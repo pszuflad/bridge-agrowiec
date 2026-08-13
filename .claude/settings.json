@@ -17,7 +17,7 @@
       "Bash(du:*)",
       "Bash(df:*)",
       "Bash(tree:*)",
-      "Bash(sed -n:*)",
+      "Bash(sed:*)",
       "Bash(awk:*)",
       "Bash(sort:*)",
       "Bash(uniq:*)",
@@ -32,18 +32,30 @@
       "Bash(realpath:*)",
       "Bash(echo:*)",
       "Bash(jq:*)",
-      "Bash(unzip -l:*)",
-      "Bash(node --version)",
-      "Bash(npm ls:*)",
-      "Bash(git status:*)",
-      "Bash(git log:*)",
-      "Bash(git diff:*)",
-      "Bash(git show:*)",
-      "Bash(bash -n:*)",
-      "Bash(sqlite3:*)",
-      "Bash(cp -n /home/szuflada/.claude/projects/-home-szuflada-apinfo-projects-bridge-backend/d51ef394-9817-4e99-b829-3b61bc760d6d.jsonl \\\\ *)",
-      "Bash(python3 -c ' *)",
-      "Bash(ps -eo pid,cmd)"
+      "Bash(unzip:*)",
+      "Bash(python3:*)",
+      "Bash(ps:*)",
+
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(chmod:*)",
+      "Bash(touch:*)",
+      "Bash(ln:*)",
+      "Bash(timeout:*)",
+      "Bash(bash:*)",
+
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+
+      "Bash(git:*)",
+      "Bash(sqlite3:*)"
     ]
   }
 }
