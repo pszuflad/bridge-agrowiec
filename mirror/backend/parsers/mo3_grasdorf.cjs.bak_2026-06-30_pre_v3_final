@@ -1,0 +1,104 @@
+'use strict';
+
+// MO3 Grasdorf parser
+// Realny plik ma kolumny m.in. eanCode, indexCatalogue, name, additionalName,
+// priceNet, category, producer, availabilityCount, imageUrls.
+//
+// POPRAWKA 2026-06-30 (v2): mapowanie POLSKICH nagłówków (z diakrytykami i spacjami)
+// na klucze camelCase, których oczekuje normalizeGrasdorf. Wcześniej parser pomijał
+// cenne kolumny strukturalne (Rodzaj bieżnika, Konstrukcja opony, Typ, Indeks nośności,
+// Ilość płócien, Zastosowanie, Rozmiar opony, Średnica felgi) i polegał wyłącznie na
+// regexach z nazwy — co powodowało błędy w nazwie/modelu/indeksach (decyzja Anny:
+// te kolumny są "źródłem prawdy" dla MO3, mają być używane).
+
+const { parse } = require('csv-parse/sync');
+const iconv = require('iconv-lite');
+const fs = require('fs');
+const c = require('../common.cjs');
+const { normalizeGrasdorf } = require('./tyre_params.cjs');
+
+const DOSTAWCA = 'MO3_Grasdorf';
+
+// Mapa polskich nagłówków z pliku Grasdorfa na klucze camelCase używane w normalizeGrasdorf.
+// Nazwy strukturalne z CSV są "źródłem prawdy" i mają pierwszeństwo nad parsowaniem z nazwy.
+const HEADER_MAP = {
+  'Rodzaj bieżnika': 'rodzajBieznika',     // CZYSTY model bez śmieci (np. "AC 65", "T421")
+  'Konstrukcja opony': 'konstrukcja',       // "Radialna" / "Diagonalna"
+  'Typ': 'typ',                              // "Bezdętkowa (TL)" / "Dętkowa (TT)"
+  'Indeks nośności': 'indeksNosnosci',      // "164D (5000 kg przy 65 km/h)" lub "128D/131A8"
+  'Ilość płócien': 'iloscPlocien',          // "6 PR"
+  'Zastosowanie': 'zastosowanie',           // "Opona rolnicza" / "Opona przemysłowa" / itp.
+  'Rozmiar opony': 'rozmiarOpony',          // "560/60" lub "25x8.50" (sama szer/profil)
+  'Stan opony': 'stanOpony',
+  'Średnica felgi': 'srednicaFelgi',        // "22.5", "14", "30"
+  'Stan': 'stan',                            // "nowa" / "pokazowa" / "demo"
+  'Indeks handlowy': 'indeksHandlowy',
+  'Indeks katalogowy': 'indeksKatalogowy',
+  'Indeks producenta': 'indeksProducenta'
+};
+
+function applyHeaderMap(row) {
+  // Tworzy nowy obiekt z dwoma kluczami: oryginalnymi (zachowane) i camelCase aliasami.
+  // Zachowanie oryginalnych kluczy umożliwia debugowanie i nie psuje surowe_pola.
+  const out = { ...row };
+  for (const [src, dst] of Object.entries(HEADER_MAP)) {
+    if (src in row) out[dst] = row[src];
+  }
+  return out;
+}
+
+function parseFile(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const text = iconv.decode(buffer, 'utf-8');
+
+  const rows = parse(text, {
+    delimiter: ';',
+    columns: header => header.map(h => h ? h.trim() : h),
+    skip_empty_lines: true,
+    relax_column_count: true,
+    relax_quotes: true,
+    bom: true,
+    trim: true
+  });
+
+  const records = [];
+  const errors = [];
+  const odrzucone = [];
+
+  for (const row of rows) {
+    try {
+      const mapped = applyHeaderMap(row);
+      const normalized = normalizeGrasdorf(mapped);
+      if (normalized.odrzucony) {
+        odrzucone.push({ powod: normalized.powod, row });
+        continue;
+      }
+
+      const rec = c.normalizeRecord({
+        ean: c.normalizeEan(normalized.ean),
+        kod_dostawcy: normalized.kodDostawcy,
+        nazwa: normalized.nazwaKoncowa,
+        producent: normalized.marka,
+        model_bieznik: normalized.model,
+        rozmiar: normalized.rozmiar,
+        rozmiar_alternatywny: normalized.rozmiarAlternatywny,
+        cena_zakupu: normalized.cenaZakupu,
+        stan_magazynowy: normalized.stan,
+        kategoria: normalized.kategoria,
+        oznaczenia_techniczne: [
+          normalized.tlTt,
+          normalized.pr ? `${normalized.pr}PR` : null
+        ].filter(Boolean),
+        dostawca: DOSTAWCA,
+        surowe_pola: row
+      });
+      records.push(rec);
+    } catch (e) {
+      errors.push({ row, error: e.message });
+    }
+  }
+
+  return { records, errors, odrzucone, dostawca: DOSTAWCA };
+}
+
+module.exports = { parseFile, DOSTAWCA };

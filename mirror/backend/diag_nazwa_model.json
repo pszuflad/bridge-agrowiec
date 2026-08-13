@@ -1,0 +1,7239 @@
+{
+ "bieznikNieWNazwie": [
+  {
+   "kod": "MO9_65581",
+   "nazwa": "480/80-26 BKT CON STAR 160A8 TL",
+   "marka": "BKT",
+   "bieznik": "CON STAR E",
+   "model": "CON STAR E"
+  },
+  {
+   "kod": "MO9_64587",
+   "nazwa": "320/60-12 BKT TR 678 132A8 TT",
+   "marka": "BKT",
+   "bieznik": "TR 678 E",
+   "model": "TR 678 E"
+  },
+  {
+   "kod": "MO9_63010",
+   "nazwa": "520/85R50 BKT AGRIMAX RT 855 165A8/165B TL",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 855 E",
+   "model": "AGRIMAX RT855 E"
+  },
+  {
+   "kod": "MO9_55205",
+   "nazwa": "320/70R24 BKT AGRIMAX RT 765 116D TL",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO9_53780",
+   "nazwa": "31x13.50-15 BKT FLOT RIBIMPL HF1 12PR TL",
+   "marka": "BKT",
+   "bieznik": "FLOT RIBIMPL 1",
+   "model": "FLOT RIBIMPL 1"
+  },
+  {
+   "kod": "MO9_37875",
+   "nazwa": "320/90R46 BKT AGRIMAX RT 945 148D/151A8 TL",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 945 E",
+   "model": "AGRIMAX RT945 E"
+  },
+  {
+   "kod": "MO9_23841",
+   "nazwa": "7.50-16 BKT TF 8181 6PR TT",
+   "marka": "BKT",
+   "bieznik": "TF 8181 SZ.",
+   "model": "TF 8181 SZ."
+  },
+  {
+   "kod": "MO9_18459",
+   "nazwa": "300/85R42 BKT AGRIMAX RT 955 144A8/141B TL",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT955 E",
+   "model": "AGRIMAX RT955 E"
+  },
+  {
+   "kod": "MO9_17324",
+   "nazwa": "710/70R42 BKT AGRIMAX RT 765 173D TL",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO9_16308",
+   "nazwa": "420/70R30 BKT AGRIMAX RT 765 134D TL",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO9_8939",
+   "nazwa": "480/70R28 BKT AGRIMAX RT 765 140D TL",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO5_VRRR240320858TV80",
+   "nazwa": "320/85R24 VREDESTEIN TRAXION85 122A8/122B TL",
+   "marka": "VREDESTEIN",
+   "bieznik": "TRAXION85 II",
+   "model": "TRAXION85"
+  },
+  {
+   "kod": "MO5_LLCR19538555JLLT0",
+   "nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T10",
+   "model": "L-T10"
+  },
+  {
+   "kod": "MO5_LLCR17524570MLLS0",
+   "nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLS0",
+   "nazwa": "235/75R17.5 LINGLONG -S20 132/130M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLD0",
+   "nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-D20",
+   "model": "L-D20"
+  },
+  {
+   "kod": "MO5_LLCR17523575JT2L0",
+   "nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20"
+  },
+  {
+   "kod": "MO5_LLCR17521575MLLS0",
+   "nazwa": "215/75R17.5 LINGLONG -S20 126/124M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17521575JT2L0",
+   "nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20"
+  },
+  {
+   "kod": "MO5_LLCR17520575MLLS0",
+   "nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17520565JT2L0",
+   "nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20"
+  },
+  {
+   "kod": "MO5_KARD080F16004IP60",
+   "nazwa": "16x6.50-8 KABAT IMP-06 73A4 6PR TL",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO5_KARD080F160040001",
+   "nazwa": "16x6.50-8 KABAT IMP-06 73A4 6PR TT",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO5_KARD080189004IP62",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TT",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO5_KARD080189004IP60",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TL",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO5_KARD060156004IP60",
+   "nazwa": "15x6.00-6 KABAT IMP-06 6PR TL",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO5_IMCR22531580L12M1",
+   "nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF",
+   "marka": "MIRAGE",
+   "bieznik": "MG121 PROWADZĄCA",
+   "model": "MG121 PROWADZĄCA"
+  },
+  {
+   "kod": "MO5_HLRD120238006MG50",
+   "nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO5_HLRD080F16003MG50",
+   "nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO5_GNCR22538565K3621",
+   "nazwa": "385/65R22.5 DUNLOP SP362 160K/158L TL M+S 3PMSF",
+   "marka": "DUNLOP",
+   "bieznik": "SP362 PROWADZĄCA",
+   "model": "SP362"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN1",
+   "nazwa": "285/70R19.5 FULDA ECOTONN 150/148J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN0",
+   "nazwa": "285/70R19.5 FULDA ECOTONN 150/148J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN"
+  },
+  {
+   "kod": "MO5_GFCR19526570JECT1",
+   "nazwa": "265/70R19.5 FULDA ECOTONN 143/141J M+S 3PMSF",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN"
+  },
+  {
+   "kod": "MO5_GFCR175D9500JETN1",
+   "nazwa": "9.5R17.5 FULDA ECOTONN 143/141J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN"
+  },
+  {
+   "kod": "MO5_GFCR17521575JETN0",
+   "nazwa": "215/75R17.5 FULDA ECOTONN 135/133J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN"
+  },
+  {
+   "kod": "MO5_FKCR22527570MBI80",
+   "nazwa": "275/70R22.5 FALKEN BI856 148/145M TL M+S 3PMSF",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856"
+  },
+  {
+   "kod": "MO5_CTCR22529580MWX30",
+   "nazwa": "295/80R22.5 CEAT WINMILE-AW 154/149M 18PR TL M+S 3PMSF",
+   "marka": "CEAT",
+   "bieznik": "WINMILE-X3-AW",
+   "model": "WINMILE-X3-AW"
+  },
+  {
+   "kod": "MO5_CCCZ22538565K3SH0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 160K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ22538555K3SH1",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 ED 160K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3 ED",
+   "model": "CONTI SCANDINAVIA 3 ED"
+  },
+  {
+   "kod": "MO5_CCCZ22531570L3SH0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ19528570MS3H2",
+   "nazwa": "285/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 146/144M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ19526570MS3H0",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 140/138M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ17523575ML3S0",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 132/130M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ17521575ML3S0",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 126/124M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCR22538565KCH50",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI HYBRID HS5 164K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22538565K5SH0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22538565K3CS0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 160K/158L 20PR M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI CROSSTRAC 3",
+   "model": "CONTI CROSSTRAC 3"
+  },
+  {
+   "kod": "MO5_CCCR22538555KCH50",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI HYBRID HS5 160K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22535550L5SH0",
+   "nazwa": "355/50R22.5 CONTINENTAL CONTI ECO HS5 158L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531580LCH50",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22531580L5SH0",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531580K3CS0",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI CROSS TRAC HS3 156/150K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI CROSSTRAC 3",
+   "model": "CONTI CROSS TRAC 3"
+  },
+  {
+   "kod": "MO5_CCCR22531570LCH50",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH1",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 158/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5HC0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI EFFICIENTPRO HS5 158/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI EFFICIENTPRO 5",
+   "model": "CONTI EFFICIENTPRO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531560L5SH0",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS5 154/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22529580MCH50",
+   "nazwa": "295/80R22.5 CONTINENTAL CONTI HYBRID HS5 154/149M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22529560LCES2",
+   "nazwa": "295/60R22.5 CONTINENTAL CONTI ECOPLUS HS3 150/147L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECOPLUS 3",
+   "model": "CONTI ECOPLUS 3"
+  },
+  {
+   "kod": "MO5_CCCR19526570MHSH0",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI HYBRID HS3+ 140/138M 14PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3+",
+   "model": "CONTI HYBRID 3+"
+  },
+  {
+   "kod": "MO5_CCCR19524570MHS32",
+   "nazwa": "245/70R19.5 CONTINENTAL CONTI HYBRID HS3 136/134M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17526570MH3S2",
+   "nazwa": "265/70R17.5 CONTINENTAL CONTI HYBRID LS3 139/136M 14PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17524570MH3S2",
+   "nazwa": "245/70R17.5 CONTINENTAL CONTI HYBRID LS3 136/134M 14PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17523575MH3S4",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI HYBRID LS3 132/130M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17522575MH3S2",
+   "nazwa": "225/75R17.5 CONTINENTAL CONTI HYBRID LS3 129/127M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17521575MH3S2",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI HYBRID LS3 126/124M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17520575MHLS2",
+   "nazwa": "205/75R17.5 CONTINENTAL CONTI HYBRID LS3 124/122M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_BRCR22527570JUA21",
+   "nazwa": "275/70R22.5 BRIDGESTONE U-AP2 152/149J TL M+S 3PMSF",
+   "marka": "BRIDGESTONE",
+   "bieznik": "U-AP002",
+   "model": "U-AP2"
+  },
+  {
+   "kod": "MO4_LLCR19538555JLLT0",
+   "nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T10",
+   "model": "L-T10"
+  },
+  {
+   "kod": "MO4_LLCR17524570MLLS0",
+   "nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20"
+  },
+  {
+   "kod": "MO4_LLCR17523575MLLS0",
+   "nazwa": "LINGLONG S20 132/130M 14PR TL M+S 3PMSF",
+   "marka": "",
+   "bieznik": "L-S20",
+   "model": ""
+  },
+  {
+   "kod": "MO4_LLCR17523575MLLD0",
+   "nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-D20",
+   "model": "L-D20"
+  },
+  {
+   "kod": "MO4_LLCR17523575JT2L0",
+   "nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20"
+  },
+  {
+   "kod": "MO4_LLCR17521575JT2L0",
+   "nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20"
+  },
+  {
+   "kod": "MO4_LLCR17520575MLLS0",
+   "nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20"
+  },
+  {
+   "kod": "MO4_LLCR17520565JT2L0",
+   "nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20"
+  },
+  {
+   "kod": "MO4_KARD080F160040001",
+   "nazwa": "16x6.50-8 KABAT IMP-06 73A4 6PR TT",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO4_KARD060156004IP60",
+   "nazwa": "15x6.00-6 KABAT IMP-06 6PR TL",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO4_IMCR22531580L12M1",
+   "nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF",
+   "marka": "MIRAGE",
+   "bieznik": "MG121 PROWADZĄCA",
+   "model": "MG121 PROWADZĄCA"
+  },
+  {
+   "kod": "MO4_HLRD120238006MG50",
+   "nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO4_HLRD080F16003MG50",
+   "nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO4_GFCR17521575JETN0",
+   "nazwa": "215/75R17.5 FULDA ECOTONN 135/133J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN"
+  },
+  {
+   "kod": "MO4_CCCR22538565K5SH0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO4_CCCR22531580LCH50",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO4_CCCR22531580L5SH0",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO4_CCCR22531570LCH50",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO4_CCCR22531570L5SH0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO3_71045265Af644f20tt",
+   "nazwa": "710/45-26.5 ALLIANCE FORESTAR 644 III 175A2/168A8 20PR SB TT",
+   "marka": "ALLIANCE",
+   "bieznik": "F-644",
+   "model": "F-644"
+  },
+  {
+   "kod": "MO3_71045265Af643f20tt",
+   "nazwa": "710/45-26.5 ALLIANCE 643 FORESTAR RIII 20PR TT",
+   "marka": "ALLIANCE",
+   "bieznik": "F-643",
+   "model": "F-643"
+  },
+  {
+   "kod": "MO3_60055265Af644f20tt",
+   "nazwa": "600/55-26.5 ALLIANCE 644 FORESTAR III 20PR TT",
+   "marka": "ALLIANCE",
+   "bieznik": "F-644",
+   "model": "F-644"
+  },
+  {
+   "kod": "MO3_4408028FIDU",
+   "nazwa": "440/80R28 FIRESTONE DURA-UT 156A8 TL",
+   "marka": "FIRESTONE",
+   "bieznik": "DURAFORCE",
+   "model": "DURAFORCE"
+  },
+  {
+   "kod": "MO3_3807024BRvxr",
+   "nazwa": "380/70R24 BRIDGESTONE VX-R TRACTOR 125D/122E TL",
+   "marka": "BRIDGESTONE",
+   "bieznik": "VX-TRACTOR",
+   "model": "VX TRACTOR"
+  },
+  {
+   "kod": "MO3_5007024FIDU",
+   "nazwa": "500/70R24 FIRESTONE DURA-UT 164A/164B TL",
+   "marka": "FIRESTONE",
+   "bieznik": "DURAFORCE",
+   "model": "DURAFORCE"
+  },
+  {
+   "kod": "MO3_3808528BRvxr",
+   "nazwa": "380/85R28 BRIDGESTONE VX-R TRACTOR 133D/130E TL",
+   "marka": "BRIDGESTONE",
+   "bieznik": "VX-TRACTOR",
+   "model": "VX TRACTOR"
+  },
+  {
+   "kod": "MO3_6006538BRvxr",
+   "nazwa": "600/65R38 BRIDGESTONE VX-R TRACTOR 153D/150E TL",
+   "marka": "BRIDGESTONE",
+   "bieznik": "VX-TRACTOR",
+   "model": "VX TRACTOR"
+  },
+  {
+   "kod": "MO3_4057018FIDU",
+   "nazwa": "405/70R18 FIRESTONE DURA-UT 141B",
+   "marka": "FIRESTONE",
+   "bieznik": "DURAFORCE",
+   "model": "DURAFORCE"
+  },
+  {
+   "kod": "MO3_4008024AA-325162A8",
+   "nazwa": "400/80-24 ALLIANCE TOUGH TRAC 325 162A8 TL",
+   "marka": "ALLIANCE",
+   "bieznik": "A-325",
+   "model": "A-325"
+  },
+  {
+   "kod": "MO3_40060155AA-320VP143A",
+   "nazwa": "400/60-15.5 ALLIANCE 320 VALUE PLUS 152A6/148A8 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "A320 VP",
+   "model": "320 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_3808038Aaii",
+   "nazwa": "380/80R38 ALLIANCE AGRISTAR II 142D TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 85",
+   "model": "AGRISTAR II 85"
+  },
+  {
+   "kod": "MO3_9006038contiTM",
+   "nazwa": "900/60R38 CONTINENTAL 178D/181A8 TL",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER"
+  },
+  {
+   "kod": "MO3_6007030conti",
+   "nazwa": "600/70R30 CONTINENTAL 152D/155A8 TL",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER"
+  },
+  {
+   "kod": "MO3_6007030Aaii",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_4207024Aaii",
+   "nazwa": "420/70R24 ALLIANCE AGRISTAR II 130D TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_6507538conti",
+   "nazwa": "650/75R38 CONTINENTAL 169D/172A8 TL",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER"
+  },
+  {
+   "kod": "MO3_4208534Aaii",
+   "nazwa": "420/85R34 ALLIANCE AGRI STAR II 142D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 85",
+   "model": "AGRISTAR II 85"
+  },
+  {
+   "kod": "MO3_5807038Aaii",
+   "nazwa": "580/70R38 ALLIANCE AGRISTAR II 155D TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_8007032conti",
+   "nazwa": "800/70R32 CONTINENTAL 181A8/181B TL",
+   "marka": "CONTINENTAL",
+   "bieznik": "COMBINEMASTER",
+   "model": "COMBINEMASTER"
+  },
+  {
+   "kod": "MO3_6006534conti",
+   "nazwa": "600/65R34 CONTINENTAL 151D/154A8 TL",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER"
+  },
+  {
+   "kod": "MO3_6508538Aaii",
+   "nazwa": "650/85R38 ALLIANCE AGRISTAR II 173D TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 85",
+   "model": "AGRISTAR II 85"
+  },
+  {
+   "kod": "MO3_4607024contiEM",
+   "nazwa": "460/70R24 CONTINENTAL 159A8/159B TL",
+   "marka": "CONTINENTAL",
+   "bieznik": "COMPACT MASTER EM",
+   "model": "COMPACTMASTER EM"
+  },
+  {
+   "kod": "MO3_6007030ademo",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_6506542MThcmdemo",
+   "nazwa": "650/65R42 MITAS HCM 176A8/171D TL DEMO",
+   "marka": "MITAS",
+   "bieznik": "HCM IND",
+   "model": "HCM"
+  },
+  {
+   "kod": "MO3_5406530mthcmdemo",
+   "nazwa": "540/65R30 MITAS HCM 161A8/156D TL DEMO",
+   "marka": "MITAS",
+   "bieznik": "HCM IND",
+   "model": "HCM"
+  },
+  {
+   "kod": "MO3_38565225Kabat",
+   "nazwa": "385/65R22.5 KABAT TRY1 160F 18PR TL",
+   "marka": "KABAT",
+   "bieznik": "TRY1 AG",
+   "model": "TRY1"
+  },
+  {
+   "kod": "MO3_30095R46AAIIRC148D14",
+   "nazwa": "300/95R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO3_23095R36AAIIRC130D12",
+   "nazwa": "230/95R36 ALLIANCE AGRISTAR II ROW CROP 130D/127E TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO3_32090R46AAIIRC148D14",
+   "nazwa": "320/90R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO3_23095R28AAIIRC110D10",
+   "nazwa": "230/95R28 ALLIANCE AGRISTAR II ROW CROP 110D/107E TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO3_11580153A",
+   "nazwa": "11.5/80-15.3 ALLIANCE 320 VALUE PLUS 14PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "A320 VP",
+   "model": "320 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_40055175AL",
+   "nazwa": "400/55-17.5 ALLIANCE FLOTATION 328 136A8/149A8 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO3_70040225A",
+   "nazwa": "700/40-22.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO3_50060225ALLI",
+   "nazwa": "500/60-22.5 ALLIANCE 328 VALUE 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 VALUE"
+  },
+  {
+   "kod": "MO3_60055265A1",
+   "nazwa": "600/55-26.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO3_8006532A-IN",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_T485430",
+   "nazwa": "18.4-38 NOKIAN TR FOREST 155A8 14PR",
+   "marka": "NOKIAN",
+   "bieznik": "TR FOREST 2",
+   "model": "TR FOREST"
+  },
+  {
+   "kod": "MO2_T484420",
+   "nazwa": "18.4-34 NOKIAN TR FOREST 14PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "TR FS FOREST",
+   "model": "TR FS FOREST"
+  },
+  {
+   "kod": "MO2_T445622",
+   "nazwa": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO2_KOIM81885061T",
+   "nazwa": "18x8.50-8 KABAT IMP-06 LINIOWA 6PR TT",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM81665061L",
+   "nazwa": "16x6.50-8 KABAT IMP-06 LINIOWA 6PR TL",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM61560061T",
+   "nazwa": "15x6.00-6 KABAT IMP-06 LINIOWA IMPLEMENT 6PR TT",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA IMPLEMENT"
+  },
+  {
+   "kod": "MO2_KOIM61560061L",
+   "nazwa": "15x6.00-6 KABAT IMP-06 LINIOWA IMPLEMENT 6PR TL",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA IMPLEMENT"
+  },
+  {
+   "kod": "MO2_CET0017",
+   "nazwa": "445/45R19.5 CETROC GHT22 160J 3PMSF M+S",
+   "marka": "CETROC",
+   "bieznik": "GHT22 TRAILER",
+   "model": "GHT22"
+  },
+  {
+   "kod": "MO2_CET0016",
+   "nazwa": "435/50R19.5 CETROC GHT22 160J 3PMSF M+S FRONT",
+   "marka": "CETROC",
+   "bieznik": "GHT22 TRAILER",
+   "model": "GHT22"
+  },
+  {
+   "kod": "MO2_CET0013",
+   "nazwa": "385/55R22.5 CETROC GHT50 160K 3PMSF M+S",
+   "marka": "CETROC",
+   "bieznik": "GHT50 TRAILER",
+   "model": "GHT50"
+  },
+  {
+   "kod": "MO2_67000010AL-IG",
+   "nazwa": "710/70R38 ALLIANCE AGRO FORESTRY 670 175A2/168A8 SB TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AF 670",
+   "model": "AF 670"
+  },
+  {
+   "kod": "MO2_67000005AL-IN",
+   "nazwa": "480/70-34 ALLIANCE AGRO FORESTRY 670 146A8/143B SB TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AF 670",
+   "model": "AF 670"
+  },
+  {
+   "kod": "MO2_45045005AL-IN",
+   "nazwa": "230/95R44 ALLIANCE AGRISTAR II ROW CROP 134D/131E TL",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO2_38102600AL-IN",
+   "nazwa": "620/40R22.5 ALLIANCE FLOTMASTER 381 148D TL",
+   "marka": "ALLIANCE",
+   "bieznik": "381 FLOTAMASTER",
+   "model": "381 FLOTAMASTER"
+  },
+  {
+   "kod": "MO2_361420",
+   "nazwa": "205/75R17.5 FALKEN BI856 124M 3PMSF M+S DRIVE",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856"
+  },
+  {
+   "kod": "MO2_36061747AL-IN",
+   "nazwa": "620/70R42 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36061533AL",
+   "nazwa": "620/70R42 ALLIANCE 360 166A8/163B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36035001AL-IN",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36035001AL-IG",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36033498AL-IG",
+   "nazwa": "800/65R32 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36020432AL",
+   "nazwa": "650/75R32 ALLIANCE 360 172D/175A8 TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36018062AL",
+   "nazwa": "600/65-28 ALLIANCE 360 154A8/161A2",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36017698AL",
+   "nazwa": "28R26 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36017507AL",
+   "nazwa": "28R26 ALLIANCE 360 166A8/163B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36017501AL",
+   "nazwa": "750/65R26 ALLIANCE 360 158A8/155B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_36016205AL",
+   "nazwa": "480/65-24 ALLIANCE 360 140A8 TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO2_34502989AL",
+   "nazwa": "28L-26 ALLIANCE 345 20PR",
+   "marka": "ALLIANCE",
+   "bieznik": "345 FORESTAR",
+   "model": "345"
+  },
+  {
+   "kod": "MO2_34435416AL",
+   "nazwa": "710/40-22.5 ALLIANCE 344 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "344 FORESTRY",
+   "model": "344"
+  },
+  {
+   "kod": "MO2_335674",
+   "nazwa": "315/60R22.5 FALKEN BI856 152/148L 3PMSF DRIVE",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856"
+  },
+  {
+   "kod": "MO2_335670",
+   "nazwa": "265/70R19.5 FALKEN BI856 140/138M M+S DRIVE",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856"
+  },
+  {
+   "kod": "MO2_335667",
+   "nazwa": "315/70R22.5 FALKEN BI856 154/150L 3PMSF M+S DRIVE",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856"
+  },
+  {
+   "kod": "MO2_335661",
+   "nazwa": "245/70R17.5 FALKEN BI856 136/134M M+S DRIVE",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856"
+  },
+  {
+   "kod": "MO2_33300276AL-IN",
+   "nazwa": "20.8-38 ALLIANCE 333 164A8/160B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333"
+  },
+  {
+   "kod": "MO2_33300242AL-IN",
+   "nazwa": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333 FORESTRY"
+  },
+  {
+   "kod": "MO2_33300149AL-IN",
+   "nazwa": "16.9R38 ALLIANCE 333 149A8/146B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333"
+  },
+  {
+   "kod": "MO2_33300134AL-IN",
+   "nazwa": "460/85-30 ALLIANCE 333 150A8/147B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333"
+  },
+  {
+   "kod": "MO2_33300126AL-IN",
+   "nazwa": "420/85-30 ALLIANCE 333 145A8/142B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333"
+  },
+  {
+   "kod": "MO2_33300118AL-IN",
+   "nazwa": "16.9-28 ALLIANCE 333 FORESTRY 144A8/141B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333 FORESTRY"
+  },
+  {
+   "kod": "MO2_33300104AL-IN",
+   "nazwa": "14.9-28 ALLIANCE 333 139A8/136B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333"
+  },
+  {
+   "kod": "MO2_33300054AL-IN",
+   "nazwa": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333 FORESTRY"
+  },
+  {
+   "kod": "MO2_32862024AL-AP",
+   "nazwa": "700/50-26.5 ALLIANCE 328 XP 174A8/170B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 XP"
+  },
+  {
+   "kod": "MO2_32862023AL",
+   "nazwa": "700/50-26.5 ALLIANCE 328 174A8/170B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32853003AL-IG",
+   "nazwa": "600/55-26.5 ALLIANCE FLOTATION 328 159A8/170A8 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32852215AL",
+   "nazwa": "600/55-26.5 ALLIANCE 328 163C TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32841144",
+   "nazwa": "700/50-22.5 ALLIANCE 328 167D/166E TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32840020AL-IG",
+   "nazwa": "700/50-22.5 ALLIANCE 328 FLOTATION 174A8/170B 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FLOTATION"
+  },
+  {
+   "kod": "MO2_32835319AL-IN",
+   "nazwa": "700/40-22.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32832520AL-IG",
+   "nazwa": "600/50-22.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32827420AL",
+   "nazwa": "500/50R17 ALLIANCE 328 145D TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32827076AL-IG",
+   "nazwa": "500/45-22.5 ALLIANCE 328 FORESTRY 144A8 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FORESTRY"
+  },
+  {
+   "kod": "MO2_32827075AL-IN",
+   "nazwa": "400/60-15.5 ALLIANCE 328 FORESTRY 152A8 20PR",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FORESTRY"
+  },
+  {
+   "kod": "MO2_32827054AL-IN",
+   "nazwa": "550/45-22.5 ALLIANCE FLOTATION 328 147A8/159A8 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FLOTATION"
+  },
+  {
+   "kod": "MO2_32827054AL-IG",
+   "nazwa": "550/45-22.5 ALLIANCE 328 FLOTATION 159A8/156B 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FLOTATION"
+  },
+  {
+   "kod": "MO2_32827045AL-IN",
+   "nazwa": "400/60-22.5 ALLIANCE 328 160A8 18PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32800028AL-AP",
+   "nazwa": "600/55-22.5 ALLIANCE 328 XP 162D 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 XP"
+  },
+  {
+   "kod": "MO2_32800027AL-AP",
+   "nazwa": "800/45-26.5 ALLIANCE 328 XP 177A8/173B 16PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 XP"
+  },
+  {
+   "kod": "MO2_32800016AL-IN",
+   "nazwa": "500/50R17 ALLIANCE 328 158A8/155B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328"
+  },
+  {
+   "kod": "MO2_32470010FP-IN",
+   "nazwa": "18.4-26 ALLIANCE FARM PRO 324 146A8 12PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32414002FP-IG",
+   "nazwa": "14.9-28 ALLIANCE FARM PRO 324 130A8 8PR TT",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32412520FP-IG",
+   "nazwa": "12.4-28 ALLIANCE FARM PRO 324 123A8 8PR TT",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32406112FP-IG",
+   "nazwa": "13.6-24 ALLIANCE FARM PRO 324 123A8 8PR TT",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32014918VP-IG",
+   "nazwa": "12.5/80-18 ALLIANCE 320 VALUE PLUS 145A6/142A8 12PR TL",
+   "marka": "ALLIANCE",
+   "bieznik": "A320 VALUE PLUS",
+   "model": "A320 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_05153350000",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 164K 20PR 3PMSF M+S FRONT",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI CROSSTRAC 3",
+   "model": "CONTI CROSSTRAC 3"
+  },
+  {
+   "kod": "MO2_05128730000",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS 5 154/150L 3PMSF M+S HS FRONT",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO2_05128600000",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS 5 164K 3PMSF M+S HS FRONT",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO1_19800286",
+   "nazwa": "7.50-16 MRL MTF 222 103A6/98A8 8PR TT",
+   "marka": "MRL",
+   "bieznik": "MTF 222 TWO RIB",
+   "model": "MTF 222"
+  },
+  {
+   "kod": "MO1_17422750",
+   "nazwa": "18.4-34 NOKIAN TR FOREST 14PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "TR FOREST 2",
+   "model": "TR FOREST"
+  },
+  {
+   "kod": "MO1_15226831",
+   "nazwa": "620/70R42 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO1_15226794",
+   "nazwa": "650/65R38 ALLIANCE 360 178A8/175B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO1_15226767",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360"
+  },
+  {
+   "kod": "MO1_11166115",
+   "nazwa": "385/65R22.5 GOODTRIP GHT50 160K/158L 20PR TL",
+   "marka": "GOODTRIP",
+   "bieznik": "GHT50 TRAILER",
+   "model": "GHT50"
+  },
+  {
+   "kod": "MO1_10001615",
+   "nazwa": "435/50R19.5 GOODTRIP GHT22 160J 22PR TL",
+   "marka": "GOODTRIP",
+   "bieznik": "GHT22 TRAILER",
+   "model": "GHT22"
+  },
+  {
+   "kod": "MO7_T445516",
+   "nazwa": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL",
+   "marka": "NOKIAN",
+   "bieznik": "FOREST KING TRS 2",
+   "model": "FOREST KING TRS -2"
+  },
+  {
+   "kod": "MO7_T445596",
+   "nazwa": "700/70-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO7_T445476",
+   "nazwa": "700/55-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO7_T445475",
+   "nazwa": "600/65-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO7_T445528",
+   "nazwa": "750/55-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO7_T445527",
+   "nazwa": "600/55-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO7_T445541",
+   "nazwa": "710/45-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO7_T445624",
+   "nazwa": "710/40-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO7_T445622",
+   "nazwa": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS"
+  },
+  {
+   "kod": "MO5_LLCR22531570LRD30",
+   "nazwa": "315/70R22.5 LINGLONG -D30 156/150L 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "bieznik": "R-D30",
+   "model": "R-D30"
+  },
+  {
+   "kod": "MO2_CET0048",
+   "nazwa": "265/70R19.5 CETROC GHT50 143/141K 3PMSF M+S FRONT",
+   "marka": "CETROC",
+   "bieznik": "GHT50 TRAILER",
+   "model": "GHT50"
+  },
+  {
+   "kod": "MO2_05127050000",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "5 CONTI HYBRID",
+   "model": "5 CONTI HYBRID"
+  },
+  {
+   "kod": "MO3_6506542A",
+   "nazwa": "650/65R42 ALLIANCE 365 170D/173A8 TL",
+   "marka": "ALLIANCE",
+   "bieznik": "365 AGRISTAR",
+   "model": "365"
+  },
+  {
+   "kod": "MO5_CCCR22538555K5SH0",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS5 162K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO2_05127970000",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS 5 162K/158L 3PMSF M+S HS",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO4_KARD080189004IP60",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TL",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  },
+  {
+   "kod": "MO4_KARD080189004IP62",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TT",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06"
+  }
+ ],
+ "modelNieWNazwie": [
+  {
+   "kod": "MO9_65581",
+   "nazwa": "480/80-26 BKT CON STAR 160A8 TL",
+   "marka": "BKT",
+   "model": "CON STAR E",
+   "bieznik": "CON STAR E"
+  },
+  {
+   "kod": "MO9_64587",
+   "nazwa": "320/60-12 BKT TR 678 132A8 TT",
+   "marka": "BKT",
+   "model": "TR 678 E",
+   "bieznik": "TR 678 E"
+  },
+  {
+   "kod": "MO9_63010",
+   "nazwa": "520/85R50 BKT AGRIMAX RT 855 165A8/165B TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT855 E",
+   "bieznik": "AGRIMAX RT 855 E"
+  },
+  {
+   "kod": "MO9_55205",
+   "nazwa": "320/70R24 BKT AGRIMAX RT 765 116D TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT 765 E",
+   "bieznik": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO9_53780",
+   "nazwa": "31x13.50-15 BKT FLOT RIBIMPL HF1 12PR TL",
+   "marka": "BKT",
+   "model": "FLOT RIBIMPL 1",
+   "bieznik": "FLOT RIBIMPL 1"
+  },
+  {
+   "kod": "MO9_37875",
+   "nazwa": "320/90R46 BKT AGRIMAX RT 945 148D/151A8 TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT945 E",
+   "bieznik": "AGRIMAX RT 945 E"
+  },
+  {
+   "kod": "MO9_23841",
+   "nazwa": "7.50-16 BKT TF 8181 6PR TT",
+   "marka": "BKT",
+   "model": "TF 8181 SZ.",
+   "bieznik": "TF 8181 SZ."
+  },
+  {
+   "kod": "MO9_18459",
+   "nazwa": "300/85R42 BKT AGRIMAX RT 955 144A8/141B TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT955 E",
+   "bieznik": "AGRIMAX RT955 E"
+  },
+  {
+   "kod": "MO9_17324",
+   "nazwa": "710/70R42 BKT AGRIMAX RT 765 173D TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT 765 E",
+   "bieznik": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO9_16308",
+   "nazwa": "420/70R30 BKT AGRIMAX RT 765 134D TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT 765 E",
+   "bieznik": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO9_8939",
+   "nazwa": "480/70R28 BKT AGRIMAX RT 765 140D TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT 765 E",
+   "bieznik": "AGRIMAX RT 765 E"
+  },
+  {
+   "kod": "MO5_LLCR19538555JLLT0",
+   "nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T10",
+   "bieznik": "L-T10"
+  },
+  {
+   "kod": "MO5_LLCR17524570MLLS0",
+   "nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-S20",
+   "bieznik": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLS0",
+   "nazwa": "235/75R17.5 LINGLONG -S20 132/130M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-S20",
+   "bieznik": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLD0",
+   "nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-D20",
+   "bieznik": "L-D20"
+  },
+  {
+   "kod": "MO5_LLCR17523575JT2L0",
+   "nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T20",
+   "bieznik": "L-T20"
+  },
+  {
+   "kod": "MO5_LLCR17521575MLLS0",
+   "nazwa": "215/75R17.5 LINGLONG -S20 126/124M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-S20",
+   "bieznik": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17521575JT2L0",
+   "nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T20",
+   "bieznik": "L-T20"
+  },
+  {
+   "kod": "MO5_LLCR17520575MLLS0",
+   "nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-S20",
+   "bieznik": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17520565JT2L0",
+   "nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T20",
+   "bieznik": "L-T20"
+  },
+  {
+   "kod": "MO5_IMCR22531580L12M1",
+   "nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF",
+   "marka": "MIRAGE",
+   "model": "MG121 PROWADZĄCA",
+   "bieznik": "MG121 PROWADZĄCA"
+  },
+  {
+   "kod": "MO5_HLRD120238006MG50",
+   "nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL",
+   "marka": "MRL",
+   "model": "MG 54 Z-WIDE",
+   "bieznik": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO5_HLRD080F16003MG50",
+   "nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL",
+   "marka": "MRL",
+   "model": "MG 54 Z-WIDE",
+   "bieznik": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO5_CTCR22529580MWX30",
+   "nazwa": "295/80R22.5 CEAT WINMILE-AW 154/149M 18PR TL M+S 3PMSF",
+   "marka": "CEAT",
+   "model": "WINMILE-X3-AW",
+   "bieznik": "WINMILE-X3-AW"
+  },
+  {
+   "kod": "MO5_CCCZ22538565K3SH0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 160K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI SCANDINAVIA 3",
+   "bieznik": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ22538555K3SH1",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 ED 160K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI SCANDINAVIA 3 ED",
+   "bieznik": "CONTI SCANDINAVIA 3 ED"
+  },
+  {
+   "kod": "MO5_CCCZ22531570L3SH0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI SCANDINAVIA 3",
+   "bieznik": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ19528570MS3H2",
+   "nazwa": "285/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 146/144M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI SCANDINAVIA 3",
+   "bieznik": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ19526570MS3H0",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 140/138M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI SCANDINAVIA 3",
+   "bieznik": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ17523575ML3S0",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 132/130M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI SCANDINAVIA 3",
+   "bieznik": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCZ17521575ML3S0",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 126/124M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI SCANDINAVIA 3",
+   "bieznik": "CONTI SCANDINAVIA 3"
+  },
+  {
+   "kod": "MO5_CCCR22538565KCH50",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI HYBRID HS5 164K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 5",
+   "bieznik": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22538565K5SH0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22538565K3CS0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 160K/158L 20PR M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI CROSSTRAC 3",
+   "bieznik": "CONTI CROSSTRAC 3"
+  },
+  {
+   "kod": "MO5_CCCR22538555KCH50",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI HYBRID HS5 160K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 5",
+   "bieznik": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22535550L5SH0",
+   "nazwa": "355/50R22.5 CONTINENTAL CONTI ECO HS5 158L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531580LCH50",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 5",
+   "bieznik": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22531580L5SH0",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531580K3CS0",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI CROSS TRAC HS3 156/150K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI CROSS TRAC 3",
+   "bieznik": "CONTI CROSSTRAC 3"
+  },
+  {
+   "kod": "MO5_CCCR22531570LCH50",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 5",
+   "bieznik": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH1",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 158/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5HC0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI EFFICIENTPRO HS5 158/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI EFFICIENTPRO 5",
+   "bieznik": "CONTI EFFICIENTPRO 5"
+  },
+  {
+   "kod": "MO5_CCCR22531560L5SH0",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS5 154/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO5_CCCR22529580MCH50",
+   "nazwa": "295/80R22.5 CONTINENTAL CONTI HYBRID HS5 154/149M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 5",
+   "bieznik": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO5_CCCR22529560LCES2",
+   "nazwa": "295/60R22.5 CONTINENTAL CONTI ECOPLUS HS3 150/147L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECOPLUS 3",
+   "bieznik": "CONTI ECOPLUS 3"
+  },
+  {
+   "kod": "MO5_CCCR19526570MHSH0",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI HYBRID HS3+ 140/138M 14PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3+",
+   "bieznik": "CONTI HYBRID 3+"
+  },
+  {
+   "kod": "MO5_CCCR19524570MHS32",
+   "nazwa": "245/70R19.5 CONTINENTAL CONTI HYBRID HS3 136/134M 16PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3",
+   "bieznik": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17526570MH3S2",
+   "nazwa": "265/70R17.5 CONTINENTAL CONTI HYBRID LS3 139/136M 14PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3",
+   "bieznik": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17524570MH3S2",
+   "nazwa": "245/70R17.5 CONTINENTAL CONTI HYBRID LS3 136/134M 14PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3",
+   "bieznik": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17523575MH3S4",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI HYBRID LS3 132/130M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3",
+   "bieznik": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17522575MH3S2",
+   "nazwa": "225/75R17.5 CONTINENTAL CONTI HYBRID LS3 129/127M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3",
+   "bieznik": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17521575MH3S2",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI HYBRID LS3 126/124M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3",
+   "bieznik": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO5_CCCR17520575MHLS2",
+   "nazwa": "205/75R17.5 CONTINENTAL CONTI HYBRID LS3 124/122M 12PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 3",
+   "bieznik": "CONTI HYBRID 3"
+  },
+  {
+   "kod": "MO4_LLCR19538555JLLT0",
+   "nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T10",
+   "bieznik": "L-T10"
+  },
+  {
+   "kod": "MO4_LLCR17524570MLLS0",
+   "nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-S20",
+   "bieznik": "L-S20"
+  },
+  {
+   "kod": "MO4_LLCR17523575MLLD0",
+   "nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-D20",
+   "bieznik": "L-D20"
+  },
+  {
+   "kod": "MO4_LLCR17523575JT2L0",
+   "nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T20",
+   "bieznik": "L-T20"
+  },
+  {
+   "kod": "MO4_LLCR17521575JT2L0",
+   "nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T20",
+   "bieznik": "L-T20"
+  },
+  {
+   "kod": "MO4_LLCR17520575MLLS0",
+   "nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-S20",
+   "bieznik": "L-S20"
+  },
+  {
+   "kod": "MO4_LLCR17520565JT2L0",
+   "nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "L-T20",
+   "bieznik": "L-T20"
+  },
+  {
+   "kod": "MO4_IMCR22531580L12M1",
+   "nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF",
+   "marka": "MIRAGE",
+   "model": "MG121 PROWADZĄCA",
+   "bieznik": "MG121 PROWADZĄCA"
+  },
+  {
+   "kod": "MO4_HLRD120238006MG50",
+   "nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL",
+   "marka": "MRL",
+   "model": "MG 54 Z-WIDE",
+   "bieznik": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO4_HLRD080F16003MG50",
+   "nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL",
+   "marka": "MRL",
+   "model": "MG 54 Z-WIDE",
+   "bieznik": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO4_CCCR22538565K5SH0",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO4_CCCR22531580LCH50",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 5",
+   "bieznik": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO4_CCCR22531580L5SH0",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO4_CCCR22531570LCH50",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI HYBRID 5",
+   "bieznik": "CONTI HYBRID 5"
+  },
+  {
+   "kod": "MO4_CCCR22531570L5SH0",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO3_71045265Af644f20tt",
+   "nazwa": "710/45-26.5 ALLIANCE FORESTAR 644 III 175A2/168A8 20PR SB TT",
+   "marka": "ALLIANCE",
+   "model": "F-644",
+   "bieznik": "F-644"
+  },
+  {
+   "kod": "MO3_71045265Af643f20tt",
+   "nazwa": "710/45-26.5 ALLIANCE 643 FORESTAR RIII 20PR TT",
+   "marka": "ALLIANCE",
+   "model": "F-643",
+   "bieznik": "F-643"
+  },
+  {
+   "kod": "MO3_60055265Af644f20tt",
+   "nazwa": "600/55-26.5 ALLIANCE 644 FORESTAR III 20PR TT",
+   "marka": "ALLIANCE",
+   "model": "F-644",
+   "bieznik": "F-644"
+  },
+  {
+   "kod": "MO3_4408028FIDU",
+   "nazwa": "440/80R28 FIRESTONE DURA-UT 156A8 TL",
+   "marka": "FIRESTONE",
+   "model": "DURAFORCE",
+   "bieznik": "DURAFORCE"
+  },
+  {
+   "kod": "MO3_3807024BRvxr",
+   "nazwa": "380/70R24 BRIDGESTONE VX-R TRACTOR 125D/122E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5007024FIDU",
+   "nazwa": "500/70R24 FIRESTONE DURA-UT 164A/164B TL",
+   "marka": "FIRESTONE",
+   "model": "DURAFORCE",
+   "bieznik": "DURAFORCE"
+  },
+  {
+   "kod": "MO3_3808528BRvxr",
+   "nazwa": "380/85R28 BRIDGESTONE VX-R TRACTOR 133D/130E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6006538BRvxr",
+   "nazwa": "600/65R38 BRIDGESTONE VX-R TRACTOR 153D/150E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4057018FIDU",
+   "nazwa": "405/70R18 FIRESTONE DURA-UT 141B",
+   "marka": "FIRESTONE",
+   "model": "DURAFORCE",
+   "bieznik": "DURAFORCE"
+  },
+  {
+   "kod": "MO3_4008024AA-325162A8",
+   "nazwa": "400/80-24 ALLIANCE TOUGH TRAC 325 162A8 TL",
+   "marka": "ALLIANCE",
+   "model": "A-325",
+   "bieznik": "A-325"
+  },
+  {
+   "kod": "MO3_3808038Aaii",
+   "nazwa": "380/80R38 ALLIANCE AGRISTAR II 142D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II 85",
+   "bieznik": "AGRISTAR II 85"
+  },
+  {
+   "kod": "MO3_9006038contiTM",
+   "nazwa": "900/60R38 CONTINENTAL 178D/181A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6007030conti",
+   "nazwa": "600/70R30 CONTINENTAL 152D/155A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6007030Aaii",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II 70",
+   "bieznik": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_4207024Aaii",
+   "nazwa": "420/70R24 ALLIANCE AGRISTAR II 130D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II 70",
+   "bieznik": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_6507538conti",
+   "nazwa": "650/75R38 CONTINENTAL 169D/172A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_4208534Aaii",
+   "nazwa": "420/85R34 ALLIANCE AGRI STAR II 142D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II 85",
+   "bieznik": "AGRISTAR II 85"
+  },
+  {
+   "kod": "MO3_5807038Aaii",
+   "nazwa": "580/70R38 ALLIANCE AGRISTAR II 155D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II 70",
+   "bieznik": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_8007032conti",
+   "nazwa": "800/70R32 CONTINENTAL 181A8/181B TL",
+   "marka": "CONTINENTAL",
+   "model": "COMBINEMASTER",
+   "bieznik": "COMBINEMASTER"
+  },
+  {
+   "kod": "MO3_6006534conti",
+   "nazwa": "600/65R34 CONTINENTAL 151D/154A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6508538Aaii",
+   "nazwa": "650/85R38 ALLIANCE AGRISTAR II 173D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II 85",
+   "bieznik": "AGRISTAR II 85"
+  },
+  {
+   "kod": "MO3_4607024contiEM",
+   "nazwa": "460/70R24 CONTINENTAL 159A8/159B TL",
+   "marka": "CONTINENTAL",
+   "model": "COMPACTMASTER EM",
+   "bieznik": "COMPACT MASTER EM"
+  },
+  {
+   "kod": "MO3_6007030ademo",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II 70",
+   "bieznik": "AGRISTAR II 70"
+  },
+  {
+   "kod": "MO3_30095R46AAIIRC148D14",
+   "nazwa": "300/95R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II RC",
+   "bieznik": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO3_23095R36AAIIRC130D12",
+   "nazwa": "230/95R36 ALLIANCE AGRISTAR II ROW CROP 130D/127E TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II RC",
+   "bieznik": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO3_32090R46AAIIRC148D14",
+   "nazwa": "320/90R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II RC",
+   "bieznik": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO3_23095R28AAIIRC110D10",
+   "nazwa": "230/95R28 ALLIANCE AGRISTAR II ROW CROP 110D/107E TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II RC",
+   "bieznik": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO2_T484420",
+   "nazwa": "18.4-34 NOKIAN TR FOREST 14PR TT",
+   "marka": "NOKIAN",
+   "model": "TR FS FOREST",
+   "bieznik": "TR FS FOREST"
+  },
+  {
+   "kod": "MO2_T445622",
+   "nazwa": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS L-2",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO2_67000010AL-IG",
+   "nazwa": "710/70R38 ALLIANCE AGRO FORESTRY 670 175A2/168A8 SB TL",
+   "marka": "ALLIANCE",
+   "model": "AF 670",
+   "bieznik": "AF 670"
+  },
+  {
+   "kod": "MO2_67000005AL-IN",
+   "nazwa": "480/70-34 ALLIANCE AGRO FORESTRY 670 146A8/143B SB TL",
+   "marka": "ALLIANCE",
+   "model": "AF 670",
+   "bieznik": "AF 670"
+  },
+  {
+   "kod": "MO2_45045005AL-IN",
+   "nazwa": "230/95R44 ALLIANCE AGRISTAR II ROW CROP 134D/131E TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II RC",
+   "bieznik": "AGRISTAR II RC"
+  },
+  {
+   "kod": "MO2_38102600AL-IN",
+   "nazwa": "620/40R22.5 ALLIANCE FLOTMASTER 381 148D TL",
+   "marka": "ALLIANCE",
+   "model": "381 FLOTAMASTER",
+   "bieznik": "381 FLOTAMASTER"
+  },
+  {
+   "kod": "MO2_33300242AL-IN",
+   "nazwa": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL",
+   "marka": "ALLIANCE",
+   "model": "333 FORESTRY",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300054AL-IN",
+   "nazwa": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL",
+   "marka": "ALLIANCE",
+   "model": "333 FORESTRY",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_32827054AL-IN",
+   "nazwa": "550/45-22.5 ALLIANCE FLOTATION 328 147A8/159A8 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 FLOTATION",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32470010FP-IN",
+   "nazwa": "18.4-26 ALLIANCE FARM PRO 324 146A8 12PR TL",
+   "marka": "ALLIANCE",
+   "model": "324 FARM PRO",
+   "bieznik": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32414002FP-IG",
+   "nazwa": "14.9-28 ALLIANCE FARM PRO 324 130A8 8PR TT",
+   "marka": "ALLIANCE",
+   "model": "324 FARM PRO",
+   "bieznik": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32412520FP-IG",
+   "nazwa": "12.4-28 ALLIANCE FARM PRO 324 123A8 8PR TT",
+   "marka": "ALLIANCE",
+   "model": "324 FARM PRO",
+   "bieznik": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32406112FP-IG",
+   "nazwa": "13.6-24 ALLIANCE FARM PRO 324 123A8 8PR TT",
+   "marka": "ALLIANCE",
+   "model": "324 FARM PRO",
+   "bieznik": "324 FARM PRO"
+  },
+  {
+   "kod": "MO2_32014918VP-IG",
+   "nazwa": "12.5/80-18 ALLIANCE 320 VALUE PLUS 145A6/142A8 12PR TL",
+   "marka": "ALLIANCE",
+   "model": "A320 VALUE PLUS",
+   "bieznik": "A320 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_05153350000",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 164K 20PR 3PMSF M+S FRONT",
+   "marka": "CONTINENTAL",
+   "model": "CONTI CROSSTRAC 3",
+   "bieznik": "CONTI CROSSTRAC 3"
+  },
+  {
+   "kod": "MO2_05128730000",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS 5 154/150L 3PMSF M+S HS FRONT",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO2_05128600000",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS 5 164K 3PMSF M+S HS FRONT",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO7_T445516",
+   "nazwa": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL",
+   "marka": "NOKIAN",
+   "model": "FOREST KING TRS -2",
+   "bieznik": "FOREST KING TRS 2"
+  },
+  {
+   "kod": "MO5_LLCR22531570LRD30",
+   "nazwa": "315/70R22.5 LINGLONG -D30 156/150L 18PR TL M+S 3PMSF",
+   "marka": "LINGLONG",
+   "model": "R-D30",
+   "bieznik": "R-D30"
+  },
+  {
+   "kod": "MO2_05127050000",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "5 CONTI HYBRID",
+   "bieznik": "5 CONTI HYBRID"
+  },
+  {
+   "kod": "MO5_CCCR22538555K5SH0",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS5 162K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  },
+  {
+   "kod": "MO2_05127970000",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS 5 162K/158L 3PMSF M+S HS",
+   "marka": "CONTINENTAL",
+   "model": "CONTI ECO 5",
+   "bieznik": "CONTI ECO 5"
+  }
+ ],
+ "modelBieznikRozne": [
+  {
+   "kod": "MO9_336319",
+   "nazwa": "240/70R16 BKT RIDEMAX IT696 107A8/107B TL",
+   "marka": "BKT",
+   "model": "RIDEMAX IT696",
+   "bieznik": "RIDEMAX IT 696"
+  },
+  {
+   "kod": "MO9_280851",
+   "nazwa": "8.00x20 BKT TR135 E 8PR TT",
+   "marka": "BKT",
+   "model": "TR135 E",
+   "bieznik": "TR 135 E"
+  },
+  {
+   "kod": "MO9_103583",
+   "nazwa": "23.5R25 BKT EARTHMAX SR53 CR L5**",
+   "marka": "BKT",
+   "model": "EARTHMAX SR53 CR",
+   "bieznik": "EARTHMAX SR 53 CR"
+  },
+  {
+   "kod": "MO9_102759",
+   "nazwa": "29.5R25 BKT EARTHMAX SR53 CR L5**",
+   "marka": "BKT",
+   "model": "EARTHMAX SR53 CR",
+   "bieznik": "EARTHMAX SR 53 CR"
+  },
+  {
+   "kod": "MO9_102383",
+   "nazwa": "29.5R25 BKT EARTHMAX SR41 CR E4**",
+   "marka": "BKT",
+   "model": "EARTHMAX SR41 CR",
+   "bieznik": "EARTHMAX SR 41 CR"
+  },
+  {
+   "kod": "MO9_102381",
+   "nazwa": "26.5R25 BKT EARTHMAX SR53 CR L5**",
+   "marka": "BKT",
+   "model": "EARTHMAX SR53 CR",
+   "bieznik": "EARTHMAX SR 53 CR"
+  },
+  {
+   "kod": "MO9_101509",
+   "nazwa": "650/45x22.5 BKT TR678 166B 20PR TL",
+   "marka": "BKT",
+   "model": "TR678",
+   "bieznik": "TR 678"
+  },
+  {
+   "kod": "MO9_98983",
+   "nazwa": "10.0/80x12 BKT AW-702 10PR TL",
+   "marka": "BKT",
+   "model": "AW-702",
+   "bieznik": "AW 702"
+  },
+  {
+   "kod": "MO9_98831",
+   "nazwa": "600/55R26.5 BKT FL630 SUPER 177D TL",
+   "marka": "BKT",
+   "model": "FL630 SUPER",
+   "bieznik": "FL 630 SUPER"
+  },
+  {
+   "kod": "MO9_68018",
+   "nazwa": "28x12.5-15 BKT PT - HD 24PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_67206",
+   "nazwa": "600/60R30.5 BKT RIDEMAX FL693M 173D",
+   "marka": "BKT",
+   "model": "RIDEMAX FL693M",
+   "bieznik": "RIDEMAX FL 693 M"
+  },
+  {
+   "kod": "MO9_66753",
+   "nazwa": "8.5/90x15 BKT PAC MASTER 6PR TL",
+   "marka": "BKT",
+   "model": "PAC MASTER",
+   "bieznik": "PACMASTER"
+  },
+  {
+   "kod": "MO9_66455",
+   "nazwa": "15.5x38 BKT TR135 E 10PR TT",
+   "marka": "BKT",
+   "model": "TR135 E",
+   "bieznik": "TR 135 E"
+  },
+  {
+   "kod": "MO9_66351",
+   "nazwa": "19.5L-24 BKT MULTIMAX MP 527 164 B 164A8 TL",
+   "marka": "BKT",
+   "model": "MULTIMAX MP 527 164 B",
+   "bieznik": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_66298",
+   "nazwa": "340/80R18 BKT RIDEMAX IT696 E 138D/143A8",
+   "marka": "BKT",
+   "model": "RIDEMAX IT696 E",
+   "bieznik": "RIDEMAX IT 696 E"
+  },
+  {
+   "kod": "MO9_66258",
+   "nazwa": "420/90R30 BKT AGRIMAX RT945 E 147A8/147B",
+   "marka": "BKT",
+   "model": "AGRIMAX RT945 E",
+   "bieznik": "AGRIMAX RT 945 E"
+  },
+  {
+   "kod": "MO9_66009",
+   "nazwa": "365/80R20 BKT EARTHMAX SR33 152K TL",
+   "marka": "BKT",
+   "model": "EARTHMAX SR33",
+   "bieznik": "EARTHMAX SR 33"
+  },
+  {
+   "kod": "MO9_65988",
+   "nazwa": "360/80R24 BKT RIDEMAX IT696 E 138D/143A8",
+   "marka": "BKT",
+   "model": "RIDEMAX IT696 E",
+   "bieznik": "RIDEMAX IT 696 E"
+  },
+  {
+   "kod": "MO9_65945",
+   "nazwa": "395/85R20 BKT EARTHMAX SR33 168J TL",
+   "marka": "BKT",
+   "model": "EARTHMAX SR33",
+   "bieznik": "EARTHMAX SR 33"
+  },
+  {
+   "kod": "MO9_65695",
+   "nazwa": "IF650/75R38 CFO BKT AGRIMAX FORCE E 175D",
+   "marka": "BKT",
+   "model": "AGRIMAX FORCE E",
+   "bieznik": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO9_63494",
+   "nazwa": "650/55R22.5 BKT FL635 167D",
+   "marka": "BKT",
+   "model": "FL635",
+   "bieznik": "FL 635"
+  },
+  {
+   "kod": "MO9_63312",
+   "nazwa": "600/50R22.5 BKT RIDEMAX FL693 M 159D/156E TL SB",
+   "marka": "BKT",
+   "model": "RIDEMAX FL693 M",
+   "bieznik": "RIDEMAX FL 693 M"
+  },
+  {
+   "kod": "MO9_63010",
+   "nazwa": "520/85R50 BKT AGRIMAX RT 855 165A8/165B TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT855 E",
+   "bieznik": "AGRIMAX RT 855 E"
+  },
+  {
+   "kod": "MO9_62208",
+   "nazwa": "10x16.5 BKT SURE-TRAX HD 10PR",
+   "marka": "BKT",
+   "model": "SURE-TRAX HD",
+   "bieznik": "SURETRAX HD"
+  },
+  {
+   "kod": "MO9_58181",
+   "nazwa": "550/45x22.5 BKT FLOT 648 T WZM T E 20PR TL",
+   "marka": "BKT",
+   "model": "FLOT 648 T WZM T E",
+   "bieznik": "FLOT 648"
+  },
+  {
+   "kod": "MO9_57748",
+   "nazwa": "580/65R22.5 BKT FL693 M 166D TL",
+   "marka": "BKT",
+   "model": "FL693 M",
+   "bieznik": "FL 693 M"
+  },
+  {
+   "kod": "MO9_57305",
+   "nazwa": "6.00-9 BKT PT-HD 10PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_56230",
+   "nazwa": "520/50x17 BKT AW708 162A8 TL",
+   "marka": "BKT",
+   "model": "AW708",
+   "bieznik": "AW 708"
+  },
+  {
+   "kod": "MO9_51366",
+   "nazwa": "250x15 BKT PT - HD 20PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_48102",
+   "nazwa": "400/80R24 BKT MULTIMAX MP522 162A8/B TL",
+   "marka": "BKT",
+   "model": "MULTIMAX MP522",
+   "bieznik": "MULTIMAX MP 522"
+  },
+  {
+   "kod": "MO9_47020",
+   "nazwa": "8.15x15 BKT PT - HD 14PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_45695",
+   "nazwa": "8.25x15 BKT PT - HD 14PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_45282",
+   "nazwa": "205/60x15 BKT PAC MASTER 6PR TL",
+   "marka": "BKT",
+   "model": "PAC MASTER",
+   "bieznik": "PACMASTER"
+  },
+  {
+   "kod": "MO9_45140",
+   "nazwa": "750/60x30.5 BKT FLOT 648 E 16PR TL",
+   "marka": "BKT",
+   "model": "FLOT 648 E",
+   "bieznik": "FLOT 648"
+  },
+  {
+   "kod": "MO9_43233",
+   "nazwa": "18x7-8 BKT PT - HD 16PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_38155",
+   "nazwa": "250/65-14.5 BKT RIB 774 14PR TL",
+   "marka": "BKT",
+   "model": "RIB-774",
+   "bieznik": "RIB 774"
+  },
+  {
+   "kod": "MO9_37875",
+   "nazwa": "320/90R46 BKT AGRIMAX RT 945 148D/151A8 TL",
+   "marka": "BKT",
+   "model": "AGRIMAX RT945 E",
+   "bieznik": "AGRIMAX RT 945 E"
+  },
+  {
+   "kod": "MO9_37266",
+   "nazwa": "850/50R30.5 BKT RIDEMAX FL 693M 182D TL",
+   "marka": "BKT",
+   "model": "RIDEMAX FL 693M",
+   "bieznik": "RIDEMAX FL 693 M"
+  },
+  {
+   "kod": "MO9_35491",
+   "nazwa": "700/40x22.5 BKT FLOT 648 166 A8 16PR TL",
+   "marka": "BKT",
+   "model": "FLOT 648 166 A8",
+   "bieznik": "FLOT 648"
+  },
+  {
+   "kod": "MO9_35163",
+   "nazwa": "500/50x17 BKT FLOT648 157A8 18PR TL",
+   "marka": "BKT",
+   "model": "FLOT648",
+   "bieznik": "FLOT 648"
+  },
+  {
+   "kod": "MO9_31862",
+   "nazwa": "27x10-12 BKT PT - HD 16PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_29113",
+   "nazwa": "6.50x10 BKT PT - HD 14PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_28612",
+   "nazwa": "IF600/70R28 BKT AGRIMAX FORCE E 164D TL",
+   "marka": "BKT",
+   "model": "AGRIMAX FORCE E",
+   "bieznik": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO9_27582",
+   "nazwa": "18.4x26 BKT MULTIMAX MP 527 E 160A8/B",
+   "marka": "BKT",
+   "model": "MULTIMAX MP 527 E",
+   "bieznik": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_27235",
+   "nazwa": "12.5R20 BKT MULTIMAX MP522 E 144A8/B",
+   "marka": "BKT",
+   "model": "MULTIMAX MP522 E",
+   "bieznik": "MULTIMAX MP 522 E"
+  },
+  {
+   "kod": "MO9_27054",
+   "nazwa": "500/55x20 BKT FLOT648 12PR TL",
+   "marka": "BKT",
+   "model": "FLOT648",
+   "bieznik": "FLOT 648"
+  },
+  {
+   "kod": "MO9_26914",
+   "nazwa": "400/80R28 BKT RIDEMAX IT-696 151A8/146D TL",
+   "marka": "BKT",
+   "model": "RIDEMAX IT-696",
+   "bieznik": "RIDEMAX IT 696"
+  },
+  {
+   "kod": "MO9_26493",
+   "nazwa": "IF680/85R32 CFO BKT AGRIMAX RT600 179D",
+   "marka": "BKT",
+   "model": "AGRIMAX RT600",
+   "bieznik": "AGRIMAX RT 600"
+  },
+  {
+   "kod": "MO9_26058",
+   "nazwa": "5.00-8 BKT PT-HD 10PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_20965",
+   "nazwa": "340/80R18 BKT MULTIMAX MP-522 143A8/B TL",
+   "marka": "BKT",
+   "model": "MULTIMAX MP-522",
+   "bieznik": "MULTIMAX MP 522"
+  },
+  {
+   "kod": "MO9_20015",
+   "nazwa": "500/60x22.5 BKT V-LINE 16PR TL",
+   "marka": "BKT",
+   "model": "V-LINE",
+   "bieznik": "V LINE"
+  },
+  {
+   "kod": "MO9_19800",
+   "nazwa": "23x9-10 BKT PT - HD 20PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_19593",
+   "nazwa": "12.00x20 BKT PT - HD 20PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_19460",
+   "nazwa": "16.0/70R20 BKT MULTIMAX MP527 E 149A8/B",
+   "marka": "BKT",
+   "model": "MULTIMAX MP527 E",
+   "bieznik": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_19085",
+   "nazwa": "27x10-12 BKT PT - HD 20PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_18025",
+   "nazwa": "28x12.5-15 BKT PT - HD 24PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_15722",
+   "nazwa": "IF900/60R38 BKT AGRIMAX FORCE E 184D",
+   "marka": "BKT",
+   "model": "AGRIMAX FORCE E",
+   "bieznik": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO9_14375",
+   "nazwa": "750/65R25 BKT EARTHMAX SR35 CR TL E3** L3*",
+   "marka": "BKT",
+   "model": "EARTHMAX SR35 CR",
+   "bieznik": "EARTHMAX SR 35 CR"
+  },
+  {
+   "kod": "MO9_14028",
+   "nazwa": "7.00-12 BKT PT-HD 14PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_10342",
+   "nazwa": "300x15 BKT PT - HD 20PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_8663",
+   "nazwa": "6.50x10 BKT PT - HD 10PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_8478",
+   "nazwa": "12.5R20 BKT MULTIMAX MP527 E 144A8/B",
+   "marka": "BKT",
+   "model": "MULTIMAX MP527 E",
+   "bieznik": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_7670",
+   "nazwa": "250/70R15 BKT LIFTMAX LM81 153A5 TL",
+   "marka": "BKT",
+   "model": "LIFTMAX LM81",
+   "bieznik": "LIFT MAX LM81"
+  },
+  {
+   "kod": "MO9_7445",
+   "nazwa": "10.00x20 BKT PT - HD 18PR TT",
+   "marka": "BKT",
+   "model": "PT - HD",
+   "bieznik": "PT-HD"
+  },
+  {
+   "kod": "MO9_3142",
+   "nazwa": "IF900/60R42 BKT AGRIMAX FORCE E 186D",
+   "marka": "BKT",
+   "model": "AGRIMAX FORCE E",
+   "bieznik": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO5_VRRR240320858TV80",
+   "nazwa": "320/85R24 VREDESTEIN TRAXION85 122A8/122B TL",
+   "marka": "VREDESTEIN",
+   "model": "TRAXION85",
+   "bieznik": "TRAXION85 II"
+  },
+  {
+   "kod": "MO5_TRRD160360658AW30",
+   "nazwa": "360/65-16 TRELLEBORG AW305 148A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO5_TRRD160340558AW30",
+   "nazwa": "340/55-16 TRELLEBORG AW305 140A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO5_TRRD155280608T210",
+   "nazwa": "280/60-15.5 TRELLEBORG T-421 115A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "T-421",
+   "bieznik": "T421"
+  },
+  {
+   "kod": "MO5_TRRD14016000452T1",
+   "nazwa": "645x160-14 TRELLEBORG T-528 120A4 TT",
+   "marka": "TRELLEBORG",
+   "model": "T-528",
+   "bieznik": "T528"
+  },
+  {
+   "kod": "MO5_TRRD13014500452T1",
+   "nazwa": "610x145-13 TRELLEBORG T-528 112A4 TT",
+   "marka": "TRELLEBORG",
+   "model": "T-528",
+   "bieznik": "T528"
+  },
+  {
+   "kod": "MO5_TRRD120320608T211",
+   "nazwa": "320/60-12 TRELLEBORG T-421 132A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "T-421",
+   "bieznik": "T421"
+  },
+  {
+   "kod": "MO5_TRRD120320608T210",
+   "nazwa": "320/60-12 TRELLEBORG T-421 132A8 TT",
+   "marka": "TRELLEBORG",
+   "model": "T-421",
+   "bieznik": "T421"
+  },
+  {
+   "kod": "MO5_TRRD12014000452T1",
+   "nazwa": "560x140-12 TRELLEBORG T-528 100A4 TT",
+   "marka": "TRELLEBORG",
+   "model": "T-528",
+   "bieznik": "T528"
+  },
+  {
+   "kod": "MO5_TRRD090E600065220",
+   "nazwa": "6.00-9 TRELLEBORG T-522 10PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-522",
+   "bieznik": "T522"
+  },
+  {
+   "kod": "MO5_TRRD090E60000T990",
+   "nazwa": "6.00-9 TRELLEBORG T-991 10PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO5_TRRD080E35000T510",
+   "nazwa": "3.50-8 TRELLEBORG T-510 4PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-510",
+   "bieznik": "T510"
+  },
+  {
+   "kod": "MO5_TRRD060E40000T990",
+   "nazwa": "4.00-6 TRELLEBORG T-991 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO5_TRRD060E35006T510",
+   "nazwa": "3.50-6 TRELLEBORG T-510 4PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-510",
+   "bieznik": "T510"
+  },
+  {
+   "kod": "MO5_TRRD040E41000T391",
+   "nazwa": "4.10/3.50-4 TRELLEBORG T-539 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-539",
+   "bieznik": "T539"
+  },
+  {
+   "kod": "MO5_TRRD040E40000T990",
+   "nazwa": "4.00-4 TRELLEBORG T-991 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO5_TRRD040E30000T991",
+   "nazwa": "3.00-4 TRELLEBORG T-991 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO5_TRRD040E30000T990",
+   "nazwa": "3.00-4 TRELLEBORG T-991 4PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO5_PPCR22538565KR0S0",
+   "nazwa": "385/65R22.5 PROMETEON R02 PROFUEL STEER HL 164K/158L TL M+S 3PMSF",
+   "marka": "PROMETEON",
+   "model": "R02 PROFUEL STEER HL",
+   "bieznik": "R02 PROFUEL STEER"
+  },
+  {
+   "kod": "MO5_PPCR22538565KR0N0",
+   "nazwa": "385/65R22.5 PROMETEON R02 PRO TRAILER FRT HL 164K/158L TL M+S 3PMSF",
+   "marka": "PROMETEON",
+   "model": "R02 PRO TRAILER FRT HL",
+   "bieznik": "R02 PRO TRAILER FRT"
+  },
+  {
+   "kod": "MO5_PPCR22538555KR0N0",
+   "nazwa": "385/55R22.5 PROMETEON R02 PRO TRAILER FRT HL 164K TL M+S 3PMSF",
+   "marka": "PROMETEON",
+   "model": "R02 PRO TRAILER FRT HL",
+   "bieznik": "R02 PRO TRAILER FRT"
+  },
+  {
+   "kod": "MO5_MIRR38058070DHC70",
+   "nazwa": "580/70R38 MITAS HC70 155D/158A8 TL",
+   "marka": "MITAS",
+   "model": "HC70",
+   "bieznik": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR38052070DHC70",
+   "nazwa": "520/70R38 MITAS HC70 150D/153A8 TL",
+   "marka": "MITAS",
+   "model": "HC70",
+   "bieznik": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR34048070DH7M1",
+   "nazwa": "480/70R34 MITAS HC70 155D/158A8 TL",
+   "marka": "MITAS",
+   "model": "HC70",
+   "bieznik": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR28038070DHC70",
+   "nazwa": "380/70R28 MITAS HC70 127D/130A8 TL",
+   "marka": "MITAS",
+   "model": "HC70",
+   "bieznik": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR24042070DHC70",
+   "nazwa": "420/70R24 MITAS HC70 130D/133A8 TL",
+   "marka": "MITAS",
+   "model": "HC70",
+   "bieznik": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR24038070DHC70",
+   "nazwa": "380/70R24 MITAS HC70 125D/128A8 TL",
+   "marka": "MITAS",
+   "model": "HC70",
+   "bieznik": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRD340G84006TD20",
+   "nazwa": "18.4-34 MITAS TD-02 151A6/144A8 12PR TT",
+   "marka": "MITAS",
+   "model": "TD-02",
+   "bieznik": "TD02"
+  },
+  {
+   "kod": "MO5_MIRD340G84006TD11",
+   "nazwa": "18.4-34 MITAS TD-19 151A6/144A8 12PR TT",
+   "marka": "MITAS",
+   "model": "TD-19",
+   "bieznik": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD280G4900OTD10",
+   "nazwa": "14.9-28 MITAS TD-19 130A6/122A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TD-19",
+   "bieznik": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD280G24006TD20",
+   "nazwa": "12.4-28 MITAS TD-02 123A6/116A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TD-02",
+   "bieznik": "TD02"
+  },
+  {
+   "kod": "MO5_MIRD280G24006TD1T",
+   "nazwa": "12.4-28 MITAS TD-19 126A6/121A8 10PR TT",
+   "marka": "MITAS",
+   "model": "TD-19",
+   "bieznik": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD240G49006TD10",
+   "nazwa": "14.9-24 MITAS TD-19 128A6/121A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TD-19",
+   "bieznik": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD240D95006TD28",
+   "nazwa": "9.5-24 MITAS TD-02 112A6/104A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TD-02",
+   "bieznik": "TD02"
+  },
+  {
+   "kod": "MO5_MIRD24012400ATD10",
+   "nazwa": "12.4-24 MITAS TD-19 120A6/112A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TD-19",
+   "bieznik": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD240124008TD10",
+   "nazwa": "12.4-24 MITAS TD-19 128A8 12PR TL",
+   "marka": "MITAS",
+   "model": "TD-19",
+   "bieznik": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD200E750063TF0",
+   "nazwa": "7.50-20 MITAS TF-03 103A6/96A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD200D83006T130",
+   "nazwa": "8.3-20 MITAS TD-13 104A8/92A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TD-13",
+   "bieznik": "TD13"
+  },
+  {
+   "kod": "MO5_MIRD2006500063TF0",
+   "nazwa": "6.50-20 MITAS TF-03 96A6/88A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD180E600063TF0",
+   "nazwa": "6.00-18 MITAS TF-03 96A6/88A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD170G50558IM44",
+   "nazwa": "15.0/55-17 MITAS IM-04 137A8 14PR TL",
+   "marka": "MITAS",
+   "model": "IM-04",
+   "bieznik": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD160E750063TF1",
+   "nazwa": "7.50-16 MITAS TF-03 103A6/96A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD160E750063TF0",
+   "nazwa": "7.50-16 MITAS TF-03 98A6/90A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD160E650063TF0",
+   "nazwa": "6.50-16 MITAS TF-03 97A6/89A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD160E60006T130",
+   "nazwa": "6.00-16 MITAS TD-13 88A6/80A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TD-13",
+   "bieznik": "TD13"
+  },
+  {
+   "kod": "MO5_MIRD160E600063TF0",
+   "nazwa": "6.00-16 MITAS TF-03 88A6/80A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD155400608IM71",
+   "nazwa": "400/60-15.5 MITAS IM-07 140A8 14PR TL",
+   "marka": "MITAS",
+   "model": "IM-07",
+   "bieznik": "IM07"
+  },
+  {
+   "kod": "MO5_MIRD153G25808IM40",
+   "nazwa": "12.5/80-15.3 MITAS IM-04 141A8 14PR TL",
+   "marka": "MITAS",
+   "model": "IM-04",
+   "bieznik": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD153G15808IM44",
+   "nazwa": "11.5/80-15.3 MITAS IM-04 141A8 16PR TL",
+   "marka": "MITAS",
+   "model": "IM-04",
+   "bieznik": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD153G10758IM4Y",
+   "nazwa": "10.0/75-15.3 MITAS IM-04 143A8 18PR TL",
+   "marka": "MITAS",
+   "model": "IM-04",
+   "bieznik": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD153G10758IM42",
+   "nazwa": "10.0/75-15.3 MITAS IM-04 130A8 14PR TL",
+   "marka": "MITAS",
+   "model": "IM-04",
+   "bieznik": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD150E50008TS60",
+   "nazwa": "5.00-15 MITAS TS-06 84A8/71A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TS-06",
+   "bieznik": "TS06"
+  },
+  {
+   "kod": "MO5_MIRD150180008TS70",
+   "nazwa": "690x180-15 MITAS TS-07 100A8/88A8 4PR TT",
+   "marka": "MITAS",
+   "model": "TS-07",
+   "bieznik": "TS07"
+  },
+  {
+   "kod": "MO5_MIRD120E50000B1S2",
+   "nazwa": "5.00-12 MITAS B-12 4PR TT",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO5_MIRD120E40000B1S2",
+   "nazwa": "4.00-12 MITAS B-12 4PR TT",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO5_MIRD120D65808TS66",
+   "nazwa": "6.50/80-12 MITAS TS-06 89A8/76A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TS-06",
+   "bieznik": "TS06"
+  },
+  {
+   "kod": "MO5_MIRD100E40000B1S3",
+   "nazwa": "4.00-10 MITAS B-12 4PR TT",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO5_MIRD100E40000B1S2",
+   "nazwa": "4.00-10 MITAS B-12 2PR TT",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO5_MIRD080F16000B195",
+   "nazwa": "16x6.50-8 MITAS B-19 12PR TL",
+   "marka": "MITAS",
+   "model": "B-19",
+   "bieznik": "B19"
+  },
+  {
+   "kod": "MO5_MIRD080E40000B1S2",
+   "nazwa": "4.00-8 MITAS B-12 4PR TT",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO5_MIRD06013A000B1S1",
+   "nazwa": "13x5.00-6 MITAS B-12 4PR TL",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO5_MIRD06013A000B193",
+   "nazwa": "13x5.00-6 MITAS B-19 8PR TL",
+   "marka": "MITAS",
+   "model": "B-19",
+   "bieznik": "B19"
+  },
+  {
+   "kod": "MO5_MIPR24040570JM210",
+   "nazwa": "405/70R24 MITAS MPT-21 152J TL",
+   "marka": "MITAS",
+   "model": "MPT-21",
+   "bieznik": "MPT21"
+  },
+  {
+   "kod": "MO5_MIPR20040570JM210",
+   "nazwa": "405/70R20 MITAS MPT-21 152J TL",
+   "marka": "MITAS",
+   "model": "MPT-21",
+   "bieznik": "MPT21"
+  },
+  {
+   "kod": "MO5_MIPR20040570B01E0",
+   "nazwa": "405/70R20 MITAS EM-01 143B TL",
+   "marka": "MITAS",
+   "model": "EM-01",
+   "bieznik": "EM01"
+  },
+  {
+   "kod": "MO5_MIPR18040570B01E1",
+   "nazwa": "405/70R18 MITAS EM-01 156B TL",
+   "marka": "MITAS",
+   "model": "EM-01",
+   "bieznik": "EM01"
+  },
+  {
+   "kod": "MO5_MIPR18036570B01E0",
+   "nazwa": "365/70R18 MITAS EM-01 135B/146A2 TL",
+   "marka": "MITAS",
+   "model": "EM-01",
+   "bieznik": "EM01"
+  },
+  {
+   "kod": "MO5_MIPD250G2300BEM20",
+   "nazwa": "23.5-25 MITAS EM-20 L-2 177B 20PR TL",
+   "marka": "MITAS",
+   "model": "EM-20",
+   "bieznik": "EM20"
+  },
+  {
+   "kod": "MO5_MIPD240G75008TI00",
+   "nazwa": "17.5L-24 MITAS TI-02 144A8 10PR TL",
+   "marka": "MITAS",
+   "model": "TI-02",
+   "bieznik": "TI02"
+  },
+  {
+   "kod": "MO5_MIPD24040570BMT40",
+   "nazwa": "405/70-24 MITAS MPT-04 152B 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-04",
+   "bieznik": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD24040070DMT40",
+   "nazwa": "400/70-24 MITAS MPT-04 151D 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-04",
+   "bieznik": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD225480658ME60",
+   "nazwa": "480/65-22.5 MITAS MPT-06 163A8 16PR TL",
+   "marka": "MITAS",
+   "model": "MPT-06",
+   "bieznik": "MPT06"
+  },
+  {
+   "kod": "MO5_MIPD200H0000BE230",
+   "nazwa": "10.00-20 MITAS EM-23 146B 16PR TT",
+   "marka": "MITAS",
+   "model": "EM-23",
+   "bieznik": "EM23"
+  },
+  {
+   "kod": "MO5_MIPD200H0000BE220",
+   "nazwa": "10.00-20 MITAS EM-22 146B 16PR TT",
+   "marka": "MITAS",
+   "model": "EM-22",
+   "bieznik": "EM 22"
+  },
+  {
+   "kod": "MO5_MIPD200F6070GMT54",
+   "nazwa": "16.0/70-20 MITAS MPT-05 145G 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-05",
+   "bieznik": "MPT05"
+  },
+  {
+   "kod": "MO5_MIPD20040570BMT11",
+   "nazwa": "405/70-20 MITAS MPT-01 152B 16PR TL",
+   "marka": "MITAS",
+   "model": "MPT-01",
+   "bieznik": "MPT01"
+  },
+  {
+   "kod": "MO5_MIPD20040570BMT10",
+   "nazwa": "405/70-20 MITAS MPT-01 149B 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-01",
+   "bieznik": "MPT01"
+  },
+  {
+   "kod": "MO5_MIPD20040070DMT40",
+   "nazwa": "400/70-20 MITAS MPT-04 148D 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-04",
+   "bieznik": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD20036085DMT41",
+   "nazwa": "360/85-20 MITAS MPT-04 142D 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-04",
+   "bieznik": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD20034080DMT41",
+   "nazwa": "340/80-20 MITAS MPT-04 135D 12PR TL",
+   "marka": "MITAS",
+   "model": "MPT-04",
+   "bieznik": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD2001670014O5L",
+   "nazwa": "16/70-20 MITAS MPT-05 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-05",
+   "bieznik": "MPT05"
+  },
+  {
+   "kod": "MO5_MIPD180G2500GMP32",
+   "nazwa": "12.5-18 MITAS MPT-03 136G 16PR TL",
+   "marka": "MITAS",
+   "model": "MPT-03",
+   "bieznik": "MPT03"
+  },
+  {
+   "kod": "MO5_MIPD150311008SK00",
+   "nazwa": "31x15.50-15 MITAS SK-02 8PR TL",
+   "marka": "MITAS",
+   "model": "SK-02",
+   "bieznik": "SK02"
+  },
+  {
+   "kod": "MO5_MIPD120D85004SK20",
+   "nazwa": "23x8.50-12 MITAS SK-02 115A4 10PR TL",
+   "marka": "MITAS",
+   "model": "SK-02",
+   "bieznik": "SK02"
+  },
+  {
+   "kod": "MO5_MCRR42065065DRD30",
+   "nazwa": "650/65R42 CULTOR RD-03 165D/168A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR420520858RD10",
+   "nazwa": "520/85R42 CULTOR RD-01 162B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR38071070DRD30",
+   "nazwa": "710/70R38 CULTOR RD-03 153D/156A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR380650658RD31",
+   "nazwa": "650/65R38 CULTOR RD-03 157A8/160B TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR380650658RD30",
+   "nazwa": "650/65R38 CULTOR RD-03 166D/169A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR38060065DRD30",
+   "nazwa": "600/65R38 CULTOR RD-03 153D/156A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR38054065DRD30",
+   "nazwa": "540/65R38 CULTOR RD-03 147D/150A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR38052085ARD10",
+   "nazwa": "520/85R38 CULTOR RD-01 155A8/152B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR380460858RD10",
+   "nazwa": "460/85R38 CULTOR RD-01 149A8/146B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR360340858RD10",
+   "nazwa": "340/85R36 CULTOR RD-01 66A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR34060065DRD30",
+   "nazwa": "600/65R34 CULTOR RD-03 151D/154A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR340460858RD10",
+   "nazwa": "460/85R34 CULTOR RD-01 147A8/144B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR340420858RD10",
+   "nazwa": "420/85R34 CULTOR RD-01 147A8/144B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR320320858RD10",
+   "nazwa": "320/85R32 CULTOR RD-01 142A8/142B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR30054065DRD30",
+   "nazwa": "540/65R30 CULTOR RD-03 150D/153A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR300460858RD10",
+   "nazwa": "460/85R30 CULTOR RD-01 145A8/145B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR300420858RD10",
+   "nazwa": "420/85R30 CULTOR RD-01 140A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR28060065DRD30",
+   "nazwa": "600/65R28 CULTOR RD-03 147D/150A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR280540658RD30",
+   "nazwa": "540/65R28 CULTOR RD-03 142A8/142B TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR28048065DRD30",
+   "nazwa": "480/65R28 CULTOR RD-03 136D/139A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR280440658RD30",
+   "nazwa": "440/65R28 CULTOR RD-03 131A8/131D TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR280420858RD11",
+   "nazwa": "420/85R28 CULTOR RD-01 139A8/136B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR280380858RD12",
+   "nazwa": "380/85R28 CULTOR RD-01 133A8/130B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR280320858RD10",
+   "nazwa": "320/85R28 CULTOR RD-01 124A8/121B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR24048065DRD30",
+   "nazwa": "480/65R24 CULTOR RD-03 133D/136A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR240440658RD30",
+   "nazwa": "440/65R24 CULTOR RD-03 128A8/128B TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR24042085DRD10",
+   "nazwa": "420/85R24 CULTOR RD-01 137A8/137B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR24038085BRD10",
+   "nazwa": "380/85R24 CULTOR RD-01 131A8/128B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR240340858RD20",
+   "nazwa": "340/85R24 CULTOR RD-01 125A8/122B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR240320858RD20",
+   "nazwa": "320/85R24 CULTOR RD-01 122A8/119B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR240280858RD20",
+   "nazwa": "280/85R24 CULTOR RD-01 115A8/112B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO5_KARD080F16004IP60",
+   "nazwa": "16x6.50-8 KABAT IMP-06 73A4 6PR TL",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD080F160040001",
+   "nazwa": "16x6.50-8 KABAT IMP-06 73A4 6PR TT",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD080189004IP62",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TT",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD080189004IP60",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TL",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD060156004IP60",
+   "nazwa": "15x6.00-6 KABAT IMP-06 6PR TL",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_GNCR22538565K3621",
+   "nazwa": "385/65R22.5 DUNLOP SP362 160K/158L TL M+S 3PMSF",
+   "marka": "DUNLOP",
+   "model": "SP362",
+   "bieznik": "SP362 PROWADZĄCA"
+  },
+  {
+   "kod": "MO5_GNCR19530570MS441",
+   "nazwa": "305/70R19.5 DUNLOP SP446 3PSF 148/145M TL M+S",
+   "marka": "DUNLOP",
+   "model": "SP446 3PSF",
+   "bieznik": "SP446"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN1",
+   "nazwa": "285/70R19.5 FULDA ECOTONN 150/148J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "model": "ECOTONN",
+   "bieznik": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN0",
+   "nazwa": "285/70R19.5 FULDA ECOTONN 150/148J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "model": "ECOTONN",
+   "bieznik": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR19526570JECT1",
+   "nazwa": "265/70R19.5 FULDA ECOTONN 143/141J M+S 3PMSF",
+   "marka": "FULDA",
+   "model": "ECOTONN",
+   "bieznik": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR175D9500JETN1",
+   "nazwa": "9.5R17.5 FULDA ECOTONN 143/141J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "model": "ECOTONN",
+   "bieznik": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR17521575JETN0",
+   "nazwa": "215/75R17.5 FULDA ECOTONN 135/133J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "model": "ECOTONN",
+   "bieznik": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_FKCR22527570MBI80",
+   "nazwa": "275/70R22.5 FALKEN BI856 148/145M TL M+S 3PMSF",
+   "marka": "FALKEN",
+   "model": "BI856",
+   "bieznik": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO5_CCCR22531580K3CS0",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI CROSS TRAC HS3 156/150K 20PR TL M+S 3PMSF",
+   "marka": "CONTINENTAL",
+   "model": "CONTI CROSS TRAC 3",
+   "bieznik": "CONTI CROSSTRAC 3"
+  },
+  {
+   "kod": "MO5_BRCR22527570JUA21",
+   "nazwa": "275/70R22.5 BRIDGESTONE U-AP2 152/149J TL M+S 3PMSF",
+   "marka": "BRIDGESTONE",
+   "model": "U-AP2",
+   "bieznik": "U-AP002"
+  },
+  {
+   "kod": "MO5_BFRR38054065DMX60",
+   "nazwa": "540/65R38 FIRESTONE MAXITRACTION 65 147D/144E TL",
+   "marka": "FIRESTONE",
+   "model": "MAXITRACTION 65",
+   "bieznik": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR34060065DMX60",
+   "nazwa": "600/65R34 FIRESTONE MAXITRACTION 65 151D/148E TL",
+   "marka": "FIRESTONE",
+   "model": "MAXITRACTION 65",
+   "bieznik": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR24054065DMX60",
+   "nazwa": "540/65R24 FIRESTONE MAXITRACTION 65 140D/137E TL",
+   "marka": "FIRESTONE",
+   "model": "MAXITRACTION 65",
+   "bieznik": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR24048065DMX60",
+   "nazwa": "480/65R24 FIRESTONE MAXITRACTION 65 133D/130E TL",
+   "marka": "FIRESTONE",
+   "model": "MAXITRACTION 65",
+   "bieznik": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR24044065DMX60",
+   "nazwa": "440/65R24 FIRESTONE MAXITRACTION 65 128D/125E TL",
+   "marka": "FIRESTONE",
+   "model": "MAXITRACTION 65",
+   "bieznik": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFCR175D9500MFS41",
+   "nazwa": "9.5R17.5 FIRESTONE FS400 129 TL M+S 3PMSF",
+   "marka": "FIRESTONE",
+   "model": "FS400 129",
+   "bieznik": "FS400"
+  },
+  {
+   "kod": "MO5_ACRR24036070DAAR0",
+   "nazwa": "360/70R24 ALLIANCE AGRISTAR II 122D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO4_TRRD160340558AW30",
+   "nazwa": "340/55-16 TRELLEBORG AW305 140A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO4_TRRD090E60000T990",
+   "nazwa": "6.00-9 TRELLEBORG T-991 10PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO4_TRRD080E35000T510",
+   "nazwa": "3.50-8 TRELLEBORG T-510 4PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-510",
+   "bieznik": "T510"
+  },
+  {
+   "kod": "MO4_TRRD060E40000T990",
+   "nazwa": "4.00-6 TRELLEBORG T-991 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO4_TRRD060E35006T510",
+   "nazwa": "3.50-6 TRELLEBORG T-510 4PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-510",
+   "bieznik": "T510"
+  },
+  {
+   "kod": "MO4_TRRD040E41000T391",
+   "nazwa": "4.10/3.50-4 TRELLEBORG T-539 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-539",
+   "bieznik": "T539"
+  },
+  {
+   "kod": "MO4_TRRD040E40000T990",
+   "nazwa": "4.00-4 TRELLEBORG T-991 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO4_TRRD040E30000T991",
+   "nazwa": "3.00-4 TRELLEBORG T-991 6PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO4_TRRD040E30000T990",
+   "nazwa": "3.00-4 TRELLEBORG T-991 4PR TT",
+   "marka": "TRELLEBORG",
+   "model": "T-991",
+   "bieznik": "T991"
+  },
+  {
+   "kod": "MO4_MIRD180E600063TF0",
+   "nazwa": "6.00-18 MITAS TF-03 96A6/88A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD160E750063TF1",
+   "nazwa": "7.50-16 MITAS TF-03 103A6/96A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD160E750063TF0",
+   "nazwa": "7.50-16 MITAS TF-03 98A6/90A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD160E600063TF0",
+   "nazwa": "6.00-16 MITAS TF-03 88A6/80A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD153G15808IM44",
+   "nazwa": "11.5/80-15.3 MITAS IM-04 141A8 16PR TL",
+   "marka": "MITAS",
+   "model": "IM-04",
+   "bieznik": "IM04"
+  },
+  {
+   "kod": "MO4_MIRD120E40000B1S2",
+   "nazwa": "4.00-12 MITAS B-12 4PR TT",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO4_MIRD080F16000B195",
+   "nazwa": "16x6.50-8 MITAS B-19 12PR TL",
+   "marka": "MITAS",
+   "model": "B-19",
+   "bieznik": "B19"
+  },
+  {
+   "kod": "MO4_MIRD080E40000B1S2",
+   "nazwa": "4.00-8 MITAS B-12 4PR TT",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO4_MIRD06013A000B1S1",
+   "nazwa": "13x5.00-6 MITAS B-12 4PR TL",
+   "marka": "MITAS",
+   "model": "B-12",
+   "bieznik": "B12"
+  },
+  {
+   "kod": "MO4_MIRD06013A000B193",
+   "nazwa": "13x5.00-6 MITAS B-19 8PR TL",
+   "marka": "MITAS",
+   "model": "B-19",
+   "bieznik": "B19"
+  },
+  {
+   "kod": "MO4_MIPD200H0000BE230",
+   "nazwa": "10.00-20 MITAS EM-23 146B 16PR TT",
+   "marka": "MITAS",
+   "model": "EM-23",
+   "bieznik": "EM23"
+  },
+  {
+   "kod": "MO4_MCRR380650658RD31",
+   "nazwa": "650/65R38 CULTOR RD-03 157A8/160B TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO4_MCRR320320858RD10",
+   "nazwa": "320/85R32 CULTOR RD-01 142A8/142B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO4_MCRR280380858RD12",
+   "nazwa": "380/85R28 CULTOR RD-01 133A8/130B TL",
+   "marka": "CULTOR",
+   "model": "RD-01",
+   "bieznik": "RD01"
+  },
+  {
+   "kod": "MO4_KARD080F160040001",
+   "nazwa": "16x6.50-8 KABAT IMP-06 73A4 6PR TT",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO4_KARD060156004IP60",
+   "nazwa": "15x6.00-6 KABAT IMP-06 6PR TL",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO4_GFCR17521575JETN0",
+   "nazwa": "215/75R17.5 FULDA ECOTONN 135/133J TL M+S 3PMSF",
+   "marka": "FULDA",
+   "model": "ECOTONN",
+   "bieznik": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO3_5406530Aaii",
+   "nazwa": "540/65R30 ALLIANCE AGRISTAR II 150D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4206520Aaii",
+   "nazwa": "420/65R20 ALLIANCE AGRISTAR II 135D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4806528BRvxr",
+   "nazwa": "480/65R28 BRIDGESTONE VX TRACTOR 136D TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5406534BRvxr",
+   "nazwa": "540/65R34 BRIDGESTONE VX TRACTOR 145D/142E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3209042Aaii",
+   "nazwa": "320/90R42 ALLIANCE AGRISTAR II 147D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4406524Aaii",
+   "nazwa": "440/65R24 ALLIANCE AGRISTAR II 135D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4608542BRVX-T",
+   "nazwa": "460/85R42 BRIDGESTONE VX TRACTOR 156D/153E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4806528Aaii",
+   "nazwa": "480/65R28 ALLIANCE AGRISTAR II 142D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_5406528Aaii",
+   "nazwa": "540/65R28 ALLIANCE AGRISTAR II 149D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4208046Aaii",
+   "nazwa": "420/80R46 ALLIANCE AGRISTAR II 159D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_5208538BRvxr",
+   "nazwa": "520/85R38 BRIDGESTONE VX TRACTOR 155D/152E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208528BRvxr",
+   "nazwa": "420/85R28 BRIDGESTONE VX TRACTOR 139D/136E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6006528Aaii",
+   "nazwa": "600/65R28 ALLIANCE AGRISTAR II 154D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4208534BRvxr",
+   "nazwa": "420/85R34 BRIDGESTONE VX TRACTOR 142D/139E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208538BRvxr",
+   "nazwa": "420/85R38 BRIDGESTONE VX TRACTOR 144D/141E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6506538BRvxr",
+   "nazwa": "650/65R38 BRIDGESTONE VX TRACTOR 157D/154E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5406528BRvxr",
+   "nazwa": "540/65R28 BRIDGESTONE VX TRACTOR 142D/139E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4807038BRvxr",
+   "nazwa": "480/70R38 BRIDGESTONE VX TRACTOR 145D/142E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4406528BRvxr",
+   "nazwa": "440/65R28 BRIDGESTONE VX TRACTOR 131D/128E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4406524BRvxr",
+   "nazwa": "440/65R24 BRIDGESTONE VX TRACTOR 128D/125E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5807038BRvxr",
+   "nazwa": "580/70R38 BRIDGESTONE VX TRACTOR 155D/152E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208530BRvxr",
+   "nazwa": "420/85R30 BRIDGESTONE VX TRACTOR 140D/137E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3807024BRvxr",
+   "nazwa": "380/70R24 BRIDGESTONE VX-R TRACTOR 125D/122E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4207024BRvxr",
+   "nazwa": "420/70R24 BRIDGESTONE VX TRACTOR 130D/127E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208524BRvxr",
+   "nazwa": "420/85R24 BRIDGESTONE VX TRACTOR 137D/134E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4608538BRvxr",
+   "nazwa": "460/85R38 BRIDGESTONE VX TRACTOR 149D/146E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6506538Aaii",
+   "nazwa": "650/65R38 ALLIANCE AGRISTAR II 171D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4608534BRvxr",
+   "nazwa": "460/85R34 BRIDGESTONE VX TRACTOR 147D/144E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3808528BRvxr",
+   "nazwa": "380/85R28 BRIDGESTONE VX-R TRACTOR 133D/130E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5807042BRVX-T",
+   "nazwa": "580/70R42 BRIDGESTONE VX TRACTOR 162D/159E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6006538BRvxr",
+   "nazwa": "600/65R38 BRIDGESTONE VX-R TRACTOR 153D/150E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4807028BRvxr",
+   "nazwa": "480/70R28 BRIDGESTONE VX TRACTOR 140D/137E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5207038BRvxr",
+   "nazwa": "520/70R38 BRIDGESTONE VX TRACTOR 150D/147E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5207034BRvxr",
+   "nazwa": "520/70R34 BRIDGESTONE VX TRACTOR 148D/145E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4806524BRVX-T",
+   "nazwa": "480/65R24 BRIDGESTONE VX TRACTOR 140D/137E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3408524BRvxr",
+   "nazwa": "340/85R24 BRIDGESTONE VX TRACTOR 125D/122E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VX TRACTOR",
+   "bieznik": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6506542Aaii158",
+   "nazwa": "650/65R42 ALLIANCE AGRISTAR II 158D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_40060155AA-320VP143A",
+   "nazwa": "400/60-15.5 ALLIANCE 320 VALUE PLUS 152A6/148A8 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "320 VALUE PLUS",
+   "bieznik": "A320 VP"
+  },
+  {
+   "kod": "MO3_9006038contiTM",
+   "nazwa": "900/60R38 CONTINENTAL 178D/181A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6007030conti",
+   "nazwa": "600/70R30 CONTINENTAL 152D/155A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6507538conti",
+   "nazwa": "650/75R38 CONTINENTAL 169D/172A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6006534conti",
+   "nazwa": "600/65R34 CONTINENTAL 151D/154A8 TL",
+   "marka": "CONTINENTAL",
+   "model": "TRACTORMASTER",
+   "bieznik": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_4607024contiEM",
+   "nazwa": "460/70R24 CONTINENTAL 159A8/159B TL",
+   "marka": "CONTINENTAL",
+   "model": "COMPACTMASTER EM",
+   "bieznik": "COMPACT MASTER EM"
+  },
+  {
+   "kod": "MO3_6506542MThcmdemo",
+   "nazwa": "650/65R42 MITAS HCM 176A8/171D TL DEMO",
+   "marka": "MITAS",
+   "model": "HCM",
+   "bieznik": "HCM IND"
+  },
+  {
+   "kod": "MO3_5406530mthcmdemo",
+   "nazwa": "540/65R30 MITAS HCM 161A8/156D TL DEMO",
+   "marka": "MITAS",
+   "model": "HCM",
+   "bieznik": "HCM IND"
+  },
+  {
+   "kod": "MO3_38565225Kabat",
+   "nazwa": "385/65R22.5 KABAT TRY1 160F 18PR TL",
+   "marka": "KABAT",
+   "model": "TRY1",
+   "bieznik": "TRY1 AG"
+  },
+  {
+   "kod": "MO3_4807024trdemo",
+   "nazwa": "480/70R24 TRELLEBORG TM700 138A8 TL DEMO",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO3_114004kk5004",
+   "nazwa": "11x4.00-4 KENDA K500 SUPERTURF 4PR TL",
+   "marka": "KENDA",
+   "model": "K500 SUPERTURF",
+   "bieznik": "K500 SUPER TURF"
+  },
+  {
+   "kod": "MO3_54065R34AAII145D",
+   "nazwa": "540/65R34 ALLIANCE AGRISTAR II 145D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_11580153A",
+   "nazwa": "11.5/80-15.3 ALLIANCE 320 VALUE PLUS 14PR TL",
+   "marka": "ALLIANCE",
+   "model": "320 VALUE PLUS",
+   "bieznik": "A320 VP"
+  },
+  {
+   "kod": "MO3_4007018TR",
+   "nazwa": "400/70R18 TRELLEBORG TH400 147A8/147B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO3_40055175AL",
+   "nazwa": "400/55-17.5 ALLIANCE FLOTATION 328 136A8/149A8 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_55060225A",
+   "nazwa": "550/60-22.5 ALLIANCE 328 VALUE PLUS 154A8/166A8 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_70040225A",
+   "nazwa": "700/40-22.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_50060225ALLI",
+   "nazwa": "500/60-22.5 ALLIANCE 328 VALUE 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 VALUE",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_60055265A1",
+   "nazwa": "600/55-26.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_8006532A-IN",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_T485430",
+   "nazwa": "18.4-38 NOKIAN TR FOREST 155A8 14PR",
+   "marka": "NOKIAN",
+   "model": "TR FOREST",
+   "bieznik": "TR FOREST 2"
+  },
+  {
+   "kod": "MO2_T445372",
+   "nazwa": "15.5/80R24 NOKIAN TRI2 149/144A8",
+   "marka": "NOKIAN",
+   "model": "TRI2",
+   "bieznik": "TRI 2"
+  },
+  {
+   "kod": "MO2_T445338",
+   "nazwa": "540/80R38 NOKIAN TRI2 172/167A8",
+   "marka": "NOKIAN",
+   "model": "TRI2",
+   "bieznik": "TRI 2"
+  },
+  {
+   "kod": "MO2_T445337",
+   "nazwa": "440/80R28 NOKIAN TRI 2 156A8/151D SB TL",
+   "marka": "NOKIAN",
+   "model": "TRI2",
+   "bieznik": "TRI 2"
+  },
+  {
+   "kod": "MO2_KOSR1660082T",
+   "nazwa": "6.00-16 KABAT SRF-03 SUPRA RIB 8PR TT",
+   "marka": "KABAT",
+   "model": "SRF-03 SUPRA RIB",
+   "bieznik": "SRF-03"
+  },
+  {
+   "kod": "MO2_KOSR1660081T",
+   "nazwa": "6.00-16 KABAT SRF-01 SUPRA RIB 8PR TT",
+   "marka": "KABAT",
+   "model": "SRF-01 SUPRA RIB",
+   "bieznik": "SRF-01"
+  },
+  {
+   "kod": "MO2_KOSR1660061T",
+   "nazwa": "6.00-16 KABAT SRF-01 SUPRA RIB 6PR TT",
+   "marka": "KABAT",
+   "model": "SRF-01 SUPRA RIB",
+   "bieznik": "SRF-01"
+  },
+  {
+   "kod": "MO2_KOSG2814981T",
+   "nazwa": "14.9-28 KABAT SGP-03 SUPRA GRIP 8PR TT",
+   "marka": "KABAT",
+   "model": "SGP-03 SUPRA GRIP",
+   "bieznik": "SGP-03"
+  },
+  {
+   "kod": "MO2_KOIM81885061T",
+   "nazwa": "18x8.50-8 KABAT IMP-06 LINIOWA 6PR TT",
+   "marka": "KABAT",
+   "model": "IMP-06 LINIOWA",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM81665061L",
+   "nazwa": "16x6.50-8 KABAT IMP-06 LINIOWA 6PR TL",
+   "marka": "KABAT",
+   "model": "IMP-06 LINIOWA",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM61560061T",
+   "nazwa": "15x6.00-6 KABAT IMP-06 LINIOWA IMPLEMENT 6PR TT",
+   "marka": "KABAT",
+   "model": "IMP-06 LINIOWA IMPLEMENT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM61560061L",
+   "nazwa": "15x6.00-6 KABAT IMP-06 LINIOWA IMPLEMENT 6PR TL",
+   "marka": "KABAT",
+   "model": "IMP-06 LINIOWA IMPLEMENT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_CET0017",
+   "nazwa": "445/45R19.5 CETROC GHT22 160J 3PMSF M+S",
+   "marka": "CETROC",
+   "model": "GHT22",
+   "bieznik": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO2_CET0016",
+   "nazwa": "435/50R19.5 CETROC GHT22 160J 3PMSF M+S FRONT",
+   "marka": "CETROC",
+   "model": "GHT22",
+   "bieznik": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO2_CET0013",
+   "nazwa": "385/55R22.5 CETROC GHT50 160K 3PMSF M+S",
+   "marka": "CETROC",
+   "model": "GHT50",
+   "bieznik": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO2_5011514960000",
+   "nazwa": "300/95R42 MITAS AC90 147A8/144B TL",
+   "marka": "MITAS",
+   "model": "AC90",
+   "bieznik": "AC 90"
+  },
+  {
+   "kod": "MO2_5011514950000",
+   "nazwa": "11.2R42 MITAS AC90 144A8/141A8 TL",
+   "marka": "MITAS",
+   "model": "AC90",
+   "bieznik": "AC 90"
+  },
+  {
+   "kod": "MO2_5002614710000",
+   "nazwa": "12.4-24 CULTOR AS-AGRI19 8PR TL",
+   "marka": "CULTOR",
+   "model": "AS-AGRI19",
+   "bieznik": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002613430000",
+   "nazwa": "23.1-26 CULTOR AS-AGRI07 18PR TL/TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI07",
+   "bieznik": "AS AGRI 07"
+  },
+  {
+   "kod": "MO2_5002606760000",
+   "nazwa": "6.50-16 CULTOR AS-FRONT 08 8PR TT FRONT",
+   "marka": "CULTOR",
+   "model": "AS-FRONT 08",
+   "bieznik": "AS FRONT 08"
+  },
+  {
+   "kod": "MO2_5002605590000",
+   "nazwa": "300/90-24 CULTOR AW-IMPLEMENT 13 132A6 TT",
+   "marka": "CULTOR",
+   "model": "AW-IMPLEMENT 13",
+   "bieznik": "AW IMPLEMENT 13"
+  },
+  {
+   "kod": "MO2_5002604970000",
+   "nazwa": "9.5-42 CULTOR AS-AGRI 10 10PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI 10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002604170000",
+   "nazwa": "18.4-38 CULTOR AS-AGRI19 10PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI19",
+   "bieznik": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002604150000",
+   "nazwa": "16.9-30 CULTOR AS-AGRI 13 14PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI 13",
+   "bieznik": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002604130000",
+   "nazwa": "16.9-28 CULTOR AS-AGRI13 12PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI13",
+   "bieznik": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002604060000",
+   "nazwa": "14.9-24 CULTOR AS-AGRI19 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI19",
+   "bieznik": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002603920000",
+   "nazwa": "12.4-28 CULTOR AS-AGRI19 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI19",
+   "bieznik": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002602970000",
+   "nazwa": "12.4-36 CULTOR AS-AGRI13 6PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI13",
+   "bieznik": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002602910000",
+   "nazwa": "9.5-36 CULTOR AS-AGRI 10 6PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI 10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602730000",
+   "nazwa": "12.4-32 CULTOR AS-AGRI13 6PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI13",
+   "bieznik": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002602710000",
+   "nazwa": "9.5-32 CULTOR AS-AGRI13 6PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI13",
+   "bieznik": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002602680000",
+   "nazwa": "8.3-32 CULTOR AS-AGRI10 6PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602460000",
+   "nazwa": "14.9-30 CULTOR AS-AGRI10 6PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602290000",
+   "nazwa": "14.9-28 CULTOR AS AGRI 20 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI20",
+   "bieznik": "AS AGRI 20"
+  },
+  {
+   "kod": "MO2_5002602050000",
+   "nazwa": "11.2-28 CULTOR AS-AGRI10 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602010000",
+   "nazwa": "8.3-28 CULTOR AS-AGRI10 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002601940000",
+   "nazwa": "23.1-26 CULTOR AS-AGRI07 18PR TL/TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI07",
+   "bieznik": "AS AGRI 07"
+  },
+  {
+   "kod": "MO2_5002601859000",
+   "nazwa": "16.9-26 CULTOR AS-AGRI10 10PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002601820000",
+   "nazwa": "14.9-26 CULTOR AS-AGRI10 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002601450000",
+   "nazwa": "13.6-24 CULTOR AS-AGRI13 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-AGRI13",
+   "bieznik": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002600430000",
+   "nazwa": "6.00-16 CULTOR AS-FRONT 04 8PR TT",
+   "marka": "CULTOR",
+   "model": "AS-FRONT 04",
+   "bieznik": "AS FRONT 04"
+  },
+  {
+   "kod": "MO2_5001514320000",
+   "nazwa": "16.9-24 MITAS TG-01 12PR TL",
+   "marka": "MITAS",
+   "model": "TG-01",
+   "bieznik": "TG 01"
+  },
+  {
+   "kod": "MO2_5001506110000",
+   "nazwa": "6.5/80-12 MITAS TS-06 6PR TT",
+   "marka": "MITAS",
+   "model": "TS-06",
+   "bieznik": "TS06"
+  },
+  {
+   "kod": "MO2_49000002AL-IG",
+   "nazwa": "420/90R30 ALLIANCE AGRISTAR II 147D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_49000001AL-IG",
+   "nazwa": "12.4R42 ALLIANCE AGRISTAR II 147D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48504730AL-IG",
+   "nazwa": "420/85R34 ALLIANCE AGRISTAR II 147D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500361AL-IG",
+   "nazwa": "20.8R46 ALLIANCE AGRISTAR II 169D/173A8 TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500360AL-IG",
+   "nazwa": "520/85R46 ALLIANCE AGRISTAR II 85 158D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500334AL-IG",
+   "nazwa": "20.8R42 ALLIANCE AGRISTAR II 169D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500325AL-IG",
+   "nazwa": "480/80R42 ALLIANCE AGRI STAR II 151D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500301AL-IN",
+   "nazwa": "520/85R38 ALLIANCE AGRISTAR II 169D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500301AL-IG",
+   "nazwa": "520/85R38 ALLIANCE AGRISTAR II 169D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500300AL-IG",
+   "nazwa": "520/85R38 ALLIANCE AGRISTAR II 85 155D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500264AL-IN",
+   "nazwa": "480/80R50 ALLIANCE AGRI STAR II 159D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500260AL-IG",
+   "nazwa": "18.4R46 ALLIANCE AGRISTAR II 158D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500200AL-IG",
+   "nazwa": "420/85R30 ALLIANCE AGRISTAR II 85 140D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500190AL-IG",
+   "nazwa": "420/85R28 ALLIANCE AGRI STAR II 139D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500167AL-IG",
+   "nazwa": "18.4R38 ALLIANCE AGRISTAR II 167D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500165AL-IG",
+   "nazwa": "420/85R24 ALLIANCE AGRI STAR II 137D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500151AL-IG",
+   "nazwa": "460/85R34 ALLIANCE AGRI STAR II 157D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500140AL-AP",
+   "nazwa": "18.4R30 ALLIANCE AGRISTAR II 145D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500130AL-IG",
+   "nazwa": "420/85R38 ALLIANCE AGRISTAR II 85 144D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500125AL-IG",
+   "nazwa": "650/85R38 ALLIANCE AGRISTAR II 173D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500120AL-IG",
+   "nazwa": "380/80R38 ALLIANCE AGRISTAR II 142D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500110AL-IG",
+   "nazwa": "520/85R42 ALLIANCE AGRI STAR II 157D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500106AL-IG",
+   "nazwa": "280/85R20 ALLIANCE AGRISTAR II 85 112D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500104AL-IG",
+   "nazwa": "420/80R46 ALLIANCE AGRISTAR II 159D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500103AL-IG",
+   "nazwa": "320/85R34 ALLIANCE AGRI STAR II 133D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500101AL-IG",
+   "nazwa": "12.4R24 ALLIANCE AGRISTAR II 142D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500100AL-IG",
+   "nazwa": "420/85R34 ALLIANCE AGRI STAR II 142D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500070AL-IG",
+   "nazwa": "380/85R28 ALLIANCE AGRISTAR II 85 133D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500048AL-IG",
+   "nazwa": "340/85R38 ALLIANCE AGRI STAR II 151D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500047AL-IG",
+   "nazwa": "380/85R24 ALLIANCE AGRISTAR II 85 131D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500046AL-IG",
+   "nazwa": "13.6R38 ALLIANCE AGRISTAR II 133D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500044AL-IG",
+   "nazwa": "13.6R36 ALLIANCE AGRISTAR II 132D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500040AL-IG",
+   "nazwa": "13.6R28 ALLIANCE AGRISTAR II 127D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500038AL-IG",
+   "nazwa": "9.5R24 ALLIANCE AGRISTAR II 109D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500037AL-IG",
+   "nazwa": "380/85R34 ALLIANCE AGRI STAR II 137D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500035AL-IG",
+   "nazwa": "340/85R24 ALLIANCE AGRISTAR II 85 125D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500033AL-IG",
+   "nazwa": "12.4R36 ALLIANCE AGRISTAR II 128D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500032AL-IG",
+   "nazwa": "320/85R32 ALLIANCE AGRISTAR II 85 126D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500031AL-IG",
+   "nazwa": "320/85R38 ALLIANCE AGRI STAR II 143D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500026AL-IG",
+   "nazwa": "12.4R28 ALLIANCE AGRISTAR II 124D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500025AL-IG",
+   "nazwa": "320/85R24 ALLIANCE AGRI STAR II 122D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500022AL-IG",
+   "nazwa": "320/85R20 ALLIANCE AGRISTAR II 85 119D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500021AL-IG",
+   "nazwa": "280/85R28 ALLIANCE AGRISTAR II 85 118D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500020AL-IG",
+   "nazwa": "280/85R24 ALLIANCE AGRISTAR II 85 115D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500001AL-IG",
+   "nazwa": "12.4R36 ALLIANCE AGRISTAR II 147D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47025034AL-IN",
+   "nazwa": "520/70R34 ALLIANCE AGRISTAR II 168D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47025030AL-IN",
+   "nazwa": "480/70R30 ALLIANCE AGRISTAR II 150D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47002588AL-IN",
+   "nazwa": "710/70R38 ALLIANCE AGRI STAR II 178D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47001541AL-IN",
+   "nazwa": "480/70R34 ALLIANCE AGRI STAR II 155D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000047AL-IN",
+   "nazwa": "240/70R16 ALLIANCE AGRISTAR II 104D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000044AL-IG",
+   "nazwa": "800/70R38 ALLIANCE AGRISTAR II 173D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000043AL-IN",
+   "nazwa": "360/70R28 ALLIANCE AGRI STAR II 125D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000041AL-IN",
+   "nazwa": "520/70R34 ALLIANCE AGRISTAR II 70 148D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000040AL-IN",
+   "nazwa": "710/70R38 ALLIANCE AGRISTAR II 70 172D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000038AL-IN",
+   "nazwa": "480/70R38 ALLIANCE AGRI STAR II 145D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000035AL-IN",
+   "nazwa": "360/70R20 ALLIANCE AGRISTAR II 129D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000033AL-IN",
+   "nazwa": "280/70R20 ALLIANCE AGRISTAR II 116D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000032AL-IN",
+   "nazwa": "480/70R30 ALLIANCE AGRISTAR II 70 141D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000031AL-IN",
+   "nazwa": "580/70R38 ALLIANCE AGRISTAR II 155D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000030AL-IN",
+   "nazwa": "380/70R28 ALLIANCE AGRI STAR II 127D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000029AL-IN",
+   "nazwa": "480/70R28 ALLIANCE AGRISTAR II 70 140D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000028AL-IN",
+   "nazwa": "480/70R34 ALLIANCE AGRISTAR II 70 143D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000027AL-IN",
+   "nazwa": "300/70R20 ALLIANCE AGRI STAR II 120D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000026AL-IN",
+   "nazwa": "360/70R24 ALLIANCE AGRISTAR II 122D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000025AL-IN",
+   "nazwa": "480/70R28 ALLIANCE AGRI STAR II 151D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000022AL-IN",
+   "nazwa": "600/70R28 ALLIANCE AGRISTAR II 70 161D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000018AL-AP",
+   "nazwa": "480/70R30 ALLIANCE AGRISTAR II 156D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000013AL-IN",
+   "nazwa": "480/70R24 ALLIANCE AGRI STAR II 138D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000011AL-IN",
+   "nazwa": "580/70R38 ALLIANCE AGRISTAR II 180D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000009AL-IN",
+   "nazwa": "420/70R30 ALLIANCE AGRI STAR II 134D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000007AL-IN",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000006AL-IN",
+   "nazwa": "710/70R42 ALLIANCE AGRISTAR II 70 173D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000005AL-IN",
+   "nazwa": "420/70R24 ALLIANCE AGRISTAR II 130D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000004AL-IN",
+   "nazwa": "520/70R38 ALLIANCE AGRISTAR II 70 150D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000003AL-IN",
+   "nazwa": "280/70R16 ALLIANCE AGRISTAR II 112D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000002AL-IN",
+   "nazwa": "420/70R28 ALLIANCE AGRISTAR II 70 133D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000001AL-IN",
+   "nazwa": "380/70R24 ALLIANCE AGRISTAR II 70 125D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000000AL-IN",
+   "nazwa": "280/70R18 ALLIANCE AGRISTAR II 70 114D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500027AL-AP",
+   "nazwa": "650/65R38 ALLIANCE AGRISTAR II 157D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500026AL-AP",
+   "nazwa": "540/65R30 ALLIANCE AGRISTAR II 150D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500024AL-AP",
+   "nazwa": "320/65R16 ALLIANCE AGRISTAR II 117D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500021AL-AP",
+   "nazwa": "600/65R38 ALLIANCE AGRI STAR II 159D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500020AL-AP",
+   "nazwa": "420/65R20 ALLIANCE AGRISTAR II 135D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500019AL-AP",
+   "nazwa": "420/65R24 ALLIANCE AGRI STAR II 138D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500018AL-AP",
+   "nazwa": "600/65R34 ALLIANCE AGRI STAR II 157D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500017AL-AP",
+   "nazwa": "440/65R24 ALLIANCE AGRISTAR II 135D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500015AL-AP",
+   "nazwa": "540/65R34 ALLIANCE AGRISTAR II 145D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500014AL-AP",
+   "nazwa": "480/65R24 ALLIANCE AGRI STAR II 140D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500012AL-AP",
+   "nazwa": "480/65R28 ALLIANCE AGRISTAR II 142D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500011AL-AP",
+   "nazwa": "540/65R24 ALLIANCE AGRI STAR II 146D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500010AL-AP",
+   "nazwa": "650/65R42 ALLIANCE AGRISTAR II 158D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500008AL-AP",
+   "nazwa": "540/65R34 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500007AL-AP",
+   "nazwa": "540/65R38 ALLIANCE AGRI STAR II 153D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500006AL-AP",
+   "nazwa": "600/65R28 ALLIANCE AGRISTAR II 154D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500004AL-AP",
+   "nazwa": "650/65R38 ALLIANCE AGRISTAR II 171D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500003AL-AP",
+   "nazwa": "650/65R42 ALLIANCE AGRI STAR II 170D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500002AL-IG",
+   "nazwa": "540/65R28 ALLIANCE AGRISTAR II 149D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_4006343190000",
+   "nazwa": "12.4R32 MITAS AC85 145A8/145B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341900000",
+   "nazwa": "13.6R48 MITAS AC85 154A8/154B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341740000",
+   "nazwa": "18.4R34 MITAS AC85 147A8/147B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341720001",
+   "nazwa": "20.8R38 MITAS AC85 155A8/155B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341720000",
+   "nazwa": "20.8R38 MITAS AC85 155A8/155B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341630001",
+   "nazwa": "710/70R38 MITAS AC65 166D/169A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341630000",
+   "nazwa": "710/70R38 MITAS AC65 166D/169A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341620000",
+   "nazwa": "650/65R38 MITAS AC 65 157D/160A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341380001",
+   "nazwa": "360/70R24 MITAS HC70 122D/125A8 TL",
+   "marka": "MITAS",
+   "model": "HC70",
+   "bieznik": "HC 70"
+  },
+  {
+   "kod": "MO2_4006341140000",
+   "nazwa": "540/65R38 MITAS AC 65 147D/150A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341120000",
+   "nazwa": "540/65R34 MITAS AC65 145D/148A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341110000",
+   "nazwa": "540/65R28 MITAS AC65 142D/145A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341100000",
+   "nazwa": "480/65R28 MITAS AC 65 136D/139A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341060000",
+   "nazwa": "480/65R24 MITAS AC 65 133D/136A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340840000",
+   "nazwa": "380/70R24 MITAS AC70 G 125A8/125B TL",
+   "marka": "MITAS",
+   "model": "AC70 G",
+   "bieznik": "AC 70 G"
+  },
+  {
+   "kod": "MO2_4006340730000",
+   "nazwa": "380/70R28 MITAS AC 70 127A8/127B TL",
+   "marka": "MITAS",
+   "model": "AC70",
+   "bieznik": "AC 70"
+  },
+  {
+   "kod": "MO2_4006340610000",
+   "nazwa": "540/65R30 MITAS AC65 153A8/150D TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340580000",
+   "nazwa": "13.6R38 MITAS AC85 133A8/133B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340560000",
+   "nazwa": "650/65R42 MITAS AC 65 165D/168A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340530000",
+   "nazwa": "12.4R28 MITAS AC85 124A8/121B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340520000",
+   "nazwa": "11.2R28 MITAS AC85 118A8 TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340440000",
+   "nazwa": "16.9R38 MITAS AC85 144A8/144B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340330000",
+   "nazwa": "16.9R28 MITAS AC85 139A8/136B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340320000",
+   "nazwa": "480/70R24 MITAS AC70 G 138A8/138B TL",
+   "marka": "MITAS",
+   "model": "AC70 G",
+   "bieznik": "AC 70 G"
+  },
+  {
+   "kod": "MO2_4006340310000",
+   "nazwa": "13.6R28 MITAS AC85 127A8/124B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340300000",
+   "nazwa": "16.9R24 MITAS AC85 137A8/137B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340290000",
+   "nazwa": "14.9R24 MITAS AC85 131A8/128B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340270000",
+   "nazwa": "12.4R24 MITAS AC85 122A8/119B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340260000",
+   "nazwa": "11.2R24 MITAS AC85 115A8/115B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340210000",
+   "nazwa": "14.9R34 MITAS AC85 146A8/146B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340190000",
+   "nazwa": "600/65R28 MITAS AC 65 147D/150A8 TL",
+   "marka": "MITAS",
+   "model": "AC65",
+   "bieznik": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340180000",
+   "nazwa": "14.9R28 MITAS AC85 133A8/130B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340140000",
+   "nazwa": "14.9R46 MITAS AC85 159A8/159B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340100000",
+   "nazwa": "270/80R36 MITAS AC90 134A8/131B TL",
+   "marka": "MITAS",
+   "model": "AC90",
+   "bieznik": "AC 90"
+  },
+  {
+   "kod": "MO2_4006340090000",
+   "nazwa": "12.4R32 MITAS AC85 142A8/142B TL",
+   "marka": "MITAS",
+   "model": "AC85",
+   "bieznik": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340080000",
+   "nazwa": "270/80R32 MITAS AC 90 131A8/128B TL",
+   "marka": "MITAS",
+   "model": "AC90",
+   "bieznik": "AC 90"
+  },
+  {
+   "kod": "MO2_4006208420000",
+   "nazwa": "19.5R24 MITAS EM-01 164A8 TL",
+   "marka": "MITAS",
+   "model": "EM-01",
+   "bieznik": "EM01"
+  },
+  {
+   "kod": "MO2_4006202000000",
+   "nazwa": "12.5R20 MITAS MPT-21 139J TL",
+   "marka": "MITAS",
+   "model": "MPT-21",
+   "bieznik": "MPT21"
+  },
+  {
+   "kod": "MO2_361420",
+   "nazwa": "205/75R17.5 FALKEN BI856 124M 3PMSF M+S DRIVE",
+   "marka": "FALKEN",
+   "model": "BI856",
+   "bieznik": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_36061747AL-IN",
+   "nazwa": "620/70R42 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36061533AL",
+   "nazwa": "620/70R42 ALLIANCE 360 166A8/163B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36035001AL-IN",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36035001AL-IG",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36033498AL-IG",
+   "nazwa": "800/65R32 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36020432AL",
+   "nazwa": "650/75R32 ALLIANCE 360 172D/175A8 TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36018062AL",
+   "nazwa": "600/65-28 ALLIANCE 360 154A8/161A2",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36017698AL",
+   "nazwa": "28R26 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36017507AL",
+   "nazwa": "28R26 ALLIANCE 360 166A8/163B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36017501AL",
+   "nazwa": "750/65R26 ALLIANCE 360 158A8/155B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36016205AL",
+   "nazwa": "480/65-24 ALLIANCE 360 140A8 TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_34502989AL",
+   "nazwa": "28L-26 ALLIANCE 345 20PR",
+   "marka": "ALLIANCE",
+   "model": "345",
+   "bieznik": "345 FORESTAR"
+  },
+  {
+   "kod": "MO2_34435416AL",
+   "nazwa": "710/40-22.5 ALLIANCE 344 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "344",
+   "bieznik": "344 FORESTRY"
+  },
+  {
+   "kod": "MO2_335674",
+   "nazwa": "315/60R22.5 FALKEN BI856 152/148L 3PMSF DRIVE",
+   "marka": "FALKEN",
+   "model": "BI856",
+   "bieznik": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_335670",
+   "nazwa": "265/70R19.5 FALKEN BI856 140/138M M+S DRIVE",
+   "marka": "FALKEN",
+   "model": "BI856",
+   "bieznik": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_335667",
+   "nazwa": "315/70R22.5 FALKEN BI856 154/150L 3PMSF M+S DRIVE",
+   "marka": "FALKEN",
+   "model": "BI856",
+   "bieznik": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_335661",
+   "nazwa": "245/70R17.5 FALKEN BI856 136/134M M+S DRIVE",
+   "marka": "FALKEN",
+   "model": "BI856",
+   "bieznik": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_33300276AL-IN",
+   "nazwa": "20.8-38 ALLIANCE 333 164A8/160B TL",
+   "marka": "ALLIANCE",
+   "model": "333",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300242AL-IN",
+   "nazwa": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL",
+   "marka": "ALLIANCE",
+   "model": "333 FORESTRY",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300149AL-IN",
+   "nazwa": "16.9R38 ALLIANCE 333 149A8/146B TL",
+   "marka": "ALLIANCE",
+   "model": "333",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300146AL-IN",
+   "nazwa": "16.9-34 ALLIANCE AF-333 147A8 TL",
+   "marka": "ALLIANCE",
+   "model": "AF-333",
+   "bieznik": "AF 333"
+  },
+  {
+   "kod": "MO2_33300138AL-IN",
+   "nazwa": "18.4R30 ALLIANCE AF-333 155A8/152B TL",
+   "marka": "ALLIANCE",
+   "model": "AF-333",
+   "bieznik": "AF 333"
+  },
+  {
+   "kod": "MO2_33300134AL-IN",
+   "nazwa": "460/85-30 ALLIANCE 333 150A8/147B TL",
+   "marka": "ALLIANCE",
+   "model": "333",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300126AL-IN",
+   "nazwa": "420/85-30 ALLIANCE 333 145A8/142B TL",
+   "marka": "ALLIANCE",
+   "model": "333",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300118AL-IN",
+   "nazwa": "16.9-28 ALLIANCE 333 FORESTRY 144A8/141B TL",
+   "marka": "ALLIANCE",
+   "model": "333 FORESTRY",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300104AL-IN",
+   "nazwa": "14.9-28 ALLIANCE 333 139A8/136B TL",
+   "marka": "ALLIANCE",
+   "model": "333",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300054AL-IN",
+   "nazwa": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL",
+   "marka": "ALLIANCE",
+   "model": "333 FORESTRY",
+   "bieznik": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300012AL-IN",
+   "nazwa": "12.4-24 ALLIANCE AF-333 14PR TL",
+   "marka": "ALLIANCE",
+   "model": "AF-333",
+   "bieznik": "AF 333"
+  },
+  {
+   "kod": "MO2_32862024AL-AP",
+   "nazwa": "700/50-26.5 ALLIANCE 328 XP 174A8/170B TL",
+   "marka": "ALLIANCE",
+   "model": "328 XP",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32862023AL",
+   "nazwa": "700/50-26.5 ALLIANCE 328 174A8/170B TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32853003AL-IG",
+   "nazwa": "600/55-26.5 ALLIANCE FLOTATION 328 159A8/170A8 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32852215AL",
+   "nazwa": "600/55-26.5 ALLIANCE 328 163C TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32841144",
+   "nazwa": "700/50-22.5 ALLIANCE 328 167D/166E TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32840020AL-IG",
+   "nazwa": "700/50-22.5 ALLIANCE 328 FLOTATION 174A8/170B 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 FLOTATION",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32835319AL-IN",
+   "nazwa": "700/40-22.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32832520AL-IG",
+   "nazwa": "600/50-22.5 ALLIANCE 328 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827420AL",
+   "nazwa": "500/50R17 ALLIANCE 328 145D TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827076AL-IG",
+   "nazwa": "500/45-22.5 ALLIANCE 328 FORESTRY 144A8 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 FORESTRY",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827075AL-IN",
+   "nazwa": "400/60-15.5 ALLIANCE 328 FORESTRY 152A8 20PR",
+   "marka": "ALLIANCE",
+   "model": "328 FORESTRY",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827054AL-IN",
+   "nazwa": "550/45-22.5 ALLIANCE FLOTATION 328 147A8/159A8 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 FLOTATION",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827054AL-IG",
+   "nazwa": "550/45-22.5 ALLIANCE 328 FLOTATION 159A8/156B 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 FLOTATION",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827045AL-IN",
+   "nazwa": "400/60-22.5 ALLIANCE 328 160A8 18PR TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32800028AL-AP",
+   "nazwa": "600/55-22.5 ALLIANCE 328 XP 162D 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 XP",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32800027AL-AP",
+   "nazwa": "800/45-26.5 ALLIANCE 328 XP 177A8/173B 16PR TL",
+   "marka": "ALLIANCE",
+   "model": "328 XP",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32800016AL-IN",
+   "nazwa": "500/50R17 ALLIANCE 328 158A8/155B TL",
+   "marka": "ALLIANCE",
+   "model": "328",
+   "bieznik": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_28049",
+   "nazwa": "900/65R46 BRIDGESTONE VT TRACTOR 193D/190E TL",
+   "marka": "BRIDGESTONE",
+   "model": "VT TRACTOR",
+   "bieznik": "VT-TRACTOR"
+  },
+  {
+   "kod": "MO2_25031833",
+   "nazwa": "9.00-20 MITAS NB38 14PR TT",
+   "marka": "MITAS",
+   "model": "NB38",
+   "bieznik": "NB 38"
+  },
+  {
+   "kod": "MO2_25029588",
+   "nazwa": "340/80-18 MITAS MPT-04 16PR TL",
+   "marka": "MITAS",
+   "model": "MPT-04",
+   "bieznik": "MPT04"
+  },
+  {
+   "kod": "MO2_25029093",
+   "nazwa": "405/70-24 MITAS MPT-04 152B 14PR TL",
+   "marka": "MITAS",
+   "model": "MPT-04",
+   "bieznik": "MPT04"
+  },
+  {
+   "kod": "MO2_25028196",
+   "nazwa": "10.00-20 MITAS NB38 16PR TT",
+   "marka": "MITAS",
+   "model": "NB38",
+   "bieznik": "NB 38"
+  },
+  {
+   "kod": "MO2_25020825",
+   "nazwa": "27x10.50-15 MITAS SK-02 8PR TL",
+   "marka": "MITAS",
+   "model": "SK-02",
+   "bieznik": "SK02"
+  },
+  {
+   "kod": "MO2_2000061774001",
+   "nazwa": "4.00-16 CULTOR AS-AGRI 10 2PR TL",
+   "marka": "CULTOR",
+   "model": "AS-AGRI 10",
+   "bieznik": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_162527",
+   "nazwa": "385/65R22.5 MICHELIN XTE3 160J M+S",
+   "marka": "MICHELIN",
+   "model": "XTE3",
+   "bieznik": "XTE 3"
+  },
+  {
+   "kod": "MO2_152.28.812",
+   "nazwa": "280/70R20 ALLIANCE AGRISTAR II 116D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_152.28.692",
+   "nazwa": "420/85R34 ALLIANCE AGRISTAR II 147D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_152.28.691",
+   "nazwa": "420/85R34 ALLIANCE AGRI STAR II 142D STUBBLE GUARD TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_1327700",
+   "nazwa": "340/55-16 TRELLEBORG AW305 140A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO2_1032400",
+   "nazwa": "540/65R30 TRELLEBORG TM800 150D/147E TL HS",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO2_1011301780000",
+   "nazwa": "280/80-18 MITAS MPT-01 140B 16PR TL",
+   "marka": "MITAS",
+   "model": "MPT-01",
+   "bieznik": "MPT01"
+  },
+  {
+   "kod": "MO2_10000674",
+   "nazwa": "210/95R16 ALLIANCE AGRISTAR II 106D TL",
+   "marka": "ALLIANCE",
+   "model": "AGRISTAR II",
+   "bieznik": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_06700030000",
+   "nazwa": "17.5R24 CONTINENTAL COMPACTMASTER EM 159A8/159B TL",
+   "marka": "CONTINENTAL",
+   "model": "COMPACTMASTER EM",
+   "bieznik": "COMPACT MASTER EM"
+  },
+  {
+   "kod": "MO2_05740150000",
+   "nazwa": "365/80R20 CONTINENTAL MPT 81 152K TL M+S",
+   "marka": "CONTINENTAL",
+   "model": "MPT81",
+   "bieznik": "MPT 81"
+  },
+  {
+   "kod": "MO10_PAR1271",
+   "nazwa": "480/70R28 GRI GREEN XLR70 140D/143A8 R-1W TL",
+   "marka": "GRI",
+   "model": "GREEN XLR70",
+   "bieznik": "GREEN XLR 70"
+  },
+  {
+   "kod": "MO10_PAR1241",
+   "nazwa": "380/70R28 GRI GREEN XLR70 127D R-1W TL",
+   "marka": "GRI",
+   "model": "GREEN XLR70",
+   "bieznik": "GREEN XLR 70"
+  },
+  {
+   "kod": "MO10_PAR1237",
+   "nazwa": "360/70R24 GRI GREEN XLR70 122D R-1W TL",
+   "marka": "GRI",
+   "model": "GREEN XLR70",
+   "bieznik": "GREEN XLR 70"
+  },
+  {
+   "kod": "MO8_11789000",
+   "nazwa": "29x12.50-15 TRELLEBORG T463 FLOT 90B/99A3 TL",
+   "marka": "TRELLEBORG",
+   "model": "T463 FLOT",
+   "bieznik": "T463"
+  },
+  {
+   "kod": "MO8_0579600",
+   "nazwa": "220/60-8 TRELLEBORG T463 PLUS 74A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "T463 PLUS",
+   "bieznik": "T463"
+  },
+  {
+   "kod": "MO8_1106500",
+   "nazwa": "600/60-30.5 TRELLEBORG T414 FS 153A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "T414 FS",
+   "bieznik": "T414"
+  },
+  {
+   "kod": "MO8_12174500",
+   "nazwa": "500/55-20 TRELLEBORG AW309 150A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW309",
+   "bieznik": "AW 309"
+  },
+  {
+   "kod": "MO8_1323000",
+   "nazwa": "500/50-17 TRELLEBORG AW309 149A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW309",
+   "bieznik": "AW 309"
+  },
+  {
+   "kod": "MO8_12174800",
+   "nazwa": "480/45-17 TRELLEBORG AW309 150A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW309",
+   "bieznik": "AW 309"
+  },
+  {
+   "kod": "MO8_1468800",
+   "nazwa": "480/45-17 TRELLEBORG AW305 146A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_12174700",
+   "nazwa": "380/55-17 TRELLEBORG AW309 138A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW309",
+   "bieznik": "AW 309"
+  },
+  {
+   "kod": "MO8_1298400",
+   "nazwa": "380/55-17 TRELLEBORG AW305 138A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1327900",
+   "nazwa": "360/65-16 TRELLEBORG AW305 148A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1327800",
+   "nazwa": "360/70-16 TRELLEBORG AW305 137A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_10716800",
+   "nazwa": "340/55-16 TRELLEBORG AW309 140A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW309",
+   "bieznik": "AW 309"
+  },
+  {
+   "kod": "MO8_1327700",
+   "nazwa": "340/55-16 TRELLEBORG AW305 140A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1326400",
+   "nazwa": "260/70-16 TRELLEBORG AW305 134A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1327200",
+   "nazwa": "320/80-15.3 TRELLEBORG AW305 145A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1326700",
+   "nazwa": "300/80-15.3 TRELLEBORG AW305 141A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1326600",
+   "nazwa": "300/80-15.3 TRELLEBORG AW305 132A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1326200",
+   "nazwa": "260/70-15.3 TRELLEBORG AW305 131A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1326100",
+   "nazwa": "260/70-15.3 TRELLEBORG AW305 126A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1469300",
+   "nazwa": "10.0/80-12 TRELLEBORG AW305 10PR TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1130300",
+   "nazwa": "10.0/80-12 TRELLEBORG AW305 8PR TT",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_1469200",
+   "nazwa": "10.0/80-12 TRELLEBORG AW305 8PR TL",
+   "marka": "TRELLEBORG",
+   "model": "AW305",
+   "bieznik": "AW 305"
+  },
+  {
+   "kod": "MO8_5017215710000",
+   "nazwa": "440/80R28 TRELLEBORG TH400 156A8/156B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215700000",
+   "nazwa": "480/80R26 TRELLEBORG TH400 160A8/160B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_1110600",
+   "nazwa": "500/70R24 TRELLEBORG TH400 164A8/164B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215680000",
+   "nazwa": "460/70R24 TRELLEBORG TH400 159A8/159B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215670000",
+   "nazwa": "440/80R24 TRELLEBORG TH400 161A8/161B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215660000",
+   "nazwa": "400/70R24 TRELLEBORG TH400 152A8/152B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215650000",
+   "nazwa": "400/70R20 TRELLEBORG TH400 149A8/149B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215640000",
+   "nazwa": "400/70R18 TRELLEBORG TH400 147A8/147B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215630000",
+   "nazwa": "340/80R18 TRELLEBORG TH400 143A8/143B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215610000",
+   "nazwa": "11L-16 TRELLEBORG TH400 130A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO8_4007103200000",
+   "nazwa": "380/90R54 TRELLEBORG TM100 152A8/152B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103190000",
+   "nazwa": "300/95R52 TRELLEBORG TM100 151A8/151B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103160000",
+   "nazwa": "380/90R50 TRELLEBORG TM100 151A8/151B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103150000",
+   "nazwa": "270/95R48 TRELLEBORG TM100 144A8/144B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103140000",
+   "nazwa": "230/95R48 TRELLEBORG TM100 136A8/136B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103100000",
+   "nazwa": "300/95R46 TRELLEBORG TM100 148A8/148B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103090000",
+   "nazwa": "270/95R44 TRELLEBORG TM100 142A8/142B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103080000",
+   "nazwa": "230/95R44 TRELLEBORG TM100 134A8/134B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103070000",
+   "nazwa": "210/95R44 TRELLEBORG TM100 120A8/120B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_0558100",
+   "nazwa": "270/95R38 TRELLEBORG TM100 140A8/140B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103040000",
+   "nazwa": "230/95R36 TRELLEBORG TM100 130A8/130B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103020000",
+   "nazwa": "270/95R32 TRELLEBORG TM100 136A8/136B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103010000",
+   "nazwa": "230/95R32 TRELLEBORG TM100 128A8/128B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM100",
+   "bieznik": "TM 100"
+  },
+  {
+   "kod": "MO8_1115400",
+   "nazwa": "480/80R50 TRELLEBORG TM600 159D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1071200",
+   "nazwa": "520/85R46 TRELLEBORG TM600 158A8/158B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1070900",
+   "nazwa": "480/80R46 TRELLEBORG TM600 158A8/158B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1296400",
+   "nazwa": "900/60R42 TRELLEBORG TM900HP 180D/177E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1296800",
+   "nazwa": "710/70R42 TRELLEBORG TM900HP 179A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_11156600",
+   "nazwa": "710/70R42 TRELLEBORG TM900HP HA 173D/170E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP HA",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_0733100",
+   "nazwa": "620/70R42 TRELLEBORG TM700 166D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1034900",
+   "nazwa": "600/65R42 TRELLEBORG TM800 154D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_0732900",
+   "nazwa": "580/70R42 TRELLEBORG TM700 158D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1112800",
+   "nazwa": "520/85R42 TRELLEBORG TM600 157A8/157B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_12948600",
+   "nazwa": "520/85R42 TRELLEBORG TM600 162A8/162B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1112700",
+   "nazwa": "480/80R42 TRELLEBORG TM600 151A8/151B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1296600",
+   "nazwa": "900/60R38 TRELLEBORG TM900HP 178D/175E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1293100",
+   "nazwa": "800/70R38 TRELLEBORG TM900HP 178D/175E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_12934700",
+   "nazwa": "710/70R38 TRELLEBORG TM800 171D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1295000",
+   "nazwa": "650/75R38 TRELLEBORG TM900HP 169D/166E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_11572700",
+   "nazwa": "580/70R38 TRELLEBORG TM700 155D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_12205000",
+   "nazwa": "540/65R38 TRELLEBORG TM800 147D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1032800",
+   "nazwa": "540/65R38 TRELLEBORG TM800HS 153D/150E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_5017215950000",
+   "nazwa": "520/85R38 TRELLEBORG TM600 155A8/152B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_11572500",
+   "nazwa": "520/70R38 TRELLEBORG TM700 150D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_0732300",
+   "nazwa": "480/70R38 TRELLEBORG TM700 145A8/145B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_5017215940000",
+   "nazwa": "460/85R38 TRELLEBORG TM600 149A8/146B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1112100",
+   "nazwa": "420/85R38 TRELLEBORG TM600 144A8/141B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1115100",
+   "nazwa": "400/75R38 TRELLEBORG TM600 138A8/135B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1294800",
+   "nazwa": "380/85R38 TRELLEBORG TM600 144A8/144B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1115300",
+   "nazwa": "380/80R38 TRELLEBORG TM600 142A8/142B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1117600",
+   "nazwa": "340/85R38 TRELLEBORG TM600 133A8/130B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1070700",
+   "nazwa": "320/85R38 TRELLEBORG TM600 129A8/126B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_13467400",
+   "nazwa": "340/85R36 TRELLEBORG TM600 132A8/128B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1296500",
+   "nazwa": "710/60R34 TRELLEBORG TM900HP 164D/161E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1296200",
+   "nazwa": "600/70R34 TRELLEBORG TM900HP 160D/157E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1034400",
+   "nazwa": "600/65R34 TRELLEBORG TM800 151D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1032900",
+   "nazwa": "600/65R34 TRELLEBORG TM800HS 157D/154E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_11562200",
+   "nazwa": "540/65R34 TRELLEBORG TM800 145D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1032600",
+   "nazwa": "540/65R34 TRELLEBORG TM800 HS 152D/149E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_0732200",
+   "nazwa": "520/70R34 TRELLEBORG TM700 148A8/148B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_12086100",
+   "nazwa": "480/70R34 TRELLEBORG TM700 155A8/155B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_11562600",
+   "nazwa": "480/70R34 TRELLEBORG TM700 143A8/143B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1112000",
+   "nazwa": "460/85R34 TRELLEBORG TM600 147A8/144B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_12626100",
+   "nazwa": "420/85R34 TRELLEBORG TM600 147A8/147B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1111900",
+   "nazwa": "420/85R34 TRELLEBORG TM600 142A8/139B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1071000",
+   "nazwa": "380/85R34 TRELLEBORG TM600 137A8/137B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1296700",
+   "nazwa": "710/60R30 TRELLEBORG TM900HP 162D/159E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM900HP",
+   "bieznik": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_0732000",
+   "nazwa": "520/70R30 TRELLEBORG TM700 145A8/145B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_0730300",
+   "nazwa": "480/70R30 TRELLEBORG TM700 141D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1111800",
+   "nazwa": "460/85R30 TRELLEBORG TM600 145A8/142B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1118900",
+   "nazwa": "420/90R30 TRELLEBORG TM600 147A8/147B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1111700",
+   "nazwa": "420/85R30 TRELLEBORG TM600 140A8/137B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0731800",
+   "nazwa": "420/70R30 TRELLEBORG TM700 134A8/134B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_12206900",
+   "nazwa": "380/85R30 TRELLEBORG TM600 135A8/135B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1034200",
+   "nazwa": "600/65R28 TRELLEBORG TM800 147D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1032500",
+   "nazwa": "600/65R28 TRELLEBORG TM800HS 154D/151E TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1117300",
+   "nazwa": "480/70R28 TRELLEBORG TM700 145D/148A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1117200",
+   "nazwa": "480/70R28 TRELLEBORG TM700 140D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_11624100",
+   "nazwa": "440/65R28 TRELLEBORG TM800 131D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1111600",
+   "nazwa": "420/85R28 TRELLEBORG TM600 139A8/136B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1117100",
+   "nazwa": "420/70R28 TRELLEBORG TM700 133D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_13153500",
+   "nazwa": "420/65R28 TRELLEBORG TM800 135D/138A8 TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1111500",
+   "nazwa": "380/85R28 TRELLEBORG TM600 133A8/130B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0731500",
+   "nazwa": "380/70R28 TRELLEBORG TM700 127A8/127B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1116900",
+   "nazwa": "360/70R28 TRELLEBORG TM700 125A8/125B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1111400",
+   "nazwa": "340/85R28 TRELLEBORG TM600 127A8/124B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1115800",
+   "nazwa": "320/85R28 TRELLEBORG TM600 124A8/121B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1116800",
+   "nazwa": "320/70R28 TRELLEBORG TM700 119A8/119B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1115700",
+   "nazwa": "280/85R28 TRELLEBORG TM600 118A8/115B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1033700",
+   "nazwa": "540/65R26 TRELLEBORG TM800 141D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_0731200",
+   "nazwa": "480/70R26 TRELLEBORG TM700 139A8/139B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1116600",
+   "nazwa": "480/70R24 TRELLEBORG TM700 138A8/138B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_5017217270000",
+   "nazwa": "480/65R24 TRELLEBORG TM800 133D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_13016800",
+   "nazwa": "480/65R24 TRELLEBORG TM800 140D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_11562400",
+   "nazwa": "440/65R24 TRELLEBORG TM800 128D TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1117400",
+   "nazwa": "420/85R24 TRELLEBORG TM600 137A8/134B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0733600",
+   "nazwa": "420/70R24 TRELLEBORG TM700 130A8/130B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_13302300",
+   "nazwa": "380/85R24 TRELLEBORG TM600 140A8/140B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1111300",
+   "nazwa": "380/85R24 TRELLEBORG TM600 131A8/128B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0733500",
+   "nazwa": "380/70R24 TRELLEBORG TM700 125A8/125B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_0733400",
+   "nazwa": "360/70R24 TRELLEBORG TM700 122A8/122B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1111200",
+   "nazwa": "340/85R24 TRELLEBORG TM600 125A8/122B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1111100",
+   "nazwa": "320/85R24 TRELLEBORG TM600 122A8/119B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0733300",
+   "nazwa": "320/70R24 TRELLEBORG TM700 116A8/116B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1294000",
+   "nazwa": "280/85R24 TRELLEBORG TM600 115A8/112B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_11372800",
+   "nazwa": "250/85R24 TRELLEBORG TM600 112A8/109B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0733200",
+   "nazwa": "380/70R20 TRELLEBORG TM700 122A8/122B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_0730900",
+   "nazwa": "360/70R20 TRELLEBORG TM700 120A8/120B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1293900",
+   "nazwa": "320/85R20 TRELLEBORG TM600 119A8/116B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0730700",
+   "nazwa": "320/70R20 TRELLEBORG TM700 113A8/113B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_0730600",
+   "nazwa": "300/70R20 TRELLEBORG TM700 110A8/110B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_1293800",
+   "nazwa": "280/85R20 TRELLEBORG TM600 112A8/109B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_1114800",
+   "nazwa": "340/65R18 TRELLEBORG TM800 113A8/113B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_1114700",
+   "nazwa": "320/65R18 TRELLEBORG TM800 109A8/109B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM800",
+   "bieznik": "TM 800"
+  },
+  {
+   "kod": "MO8_0730800",
+   "nazwa": "280/70R18 TRELLEBORG TM700 114A8/114B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_10716600",
+   "nazwa": "210/95R18 TRELLEBORG TM600 108A8/108B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO8_0730500",
+   "nazwa": "280/70R16 TRELLEBORG TM700 112A8/112B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_0730400",
+   "nazwa": "260/70R16 TRELLEBORG TM700 109A8/109B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM700",
+   "bieznik": "TM 700"
+  },
+  {
+   "kod": "MO8_10716500",
+   "nazwa": "210/95R16 TRELLEBORG TM600 106A8/106B TL",
+   "marka": "TRELLEBORG",
+   "model": "TM600",
+   "bieznik": "TM 600"
+  },
+  {
+   "kod": "MO1_71970074",
+   "nazwa": "300-15 GALAXY YARDMASTER ULTRA 20PR TT",
+   "marka": "GALAXY",
+   "model": "YARDMASTER ULTRA",
+   "bieznik": "YARD MASTER ULTRA"
+  },
+  {
+   "kod": "MO1_19800286",
+   "nazwa": "7.50-16 MRL MTF 222 103A6/98A8 8PR TT",
+   "marka": "MRL",
+   "model": "MTF 222",
+   "bieznik": "MTF 222 TWO RIB"
+  },
+  {
+   "kod": "MO1_17422750",
+   "nazwa": "18.4-34 NOKIAN TR FOREST 14PR TT",
+   "marka": "NOKIAN",
+   "model": "TR FOREST",
+   "bieznik": "TR FOREST 2"
+  },
+  {
+   "kod": "MO1_15226831",
+   "nazwa": "620/70R42 ALLIANCE 360 173A8/170B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO1_15226794",
+   "nazwa": "650/65R38 ALLIANCE 360 178A8/175B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO1_15226767",
+   "nazwa": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "marka": "ALLIANCE",
+   "model": "360",
+   "bieznik": "360 FORESTRY"
+  },
+  {
+   "kod": "MO1_11166115",
+   "nazwa": "385/65R22.5 GOODTRIP GHT50 160K/158L 20PR TL",
+   "marka": "GOODTRIP",
+   "model": "GHT50",
+   "bieznik": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO1_10001615",
+   "nazwa": "435/50R19.5 GOODTRIP GHT22 160J 22PR TL",
+   "marka": "GOODTRIP",
+   "model": "GHT22",
+   "bieznik": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO1_10001614",
+   "nazwa": "445/45R19.5 GOODTRIP GHT22 TRAILER 160J 22PR TL M+S 3PMSF",
+   "marka": "GOODTRIP",
+   "model": "GHT22",
+   "bieznik": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO1_10001613",
+   "nazwa": "385/55R22.5 GOODTRIP GHT50 TRAILER 160K 20PR TL M+S 3PMSF",
+   "marka": "GOODTRIP",
+   "model": "GHT50",
+   "bieznik": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO7_T445516",
+   "nazwa": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL",
+   "marka": "NOKIAN",
+   "model": "FOREST KING TRS -2",
+   "bieznik": "FOREST KING TRS 2"
+  },
+  {
+   "kod": "MO7_T445596",
+   "nazwa": "700/70-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445476",
+   "nazwa": "700/55-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445475",
+   "nazwa": "600/65-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445528",
+   "nazwa": "750/55-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445527",
+   "nazwa": "600/55-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445541",
+   "nazwa": "710/45-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445624",
+   "nazwa": "710/40-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445622",
+   "nazwa": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "marka": "NOKIAN",
+   "model": "NORDMAN FOREST TRS",
+   "bieznik": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO5_MIRD080F16000B196",
+   "nazwa": "16x6.50-8 MITAS B-19 6PR TL",
+   "marka": "MITAS",
+   "model": "B-19",
+   "bieznik": "B19"
+  },
+  {
+   "kod": "MO2_5017215680000",
+   "nazwa": "460/70R24 TRELLEBORG TH400 159A8/159B TL",
+   "marka": "TRELLEBORG",
+   "model": "TH400",
+   "bieznik": "TH 400"
+  },
+  {
+   "kod": "MO2_25031827",
+   "nazwa": "11.00-20 MITAS NB38 16PR TT",
+   "marka": "MITAS",
+   "model": "NB38",
+   "bieznik": "NB 38"
+  },
+  {
+   "kod": "MO2_CET0048",
+   "nazwa": "265/70R19.5 CETROC GHT50 143/141K 3PMSF M+S FRONT",
+   "marka": "CETROC",
+   "model": "GHT50",
+   "bieznik": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO5_MIRD300G84006T130",
+   "nazwa": "18.4-30 MITAS TD-13 152A6/144A8 14PR TT",
+   "marka": "MITAS",
+   "model": "TD-13",
+   "bieznik": "TD13"
+  },
+  {
+   "kod": "MO5_MCRR24054065DRD30",
+   "nazwa": "540/65R24 CULTOR RD-03 140D/143A8 TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR240420658RD30",
+   "nazwa": "420/65R24 CULTOR RD-03 129A8/126D TL",
+   "marka": "CULTOR",
+   "model": "RD-03",
+   "bieznik": "RD03"
+  },
+  {
+   "kod": "MO3_6506542A",
+   "nazwa": "650/65R42 ALLIANCE 365 170D/173A8 TL",
+   "marka": "ALLIANCE",
+   "model": "365",
+   "bieznik": "365 AGRISTAR"
+  },
+  {
+   "kod": "MO5_MIRD060156000B191",
+   "nazwa": "15x6.00-6 MITAS B-19 6PR TL",
+   "marka": "MITAS",
+   "model": "B-19",
+   "bieznik": "B19"
+  },
+  {
+   "kod": "MO4_MIRD280G4900OTD10",
+   "nazwa": "14.9-28 MITAS TD-19 130A6/122A8 8PR TT",
+   "marka": "MITAS",
+   "model": "TD-19",
+   "bieznik": "TD19"
+  },
+  {
+   "kod": "MO4_MIRD200E750063TF0",
+   "nazwa": "7.50-20 MITAS TF-03 103A6/96A8 6PR TT",
+   "marka": "MITAS",
+   "model": "TF-03",
+   "bieznik": "TF03"
+  },
+  {
+   "kod": "MO4_KARD080189004IP60",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TL",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO4_KARD080189004IP62",
+   "nazwa": "18x8.50-8 KABAT IMP-06 82A4 6PR TT",
+   "marka": "KABAT",
+   "model": "IMP-06",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA"
+  }
+ ]
+}

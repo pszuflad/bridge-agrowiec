@@ -1,0 +1,747 @@
+/**
+ * Bridge Agrowca — Selly injection
+ * v1 - dodaje zakładkę "Selly" w sidebarze panelu React
+ *      + renderuje pełny widok integracji Selly.pl w kontenerze <main>
+ *
+ * Architektura (analogiczna do pending-injection.js):
+ *  - MutationObserver / interval nasłuchuje na React DOM
+ *  - Dodaje link "Selly" do sidebar nav (po ostatniej zakładce)
+ *  - Nasłuchuje na hashchange - gdy hash to #/selly, ukrywa React content
+ *    i renderuje własny widok Selly wewnątrz kontenera <main>
+ *  - Używa /panel/api/selly/* endpointów (routes przez .htaccess)
+ *  - Autoryzacja: JWT z localStorage (klucz 'bridge_token' - jak w istniejącym selly.html)
+ */
+(function () {
+  'use strict';
+
+  const VERSION = 'v4-csvstatus';
+  const API_BASE = '/panel/api/selly';
+  // Uwaga: React router panelu zna tylko konkretne route'y (#/, #/staging, ...).
+  // Cokolwiek innego (#/selly, #/?view=selly) traktuje jako 'Not Found' i
+  // rozmontowuje layout (sidebar + main). Dlatego trzymamy link Selly na hashu
+  // '#/' (dashboard - React renderuje pełen layout), a stan 'jestem na Selly'
+  // trzymamy w sessionStorage. Nasz injector wykrywa flagę i overlayuje
+  // widok Selly nad <main>, ukrywając React content.
+  const FLAG_KEY = 'sellyViewActive';
+  const HASH = '#/'; // link Selly wskazuje na dashboard, aby React nie rozmontował layoutu
+  const LABEL = 'Selly';
+
+  const state = {
+    lastRoute: null,
+    injectedNav: false,
+    injectedView: false,
+    dostawcy: [],
+  };
+
+  // ============ CSS ============
+  const CSS = `
+    /* Sidebar link "Selly" - dopasowany do reszty */
+    #selly-nav-link {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+    #selly-nav-link .selly-nav-inner {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 12px; border-radius: 6px;
+      font: 500 14px/1 Inter, system-ui, sans-serif;
+      color: rgba(205,204,202,0.8);
+      cursor: pointer;
+      transition: background .12s, color .12s;
+    }
+    #selly-nav-link:hover .selly-nav-inner {
+      background: rgba(217,119,6,0.08);
+      color: #CDCCCA;
+    }
+    #selly-nav-link.active .selly-nav-inner {
+      background: #D97706;
+      color: #171614;
+      font-weight: 600;
+    }
+    #selly-nav-link .selly-nav-icon {
+      width: 18px; height: 18px; flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    #selly-nav-link .selly-nav-label { flex: 1; }
+    #selly-nav-link .selly-nav-badge {
+      font-size: 10px; padding: 2px 6px; border-radius: 8px;
+      background: rgba(217,119,6,0.15); color: #D97706;
+      font-weight: 600; letter-spacing: 0.02em;
+    }
+    #selly-nav-link.active .selly-nav-badge {
+      background: rgba(23,22,20,0.25); color: #171614;
+    }
+
+    /* Główny widok Selly - overlay nad <main> React'a */
+    #selly-view {
+      font-family: Inter, system-ui, sans-serif;
+      color: #CDCCCA;
+      background: #0F0E0D;
+      padding: 24px 28px;
+      min-height: 100vh;
+      max-width: 100%;
+    }
+    #selly-view h1 {
+      font-size: 22px; font-weight: 600;
+      color: #F9F8F5 !important; margin: 0 0 6px;
+    }
+    #selly-view .subtitle {
+      font-size: 13px; color: #A5A4A2; margin-bottom: 24px;
+    }
+    /* Wygaszamy React'owe podświetlenie "Pulpit" gdy jesteśmy na Selly */
+    a[data-selly-suppressed] > span.bg-sidebar-primary,
+    a[data-selly-suppressed] > span[class*="sidebar-primary"] {
+      background: transparent !important;
+      color: rgba(205,204,202,0.8) !important;
+      font-weight: 500 !important;
+    }
+    #selly-view .card {
+      background: #1C1B19;
+      border: 1px solid #393836;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    #selly-view .card h3 {
+      font-size: 14px; font-weight: 600;
+      color: #CDCCCA; margin: 0 0 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    #selly-view .card h3 .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #6DAA45; display: inline-block;
+    }
+    #selly-view .card h3 .dot.err { background: #E5484D; }
+    #selly-view .card h3 .dot.load { background: #FDAB43; animation: pulse 1.4s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:.4 } }
+
+    #selly-view button.btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 7px;
+      background: #D97706; color: #171614;
+      border: none; font: 600 12px/1 Inter, sans-serif;
+      cursor: pointer; transition: background .12s;
+    }
+    #selly-view button.btn:hover { background: #B45309; }
+    #selly-view button.btn:disabled { opacity: .45; cursor: not-allowed; }
+    #selly-view button.btn.secondary {
+      background: transparent; color: #CDCCCA;
+      border: 1px solid #393836;
+    }
+    #selly-view button.btn.secondary:hover {
+      background: #201F1D; border-color: #4a4844;
+    }
+    #selly-view button.btn.small {
+      padding: 5px 10px; font-size: 11px;
+    }
+
+    #selly-view table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px;
+    }
+    #selly-view th {
+      text-align: left; font-weight: 600;
+      color: #797876; font-size: 11px;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 8px 10px; border-bottom: 1px solid #393836;
+    }
+    #selly-view td {
+      padding: 10px; border-bottom: 1px solid #2a2926;
+      color: #CDCCCA;
+    }
+    #selly-view td.num, #selly-view th.num {
+      text-align: right; font-variant-numeric: tabular-nums;
+    }
+    #selly-view td .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 600;
+    }
+    #selly-view td .badge.ok  { background: rgba(109,170,69,0.15);  color: #6DAA45; }
+    #selly-view td .badge.err { background: rgba(229,72,77,0.15);   color: #E5484D; }
+    #selly-view td .badge.warn{ background: rgba(253,171,67,0.15);  color: #FDAB43; }
+
+    #selly-view label {
+      font-size: 12px; color: #CDCCCA;
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-right: 16px;
+    }
+    #selly-view select, #selly-view input[type=number] {
+      background: #0e0d0c; color: #CDCCCA;
+      border: 1px solid #393836; padding: 7px 10px;
+      border-radius: 6px; font: 400 13px Inter, sans-serif;
+      min-width: 100px;
+    }
+    #selly-view input[type=checkbox] { accent-color: #D97706; }
+
+    #selly-view .form-row {
+      display: flex; align-items: center; gap: 18px;
+      flex-wrap: wrap; margin-bottom: 12px;
+    }
+    #selly-view .btn-row {
+      display: flex; gap: 10px; margin-top: 8px;
+    }
+
+    #selly-view pre {
+      background: #0e0d0c; border: 1px solid #2a2926;
+      color: #CDCCCA; padding: 12px 14px; border-radius: 8px;
+      overflow: auto; max-height: 320px;
+      font: 12px/1.5 "JetBrains Mono", "Fira Code", monospace;
+    }
+    #selly-view details { margin-top: 10px; }
+    #selly-view details summary {
+      cursor: pointer; color: #797876; font-size: 12px;
+      padding: 4px 0; user-select: none;
+    }
+    #selly-view details summary:hover { color: #CDCCCA; }
+
+    #selly-view .status-line { font-size: 13px; }
+    #selly-view .status-line strong { color: #F9F8F5; }
+    #selly-view .status-line .mono {
+      font: 11px "JetBrains Mono", monospace; color: #797876;
+    }
+    #selly-view .status-line .ok  { color: #6DAA45; }
+    #selly-view .status-line .err { color: #E5484D; }
+    #selly-view .status-line .warn{ color: #FDAB43; }
+
+    #selly-view .sync-result { margin-top: 12px; font-size: 13px; }
+    #selly-view .sync-result .summary-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 12px 14px; background: #201F1D;
+      border-radius: 8px; border: 1px solid #393836;
+    }
+    #selly-view .sync-result .stat {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    #selly-view .sync-result .stat .num {
+      font: 700 18px/1 "JetBrains Mono", monospace;
+    }
+    #selly-view .sync-result .stat .lbl {
+      font-size: 10px; color: #797876; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  `;
+
+  function injectCSS() {
+    if (document.getElementById('selly-inject-style')) return;
+    const style = document.createElement('style');
+    style.id = 'selly-inject-style';
+    style.textContent = CSS;
+    document.head.appendChild(style);
+  }
+
+  // ============ AUTH ============
+  function getToken() {
+    // Panel React trzyma token pod różnymi kluczami - próbujemy wszystkie
+    return (
+      localStorage.getItem('bridge_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('jwt') ||
+      sessionStorage.getItem('bridge_token') ||
+      sessionStorage.getItem('token') ||
+      ''
+    );
+  }
+
+  async function api(path, opts = {}) {
+    const token = getToken();
+    const r = await fetch(API_BASE + path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+        ...(opts.headers || {}),
+      },
+    });
+    const text = await r.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    return { ok: r.ok, status: r.status, data };
+  }
+
+  // ============ NAV LINK INJECTION ============
+  const SELLY_ICON_SVG = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         width="18" height="18">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+      <line x1="3" x2="21" y1="6" y2="6"/>
+      <path d="M16 10a4 4 0 0 1-8 0"/>
+    </svg>
+  `;
+
+  function findSidebarNav() {
+    // Bundle: <div className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+    // Zakładki są renderowane w kontenerze który ma tę klasę
+    const candidates = document.querySelectorAll('div.flex-1.overflow-y-auto.py-4.px-3, aside nav, nav[aria-label*="ain"], nav[aria-label*="ide"]');
+    for (const c of candidates) {
+      // Weryfikujemy że jest to sidebar nav - musi zawierać któryś z linków do znanych route'ów
+      const links = c.querySelectorAll('a[href*="/katalog"], a[href*="/atrybuty"], a[href*="/staging"], a[href*="#/katalog"], a[href*="#/atrybuty"]');
+      if (links.length > 0) return c;
+    }
+    // Fallback: znajdź element rodzic linku #/katalog
+    const anchor = document.querySelector('a[href="#/katalog"], a[href="/katalog"]');
+    if (anchor) {
+      // Idź w górę aż znajdziesz kontener wielu linków
+      let el = anchor.parentElement;
+      while (el && el !== document.body) {
+        if (el.querySelectorAll('a').length >= 3) return el;
+        el = el.parentElement;
+      }
+    }
+    return null;
+  }
+
+  function ensureNavLink() {
+    if (document.getElementById('selly-nav-link')) {
+      updateNavActive();
+      bindOtherNavLinks();
+      return;
+    }
+    const nav = findSidebarNav();
+    if (!nav) return;
+
+    const link = document.createElement('a');
+    link.id = 'selly-nav-link';
+    link.href = HASH;
+    link.setAttribute('data-testid', 'link-nav-selly');
+    link.innerHTML = `
+      <div class="selly-nav-inner">
+        <span class="selly-nav-icon">${SELLY_ICON_SVG}</span>
+        <span class="selly-nav-label">${LABEL}</span>
+        <span class="selly-nav-badge">API</span>
+      </div>
+    `;
+    // Handler: nie pozwalamy hashowi się zmienić - zamiast tego ustawiamy flag
+    // i wymuszamy hash='#/' (jeśli już nie jest). React renderuje dashboard,
+    // a nasz observer wykrywa flag i overlayuje widok Selly.
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      sessionStorage.setItem(FLAG_KEY, '1');
+      if (location.hash !== '#/' && location.hash !== '') {
+        location.hash = '#/';
+      } else {
+        // Już jesteśmy na #/, ale React nie wywoła hashchange - odpal ręcznie
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      }
+      // Wymuś natychmiastowy re-render naszego widoku
+      setTimeout(() => { ensureView(); updateNavActive(); }, 50);
+    });
+    nav.appendChild(link);
+    updateNavActive();
+    bindOtherNavLinks();
+    state.injectedNav = true;
+    console.log(`[selly-inject ${VERSION}] nav link injected`);
+  }
+
+  // Do wszystkich innych linków nawigacyjnych podpinamy handler który
+  // WYCZYŚCI naszą flagę - żeby po kliknięciu Katalog/Pulpit React normalnie
+  // wyrenderował swój widok, a nasz overlay się usunął.
+  function bindOtherNavLinks() {
+    const nav = findSidebarNav();
+    if (!nav) return;
+    nav.querySelectorAll('a[href^="#/"]').forEach(a => {
+      if (a.id === 'selly-nav-link') return;
+      if (a.dataset.sellyBound === '1') return;
+      a.dataset.sellyBound = '1';
+      a.addEventListener('click', () => {
+        sessionStorage.removeItem(FLAG_KEY);
+        // Nasz observer wykryje że flag zniknął i posprząta
+        setTimeout(() => { ensureView(); updateNavActive(); }, 50);
+      }, true);
+    });
+  }
+
+  function updateNavActive() {
+    const link = document.getElementById('selly-nav-link');
+    if (!link) return;
+    const onSelly = isSellyRoute();
+    link.classList.toggle('active', onSelly);
+    // Wygaszamy podświetlenie 'Pulpit' gdy jesteśmy na Selly (bo hash to #/)
+    document.querySelectorAll('a[href="#/"], a[href="/"]').forEach(a => {
+      if (a.id === 'selly-nav-link') return;
+      if (onSelly) a.setAttribute('data-selly-suppressed', '1');
+      else a.removeAttribute('data-selly-suppressed');
+    });
+  }
+
+  // ============ VIEW RENDER ============
+  function findMainContainer() {
+    // Bundle: <main className="flex-1 min-w-0 pt-14 md:pt-0 overflow-x-hidden">
+    const main = document.querySelector('main.flex-1');
+    if (main) return main;
+    // Fallback
+    return document.querySelector('main') || document.getElementById('root');
+  }
+
+  function ensureView() {
+    if (!isSellyRoute()) {
+      // Sprzątanie: usuń nasz widok, przywróć React
+      const view = document.getElementById('selly-view');
+      if (view) view.remove();
+      // Odkryj React content
+      document.querySelectorAll('[data-selly-hidden]').forEach(el => {
+        el.style.display = el.dataset.sellyPrevDisplay || '';
+        delete el.dataset.sellyHidden;
+        delete el.dataset.sellyPrevDisplay;
+      });
+      state.injectedView = false;
+      return;
+    }
+    if (document.getElementById('selly-view')) return; // już jest
+
+    const main = findMainContainer();
+    if (!main) return;
+
+    // Ukryj React children of main (nie usuwamy - tylko display:none)
+    Array.from(main.children).forEach(el => {
+      if (el.id === 'selly-view') return;
+      el.dataset.sellyPrevDisplay = el.style.display || '';
+      el.dataset.sellyHidden = '1';
+      el.style.display = 'none';
+    });
+
+    const view = document.createElement('div');
+    view.id = 'selly-view';
+    view.innerHTML = `
+      <h1>Integracja Selly.pl</h1>
+      <div class="subtitle">Synchronizacja produktów z Bridge do sklepu w Selly przez API v3.</div>
+
+      <div class="card">
+        <h3><span id="selly-ping-dot" class="dot load"></span> Status połączenia</h3>
+        <div id="selly-ping" class="status-line">Sprawdzam...</div>
+      </div>
+
+      <div class="card">
+        <h3><span id="selly-csv-dot" class="dot load"></span> Codzienna synchronizacja CSV
+          <a id="selly-csv-dl" href="#" target="_blank" style="display:none;float:right;font-size:12px">Pobierz / podgląd CSV ↗</a>
+        </h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:12px;color:#797876">Plik CSV generowany codziennie o 6:00 i pobierany przez Selly. Kryterium OK: plik wygenerowany dzisiaj i niepusty.</div>
+          <button class="btn secondary small" id="selly-refresh-csv">Odśwież</button>
+        </div>
+        <div id="selly-csv-status" class="status-line">Sprawdzam status pliku CSV...</div>
+        <table id="selly-csv-table" style="display:none;margin-top:10px">
+          <tbody>
+            <tr><td style="color:#797876">Status</td><td id="selly-csv-ok"></td></tr>
+            <tr><td style="color:#797876">Ostatnia synchronizacja</td><td id="selly-csv-mtime"></td></tr>
+            <tr><td style="color:#797876">Liczba produktów w pliku</td><td id="selly-csv-rows" class="num"></td></tr>
+            <tr><td style="color:#797876">Rozmiar pliku</td><td id="selly-csv-size" class="num"></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot"></span> Mapowanie dostawców</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:12px;color:#797876">Licznik "W Selly" oparty o tabelę selly_products (uzupełnia się przez sync z Bridge).</div>
+          <button class="btn secondary small" id="selly-refresh-status">Odśwież</button>
+        </div>
+        <table id="selly-status-table">
+          <thead><tr>
+            <th>Dostawca</th>
+            <th class="num">W Bridge</th>
+            <th class="num">W Selly</th>
+            <th class="num">Błędy</th>
+            <th></th>
+          </tr></thead>
+          <tbody><tr><td colspan="5" style="color:#797876">Ładowanie...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot"></span> Sync dostawcy</h3>
+        <div class="form-row">
+          <label>Dostawca:
+            <select id="selly-dostawca"></select>
+          </label>
+          <label>Limit (0=wszystko):
+            <input type="number" id="selly-limit" value="0" min="0" style="width:90px">
+          </label>
+          <label>
+            <input type="checkbox" id="selly-only-updated"> tylko zmienione od ostatniego syncu
+          </label>
+        </div>
+        <div class="btn-row">
+          <button class="btn secondary" id="selly-btn-dryrun">Test dry-run (5 szt.)</button>
+          <button class="btn" id="selly-btn-sync">Wyślij do Selly</button>
+        </div>
+        <div id="selly-sync-result" class="sync-result"></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="dot"></span> Historia operacji</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:12px;color:#797876">Ostatnie 10 operacji z tabeli selly_sync_log.</div>
+          <button class="btn secondary small" id="selly-refresh-log">Odśwież</button>
+        </div>
+        <table id="selly-log-table">
+          <thead><tr>
+            <th>Data</th>
+            <th>Operacja</th>
+            <th>Dostawca</th>
+            <th class="num">OK</th>
+            <th class="num">Błąd</th>
+            <th class="num">Skip</th>
+            <th>Status</th>
+          </tr></thead>
+          <tbody><tr><td colspan="7" style="color:#797876">Ładowanie...</td></tr></tbody>
+        </table>
+      </div>
+    `;
+    main.appendChild(view);
+
+    // Wypełnij select dostawców
+    const sel = view.querySelector('#selly-dostawca');
+    for (const d of ['MO1','MO2','MO3','MO4','MO5','MO6','MO7','MO8','MO9','MO10']) {
+      const o = document.createElement('option');
+      o.value = d; o.textContent = d;
+      sel.appendChild(o);
+    }
+
+    // Bindings
+    view.querySelector('#selly-refresh-csv').onclick = loadCsvStatus;
+    view.querySelector('#selly-refresh-status').onclick = loadStatus;
+    view.querySelector('#selly-refresh-log').onclick = loadLog;
+    view.querySelector('#selly-btn-dryrun').onclick = () => doSync(true);
+    view.querySelector('#selly-btn-sync').onclick = () => doSync(false);
+
+    // Załaduj dane
+    loadPing();
+    loadCsvStatus();
+    loadStatus();
+    loadLog();
+
+    state.injectedView = true;
+    console.log(`[selly-inject ${VERSION}] view rendered`);
+  }
+
+  function isSellyRoute() {
+    // Widok Selly jest aktywny gdy:
+    //  1) mamy flag w sessionStorage (główny mechanizm)
+    //  2) hash to #/ lub pusty (żeby nie nakładać się na inne route'y jak #/katalog)
+    try {
+      if (sessionStorage.getItem(FLAG_KEY) !== '1') return false;
+    } catch (e) { return false; }
+    const h = location.hash || '';
+    return h === '' || h === '#/' || h === '#';
+  }
+
+  // ============ DATA LOADERS ============
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])
+    );
+  }
+
+  async function loadPing() {
+    const box = document.getElementById('selly-ping');
+    const dot = document.getElementById('selly-ping-dot');
+    if (!box) return;
+    box.innerHTML = 'Sprawdzam połączenie...';
+    dot.className = 'dot load';
+    const r = await api('/ping');
+    if (!r.ok) {
+      dot.className = 'dot err';
+      box.innerHTML = `<span class="err">✗ Błąd (${r.status}): </span><span class="mono">${escapeHtml(JSON.stringify(r.data))}</span>`;
+      return;
+    }
+    dot.className = 'dot';
+    box.innerHTML = `
+      <span class="ok">✓ Połączono</span> ·
+      <strong>${escapeHtml(r.data.shop)}</strong> ·
+      token wygasa za <strong>${r.data.expires_in_seconds}s</strong> ·
+      <span class="mono">${escapeHtml(r.data.vat_probe || '')}</span>
+    `;
+  }
+
+  async function loadCsvStatus() {
+    const box = document.getElementById('selly-csv-status');
+    const dot = document.getElementById('selly-csv-dot');
+    const tbl = document.getElementById('selly-csv-table');
+    const dl  = document.getElementById('selly-csv-dl');
+    if (!box) return;
+    box.innerHTML = 'Sprawdzam status pliku CSV...';
+    if (dot) dot.className = 'dot load';
+    const r = await api('/csv-status');
+    if (!r.ok) {
+      if (dot) dot.className = 'dot err';
+      box.innerHTML = `<span class="err">✗ Błąd odczytu statusu (${r.status}): </span><span class="mono">${escapeHtml(JSON.stringify(r.data))}</span>`;
+      if (tbl) tbl.style.display = 'none';
+      return;
+    }
+    const d = r.data;
+    const isOk = d.status === 'ok';
+    if (dot) dot.className = isOk ? 'dot' : 'dot err';
+    box.innerHTML = isOk
+      ? `<span class="ok">✓ Synchronizacja OK — plik wygenerowany dzisiaj</span>`
+      : `<span class="err">✗ Błąd synchronizacji — ${escapeHtml(d.powod || 'plik nieaktualny lub pusty')}</span>`;
+    document.getElementById('selly-csv-ok').innerHTML = isOk
+      ? '<span class="badge ok">OK</span>' : '<span class="badge err">BŁĄD</span>';
+    const mt = d.ostatnia_synchronizacja ? new Date(d.ostatnia_synchronizacja) : null;
+    document.getElementById('selly-csv-mtime').innerHTML = mt
+      ? `${escapeHtml(mt.toLocaleString('pl-PL'))} <span class="${d.wygenerowany_dzisiaj?'ok':'warn'}">(${d.wiek_minut} min temu)</span>`
+      : '—';
+    document.getElementById('selly-csv-rows').textContent = (d.wiersze!=null ? d.wiersze.toLocaleString('pl-PL') : '—');
+    document.getElementById('selly-csv-size').textContent = (d.rozmiar_mb!=null ? d.rozmiar_mb + ' MB' : '—');
+    if (tbl) tbl.style.display = 'table';
+    if (dl && d.url) { dl.href = d.url; dl.style.display = 'inline-block'; }
+  }
+
+  async function loadStatus() {
+    const tbody = document.querySelector('#selly-status-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = `<tr><td colspan="5" style="color:#797876">Ładowanie...</td></tr>`;
+    const r = await api('/status');
+    if (!r.ok) {
+      tbody.innerHTML = `<tr><td colspan="5" class="err">${escapeHtml(JSON.stringify(r.data))}</td></tr>`;
+      return;
+    }
+    const items = r.data.items || [];
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="5" style="color:#797876">Brak danych.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = items.map(row => `
+      <tr>
+        <td><strong>${escapeHtml(row.dostawca)}</strong></td>
+        <td class="num">${row.w_bridge}</td>
+        <td class="num">${row.w_selly}</td>
+        <td class="num">${row.z_bledami > 0 ? `<span class="badge err">${row.z_bledami}</span>` : '0'}</td>
+        <td style="text-align:right">
+          <button class="btn secondary small" data-quick-sync="${escapeHtml(row.dostawca)}">Sync</button>
+        </td>
+      </tr>
+    `).join('');
+    tbody.querySelectorAll('[data-quick-sync]').forEach(btn => {
+      btn.onclick = () => {
+        const d = btn.getAttribute('data-quick-sync');
+        document.getElementById('selly-dostawca').value = d;
+        doSync(false);
+      };
+    });
+  }
+
+  async function loadLog() {
+    const tbody = document.querySelector('#selly-log-table tbody');
+    if (!tbody) return;
+    const r = await api('/log?limit=10');
+    if (!r.ok) {
+      tbody.innerHTML = `<tr><td colspan="7" class="err">${escapeHtml(JSON.stringify(r.data))}</td></tr>`;
+      return;
+    }
+    const items = r.data.items || [];
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="7" style="color:#797876">Brak wpisów — jeszcze nie było żadnej operacji.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = items.map(row => {
+      const dt = (row.rozpoczeto || '').slice(0,19).replace('T',' ');
+      const statusBadge = row.status === 'success' ? 'ok' : (row.status === 'error' ? 'err' : 'warn');
+      return `
+        <tr>
+          <td class="mono">${escapeHtml(dt)}</td>
+          <td>${escapeHtml(row.operacja || '')}</td>
+          <td>${escapeHtml(row.dostawca_kod || '—')}</td>
+          <td class="num"><span class="badge ok">${row.liczba_ok || 0}</span></td>
+          <td class="num">${row.liczba_blad > 0 ? `<span class="badge err">${row.liczba_blad}</span>` : '0'}</td>
+          <td class="num">${row.liczba_skip > 0 ? `<span class="badge warn">${row.liczba_skip}</span>` : '0'}</td>
+          <td><span class="badge ${statusBadge}">${escapeHtml(row.status || '')}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function doSync(dryRun) {
+    const dostawca = document.getElementById('selly-dostawca').value;
+    const limitRaw = parseInt(document.getElementById('selly-limit').value) || 0;
+    const onlyUpd  = document.getElementById('selly-only-updated').checked;
+    const result   = document.getElementById('selly-sync-result');
+    const btnDry = document.getElementById('selly-btn-dryrun');
+    const btnGo  = document.getElementById('selly-btn-sync');
+    btnDry.disabled = true; btnGo.disabled = true;
+
+    result.innerHTML = `<div class="status-line">⏳ Synchronizuję <strong>${escapeHtml(dostawca)}</strong>${dryRun ? ' (dry-run)' : ''}...</div>`;
+
+    const r = await api('/sync-supplier', {
+      method: 'POST',
+      body: JSON.stringify({
+        dostawca,
+        dry_run: dryRun,
+        limit: dryRun ? 5 : limitRaw,
+        only_updated: onlyUpd,
+      }),
+    });
+
+    btnDry.disabled = false; btnGo.disabled = false;
+
+    if (!r.ok) {
+      result.innerHTML = `
+        <div class="status-line err">✗ Błąd (${r.status})</div>
+        <pre>${escapeHtml(JSON.stringify(r.data, null, 2))}</pre>
+      `;
+      return;
+    }
+    const d = r.data;
+    const dryLabel = d.dry_run ? ' <span class="badge warn">DRY-RUN</span>' : '';
+    result.innerHTML = `
+      <div class="status-line">
+        <strong>${escapeHtml(dostawca)}</strong>: ${d.total || 0} produktów${dryLabel}
+      </div>
+      <div class="summary-row" style="margin-top:10px">
+        <div class="stat"><span class="num" style="color:#6DAA45">${(d.created || 0) + (d.updated || 0)}</span><span class="lbl">OK</span></div>
+        <div class="stat"><span class="num" style="color:#E5484D">${d.failed || 0}</span><span class="lbl">Błędy</span></div>
+        <div class="stat"><span class="num" style="color:#FDAB43">${d.skipped || 0}</span><span class="lbl">Pominięto</span></div>
+        <div class="stat"><span class="num" style="color:#6DAA45">${d.created || 0}</span><span class="lbl">Utworzono</span></div>
+        <div class="stat"><span class="num" style="color:#4F98A3">${d.updated || 0}</span><span class="lbl">Zaktualizowano</span></div>
+      </div>
+      ${d.errors && d.errors.length ? `
+        <details open>
+          <summary>Błędy (${d.errors.length})</summary>
+          <pre>${escapeHtml(JSON.stringify(d.errors, null, 2))}</pre>
+        </details>
+      ` : ''}
+      ${d.dry_payloads ? `
+        <details>
+          <summary>Podgląd payloadów (${(d.dry_payloads || []).length})</summary>
+          <pre>${escapeHtml(JSON.stringify(d.dry_payloads, null, 2))}</pre>
+        </details>
+      ` : ''}
+    `;
+
+    // Odśwież status i log
+    loadStatus();
+    loadLog();
+  }
+
+  // ============ BOOTSTRAP ============
+  function tick() {
+    ensureNavLink();
+    updateNavActive();
+    ensureView();
+  }
+
+  function init() {
+    injectCSS();
+    // Interval - React nawigacja bez pełnego reloadu, więc nasłuchujemy ciągle
+    setInterval(tick, 500);
+    // Reakcja na hashchange - natychmiast, nie czekając na tick
+    window.addEventListener('hashchange', () => {
+      updateNavActive();
+      ensureView();
+    });
+    // MutationObserver na body - żeby zareagować szybciej gdy React zmontuje sidebar
+    const obs = new MutationObserver(() => tick());
+    obs.observe(document.body, { childList: true, subtree: true });
+    // Auto-fire w razie już zamontowanego
+    setTimeout(tick, 100);
+    setTimeout(tick, 500);
+    setTimeout(tick, 1500);
+    console.log(`[selly-inject ${VERSION}] initialized`);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

@@ -1,0 +1,172 @@
+{
+  "changes": [
+    {
+      "kod": "MO3_2309532T",
+      "dostawca": "MO3",
+      "rozmiar": "230/95R32",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_2309536t",
+      "dostawca": "MO3",
+      "rozmiar": "230/95R36",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_2309548t",
+      "dostawca": "MO3",
+      "rozmiar": "230/95R48",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_2709532t",
+      "dostawca": "MO3",
+      "rozmiar": "270/95R32",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_3009546TA",
+      "dostawca": "MO3",
+      "rozmiar": "300/95R46",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_3208536A-IN",
+      "dostawca": "MO3",
+      "rozmiar": "320/85R36",
+      "dot": "24",
+      "target": "2024"
+    },
+    {
+      "kod": "MO3_3658020N",
+      "dostawca": "MO3",
+      "rozmiar": "365/80R20",
+      "dot": "19",
+      "target": "2019"
+    },
+    {
+      "kod": "MO3_4208534A-IN",
+      "dostawca": "MO3",
+      "rozmiar": "420/85R34",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_4209030conti",
+      "dostawca": "MO3",
+      "rozmiar": "420/90R30",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_4406524T",
+      "dostawca": "MO3",
+      "rozmiar": "440/65R24",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_4408028Gdemo",
+      "dostawca": "MO3",
+      "rozmiar": "440/80R28",
+      "dot": "21",
+      "target": "2021"
+    },
+    {
+      "kod": "MO3_4608534m",
+      "dostawca": "MO3",
+      "rozmiar": "460/85R34",
+      "dot": "21",
+      "target": "2021"
+    },
+    {
+      "kod": "MO3_5007024MMM",
+      "dostawca": "MO3",
+      "rozmiar": "500/70-24",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_5207034K",
+      "dostawca": "MO3",
+      "rozmiar": "520/70R34",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_5208542tr",
+      "dostawca": "MO3",
+      "rozmiar": "520/85R42",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_5208546conti",
+      "dostawca": "MO3",
+      "rozmiar": "520/85R46",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_6006528A-IN",
+      "dostawca": "MO3",
+      "rozmiar": "600/65R28",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_6006528T",
+      "dostawca": "MO3",
+      "rozmiar": "600/65R28",
+      "dot": "23",
+      "target": "2023"
+    },
+    {
+      "kod": "MO3_6007030conti",
+      "dostawca": "MO3",
+      "rozmiar": "600/70R30",
+      "dot": "24",
+      "target": "2024"
+    },
+    {
+      "kod": "MO3_6007030T",
+      "dostawca": "MO3",
+      "rozmiar": "600/70R30",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_6506034Mm",
+      "dostawca": "MO3",
+      "rozmiar": "650/60R34",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_6506542A",
+      "dostawca": "MO3",
+      "rozmiar": "650/65R42",
+      "dot": "24",
+      "target": "2024"
+    },
+    {
+      "kod": "MO3_7107038T",
+      "dostawca": "MO3",
+      "rozmiar": "710/70R38",
+      "dot": "22",
+      "target": "2022"
+    },
+    {
+      "kod": "MO3_9006038contiTM",
+      "dostawca": "MO3",
+      "rozmiar": "900/60R38",
+      "dot": "23",
+      "target": "2023"
+    }
+  ]
+}

@@ -1,0 +1,482 @@
+[
+ {
+  "kod": "MO5_LLCZ22531580LWD60",
+  "dostawca": "MO5",
+  "bieznik_old": "W-D60 158/150L",
+  "bieznik_new": "W-D60",
+  "model_old": "W-D60 158/150L",
+  "model_new": "W-D60",
+  "nazwa": "315/80R22.5 LINGLONG W-D60 158/150L 22PR TL M+S 3PMSF",
+  "indeksy": "158L/150L"
+ },
+ {
+  "kod": "MO5_LLCZ22531580LLLW0",
+  "dostawca": "MO5",
+  "bieznik_old": "W-S60 158/150L",
+  "bieznik_new": "W-S60",
+  "model_old": "W-S60 158/150L",
+  "model_new": "W-S60",
+  "nazwa": "315/80R22.5 LINGLONG W-S60 158/150L 22PR TL M+S 3PMSF",
+  "indeksy": "158L/150L"
+ },
+ {
+  "kod": "MO5_LLCZ22531570LWD60",
+  "dostawca": "MO5",
+  "bieznik_old": "W-D60 156/150L",
+  "bieznik_new": "W-D60",
+  "model_old": "W-D60 156/150L",
+  "model_new": "W-D60",
+  "nazwa": "315/70R22.5 LINGLONG W-D60 156/150L 18PR TL M+S 3PMSF",
+  "indeksy": "156L/150L"
+ },
+ {
+  "kod": "MO5_LLCZ22531570LLLW0",
+  "dostawca": "MO5",
+  "bieznik_old": "W-S60 156/150L",
+  "bieznik_new": "W-S60",
+  "model_old": "W-S60 156/150L",
+  "model_new": "W-S60",
+  "nazwa": "315/70R22.5 LINGLONG W-S60 156/150L 16PR TL M+S 3PMSF",
+  "indeksy": "156L/150L"
+ },
+ {
+  "kod": "MO5_LLCR22531580LETD1",
+  "dostawca": "MO5",
+  "bieznik_old": "ETD100 156/150L",
+  "bieznik_new": "ETD100",
+  "model_old": "ETD100 156/150L",
+  "model_new": "ETD100",
+  "nazwa": "315/80R22.5 LINGLONG ETD100 156/150L 20PR TL M+S 3PMSF",
+  "indeksy": "156L/150L"
+ },
+ {
+  "kod": "MO5_LLCR22531570LETD1",
+  "dostawca": "MO5",
+  "bieznik_old": "ETD100 156/150L",
+  "bieznik_new": "ETD100",
+  "model_old": "ETD100 156/150L",
+  "model_new": "ETD100",
+  "nazwa": "315/70R22.5 LINGLONG ETD100 156/150L 18PR TL M+S 3PMSF",
+  "indeksy": "156L/150L"
+ },
+ {
+  "kod": "MO5_LLCR22531570LD360",
+  "dostawca": "MO5",
+  "bieznik_old": "D36",
+  "bieznik_new": "D36",
+  "model_old": "D36 156/150L",
+  "model_new": "D36",
+  "nazwa": "315/70R22.5 LINGLONG -D36 156/150L 18PR TL M+S 3PMSF",
+  "indeksy": "156L/150L"
+ },
+ {
+  "kod": "MO5_IMCR225F3000G7680",
+  "dostawca": "MO5",
+  "bieznik_old": "MG768 NAPĘD",
+  "bieznik_new": "MG768",
+  "model_old": "MG768 NAPĘD",
+  "model_new": "MG768",
+  "nazwa": "13R22.5 MIRAGE MG768 NAPĘD 156/152G 20PR M+S",
+  "indeksy": "156G/152G"
+ },
+ {
+  "kod": "MO5_IMCR22531580L7680",
+  "dostawca": "MO5",
+  "bieznik_old": "MG768 NAPĘD",
+  "bieznik_new": "MG768",
+  "model_old": "MG768 NAPĘD",
+  "model_new": "MG768",
+  "nazwa": "315/80R22.5 MIRAGE MG768 NAPĘD 156/152L 20PR M+S",
+  "indeksy": "156L/152L"
+ },
+ {
+  "kod": "MO5_IMCR22531580L6380",
+  "dostawca": "MO5",
+  "bieznik_old": "MG638 156/152L NAPĘD",
+  "bieznik_new": "MG638",
+  "model_old": "MG638 156/152L NAPĘD",
+  "model_new": "MG638",
+  "nazwa": "315/80R22.5 MIRAGE MG638 156/152L NAPĘD 20PR M+S 3PMSF",
+  "indeksy": "156L/152L"
+ },
+ {
+  "kod": "MO5_IMCR22531570L6380",
+  "dostawca": "MO5",
+  "bieznik_old": "MG638 NAPĘD",
+  "bieznik_new": "MG638",
+  "model_old": "MG638 NAPĘD",
+  "model_new": "MG638",
+  "nazwa": "315/70R22.5 MIRAGE MG638 NAPĘD 154/150L 20PR M+S 3PMSF",
+  "indeksy": "154L/150L"
+ },
+ {
+  "kod": "MO5_IMCR22529580M6280",
+  "dostawca": "MO5",
+  "bieznik_old": "MG628 NAPĘD",
+  "bieznik_new": "MG628",
+  "model_old": "MG628 NAPĘD",
+  "model_new": "MG628",
+  "nazwa": "295/80R22.5 MIRAGE MG628 NAPĘD 152/149M 18PR M+S 3PMSF",
+  "indeksy": "152M/149M"
+ },
+ {
+  "kod": "MO5_HACR22531580LDHJ0",
+  "dostawca": "MO5",
+  "bieznik_old": "DH31 NAPĘD",
+  "bieznik_new": "DH31",
+  "model_old": "DH31 NAPĘD",
+  "model_new": "DH31",
+  "nazwa": "315/80R22.5 HANKOOK DH31 NAPĘD 156/150L M+S 3PMSF",
+  "indeksy": "156L/150L"
+ },
+ {
+  "kod": "MO5_GSCR225F3000GOMS1",
+  "dostawca": "MO5",
+  "bieznik_old": "ORJAK MSD2 NAPĘD",
+  "bieznik_new": "ORJAK MSD2",
+  "model_old": "ORJAK MSD2 NAPĘD",
+  "model_new": "ORJAK MSD2",
+  "nazwa": "13R22.5 SAVA ORJAK MSD2 NAPĘD 156/150G TL M+S 3PMSF",
+  "indeksy": "156G/150G"
+ },
+ {
+  "kod": "MO5_GSCR225F2000KOMS1",
+  "dostawca": "MO5",
+  "bieznik_old": "ORJAK MS NAPĘD",
+  "bieznik_new": "ORJAK MS",
+  "model_old": "ORJAK MS NAPĘD",
+  "model_new": "ORJAK MS",
+  "nazwa": "12R22.5 SAVA ORJAK MS NAPĘD 152/148K TL M+S 3PMSF",
+  "indeksy": "152K/148K"
+ },
+ {
+  "kod": "MO5_GSCR19543550JCA41",
+  "dostawca": "MO5",
+  "bieznik_old": "CARGO 5 160J",
+  "bieznik_new": "CARGO 5",
+  "model_old": "CARGO 5 160J",
+  "model_new": "CARGO 5",
+  "nazwa": "435/50R19.5 SAVA CARGO 5 160J TL M+S 3PMSF",
+  "indeksy": "160J"
+ },
+ {
+  "kod": "MO5_GNCZ22531580KS460",
+  "dostawca": "MO5",
+  "bieznik_old": "SP462 NAPĘD",
+  "bieznik_new": "SP462",
+  "model_old": "SP462 NAPĘD",
+  "model_new": "SP462",
+  "nazwa": "315/80R22.5 DUNLOP SP462 NAPĘD 156L/154M TL M+S 3PMSF",
+  "indeksy": "156L/154M"
+ },
+ {
+  "kod": "MO5_GNCR22531580K4821",
+  "dostawca": "MO5",
+  "bieznik_old": "SP482 NAPĘD",
+  "bieznik_new": "SP482",
+  "model_old": "SP482 NAPĘD",
+  "model_new": "SP482",
+  "nazwa": "315/80R22.5 DUNLOP SP482 NAPĘD 156/150K TL M+S 3PMSF",
+  "indeksy": "156K/150K"
+ },
+ {
+  "kod": "MO5_GFCZ22531580KWRF0",
+  "dostawca": "MO5",
+  "bieznik_old": "WINTERFORCE NAPĘD",
+  "bieznik_new": "WINTERFORCE",
+  "model_old": "WINTERFORCE NAPĘD",
+  "model_new": "WINTERFORCE",
+  "nazwa": "315/80R22.5 FULDA WINTERFORCE NAPĘD 156K/154L TL M+S 3PMSF",
+  "indeksy": "156K/154L"
+ },
+ {
+  "kod": "MO5_GFCZ22531570KWFC0",
+  "dostawca": "MO5",
+  "bieznik_old": "WINTERFORCE NAPĘD",
+  "bieznik_new": "WINTERFORCE",
+  "model_old": "WINTERFORCE NAPĘD",
+  "model_new": "WINTERFORCE",
+  "nazwa": "315/70R22.5 FULDA WINTERFORCE NAPĘD 154K1/52L TL M+S 3PMSF",
+  "indeksy": "154K1/52L"
+ },
+ {
+  "kod": "MO5_GFCZ22529580LWFC1",
+  "dostawca": "MO5",
+  "bieznik_old": "WINTERFORCE NAPĘD",
+  "bieznik_new": "WINTERFORCE",
+  "model_old": "WINTERFORCE NAPĘD",
+  "model_new": "WINTERFORCE",
+  "nazwa": "295/80R22.5 FULDA WINTERFORCE NAPĘD 152/148L TL M+S 3PMSF",
+  "indeksy": "152L/148L"
+ },
+ {
+  "kod": "MO5_GFCR22531560LE2R0",
+  "dostawca": "MO5",
+  "bieznik_old": "ECOFORCE 2+ NAPĘD",
+  "bieznik_new": "ECOFORCE 2+",
+  "model_old": "ECOFORCE 2+ NAPĘD",
+  "model_new": "ECOFORCE 2+",
+  "nazwa": "315/60R22.5 FULDA ECOFORCE 2+ NAPĘD 152/148L TL M+S 3PMSF",
+  "indeksy": "152L/148L"
+ },
+ {
+  "kod": "MO5_GFCR19528570LRGF3",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "285/70R19.5 FULDA REGIOFORCE NAPĘD 146L/140M TL M+S 3PMSF",
+  "indeksy": "146L/140M"
+ },
+ {
+  "kod": "MO5_GFCR19526570MRGF2",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "265/70R19.5 FULDA REGIOFORCE NAPĘD 140/138M TL M+S 3PMSF",
+  "indeksy": "140M/138M"
+ },
+ {
+  "kod": "MO5_GFCR19524570MRGF2",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "245/70R19.5 FULDA REGIOFORCE NAPĘD 136/134M TL M+S 3PMSF",
+  "indeksy": "136M/134M"
+ },
+ {
+  "kod": "MO5_GFCR17524570MRGF2",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "245/70R17.5 FULDA REGIOFORCE NAPĘD 136/134M TL M+S 3PMSF",
+  "indeksy": "136M/134M"
+ },
+ {
+  "kod": "MO5_GFCR17523575MRGF3",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "235/75R17.5 FULDA REGIOFORCE NAPĘD 132/130M TL M+S 3PMSF",
+  "indeksy": "132M/130M"
+ },
+ {
+  "kod": "MO5_GFCR17522575MRGF3",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "225/75R17.5 FULDA REGIOFORCE NAPĘD 129/127M TL M+S 3PMSF",
+  "indeksy": "129M/127M"
+ },
+ {
+  "kod": "MO5_GFCR17521575MRGF2",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "215/75R17.5 FULDA REGIOFORCE NAPĘD 126/124M TL M+S 3PMSF",
+  "indeksy": "126M/124M"
+ },
+ {
+  "kod": "MO5_GFCR17520575MRGF1",
+  "dostawca": "MO5",
+  "bieznik_old": "REGIOFORCE NAPĘD",
+  "bieznik_new": "REGIOFORCE",
+  "model_old": "REGIOFORCE NAPĘD",
+  "model_new": "REGIOFORCE",
+  "nazwa": "205/75R17.5 FULDA REGIOFORCE NAPĘD 124/122M TL M+S 3PMSF",
+  "indeksy": "124M/122M"
+ },
+ {
+  "kod": "MO5_CCCR22531580MHD10",
+  "dostawca": "MO5",
+  "bieznik_old": "HDC1 NAPĘD",
+  "bieznik_new": "HDC1",
+  "model_old": "HDC1 NAPĘD",
+  "model_new": "HDC1",
+  "nazwa": "315/80R22.5 CONTINENTAL HDC1 NAPĘD 156/150M 18PR TL M+S 3PMSF",
+  "indeksy": "156M/150M"
+ },
+ {
+  "kod": "MO5_CCCR22531580MCD30",
+  "dostawca": "MO5",
+  "bieznik_old": "CONTI CROSSTRAC HD3 NAPĘD",
+  "bieznik_new": "CONTI CROSSTRAC HD3",
+  "model_old": "CONTI CROSSTRAC HD3 NAPĘD",
+  "model_new": "CONTI CROSSTRAC HD3",
+  "nazwa": "315/80R22.5 CONTINENTAL CONTI CROSSTRAC HD3 NAPĘD 156/150M 20PR TL M+S 3PMSF",
+  "indeksy": "156M/150M"
+ },
+ {
+  "kod": "MO5_CBCR22531580KDMR1",
+  "dostawca": "MO5",
+  "bieznik_old": "BD200M NAPĘD",
+  "bieznik_new": "BD200M",
+  "model_old": "BD200M NAPĘD",
+  "model_new": "BD200M",
+  "nazwa": "315/80R22.5 BARUM BD200M NAPĘD 156/150K 18PR TL M+S 3PMSF",
+  "indeksy": "156K/150K"
+ },
+ {
+  "kod": "MO4_IMCR22531580L7680",
+  "dostawca": "MO4",
+  "bieznik_old": "MG768 NAPĘD",
+  "bieznik_new": "MG768",
+  "model_old": "MG768 NAPĘD",
+  "model_new": "MG768",
+  "nazwa": "315/80R22.5 MIRAGE MG768 NAPĘD 156/152L 20PR M+S",
+  "indeksy": "156L/152L"
+ },
+ {
+  "kod": "MO4_IMCR22531580L6380",
+  "dostawca": "MO4",
+  "bieznik_old": "MG638  NAPĘD",
+  "bieznik_new": "MG638",
+  "model_old": "MG638  NAPĘD",
+  "model_new": "MG638",
+  "nazwa": "315/80R22.5 MIRAGE MG638 156/152L NAPĘD 20PR M+S 3PMSF",
+  "indeksy": "156L/152L"
+ },
+ {
+  "kod": "MO4_IMCR22531570L6380",
+  "dostawca": "MO4",
+  "bieznik_old": "MG638 NAPĘD",
+  "bieznik_new": "MG638",
+  "model_old": "MG638 NAPĘD",
+  "model_new": "MG638",
+  "nazwa": "315/70R22.5 MIRAGE MG638 NAPĘD 154/150L 20PR M+S 3PMSF",
+  "indeksy": "154L/150L"
+ },
+ {
+  "kod": "MO4_IMCR22529580M6280",
+  "dostawca": "MO4",
+  "bieznik_old": "MG628 NAPĘD",
+  "bieznik_new": "MG628",
+  "model_old": "MG628 NAPĘD",
+  "model_new": "MG628",
+  "nazwa": "295/80R22.5 MIRAGE MG628 NAPĘD 152/149M 18PR M+S 3PMSF",
+  "indeksy": "152M/149M"
+ },
+ {
+  "kod": "MO4_GNCZ22531580KS460",
+  "dostawca": "MO4",
+  "bieznik_old": "SP462 NAPĘD",
+  "bieznik_new": "SP462",
+  "model_old": "SP462 NAPĘD",
+  "model_new": "SP462",
+  "nazwa": "315/80R22.5 DUNLOP SP462 NAPĘD 156L/154M TL M+S 3PMSF",
+  "indeksy": "156L/154M"
+ },
+ {
+  "kod": "MO7_T445796",
+  "dostawca": "MO7",
+  "bieznik_old": "GROUND KING LOADER L-3 TL",
+  "bieznik_new": "GROUND KING LOADER L-3",
+  "model_old": "GROUND KING LOADER L-3 TL",
+  "model_new": "GROUND KING LOADER L-3",
+  "nazwa": "20.5R25 NOKIAN GROUND KING LOADER L-3 TL SB TL",
+  "indeksy": null
+ },
+ {
+  "kod": "MO7_T445620",
+  "dostawca": "MO7",
+  "bieznik_old": "LOGGER KING TRS-2 EXTREME TL",
+  "bieznik_new": "LOGGER KING TRS-2 EXTREME",
+  "model_old": "LOGGER KING TRS-2 EXTREME TL",
+  "model_new": "LOGGER KING TRS-2 EXTREME",
+  "nazwa": "35.5-32 NOKIAN LOGGER KING TRS-2 EXTREME TL SF 26PR TL",
+  "indeksy": null
+ },
+ {
+  "kod": "MO7_T445613",
+  "dostawca": "MO7",
+  "bieznik_old": "LOGGER KING TRS-2 EXTREME TL",
+  "bieznik_new": "LOGGER KING TRS-2 EXTREME",
+  "model_old": "LOGGER KING TRS-2 EXTREME TL",
+  "model_new": "LOGGER KING TRS-2 EXTREME",
+  "nazwa": "30.5L-32 NOKIAN LOGGER KING TRS-2 EXTREME TL SF 26PR TL",
+  "indeksy": null
+ },
+ {
+  "kod": "MO7_T445621",
+  "dostawca": "MO7",
+  "bieznik_old": "LOGGER KING TRS-2 TL",
+  "bieznik_new": "LOGGER KING TRS-2",
+  "model_old": "LOGGER KING TRS-2 TL",
+  "model_new": "LOGGER KING TRS-2",
+  "nazwa": "30.5L-32 NOKIAN LOGGER KING TRS-2 TL SF 20PR TL",
+  "indeksy": null
+ },
+ {
+  "kod": "MO7_T445615",
+  "dostawca": "MO7",
+  "bieznik_old": "LOGGER KING TRS-2 TL",
+  "bieznik_new": "LOGGER KING TRS-2",
+  "model_old": "LOGGER KING TRS-2 TL",
+  "model_new": "LOGGER KING TRS-2",
+  "nazwa": "28L-26 NOKIAN LOGGER KING TRS-2 SF 20PR TL",
+  "indeksy": "28L"
+ },
+ {
+  "kod": "MO7_T445516",
+  "dostawca": "MO7",
+  "bieznik_old": "FOREST KING TRS -2 TL",
+  "bieznik_new": "FOREST KING TRS -2",
+  "model_old": "FOREST KING TRS -2 TL",
+  "model_new": "FOREST KING TRS -2",
+  "nazwa": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL",
+  "indeksy": "28L"
+ },
+ {
+  "kod": "MO5_LLCR22531570LRD30",
+  "dostawca": "MO5",
+  "bieznik_old": "R-D30 156/150L",
+  "bieznik_new": "R-D30",
+  "model_old": "R-D30 156/150L",
+  "model_new": "R-D30",
+  "nazwa": "315/70R22.5 LINGLONG -D30 156/150L 18PR TL M+S 3PMSF",
+  "indeksy": "156L/150L"
+ },
+ {
+  "kod": "MO4_IMCR225F3000G7680",
+  "dostawca": "MO4",
+  "bieznik_old": "MG768 NAPĘD",
+  "bieznik_new": "MG768",
+  "model_old": "MG768 NAPĘD",
+  "model_new": "MG768",
+  "nazwa": "13R22.5 MIRAGE MG768 NAPĘD 156/152G 20PR M+S",
+  "indeksy": "156G/152G"
+ },
+ {
+  "kod": "MO7_T445614",
+  "dostawca": "MO7",
+  "bieznik_old": "LOGGER KING TRS-2 TL",
+  "bieznik_new": "LOGGER KING TRS-2",
+  "model_old": "LOGGER KING TRS-2 TL",
+  "model_new": "LOGGER KING TRS-2",
+  "nazwa": "24.5-32 NOKIAN LOGGER KING TRS-2 TL SF 20PR TL",
+  "indeksy": null
+ },
+ {
+  "kod": "MO7_T445616",
+  "dostawca": "MO7",
+  "bieznik_old": "LOGGER KING TRS-2 TL",
+  "bieznik_new": "LOGGER KING TRS-2",
+  "model_old": "LOGGER KING TRS-2 TL",
+  "model_new": "LOGGER KING TRS-2",
+  "nazwa": "23.1-26 NOKIAN LOGGER KING TRS-2 TL SF 16PR TL",
+  "indeksy": null
+ }
+]

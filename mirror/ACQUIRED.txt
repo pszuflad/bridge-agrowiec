@@ -1,0 +1,8 @@
+2026-08-13 17:48:27  acquire
+  backend  md5(index.cjs): b745bf958a991105adc70cd85a3462b1
+  db       31M
+2026-08-13 17:51:35  acquire (backend oczyszczony z kopii bazy)
+  backend  md5(index.cjs): b745bf958a991105adc70cd85a3462b1
+  backend  rozmiar: 105M
+  frontend rozmiar: 44M
+  db       snapshot: 31M

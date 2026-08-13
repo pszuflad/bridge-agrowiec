@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>Bridge dla Agrowca — konsolidacja cenników opon</title>
+    <meta name="description" content="Bridge — narzędzie do konsolidacji plików cennikowych od 10 dostawców opon i eksportu do sklepu Shoper." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='6' cy='28' r='2.5' fill='%23d97706'/%3E%3Ccircle cx='34' cy='28' r='2.5' fill='%23d97706'/%3E%3Cpath d='M6 28 Q 20 4, 34 28' stroke='%23d97706' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&family=Oxanium:wght@200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="./assets/index-AUTOFILL1783335600.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BVOkSOnE.css">
+    <script src="./assets/pending-injection.js" defer></script>
+    <script src="./assets/selly-injection.js" defer></script>
+    <script src="./assets/freq-injection.js" defer></script>
+    <style>
+      /* POPRAWKA 2026-07-07 (v3): sticky naglowki kolumn.
+         Wrapper tabeli staje sie kontenerem przewijania pionowego (max-height + overflow-y auto),
+         dzieki temu thead sticky top:0 faktycznie przykleja sie do gory podczas scrolla.
+         Lewy sidebar nawigacji to osobny element flex - nie jest dotykany.
+         Tlo naglowka nieprzezroczyste + dolna ramka = czytelne odseparowanie od wierszy. */
+      /* POPRAWKA 2026-07-13: usunieto wewnetrzny max-height/overflow z tabeli.
+         Teraz jedynym kontenerem przewijania pionowego jest <main> (h-screen + overflow-y-auto),
+         co eliminuje podwojny/konfliktowy scroll (strona + tabela jednoczesnie).
+         Sticky header tabeli dziala teraz wzgledem <main> jako najblizszego
+         przewijalnego przodka - wciaz przykleja sie prawidlowo. Tabela rozciaga sie
+         na cala wysokosc tresci, co daje wieksze okno widoku (wiecej wierszy na raz). */
+      div.overflow-x-auto:has(> table) {
+        overflow-x: auto;
+        overflow-y: visible;
+      }
+      div.overflow-x-auto:has(> table) thead,
+      div.overflow-x-auto:has(> table) thead tr,
+      div.overflow-x-auto:has(> table) thead th {
+        position: sticky;
+        top: 0;
+        z-index: 6;
+        background-color: #f1f5f9 !important;
+        background-image: none !important;
+        backdrop-filter: none !important;
+        box-shadow: inset 0 -1px 0 hsl(var(--border, 214 32% 91%));
+      }
+      /* narozne naglowki (kod/Akcje, juz sticky poziomo) nad reszta */
+      div.overflow-x-auto:has(> table) thead th.sticky,
+      div.overflow-x-auto:has(> table) thead th[class*="sticky"] {
+        z-index: 8;
+      }
+      /* komorki przyklejone poziomo - nieprzezroczyste tlo, by nie przeswitywaly */
+      div.overflow-x-auto:has(> table) tbody td.sticky,
+      div.overflow-x-auto:has(> table) tbody td[class*="sticky"] {
+        background-color: #ffffff !important;
+        background-image: none !important;
+        backdrop-filter: none !important;
+      }
+      div.overflow-x-auto:has(> table) tbody td.sticky.right-0,
+      div.overflow-x-auto:has(> table) tbody td[class*="right"][class*="sticky"] {
+        background-color: #f1f5f9 !important;
+        background-image: none !important;
+        backdrop-filter: none !important;
+      }
+      /* POPRAWKA 2026-07-13: szerszy, latwiej chwytalny scrollbar wewnatrz tabeli
+         (natywny scrollbar byl bardzo waski i trudny do zlapania/przeciagniecia myszka) */
+      main {
+        scrollbar-width: auto;
+        outline: none;
+      }
+      main::-webkit-scrollbar {
+        width: 14px;
+        height: 14px;
+      }
+      main::-webkit-scrollbar-track {
+        background: #e2e8f0;
+      }
+      main::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 7px;
+        border: 2px solid #e2e8f0;
+      }
+      main::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+      }
+      .dark main::-webkit-scrollbar-track {
+        background: #1e293b;
+      }
+      .dark main::-webkit-scrollbar-thumb {
+        background: #475569;
+        border-color: #1e293b;
+      }
+      /* tryb ciemny: nieprzezroczyste tlo dopasowane do motywu */
+      @media (prefers-color-scheme: dark) {
+        div.overflow-x-auto:has(> table) thead,
+        div.overflow-x-auto:has(> table) thead tr,
+        div.overflow-x-auto:has(> table) thead th {
+          background-color: #1e293b !important;
+        }
+        div.overflow-x-auto:has(> table) tbody td.sticky,
+        div.overflow-x-auto:has(> table) tbody td[class*="sticky"] {
+          background-color: #0f172a !important;
+        }
+        div.overflow-x-auto:has(> table) tbody td.sticky.right-0,
+        div.overflow-x-auto:has(> table) tbody td[class*="right"][class*="sticky"] {
+          background-color: #1e293b !important;
+        }
+      }
+      /* jesli aplikacja uzywa klasy .dark na root (Tailwind dark mode class-based) */
+      .dark div.overflow-x-auto:has(> table) thead,
+      .dark div.overflow-x-auto:has(> table) thead tr,
+      .dark div.overflow-x-auto:has(> table) thead th {
+        background-color: #1e293b !important;
+      }
+      .dark div.overflow-x-auto:has(> table) tbody td.sticky,
+      .dark div.overflow-x-auto:has(> table) tbody td[class*="sticky"] {
+        background-color: #0f172a !important;
+      }
+      .dark div.overflow-x-auto:has(> table) tbody td.sticky.right-0,
+      .dark div.overflow-x-auto:has(> table) tbody td[class*="right"][class*="sticky"] {
+        background-color: #1e293b !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+// MO4 Handlopex Wrocław + MO5 Handlopex Rzeszów parser
+// Pliki: agrowiec_wr.csv, agrowiec_mw.csv
+// Kodowanie: Windows-1250
+// Separator: ;
+// Decyzja Anny: cena = "cena hurt netto" (ignorujemy detal i fix)
+// Decyzja Anny: MO4 i MO5 to OSOBNE wpisy (nie sumujemy)
+
+const { parse } = require('csv-parse/sync');
+const iconv = require('iconv-lite');
+const fs = require('fs');
+const c = require('../common.cjs');
+
+function parseFile(filePath, dostawcaCode) {
+  const buffer = fs.readFileSync(filePath);
+  const text = iconv.decode(buffer, 'cp1250');
+
+  const rows = parse(text, {
+    delimiter: ';',
+    columns: true,
+    skip_empty_lines: true,
+    relax_column_count: true,
+    trim: true
+  });
+
+  const records = [];
+  const errors = [];
+
+  for (const row of rows) {
+    try {
+      const nazwa = row['nazwa'] || '';
+      const producent = row['producent'] || '';
+      const szerokosc = row['szerokosc'] || '';
+      const profil = row['profil'] || '';
+      const srednica = row['srednica'] || '';
+      let rozmiar = '';
+      if (szerokosc && srednica) {
+        rozmiar = profil
+          ? `${szerokosc}/${profil}R${srednica}`
+          : `${szerokosc}-${srednica}`;
+      }
+
+      const sizeFromName = c.extractSize(nazwa);
+      if (!rozmiar) rozmiar = sizeFromName.rozmiar;
+
+      const oznaczenia = c.extractTechnicalMarks(nazwa);
+
+      const kategoria = c.classifyByName(nazwa);
+
+      // DECYZJA ANNY: cena = "cena hurt netto"
+      const cena = row['cena hurt netto'];
+
+      const rec = c.normalizeRecord({
+        ean: c.normalizeEan(row['ean']),
+        kod_dostawcy: row['symbol handlopex'] || row['kod producenta'],
+        nazwa: nazwa,
+        producent: producent,
+        model_bieznik: '', // Handlopex nie ma osobnej kolumny modelu
+        rozmiar: rozmiar,
+        rozmiar_alternatywny: sizeFromName.alternatywny,
+        cena_zakupu: cena,
+        stan_magazynowy: row['ilosc'],
+        kategoria: kategoria,
+        oznaczenia_techniczne: oznaczenia,
+        dostawca: dostawcaCode,
+        surowe_pola: row
+      });
+      records.push(rec);
+    } catch (e) {
+      errors.push({ row, error: e.message });
+    }
+  }
+
+  return { records, errors, dostawca: dostawcaCode };
+}
+
+module.exports = {
+  parseFile,
+  parseMO4: (path) => parseFile(path, 'MO4_Handlopex_WR'),
+  parseMO5: (path) => parseFile(path, 'MO5_Handlopex_RZ')
+};

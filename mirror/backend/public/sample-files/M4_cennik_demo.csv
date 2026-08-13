@@ -1,0 +1,31 @@
+Kod;Nazwa;Marka;Rozmiar;Magazyn;Stan;Cena netto;EAN;Sezon
+M4-CONT-PC6-19565R15;Continental PremiumContact 6;Continental;195/65 R15 91V;Warszawa;15;412,50;5901234560011;Letnie
+M4-CONT-PC6-20555R16;Continental PremiumContact 6;Continental;205/55 R16 91H;Warszawa;22;468,00;5901234560012;Letnie
+M4-CONT-PC6-21555R17;Continental PremiumContact 6;Continental;215/55 R17 94W;Poznań;8;589,30;5901234560013;Letnie
+M4-CONT-EC6-19565R15;Continental EcoContact 6;Continental;195/65 R15 91H;Warszawa;30;376,80;5901234560021;Letnie
+M4-CONT-EC6-20555R16;Continental EcoContact 6;Continental;205/55 R16 91V;Poznań;12;429,50;5901234560022;Letnie
+M4-CONT-WC870-20555R16;Continental WinterContact TS 870;Continental;205/55 R16 91H;Warszawa;18;498,00;5901234560031;Zimowe
+M4-CONT-WC870-21560R17;Continental WinterContact TS 870;Continental;215/60 R17 96H;Poznań;9;612,40;5901234560032;Zimowe
+M4-CONT-WC870-22550R17;Continental WinterContact TS 870;Continental;225/50 R17 98V;Warszawa;14;648,90;5901234560033;Zimowe
+M4-CONT-CCATR-23555R18;Continental CrossContact ATR;Continental;235/55 R18 100V;Poznań;6;789,00;5901234560041;SUV/4x4
+M4-CONT-CCATR-25555R19;Continental CrossContact ATR;Continental;255/55 R19 111W;Warszawa;4;1098,50;5901234560042;SUV/4x4
+M4-CONT-VC100-19575R16C;Continental VanContact 100;Continental;195/75 R16C 107R;Warszawa;25;398,00;5901234560051;Dostawcze
+M4-CONT-ASC-20555R16;Continental AllSeasonContact;Continental;205/55 R16 94V;Poznań;-1;489,90;5901234560061;Całoroczne
+M4-CONT-ASC-21555R17;Continental AllSeasonContact;Continental;215/55 R17 98W;Warszawa;11;578,30;5901234560062;Całoroczne
+M4-MICH-PRM4-19565R15;Michelin Primacy 4;Michelin;195/65 R15 91V;Warszawa;20;445,00;5902345670011;Letnie
+M4-MICH-PRM4-20555R16;Michelin Primacy 4;Michelin;205/55 R16 91V;Poznań;16;498,50;5902345670012;Letnie
+M4-MICH-PRM4-22545R17;Michelin Primacy 4;Michelin;225/45 R17 91Y;Warszawa;9;678,90;5902345670013;Letnie
+M4-MICH-CC2-20555R16;Michelin CrossClimate 2;Michelin;205/55 R16 94V;Poznań;13;532,00;5902345670021;Całoroczne
+M4-MICH-CC2-21555R17;Michelin CrossClimate 2;Michelin;215/55 R17 98W;Warszawa;7;612,70;5902345670022;Całoroczne
+M4-MICH-CC2-22555R17;Michelin CrossClimate 2;Michelin;225/55 R17 101W;Poznań;5;689,40;5902345670023;Całoroczne
+M4-MICH-PS4-22545R17;Michelin Pilot Sport 4;Michelin;225/45 R17 91Y;Warszawa;12;698,00;5902345670031;Letnie
+M4-MICH-PS4-24540R18;Michelin Pilot Sport 4;Michelin;245/40 R18 97Y;Poznań;3;889,50;5902345670032;Letnie
+M4-MICH-PS4-25540R19;Michelin Pilot Sport 4;Michelin;255/40 R19 100Y;Warszawa;0;1198,00;5902345670033;Letnie
+M4-MICH-LS3-23555R18;Michelin Latitude Sport 3;Michelin;235/55 R18 100V;Warszawa;6;945,00;5902345670041;SUV/4x4
+M4-MICH-LS3-27545R20;Michelin Latitude Sport 3;Michelin;275/45 R20 110Y;Poznań;2;1389,90;5902345670042;SUV/4x4
+M4-MICH-AGCC-19575R16C;Michelin Agilis CrossClimate;Michelin;195/75 R16C 107R;Warszawa;19;478,30;5902345670051;Dostawcze
+M4-MICH-AL6-19565R15;Michelin Alpin 6;Michelin;195/65 R15 91T;Poznań;17;468,00;5902345670061;Zimowe
+M4-MICH-AL6-20555R16;Michelin Alpin 6;Michelin;205/55 R16 91H;Warszawa;14;512,40;5902345670062;Zimowe
+M4-MICH-AL6-21555R17;Michelin Alpin 6;Michelin;215/55 R17 98V;Poznań;-1;598,90;5902345670063;Zimowe
+M4-CONT-PC6-22555R17;Continental PremiumContact 6;Continental;225/55 R17 97Y;Warszawa;0;648,00;5901234560014;Letnie
+M4-CONT-EC6-21555R17;Continental EcoContact 6;Continental;215/55 R17 94W;Poznań;21;512,50;5901234560023;Letnie

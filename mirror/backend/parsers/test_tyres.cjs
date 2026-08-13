@@ -1,0 +1,1207 @@
+'use strict';
+
+const assert = require('assert');
+const { normalizeBohnenkamp, normalizeJmk, normalizeGrasdorf, normalizeHandlopex, normalizeAgrowiec, normalizeNokian, normalizeTrelleborg, normalizeAgrorami, normalizeGri, parseSize } = require('./tyre_params.cjs');
+const { recordToSuroweDostawca } = require('./adapter.cjs');
+
+function splitSemi(line) {
+  return line.split(';');
+}
+
+function pick(obj, keys) {
+  const out = {};
+  for (const key of keys) out[key] = obj[key];
+  return out;
+}
+
+function test(name, actual, expected) {
+  try {
+    assert.deepStrictEqual(actual, expected);
+    console.log(`PASS ${name}`);
+  } catch (err) {
+    console.error(`FAIL ${name}`);
+    console.error('ACTUAL:', JSON.stringify(actual, null, 2));
+    console.error('EXPECTED:', JSON.stringify(expected, null, 2));
+    throw err;
+  }
+}
+
+const mo1TyreLine1 = '10000085;8906117626978;CEAT;Opona VF 650 / 65 R 42 NRO, Torquemax;174 D, TL, Steel Belted;CEAT;1;6000,80;10,00;0,00;';
+const mo1Tyre = normalizeBohnenkamp(splitSemi(mo1TyreLine1));
+
+test(
+  'MO1 Bohnenkamp opona linia 1',
+  pick(mo1Tyre, [
+    'kategoria',
+    'kodDostawcy',
+    'ean',
+    'marka',
+    'model',
+    'rozmiar',
+    'szerokosc',
+    'profil',
+    'srednica',
+    'konstrukcja',
+    'vfIf',
+    'nro',
+    'indeksNosnosci',
+    'indeksPredkosci',
+    'tlTt',
+    'sb',
+    'dot',
+    'stan',
+    'cenaZakupu',
+    'nazwaKoncowa',
+    'wysokoscRzeczywistaCm'
+  ]),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: '10000085',
+    ean: '8906117626978',
+    marka: 'CEAT',
+    model: 'Torquemax',
+    rozmiar: '650/65R42',
+    szerokosc: 650,
+    profil: 65,
+    srednica: 42,
+    konstrukcja: 'R',
+    vfIf: 'VF',
+    nro: 1,
+    indeksNosnosci: '174',
+    indeksPredkosci: 'D',
+    tlTt: 'TL',
+    sb: 1,
+    dot: 'nie starsza niz 3 lata',
+    stan: 10,
+    cenaZakupu: 6000.8,
+    nazwaKoncowa: 'VF650/65R42 NRO CEAT Torquemax 174D SB TL',
+    wysokoscRzeczywistaCm: 191.18
+  }
+);
+
+const mo9Flot = normalizeAgrorami({
+  id: '106541',
+  ean: '8903094031443',
+  producent: 'BKT',
+  bieznik: 'FLOT 648',
+  rozmiar: '385/65-22.5',
+  nosnosc: '148/144',
+  predkosc: 'A8/B',
+  tlTt: 'TL',
+  plotna: '18',
+  cena: '1400',
+  magazyn: '0',
+  waga: '57',
+  kategoria: 'inne',
+  sezon: 'wielosezonowe'
+});
+
+test(
+  'MO9 Agrorami linia 2',
+  pick(mo9Flot, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'pr', 'tlTt', 'waga', 'sezon', 'stan', 'cenaZakupu', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: '106541',
+    ean: '8903094031443',
+    marka: 'BKT',
+    model: 'FLOT 648',
+    rozmiar: '385/65-22.5',
+    indeksNosnosci: '148/144',
+    indeksPredkosci: 'A8/B',
+    pr: '18',
+    tlTt: 'TL',
+    waga: 57,
+    sezon: 'wielosezonowe',
+    stan: 0,
+    cenaZakupu: 1400,
+    nazwaKoncowa: '385/65-22.5 BKT FLOT 648 148A8/144B 18PR TL'
+  }
+);
+
+const mo9Tf = normalizeAgrorami({
+  id: '106547',
+  ean: '8903094020928',
+  producent: 'BKT',
+  bieznik: 'TF 9090',
+  rozmiar: '6.00-16',
+  nosnosc: '88/80',
+  predkosc: 'A6/A8',
+  tlTt: 'TT',
+  plotna: '6',
+  cena: '198',
+  magazyn: '1',
+  waga: '10',
+  kategoria: 'rolnicze',
+  sezon: 'wielosezonowe'
+});
+
+test(
+  'MO9 Agrorami linia 4',
+  pick(mo9Tf, ['kategoria', 'kodDostawcy', 'rozmiar', 'profil', 'indeksNosnosci', 'indeksPredkosci', 'stan', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: '106547',
+    rozmiar: '6.00-16',
+    profil: null,
+    indeksNosnosci: '88/80',
+    indeksPredkosci: 'A6/A8',
+    stan: 1,
+    nazwaKoncowa: '6.00-16 BKT TF 9090 88A6/80A8 6PR TT'
+  }
+);
+
+const mo8T421 = normalizeTrelleborg({
+  rozmiar: '620/55B26.5',
+  vfIf: '',
+  cfo: '',
+  rozmiarAlternatywny: '',
+  tlTt: 'TL',
+  liSi: '166D',
+  pr: '',
+  producent: 'Trelleborg',
+  rodzaj: 'Rolnicze',
+  bieznik: 'T421',
+  kodProducenta: '1106900',
+  ean: '8,05997E+12',
+  cena: '6175,5',
+  magazyn: '5'
+});
+
+test(
+  'MO8 Trelleborg linia 2',
+  pick(mo8T421, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'konstrukcja', 'indeksNosnosci', 'indeksPredkosci', 'tlTt', 'dot', 'stan', 'cenaZakupu', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: '1106900',
+    ean: '8059970000000',
+    marka: 'Trelleborg',
+    model: 'T421',
+    rozmiar: '620/55B26.5',
+    konstrukcja: 'B',
+    indeksNosnosci: '166',
+    indeksPredkosci: 'D',
+    tlTt: 'TL',
+    dot: 'nie starsza niz 3 lata',
+    stan: 5,
+    cenaZakupu: 6175.5,
+    nazwaKoncowa: '620/55B26.5 Trelleborg T421 166D TL'
+  }
+);
+
+const mo8T428 = normalizeTrelleborg({
+  rozmiar: '750/50B30.5',
+  tlTt: 'TL',
+  liSi: '173D',
+  producent: 'Trelleborg',
+  rodzaj: 'Rolnicze',
+  bieznik: 'T428',
+  kodProducenta: '1102700',
+  ean: '8,05997E+12',
+  cena: '7572,5',
+  magazyn: '5'
+});
+
+test(
+  'MO8 Trelleborg linia 7',
+  pick(mo8T428, ['kodDostawcy', 'rozmiar', 'konstrukcja', 'indeksNosnosci', 'indeksPredkosci', 'nazwaKoncowa']),
+  {
+    kodDostawcy: '1102700',
+    rozmiar: '750/50B30.5',
+    konstrukcja: 'B',
+    indeksNosnosci: '173',
+    indeksPredkosci: 'D',
+    nazwaKoncowa: '750/50B30.5 Trelleborg T428 173D TL'
+  }
+);
+
+const mo7GroundKing1 = normalizeNokian({
+  kodProduktu: 'T445733',
+  rozmiar: '420/70R28',
+  rozmiarAlternatywny: '',
+  model: 'Nokian Tyres Ground King SB',
+  producent: 'NOKIAN',
+  bieznik: 'Nokian Tyres Ground King SB',
+  sfSb: 'SB',
+  tlTt: 'TL',
+  liSi: '144D / 141E',
+  pr: '',
+  rodzaj: 'ROLNICZA',
+  ean: '6419440427386',
+  zakup1: ' 3 241 zł ',
+  magazyn: '5'
+});
+
+test(
+  'MO7 Nokian linia 2',
+  pick(mo7GroundKing1, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'sb', 'sf', 'tlTt', 'dot', 'stan', 'cenaZakupu', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: 'T445733',
+    ean: '6419440427386',
+    marka: 'NOKIAN',
+    model: 'Ground King',
+    rozmiar: '420/70R28',
+    indeksNosnosci: '144/141',
+    indeksPredkosci: 'D/E',
+    sb: 1,
+    sf: null,
+    tlTt: 'TL',
+    dot: 'nie starsza niz 3 lata',
+    stan: 5,
+    cenaZakupu: 3241,
+    nazwaKoncowa: '420/70R28 NOKIAN Ground King 144D/141E SB TL'
+  }
+);
+
+const mo7GroundKing2 = normalizeNokian({
+  kodProduktu: 'T445763',
+  rozmiar: '600/70R28',
+  model: 'Nokian Tyres Ground King SB',
+  producent: 'NOKIAN',
+  bieznik: 'Nokian Tyres Ground King SB',
+  sfSb: 'SB',
+  tlTt: 'TL',
+  liSi: '164D / 160E',
+  rodzaj: 'ROLNICZA',
+  ean: '6419440463216',
+  zakup1: ' 5 976 zł ',
+  magazyn: '5'
+});
+
+test(
+  'MO7 Nokian linia 7',
+  pick(mo7GroundKing2, ['kodDostawcy', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'nazwaKoncowa']),
+  {
+    kodDostawcy: 'T445763',
+    rozmiar: '600/70R28',
+    indeksNosnosci: '164/160',
+    indeksPredkosci: 'D/E',
+    nazwaKoncowa: '600/70R28 NOKIAN Ground King 164D/160E SB TL'
+  }
+);
+
+const mo6Smartagro1 = normalizeAgrowiec({
+  ean: '6900532088753',
+  rozmiar: '650/65R42',
+  indeksy: '165D/168A8',
+  producent: 'UNIGLORY',
+  stan: '2',
+  cena: '4898,42',
+  model: 'SMARTAGRO',
+  vfIf: '',
+  kategoria: 'Rolnicze'
+});
+
+test(
+  'MO6 Agrowiec Uniglory linia 2',
+  pick(mo6Smartagro1, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'tlTt', 'pr', 'dot', 'stan', 'cenaZakupu', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: null,
+    ean: '6900532088753',
+    marka: 'UNIGLORY',
+    model: 'SMARTAGRO',
+    rozmiar: '650/65R42',
+    indeksNosnosci: '165/168',
+    indeksPredkosci: 'D/A8',
+    tlTt: null,
+    pr: null,
+    dot: 'nie starsza niz 3 lata',
+    stan: 2,
+    cenaZakupu: 4898.42,
+    nazwaKoncowa: '650/65R42 UNIGLORY SMARTAGRO 165D/168A8'
+  }
+);
+
+const mo6Smartagro2 = normalizeAgrowiec({
+  ean: '6969999612400',
+  rozmiar: '420/85R24',
+  indeksy: '137A8/134B',
+  producent: 'UNIGLORY',
+  stan: '2',
+  cena: '1501,49',
+  model: 'SMARTAGRO',
+  vfIf: '',
+  kategoria: 'Rolnicze'
+});
+
+test(
+  'MO6 Agrowiec Uniglory linia 7',
+  pick(mo6Smartagro2, ['kodDostawcy', 'ean', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'nazwaKoncowa']),
+  {
+    kodDostawcy: null,
+    ean: '6969999612400',
+    rozmiar: '420/85R24',
+    indeksNosnosci: '137/134',
+    indeksPredkosci: 'A8/B',
+    nazwaKoncowa: '420/85R24 UNIGLORY SMARTAGRO 137A8/134B'
+  }
+);
+
+const mo4Firestone = normalizeHandlopex({
+  kodProducenta: '27829',
+  symbolHandlopex: 'BFCR17523575JTSP2',
+  producent: 'Firestone',
+  nazwa: '235/75  R17.5  TSP3000  [143J/144F]  TL  M+S  3PMSF',
+  szerokosc: '235',
+  profil: '75',
+  srednica: '17.5',
+  indeksPredkosci: 'J',
+  indeksNosnosci: '143J/144F',
+  ilosc: '4',
+  cenaHurtNetto: '925.65',
+  ean: '3286342782911',
+  oporToczenia: 'C',
+  przyczepnosc: 'B',
+  halas: '70dB',
+  dot: '2025',
+  waga: '33.100',
+  labelNoise: 'A',
+  labelSnow: '1',
+  labelIce: '0'
+});
+
+test(
+  'MO4 Handlopex Wroclaw linia 5',
+  pick(mo4Firestone, [
+    'kategoria',
+    'kodDostawcy',
+    'ean',
+    'marka',
+    'model',
+    'rozmiar',
+    'szerokosc',
+    'profil',
+    'srednica',
+    'konstrukcja',
+    'indeksNosnosci',
+    'indeksPredkosci',
+    'tlTt',
+    'ms',
+    'snow3pmsf',
+    'labelRolling',
+    'labelWet',
+    'labelNoise',
+    'labelNoiseClass',
+    'labelSnow',
+    'labelIce',
+    'dot',
+    'waga',
+    'stan',
+    'cenaZakupu',
+    'nazwaKoncowa'
+  ]),
+  {
+    kategoria: 'ciezarowe',
+    kodDostawcy: 'BFCR17523575JTSP2',
+    ean: '3286342782911',
+    marka: 'Firestone',
+    model: 'TSP3000',
+    rozmiar: '235/75R17.5',
+    szerokosc: 235,
+    profil: 75,
+    srednica: 17.5,
+    konstrukcja: 'R',
+    indeksNosnosci: '143/144',
+    indeksPredkosci: 'J/F',
+    tlTt: 'TL',
+    ms: 1,
+    snow3pmsf: 1,
+    labelRolling: 'C',
+    labelWet: 'B',
+    labelNoise: '70dB',
+    labelNoiseClass: 'A',
+    labelSnow: 1,
+    labelIce: 0,
+    dot: '2025',
+    waga: 33.1,
+    stan: 4,
+    cenaZakupu: 925.65,
+    nazwaKoncowa: '235/75R17.5 Firestone TSP3000 143J/144F TL M+S 3PMSF'
+  }
+);
+
+const mo4FirestoneNew = normalizeHandlopex({
+  symbolHandlopex: 'BFCR22531570L24F0',
+  producent: 'Firestone',
+  nazwa: '315/70  R22.5  FS424  [154/150] L  TL  M+S  3PMSF  NEW',
+  szerokosc: '315',
+  profil: '70',
+  srednica: '22.5',
+  indeksPredkosci: 'L',
+  indeksNosnosci: '154/150',
+  ilosc: '4',
+  cenaHurtNetto: '1454.31',
+  ean: '3286341973211',
+  oporToczenia: 'B',
+  przyczepnosc: 'B',
+  halas: '71dB',
+  dot: '2025',
+  waga: '60.400',
+  labelNoise: 'A',
+  labelSnow: '1',
+  labelIce: '0'
+});
+
+test(
+  'MO4 Handlopex Wroclaw NEW linia 7',
+  pick(mo4FirestoneNew, ['kategoria', 'kodDostawcy', 'model', 'indeksNosnosci', 'indeksPredkosci', 'stan', 'nazwaKoncowa']),
+  {
+    kategoria: 'ciezarowe',
+    kodDostawcy: 'BFCR22531570L24F0',
+    model: 'FS424',
+    indeksNosnosci: '154/150',
+    indeksPredkosci: 'L',
+    stan: 4,
+    nazwaKoncowa: '315/70R22.5 Firestone FS424 154/150L TL M+S 3PMSF'
+  }
+);
+
+const mo5Alliance = normalizeHandlopex({
+  symbolHandlopex: 'ACRR24036070DAAR0',
+  producent: 'Alliance',
+  nazwa: '360/70  R24  AGRISTAR  II  [122 D]  TL',
+  szerokosc: '360',
+  profil: '70',
+  srednica: '24',
+  indeksPredkosci: 'D',
+  indeksNosnosci: '122 D',
+  ilosc: '1',
+  cenaHurtNetto: '1157.31',
+  ean: '',
+  dot: '2025',
+  waga: '61.000',
+  labelSnow: '0',
+  labelIce: '0'
+});
+
+test(
+  'MO5 Handlopex Rzeszow linia 2',
+  pick(mo5Alliance, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'tlTt', 'dot', 'stan', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: 'ACRR24036070DAAR0',
+    ean: null,
+    marka: 'Alliance',
+    model: 'AGRISTAR II',
+    rozmiar: '360/70R24',
+    indeksNosnosci: '122',
+    indeksPredkosci: 'D',
+    tlTt: 'TL',
+    dot: '2025',
+    stan: 1,
+    nazwaKoncowa: '360/70R24 Alliance AGRISTAR II 122D TL'
+  }
+);
+
+const mo5Apollo = normalizeHandlopex({
+  symbolHandlopex: 'APPD200H0000B71A1',
+  producent: 'APOLLO',
+  nazwa: '10.00 - 20  AWE 713 SET  16PR  [146 B]  TT',
+  szerokosc: '10.00',
+  profil: '82',
+  srednica: '20',
+  indeksPredkosci: 'B',
+  indeksNosnosci: '146 B',
+  ilosc: '16',
+  cenaHurtNetto: '979.11',
+  ean: '8714692299094',
+  dot: '2025',
+  waga: '48.000',
+  labelSnow: '0',
+  labelIce: '0'
+});
+
+test(
+  'MO5 Handlopex Rzeszow przemyslowa linia 4',
+  pick(mo5Apollo, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'profil', 'indeksNosnosci', 'indeksPredkosci', 'pr', 'tlTt', 'stan', 'nazwaKoncowa']),
+  {
+    kategoria: 'przemyslowe',
+    kodDostawcy: 'APPD200H0000B71A1',
+    ean: '8714692299094',
+    marka: 'APOLLO',
+    model: 'AWE 713 SET',
+    rozmiar: '10.00-20',
+    profil: null,
+    indeksNosnosci: '146',
+    indeksPredkosci: 'B',
+    pr: '16',
+    tlTt: 'TT',
+    stan: 16,
+    nazwaKoncowa: '10.00-20 APOLLO AWE 713 SET 146B 16PR TT'
+  }
+);
+
+const mo3Felga = normalizeGrasdorf({
+  indexCatalogue: '1238e984',
+  name: 'Felga 12x38 8/275/221/regulowana E984',
+  category: 'Felgi',
+  producer: 'Grasdorf'
+});
+
+test(
+  'MO3 Grasdorf odrzuca felge',
+  pick(mo3Felga, ['odrzucony', 'powod']),
+  {
+    odrzucony: true,
+    powod: 'akcesoria/felgi nie sa importowane'
+  }
+);
+
+const mo3Bridgestone = normalizeGrasdorf({
+  eanCode: '3286347045912',
+  indexCatalogue: '13616BR',
+  name: 'Opona 13.6-16 Bridgestone PD1 4PR TT',
+  additionalName: '',
+  priceNet: '1430.00',
+  category: 'Opony/Opony rolnicze i przemysłowe/Opony Bridgestone',
+  producer: 'Bridgestone',
+  availabilityCount: '1.0000',
+  imageUrls: 'https://static.abstore.pl/img/grasdorf/76ec8326-9277-4c2f-aa74-96e5c4535602/l/opona-13-6-16-bridgestone-pd1-4pr-tt.jpg',
+  konstrukcja: 'Diagonalna',
+  typ: 'Dętkowa (TT)',
+  indeksNosnosci: '',
+  iloscPlocien: '4 PR',
+  zastosowanie: 'Opona rolnicza',
+  rozmiarOpony: '13.6 (340/85, 340/90)'
+});
+
+test(
+  'MO3 Grasdorf opona linia 7',
+  pick(mo3Bridgestone, [
+    'odrzucony',
+    'kategoria',
+    'kodDostawcy',
+    'ean',
+    'marka',
+    'model',
+    'rozmiar',
+    'rozmiarAlternatywny',
+    'szerokosc',
+    'profil',
+    'srednica',
+    'konstrukcja',
+    'pr',
+    'tlTt',
+    'dot',
+    'stan',
+    'cenaZakupu',
+    'linkZdjecia',
+    'nazwaKoncowa'
+  ]),
+  {
+    odrzucony: false,
+    kategoria: 'rolnicze',
+    kodDostawcy: '13616BR',
+    ean: '3286347045912',
+    marka: 'Bridgestone',
+    model: 'PD1',
+    rozmiar: '13.6-16',
+    rozmiarAlternatywny: '13.6 (340/85, 340/90)',
+    szerokosc: 13.6,
+    profil: null,
+    srednica: 16,
+    konstrukcja: 'D',
+    pr: '4',
+    tlTt: 'TT',
+    dot: 'nie starsza niz 3 lata',
+    stan: 1,
+    cenaZakupu: 1430,
+    linkZdjecia: 'https://static.abstore.pl/img/grasdorf/76ec8326-9277-4c2f-aa74-96e5c4535602/l/opona-13-6-16-bridgestone-pd1-4pr-tt.jpg',
+    nazwaKoncowa: '13.6-16 Bridgestone PD1 4PR TT'
+  }
+);
+
+const mo3AllianceDemo = normalizeGrasdorf({
+  eanCode: '8903635010555',
+  indexCatalogue: '4208538Afpdemo',
+  name: 'Opona 420/85R38 Alliance FarmPro demo',
+  additionalName: '144A8/144B TL (16.9R38)',
+  priceNet: '1970.00',
+  category: 'Opony/Opony rolnicze i przemysłowe/Opony Alliance',
+  producer: 'Alliance',
+  availabilityCount: '4.0000',
+  imageUrls: 'https://static.abstore.pl/img/grasdorf/a450cb29-ca66-44bb-bd69-3cb851859d43/l/opona-420-85r38-alliance-farmpro-demo.jpg,https://example.test/second.jpg',
+  konstrukcja: 'Radialna',
+  typ: 'Bezdętkowa (TL)',
+  indeksNosnosci: '144A8 (2800 kg przy 40 km/h)',
+  iloscPlocien: '',
+  zastosowanie: 'Opona rolnicza',
+  rozmiarOpony: '16.9 (420/85, 420/80, 440/80)'
+});
+
+test(
+  'MO3 Grasdorf demo linia 17',
+  pick(mo3AllianceDemo, [
+    'odrzucony',
+    'kategoria',
+    'kodDostawcy',
+    'ean',
+    'marka',
+    'model',
+    'rozmiar',
+    'rozmiarAlternatywny',
+    'szerokosc',
+    'profil',
+    'srednica',
+    'konstrukcja',
+    'indeksNosnosci',
+    'indeksPredkosci',
+    'tlTt',
+    'dot',
+    'stan',
+    'cenaZakupu',
+    'linkZdjecia',
+    'dopisek',
+    'nazwaKoncowa'
+  ]),
+  {
+    odrzucony: false,
+    kategoria: 'rolnicze',
+    kodDostawcy: '4208538Afpdemo',
+    ean: '8903635010555',
+    marka: 'Alliance',
+    model: 'FarmPro',
+    rozmiar: '420/85R38',
+    rozmiarAlternatywny: '16.9R38',
+    szerokosc: 420,
+    profil: 85,
+    srednica: 38,
+    konstrukcja: 'R',
+    indeksNosnosci: '144/144',
+    indeksPredkosci: 'A8/B',
+    tlTt: 'TL',
+    dot: 'nie starsza niz 3 lata',
+    stan: 4,
+    cenaZakupu: 1970,
+    linkZdjecia: 'https://static.abstore.pl/img/grasdorf/a450cb29-ca66-44bb-bd69-3cb851859d43/l/opona-420-85r38-alliance-farmpro-demo.jpg',
+    dopisek: 'demo',
+    nazwaKoncowa: '420/85R38 Alliance FarmPro 144A8/144B TL demo'
+  }
+);
+
+const mo1TubeLine559 = '22090580;4040658021329;Dong Ah;Dętka 550 / 60 - 22.5, (szt. 2);TR 218 A;(560/55-22.5) (560/60-22.5);1;287,82;1,00;0,00;';
+const mo1Tube = normalizeBohnenkamp(splitSemi(mo1TubeLine559));
+
+test(
+  'MO1 Bohnenkamp detka linia 559',
+  pick(mo1Tube, [
+    'kategoria',
+    'kodDostawcy',
+    'ean',
+    'marka',
+    'typ',
+    'rozmiar',
+    'rozmiarAlternatywny',
+    'wentyl',
+    'stan',
+    'cenaZakupu',
+    'nazwaKoncowa'
+  ]),
+  {
+    kategoria: 'detki',
+    kodDostawcy: '22090580',
+    ean: '4040658021329',
+    marka: 'Dong Ah',
+    typ: 'Detka',
+    rozmiar: '550/60-22.5',
+    rozmiarAlternatywny: '560/55-22.5; 560/60-22.5',
+    wentyl: 'TR 218 A',
+    stan: 2,
+    cenaZakupu: 287.82,
+    nazwaKoncowa: 'Detka 550/60-22.5 Dong Ah TR 218 A'
+  }
+);
+
+const mo2Barum = normalizeJmk({
+  kodProducenta: '05124690000',
+  ean: '0440000111861',
+  producent: 'Barum',
+  bieznik: 'BF 200',
+  rodzaj: 'ciężarowe',
+  nazwa: 'OPONA 385/65R22.5 BF 200 160K/158L 3PMSF M+S FRONT Barum (C,B,B,73dB)',
+  szerokosc: '385',
+  profil: '65',
+  srednica: '22.5',
+  indeksPredkosci1: 'K',
+  indeksPredkosci2: 'L',
+  indeksNosnosci1: '160',
+  indeksNosnosci2: '158',
+  magazyn1: '1',
+  magazyn2: '1',
+  cenaKlientNetto: '1566,12',
+  oporToczenia: 'C',
+  przyczepnosc: 'B',
+  halasKlasa: 'B',
+  halasDb: '73dB',
+  dot: '',
+  konstrukcja: 'R',
+  masaBrutto: '0 kg'
+});
+
+test(
+  'MO2 JMK ciezarowa linia 6',
+  pick(mo2Barum, [
+    'kategoria',
+    'kodDostawcy',
+    'ean',
+    'marka',
+    'model',
+    'rozmiar',
+    'szerokosc',
+    'profil',
+    'srednica',
+    'konstrukcja',
+    'indeksNosnosci',
+    'indeksPredkosci',
+    'ms',
+    'snow3pmsf',
+    'pozycjaOsi',
+    'labelRolling',
+    'labelWet',
+    'labelNoiseClass',
+    'labelNoise',
+    'dot',
+    'waga',
+    'stan',
+    'cenaZakupu',
+    'nazwaKoncowa'
+  ]),
+  {
+    kategoria: 'ciężarowe',
+    kodDostawcy: '05124690000',
+    ean: '0440000111861',
+    marka: 'Barum',
+    model: 'BF 200',
+    rozmiar: '385/65R22.5',
+    szerokosc: 385,
+    profil: 65,
+    srednica: 22.5,
+    konstrukcja: 'R',
+    indeksNosnosci: '160/158',
+    indeksPredkosci: 'K/L',
+    ms: 1,
+    snow3pmsf: 1,
+    pozycjaOsi: 'FRONT',
+    labelRolling: 'C',
+    labelWet: 'B',
+    labelNoiseClass: 'B',
+    labelNoise: '73dB',
+    dot: 'nie starsza niz 3 lata',
+    waga: 0,
+    stan: 1,
+    cenaZakupu: 1566.12,
+    nazwaKoncowa: '385/65R22.5 Barum BF 200 160K/158L 3PMSF M+S FRONT'
+  }
+);
+
+const mo2Michelin = normalizeJmk({
+  kodProducenta: '050267',
+  ean: '3528700502671',
+  producent: 'Michelin',
+  bieznik: 'POWER CL',
+  rodzaj: 'przemysłowe',
+  nazwa: 'OPONA 15.5/80-24 (400/80-24) POWER CL 162A8/20PR TL Michelin',
+  szerokosc: '15.5',
+  profil: '80',
+  srednica: '24',
+  indeksPredkosci1: 'A8',
+  indeksPredkosci2: '',
+  indeksNosnosci1: '162',
+  indeksNosnosci2: '20PR',
+  zamiennik: '400/80-24',
+  magazyn1: '10',
+  magazyn2: '10',
+  cenaKlientNetto: '2954,55',
+  konstrukcja: '-',
+  masaBrutto: '74 kg'
+});
+
+test(
+  'MO2 JMK przemyslowa linia 5',
+  pick(mo2Michelin, [
+    'kategoria',
+    'kodDostawcy',
+    'ean',
+    'marka',
+    'model',
+    'rozmiar',
+    'rozmiarAlternatywny',
+    'szerokosc',
+    'profil',
+    'srednica',
+    'konstrukcja',
+    'indeksNosnosci',
+    'indeksPredkosci',
+    'pr',
+    'tlTt',
+    'dot',
+    'waga',
+    'stan',
+    'cenaZakupu',
+    'nazwaKoncowa'
+  ]),
+  {
+    kategoria: 'przemysłowe',
+    kodDostawcy: '050267',
+    ean: '3528700502671',
+    marka: 'Michelin',
+    model: 'POWER CL',
+    rozmiar: '15.5/80-24',
+    rozmiarAlternatywny: '400/80-24',
+    szerokosc: 15.5,
+    profil: 80,
+    srednica: 24,
+    konstrukcja: 'D',
+    indeksNosnosci: '162',
+    indeksPredkosci: 'A8',
+    pr: '20',
+    tlTt: 'TL',
+    dot: 'nie starsza niz 3 lata',
+    waga: 74,
+    stan: 10,
+    cenaZakupu: 2954.55,
+    nazwaKoncowa: '15.5/80-24 Michelin POWER CL 162A8 20PR TL'
+  }
+);
+
+const mo10Fl700 = normalizeGri({
+  nrKat: 'PAB1001',
+  ean: '4792290022881',
+  bieznik: 'GREEN EX FL700',
+  rozmiar: '400/60-15.5 18PR I-3 TL',
+  ilosc: '8',
+  cena: '594 zl'
+});
+
+test(
+  'MO10 GRI przemyslowa linia 2',
+  pick(mo10Fl700, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'szerokosc', 'profil', 'srednica', 'konstrukcja', 'pr', 'tlTt', 'oznaczenieBieznika', 'stan', 'cenaZakupu', 'nazwaKoncowa']),
+  {
+    kategoria: 'przemyslowe',
+    kodDostawcy: 'PAB1001',
+    ean: '4792290022881',
+    marka: 'GRI',
+    model: 'GREEN EX FL700',
+    rozmiar: '400/60-15.5',
+    szerokosc: 400,
+    profil: 60,
+    srednica: 15.5,
+    konstrukcja: 'D',
+    pr: '18',
+    tlTt: 'TL',
+    oznaczenieBieznika: 'I-3',
+    stan: 8,
+    cenaZakupu: 594,
+    nazwaKoncowa: '400/60-15.5 GRI GREEN EX FL700 18PR I-3 TL'
+  }
+);
+
+const mo10Rt100 = normalizeGri({
+  nrKat: 'PAB1035',
+  ean: '4792290037298',
+  bieznik: 'GREEN EX RT100',
+  rozmiar: '23.1-26 12PR R-1 TL',
+  ilosc: '8',
+  cena: '2 009 zl'
+});
+
+test(
+  'MO10 GRI rolnicza linia 5',
+  pick(mo10Rt100, ['kategoria', 'kodDostawcy', 'rozmiar', 'profil', 'pr', 'oznaczenieBieznika', 'cenaZakupu', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: 'PAB1035',
+    rozmiar: '23.1-26',
+    profil: null,
+    pr: '12',
+    oznaczenieBieznika: 'R-1',
+    cenaZakupu: 2009,
+    nazwaKoncowa: '23.1-26 GRI GREEN EX RT100 12PR R-1 TL'
+  }
+);
+
+const mo10Xlr = normalizeGri({
+  nrKat: 'PAR1226',
+  ean: '4792290039537',
+  bieznik: 'GREEN XLR 85',
+  rozmiar: '380/80R38 152A8/149D R-1W TL',
+  ilosc: '6',
+  cena: '1 681 zl'
+});
+
+test(
+  'MO10 GRI GREEN XLR 85 linia 64',
+  pick(mo10Xlr, ['kategoria', 'kodDostawcy', 'ean', 'marka', 'model', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'oznaczenieBieznika', 'tlTt', 'stan', 'cenaZakupu', 'nazwaKoncowa']),
+  {
+    kategoria: 'rolnicze',
+    kodDostawcy: 'PAR1226',
+    ean: '4792290039537',
+    marka: 'GRI',
+    model: 'GREEN XLR 85',
+    rozmiar: '380/80R38',
+    indeksNosnosci: '152/149',
+    indeksPredkosci: 'A8/D',
+    oznaczenieBieznika: 'R-1W',
+    tlTt: 'TL',
+    stan: 6,
+    cenaZakupu: 1681,
+    nazwaKoncowa: '380/80R38 GRI GREEN XLR 85 152A8/149D R-1W TL'
+  }
+);
+
+const adapterJmk = recordToSuroweDostawca('MO2', {
+  dostawca: 'MO2_JMK',
+  kod_dostawcy: '050267',
+  ean: '3528700502671',
+  nazwa: 'OPONA 15.5/80-24 (400/80-24) POWER CL 162A8/20PR TL Michelin',
+  producent: 'Michelin',
+  model_bieznik: 'POWER CL',
+  rozmiar: '15.5/80-24',
+  cena_zakupu: 2954.55,
+  stan_magazynowy: 10,
+  kategoria: 'przemyslowe',
+  oznaczenia_techniczne: [],
+  surowe_pola: {
+    'Kod producenta': '050267',
+    ean: '3528700502671',
+    Producent: 'Michelin',
+    'BieĹĽnik': 'POWER CL',
+    Rodzaj: 'przemyslowe',
+    nazwa: 'OPONA 15.5/80-24 (400/80-24) POWER CL 162A8/20PR TL Michelin',
+    szerokosc: '15.5',
+    profil: '80',
+    srednica: '24',
+    'Indeks prÄ™dkoĹ›ci 1': 'A8',
+    'Indeks NoĹ›noĹ›Ä‡ 1': '162',
+    'Indeks NoĹ›noĹ›Ä‡ 2': '20PR',
+    Zamiennik: '400/80-24',
+    'Magazyn 1 ilosc': '10',
+    'Magazyn 2 ilosc': '10',
+    'Cena klient netto': '2954,55',
+    Konstrukcja: '-',
+    'Masa brutto': '74 kg'
+  }
+});
+
+test(
+  'adapter MO2 nie sumuje zduplikowanych magazynow',
+  pick(adapterJmk, ['kod', 'stan', 'magazynRaw', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'pr', 'nazwa']),
+  {
+    kod: '050267',
+    stan: 10,
+    magazynRaw: 'Magazyn 1',
+    rozmiar: '15.5/80-24',
+    indeksNosnosci: '162',
+    indeksPredkosci: 'A8',
+    pr: '20',
+    nazwa: '15.5/80-24 Michelin POWER CL 162A8 20PR TL'
+  }
+);
+
+const adapterGri = recordToSuroweDostawca('MO10', {
+  dostawca: 'MO10_GRI',
+  kod_dostawcy: 'PAR1226',
+  ean: '4792290039537',
+  nazwa: 'OPONA GREEN XLR 85 380/80R38 152A8/149D R-1W TL',
+  producent: 'GRI',
+  model_bieznik: 'GREEN XLR 85',
+  rozmiar: '380/80R38 152A8/149D R-1W TL',
+  cena_zakupu: 1681,
+  stan_magazynowy: 6,
+  kategoria: 'rolnicze',
+  oznaczenia_techniczne: [],
+  surowe_pola: {
+    'NR KAT': 'PAR1226',
+    EAN: '4792290039537',
+    'BieĹĽnik': 'GREEN XLR 85',
+    Rozmiar: '380/80R38 152A8/149D R-1W TL',
+    'iloĹ›Ä‡': '6',
+    'cena netto/szt': '1 681 zl'
+  }
+});
+
+test(
+  'adapter MO10 przekazuje parametry do tk',
+  pick(adapterGri, ['kod', 'ean', 'nazwa', 'marka', 'model', 'kategoria', 'rozmiar', 'indeksNosnosci', 'indeksPredkosci', 'tlTt', 'rodzaj', 'oznaczenieBieznika', 'stan', 'cenaZakupu']),
+  {
+    kod: 'PAR1226',
+    ean: '4792290039537',
+    nazwa: '380/80R38 GRI GREEN XLR 85 152A8/149D R-1W TL',
+    marka: 'GRI',
+    model: 'GREEN XLR 85',
+    kategoria: 'rolnicze',
+    rozmiar: '380/80R38',
+    indeksNosnosci: '152/149',
+    indeksPredkosci: 'A8/D',
+    tlTt: 'TL',
+    rodzaj: 'R-1W',
+    oznaczenieBieznika: 'R-1W',
+    stan: 6,
+    cenaZakupu: 1681
+  }
+);
+
+const adapterRetread = recordToSuroweDostawca('MO10', {
+  dostawca: 'MO10_GRI',
+  kod_dostawcy: 'RETREAD1',
+  nazwa: 'Opona bieżnikowana 380/80R38',
+  producent: 'GRI',
+  model_bieznik: 'GREEN XLR 85',
+  rozmiar: '380/80R38',
+  surowe_pola: {
+    'NR KAT': 'RETREAD1',
+    'BieÄąÄ˝nik': 'GREEN XLR 85',
+    Rozmiar: '380/80R38',
+    'iloÄąâ€şĂ„â€ˇ': '1',
+    'cena netto/szt': '100'
+  }
+});
+
+test(
+  'adapter odrzuca opone bieznikowana',
+  adapterRetread,
+  null
+);
+
+const adapterGrasdorfFelga = recordToSuroweDostawca('MO3', {
+  dostawca: 'MO3_GRASDORF',
+  nazwa: 'Felga 12x38',
+  surowe_pola: {
+    name: 'Felga 12x38',
+    category: 'Felgi',
+    indexCatalogue: 'FELGA1',
+    priceNet: '100',
+    availabilityCount: '2'
+  }
+});
+
+test(
+  'adapter odrzuca felge Grasdorf',
+  adapterGrasdorfFelga,
+  null
+);
+
+const adapterNoSupplierCodeWithEan = recordToSuroweDostawca('MO6', {
+  dostawca: 'MO6_AGROWIEC',
+  nazwa: '650/65R42 UNIGLORY SMARTAGRO 165D/168A8',
+  producent: 'UNIGLORY',
+  model_bieznik: 'SMARTAGRO',
+  rozmiar: '650/65R42',
+  ean: '1234567890123',
+  stan_magazynowy: 3,
+  cena_zakupu: 1000,
+  surowe_pola: {
+    EAN: '1234567890123',
+    Beschreibung: '650/65R42',
+    'Beschreibung 2': '165D/168A8',
+    Hersteller: 'UNIGLORY',
+    Lagerbestand: '3',
+    Cena: '1000',
+    Model: 'SMARTAGRO'
+  }
+});
+
+test(
+  'adapter bez kodu dostawcy uzywa EAN jako identyfikatora',
+  pick(adapterNoSupplierCodeWithEan, ['kod', 'ean', 'nazwa', 'marka', 'model', 'rozmiar']),
+  {
+    kod: '1234567890123',
+    ean: '1234567890123',
+    nazwa: '650/65R42 UNIGLORY SMARTAGRO 165D/168A8',
+    marka: 'UNIGLORY',
+    model: 'SMARTAGRO',
+    rozmiar: '650/65R42'
+  }
+);
+
+const adapterNoSupplierCodeNoEan = recordToSuroweDostawca('MO6', {
+  dostawca: 'MO6_AGROWIEC',
+  nazwa: '650/65R42 UNIGLORY SMARTAGRO 165D/168A8',
+  producent: 'UNIGLORY',
+  model_bieznik: 'SMARTAGRO',
+  rozmiar: '650/65R42',
+  stan_magazynowy: 3,
+  cena_zakupu: 1000,
+  surowe_pola: {
+    Beschreibung: '650/65R42',
+    'Beschreibung 2': '165D/168A8',
+    Hersteller: 'UNIGLORY',
+    Lagerbestand: '3',
+    Cena: '1000',
+    Model: 'SMARTAGRO'
+  }
+});
+
+test(
+  'adapter bez kodu i EAN generuje stabilny kod techniczny',
+  {
+    hasTechnicalCode: /^MO6_[A-F0-9]{14}$/.test(adapterNoSupplierCodeNoEan.kod),
+    nazwa: adapterNoSupplierCodeNoEan.nazwa
+  },
+  {
+    hasTechnicalCode: true,
+    nazwa: '650/65R42 UNIGLORY SMARTAGRO 165D/168A8'
+  }
+);
+
+for (const accessoryName of [
+  'Koło kompletne 10x28',
+  'Zawór do koła',
+  'Oring uszczelniający',
+  'Obręcz 12x38',
+  'Ochraniacz dętki'
+]) {
+  test(
+    `adapter odrzuca akcesorium: ${accessoryName}`,
+    recordToSuroweDostawca('MO3', {
+      dostawca: 'MO3_GRASDORF',
+      nazwa: accessoryName,
+      surowe_pola: {
+        name: accessoryName,
+        category: 'Akcesoria',
+        indexCatalogue: `ACC_${accessoryName}`,
+        priceNet: '100',
+        availabilityCount: '1'
+      }
+    }),
+    null
+  );
+}
+
+// POPRAWKA 2026-06-18: notacja flotacyjna L-series (np. "30.5L-32") musi byc
+// rozpoznawana, inaczej rozmiar/wysokosc wychodzi null dla GRI/Nokian/JMK/Trelleborg.
+test(
+  'parseSize rozpoznaje L-series 30.5L-32',
+  pick(parseSize('30.5L-32'), ['rozmiar', 'szerokosc', 'srednica', 'konstrukcja']),
+  { rozmiar: '30.5L-32', szerokosc: 30.5, srednica: 32, konstrukcja: 'L' }
+);
+
+test(
+  'parseSize rozpoznaje L-series 28L-26 i liczy wysokosc',
+  (() => {
+    const r = parseSize('28L-26');
+    return { konstrukcja: r.konstrukcja, wysokoscNull: r.wysokoscRzeczywistaCm === null };
+  })(),
+  { konstrukcja: 'L', wysokoscNull: false }
+);
+
+test(
+  'parseSize rozpoznaje L-series z odstepami "28 L - 26" (realne dane Bohnenkamp)',
+  pick(parseSize('Opona 28 L - 26 , Logger King LS-2'), ['rozmiar', 'szerokosc', 'srednica', 'konstrukcja']),
+  { rozmiar: '28L-26', szerokosc: 28, srednica: 26, konstrukcja: 'L' }
+);
+
+test(
+  'parseSize rozpoznaje L-series z "L R" zamiast "L-" (realne dane Bohnenkamp)',
+  pick(parseSize('Opona 28 L R 26, 390'), ['rozmiar', 'szerokosc', 'srednica', 'konstrukcja']),
+  { rozmiar: '28L-26', szerokosc: 28, srednica: 26, konstrukcja: 'L' }
+);
+
+test(
+  'parseSize rozpoznaje slash+L-series z profilem "400/45L-17.5" (realne dane Bohnenkamp)',
+  pick(parseSize('Opona 400 / 45 L - 17.5, SG-815'), ['rozmiar', 'szerokosc', 'profil', 'srednica', 'konstrukcja']),
+  { rozmiar: '400/45L-17.5', szerokosc: 400, profil: 45, srednica: 17.5, konstrukcja: 'L' }
+);
+
+console.log('OK tyre parser tests');

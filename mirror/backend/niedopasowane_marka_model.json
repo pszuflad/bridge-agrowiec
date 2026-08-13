@@ -1,0 +1,432 @@
+[
+  {
+    "kategoria": "Rolnicze",
+    "marka": "ALLIANCE",
+    "model": "Agriflex+ 373",
+    "zastosowania": [
+      "Rolnicze (ogólne)"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "Alliance",
+    "model": "AGRIFLEX 377 + XT",
+    "zastosowania": [
+      "Kombajn",
+      "Opryskiwacz"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "Alliance",
+    "model": "AGRIFLEX 389 + (AGRIFLEX 389 + XT, AGRIFLEX 389 +)",
+    "zastosowania": [
+      "Przyczepa",
+      "Przyczepa / Flotacja"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "BKT",
+    "model": "380",
+    "zastosowania": [
+      "Ciągnik"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "BKT",
+    "model": "AS (AS, 6.5/AS)",
+    "zastosowania": [
+      "Implement rolniczy",
+      "Przyczepa"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "BKT",
+    "model": "MP (MP)",
+    "zastosowania": [
+      "Ładowarka rolnicza"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "BKT",
+    "model": "RIDEMAX IT (RIDEMAX IT)",
+    "zastosowania": [
+      "Ciągnik"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "CEAT",
+    "model": "FARM IMPLEMENT (404)",
+    "zastosowania": [
+      "Implement rolniczy",
+      "Przyczepa"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "CEAT",
+    "model": "MPT (MPT)",
+    "zastosowania": [
+      "Przemysłowe (ogólne)",
+      "Ładowarka rolnicza"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "Cultor",
+    "model": "AS-AGRI (AS AGRI, AS-AGRI 07/10/13/19/20)",
+    "zastosowania": [
+      "Ciągnik"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "Cultor",
+    "model": "AW-IMPLEMENT (AW IMPLEMENT)",
+    "zastosowania": [
+      "Implement rolniczy",
+      "Przyczepa"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "GTK",
+    "model": "TN50",
+    "zastosowania": [
+      "Przyczepa"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "MRL",
+    "model": "FARM MAXX 70 RRT (FARM XTREME 70 RRT)",
+    "zastosowania": [
+      "Ciągnik"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "MRL",
+    "model": "MPT (MPT)",
+    "zastosowania": [
+      "Przemysłowe (ogólne)",
+      "Ładowarka rolnicza"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "MRL",
+    "model": "Prince 338 / 335 Flotation",
+    "zastosowania": [
+      "Leśne (ogólne)",
+      "Rolnicze (ogólne)"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "Nokian",
+    "model": "Float King VF",
+    "zastosowania": [
+      "Przyczepa"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "Ozka",
+    "model": "OR (OR71)",
+    "zastosowania": [
+      "Przyczepa",
+      "Uniwersalne przemysłowe"
+    ]
+  },
+  {
+    "kategoria": "Rolnicze",
+    "marka": "Trelleborg",
+    "model": "TM (TM600)",
+    "zastosowania": [
+      "Ciągnik"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "BKT",
+    "model": "EARTHMAX SR (SR30/35/41/45/51/53 i warianty CR/E3/E4/L5)",
+    "zastosowania": [
+      "Maszyny górnicze/kamieniołomy"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "BKT",
+    "model": "JUMBOTRAX (HD) / SURETRAX (HD)",
+    "zastosowania": [
+      "Ładowarka kołowa"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "BKT",
+    "model": "MAGLIFT (LIP / STD / OPONA STD)",
+    "zastosowania": [
+      "Wózek widłowy"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "BKT",
+    "model": "PORT KING (IND / PLUS)",
+    "zastosowania": [
+      "Suwnice/dźwig",
+      "Uniwersalne"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "GRI",
+    "model": "XPT (HD)",
+    "zastosowania": [
+      "Ładowarka kołowa"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Galaxy",
+    "model": "HTSR (400)",
+    "zastosowania": [
+      "Maszyny górnicze/kamieniołomy",
+      "Ładowarka"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Galaxy",
+    "model": "LDSR (500)",
+    "zastosowania": [
+      "Maszyny górnicze/kamieniołomy",
+      "Ładowarka kołowa"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "JK Tyre",
+    "model": "ST-01 (Standard / Premium)",
+    "zastosowania": [
+      "Wózek widłowy"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "JK Tyre",
+    "model": "ST-02 (Standard / Premium)",
+    "zastosowania": [
+      "Wózek widłowy"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "MRL",
+    "model": "19.5L R24 GT (375)",
+    "zastosowania": [
+      "Koparka"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "MRL",
+    "model": "MTU 430 Rocky (HD)",
+    "zastosowania": [
+      "Koparka",
+      "Ładowarka"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Nokian",
+    "model": "Armor Gard / Armor Gard 2 / Armor Gard (2) Mine",
+    "zastosowania": [
+      "Koparka",
+      "Maszyny górnicze/kamieniołomy",
+      "Suwnice/dźwig"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Nokian",
+    "model": "Excavator",
+    "zastosowania": [
+      "Koparka"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Nokian",
+    "model": "HTS G2 (E-4 / L-4S / L-5S) / HTS Tugger",
+    "zastosowania": [
+      "Suwnice/dźwig",
+      "Uniwersalne"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Nokian",
+    "model": "Mine King (L-5S / E-4)",
+    "zastosowania": [
+      "Maszyny górnicze/kamieniołomy"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Nokian",
+    "model": "Mine L-3S / Nordman Mine E-4",
+    "zastosowania": [
+      "Maszyny górnicze/kamieniołomy"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Nokian",
+    "model": "RTG",
+    "zastosowania": [
+      "Suwnice/dźwig",
+      "Uniwersalne"
+    ]
+  },
+  {
+    "kategoria": "Przemysłowe",
+    "marka": "Trelleborg",
+    "model": "EMR (1030)",
+    "zastosowania": [
+      "Maszyny górnicze/kamieniołomy",
+      "Ładowarka kołowa"
+    ]
+  },
+  {
+    "kategoria": "Ciężarowe",
+    "marka": "Goodyear",
+    "model": "EQMAX / EQMAX (ULTRA/S/T/HL/RFID/DEMO warianty)",
+    "zastosowania": [
+      "Naczepa",
+      "Oś kierowana",
+      "Oś napędowa"
+    ]
+  },
+  {
+    "kategoria": "Ciężarowe",
+    "marka": "LingLong",
+    "model": "A40 (uniwersalna)",
+    "zastosowania": [
+      "Uniwersalne"
+    ]
+  },
+  {
+    "kategoria": "Ciężarowe",
+    "marka": "Uniroyal",
+    "model": "FM40 (prowadząca)",
+    "zastosowania": [
+      "Maszyny górnicze/kamieniołomy",
+      "Oś kierowana"
+    ]
+  },
+  {
+    "kategoria": "Ciężarowe",
+    "marka": "West Lake",
+    "model": "WAU1 URBAN MASTER",
+    "zastosowania": [
+      "Uniwersalne"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "ALLIANCE",
+    "model": "643 Forestar III",
+    "zastosowania": [
+      "Forwarder",
+      "Harwester"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "ELS Radial",
+    "zastosowania": [
+      "Leśne (ogólne)",
+      "Rolnicze (ogólne)"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Forest King F(2)",
+    "zastosowania": [
+      "Forwarder",
+      "Harwester"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Forest King T",
+    "zastosowania": [
+      "Skidder",
+      "Uniwersalne"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Forest King TRS (2 / 2+)",
+    "zastosowania": [
+      "Forwarder",
+      "Harwester"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Forest King TRS L-2",
+    "zastosowania": [
+      "Forwarder",
+      "Harwester"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Logger King LS-2 (TRS-2)",
+    "zastosowania": [
+      "Skidder"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Nordman Forest ELS L-2",
+    "zastosowania": [
+      "Forwarder",
+      "Harwester"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Nordman Forest F",
+    "zastosowania": [
+      "Forwarder",
+      "Harwester"
+    ]
+  },
+  {
+    "kategoria": "Leśne",
+    "marka": "Nokian",
+    "model": "Nordman Forest TRS (L-2)",
+    "zastosowania": [
+      "Forwarder",
+      "Harwester"
+    ]
+  }
+]

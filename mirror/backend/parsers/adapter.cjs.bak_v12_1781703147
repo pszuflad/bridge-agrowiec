@@ -1,0 +1,114 @@
+// Adapter: nasze records (z bridge_parsers) -> format który akceptuje tk(dostawca, surowe)
+// Patrz funkcja Gq() / Hq() / tk() w index.cjs produkcji.
+//
+// Oczekiwane pola na wejściu tk():
+//   kod          (klucz produktu, wymagany — bez tego rekord odrzucony jako "brak kodu")
+//   nazwa
+//   kategoria
+//   marka
+//   model
+//   ean
+//   magazyn, magazynRaw
+//   stan
+//   cenaZakupu, cenaSprzedazy
+//   rozmiar (opcj.)
+//   szerokosc, profil, srednica, konstrukcja  (opcj. — Hq() wyciągnie z rozmiaru)
+//   indeksNosnosci, indeksPredkosci, tlTt, vfIf, pr, wysokosc (opcj.)
+//   indeks1, indeks2, indeksy (opcj.)
+//
+// Nasze pola z normalizeRecord():
+//   ean, ean_lossy, kod_dostawcy, nazwa, producent, model_bieznik,
+//   rozmiar, rozmiar_alternatywny, cena_zakupu, stan_magazynowy,
+//   kategoria, oznaczenia_techniczne (array), dostawca, surowe_pola
+
+const crypto = require('crypto');
+
+// Deterministyczny syntetyczny kod gdy dostawca nie podaje własnego kodu.
+// Zasada: ten sam (dostawcaKod, ean, nazwa) zawsze produkuje ten sam kod →
+// diff rozpoznaje produkt między importami zamiast generować fałszywe "nowy/wycofany".
+// 1) jeśli EAN jest, użyj EAN jako kodu (krocej, czytelniej w UI)
+// 2) inaczej — sha1(dostawcaKod + nazwa) skrócony do 14 znaków z prefiksem
+function syntheticKod(dostawcaKod, record) {
+  const ean = record.ean || null;
+  if (ean) return String(ean);
+  const nazwa = (record.nazwa || '').trim().toUpperCase().replace(/\s+/g, ' ');
+  if (!nazwa) return null;
+  const h = crypto.createHash('sha1').update(`${dostawcaKod}|${nazwa}`).digest('hex').slice(0, 14);
+  return `${dostawcaKod}_${h.toUpperCase()}`;
+}
+
+function recordToSurowe(record) {
+  const oz = Array.isArray(record.oznaczenia_techniczne) ? record.oznaczenia_techniczne : [];
+  return {
+    // klucze identyfikacyjne
+    kod: record.kod_dostawcy ? String(record.kod_dostawcy) : null,
+    ean: record.ean || null,
+
+    // tekst
+    nazwa: record.nazwa || '',
+    marka: record.producent || null,
+    model: record.model_bieznik || null,
+    kategoria: record.kategoria || null,
+
+    // magazyn i stan
+    magazyn: null,            // Gq() zaciągnie z magazynRaw jeśli null
+    magazynRaw: null,         // dla MO1 Bohnenkamp brak magazynu, dla MO2/MO4/MO5 jest, doprecyzujemy poniżej
+    stan: record.stan_magazynowy ?? null,
+
+    // ceny
+    cenaZakupu: record.cena_zakupu ?? null,
+    cenaSprzedazy: null,      // nasze parsery nie podają ceny sprzedaży
+
+    // rozmiar i indeksy
+    rozmiar: record.rozmiar || record.rozmiar_alternatywny || null,
+    szerokosc: null,
+    profil: null,
+    srednica: null,
+    konstrukcja: null,
+    indeksNosnosci: null,
+    indeksPredkosci: null,
+    tlTt: null,
+    vfIf: null,
+    pr: null,
+    wysokosc: null,
+    indeks1: null,
+    indeks2: null,
+    indeksy: oz.length ? oz.join(' ') : null,
+
+    // metadane: zostawiamy dla debugowania / audytu, nie zmieniają logiki tk()
+    _ean_lossy: !!record.ean_lossy,
+    _oznaczenia: oz
+  };
+}
+
+// Adaptuje per dostawca dodatkowe pola które mają sens
+function recordToSuroweDostawca(dostawcaKod, record) {
+  const s = recordToSurowe(record);
+  const kod = (dostawcaKod || '').toUpperCase();
+
+  // MO2 JMK: stan to suma M1+M2, brak konkretnego magazynu - oznaczmy "M1+M2"
+  if (kod === 'MO2' && record.stan_magazynowy !== null) {
+    s.magazynRaw = record.surowe_pola?.magazyn || 'M1+M2';
+  }
+  // MO4/MO5 Handlopex: WR / RZ
+  if (kod === 'MO4') s.magazynRaw = 'Wrocław';
+  if (kod === 'MO5') s.magazynRaw = 'Rzeszów';
+  // MO6 Agrowiec: magazyn z pola (jeśli było)
+  if (kod === 'MO6' && record.surowe_pola?.magazyn) {
+    s.magazynRaw = record.surowe_pola.magazyn;
+  }
+
+  // FALLBACK: dostawcy bez własnego kodu produktu (MO3 Grasdorf, MO6 Agrowiec)
+  // tk() odrzuca rekordy bez kodu. Generujemy deterministyczny kod Żeby diff działał.
+  if (!s.kod) {
+    s.kod = syntheticKod(kod, record);
+  }
+
+  return s;
+}
+
+function recordsToSurowe(dostawcaKod, records) {
+  return records.map(r => recordToSuroweDostawca(dostawcaKod, r));
+}
+
+module.exports = { recordToSurowe, recordToSuroweDostawca, recordsToSurowe };

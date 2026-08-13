@@ -1,0 +1,8 @@
+{
+  "name": "bridge-tools",
+  "private": true,
+  "description": "Narzędzia synchronizacji Bridge — js-beautify dla deminify.sh",
+  "dependencies": {
+    "js-beautify": "1.14.11"
+  }
+}

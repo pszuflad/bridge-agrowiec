@@ -1,0 +1,124 @@
+// Generator pliku CSV dla Selly - pelny eksport wszystkich aktywnych produktow, wszyscy dostawcy
+// Odwzorowuje format pliku katalog_wszyscy_wybrane_2026-07-23.csv (59 kolumn, separator ';', BOM UTF-8)
+const path = require('path');
+const fs = require('fs');
+const Database = require('better-sqlite3');
+
+const DB_PATH = '/home/admin/private_apps/bridge/data.db';
+const OUT_DIR = '/home/admin/domains/agritires.eu/public_html/panel/ex-port-files';
+const OUT_FILE = 'sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv';
+
+const db = new Database(DB_PATH, { readonly: true });
+
+// Mapowanie: naglowek CSV -> kolumna SQL (lub funkcja transformujaca)
+const columns = [
+  ['Nazwa-produktu', 'nazwa'],
+  ['Kod-importu', 'kod_importu'],
+  ['Dost', 'dostawca'],
+  ['Producent-opony', 'marka'],
+  ['Cena-zakupu', 'cena_zakupu'],
+  ['marza_pct', 'marza_pct'],
+  ['cena_sprzedazy', 'cena_sprzedazy'],
+  ['Promocja', null], // brak kolumny w bazie - zawsze puste w zrodlowym pliku
+  ['Stan-magazynowy', 'stan'],
+  ['Kod-dostawcy', 'kod'], // uwaga: bazowa kolumna 'kod' (np. MO9_336320) z usunietym podkreslnikiem, nie 'kod_dostawcy'
+  ['EAN', 'ean'],
+  ['Rozmiar', 'rozmiar'],
+  ['Rozmiar-alternatywny', 'rozmiar_alternatywny'],
+  ['Bieznik/model', 'model'],
+  ['Szerokosc-opony-mm', 'szerokosc'],
+  ['Profil', 'profil'],
+  ['Srednica', 'srednica'],
+  ['Dlugosc-paczki-cm', 'dlugosc'],
+  ['Szerokosc-paczki-cm', 'szerokosc_paczki'],
+  ['Wysokosc-paczki-cm', 'wysokosc'],
+  ['Wysokosc-przesylki-cm', 'wysokosc_przesylki'],
+  ['Indeks-nosnosci', 'indeks_nosnosci'],
+  ['Indeks-predkosci', 'indeks_predkosci'],
+  ['Indeksy', 'indeksy'],
+  ['Kategoria', 'kategoria'],
+  ['DOT', 'dot'],
+  ['Waga', 'waga'],
+  ['TL/TT', 'tl_tt'],
+  ['PR', 'pr'],
+  ['R/D', 'konstrukcja'],
+  ['IF/VF', 'vf_if'],
+  ['Oznaczenie-bieznika', 'oznaczenie_bieznika'],
+  ['Link-do-zdjecia', 'link_zdjecia'],
+  ['Sezon', 'sezon'],
+  ['Bloto+snieg', 'ms'],
+  ['Snieg-3PMSF', 'snow_3pmsf'],
+  ['Wentyl', 'wentyl'],
+  ['CFO', 'cfo'],
+  ['SF', 'sf'],
+  ['SB', 'sb'],
+  ['NRO', 'nro'],
+  ['CHO', 'cho'],
+  ['HF', 'hf'],
+  ['LS', 'ls'],
+  ['Reinforced', 'reinforced'],
+  ['ExtraLoad', 'extra_load'],
+  ['CutResistant', 'cut_resistant'],
+  ['HeatResistant', 'heat_resistant'],
+  ['StubbleResistant', 'stubble_resistant'],
+  ['Dostepnosc', 'dostepnosc'],
+  ['Opor-toczenia', 'label_rolling'],
+  ['Przyczepnosc', 'label_wet'],
+  ['Halas', 'label_noise'],
+  ['Lod', 'label_ice'],
+  ['Snieg', 'label_snow'],
+  ['vat', 'vat'],
+  ['status', 'status'],
+  ['Zastosowanie', 'zastosowanie'],
+  ['data_aktualizacji', 'data_aktualizacji'],
+];
+
+const boolCols = new Set(['reinforced','extra_load','cut_resistant','heat_resistant','stubble_resistant','nro','cho','ms','snow_3pmsf','cfo']);
+
+function esc(val) {
+  if (val === null || val === undefined) return '';
+  let s = String(val);
+  if (s.includes(';') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+    s = '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
+
+const sqlCols = columns.map(c => c[1]).filter(Boolean);
+const rows = db.prepare(`SELECT * FROM products WHERE status = 'aktywny' ORDER BY id`).all();
+
+const lines = [];
+lines.push(columns.map(c => c[0]).join(';'));
+
+for (const row of rows) {
+  const line = columns.map(([header, sqlCol]) => {
+    if (!sqlCol) return '';
+    let v = row[sqlCol];
+    if (boolCols.has(sqlCol)) {
+      v = v ? 'Tak' : ''; // 2026-07-24: na prosbe Selly (Arnold) - wartosc opisowa "Tak" zamiast 1, puste gdy nieprawda
+    }
+    if (header === 'Kod-dostawcy' && typeof v === 'string') {
+      v = v.replace(/_/g, ''); // MO9_336320 -> MO9336320, zgodnie ze wzorcowym plikiem wyslanym do Selly
+    }
+    if (header === 'cena_sprzedazy' && typeof v === 'number') {
+      v = `${Math.floor(v)},-`; // 2026-07-31: format gola liczba + ",-" zamiast surowej liczby z kropka
+    }
+    return esc(v);
+  }).join(';');
+  lines.push(line);
+}
+
+const csvBody = lines.join('\r\n') + '\r\n';
+const BOM = '\uFEFF';
+
+if (!fs.existsSync(OUT_DIR)) {
+  fs.mkdirSync(OUT_DIR, { recursive: true });
+}
+
+const outPath = path.join(OUT_DIR, OUT_FILE);
+fs.writeFileSync(outPath, BOM + csvBody, 'utf8');
+
+console.log('Zapisano:', outPath);
+console.log('Liczba produktow (aktywnych):', rows.length);
+console.log('Liczba kolumn:', columns.length);
+console.log('Rozmiar pliku (bajty):', fs.statSync(outPath).size);

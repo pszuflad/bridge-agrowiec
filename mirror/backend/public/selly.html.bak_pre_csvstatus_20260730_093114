@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Bridge → Selly – Integracja</title>
+<style>
+  body { font-family: system-ui,-apple-system,sans-serif; background:#0e1220; color:#e5e7eb; margin:0; padding:24px; }
+  h1 { color:#f6b93b; }
+  .card { background:#1a1f36; border:1px solid #2c3352; border-radius:12px; padding:20px; margin-bottom:16px; }
+  button { background:#f6b93b; color:#0e1220; border:0; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer; }
+  button:hover { background:#ffc94b; } button:disabled { opacity:.5; cursor:not-allowed; }
+  button.secondary { background:transparent; color:#f6b93b; border:1px solid #f6b93b; }
+  table { width:100%; border-collapse:collapse; margin-top:12px; }
+  th, td { padding:8px 12px; text-align:left; border-bottom:1px solid #2c3352; }
+  th { color:#9ca3af; font-weight:500; font-size:13px; text-transform:uppercase; }
+  .num { text-align:right; font-variant-numeric:tabular-nums; }
+  .ok { color:#10b981; } .err { color:#ef4444; } .warn { color:#f59e0b; }
+  pre { background:#0a0d17; padding:12px; border-radius:8px; overflow:auto; max-height:400px; font-size:12px; }
+  select, input[type=number] { background:#0a0d17; color:#e5e7eb; border:1px solid #2c3352; padding:8px; border-radius:6px; }
+</style>
+</head>
+<body>
+  <h1>Integracja Selly.pl</h1>
+
+  <div class="card">
+    <h3>Status</h3>
+    <div id="ping">Sprawdzam połączenie...</div>
+  </div>
+
+  <div class="card">
+    <h3>Mapowanie dostawców</h3>
+    <button class="secondary" onclick="loadStatus()">Odśwież</button>
+    <table id="statusTable">
+      <thead><tr><th>Dostawca</th><th class="num">W Bridge</th><th class="num">W Selly</th><th class="num">Błędy</th><th></th></tr></thead>
+      <tbody><tr><td colspan="5">Ładowanie...</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Sync dostawcy</h3>
+    <label>Dostawca:
+      <select id="dostawca">
+        <option>MO1</option><option>MO2</option><option>MO3</option><option>MO4</option>
+        <option>MO5</option><option>MO6</option><option>MO7</option><option>MO8</option>
+        <option>MO9</option><option>MO10</option>
+      </select>
+    </label>
+    <label>Limit (0=wszystkie): <input type="number" id="limit" value="0" min="0" style="width:80px"></label>
+    <label><input type="checkbox" id="onlyUpdated"> tylko zmienione</label>
+    <br><br>
+    <button onclick="doSync(true)" class="secondary">Test (dry-run 5 szt.)</button>
+    <button onclick="doSync(false)">Wyślij do Selly</button>
+    <div id="syncResult"></div>
+  </div>
+
+  <div class="card">
+    <h3>Historia operacji</h3>
+    <table id="logTable">
+      <thead><tr><th>Data</th><th>Operacja</th><th>Dostawca</th><th class="num">OK</th><th class="num">Błąd</th><th class="num">Skip</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+<script>
+const token = () => localStorage.getItem('bridge_token') || sessionStorage.getItem('bridge_token') || '';
+async function api(path, opts = {}) {
+  const r = await fetch(path, {
+    ...opts,
+    headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + token(), ...(opts.headers||{}) },
+  });
+  const text = await r.text();
+  try { return { ok: r.ok, status: r.status, data: JSON.parse(text) }; }
+  catch { return { ok: r.ok, status: r.status, data: text }; }
+}
+
+async function loadPing() {
+  const r = await api('/api/selly/ping');
+  document.getElementById('ping').innerHTML = r.ok
+    ? `<span class="ok">✓ Połączono z ${r.data.shop}</span>  ·  token wygasa za ${r.data.expires_in_seconds}s  ·  ${r.data.vat_probe}`
+    : `<span class="err">✗ Błąd: ${JSON.stringify(r.data)}</span>`;
+}
+
+async function loadStatus() {
+  const r = await api('/api/selly/status');
+  const tbody = document.querySelector('#statusTable tbody');
+  if (!r.ok) { tbody.innerHTML = `<tr><td colspan="5" class="err">${JSON.stringify(r.data)}</td></tr>`; return; }
+  tbody.innerHTML = r.data.items.map(row => `
+    <tr>
+      <td><b>${row.dostawca}</b></td>
+      <td class="num">${row.w_bridge}</td>
+      <td class="num">${row.w_selly}</td>
+      <td class="num ${row.z_bledami>0?'err':''}">${row.z_bledami}</td>
+      <td><button class="secondary" onclick="quickSync('${row.dostawca}')">Sync</button></td>
+    </tr>`).join('');
+}
+
+function quickSync(dostawca) {
+  document.getElementById('dostawca').value = dostawca;
+  doSync(false);
+}
+
+async function doSync(dryRun) {
+  const dostawca = document.getElementById('dostawca').value;
+  const limit    = parseInt(document.getElementById('limit').value) || 0;
+  const onlyUpd  = document.getElementById('onlyUpdated').checked;
+  const result   = document.getElementById('syncResult');
+  result.innerHTML = `<p>⏳ Synchronizuję ${dostawca}${dryRun?' (dry-run)':''}...</p>`;
+  const r = await api('/api/selly/sync-supplier', {
+    method: 'POST',
+    body: JSON.stringify({ dostawca, dry_run: dryRun, limit: dryRun ? 5 : limit, only_updated: onlyUpd }),
+  });
+  if (!r.ok) { result.innerHTML = `<pre class="err">${JSON.stringify(r.data,null,2)}</pre>`; return; }
+  const d = r.data;
+  result.innerHTML = `
+    <p><b>${dostawca}</b>: ${d.total} produktów →
+      <span class="ok">OK: ${d.created + (d.updated||0)}</span>
+      · <span class="err">Błędy: ${d.failed}</span>
+      · <span class="warn">Pominięto: ${d.skipped}</span>
+      ${d.dry_run ? ' <b>(DRY-RUN)</b>' : ''}
+    </p>
+    ${d.errors?.length ? `<details><summary>Błędy (${d.errors.length})</summary><pre>${JSON.stringify(d.errors,null,2)}</pre></details>` : ''}
+    ${d.dry_payloads ? `<details><summary>Podgląd payloadów</summary><pre>${JSON.stringify(d.dry_payloads,null,2)}</pre></details>` : ''}
+  `;
+  loadStatus(); loadLog();
+}
+
+async function loadLog() {
+  const r = await api('/api/selly/log?limit=10');
+  if (!r.ok) return;
+  document.querySelector('#logTable tbody').innerHTML = r.data.items.map(row => `
+    <tr>
+      <td>${row.rozpoczeto?.slice(0,19).replace('T',' ')}</td>
+      <td>${row.operacja}</td>
+      <td>${row.dostawca_kod || '—'}</td>
+      <td class="num ok">${row.liczba_ok}</td>
+      <td class="num err">${row.liczba_blad}</td>
+      <td class="num warn">${row.liczba_skip}</td>
+      <td>${row.status}</td>
+    </tr>`).join('');
+}
+
+loadPing(); loadStatus(); loadLog();
+</script>
+</body>
+</html>

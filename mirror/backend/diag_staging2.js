@@ -1,0 +1,10 @@
+const Database = require('better-sqlite3');
+const db = new Database('./data.db', {readonly:true});
+const count = db.prepare("SELECT COUNT(*) as n FROM staging_items").get();
+console.log('total staging_items:', count.n);
+const mo2count = db.prepare("SELECT COUNT(*) as n FROM staging_items WHERE dostawca LIKE '%MO2%' OR dostawca LIKE '%JMK%'").get();
+console.log('MO2 staging_items:', mo2count.n);
+const sample = db.prepare("SELECT id, typ_zmiany, kod, nazwa, dostawca FROM staging_items LIMIT 5").all();
+console.log(JSON.stringify(sample, null, 2));
+const sample2 = db.prepare("SELECT id, typ_zmiany, kod, nazwa, dostawca FROM staging_items WHERE nazwa LIKE '%4.00-4%' OR nazwa LIKE '%RUBBER KING%' OR nazwa LIKE '%Cetroc%'").all();
+console.log('matches:', JSON.stringify(sample2, null, 2));

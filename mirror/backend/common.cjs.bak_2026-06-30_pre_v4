@@ -1,0 +1,552 @@
+// common.cjs — moduł wspólny dla wszystkich parserów Bridge v5
+// Wersja: 1.0 (10.06.2026)
+//
+// Zawiera:
+//   - normalizeEan()       — czyści EAN, obsługuje notację naukową (Trelleborg)
+//   - normalizePrice()     — czyści cenę, obsługuje "1 234,56", "1234.56", spacje, waluty
+//   - normalizeQty()       — czyści stan magazynowy
+//   - normalizeText()      — trim, kolapsacja whitespace, naprawa kodowania ®/ę
+//   - classifyByName()     — klasyfikacja kategorii po nazwie (fallback)
+//   - extractTechnicalMarks() — wyciąga oznaczenia techniczne ze słownika
+//   - extractSize()        — wyciąga rozmiar opony z nazwy (np. "540/65R30")
+//   - normalizeRecord()    — końcowa walidacja rekordu przed wpisem do bazy
+
+const fs = require('fs');
+const path = require('path');
+
+// === Słownik oznaczeń (ładowany raz przy starcie) ===
+const DICT_PATH = path.join(__dirname, 'dictionaries', 'oznaczenia.json');
+let TECH_DICTIONARY = null;
+let TECH_TOKENS_FLAT = null;
+
+function loadDictionary() {
+  if (TECH_DICTIONARY) return TECH_DICTIONARY;
+  TECH_DICTIONARY = JSON.parse(fs.readFileSync(DICT_PATH, 'utf-8'));
+  // Płaska lista tokenów do szybkiego wyszukiwania
+  TECH_TOKENS_FLAT = [];
+  for (const [grupa, slownik] of Object.entries(TECH_DICTIONARY)) {
+    if (grupa.startsWith('_')) continue;
+    for (const token of Object.keys(slownik)) {
+      TECH_TOKENS_FLAT.push({ token, grupa });
+    }
+  }
+  // Sortujemy po długości malejąco — najpierw "L-5S" potem "L-5"
+  TECH_TOKENS_FLAT.sort((a, b) => b.token.length - a.token.length);
+  return TECH_DICTIONARY;
+}
+
+// === Normalizacja EAN ===
+// Obsługuje:
+//   - czyste cyfry (np. "0440000011215")
+//   - notację naukową (Trelleborg: "8,05997E+12" → "8059970000000")
+//   - z separatorami ("8 059 970 000 000" → "8059970000000")
+//   - puste / null / undefined → null
+function normalizeEan(raw) {
+  if (raw === null || raw === undefined) return null;
+  let s = String(raw).trim();
+  if (s === '' || s === '0') return null;
+
+  // Detekcja notacji naukowej (Trelleborg)
+  // Format: "8,05997E+12" lub "8.05997E+12" lub "8.05997e+12"
+  const sciMatch = s.match(/^(\d+)[,.](\d+)\s*[Ee]\s*\+?(\d+)$/);
+  if (sciMatch) {
+    const intPart = sciMatch[1];
+    const fracPart = sciMatch[2];
+    const exp = parseInt(sciMatch[3], 10);
+    // Składamy liczbę: intPart + fracPart, potem dopełniamy zerami do potęgi
+    const combined = intPart + fracPart;
+    const totalDigits = intPart.length + exp;
+    if (totalDigits >= 12 && totalDigits <= 14) {
+      // Dopełniamy zerami do oczekiwanej długości
+      const ean = combined.padEnd(totalDigits, '0');
+      // Sprawdzamy czy precyzja nie została utracona
+      if (combined.length < 12) {
+        // Precyzja utracona — Excel obciął cyfry
+        return { value: ean, lossy: true };
+      }
+      return ean;
+    }
+    return null;
+  }
+
+  // Usuń wszystko poza cyframi
+  s = s.replace(/\D/g, '');
+  if (s === '') return null;
+
+  // Akceptujemy EAN-8 (8), UPC-A (12), EAN-13 (13)
+  if ([8, 12, 13, 14].includes(s.length)) return s;
+
+  // Jeśli krótszy → null (niepoprawny)
+  // Jeśli dłuższy → bierzemy ostatnie 13 cyfr (czasem są dodatkowe prefiksy)
+  if (s.length > 14) return s.slice(-13);
+
+  return null;
+}
+
+// === Normalizacja ceny ===
+// Obsługuje:
+//   - "12933,00" → 12933.00
+//   - "12 933,00" → 12933.00
+//   - "1,234.56" → 1234.56  (USA)
+//   - "12933.00 PLN" → 12933.00
+//   - 0 / null / pusty → null
+function normalizePrice(raw) {
+  if (raw === null || raw === undefined) return null;
+  let s = String(raw).trim();
+  if (s === '' || s === '-') return null;
+
+  // Usuń waluty i spacje
+  s = s.replace(/PLN|EUR|USD|zł|€|\$/gi, '').replace(/\s/g, '');
+
+  // Rozróżnienie separatora dziesiętnego:
+  // Jeśli jest tylko jeden separator (kropka lub przecinek) → dziesiętny
+  // Jeśli są oba → ostatni jest dziesiętny, drugi to separator tysięcy
+  const hasComma = s.includes(',');
+  const hasDot = s.includes('.');
+
+  if (hasComma && hasDot) {
+    // Format "1,234.56" lub "1.234,56"
+    const lastComma = s.lastIndexOf(',');
+    const lastDot = s.lastIndexOf('.');
+    if (lastComma > lastDot) {
+      // Polski: "1.234,56"
+      s = s.replace(/\./g, '').replace(',', '.');
+    } else {
+      // USA: "1,234.56"
+      s = s.replace(/,/g, '');
+    }
+  } else if (hasComma) {
+    // Tylko przecinek → polski dziesiętny
+    s = s.replace(',', '.');
+  }
+  // Jeśli tylko kropka → zostaje
+
+  const num = parseFloat(s);
+  if (isNaN(num) || num <= 0) return null;
+  return Math.round(num * 100) / 100;
+}
+
+// === Normalizacja stanu magazynowego ===
+function normalizeQty(raw) {
+  if (raw === null || raw === undefined) return null;
+  let s = String(raw).trim();
+  if (s === '' || s === '-') return null;
+  // Usuń wszystko poza cyframi i minusem
+  s = s.replace(/[^\d-]/g, '');
+  if (s === '' || s === '-') return null;
+  const num = parseInt(s, 10);
+  if (isNaN(num) || num < 0) return null;
+  return num;
+}
+
+// === Normalizacja tekstu ===
+// Naprawa znanych błędów kodowania (Bohnenkamp ® zamiast ę)
+function normalizeText(raw) {
+  if (raw === null || raw === undefined) return '';
+  let s = String(raw).trim();
+  // Bohnenkamp: ® → ę (występuje w "D®tka", "Obr®cz")
+  s = s.replace(/®/g, 'ę');
+  // Trelleborg: uszkodzone CRLF + NEL
+  s = s.replace(/\u0085/g, ' ');
+  // Kolapsacja whitespace
+  s = s.replace(/\s+/g, ' ');
+  return s.trim();
+}
+
+// === Klasyfikacja po nazwie (fallback) ===
+// Reguły priorytetu:
+//   1. "dętka" lub "TUBE" w nazwie → dętki
+//   2. "obręcz", "felga", "rim" → akcesoria
+//   3. Jeśli rozmiar typowo opony (cyfry/cyfry) → rolnicze (domyślnie)
+//   4. Inaczej → akcesoria
+// === Detekcja opon przemysłowych ===
+// POPRAWKA 2026-06-30: opony do wózków widłowych, ładowarek, koparek itp.
+// rozróżniane po rozmiarze NHS (np. "5.00-8", "6.00-9", "7.00-12", "15x4.5")
+// oraz słowach kluczowych (LIFT, FORK, IND, NHS, INDUSTRIAL).
+// Klucz: w oponach NHS liczba przed literą NIE jest LI/SI, tylko PR (Ply Rating).
+const INDUSTRIAL_SIZE_PATTERNS = [
+  // 5.00-8, 6.00-9, 7.00-12, 8.25-15, 6.50-10, 4.00-8, 3.00-4 — klasyczne NHS
+  /^(\d(?:\.\d+)?)\.\d{2}-(\d{1,2})$/,
+  // 15x4.5, 16x6-8, 21x8-9, 23x9-10 — calowe oznaczenia wózkowe
+  /^(\d{1,2})x(\d(?:\.\d+)?)(?:-(\d{1,2}))?$/i,
+  // 5.00x8, 6.00x9 — wariant ze znakiem x zamiast -
+  /^(\d(?:\.\d+)?)\.\d{2}x(\d{1,2})$/i
+];
+
+const INDUSTRIAL_KEYWORDS_RE = /\bLIFT\b|\bFORK(?:LIFT)?\b|\bIND(?:USTRIAL)?\b|\bNHS\b|\bSOLID(?:EAL)?\b|\bSKID[\s-]?STEER\b|\bRESILIENT\b|przemysłow|przemyslow|industrial|loader|grader|compactor|earthmover|wózek|wozek|widłow|widlow/i;
+
+function isIndustrialSize(rozmiar) {
+  if (!rozmiar) return false;
+  const s = String(rozmiar).trim();
+  return INDUSTRIAL_SIZE_PATTERNS.some(re => re.test(s));
+}
+
+function isIndustrialName(nazwa) {
+  if (!nazwa) return false;
+  return INDUSTRIAL_KEYWORDS_RE.test(nazwa);
+}
+
+function classifyByName(nazwa, rozmiar) {
+  if (!nazwa) return 'rolnicze';
+  const n = nazwa.toLowerCase();
+
+  // Dętki
+  if (/\bdętka\b|\bdetka\b|\btube\b|\bd[®ę]tka\b/i.test(nazwa)) {
+    return 'dętki';
+  }
+
+  // Akcesoria — felgi, obręcze, zawory itd.
+  if (/\bobręcz\b|\bobrecz\b|\bfelga\b|\brim\b|\bzawór\b|\bzawor\b|\bvalve\b|\bnakrętka\b/i.test(nazwa)) {
+    return 'akcesoria';
+  }
+
+  // POPRAWKA 2026-06-30: opony przemysłowe — sprawdzane PRZED ciężarowymi/leśnymi,
+  // bo np. "LIFT EX F300" + rozmiar "5.00-8" musi trafić do Przemysłowych,
+  // a nie do Rolniczych (fallback). Detekcja po nazwie LUB rozmiarze NHS.
+  if (isIndustrialName(nazwa) || isIndustrialSize(rozmiar)) {
+    return 'przemysłowe';
+  }
+
+  // Słowa kluczowe ciężarowe
+  if (/ciężarow|ciezarow|3PMSF|FRT\b|drive\b|trailer\b|truck/i.test(nazwa)) {
+    return 'ciężarowe';
+  }
+
+  // Słowa kluczowe leśne
+  if (/leśne|lesne|forestry|skidder/i.test(nazwa)) {
+    return 'leśne';
+  }
+
+  // Domyślnie rolnicze (reguła Anny: "inna → rolnicze, tylko dla opon")
+  return 'rolnicze';
+}
+
+// === Wyciąganie oznaczeń technicznych ===
+// Zwraca tokeny w kolejności wystąpienia w nazwie.
+// Token jednoznakowy (np. "S", "D", "T", "A", "U") wymaga kontekstu "oś X" lub "X-axis"
+// żeby uniknąć fałszywych dopasowań w środku innych słów.
+function extractTechnicalMarks(nazwa) {
+  loadDictionary();
+  if (!nazwa) return [];
+  const foundWithPos = []; // {token, pos}
+  // Sprawdzamy w słowniku każde oznaczenie
+  for (const { token } of TECH_TOKENS_FLAT) {
+    // Pomijamy tokeny 1-znakowe (S, D, T, A, U) — zbyt często fałszywie dopasowują
+    // (np. "S" w "M+S", "D" w nazwie produktu)
+    // Te oznaczenia są czytane z osobnych pól w CSV (np. "Oś" w pliku JMK),
+    // nie z nazwy.
+    if (token.length === 1) continue;
+
+    // Escapowanie znaków regex
+    const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Dla tokenów z myślnikiem (L-2, E-3) — lookahead/behind dla cyfr i liter
+    // Dla pozostałych — standardowe \b, ale z dodatkową ostrożnością
+    let pattern;
+    if (/[A-Z0-9]-[A-Z0-9]/.test(token)) {
+      pattern = new RegExp(`(?<![A-Z0-9])${escaped}(?![A-Z0-9])`, 'g');
+    } else if (token.includes('+')) {
+      // Token z plusem (M+S, 3PMSF) — \b nie zadziała po +
+      pattern = new RegExp(`(?<![A-Z0-9])${escaped}(?![A-Z0-9])`, 'g');
+    } else {
+      pattern = new RegExp(`\\b${escaped}\\b`, 'g');
+    }
+    let m;
+    while ((m = pattern.exec(nazwa)) !== null) {
+      foundWithPos.push({ token, pos: m.index });
+      // Żeby uniknąć nieskończonych pętli dla zerowej szerokości
+      if (m.index === pattern.lastIndex) pattern.lastIndex++;
+    }
+  }
+  // Sortujemy po pozycji w nazwie i dedupujemy
+  foundWithPos.sort((a, b) => a.pos - b.pos);
+  const seen = new Set();
+  const result = [];
+  for (const { token } of foundWithPos) {
+    if (!seen.has(token)) {
+      seen.add(token);
+      result.push(token);
+    }
+  }
+  return result;
+}
+
+// === Wyciąganie rozmiaru opony ===
+// Wzorce:
+//   - "540/65R30" — metryczny radialny
+//   - "540/65-30" — metryczny diagonalny
+//   - "23.5-25" — calowy
+//   - "10R17.5" — krotki radialny
+//   - "385/65R22.5" — ciężarowy
+function extractSize(nazwa) {
+  if (!nazwa) return { rozmiar: null, alternatywny: null };
+
+  // Wzorce: od najbardziej specyficznego do najmniej.
+  // Dopasowanie z wczesnym znacznikiem — jak coś złapie dłuższy wzorzec, ten fragment jest blokowany.
+  const sizes = [];
+  const used = []; // przedziały [start, end] już zajęte
+
+  function overlaps(start, end) {
+    return used.some(([s, e]) => !(end <= s || start >= e));
+  }
+
+  const patterns = [
+    // Metryczny radialny: 540/65R30, 385/65R22.5
+    /(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)R(\d+(?:\.\d+)?)/g,
+    // Metryczny diagonalny: 540/65-30, 15.5/80-24
+    /(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/g,
+    // Calowy: 23.5-25, 11.2-28
+    /(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)/g,
+    // Krótki radialny: 10R17.5
+    /(\d+(?:\.\d+)?)R(\d+(?:\.\d+)?)/g
+  ];
+
+  for (const pat of patterns) {
+    let m;
+    while ((m = pat.exec(nazwa)) !== null) {
+      const start = m.index;
+      const end = m.index + m[0].length;
+      if (!overlaps(start, end)) {
+        sizes.push(m[0]);
+        used.push([start, end]);
+      }
+    }
+  }
+
+  // Sortujemy po pozycji wystąpienia (used jest w kolejności dodawania, ale można mieć różny wzór znajdujący się wcześniej)
+  // Robię sort indeksów razem z size
+  const pairs = sizes.map((s, i) => ({ s, pos: used[i][0] }));
+  pairs.sort((a, b) => a.pos - b.pos);
+  const ordered = pairs.map(p => p.s);
+
+  return {
+    rozmiar: ordered[0] || null,
+    alternatywny: ordered[1] || null
+  };
+}
+
+// === Końcowa normalizacja rekordu ===
+function normalizeRecord(rec) {
+  // Obsługa lossy EAN (Trelleborg z utratą precyzji)
+  // Akceptujemy zarówno surowy EAN, jak i już znormalizowany obiekt {value, lossy}
+  let eanValue = null;
+  let eanLossy = false;
+
+  if (rec.ean && typeof rec.ean === 'object' && 'value' in rec.ean) {
+    // Już znormalizowany lossy obiekt z parsera
+    eanValue = rec.ean.value;
+    eanLossy = !!rec.ean.lossy;
+  } else {
+    const ean = normalizeEan(rec.ean);
+    if (ean && typeof ean === 'object' && ean.lossy) {
+      eanValue = ean.value;
+      eanLossy = true;
+    } else {
+      eanValue = ean;
+    }
+  }
+
+  return {
+    ean: eanValue,
+    ean_lossy: eanLossy,
+    kod_dostawcy: rec.kod_dostawcy ? String(rec.kod_dostawcy).trim() : null,
+    nazwa: normalizeText(rec.nazwa),
+    producent: normalizeText(rec.producent),
+    model_bieznik: normalizeText(rec.model_bieznik),
+    rozmiar: rec.rozmiar || null,
+    rozmiar_alternatywny: rec.rozmiar_alternatywny || null,
+    cena_zakupu: normalizePrice(rec.cena_zakupu),
+    stan_magazynowy: normalizeQty(rec.stan_magazynowy),
+    kategoria: rec.kategoria || 'rolnicze',
+    oznaczenia_techniczne: rec.oznaczenia_techniczne || [],
+    dostawca: rec.dostawca,
+    surowe_pola: rec.surowe_pola || null
+  };
+}
+
+// === POPRAWKA 2026-06-30: normalizacja bieżnika ===
+// Cel: ujednolicić różne warianty zapisu modelu z plus-em w jeden kanoniczny format.
+// Decyzja Anny:
+//   - Agriflex (i każdy inny model typu "NAZWA LICZBA +") => "<Nazwa> <Numer> +<sufiks>"
+//   - Plus zawsze zaraz po liczbie z jedną spacją ("Agriflex 372 +", nie "372+" ani "+372")
+//   - Sufiks (XT, STUBBLE GUARD, itd.) zostaje na końcu po plusie
+// Wzorce wejściowe spotykane w plikach JMK MO2 (Alliance):
+//   "AGRIFLEX 372+"             -> "Agriflex 372 +"
+//   "AGRIFLEX 372 +"            -> "Agriflex 372 +"
+//   "AGRIFLEX+372"              -> "Agriflex 372 +"
+//   "AGRIFLEX+ 372"             -> "Agriflex 372 +"
+//   "372 AGRIFLEX+"             -> "Agriflex 372 +"
+//   "372+ AGRIFLEX"             -> "Agriflex 372 +"
+//   "372 AGRIFLEX +"            -> "Agriflex 372 +"
+//   "AGRIFLEX 377+ XT"          -> "Agriflex 377 + XT"
+//   "AGRIFLEX+ 389 XT"          -> "Agriflex 389 + XT"
+//   "AGRIFLEX+373 STUBBLE GUARD" -> "Agriflex 373 + STUBBLE GUARD"
+//   "AGRIFLEX 373+"             -> "Agriflex 373 +"
+// Funkcja jest używana w adapter.cjs / tyre_params.cjs dla wszystkich dostawców,
+// którzy mają takie marki w polu "bieżnik". Zachowuje case-sensitive sufiks.
+function normalizeBieznikPlus(value) {
+  if (value === null || value === undefined) return value;
+  let s = String(value).trim();
+  if (!s) return s;
+
+  // Lista marek, dla których stosujemy normalizację "NAZWA LICZBA +".
+  // Można rozszerzyć — każda nazwa musi mieć ten sam wzorzec.
+  const PLUS_BRANDS = ['AGRIFLEX'];
+
+  for (const brand of PLUS_BRANDS) {
+    const brandRe = new RegExp(brand, 'i');
+    if (!brandRe.test(s)) continue;
+
+    // Wszystkie permutacje: marka, liczba (2-4 cyfry), opcjonalny plus, opcjonalny sufiks.
+    // Najpierw ściągam plus i markę, żeby został "liczba sufiks".
+    // 1) zbieram wszystkie części: marka, liczba (z możliwym przylepionym + albo z odstępami),
+    //    sufiks (reszta).
+    // Format kanoniczny marki:
+    const canonical = brand.charAt(0) + brand.slice(1).toLowerCase(); // "AGRIFLEX" -> "Agriflex"
+
+    // Usuń znak "+" w dowolnym miejscu — przeniesiemy go potem.
+    let cleaned = s.replace(/\+/g, ' ').replace(/\s+/g, ' ').trim();
+    // Usuń markę (case-insensitive)
+    cleaned = cleaned.replace(brandRe, ' ').replace(/\s+/g, ' ').trim();
+    // Teraz cleaned to: "<liczba> [sufiks]" albo "[sufiks] <liczba>" (rzadko)
+    // Wyciągam pierwszą liczbę 2-4 cyfrową
+    const numMatch = cleaned.match(/\b(\d{2,4})\b/);
+    if (!numMatch) {
+      // brak liczby — zwracam tylko markę z resztą
+      return [canonical, cleaned].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+    }
+    const num = numMatch[1];
+    // Usuwam liczbę z cleaned, reszta to sufiks
+    const suffix = cleaned.replace(numMatch[0], '').replace(/\s+/g, ' ').trim();
+    // Format końcowy: "Agriflex <num> +<sp><suffix?>"
+    const parts = [canonical, num, '+'];
+    if (suffix) parts.push(suffix);
+    return parts.join(' ').replace(/\s+/g, ' ').trim();
+  }
+  return s;
+}
+
+// === POPRAWKA 2026-06-30: wyciąganie PR z dowolnego pola tekstowego ===
+// Decyzja Anny: gdziekolwiek w tekście występuje liczba+P (np. "16P", "10P", "12P"),
+// traktujemy to jako płótna (PR) i wyciągamy do osobnego pola. W nazwie będzie zapisane
+// jako "NPR" (np. "16PR").
+// Wykluczenia (żeby nie złapać indeksu prędkości typu "129P"):
+//   - musi być liczba 1-3 cyfry zakończona literką P (case-insens), nie część większego słowa
+//   - 'P' nie może być częścią oznaczenia 3PMSF (już zaczyna się od cyfry, ale po niej "PMSF")
+//   - Akceptowane konteksty: kończy się końcem stringa, '/', spacją, '-', albo "PR"
+// Funkcja zwraca obiekt: { pr: '16', cleaned: '159A8' }, gdzie cleaned to oryginalny
+// tekst po usunięciu fragmentu "NP" (żeby nie pojawiał się ponownie w indeksach).
+// Jeśli nic nie znaleziono: { pr: null, cleaned: <oryginal> }.
+function extractPrFromText(text) {
+  if (text === null || text === undefined) return { pr: null, cleaned: text };
+  const s = String(text).trim();
+  if (!s) return { pr: null, cleaned: s };
+
+  // Wzorzec: liczba 1-3 cyfry + P (nie PR — już jest pełne PR, nie ruszamy),
+  // poprzedzone początkiem/separatorem, zakończone separatorem '/', '-', '\s', końcem stringa.
+  // Wykluczamy 3PMSF (P po cyfrze ale potem MSF) — lookahead na PMSF.
+  // Ograniczamy zakres do realnych wartości PR (1-36) — wyższe wartości to indeksy prędkości
+  // (np. "129P" = obciążenie 129, prędkość P, NIE 129 PR).
+  const re = /(^|[\s\/\-])(\d{1,3})P(?!R|MSF|[A-Z\d])(?=$|[\s\/\-])/i;
+  const m = s.match(re);
+  if (!m) return { pr: null, cleaned: s };
+  const prNum = parseInt(m[2], 10);
+  if (prNum > 36) return { pr: null, cleaned: s };  // za wysoka wartość — to indeks prędkości, nie PR
+  const pr = m[2];
+  // Usuń znalezione "NP" z tekstu, zostaw separatory ale skolapsuj podwójne
+  const cleaned = s.replace(re, '$1').replace(/\s*\/\s*\/\s*/g, '/').replace(/^[\s\/\-]+|[\s\/\-]+$/g, '').trim();
+  return { pr, cleaned };
+}
+
+// === POPRAWKA 2026-06-30 (v2): zdejmowanie indeksów w nawiasach z ukośnikiem ===
+// Decyzja Anny: gdy w nazwie lub indeksach jest fragment w nawiasie zawierający
+// ukośnik (np. "(152/148M)" w "154/150L/(152/148M)"), wycinamy go całkowicie.
+// To są warianty indeksów do innej osi/zastosowania, których nie wstawiamy do nazwy.
+// Zawartość bez ukośnika w nawiasie (np. "(D,D,2,72dB)" — etykiety EU) NIE jest ruszana.
+function stripParenSlash(text) {
+  if (text === null || text === undefined) return text;
+  let s = String(text);
+  // Najpierw rekurencyjnie wycinamy nawiasy zawierające ukośnik wewnątrz.
+  // Wycinamy także poprzedzający "/" jeśli występuje (np. "154/150L/(152/148M)" -> "154/150L").
+  let prev;
+  do {
+    prev = s;
+    // "/" przed nawiasem (bezpośrednio lub z białym znakiem) wycinamy razem.
+    s = s.replace(/\s*\/?\s*\([^()]*\/[^()]*\)\s*/g, ' ');
+  } while (s !== prev);
+  // Sprzątanie wiszących separatorów.
+  s = s.replace(/\s+/g, ' ')
+       .replace(/\s*\/\s*\/\s*/g, '/')        // // → /
+       .replace(/\/\s*$/g, '')                 // koniec z /
+       .replace(/^\s*\//, '')                  // start z /
+       .trim();
+  return s;
+}
+
+// === POPRAWKA 2026-06-30 (v2): deduplikacja powtórzonej litery prędkości po ukośniku ===
+// Decyzja Anny: gdy indeks ma format "160A8/BA8" (drugi człon kopiuje końcówkę pierwszego),
+// drugi A8 to duplikat — powinno być "160A8/B". Reguła:
+//   gdy po ukośniku występuje pojedyncza litera A-Z + duplikat końcówki z pierwszego członu,
+//   ta końcówka jest zbędna i ją usuwamy.
+// Bezpiecznie: nie ruszamy normalnych zapisów typu "129/127M" (brak końcówki na drugim).
+function dedupeSpeedSuffix(text) {
+  if (text === null || text === undefined) return text;
+  let s = String(text);
+  // Decyzja Anny: "160A8/BA8" -> "160A8/B" (drugi człon zaczyna się pojedynczą literą
+  // a parser przykleił dodatkowo "A8"). Klucz: druga część musi być pojedynczą literą (np. "B"),
+  // do której doklejono końcówkę widzianą w pierwszej części (np. "A8").
+  // NIE ruszamy "174A8/177A8" — to dwa pełne legalne indeksy (drugi zaczyna się od cyfr).
+  // Forma: <liczba><LITERA+CYFRA> / <pojedyncza-LITERA> + ta sama <LITERA+CYFRA>
+  s = s.replace(/(\d+)([A-Z]\d)\/([A-Z])\2(?=\b|$)/gi, '$1$2/$3');
+  return s;
+}
+
+// === POPRAWKA 2026-06-30 (v2): wykrywanie opon przemysłowych po bieżniku IND/MPT/EM ===
+// Decyzja Anny (2026-06-30, doprecyzowana): jeśli w bieżniku występują dopiski IND, MPT
+// lub EM — także jako PREFIKSY z cyfrą/myślnikiem (np. EM01, EM-02, MPT-007, MPT04,
+// INDUSTRIAL) — traktujemy jako kategorię Przemysłowe. Nadpisuje wcześniejszą
+// klasyfikację (rolnicze/ciężarowe).
+//
+// Reguła w słowach: token zaczynający się od IND/MPT/EM, po którym natychmiast
+// występuje cyfra, myślnik, spacja, koniec stringu lub litera (gdzie pełen sufix
+// nadal pasuje do INDUSTRIAL itp.) — łapiemy. Tokeny niezwiązane (EMERALD,
+// INDIANA, MPTHEORY) są kontrolowane przez wykluczenia poniżej.
+//
+// Bezpieczna lista znanych słów-pułapek, które wyglądają jak EM*/IND*/MPT* ale
+// NIE są oznaczeniami przemysłowymi — można rozszerzać.
+const INDUSTRIAL_BIEZNIK_NEGATIVE_RE = /(^|[\s\-_\/])(EMERALD|INDIANA|INDIA|EMPIRE|EMER)([\s\-_\/+]|$)/i;
+// Match jako CAŁE słowo IND/MPT/EM, ALBO jako prefiks po którym idzie cyfra (EM01, EM933,
+// MPT04) lub myślnik (EM-02, MPT-007), ALBO znane rozszerzenia (INDUSTRIAL, EMR — seria
+// earth-moving Trelleborg, np. "EMR 1030").
+const INDUSTRIAL_BIEZNIK_RE = /(^|[\s\-_\/])(IND(USTRIAL)?|MPT|EMR|EM)([0-9\-][\w\-]*|[\s\-_\/+]|$)/i;
+function hasIndustrialMarkInBieznik(value) {
+  if (!value) return false;
+  const s = String(value);
+  if (INDUSTRIAL_BIEZNIK_NEGATIVE_RE.test(s)) {
+    // sprawdź czy POZA wykluczeniem jest jeszcze inny match
+    const cleaned = s.replace(INDUSTRIAL_BIEZNIK_NEGATIVE_RE, ' ');
+    return INDUSTRIAL_BIEZNIK_RE.test(cleaned);
+  }
+  return INDUSTRIAL_BIEZNIK_RE.test(s);
+}
+
+module.exports = {
+  normalizeEan,
+  normalizePrice,
+  normalizeQty,
+  normalizeText,
+  classifyByName,
+  extractTechnicalMarks,
+  extractSize,
+  normalizeRecord,
+  loadDictionary,
+  // POPRAWKA 2026-06-30: helpery do detekcji opon przemysłowych
+  isIndustrialSize,
+  isIndustrialName,
+  // POPRAWKA 2026-06-30: normalizacja bieżnika + ekstrakcja PR z indeksów
+  normalizeBieznikPlus,
+  extractPrFromText,
+  // POPRAWKA 2026-06-30 (v2): nawiasy z /, dedup speed, bieżnik IND/MPT/EM
+  stripParenSlash,
+  dedupeSpeedSuffix,
+  hasIndustrialMarkInBieznik
+};

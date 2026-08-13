@@ -1,0 +1,174 @@
+{
+  "out": [
+    {
+      "kod": "MO2_CET0048",
+      "rozmiar": "265/70R19.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Oś kierowana",
+      "n": 38,
+      "total": 65,
+      "method": "rozmiar-identyczny",
+      "top": "Oś kierowana:38, Oś napędowa:17, Naczepa/przyczepa:7"
+    },
+    {
+      "kod": "MO2_570307",
+      "rozmiar": "435/50R19.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Naczepa/przyczepa",
+      "n": 10,
+      "total": 16,
+      "method": "rozmiar-identyczny",
+      "top": "Naczepa/przyczepa:10, All position:5, Oś kierowana:1"
+    },
+    {
+      "kod": "MO2_570283",
+      "rozmiar": "385/55R22.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Oś kierowana",
+      "n": 38,
+      "total": 77,
+      "method": "rozmiar-identyczny",
+      "top": "Oś kierowana:38, Naczepa/przyczepa:25, All position:13"
+    },
+    {
+      "kod": "MO2_568915",
+      "rozmiar": "315/80R22.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Oś kierowana",
+      "n": 91,
+      "total": 189,
+      "method": "rozmiar-identyczny",
+      "top": "Oś kierowana:91, Oś napędowa:72, All position:22"
+    },
+    {
+      "kod": "MO2_05127050000",
+      "rozmiar": "315/80R22.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Oś kierowana",
+      "n": 91,
+      "total": 189,
+      "method": "rozmiar-identyczny",
+      "top": "Oś kierowana:91, Oś napędowa:72, All position:22"
+    },
+    {
+      "kod": "MO2_37200023AL-AP",
+      "rozmiar": "600/60R30",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 3,
+      "total": 4,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:3, Kombajn:1"
+    },
+    {
+      "kod": "MO2_IND004710",
+      "rozmiar": "9.5R44",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 2,
+      "total": 2,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:2"
+    },
+    {
+      "kod": "MO2_IND00410",
+      "rozmiar": "20.8-38",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 3,
+      "total": 4,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:3, Wózek widłowy:1"
+    },
+    {
+      "kod": "MO2_IND00409",
+      "rozmiar": "280/70R20",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 8,
+      "total": 9,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:8, Uniwersalne/pozostałe:1"
+    },
+    {
+      "kod": "MO2_IND00197",
+      "rozmiar": "18.4R38",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 3,
+      "total": 3,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:3"
+    },
+    {
+      "kod": "MO2_IND00186",
+      "rozmiar": "14.9-26",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 4,
+      "total": 5,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:4, Uniwersalne/pozostałe:1"
+    },
+    {
+      "kod": "MO2_IND00032",
+      "rozmiar": "12.5/80-18",
+      "kategoria": "Przemysłowe",
+      "zast": "Ładowarka",
+      "n": 15,
+      "total": 31,
+      "method": "rozmiar-identyczny",
+      "top": "Ładowarka:15, Przyczepa:6, Uniwersalne/pozostałe:4"
+    },
+    {
+      "kod": "MO2_IND00023",
+      "rozmiar": "16.9-28",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 18,
+      "total": 37,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:18, Ładowarka:10, Koparka:3"
+    },
+    {
+      "kod": "MO2_IND00018",
+      "rozmiar": "9.5-24",
+      "kategoria": "Rolnicze",
+      "zast": "Ciągnik",
+      "n": 11,
+      "total": 12,
+      "method": "rozmiar-identyczny",
+      "top": "Ciągnik:11, Uniwersalne/pozostałe:1"
+    },
+    {
+      "kod": "MO2_CET0006",
+      "rozmiar": "315/80R22.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Oś kierowana",
+      "n": 91,
+      "total": 189,
+      "method": "rozmiar-identyczny",
+      "top": "Oś kierowana:91, Oś napędowa:72, All position:22"
+    },
+    {
+      "kod": "MO2_19738",
+      "rozmiar": "295/80R22.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Oś kierowana",
+      "n": 44,
+      "total": 82,
+      "method": "rozmiar-identyczny",
+      "top": "Oś kierowana:44, Oś napędowa:28, All position:8"
+    },
+    {
+      "kod": "MO2_05127970000",
+      "rozmiar": "385/55R22.5",
+      "kategoria": "Ciężarowe",
+      "zast": "Oś kierowana",
+      "n": 38,
+      "total": 77,
+      "method": "rozmiar-identyczny",
+      "top": "Oś kierowana:38, Naczepa/przyczepa:25, All position:13"
+    }
+  ]
+}

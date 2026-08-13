@@ -1,0 +1,724 @@
+{
+ "conti_model_biez": [
+  {
+   "kod": "MO5_CCCZ22538565K3SH0",
+   "stara_biez": "CONTI SCANDINAVIA 3",
+   "stary_model": "CONTI SCANDINAVIA 3",
+   "nowy": "CONTI SCANDINAVIA HS3",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 160K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ22538555K3SH1",
+   "stara_biez": "CONTI SCANDINAVIA 3 ED",
+   "stary_model": "CONTI SCANDINAVIA 3 ED",
+   "nowy": "CONTI SCANDINAVIA HS3 ED",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 ED 160K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ22531570L3SH0",
+   "stara_biez": "CONTI SCANDINAVIA 3",
+   "stary_model": "CONTI SCANDINAVIA 3",
+   "nowy": "CONTI SCANDINAVIA HS3",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ19528570MS3H2",
+   "stara_biez": "CONTI SCANDINAVIA 3",
+   "stary_model": "CONTI SCANDINAVIA 3",
+   "nowy": "CONTI SCANDINAVIA HS3",
+   "nazwa": "285/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 146/144M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ19526570MS3H0",
+   "stara_biez": "CONTI SCANDINAVIA 3",
+   "stary_model": "CONTI SCANDINAVIA 3",
+   "nowy": "CONTI SCANDINAVIA HS3",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 140/138M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ17523575ML3S0",
+   "stara_biez": "CONTI SCANDINAVIA 3",
+   "stary_model": "CONTI SCANDINAVIA 3",
+   "nowy": "CONTI SCANDINAVIA LS3",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 132/130M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ17521575ML3S0",
+   "stara_biez": "CONTI SCANDINAVIA 3",
+   "stary_model": "CONTI SCANDINAVIA 3",
+   "nowy": "CONTI SCANDINAVIA LS3",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 126/124M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538565KCH50",
+   "stara_biez": "CONTI HYBRID 5",
+   "stary_model": "CONTI HYBRID 5",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI HYBRID HS5 164K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538565K5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538565K3CS0",
+   "stara_biez": "CONTI CROSSTRAC 3",
+   "stary_model": "CONTI CROSSTRAC 3",
+   "nowy": "CONTI CROSSTRAC HS3",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 160K/158L 20PR M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538555KCH50",
+   "stara_biez": "CONTI HYBRID 5",
+   "stary_model": "CONTI HYBRID 5",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI HYBRID HS5 160K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22535550L5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "355/50R22.5 CONTINENTAL CONTI ECO HS5 158L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531580LCH50",
+   "stara_biez": "CONTI HYBRID 5",
+   "stary_model": "CONTI HYBRID 5",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531580L5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531580K3CS0",
+   "stara_biez": "CONTI CROSSTRAC 3",
+   "stary_model": "CONTI CROSS TRAC 3",
+   "nowy": "CONTI CROSS TRAC HS3",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI CROSS TRAC HS3 156/150K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570LCH50",
+   "stara_biez": "CONTI HYBRID 5",
+   "stary_model": "CONTI HYBRID 5",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH1",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 158/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5HC0",
+   "stara_biez": "CONTI EFFICIENTPRO 5",
+   "stary_model": "CONTI EFFICIENTPRO 5",
+   "nowy": "CONTI EFFICIENTPRO HS5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI EFFICIENTPRO HS5 158/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531560L5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS5 154/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22529580MCH50",
+   "stara_biez": "CONTI HYBRID 5",
+   "stary_model": "CONTI HYBRID 5",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "295/80R22.5 CONTINENTAL CONTI HYBRID HS5 154/149M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22529560LCES2",
+   "stara_biez": "CONTI ECOPLUS 3",
+   "stary_model": "CONTI ECOPLUS 3",
+   "nowy": "CONTI ECOPLUS HS3",
+   "nazwa": "295/60R22.5 CONTINENTAL CONTI ECOPLUS HS3 150/147L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR19526570MHSH0",
+   "stara_biez": "CONTI HYBRID 3+",
+   "stary_model": "CONTI HYBRID 3+",
+   "nowy": "CONTI HYBRID HS3+",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI HYBRID HS3+ 140/138M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR19524570MHS32",
+   "stara_biez": "CONTI HYBRID 3",
+   "stary_model": "CONTI HYBRID 3",
+   "nowy": "CONTI HYBRID HS3",
+   "nazwa": "245/70R19.5 CONTINENTAL CONTI HYBRID HS3 136/134M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17526570MH3S2",
+   "stara_biez": "CONTI HYBRID 3",
+   "stary_model": "CONTI HYBRID 3",
+   "nowy": "CONTI HYBRID LS3",
+   "nazwa": "265/70R17.5 CONTINENTAL CONTI HYBRID LS3 139/136M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17524570MH3S2",
+   "stara_biez": "CONTI HYBRID 3",
+   "stary_model": "CONTI HYBRID 3",
+   "nowy": "CONTI HYBRID LS3",
+   "nazwa": "245/70R17.5 CONTINENTAL CONTI HYBRID LS3 136/134M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17523575MH3S4",
+   "stara_biez": "CONTI HYBRID 3",
+   "stary_model": "CONTI HYBRID 3",
+   "nowy": "CONTI HYBRID LS3",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI HYBRID LS3 132/130M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17522575MH3S2",
+   "stara_biez": "CONTI HYBRID 3",
+   "stary_model": "CONTI HYBRID 3",
+   "nowy": "CONTI HYBRID LS3",
+   "nazwa": "225/75R17.5 CONTINENTAL CONTI HYBRID LS3 129/127M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17521575MH3S2",
+   "stara_biez": "CONTI HYBRID 3",
+   "stary_model": "CONTI HYBRID 3",
+   "nowy": "CONTI HYBRID LS3",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI HYBRID LS3 126/124M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17520575MHLS2",
+   "stara_biez": "CONTI HYBRID 3",
+   "stary_model": "CONTI HYBRID 3",
+   "nowy": "CONTI HYBRID LS3",
+   "nazwa": "205/75R17.5 CONTINENTAL CONTI HYBRID LS3 124/122M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22538565K5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531580LCH50",
+   "stara_biez": "CONTI HYBRID 5",
+   "stary_model": "CONTI HYBRID 5",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531580L5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531570LCH50",
+   "stara_biez": "CONTI HYBRID 5",
+   "stary_model": "CONTI HYBRID 5",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531570L5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO2_05153350000",
+   "stara_biez": "CONTI CROSSTRAC 3",
+   "stary_model": "CONTI CROSSTRAC 3",
+   "nowy": "CONTI CROSSTRAC HS3",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 164K 20PR 3PMSF M+S FRONT"
+  },
+  {
+   "kod": "MO2_05128730000",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS 5",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS 5 154/150L 3PMSF M+S HS FRONT"
+  },
+  {
+   "kod": "MO2_05128600000",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS 5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS 5 164K 3PMSF M+S HS FRONT"
+  },
+  {
+   "kod": "MO2_05127050000",
+   "stara_biez": "5 CONTI HYBRID",
+   "stary_model": "5 CONTI HYBRID",
+   "nowy": "CONTI HYBRID HS5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538555K5SH0",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS5",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS5 162K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO2_05127970000",
+   "stara_biez": "CONTI ECO 5",
+   "stary_model": "CONTI ECO 5",
+   "nowy": "CONTI ECO HS 5",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS 5 162K/158L 3PMSF M+S HS"
+  }
+ ],
+ "conti_skip": [
+  {
+   "kod": "MO3_9006038contiTM",
+   "biez": "TRACTOR MASTER",
+   "nazwa": "900/60R38 CONTINENTAL 178D/181A8 TL",
+   "why": "brak modelu w nazwie (same indeksy)"
+  },
+  {
+   "kod": "MO3_6007030conti",
+   "biez": "TRACTOR MASTER",
+   "nazwa": "600/70R30 CONTINENTAL 152D/155A8 TL",
+   "why": "brak modelu w nazwie (same indeksy)"
+  },
+  {
+   "kod": "MO3_6507538conti",
+   "biez": "TRACTOR MASTER",
+   "nazwa": "650/75R38 CONTINENTAL 169D/172A8 TL",
+   "why": "brak modelu w nazwie (same indeksy)"
+  },
+  {
+   "kod": "MO3_8007032conti",
+   "biez": "COMBINEMASTER",
+   "nazwa": "800/70R32 CONTINENTAL 181A8/181B TL",
+   "why": "brak modelu w nazwie (same indeksy)"
+  },
+  {
+   "kod": "MO3_6006534conti",
+   "biez": "TRACTOR MASTER",
+   "nazwa": "600/65R34 CONTINENTAL 151D/154A8 TL",
+   "why": "brak modelu w nazwie (same indeksy)"
+  },
+  {
+   "kod": "MO3_4607024contiEM",
+   "biez": "COMPACT MASTER EM",
+   "nazwa": "460/70R24 CONTINENTAL 159A8/159B TL",
+   "why": "brak modelu w nazwie (same indeksy)"
+  }
+ ],
+ "linglong_nazwa": [
+  {
+   "kod": "MO5_LLCR19538555JLLT0",
+   "stara_nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF",
+   "nowa_nazwa": "385/55R19.5 LINGLONG L-T10 156J 18PR TL M+S 3PMSF",
+   "biez": "L-T10"
+  },
+  {
+   "kod": "MO5_LLCR17524570MLLS0",
+   "stara_nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF",
+   "nowa_nazwa": "245/70R17.5 LINGLONG L-S20 136/134M 16PR TL M+S 3PMSF",
+   "biez": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLS0",
+   "stara_nazwa": "235/75R17.5 LINGLONG -S20 132/130M 14PR TL M+S 3PMSF",
+   "nowa_nazwa": "235/75R17.5 LINGLONG L-S20 132/130M 14PR TL M+S 3PMSF",
+   "biez": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLD0",
+   "stara_nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF",
+   "nowa_nazwa": "235/75R17.5 LINGLONG L-D20 132/130M 14PR TL M+S 3PMSF",
+   "biez": "L-D20"
+  },
+  {
+   "kod": "MO5_LLCR17523575JT2L0",
+   "stara_nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF",
+   "nowa_nazwa": "235/75R17.5 LINGLONG L-T20 143/141J 18PR TL M+S 3PMSF",
+   "biez": "L-T20"
+  },
+  {
+   "kod": "MO5_LLCR17521575MLLS0",
+   "stara_nazwa": "215/75R17.5 LINGLONG -S20 126/124M 14PR TL M+S 3PMSF",
+   "nowa_nazwa": "215/75R17.5 LINGLONG L-S20 126/124M 14PR TL M+S 3PMSF",
+   "biez": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17521575JT2L0",
+   "stara_nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF",
+   "nowa_nazwa": "215/75R17.5 LINGLONG L-T20 135/133J 16PR TL M+S 3PMSF",
+   "biez": "L-T20"
+  },
+  {
+   "kod": "MO5_LLCR17520575MLLS0",
+   "stara_nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF",
+   "nowa_nazwa": "205/75R17.5 LINGLONG L-S20 124/122M 14PR TL M+S 3PMSF",
+   "biez": "L-S20"
+  },
+  {
+   "kod": "MO5_LLCR17520565JT2L0",
+   "stara_nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF",
+   "nowa_nazwa": "205/65R17.5 LINGLONG L-T20 129/127J 16PR TL M+S 3PMSF",
+   "biez": "L-T20"
+  },
+  {
+   "kod": "MO4_LLCR19538555JLLT0",
+   "stara_nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF",
+   "nowa_nazwa": "385/55R19.5 LINGLONG L-T10 156J 18PR TL M+S 3PMSF",
+   "biez": "L-T10"
+  },
+  {
+   "kod": "MO4_LLCR17524570MLLS0",
+   "stara_nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF",
+   "nowa_nazwa": "245/70R17.5 LINGLONG L-S20 136/134M 16PR TL M+S 3PMSF",
+   "biez": "L-S20"
+  },
+  {
+   "kod": "MO4_LLCR17523575MLLS0",
+   "stara_nazwa": "LINGLONG S20 132/130M 14PR TL M+S 3PMSF",
+   "nowa_nazwa": "LINGLONG L-S20 132/130M 14PR TL M+S 3PMSF",
+   "biez": "L-S20"
+  },
+  {
+   "kod": "MO4_LLCR17523575MLLD0",
+   "stara_nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF",
+   "nowa_nazwa": "235/75R17.5 LINGLONG L-D20 132/130M 14PR TL M+S 3PMSF",
+   "biez": "L-D20"
+  },
+  {
+   "kod": "MO4_LLCR17523575JT2L0",
+   "stara_nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF",
+   "nowa_nazwa": "235/75R17.5 LINGLONG L-T20 143/141J 18PR TL M+S 3PMSF",
+   "biez": "L-T20"
+  },
+  {
+   "kod": "MO4_LLCR17521575JT2L0",
+   "stara_nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF",
+   "nowa_nazwa": "215/75R17.5 LINGLONG L-T20 135/133J 16PR TL M+S 3PMSF",
+   "biez": "L-T20"
+  },
+  {
+   "kod": "MO4_LLCR17520575MLLS0",
+   "stara_nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF",
+   "nowa_nazwa": "205/75R17.5 LINGLONG L-S20 124/122M 14PR TL M+S 3PMSF",
+   "biez": "L-S20"
+  },
+  {
+   "kod": "MO4_LLCR17520565JT2L0",
+   "stara_nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF",
+   "nowa_nazwa": "205/65R17.5 LINGLONG L-T20 129/127J 16PR TL M+S 3PMSF",
+   "biez": "L-T20"
+  },
+  {
+   "kod": "MO5_LLCR22531570LRD30",
+   "stara_nazwa": "315/70R22.5 LINGLONG -D30 156/150L 18PR TL M+S 3PMSF",
+   "nowa_nazwa": "315/70R22.5 LINGLONG R-D30 156/150L 18PR TL M+S 3PMSF",
+   "biez": "R-D30"
+  }
+ ],
+ "linglong_skip": [],
+ "mrl_nazwa": [
+  {
+   "kod": "MO5_HLRD120238006MG50",
+   "stara_nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL",
+   "nowa_nazwa": "23x8.50-12 MRL MG 54 Z-WIDE 102A6/106A3 12PR TL",
+   "biez": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO5_HLRD080F16003MG50",
+   "stara_nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL",
+   "nowa_nazwa": "16x6.50-8 MRL MG 54 Z-WIDE 72A3 6PR TL",
+   "biez": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO4_HLRD120238006MG50",
+   "stara_nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL",
+   "nowa_nazwa": "23x8.50-12 MRL MG 54 Z-WIDE 102A6/106A3 12PR TL",
+   "biez": "MG 54 Z-WIDE"
+  },
+  {
+   "kod": "MO4_HLRD080F16003MG50",
+   "stara_nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL",
+   "nowa_nazwa": "16x6.50-8 MRL MG 54 Z-WIDE 72A3 6PR TL",
+   "biez": "MG 54 Z-WIDE"
+  }
+ ],
+ "mirage_nazwa": [
+  {
+   "kod": "MO5_IMCR22531580L12M1",
+   "stara_nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF",
+   "nowa_nazwa": "315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF",
+   "biez": "MG121 PROWADZĄCA"
+  },
+  {
+   "kod": "MO4_IMCR22531580L12M1",
+   "stara_nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF",
+   "nowa_nazwa": "315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF",
+   "biez": "MG121 PROWADZĄCA"
+  }
+ ],
+ "alliance_rc": [
+  {
+   "kod": "MO3_30095R46AAIIRC148D14",
+   "stara_biez": "AGRISTAR II RC",
+   "nowy_biez": "AGRISTAR II ROW CROP",
+   "nazwa": "300/95R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL"
+  },
+  {
+   "kod": "MO3_23095R36AAIIRC130D12",
+   "stara_biez": "AGRISTAR II RC",
+   "nowy_biez": "AGRISTAR II ROW CROP",
+   "nazwa": "230/95R36 ALLIANCE AGRISTAR II ROW CROP 130D/127E TL"
+  },
+  {
+   "kod": "MO3_32090R46AAIIRC148D14",
+   "stara_biez": "AGRISTAR II RC",
+   "nowy_biez": "AGRISTAR II ROW CROP",
+   "nazwa": "320/90R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL"
+  },
+  {
+   "kod": "MO3_23095R28AAIIRC110D10",
+   "stara_biez": "AGRISTAR II RC",
+   "nowy_biez": "AGRISTAR II ROW CROP",
+   "nazwa": "230/95R28 ALLIANCE AGRISTAR II ROW CROP 110D/107E TL"
+  },
+  {
+   "kod": "MO2_45045005AL-IN",
+   "stara_biez": "AGRISTAR II RC",
+   "nowy_biez": "AGRISTAR II ROW CROP",
+   "nazwa": "230/95R44 ALLIANCE AGRISTAR II ROW CROP 134D/131E TL"
+  }
+ ],
+ "inne_skip": [
+  {
+   "kod": "MO9_53780",
+   "marka": "BKT",
+   "biez": "FLOT RIBIMPL 1",
+   "nazwa": "31x13.50-15 BKT FLOT RIBIMPL HF1 12PR TL"
+  },
+  {
+   "kod": "MO9_23841",
+   "marka": "BKT",
+   "biez": "TF 8181 SZ.",
+   "nazwa": "7.50-16 BKT TF 8181 6PR TT"
+  },
+  {
+   "kod": "MO9_18459",
+   "marka": "BKT",
+   "biez": "AGRIMAX RT955 E",
+   "nazwa": "300/85R42 BKT AGRIMAX RT 955 144A8/141B TL"
+  },
+  {
+   "kod": "MO5_CTCR22529580MWX30",
+   "marka": "CEAT",
+   "biez": "WINMILE-X3-AW",
+   "nazwa": "295/80R22.5 CEAT WINMILE-AW 154/149M 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO3_71045265Af644f20tt",
+   "marka": "ALLIANCE",
+   "biez": "F-644",
+   "nazwa": "710/45-26.5 ALLIANCE FORESTAR 644 III 175A2/168A8 20PR SB TT"
+  },
+  {
+   "kod": "MO3_71045265Af643f20tt",
+   "marka": "ALLIANCE",
+   "biez": "F-643",
+   "nazwa": "710/45-26.5 ALLIANCE 643 FORESTAR RIII 20PR TT"
+  },
+  {
+   "kod": "MO3_60055265Af644f20tt",
+   "marka": "ALLIANCE",
+   "biez": "F-644",
+   "nazwa": "600/55-26.5 ALLIANCE 644 FORESTAR III 20PR TT"
+  },
+  {
+   "kod": "MO3_4408028FIDU",
+   "marka": "FIRESTONE",
+   "biez": "DURAFORCE",
+   "nazwa": "440/80R28 FIRESTONE DURA-UT 156A8 TL"
+  },
+  {
+   "kod": "MO3_3807024BRvxr",
+   "marka": "BRIDGESTONE",
+   "biez": "VX-TRACTOR",
+   "nazwa": "380/70R24 BRIDGESTONE VX-R TRACTOR 125D/122E TL"
+  },
+  {
+   "kod": "MO3_5007024FIDU",
+   "marka": "FIRESTONE",
+   "biez": "DURAFORCE",
+   "nazwa": "500/70R24 FIRESTONE DURA-UT 164A/164B TL"
+  },
+  {
+   "kod": "MO3_3808528BRvxr",
+   "marka": "BRIDGESTONE",
+   "biez": "VX-TRACTOR",
+   "nazwa": "380/85R28 BRIDGESTONE VX-R TRACTOR 133D/130E TL"
+  },
+  {
+   "kod": "MO3_6006538BRvxr",
+   "marka": "BRIDGESTONE",
+   "biez": "VX-TRACTOR",
+   "nazwa": "600/65R38 BRIDGESTONE VX-R TRACTOR 153D/150E TL"
+  },
+  {
+   "kod": "MO3_4057018FIDU",
+   "marka": "FIRESTONE",
+   "biez": "DURAFORCE",
+   "nazwa": "405/70R18 FIRESTONE DURA-UT 141B"
+  },
+  {
+   "kod": "MO3_4008024AA-325162A8",
+   "marka": "ALLIANCE",
+   "biez": "A-325",
+   "nazwa": "400/80-24 ALLIANCE TOUGH TRAC 325 162A8 TL"
+  },
+  {
+   "kod": "MO3_3808038Aaii",
+   "marka": "ALLIANCE",
+   "biez": "AGRISTAR II 85",
+   "nazwa": "380/80R38 ALLIANCE AGRISTAR II 142D TL"
+  },
+  {
+   "kod": "MO3_6007030Aaii",
+   "marka": "ALLIANCE",
+   "biez": "AGRISTAR II 70",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL"
+  },
+  {
+   "kod": "MO3_4207024Aaii",
+   "marka": "ALLIANCE",
+   "biez": "AGRISTAR II 70",
+   "nazwa": "420/70R24 ALLIANCE AGRISTAR II 130D TL"
+  },
+  {
+   "kod": "MO3_4208534Aaii",
+   "marka": "ALLIANCE",
+   "biez": "AGRISTAR II 85",
+   "nazwa": "420/85R34 ALLIANCE AGRI STAR II 142D STUBBLE GUARD TL"
+  },
+  {
+   "kod": "MO3_5807038Aaii",
+   "marka": "ALLIANCE",
+   "biez": "AGRISTAR II 70",
+   "nazwa": "580/70R38 ALLIANCE AGRISTAR II 155D TL"
+  },
+  {
+   "kod": "MO3_6508538Aaii",
+   "marka": "ALLIANCE",
+   "biez": "AGRISTAR II 85",
+   "nazwa": "650/85R38 ALLIANCE AGRISTAR II 173D TL"
+  },
+  {
+   "kod": "MO3_6007030ademo",
+   "marka": "ALLIANCE",
+   "biez": "AGRISTAR II 70",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL"
+  },
+  {
+   "kod": "MO2_T484420",
+   "marka": "NOKIAN",
+   "biez": "TR FS FOREST",
+   "nazwa": "18.4-34 NOKIAN TR FOREST 14PR TT"
+  },
+  {
+   "kod": "MO2_T445622",
+   "marka": "NOKIAN",
+   "biez": "NORDMAN FOREST TRS L-2",
+   "nazwa": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT"
+  },
+  {
+   "kod": "MO2_67000010AL-IG",
+   "marka": "ALLIANCE",
+   "biez": "AF 670",
+   "nazwa": "710/70R38 ALLIANCE AGRO FORESTRY 670 175A2/168A8 SB TL"
+  },
+  {
+   "kod": "MO2_67000005AL-IN",
+   "marka": "ALLIANCE",
+   "biez": "AF 670",
+   "nazwa": "480/70-34 ALLIANCE AGRO FORESTRY 670 146A8/143B SB TL"
+  },
+  {
+   "kod": "MO2_38102600AL-IN",
+   "marka": "ALLIANCE",
+   "biez": "381 FLOTAMASTER",
+   "nazwa": "620/40R22.5 ALLIANCE FLOTMASTER 381 148D TL"
+  },
+  {
+   "kod": "MO2_33300242AL-IN",
+   "marka": "ALLIANCE",
+   "biez": "333 AGRO-FORESTRY",
+   "nazwa": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL"
+  },
+  {
+   "kod": "MO2_33300054AL-IN",
+   "marka": "ALLIANCE",
+   "biez": "333 AGRO-FORESTRY",
+   "nazwa": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL"
+  },
+  {
+   "kod": "MO2_32827054AL-IN",
+   "marka": "ALLIANCE",
+   "biez": "328 VALUE PLUS",
+   "nazwa": "550/45-22.5 ALLIANCE FLOTATION 328 147A8/159A8 16PR TL"
+  },
+  {
+   "kod": "MO2_32470010FP-IN",
+   "marka": "ALLIANCE",
+   "biez": "324 FARM PRO",
+   "nazwa": "18.4-26 ALLIANCE FARM PRO 324 146A8 12PR TL"
+  },
+  {
+   "kod": "MO2_32414002FP-IG",
+   "marka": "ALLIANCE",
+   "biez": "324 FARM PRO",
+   "nazwa": "14.9-28 ALLIANCE FARM PRO 324 130A8 8PR TT"
+  },
+  {
+   "kod": "MO2_32412520FP-IG",
+   "marka": "ALLIANCE",
+   "biez": "324 FARM PRO",
+   "nazwa": "12.4-28 ALLIANCE FARM PRO 324 123A8 8PR TT"
+  },
+  {
+   "kod": "MO2_32406112FP-IG",
+   "marka": "ALLIANCE",
+   "biez": "324 FARM PRO",
+   "nazwa": "13.6-24 ALLIANCE FARM PRO 324 123A8 8PR TT"
+  },
+  {
+   "kod": "MO2_32014918VP-IG",
+   "marka": "ALLIANCE",
+   "biez": "A320 VALUE PLUS",
+   "nazwa": "12.5/80-18 ALLIANCE 320 VALUE PLUS 145A6/142A8 12PR TL"
+  },
+  {
+   "kod": "MO7_T445516",
+   "marka": "NOKIAN",
+   "biez": "FOREST KING TRS 2",
+   "nazwa": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL"
+  }
+ ]
+}

@@ -1,0 +1,820 @@
+// extensions.cjs — rozszerzenia Bridge v6 dla Anny
+// Dodaje endpointy:
+//   POST /api/import/from-url      (body: {dostawcaKod})
+//   POST /api/import/parse-file    (multipart upload pliku CSV)
+// Plus scheduler auto-pull codziennie o 06:00 czasu serwera.
+//
+// Wszystko wchodzi przez TĘ SAMĄ FUNKCJĘ tk(dostawca, surowe) co stary flow.
+// Stary endpoint /api/staging/import nie jest ruszany.
+
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const https = require('https');
+const http = require('http');
+
+const dispatcher = require('./parsers/dispatcher.cjs');
+const adapter = require('./parsers/adapter.cjs');
+const atrybuty = require('./atrybuty_module.cjs');
+const pending = require('./pending_module.cjs');
+
+const TMP = path.join(os.tmpdir(), 'bridge_v6_imports');
+if (!fs.existsSync(TMP)) fs.mkdirSync(TMP, { recursive: true });
+
+// === Pobranie URL → bufor ===
+function downloadUrl(url) {
+  return new Promise((resolve, reject) => {
+    const mod = url.startsWith('https') ? https : http;
+    const req = mod.get(url, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        // proste obsłużenie 3xx redirect
+        downloadUrl(res.headers.location).then(resolve, reject);
+        return;
+      }
+      if (res.statusCode !== 200) {
+        reject(new Error(`HTTP ${res.statusCode} dla ${url}`));
+        return;
+      }
+      const chunks = [];
+      res.on('data', (c) => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+      res.on('error', reject);
+    });
+    req.on('error', reject);
+    req.setTimeout(60000, () => req.destroy(new Error(`Timeout: ${url}`)));
+  });
+}
+
+function saveTmp(buf, name) {
+  const filePath = path.join(TMP, name);
+  fs.writeFileSync(filePath, buf);
+  return filePath;
+}
+
+// === Główna ścieżka: file path → surowe gotowe dla tk() ===
+function parseAndConvert(dostawcaKod, filePath) {
+  const result = dispatcher.parseByKod(dostawcaKod, filePath);
+  const surowe = adapter.recordsToSurowe(dostawcaKod, result.records);
+  return {
+    surowe,
+    errors: result.errors || [],
+    odrzucone: result.odrzucone || [],
+    recordsCount: result.records.length
+  };
+}
+
+// === Rejestracja endpointów ===
+// Wywoływane z index.cjs przez require('./extensions.cjs').register(app, ctx)
+// ctx zawiera referencje do funkcji backendu które potrzebujemy: tk, U (DB), we (auth middleware), be (audit log)
+// === Helper: URL i częstotliwość per dostawca z DB ===
+// Preferuje wartości z tabeli suppliers, fallback do dispatcher.URLS.
+function getSupplierUrlFromDb(U, kod) {
+  try {
+    const s = U.getSupplierByKod(kod);
+    if (s && typeof s.url === 'string' && s.url.trim().length > 0) return s.url.trim();
+  } catch (_) {}
+  return null;
+}
+function resolveUrl(U, kod) {
+  return getSupplierUrlFromDb(U, kod) || dispatcher.getUrl(kod);
+}
+function getSupplierMinutesFromDb(U, kod) {
+  try {
+    const s = U.getSupplierByKod(kod);
+    if (s) {
+      const m = s.czestotliwosc_minuty ?? s.czestotliwoscMinuty;
+      if (m !== null && m !== undefined && Number.isFinite(Number(m)) && Number(m) > 0) return Number(m);
+    }
+  } catch (_) {}
+  return null;
+}
+
+function register(app, ctx) {
+  const { tk, U, we, be } = ctx;
+
+  if (!tk || !U || !we || !be) {
+    console.error('[bridge_v6] BŁĄD: brakuje ctx (tk/U/we/be) — extensions nie zostały zarejestrowane');
+    return;
+  }
+
+  // === MODUŁ ATRYBUTÓW ===
+  try {
+    atrybuty.registerAtrybuty(app, { we, be });
+  } catch (e) {
+    console.error('[bridge_v6] BŁĄD ładowania modułu atrybutów:', e.message);
+  }
+
+  // === MODUŁ PENDING (Faza B) ===
+  try {
+    pending.registerPending(app, { we, be });
+  } catch (e) {
+    console.error('[bridge_v6] BŁĄD ładowania modułu pending:', e.message);
+  }
+
+  // === POST /api/import/from-url ===
+  // Body: { dostawcaKod: "MO10" }
+  // Pobiera plik z URL dostawcy, parsuje, woła tk(), zapisuje staging
+  app.post('/api/import/from-url', we, async (req, res) => {
+    const dostawcaKod = (req.body?.dostawcaKod || req.body?.dostawca || '').toUpperCase();
+    if (!dostawcaKod) return res.status(400).json({ error: 'Brak dostawcaKod' });
+
+    const url = resolveUrl(U, dostawcaKod);
+    if (!url) return res.status(400).json({ error: `Brak URL dla dostawcy ${dostawcaKod}` });
+
+    try {
+      console.log(`[bridge_v6] from-url ${dostawcaKod} ← ${url}`);
+      const buf = await downloadUrl(url);
+      const filePath = saveTmp(buf, `${dostawcaKod}_${Date.now()}.csv`);
+
+      const { surowe, errors, odrzucone, recordsCount } = parseAndConvert(dostawcaKod, filePath);
+      const tkResult = tk(dostawcaKod, surowe);
+
+      // Audit log
+      try {
+        const dostawca = U.getSupplierByKod(dostawcaKod);
+        if (dostawca) {
+          U.updateSupplier(dostawca.id, {
+            ostatniPlik: new Date().toISOString(),
+            liczbaProduktow: recordsCount,
+            status: 'aktywny'
+          });
+        }
+        be(req.user.id, req.user.imieNazwisko, 'import_z_url', 'dostawca', dostawcaKod, {
+          source: 'from-url',
+          url,
+          wczytanych: recordsCount,
+          parserErrors: errors.length,
+          odrzucone: odrzucone.length,
+          ...tkResult
+        });
+      } catch (e) {
+        console.error('[bridge_v6] audit log fail:', e.message);
+      }
+
+      res.json({
+        ok: true,
+        dostawcaKod,
+        url,
+        wczytanych: recordsCount,
+        parserErrors: errors.length,
+        odrzuconePrzezParser: odrzucone.length,
+        ...tkResult
+      });
+
+      // Czyszczenie tmp
+      try { fs.unlinkSync(filePath); } catch (_) {}
+    } catch (e) {
+      console.error(`[bridge_v6] from-url ${dostawcaKod} BŁĄD:`, e);
+      res.status(500).json({ error: e.message, dostawcaKod, url });
+    }
+  });
+
+  // === POST /api/import/parse-file ===
+  // Multipart upload pliku CSV (pole 'file', dostawcaKod w body lub auto-detekcja po nazwie)
+  // Marta używa tego z drag&drop w panelu
+  //
+  // UWAGA: multipart wymaga middleware. Sprawdzamy czy multer jest dostępny,
+  // jeśli nie — fallback: przyjmujemy raw body jako CSV gdy Content-Type to text/csv lub application/octet-stream
+  app.post('/api/import/parse-file', we, async (req, res) => {
+    const dostawcaKod = (req.query?.dostawcaKod || req.body?.dostawcaKod || '').toUpperCase();
+    if (!dostawcaKod) return res.status(400).json({ error: 'Brak dostawcaKod (query lub body)' });
+
+    if (!resolveUrl(U, dostawcaKod)) {
+      return res.status(400).json({ error: `Nieznany dostawca: ${dostawcaKod}` });
+    }
+
+    try {
+      // Czytamy raw body (req jest stream)
+      const chunks = [];
+      for await (const c of req) chunks.push(c);
+      const buf = Buffer.concat(chunks);
+
+      if (buf.length === 0) return res.status(400).json({ error: 'Pusty plik' });
+      if (buf.length > 25 * 1024 * 1024) return res.status(400).json({ error: 'Plik większy niż 25 MB' });
+
+      const filePath = saveTmp(buf, `${dostawcaKod}_upload_${Date.now()}.csv`);
+      const { surowe, errors, odrzucone, recordsCount } = parseAndConvert(dostawcaKod, filePath);
+      const tkResult = tk(dostawcaKod, surowe);
+
+      try {
+        const dostawca = U.getSupplierByKod(dostawcaKod);
+        if (dostawca) {
+          U.updateSupplier(dostawca.id, {
+            ostatniPlik: new Date().toISOString(),
+            liczbaProduktow: recordsCount,
+            status: 'aktywny'
+          });
+        }
+        be(req.user.id, req.user.imieNazwisko, 'import_pliku', 'dostawca', dostawcaKod, {
+          source: 'parse-file',
+          wczytanych: recordsCount,
+          parserErrors: errors.length,
+          odrzucone: odrzucone.length,
+          ...tkResult
+        });
+      } catch (e) {
+        console.error('[bridge_v6] audit log fail:', e.message);
+      }
+
+      res.json({
+        ok: true,
+        dostawcaKod,
+        wczytanych: recordsCount,
+        parserErrors: errors.length,
+        odrzuconePrzezParser: odrzucone.length,
+        ...tkResult
+      });
+
+      try { fs.unlinkSync(filePath); } catch (_) {}
+    } catch (e) {
+      console.error(`[bridge_v6] parse-file ${dostawcaKod} BŁĄD:`, e);
+      res.status(500).json({ error: e.message, dostawcaKod });
+    }
+  });
+
+  // === GET /admin/import-now ===
+  // Prosta strona admina: lista dostawców z przyciskiem "Pobierz teraz".
+  // Logowanie używa /api/login (zwraca token JWT — zapisujemy w localStorage).
+  app.get('/admin/import-now', (req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(IMPORT_NOW_HTML);
+  });
+
+  // === GET /api/admin/suppliers-list ===
+  // Zwraca listę dostawców + URL z dispatchera + status z bazy. Dla strony import-now.
+  app.get('/api/admin/suppliers-list', we, (req, res) => {
+    try {
+      const wszyscy = U.listSuppliers();
+      const out = dispatcher.listDostawcy().map(kod => {
+        const supplier = wszyscy.find(s => s.kod === kod) || {};
+        return {
+          kod,
+          nazwa: supplier.nazwa || kod,
+          url: resolveUrl(U, kod),
+          czestotliwoscMinuty: supplier.czestotliwosc_minuty ?? supplier.czestotliwoscMinuty ?? null,
+          status: supplier.status || 'aktywny',
+          ostatniPlik: supplier.ostatni_plik || supplier.ostatniPlik || null,
+          liczbaProduktow: supplier.liczba_produktow || supplier.liczbaProduktow || 0
+        };
+      });
+      res.json({ ok: true, dostawcy: out });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // === GET /api/admin/supplier-config ===
+  // Zwraca listę wszystkich dostawców z ich URL i częstotliwością (do formularza edycji)
+  app.get('/api/admin/supplier-config', we, (req, res) => {
+    try {
+      const out = dispatcher.listDostawcy().map(kod => {
+        const s = U.getSupplierByKod(kod) || {};
+        return {
+          kod,
+          nazwa: s.nazwa || kod,
+          url: (s.url && s.url.trim().length > 0) ? s.url : dispatcher.getUrl(kod),
+          urlEfektywnyZDb: !!(s.url && s.url.trim().length > 0),
+          czestotliwoscMinuty: s.czestotliwosc_minuty ?? s.czestotliwoscMinuty ?? null,
+          status: s.status || 'aktywny',
+          fallbackUrl: dispatcher.getUrl(kod)
+        };
+      });
+      res.json({ ok: true, dostawcy: out });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // === PATCH /api/admin/supplier-config/:kod ===
+  // Body: { url?: string, czestotliwoscMinuty?: number|null, status?: 'aktywny'|'wstrzymany' }
+  // Aktualizuje pola dostawcy w tabeli suppliers.
+  app.patch('/api/admin/supplier-config/:kod', we, (req, res) => {
+    const kod = String(req.params.kod || '').toUpperCase();
+    if (!dispatcher.listDostawcy().includes(kod)) {
+      return res.status(400).json({ error: `Nieznany dostawca: ${kod}` });
+    }
+    const supplier = U.getSupplierByKod(kod);
+    if (!supplier) return res.status(404).json({ error: `Dostawca ${kod} nie istnieje w bazie` });
+
+    const patch = {};
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, 'url')) {
+      const v = req.body.url;
+      if (v === null || v === '') {
+        patch.url = null;
+      } else if (typeof v === 'string' && /^https?:\/\//i.test(v.trim())) {
+        patch.url = v.trim();
+      } else {
+        return res.status(400).json({ error: 'url musi być http(s):// albo null/pusty' });
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, 'czestotliwoscMinuty')) {
+      const v = req.body.czestotliwoscMinuty;
+      if (v === null || v === '' || v === undefined) {
+        patch.czestotliwoscMinuty = null;
+      } else {
+        const n = Number(v);
+        if (!Number.isFinite(n) || n < 5 || n > 10080) {
+          return res.status(400).json({ error: 'czestotliwoscMinuty: 5..10080 albo null' });
+        }
+        patch.czestotliwoscMinuty = Math.round(n);
+      }
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, 'status')) {
+      const v = String(req.body.status || '').toLowerCase();
+      if (!['aktywny', 'wstrzymany', 'blad'].includes(v)) {
+        return res.status(400).json({ error: 'status: aktywny|wstrzymany|blad' });
+      }
+      patch.status = v;
+    }
+
+    if (Object.keys(patch).length === 0) {
+      return res.status(400).json({ error: 'Brak pól do aktualizacji (url|czestotliwoscMinuty|status)' });
+    }
+
+    try {
+      U.updateSupplier(supplier.id, patch);
+      // Reset last-run żeby nowa częstotliwość od razu obowiązywała
+      if (Object.prototype.hasOwnProperty.call(patch, 'czestotliwoscMinuty')) {
+        delete lastRunPerSupplier[kod];
+      }
+      be(req.user.id, req.user.imieNazwisko, 'edit_supplier_config', 'dostawca', kod, {
+        pola: Object.keys(patch),
+        nowe: patch
+      });
+      const updated = U.getSupplierByKod(kod);
+      res.json({
+        ok: true,
+        kod,
+        url: updated.url,
+        czestotliwoscMinuty: updated.czestotliwosc_minuty ?? updated.czestotliwoscMinuty ?? null,
+        status: updated.status
+      });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // === GET /admin/supplier-config ===
+  // Prosty admin page z formularzem edycji URL + częstotliwość per dostawca.
+  app.get('/admin/supplier-config', (req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(SUPPLIER_CONFIG_HTML);
+  });
+
+  // === Scheduler: per-supplier auto-pull ===
+  startScheduler(app, ctx);
+
+  console.log('[bridge_v6] Extensions registered: /api/import/from-url, /api/import/parse-file, /admin/import-now, /admin/supplier-config, scheduler per-supplier');
+
+  // === Fix E + Fix J: rejestracja modulow analityki i paginacji ===
+  // Otwieram drugi handle do tej samej bazy (better-sqlite3 obsluguje wiele handle'i)
+  let _bridgeDb = null;
+  try {
+    const Database = require('better-sqlite3');
+    const path = require('path');
+    _bridgeDb = new Database(path.join(__dirname, 'data.db'), { readonly: false });
+  } catch (e) {
+    console.error('[bridge_v6] BLAD otwarcia data.db dla analytics/pagination:', e.message);
+  }
+  if (_bridgeDb) {
+    try {
+      const { registerAnalyticsRoutes } = require('./analytics_module.cjs');
+      registerAnalyticsRoutes(app, _bridgeDb, we);
+      console.log('[bridge_v6] Fix E: /api/analytics/* zarejestrowane');
+    } catch (e) {
+      console.error('[bridge_v6] BLAD ladowania analytics_module:', e.message);
+    }
+    try {
+      const { registerPaginationRoutes } = require('./pagination_module.cjs');
+      registerPaginationRoutes(app, _bridgeDb, we);
+      console.log('[bridge_v6] Fix J: /api/staging/paged i /api/history/* zarejestrowane');
+    } catch (e) {
+      console.error('[bridge_v6] BLAD ladowania pagination_module:', e.message);
+    }
+  }
+}
+
+// === Strona admina: import ręczny ===
+const IMPORT_NOW_HTML = `<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Bridge — Import ręczny</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, system-ui, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; background: #f4f6f8; color: #1a202c; }
+  h1 { margin: 0 0 4px 0; font-size: 22px; }
+  .sub { color: #718096; margin-bottom: 24px; font-size: 14px; }
+  .login-box, .panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  input { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; width: 100%; margin-bottom: 8px; }
+  button { padding: 8px 16px; background: #3182ce; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; }
+  button:hover { background: #2c5282; }
+  button:disabled { background: #a0aec0; cursor: not-allowed; }
+  button.secondary { background: #fff; color: #3182ce; border: 1px solid #3182ce; }
+  button.danger { background: #e53e3e; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; }
+  .row-info { flex: 1; }
+  .row-info .kod { font-weight: 600; font-size: 15px; }
+  .row-info .nazwa { font-size: 13px; color: #4a5568; margin-top: 2px; }
+  .row-info .url { font-size: 11px; color: #a0aec0; margin-top: 2px; word-break: break-all; font-family: monospace; }
+  .meta { font-size: 12px; color: #718096; text-align: right; min-width: 160px; padding-right: 12px; }
+  .result { margin-top: 6px; padding: 8px; border-radius: 4px; font-size: 12px; display: none; font-family: monospace; }
+  .result.ok { background: #c6f6d5; color: #22543d; display: block; }
+  .result.err { background: #fed7d7; color: #742a2a; display: block; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .user-info { font-size: 13px; color: #4a5568; }
+  .hidden { display: none; }
+  .pull-all-btn { padding: 12px 24px; font-size: 15px; }
+</style>
+</head>
+<body>
+<h1>Bridge — Import ręczny z URL</h1>
+<div class="sub">Pobiera plik CSV od dostawcy, parsuje, dodaje zmiany do stagingu.</div>
+
+<div id="login-box" class="login-box">
+  <h3 style="margin:0 0 12px 0;font-size:16px;">Zaloguj się</h3>
+  <input id="email" type="email" placeholder="email" autocomplete="username">
+  <input id="password" type="password" placeholder="hasło" autocomplete="current-password">
+  <button id="login-btn">Zaloguj</button>
+  <div id="login-err" class="result"></div>
+</div>
+
+<div id="panel" class="panel hidden">
+  <div class="topbar">
+    <div class="user-info">Zalogowany jako: <span id="who"></span></div>
+    <button class="secondary" id="logout-btn">Wyloguj</button>
+  </div>
+  <div style="margin-bottom:16px;">
+    <button class="pull-all-btn" id="pull-all-btn">Pobierz wszystkich (10 dostawców)</button>
+    <span style="margin-left:12px;font-size:13px;color:#718096;" id="pull-all-status"></span>
+  </div>
+  <div id="list" class="grid"></div>
+</div>
+
+<script>
+const TOKEN_KEY = 'bridge_token';
+const USER_KEY = 'bridge_user';
+
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function getUser() { try { return JSON.parse(localStorage.getItem(USER_KEY)); } catch(_){ return null; } }
+function setAuth(t, u) { localStorage.setItem(TOKEN_KEY, t); localStorage.setItem(USER_KEY, JSON.stringify(u)); }
+function clearAuth() { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); }
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  const t = getToken();
+  if (t) opts.headers['Authorization'] = 'Bearer ' + t;
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(path, opts);
+  const txt = await res.text();
+  let json; try { json = JSON.parse(txt); } catch(_){ json = { error: txt }; }
+  return { ok: res.ok, status: res.status, json };
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleString('pl-PL', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); } catch(_) { return iso; }
+}
+
+function showLogin() {
+  document.getElementById('login-box').classList.remove('hidden');
+  document.getElementById('panel').classList.add('hidden');
+}
+function showPanel() {
+  document.getElementById('login-box').classList.add('hidden');
+  document.getElementById('panel').classList.remove('hidden');
+  const u = getUser();
+  document.getElementById('who').textContent = u ? (u.imieNazwisko + ' (' + u.email + ')') : '';
+  loadList();
+}
+
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const err = document.getElementById('login-err');
+  err.className = 'result'; err.textContent = '';
+  if (!email || !password) { err.className='result err'; err.textContent='Podaj email i hasło'; return; }
+  const r = await api('POST', '/api/login', { email, password });
+  if (!r.ok || !r.json.token) { err.className='result err'; err.textContent = r.json.error || 'Błąd logowania'; return; }
+  setAuth(r.json.token, r.json.user);
+  showPanel();
+}
+
+async function loadList() {
+  const list = document.getElementById('list');
+  list.innerHTML = 'Ładowanie...';
+  const r = await api('GET', '/api/admin/suppliers-list');
+  if (!r.ok) {
+    if (r.status === 401) { clearAuth(); showLogin(); return; }
+    list.textContent = 'Błąd: ' + (r.json.error || r.status);
+    return;
+  }
+  list.innerHTML = '';
+  for (const d of r.json.dostawcy) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = \`
+      <div class="row-info">
+        <div class="kod">\${d.kod} — \${d.nazwa}</div>
+        <div class="url">\${d.url}</div>
+        <div class="result" id="res-\${d.kod}"></div>
+      </div>
+      <div class="meta">
+        Ostatnio: \${fmtDate(d.ostatniPlik)}<br>
+        Produktów: \${d.liczbaProduktow}
+      </div>
+      <button data-kod="\${d.kod}" class="import-btn">Pobierz teraz</button>
+    \`;
+    list.appendChild(row);
+  }
+  document.querySelectorAll('.import-btn').forEach(b => {
+    b.addEventListener('click', () => importOne(b.dataset.kod, b));
+  });
+}
+
+async function importOne(kod, btn) {
+  const res = document.getElementById('res-' + kod);
+  res.className = 'result'; res.textContent = '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Pobieram...'; }
+  const r = await api('POST', '/api/import/from-url', { dostawcaKod: kod });
+  if (btn) { btn.disabled = false; btn.textContent = 'Pobierz teraz'; }
+  if (!r.ok) {
+    if (r.status === 401) { clearAuth(); showLogin(); return; }
+    res.className = 'result err';
+    res.textContent = 'Błąd: ' + (r.json.error || r.status);
+    return;
+  }
+  const d = r.json;
+  res.className = 'result ok';
+  res.textContent = \`OK — wczytanych: \${d.wczytanych}, do stagingu: \${d.doStagingu}, nowe: \${d.nowe}, zmiany: \${d.zmienione}, wycofane: \${d.wycofane}\`;
+  // Odśwież listę zeby zaktualizować 'ostatniPlik'
+  setTimeout(loadList, 1500);
+}
+
+async function pullAll() {
+  const btn = document.getElementById('pull-all-btn');
+  const status = document.getElementById('pull-all-status');
+  btn.disabled = true;
+  const r = await api('GET', '/api/admin/suppliers-list');
+  if (!r.ok) { btn.disabled = false; return; }
+  let done = 0;
+  for (const d of r.json.dostawcy) {
+    status.textContent = \`\${done+1}/\${r.json.dostawcy.length}: \${d.kod}...\`;
+    await importOne(d.kod, null);
+    done++;
+  }
+  status.textContent = 'Gotowe: pobrano ' + done + ' dostawców';
+  btn.disabled = false;
+  loadList();
+}
+
+document.getElementById('login-btn').addEventListener('click', login);
+document.getElementById('password').addEventListener('keypress', (e) => { if (e.key === 'Enter') login(); });
+document.getElementById('logout-btn').addEventListener('click', () => { clearAuth(); showLogin(); });
+document.getElementById('pull-all-btn').addEventListener('click', pullAll);
+
+if (getToken()) showPanel(); else showLogin();
+</script>
+</body>
+</html>`;
+
+// === Strona admina: konfiguracja dostawców (URL + częstotliwość) ===
+const SUPPLIER_CONFIG_HTML = `<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>Konfiguracja dostawców — Bridge v6</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 24px; background: #0f172a; color: #e2e8f0; }
+  h1 { margin: 0 0 6px; font-size: 22px; }
+  .sub { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+  .card { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 18px; margin-bottom: 12px; }
+  .row { display: grid; grid-template-columns: 90px 1fr 130px 100px 120px; gap: 12px; align-items: end; }
+  @media (max-width: 900px) { .row { grid-template-columns: 1fr; } }
+  .kod { font-family: monospace; font-size: 15px; font-weight: 600; color: #38bdf8; padding-top: 22px; }
+  .nazwa { font-size: 13px; color: #94a3b8; font-weight: 400; margin-top: 2px; font-family: -apple-system, sans-serif; }
+  label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-bottom: 4px; }
+  input, select { width: 100%; padding: 8px 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #e2e8f0; font-size: 13px; font-family: monospace; }
+  input:focus, select:focus { outline: none; border-color: #38bdf8; }
+  .fallback { color: #64748b; font-size: 11px; margin-top: 4px; font-family: monospace; word-break: break-all; }
+  button { padding: 8px 14px; background: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; }
+  button:hover { background: #0ea5e9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .save-btn { background: #10b981; }
+  .save-btn:hover { background: #059669; }
+  .msg { font-size: 12px; padding: 6px 10px; border-radius: 4px; margin-top: 8px; }
+  .msg.ok { background: #064e3b; color: #6ee7b7; }
+  .msg.err { background: #7f1d1d; color: #fca5a5; }
+  #login { max-width: 400px; margin: 100px auto; padding: 32px; background: #1e293b; border-radius: 12px; }
+  #login h2 { margin-top: 0; }
+  #login input { margin-bottom: 12px; }
+  .toolbar { margin-bottom: 20px; display: flex; gap: 12px; }
+  .toolbar a { color: #38bdf8; text-decoration: none; font-size: 13px; padding: 6px 12px; background: #1e293b; border: 1px solid #334155; border-radius: 6px; }
+  .toolbar a:hover { background: #334155; }
+</style>
+</head>
+<body>
+
+<div id="login" style="display:none">
+  <h2>Logowanie</h2>
+  <input id="email" type="email" placeholder="email" autocomplete="username">
+  <input id="haslo" type="password" placeholder="hasło" autocomplete="current-password">
+  <button onclick="login()">Zaloguj</button>
+  <div id="login-msg"></div>
+</div>
+
+<div id="panel" style="display:none">
+  <h1>Konfiguracja dostawców</h1>
+  <div class="sub">URL źródła i częstotliwość auto-pull. Puste minuty = tylko ręczny import.</div>
+  <div class="toolbar">
+    <a href="/admin/import-now">→ Import teraz</a>
+    <a href="#" onclick="logout(); return false">Wyloguj</a>
+  </div>
+  <div id="lista"></div>
+</div>
+
+<script>
+function getToken() { return localStorage.getItem('bridge_token'); }
+function setToken(t) { localStorage.setItem('bridge_token', t); }
+function logout() { localStorage.removeItem('bridge_token'); showLogin(); }
+function showLogin() { document.getElementById('login').style.display='block'; document.getElementById('panel').style.display='none'; }
+function showPanel() { document.getElementById('login').style.display='none'; document.getElementById('panel').style.display='block'; loadList(); }
+
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const haslo = document.getElementById('haslo').value;
+  const msg = document.getElementById('login-msg');
+  msg.innerHTML = '';
+  try {
+    const r = await fetch('/api/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, haslo }) });
+    const j = await r.json();
+    if (!r.ok || !j.token) { msg.innerHTML = '<div class="msg err">' + (j.error || 'Błąd logowania') + '</div>'; return; }
+    setToken(j.token);
+    showPanel();
+  } catch (e) { msg.innerHTML = '<div class="msg err">' + e.message + '</div>'; }
+}
+
+async function loadList() {
+  const cont = document.getElementById('lista');
+  cont.innerHTML = '<div style="color:#94a3b8">Ładuję…</div>';
+  try {
+    const r = await fetch('/api/admin/supplier-config', { headers: { 'Authorization': 'Bearer ' + getToken() } });
+    if (r.status === 401) { logout(); return; }
+    const j = await r.json();
+    if (!j.ok) { cont.innerHTML = '<div class="msg err">' + (j.error || 'Błąd') + '</div>'; return; }
+    cont.innerHTML = j.dostawcy.map(d => renderCard(d)).join('');
+  } catch (e) { cont.innerHTML = '<div class="msg err">' + e.message + '</div>'; }
+}
+
+function renderCard(d) {
+  const min = d.czestotliwoscMinuty == null ? '' : d.czestotliwoscMinuty;
+  const showFallback = !d.urlEfektywnyZDb && d.fallbackUrl;
+  const fallbackHtml = showFallback ? ('<div class="fallback">Domyślny (kod): ' + escapeHtml(d.fallbackUrl) + '</div>') : '';
+  return '<div class="card" id="card-' + d.kod + '">' +
+    '<div class="row">' +
+      '<div><div class="kod">' + d.kod + '</div><div class="nazwa">' + escapeHtml(d.nazwa) + '</div></div>' +
+      '<div><label>URL źródła</label><input type="url" id="url-' + d.kod + '" value="' + escapeAttr(d.url || '') + '" placeholder="https://...">' + fallbackHtml + '</div>' +
+      '<div><label>Częstotliwość (min)</label><input type="number" id="min-' + d.kod + '" value="' + min + '" placeholder="puste = manual" min="5" max="10080"></div>' +
+      '<div><label>Status</label><select id="status-' + d.kod + '">' +
+        '<option value="aktywny"' + (d.status === 'aktywny' ? ' selected' : '') + '>aktywny</option>' +
+        '<option value="wstrzymany"' + (d.status === 'wstrzymany' ? ' selected' : '') + '>wstrzymany</option>' +
+        '<option value="blad"' + (d.status === 'blad' ? ' selected' : '') + '>błąd</option>' +
+      '</select></div>' +
+      '<div><label>&nbsp;</label><button class="save-btn" onclick="save(\\'' + d.kod + '\\')">Zapisz</button></div>' +
+    '</div>' +
+    '<div id="msg-' + d.kod + '"></div>' +
+  '</div>';
+}
+
+function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function save(kod) {
+  const url = document.getElementById('url-' + kod).value.trim();
+  const minRaw = document.getElementById('min-' + kod).value.trim();
+  const status = document.getElementById('status-' + kod).value;
+  const msg = document.getElementById('msg-' + kod);
+  msg.innerHTML = '';
+  const body = {
+    url: url || null,
+    czestotliwoscMinuty: minRaw === '' ? null : Number(minRaw),
+    status
+  };
+  try {
+    const r = await fetch('/api/admin/supplier-config/' + kod, {
+      method: 'PATCH',
+      headers: { 'Content-Type':'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify(body)
+    });
+    if (r.status === 401) { logout(); return; }
+    const j = await r.json();
+    if (!r.ok || !j.ok) { msg.innerHTML = '<div class="msg err">' + (j.error || 'Błąd') + '</div>'; return; }
+    msg.innerHTML = '<div class="msg ok">Zapisano ✅</div>';
+    setTimeout(() => { msg.innerHTML = ''; }, 3000);
+  } catch (e) { msg.innerHTML = '<div class="msg err">' + e.message + '</div>'; }
+}
+
+if (getToken()) showPanel(); else showLogin();
+</script>
+</body>
+</html>`;
+
+
+// === Scheduler ===
+let schedulerStarted = false;
+// Per-supplier: last-run timestamp (ms since epoch) w pamięci.
+// Nie zapisujemy do DB — restart backendu = reset kalendarza (uznałam, że OK).
+const lastRunPerSupplier = {};
+
+function startScheduler(app, ctx) {
+  if (schedulerStarted) return;
+  schedulerStarted = true;
+
+  const { tk, U, be } = ctx;
+
+  // Co 60 sek: sprawdzam każdego dostawcę osobno.
+  // Jeśli ma czestotliwosc_minuty i minęło od ostatniego runu — odpalam.
+  // Jeśli brak czestotliwosc_minuty — pomijam (ręczny import przez UI).
+  // Domyślne dolne ograniczenie: 5 min (chroni przed konfiguracją typu „co 1 min”).
+  setInterval(async () => {
+    const now = Date.now();
+    for (const kod of dispatcher.listDostawcy()) {
+      const minuty = getSupplierMinutesFromDb(U, kod);
+      if (!minuty) continue; // dostawca bez skonfigurowanej częstotliwości = tylko manual
+      const minMinutes = 5;
+      const effectiveMinutes = Math.max(minuty, minMinutes);
+      const last = lastRunPerSupplier[kod] || 0;
+      if (now - last < effectiveMinutes * 60 * 1000) continue;
+      lastRunPerSupplier[kod] = now;
+      // Odpalamy niezablokowanie — nie czekamy na dostawcę, żeby pętla nie stała.
+      runAutoPull(ctx, kod).catch(err => {
+        console.error(`[bridge_v6] scheduler ${kod} BLAD:`, err.message);
+      });
+    }
+  }, 60 * 1000);
+
+  console.log('[bridge_v6] Scheduler started: per-supplier polling wg czestotliwosc_minuty (co 60s tick, min 5 min)');
+}
+
+async function runAutoPull(ctx, onlyKod) {
+  const { tk, U, be } = ctx;
+  const kody = onlyKod
+    ? [String(onlyKod).toUpperCase()].filter(k => dispatcher.listDostawcy().includes(k))
+    : dispatcher.listDostawcy();
+  if (!onlyKod) console.log('[bridge_v6] AUTO-PULL START (wszyscy)');
+
+  for (const dostawcaKod of kody) {
+    const url = resolveUrl(U, dostawcaKod);
+    if (!url) {
+      console.error(`[bridge_v6] AUTO-PULL ${dostawcaKod}: brak URL — pomijam`);
+      continue;
+    }
+    try {
+      const buf = await downloadUrl(url);
+      const filePath = saveTmp(buf, `${dostawcaKod}_auto_${Date.now()}.csv`);
+      const { surowe, errors, odrzucone, recordsCount } = parseAndConvert(dostawcaKod, filePath);
+      const tkResult = tk(dostawcaKod, surowe);
+
+      try {
+        const dostawca = U.getSupplierByKod(dostawcaKod);
+        if (dostawca) {
+          U.updateSupplier(dostawca.id, {
+            ostatniPlik: new Date().toISOString(),
+            liczbaProduktow: recordsCount,
+            status: 'aktywny'
+          });
+        }
+        // System user: id=0, imieNazwisko='SYSTEM-AUTOPULL'
+        be(0, 'SYSTEM-AUTOPULL', 'auto_pull', 'dostawca', dostawcaKod, {
+          source: 'scheduler',
+          url,
+          wczytanych: recordsCount,
+          parserErrors: errors.length,
+          odrzucone: odrzucone.length,
+          ...tkResult
+        });
+      } catch (e) {
+        console.error(`[bridge_v6] audit fail ${dostawcaKod}:`, e.message);
+      }
+
+      console.log(`[bridge_v6] AUTO-PULL ${dostawcaKod}: ${recordsCount} wierszy, ${tkResult.doStagingu} do stagingu`);
+
+      try { fs.unlinkSync(filePath); } catch (_) {}
+    } catch (e) {
+      console.error(`[bridge_v6] AUTO-PULL ${dostawcaKod} BŁĄD:`, e.message);
+      try {
+        be(0, 'SYSTEM-AUTOPULL', 'auto_pull_blad', 'dostawca', dostawcaKod, {
+          error: e.message,
+          url
+        });
+      } catch (_) {}
+    }
+  }
+  if (!onlyKod) console.log('[bridge_v6] AUTO-PULL END');
+}
+
+module.exports = { register, runAutoPull };

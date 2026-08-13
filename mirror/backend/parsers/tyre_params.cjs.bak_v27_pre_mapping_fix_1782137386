@@ -1,0 +1,910 @@
+'use strict';
+
+function cleanText(value) {
+  return String(value ?? '')
+    .replace(/®/g, 'ę')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function emptyToNull(value) {
+  const text = cleanText(value);
+  return text ? text : null;
+}
+
+function parseNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const text = String(value)
+    .replace(/\s+/g, '')
+    .replace(/[^\d,.-]/g, '')
+    .replace(',', '.');
+  const num = Number.parseFloat(text);
+  return Number.isFinite(num) ? num : null;
+}
+
+function normalizePrice(value) {
+  return parseNumber(value);
+}
+
+function normalizeQty(value) {
+  const num = parseNumber(value);
+  return num === null ? null : Math.trunc(num);
+}
+
+function normalizeSizeText(value) {
+  let text = cleanText(value);
+  text = text.replace(/\bOpona\b/gi, '').trim();
+  text = text.replace(/\s*\/\s*/g, '/');
+  // POPRAWKA 2026-06-18: poprzednie wersje tych zamian (\s*R\s*, \s*B\s*, \s*x\s*, \s*-\s*)
+  // dopasowywały litery R/B/x i myslnik W CALYM tekscie (np. w nazwie producenta/modelu),
+  // a nie tylko w obrebie zapisu rozmiaru. Powodowalo to "zjadanie" spacji np. miedzy
+  // "...R42" a nazwa producenta zaczynajaca sie na B/R/X ("520/85R42 BKT" -> "520/85R42BKT"),
+  // co niszczylo granice slowa (\b) wymagana przez extractMainSize i w efekcie rozmiar=null
+  // dla bardzo wielu realnych rekordow (np. producenci BKT, Bridgestone, Barum, marki z "X").
+  // Teraz zamiany dzialaja tylko gdy litera/myslnik jest MIEDZY cyframi (czyli realnie
+  // czesc zapisu rozmiaru typu "520 / 85 R 42" czy "11.2 - 24").
+  text = text.replace(/(\d)\s*-\s*(\d)/g, '$1-$2');
+  text = text.replace(/(\d)\s*R\s*(\d)/gi, '$1R$2');
+  text = text.replace(/(\d)\s*B\s*(\d)/gi, '$1B$2');
+  text = text.replace(/(\d)\s*x\s*(\d)/gi, '$1x$2');
+  // POPRAWKA 2026-06-18 (4): realne dane Bohnenkamp (Alliance/Nokian/Deli) maja zapis
+  // L-series z ODSTEPAMI i/lub z "R" zamiast "-" jako separatorem, np. "28 L - 26",
+  // "28 L R 26", "19.5L R 24", "400 / 45 L - 17.5" — wczesniejszy wzorzec L-series
+  // wymagal scisle "L-" bez spacji, wiec te zapisy nigdy nie byly rozpoznawane (rozmiar
+  // i wysokosc wychodzily null, mimo ze rozmiar byl obecny w tekscie nazwy). Normalizujemy
+  // do kanonicznej postaci "L-" bez wzgledu na oryginalny separator/odstepy.
+  text = text.replace(/(\d{1,3}(?:[.,]\d+)?)\s*L\s*[-R]\s*(\d{1,3}(?:[.,]\d+)?)/gi, '$1L-$2');
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+function extractMainSize(value) {
+  const text = normalizeSizeText(value);
+  // POPRAWKA 2026-06-18 (3): kilka realnych dodatkowych usterek wykrytych na danych
+  // Agrorami (BKT):
+  //  a) Kolejnosc wzorcow: 2-liczbowy bias "W-D" lapal SUBSTRING wewnatrz dluzszego
+  //     3-liczbowego zapisu "WxP-D" (np. "10.5x80-18" -> bias-D znajdowal "80-18" w
+  //     srodku stringa, obcinajac "10.5x" i dajac bledny rozmiar/wysokosc). Naprawka:
+  //     wzorzec "WxP-D" musi byc sprawdzany PRZED bias-D.
+  //  b) Sufiksy dolepione bez separatora (np. "VF520/60R28NRO", "17.5R25L5" — "NRO"/"L5"
+  //     to oznaczenia bieznika/zastosowania BKT, nie czesc rozmiaru) blokowaly \b na
+  //     koncu wzorca (cyfra+litera to oba znaki \w, brak granicy). Naprawka: koniec
+  //     wzorcow 1/2/3 zamieniony z \b na (?![\d.]) — pozwala litery po rozmiarze,
+  //     ale wciaz blokuje "dociaganie" kolejnych cyfr (zapobiega bledom typu 85R2|5).
+  //  c) Format "WxD" bez profilu (2 liczby, separator "x", bez segmentu "-srednica"),
+  //     np. "7x14", "8x16", "12,00x24" — kompletnie nieobslugiwany. Nowy wzorzec na
+  //     koniec listy (po 3-liczbowym wariancie, ktory ma priorytet gdy obie czesci sa).
+  const patterns = [
+    /\b(?:VF|IF)?\d{2,4}(?:[.,]\d+)?\/\d{1,3}(?:[.,]\d+)?[RBD-]\d{1,3}(?:[.,]\d+)?(?![\d.])/i,
+    // slash + L-series z podanym profilem (np. "400/45L-17.5") — MUSI byc przed plain
+    // L-series nizej, inaczej plain L-series zlapie tylko fragment po "/" (profil
+    // pomylony z szerokoscia, prefiks "400/" zostaje odciety).
+    /\b\d{2,4}(?:[.,]\d+)?\/\d{1,3}(?:[.,]\d+)?L-\d{1,3}(?:[.,]\d+)?(?![\d.])/i,
+    /\b\d{1,3}(?:[.,]\d+)?[RBD]\d{1,3}(?:[.,]\d+)?(?![\d.])/i,
+    // notacja flotacyjna L-series (np. "30.5L-32", "17.5L-24", "28L-26")
+    /\b\d{1,3}(?:[.,]\d+)?L-\d{1,3}(?:[.,]\d+)?(?![\d.])/i,
+    // "WxP-D" (3 liczby, np. "10.5x80-18") — MUSI byc przed bias-D "W-D", inaczej
+    // bias-D zlapie tylko ostatnie dwie liczby.
+    /\b\d{1,3}(?:[.,]\d+)?x\d{1,3}(?:[.,]\d+)?-\d{1,3}(?:[.,]\d+)?\b/i,
+    /(?<![\d.])\d{1,3}(?:[.,]\d+)?-\d{1,3}(?:[.,]\d+)?(?![\d.])/i,
+    // "WxD" (2 liczby, bez profilu, np. "7x14", "12,00x24")
+    /\b\d{1,3}(?:[.,]\d+)?x\d{1,3}(?:[.,]\d+)?\b/i
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) return normalizeSizeText(match[0]).replace(',', '.');
+  }
+  return null;
+}
+
+function parseSize(value) {
+  const raw = normalizeSizeText(value);
+  const size = extractMainSize(raw);
+  const result = {
+    rozmiar: size,
+    szerokosc: null,
+    profil: null,
+    srednica: null,
+    konstrukcja: null,
+    wysokoscRzeczywistaCm: null,
+    wysokoscBokuCm: null
+  };
+  if (!size) return result;
+
+  let match = size.match(/^(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)L-(\d{1,3}(?:\.\d+)?)$/i);
+  if (match) {
+    // slash + L-series z profilem, np. "400/45L-17.5"
+    result.szerokosc = parseNumber(match[1]);
+    result.profil = parseNumber(match[2]);
+    result.konstrukcja = 'L';
+    result.srednica = parseNumber(match[3]);
+    match = null;
+  } else {
+    match = size.match(/^(VF|IF)?(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)([RBD-])(\d{1,3}(?:\.\d+)?)$/i);
+  }
+  if (match) {
+    result.szerokosc = parseNumber(match[2]);
+    result.profil = parseNumber(match[3]);
+    const k = match[4].toUpperCase();
+    result.konstrukcja = k === '-' ? 'D' : k;
+    result.srednica = parseNumber(match[5]);
+  } else if (result.konstrukcja !== 'L') {
+    match = size.match(/^(\d{1,3}(?:\.\d+)?)([RBD])(\d{1,3}(?:\.\d+)?)$/i);
+    if (match) {
+      result.szerokosc = parseNumber(match[1]);
+      result.konstrukcja = match[2].toUpperCase();
+      result.srednica = parseNumber(match[3]);
+    } else {
+      match = size.match(/^(\d{1,3}(?:\.\d+)?)-(\d{1,3}(?:\.\d+)?)$/);
+      if (match) {
+        result.szerokosc = parseNumber(match[1]);
+        result.profil = null;
+        result.konstrukcja = 'D';
+        result.srednica = parseNumber(match[2]);
+      } else {
+        // POPRAWKA 2026-06-18: notacja L-series (szerokosc + "L" + "-" + srednica),
+        // np. "30.5L-32". Brak profilu (jak przy bias "D"), wiec domyslny profil 83%
+        // jest stosowany dalej w obliczeniu wysokosci tak jak dla konstrukcji "D".
+        match = size.match(/^(\d{1,3}(?:\.\d+)?)L-(\d{1,3}(?:\.\d+)?)$/i);
+        if (match) {
+          result.szerokosc = parseNumber(match[1]);
+          result.profil = null;
+          result.konstrukcja = 'L';
+          result.srednica = parseNumber(match[2]);
+        } else {
+          // POPRAWKA 2026-06-18 (3): zapis "WxP-D" (3 liczby, separator "x" miedzy
+          // szerokoscia i profilem, np. "10.5x80-18") — tradycyjna notacja bias-ply.
+          match = size.match(/^(\d{1,3}(?:\.\d+)?)x(\d{1,3}(?:\.\d+)?)-(\d{1,3}(?:\.\d+)?)$/i);
+          if (match) {
+            result.szerokosc = parseNumber(match[1]);
+            result.profil = parseNumber(match[2]);
+            result.konstrukcja = 'D';
+            result.srednica = parseNumber(match[3]);
+          } else {
+            // zapis "WxD" (2 liczby, bez profilu, np. "7x14", "12,00x24")
+            match = size.match(/^(\d{1,3}(?:\.\d+)?)x(\d{1,3}(?:\.\d+)?)$/i);
+            if (match) {
+              result.szerokosc = parseNumber(match[1]);
+              result.profil = null;
+              result.konstrukcja = 'D';
+              result.srednica = parseNumber(match[2]);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (result.szerokosc !== null && result.srednica !== null) {
+    const metricWidth = result.szerokosc >= 100;
+    const widthCm = metricWidth ? result.szerokosc / 10 : result.szerokosc * 2.54;
+    const profile = result.profil ?? 83;
+    result.wysokoscBokuCm = Math.round(widthCm * (profile / 100) * 100) / 100;
+    result.wysokoscRzeczywistaCm = Math.round((result.wysokoscBokuCm * 2 + result.srednica * 2.54) * 100) / 100;
+  }
+
+  return result;
+}
+
+function parseLoadSpeed(value) {
+  const text = cleanText(value).replace(/\s*\/\s*/g, '/').replace(/\s+/g, '');
+  if (!text) return { indeksNosnosci: null, indeksPredkosci: null };
+  const direct = text.match(/^(\d{2,3})([A-Z]\d?)\/(\d{2,3})([A-Z]\d?)$/i);
+  if (direct) {
+    return {
+      indeksNosnosci: `${direct[1]}/${direct[3]}`,
+      indeksPredkosci: `${direct[2].toUpperCase()}/${direct[4].toUpperCase()}`
+    };
+  }
+  const pairs = [];
+  const re = /(\d{2,3})([A-Z]\d?)/gi;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    if (/PR$/i.test(match[0])) continue;
+    pairs.push({ load: match[1], speed: match[2].toUpperCase() });
+  }
+  if (!pairs.length) return { indeksNosnosci: null, indeksPredkosci: null };
+  return {
+    indeksNosnosci: pairs.map(p => p.load).join('/'),
+    indeksPredkosci: pairs.map(p => p.speed).join('/')
+  };
+}
+
+function normalizeTlTt(value) {
+  const text = cleanText(value).toUpperCase();
+  if (!text) return null;
+  if (text.includes('TL')) return 'TL';
+  if (text.includes('TT')) return 'TT';
+  return null;
+}
+
+function inferProducerFromName(name, sizeText) {
+  const text = cleanText(name).replace(/^opona\s+/i, '');
+  const escapedSize = cleanText(sizeText).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const withoutSize = escapedSize ? text.replace(new RegExp(`^${escapedSize}\\s*`, 'i'), '') : text;
+  const token = emptyToNull(withoutSize.split(/\s+/)[0]);
+  if (!token || /^\d/.test(token) || /^(TL|TT|PR|VF|IF|DOT)$/i.test(token)) return null;
+  return token;
+}
+
+function parseTechnicalMarks(...values) {
+  const text = values.map(v => cleanText(v)).join(' ');
+  const upper = text.toUpperCase();
+  const loadSpeed = parseLoadSpeed(text);
+  const prMatch = upper.match(/\b(\d{1,2})\s*PR\b/);
+  return {
+    ...loadSpeed,
+    pr: prMatch ? prMatch[1] : null,
+    tlTt: /\bTL\b/.test(upper) ? 'TL' : /\bTT\b/.test(upper) ? 'TT' : null,
+    vfIf: /\bVF\b/.test(upper) ? 'VF' : /\bIF\b/.test(upper) ? 'IF' : null,
+    nro: /\bNRO\b/.test(upper) ? 1 : 0,
+    cho: /\bCHO\b/.test(upper) ? 1 : 0,
+    cfo: /\bCFO\b/.test(upper) ? 1 : 0,
+    sb: /\bSB\b|\bSTEEL BELTED\b/.test(upper) ? 1 : 0,
+    sf: /\bSF\b/.test(upper) ? 1 : 0,
+    stubbleResistant: /\bSTUBBLE\b/.test(upper) ? 1 : 0
+  };
+}
+
+function parseJmkLoadSpeed(row) {
+  const speed1 = emptyToNull(row.speed1);
+  const speed2 = emptyToNull(row.speed2);
+  const load1Raw = emptyToNull(row.load1);
+  const load2Raw = emptyToNull(row.load2);
+  const loads = [];
+  const speeds = [];
+  let pr = null;
+
+  function addLoadSpeed(loadRaw, speedRaw) {
+    if (!loadRaw) return;
+    const prMatch = loadRaw.match(/^(\d{1,2})\s*PR$/i);
+    if (prMatch) {
+      pr = prMatch[1];
+      return;
+    }
+    const embedded = parseLoadSpeed(loadRaw);
+    if (embedded.indeksNosnosci && embedded.indeksPredkosci) {
+      const loadParts = embedded.indeksNosnosci.split('/');
+      const speedParts = embedded.indeksPredkosci.split('/');
+      for (let i = 0; i < loadParts.length; i++) {
+        loads.push(loadParts[i]);
+        speeds.push(speedParts[i] || speedRaw || null);
+      }
+      return;
+    }
+    loads.push(loadRaw.replace(/\s+/g, ''));
+    speeds.push(speedRaw || null);
+  }
+
+  addLoadSpeed(load1Raw, speed1);
+  addLoadSpeed(load2Raw, speed2);
+
+  return {
+    indeksNosnosci: loads.length ? loads.join('/') : null,
+    indeksPredkosci: speeds.filter(Boolean).length ? speeds.map(s => s || '').join('/') : null,
+    pr
+  };
+}
+
+function formatLiSi(load, speed) {
+  if (!load || !speed) return null;
+  const loads = String(load).split('/');
+  const speeds = String(speed).split('/');
+  if (loads.length > 1 && speeds.length === 1) return `${loads.join('/')}${speeds[0]}`;
+  return loads.map((li, idx) => `${li}${speeds[idx] || speeds[0] || ''}`).join('/');
+}
+
+function normalizeJmk(record) {
+  const konstrukcjaRaw = emptyToNull(record.konstrukcja);
+  const konstrukcjaMark = konstrukcjaRaw === '-' ? '-' : konstrukcjaRaw || (/R/i.test(record.nazwa || '') ? 'R' : '-');
+  const rozmiar = record.rozmiar || [
+    record.szerokosc,
+    record.profil ? `/${record.profil}` : '',
+    konstrukcjaMark === '-' ? '-' : konstrukcjaMark,
+    record.srednica
+  ].filter(Boolean).join('');
+  const size = parseSize(rozmiar || record.nazwa);
+  const loadSpeed = parseJmkLoadSpeed({
+    speed1: record.indeksPredkosci1,
+    speed2: record.indeksPredkosci2,
+    load1: record.indeksNosnosci1,
+    load2: record.indeksNosnosci2
+  });
+  const marks = parseTechnicalMarks(record.nazwa, record.system);
+  const kategoria = cleanText(record.rodzaj).toLowerCase() || null;
+  const liSi = formatLiSi(loadSpeed.indeksNosnosci, loadSpeed.indeksPredkosci);
+  const cenaZakupu = normalizePrice(record.cenaKlientNetto);
+  const stan = normalizeQty(record.magazyn1);
+  const model = emptyToNull(record.bieznik);
+  const marka = emptyToNull(record.producent);
+  const result = {
+    kategoria,
+    kodDostawcy: emptyToNull(record.kodProducenta),
+    ean: emptyToNull(record.ean),
+    marka,
+    model,
+    rozmiar: size.rozmiar,
+    rozmiarAlternatywny: emptyToNull(record.zamiennik),
+    szerokosc: size.szerokosc ?? parseNumber(record.szerokosc),
+    profil: size.profil ?? parseNumber(record.profil),
+    srednica: size.srednica ?? parseNumber(record.srednica),
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: konstrukcjaRaw === '-' ? 'D' : konstrukcjaRaw || size.konstrukcja,
+    indeksNosnosci: loadSpeed.indeksNosnosci,
+    indeksPredkosci: loadSpeed.indeksPredkosci,
+    pr: loadSpeed.pr || marks.pr,
+    tlTt: marks.tlTt,
+    ms: /\bM\+S\b/i.test(record.nazwa || '') ? 1 : 0,
+    snow3pmsf: /\b3PMSF\b/i.test(record.nazwa || '') ? 1 : 0,
+    pozycjaOsi: /\bFRONT\b/i.test(record.nazwa || '') ? 'FRONT' : /\bDRIVE\b/i.test(record.nazwa || '') ? 'DRIVE' : null,
+    labelRolling: emptyToNull(record.oporToczenia),
+    labelWet: emptyToNull(record.przyczepnosc),
+    labelNoiseClass: emptyToNull(record.halasKlasa),
+    labelNoise: emptyToNull(record.halasDb),
+    dot: emptyToNull(record.dot) || 'nie starsza niz 3 lata',
+    waga: parseNumber(record.masaBrutto),
+    stan,
+    cenaZakupu
+  };
+  result.nazwaKoncowa = [
+    result.rozmiar,
+    marka,
+    model,
+    liSi,
+    result.pr ? `${result.pr}PR` : null,
+    result.tlTt,
+    result.snow3pmsf ? '3PMSF' : null,
+    result.ms ? 'M+S' : null,
+    result.pozycjaOsi
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return result;
+}
+
+function stripProducerAndModelFromName(name, size, producer) {
+  let text = removeSizePrefixFromName(name, size)
+    .replace(/\bOpona\b/gi, '')
+    .replace(/(?<![\d.])\d{1,3}(?:[.,]\d+)?-\d{1,3}(?:[.,]\d+)?(?![\d.])/g, '')
+    .replace(/\b\d{1,2}\s*PR\b/gi, '')
+    .replace(/\bTL\b|\bTT\b/gi, '')
+    .replace(/\bdemo\b/gi, '')
+    .trim();
+  if (producer) text = text.replace(new RegExp(`\\b${producer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'), ' ');
+  return text.replace(/\s+/g, ' ').trim() || null;
+}
+
+function firstImageUrl(value) {
+  const text = cleanText(value);
+  if (!text) return null;
+  return text.split(',').map(v => v.trim()).filter(Boolean)[0] || null;
+}
+
+function shouldRejectGrasdorf(record) {
+  const text = `${record.category || ''} ${record.name || ''}`.toLowerCase();
+  // POPRAWKA 2026-06-18: dodano "kół" (dopelniacz lm., np. "Komplet kół do ciagnika...")
+  // — wczesniejsza wersja lapala tylko "koła/koło/kola/kolo" i przepuszczala zestawy kol.
+  // UWAGA: \b NIE dziala po polskiej literze diakrytycznej (np. "ł" nie jest \w dla JS),
+  // wiec "kół\b" nigdy by nie zlapal "kół " — uzywamy negative lookahead przeciw klasie
+  // polskich liter zamiast \b.
+  // POPRAWKA 2026-06-18 (2): dodano "łącznik" — to laczniki/drazki do zestawow kol
+  // podwojnych (np. "ŁĄCZNIK W10x38/28/38/750"), nie opony, a przechodzily przez filtr.
+  return /(felg|śrub|srub|nakręt|nakret|akcesor|quad|atv|koł[ao]\b|kolo\b|kół(?![a-ząćęłńóśźż])|łączni|laczni|zaw[oó]r|oring|o-ring|obr[eę]cz|obrecz|ochraniacz|d[eę]tk|detk|bie[zż]nikowan)/i.test(text);
+}
+
+function normalizeGrasdorf(record) {
+  if (shouldRejectGrasdorf(record)) {
+    return {
+      odrzucony: true,
+      powod: 'akcesoria/felgi nie sa importowane'
+    };
+  }
+
+  const sizeFromName = parseSize(record.name);
+  const sizeFromField = parseSize(record.rozmiarOpony);
+  const size = sizeFromName.rozmiar ? sizeFromName : sizeFromField;
+  const producer = emptyToNull(record.producer) || inferProducerFromName(record.name, size.rozmiar);
+  const model = stripProducerAndModelFromName(record.name, size.rozmiar, producer);
+  const cleanIndexText = cleanText(record.indeksNosnosci).replace(/\([^)]*\)/g, '');
+  const indexedSource = parseLoadSpeed(record.additionalName).indeksNosnosci ? record.additionalName : cleanIndexText;
+  const indexedMarks = parseTechnicalMarks(indexedSource);
+  const allMarks = parseTechnicalMarks(record.name, record.additionalName, record.indeksNosnosci, record.iloscPlocien);
+  const marks = {
+    ...indexedMarks,
+    pr: allMarks.pr,
+    tlTt: allMarks.tlTt
+  };
+  const typ = cleanText(record.typ).toUpperCase();
+  const konstrukcjaTxt = cleanText(record.konstrukcja).toLowerCase();
+  const result = {
+    odrzucony: false,
+    kategoria: /opona rolnicza/i.test(record.zastosowanie || '') ? 'rolnicze' : /przemys/i.test(record.zastosowanie || record.category || '') ? 'przemyslowe' : 'rolnicze',
+    kodDostawcy: emptyToNull(record.indexCatalogue),
+    ean: emptyToNull(record.eanCode),
+    marka: producer,
+    model,
+    rozmiar: size.rozmiar,
+    rozmiarAlternatywny: emptyToNull(record.additionalName?.match(/\(([^)]+)\)/)?.[1]) || emptyToNull(record.rozmiarOpony),
+    szerokosc: size.szerokosc,
+    profil: size.profil,
+    srednica: size.srednica,
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: konstrukcjaTxt.includes('radial') ? 'R' : konstrukcjaTxt.includes('diagonal') ? 'D' : size.konstrukcja,
+    indeksNosnosci: marks.indeksNosnosci,
+    indeksPredkosci: marks.indeksPredkosci,
+    pr: marks.pr || emptyToNull(record.iloscPlocien)?.replace(/\s*PR$/i, ''),
+    tlTt: normalizeTlTt(record.typ) || marks.tlTt,
+    dot: emptyToNull((record.name || '').match(/\bDOT\s*([0-9]{2,4})\b/i)?.[1]) || 'nie starsza niz 3 lata',
+    stan: normalizeQty(record.availabilityCount),
+    cenaZakupu: normalizePrice(record.priceNet),
+    linkZdjecia: firstImageUrl(record.imageUrls),
+    waga: parseNumber(record.weight),
+    dopisek: /\bdemo\b/i.test(record.name || record.indexCatalogue || '') ? 'demo' : /pokazowa/i.test(record.stan || '') ? 'pokazowa' : null
+  };
+  const liSi = formatLiSi(result.indeksNosnosci, result.indeksPredkosci);
+  result.nazwaKoncowa = [
+    result.rozmiar,
+    result.marka,
+    result.model,
+    liSi,
+    result.pr ? `${result.pr}PR` : null,
+    result.tlTt,
+    result.dopisek
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return result;
+}
+
+function parseHandlopexLoadSpeed(loadRaw, speedRaw) {
+  const loadText = cleanText(loadRaw).replace(/[\[\]]/g, '').replace(/\s+/g, '');
+  const speedText = emptyToNull(speedRaw);
+  const parsed = parseLoadSpeed(loadText);
+  if (parsed.indeksNosnosci && parsed.indeksPredkosci) return parsed;
+  if (loadText && speedText) {
+    const load = loadText.replace(/[A-Z]\d?/gi, '');
+    return {
+      indeksNosnosci: load || null,
+      indeksPredkosci: speedText
+    };
+  }
+  return { indeksNosnosci: loadText || null, indeksPredkosci: speedText || null };
+}
+
+function extractHandlopexModel(nazwa, marka, size) {
+  let text = removeSizePrefixFromName(nazwa, size)
+    .replace(/\([^)]*\)/g, ' ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/\b\d{1,2}\s*PR\b/gi, ' ')
+    .replace(/\bTL\b|\bTT\b|\bM\+S\b|\b3PMSF\b|\bNEW\b/gi, ' ')
+    .replace(/\b[A-Z]\d?\b/g, ' ')
+    .trim();
+  if (marka) text = text.replace(new RegExp(`\\b${marka.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'ig'), ' ');
+  return text.replace(/\s+/g, ' ').trim() || null;
+}
+
+function normalizeHandlopex(record) {
+  const sizeRaw = `${record.szerokosc || ''}/${record.profil || ''}R${record.srednica || ''}`;
+  const nameSize = parseSize(record.nazwa);
+  const fallbackSize = parseSize(sizeRaw);
+  const size = nameSize.rozmiar ? nameSize : fallbackSize;
+  const loadSpeed = parseHandlopexLoadSpeed(record.indeksNosnosci, record.indeksPredkosci);
+  const marks = parseTechnicalMarks(record.nazwa);
+  const marka = emptyToNull(record.producent);
+  const model = extractHandlopexModel(record.nazwa, marka, size.rozmiar);
+  const simpleInchSize = !!(size.rozmiar && /^\d{1,3}(?:\.\d+)?-\d{1,3}(?:\.\d+)?$/.test(size.rozmiar));
+  const result = {
+    kategoria: record.kategoria || (/16PR|AWE 713|SET/i.test(record.nazwa || '') ? 'przemyslowe' : /R\d{2}\.5|M\+S|3PMSF/i.test(record.nazwa || '') ? 'ciezarowe' : 'rolnicze'),
+    kodDostawcy: emptyToNull(record.symbolHandlopex),
+    ean: emptyToNull(record.ean),
+    marka,
+    model,
+    rozmiar: size.rozmiar,
+    szerokosc: parseNumber(record.szerokosc),
+    profil: simpleInchSize ? null : (parseNumber(record.profil) ?? size.profil),
+    srednica: parseNumber(record.srednica),
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: size.konstrukcja,
+    indeksNosnosci: loadSpeed.indeksNosnosci,
+    indeksPredkosci: loadSpeed.indeksPredkosci,
+    pr: marks.pr,
+    tlTt: marks.tlTt,
+    ms: /\bM\+S\b/i.test(record.nazwa || '') ? 1 : 0,
+    snow3pmsf: /\b3PMSF\b/i.test(record.nazwa || '') ? 1 : 0,
+    labelRolling: emptyToNull(record.oporToczenia),
+    labelWet: emptyToNull(record.przyczepnosc),
+    labelNoise: emptyToNull(record.halas),
+    labelNoiseClass: emptyToNull(record.labelNoise),
+    labelSnow: normalizeQty(record.labelSnow) ?? 0,
+    labelIce: normalizeQty(record.labelIce) ?? 0,
+    dot: emptyToNull(record.dot) || 'nie starsza niz 3 lata',
+    waga: parseNumber(record.waga),
+    stan: normalizeQty(record.ilosc),
+    cenaZakupu: normalizePrice(record.cenaHurtNetto),
+    dopisek: null
+  };
+  const liSi = formatLiSi(result.indeksNosnosci, result.indeksPredkosci);
+  result.nazwaKoncowa = [
+    result.rozmiar,
+    result.marka,
+    result.model,
+    liSi,
+    result.pr ? `${result.pr}PR` : null,
+    result.tlTt,
+    result.ms ? 'M+S' : null,
+    result.snow3pmsf ? '3PMSF' : null,
+    result.dopisek
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return result;
+}
+
+function normalizeAgrowiec(record) {
+  const size = parseSize(record.rozmiar);
+  const loadSpeed = parseLoadSpeed(record.indeksy);
+  const vfIf = emptyToNull(record.vfIf);
+  const result = {
+    kategoria: cleanText(record.kategoria).toLowerCase() || null,
+    kodDostawcy: null,
+    ean: emptyToNull(record.ean),
+    marka: emptyToNull(record.producent),
+    model: emptyToNull(record.model),
+    rozmiar: size.rozmiar,
+    szerokosc: size.szerokosc,
+    profil: size.profil,
+    srednica: size.srednica,
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: size.konstrukcja,
+    indeksNosnosci: loadSpeed.indeksNosnosci,
+    indeksPredkosci: loadSpeed.indeksPredkosci,
+    vfIf,
+    tlTt: null,
+    pr: null,
+    dot: 'nie starsza niz 3 lata',
+    stan: normalizeQty(record.stan),
+    cenaZakupu: normalizePrice(record.cena)
+  };
+  const liSi = formatLiSi(result.indeksNosnosci, result.indeksPredkosci);
+  const sizeForName = vfIf ? `${vfIf}${result.rozmiar}` : result.rozmiar;
+  result.nazwaKoncowa = [sizeForName, result.marka, result.model, liSi].filter(Boolean).join(' ').trim();
+  return result;
+}
+
+function stripBrandFromModel(model, brand) {
+  let text = cleanText(model);
+  if (!text) return null;
+  if (brand) {
+    text = text.replace(new RegExp(`\\b${brand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'ig'), ' ');
+  }
+  text = text.replace(/\bTyres\b/gi, ' ').replace(/\bSB\b|\bSF\b/gi, ' ');
+  return text.replace(/\s+/g, ' ').trim() || null;
+}
+
+function normalizeNokian(record) {
+  const size = parseSize(record.rozmiar);
+  const loadSpeed = parseLoadSpeed(record.liSi);
+  const marka = emptyToNull(record.producent);
+  const model = stripBrandFromModel(record.model || record.bieznik, marka);
+  const sbSf = cleanText(record.sfSb).toUpperCase();
+  const result = {
+    kategoria: /rolnicz/i.test(record.rodzaj || '') ? 'rolnicze' : cleanText(record.rodzaj).toLowerCase() || null,
+    kodDostawcy: emptyToNull(record.kodProduktu),
+    ean: emptyToNull(record.ean),
+    marka,
+    model,
+    rozmiar: size.rozmiar,
+    rozmiarAlternatywny: emptyToNull(record.rozmiarAlternatywny),
+    szerokosc: size.szerokosc,
+    profil: size.profil,
+    srednica: size.srednica,
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: size.konstrukcja,
+    indeksNosnosci: loadSpeed.indeksNosnosci,
+    indeksPredkosci: loadSpeed.indeksPredkosci,
+    sb: sbSf === 'SB' ? 1 : null,
+    sf: sbSf === 'SF' ? 1 : null,
+    tlTt: emptyToNull(record.tlTt),
+    pr: emptyToNull(record.pr)?.replace(/\s*PR$/i, '') || null,
+    dot: 'nie starsza niz 3 lata',
+    stan: normalizeQty(record.magazyn),
+    cenaZakupu: normalizePrice(record.zakup1)
+  };
+  const liSi = formatLiSi(result.indeksNosnosci, result.indeksPredkosci);
+  result.nazwaKoncowa = [
+    result.rozmiar,
+    result.marka,
+    result.model,
+    liSi,
+    result.sb ? 'SB' : result.sf ? 'SF' : null,
+    result.pr ? `${result.pr}PR` : null,
+    result.tlTt
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return result;
+}
+
+function normalizeScientificEan(value) {
+  const raw = cleanText(value);
+  if (!raw) return null;
+  if (!/[eE]/.test(raw)) return raw.replace(/\D/g, '') || raw;
+  const normalized = raw.replace(',', '.');
+  const num = Number(normalized);
+  if (!Number.isFinite(num)) return raw;
+  return Math.trunc(num).toString();
+}
+
+function normalizeTrelleborg(record) {
+  const size = parseSize(record.rozmiar);
+  const loadSpeed = parseLoadSpeed(record.liSi);
+  const vfIf = emptyToNull(record.vfIf);
+  const cfo = emptyToNull(record.cfo) ? 1 : 0;
+  const result = {
+    kategoria: cleanText(record.rodzaj).toLowerCase() || null,
+    kodDostawcy: emptyToNull(record.kodProducenta),
+    ean: normalizeScientificEan(record.ean),
+    marka: emptyToNull(record.producent),
+    model: emptyToNull(record.bieznik),
+    rozmiar: size.rozmiar,
+    rozmiarAlternatywny: emptyToNull(record.rozmiarAlternatywny),
+    szerokosc: size.szerokosc,
+    profil: size.profil,
+    srednica: size.srednica,
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: size.konstrukcja,
+    indeksNosnosci: loadSpeed.indeksNosnosci,
+    indeksPredkosci: loadSpeed.indeksPredkosci,
+    pr: emptyToNull(record.pr)?.replace(/\s*PR$/i, '') || null,
+    vfIf,
+    cfo,
+    tlTt: emptyToNull(record.tlTt),
+    dot: 'nie starsza niz 3 lata',
+    stan: normalizeQty(record.magazyn),
+    cenaZakupu: normalizePrice(record.cena)
+  };
+  const liSi = formatLiSi(result.indeksNosnosci, result.indeksPredkosci);
+  const sizeForName = vfIf ? `${vfIf}${result.rozmiar}` : result.rozmiar;
+  result.nazwaKoncowa = [
+    sizeForName,
+    cfo ? 'CFO' : null,
+    result.marka,
+    result.model,
+    liSi,
+    result.pr ? `${result.pr}PR` : null,
+    result.tlTt
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return result;
+}
+
+function normalizeAgrorami(record) {
+  const size = parseSize(record.rozmiar);
+  const loadRaw = emptyToNull(record.nosnosc);
+  const speedRaw = emptyToNull(record.predkosc);
+  const loadParts = loadRaw ? loadRaw.replace(/\s+/g, '').split('/') : [];
+  const speedParts = speedRaw ? speedRaw.replace(/\s+/g, '').split('/') : [];
+  const parsedLiSi = parseLoadSpeed(`${record.nosnosc || ''}${record.predkosc || ''}`);
+  const load = loadParts.length ? loadParts.join('/') : parsedLiSi.indeksNosnosci || loadRaw;
+  const speed = speedParts.length
+    ? (loadParts.length > 1 && speedParts.length === 1 ? loadParts.map(() => speedParts[0]).join('/') : speedParts.join('/'))
+    : parsedLiSi.indeksPredkosci || speedRaw;
+  const result = {
+    kategoria: cleanText(record.kategoria).toLowerCase() === 'inne' ? 'rolnicze' : cleanText(record.kategoria).toLowerCase(),
+    kodDostawcy: emptyToNull(record.id),
+    ean: emptyToNull(record.ean),
+    marka: emptyToNull(record.producent),
+    model: emptyToNull(record.bieznik),
+    rozmiar: size.rozmiar,
+    szerokosc: size.szerokosc,
+    profil: size.profil,
+    srednica: size.srednica,
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: size.konstrukcja,
+    indeksNosnosci: load,
+    indeksPredkosci: speed,
+    pr: emptyToNull(record.plotna),
+    tlTt: normalizeTlTt(record.tlTt),
+    dot: 'nie starsza niz 3 lata',
+    waga: parseNumber(record.waga),
+    sezon: emptyToNull(record.sezon),
+    stan: normalizeQty(record.magazyn),
+    cenaZakupu: normalizePrice(record.cena)
+  };
+  const liSi = formatLiSi(load, speed);
+  result.nazwaKoncowa = [
+    result.rozmiar,
+    result.marka,
+    result.model,
+    liSi,
+    result.pr ? `${result.pr}PR` : null,
+    result.tlTt
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return result;
+}
+
+function extractTreadDesignation(value) {
+  const text = cleanText(value).toUpperCase();
+  const match = text.match(/\b([RILEGC])-?\s*(\d)([SW])?\b/);
+  if (!match) return null;
+  return `${match[1]}-${match[2]}${match[3] || ''}`;
+}
+
+function normalizeGri(record) {
+  const spec = cleanText(record.rozmiar || record.spec || record.opis);
+  const size = parseSize(spec);
+  const marks = parseTechnicalMarks(spec);
+  const indexSource = spec
+    .replace(size.rozmiar || '', ' ')
+    .replace(/\b\d{1,2}\s*PR\b/gi, ' ')
+    .replace(/\b[RILEGC]-?\s*\d[SW]?\b/gi, ' ')
+    .replace(/\bTL\b|\bTT\b/gi, ' ');
+  const loadSpeed = parseLoadSpeed(indexSource);
+  const tread = extractTreadDesignation(spec);
+  const result = {
+    kategoria: tread && /^[ILEGC]-/.test(tread) ? 'przemyslowe' : 'rolnicze',
+    kodDostawcy: emptyToNull(record.kodDostawcy || record.nrKat),
+    ean: emptyToNull(record.ean),
+    marka: 'GRI',
+    model: emptyToNull(record.model || record.bieznik),
+    rozmiar: size.rozmiar,
+    szerokosc: size.szerokosc,
+    profil: size.profil,
+    srednica: size.srednica,
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    konstrukcja: size.konstrukcja,
+    indeksNosnosci: loadSpeed.indeksNosnosci,
+    indeksPredkosci: loadSpeed.indeksPredkosci,
+    pr: marks.pr,
+    tlTt: marks.tlTt,
+    oznaczenieBieznika: tread,
+    dot: 'nie starsza niz 3 lata',
+    stan: normalizeQty(record.stan || record.ilosc),
+    cenaZakupu: normalizePrice(record.cena)
+  };
+  const liSi = formatLiSi(result.indeksNosnosci, result.indeksPredkosci);
+  result.nazwaKoncowa = [
+    result.rozmiar,
+    result.marka,
+    result.model,
+    liSi,
+    result.pr ? `${result.pr}PR` : null,
+    result.oznaczenieBieznika,
+    result.tlTt
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+  return result;
+}
+
+function removeSizePrefixFromName(name, size) {
+  let text = cleanText(name)
+    .replace(/^Opona\s+/i, '')
+    .replace(/\([^)]*szt\.[^)]*\)/i, '')
+    .replace(/,\s*/g, ' ')
+    .trim();
+  if (size) {
+    const sizePattern = size.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)([RBD-])(\d+(?:\.\d+)?)$/i);
+    if (sizePattern) {
+      const [, w, p, k, d] = sizePattern;
+      const rough = `${w}\\s*\\/\\s*${p}\\s*${k === '-' ? '[-]' : k}\\s*${d}`;
+      text = text.replace(new RegExp(`\\b(?:VF|IF)?\\s*${rough}\\b`, 'i'), ' ');
+    } else {
+      const rough = size.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/-/g, '\\s*-\\s*');
+      text = text.replace(new RegExp(`(?<![\\d.])${rough}(?![\\d.])`, 'i'), ' ');
+    }
+  }
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+function extractModelFromBohnenkamp(name, size) {
+  const comma = cleanText(name).split(',');
+  if (comma.length > 1) return comma.slice(1).join(',').trim() || null;
+  const rest = removeSizePrefixFromName(name, size);
+  const withoutMarks = rest
+    .replace(/\bNRO\b/gi, '')
+    .replace(/\bCFO\b/gi, '')
+    .replace(/\bCHO\b/gi, '')
+    .trim();
+  return withoutMarks || null;
+}
+
+function buildTyreName(parts) {
+  const sizeForName = parts.vfIf ? `${parts.vfIf}${parts.rozmiar}` : parts.rozmiar;
+  const liSi = parts.indeksNosnosci && parts.indeksPredkosci
+    ? parts.indeksNosnosci.split('/').map((li, idx) => `${li}${parts.indeksPredkosci.split('/')[idx] || parts.indeksPredkosci}`).join('/')
+    : null;
+  const tech = [
+    parts.nro ? 'NRO' : null,
+    parts.cho ? 'CHO' : null,
+    parts.cfo ? 'CFO' : null,
+    parts.sb ? 'SB' : null,
+    parts.sf ? 'SF' : null,
+    parts.stubbleResistant ? 'Stubble Guard' : null
+  ].filter(Boolean);
+  return [
+    sizeForName,
+    ...tech.filter(x => ['NRO', 'CHO', 'CFO'].includes(x)),
+    parts.marka,
+    parts.model,
+    liSi,
+    parts.pr ? `${parts.pr}PR` : null,
+    ...tech.filter(x => !['NRO', 'CHO', 'CFO'].includes(x)),
+    parts.tlTt
+  ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function normalizeBohnenkamp(row) {
+  const [
+    kodDostawcy,
+    ean,
+    producent,
+    nazwa,
+    spec,
+    producent2,
+    _flag,
+    cena,
+    stanKolumna,
+    _ignored,
+  ] = row;
+  const cleanName = cleanText(nazwa);
+  const isTube = /d[ęe]tka/i.test(cleanName);
+  const sztMatch = cleanName.match(/\(szt\.?\s*(\d+)\)/i);
+  const size = parseSize(cleanName);
+  const marks = {
+    ...parseTechnicalMarks(spec),
+    vfIf: parseTechnicalMarks(cleanName).vfIf || parseTechnicalMarks(spec).vfIf,
+    nro: parseTechnicalMarks(cleanName).nro || parseTechnicalMarks(spec).nro,
+    cho: parseTechnicalMarks(cleanName).cho || parseTechnicalMarks(spec).cho,
+    cfo: parseTechnicalMarks(cleanName).cfo || parseTechnicalMarks(spec).cfo,
+    stubbleResistant: parseTechnicalMarks(cleanName).stubbleResistant || parseTechnicalMarks(spec).stubbleResistant
+  };
+
+  if (isTube) {
+    const alt = cleanText(row[5]).match(/\(([^)]+)\)/g) || [];
+    const altSizes = alt.map(v => v.replace(/[()]/g, '').trim()).filter(Boolean);
+    const valve = emptyToNull(spec);
+    return {
+      kategoria: 'detki',
+      kodDostawcy: emptyToNull(kodDostawcy),
+      ean: emptyToNull(ean),
+      marka: emptyToNull(producent || producent2),
+      typ: 'Detka',
+      rozmiar: size.rozmiar,
+      rozmiarAlternatywny: altSizes.join('; ') || null,
+      wentyl: valve,
+      stan: sztMatch ? Number.parseInt(sztMatch[1], 10) : null,
+      cenaZakupu: normalizePrice(cena),
+      nazwaKoncowa: ['Detka', size.rozmiar, emptyToNull(producent || producent2), valve].filter(Boolean).join(' ')
+    };
+  }
+
+  const model = extractModelFromBohnenkamp(cleanName, size.rozmiar);
+  const result = {
+    kategoria: 'rolnicze',
+    kodDostawcy: emptyToNull(kodDostawcy),
+    ean: emptyToNull(ean),
+    marka: emptyToNull(producent || producent2),
+    model,
+    rozmiar: size.rozmiar,
+    szerokosc: size.szerokosc,
+    profil: size.profil,
+    srednica: size.srednica,
+    konstrukcja: size.konstrukcja,
+    wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
+    wysokoscBokuCm: size.wysokoscBokuCm,
+    ...marks,
+    dot: 'nie starsza niz 3 lata',
+    stan: normalizeQty(stanKolumna),
+    cenaZakupu: normalizePrice(cena)
+  };
+  result.nazwaKoncowa = buildTyreName(result);
+  return result;
+}
+
+module.exports = {
+  cleanText,
+  normalizePrice,
+  normalizeQty,
+  parseSize,
+  parseLoadSpeed,
+  parseTechnicalMarks,
+  buildTyreName,
+  normalizeBohnenkamp,
+  normalizeJmk,
+  normalizeGrasdorf,
+  normalizeHandlopex,
+  normalizeAgrowiec,
+  normalizeNokian,
+  normalizeTrelleborg,
+  normalizeAgrorami,
+  normalizeGri
+};

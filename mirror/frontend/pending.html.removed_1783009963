@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bridge — Atrybuty do akceptacji</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='6' cy='28' r='2.5' fill='%23d97706'/%3E%3Ccircle cx='34' cy='28' r='2.5' fill='%23d97706'/%3E%3Cpath d='M6 28 Q 20 4, 34 28' stroke='%23d97706' stroke-width='2.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#F7F6F2; --surface:#F9F8F5; --surface2:#FBFBF9; --border:#D4D1CA;
+    --text:#28251D; --muted:#7A7974; --faint:#BAB9B4;
+    --primary:#01696F; --primary-hover:#0C4E54;
+    --accent:#D97706; --accent-hover:#B45309;
+    --error:#A12C7B; --success:#437A22; --warn:#964219;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.5}
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+  header h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-0.01em}
+  header .subtitle{color:var(--muted);font-size:13px;margin-top:2px}
+  .container{max-width:1400px;margin:0 auto;padding:24px}
+  .toolbar{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .toolbar label{font-weight:500;color:var(--muted);font-size:13px}
+  select,input[type=text]{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:white;font:inherit;color:var(--text);min-width:160px}
+  select:focus,input:focus{outline:2px solid var(--primary);outline-offset:-1px;border-color:var(--primary)}
+  button{padding:8px 16px;border:none;border-radius:6px;font:inherit;font-weight:500;cursor:pointer;transition:background .15s}
+  button.primary{background:var(--primary);color:white}
+  button.primary:hover{background:var(--primary-hover)}
+  button.success{background:var(--success);color:white}
+  button.success:hover{background:#365f1a}
+  button.error{background:var(--error);color:white}
+  button.error:hover{background:#7d215e}
+  button.warn{background:var(--warn);color:white}
+  button.warn:hover{background:#7a3616}
+  button.ghost{background:transparent;color:var(--text);border:1px solid var(--border)}
+  button.ghost:hover{background:var(--surface2)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:12px;font-weight:500;background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+  .badge.rodzaj{background:#E8F4F5;color:var(--primary);border-color:#B8DDE0}
+  .status{padding:8px 14px;border-radius:6px;font-size:13px;font-weight:500}
+  .status.ok{background:#E4F3D9;color:var(--success);border:1px solid #B8DFB0}
+  .status.err{background:#FBE4F0;color:var(--error);border:1px solid #EBB3D3}
+  .status.info{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+  table{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;border-collapse:collapse;overflow:hidden}
+  th{text-align:left;padding:12px;background:var(--surface2);border-bottom:1px solid var(--border);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted)}
+  td{padding:12px;border-bottom:1px solid var(--border);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:var(--surface2)}
+  td.wartosc{font-weight:600;font-family:'JetBrains Mono',ui-monospace,monospace;color:var(--text)}
+  td.actions{white-space:nowrap;text-align:right}
+  td.actions button{margin-left:6px;font-size:12px;padding:6px 10px}
+  .aliasy{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+  .alias-chip{background:#FFF6E5;color:#8B5A00;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:500;border:1px solid #EBD9B0;cursor:pointer;transition:background .15s}
+  .alias-chip:hover{background:#FDECC7}
+  .sim{opacity:.7;margin-left:4px}
+  .empty{text-align:center;padding:48px;color:var(--muted);font-size:15px}
+  .empty-icon{font-size:36px;margin-bottom:12px;opacity:.4}
+  #login-panel{max-width:400px;margin:60px auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px}
+  #login-panel h2{margin:0 0 16px 0;font-size:20px}
+  #login-panel input{width:100%;margin-bottom:12px}
+  #login-panel button{width:100%}
+  .stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .stats .badge.count{background:var(--primary);color:white;border-color:var(--primary)}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(40,37,29,0.5);display:flex;align-items:center;justify-content:center;z-index:100}
+  .modal{background:var(--surface);border-radius:8px;padding:24px;max-width:500px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+  .modal h3{margin:0 0 16px 0}
+  .modal label{display:block;margin-top:12px;font-weight:500;color:var(--muted);font-size:13px;margin-bottom:6px}
+  .modal input{width:100%}
+  .modal-actions{margin-top:20px;display:flex;gap:8px;justify-content:flex-end}
+  .toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:6px;font-weight:500;z-index:200;animation:slideIn .2s;box-shadow:0 8px 24px rgba(0,0,0,.15)}
+  .toast.ok{background:var(--success);color:white}
+  .toast.err{background:var(--error);color:white}
+  @keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+  .hint{color:var(--muted);font-size:12px;margin-top:8px}
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Atrybuty do akceptacji</h1>
+    <div class="subtitle">Nowe wartości atrybutów wykryte po imporcie danych</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a href="/" class="badge">← Bridge</a>
+    <button class="ghost" onclick="skanuj()">Skanuj teraz</button>
+    <button class="primary" onclick="odswiez()">Odśwież</button>
+  </div>
+</header>
+
+<div id="login-panel" style="display:none">
+  <h2>Zaloguj się</h2>
+  <input type="email" id="l-email" placeholder="email" value="marta.bieguniak@agrowiec.eu" />
+  <input type="password" id="l-pass" placeholder="hasło" />
+  <button class="primary" onclick="loguj()">Zaloguj</button>
+  <div id="l-err" class="hint" style="color:var(--error);margin-top:12px"></div>
+</div>
+
+<div class="container" id="main">
+  <div class="toolbar">
+    <label>Rodzaj:</label>
+    <select id="filter-rodzaj" onchange="odswiez()">
+      <option value="">— wszystkie —</option>
+    </select>
+    <div class="stats" id="stats"></div>
+    <div style="flex:1"></div>
+    <div id="status-line"></div>
+  </div>
+
+  <div id="lista"></div>
+</div>
+
+<div id="modal-container"></div>
+<div id="toast-container"></div>
+
+<script>
+const API = '';  // ten sam host
+let TOKEN = localStorage.getItem('bridge_token') || '';
+let RODZAJE = [];
+
+function el(id){return document.getElementById(id)}
+
+function toast(msg, kind){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (kind || 'ok');
+  t.textContent = msg;
+  el('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(), 3000);
+}
+
+async function api(path, opts){
+  opts = opts || {};
+  opts.headers = Object.assign({
+    'Content-Type':'application/json',
+    'Authorization':'Bearer ' + TOKEN
+  }, opts.headers||{});
+  const r = await fetch(API + path, opts);
+  if (r.status === 401 || r.status === 403){
+    TOKEN = ''; localStorage.removeItem('bridge_token');
+    pokazLogin(); throw new Error('brak autoryzacji');
+  }
+  const d = await r.json();
+  if (!d.ok && !r.ok) throw new Error(d.error || 'API error');
+  return d;
+}
+
+function pokazLogin(){
+  el('login-panel').style.display = 'block';
+  el('main').style.display = 'none';
+}
+function pokazMain(){
+  el('login-panel').style.display = 'none';
+  el('main').style.display = 'block';
+}
+
+async function loguj(){
+  el('l-err').textContent = '';
+  const email = el('l-email').value.trim();
+  const pass = el('l-pass').value;
+  try {
+    const r = await fetch(API + '/api/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password:pass})
+    });
+    const d = await r.json();
+    if (!d.token) throw new Error(d.error || 'brak tokena');
+    TOKEN = d.token;
+    localStorage.setItem('bridge_token', TOKEN);
+    pokazMain();
+    await zaladujRodzaje();
+    await odswiez();
+  } catch (e) {
+    el('l-err').textContent = 'Błąd logowania: ' + e.message;
+  }
+}
+
+async function zaladujRodzaje(){
+  try {
+    const d = await api('/api/atrybuty/rodzaje');
+    RODZAJE = d.items || d.rodzaje || [];
+    const sel = el('filter-rodzaj');
+    sel.innerHTML = '<option value="">— wszystkie —</option>';
+    for (const r of RODZAJE){
+      const opt = document.createElement('option');
+      opt.value = r.value || r.rodzaj || r;
+      opt.textContent = (r.label || r.value || r);
+      sel.appendChild(opt);
+    }
+  } catch (e) {
+    // rodzaje mogą być inaczej opakowane — cichutko pomijamy
+  }
+}
+
+async function skanuj(){
+  const btn = event && event.target;
+  if (btn) { btn.disabled = true; btn.textContent = 'Skanuję…' }
+  try {
+    const d = await api('/api/atrybuty/scan-pending', {method:'POST'});
+    toast('Scan: ' + (d.nowych_wartosci || 0) + ' nowych, ' + (d.zaktualizowano || 0) + ' zaktualizowanych');
+    await odswiez();
+  } catch (e) {
+    toast('Błąd scanu: ' + e.message, 'err');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Skanuj teraz' }
+  }
+}
+
+async function odswiez(){
+  const rodzaj = el('filter-rodzaj').value;
+  el('status-line').innerHTML = '<span class="status info">Ładuję…</span>';
+  try {
+    const q = rodzaj ? '?rodzaj=' + encodeURIComponent(rodzaj) : '';
+    const d = await api('/api/atrybuty/pending' + q);
+    el('status-line').innerHTML = '';
+    renderStats(d.items || []);
+    renderLista(d.items || []);
+  } catch (e) {
+    el('status-line').innerHTML = '<span class="status err">Błąd: ' + e.message + '</span>';
+  }
+}
+
+function renderStats(items){
+  const perRodzaj = {};
+  for (const it of items) perRodzaj[it.rodzaj] = (perRodzaj[it.rodzaj] || 0) + 1;
+  const parts = [`<span class="badge count">${items.length} do akceptacji</span>`];
+  for (const [r, n] of Object.entries(perRodzaj).sort((a,b)=>b[1]-a[1])){
+    parts.push(`<span class="badge">${r}: ${n}</span>`);
+  }
+  el('stats').innerHTML = parts.join('');
+}
+
+function fmt(d){
+  if (!d) return '';
+  return d.replace(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}).*$/, '$3.$2 $4:$5');
+}
+
+function renderLista(items){
+  if (items.length === 0){
+    el('lista').innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">✓</div>
+        <div>Brak wartości do akceptacji</div>
+        <div class="hint" style="margin-top:8px">Nowe wartości pojawią się tu automatycznie po każdym imporcie danych.</div>
+      </div>`;
+    return;
+  }
+  const rows = items.map(it => {
+    const aliasyHtml = (it.sugerowane_aliasy || []).length
+      ? `<div class="aliasy">Sugerowane aliasy:
+          ${it.sugerowane_aliasy.map(a =>
+            `<span class="alias-chip" title="Kliknij aby ustawić alias" onclick="alias(${it.id}, '${escapeAttr(a.wartosc)}')">${escapeHtml(a.wartosc)}<span class="sim">${a.podobienstwo}%</span></span>`
+          ).join('')}
+         </div>`
+      : '';
+    return `
+      <tr>
+        <td><span class="badge rodzaj">${escapeHtml(it.rodzaj)}</span></td>
+        <td class="wartosc">${escapeHtml(it.wartosc)}${aliasyHtml}</td>
+        <td>${it.ile_wystapien}</td>
+        <td style="color:var(--muted);font-size:12px">${escapeHtml(it.dostawcy || '')}</td>
+        <td style="color:var(--muted);font-size:12px">${fmt(it.pierwszy_import)}</td>
+        <td class="actions">
+          <button class="success" onclick="akceptuj(${it.id}, '${escapeAttr(it.wartosc)}')">Akceptuj</button>
+          <button class="ghost" onclick="edytuj(${it.id}, '${escapeAttr(it.wartosc)}', '${escapeAttr(it.rodzaj)}')">Edytuj</button>
+          <button class="warn" onclick="aliasModal(${it.id}, '${escapeAttr(it.wartosc)}', '${escapeAttr(it.rodzaj)}')">Alias</button>
+          <button class="error" onclick="odrzuc(${it.id}, '${escapeAttr(it.wartosc)}')">Odrzuć</button>
+        </td>
+      </tr>`;
+  }).join('');
+
+  el('lista').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Rodzaj</th>
+          <th>Wartość</th>
+          <th>Wystąpień</th>
+          <th>Dostawcy</th>
+          <th>Pierwszy import</th>
+          <th style="text-align:right">Akcje</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function escapeHtml(s){
+  s = String(s == null ? '' : s);
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escapeAttr(s){
+  s = String(s == null ? '' : s);
+  return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function akceptuj(id, wartosc){
+  if (!confirm(`Zaakceptować wartość "${wartosc}" i dodać do katalogu?`)) return;
+  try {
+    await api(`/api/atrybuty/pending/${id}/akceptuj`, {method:'POST'});
+    toast(`Zaakceptowano: ${wartosc}`);
+    await odswiez();
+  } catch (e) { toast('Błąd: ' + e.message, 'err') }
+}
+
+function edytuj(id, wartosc, rodzaj){
+  pokazModal({
+    tytul: 'Akceptuj z edycją',
+    opis: `Zmień wartość i zaktualizuj wszystkie produkty w rodzaju <b>${escapeHtml(rodzaj)}</b>.`,
+    labelInput: 'Nowa wartość (zamienimy "' + wartosc + '" → nowa)',
+    placeholder: wartosc,
+    initial: wartosc,
+    ok: 'Zastosuj',
+    okColor: 'success',
+    action: async (nowa) => {
+      if (!nowa || nowa === wartosc){ toast('Brak zmiany', 'err'); return }
+      await api(`/api/atrybuty/pending/${id}/akceptuj-z-edycja`, {
+        method:'POST',
+        body: JSON.stringify({nowa_wartosc: nowa})
+      });
+      toast(`"${wartosc}" → "${nowa}"`);
+      await odswiez();
+    }
+  });
+}
+
+function aliasModal(id, wartosc, rodzaj){
+  pokazModal({
+    tytul: 'Akceptuj jako alias',
+    opis: `Ustaw kanoniczną wartość dla "${escapeHtml(wartosc)}" w rodzaju <b>${escapeHtml(rodzaj)}</b>. Wszystkie produkty dostaną kanoniczną wartość.`,
+    labelInput: `Kanoniczna wartość (musi istnieć w katalogu ${rodzaj})`,
+    placeholder: 'np. istniejąca wartość',
+    initial: '',
+    ok: 'Ustaw alias',
+    okColor: 'warn',
+    action: async (kanoniczna) => {
+      if (!kanoniczna){ toast('Podaj kanoniczną wartość', 'err'); return }
+      await api(`/api/atrybuty/pending/${id}/akceptuj-jako-alias`, {
+        method:'POST',
+        body: JSON.stringify({kanoniczna_wartosc: kanoniczna})
+      });
+      toast(`Alias: "${wartosc}" → "${kanoniczna}"`);
+      await odswiez();
+    }
+  });
+}
+
+async function alias(id, kanoniczna){
+  if (!confirm(`Ustawić alias na "${kanoniczna}"?`)) return;
+  try {
+    await api(`/api/atrybuty/pending/${id}/akceptuj-jako-alias`, {
+      method:'POST',
+      body: JSON.stringify({kanoniczna_wartosc: kanoniczna})
+    });
+    toast(`Alias ustawiony: → "${kanoniczna}"`);
+    await odswiez();
+  } catch (e) { toast('Błąd: ' + e.message, 'err') }
+}
+
+async function odrzuc(id, wartosc){
+  if (!confirm(`Odrzucić wartość "${wartosc}"? Nie będzie ponownie proponowana.`)) return;
+  try {
+    await api(`/api/atrybuty/pending/${id}/odrzuc`, {method:'POST'});
+    toast(`Odrzucono: ${wartosc}`);
+    await odswiez();
+  } catch (e) { toast('Błąd: ' + e.message, 'err') }
+}
+
+function pokazModal(cfg){
+  const modal = document.createElement('div');
+  modal.className = 'modal-backdrop';
+  modal.innerHTML = `
+    <div class="modal">
+      <h3>${escapeHtml(cfg.tytul)}</h3>
+      <p style="color:var(--muted);margin-bottom:16px">${cfg.opis}</p>
+      <label>${escapeHtml(cfg.labelInput)}</label>
+      <input type="text" id="modal-input" placeholder="${escapeAttr(cfg.placeholder || '')}" value="${escapeAttr(cfg.initial || '')}" />
+      <div class="modal-actions">
+        <button class="ghost" onclick="this.closest('.modal-backdrop').remove()">Anuluj</button>
+        <button class="${cfg.okColor}" id="modal-ok">${escapeHtml(cfg.ok)}</button>
+      </div>
+    </div>`;
+  el('modal-container').appendChild(modal);
+  const input = modal.querySelector('#modal-input');
+  const ok = modal.querySelector('#modal-ok');
+  input.focus();
+  input.select();
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') ok.click() });
+  ok.addEventListener('click', async () => {
+    const v = input.value.trim();
+    try {
+      await cfg.action(v);
+      modal.remove();
+    } catch (e) {
+      toast('Błąd: ' + e.message, 'err');
+    }
+  });
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove() });
+}
+
+// start
+(async () => {
+  if (!TOKEN){ pokazLogin(); return }
+  try {
+    await zaladujRodzaje();
+    await odswiez();
+    pokazMain();
+  } catch(e){
+    pokazLogin();
+  }
+})();
+</script>
+</body>
+</html>

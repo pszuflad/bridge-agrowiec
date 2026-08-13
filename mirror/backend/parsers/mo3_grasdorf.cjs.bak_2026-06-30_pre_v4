@@ -1,0 +1,127 @@
+'use strict';
+
+// MO3 Grasdorf parser
+// Obsługuje DWA formaty plików:
+//
+//  A) Plik produkcyjny Anny (https://agroopony.eu/imports/grasdorfCSV.csv, 16 kolumn):
+//     nazwa;ean;producent;bieznik;rozmiar;rozmiar_alt;kategoria;indeks_nosnosci;
+//     indeks_predkosci;cena;stan_magazynu;budowa;typ;ilosc_plocien;zdjecie;opis
+//     UWAGA: większość pól strukturalnych jest PUSTA — wszystko trzeba parsować z nazwy.
+//
+//  B) Plik surowy z abstore (33 kolumny z polskimi nagłówkami):
+//     id;eid;eanCode;indexCatalogue;name;additionalName;...;Rodzaj bieżnika;
+//     Konstrukcja opony;Typ;Indeks nośności;Ilość płócien;Zastosowanie;
+//     Rozmiar opony;Stan opony;Średnica felgi;...
+//     UWAGA: pola strukturalne są wypełnione — używamy ich jako źródła prawdy.
+//
+// Oba formaty mapujemy na te same klucze camelCase, których oczekuje normalizeGrasdorf.
+// Pierwszeństwo: pole strukturalne > parse z nazwy (gdy pole strukturalne puste).
+
+const { parse } = require('csv-parse/sync');
+const iconv = require('iconv-lite');
+const fs = require('fs');
+const c = require('../common.cjs');
+const { normalizeGrasdorf } = require('./tyre_params.cjs');
+
+const DOSTAWCA = 'MO3_Grasdorf';
+
+// Mapy nagłówków → klucze camelCase oczekiwane przez normalizeGrasdorf.
+// Wartość pierwsza wygrywa (||), więc kolejność określa priorytet.
+const FIELD_ALIASES = {
+  // identyfikatory
+  eanCode:         ['eanCode', 'ean', 'EAN'],
+  indexCatalogue:  ['indexCatalogue', 'Indeks producenta', 'Indeks katalogowy', 'id'],
+  // tekstowe
+  name:            ['name', 'nazwa'],
+  additionalName:  ['additionalName', 'rozmiar_alt'],
+  category:        ['category', 'kategoria'],
+  producer:        ['producer', 'producent'],
+  // strukturalne (źródło prawdy gdy wypełnione)
+  rodzajBieznika:  ['Rodzaj bieżnika', 'bieznik'],
+  konstrukcja:     ['Konstrukcja opony', 'budowa'],
+  typ:             ['Typ', 'typ'],
+  indeksNosnosci:  ['Indeks nośności', 'indeks_nosnosci'],
+  indeksPredkosci: ['Indeks prędkości', 'indeks_predkosci'],
+  iloscPlocien:    ['Ilość płócien', 'ilosc_plocien'],
+  zastosowanie:    ['Zastosowanie'],
+  rozmiarOpony:    ['Rozmiar opony', 'rozmiar'],
+  srednicaFelgi:   ['Średnica felgi'],
+  stanOpony:       ['Stan opony'],
+  stan:            ['Stan'],
+  // liczbowe / techniczne
+  priceNet:        ['priceNet', 'cena'],
+  availabilityCount: ['availabilityCount', 'stan_magazynu'],
+  imageUrls:       ['imageUrls', 'zdjecie'],
+  weight:          ['weight', 'waga']
+};
+
+function applyHeaderMap(row) {
+  const out = { ...row };
+  for (const [target, sources] of Object.entries(FIELD_ALIASES)) {
+    // Pomijamy gdy target juz istnieje (np. już ma 'name' w pliku abstore)
+    if (out[target] !== undefined && out[target] !== '') continue;
+    for (const src of sources) {
+      if (row[src] !== undefined && row[src] !== '') {
+        out[target] = row[src];
+        break;
+      }
+    }
+  }
+  return out;
+}
+
+function parseFile(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const text = iconv.decode(buffer, 'utf-8');
+
+  const rows = parse(text, {
+    delimiter: ';',
+    columns: header => header.map(h => h ? h.trim() : h),
+    skip_empty_lines: true,
+    relax_column_count: true,
+    relax_quotes: true,
+    bom: true,
+    trim: true
+  });
+
+  const records = [];
+  const errors = [];
+  const odrzucone = [];
+
+  for (const row of rows) {
+    try {
+      const mapped = applyHeaderMap(row);
+      const normalized = normalizeGrasdorf(mapped);
+      if (normalized.odrzucony) {
+        odrzucone.push({ powod: normalized.powod, row });
+        continue;
+      }
+
+      const rec = c.normalizeRecord({
+        ean: c.normalizeEan(normalized.ean),
+        kod_dostawcy: normalized.kodDostawcy,
+        nazwa: normalized.nazwaKoncowa,
+        producent: normalized.marka,
+        model_bieznik: normalized.model,
+        rozmiar: normalized.rozmiar,
+        rozmiar_alternatywny: normalized.rozmiarAlternatywny,
+        cena_zakupu: normalized.cenaZakupu,
+        stan_magazynowy: normalized.stan,
+        kategoria: normalized.kategoria,
+        oznaczenia_techniczne: [
+          normalized.tlTt,
+          normalized.pr ? `${normalized.pr}PR` : null
+        ].filter(Boolean),
+        dostawca: DOSTAWCA,
+        surowe_pola: row
+      });
+      records.push(rec);
+    } catch (e) {
+      errors.push({ row, error: e.message });
+    }
+  }
+
+  return { records, errors, odrzucone, dostawca: DOSTAWCA };
+}
+
+module.exports = { parseFile, DOSTAWCA };

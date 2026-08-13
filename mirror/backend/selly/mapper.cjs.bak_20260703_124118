@@ -1,0 +1,141 @@
+// backend/selly/mapper.cjs
+// Mapowanie: wiersz z Bridge (tabela products, snake_case) → payload Selly.pl (POST /api/products).
+// Uwaga: schemat kolumn wg backend/db_schema.sql (products).
+
+'use strict';
+
+// ---- Konfiguracja ----
+const DEFAULT_VAT_RATE     = 23;   // % - opony w PL
+const DEFAULT_WAREHOUSE_ID = 1;    // Magazyn główny w Selly
+const DEFAULT_UNIT         = 1;    // 1 = szt.
+const DEFAULT_AVAILABILITY = 'dostępny';
+
+/**
+ * Zwraca category_id w Selly dla wartości "kategoria" z Bridge.
+ * @param {string} kategoria  - np. "Rolnicze", "Leśne", "Przemysłowe", "Ciężarowe"
+ * @param {Object} catMap     - { "opony rolnicze": 1, "opony leśne": 2, ... }
+ */
+function mapCategoryId(kategoria, catMap) {
+  const k = (kategoria || '').trim().toLowerCase();
+  if (!k) return null;
+  // dokładne dopasowania
+  const table = {
+    'rolnicze':      'opony rolnicze',
+    'leśne':         'opony leśne',
+    'lesne':         'opony leśne',
+    'przemysłowe':   'opony  przemysłowe',   // uwaga: podwójna spacja w Selly demo
+    'przemyslowe':   'opony  przemysłowe',
+    'ciężarowe':     'opony ciężarowe',
+    'ciezarowe':     'opony ciężarowe',
+  };
+  const wanted = table[k];
+  if (!wanted) return null;
+  // fallback: spacje pojedyncze vs podwójne
+  return catMap[wanted]
+      || catMap[wanted.replace(/  +/g, ' ')]
+      || catMap[wanted.replace(/ /g, '  ')]
+      || null;
+}
+
+/**
+ * Zwraca producer_id w Selly dla wartości "marka" z Bridge.
+ * @param {string} marka
+ * @param {Object} producerMap - { "alliance": 2, "bkt": 4, ... }
+ */
+function mapProducerId(marka, producerMap) {
+  return producerMap[(marka || '').trim().toLowerCase()] || null;
+}
+
+/**
+ * Buduje HTML z parametrami technicznymi opony.
+ */
+function buildTireDescription(p) {
+  const rows = [];
+  const add = (k, v) => {
+    if (v === null || v === undefined || v === '' || v === false) return;
+    rows.push(`<tr><td><b>${k}</b></td><td>${String(v).replace(/</g,'&lt;')}</td></tr>`);
+  };
+  add('Rozmiar',        p.rozmiar);
+  add('Szerokość',      p.szerokosc);
+  add('Profil',         p.profil);
+  add('Średnica',       p.srednica);
+  add('Konstrukcja',    p.konstrukcja);
+  add('Indeks nośności',p.indeks_nosnosci || p.indeks_1);
+  add('Indeks prędkości', p.indeks_predkosci || p.indeks_2);
+  add('PR',             p.pr);
+  add('TL/TT',          p.tl_tt);
+  add('VF/IF',          p.vf_if);
+  add('Bieżnik',        p.bieznik);
+  add('Model',          p.model);
+  add('DOT',            p.dot);
+  add('Sezon',          p.sezon);
+  add('M+S',            p.ms ? 'tak' : null);
+  add('3PMSF',          p.snow_3pmsf ? 'tak' : null);
+  add('Reinforced',     p.reinforced ? 'tak' : null);
+  add('Extra Load',     p.extra_load ? 'tak' : null);
+  add('Odporność na przecięcia', p.cut_resistant ? 'tak' : null);
+  add('Odporność na temperaturę', p.heat_resistant ? 'tak' : null);
+  add('Odporność na ściernisko', p.stubble_resistant ? 'tak' : null);
+  add('Waga (kg)',      p.waga);
+  add('Kod dostawcy',   p.kod_dostawcy);
+  if (!rows.length) return '';
+  return `<table class="tire-specs">${rows.join('')}</table>`;
+}
+
+/**
+ * Konwertuje wiersz z tabeli products (snake_case) do payloadu Selly /api/products.
+ * @param {Object} row          - wiersz z SQLite
+ * @param {Object} maps         - { producerMap, catMap }
+ * @param {Object} opts         - { warehouse_id, vat_rate }
+ * @returns {Object}            - payload gotowy do POST /api/products
+ */
+function toSellyPayload(row, maps, opts = {}) {
+  const warehouseId = opts.warehouse_id ?? DEFAULT_WAREHOUSE_ID;
+  const vatRate     = opts.vat_rate     ?? row.vat ?? DEFAULT_VAT_RATE;
+
+  const category_id = mapCategoryId(row.kategoria, maps.catMap);
+  const producer_id = mapProducerId(row.marka,     maps.producerMap);
+
+  return {
+    // ---- Product ----
+    name: row.nazwa,
+    category_id,
+    producer_id: producer_id || undefined,
+    price: Number(row.cena_sprzedazy) || 0,
+    visible: true,
+    // ---- ProductProperties ----
+    product_code:   row.kod,
+    provider_code:  row.kod_dostawcy || row.kod,
+    ean:            row.ean || '',
+    vat_rate:       Number(vatRate),
+    price_purchase: Number(row.cena_zakupu) || 0,
+    warehouse_id:   warehouseId,
+    weight:         Number(row.waga) || 0,
+    content_html:   buildTireDescription(row),
+    unit_of_measure: DEFAULT_UNIT,
+    availability:   DEFAULT_AVAILABILITY,
+  };
+}
+
+/**
+ * Waliduje payload przed wysyłką. Zwraca { ok, errors: [...] }.
+ */
+function validatePayload(payload) {
+  const errors = [];
+  if (!payload.name)         errors.push('Brak name');
+  if (!payload.category_id)  errors.push('Brak category_id (nieznana kategoria)');
+  if (!payload.producer_id)  errors.push('Brak producer_id (nieznana marka) — produkt zostanie pominięty');
+  if (!(payload.price >= 0)) errors.push('Nieprawidłowa cena');
+  if (!payload.product_code) errors.push('Brak product_code');
+  return { ok: errors.length === 0, errors };
+}
+
+module.exports = {
+  toSellyPayload,
+  validatePayload,
+  buildTireDescription,
+  mapCategoryId,
+  mapProducerId,
+  DEFAULT_VAT_RATE,
+  DEFAULT_WAREHOUSE_ID,
+};

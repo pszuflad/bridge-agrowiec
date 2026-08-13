@@ -13,8 +13,11 @@ cd "$ROOT"
 echo "=== sync $(date '+%F %T') ==="
 bash tools/acquire.sh
 
-# snapshot bazy jest gitignored (binarny, duży) — wersjonujemy schemat i bundle
-git add mirror/ knowledge/ db/schema.sql 2>/dev/null || true
+# upiększ żywe bundle do postaci diffowalnej (deminified/)
+bash tools/deminify.sh
+
+# snapshot bazy jest gitignored (binarny, duży) — wersjonujemy schemat, bundle, deminified
+git add mirror/ deminified/ knowledge/ db/schema.sql 2>/dev/null || true
 
 if git diff --cached --quiet; then
   echo "Brak zmian od ostatniej synchronizacji."

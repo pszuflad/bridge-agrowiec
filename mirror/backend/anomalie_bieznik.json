@@ -1,0 +1,272 @@
+[
+ {
+  "kod": "MO9_37266",
+  "dostawca": "MO9",
+  "bieznik": "RIDEMAX FL 693M",
+  "model": "RIDEMAX FL 693M",
+  "rozmiar": "850/50R30.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO5_TRRD040114000T7S0",
+  "dostawca": "MO5",
+  "bieznik": "537S",
+  "model": "537S",
+  "rozmiar": "11x4.00-4",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO5_LLCZ22531580LWD60",
+  "dostawca": "MO5",
+  "bieznik": "W-D60 158/150L",
+  "model": "W-D60 158/150L",
+  "rozmiar": "315/80R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_LLCZ22531580LLLW0",
+  "dostawca": "MO5",
+  "bieznik": "W-S60 158/150L",
+  "model": "W-S60 158/150L",
+  "rozmiar": "315/80R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_LLCZ22531570LWD60",
+  "dostawca": "MO5",
+  "bieznik": "W-D60 156/150L",
+  "model": "W-D60 156/150L",
+  "rozmiar": "315/70R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_LLCZ22531570LLLW0",
+  "dostawca": "MO5",
+  "bieznik": "W-S60 156/150L",
+  "model": "W-S60 156/150L",
+  "rozmiar": "315/70R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_LLCR22531580LETD1",
+  "dostawca": "MO5",
+  "bieznik": "ETD100 156/150L",
+  "model": "ETD100 156/150L",
+  "rozmiar": "315/80R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_LLCR22531570LETD1",
+  "dostawca": "MO5",
+  "bieznik": "ETD100 156/150L",
+  "model": "ETD100 156/150L",
+  "rozmiar": "315/70R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_LLCR22531570LD360",
+  "dostawca": "MO5",
+  "bieznik": "D36",
+  "model": "D36 156/150L",
+  "rozmiar": "315/70R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_IMCR22531580L6380",
+  "dostawca": "MO5",
+  "bieznik": "MG638 156/152L NAPĘD",
+  "model": "MG638 156/152L NAPĘD",
+  "rozmiar": "315/80R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO5_GSCR19543550JCA41",
+  "dostawca": "MO5",
+  "bieznik": "CARGO 5 160J",
+  "model": "CARGO 5 160J",
+  "rozmiar": "435/50R19.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO2_24865900",
+  "dostawca": "MO2",
+  "bieznik": "MAXIWAYS 100S",
+  "model": "MAXIWAYS 100S",
+  "rozmiar": "245/70R17.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO2_24846800",
+  "dostawca": "MO2",
+  "bieznik": "MAXIWAYS 110D",
+  "model": "MAXIWAYS 110D",
+  "rozmiar": "225/75R17.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO2_24846200",
+  "dostawca": "MO2",
+  "bieznik": "MAXIWAYS 100S",
+  "model": "MAXIWAYS 100S",
+  "rozmiar": "225/75R17.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO2_248398",
+  "dostawca": "MO2",
+  "bieznik": "MAXIWAYS 110D",
+  "model": "MAXIWAYS 110D",
+  "rozmiar": "235/75R17.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO2_24838200",
+  "dostawca": "MO2",
+  "bieznik": "MAXIWAYS 100S",
+  "model": "MAXIWAYS 100S",
+  "rozmiar": "235/75R17.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO2_24836800",
+  "dostawca": "MO2",
+  "bieznik": "MAXIWAYS 110D",
+  "model": "MAXIWAYS 110D",
+  "rozmiar": "215/75R17.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO1_10007509",
+  "dostawca": "MO1",
+  "bieznik": "FARM IMPLEMENT 800R",
+  "model": "FARM IMPLEMENT 800R",
+  "rozmiar": "340/60R16.5",
+  "tokens": [
+   "singleIdx"
+  ]
+ },
+ {
+  "kod": "MO7_T445796",
+  "dostawca": "MO7",
+  "bieznik": "GROUND KING LOADER L-3 TL",
+  "model": "GROUND KING LOADER L-3 TL",
+  "rozmiar": "20.5R25",
+  "tokens": [
+   "TLTT"
+  ]
+ },
+ {
+  "kod": "MO7_T445620",
+  "dostawca": "MO7",
+  "bieznik": "LOGGER KING TRS-2 EXTREME TL",
+  "model": "LOGGER KING TRS-2 EXTREME TL",
+  "rozmiar": "35.5-32",
+  "tokens": [
+   "TLTT"
+  ]
+ },
+ {
+  "kod": "MO7_T445613",
+  "dostawca": "MO7",
+  "bieznik": "LOGGER KING TRS-2 EXTREME TL",
+  "model": "LOGGER KING TRS-2 EXTREME TL",
+  "rozmiar": "30.5L-32",
+  "tokens": [
+   "TLTT"
+  ]
+ },
+ {
+  "kod": "MO7_T445621",
+  "dostawca": "MO7",
+  "bieznik": "LOGGER KING TRS-2 TL",
+  "model": "LOGGER KING TRS-2 TL",
+  "rozmiar": "30.5L-32",
+  "tokens": [
+   "TLTT"
+  ]
+ },
+ {
+  "kod": "MO7_T445615",
+  "dostawca": "MO7",
+  "bieznik": "LOGGER KING TRS-2 TL",
+  "model": "LOGGER KING TRS-2 TL",
+  "rozmiar": "28L-26",
+  "tokens": [
+   "TLTT"
+  ]
+ },
+ {
+  "kod": "MO7_T445516",
+  "dostawca": "MO7",
+  "bieznik": "FOREST KING TRS -2 TL",
+  "model": "FOREST KING TRS -2 TL",
+  "rozmiar": "28L-26",
+  "tokens": [
+   "TLTT"
+  ]
+ },
+ {
+  "kod": "MO5_LLCR22531570LRD30",
+  "dostawca": "MO5",
+  "bieznik": "R-D30 156/150L",
+  "model": "R-D30 156/150L",
+  "rozmiar": "315/70R22.5",
+  "tokens": [
+   "dblIdx"
+  ]
+ },
+ {
+  "kod": "MO7_T445614",
+  "dostawca": "MO7",
+  "bieznik": "LOGGER KING TRS-2 TL",
+  "model": "LOGGER KING TRS-2 TL",
+  "rozmiar": "24.5-32",
+  "tokens": [
+   "TLTT"
+  ]
+ },
+ {
+  "kod": "MO7_T445616",
+  "dostawca": "MO7",
+  "bieznik": "LOGGER KING TRS-2 TL",
+  "model": "LOGGER KING TRS-2 TL",
+  "rozmiar": "23.1-26",
+  "tokens": [
+   "TLTT"
+  ]
+ }
+]

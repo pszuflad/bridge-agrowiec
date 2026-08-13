@@ -1,0 +1,13 @@
+# Blokada dostepu do plikow eksportu - dostep tylko z adresu IP Selly (Arnold, integrator)
+# Ustalone 2026-07-23, adres IP potwierdzony przez zespol w rozmowie z integratorem Selly
+
+<IfModule mod_authz_core.c>
+    # Apache 2.4+
+    Require ip 212.91.27.191
+</IfModule>
+<IfModule !mod_authz_core.c>
+    # Apache 2.2 (fallback)
+    Order Deny,Allow
+    Deny from all
+    Allow from 212.91.27.191
+</IfModule>

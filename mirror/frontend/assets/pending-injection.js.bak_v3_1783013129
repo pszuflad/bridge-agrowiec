@@ -1,0 +1,463 @@
+/**
+ * Bridge Agrowca — injection skryptu "Do akceptacji" do widoku /atrybuty
+ * v2 - dopasowane do dark mode, poprawione formaty API (items/sugerowane_aliasy/ile_wystapien)
+ */
+(function() {
+  'use strict';
+
+  const API_BASE = '/panel/api';
+
+  const CSS = `
+    .pending-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 8px;
+      background: #D97706; color: #171614;
+      border: none; font: 600 13px/1 Inter, system-ui, sans-serif;
+      cursor: pointer; transition: background .15s;
+      vertical-align: middle;
+    }
+    .pending-btn:hover { background: #B45309; }
+    .pending-btn.active { background: #964219; color: #F9F8F5; }
+    .pending-btn.active:hover { background: #7a3616; }
+    .pending-btn .pending-badge {
+      background: rgba(23,22,20,0.25); color: inherit;
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 700;
+      min-width: 20px; text-align: center;
+    }
+    .pending-btn.active .pending-badge {
+      background: rgba(249,248,245,0.25);
+    }
+
+    #pending-panel { 
+      background: #1C1B19; border: 1px solid #393836;
+      border-radius: 12px; padding: 20px; margin-top: 16px;
+      font-family: Inter, system-ui, sans-serif; font-size: 13px; color: #CDCCCA;
+    }
+    #pending-panel .pending-toolbar {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #393836;
+    }
+    #pending-panel label { font-weight: 500; color: #797876; font-size: 12px; }
+    #pending-panel select, #pending-panel input[type=text] {
+      padding: 7px 10px; border: 1px solid #393836; border-radius: 6px;
+      background: #171614; font: inherit; color: #CDCCCA;
+    }
+    #pending-panel select:focus, #pending-panel input:focus {
+      outline: 2px solid #D97706; outline-offset: -1px; border-color: #D97706;
+    }
+    #pending-panel .stats { color: #797876; font-size: 12px; margin-left: auto; }
+    #pending-panel table { width: 100%; border-collapse: collapse; }
+    #pending-panel th, #pending-panel td {
+      padding: 10px 12px; text-align: left; border-bottom: 1px solid #2A2926;
+      vertical-align: top;
+    }
+    #pending-panel th { 
+      background: #201F1D; font-weight: 600; color: #CDCCCA;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    #pending-panel .val {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; background: #201F1D; padding: 3px 8px; border-radius: 4px;
+      display: inline-block; color: #FDAB43; font-weight: 500;
+    }
+    #pending-panel .aliases { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+    #pending-panel .alias-chip {
+      cursor: pointer; padding: 3px 8px; border-radius: 12px;
+      background: #2A2926; font-size: 11px; color: #CDCCCA;
+      border: 1px solid #393836; transition: all .15s;
+    }
+    #pending-panel .alias-chip:hover { background: #D97706; color: #171614; border-color: #D97706; }
+    #pending-panel .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    #pending-panel .act-btn {
+      padding: 6px 12px; border: none; border-radius: 5px;
+      font: 500 11px/1 Inter, sans-serif; cursor: pointer;
+      transition: opacity .15s;
+    }
+    #pending-panel .act-btn.accept { background: #6DAA45; color: #171614; }
+    #pending-panel .act-btn.edit { background: #4F98A3; color: #171614; }
+    #pending-panel .act-btn.reject { background: #D163A7; color: #171614; }
+    #pending-panel .act-btn:hover { opacity: 0.85; }
+    #pending-panel .act-btn:disabled { opacity: 0.4; cursor: wait; }
+    #pending-panel .empty {
+      text-align: center; padding: 40px 20px; color: #797876;
+    }
+    #pending-panel .rodzaj-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      background: #2A2926; font-size: 11px; color: #CDCCCA;
+      font-weight: 500;
+    }
+    #pending-panel .count-tag {
+      display: inline-block; padding: 2px 6px; border-radius: 10px;
+      background: #D97706; color: #171614; font-size: 11px;
+      font-weight: 700;
+    }
+    #pending-toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 12px 20px; border-radius: 8px;
+      font: 500 13px/1.4 Inter, sans-serif; z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+      max-width: 400px;
+    }
+    #pending-toast.show { opacity: 1; }
+    #pending-toast.success { background: #6DAA45; color: #171614; }
+    #pending-toast.error { background: #D163A7; color: #171614; }
+  `;
+
+  function injectCSS() {
+    if (document.getElementById('pending-inject-css')) return;
+    const style = document.createElement('style');
+    style.id = 'pending-inject-css';
+    style.textContent = CSS;
+    document.head.appendChild(style);
+  }
+
+  function getToken() {
+    return sessionStorage.getItem('bridge_auth_token') || '';
+  }
+
+  async function api(path, options = {}) {
+    const token = getToken();
+    if (!token) throw new Error('Brak tokenu - zaloguj się ponownie');
+    const opts = {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(options.headers || {})
+      }
+    };
+    const r = await fetch(API_BASE + path, opts);
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      throw new Error(`${r.status}: ${text || r.statusText}`);
+    }
+    return r.json();
+  }
+
+  function toast(msg, type = 'success') {
+    let t = document.getElementById('pending-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'pending-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.className = 'show ' + type;
+    setTimeout(() => { t.className = ''; }, 3500);
+  }
+
+  const state = {
+    isOpen: false,
+    items: [],
+    filter: 'all',
+    search: '',
+    count: 0,
+    lastRoute: '',
+  };
+
+  async function refreshCount() {
+    if (!getToken()) return;
+    try {
+      const data = await api('/atrybuty/pending');
+      state.count = (data.items || []).length;
+      updateBadge();
+    } catch (e) {
+      console.warn('[pending-inject] refreshCount failed:', e.message);
+    }
+  }
+
+  function updateBadge() {
+    const btn = document.getElementById('pending-inject-btn');
+    if (btn) {
+      const badge = btn.querySelector('.pending-badge');
+      if (badge) badge.textContent = state.count;
+    }
+  }
+
+  // Bridge używa hash-routingu: #/atrybuty (oraz czasem pathname /atrybuty)
+  function isAtrybutyRoute() {
+    return location.pathname.endsWith('/atrybuty') 
+        || location.hash === '#/atrybuty' 
+        || location.hash.startsWith('#/atrybuty?')
+        || location.hash.startsWith('#/atrybuty/');
+  }
+
+  function ensureButton() {
+    if (!isAtrybutyRoute()) return;
+    if (document.getElementById('pending-inject-btn')) return;
+
+    // Znajdź przycisk "Dodaj atrybut" — obok niego wstawimy nasz przycisk
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const dodajBtn = buttons.find(el => {
+      const t = el.textContent.trim().replace(/^\+\s*/, '');
+      return t === 'Dodaj atrybut';
+    });
+
+    let targetContainer = null;
+    if (dodajBtn && dodajBtn.parentElement) {
+      targetContainer = dodajBtn.parentElement;
+    } else {
+      // Fallback: nagłówek h1/h2 "Atrybuty"
+      const headers = Array.from(document.querySelectorAll('h1, h2'));
+      const headerEl = headers.find(el => el.textContent.trim() === 'Atrybuty');
+      if (!headerEl || !headerEl.parentElement) return;
+      targetContainer = headerEl.parentElement;
+    }
+
+    const btn = document.createElement('button');
+    btn.id = 'pending-inject-btn';
+    btn.className = 'pending-btn';
+    btn.innerHTML = `Do akceptacji <span class="pending-badge">${state.count}</span>`;
+    btn.addEventListener('click', togglePanel);
+
+    // Wstaw jako pierwszy w kontenerze (przed "Nowy rodzaj" i "Dodaj atrybut")
+    if (dodajBtn) {
+      targetContainer.insertBefore(btn, targetContainer.firstChild);
+    } else {
+      targetContainer.appendChild(btn);
+    }
+  }
+
+  async function togglePanel() {
+    state.isOpen = !state.isOpen;
+    const btn = document.getElementById('pending-inject-btn');
+    if (btn) btn.classList.toggle('active', state.isOpen);
+
+    if (state.isOpen) {
+      await renderPanel();
+    } else {
+      const p = document.getElementById('pending-panel');
+      if (p) p.remove();
+      // Przywróć siatkę kafli
+      document.querySelectorAll('[data-hidden-by-pending="1"]').forEach(el => {
+        el.style.display = '';
+        delete el.dataset.hiddenByPending;
+      });
+    }
+  }
+
+  async function renderPanel() {
+    let panel = document.getElementById('pending-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'pending-panel';
+      // Wstaw panel jako sibling siatki kafli
+      const btn = document.getElementById('pending-inject-btn');
+      // Znajdź kontener siatki kafli - element grid najbliżej main
+      const grid = document.querySelector('main [class*="grid"], [class*="grid-cols"]');
+      if (grid) {
+        grid.style.display = 'none';
+        grid.dataset.hiddenByPending = '1';
+        grid.parentElement.insertBefore(panel, grid);
+      } else {
+        // Fallback: wstaw po kontenerze przycisków
+        if (btn && btn.parentElement && btn.parentElement.parentElement) {
+          btn.parentElement.parentElement.appendChild(panel);
+        } else {
+          document.body.appendChild(panel);
+        }
+      }
+    }
+
+    panel.innerHTML = '<div class="empty">Ładowanie...</div>';
+
+    try {
+      const data = await api('/atrybuty/pending');
+      state.items = data.items || [];
+      state.count = state.items.length;
+      updateBadge();
+    } catch (e) {
+      panel.innerHTML = `<div class="empty" style="color:#D163A7">Błąd: ${escapeHtml(e.message)}</div>`;
+      return;
+    }
+
+    const rodzaje = Array.from(new Set(state.items.map(x => x.rodzaj))).sort();
+
+    const filtered = state.items.filter(item => {
+      if (state.filter !== 'all' && item.rodzaj !== state.filter) return false;
+      if (state.search && !item.wartosc.toLowerCase().includes(state.search.toLowerCase())) return false;
+      return true;
+    });
+
+    const toolbarHTML = `
+      <div class="pending-toolbar">
+        <label>Rodzaj:</label>
+        <select id="pending-filter">
+          <option value="all">Wszystkie (${state.items.length})</option>
+          ${rodzaje.map(r => {
+            const c = state.items.filter(x => x.rodzaj === r).length;
+            return `<option value="${escapeAttr(r)}" ${state.filter === r ? 'selected' : ''}>${escapeHtml(r)} (${c})</option>`;
+          }).join('')}
+        </select>
+        <input type="text" id="pending-search" placeholder="Szukaj wartości..." value="${escapeAttr(state.search)}" style="min-width: 200px">
+        <div class="stats">Wyświetlono: <span class="count-tag">${filtered.length}</span> z ${state.items.length}</div>
+      </div>
+    `;
+
+    let tableHTML;
+    if (filtered.length === 0) {
+      tableHTML = '<div class="empty">Brak wartości do akceptacji</div>';
+    } else {
+      tableHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 12%">Rodzaj</th>
+              <th style="width: 25%">Wartość</th>
+              <th style="width: 8%">Wystąpień</th>
+              <th style="width: 30%">Sugerowane aliasy</th>
+              <th style="width: 25%">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(item => {
+              const aliasesHTML = (item.sugerowane_aliasy || []).map(a => 
+                `<span class="alias-chip" data-id="${item.id}" data-alias="${escapeAttr(a.wartosc)}">${escapeHtml(a.wartosc)} (${a.podobienstwo}%)</span>`
+              ).join('');
+              return `
+                <tr data-id="${item.id}">
+                  <td><span class="rodzaj-tag">${escapeHtml(item.rodzaj)}</span></td>
+                  <td><span class="val">${escapeHtml(item.wartosc)}</span></td>
+                  <td>${item.ile_wystapien || '?'}</td>
+                  <td>
+                    ${aliasesHTML ? `<div class="aliases">${aliasesHTML}</div>` : '<span style="color:#5A5957;font-size:11px">brak podobnych</span>'}
+                  </td>
+                  <td>
+                    <div class="actions">
+                      <button class="act-btn accept" data-action="accept" data-id="${item.id}">Akceptuj</button>
+                      <button class="act-btn edit" data-action="edit" data-id="${item.id}">Edytuj</button>
+                      <button class="act-btn reject" data-action="reject" data-id="${item.id}">Odrzuć</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    panel.innerHTML = toolbarHTML + tableHTML;
+
+    document.getElementById('pending-filter').addEventListener('change', e => {
+      state.filter = e.target.value;
+      renderPanel();
+    });
+    document.getElementById('pending-search').addEventListener('input', e => {
+      state.search = e.target.value;
+      renderPanel();
+    });
+
+    panel.querySelectorAll('.act-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id);
+        const action = btn.dataset.action;
+        const item = state.items.find(x => x.id === id);
+        if (!item) return;
+        await handleAction(action, item, btn);
+      });
+    });
+
+    panel.querySelectorAll('.alias-chip').forEach(chip => {
+      chip.addEventListener('click', async () => {
+        const id = parseInt(chip.dataset.id);
+        const alias = chip.dataset.alias;
+        const item = state.items.find(x => x.id === id);
+        if (!item) return;
+        if (!confirm(`Zmapować "${item.wartosc}" jako alias dla "${alias}"?`)) return;
+        await handleAlias(item, alias);
+      });
+    });
+  }
+
+  async function handleAction(action, item, btnEl) {
+    btnEl.disabled = true;
+    try {
+      if (action === 'accept') {
+        await api(`/atrybuty/pending/${item.id}/akceptuj`, { method: 'POST' });
+        toast(`Zaakceptowano: ${item.wartosc}`, 'success');
+      } else if (action === 'reject') {
+        const powod = prompt('Powód odrzucenia (opcjonalnie):') || '';
+        await api(`/atrybuty/pending/${item.id}/odrzuc`, { 
+          method: 'POST', 
+          body: JSON.stringify({ powod }) 
+        });
+        toast(`Odrzucono: ${item.wartosc}`, 'success');
+      } else if (action === 'edit') {
+        const nowa = prompt(`Edytuj wartość dla rodzaju "${item.rodzaj}":`, item.wartosc);
+        if (!nowa || nowa === item.wartosc) { btnEl.disabled = false; return; }
+        await api(`/atrybuty/pending/${item.id}/akceptuj-z-edycja`, { 
+          method: 'POST', 
+          body: JSON.stringify({ wartosc: nowa }) 
+        });
+        toast(`Zapisano: ${nowa}`, 'success');
+      }
+      await renderPanel();
+    } catch (e) {
+      toast(`Błąd: ${e.message}`, 'error');
+    } finally {
+      btnEl.disabled = false;
+    }
+  }
+
+  async function handleAlias(item, aliasTarget) {
+    try {
+      await api(`/atrybuty/pending/${item.id}/akceptuj-jako-alias`, { 
+        method: 'POST', 
+        body: JSON.stringify({ alias_dla: aliasTarget }) 
+      });
+      toast(`Alias: ${item.wartosc} → ${aliasTarget}`, 'success');
+      await renderPanel();
+    } catch (e) {
+      toast(`Błąd: ${e.message}`, 'error');
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s || '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  function cleanup() {
+    const btn = document.getElementById('pending-inject-btn');
+    if (btn) btn.remove();
+    const panel = document.getElementById('pending-panel');
+    if (panel) panel.remove();
+    document.querySelectorAll('[data-hidden-by-pending="1"]').forEach(el => {
+      el.style.display = '';
+      delete el.dataset.hiddenByPending;
+    });
+    state.isOpen = false;
+  }
+
+  function tick() {
+    // Śledzimy pathname + hash żeby wykrywać zmiany route w hash-routingu
+    const currentRoute = location.pathname + location.hash;
+    if (currentRoute !== state.lastRoute) {
+      cleanup();
+      state.lastRoute = currentRoute;
+    }
+    if (isAtrybutyRoute()) {
+      ensureButton();
+    }
+  }
+
+  function init() {
+    injectCSS();
+    setInterval(tick, 500);
+    // Poczekaj 3s na login, potem regularnie odświeżaj licznik
+    setTimeout(refreshCount, 3000);
+    setInterval(refreshCount, 30000);
+    console.log('[pending-inject v2] initialized');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

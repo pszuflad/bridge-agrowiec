@@ -1,0 +1,111 @@
+// MO1 Bohnenkamp parser
+// Plik: bohnenkamp.csv
+// Kodowanie: Windows-1250 (z artefaktem ® zamiast ę)
+// Separator: ;
+// BRAK NAGŁÓWKA - parser pozycyjny
+//
+// Struktura pozycyjna (zweryfikowana 10.06.2026):
+//   A(0): kod_dostawcy   np. "10000085"
+//   B(1): EAN            np. "8906117626978"
+//   C(2): producent      np. "CEAT"
+//   D(3): nazwa          np. "Opona VF 650 / 65 R 42 NRO, Torquemax" + opcjonalnie "(szt. X)" dla dętek
+//   E(4): typ wentyla / specyfikacja techniczna
+//   F(5): producent2     duplikat C
+//   G(6): stała 1        IGNORUJEMY (stan magazynowy innego kraju)
+//   H(7): cena           np. "6000,80" — cena zakupu PLN
+//   I(8): IGNORUJEMY     stan magazynowy innego kraju (Anna 10.06)
+//   J(9): IGNORUJEMY     stan magazynowy innego kraju
+//   K(10): puste
+//
+// DECYZJA ANNY (10.06.2026):
+//   - Stan magazynowy dla DĘTEK = liczba sztuk z "(szt. X)" w nazwie
+//   - Stan magazynowy dla OPON = null (Bohnenkamp nie podaje polskiego stanu krajowego)
+//   - Cena H = cena zakupu (PLN, za jednostkę)
+//   - Kolumny G/I/J ignorujemy (stany krajowe innych krajow)
+
+const { parse } = require('csv-parse/sync');
+const iconv = require('iconv-lite');
+const fs = require('fs');
+const c = require('../common.cjs');
+
+const DOSTAWCA = 'MO1_Bohnenkamp';
+
+function parseFile(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const text = iconv.decode(buffer, 'cp1250');
+
+  const rows = parse(text, {
+    delimiter: ';',
+    columns: false, // BRAK NAGŁÓWKA
+    skip_empty_lines: true,
+    relax_column_count: true,
+    trim: true
+  });
+
+  const records = [];
+  const errors = [];
+
+  const sztPat = /\(szt\.?\s*(\d+)\)/i;
+
+  for (const row of rows) {
+    try {
+      if (row.length < 9) {
+        errors.push({ row, error: `Wiersz ma ${row.length} kolumn, oczekiwane min 9` });
+        continue;
+      }
+
+      const kodDostawcy = row[0];
+      const ean = c.normalizeEan(row[1]);
+      const producent = row[2];
+      let nazwa = c.normalizeText(row[3]); // m.in. ® → ę
+      const specyfikacja = c.normalizeText(row[4]); // typ wentyla dla dętek
+      const cena = row[7];
+      // Stan z kolumny I (row[8]) IGNORUJEMY — to stan magazynu innego kraju (decyzja Anny 10.06)
+
+      // Ekstrakcja (szt. X) z nazwy — dla dętek to LICZBA SZTUK na magazynie (decyzja Anny)
+      let stanZNazwy = null;
+      const sztMatch = nazwa.match(sztPat);
+      if (sztMatch) {
+        stanZNazwy = parseInt(sztMatch[1], 10);
+        // Usuwamy z nazwy
+        nazwa = nazwa.replace(sztPat, '').replace(/,\s*$/, '').trim();
+      }
+
+      const sizeFromName = c.extractSize(nazwa);
+      // Klasyfikacja: po nazwie (Bohnenkamp nie ma pola kategorii w pliku)
+      const kategoria = c.classifyByName(nazwa);
+
+      // Stan magazynowy: tylko dla dętek (z (szt. X)), dla opon null
+      const stan = kategoria === 'dętki' ? stanZNazwy : null;
+
+      const oznaczenia = [
+        ...c.extractTechnicalMarks(nazwa),
+        ...c.extractTechnicalMarks(specyfikacja)
+      ];
+      const oznaczeniaUnique = [...new Set(oznaczenia)];
+
+      const rec = c.normalizeRecord({
+        ean: ean,
+        kod_dostawcy: kodDostawcy,
+        nazwa: nazwa,
+        producent: producent,
+        model_bieznik: '', // Bohnenkamp nie ma osobnej kolumny modelu
+        rozmiar: sizeFromName.rozmiar,
+        rozmiar_alternatywny: sizeFromName.alternatywny,
+        cena_zakupu: cena,
+        stan_magazynowy: stan,
+        kategoria: kategoria,
+        oznaczenia_techniczne: oznaczeniaUnique,
+        dostawca: DOSTAWCA,
+        surowe_pola: { row, specyfikacja }
+      });
+      records.push(rec);
+    } catch (e) {
+      errors.push({ row, error: e.message });
+    }
+  }
+
+  return { records, errors, dostawca: DOSTAWCA };
+}
+
+module.exports = { parseFile, DOSTAWCA };

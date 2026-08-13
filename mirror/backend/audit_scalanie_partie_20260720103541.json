@@ -1,0 +1,863 @@
+[
+ {
+  "id": 98144,
+  "ki_old": "105825",
+  "ki_new": "105825",
+  "nazwa_old": "11.5/80x15.3 BKT AW 909 E 18PR TL",
+  "nazwa_new": "11.5/80-15.3 BKT AW 909 E 18PR TL"
+ },
+ {
+  "id": 98160,
+  "ki_old": "361008",
+  "ki_new": "361008",
+  "nazwa_old": "11.5/80x15.3 BKT AW 909 10PR TL",
+  "nazwa_new": "11.5/80-15.3 BKT AW 909 10PR TL"
+ },
+ {
+  "id": 98428,
+  "ki_old": "522995",
+  "ki_new": "522995",
+  "nazwa_old": "11.5/80x15.3 BKT AW 909 12PR TL",
+  "nazwa_new": "11.5/80-15.3 BKT AW 909 12PR TL"
+ },
+ {
+  "id": 98578,
+  "ki_old": "142309",
+  "ki_new": "142309",
+  "nazwa_old": "11.5/80x15.3 BKT AW 909 14PR TL",
+  "nazwa_new": "11.5/80-15.3 BKT AW 909 14PR TL"
+ },
+ {
+  "id": 98540,
+  "ki_old": "840124",
+  "ki_new": "559773",
+  "nazwa_old": "11.5/80x15.3 BKT AW 909 16PR TL",
+  "nazwa_new": "11.5/80-15.3 BKT AW 909 16PR TL"
+ },
+ {
+  "id": 103273,
+  "ki_old": "948365",
+  "ki_new": "948365",
+  "nazwa_old": "3.00-4 Trelleborg T991 6PR TT",
+  "nazwa_new": "3.00-4 Trelleborg T-991 6PR TT"
+ },
+ {
+  "id": 103148,
+  "ki_old": "480106",
+  "ki_new": "841375",
+  "nazwa_old": "3.00-4 Trelleborg T991 4PR TT",
+  "nazwa_new": "3.00-4 Trelleborg T-991 4PR TT"
+ },
+ {
+  "id": 103274,
+  "ki_old": "841375",
+  "ki_new": "841375",
+  "nazwa_old": "3.00-4 Trelleborg T991 4PR TT",
+  "nazwa_new": "3.00-4 Trelleborg T-991 4PR TT"
+ },
+ {
+  "id": 99585,
+  "ki_old": "241491",
+  "ki_new": "241491",
+  "nazwa_old": "6.00-16 Kabat SRF-01 94A8 8PR TT",
+  "nazwa_new": "6.00-16 Kabat SRF-01 8PR TT"
+ },
+ {
+  "id": 100624,
+  "ki_old": "241491",
+  "ki_new": "241491",
+  "nazwa_old": "6.00-16 Kabat SRF-01 94A8 8PR TT",
+  "nazwa_new": "6.00-16 Kabat SRF-01 8PR TT"
+ },
+ {
+  "id": 99586,
+  "ki_old": "681831",
+  "ki_new": "681831",
+  "nazwa_old": "6.00-16 Kabat SRF-01 88A8 6PR TT",
+  "nazwa_new": "6.00-16 Kabat SRF-01 6PR TT"
+ },
+ {
+  "id": 100625,
+  "ki_old": "681831",
+  "ki_new": "681831",
+  "nazwa_old": "6.00-16 Kabat SRF-01 88A8 6PR TT",
+  "nazwa_new": "6.00-16 Kabat SRF-01 6PR TT"
+ },
+ {
+  "id": 99609,
+  "ki_old": "799518",
+  "ki_new": "799518",
+  "nazwa_old": "4.00-8 Kabat IMP-01 59A4 6PR TT",
+  "nazwa_new": "4.00-8 Kabat IMP-01 6PR TT"
+ },
+ {
+  "id": 100642,
+  "ki_old": "799518",
+  "ki_new": "799518",
+  "nazwa_old": "4.00-8 Kabat IMP-01 59A4 6PR TT",
+  "nazwa_new": "4.00-8 Kabat IMP-01 6PR TT"
+ },
+ {
+  "id": 99610,
+  "ki_old": "270820",
+  "ki_new": "270820",
+  "nazwa_old": "4.00-8 Kabat IMP-01 57A4 4PR TT",
+  "nazwa_new": "4.00-8 Kabat IMP-01 4PR TT"
+ },
+ {
+  "id": 100643,
+  "ki_old": "270820",
+  "ki_new": "270820",
+  "nazwa_old": "4.00-8 Kabat IMP-01 57A4 4PR TT",
+  "nazwa_new": "4.00-8 Kabat IMP-01 4PR TT"
+ },
+ {
+  "id": 99965,
+  "ki_old": "739763",
+  "ki_new": "739763",
+  "nazwa_old": "315/70R22.5 Goodyear KMAX 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Goodyear KMAX D G3 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 99966,
+  "ki_old": "726144",
+  "ki_new": "739763",
+  "nazwa_old": "315/70R22.5 Goodyear KMAX 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Goodyear KMAX D G3 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 100738,
+  "ki_old": "739763",
+  "ki_new": "739763",
+  "nazwa_old": "315/70R22.5 Goodyear KMAX 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Goodyear KMAX D G3 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 101776,
+  "ki_old": "739763",
+  "ki_new": "739763",
+  "nazwa_old": "315/70R22.5 Goodyear KMAX D G3 154L/152M 3PMSF M+S DRIVE",
+  "nazwa_new": "315/70R22.5 Goodyear KMAX D G3 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 101842,
+  "ki_old": "726144",
+  "ki_new": "739763",
+  "nazwa_old": "315/70R22.5 Goodyear KMAX D G3 154L/152M 3PMSF M+S DRIVE",
+  "nazwa_new": "315/70R22.5 Goodyear KMAX D G3 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 98511,
+  "ki_old": "535601",
+  "ki_new": "535601",
+  "nazwa_old": "19.0/45x17 BKT AW 708 22PR TL",
+  "nazwa_new": "19.0/45-17 BKT AW 708 22PR TL"
+ },
+ {
+  "id": 98608,
+  "ki_old": "458167",
+  "ki_new": "458167",
+  "nazwa_old": "19.0/45x17 BKT AW 708 18PR TL",
+  "nazwa_new": "19.0/45-17 BKT AW 708 18PR TL"
+ },
+ {
+  "id": 98106,
+  "ki_old": "981200",
+  "ki_new": "981200",
+  "nazwa_old": "19.0/45x17 BKT AW 708 14PR TL",
+  "nazwa_new": "19.0/45-17 BKT AW 708 14PR TL"
+ },
+ {
+  "id": 103139,
+  "ki_old": "728639",
+  "ki_new": "849892",
+  "nazwa_old": "3.50-8 Trelleborg T510 4PR TT",
+  "nazwa_new": "3.50-8 Trelleborg T-510 4PR TT"
+ },
+ {
+  "id": 103264,
+  "ki_old": "849892",
+  "ki_new": "849892",
+  "nazwa_old": "3.50-8 Trelleborg T510 4PR TT",
+  "nazwa_new": "3.50-8 Trelleborg T-510 4PR TT"
+ },
+ {
+  "id": 103146,
+  "ki_old": "259586",
+  "ki_new": "689777",
+  "nazwa_old": "3.50-6 Trelleborg T510 4PR TT",
+  "nazwa_new": "3.50-6 Trelleborg T-510 4PR TT"
+ },
+ {
+  "id": 103270,
+  "ki_old": "689777",
+  "ki_new": "689777",
+  "nazwa_old": "3.50-6 Trelleborg T510 4PR TT",
+  "nazwa_new": "3.50-6 Trelleborg T-510 4PR TT"
+ },
+ {
+  "id": 102787,
+  "ki_old": "396418",
+  "ki_new": "396418",
+  "nazwa_old": "4.10-4 Trelleborg T539 6PR TT",
+  "nazwa_new": "10/3.50-4 Trelleborg T-539 6PR TT"
+ },
+ {
+  "id": 103212,
+  "ki_old": "396418",
+  "ki_new": "396418",
+  "nazwa_old": "10/3.50-4 Trelleborg T539 6PR TT",
+  "nazwa_new": "10/3.50-4 Trelleborg T-539 6PR TT"
+ },
+ {
+  "id": 99382,
+  "ki_old": "855302",
+  "ki_new": "645788",
+  "nazwa_old": "315/80R22.5 Matador HR 4 156/150L 18PR TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 Matador HR 4 156/150L 20PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100520,
+  "ki_old": "855302",
+  "ki_new": "645788",
+  "nazwa_old": "315/80R22.5 Matador HR 4 156/150L 18PR TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 Matador HR 4 156/150L 20PR TL M+S 3PMSF"
+ },
+ {
+  "id": 99400,
+  "ki_old": "626880",
+  "ki_new": "575959",
+  "nazwa_old": "285/70R19.5 Matador HR 4 146/144M 16PR TL M+S 3PMSF",
+  "nazwa_new": "285/70R19.5 Matador HR 4 146/144M 16PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100535,
+  "ki_old": "626880",
+  "ki_new": "575959",
+  "nazwa_old": "285/70R19.5 Matador HR 4 146/144M 16PR TL M+S 3PMSF",
+  "nazwa_new": "285/70R19.5 Matador HR 4 146/144M 16PR TL M+S 3PMSF"
+ },
+ {
+  "id": 99403,
+  "ki_old": "403455",
+  "ki_new": "258648",
+  "nazwa_old": "265/70R19.5 Matador HR 4 140/138M 14PR TL M+S 3PMSF",
+  "nazwa_new": "265/70R19.5 Matador HR 4 140/138M 14PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100537,
+  "ki_old": "403455",
+  "ki_new": "258648",
+  "nazwa_old": "265/70R19.5 Matador HR 4 140/138M 14PR TL M+S 3PMSF",
+  "nazwa_new": "265/70R19.5 Matador HR 4 140/138M 14PR TL M+S 3PMSF"
+ },
+ {
+  "id": 99409,
+  "ki_old": "621993",
+  "ki_new": "482626",
+  "nazwa_old": "245/70R17.5 Matador HR 4 136/134M 14PR TL M+S 3PMSF",
+  "nazwa_new": "245/70R17.5 Matador HR 4 136/134M 14PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100539,
+  "ki_old": "621993",
+  "ki_new": "482626",
+  "nazwa_old": "245/70R17.5 Matador HR 4 136/134M 14PR TL M+S 3PMSF",
+  "nazwa_new": "245/70R17.5 Matador HR 4 136/134M 14PR TL M+S 3PMSF"
+ },
+ {
+  "id": 99611,
+  "ki_old": "547971",
+  "ki_new": "547971",
+  "nazwa_old": "18x8.50-8 Kabat LWG-02 Implement Klockowa 82A4 6PR TL",
+  "nazwa_new": "18x8.50-8 Kabat LWG-02 Implement Klockowa 6PR TL"
+ },
+ {
+  "id": 100644,
+  "ki_old": "547971",
+  "ki_new": "547971",
+  "nazwa_old": "18x8.50-8 Kabat LWG-02 Implement Klockowa 82A4 6PR TL",
+  "nazwa_new": "18x8.50-8 Kabat LWG-02 Implement Klockowa 6PR TL"
+ },
+ {
+  "id": 101480,
+  "ki_old": "763005",
+  "ki_new": "547971",
+  "nazwa_old": "18x8.50-8 Kabat LWG-02 IMP KLOCKOWA 6PR TL",
+  "nazwa_new": "18x8.50-8 Kabat LWG-02 Implement Klockowa 6PR TL"
+ },
+ {
+  "id": 99612,
+  "ki_old": "986667",
+  "ki_new": "986667",
+  "nazwa_old": "18x8.50-8 Kabat LWG-02 Implement Klockowa 82A4 6PR TT",
+  "nazwa_new": "18x8.50-8 Kabat LWG-02 Implement Klockowa 6PR TT"
+ },
+ {
+  "id": 100645,
+  "ki_old": "986667",
+  "ki_new": "986667",
+  "nazwa_old": "18x8.50-8 Kabat LWG-02 Implement Klockowa 82A4 6PR TT",
+  "nazwa_new": "18x8.50-8 Kabat LWG-02 Implement Klockowa 6PR TT"
+ },
+ {
+  "id": 101479,
+  "ki_old": "986667",
+  "ki_new": "986667",
+  "nazwa_old": "18x8.50-8 Kabat LWG-02 IMP KLOCKOWA 6PR TT",
+  "nazwa_new": "18x8.50-8 Kabat LWG-02 Implement Klockowa 6PR TT"
+ },
+ {
+  "id": 101291,
+  "ki_old": "219805",
+  "ki_new": "219805",
+  "nazwa_old": "340/55-16 Trelleborg AW 305 140A8 TL",
+  "nazwa_new": "340/55-16 Trelleborg AW305 140A8 TL"
+ },
+ {
+  "id": 102776,
+  "ki_old": "219805",
+  "ki_new": "219805",
+  "nazwa_old": "340/55-16 Trelleborg AW305 128A8/140A8 TL",
+  "nazwa_new": "340/55-16 Trelleborg AW305 140A8 TL"
+ },
+ {
+  "id": 98738,
+  "ki_old": "271470",
+  "ki_new": "271470",
+  "nazwa_old": "200/60-14.5 Trelleborg T-448 EXTRA 106A6 10PR TT",
+  "nazwa_new": "200/60-14.5 Trelleborg T-448 EXTRA 10PR TT"
+ },
+ {
+  "id": 101014,
+  "ki_old": "271470",
+  "ki_new": "271470",
+  "nazwa_old": "200/60-14.5 Trelleborg T448 10PR TT",
+  "nazwa_new": "200/60-14.5 Trelleborg T-448 EXTRA 10PR TT"
+ },
+ {
+  "id": 101818,
+  "ki_old": "271470",
+  "ki_new": "271470",
+  "nazwa_old": "200/60-14.5 Trelleborg T448 10PR TT",
+  "nazwa_new": "200/60-14.5 Trelleborg T-448 EXTRA 10PR TT"
+ },
+ {
+  "id": 103221,
+  "ki_old": "271470",
+  "ki_new": "271470",
+  "nazwa_old": "200/60-14.5 Trelleborg T448 10PR TT",
+  "nazwa_new": "200/60-14.5 Trelleborg T-448 EXTRA 10PR TT"
+ },
+ {
+  "id": 103220,
+  "ki_old": "327476",
+  "ki_new": "327476",
+  "nazwa_old": "200/60-14.5 Trelleborg T448 10PR TL",
+  "nazwa_new": "200/60-14.5 Trelleborg T-448 10PR TL"
+ },
+ {
+  "id": 101243,
+  "ki_old": "916767",
+  "ki_new": "916767",
+  "nazwa_old": "6.00-9 Trelleborg T991 10PR TT",
+  "nazwa_new": "6.00-9 Trelleborg T-991 10PR TT"
+ },
+ {
+  "id": 103243,
+  "ki_old": "916767",
+  "ki_new": "916767",
+  "nazwa_old": "6.00-9 Trelleborg T991 10PR TT",
+  "nazwa_new": "6.00-9 Trelleborg T-991 10PR TT"
+ },
+ {
+  "id": 103125,
+  "ki_old": "355237",
+  "ki_new": "355237",
+  "nazwa_old": "6.00-9 Trelleborg T991 6PR TT",
+  "nazwa_new": "6.00-9 Trelleborg T-991 6PR TT"
+ },
+ {
+  "id": 99420,
+  "ki_old": "803114",
+  "ki_new": "525891",
+  "nazwa_old": "205/75R17.5 Matador HR 4 124/122M 12PR TL M+S 3PMSF",
+  "nazwa_new": "205/75R17.5 Matador HR 4 124/122M 12PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100550,
+  "ki_old": "803114",
+  "ki_new": "525891",
+  "nazwa_old": "205/75R17.5 Matador HR 4 124/122M 12PR TL M+S 3PMSF",
+  "nazwa_new": "205/75R17.5 Matador HR 4 124/122M 12PR TL M+S 3PMSF"
+ },
+ {
+  "id": 99421,
+  "ki_old": "525891",
+  "ki_new": "525891",
+  "nazwa_old": "205/75R17.5 Matador HR 4 124/122M TL M+S 3PMSF",
+  "nazwa_new": "205/75R17.5 Matador HR 4 124/122M 12PR TL M+S 3PMSF"
+ },
+ {
+  "id": 99422,
+  "ki_old": "798815",
+  "ki_new": "525891",
+  "nazwa_old": "205/75R17.5 Matador HR 4 124/122M TL M+S 3PMSF",
+  "nazwa_new": "205/75R17.5 Matador HR 4 124/122M 12PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100551,
+  "ki_old": "525891",
+  "ki_new": "525891",
+  "nazwa_old": "205/75R17.5 Matador HR 4 124/122M TL M+S 3PMSF",
+  "nazwa_new": "205/75R17.5 Matador HR 4 124/122M 12PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100641,
+  "ki_old": "889557",
+  "ki_new": "604907",
+  "nazwa_old": "16x6.50-8 Kabat LWG-02 Implement Klockowa 73A4 6PR TT",
+  "nazwa_new": "16x6.50-8 Kabat LWG-02 Implement Klockowa 73A4 6PR TL"
+ },
+ {
+  "id": 99608,
+  "ki_old": "889557",
+  "ki_new": "604907",
+  "nazwa_old": "16x6.50-8 Kabat LWG-02 Implement Klockowa 73A4 6PR TT",
+  "nazwa_new": "16x6.50-8 Kabat LWG-02 Implement Klockowa 73A4 6PR TL"
+ },
+ {
+  "id": 101484,
+  "ki_old": "170685",
+  "ki_new": "353827",
+  "nazwa_old": "15x6.00-6 Kabat IMP-06 LINIOWA IMPLEMENT 6PR TL",
+  "nazwa_new": "15x6.00-6 Kabat IMP-06 Implement Liniowa 6PR TL"
+ },
+ {
+  "id": 101483,
+  "ki_old": "353827",
+  "ki_new": "353827",
+  "nazwa_old": "15x6.00-6 Kabat IMP-06 LINIOWA IMPLEMENT 6PR TT",
+  "nazwa_new": "15x6.00-6 Kabat IMP-06 Implement Liniowa 6PR TL"
+ },
+ {
+  "id": 100647,
+  "ki_old": "353827",
+  "ki_new": "353827",
+  "nazwa_old": "15x6.00-6 Kabat IMP-06 Implement Liniowa 6PR TT",
+  "nazwa_new": "15x6.00-6 Kabat IMP-06 Implement Liniowa 6PR TL"
+ },
+ {
+  "id": 99616,
+  "ki_old": "353827",
+  "ki_new": "353827",
+  "nazwa_old": "15x6.00-6 Kabat IMP-06 Implement Liniowa 6PR TT",
+  "nazwa_new": "15x6.00-6 Kabat IMP-06 Implement Liniowa 6PR TL"
+ },
+ {
+  "id": 100693,
+  "ki_old": "996583",
+  "ki_new": "668581",
+  "nazwa_old": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TL",
+  "nazwa_new": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TL"
+ },
+ {
+  "id": 100692,
+  "ki_old": "668581",
+  "ki_new": "668581",
+  "nazwa_old": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TT",
+  "nazwa_new": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TL"
+ },
+ {
+  "id": 99762,
+  "ki_old": "996583",
+  "ki_new": "668581",
+  "nazwa_old": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TL",
+  "nazwa_new": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TL"
+ },
+ {
+  "id": 99760,
+  "ki_old": "668581",
+  "ki_new": "668581",
+  "nazwa_old": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TT",
+  "nazwa_new": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 126A6/122A8 12PR TL"
+ },
+ {
+  "id": 101775,
+  "ki_old": "482110",
+  "ki_new": "452449",
+  "nazwa_old": "315/70R22.5 Dunlop SP446 154L/152M 3PMSF M+S DRIVE",
+  "nazwa_new": "315/70R22.5 Dunlop SP446 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 100730,
+  "ki_old": "452449",
+  "ki_new": "452449",
+  "nazwa_old": "315/70R22.5 Dunlop SP446 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Dunlop SP446 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 99900,
+  "ki_old": "452449",
+  "ki_new": "452449",
+  "nazwa_old": "315/70R22.5 Dunlop SP446 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Dunlop SP446 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 99899,
+  "ki_old": "482110",
+  "ki_new": "452449",
+  "nazwa_old": "315/70R22.5 Dunlop SP446 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Dunlop SP446 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 100736,
+  "ki_old": "888932",
+  "ki_new": "220707",
+  "nazwa_old": "315/80R22.5 Goodyear OMNITRAC 156/150K TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 Goodyear OMNITRAC 156/150K TL M+S 3PMSF"
+ },
+ {
+  "id": 99962,
+  "ki_old": "888932",
+  "ki_new": "220707",
+  "nazwa_old": "315/80R22.5 Goodyear OMNITRAC 156/150K TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 Goodyear OMNITRAC 156/150K TL M+S 3PMSF"
+ },
+ {
+  "id": 100768,
+  "ki_old": "810609",
+  "ki_new": "749932",
+  "nazwa_old": "315/80R22.5 CEAT WINMILE- 156/150L TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 CEAT WINMILE- 156/150L TL M+S 3PMSF"
+ },
+ {
+  "id": 100108,
+  "ki_old": "810609",
+  "ki_new": "749932",
+  "nazwa_old": "315/80R22.5 CEAT WINMILE- 156/150L TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 CEAT WINMILE- 156/150L TL M+S 3PMSF"
+ },
+ {
+  "id": 102446,
+  "ki_old": "999980",
+  "ki_new": "326279",
+  "nazwa_old": "400/60-15.5 Alliance 320 VALUE PLUS 16PR TL",
+  "nazwa_new": "400/60-15.5 Alliance 320 Value Plus 152A6/148A8 16PR TL"
+ },
+ {
+  "id": 102445,
+  "ki_old": "326279",
+  "ki_new": "326279",
+  "nazwa_old": "400/60-15.5 Alliance 320 VALUE PLUS 16PR TL",
+  "nazwa_new": "400/60-15.5 Alliance 320 Value Plus 152A6/148A8 16PR TL"
+ },
+ {
+  "id": 100987,
+  "ki_old": "326279",
+  "ki_new": "326279",
+  "nazwa_old": "400/60-15.5 Alliance A-320 VP 143A6/135A8 16PR TL",
+  "nazwa_new": "400/60-15.5 Alliance 320 Value Plus 152A6/148A8 16PR TL"
+ },
+ {
+  "id": 101913,
+  "ki_old": "985167",
+  "ki_new": "546283",
+  "nazwa_old": "460/70R24 Trelleborg TH500 159A8/159B TL",
+  "nazwa_new": "460/70R24 Trelleborg TH500 159A8/159B TL"
+ },
+ {
+  "id": 103493,
+  "ki_old": "264573",
+  "ki_new": "546283",
+  "nazwa_old": "460/70R24 Trelleborg TH500 159A8/159B TL",
+  "nazwa_new": "460/70R24 Trelleborg TH500 159A8/159B TL"
+ },
+ {
+  "id": 102073,
+  "ki_old": "273846",
+  "ki_new": "273846",
+  "nazwa_old": "600/70R30 Alliance AGRISTAR II 152D TL",
+  "nazwa_new": "600/70R30 Alliance Agri Star II 152D Stubble Guard TL"
+ },
+ {
+  "id": 101036,
+  "ki_old": "273846",
+  "ki_new": "273846",
+  "nazwa_old": "600/70R30 Alliance AGRISTAR II 70 152D TL",
+  "nazwa_new": "600/70R30 Alliance Agri Star II 152D Stubble Guard TL"
+ },
+ {
+  "id": 101126,
+  "ki_old": "273846",
+  "ki_new": "273846",
+  "nazwa_old": "600/70R30 Alliance AGRISTAR II 70 152D TL",
+  "nazwa_new": "600/70R30 Alliance Agri Star II 152D Stubble Guard TL"
+ },
+ {
+  "id": 101752,
+  "ki_old": "278844",
+  "ki_new": "501996",
+  "nazwa_old": "750/60R30.5 Alliance 885 181D TL",
+  "nazwa_new": "750/60R30.5 Alliance 885 181D SB TL"
+ },
+ {
+  "id": 101751,
+  "ki_old": "501996",
+  "ki_new": "501996",
+  "nazwa_old": "750/60R30.5 Alliance 885 181D TL",
+  "nazwa_new": "750/60R30.5 Alliance 885 181D SB TL"
+ },
+ {
+  "id": 101040,
+  "ki_old": "501996",
+  "ki_new": "501996",
+  "nazwa_old": "750/60R30.5 Alliance 885 181D TL",
+  "nazwa_new": "750/60R30.5 Alliance 885 181D SB TL"
+ },
+ {
+  "id": 102709,
+  "ki_old": "769311",
+  "ki_new": "564329",
+  "nazwa_old": "16.9R34 Alliance AGRISTAR II 142D TL",
+  "nazwa_new": "420/85R34 Alliance Agri Star II 142D Stubble Guard TL"
+ },
+ {
+  "id": 102023,
+  "ki_old": "564329",
+  "ki_new": "564329",
+  "nazwa_old": "16.9R34 Alliance AGRISTAR II 142D TL",
+  "nazwa_new": "420/85R34 Alliance Agri Star II 142D Stubble Guard TL"
+ },
+ {
+  "id": 101051,
+  "ki_old": "564329",
+  "ki_new": "564329",
+  "nazwa_old": "420/85R34 Alliance AGRISTAR II 85 142D TL",
+  "nazwa_new": "420/85R34 Alliance Agri Star II 142D Stubble Guard TL"
+ },
+ {
+  "id": 102278,
+  "ki_old": "890664",
+  "ki_new": "525431",
+  "nazwa_old": "800/65R32 Alliance 360 181A8/178B TL",
+  "nazwa_new": "800/65R32 Alliance 360 181A8/178B TL"
+ },
+ {
+  "id": 102440,
+  "ki_old": "929172",
+  "ki_new": "251217",
+  "nazwa_old": "15.0/55-17 Alliance 320 VALUE PLUS 10PR TL",
+  "nazwa_new": "15.0/55-17 Alliance 320 Value Plus 138A6/134A8 10PR TL"
+ },
+ {
+  "id": 102439,
+  "ki_old": "251217",
+  "ki_new": "251217",
+  "nazwa_old": "15.0/55-17 Alliance 320 VALUE PLUS 10PR TL",
+  "nazwa_new": "15.0/55-17 Alliance 320 Value Plus 138A6/134A8 10PR TL"
+ },
+ {
+  "id": 103140,
+  "ki_old": "695428",
+  "ki_new": "691758",
+  "nazwa_old": "15x6.00-6 Trelleborg T510 6PR TT",
+  "nazwa_new": "15x6.00-6 Trelleborg T510 6PR TT"
+ },
+ {
+  "id": 100884,
+  "ki_old": "768850",
+  "ki_new": "768850",
+  "nazwa_old": "31x15.50-15 BKT TR 315 10PR TL",
+  "nazwa_new": "31x15.5-15 BKT TR 315 10PR TL"
+ },
+ {
+  "id": 98100,
+  "ki_old": "113633",
+  "ki_new": "113633",
+  "nazwa_old": "15.0/70x18 BKT AW 705 14PR TL",
+  "nazwa_new": "15.0/70-18 BKT AW 705 14PR TL"
+ },
+ {
+  "id": 98260,
+  "ki_old": "855754",
+  "ki_new": "855754",
+  "nazwa_old": "15.0/70x18 BKT AW 705 16PR TL",
+  "nazwa_new": "15.0/70-18 BKT AW 705 16PR TL"
+ },
+ {
+  "id": 98240,
+  "ki_old": "542369",
+  "ki_new": "542369",
+  "nazwa_old": "7.50x16 BKT AS 504 8PR TT",
+  "nazwa_new": "7.50-16 BKT AS 504 8PR TT"
+ },
+ {
+  "id": 98628,
+  "ki_old": "359055",
+  "ki_new": "359055",
+  "nazwa_old": "7.50x16 BKT AS 504 8PR TL",
+  "nazwa_new": "7.50-16 BKT AS 504 8PR TL"
+ },
+ {
+  "id": 98266,
+  "ki_old": "514140",
+  "ki_new": "514140",
+  "nazwa_old": "320/85R24 BKT AGRIMAX RT 855 122A8/B TL",
+  "nazwa_new": "320/85R24 BKT Agrimax RT 855 122A8/122B TL"
+ },
+ {
+  "id": 98367,
+  "ki_old": "695545",
+  "ki_new": "695545",
+  "nazwa_old": "15.0/55x17 BKT AS 504 14PR TL",
+  "nazwa_new": "15.0/55-17 BKT AS 504 14PR TL"
+ },
+ {
+  "id": 98557,
+  "ki_old": "899559",
+  "ki_new": "899559",
+  "nazwa_old": "15.0/55x17 BKT AS 504 10PR TL",
+  "nazwa_new": "15.0/55-17 BKT AS 504 10PR TL"
+ },
+ {
+  "id": 98372,
+  "ki_old": "915624",
+  "ki_new": "915624",
+  "nazwa_old": "210/95R18 BKT AGRIMAX RT 855 108A8/B TL",
+  "nazwa_new": "210/95R18 BKT Agrimax RT 855 108A8/108B TL"
+ },
+ {
+  "id": 98575,
+  "ki_old": "958501",
+  "ki_new": "958501",
+  "nazwa_old": "340/85R24 BKT AGRIMAX RT 855 125A8/B TL",
+  "nazwa_new": "340/85R24 BKT Agrimax RT 855 125A8/125B TL"
+ },
+ {
+  "id": 98598,
+  "ki_old": "113360",
+  "ki_new": "113360",
+  "nazwa_old": "380/70R24 BKT AGRIMAX RT 765 E 125D TL",
+  "nazwa_new": "380/70R24 BKT Agrimax RT 765 E 125D TL"
+ },
+ {
+  "id": 103329,
+  "ki_old": "478626",
+  "ki_new": "478626",
+  "nazwa_old": "4.00-15 Trelleborg TD27 4PR TT",
+  "nazwa_new": "4.00-15 Trelleborg TD27 66A6 4PR TT"
+ },
+ {
+  "id": 98744,
+  "ki_old": "333485",
+  "ki_new": "333485",
+  "nazwa_old": "6.00-9 Trelleborg T-522 10PR TT",
+  "nazwa_new": "6.00-9 Trelleborg T522 10PR TT"
+ },
+ {
+  "id": 100431,
+  "ki_old": "330901",
+  "ki_new": "330901",
+  "nazwa_old": "4.00-6 Trelleborg T-991 6PR TT",
+  "nazwa_new": "4.00-6 Trelleborg T991 6PR TT"
+ },
+ {
+  "id": 98748,
+  "ki_old": "330901",
+  "ki_new": "330901",
+  "nazwa_old": "4.00-6 Trelleborg T-991 6PR TT",
+  "nazwa_new": "4.00-6 Trelleborg T991 6PR TT"
+ },
+ {
+  "id": 102676,
+  "ki_old": "847631",
+  "ki_new": "847631",
+  "nazwa_old": "16.9-24 Michelin POWER CL 168A8 TL",
+  "nazwa_new": "440/80-24 Michelin POWER CL 168A8 TL"
+ },
+ {
+  "id": 101941,
+  "ki_old": "131745",
+  "ki_new": "131745",
+  "nazwa_old": "14.9-28 Cultor AS-AGRI20 8PR TT",
+  "nazwa_new": "14.9-28 Cultor AS AGRI 20 8PR TT"
+ },
+ {
+  "id": 99470,
+  "ki_old": "415150",
+  "ki_new": "330041",
+  "nazwa_old": "265/70R17.5 LingLong KLS200 140/138M 16PR TL M+S 3PMSF",
+  "nazwa_new": "265/70R17.5 LingLong KLS200 140/138M 16PR TL M+S 3PMSF"
+ },
+ {
+  "id": 102904,
+  "ki_old": "916142",
+  "ki_new": "916142",
+  "nazwa_old": "15.5/80-24 Michelin POWER CL 162A8 20PR TL",
+  "nazwa_new": "400/80-24 Michelin POWER CL 162A8 20PR TL"
+ },
+ {
+  "id": 101263,
+  "ki_old": "916142",
+  "ki_new": "916142",
+  "nazwa_old": "400/80-24 Michelin POWER CL 162A8 TL",
+  "nazwa_new": "400/80-24 Michelin POWER CL 162A8 20PR TL"
+ },
+ {
+  "id": 102144,
+  "ki_old": "880255",
+  "ki_new": "880255",
+  "nazwa_old": "650/65R38 Mitas AC65 157D/160A8 TL",
+  "nazwa_new": "650/65R38 Mitas AC 65 157D/160A8 TL"
+ },
+ {
+  "id": 99124,
+  "ki_old": "251110",
+  "ki_new": "880255",
+  "nazwa_old": "650/65R38 Mitas AC 65 157D/160A8 TL",
+  "nazwa_new": "650/65R38 Mitas AC 65 157D/160A8 TL"
+ },
+ {
+  "id": 102147,
+  "ki_old": "811672",
+  "ki_new": "811672",
+  "nazwa_old": "540/65R38 Mitas AC65 147D/150A8 TL",
+  "nazwa_new": "540/65R38 Mitas AC 65 147D/150A8 TL"
+ },
+ {
+  "id": 99129,
+  "ki_old": "659253",
+  "ki_new": "811672",
+  "nazwa_old": "540/65R38 Mitas AC 65 147D/150A8 TL",
+  "nazwa_new": "540/65R38 Mitas AC 65 147D/150A8 TL"
+ },
+ {
+  "id": 102179,
+  "ki_old": "215545",
+  "ki_new": "215545",
+  "nazwa_old": "270/80R32 Mitas AC90 131A8/128B TL",
+  "nazwa_new": "270/80R32 Mitas AC 90 131A8/128B TL"
+ },
+ {
+  "id": 99153,
+  "ki_old": "214101",
+  "ki_new": "215545",
+  "nazwa_old": "270/80R32 Mitas AC 90 131A8/128B TL",
+  "nazwa_new": "270/80R32 Mitas AC 90 131A8/128B TL"
+ },
+ {
+  "id": 102150,
+  "ki_old": "621080",
+  "ki_new": "621080",
+  "nazwa_old": "480/65R28 Mitas AC65 136D/139A8 TL",
+  "nazwa_new": "480/65R28 Mitas AC 65 136D/139A8 TL"
+ },
+ {
+  "id": 99163,
+  "ki_old": "993261",
+  "ki_new": "621080",
+  "nazwa_old": "480/65R28 Mitas AC 65 136D/139A8 TL",
+  "nazwa_new": "480/65R28 Mitas AC 65 136D/139A8 TL"
+ }
+]

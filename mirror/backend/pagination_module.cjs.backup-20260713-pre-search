@@ -1,0 +1,216 @@
+// pagination_module.cjs -- Fix J + Fix I: paginacja stagingu i historii importow
+// Poprawne nazwy tabel: staging_items, audit_log (NIE: staging, historia)
+
+'use strict';
+
+/**
+ * Rejestruje endpointy paginacji na obiekcie Express `app`.
+ * @param {import('express').Application} app
+ * @param {import('better-sqlite3').Database} db
+ * @param {Function} requireAuth - middleware weryfikacji JWT
+ */
+function registerPaginationRoutes(app, db, requireAuth) {
+
+  // STAGING (paginacja)
+
+  app.get('/api/staging/paged', requireAuth, (req, res) => {
+    try {
+      const page     = Math.max(1, parseInt(req.query.page     || '1', 10));
+      const pageSize = Math.min(200, Math.max(1, parseInt(req.query.pageSize || req.query.limit || '50', 10)));
+      const offset   = (page - 1) * pageSize;
+
+      const conditions = [];
+      const params     = [];
+
+      if (req.query.typZmiany && req.query.typZmiany !== 'all') {
+        conditions.push('typ_zmiany = ?');
+        params.push(req.query.typZmiany);
+      }
+      if (req.query.dostawca) {
+        conditions.push('dostawca = ?');
+        params.push(req.query.dostawca);
+      }
+      if (req.query.search) {
+        conditions.push('(nazwa LIKE ? OR kod LIKE ?)');
+        const like = '%' + req.query.search + '%';
+        params.push(like, like);
+      }
+
+      const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+
+      const total = db.prepare('SELECT COUNT(*) AS cnt FROM staging_items ' + where)
+        .get(...params).cnt;
+
+      const rows = db.prepare(
+        'SELECT' +
+        '  id,' +
+        '  typ_zmiany        AS typZmiany,' +
+        '  kod,' +
+        '  nazwa,' +
+        '  dostawca,' +
+        '  magazyn,' +
+        '  stan_stary        AS stanStary,' +
+        '  stan_nowy         AS stanNowy,' +
+        '  cena_zakupu_stara AS cenaZakupuStara,' +
+        '  cena_zakupu_nowa  AS cenaZakupuNowa,' +
+        '  cena_sprzedazy_nowa AS cenaSprzedazyNowa,' +
+        '  zmiana_pct        AS zmianaPct,' +
+        '  ostrzezenie,' +
+        '  powod,' +
+        '  ean_raw           AS eanRaw,' +
+        '  ean_is_valid      AS eanIsValid,' +
+        '  ean_source_status AS eanSourceStatus,' +
+        '  edytowane_pola    AS edytowanePola,' +
+        '  utworzono,' +
+        '  zatwierdzono_data AS zatwierdzono' +
+        ' FROM staging_items' +
+        ' ' + where +
+        ' ORDER BY id DESC' +
+        ' LIMIT ? OFFSET ?'
+      ).all(...params, pageSize, offset);
+
+      res.json({
+        items:    rows,
+        total,
+        page,
+        pageSize,
+        pages: Math.ceil(total / pageSize),
+      });
+    } catch (err) {
+      console.error('[pagination] /api/staging/paged error:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POJEDYNCZA POZYCJA STAGINGU (pełny snapshot dla edycji)
+
+  app.get('/api/staging/:id', requireAuth, (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (!Number.isFinite(id)) {
+        return res.status(400).json({ error: 'Nieprawidłowy id' });
+      }
+      const row = db.prepare(
+        'SELECT' +
+        '  id,' +
+        '  typ_zmiany        AS typZmiany,' +
+        '  kod,' +
+        '  nazwa,' +
+        '  dostawca,' +
+        '  magazyn,' +
+        '  stan_stary        AS stanStary,' +
+        '  stan_nowy         AS stanNowy,' +
+        '  cena_zakupu_stara AS cenaZakupuStara,' +
+        '  cena_zakupu_nowa  AS cenaZakupuNowa,' +
+        '  cena_sprzedazy_nowa AS cenaSprzedazyNowa,' +
+        '  zmiana_pct        AS zmianaPct,' +
+        '  ostrzezenie,' +
+        '  powod,' +
+        '  snapshot_json     AS snapshotJson,' +
+        '  ean_raw           AS eanRaw,' +
+        '  ean_is_valid      AS eanIsValid,' +
+        '  ean_source_status AS eanSourceStatus,' +
+        '  edytowane_pola    AS edytowanePola,' +
+        '  utworzono,' +
+        '  zatwierdzono_data AS zatwierdzono' +
+        ' FROM staging_items' +
+        ' WHERE id = ?'
+      ).get(id);
+      if (!row) return res.status(404).json({ error: 'Nie znaleziono pozycji stagingu' });
+      res.json(row);
+    } catch (err) {
+      console.error('[pagination] /api/staging/:id error:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // HISTORIA IMPORTOW (z audit_log)
+
+  app.get('/api/history/meta', requireAuth, (req, res) => {
+    try {
+      const rows = db.prepare(
+        "SELECT id, kiedy, uzytkownik_imie AS uzytkownik, akcja, encja_id AS dostawca, szczegoly_json AS szczegolyJson" +
+        " FROM audit_log" +
+        " WHERE akcja IN ('import_z_url','import_pliku','import')" +
+        " ORDER BY id DESC LIMIT 200"
+      ).all();
+
+      const items = rows.map(r => {
+        let szcz = {};
+        try { szcz = JSON.parse(r.szczegolyJson || '{}'); } catch (_) {}
+        return {
+          id:            r.id,
+          kiedy:         r.kiedy,
+          uzytkownik:    r.uzytkownik || 'system',
+          typ:           'import',
+          dostawca:      r.dostawca || szcz.dostawca || null,
+          liczbaPozycji: szcz.liczbaPozycji != null ? szcz.liczbaPozycji : (szcz.liczba_pozycji != null ? szcz.liczba_pozycji : null),
+          nazwaPliku:    szcz.nazwaPliku != null ? szcz.nazwaPliku : (szcz.nazwa_pliku != null ? szcz.nazwa_pliku : null),
+          uwagi:         szcz.uwagi != null ? szcz.uwagi : null,
+          akcja:         r.akcja,
+        };
+      });
+
+      res.json(items);
+    } catch (err) {
+      console.error('[pagination] /api/history/meta error:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get('/api/history/paged', requireAuth, (req, res) => {
+    try {
+      const page     = Math.max(1, parseInt(req.query.page     || '1', 10));
+      const pageSize = Math.min(200, Math.max(1, parseInt(req.query.pageSize || req.query.limit || '50', 10)));
+      const offset   = (page - 1) * pageSize;
+
+      const conditions = ["akcja IN ('import_z_url','import_pliku','import')"];
+      const params     = [];
+
+      if (req.query.dostawca) {
+        conditions.push('encja_id = ?');
+        params.push(req.query.dostawca);
+      }
+      if (req.query.search) {
+        conditions.push('(encja_id LIKE ? OR uzytkownik_imie LIKE ?)');
+        const like = '%' + req.query.search + '%';
+        params.push(like, like);
+      }
+
+      const where = 'WHERE ' + conditions.join(' AND ');
+
+      const total = db.prepare('SELECT COUNT(*) AS cnt FROM audit_log ' + where)
+        .get(...params).cnt;
+
+      const rows = db.prepare(
+        'SELECT id, kiedy, uzytkownik_imie AS uzytkownik, akcja, encja_id AS dostawca, szczegoly_json AS szczegolyJson' +
+        ' FROM audit_log' +
+        ' ' + where +
+        ' ORDER BY id DESC' +
+        ' LIMIT ? OFFSET ?'
+      ).all(...params, pageSize, offset);
+
+      const items = rows.map(r => {
+        let szcz = {};
+        try { szcz = JSON.parse(r.szczegolyJson || '{}'); } catch (_) {}
+        return {
+          id:            r.id,
+          kiedy:         r.kiedy,
+          uzytkownik:    r.uzytkownik || 'system',
+          typ:           'import',
+          dostawca:      r.dostawca || szcz.dostawca || null,
+          liczbaPozycji: szcz.liczbaPozycji != null ? szcz.liczbaPozycji : (szcz.liczba_pozycji != null ? szcz.liczba_pozycji : null),
+          nazwaPliku:    szcz.nazwaPliku != null ? szcz.nazwaPliku : (szcz.nazwa_pliku != null ? szcz.nazwa_pliku : null),
+          uwagi:         szcz.uwagi != null ? szcz.uwagi : null,
+        };
+      });
+
+      res.json({ items, total, page, pageSize, pages: Math.ceil(total / pageSize) });
+    } catch (err) {
+      console.error('[pagination] /api/history/paged error:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+}
+
+module.exports = { registerPaginationRoutes };

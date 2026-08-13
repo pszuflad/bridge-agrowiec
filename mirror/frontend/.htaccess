@@ -1,0 +1,39 @@
+# Bridge - reverse proxy do backendu Node.js na localhost:5000
+# Frontend SPA serwowany statycznie z tego katalogu.
+# Plik obsluguje DWA hosty:
+#   - https://agritires.eu/panel/...   (URL z prefixem /panel, DocumentRoot agritires.eu/public_html)
+#   - https://panel.agritires.eu/...   (subdomena, DocumentRoot = ten katalog)
+# Bundle uzywa stalej Vd="/panel" -> kazde wywolanie API ma sciezke /panel/api/...
+# Na subdomenie panel.agritires.eu wiodacy /panel jest "dodatkowy" i trzeba go usunac
+# WEWNETRZNYM rewritem (nie redirectem 301, bo to zniszczyloby POST body).
+
+RewriteEngine On
+
+# === 1) Subdomena panel.agritires.eu: WEWNETRZNY rewrite ===
+# Najpierw proxy /panel/api/* prosto do backendu (zachowuje metode i body).
+RewriteCond %{HTTP_HOST} ^(www\.)?panel\.agritires\.eu$ [NC]
+RewriteRule ^panel/api/(.*)$ http://127.0.0.1:5000/api/$1 [P,L,QSA]
+
+# Pliki/assets z prefixem /panel -> sciezka bez prefixu (zachowuje GET).
+RewriteCond %{HTTP_HOST} ^(www\.)?panel\.agritires\.eu$ [NC]
+RewriteRule ^panel/(.*)$ /$1 [L,QSA]
+
+# === 2) Standardowe proxy /api/* do backendu (oba hosty) ===
+RewriteRule ^api/(.*)$ http://127.0.0.1:5000/api/$1 [P,L,QSA]
+
+# === 3) SPA fallback ===
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule ^ index.html [L]
+
+# === 4) Wymuszenie HTTPS ===
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# === 5) Wymuszenie braku cache dla index.html i bundli JS/CSS ===
+<FilesMatch "\.(html|js|css)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</FilesMatch>

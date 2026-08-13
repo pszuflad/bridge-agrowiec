@@ -1,0 +1,1419 @@
+/**
+ * Bridge Agrowca — injection skryptu do widoku /atrybuty
+ * v4 - pełne przejęcie widoku Atrybuty z synchronizacją API /api/atrybuty
+ *      + panel "Do akceptacji" (pending) niezmieniony
+ *
+ * Architektura:
+ *  - Ukrywa oryginalne kafle bundle React (offline IndexedDB) i wstawia własny widok Attributes
+ *  - Kafle liczą wartości z /api/atrybuty (rzeczywisty DB stan)
+ *  - Klik w kafel: panel listy wartości per rodzaj + CRUD (dodaj/edytuj/usuń)
+ *  - Osobny przycisk "Do akceptacji" otwiera panel pending (bez zmian od v3)
+ */
+(function() {
+  'use strict';
+
+  const API_BASE = '/panel/api';
+  const VERSION = 'v6';
+
+  const CSS = `
+    /* ===== PRZYCISKI HEADERA ===== */
+    .pending-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 8px;
+      background: #D97706; color: #171614;
+      border: none; font: 600 13px/1 Inter, system-ui, sans-serif;
+      cursor: pointer; transition: background .15s;
+      vertical-align: middle;
+    }
+    .pending-btn:hover { background: #B45309; }
+    .pending-btn.active { background: #964219; color: #F9F8F5; }
+    .pending-btn.active:hover { background: #7a3616; }
+    .pending-btn .pending-badge {
+      background: rgba(23,22,20,0.25); color: inherit;
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 11px; font-weight: 700;
+      min-width: 20px; text-align: center;
+    }
+    .pending-btn.active .pending-badge { background: rgba(249,248,245,0.25); }
+
+    /* ===== KAFLE (VIEW ATRYBUTY) ===== */
+    #atrybuty-inject-view {
+      font-family: Inter, system-ui, sans-serif;
+      color: #CDCCCA;
+    }
+    #atrybuty-inject-view .atr-topbar {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+      color: #797876; font-size: 12px;
+    }
+    #atrybuty-inject-view .atr-topbar .sync-info {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 12px;
+      background: rgba(109,170,69,0.15); color: #6DAA45;
+      font-weight: 500; font-size: 11px;
+    }
+    #atrybuty-inject-view .atr-topbar .refresh-btn {
+      padding: 6px 12px; border: 1px solid #393836; border-radius: 6px;
+      background: #201F1D; color: #CDCCCA;
+      font: 500 12px/1 Inter, sans-serif; cursor: pointer;
+    }
+    #atrybuty-inject-view .atr-topbar .refresh-btn:hover { background: #2A2926; }
+    #atrybuty-inject-view .atr-topbar .refresh-btn:disabled { opacity: 0.5; cursor: wait; }
+    #atrybuty-inject-view .atr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    #atrybuty-inject-view .atr-tile {
+      background: #1C1B19; border: 1px solid #393836;
+      border-radius: 10px; padding: 16px;
+      cursor: pointer; text-align: left;
+      transition: all .15s;
+    }
+    #atrybuty-inject-view .atr-tile:hover {
+      border-color: #D97706; background: #201F1D;
+      transform: translateY(-1px);
+    }
+    #atrybuty-inject-view .atr-tile .tile-label {
+      font-weight: 600; font-size: 14px; color: #CDCCCA; margin-bottom: 4px;
+    }
+    #atrybuty-inject-view .atr-tile .tile-opis {
+      font-size: 11px; color: #797876; line-height: 1.4;
+      min-height: 30px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    #atrybuty-inject-view .atr-tile .tile-count {
+      margin-top: 12px; display: flex; align-items: center; justify-content: space-between;
+    }
+    #atrybuty-inject-view .atr-tile .tile-count .num {
+      font-size: 22px; font-weight: 700; color: #FDAB43;
+      font-variant-numeric: tabular-nums;
+    }
+    #atrybuty-inject-view .atr-tile .tile-count .lbl { font-size: 11px; color: #797876; }
+    #atrybuty-inject-view .atr-tile.core .tile-tag { color: #4F98A3; }
+    #atrybuty-inject-view .atr-tile.custom .tile-tag { color: #D163A7; }
+    #atrybuty-inject-view .atr-skeleton-tile {
+      background: #1F1E1C; border: 1px solid #2A2926; border-radius: 8px;
+      padding: 16px; min-height: 96px; position: relative; overflow: hidden;
+    }
+    #atrybuty-inject-view .atr-skeleton-tile .sk-line {
+      background: linear-gradient(90deg, #2A2926 25%, #34322F 37%, #2A2926 63%);
+      background-size: 400% 100%;
+      animation: atr-sk-shimmer 1.4s ease infinite;
+      border-radius: 4px; margin-bottom: 10px;
+    }
+    #atrybuty-inject-view .atr-skeleton-tile .sk-line.w-60 { width: 60%; height: 14px; }
+    #atrybuty-inject-view .atr-skeleton-tile .sk-line.w-90 { width: 90%; height: 10px; }
+    #atrybuty-inject-view .atr-skeleton-tile .sk-line.w-30 { width: 30%; height: 20px; margin-top: 12px; }
+    @keyframes atr-sk-shimmer {
+      0% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    #atrybuty-inject-view .atr-topbar.sk-topbar .sync-info { color: #797876; }
+    #atrybuty-inject-view .atr-topbar.sk-topbar .sync-info::before { content: '○ '; }
+    #atrybuty-inject-view .atr-tile .tile-tag {
+      display: inline-block; font-size: 10px; text-transform: uppercase;
+      letter-spacing: 0.05em; margin-top: 6px; font-weight: 600;
+    }
+
+    /* ===== PANEL LISTY WARTOŚCI ===== */
+    #atr-values-panel {
+      background: #1C1B19; border: 1px solid #393836;
+      border-radius: 12px; padding: 20px; margin-top: 16px;
+    }
+    #atr-values-panel .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #4F98A3; font-size: 13px; cursor: pointer;
+      padding: 4px 0; margin-bottom: 12px; background: none; border: none;
+    }
+    #atr-values-panel .back-link:hover { color: #D97706; }
+    #atr-values-panel .panel-header {
+      display: flex; align-items: center; gap: 12px; justify-content: space-between;
+      flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #393836;
+    }
+    #atr-values-panel .panel-header h2 {
+      font-size: 18px; font-weight: 600; color: #CDCCCA; margin: 0;
+    }
+    #atr-values-panel .panel-header .opis { color: #797876; font-size: 12px; margin-top: 4px; }
+    #atr-values-panel .add-form {
+      display: flex; gap: 8px; align-items: center;
+    }
+    #atr-values-panel .add-form input[type=text] {
+      padding: 8px 12px; border: 1px solid #393836; border-radius: 6px;
+      background: #171614; color: #CDCCCA; font: inherit;
+      min-width: 220px;
+    }
+    #atr-values-panel .add-form input:focus {
+      outline: 2px solid #D97706; outline-offset: -1px; border-color: #D97706;
+    }
+    #atr-values-panel .add-form button {
+      padding: 8px 14px; background: #6DAA45; color: #171614;
+      border: none; border-radius: 6px; font: 600 12px/1 Inter, sans-serif;
+      cursor: pointer;
+    }
+    #atr-values-panel .add-form button:hover { opacity: 0.9; }
+    #atr-values-panel .add-form button:disabled { opacity: 0.4; cursor: wait; }
+    #atr-values-panel .filter-bar {
+      display: flex; gap: 12px; align-items: center; margin-bottom: 12px;
+      color: #797876; font-size: 12px;
+    }
+    #atr-values-panel .filter-bar input {
+      padding: 6px 10px; border: 1px solid #393836; border-radius: 6px;
+      background: #171614; color: #CDCCCA; font: inherit; min-width: 240px;
+    }
+    #atr-values-panel .filter-bar select {
+      padding: 6px 10px; border: 1px solid #393836; border-radius: 6px;
+      background: #171614; color: #CDCCCA; font: inherit;
+    }
+    #atr-values-panel table {
+      width: 100%; border-collapse: collapse;
+    }
+    #atr-values-panel th, #atr-values-panel td {
+      padding: 8px 12px; text-align: left; border-bottom: 1px solid #2A2926;
+      vertical-align: middle;
+    }
+    #atr-values-panel th {
+      background: #201F1D; font-weight: 600; color: #CDCCCA;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+      position: sticky; top: 0;
+    }
+    #atr-values-panel td.wart-cell {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; color: #FDAB43;
+    }
+    #atr-values-panel .origin-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    #atr-values-panel .origin-badge.catalog { background: rgba(79,152,163,0.2); color: #4F98A3; }
+    #atr-values-panel .origin-badge.user    { background: rgba(217,119,6,0.2); color: #FDAB43; }
+    #atr-values-panel .origin-badge.preset  { background: rgba(109,170,69,0.2); color: #6DAA45; }
+    #atr-values-panel .val-actions { display: flex; gap: 6px; }
+    #atr-values-panel .val-btn {
+      padding: 4px 10px; border: 1px solid #393836; border-radius: 4px;
+      background: #201F1D; color: #CDCCCA; font: 500 11px/1 Inter, sans-serif;
+      cursor: pointer;
+    }
+    #atr-values-panel .val-btn:hover { background: #2A2926; }
+    #atr-values-panel .val-btn.danger:hover { background: rgba(209,99,167,0.2); border-color: #D163A7; color: #D163A7; }
+    #atr-values-panel .val-btn:disabled { opacity: 0.4; cursor: wait; }
+    #atr-values-panel .empty {
+      text-align: center; padding: 40px 20px; color: #797876;
+    }
+    #atr-values-panel .list-scroller {
+      max-height: 60vh; overflow-y: auto;
+      border: 1px solid #2A2926; border-radius: 8px;
+    }
+
+    /* ===== PANEL PENDING (bez zmian od v3) ===== */
+    #pending-panel {
+      background: #1C1B19; border: 1px solid #393836;
+      border-radius: 12px; padding: 20px; margin-top: 16px;
+      font-family: Inter, system-ui, sans-serif; font-size: 13px; color: #CDCCCA;
+    }
+    #pending-panel .pending-toolbar {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #393836;
+    }
+    #pending-panel label { font-weight: 500; color: #797876; font-size: 12px; }
+    #pending-panel select, #pending-panel input[type=text] {
+      padding: 7px 10px; border: 1px solid #393836; border-radius: 6px;
+      background: #171614; font: inherit; color: #CDCCCA;
+    }
+    #pending-panel select:focus, #pending-panel input:focus {
+      outline: 2px solid #D97706; outline-offset: -1px; border-color: #D97706;
+    }
+    #pending-panel .stats { color: #797876; font-size: 12px; margin-left: auto; }
+    #pending-panel table { width: 100%; border-collapse: collapse; }
+    #pending-panel th, #pending-panel td {
+      padding: 10px 12px; text-align: left; border-bottom: 1px solid #2A2926;
+      vertical-align: top;
+    }
+    #pending-panel th {
+      background: #201F1D; font-weight: 600; color: #CDCCCA;
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    #pending-panel .val {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 12px; background: #201F1D; padding: 3px 8px; border-radius: 4px;
+      display: inline-block; color: #FDAB43; font-weight: 500;
+    }
+    #pending-panel .aliases { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+    #pending-panel .alias-chip {
+      cursor: pointer; padding: 3px 8px; border-radius: 12px;
+      background: #2A2926; font-size: 11px; color: #CDCCCA;
+      border: 1px solid #393836; transition: all .15s;
+    }
+    #pending-panel .alias-chip:hover { background: #D97706; color: #171614; border-color: #D97706; }
+    #pending-panel .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    #pending-panel .act-btn {
+      padding: 6px 12px; border: none; border-radius: 5px;
+      font: 500 11px/1 Inter, sans-serif; cursor: pointer;
+      transition: opacity .15s;
+    }
+    #pending-panel .act-btn.accept { background: #6DAA45; color: #171614; }
+    #pending-panel .act-btn.edit { background: #4F98A3; color: #171614; }
+    #pending-panel .act-btn.reject { background: #D163A7; color: #171614; }
+    #pending-panel .act-btn:hover { opacity: 0.85; }
+    #pending-panel .clear-btn {
+      padding: 8px 14px; border: 1px solid #BB653B; border-radius: 6px;
+      background: transparent; color: #BB653B;
+      font: 600 12px/1 Inter, sans-serif; cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    #pending-panel .clear-btn:hover { background: #BB653B; color: #171614; }
+    #pending-panel .clear-btn:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; color: #BB653B; }
+    #pending-panel .act-btn:disabled { opacity: 0.4; cursor: wait; }
+    #pending-panel .empty { text-align: center; padding: 40px 20px; color: #797876; }
+    #pending-panel .rodzaj-tag {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      background: #2A2926; font-size: 11px; color: #CDCCCA; font-weight: 500;
+    }
+    #pending-panel .count-tag {
+      display: inline-block; padding: 2px 6px; border-radius: 10px;
+      background: #D97706; color: #171614; font-size: 11px; font-weight: 700;
+    }
+    #pending-panel .count-badge {
+      display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 10px;
+      background: transparent; border: 1px solid #4F98A3; color: #4F98A3;
+      font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    #pending-panel .count-badge:hover { background: #4F98A3; color: #171614; }
+
+    /* ===== PRODUCTS MODAL ===== */
+    .bridge-products-modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100000;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .bridge-products-modal {
+      background: #1A1917; color: #CDCCCA; border: 1px solid #2A2926;
+      border-radius: 12px; width: 100%; max-width: 900px; max-height: 85vh;
+      display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .bridge-products-modal-header {
+      padding: 16px 20px; border-bottom: 1px solid #2A2926;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .bridge-products-modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+    .bridge-products-modal table { width: 100%; font-size: 12px; border-collapse: collapse; }
+    .bridge-products-modal th { text-align: left; padding: 8px 6px; color: #797876; border-bottom: 1px solid #2A2926; font-weight: 500; }
+    .bridge-products-modal td { padding: 6px; border-bottom: 1px solid rgba(42,41,38,0.5); }
+    .bridge-products-modal tr:hover td { background: rgba(79,152,163,0.08); }
+    .bridge-products-modal .close-btn {
+      background: transparent; border: 1px solid #2A2926; border-radius: 6px;
+      width: 32px; height: 32px; color: inherit; cursor: pointer; font-size: 14px;
+    }
+    .bridge-products-modal .catalog-link { color: #4F98A3; text-decoration: none; font-size: 11px; }
+    .bridge-products-modal .catalog-link:hover { text-decoration: underline; }
+
+    /* ===== TOAST ===== */
+    #pending-toast {
+      position: fixed; bottom: 24px; right: 24px;
+      padding: 12px 20px; border-radius: 8px;
+      font: 500 13px/1.4 Inter, sans-serif; z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+      max-width: 400px;
+    }
+    #pending-toast.show { opacity: 1; }
+    #pending-toast.success { background: #6DAA45; color: #171614; }
+    #pending-toast.error { background: #D163A7; color: #171614; }
+  `;
+
+  function injectCSS() {
+    if (document.getElementById('pending-inject-css')) return;
+    const style = document.createElement('style');
+    style.id = 'pending-inject-css';
+    style.textContent = CSS;
+    document.head.appendChild(style);
+  }
+
+  function getToken() {
+    // Token bywa w localStorage (logowanie z "zapamiętaj mnie") lub sessionStorage
+    // - musi być spójne z bridgeGetStore() w głównym bundle (index-*.js)
+    try {
+      const fromLocal = localStorage.getItem('bridge_auth_token');
+      if (fromLocal) return fromLocal;
+    } catch (_) {}
+    try {
+      return sessionStorage.getItem('bridge_auth_token') || '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  async function api(path, options = {}) {
+    const token = getToken();
+    if (!token) throw new Error('Brak tokenu - zaloguj się ponownie');
+    const opts = {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        ...(options.headers || {})
+      }
+    };
+    const r = await fetch(API_BASE + path, opts);
+    if (!r.ok) {
+      const text = await r.text().catch(() => '');
+      throw new Error(`${r.status}: ${text || r.statusText}`);
+    }
+    return r.json();
+  }
+
+  function toast(msg, type = 'success') {
+    let t = document.getElementById('pending-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'pending-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.className = 'show ' + type;
+    setTimeout(() => { t.className = ''; }, 3500);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  // ============================================================
+  // STATE
+  // ============================================================
+  const state = {
+    view: 'kafle',         // 'kafle' | 'wartosci' | 'pending'
+    activeRodzaj: null,    // gdy view = 'wartosci'
+    rodzaje: [],
+    wartosci: [],
+    loadError: null,       // komunikat błędu ładowania (np. brak tokenu) do pokazania w UI
+    pendingItems: [],
+    pendingCount: 0,
+    pendingFilter: 'all',
+    pendingSearch: '',
+    valSearch: '',
+    valOriginFilter: 'all',
+    lastRoute: '',
+    loadedAt: 0,
+  };
+
+  // ============================================================
+  // ROUTING
+  // ============================================================
+  function isAtrybutyRoute() {
+    return location.pathname.endsWith('/atrybuty')
+        || location.hash === '#/atrybuty'
+        || location.hash.startsWith('#/atrybuty?')
+        || location.hash.startsWith('#/atrybuty/');
+  }
+
+  // ============================================================
+  // API HELPERS
+  // ============================================================
+  async function loadAtrybuty() {
+    const data = await api('/atrybuty');
+    state.rodzaje = Array.isArray(data.rodzaje) ? data.rodzaje : [];
+    state.wartosci = Array.isArray(data.wartosci) ? data.wartosci : [];
+    state.loadedAt = Date.now();
+    state.loadError = null;
+  }
+
+  async function refreshPendingCount() {
+    if (!getToken()) return;
+    try {
+      const data = await api('/atrybuty/pending');
+      state.pendingItems = data.items || [];
+      state.pendingCount = state.pendingItems.length;
+      updatePendingBadge();
+    } catch (e) {
+      console.warn('[atr-inject] refreshPendingCount:', e.message);
+    }
+  }
+
+  function updatePendingBadge() {
+    const btn = document.getElementById('pending-inject-btn');
+    if (btn) {
+      const badge = btn.querySelector('.pending-badge');
+      if (badge) badge.textContent = state.pendingCount;
+    }
+  }
+
+  // ============================================================
+  // HIDE ORIGINAL BUNDLE VIEW / SHOW INJECTED
+  // ============================================================
+  function findMainContainer() {
+    // Główny wrapper: <main> > <div class="px-4 sm:px-6 lg:px-8 py-6 md:py-8 max-w-[1400px] mx-auto">
+    const main = document.querySelector('main');
+    if (!main) return null;
+    return main.querySelector('div.mx-auto') || main.firstElementChild || main;
+  }
+
+  function findOriginalGrid() {
+    // Główna siatka kafli: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3'
+    const main = document.querySelector('main');
+    if (!main) return null;
+    return main.querySelector('[class*="grid-cols-1"][class*="grid-cols-3"], [class*="grid-cols-1"][class*="grid-cols-4"]')
+        || Array.from(main.querySelectorAll('[class*="grid"]')).find(el => {
+             const c = el.className || '';
+             return c.includes('grid-cols-') && c.includes('gap-');
+           });
+  }
+
+  function findHeaderRow() {
+    // Zawiera h1 "Atrybuty" i opis
+    const h1 = Array.from(document.querySelectorAll('h1'))
+      .find(el => el.textContent.trim() === 'Atrybuty');
+    if (!h1) return null;
+    return h1.parentElement;
+  }
+
+  function hideOriginalContent() {
+    // Znajduje wszystko poniżej "przycisku Dodaj atrybut" — kafle i inne — ukrywa
+    const main = document.querySelector('main');
+    if (!main) return;
+    // Ukryj bezpośrednie dzieci wrapper mx-auto które nie są nagłówkiem ani kontenerem przycisków
+    const wrapper = main.querySelector('div.mx-auto') || main.firstElementChild;
+    if (!wrapper) return;
+    Array.from(wrapper.children).forEach(child => {
+      if (child.id === 'atrybuty-inject-view' || child.id === 'atr-values-panel' || child.id === 'pending-panel') return;
+      const hasH1 = child.querySelector('h1');
+      const hasDodajBtn = Array.from(child.querySelectorAll('button')).some(b => {
+        const t = b.textContent.trim().replace(/^\+\s*/, '');
+        return t === 'Dodaj atrybut' || t === 'Nowy rodzaj';
+      });
+      if (hasH1 || hasDodajBtn) return; // zostaw nagłówek i przyciski
+      if (child.dataset.hiddenByInject === '1') return;
+      child.dataset.hiddenByInject = '1';
+      child.style.display = 'none';
+    });
+  }
+
+  function unhideOriginalContent() {
+    document.querySelectorAll('[data-hidden-by-inject="1"]').forEach(el => {
+      el.style.display = '';
+      delete el.dataset.hiddenByInject;
+    });
+  }
+
+  // ============================================================
+  // BUTTONS IN HEADER
+  // ============================================================
+  function ensureButtons() {
+    if (!isAtrybutyRoute()) return;
+
+    // Znajdź kontener przycisków akcji (obok "Dodaj atrybut")
+    const buttons = Array.from(document.querySelectorAll('button'));
+    const dodajBtn = buttons.find(el => {
+      const t = el.textContent.trim().replace(/^\+\s*/, '');
+      return t === 'Dodaj atrybut';
+    });
+    if (!dodajBtn || !dodajBtn.parentElement) return;
+    const container = dodajBtn.parentElement;
+
+    // Podmiana tekstu "Dodaj atrybut" -> "Dodaj wartość" (mniej mylące)
+    // Zachowujemy ikonę +, podmieniamy tylko węzeł tekstowy
+    if (!dodajBtn.dataset.textPatched) {
+      const walker = document.createTreeWalker(dodajBtn, NodeFilter.SHOW_TEXT);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.nodeValue.trim() === 'Dodaj atrybut') {
+          node.nodeValue = node.nodeValue.replace('Dodaj atrybut', 'Dodaj wartość');
+          break;
+        }
+      }
+      dodajBtn.dataset.textPatched = '1';
+    }
+
+    // Przycisk "Do akceptacji"
+    if (!document.getElementById('pending-inject-btn')) {
+      const btn = document.createElement('button');
+      btn.id = 'pending-inject-btn';
+      btn.className = 'pending-btn';
+      btn.innerHTML = `Do akceptacji <span class="pending-badge">${state.pendingCount}</span>`;
+      btn.addEventListener('click', () => switchView(state.view === 'pending' ? 'kafle' : 'pending'));
+      container.insertBefore(btn, container.firstChild);
+    }
+  }
+
+  // ============================================================
+  // SKELETON — natychmiastowy placeholder przed pobraniem danych
+  // ============================================================
+  function renderSkeletonView() {
+    if (!isAtrybutyRoute()) return;
+    const container = findMainContainer();
+    if (!container) return;
+
+    // Jesli juz jest jakikolwiek widok inject (skeleton lub prawdziwy), nie nadpisuj
+    if (document.getElementById('atrybuty-inject-view')) return;
+
+    ensureButtons();
+
+    const view = document.createElement('div');
+    view.id = 'atrybuty-inject-view';
+    view.dataset.skeleton = '1';
+
+    const skeletonTiles = Array.from({ length: 8 }).map(() => `
+      <div class="atr-skeleton-tile">
+        <div class="sk-line w-60"></div>
+        <div class="sk-line w-90"></div>
+        <div class="sk-line w-30"></div>
+      </div>
+    `).join('');
+
+    view.innerHTML = `
+      <div class="atr-topbar sk-topbar">
+        <span class="sync-info">Synchronizacja z DB...</span>
+      </div>
+      <div class="atr-grid">${skeletonTiles}</div>
+    `;
+
+    container.appendChild(view);
+    hideOriginalContent();
+  }
+
+  // ============================================================
+  // MAIN RENDER — inject view
+  // ============================================================
+  async function renderView() {
+    if (!isAtrybutyRoute()) return;
+
+    // Załaduj dane jeśli świeże potrzebne
+    if (state.view !== 'pending' && (!state.loadedAt || Date.now() - state.loadedAt > 30000)) {
+      try {
+        await loadAtrybuty();
+      } catch (e) {
+        state.loadError = e.message || 'Nieznany błąd ładowania atrybutów';
+        console.warn('[atr-inject] loadAtrybuty failed:', state.loadError);
+      }
+    }
+
+    const container = findMainContainer();
+    if (!container) return;
+
+    // Usuń stare panele
+    const existingView = document.getElementById('atrybuty-inject-view');
+    if (existingView) existingView.remove();
+    const existingValues = document.getElementById('atr-values-panel');
+    if (existingValues) existingValues.remove();
+    const existingPending = document.getElementById('pending-panel');
+    if (existingPending) existingPending.remove();
+
+    // Nasz kontener widoku
+    const view = document.createElement('div');
+    view.id = 'atrybuty-inject-view';
+
+    if (state.view === 'kafle') {
+      renderKafle(view);
+    } else if (state.view === 'wartosci') {
+      renderWartosci(view);
+    } else if (state.view === 'pending') {
+      renderPendingPanel(view);
+    }
+
+    // Ukryj oryginalne kafle
+    hideOriginalContent();
+
+    // Wstaw nasz widok
+    container.appendChild(view);
+
+    // Zaktualizuj klasę aktywności przycisku pending
+    const btn = document.getElementById('pending-inject-btn');
+    if (btn) btn.classList.toggle('active', state.view === 'pending');
+  }
+
+  async function switchView(newView) {
+    state.view = newView;
+    if (newView === 'kafle' || newView === 'wartosci') {
+      // Odśwież dane
+      try { await loadAtrybuty(); } catch (e) {}
+    }
+    if (newView === 'pending') {
+      try { await refreshPendingCount(); } catch (e) {}
+    }
+    renderView();
+  }
+
+  // ============================================================
+  // WIDOK KAFLI
+  // ============================================================
+  function renderKafle(view) {
+    // Zbuduj mapę liczników
+    const counts = {};
+    for (const w of state.wartosci) {
+      counts[w.rodzaj] = (counts[w.rodzaj] || 0) + 1;
+    }
+    const total = state.wartosci.length;
+
+    // Rodzaje w bazie ale bez odpowiadającego rodzaju w state.rodzaje (sieroty)
+    const knownValues = new Set(state.rodzaje.map(r => r.value));
+    const orphanRodzaje = Object.keys(counts).filter(r => !knownValues.has(r));
+
+    const errorBar = state.loadError ? `
+      <div class="atr-topbar" style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);">
+        <span style="color:#dc2626;font-weight:600;">⚠ Błąd ładowania danych: ${escapeHtml(state.loadError)}</span>
+        <span style="color:#dc2626;">Lista może być niepełna lub pusta mimo danych w bazie.</span>
+        <button class="refresh-btn" id="atr-refresh">Spróbuj ponownie</button>
+      </div>
+    ` : '';
+
+    const topbar = state.loadError ? errorBar : `
+      <div class="atr-topbar">
+        <span class="sync-info">● Zsynchronizowane z DB</span>
+        <span>${state.rodzaje.length} rodzajów, ${total} wartości</span>
+        <button class="refresh-btn" id="atr-refresh">Odśwież</button>
+      </div>
+    `;
+
+    const tiles = state.rodzaje.map(r => {
+      const c = counts[r.value] || 0;
+      return `
+        <button class="atr-tile ${r.core ? 'core' : 'custom'}" data-rodzaj="${escapeAttr(r.value)}">
+          <div class="tile-label">${escapeHtml(r.label)}</div>
+          <div class="tile-opis">${escapeHtml(r.opis || '')}</div>
+          <div class="tile-count">
+            <span class="num">${c}</span>
+            <span class="lbl">wartości</span>
+          </div>
+          <span class="tile-tag">${r.core ? 'wbudowany' : 'własny'}</span>
+        </button>
+      `;
+    }).join('');
+
+    const orphansHTML = orphanRodzaje.length === 0 ? '' : `
+      <div style="margin-top:24px;padding:16px;background:rgba(209,99,167,0.05);border:1px solid rgba(209,99,167,0.2);border-radius:8px;">
+        <div style="font-weight:600;color:#D163A7;font-size:13px;margin-bottom:8px;">Sieroty w DB (rodzaj nie istnieje w liście)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${orphanRodzaje.map(r => `<span class="origin-badge" style="background:rgba(209,99,167,0.2);color:#D163A7;padding:4px 10px;">${escapeHtml(r)} — ${counts[r]}</span>`).join('')}
+        </div>
+      </div>
+    `;
+
+    view.innerHTML = topbar + `<div class="atr-grid">${tiles}</div>` + orphansHTML;
+
+    view.querySelector('#atr-refresh').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      e.target.textContent = 'Ładowanie...';
+      try {
+        await loadAtrybuty();
+        renderView();
+      } catch (err) {
+        state.loadError = err.message || 'Nieznany błąd ładowania atrybutów';
+        toast('Błąd: ' + err.message, 'error');
+        renderView();
+      } finally {
+        e.target.disabled = false;
+      }
+    });
+
+    view.querySelectorAll('.atr-tile').forEach(tile => {
+      tile.addEventListener('click', () => {
+        state.activeRodzaj = tile.dataset.rodzaj;
+        state.view = 'wartosci';
+        state.valSearch = '';
+        state.valOriginFilter = 'all';
+        renderView();
+      });
+    });
+  }
+
+  // ============================================================
+  // WIDOK LISTY WARTOŚCI
+  // ============================================================
+  function renderWartosci(view) {
+    const rodzajInfo = state.rodzaje.find(r => r.value === state.activeRodzaj);
+    const label = rodzajInfo ? rodzajInfo.label : state.activeRodzaj;
+    const opis = rodzajInfo ? (rodzajInfo.opis || '') : '';
+
+    let wartosci = state.wartosci.filter(w => w.rodzaj === state.activeRodzaj);
+    // Filtry
+    if (state.valOriginFilter !== 'all') {
+      wartosci = wartosci.filter(w => (w.origin || 'user') === state.valOriginFilter);
+    }
+    if (state.valSearch) {
+      const q = state.valSearch.toLowerCase();
+      wartosci = wartosci.filter(w => (w.wartosc || '').toLowerCase().includes(q));
+    }
+    // Sort po wartości
+    wartosci.sort((a, b) => (a.wartosc || '').localeCompare(b.wartosc || '', 'pl'));
+
+    const origins = ['catalog', 'user', 'preset'];
+    const originCounts = {};
+    for (const w of state.wartosci) {
+      if (w.rodzaj !== state.activeRodzaj) continue;
+      const o = w.origin || 'user';
+      originCounts[o] = (originCounts[o] || 0) + 1;
+    }
+
+    const html = `
+      <button class="back-link" id="atr-back">← Wróć do kafli</button>
+      <div id="atr-values-panel">
+        <div class="panel-header">
+          <div>
+            <h2>${escapeHtml(label)}</h2>
+            <div class="opis">${escapeHtml(opis)}</div>
+          </div>
+          <div class="add-form">
+            <input type="text" id="atr-new-value" placeholder='Nowa wartość dla "${escapeAttr(label)}"'>
+            <button id="atr-add-btn">+ Dodaj</button>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <input type="text" id="atr-val-search" placeholder="Szukaj..." value="${escapeAttr(state.valSearch)}">
+          <select id="atr-val-origin">
+            <option value="all">Wszystkie źródła (${state.wartosci.filter(w=>w.rodzaj===state.activeRodzaj).length})</option>
+            ${origins.map(o => `<option value="${o}" ${state.valOriginFilter===o?'selected':''}>${o} (${originCounts[o]||0})</option>`).join('')}
+          </select>
+          <div style="margin-left:auto">Wyświetlono: <b style="color:#FDAB43">${wartosci.length}</b></div>
+        </div>
+
+        ${wartosci.length === 0 ? '<div class="empty">Brak wartości</div>' : `
+        <div class="list-scroller">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:60%">Wartość</th>
+              <th style="width:15%">Źródło</th>
+              <th style="width:25%">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${wartosci.map(w => `
+              <tr data-id="${w.id}">
+                <td class="wart-cell">${escapeHtml(w.wartosc)}</td>
+                <td><span class="origin-badge ${w.origin || 'user'}">${escapeHtml(w.origin || 'user')}</span></td>
+                <td>
+                  <div class="val-actions">
+                    <button class="val-btn" data-action="preview" data-id="${w.id}" title="Zobacz produkty używające tej wartości">Podgląd</button>
+                    <button class="val-btn" data-action="edit" data-id="${w.id}">Edytuj</button>
+                    <button class="val-btn danger" data-action="delete" data-id="${w.id}">Usuń</button>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        </div>`}
+      </div>
+    `;
+
+    view.innerHTML = html;
+
+    view.querySelector('#atr-back').addEventListener('click', () => {
+      state.view = 'kafle';
+      state.activeRodzaj = null;
+      renderView();
+    });
+
+    // Search / origin filter
+    view.querySelector('#atr-val-search').addEventListener('input', e => {
+      state.valSearch = e.target.value;
+      renderView();
+    });
+    view.querySelector('#atr-val-origin').addEventListener('change', e => {
+      state.valOriginFilter = e.target.value;
+      renderView();
+    });
+
+    // Add
+    const addInput = view.querySelector('#atr-new-value');
+    const addBtn = view.querySelector('#atr-add-btn');
+    async function doAdd() {
+      const val = addInput.value.trim();
+      if (!val) { toast('Wpisz wartość', 'error'); return; }
+      addBtn.disabled = true;
+      try {
+        await api('/atrybuty/wartosci', {
+          method: 'POST',
+          body: JSON.stringify({ rodzaj: state.activeRodzaj, wartosc: val })
+        });
+        toast(`Dodano: ${val}`, 'success');
+        addInput.value = '';
+        await loadAtrybuty();
+        renderView();
+      } catch (e) {
+        toast('Błąd: ' + e.message, 'error');
+      } finally {
+        addBtn.disabled = false;
+      }
+    }
+    addBtn.addEventListener('click', doAdd);
+    addInput.addEventListener('keydown', e => { if (e.key === 'Enter') doAdd(); });
+
+    // Edit / Delete
+    view.querySelectorAll('.val-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id, 10);
+        const action = btn.dataset.action;
+        const w = state.wartosci.find(x => x.id === id);
+        if (!w) return;
+        if (action === 'edit') {
+          const nowa = prompt(`Edytuj wartość "${w.wartosc}":`, w.wartosc);
+          if (!nowa || nowa === w.wartosc) return;
+          btn.disabled = true;
+          try {
+            await api(`/atrybuty/wartosci/${id}`, {
+              method: 'PUT',
+              body: JSON.stringify({ wartosc: nowa })
+            });
+            toast(`Zmieniono: ${w.wartosc} → ${nowa}`, 'success');
+            await loadAtrybuty();
+            renderView();
+          } catch (e) {
+            toast('Błąd: ' + e.message, 'error');
+          } finally {
+            btn.disabled = false;
+          }
+        } else if (action === 'delete') {
+          if (!confirm(`Usunąć wartość "${w.wartosc}" z rodzaju "${state.activeRodzaj}"?`)) return;
+          btn.disabled = true;
+          try {
+            await api(`/atrybuty/wartosci/${id}`, { method: 'DELETE' });
+            toast(`Usunięto: ${w.wartosc}`, 'success');
+            await loadAtrybuty();
+            renderView();
+          } catch (e) {
+            toast('Błąd: ' + e.message, 'error');
+          } finally {
+            btn.disabled = false;
+          }
+        } else if (action === 'preview') {
+          openProductsModal(w.rodzaj, w.wartosc);
+        }
+      });
+    });
+  }
+
+  // ============================================================
+  // WIDOK PENDING (bez zmian od v3)
+  // ============================================================
+  async function renderPendingPanel(view) {
+    view.innerHTML = '<div id="pending-panel"><div class="empty">Ładowanie...</div></div>';
+    const panel = view.querySelector('#pending-panel');
+
+    try {
+      const data = await api('/atrybuty/pending');
+      state.pendingItems = data.items || [];
+      state.pendingCount = state.pendingItems.length;
+      updatePendingBadge();
+    } catch (e) {
+      panel.innerHTML = `<div class="empty" style="color:#D163A7">Błąd: ${escapeHtml(e.message)}</div>`;
+      return;
+    }
+
+    const rodzaje = Array.from(new Set(state.pendingItems.map(x => x.rodzaj))).sort();
+
+    const filtered = state.pendingItems.filter(item => {
+      if (state.pendingFilter !== 'all' && item.rodzaj !== state.pendingFilter) return false;
+      if (state.pendingSearch && !(item.wartosc || '').toLowerCase().includes(state.pendingSearch.toLowerCase())) return false;
+      return true;
+    });
+
+    const toolbarHTML = `
+      <div class="pending-toolbar">
+        <label>Rodzaj:</label>
+        <select id="pending-filter">
+          <option value="all">Wszystkie (${state.pendingItems.length})</option>
+          ${rodzaje.map(r => {
+            const c = state.pendingItems.filter(x => x.rodzaj === r).length;
+            return `<option value="${escapeAttr(r)}" ${state.pendingFilter === r ? 'selected' : ''}>${escapeHtml(r)} (${c})</option>`;
+          }).join('')}
+        </select>
+        <input type="text" id="pending-search" placeholder="Szukaj wartości..." value="${escapeAttr(state.pendingSearch)}" style="min-width: 200px">
+        <div class="stats">Wyświetlono: <span class="count-tag">${filtered.length}</span> z ${state.pendingItems.length}</div>
+        <div style="flex: 1"></div>
+        <button type="button" class="clear-btn" id="clear-rodzaj-btn" ${state.pendingFilter === 'all' ? 'disabled title="Wybierz konkretny rodzaj z filtra powyżej"' : ''}>Wyczyść pending: ${state.pendingFilter === 'all' ? '—' : escapeHtml(state.pendingFilter)}</button>
+        <button type="button" class="clear-btn" id="clear-all-btn" ${state.pendingItems.length === 0 ? 'disabled' : ''}>Wyczyść wszystkie pending (${state.pendingItems.length})</button>
+      </div>
+    `;
+
+    let tableHTML;
+    if (filtered.length === 0) {
+      tableHTML = '<div class="empty">Brak wartości do akceptacji</div>';
+    } else {
+      tableHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 12%">Rodzaj</th>
+              <th style="width: 25%">Wartość</th>
+              <th style="width: 8%">Wystąpień</th>
+              <th style="width: 30%">Sugerowane aliasy</th>
+              <th style="width: 25%">Akcje</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map(item => {
+              const aliasesHTML = (item.sugerowane_aliasy || []).map(a =>
+                `<span class="alias-chip" data-id="${item.id}" data-alias="${escapeAttr(a.wartosc)}">${escapeHtml(a.wartosc)} (${a.podobienstwo}%)</span>`
+              ).join('');
+              return `
+                <tr data-id="${item.id}">
+                  <td><span class="rodzaj-tag">${escapeHtml(item.rodzaj)}</span></td>
+                  <td><span class="val">${escapeHtml(item.wartosc)}</span></td>
+                  <td><button type="button" class="count-badge" data-action="show-products" data-id="${item.id}" title="Pokaż produkty w katalogu">${item.ile_wystapien || 0}</button></td>
+                  <td>${aliasesHTML ? `<div class="aliases">${aliasesHTML}</div>` : '<span style="color:#5A5957;font-size:11px">brak podobnych</span>'}</td>
+                  <td>
+                    <div class="actions">
+                      <button class="act-btn accept" data-action="accept" data-id="${item.id}">Akceptuj</button>
+                      <button class="act-btn edit" data-action="edit" data-id="${item.id}">Edytuj</button>
+                      <button class="act-btn reject" data-action="reject" data-id="${item.id}">Odrzuć</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    panel.innerHTML = toolbarHTML + tableHTML;
+
+    panel.querySelector('#pending-filter').addEventListener('change', e => {
+      state.pendingFilter = e.target.value;
+      renderView();
+    });
+    panel.querySelector('#pending-search').addEventListener('input', e => {
+      state.pendingSearch = e.target.value;
+      renderView();
+    });
+
+    const clearAllBtn = panel.querySelector('#clear-all-btn');
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener('click', async () => {
+        if (!confirm(`Wyczyścić WSZYSTKIE ${state.pendingItems.length} pozycji z listy pending?\n\nUWAGA: to nie jest trwałe odrzucenie — jeśli te same wartości pojawią się w kolejnym imporcie, wrócą tutaj do ponownej akceptacji.`)) return;
+        clearAllBtn.disabled = true;
+        try {
+          const res = await api('/atrybuty/pending', { method: 'DELETE' });
+          toast(`Wyczyszczono ${res.usunieto} pozycji pending`, 'success');
+          await renderView();
+        } catch (e) {
+          toast('Błąd: ' + e.message, 'error');
+          clearAllBtn.disabled = false;
+        }
+      });
+    }
+
+    const clearRodzajBtn = panel.querySelector('#clear-rodzaj-btn');
+    if (clearRodzajBtn && state.pendingFilter !== 'all') {
+      clearRodzajBtn.addEventListener('click', async () => {
+        const rodzaj = state.pendingFilter;
+        const ile = state.pendingItems.filter(x => x.rodzaj === rodzaj).length;
+        if (!confirm(`Wyczyścić ${ile} pozycji pending dla rodzaju "${rodzaj}"?\n\nUWAGA: to nie jest trwałe odrzucenie — jeśli te same wartości pojawią się w kolejnym imporcie, wrócą tutaj do ponownej akceptacji.`)) return;
+        clearRodzajBtn.disabled = true;
+        try {
+          const res = await api('/atrybuty/pending?rodzaj=' + encodeURIComponent(rodzaj), { method: 'DELETE' });
+          toast(`Wyczyszczono ${res.usunieto} pozycji pending (${rodzaj})`, 'success');
+          state.pendingFilter = 'all';
+          await renderView();
+        } catch (e) {
+          toast('Błąd: ' + e.message, 'error');
+          clearRodzajBtn.disabled = false;
+        }
+      });
+    }
+
+    panel.querySelectorAll('.act-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = parseInt(btn.dataset.id, 10);
+        const action = btn.dataset.action;
+        const item = state.pendingItems.find(x => x.id === id);
+        if (!item) return;
+        await handlePendingAction(action, item, btn);
+      });
+    });
+
+    panel.querySelectorAll('.count-badge').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = parseInt(btn.dataset.id, 10);
+        const item = state.pendingItems.find(x => x.id === id);
+        if (!item) return;
+        openProductsModal(item.rodzaj, item.wartosc);
+      });
+    });
+
+    panel.querySelectorAll('.alias-chip').forEach(chip => {
+      chip.addEventListener('click', async () => {
+        const id = parseInt(chip.dataset.id, 10);
+        const alias = chip.dataset.alias;
+        const item = state.pendingItems.find(x => x.id === id);
+        if (!item) return;
+        if (!confirm(`Zmapować "${item.wartosc}" jako alias dla "${alias}"?`)) return;
+        try {
+          await api(`/atrybuty/pending/${item.id}/akceptuj-jako-alias`, {
+            method: 'POST',
+            body: JSON.stringify({ kanoniczna_wartosc: alias })
+          });
+          toast(`Alias: ${item.wartosc} → ${alias}`, 'success');
+          await renderView();
+        } catch (e) {
+          toast('Błąd: ' + e.message, 'error');
+        }
+      });
+    });
+  }
+
+  async function handlePendingAction(action, item, btnEl) {
+    btnEl.disabled = true;
+    try {
+      if (action === 'accept') {
+        await api(`/atrybuty/pending/${item.id}/akceptuj`, { method: 'POST' });
+        toast(`Zaakceptowano: ${item.wartosc}`, 'success');
+      } else if (action === 'reject') {
+        const powod = prompt('Powód odrzucenia (opcjonalnie):') || '';
+        await api(`/atrybuty/pending/${item.id}/odrzuc`, {
+          method: 'POST',
+          body: JSON.stringify({ powod })
+        });
+        toast(`Odrzucono: ${item.wartosc}`, 'success');
+      } else if (action === 'edit') {
+        const nowa = prompt(`Edytuj wartość dla rodzaju "${item.rodzaj}":`, item.wartosc);
+        if (!nowa || nowa === item.wartosc) { btnEl.disabled = false; return; }
+        await api(`/atrybuty/pending/${item.id}/akceptuj-z-edycja`, {
+          method: 'POST',
+          body: JSON.stringify({ nowa_wartosc: nowa })
+        });
+        toast(`Zapisano: ${nowa}`, 'success');
+      }
+      await renderView();
+    } catch (e) {
+      toast('Błąd: ' + e.message, 'error');
+    } finally {
+      btnEl.disabled = false;
+    }
+  }
+
+  // ============================================================
+  // CLEANUP przy zmianie route
+  // ============================================================
+  function cleanup() {
+    const btn = document.getElementById('pending-inject-btn');
+    if (btn) btn.remove();
+    const v = document.getElementById('atrybuty-inject-view');
+    if (v) v.remove();
+    const p = document.getElementById('pending-panel');
+    if (p) p.remove();
+    const vp = document.getElementById('atr-values-panel');
+    if (vp) vp.remove();
+    unhideOriginalContent();
+    state.view = 'kafle';
+    state.activeRodzaj = null;
+  }
+
+  // ============================================================
+  // TICK LOOP
+  // ============================================================
+  let firstInit = true;
+  async function tick() {
+    const currentRoute = location.pathname + location.hash;
+    if (currentRoute !== state.lastRoute) {
+      cleanup();
+      state.lastRoute = currentRoute;
+      if (isAtrybutyRoute()) {
+        // Natychmiast pokazujemy skeleton, zanim czekamy na DOM/fetch,
+        // aby nie przebijał sie stary widok bundla React
+        renderSkeletonView();
+        // Poczekaj aż DOM się wyrenderuje
+        setTimeout(async () => {
+          ensureButtons();
+          renderSkeletonView();
+          try {
+            await loadAtrybuty();
+            await refreshPendingCount();
+          } catch (e) {}
+          renderView();
+        }, 100);
+      }
+    } else if (isAtrybutyRoute()) {
+      ensureButtons();
+      // Jeżeli nie ma naszego widoku (ani prawdziwego, ani skeletona), wyrenderuj
+      if (!document.getElementById('atrybuty-inject-view') && !document.getElementById('atr-values-panel')) {
+        renderSkeletonView();
+        if (firstInit) {
+          firstInit = false;
+          try {
+            await loadAtrybuty();
+            await refreshPendingCount();
+          } catch (e) {}
+          renderView();
+        }
+      }
+    }
+  }
+
+  // ============================================================
+  // v5: FIX DUPLIKATOW W DROPDOWN'ACH NARZUTY/PROMOCJE
+  // Bundle React uzywa TanStack Query z kluczem "/api/attributes" ktory
+  // ma hardcoded queryFn zwracajaca client-side stan (preset + IndexedDB).
+  // Rozwiazanie: znajdujemy QueryClient przez React fiber tree i nadpisujemy
+  // cache dla klucza ["/api/attributes"] danymi z /api/atrybuty (dedupe).
+  // ============================================================
+
+  function findFiber(el) {
+    if (!el) return null;
+    const key = Object.keys(el).find(k =>
+      k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$')
+    );
+    return key ? el[key] : null;
+  }
+
+  function findQueryClient() {
+    const root = document.getElementById('root');
+    if (!root) return null;
+    let fiber = findFiber(root);
+    if (!fiber) return null;
+    // Idziemy w gore drzewa i szukamy providera z queryClient
+    let node = fiber;
+    let depth = 0;
+    while (node && depth < 200) {
+      const props = node.memoizedProps || node.pendingProps;
+      if (props && props.client && typeof props.client.setQueryData === 'function') {
+        return props.client;
+      }
+      if (props && props.value && typeof props.value.setQueryData === 'function') {
+        return props.value;
+      }
+      node = node.return || node.child;
+      depth++;
+    }
+    // Alternatywnie: DFS w dol
+    function dfs(n, d) {
+      if (!n || d > 50) return null;
+      const p = n.memoizedProps || n.pendingProps;
+      if (p && p.client && typeof p.client.setQueryData === 'function') return p.client;
+      if (p && p.value && typeof p.value.setQueryData === 'function' && typeof p.value.getQueryCache === 'function') return p.value;
+      let r = dfs(n.child, d + 1);
+      if (r) return r;
+      return dfs(n.sibling, d + 1);
+    }
+    return dfs(fiber, 0);
+  }
+
+  let attributesFixInProgress = false;
+  let lastAttributesFix = 0;
+
+  async function fixAttributesCache(force = false) {
+    if (attributesFixInProgress) return;
+    const now = Date.now();
+    if (!force && now - lastAttributesFix < 5000) return;
+    attributesFixInProgress = true;
+    try {
+      const qc = findQueryClient();
+      if (!qc) {
+        console.warn(`[atr-inject ${VERSION}] QueryClient nie znaleziony, ponawiam za chwile`);
+        return;
+      }
+      // Pobierz swieze dane z API
+      const data = await api('/atrybuty');
+      if (!data || !Array.isArray(data.wartosci)) return;
+      // Dedupe per (rodzaj, wartosc) - case-sensitive dokladnie jak w DB
+      const seen = new Set();
+      const flat = [];
+      for (const w of data.wartosci) {
+        const key = `${w.rodzaj}||${w.wartosc}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        flat.push({
+          id: w.id,
+          rodzaj: w.rodzaj,
+          wartosc: w.wartosc,
+          origin: w.origin || 'db',
+          utworzono: w.utworzono || new Date().toISOString()
+        });
+      }
+      // Nadpisz cache dla klucza ["/api/attributes"]
+      qc.setQueryData(['/api/attributes'], flat);
+      // Rowniez ["/api/attribute-kinds"] jesli bundle tego uzywa
+      if (Array.isArray(data.rodzaje)) {
+        qc.setQueryData(['/api/attribute-kinds'], data.rodzaje);
+      }
+      lastAttributesFix = now;
+      console.log(`[atr-inject ${VERSION}] cache /api/attributes nadpisany (${flat.length} wartosci, ${data.rodzaje?.length || 0} rodzajow)`);
+    } catch (e) {
+      console.error(`[atr-inject ${VERSION}] blad fixAttributesCache:`, e);
+    } finally {
+      attributesFixInProgress = false;
+    }
+  }
+
+  // Uruchamiamy fix przy starcie i przy kazdej zmianie hasha (nawigacja SPA)
+  function scheduleAttributesFix() {
+    // Roznie sie zachowuje w zaleznosci od stanu React, wiec kilka prob
+    setTimeout(() => fixAttributesCache(true), 500);
+    setTimeout(() => fixAttributesCache(true), 1500);
+    setTimeout(() => fixAttributesCache(true), 3500);
+  }
+
+  // ============================================================
+  // v6: DEDUPLIKACJA OPCJI W DROPDOWN'ACH (DOM-level)
+  // React dropdown (Radix Select) renderuje listbox przy otwarciu.
+  // Nie mogc naprawić stanu React (roznie interpretowany), robimy najprostsze:
+  // MutationObserver łapie [role="option"] i usuwa duplikaty (te same textContent).
+  // ============================================================
+
+  function dedupeDropdownOptions() {
+    // Zbieramy wszystkie listboxy Radix Select ktore sa aktualnie widoczne
+    const listboxes = document.querySelectorAll('[role="listbox"]');
+    listboxes.forEach(lb => {
+      const seen = new Set();
+      const options = lb.querySelectorAll('[role="option"]');
+      options.forEach(opt => {
+        const key = (opt.textContent || '').trim().toLowerCase();
+        if (!key) return;
+        if (seen.has(key)) {
+          opt.remove();
+        } else {
+          seen.add(key);
+        }
+      });
+    });
+  }
+
+  function initDropdownDedupe() {
+    const observer = new MutationObserver((mutations) => {
+      let hasNewOption = false;
+      for (const m of mutations) {
+        for (const n of m.addedNodes) {
+          if (n.nodeType === 1) {
+            if (n.getAttribute && n.getAttribute('role') === 'option') { hasNewOption = true; break; }
+            if (n.querySelector && n.querySelector('[role="option"]')) { hasNewOption = true; break; }
+          }
+        }
+        if (hasNewOption) break;
+      }
+      if (hasNewOption) {
+        // debounce: opcje przychodza w seriach, zaczekaj mikrosek na koniec
+        setTimeout(dedupeDropdownOptions, 0);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    console.log(`[atr-inject ${VERSION}] dropdown dedupe observer aktywny`);
+  }
+
+  // ============================================================
+  // MODAL: produkty używające danej wartości atrybutu
+  // ============================================================
+  async function openProductsModal(rodzaj, wartosc) {
+    const overlay = document.createElement('div');
+    overlay.className = 'bridge-products-modal-overlay';
+
+    const modal = document.createElement('div');
+    modal.className = 'bridge-products-modal';
+
+    modal.innerHTML = `
+      <div class="bridge-products-modal-header">
+        <div>
+          <div style="font-weight:600;font-size:16px;">Produkty używające atrybutu</div>
+          <div style="font-size:13px;color:#797876;margin-top:2px;">${escapeHtml(rodzaj)} = <strong style="color:#CDCCCA">${escapeHtml(wartosc)}</strong></div>
+        </div>
+        <button type="button" class="close-btn">&times;</button>
+      </div>
+      <div class="bridge-products-modal-body">
+        <div style="text-align:center;color:#797876;padding:30px;">Ładowanie produktów...</div>
+      </div>
+    `;
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+    function close() {
+      overlay.remove();
+      document.removeEventListener('keydown', onEsc);
+    }
+    function onEsc(e) { if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onEsc);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    modal.querySelector('.close-btn').addEventListener('click', close);
+
+    const body = modal.querySelector('.bridge-products-modal-body');
+
+    try {
+      const url = `/atrybuty/uzycie?rodzaj=${encodeURIComponent(rodzaj)}&wartosc=${encodeURIComponent(wartosc)}`;
+      const data = await api(url, { method: 'GET' });
+      const products = data.products || [];
+      const count = data.count || 0;
+
+      if (count === 0) {
+        body.innerHTML = '<div style="text-align:center;color:#797876;padding:40px;">Żaden produkt w katalogu nie używa tej wartości atrybutu.</div>';
+        return;
+      }
+
+      let html = `<div style="margin-bottom:12px;font-size:13px;color:#797876;">Znaleziono <strong style="color:#CDCCCA">${count}</strong> produkt(ów)${count > products.length ? ` (pokazano pierwsze ${products.length})` : ''}</div>`;
+      html += '<table><thead><tr>';
+      html += '<th>Dostawca</th><th>Kod</th><th>Nazwa</th><th>Marka</th><th>Rozmiar</th><th style="text-align:right">Stan</th><th></th>';
+      html += '</tr></thead><tbody>';
+      products.forEach(p => {
+        html += '<tr>';
+        html += `<td>${escapeHtml(p.dostawca || '')}</td>`;
+        html += `<td style="font-family:monospace;font-size:11px;">${escapeHtml(p.kod || '')}</td>`;
+        html += `<td>${escapeHtml(p.nazwa || '')}</td>`;
+        html += `<td>${escapeHtml(p.marka || '')}</td>`;
+        html += `<td>${escapeHtml(p.rozmiar || '')}</td>`;
+        html += `<td style="text-align:right;">${p.stan != null ? p.stan : ''}</td>`;
+        html += `<td style="text-align:right;"><a class="catalog-link" href="#/katalog" data-kod="${escapeHtml(p.kod || '')}">Katalog &rarr;</a></td>`;
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      body.innerHTML = html;
+
+      body.querySelectorAll('.catalog-link').forEach(a => {
+        a.addEventListener('click', () => {
+          try { sessionStorage.setItem('katalog_prefilter', a.getAttribute('data-kod') || ''); } catch(_) {}
+          setTimeout(close, 100);
+        });
+      });
+    } catch (e) {
+      body.innerHTML = `<div style="color:#D163A7;padding:20px;">Błąd: ${escapeHtml(e.message || String(e))}</div>`;
+    }
+  }
+
+  function applyKatalogPrefilter() {
+    let val = null;
+    try { val = sessionStorage.getItem('katalog_prefilter'); } catch(_) {}
+    if (!val) return;
+    const hash = (location.hash || '').replace(/^#/, '');
+    if (!/^\/katalog(\/?|\?|$)/.test(hash)) return;
+    let attempts = 0;
+    const tryFill = () => {
+      attempts++;
+      const input = document.querySelector('input[data-testid="input-search"]');
+      if (!input) {
+        if (attempts < 40) return setTimeout(tryFill, 100);
+        return;
+      }
+      try {
+        const proto = Object.getPrototypeOf(input);
+        const setter = Object.getOwnPropertyDescriptor(proto, 'value') && Object.getOwnPropertyDescriptor(proto, 'value').set;
+        if (setter) setter.call(input, val); else input.value = val;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        try { sessionStorage.removeItem('katalog_prefilter'); } catch(_) {}
+      } catch(e) { console.warn('[atr-inject] prefilter fail', e); }
+    };
+    setTimeout(tryFill, 150);
+  }
+
+  function init() {
+    injectCSS();
+    setInterval(tick, 500);
+    setTimeout(refreshPendingCount, 3000);
+    setInterval(refreshPendingCount, 30000);
+    scheduleAttributesFix();
+    window.addEventListener('hashchange', () => { tick(); scheduleAttributesFix(); applyKatalogPrefilter(); });
+    applyKatalogPrefilter();
+    // Odswiezaj cache co minute na wypadek gdyby cos je unewwazniło
+    setInterval(() => fixAttributesCache(false), 60000);
+    // Dedupe dropdownow (Radix Select)
+    initDropdownDedupe();
+    console.log(`[atr-inject ${VERSION}] initialized`);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

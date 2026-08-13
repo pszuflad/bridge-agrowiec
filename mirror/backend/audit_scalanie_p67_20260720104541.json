@@ -1,0 +1,149 @@
+[
+ {
+  "id": 101481,
+  "ki_old": "723677",
+  "ki_new": "723677",
+  "nazwa_old": "18x8.50-8 Kabat IMP-06 LINIOWA 6PR TT",
+  "nazwa_new": "18x8.50-8 Kabat IMP-06 LINIOWA 82A4 6PR TT"
+ },
+ {
+  "id": 99613,
+  "ki_old": "723677",
+  "ki_new": "723677",
+  "nazwa_old": "18x8.50-8 Kabat IMP-06 82A4 6PR TT",
+  "nazwa_new": "18x8.50-8 Kabat IMP-06 LINIOWA 82A4 6PR TT"
+ },
+ {
+  "id": 102487,
+  "ki_old": "476536",
+  "ki_new": "476536",
+  "nazwa_old": "315/70R22.5 Hankook DH51 SMART FLEX 154/150L 3PMSF M+S DRIVE",
+  "nazwa_new": "315/70R22.5 Hankook DH51 SMART FLEX 154/150L M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 99823,
+  "ki_old": "476536",
+  "ki_new": "476536",
+  "nazwa_old": "315/70R22.5 Hankook DH51 154/150L M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Hankook DH51 SMART FLEX 154/150L M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 99822,
+  "ki_old": "729699",
+  "ki_new": "476536",
+  "nazwa_old": "315/70R22.5 Hankook DH51 154/150L M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Hankook DH51 SMART FLEX 154/150L M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 101862,
+  "ki_old": "728931",
+  "ki_new": "728931",
+  "nazwa_old": "385/65R22.5 Sava AVANT 5 160K/158L 3PMSF FRONT",
+  "nazwa_new": "385/65R22.5 Sava AVANT 5 160K/158L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100720,
+  "ki_old": "728931",
+  "ki_new": "728931",
+  "nazwa_old": "385/65R22.5 Sava AVANT 5 160K/158L TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Sava AVANT 5 160K/158L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99851,
+  "ki_old": "728931",
+  "ki_new": "728931",
+  "nazwa_old": "385/65R22.5 Sava AVANT 5 160K/158L TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Sava AVANT 5 160K/158L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 101870,
+  "ki_old": "533028",
+  "ki_new": "533028",
+  "nazwa_old": "315/80R22.5 Sava AVANT 5 156L/154M 3PMSF FRONT",
+  "nazwa_new": "315/80R22.5 Sava AVANT 5 156L/154M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100721,
+  "ki_old": "533028",
+  "ki_new": "533028",
+  "nazwa_old": "315/80R22.5 Sava AVANT 5 156L/154M TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 Sava AVANT 5 156L/154M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99854,
+  "ki_old": "533028",
+  "ki_new": "533028",
+  "nazwa_old": "315/80R22.5 Sava AVANT 5 156L/154M TL M+S 3PMSF",
+  "nazwa_new": "315/80R22.5 Sava AVANT 5 156L/154M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 101866,
+  "ki_old": "452419",
+  "ki_new": "452419",
+  "nazwa_old": "315/70R22.5 Sava ORJAK 5 154L/152M 3PMSF DRIVE",
+  "nazwa_new": "315/70R22.5 Sava ORJAK 5 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 100722,
+  "ki_old": "452419",
+  "ki_new": "452419",
+  "nazwa_old": "315/70R22.5 Sava ORJAK 5 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Sava ORJAK 5 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 99856,
+  "ki_old": "452419",
+  "ki_new": "452419",
+  "nazwa_old": "315/70R22.5 Sava ORJAK 5 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Sava ORJAK 5 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 101867,
+  "ki_old": "957741",
+  "ki_new": "957741",
+  "nazwa_old": "315/70R22.5 Sava AVANT 5 HL 156/150L 3PMSF FRONT",
+  "nazwa_new": "315/70R22.5 Sava AVANT 5 HL 156/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100723,
+  "ki_old": "957741",
+  "ki_new": "957741",
+  "nazwa_old": "315/70R22.5 Sava AVANT 5 HL 156/150L TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Sava AVANT 5 HL 156/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99857,
+  "ki_old": "957741",
+  "ki_new": "957741",
+  "nazwa_old": "315/70R22.5 Sava AVANT 5 HL 156/150L TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Sava AVANT 5 HL 156/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 101853,
+  "ki_old": "480202",
+  "ki_new": "480202",
+  "nazwa_old": "265/70R19.5 Sava AVANT A3 140/138M 3PMSF FRONT",
+  "nazwa_new": "265/70R19.5 Sava AVANT A3 140/138M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100724,
+  "ki_old": "480202",
+  "ki_new": "480202",
+  "nazwa_old": "265/70R19.5 Sava AVANT 140/138M TL M+S 3PMSF",
+  "nazwa_new": "265/70R19.5 Sava AVANT A3 140/138M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99870,
+  "ki_old": "480202",
+  "ki_new": "480202",
+  "nazwa_old": "265/70R19.5 Sava AVANT 140/138M TL M+S 3PMSF",
+  "nazwa_new": "265/70R19.5 Sava AVANT A3 140/138M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 101859,
+  "ki_old": "196814",
+  "ki_new": "196814",
+  "nazwa_old": "385/65R22.5 Dunlop SP247 HL 164K/158L 3PMSF M+S",
+  "nazwa_new": "385/65R22.5 Dunlop SP247 HL 164K/158L TL M+S 3PMSF"
+ }
+]

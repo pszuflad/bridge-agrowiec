@@ -1,0 +1,583 @@
+[
+ {
+  "id": 102451,
+  "ki_old": "424875",
+  "ki_new": "424875",
+  "nazwa_old": "385/65R22.5 Bridgestone R168+ 160K/158L 3PMSF M+S",
+  "nazwa_new": "385/65R22.5 Bridgestone R168+ 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 100791,
+  "ki_old": "424875",
+  "ki_new": "424875",
+  "nazwa_old": "385/65R22.5 Bridgestone R168+ 160K TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Bridgestone R168+ 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 100292,
+  "ki_old": "424875",
+  "ki_new": "424875",
+  "nazwa_old": "385/65R22.5 Bridgestone R168+ 160K TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Bridgestone R168+ 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 101884,
+  "ki_old": "325656",
+  "ki_new": "325656",
+  "nazwa_old": "16.9R28 Firestone PERFORMER 85 139D/136E TL",
+  "nazwa_new": "420/85R28 Firestone PERFORMER 85 139D/136E TL"
+ },
+ {
+  "id": 100947,
+  "ki_old": "325656",
+  "ki_new": "325656",
+  "nazwa_old": "420/85R28 Firestone Performer 85 139D/136E TL",
+  "nazwa_new": "420/85R28 Firestone PERFORMER 85 139D/136E TL"
+ },
+ {
+  "id": 102334,
+  "ki_old": "729846",
+  "ki_new": "855142",
+  "nazwa_old": "420/70R28 Firestone PERFORMER 70 133D/130E TL",
+  "nazwa_new": "420/70R28 Firestone PERFORMER 70 133D/130E TL"
+ },
+ {
+  "id": 100939,
+  "ki_old": "855142",
+  "ki_new": "855142",
+  "nazwa_old": "420/70R28 Firestone Performer 70 133D/130E TL",
+  "nazwa_new": "420/70R28 Firestone PERFORMER 70 133D/130E TL"
+ },
+ {
+  "id": 101887,
+  "ki_old": "719727",
+  "ki_new": "457255",
+  "nazwa_old": "280/85R28 Firestone PERFORMER 85 118D/115E TL",
+  "nazwa_new": "280/85R28 Firestone PERFORMER 85 118D/115E TL"
+ },
+ {
+  "id": 100948,
+  "ki_old": "457255",
+  "ki_new": "457255",
+  "nazwa_old": "280/85R28 Firestone Performer 85 118D/115E TL",
+  "nazwa_new": "280/85R28 Firestone PERFORMER 85 118D/115E TL"
+ },
+ {
+  "id": 100850,
+  "ki_old": "447275",
+  "ki_new": "447275",
+  "nazwa_old": "480/65R24 Firestone Maxi Traction 133D/130E TL",
+  "nazwa_new": "480/65R24 Firestone MAXI TRACTION 65 133D/130E TL"
+ },
+ {
+  "id": 100362,
+  "ki_old": "447275",
+  "ki_new": "447275",
+  "nazwa_old": "480/65R24 Firestone MAXITRACTION 65 133D/130E TL",
+  "nazwa_new": "480/65R24 Firestone MAXI TRACTION 65 133D/130E TL"
+ },
+ {
+  "id": 102645,
+  "ki_old": "994006",
+  "ki_new": "994006",
+  "nazwa_old": "315/70R22.5 Firestone FS424 154L/150L 3PMSF M+S FRONT",
+  "nazwa_new": "315/70R22.5 Firestone FS424 154/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100800,
+  "ki_old": "994006",
+  "ki_new": "994006",
+  "nazwa_old": "315/70R22.5 Firestone FS424 154/150L TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Firestone FS424 154/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100390,
+  "ki_old": "994006",
+  "ki_new": "994006",
+  "nazwa_old": "315/70R22.5 Firestone FS424 154/150L TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Firestone FS424 154/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 102648,
+  "ki_old": "879451",
+  "ki_new": "879451",
+  "nazwa_old": "295/80R22.5 Firestone FS424 152/148M 3PMSF M+S FRONT",
+  "nazwa_new": "295/80R22.5 Firestone FS424 152/148M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100801,
+  "ki_old": "879451",
+  "ki_new": "879451",
+  "nazwa_old": "295/80R22.5 Firestone FS424 152/148M TL M+S 3PMSF",
+  "nazwa_new": "295/80R22.5 Firestone FS424 152/148M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100393,
+  "ki_old": "879451",
+  "ki_new": "879451",
+  "nazwa_old": "295/80R22.5 Firestone FS424 152/148M TL M+S 3PMSF",
+  "nazwa_new": "295/80R22.5 Firestone FS424 152/148M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 103833,
+  "ki_old": "870245",
+  "ki_new": "870245",
+  "nazwa_old": "360/70R24 Alliance Agri Star II 122D Stubble Guard TL",
+  "nazwa_new": "360/70R24 Alliance AGRISTAR II 122D Stubble Guard TL"
+ },
+ {
+  "id": 102066,
+  "ki_old": "870245",
+  "ki_new": "870245",
+  "nazwa_old": "360/70R24 Alliance AGRISTAR II 122D TL",
+  "nazwa_new": "360/70R24 Alliance AGRISTAR II 122D Stubble Guard TL"
+ },
+ {
+  "id": 100426,
+  "ki_old": "693033",
+  "ki_new": "870245",
+  "nazwa_old": "360/70R24 Alliance AGRISTAR II 122D TL",
+  "nazwa_new": "360/70R24 Alliance AGRISTAR II 122D Stubble Guard TL"
+ },
+ {
+  "id": 102896,
+  "ki_old": "907679",
+  "ki_new": "907679",
+  "nazwa_old": "365/80R20 Continental MPT81 152K TL",
+  "nazwa_new": "365/80R20 Continental MPT 81 152K TL M+S"
+ },
+ {
+  "id": 104242,
+  "ki_old": "357256",
+  "ki_new": "357256",
+  "nazwa_old": "420/65R20 Alliance Agri Star II 135D Stubble Guard TL",
+  "nazwa_new": "420/65R20 Alliance AGRISTAR II 135D Stubble Guard TL"
+ },
+ {
+  "id": 102085,
+  "ki_old": "749940",
+  "ki_new": "357256",
+  "nazwa_old": "420/65R20 Alliance AGRISTAR II 135D TL",
+  "nazwa_new": "420/65R20 Alliance AGRISTAR II 135D Stubble Guard TL"
+ },
+ {
+  "id": 100824,
+  "ki_old": "357256",
+  "ki_new": "357256",
+  "nazwa_old": "420/65R20 Alliance Agristar II 135D TL",
+  "nazwa_new": "420/65R20 Alliance AGRISTAR II 135D Stubble Guard TL"
+ },
+ {
+  "id": 104239,
+  "ki_old": "721063",
+  "ki_new": "721063",
+  "nazwa_old": "480/65R28 Alliance Agri Star II 142D Stubble Guard TL",
+  "nazwa_new": "480/65R28 Alliance AGRISTAR II 142D Stubble Guard TL"
+ },
+ {
+  "id": 102091,
+  "ki_old": "721063",
+  "ki_new": "721063",
+  "nazwa_old": "480/65R28 Alliance AGRISTAR II 142D TL",
+  "nazwa_new": "480/65R28 Alliance AGRISTAR II 142D Stubble Guard TL"
+ },
+ {
+  "id": 100881,
+  "ki_old": "721063",
+  "ki_new": "721063",
+  "nazwa_old": "480/65R28 Alliance AGRISTAR II 142D TL",
+  "nazwa_new": "480/65R28 Alliance AGRISTAR II 142D Stubble Guard TL"
+ },
+ {
+  "id": 104238,
+  "ki_old": "979765",
+  "ki_new": "979765",
+  "nazwa_old": "540/65R28 Alliance Agri Star II 149D Stubble Guard TL",
+  "nazwa_new": "540/65R28 Alliance AGRISTAR II 149D Stubble Guard TL"
+ },
+ {
+  "id": 102099,
+  "ki_old": "979765",
+  "ki_new": "979765",
+  "nazwa_old": "540/65R28 Alliance AGRISTAR II 149D TL",
+  "nazwa_new": "540/65R28 Alliance AGRISTAR II 149D Stubble Guard TL"
+ },
+ {
+  "id": 100889,
+  "ki_old": "979765",
+  "ki_new": "979765",
+  "nazwa_old": "540/65R28 Alliance AGRISTAR II 149D TL",
+  "nazwa_new": "540/65R28 Alliance AGRISTAR II 149D Stubble Guard TL"
+ },
+ {
+  "id": 104324,
+  "ki_old": "967479",
+  "ki_new": "967479",
+  "nazwa_old": "420/80R46 Alliance Agri Star II 159D Stubble Guard TL",
+  "nazwa_new": "420/80R46 Alliance AGRISTAR II 159D Stubble Guard TL"
+ },
+ {
+  "id": 102020,
+  "ki_old": "967479",
+  "ki_new": "967479",
+  "nazwa_old": "16.9R46 Alliance AGRISTAR II 159D TL",
+  "nazwa_new": "420/80R46 Alliance AGRISTAR II 159D Stubble Guard TL"
+ },
+ {
+  "id": 100895,
+  "ki_old": "967479",
+  "ki_new": "967479",
+  "nazwa_old": "420/80R46 Alliance AGRISTAR II 159D TL",
+  "nazwa_new": "420/80R46 Alliance AGRISTAR II 159D Stubble Guard TL"
+ },
+ {
+  "id": 104233,
+  "ki_old": "687004",
+  "ki_new": "687004",
+  "nazwa_old": "650/65R38 Alliance Agri Star II 171D Stubble Guard TL",
+  "nazwa_new": "650/65R38 Alliance AGRISTAR II 171D Stubble Guard TL"
+ },
+ {
+  "id": 102097,
+  "ki_old": "687004",
+  "ki_new": "687004",
+  "nazwa_old": "650/65R38 Alliance AGRISTAR II 171D TL",
+  "nazwa_new": "650/65R38 Alliance AGRISTAR II 171D Stubble Guard TL"
+ },
+ {
+  "id": 100928,
+  "ki_old": "687004",
+  "ki_new": "687004",
+  "nazwa_old": "650/65R38 Alliance AGRISTAR II 171D TL",
+  "nazwa_new": "650/65R38 Alliance AGRISTAR II 171D Stubble Guard TL"
+ },
+ {
+  "id": 103815,
+  "ki_old": "158349",
+  "ki_new": "158349",
+  "nazwa_old": "710/70R42 Alliance Agri Star II 173D Stubble Guard TL",
+  "nazwa_new": "710/70R42 Alliance AGRISTAR II 70 173D Stubble Guard TL"
+ },
+ {
+  "id": 102074,
+  "ki_old": "158349",
+  "ki_new": "158349",
+  "nazwa_old": "710/70R42 Alliance AGRISTAR II 173D TL",
+  "nazwa_new": "710/70R42 Alliance AGRISTAR II 70 173D Stubble Guard TL"
+ },
+ {
+  "id": 100997,
+  "ki_old": "158349",
+  "ki_new": "158349",
+  "nazwa_old": "710/70R42 Alliance AGRISTAR II 70 173D TL",
+  "nazwa_new": "710/70R42 Alliance AGRISTAR II 70 173D Stubble Guard TL"
+ },
+ {
+  "id": 100882,
+  "ki_old": "315653",
+  "ki_new": "315653",
+  "nazwa_old": "380/70R24 Firestone Performer 70 125D/122E TL",
+  "nazwa_new": "380/70R24 Firestone PERFORMER 70 125D/122E TL"
+ },
+ {
+  "id": 101889,
+  "ki_old": "883536",
+  "ki_new": "883536",
+  "nazwa_old": "12.4R24 Firestone PERFORMER 85 122D/119E TL",
+  "nazwa_new": "320/85R24 Firestone PERFORMER 85 122D/119E TL"
+ },
+ {
+  "id": 100910,
+  "ki_old": "883536",
+  "ki_new": "883536",
+  "nazwa_old": "320/85R24 Firestone Performer 85 122D/119E TL",
+  "nazwa_new": "320/85R24 Firestone PERFORMER 85 122D/119E TL"
+ },
+ {
+  "id": 102530,
+  "ki_old": "882833",
+  "ki_new": "882833",
+  "nazwa_old": "23.5R25 Firestone MULTI BLOCK T MS DE2 185B TL",
+  "nazwa_new": "23.5R25 Firestone MULTI BLOCK T MS DE2 E-3/L-3 185B TL"
+ },
+ {
+  "id": 100797,
+  "ki_old": "882833",
+  "ki_new": "882833",
+  "nazwa_old": "23.5R25 Firestone MBT MS DE2 ** E-3/L-3 185B TL",
+  "nazwa_new": "23.5R25 Firestone MULTI BLOCK T MS DE2 E-3/L-3 185B TL"
+ },
+ {
+  "id": 100375,
+  "ki_old": "882833",
+  "ki_new": "882833",
+  "nazwa_old": "23.5R25 Firestone MBT MS DE2 ** E-3/L-3 185B TL",
+  "nazwa_new": "23.5R25 Firestone MULTI BLOCK T MS DE2 E-3/L-3 185B TL"
+ },
+ {
+  "id": 102661,
+  "ki_old": "414827",
+  "ki_new": "414827",
+  "nazwa_old": "385/65R22.5 Firestone FT524 160K/158L 3PMSF M+S",
+  "nazwa_new": "385/65R22.5 Firestone FT524 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 100798,
+  "ki_old": "414827",
+  "ki_new": "414827",
+  "nazwa_old": "385/65R22.5 Firestone FT524 160K TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Firestone FT524 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 100380,
+  "ki_old": "414827",
+  "ki_new": "414827",
+  "nazwa_old": "385/65R22.5 Firestone FT524 160K TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Firestone FT524 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 102640,
+  "ki_old": "367461",
+  "ki_new": "367461",
+  "nazwa_old": "315/70R22.5 Firestone FD624 154L/152M 3PMSF M+S DRIVE",
+  "nazwa_new": "315/70R22.5 Firestone FD624 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 100799,
+  "ki_old": "367461",
+  "ki_new": "367461",
+  "nazwa_old": "315/70R22.5 Firestone FD624 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Firestone FD624 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 100389,
+  "ki_old": "367461",
+  "ki_new": "367461",
+  "nazwa_old": "315/70R22.5 Firestone FD624 154L/152M TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Firestone FD624 154L/152M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 104303,
+  "ki_old": "282033",
+  "ki_new": "282033",
+  "nazwa_old": "315/80R22.5 GoodTrip GHA20 154L 20PR TL",
+  "nazwa_new": "315/80R22.5 GOODTRIP GHA20 157/154L 20PR TL M+S 3PMSF"
+ },
+ {
+  "id": 104287,
+  "ki_old": "581166",
+  "ki_new": "581166",
+  "nazwa_old": "445/45R19.5 GoodTrip GHT22 160J 22PR TL",
+  "nazwa_new": "445/45R19.5 GOODTRIP GHT22 TRAILER 160J 22PR TL M+S 3PMSF"
+ },
+ {
+  "id": 102902,
+  "ki_old": "171726",
+  "ki_new": "171726",
+  "nazwa_old": "385/65R22.5 Continental CONTI ECO HS 5 164K 3PMSF M+S FRONT",
+  "nazwa_new": "385/65R22.5 Continental CONTI ECO HS5 164K 20PR TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100780,
+  "ki_old": "171726",
+  "ki_new": "171726",
+  "nazwa_old": "385/65R22.5 Continental CONTI ECO HS5 164K 20PR TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Continental CONTI ECO HS5 164K 20PR TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100177,
+  "ki_old": "171726",
+  "ki_new": "171726",
+  "nazwa_old": "385/65R22.5 Continental CONTI ECO HS5 164K 20PR TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Continental CONTI ECO HS5 164K 20PR TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100956,
+  "ki_old": "810265",
+  "ki_new": "810265",
+  "nazwa_old": "520/70R34 Bridgestone VX Tractor 148D/145E TL",
+  "nazwa_new": "520/70R34 Bridgestone VX-R TRACTOR 148D/145E TL"
+ },
+ {
+  "id": 100271,
+  "ki_old": "810265",
+  "ki_new": "810265",
+  "nazwa_old": "520/70R34 Bridgestone VX- TRACTOR 148D/145E TL",
+  "nazwa_new": "520/70R34 Bridgestone VX-R TRACTOR 148D/145E TL"
+ },
+ {
+  "id": 102898,
+  "ki_old": "167420",
+  "ki_new": "167420",
+  "nazwa_old": "315/70R22.5 Continental HD5 CONTI ECO 150L/148M 3PMSF M+S DRIVE",
+  "nazwa_new": "315/70R22.5 Continental CONTI ECO HD5 150L/148M M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 102514,
+  "ki_old": "120096",
+  "ki_new": "120096",
+  "nazwa_old": "13.6R24 Bridgestone VX-TRACTOR 125D/122E TL",
+  "nazwa_new": "340/85R24 Bridgestone VX-R TRACTOR 125D/122E TL"
+ },
+ {
+  "id": 100960,
+  "ki_old": "120096",
+  "ki_new": "120096",
+  "nazwa_old": "340/85R24 Bridgestone VX Tractor 125D/122E TL",
+  "nazwa_new": "340/85R24 Bridgestone VX-R TRACTOR 125D/122E TL"
+ },
+ {
+  "id": 100281,
+  "ki_old": "120096",
+  "ki_new": "120096",
+  "nazwa_old": "340/85R24 Bridgestone VX- TRACTOR 125D/122E TL",
+  "nazwa_new": "340/85R24 Bridgestone VX-R TRACTOR 125D/122E TL"
+ },
+ {
+  "id": 102826,
+  "ki_old": "164006",
+  "ki_new": "164006",
+  "nazwa_old": "385/65R22.5 Bridgestone RT2 DURAVIS 160K/158L",
+  "nazwa_new": "385/65R22.5 Bridgestone DURAVIS RT2 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 100790,
+  "ki_old": "164006",
+  "ki_new": "164006",
+  "nazwa_old": "385/65R22.5 Bridgestone DURT2 160K TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Bridgestone DURAVIS RT2 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 100286,
+  "ki_old": "164006",
+  "ki_new": "164006",
+  "nazwa_old": "385/65R22.5 Bridgestone DURT2 160K TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Bridgestone DURAVIS RT2 160K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 101877,
+  "ki_old": "578219",
+  "ki_new": "578219",
+  "nazwa_old": "385/65R22.5 Dunlop SP346 160K/158L 3PMSF M+S FRONT",
+  "nazwa_new": "385/65R22.5 Dunlop SP346 160K/158L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100728,
+  "ki_old": "578219",
+  "ki_new": "578219",
+  "nazwa_old": "385/65R22.5 Dunlop SP346 160K/158L TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Dunlop SP346 160K/158L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99892,
+  "ki_old": "578219",
+  "ki_new": "578219",
+  "nazwa_old": "385/65R22.5 Dunlop SP346 160K/158L TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Dunlop SP346 160K/158L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 101844,
+  "ki_old": "774569",
+  "ki_new": "774569",
+  "nazwa_old": "315/70R22.5 Dunlop SP346+ HL 156/150L 3PMSF FRONT",
+  "nazwa_new": "315/70R22.5 Dunlop SP346+ HL 156/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100731,
+  "ki_old": "774569",
+  "ki_new": "774569",
+  "nazwa_old": "315/70R22.5 Dunlop SP346+ HL 156/150L TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Dunlop SP346+ HL 156/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99901,
+  "ki_old": "774569",
+  "ki_new": "774569",
+  "nazwa_old": "315/70R22.5 Dunlop SP346+ HL 156/150L TL M+S 3PMSF",
+  "nazwa_new": "315/70R22.5 Dunlop SP346+ HL 156/150L TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 101826,
+  "ki_old": "283686",
+  "ki_new": "283686",
+  "nazwa_old": "265/70R17.5 Dunlop SP446 139/136M 3PMSF M+S DRIVE",
+  "nazwa_new": "265/70R17.5 Dunlop SP446 139/136M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 100732,
+  "ki_old": "283686",
+  "ki_new": "283686",
+  "nazwa_old": "265/70R17.5 Dunlop SP446 139/136M TL M+S 3PMSF",
+  "nazwa_new": "265/70R17.5 Dunlop SP446 139/136M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 99919,
+  "ki_old": "283686",
+  "ki_new": "283686",
+  "nazwa_old": "265/70R17.5 Dunlop SP446 139/136M TL M+S 3PMSF",
+  "nazwa_new": "265/70R17.5 Dunlop SP446 139/136M TL M+S 3PMSF DRIVE"
+ },
+ {
+  "id": 101825,
+  "ki_old": "318281",
+  "ki_new": "318281",
+  "nazwa_old": "265/70R17.5 Dunlop SP346 139/136M 3PMSF M+S FRONT",
+  "nazwa_new": "265/70R17.5 Dunlop SP346 139/136M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 100733,
+  "ki_old": "318281",
+  "ki_new": "318281",
+  "nazwa_old": "265/70R17.5 Dunlop SP346 139/136M TL M+S 3PMSF",
+  "nazwa_new": "265/70R17.5 Dunlop SP346 139/136M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99920,
+  "ki_old": "318281",
+  "ki_new": "318281",
+  "nazwa_old": "265/70R17.5 Dunlop SP346 139/136M TL M+S 3PMSF",
+  "nazwa_new": "265/70R17.5 Dunlop SP346 139/136M TL M+S 3PMSF FRONT"
+ },
+ {
+  "id": 99954,
+  "ki_old": "651526",
+  "ki_new": "814102",
+  "nazwa_old": "385/65R22.5 Goodyear KMAX 164K/158L TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 Goodyear KMAX 164K/158L TL M+S 3PMSF"
+ },
+ {
+  "id": 104121,
+  "ki_old": "884253",
+  "ki_new": "884253",
+  "nazwa_old": "385/65R22.5 GoodTrip GHT50 160K/158L 20PR TL",
+  "nazwa_new": "385/65R22.5 GOODTRIP GHT50 TRAILER 160K/158L 20PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100748,
+  "ki_old": "884253",
+  "ki_new": "884253",
+  "nazwa_old": "385/65R22.5 GOODTRIP GHT50 TRAILER 160K 20PR TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 GOODTRIP GHT50 TRAILER 160K/158L 20PR TL M+S 3PMSF"
+ },
+ {
+  "id": 100052,
+  "ki_old": "884253",
+  "ki_new": "884253",
+  "nazwa_old": "385/65R22.5 GOODTRIP GHT50 TRAILER 160K 20PR TL M+S 3PMSF",
+  "nazwa_new": "385/65R22.5 GOODTRIP GHT50 TRAILER 160K/158L 20PR TL M+S 3PMSF"
+ },
+ {
+  "id": 104288,
+  "ki_old": "287893",
+  "ki_new": "287893",
+  "nazwa_old": "385/55R22.5 GoodTrip GHT50 160K 20PR TL",
+  "nazwa_new": "385/55R22.5 GOODTRIP GHT50 TRAILER 160K 20PR TL M+S 3PMSF"
+ },
+ {
+  "id": 104122,
+  "ki_old": "763202",
+  "ki_new": "763202",
+  "nazwa_old": "315/80R22.5 GoodTrip GHD20 154L 20PR TL",
+  "nazwa_new": "315/80R22.5 GOODTRIP GHD20 157/154L 20PR TL M+S 3PMSF"
+ }
+]

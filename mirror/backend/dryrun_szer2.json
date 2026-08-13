@@ -1,0 +1,678 @@
+{
+  "changes": [
+    {
+      "kod": "MO1_19110112",
+      "dostawca": "MO1",
+      "rozmiar": "4.80/4.00-8",
+      "cur": 4,
+      "target": 4.8,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO1_19110117",
+      "dostawca": "MO1",
+      "rozmiar": "4.80/4.00-8",
+      "cur": 4,
+      "target": 4.8,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO10_PAB1112",
+      "dostawca": "MO10",
+      "rozmiar": "7.50-20",
+      "cur": 190.5,
+      "target": 7.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO10_PAB1354",
+      "dostawca": "MO10",
+      "rozmiar": "15.0/55-17",
+      "cur": 381,
+      "target": 15,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO2_25029528",
+      "dostawca": "MO2",
+      "rozmiar": "8.25-20",
+      "cur": 209.6,
+      "target": 8.25,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO3_10075153BKT2",
+      "dostawca": "MO3",
+      "rozmiar": "10.0/75-15.3",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO3_1507018BKT",
+      "dostawca": "MO3",
+      "rozmiar": "15.0/70-18",
+      "cur": 381,
+      "target": 15,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO3_55016BKT",
+      "dostawca": "MO3",
+      "rozmiar": "5.50-16",
+      "cur": 139.7,
+      "target": 5.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO3_65016BKTTF81818",
+      "dostawca": "MO3",
+      "rozmiar": "6.50-16",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO3_6508015AA-324",
+      "dostawca": "MO3",
+      "rozmiar": "6.50/80-15",
+      "cur": 50,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO3_658012BKTAS6TT",
+      "dostawca": "MO3",
+      "rozmiar": "6.5/80-12",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO3_658015BKT",
+      "dostawca": "MO3",
+      "rozmiar": "6.5/80-15",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO4_HLRD120G10808MA00",
+      "dostawca": "MO4",
+      "rozmiar": "10.0/80-12",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO4_HLRD153G10758MA00",
+      "dostawca": "MO4",
+      "rozmiar": "10.0/75-15.3",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO4_HLRD153G15808MA06",
+      "dostawca": "MO4",
+      "rozmiar": "11.5/80-15.3",
+      "cur": 292.1,
+      "target": 11.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO4_HLRD200E75006M222",
+      "dostawca": "MO4",
+      "rozmiar": "7.50-20",
+      "cur": 190.5,
+      "target": 7.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO4_HLRD280G49006MR21",
+      "dostawca": "MO4",
+      "rozmiar": "14.9-28",
+      "cur": 378.5,
+      "target": 14.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO4_OZRD160E60006KN40",
+      "dostawca": "MO4",
+      "rozmiar": "6.00-16",
+      "cur": 152.4,
+      "target": 6,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLPD180G25808ATU0",
+      "dostawca": "MO5",
+      "rozmiar": "12.5/80-18",
+      "cur": 317.5,
+      "target": 12.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLPD180G25808ATU2",
+      "dostawca": "MO5",
+      "rozmiar": "12.5/80-18",
+      "cur": 317.5,
+      "target": 12.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLPD200G60708MTL0",
+      "dostawca": "MO5",
+      "rozmiar": "16.0/70-20",
+      "cur": 406.4,
+      "target": 16,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLPD240G69008MTL0",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-24",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLPD240H40008MGM2",
+      "dostawca": "MO5",
+      "rozmiar": "14.00-24",
+      "cur": 355.6,
+      "target": 14,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLPD250G55008MG80",
+      "dostawca": "MO5",
+      "rozmiar": "15.5-25",
+      "cur": 393.7,
+      "target": 15.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLPD260G84008MTL0",
+      "dostawca": "MO5",
+      "rozmiar": "18.4-26",
+      "cur": 467.4,
+      "target": 18.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD090E600027MT0",
+      "dostawca": "MO5",
+      "rozmiar": "6.00-9",
+      "cur": 152.4,
+      "target": 6,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD120E50006MRT1",
+      "dostawca": "MO5",
+      "rozmiar": "5.00-12",
+      "cur": 127,
+      "target": 5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD120G10808MA00",
+      "dostawca": "MO5",
+      "rozmiar": "10.0/80-12",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD153G10756MA01",
+      "dostawca": "MO5",
+      "rozmiar": "10.0/75-15.3",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD153G10758MA00",
+      "dostawca": "MO5",
+      "rozmiar": "10.0/75-15.3",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD153G10758MA04",
+      "dostawca": "MO5",
+      "rozmiar": "10.0/75-15.3",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD153G10758MI30",
+      "dostawca": "MO5",
+      "rozmiar": "10.0/75-15.3",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD153G10758MI33",
+      "dostawca": "MO5",
+      "rozmiar": "10.0/75-15.3",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD153G15808MA06",
+      "dostawca": "MO5",
+      "rozmiar": "11.5/80-15.3",
+      "cur": 292.1,
+      "target": 11.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD160E40006MF20",
+      "dostawca": "MO5",
+      "rozmiar": "4.00-16",
+      "cur": 101.6,
+      "target": 4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD160E40008MI31",
+      "dostawca": "MO5",
+      "rozmiar": "4.00-16",
+      "cur": 101.6,
+      "target": 4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD160E50006MF20",
+      "dostawca": "MO5",
+      "rozmiar": "5.00-16",
+      "cur": 127,
+      "target": 5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD160E65006MI30",
+      "dostawca": "MO5",
+      "rozmiar": "6.50-16",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD200E75006M222",
+      "dostawca": "MO5",
+      "rozmiar": "7.50-20",
+      "cur": 190.5,
+      "target": 7.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD240G24006MR20",
+      "dostawca": "MO5",
+      "rozmiar": "12.4-24",
+      "cur": 315,
+      "target": 12.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD240G36006MR21",
+      "dostawca": "MO5",
+      "rozmiar": "13.6-24",
+      "cur": 345.4,
+      "target": 13.6,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD240G55808MI31",
+      "dostawca": "MO5",
+      "rozmiar": "15.5/80-24",
+      "cur": 393.7,
+      "target": 15.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD280G12008MR20",
+      "dostawca": "MO5",
+      "rozmiar": "11.2-28",
+      "cur": 284.5,
+      "target": 11.2,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD280G24006MR22",
+      "dostawca": "MO5",
+      "rozmiar": "12.4-28",
+      "cur": 315,
+      "target": 12.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD280G49006MR20",
+      "dostawca": "MO5",
+      "rozmiar": "14.9-28",
+      "cur": 378.5,
+      "target": 14.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD280G69006MR20",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-28",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD300G69006MR21",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-30",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD320G24006MR20",
+      "dostawca": "MO5",
+      "rozmiar": "12.4-32",
+      "cur": 315,
+      "target": 12.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD340G69006MR20",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-34",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD340G84008MR20",
+      "dostawca": "MO5",
+      "rozmiar": "18.4-34",
+      "cur": 467.4,
+      "target": 18.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_HLRD380G69006MR20",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-38",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTPD160E6500LKM40",
+      "dostawca": "MO5",
+      "rozmiar": "6.50-16",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTPD200405702LD60",
+      "dostawca": "MO5",
+      "rozmiar": "16.0/70-20",
+      "cur": 406.4,
+      "target": 16,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTPD200G60708LD00",
+      "dostawca": "MO5",
+      "rozmiar": "16.0/70-20",
+      "cur": 406.4,
+      "target": 16,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTPD200H00008LD91",
+      "dostawca": "MO5",
+      "rozmiar": "10.00-20",
+      "cur": 254,
+      "target": 10,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTPD240H40008GD90",
+      "dostawca": "MO5",
+      "rozmiar": "14.00-24",
+      "cur": 355.6,
+      "target": 14,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD120E70006T440",
+      "dostawca": "MO5",
+      "rozmiar": "7.00-12",
+      "cur": 177.8,
+      "target": 7,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD150E50006T6B0",
+      "dostawca": "MO5",
+      "rozmiar": "5.00-15",
+      "cur": 127,
+      "target": 5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD150E65806SA80",
+      "dostawca": "MO5",
+      "rozmiar": "6.50/80-15",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD160E60006SA50",
+      "dostawca": "MO5",
+      "rozmiar": "6.00-16",
+      "cur": 152.4,
+      "target": 6,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD180G25808BT70",
+      "dostawca": "MO5",
+      "rozmiar": "12.5/80-18",
+      "cur": 317.5,
+      "target": 12.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD200A82006TN50",
+      "dostawca": "MO5",
+      "rozmiar": "8.25-20",
+      "cur": 209.6,
+      "target": 8.25,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD200E65006SA30",
+      "dostawca": "MO5",
+      "rozmiar": "6.50-20",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD200E75006SA30",
+      "dostawca": "MO5",
+      "rozmiar": "7.50-20",
+      "cur": 190.5,
+      "target": 7.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD200G12006SA80",
+      "dostawca": "MO5",
+      "rozmiar": "11.2-20",
+      "cur": 284.5,
+      "target": 11.2,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD240D95006SA81",
+      "dostawca": "MO5",
+      "rozmiar": "9.5-24",
+      "cur": 241.3,
+      "target": 9.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD240G49006SA81",
+      "dostawca": "MO5",
+      "rozmiar": "14.9-24",
+      "cur": 378.5,
+      "target": 14.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD240G49006SA83",
+      "dostawca": "MO5",
+      "rozmiar": "14.9-24",
+      "cur": 378.5,
+      "target": 14.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD340G69006SA80",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-34",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD340G84006SA80",
+      "dostawca": "MO5",
+      "rozmiar": "18.4-34",
+      "cur": 467.4,
+      "target": 18.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD360G24006SA80",
+      "dostawca": "MO5",
+      "rozmiar": "12.4-36",
+      "cur": 315,
+      "target": 12.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OTRD380G69006SA81",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-38",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OZRD240G24006KNK1",
+      "dostawca": "MO5",
+      "rozmiar": "12.4-24",
+      "cur": 315,
+      "target": 12.4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO5_OZRD280G69006KNK0",
+      "dostawca": "MO5",
+      "rozmiar": "16.9-28",
+      "cur": 429.3,
+      "target": 16.9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO8_0198600",
+      "dostawca": "MO8",
+      "rozmiar": "6.5/80-12",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO8_0198800",
+      "dostawca": "MO8",
+      "rozmiar": "6.5/80-15",
+      "cur": 165.1,
+      "target": 6.5,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO8_0207900",
+      "dostawca": "MO8",
+      "rozmiar": "9.0/75-16",
+      "cur": 228.6,
+      "target": 9,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO8_0209500",
+      "dostawca": "MO8",
+      "rozmiar": "4.00/4.50-21",
+      "cur": 4.5,
+      "target": 4,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO8_1159100",
+      "dostawca": "MO8",
+      "rozmiar": "4.10/3.50-6",
+      "cur": 104.1,
+      "target": 4.1,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO8_1169800",
+      "dostawca": "MO8",
+      "rozmiar": "4.10/3.50-4",
+      "cur": 104.1,
+      "target": 4.1,
+      "kind": "cale->pierwsza"
+    },
+    {
+      "kod": "MO9_27304",
+      "dostawca": "MO9",
+      "rozmiar": "1050/50R32",
+      "cur": 50,
+      "target": 1050,
+      "kind": "ucieta-4cyfry"
+    },
+    {
+      "kod": "MO9_28824",
+      "dostawca": "MO9",
+      "rozmiar": "1050/50R32",
+      "cur": 50,
+      "target": 1050,
+      "kind": "ucieta-4cyfry"
+    },
+    {
+      "kod": "MO9_63069",
+      "dostawca": "MO9",
+      "rozmiar": "1250/50R32",
+      "cur": 250,
+      "target": 1250,
+      "kind": "ucieta-4cyfry"
+    }
+  ],
+  "suspicious": [
+    {
+      "kod": "MO2_GLO00131",
+      "dostawca": "MO2",
+      "rozmiar": "1/2-8",
+      "cur": 15412,
+      "target": 1,
+      "kind": "cale->pierwsza"
+    }
+  ]
+}

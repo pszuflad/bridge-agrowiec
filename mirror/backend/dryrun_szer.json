@@ -1,0 +1,6801 @@
+{
+ "changes": [
+  {
+   "kod": "MO9_280851",
+   "dostawca": "MO9",
+   "rozmiar": "8.00x20",
+   "szer_old": 8,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_106989",
+   "dostawca": "MO9",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_106987",
+   "dostawca": "MO9",
+   "rozmiar": "23x8.5-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_106985",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x16",
+   "szer_old": 6,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_106950",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x28",
+   "szer_old": 14.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_106949",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x38",
+   "szer_old": 18.4,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_103636",
+   "dostawca": "MO9",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_103369",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x28",
+   "szer_old": 14.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_103105",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x24",
+   "szer_old": 13.6,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_103038",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x24",
+   "szer_old": 14.9,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_103031",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x24",
+   "szer_old": 12.4,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_101998",
+   "dostawca": "MO9",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_101508",
+   "dostawca": "MO9",
+   "rozmiar": "300x15",
+   "szer_old": 300,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_101507",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_99436",
+   "dostawca": "MO9",
+   "rozmiar": "23.5x25",
+   "szer_old": 23.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_99356",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x16",
+   "szer_old": 12.4,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_98659",
+   "dostawca": "MO9",
+   "rozmiar": "23x8.5-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_98657",
+   "dostawca": "MO9",
+   "rozmiar": "15x19.5",
+   "szer_old": 15,
+   "szer_new": 19.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_98233",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_98124",
+   "dostawca": "MO9",
+   "rozmiar": "18x8.5-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69607",
+   "dostawca": "MO9",
+   "rozmiar": "8.15x15",
+   "szer_old": 8.15,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69599",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69596",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x20",
+   "szer_old": 8.25,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69582",
+   "dostawca": "MO9",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69580",
+   "dostawca": "MO9",
+   "rozmiar": "10.00x20",
+   "szer_old": 10,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69565",
+   "dostawca": "MO9",
+   "rozmiar": "250x15",
+   "szer_old": 250,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69538",
+   "dostawca": "MO9",
+   "rozmiar": "10.00x20",
+   "szer_old": 10,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69528",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69486",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69470",
+   "dostawca": "MO9",
+   "rozmiar": "250x15",
+   "szer_old": 250,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69449",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x15",
+   "szer_old": 8.25,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69418",
+   "dostawca": "MO9",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69403",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x9",
+   "szer_old": 6,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69371",
+   "dostawca": "MO9",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69205",
+   "dostawca": "MO9",
+   "rozmiar": "11.2x24",
+   "szer_old": 11.2,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69044",
+   "dostawca": "MO9",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_69022",
+   "dostawca": "MO9",
+   "rozmiar": "300x15",
+   "szer_old": 300,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68981",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x26",
+   "szer_old": 23.1,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68978",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x34",
+   "szer_old": 16.9,
+   "szer_new": 34,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68976",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x38",
+   "szer_old": 18.4,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68970",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x24",
+   "szer_old": 9.5,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68936",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68556",
+   "dostawca": "MO9",
+   "rozmiar": "4.00x16",
+   "szer_old": 4,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68154",
+   "dostawca": "MO9",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68109",
+   "dostawca": "MO9",
+   "rozmiar": "7.2x30",
+   "szer_old": 7.2,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_68018",
+   "dostawca": "MO9",
+   "rozmiar": "28x12.5-15",
+   "szer_old": 28,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_67470",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x30",
+   "szer_old": 16.9,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_67269",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x16",
+   "szer_old": 6,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66781",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x32",
+   "szer_old": 12.4,
+   "szer_new": 32,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66753",
+   "dostawca": "MO9",
+   "rozmiar": "90x15",
+   "szer_old": 90,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66556",
+   "dostawca": "MO9",
+   "rozmiar": "26x12-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66550",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x16",
+   "szer_old": 7.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66526",
+   "dostawca": "MO9",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66455",
+   "dostawca": "MO9",
+   "rozmiar": "15.5x38",
+   "szer_old": 15.5,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66415",
+   "dostawca": "MO9",
+   "rozmiar": "12.5x20",
+   "szer_old": 12.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66181",
+   "dostawca": "MO9",
+   "rozmiar": "65x15",
+   "szer_old": 65,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_66140",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x28",
+   "szer_old": 16.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_65625",
+   "dostawca": "MO9",
+   "rozmiar": "18x22.5",
+   "szer_old": 18,
+   "szer_new": 22.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_65581",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x26",
+   "szer_old": 18.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_65296",
+   "dostawca": "MO9",
+   "rozmiar": "18x19.5",
+   "szer_old": 18,
+   "szer_new": 19.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_65100",
+   "dostawca": "MO9",
+   "rozmiar": "10x16.5",
+   "szer_old": 10,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_64837",
+   "dostawca": "MO9",
+   "rozmiar": "31x15.5-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_64554",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x26",
+   "szer_old": 23.1,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_64363",
+   "dostawca": "MO9",
+   "rozmiar": "10x16.5",
+   "szer_old": 10,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_64180",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x26",
+   "szer_old": 23.1,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63997",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x15",
+   "szer_old": 7,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63710",
+   "dostawca": "MO9",
+   "rozmiar": "8x18",
+   "szer_old": 8,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63405",
+   "dostawca": "MO9",
+   "rozmiar": "11.2x24",
+   "szer_old": 11.2,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63262",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x20",
+   "szer_old": 8.3,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63169",
+   "dostawca": "MO9",
+   "rozmiar": "23.5x25",
+   "szer_old": 23.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63137",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x22",
+   "szer_old": 9.5,
+   "szer_new": 22,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63114",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x22",
+   "szer_old": 8.3,
+   "szer_new": 22,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63069",
+   "dostawca": "MO9",
+   "rozmiar": "1250/50R32",
+   "szer_old": 250,
+   "szer_new": 1250,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO9_63058",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x24",
+   "szer_old": 8.3,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_63018",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x24",
+   "szer_old": 9.5,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_62936",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x20",
+   "szer_old": 6.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_62208",
+   "dostawca": "MO9",
+   "rozmiar": "10x16.5",
+   "szer_old": 10,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_62119",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x26",
+   "szer_old": 18.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_62003",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x15",
+   "szer_old": 8.25,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_61960",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x20",
+   "szer_old": 9.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_61755",
+   "dostawca": "MO9",
+   "rozmiar": "5.50x15",
+   "szer_old": 5.5,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_61693",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x24",
+   "szer_old": 14.9,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_61591",
+   "dostawca": "MO9",
+   "rozmiar": "15x4.5-8",
+   "szer_old": 15,
+   "szer_new": 4.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_61319",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x16",
+   "szer_old": 6,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_61213",
+   "dostawca": "MO9",
+   "rozmiar": "8x18",
+   "szer_old": 8,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_60732",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x24",
+   "szer_old": 13.6,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_60616",
+   "dostawca": "MO9",
+   "rozmiar": "9.00x16",
+   "szer_old": 9,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_60049",
+   "dostawca": "MO9",
+   "rozmiar": "26x12-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_59906",
+   "dostawca": "MO9",
+   "rozmiar": "23x10-12",
+   "szer_old": 23,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_59898",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x24",
+   "szer_old": 14.9,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_59786",
+   "dostawca": "MO9",
+   "rozmiar": "80x12",
+   "szer_old": 80,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_57994",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x24",
+   "szer_old": 13.6,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_57772",
+   "dostawca": "MO9",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_57537",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x9",
+   "szer_old": 6,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_57481",
+   "dostawca": "MO9",
+   "rozmiar": "8.15x15",
+   "szer_old": 8.15,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_57424",
+   "dostawca": "MO9",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_57305",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x9",
+   "szer_old": 6,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_56612",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x12",
+   "szer_old": 6,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_56532",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x12",
+   "szer_old": 6,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_56138",
+   "dostawca": "MO9",
+   "rozmiar": "18x8.5-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_55825",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x19",
+   "szer_old": 6,
+   "szer_new": 19,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_55787",
+   "dostawca": "MO9",
+   "rozmiar": "10x16.5",
+   "szer_old": 10,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_55669",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_55619",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x34",
+   "szer_old": 18.4,
+   "szer_new": 34,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_55498",
+   "dostawca": "MO9",
+   "rozmiar": "16.00x25",
+   "szer_old": 16,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_55467",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x26",
+   "szer_old": 23.1,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_55188",
+   "dostawca": "MO9",
+   "rozmiar": "23x10-12",
+   "szer_old": 23,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_54661",
+   "dostawca": "MO9",
+   "rozmiar": "8.15x15",
+   "szer_old": 8.15,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_54530",
+   "dostawca": "MO9",
+   "rozmiar": "12x16.5",
+   "szer_old": 12,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_54389",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x26",
+   "szer_old": 13.6,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_54280",
+   "dostawca": "MO9",
+   "rozmiar": "5.50x16",
+   "szer_old": 5.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_54043",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x28",
+   "szer_old": 13.6,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_53780",
+   "dostawca": "MO9",
+   "rozmiar": "31x13.50-15",
+   "szer_old": 31,
+   "szer_new": 13.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_53621",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x15",
+   "szer_old": 8.25,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_53558",
+   "dostawca": "MO9",
+   "rozmiar": "31x15.5-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_52988",
+   "dostawca": "MO9",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_52888",
+   "dostawca": "MO9",
+   "rozmiar": "4.00x12",
+   "szer_old": 4,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_52537",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x24",
+   "szer_old": 18.4,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_52519",
+   "dostawca": "MO9",
+   "rozmiar": "12.00x24",
+   "szer_old": 12,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_52175",
+   "dostawca": "MO9",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_51978",
+   "dostawca": "MO9",
+   "rozmiar": "23x8.5-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_51642",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x30",
+   "szer_old": 18.4,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_51400",
+   "dostawca": "MO9",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_51392",
+   "dostawca": "MO9",
+   "rozmiar": "12x16.5",
+   "szer_old": 12,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_51366",
+   "dostawca": "MO9",
+   "rozmiar": "250x15",
+   "szer_old": 250,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_51338",
+   "dostawca": "MO9",
+   "rozmiar": "4.00x8",
+   "szer_old": 4,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_51242",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x28",
+   "szer_old": 13.6,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_50835",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x30",
+   "szer_old": 9.5,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_50624",
+   "dostawca": "MO9",
+   "rozmiar": "16.00x25",
+   "szer_old": 16,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_49931",
+   "dostawca": "MO9",
+   "rozmiar": "10.00x15",
+   "szer_old": 10,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_49738",
+   "dostawca": "MO9",
+   "rozmiar": "9.00x20",
+   "szer_old": 9,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_49725",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_49564",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x26",
+   "szer_old": 13.6,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_49516",
+   "dostawca": "MO9",
+   "rozmiar": "10x16.5",
+   "szer_old": 10,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_49004",
+   "dostawca": "MO9",
+   "rozmiar": "300x15",
+   "szer_old": 300,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_48931",
+   "dostawca": "MO9",
+   "rozmiar": "20x8.00-10",
+   "szer_old": 20,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_48489",
+   "dostawca": "MO9",
+   "rozmiar": "11.00x20",
+   "szer_old": 11,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47968",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47909",
+   "dostawca": "MO9",
+   "rozmiar": "26x12-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47845",
+   "dostawca": "MO9",
+   "rozmiar": "14.5x20",
+   "szer_old": 14.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47701",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x28",
+   "szer_old": 18.4,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47419",
+   "dostawca": "MO9",
+   "rozmiar": "8.15x15",
+   "szer_old": 8.15,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47322",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x16",
+   "szer_old": 6,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47285",
+   "dostawca": "MO9",
+   "rozmiar": "10.5x20",
+   "szer_old": 10.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47236",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47135",
+   "dostawca": "MO9",
+   "rozmiar": "20.8x38",
+   "szer_old": 20.8,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47068",
+   "dostawca": "MO9",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47027",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x36",
+   "szer_old": 9.5,
+   "szer_new": 36,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_47020",
+   "dostawca": "MO9",
+   "rozmiar": "8.15x15",
+   "szer_old": 8.15,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46705",
+   "dostawca": "MO9",
+   "rozmiar": "11.2x20",
+   "szer_old": 11.2,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46526",
+   "dostawca": "MO9",
+   "rozmiar": "9.00x20",
+   "szer_old": 9,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46495",
+   "dostawca": "MO9",
+   "rozmiar": "13.00x24",
+   "szer_old": 13,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46430",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46320",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x30",
+   "szer_old": 23.1,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46098",
+   "dostawca": "MO9",
+   "rozmiar": "24.5x32",
+   "szer_old": 24.5,
+   "szer_new": 32,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46048",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x26",
+   "szer_old": 18.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_46004",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x24",
+   "szer_old": 12.4,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45914",
+   "dostawca": "MO9",
+   "rozmiar": "25x8.50-14",
+   "szer_old": 25,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45895",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x26",
+   "szer_old": 23.1,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45894",
+   "dostawca": "MO9",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45764",
+   "dostawca": "MO9",
+   "rozmiar": "23x8.5-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45695",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x15",
+   "szer_old": 8.25,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45636",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x32",
+   "szer_old": 12.4,
+   "szer_new": 32,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45461",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x15",
+   "szer_old": 8.25,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45351",
+   "dostawca": "MO9",
+   "rozmiar": "27x10-15.3",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45148",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x28",
+   "szer_old": 9.5,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45126",
+   "dostawca": "MO9",
+   "rozmiar": "26.5x14.00-12",
+   "szer_old": 26.5,
+   "szer_new": 14,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_45077",
+   "dostawca": "MO9",
+   "rozmiar": "26x12-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_44997",
+   "dostawca": "MO9",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_44559",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x18",
+   "szer_old": 7.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_44496",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x24",
+   "szer_old": 8.3,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_43783",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x18",
+   "szer_old": 9.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_43560",
+   "dostawca": "MO9",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_43429",
+   "dostawca": "MO9",
+   "rozmiar": "4.00x12",
+   "szer_old": 4,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_43233",
+   "dostawca": "MO9",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_43031",
+   "dostawca": "MO9",
+   "rozmiar": "18.00x25",
+   "szer_old": 18,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_42978",
+   "dostawca": "MO9",
+   "rozmiar": "250x15",
+   "szer_old": 250,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_42923",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x36",
+   "szer_old": 12.4,
+   "szer_new": 36,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_42841",
+   "dostawca": "MO9",
+   "rozmiar": "31x15.5-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_42728",
+   "dostawca": "MO9",
+   "rozmiar": "20x10-10",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_42154",
+   "dostawca": "MO9",
+   "rozmiar": "14.00x24",
+   "szer_old": 14,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_41836",
+   "dostawca": "MO9",
+   "rozmiar": "10x16.5",
+   "szer_old": 10,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_41679",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x22",
+   "szer_old": 9.5,
+   "szer_new": 22,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_41483",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x16",
+   "szer_old": 7.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_41346",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x19",
+   "szer_old": 6,
+   "szer_new": 19,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_41314",
+   "dostawca": "MO9",
+   "rozmiar": "12.5x18",
+   "szer_old": 12.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_40776",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x36",
+   "szer_old": 13.6,
+   "szer_new": 36,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_40292",
+   "dostawca": "MO9",
+   "rozmiar": "14.5x20",
+   "szer_old": 14.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_40078",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x24",
+   "szer_old": 16.9,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_39768",
+   "dostawca": "MO9",
+   "rozmiar": "27x8.5-15",
+   "szer_old": 27,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_39369",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_39331",
+   "dostawca": "MO9",
+   "rozmiar": "4.50x16",
+   "szer_old": 4.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_39190",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x24",
+   "szer_old": 16.9,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_39175",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x28",
+   "szer_old": 16.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_38951",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x24",
+   "szer_old": 8.3,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_38863",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_38580",
+   "dostawca": "MO9",
+   "rozmiar": "11x4.00-5",
+   "szer_old": 11,
+   "szer_new": 4,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_38369",
+   "dostawca": "MO9",
+   "rozmiar": "20x10-8",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_38131",
+   "dostawca": "MO9",
+   "rozmiar": "31.5x13-16.5",
+   "szer_old": 31.5,
+   "szer_new": 13,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_37974",
+   "dostawca": "MO9",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_37626",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x16",
+   "szer_old": 9.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_37513",
+   "dostawca": "MO9",
+   "rozmiar": "20.8x38",
+   "szer_old": 20.8,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_36668",
+   "dostawca": "MO9",
+   "rozmiar": "4.00x19",
+   "szer_old": 4,
+   "szer_new": 19,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_36491",
+   "dostawca": "MO9",
+   "rozmiar": "13.6x38",
+   "szer_old": 13.6,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_36309",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x26",
+   "szer_old": 23.1,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_36226",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x30",
+   "szer_old": 16.9,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_36067",
+   "dostawca": "MO9",
+   "rozmiar": "18x8.5-10",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_35199",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x26",
+   "szer_old": 14.9,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_34810",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x15",
+   "szer_old": 7.5,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_34669",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x15",
+   "szer_old": 7,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_34602",
+   "dostawca": "MO9",
+   "rozmiar": "11.00x20",
+   "szer_old": 11,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_34461",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x16",
+   "szer_old": 6,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_34250",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x38",
+   "szer_old": 12.4,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_34172",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x28",
+   "szer_old": 8.3,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_33947",
+   "dostawca": "MO9",
+   "rozmiar": "18.00x25",
+   "szer_old": 18,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_33713",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x22",
+   "szer_old": 9.5,
+   "szer_new": 22,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_33325",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x12",
+   "szer_old": 5,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_33267",
+   "dostawca": "MO9",
+   "rozmiar": "18.00x33",
+   "szer_old": 18,
+   "szer_new": 33,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_32899",
+   "dostawca": "MO9",
+   "rozmiar": "12.5x18",
+   "szer_old": 12.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_32529",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_31862",
+   "dostawca": "MO9",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_31466",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x24",
+   "szer_old": 14.9,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_31296",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x16",
+   "szer_old": 6,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_31282",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x20",
+   "szer_old": 7.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_30604",
+   "dostawca": "MO9",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_30599",
+   "dostawca": "MO9",
+   "rozmiar": "20.5x25",
+   "szer_old": 20.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_30305",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_30276",
+   "dostawca": "MO9",
+   "rozmiar": "17.5x25",
+   "szer_old": 17.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_29671",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_29613",
+   "dostawca": "MO9",
+   "rozmiar": "10.5x20",
+   "szer_old": 10.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_29447",
+   "dostawca": "MO9",
+   "rozmiar": "23x8.5-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_29301",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x36",
+   "szer_old": 8.3,
+   "szer_new": 36,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_29113",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_28945",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x28",
+   "szer_old": 12.4,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_28889",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x16",
+   "szer_old": 6,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_28879",
+   "dostawca": "MO9",
+   "rozmiar": "12x16.5",
+   "szer_old": 12,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_28824",
+   "dostawca": "MO9",
+   "rozmiar": "1050/50R32",
+   "szer_old": 50,
+   "szer_new": 1050,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO9_28771",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_28497",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x20",
+   "szer_old": 7.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_27582",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x26",
+   "szer_old": 18.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_27491",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_27435",
+   "dostawca": "MO9",
+   "rozmiar": "23.5x25",
+   "szer_old": 23.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_27416",
+   "dostawca": "MO9",
+   "rozmiar": "23.5x25",
+   "szer_old": 23.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_27304",
+   "dostawca": "MO9",
+   "rozmiar": "1050/50R32",
+   "szer_old": 50,
+   "szer_new": 1050,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO9_27196",
+   "dostawca": "MO9",
+   "rozmiar": "15.5x25",
+   "szer_old": 15.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_27152",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x16",
+   "szer_old": 9.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_27068",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x28",
+   "szer_old": 12.4,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_26836",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x15",
+   "szer_old": 7,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_26807",
+   "dostawca": "MO9",
+   "rozmiar": "23x10-12",
+   "szer_old": 23,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_26704",
+   "dostawca": "MO9",
+   "rozmiar": "4.00x16",
+   "szer_old": 4,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_26641",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x30",
+   "szer_old": 23.1,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_26425",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_26058",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_25823",
+   "dostawca": "MO9",
+   "rozmiar": "26x12-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_25637",
+   "dostawca": "MO9",
+   "rozmiar": "33x12.5-15",
+   "szer_old": 33,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_25629",
+   "dostawca": "MO9",
+   "rozmiar": "12.5x20",
+   "szer_old": 12.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_25484",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x24",
+   "szer_old": 9.5,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_24441",
+   "dostawca": "MO9",
+   "rozmiar": "5.50x16",
+   "szer_old": 5.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_24282",
+   "dostawca": "MO9",
+   "rozmiar": "31x15.5-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_24102",
+   "dostawca": "MO9",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_24024",
+   "dostawca": "MO9",
+   "rozmiar": "20x24",
+   "szer_old": 20,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_23841",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x16",
+   "szer_old": 7.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_23391",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x20",
+   "szer_old": 8.3,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_23238",
+   "dostawca": "MO9",
+   "rozmiar": "14x17.5",
+   "szer_old": 14,
+   "szer_new": 17.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_23150",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x20",
+   "szer_old": 6.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_23018",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_22661",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x30",
+   "szer_old": 18.4,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_22343",
+   "dostawca": "MO9",
+   "rozmiar": "11.2x24",
+   "szer_old": 11.2,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_22128",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x30",
+   "szer_old": 16.9,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_21689",
+   "dostawca": "MO9",
+   "rozmiar": "17.5x25",
+   "szer_old": 17.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_20573",
+   "dostawca": "MO9",
+   "rozmiar": "33x15.5-15",
+   "szer_old": 33,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_20515",
+   "dostawca": "MO9",
+   "rozmiar": "18x22.5",
+   "szer_old": 18,
+   "szer_new": 22.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_20480",
+   "dostawca": "MO9",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_20445",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x34",
+   "szer_old": 18.4,
+   "szer_new": 34,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_20425",
+   "dostawca": "MO9",
+   "rozmiar": "31x15.5-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_20335",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x15",
+   "szer_old": 5,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_19912",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x24",
+   "szer_old": 9.5,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_19800",
+   "dostawca": "MO9",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_19593",
+   "dostawca": "MO9",
+   "rozmiar": "12.00x20",
+   "szer_old": 12,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_19491",
+   "dostawca": "MO9",
+   "rozmiar": "11.2x26",
+   "szer_old": 11.2,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_19136",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x18",
+   "szer_old": 7.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_19085",
+   "dostawca": "MO9",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_18727",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x26",
+   "szer_old": 18.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_18687",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x20",
+   "szer_old": 12.4,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_18261",
+   "dostawca": "MO9",
+   "rozmiar": "24x13.00-12",
+   "szer_old": 24,
+   "szer_new": 13,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_18179",
+   "dostawca": "MO9",
+   "rozmiar": "11.00x20",
+   "szer_old": 11,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_18043",
+   "dostawca": "MO9",
+   "rozmiar": "10.00x20",
+   "szer_old": 10,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_18025",
+   "dostawca": "MO9",
+   "rozmiar": "28x12.5-15",
+   "szer_old": 28,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_17796",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x26",
+   "szer_old": 18.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_17462",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x28",
+   "szer_old": 16.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_17265",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x15",
+   "szer_old": 8.25,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_17167",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x18",
+   "szer_old": 6,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_17065",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x24",
+   "szer_old": 16.9,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_17033",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x28",
+   "szer_old": 16.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_16565",
+   "dostawca": "MO9",
+   "rozmiar": "5x12",
+   "szer_old": 5,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_16484",
+   "dostawca": "MO9",
+   "rozmiar": "7x14",
+   "szer_old": 7,
+   "szer_new": 14,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_16483",
+   "dostawca": "MO9",
+   "rozmiar": "20x12.00",
+   "szer_old": 20,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_16289",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x30",
+   "szer_old": 16.9,
+   "szer_new": 30,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_15755",
+   "dostawca": "MO9",
+   "rozmiar": "18x9.5-8",
+   "szer_old": 18,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_15564",
+   "dostawca": "MO9",
+   "rozmiar": "12x16.5",
+   "szer_old": 12,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_15511",
+   "dostawca": "MO9",
+   "rozmiar": "18.00x25",
+   "szer_old": 18,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_15237",
+   "dostawca": "MO9",
+   "rozmiar": "250x15",
+   "szer_old": 250,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_15098",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x28",
+   "szer_old": 16.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_14957",
+   "dostawca": "MO9",
+   "rozmiar": "20.5x25",
+   "szer_old": 20.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_14831",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x18",
+   "szer_old": 7.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_14649",
+   "dostawca": "MO9",
+   "rozmiar": "23x10-12",
+   "szer_old": 23,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_14475",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x9",
+   "szer_old": 6,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_14275",
+   "dostawca": "MO9",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_14028",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_13970",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x42",
+   "szer_old": 9.5,
+   "szer_new": 42,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_13725",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x15",
+   "szer_old": 8.25,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_13671",
+   "dostawca": "MO9",
+   "rozmiar": "10.00x16",
+   "szer_old": 10,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_13339",
+   "dostawca": "MO9",
+   "rozmiar": "4.00x15",
+   "szer_old": 4,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_13090",
+   "dostawca": "MO9",
+   "rozmiar": "7.00x12",
+   "szer_old": 7,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_12971",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x15",
+   "szer_old": 5,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_12889",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x20",
+   "szer_old": 8.3,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_12866",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x28",
+   "szer_old": 16.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_12840",
+   "dostawca": "MO9",
+   "rozmiar": "7x16",
+   "szer_old": 7,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_12719",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x16",
+   "szer_old": 5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_12525",
+   "dostawca": "MO9",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_11374",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x9",
+   "szer_old": 6,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_11344",
+   "dostawca": "MO9",
+   "rozmiar": "14.5x20",
+   "szer_old": 14.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_11295",
+   "dostawca": "MO9",
+   "rozmiar": "12.5x20",
+   "szer_old": 12.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_11160",
+   "dostawca": "MO9",
+   "rozmiar": "10.5x18",
+   "szer_old": 10.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_11037",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x26",
+   "szer_old": 12.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_10796",
+   "dostawca": "MO9",
+   "rozmiar": "18.4x26",
+   "szer_old": 18.4,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_10663",
+   "dostawca": "MO9",
+   "rozmiar": "15x4.5-8",
+   "szer_old": 15,
+   "szer_new": 4.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_10516",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x38",
+   "szer_old": 16.9,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_10342",
+   "dostawca": "MO9",
+   "rozmiar": "300x15",
+   "szer_old": 300,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_10237",
+   "dostawca": "MO9",
+   "rozmiar": "33x15.5-16.5",
+   "szer_old": 33,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_10163",
+   "dostawca": "MO9",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_9965",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x16",
+   "szer_old": 6.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_9746",
+   "dostawca": "MO9",
+   "rozmiar": "29.5x25",
+   "szer_old": 29.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_9441",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x9",
+   "szer_old": 6,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_9309",
+   "dostawca": "MO9",
+   "rozmiar": "6.00x9",
+   "szer_old": 6,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_8663",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_8435",
+   "dostawca": "MO9",
+   "rozmiar": "70x16",
+   "szer_old": 70,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7726",
+   "dostawca": "MO9",
+   "rozmiar": "25x8.5-14",
+   "szer_old": 25,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7632",
+   "dostawca": "MO9",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7492",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x15",
+   "szer_old": 5,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7459",
+   "dostawca": "MO9",
+   "rozmiar": "23.1x26",
+   "szer_old": 23.1,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7445",
+   "dostawca": "MO9",
+   "rozmiar": "10.00x20",
+   "szer_old": 10,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7384",
+   "dostawca": "MO9",
+   "rozmiar": "5.00x8",
+   "szer_old": 5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7297",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x16",
+   "szer_old": 7.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7078",
+   "dostawca": "MO9",
+   "rozmiar": "11.2x28",
+   "szer_old": 11.2,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_6880",
+   "dostawca": "MO9",
+   "rozmiar": "20x10.00-10",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_6823",
+   "dostawca": "MO9",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_6701",
+   "dostawca": "MO9",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_6264",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x20",
+   "szer_old": 7.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_5646",
+   "dostawca": "MO9",
+   "rozmiar": "14.9x28",
+   "szer_old": 14.9,
+   "szer_new": 28,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_5589",
+   "dostawca": "MO9",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_5569",
+   "dostawca": "MO9",
+   "rozmiar": "15.5x38",
+   "szer_old": 15.5,
+   "szer_new": 38,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_5489",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x10",
+   "szer_old": 6.5,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_5345",
+   "dostawca": "MO9",
+   "rozmiar": "11.00x16",
+   "szer_old": 11,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_5229",
+   "dostawca": "MO9",
+   "rozmiar": "12x16.5",
+   "szer_old": 12,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_4929",
+   "dostawca": "MO9",
+   "rozmiar": "12.4x24",
+   "szer_old": 12.4,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_4578",
+   "dostawca": "MO9",
+   "rozmiar": "20.5x25",
+   "szer_old": 20.5,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_4559",
+   "dostawca": "MO9",
+   "rozmiar": "12.5x20",
+   "szer_old": 12.5,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_4238",
+   "dostawca": "MO9",
+   "rozmiar": "14.00x25",
+   "szer_old": 14,
+   "szer_new": 25,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_4141",
+   "dostawca": "MO9",
+   "rozmiar": "31x15.5-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_4033",
+   "dostawca": "MO9",
+   "rozmiar": "8x18",
+   "szer_old": 8,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_3901",
+   "dostawca": "MO9",
+   "rozmiar": "12.00x24",
+   "szer_old": 12,
+   "szer_new": 24,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_3743",
+   "dostawca": "MO9",
+   "rozmiar": "10x16.5",
+   "szer_old": 10,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_3439",
+   "dostawca": "MO9",
+   "rozmiar": "80x15",
+   "szer_old": 80,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_3422",
+   "dostawca": "MO9",
+   "rozmiar": "8x16",
+   "szer_old": 8,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_3277",
+   "dostawca": "MO9",
+   "rozmiar": "6x14",
+   "szer_old": 6,
+   "szer_new": 14,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_3239",
+   "dostawca": "MO9",
+   "rozmiar": "250x15",
+   "szer_old": 250,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_3003",
+   "dostawca": "MO9",
+   "rozmiar": "10.5x16",
+   "szer_old": 10.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_2837",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x32",
+   "szer_old": 8.3,
+   "szer_new": 32,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_2780",
+   "dostawca": "MO9",
+   "rozmiar": "9.5x32",
+   "szer_old": 9.5,
+   "szer_new": 32,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_2703",
+   "dostawca": "MO9",
+   "rozmiar": "16.9x26",
+   "szer_old": 16.9,
+   "szer_new": 26,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_2645",
+   "dostawca": "MO9",
+   "rozmiar": "8.3x22",
+   "szer_old": 8.3,
+   "szer_new": 22,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_2393",
+   "dostawca": "MO9",
+   "rozmiar": "8.15x15",
+   "szer_old": 8.15,
+   "szer_new": 15,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_2361",
+   "dostawca": "MO9",
+   "rozmiar": "27x10.5-15",
+   "szer_old": 27,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_1987",
+   "dostawca": "MO9",
+   "rozmiar": "18x19.5",
+   "szer_old": 18,
+   "szer_new": 19.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_855",
+   "dostawca": "MO9",
+   "rozmiar": "12x16.5",
+   "szer_old": 12,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_628",
+   "dostawca": "MO9",
+   "rozmiar": "12.5x18",
+   "szer_old": 12.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_389",
+   "dostawca": "MO9",
+   "rozmiar": "6.50x16",
+   "szer_old": 6.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_266",
+   "dostawca": "MO9",
+   "rozmiar": "10.5x18",
+   "szer_old": 10.5,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_262",
+   "dostawca": "MO9",
+   "rozmiar": "7.50x16",
+   "szer_old": 7.5,
+   "szer_new": 16,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO9_7",
+   "dostawca": "MO9",
+   "rozmiar": "8.25x20",
+   "szer_old": 8.25,
+   "szer_new": 20,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRRD150E70000TCT0",
+   "dostawca": "MO5",
+   "rozmiar": "690x180-15",
+   "szer_old": 690,
+   "szer_new": 180,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRRD14016000452T1",
+   "dostawca": "MO5",
+   "rozmiar": "645x160-14",
+   "szer_old": 645,
+   "szer_new": 160,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRRD13014500452T1",
+   "dostawca": "MO5",
+   "rozmiar": "610x145-13",
+   "szer_old": 610,
+   "szer_new": 145,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRRD12014000452T1",
+   "dostawca": "MO5",
+   "rozmiar": "560x140-12",
+   "szer_old": 560,
+   "szer_new": 140,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRRD080191000TDR0",
+   "dostawca": "MO5",
+   "rozmiar": "18x9.50-8",
+   "szer_old": 18,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRRD040114000T7S0",
+   "dostawca": "MO5",
+   "rozmiar": "11x4.00-4",
+   "szer_old": 11,
+   "szer_new": 4,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRPD150291002SK90",
+   "dostawca": "MO5",
+   "rozmiar": "29x12.50-15",
+   "szer_old": 29,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRPD150278002SK80",
+   "dostawca": "MO5",
+   "rozmiar": "27x8.50-15",
+   "szer_old": 27,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_TRPD120D85002SK90",
+   "dostawca": "MO5",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_OZRD280G69006KNK0",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-28",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OZRD240G24006KNK1",
+   "dostawca": "MO5",
+   "rozmiar": "12.4-24",
+   "szer_old": 315,
+   "szer_new": 12.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD380G69006SA81",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-38",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD360G24006SA80",
+   "dostawca": "MO5",
+   "rozmiar": "12.4-36",
+   "szer_old": 315,
+   "szer_new": 12.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD340G84006SA80",
+   "dostawca": "MO5",
+   "rozmiar": "18.4-34",
+   "szer_old": 467.4,
+   "szer_new": 18.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD340G69006SA80",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-34",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD240G49006SA83",
+   "dostawca": "MO5",
+   "rozmiar": "14.9-24",
+   "szer_old": 378.5,
+   "szer_new": 14.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD240G49006SA81",
+   "dostawca": "MO5",
+   "rozmiar": "14.9-24",
+   "szer_old": 378.5,
+   "szer_new": 14.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD240D95006SA81",
+   "dostawca": "MO5",
+   "rozmiar": "9.5-24",
+   "szer_old": 241.3,
+   "szer_new": 9.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD200G12006SA80",
+   "dostawca": "MO5",
+   "rozmiar": "11.2-20",
+   "szer_old": 284.5,
+   "szer_new": 11.2,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD200E75006SA30",
+   "dostawca": "MO5",
+   "rozmiar": "7.50-20",
+   "szer_old": 190.5,
+   "szer_new": 7.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD200E65006SA30",
+   "dostawca": "MO5",
+   "rozmiar": "6.50-20",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD200A82006TN50",
+   "dostawca": "MO5",
+   "rozmiar": "8.25-20",
+   "szer_old": 209.6,
+   "szer_new": 8.25,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD160E60006SA50",
+   "dostawca": "MO5",
+   "rozmiar": "6.00-16",
+   "szer_old": 152.4,
+   "szer_new": 6,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD150E65806SA80",
+   "dostawca": "MO5",
+   "rozmiar": "6.50/80-15",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_OTRD150E50006T6B0",
+   "dostawca": "MO5",
+   "rozmiar": "5.00-15",
+   "szer_old": 127,
+   "szer_new": 5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD120E70006T440",
+   "dostawca": "MO5",
+   "rozmiar": "7.00-12",
+   "szer_old": 177.8,
+   "szer_new": 7,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTPD240H40008GD90",
+   "dostawca": "MO5",
+   "rozmiar": "14.00-24",
+   "szer_old": 355.6,
+   "szer_new": 14,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTPD200H00008LD91",
+   "dostawca": "MO5",
+   "rozmiar": "10.00-20",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTPD200G60708LD00",
+   "dostawca": "MO5",
+   "rozmiar": "16.0/70-20",
+   "szer_old": 406.4,
+   "szer_new": 16,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_OTPD200405702LD60",
+   "dostawca": "MO5",
+   "rozmiar": "16.0/70-20",
+   "szer_old": 406.4,
+   "szer_new": 16,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_OTPD160E6500LKM40",
+   "dostawca": "MO5",
+   "rozmiar": "6.50-16",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_MIRD150180008TS70",
+   "dostawca": "MO5",
+   "rozmiar": "690x180-15",
+   "szer_old": 690,
+   "szer_new": 180,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIRD080F18000B633",
+   "dostawca": "MO5",
+   "rozmiar": "18.5x8.50-8",
+   "szer_old": 18.5,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIRD080F16000B195",
+   "dostawca": "MO5",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIRD080189000MG11",
+   "dostawca": "MO5",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIRD06013A000MG11",
+   "dostawca": "MO5",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIRD06013A000B1S1",
+   "dostawca": "MO5",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIRD06013A000B193",
+   "dostawca": "MO5",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIPD150311008SK00",
+   "dostawca": "MO5",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIPD120D85004SK20",
+   "dostawca": "MO5",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080F16004LWG0",
+   "dostawca": "MO5",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080F16004IP60",
+   "dostawca": "MO5",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080F160040001",
+   "dostawca": "MO5",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080F160040000",
+   "dostawca": "MO5",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080189004LWG2",
+   "dostawca": "MO5",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080189004LWG0",
+   "dostawca": "MO5",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080189004IP62",
+   "dostawca": "MO5",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD080189004IP60",
+   "dostawca": "MO5",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD060156004LWG1",
+   "dostawca": "MO5",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD060156004IP62",
+   "dostawca": "MO5",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD060156004IP60",
+   "dostawca": "MO5",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD050K30006IP82",
+   "dostawca": "MO5",
+   "rozmiar": "23x5",
+   "szer_old": 23,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_KARD050K30006IP80",
+   "dostawca": "MO5",
+   "rozmiar": "23x5",
+   "szer_old": 23,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLRD380G69006MR20",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-38",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD340G84008MR20",
+   "dostawca": "MO5",
+   "rozmiar": "18.4-34",
+   "szer_old": 467.4,
+   "szer_new": 18.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD340G69006MR20",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-34",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD320G24006MR20",
+   "dostawca": "MO5",
+   "rozmiar": "12.4-32",
+   "szer_old": 315,
+   "szer_new": 12.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD300G69006MR21",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-30",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD280G69006MR20",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-28",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD280G49006MR20",
+   "dostawca": "MO5",
+   "rozmiar": "14.9-28",
+   "szer_old": 378.5,
+   "szer_new": 14.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD280G24006MR22",
+   "dostawca": "MO5",
+   "rozmiar": "12.4-28",
+   "szer_old": 315,
+   "szer_new": 12.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD280G12008MR20",
+   "dostawca": "MO5",
+   "rozmiar": "11.2-28",
+   "szer_old": 284.5,
+   "szer_new": 11.2,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD240G55808MI31",
+   "dostawca": "MO5",
+   "rozmiar": "15.5/80-24",
+   "szer_old": 393.7,
+   "szer_new": 15.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD240G36006MR21",
+   "dostawca": "MO5",
+   "rozmiar": "13.6-24",
+   "szer_old": 345.4,
+   "szer_new": 13.6,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD240G24006MR20",
+   "dostawca": "MO5",
+   "rozmiar": "12.4-24",
+   "szer_old": 315,
+   "szer_new": 12.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD200E75006M222",
+   "dostawca": "MO5",
+   "rozmiar": "7.50-20",
+   "szer_old": 190.5,
+   "szer_new": 7.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD160E65006MI30",
+   "dostawca": "MO5",
+   "rozmiar": "6.50-16",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD160E50006MF20",
+   "dostawca": "MO5",
+   "rozmiar": "5.00-16",
+   "szer_old": 127,
+   "szer_new": 5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD160E40008MI31",
+   "dostawca": "MO5",
+   "rozmiar": "4.00-16",
+   "szer_old": 101.6,
+   "szer_new": 4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD153G15808MA06",
+   "dostawca": "MO5",
+   "rozmiar": "11.5/80-15.3",
+   "szer_old": 292.1,
+   "szer_new": 11.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD153G10758MI33",
+   "dostawca": "MO5",
+   "rozmiar": "10.0/75-15.3",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD153G10758MI30",
+   "dostawca": "MO5",
+   "rozmiar": "10.0/75-15.3",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD153G10758MA04",
+   "dostawca": "MO5",
+   "rozmiar": "10.0/75-15.3",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD153G10758MA00",
+   "dostawca": "MO5",
+   "rozmiar": "10.0/75-15.3",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD153G10756MA01",
+   "dostawca": "MO5",
+   "rozmiar": "10.0/75-15.3",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD150H5500BM600",
+   "dostawca": "MO5",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLRD120G10808MA00",
+   "dostawca": "MO5",
+   "rozmiar": "10.0/80-12",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLRD120E50006MRT1",
+   "dostawca": "MO5",
+   "rozmiar": "5.00-12",
+   "szer_old": 127,
+   "szer_new": 5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD12023X0036TR0",
+   "dostawca": "MO5",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLRD120238006MG50",
+   "dostawca": "MO5",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLRD120212003M600",
+   "dostawca": "MO5",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLRD090E600027MT0",
+   "dostawca": "MO5",
+   "rozmiar": "6.00-9",
+   "szer_old": 152.4,
+   "szer_new": 6,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLRD080F16003MG50",
+   "dostawca": "MO5",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLPD260G84008MTL0",
+   "dostawca": "MO5",
+   "rozmiar": "18.4-26",
+   "szer_old": 467.4,
+   "szer_new": 18.4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLPD250G55008MG80",
+   "dostawca": "MO5",
+   "rozmiar": "15.5-25",
+   "szer_old": 393.7,
+   "szer_new": 15.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLPD240H40008MGM2",
+   "dostawca": "MO5",
+   "rozmiar": "14.00-24",
+   "szer_old": 355.6,
+   "szer_new": 14,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLPD240G69008MTL0",
+   "dostawca": "MO5",
+   "rozmiar": "16.9-24",
+   "szer_old": 429.3,
+   "szer_new": 16.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_HLPD200G60708MTL0",
+   "dostawca": "MO5",
+   "rozmiar": "16.0/70-20",
+   "szer_old": 406.4,
+   "szer_new": 16,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLPD180G25808ATU2",
+   "dostawca": "MO5",
+   "rozmiar": "12.5/80-18",
+   "szer_old": 317.5,
+   "szer_new": 12.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_HLPD180G25808ATU0",
+   "dostawca": "MO5",
+   "rozmiar": "12.5/80-18",
+   "szer_old": 317.5,
+   "szer_new": 12.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO4_TRPD120D85002SK90",
+   "dostawca": "MO4",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_OZRD160E60006KN40",
+   "dostawca": "MO4",
+   "rozmiar": "6.00-16",
+   "szer_old": 152.4,
+   "szer_new": 6,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO4_MIRD080F18000B633",
+   "dostawca": "MO4",
+   "rozmiar": "18.5x8.50-8",
+   "szer_old": 18.5,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_MIRD080F16000B195",
+   "dostawca": "MO4",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_MIRD06013A000MG11",
+   "dostawca": "MO4",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_MIRD06013A000B1S1",
+   "dostawca": "MO4",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_MIRD06013A000B193",
+   "dostawca": "MO4",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD080F16004LWG0",
+   "dostawca": "MO4",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD080F160040001",
+   "dostawca": "MO4",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD080F160040000",
+   "dostawca": "MO4",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD080189004LWG2",
+   "dostawca": "MO4",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD080189004LWG0",
+   "dostawca": "MO4",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD060156004LWG1",
+   "dostawca": "MO4",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD060156004IP62",
+   "dostawca": "MO4",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD060156004IP60",
+   "dostawca": "MO4",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD050K30006IP82",
+   "dostawca": "MO4",
+   "rozmiar": "23x5",
+   "szer_old": 23,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD050K30006IP80",
+   "dostawca": "MO4",
+   "rozmiar": "23x5",
+   "szer_old": 23,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_HLRD280G49006MR21",
+   "dostawca": "MO4",
+   "rozmiar": "14.9-28",
+   "szer_old": 378.5,
+   "szer_new": 14.9,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO4_HLRD200E75006M222",
+   "dostawca": "MO4",
+   "rozmiar": "7.50-20",
+   "szer_old": 190.5,
+   "szer_new": 7.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO4_HLRD153G15808MA06",
+   "dostawca": "MO4",
+   "rozmiar": "11.5/80-15.3",
+   "szer_old": 292.1,
+   "szer_new": 11.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO4_HLRD153G10758MA00",
+   "dostawca": "MO4",
+   "rozmiar": "10.0/75-15.3",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO4_HLRD150H5500BM600",
+   "dostawca": "MO4",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_HLRD120G10808MA00",
+   "dostawca": "MO4",
+   "rozmiar": "10.0/80-12",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO4_HLRD1202X10036TR0",
+   "dostawca": "MO4",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_HLRD12023X0036TR0",
+   "dostawca": "MO4",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 2310,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_HLRD120238006MG50",
+   "dostawca": "MO4",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_HLRD080F16003MG50",
+   "dostawca": "MO4",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_HLRD080189003MGC0",
+   "dostawca": "MO4",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2385012J",
+   "dostawca": "MO3",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_29125015Jp332",
+   "dostawca": "MO3",
+   "rozmiar": "29x12.50-15",
+   "szer_old": 29,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_156006J5086",
+   "dostawca": "MO3",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_31155015BR",
+   "dostawca": "MO3",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_27105015J3328",
+   "dostawca": "MO3",
+   "rozmiar": "27x10.50-15",
+   "szer_old": 27,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_26120012Jou3326",
+   "dostawca": "MO3",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_31135015Jp332",
+   "dostawca": "MO3",
+   "rozmiar": "31x13.50-15",
+   "szer_old": 31,
+   "szer_new": 13.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_31155015BKTtr10",
+   "dostawca": "MO3",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_114005J",
+   "dostawca": "MO3",
+   "rozmiar": "11x4.00-5",
+   "szer_old": 11,
+   "szer_new": 4,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_23105012J328",
+   "dostawca": "MO3",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2485014Jp332",
+   "dostawca": "MO3",
+   "rozmiar": "24x8.50-14",
+   "szer_old": 24,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_166508J3326",
+   "dostawca": "MO3",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_41140020J3324",
+   "dostawca": "MO3",
+   "rozmiar": "41x14.00-20",
+   "szer_old": 41,
+   "szer_new": 14,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2385012Jh85018",
+   "dostawca": "MO3",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_6508015AA-324",
+   "dostawca": "MO3",
+   "rozmiar": "6.50/80-15",
+   "szer_old": 50,
+   "szer_new": 6.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO3_1885010BKT",
+   "dostawca": "MO3",
+   "rozmiar": "18x8.50-10",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2485014BKTLG3064",
+   "dostawca": "MO3",
+   "rozmiar": "24x8.50-14",
+   "szer_old": 24,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_55016BKT",
+   "dostawca": "MO3",
+   "rozmiar": "5.50-16",
+   "szer_old": 139.7,
+   "szer_new": 5.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO3_65016BKTTF81818",
+   "dostawca": "MO3",
+   "rozmiar": "6.50-16",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO3_26120012BKTSPHD12",
+   "dostawca": "MO3",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_31155015BKTsphd",
+   "dostawca": "MO3",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_27105015BKTLG30612",
+   "dostawca": "MO3",
+   "rozmiar": "27x10.50-15",
+   "szer_old": 27,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_658015BKT",
+   "dostawca": "MO3",
+   "rozmiar": "6.5/80-15",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO3_26120012BKTtr",
+   "dostawca": "MO3",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_23513TR",
+   "dostawca": "MO3",
+   "rozmiar": "23x5-13",
+   "szer_old": 23,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2385012BKTTR3156",
+   "dostawca": "MO3",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_235Kabat",
+   "dostawca": "MO3",
+   "rozmiar": "23x5",
+   "szer_old": 23,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_23105012TR",
+   "dostawca": "MO3",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_658012BKTAS6TT",
+   "dostawca": "MO3",
+   "rozmiar": "6.5/80-12",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO3_1507018BKT",
+   "dostawca": "MO3",
+   "rozmiar": "15.0/70-18",
+   "szer_old": 381,
+   "szer_new": 15,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO3_26120012BKTLG30614",
+   "dostawca": "MO3",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_188508BKTSkidPowerHD",
+   "dostawca": "MO3",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2385012TR",
+   "dostawca": "MO3",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_27105015BKTSkidPower",
+   "dostawca": "MO3",
+   "rozmiar": "27x10.50-15",
+   "szer_old": 27,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2585014BKT",
+   "dostawca": "MO3",
+   "rozmiar": "25x8.50-14",
+   "szer_old": 25,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_2495014joup3326",
+   "dostawca": "MO3",
+   "rozmiar": "24x9.50-14",
+   "szer_old": 24,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_1885010JouH85018",
+   "dostawca": "MO3",
+   "rozmiar": "18x8.50-10",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_166508joup508a10",
+   "dostawca": "MO3",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_31155015a3328",
+   "dostawca": "MO3",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_188508jh85018",
+   "dostawca": "MO3",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_188508jp3284",
+   "dostawca": "MO3",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_114004kk5004",
+   "dostawca": "MO3",
+   "rozmiar": "11x4.00-4",
+   "szer_old": 11,
+   "szer_new": 4,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_22110010joup3286",
+   "dostawca": "MO3",
+   "rozmiar": "22x11.00-10",
+   "szer_old": 22,
+   "szer_new": 11,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_26120016J",
+   "dostawca": "MO3",
+   "rozmiar": "26x12.00-16",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_81515bkt",
+   "dostawca": "MO3",
+   "rozmiar": "28x9-15",
+   "szer_old": 28,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_ULT00005",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_S10166415223",
+   "dostawca": "MO2",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_S10166415113",
+   "dostawca": "MO2",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_P869208318",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_P861208318",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_P854168318",
+   "dostawca": "MO2",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_P848168318",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_P845168318",
+   "dostawca": "MO2",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_KOIM81885062T",
+   "dostawca": "MO2",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_KOIM81885062L",
+   "dostawca": "MO2",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_KOIM81885061T",
+   "dostawca": "MO2",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_KOIM81665061L",
+   "dostawca": "MO2",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_KOIM61560061T",
+   "dostawca": "MO2",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_KOIM61560061L",
+   "dostawca": "MO2",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00404",
+   "dostawca": "MO2",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00342",
+   "dostawca": "MO2",
+   "rozmiar": "20.5x8.00-10",
+   "szer_old": 20.5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00341",
+   "dostawca": "MO2",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00325",
+   "dostawca": "MO2",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00255",
+   "dostawca": "MO2",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00223",
+   "dostawca": "MO2",
+   "rozmiar": "27x8.50-15",
+   "szer_old": 27,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00181",
+   "dostawca": "MO2",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00136",
+   "dostawca": "MO2",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00135",
+   "dostawca": "MO2",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00134",
+   "dostawca": "MO2",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_IND00133",
+   "dostawca": "MO2",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00159",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00154",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00152",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00148",
+   "dostawca": "MO2",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00142",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00113",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00111",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00109",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00097",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00095",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00086",
+   "dostawca": "MO2",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00084",
+   "dostawca": "MO2",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00083",
+   "dostawca": "MO2",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00082",
+   "dostawca": "MO2",
+   "rozmiar": "23x10-12",
+   "szer_old": 23,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00077",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00066",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00062",
+   "dostawca": "MO2",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00059",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_GLO00006",
+   "dostawca": "MO2",
+   "rozmiar": "16x6-8",
+   "szer_old": 16,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_AM84881685",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_999991669",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_999991606",
+   "dostawca": "MO2",
+   "rozmiar": "33x15.50-16.5",
+   "szer_old": 33,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_5001506710000",
+   "dostawca": "MO2",
+   "rozmiar": "28x9.00-15",
+   "szer_old": 28,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_5001506260000",
+   "dostawca": "MO2",
+   "rozmiar": "690x180-15",
+   "szer_old": 690,
+   "szer_new": 180,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_480150-33",
+   "dostawca": "MO2",
+   "rozmiar": "25x10.50-15",
+   "szer_old": 25,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_33201400AL-IN",
+   "dostawca": "MO2",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_3068180442090400",
+   "dostawca": "MO2",
+   "rozmiar": "44x18.00-20",
+   "szer_old": 44,
+   "szer_new": 18,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_256801-33",
+   "dostawca": "MO2",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_25029528",
+   "dostawca": "MO2",
+   "rozmiar": "8.25-20",
+   "szer_old": 209.6,
+   "szer_new": 8.25,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO2_25020825",
+   "dostawca": "MO2",
+   "rozmiar": "27x10.50-15",
+   "szer_old": 27,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_25020824",
+   "dostawca": "MO2",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_25020821",
+   "dostawca": "MO2",
+   "rozmiar": "27x8.50-15",
+   "szer_old": 27,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_22101404AL-IG",
+   "dostawca": "MO2",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_1E41Z280150005GS10",
+   "dostawca": "MO2",
+   "rozmiar": "28x9-15",
+   "szer_old": 28,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_1E41Z210090005GS20",
+   "dostawca": "MO2",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_1E3123101500800T20",
+   "dostawca": "MO2",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_1E3122501400600DX0",
+   "dostawca": "MO2",
+   "rozmiar": "25x8.50-14",
+   "szer_old": 25,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_152.11.646",
+   "dostawca": "MO2",
+   "rozmiar": "33x15.50-15",
+   "szer_old": 33,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13763840000",
+   "dostawca": "MO2",
+   "rozmiar": "28x9-15",
+   "szer_old": 28,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13763730000",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13763660000",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13763530000",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13763510000",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13763160000",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13760930000",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13760920000",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13760560000",
+   "dostawca": "MO2",
+   "rozmiar": "23x10-12",
+   "szer_old": 23,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13760540000",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13760530000",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13760520000",
+   "dostawca": "MO2",
+   "rozmiar": "21x8-9",
+   "szer_old": 21,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13219400",
+   "dostawca": "MO2",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_13219300",
+   "dostawca": "MO2",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_1168500",
+   "dostawca": "MO2",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_11606000",
+   "dostawca": "MO2",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_11605900",
+   "dostawca": "MO2",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_1147700",
+   "dostawca": "MO2",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_1014101010000",
+   "dostawca": "MO2",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_07300500000",
+   "dostawca": "MO2",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_07021800000",
+   "dostawca": "MO2",
+   "rozmiar": "28x9-15",
+   "szer_old": 28,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_07021360000",
+   "dostawca": "MO2",
+   "rozmiar": "27x10-12",
+   "szer_old": 27,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO2_07020880000",
+   "dostawca": "MO2",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO10_PMB1012",
+   "dostawca": "MO10",
+   "rozmiar": "23x9-10",
+   "szer_old": 23,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO10_PMB1001",
+   "dostawca": "MO10",
+   "rozmiar": "18x7-8",
+   "szer_old": 18,
+   "szer_new": 7,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO10_PCB1408",
+   "dostawca": "MO10",
+   "rozmiar": "31x15.5-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO10_PAB1354",
+   "dostawca": "MO10",
+   "rozmiar": "15.0/55-17",
+   "szer_old": 381,
+   "szer_new": 15,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO10_PAB1112",
+   "dostawca": "MO10",
+   "rozmiar": "7.50-20",
+   "szer_old": 190.5,
+   "szer_new": 7.5,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO8_10557200",
+   "dostawca": "MO8",
+   "rozmiar": "20x8.00-8",
+   "szer_old": 20,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6140200",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6140600",
+   "dostawca": "MO8",
+   "rozmiar": "18x7.50-8",
+   "szer_old": 18,
+   "szer_new": 7.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_11271200",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6140300",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_11680900",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_10576400",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6141100",
+   "dostawca": "MO8",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6140400",
+   "dostawca": "MO8",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6405000",
+   "dostawca": "MO8",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6140500",
+   "dostawca": "MO8",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1158900",
+   "dostawca": "MO8",
+   "rozmiar": "645x160-14",
+   "szer_old": 645,
+   "szer_new": 160,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1158800",
+   "dostawca": "MO8",
+   "rozmiar": "610x145-13",
+   "szer_old": 610,
+   "szer_new": 145,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1158700",
+   "dostawca": "MO8",
+   "rozmiar": "560x140-12",
+   "szer_old": 560,
+   "szer_new": 140,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_11233600",
+   "dostawca": "MO8",
+   "rozmiar": "16.5x6.5-8",
+   "szer_old": 16.5,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1148800",
+   "dostawca": "MO8",
+   "rozmiar": "16.5x6.5-8",
+   "szer_old": 16.5,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1159100",
+   "dostawca": "MO8",
+   "rozmiar": "4.10/3.50-6",
+   "szer_old": 104.1,
+   "szer_new": 4.1,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO8_1466500",
+   "dostawca": "MO8",
+   "rozmiar": "33x15.50-15",
+   "szer_old": 33,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1466400",
+   "dostawca": "MO8",
+   "rozmiar": "33x15.50-15",
+   "szer_old": 33,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1467400",
+   "dostawca": "MO8",
+   "rozmiar": "33x12.50-15",
+   "szer_old": 33,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1466700",
+   "dostawca": "MO8",
+   "rozmiar": "29x13.50-15",
+   "szer_old": 29,
+   "szer_new": 13.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1466600",
+   "dostawca": "MO8",
+   "rozmiar": "29x12.50-15",
+   "szer_old": 29,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1465800",
+   "dostawca": "MO8",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1444000",
+   "dostawca": "MO8",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1150400",
+   "dostawca": "MO8",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1150200",
+   "dostawca": "MO8",
+   "rozmiar": "20x8.00-10",
+   "szer_old": 20,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1444500",
+   "dostawca": "MO8",
+   "rozmiar": "20x10.00-8",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1443600",
+   "dostawca": "MO8",
+   "rozmiar": "20x8.00-8",
+   "szer_old": 20,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1443800",
+   "dostawca": "MO8",
+   "rozmiar": "18x9.50-8",
+   "szer_old": 18,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1155000",
+   "dostawca": "MO8",
+   "rozmiar": "18x9.50-8",
+   "szer_old": 18,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1149600",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1444400",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1194600",
+   "dostawca": "MO8",
+   "rozmiar": "18x7.50-8",
+   "szer_old": 18,
+   "szer_new": 7.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1159200",
+   "dostawca": "MO8",
+   "rozmiar": "16x7.50-8",
+   "szer_old": 16,
+   "szer_new": 7.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1443500",
+   "dostawca": "MO8",
+   "rozmiar": "16x7.50-8",
+   "szer_old": 16,
+   "szer_new": 7.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1442900",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6467500",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1444300",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1476300",
+   "dostawca": "MO8",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1169900",
+   "dostawca": "MO8",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1444200",
+   "dostawca": "MO8",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1298800",
+   "dostawca": "MO8",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1444100",
+   "dostawca": "MO8",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1148200",
+   "dostawca": "MO8",
+   "rozmiar": "11x4.00-4",
+   "szer_old": 11,
+   "szer_new": 4,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1467600",
+   "dostawca": "MO8",
+   "rozmiar": "23x5",
+   "szer_old": 23,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1467500",
+   "dostawca": "MO8",
+   "rozmiar": "23x12.50-12",
+   "szer_old": 23,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6150500",
+   "dostawca": "MO8",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1444600",
+   "dostawca": "MO8",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1440600",
+   "dostawca": "MO8",
+   "rozmiar": "20x8.00-10",
+   "szer_old": 20,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1440500",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-10",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1440400",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1470500",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_12754500",
+   "dostawca": "MO8",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1300000",
+   "dostawca": "MO8",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1169800",
+   "dostawca": "MO8",
+   "rozmiar": "4.10/3.50-4",
+   "szer_old": 104.1,
+   "szer_new": 4.1,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO8_1467800",
+   "dostawca": "MO8",
+   "rozmiar": "690x180-15",
+   "szer_old": 690,
+   "szer_new": 180,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1467300",
+   "dostawca": "MO8",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_11789000",
+   "dostawca": "MO8",
+   "rozmiar": "29x12.50-15",
+   "szer_old": 29,
+   "szer_new": 12.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1151000",
+   "dostawca": "MO8",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6151100",
+   "dostawca": "MO8",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1169500",
+   "dostawca": "MO8",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1464900",
+   "dostawca": "MO8",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1227900",
+   "dostawca": "MO8",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1465600",
+   "dostawca": "MO8",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6150600",
+   "dostawca": "MO8",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6146100",
+   "dostawca": "MO8",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1146200",
+   "dostawca": "MO8",
+   "rozmiar": "23x8.50-12",
+   "szer_old": 23,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1150000",
+   "dostawca": "MO8",
+   "rozmiar": "20x10.00-10",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_10871100",
+   "dostawca": "MO8",
+   "rozmiar": "20.5x8.00-10",
+   "szer_old": 20.5,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1150300",
+   "dostawca": "MO8",
+   "rozmiar": "20x8.00-10",
+   "szer_old": 20,
+   "szer_new": 8,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6150100",
+   "dostawca": "MO8",
+   "rozmiar": "20x10.00-8",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_6170400",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1194700",
+   "dostawca": "MO8",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_11231200",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_11454700",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_10576300",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1170000",
+   "dostawca": "MO8",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1147700",
+   "dostawca": "MO8",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_1168500",
+   "dostawca": "MO8",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO8_0209500",
+   "dostawca": "MO8",
+   "rozmiar": "4.00/4.50-21",
+   "szer_old": 4.5,
+   "szer_new": 4,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO8_0207900",
+   "dostawca": "MO8",
+   "rozmiar": "9.0/75-16",
+   "szer_old": 228.6,
+   "szer_new": 9,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO8_0198800",
+   "dostawca": "MO8",
+   "rozmiar": "6.5/80-15",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO8_0198600",
+   "dostawca": "MO8",
+   "rozmiar": "6.5/80-12",
+   "szer_old": 165.1,
+   "szer_new": 6.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO1_19800433",
+   "dostawca": "MO1",
+   "rozmiar": "23x10.50-12",
+   "szer_old": 23,
+   "szer_new": 10.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19271099",
+   "dostawca": "MO1",
+   "rozmiar": "27x8.50-15",
+   "szer_old": 27,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211335",
+   "dostawca": "MO1",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211334",
+   "dostawca": "MO1",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211329",
+   "dostawca": "MO1",
+   "rozmiar": "24x12.00-12",
+   "szer_old": 24,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211277",
+   "dostawca": "MO1",
+   "rozmiar": "20x10.00-10",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211276",
+   "dostawca": "MO1",
+   "rozmiar": "20x10.00-10",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211233",
+   "dostawca": "MO1",
+   "rozmiar": "18x9.50-8",
+   "szer_old": 18,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211226",
+   "dostawca": "MO1",
+   "rozmiar": "20x10.00-8",
+   "szer_old": 20,
+   "szer_new": 10,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211215",
+   "dostawca": "MO1",
+   "rozmiar": "18x9.50-8",
+   "szer_old": 18,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211205",
+   "dostawca": "MO1",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211201",
+   "dostawca": "MO1",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211190",
+   "dostawca": "MO1",
+   "rozmiar": "16x7.50-8",
+   "szer_old": 16,
+   "szer_new": 7.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19211087",
+   "dostawca": "MO1",
+   "rozmiar": "8x3.00-4",
+   "szer_old": 8,
+   "szer_new": 3,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19110117",
+   "dostawca": "MO1",
+   "rozmiar": "4.80/4.00-8",
+   "szer_old": 4,
+   "szer_new": 4.8,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO1_19110112",
+   "dostawca": "MO1",
+   "rozmiar": "4.80/4.00-8",
+   "szer_old": 4,
+   "szer_new": 4.8,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO1_19110097",
+   "dostawca": "MO1",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19110081",
+   "dostawca": "MO1",
+   "rozmiar": "13x5.00-6",
+   "szer_old": 13,
+   "szer_new": 5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_15272127",
+   "dostawca": "MO1",
+   "rozmiar": "12x16.5",
+   "szer_old": 12,
+   "szer_new": 16.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_15211647",
+   "dostawca": "MO1",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_15211639",
+   "dostawca": "MO1",
+   "rozmiar": "31x15.50-15",
+   "szer_old": 31,
+   "szer_new": 15.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_12500701",
+   "dostawca": "MO1",
+   "rozmiar": "31x13.50-15",
+   "szer_old": 31,
+   "szer_new": 13.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_10714890",
+   "dostawca": "MO1",
+   "rozmiar": "18.5x8.5-8",
+   "szer_old": 18.5,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_10002975",
+   "dostawca": "MO1",
+   "rozmiar": "28x9-15",
+   "szer_old": 28,
+   "szer_new": 9,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLRD160E40006MF20",
+   "dostawca": "MO5",
+   "rozmiar": "4.00-16",
+   "szer_old": 101.6,
+   "szer_new": 4,
+   "kind": "simple",
+   "note": "szer=pierwsza liczba"
+  },
+  {
+   "kod": "MO5_OTRD180G25808BT70",
+   "dostawca": "MO5",
+   "rozmiar": "12.5/80-18",
+   "szer_old": 317.5,
+   "szer_new": 12.5,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO5_MIRD080F16000B196",
+   "dostawca": "MO5",
+   "rozmiar": "16x6.50-8",
+   "szer_old": 16,
+   "szer_new": 6.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO1_19111119",
+   "dostawca": "MO1",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO3_10075153BKT2",
+   "dostawca": "MO3",
+   "rozmiar": "10.0/75-15.3",
+   "szer_old": 254,
+   "szer_new": 10,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  },
+  {
+   "kod": "MO3_2585014BKTlg",
+   "dostawca": "MO3",
+   "rozmiar": "25x8.50-14",
+   "szer_old": 25,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_MIRD060156000B191",
+   "dostawca": "MO5",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO5_HLRD060156003MG51",
+   "dostawca": "MO5",
+   "rozmiar": "15x6.00-6",
+   "szer_old": 15,
+   "szer_new": 6,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_TRRD080191000TDR0",
+   "dostawca": "MO4",
+   "rozmiar": "18x9.50-8",
+   "szer_old": 18,
+   "szer_new": 9.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD080189004IP60",
+   "dostawca": "MO4",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_HLRD120212003M600",
+   "dostawca": "MO4",
+   "rozmiar": "26x12.00-12",
+   "szer_old": 26,
+   "szer_new": 12,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  },
+  {
+   "kod": "MO4_KARD080189004IP62",
+   "dostawca": "MO4",
+   "rozmiar": "18x8.50-8",
+   "szer_old": 18,
+   "szer_new": 8.5,
+   "kind": "axb",
+   "note": "szer=druga liczba (B)"
+  }
+ ],
+ "suspicious": [
+  {
+   "kod": "MO2_GLO00131",
+   "dostawca": "MO2",
+   "rozmiar": "1/2-8",
+   "szer_old": 15412,
+   "szer_new": 1,
+   "kind": "slash",
+   "note": "szer=pierwsza liczba (W)"
+  }
+ ]
+}

@@ -1,0 +1,86 @@
+// MO3 Grasdorf parser
+// Plik: grasdorfCSV.csv
+// Kodowanie: UTF-8 z BOM
+// Separator: ;
+// Pokrycie EAN: 19% → fallback po nazwie
+
+const { parse } = require('csv-parse/sync');
+const iconv = require('iconv-lite');
+const fs = require('fs');
+const c = require('../common.cjs');
+
+const DOSTAWCA = 'MO3_Grasdorf';
+
+const KATEGORIA_MAP = {
+  'rolnicze': 'rolnicze',
+  'leśne': 'leśne',
+  'lesne': 'leśne',
+  'przemysłowe': 'przemysłowe',
+  'przemyslowe': 'przemysłowe',
+  'ciężarowe': 'ciężarowe',
+  'ciezarowe': 'ciężarowe',
+  'dętki': 'dętki',
+  'detki': 'dętki',
+  'akcesoria': 'akcesoria'
+};
+
+function parseFile(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const text = iconv.decode(buffer, 'utf-8');
+
+  const rows = parse(text, {
+    delimiter: ';',
+    columns: true,
+    skip_empty_lines: true,
+    relax_column_count: true,
+    bom: true,
+    trim: true
+  });
+
+  const records = [];
+  const errors = [];
+
+  for (const row of rows) {
+    try {
+      const nazwa = row['nazwa'] || '';
+      const producent = row['producent'] || '';
+      const bieznik = row['bieznik'] || '';
+      const rozmiar = row['rozmiar'] || '';
+      const rozmiarAlt = row['rozmiar_alt'] || '';
+      const kategoriaRaw = (row['kategoria'] || '').toLowerCase();
+
+      let kategoria = KATEGORIA_MAP[kategoriaRaw];
+      if (!kategoria) {
+        kategoria = c.classifyByName(nazwa);
+      }
+
+      // Próbuj wyciągnąć rozmiar z nazwy, jeśli kolumna pusta
+      const sizeFromName = c.extractSize(nazwa);
+      const finalRozmiar = rozmiar || sizeFromName.rozmiar;
+      const finalAlt = rozmiarAlt || sizeFromName.alternatywny;
+
+      const rec = c.normalizeRecord({
+        ean: c.normalizeEan(row['ean']),
+        kod_dostawcy: null, // Grasdorf nie ma kodu w pliku
+        nazwa: nazwa,
+        producent: producent,
+        model_bieznik: bieznik,
+        rozmiar: finalRozmiar,
+        rozmiar_alternatywny: finalAlt,
+        cena_zakupu: row['cena'],
+        stan_magazynowy: row['stan_magazynu'],
+        kategoria: kategoria,
+        oznaczenia_techniczne: c.extractTechnicalMarks(nazwa),
+        dostawca: DOSTAWCA,
+        surowe_pola: row
+      });
+      records.push(rec);
+    } catch (e) {
+      errors.push({ row, error: e.message });
+    }
+  }
+
+  return { records, errors, dostawca: DOSTAWCA };
+}
+
+module.exports = { parseFile, DOSTAWCA };

@@ -1,0 +1,15 @@
+# Blokada dostepu do plikow eksportu - dostep tylko z wybranych adresow IP
+# Ustalone 2026-07-23: adres IP Selly (Arnold, integrator)
+# Zaktualizowane 2026-07-24: dodano adres IP Agrowiec (Marta) do podgladu pliku
+
+<IfModule mod_authz_core.c>
+    # Apache 2.4+ - Require ip z wieloma adresami w jednej dyrektywie dziala jako OR
+    Require ip 212.91.27.191 46.170.251.129
+</IfModule>
+<IfModule !mod_authz_core.c>
+    # Apache 2.2 (fallback)
+    Order Deny,Allow
+    Deny from all
+    Allow from 212.91.27.191
+    Allow from 46.170.251.129
+</IfModule>

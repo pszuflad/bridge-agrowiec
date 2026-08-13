@@ -1,0 +1,5126 @@
+{
+ "grupaA": [
+  {
+   "kod": "MO9_336319",
+   "model_old": "RIDEMAX IT696",
+   "model_new": "RIDEMAX IT 696"
+  },
+  {
+   "kod": "MO9_280851",
+   "model_old": "TR135 E",
+   "model_new": "TR 135 E"
+  },
+  {
+   "kod": "MO9_103583",
+   "model_old": "EARTHMAX SR53 CR",
+   "model_new": "EARTHMAX SR 53 CR"
+  },
+  {
+   "kod": "MO9_102759",
+   "model_old": "EARTHMAX SR53 CR",
+   "model_new": "EARTHMAX SR 53 CR"
+  },
+  {
+   "kod": "MO9_102383",
+   "model_old": "EARTHMAX SR41 CR",
+   "model_new": "EARTHMAX SR 41 CR"
+  },
+  {
+   "kod": "MO9_102381",
+   "model_old": "EARTHMAX SR53 CR",
+   "model_new": "EARTHMAX SR 53 CR"
+  },
+  {
+   "kod": "MO9_101509",
+   "model_old": "TR678",
+   "model_new": "TR 678"
+  },
+  {
+   "kod": "MO9_98983",
+   "model_old": "AW-702",
+   "model_new": "AW 702"
+  },
+  {
+   "kod": "MO9_98831",
+   "model_old": "FL630 SUPER",
+   "model_new": "FL 630 SUPER"
+  },
+  {
+   "kod": "MO9_68018",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_67206",
+   "model_old": "RIDEMAX FL693M",
+   "model_new": "RIDEMAX FL 693 M"
+  },
+  {
+   "kod": "MO9_66753",
+   "model_old": "PAC MASTER",
+   "model_new": "PACMASTER"
+  },
+  {
+   "kod": "MO9_66455",
+   "model_old": "TR135 E",
+   "model_new": "TR 135 E"
+  },
+  {
+   "kod": "MO9_66351",
+   "model_old": "MULTIMAX MP 527 164 B",
+   "model_new": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_66298",
+   "model_old": "RIDEMAX IT696 E",
+   "model_new": "RIDEMAX IT 696 E"
+  },
+  {
+   "kod": "MO9_66258",
+   "model_old": "AGRIMAX RT945 E",
+   "model_new": "AGRIMAX RT 945 E"
+  },
+  {
+   "kod": "MO9_66009",
+   "model_old": "EARTHMAX SR33",
+   "model_new": "EARTHMAX SR 33"
+  },
+  {
+   "kod": "MO9_65988",
+   "model_old": "RIDEMAX IT696 E",
+   "model_new": "RIDEMAX IT 696 E"
+  },
+  {
+   "kod": "MO9_65945",
+   "model_old": "EARTHMAX SR33",
+   "model_new": "EARTHMAX SR 33"
+  },
+  {
+   "kod": "MO9_65695",
+   "model_old": "AGRIMAX FORCE E",
+   "model_new": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO9_63494",
+   "model_old": "FL635",
+   "model_new": "FL 635"
+  },
+  {
+   "kod": "MO9_63312",
+   "model_old": "RIDEMAX FL693 M",
+   "model_new": "RIDEMAX FL 693 M"
+  },
+  {
+   "kod": "MO9_63010",
+   "model_old": "AGRIMAX RT855 E",
+   "model_new": "AGRIMAX RT 855 E"
+  },
+  {
+   "kod": "MO9_62208",
+   "model_old": "SURE-TRAX HD",
+   "model_new": "SURETRAX HD"
+  },
+  {
+   "kod": "MO9_58181",
+   "model_old": "FLOT 648 T WZM T E",
+   "model_new": "FLOT 648"
+  },
+  {
+   "kod": "MO9_57748",
+   "model_old": "FL693 M",
+   "model_new": "FL 693 M"
+  },
+  {
+   "kod": "MO9_57305",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_56230",
+   "model_old": "AW708",
+   "model_new": "AW 708"
+  },
+  {
+   "kod": "MO9_51366",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_48102",
+   "model_old": "MULTIMAX MP522",
+   "model_new": "MULTIMAX MP 522"
+  },
+  {
+   "kod": "MO9_47020",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_45695",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_45282",
+   "model_old": "PAC MASTER",
+   "model_new": "PACMASTER"
+  },
+  {
+   "kod": "MO9_45140",
+   "model_old": "FLOT 648 E",
+   "model_new": "FLOT 648"
+  },
+  {
+   "kod": "MO9_43233",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_38155",
+   "model_old": "RIB-774",
+   "model_new": "RIB 774"
+  },
+  {
+   "kod": "MO9_37875",
+   "model_old": "AGRIMAX RT945 E",
+   "model_new": "AGRIMAX RT 945 E"
+  },
+  {
+   "kod": "MO9_37266",
+   "model_old": "RIDEMAX FL 693M",
+   "model_new": "RIDEMAX FL 693 M"
+  },
+  {
+   "kod": "MO9_35491",
+   "model_old": "FLOT 648 166 A8",
+   "model_new": "FLOT 648"
+  },
+  {
+   "kod": "MO9_35163",
+   "model_old": "FLOT648",
+   "model_new": "FLOT 648"
+  },
+  {
+   "kod": "MO9_31862",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_29113",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_28612",
+   "model_old": "AGRIMAX FORCE E",
+   "model_new": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO9_27582",
+   "model_old": "MULTIMAX MP 527 E",
+   "model_new": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_27235",
+   "model_old": "MULTIMAX MP522 E",
+   "model_new": "MULTIMAX MP 522 E"
+  },
+  {
+   "kod": "MO9_27054",
+   "model_old": "FLOT648",
+   "model_new": "FLOT 648"
+  },
+  {
+   "kod": "MO9_26914",
+   "model_old": "RIDEMAX IT-696",
+   "model_new": "RIDEMAX IT 696"
+  },
+  {
+   "kod": "MO9_26493",
+   "model_old": "AGRIMAX RT600",
+   "model_new": "AGRIMAX RT 600"
+  },
+  {
+   "kod": "MO9_26058",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_20965",
+   "model_old": "MULTIMAX MP-522",
+   "model_new": "MULTIMAX MP 522"
+  },
+  {
+   "kod": "MO9_20015",
+   "model_old": "V-LINE",
+   "model_new": "V LINE"
+  },
+  {
+   "kod": "MO9_19800",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_19593",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_19460",
+   "model_old": "MULTIMAX MP527 E",
+   "model_new": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_19085",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_18025",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_15722",
+   "model_old": "AGRIMAX FORCE E",
+   "model_new": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO9_14375",
+   "model_old": "EARTHMAX SR35 CR",
+   "model_new": "EARTHMAX SR 35 CR"
+  },
+  {
+   "kod": "MO9_14028",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_10342",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_8663",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_8478",
+   "model_old": "MULTIMAX MP527 E",
+   "model_new": "MULTIMAX MP 527"
+  },
+  {
+   "kod": "MO9_7670",
+   "model_old": "LIFTMAX LM81",
+   "model_new": "LIFT MAX LM81"
+  },
+  {
+   "kod": "MO9_7445",
+   "model_old": "PT - HD",
+   "model_new": "PT-HD"
+  },
+  {
+   "kod": "MO9_3142",
+   "model_old": "AGRIMAX FORCE E",
+   "model_new": "AGRIMAXFORCE E"
+  },
+  {
+   "kod": "MO5_VRRR240320858TV80",
+   "model_old": "TRAXION85",
+   "model_new": "TRAXION85 II"
+  },
+  {
+   "kod": "MO5_TRRD160360658AW30",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO5_TRRD160340558AW30",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO5_TRRD155280608T210",
+   "model_old": "T-421",
+   "model_new": "T421"
+  },
+  {
+   "kod": "MO5_TRRD14016000452T1",
+   "model_old": "T-528",
+   "model_new": "T528"
+  },
+  {
+   "kod": "MO5_TRRD13014500452T1",
+   "model_old": "T-528",
+   "model_new": "T528"
+  },
+  {
+   "kod": "MO5_TRRD120320608T211",
+   "model_old": "T-421",
+   "model_new": "T421"
+  },
+  {
+   "kod": "MO5_TRRD120320608T210",
+   "model_old": "T-421",
+   "model_new": "T421"
+  },
+  {
+   "kod": "MO5_TRRD12014000452T1",
+   "model_old": "T-528",
+   "model_new": "T528"
+  },
+  {
+   "kod": "MO5_TRRD090E600065220",
+   "model_old": "T-522",
+   "model_new": "T522"
+  },
+  {
+   "kod": "MO5_TRRD090E60000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO5_TRRD080E35000T510",
+   "model_old": "T-510",
+   "model_new": "T510"
+  },
+  {
+   "kod": "MO5_TRRD060E40000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO5_TRRD060E35006T510",
+   "model_old": "T-510",
+   "model_new": "T510"
+  },
+  {
+   "kod": "MO5_TRRD040E41000T391",
+   "model_old": "T-539",
+   "model_new": "T539"
+  },
+  {
+   "kod": "MO5_TRRD040E40000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO5_TRRD040E30000T991",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO5_TRRD040E30000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO5_PPCR22538565KR0S0",
+   "model_old": "R02 PROFUEL STEER HL",
+   "model_new": "R02 PROFUEL STEER"
+  },
+  {
+   "kod": "MO5_PPCR22538565KR0N0",
+   "model_old": "R02 PRO TRAILER FRT HL",
+   "model_new": "R02 PRO TRAILER FRT"
+  },
+  {
+   "kod": "MO5_PPCR22538555KR0N0",
+   "model_old": "R02 PRO TRAILER FRT HL",
+   "model_new": "R02 PRO TRAILER FRT"
+  },
+  {
+   "kod": "MO5_MIRR38058070DHC70",
+   "model_old": "HC70",
+   "model_new": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR38052070DHC70",
+   "model_old": "HC70",
+   "model_new": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR34048070DH7M1",
+   "model_old": "HC70",
+   "model_new": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR28038070DHC70",
+   "model_old": "HC70",
+   "model_new": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR24042070DHC70",
+   "model_old": "HC70",
+   "model_new": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRR24038070DHC70",
+   "model_old": "HC70",
+   "model_new": "HC 70"
+  },
+  {
+   "kod": "MO5_MIRD340G84006TD20",
+   "model_old": "TD-02",
+   "model_new": "TD02"
+  },
+  {
+   "kod": "MO5_MIRD340G84006TD11",
+   "model_old": "TD-19",
+   "model_new": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD280G4900OTD10",
+   "model_old": "TD-19",
+   "model_new": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD280G24006TD20",
+   "model_old": "TD-02",
+   "model_new": "TD02"
+  },
+  {
+   "kod": "MO5_MIRD280G24006TD1T",
+   "model_old": "TD-19",
+   "model_new": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD240G49006TD10",
+   "model_old": "TD-19",
+   "model_new": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD240D95006TD28",
+   "model_old": "TD-02",
+   "model_new": "TD02"
+  },
+  {
+   "kod": "MO5_MIRD24012400ATD10",
+   "model_old": "TD-19",
+   "model_new": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD240124008TD10",
+   "model_old": "TD-19",
+   "model_new": "TD19"
+  },
+  {
+   "kod": "MO5_MIRD200E750063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD200D83006T130",
+   "model_old": "TD-13",
+   "model_new": "TD13"
+  },
+  {
+   "kod": "MO5_MIRD2006500063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD180E600063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD170G50558IM44",
+   "model_old": "IM-04",
+   "model_new": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD160E750063TF1",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD160E750063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD160E650063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD160E60006T130",
+   "model_old": "TD-13",
+   "model_new": "TD13"
+  },
+  {
+   "kod": "MO5_MIRD160E600063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO5_MIRD155400608IM71",
+   "model_old": "IM-07",
+   "model_new": "IM07"
+  },
+  {
+   "kod": "MO5_MIRD153G25808IM40",
+   "model_old": "IM-04",
+   "model_new": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD153G15808IM44",
+   "model_old": "IM-04",
+   "model_new": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD153G10758IM4Y",
+   "model_old": "IM-04",
+   "model_new": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD153G10758IM42",
+   "model_old": "IM-04",
+   "model_new": "IM04"
+  },
+  {
+   "kod": "MO5_MIRD150E50008TS60",
+   "model_old": "TS-06",
+   "model_new": "TS06"
+  },
+  {
+   "kod": "MO5_MIRD150180008TS70",
+   "model_old": "TS-07",
+   "model_new": "TS07"
+  },
+  {
+   "kod": "MO5_MIRD120E50000B1S2",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO5_MIRD120E40000B1S2",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO5_MIRD120D65808TS66",
+   "model_old": "TS-06",
+   "model_new": "TS06"
+  },
+  {
+   "kod": "MO5_MIRD100E40000B1S3",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO5_MIRD100E40000B1S2",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO5_MIRD080F16000B195",
+   "model_old": "B-19",
+   "model_new": "B19"
+  },
+  {
+   "kod": "MO5_MIRD080E40000B1S2",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO5_MIRD06013A000B1S1",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO5_MIRD06013A000B193",
+   "model_old": "B-19",
+   "model_new": "B19"
+  },
+  {
+   "kod": "MO5_MIPR24040570JM210",
+   "model_old": "MPT-21",
+   "model_new": "MPT21"
+  },
+  {
+   "kod": "MO5_MIPR20040570JM210",
+   "model_old": "MPT-21",
+   "model_new": "MPT21"
+  },
+  {
+   "kod": "MO5_MIPR20040570B01E0",
+   "model_old": "EM-01",
+   "model_new": "EM01"
+  },
+  {
+   "kod": "MO5_MIPR18040570B01E1",
+   "model_old": "EM-01",
+   "model_new": "EM01"
+  },
+  {
+   "kod": "MO5_MIPR18036570B01E0",
+   "model_old": "EM-01",
+   "model_new": "EM01"
+  },
+  {
+   "kod": "MO5_MIPD250G2300BEM20",
+   "model_old": "EM-20",
+   "model_new": "EM20"
+  },
+  {
+   "kod": "MO5_MIPD240G75008TI00",
+   "model_old": "TI-02",
+   "model_new": "TI02"
+  },
+  {
+   "kod": "MO5_MIPD24040570BMT40",
+   "model_old": "MPT-04",
+   "model_new": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD24040070DMT40",
+   "model_old": "MPT-04",
+   "model_new": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD225480658ME60",
+   "model_old": "MPT-06",
+   "model_new": "MPT06"
+  },
+  {
+   "kod": "MO5_MIPD200H0000BE230",
+   "model_old": "EM-23",
+   "model_new": "EM23"
+  },
+  {
+   "kod": "MO5_MIPD200H0000BE220",
+   "model_old": "EM-22",
+   "model_new": "EM 22"
+  },
+  {
+   "kod": "MO5_MIPD200F6070GMT54",
+   "model_old": "MPT-05",
+   "model_new": "MPT05"
+  },
+  {
+   "kod": "MO5_MIPD20040570BMT11",
+   "model_old": "MPT-01",
+   "model_new": "MPT01"
+  },
+  {
+   "kod": "MO5_MIPD20040570BMT10",
+   "model_old": "MPT-01",
+   "model_new": "MPT01"
+  },
+  {
+   "kod": "MO5_MIPD20040070DMT40",
+   "model_old": "MPT-04",
+   "model_new": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD20036085DMT41",
+   "model_old": "MPT-04",
+   "model_new": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD20034080DMT41",
+   "model_old": "MPT-04",
+   "model_new": "MPT04"
+  },
+  {
+   "kod": "MO5_MIPD2001670014O5L",
+   "model_old": "MPT-05",
+   "model_new": "MPT05"
+  },
+  {
+   "kod": "MO5_MIPD180G2500GMP32",
+   "model_old": "MPT-03",
+   "model_new": "MPT03"
+  },
+  {
+   "kod": "MO5_MIPD150311008SK00",
+   "model_old": "SK-02",
+   "model_new": "SK02"
+  },
+  {
+   "kod": "MO5_MIPD120D85004SK20",
+   "model_old": "SK-02",
+   "model_new": "SK02"
+  },
+  {
+   "kod": "MO5_MCRR42065065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR420520858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR38071070DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR380650658RD31",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR380650658RD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR38060065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR38054065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR38052085ARD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR380460858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR360340858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR34060065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR340460858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR340420858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR320320858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR30054065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR300460858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR300420858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR28060065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR280540658RD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR28048065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR280440658RD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR280420858RD11",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR280380858RD12",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR280320858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR24048065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR240440658RD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR24042085DRD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR24038085BRD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR240340858RD20",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR240320858RD20",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_MCRR240280858RD20",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO5_KARD080F16004IP60",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD080F160040001",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD080189004IP62",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD080189004IP60",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_KARD060156004IP60",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO5_GNCR22538565K3621",
+   "model_old": "SP362",
+   "model_new": "SP362 PROWADZĄCA"
+  },
+  {
+   "kod": "MO5_GNCR19530570MS441",
+   "model_old": "SP446 3PSF",
+   "model_new": "SP446"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN1",
+   "model_old": "ECOTONN",
+   "model_new": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN0",
+   "model_old": "ECOTONN",
+   "model_new": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR19526570JECT1",
+   "model_old": "ECOTONN",
+   "model_new": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR175D9500JETN1",
+   "model_old": "ECOTONN",
+   "model_new": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_GFCR17521575JETN0",
+   "model_old": "ECOTONN",
+   "model_new": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO5_FKCR22527570MBI80",
+   "model_old": "BI856",
+   "model_new": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO5_CCCR22531580K3CS0",
+   "model_old": "CONTI CROSS TRAC 3",
+   "model_new": "CONTI CROSSTRAC 3"
+  },
+  {
+   "kod": "MO5_BRCR22527570JUA21",
+   "model_old": "U-AP2",
+   "model_new": "U-AP002"
+  },
+  {
+   "kod": "MO5_BFRR38054065DMX60",
+   "model_old": "MAXITRACTION 65",
+   "model_new": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR34060065DMX60",
+   "model_old": "MAXITRACTION 65",
+   "model_new": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR24054065DMX60",
+   "model_old": "MAXITRACTION 65",
+   "model_new": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR24048065DMX60",
+   "model_old": "MAXITRACTION 65",
+   "model_new": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFRR24044065DMX60",
+   "model_old": "MAXITRACTION 65",
+   "model_new": "MAXI TRACTION 65"
+  },
+  {
+   "kod": "MO5_BFCR175D9500MFS41",
+   "model_old": "FS400 129",
+   "model_new": "FS400"
+  },
+  {
+   "kod": "MO5_ACRR24036070DAAR0",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO4_TRRD160340558AW30",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO4_TRRD090E60000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO4_TRRD080E35000T510",
+   "model_old": "T-510",
+   "model_new": "T510"
+  },
+  {
+   "kod": "MO4_TRRD060E40000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO4_TRRD060E35006T510",
+   "model_old": "T-510",
+   "model_new": "T510"
+  },
+  {
+   "kod": "MO4_TRRD040E41000T391",
+   "model_old": "T-539",
+   "model_new": "T539"
+  },
+  {
+   "kod": "MO4_TRRD040E40000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO4_TRRD040E30000T991",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO4_TRRD040E30000T990",
+   "model_old": "T-991",
+   "model_new": "T991"
+  },
+  {
+   "kod": "MO4_MIRD180E600063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD160E750063TF1",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD160E750063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD160E600063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO4_MIRD153G15808IM44",
+   "model_old": "IM-04",
+   "model_new": "IM04"
+  },
+  {
+   "kod": "MO4_MIRD120E40000B1S2",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO4_MIRD080F16000B195",
+   "model_old": "B-19",
+   "model_new": "B19"
+  },
+  {
+   "kod": "MO4_MIRD080E40000B1S2",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO4_MIRD06013A000B1S1",
+   "model_old": "B-12",
+   "model_new": "B12"
+  },
+  {
+   "kod": "MO4_MIRD06013A000B193",
+   "model_old": "B-19",
+   "model_new": "B19"
+  },
+  {
+   "kod": "MO4_MIPD200H0000BE230",
+   "model_old": "EM-23",
+   "model_new": "EM23"
+  },
+  {
+   "kod": "MO4_MCRR380650658RD31",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO4_MCRR320320858RD10",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO4_MCRR280380858RD12",
+   "model_old": "RD-01",
+   "model_new": "RD01"
+  },
+  {
+   "kod": "MO4_KARD080F160040001",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO4_KARD060156004IP60",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO4_GFCR17521575JETN0",
+   "model_old": "ECOTONN",
+   "model_new": "ECOTONN NACZEPA"
+  },
+  {
+   "kod": "MO4_DCPR250H4000ERM80",
+   "model_old": "REM8 ",
+   "model_new": "REM8"
+  },
+  {
+   "kod": "MO3_5406530Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4206520Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4806528BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5406534BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3209042Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4406524Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4608542BRVX-T",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4806528Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_5406528Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4208046Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_5208538BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208528BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6006528Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4208534BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208538BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6506538BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5406528BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4807038BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4406528BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4406524BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5807038BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208530BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3807024BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4207024BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4208524BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4608538BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6506538Aaii",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_4608534BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3808528BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5807042BRVX-T",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6006538BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4807028BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5207038BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_5207034BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_4806524BRVX-T",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_3408524BRvxr",
+   "model_old": "VX TRACTOR",
+   "model_new": "VX-TRACTOR"
+  },
+  {
+   "kod": "MO3_6506542Aaii158",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_40060155AA-320VP143A",
+   "model_old": "320 VALUE PLUS",
+   "model_new": "A320 VP"
+  },
+  {
+   "kod": "MO3_714BKT",
+   "model_old": "TR 126 ",
+   "model_new": "TR 126"
+  },
+  {
+   "kod": "MO3_9006038contiTM",
+   "model_old": "TRACTORMASTER",
+   "model_new": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6007030conti",
+   "model_old": "TRACTORMASTER",
+   "model_new": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_6507538conti",
+   "model_old": "TRACTORMASTER",
+   "model_new": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_2808528MTdemo",
+   "model_old": "AC 85 ",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO3_6006534conti",
+   "model_old": "TRACTORMASTER",
+   "model_new": "TRACTOR MASTER"
+  },
+  {
+   "kod": "MO3_4607024contiEM",
+   "model_old": "COMPACTMASTER EM",
+   "model_new": "COMPACT MASTER EM"
+  },
+  {
+   "kod": "MO3_6506542MThcmdemo",
+   "model_old": "HCM",
+   "model_new": "HCM IND"
+  },
+  {
+   "kod": "MO3_5406530mthcmdemo",
+   "model_old": "HCM",
+   "model_new": "HCM IND"
+  },
+  {
+   "kod": "MO3_38565225Kabat",
+   "model_old": "TRY1",
+   "model_new": "TRY1 AG"
+  },
+  {
+   "kod": "MO3_4807024trdemo",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO3_114004kk5004",
+   "model_old": "K500 SUPERTURF",
+   "model_new": "K500 SUPER TURF"
+  },
+  {
+   "kod": "MO3_54065R34AAII145D",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO3_11580153A",
+   "model_old": "320 VALUE PLUS",
+   "model_new": "A320 VP"
+  },
+  {
+   "kod": "MO3_4007018TR",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO3_40055175AL",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_55060225A",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_70040225A",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_50060225ALLI",
+   "model_old": "328 VALUE",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_60055265A1",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO3_8006532A-IN",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_T485430",
+   "model_old": "TR FOREST",
+   "model_new": "TR FOREST 2"
+  },
+  {
+   "kod": "MO2_T445372",
+   "model_old": "TRI2",
+   "model_new": "TRI 2"
+  },
+  {
+   "kod": "MO2_T445338",
+   "model_old": "TRI2",
+   "model_new": "TRI 2"
+  },
+  {
+   "kod": "MO2_T445337",
+   "model_old": "TRI2",
+   "model_new": "TRI 2"
+  },
+  {
+   "kod": "MO2_KOSR1660082T",
+   "model_old": "SRF-03 SUPRA RIB",
+   "model_new": "SRF-03"
+  },
+  {
+   "kod": "MO2_KOSR1660081T",
+   "model_old": "SRF-01 SUPRA RIB",
+   "model_new": "SRF-01"
+  },
+  {
+   "kod": "MO2_KOSR1660061T",
+   "model_old": "SRF-01 SUPRA RIB",
+   "model_new": "SRF-01"
+  },
+  {
+   "kod": "MO2_KOSG2814981T",
+   "model_old": "SGP-03 SUPRA GRIP",
+   "model_new": "SGP-03"
+  },
+  {
+   "kod": "MO2_KOIM81885061T",
+   "model_old": "IMP-06 LINIOWA",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM81665061L",
+   "model_old": "IMP-06 LINIOWA",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM61560061T",
+   "model_old": "IMP-06 LINIOWA IMPLEMENT",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_KOIM61560061L",
+   "model_old": "IMP-06 LINIOWA IMPLEMENT",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO2_CET0017",
+   "model_old": "GHT22",
+   "model_new": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO2_CET0016",
+   "model_old": "GHT22",
+   "model_new": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO2_CET0013",
+   "model_old": "GHT50",
+   "model_new": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO2_5011514960000",
+   "model_old": "AC90",
+   "model_new": "AC 90"
+  },
+  {
+   "kod": "MO2_5011514950000",
+   "model_old": "AC90",
+   "model_new": "AC 90"
+  },
+  {
+   "kod": "MO2_5002614710000",
+   "model_old": "AS-AGRI19",
+   "model_new": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002613430000",
+   "model_old": "AS-AGRI07",
+   "model_new": "AS AGRI 07"
+  },
+  {
+   "kod": "MO2_5002606760000",
+   "model_old": "AS-FRONT 08",
+   "model_new": "AS FRONT 08"
+  },
+  {
+   "kod": "MO2_5002605590000",
+   "model_old": "AW-IMPLEMENT 13",
+   "model_new": "AW IMPLEMENT 13"
+  },
+  {
+   "kod": "MO2_5002604970000",
+   "model_old": "AS-AGRI 10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002604170000",
+   "model_old": "AS-AGRI19",
+   "model_new": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002604150000",
+   "model_old": "AS-AGRI 13",
+   "model_new": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002604130000",
+   "model_old": "AS-AGRI13",
+   "model_new": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002604060000",
+   "model_old": "AS-AGRI19",
+   "model_new": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002603920000",
+   "model_old": "AS-AGRI19",
+   "model_new": "AS AGRI 19"
+  },
+  {
+   "kod": "MO2_5002602970000",
+   "model_old": "AS-AGRI13",
+   "model_new": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002602910000",
+   "model_old": "AS-AGRI 10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602730000",
+   "model_old": "AS-AGRI13",
+   "model_new": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002602710000",
+   "model_old": "AS-AGRI13",
+   "model_new": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002602680000",
+   "model_old": "AS-AGRI10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602460000",
+   "model_old": "AS-AGRI10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602290000",
+   "model_old": "AS-AGRI20",
+   "model_new": "AS AGRI 20"
+  },
+  {
+   "kod": "MO2_5002602050000",
+   "model_old": "AS-AGRI10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002602010000",
+   "model_old": "AS-AGRI10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002601940000",
+   "model_old": "AS-AGRI07",
+   "model_new": "AS AGRI 07"
+  },
+  {
+   "kod": "MO2_5002601859000",
+   "model_old": "AS-AGRI10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002601820000",
+   "model_old": "AS-AGRI10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_5002601450000",
+   "model_old": "AS-AGRI13",
+   "model_new": "AS AGRI 13"
+  },
+  {
+   "kod": "MO2_5002600430000",
+   "model_old": "AS-FRONT 04",
+   "model_new": "AS FRONT 04"
+  },
+  {
+   "kod": "MO2_5001514320000",
+   "model_old": "TG-01",
+   "model_new": "TG 01"
+  },
+  {
+   "kod": "MO2_5001506110000",
+   "model_old": "TS-06",
+   "model_new": "TS06"
+  },
+  {
+   "kod": "MO2_49000002AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_49000001AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48504730AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500361AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500360AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500334AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500325AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500301AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500301AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500300AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500264AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500260AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500200AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500190AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500167AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500165AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500151AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500140AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500130AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500125AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500120AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500110AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500106AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500104AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500103AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500101AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500100AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500070AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500048AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500047AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500046AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500044AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500040AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500038AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500037AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500035AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500033AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500032AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500031AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500026AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500025AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500022AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500021AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500020AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_48500001AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47025034AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47025030AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47002588AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47001541AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000047AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000044AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000043AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000041AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000040AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000038AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000035AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000033AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000032AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000031AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000030AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000029AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000028AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000027AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000026AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000025AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000022AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000018AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000013AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000011AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000009AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000007AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000006AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000005AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000004AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000003AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000002AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000001AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_47000000AL-IN",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500027AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500026AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500024AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500021AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500020AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500019AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500018AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500017AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500015AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500014AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500012AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500011AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500010AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500008AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500007AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500006AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500004AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500003AL-AP",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_46500002AL-IG",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_4006343190000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341900000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341740000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341720001",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341720000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006341630001",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341630000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341620000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341380001",
+   "model_old": "HC70",
+   "model_new": "HC 70"
+  },
+  {
+   "kod": "MO2_4006341140000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341120000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341110000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341100000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006341060000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340840000",
+   "model_old": "AC70 G",
+   "model_new": "AC 70 G"
+  },
+  {
+   "kod": "MO2_4006340730000",
+   "model_old": "AC70",
+   "model_new": "AC 70"
+  },
+  {
+   "kod": "MO2_4006340610000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340580000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340560000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340530000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340520000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340440000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340330000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340320000",
+   "model_old": "AC70 G",
+   "model_new": "AC 70 G"
+  },
+  {
+   "kod": "MO2_4006340310000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340300000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340290000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340270000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340260000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340210000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340190000",
+   "model_old": "AC65",
+   "model_new": "AC 65"
+  },
+  {
+   "kod": "MO2_4006340180000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340140000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340100000",
+   "model_old": "AC90",
+   "model_new": "AC 90"
+  },
+  {
+   "kod": "MO2_4006340090000",
+   "model_old": "AC85",
+   "model_new": "AC 85"
+  },
+  {
+   "kod": "MO2_4006340080000",
+   "model_old": "AC90",
+   "model_new": "AC 90"
+  },
+  {
+   "kod": "MO2_4006208420000",
+   "model_old": "EM-01",
+   "model_new": "EM01"
+  },
+  {
+   "kod": "MO2_4006202000000",
+   "model_old": "MPT-21",
+   "model_new": "MPT21"
+  },
+  {
+   "kod": "MO2_361420",
+   "model_old": "BI856",
+   "model_new": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_36061747AL-IN",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36061533AL",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36035001AL-IN",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36035001AL-IG",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36033498AL-IG",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36020432AL",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36018062AL",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36017698AL",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36017507AL",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36017501AL",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_36016205AL",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO2_34502989AL",
+   "model_old": "345",
+   "model_new": "345 FORESTAR"
+  },
+  {
+   "kod": "MO2_34435416AL",
+   "model_old": "344",
+   "model_new": "344 FORESTRY"
+  },
+  {
+   "kod": "MO2_335674",
+   "model_old": "BI856",
+   "model_new": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_335670",
+   "model_old": "BI856",
+   "model_new": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_335667",
+   "model_old": "BI856",
+   "model_new": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_335661",
+   "model_old": "BI856",
+   "model_new": "BI856 DRIVE"
+  },
+  {
+   "kod": "MO2_33300276AL-IN",
+   "model_old": "333",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300242AL-IN",
+   "model_old": "333 FORESTRY",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300149AL-IN",
+   "model_old": "333",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300146AL-IN",
+   "model_old": "AF-333",
+   "model_new": "AF 333"
+  },
+  {
+   "kod": "MO2_33300138AL-IN",
+   "model_old": "AF-333",
+   "model_new": "AF 333"
+  },
+  {
+   "kod": "MO2_33300134AL-IN",
+   "model_old": "333",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300126AL-IN",
+   "model_old": "333",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300118AL-IN",
+   "model_old": "333 FORESTRY",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300104AL-IN",
+   "model_old": "333",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300054AL-IN",
+   "model_old": "333 FORESTRY",
+   "model_new": "333 AGRO-FORESTRY"
+  },
+  {
+   "kod": "MO2_33300012AL-IN",
+   "model_old": "AF-333",
+   "model_new": "AF 333"
+  },
+  {
+   "kod": "MO2_32862024AL-AP",
+   "model_old": "328 XP",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32862023AL",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32853003AL-IG",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32852215AL",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32841144",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32840020AL-IG",
+   "model_old": "328 FLOTATION",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32835319AL-IN",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32832520AL-IG",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827420AL",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827076AL-IG",
+   "model_old": "328 FORESTRY",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827075AL-IN",
+   "model_old": "328 FORESTRY",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827054AL-IN",
+   "model_old": "328 FLOTATION",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827054AL-IG",
+   "model_old": "328 FLOTATION",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32827045AL-IN",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32800028AL-AP",
+   "model_old": "328 XP",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32800027AL-AP",
+   "model_old": "328 XP",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_32800016AL-IN",
+   "model_old": "328",
+   "model_new": "328 VALUE PLUS"
+  },
+  {
+   "kod": "MO2_28049",
+   "model_old": "VT TRACTOR",
+   "model_new": "VT-TRACTOR"
+  },
+  {
+   "kod": "MO2_25031833",
+   "model_old": "NB38",
+   "model_new": "NB 38"
+  },
+  {
+   "kod": "MO2_25029588",
+   "model_old": "MPT-04",
+   "model_new": "MPT04"
+  },
+  {
+   "kod": "MO2_25029093",
+   "model_old": "MPT-04",
+   "model_new": "MPT04"
+  },
+  {
+   "kod": "MO2_25028196",
+   "model_old": "NB38",
+   "model_new": "NB 38"
+  },
+  {
+   "kod": "MO2_25020825",
+   "model_old": "SK-02",
+   "model_new": "SK02"
+  },
+  {
+   "kod": "MO2_2000061774001",
+   "model_old": "AS-AGRI 10",
+   "model_new": "AS AGRI 10"
+  },
+  {
+   "kod": "MO2_162527",
+   "model_old": "XTE3",
+   "model_new": "XTE 3"
+  },
+  {
+   "kod": "MO2_152.28.812",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_152.28.692",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_152.28.691",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_1327700",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO2_1032400",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO2_1011301780000",
+   "model_old": "MPT-01",
+   "model_new": "MPT01"
+  },
+  {
+   "kod": "MO2_10000674",
+   "model_old": "AGRISTAR II",
+   "model_new": "AGRI STAR II"
+  },
+  {
+   "kod": "MO2_06700030000",
+   "model_old": "COMPACTMASTER EM",
+   "model_new": "COMPACT MASTER EM"
+  },
+  {
+   "kod": "MO2_05740150000",
+   "model_old": "MPT81",
+   "model_new": "MPT 81"
+  },
+  {
+   "kod": "MO10_PAR1271",
+   "model_old": "GREEN XLR70",
+   "model_new": "GREEN XLR 70"
+  },
+  {
+   "kod": "MO10_PAR1241",
+   "model_old": "GREEN XLR70",
+   "model_new": "GREEN XLR 70"
+  },
+  {
+   "kod": "MO10_PAR1237",
+   "model_old": "GREEN XLR70",
+   "model_new": "GREEN XLR 70"
+  },
+  {
+   "kod": "MO8_11789000",
+   "model_old": "T463 FLOT",
+   "model_new": "T463"
+  },
+  {
+   "kod": "MO8_0579600",
+   "model_old": "T463 PLUS",
+   "model_new": "T463"
+  },
+  {
+   "kod": "MO8_1106500",
+   "model_old": "T414 FS",
+   "model_new": "T414"
+  },
+  {
+   "kod": "MO8_12174500",
+   "model_old": "AW309",
+   "model_new": "AW 309"
+  },
+  {
+   "kod": "MO8_1323000",
+   "model_old": "AW309",
+   "model_new": "AW 309"
+  },
+  {
+   "kod": "MO8_12174800",
+   "model_old": "AW309",
+   "model_new": "AW 309"
+  },
+  {
+   "kod": "MO8_1468800",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_12174700",
+   "model_old": "AW309",
+   "model_new": "AW 309"
+  },
+  {
+   "kod": "MO8_1298400",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1327900",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1327800",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_10716800",
+   "model_old": "AW309",
+   "model_new": "AW 309"
+  },
+  {
+   "kod": "MO8_1327700",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1326400",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1327200",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1326700",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1326600",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1326200",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1326100",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1469300",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1130300",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_1469200",
+   "model_old": "AW305",
+   "model_new": "AW 305"
+  },
+  {
+   "kod": "MO8_5017215710000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215700000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_1110600",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215680000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215670000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215660000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215650000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215640000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215630000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_5017215610000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO8_4007103200000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103190000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103160000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103150000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103140000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103100000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103090000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103080000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103070000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_0558100",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103040000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103020000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_4007103010000",
+   "model_old": "TM100",
+   "model_new": "TM 100"
+  },
+  {
+   "kod": "MO8_1115400",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1071200",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1070900",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1296400",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1296800",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_11156600",
+   "model_old": "TM900HP HA",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_0733100",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1034900",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_0732900",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1112800",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_12948600",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1112700",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1296600",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1293100",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_12934700",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1295000",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_11572700",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_12205000",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1032800",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_5017215950000",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_11572500",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_0732300",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_5017215940000",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1112100",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1115100",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1294800",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1115300",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1117600",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1070700",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_13467400",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1296500",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1296200",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_1034400",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1032900",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_11562200",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1032600",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_0732200",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_12086100",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_11562600",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1112000",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_12626100",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1111900",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1071000",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1296700",
+   "model_old": "TM900HP",
+   "model_new": "TM 900 HP"
+  },
+  {
+   "kod": "MO8_0732000",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_0730300",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1111800",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1118900",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1111700",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0731800",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_12206900",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1034200",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1032500",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1117300",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1117200",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_11624100",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1111600",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1117100",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_13153500",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1111500",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0731500",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1116900",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1111400",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1115800",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1116800",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1115700",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1033700",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_0731200",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1116600",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_5017217270000",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_13016800",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_11562400",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1117400",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0733600",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_13302300",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1111300",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0733500",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_0733400",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1111200",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1111100",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0733300",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1294000",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_11372800",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0733200",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_0730900",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1293900",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0730700",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_0730600",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_1293800",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_1114800",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_1114700",
+   "model_old": "TM800",
+   "model_new": "TM 800"
+  },
+  {
+   "kod": "MO8_0730800",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_10716600",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO8_0730500",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_0730400",
+   "model_old": "TM700",
+   "model_new": "TM 700"
+  },
+  {
+   "kod": "MO8_10716500",
+   "model_old": "TM600",
+   "model_new": "TM 600"
+  },
+  {
+   "kod": "MO1_71970074",
+   "model_old": "YARDMASTER ULTRA",
+   "model_new": "YARD MASTER ULTRA"
+  },
+  {
+   "kod": "MO1_19800286",
+   "model_old": "MTF 222",
+   "model_new": "MTF 222 TWO RIB"
+  },
+  {
+   "kod": "MO1_17422750",
+   "model_old": "TR FOREST",
+   "model_new": "TR FOREST 2"
+  },
+  {
+   "kod": "MO1_15226831",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO1_15226794",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO1_15226767",
+   "model_old": "360",
+   "model_new": "360 FORESTRY"
+  },
+  {
+   "kod": "MO1_11166115",
+   "model_old": "GHT50",
+   "model_new": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO1_10001615",
+   "model_old": "GHT22",
+   "model_new": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO1_10001614",
+   "model_old": "GHT22",
+   "model_new": "GHT22 TRAILER"
+  },
+  {
+   "kod": "MO1_10001613",
+   "model_old": "GHT50",
+   "model_new": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO7_T445516",
+   "model_old": "FOREST KING TRS -2",
+   "model_new": "FOREST KING TRS 2"
+  },
+  {
+   "kod": "MO7_T445596",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445476",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445475",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445528",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445527",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445541",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445624",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO7_T445622",
+   "model_old": "NORDMAN FOREST TRS",
+   "model_new": "NORDMAN FOREST TRS L-2"
+  },
+  {
+   "kod": "MO5_MIRD080F16000B196",
+   "model_old": "B-19",
+   "model_new": "B19"
+  },
+  {
+   "kod": "MO2_5017215680000",
+   "model_old": "TH400",
+   "model_new": "TH 400"
+  },
+  {
+   "kod": "MO2_25031827",
+   "model_old": "NB38",
+   "model_new": "NB 38"
+  },
+  {
+   "kod": "MO2_CET0048",
+   "model_old": "GHT50",
+   "model_new": "GHT50 TRAILER"
+  },
+  {
+   "kod": "MO5_MIRD300G84006T130",
+   "model_old": "TD-13",
+   "model_new": "TD13"
+  },
+  {
+   "kod": "MO5_MCRR24054065DRD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO5_MCRR240420658RD30",
+   "model_old": "RD-03",
+   "model_new": "RD03"
+  },
+  {
+   "kod": "MO3_6506542A",
+   "model_old": "365",
+   "model_new": "365 AGRISTAR"
+  },
+  {
+   "kod": "MO5_MIRD060156000B191",
+   "model_old": "B-19",
+   "model_new": "B19"
+  },
+  {
+   "kod": "MO4_MIRD280G4900OTD10",
+   "model_old": "TD-19",
+   "model_new": "TD19"
+  },
+  {
+   "kod": "MO4_MIRD200E750063TF0",
+   "model_old": "TF-03",
+   "model_new": "TF03"
+  },
+  {
+   "kod": "MO4_KARD080189004IP60",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  },
+  {
+   "kod": "MO4_KARD080189004IP62",
+   "model_old": "IMP-06",
+   "model_new": "IMP-06 IMPLEMENT LINIOWA"
+  }
+ ],
+ "grupaB": [
+  {
+   "kod": "MO9_65581",
+   "marka": "BKT",
+   "bieznik": "CON STAR E",
+   "model": "CON STAR E",
+   "nazwa_old": "480/80-26 BKT CON STAR 160A8 TL",
+   "nazwa_new": "480/80-26 BKT CON STAR E 160A8 TL"
+  },
+  {
+   "kod": "MO9_64587",
+   "marka": "BKT",
+   "bieznik": "TR 678 E",
+   "model": "TR 678 E",
+   "nazwa_old": "320/60-12 BKT TR 678 132A8 TT",
+   "nazwa_new": "320/60-12 BKT TR 678 E 132A8 TT"
+  },
+  {
+   "kod": "MO9_63010",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 855 E",
+   "model": "AGRIMAX RT855 E",
+   "nazwa_old": "520/85R50 BKT AGRIMAX RT 855 165A8/165B TL",
+   "nazwa_new": "520/85R50 BKT AGRIMAX RT 855 E 165A8/165B TL"
+  },
+  {
+   "kod": "MO9_55205",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E",
+   "nazwa_old": "320/70R24 BKT AGRIMAX RT 765 116D TL",
+   "nazwa_new": "320/70R24 BKT AGRIMAX RT 765 E 116D TL"
+  },
+  {
+   "kod": "MO9_37875",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 945 E",
+   "model": "AGRIMAX RT945 E",
+   "nazwa_old": "320/90R46 BKT AGRIMAX RT 945 148D/151A8 TL",
+   "nazwa_new": "320/90R46 BKT AGRIMAX RT 945 E 148D/151A8 TL"
+  },
+  {
+   "kod": "MO9_17324",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E",
+   "nazwa_old": "710/70R42 BKT AGRIMAX RT 765 173D TL",
+   "nazwa_new": "710/70R42 BKT AGRIMAX RT 765 E 173D TL"
+  },
+  {
+   "kod": "MO9_16308",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E",
+   "nazwa_old": "420/70R30 BKT AGRIMAX RT 765 134D TL",
+   "nazwa_new": "420/70R30 BKT AGRIMAX RT 765 E 134D TL"
+  },
+  {
+   "kod": "MO9_8939",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT 765 E",
+   "model": "AGRIMAX RT 765 E",
+   "nazwa_old": "480/70R28 BKT AGRIMAX RT 765 140D TL",
+   "nazwa_new": "480/70R28 BKT AGRIMAX RT 765 E 140D TL"
+  },
+  {
+   "kod": "MO5_VRRR240320858TV80",
+   "marka": "VREDESTEIN",
+   "bieznik": "TRAXION85 II",
+   "model": "TRAXION85",
+   "nazwa_old": "320/85R24 VREDESTEIN TRAXION85 122A8/122B TL",
+   "nazwa_new": "320/85R24 VREDESTEIN TRAXION85 II 122A8/122B TL"
+  },
+  {
+   "kod": "MO5_KARD080F16004IP60",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "16x6.50-8 KABAT IMP-06 73A4 6PR TL",
+   "nazwa_new": "16x6.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 73A4 6PR TL"
+  },
+  {
+   "kod": "MO5_KARD080F160040001",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "16x6.50-8 KABAT IMP-06 73A4 6PR TT",
+   "nazwa_new": "16x6.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 73A4 6PR TT"
+  },
+  {
+   "kod": "MO5_KARD080189004IP62",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "18x8.50-8 KABAT IMP-06 82A4 6PR TT",
+   "nazwa_new": "18x8.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 82A4 6PR TT"
+  },
+  {
+   "kod": "MO5_KARD080189004IP60",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "18x8.50-8 KABAT IMP-06 82A4 6PR TL",
+   "nazwa_new": "18x8.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 82A4 6PR TL"
+  },
+  {
+   "kod": "MO5_KARD060156004IP60",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "15x6.00-6 KABAT IMP-06 6PR TL",
+   "nazwa_new": "15x6.00-6 KABAT IMP-06 IMPLEMENT LINIOWA 6PR TL"
+  },
+  {
+   "kod": "MO5_GNCR22538565K3621",
+   "marka": "DUNLOP",
+   "bieznik": "SP362 PROWADZĄCA",
+   "model": "SP362",
+   "nazwa_old": "385/65R22.5 DUNLOP SP362 160K/158L TL M+S 3PMSF",
+   "nazwa_new": "385/65R22.5 DUNLOP SP362 PROWADZĄCA 160K/158L TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN1",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN",
+   "nazwa_old": "285/70R19.5 FULDA ECOTONN 150/148J TL M+S 3PMSF",
+   "nazwa_new": "285/70R19.5 FULDA ECOTONN NACZEPA 150/148J TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_GFCR19528570JETN0",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN",
+   "nazwa_old": "285/70R19.5 FULDA ECOTONN 150/148J TL M+S 3PMSF",
+   "nazwa_new": "285/70R19.5 FULDA ECOTONN NACZEPA 150/148J TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_GFCR19526570JECT1",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN",
+   "nazwa_old": "265/70R19.5 FULDA ECOTONN 143/141J M+S 3PMSF",
+   "nazwa_new": "265/70R19.5 FULDA ECOTONN NACZEPA 143/141J M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_GFCR175D9500JETN1",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN",
+   "nazwa_old": "9.5R17.5 FULDA ECOTONN 143/141J TL M+S 3PMSF",
+   "nazwa_new": "9.5R17.5 FULDA ECOTONN NACZEPA 143/141J TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_GFCR17521575JETN0",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN",
+   "nazwa_old": "215/75R17.5 FULDA ECOTONN 135/133J TL M+S 3PMSF",
+   "nazwa_new": "215/75R17.5 FULDA ECOTONN NACZEPA 135/133J TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_FKCR22527570MBI80",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856",
+   "nazwa_old": "275/70R22.5 FALKEN BI856 148/145M TL M+S 3PMSF",
+   "nazwa_new": "275/70R22.5 FALKEN BI856 DRIVE 148/145M TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_BRCR22527570JUA21",
+   "marka": "BRIDGESTONE",
+   "bieznik": "U-AP002",
+   "model": "U-AP2",
+   "nazwa_old": "275/70R22.5 BRIDGESTONE U-AP2 152/149J TL M+S 3PMSF",
+   "nazwa_new": "275/70R22.5 BRIDGESTONE U-AP002 152/149J TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_KARD080F160040001",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "16x6.50-8 KABAT IMP-06 73A4 6PR TT",
+   "nazwa_new": "16x6.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 73A4 6PR TT"
+  },
+  {
+   "kod": "MO4_KARD060156004IP60",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "15x6.00-6 KABAT IMP-06 6PR TL",
+   "nazwa_new": "15x6.00-6 KABAT IMP-06 IMPLEMENT LINIOWA 6PR TL"
+  },
+  {
+   "kod": "MO4_GFCR17521575JETN0",
+   "marka": "FULDA",
+   "bieznik": "ECOTONN NACZEPA",
+   "model": "ECOTONN",
+   "nazwa_old": "215/75R17.5 FULDA ECOTONN 135/133J TL M+S 3PMSF",
+   "nazwa_new": "215/75R17.5 FULDA ECOTONN NACZEPA 135/133J TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO3_40060155AA-320VP143A",
+   "marka": "ALLIANCE",
+   "bieznik": "A320 VP",
+   "model": "320 VALUE PLUS",
+   "nazwa_old": "400/60-15.5 ALLIANCE 320 VALUE PLUS 152A6/148A8 16PR TL",
+   "nazwa_new": "400/60-15.5 ALLIANCE A320 VP 152A6/148A8 16PR TL"
+  },
+  {
+   "kod": "MO3_6506542MThcmdemo",
+   "marka": "MITAS",
+   "bieznik": "HCM IND",
+   "model": "HCM",
+   "nazwa_old": "650/65R42 MITAS HCM 176A8/171D TL DEMO",
+   "nazwa_new": "650/65R42 MITAS HCM IND 176A8/171D TL DEMO"
+  },
+  {
+   "kod": "MO3_5406530mthcmdemo",
+   "marka": "MITAS",
+   "bieznik": "HCM IND",
+   "model": "HCM",
+   "nazwa_old": "540/65R30 MITAS HCM 161A8/156D TL DEMO",
+   "nazwa_new": "540/65R30 MITAS HCM IND 161A8/156D TL DEMO"
+  },
+  {
+   "kod": "MO3_38565225Kabat",
+   "marka": "KABAT",
+   "bieznik": "TRY1 AG",
+   "model": "TRY1",
+   "nazwa_old": "385/65R22.5 KABAT TRY1 160F 18PR TL",
+   "nazwa_new": "385/65R22.5 KABAT TRY1 AG 160F 18PR TL"
+  },
+  {
+   "kod": "MO3_11580153A",
+   "marka": "ALLIANCE",
+   "bieznik": "A320 VP",
+   "model": "320 VALUE PLUS",
+   "nazwa_old": "11.5/80-15.3 ALLIANCE 320 VALUE PLUS 14PR TL",
+   "nazwa_new": "11.5/80-15.3 ALLIANCE A320 VP 14PR TL"
+  },
+  {
+   "kod": "MO3_40055175AL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "400/55-17.5 ALLIANCE FLOTATION 328 136A8/149A8 16PR TL",
+   "nazwa_new": "400/55-17.5 ALLIANCE FLOTATION 328 VALUE PLUS 136A8/149A8 16PR TL"
+  },
+  {
+   "kod": "MO3_70040225A",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "700/40-22.5 ALLIANCE 328 16PR TL",
+   "nazwa_new": "700/40-22.5 ALLIANCE 328 VALUE PLUS 16PR TL"
+  },
+  {
+   "kod": "MO3_50060225ALLI",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 VALUE",
+   "nazwa_old": "500/60-22.5 ALLIANCE 328 VALUE 16PR TL",
+   "nazwa_new": "500/60-22.5 ALLIANCE 328 VALUE PLUS 16PR TL"
+  },
+  {
+   "kod": "MO3_60055265A1",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "600/55-26.5 ALLIANCE 328 16PR TL",
+   "nazwa_new": "600/55-26.5 ALLIANCE 328 VALUE PLUS 16PR TL"
+  },
+  {
+   "kod": "MO3_8006532A-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "nazwa_new": "800/65R32 ALLIANCE 360 FORESTRY 181A8/178B TL"
+  },
+  {
+   "kod": "MO2_T485430",
+   "marka": "NOKIAN",
+   "bieznik": "TR FOREST 2",
+   "model": "TR FOREST",
+   "nazwa_old": "18.4-38 NOKIAN TR FOREST 155A8 14PR",
+   "nazwa_new": "18.4-38 NOKIAN TR FOREST 2 155A8 14PR"
+  },
+  {
+   "kod": "MO2_KOIM81885061T",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA",
+   "nazwa_old": "18x8.50-8 KABAT IMP-06 LINIOWA 6PR TT",
+   "nazwa_new": "18x8.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 6PR TT"
+  },
+  {
+   "kod": "MO2_KOIM81665061L",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA",
+   "nazwa_old": "16x6.50-8 KABAT IMP-06 LINIOWA 6PR TL",
+   "nazwa_new": "16x6.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 6PR TL"
+  },
+  {
+   "kod": "MO2_KOIM61560061T",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA IMPLEMENT",
+   "nazwa_old": "15x6.00-6 KABAT IMP-06 LINIOWA IMPLEMENT 6PR TT",
+   "nazwa_new": "15x6.00-6 KABAT IMP-06 IMPLEMENT LINIOWA 6PR TT"
+  },
+  {
+   "kod": "MO2_KOIM61560061L",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06 LINIOWA IMPLEMENT",
+   "nazwa_old": "15x6.00-6 KABAT IMP-06 LINIOWA IMPLEMENT 6PR TL",
+   "nazwa_new": "15x6.00-6 KABAT IMP-06 IMPLEMENT LINIOWA 6PR TL"
+  },
+  {
+   "kod": "MO2_CET0017",
+   "marka": "CETROC",
+   "bieznik": "GHT22 TRAILER",
+   "model": "GHT22",
+   "nazwa_old": "445/45R19.5 CETROC GHT22 160J 3PMSF M+S",
+   "nazwa_new": "445/45R19.5 CETROC GHT22 TRAILER 160J 3PMSF M+S"
+  },
+  {
+   "kod": "MO2_CET0016",
+   "marka": "CETROC",
+   "bieznik": "GHT22 TRAILER",
+   "model": "GHT22",
+   "nazwa_old": "435/50R19.5 CETROC GHT22 160J 3PMSF M+S FRONT",
+   "nazwa_new": "435/50R19.5 CETROC GHT22 TRAILER 160J 3PMSF M+S FRONT"
+  },
+  {
+   "kod": "MO2_CET0013",
+   "marka": "CETROC",
+   "bieznik": "GHT50 TRAILER",
+   "model": "GHT50",
+   "nazwa_old": "385/55R22.5 CETROC GHT50 160K 3PMSF M+S",
+   "nazwa_new": "385/55R22.5 CETROC GHT50 TRAILER 160K 3PMSF M+S"
+  },
+  {
+   "kod": "MO2_361420",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856",
+   "nazwa_old": "205/75R17.5 FALKEN BI856 124M 3PMSF M+S DRIVE",
+   "nazwa_new": "205/75R17.5 FALKEN BI856 DRIVE 124M 3PMSF M+S DRIVE"
+  },
+  {
+   "kod": "MO2_36061747AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "620/70R42 ALLIANCE 360 173A8/170B TL",
+   "nazwa_new": "620/70R42 ALLIANCE 360 FORESTRY 173A8/170B TL"
+  },
+  {
+   "kod": "MO2_36061533AL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "620/70R42 ALLIANCE 360 166A8/163B TL",
+   "nazwa_new": "620/70R42 ALLIANCE 360 FORESTRY 166A8/163B TL"
+  },
+  {
+   "kod": "MO2_36035001AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "nazwa_new": "800/65R32 ALLIANCE 360 FORESTRY 181A8/178B TL"
+  },
+  {
+   "kod": "MO2_36035001AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "nazwa_new": "800/65R32 ALLIANCE 360 FORESTRY 181A8/178B TL"
+  },
+  {
+   "kod": "MO2_36033498AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "800/65R32 ALLIANCE 360 173A8/170B TL",
+   "nazwa_new": "800/65R32 ALLIANCE 360 FORESTRY 173A8/170B TL"
+  },
+  {
+   "kod": "MO2_36020432AL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "650/75R32 ALLIANCE 360 172D/175A8 TL",
+   "nazwa_new": "650/75R32 ALLIANCE 360 FORESTRY 172D/175A8 TL"
+  },
+  {
+   "kod": "MO2_36018062AL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "600/65-28 ALLIANCE 360 154A8/161A2",
+   "nazwa_new": "600/65-28 ALLIANCE 360 FORESTRY 154A8/161A2"
+  },
+  {
+   "kod": "MO2_36017698AL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "28R26 ALLIANCE 360 173A8/170B TL",
+   "nazwa_new": "28R26 ALLIANCE 360 FORESTRY 173A8/170B TL"
+  },
+  {
+   "kod": "MO2_36017507AL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "28R26 ALLIANCE 360 166A8/163B TL",
+   "nazwa_new": "28R26 ALLIANCE 360 FORESTRY 166A8/163B TL"
+  },
+  {
+   "kod": "MO2_36017501AL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "750/65R26 ALLIANCE 360 158A8/155B TL",
+   "nazwa_new": "750/65R26 ALLIANCE 360 FORESTRY 158A8/155B TL"
+  },
+  {
+   "kod": "MO2_36016205AL",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "480/65-24 ALLIANCE 360 140A8 TL",
+   "nazwa_new": "480/65-24 ALLIANCE 360 FORESTRY 140A8 TL"
+  },
+  {
+   "kod": "MO2_34502989AL",
+   "marka": "ALLIANCE",
+   "bieznik": "345 FORESTAR",
+   "model": "345",
+   "nazwa_old": "28L-26 ALLIANCE 345 20PR",
+   "nazwa_new": "28L-26 ALLIANCE 345 FORESTAR 20PR"
+  },
+  {
+   "kod": "MO2_34435416AL",
+   "marka": "ALLIANCE",
+   "bieznik": "344 FORESTRY",
+   "model": "344",
+   "nazwa_old": "710/40-22.5 ALLIANCE 344 16PR TL",
+   "nazwa_new": "710/40-22.5 ALLIANCE 344 FORESTRY 16PR TL"
+  },
+  {
+   "kod": "MO2_335674",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856",
+   "nazwa_old": "315/60R22.5 FALKEN BI856 152/148L 3PMSF DRIVE",
+   "nazwa_new": "315/60R22.5 FALKEN BI856 DRIVE 152/148L 3PMSF DRIVE"
+  },
+  {
+   "kod": "MO2_335670",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856",
+   "nazwa_old": "265/70R19.5 FALKEN BI856 140/138M M+S DRIVE",
+   "nazwa_new": "265/70R19.5 FALKEN BI856 DRIVE 140/138M M+S DRIVE"
+  },
+  {
+   "kod": "MO2_335667",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856",
+   "nazwa_old": "315/70R22.5 FALKEN BI856 154/150L 3PMSF M+S DRIVE",
+   "nazwa_new": "315/70R22.5 FALKEN BI856 DRIVE 154/150L 3PMSF M+S DRIVE"
+  },
+  {
+   "kod": "MO2_335661",
+   "marka": "FALKEN",
+   "bieznik": "BI856 DRIVE",
+   "model": "BI856",
+   "nazwa_old": "245/70R17.5 FALKEN BI856 136/134M M+S DRIVE",
+   "nazwa_new": "245/70R17.5 FALKEN BI856 DRIVE 136/134M M+S DRIVE"
+  },
+  {
+   "kod": "MO2_33300276AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333",
+   "nazwa_old": "20.8-38 ALLIANCE 333 164A8/160B TL",
+   "nazwa_new": "20.8-38 ALLIANCE 333 AGRO-FORESTRY 164A8/160B TL"
+  },
+  {
+   "kod": "MO2_33300149AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333",
+   "nazwa_old": "16.9R38 ALLIANCE 333 149A8/146B TL",
+   "nazwa_new": "16.9R38 ALLIANCE 333 AGRO-FORESTRY 149A8/146B TL"
+  },
+  {
+   "kod": "MO2_33300134AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333",
+   "nazwa_old": "460/85-30 ALLIANCE 333 150A8/147B TL",
+   "nazwa_new": "460/85-30 ALLIANCE 333 AGRO-FORESTRY 150A8/147B TL"
+  },
+  {
+   "kod": "MO2_33300126AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333",
+   "nazwa_old": "420/85-30 ALLIANCE 333 145A8/142B TL",
+   "nazwa_new": "420/85-30 ALLIANCE 333 AGRO-FORESTRY 145A8/142B TL"
+  },
+  {
+   "kod": "MO2_33300118AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333 FORESTRY",
+   "nazwa_old": "16.9-28 ALLIANCE 333 FORESTRY 144A8/141B TL",
+   "nazwa_new": "16.9-28 ALLIANCE 333 AGRO-FORESTRY 144A8/141B TL"
+  },
+  {
+   "kod": "MO2_33300104AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333",
+   "nazwa_old": "14.9-28 ALLIANCE 333 139A8/136B TL",
+   "nazwa_new": "14.9-28 ALLIANCE 333 AGRO-FORESTRY 139A8/136B TL"
+  },
+  {
+   "kod": "MO2_32862024AL-AP",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 XP",
+   "nazwa_old": "700/50-26.5 ALLIANCE 328 XP 174A8/170B TL",
+   "nazwa_new": "700/50-26.5 ALLIANCE 328 VALUE PLUS 174A8/170B TL"
+  },
+  {
+   "kod": "MO2_32862023AL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "700/50-26.5 ALLIANCE 328 174A8/170B TL",
+   "nazwa_new": "700/50-26.5 ALLIANCE 328 VALUE PLUS 174A8/170B TL"
+  },
+  {
+   "kod": "MO2_32853003AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "600/55-26.5 ALLIANCE FLOTATION 328 159A8/170A8 16PR TL",
+   "nazwa_new": "600/55-26.5 ALLIANCE FLOTATION 328 VALUE PLUS 159A8/170A8 16PR TL"
+  },
+  {
+   "kod": "MO2_32852215AL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "600/55-26.5 ALLIANCE 328 163C TL",
+   "nazwa_new": "600/55-26.5 ALLIANCE 328 VALUE PLUS 163C TL"
+  },
+  {
+   "kod": "MO2_32841144",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "700/50-22.5 ALLIANCE 328 167D/166E TL",
+   "nazwa_new": "700/50-22.5 ALLIANCE 328 VALUE PLUS 167D/166E TL"
+  },
+  {
+   "kod": "MO2_32840020AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FLOTATION",
+   "nazwa_old": "700/50-22.5 ALLIANCE 328 FLOTATION 174A8/170B 16PR TL",
+   "nazwa_new": "700/50-22.5 ALLIANCE 328 VALUE PLUS 174A8/170B 16PR TL"
+  },
+  {
+   "kod": "MO2_32835319AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "700/40-22.5 ALLIANCE 328 16PR TL",
+   "nazwa_new": "700/40-22.5 ALLIANCE 328 VALUE PLUS 16PR TL"
+  },
+  {
+   "kod": "MO2_32832520AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "600/50-22.5 ALLIANCE 328 16PR TL",
+   "nazwa_new": "600/50-22.5 ALLIANCE 328 VALUE PLUS 16PR TL"
+  },
+  {
+   "kod": "MO2_32827420AL",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "500/50R17 ALLIANCE 328 145D TL",
+   "nazwa_new": "500/50R17 ALLIANCE 328 VALUE PLUS 145D TL"
+  },
+  {
+   "kod": "MO2_32827076AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FORESTRY",
+   "nazwa_old": "500/45-22.5 ALLIANCE 328 FORESTRY 144A8 16PR TL",
+   "nazwa_new": "500/45-22.5 ALLIANCE 328 VALUE PLUS 144A8 16PR TL"
+  },
+  {
+   "kod": "MO2_32827075AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FORESTRY",
+   "nazwa_old": "400/60-15.5 ALLIANCE 328 FORESTRY 152A8 20PR",
+   "nazwa_new": "400/60-15.5 ALLIANCE 328 VALUE PLUS 152A8 20PR"
+  },
+  {
+   "kod": "MO2_32827054AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FLOTATION",
+   "nazwa_old": "550/45-22.5 ALLIANCE 328 FLOTATION 159A8/156B 16PR TL",
+   "nazwa_new": "550/45-22.5 ALLIANCE 328 VALUE PLUS 159A8/156B 16PR TL"
+  },
+  {
+   "kod": "MO2_32827045AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "400/60-22.5 ALLIANCE 328 160A8 18PR TL",
+   "nazwa_new": "400/60-22.5 ALLIANCE 328 VALUE PLUS 160A8 18PR TL"
+  },
+  {
+   "kod": "MO2_32800028AL-AP",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 XP",
+   "nazwa_old": "600/55-22.5 ALLIANCE 328 XP 162D 16PR TL",
+   "nazwa_new": "600/55-22.5 ALLIANCE 328 VALUE PLUS 162D 16PR TL"
+  },
+  {
+   "kod": "MO2_32800027AL-AP",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 XP",
+   "nazwa_old": "800/45-26.5 ALLIANCE 328 XP 177A8/173B 16PR TL",
+   "nazwa_new": "800/45-26.5 ALLIANCE 328 VALUE PLUS 177A8/173B 16PR TL"
+  },
+  {
+   "kod": "MO2_32800016AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328",
+   "nazwa_old": "500/50R17 ALLIANCE 328 158A8/155B TL",
+   "nazwa_new": "500/50R17 ALLIANCE 328 VALUE PLUS 158A8/155B TL"
+  },
+  {
+   "kod": "MO1_19800286",
+   "marka": "MRL",
+   "bieznik": "MTF 222 TWO RIB",
+   "model": "MTF 222",
+   "nazwa_old": "7.50-16 MRL MTF 222 103A6/98A8 8PR TT",
+   "nazwa_new": "7.50-16 MRL MTF 222 TWO RIB 103A6/98A8 8PR TT"
+  },
+  {
+   "kod": "MO1_17422750",
+   "marka": "NOKIAN",
+   "bieznik": "TR FOREST 2",
+   "model": "TR FOREST",
+   "nazwa_old": "18.4-34 NOKIAN TR FOREST 14PR TT",
+   "nazwa_new": "18.4-34 NOKIAN TR FOREST 2 14PR TT"
+  },
+  {
+   "kod": "MO1_15226831",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "620/70R42 ALLIANCE 360 173A8/170B TL",
+   "nazwa_new": "620/70R42 ALLIANCE 360 FORESTRY 173A8/170B TL"
+  },
+  {
+   "kod": "MO1_15226794",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "650/65R38 ALLIANCE 360 178A8/175B TL",
+   "nazwa_new": "650/65R38 ALLIANCE 360 FORESTRY 178A8/175B TL"
+  },
+  {
+   "kod": "MO1_15226767",
+   "marka": "ALLIANCE",
+   "bieznik": "360 FORESTRY",
+   "model": "360",
+   "nazwa_old": "800/65R32 ALLIANCE 360 181A8/178B TL",
+   "nazwa_new": "800/65R32 ALLIANCE 360 FORESTRY 181A8/178B TL"
+  },
+  {
+   "kod": "MO1_11166115",
+   "marka": "GOODTRIP",
+   "bieznik": "GHT50 TRAILER",
+   "model": "GHT50",
+   "nazwa_old": "385/65R22.5 GOODTRIP GHT50 160K/158L 20PR TL",
+   "nazwa_new": "385/65R22.5 GOODTRIP GHT50 TRAILER 160K/158L 20PR TL"
+  },
+  {
+   "kod": "MO1_10001615",
+   "marka": "GOODTRIP",
+   "bieznik": "GHT22 TRAILER",
+   "model": "GHT22",
+   "nazwa_old": "435/50R19.5 GOODTRIP GHT22 160J 22PR TL",
+   "nazwa_new": "435/50R19.5 GOODTRIP GHT22 TRAILER 160J 22PR TL"
+  },
+  {
+   "kod": "MO7_T445596",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "700/70-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "nazwa_new": "700/70-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT"
+  },
+  {
+   "kod": "MO7_T445476",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "700/55-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "nazwa_new": "700/55-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT"
+  },
+  {
+   "kod": "MO7_T445475",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "600/65-34 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "nazwa_new": "600/65-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT"
+  },
+  {
+   "kod": "MO7_T445528",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "750/55-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "nazwa_new": "750/55-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT"
+  },
+  {
+   "kod": "MO7_T445527",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "600/55-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "nazwa_new": "600/55-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT"
+  },
+  {
+   "kod": "MO7_T445541",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "710/45-26.5 NOKIAN NORDMAN FOREST TRS SF 20PR TT",
+   "nazwa_new": "710/45-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT"
+  },
+  {
+   "kod": "MO7_T445624",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "710/40-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "nazwa_new": "710/40-22.5 NOKIAN NORDMAN FOREST TRS L-2 SF 16PR TT"
+  },
+  {
+   "kod": "MO7_T445622",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS",
+   "nazwa_old": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+   "nazwa_new": "600/50-22.5 NOKIAN NORDMAN FOREST TRS L-2 SF 16PR TT"
+  },
+  {
+   "kod": "MO2_CET0048",
+   "marka": "CETROC",
+   "bieznik": "GHT50 TRAILER",
+   "model": "GHT50",
+   "nazwa_old": "265/70R19.5 CETROC GHT50 143/141K 3PMSF M+S FRONT",
+   "nazwa_new": "265/70R19.5 CETROC GHT50 TRAILER 143/141K 3PMSF M+S FRONT"
+  },
+  {
+   "kod": "MO3_6506542A",
+   "marka": "ALLIANCE",
+   "bieznik": "365 AGRISTAR",
+   "model": "365",
+   "nazwa_old": "650/65R42 ALLIANCE 365 170D/173A8 TL",
+   "nazwa_new": "650/65R42 ALLIANCE 365 AGRISTAR 170D/173A8 TL"
+  },
+  {
+   "kod": "MO4_KARD080189004IP60",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "18x8.50-8 KABAT IMP-06 82A4 6PR TL",
+   "nazwa_new": "18x8.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 82A4 6PR TL"
+  },
+  {
+   "kod": "MO4_KARD080189004IP62",
+   "marka": "KABAT",
+   "bieznik": "IMP-06 IMPLEMENT LINIOWA",
+   "model": "IMP-06",
+   "nazwa_old": "18x8.50-8 KABAT IMP-06 82A4 6PR TT",
+   "nazwa_new": "18x8.50-8 KABAT IMP-06 IMPLEMENT LINIOWA 82A4 6PR TT"
+  }
+ ],
+ "grupaB_nieudane": [
+  {
+   "kod": "MO9_53780",
+   "marka": "BKT",
+   "bieznik": "FLOT RIBIMPL 1",
+   "model": "FLOT RIBIMPL 1",
+   "nazwa": "31x13.50-15 BKT FLOT RIBIMPL HF1 12PR TL"
+  },
+  {
+   "kod": "MO9_23841",
+   "marka": "BKT",
+   "bieznik": "TF 8181 SZ.",
+   "model": "TF 8181 SZ.",
+   "nazwa": "7.50-16 BKT TF 8181 6PR TT"
+  },
+  {
+   "kod": "MO9_18459",
+   "marka": "BKT",
+   "bieznik": "AGRIMAX RT955 E",
+   "model": "AGRIMAX RT955 E",
+   "nazwa": "300/85R42 BKT AGRIMAX RT 955 144A8/141B TL"
+  },
+  {
+   "kod": "MO5_LLCR19538555JLLT0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T10",
+   "model": "L-T10",
+   "nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17524570MLLS0",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20",
+   "nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLS0",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20",
+   "nazwa": "235/75R17.5 LINGLONG -S20 132/130M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17523575MLLD0",
+   "marka": "LINGLONG",
+   "bieznik": "L-D20",
+   "model": "L-D20",
+   "nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17523575JT2L0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20",
+   "nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17521575MLLS0",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20",
+   "nazwa": "215/75R17.5 LINGLONG -S20 126/124M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17521575JT2L0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20",
+   "nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17520575MLLS0",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20",
+   "nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_LLCR17520565JT2L0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20",
+   "nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_IMCR22531580L12M1",
+   "marka": "MIRAGE",
+   "bieznik": "MG121 PROWADZĄCA",
+   "model": "MG121 PROWADZĄCA",
+   "nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_HLRD120238006MG50",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE",
+   "nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL"
+  },
+  {
+   "kod": "MO5_HLRD080F16003MG50",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE",
+   "nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL"
+  },
+  {
+   "kod": "MO5_CTCR22529580MWX30",
+   "marka": "CEAT",
+   "bieznik": "WINMILE-X3-AW",
+   "model": "WINMILE-X3-AW",
+   "nazwa": "295/80R22.5 CEAT WINMILE-AW 154/149M 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ22538565K3SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 160K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ22538555K3SH1",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3 ED",
+   "model": "CONTI SCANDINAVIA 3 ED",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 ED 160K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ22531570L3SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ19528570MS3H2",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3",
+   "nazwa": "285/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 146/144M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ19526570MS3H0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 140/138M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ17523575ML3S0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 132/130M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCZ17521575ML3S0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI SCANDINAVIA 3",
+   "model": "CONTI SCANDINAVIA 3",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI SCANDINAVIA LS3 126/124M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538565KCH50",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI HYBRID HS5 164K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538565K5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538565K3CS0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI CROSSTRAC 3",
+   "model": "CONTI CROSSTRAC 3",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 160K/158L 20PR M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538555KCH50",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI HYBRID HS5 160K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22535550L5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "355/50R22.5 CONTINENTAL CONTI ECO HS5 158L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531580LCH50",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531580L5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531580K3CS0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI CROSSTRAC 3",
+   "model": "CONTI CROSS TRAC 3",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI CROSS TRAC HS3 156/150K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570LCH50",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH1",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 158/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531570L5HC0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI EFFICIENTPRO 5",
+   "model": "CONTI EFFICIENTPRO 5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI EFFICIENTPRO HS5 158/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22531560L5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS5 154/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22529580MCH50",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5",
+   "nazwa": "295/80R22.5 CONTINENTAL CONTI HYBRID HS5 154/149M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22529560LCES2",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECOPLUS 3",
+   "model": "CONTI ECOPLUS 3",
+   "nazwa": "295/60R22.5 CONTINENTAL CONTI ECOPLUS HS3 150/147L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR19526570MHSH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3+",
+   "model": "CONTI HYBRID 3+",
+   "nazwa": "265/70R19.5 CONTINENTAL CONTI HYBRID HS3+ 140/138M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR19524570MHS32",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3",
+   "nazwa": "245/70R19.5 CONTINENTAL CONTI HYBRID HS3 136/134M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17526570MH3S2",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3",
+   "nazwa": "265/70R17.5 CONTINENTAL CONTI HYBRID LS3 139/136M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17524570MH3S2",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3",
+   "nazwa": "245/70R17.5 CONTINENTAL CONTI HYBRID LS3 136/134M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17523575MH3S4",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3",
+   "nazwa": "235/75R17.5 CONTINENTAL CONTI HYBRID LS3 132/130M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17522575MH3S2",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3",
+   "nazwa": "225/75R17.5 CONTINENTAL CONTI HYBRID LS3 129/127M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17521575MH3S2",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3",
+   "nazwa": "215/75R17.5 CONTINENTAL CONTI HYBRID LS3 126/124M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR17520575MHLS2",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 3",
+   "model": "CONTI HYBRID 3",
+   "nazwa": "205/75R17.5 CONTINENTAL CONTI HYBRID LS3 124/122M 12PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR19538555JLLT0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T10",
+   "model": "L-T10",
+   "nazwa": "385/55R19.5 LINGLONG -T10 156J 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR17524570MLLS0",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20",
+   "nazwa": "245/70R17.5 LINGLONG -S20 136/134M 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR17523575MLLS0",
+   "marka": "",
+   "bieznik": "L-S20",
+   "model": "",
+   "nazwa": "LINGLONG S20 132/130M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR17523575MLLD0",
+   "marka": "LINGLONG",
+   "bieznik": "L-D20",
+   "model": "L-D20",
+   "nazwa": "235/75R17.5 LINGLONG -D20 132/130M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR17523575JT2L0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20",
+   "nazwa": "235/75R17.5 LINGLONG -T20 143/141J 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR17521575JT2L0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20",
+   "nazwa": "215/75R17.5 LINGLONG -T20 135/133J 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR17520575MLLS0",
+   "marka": "LINGLONG",
+   "bieznik": "L-S20",
+   "model": "L-S20",
+   "nazwa": "205/75R17.5 LINGLONG -S20 124/122M 14PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_LLCR17520565JT2L0",
+   "marka": "LINGLONG",
+   "bieznik": "L-T20",
+   "model": "L-T20",
+   "nazwa": "205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_IMCR22531580L12M1",
+   "marka": "MIRAGE",
+   "bieznik": "MG121 PROWADZĄCA",
+   "model": "MG121 PROWADZĄCA",
+   "nazwa": "315/80R22.5 MIRAGE MG121 158/150L PROWADZĄCA 20PR M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_HLRD120238006MG50",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE",
+   "nazwa": "23x8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL"
+  },
+  {
+   "kod": "MO4_HLRD080F16003MG50",
+   "marka": "MRL",
+   "bieznik": "MG 54 Z-WIDE",
+   "model": "MG 54 Z-WIDE",
+   "nazwa": "16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL"
+  },
+  {
+   "kod": "MO4_CCCR22538565K5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531580LCH50",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531580L5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531570LCH50",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI HYBRID 5",
+   "model": "CONTI HYBRID 5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO4_CCCR22531570L5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO3_71045265Af644f20tt",
+   "marka": "ALLIANCE",
+   "bieznik": "F-644",
+   "model": "F-644",
+   "nazwa": "710/45-26.5 ALLIANCE FORESTAR 644 III 175A2/168A8 20PR SB TT"
+  },
+  {
+   "kod": "MO3_71045265Af643f20tt",
+   "marka": "ALLIANCE",
+   "bieznik": "F-643",
+   "model": "F-643",
+   "nazwa": "710/45-26.5 ALLIANCE 643 FORESTAR RIII 20PR TT"
+  },
+  {
+   "kod": "MO3_60055265Af644f20tt",
+   "marka": "ALLIANCE",
+   "bieznik": "F-644",
+   "model": "F-644",
+   "nazwa": "600/55-26.5 ALLIANCE 644 FORESTAR III 20PR TT"
+  },
+  {
+   "kod": "MO3_4408028FIDU",
+   "marka": "FIRESTONE",
+   "bieznik": "DURAFORCE",
+   "model": "DURAFORCE",
+   "nazwa": "440/80R28 FIRESTONE DURA-UT 156A8 TL"
+  },
+  {
+   "kod": "MO3_3807024BRvxr",
+   "marka": "BRIDGESTONE",
+   "bieznik": "VX-TRACTOR",
+   "model": "VX TRACTOR",
+   "nazwa": "380/70R24 BRIDGESTONE VX-R TRACTOR 125D/122E TL"
+  },
+  {
+   "kod": "MO3_5007024FIDU",
+   "marka": "FIRESTONE",
+   "bieznik": "DURAFORCE",
+   "model": "DURAFORCE",
+   "nazwa": "500/70R24 FIRESTONE DURA-UT 164A/164B TL"
+  },
+  {
+   "kod": "MO3_3808528BRvxr",
+   "marka": "BRIDGESTONE",
+   "bieznik": "VX-TRACTOR",
+   "model": "VX TRACTOR",
+   "nazwa": "380/85R28 BRIDGESTONE VX-R TRACTOR 133D/130E TL"
+  },
+  {
+   "kod": "MO3_6006538BRvxr",
+   "marka": "BRIDGESTONE",
+   "bieznik": "VX-TRACTOR",
+   "model": "VX TRACTOR",
+   "nazwa": "600/65R38 BRIDGESTONE VX-R TRACTOR 153D/150E TL"
+  },
+  {
+   "kod": "MO3_4057018FIDU",
+   "marka": "FIRESTONE",
+   "bieznik": "DURAFORCE",
+   "model": "DURAFORCE",
+   "nazwa": "405/70R18 FIRESTONE DURA-UT 141B"
+  },
+  {
+   "kod": "MO3_4008024AA-325162A8",
+   "marka": "ALLIANCE",
+   "bieznik": "A-325",
+   "model": "A-325",
+   "nazwa": "400/80-24 ALLIANCE TOUGH TRAC 325 162A8 TL"
+  },
+  {
+   "kod": "MO3_3808038Aaii",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 85",
+   "model": "AGRISTAR II 85",
+   "nazwa": "380/80R38 ALLIANCE AGRISTAR II 142D TL"
+  },
+  {
+   "kod": "MO3_9006038contiTM",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER",
+   "nazwa": "900/60R38 CONTINENTAL 178D/181A8 TL"
+  },
+  {
+   "kod": "MO3_6007030conti",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER",
+   "nazwa": "600/70R30 CONTINENTAL 152D/155A8 TL"
+  },
+  {
+   "kod": "MO3_6007030Aaii",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL"
+  },
+  {
+   "kod": "MO3_4207024Aaii",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70",
+   "nazwa": "420/70R24 ALLIANCE AGRISTAR II 130D TL"
+  },
+  {
+   "kod": "MO3_6507538conti",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER",
+   "nazwa": "650/75R38 CONTINENTAL 169D/172A8 TL"
+  },
+  {
+   "kod": "MO3_4208534Aaii",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 85",
+   "model": "AGRISTAR II 85",
+   "nazwa": "420/85R34 ALLIANCE AGRI STAR II 142D STUBBLE GUARD TL"
+  },
+  {
+   "kod": "MO3_5807038Aaii",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70",
+   "nazwa": "580/70R38 ALLIANCE AGRISTAR II 155D TL"
+  },
+  {
+   "kod": "MO3_8007032conti",
+   "marka": "CONTINENTAL",
+   "bieznik": "COMBINEMASTER",
+   "model": "COMBINEMASTER",
+   "nazwa": "800/70R32 CONTINENTAL 181A8/181B TL"
+  },
+  {
+   "kod": "MO3_6006534conti",
+   "marka": "CONTINENTAL",
+   "bieznik": "TRACTOR MASTER",
+   "model": "TRACTORMASTER",
+   "nazwa": "600/65R34 CONTINENTAL 151D/154A8 TL"
+  },
+  {
+   "kod": "MO3_6508538Aaii",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 85",
+   "model": "AGRISTAR II 85",
+   "nazwa": "650/85R38 ALLIANCE AGRISTAR II 173D TL"
+  },
+  {
+   "kod": "MO3_4607024contiEM",
+   "marka": "CONTINENTAL",
+   "bieznik": "COMPACT MASTER EM",
+   "model": "COMPACTMASTER EM",
+   "nazwa": "460/70R24 CONTINENTAL 159A8/159B TL"
+  },
+  {
+   "kod": "MO3_6007030ademo",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II 70",
+   "model": "AGRISTAR II 70",
+   "nazwa": "600/70R30 ALLIANCE AGRI STAR II 152D STUBBLE GUARD TL"
+  },
+  {
+   "kod": "MO3_30095R46AAIIRC148D14",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC",
+   "nazwa": "300/95R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL"
+  },
+  {
+   "kod": "MO3_23095R36AAIIRC130D12",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC",
+   "nazwa": "230/95R36 ALLIANCE AGRISTAR II ROW CROP 130D/127E TL"
+  },
+  {
+   "kod": "MO3_32090R46AAIIRC148D14",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC",
+   "nazwa": "320/90R46 ALLIANCE AGRISTAR II ROW CROP 148D/145E TL"
+  },
+  {
+   "kod": "MO3_23095R28AAIIRC110D10",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC",
+   "nazwa": "230/95R28 ALLIANCE AGRISTAR II ROW CROP 110D/107E TL"
+  },
+  {
+   "kod": "MO2_T484420",
+   "marka": "NOKIAN",
+   "bieznik": "TR FS FOREST",
+   "model": "TR FS FOREST",
+   "nazwa": "18.4-34 NOKIAN TR FOREST 14PR TT"
+  },
+  {
+   "kod": "MO2_T445622",
+   "marka": "NOKIAN",
+   "bieznik": "NORDMAN FOREST TRS L-2",
+   "model": "NORDMAN FOREST TRS L-2",
+   "nazwa": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT"
+  },
+  {
+   "kod": "MO2_67000010AL-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "AF 670",
+   "model": "AF 670",
+   "nazwa": "710/70R38 ALLIANCE AGRO FORESTRY 670 175A2/168A8 SB TL"
+  },
+  {
+   "kod": "MO2_67000005AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "AF 670",
+   "model": "AF 670",
+   "nazwa": "480/70-34 ALLIANCE AGRO FORESTRY 670 146A8/143B SB TL"
+  },
+  {
+   "kod": "MO2_45045005AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "AGRISTAR II RC",
+   "model": "AGRISTAR II RC",
+   "nazwa": "230/95R44 ALLIANCE AGRISTAR II ROW CROP 134D/131E TL"
+  },
+  {
+   "kod": "MO2_38102600AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "381 FLOTAMASTER",
+   "model": "381 FLOTAMASTER",
+   "nazwa": "620/40R22.5 ALLIANCE FLOTMASTER 381 148D TL"
+  },
+  {
+   "kod": "MO2_33300242AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333 FORESTRY",
+   "nazwa": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL"
+  },
+  {
+   "kod": "MO2_33300054AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "333 AGRO-FORESTRY",
+   "model": "333 FORESTRY",
+   "nazwa": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL"
+  },
+  {
+   "kod": "MO2_32827054AL-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "328 VALUE PLUS",
+   "model": "328 FLOTATION",
+   "nazwa": "550/45-22.5 ALLIANCE FLOTATION 328 147A8/159A8 16PR TL"
+  },
+  {
+   "kod": "MO2_32470010FP-IN",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO",
+   "nazwa": "18.4-26 ALLIANCE FARM PRO 324 146A8 12PR TL"
+  },
+  {
+   "kod": "MO2_32414002FP-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO",
+   "nazwa": "14.9-28 ALLIANCE FARM PRO 324 130A8 8PR TT"
+  },
+  {
+   "kod": "MO2_32412520FP-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO",
+   "nazwa": "12.4-28 ALLIANCE FARM PRO 324 123A8 8PR TT"
+  },
+  {
+   "kod": "MO2_32406112FP-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "324 FARM PRO",
+   "model": "324 FARM PRO",
+   "nazwa": "13.6-24 ALLIANCE FARM PRO 324 123A8 8PR TT"
+  },
+  {
+   "kod": "MO2_32014918VP-IG",
+   "marka": "ALLIANCE",
+   "bieznik": "A320 VALUE PLUS",
+   "model": "A320 VALUE PLUS",
+   "nazwa": "12.5/80-18 ALLIANCE 320 VALUE PLUS 145A6/142A8 12PR TL"
+  },
+  {
+   "kod": "MO2_05153350000",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI CROSSTRAC 3",
+   "model": "CONTI CROSSTRAC 3",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI CROSSTRAC HS3 164K 20PR 3PMSF M+S FRONT"
+  },
+  {
+   "kod": "MO2_05128730000",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "315/60R22.5 CONTINENTAL CONTI ECO HS 5 154/150L 3PMSF M+S HS FRONT"
+  },
+  {
+   "kod": "MO2_05128600000",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS 5 164K 3PMSF M+S HS FRONT"
+  },
+  {
+   "kod": "MO7_T445516",
+   "marka": "NOKIAN",
+   "bieznik": "FOREST KING TRS 2",
+   "model": "FOREST KING TRS -2",
+   "nazwa": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL"
+  },
+  {
+   "kod": "MO5_LLCR22531570LRD30",
+   "marka": "LINGLONG",
+   "bieznik": "R-D30",
+   "model": "R-D30",
+   "nazwa": "315/70R22.5 LINGLONG -D30 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO2_05127050000",
+   "marka": "CONTINENTAL",
+   "bieznik": "5 CONTI HYBRID",
+   "model": "5 CONTI HYBRID",
+   "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO5_CCCR22538555K5SH0",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS5 162K 20PR TL M+S 3PMSF"
+  },
+  {
+   "kod": "MO2_05127970000",
+   "marka": "CONTINENTAL",
+   "bieznik": "CONTI ECO 5",
+   "model": "CONTI ECO 5",
+   "nazwa": "385/55R22.5 CONTINENTAL CONTI ECO HS 5 162K/158L 3PMSF M+S HS"
+  }
+ ]
+}

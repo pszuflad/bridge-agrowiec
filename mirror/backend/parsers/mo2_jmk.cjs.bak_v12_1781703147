@@ -1,0 +1,124 @@
+// MO2 JMK parser
+// Plik: Cennik_26002_v2_*.csv
+// Kodowanie: UTF-8 z BOM
+// Separator: ;
+// Decyzja Anny:
+//   - cena = "Cena klient netto" (NIE detal)
+//   - stan = Magazyn 1 + Magazyn 2 (sumujemy per EAN, gdy ten sam EAN)
+//   - różne EAN = osobne wpisy
+
+const { parse } = require('csv-parse/sync');
+const iconv = require('iconv-lite');
+const fs = require('fs');
+const c = require('../common.cjs');
+
+const DOSTAWCA = 'MO2_JMK';
+
+const RODZAJ_MAP = {
+  'rolnicze': 'rolnicze',
+  'leśne': 'leśne',
+  'lesne': 'leśne',
+  'przemysłowe': 'przemysłowe',
+  'przemyslowe': 'przemysłowe',
+  'ciężarowe': 'ciężarowe',
+  'ciezarowe': 'ciężarowe',
+  'dętki': 'dętki',
+  'detki': 'dętki',
+  'akcesoria': 'akcesoria'
+};
+
+function parseFile(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  const text = iconv.decode(buffer, 'utf-8');
+
+  const rows = parse(text, {
+    delimiter: ';',
+    columns: true,
+    skip_empty_lines: true,
+    relax_column_count: true,
+    bom: true,
+    trim: true
+  });
+
+  // Najpierw parsowanie do pełnych rekordów, potem grupowanie po EAN
+  const intermediate = [];
+  const errors = [];
+
+  for (const row of rows) {
+    try {
+      const rodzajRaw = (row['Rodzaj'] || '').toLowerCase().trim();
+      const nazwa = row['nazwa'] || '';
+      let kategoria = RODZAJ_MAP[rodzajRaw];
+      if (!kategoria) kategoria = c.classifyByName(nazwa);
+
+      const producent = row['Producent'] || '';
+      const bieznik = row['Bieżnik'] || '';
+      const szerokosc = row['szerokosc'] || '';
+      const profil = row['profil'] || '';
+      const srednica = row['srednica'] || '';
+      let rozmiar = '';
+      if (szerokosc && srednica) {
+        rozmiar = profil
+          ? `${szerokosc}/${profil}R${srednica}`
+          : `${szerokosc}-${srednica}`;
+      }
+      if (!rozmiar) {
+        const fromName = c.extractSize(nazwa);
+        rozmiar = fromName.rozmiar;
+      }
+
+      // SUMOWANIE STANÓW
+      const m1 = c.normalizeQty(row['Magazyn 1 ilosc']) || 0;
+      const m2 = c.normalizeQty(row['Magazyn 2 ilosc']) || 0;
+      const stan = m1 + m2;
+
+      const oznaczenia = c.extractTechnicalMarks(nazwa);
+      // Dodaj 3PMSF, M+S z osobnych kolumn jeśli są
+      // (JMK ma to w nazwie zwykle)
+
+      const rec = c.normalizeRecord({
+        ean: c.normalizeEan(row['ean']),
+        kod_dostawcy: row['Kod producenta'],
+        nazwa: nazwa,
+        producent: producent,
+        model_bieznik: bieznik,
+        rozmiar: rozmiar,
+        rozmiar_alternatywny: null,
+        // DECYZJA ANNY: cena z "Cena klient netto"
+        cena_zakupu: row['Cena klient netto'],
+        // DECYZJA ANNY: stan = M1 + M2
+        stan_magazynowy: stan,
+        kategoria: kategoria,
+        oznaczenia_techniczne: oznaczenia,
+        dostawca: DOSTAWCA,
+        surowe_pola: row
+      });
+      intermediate.push(rec);
+    } catch (e) {
+      errors.push({ row, error: e.message });
+    }
+  }
+
+  // Grupowanie po EAN — jeśli ten sam EAN w wielu wierszach, sumujemy stany
+  // (decyzja Anny: ten sam EAN = jeden wpis ze stanem = suma; różne EAN = osobne)
+  const byEan = new Map();
+  const noEan = []; // bez EAN wpadają osobno
+  for (const rec of intermediate) {
+    if (!rec.ean) {
+      noEan.push(rec);
+      continue;
+    }
+    if (byEan.has(rec.ean)) {
+      // sumujemy stan
+      const existing = byEan.get(rec.ean);
+      existing.stan_magazynowy = (existing.stan_magazynowy || 0) + (rec.stan_magazynowy || 0);
+    } else {
+      byEan.set(rec.ean, rec);
+    }
+  }
+
+  const records = [...byEan.values(), ...noEan];
+  return { records, errors, dostawca: DOSTAWCA };
+}
+
+module.exports = { parseFile, DOSTAWCA };

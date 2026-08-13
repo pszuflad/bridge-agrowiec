@@ -1,0 +1,372 @@
+'use strict';
+
+// Adapter: records z parserow -> format akceptowany przez tk(dostawca, surowe).
+// Tutaj dopinamy wspolny normalizator parametrow opon, zeby import przekazywal
+// strukturalne pola zamiast chowania ich w nazwie/oznaczeniach technicznych.
+
+const crypto = require('crypto');
+const tyre = require('./tyre_params.cjs');
+
+function firstValue(...values) {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return null;
+}
+
+// POPRAWKA 2026-06-18: Excel przy eksporcie CSV czasem zaokragla dlugie numery
+// (np. "Kod producenta") do notacji naukowej, np. "5,02E+12". Realne dane Trelleborg
+// pokazaly, ze taki znieksztalcony kod jest IDENTYCZNY dla wielu (np. 48) calkowicie
+// roznych opon (rozna nazwa, rozmiar) — bez tej detekcji wszystkie one dostawalyby
+// ten sam "kod", co psuje unikalnosc identyfikatora produktu (dostawca+kod).
+function looksLikeMangledScientific(value) {
+  if (value === null || value === undefined) return false;
+  return /^-?\d+(?:[.,]\d+)?E[+-]?\d+$/i.test(String(value).trim());
+}
+
+function syntheticKod(dostawcaKod, record, enriched = {}) {
+  // POPRAWKA 2026-06-18: jesli EAN jest oznaczony jako "lossy" (utracona precyzja przez
+  // notacje naukowa Excela), NIE uzywamy go jako bazy identyfikatora — taki EAN bywa
+  // identyczny dla wielu roznych produktow (potwierdzone na realnych danych Trelleborg:
+  // 48 roznych opon z tym samym zaokraglonym EAN). Wtedy budujemy hash z nazwy/rozmiaru.
+  const eanLossy = !!record.ean_lossy;
+  const ean = !eanLossy ? firstValue(enriched.ean, record.ean) : null;
+  if (ean) return String(ean);
+  const basis = [
+    enriched.nazwaKoncowa,
+    record.nazwa,
+    enriched.rozmiar,
+    record.rozmiar,
+    enriched.marka,
+    record.producent,
+    enriched.model,
+    record.model_bieznik
+  ].filter(Boolean).join('|').trim().toUpperCase().replace(/\s+/g, ' ');
+  if (!basis) return null;
+  const h = crypto.createHash('sha1').update(`${dostawcaKod}|${basis}`).digest('hex').slice(0, 14);
+  return `${dostawcaKod}_${h.toUpperCase()}`;
+}
+
+function buildIndeksy(enriched, technicalMarks = []) {
+  const load = firstValue(enriched.indeksNosnosci);
+  const speed = firstValue(enriched.indeksPredkosci);
+  if (load && speed) {
+    const loads = String(load).split('/');
+    const speeds = String(speed).split('/');
+    return loads
+      .map((li, idx) => `${li}${speeds[idx] || speeds[0] || ''}`)
+      .join('/')
+      .replace(/\s+/g, '');
+  }
+
+  if (!Array.isArray(technicalMarks) || !technicalMarks.length) return null;
+  return technicalMarks.join(' ').replace(/\s+/g, '');
+}
+
+function baseSupplierCode(dostawcaKod, record) {
+  const source = dostawcaKod || record.dostawca || '';
+  return String(source).toUpperCase().split('_')[0];
+}
+
+function shouldRejectRecord(record, enriched) {
+  if (enriched && enriched.odrzucony) return true;
+  const text = [
+    record?.nazwa,
+    record?.model_bieznik,
+    record?.kategoria,
+    enriched?.nazwaKoncowa,
+    enriched?.model,
+    enriched?.kategoria
+  ].filter(Boolean).join(' ');
+  // POPRAWKA 2026-06-18: JS \b nie dziala poprawnie przy polskich znakach diakrytycznych
+  // (np. "ł", "ś" nie sa traktowane jako \w), co powodowalo, ze warianty takie jak
+  // "kół" (nie wykrywany na granicy koncowej) albo "śruba"/"śrubki" (nie wykrywany na
+  // granicy startowej) NIGDY nie byly faktycznie dopasowywane, mimo ze wystepowaly w liscie.
+  // Zamiast \b uzywamy lookbehind/lookahead z negacja klasy polskich liter.
+  const PL = 'a-ząćęłńóśźż';
+  // POPRAWKA 2026-06-18: Bohnenkamp (dostawca niemiecki) ma w katalogu pozycje typu
+  // "PKW-VENTIL, TR 415 (SNAP IN)", "LKW-FELGENVENTIL 32 MS", "METALLVENTIL 42 MS" —
+  // to wentyle/zaworki do felg, nie opony. Wczesniejsza lista mialo tylko polskie
+  // "wentyl/wentyle", co nie lapalo niemieckiego "ventil" i te pozycje przechodzily
+  // jako "opony" z rozmiar=null, wysokosc=null (cichy blad widoczny tylko po realnych
+  // danych Bohnenkamp).
+  const accessoryRe = new RegExp(
+    `(?<![${PL}])(koła|koło|kola|kolo|kół|zawory|zawór|zawor|oring|oringi|o-ring|o-ringi|obręcz|obręcze|obrecz|obrecze|ochraniacz|ochraniacze|felga|felgi|felg|śruba|śrubki|śrubek|sruba|srubki|srubek|nakrętka|nakrętki|nakrętek|nakretka|nakretki|nakretek|dętka|dętki|detka|detki|wentyl|wentyle)(?![${PL}])`,
+    'i'
+  );
+  // POPRAWKA 2026-06-18 (2): "ventil" w realnych danych Bohnenkamp wystepuje prawie
+  // zawsze jako czesc niemieckiego zlozenia bez spacji (np. "FELGENVENTIL",
+  // "METALLVENTIL", "PKW-VENTIL") — granica (?<![PL]) wymagana przez accessoryRe
+  // blokuje dopasowanie, bo przed "VENTIL" stoi litera ("N" w FELGENVENTIL, "L" w
+  // METALLVENTIL), nie separator. "ventil" jako fragment slowa jest wystarczajaco
+  // specyficzny, zeby sprawdzac go bez granic.
+  const ventilRe = /ventil/i;
+  return /bie[zż]nikowan/i.test(text) ||
+    /\bquad\b/i.test(text) ||
+    /\batv\b/i.test(text) ||
+    /\bd?tki?\b/i.test(text) ||
+    /\bdetki?\b/i.test(text) ||
+    accessoryRe.test(text) ||
+    ventilRe.test(text);
+}
+
+function normalizeBySupplier(dostawcaKod, record) {
+  const kod = baseSupplierCode(dostawcaKod, record);
+  const raw = record.surowe_pola || {};
+
+  try {
+    if (kod === 'MO1') return tyre.normalizeBohnenkamp(Array.isArray(raw.row) ? raw.row : []);
+
+    if (kod === 'MO2') return tyre.normalizeJmk({
+      kodProducenta: raw['Kod producenta'],
+      ean: raw.ean,
+      producent: raw.Producent,
+      bieznik: raw.Bieznik || raw['BieĹĽnik'],
+      rodzaj: raw.Rodzaj,
+      nazwa: raw.nazwa,
+      szerokosc: raw.szerokosc,
+      profil: raw.profil,
+      srednica: raw.srednica,
+      indeksPredkosci1: raw['Indeks predkosci 1'] || raw['Indeks prÄ™dkoĹ›ci 1'] || raw['Indeks prędkości 1'],
+      indeksPredkosci2: raw['Indeks Predkosci 2'] || raw['Indeks PrÄ™dkoĹ›ci 2'] || raw['Indeks Prędkości 2'],
+      indeksNosnosci1: raw['Indeks Nosnosc 1'] || raw['Indeks NoĹ›noĹ›Ä‡ 1'] || raw['Indeks Nośność 1'],
+      indeksNosnosci2: raw['Indeks Nosnosc 2'] || raw['Indeks NoĹ›noĹ›Ä‡ 2'] || raw['Indeks Nośność 2'],
+      zamiennik: raw.Zamiennik,
+      magazyn1: raw['Magazyn 1 ilosc'],
+      magazyn2: raw['Magazyn 2 ilosc'],
+      cenaKlientNetto: raw['Cena klient netto'],
+      oporToczenia: raw['Opor toczenia'] || raw['OpĂłr toczenia'] || raw['Opór toczenia'],
+      przyczepnosc: raw.Przyczepnosc || raw['PrzyczepnoĹ›Ä‡'] || raw['Przyczepność'],
+      halasKlasa: raw['Halas Klasa'] || raw['HaĹ‚as Klasa'] || raw['Hałas Klasa'],
+      halasDb: raw['Halas dB'] || raw['HaĹ‚as dB'] || raw['Hałas dB'],
+      dot: raw.Dot,
+      konstrukcja: raw.Konstrukcja,
+      masaBrutto: raw['Masa brutto']
+    });
+
+    if (kod === 'MO3') return tyre.normalizeGrasdorf({
+      eanCode: firstValue(raw.eanCode, raw.ean, raw.EAN),
+      indexCatalogue: firstValue(raw.indexCatalogue, raw['Index Catalogue'], raw['Indeks producenta'], raw.id),
+      name: firstValue(raw.name, raw.nazwa),
+      additionalName: raw.additionalName,
+      priceNet: firstValue(raw.priceNet, raw.cena),
+      category: firstValue(raw.category, raw.kategoria),
+      producer: firstValue(raw.producer, raw.producent),
+      availabilityCount: firstValue(raw.availabilityCount, raw.stan_magazynu),
+      imageUrls: raw.imageUrls,
+      konstrukcja: firstValue(raw['Konstrukcja opony'], raw.konstrukcja),
+      typ: raw.Typ,
+      indeksNosnosci: raw['Indeks noĹ›noĹ›ci'] || raw['Indeks nośności'],
+      iloscPlocien: raw['IloĹ›Ä‡ pĹ‚Ăłcien'] || raw['Ilość płócien'],
+      zastosowanie: raw.Zastosowanie,
+      rozmiarOpony: raw['Rozmiar opony'],
+      weight: firstValue(raw.weight, raw.waga)
+    });
+
+    if (kod === 'MO4' || kod === 'MO5') return tyre.normalizeHandlopex({
+      kodProducenta: raw['kod producenta'],
+      symbolHandlopex: raw['symbol handlopex'],
+      producent: raw.producent,
+      nazwa: raw.nazwa,
+      szerokosc: raw.szerokosc,
+      profil: raw.profil,
+      srednica: raw.srednica,
+      indeksPredkosci: raw['indeks pr.'],
+      indeksNosnosci: raw['indeks nosn.'],
+      ilosc: raw.ilosc,
+      cenaHurtNetto: raw['cena hurt netto'],
+      ean: raw.ean,
+      oporToczenia: raw['opor toczenia'],
+      przyczepnosc: raw.przyczepnosc,
+      halas: raw.halas,
+      dot: raw.dot,
+      waga: raw.waga,
+      labelNoise: raw.labelNoise,
+      labelSnow: raw.labelSnow,
+      labelIce: raw.labelIce
+    });
+
+    if (kod === 'MO6') return tyre.normalizeAgrowiec({
+      ean: raw.EAN,
+      rozmiar: raw.Beschreibung,
+      indeksy: raw['Beschreibung 2'],
+      producent: raw.Hersteller,
+      stan: raw.Lagerbestand,
+      cena: raw.Cena,
+      model: raw.Model,
+      vfIf: raw['VF/IF'],
+      kategoria: raw.Kategoria
+    });
+
+    if (kod === 'MO7') return tyre.normalizeNokian({
+      kodProduktu: raw['Kod produktu'],
+      rozmiar: raw.Rozmiar,
+      rozmiarAlternatywny: raw['Rozmiar alternatywny'],
+      model: raw.MODEL,
+      producent: raw.PRODUCENT,
+      bieznik: raw['BIEÄąÂ»NIK'] || raw['BIEĹ»NIK'] || raw.BIEZNIK,
+      sfSb: raw['SF/SB'],
+      tlTt: raw['TL/TT'],
+      liSi: raw['LI/SI'],
+      pr: raw.PR,
+      rodzaj: raw.RODZAJ,
+      ean: raw.EAN,
+      zakup1: raw['Zakup 1 szt'],
+      magazyn: raw.Magazyn
+    });
+
+    if (kod === 'MO8') {
+      const keys = Object.keys(raw);
+      const bieznikKey = keys.find(k => /BIE|bie/i.test(k) && !/rozmiar/i.test(k));
+      const eanKey = keys.find(k => /ean/i.test(k));
+      return tyre.normalizeTrelleborg({
+        rozmiar: raw.Rozmiar,
+        vfIf: raw['VF/IF'],
+        cfo: raw.CFO,
+        rozmiarAlternatywny: raw['Rozmiar alternatywny'],
+        tlTt: raw['TT/TL'] || raw['TL/TT'],
+        liSi: raw['LI/SI'],
+        pr: raw.PR,
+        producent: raw.PRODUCENT,
+        rodzaj: raw.RODZAJ || raw['RODZAJ '],
+        bieznik: bieznikKey ? raw[bieznikKey] : null,
+        kodProducenta: raw['Kod producenta'],
+        ean: eanKey ? raw[eanKey] : null,
+        cena: raw.Cena || raw['Cena '],
+        magazyn: raw.Magazyn
+      });
+    }
+
+    if (kod === 'MO9') return tyre.normalizeAgrorami({
+      id: raw.id,
+      ean: raw.ean,
+      producent: raw.producent,
+      bieznik: raw.bieznik,
+      // POPRAWKA 2026-06-18: gdy surowa kolumna "rozmiar" jest pusta, parser MO9 (Agrorami)
+      // sam juz wczesniej probowal wydobyc rozmiar z tekstu nazwy (sizeFromName) i zapisal
+      // go w record.rozmiar — ale tutaj przekazywalismy tylko raw.rozmiar (pusty string),
+      // wiec normalizeAgrorami nigdy nie widzial tego fallbacku i wysokosc wychodzila null,
+      // mimo ze surowe.rozmiar w wyniku koncowym (przez inny fallback w adapterze) wygladal
+      // poprawnie — klasyczny przypadek "podglad OK, dane strukturalne zepsute".
+      rozmiar: firstValue(raw.rozmiar, record.rozmiar),
+      nosnosc: raw.nosnosc,
+      predkosc: raw.predkosc,
+      tlTt: raw['tl/tt'],
+      plotna: raw['pĹ‚otna'] || raw['płotna'] || raw.plotna,
+      cena: raw.cena,
+      magazyn: raw.magazyn,
+      waga: raw.waga,
+      kategoria: raw.kategoria,
+      sezon: raw.sezon
+    });
+
+    if (kod === 'MO10') return tyre.normalizeGri({
+      nrKat: raw['NR KAT'],
+      ean: raw.EAN,
+      bieznik: raw['Bieżnik'] || raw['BieĹĽnik'] || raw.Bieznik,
+      rozmiar: raw.Rozmiar,
+      ilosc: raw['ilość'] || raw['iloĹ›Ä‡'] || raw.ilosc,
+      cena: raw['cena netto/szt']
+    });
+  } catch (e) {
+    const identyfikator = firstValue(record.kod_dostawcy, record.ean, record.nazwa) || '(brak identyfikatora)';
+    console.error(`[adapter] BLAD normalizacji dostawcy=${dostawcaKod} kod=${identyfikator}: ${e && e.message ? e.message : e}`);
+    return null;
+  }
+
+  return null;
+}
+
+function recordToSurowe(record, dostawcaKod = record.dostawca) {
+  const oz = Array.isArray(record.oznaczenia_techniczne) ? record.oznaczenia_techniczne : [];
+  const enriched = normalizeBySupplier(dostawcaKod, record) || {};
+  if (shouldRejectRecord(record, enriched)) return null;
+  let kod = firstValue(enriched.kodDostawcy, record.kod_dostawcy);
+  // POPRAWKA 2026-06-18: odrzucamy kod_dostawcy znieksztalcony przez notacje naukowa
+  // Excela (np. "5,02E+12") — taki "kod" nie jest unikalny i nie powinien byc uzywany
+  // jako identyfikator produktu. Pipeline ponizej (recordToSuroweDostawca) wygeneruje
+  // wtedy stabilny syntetyczny kod z nazwy/rozmiaru zamiast tego.
+  if (looksLikeMangledScientific(kod)) kod = null;
+  const nazwa = firstValue(enriched.nazwaKoncowa, record.nazwa, '');
+
+  return {
+    kod: kod ? String(kod) : null,
+    ean: firstValue(enriched.ean, record.ean),
+
+    nazwa,
+    marka: firstValue(enriched.marka, record.producent, record.marka),
+    model: firstValue(enriched.model, record.model_bieznik),
+    bieznik: firstValue(enriched.model, record.model_bieznik),
+    kategoria: firstValue(enriched.kategoria, record.kategoria),
+
+    magazyn: null,
+    magazynRaw: null,
+    stan: firstValue(enriched.stan, record.stan_magazynowy),
+
+    cenaZakupu: firstValue(enriched.cenaZakupu, record.cena_zakupu),
+    cenaSprzedazy: null,
+
+    rozmiar: firstValue(enriched.rozmiar, record.rozmiar, record.rozmiar_alternatywny),
+    rozmiarAlternatywny: firstValue(enriched.rozmiarAlternatywny, record.rozmiar_alternatywny),
+    szerokosc: enriched.szerokosc ?? null,
+    profil: enriched.profil ?? null,
+    srednica: enriched.srednica ?? null,
+    konstrukcja: enriched.konstrukcja ?? null,
+    indeksNosnosci: enriched.indeksNosnosci ?? null,
+    indeksPredkosci: enriched.indeksPredkosci ?? null,
+    tlTt: enriched.tlTt ?? null,
+    vfIf: enriched.vfIf ?? null,
+    pr: enriched.pr ?? null,
+    wysokosc: enriched.wysokoscRzeczywistaCm ?? null,
+    indeks1: null,
+    indeks2: null,
+    indeksy: buildIndeksy(enriched, oz),
+
+    dot: enriched.dot ?? null,
+    waga: enriched.waga ?? null,
+    sf: enriched.sf ? 'SF' : null,
+    sb: enriched.sb ? 'SB' : null,
+    nro: enriched.nro ?? null,
+    cho: enriched.cho ?? null,
+    cfo: enriched.cfo ?? null,
+    stubbleResistant: enriched.stubbleResistant ?? null,
+    labelRolling: enriched.labelRolling ?? null,
+    labelWet: enriched.labelWet ?? null,
+    labelNoise: enriched.labelNoise ?? null,
+    labelNoiseClass: enriched.labelNoiseClass ?? null,
+    labelIce: enriched.labelIce ?? null,
+    labelSnow: enriched.labelSnow ?? enriched.snow3pmsf ?? null,
+    rodzaj: enriched.oznaczenieBieznika ?? null,
+    linkZdjecia: enriched.linkZdjecia ?? null,
+    oznaczenieBieznika: enriched.oznaczenieBieznika ?? null,
+    sezon: enriched.sezon ?? null,
+    ms: enriched.ms ?? null,
+    snow3pmsf: enriched.snow3pmsf ?? null,
+    wentyl: enriched.wentyl ?? null
+  };
+}
+
+function recordToSuroweDostawca(dostawcaKod, record) {
+  const enriched = normalizeBySupplier(dostawcaKod, record) || {};
+  const s = recordToSurowe(record, dostawcaKod);
+  if (!s) return null;
+  const kod = baseSupplierCode(dostawcaKod, record);
+
+  if (kod === 'MO2' && s.stan !== null) {
+    s.magazynRaw = record.surowe_pola?.['Magazyn 1 ilosc'] ? 'Magazyn 1' : null;
+  }
+  if (kod === 'MO4') s.magazynRaw = 'Wroclaw';
+  if (kod === 'MO5') s.magazynRaw = 'Rzeszow';
+  if (kod === 'MO6' && record.surowe_pola?.Lagerbestand) {
+    s.magazynRaw = record.surowe_pola.Lagerbestand;
+  }
+
+  if (!s.kod) s.kod = syntheticKod(kod, record, enriched);
+  return s;
+}
+
+function recordsToSurowe(dostawcaKod, records) {
+  return records.map(record => recordToSuroweDostawca(dostawcaKod, record)).filter(Boolean);
+}
+
+module.exports = { recordToSurowe, recordToSuroweDostawca, recordsToSurowe };

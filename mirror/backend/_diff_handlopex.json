@@ -1,0 +1,2492 @@
+[
+ {
+  "key": "MO4::DCPR250H4000ERM80",
+  "ean": null,
+  "diffs": {
+   "szerokosc": {
+    "db": 14,
+    "new": 385
+   },
+   "profil": {
+    "db": 82,
+    "new": 95
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD080189003MGC0",
+  "ean": "8907375021574",
+  "diffs": {
+   "szerokosc": {
+    "db": 188.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD080F16003MG50",
+  "ean": "8907375018901",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD120238006MG50",
+  "ean": "8907375055029",
+  "diffs": {
+   "szerokosc": {
+    "db": 238.5,
+    "new": 23
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD150E50006MI30",
+  "ean": "8907375029525",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "5.00-15"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 60
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 18
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 60
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 75
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD150H5500BM600",
+  "ean": "8907375025626",
+  "diffs": {
+   "rozmiar": {
+    "db": "600R1",
+    "new": "31x15.50-15"
+   },
+   "szerokosc": {
+    "db": 15.5,
+    "new": 31
+   },
+   "profil": {
+    "db": 82,
+    "new": 15.5
+   },
+   "model": {
+    "db": "31 x MTR",
+    "new": "MTR 600"
+   },
+   "dlugosc": {
+    "db": 103,
+    "new": 79
+   },
+   "szerokosc_paczki": {
+    "db": 65,
+    "new": 45
+   },
+   "wysokosc": {
+    "db": 103,
+    "new": 79
+   },
+   "wysokosc_przesylki": {
+    "db": 118,
+    "new": 94
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD153G10758MA04",
+  "ean": "8907375000692",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD153G10758MA0T",
+  "ean": "8907375000722",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD153G15808MA01",
+  "ean": "8907375005673",
+  "diffs": {
+   "szerokosc": {
+    "db": 292.1,
+    "new": 11.5
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD160E40008MI30",
+  "ean": "8907375026586",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "4.00-16"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 58
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 16
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 58
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 73
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD160E40008MI31",
+  "ean": "8907375026494",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "4.00-16"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 58
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 16
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 58
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 73
+   }
+  }
+ },
+ {
+  "key": "MO4::HLRD280G49006MR21",
+  "ean": "8907375015184",
+  "diffs": {
+   "szerokosc": {
+    "db": 378.5,
+    "new": 14.9
+   }
+  }
+ },
+ {
+  "key": "MO4::KAPD280G69000GE11",
+  "ean": "5901765100859",
+  "diffs": {
+   "szerokosc": {
+    "db": 16.9,
+    "new": 440
+   },
+   "profil": {
+    "db": 82,
+    "new": 80
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD060156004IP60",
+  "ean": "5901765100163",
+  "diffs": {
+   "szerokosc": {
+    "db": 156,
+    "new": 15
+   },
+   "profil": {
+    "db": 82,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD060156004IP62",
+  "ean": "5901765100323",
+  "diffs": {
+   "szerokosc": {
+    "db": 156,
+    "new": 15
+   },
+   "profil": {
+    "db": 82,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD060156004LWG1",
+  "ean": "5901765100347",
+  "diffs": {
+   "szerokosc": {
+    "db": 156,
+    "new": 15
+   },
+   "profil": {
+    "db": 82,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD080189004LWG0",
+  "ean": "5901765100439",
+  "diffs": {
+   "szerokosc": {
+    "db": 188.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD080189004LWG2",
+  "ean": "5901765100491",
+  "diffs": {
+   "szerokosc": {
+    "db": 188.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD080E40004IM31",
+  "ean": "5901765100224",
+  "diffs": {
+   "szerokosc": {
+    "db": 101.6,
+    "new": 4
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD080F160040000",
+  "ean": "5901765100316",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD080F160040001",
+  "ean": "5901765100200",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD080F16004LWG0",
+  "ean": "5901765100309",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD090E50006KAI0",
+  "ean": "5901765100125",
+  "diffs": {
+   "szerokosc": {
+    "db": 127,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD100E40004IMK0",
+  "ean": "5901765100019",
+  "diffs": {
+   "szerokosc": {
+    "db": 101.6,
+    "new": 4
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD153G10756KAI1",
+  "ean": "5901765100040",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD160E60006SRI0",
+  "ean": "5901765100064",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD160E60006SRI2",
+  "ean": "5901765100293",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD160E75008SRF1",
+  "ean": "5901765100088",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD180E60008SF40",
+  "ean": "5901765100279",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD200E75006SF40",
+  "ean": "5901765100392",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO4::KARD280G24856SGP0",
+  "ean": "5901765100149",
+  "diffs": {
+   "szerokosc": {
+    "db": 315,
+    "new": 12.4
+   }
+  }
+ },
+ {
+  "key": "MO4::KUCR22538565KXA11",
+  "ean": "8808956624132",
+  "diffs": {
+   "model": {
+    "db": "KXA11 uniwersalna",
+    "new": "KXA11"
+   }
+  }
+ },
+ {
+  "key": "MO4::MCRD280G24006A190",
+  "ean": "8059971069631",
+  "diffs": {
+   "szerokosc": {
+    "db": 315,
+    "new": 12.4
+   }
+  }
+ },
+ {
+  "key": "MO4::MIRD06013A000B193",
+  "ean": "8059971028102",
+  "diffs": {
+   "szerokosc": {
+    "db": 135,
+    "new": 13
+   },
+   "profil": {
+    "db": 82,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO4::MIRD06013A000B1S1",
+  "ean": "8059971027563",
+  "diffs": {
+   "szerokosc": {
+    "db": 135,
+    "new": 13
+   },
+   "profil": {
+    "db": 82,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO4::MIRD06013A000MG11",
+  "ean": "8059971027488",
+  "diffs": {
+   "szerokosc": {
+    "db": 135,
+    "new": 13
+   },
+   "profil": {
+    "db": 82,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO4::MIRD080F16000B195",
+  "ean": "8059971027556",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO4::MIRD080F18000B633",
+  "ean": "8059971027365",
+  "diffs": {
+   "szerokosc": {
+    "db": 18.58,
+    "new": 18.5
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO4::OZRD150E65806KNK0",
+  "ean": "4251438402201",
+  "diffs": {
+   "rozmiar": {
+    "db": "50/80-15",
+    "new": "6.50/80-15"
+   },
+   "dlugosc": {
+    "db": 242,
+    "new": 65
+   },
+   "szerokosc_paczki": {
+    "db": 132,
+    "new": 22
+   },
+   "wysokosc": {
+    "db": 242,
+    "new": 65
+   },
+   "wysokosc_przesylki": {
+    "db": 257,
+    "new": 80
+   }
+  }
+ },
+ {
+  "key": "MO4::TRRD040E41000T391",
+  "ean": "8059971011913",
+  "diffs": {
+   "rozmiar": {
+    "db": "10/3.50-4",
+    "new": "4.10/3.50-4"
+   },
+   "dlugosc": {
+    "db": 12,
+    "new": 11
+   },
+   "szerokosc_paczki": {
+    "db": 31,
+    "new": 16
+   },
+   "wysokosc": {
+    "db": 12,
+    "new": 11
+   },
+   "wysokosc_przesylki": {
+    "db": 27,
+    "new": 26
+   }
+  }
+ },
+ {
+  "key": "MO5::BRCR22513080K8401",
+  "ean": "3286342591919",
+  "diffs": {
+   "szerokosc": {
+    "db": 130,
+    "new": 13
+   }
+  }
+ },
+ {
+  "key": "MO5::CCCR175F0000LLD11",
+  "ean": "4019238012613",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::CCPR200G2500JM802",
+  "ean": "4019238129014",
+  "diffs": {
+   "szerokosc": {
+    "db": 12.5,
+    "new": 335
+   },
+   "profil": {
+    "db": 82,
+    "new": 80
+   }
+  }
+ },
+ {
+  "key": "MO5::DCPR250H4000ERM80",
+  "ean": null,
+  "diffs": {
+   "profil": {
+    "db": 82,
+    "new": 95
+   }
+  }
+ },
+ {
+  "key": "MO5::GFCR22513000GVR20",
+  "ean": "4038526336767",
+  "diffs": {
+   "szerokosc": {
+    "db": 130,
+    "new": 13
+   }
+  }
+ },
+ {
+  "key": "MO5::GFCR22513000LRCL0",
+  "ean": "5452000328564W2",
+  "diffs": {
+   "szerokosc": {
+    "db": 130,
+    "new": 13
+   }
+  }
+ },
+ {
+  "key": "MO5::GGCR20012000KMS20",
+  "ean": "5452000393630",
+  "diffs": {
+   "szerokosc": {
+    "db": 120,
+    "new": 12
+   }
+  }
+ },
+ {
+  "key": "MO5::GGCR22511000KMSS0",
+  "ean": "5452000986535",
+  "diffs": {
+   "szerokosc": {
+    "db": 110,
+    "new": 11
+   }
+  }
+ },
+ {
+  "key": "MO5::GSCR175H0900MTAM1",
+  "ean": "4038526403339",
+  "diffs": {
+   "szerokosc": {
+    "db": 241.3,
+    "new": 9.5
+   }
+  }
+ },
+ {
+  "key": "MO5::GSCR22512000LAVA0",
+  "ean": "5452000639554",
+  "diffs": {
+   "szerokosc": {
+    "db": 120,
+    "new": 12
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD180G25808ATU0",
+  "ean": "8907375010110",
+  "diffs": {
+   "szerokosc": {
+    "db": 317.5,
+    "new": 12.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD200G2500GM460",
+  "ean": "8907375010653",
+  "diffs": {
+   "szerokosc": {
+    "db": 317.5,
+    "new": 12.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD200G60708MTL0",
+  "ean": "8907375051977",
+  "diffs": {
+   "szerokosc": {
+    "db": 406.4,
+    "new": 16
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD200H0000BMEX0",
+  "ean": "8907375053575",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD240G55808MTL0",
+  "ean": "8907375052004",
+  "diffs": {
+   "szerokosc": {
+    "db": 15.5,
+    "new": 400
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD240G69008MTL0",
+  "ean": "8907375017522",
+  "diffs": {
+   "szerokosc": {
+    "db": 429.3,
+    "new": 16.9
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD240G75008MTU0",
+  "ean": "8907375019380",
+  "diffs": {
+   "szerokosc": {
+    "db": 444.5,
+    "new": 17.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD240G95008MTL0",
+  "ean": "8907375052356",
+  "diffs": {
+   "szerokosc": {
+    "db": 19.5,
+    "new": 500
+   },
+   "profil": {
+    "db": 82,
+    "new": 70
+   }
+  }
+ },
+ {
+  "key": "MO5::HLPD260G84008MTL0",
+  "ean": "8907375051915",
+  "diffs": {
+   "szerokosc": {
+    "db": 467.4,
+    "new": 18.4
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD080E40006MI30",
+  "ean": "8907375027699",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "4.00-8"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 38
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 16
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 38
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 53
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD080F16003MG50",
+  "ean": "8907375018901",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD090E600027MT0",
+  "ean": "8907375047512",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD120212003M600",
+  "ean": "8907375024452",
+  "diffs": {
+   "rozmiar": {
+    "db": "601R1",
+    "new": "26x12.00-12"
+   },
+   "szerokosc": {
+    "db": 2612,
+    "new": 26
+   },
+   "profil": {
+    "db": 82,
+    "new": 12
+   },
+   "model": {
+    "db": "26 x MTR",
+    "new": "MTR 601"
+   },
+   "dlugosc": {
+    "db": 103,
+    "new": 67
+   },
+   "szerokosc_paczki": {
+    "db": 66,
+    "new": 36
+   },
+   "wysokosc": {
+    "db": 103,
+    "new": 67
+   },
+   "wysokosc_przesylki": {
+    "db": 118,
+    "new": 82
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD120238006MG50",
+  "ean": "8907375055029",
+  "diffs": {
+   "szerokosc": {
+    "db": 215.9,
+    "new": 23
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD12023X0036TR0",
+  "ean": "8907375047345",
+  "diffs": {
+   "rozmiar": {
+    "db": "600R1",
+    "new": "23x10.50-12"
+   },
+   "szerokosc": {
+    "db": 2310,
+    "new": 23
+   },
+   "profil": {
+    "db": 82,
+    "new": 10.5
+   },
+   "model": {
+    "db": "23 x MTR",
+    "new": "MTR 600"
+   },
+   "dlugosc": {
+    "db": 103,
+    "new": 59
+   },
+   "szerokosc_paczki": {
+    "db": 65,
+    "new": 32
+   },
+   "wysokosc": {
+    "db": 103,
+    "new": 59
+   },
+   "wysokosc_przesylki": {
+    "db": 118,
+    "new": 74
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD120G10808MA00",
+  "ean": "8907375001743",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD150E50006MI30",
+  "ean": "8907375029525",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "5.00-15"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 60
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 18
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 60
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 75
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD150H5500BM600",
+  "ean": "8907375025626",
+  "diffs": {
+   "rozmiar": {
+    "db": "600R1",
+    "new": "31x15.50-15"
+   },
+   "szerokosc": {
+    "db": 600,
+    "new": 31
+   },
+   "profil": {
+    "db": 82,
+    "new": 15.5
+   },
+   "model": {
+    "db": "31 x MTR",
+    "new": "MTR 600"
+   },
+   "dlugosc": {
+    "db": 103,
+    "new": 79
+   },
+   "szerokosc_paczki": {
+    "db": 65,
+    "new": 45
+   },
+   "wysokosc": {
+    "db": 103,
+    "new": 79
+   },
+   "wysokosc_przesylki": {
+    "db": 118,
+    "new": 94
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G10756MA01",
+  "ean": "8907375000906",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G10758MA00",
+  "ean": "8907375000937",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G10758MA04",
+  "ean": "8907375000692",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G10758MI33",
+  "ean": "8907375001026",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G15808MA01",
+  "ean": "8907375005673",
+  "diffs": {
+   "szerokosc": {
+    "db": 292.1,
+    "new": 11.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G15808MA06",
+  "ean": "8907375005857",
+  "diffs": {
+   "szerokosc": {
+    "db": 292.1,
+    "new": 11.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G25806MAW0",
+  "ean": "8907375009510",
+  "diffs": {
+   "szerokosc": {
+    "db": 317.5,
+    "new": 12.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD153G25808MA00",
+  "ean": "8907375009459",
+  "diffs": {
+   "szerokosc": {
+    "db": 317.5,
+    "new": 12.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD160550006MTP0",
+  "ean": "8907375030606",
+  "diffs": {
+   "szerokosc": {
+    "db": 550,
+    "new": 5.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD160C80006MI30",
+  "ean": "8907375000272",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "8-16"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "8 - 16 MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 75
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 26
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 75
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 90
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD160E40008MI30",
+  "ean": "8907375026586",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "4.00-16"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 58
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 16
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 58
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 73
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD160E40008MI31",
+  "ean": "8907375026494",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "4.00-16"
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 58
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 16
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 58
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 73
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD160E60006MF20",
+  "ean": "8907375032075",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD160E65006MI30",
+  "ean": "8907375034536",
+  "diffs": {
+   "rozmiar": {
+    "db": "374R1",
+    "new": "6.50-16"
+   },
+   "szerokosc": {
+    "db": 374,
+    "new": 6.5
+   },
+   "profil": {
+    "db": 82,
+    "new": null
+   },
+   "model": {
+    "db": "MIM",
+    "new": "MIM 374"
+   },
+   "dlugosc": {
+    "db": 65,
+    "new": 69
+   },
+   "szerokosc_paczki": {
+    "db": 43,
+    "new": 22
+   },
+   "wysokosc": {
+    "db": 65,
+    "new": 69
+   },
+   "wysokosc_przesylki": {
+    "db": 80,
+    "new": 84
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD170G50556M900",
+  "ean": "8907375016112",
+  "diffs": {
+   "szerokosc": {
+    "db": 381,
+    "new": 15
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD200D83006MR23",
+  "ean": "8907375040629",
+  "diffs": {
+   "szerokosc": {
+    "db": 210.8,
+    "new": 8.3
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD200E75006M222",
+  "ean": "8907375039609",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD220D830083290",
+  "ean": "8907375040681",
+  "diffs": {
+   "szerokosc": {
+    "db": 210.8,
+    "new": 8.3
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD240G55808MI31",
+  "ean": "8907375016471",
+  "diffs": {
+   "szerokosc": {
+    "db": 393.7,
+    "new": 15.5
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD260G84006MR28",
+  "ean": "8907375020041",
+  "diffs": {
+   "szerokosc": {
+    "db": 467.4,
+    "new": 18.4
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD280G12008MR20",
+  "ean": "8907375004805",
+  "diffs": {
+   "szerokosc": {
+    "db": 284.5,
+    "new": 11.2
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD280G49006MR20",
+  "ean": "8907375015429",
+  "diffs": {
+   "szerokosc": {
+    "db": 378.5,
+    "new": 14.9
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD280G69006MR20",
+  "ean": "8907375018062",
+  "diffs": {
+   "szerokosc": {
+    "db": 429.3,
+    "new": 16.9
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD340G69006MR20",
+  "ean": "8907375018512",
+  "diffs": {
+   "szerokosc": {
+    "db": 429.3,
+    "new": 16.9
+   }
+  }
+ },
+ {
+  "key": "MO5::HLRD340G84008MR20",
+  "ean": "8907375020911",
+  "diffs": {
+   "szerokosc": {
+    "db": 467.4,
+    "new": 18.4
+   }
+  }
+ },
+ {
+  "key": "MO5::IMCR225F3000G7021",
+  "ean": "8935355525132",
+  "diffs": {
+   "szerokosc": {
+    "db": 330.2,
+    "new": 13
+   }
+  }
+ },
+ {
+  "key": "MO5::IMCR225F3000G7680",
+  "ean": "6920758661152",
+  "diffs": {
+   "szerokosc": {
+    "db": 330.2,
+    "new": 13
+   }
+  }
+ },
+ {
+  "key": "MO5::KAPD280G69000GE10",
+  "ean": "5901765100675",
+  "diffs": {
+   "szerokosc": {
+    "db": 16.9,
+    "new": 440
+   },
+   "profil": {
+    "db": 82,
+    "new": 80
+   }
+  }
+ },
+ {
+  "key": "MO5::KAPD280G69000GE11",
+  "ean": "5901765100859",
+  "diffs": {
+   "profil": {
+    "db": 82,
+    "new": 80
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD050K30006IP82",
+  "ean": "5901765100651",
+  "diffs": {
+   "szerokosc": {
+    "db": 127,
+    "new": 23
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD060156004IP60",
+  "ean": "5901765100163",
+  "diffs": {
+   "szerokosc": {
+    "db": 156,
+    "new": 15
+   },
+   "profil": {
+    "db": 82,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD060156004IP62",
+  "ean": "5901765100323",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 15
+   },
+   "profil": {
+    "db": 82,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD060156004LWG1",
+  "ean": "5901765100347",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 15
+   },
+   "profil": {
+    "db": 82,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080189004IP60",
+  "ean": "5901765100187",
+  "diffs": {
+   "szerokosc": {
+    "db": 188.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080189004IP62",
+  "ean": "5901765100422",
+  "diffs": {
+   "szerokosc": {
+    "db": 188.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080189004LWG0",
+  "ean": "5901765100439",
+  "diffs": {
+   "szerokosc": {
+    "db": 215.9,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080189004LWG2",
+  "ean": "5901765100491",
+  "diffs": {
+   "szerokosc": {
+    "db": 188.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080E40004IM31",
+  "ean": "5901765100224",
+  "diffs": {
+   "szerokosc": {
+    "db": 101.6,
+    "new": 4
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080F160040000",
+  "ean": "5901765100316",
+  "diffs": {
+   "szerokosc": {
+    "db": 165.1,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080F160040001",
+  "ean": "5901765100200",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080F16004IP60",
+  "ean": "5901765100170",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD080F16004LWG0",
+  "ean": "5901765100309",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD090E50006KAI0",
+  "ean": "5901765100125",
+  "diffs": {
+   "szerokosc": {
+    "db": 127,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD153G10758KAI0",
+  "ean": "5901765100286",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD153G15808KAI4",
+  "ean": "5901765100132",
+  "diffs": {
+   "szerokosc": {
+    "db": 292.1,
+    "new": 11.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD160E60948SRR1",
+  "ean": "5901765100705",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD160E75006SGQ0",
+  "ean": "5901765100835",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD160E75008SF51",
+  "ean": "5901765100606",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD160E75008SRF1",
+  "ean": "5901765100088",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD200E75006SF40",
+  "ean": "5901765100392",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD240G24006SGQ2",
+  "ean": "5901765100644",
+  "diffs": {
+   "szerokosc": {
+    "db": 315,
+    "new": 12.4
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD280G69006SGQ0",
+  "ean": "5901765100668",
+  "diffs": {
+   "szerokosc": {
+    "db": 429.3,
+    "new": 16.9
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD320G24006SGQ0",
+  "ean": "5901765100682",
+  "diffs": {
+   "szerokosc": {
+    "db": 315,
+    "new": 12.4
+   }
+  }
+ },
+ {
+  "key": "MO5::KARD380G69008SGQ0",
+  "ean": "9995570755508",
+  "diffs": {
+   "szerokosc": {
+    "db": 429.3,
+    "new": 16.9
+   }
+  }
+ },
+ {
+  "key": "MO5::KUCR22538565KXA11",
+  "ean": "8808956624132",
+  "diffs": {
+   "model": {
+    "db": "KXA11 uniwersalna",
+    "new": "KXA11"
+   }
+  }
+ },
+ {
+  "key": "MO5::MACR225F1000KDR12",
+  "ean": "4050496000677",
+  "diffs": {
+   "szerokosc": {
+    "db": 279.4,
+    "new": 11
+   }
+  }
+ },
+ {
+  "key": "MO5::MACR225F1000LDH12",
+  "ean": "4050496000561",
+  "diffs": {
+   "szerokosc": {
+    "db": 279.4,
+    "new": 11
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD160E75006AS80",
+  "ean": "8059971067514",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD160E75008ASI0",
+  "ean": "8059971040630",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD200E75008ASO0",
+  "ean": "8059971039313",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD240G49006A190",
+  "ean": "8059971036862",
+  "diffs": {
+   "szerokosc": {
+    "db": 378.5,
+    "new": 14.9
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD260G84006A100",
+  "ean": "8059971041200",
+  "diffs": {
+   "szerokosc": {
+    "db": 18.4,
+    "new": 16.9
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD260L3100TA072",
+  "ean": "8059971067187",
+  "diffs": {
+   "szerokosc": {
+    "db": 586.7,
+    "new": 23.1
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD280G12008A190",
+  "ean": "8059971044317",
+  "diffs": {
+   "szerokosc": {
+    "db": 284.5,
+    "new": 11.2
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD280G24006A190",
+  "ean": "8059971069631",
+  "diffs": {
+   "szerokosc": {
+    "db": 315,
+    "new": 12.4
+   }
+  }
+ },
+ {
+  "key": "MO5::MCRD280G36006A190",
+  "ean": "8059971036879",
+  "diffs": {
+   "szerokosc": {
+    "db": 345.4,
+    "new": 13.6
+   }
+  }
+ },
+ {
+  "key": "MO5::MIPD120D85004SK20",
+  "ean": "8059971615524",
+  "diffs": {
+   "szerokosc": {
+    "db": 8.5,
+    "new": 23
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIPD150311008SK00",
+  "ean": "8590341078889",
+  "diffs": {
+   "szerokosc": {
+    "db": 3115.5,
+    "new": 31
+   },
+   "profil": {
+    "db": 82,
+    "new": 15.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIPD2001670014O5L",
+  "ean": null,
+  "diffs": {
+   "szerokosc": {
+    "db": 167.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 70
+   }
+  }
+ },
+ {
+  "key": "MO5::MIPD200A8200BB380",
+  "ean": "8059971616958",
+  "diffs": {
+   "szerokosc": {
+    "db": 209.6,
+    "new": 8.25
+   }
+  }
+ },
+ {
+  "key": "MO5::MIPD200H0000BB380",
+  "ean": "8059971615821",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::MIPD240G95708GNR0",
+  "ean": "8059971616453",
+  "diffs": {
+   "szerokosc": {
+    "db": 19.5,
+    "new": 500
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD06013A000B193",
+  "ean": "8059971028102",
+  "diffs": {
+   "szerokosc": {
+    "db": 135,
+    "new": 13
+   },
+   "profil": {
+    "db": 82,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD06013A000B1S1",
+  "ean": "8059971027563",
+  "diffs": {
+   "szerokosc": {
+    "db": 135,
+    "new": 13
+   },
+   "profil": {
+    "db": 82,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD06013A000MG11",
+  "ean": "8059971027488",
+  "diffs": {
+   "szerokosc": {
+    "db": 135,
+    "new": 13
+   },
+   "profil": {
+    "db": 82,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD060E35000B1A1",
+  "ean": "8059971027327",
+  "diffs": {
+   "szerokosc": {
+    "db": 88.9,
+    "new": 3.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD060E40000V552",
+  "ean": "8059971046502",
+  "diffs": {
+   "szerokosc": {
+    "db": 101.6,
+    "new": 4
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD080189000MG11",
+  "ean": "8059971027501",
+  "diffs": {
+   "szerokosc": {
+    "db": 188.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD080E35000V551",
+  "ean": "8059971046533",
+  "diffs": {
+   "szerokosc": {
+    "db": 88.9,
+    "new": 3.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD080E40000V551",
+  "ean": "8059971038842",
+  "diffs": {
+   "szerokosc": {
+    "db": 101.6,
+    "new": 4
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD080F16000B195",
+  "ean": "8059971027556",
+  "diffs": {
+   "szerokosc": {
+    "db": 166.5,
+    "new": 16
+   },
+   "profil": {
+    "db": 82,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD080F18000B633",
+  "ean": "8059971027365",
+  "diffs": {
+   "szerokosc": {
+    "db": 215.9,
+    "new": 18.5
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD120D65808TS66",
+  "ean": "8059971066463",
+  "diffs": {
+   "rozmiar": {
+    "db": "50/80-12",
+    "new": "6.50/80-12"
+   },
+   "dlugosc": {
+    "db": 234,
+    "new": 57
+   },
+   "szerokosc_paczki": {
+    "db": 132,
+    "new": 22
+   },
+   "wysokosc": {
+    "db": 234,
+    "new": 57
+   },
+   "wysokosc_przesylki": {
+    "db": 249,
+    "new": 72
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD150180008TS70",
+  "ean": "8059971042443",
+  "diffs": {
+   "szerokosc": {
+    "db": 180,
+    "new": 690
+   },
+   "profil": {
+    "db": 82,
+    "new": 180
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD153G10758IM42",
+  "ean": "8059971043068",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD160E600063TF0",
+  "ean": "8059971062571",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD180G45808IM30",
+  "ean": "8059971043297",
+  "diffs": {
+   "szerokosc": {
+    "db": 368.3,
+    "new": 14.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD2006500063TF0",
+  "ean": "8059971038187",
+  "diffs": {
+   "szerokosc": {
+    "db": 650,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD260L31008D010",
+  "ean": "8059971036343",
+  "diffs": {
+   "szerokosc": {
+    "db": 586.7,
+    "new": 23.1
+   }
+  }
+ },
+ {
+  "key": "MO5::MIRD280G4900OTD10",
+  "ean": "8059971037265",
+  "diffs": {
+   "szerokosc": {
+    "db": 378.5,
+    "new": 14.9
+   }
+  }
+ },
+ {
+  "key": "MO5::OTPD160E6500LKM40",
+  "ean": "4251438411692",
+  "diffs": {
+   "szerokosc": {
+    "db": 165.1,
+    "new": 6.5
+   }
+  }
+ },
+ {
+  "key": "MO5::OTPD200405702LD60",
+  "ean": "4251438413252",
+  "diffs": {
+   "szerokosc": {
+    "db": 406.4,
+    "new": 16
+   }
+  }
+ },
+ {
+  "key": "MO5::OTPD200G60708LD00",
+  "ean": "4251438412590",
+  "diffs": {
+   "szerokosc": {
+    "db": 406.4,
+    "new": 16
+   }
+  }
+ },
+ {
+  "key": "MO5::OTRD120E70006T440",
+  "ean": "4251438410039",
+  "diffs": {
+   "szerokosc": {
+    "db": 177.8,
+    "new": 7
+   }
+  }
+ },
+ {
+  "key": "MO5::OTRD150E65806SA80",
+  "ean": "4251438411661",
+  "diffs": {
+   "rozmiar": {
+    "db": "50/80-15",
+    "new": "6.50/80-15"
+   },
+   "dlugosc": {
+    "db": 242,
+    "new": 65
+   },
+   "szerokosc_paczki": {
+    "db": 132,
+    "new": 22
+   },
+   "wysokosc": {
+    "db": 242,
+    "new": 65
+   },
+   "wysokosc_przesylki": {
+    "db": 257,
+    "new": 80
+   }
+  }
+ },
+ {
+  "key": "MO5::OTRD200A82006TN50",
+  "ean": "4251438412125",
+  "diffs": {
+   "szerokosc": {
+    "db": 209.6,
+    "new": 8.25
+   }
+  }
+ },
+ {
+  "key": "MO5::OTRD200G12006SA80",
+  "ean": "4251438411548",
+  "diffs": {
+   "szerokosc": {
+    "db": 284.5,
+    "new": 11.2
+   }
+  }
+ },
+ {
+  "key": "MO5::OTRD300G69006SA80",
+  "ean": "4251438410466",
+  "diffs": {
+   "szerokosc": {
+    "db": 429.3,
+    "new": 16.9
+   }
+  }
+ },
+ {
+  "key": "MO5::OZPD260L31008K770",
+  "ean": "4251438402621",
+  "diffs": {
+   "szerokosc": {
+    "db": 586.7,
+    "new": 23.1
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD120E70006K520",
+  "ean": "4251438402232",
+  "diffs": {
+   "szerokosc": {
+    "db": 177.8,
+    "new": 7
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD150E50006KN00",
+  "ean": "4251438402263",
+  "diffs": {
+   "szerokosc": {
+    "db": 127,
+    "new": 5
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD153G10758K430",
+  "ean": "4251438402096",
+  "diffs": {
+   "szerokosc": {
+    "db": 254,
+    "new": 10
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD160E60006KN41",
+  "ean": "4251438400979",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD160E60006KNK1",
+  "ean": "4251438401174",
+  "diffs": {
+   "szerokosc": {
+    "db": 152.4,
+    "new": 6
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD160E75006KN40",
+  "ean": "4251438401013",
+  "diffs": {
+   "szerokosc": {
+    "db": 190.5,
+    "new": 7.5
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD160E90006K6N1",
+  "ean": "4251438402034",
+  "diffs": {
+   "szerokosc": {
+    "db": 228.6,
+    "new": 9
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD260G84006KNK0",
+  "ean": "4251438401488",
+  "diffs": {
+   "szerokosc": {
+    "db": 467.4,
+    "new": 18.4
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD300G84006KNK1",
+  "ean": "4251438401709",
+  "diffs": {
+   "szerokosc": {
+    "db": 467.4,
+    "new": 18.4
+   }
+  }
+ },
+ {
+  "key": "MO5::OZRD320G24006KNK0",
+  "ean": "4251438401747",
+  "diffs": {
+   "szerokosc": {
+    "db": 315,
+    "new": 12.4
+   }
+  }
+ },
+ {
+  "key": "MO5::TRPD120D85002SK90",
+  "ean": "8059971559408",
+  "diffs": {
+   "szerokosc": {
+    "db": 215.9,
+    "new": 23
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::TRPD150278002SK80",
+  "ean": "8059971551389",
+  "diffs": {
+   "szerokosc": {
+    "db": 215.9,
+    "new": 27
+   },
+   "profil": {
+    "db": 82,
+    "new": 8.5
+   }
+  }
+ },
+ {
+  "key": "MO5::TRPD150291002SK90",
+  "ean": "8059971520033",
+  "diffs": {
+   "szerokosc": {
+    "db": 2912.5,
+    "new": 29
+   },
+   "profil": {
+    "db": 82,
+    "new": 12.5
+   }
+  }
+ },
+ {
+  "key": "MO5::TRRD040E40000T992",
+  "ean": "8059971012279",
+  "diffs": {
+   "szerokosc": {
+    "db": 101.6,
+    "new": 4
+   }
+  }
+ },
+ {
+  "key": "MO5::TRRD040E41000T391",
+  "ean": "8059971011913",
+  "diffs": {
+   "rozmiar": {
+    "db": "10/3.50-4",
+    "new": "4.10/3.50-4"
+   },
+   "dlugosc": {
+    "db": 12,
+    "new": 11
+   },
+   "szerokosc_paczki": {
+    "db": 31,
+    "new": 16
+   },
+   "wysokosc": {
+    "db": 12,
+    "new": 11
+   },
+   "wysokosc_przesylki": {
+    "db": 27,
+    "new": 26
+   }
+  }
+ },
+ {
+  "key": "MO5::TRRD080191000TDR0",
+  "ean": "8059971016956",
+  "diffs": {
+   "szerokosc": {
+    "db": 189.5,
+    "new": 18
+   },
+   "profil": {
+    "db": 82,
+    "new": 9.5
+   }
+  }
+ },
+ {
+  "key": "MO5::TRRD12014000452T1",
+  "ean": "8059971011654",
+  "diffs": {
+   "szerokosc": {
+    "db": 140,
+    "new": 560
+   },
+   "profil": {
+    "db": 82,
+    "new": 140
+   }
+  }
+ },
+ {
+  "key": "MO5::TRRD13014500452T1",
+  "ean": "8059971011661",
+  "diffs": {
+   "szerokosc": {
+    "db": 145,
+    "new": 610
+   },
+   "profil": {
+    "db": 82,
+    "new": 145
+   }
+  }
+ },
+ {
+  "key": "MO5::TRRD14016000452T1",
+  "ean": "8059971011678",
+  "diffs": {
+   "szerokosc": {
+    "db": 160,
+    "new": 645
+   },
+   "profil": {
+    "db": 82,
+    "new": 160
+   }
+  }
+ },
+ {
+  "key": "MO5::TRRD150E70000TCT0",
+  "ean": "8059971018431",
+  "diffs": {
+   "szerokosc": {
+    "db": 7,
+    "new": 690
+   },
+   "profil": {
+    "db": 82,
+    "new": 180
+   }
+  }
+ }
+]

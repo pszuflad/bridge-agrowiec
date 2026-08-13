@@ -1,0 +1,618 @@
+[
+  {
+    "kod": "MO9_41836",
+    "nazwa_db": "10x16.5 BKT JUMBOTRAX HD 10PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094017287",
+    "ean_memory": "8903094056279"
+  },
+  {
+    "kod": "MO9_33568",
+    "nazwa_db": "10.0/75x15.3 BKT AW 909 10PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094010394",
+    "ean_memory": "8903094025138"
+  },
+  {
+    "kod": "MO9_7445",
+    "nazwa_db": "10.00x20 BKT PT - HD 18PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094007639",
+    "ean_memory": "8903094005307"
+  },
+  {
+    "kod": "MO9_29613",
+    "nazwa_db": "10.5x20 BKT MP 567 10PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094038091",
+    "ean_memory": "8903094039784"
+  },
+  {
+    "kod": "MO9_5345",
+    "nazwa_db": "11.00x16 BKT TF 9090 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094020775",
+    "ean_memory": "8903094018369"
+  },
+  {
+    "kod": "MO9_69205",
+    "nazwa_db": "11.2x24 BKT TR 135 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094003044",
+    "ean_memory": "8903094003396"
+  },
+  {
+    "kod": "MO9_30803",
+    "nazwa_db": "11.5/80x15.3 BKT AW 702 14PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094009466",
+    "ean_memory": "8903094009619"
+  },
+  {
+    "kod": "MO9_49280",
+    "nazwa_db": "11.5/80x15.3 BKT AW 909 E 18PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094010707",
+    "ean_memory": "8903094025190"
+  },
+  {
+    "kod": "MO9_19593",
+    "nazwa_db": "12.00x20 BKT PT - HD 20PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094007660",
+    "ean_memory": "8903094005444"
+  },
+  {
+    "kod": "MO9_4929",
+    "nazwa_db": "12.4x24 BKT TR 135 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094003129",
+    "ean_memory": "8903094003433"
+  },
+  {
+    "kod": "MO9_11037",
+    "nazwa_db": "12.4x26 BKT TR 171 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094034826",
+    "ean_memory": "8903094004379"
+  },
+  {
+    "kod": "MO9_11295",
+    "nazwa_db": "12.5x20 BKT MP 570 12PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094038329",
+    "ean_memory": "8903094039807"
+  },
+  {
+    "kod": "MO9_31378",
+    "nazwa_db": "12.5/70x16 BKT AT 621 8PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094028511",
+    "ean_memory": "8903094027927"
+  },
+  {
+    "kod": "MO9_27325",
+    "nazwa_db": "12.5/80x18 BKT AW 702 16PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094009701",
+    "ean_memory": "8903094009718"
+  },
+  {
+    "kod": "MO9_58507",
+    "nazwa_db": "12.5/80x18 BKT CON STAR 143A8 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094051304",
+    "ean_memory": "8903094029457"
+  },
+  {
+    "kod": "MO9_48690",
+    "nazwa_db": "13.0/55x16 BKT AW 702 14PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094009725",
+    "ean_memory": "8903094009596"
+  },
+  {
+    "kod": "MO9_1034",
+    "nazwa_db": "13.0/65x18 BKT AW 702 16PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094009800",
+    "ean_memory": "8903094009732"
+  },
+  {
+    "kod": "MO9_57994",
+    "nazwa_db": "13.6x24 BKT TR 135 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094003303",
+    "ean_memory": "8903094003495"
+  },
+  {
+    "kod": "MO9_54043",
+    "nazwa_db": "13.6x28 BKT TR 135 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094003341",
+    "ean_memory": "8903094003556"
+  },
+  {
+    "kod": "MO9_40776",
+    "nazwa_db": "13.6x36 BKT TR 135 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094003372",
+    "ean_memory": "8903094003716"
+  },
+  {
+    "kod": "MO9_36491",
+    "nazwa_db": "13.6x38 BKT TR 135 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094003419",
+    "ean_memory": "8903094003754"
+  },
+  {
+    "kod": "MO9_8205",
+    "nazwa_db": "14.5/80x18 BKT AW 702 12PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094034666",
+    "ean_memory": "8903094009770"
+  },
+  {
+    "kod": "MO5_KARD240G49006SGQ0",
+    "nazwa_db": "14.9-24 Kabat SGP-04 128A6 8PR TT",
+    "dostawca": "MO5",
+    "ean_db": "5901765100460",
+    "ean_memory": "5901765201087"
+  },
+  {
+    "kod": "MO9_12973",
+    "nazwa_db": "15.0/55x17 BKT AW 909 14PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094010813",
+    "ean_memory": "8903094025237"
+  },
+  {
+    "kod": "MO9_27196",
+    "nazwa_db": "15.5x25 BKT GR 288 12PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094014415",
+    "ean_memory": "8903094014378"
+  },
+  {
+    "kod": "MO9_59616",
+    "nazwa_db": "16.0/70x24 BKT MP 600 14PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094015320",
+    "ean_memory": "8903094039869"
+  },
+  {
+    "kod": "MO9_34671",
+    "nazwa_db": "16.0/70R20 BKT BK-LOADER 53 155A2/151A4 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094054428",
+    "ean_memory": "8903094043507"
+  },
+  {
+    "kod": "MO9_55619",
+    "nazwa_db": "18.4x34 BKT FS 216 STEL BLT 14PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094029297",
+    "ean_memory": "3607044143174"
+  },
+  {
+    "kod": "MO3_2109518BKT",
+    "nazwa_db": "210/95R18 BKT Agrimax RT 855 108A8/108B TL",
+    "dostawca": "MO3",
+    "ean_db": "8903094028672",
+    "ean_memory": "8903094021420"
+  },
+  {
+    "kod": "MO9_28808",
+    "nazwa_db": "215/75x17.5 BKT RIB 774 DOT 16PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094038084",
+    "ean_memory": "8903094011070"
+  },
+  {
+    "kod": "MO9_45895",
+    "nazwa_db": "23.1x26 BKT TR 387 145A6 8PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094005048",
+    "ean_memory": "8903094005017"
+  },
+  {
+    "kod": "MO9_46320",
+    "nazwa_db": "23.1x30 BKT TR 135 12PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094004058",
+    "ean_memory": "8903094003822"
+  },
+  {
+    "kod": "MO9_42762",
+    "nazwa_db": "240/70R16 BKT AGRIMAX RT 765 104A8/104B TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094022014",
+    "ean_memory": "8903094021482"
+  },
+  {
+    "kod": "MO9_18261",
+    "nazwa_db": "24x13.00-12 BKT LG 408 6PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094012879",
+    "ean_memory": "8903094022786"
+  },
+  {
+    "kod": "MO9_7670",
+    "nazwa_db": "250/70R15 BKT LIFTMAX LM81 NOWOŚĆ 153A5 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094062904",
+    "ean_memory": "8903094045143"
+  },
+  {
+    "kod": "MO9_52943",
+    "nazwa_db": "250/80x18 BKT FARM 2000 127A8 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094040285",
+    "ean_memory": "8903094024377"
+  },
+  {
+    "kod": "MO9_45914",
+    "nazwa_db": "25x8.50-14 BKT LG 306 6PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094036622",
+    "ean_memory": "8903094012534"
+  },
+  {
+    "kod": "MO9_60049",
+    "nazwa_db": "26x12-12 BKT SKID POWER HD 8PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094017836",
+    "ean_memory": "8903094056118"
+  },
+  {
+    "kod": "MO3_2709532BKT",
+    "nazwa_db": "270/95R32 BKT Agrimax RT 955 136A8/136B TL",
+    "dostawca": "MO3",
+    "ean_db": "8903094021857",
+    "ean_memory": "8903094021642"
+  },
+  {
+    "kod": "MO3_27095R48AAIIRC142D13",
+    "nazwa_db": "270/95R48 Alliance AGRISTAR II RC 142D/139E TL",
+    "dostawca": "MO3",
+    "ean_db": "8903635066477",
+    "ean_memory": "7291050074029"
+  },
+  {
+    "kod": "MO9_10342",
+    "nazwa_db": "300x15 BKT PT - HD 20PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094007776",
+    "ean_memory": "8903094007233"
+  },
+  {
+    "kod": "MO9_36449",
+    "nazwa_db": "300/80x15.3 BKT AW 09 138A8 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094037902",
+    "ean_memory": "8903094025299"
+  },
+  {
+    "kod": "MO3_31155015BKTsphd",
+    "nazwa_db": "31x15.50-15 BKT Skid Power HD 10PR TL",
+    "dostawca": "MO3",
+    "ean_db": "8903094056057",
+    "ean_memory": "8903094056156"
+  },
+  {
+    "kod": "MO9_5837",
+    "nazwa_db": "320/70R20 BKT AGRIMAX RT 765 123A8/B TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094021932",
+    "ean_memory": "8903094021529"
+  },
+  {
+    "kod": "MO9_54329",
+    "nazwa_db": "380/90R50 BKT AGRIMAX RT 945 151A8/151B TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094037025",
+    "ean_memory": "8903094022052"
+  },
+  {
+    "kod": "MO9_55491",
+    "nazwa_db": "385/65x22.5 BKT FLOT 648 16PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094006281",
+    "ean_memory": "8903094035175"
+  },
+  {
+    "kod": "MO9_42023",
+    "nazwa_db": "400/60x15.5 BKT AW 708 18PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094010356",
+    "ean_memory": "8903094036523"
+  },
+  {
+    "kod": "MO9_37078",
+    "nazwa_db": "400/60x15.5 BKT RIB 900 16PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094026340",
+    "ean_memory": "8903094035564"
+  },
+  {
+    "kod": "MO9_15793",
+    "nazwa_db": "400/60x15.5 BKT TR 882 14PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094019861",
+    "ean_memory": "8903094037353"
+  },
+  {
+    "kod": "MO9_42859",
+    "nazwa_db": "400/60x22.5 BKT FLOT 648 18PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094006328",
+    "ean_memory": "8903094035205"
+  },
+  {
+    "kod": "MO9_56040",
+    "nazwa_db": "420/55x17 BKT AS 504 145A8/133A8 16PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094032136",
+    "ean_memory": "8903094019182"
+  },
+  {
+    "kod": "MO9_36723",
+    "nazwa_db": "440/65R24 BKT AGRIMAX RT 657 135D/138A8 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094029136",
+    "ean_memory": "8903094022496"
+  },
+  {
+    "kod": "MO9_42510",
+    "nazwa_db": "460/85R30 BKT AGRIMAX RT 855 145A8/B TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094021765",
+    "ean_memory": "8903094021789"
+  },
+  {
+    "kod": "MO3_4608534m",
+    "nazwa_db": "460/85R34 Michelin AGRIBIB 2 152A8/152B TL",
+    "dostawca": "MO3",
+    "ean_db": "3528708177116",
+    "ean_memory": "3528705113442"
+  },
+  {
+    "kod": "MO9_5463",
+    "nazwa_db": "480/80R30 BKT RIDEMAX IT 696 162A8/157D TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094033850",
+    "ean_memory": "8903094042531"
+  },
+  {
+    "kod": "MO9_20335",
+    "nazwa_db": "5.00x15 BKT AS 504 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094019151",
+    "ean_memory": "8903094019229"
+  },
+  {
+    "kod": "MO9_12971",
+    "nazwa_db": "5.00x15 BKT TF 8181 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094020546",
+    "ean_memory": "8903094018390"
+  },
+  {
+    "kod": "MO9_12719",
+    "nazwa_db": "5.00x16 BKT TF 8181 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094020560",
+    "ean_memory": "8903094018413"
+  },
+  {
+    "kod": "MO9_27054",
+    "nazwa_db": "500/55x20 BKT FLOT648 12PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094039234",
+    "ean_memory": "8903094035229"
+  },
+  {
+    "kod": "MO9_48460",
+    "nazwa_db": "500/60x22.5 BKT TR 675 12PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094019786",
+    "ean_memory": "8903094037766"
+  },
+  {
+    "kod": "MO9_37146",
+    "nazwa_db": "500/60R22.5 BKT FL 630 ULTRA 155D/166A8 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094046065",
+    "ean_memory": "8903094041022"
+  },
+  {
+    "kod": "MO3_5208546BKT",
+    "nazwa_db": "520/85R46 BKT Agrimax RT 855 158A8/158B TL",
+    "dostawca": "MO3",
+    "ean_db": "8903094030569",
+    "ean_memory": "8903094021949"
+  },
+  {
+    "kod": "MO9_650",
+    "nazwa_db": "550/60x22.5 BKT FLOT 648 12PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094006373",
+    "ean_memory": "8903094035267"
+  },
+  {
+    "kod": "MO9_28397",
+    "nazwa_db": "560/45R22.5 BKT FL 639 152D/163A8 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094034260",
+    "ean_memory": "8903094041084"
+  },
+  {
+    "kod": "MO9_56612",
+    "nazwa_db": "6.00x12 BKT TR 128 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094045242",
+    "ean_memory": "8903094018659"
+  },
+  {
+    "kod": "MO9_55825",
+    "nazwa_db": "6.00x19 BKT TF 8181 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094020607",
+    "ean_memory": "8903094018475"
+  },
+  {
+    "kod": "MO9_49725",
+    "nazwa_db": "6.50x10 BKT PL 801 10PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094007165",
+    "ean_memory": "8903094006878"
+  },
+  {
+    "kod": "MO9_25380",
+    "nazwa_db": "600/40x22.5 BKT TR 678 DUAL BEAD 169A8 20PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094051915",
+    "ean_memory": "8903094037834"
+  },
+  {
+    "kod": "MO9_29764",
+    "nazwa_db": "600/50x22.5 BKT FLOT 648 12PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094006397",
+    "ean_memory": "8903094035304"
+  },
+  {
+    "kod": "MO9_29230",
+    "nazwa_db": "600/50x22.5 BKT FLOT 648 16PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094006403",
+    "ean_memory": "8903094035328"
+  },
+  {
+    "kod": "MO3_6007030Aaii",
+    "nazwa_db": "600/70R30 Alliance AGRISTAR II 70 152D TL",
+    "dostawca": "MO3",
+    "ean_db": "8903635028154",
+    "ean_memory": "7291050076207"
+  },
+  {
+    "kod": "MO9_42921",
+    "nazwa_db": "600/70R30 BKT AGRIMAX FORTIS 158D/161A8 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094032952",
+    "ean_memory": "8903094047864"
+  },
+  {
+    "kod": "MO9_7093",
+    "nazwa_db": "600/70R34 BKT AGRIMAX FORCE 167D TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094045228",
+    "ean_memory": "8903094047680"
+  },
+  {
+    "kod": "MO2_5439",
+    "nazwa_db": "620/70R42 Firestone MAXI TRACTION 166D/163E TL",
+    "dostawca": "MO2",
+    "ean_db": "0440000010966",
+    "ean_memory": "3286341078916"
+  },
+  {
+    "kod": "MO9_30305",
+    "nazwa_db": "7.00x12 BKT AS 504 6PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094019274",
+    "ean_memory": "8903094019243"
+  },
+  {
+    "kod": "MO9_13090",
+    "nazwa_db": "7.00x12 BKT PL 801 14PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094007219",
+    "ean_memory": "8903094006908"
+  },
+  {
+    "kod": "MO9_6264",
+    "nazwa_db": "7.50x20 BKT AS 504 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094019373",
+    "ean_memory": "8903094019304"
+  },
+  {
+    "kod": "MO9_28497",
+    "nazwa_db": "7.50x20 BKT TF 8181 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094020683",
+    "ean_memory": "8903094018536"
+  },
+  {
+    "kod": "MO9_31282",
+    "nazwa_db": "7.50x20 BKT TF 9090 8PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094021260",
+    "ean_memory": "8903094018321"
+  },
+  {
+    "kod": "MO9_8435",
+    "nazwa_db": "70x16 BKT AS 504 10PR TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094048830",
+    "ean_memory": "8903094019267"
+  },
+  {
+    "kod": "MO3_7107542TREL",
+    "nazwa_db": "710/75R42 Trelleborg TM 900 HP 175D/172E TL",
+    "dostawca": "MO3",
+    "ean_db": "8059971013726",
+    "ean_memory": "8059971021820"
+  },
+  {
+    "kod": "MO9_13725",
+    "nazwa_db": "8.25x15 BKT FL 252 14PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094006939",
+    "ean_memory": "8903094007370"
+  },
+  {
+    "kod": "MO9_2837",
+    "nazwa_db": "8.3x32 BKT TR 135 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094004072",
+    "ean_memory": "8903094003310"
+  },
+  {
+    "kod": "MO9_51923",
+    "nazwa_db": "800/45R26.5 BKT FL 630 ULTRA 174D/184A8 TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094054831",
+    "ean_memory": "8903094041121"
+  },
+  {
+    "kod": "MO9_60616",
+    "nazwa_db": "9.00x16 BKT TF 9090 10PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094021338",
+    "ean_memory": "8903094018345"
+  },
+  {
+    "kod": "MO9_37626",
+    "nazwa_db": "9.5x16 BKT TR 144 6PR TT",
+    "dostawca": "MO9",
+    "ean_db": "8903094041374",
+    "ean_memory": "8903094002924"
+  },
+  {
+    "kod": "MO9_21305",
+    "nazwa_db": "900/60R32 BKT AGRIMAX TERIS 181A8/178B TL",
+    "dostawca": "MO9",
+    "ean_db": "8903094029723",
+    "ean_memory": "8903094046973"
+  },
+  {
+    "kod": "MO9_15722",
+    "nazwa_db": "900/60R38 BKT AGRIMAX FORCE E 184D",
+    "dostawca": "MO9",
+    "ean_db": "8903094038749",
+    "ean_memory": "8903094047727"
+  }
+]

@@ -1,0 +1,17 @@
+# Bridge - reverse proxy do backendu Node.js na localhost:5000
+# Frontend SPA serwowany statycznie z tego katalogu
+
+RewriteEngine On
+
+# Proxy /api/* do backendu Node.js
+RewriteRule ^api/(.*)$ http://127.0.0.1:5000/api/$1 [P,L,QSA]
+
+# SPA fallback - wszystko co nie jest plikiem ani katalogiem -> index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule ^ index.html [L]
+
+# Wymuszenie HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

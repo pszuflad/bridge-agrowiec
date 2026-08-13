@@ -1,0 +1,695 @@
+[
+  {
+    "kod": "MO9_102103",
+    "rozmiar": "420/85R34",
+    "cur": "9R34",
+    "alt": "16.9R34",
+    "poprz": "9R34",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_66593",
+    "rozmiar": "480/80R38",
+    "cur": "4R38",
+    "alt": "18.4R38",
+    "poprz": "4R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_66466",
+    "rozmiar": "460/85R34",
+    "cur": "4R34",
+    "alt": "18.4R34",
+    "poprz": "4R34",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_61501",
+    "rozmiar": "230/95R44",
+    "cur": "5R44",
+    "alt": "9.5R44",
+    "poprz": "5R44",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_61299",
+    "rozmiar": "380/85R30",
+    "cur": "9R30",
+    "alt": "14.9R30",
+    "poprz": "9R30",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_61255",
+    "rozmiar": "300/95R46",
+    "cur": "4R46",
+    "alt": "12.4R46",
+    "poprz": "4R46",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_59070",
+    "rozmiar": "230/95R42",
+    "cur": "5R42",
+    "alt": "9.5R42",
+    "poprz": "5R42",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_58956",
+    "rozmiar": "280/85R24",
+    "cur": "2R24",
+    "alt": "11.2R24",
+    "poprz": "2R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_58730",
+    "rozmiar": "340/85R38",
+    "cur": "6R38",
+    "alt": "13.6R38",
+    "poprz": "6R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_58281",
+    "rozmiar": "420/80R46",
+    "cur": "9R46",
+    "alt": "16.9R46",
+    "poprz": "9R46",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_58068",
+    "rozmiar": "400/80R24",
+    "cur": "5/80R24",
+    "alt": "15.5R24",
+    "poprz": "5/80R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_56725",
+    "rozmiar": "320/85R34",
+    "cur": "4R34",
+    "alt": "12.4R34",
+    "poprz": "4R34",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_55749",
+    "rozmiar": "250/85R20",
+    "cur": "5R20",
+    "alt": "9.5R20",
+    "poprz": "5R20",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_52552",
+    "rozmiar": "300/95R52",
+    "cur": "4R52",
+    "alt": "12.4R52",
+    "poprz": "4R52",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_52469",
+    "rozmiar": "420/85R38",
+    "cur": "9R38",
+    "alt": "16.9R38",
+    "poprz": "9R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_49828",
+    "rozmiar": "440/80R28",
+    "cur": "9R28",
+    "alt": "16.9R28",
+    "poprz": "9R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_49502",
+    "rozmiar": "380/85R34",
+    "cur": "9R34",
+    "alt": "14.9R34",
+    "poprz": "9R34",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_48102",
+    "rozmiar": "400/80R24",
+    "cur": "0/80R24",
+    "alt": "15.5R24",
+    "poprz": "0/80R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_48078",
+    "rozmiar": "380/85R38",
+    "cur": "9R38",
+    "alt": "14.9R38",
+    "poprz": "9R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_47746",
+    "rozmiar": "480/80R46",
+    "cur": "4R46",
+    "alt": "18.4R46",
+    "poprz": "4R46",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_47570",
+    "rozmiar": "270/95R32",
+    "cur": "2R32",
+    "alt": "11.2R32",
+    "poprz": "2R32",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_45326",
+    "rozmiar": "250/85R24",
+    "cur": "5R24",
+    "alt": "9.5R24",
+    "poprz": "5R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_43761",
+    "rozmiar": "340/85R46",
+    "cur": "6R46",
+    "alt": "13.6R46",
+    "poprz": "6R46",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_42510",
+    "rozmiar": "460/85R30",
+    "cur": "4R30",
+    "alt": "18.4R30",
+    "poprz": "4R30",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_38444",
+    "rozmiar": "320/85R24",
+    "cur": "4R24",
+    "alt": "12.4R24",
+    "poprz": "4R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_38366",
+    "rozmiar": "320/85R36",
+    "cur": "4R36",
+    "alt": "12.4R36",
+    "poprz": "4R36",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_38272",
+    "rozmiar": "420/85R28",
+    "cur": "9R28",
+    "alt": "16.9R28",
+    "poprz": "9R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_37875",
+    "rozmiar": "320/90R46",
+    "cur": "4R46",
+    "alt": "12.4R46",
+    "poprz": "4R46",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_37485",
+    "rozmiar": "270/95R36",
+    "cur": "2R36",
+    "alt": "11.2R36",
+    "poprz": "2R36",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_35822",
+    "rozmiar": "230/95R32",
+    "cur": "5R32",
+    "alt": "9.5R32",
+    "poprz": "5R32",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_31896",
+    "rozmiar": "270/95R38",
+    "cur": "2R38",
+    "alt": "11.2R38",
+    "poprz": "2R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_31367",
+    "rozmiar": "230/95R36",
+    "cur": "5R36",
+    "alt": "9.5R36",
+    "poprz": "5R36",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_30678",
+    "rozmiar": "480/80R50",
+    "cur": "4R50",
+    "alt": "18.4R50",
+    "poprz": "4R50",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_30183",
+    "rozmiar": "210/90R24",
+    "cur": "3R24",
+    "alt": "8.3R24",
+    "poprz": "3R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_28977",
+    "rozmiar": "420/85R30",
+    "cur": "9R30",
+    "alt": "16.9R30",
+    "poprz": "9R30",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_27624",
+    "rozmiar": "320/85R32",
+    "cur": "4R32",
+    "alt": "12.4R32",
+    "poprz": "4R32",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_26914",
+    "rozmiar": "400/80R28",
+    "cur": "9R28",
+    "alt": "15.5R28",
+    "poprz": "9R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_25559",
+    "rozmiar": "340/85R28",
+    "cur": "6R28",
+    "alt": "13.6R28",
+    "poprz": "6R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_22997",
+    "rozmiar": "380/85R24",
+    "cur": "9R24",
+    "alt": "14.9R24",
+    "poprz": "9R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_22691",
+    "rozmiar": "400/80R24",
+    "cur": "9R24",
+    "alt": "15.5R24",
+    "poprz": "9R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_22180",
+    "rozmiar": "320/85R28",
+    "cur": "4R28",
+    "alt": "12.4R28",
+    "poprz": "4R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_21856",
+    "rozmiar": "445/95R25",
+    "cur": "00R25",
+    "alt": "16.00R25",
+    "poprz": "00R25",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_21771",
+    "rozmiar": "280/85R20",
+    "cur": "2R20",
+    "alt": "11.2R20",
+    "poprz": "2R20",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_20020",
+    "rozmiar": "340/85R48",
+    "cur": "6R48",
+    "alt": "13.6R48",
+    "poprz": "6R48",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_19445",
+    "rozmiar": "480/80R42",
+    "cur": "4R42",
+    "alt": "18.4R42",
+    "poprz": "4R42",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_19216",
+    "rozmiar": "250/85R28",
+    "cur": "5R28",
+    "alt": "9.5R28",
+    "poprz": "5R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_18459",
+    "rozmiar": "300/85R42",
+    "cur": "2R42",
+    "alt": "12.4R42",
+    "poprz": "2R42",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_17794",
+    "rozmiar": "270/95R44",
+    "cur": "2R44",
+    "alt": "11.2R44",
+    "poprz": "2R44",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_17681",
+    "rozmiar": "320/90R42",
+    "cur": "4R42",
+    "alt": "12.4R42",
+    "poprz": "4R42",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_17246",
+    "rozmiar": "280/85R28",
+    "cur": "2R28",
+    "alt": "11.2R28",
+    "poprz": "2R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_15937",
+    "rozmiar": "440/80R30",
+    "cur": "9R30",
+    "alt": "16.9R30",
+    "poprz": "9R30",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_15710",
+    "rozmiar": "420/85R24",
+    "cur": "9R24",
+    "alt": "16.9R24",
+    "poprz": "9R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_15641",
+    "rozmiar": "380/85R38",
+    "cur": "9R38",
+    "alt": "14.9R38",
+    "poprz": "9R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_15154",
+    "rozmiar": "460/85R38",
+    "cur": "4R38",
+    "alt": "18.4R38",
+    "poprz": "4R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_13784",
+    "rozmiar": "340/85R36",
+    "cur": "6R36",
+    "alt": "13.6R36",
+    "poprz": "6R36",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_13133",
+    "rozmiar": "300/80R24",
+    "cur": "2R24",
+    "alt": "11.2R24",
+    "poprz": "2R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_12959",
+    "rozmiar": "270/95R48",
+    "cur": "2R48",
+    "alt": "11.2R48",
+    "poprz": "2R48",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_11814",
+    "rozmiar": "320/85R20",
+    "cur": "4R20",
+    "alt": "12.4R20",
+    "poprz": "4R20",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_11542",
+    "rozmiar": "340/85R24",
+    "cur": "6R24",
+    "alt": "13.6R24",
+    "poprz": "6R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_8912",
+    "rozmiar": "320/85R38",
+    "cur": "4R38",
+    "alt": "12.4R38",
+    "poprz": "4R38",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_5463",
+    "rozmiar": "480/80R30",
+    "cur": "4R30",
+    "alt": "18.4R30",
+    "poprz": "4R30",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_5287",
+    "rozmiar": "460/85R34",
+    "cur": "4R34",
+    "alt": "18.4R34",
+    "poprz": "4R34",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_5006",
+    "rozmiar": "270/95R46",
+    "cur": "2R46",
+    "alt": "11.2R46",
+    "poprz": "2R46",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_4695",
+    "rozmiar": "230/95R48",
+    "cur": "5R48",
+    "alt": "9.5R48",
+    "poprz": "5R48",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_4640",
+    "rozmiar": "380/85R28",
+    "cur": "9R28",
+    "alt": "14.9R28",
+    "poprz": "9R28",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_4347",
+    "rozmiar": "420/85R34",
+    "cur": "9R34",
+    "alt": "16.9R34",
+    "poprz": "9R34",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO9_697",
+    "rozmiar": "270/95R54",
+    "cur": "2R54",
+    "alt": "11.2R54",
+    "poprz": "2R54",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO3_3808528BRvxr",
+    "rozmiar": "380/85R28",
+    "cur": "380/85, 380/90, 400/80",
+    "alt": "14.9R28",
+    "poprz": "380/85R28, 380/90R28, 400/80R28",
+    "via": "ean",
+    "poprzOK": false
+  },
+  {
+    "kod": "MO3_4057018FIDU",
+    "rozmiar": "405/70R18",
+    "cur": "400/70, 405/70",
+    "alt": "16.0/70R18",
+    "poprz": "400/70R18, 405/70R18",
+    "via": "ean",
+    "poprzOK": false
+  },
+  {
+    "kod": "MO3_4008024Nok",
+    "rozmiar": "400/80R24",
+    "cur": "380/85, 380/90, 400/80",
+    "alt": "15.5R24",
+    "poprz": "380/85R24, 380/90R24, 400/80R24",
+    "via": "ean",
+    "poprzOK": false
+  },
+  {
+    "kod": "MO3_4008024cross",
+    "rozmiar": "400/80R24",
+    "cur": "380/85, 380/90, 400/80",
+    "alt": "15.5R24",
+    "poprz": "380/85R24, 380/90R24, 400/80R24",
+    "via": "ean",
+    "poprzOK": false
+  },
+  {
+    "kod": "MO3_3809046CeatFRC165A8",
+    "rozmiar": "380/90R46",
+    "cur": "380/85, 380/90, 400/80",
+    "alt": "14.9R46",
+    "poprz": "380/85R46, 380/90R46, 400/80R46",
+    "via": "ean",
+    "poprzOK": false
+  },
+  {
+    "kod": "MO9_55366",
+    "rozmiar": "16.0/70x20",
+    "cur": null,
+    "alt": "16.0/70-20",
+    "poprz": "400/70, 405/70",
+    "via": "ean",
+    "poprzOK": false
+  },
+  {
+    "kod": "MO2_57024008AL-IN",
+    "rozmiar": "19.5R24",
+    "cur": "19.5LR24, 500/70R24",
+    "alt": "19.5R24",
+    "poprz": "19.5LR24, 500/70R24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO2_57020300AL-IN",
+    "rozmiar": "17.5-24",
+    "cur": "17.5L-24, 460/70-24",
+    "alt": "17.5-24",
+    "poprz": "17.5L-24, 460/70-24",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO2_36017698AL",
+    "rozmiar": "28R26",
+    "cur": "750/65R26, 28LR26",
+    "alt": "28LR26",
+    "poprz": "750/65R26, 28LR26",
+    "via": "ean",
+    "poprzOK": true
+  },
+  {
+    "kod": "MO2_36017507AL",
+    "rozmiar": "28R26",
+    "cur": "750/65R26, 28LR26",
+    "alt": "28LR26",
+    "poprz": "750/65R26, 28LR26",
+    "via": "ean",
+    "poprzOK": true
+  }
+]

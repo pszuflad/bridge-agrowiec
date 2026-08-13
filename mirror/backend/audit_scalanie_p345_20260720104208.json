@@ -1,0 +1,79 @@
+[
+ {
+  "id": 99475,
+  "ki_old": "676975",
+  "ki_new": "446848",
+  "nazwa_old": "245/70R17.5 LingLong KLS200 136/134M 16PR TL M+S 3PMSF",
+  "nazwa_new": "245/70R17.5 LingLong KLS200 136/134M 16PR TL M+S 3PMSF"
+ },
+ {
+  "id": 99481,
+  "ki_old": "747156",
+  "ki_new": "411400",
+  "nazwa_old": "235/75R17.5 LingLong KLD200 132/130M 14PR TL M+S 3PMSF",
+  "nazwa_new": "235/75R17.5 LingLong KLD200 132/130M 14PR TL M+S 3PMSF"
+ },
+ {
+  "id": 102570,
+  "ki_old": "341290",
+  "ki_new": "341290",
+  "nazwa_old": "385/65R22.5 Kumho XA11 164K 3PMSF",
+  "nazwa_new": "385/65R22.5 Kumho KXA11 uniwersalna 164K 24PR TL 3PMSF"
+ },
+ {
+  "id": 99507,
+  "ki_old": "472304",
+  "ki_new": "133270",
+  "nazwa_old": "385/65R22.5 Kumho KLT03 160K 20PR TL 3PMSF",
+  "nazwa_new": "385/65R22.5 Kumho KLT03 160K 20PR TL 3PMSF"
+ },
+ {
+  "id": 102587,
+  "ki_old": "602256",
+  "ki_new": "602256",
+  "nazwa_old": "315/70R22.5 Kumho LD23 154/150L 3PMSF DRIVE",
+  "nazwa_new": "315/70R22.5 Kumho KLD23 154/150L 18PR TL 3PMSF"
+ },
+ {
+  "id": 102584,
+  "ki_old": "472376",
+  "ki_new": "472376",
+  "nazwa_old": "435/50R19.5 Kumho LT23 160J 3PMSF",
+  "nazwa_new": "435/50R19.5 Kumho KLT23 160J 20PR TL 3PMSF"
+ },
+ {
+  "id": 101472,
+  "ki_old": "799370",
+  "ki_new": "799370",
+  "nazwa_old": "6.00-16 Kabat SRF-03 SUPRA RIB 8PR TT",
+  "nazwa_new": "6.00-16 Kabat SRF-03 SUPRA RIB 94A8 8PR TT"
+ },
+ {
+  "id": 100621,
+  "ki_old": "799370",
+  "ki_new": "799370",
+  "nazwa_old": "6.00-16 Kabat SRF-03 94A8 8PR TT",
+  "nazwa_new": "6.00-16 Kabat SRF-03 SUPRA RIB 94A8 8PR TT"
+ },
+ {
+  "id": 99582,
+  "ki_old": "799370",
+  "ki_new": "799370",
+  "nazwa_old": "6.00-16 Kabat SRF-03 94A8 8PR TT",
+  "nazwa_new": "6.00-16 Kabat SRF-03 SUPRA RIB 94A8 8PR TT"
+ },
+ {
+  "id": 101485,
+  "ki_old": "606853",
+  "ki_new": "606853",
+  "nazwa_old": "4.00-10 Kabat IMP-02 4PR TT",
+  "nazwa_new": "4.00-10 Kabat IMP-02 62A4 4PR TT"
+ },
+ {
+  "id": 101476,
+  "ki_old": "809769",
+  "ki_new": "809769",
+  "nazwa_old": "5.00-9 Kabat IMP-02 4PR TT",
+  "nazwa_new": "5.00-9 Kabat IMP-02 69A6 4PR TT"
+ }
+]

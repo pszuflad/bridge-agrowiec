@@ -1,0 +1,938 @@
+[
+ {
+  "typ": "A",
+  "marka": "ALLIANCE",
+  "src": "A-320 VP",
+  "target": "A320 VP"
+ },
+ {
+  "typ": "A",
+  "marka": "ALLIANCE",
+  "src": "AF-333",
+  "target": "AF 333"
+ },
+ {
+  "typ": "A",
+  "marka": "ALLIANCE",
+  "src": "AGRISTAR II",
+  "target": "AGRI STAR II"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "AGRIMAX FORCE E",
+  "target": "AGRIMAXFORCE E"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "AGRIMAX RT600",
+  "target": "AGRIMAX RT 600"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "AGRIMAX RT855 E",
+  "target": "AGRIMAX RT 855 E"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "AGRIMAX RT945 E",
+  "target": "AGRIMAX RT 945 E"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "AW-702",
+  "target": "AW 702"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "AW708",
+  "target": "AW 708"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "EARTHMAX SR33",
+  "target": "EARTHMAX SR 33"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "EARTHMAX SR35 CR",
+  "target": "EARTHMAX SR 35 CR"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "EARTHMAX SR41 CR",
+  "target": "EARTHMAX SR 41 CR"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "EARTHMAX SR53 CR",
+  "target": "EARTHMAX SR 53 CR"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "FL630 SUPER",
+  "target": "FL 630 SUPER"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "FL635",
+  "target": "FL 635"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "FL693 M",
+  "target": "FL 693 M"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "FLOT648",
+  "target": "FLOT 648"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "LIFTMAX LM81",
+  "target": "LIFT MAX LM81"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "MULTIMAX MP-522",
+  "target": "MULTIMAX MP 522"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "MULTIMAX MP522",
+  "target": "MULTIMAX MP 522"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "MULTIMAX MP522 E",
+  "target": "MULTIMAX MP 522 E"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "MULTIMAX MP527 E",
+  "target": "MULTIMAX MP 527 E"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "PAC MASTER",
+  "target": "PACMASTER"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "PT - HD",
+  "target": "PT-HD"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "RIB-774",
+  "target": "RIB 774"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "RIDEMAX FL 693M",
+  "target": "RIDEMAX FL 693 M"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "RIDEMAX FL693 M",
+  "target": "RIDEMAX FL 693 M"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "RIDEMAX FL693M",
+  "target": "RIDEMAX FL 693 M"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "RIDEMAX IT-696",
+  "target": "RIDEMAX IT 696"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "RIDEMAX IT696",
+  "target": "RIDEMAX IT 696"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "RIDEMAX IT696 E",
+  "target": "RIDEMAX IT 696 E"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "SURE-TRAX HD",
+  "target": "SURETRAX HD"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "TR 126 ",
+  "target": "TR 126"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "TR135 E",
+  "target": "TR 135 E"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "TR678",
+  "target": "TR 678"
+ },
+ {
+  "typ": "A",
+  "marka": "BKT",
+  "src": "V-LINE",
+  "target": "V LINE"
+ },
+ {
+  "typ": "A",
+  "marka": "BRIDGESTONE",
+  "src": "U-AP2",
+  "target": "U-AP002"
+ },
+ {
+  "typ": "A",
+  "marka": "BRIDGESTONE",
+  "src": "VT TRACTOR",
+  "target": "VT-TRACTOR"
+ },
+ {
+  "typ": "A",
+  "marka": "BRIDGESTONE",
+  "src": "VX TRACTOR",
+  "target": "VX-TRACTOR"
+ },
+ {
+  "typ": "A",
+  "marka": "CONTINENTAL",
+  "src": "COMPACTMASTER EM",
+  "target": "COMPACT MASTER EM"
+ },
+ {
+  "typ": "A",
+  "marka": "CONTINENTAL",
+  "src": "CONTI CROSS TRAC 3",
+  "target": "CONTI CROSSTRAC 3"
+ },
+ {
+  "typ": "A",
+  "marka": "CONTINENTAL",
+  "src": "MPT81",
+  "target": "MPT 81"
+ },
+ {
+  "typ": "A",
+  "marka": "CONTINENTAL",
+  "src": "TRACTORMASTER",
+  "target": "TRACTOR MASTER"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-AGRI07",
+  "target": "AS AGRI 07"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-AGRI 10",
+  "target": "AS AGRI 10"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-AGRI10",
+  "target": "AS AGRI 10"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-AGRI 13",
+  "target": "AS AGRI 13"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-AGRI13",
+  "target": "AS AGRI 13"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-AGRI19",
+  "target": "AS AGRI 19"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-AGRI20",
+  "target": "AS AGRI 20"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-FRONT 04",
+  "target": "AS FRONT 04"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AS-FRONT 08",
+  "target": "AS FRONT 08"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "AW-IMPLEMENT 13",
+  "target": "AW IMPLEMENT 13"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "RD-01",
+  "target": "RD01"
+ },
+ {
+  "typ": "A",
+  "marka": "CULTOR",
+  "src": "RD-03",
+  "target": "RD03"
+ },
+ {
+  "typ": "A",
+  "marka": "DOUBLE COIN",
+  "src": "REM8 ",
+  "target": "REM8"
+ },
+ {
+  "typ": "A",
+  "marka": "FIRESTONE",
+  "src": "MAXITRACTION 65",
+  "target": "MAXI TRACTION 65"
+ },
+ {
+  "typ": "A",
+  "marka": "GALAXY",
+  "src": "YARDMASTER ULTRA",
+  "target": "YARD MASTER ULTRA"
+ },
+ {
+  "typ": "A",
+  "marka": "GRI",
+  "src": "GREEN XLR70",
+  "target": "GREEN XLR 70"
+ },
+ {
+  "typ": "A",
+  "marka": "KENDA",
+  "src": "K500 SUPERTURF",
+  "target": "K500 SUPER TURF"
+ },
+ {
+  "typ": "A",
+  "marka": "MICHELIN",
+  "src": "XTE3",
+  "target": "XTE 3"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "AC65",
+  "target": "AC 65"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "AC70",
+  "target": "AC 70"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "AC70 G",
+  "target": "AC 70 G"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "AC 85 ",
+  "target": "AC 85"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "AC85",
+  "target": "AC 85"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "AC90",
+  "target": "AC 90"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "B-12",
+  "target": "B12"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "B-19",
+  "target": "B19"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "EM-22",
+  "target": "EM 22"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "EM-01",
+  "target": "EM01"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "EM-20",
+  "target": "EM20"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "EM-23",
+  "target": "EM23"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "HC70",
+  "target": "HC 70"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "IM-04",
+  "target": "IM04"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "IM-07",
+  "target": "IM07"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "MPT-01",
+  "target": "MPT01"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "MPT-03",
+  "target": "MPT03"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "MPT-04",
+  "target": "MPT04"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "MPT-05",
+  "target": "MPT05"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "MPT-06",
+  "target": "MPT06"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "MPT-21",
+  "target": "MPT21"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "NB38",
+  "target": "NB 38"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "SK-02",
+  "target": "SK02"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TD-02",
+  "target": "TD02"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TD-13",
+  "target": "TD13"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TD-19",
+  "target": "TD19"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TF-03",
+  "target": "TF03"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TG-01",
+  "target": "TG 01"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TI-02",
+  "target": "TI02"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TS-06",
+  "target": "TS06"
+ },
+ {
+  "typ": "A",
+  "marka": "MITAS",
+  "src": "TS-07",
+  "target": "TS07"
+ },
+ {
+  "typ": "A",
+  "marka": "NOKIAN",
+  "src": "FOREST KING TRS -2",
+  "target": "FOREST KING TRS 2"
+ },
+ {
+  "typ": "A",
+  "marka": "NOKIAN",
+  "src": "TRI2",
+  "target": "TRI 2"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "AW305",
+  "target": "AW 305"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "AW309",
+  "target": "AW 309"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "T-421",
+  "target": "T421"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "T-510",
+  "target": "T510"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "T-522",
+  "target": "T522"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "T-528",
+  "target": "T528"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "T-539",
+  "target": "T539"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "T-991",
+  "target": "T991"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "TH400",
+  "target": "TH 400"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "TM100",
+  "target": "TM 100"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "TM600",
+  "target": "TM 600"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "TM700",
+  "target": "TM 700"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "TM800",
+  "target": "TM 800"
+ },
+ {
+  "typ": "A",
+  "marka": "TRELLEBORG",
+  "src": "TM900HP",
+  "target": "TM 900 HP"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "328",
+  "target": "328 VALUE PLUS"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "328 FLOTATION",
+  "target": "328 VALUE PLUS"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "328 FORESTRY",
+  "target": "328 VALUE PLUS"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "328 VALUE",
+  "target": "328 VALUE PLUS"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "328 XP",
+  "target": "328 VALUE PLUS"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "328 VALUE",
+  "target": "328 VALUE PLUS"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "333",
+  "target": "333 AGRO-FORESTRY"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "333 FORESTRY",
+  "target": "333 AGRO-FORESTRY"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "344",
+  "target": "344 FORESTRY"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "345",
+  "target": "345 FORESTAR"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "360",
+  "target": "360 FORESTRY"
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "365",
+  "target": 365.0
+ },
+ {
+  "typ": "B",
+  "marka": "ALLIANCE",
+  "src": "365 AGRISTAR",
+  "target": 365.0
+ },
+ {
+  "typ": "B",
+  "marka": "BKT",
+  "src": "FLOT 648 166 A8",
+  "target": "FLOT 648"
+ },
+ {
+  "typ": "B",
+  "marka": "BKT",
+  "src": "FLOT 648 E",
+  "target": "FLOT 648"
+ },
+ {
+  "typ": "B",
+  "marka": "BKT",
+  "src": "FLOT 648 T WZM T E",
+  "target": "FLOT 648"
+ },
+ {
+  "typ": "B",
+  "marka": "BKT",
+  "src": "MULTIMAX MP 527 164 B",
+  "target": "MULTIMAX MP 527"
+ },
+ {
+  "typ": "B",
+  "marka": "BKT",
+  "src": "MULTIMAX MP 527 E",
+  "target": "MULTIMAX MP 527"
+ },
+ {
+  "typ": "B",
+  "marka": "BKT",
+  "src": "TR 126 ",
+  "target": "TR 126"
+ },
+ {
+  "typ": "B",
+  "marka": "DOUBLE COIN",
+  "src": "REM8 ",
+  "target": "REM8"
+ },
+ {
+  "typ": "B",
+  "marka": "DUNLOP",
+  "src": "SP362",
+  "target": "SP362 PROWADZĄCA"
+ },
+ {
+  "typ": "B",
+  "marka": "DUNLOP",
+  "src": "SP446 3PSF",
+  "target": "SP446"
+ },
+ {
+  "typ": "B",
+  "marka": "FALKEN",
+  "src": "BI856",
+  "target": "BI856 DRIVE"
+ },
+ {
+  "typ": "B",
+  "marka": "FIRESTONE",
+  "src": "FS400 129",
+  "target": "FS400"
+ },
+ {
+  "typ": "B",
+  "marka": "FULDA",
+  "src": "ECOTONN",
+  "target": "ECOTONN NACZEPA"
+ },
+ {
+  "typ": "B",
+  "marka": "GOODTRIP",
+  "src": "GHT22",
+  "target": "GHT22 TRAILER"
+ },
+ {
+  "typ": "B",
+  "marka": "GOODTRIP",
+  "src": "GHT50",
+  "target": "GHT50 TRAILER"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "IMP-06",
+  "target": "IMP-06 IMPLEMENT LINIOWA"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "IMP-06 LINIOWA",
+  "target": "IMP-06 IMPLEMENT LINIOWA"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "IMP-06 LINIOWA IMPLEMENT",
+  "target": "IMP-06 IMPLEMENT LINIOWA"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "IMP-06 LINIOWA",
+  "target": "IMP-06 LINIOWA IMPLEMENT"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "SGP-03 SUPRA GRIP",
+  "target": "SGP-03"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "SRF-01 SUPRA RIB",
+  "target": "SRF-01"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "SRF-03 SUPRA RIB",
+  "target": "SRF-03"
+ },
+ {
+  "typ": "B",
+  "marka": "KABAT",
+  "src": "TRY1",
+  "target": "TRY1 AG"
+ },
+ {
+  "typ": "B",
+  "marka": "MITAS",
+  "src": "AC 85 ",
+  "target": "AC 85"
+ },
+ {
+  "typ": "B",
+  "marka": "MITAS",
+  "src": "HCM",
+  "target": "HCM IND"
+ },
+ {
+  "typ": "B",
+  "marka": "MRL",
+  "src": "MIM",
+  "target": "MIM 374"
+ },
+ {
+  "typ": "B",
+  "marka": "MRL",
+  "src": "MTF 222",
+  "target": "MTF 222 TWO RIB"
+ },
+ {
+  "typ": "B",
+  "marka": "NOKIAN",
+  "src": "NORDMAN FOREST TRS",
+  "target": "NORDMAN FOREST TRS L-2"
+ },
+ {
+  "typ": "B",
+  "marka": "NOKIAN",
+  "src": "TR FOREST",
+  "target": "TR FOREST 2"
+ },
+ {
+  "typ": "B",
+  "marka": "PROMETEON",
+  "src": "R02 PRO TRAILER FRT HL",
+  "target": "R02 PRO TRAILER FRT"
+ },
+ {
+  "typ": "B",
+  "marka": "PROMETEON",
+  "src": "R02 PROFUEL STEER HL",
+  "target": "R02 PROFUEL STEER"
+ },
+ {
+  "typ": "B",
+  "marka": "TRELLEBORG",
+  "src": "T414 FS",
+  "target": "T414"
+ },
+ {
+  "typ": "B",
+  "marka": "TRELLEBORG",
+  "src": "T463 FLOT",
+  "target": "T463"
+ },
+ {
+  "typ": "B",
+  "marka": "TRELLEBORG",
+  "src": "T463 PLUS",
+  "target": "T463"
+ },
+ {
+  "typ": "B",
+  "marka": "TRELLEBORG",
+  "src": "TM900HP HA",
+  "target": "TM900HP"
+ },
+ {
+  "typ": "B",
+  "marka": "VREDESTEIN",
+  "src": "TRAXION85",
+  "target": "TRAXION85 II"
+ }
+]
