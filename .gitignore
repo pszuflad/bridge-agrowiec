@@ -1,0 +1,23 @@
+# ── Snapshot bazy — binarny, ~25 MB, zmienny; wersjonujemy tylko schemat ──
+db/snapshot.db
+*.db
+*.db-shm
+*.db-wal
+
+# ── Sekrety — nigdy do repo ────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+mirror/**/.env
+
+# ── Zależności i śmieci runtime ────────────────────────────────────────────
+node_modules/
+*.log
+tools/sync.log
+logs/
+
+# ── Lokalne / systemowe ────────────────────────────────────────────────────
+.claude/settings.local.json
+.DS_Store
+*.swp
+*~
