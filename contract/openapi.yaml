@@ -1,0 +1,1165 @@
+openapi: 3.0.3
+info:
+  title: Bridge dla Agrowca — API (kontrakt zamrożony)
+  version: "1.0.0-2026-08-17"
+  description: >
+    Kontrakt wygenerowany z ZWERYFIKOWANEGO inwentarza endpointów
+    (docs/spec-backend.md + 01_ENDPOINTY.md), nie z pamięci.
+    Ścieżki/metody/auth/parametry: FROZEN. Kształty request/response: do
+    zamrożenia w Kroku 2.4 (nagrane fixtures z żywego backendu).
+    UWAGA BEZPIECZEŃSTWA: operacje bez `security` są PUBLICZNE (bez logowania)
+    — to stan faktyczny do naprawy, nie rekomendacja. Patrz spec-backend.md §2.
+servers:
+  - url: https://panel.agritires.eu
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+    cookieAuth: { type: apiKey, in: cookie, name: bridge_session }
+paths:
+  /api/admin/supplier-config:
+    get:
+      tags: [admin]
+      summary: "GET /api/admin/supplier-config"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/admin/supplier-config/{kod}:
+    patch:
+      tags: [admin]
+      summary: "PATCH /api/admin/supplier-config/{kod}"
+      parameters:
+        - { name: kod, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/admin/suppliers-list:
+    get:
+      tags: [admin]
+      summary: "GET /api/admin/suppliers-list"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/ai-fallback/parse:
+    post:
+      tags: [ai-fallback]
+      summary: "POST /api/ai-fallback/parse"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/alerts:
+    get:
+      tags: [alerts]
+      summary: "GET /api/alerts"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/alerts/{id}:
+    patch:
+      tags: [alerts]
+      summary: "PATCH /api/alerts/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/availability/products:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/availability/products"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/availability/sell-through:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/availability/sell-through"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/bootstrap-current:
+    post:
+      tags: [analytics]
+      summary: "POST /api/analytics/bootstrap-current"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/dostawcy-stats:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/dostawcy-stats"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/ean-porownanie:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/ean-porownanie"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/ean/comparison:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/ean/comparison"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/ean/coverage:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/ean/coverage"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/ean/details:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/ean/details"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/ean/supplier-rank:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/ean/supplier-rank"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/ean/unique:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/ean/unique"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/export/{view}:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/export/{view}"
+      parameters:
+        - { name: view, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/filters:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/filters"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/importy-timeline:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/importy-timeline"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/kpi:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/kpi"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/lifecycle/models:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/lifecycle/models"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/margins:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/margins"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/market/group-prices:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/market/group-prices"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/prices/inflation:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/prices/inflation"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/prices/last-import:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/prices/last-import"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/prices/product-history:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/prices/product-history"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/rotation/inactive:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/rotation/inactive"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/seasonality/monthly:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/seasonality/monthly"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/status:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/status"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/suppliers/lifecycle:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/suppliers/lifecycle"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/suppliers/stability:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/suppliers/stability"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/suppliers/stock:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/suppliers/stock"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/analytics/top-zmiany:
+    get:
+      tags: [analytics]
+      summary: "GET /api/analytics/top-zmiany"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty:
+    get:
+      tags: [atrybuty]
+      summary: "GET /api/atrybuty"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/liczniki:
+    get:
+      tags: [atrybuty]
+      summary: "GET /api/atrybuty/liczniki"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/pending:
+    delete:
+      tags: [atrybuty]
+      summary: "DELETE /api/atrybuty/pending"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    get:
+      tags: [atrybuty]
+      summary: "GET /api/atrybuty/pending"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/pending/{id}/akceptuj:
+    post:
+      tags: [atrybuty]
+      summary: "POST /api/atrybuty/pending/{id}/akceptuj"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/pending/{id}/akceptuj-jako-alias:
+    post:
+      tags: [atrybuty]
+      summary: "POST /api/atrybuty/pending/{id}/akceptuj-jako-alias"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/pending/{id}/akceptuj-z-edycja:
+    post:
+      tags: [atrybuty]
+      summary: "POST /api/atrybuty/pending/{id}/akceptuj-z-edycja"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/pending/{id}/odrzuc:
+    post:
+      tags: [atrybuty]
+      summary: "POST /api/atrybuty/pending/{id}/odrzuc"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/rodzaje:
+    get:
+      tags: [atrybuty]
+      summary: "GET /api/atrybuty/rodzaje"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [atrybuty]
+      summary: "POST /api/atrybuty/rodzaje"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/rodzaje/{value}:
+    delete:
+      tags: [atrybuty]
+      summary: "DELETE /api/atrybuty/rodzaje/{value}"
+      parameters:
+        - { name: value, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    put:
+      tags: [atrybuty]
+      summary: "PUT /api/atrybuty/rodzaje/{value}"
+      parameters:
+        - { name: value, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/scan-pending:
+    post:
+      tags: [atrybuty]
+      summary: "POST /api/atrybuty/scan-pending"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/uzycie:
+    get:
+      tags: [atrybuty]
+      summary: "GET /api/atrybuty/uzycie"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/wartosci:
+    get:
+      tags: [atrybuty]
+      summary: "GET /api/atrybuty/wartosci"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [atrybuty]
+      summary: "POST /api/atrybuty/wartosci"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/atrybuty/wartosci/{id}:
+    delete:
+      tags: [atrybuty]
+      summary: "DELETE /api/atrybuty/wartosci/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    put:
+      tags: [atrybuty]
+      summary: "PUT /api/atrybuty/wartosci/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/audit-log:
+    get:
+      tags: [audit-log]
+      summary: "GET /api/audit-log"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/config:
+    get:
+      tags: [config]
+      summary: "GET /api/config"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [config]
+      summary: "POST /api/config"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/dostawcy:
+    get:
+      tags: [dostawcy]
+      summary: "GET /api/dostawcy"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/dostawcy/{id}:
+    patch:
+      tags: [dostawcy]
+      summary: "PATCH /api/dostawcy/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/dostawcy/{kod}/synchronizuj-teraz:
+    post:
+      tags: [dostawcy]
+      summary: "POST /api/dostawcy/{kod}/synchronizuj-teraz"
+      parameters:
+        - { name: kod, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/dostawcy/{kod}/upload:
+    post:
+      tags: [dostawcy]
+      summary: "POST /api/dostawcy/{kod}/upload"
+      parameters:
+        - { name: kod, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/export-shoper:
+    get:
+      tags: [export-shoper]
+      summary: "GET /api/export-shoper"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/export/shoper:
+    get:
+      tags: [export]
+      summary: "GET /api/export/shoper"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/history:
+    get:
+      tags: [history]
+      summary: "GET /api/history"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/history/meta:
+    get:
+      tags: [history]
+      summary: "GET /api/history/meta"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/history/paged:
+    get:
+      tags: [history]
+      summary: "GET /api/history/paged"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/import/from-url:
+    post:
+      tags: [import]
+      summary: "POST /api/import/from-url"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/import/parse-file:
+    post:
+      tags: [import]
+      summary: "POST /api/import/parse-file"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/login:
+    post:
+      tags: [login]
+      summary: "POST /api/login"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/logout:
+    post:
+      tags: [logout]
+      summary: "POST /api/logout"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/maintenance/usun-nieopony:
+    post:
+      tags: [maintenance]
+      summary: "POST /api/maintenance/usun-nieopony"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/markups:
+    get:
+      tags: [markups]
+      summary: "GET /api/markups"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [markups]
+      summary: "POST /api/markups"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/markups/{id}:
+    delete:
+      tags: [markups]
+      summary: "DELETE /api/markups/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    patch:
+      tags: [markups]
+      summary: "PATCH /api/markups/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/me:
+    get:
+      tags: [me]
+      summary: "GET /api/me"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/overrides:
+    get:
+      tags: [overrides]
+      summary: "GET /api/overrides"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [overrides]
+      summary: "POST /api/overrides"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/overrides/{id}:
+    delete:
+      tags: [overrides]
+      summary: "DELETE /api/overrides/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/password/change:
+    post:
+      tags: [password]
+      summary: "POST /api/password/change"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/products:
+    get:
+      tags: [products]
+      summary: "GET /api/products"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [products]
+      summary: "POST /api/products"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/products/clear:
+    post:
+      tags: [products]
+      summary: "POST /api/products/clear"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/products/{id}:
+    delete:
+      tags: [products]
+      summary: "DELETE /api/products/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    patch:
+      tags: [products]
+      summary: "PATCH /api/products/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    put:
+      tags: [products]
+      summary: "PUT /api/products/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/promotions:
+    get:
+      tags: [promotions]
+      summary: "GET /api/promotions"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [promotions]
+      summary: "POST /api/promotions"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/promotions/{id}:
+    delete:
+      tags: [promotions]
+      summary: "DELETE /api/promotions/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    patch:
+      tags: [promotions]
+      summary: "PATCH /api/promotions/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/categories:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/categories"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/csv-status:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/csv-status"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/dictionaries:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/dictionaries"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/generate-csv:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/generate-csv"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/log:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/log"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/ping:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/ping"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/producers:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/producers"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/status:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/status"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/sync-product:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-product"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/selly/sync-supplier:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-supplier"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/spedycja:
+    get:
+      tags: [spedycja]
+      summary: "GET /api/spedycja"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+    post:
+      tags: [spedycja]
+      summary: "POST /api/spedycja"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/staging:
+    get:
+      tags: [staging]
+      summary: "GET /api/staging"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
+  /api/staging/accept:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/accept"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/staging/clear:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/clear"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/staging/import:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/import"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/staging/paged:
+    get:
+      tags: [staging]
+      summary: "GET /api/staging/paged"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/staging/reject:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/reject"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/staging/{id}:
+    delete:
+      tags: [staging]
+      summary: "DELETE /api/staging/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    get:
+      tags: [staging]
+      summary: "GET /api/staging/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+    put:
+      tags: [staging]
+      summary: "PUT /api/staging/{id}"
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/suppliers:
+    get:
+      tags: [suppliers]
+      summary: "GET /api/suppliers"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/users:
+    get:
+      tags: [users]
+      summary: "GET /api/users"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+  /api/waga-gabarytowa/oblicz:
+    post:
+      tags: [waga-gabarytowa]
+      summary: "POST /api/waga-gabarytowa/oblicz"
+      security: []   # ⚠ PUBLICZNE — bez auth (stan faktyczny)
+      requestBody:
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        content: { application/json: { schema: { type: object } } }
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
+        "400": { description: "Błędne żądanie" }
