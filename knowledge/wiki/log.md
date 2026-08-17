@@ -1,0 +1,192 @@
+- [2026-06-11] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-11] ingest: 10 sessions -> created entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice, entities/columbus-cars, projects/facebook-commenting-operations, projects/tiktok-microauto-lead-research, projects/bridge-agrowiec
+- [2026-06-11] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 6 pages, stamped frontmatter on 6 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-12] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-12] ingest: 9 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice
+- [2026-06-12] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 10 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-12] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-12] connector probe: no authenticated workplace connectors; no connector activity signal retrieved
+- [2026-06-12] ingest: 2 sessions -> updated entities/centrum-motoryzacyjne-bowit, entities/columbus-cars, projects/facebook-commenting-operations; wrote 2 session summaries
+- [2026-06-12] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 4 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-14] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-14] connector probe: no authenticated workplace connectors; no connector activity signal retrieved
+- [2026-06-14] ingest: 5 sessions -> updated entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, projects/facebook-commenting-operations; created projects/home-insulation-sourcing; wrote 5 session summaries
+- [2026-06-14] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 8 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-15] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-15] connector probe: no authenticated workplace connectors; no connector activity signal retrieved
+- [2026-06-15] ingest: 6 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice; wrote 6 session summaries
+- [2026-06-15] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-17] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-17] connector probe: no authenticated workplace connectors; no connector activity signal retrieved
+- [2026-06-17] ingest: 9 sessions -> updated projects/bridge-agrowiec, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; created projects/pony-assistant-demo; wrote 8 session summaries
+- [2026-06-17] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 8 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-18] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-18] connector probe: no authenticated workplace connectors; all checked connector categories disconnected
+- [2026-06-18] ingest: 5 sessions -> updated projects/bridge-agrowiec, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; wrote 5 session summaries
+- [2026-06-18] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-19] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-19] connector probe: no authenticated workplace connectors; all checked connector categories disconnected or not registered
+- [2026-06-19] ingest: 4 sessions -> updated entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice, projects/facebook-commenting-operations; wrote 4 session summaries
+- [2026-06-19] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 4 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-20] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-20] connector probe: all queried workplace connectors disconnected; no connector activity signal retrieved
+- [2026-06-20] ingest: 9 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice; wrote 6 session summaries
+- [2026-06-20] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 5 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-21] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-21] connector probe: all queried workplace connectors disconnected or not found; no connector activity signal retrieved
+- [2026-06-21] ingest: 7 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice; wrote 6 session summaries
+- [2026-06-21] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-22] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-22] connector probe: all queried workplace connectors disconnected or not found; no connector activity signal retrieved
+- [2026-06-22] ingest: 10 sessions -> updated projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; wrote 6 session summaries
+- [2026-06-22] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-22] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-22] connector probe: all discovered workplace connectors disconnected; no connector activity signal retrieved
+- [2026-06-22] ingest: 6 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/centrum-motoryzacyjne-bowit, entities/columbus-cars; wrote 6 session summaries
+- [2026-06-22] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-24] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-24] connector probe: all checked workplace connectors disconnected or not returned; no connector activity signal retrieved
+- [2026-06-24] ingest: 4 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/centrum-motoryzacyjne-bowit, entities/columbus-cars; wrote 4 session summaries
+- [2026-06-24] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 8 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-26] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-26] connector probe: all checked workplace connectors disconnected or not found; no connector activity signal retrieved
+- [2026-06-26] ingest: 7 sessions -> updated entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, projects/facebook-commenting-operations; wrote 7 session summaries
+- [2026-06-26] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 8 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-26] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-26] connector probe: 11 workplace connectors disconnected or not found; no connector activity signal retrieved
+- [2026-06-26] ingest: 11 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/centrum-motoryzacyjne-bowit, entities/columbus-cars, entities/microauto-ziebice; wrote 8 session summaries
+- [2026-06-26] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 8 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-06-28] phase 0: 0 zero-tolerance issues, no-op
+- [2026-06-28] connector probe: 10 connector slots disconnected or not found; no connector activity signal retrieved
+- [2026-06-28] ingest: 1 session -> wrote session summary for 889a9c42; no wiki pages updated
+- [2026-06-28] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 0 citations across 0 pages, stamped frontmatter on 0 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-01] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-01] connector probe: 7 checked workplace connectors disconnected and 4 connector types not returned; no connector activity signal retrieved
+- [2026-07-01] ingest: 11 sessions -> updated projects/bridge-agrowiec, entities/columbus-cars, entities/microauto-ziebice, entities/centrum-motoryzacyjne-bowit; wrote 11 session summaries
+- [2026-07-01] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 8 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-01] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-01] connector probe: 6 queried workplace connectors disconnected; no connector activity signal retrieved
+- [2026-07-01] ingest: 2 sessions -> updated entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; wrote 2 session summaries
+- [2026-07-01] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 2 citations across 2 pages, stamped frontmatter on 2 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-02] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-02] connector probe: all checked workplace connectors disconnected or not returned; no connector activity signal retrieved
+- [2026-07-02] ingest: 9 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; created projects/camper-rental-facebook-lead-research; wrote 9 session summaries
+- [2026-07-02] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 8 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-03] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-03] connector probe: all checked workplace connectors disconnected; no connector activity signal retrieved
+- [2026-07-03] ingest: 13 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice; created projects/selly-tire-search-ux; wrote 11 session summaries
+- [2026-07-03] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 6 pages, stamped frontmatter on 6 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-05] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-05] connector probe: all checked workplace connectors disconnected or not returned; no connector activity signal retrieved
+- [2026-07-05] ingest: 5 sessions -> updated entities/columbus-cars, projects/facebook-commenting-operations, projects/camper-rental-facebook-lead-research
+- [2026-07-05] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-08] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-08] connector probe: all checked workplace connectors disconnected; no connector activity signal retrieved
+- [2026-07-08] ingest: 14 sessions -> updated projects/bridge-agrowiec, projects/selly-tire-search-ux, projects/facebook-commenting-operations, projects/camper-rental-facebook-lead-research, entities/columbus-cars, entities/microauto-ziebice, entities/centrum-motoryzacyjne-bowit; created projects/agrorami-api-integration; wrote 14 session summaries
+- [2026-07-08] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 4 citations across 4 pages, stamped frontmatter on 8 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-09] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-09] connector probe: all checked workplace connectors disconnected; no connector activity signal retrieved
+- [2026-07-09] ingest: 10 sessions -> updated projects/bridge-agrowiec, projects/selly-tire-search-ux, projects/camper-rental-facebook-lead-research, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; created projects/selly-agroopony-catalog-configuration; wrote 10 session summaries
+- [2026-07-09] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 5 pages, stamped frontmatter on 6 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-09] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-09] connector probe: all checked workplace connectors disconnected or absent; no connector activity signal retrieved
+- [2026-07-09] ingest: 7 sessions -> updated projects/agrorami-api-integration, projects/bridge-agrowiec, projects/facebook-commenting-operations, entities/columbus-cars, entities/microauto-ziebice; wrote 7 session summaries
+- [2026-07-09] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 5 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-10] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-10] connector probe: all checked workplace connectors disconnected or absent; no connector activity signal retrieved
+- [2026-07-10] ingest: 13 sessions -> updated projects/bridge-agrowiec, projects/agrorami-api-integration, projects/selly-agroopony-catalog-configuration, projects/facebook-commenting-operations, projects/camper-rental-facebook-lead-research, entities/columbus-cars, entities/microauto-ziebice, entities/centrum-motoryzacyjne-bowit; wrote 8 session summaries
+- [2026-07-10] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 12 citations across 8 pages, stamped frontmatter on 8 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-11] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-11] connector probe: all checked workplace connectors disconnected or absent; no connector activity signal retrieved
+- [2026-07-11] ingest: 6 sessions -> updated projects/facebook-commenting-operations, projects/camper-rental-facebook-lead-research, entities/columbus-cars, entities/microauto-ziebice; wrote 4 session summaries
+- [2026-07-11] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 3 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-13] phase 0: fixed 0 zero-tolerance issues (legacy_cross_references_heading=0, legacy_middle_h2=0, learnings_section_on_wiki_page=0, page_over_body_line_cap=0, wiki_activity_log_section=0, index_*=0); translated existing wiki prose to Polish
+- [2026-07-13] connector probe: all checked workplace connectors disconnected; no connector activity signal retrieved
+- [2026-07-13] ingest: 7 sessions -> updated projects/bridge-agrowiec, projects/agrorami-api-integration, projects/selly-agroopony-catalog-configuration, projects/facebook-commenting-operations, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit, entities/microauto-ziebice; wrote 6 session summaries
+- [2026-07-13] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 7 pages, stamped frontmatter on 12 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-14] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-14] connector probe: all checked workplace connectors disconnected; no connector activity signal retrieved
+- [2026-07-14] ingest: 8 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations; created projects/agroopony-tire-data-enrichment; wrote 6 session summaries
+- [2026-07-14] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-16] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-16] connector probe: no authenticated workplace connectors; all checked connector categories disconnected
+- [2026-07-16] ingest: 5 sessions -> updated projects/bridge-agrowiec, projects/agrorami-api-integration, projects/agroopony-tire-data-enrichment, projects/facebook-commenting-operations, projects/camper-rental-facebook-lead-research; wrote 5 session summaries
+- [2026-07-16] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-16] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-16] connector probe: all checked workplace connectors disconnected; no connector activity signal retrieved
+- [2026-07-16] ingest: 7 sessions -> updated projects/bridge-agrowiec, projects/agroopony-tire-data-enrichment, projects/facebook-commenting-operations; wrote 5 session summaries
+- [2026-07-16] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 1 invalid URI, spot-checked 6 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-17] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-17] connector probe: no authenticated workplace connectors; all discovered workplace connectors disconnected or not returned
+- [2026-07-17] ingest: 3 sessions -> updated projects/bridge-agrowiec, projects/agroopony-tire-data-enrichment; wrote 1 session summary
+- [2026-07-17] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 3 citations across 2 pages, stamped frontmatter on 2 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-19] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-19] connector probe: no authenticated workplace connectors; all discovered workplace connector surfaces disconnected
+- [2026-07-19] ingest: 9 sessions -> updated projects/bridge-agrowiec, projects/selly-agroopony-catalog-configuration, projects/facebook-commenting-operations, entities/microauto-ziebice; wrote 0 session summaries
+- [2026-07-19] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 4 citations across 4 pages, stamped frontmatter on 4 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-21] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-21] connector probe: no authenticated workplace connectors; Outlook, Gmail/Calendar, Notion, GitHub, Microsoft Teams, Slack and Linear disconnected
+- [2026-07-21] ingest: 8 sessions -> updated projects/bridge-agrowiec, projects/agroopony-tire-data-enrichment, projects/camper-rental-facebook-lead-research, entities/centrum-motoryzacyjne-bowit, entities/columbus-cars, entities/microauto-ziebice; wrote 7 session summaries
+- [2026-07-21] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 6 pages, stamped frontmatter on 6 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-22] phase 0: fixed 4 zero-tolerance issues (legacy_cross_references_heading=0, legacy_middle_h2=0, learnings_section_on_wiki_page=0, page_over_body_line_cap=0, page_over_body_char_cap=2, wiki_activity_log_section=0, index_*=2)
+- [2026-07-22] connector probe: no authenticated workplace connectors; Gmail/Calendar, Outlook, GitHub, Notion, Microsoft Teams, Slack and Linear disconnected
+- [2026-07-22] ingest: 6 sessions -> updated projects/bridge-agrowiec, projects/selly-agroopony-catalog-configuration, projects/camper-rental-facebook-lead-research, entities/centrum-motoryzacyjne-bowit, entities/columbus-cars; wrote 5 session summaries
+- [2026-07-22] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 2 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-22] phase 0: 0 zero-tolerance issues, no-op follow-up verification run; translation scratch confirmed 2 already-Polish pages
+- [2026-07-22] connector probe: no authenticated workplace connectors; Gmail/Calendar, Outlook, GitHub, Notion, Microsoft Teams, Slack and Linear disconnected
+- [2026-07-22] ingest: verified 6 already-routed sessions -> wrote 5 session summaries; no wiki subject deltas
+- [2026-07-22] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 3 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-24] phase 0: fixed 13 zero-tolerance issues (legacy_cross_references_heading=0, legacy_middle_h2=13, learnings_section_on_wiki_page=0, page_over_body_line_cap=0, page_over_body_char_cap=0, wiki_activity_log_section=0, index_*=0)
+- [2026-07-24] connector probe: no authenticated workplace connectors; checked connectors disconnected or not returned
+- [2026-07-24] ingest: 13 sessions -> updated projects/bridge-agrowiec, projects/selly-agroopony-catalog-configuration, entities/centrum-motoryzacyjne-bowit, entities/columbus-cars, entities/microauto-ziebice; wrote 13 session summaries
+- [2026-07-24] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 5 pages, stamped frontmatter on 13 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-25] phase 0: fixed 13 zero-tolerance issues (legacy_cross_references_heading=0, legacy_middle_h2=13, learnings_section_on_wiki_page=0, page_over_body_line_cap=0, page_over_body_char_cap=0, wiki_activity_log_section=0, index_*=0)
+- [2026-07-25] connector probe: wszystkie wykryte konektory były rozłączone; nie pozyskano sygnałów zewnętrznych
+- [2026-07-25] ingest: 4 sessions -> updated entities/columbus-cars; wrote 1 session summary
+- [2026-07-25] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 3 citations across 3 pages, stamped frontmatter on 13 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-25] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-25] connector probe: wszystkie wykryte konektory były rozłączone; nie pozyskano sygnałów zewnętrznych
+- [2026-07-25] ingest: 1 session -> updated projects/bridge-agrowiec; wrote 1 session summary
+- [2026-07-25] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 3 citations across 1 page, stamped frontmatter on 1 wiki page, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-26] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-26] connector probe: brak uwierzytelnionych konektorów; nie pozyskano sygnałów zewnętrznych
+- [2026-07-26] ingest: 1 trywialna sesja -> brak zmian stron wiki; zapisano dzienny wpis learnings
+- [2026-07-26] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 0 citations across 0 wiki pages, stamped frontmatter on 0 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-28] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-28] connector probe: brak uwierzytelnionych konektorów; sprawdzone źródła były rozłączone lub niewykryte
+- [2026-07-28] ingest: 12 sessions -> updated projects/bridge-agrowiec, projects/selly-agroopony-catalog-configuration, projects/selly-tire-search-ux, entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; wrote 8 session summaries
+- [2026-07-28] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 10 citations across 5 pages, stamped frontmatter on 5 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-29] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-29] connector probe: brak uwierzytelnionych konektorów; wszystkie sprawdzone źródła były rozłączone
+- [2026-07-29] ingest: 5 sessions -> updated projects/selly-agroopony-catalog-configuration, entities/centrum-motoryzacyjne-bowit; wrote 4 session summaries
+- [2026-07-29] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 5 citations across 2 pages, stamped frontmatter on 2 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-07-31] phase 0: 0 zero-tolerance issues, no-op
+- [2026-07-31] connector probe: wszystkie wykryte konektory były rozłączone; nie pozyskano sygnałów zewnętrznych
+- [2026-07-31] ingest: 13 sessions -> updated projects/bridge-agrowiec, projects/selly-agroopony-catalog-configuration, projects/selly-tire-search-ux; wrote 7 session summaries
+- [2026-07-31] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 6 citations across 3 pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-08-01] phase 0: 0 zero-tolerance issues, no-op
+- [2026-08-01] connector probe: wszystkie wykryte konektory były rozłączone; nie pozyskano sygnałów zewnętrznych
+- [2026-08-01] ingest: 2 sessions -> updated entities/columbus-cars, entities/centrum-motoryzacyjne-bowit; wrote 2 session summaries
+- [2026-08-01] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 4 citations across 2 pages, stamped frontmatter on 2 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-08-02] phase 0: 0 zero-tolerance issues, no-op
+- [2026-08-02] connector probe: wszystkie wykryte konektory były rozłączone; nie pozyskano sygnałów zewnętrznych
+- [2026-08-02] ingest: 1 session -> wrote 1 session summary; no wiki subject deltas
+- [2026-08-02] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 4 citations across 2 wiki pages, stamped frontmatter on 2 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-08-06] phase 0: 0 zero-tolerance issues, no-op
+- [2026-08-06] connector probe: GitHub `Devilian07` aktywny; odczytano 3 prywatne repozytoria, bez PR i issue
+- [2026-08-06] ingest: 13 sessions -> updated projects/bridge-agrowiec, projects/facebook-commenting-operations; created projects/facebook-commenting-bot-v2, entities/anna-naumowicz; wrote 10 session summaries
+- [2026-08-06] preferences: 7 created, 0 updated, 0 skipped, 7 rules in artifact
+- [2026-08-06] user_context: bootstrap, focus rewritten, profile edited
+- [2026-08-06] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 5 citations across 3 wiki pages, stamped frontmatter on 13 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-08-07] phase 0: 0 zero-tolerance issues, no-op
+- [2026-08-07] connector probe: GitHub `Devilian07` aktywny; 3 prywatne repozytoria, bez nowych commitów, PR i issue
+- [2026-08-07] ingest: 6 sessions -> wrote 4 session summaries; no wiki subject deltas
+- [2026-08-07] preferences: 0 created, 0 updated, 2 skipped, 7 rules in artifact
+- [2026-08-07] user_context: steady, focus skipped, profile untouched
+- [2026-08-07] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 0 orphan markers/refs, spot-checked 0 citations across 0 wiki pages, stamped frontmatter on 0 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-08-07] connector probe: GitHub `Devilian07` aktywny; 3 prywatne repozytoria, bez nowych PR i issue
+- [2026-08-07] ingest: 8 sessions -> updated projects/camper-rental-facebook-lead-research, entities/columbus-cars; wrote 5 session summaries
+- [2026-08-07] preferences: 0 created, 0 updated, 2 skipped, 7 rules in artifact
+- [2026-08-07] user_context: steady, focus rewritten, profile untouched
+- [2026-08-07] lint: migrated 0 legacy citations, purged 0 tombstones, decoded 0 encoding bugs, fixed 1 orphan reference, spot-checked 4 citations across 2 wiki pages, stamped frontmatter on 3 wiki pages, compacted 0 oversize pages, merged 0 addenda, consolidated 0 reference sections
+- [2026-08-07] phase 0: 0 zero-tolerance issues, no-op

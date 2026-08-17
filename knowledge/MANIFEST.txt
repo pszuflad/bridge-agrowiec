@@ -1,0 +1,143 @@
+======================================================================
+EKSPORT WIEDZY — PROJEKT BRIDGE DLA AGROWCA
+======================================================================
+Data eksportu:      2026-08-17 09:53 UTC (2026-08-17)
+Zakres:             stan bieżący wiki + changelog + inwentarz Space + transkrypty sesji
+Poprzedni eksport:  2026-07-23
+
+ZAWARTOŚĆ:
+  MANIFEST.txt                      — ten plik
+  knowledge/wiki/                   — cała wiki (Brain): projects/, learnings/,
+                                       entities/, index.md, log.md (stan bieżący)
+  knowledge/CHANGELOG.md            — chronologiczny changelog front/backend/schemat
+  knowledge/space/INWENTARZ_SPACE.md — lista sesji i plików Space
+  knowledge/space/sessions/         — pełne transkrypty sesji (conversation + assety)
+
+BEZPIECZEŃSTWO (sekrety usunięte):
+  - Hasła (panel admin, SSH, FTP) w transkryptach zredagowano do [USUNIĘTO].
+  - Wartości JWT_SECRET / kluczy — nieobecne (tylko nazwy zmiennych, jeśli w ogóle).
+  - Pominięto 2 pełne backupy produkcyjnej bazy data.db (~210 MB każdy, .gz),
+    bo mogą zawierać dane wrażliwe. Dostępne osobno na żądanie.
+  UWAGA: hasło SSH/panelu pojawiło się w historii czatu — zaleca się jego ROTACJĘ
+         oraz przejście na klucze SSH (zgodnie z rekomendacją z wiki).
+
+LICZNOŚĆ SESJI:     20 (katalogi sesji w space/sessions/)
+SESJE W SPACE:      20 (wg projektu; file_count repozytorium plików = 0)
+
+----------------------------------------------------------------------
+PEŁNA LISTA PLIKÓW (ścieżka | rozmiar)
+----------------------------------------------------------------------
+knowledge/CHANGELOG.md                                                      8.0KB
+knowledge/space/INWENTARZ_SPACE.md                                          8.3KB
+knowledge/space/sessions/.version                                            1.0B
+knowledge/space/sessions/2026-07-13_2026-07-19/0efb554c/conversation.md     45.8KB
+knowledge/space/sessions/2026-07-13_2026-07-19/12d4afdd/ai_outputs/agrorami_linki_opon.xlsx     79.6KB
+knowledge/space/sessions/2026-07-13_2026-07-19/12d4afdd/ai_outputs/produkty_bez_ean.xlsx     79.6KB
+knowledge/space/sessions/2026-07-13_2026-07-19/12d4afdd/conversation.md     63.8KB
+knowledge/space/sessions/2026-07-13_2026-07-19/1f18be52/conversation.md      3.0KB
+knowledge/space/sessions/2026-07-13_2026-07-19/7d346558/conversation.md     25.8KB
+knowledge/space/sessions/2026-07-13_2026-07-19/975c279b/ai_outputs/Weryfikacja-rozmiarów-żółtych-produktów-BKT.xlsx     47.0KB
+knowledge/space/sessions/2026-07-13_2026-07-19/975c279b/conversation.md      2.1KB
+knowledge/space/sessions/2026-07-13_2026-07-19/b7b532ad/ai_outputs/Produkty-wg-EAN-2026-07-17.xlsx     10.7KB
+knowledge/space/sessions/2026-07-13_2026-07-19/b7b532ad/ai_outputs/katalog_pozostale_braki_2026-07-17.csv      8.4KB
+knowledge/space/sessions/2026-07-13_2026-07-19/b7b532ad/ai_outputs/katalog_wszyscy_wybrane_2026-07-17-uzupelnione.csv     72.4KB
+knowledge/space/sessions/2026-07-13_2026-07-19/b7b532ad/ai_outputs/katalog_zastosowania_2026-07-17.csv    913.5KB
+knowledge/space/sessions/2026-07-13_2026-07-19/b7b532ad/ai_outputs/katalog_zastosowania_v2_2026-07-17.csv    769.1KB
+knowledge/space/sessions/2026-07-13_2026-07-19/b7b532ad/conversation.md     66.7KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/alliance_wagi.xlsx     49.6KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/bkt_wagi.xlsx     18.6KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/bridgestone_wagi.xlsx     18.7KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/ceat_wagi.xlsx     29.2KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/continental_wagi.xlsx     12.8KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/firestone_wagi.xlsx     20.1KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/galaxy_wagi.xlsx     12.6KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/kabat_wagi.xlsx     11.3KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/kleber_wagi.xlsx     13.6KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/michelin_wagi.xlsx     18.9KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/mitas_wagi.xlsx     16.8KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/ai_outputs/nokian_wagi.xlsx     29.5KB
+knowledge/space/sessions/2026-07-13_2026-07-19/c1cbe13a/conversation.md      1.5KB
+knowledge/space/sessions/2026-07-20_2026-07-26/7fcd8b97/ai_outputs/Notatka-migracja-Bridge-do-repozytorium.md     21.0KB
+knowledge/space/sessions/2026-07-20_2026-07-26/7fcd8b97/conversation.md      1.4KB
+knowledge/space/sessions/2026-07-20_2026-07-26/92f95de1/conversation.md     10.9KB
+knowledge/space/sessions/2026-07-20_2026-07-26/cd39f335/conversation.md      4.1KB
+knowledge/space/sessions/2026-07-27_2026-08-02/204b8fdb/ai_outputs/Podsumowanie-VAT--zaokrąglenie-cena_sprzedazy-2026-07-31.md      1.9KB
+knowledge/space/sessions/2026-07-27_2026-08-02/204b8fdb/ai_outputs/Podsumowanie-format-ceny-sprzedaży-N--2026-07-31.md      1.9KB
+knowledge/space/sessions/2026-07-27_2026-08-02/204b8fdb/ai_outputs/Podsumowanie-marża_pct---czysty-narzut-bez-VAT-2026-07-31.md      2.3KB
+knowledge/space/sessions/2026-07-27_2026-08-02/204b8fdb/ai_outputs/diag-test.html     12.0KB
+knowledge/space/sessions/2026-07-27_2026-08-02/204b8fdb/conversation.md     20.6KB
+knowledge/space/sessions/2026-07-27_2026-08-02/5b58cf79/ai_outputs/Kod-normalizacji-rozmiarów-opon-wyszukiwarka.md     12.0KB
+knowledge/space/sessions/2026-07-27_2026-08-02/5b58cf79/conversation.md    294.0KB
+knowledge/space/sessions/2026-07-27_2026-08-02/685eb28d/conversation.md     13.5KB
+knowledge/space/sessions/2026-07-27_2026-08-02/e920a1ff/conversation.md      6.7KB
+knowledge/space/sessions/2026-07-27_2026-08-02/e9f305c1/ai_outputs/Makieta-widoku-kategorii-ecommerce-z-filtrami-sliderem-promocji-i-listą-produktów..png      5.0MB
+knowledge/space/sessions/2026-07-27_2026-08-02/e9f305c1/ai_outputs/Wizualizacja-strony-kategorii-sklepu.png      4.4MB
+knowledge/space/sessions/2026-07-27_2026-08-02/e9f305c1/conversation.md    103.7KB
+knowledge/space/sessions/2026-07-27_2026-08-02/f99ad55a/ai_outputs/NOTATKA_selly_API_naprawa_2026-07-31.md      5.7KB
+knowledge/space/sessions/2026-07-27_2026-08-02/f99ad55a/ai_outputs/PODSUMOWANIE_selly_filtr_wstrzymane_2026-07-31.md     654.0B
+knowledge/space/sessions/2026-07-27_2026-08-02/f99ad55a/ai_outputs/niepewne_nazwa_bieznik_2026-07-22.xlsx     11.5KB
+knowledge/space/sessions/2026-07-27_2026-08-02/f99ad55a/ai_outputs/warianty_bieznik_do_weryfikacji.xlsx     50.7KB
+knowledge/space/sessions/2026-07-27_2026-08-02/f99ad55a/conversation.md     66.8KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Backup-kodu-produkcyjnego-Bridge-2026-07-21-checkmark-tak.zip    348.5KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Backup-kodu-produkcyjnego-Bridge-2026-07-21-indeks-prędkości.zip     21.5KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Backup-kodu-produkcyjnego-Bridge-2026-07-21-narzuty.zip    429.5KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Backup-kodu-produkcyjnego-Bridge-2026-07-23-eksport-CSV-Selly.zip      3.8KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Backup-kodu-produkcyjnego-Bridge-2026-07-23-ukrycie-danych-logowania.zip    349.1KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Backup-kodu-produkcyjnego-Bridge-2026-07-24-htaccess-IP-Agrowiec.zip      2.4KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Backup-kodu-produkcyjnego-Bridge-2026-07-24-sprzatanie-glosnosci.zip      1.8KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/ai_outputs/Propozycje-standaryzacji-zapisu--139-grup-modeli.md      6.8KB
+knowledge/space/sessions/2026-07-27_2026-08-02/fc2830c5/conversation.md     72.8KB
+knowledge/space/sessions/2026-08-03_2026-08-09/08e70c89/ai_outputs/02476fb8-85ce-41ae-973e-67610a3ec8fe.jpg     98.1KB
+knowledge/space/sessions/2026-08-03_2026-08-09/08e70c89/ai_outputs/49f1517e-d607-4500-8d51-1ea74c57798b.jpg    125.7KB
+knowledge/space/sessions/2026-08-03_2026-08-09/08e70c89/ai_outputs/4a17f007-4fad-4cf8-8ccc-51d71e6a5da2.jpg    132.2KB
+knowledge/space/sessions/2026-08-03_2026-08-09/08e70c89/ai_outputs/7254e9ba-77a8-450a-9ec5-9dbc267312f1.jpg    246.8KB
+knowledge/space/sessions/2026-08-03_2026-08-09/08e70c89/ai_outputs/Przekazanie-kontekstu--prace-nad-wyglądem-Selly-Agroopony.md     13.8KB
+knowledge/space/sessions/2026-08-03_2026-08-09/08e70c89/conversation.md    138.3KB
+knowledge/space/sessions/2026-08-03_2026-08-09/d35fafff/conversation.md      4.2KB
+knowledge/space/sessions/2026-08-10_2026-08-16/626ef740/ai_outputs/Podsumowanie-naprawa-i-czyszczenie-atrybutów-2026-08-05.md      2.8KB
+knowledge/space/sessions/2026-08-10_2026-08-16/626ef740/ai_outputs/Podsumowanie-wycofania-i-konflikty-z-Martą-2026-08-04.md      2.0KB
+knowledge/space/sessions/2026-08-10_2026-08-16/626ef740/conversation.md     23.4KB
+knowledge/space/sessions/asset_index.md                                    15.3KB
+knowledge/space/sessions/changelog.md                                     1006.0B
+knowledge/space/sessions/sessions_index.md                                 11.3KB
+knowledge/wiki/entities/anna-naumowicz.md                                   1.8KB
+knowledge/wiki/entities/centrum-motoryzacyjne-bowit.md                     17.8KB
+knowledge/wiki/entities/columbus-cars.md                                    5.8KB
+knowledge/wiki/entities/microauto-ziebice.md                                8.7KB
+knowledge/wiki/index.md                                                     1.6KB
+knowledge/wiki/learnings/2026-07-17.md                                      2.2KB
+knowledge/wiki/learnings/2026-07-19.md                                      3.5KB
+knowledge/wiki/learnings/2026-07-21.md                                      2.2KB
+knowledge/wiki/learnings/2026-07-22.md                                      2.4KB
+knowledge/wiki/learnings/2026-07-24.md                                      3.5KB
+knowledge/wiki/learnings/2026-07-25.md                                      1.9KB
+knowledge/wiki/learnings/2026-07-26.md                                      1.1KB
+knowledge/wiki/learnings/2026-07-28.md                                      1.5KB
+knowledge/wiki/learnings/2026-07-29.md                                      1.7KB
+knowledge/wiki/learnings/2026-07-31.md                                      2.3KB
+knowledge/wiki/learnings/2026-08-01.md                                      2.0KB
+knowledge/wiki/learnings/2026-08-02.md                                      2.0KB
+knowledge/wiki/learnings/2026-08-06.md                                      1.2KB
+knowledge/wiki/learnings/2026-08-07.md                                      1.7KB
+knowledge/wiki/log.md                                                      31.3KB
+knowledge/wiki/preferences/autonomous-routine-work.md                      671.0B
+knowledge/wiki/preferences/browser-control.md                              622.0B
+knowledge/wiki/preferences/full-replacement-code.md                        580.0B
+knowledge/wiki/preferences/immediate-code-visualization.md                 589.0B
+knowledge/wiki/preferences/polish-working-language.md                      565.0B
+knowledge/wiki/preferences/varied-customer-messages.md                     650.0B
+knowledge/wiki/preferences/verified-customer-facing-claims.md              760.0B
+knowledge/wiki/projects/agroopony-tire-data-enrichment.md                   5.9KB
+knowledge/wiki/projects/agrorami-api-integration.md                         4.9KB
+knowledge/wiki/projects/bridge-agrowiec.md                                 12.1KB
+knowledge/wiki/projects/camper-rental-facebook-lead-research.md             6.3KB
+knowledge/wiki/projects/facebook-commenting-bot-v2.md                       1.8KB
+knowledge/wiki/projects/facebook-commenting-operations.md                  18.9KB
+knowledge/wiki/projects/home-insulation-sourcing.md                         1.9KB
+knowledge/wiki/projects/pony-assistant-demo.md                              2.7KB
+knowledge/wiki/projects/selly-agroopony-catalog-configuration.md           11.0KB
+knowledge/wiki/projects/selly-tire-search-ux.md                             6.0KB
+knowledge/wiki/projects/tiktok-microauto-lead-research.md                   2.2KB
+----------------------------------------------------------------------
+RAZEM: 111 plików, 14.7MB
+======================================================================
