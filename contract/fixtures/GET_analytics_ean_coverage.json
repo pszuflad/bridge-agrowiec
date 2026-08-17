@@ -1,0 +1,30 @@
+{
+  "endpoint": "/api/analytics/ean/coverage",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "liczbaDostawcow": 1,
+        "liczbaEAN": 5109
+      },
+      {
+        "liczbaDostawcow": 2,
+        "liczbaEAN": 676
+      },
+      {
+        "liczbaDostawcow": 3,
+        "liczbaEAN": 90
+      },
+      {
+        "liczbaDostawcow": 4,
+        "liczbaEAN": 2
+      },
+      {
+        "liczbaDostawcow": 5,
+        "liczbaEAN": 1
+      }
+    ]
+  }
+}

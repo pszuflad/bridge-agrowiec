@@ -1,0 +1,10 @@
+{
+  "endpoint": "/api/atrybuty/uzycie",
+  "method": "GET",
+  "status": 400,
+  "json": true,
+  "body": {
+    "ok": false,
+    "error": "Nieznany rodzaj atrybutu: undefined"
+  }
+}

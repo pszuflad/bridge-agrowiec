@@ -1,0 +1,106 @@
+{
+  "endpoint": "/api/atrybuty/pending",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "count": 498,
+    "items": [
+      {
+        "id": 851,
+        "rodzaj": "bieznik",
+        "wartosc": "AGRI STAR II",
+        "ile_wystapien": 186,
+        "pierwszy_import": "2026-07-21 12:11:21",
+        "ostatni_import": "2026-07-27 10:32:22",
+        "dostawcy": "MO5,MO3,MO2,MO1",
+        "sugerowane_aliasy": [
+          {
+            "wartosc": "AGRI STAR II",
+            "podobienstwo": 100
+          },
+          {
+            "wartosc": "AGRISTAR II",
+            "podobienstwo": 92
+          }
+        ]
+      },
+      {
+        "id": 946,
+        "rodzaj": "bieznik",
+        "wartosc": "HAKKAPELIITTA TRI",
+        "ile_wystapien": 36,
+        "pierwszy_import": "2026-07-21 12:11:21",
+        "ostatni_import": "2026-07-27 10:32:22",
+        "dostawcy": "MO3,MO7",
+        "sugerowane_aliasy": [
+          {
+            "wartosc": "HAKKAPELIITTA TRI",
+            "podobienstwo": 100
+          }
+        ]
+      },
+      {
+        "id": 1010,
+        "rodzaj": "bieznik",
+        "wartosc": "TORQUEMAX",
+        "ile_wystapien": 25,
+        "pierwszy_import": "2026-07-21 12:11:21",
+        "ostatni_import": "2026-07-27 10:32:22",
+        "dostawcy": "MO1",
+        "sugerowane_aliasy": [
+          {
+            "wartosc": "TORQUEMAX",
+            "podobienstwo": 100
+          }
+        ]
+      },
+      {
+        "id": 909,
+        "rodzaj": "bieznik",
+        "wartosc": "FARMAX R85",
+        "ile_wystapien": 24,
+        "pierwszy_import": "2026-07-21 12:11:21",
+        "ostatni_import": "2026-07-27 10:32:22",
+        "dostawcy": "MO1",
+        "sugerowane_aliasy": [
+          {
+            "wartosc": "FARMAX R85",
+            "podobienstwo": 100
+          },
+          {
+            "wartosc": "FARMAX R65",
+            "podobienstwo": 90
+          },
+          {
+            "wartosc": "FARMAX R80",
+            "podobienstwo": 90
+          }
+        ]
+      },
+      {
+        "id": 854,
+        "rodzaj": "bieznik",
+        "wartosc": "AGRIFLEX 372 +",
+        "ile_wystapien": 21,
+        "pierwszy_import": "2026-07-21 12:11:21",
+        "ostatni_import": "2026-07-27 10:32:22",
+        "dostawcy": "MO2,MO1",
+        "sugerowane_aliasy": [
+          {
+            "wartosc": "AGRIFLEX 372 +",
+            "podobienstwo": 100
+          },
+          {
+            "wartosc": "AGRIFLEX 373 +",
+            "podobienstwo": 93
+          }
+        ]
+      }
+    ],
+    "_przyciete": {
+      "items": 498
+    }
+  }
+}

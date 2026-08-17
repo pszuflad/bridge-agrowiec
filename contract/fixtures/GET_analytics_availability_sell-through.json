@@ -1,0 +1,10 @@
+{
+  "endpoint": "/api/analytics/availability/sell-through",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "hasHistory": true,
+    "rows": []
+  }
+}

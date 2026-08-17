@@ -1,0 +1,21 @@
+{
+  "endpoint": "/api/markups",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "id": 10,
+      "typ": "globalny",
+      "zakres": "",
+      "warunki": "[]",
+      "nazwa": "Reguła Globalna",
+      "wartosc": 6,
+      "jednostka": "procent",
+      "priorytet": 50,
+      "status": "aktywny",
+      "zmienilUzytkownikId": 1,
+      "zmienionoData": "2026-07-31T13:07:21.578Z"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "endpoint": "/api/analytics/ean/comparison",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "ean": "8059971008746",
+        "nazwa": "520/85R42 Trelleborg TM600 157A8/157B TL",
+        "dostawcy": 2,
+        "cenaMin": 3790,
+        "cenaMax": 14138,
+        "srednia": 8964,
+        "oferty": 2,
+        "spreadZl": 10348,
+        "spreadPct": 273.03
+      },
+      {
+        "ean": "8059971006902",
+        "nazwa": "710/40-22.5 Trelleborg T404 158A8 TL",
+        "dostawcy": 2,
+        "cenaMin": 2912,
+        "cenaMax": 7611,
+        "srednia": 5261.5,
+        "oferty": 2,
+        "spreadZl": 4699,
+        "spreadPct": 161.37
+      },
+      {
+        "ean": "7291050039505",
+        "nazwa": "700/50-22.5 ALLIANCE FLOTATION 328 167D/166E 16PR HS TL",
+        "dostawcy": 2,
+        "cenaMin": 2556.45,
+        "cenaMax": 6738.8,
+        "srednia": 4647.63,
+        "oferty": 2,
+        "spreadZl": 4182.35,
+        "spreadPct": 163.6
+      },
+      {
+        "ean": "8059971024463",
+        "nazwa": "480/80R26 TRELLEBORG TH400 160A8/160B TL",
+        "dostawcy": 2,
+        "cenaMin": 2929.22,
+        "cenaMax": 6771,
+        "srednia": 4850.11,
+        "oferty": 2,
+        "spreadZl": 3841.78,
+        "spreadPct": 131.15
+      },
+      {
+        "ean": "8059971009781",
+        "nazwa": "420/90R30 Trelleborg TM600 147A8/147B TL",
+        "dostawcy": 2,
+        "cenaMin": 3390,
+        "cenaMax": 7048,
+        "srednia": 5219,
+        "oferty": 2,
+        "spreadZl": 3658,
+        "spreadPct": 107.91
+      }
+    ],
+    "_przyciete": {
+      "rows": 769
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "endpoint": "/api/selly/ping",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "shop": "https://agroopony.selly24.pl",
+    "token_prefix": "eyJ0eXAiOiJK...",
+    "expires_in_seconds": 3596,
+    "vat_probe": "OK (15 stawek)"
+  }
+}

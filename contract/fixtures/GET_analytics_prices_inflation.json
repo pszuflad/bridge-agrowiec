@@ -1,0 +1,44 @@
+{
+  "endpoint": "/api/analytics/prices/inflation",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "hasHistory": true,
+    "rows": [
+      {
+        "dostawca": "MO1",
+        "miesiac": "2026-08",
+        "sredniaCena": 3138.08,
+        "inflacjaPct": 44.06
+      },
+      {
+        "dostawca": "MO2",
+        "miesiac": "2026-08",
+        "sredniaCena": 1465.34,
+        "inflacjaPct": -38.51
+      },
+      {
+        "dostawca": "MO3",
+        "miesiac": "2026-08",
+        "sredniaCena": 2214.85,
+        "inflacjaPct": -38.2
+      },
+      {
+        "dostawca": "MO4",
+        "miesiac": "2026-08",
+        "sredniaCena": 804.26,
+        "inflacjaPct": 4.77
+      },
+      {
+        "dostawca": "MO5",
+        "miesiac": "2026-08",
+        "sredniaCena": 1196.8,
+        "inflacjaPct": 12.9
+      }
+    ],
+    "_przyciete": {
+      "rows": 17
+    }
+  }
+}

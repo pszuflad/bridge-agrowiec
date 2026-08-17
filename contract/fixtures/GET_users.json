@@ -1,0 +1,18 @@
+{
+  "endpoint": "/api/users",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "id": 1,
+      "email": "marta.bieguniak@agrowiec.eu",
+      "imieNazwisko": "Marta Bieguniak"
+    },
+    {
+      "id": 2,
+      "email": "arkadiusz.mielczarek@agrowiec.eu",
+      "imieNazwisko": "Arkadiusz Mielczarek"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "endpoint": "/api/promotions",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": []
+}

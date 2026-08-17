@@ -1,0 +1,48 @@
+{
+  "endpoint": "/api/analytics/suppliers/stock",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "dostawca": "MO5",
+        "produkty": 1747,
+        "sredniStan": 15.18,
+        "dostepne": 1747,
+        "dostepnoscPct": 100
+      },
+      {
+        "dostawca": "MO2",
+        "produkty": 1629,
+        "sredniStan": 8.13,
+        "dostepne": 1629,
+        "dostepnoscPct": 100
+      },
+      {
+        "dostawca": "MO1",
+        "produkty": 634,
+        "sredniStan": 6.29,
+        "dostepne": 634,
+        "dostepnoscPct": 100
+      },
+      {
+        "dostawca": "MO3",
+        "produkty": 577,
+        "sredniStan": 3.65,
+        "dostepne": 577,
+        "dostepnoscPct": 100
+      },
+      {
+        "dostawca": "MO4",
+        "produkty": 353,
+        "sredniStan": 4.08,
+        "dostepne": 353,
+        "dostepnoscPct": 100
+      }
+    ],
+    "_przyciete": {
+      "rows": 9
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "endpoint": "/api/analytics/filters",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "dostawcy": [
+      {
+        "value": "MO1"
+      },
+      {
+        "value": "MO10"
+      },
+      {
+        "value": "MO2"
+      },
+      {
+        "value": "MO3"
+      },
+      {
+        "value": "MO4"
+      }
+    ],
+    "marki": [
+      {
+        "value": "11.2R32"
+      },
+      {
+        "value": "11.5/80-15.3"
+      },
+      {
+        "value": "12.5/80-18"
+      },
+      {
+        "value": "16.5/70-18"
+      },
+      {
+        "value": "18x8.50-8"
+      }
+    ],
+    "modele": [
+      {
+        "value": "1000"
+      },
+      {
+        "value": "2 ECO"
+      },
+      {
+        "value": "202"
+      },
+      {
+        "value": "221"
+      },
+      {
+        "value": "224"
+      }
+    ],
+    "rozmiary": [
+      {
+        "value": "1/2-8"
+      },
+      {
+        "value": "10-16.5"
+      },
+      {
+        "value": "10.0/75-12"
+      },
+      {
+        "value": "10.0/75-15.3"
+      },
+      {
+        "value": "10.0/75x15.3"
+      }
+    ],
+    "indeksyNosnosci": [
+      {
+        "value": "100"
+      },
+      {
+        "value": "100/113"
+      },
+      {
+        "value": "100/88"
+      },
+      {
+        "value": "100/98"
+      },
+      {
+        "value": "101"
+      }
+    ],
+    "indeksyPredkosci": [
+      {
+        "value": "A"
+      },
+      {
+        "value": "A/B"
+      },
+      {
+        "value": "A/D"
+      },
+      {
+        "value": "A1"
+      },
+      {
+        "value": "A2"
+      }
+    ],
+    "_przyciete": {
+      "dostawcy": 9,
+      "marki": 93,
+      "modele": 1000,
+      "rozmiary": 1000,
+      "indeksyNosnosci": 300,
+      "indeksyPredkosci": 71
+    }
+  }
+}

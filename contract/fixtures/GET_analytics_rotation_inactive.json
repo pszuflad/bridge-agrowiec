@@ -1,0 +1,10 @@
+{
+  "endpoint": "/api/analytics/rotation/inactive",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "days": 60,
+    "rows": []
+  }
+}

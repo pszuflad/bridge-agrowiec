@@ -1,0 +1,43 @@
+{
+  "endpoint": "/api/selly/status",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "items": [
+      {
+        "dostawca": "MO1",
+        "w_bridge": 634,
+        "w_selly": 0,
+        "z_bledami": 0
+      },
+      {
+        "dostawca": "MO10",
+        "w_bridge": 217,
+        "w_selly": 0,
+        "z_bledami": 0
+      },
+      {
+        "dostawca": "MO2",
+        "w_bridge": 1629,
+        "w_selly": 0,
+        "z_bledami": 0
+      },
+      {
+        "dostawca": "MO3",
+        "w_bridge": 577,
+        "w_selly": 0,
+        "z_bledami": 0
+      },
+      {
+        "dostawca": "MO4",
+        "w_bridge": 353,
+        "w_selly": 0,
+        "z_bledami": 0
+      }
+    ],
+    "_przyciete": {
+      "items": 9
+    }
+  }
+}

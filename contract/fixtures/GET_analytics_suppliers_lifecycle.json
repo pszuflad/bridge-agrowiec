@@ -1,0 +1,53 @@
+{
+  "endpoint": "/api/analytics/suppliers/lifecycle",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "dostawca": "MO5",
+        "typ": "wycofana",
+        "kod": "MO5_LLCR22538565KKTS0",
+        "nazwa": "385/65R22.5 LingLong KTS300 164K/158L 24PR TL M+S 3PMSF",
+        "kiedy": "2026-08-17T15:44:43.229Z",
+        "powod": "Brak w cenniku — pozycja wycofana"
+      },
+      {
+        "dostawca": "MO5",
+        "typ": "wycofana",
+        "kod": "MO5_LLCR22531580LKTS0",
+        "nazwa": "315/80R22.5 LingLong KTS300 156L/154M 22PR TL M+S 3PMSF",
+        "kiedy": "2026-08-17T15:44:43.229Z",
+        "powod": "Brak w cenniku — pozycja wycofana"
+      },
+      {
+        "dostawca": "MO5",
+        "typ": "wycofana",
+        "kod": "MO5_VRPR240400808TVE0",
+        "nazwa": "400/80R24 VREDESTEIN TRAXION VERSA 162A8 TL",
+        "kiedy": "2026-08-17T14:44:43.238Z",
+        "powod": "Brak w cenniku — pozycja wycofana"
+      },
+      {
+        "dostawca": "MO2",
+        "typ": "wycofana",
+        "kod": "MO2_48500026AL-IG",
+        "nazwa": "12.4R28 ALLIANCE AGRISTAR II 124D TL",
+        "kiedy": "2026-08-17T14:44:40.244Z",
+        "powod": "Brak w cenniku — pozycja wycofana"
+      },
+      {
+        "dostawca": "MO2",
+        "typ": "wycofana",
+        "kod": "MO2_11467600",
+        "nazwa": "5.00-10 MITAS B17 4PR TT",
+        "kiedy": "2026-08-17T14:44:40.244Z",
+        "powod": "Brak w cenniku — pozycja wycofana"
+      }
+    ],
+    "_przyciete": {
+      "rows": 500
+    }
+  }
+}

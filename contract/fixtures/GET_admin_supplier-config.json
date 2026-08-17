@@ -1,0 +1,59 @@
+{
+  "endpoint": "/api/admin/supplier-config",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "dostawcy": [
+      {
+        "kod": "MO1",
+        "nazwa": "Bohnenkamp",
+        "url": "https://agroopony.eu/imports/bohnenkamp.csv",
+        "urlEfektywnyZDb": true,
+        "czestotliwoscMinuty": 10080,
+        "status": "aktywny",
+        "fallbackUrl": "https://agroopony.eu/imports/bohnenkamp.csv"
+      },
+      {
+        "kod": "MO2",
+        "nazwa": "JMK",
+        "url": "http://46.238.100.138:5844/Cennik_26002_v2_4f8a1740-11c5-4ee8-8e1d-e3145b10d335.csv",
+        "urlEfektywnyZDb": true,
+        "czestotliwoscMinuty": 60,
+        "status": "aktywny",
+        "fallbackUrl": "http://46.238.100.138:5844/Cennik_26002_v2_4f8a1740-11c5-4ee8-8e1d-e3145b10d335.csv"
+      },
+      {
+        "kod": "MO3",
+        "nazwa": "Grasdorf (kolarolnicze.pl)",
+        "url": "https://sklep.kolarolnicze.pl/offer/export/test-csv-3,t1004,pl.csv",
+        "urlEfektywnyZDb": true,
+        "czestotliwoscMinuty": 60,
+        "status": "aktywny",
+        "fallbackUrl": "https://sklep.kolarolnicze.pl/offer/export/test-csv-3,t1004,pl.csv"
+      },
+      {
+        "kod": "MO4",
+        "nazwa": "Handlopex Wrocław",
+        "url": "https://agroopony.eu/imports/acc_ftp3/agrowiec_wr.csv",
+        "urlEfektywnyZDb": true,
+        "czestotliwoscMinuty": 60,
+        "status": "aktywny",
+        "fallbackUrl": "https://agroopony.eu/imports/acc_ftp3/agrowiec_wr.csv"
+      },
+      {
+        "kod": "MO5",
+        "nazwa": "Handlopex Rzeszów",
+        "url": "https://agroopony.eu/imports/acc_ftp3/agrowiec_mw.csv",
+        "urlEfektywnyZDb": true,
+        "czestotliwoscMinuty": 60,
+        "status": "aktywny",
+        "fallbackUrl": "https://agroopony.eu/imports/acc_ftp3/agrowiec_mw.csv"
+      }
+    ],
+    "_przyciete": {
+      "dostawcy": 10
+    }
+  }
+}

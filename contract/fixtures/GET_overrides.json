@@ -1,0 +1,64 @@
+{
+  "endpoint": "/api/overrides",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "id": 8938,
+      "supplierKod": "MO2",
+      "supplierProductId": "MO2_1147700",
+      "fieldName": "kategoria",
+      "overrideValue": "Rolnicze",
+      "reason": "edycja w katalogu",
+      "createdBy": 1,
+      "createdAt": "2026-07-28T06:22:26.735Z",
+      "acknowledgedSourceValue": "rolnicze małe"
+    },
+    {
+      "id": 12749,
+      "supplierKod": "MO2",
+      "supplierProductId": "MO2_1147700",
+      "fieldName": "labelSnow",
+      "overrideValue": "",
+      "reason": "edycja w katalogu",
+      "createdBy": 1,
+      "createdAt": "2026-07-28T06:22:26.735Z",
+      "acknowledgedSourceValue": "0"
+    },
+    {
+      "id": 8913,
+      "supplierKod": "MO2",
+      "supplierProductId": "MO2_1169800",
+      "fieldName": "kategoria",
+      "overrideValue": "Rolnicze",
+      "reason": "edycja w katalogu",
+      "createdBy": 1,
+      "createdAt": "2026-07-28T06:22:16.803Z",
+      "acknowledgedSourceValue": "rolnicze małe"
+    },
+    {
+      "id": 12748,
+      "supplierKod": "MO2",
+      "supplierProductId": "MO2_1169800",
+      "fieldName": "labelSnow",
+      "overrideValue": "",
+      "reason": "edycja w katalogu",
+      "createdBy": 1,
+      "createdAt": "2026-07-28T06:22:16.803Z",
+      "acknowledgedSourceValue": "0"
+    },
+    {
+      "id": 8842,
+      "supplierKod": "MO2",
+      "supplierProductId": "MO2_1472500",
+      "fieldName": "kategoria",
+      "overrideValue": "Rolnicze",
+      "reason": "edycja w katalogu",
+      "createdBy": 1,
+      "createdAt": "2026-07-28T06:22:00.827Z",
+      "acknowledgedSourceValue": "rolnicze małe"
+    }
+  ],
+  "_body_przyciete_z": 12620
+}

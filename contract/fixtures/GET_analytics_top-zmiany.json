@@ -1,0 +1,54 @@
+{
+  "endpoint": "/api/analytics/top-zmiany",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "kod": "MO9_48466",
+      "nazwa": "BKT FLOT 648 850/50-30.5",
+      "dostawca": "MO9",
+      "cenaStara": 1120,
+      "cenaNowa": 7050,
+      "zmianaPct": 529.4642857142857,
+      "utworzono": "2026-08-06T03:44:43.859Z"
+    },
+    {
+      "kod": "MO9_47604",
+      "nazwa": "BKT AW 702 10.5-16",
+      "dostawca": "MO9",
+      "cenaStara": 280,
+      "cenaNowa": 820,
+      "zmianaPct": 192.85714285714286,
+      "utworzono": "2026-08-06T03:44:43.859Z"
+    },
+    {
+      "kod": "MO9_23080",
+      "nazwa": "BKT RIDEMAX FL693M E 500/50R17",
+      "dostawca": "MO9",
+      "cenaStara": 1402.4,
+      "cenaNowa": 2400,
+      "zmianaPct": 71.13519680547633,
+      "utworzono": "2026-08-06T03:44:43.859Z"
+    },
+    {
+      "kod": "MO9_30183",
+      "nazwa": "BKT AGRIMAX RT 955 210/90R24",
+      "dostawca": "MO9",
+      "cenaStara": 680,
+      "cenaNowa": 1130,
+      "zmianaPct": 66.17647058823529,
+      "utworzono": "2026-08-06T03:44:43.859Z"
+    },
+    {
+      "kod": "MO9_59070",
+      "nazwa": "BKT AGRIMAX RT 955 230/95R42",
+      "dostawca": "MO9",
+      "cenaStara": 1472,
+      "cenaNowa": 2400,
+      "zmianaPct": 63.04347826086957,
+      "utworzono": "2026-08-06T03:44:43.859Z"
+    }
+  ],
+  "_body_przyciete_z": 100
+}

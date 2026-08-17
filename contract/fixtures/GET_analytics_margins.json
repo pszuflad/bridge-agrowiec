@@ -1,0 +1,60 @@
+{
+  "endpoint": "/api/analytics/margins",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "dostawca": "MO1",
+        "kategoria": "Ciężarowe",
+        "marka": "ALLIANCE",
+        "produkty": 1,
+        "avgMarza": 6,
+        "minMarza": 6,
+        "maxMarza": 6
+      },
+      {
+        "dostawca": "MO1",
+        "kategoria": "Ciężarowe",
+        "marka": "ROVELO",
+        "produkty": 19,
+        "avgMarza": 6,
+        "minMarza": 6,
+        "maxMarza": 6
+      },
+      {
+        "dostawca": "MO1",
+        "kategoria": "Leśne",
+        "marka": "ALLIANCE",
+        "produkty": 19,
+        "avgMarza": 6,
+        "minMarza": 6,
+        "maxMarza": 6
+      },
+      {
+        "dostawca": "MO1",
+        "kategoria": "Przemysłowe",
+        "marka": "ALLIANCE",
+        "produkty": 9,
+        "avgMarza": 6,
+        "minMarza": 6,
+        "maxMarza": 6
+      },
+      {
+        "dostawca": "MO1",
+        "kategoria": "Przemysłowe",
+        "marka": "CEAT",
+        "produkty": 3,
+        "avgMarza": 6,
+        "minMarza": 6,
+        "maxMarza": 6
+      }
+    ],
+    "low": [],
+    "high": [],
+    "_przyciete": {
+      "rows": 335
+    }
+  }
+}

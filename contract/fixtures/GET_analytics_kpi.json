@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/analytics/kpi",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "produkty": 6898,
+    "dostawcy": 9,
+    "avgMarza": 6,
+    "stagingPending": 3480
+  }
+}

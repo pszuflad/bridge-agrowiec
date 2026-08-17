@@ -1,0 +1,18 @@
+{
+  "endpoint": "/api/history/meta",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "dostawcy": [
+      "MO1",
+      "MO10",
+      "MO2",
+      "MO3",
+      "MO6"
+    ],
+    "_przyciete": {
+      "dostawcy": 8
+    }
+  }
+}

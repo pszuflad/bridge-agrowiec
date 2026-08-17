@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/analytics/status",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "hasHistory": true,
+    "snapshots": 15597,
+    "od": "2026-06-30T09:11:42.589Z",
+    "do": "2026-08-17T15:49:16.928Z"
+  }
+}

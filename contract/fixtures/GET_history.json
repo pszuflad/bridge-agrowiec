@@ -1,0 +1,69 @@
+{
+  "endpoint": "/api/history",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "id": 46915,
+      "data": "2026-07-28T06:22:26.735Z",
+      "kodProduktu": "MO2_1147700",
+      "nazwa": "15x6.00-6 TRELLEBORG T510 6PR TT",
+      "pole": "kategoria",
+      "staraWartosc": "Rolnicze małe",
+      "nowaWartosc": "Rolnicze",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonalUzytkownikId": 1
+    },
+    {
+      "id": 46916,
+      "data": "2026-07-28T06:22:26.735Z",
+      "kodProduktu": "MO2_1147700",
+      "nazwa": "15x6.00-6 TRELLEBORG T510 6PR TT",
+      "pole": "labelSnow",
+      "staraWartosc": "0.0",
+      "nowaWartosc": "",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonalUzytkownikId": 1
+    },
+    {
+      "id": 46913,
+      "data": "2026-07-28T06:22:16.803Z",
+      "kodProduktu": "MO2_1169800",
+      "nazwa": "4.10-4 TRELLEBORG T539 6PR TT",
+      "pole": "kategoria",
+      "staraWartosc": "Rolnicze małe",
+      "nowaWartosc": "Rolnicze",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonalUzytkownikId": 1
+    },
+    {
+      "id": 46914,
+      "data": "2026-07-28T06:22:16.803Z",
+      "kodProduktu": "MO2_1169800",
+      "nazwa": "4.10-4 TRELLEBORG T539 6PR TT",
+      "pole": "labelSnow",
+      "staraWartosc": "0.0",
+      "nowaWartosc": "",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonalUzytkownikId": 1
+    },
+    {
+      "id": 46912,
+      "data": "2026-07-28T06:22:00.827Z",
+      "kodProduktu": "MO2_1472500",
+      "nazwa": "220/60-12 TRELLEBORG T539 SOFT GRIP 88A8 TL",
+      "pole": "kategoria",
+      "staraWartosc": "Rolnicze małe",
+      "nowaWartosc": "Rolnicze",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonalUzytkownikId": 1
+    }
+  ],
+  "_body_przyciete_z": 46916
+}

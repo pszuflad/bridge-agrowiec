@@ -1,0 +1,19 @@
+{
+  "endpoint": "/api/selly/csv-status",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "exists": true,
+    "status": "ok",
+    "powod": null,
+    "ostatnia_synchronizacja": "2026-08-17T04:00:05.212Z",
+    "wygenerowany_dzisiaj": true,
+    "wiek_minut": 721,
+    "wiersze": 6898,
+    "rozmiar_bajty": 2498830,
+    "rozmiar_mb": 2.38,
+    "url": "https://agritires.eu/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"
+  }
+}

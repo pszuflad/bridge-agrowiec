@@ -1,0 +1,64 @@
+{
+  "endpoint": "/api/analytics/prices/product-history",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "hasHistory": true,
+    "rows": [
+      {
+        "data": "2026-06-30T09:11:42.589Z",
+        "dostawca": "MO2",
+        "kod": "MO2_30800800AL-IN",
+        "ean": "8903635000259",
+        "cenaZakupu": 1372.8,
+        "cenaSprzedazy": 1716,
+        "stan": 8
+      },
+      {
+        "data": "2026-06-30T09:11:42.589Z",
+        "dostawca": "MO2",
+        "kod": "MO2_5001515770000",
+        "ean": "8590341001375",
+        "cenaZakupu": 371.58,
+        "cenaSprzedazy": 464.48,
+        "stan": 6
+      },
+      {
+        "data": "2026-06-30T09:11:42.589Z",
+        "dostawca": "MO2",
+        "kod": "MO2_5002602680000",
+        "ean": "8590341052650",
+        "cenaZakupu": 495,
+        "cenaSprzedazy": 688.88,
+        "stan": 2
+      },
+      {
+        "data": "2026-06-30T09:11:42.589Z",
+        "dostawca": "MO2",
+        "kod": "MO2_936570",
+        "ean": "0440000010720",
+        "cenaZakupu": 4240,
+        "cenaSprzedazy": 7341.16,
+        "stan": 1
+      },
+      {
+        "data": "2026-06-30T09:11:42.589Z",
+        "dostawca": "MO2",
+        "kod": "MO2_IND00316",
+        "ean": "0440000127350",
+        "cenaZakupu": 1085,
+        "cenaSprzedazy": 1356.25,
+        "stan": 6
+      }
+    ],
+    "stats": {
+      "min": 24.26,
+      "max": 27230,
+      "avg": 1561.39
+    },
+    "_przyciete": {
+      "rows": 15597
+    }
+  }
+}

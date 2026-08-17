@@ -1,0 +1,49 @@
+{
+  "endpoint": "/api/analytics/lifecycle/models",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "hasHistory": true,
+    "rows": [
+      {
+        "marka": "ALLIANCE",
+        "model": "550",
+        "pierwszyRaz": "2026-08-04T14:31:24.143Z",
+        "ostatniRaz": "2026-08-17T15:49:16.928Z",
+        "produkty": 1
+      },
+      {
+        "marka": "CULTOR",
+        "model": "AS AGRI 10",
+        "pierwszyRaz": "2026-08-04T14:31:24.143Z",
+        "ostatniRaz": "2026-08-17T15:49:16.928Z",
+        "produkty": 5
+      },
+      {
+        "marka": "BKT",
+        "model": "AS 504",
+        "pierwszyRaz": "2026-07-09T07:50:23.580Z",
+        "ostatniRaz": "2026-08-17T15:45:27.479Z",
+        "produkty": 16
+      },
+      {
+        "marka": "CULTOR",
+        "model": "AS AGRI 13",
+        "pierwszyRaz": "2026-08-07T09:47:07.577Z",
+        "ostatniRaz": "2026-08-17T15:44:43.229Z",
+        "produkty": 7
+      },
+      {
+        "marka": "GTK",
+        "model": "TN50",
+        "pierwszyRaz": "2026-07-01T10:26:46.982Z",
+        "ostatniRaz": "2026-08-17T15:44:43.229Z",
+        "produkty": 3
+      }
+    ],
+    "_przyciete": {
+      "rows": 1000
+    }
+  }
+}

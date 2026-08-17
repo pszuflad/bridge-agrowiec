@@ -1,0 +1,54 @@
+{
+  "endpoint": "/api/alerts",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "id": 3042,
+      "poziom": "info",
+      "typ": "Synchronizacja",
+      "opis": "MO9 (Agro-Rami (BKT)): pobrano 925 produkt?w (nowe: 63, kluczowe/b??dy: 61, wycofane: 0, auto: 1)",
+      "dostawca": "MO9",
+      "status": "rozwiazany",
+      "data": "2026-08-17T15:45:27.963Z"
+    },
+    {
+      "id": 3041,
+      "poziom": "info",
+      "typ": "Synchronizacja",
+      "opis": "MO5 (Handlopex Rzeszów): pobrano 1687 produkt?w (nowe: 29, kluczowe/b??dy: 310, wycofane: 72, auto: 8)",
+      "dostawca": "MO5",
+      "status": "rozwiazany",
+      "data": "2026-08-17T15:44:43.647Z"
+    },
+    {
+      "id": 3040,
+      "poziom": "info",
+      "typ": "Synchronizacja",
+      "opis": "MO3 (Grasdorf (kolarolnicze.pl)): pobrano 590 produkt?w (nowe: 31, kluczowe/b??dy: 145, wycofane: 16, auto: 0)",
+      "dostawca": "MO3",
+      "status": "rozwiazany",
+      "data": "2026-08-17T15:44:41.998Z"
+    },
+    {
+      "id": 3039,
+      "poziom": "info",
+      "typ": "Synchronizacja",
+      "opis": "MO4 (Handlopex Wrocław): pobrano 344 produkt?w (nowe: 5, kluczowe/b??dy: 201, wycofane: 59, auto: 0)",
+      "dostawca": "MO4",
+      "status": "rozwiazany",
+      "data": "2026-08-17T15:44:41.543Z"
+    },
+    {
+      "id": 3038,
+      "poziom": "info",
+      "typ": "Synchronizacja",
+      "opis": "MO2 (JMK): pobrano 1605 produkt?w (nowe: 20, kluczowe/b??dy: 315, wycofane: 30, auto: 3)",
+      "dostawca": "MO2",
+      "status": "rozwiazany",
+      "data": "2026-08-17T15:44:40.719Z"
+    }
+  ],
+  "_body_przyciete_z": 3042
+}

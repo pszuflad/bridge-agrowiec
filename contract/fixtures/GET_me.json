@@ -1,0 +1,13 @@
+{
+  "endpoint": "/api/me",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "id": 1,
+    "email": "marta.bieguniak@agrowiec.eu",
+    "imieNazwisko": "Marta Bieguniak",
+    "iat": 1786982455,
+    "exp": 1789574455
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "endpoint": "/api/atrybuty/rodzaje",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "rodzaje": [
+      {
+        "value": "bieznik",
+        "label": "Bieżnik",
+        "opis": "Wzór bieżnika opony",
+        "core": 1
+      },
+      {
+        "value": "indeks_nosnosci",
+        "label": "Indeks nośności",
+        "opis": "LI",
+        "core": 1
+      },
+      {
+        "value": "indeks_predkosci",
+        "label": "Indeks prędkości",
+        "opis": "SI",
+        "core": 1
+      },
+      {
+        "value": "kategoria",
+        "label": "Kategoria",
+        "opis": "Rolnicze, Leśne, Przemysłowe, Ciężarowe, Dętki, Akcesoria",
+        "core": 1
+      },
+      {
+        "value": "konstrukcja",
+        "label": "Konstrukcja",
+        "opis": "R (radialna), D (diagonalna), B (bias-belted)",
+        "core": 1
+      }
+    ],
+    "_przyciete": {
+      "rodzaje": 15
+    }
+  }
+}

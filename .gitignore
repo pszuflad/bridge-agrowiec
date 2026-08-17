@@ -21,4 +21,3 @@ logs/
 .DS_Store
 *.swp
 *~
-contract/fixtures/*.json

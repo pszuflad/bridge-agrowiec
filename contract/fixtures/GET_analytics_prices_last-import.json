@@ -1,0 +1,58 @@
+{
+  "endpoint": "/api/analytics/prices/last-import",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "kod": "MO2_37200095AL",
+        "nazwa": "VF710/70R42 ALLIANCE AGRIFLEX 372 + 185D TL",
+        "dostawca": "MO2",
+        "cenaStara": 7517.9,
+        "cenaNowa": 7517.9,
+        "zmianaPct": 0,
+        "utworzono": "2026-08-17T14:44:40.244Z"
+      },
+      {
+        "kod": "MO5_OZRR420710708ARO0",
+        "nazwa": "710/70R42 OZKA AGRO 10 176A8/173D TL",
+        "dostawca": "MO5",
+        "cenaStara": 5683.99,
+        "cenaNowa": 5626.57,
+        "zmianaPct": -1.0102058589124905,
+        "utworzono": "2026-08-17T13:44:43.244Z"
+      },
+      {
+        "kod": "MO5_OZRR420270908ARO0",
+        "nazwa": "270/95R42 OZKA AGRO 10 141A8 TL",
+        "dostawca": "MO5",
+        "cenaStara": 1303.73,
+        "cenaNowa": 1264.79,
+        "zmianaPct": -2.986814754588761,
+        "utworzono": "2026-08-17T13:44:43.244Z"
+      },
+      {
+        "kod": "MO5_OZRR240420708LOX0",
+        "nazwa": "420/70R24 OZKA AGROLOX 133A8/130D TL",
+        "dostawca": "MO5",
+        "cenaStara": 1331.55,
+        "cenaNowa": 1291.74,
+        "zmianaPct": -2.9897487890052905,
+        "utworzono": "2026-08-17T13:44:43.244Z"
+      },
+      {
+        "kod": "MO5_OZRR200320708LOX0",
+        "nazwa": "320/70R20 OZKA AGROLOX 113A8/113B TL",
+        "dostawca": "MO5",
+        "cenaStara": 732.4,
+        "cenaNowa": 725,
+        "zmianaPct": -1.0103768432550488,
+        "utworzono": "2026-08-17T13:44:43.244Z"
+      }
+    ],
+    "_przyciete": {
+      "rows": 500
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "endpoint": "/api/analytics/ean/details",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ean": null,
+    "offers": []
+  }
+}

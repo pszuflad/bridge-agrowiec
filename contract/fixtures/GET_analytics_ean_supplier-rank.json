@@ -1,0 +1,43 @@
+{
+  "endpoint": "/api/analytics/ean/supplier-rank",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "dostawca": "MO9",
+        "wspolnePozycje": 846,
+        "najtanszy": 846,
+        "najtanszyPct": 100
+      },
+      {
+        "dostawca": "MO10",
+        "wspolnePozycje": 217,
+        "najtanszy": 216,
+        "najtanszyPct": 99.54
+      },
+      {
+        "dostawca": "MO7",
+        "wspolnePozycje": 265,
+        "najtanszy": 261,
+        "najtanszyPct": 98.49
+      },
+      {
+        "dostawca": "MO4",
+        "wspolnePozycje": 347,
+        "najtanszy": 339,
+        "najtanszyPct": 97.69
+      },
+      {
+        "dostawca": "MO5",
+        "wspolnePozycje": 1714,
+        "najtanszy": 1636,
+        "najtanszyPct": 95.45
+      }
+    ],
+    "_przyciete": {
+      "rows": 9
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "endpoint": "/api/atrybuty/wartosci",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "wartosci": [
+      {
+        "id": 1379604,
+        "rodzaj": "bieznik",
+        "wartosc": "1000"
+      },
+      {
+        "id": 411058260,
+        "rodzaj": "bieznik",
+        "wartosc": "2 ECO"
+      },
+      {
+        "id": 230887,
+        "rodzaj": "bieznik",
+        "wartosc": "202"
+      },
+      {
+        "id": 230888,
+        "rodzaj": "bieznik",
+        "wartosc": "221"
+      },
+      {
+        "id": 230889,
+        "rodzaj": "bieznik",
+        "wartosc": "224"
+      }
+    ],
+    "_przyciete": {
+      "wartosci": 5144
+    }
+  }
+}

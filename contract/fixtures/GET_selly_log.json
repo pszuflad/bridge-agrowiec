@@ -1,0 +1,83 @@
+{
+  "endpoint": "/api/selly/log",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "items": [
+      {
+        "id": 13,
+        "operacja": "sync_supplier",
+        "dostawca_kod": "MO1",
+        "liczba_ok": 570,
+        "liczba_blad": 0,
+        "liczba_skip": 0,
+        "szczegoly_json": "{\"dostawca\":\"MO1\",\"total\":570,\"created\":0,\"updated\":570,\"failed\":0,\"skipped\":0,\"dry_run\":false,\"errors\":[]}",
+        "uzytkownik_id": 1,
+        "uzytkownik_imie": "Marta Bieguniak",
+        "rozpoczeto": "2026-07-06 07:43:36",
+        "zakonczono": "2026-07-06 07:46:54",
+        "status": "zakonczono"
+      },
+      {
+        "id": 12,
+        "operacja": "sync_supplier",
+        "dostawca_kod": "MO2",
+        "liczba_ok": 1604,
+        "liczba_blad": 0,
+        "liczba_skip": 0,
+        "szczegoly_json": "{\"dostawca\":\"MO2\",\"total\":1604,\"created\":1604,\"updated\":0,\"failed\":0,\"skipped\":0,\"dry_run\":false,\"errors\":[]}",
+        "uzytkownik_id": 1,
+        "uzytkownik_imie": "Marta Bieguniak",
+        "rozpoczeto": "2026-07-03 13:00:24",
+        "zakonczono": "2026-07-03 13:09:39",
+        "status": "zakonczono"
+      },
+      {
+        "id": 11,
+        "operacja": "sync_supplier",
+        "dostawca_kod": "MO1",
+        "liczba_ok": 570,
+        "liczba_blad": 0,
+        "liczba_skip": 0,
+        "szczegoly_json": "{\"dostawca\":\"MO1\",\"total\":570,\"created\":570,\"updated\":0,\"failed\":0,\"skipped\":0,\"dry_run\":false,\"errors\":[]}",
+        "uzytkownik_id": 1,
+        "uzytkownik_imie": "Marta Bieguniak",
+        "rozpoczeto": "2026-07-03 12:54:31",
+        "zakonczono": "2026-07-03 12:57:40",
+        "status": "zakonczono"
+      },
+      {
+        "id": 10,
+        "operacja": "sync_supplier",
+        "dostawca_kod": "MO1",
+        "liczba_ok": 0,
+        "liczba_blad": 570,
+        "liczba_skip": 0,
+        "szczegoly_json": "{\"dostawca\":\"MO1\",\"total\":570,\"created\":0,\"updated\":0,\"failed\":570,\"skipped\":0,\"dry_run\":false,\"errors\":[{\"kod\":\"MO171970103\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO171970074\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO171970071\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO171970032\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO171970021\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119981689\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119912122\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119800433\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119800286\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119271099\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211335\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211334\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211329\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211309\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211277\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211276\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211233\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211226\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211215\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211205\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211201\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211190\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211111\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119211087\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119172460\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119111103\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119111100\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119110121\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119110117\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119110112\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119110097\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119110081\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO119110065\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO118366370\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO118345403\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO118345285\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO118345276\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO117422750\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO117421920\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115285410\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115285312\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115285305\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 3.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115284098\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115272630\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115272625\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115272620\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115272572\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115272548\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115272542\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"},{\"kod\":\"MO115272465\",\"error\":\"[Selly] HTTP 400 POST https://agroopony.selly24.pl/api/products :: {\\n    \\\"message\\\": \\\"400 Bad Request\\\",\\n    \\\"message_detail\\\": \\\"Brak kategorii o id 1.\\\",\\n    \\\"code\\\": 400\\n}\"}]}",
+        "uzytkownik_id": 1,
+        "uzytkownik_imie": "Marta Bieguniak",
+        "rozpoczeto": "2026-07-03 12:47:29",
+        "zakonczono": "2026-07-03 12:47:54",
+        "status": "zakonczono"
+      },
+      {
+        "id": 9,
+        "operacja": "sync_supplier",
+        "dostawca_kod": "MO7",
+        "liczba_ok": 264,
+        "liczba_blad": 0,
+        "liczba_skip": 0,
+        "szczegoly_json": "{\"dostawca\":\"MO7\",\"total\":264,\"created\":264,\"updated\":0,\"failed\":0,\"skipped\":0,\"dry_run\":false,\"errors\":[]}",
+        "uzytkownik_id": 1,
+        "uzytkownik_imie": "Marta Bieguniak",
+        "rozpoczeto": "2026-07-03 12:22:56",
+        "zakonczono": "2026-07-03 12:24:25",
+        "status": "zakonczono"
+      }
+    ],
+    "_przyciete": {
+      "items": 13
+    }
+  }
+}

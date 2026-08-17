@@ -1,0 +1,94 @@
+{
+  "endpoint": "/api/history/paged",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "items": [
+      {
+        "id": 2288,
+        "typ": "edycja",
+        "kiedy": "2026-07-28T06:22:26.735Z",
+        "dostawca": null,
+        "uzytkownik": "Marta Bieguniak",
+        "liczbaPozycji": 1,
+        "nazwaPliku": null,
+        "format": null,
+        "kodProduktu": "MO2_1147700",
+        "zmienionePola": [
+          "kategoria",
+          "labelSnow"
+        ],
+        "uwagi": null
+      },
+      {
+        "id": 2287,
+        "typ": "edycja",
+        "kiedy": "2026-07-28T06:22:16.803Z",
+        "dostawca": null,
+        "uzytkownik": "Marta Bieguniak",
+        "liczbaPozycji": 1,
+        "nazwaPliku": null,
+        "format": null,
+        "kodProduktu": "MO2_1169800",
+        "zmienionePola": [
+          "kategoria",
+          "labelSnow"
+        ],
+        "uwagi": null
+      },
+      {
+        "id": 2286,
+        "typ": "edycja",
+        "kiedy": "2026-07-28T06:22:00.827Z",
+        "dostawca": null,
+        "uzytkownik": "Marta Bieguniak",
+        "liczbaPozycji": 1,
+        "nazwaPliku": null,
+        "format": null,
+        "kodProduktu": "MO2_1472500",
+        "zmienionePola": [
+          "kategoria"
+        ],
+        "uwagi": null
+      },
+      {
+        "id": 2285,
+        "typ": "edycja",
+        "kiedy": "2026-07-28T06:21:51.951Z",
+        "dostawca": null,
+        "uzytkownik": "Marta Bieguniak",
+        "liczbaPozycji": 1,
+        "nazwaPliku": null,
+        "format": null,
+        "kodProduktu": "MO2_1472500",
+        "zmienionePola": [
+          "labelSnow"
+        ],
+        "uwagi": null
+      },
+      {
+        "id": 2284,
+        "typ": "edycja",
+        "kiedy": "2026-07-28T06:21:43.737Z",
+        "dostawca": null,
+        "uzytkownik": "Marta Bieguniak",
+        "liczbaPozycji": 1,
+        "nazwaPliku": null,
+        "format": null,
+        "kodProduktu": "MO2_1480700",
+        "zmienionePola": [
+          "kategoria"
+        ],
+        "uwagi": null
+      }
+    ],
+    "total": 270,
+    "pages": 6,
+    "page": 1,
+    "limit": 50,
+    "_przyciete": {
+      "items": 50
+    }
+  }
+}

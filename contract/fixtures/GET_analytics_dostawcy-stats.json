@@ -1,0 +1,44 @@
+{
+  "endpoint": "/api/analytics/dostawcy-stats",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "dostawca": "MO5",
+      "liczbaProduktow": 1747,
+      "avgMarza": 6,
+      "avgCenaZakupu": 1401.48,
+      "dostepnych": 1747
+    },
+    {
+      "dostawca": "MO2",
+      "liczbaProduktow": 1629,
+      "avgMarza": 6,
+      "avgCenaZakupu": 1948.64,
+      "dostepnych": 1629
+    },
+    {
+      "dostawca": "MO9",
+      "liczbaProduktow": 861,
+      "avgMarza": 6,
+      "avgCenaZakupu": 2244.09,
+      "dostepnych": 675
+    },
+    {
+      "dostawca": "MO1",
+      "liczbaProduktow": 634,
+      "avgMarza": 6,
+      "avgCenaZakupu": 2976.21,
+      "dostepnych": 634
+    },
+    {
+      "dostawca": "MO8",
+      "liczbaProduktow": 615,
+      "avgMarza": 6,
+      "avgCenaZakupu": 7645.73,
+      "dostepnych": 0
+    }
+  ],
+  "_body_przyciete_z": 9
+}

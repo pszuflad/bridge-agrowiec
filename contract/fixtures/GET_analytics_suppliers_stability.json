@@ -1,0 +1,49 @@
+{
+  "endpoint": "/api/analytics/suppliers/stability",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "hasHistory": true,
+    "rows": [
+      {
+        "dostawca": "MO1",
+        "punkty": 1787,
+        "liczbaZmian": 440,
+        "sredniaZmianaPct": 16.17,
+        "maxZmianaPct": 102.75
+      },
+      {
+        "dostawca": "MO2",
+        "punkty": 3126,
+        "liczbaZmian": 2196,
+        "sredniaZmianaPct": 11.27,
+        "maxZmianaPct": 38.51
+      },
+      {
+        "dostawca": "MO3",
+        "punkty": 722,
+        "liczbaZmian": 162,
+        "sredniaZmianaPct": 8.34,
+        "maxZmianaPct": 91.55
+      },
+      {
+        "dostawca": "MO9",
+        "punkty": 354,
+        "liczbaZmian": 6,
+        "sredniaZmianaPct": 0.67,
+        "maxZmianaPct": 26.15
+      },
+      {
+        "dostawca": "MO4",
+        "punkty": 758,
+        "liczbaZmian": 143,
+        "sredniaZmianaPct": 0.54,
+        "maxZmianaPct": 12.22
+      }
+    ],
+    "_przyciete": {
+      "rows": 7
+    }
+  }
+}

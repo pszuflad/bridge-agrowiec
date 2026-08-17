@@ -1,0 +1,49 @@
+{
+  "endpoint": "/api/analytics/market/group-prices",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "group": "marka",
+    "rows": [
+      {
+        "grupa": "BKT",
+        "oferty": 945,
+        "srednia": 2159.68,
+        "min": 36.4,
+        "max": 26942.4
+      },
+      {
+        "grupa": "ALLIANCE",
+        "oferty": 803,
+        "srednia": 3101.47,
+        "min": 139.1,
+        "max": 16405
+      },
+      {
+        "grupa": "TRELLEBORG",
+        "oferty": 714,
+        "srednia": 6917.47,
+        "min": 23.89,
+        "max": 48852
+      },
+      {
+        "grupa": "MITAS",
+        "oferty": 452,
+        "srednia": 1769.79,
+        "min": 25.35,
+        "max": 11375.25
+      },
+      {
+        "grupa": "CEAT",
+        "oferty": 354,
+        "srednia": 2756.6,
+        "min": 160.18,
+        "max": 12953.15
+      }
+    ],
+    "_przyciete": {
+      "rows": 92
+    }
+  }
+}

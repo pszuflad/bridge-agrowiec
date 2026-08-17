@@ -1,0 +1,44 @@
+{
+  "endpoint": "/api/analytics/seasonality/monthly",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "hasHistory": true,
+    "rows": [
+      {
+        "miesiac": "08",
+        "marka": "",
+        "sredniaCena": 475.3,
+        "dostepnoscPct": 100
+      },
+      {
+        "miesiac": "08",
+        "marka": "AEOLUS",
+        "sredniaCena": 2793,
+        "dostepnoscPct": 100
+      },
+      {
+        "miesiac": "07",
+        "marka": "ALLIANCE",
+        "sredniaCena": 2930.2,
+        "dostepnoscPct": 100
+      },
+      {
+        "miesiac": "08",
+        "marka": "ALLIANCE",
+        "sredniaCena": 2693.01,
+        "dostepnoscPct": 100
+      },
+      {
+        "miesiac": "08",
+        "marka": "APOLLO",
+        "sredniaCena": 1709.12,
+        "dostepnoscPct": 100
+      }
+    ],
+    "_przyciete": {
+      "rows": 172
+    }
+  }
+}

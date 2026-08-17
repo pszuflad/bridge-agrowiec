@@ -1,0 +1,49 @@
+{
+  "endpoint": "/api/spedycja",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "id": 1,
+      "dostawcaKod": "MO1",
+      "progNetto": 1100,
+      "kosztPonizej": 89,
+      "kosztPowyzej": 0,
+      "dodatkoweReguly": "Bohnenkamp: powyżej progu — gratis"
+    },
+    {
+      "id": 2,
+      "dostawcaKod": "MO2",
+      "progNetto": 6000,
+      "kosztPonizej": 119,
+      "kosztPowyzej": 0,
+      "dodatkoweReguly": "JMK: felgi 4-10\" → 29 zł; paczka ≤ 80×60 → 119 zł; > 80×60 → 340 zł"
+    },
+    {
+      "id": 3,
+      "dostawcaKod": "MO3",
+      "progNetto": null,
+      "kosztPonizej": 119,
+      "kosztPowyzej": 0,
+      "dodatkoweReguly": "Grasdorf: wg gabarytu: ≤120×80 → 119; ≤120×120 → 189; ≤185×120 → 299; > → 449 zł"
+    },
+    {
+      "id": 4,
+      "dostawcaKod": "MO4",
+      "progNetto": null,
+      "kosztPonizej": 0,
+      "kosztPowyzej": 0,
+      "dodatkoweReguly": "Handlopex WR: gratis"
+    },
+    {
+      "id": 5,
+      "dostawcaKod": "MO5",
+      "progNetto": null,
+      "kosztPonizej": 0,
+      "kosztPowyzej": 0,
+      "dodatkoweReguly": "Handlopex RZ: gratis"
+    }
+  ],
+  "_body_przyciete_z": 10
+}

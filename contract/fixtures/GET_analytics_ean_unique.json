@@ -1,0 +1,48 @@
+{
+  "endpoint": "/api/analytics/ean/unique",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "rows": [
+      {
+        "ean": "0440000005139",
+        "nazwa": "1/2-8 GLOBESTAR PERFORMER",
+        "dostawca": "MO2",
+        "cenaZakupu": 210,
+        "stan": 13
+      },
+      {
+        "ean": "8903635016229",
+        "nazwa": "10-16.5 ALLIANCE SK 903 129A2 8PR TL",
+        "dostawca": "MO1",
+        "cenaZakupu": 471.75,
+        "stan": 3
+      },
+      {
+        "ean": "8903635018841",
+        "nazwa": "10-16.5 ALLIANCE SK 903 134A2 10PR TL",
+        "dostawca": "MO1",
+        "cenaZakupu": 654.5,
+        "stan": 6
+      },
+      {
+        "ean": "8906117620600",
+        "nazwa": "10-16.5 CEAT GRIP MASTER LOADER HD 10PR TL",
+        "dostawca": "MO1",
+        "cenaZakupu": 388.31,
+        "stan": 10
+      },
+      {
+        "ean": "8059971615258",
+        "nazwa": "10-16.5 CULTOR SK.ST.20 124A2 8PR TL",
+        "dostawca": "MO5",
+        "cenaZakupu": 448.85,
+        "stan": 7
+      }
+    ],
+    "_przyciete": {
+      "rows": 1000
+    }
+  }
+}

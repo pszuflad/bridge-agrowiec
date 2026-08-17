@@ -1,0 +1,59 @@
+{
+  "endpoint": "/api/audit-log",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": [
+    {
+      "id": 4358,
+      "uzytkownikId": 0,
+      "uzytkownikImie": "SYSTEM-AUTOPULL",
+      "akcja": "auto_pull",
+      "encjaTyp": "dostawca",
+      "encjaId": "MO3",
+      "szczegolyJson": "{\"source\":\"scheduler\",\"url\":\"https://sklep.kolarolnicze.pl/offer/export/test-csv-3,t1004,pl.csv\",\"wczytanych\":590,\"parserErrors\":0,\"odrzucone\":715,\"doStagingu\":215,\"odrzuconeNieOpony\":0,\"odrzuconeBrakDanych\":0,\"odrzuconeSmieciMO2\":0,\"nowe\":31,\"zmienione\":145,\"wycofane\":39,\"bezZmian\":414,\"autoZatwierdzone\":0,\"szczegolyOdrzuconych\":[]}",
+      "kiedy": "2026-08-17T15:49:19.820Z"
+    },
+    {
+      "id": 4357,
+      "uzytkownikId": 0,
+      "uzytkownikImie": "SYSTEM-AUTOPULL",
+      "akcja": "auto_pull",
+      "encjaTyp": "dostawca",
+      "encjaId": "MO5",
+      "szczegolyJson": "{\"source\":\"scheduler\",\"url\":\"https://agroopony.eu/imports/acc_ftp3/agrowiec_mw.csv\",\"wczytanych\":5336,\"parserErrors\":0,\"odrzucone\":0,\"doStagingu\":396,\"odrzuconeNieOpony\":1,\"odrzuconeBrakDanych\":0,\"odrzuconeSmieciMO2\":0,\"nowe\":29,\"zmienione\":310,\"wycofane\":57,\"bezZmian\":1347,\"autoZatwierdzone\":0,\"szczegolyOdrzuconych\":[{\"nazwa\":\"MO5_STFP2391000000000 — STARCO\",\"powod\":\"nie opona (brak słów kluczowych i rozmiaru opony)\"}]}",
+      "kiedy": "2026-08-17T15:49:19.201Z"
+    },
+    {
+      "id": 4356,
+      "uzytkownikId": 0,
+      "uzytkownikImie": "SYSTEM-AUTOPULL",
+      "akcja": "auto_pull",
+      "encjaTyp": "dostawca",
+      "encjaId": "MO4",
+      "szczegolyJson": "{\"source\":\"scheduler\",\"url\":\"https://agroopony.eu/imports/acc_ftp3/agrowiec_wr.csv\",\"wczytanych\":3909,\"parserErrors\":0,\"odrzucone\":0,\"doStagingu\":219,\"odrzuconeNieOpony\":1,\"odrzuconeBrakDanych\":0,\"odrzuconeSmieciMO2\":0,\"nowe\":5,\"zmienione\":201,\"wycofane\":13,\"bezZmian\":137,\"autoZatwierdzone\":0,\"szczegolyOdrzuconych\":[{\"nazwa\":\"MO4_STFP2391000000000 — STARCO\",\"powod\":\"nie opona (brak słów kluczowych i rozmiaru opony)\"}]}",
+      "kiedy": "2026-08-17T15:49:18.062Z"
+    },
+    {
+      "id": 4355,
+      "uzytkownikId": 0,
+      "uzytkownikImie": "SYSTEM-AUTOPULL",
+      "akcja": "auto_pull",
+      "encjaTyp": "dostawca",
+      "encjaId": "MO2",
+      "szczegolyJson": "{\"source\":\"scheduler\",\"url\":\"http://46.238.100.138:5844/Cennik_26002_v2_4f8a1740-11c5-4ee8-8e1d-e3145b10d335.csv\",\"wczytanych\":1607,\"parserErrors\":0,\"odrzucone\":0,\"doStagingu\":354,\"odrzuconeNieOpony\":0,\"odrzuconeBrakDanych\":0,\"odrzuconeSmieciMO2\":0,\"nowe\":20,\"zmienione\":315,\"wycofane\":19,\"bezZmian\":1268,\"autoZatwierdzone\":2,\"szczegolyOdrzuconych\":[]}",
+      "kiedy": "2026-08-17T15:49:17.331Z"
+    },
+    {
+      "id": 4354,
+      "uzytkownikId": 0,
+      "uzytkownikImie": "SYSTEM-AUTOPULL",
+      "akcja": "auto_pull",
+      "encjaTyp": "dostawca",
+      "encjaId": "MO9",
+      "szczegolyJson": "{\"source\":\"scheduler\",\"url\":\"https://agroopony.eu/imports/agrorami.csv\",\"wczytanych\":993,\"parserErrors\":0,\"odrzucone\":123,\"doStagingu\":124,\"odrzuconeNieOpony\":1,\"odrzuconeBrakDanych\":0,\"odrzuconeSmieciMO2\":0,\"nowe\":63,\"zmienione\":61,\"wycofane\":0,\"bezZmian\":800,\"autoZatwierdzone\":0,\"szczegolyOdrzuconych\":[{\"nazwa\":\"MO9_51667 — BKT EARTHMAX SR 22 G 146A8/169A2 TL\",\"powod\":\"nie opona (brak słów kluczowych i rozmiaru opony)\"}]}",
+      "kiedy": "2026-08-17T15:49:16.708Z"
+    }
+  ],
+  "_body_przyciete_z": 500
+}

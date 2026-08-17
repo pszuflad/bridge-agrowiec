@@ -1,0 +1,19 @@
+{
+  "endpoint": "/api/config",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "waga_gab.szer_polpaleta": "55",
+    "waga_gab.szer_paleta": "80",
+    "waga_gab.wys_palety": "10",
+    "waga_gab.wspolczynnik": "0.000167",
+    "waga_gab.opis_wspolczynnik": "DPD 1/6000 (1 m³ = 167 kg)",
+    "ai_fallback.klucz_api": "",
+    "ai_fallback.model": "gpt-4o-mini",
+    "ai_fallback.aktywny": "false",
+    "shoper.adres_sklepu": "",
+    "shoper.token_api": "",
+    "shoper.format_eksportu": "ean;nazwa;producent;rozmiar;cena_netto;magazyn;vat"
+  }
+}

@@ -8,7 +8,7 @@ przepisywaniu.
 | Plik | Co | Stan |
 |---|---|---|
 | `openapi.yaml` | 94 ścieżki / 111 operacji: metoda, ścieżka, auth, parametry | ✅ **zamrożone** (z zweryfikowanego inwentarza, Krok 2.3) |
-| `fixtures/` | nagrane pary żądanie↔odpowiedź z żywego backendu | 🔲 **Krok 2.4** — jeszcze puste |
+| `fixtures/` | nagrane odpowiedzi GET z żywego backendu (kształt) | ✅ **Krok 2.4** — 55 GET-ów, 54×200 |
 
 ## Co jest zamrożone teraz (2.3)
 
@@ -17,13 +17,28 @@ Z `docs/spec-backend.md` + `01_ENDPOINTY.md` (cytaty `plik:linia`, nie pamięć)
 - **auth** per operacja (`security` = wymaga JWT; brak `security` = **publiczne**),
 - **parametry ścieżki** (`{id}`, `{kod}`, `{value}`, `{view}`).
 
-## Czego jeszcze NIE ma (celowo — Krok 2.4)
+## Fixtures GET (Krok 2.4 — zrobione)
 
-**Kształtów request/response nie zmyślam.** Zostaną zamrożone przez **nagranie
-rzeczywistych odpowiedzi** z żywego backendu (potrzebny token logowania):
-dla każdego GET-a zapiszemy realną odpowiedź do `fixtures/`, a przy przepisywaniu
-nowy backend będzie musiał zwrócić identyczny kształt. To jest właściwy „dowód",
-że kontrakt opisuje rzeczywistość — nie nasze wyobrażenie.
+`fixtures/GET_*.json` — 55 endpointów GET nagranych z żywego backendu (54×200;
+`/api/atrybuty/uzycie` → 400, bo wymaga parametru query). Każdy plik:
+```json
+{ "endpoint": "...", "method": "GET", "status": 200, "json": true, "body": {...} }
+```
+
+**To są fixtures KSZTAŁTU, nie pełne snapshoty danych.** Duże tablice przycięto do
+5 elementów (adnotacja `_body_przyciete_z` / `_przyciete`), bo celem jest zamrożenie
+**struktury odpowiedzi** (pola, zagnieżdżenie, typy), nie archiwum danych, które
+i tak się zmieniają. Rozmiar: 27 MB → 247 KB.
+
+**Ustalenie kontraktowe:** API zwraca **camelCase** (`cenaZakupu`, `cenaSprzedazy`,
+`marzaPct`, `kodDostawcy`), mimo że baza jest snake_case (`cena_zakupu`). Warstwa
+API konwertuje — nowy backend musi to zachować.
+
+Sanityzacja: brak sekretów (config: klucze puste; users: bez hashy; zero JWT/Bearer).
+
+**Czego wciąż NIE ma:** POST/PUT/PATCH/DELETE (zapisujące) — świadomie pominięte,
+bo modyfikowałyby produkcję. Nagramy je osobno przeciwko **kopii bazy**
+(`db/snapshot.db`) w Fazie 4.
 
 ## ⚠ Uwaga bezpieczeństwa wbudowana w kontrakt
 
