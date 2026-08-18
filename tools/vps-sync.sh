@@ -83,9 +83,12 @@ $CH}"
   SHA="$(git rev-parse --short HEAD)"
   echo "$TS  wypchnięto zmiany $CAT ${BAKS}"
 
-  # diff CZYTELNYCH plików kodu do maila (bez .bak, bez zminifikowanego index.cjs), przycięty
-  DIFF="$(git show "$SHA" -- mirror/backend deminified db/schema.sql \
-          ':(exclude)*.bak_*' ':(exclude)mirror/backend/index.cjs' 2>/dev/null | head -250)"
+  # diff CZYTELNYCH plików kodu do maila — SAM diff (git diff, nie git show, żeby
+  # nie dublować komunikatu commita); bez .bak, bez zminifikowanego index.cjs oraz
+  # bez CHANGELOG.md (wpis Ani jest już wyżej w sekcji "Changelog Ani"). Przycięty.
+  DIFF="$(git diff "$SHA^" "$SHA" -- mirror/backend deminified db/schema.sql \
+          ':(exclude)*.bak_*' ':(exclude)mirror/backend/index.cjs' \
+          ':(exclude)*/CHANGELOG.md' 2>/dev/null | head -250)"
 
   # powiadomienie e-mail (sendmail -t; From na domenie serwera = lepsza dostarczalność)
   {
