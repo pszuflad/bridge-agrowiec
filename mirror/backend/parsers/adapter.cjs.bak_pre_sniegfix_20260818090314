@@ -14,21 +14,6 @@ function firstValue(...values) {
   return null;
 }
 
-// POPRAWKA 2026-08-18 (decyzja Anny): kolumna label_snow ("śnieg") w UI ma pokazywac
-// wylacznie "Tak" (gdy opona ma oznaczenie snow/3PMSF) albo byc pusta (brak oznaczenia) -
-// NIGDY liczbe 0/1 czy string "0.0"/"1.0". Wczesniej fallback wpisywal tu surowa flage
-// snow3pmsf (0 lub 1) prosto do TEXT kolumny, co dawalo "0.0"/"1.0" po zapisie. Ta funkcja
-// jest jedynym miejscem, ktore ustawia labelSnow w recordToSurowe - obsluguje zarowno
-// wartosc realna od dostawcy (rawLabelSnow, gdy normalizator ja dostarczy) jak i fallback
-// z detekcji 3PMSF w nazwie (snow3pmsf).
-function normalizeLabelSnowValue(rawLabelSnow, snow3pmsf) {
-  const truthy = (v) => v === true || v === 1 || v === '1' || (typeof v === 'string' && v.trim().toLowerCase() === 'tak');
-  if (rawLabelSnow !== undefined && rawLabelSnow !== null && rawLabelSnow !== '') {
-    return truthy(rawLabelSnow) ? 'Tak' : null;
-  }
-  return truthy(snow3pmsf) ? 'Tak' : null;
-}
-
 // POPRAWKA 2026-07-07: Oznaczenia techniczne SF/SB/HF/LS czasem nie są lapane przez
 // normalizatory tyre_params.cjs, gdy są doklejone do modelu/bieżnika (np. "MODEL SB")
 // albo ukryte w nazwie. Tu wykrywamy je z tekstu i:
@@ -590,11 +575,7 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     labelNoise: enriched.labelNoise ?? null,
     labelNoiseClass: enriched.labelNoiseClass ?? null,
     labelIce: enriched.labelIce ?? null,
-    // POPRAWKA 2026-08-18: labelSnow to pole wyswietlane w UI jako "Tak"/puste (nie
-    // liczba). enriched.labelSnow (gdy dostawca faktycznie go dostarcza) moze byc juz
-    // liczba 0/1 z normalizeQty() lub gotowy string - normalizujemy obie sciezki tutaj,
-    // zamiast wpisywac surowa flage snow3pmsf (0/1) prosto do kolumny TEXT.
-    labelSnow: normalizeLabelSnowValue(enriched.labelSnow, enriched.snow3pmsf),
+    labelSnow: enriched.labelSnow ?? enriched.snow3pmsf ?? null,
     rodzaj: toUpperPL(enriched.oznaczenieBieznika ?? null),
     linkZdjecia: enriched.linkZdjecia ?? null,
     oznaczenieBieznika: toUpperPL(enriched.oznaczenieBieznika ?? null),

@@ -36,17 +36,6 @@ function normalizeQty(value) {
   return num === null ? null : Math.trunc(num);
 }
 
-// POPRAWKA 2026-08-18 (decyzja Anny): pola etykiety UE typu "snow" sa flaga Tak/brak,
-// NIE liczba/ilosc - normalizeQty() tutaj bylo zle uzyte (obcinalo do 0/1, ktore trafialo
-// jako string "0.0"/"1.0" do kolumny TEXT w bazie). Ta funkcja zwraca wylacznie 'Tak' albo
-// null, niezaleznie czy surowa wartosc to liczba (0/1), string ("1"/"tak") czy bool.
-function normalizeLabelFlag(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const truthy = value === true || value === 1 || value === '1' ||
-    (typeof value === 'string' && value.trim().toLowerCase() === 'tak');
-  return truthy ? 'Tak' : null;
-}
-
 function normalizeSizeText(value) {
   let text = cleanText(value);
   text = text.replace(/\bOpona\b/gi, '').trim();
@@ -1032,7 +1021,7 @@ function normalizeHandlopex(record) {
     labelWet: emptyToNull(record.przyczepnosc),
     labelNoise: emptyToNull(record.halas),
     labelNoiseClass: emptyToNull(record.labelNoise),
-    labelSnow: normalizeLabelFlag(record.labelSnow),
+    labelSnow: normalizeQty(record.labelSnow) ?? null,
     labelIce: normalizeQty(record.labelIce) ?? null,
     dot: emptyToNull(record.dot) || 'nie starsza niz 3 lata',
     waga: parseNumber(record.waga),
