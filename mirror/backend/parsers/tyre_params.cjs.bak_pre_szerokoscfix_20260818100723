@@ -27,16 +27,6 @@ function parseNumber(value) {
   return Number.isFinite(num) ? num : null;
 }
 
-// POPRAWKA 2026-08-18: fallback szerokosci (gdy rozbicie rozmiaru przez parseSize() nie dalo
-// wartosci) musi zwracac mm, tak jak size.szerokosc po naprawie nizej - inaczej surowa kolumna
-// CSV (cale, np. 11.2) wraca nieprzeliczona i psuje jednostke w products.szerokosc.
-function parseWidthFallbackMm(value) {
-  const n = parseNumber(value);
-  if (n === null) return null;
-  const mm = n >= 100 ? n : n * 25.4;
-  return Math.round(mm * 100) / 100;
-}
-
 function normalizePrice(value) {
   return parseNumber(value);
 }
@@ -256,15 +246,6 @@ function parseSize(value) {
     const profile = result.profil ?? 83;
     result.wysokoscBokuCm = Math.round(widthCm * (profile / 100) * 100) / 100;
     result.wysokoscRzeczywistaCm = Math.round((result.wysokoscBokuCm * 2 + result.srednica * 2.54) * 100) / 100;
-    // POPRAWKA 2026-08-18: `szerokosc` MUSI byc zawsze w mm (parametr techniczny), tak jak
-    // przelicza tire_dims.js's tireWidthMm(). Do tej pory result.szerokosc zostawal surowa
-    // liczba wyekstrahowana z tekstu rozmiaru (np. 11.2 dla "11.2-24", 550 dla notacji
-    // "550/45x22.5"), przeliczenie widthCm istnialo TYLKO lokalnie do liczenia wysokosci.
-    // adapter.cjs zapisuje enriched.szerokosc 1:1 do bazy, a bridge_ext.cjs's applyDims()
-    // nadpisuje mm-em WYLACZNIE gdy pole jest null/puste - wiec ta niekonsekwencja trafiala
-    // prosto do products.szerokosc: 1818 rekordow mialo cale/surowa liczbe, 5577 mm poprawne,
-    // dajac dla tego samego rozmiaru (np. "11.2-24") raz 11.2 raz 284.5 w bazie.
-    result.szerokosc = Math.round(widthCm * 10 * 100) / 100; // cm -> mm, 2 miejsca po przecinku
   }
 
   return result;
@@ -487,7 +468,7 @@ function normalizeJmk(record) {
     model,
     rozmiar: size.rozmiar,
     rozmiarAlternatywny: emptyToNull(record.zamiennik),
-    szerokosc: size.szerokosc ?? parseWidthFallbackMm(record.szerokosc),
+    szerokosc: size.szerokosc ?? parseNumber(record.szerokosc),
     profil: size.profil ?? parseNumber(record.profil),
     srednica: size.srednica ?? parseNumber(record.srednica),
     wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,
@@ -1036,7 +1017,7 @@ function normalizeHandlopex(record) {
     // profil=82, co dawalo bledne szerokosci (2310, 4, 1270) i profil. size.* pochodzi
     // z parseSize(rozmiar) i jest spojne z wymiarami liczonymi w tire_dims. Fallback do
     // kolumn tylko gdy rozbicie rozmiaru nie dalo wartosci.
-    szerokosc: size.szerokosc ?? parseWidthFallbackMm(record.szerokosc),
+    szerokosc: size.szerokosc ?? parseNumber(record.szerokosc),
     profil: simpleInchSize ? null : (size.profil ?? parseNumber(record.profil)),
     srednica: size.srednica ?? parseNumber(record.srednica),
     wysokoscRzeczywistaCm: size.wysokoscRzeczywistaCm,

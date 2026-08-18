@@ -5,6 +5,16 @@ Zasady prowadzenia: każda zmiana (edycja bundla frontu, modułu backendu, ALTER
 nowy endpoint, zmiana parsera, skrypt migracyjny) dostaje wpis. Bez sekretów. Kopie .bak podawane
 z nazwą, aby dało się powiązać z wpisem.
 
+## 2026-08-18 12:08
+- obszar: backend, baza danych
+- pliki: parsers/tyre_params.cjs (funkcja parseSize() — konwersja szerokosc do mm; nowa funkcja parseWidthFallbackMm(); 2 miejsca fallbacku w normalizeJmk/normalizeHandlopex); kopie zapasowe: parsers/tyre_params.cjs.bak_pre_szerokoscfix_20260818100723, data.db.bak_pre_szerokoscfix_20260818100743 (+backfill skrypt jednorazowy backfill_szerokosc_20260818.js, usunac po weryfikacji)
+- zmiana:
+    1) Przyczyna: parseSize() w tyre_params.cjs zwracal result.szerokosc jako surowa liczbe z tekstu rozmiaru (np. 11.2 dla "11.2-24"), mimo ze wewnetrznie liczyl widthCm (poprawnie przeliczone cm) tylko do wysokosci opony. adapter.cjs zapisuje enriched.szerokosc 1:1 do bazy; bridge_ext.cjs's applyDims() dopisuje mm z tire_dims.js's tireWidthMm() TYLKO gdy pole jest null — wiec gdy parser cokolwiek ustawil (nawet surowa liczbe), poprawka nigdy sie nie uruchamiala. Efekt: dla identycznego rozmiaru (np. "11.2-24") raz zapisywano 11.2 (cale), raz 284.5 (mm) w zaleznosci od sciezki parsera/dostawcy — 177 rozmiarow z rozbieznymi wartosciami, 2027 rekordow dotkniete.
+    2) Kod: parseSize() teraz zawsze przypisuje result.szerokosc = widthCm przeliczone na mm (ta sama logika inch/mm co juz istniala lokalnie dla wysokosci, teraz stosowana konsekwentnie do samej szerokosci). Dodano parseWidthFallbackMm() i zastosowano w 2 miejscach (normalizeJmk linia ok.490, normalizeHandlopex linia ok.1039), gdzie istnial ryzykowny fallback do surowej niesprzeliczonej kolumny CSV (parseNumber(record.szerokosc)) — teraz ten fallback rowniez konwertuje do mm. Obejmuje wszystkich dostawcow (MO1-MO10), bo wszyscy przechodza przez parseSize().
+    3) Backfill danych: skrypt jednorazowy przeliczyl products.szerokosc dla wszystkich 7405 produktow z rozmiar niepusty, uzywajac kanonicznego tireWidthMm() z tire_dims.js. Zaktualizowano 1827 rekordow (bylo w calach/surowej liczbie), 5568 bez zmian (juz poprawne), 10 nieparsowalny format rozmiaru (bez zmian, do przyszlej analizy). Po naprawie: 0 rozmiarow z rozbieznymi wartosciami szerokosc (bylo 177). PRAGMA integrity_check: ok.
+    4) Weryfikacja: pozostale 32 rekordy z szerokosc<100mm sa prawidlowe (male opony do taczek/wozkow, np. "3.00-4"=76.2mm, "3.50-8"=88.9mm) — nie blad.
+- powód: na prosbe Anny — zbadanie i naprawa niekonsekwentnego formatu w products.szerokosc ("11 vs 11.00"); po ustaleniu ze to nie problem formatowania (kolumna REAL) a rzeczywisty blad konwersji jednostek, naprawiono kod + dane za zgoda uzytkownika ("znajdz problem i napraw od razu").
+
 ## 2026-08-18 11:50
 - obszar: backend, baza danych
 - pliki: common.cjs (nowa funkcja capitalizeKategoria, klasyfikator classifyByName), parsers/adapter.cjs (import common.cjs, zastosowanie capitalizeKategoria przy zapisie kategoria), zastosowania/audit.cjs (slownik SLOWNIK); kopie zapasowe: common.cjs.bak_pre_kategoriafix_20260818114801, parsers/adapter.cjs.bak_pre_kategoriafix_20260818114801, zastosowania/audit.cjs.bak_pre_kategoriafix_20260818114801
