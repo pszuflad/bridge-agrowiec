@@ -1,0 +1,4 @@
+# Marker triażu zmian produkcji (komenda /triaz-zmian).
+# Pełny SHA ostatnio przetworzonego commita sync(vps). Wszystko PO nim = nowe do triażu.
+740b273
+# ^ 2026-08-18 kategoriafix (backlog #2) — ostatni przetworzony ręcznie
