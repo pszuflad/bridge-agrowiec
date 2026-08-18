@@ -57,17 +57,23 @@ else
   printf '%s\n' "$NS" | grep -qE 'mirror/frontend|deminified/frontend' && CAT="$CAT[FRONTEND]"
   [ -z "$CAT" ] && CAT="[INNE]"
 
+  # etykiety zmian z nazw kopii .bak (np. "sniegfix") — niezawodne, bo Ania zawsze robi .bak
+  BAKS="$(printf '%s\n' "$NS" | grep -oE '\.bak_pre_[A-Za-z0-9_-]+' \
+          | sed -E 's/\.bak_pre_//; s/[_-][0-9]{6,}.*$//' | sort -u | tr '\n' ' ' | sed 's/ *$//')"
+
   # najnowszy wpis z changelogu Ani (pierwsza sekcja "## "), jeśli CHANGELOG się zmienił
   CH=""
   if printf '%s\n' "$NS" | grep -q 'CHANGELOG' && [ -f "$REPO/mirror/backend/CHANGELOG.md" ]; then
     CH="$(awk '/^## /{c++} c>=1 && c<2{print} c>=2{exit}' "$REPO/mirror/backend/CHANGELOG.md")"
   fi
 
-  # jeden opis -> commit ORAZ mail
-  MSG="sync(vps): zmiana $CAT $TS
+  # opis do commita (bez surowego diffa — diff jest treścią samego commita)
+  MSG="sync(vps): zmiana $CAT${BAKS:+ ($BAKS)} $TS
 
 Zmienione pliki:
-$(printf '%s\n' "$NS" | sed 's/^/  /')${CH:+
+$(printf '%s\n' "$NS" | sed 's/^/  /')${BAKS:+
+
+Etykiety zmian (z kopii .bak): $BAKS}${CH:+
 
 Changelog Ani (najnowszy wpis):
 $CH}"
@@ -75,16 +81,23 @@ $CH}"
   git commit -q -m "$MSG"
   git push -q origin main
   SHA="$(git rev-parse --short HEAD)"
-  echo "$TS  wypchnięto zmiany $CAT"
+  echo "$TS  wypchnięto zmiany $CAT ${BAKS}"
+
+  # diff CZYTELNYCH plików kodu do maila (bez .bak, bez zminifikowanego index.cjs), przycięty
+  DIFF="$(git show "$SHA" -- mirror/backend deminified db/schema.sql \
+          ':(exclude)*.bak_*' ':(exclude)mirror/backend/index.cjs' 2>/dev/null | head -250)"
 
   # powiadomienie e-mail (sendmail -t; From na domenie serwera = lepsza dostarczalność)
   {
     echo "From: Bridge dla Agrowca <admin@agritires.eu>"
     echo "To: pszuflad@gmail.com, anna.naumowicz4@gmail.com"
-    echo "Subject: [Bridge] Zmiana produkcji $CAT $TS"
+    echo "Subject: [Bridge] Zmiana produkcji $CAT${BAKS:+ ($BAKS)} $TS"
     echo "Content-Type: text/plain; charset=UTF-8"
     echo
     printf '%s\n' "$MSG"
+    echo
+    echo "----- Diff (czytelne pliki, przycięty do 250 linii) -----"
+    printf '%s\n' "$DIFF"
     echo
     echo "Commit: https://github.com/pszuflad/bridge-agrowiec/commit/$SHA"
   } | sendmail -t 2>/dev/null && echo "$TS  mail wyslany" || echo "$TS  UWAGA: mail nie wyszedl"
