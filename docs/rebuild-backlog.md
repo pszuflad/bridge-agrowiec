@@ -55,6 +55,40 @@ Ta sama zasada dotyczy prawdopodobnie innych pól-flag etykiety UE (`label_ice`,
 `ms`, `reinforced` itd.) — do sprawdzenia przy przepisywaniu adaptera, czy nie mają
 tego samego błędu „ilość zamiast flagi".
 
+### #2 · 2026-08-18 · [BACKEND][BAZA] · `kategoriafix`
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-08-18 11:48 |
+| **Kategoria** | BACKEND (import/adapter, klasyfikator) + BAZA (dane) |
+| **Pliki** | `common.cjs`, `parsers/adapter.cjs`, `zastosowania/audit.cjs` (kopie `*.bak_pre_kategoriafix_20260818114801`) |
+| **Commit** | `740b273` sync(vps) |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — |
+
+**Opis biznesowy:**
+Kategorie produktów miały **duplikaty różniące się tylko wielkością liter**
+(np. „rolnicze" i „Rolnicze" jako dwie osobne kategorie) — **537 rekordów** —
+co psuło statystyki i filtry w panelu. Ania scaliła je do jednej formy z wielkiej
+litery (stan: Rolnicze 4533, Ciężarowe 1463, Przemysłowe 1195, Leśne 214) i naprawiła
+**u źródła**, żeby nie wracały. Analogicznie ujednolicono `zastosowanie` (343 rekordy)
+i dodano 5 brakujących wartości do słownika.
+
+**Szczegół techniczny (dla rebuildu):**
+- `classifyByName()` (common.cjs) zwraca teraz formy z wielkiej litery (było z małej).
+- **Nowa `capitalizeKategoria()` (common.cjs)** — mapuje każdy wariant (mała/wielka,
+  z/bez polskich znaków) na formę kanoniczną; wołana w **`adapter.cjs` → `recordToSurowe()`
+  na KOŃCU potoku (przed zapisem)** → obejmuje wszystkich dostawców (też MO9 i hardkody
+  w `tyre_params.cjs`) bez edycji każdego parsera.
+- `zastosowania/audit.cjs` — słownik `SLOWNIK` ujednolicony, żeby audyt nie zgłaszał
+  naprawionych wartości jako błędnych.
+
+**Rekomendacja (moja):** ✅ **nanieść** — poprawka jakości danych + **dobry wzorzec
+architektoniczny**. Potwierdza regułę: **`adapter.recordToSurowe()` to centralne miejsce
+finalnej normalizacji** wszystkich pól przed zapisem (tu: kategoria; przy sniegfix: labelSnow).
+Nowy adapter powinien mieć jeden blok „normalizacja końcowa" — kategoria, zastosowanie,
+flagi etykiety UE — zamiast rozsypanych hardkodów po parserach.
+
 ---
 
 *Pominięte (nie kod, brak zadania rebuild):*
