@@ -6,7 +6,7 @@
 
 const crypto = require('crypto');
 const tyre = require('./tyre_params.cjs');
-const common = require('../common.cjs');
+const common = require('./common.cjs');
 
 function firstValue(...values) {
   for (const value of values) {

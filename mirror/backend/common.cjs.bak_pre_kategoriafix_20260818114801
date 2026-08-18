@@ -194,25 +194,18 @@ function isIndustrialName(nazwa) {
   return INDUSTRIAL_KEYWORDS_RE.test(nazwa);
 }
 
-// POPRAWKA 2026-08-18 (decyzja Anny): classifyByName() zwracala kategorie mala
-// litera ('rolnicze','przemyslowe' itd.), podczas gdy wartosci dostarczane wprost
-// przez CSV dostawcow (np. MO6 Agrowiec, kolumna "Kategoria") sa z Wielkiej litery
-// ('Rolnicze'). To tworzylo prawdziwe duplikaty tej samej kategorii w products.kategoria
-// (537 rekordow: rolnicze/Rolnicze, przemyslowe/Przemyslowe, ciezarowe/Ciezarowe,
-// lesne/Lesne), psujace statystyki/filtry w panelu. Ujednolicono: wszystkie zwracane
-// wartosci teraz z Wielkiej litery na poczatku, zgodnie z konwencja dostawcow.
 function classifyByName(nazwa, rozmiar) {
-  if (!nazwa) return 'Rolnicze';
+  if (!nazwa) return 'rolnicze';
   const n = nazwa.toLowerCase();
 
   // Dętki
   if (/\bdętka\b|\bdetka\b|\btube\b|\bd[®ęż]tka\b|\bschlauch\b|inner\s*tube/i.test(nazwa)) {
-    return 'Dętki';
+    return 'dętki';
   }
 
   // Akcesoria — felgi, obręcze, zawory itd.
   if (/\bobręcz\b|\bobrecz\b|\bfelga\b|\brim\b|\bzawór\b|\bzawor\b|\bvalve\b|\bnakrętka\b|\bwulstband\b|bead\s*band|rim\s*band|ochraniacz|\bflap\b/i.test(nazwa)) {
-    return 'Akcesoria';
+    return 'akcesoria';
   }
 
   // POPRAWKA 2026-06-30: opony przemysłowe — sprawdzane PRZED ciężarowymi/leśnymi,
@@ -225,27 +218,27 @@ function classifyByName(nazwa, rozmiar) {
   const AGRICULTURAL_MODEL_RE = /\bFARM\s*PRO\b|\bFARMPRO\b|\bFARM\s*MAX\b|\bFARMAX\b|\bAGRI\s*STAR\b|\bAGRISTAR\b|\bAGRO\s*STAR\b/i;
   const INDUSTRIAL_MODEL_RE = /\bYARD\s*MASTER\b|\bYARDMASTER\b/i;
   if (INDUSTRIAL_MODEL_RE.test(nazwa)) {
-    return 'Przemysłowe';
+    return 'przemysłowe';
   }
   if (isIndustrialName(nazwa)) {
-    return 'Przemysłowe';
+    return 'przemysłowe';
   }
   if (isIndustrialSize(rozmiar) && !AGRICULTURAL_MODEL_RE.test(nazwa)) {
-    return 'Przemysłowe';
+    return 'przemysłowe';
   }
 
   // Słowa kluczowe ciężarowe
   if (/ciężarow|ciezarow|3PMSF|FRT\b|drive\b|trailer\b|truck/i.test(nazwa)) {
-    return 'Ciężarowe';
+    return 'ciężarowe';
   }
 
   // Słowa kluczowe leśne (POPRAWKA 2026-07-01: dodane forestar, forstech/forestech, agroforestry/agro forestry)
   if (/leśne|lesne|forestry|skidder|\bforestar\b|\bfor[e]?stech\b|agro\s*forestry|agroforestry/i.test(nazwa)) {
-    return 'Leśne';
+    return 'leśne';
   }
 
   // Domyślnie rolnicze (reguła Anny: "inna → rolnicze, tylko dla opon")
-  return 'Rolnicze';
+  return 'rolnicze';
 }
 
 // === Wyciąganie oznaczeń technicznych ===
@@ -561,33 +554,12 @@ function hasIndustrialMarkInBieznik(value) {
   return INDUSTRIAL_BIEZNIK_RE.test(s);
 }
 
-// POPRAWKA 2026-08-18: centralna normalizacja wielkosci liter dla kategoria/rodzaj.
-// Uzywana przez tyre_params.cjs i mo9_agrorami_api.cjs, ktore mialy WLASNE hardkody
-// malej litery ('rolnicze','przemyslowe','ciezarowe','lesne') niezalezne od
-// classifyByName(). Mapuje kazdy znany warriant (mala/wielka litera, z/bez
-// polskich znakow) na kanoniczna forme z Wielkiej litery. Nieznane wartosci
-// przechodza bez zmian (nie ucina np. 'Dętki'/'Akcesoria' jesli juz sa OK).
-const KATEGORIA_CANONICAL_MAP = {
-  'rolnicze': 'Rolnicze',
-  'przemysłowe': 'Przemysłowe', 'przemyslowe': 'Przemysłowe',
-  'ciężarowe': 'Ciężarowe', 'ciezarowe': 'Ciężarowe',
-  'leśne': 'Leśne', 'lesne': 'Leśne',
-  'dętki': 'Dętki', 'detki': 'Dętki',
-  'akcesoria': 'Akcesoria'
-};
-function capitalizeKategoria(value) {
-  if (!value) return value;
-  const key = String(value).trim().toLowerCase();
-  return KATEGORIA_CANONICAL_MAP[key] || value;
-}
-
 module.exports = {
   normalizeEan,
   normalizePrice,
   normalizeQty,
   normalizeText,
   classifyByName,
-  capitalizeKategoria,
   extractTechnicalMarks,
   extractSize,
   normalizeRecord,

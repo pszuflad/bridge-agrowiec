@@ -85,11 +85,7 @@ for (const p of all) { const k = (p.kategoria || '(puste)'); katCount[k] = (katC
 add('INFO', 'rozklad_kategoria', 'Rozklad wartosci kolumny kategoria:', Object.entries(katCount).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}: ${v}`));
 
 // 10) zastosowanie - dozwolone wartosci (slownik)
-// POPRAWKA 2026-08-18: ujednolicono wielkosc liter w slowniku (byla mieszana:
-// 'kosiarka/ogród','suwnica/dźwig','maszyny górnicze','kompaktor','harwester' małą
-// literą vs reszta Wielką). Po naprawie products.zastosowanie w bazie (343 rekordy),
-// stary slownik zglaszalby te poprawne juz wartosci jako "zle" przy kolejnym audycie.
-const SLOWNIK = ['Ciągnik','Opryskiwacz','Przyczepa','Ładowarka','Kombajn','Kosiarka/ogród','Wózek widłowy','Koparka','Suwnica/dźwig','Maszyny górnicze','Kompaktor','All position','Oś kierowana','Oś napędowa','Naczepa/przyczepa','Ciągnik leśny','Harwester','Forwarder','Skidder','Uniwersalne/pozostałe','Forwarder, harwester'];
+const SLOWNIK = ['Ciągnik','Opryskiwacz','Przyczepa','Ładowarka','Kombajn','kosiarka/ogród','Wózek widłowy','Koparka','suwnica/dźwig','maszyny górnicze','kompaktor','All position','Oś kierowana','Oś napędowa','Naczepa/przyczepa','Ciągnik leśny','harwester','Forwarder','Skidder','Uniwersalne/pozostałe','Forwarder, harwester'];
 const zastCount = {}; const zastZle = [];
 for (const p of all) { const z = p.zastosowanie; if (z === null || String(z).trim() === '') continue; zastCount[z] = (zastCount[z] || 0) + 1; if (!SLOWNIK.includes(z)) zastZle.push(p.kod + '=' + JSON.stringify(z)); }
 if (zastZle.length) add('HIGH', 'zastosowanie_spoza_slownika', `${zastZle.length} produktow z zastosowaniem spoza slownika`, zastZle.slice(0, 8));
