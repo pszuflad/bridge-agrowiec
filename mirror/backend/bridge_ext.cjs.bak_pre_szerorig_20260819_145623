@@ -50,14 +50,10 @@ function applyDims(P, rozmiarFallback) {
     // Priorytet: jesli parser juz ustawil sensowna szerokosc opony (np. tyre_params.parseSize
     // dala 235 dla "235/75R17.5"), NIE nadpisujemy jej — parser ma czasem lepszy kontekst
     // (np. warianty producenta). Nadpisujemy tylko gdy pole jest puste/null.
-    // POPRAWKA 2026-08-19: NIE uzywamy juz tireWidthMm() jako fallbacku.
-    // tire_dims.js's calcDims dla notacji "AxB" / "AxB-D" traktuje A jako srednice
-    // felgi, B jako szerokosc — to konwencja ATV. Ale wiekszosc opon rolniczych
-    // uzywa notacji "WxD" gdzie W to SZEROKOSC, D to srednica (np. 13.6x24 =
-    // szerokosc 13.6", felga 24"). tireWidthMm dawal wtedy 24*25.4 = 609.6mm
-    // dla wszystkich opon *xD niezaleznie od szerokosci. Poza tym zwracal w mm,
-    // co miesza jednostki (Anna chce zostawic oryginalna). Zostawiamy null gdy
-    // parseSize nic nie wykryl — wolimy null niz zle dane.
+    if ((P.szerokosc == null || P.szerokosc === '') && tireWidthMm) {
+      const w = tireWidthMm(rozmiar);
+      if (w != null) P.szerokosc = w;
+    }
     return d;
   } catch (_) { return null; }
 }
