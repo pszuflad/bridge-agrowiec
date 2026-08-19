@@ -1,3 +1,14 @@
+2026-08-19 14:56
+obszar: backend + baza danych
+
+pliki: parsers/tyre_params.cjs (.bak_pre_szerorig_20260819_145623), bridge_ext.cjs (.bak_pre_szerorig_20260819_145623), data.db (.bak_pre_szerorig_20260819_145623)
+
+zmiana: cofniete przeliczanie products.szerokosc -> mm z 2026-08-18. Teraz szerokosc zostaje w jednostce oryginalnej z rozmiaru (mm dla notacji slash W/PxD/W/PRD; cale dla WxD, W-D, WxP-D, WRD, L-series). Usunieto koncowe "result.szerokosc = mm" w parseSize(). Usunieto fallback tireWidthMm() w bridge_ext.applyDims() (tireWidthMm mial dodatkowo bug: dla notacji AxB traktowal A jako srednice zamiast szerokosci, wiec dla 13.6x24, 14.9x24, 12.4x24 wszystkie 3 dostawaly 609.6 = 24*25.4). Backfill: przeliczono 7405 rekordow, 2665 zmienionych, 4702 bez zmian, 38 nieparsowalnych rozmiarow (28 wyzerowanych do NULL, 10 juz mialo NULL). PRAGMA integrity_check: ok. PM2 zrestartowany.
+
+powod: Anna zglosila ze panel pokazywal "706.2" dla 14.9x28 i "609.6" dla 13.6x24 / 14.9x24 / 12.4x24 (identyczne dla roznych szerokosci) — konwersja cali na mm mieszala jednostki i ukrywala bug tireWidthMm.
+
+---
+
 # CHANGELOG — Bridge dla Agrowca
 
 Rejestr zmian w projekcie (frontend / backend / baza danych). Najnowsze wpisy na górze.

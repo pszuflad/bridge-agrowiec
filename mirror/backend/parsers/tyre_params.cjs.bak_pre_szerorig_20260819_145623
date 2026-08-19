@@ -256,13 +256,15 @@ function parseSize(value) {
     const profile = result.profil ?? 83;
     result.wysokoscBokuCm = Math.round(widthCm * (profile / 100) * 100) / 100;
     result.wysokoscRzeczywistaCm = Math.round((result.wysokoscBokuCm * 2 + result.srednica * 2.54) * 100) / 100;
-    // POPRAWKA 2026-08-19: cofniete przeliczanie szerokosc->mm. Anna zdecydowala,
-    // ze `szerokosc` ma pozostac w JEDNOSTCE ORYGINALNEJ z rozmiaru (mm dla slash,
-    // cale dla WxD/W-D). Panel pokazywal wtedy "706.2"/"609.6" dla opon 14.9x28
-    // / 13.6x24, co bylo mylace: bug w tire_dims.js (calcDims dla AxB traktuje A jako
-    // srednice, B jako szerokosc) sprzedawal przez tireWidthMm srednice zamiast szerokosci.
-    // Teraz zostawiamy `result.szerokosc` = surowa pierwsza liczba z rozmiaru (14.9, 800, 13.6).
-    // widthCm powyzej dalej dobrze liczy wysokoscBokuCm/wysokoscRzeczywistaCm (formula wymaga cm).
+    // POPRAWKA 2026-08-18: `szerokosc` MUSI byc zawsze w mm (parametr techniczny), tak jak
+    // przelicza tire_dims.js's tireWidthMm(). Do tej pory result.szerokosc zostawal surowa
+    // liczba wyekstrahowana z tekstu rozmiaru (np. 11.2 dla "11.2-24", 550 dla notacji
+    // "550/45x22.5"), przeliczenie widthCm istnialo TYLKO lokalnie do liczenia wysokosci.
+    // adapter.cjs zapisuje enriched.szerokosc 1:1 do bazy, a bridge_ext.cjs's applyDims()
+    // nadpisuje mm-em WYLACZNIE gdy pole jest null/puste - wiec ta niekonsekwencja trafiala
+    // prosto do products.szerokosc: 1818 rekordow mialo cale/surowa liczbe, 5577 mm poprawne,
+    // dajac dla tego samego rozmiaru (np. "11.2-24") raz 11.2 raz 284.5 w bazie.
+    result.szerokosc = Math.round(widthCm * 10 * 100) / 100; // cm -> mm, 2 miejsca po przecinku
   }
 
   return result;
