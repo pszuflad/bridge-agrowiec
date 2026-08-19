@@ -1,3 +1,14 @@
+2026-08-19 15:50
+obszar: backend + baza danych
+
+pliki: parsers/tyre_params.cjs (.bak_pre_szertxt_20260819_154550), data.db (.bak_pre_szertxt_20260819_154550)
+
+zmiana: products.szerokosc: REAL -> TEXT. parseSize zwraca teraz szerokosc jako string 1:1 z rozmiaru (zachowane zera koncowe: "10.0", "10.00", "12.00", "24.00"). Dodane pole szerokoscRaw w wyniku parseSize (kopia stringa). Migracja: CREATE TABLE products_new (TEXT) + INSERT SELECT z ekstrakcja pierwszej liczby z rozmiar jako string (regex /(\d+(?:[.,]\d+)?)/, przecinek -> kropka) + DROP + RENAME + odtworzenie indeksu idx_products_kod_importu. Zmigrowano 7405 rekordow, 880 zmienionych (odzyskane zera koncowe np. 24.00R35: 24 -> "24.00", 10.0/75x15.3: 10 -> "10.0"), 6525 bez zmian, integrity_check ok. PM2 zrestartowany. wysokoscBokuCm i wysokoscRzeczywistaCm dalej liczone z float (kolejnosc w parseSize: najpierw obliczenia z liczby, potem nadpisanie result.szerokosc stringiem). Konsekwencja: eksport CSV Selly (generate_selly_export.cjs) w kolumnie "Szerokosc-opony-mm" bedzie teraz mial 1:1 z rozmiaru — nazwa naglowka z sufiksem "-mm" jest historyczna, faktyczna jednostka to jednostka oryginalna z rozmiaru (mm dla slash, cale dla WxD/W-D/L-series).
+
+powod: Anna zauwazyla ze float ucina zera koncowe (10.0 -> 10). Wymog: "jezeli jest 10.0 to ma byc 10.0, jezeli 10.00 to 10.00" — kolumna musi trzymac dokladny string z pliku dostawcy.
+
+---
+
 2026-08-19 14:56
 obszar: backend + baza danych
 

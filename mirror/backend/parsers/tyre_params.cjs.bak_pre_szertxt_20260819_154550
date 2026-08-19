@@ -162,7 +162,6 @@ function parseSize(value) {
   const result = {
     rozmiar: size,
     szerokosc: null,
-    szerokoscRaw: null,
     profil: null,
     srednica: null,
     konstrukcja: null,
@@ -264,22 +263,6 @@ function parseSize(value) {
     // srednice, B jako szerokosc) sprzedawal przez tireWidthMm srednice zamiast szerokosci.
     // Teraz zostawiamy `result.szerokosc` = surowa pierwsza liczba z rozmiaru (14.9, 800, 13.6).
     // widthCm powyzej dalej dobrze liczy wysokoscBokuCm/wysokoscRzeczywistaCm (formula wymaga cm).
-  }
-
-  // POPRAWKA 2026-08-19 (v2): Anna wymaga zachowania oryginalnego zapisu pierwszej
-  // liczby z rozmiaru — z zerami koncowymi (10.0, 10.00). result.szerokosc to float
-  // (potrzebny do widthCm/wysokoscBokuCm), wiec dodajemy osobne pole szerokoscRaw
-  // jako string 1:1 z rozmiaru. Trafi do kolumny products.szerokosc (TEXT).
-  if (result.szerokosc !== null && size) {
-    const rawMatch = size.match(/(\d+(?:[.,]\d+)?)/);
-    if (rawMatch) {
-      result.szerokoscRaw = rawMatch[1].replace(',', '.');
-      // POPRAWKA 2026-08-19 (v3): nadpisuje result.szerokosc stringiem 1:1 z rozmiaru
-      // (10.0, 14.9, 800, 10.00). Kolumna products.szerokosc jest teraz TEXT.
-      // wysokoscBokuCm/wysokoscRzeczywistaCm sa juz policzone powyzej z floata,
-      // wiec ta zmiana ich nie ruszy. Zachowujemy zera koncowe zgodnie z prosba Anny.
-      result.szerokosc = result.szerokoscRaw;
-    }
   }
 
   return result;
