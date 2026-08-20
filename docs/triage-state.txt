@@ -1,4 +1,7 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio przetworzonego commita sync(vps). Wszystko PO nim = nowe do triażu.
-740b273
-# ^ 2026-08-18 kategoriafix (backlog #2) — ostatni przetworzony ręcznie
+de293eb
+# ^ 2026-08-20 HEAD develop po striażowaniu sagi szerokości (backlog #3:
+#   szerokoscfix 97ccb9f + szerorig 5c060b0 + szertxt d5a43c9, oraz ich bliźniaki
+#   po merge 1679b9e/ef80450). Ustawiony na HEAD, nie na SHA delty, by duplikaty
+#   z rebase/merge nie wróciły do triażu. Wszystko PO tym commicie = nowe.
