@@ -49,6 +49,33 @@ ticket = własny worktree + branch z `origin/develop`, PR z powrotem do `develop
 
 ---
 
+## 1a. Środowiska i wdrożenia (CI/CD)
+
+Trzy środowiska — uwaga: **`main` NIE jest kodem do wdrażania**, tylko lustrem starej produkcji.
+
+| Środowisko | Gałąź | Co to jest | Wdrażane |
+|---|---|---|---|
+| Stara PRODUKCJA | — | żywy panel Ani (agritires.eu), **nietknięty** | nie z tego repo |
+| Lustro produkcji | `main` | producent zrzuca tu zmiany Ani | nie wdrażane |
+| **STAGING (nowa wersja)** | `develop` | odbudowa `rebuild/` | **auto-deploy z `develop`** |
+| PRODUKCJA (nowa) | `main` po cutoverze | dopiero na końcu odbudowy | później |
+
+**Przepływ iteracji:**
+`ticket → PR do develop → CI (testy + GATE fixtures/kontrakt) zielone → merge → CD (pull na VPS) → podmiana staging → Ania klika nowa.agritires.eu`
+
+**Ustalenia (2026-08-20):**
+- **Staging = ten sam VPS co produkcja, izolowany:** osobny katalog (`bridge-nowy`), osobny port,
+  proces PM2 (`bridge-backend-nowy`), subdomena (np. `nowa.agritires.eu`), **osobny plik bazy** `data-nowy.db`.
+- **Dane staging = snapshot produkcji** do `data-nowy.db` (realne dane, które Ania rozpoznaje;
+  odświeżanie **na żądanie**, żeby nie kasować testów importu).
+- **CD = pull-based cron na VPS** (`tools/deploy-staging.sh`): build `rebuild/` → migracje na
+  `data-nowy.db` → **atomowa podmiana (symlink current→release)** → `pm2 reload`. Bez sekretów w GitHubie.
+- **CI = GitHub Actions** na PR/push do `develop` + **branch protection** (merge tylko z zielonym CI).
+- **Cutover** (koniec odbudowy): wprowadzimy `main → produkcja` i przełączymy żywy panel na nowy stos
+  (ta sama `data.db`).
+
+---
+
 ## 2. Źródła prawdy (czytaj je, nie zgaduj)
 
 Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**.
@@ -89,7 +116,8 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 
 | # | Iteracja | Sesje | Zależy od | Status | PR / data |
 |---|---|---|---|---|---|
-| 1 | Fundament + logowanie | 1a BE · 1b FE | — | ⬜ | |
+| 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ⬜ | |
+| 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ⬜ | |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ⬜ | |
 | 3 | Import — rdzeń | 3a BE · 3b BE · 3c BE · 3d FE | 2 | ⬜ | |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
@@ -110,8 +138,33 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 
 ---
 
+### Iteracja 0 — CI/CD + środowisko staging
+- **Status:** ⬜  **Sesje:** 1 (DevOps)  **Zależy od:** —
+- **Cel:** działający pipeline `develop → staging`. Po tej iteracji każdy zmergowany ticket
+  automatycznie ląduje na serwerze i Ania widzi go pod subdomeną.
+- **CI (GitHub Actions):** workflow na PR i push do `develop` — install → lint → typecheck →
+  **test (unit + GATE: fixtures + openapi)** → build BE+FE. **Branch protection na `develop`**:
+  merge tylko z zielonym CI.
+- **Środowisko staging na VPS (izolowane, ten sam serwer co prod):**
+  - Backend: katalog `bridge-nowy`, osobny port, proces PM2 `bridge-backend-nowy`.
+  - Frontend: subdomena `nowa.agritires.eu` (osobny docroot Apache).
+  - Baza: osobny plik `data-nowy.db` ze schematu `rebuild/schema/001_schema.sql`, **zasilony
+    snapshotem produkcji**; skrypt odświeżenia bazy na żądanie.
+- **CD (pull-based na VPS):** `tools/deploy-staging.sh` — `git fetch develop` → build `rebuild/`
+  → migracje na `data-nowy.db` → **atomowa podmiana (symlink `current`→`release-<sha>`)** →
+  `pm2 reload bridge-backend-nowy`. Wyzwalany cronem DirectAdmin (poll), log + ewentualny mail
+  jak producent. Rollback = przełączenie symlinku na poprzedni release.
+- **Dokumentacja:** `docs/deploy-setup.md` (architektura, odświeżanie bazy, rollback, porty/ścieżki).
+- **Prerekwizyty (od użytkownika, przy realizacji):** potwierdzenie VPS = ten sam co prod;
+  założenie subdomeny w DirectAdmin; wersja Node na VPS; wolny port dla staging.
+- **DoD:** PR do `develop` uruchamia CI; merge → `deploy-staging.sh` podmienia aplikację;
+  `nowa.agritires.eu` odpowiada (health/placeholder); baza staging = snapshot prod; rollback
+  przez symlink udokumentowany i przetestowany.
+
+---
+
 ### Iteracja 1 — Fundament + logowanie
-- **Status:** ⬜  **Sesje:** 1a (backend) → 1b (frontend)  **Zależy od:** —
+- **Status:** ⬜  **Sesje:** 1a (backend) → 1b (frontend)  **Zależy od:** 0
 - **Cel (Ania klika):** loguje się mailem/hasłem, widzi szkielet panelu z sidebarem i 12 pozycjami.
 - **Backend (1a):**
   - Szkielet Express; warstwa danych better-sqlite3 (WAL) + Drizzle na `rebuild/schema/001_schema.sql`.
@@ -125,7 +178,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - Przepływ auth 1:1 (spec-frontend §5): Bearer gdy token + `credentials:include`; `localStorage.bridge_user`.
 - **Ścieżki (GATE):** `/api/login`, `/api/logout`, `/api/me`.  **Fixtures:** `GET_me.json`.
 - **Decyzje (Q&A ticketu):** TS vs JS · framework testów · drizzle introspect vs ręczny · layout `rebuild/` (backend/frontend/shared) · zaklepać „auth na wszystkich trasach".
-- **DoD:** backend startuje; login/logout/me działają; harness GATE gotowy; FE loguje i pokazuje shell; `GET_me.json` przez GATE; README.
+- **DoD:** backend startuje; login/logout/me działają; harness GATE gotowy; FE loguje i pokazuje shell; `GET_me.json` przez GATE; README; **aplikacja auto-deployuje się na staging z zielonym CI — Ania widzi `/login` pod `nowa.agritires.eu`** (przez pipeline z I0).
 
 ---
 
