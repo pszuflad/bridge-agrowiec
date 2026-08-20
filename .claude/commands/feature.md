@@ -1,5 +1,5 @@
 ---
-description: Start a new feature or bugfix end-to-end (plan → impl → review → docs → PR)
+description: Ticket odbudowy Bridge end-to-end — wierne odtworzenie zachowania wg kontraktu/fixtures (plan → impl → review → docs → PR)
 argument-hint: <feature/bug description — be concrete>
 ---
 
@@ -8,6 +8,29 @@ You are **Master**. You drive a ticket end-to-end in this single chat. The user 
 User request:
 
 > $ARGUMENTS
+
+---
+
+## Kontekst odbudowy — WIERNE ODTWORZENIE, nie nowy feature
+
+**To NIE jest zwykły ticket „nowa funkcja".** Odbudowujemy istniejącą, działającą produkcję
+(„Bridge dla Agrowca") w nowym stosie `rebuild/`, zachowując jej zachowanie **1:1**. Domyślna
+reguła: **odtwarzasz udokumentowane zachowanie, nie wymyślasz nowego.** Każde odstępstwo od
+zastanego zachowania musi być **świadomą decyzją użytkownika** (Krok 3), nigdy przypadkiem czy
+„ulepszeniem" z własnej inicjatywy.
+
+**Źródła prawdy (czytaj je, nie zgaduj) — w kolejności wiarygodności:**
+- `contract/fixtures/` — nagrane odpowiedzi żywego backendu (kształt + zsanityzowane wartości). **Siatka bezpieczeństwa: to, co produkcja realnie zwraca.**
+- `contract/openapi.yaml` — zamrożony kontrakt API (ścieżki, metody, kształty request/response). Patrz też `contract/README.md`.
+- `docs/spec-backend.md`, `docs/spec-frontend.md` — zweryfikowana specyfikacja zachowania.
+- `rebuild/schema/001_schema.sql` — kanoniczny schemat bazy (zgodny z produkcją); pomocniczo `db/schema.sql`.
+- `docs/prompts/mapa-kodu-do-wiki.md` — mapa starego kodu (funkcje/pliki, nie numery linii).
+- `deminified/` (`backend-index.cjs`, `frontend-index.js`) + `mirror/backend`, `mirror/frontend` — zdeminifikowany oryginał: **ostateczne źródło, gdy specyfikacja milczy**. To jego zachowanie odtwarzasz.
+- `docs/rebuild-backlog.md` — świadome zmiany Ani. **Nanosisz TYLKO wpisy oznaczone ✅ TAK; „⬜ do decyzji" i „❌ NIE" pomijasz** (nie decydujesz o tym sam).
+
+**Rozstrzyganie sprzeczności:** fixtures/kontrakt (co produkcja realnie robi) **>** spec (nasz opis)
+**>** mapa kodu. Jeśli spec i oryginał się różnią — wierzysz oryginałowi i **zgłaszasz rozjazd
+użytkownikowi** zamiast po cichu wybierać.
 
 ---
 
@@ -37,16 +60,26 @@ User request:
 
 ### Step 1: Load main docs
 
-Start with `README.md` and `docs/INDEX.md` (if it exists) — that's your map. From there, decide which other docs are relevant for the request and read them. Common candidates: a vision/PRD doc, project conventions (e.g. `docs/CLAUDE.md`), testing strategy. Don't load huge specs in full — pick relevant **sections**. If the researcher later suggests other sections — read them then.
+Twoją mapą są **źródła prawdy odbudowy** wymienione w sekcji „Kontekst odbudowy" wyżej. Zacznij od nich — nie ma tu `README.md` ani `docs/INDEX.md`. Dla danego ticketa wybierz **właściwe sekcje** (nie ładuj całych specyfikacji ani `openapi.yaml` w całości):
+- ustal, których **endpointów/ekranów** dotyczy zadanie → odczytaj odpowiednie ścieżki w `contract/openapi.yaml` i pasujące pliki w `contract/fixtures/`;
+- odczytaj odpowiednie sekcje `docs/spec-backend.md` / `docs/spec-frontend.md`;
+- sprawdź `docs/rebuild-backlog.md`, czy zadania nie dotyka któraś zdecydowana zmiana (✅/⬜/❌);
+- jeśli zadanie rusza schemat/dane → `rebuild/schema/001_schema.sql`.
+
+Jeśli researcher później wskaże inne sekcje — doczytasz wtedy.
 
 ### Step 2: Spawn researcher subagent
 
 Launch `Task` with the `researcher` agent. **Don't use `isolation: "worktree"`.** At this stage the ticket worktree doesn't exist yet — researcher works in the main repo (current cwd). Pass:
 - The user's request (exactly as above)
 - Key docs sections you identified in Step 1 (paths + section numbers)
-- Instruction: "analyze the codebase as it's **actually** implemented, don't rely on docs alone — docs are often stale. You work in the main repo (read-only), don't create a worktree."
+- Instrukcja (to jest odbudowa, nie greenfield): **„Ustal DOKŁADNE udokumentowane zachowanie, które nowy kod w `rebuild/` ma odtworzyć.** Źródła w kolejności: `contract/fixtures/` i `contract/openapi.yaml` (co produkcja realnie zwraca — wiążące), potem `docs/spec-*`, a gdy milczą — zdeminifikowany oryginał (`deminified/`, `mirror/backend`, `mirror/frontend`) wskazany przez `docs/prompts/mapa-kodu-do-wiki.md`. **Docs odbudowy są świeże i zweryfikowane — traktuj je jako wiarygodne, ale każdą tezę potwierdź w fixtures/oryginale.** Pracujesz w głównym repo (read-only), nie twórz worktree."
 
-You'll get a report: relevant files, existing patterns, risks, open questions.
+Raport researchera ma zawierać:
+- **Zakres kontraktu:** które ścieżki `openapi.yaml` i które pliki `contract/fixtures/` ten ticket musi spełnić (to potem gate testów w Kroku 9).
+- Które sekcje spec i które miejsca oryginału (`deminified/`, funkcje z mapy kodu) opisują to zachowanie.
+- Istniejące w `rebuild/` wzorce do ponownego użycia (jeśli już coś jest).
+- **Rozjazdy** spec↔oryginał↔fixtures oraz pytania otwarte (trafią do Kroku 3).
 
 ### Step 3: Ask the user questions
 
@@ -125,14 +158,26 @@ Create `docs/tickets/<TICKET-ID>/plan.md` (in the worktree!). Content — dense,
 ## Context
 [What the researcher found — key bits. Which parts of the system it will touch.]
 
+## Kontrakt i fixtures (zakres) — siatka bezpieczeństwa
+[Które ścieżki `contract/openapi.yaml` (metoda + path) i które pliki `contract/fixtures/`
+ten ticket MUSI spełnić. To jest wiążące — nowy kod musi zwracać ten sam kształt i te same
+(zsanityzowane) wartości. Jeśli ticket nie dotyka API — napisz „brak (nie dotyka kontraktu)"
+i uzasadnij. Odnotuj wszelkie znane rozjazdy spec↔oryginał↔fixtures i jak je rozstrzygamy.]
+
 ## Decisions
-[From Q&A with the user. Each decision = 1-2 lines + rationale (pros/cons we weighed).]
+[From Q&A with the user. Each decision = 1-2 lines + rationale (pros/cons we weighed).
+Osobno wypisz KAŻDE świadome odstępstwo od zachowania oryginału (np. wpis z backlogu ✅ TAK) —
+domyślnie odtwarzamy 1:1, odstępstwa muszą być zatwierdzone przez użytkownika.]
 
 ## Implementation plan
-[Low-level steps. Files you'll change/create/delete. Concrete function names, DB tables, endpoints, UI components. What in what order.]
+[Kroki odtworzenia udokumentowanego zachowania (nie wymyślania nowego). Pliki do zmiany/utworzenia/
+usunięcia. Konkretne nazwy funkcji, tabele, endpointy, komponenty UI. Co w jakiej kolejności.
+Gdzie oryginał (`deminified/`, mapa kodu) pokazuje, jak dana rzecz działa — wskaż to miejsce.]
 
 ## Testing strategy
-[Which tests to write/run. Unit? Integration? E2E? Which to skip and why.]
+[Jak zweryfikujemy zgodność z kontraktem: które fixtures z „Kontrakt i fixtures (zakres)" porównujemy
+i jak (kształt + wartości), walidacja odpowiedzi względem `openapi.yaml`, plus testy jednostkowe logiki.
+Co pomijamy i dlaczego. GATE z Kroku 9 obowiązuje: brak zgodności z fixtures/kontraktem = ticket nie jest gotowy.]
 
 ## Out of scope
 [What explicitly is NOT in this ticket.]
@@ -174,6 +219,22 @@ Rules:
 
 Read the project's testing docs (if any — e.g. `docs/TESTING.md`) to know what test types exist and how to run them. Principle: **the minimum that gives confidence**.
 
+> **GATE ODBUDOWY (obowiązkowy, jeśli ticket dotyka API/kontraktu).**
+> Ticket **NIE jest gotowy**, dopóki nowy kod nie zgadza się z siatką bezpieczeństwa:
+> 1. **Fixtures** — dla każdej ścieżki z sekcji „Kontrakt i fixtures (zakres)" w `plan.md`
+>    porównaj odpowiedź nowego backendu z odpowiadającym plikiem w `contract/fixtures/`:
+>    **kształt (klucze, typy, zagnieżdżenie) musi się zgadzać 1:1**; wartości — tam gdzie
+>    deterministyczne (enumy, `kategoria`, `zastosowanie`, flagi) też. Różnice tylko tam,
+>    gdzie plan świadomie je przewiduje (zatwierdzone odstępstwo).
+> 2. **Kontrakt** — odpowiedzi walidują się względem schematów z `contract/openapi.yaml`
+>    (ścieżki, kody, kształty request/response).
+> 3. **Rozbieżność = STOP.** Jeśli nie możesz pogodzić kodu z fixtures/kontraktem, a to nie jest
+>    zatwierdzone odstępstwo — **nie obchodź gate'a i nie „poprawiaj" fixtures**; zatrzymaj się,
+>    opisz rozjazd użytkownikowi (fixtures pokazują, co robi produkcja — to one są wzorcem).
+>
+> Zapisz wynik gate'a w `raport.md` (które fixtures/ścieżki sprawdzone, wynik). Jeśli ticket
+> **nie dotyka** kontraktu — napisz to wprost i uzasadnij, wtedy gate nie obowiązuje.
+
 - Unit tests for new logic — yes, always if the logic is non-trivial.
 - Integration tests — if the changes warrant them or touch interactions with external systems / services.
 - E2E — only if it's a user-facing flow and the plan called for it.
@@ -201,6 +262,7 @@ Create `docs/tickets/<TICKET-ID>/raport.md`:
 [If 1:1 — "None". If you deviated — describe what and why.]
 
 ## Test results
+- **Gate odbudowy (fixtures/kontrakt):** [✓ zgodne / ✗ rozjazd / N/D — nie dotyka API] — które ścieżki i pliki `contract/fixtures/` sprawdzone; przy ✗ opisz rozjazd
 - Unit: [✓/✗/skipped + count + reason if skipped]
 - Integration: …
 - E2E: …
