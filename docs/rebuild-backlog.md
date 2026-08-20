@@ -100,7 +100,7 @@ flagi etykiety UE — zamiast rozsypanych hardkodów po parserach.
 | **Kategoria** | BACKEND (parser/wymiary) + BAZA (typ kolumny) + FRONTEND (regeneracja eksportu) |
 | **Pliki (stan końcowy)** | `parsers/tyre_params.cjs`, `bridge_ext.cjs`, `db/schema.sql` (kolumna `products.szerokosc`); skasowane `probe.cjs/2/3`; kopie `*.bak_pre_szerokoscfix_*`, `*.bak_pre_szerorig_*`, `*.bak_pre_szertxt_*` |
 | **Commity** | `97ccb9f` (szerokoscfix — cofnięty) · `5c060b0` (szerorig) · `d5a43c9` (szertxt) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Do nowej wersji?** | 🕒 **PÓŹNIEJ** (decyzja 2026-08-20 — rozstrzygniemy przy tickecie importu/schematu) |
 | **Status** | — |
 
 **Opis biznesowy:**
