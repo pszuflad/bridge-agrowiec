@@ -1,0 +1,65 @@
+name: CI
+
+# GATE mechaniczny odbudowy: testy backendu i build frontendu na każdym PR i push do develop.
+# Włącz branch protection na develop (Settings > Branches): wymagaj zielonego "backend" i "frontend".
+# Dopóki rebuild/ nie ma aplikacji (przed I1), joby przechodzą trywialnie (nic do testowania).
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wykryj rebuild/backend
+        id: det
+        run: |
+          if [ -f rebuild/backend/package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@v4
+        if: steps.det.outputs.exists == 'true'
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: rebuild/backend/package-lock.json
+      - name: Install + lint + typecheck + test + build
+        if: steps.det.outputs.exists == 'true'
+        working-directory: rebuild/backend
+        run: |
+          npm ci
+          npm run lint --if-present
+          npm run typecheck --if-present
+          npm test --if-present            # zawiera GATE fixtures/kontrakt (feature.md Krok 9)
+          npm run build --if-present
+      - name: Backendu jeszcze nie ma (I1)
+        if: steps.det.outputs.exists != 'true'
+        run: echo "rebuild/backend nie istnieje — I1 niezrobione. CI zielone (nic do testowania)."
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wykryj rebuild/frontend
+        id: det
+        run: |
+          if [ -f rebuild/frontend/package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@v4
+        if: steps.det.outputs.exists == 'true'
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: rebuild/frontend/package-lock.json
+      - name: Install + lint + test + build
+        if: steps.det.outputs.exists == 'true'
+        working-directory: rebuild/frontend
+        run: |
+          npm ci
+          npm run lint --if-present
+          npm test --if-present
+          npm run build
+      - name: Frontendu jeszcze nie ma (I1)
+        if: steps.det.outputs.exists != 'true'
+        run: echo "rebuild/frontend nie istnieje — I1 niezrobione. CI zielone (nic do testowania)."

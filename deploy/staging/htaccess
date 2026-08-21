@@ -1,0 +1,26 @@
+# Bridge STAGING (test.agritires.eu) — reverse proxy do backendu Node na 127.0.0.1:5001
+# Frontend SPA (rebuild/frontend, base "/") serwowany statycznie z tego katalogu.
+# Wzorowane na produkcyjnym public_html/panel/.htaccess (uproszczone: bez prefiksu /panel).
+# Ten plik jest utrzymywany w repo (deploy/staging/htaccess) i kopiowany do docroota przez deploy-staging.sh.
+
+RewriteEngine On
+
+# 1) API -> backend staging (flaga [P] = proxy; zachowuje metodę i body — działa, bo mod_proxy jest włączony)
+RewriteRule ^api/(.*)$ http://127.0.0.1:5001/api/$1 [P,L,QSA]
+
+# 2) SPA fallback: wszystko poza istniejącym plikiem/katalogiem i poza /api -> index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule ^ index.html [L]
+
+# 3) Wymuszenie HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 4) Brak cache dla index.html i bundli (żeby nowa wersja była widoczna od razu)
+<FilesMatch "\.(html|js|css)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</FilesMatch>
