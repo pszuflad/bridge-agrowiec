@@ -61,11 +61,11 @@ Trzy środowiska — uwaga: **`main` NIE jest kodem do wdrażania**, tylko lustr
 | PRODUKCJA (nowa) | `main` po cutoverze | dopiero na końcu odbudowy | później |
 
 **Przepływ iteracji:**
-`ticket → PR do develop → CI (testy + GATE fixtures/kontrakt) zielone → merge → CD (pull na VPS) → podmiana staging → Ania klika nowa.agritires.eu`
+`ticket → PR do develop → CI (testy + GATE fixtures/kontrakt) zielone → merge → CD (pull na VPS) → podmiana staging → Ania klika test.agritires.eu`
 
 **Ustalenia (2026-08-20):**
 - **Staging = ten sam VPS co produkcja, izolowany:** osobny katalog (`bridge-nowy`), osobny port,
-  proces PM2 (`bridge-backend-nowy`), subdomena (np. `nowa.agritires.eu`), **osobny plik bazy** `data-nowy.db`.
+  proces PM2 (`bridge-backend-nowy`), subdomena (np. `test.agritires.eu`), **osobny plik bazy** `data-nowy.db`.
 - **Dane staging = snapshot produkcji** do `data-nowy.db` (realne dane, które Ania rozpoznaje;
   odświeżanie **na żądanie**, żeby nie kasować testów importu).
 - **CD = pull-based cron na VPS** (`tools/deploy-staging.sh`): build `rebuild/` → migracje na
@@ -147,7 +147,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   merge tylko z zielonym CI.
 - **Środowisko staging na VPS (izolowane, ten sam serwer co prod):**
   - Backend: katalog `bridge-nowy`, osobny port, proces PM2 `bridge-backend-nowy`.
-  - Frontend: subdomena `nowa.agritires.eu` (osobny docroot Apache).
+  - Frontend: subdomena `test.agritires.eu` (osobny docroot Apache).
   - Baza: osobny plik `data-nowy.db` ze schematu `rebuild/schema/001_schema.sql`, **zasilony
     snapshotem produkcji**; skrypt odświeżenia bazy na żądanie.
 - **CD (pull-based na VPS):** `tools/deploy-staging.sh` — `git fetch develop` → build `rebuild/`
@@ -158,7 +158,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Prerekwizyty (od użytkownika, przy realizacji):** potwierdzenie VPS = ten sam co prod;
   założenie subdomeny w DirectAdmin; wersja Node na VPS; wolny port dla staging.
 - **DoD:** PR do `develop` uruchamia CI; merge → `deploy-staging.sh` podmienia aplikację;
-  `nowa.agritires.eu` odpowiada (health/placeholder); baza staging = snapshot prod; rollback
+  `test.agritires.eu` odpowiada (health/placeholder); baza staging = snapshot prod; rollback
   przez symlink udokumentowany i przetestowany.
 
 ---
@@ -178,7 +178,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - Przepływ auth 1:1 (spec-frontend §5): Bearer gdy token + `credentials:include`; `localStorage.bridge_user`.
 - **Ścieżki (GATE):** `/api/login`, `/api/logout`, `/api/me`.  **Fixtures:** `GET_me.json`.
 - **Decyzje (Q&A ticketu):** TS vs JS · framework testów · drizzle introspect vs ręczny · layout `rebuild/` (backend/frontend/shared) · zaklepać „auth na wszystkich trasach".
-- **DoD:** backend startuje; login/logout/me działają; harness GATE gotowy; FE loguje i pokazuje shell; `GET_me.json` przez GATE; README; **aplikacja auto-deployuje się na staging z zielonym CI — Ania widzi `/login` pod `nowa.agritires.eu`** (przez pipeline z I0).
+- **DoD:** backend startuje; login/logout/me działają; harness GATE gotowy; FE loguje i pokazuje shell; `GET_me.json` przez GATE; README; **aplikacja auto-deployuje się na staging z zielonym CI — Ania widzi `/login` pod `test.agritires.eu`** (przez pipeline z I0).
 
 ---
 
