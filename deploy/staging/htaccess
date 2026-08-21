@@ -5,6 +5,9 @@
 
 RewriteEngine On
 
+# 0) Wyzwania Let's Encrypt (wystawianie/odnawianie SSL) — serwuj bez proxy/redirectu/SPA-fallbacku
+RewriteRule ^\.well-known/acme-challenge/ - [L]
+
 # 1) API -> backend staging (flaga [P] = proxy; zachowuje metodę i body — działa, bo mod_proxy jest włączony)
 RewriteRule ^api/(.*)$ http://127.0.0.1:5001/api/$1 [P,L,QSA]
 
