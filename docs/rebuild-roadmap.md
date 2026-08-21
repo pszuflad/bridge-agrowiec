@@ -145,18 +145,23 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **CI (GitHub Actions):** workflow na PR i push do `develop` — install → lint → typecheck →
   **test (unit + GATE: fixtures + openapi)** → build BE+FE. **Branch protection na `develop`**:
   merge tylko z zielonym CI.
+- **Fakty hosta (zwiad 2026-08-21):** Apache z działającym `mod_proxy` w `.htaccess` (flaga `[P]`)
+  — **nie trzeba „Custom HTTPD Configurations"**. Prod Node = PM2 `bridge-backend`, port **5000**.
+  Docroot subdomeny: `/home/admin/domains/agritires.eu/public_html/test`. User `admin` (bez roota).
 - **Środowisko staging na VPS (izolowane, ten sam serwer co prod):**
-  - Backend: katalog `bridge-nowy`, osobny port, proces PM2 `bridge-backend-nowy`.
-  - Frontend: subdomena `test.agritires.eu` (osobny docroot Apache).
-  - Baza: osobny plik `data-nowy.db` ze schematu `rebuild/schema/001_schema.sql`, **zasilony
-    snapshotem produkcji**; skrypt odświeżenia bazy na żądanie.
-- **CD (pull-based na VPS):** `tools/deploy-staging.sh` — `git fetch develop` → build `rebuild/`
-  → migracje na `data-nowy.db` → **atomowa podmiana (symlink `current`→`release-<sha>`)** →
-  `pm2 reload bridge-backend-nowy`. Wyzwalany cronem DirectAdmin (poll), log + ewentualny mail
-  jak producent. Rollback = przełączenie symlinku na poprzedni release.
+  - Backend: katalog `/home/admin/private_apps/bridge-staging` (build z `rebuild/backend`), PM2
+    `bridge-backend-staging`, port **5001**, **nasłuch tylko na `127.0.0.1`** (bezpieczniej niż prod na 0.0.0.0).
+  - Frontend: subdomena `test.agritires.eu`, docroot `.../public_html/test`; build `rebuild/frontend` (base `/`).
+  - Reverse proxy: `.htaccess` w docroocie `test` (wzór z prod `panel/.htaccess`):
+    `RewriteRule ^api/(.*)$ http://127.0.0.1:5001/api/$1 [P,L,QSA]` + SPA fallback + wymuszenie HTTPS + no-cache html/js/css.
+  - Baza: osobny plik `data-nowy.db` ze schematu `001_schema.sql`, **zasilony snapshotem produkcji**; skrypt odświeżenia na żądanie.
+- **CD (pull-based na VPS):** dedykowany klon repo `~/bridge-deploy` (osobny od producenta `~/bridge-sync`)
+  śledzący `develop`. `deploy-staging.sh`: `git pull develop` → build `rebuild/backend`+`rebuild/frontend`
+  → migracje na `data-nowy.db` → **atomowa podmiana** (symlink release dla BE, rsync buildu FE do docroota)
+  → `pm2 reload bridge-backend-staging`. Wyzwalany cronem DirectAdmin (poll), log + ewentualny mail. Rollback = symlink.
 - **Dokumentacja:** `docs/deploy-setup.md` (architektura, odświeżanie bazy, rollback, porty/ścieżki).
-- **Prerekwizyty (od użytkownika, przy realizacji):** potwierdzenie VPS = ten sam co prod;
-  założenie subdomeny w DirectAdmin; wersja Node na VPS; wolny port dla staging.
+- **Prerekwizyty:** ✅ subdomena `test.agritires.eu` założona (docroot `.../public_html/test`).
+  Do potwierdzenia: wersja Node/npm na VPS, sqlite3, obecność `sudo`.
 - **DoD:** PR do `develop` uruchamia CI; merge → `deploy-staging.sh` podmienia aplikację;
   `test.agritires.eu` odpowiada (health/placeholder); baza staging = snapshot prod; rollback
   przez symlink udokumentowany i przetestowany.
