@@ -1,3 +1,44 @@
+2026-08-21 15:15
+obszar: backend + baza danych
+
+pliki: usuniete stare backupy (data.db.bak_* x49, index.cjs.bak_* x55, parsers/*.bak* x124, common/bridge_ext/extensions/selly .bak x22, panel/assets stare bundle i .bak x42)
+
+zmiana: Sprzatanie serwera po diagnozie "wracajacych" poprawek. Usunieto 292 stare pliki backup (~6 GB; dysk 77% -> 58%). Zachowano najnowsze punkty przywracania: data.db.bak_pre_szertxt_20260819_154550, data.db.bak_pre_szerorig_20260819_145623, data.db.bak_pre_atrybutycleanup_20260805095548, index.cjs.bak_arch_core_20260821, index.cjs.bak_pre_atrybutyfix_20260805093822, index.cjs.bak_post_masowaakceptacja_20260804143100 + najnowsze .bak per parser/modul. DIAGNOZA: zasmiecenia w label_noise ("B", "74", "73dB - )))") oraz zera w ms/snow_3pmsf/label_ice NIE pochodza z przywrocenia starego backupu — produkcyjny index.cjs (2026-08-21 12:58) zawiera wszystkie poprawki (authfix, VAT, marza_pct, parserfix, nieobecnosc_pod_rzad). Przyczyna: parsery przy KAZDYM imporcie wpisuja surowe wartosci — tyre_params.cjs:520 emptyToNull(record.halasDb) bez normalizacji, tyre_params.cjs:514-515/1063-1064 ms/snow3pmsf hardkodowane 1/0, tyre_params.cjs:1070 labelIce przez normalizeQty. Czyszczenie czysto danych (SQL 2026-07-24) jest nadpisywane przez kolejne importy MO2/MO5. Dodatkowe ryzyko systemowe: snapshoty backend__*.txt w repo plikow projektu sa nieaktualne (nawet 6 tygodni) — NIGDY nie wdrazac z nich; zrodlem prawdy sa pliki na serwerze.
+
+powod: zgloszenie Anny — stare zasmiecenia wracaja, podejrzenie nadpisywania zlych wersji; polecenie usuniecia starych backupow.
+
+2026-08-21 13:55
+obszar: backend
+
+pliki: archive_module.cjs (+ .bak_ret7_20260821)
+
+zmiana: Retencja archiwum importow zmieniona z 90 na 7 dni (RETENTION_DAYS=7). Limit 5 GB bez zmian. Panel pokazuje nowa retencje automatycznie (czyta z /api/import-archive/stats).
+
+powod: prosba Anny — 90 dni to za dlugo, wystarczy 7.
+2026-08-21 13:05
+obszar: backend
+
+pliki: index.cjs (+ .bak_arch_core_20260821)
+
+zmiana: Rozszerzenie archiwum na rdzen — podpieto archiveBuffer() w centralnym lejku nq() w index.cjs. Do tej pory archiwizowaly sie tylko sciezki z extensions.cjs (auto-pull, from-url, parse-file). Teraz objete sa tez reczne akcje rdzenia: „Synchronizuj teraz" (L4->nq) oraz upload pliku z panelu (/api/dostawcy/:kod/upload -> nq). Zrodlo w metadanych: „rdzen-nq". Archiwum w try/catch — nigdy nie przerywa importu. Test E2E: POST /api/dostawcy/MO2/synchronizuj-teraz -> plik trafil do archiwum (MO2 | rdzen-nq | ok).
+
+powod: pytanie Anny czy KAZDY wpadajacy plik bedzie zapisywany — domkniecie luki w recznych importach rdzenia.
+2026-08-21 12:58
+obszar: backend + frontend
+
+pliki: archive_module.cjs (+ .bak_dlfix_20260821), assets/archive-injection.js (+ .bak_dlfix_20260821)
+
+zmiana: Poprawka pobierania z archiwum — trasa /api/import-archive/file/:id zamieniona na /file/:month/:name (dwa segmenty sciezki). Przyczyna: Apache (AllowEncodedSlashes=Off) odrzucal zakodowany %2F w sciezce, wiec klik „Pobierz" w panelu zwracal 404. Injection buduje teraz URL z dwoch segmentow. Przetestowane przez publiczny adres — pobieranie dziala (HTTP 200, pelny plik).
+
+powod: zgloszenie Anny — „Nie udalo sie pobrac pliku: 404" w zakladce Archiwum importow.
+2026-08-21 10:52
+obszar: backend + frontend
+
+pliki: archive_module.cjs (NOWY), extensions.cjs (+ .bak_archiwum_20260821), assets/archive-injection.js (NOWY), index.html (+ .bak_archiwum_20260821)
+
+zmiana: Archiwum plikow importu — kazdy plik, ktory wpada do Bridge (auto-pull, from-url, upload z panelu) jest kopiowany PRZED parsowaniem do import_archive/RRRR-MM/ wraz z metadanymi JSON (zrodlo, uzytkownik, rozmiar, sha256, rekordy, status ok/blad, tresc bledu). Archiwizowane sa tez pliki, ktore nie przeszly parsowaniem. Rotacja: usuwanie starszych niz 90 dni oraz najstarszych przy przekroczeniu 5 GB. Nowe endpointy (auth JWT): GET /api/import-archive (lista z filtrami dostawca/miesiac/status), GET /api/import-archive/stats, GET /api/import-archive/file/:id (pobranie). Frontend: nowa zakladka „Archiwum importow" w sidebarze (injection archive-injection.js, przejmuje trase /archiwum) — tabela z filtrami, pasek zajecia archiwum, pobieranie plikow.
+
+powod: prosba Anny — historia zapisywanych plikow, ktore wpadaja z importow, dostepna do wgladu i pobrania z panelu.
 2026-08-19 15:50
 obszar: backend + baza danych
 

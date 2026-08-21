@@ -1,0 +1,16 @@
+{
+  "id": "2026-08/MO1__20260821__08471__bohnenkamp.csv",
+  "dostawca": "MO1",
+  "zrodlo": "auto-pull",
+  "url": "https://agroopony.eu/imports/bohnenkamp.csv",
+  "uzytkownik": "SYSTEM-AUTOPULL",
+  "data": "2026-08-21T08:47:18.053Z",
+  "oryginalnaNazwa": "bohnenkamp.csv",
+  "rozmiar": 95676,
+  "sha256": "8b1b0504ea15f7bd70074de133c4260e84219fa8c8a1a27d41f636cf702be1ef",
+  "status": "ok",
+  "blad": null,
+  "rekordy": 842,
+  "parserErrors": 0,
+  "odrzucone": 0
+}

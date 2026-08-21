@@ -1,0 +1,259 @@
+// archive_module.cjs — Archiwum plików importu Bridge
+// v1 — 2026-08-21 (prośba Anny: miejsce, gdzie lądują pliki wpływające z importów)
+//
+// Co robi:
+//   - KAŻDY plik importu (auto-pull, from-url, upload z panelu) jest kopiowany
+//     PRZED parsowaniem do /home/admin/private_apps/bridge/import_archive/RRRR-MM/
+//   - obok pliku .json z metadanymi (źródło, kto, rozmiar, sha256, rekordy, status, błąd)
+//   - archiwizuje też pliki, które NIE przeszły parsowaniem (status 'blad')
+//   - rotacja: usuwa pliki starsze niż 90 dni; przy przekroczeniu 5 GB usuwa najstarsze
+//
+// API (auth: we — middleware JWT):
+//   GET /api/import-archive?dostawca=MO1&miesiac=2026-08  → lista wpisów
+//   GET /api/import-archive/file/:id                      → pobranie surowego pliku (content-disposition)
+//   GET /api/import-archive/stats                         → sumaryczny rozmiar, liczba plików
+//
+// Integracja: registerArchive(app, {we, be}) + wyeksportowana funkcja archiveBuffer()
+// używana przez 3 punkty w extensions.cjs (from-url, parse-file, runAutoPull).
+
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+
+const ARCHIVE_ROOT = path.join(__dirname, 'import_archive');
+const RETENTION_DAYS = 90;
+const MAX_BYTES = 5 * 1024 * 1024 * 1024; // 5 GB
+
+function ensureDir(dir) {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function monthDir(dateIso) {
+  // RRRR-MM z ISO (UTC — spójne z resztą backendu)
+  const ym = String(dateIso || new Date().toISOString()).slice(0, 7);
+  return ensureDir(path.join(ARCHIVE_ROOT, ym));
+}
+
+function safeName(s) {
+  return String(s || 'plik').replace(/[^A-Za-z0-9._-]/g, '_').slice(-80) || 'plik';
+}
+
+function sha256(buf) {
+  return crypto.createHash('sha256').update(buf).digest('hex');
+}
+
+// === Główna funkcja: zapis bufora do archiwum ===
+// opts: { dostawcaKod, oryginalnaNazwa, zrodlo: 'auto-pull'|'from-url'|'upload', url?, user?,
+//         status: 'ok'|'blad', blad?, rekordy?, parserErrors?, odrzucone? }
+// Zwraca { id, sciezka, rozmiar, sha } albo null przy błędzie (archiwum NIGDY nie psuje importu).
+function archiveBuffer(buf, opts) {
+  try {
+    if (!buf || !Buffer.isBuffer(buf) || buf.length === 0) return null;
+    const o = opts || {};
+    const now = new Date();
+    const iso = now.toISOString();
+    const dir = monthDir(iso);
+
+    const stamp = iso.replace(/[-:]/g, '').replace('T', '__').slice(0, 15); // RRRRMMDD__GGMMSS
+    const base = `${String(o.dostawcaKod || 'XX').toUpperCase()}__${stamp}__${safeName(o.oryginalnaNazwa)}`;
+    const filePath = path.join(dir, base);
+    const metaPath = filePath + '.meta.json';
+
+    fs.writeFileSync(filePath, buf);
+
+    const meta = {
+      id: `${dir.slice(ARCHIVE_ROOT.length + 1)}/${base}`,
+      dostawca: String(o.dostawcaKod || '').toUpperCase(),
+      zrodlo: o.zrodlo || 'nieznane',
+      url: o.url || null,
+      uzytkownik: o.user || null,
+      data: iso,
+      oryginalnaNazwa: o.oryginalnaNazwa || null,
+      rozmiar: buf.length,
+      sha256: sha256(buf),
+      status: o.status || 'ok',
+      blad: o.blad || null,
+      rekordy: o.rekordy ?? null,
+      parserErrors: o.parserErrors ?? null,
+      odrzucone: o.odrzucone ?? null
+    };
+    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+
+    enforceRetention();
+    return { id: meta.id, sciezka: filePath, rozmiar: buf.length, sha: meta.sha256 };
+  } catch (e) {
+    console.error('[archive] BŁĄD zapisu archiwum:', e.message);
+    return null; // celowo: archiwum nie może wywrócić importu
+  }
+}
+
+// === Rotacja: 90 dni + sufit 5 GB ===
+function enforceRetention() {
+  try {
+    const files = listFiles(); // rosnąco po dacie (najstarsze pierwsze)
+    const cutoff = Date.now() - RETENTION_DAYS * 24 * 3600 * 1000;
+
+    // 1) wiek
+    const toDelete = [];
+    for (const f of files) {
+      if (f.mtimeMs < cutoff) toDelete.push(f);
+    }
+
+    // 2) sufit rozmiaru
+    let total = files.reduce((s, f) => s + f.size, 0);
+    for (const f of files) {
+      if (total <= MAX_BYTES) break;
+      if (!toDelete.includes(f)) toDelete.push(f);
+      total -= f.size;
+    }
+
+    for (const f of toDelete) {
+      try { fs.unlinkSync(f.full); } catch (_) {}
+      try { fs.unlinkSync(f.full + '.meta.json'); } catch (_) {}
+    }
+
+    // 3) puste katalogi miesięcy
+    for (const m of fs.readdirSync(ARCHIVE_ROOT)) {
+      const d = path.join(ARCHIVE_ROOT, m);
+      try {
+        if (fs.statSync(d).isDirectory() && fs.readdirSync(d).length === 0) fs.rmdirSync(d);
+      } catch (_) {}
+    }
+
+    if (toDelete.length > 0) console.log(`[archive] rotacja: usunięto ${toDelete.length} plików`);
+  } catch (e) {
+    console.error('[archive] BŁĄD rotacji:', e.message);
+  }
+}
+
+// === Listing wszystkich plików archiwum (bez .meta.json) ===
+function listFiles() {
+  if (!fs.existsSync(ARCHIVE_ROOT)) return [];
+  const out = [];
+  for (const m of fs.readdirSync(ARCHIVE_ROOT)) {
+    const d = path.join(ARCHIVE_ROOT, m);
+    let st;
+    try { st = fs.statSync(d); } catch (_) { continue; }
+    if (!st.isDirectory()) continue;
+    for (const f of fs.readdirSync(d)) {
+      if (f.endsWith('.meta.json')) continue;
+      const full = path.join(d, f);
+      try {
+        const fst = fs.statSync(full);
+        out.push({ full, name: f, month: m, size: fst.size, mtimeMs: fst.mtimeMs });
+      } catch (_) {}
+    }
+  }
+  out.sort((a, b) => a.mtimeMs - b.mtimeMs);
+  return out;
+}
+
+function readMeta(filePath) {
+  try {
+    const p = filePath + '.meta.json';
+    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (_) {}
+  return null;
+}
+
+// === Rejestracja endpointów ===
+function registerArchive(app, ctx) {
+  const { we } = ctx || {};
+  if (!we) {
+    console.error('[archive] BŁĄD: brak middleware auth (we) — endpointy NIE zarejestrowane');
+    return;
+  }
+
+  // Lista: GET /api/import-archive?dostawca=MO1&miesiac=2026-08&status=ok|blad
+  app.get('/api/import-archive', we, (req, res) => {
+    try {
+      const fDost = (req.query.dostawca || '').toUpperCase() || null;
+      const fMon = req.query.miesiac || null;
+      const fStat = req.query.status || null;
+
+      const items = [];
+      for (const f of listFiles().reverse()) { // najnowsze pierwsze
+        const meta = readMeta(f.full) || {};
+        if (fDost && meta.dostawca !== fDost) continue;
+        if (fMon && f.month !== fMon) continue;
+        if (fStat && meta.status !== fStat) continue;
+        items.push({
+          id: meta.id || `${f.month}/${f.name}`,
+          dostawca: meta.dostawca || f.name.slice(0, 3),
+          zrodlo: meta.zrodlo || null,
+          uzytkownik: meta.uzytkownik || null,
+          data: meta.data || new Date(f.mtimeMs).toISOString(),
+          oryginalnaNazwa: meta.oryginalnaNazwa || f.name,
+          rozmiar: f.size,
+          status: meta.status || 'ok',
+          blad: meta.blad || null,
+          rekordy: meta.rekordy ?? null,
+          sha256: meta.sha256 || null
+        });
+      }
+      res.json({ ok: true, total: items.length, items });
+    } catch (e) {
+      console.error('[archive] BŁĄD listy:', e.message);
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  // Statystyki: GET /api/import-archive/stats
+  app.get('/api/import-archive/stats', we, (req, res) => {
+    try {
+      const files = listFiles();
+      const total = files.reduce((s, f) => s + f.size, 0);
+      const perMonth = {};
+      for (const f of files) perMonth[f.month] = (perMonth[f.month] || 0) + f.size;
+      res.json({
+        ok: true,
+        plikow: files.length,
+        bajtow: total,
+        limitBajtow: MAX_BYTES,
+        retencjaDni: RETENTION_DAYS,
+        perMiesiac: perMonth
+      });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  // Pobranie: GET /api/import-archive/file/:id — id = "2026-08/NAZWA.csv" URI-encoded (encodeURIComponent łapie ukośnik)
+  app.get('/api/import-archive/file/:id', we, (req, res) => {
+    try {
+      const id = decodeURIComponent(req.params.id || '');
+      // ochrona przed path traversal: musi być "RRRR-MM/nazwa" bez ..
+      if (!/^\d{4}-\d{2}\/[^/]+$/.test(id) || id.includes('..')) {
+        return res.status(400).json({ ok: false, error: 'Nieprawidłowe id' });
+      }
+      const full = path.join(ARCHIVE_ROOT, id);
+      if (!fs.existsSync(full)) return res.status(404).json({ ok: false, error: 'Nie znaleziono pliku' });
+      res.setHeader('Content-Disposition', `attachment; filename="${path.basename(full)}"`);
+      res.sendFile(full);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  console.log('[archive] Endpointy zarejestrowane: /api/import-archive (+ /file/:id, /stats)');
+}
+
+// === Uzupełnienie metadanych po parsowaniu (rekordy, błędy, status) ===
+// id = "RRRR-MM/NAZWA" zwrócone przez archiveBuffer()
+function updateMeta(id, patch) {
+  try {
+    if (!id || id.includes('..')) return false;
+    const metaPath = path.join(ARCHIVE_ROOT, id + '.meta.json');
+    if (!fs.existsSync(metaPath)) return false;
+    const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+    Object.assign(meta, patch || {});
+    fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+    return true;
+  } catch (e) {
+    console.error('[archive] BŁĄD updateMeta:', e.message);
+    return false;
+  }
+}
+
+module.exports = { registerArchive, archiveBuffer, updateMeta, ARCHIVE_ROOT, RETENTION_DAYS, MAX_BYTES };

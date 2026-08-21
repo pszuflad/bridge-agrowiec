@@ -17,7 +17,6 @@
     <script src="./assets/pending-injection.js" defer></script>
     <script src="./assets/selly-injection.js" defer></script>
     <script src="./assets/freq-injection.js" defer></script>
-    <script src="./assets/archive-injection.js" defer></script>
     <style>
       /* POPRAWKA 2026-07-07 (v3): sticky naglowki kolumn.
          Wrapper tabeli staje sie kontenerem przewijania pionowego (max-height + overflow-y auto),
