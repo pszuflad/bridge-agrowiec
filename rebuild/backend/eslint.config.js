@@ -8,6 +8,11 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: { ecmaVersion: 2022, sourceType: "module" },
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        NodeJS: "readonly",
+      },
     },
     rules: {
       "@typescript-eslint/no-unused-vars": [
