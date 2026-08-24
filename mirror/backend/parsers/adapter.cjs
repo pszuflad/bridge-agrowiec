@@ -564,6 +564,10 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     stan: firstValue(enriched.stan, record.stan_magazynowy),
 
     cenaZakupu: firstValue(enriched.cenaZakupu, record.cena_zakupu),
+    // DODANE 2026-08-24: uwaga_cena — gdy dostawca zwraca "- zł"/"na zapytanie"
+    // (parser MO7 Nokian ustawia to dla wielkoformatowych VF Float King).
+    // Trafia do products.uwaga_cena i frontend pokazuje tooltip przy statusie.
+    uwagaCena: firstValue(record.uwaga_cena, enriched.uwagaCena),
     cenaSprzedazy: null,
 
     rozmiar: firstValue(enriched.rozmiar, record.rozmiar, record.rozmiar_alternatywny),
@@ -650,3 +654,4 @@ function recordsToSurowe(dostawcaKod, records) {
 }
 
 module.exports = { recordToSurowe, recordToSuroweDostawca, recordsToSurowe };
+

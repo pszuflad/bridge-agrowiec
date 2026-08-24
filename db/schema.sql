@@ -295,5 +295,5 @@ CREATE TABLE IF NOT EXISTS "products" (
   label_rolling TEXT,
   label_ice TEXT,
   label_snow TEXT
-, link_zdjecia TEXT, oznaczenie_bieznika TEXT, sezon TEXT, ms INTEGER, snow_3pmsf INTEGER, wentyl TEXT, cfo INTEGER, wysokosc_przesylki REAL, zastosowanie TEXT, kod_importu TEXT, nieobecnosc_pod_rzad INTEGER NOT NULL DEFAULT 0);
+, link_zdjecia TEXT, oznaczenie_bieznika TEXT, sezon TEXT, ms INTEGER, snow_3pmsf INTEGER, wentyl TEXT, cfo INTEGER, wysokosc_przesylki REAL, zastosowanie TEXT, kod_importu TEXT, nieobecnosc_pod_rzad INTEGER NOT NULL DEFAULT 0, uwaga_cena TEXT);
 CREATE INDEX idx_products_kod_importu ON products(kod_importu);

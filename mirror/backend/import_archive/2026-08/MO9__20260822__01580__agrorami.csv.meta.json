@@ -1,0 +1,16 @@
+{
+  "id": "2026-08/MO9__20260822__01580__agrorami.csv",
+  "dostawca": "MO9",
+  "zrodlo": "auto-pull",
+  "url": "https://agroopony.eu/imports/agrorami.csv",
+  "uzytkownik": "SYSTEM-AUTOPULL",
+  "data": "2026-08-22T01:58:01.248Z",
+  "oryginalnaNazwa": "agrorami.csv",
+  "rozmiar": 75376,
+  "sha256": "3aaa351a34b2d0f5df9a358b7cab5081fa54ed9c14c088cf9109f011480503f8",
+  "status": "ok",
+  "blad": null,
+  "rekordy": 993,
+  "parserErrors": 0,
+  "odrzucone": 123
+}

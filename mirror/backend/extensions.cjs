@@ -459,6 +459,16 @@ function register(app, ctx) {
     } catch (e) {
       console.error('[bridge_v6] BLAD ladowania selly/routes:', e.message);
     }
+    // === DODANE 2026-08-24: uwaga_cena patch ===
+    // Kolumna products.uwaga_cena + monkey-patch acceptStaging/addProductsBulk
+    // + endpoint GET /api/products/uwagi-cena dla frontendowego tooltipu przy statusie.
+    try {
+      const { installUwagaCena } = require('./uwaga_cena_patch.cjs');
+      installUwagaCena(app, ctx, _bridgeDb);
+      console.log('[bridge_v6] uwaga_cena: patch zaladowany (kolumna + acceptStaging + endpoint)');
+    } catch (e) {
+      console.error('[bridge_v6] BLAD ladowania uwaga_cena_patch:', e.message);
+    }
   }
 }
 
@@ -904,3 +914,4 @@ async function runAutoPull(ctx, onlyKod) {
 }
 
 module.exports = { register, runAutoPull };
+

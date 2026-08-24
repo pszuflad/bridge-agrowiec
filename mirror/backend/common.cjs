@@ -98,6 +98,23 @@ function normalizeEan(raw) {
 //   - "1,234.56" → 1234.56  (USA)
 //   - "12933.00 PLN" → 12933.00
 //   - 0 / null / pusty → null
+// DODANE 2026-08-24: detekcja "cena na zapytanie" (dostawca zwraca cenę nienumeryczną
+// np. "- zł", "- \u00A0zł", "POR", "na zapytanie") — wtedy cena zostaje null, ale
+// pole uwaga_cena w adapterze dostaje wartość 'na zapytanie'.
+// Zwraca krótki opis powodu lub null jeśli wartość jest pusta/numeryczna.
+function detectPriceOnRequest(raw) {
+  if (raw === null || raw === undefined) return null;
+  const s = String(raw).trim();
+  if (s === '' || s === '0' || s === '0,00' || s === '0.00') return null;
+  // Znormalizuj — usuń niełamliwe spacje, waluty
+  const clean = s.replace(/\u00A0/g, ' ').replace(/PLN|EUR|USD|zł|€|\$/gi, '').replace(/\s+/g, ' ').trim();
+  // Sam myślnik / puste po usunięciu waluty → "na zapytanie"
+  if (/^[-–—]+$/.test(clean)) return 'na zapytanie';
+  // Zawiera litery (POR, brak, na zapytanie, itp.) i NIE zawiera cyfr → "na zapytanie"
+  if (/[a-zA-Zżąćęłńóśźż]/i.test(clean) && !/\d/.test(clean)) return 'na zapytanie';
+  return null;
+}
+
 function normalizePrice(raw) {
   if (raw === null || raw === undefined) return null;
   let s = String(raw).trim();
@@ -382,6 +399,10 @@ function normalizeRecord(rec) {
     rozmiar: rec.rozmiar || null,
     rozmiar_alternatywny: rec.rozmiar_alternatywny || null,
     cena_zakupu: normalizePrice(rec.cena_zakupu),
+    // DODANE 2026-08-24: parser może ustawić rec.uwaga_cena='na zapytanie' gdy wykryje
+    // nienumeryczną cenę (np. "- zł" u Nokiana dla wielkoformatowych VF Float King).
+    // Adapter propaguje to do output i finalnie do products.uwaga_cena.
+    uwaga_cena: rec.uwaga_cena || null,
     stan_magazynowy: normalizeQty(rec.stan_magazynowy),
     kategoria: rec.kategoria || 'rolnicze',
     oznaczenia_techniczne: rec.oznaczenia_techniczne || [],
@@ -584,6 +605,7 @@ function capitalizeKategoria(value) {
 module.exports = {
   normalizeEan,
   normalizePrice,
+  detectPriceOnRequest,
   normalizeQty,
   normalizeText,
   classifyByName,
@@ -603,3 +625,4 @@ module.exports = {
   dedupeSpeedSuffix,
   hasIndustrialMarkInBieznik
 };
+

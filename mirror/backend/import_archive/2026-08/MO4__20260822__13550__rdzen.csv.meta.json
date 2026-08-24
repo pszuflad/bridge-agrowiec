@@ -1,0 +1,16 @@
+{
+  "id": "2026-08/MO4__20260822__13550__rdzen.csv",
+  "dostawca": "MO4",
+  "zrodlo": "rdzen-nq",
+  "url": null,
+  "uzytkownik": null,
+  "data": "2026-08-22T13:55:04.962Z",
+  "oryginalnaNazwa": "rdzen.csv",
+  "rozmiar": 504399,
+  "sha256": "63c19e86ca59b8597597660039de9acdfa104a1bb99bd890364911a83c59930d",
+  "status": "ok",
+  "blad": null,
+  "rekordy": null,
+  "parserErrors": null,
+  "odrzucone": null
+}

@@ -1,3 +1,13 @@
+2026-08-24 12:25
+obszar: backend + baza danych + frontend
+
+pliki: common.cjs (+bak_pre_uwagacena_20260824_121500), parsers/mo7_nokian.cjs (+bak), parsers/adapter.cjs (+bak), extensions.cjs (+bak), uwaga_cena_patch.cjs (NEW), data.db (+bak_pre_uwagacena_20260824_121500), panel/index.html (+bak_pre_holdreason_20260824_121500), panel/assets/hold-reason-injection.js (NEW), index.cjs (+bak — nie zmodyfikowany, backup profilaktyczny)
+
+zmiana: obsługa "ceny na zapytanie" dla dostawców zwracających cenę nienumeryczną (np. Nokian dla wielkoformatowych VF Float King: "- zł" zamiast liczby). (1) common.cjs — nowa funkcja detectPriceOnRequest() wykrywa myślnik/tekst-bez-cyfr → 'na zapytanie'; normalizeRecord propaguje uwaga_cena. (2) parsers/mo7_nokian.cjs — dla row['Zakup 1 szt'] wywołuje detectPriceOnRequest, ustawia uwaga_cena w rec. (3) parsers/adapter.cjs — output surowe ma pole uwagaCena obok cenaZakupu. (4) uwaga_cena_patch.cjs — nowy moduł: ALTER TABLE products ADD COLUMN uwaga_cena TEXT (idempotentnie), monkey-patch U.acceptStaging odczytuje uwagaCena ze snapshotJson i wykonuje UPDATE products.uwaga_cena po zaakceptowaniu staging, monkey-patch U.addProductsBulk propaguje z payload, endpoint GET /api/products/uwagi-cena. (5) extensions.cjs — wywołuje installUwagaCena w register(). (6) frontend hold-reason-injection.js — MutationObserver+cache dodaje ikonę "i" w kółku obok badge'a statusu "wstrzymany" w widoku katalogu, tooltip pokazuje uwaga_cena. (7) Backfill 5 rekordów MO7 Nokian VF Float King (MO7_T445819/22/23/25/26) — uwaga_cena='na zapytanie'.
+
+powód: prośba Anny — pozycje z ceną 0 wynikającą z "ceny na zapytanie" u dostawcy miały wyglądać identycznie jak realnie zepsute dane. Teraz kolumna uwaga_cena w bazie dokumentuje powód wstrzymania, a frontend pokazuje wizualnie odnośnik przy statusie "wstrzymany" żeby każdy wiedział że to celowe (nie błąd importu). Weryfikacja parserem live-feedu: 6 pozycji wykrytych (5 katalogowych + 1 wycofana T445824), wszystkie z uwagaCena='na zapytanie'.
+
+ 
 2026-08-21 15:15
 obszar: backend + baza danych
 
@@ -97,3 +107,4 @@ z nazwą, aby dało się powiązać z wpisem.
     4) Klasyfikator opon Zc() — rozszerzone rozpoznawanie formatów rozmiarów (skid-steer z częścią dziesiętną, VF, wartości całkowite/ułamkowe, modele TR-, sygnały PR TL/TT); rekordy bez danych rozpoznawczych nadal odrzucane.
     5) Czyszczenie słownika — schemat/dane: z tabeli słownikowej atrybuty_wartosci usunięto 1755 z 6899 wartości nieużywanych przez żaden produkt (po pełnym przeliczeniu użycia). Bez zmiany struktury tabel (brak ALTER TABLE) — operacja tylko na danych (DELETE nieużywanych wierszy). Dane produktów nie migrowane; puste 'sezon'/'wentyl' wynikają z pustych kolumn produktów. Kopia bazy przed operacją: data.db.bak_pre_atrybutycleanup_20260805095548.
 - powód: zamknięcie publicznego dostępu do API katalogu (bezpieczeństwo), usunięcie konfliktu duplikujących się tras maskujących moduł Atrybuty, ograniczenie błędnych wycofań przy niepełnym imporcie, poprawność klasyfikacji rozmiarów opon oraz uporządkowanie słownika atrybutów.
+

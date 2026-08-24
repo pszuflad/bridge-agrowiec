@@ -1,0 +1,16 @@
+{
+  "id": "2026-08/MO4__20260821__20575__agrowiec_wr.csv",
+  "dostawca": "MO4",
+  "zrodlo": "auto-pull",
+  "url": "https://agroopony.eu/imports/acc_ftp3/agrowiec_wr.csv",
+  "uzytkownik": "SYSTEM-AUTOPULL",
+  "data": "2026-08-21T20:57:50.208Z",
+  "oryginalnaNazwa": "agrowiec_wr.csv",
+  "rozmiar": 504531,
+  "sha256": "e84e587a77610d3ecfbe756a471d0db3bd1a25432e3d3a48e38926f65a57ce46",
+  "status": "ok",
+  "blad": null,
+  "rekordy": 3861,
+  "parserErrors": 0,
+  "odrzucone": 0
+}
