@@ -86,7 +86,26 @@ pm2 reload bridge-backend-staging
 
 ## CI (GitHub Actions)
 `.github/workflows/ci.yml` — na PR/push do `develop`: install + lint + typecheck + **test (GATE fixtures/kontrakt)** + build.
-Włącz **branch protection** na `develop` (Settings → Branches → Add rule): wymagaj przejścia jobów `backend` i `frontend` przed merge.
+
+### Branch protection na `develop` (krok po kroku)
+Cel: żaden PR ticketa nie wejdzie do `develop` bez zielonego CI — a właściciel repo nadal może pushować docsy bezpośrednio.
+
+1. GitHub → repo `pszuflad/bridge-agrowiec` → **Settings** (widoczne tylko dla właściciela).
+2. Lewe menu: **Code and automation → Branches**.
+3. **Add branch protection rule** (albo „Add rule").
+4. **Branch name pattern:** `develop`.
+5. Zaznacz **Require a pull request before merging** (Required approvals możesz zostawić **0** — praca solo).
+6. Zaznacz **Require status checks to pass before merging**:
+   - w polu wyszukiwania checków dodaj **`backend`** i **`frontend`** (pojawią się, bo CI już się uruchomiło),
+   - zaznacz też **Require branches to be up to date before merging**.
+7. **NIE** zaznaczaj **„Do not allow bypassing the above settings"** ani **„Include administrators"** — dzięki temu Ty (właściciel) możesz dalej pushować docsy prosto na `develop`, a reguła i tak wymusza GATE na normalnym flow ticketów. (Chcesz twardej ochrony także dla siebie? Zaznacz „Include administrators" — ale wtedy KAŻDA zmiana na `develop`, też docsy, musi iść przez PR.)
+8. **Create** / **Save changes**.
+
+**Weryfikacja:** przy następnym PR do `develop` przy checkach `backend`/`frontend` pojawi się „Required", a przycisk merge jest zablokowany aż zzielenieją.
+
+> Jeśli checki `backend`/`frontend` nie są na liście — CI jeszcze się nie uruchomiło na tym repo. Zrób dowolny mały push/PR do `develop`, poczekaj aż workflow przejdzie (zakładka **Actions**), i wróć do ustawień.
+>
+> Alternatywa (nowszy mechanizm): **Settings → Rules → Rulesets → New branch ruleset**, target `develop`, reguły „Require a pull request" + „Require status checks" (backend, frontend). Efekt ten sam.
 
 ## Otwarte punkty (do rozwiązania przy I2)
 - **Schemat snapshotu vs kanon:** snapshot produkcji niesie schemat prod (może różnić się od `rebuild/schema/001_schema.sql`,
