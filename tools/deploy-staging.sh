@@ -8,6 +8,7 @@
 #   - rebuild/backend:  `npm ci` && `npm run build` -> katalog dist/, wejście dist/server.js
 #       server nasłuchuje na process.env.HOST:process.env.PORT, baza z process.env.DB_PATH
 #       `npm run migrate` stosuje schemat/migracje na DB_PATH (idempotentnie)
+#       wymaga JWT_SECRET z $STAGING_ROOT/.env (sekret poza repo — docs/deploy-setup.md)
 #   - rebuild/frontend: `npm ci` && `npm run build` -> katalog dist/ (base "/", API pod /api)
 #
 #  Dopóki rebuild/ nie ma aplikacji (przed I1), skrypt nic nie buduje — placeholder działa dalej.
@@ -24,6 +25,10 @@ PM2_NAME="bridge-backend-staging"
 BRANCH="develop"
 LOG="$STAGING_ROOT/deploy.log"
 export PORT=5001 HOST=127.0.0.1 NODE_ENV=production DB_PATH="$DATA_DB"
+
+# Sekrety środowiska (JWT_SECRET) — plik POZA repo, tworzony raz ręcznie na VPS.
+# Format: jedna para KLUCZ=wartość na linię. Instrukcja: docs/deploy-setup.md.
+if [ -f "$STAGING_ROOT/.env" ]; then set -a; . "$STAGING_ROOT/.env"; set +a; fi
 
 log(){ echo "$(date '+%F %T')  $*" | tee -a "$LOG"; }
 
@@ -42,6 +47,12 @@ SHA="$(git rev-parse --short HEAD)"
 if [ ! -f rebuild/backend/package.json ] || [ ! -f rebuild/frontend/package.json ]; then
   log "rebuild/ nie ma jeszcze aplikacji (I1 niezrobione) — pomijam build. Placeholder działa dalej."
   exit 0
+fi
+
+# --- guard: sekret JWT musi istnieć, inaczej backend nie wstanie (pm2 crash-loop) ---
+if [ -z "${JWT_SECRET:-}" ]; then
+  log "BŁĄD: brak JWT_SECRET. Utwórz $STAGING_ROOT/.env z linią JWT_SECRET=... (docs/deploy-setup.md). Przerywam."
+  exit 1
 fi
 
 # --- backend: build -> release -> migracje -> pm2 ---
