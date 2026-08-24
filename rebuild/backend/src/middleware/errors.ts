@@ -26,10 +26,13 @@ export const bladHandler: ErrorRequestHandler = (err, req, res, next) => {
     next(err);
     return;
   }
-  // Nieprawidłowy JSON w ciele żądania — express.json() rzuca SyntaxError ze statusem 400.
-  const status = (err as { status?: number; statusCode?: number })?.status ?? 500;
-  if (status === 400) {
-    res.status(400).json({ error: "Błędne żądanie" });
+  // Błędy klienta z parserów ciała (SyntaxError 400 przy zepsutym JSON-ie,
+  // PayloadTooLargeError 413 przy przekroczeniu limitu) niosą własny status —
+  // oddajemy go zamiast maskować błędem serwera.
+  const surowyStatus = (err as { status?: number; statusCode?: number } | null)?.status;
+  const status = typeof surowyStatus === "number" ? surowyStatus : 500;
+  if (status >= 400 && status < 500) {
+    res.status(status).json({ error: "Błędne żądanie" });
     return;
   }
   console.error(`[błąd] ${req.method} ${req.originalUrl}`, err);

@@ -150,6 +150,7 @@ dokładne (bez `trim`/`lowercase`) dopasowanie e-maila. Wszystko to zachowanie p
 | O4 | cookie zawsze `Secure; SameSite=None` | flagi sterowane env; `SameSite=Lax` | staging jest same-origin, `Lax` chroni przed CSRF; bez tego dev po HTTP nie zapisze cookie |
 | O5 | token podpisywany dwa razy | jeden `sign()` | czysta redundancja, bez wpływu na kontrakt |
 | O6 | logout czyścił cookie bez `Secure`/`SameSite` | te same atrybuty co przy ustawianiu | inaczej przeglądarka potrafi nie nadpisać cookie |
+| O7 | nie-stringowe `email`/`password` w `/api/login` kończyły się wyjątkiem SQLite → 500 | jawne `typeof` → `400 {error:"Email i hasło są wymagane"}` | błędna ścieżka oryginału, trywialna do wywrócenia z zewnątrz; poprawny przepływ bez zmian |
 
 ## Schemat Drizzle
 

@@ -23,8 +23,14 @@ export function stworzApp({ env, db }: ZaleznosciApp): Express {
   app.set("trust proxy", true);
   app.disable("x-powered-by");
 
-  app.use(express.json({ limit: "5mb" }));
+  // Kolejność jak w oryginale: najpierw CORS (żeby preflight OPTIONS nie przechodził
+  // przez parser ciała), potem parsery (backend-index.cjs:48926-48940).
   if (env.CORS_ORIGINS.length > 0) app.use(corsZAllowlisty(env.CORS_ORIGINS));
+
+  // Limit 50 MB — 1:1 z oryginałem (backend-index.cjs:48932, :48939). Import z Iteracji 3
+  // przesyła duże pakiety danych, więc obniżenie limitu byłoby cichą zmianą zachowania.
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ extended: false, limit: "50mb" }));
 
   // Odpowiednik globalnego `e.use(C4)` z oryginału (backend-index.cjs:48156):
   // wypełnia req.user, gdy żądanie niesie ważny token. O dostępie decyduje requireAuth.

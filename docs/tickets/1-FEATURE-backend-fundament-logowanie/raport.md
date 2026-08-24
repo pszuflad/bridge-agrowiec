@@ -144,3 +144,47 @@ Dwie zmiany wymagają **jednorazowej akcji na VPS przed pierwszym wdrożeniem ba
 - **`src/repos/users.ts`** ma `pobierzUzytkownikaPoId` nieużywane w tej iteracji — świadomie
   zostawione, bo `POST /api/password/change` (Iteracja 12) tego potrzebuje i jest to
   jednolinijkowy odpowiednik istniejącej funkcji oryginału.
+
+---
+
+## Review fixes applied
+
+Code review: **0 BLOCKER**, 3 SHOULD-FIX, 3 NICE-TO-HAVE
+(`docs/tickets/1-FEATURE-backend-fundament-logowanie/review.md`). Naprawione wszystkie sześć —
+żadnej nie zostawiono jako follow-up, bo cztery z nich dotyczyły wierności oryginałowi, a to
+główne kryterium tego ticketa.
+
+**Najważniejsze: trzy ciche odejścia od oryginału, których nie było w tabeli odstępstw.**
+Reviewer je wyłapał, ja potwierdziłem w `deminified/backend-index.cjs:48926-48940` i przywróciłem
+wierność, zamiast dopisywać odstępstwo:
+
+- `src/app.ts` — **limit ciała żądania podniesiony z 5 MB z powrotem do 50 MB** (oryginał:
+  `:48932`, `:48939`). To była realna pułapka na przyszłość: import z Iteracji 3 przesyła duże
+  pakiety danych i cicho obcięty limit objawiłby się dopiero tam, jako trudny do zdiagnozowania
+  błąd. Dołożony też `express.urlencoded({extended:false, limit:"50mb"})`, którego oryginał używa.
+- `src/app.ts` — **kolejność middleware wyrównana do oryginału**: CORS przed parserami ciała
+  (było odwrotnie), żeby preflight `OPTIONS` nie przechodził przez parser JSON-a.
+- `src/middleware/cors.ts` — **komplet nagłówków jak w oryginale** (`:48928`):
+  `Access-Control-Expose-Headers: Set-Cookie` i `Cookie` w `Allow-Headers`. Różnica względem
+  produkcji zostaje wyłącznie ta zatwierdzona: *które* originy je dostają (allowlista zamiast
+  odbijania każdego).
+
+**Poprawka poprawności:**
+- `src/middleware/errors.ts` — handler błędów maskował jako `500` każdy status 4xx inny niż `400`.
+  W praktyce oznaczało to, że przekroczenie limitu ciała (`PayloadTooLargeError`, status 413)
+  wracało do klienta jako błąd serwera i śmieciło w logach. Teraz każdy status 4xx wraca ze swoim
+  kodem. Dołożony test jednostkowy handlera (`test/middleware.bledy.test.ts`, 4 przypadki:
+  413, 400, 500 bez wycieku treści błędu, delegacja przy już wysłanych nagłówkach).
+
+**Uzupełnienie dokumentacji (odstępstwo O7):**
+- `POST /api/login` odrzuca nie-stringowe `email`/`password` kodem `400`, podczas gdy oryginał
+  próbował związać taką wartość w zapytaniu SQLite i kończył wyjątkiem → `500`. Kod tak działał
+  od początku (jest na to test), ale nie było tego w tabeli odstępstw. Dopisane jako **O7**
+  w `plan.md` i w README backendu.
+
+**Nowe testy:** `test/middleware.bledy.test.ts` (4) + asercje na nagłówki CORS i na parser
+`urlencoded` w `test/app.cors-i-bledy.test.ts` (2). Łącznie **69 testów w 9 plikach**, wszystkie
+zielone; `lint`, `typecheck`, `build`, `migrate` bez zmian — zielone.
+
+**Nie zmieniono** (świadomie): `pobierzUzytkownikaPoId` zostaje nieużywane do Iteracji 12 —
+reviewer zgłosił to tylko jako przypomnienie, żeby nie zniknęło przy sprzątaniu lintera.

@@ -18,8 +18,11 @@ export function corsZAllowlisty(dozwoloneOrigins: string[]): RequestHandler {
     if (origin && dozwolone.has(origin)) {
       res.setHeader("Access-Control-Allow-Origin", origin);
       res.setHeader("Access-Control-Allow-Credentials", "true");
-      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-      res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+      // Zestaw nagłówków 1:1 z oryginałem (backend-index.cjs:48928) — różnica jest tylko
+      // w tym, KTÓRE originy je dostają (allowlista zamiast odbijania każdego).
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
+      res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,PATCH,OPTIONS");
+      res.setHeader("Access-Control-Expose-Headers", "Set-Cookie");
       res.setHeader("Vary", "Origin");
     }
     if (req.method === "OPTIONS") {

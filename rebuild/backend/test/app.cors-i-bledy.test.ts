@@ -36,6 +36,9 @@ describe("CORS", () => {
       const dozwolony = await request(app).get("/api/health").set("Origin", "http://localhost:5173");
       expect(dozwolony.headers["access-control-allow-origin"]).toBe("http://localhost:5173");
       expect(dozwolony.headers["access-control-allow-credentials"]).toBe("true");
+      // Zestaw nagłówków jak w oryginale (backend-index.cjs:48928).
+      expect(dozwolony.headers["access-control-expose-headers"]).toBe("Set-Cookie");
+      expect(dozwolony.headers["access-control-allow-headers"]).toContain("Cookie");
 
       const obcy = await request(app).get("/api/health").set("Origin", "https://zlosliwa.example");
       expect(obcy.headers["access-control-allow-origin"]).toBeUndefined();
@@ -67,6 +70,16 @@ describe("obsługa błędów", () => {
       .send("{to nie jest json");
     expect(odp.status).toBe(400);
     expect(odp.body).toEqual({ error: "Błędne żądanie" });
+  });
+
+  it("przyjmuje ciało application/x-www-form-urlencoded (parser jak w oryginale)", async () => {
+    const s = await stworzSrodowiskoTestowe();
+    posprzataj = s.posprzataj;
+    const odp = await request(s.app)
+      .post("/api/login")
+      .type("form")
+      .send({ email: s.dane.email, password: s.dane.haslo });
+    expect(odp.status).toBe(200);
   });
 
   it("nie ujawnia nagłówka X-Powered-By", async () => {

@@ -124,6 +124,13 @@ Wszystkie podjęte przez użytkownika w fazie pytań (2026-08-24).
 | O4 | cookie zawsze `Secure; SameSite=None` (zahardkodowane) | **flagi sterowane env**: produkcja/staging `Secure; SameSite=Lax`, dev/test po HTTP bez `Secure`; `HttpOnly`, `Path=/`, `Max-Age=2592000` **bez zmian** | staging jest same-origin, więc `None` jest niepotrzebne, a `Lax` daje ochronę CSRF; bez tego lokalny dev w 1b nie zapisze cookie po HTTP |
 | O5 | `POST /api/login` podpisuje token **dwa razy** (raz w `R4` do cookie, raz do body) | **jeden `sign()`**, ten sam token w cookie i w body | czysta redundancja oryginału; oba tokeny były funkcjonalnie identyczne — brak wpływu na kontrakt |
 | O6 | `logout` czyści cookie bez `Secure`/`SameSite` | czyszczenie **tymi samymi atrybutami**, którymi cookie było ustawione | inaczej przeglądarki potrafią nie nadpisać cookie ustawionego z `SameSite`/`Secure` |
+| O7 | `POST /api/login` sprawdza tylko `if (!email || !password)`; przy nie-stringowym, prawdziwym polu (np. `{"email":{"a":1}}`) oryginał próbował związać obiekt w zapytaniu SQLite i kończył wyjątkiem → 500 | jawne sprawdzenie `typeof` → `400 {error:"Email i hasło są wymagane"}` | ścieżka błędna w oryginale (500 zamiast 400) i trywialna do wywrócenia z zewnątrz; ten sam komunikat i ten sam kod co pozostałe błędne żądania — bez wpływu na poprawny przepływ logowania |
+
+> O7 dopisane po code review (2026-08-24) — kod już tak działał, brakowało wpisu w tabeli.
+> Przy tej samej okazji przywrócono wierność w trzech miejscach, w których kod odbiegał od
+> oryginału bez decyzji: limit ciała żądania **50 MB** (było 5 MB), kolejność middleware
+> (CORS przed parserami) i komplet nagłówków CORS (`Expose-Headers: Set-Cookie`,
+> `Cookie` w `Allow-Headers`).
 
 **Odtwarzane wiernie 1:1 (świadomie, mimo że można by „ulepszyć"):**
 - `GET /api/me` zwraca **surowy payload JWT** (`id,email,imieNazwisko,iat,exp`), nie świeży rekord
