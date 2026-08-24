@@ -1,0 +1,16 @@
+{
+  "id": "2026-08/MO3__20260824__13215__test-csv-3_t1004_pl.csv",
+  "dostawca": "MO3",
+  "zrodlo": "auto-pull",
+  "url": "https://sklep.kolarolnicze.pl/offer/export/test-csv-3,t1004,pl.csv",
+  "uzytkownik": "SYSTEM-AUTOPULL",
+  "data": "2026-08-24T13:21:58.782Z",
+  "oryginalnaNazwa": "test-csv-3,t1004,pl.csv",
+  "rozmiar": 703429,
+  "sha256": "869e0a1fe46329c609bfbfa3d87afdef5582ffde5057e4e76f271fde1ec23bb1",
+  "status": "ok",
+  "blad": null,
+  "rekordy": 587,
+  "parserErrors": 0,
+  "odrzucone": 716
+}

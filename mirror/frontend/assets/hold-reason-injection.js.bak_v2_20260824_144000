@@ -1,23 +1,21 @@
-// hold-reason-injection.js — DODANE 2026-08-24, v3 2026-08-24 14:40
+// hold-reason-injection.js — DODANE 2026-08-24, v2 2026-08-24 14:20
 // Dokleja ikonę "i" w kółku obok badge'a statusu "wstrzymany" w widoku katalogu.
-// Tooltip pokazuje powód wstrzymania z /api/products/hold-reasons.
+// Po najechaniu na ikonę pokazuje tooltip z powodem z products.uwaga_cena
+// (obecnie: "na zapytanie" dla 6 pozycji MO7 Nokian VF Float King bez ceny).
 //
-// v3 (2026-08-24 14:40):
-//   - Pokazuje powód dla WSZYSTKICH wstrzymanych (nie tylko 'na zapytanie').
-//   - Nowy endpoint /api/products/hold-reasons zwraca reason liczony na runtime:
-//     * uwaga_cena (jeśli ustawione) → dosłownie
-//     * cena=0 & stan=0 → "Brak ceny i stanu u dostawcy"
-//     * cena=0 & stan>0 → "Brak ceny u dostawcy"
-//     * cena>0 & stan=0 → "Brak stanu magazynowego u dostawcy"
-//     * cena>0 & stan>0 → "Wstrzymane — sprawdź ręcznie"
-// v2 (2026-08-24 14:20): dopasowanie po EAN, selektor bez klas Tailwind.
+// v2: dopasowanie po EAN (widoczna kolumna) zamiast po kod (niewidoczny).
+// Selektor badge'a rozszerzony (Tailwind: bg-*/rounded-* NIE zawsze — czasami inline-flex,
+// spans z classą 'px-2' 'text-xs' etc.). Fallback: pełne skanowanie wszystkich
+// SPAN + DIV z dokładnym tekstem 'wstrzymany' bez wymagania konkretnych klas.
+//
+// Źródło danych: GET /api/products/uwagi-cena → { items: [{id, kod, ean, uwaga_cena}] }
 
 (function () {
   'use strict';
 
   const REFRESH_MS = 5 * 60 * 1000;
-  const CACHE_EAN = new Map(); // ean → reason
-  const CACHE_KOD = new Map(); // kod → reason
+  const CACHE_EAN = new Map(); // ean → uwaga_cena
+  const CACHE_KOD = new Map(); // kod → uwaga_cena
   let lastFetch = 0;
 
   const STYLE_ID = 'hold-reason-injection-style';
@@ -80,7 +78,7 @@
     const now = Date.now();
     if (now - lastFetch < REFRESH_MS && CACHE_EAN.size > 0) return;
     try {
-      const res = await fetch('/api/products/hold-reasons', { credentials: 'include' });
+      const res = await fetch('/api/products/uwagi-cena', { credentials: 'include' });
       if (!res.ok) {
         console.warn('[hold-reason] fetch failed:', res.status);
         return;
@@ -90,18 +88,13 @@
       CACHE_EAN.clear();
       CACHE_KOD.clear();
       for (const it of data.items) {
-        if (it.reason) {
-          if (it.ean) CACHE_EAN.set(String(it.ean).trim(), String(it.reason));
-          if (it.kod) CACHE_KOD.set(String(it.kod).trim(), String(it.reason));
+        if (it.uwaga_cena) {
+          if (it.ean) CACHE_EAN.set(String(it.ean).trim(), String(it.uwaga_cena));
+          if (it.kod) CACHE_KOD.set(String(it.kod).trim(), String(it.uwaga_cena));
         }
       }
       lastFetch = now;
       console.log('[hold-reason] loaded', CACHE_EAN.size, 'EAN,', CACHE_KOD.size, 'kod');
-      // Reset dataset, żeby przy nowych danych wszystkie wiersze się przeliczyly
-      document.querySelectorAll('[data-hr-processed]').forEach(el => {
-        delete el.dataset.hrProcessed;
-      });
-      document.querySelectorAll('.hold-reason-icon').forEach(el => el.remove());
       scanBadges();
     } catch (e) {
       console.warn('[hold-reason] fetch exception:', e);
@@ -130,9 +123,11 @@
 
   function scanBadges() {
     if (CACHE_EAN.size === 0 && CACHE_KOD.size === 0) return;
+    // Znajdź wszystkie elementy z dokładnie tekstem 'wstrzymany' (bez wymagania klas)
     const all = document.querySelectorAll('span, div');
     for (const el of all) {
       if (el.dataset.hrProcessed === '1') continue;
+      // Element musi mieć BEZPOŚREDNIO tekst 'wstrzymany' (bez zagnieżdżeń)
       if (el.children.length > 0) continue;
       const text = (el.textContent || '').trim().toLowerCase();
       if (text !== 'wstrzymany') continue;
@@ -169,7 +164,7 @@
     observer.observe(document.body, { childList: true, subtree: true });
     loadReasons();
     setInterval(loadReasons, REFRESH_MS);
-    console.log('[hold-reason-injection] v3 uruchomiony');
+    console.log('[hold-reason-injection] v2 uruchomiony');
   }
 
   if (document.readyState === 'loading') {

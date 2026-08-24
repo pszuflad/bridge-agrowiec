@@ -107,49 +107,7 @@ function installUwagaCena(app, ctx, db) {
       }
     });
     console.log('[uwaga_cena] Endpoint GET /api/products/uwagi-cena aktywny');
-
-    // === 5) Endpoint hold-reasons — powód wstrzymania dla KAŻDEGO wstrzymanego ===
-    // DODANE 2026-08-24 14:35: standard powodów wstrzymania (runtime-computed).
-    // Katalog:
-    //  1. uwaga_cena set -> dosłownie (np. "na zapytanie")
-    //  2. cena=0 && stan=0 -> "Brak ceny i stanu u dostawcy"
-    //  3. cena=0 && stan>0 -> "Brak ceny u dostawcy"
-    //  4. cena>0 && stan=0 -> "Brak stanu magazynowego u dostawcy"
-    //  5. cena>0 && stan>0 -> "Wstrzymane — sprawdź ręcznie"
-    app.get('/api/products/hold-reasons', we, (req, res) => {
-      try {
-        const rows = db.prepare(`
-          SELECT id, kod, ean, cena_zakupu, stan, uwaga_cena
-          FROM products
-          WHERE status = 'wstrzymany'
-        `).all();
-        const items = rows.map(r => {
-          const cenaZ = Number(r.cena_zakupu) || 0;
-          const stan = Number(r.stan) || 0;
-          let reason;
-          if (r.uwaga_cena && String(r.uwaga_cena).trim() !== '') {
-            reason = String(r.uwaga_cena).trim();
-          } else if (cenaZ === 0 && stan === 0) {
-            reason = 'Brak ceny i stanu u dostawcy';
-          } else if (cenaZ === 0 && stan > 0) {
-            reason = 'Brak ceny u dostawcy';
-          } else if (cenaZ > 0 && stan === 0) {
-            reason = 'Brak stanu magazynowego u dostawcy';
-          } else if (cenaZ > 0 && stan > 0) {
-            reason = 'Wstrzymane — sprawdź ręcznie';
-          } else {
-            reason = 'Wstrzymane — powód nieznany';
-          }
-          return { id: r.id, kod: r.kod, ean: r.ean, reason };
-        });
-        res.json({ ok: true, items });
-      } catch (err) {
-        res.status(500).json({ ok: false, error: err.message });
-      }
-    });
-    console.log('[uwaga_cena] Endpoint GET /api/products/hold-reasons aktywny');
   }
 }
 
 module.exports = { installUwagaCena };
-

@@ -1,3 +1,16 @@
+2026-08-24 14:40
+obszar: backend + frontend
+pliki:
+  - uwaga_cena_patch.cjs (+bak_pre_holdreasons_20260824_143500)
+  - public_html/panel/assets/hold-reason-injection.js (+bak_v2_20260824_144000)
+zmiana:
+  - Backend: dodano endpoint GET /api/products/hold-reasons zwracający powód wstrzymania dla KAŻDEGO produktu ze statusem 'wstrzymany' (nie tylko z uwaga_cena).
+    Katalog powodów liczony runtime: uwaga_cena (jeśli set) / "Brak ceny i stanu u dostawcy" / "Brak ceny u dostawcy" / "Brak stanu magazynowego u dostawcy" / "Wstrzymane — sprawdź ręcznie".
+  - Frontend v3: injection wywołuje nowy endpoint, dokleja ikonę "i" do wszystkich 507 wstrzymanych (356 brak stanu, 136 sprawdź ręcznie, 9 brak ceny+stanu, 6 na zapytanie).
+  - Frontend przełącza się na dopasowanie po EAN (widoczna kolumna) zamiast kod (niewidoczny).
+powód:
+  Anna: "możemy ustawić standard taki że do każdego wstrzymanego będzie taki podgląd żeby było widać jaki powód wstrzymania?"
+  Poprzednia wersja (v1/v2) pokazywała ikonę tylko dla 6 pozycji z uwaga_cena. Nowy standard: KAŻDY wstrzymany ma widoczny powód.
 2026-08-24 12:25
 obszar: backend + baza danych + frontend
 
