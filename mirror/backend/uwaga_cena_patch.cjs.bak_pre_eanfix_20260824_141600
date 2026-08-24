@@ -97,7 +97,7 @@ function installUwagaCena(app, ctx, db) {
     app.get('/api/products/uwagi-cena', we, (req, res) => {
       try {
         const rows = db.prepare(`
-          SELECT id, kod, ean, uwaga_cena
+          SELECT id, kod, uwaga_cena
           FROM products
           WHERE uwaga_cena IS NOT NULL AND uwaga_cena <> ''
         `).all();
