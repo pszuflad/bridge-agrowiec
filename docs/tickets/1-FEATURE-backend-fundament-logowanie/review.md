@@ -123,3 +123,121 @@ Jedyne zastrzeżenia to dwa drobne, niezatwierdzone odejścia od 1:1 (limit body
 typu w loginie) i jeden realny, choć niszowy bug w obsłudze błędów (413 mapowane na 500) — żadne z
 nich nie blokuje merge'a, ale pierwsze dwa warto formalnie dopisać do tabeli odstępstw, żeby kolejny
 agent nie musiał się domyślać, czy to celowe.
+
+---
+
+# Runda 2 — po naniesieniu poprawek z rundy 1
+
+> Reviewed: 2026-08-24
+> Branch: `feature/1-backend-fundament-logowanie`
+> Diff: 51 plików łącznie (9 plików w commicie poprawek), 6 commitów (`origin/develop...HEAD`)
+> Commit poprawek: `90cdabc` — „review fix - przywrócenie wierności oryginałowi (limit 50mb, kolejność middleware, nagłówki CORS) i statusy 4xx”
+
+## Weryfikacja sześciu poprawek z rundy 1
+
+Wszystkie sześć sprawdzone bezpośrednio w kodzie (nie tylko w opisie z raportu) i porównane
+linia po linii z `deminified/backend-index.cjs:48926-48945` — zgodne z deklaracją:
+
+1. **Limit ciała 50 MB** (`src/app.ts:32-33`) — `express.json({limit:"50mb"})` +
+   dołożony `express.urlencoded({extended:false, limit:"50mb"})`, dokładnie jak oryginał
+   (`:48931-48940`). Potwierdzone testem `przyjmuje ciało application/x-www-form-urlencoded`.
+2. **Kolejność middleware** (`src/app.ts:26-33`) — CORS (jeśli włączony) montowany przed
+   parserami ciała, zgodnie z oryginałem (`:48926-48940`). Ponieważ `stworzSrodowiskoTestowe()`
+   nie ustawia `CORS_ORIGINS`, middleware CORS w ogóle się nie montuje w domyślnym środowisku
+   testowym — więc ta zmiana kolejności nie wpływa na istniejące testy, co potwierdza czyste
+   `npm test` (69/69).
+3. **Nagłówki CORS** (`src/middleware/cors.ts:23-26`) — `Access-Control-Allow-Headers` z `Cookie`,
+   `Access-Control-Allow-Methods` bez spacji (`GET,POST,PUT,DELETE,PATCH,OPTIONS`),
+   `Access-Control-Expose-Headers: Set-Cookie` — 1:1 z `:48928`. Pokryte nowymi asercjami
+   w `test/app.cors-i-bledy.test.ts:40-41`.
+4. **`bladHandler` — pełny zakres 4xx** (`src/middleware/errors.ts:32-37`) — sprawdzone: w całym
+   `src/` nie ma ani jednego miejsca, które rzuca błąd z własnym `status`/`statusCode` poza
+   parserami Expressa (`grep -rn "new Error" src/` → tylko `env.ts`/`migrate.ts`, oba bez `status`).
+   Rozszerzenie zakresu z `=== 400` na `>= 400 && < 500` jest więc **bezpieczne** — nie przepuszcza
+   niczego, co wcześniej trafiało do gałęzi 500 z premedytacją; jedyne co realnie przez to przechodzi
+   to `SyntaxError` (400) i `PayloadTooLargeError` (413) z `express.json`/`express.urlencoded`.
+   Pokryte 4 nowymi testami jednostkowymi handlera (`test/middleware.bledy.test.ts`), w tym
+   przypadkiem „nagłówki już wysłane → deleguj dalej”.
+5. **Odstępstwo O7** dopisane w `plan.md:127-132` i w tabeli README (`README.md:153`) — treść zgadza
+   się z tym, co kod faktycznie robi (`src/routes/auth.ts:34`).
+6. **Nowe testy** — faktycznie dodane i przechodzą: `test/middleware.bledy.test.ts` (4 przypadki),
+   `test/app.cors-i-bledy.test.ts` (+2 asercje/test). Łączny licznik zgadza się z raportem: **69
+   testów w 9 plikach** (`npm test` lokalnie, Node 20, potwierdzone w tej rundzie).
+
+## Szukanie regresji
+
+Nie znaleziono regresji. W szczególności sprawdzone:
+- **Zmiana kolejności CORS→parsery** nie psuje żadnego istniejącego testu ani przepływu — w
+  domyślnym (produkcyjnym/testowym) ustawieniu `CORS_ORIGINS=""` middleware CORS w ogóle się nie
+  montuje (`if (env.CORS_ORIGINS.length > 0)`), więc kolejność jest bez znaczenia poza scenariuszem
+  lokalnego dev z ustawioną allowlistą — tam też zachowanie jest teraz identyczne z oryginałem.
+- **Limit 50 MB** nie wprowadza nowego ryzyka DoS ponad to, co miała produkcja — to przywrócenie
+  identycznego zachowania oryginału (`:48932`,`:48939`), nie nowa decyzja tego ticketa; brak
+  rate-limitingu jest już świadomie zachowanym zachowaniem produkcji (patrz nagłówek zadania).
+- **`bladHandler` przy szerszym zakresie 4xx** nie zaczyna „połykać” żadnych specyficznych
+  komunikatów błędów biznesowych — potwierdzone grep-em, że żaden kod aplikacji nie rzuca
+  własnych błędów ze statusem 4xx przez `next(err)`; wszystkie trasy odpowiadają bezpośrednio
+  przez `res.status().json()`. Gdy w kolejnych iteracjach (np. import) pojawią się takie błędy,
+  trzeba będzie pamiętać, że `bladHandler` teraz zwraca generyczne `{error:"Błędne żądanie"}` dla
+  każdego z nich (nie przekazuje oryginalnej wiadomości) — to zamierzone (nie wyciekać szczegółów),
+  ale warto mieć to na uwadze przy pisaniu nowych handlerów z niestandardowymi kodami 4xx.
+- **`urlencoded` parser** dodany z `extended:false` (parser `querystring`, nie `qs`) — tak jak
+  oryginał; nie wprowadza ryzyka prototype pollution charakterystycznego dla `extended:true`.
+
+## Świeży przegląd całości — fidelity i harness GATE
+
+- Ponownie porównane `deminified/backend-index.cjs:47850-47945` (JWT/cookie/auth middleware) i
+  `:48156-48215` (routes login/logout/me/users/password-change) z `src/auth/jwt.ts`,
+  `src/auth/cookie.ts`, `src/middleware/auth.ts`, `src/repos/users.ts`, `src/routes/auth.ts` —
+  zgodność potwierdzona linia po linii, bez nowych rozbieżności.
+- `test/gate/kontrakt.ts` i `test/gate/ksztalt.ts` (harness dla 11 kolejnych iteracji) przejrzane
+  pod kątem logiki porównawczej: dopasowanie ścieżek z parametrami, ignorowanie query stringu,
+  scalanie szablonu z przyciętych tablic fixture'ów, polityka `null`-i-ostrzeżeń — logika jest
+  spójna i bezpieczna (błąd zawsze w stronę „za ostro”, nie „za luźno”: brakujący/nadmiarowy klucz
+  i niezgodny typ to zawsze twarda różnica).
+- Pole `Operacja.wymagaAuth` (`test/gate/kontrakt.ts:23,56`) jest wyliczane z `security` w
+  kontrakcie, ale w tej iteracji nie jest nigdzie egzekwowane automatycznie — używane tylko
+  w jednym teście `gate.harness.test.ts` do potwierdzenia, że się poprawnie liczy. To świadomie
+  budulec dla kolejnych iteracji (harness dostarcza dane, testy per-endpoint z nich korzystają),
+  nie błąd — zanotowane niżej jako NICE-TO-HAVE, żeby kolejny agent wiedział, że pole istnieje
+  i można je wykorzystać zamiast pisać własne sprawdzanie 401.
+- `contract/fixtures/GET_me.json` zgadza się z kształtem zwracanym przez `GET /api/me`
+  (`test/auth.gate.test.ts`), a udokumentowany rozjazd kontrakt↔produkcja (401 nieopisane
+  w `openapi.yaml` dla `/api/me`) jest jawnie przetestowany i wyjaśniony w kodzie testu —
+  wzorowy przykład tego, jak kolejne iteracje powinny dokumentować podobne rozjazdy.
+
+## BLOCKER
+
+Brak.
+
+## SHOULD-FIX
+
+Brak nowych. Wszystkie trzy z rundy 1 potwierdzone jako naprawione (patrz sekcja weryfikacji
+powyżej), bez regresji.
+
+## NICE-TO-HAVE
+
+- [ ] `rebuild/backend/test/gate/kontrakt.ts:23,56` — pole `wymagaAuth` jest liczone, ale
+  nieużywane do automatycznej weryfikacji 401 na chronionych trasach w żadnym z testów per-endpoint
+  (na razie nie ma jeszcze takich testów poza `/api/me`). Warto rozważyć w kolejnej iteracji dodanie
+  wspólnej asercji (np. w `asercje.ts`) korzystającej z tego pola, żeby nie trzeba było ręcznie
+  pamiętać, które trasy wymagają auth.
+- [ ] `rebuild/backend/src/middleware/errors.ts:34-36` — przy rozszerzeniu zakresu 4xx handler
+  zawsze zwraca ten sam komunikat `"Błędne żądanie"` niezależnie od realnej przyczyny (400 vs 413
+  vs inny). To celowe (nie wyciekać szczegółów), ale warto to jednym zdaniem dopisać w komentarzu
+  nad handlerem, żeby kolejny agent pisząc handler dla nowego kodu 4xx (np. 422 przy walidacji
+  importu w Iteracji 3) wiedział, że musi obsłużyć własny komunikat błędu PRZED `next(err)`, a nie
+  liczyć na to, że `bladHandler` odda coś specyficznego.
+
+## Overall assessment
+
+Wszystkie sześć poprawek z rundy 1 zostały wprowadzone dokładnie tak, jak deklaruje raport —
+zweryfikowane bezpośrednim porównaniem kodu z `deminified/backend-index.cjs:48926-48945` oraz
+uruchomieniem pełnego pipeline'u (`lint`, `typecheck`, `test` 69/69, `build`) z czystego stanu
+worktree. Nie znaleziono żadnej regresji: zmiana kolejności middleware jest neutralna w domyślnej
+konfiguracji (CORS wyłączony), limit 50 MB przywraca tożsamość z produkcją bez nowego ryzyka
+ponad to, co produkcja już ma, a rozszerzenie `bladHandler` na cały zakres 4xx jest bezpieczne,
+bo żaden kod aplikacji nie rzuca własnych błędów status-bearing poza parserami Expressa. Świeży
+przegląd fidelity (linie 47850-47945, 48156-48215, 48920-48945) i harnessu GATE nie wykrył nic
+nowego poza dwoma kosmetycznymi uwagami do rozważenia w kolejnych iteracjach. Gałąź gotowa do
+merge'a.

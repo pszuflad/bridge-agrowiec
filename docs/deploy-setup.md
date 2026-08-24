@@ -23,14 +23,17 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
 - User `admin`, **bez sudo** → wszystko na poziomie usera. Port **5001 wolny**.
 - Docroot subdomeny: `/home/admin/domains/agritires.eu/public_html/test`.
 
-## Kontrakt z aplikacją (musi spełnić Iteracja 1)
+## Kontrakt z aplikacją (spełniony przez Iterację 1a — backend)
 `deploy-staging.sh` zakłada, że:
 - **rebuild/backend**: `npm ci` && `npm run build` → `dist/`, wejście `dist/server.js`; serwer nasłuchuje na
   `process.env.HOST:process.env.PORT`, baza z `process.env.DB_PATH`; `npm run migrate` stosuje schemat/migracje (idempotentnie).
   Wymaga też **`JWT_SECRET`** — bez niego serwer celowo nie wstaje (brak zahardkodowanego fallbacku, patrz niżej).
-- **rebuild/frontend**: `npm ci` && `npm run build` → `dist/` (base `/`, API pod `/api`).
+  Spełnione od Iteracji 1a (`rebuild/backend/`, szczegóły: `rebuild/backend/README.md`).
+- **rebuild/frontend**: `npm ci` && `npm run build` → `dist/` (base `/`, API pod `/api`). Powstaje w Iteracji 1b.
 
-Dopóki tego nie ma, `deploy-staging.sh` pomija build (placeholder działa dalej).
+`deploy-staging.sh` odpala build tylko, gdy widzi **jednocześnie** `rebuild/backend/package.json`
+i `rebuild/frontend/package.json`. Backend już istnieje, ale frontendu jeszcze nie ma — dopóki
+nie powstanie (Iteracja 1b), skrypt pomija build i staging zostaje na placeholderze.
 
 ---
 
@@ -50,7 +53,7 @@ sqlite3 /home/admin/private_apps/bridge/data.db \
 cp ~/private_apps/bridge-staging/repo/deploy/staging/htaccess \
    /home/admin/domains/agritires.eu/public_html/test/.htaccess
 
-# 4. Placeholder (dowód, że pipeline działa) — do czasu Iteracji 1
+# 4. Placeholder (dowód, że pipeline działa) — do czasu Iteracji 1b (backend z 1a sam nie wystarczy do builda)
 cp ~/private_apps/bridge-staging/repo/deploy/staging/placeholder-index.html \
    /home/admin/domains/agritires.eu/public_html/test/index.html
 cd ~/private_apps/bridge-staging/repo/deploy/staging

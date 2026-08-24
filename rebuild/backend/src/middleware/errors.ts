@@ -32,6 +32,9 @@ export const bladHandler: ErrorRequestHandler = (err, req, res, next) => {
   const surowyStatus = (err as { status?: number; statusCode?: number } | null)?.status;
   const status = typeof surowyStatus === "number" ? surowyStatus : 500;
   if (status >= 400 && status < 500) {
+    // Świadomie jeden generyczny komunikat: dziś jedynym źródłem błędów 4xx z tego
+    // handlera są parsery Expressa. Jeśli kolejna iteracja zacznie rzucać własne błędy
+    // ze statusem (np. 422 z walidacji importu), trzeba tu przepuścić ich treść.
     res.status(status).json({ error: "Błędne żądanie" });
     return;
   }

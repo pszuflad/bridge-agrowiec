@@ -53,15 +53,25 @@ Dodatkowo subtelność z podwójnej rejestracji: `/api/history/meta` i
 przesłaniający wersję modułową (która auth by miała). Kolejność rejestracji ma
 skutek bezpieczeństwa.
 
+> **Odbudowa (I1a, `1-FEATURE-backend-fundament-logowanie`):** w `rebuild/backend`
+> zasada jest odwrócona od startu — `requireAuth` nakłada się jawnie na trasy danych,
+> publiczne zostają tylko `/api/login`, `/api/logout` i `/api/health`. Konkretne
+> endpointy z listy wyżej (products, staging, history, audit-log, export/shoper…)
+> wjeżdżają dopiero w iteracjach 2+, każdy już pod `requireAuth`; ta lista opisuje
+> stan **oryginału**, nie nowego backendu.
+
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).
+  **Odbudowa (I1a):** CORS domyślnie wyłączony; opcjonalna allowlista przez `CORS_ORIGINS`
+  (staging jest same-origin przez proxy Apache).
 - **≥4 niezależne uchwyty `better-sqlite3`** do jednej bazy (rdzeń `Qi`, Extensions
   `_bridgeDb`, Atrybuty, Pending); WAL, więc działa, ale wielu writerów = ryzyko blokad.
 - **Handler błędów przed modułami** — nie łapie błędów tras modułowych; moduły ratują
   się lokalnym `try/catch`.
 - **Podwójna rejestracja** analytics (×2) i pagination — druga warstwa martwa.
 - **`JWT_SECRET` z zahardkodowanym fallbackiem** (Perplexity nie cytuje wartości — słusznie).
+  **Odbudowa (I1a):** `JWT_SECRET` wymagany z env, bez fallbacku — serwer nie startuje bez niego.
 - **Dryf schematu** potwierdzony: tabele `atrybuty_wartosci_pending`,
   `atrybuty_wartosci_odrzucone`, `selly_kategoria_norm_map`,
   `selly_zastosowanie_category_map`; kolumny `products.kod_importu`, `products.zastosowanie`.

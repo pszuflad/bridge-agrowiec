@@ -73,6 +73,9 @@ Trzy środowiska — uwaga: **`main` NIE jest kodem do wdrażania**, tylko lustr
 - **CI = GitHub Actions** na PR/push do `develop` + **branch protection** (merge tylko z zielonym CI).
 - **Cutover** (koniec odbudowy): wprowadzimy `main → produkcja` i przełączymy żywy panel na nowy stos
   (ta sama `data.db`).
+- **Sekrety poza repo (od I1):** `deploy-staging.sh` wczytuje `$STAGING_ROOT/.env` (poza repo) przed
+  buildem — tam m.in. wymagany `JWT_SECRET` (backend nie startuje bez niego, fail-fast); instrukcja
+  ustawienia na VPS: `docs/deploy-setup.md`, krok 4a.
 
 ---
 
@@ -91,6 +94,13 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | `deminified/` + `mirror/backend`, `mirror/frontend` | zdeminifikowany oryginał — ostateczne źródło, gdy spec milczy |
 | `docs/incoming/*-perplexity/` | kanoniczne dokumentacje BE/FE (cytują plik:linia) |
 | `docs/reference/Instrukcja_obslugi_Bridge.docx` (17 zrzutów) | wygląd/UX (wersja 5, starsza niż bundle) |
+| `rebuild/backend/test/gate/` | harness GATE (od I1): porównanie odpowiedzi z `contract/fixtures/` + walidacja wg `contract/openapi.yaml`, generyczny — kolejne iteracje dokładają tylko ścieżki/fixtures |
+
+> **Rozjazd kontrakt↔produkcja (wykryty w I1):** `contract/openapi.yaml` (2.3) nie zamraża schematów
+> ciał (tylko ścieżkę/metodę/kod statusu) i oznacza `GET /api/me` jako publiczny (`security: []`)
+> mimo że produkcja realnie zwraca `401` bez tokenu; kontrakt nie deklaruje `401` też dla
+> `POST /api/login`. **Wzorcem jest zawsze zachowanie produkcji.** Odświeżenie kontraktu (kody
+> błędów + schematy ciał) — do rozważenia w Iteracji 12.
 
 ---
 
@@ -99,14 +109,14 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | Temat | Ustalenie / decyzja | Rekomendacja | Status decyzji |
 |---|---|---|---|
 | **Język** | artefakty i rozmowa PL; terminy domenowe w kodzie PL (`kategoria`, `zastosowanie`, `cenaZakupu`, `dostawca`, `bieznik`, `szerokosc`) — nie tłumaczyć | wg `feature.md` | ✅ ustalone |
-| **Bezpieczeństwo** | produkcja ma 17 tras publicznych (m.in. `export/shoper`, `audit-log`, `history`, `config`) + CORS odbija każdy Origin (spec-backend §2) | **naprawić od I1**: auth na każdej trasie danych, CORS zamknięty (świadome odejście od oryginału) | ⬜ do zaklepania |
+| **Bezpieczeństwo** | produkcja ma 17 tras publicznych (m.in. `export/shoper`, `audit-log`, `history`, `config`) + CORS odbija każdy Origin + zahardkodowany fallback `JWT_SECRET` (spec-backend §2) | **zaklepane w I1 (1a):** auth wymagany na trasach danych (`requireAuth`), CORS domyślnie zamknięty z allowlistą z env (`CORS_ORIGINS`), `JWT_SECRET` wymagany bez fallbacku (fail-fast) | ✅ ustalone |
 | **Stack FE** | React 18 · Wouter v3 · TanStack Query · Radix/shadcn · Tailwind | odtworzyć 1:1 (spec-frontend §5) | ✅ ustalone |
 | **Wygląd** | design tokens: Inter + JetBrains Mono, primary `hsl(35 70% 45%)`, sidebar `hsl(215 28% 12%)`, tło `hsl(210 20% 98%)` | wierny UX od I1 (`04_DESIGN_TOKENS.md` + 17 zrzutów) | ✅ ustalone |
 | **Auth flow** | `POST /api/login {email:trim,password}` → `{ok,user,token}`; `Bearer` gdy token + `credentials:include` równolegle; `localStorage.bridge_user`; Query `on401:returnNull,staleTime:Infinity,retry:false` | odtworzyć 1:1 (spec-frontend §5) | ✅ ustalone |
 | **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | naprawić w I7 (wołać natywne) | ⬜ do zaklepania |
 | **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / I8 / I11 | ⬜ do zaklepania |
 | **Lokalne vs API** | alerty, waga gabarytowa, staging auto-accept liczone lokalnie mimo endpointów (spec-frontend §4) | decydować per iteracja (I6, I9, I3) | ⬜ per iteracja |
-| **Stack BE / decyzje szkieletu** | TypeScript vs JS; framework testów; drizzle introspect vs ręczny | TS + Vitest + introspect (do potwierdzenia w Q&A I1) | ⬜ do zaklepania w I1 |
+| **Stack BE / decyzje szkieletu** | TypeScript vs JS; framework testów; drizzle introspect vs ręczny; layout `rebuild/` | **zaklepane w I1 (1a):** TypeScript (strict, ESM) + Vitest + `drizzle-kit introspect` (schemat wygenerowany z bazy, potem ręcznie dopieszczony) + layout `rebuild/backend/` (dalej `rebuild/frontend/`, ewentualnie `rebuild/shared/`) | ✅ ustalone |
 
 ---
 
@@ -117,7 +127,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | # | Iteracja | Sesje | Zależy od | Status | PR / data |
 |---|---|---|---|---|---|
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
-| 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ⬜ | |
+| 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | 🔨 | 1a (backend) zrobione (PR do uzupełnienia po merge); 1b (frontend) jeszcze nie zaczęte |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ⬜ | |
 | 3 | Import — rdzeń | 3a BE · 3b BE · 3c BE · 3d FE | 2 | ⬜ | |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
@@ -169,21 +179,30 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 1 — Fundament + logowanie
-- **Status:** ⬜  **Sesje:** 1a (backend) → 1b (frontend)  **Zależy od:** 0
-- **Cel (Ania klika):** loguje się mailem/hasłem, widzi szkielet panelu z sidebarem i 12 pozycjami.
-- **Backend (1a):**
-  - Szkielet Express; warstwa danych better-sqlite3 (WAL) + Drizzle na `rebuild/schema/001_schema.sql`.
-  - Endpointy: `POST /api/login`, `POST /api/logout`, `GET /api/me`.
-  - Middleware auth (odpowiednik `we`) — od razu **wymagany na trasach danych** (zasada bezpieczeństwa §3).
-  - **Harness GATE** (współdzielony przez kolejne sesje): ładuje `contract/fixtures/`, waliduje wg `openapi.yaml`; baza testowa świeża z kanonu + minimalny seed.
-  - README `rebuild/backend/` (uruchomienie, testy).
-- **Frontend (1b):**
+- **Status:** 🔨 **1a (backend) zrobione** (`docs/tickets/1-FEATURE-backend-fundament-logowanie/`), **1b (frontend) jeszcze nie zaczęte**  **Sesje:** 1a (backend) → 1b (frontend)  **Zależy od:** 0
+- **Cel (Ania klika):** loguje się mailem/hasłem, widzi szkielet panelu z sidebarem i 12 pozycjami. *(spełni się dopiero po 1b — patrz DoD niżej.)*
+- **Backend (1a) — ✅ zrobione** (`rebuild/backend/`; 69 testów, CI zielone; szczegóły w tickecie wyżej):
+  - Szkielet Node 20 + TypeScript (strict, ESM) + Express 4; warstwa danych better-sqlite3 (WAL) + Drizzle
+    (`schema.ts` wygenerowany `drizzle-kit introspect`) na `rebuild/schema/001_schema.sql`.
+  - Endpointy: `POST /api/login`, `POST /api/logout`, `GET /api/me` — wiernie odtworzone z oryginału.
+  - Middleware auth (`requireAuth`, odpowiednik `we`) — **wymagany na trasach danych** (zasada
+    bezpieczeństwa §3), gotowy do nakładania w kolejnych iteracjach.
+  - **Harness GATE** (`rebuild/backend/test/gate/`, współdzielony przez kolejne sesje): ładuje
+    `contract/fixtures/`, waliduje wg `openapi.yaml`; baza testowa świeża z kanonu + seed testowy.
+  - README `rebuild/backend/` (uruchomienie, env, migracje, testy/GATE, kontrakt deployu).
+- **Frontend (1b) — ⬜ nie zaczęte (osobny ticket):**
   - Szkielet React 18 · Wouter v3 · TanStack Query · Radix/shadcn · Tailwind; **design tokens** (§3).
   - Widok `/login` + shell aplikacji (ciemny sidebar, 12 pozycji nawigacji, puste trasy-placeholdery).
   - Przepływ auth 1:1 (spec-frontend §5): Bearer gdy token + `credentials:include`; `localStorage.bridge_user`.
 - **Ścieżki (GATE):** `/api/login`, `/api/logout`, `/api/me`.  **Fixtures:** `GET_me.json`.
-- **Decyzje (Q&A ticketu):** TS vs JS · framework testów · drizzle introspect vs ręczny · layout `rebuild/` (backend/frontend/shared) · zaklepać „auth na wszystkich trasach".
+- **Decyzje 1a (zaklepane):** TypeScript + Vitest + `drizzle-kit introspect` + layout `rebuild/backend/`;
+  auth wymagany na trasach danych; CORS domyślnie zamknięty z allowlistą z env; `JWT_SECRET` wymagany
+  bez fallbacku. Szczegóły i świadome odstępstwa od oryginału (O1–O7): `docs/tickets/1-FEATURE-backend-fundament-logowanie/plan.md`.
 - **DoD:** backend startuje; login/logout/me działają; harness GATE gotowy; FE loguje i pokazuje shell; `GET_me.json` przez GATE; README; **aplikacja auto-deployuje się na staging z zielonym CI — Ania widzi `/login` pod `test.agritires.eu`** (przez pipeline z I0).
+  - **Uwaga (1a):** samo 1a tego nie domyka. `tools/deploy-staging.sh:36-39` pomija build, dopóki nie
+    istnieją jednocześnie `rebuild/backend/package.json` **i** `rebuild/frontend/package.json` — po
+    merge'u 1a `test.agritires.eu` zostaje na placeholderze z I0. Deploy backendu (i spełnienie tego
+    punktu DoD) nastąpi dopiero razem z sesją 1b.
 
 ---
 

@@ -50,19 +50,18 @@ print(len([r for r in c.execute("SELECT name FROM sqlite_master WHERE type='tabl
 EOF
 ```
 
-## Drizzle (do odbudowy backendu)
+## Drizzle (odbudowa backendu — Iteracja 1)
 
-Nowy backend używa Drizzle ORM. **Nie pisz `schema.ts` ręcznie** (26 tabel = ryzyko
-błędu). Gdy zescaffoldujemy `rebuild/backend`, wygeneruj go introspekcją z bazy:
-
-```bash
-npx drizzle-kit introspect   # (lub: drizzle-kit pull) — czyta strukturę z data.db
-```
-
+`rebuild/backend/src/db/schema.ts` jest **wygenerowany** przez `npx drizzle-kit pull` z bazy
+zbudowanej z `001_schema.sql` (26 tabel, 269 kolumn, 13 indeksów), z jednym ręcznym
+dopieszczeniem: `.unique()` na `users.email` (introspekcja nie przenosi ograniczeń inline).
 `001_schema.sql` jest źródłem prawdy; Drizzle `schema.ts` z niego wynika, nie odwrotnie.
+Dokładna procedura regeneracji: `rebuild/backend/README.md`, sekcja „Schemat Drizzle".
 
 ## Uwaga o migracjach przyrostowych
 
 Produkcja dokłada kolumny idempotentną funkcją `bw()` (w bundlu) — np. sierpniowa
-`nieobecnosc_pod_rzad`. W odbudowie odpowiednikiem będą **numerowane migracje**
-(`002_*.sql`, `003_*.sql`). `001_schema.sql` to punkt zerowy = stan produkcji na 2026-08-17.
+`nieobecnosc_pod_rzad`. W odbudowie odpowiednikiem są **numerowane migracje**
+(`002_*.sql`, `003_*.sql`). Mechanizm już istnieje: `npm run migrate` w `rebuild/backend`
+stosuje `rebuild/schema/*.sql` idempotentnie, z ewidencją zastosowanych plików w tabeli
+`_migracje`. `001_schema.sql` to punkt zerowy = stan produkcji na 2026-08-17.

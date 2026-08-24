@@ -188,3 +188,69 @@ zielone; `lint`, `typecheck`, `build`, `migrate` bez zmian — zielone.
 
 **Nie zmieniono** (świadomie): `pobierzUzytkownikaPoId` zostaje nieużywane do Iteracji 12 —
 reviewer zgłosił to tylko jako przypomnienie, żeby nie zniknęło przy sprzątaniu lintera.
+
+---
+
+## Docs updates
+
+Pięć doc-checkerów sprawdziło 15 plików dokumentacji równolegle. Zaktualizowano 6, sześć
+świadomie zostawiono bez zmian (z uzasadnieniem), reszta bez uwag.
+
+### `docs/rebuild-roadmap.md` — powierzchnia kontrolna odbudowy (7 edycji)
+- **§4 Tablica postępu** — Iteracja 1: ⬜ → 🔨 (**nie** ✅ — 1b jeszcze nie zrobione), w kolumnie
+  PR/data notatka „1a (backend) zrobione, 1b (frontend) jeszcze nie zaczęte".
+- **§5 Iteracja 1** — zakres backendu przepisany z planowanego na faktycznie zrealizowany;
+  frontend oznaczony jako nie zaczęty; odesłanie do ticketa po szczegóły odstępstw O1–O7.
+  Do DoD dopisana **krytyczna uwaga**: `deploy-staging.sh:36-39` pomija build, dopóki nie ma
+  obu `package.json`, więc punkt „Ania widzi `/login`" domyka się dopiero po 1b.
+- **§3 Zasady przekrojowe** — wiersz „Stack BE / decyzje szkieletu" ⬜ → ✅ (TypeScript + Vitest
+  + drizzle-kit introspect + layout `rebuild/backend/`); wiersz „Bezpieczeństwo" ⬜ → ✅ (auth na
+  trasach danych, CORS zamknięty z allowlistą, `JWT_SECRET` bez fallbacku).
+- **§2 Źródła prawdy** — dopisany `rebuild/backend/test/gate/` jako narzędzie GATE dla kolejnych
+  iteracji + notka o rozjeździe kontrakt ↔ produkcja przy `GET /api/me`.
+- **§1a Środowiska** — `deploy-staging.sh` wczytuje `$STAGING_ROOT/.env` przed buildem;
+  `JWT_SECRET` wymagany (fail-fast).
+
+### `contract/README.md` (3 edycje)
+- Wskazany istniejący harness GATE (`rebuild/backend/test/gate/`), żeby kolejne iteracje nie
+  budowały go drugi raz.
+- **Dopisane ograniczenie kontraktu:** `openapi.yaml` (2.3) nie zamraża schematów ciał —
+  walidacja sprawdza ścieżkę/metodę/kod/JSON-owatość, kształt ciała weryfikują wyłącznie fixtures.
+- Dopisany rozjazd: `GET /api/me` ma `security: []` i kody 200/400, a produkcja realnie zwraca 401.
+
+### `rebuild/schema/README.md` (2 edycje)
+- Sekcja o Drizzle przepisana z czasu przyszłego na dokonany: `src/db/schema.ts` już istnieje
+  (26 tabel, 269 kolumn, 13 indeksów), z dopieszczeniem `.unique()` na `users.email`; procedura
+  regeneracji odesłana do README backendu zamiast duplikowana.
+- Dopisane, że mechanizm migracji przyrostowych już działa (`npm run migrate`, tabela `_migracje`).
+
+### `docs/deploy-setup.md` (3 edycje, ponad zmiany naniesione wcześniej w tym tickecie)
+- „Kontrakt z aplikacją (musi spełnić Iteracja 1)" → „(spełniony przez Iterację 1a — backend)”.
+- Doprecyzowany **prawdziwy powód**, dla którego staging nadal stoi na placeholderze: skrypt
+  wymaga jednocześnie obu `package.json`, a frontendu jeszcze nie ma.
+
+### `docs/spec-backend.md` (3 dopiski) i `docs/spec-frontend.md` (1 dopisek)
+Krótkie, wyraźnie oznaczone adnotacje „**Odbudowa (I1a)**" przy opisach stanu zastanego —
+bez zmieniania samego opisu produkcji: `requireAuth` na trasach danych, CORS domyślnie wyłączony,
+`JWT_SECRET` bez fallbacku, cookie z flagami sterowanymi środowiskiem. W spec-frontend odnotowane
+osobno, że **backend nie robi `trim()`** na e-mailu — dopasowanie jest dokładne, `.trim()` musi
+zostać po stronie frontendu w sesji 1b.
+
+### `docs/audit-2026-07-22.md` (2 adnotacje)
+Dokument historyczny — opis stanu zastanego nietknięty. Dopisane tylko dwie adnotacje
+„**Stan w odbudowie (I1a, 2026-08-24)**" przy punktach o zahardkodowanym `JWT_SECRET` i o CORS-ie
+odbijającym każdy Origin. Doc-checker świadomie **nie** dopisał adnotacji o rate-limitingu ani
+o `audit_log`, bo audyt ich nie zgłasza, a te rzeczy są w odbudowie odtworzone 1:1.
+
+### Bez zmian (uzasadnione)
+- `START.md`, `docs/plan.md` — dokumenty bootstrapowe/architektoniczne z 2026-07-24, sprzed procesu
+  iteracyjnego; nie zawierają twierdzeń o stanie `rebuild/`, którym ta iteracja przeczy.
+- `docs/rebuild-backlog.md` — żaden z trzech wpisów nie dotyczy auth/users/bezpieczeństwa
+  (potwierdzenie ustalenia z fazy researchu).
+- `docs/audit-delta.md` — opisuje deltę **produkcji**, nie dotyka `rebuild/`. Wzmianka
+  o `JWT_SECRET` z fallbackiem dotyczy produkcji i nadal jest prawdziwa.
+- `docs/vps-syncer-setup.md` — syncer zmian produkcji, niezależny od tej iteracji.
+
+### Pre-existing issues zgłoszone przez doc-checkery
+Brak. Żaden nie znalazł zastanych nieścisłości poza tymi, które ten ticket sam opisuje
+(rozjazd `GET /api/me` `security: []` vs realne 401).
