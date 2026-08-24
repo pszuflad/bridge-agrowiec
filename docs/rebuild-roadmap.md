@@ -116,7 +116,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 
 | # | Iteracja | Sesje | Zależy od | Status | PR / data |
 |---|---|---|---|---|---|
-| 0 | CI/CD + środowisko staging | 1 (DevOps) | — | 🔨 | pipeline żyje (HTTP), CI zielone, branch protection ✅; zostało tylko SSL |
+| 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ⬜ | |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ⬜ | |
 | 3 | Import — rdzeń | 3a BE · 3b BE · 3c BE · 3d FE | 2 | ⬜ | |
@@ -139,7 +139,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 0 — CI/CD + środowisko staging
-- **Status:** ⬜  **Sesje:** 1 (DevOps)  **Zależy od:** —
+- **Status:** ✅ **zrobione** (2026-08-24 — pipeline HTTPS, CI zielone, branch protection przez ruleset z bypassem admina, placeholder na `test.agritires.eu`)  **Sesje:** 1 (DevOps)  **Zależy od:** —
 - **Cel:** działający pipeline `develop → staging`. Po tej iteracji każdy zmergowany ticket
   automatycznie ląduje na serwerze i Ania widzi go pod subdomeną.
 - **CI (GitHub Actions):** workflow na PR i push do `develop` — install → lint → typecheck →
