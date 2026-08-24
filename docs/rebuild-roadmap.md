@@ -116,7 +116,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 
 | # | Iteracja | Sesje | Zależy od | Status | PR / data |
 |---|---|---|---|---|---|
-| 0 | CI/CD + środowisko staging | 1 (DevOps) | — | 🔨 | artefakty w repo; setup VPS w toku |
+| 0 | CI/CD + środowisko staging | 1 (DevOps) | — | 🔨 | pipeline żyje (HTTP), CI zielone, branch protection ✅; zostało tylko SSL |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ⬜ | |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ⬜ | |
 | 3 | Import — rdzeń | 3a BE · 3b BE · 3c BE · 3d FE | 2 | ⬜ | |
