@@ -53,3 +53,20 @@ albo zachować dla zgodności. Szczegóły: `docs/spec-backend.md §2`.
 1. Nowy backend implementuje ścieżki z `openapi.yaml`.
 2. Nagrane fixtures (2.4) puszczamy na nowy backend → odpowiedzi muszą się zgadzać.
 3. Rozbieżność = błąd, zanim dotknie produkcji.
+
+Mechanizm z punktów 2-3 już istnieje jako harness **GATE** (`rebuild/backend/test/gate/`,
+funkcje `sprawdzZgodnoscZFixture` i `sprawdzZgodnoscZKontraktem`), odpalany przez `npm test`
+w `rebuild/backend` i wpięty w CI — kolejne iteracje dokładają tylko ścieżki/fixtures, nie
+budują harnessu od nowa. Szczegóły: `rebuild/backend/README.md`.
+
+**⚠ Ograniczenie kontraktu (odkryte w Iteracji 1):** `openapi.yaml` (2.3) zamraża ścieżki,
+metody, `security` i kody odpowiedzi, ale **nie zawiera schematów ciał** — request body to
+`{type: object}`, a odpowiedzi mają tylko `description`. Walidacja „wg kontraktu" w GATE
+sprawdza więc istnienie ścieżki+metody, zadeklarowany kod statusu i JSON-owatość odpowiedzi;
+**kształt ciała weryfikują wyłącznie fixtures**. Nie czytaj „zgodne z openapi" jako gwarancji
+kształtu odpowiedzi.
+
+**Rozjazd kontrakt ↔ produkcja:** `GET /api/me` ma w kontrakcie `security: []` i kody 200/400,
+ale produkcja realnie zwraca **401** bez tokenu — oryginał chroni tę trasę ręcznym `if (!req.user)`,
+nie wspólnym middlewarem `we`, więc inwentarz 2.3 uznał ją za publiczną. To samo dotyczy 401
+z `POST /api/login`. Wzorcem przy odbudowie jest zachowanie produkcji, nie deklaracja kontraktu.

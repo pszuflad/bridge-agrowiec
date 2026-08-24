@@ -1,0 +1,54 @@
+import { z } from "zod";
+
+/**
+ * Konfiguracja z zmiennych środowiskowych.
+ *
+ * ODSTĘPSTWO OD ORYGINAŁU (zatwierdzone, plan.md O2): oryginał miał
+ * `process.env.JWT_SECRET || "bridge-agrowiec-secret-2026"` (deminified/backend-index.cjs:47853).
+ * Zahardkodowany fallback pozwala każdemu z dostępem do kodu podrobić dowolny token,
+ * więc tutaj JWT_SECRET jest WYMAGANY — bez niego serwer nie wstaje (fail-fast).
+ */
+const listaOriginow = z
+  .string()
+  .default("")
+  .transform((s) =>
+    s
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean),
+  );
+
+const flagaBool = z
+  .enum(["true", "false", "1", "0"])
+  .transform((v) => v === "true" || v === "1");
+
+const schemaEnv = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  HOST: z.string().min(1).default("127.0.0.1"),
+  PORT: z.coerce.number().int().min(1).max(65535).default(5001),
+  DB_PATH: z.string().min(1),
+  JWT_SECRET: z.string().min(1, "JWT_SECRET jest wymagany — patrz .env.example"),
+  CORS_ORIGINS: listaOriginow,
+  COOKIE_SECURE: flagaBool.optional(),
+});
+
+export type Env = z.infer<typeof schemaEnv> & { cookieSecure: boolean };
+
+export function wczytajEnv(source: NodeJS.ProcessEnv = process.env): Env {
+  const wynik = schemaEnv.safeParse(source);
+  if (!wynik.success) {
+    const problemy = wynik.error.issues
+      .map((i) => `  - ${i.path.join(".") || "(env)"}: ${i.message}`)
+      .join("\n");
+    throw new Error(
+      `Nieprawidłowa konfiguracja środowiska:\n${problemy}\n` +
+        `Uzupełnij zmienne (wzór: rebuild/backend/.env.example).`,
+    );
+  }
+  const env = wynik.data;
+  return {
+    ...env,
+    // Domyślnie Secure w produkcji/stagingu (za proxy HTTPS), bez Secure lokalnie po HTTP.
+    cookieSecure: env.COOKIE_SECURE ?? env.NODE_ENV === "production",
+  };
+}

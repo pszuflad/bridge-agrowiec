@@ -1,0 +1,12 @@
+node_modules/
+dist/
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.*
+!.env.example
+
+# Wygenerowane jednorazowo przez `drizzle-kit pull` (patrz README) — nie wersjonujemy
+.drizzle/
+.tmp/

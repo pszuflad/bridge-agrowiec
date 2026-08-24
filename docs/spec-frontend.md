@@ -82,6 +82,14 @@ ma endpoint:
 - Query: `on401:"returnNull"`, `staleTime:Infinity`, `retry:false`, `refetchOnWindowFocus:false`. Klucz = `queryKey.join("/")`.
 - Po mutacjach stagingu invalidacja: `staging`, `products`, `history`, `alerts`.
 
+> **Odbudowa (I1a, `1-FEATURE-backend-fundament-logowanie`):** strona serwerowa tego
+> przepływu już działa — `POST /api/login`/`/api/logout`/`GET /api/me` w `rebuild/backend`
+> zwracają dokładnie ten kształt (`{ok,user,token}`), akceptują Bearer i cookie
+> `bridge_session` równolegle. **Ważne dla 1b:** backend dopasowuje e-mail **dokładnie**,
+> bez `trim()` po swojej stronie — `.trim()` musi zostać po stronie frontendu, tak jak
+> tu opisano, inaczej logowanie z białymi znakami się rozjedzie. Widok `/login` (React)
+> przychodzi dopiero w sesji 1b.
+
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).
 - Primary `hsl(35 70% 45%)` (bursztyn), sidebar ciemny `hsl(215 28% 12%)`,
