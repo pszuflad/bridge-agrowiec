@@ -67,11 +67,11 @@ cp -a rebuild/backend/dist rebuild/backend/package.json rebuild/backend/package-
 ( cd "$RELEASE" && npm ci --omit=dev )                    # tylko zależności produkcyjne
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run migrate )   # migracje na bazie staging
 ln -sfn "$RELEASE" "$STAGING_ROOT/current"               # atomowa podmiana
-if pm2 describe "$PM2_NAME" >/dev/null 2>&1; then
-  pm2 reload "$PM2_NAME" --update-env
-else
-  ( cd "$STAGING_ROOT/current" && pm2 start dist/server.js --name "$PM2_NAME" --update-env )
-fi
+# zawsze uruchamiamy BIEŻĄCY release; delete+start jest odporne na (a) placeholder
+# trzymający nazwę i (b) pm2 reload trzymający starą, rozwiązaną ścieżkę skryptu po podmianie symlinku
+pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
+( cd "$STAGING_ROOT/current" && PORT="$PORT" HOST="$HOST" DB_PATH="$DATA_DB" NODE_ENV=production \
+    pm2 start dist/server.js --name "$PM2_NAME" --update-env )
 pm2 save >/dev/null 2>&1 || true
 
 # --- frontend: build -> publikacja do docroota ---
