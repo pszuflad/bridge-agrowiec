@@ -94,7 +94,7 @@ Endpointy zweryfikowane dodatkowo na **realnym snapshocie produkcji** (`db/snaps
   Jedyne świadome odstępstwo to **wartości** `szerokosc` na stagingu (backlog #3) — opisane niżej.
   Rozjazdu **typu** w GATE nie ma, bo baza testowa powstaje z kanonu.
 - **Unit + integracyjne backendu:** ✓ 103 testy (12 plików), w tym 34 nowe.
-- **Unit + integracyjne frontendu:** ✓ 106 testów (9 plików), w tym 58 nowych.
+- **Unit + integracyjne frontendu:** ✓ 110 testów (9 plików), w tym 62 nowe (po poprawkach z review).
 - **Lint, typecheck, build:** ✓ czyste po obu stronach.
 - **E2E:** pominięte — brak harnessu E2E w projekcie; rolę weryfikacji end-to-end pełni
   próbka na realnym snapshocie (niżej) plus przeklikanie przez Anię po deployu.
@@ -148,6 +148,39 @@ koszt jest jednorazowy i mały). Argumenty: pole jest z natury prezentacyjne (ma
 „10.00"), a liczby do obliczeń i tak żyją osobno (`widthCm` w parserze). Warto przy tej okazji
 rozstrzygnąć, czy sortowanie po szerokości ma zostać leksykalne — po przejściu na TEXT stanie
 się jedynym wariantem, więc dziś-niewidoczna różnica stanie się trwała.
+
+## Poprawki po review
+
+Review: **0 BLOCKER · 3 SHOULD-FIX · 2 NICE-TO-HAVE** (`review.md`). Każdą uwagę zweryfikowałem
+w oryginale, zanim ją naniosłem — wszystkie okazały się trafne i wszystkie zostały naprawione.
+
+1. **`TabelaProduktow.tsx` — nagłówki tabeli rozjeżdżały się z oryginałem.** To był realny rozjazd
+   wierności, i to z mojej winy: dodałem wskaźnik kierunku sortowania (`↑`/`↓`/`↕`), którego
+   oryginał NIE MA — rysuje w każdym nagłówku tę samą, przygaszoną ikonę `ArrowUpDown`
+   (`frontend-index.js:23650`, `:23689`), bez informacji, po czym lista jest posortowana. Etykiety
+   też były nie te: „Nazwa-produktu" zamiast „Nazwa" i „Dost" zamiast „Dost.". Naprawione: wspólny
+   komponent `NaglowekKolumny` odtwarza układ `inline-flex` z ikoną 1:1, dołożone brakujące
+   `maxWidth` i `minWidth: 60` na kolumnie dostawcy. Propsy `sortKolumna`/`sortKierunek` stały się
+   przez to zbędne i zostały usunięte. Nagłówek ostatniej kolumny (w oryginale „Akcje") dostał
+   etykietę **„Podgląd"** — spójnie z D4, bo mieści wyłącznie podgląd read-only.
+2. **`wirtualizacja.ts` — brakowało `ResizeObserver`.** Oryginał obserwuje kontener tabeli
+   (`frontend-index.js:23246-23248`), bo sam `resize` okna nie łapie zmian layoutu, przy których
+   tabela przesuwa się w pionie (np. zawinięcie paska zakładek dostawców) — bez tego offset
+   wirtualizacji robił się nieaktualny. Dołożony wraz ze sprzątaniem w `cleanup`.
+3. **`kolumny.ts` — dołożony retrofit `uzupelnijKodImportu`** (`MT()`, `frontend-index.js:23032-23035`).
+   Review uznało to za nieistotne, bo IndexedDB jest per-origin, a nowy front stoi na innej domenie.
+   Uznałem inaczej: **po cutoverze nowy panel stanie pod tą samą domeną co stary**
+   (`rebuild-roadmap.md` §1a), więc zastane zapisy realnie tam będą i kolumna `kodImportu`
+   znikałaby użytkownikom bez powodu. Doszły 4 testy jednostkowe.
+
+**Świadomie NIE naprawione (1 NICE-TO-HAVE):** `colSpan` wierszy stanu i spacerów wirtualizacji
+liczymy jako `kolumnyZmienne.length + 3 + 1`, podczas gdy oryginał liczy `_.length + 3` i nie
+uwzględnia kolumny akcji. Nasza liczba jest po prostu poprawna — wiersz „Wczytuję katalog…"
+rozciąga się na pełną szerokość tabeli, a w oryginale o jedną komórkę za mało. Odejście od
+dosłowności bez wpływu na zachowanie, świadome.
+
+Po poprawkach: **110 testów frontendu** (wcześniej 106) i 103 backendu — wszystkie zielone,
+lint/typecheck/build czyste.
 
 ## Breaking changes
 

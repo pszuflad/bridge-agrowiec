@@ -108,3 +108,22 @@ export const KOLUMNY_DOMYSLNE: string[] = [
  * kolumn są odfiltrowywane, żeby się nie zdublowały.
  */
 export const KOLUMNY_PRZYKLEJONE = ["nazwa", "ean", "dostawca"] as const;
+
+/**
+ * Retrofit zapisanej listy kolumn — 1:1 z `MT()` (`frontend-index.js:23032-23035`).
+ *
+ * Kolumna `kodImportu` doszła do zestawu domyślnego już po tym, jak część użytkowników
+ * miała zapisany wybór w IndexedDB. Oryginał dokłada ją takim zapisom tuż za `nazwa`
+ * (a gdy `nazwa` nie ma — na początek), żeby nikomu nagle nie zniknęła.
+ *
+ * Nie jest to martwy kod „na wszelki wypadek": po cutoverze nowy panel stanie pod tą samą
+ * domeną co stary, a IndexedDB jest per-origin — czyli zastane zapisy realnie tam będą.
+ */
+export function uzupelnijKodImportu(zapisane: string[]): string[] {
+  if (zapisane.includes("kodImportu")) return zapisane;
+  const wynik = [...zapisane];
+  const poNazwie = wynik.indexOf("nazwa");
+  if (poNazwie >= 0) wynik.splice(poNazwie + 1, 0, "kodImportu");
+  else wynik.unshift("kodImportu");
+  return wynik;
+}

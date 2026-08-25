@@ -15,6 +15,7 @@ import {
   zastosujFiltry,
   type Produkt,
 } from "@/pages/katalog/filtrowanie";
+import { uzupelnijKodImportu } from "@/pages/katalog/kolumny";
 
 function produkt(nadpisania: Partial<Produkt> & { id: number }): Produkt {
   return {
@@ -210,5 +211,31 @@ describe("zastosujFiltry — pełny łańcuch", () => {
       sortKierunek: "desc",
     });
     expect(wynik.map((p) => p.stan)).toEqual([5, 3, 0]);
+  });
+});
+
+describe("uzupelnijKodImportu (retrofit zapisu kolumn)", () => {
+  it("dokłada kodImportu tuż za nazwą, gdy zapis go nie ma", () => {
+    expect(uzupelnijKodImportu(["nazwa", "marka", "stan"])).toEqual([
+      "nazwa",
+      "kodImportu",
+      "marka",
+      "stan",
+    ]);
+  });
+
+  it("gdy nazwy nie ma w zapisie, dokłada kodImportu na początek", () => {
+    expect(uzupelnijKodImportu(["marka", "stan"])).toEqual(["kodImportu", "marka", "stan"]);
+  });
+
+  it("zapis, który już ma kodImportu, zostaje nietknięty", () => {
+    const zapis = ["marka", "kodImportu", "nazwa"];
+    expect(uzupelnijKodImportu(zapis)).toEqual(zapis);
+  });
+
+  it("nie modyfikuje tablicy wejściowej", () => {
+    const zapis = ["nazwa", "marka"];
+    uzupelnijKodImportu(zapis);
+    expect(zapis).toEqual(["nazwa", "marka"]);
   });
 });

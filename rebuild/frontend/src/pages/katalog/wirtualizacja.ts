@@ -78,10 +78,17 @@ export function useWirtualizacja(liczbaWierszy: number): OknoWirtualizacji {
     zmierz();
     scroller.addEventListener("scroll", naScroll, { passive: true });
     window.addEventListener("resize", zmierz);
+    // ResizeObserver na kontenerze tabeli (frontend-index.js:23246-23248): sam `resize`
+    // okna nie wystarczy, bo tabela przesuwa się w pionie także przy zmianach layoutu
+    // bez zmiany rozmiaru okna — np. gdy zawinie się pasek zakładek dostawców. Bez tego
+    // offset użyty do wyliczenia okna wirtualizacji byłby nieaktualny.
+    const obserwator = new ResizeObserver(() => zmierz());
+    if (refKontenera.current) obserwator.observe(refKontenera.current);
     return () => {
       if (klatka !== null) cancelAnimationFrame(klatka);
       scroller.removeEventListener("scroll", naScroll);
       window.removeEventListener("resize", zmierz);
+      obserwator.disconnect();
     };
   }, []);
 

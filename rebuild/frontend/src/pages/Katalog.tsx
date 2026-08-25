@@ -7,8 +7,9 @@
  * `limit`, bez `offset` — i robi u siebie wszystko: filtry, szukajkę, sortowanie,
  * paginację i wirtualizację. Backend `GET /api/products` nie obsługuje żadnego z tych
  * parametrów (poza `dostawca`), więc paginacja serwerowa byłaby ZMIANĄ zachowania,
- * nie usprawnieniem. Koszt transportu (~15 MB JSON przy 7 405 produktach) zdejmuje
- * kompresja włączona po stronie backendu (`rebuild/backend/src/app.ts`).
+ * nie usprawnieniem. Koszt transportu (zmierzone 10,0 MB JSON dla 7 405 produktów ze
+ * snapshotu produkcji) zdejmuje kompresja włączona po stronie backendu
+ * (`rebuild/backend/src/app.ts`) — po gzipie 0,84 MB, czyli 12× mniej.
  *
  * Zakres Iteracji 2 to ODCZYT. Menu „Akcje" (Edytuj/Wstrzymaj/Usuń), eksport CSV do
  * Shopera oraz zaciąganie słowników z `GET /api/atrybuty` i `GET /api/config` należą
@@ -40,7 +41,7 @@ import {
   type TrybStatusu,
 } from "./katalog/filtrowanie";
 import { KonfiguratorKolumn } from "./katalog/KonfiguratorKolumn";
-import { KOLUMNY, KOLUMNY_DOMYSLNE } from "./katalog/kolumny";
+import { KOLUMNY, KOLUMNY_DOMYSLNE, uzupelnijKodImportu } from "./katalog/kolumny";
 import { PodgladProduktu } from "./katalog/PodgladProduktu";
 import { TabelaProduktow } from "./katalog/TabelaProduktow";
 import { WyborWielokrotny } from "./katalog/WyborWielokrotny";
@@ -94,7 +95,7 @@ export function Katalog() {
     let aktualne = true;
     void odczytajKV<string[]>(KLUCZ_KOLUMN_KATALOGU).then((zapisane) => {
       if (aktualne && Array.isArray(zapisane) && zapisane.length > 0) {
-        setKolumnyWybrane(new Set(zapisane));
+        setKolumnyWybrane(new Set(uzupelnijKodImportu(zapisane)));
       }
       if (aktualne) setZaladowanoKolumny(true);
     });
@@ -333,8 +334,6 @@ export function Katalog() {
             <TabelaProduktow
               produkty={naStronie}
               kolumny={kolumnyWidoczne}
-              sortKolumna={sortKolumna}
-              sortKierunek={sortKierunek}
               onSortuj={przelaczSortowanie}
               ladowanie={isLoading}
               bylyJakiesProdukty={wZakladce.length > 0}

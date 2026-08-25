@@ -15,11 +15,11 @@
  * Historia, Wstrzymaj, Usuń). Mutacje są poza Iteracją 2, więc w jej miejscu jest
  * przycisk otwierający podgląd read-only.
  */
-import { Eye } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpDown, Eye } from "lucide-react";
+import { useState, type CSSProperties } from "react";
 import { Button } from "@/components/ui/button";
 import { formatujKomorke } from "./formatowanie";
-import type { KierunekSortowania, Produkt } from "./filtrowanie";
+import type { Produkt } from "./filtrowanie";
 import { KOLUMNY_PRZYKLEJONE, type DefinicjaKolumny } from "./kolumny";
 import { useWirtualizacja } from "./wirtualizacja";
 
@@ -27,16 +27,38 @@ const KLASA_NAGLOWKA =
   "px-3 py-2.5 font-medium whitespace-nowrap cursor-pointer hover:text-foreground select-none";
 const CIEN_PRZYKLEJENIA = "shadow-[2px_0_4px_rgba(0,0,0,0.1)]";
 
-function StrzalkaSortowania({ aktywna, kierunek }: { aktywna: boolean; kierunek: KierunekSortowania }) {
-  if (!aktywna) return <span className="w-3 h-3 opacity-50 ml-1">↕</span>;
-  return <span className="w-3 h-3 ml-1">{kierunek === "asc" ? "↑" : "↓"}</span>;
+/**
+ * Nagłówek kolumny — 1:1 z oryginałem (frontend-index.js:23641-23692): etykieta i ikona
+ * w `inline-flex` z odstępem, ikona ZAWSZE ta sama i zawsze przygaszona.
+ *
+ * Kusi, żeby pokazać strzałkę kierunku aktywnego sortowania — ale oryginał tego NIE robi,
+ * a to jest wierna odbudowa, nie ulepszanie. Gdyby kiedyś doszło, musi być świadomą decyzją.
+ */
+function NaglowekKolumny({
+  etykieta,
+  onKlik,
+  className,
+  style,
+  testId,
+}: {
+  etykieta: string;
+  onKlik: () => void;
+  className?: string;
+  style?: CSSProperties;
+  testId: string;
+}) {
+  return (
+    <th className={className ?? KLASA_NAGLOWKA} style={style} onClick={onKlik} data-testid={testId}>
+      <span className="inline-flex items-center gap-1">
+        {etykieta} <ArrowUpDown className="w-3 h-3 opacity-50" />
+      </span>
+    </th>
+  );
 }
 
 export function TabelaProduktow({
   produkty,
   kolumny,
-  sortKolumna,
-  sortKierunek,
   onSortuj,
   ladowanie,
   bylyJakiesProdukty,
@@ -45,8 +67,11 @@ export function TabelaProduktow({
   /** Wiersze BIEŻĄCEJ strony (paginacja dzieje się wyżej). */
   produkty: Produkt[];
   kolumny: DefinicjaKolumny[];
-  sortKolumna: string;
-  sortKierunek: KierunekSortowania;
+  /**
+   * Sam komponent nie dostaje aktualnej kolumny ani kierunku — i nie potrzebuje ich:
+   * oryginał rysuje w każdym nagłówku tę samą, przygaszoną ikonę, bez wskazywania,
+   * po czym lista jest właśnie posortowana (frontend-index.js:23650, :23689).
+   */
   onSortuj: (klucz: string) => void;
   ladowanie: boolean;
   /** Czy przed filtrowaniem cokolwiek było — rozstrzyga, który komunikat pustki pokazać. */
@@ -77,48 +102,40 @@ export function TabelaProduktow({
       <table className="w-full text-sm">
         <thead className="bg-muted/50">
           <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-            <th
+            <NaglowekKolumny
+              etykieta="Nazwa"
               className={`${KLASA_NAGLOWKA} sticky left-0 bg-muted/50 z-10 ${CIEN_PRZYKLEJENIA}`}
-              style={{ minWidth: 220 }}
-              onClick={() => onSortuj("nazwa")}
-              data-testid="header-nazwa"
-            >
-              Nazwa-produktu
-              <StrzalkaSortowania aktywna={sortKolumna === "nazwa"} kierunek={sortKierunek} />
-            </th>
-            <th
+              style={{ minWidth: 220, maxWidth: 220 }}
+              onKlik={() => onSortuj("nazwa")}
+              testId="header-nazwa"
+            />
+            <NaglowekKolumny
+              etykieta="EAN"
               className={`${KLASA_NAGLOWKA} sticky bg-muted/50 z-10 ${CIEN_PRZYKLEJENIA}`}
-              style={{ left: 220, minWidth: 140 }}
-              onClick={() => onSortuj("ean")}
-              data-testid="header-ean"
-            >
-              EAN
-              <StrzalkaSortowania aktywna={sortKolumna === "ean"} kierunek={sortKierunek} />
-            </th>
-            <th
-              className={KLASA_NAGLOWKA}
-              onClick={() => onSortuj("dostawca")}
-              data-testid="header-dostawca"
-            >
-              Dost
-              <StrzalkaSortowania aktywna={sortKolumna === "dostawca"} kierunek={sortKierunek} />
-            </th>
+              style={{ left: 220, minWidth: 140, maxWidth: 140 }}
+              onKlik={() => onSortuj("ean")}
+              testId="header-ean"
+            />
+            <NaglowekKolumny
+              etykieta="Dost."
+              style={{ minWidth: 60 }}
+              onKlik={() => onSortuj("dostawca")}
+              testId="header-dostawca"
+            />
             {kolumnyZmienne.map((kolumna) => (
-              <th
+              <NaglowekKolumny
                 key={kolumna.key}
-                className={KLASA_NAGLOWKA}
+                etykieta={kolumna.label}
                 style={{ textAlign: kolumna.align ?? "left", minWidth: kolumna.width }}
-                onClick={() => onSortuj(kolumna.key)}
-                data-testid={`header-${kolumna.key}`}
-              >
-                {kolumna.label}
-                <StrzalkaSortowania
-                  aktywna={sortKolumna === kolumna.key}
-                  kierunek={sortKierunek}
-                />
-              </th>
+                onKlik={() => onSortuj(kolumna.key)}
+                testId={`header-${kolumna.key}`}
+              />
             ))}
-            <th className="px-3 py-2.5 font-medium text-right sticky right-0 bg-muted/50 z-10" />
+            {/* Oryginał ma tu „Akcje" (frontend-index.js:23695). W I2 kolumna mieści wyłącznie
+                podgląd read-only (plan.md D4), więc etykieta mówi, co naprawdę robi. */}
+            <th className="px-3 py-2.5 font-medium text-right sticky right-0 bg-muted/50 z-10">
+              Podgląd
+            </th>
           </tr>
         </thead>
         <tbody>
