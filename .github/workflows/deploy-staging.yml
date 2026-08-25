@@ -1,0 +1,40 @@
+name: Deploy staging
+
+# Event-driven CD: po merge do develop (zmiany istotne dla aplikacji) łączy się po SSH
+# z VPS i uruchamia tools/deploy-staging.sh. Zastępuje cron-poll (patrz docs/deploy-setup.md).
+#
+# Wymagane sekrety repo (Settings → Secrets and variables → Actions):
+#   STAGING_SSH_HOST         np. vpshd1242.cyber-folks.pl
+#   STAGING_SSH_PORT         np. 22
+#   STAGING_SSH_USER         admin
+#   STAGING_SSH_KEY          klucz PRYWATNY (ed25519) dedykowany do deployu
+#   STAGING_SSH_KNOWN_HOSTS  wynik `ssh-keyscan -p <port> <host>` (weryfikacja klucza serwera)
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - "rebuild/**"
+      - "deploy/staging/**"
+      - "tools/deploy-staging.sh"
+  workflow_dispatch: {}          # ręczne uruchomienie z zakładki Actions
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false      # nie przerywaj trwającego deployu — kolejkuj
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy przez SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.STAGING_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
+            -p "${{ secrets.STAGING_SSH_PORT }}" \
+            "${{ secrets.STAGING_SSH_USER }}@${{ secrets.STAGING_SSH_HOST }}" \
+            'bash /home/admin/private_apps/bridge-staging/repo/tools/deploy-staging.sh'

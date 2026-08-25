@@ -83,12 +83,52 @@ curl -s https://test.agritires.eu/api/health      # -> {"ok":true,"stage":"stagi
 #   i otwórz https://test.agritires.eu — kafelek powinien pokazać "backend OK"
 ```
 
-## Cron w DirectAdmin (wyzwalacz CD)
-Panel DirectAdmin → **Cron Jobs** → dodaj (poll co 5 min):
+## Wyzwalacz CD — dwie opcje
+
+### Opcja A (zalecana): GitHub Actions po SSH — event-driven
+Workflow `.github/workflows/deploy-staging.yml` uruchamia deploy **natychmiast po merge do develop**
+(tylko przy zmianach `rebuild/**`, `deploy/staging/**`, `tools/deploy-staging.sh`) oraz ręcznie
+(zakładka Actions → „Deploy staging" → Run workflow). Łączy się po SSH z VPS i odpala `deploy-staging.sh`.
+
+**1. Wygeneruj dedykowany klucz SSH (na swojej maszynie):**
+```bash
+ssh-keygen -t ed25519 -C "gh-actions-staging-deploy" -f ~/gh_staging_deploy -N ""
+```
+
+**2. Dodaj klucz PUBLICZNY na VPS z wymuszoną komendą (klucz może TYLKO deployować):**
+```bash
+# na VPS, w ~/.ssh/authorized_keys — jedna linia:
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+printf 'command="bash /home/admin/private_apps/bridge-staging/repo/tools/deploy-staging.sh",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty %s\n' \
+  "$(cat ~/gh_staging_deploy.pub)" >> ~/.ssh/authorized_keys   # wklej treść .pub jeśli generujesz gdzie indziej
+chmod 600 ~/.ssh/authorized_keys
+```
+> Wymuszona komenda (`command="…"`) sprawia, że nawet gdyby klucz wyciekł, da się nim uruchomić WYŁĄCZNIE deploy — nie zwykłą powłokę.
+
+**3. Pobierz klucz serwera do weryfikacji (na dowolnej zaufanej maszynie):**
+```bash
+ssh-keyscan -p <PORT_SSH> vpshd1242.cyber-folks.pl 2>/dev/null
+```
+
+**4. Dodaj sekrety repo** (GitHub → Settings → Secrets and variables → Actions → New repository secret):
+| Sekret | Wartość |
+|---|---|
+| `STAGING_SSH_HOST` | `vpshd1242.cyber-folks.pl` (lub IP) |
+| `STAGING_SSH_PORT` | port SSH (np. `22`) |
+| `STAGING_SSH_USER` | `admin` |
+| `STAGING_SSH_KEY` | treść klucza PRYWATNEGO `~/gh_staging_deploy` (cała, z nagłówkami) |
+| `STAGING_SSH_KNOWN_HOSTS` | wynik `ssh-keyscan` z kroku 3 |
+
+**5. Test:** Actions → „Deploy staging" → **Run workflow** (albo zmerguj cokolwiek w `rebuild/`). Sprawdź log runu i `~/private_apps/bridge-staging/deploy.log`.
+
+Uwagi: SSH VPS-a musi być osiągalne z internetu (runnery GitHuba mają publiczne IP) i nie może być zablokowane po IP. Branch protection już gwarantuje, że na `develop` trafia tylko kod z zielonym CI, więc deploy dostaje sprawdzony stan.
+
+### Opcja B (alternatywa/fallback): cron-poll w DirectAdmin
+Panel DirectAdmin → **Cron Jobs** (poll co 5 min; skrypt sam wykrywa brak zmian i kończy bez pracy):
 ```
 */5 * * * * /bin/bash /home/admin/private_apps/bridge-staging/repo/tools/deploy-staging.sh >> /home/admin/private_apps/bridge-staging/deploy.log 2>&1
 ```
-Skrypt sam wykrywa brak zmian (`git rev-parse`) i kończy bez pracy — bezpiecznie odpalać często.
+**Nie używaj obu naraz na stałe.** Jeśli włączasz Opcję A, usuń tego crona (albo zostaw z rzadkim interwałem, np. co 30 min, jako awaryjny fallback — przy nakładce po prostu zrobi no-op).
 
 ## Rollback
 ```bash
