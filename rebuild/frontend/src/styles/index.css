@@ -1,0 +1,224 @@
+/*
+ * Design tokens Bridge — przepisane DOSŁOWNIE z produkcyjnego arkusza
+ * `mirror/frontend/assets/index-BVOkSOnE.css` (bloki `:root` i `.dark`).
+ *
+ * To źródło wygrywa z `docs/incoming/frontend-perplexity/dokumentacja/04_DESIGN_TOKENS.md`,
+ * który w kilku miejscach podaje inne wartości ciemnego motywu (zasada odbudowy:
+ * oryginał > spec). Rozjazdy wypisane w plan.md ticketu 2-FEATURE-frontend-shell-logowanie.
+ *
+ * Fonty (Inter + JetBrains Mono) ładuje `index.html` — w produkcji robił to `@import`
+ * na początku arkusza, co blokuje render; `<link rel="preconnect">` daje ten sam efekt taniej.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --button-outline: rgba(0, 0, 0, 0.08);
+    --badge-outline: rgba(0, 0, 0, 0.05);
+    --opaque-button-border-intensity: -8;
+    --elevate-1: rgba(0, 0, 0, 0.03);
+    --elevate-2: rgba(0, 0, 0, 0.07);
+
+    --background: 210 20% 98%;
+    --foreground: 215 25% 14%;
+    --border: 215 16% 88%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 14%;
+    --card-border: 215 16% 90%;
+
+    --sidebar: 215 28% 12%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-border: 215 25% 18%;
+    --sidebar-primary: 35 80% 55%;
+    --sidebar-primary-foreground: 215 28% 10%;
+    --sidebar-accent: 215 25% 20%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-ring: 35 80% 55%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 14%;
+    --popover-border: 215 16% 88%;
+
+    --primary: 35 70% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 215 16% 92%;
+    --secondary-foreground: 215 25% 14%;
+    --muted: 215 16% 94%;
+    --muted-foreground: 215 14% 42%;
+    --accent: 35 60% 92%;
+    --accent-foreground: 35 70% 25%;
+    --destructive: 0 75% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --input: 215 16% 84%;
+    --ring: 35 70% 45%;
+
+    --chart-1: 35 70% 50%;
+    --chart-2: 215 50% 45%;
+    --chart-3: 173 50% 40%;
+    --chart-4: 25 80% 55%;
+    --chart-5: 215 25% 35%;
+
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-serif: Georgia, serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+    --radius: 0.5rem;
+    --tracking-normal: 0em;
+    --spacing: 0.25rem;
+
+    /* Cienie produkcji mają alpha 0 — są zdefiniowane, ale niewidoczne.
+       Przepisane 1:1, żeby ewentualne włączenie ich w produkcji było jedną zmianą. */
+    --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0);
+    --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0);
+    --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 1px 2px -1px hsl(0 0% 0% / 0);
+    --shadow: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 1px 2px -1px hsl(0 0% 0% / 0);
+    --shadow-md: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 2px 4px -1px hsl(0 0% 0% / 0);
+    --shadow-lg: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 4px 6px -1px hsl(0 0% 0% / 0);
+    --shadow-xl: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 8px 10px -1px hsl(0 0% 0% / 0);
+    --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 0% / 0);
+  }
+
+  .dark {
+    --button-outline: rgba(255, 255, 255, 0.08);
+    --badge-outline: rgba(255, 255, 255, 0.05);
+    --opaque-button-border-intensity: 9;
+    --elevate-1: rgba(255, 255, 255, 0.04);
+    --elevate-2: rgba(255, 255, 255, 0.08);
+
+    --background: 215 30% 8%;
+    --foreground: 210 20% 95%;
+    --border: 215 20% 18%;
+    --card: 215 28% 11%;
+    --card-foreground: 210 20% 95%;
+    --card-border: 215 20% 16%;
+
+    --sidebar: 215 32% 6%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-border: 215 24% 14%;
+    --sidebar-primary: 35 80% 58%;
+    --sidebar-primary-foreground: 215 28% 10%;
+    --sidebar-accent: 215 22% 16%;
+    --sidebar-accent-foreground: 210 20% 96%;
+    --sidebar-ring: 35 80% 58%;
+
+    --popover: 215 28% 12%;
+    --popover-foreground: 210 20% 95%;
+    --popover-border: 215 20% 20%;
+
+    --primary: 35 75% 55%;
+    --primary-foreground: 215 28% 10%;
+    --secondary: 215 20% 18%;
+    --secondary-foreground: 210 20% 95%;
+    --muted: 215 20% 16%;
+    --muted-foreground: 215 12% 65%;
+    --accent: 35 30% 22%;
+    --accent-foreground: 35 80% 80%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --input: 215 20% 24%;
+    --ring: 35 75% 55%;
+
+    --chart-1: 35 75% 60%;
+    --chart-2: 215 60% 65%;
+    --chart-3: 173 55% 55%;
+    --chart-4: 25 75% 60%;
+    --chart-5: 210 30% 70%;
+  }
+
+  /*
+   * Warianty obramowań liczone z koloru bazowego (`hsl(from ...)`), używane przez
+   * przyciski i badge. Pierwsza deklaracja to fallback dla przeglądarek bez
+   * względnych kolorów CSS — dokładnie tak jak w produkcji.
+   */
+  :root,
+  .dark {
+    --sidebar-primary-border: hsl(var(--sidebar-primary));
+    --sidebar-primary-border: hsl(
+      from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+    );
+    --sidebar-accent-border: hsl(var(--sidebar-accent));
+    --sidebar-accent-border: hsl(
+      from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+    );
+    --primary-border: hsl(var(--primary));
+    --primary-border: hsl(
+      from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+    );
+    --secondary-border: hsl(var(--secondary));
+    --secondary-border: hsl(
+      from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+    );
+    --muted-border: hsl(var(--muted));
+    --muted-border: hsl(
+      from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+    );
+    --accent-border: hsl(var(--accent));
+    --accent-border: hsl(
+      from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+    );
+    --destructive-border: hsl(var(--destructive));
+    --destructive-border: hsl(
+      from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha
+    );
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+}
+
+/*
+ * Utility „elevate" — nakładka przyciemniająca/rozjaśniająca na hover/active.
+ * Na nich stoją Button i Badge z oryginału (fe.js:16183). Przepisane 1:1
+ * z produkcyjnego arkusza.
+ */
+@layer components {
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate)::after,
+  .active-elevate:not(.no-default-active-elevate)::after,
+  .hover-elevate-2:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:not(.no-default-active-elevate)::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 999;
+  }
+
+  .hover-elevate:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-1);
+  }
+
+  .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
+  .active-elevate-2:active:not(.no-default-active-elevate)::after {
+    background-color: var(--elevate-2);
+  }
+
+  /* Przy elemencie z obramowaniem nakładka musi wyjść o piksel poza nie. */
+  .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate:not(.no-active-interaction-elevate)::after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after {
+    inset: -1px;
+  }
+
+  .border.toggle-elevate::before {
+    inset: -1px;
+  }
+}

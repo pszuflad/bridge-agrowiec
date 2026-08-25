@@ -21,3 +21,6 @@ logs/
 .DS_Store
 *.swp
 *~
+
+# ── Worktree ticketów (procedura .claude/commands/feature.md) ──────────────
+.worktrees/
