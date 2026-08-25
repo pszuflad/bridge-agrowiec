@@ -1,0 +1,175 @@
+# 3-FEATURE-katalog-odczyt — raport z implementacji
+
+## Podsumowanie
+
+Iteracja 2 odbudowy: backend dostał `GET /api/products` odtworzony 1:1 z produkcji (oba
+kształty odpowiedzi, cap `limit`, filtr `dostawca`) oraz `GET /api/suppliers` / `GET /api/dostawcy`
+z polami liczonymi w locie, a frontend — pełny widok `/katalog` z tabelą 59 kolumn, filtrami,
+szukajką tokenową, sortowaniem, paginacją, wirtualizacją i podglądem produktu. Wszystkie trzy
+ścieżki przechodzą GATE (kształt 1:1 z `contract/fixtures/` + walidacja wg `openapi.yaml`).
+Endpointy zweryfikowane dodatkowo na **realnym snapshocie produkcji** (`db/snapshot.db`,
+7 405 produktów, 10 dostawców).
+
+## Zmiany
+
+### Backend (`rebuild/backend/`)
+
+- `src/db/schema.ts` — **dwie naprawy defektów introspekcji** (D5): `snow3Pmsf` → `snow3pmsf`
+  oraz `{ mode: "boolean" }` na 10 kolumnach (`reinforced`, `extraLoad`, `cutResistant`,
+  `heatResistant`, `stubbleResistant`, `nro`, `cho`, `ms`, `snow3pmsf`, `cfo`). Bez tego GATE
+  zgłaszałby jednocześnie brakujący i nadmiarowy klucz oraz `0` zamiast `false`.
+  `eanIsValid` celowo zostaje zwykłym `integer()`.
+- **Nowy:** `src/repos/products.ts` — `listaProduktow` / `listaProduktowStronicowana`
+  (odpowiedniki `U.listProducts*`, `backend-index.cjs:44699-44721`).
+- **Nowy:** `src/repos/suppliers.ts` — `listaDostawcow` + wydzielona, testowalna `przeliczStatus`;
+  `liczbaProduktow` z `count(*)`, znaczniki ostatnich zmian z zapytania okienkowego po
+  `historia_cen` (`backend-index.cjs:45011-45036`).
+- **Nowy:** `src/routes/products.ts` — `GET /api/products` za `requireAuth`, oba kształty
+  odpowiedzi, `MAX_LIMIT = 2000`, `DOMYSLNY_LIMIT = 200`.
+- **Nowy:** `src/routes/suppliers.ts` — jeden handler pod `/api/dostawcy` i `/api/suppliers`.
+- `src/app.ts` — rejestracja obu routerów + `compression()` (D2).
+- `package.json` — nowe zależności: `compression`, `@types/compression`.
+
+### Testy backendu
+
+- **Nowy:** `test/gate/dane.ts` — seed produktów/dostawców/`historia_cen` pokrywający pułapki
+  typów, plus `przelaczSzerokoscNaText` (odtworzenie migracji `szertxt` na bazie testowej).
+- **Nowy:** `test/katalog.gate.test.ts` — GATE dla trzech ścieżek (8 testów).
+- **Nowy:** `test/produkty.test.ts` — parametry, oba kształty, cap, filtr, 401, strażnik `szerokosc` (15).
+- **Nowy:** `test/dostawcy.test.ts` — cztery gałęzie statusu, `liczbaProduktow`, `historia_cen` (11).
+- `test/gate/index.ts` — reeksport nowego modułu seedującego.
+
+### Frontend (`rebuild/frontend/`)
+
+- **Nowy:** `src/pages/Katalog.tsx` — widok główny (odtworzenie `AT()`, `frontend-index.js:23191-23830`).
+- **Nowe:** `src/pages/katalog/` — `kolumny.ts` (59 definicji + 15 domyślnych, wygenerowane
+  z bundla), `filtrowanie.ts` (czyste funkcje), `formatowanie.tsx` (`Wfmt` + `DT`),
+  `wirtualizacja.ts`, `TabelaProduktow.tsx`, `KonfiguratorKolumn.tsx`, `WyborWielokrotny.tsx`,
+  `PodgladProduktu.tsx`.
+- **Nowy:** `src/lib/magazynKV.ts` — IndexedDB `bridge-store-v2` (`frontend-index.js:9161-9192`).
+- **Nowe:** `src/components/ui/` — `badge.tsx`, `tabs.tsx`, `dropdown-menu.tsx`, `dialog.tsx`,
+  `select.tsx`; klasy przepisane z produkcyjnego bundla.
+- `src/App.tsx` + `src/pages/placeholdery.ts` — `/katalog` zdjęty z placeholderów, wpięty jako
+  realna trasa. **Liczba tras routera bez zmian: 12.**
+- `package.json` — `@radix-ui/react-{tabs,dropdown-menu,dialog,select}`.
+
+### Testy frontendu
+
+- **Nowe:** `test/katalog.filtrowanie.test.ts` (21), `test/katalog.formatowanie.test.tsx` (21),
+  `test/katalog.test.tsx` (16).
+- `test/msw/kontrakt.ts` — `produktyZFixtura()` i `dostawcyZFixtura()` (dane do mocków prosto
+  z nagranych fixtures, nie z wyobrażenia o kształcie).
+- `test/setup.ts` — polyfille jsdom dla Radiksa + **czyszczenie cache TanStack Query po każdym
+  teście** (patrz „Odstępstwa", pkt 3).
+
+## Odstępstwa od planu
+
+1. **Test-strażnik `szerokosc` wymagał prawdziwej migracji kolumny, nie `UPDATE`.** Plan zakładał
+   wpisanie `'10.00'` do kolumny REAL. Okazało się, że SQLite stosuje **type affinity** i sam
+   konwertuje ten napis na liczbę `10.0` — kanoniczny schemat FIZYCZNIE nie potrafi przechować
+   tego, co trzyma staging. Dołożyłem `przelaczSzerokoscNaText()`, która odtwarza na bazie
+   testowej dokładnie tę samą operację co migracja produkcji (nowa tabela → przepisanie danych →
+   podmiana nazwy → odtworzenie indeksów, DDL brany z `sqlite_master`). Dopiero na takiej bazie
+   test dowodzi pass-through. Ustalenie samo w sobie jest wartościowe — patrz „Rozjazd `szerokosc`".
+2. **Ostatnia kolumna tabeli to przycisk podglądu, nie menu „Akcje".** Wynika wprost z D4
+   (mutacje poza zakresem), ale plan tego nie dopowiadał.
+3. **Trzeba było wyczyścić cache TanStack Query między testami.** `queryClient` jest singletonem
+   modułowym ze `staleTime: Infinity` (wiernie oryginałowi) — bez `queryClient.clear()`
+   w `afterEach` kolejny test dostawał dane poprzedniego bez żadnego żądania, więc mock ustawiony
+   przez `server.use` nigdy nie dochodził do głosu. To poprawka izolacji testów, nie zmiana
+   zachowania aplikacji.
+4. **`GET /api/dostawcy` doszedł „gratis" do `GET /api/suppliers`.** W oryginale to jeden handler
+   pod dwiema ścieżkami, obie mają fixtures — rejestracja obu kosztowała dwie linijki i dała
+   dodatkowy plik do GATE.
+
+## Wyniki testów
+
+- **Gate odbudowy (fixtures/kontrakt): ✓ zgodne.** Sprawdzone ścieżki i pliki:
+  | Ścieżka | Fixture | Wynik |
+  |---|---|---|
+  | `GET /api/products` (`openapi.yaml:802`) | `GET_products.json` | ✓ kształt 1:1 (72 klucze), kontrakt OK |
+  | `GET /api/suppliers` (`openapi.yaml:1137`) | `GET_suppliers.json` | ✓ kształt 1:1 (17 pól), kontrakt OK |
+  | `GET /api/dostawcy` (`openapi.yaml:560`) | `GET_dostawcy.json` | ✓ kształt 1:1, kontrakt OK |
+
+  Jedyne świadome odstępstwo to **wartości** `szerokosc` na stagingu (backlog #3) — opisane niżej.
+  Rozjazdu **typu** w GATE nie ma, bo baza testowa powstaje z kanonu.
+- **Unit + integracyjne backendu:** ✓ 103 testy (12 plików), w tym 34 nowe.
+- **Unit + integracyjne frontendu:** ✓ 106 testów (9 plików), w tym 58 nowych.
+- **Lint, typecheck, build:** ✓ czyste po obu stronach.
+- **E2E:** pominięte — brak harnessu E2E w projekcie; rolę weryfikacji end-to-end pełni
+  próbka na realnym snapshocie (niżej) plus przeklikanie przez Anię po deployu.
+
+### Weryfikacja na realnych danych (`db/snapshot.db`, 7 405 produktów)
+
+| Sprawdzenie | Wynik |
+|---|---|
+| `GET /api/products?limit=5` | `200`, `total: 7405` — **zgadza się co do jednego z fixturem** |
+| liczba kluczy w pozycji | 72 |
+| `szerokosc` | `620` (number) — jak w fixturze |
+| `eanIsValid` | `1` (number, nie boolean) ✓ |
+| `nro` / `cfo` / `stubbleResistant` | `false` (boolean, nie `0`) ✓ |
+| `reinforced` (NULL w bazie) | `null`, nie `false` ✓ |
+| `GET /api/products` bez parametrów | tablica 7 405 pozycji, 10,0 MB JSON |
+| `GET /api/products?dostawca=MO9` | `total: 861`, `items: 200` (domyślny limit) ✓ |
+| `GET /api/suppliers` | 10 dostawców, przeliczone statusy (`MO10:GRI:wstrzymany` — plik z 21.07 starszy niż 30 dni) i `liczbaProduktow` |
+| `ostatniaAktualizacjaCeny` (MO1) | `2026-08-12T09:47:18.792Z` — okno po `historia_cen` działa na realnych danych |
+
+**Zysk z kompresji (D2) na tym samym ładunku:** 10,0 MB → **0,84 MB**, współczynnik **12×**.
+
+## Rozjazd `szerokosc` — ustalenia i propozycja domknięcia backlogu #3
+
+To było główne pytanie otwarte tego ticketa. Trzy rzeczy ustalone w trakcie implementacji:
+
+**1. Jak backend czyta `szerokosc` — pass-through, typ zależy od bazy.**
+Drizzle `real()` nie ma mapowania z drivera, a SQLite jest dynamicznie typowany, więc ta sama
+linia kodu oddaje:
+- **liczbę** na kanonie i na `db/snapshot.db` (kolumna REAL) — potwierdzone: `620`, `typeof number`;
+- **string** na stagingu po migracji `szertxt` (kolumna TEXT) — potwierdzone testem
+  `produkty.test.ts` po przebudowie kolumny: `"10.00"`, `typeof string`.
+
+**2. Kanon nie potrafi odtworzyć stanu stagingu bez migracji.** SQLite type affinity zamienia
+`'10.00'` zapisane do kolumny REAL na liczbę `10.0`. To dlatego GATE nie łapie tego rozjazdu
+i **nie może go złapać** — nie jest to luka w harnessie, tylko właściwość schematu.
+
+**3. ⚠ Najważniejsze: w UI ten rozjazd jest w dużej mierze NIEWIDOCZNY — oryginał już go rozwiązał.**
+Funkcja `Wfmt` (`frontend-index.js:23098-23119`, odtworzona jako `formatujSzerokosc`) nie ufa
+wartości z bazy, tylko odzyskuje zapis z pola `rozmiar`: szuka w nim tokenu liczbowego równego
+szerokości i zwraca go **w oryginalnym brzmieniu**. Skutek — dopóki `rozmiar` zawiera pasujący
+token, `10` (REAL) i `"10.00"` (TEXT) renderują się **identycznie**. Utrwalone testem
+„liczba i jej tekstowy odpowiednik dają TEN SAM wynik".
+
+**Gdzie różnica JEST widoczna:** sortowanie po kolumnie „Szerokość opony" — liczby sortują się
+numerycznie, stringi leksykalnie (`"100"` przed `"9"`). To zachowanie oryginału, nie nasza decyzja.
+
+**Propozycja domknięcia #3 (do decyzji w tickecie importu/schematu, NIE tutaj):**
+przyjąć stan `szertxt` w całości — `rebuild/schema/001_schema.sql:44` REAL → TEXT, Drizzle
+`real()` → `text()`, i **przenagrać `GET_products.json`** (to jedyny fixture z tym polem, więc
+koszt jest jednorazowy i mały). Argumenty: pole jest z natury prezentacyjne (ma zachować
+„10.00"), a liczby do obliczeń i tak żyją osobno (`widthCm` w parserze). Warto przy tej okazji
+rozstrzygnąć, czy sortowanie po szerokości ma zostać leksykalne — po przejściu na TEXT stanie
+się jedynym wariantem, więc dziś-niewidoczna różnica stanie się trwała.
+
+## Breaking changes
+
+Brak. Zmiany w `src/db/schema.ts` (D5) dotykają tabeli `products`, której przed tym ticketem
+nie czytał żaden endpoint — nic istniejącego się na nich nie opierało. Schemat bazy
+(`001_schema.sql`) jest nietknięty, więc migracje i staging nie wymagają żadnej akcji.
+
+## Follow-up
+
+Rzeczy świadomie odłożone (żadna nie blokuje DoD tej iteracji):
+
+1. **Eksport CSV do Shopera** — przycisk „Pobierz CSV" z oryginału wymaga `GET /api/config`
+   (`shoper.separator`, `shoper.kolumny`). → I8 albo I11.
+2. **Słowniki marek/kategorii z `GET /api/atrybuty`** — dziś listy filtrów powstają wyłącznie
+   z danych, więc nie pokażą wartości słownikowej bez ani jednego produktu. → I7.
+3. **Akcje wierszowe** (Edytuj, Wstrzymaj/Aktywuj, Usuń) i „Historia" — mutacje produktów. → I12
+   („Historia" jest `disabled` także w oryginale, więc odtworzenie samego przycisku nic nie daje).
+4. **Kolumna „Promocja"** jest w domyślnym zestawie i renderuje „—", bo dane liczy warstwa
+   cenowa. → I4.
+5. **Backlog #3 (`szerokosc`)** — propozycja domknięcia wyżej. → ticket importu/schematu.
+6. **`openapi.yaml` nie deklaruje `GET /api/products/{id}`** i produkcja go nie ma. Utrwalone
+   testem, który zaświeci, gdyby ktoś dołożył tę operację do kontraktu. → I12 (odświeżenie kontraktu).
+7. **Nagranie fixtures dla wariantu „goła tablica"** (`GET /api/products` bez parametrów) —
+   główna ścieżka używana przez katalog nie ma dziś siatki fixtures, tylko własne testy.
+   Warto dograć przy najbliższym odświeżaniu `contract/fixtures/`.
