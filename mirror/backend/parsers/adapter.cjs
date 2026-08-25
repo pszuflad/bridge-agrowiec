@@ -595,8 +595,10 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     hs: (enriched.hs || marks.hs) ? 'HS' : null,
     nro: enriched.nro ?? null,
     cho: enriched.cho ?? null,
-    cfo: enriched.cfo ?? null,
-    stubbleResistant: enriched.stubbleResistant ?? null,
+    // POPRAWKA 2026-08-25 (flagsfix): flagi UE (cfo, stubbleResistant, reinforced) sa
+    // teraz Tak/NULL zgodnie z konwencja checkmark_tak z 21.07. Wczesniej byly INTEGER 0/1.
+    cfo: tyre.normalizeLabelFlag(enriched.cfo),
+    stubbleResistant: tyre.normalizeLabelFlag(enriched.stubbleResistant),
     labelRolling: enriched.labelRolling ?? null,
     labelWet: enriched.labelWet ?? null,
     labelNoise: enriched.labelNoise ?? null,
@@ -611,8 +613,11 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     linkZdjecia: enriched.linkZdjecia ?? null,
     oznaczenieBieznika: toUpperPL(enriched.oznaczenieBieznika ?? null),
     sezon: enriched.sezon ?? null,
-    ms: enriched.ms ?? null,
-    snow3pmsf: enriched.snow3pmsf ?? null,
+    // POPRAWKA 2026-08-25 (flagsfix): ms/snow3pmsf zwracane teraz jako 'Tak'/null z
+    // tyre_params.cjs (nie 1/0). Dodatkowe zabezpieczenie normalizeLabelFlag na wypadek
+    // starych sciezek importu ktore moglyby zwrocic surowa liczbe.
+    ms: tyre.normalizeLabelFlag(enriched.ms),
+    snow3pmsf: tyre.normalizeLabelFlag(enriched.snow3pmsf),
     wentyl: enriched.wentyl ?? null
   };
 }

@@ -57,6 +57,21 @@ function normalizeLabelFlag(value) {
   return truthy ? 'Tak' : null;
 }
 
+// POPRAWKA 2026-08-25 (Anna — flagsfix): kolumna label_noise (halas dB) musi trzymac
+// format "NNdB" albo NULL. Dostawcy zwracaja rozne wersje: "73", "73dB", "73 db",
+// "73dB - )))" (Selly quirk), "B", nawet "24dB" (zbyt niska - podejrzenie bledu).
+// Uszczegolowienie 24.07 zrobione tylko na danych - importy nadpisywaly. Teraz w kodzie.
+function normalizeLabelNoise(value) {
+  if (value === null || value === undefined) return null;
+  const s = String(value).trim();
+  if (!s) return null;
+  const m = s.match(/(\d{2,3})\s*d?B?/i);
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  if (!Number.isFinite(n) || n < 60 || n > 90) return null; // sensowny zakres opon
+  return `${n}dB`;
+}
+
 function normalizeSizeText(value) {
   let text = cleanText(value);
   text = text.replace(/\bOpona\b/gi, '').trim();
@@ -511,13 +526,13 @@ function normalizeJmk(record) {
     indeksPredkosci: loadSpeed.indeksPredkosci,
     pr: loadSpeed.pr || marks.pr,
     tlTt: marks.tlTt,
-    ms: /\bM\+S\b/i.test(record.nazwa || '') ? 1 : 0,
-    snow3pmsf: /\b3PMSF\b/i.test(record.nazwa || '') ? 1 : 0,
+    ms: /\bM\+S\b/i.test(record.nazwa || '') ? 'Tak' : null,
+    snow3pmsf: /\b3PMSF\b/i.test(record.nazwa || '') ? 'Tak' : null,
     pozycjaOsi: /\bFRONT\b/i.test(record.nazwa || '') ? 'FRONT' : /\bDRIVE\b/i.test(record.nazwa || '') ? 'DRIVE' : null,
     labelRolling: emptyToNull(record.oporToczenia),
     labelWet: emptyToNull(record.przyczepnosc),
     labelNoiseClass: emptyToNull(record.halasKlasa),
-    labelNoise: emptyToNull(record.halasDb),
+    labelNoise: normalizeLabelNoise(record.halasDb),
     dot: emptyToNull(record.dot) || 'nie starsza niz 3 lata',
     waga: parseNumber(record.masaBrutto),
     stan,
@@ -1060,14 +1075,15 @@ function normalizeHandlopex(record) {
     indeksPredkosci: loadSpeed.indeksPredkosci,
     pr: marks.pr,
     tlTt: marks.tlTt,
-    ms: /\bM\+S\b/i.test(record.nazwa || '') ? 1 : 0,
-    snow3pmsf: /\b3PMSF\b/i.test(record.nazwa || '') ? 1 : 0,
+    ms: /\bM\+S\b/i.test(record.nazwa || '') ? 'Tak' : null,
+    snow3pmsf: /\b3PMSF\b/i.test(record.nazwa || '') ? 'Tak' : null,
     labelRolling: emptyToNull(record.oporToczenia),
     labelWet: emptyToNull(record.przyczepnosc),
-    labelNoise: emptyToNull(record.halas),
+    labelNoise: normalizeLabelNoise(record.halas),
     labelNoiseClass: emptyToNull(record.labelNoise),
     labelSnow: normalizeLabelFlag(record.labelSnow),
-    labelIce: normalizeQty(record.labelIce) ?? null,
+    // POPRAWKA 2026-08-25 (flagsfix): normalizeQty wpisywalo do TEXT "0.0"/"1.0" (2278 rek MO4/MO5)
+    labelIce: normalizeLabelFlag(record.labelIce),
     dot: emptyToNull(record.dot) || 'nie starsza niz 3 lata',
     waga: parseNumber(record.waga),
     stan: normalizeQty(record.ilosc),
@@ -1692,6 +1708,8 @@ module.exports = {
   cleanText,
   normalizePrice,
   normalizeQty,
+  normalizeLabelFlag,
+  normalizeLabelNoise,
   parseSize,
   parseLoadSpeed,
   parseTechnicalMarks,

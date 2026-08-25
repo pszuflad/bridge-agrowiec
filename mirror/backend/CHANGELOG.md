@@ -1,4 +1,65 @@
-2026-08-24 14:40
+
+2026-08-25 13:15
+obszar: backend + baza danych
+
+pliki:
+  - parsers/tyre_params.cjs (+ .bak_pre_flagsfix_20260825_1315)
+  - parsers/adapter.cjs (+ .bak_pre_flagsfix_20260825_1315)
+  - data.db (+ .bak_pre_flagsfix_20260825_1315, .backup — WAL-safe)
+
+zmiana:
+  Naprawa rozjazdow w kolumnach flag opon i normalizacji tekstu. Wszystkie
+  flagi UE (ms, snow_3pmsf, label_ice, cfo, stubble_resistant) sa teraz Tak/NULL
+  konsekwentnie zgodnie z poprawka checkmark_tak z 2026-07-21, a label_noise
+  ma zawsze format NNdB albo NULL.
+
+  KOD (naprawa nadpisywania przy imporcie):
+  1) tyre_params.cjs: normalizeLabelFlag() dostal 2 dodatkowe zastosowania — linie
+     514-515 i 1063-1064 (ms/snow3pmsf zwracaly hardkodowane 1/0 zamiast Tak/null)
+     i linia 1070 (labelIce przez normalizeQty zwracal string "0.0" zamiast Tak/null).
+     Nowa funkcja normalizeLabelNoise() ustala format "NNdB" w zakresie 60-90 albo
+     NULL (odsiewa "B", "24dB", "73dB - )))"). Zastosowana w liniach 519 i 1067.
+     Eksport modulowy rozszerzony: normalizeLabelFlag i normalizeLabelNoise dostepne
+     dla adaptera.
+  2) adapter.cjs: cfo i stubbleResistant propagowane przez tyre.normalizeLabelFlag()
+     przed zapisem do bazy (wczesniej ?? null bez konwersji 0/1 → Tak/NULL). Ms i
+     snow3pmsf tez przechodza przez normalizeLabelFlag jako druga linia obrony na
+     wypadek starych sciezek importu ktore moglyby zwrocic surowa liczbe.
+
+  DANE (jednorazowe czyszczenie w transakcji):
+  - label_ice: 2278 wartosci "0.0" i 134 pustych stringow → NULL (parser wpisywal
+    ilosc jako string, kolumna TEXT trzymala smieci)
+  - label_noise: 22 smieci ("B", "70"/"73"/"74" bez dB, "72dB - )))", "24dB") →
+    NULL albo znormalizowane do NNdB
+  - ms: 1311 wartosci 1 → 'Tak', 2830 wartosci 0 → NULL
+  - snow_3pmsf: 1358 → 'Tak', 2783 → NULL
+  - cfo: 57 → 'Tak', 2716 → NULL
+  - stubble_resistant: 2 → 'Tak', 2147 → NULL
+  - marka: 2 rekordy MO2 z rozmiarem opony jako marka (MO2_999991688, MO2_999991691)
+    zamienione na 'UNKNOWN' (marka ma NOT NULL, parser MO2 do zbadania osobno);
+    1 rekord "Alliance" → UPPER
+  - nazwa: 1139 rekordow z realnie malymi literami (glownie MO5 Trelleborg/Ozka,
+    MO9 BKT V-Flecto/Agrimax) → UPPER. Przy najblizszym imporcie parser zwroci
+    male 'x' w rozmiarze przez toUpperPLName().
+
+  MIGRACJA SCHEMATU: pominieta. SQLite ma dynamic typing i przyjmuje 'Tak' w
+  kolumnie deklarowanej jako INTEGER (typ trzyma sie na wartosci, nie kolumnie).
+  Zmiana INTEGER→TEXT nie jest konieczna.
+
+  WERYFIKACJA:
+  - PM2 restart bridge-backend (uptime OK, wszystkie moduly zarejestrowane)
+  - PRAGMA integrity_check: ok
+  - Symulacja parsera na realnym CSV MO5 (5194 wierszy, sample 500): ms Tak=429/null=71,
+    snow Tak=415/null=85, label_ice Tak=0/null=500, label_noise OK=383/smieci=0
+
+powod:
+  Zgloszenie Anny: "sprawdz czy nie ma wiecej [poprawek], np. mialo sie nie
+  pojawiac 0 w kolumnie lod i snieg". Audit potwierdzil 6543 zerowych flag i
+  22 smieciowych label_noise mimo poprawki sniegfix z 18.08. Notatka
+  diagnostyczna z 2026-08-21 (wpis wyzej) juz identyfikowala te 4 miejsca
+  w tyre_params.cjs — teraz naprawione zgodnie z zasada z system-promptu
+  "poprawki danych zawsze tez w parserach" (bez tego auto-pull 04:00 nadpisze).
+
 obszar: backend + frontend
 pliki:
   - uwaga_cena_patch.cjs (+bak_pre_holdreasons_20260824_143500)

@@ -1,0 +1,16 @@
+{
+  "id": "2026-08/MO2__20260825__08335__Cennik_26002_v2_4f8a1740-11c5-4ee8-8e1d-e3145b10d335.csv",
+  "dostawca": "MO2",
+  "zrodlo": "auto-pull",
+  "url": "http://46.238.100.138:5844/Cennik_26002_v2_4f8a1740-11c5-4ee8-8e1d-e3145b10d335.csv",
+  "uzytkownik": "SYSTEM-AUTOPULL",
+  "data": "2026-08-25T08:33:57.229Z",
+  "oryginalnaNazwa": "Cennik_26002_v2_4f8a1740-11c5-4ee8-8e1d-e3145b10d335.csv",
+  "rozmiar": 291615,
+  "sha256": "14017737641fa04adfcef55327fe201b7ef6e9a6e84d306e2cf8e61540e1a485",
+  "status": "ok",
+  "blad": null,
+  "rekordy": 1598,
+  "parserErrors": 0,
+  "odrzucone": 0
+}
