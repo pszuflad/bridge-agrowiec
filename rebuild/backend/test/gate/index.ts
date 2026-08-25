@@ -10,6 +10,7 @@
 //
 export * from "./aplikacja.js";
 export * from "./baza.js";
+export * from "./dane.js";
 export * from "./fixtures.js";
 export * from "./kontrakt.js";
 export * from "./ksztalt.js";
