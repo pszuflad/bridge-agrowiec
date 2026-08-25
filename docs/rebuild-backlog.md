@@ -176,14 +176,14 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 | **Pliki** | `db/schema.sql` (kolumna `uwaga_cena`), `uwaga_cena_patch.cjs` (nowy), `parsers/adapter.cjs`, `parsers/mo7_nokian.cjs`, `extensions.cjs` |
 | **Commity** | `33455c8`, `c5d3d63`, `16bc37c` |
 | **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Iteracja** | **→ follow-up I2** (kolumna+endpoint w katalogu) **+ I3** (propagacja w imporcie) |
+| **Iteracja** | **→ I3** (schemat + endpoint + propagacja importu) **+ injection-tooltip** (późniejsza iteracja; wzorzec jak pending/selly/freq-injection) |
 | **Status** | — |
 
 **Opis biznesowy:** dostawcy czasem zwracają „cena na zapytanie" (np. „- zł" w Nokian dla wielkoformatowych VF Float King). Zamiast pokazywać 0/pustą cenę, produkt dostaje notatkę i jest „wstrzymany"; frontend pokazuje tooltip z powodem.
 
 **Szczegół techniczny:** nowa kolumna `products.uwaga_cena TEXT`; `uwaga_cena_patch.cjs`: idempotentny `ALTER TABLE ADD COLUMN` + monkey-patch `U.acceptStaging` (odczyt `uwagaCena` ze `snapshotJson`) i `U.addProductsBulk`; **nowy endpoint `GET /api/products/uwagi-cena`** (lista wstrzymanych, dla tooltipu). Parser `mo7_nokian.cjs` i `adapter.cjs` propagują pole `uwagaCena`.
 
-**Rekomendacja:** ✅ **nanieść.** ⚠ **I2 (katalog) już zrobione BEZ tej kolumny/endpointu** (przyszły po zamrożeniu kontraktu) → dołożyć jako **follow-up do I2** (kolumna w widoku + `/api/products/uwagi-cena` + tooltip). Propagacja w imporcie wejdzie naturalnie przy **porcie parserów (I3)**.
+**Rekomendacja:** ✅ **nanieść, ale NIE jako łatka do I2.** Po przeglądzie raportu I2 (2026-08-25): `uwaga_cena` rozkłada się jak inne rzeczy odłożone przez I2 — **schemat** (nowa kolumna, razem z decyzją #3) + **endpoint `/api/products/uwagi-cena`** + **propagacja w imporcie** (`acceptStaging`, parser mo7/adapter) → **I3**; **frontend to skrypt injection do tooltipu** (wprost z komentarza w `uwaga_cena_patch.cjs`) → wchłonięcie injection w późniejszej iteracji. Katalog I2 odtworzył bundle **sprzed** `uwaga_cena`, a dołożenie pola do `GET /api/products` złamałoby GATE wobec zamrożonego `GET_products.json` (przenagranie fixtures należy do I12). Dlatego I2 zostaje zamknięte, a to wchodzi u swoich właścicieli.
 
 ### #5 · 2026-08-24 · [BACKEND] · `frazy` (dopasowanie fraz — NIEZNANE szczegóły)
 

@@ -308,6 +308,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
 - **Status:** ⬜  **Sesje:** 3a BE (parser+staging) · 3b BE (silnik `tk()`) · 3c BE (overrides) · 3d FE (`/staging`)  **Zależy od:** 2
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
+- **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~3000+ linii: `tyre_params.cjs`, `adapter.cjs`, `common.cjs`, `bridge_ext.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dispatcher.cjs`, `dictionaries/`), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
 - **Backend 3a — parser + adapter → staging:**
   - Parsery dostawców + `adapter.recordToSurowe()` z **blokiem normalizacji końcowej** (kategoria, zastosowanie, flagi etykiety, szerokość).
   - **Tu wracają decyzje z backlogu:** #1 sniegfix, #2 kategoriafix, #3 szerokość (`docs/rebuild-backlog.md`).
@@ -322,6 +323,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - Staging: `GET /api/staging`, `/api/staging/paged`, `/api/staging/{id}`, `POST /api/staging/accept`, `/reject`, `/import`, `/clear`.
 - **Backend 3c — manual_overrides `Gq()`:** przy konflikcie zachowuje wartość Marty, zapis do `snapshotJson`. `GET /api/overrides`, `PUT/DELETE /api/overrides/{id}`.
 - **Frontend 3d:** widok `/staging` — przegląd pozycji importu, akcje accept/reject, podgląd różnic. **Decyzja:** staging auto-accept vs ręczny (spec-frontend §4).
+- **Wejście z triażu (2026-08-25, `rebuild-backlog.md`):**
+  - **#6** bieżące poprawki parserów (flagsfix, mo8…) → objęte **portem**, zero osobnej pracy.
+  - **#4 `uwaga_cena`** (cena „na zapytanie") → dołożyć: kolumna `products.uwaga_cena` (schemat, razem z #3), endpoint **`GET /api/products/uwagi-cena`** (nowy — brak w zamrożonym kontrakcie/fixtures, dodać do openapi w I12), propagacja w imporcie (`acceptStaging`; parser `mo7_nokian`/adapter propagują `uwagaCena`). Frontend tooltip = injection → późniejsza iteracja.
+  - **#5 `frazy`** (`frazy_migruj.cjs`, `common.cjs`) → zbadać z diffa (changelog Ani nieaktualny); prawdopodobnie normalizacja `zastosowanie`/nazw w adapterze.
 - **Ścieżki (GATE):** staging×7, import×2, overrides×2, ai-fallback.  **Fixtures:** `GET_staging.json`, `GET_staging_paged.json`, `GET_overrides.json`.
 - **DoD:** import przetwarza plik/URL do stagingu; `tk()` odtwarza reguły dopasowania/auto-approve/wycofania; overrides Marty respektowane; fixtures przez GATE; Ania przeklika pełny cykl importu.
 
