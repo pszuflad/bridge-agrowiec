@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
+import { queryClient } from "@/lib/queryClient";
 import { server } from "./msw/server";
 
 beforeAll(() => {
@@ -17,6 +18,19 @@ beforeAll(() => {
       removeListener: () => {},
       dispatchEvent: () => false,
     })) as typeof window.matchMedia;
+  }
+
+  // Radix (Select, DropdownMenu) używa Pointer Events API i `scrollIntoView`,
+  // których jsdom nie implementuje. Bez tych trzech zaślepek komponent rzuca przy
+  // otwieraniu listy. To luka jsdoma, nie zachowanie aplikacji — tak samo jak
+  // `matchMedia` wyżej.
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = () => false;
+    Element.prototype.setPointerCapture = () => {};
+    Element.prototype.releasePointerCapture = () => {};
+  }
+  if (!Element.prototype.scrollIntoView) {
+    Element.prototype.scrollIntoView = () => {};
   }
 
   server.listen({ onUnhandledRequest: "error" });
@@ -37,6 +51,11 @@ beforeAll(() => {
 afterEach(() => {
   cleanup();
   server.resetHandlers();
+  // `queryClient` jest singletonem modułowym ze `staleTime: Infinity` (wiernie oryginałowi,
+  // lib/queryClient.ts). Bez czyszczenia cache przecieka między testami: kolejny render
+  // dostaje dane poprzedniego bez żadnego żądania, więc mock ustawiony przez `server.use`
+  // nigdy nie dochodzi do głosu.
+  queryClient.clear();
   localStorage.clear();
   sessionStorage.clear();
 });
