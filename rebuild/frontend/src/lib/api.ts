@@ -11,7 +11,7 @@
 /**
  * ODSTĘPSTWO ŚWIADOME (plan.md D5): oryginał miał `Vd = "/panel"`, bo panel był
  * montowany pod tym prefiksem. Nowy build stoi w korzeniu domeny, więc prefiks jest pusty,
- * a każda ścieżka i tak zaczyna się od `/api` — to jest wymagane „API base /api".
+ * a każda ścieżka i tak zaczyna się od `/api` — to jest wymagane „API base /api”.
  *
  * Stała zostaje, bo `queryFn` skleja ją z `queryKey.join("/")` (queryClient.ts) — gdyby
  * aplikacja kiedyś wróciła pod prefiks, jest to jedno miejsce do zmiany.
@@ -30,7 +30,7 @@ export type Uzytkownik = {
 };
 
 /**
- * „Zapamiętaj mnie" w oryginale nie zapisuje osobnej flagi przy tokenie — przełącza
+ * „Zapamiętaj mnie” w oryginale nie zapisuje osobnej flagi przy tokenie — przełącza
  * CAŁY magazyn, w którym siedzi token ORAZ `bridge_user` (fe.js:9000-9006).
  * Zaznaczone → `localStorage` (przeżywa zamknięcie przeglądarki), inaczej `sessionStorage`.
  * Gdy dostęp do storage rzuca (tryb prywatny, zablokowane ciasteczka) — `sessionStorage`.

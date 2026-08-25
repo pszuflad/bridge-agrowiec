@@ -1,8 +1,8 @@
 /**
  * 404 — odpowiednik `deminified/frontend-index.js:16534-16556` (`p2`).
  *
- * ODSTĘPSTWO O3 (plan.md): oryginał miał tu angielski tekst („404 Page Not Found" /
- * „Did you forget to add the page to the router?") na `bg-gray-50` i `text-gray-*` —
+ * ODSTĘPSTWO O3 (plan.md): oryginał miał tu angielski tekst („404 Page Not Found” /
+ * „Did you forget to add the page to the router?”) na `bg-gray-50` i `text-gray-*` —
  * jedyny ekran aplikacji poza design tokenami, wyglądający na niedokończony.
  * Tłumaczymy na polski i przenosimy na tokeny; struktura (karta, ikona, nagłówek,
  * akapit) zostaje.
