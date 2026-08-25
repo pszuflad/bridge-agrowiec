@@ -100,6 +100,21 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | `docs/reference/Instrukcja_obslugi_Bridge.docx` (17 zrzutów) | wygląd/UX (wersja 5, starsza niż bundle) |
 | `rebuild/backend/test/gate/` | harness GATE (od I1, rozbudowany w I2 o moduł seedujący `test/gate/dane.ts` — produkty/dostawcy/`historia_cen`): porównanie odpowiedzi z `contract/fixtures/` + walidacja wg `contract/openapi.yaml`, generyczny — kolejne iteracje dokładają tylko ścieżki/fixtures/seed |
 
+> **Gdzie szukać „co dokładnie robi endpoint X" (ustalone 2026-08-25).** Świadomie **NIE zakładamy
+> osobnego pliku ze specyfikacją endpointów odbudowy** — byłby czwartą kopią tej samej wiedzy obok
+> kontraktu, fixtures i kodu, a projekt już raz oberwał od dokumentacji, która rozjechała się ze stanem
+> faktycznym (`04_DESIGN_TOKENS.md`, spec-frontend §7). Zamiast tego obowiązuje łańcuch:
+>
+> 1. **kształt odpowiedzi** → `contract/fixtures/` (nagranie produkcji) i `contract/openapi.yaml`;
+> 2. **zachowanie** (parametry, rozgałęzienia, pola liczone w locie, pułapki) → blok iteracji w §5 →
+>    wskazany tam katalog `docs/tickets/<ID>/` (`plan.md` = decyzje, `raport.md` = ustalenia i dowody);
+> 3. **ostateczne rozstrzygnięcie** → komentarz w kodzie `rebuild/`, który cytuje linię oryginału,
+>    i sam zdeminifikowany oryginał.
+>
+> Łańcuch działa, bo każdy blok iteracji podaje swoje **Ścieżki (GATE)** i katalog ticketa. Jedyne
+> miejsce, gdzie wiedza o zachowaniu ma się scalić maszynowo, to **odświeżenie `openapi.yaml` w I12** —
+> i tam schematy powstają **z fixtures, nie z naszego kodu**.
+
 > **Rozjazd kontrakt↔produkcja (wykryty w I1):** `contract/openapi.yaml` (2.3) nie zamraża schematów
 > ciał (tylko ścieżkę/metodę/kod statusu) i oznacza `GET /api/me` jako publiczny (`security: []`)
 > mimo że produkcja realnie zwraca `401` bez tokenu; kontrakt nie deklaruje `401` też dla
@@ -278,8 +293,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   | Odświeżenie kontraktu + nagranie fixtures zapisujących i wariantu „goła tablica" `GET /api/products` | **I12** | ✅ dopisane do zakresu I12 |
   | Słowniki marek/kategorii z `GET /api/atrybuty` (znosi degradację z D3) | **I7** | ✅ odnotowane w I7 |
   | Dane kolumny „Promocja" (dziś renderuje `—`) | **I4** | ✅ odnotowane w I4 |
-  | `GET /api/config` — odblokowuje eksport CSV | **I11** | ✅ odnotowane w I11 |
-  | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8 albo I11** | ⬜ **właściciel nierozstrzygnięty** — patrz I8 |
+  | `GET /api/config` (produkcja nie ma kluczy eksportu — patrz I8) | **I11** | ✅ odnotowane w I11 |
+  | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8** | ✅ dopisane do zakresu I8 — zależność od `/api/config` okazała się nominalna |
   | Decyzja o `szerokosc` (backlog #3) | ticket importu/schematu (I3) | ✅ ustalenia w `rebuild-backlog.md` #3, odsyłacz w I3 |
 - **DoD:** ✅ oba kształty `GET /api/products` + cap/filtr/auth; ✅ `GET /api/suppliers`/`GET /api/dostawcy`
   z polami liczonymi w locie; ✅ `src/db/schema.ts` naprawiony (D5); ✅ kompresja włączona; ✅ GATE —
@@ -360,12 +375,19 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Cel (Ania klika):** otwiera `/selly`, generuje/eksportuje CSV do marketplace, widzi status/log/słowniki — natywnie.
 - **Backend:** `/api/selly/status|ping|csv-status|log|dictionaries|categories|producers`, `POST /api/selly/generate-csv|sync-product|sync-supplier`; `GET /api/export/shoper`, `/api/export-shoper` (pełny katalog CSV — **z auth**, §3). Tabele `selly_kategoria_norm_map`, `selly_zastosowanie_category_map`.
 - **Frontend:** trasa Wouter `/selly` + komponenty React/TanStack (zamiast overlay + routing przez hash).
-  - **Eksport CSV odłożony z I2:** przycisk „Pobierz CSV (Shoper)" w `/katalog` (`frontend-index.js:23384-23422`).
-    Wymaga `GET /api/config` (`shoper.separator`, `shoper.kolumny` — dostarcza I11), a kolumny bierze
-    z konfiguratora katalogu, który już istnieje. **Właściciel do ustalenia przy starcie: I8 (bo to
-    eksport do marketplace) czy I11 (bo blokerem jest `/api/config`)** — nie rozstrzygnięte w I2.
+  - **Eksport CSV odłożony z I2 — należy do TEJ iteracji** (rozstrzygnięte 2026-08-25): przycisk
+    „Pobierz CSV (Shoper)" w `/katalog` (`frontend-index.js:23384-23422`). Uzasadnienie: to eksport
+    Shoperowy, a I8 wnosi już jego serwerowy odpowiednik (`GET /api/export/shoper`,
+    `backend-index.cjs:48843`) — jedna iteracja ma trzymać obie drogi emisji CSV spójnie.
+  - **⚠ Zależność od `/api/config` jest NOMINALNA, nie realna** (zweryfikowane w `contract/fixtures/GET_config.json`):
+    produkcja **nie ma** ani klucza `shoper.separator`, ani `shoper.kolumny` — ma tylko
+    `shoper.format_eksportu`, którego katalog nie czyta (konsumuje go serwerowy eksport,
+    `backend-index.cjs:48843`). Przycisk zawsze wpada więc w fallbacki: separator `";"` i zahardkodowana
+    13-kolumnowa lista `TT` (`frontend-index.js:22706-22731`). **Wniosek: I8 dowozi ten przycisk w pełni
+    wiernie, nie czekając na I11** — wystarczy czytać konfigurację defensywnie (brak wartości → fallback);
+    gdy I11 doda `GET /api/config`, kod nie wymaga zmiany. Kolumny bierze z konfiguratora katalogu (I2).
 - **Ścieżki (GATE):** selly×10, export×2.  **Fixtures:** `GET_selly_status.json`, `_ping`, `_csv-status`, `_log`, `_dictionaries`.
-- **DoD:** panel Selly natywny; eksport CSV działa i jest chroniony auth; fixtures przez GATE; parytet z `selly-injection.js` (26 KB). Jeśli eksport CSV z `/katalog` przypadnie tej iteracji — także on.
+- **DoD:** panel Selly natywny; eksport CSV (serwerowy **oraz** przycisk w `/katalog` odłożony z I2) działa i jest chroniony auth; fixtures przez GATE; parytet z `selly-injection.js` (26 KB).
 
 ---
 
@@ -393,7 +415,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** 1
 - **Cel (Ania klika):** edytuje konfigurację, dostawców (w tym **częstotliwość importu** natywnie) i limity spedycji.
 - **Backend:** `GET/PUT /api/config` (`Jt`); `/api/dostawcy/{id}`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`, `/api/dostawcy/{kod}/upload`; `GET /api/spedycja` (`gn`). **`GET /api/dostawcy` i `GET /api/suppliers` (listy) już dostarczone w I2** — tu dochodzą tylko detal i mutacje dostawcy.
-- **Frontend:** widoki `/konfiguracja` + edycja dostawcy z polem `czestotliwoscMinuty` (zamiast `freq-injection.js` PATCH poza Reactem). `GET /api/config` odblokuje też eksport CSV w `/katalog` (I2, follow-up).
+- **Frontend:** widoki `/konfiguracja` + edycja dostawcy z polem `czestotliwoscMinuty` (zamiast `freq-injection.js` PATCH poza Reactem). Eksport CSV w `/katalog` należy do I8, nie tu — produkcja
+  nie ma kluczy `shoper.separator`/`shoper.kolumny`, więc `/api/config` nie jest dla niego blokerem.
 - **Ścieżki (GATE):** config, dostawcy×3 (detal + 2 mutacje), spedycja.  **Fixtures:** `GET_config.json`, `GET_spedycja.json` (`GET_dostawcy.json`/`GET_suppliers.json` już zielone od I2).
 - **DoD:** konfiguracja/dostawcy/spedycja edytowalne; częstotliwość natywnie; fixtures przez GATE.
 
@@ -408,7 +431,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     `PUT /api/products/{id}`, `DELETE /api/products/{id}`, `POST /api/products` (bulk). Katalog (I2) jest
     dziś wyłącznie do odczytu — te trasy domykają go do parytetu z produkcją.
   - **Finalny przegląd bezpieczeństwa:** potwierdzić auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego `JWT_SECRET` z fallbackiem.
-  - **Odświeżenie kontraktu i fixtures** (zapowiedziane w §2, zebrane z iteracji 1–11):
+  - **Odświeżenie kontraktu i fixtures** (zapowiedziane w §2, zebrane z iteracji 1–11).
+    **⚠ Schematy ciał generujemy z `contract/fixtures/` — z nagrań produkcji, NIE z naszej implementacji.**
+    Inaczej kontrakt przestaje być niezależnym dowodem i zaczynamy sprawdzać własną pracę własną pracą.
+    Zakres:
     dopisać do `contract/openapi.yaml` realne kody błędów (m.in. `401` dla `GET /api/me` i `POST /api/login`)
     oraz schematy ciał, których wersja 2.3 nie zamraża; **przenagrać fixtures POST/PUT/PATCH/DELETE
     przeciw kopii bazy**; dograć wariant `GET /api/products` **bez parametrów** (goła tablica — główna

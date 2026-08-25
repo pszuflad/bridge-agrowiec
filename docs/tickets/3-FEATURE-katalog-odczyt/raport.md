@@ -201,16 +201,31 @@ znajduje się też w bloku Iteracji 2 („Co I2 świadomie odłożyła i dokąd"
 | 3 | Słowniki marek/kategorii z `GET /api/atrybuty` — znosi degradację przyjętą w D3 | **I7** | ✅ odnotowane w bloku I7 |
 | 4 | Dane kolumny „Promocja" (dziś renderuje `—`, jak w oryginale bez promocji) | **I4** | ✅ odnotowane w bloku I4 |
 | 5 | `GET /api/config` — bloker eksportu CSV | **I11** | ✅ odnotowane w bloku I11 |
-| 6 | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8 albo I11** | ⬜ **właściciel nierozstrzygnięty** — opisane w I8 z jawnym pytaniem |
+| 6 | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8** | ✅ dopisane do zakresu i DoD I8 |
 | 7 | Decyzja o `szerokosc` (backlog #3) — ustalenia i propozycja domknięcia gotowe | ticket importu/schematu (**I3**) | ✅ podsekcja w `rebuild-backlog.md` #3 (status bez zmian: 🕒 PÓŹNIEJ) + odsyłacz w I3 |
-| 8 | Brak kanonicznego specu endpointów produktów/dostawców poza artefaktami ticketa (dług dokumentacyjny zgłoszony przez doc-checkera) | — | ⬜ **nieprzypisane** — nie jest to zakres żadnej iteracji, decyzja czy w ogóle powstawać |
+| 8 | Brak kanonicznego specu endpointów produktów/dostawców | — | ✅ **rozstrzygnięte: osobnego specu NIE zakładamy** — łańcuch wyszukiwania utrwalony w §2 roadmapy |
 
-**Dwie rzeczy wymagają Twojej decyzji, a nie zostały rozstrzygnięte w tym tickecie:**
-- **poz. 6** — czy eksport CSV z katalogu należy do I8 (bo to eksport do marketplace), czy do I11
-  (bo blokerem jest `GET /api/config`). Zostawiłem to jawnie otwarte w obu miejscach zamiast wybierać
-  za Ciebie.
-- **poz. 8** — czy zakładamy osobny plik ze specyfikacją endpointów odbudowy, czy artefakty ticketów
-  wystarczą.
+### Dwie decyzje rozstrzygnięte po review (2026-08-25)
+
+**poz. 6 — eksport CSV z katalogu należy do I8.** Rozstrzygnęły to dwa fakty, nie preferencja:
+- `contract/fixtures/GET_config.json` pokazuje, że produkcja **nie ma** kluczy `shoper.separator`
+  ani `shoper.kolumny` — ma tylko `shoper.format_eksportu`, którego katalog nie czyta (konsumuje go
+  serwerowy eksport, `backend-index.cjs:48843`). Przycisk zawsze wpada więc w fallbacki: separator
+  `";"` i zahardkodowana 13-kolumnowa lista `TT`. **Zależność od `/api/config` jest nominalna** —
+  I11 nie jest blokerem, a I8 idzie na tablicy wcześniej.
+- I8 wnosi już serwerowy eksport Shopera (`GET /api/export/shoper`), więc jedna iteracja trzyma obie
+  drogi emisji CSV spójnie.
+Zapisane w bloku I8 (zakres + DoD), w tabeli odłożonych w I2 i sprostowane w I11.
+
+**poz. 8 — osobnego specu endpointów NIE zakładamy.** Byłby czwartą kopią tej samej wiedzy obok
+kontraktu, fixtures i kodu — a ten projekt już raz oberwał od dokumentacji, która rozjechała się ze
+stanem faktycznym (`04_DESIGN_TOKENS.md`, 6 rozjazdów; `spec-frontend.md` §7). Zamiast tego utrwaliłem
+w §2 roadmapy **łańcuch wyszukiwania**: kształt → `contract/fixtures/` + `openapi.yaml`; zachowanie →
+blok iteracji w §5 → katalog `docs/tickets/<ID>/`; rozstrzygnięcie → komentarz w kodzie cytujący
+oryginał. Łańcuch działa bez nowego pliku, bo każdy blok iteracji podaje swoje ścieżki GATE i katalog
+ticketa. **Dodatkowe zabezpieczenie:** przy odświeżaniu `openapi.yaml` w I12 schematy ciał mają
+powstać **z fixtures, nie z naszej implementacji** — inaczej kontrakt przestaje być niezależnym
+dowodem i zaczynamy sprawdzać własną pracę własną pracą. To ograniczenie jest teraz zapisane w I12.
 
 ## Aktualizacja dokumentacji
 
