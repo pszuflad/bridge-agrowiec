@@ -15,6 +15,9 @@ FE_SRC="/home/admin/domains/agritires.eu/public_html/panel"  # żywy frontend
 
 cd "$REPO"
 
+# cron ma ubogi PATH — sendmail zwykle jest w /usr/sbin (dlatego git działał, a mail nie)
+export PATH="/usr/sbin:/usr/local/sbin:$PATH"
+
 # node z nvm/.nvmrc jeśli dostępne (dla deminify), inaczej systemowy node
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && nvm use >/dev/null 2>&1 || true
@@ -90,8 +93,8 @@ $CH}"
           ':(exclude)*.bak_*' ':(exclude)mirror/backend/index.cjs' \
           ':(exclude)*/CHANGELOG.md' 2>/dev/null | head -250)"
 
-  # powiadomienie e-mail (sendmail -t; From na domenie serwera = lepsza dostarczalność)
-  {
+  # powiadomienie e-mail — komponujemy wiadomość, potem wysyłamy z JAWNĄ obsługą błędu
+  MAILMSG="$( {
     echo "From: Bridge dla Agrowca <admin@agritires.eu>"
     echo "To: pszuflad@gmail.com, anna.naumowicz4@gmail.com"
     echo "Subject: [Bridge] Zmiana produkcji $CAT${BAKS:+ ($BAKS)} $TS"
@@ -103,5 +106,15 @@ $CH}"
     printf '%s\n' "$DIFF"
     echo
     echo "Commit: https://github.com/pszuflad/bridge-agrowiec/commit/$SHA"
-  } | sendmail -t 2>/dev/null && echo "$TS  mail wyslany" || echo "$TS  UWAGA: mail nie wyszedl"
+  } )"
+
+  # sendmail bywa poza PATH crona (np. /usr/sbin) — rozwiąż jawnie i NIE ukrywaj błędu
+  SENDMAIL="$(command -v sendmail || echo /usr/sbin/sendmail)"
+  if [ ! -x "$SENDMAIL" ]; then
+    echo "$TS  UWAGA: nie znaleziono sendmail (PATH=$PATH) — mail nie wyszedl"
+  elif MAIL_ERR="$(printf '%s\n' "$MAILMSG" | "$SENDMAIL" -t 2>&1)"; then
+    echo "$TS  mail wyslany (via $SENDMAIL)"
+  else
+    echo "$TS  UWAGA: mail nie wyszedl (via $SENDMAIL): ${MAIL_ERR:-kod wyjscia != 0, bez komunikatu}"
+  fi
 fi
