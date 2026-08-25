@@ -129,6 +129,16 @@ Cel: żaden PR ticketa nie wejdzie do `develop` bez zielonego CI — a właścic
 >
 > Alternatywa (nowszy mechanizm): **Settings → Rules → Rulesets → New branch ruleset**, target `develop`, reguły „Require a pull request" + „Require status checks" (backend, frontend). Efekt ten sam.
 
+## Znane pułapki środowiska (VPS)
+- **better-sqlite3 vs glibc 2.28.** VPS ma glibc 2.28; prebuilt better-sqlite3 (11.7+/11.10) wymaga
+  `GLIBC_2.29` i nie ładuje się, a node-gyp 10 nie zbuduje ze źródła na dostępnym Pythonie 3.6.
+  **Obejście (w `deploy-staging.sh`):** `npm ci --ignore-scripts` + podłożenie działającej binarki
+  `better_sqlite3.node` **z produkcji** (`/home/admin/private_apps/bridge/node_modules/better-sqlite3/...`,
+  wersja **11.7.0**, ABI node 20 = 115). Dlatego `rebuild/backend` jest **przypięty do better-sqlite3 11.7.0**
+  (musi zgadzać się z wersją produkcji). Gdyby produkcja zmieniła/usunęła tę binarkę — deploy przerwie się
+  z jasnym komunikatem; wtedy zaktualizuj pin i źródło binarki.
+- **Pierwszy/ręczny deploy:** użyj `FORCE=1 bash tools/deploy-staging.sh` (skrypt normalnie wdraża tylko przy nowym commicie).
+
 ## Otwarte punkty (do rozwiązania przy I2)
 - **Schemat snapshotu vs kanon:** snapshot produkcji niesie schemat prod (może różnić się od `rebuild/schema/001_schema.sql`,
   np. `szerokosc` — backlog #3). Przy pierwszym tickecie czytającym realne dane trzeba uzgodnić migrację snapshotu do kanonu.
