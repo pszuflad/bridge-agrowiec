@@ -1,0 +1,9 @@
+{
+  // Osobna konfiguracja testów: tylko one mają prawo sięgać po API Node
+  // (odczyt fixtures, start backendu). `src/` zostaje czysto przeglądarkowe.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
+  },
+  "include": ["test", "src"]
+}

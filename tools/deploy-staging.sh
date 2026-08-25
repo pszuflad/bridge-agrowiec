@@ -5,11 +5,11 @@
 #  Uruchamiany z crona DirectAdmin. Laptopy tego nie odpalają.
 #
 #  KONTRAKT z aplikacją (musi spełnić Iteracja 1):
-#   - rebuild/backend:  `npm ci` && `npm run build` -> katalog dist/, wejście dist/server.js
+#   - rebuild/backend:  `npm ci --include=dev` && `npm run build` -> katalog dist/, wejście dist/server.js
 #       server nasłuchuje na process.env.HOST:process.env.PORT, baza z process.env.DB_PATH
 #       `npm run migrate` stosuje schemat/migracje na DB_PATH (idempotentnie)
 #       wymaga JWT_SECRET z $STAGING_ROOT/.env (sekret poza repo — docs/deploy-setup.md)
-#   - rebuild/frontend: `npm ci` && `npm run build` -> katalog dist/ (base "/", API pod /api)
+#   - rebuild/frontend: `npm ci --include=dev` && `npm run build` -> katalog dist/ (base "/", API pod /api)
 #
 #  Dopóki rebuild/ nie ma aplikacji (przed I1), skrypt nic nie buduje — placeholder działa dalej.
 #  Konfiguracja i pełna instrukcja: docs/deploy-setup.md
@@ -58,7 +58,10 @@ fi
 # --- backend: build -> release -> migracje -> pm2 ---
 RELEASE="$STAGING_ROOT/releases/$SHA"
 log "backend: build -> $RELEASE"
-( cd rebuild/backend && npm ci && npm run build )
+# `--include=dev` jest KONIECZNE: wyżej eksportujemy NODE_ENV=production (dla runtime),
+# a przy tej zmiennej `npm ci` pomija devDependencies — czyli TypeScript i Vite,
+# bez których nie ma czym zbudować. Zależności produkcyjne release'u instalujemy niżej.
+( cd rebuild/backend && npm ci --include=dev && npm run build )
 mkdir -p "$RELEASE"
 cp -a rebuild/backend/dist rebuild/backend/package.json rebuild/backend/package-lock.json "$RELEASE"/
 ( cd "$RELEASE" && npm ci --omit=dev )                    # tylko zależności produkcyjne
@@ -73,7 +76,7 @@ pm2 save >/dev/null 2>&1 || true
 
 # --- frontend: build -> publikacja do docroota ---
 log "frontend: build -> $DOCROOT"
-( cd rebuild/frontend && npm ci && npm run build )
+( cd rebuild/frontend && npm ci --include=dev && npm run build )   # jw. — build wymaga devDependencies
 mkdir -p "$DOCROOT"
 rsync -a --delete --exclude '.htaccess' rebuild/frontend/dist/ "$DOCROOT"/
 cp -f deploy/staging/htaccess "$DOCROOT/.htaccess"       # proxy utrzymywany z repo
