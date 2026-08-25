@@ -212,3 +212,54 @@ Rzeczy zauważone przy okazji, świadomie NIE zrobione w tym tickecie:
    ma 6 rozjazdów wartości względem produkcyjnego CSS oraz nierozstrzygnięte „NIEZNANE"
    przy zapisie motywu; `01_WARSTWA_WSPOLNA.md` podaje nieistniejącą opcję
    `refetchOnReconnect:false` i „NIEZNANY" zakres ochrony tras.
+
+## Docs updates
+
+Faza 5 — trzy doc-checkery równolegle.
+
+**`docs/rebuild-roadmap.md`** — Iteracja 1 zamknięta (§4 i §5 na ✅, `1a: PR #2 · 1b: 2026-08-25`).
+Kluczowa korekta: „sidebar z 12 pozycjami" → **10 pozycji nawigacji** (12 = liczba tras routera).
+§3: wiersze „Stack FE", „Wygląd", „Auth flow" i „Stack / decyzje szkieletu" zaktualizowane
+(m.in. usunięta nieprawda, że `bridge_user` leży w `localStorage` — magazyn zależy od
+`bridge_remember`); jako źródło tokenów wskazany surowy arkusz produkcji, nie `04_DESIGN_TOKENS.md`.
+§1a: dopisany kontrakt deployu z `npm ci --include=dev`. Dodany blok „Decyzje 1b wiążące dla
+kolejnych iteracji FE" (routing po ścieżkach, brak auto-wylogowania po 401, klucze Query
+z pełnym `/api/...`, zawężony zakres shadcn) i wskaźnik do sprostowań w `spec-frontend.md §7`.
+
+**`docs/spec-frontend.md`** — nowa **§7 „Sprostowania do dokumentacji Perplexity"** (punkty A–F
+z cytatami `plik:linia`): tabela 6 rozjazdów tokenów, rozstrzygnięte dwa „NIEZNANE" (zapis motywu,
+zakres ochrony tras), lista tokenów spoza dokumentacji, statyczna skala zaokrągleń, nieistniejące
+`refetchOnReconnect:false`. §5 uzupełniona o szczegóły przepływu auth, których spec nie miał
+(przełączanie całego magazynu przez „remember me", brak wołania `GET /api/me`, format błędu
+`401: {"error":"…"}`). §6 doprecyzowana: 12 tras vs 10 pozycji nawigacji.
+Pliki w `docs/incoming/` celowo NIE ruszone — są artefaktem „jak dostaliśmy", a `spec-frontend.md`
+sam siebie definiuje jako warstwę weryfikacji nad nimi.
+
+**`docs/deploy-setup.md`** — kontrakt aplikacji oznaczony jako spełniony przez 1a + 1b; oba kroki
+build na `npm ci --include=dev` z wyjaśnieniem dlaczego (23 vs 383 pakiety przy `NODE_ENV=production`);
+odnotowany brak sourcemap w publicznym docroocie; usunięte zdania mówiące, że frontendu jeszcze nie ma.
+
+**`START.md`** — drzewo repo przestało twierdzić, że `rebuild/` jest puste; dodana sekcja
+„Po bootstrapie" ze stanem odbudowy i komendami startowymi BE + FE.
+
+**`docs/audit-delta.md`** — bez zmian (datowany audyt produkcji; ticket nie unieważnił żadnej tezy).
+
+### Pre-existing issues (zgłoszone przez doc-checkerów, NIE naprawiane w tym tickecie)
+
+1. **`docs/rebuild-roadmap.md` §1a** mówi o katalogu `bridge-nowy`, procesie PM2 `bridge-backend-nowy`
+   i bazie `data-nowy.db`, a §5 Iteracja 0 (zrealizowana) i `tools/deploy-staging.sh` używają
+   `bridge-staging` / `bridge-backend-staging`. Rozjazd nazewnictwa z Iteracji 0 — do ujednolicenia.
+2. **`docs/rebuild-roadmap.md` §5 Iteracja 8** zakłada trasę Wouter `/selly`, której nie ma
+   w 12 trasach odtworzonych z produkcji (Selly działa dziś jako overlay ze skryptu injection).
+   I8 dołoży 13. trasę — warto to tam dopowiedzieć, żeby przyszła sesja nie uznała braku `/selly`
+   w shellu za regresję.
+3. **`docs/rebuild-roadmap.md` §2** nazywa `docs/incoming/*-perplexity/` „kanonicznymi", a kolejność
+   wiarygodności podaje jako „fixtures/kontrakt > spec > mapa kodu > oryginał". Praktyka 1a i 1b
+   pokazała, że **oryginał wygrywa ze spec** (6 udowodnionych błędów w `04_DESIGN_TOKENS.md`).
+   Zmiana rangi źródeł prawdy to decyzja użytkownika — nie ruszaliśmy.
+4. **`deploy/staging/htaccess`** — wymuszenie HTTPS stoi PO SPA fallbacku kończącym się `[L]`;
+   działa (łapie drugi przebieg), ale krucho. Plik z I0, zmiana dotyka żywego stagingu.
+5. **`docs/deploy-setup.md:83`** — smoke test spodziewa się odpowiedzi placeholdera
+   (`{"ok":true,"stage":"staging-placeholder"}`); po wdrożeniu backendu z 1a `/api/health`
+   odpowie inaczej. Do korekty przez osobę znającą kształt tego endpointu.
+6. **`docs/spec-frontend.md:101`** — literówka „17 zrzytów" zamiast „zrzutów".

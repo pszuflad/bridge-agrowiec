@@ -23,17 +23,28 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
 - User `admin`, **bez sudo** → wszystko na poziomie usera. Port **5001 wolny**.
 - Docroot subdomeny: `/home/admin/domains/agritires.eu/public_html/test`.
 
-## Kontrakt z aplikacją (spełniony przez Iterację 1a — backend)
+## Kontrakt z aplikacją (spełniony — Iteracja 1a backend + 1b frontend)
 `deploy-staging.sh` zakłada, że:
-- **rebuild/backend**: `npm ci` && `npm run build` → `dist/`, wejście `dist/server.js`; serwer nasłuchuje na
+- **rebuild/backend**: `npm ci --include=dev` && `npm run build` → `dist/`, wejście `dist/server.js`; serwer nasłuchuje na
   `process.env.HOST:process.env.PORT`, baza z `process.env.DB_PATH`; `npm run migrate` stosuje schemat/migracje (idempotentnie).
   Wymaga też **`JWT_SECRET`** — bez niego serwer celowo nie wstaje (brak zahardkodowanego fallbacku, patrz niżej).
   Spełnione od Iteracji 1a (`rebuild/backend/`, szczegóły: `rebuild/backend/README.md`).
-- **rebuild/frontend**: `npm ci` && `npm run build` → `dist/` (base `/`, API pod `/api`). Powstaje w Iteracji 1b.
+- **rebuild/frontend**: `npm ci --include=dev` && `npm run build` → `dist/` (base `/`, API pod `/api`).
+  Spełnione od Iteracji 1b (`rebuild/frontend/`, szczegóły: `rebuild/frontend/README.md`).
 
 `deploy-staging.sh` odpala build tylko, gdy widzi **jednocześnie** `rebuild/backend/package.json`
-i `rebuild/frontend/package.json`. Backend już istnieje, ale frontendu jeszcze nie ma — dopóki
-nie powstanie (Iteracja 1b), skrypt pomija build i staging zostaje na placeholderze.
+i `rebuild/frontend/package.json`. **Oba pakiety już istnieją**, więc skrypt nie pomija builda —
+pierwszy deploy po Iteracji 1b podmienia placeholder na realny panel.
+
+> **`--include=dev` jest konieczne, nie kosmetyczne.** Skrypt eksportuje `NODE_ENV=production`
+> (potrzebne dla runtime backendu), a przy tej zmiennej `npm ci` pomija devDependencies — na naszym
+> lockfile frontendu **23 pakiety zamiast 383**, bez `vite` i bez `tsc` w `node_modules/.bin`.
+> Przy `set -euo pipefail` build przerwałby się na `tsc: not found` i staging zostałby na placeholderze.
+> `npm ci --omit=dev` w katalogu release'u backendu **zostaje bez zmian** — tam faktycznie chcemy
+> wyłącznie zależności produkcyjne.
+
+> **Frontend nie buduje sourcemap** (`sourcemap: false`). Skrypt rsynkuje całe `dist/` do publicznego
+> docroota bez autoryzacji, więc mapy wystawiłyby źródła panelu w internet.
 
 ---
 
@@ -53,7 +64,7 @@ sqlite3 /home/admin/private_apps/bridge/data.db \
 cp ~/private_apps/bridge-staging/repo/deploy/staging/htaccess \
    /home/admin/domains/agritires.eu/public_html/test/.htaccess
 
-# 4. Placeholder (dowód, że pipeline działa) — do czasu Iteracji 1b (backend z 1a sam nie wystarczy do builda)
+# 4. Placeholder (dowód, że pipeline działa) — pierwszy deploy po Iteracji 1b nadpisuje go realnym panelem
 cp ~/private_apps/bridge-staging/repo/deploy/staging/placeholder-index.html \
    /home/admin/domains/agritires.eu/public_html/test/index.html
 cd ~/private_apps/bridge-staging/repo/deploy/staging
@@ -121,4 +132,7 @@ Cel: żaden PR ticketa nie wejdzie do `develop` bez zielonego CI — a właścic
 ## Otwarte punkty (do rozwiązania przy I2)
 - **Schemat snapshotu vs kanon:** snapshot produkcji niesie schemat prod (może różnić się od `rebuild/schema/001_schema.sql`,
   np. `szerokosc` — backlog #3). Przy pierwszym tickecie czytającym realne dane trzeba uzgodnić migrację snapshotu do kanonu.
+- **Kolejność reguł w `deploy/staging/htaccess`:** wymuszenie HTTPS (reguła 3) stoi PO SPA fallbacku
+  (reguła 2) kończącym się `[L]` — przekierowanie łapie dopiero drugi przebieg. Działa, ale jest kruche;
+  HTTPS powinno iść zaraz za wyjątkiem na `.well-known`. Zmiana dotyka żywego stagingu — do zaplanowania.
 - **Prod Node słucha na `0.0.0.0:5000`** (potencjalnie dostępny z sieci) — osobna, produkcyjna kwestia bezpieczeństwa; staging celowo słucha tylko na `127.0.0.1`.

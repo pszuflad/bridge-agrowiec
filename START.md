@@ -44,7 +44,7 @@ bridge/
 ├── db/                           ← schemat + snapshot bazy
 ├── docs/                         ← nasza praca (audyt, plan, kontrakt, prompty)
 ├── tools/{acquire.sh,sync.sh}    ← skrypty pobierania i synchronizacji
-├── rebuild/                      ← nowe źródła (na razie puste)
+├── rebuild/                      ← nowe źródła (w kroku 1 puste; dziś backend/, frontend/, schema/)
 ├── .gitignore
 └── START.md                      ← ten plik
 ```
@@ -213,6 +213,17 @@ niż sam stan bieżący.
 Masz wtedy: repo Git będące żywym lustrem produkcji, świeżą wiedzę, baseline
 i działającą synchronizację. To domyka **Fazę 1** z [PLAN.md](PLAN.md). Dalej:
 zamrożenie kontraktu API (Faza 2) i odbudowa (Fazy 3–4).
+
+**Stan odbudowy: Iteracja 1 zamknięta** — `rebuild/backend/` (API + logowanie, sesja 1a),
+`rebuild/frontend/` (rama panelu, `/login`, 12 tras routera — sesja 1b) i `rebuild/schema/`.
+Podział na iteracje: `docs/rebuild-roadmap.md`; deploy stagingu: `docs/deploy-setup.md`.
+Uruchomienie lokalne (Node 20; dev frontendu proxuje `/api` na backend, więc backend musi
+działać osobno — szczegóły w README obu pakietów):
+
+```bash
+cd rebuild/backend  && npm ci && npm run dev    # terminal 1 → 127.0.0.1:5001 (wymaga .env z JWT_SECRET)
+cd rebuild/frontend && npm ci && npm run dev    # terminal 2 → http://localhost:5173
+```
 
 Niezależnie, natychmiast (produkcja cierpi): feed MO3 nie działa od 2026-07-06,
 alertów nikt nie czyta.

@@ -15,7 +15,7 @@ instrukcją z 17 zrzutami.
 **Kanoniczna referencja (przyjęta):**
 `docs/incoming/frontend-perplexity/dokumentacja/` — `00_PODSUMOWANIE`,
 `01_WARSTWA_WSPOLNA`, `02_WIDOKI`, `03_ROZBIEZNOSCI`, `04_DESIGN_TOKENS`,
-`_mapy_api/` (mapy wywołań FE vs BE).
+`_mapy_api/` (mapy wywołań FE vs BE). **Sprostowania do niej — §7.**
 
 ---
 
@@ -78,8 +78,16 @@ ma endpoint:
 **Przepływ auth (do wiernego odtworzenia, `01_WARSTWA_WSPOLNA.md`):**
 - `POST /api/login` z `{email: email.trim(), password}` → oczekuje `{ok, user, token}`.
 - Nagłówki: `Authorization: Bearer <token>` **tylko gdy token jest** + `credentials:"include"` (cookie `bridge_session`) — **równolegle**.
-- Dane użytkownika pod `localStorage.bridge_user`; „remember me" → token w `localStorage`/`sessionStorage`.
-- Query: `on401:"returnNull"`, `staleTime:Infinity`, `retry:false`, `refetchOnWindowFocus:false`. Klucz = `queryKey.join("/")`.
+- „Remember me" nie zapisuje osobnej flagi przy tokenie — przełącza **cały magazyn**:
+  `localStorage.bridge_remember === "1" ? localStorage : sessionStorage`, i w nim lądują ZARÓWNO
+  token (`bridge_auth_token`), JAK I `bridge_user` (`fe.js:9000-9013`). Wylogowanie czyści oba
+  klucze z **obu** magazynów (`:9015-9021`, `:9098-9107`).
+- **Frontend NIGDY nie woła `GET /api/me`** — stan użytkownika jest hydratowany raz, przy starcie,
+  z `bridge_user` (`:9080-9084`; grep po bundlu: zero trafień `/api/me`).
+- Błąd logowania, który widzi użytkownik, ma postać `401: {"error":"…"}` — `Mg` rzuca wyjątek, zanim
+  `gb` sięgnie po pole `error` (`:9031-9038`, `:9085-9097`). To **nie** jest goły komunikat backendu.
+- Query: `on401:"returnNull"`, `staleTime:Infinity`, `retry:false`, `refetchOnWindowFocus:false`,
+  `refetchInterval:false`. Klucz = `queryKey.join("/")`.
 - Po mutacjach stagingu invalidacja: `staging`, `products`, `history`, `alerts`.
 
 > **Odbudowa (I1a, `1-FEATURE-backend-fundament-logowanie`):** strona serwerowa tego
@@ -87,20 +95,70 @@ ma endpoint:
 > zwracają dokładnie ten kształt (`{ok,user,token}`), akceptują Bearer i cookie
 > `bridge_session` równolegle. **Ważne dla 1b:** backend dopasowuje e-mail **dokładnie**,
 > bez `trim()` po swojej stronie — `.trim()` musi zostać po stronie frontendu, tak jak
-> tu opisano, inaczej logowanie z białymi znakami się rozjedzie. Widok `/login` (React)
-> przychodzi dopiero w sesji 1b.
+> tu opisano, inaczej logowanie z białymi znakami się rozjedzie.
+>
+> **Iteracja 1 zamknięta (I1b, `2-FEATURE-frontend-shell-logowanie`):** `rebuild/frontend/`
+> realizuje ten blueprint — widok `/login`, rama aplikacji z ciemnym sidebarem, 12 tras
+> (11 placeholderów) i pełne tokeny z produkcyjnego CSS. Odstępstwa od oryginału (m.in. routing
+> po ścieżkach zamiast po hashu) — patrz `docs/tickets/2-FEATURE-frontend-shell-logowanie/raport.md`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).
 - Primary `hsl(35 70% 45%)` (bursztyn), sidebar ciemny `hsl(215 28% 12%)`,
-  tło `hsl(210 20% 98%)` — pełne HSL w pliku.
+  tło `hsl(210 20% 98%)`.
+- ⚠️ Źródłem prawdy jest **surowy arkusz produkcji** `mirror/frontend/assets/index-BVOkSOnE.css`,
+  nie `04_DESIGN_TOKENS.md` — patrz §7.
 
 ## 6. Widoki
 
-12 widoków opisanych w `02_WIDOKI.md` (widok/dane/akcje/API/komponenty) +
+12 tras = 12 widoków opisanych w `02_WIDOKI.md` (widok/dane/akcje/API/komponenty) +
 tabela zbiorcza w `00_PODSUMOWANIE.md`. Do wiernego UX służą też **17 zrzytów**
 z `docs/reference/Instrukcja_obslugi_Bridge.docx` (uwaga: instrukcja to wersja 5,
 starsza niż bundle — patrz §4).
+
+Uwaga na arytmetykę: **sidebar ma 10 pozycji nawigacji** (`fe.js:16287-16327`). `/moje-konto`
+jest linkiem w stopce sidebara przy avatarze, a `/login` nie występuje w żadnym menu.
+
+## 7. Sprostowania do dokumentacji Perplexity
+
+Dokumentacja pozostaje kanoniczna, ale poniższe punkty są w niej błędne albo niepełne —
+zweryfikowane w kodzie oryginału przy Iteracji 1b. Plików w `docs/incoming/` nie ruszamy
+(artefakt „jak dostaliśmy"); obowiązuje ta lista.
+
+**A. `04_DESIGN_TOKENS.md` — sześć rozjazdów wartości** względem surowego arkusza
+`mirror/frontend/assets/index-BVOkSOnE.css`. **Wygrywa arkusz** (zasada: oryginał > spec):
+
+| Token | Dokumentacja | Produkcyjny CSS |
+|---|---|---|
+| `--border` (dark) | `215 22% 18%` | `215 20% 18%` |
+| `--input` (dark) | `215 22% 20%` | `215 20% 24%` |
+| `--secondary` (dark) | `215 22% 17%` | `215 20% 18%` |
+| `--muted-foreground` (dark) | `215 16% 62%` | `215 12% 65%` |
+| `--accent` / `--accent-foreground` (dark) | `35 45% 17%` / `35 80% 65%` | `35 30% 22%` / `35 80% 80%` |
+| `--secondary-foreground` (light) | `215 25% 20%` | `215 25% 14%` |
+
+**B. `04_DESIGN_TOKENS.md:73` „mechanizm zapisu trybu ciemnego NIEZNANY" — rozstrzygnięte:**
+oryginał **nie zapisuje** preferencji. Init = `window.matchMedia("(prefers-color-scheme: dark)").matches`,
+toggle tylko dodaje/usuwa klasę `dark` na `<html>` (`fe.js:16228-16241`).
+
+**C. `04_DESIGN_TOKENS.md` nie wymienia kompletu tokenów.** Surowy arkusz ma dodatkowo:
+`--popover`/`-foreground`/`-border`, `--card-border`, `--sidebar-ring`, `--chart-1..5`,
+`--shadow-2xs…-2xl` (wszystkie z alpha 0, czyli faktycznie niewidoczne), `--button-outline`,
+`--badge-outline`, `--elevate-1/2`, `--opaque-button-border-intensity`, warianty `--*-border`
+liczone przez `hsl(from …)`, `--tracking-normal`, `--font-sans/serif/mono`. Plus utility
+`hover-elevate` / `active-elevate-2` / `toggle-elevate`, na których stoją Button i Badge.
+
+**D. Skala zaokrągleń jest STATYCZNA i nie wynika z `--radius`.** Produkcja generuje
+`.rounded-sm{.1875rem}`, `.rounded-md{.375rem}`, `.rounded-lg{.5625rem}`, `.rounded-xl{.75rem}`,
+a `var(--radius)` nie występuje w żadnej regule arkusza (0 trafień). Domyślna konwencja shadcn
+(`lg: var(--radius)`) dałaby złe wartości.
+
+**E. `01_WARSTWA_WSPOLNA.md` podaje nieistniejącą opcję `refetchOnReconnect:false`.** W kodzie
+jest `refetchInterval:false` (`fe.js:9063-9079`). Reszta domyślnych opcji Query się zgadza.
+
+**F. `01_WARSTWA_WSPOLNA.md` „zakres ochrony pozostałych tras NIEZNANY" — rozstrzygnięte:**
+komponent `cM` (`fe.js:27789-27801`) opakowuje cały `Switch` i przekierowuje na `/login` każdego
+bez sesji; wyjątkiem jest sama trasa `/login`.
 
 ---
 
@@ -108,7 +166,7 @@ starsza niż bundle — patrz §4).
 
 - `audit-delta.md`: dopisać — **UI analityki istnieje** (`/analityka`); 12 tras.
 - Faza 3 (odbudowa frontendu): punktem wyjścia jest §2 (mapa napraw) + §5 (blueprint)
-  + `02_WIDOKI.md` + zrzuty. Kontrakt `openapi.yaml` mówi, na jakie API wołać.
+  + §7 (sprostowania) + `02_WIDOKI.md` + zrzuty. Kontrakt `openapi.yaml` mówi, na jakie API wołać.
 
 *Weryfikacja Krok 2.2 (Faza 2) — 2026-08-17. Krzyżowa kontrola tez Perplexity
 z naszym kodem i kontraktem 2.3. Dokumentacja przyjęta jako kanoniczna referencja
