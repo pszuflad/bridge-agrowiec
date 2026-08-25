@@ -38,7 +38,7 @@ export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" >/d
 cd "$REPO_DIR"
 git fetch --quiet origin "$BRANCH"
 LOCAL="$(git rev-parse HEAD)"; REMOTE="$(git rev-parse "origin/$BRANCH")"
-if [ "$LOCAL" = "$REMOTE" ]; then log "brak zmian ($LOCAL)"; exit 0; fi
+if [ "$LOCAL" = "$REMOTE" ] && [ "${FORCE:-0}" != "1" ]; then log "brak zmian ($LOCAL) — użyj FORCE=1 by wymusić deploy"; exit 0; fi
 log "nowy commit $REMOTE (było $LOCAL) — deployuję"
 git reset --hard "origin/$BRANCH" >/dev/null
 SHA="$(git rev-parse --short HEAD)"
