@@ -59,6 +59,13 @@ skutek bezpieczeństwa.
 > endpointy z listy wyżej (products, staging, history, audit-log, export/shoper…)
 > wjeżdżają dopiero w iteracjach 2+, każdy już pod `requireAuth`; ta lista opisuje
 > stan **oryginału**, nie nowego backendu.
+>
+> **Potwierdzone w I2** (`3-FEATURE-katalog-odczyt`): `GET /api/products`, `GET /api/suppliers`
+> i `GET /api/dostawcy` wjechały pod `requireAuth`, zgodnie z zasadą powyżej — i zgodnie
+> z kontraktem, który dla tych operacji deklaruje `security: [bearerAuth, cookieAuth]`,
+> więc to nie jest odstępstwo. `GET /api/products/{id}` nie istnieje ani w produkcji, ani
+> w `contract/openapi.yaml` — nie został odtworzony (szczegóły endpointów: `spec-frontend.md`
+> / `docs/tickets/3-FEATURE-katalog-odczyt/`, nie zakres tego pliku).
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 

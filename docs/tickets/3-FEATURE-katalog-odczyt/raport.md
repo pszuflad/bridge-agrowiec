@@ -206,3 +206,66 @@ Rzeczy świadomie odłożone (żadna nie blokuje DoD tej iteracji):
 7. **Nagranie fixtures dla wariantu „goła tablica"** (`GET /api/products` bez parametrów) —
    główna ścieżka używana przez katalog nie ma dziś siatki fixtures, tylko własne testy.
    Warto dograć przy najbliższym odświeżaniu `contract/fixtures/`.
+
+## Aktualizacja dokumentacji
+
+Cztery doc-checkery przejrzały równolegle dokumentację, którą ten ticket mógł zdezaktualizować.
+Poza dopisaniem nowego stanu **naprawiły cztery zastane nieprawdy** (opisane niżej).
+
+### `docs/rebuild-roadmap.md`
+- §4 Tablica postępu: Iteracja 2 → ✅, `PR #4 · 2026-08-25`.
+- §5 blok Iteracji 2 rozbudowany do formy zamkniętych iteracji (zakres BE i FE, ścieżki i fixtures
+  GATE, decyzje D2/D3/D5/D6 z ostrzeżeniem operacyjnym, ustalenie o `szerokosc`, odhaczone DoD
+  z jednym otwartym punktem — weryfikacja Ani po deployu).
+- §2 Źródła prawdy: wiersz o harnessie GATE uzupełniony o moduł seedujący `test/gate/dane.ts`.
+- **Naprawiona nieprawda:** Iteracja 11 miała w zakresie `GET /api/dostawcy` i `GET /api/suppliers`
+  (listy) — I2 już je dostarczyła. Zakres I11 zawężony do detalu i mutacji, fixtures
+  `GET_dostawcy.json`/`GET_suppliers.json` usunięte z jej GATE-a.
+- Dopiski w blokach I3 (gotowa propozycja domknięcia backlogu #3), I4 (kolumna „Promocja" już
+  jest w katalogu, czeka na dane) i I7 (domknie degradację list marek/kategorii z D3).
+
+### `docs/rebuild-backlog.md`
+- Wpis **#3** — nowa podsekcja „Ustalenia z Iteracji 2" z pięcioma zweryfikowanymi empirycznie
+  faktami (pass-through, type affinity, maskowanie rozjazdu przez `Wfmt`, widoczność w sortowaniu,
+  propozycja domknięcia). **Status decyzji świadomie NIE zmieniony — zostaje 🕒 PÓŹNIEJ**, bo to nie
+  decyzja I2. Zweryfikowano też, że `rebuild/schema/001_schema.sql:44` nadal ma `szerokosc REAL`,
+  i doprecyzowano zakres przenagrania fixtures: `GET_products.json` jest **jedynym** plikiem,
+  w którym `szerokosc` jest typowanym kluczem odpowiedzi (w `GET_staging.json` siedzi wyłącznie
+  wewnątrz zserializowanego `snapshotJson`, poza zasięgiem porównania kształtu).
+- Wpis **#2** (`kategoriafix`) — jedno zdanie: od I2 katalog wyświetla i filtruje po `kategoria`,
+  więc ta decyzja dotyczy teraz również tego, co Ania realnie widzi w panelu.
+
+### `docs/spec-backend.md`
+- Sekcja o auth: potwierdzenie, że trzy nowe trasy wjechały pod `requireAuth` zgodnie z zasadą §3
+  **i zgodnie z kontraktem** (`security: [bearerAuth, cookieAuth]`), więc nie jest to odstępstwo;
+  odnotowany brak `GET /api/products/{id}` w produkcji i w kontrakcie.
+- Reszta pliku świadomie nietknięta — to audyt bezpieczeństwa, nie spec zachowania endpointów.
+
+### `docs/spec-frontend.md` i `docs/plan.md`
+- `spec-frontend.md`: akapit o zamkniętej Iteracji 2 (client-side'owa natura widoku, 59/15 kolumn
+  w IndexedDB, trzy kolumny zawsze przyklejone, statyczna ikona sortowania, brak szczegółu
+  w oryginale vs nasz podgląd read-only). **§7 sprawdzone i celowo nietknięte** — porównanie
+  `02_WIDOKI.md` z ustaleniami ticketa nie ujawniło nowych rozjazdów.
+- `plan.md`: **naprawione martwe linki** — `README.md`, `audyt-vps.sh` i oba `PROMPT-*.md`
+  nie istnieją. Nagłówek zastąpiony notką kierującą do `rebuild-roadmap.md` jako aktualnego źródła
+  prawdy; dokument zostaje jako zapis historyczny.
+
+### README-y w `rebuild/`
+- `rebuild/backend/README.md`: stan → Iteracja 2, nowe endpointy z pułapką dwóch kształtów
+  odpowiedzi, `compression` w stosie, rozszerzona lista fixtures GATE, zaktualizowana struktura
+  katalogów. **Najważniejsze:** sekcja „Schemat Drizzle" dostała ostrzeżenie o trzech dopieszczeniach
+  do naniesienia po KAŻDEJ regeneracji `drizzle-kit pull` — bez niego następna regeneracja po cichu
+  zepsułaby kontrakt `GET /api/products`. **Naprawiona nieprawda:** usunięta uwaga z I1a, że backend
+  „jeszcze się nie zdeployuje" (oba `package.json` istnieją od I1b).
+- `rebuild/frontend/README.md`: `/katalog` zrobiony, 11→10 placeholderów, 44→110 testów, nowa
+  struktura, odstępstwo O8 (podgląd read-only) oraz udokumentowana pułapka `queryClient.clear()`
+  w testach.
+- `rebuild/schema/README.md`: **naprawiona nieprawda** — zdanie o „jednym ręcznym dopieszczeniu
+  (`.unique()` na `users.email`)" przestało być prawdziwe; dopisane dwa z I2 i doprecyzowane,
+  że `001_schema.sql` zostaje nietknięty, bo zmienia się mapowanie w Drizzle, a nie typy w bazie.
+
+### Zastane problemy zgłoszone przez doc-checkery
+- Szczegółowy opis endpointów produktów i dostawców (kształty odpowiedzi, limity, pola liczone
+  w locie) **nie istnieje w żadnym pliku kanonicznym** poza artefaktami ticketa i kodem. Jeśli ma
+  powstać zbiorczy spec backendu odbudowy, to osobne zadanie — poza zakresem tej sesji.
+- Poza tym nie zgłoszono nic, czego ten ticket nie naprawił.
