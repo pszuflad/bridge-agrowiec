@@ -148,7 +148,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a BE · 3b BE · 3c BE · 3d FE | 2 | ⬜ | |
+| 3 | Import — rdzeń | 3a·3b·3c·3d BE · 3e FE | 2 | ⬜ | |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
@@ -306,29 +306,25 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
-- **Status:** ⬜  **Sesje:** 3a BE (parser+staging) · 3b BE (silnik `tk()`) · 3c BE (overrides) · 3d FE (`/staging`)  **Zależy od:** 2
+- **Status:** ⬜  **Sesje (5, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · 3d BE (zatwierdzanie+overrides) · 3e FE (`/staging`)  **Zależy od:** 2
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
 - **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~3000+ linii: `tyre_params.cjs`, `adapter.cjs`, `common.cjs`, `bridge_ext.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dispatcher.cjs`, `dictionaries/`), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
-- **Backend 3a — parser + adapter → staging:**
-  - Parsery dostawców + `adapter.recordToSurowe()` z **blokiem normalizacji końcowej** (kategoria, zastosowanie, flagi etykiety, szerokość).
-  - **Tu wracają decyzje z backlogu:** #1 sniegfix, #2 kategoriafix, #3 szerokość (`docs/rebuild-backlog.md`).
-    Dla #3 — I2 zostawiła gotową propozycję domknięcia (schemat REAL→TEXT + przenagranie fixture):
-    `docs/tickets/3-FEATURE-katalog-odczyt/raport.md`, sekcja „Rozjazd `szerokosc`".
-  - Endpointy: `POST /api/import/from-url`, `POST /api/import/parse-file`, `POST /api/ai-fallback/parse`.
-- **Backend 3b — silnik `tk()`** (spec-backend §5, `03_IMPORT_tk.md`):
-  - Dopasowanie kod → EAN → kod zastępczy `Lq()` (tylko opona); klasyfikator `Zc()`.
-  - Auto-zatwierdzenie **tylko** cena/marża/stan/magazyn → wpis do `historia_cen`.
-  - Wycofanie po **3 kolejnych** nieobecnościach (`nieobecnosc_pod_rzad`, próg=3).
-  - EAN auto tylko dla długości 8/12/13/14 i nie kończący się 5 zerami; `kod_importu` = `bridge_ext.assignKodImportu` (grupa po EAN lub marka+rozmiar+bieznik+nazwa).
-  - Staging: `GET /api/staging`, `/api/staging/paged`, `/api/staging/{id}`, `POST /api/staging/accept`, `/reject`, `/import`, `/clear`.
-- **Backend 3c — manual_overrides `Gq()`:** przy konflikcie zachowuje wartość Marty, zapis do `snapshotJson`. `GET /api/overrides`, `PUT/DELETE /api/overrides/{id}`.
-- **Frontend 3d:** widok `/staging` — przegląd pozycji importu, akcje accept/reject, podgląd różnic. **Decyzja:** staging auto-accept vs ręczny (spec-frontend §4).
+- **3a · Port + charakteryzacja parserów** (BE) — wciągnij podsystem `parsers/` (`tyre_params`, `adapter`, `common`, `bridge_ext`, `dispatcher`, `dictionaries`) do `rebuild/backend` jako moduły JS; adaptuj **wejście**: plik/bufor → rekord (bez DB). `adapter.recordToSurowe()` z blokiem normalizacji końcowej (kategoria, zastosowanie, flagi, szerokość) — decyzje **#1 sniegfix / #2 kategoriafix / #3 szerokość** wchodzą **przez port najświeższego źródła** (nie reimplementujemy). Dla #3 gotowa propozycja domknięcia: `docs/tickets/3-FEATURE-katalog-odczyt/raport.md`, sekcja „Rozjazd `szerokosc`".
+  - **⭐ Gate (najważniejszy w całej odbudowie):** charakteryzacja — próbki realnych plików (po 1 na MO1–MO10, z historii `import_archive`/żywej prod) → portowany parser vs **wyjście oryginału** (raz uruchom stary parser, złap oczekiwane rekordy jako fixtures) → **1:1**. Dowód wierności portu; bez zielonego gate'a nie ruszamy 3b.
+- **3b · Zapis do stagingu** (BE) — wyjście parsera → tabela `staging_items` przez Drizzle. `POST /api/import/from-url`, `/parse-file`, `/ai-fallback/parse`.
+  - **Gate:** staging wypełnia się poprawnie; `GET /api/staging`, `/paged`, `/{id}` przez **fixtures/kontrakt**.
+- **3c · Silnik `tk()` — dopasowanie + klasyfikator** (BE, spec-backend §5, `03_IMPORT_tk.md`) — dopasowanie **kod → EAN → `Lq()`** (zastępczy, tylko opona); klasyfikator `Zc()` „czy opona"; `kod_importu` = `bridge_ext.assignKodImportu` (grupa po EAN lub marka+rozmiar+bieznik+nazwa); EAN auto tylko dla długości 8/12/13/14 i nie kończący się 5 zerami.
+  - **Gate:** testy scenariuszy dopasowania — nowy / po kodzie / po EAN / zastępczy / nie-opona.
+- **3d · Zatwierdzanie + historia + wycofanie + overrides Marty** (BE) — auto-zatwierdzenie **tylko** cena/marża/stan/magazyn → `historia_cen`; wycofanie po **3 kolejnych** nieobecnościach (`nieobecnosc_pod_rzad`, próg=3); **overrides `Gq()`** wpięte jako **strażnik**: przy konflikcie zachowuje wartość Marty (zapis do `snapshotJson`), override wygrywa. Staging: `POST /api/staging/accept`, `/reject`, `/import`, `/clear`; `GET /api/overrides`, `PUT/DELETE /api/overrides/{id}`.
+  - **Gate:** testy decyzji — co się auto-approve'uje a co nie; wycofanie po 3; **precedencja override** (import NIE nadpisuje ręcznej wartości Marty).
+- **3e · `/staging` (FE) + weryfikacja Ani** — widok `/staging`: przegląd pozycji importu, accept/reject, podgląd różnic. **Decyzja:** staging auto-accept vs ręczny (spec-frontend §4).
+  - **Gate:** fixtures FE + **Ania klika pełny cykl importu** na staging.
 - **Wejście z triażu (2026-08-25, `rebuild-backlog.md`):**
   - **#6** bieżące poprawki parserów (flagsfix, mo8…) → objęte **portem**, zero osobnej pracy.
   - **#4 `uwaga_cena`** (cena „na zapytanie") → dołożyć: kolumna `products.uwaga_cena` (schemat, razem z #3), endpoint **`GET /api/products/uwagi-cena`** (nowy — brak w zamrożonym kontrakcie/fixtures, dodać do openapi w I12), propagacja w imporcie (`acceptStaging`; parser `mo7_nokian`/adapter propagują `uwagaCena`). Frontend tooltip = injection → późniejsza iteracja.
   - **#5 `frazy`** (`frazy_migruj.cjs`, `common.cjs`) → zbadać z diffa (changelog Ani nieaktualny); prawdopodobnie normalizacja `zastosowanie`/nazw w adapterze.
 - **Ścieżki (GATE):** staging×7, import×2, overrides×2, ai-fallback.  **Fixtures:** `GET_staging.json`, `GET_staging_paged.json`, `GET_overrides.json`.
-- **DoD:** import przetwarza plik/URL do stagingu; `tk()` odtwarza reguły dopasowania/auto-approve/wycofania; overrides Marty respektowane; fixtures przez GATE; Ania przeklika pełny cykl importu.
+- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10); import przetwarza plik/URL do stagingu; `tk()` odtwarza dopasowanie/auto-approve/wycofanie; overrides Marty respektowane (import nie nadpisuje); **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE; Ania przeklika pełny cykl importu na staging.
 
 ---
 
