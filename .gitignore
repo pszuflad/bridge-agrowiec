@@ -21,3 +21,6 @@ logs/
 .DS_Store
 *.swp
 *~
+
+# ── Bloat produkcji (nie wersjonujemy godzinowych zrzutów importu) ──────────
+mirror/backend/import_archive/
