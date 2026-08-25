@@ -98,7 +98,7 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | `deminified/` + `mirror/backend`, `mirror/frontend` | zdeminifikowany oryginał — ostateczne źródło, gdy spec milczy |
 | `docs/incoming/*-perplexity/` | kanoniczne dokumentacje BE/FE (cytują plik:linia) |
 | `docs/reference/Instrukcja_obslugi_Bridge.docx` (17 zrzutów) | wygląd/UX (wersja 5, starsza niż bundle) |
-| `rebuild/backend/test/gate/` | harness GATE (od I1): porównanie odpowiedzi z `contract/fixtures/` + walidacja wg `contract/openapi.yaml`, generyczny — kolejne iteracje dokładają tylko ścieżki/fixtures |
+| `rebuild/backend/test/gate/` | harness GATE (od I1, rozbudowany w I2 o moduł seedujący `test/gate/dane.ts` — produkty/dostawcy/`historia_cen`): porównanie odpowiedzi z `contract/fixtures/` + walidacja wg `contract/openapi.yaml`, generyczny — kolejne iteracje dokładają tylko ścieżki/fixtures/seed |
 
 > **Rozjazd kontrakt↔produkcja (wykryty w I1):** `contract/openapi.yaml` (2.3) nie zamraża schematów
 > ciał (tylko ścieżkę/metodę/kod statusu) i oznacza `GET /api/me` jako publiczny (`security: []`)
@@ -132,7 +132,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 |---|---|---|---|---|---|
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
-| 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ⬜ | |
+| 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a BE · 3b BE · 3c BE · 3d FE | 2 | ⬜ | |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
@@ -227,13 +227,56 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 2 — Katalog (odczyt)
-- **Status:** ⬜  **Sesje:** 1 (BE+FE)  **Zależy od:** 1
+- **Status:** ✅ **zrobione** (2026-08-25 — `docs/tickets/3-FEATURE-katalog-odczyt/`, PR #4)  **Sesje:** 1 (BE+FE)  **Zależy od:** 1
 - **Cel (Ania klika):** otwiera `/katalog`, widzi listę opon (realne ~7 405 produktów z istniejącej bazy), filtruje i wyszukuje.
-- **Backend:** `GET /api/products` (lista + filtry + paginacja), `GET /api/products/{id}`. Odczyt z istniejących danych (bez importu). Tabela `products` (`he`, 72 kolumny).
-- **Frontend:** widok `/katalog` — tabela opon, filtry, wyszukiwarka, szczegół produktu.
-- **Ścieżki (GATE):** `GET /api/products`, `GET /api/products/{id}`.  **Fixtures:** `GET_products.json`.
-- **Uwaga:** to „okno", w którym Ania będzie później weryfikować efekty importu (I3). `POST /api/products/clear` (destrukcyjne) → I12, nie tu.
-- **DoD:** katalog renderuje realne dane; filtry/szukajka działają; `GET_products.json` przez GATE; Ania potwierdza wygląd/zachowanie.
+- **Backend — ✅ zrobione** (`rebuild/backend/`; 103 testy):
+  - `GET /api/products` odtworzony 1:1 z produkcji: **dwa kształty odpowiedzi** — bez `limit` i bez
+    `dostawca` → goła tablica wszystkich produktów; w przeciwnym razie → `{items,total,limit,offset}`
+    (`total` liczony po filtrze `dostawca`). Cap `limit` = 2000, domyślny 200 (`Math.min(parseInt(...)‖200,2000)`).
+  - `GET /api/suppliers` + `GET /api/dostawcy` — jeden handler, dwie trasy; `liczbaProduktow`, `status`
+    (4-gałęziowe przeliczenie wg progu 30 dni) i `ostatniaAktualizacjaCeny`/`Stanu` liczone w locie
+    (okno `LAG` po `historia_cen`, w `try/catch`).
+  - `compression()` (gzip/brotli) wpięte w `app.ts` — warstwa transportu, zero zmian w kontrakcie.
+  - Naprawa dwóch defektów `drizzle-kit pull` w `src/db/schema.ts` (`snow3Pmsf`→`snow3pmsf`,
+    10 kolumn na `{mode:"boolean"}`) — bez tego GATE nie zgadzał kluczy/typów z fixture.
+  - Wszystkie trzy trasy za `requireAuth`, zgodnie z kontraktem i zasadą §3.
+- **Frontend — ✅ zrobione** (`rebuild/frontend/`; 110 testów):
+  - Widok `/katalog` — tabela 59 kolumn (15 domyślnych), szukajka tokenowa (16 pól, AND/OR, case-insensitive),
+    filtry marka/kategoria/status, zakładki dostawców, sortowanie po nagłówkach, paginacja 25/50/100/Wszystkie,
+    wirtualizacja > 150 wierszy, konfigurator widoczności kolumn w IndexedDB (`bridge-store-v2`).
+  - Modal podglądu produktu **read-only** — oryginał ma tu modal edycji, my dajemy tylko podgląd (D4).
+  - `/katalog` zdjęty z placeholderów. **Liczba tras routera bez zmian: 12.**
+- **Ścieżki (GATE):** `GET /api/products`, `GET /api/suppliers`, `GET /api/dostawcy`.
+  **Fixtures:** `GET_products.json`, `GET_suppliers.json`, `GET_dostawcy.json`.
+- **Decyzje (zaklepane, wiążące dla kolejnych iteracji):**
+  - **D2 — pobieranie 1:1 + kompresja transportu:** frontend woła `/api/products` bez parametrów i
+    filtruje/sortuje/paginuje client-side, jak oryginał; kompresja to tylko warstwa transportu
+    (10,0 MB → 0,84 MB, 12× dla pełnego katalogu), kontrakt API się nie zmienia.
+  - **D3 — świadomie NIE dołożono `GET /api/config` (I11) ani `GET /api/atrybuty` (I7):** katalog
+    degraduje się łagodnie — listy marek/kategorii budowane tylko z danych produktów, eksport CSV
+    (zależny od `/api/config`) odłożony.
+  - **D5 — `src/db/schema.ts` ma teraz sekcje „dopieszczeń" po introspekcji** (`snow3pmsf` + 10×
+    `mode:"boolean"`, komentarz z cytatem oryginału). **⚠ Kolejne iteracje muszą je nanieść ponownie,
+    jeśli ktoś przegeneruje `schema.ts` przez `drizzle-kit pull`.**
+  - **D6 — `GET /api/products/{id}` NIE ISTNIEJE** w produkcji ani w kontrakcie — nie tworzyć go.
+  - Pełne uzasadnienia (D1, D4 i alternatywy odrzucone): `docs/tickets/3-FEATURE-katalog-odczyt/plan.md`.
+- **Ustalenie o `szerokosc` (backlog #3):** backend przepuszcza wartość bez konwersji — liczba na
+  kanonie/`db/snapshot.db`, string na stagingu po migracji `szertxt` (SQLite jest dynamicznie typowany,
+  Drizzle `real()` nie ma mapowania z drivera). W UI rozjazd jest w większości **niewidoczny** — formatter
+  `Wfmt`/`formatujSzerokosc` odzyskuje oryginalny zapis z pola `rozmiar`, nie z `szerokosc`; różnica
+  zostaje widoczna tylko w sortowaniu po tej kolumnie (liczby numerycznie, stringi leksykalnie).
+  Propozycja domknięcia (schemat REAL→TEXT + przenagranie `GET_products.json`) i pełny wywód:
+  `docs/tickets/3-FEATURE-katalog-odczyt/raport.md` (sekcja „Rozjazd `szerokosc`"), decyzja należy do
+  ticketu importu/schematu, nie do I2.
+- **Uwaga:** to „okno", w którym Ania będzie później weryfikować efekty importu (I3). `POST /api/products/clear`
+  (destrukcyjne) → I12, nie tu. `GET /api/products/{id}` nie powstał (D6) — frontend operuje na obiekcie
+  już wczytanym z listy.
+- **DoD:** ✅ oba kształty `GET /api/products` + cap/filtr/auth; ✅ `GET /api/suppliers`/`GET /api/dostawcy`
+  z polami liczonymi w locie; ✅ `src/db/schema.ts` naprawiony (D5); ✅ kompresja włączona; ✅ GATE —
+  wszystkie trzy fixtures zielone; ✅ `/katalog` renderuje realne dane (12 tras bez zmian); ✅ szukajka/
+  filtry/zakładki/sortowanie/paginacja/konfigurator kolumn/wirtualizacja; ✅ modal podglądu read-only;
+  ✅ `lint`/`typecheck`/`test` zielone po obu stronach; ✅ rozjazd `szerokosc` opisany z propozycją domknięcia
+  backlogu #3. Otwarte: **weryfikacja Ani po deployu na `test.agritires.eu`.**
 
 ---
 
@@ -243,6 +286,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Backend 3a — parser + adapter → staging:**
   - Parsery dostawców + `adapter.recordToSurowe()` z **blokiem normalizacji końcowej** (kategoria, zastosowanie, flagi etykiety, szerokość).
   - **Tu wracają decyzje z backlogu:** #1 sniegfix, #2 kategoriafix, #3 szerokość (`docs/rebuild-backlog.md`).
+    Dla #3 — I2 zostawiła gotową propozycję domknięcia (schemat REAL→TEXT + przenagranie fixture):
+    `docs/tickets/3-FEATURE-katalog-odczyt/raport.md`, sekcja „Rozjazd `szerokosc`".
   - Endpointy: `POST /api/import/from-url`, `POST /api/import/parse-file`, `POST /api/ai-fallback/parse`.
 - **Backend 3b — silnik `tk()`** (spec-backend §5, `03_IMPORT_tk.md`):
   - Dopasowanie kod → EAN → kod zastępczy `Lq()` (tylko opona); klasyfikator `Zc()`.
@@ -261,7 +306,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** 2, 3
 - **Cel (Ania klika):** ustawia narzut/promocję, widzi przeliczoną `cena_sprzedazy`/marżę w katalogu.
 - **Backend:** markups `Bt` (`GET/POST /api/markups`, `PUT/DELETE /api/markups/{id}`), promotions `hn` (`/api/promotions`, `/api/promotions/{id}`). Reguły przeliczania ceny sprzedaży.
-- **Frontend:** widok `/narzuty` (reguły narzutów + promocje).
+- **Frontend:** widok `/narzuty` (reguły narzutów + promocje). Kolumna „Promocja" w `/katalog` (I2)
+  już istnieje w domyślnym zestawie, dziś renderuje puste — I4 dostarcza dla niej dane.
 - **Ścieżki (GATE):** markups×2, promotions×2.  **Fixtures:** `GET_markups.json`, `GET_promotions.json`.
 - **DoD:** narzuty/promocje liczą ceny zgodnie z oryginałem; fixtures przez GATE; ceny widoczne w katalogu.
 
@@ -294,6 +340,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Frontend:** widok `/atrybuty` natywnie (bez React Fiber/MutationObserver); jeden Query key `/api/atrybuty`, mutacje + invalidacje. **Naprawa martwych ścieżek:** wołać `/api/atrybuty(/rodzaje)`, nie `/api/attributes(-kinds)`.
 - **Ścieżki (GATE):** atrybuty×13.  **Fixtures:** `GET_atrybuty.json`, `_liczniki`, `_pending`, `_rodzaje`, `_uzycie`, `_wartosci`.
 - **DoD:** pełen CRUD + workflow pending natywnie; martwe ścieżki naprawione; fixtures przez GATE; parytet z `pending-injection.js` (57 KB) bez samego skryptu.
+- **Efekt uboczny dla I2:** `/api/atrybuty` domyka degradację D3 z I2 — listy marek/kategorii w `/katalog`
+  dziś powstają wyłącznie z danych produktów, po I7 mogą korzystać ze słowników.
 
 ---
 
@@ -330,9 +378,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ### Iteracja 11 — Konfiguracja + dostawcy + spedycja (+ wchłonięcie `freq-injection.js`)
 - **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** 1
 - **Cel (Ania klika):** edytuje konfigurację, dostawców (w tym **częstotliwość importu** natywnie) i limity spedycji.
-- **Backend:** `GET/PUT /api/config` (`Jt`); `GET /api/dostawcy`, `/api/dostawcy/{id}`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`, `/api/dostawcy/{kod}/upload`, `GET /api/suppliers` (`Ot`); `GET /api/spedycja` (`gn`).
-- **Frontend:** widoki `/konfiguracja` + edycja dostawcy z polem `czestotliwoscMinuty` (zamiast `freq-injection.js` PATCH poza Reactem).
-- **Ścieżki (GATE):** config, dostawcy×4, suppliers, spedycja.  **Fixtures:** `GET_config.json`, `GET_dostawcy.json`, `GET_suppliers.json`, `GET_spedycja.json`.
+- **Backend:** `GET/PUT /api/config` (`Jt`); `/api/dostawcy/{id}`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`, `/api/dostawcy/{kod}/upload`; `GET /api/spedycja` (`gn`). **`GET /api/dostawcy` i `GET /api/suppliers` (listy) już dostarczone w I2** — tu dochodzą tylko detal i mutacje dostawcy.
+- **Frontend:** widoki `/konfiguracja` + edycja dostawcy z polem `czestotliwoscMinuty` (zamiast `freq-injection.js` PATCH poza Reactem). `GET /api/config` odblokuje też eksport CSV w `/katalog` (I2, follow-up).
+- **Ścieżki (GATE):** config, dostawcy×3 (detal + 2 mutacje), spedycja.  **Fixtures:** `GET_config.json`, `GET_spedycja.json` (`GET_dostawcy.json`/`GET_suppliers.json` już zielone od I2).
 - **DoD:** konfiguracja/dostawcy/spedycja edytowalne; częstotliwość natywnie; fixtures przez GATE.
 
 ---

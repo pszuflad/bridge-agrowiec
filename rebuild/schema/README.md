@@ -50,13 +50,16 @@ print(len([r for r in c.execute("SELECT name FROM sqlite_master WHERE type='tabl
 EOF
 ```
 
-## Drizzle (odbudowa backendu — Iteracja 1)
+## Drizzle (odbudowa backendu)
 
 `rebuild/backend/src/db/schema.ts` jest **wygenerowany** przez `npx drizzle-kit pull` z bazy
-zbudowanej z `001_schema.sql` (26 tabel, 269 kolumn, 13 indeksów), z jednym ręcznym
-dopieszczeniem: `.unique()` na `users.email` (introspekcja nie przenosi ograniczeń inline).
-`001_schema.sql` jest źródłem prawdy; Drizzle `schema.ts` z niego wynika, nie odwrotnie.
-Dokładna procedura regeneracji: `rebuild/backend/README.md`, sekcja „Schemat Drizzle".
+zbudowanej z `001_schema.sql` (26 tabel, 269 kolumn, 13 indeksów), z ręcznymi dopieszczeniami,
+bo introspekcja nie jest wierna oryginałowi w kilku miejscach: `.unique()` na `users.email`
+(nie przenosi ograniczeń inline), poprawka nazwy `snow3pmsf` i `{ mode: "boolean" }` na
+10 kolumnach `products` (Iteracja 2, Decyzja D5 — bez tego API zwraca `0/1` zamiast `false/true`).
+`001_schema.sql` jest źródłem prawdy i **zostaje nietknięty** przez te poprawki — typy kolumn
+w bazie się nie zmieniają, zmienia się tylko mapowanie w Drizzle. Dokładna lista dopieszczeń
+i procedura regeneracji: `rebuild/backend/README.md`, sekcja „Schemat Drizzle".
 
 ## Uwaga o migracjach przyrostowych
 

@@ -1,8 +1,10 @@
 # Bridge — frontend (odbudowa)
 
-Szkielet nowego panelu „Bridge dla Agrowca": React 18 · Wouter v3 · TanStack Query ·
-Radix/shadcn · Tailwind, budowany Vite. Powstał w **Iteracji 1b** (`docs/rebuild-roadmap.md` §5)
-i dostarcza logowanie oraz ramę aplikacji; treść pozostałych widoków dokładają kolejne iteracje.
+Nowy panel „Bridge dla Agrowca": React 18 · Wouter v3 · TanStack Query ·
+Radix/shadcn · Tailwind, budowany Vite. Iteracja 1b (`docs/rebuild-roadmap.md` §5) dostarczyła
+logowanie i ramę aplikacji; Iteracja 2 dołożyła pierwszy widok z realnymi danymi — `/katalog`
+(tabela produktów, filtry, szukajka, sortowanie, paginacja, podgląd). Treść pozostałych
+widoków dokładają kolejne iteracje (10 placeholderów w `src/pages/placeholdery.ts`).
 
 ## Wymagania
 
@@ -43,9 +45,18 @@ Bez backendu widok `/login` się otworzy, ale logowanie zwróci błąd sieci.
 
 ## Testy
 
-`npm test` (44 testy) działa bez backendu. Żądania przechwytuje MSW, a użytkownik
-w mockach jest czytany wprost z `contract/fixtures/GET_me.json` — nagranej odpowiedzi
-produkcji. Zmiana kontraktu wywala test, zamiast przejść niezauważona.
+`npm test` (110 testów) działa bez backendu. Żądania przechwytuje MSW, a mocki
+(`test/msw/kontrakt.ts`) są czytane wprost z `contract/fixtures/GET_me.json`,
+`GET_products.json`, `GET_suppliers.json` — nagranych odpowiedzi produkcji. Zmiana kontraktu
+wywala test, zamiast przejść niezauważona. Katalog ma własne pliki:
+`test/katalog.filtrowanie.test.ts` (czyste funkcje szukajki/filtrów/sortowania),
+`test/katalog.formatowanie.test.tsx` i `test/katalog.test.tsx` (render z MSW).
+
+`test/setup.ts` czyści `queryClient` (`queryClient.clear()`) po każdym teście. Ważne przy pisaniu
+nowych testów: `queryClient` jest singletonem modułowym ze `staleTime: Infinity` — bez tego
+czyszczenia dane przeciekają między testami i mock ustawiony przez `server.use` nigdy nie
+dochodzi do głosu. `setup.ts` dokłada też polyfille jsdom dla Radiksa (`hasPointerCapture`,
+`setPointerCapture`, `releasePointerCapture`, `scrollIntoView`).
 
 `test/tokeny.test.ts` to **strażnik wyglądu**: porównuje efektywne wartości wszystkich
 design tokenów (osobno motyw jasny i ciemny) z produkcyjnym arkuszem
@@ -75,8 +86,10 @@ src/
   lib/api.ts          warstwa HTTP: nagłówki, token, „zapamiętaj mnie", błędy
   lib/auth.ts         sesja: zaloguj / wyloguj / pobierzUzytkownika
   lib/queryClient.ts  TanStack Query — klucz zapytania JEST ścieżką
+  lib/magazynKV.ts    IndexedDB (bridge-store-v2) — konfiguracja kolumn katalogu itp.
   components/         AppShell (rama + sidebar), AuthGate, ThemeProvider, Logo, ui/
-  pages/              Login, NotFound, placeholdery pozostałych 11 tras
+  pages/              Login, NotFound, Katalog.tsx, placeholdery pozostałych 10 tras
+  pages/katalog/      kolumny, filtrowanie, formatowanie, wirtualizacja, podkomponenty tabeli
   styles/index.css    design tokens przepisane z arkusza produkcji
 ```
 
@@ -97,8 +110,9 @@ src/
 
 ## Świadome odstępstwa od oryginału
 
-Zatwierdzone w `docs/tickets/2-FEATURE-frontend-shell-logowanie/plan.md`; reszta
-zachowania jest odtworzona 1:1 z `deminified/frontend-index.js`.
+Zatwierdzone w `docs/tickets/2-FEATURE-frontend-shell-logowanie/plan.md` (O1-O6) i
+`docs/tickets/3-FEATURE-katalog-odczyt/plan.md` (O8); reszta zachowania jest odtworzona 1:1
+z `deminified/frontend-index.js`.
 
 | # | Odstępstwo | Powód |
 |---|---|---|
@@ -108,3 +122,4 @@ zachowania jest odtworzona 1:1 z `deminified/frontend-index.js`.
 | O4 | pominięte konta testowe z hasłami w kodzie i martwy `list="konta-testowe-email"` | wyciek danych logowania; atrybut wskazywał na nieistniejącą `<datalist>` |
 | O5 | stan „Ładowanie…" w `AuthGate` zamiast `null` | oryginał migał białym ekranem przed przekierowaniem na `/login` |
 | O6 | `aria-label` na przycisku menu mobilnego | oryginał (`:16348-16357`) miał tam samą ikonę, bez nazwy dostępnej dla czytnika ekranu |
+| O8 | modal podglądu produktu jest **read-only** | oryginał otwiera z tego miejsca modal EDYCJI; mutacje są poza zakresem katalogu-odczyt (Iteracja 12) |

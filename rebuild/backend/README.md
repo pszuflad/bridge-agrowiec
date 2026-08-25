@@ -1,8 +1,15 @@
 # Bridge — backend (odbudowa)
 
 Nowy backend „Bridge dla Agrowca", budowany pionowymi plastrami wg
-[`docs/rebuild-roadmap.md`](../../docs/rebuild-roadmap.md). Stan: **Iteracja 1a** —
-fundament + logowanie (`POST /api/login`, `POST /api/logout`, `GET /api/me`).
+[`docs/rebuild-roadmap.md`](../../docs/rebuild-roadmap.md). Stan: **Iteracja 2** —
+fundament + logowanie (`POST /api/login`, `POST /api/logout`, `GET /api/me`) oraz
+katalog odczyt (`GET /api/products`, `GET /api/suppliers`, `GET /api/dostawcy`), wszystkie za `requireAuth`.
+
+`GET /api/products` ma **dwa kształty odpowiedzi**, wiernie wg oryginału: bez parametru `limit`
+i bez `dostawca` → goła **tablica** wszystkich produktów; w każdym innym przypadku →
+`{ items, total, limit, offset }` (`limit` capowany do 2000, domyślnie 200, `total` liczony po
+filtrze `dostawca`). `GET /api/dostawcy` i `GET /api/suppliers` to **jeden handler pod dwiema
+ścieżkami**. Szczegóły i uzasadnienie: `docs/tickets/3-FEATURE-katalog-odczyt/plan.md`.
 
 **Zasada naczelna: odtwarzamy udokumentowane zachowanie 1:1, nie wymyślamy nowego.**
 Wzorcem jest produkcja — `contract/fixtures/` i `contract/openapi.yaml`, a gdy milczą,
@@ -12,7 +19,8 @@ zatwierdzoną decyzją i jest opisane w kodzie oraz w `docs/tickets/*/plan.md`.
 ## Stos
 
 Node ≥ 20 (`.nvmrc`) · TypeScript (strict, ESM) · Express 4 · better-sqlite3 (WAL) ·
-Drizzle ORM · Vitest + supertest · ESLint 9 (flat config).
+Drizzle ORM · `compression` (gzip/brotli odpowiedzi, wpięte w `app.ts` po CORS a przed trasami) ·
+Vitest + supertest · ESLint 9 (flat config).
 
 ## Szybki start (lokalnie)
 
@@ -66,11 +74,13 @@ npm run lint
 npm run typecheck
 ```
 
-**GATE** (`test/auth.gate.test.ts` + harness `test/gate/`) to siatka bezpieczeństwa odbudowy.
+**GATE** (`test/auth.gate.test.ts`, `test/katalog.gate.test.ts` + harness `test/gate/`) to siatka
+bezpieczeństwa odbudowy.
 Sprawdza dwie rzeczy:
 
 1. **Fixtures** — kształt odpowiedzi (klucze, typy, zagnieżdżenie) zgadza się **1:1** z nagraną
-   odpowiedzią żywego backendu z `contract/fixtures/`. W Iteracji 1a: `GET_me.json`.
+   odpowiedzią żywego backendu z `contract/fixtures/`. Dziś w zakresie: `GET_me.json`,
+   `GET_products.json`, `GET_suppliers.json`, `GET_dostawcy.json`.
 2. **Kontrakt** — ścieżka, metoda i zwrócony kod statusu są zadeklarowane w `contract/openapi.yaml`,
    a odpowiedź jest JSON-em.
 
@@ -99,11 +109,13 @@ import { podpiszToken } from "../src/auth/jwt.js";
 
 const s = await stworzSrodowiskoTestowe();
 const token = podpiszToken(s.uzytkownik, SEKRET_TESTOWY);
-const odp = await request(s.app).get("/api/products").set("Authorization", `Bearer ${token}`);
+const odp = await request(s.app).get("/api/config").set("Authorization", `Bearer ${token}`);
 
-sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/products", odpowiedz: odp });
-sprawdzZgodnoscZFixture("GET_products.json", odp.body);
+sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/config", odpowiedz: odp });
+sprawdzZgodnoscZFixture("GET_config.json", odp.body);
 ```
+
+Zobacz `test/katalog.gate.test.ts` (Iteracja 2) jako gotowy przykład dla trzech ścieżek naraz.
 
 ## Struktura
 
@@ -118,7 +130,11 @@ src/
   auth/                jwt · password (bcrypt) · cookie bridge_session
   middleware/          optionalAuth · requireAuth · cors · errors
   repos/users.ts       dostęp do tabeli users
+  repos/products.ts    listaProduktow / listaProduktowStronicowana
+  repos/suppliers.ts   listaDostawcow (liczbaProduktow, status, ostatnie aktualizacje)
   routes/auth.ts       login · logout · me
+  routes/products.ts   GET /api/products
+  routes/suppliers.ts  GET /api/suppliers, GET /api/dostawcy (jeden handler)
 test/
   gate/                harness GATE — współdzielony przez wszystkie iteracje
   *.test.ts            testy iteracji
@@ -166,8 +182,19 @@ node -e "const D=require('better-sqlite3'),f=require('fs');const d=new D('.tmp/i
          for (const p of f.readdirSync('../schema').filter(x=>x.endsWith('.sql')).sort())
            d.exec(f.readFileSync('../schema/'+p,'utf8'));"
 DB_PATH=./.tmp/introspect.db npx drizzle-kit pull
-# skopiuj .drizzle/schema.ts do src/db/schema.ts i nanieś ponownie dopieszczenia
+# skopiuj .drizzle/schema.ts do src/db/schema.ts i nanieś ponownie dopieszczenia (patrz niżej)
 ```
+
+> ⚠ **Dopieszczenia do naniesienia po KAŻDEJ regeneracji** (introspekcja `drizzle-kit pull` nie
+> jest wierna oryginałowi w tych miejscach; bez nich GATE dla `GET /api/products` czerwieni się):
+> 1. `snow3Pmsf` → `snow3pmsf` — introspekcja camelizuje `snow_3pmsf` inaczej niż oryginał i niż
+>    `contract/fixtures/GET_products.json`.
+> 2. `{ mode: "boolean" }` na 10 kolumnach tabeli `products`: `reinforced`, `extraLoad`,
+>    `cutResistant`, `heatResistant`, `stubbleResistant`, `nro`, `cho`, `ms`, `snow3pmsf`, `cfo` —
+>    bez tego API zwraca `0`/`1` zamiast `false`/`true`.
+> 3. `eanIsValid` **celowo zostaje** zwykłym `integer()` — oryginał też go nie boolean-uje.
+>
+> Szczegóły i uzasadnienie (Decyzja D5): `docs/tickets/3-FEATURE-katalog-odczyt/plan.md`.
 
 `drizzle-kit` jest zależnością **wyłącznie deweloperską** (release na VPS instaluje się
 przez `npm ci --omit=dev`). `npm audit` zgłasza dla niego ostrzeżenia dziedziczone po
@@ -181,8 +208,5 @@ stosuje migracje na `data-nowy.db`, atomowo podmienia release (symlink `current`
 `pm2 reload`. Kontrakt, który spełnia ten pakiet: `npm ci && npm run build` → `dist/`,
 wejście `dist/server.js`, `HOST`/`PORT`/`DB_PATH` z env, `npm run migrate` idempotentne.
 
-> **Uwaga: sam backend jeszcze się nie zdeployuje.** `tools/deploy-staging.sh` pomija build,
-> dopóki nie istnieją **jednocześnie** `rebuild/backend/package.json` **i**
-> `rebuild/frontend/package.json`. Po zmergowaniu Iteracji 1a staging zostaje na placeholderze —
-> backend wjedzie na `test.agritires.eu` razem z frontendem z **sesji 1b**. To świadoma decyzja
-> (nie ruszamy działającego pipeline'u I0 dla połowy iteracji).
+Backend i frontend deployują się razem od Iteracji 1b — oba `package.json` już istnieją, więc
+`tools/deploy-staging.sh` buduje i podmienia release przy każdym pushu na `develop`.

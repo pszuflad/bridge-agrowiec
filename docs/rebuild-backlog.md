@@ -89,6 +89,10 @@ finalnej normalizacji** wszystkich pól przed zapisem (tu: kategoria; przy snieg
 Nowy adapter powinien mieć jeden blok „normalizacja końcowa" — kategoria, zastosowanie,
 flagi etykiety UE — zamiast rozsypanych hardkodów po parserach.
 
+Od Iteracji 2 (`3-FEATURE-katalog-odczyt`) katalog **wyświetla i filtruje** po kolumnie `kategoria`
+(pass-through z bazy, bez normalizacji po stronie API) — ta decyzja dotyczy więc teraz również
+tego, co użytkownik realnie widzi w panelu, nie tylko statystyk importu.
+
 ### #3 · 2026-08-18…19 · [BACKEND][BAZA][FRONTEND] · saga szerokości (`szerokoscfix`→`szerorig`→`szertxt`)
 
 > **Trzy commity, jedna sprawa. Kolejne kroki COFAJĄ poprzedni** — dla odbudowy liczy się
@@ -129,13 +133,39 @@ liczbę z tekstu rozmiaru 1:1, z zerami końcowymi**, bez konwersji jednostek.
 
 **⚠ Rozjazdy do naprawienia u nas (po decyzji ✅):**
 - `rebuild/schema/001_schema.sql:44` ma jeszcze `szerokosc REAL` → zmienić na `TEXT` (produkcja: `db/schema.sql:258`).
-- **Fixtures z Fazy 2** (`contract/fixtures/`) mają starą `szerokosc` (liczbową/mm). Endpointy zwracające
-  szerokość trzeba **przenagrać**, inaczej GATE testów odbudowy (feature.md, Krok 9) słusznie zgłosi rozjazd.
+  Stan na 2026-08-25 (po Iteracji 2): nadal REAL, świadomie nietknięte (patrz niżej).
+- **Fixtures z Fazy 2** (`contract/fixtures/`) mają starą `szerokosc` (liczbową/mm). Od Iteracji 2 endpoint,
+  którego to dotyczy, już istnieje: `GET /api/products` + `contract/fixtures/GET_products.json` — jedyny
+  fixture, w którym `szerokosc` jest typowanym polem odpowiedzi (w `GET_staging.json` występuje tylko jako
+  fragment zserializowanego `snapshotJson`, poza zasięgiem porównania kształtu). Przenagranie tego jednego
+  pliku po zmianie schematu jest więc kosztem jednorazowym i małym.
 
 **Rekomendacja (moja):** ✅ **nanieść stan końcowy (szertxt)**, ❌ **pominąć szerokoscfix** (cofnięty).
 Realna poprawka poprawności danych. Wzorzec architektoniczny: `szerokosc` staje się polem
 **prezentacyjnym** (TEXT, oryginał), a liczby do obliczeń (`widthCm`) żyją osobno — nowy parser powinien
 rozdzielić „surowy zapis do wyświetlenia" od „liczby do matematyki".
+
+**Ustalenia z Iteracji 2 (ticket `3-FEATURE-katalog-odczyt`) — odblokowują tę decyzję, ale jej NIE
+podejmują (status zostaje 🕒 PÓŹNIEJ):**
+1. Backend czyta `szerokosc` bez konwersji (pass-through) — Drizzle `real()` nie mapuje wartości z drivera,
+   a SQLite jest dynamicznie typowany, więc ta sama linia kodu oddaje **liczbę** na kanonie/`db/snapshot.db`
+   (kolumna REAL, potwierdzone `620`, `typeof number`) i **string** na stagingu po `szertxt` (kolumna TEXT,
+   potwierdzone `"10.00"`, `typeof string` — po odtworzeniu migracji na bazie testowej).
+2. Kanoniczny schemat **fizycznie nie potrafi** przechować tego, co trzyma staging — SQLite *type affinity*
+   konwertuje zapis `'10.00'` do kolumny REAL na liczbę `10.0`. GATE nie łapie tego rozjazdu, bo baza testowa
+   powstaje z kanonu — to nie luka harnessu, tylko właściwość schematu.
+3. **⚠ Najważniejsze: w UI rozjazd jest w większości niewidoczny, bo oryginał już go rozwiązał.** `Wfmt`
+   (`deminified/frontend-index.js:23098-23119`, odtworzona jako `formatujSzerokosc`,
+   `rebuild/frontend/src/pages/katalog/formatowanie.tsx`) nie ufa wartości z bazy — odzyskuje zapis z pola
+   `rozmiar`, szukając tokenu liczbowego równego szerokości, i zwraca go w oryginalnym brzmieniu. Dopóki
+   `rozmiar` zawiera pasujący token, `10` (REAL) i `"10.00"` (TEXT) renderują się identycznie. To istotnie
+   obniża koszt i ryzyko przejścia na TEXT.
+4. Różnica JEST widoczna przy sortowaniu po kolumnie „Szerokość opony" — liczby sortują się numerycznie,
+   stringi leksykalnie (`"100"` przed `"9"`); zachowanie oryginału.
+5. Propozycja domknięcia (do decyzji tutaj, nie w I2): przyjąć `szertxt` w całości — schemat i Drizzle
+   REAL→TEXT, przenagrać `GET_products.json` — plus rozstrzygnąć, czy sortowanie po szerokości ma zostać
+   leksykalne (po przejściu na TEXT stanie się jedynym wariantem). Szczegóły i dowody empiryczne:
+   `docs/tickets/3-FEATURE-katalog-odczyt/raport.md`, sekcja „Rozjazd `szerokosc`".
 
 ---
 

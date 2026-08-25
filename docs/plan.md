@@ -1,12 +1,14 @@
 # Bridge dla Agrowca — plan odbudowy projektu
 
-*Wersja z 2026-07-24. Dokument roboczy — aktualizowany w miarę postępu.*
+*Wersja z 2026-07-24. Dokument roboczy z Fazy wstępnej (przed startem `rebuild/`).*
 
-Powiązane dokumenty:
-- [README.md](README.md) — audyt stanu obecnego (źródła, schemat, dane, API)
-- [audyt-vps.sh](audyt-vps.sh) — skrypt audytu serwera (wykonany, §2.8 README)
-- [PROMPT-dokumentacja-backendu.md](PROMPT-dokumentacja-backendu.md) — dokumentacja backendu przez Perplexity
-- `PROMPT-dokumentacja-frontendu.md` — dokumentacja frontendu przez Perplexity
+> **Ten dokument jest historyczny.** Bieżącym źródłem prawdy o kolejności, zakresie i stanie
+> odbudowy jest **`docs/rebuild-roadmap.md`** (+ `docs/rebuild-backlog.md` na zmiany Ani).
+> Fazy 3 i 4 opisane niżej **wystartowały** — patrz roadmap §4/§5 za aktualny status per
+> iteracja (I1 fundament+shell, I2 katalog zamknięte; kolejne w toku). Pliki wymienione niżej
+> jako „Powiązane dokumenty" (`README.md`, `audyt-vps.sh`, `PROMPT-dokumentacja-*.md`) **już nie
+> istnieją** w repo — ich treść przeszła do `docs/` (m.in. `spec-backend.md`, `spec-frontend.md`,
+> `rebuild-roadmap.md`). Ten plik zostaje jako zapis kontekstu i decyzji z Fazy wstępnej.
 
 ---
 
@@ -178,7 +180,8 @@ Przy okazji domknąć dryf schematu (4 tabele + 2 kolumny bez kodu tworzącego),
 1. Nowy backend obok starego, na kopii bazy; porównanie odpowiedzi z kontraktem.
 2. Nowy frontend na tym samym API.
 3. Przełączenie w oknie serwisowym, **stary bundle zachowany jako rollback**.
-4. Dopiero po stabilizacji — sprzątanie repo (lista w README §7.4).
+4. Dopiero po stabilizacji — sprzątanie repo (`README.md` §7.4 już nie istnieje w repo —
+   lista do odtworzenia przy tej fazie, jeśli będzie potrzebna).
 
 ---
 

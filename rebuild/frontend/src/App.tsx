@@ -16,6 +16,7 @@ import { Route, Switch } from "wouter";
 import { AuthGate } from "@/components/AuthGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { queryClient } from "@/lib/queryClient";
+import { Katalog } from "@/pages/Katalog";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
 import { PLACEHOLDERY } from "@/pages/placeholdery";
@@ -26,6 +27,7 @@ export function Trasy() {
     <AuthGate>
       <Switch>
         <Route path="/login" component={Login} />
+        <Route path="/katalog" component={Katalog} />
         {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
           <Route key={path} path={path}>
             <WidokWPrzygotowaniu tytul={tytul} opis={opis} iteracja={iteracja} />

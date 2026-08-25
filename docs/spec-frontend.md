@@ -101,6 +101,19 @@ ma endpoint:
 > realizuje ten blueprint — widok `/login`, rama aplikacji z ciemnym sidebarem, 12 tras
 > (11 placeholderów) i pełne tokeny z produkcyjnego CSS. Odstępstwa od oryginału (m.in. routing
 > po ścieżkach zamiast po hashu) — patrz `docs/tickets/2-FEATURE-frontend-shell-logowanie/raport.md`.
+>
+> **Iteracja 2 zamknięta (I2, `3-FEATURE-katalog-odczyt`):** `/katalog` odbudowany — 12 tras,
+> 10 placeholderów. Kluczowy fakt zweryfikowany w kodzie: `GET /api/products` jest wołane
+> **bez żadnych parametrów** i zwraca gołą tablicę ~7405 produktów; szukajka (tokeny, AND
+> między tokenami / OR po 16 polach, bez debounce), filtry, sortowanie, paginacja
+> (25/50/100/Wszystkie) i wirtualizacja (> 150 wierszy) są **w 100% po stronie klienta**
+> (`frontend-index.js:23261-23312`). Tabela ma 59 konfigurowalnych kolumn (15 domyślnych,
+> zapis w IndexedDB), z `nazwa`/`ean`/`dostawca` zawsze widocznymi i przyklejonymi do lewej;
+> nagłówki mają statyczną, przygaszoną ikonę sortowania — bez wskazania aktywnej kolumny/kierunku.
+> Oryginał **nie ma** szczegółu produktu w trybie odczytu (tylko modal edycji) — odbudowa
+> dokłada podgląd read-only jako świadome, zatwierdzone odstępstwo. Eksport CSV i słowniki
+> marek/kategorii z `GET /api/atrybuty` odłożone do kolejnych iteracji. Szczegóły:
+> `docs/tickets/3-FEATURE-katalog-odczyt/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).
