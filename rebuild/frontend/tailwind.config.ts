@@ -82,10 +82,17 @@ export default {
           5: "hsl(var(--chart-5) / <alpha-value>)",
         },
       },
+      // Skala zaokrągleń przepisana z WARTOŚCI wygenerowanych przez produkcję:
+      // `.rounded-sm{.1875rem}`, `.rounded-md{.375rem}`, `.rounded-lg{.5625rem}`,
+      // `.rounded-xl{.75rem}` (index-BVOkSOnE.css). Celowo NIE wyliczamy ich z `--radius`:
+      // produkcyjny arkusz nie używa `var(--radius)` w żadnej regule (0 trafień), a domyślna
+      // konwencja shadcn (`lg: var(--radius)`) dałaby 8 px zamiast 9 px i 4 px zamiast 3 px.
+      // `rounded` (.25rem) i `rounded-full` zostają domyślne — produkcja ma je identyczne.
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        sm: "0.1875rem",
+        md: "0.375rem",
+        lg: "0.5625rem",
+        xl: "0.75rem",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

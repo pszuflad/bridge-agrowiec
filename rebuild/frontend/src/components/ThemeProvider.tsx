@@ -38,7 +38,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [dark]);
 
   function toggle() {
-    const nowy = !dark;
+    // Uwaga na nazewnictwo: zapis `!dark` skaner Tailwinda bierze za klasę `!dark`
+    // i generuje dla niej martwą regułę w bundlu. Stąd `dark === false`.
+    const nowy = dark === false;
     try {
       localStorage.setItem(KLUCZ_MOTYWU, nowy ? "dark" : "light");
     } catch {

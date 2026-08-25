@@ -171,7 +171,20 @@ na hamburgerze udokumentowany jako **O6**; cienie dopisane do `.dark` dla dosło
 lista O1–O6 wprost w tym raporcie; nazwa klasy w komentarzu `NotFound.tsx` przestała
 generować martwą regułę w bundlu.
 
-**Odrzucone:** brak — wszystkie uwagi zaadresowane. Uwaga o `maximum-scale=1` blokującym
+**Runda 2 review (0 BLOCKER) — trzy dodatkowe naprawy:**
+- **Skala zaokrągleń odbiegała od produkcji.** Użyłem domyślnej konwencji shadcn
+  (`lg: var(--radius)`), a produkcja ma wartości STATYCZNE: `.rounded-sm{.1875rem}`,
+  `.rounded-md{.375rem}`, `.rounded-lg{.5625rem}`, `.rounded-xl{.75rem}` — i nie używa
+  `var(--radius)` w żadnej regule (0 trafień w arkuszu). Dawało 8 px zamiast 9 px na karcie
+  logowania i 4 px zamiast 3 px. Przepisane dosłownie; strażnik tokenów porównuje teraz
+  także wszystkie klasy `rounded-*` z produkcyjnymi (sprawdzone mutacyjnie).
+- `const nowy = !dark` w `ThemeProvider` — skaner Tailwinda brał `!dark` za nazwę klasy
+  i generował martwą regułę `.\!dark{…!important}` (~1,4 kB) w bundlu. Zmienione na
+  `dark === false`.
+- `restoreMocks: true` w `vitest.config.ts` — szpiedzy na `fetch` wracają do oryginału
+  nawet gdy test padnie przed `mockRestore()`.
+
+**Odrzucone:** brak — wszystkie uwagi z obu rund zaadresowane. Uwaga o `maximum-scale=1` blokującym
 zoom zostaje świadomie niezmieniona (wierność produkcji), odnotowana w „Follow-up".
 
 ## Follow-up

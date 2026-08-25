@@ -176,5 +176,28 @@ describe("wygenerowany arkusz", () => {
     // po ujednoliceniu białych znaków.
     const zwiniety = wynik.css.replace(/\s+/g, "");
     expect(zwiniety).toContain(".border-primary-border{border-color:var(--primary-border);}");
+
+    // Skala zaokrągleń: produkcja generuje statyczne wartości (`.rounded-lg{.5625rem}`),
+    // których NIE da się wyprowadzić z `--radius` domyślną konwencją shadcn.
+    // Każda nasza klasa `rounded-*` musi mieć wartość identyczną z produkcyjną.
+    const promienie = (css: string) => {
+      const mapa = new Map<string, string>();
+      for (const [, klasa, wartosc] of css.matchAll(
+        /\.(rounded[a-z-]*)\s*\{\s*border-radius:\s*([^;}]+)/g,
+      )) {
+        mapa.set(klasa!, znormalizuj(wartosc!));
+      }
+      return mapa;
+    };
+    const nasze = promienie(wynik.css);
+    const produkcyjne = promienie(CSS_PRODUKCJI);
+
+    expect(nasze.size).toBeGreaterThan(0);
+    const rozjazdyPromieni = [...nasze.entries()]
+      .filter(([klasa, wartosc]) => produkcyjne.has(klasa) && produkcyjne.get(klasa) !== wartosc)
+      .map(([klasa, wartosc]) => `${klasa}: nasze ${wartosc} vs produkcja ${produkcyjne.get(klasa)}`);
+    expect(rozjazdyPromieni).toEqual([]);
+    // Kontrola, że porównanie w ogóle miało co porównywać.
+    expect(nasze.get("rounded-lg")).toBe("0.5625rem");
   });
 });
