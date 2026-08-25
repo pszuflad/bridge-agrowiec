@@ -284,14 +284,6 @@ function parseFile(filePath) {
         // Cena PLN (Radial: kol O, XPly: kol M)
         const cenaZakupu = cellNum(pln);
 
-        // POPRAWKA 2026-08-25: Trelleborg dla wielkoformatowych VF (HF1000, TM3000,
-        // TM1000, PNEUTRAC VF) w XLSX zwraca pustą komórkę lub tekstową ("-", brak).
-        // cellNum() daje null, potem tk() ma fallback "?? 0" → cena=0 i produkt trafia
-        // do katalogu ze statusem 'wstrzymany' ale bez sygnału "na zapytanie".
-        // Wzorzec identyczny jak MO7 Nokian VF Float King (poprawka 24.08).
-        // detectPriceOnRequest wykrywa: sam myślnik, tekst bez cyfr, puste po usunięciu waluty.
-        const uwagaCena = c.detectPriceOnRequest(pln);
-
         const rec = c.normalizeRecord({
           ean,
           kod_dostawcy: ipCode || null,
@@ -301,7 +293,6 @@ function parseFile(filePath) {
           rozmiar,
           rozmiar_alternatywny: alt,
           cena_zakupu: cenaZakupu,
-          uwaga_cena: uwagaCena,
           stan_magazynowy: 0,  // Anna 01.07: stan zawsze 0
           kategoria,
           oznaczenia_techniczne: oznaczeniaUnique,

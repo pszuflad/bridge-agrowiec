@@ -1,3 +1,30 @@
+2026-08-25 15:54
+obszar: baza danych
+
+pliki: data.db (backup: data.db.bak_fix105056_20260825_1554)
+
+zmiana: UPDATE products SET rozmiar='520/70R38', konstrukcja='R' WHERE id=105056 (ALLIANCE AF 670). Rekord sierota od 05.08 (kod 3071520703870001 nie występuje w bieżącym CSV MO2 JMK, nieobecnosc_pod_rzad=1). Miał 'rozmiar=520/70x38' i 'konstrukcja=X' — błąd typu w historycznym CSV JMK, przeszedł przez parseSize (linia 214 tyre_params.cjs — regex [RBD-] nie łapie 'x') i przez fallback konstrukcjaRaw || size.konstrukcja przy linii 524 (konstrukcjaRaw='X'). ALLIANCE AF 670 to opona radialna (potwierdzenie: dzisiejsze CSV JMK ma 710/70R38 AF 670 z R). Parsera NIE tykamy — jednorazowy błąd źródła, nie ryzykujemy false-positive dla prawdziwych diagonalnych WxD.
+
+powód: audyt anomalii katalogu 25.08 — 1 rekord z konstrukcja='X' (nieprawidłowy marker).
+
+2026-08-25 15:41
+obszar: backend
+
+pliki: parsers/mo8_trelleborg.cjs (+ .bak_pre_uwagacena_20260825_1541)
+
+zmiana: Dodano detectPriceOnRequest w parserze MO8 (Trelleborg) — analogicznie do MO7 Nokian (poprawka 24.08). Gdy komórka Cena PLN w XLSX jest pusta / myślnik / tekst bez cyfr, uwaga_cena='na zapytanie'. Bez tego cellNum→null→tk fallback ?? 0 daje cena_zakupu=0 bez sygnału. Wykryte w audycie 25.08: 9 rekordów VF (HF1000, TM3000, TM1000, PNEUTRAC ×6, VF800/70R38) z cena=0 bez uwaga_cena. Fix parsera zabezpieczy kolejny ręczny import; istniejące 9 rekordów zostaje bez zmian (brak XLSX z 21.07 w archive, nie można potwierdzić czy była tekstowa "na zapytanie" czy 0).
+
+powód: audyt anomalii katalogu 25.08 — 9 pozycji Trelleborg VF z cena=0 bez uwaga_cena.
+
+2026-08-25 15:30
+obszar: baza danych
+
+pliki: data.db (+ data.db.bak_fix100577_20260825_1530)
+
+zmiana: UPDATE products SET marka='LINGLONG' WHERE id=100577 (LINGLONG L-S20 235/75R17.5, MO4 kod LLCR17523575MLLS0). Rekord od 10.08 osierocony — w bieżącym MO4 CSV (agrowiec_wr.csv) nie występuje; ten sam produkt jest w MO5 (agrowiec_mw.csv) z poprawną marką LingLong. Historyczny import 10.08 zostawił markę pustą, obecne feedy MO4 nie odświeżają rekordu.
+
+powód: cleanup jedynego rekordu z pustą marką (audyt anomalii 25.08). Zgłoszenie osobne: rekord powinien być oznaczony jako nieobecny (nieobecnosc_pod_rzad=0 mimo 15 dni braku w feedzie MO4).
+
 
 2026-08-25 13:15
 obszar: backend + baza danych
