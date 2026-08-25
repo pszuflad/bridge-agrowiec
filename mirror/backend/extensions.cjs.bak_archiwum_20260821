@@ -17,7 +17,6 @@ const dispatcher = require('./parsers/dispatcher.cjs');
 const adapter = require('./parsers/adapter.cjs');
 const atrybuty = require('./atrybuty_module.cjs');
 const pending = require('./pending_module.cjs');
-const archive = require('./archive_module.cjs');
 
 const TMP = path.join(os.tmpdir(), 'bridge_v6_imports');
 if (!fs.existsSync(TMP)) fs.mkdirSync(TMP, { recursive: true });
@@ -50,17 +49,6 @@ function saveTmp(buf, name) {
   const filePath = path.join(TMP, name);
   fs.writeFileSync(filePath, buf);
   return filePath;
-}
-
-// Nazwa pliku z URL (do archiwum) — ostatni segment ścieżki, bez query string
-function getUrlFileName(url) {
-  try {
-    const u = new URL(url);
-    const seg = u.pathname.split('/').filter(Boolean);
-    return seg[seg.length - 1] || 'import.csv';
-  } catch (_) {
-    return 'import.csv';
-  }
 }
 
 // === Główna ścieżka: file path → surowe gotowe dla tk() ===
@@ -133,20 +121,10 @@ function register(app, ctx) {
     const url = resolveUrl(U, dostawcaKod);
     if (!url) return res.status(400).json({ error: `Brak URL dla dostawcy ${dostawcaKod}` });
 
-    let buf = null; // poza try — potrzebne w catch do archiwum błędnych plików
     try {
       console.log(`[bridge_v6] from-url ${dostawcaKod} ← ${url}`);
-      buf = await downloadUrl(url);
+      const buf = await downloadUrl(url);
       const filePath = saveTmp(buf, `${dostawcaKod}_${Date.now()}.csv`);
-
-      // Archiwum importu: kopia surowego pliku PRZED parsowaniem (nigdy nie psuje importu)
-      let archOk = null;
-      try {
-        archOk = archive.archiveBuffer(buf, {
-          dostawcaKod, oryginalnaNazwa: getUrlFileName(url),
-          zrodlo: 'from-url', url, user: req.user?.imieNazwisko || null, status: 'ok'
-        });
-      } catch (_) {}
 
       const { surowe, errors, odrzucone, recordsCount } = parseAndConvert(dostawcaKod, filePath);
       const tkResult = tk(dostawcaKod, surowe);
@@ -173,9 +151,6 @@ function register(app, ctx) {
         console.error('[bridge_v6] audit log fail:', e.message);
       }
 
-      // Uzupełnij metadane archiwum o wynik parsowania
-      if (archOk) try { archive.updateMeta(archOk.id, { rekordy: recordsCount, parserErrors: errors.length, odrzucone: odrzucone.length }); } catch (_) {}
-
       res.json({
         ok: true,
         dostawcaKod,
@@ -183,7 +158,6 @@ function register(app, ctx) {
         wczytanych: recordsCount,
         parserErrors: errors.length,
         odrzuconePrzezParser: odrzucone.length,
-        archiwum: archOk ? archOk.id : null,
         ...tkResult
       });
 
@@ -191,15 +165,6 @@ function register(app, ctx) {
       try { fs.unlinkSync(filePath); } catch (_) {}
     } catch (e) {
       console.error(`[bridge_v6] from-url ${dostawcaKod} BŁĄD:`, e);
-      // Nawet błędny plik chcemy w archiwum (ale tylko raz — jeśli nie zapisaliśmy go już jako ok)
-      try {
-        if (buf && !archOk) archive.archiveBuffer(buf, {
-          dostawcaKod, oryginalnaNazwa: getUrlFileName(url),
-          zrodlo: 'from-url', url, user: req.user?.imieNazwisko || null,
-          status: 'blad', blad: String(e.message || e).slice(0, 500)
-        });
-        else if (buf && archOk) archive.updateMeta(archOk.id, { status: 'blad', blad: String(e.message || e).slice(0, 500) });
-      } catch (_) {}
       res.status(500).json({ error: e.message, dostawcaKod, url });
     }
   });
@@ -228,25 +193,7 @@ function register(app, ctx) {
       if (buf.length > 25 * 1024 * 1024) return res.status(400).json({ error: 'Plik większy niż 25 MB' });
 
       const filePath = saveTmp(buf, `${dostawcaKod}_upload_${Date.now()}.csv`);
-
-      // Archiwum importu (upload z panelu) — PRZED parsowaniem
-      let archOk = null;
-      try {
-        archOk = archive.archiveBuffer(buf, {
-          dostawcaKod, oryginalnaNazwa: String(req.query?.nazwa || req.headers['x-nazwa-pliku'] || 'upload.csv'),
-          zrodlo: 'upload', user: req.user?.imieNazwisko || null, status: 'ok'
-        });
-      } catch (_) {}
-
-      let parsed;
-      try {
-        parsed = parseAndConvert(dostawcaKod, filePath);
-      } catch (perr) {
-        if (archOk) try { archive.updateMeta(archOk.id, { status: 'blad', blad: String(perr.message || perr).slice(0, 500) }); } catch (_) {}
-        throw perr;
-      }
-      const { surowe, errors, odrzucone, recordsCount } = parsed;
-      if (archOk) try { archive.updateMeta(archOk.id, { rekordy: recordsCount, parserErrors: errors.length, odrzucone: odrzucone.length }); } catch (_) {}
+      const { surowe, errors, odrzucone, recordsCount } = parseAndConvert(dostawcaKod, filePath);
       const tkResult = tk(dostawcaKod, surowe);
 
       try {
@@ -414,14 +361,6 @@ function register(app, ctx) {
     res.send(SUPPLIER_CONFIG_HTML);
   });
 
-  // === MODUŁ ARCHIWUM IMPORTU ===
-  try {
-    archive.registerArchive(app, { we, be });
-    console.log('[bridge_v6] Archiwum importow: /api/import-archive zarejestrowane');
-  } catch (e) {
-    console.error('[bridge_v6] BLAD ladowania archive_module:', e.message);
-  }
-
   // === Scheduler: per-supplier auto-pull ===
   startScheduler(app, ctx);
 
@@ -458,16 +397,6 @@ function register(app, ctx) {
       console.log('[bridge_v6] Fix S: /api/selly/* zarejestrowane (ping, status, sync, log, csv-status, generate-csv)');
     } catch (e) {
       console.error('[bridge_v6] BLAD ladowania selly/routes:', e.message);
-    }
-    // === DODANE 2026-08-24: uwaga_cena patch ===
-    // Kolumna products.uwaga_cena + monkey-patch acceptStaging/addProductsBulk
-    // + endpoint GET /api/products/uwagi-cena dla frontendowego tooltipu przy statusie.
-    try {
-      const { installUwagaCena } = require('./uwaga_cena_patch.cjs');
-      installUwagaCena(app, ctx, _bridgeDb);
-      console.log('[bridge_v6] uwaga_cena: patch zaladowany (kolumna + acceptStaging + endpoint)');
-    } catch (e) {
-      console.error('[bridge_v6] BLAD ladowania uwaga_cena_patch:', e.message);
     }
   }
 }
@@ -854,25 +783,7 @@ async function runAutoPull(ctx, onlyKod) {
     try {
       const buf = await downloadUrl(url);
       const filePath = saveTmp(buf, `${dostawcaKod}_auto_${Date.now()}.csv`);
-
-      // Archiwum importu (auto-pull) — PRZED parsowaniem
-      let archOk = null;
-      try {
-        archOk = archive.archiveBuffer(buf, {
-          dostawcaKod, oryginalnaNazwa: getUrlFileName(url),
-          zrodlo: 'auto-pull', url, user: 'SYSTEM-AUTOPULL', status: 'ok'
-        });
-      } catch (_) {}
-
-      let parsed;
-      try {
-        parsed = parseAndConvert(dostawcaKod, filePath);
-      } catch (perr) {
-        if (archOk) try { archive.updateMeta(archOk.id, { status: 'blad', blad: String(perr.message || perr).slice(0, 500) }); } catch (_) {}
-        throw perr;
-      }
-      const { surowe, errors, odrzucone, recordsCount } = parsed;
-      if (archOk) try { archive.updateMeta(archOk.id, { rekordy: recordsCount, parserErrors: errors.length, odrzucone: odrzucone.length }); } catch (_) {}
+      const { surowe, errors, odrzucone, recordsCount } = parseAndConvert(dostawcaKod, filePath);
       const tkResult = tk(dostawcaKod, surowe);
 
       try {
@@ -914,4 +825,3 @@ async function runAutoPull(ctx, onlyKod) {
 }
 
 module.exports = { register, runAutoPull };
-

@@ -34,6 +34,7 @@ rsync -a --delete --delete-excluded \
   --exclude '*.tar.gz' --exclude '*.gz' \
   --exclude '.env' --exclude '.env.*' \
   --exclude 'logs' --exclude '*.log' \
+  --exclude 'import_archive' \
   "$BE_SRC/" "$REPO/mirror/backend/"
 
 rsync -a --delete --exclude 'node_modules' \

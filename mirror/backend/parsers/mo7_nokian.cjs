@@ -64,6 +64,12 @@ function parseFile(filePath) {
       // DECYZJA ANNY: cena = "Zakup 1 szt"
       const cena = row['Zakup 1 szt'];
 
+      // DODANE 2026-08-24: Nokian dla wielkoformatowych VF Float King zwraca "- zł"
+      // zamiast liczby (cena na zapytanie u dostawcy). Wykrywamy to i przekazujemy do
+      // pola uwaga_cena — dzięki temu produkt trafia do katalogu ze statusem 'wstrzymany',
+      // ale panel wie że to "na zapytanie", nie błąd danych.
+      const uwagaCena = c.detectPriceOnRequest(cena);
+
       const oznaczenia = [
         ...c.extractTechnicalMarks(nazwa),
         ...(sfsb ? [sfsb.trim()] : []),
@@ -81,6 +87,7 @@ function parseFile(filePath) {
         rozmiar: rozmiar,
         rozmiar_alternatywny: rozmiarAlt || null,
         cena_zakupu: cena,
+        uwaga_cena: uwagaCena,
         stan_magazynowy: row['Magazyn'],
         kategoria: kategoria,
         oznaczenia_techniczne: oznaczeniaUnique,
@@ -97,3 +104,4 @@ function parseFile(filePath) {
 }
 
 module.exports = { parseFile, DOSTAWCA };
+

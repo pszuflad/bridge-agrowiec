@@ -48011,6 +48011,17 @@ function nq(t, e, n = ".csv") {
     c = a.join(r.tmpdir(), `bridge_${t}_${Date.now()}_${Math.random().toString(36).slice(2)}${n||".csv"}`);
   try {
     i.writeFileSync(c, e);
+    try {
+      require("./archive_module.cjs").archiveBuffer(e, {
+        dostawcaKod: t,
+        oryginalnaNazwa: ("rdzen" + (n || ".csv")),
+        zrodlo: "rdzen-nq",
+        status: "ok",
+        rekordy: null
+      })
+    } catch (_ae) {
+      console.error("[archive] rdzen:", _ae.message)
+    }
     let u = s.parseByKod(t, c),
       l = u.records || u.produkty || [];
     return {

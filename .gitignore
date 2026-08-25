@@ -24,3 +24,6 @@ logs/
 
 # ── Worktree ticketów (procedura .claude/commands/feature.md) ──────────────
 .worktrees/
+
+# ── Bloat produkcji (nie wersjonujemy godzinowych zrzutów importu) ──────────
+mirror/backend/import_archive/
