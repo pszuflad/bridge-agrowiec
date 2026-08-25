@@ -167,6 +167,48 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
    leksykalne (po przejściu na TEXT stanie się jedynym wariantem). Szczegóły i dowody empiryczne:
    `docs/tickets/3-FEATURE-katalog-odczyt/raport.md`, sekcja „Rozjazd `szerokosc`".
 
+### #4 · 2026-08-24 · [BAZA][BACKEND][FRONTEND] · `uwaga_cena` (cena „na zapytanie")
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-08-24 13:00–16:00 |
+| **Kategoria** | BAZA (nowa kolumna) + BACKEND (endpoint, patche) + FRONTEND (tooltip) |
+| **Pliki** | `db/schema.sql` (kolumna `uwaga_cena`), `uwaga_cena_patch.cjs` (nowy), `parsers/adapter.cjs`, `parsers/mo7_nokian.cjs`, `extensions.cjs` |
+| **Commity** | `33455c8`, `c5d3d63`, `16bc37c` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Iteracja** | **→ follow-up I2** (kolumna+endpoint w katalogu) **+ I3** (propagacja w imporcie) |
+| **Status** | — |
+
+**Opis biznesowy:** dostawcy czasem zwracają „cena na zapytanie" (np. „- zł" w Nokian dla wielkoformatowych VF Float King). Zamiast pokazywać 0/pustą cenę, produkt dostaje notatkę i jest „wstrzymany"; frontend pokazuje tooltip z powodem.
+
+**Szczegół techniczny:** nowa kolumna `products.uwaga_cena TEXT`; `uwaga_cena_patch.cjs`: idempotentny `ALTER TABLE ADD COLUMN` + monkey-patch `U.acceptStaging` (odczyt `uwagaCena` ze `snapshotJson`) i `U.addProductsBulk`; **nowy endpoint `GET /api/products/uwagi-cena`** (lista wstrzymanych, dla tooltipu). Parser `mo7_nokian.cjs` i `adapter.cjs` propagują pole `uwagaCena`.
+
+**Rekomendacja:** ✅ **nanieść.** ⚠ **I2 (katalog) już zrobione BEZ tej kolumny/endpointu** (przyszły po zamrożeniu kontraktu) → dołożyć jako **follow-up do I2** (kolumna w widoku + `/api/products/uwagi-cena` + tooltip). Propagacja w imporcie wejdzie naturalnie przy **porcie parserów (I3)**.
+
+### #5 · 2026-08-24 · [BACKEND] · `frazy` (dopasowanie fraz — NIEZNANE szczegóły)
+
+| Pole | Wartość |
+|---|---|
+| **Pliki** | `frazy_migruj.cjs` (nowy, +64), `common.cjs` (+23), `frazy_niedopasowane.json` (dane), `frazy_raport.json` |
+| **Commit** | `33455c8` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Iteracja** | → do zbadania przy **I3** (normalizacja w adapterze) lub **I7** (atrybuty) |
+| **Status** | — |
+
+**Opis:** system migracji/dopasowania „fraz" — najpewniej normalizacja `zastosowanie`/nazw. **Changelog Ani nieaktualny**, więc szczegóły do potwierdzenia z diffa przy realizacji. **Rekomendacja:** 🕒 zbadać przy I3 (prawdopodobnie część warstwy normalizacji adaptera).
+
+### #6 · 2026-08-21…25 · [BACKEND] · bieżące poprawki parserów (`flagsfix`, mo8, batch) → obsłużone PORTEM
+
+| Pole | Wartość |
+|---|---|
+| **Pliki** | `parsers/adapter.cjs`, `parsers/tyre_params.cjs`, `parsers/mo8_trelleborg.cjs`, `parsers/mo7_nokian.cjs` + inne w źródle |
+| **Commity** | `3be0ccc` (flagsfix), `08be0f3` (mo8), część `ba3cc6e` |
+| **Do nowej wersji?** | ✅ **TAK (automatycznie)** |
+| **Iteracja** | **→ I3 (port)** |
+| **Status** | — |
+
+**Opis:** bieżące poprawki parserów Ani (flagi etykiet, MO8 Trelleborg, itd.). **Rekomendacja:** ✅ **objęte strategią „port parserów z najświeższego źródła" (I3/3a)** — nie wymagają osobnej implementacji; portując aktualny stan `parsers/`, dostajemy je wszystkie za darmo. To główny argument za portem, nie rewrite.
+
 ---
 
 *Pominięte (nie kod, brak zadania rebuild):*
@@ -174,3 +216,8 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
   danych, nie zmiana UI/kodu).
 - 2026-08-19 15:00 [FRONTEND] (szerorig) — kolejna regeneracja `sellycsv-...csv` (dane) + usunięcie
   skryptów debugowych `probe.cjs/probe2.cjs/probe3.cjs` (sprzątanie, nie logika produktu).
+- 2026-08-21 16:00 (`ba3cc6e`) — usunięcie starych backupów `index.cjs.v3/v4/v6/broken/before_v6…`
+  + adapter backup (sprzątanie, ~4100 linii); pliki `*.json` danych. Kod istotny (uwaga_cena/parsery)
+  ujęty w #4/#6.
+- `archive_module.cjs` (nowy, obsługa `import_archive`) — archiwizacja zrzutów importu; my `import_archive`
+  wykluczyliśmy z mirrora, więc **→ później (Ix)**, nie cel wczesnych iteracji.
