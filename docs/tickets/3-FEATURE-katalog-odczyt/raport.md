@@ -190,22 +190,42 @@ nie czytał żaden endpoint — nic istniejącego się na nich nie opierało. Sc
 
 ## Follow-up
 
-Rzeczy świadomie odłożone (żadna nie blokuje DoD tej iteracji):
+Rzeczy świadomie odłożone (żadna nie blokuje DoD tej iteracji). **Każda ma wskazanego adresata
+i została dopisana do zakresu docelowej iteracji w `docs/rebuild-roadmap.md`** — mapa zbiorcza
+znajduje się też w bloku Iteracji 2 („Co I2 świadomie odłożyła i dokąd").
 
-1. **Eksport CSV do Shopera** — przycisk „Pobierz CSV" z oryginału wymaga `GET /api/config`
-   (`shoper.separator`, `shoper.kolumny`). → I8 albo I11.
-2. **Słowniki marek/kategorii z `GET /api/atrybuty`** — dziś listy filtrów powstają wyłącznie
-   z danych, więc nie pokażą wartości słownikowej bez ani jednego produktu. → I7.
-3. **Akcje wierszowe** (Edytuj, Wstrzymaj/Aktywuj, Usuń) i „Historia" — mutacje produktów. → I12
-   („Historia" jest `disabled` także w oryginale, więc odtworzenie samego przycisku nic nie daje).
-4. **Kolumna „Promocja"** jest w domyślnym zestawie i renderuje „—", bo dane liczy warstwa
-   cenowa. → I4.
-5. **Backlog #3 (`szerokosc`)** — propozycja domknięcia wyżej. → ticket importu/schematu.
-6. **`openapi.yaml` nie deklaruje `GET /api/products/{id}`** i produkcja go nie ma. Utrwalone
-   testem, który zaświeci, gdyby ktoś dołożył tę operację do kontraktu. → I12 (odświeżenie kontraktu).
-7. **Nagranie fixtures dla wariantu „goła tablica"** (`GET /api/products` bez parametrów) —
-   główna ścieżka używana przez katalog nie ma dziś siatki fixtures, tylko własne testy.
-   Warto dograć przy najbliższym odświeżaniu `contract/fixtures/`.
+| # | Odłożone | Adresat | Stan zapisu w roadmapie |
+|---|---|---|---|
+| 1 | Mutacje produktów: `POST /api/products`, `PATCH`/`PUT`/`DELETE /api/products/{id}` oraz menu „Akcje" (Edytuj / Wstrzymaj-Aktywuj / Usuń) i modal edycji w `/katalog` | **I12** | ✅ dopisane do zakresu BE i FE I12 + do jej DoD i ścieżek GATE |
+| 2 | Odświeżenie `contract/openapi.yaml` (kody błędów, schematy ciał) i nagranie fixtures zapisujących; dograć wariant `GET /api/products` **bez parametrów** (goła tablica — dziś bez siatki fixtures) | **I12** | ✅ dopisane do zakresu I12 |
+| 3 | Słowniki marek/kategorii z `GET /api/atrybuty` — znosi degradację przyjętą w D3 | **I7** | ✅ odnotowane w bloku I7 |
+| 4 | Dane kolumny „Promocja" (dziś renderuje `—`, jak w oryginale bez promocji) | **I4** | ✅ odnotowane w bloku I4 |
+| 5 | `GET /api/config` — bloker eksportu CSV | **I11** | ✅ odnotowane w bloku I11 |
+| 6 | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8** | ✅ dopisane do zakresu i DoD I8 |
+| 7 | Decyzja o `szerokosc` (backlog #3) — ustalenia i propozycja domknięcia gotowe | ticket importu/schematu (**I3**) | ✅ podsekcja w `rebuild-backlog.md` #3 (status bez zmian: 🕒 PÓŹNIEJ) + odsyłacz w I3 |
+| 8 | Brak kanonicznego specu endpointów produktów/dostawców | — | ✅ **rozstrzygnięte: osobnego specu NIE zakładamy** — łańcuch wyszukiwania utrwalony w §2 roadmapy |
+
+### Dwie decyzje rozstrzygnięte po review (2026-08-25)
+
+**poz. 6 — eksport CSV z katalogu należy do I8.** Rozstrzygnęły to dwa fakty, nie preferencja:
+- `contract/fixtures/GET_config.json` pokazuje, że produkcja **nie ma** kluczy `shoper.separator`
+  ani `shoper.kolumny` — ma tylko `shoper.format_eksportu`, którego katalog nie czyta (konsumuje go
+  serwerowy eksport, `backend-index.cjs:48843`). Przycisk zawsze wpada więc w fallbacki: separator
+  `";"` i zahardkodowana 13-kolumnowa lista `TT`. **Zależność od `/api/config` jest nominalna** —
+  I11 nie jest blokerem, a I8 idzie na tablicy wcześniej.
+- I8 wnosi już serwerowy eksport Shopera (`GET /api/export/shoper`), więc jedna iteracja trzyma obie
+  drogi emisji CSV spójnie.
+Zapisane w bloku I8 (zakres + DoD), w tabeli odłożonych w I2 i sprostowane w I11.
+
+**poz. 8 — osobnego specu endpointów NIE zakładamy.** Byłby czwartą kopią tej samej wiedzy obok
+kontraktu, fixtures i kodu — a ten projekt już raz oberwał od dokumentacji, która rozjechała się ze
+stanem faktycznym (`04_DESIGN_TOKENS.md`, 6 rozjazdów; `spec-frontend.md` §7). Zamiast tego utrwaliłem
+w §2 roadmapy **łańcuch wyszukiwania**: kształt → `contract/fixtures/` + `openapi.yaml`; zachowanie →
+blok iteracji w §5 → katalog `docs/tickets/<ID>/`; rozstrzygnięcie → komentarz w kodzie cytujący
+oryginał. Łańcuch działa bez nowego pliku, bo każdy blok iteracji podaje swoje ścieżki GATE i katalog
+ticketa. **Dodatkowe zabezpieczenie:** przy odświeżaniu `openapi.yaml` w I12 schematy ciał mają
+powstać **z fixtures, nie z naszej implementacji** — inaczej kontrakt przestaje być niezależnym
+dowodem i zaczynamy sprawdzać własną pracę własną pracą. To ograniczenie jest teraz zapisane w I12.
 
 ## Aktualizacja dokumentacji
 
