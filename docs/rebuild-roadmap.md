@@ -268,9 +268,19 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   Propozycja domknięcia (schemat REAL→TEXT + przenagranie `GET_products.json`) i pełny wywód:
   `docs/tickets/3-FEATURE-katalog-odczyt/raport.md` (sekcja „Rozjazd `szerokosc`"), decyzja należy do
   ticketu importu/schematu, nie do I2.
-- **Uwaga:** to „okno", w którym Ania będzie później weryfikować efekty importu (I3). `POST /api/products/clear`
-  (destrukcyjne) → I12, nie tu. `GET /api/products/{id}` nie powstał (D6) — frontend operuje na obiekcie
-  już wczytanym z listy.
+- **Uwaga:** to „okno", w którym Ania będzie później weryfikować efekty importu (I3). `GET /api/products/{id}`
+  nie powstał (D6) — frontend operuje na obiekcie już wczytanym z listy.
+- **Co I2 świadomie odłożyła i dokąd** (zakresy docelowych iteracji już to uwzględniają):
+
+  | Odłożone | Dokąd | Stan zapisu |
+  |---|---|---|
+  | Mutacje produktów (`POST`, `PATCH`/`PUT`/`DELETE {id}`, `clear`) + menu „Akcje" i modal edycji w `/katalog` | **I12** | ✅ dopisane do zakresu I12 |
+  | Odświeżenie kontraktu + nagranie fixtures zapisujących i wariantu „goła tablica" `GET /api/products` | **I12** | ✅ dopisane do zakresu I12 |
+  | Słowniki marek/kategorii z `GET /api/atrybuty` (znosi degradację z D3) | **I7** | ✅ odnotowane w I7 |
+  | Dane kolumny „Promocja" (dziś renderuje `—`) | **I4** | ✅ odnotowane w I4 |
+  | `GET /api/config` — odblokowuje eksport CSV | **I11** | ✅ odnotowane w I11 |
+  | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8 albo I11** | ⬜ **właściciel nierozstrzygnięty** — patrz I8 |
+  | Decyzja o `szerokosc` (backlog #3) | ticket importu/schematu (I3) | ✅ ustalenia w `rebuild-backlog.md` #3, odsyłacz w I3 |
 - **DoD:** ✅ oba kształty `GET /api/products` + cap/filtr/auth; ✅ `GET /api/suppliers`/`GET /api/dostawcy`
   z polami liczonymi w locie; ✅ `src/db/schema.ts` naprawiony (D5); ✅ kompresja włączona; ✅ GATE —
   wszystkie trzy fixtures zielone; ✅ `/katalog` renderuje realne dane (12 tras bez zmian); ✅ szukajka/
@@ -350,8 +360,12 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Cel (Ania klika):** otwiera `/selly`, generuje/eksportuje CSV do marketplace, widzi status/log/słowniki — natywnie.
 - **Backend:** `/api/selly/status|ping|csv-status|log|dictionaries|categories|producers`, `POST /api/selly/generate-csv|sync-product|sync-supplier`; `GET /api/export/shoper`, `/api/export-shoper` (pełny katalog CSV — **z auth**, §3). Tabele `selly_kategoria_norm_map`, `selly_zastosowanie_category_map`.
 - **Frontend:** trasa Wouter `/selly` + komponenty React/TanStack (zamiast overlay + routing przez hash).
+  - **Eksport CSV odłożony z I2:** przycisk „Pobierz CSV (Shoper)" w `/katalog` (`frontend-index.js:23384-23422`).
+    Wymaga `GET /api/config` (`shoper.separator`, `shoper.kolumny` — dostarcza I11), a kolumny bierze
+    z konfiguratora katalogu, który już istnieje. **Właściciel do ustalenia przy starcie: I8 (bo to
+    eksport do marketplace) czy I11 (bo blokerem jest `/api/config`)** — nie rozstrzygnięte w I2.
 - **Ścieżki (GATE):** selly×10, export×2.  **Fixtures:** `GET_selly_status.json`, `_ping`, `_csv-status`, `_log`, `_dictionaries`.
-- **DoD:** panel Selly natywny; eksport CSV działa i jest chroniony auth; fixtures przez GATE; parytet z `selly-injection.js` (26 KB).
+- **DoD:** panel Selly natywny; eksport CSV działa i jest chroniony auth; fixtures przez GATE; parytet z `selly-injection.js` (26 KB). Jeśli eksport CSV z `/katalog` przypadnie tej iteracji — także on.
 
 ---
 
@@ -389,10 +403,24 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** wszystkie (finalny przegląd)
 - **Cel (Ania klika):** zmienia hasło w `/moje-konto`; admin zarządza użytkownikami/konfiguracją dostawców i utrzymaniem.
 - **Backend:** `POST /api/password/change`; `GET /api/users`; `GET/PUT /api/admin/supplier-config(+{kod})`, `/api/admin/suppliers-list`; `POST /api/maintenance/usun-nieopony`, `POST /api/products/clear`; `GET /api/audit-log`.
+  - **Mutacje produktów odłożone z I2:** `PATCH /api/products/{id}` (edycja, wstrzymanie/aktywacja —
+    uwaga: oryginał sam ustawia `status: "wstrzymany"`, gdy któraś z cen spada do 0, `backend-index.cjs:44735-44741`),
+    `PUT /api/products/{id}`, `DELETE /api/products/{id}`, `POST /api/products` (bulk). Katalog (I2) jest
+    dziś wyłącznie do odczytu — te trasy domykają go do parytetu z produkcją.
   - **Finalny przegląd bezpieczeństwa:** potwierdzić auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego `JWT_SECRET` z fallbackiem.
+  - **Odświeżenie kontraktu i fixtures** (zapowiedziane w §2, zebrane z iteracji 1–11):
+    dopisać do `contract/openapi.yaml` realne kody błędów (m.in. `401` dla `GET /api/me` i `POST /api/login`)
+    oraz schematy ciał, których wersja 2.3 nie zamraża; **przenagrać fixtures POST/PUT/PATCH/DELETE
+    przeciw kopii bazy**; dograć wariant `GET /api/products` **bez parametrów** (goła tablica — główna
+    ścieżka katalogu, dziś bez siatki fixtures, opisana tylko testami w `rebuild/backend/test/produkty.test.ts`).
+    Jeśli backlog #3 zostanie do tego czasu przyjęty, tu wpada też przenagranie `GET_products.json`
+    z `szerokosc` jako TEXT.
 - **Frontend:** `/moje-konto` (pełne) + ekrany admin.
-- **Ścieżki (GATE):** password, users, admin×3, maintenance, products/clear, audit-log.  **Fixtures:** `GET_users.json`, `GET_admin_supplier-config.json`, `GET_admin_suppliers-list.json`, `GET_audit-log.json`.
-- **DoD:** konto/admin/maintenance działają; audyt bezpieczeństwa domknięty; fixtures przez GATE; **kompletny przegląd 12 widoków z Anią**.
+  - **Dokończenie `/katalog` z I2:** menu „Akcje" w wierszu tabeli (Edytuj / Wstrzymaj-Aktywuj / Usuń,
+    „Historia" `disabled` — tak jak w oryginale) i modal EDYCJI produktu. Zastępuje modal podglądu
+    read-only, który I2 wniosła jako świadome odstępstwo D4 — po tej iteracji odstępstwo znika.
+- **Ścieżki (GATE):** password, users, admin×3, maintenance, products/clear, audit-log, **products×4 (POST + PATCH/PUT/DELETE `{id}`)**.  **Fixtures:** `GET_users.json`, `GET_admin_supplier-config.json`, `GET_admin_suppliers-list.json`, `GET_audit-log.json` + fixtures zapisujące nagrane w tej iteracji (dziś ich nie ma — `contract/README.md`).
+- **DoD:** konto/admin/maintenance działają; **mutacje produktów i akcje wierszowe w `/katalog` domknięte** (odstępstwo D4 z I2 zniesione); audyt bezpieczeństwa domknięty; kontrakt i fixtures odświeżone; fixtures przez GATE; **kompletny przegląd 12 widoków z Anią**.
 
 ---
 
