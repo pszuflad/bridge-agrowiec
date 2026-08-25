@@ -59,13 +59,19 @@ export const products = sqliteTable("products", {
 	sb: text(),
 	hf: text(),
 	ls: text(),
-	reinforced: integer(),
-	extraLoad: integer("extra_load"),
-	cutResistant: integer("cut_resistant"),
-	heatResistant: integer("heat_resistant"),
-	stubbleResistant: integer("stubble_resistant"),
-	nro: integer(),
-	cho: integer(),
+	// dopieszczenie (ticket 3-FEATURE-katalog-odczyt, D5): introspekcja zrobiła z tych
+	// dziesięciu kolumn zwykłe `integer()`, a oryginał trzyma je w trybie boolean
+	// (backend-index.cjs:43733-43780). Bez tego API zwracałoby 0/1 zamiast false/true
+	// i rozjechałoby się z contract/fixtures/GET_products.json. `NULL` zostaje `null`.
+	// UWAGA: `eanIsValid` celowo ZOSTAJE zwykłym integer() — oryginał też go nie boolean-uje,
+	// a fixture ma tam liczbę 1.
+	reinforced: integer({ mode: "boolean" }),
+	extraLoad: integer("extra_load", { mode: "boolean" }),
+	cutResistant: integer("cut_resistant", { mode: "boolean" }),
+	heatResistant: integer("heat_resistant", { mode: "boolean" }),
+	stubbleResistant: integer("stubble_resistant", { mode: "boolean" }),
+	nro: integer({ mode: "boolean" }),
+	cho: integer({ mode: "boolean" }),
 	indeksy: text(),
 	indeks1: text("indeks_1"),
 	indeks2: text("indeks_2"),
@@ -82,10 +88,12 @@ export const products = sqliteTable("products", {
 	linkZdjecia: text("link_zdjecia"),
 	oznaczenieBieznika: text("oznaczenie_bieznika"),
 	sezon: text(),
-	ms: integer(),
-	snow3Pmsf: integer("snow_3pmsf"),
+	ms: integer({ mode: "boolean" }),
+	// dopieszczenie (D5): `drizzle-kit pull` scamelizował `snow_3pmsf` na `snow3Pmsf`,
+	// oryginał i fixture mają `snow3pmsf` (backend-index.cjs:43775).
+	snow3pmsf: integer("snow_3pmsf", { mode: "boolean" }),
 	wentyl: text(),
-	cfo: integer(),
+	cfo: integer({ mode: "boolean" }),
 	wysokoscPrzesylki: real("wysokosc_przesylki"),
 	zastosowanie: text(),
 	kodImportu: text("kod_importu"),

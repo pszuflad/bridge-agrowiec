@@ -1,3 +1,4 @@
+import compression from "compression";
 import express, { type Express } from "express";
 import type { Env } from "./config/env.js";
 import type { Baza } from "./db/index.js";
@@ -5,6 +6,8 @@ import { optionalAuth } from "./middleware/auth.js";
 import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
 import { trasyAuth } from "./routes/auth.js";
+import { trasyDostawcow } from "./routes/suppliers.js";
+import { trasyProduktow } from "./routes/products.js";
 
 export type ZaleznosciApp = {
   env: Env;
@@ -27,6 +30,13 @@ export function stworzApp({ env, db }: ZaleznosciApp): Express {
   // przez parser ciała), potem parsery (backend-index.cjs:48926-48940).
   if (env.CORS_ORIGINS.length > 0) app.use(corsZAllowlisty(env.CORS_ORIGINS));
 
+  // ODSTĘPSTWO ŚWIADOME (ticket 3-FEATURE-katalog-odczyt, D2): oryginał nie kompresuje
+  // odpowiedzi. Katalog wierny produkcji pobiera CAŁĄ tabelę produktów jednym żądaniem
+  // (routes/products.ts — wariant „goła tablica"), co przy ~7 400 pozycjach daje ok. 15 MB
+  // JSON-a. Kompresja to warstwa TRANSPORTU: ciało odpowiedzi, kontrakt i kształt danych
+  // pozostają identyczne, zmienia się tylko liczba bajtów w locie.
+  app.use(compression());
+
   // Limit 50 MB — 1:1 z oryginałem (backend-index.cjs:48932, :48939). Import z Iteracji 3
   // przesyła duże pakiety danych, więc obniżenie limitu byłoby cichą zmianą zachowania.
   app.use(express.json({ limit: "50mb" }));
@@ -42,6 +52,8 @@ export function stworzApp({ env, db }: ZaleznosciApp): Express {
   });
 
   app.use(trasyAuth({ db, jwtSecret: env.JWT_SECRET, cookieSecure: env.cookieSecure }));
+  app.use(trasyProduktow({ db }));
+  app.use(trasyDostawcow({ db }));
 
   app.use(nieZnalezionoHandler);
   app.use(bladHandler);
