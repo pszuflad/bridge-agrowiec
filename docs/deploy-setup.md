@@ -85,10 +85,7 @@ curl -s https://test.agritires.eu/api/health      # -> {"ok":true,"stage":"stagi
 
 ## Wyzwalacz CD — dwie opcje
 
-### Opcja A: GitHub Actions po SSH — event-driven
-> **Stan: NIEUŻYWANE** — obecnie działamy na Opcji B (cron). Plik workflow został usunięty z repo;
-> aby wrócić do tej opcji, odtwórz `.github/workflows/deploy-staging.yml` z historii gita i wykonaj kroki poniżej.
-
+### Opcja A (UŻYWANA): GitHub Actions po SSH — event-driven
 Workflow `.github/workflows/deploy-staging.yml` uruchamia deploy **natychmiast po merge do develop**
 (tylko przy zmianach `rebuild/**`, `deploy/staging/**`, `tools/deploy-staging.sh`) oraz ręcznie
 (zakładka Actions → „Deploy staging" → Run workflow). Łączy się po SSH z VPS i odpala `deploy-staging.sh`.
