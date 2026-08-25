@@ -3,7 +3,7 @@
  * `deminified/frontend-index.js:9054-9079`. Na tym stoją wszystkie kolejne iteracje.
  */
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { zapiszToken } from "@/lib/api";
 import { utworzQueryClient, zapytanieZwracajaceNullNa401 } from "@/lib/queryClient";
 import { server } from "./msw/server";
@@ -47,7 +47,7 @@ describe("zapytanieZwracajaceNullNa401", () => {
     await expect(wykonaj(["/api/staging"])).rejects.toThrow("500: padło");
   });
 
-  it("dokłada Bearer, gdy token istnieje, i zawsze wysyła cookie", async () => {
+  it("dokłada Bearer, gdy token istnieje", async () => {
     zapiszToken("tajne");
     let autoryzacja: string | null | undefined;
     server.use(
@@ -59,6 +59,20 @@ describe("zapytanieZwracajaceNullNa401", () => {
 
     await wykonaj(["/api/me"]);
     expect(autoryzacja).toBe("Bearer tajne");
+  });
+
+  it("zapytanie odczytowe też zawsze wysyła credentials:\"include\"", async () => {
+    // Jak w `zadanie()`: MSW nie widzi `credentials`, więc podglądamy wywołanie `fetch`.
+    const szpieg = vi.spyOn(globalThis, "fetch");
+    server.use(http.get("http://localhost:5173/api/me", () => HttpResponse.json({ id: 1 })));
+
+    await wykonaj(["/api/me"]);
+
+    expect(szpieg).toHaveBeenCalledWith(
+      "/api/me",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    szpieg.mockRestore();
   });
 });
 

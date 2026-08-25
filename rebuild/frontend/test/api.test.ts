@@ -3,7 +3,7 @@
  * z backendem (`deminified/frontend-index.js:8996-9053`).
  */
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   KLUCZE_STORAGE,
   naglowki,
@@ -95,6 +95,21 @@ describe("zadanie()", () => {
       typTresci: "application/json",
       body: JSON.stringify({ a: 1 }),
     });
+  });
+
+  it("ZAWSZE wysyła credentials:\"include\" — to jedyna droga cookie bridge_session", async () => {
+    // MSW nie widzi opcji `credentials`, więc podglądamy je na samym wywołaniu `fetch`.
+    // Bez tej asercji refaktor gubiący cookie przeszedłby CI i wywalił się na stagingu.
+    const szpieg = vi.spyOn(globalThis, "fetch");
+    server.use(http.post("http://localhost:5173/api/test", () => HttpResponse.json({ ok: true })));
+
+    await zadanie("POST", "/api/test", { a: 1 });
+
+    expect(szpieg).toHaveBeenCalledWith(
+      "/api/test",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    szpieg.mockRestore();
   });
 
   it("żądanie bez body nie dostaje Content-Type", async () => {

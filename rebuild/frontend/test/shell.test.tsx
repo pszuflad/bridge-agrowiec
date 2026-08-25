@@ -116,6 +116,14 @@ describe("tryb ciemny", () => {
     expect(przelacznik).toHaveTextContent("Tryb jasny");
     expect(localStorage.getItem("bridge_theme")).toBe("dark");
   });
+
+  it("sama wizyta bez kliknięcia NIE utrwala preferencji systemowej", () => {
+    render(<App />);
+
+    // Gdyby zapis siedział w efekcie, pierwsze renderowanie zamroziłoby
+    // `prefers-color-scheme` i aplikacja przestałaby za nim podążać.
+    expect(localStorage.getItem("bridge_theme")).toBeNull();
+  });
 });
 
 describe("wylogowanie", () => {

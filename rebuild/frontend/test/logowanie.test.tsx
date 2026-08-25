@@ -115,7 +115,13 @@ describe("nieudane logowanie", () => {
     await uzytkownik.click(screen.getByTestId("button-login"));
 
     const blad = await screen.findByTestId("text-login-error");
-    expect(blad).toHaveTextContent("Nieprawidłowy email lub hasło");
+    // UWAGA: to NIE jest goły komunikat backendu. Oryginał rzuca wyjątek w `rzucGdyBlad`
+    // ZANIM `zaloguj()` sięgnie po pole `error` (frontend-index.js:9031-9038 + :9085-9097),
+    // więc użytkownik widzi status i surowe ciało odpowiedzi. Odtwarzamy to 1:1 —
+    // asercja na dokładny string, żeby nikt nie „poprawił" tego jako literówki.
+    expect(blad).toHaveTextContent(
+      '401: {"error":"Nieprawidłowy email lub hasło"}',
+    );
     expect(screen.getByTestId("text-login-title")).toBeInTheDocument();
     expect(sessionStorage.getItem(KLUCZE_STORAGE.token)).toBeNull();
   });

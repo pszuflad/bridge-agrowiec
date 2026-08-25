@@ -101,3 +101,80 @@ describe("tokeny wymienione wprost w zakresie ticketa", () => {
     expect(jasne.get("--font-mono")).toContain("JetBrains Mono");
   });
 });
+
+/**
+ * Druga warstwa strażnika — czy klasy przepisane z oryginału FAKTYCZNIE coś generują.
+ *
+ * Powód istnienia: porównanie samych deklaracji `:root`/`.dark` przepuściło błąd, w którym
+ * tokeny `--primary-border` były zdefiniowane 1:1, ale `tailwind.config.ts` nie mapował ich
+ * na kolory, więc `border-primary-border` z `Button` nie renderowało żadnej reguły —
+ * CTA „Zaloguj się" dostawało szarą obwódkę zamiast bursztynowej.
+ *
+ * Test uruchamia prawdziwy potok PostCSS + Tailwind na naszym arkuszu i sprawdza,
+ * że dla każdej klasy z listy powstała reguła.
+ */
+describe("wygenerowany arkusz", () => {
+  it("renderuje reguły dla klas przepisanych z oryginału", async () => {
+    const postcss = (await import("postcss")).default;
+    const tailwindcss = (await import("tailwindcss")).default;
+    const konfiguracja = (await import("../tailwind.config")).default;
+
+    const wynik = await postcss([
+      tailwindcss({
+        ...konfiguracja,
+        content: [resolve(korzenFrontendu, "src/**/*.{ts,tsx}")],
+      }),
+    ]).process(NASZ_CSS, { from: resolve(korzenFrontendu, "src/styles/index.css") });
+
+    // Klasy, na których stoi wygląd shellu i ekranu logowania. Każda pochodzi
+    // z bundla produkcji — brak reguły oznacza cichy rozjazd wyglądu.
+    const wymagane = [
+      "border-primary-border",
+      "border-secondary-border",
+      "border-destructive-border",
+      "border-card-border",
+      "border-sidebar-border",
+      "bg-sidebar",
+      "bg-sidebar-primary",
+      "text-sidebar-primary",
+      "text-sidebar-primary-foreground",
+      "bg-sidebar-accent",
+      "text-sidebar-accent-foreground",
+      "bg-background",
+      "bg-card",
+      "text-primary",
+      "bg-primary",
+      "text-primary-foreground",
+      "text-muted-foreground",
+      "text-destructive",
+      "border-input",
+      "ring-ring",
+    ];
+
+    // Klasa może wystąpić samodzielnie (`.bg-sidebar`) albo za modyfikatorem
+    // (`.hover\:bg-sidebar-accent:hover`, `.focus-visible\:ring-ring:focus-visible`),
+    // dlatego dopuszczamy oba prefiksy: kropkę i escape'owany dwukropek.
+    const czyWygenerowana = (klasa: string) =>
+      new RegExp(`[.\\\\:]${klasa}(?![a-zA-Z0-9_-])`).test(wynik.css);
+
+    const brakujace = wymagane.filter((klasa) => !czyWygenerowana(klasa));
+    expect(brakujace).toEqual([]);
+
+    // Warianty z alfą i modyfikatorami — używane wprost w Login.tsx i AppShell.tsx.
+    for (const fragment of [
+      "bg-destructive\\/10",
+      "border-destructive\\/20",
+      "text-sidebar-foreground\\/80",
+      "bg-black\\/40",
+    ]) {
+      expect(wynik.css).toContain(`.${fragment}`);
+    }
+
+    // Wartość musi być SUROWA (`var(--primary-border)`), a nie owinięta w hsl() —
+    // ten token jest już gotowym kolorem. Produkcja generuje dokładnie taką regułę.
+    // PostCSS zwraca arkusz sformatowany, produkcja jest zminifikowana — porównujemy
+    // po ujednoliceniu białych znaków.
+    const zwiniety = wynik.css.replace(/\s+/g, "");
+    expect(zwiniety).toContain(".border-primary-border{border-color:var(--primary-border);}");
+  });
+});

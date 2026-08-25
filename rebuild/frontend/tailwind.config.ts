@@ -5,6 +5,12 @@ import type { Config } from "tailwindcss";
  * Nazwy kolorów odpowiadają klasom używanym w oryginalnym bundlu
  * (`bg-sidebar`, `text-sidebar-foreground`, `border-card-border`, `bg-destructive/10`…),
  * dzięki czemu klasy przepisane z produkcji działają bez tłumaczenia.
+ *
+ * Warianty `border` (np. `primary.border` → klasa `border-primary-border`) celowo mają
+ * wartość SUROWĄ `var(--primary-border)`, bez `hsl()` i bez `<alpha-value>` — ten token
+ * jest już gotowym kolorem liczonym przez `hsl(from ...)` w `src/styles/index.css`.
+ * Produkcja generuje je dokładnie tak: `.border-primary-border{border-color:var(--primary-border)}`
+ * (index-BVOkSOnE.css). Bez tego mapowania klasy z `Button` nie generowałyby żadnej reguły.
  */
 export default {
   darkMode: "class",
@@ -30,22 +36,27 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary) / <alpha-value>)",
           foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
+          border: "var(--primary-border)",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
           foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
+          border: "var(--secondary-border)",
         },
         muted: {
           DEFAULT: "hsl(var(--muted) / <alpha-value>)",
           foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
+          border: "var(--muted-border)",
         },
         accent: {
           DEFAULT: "hsl(var(--accent) / <alpha-value>)",
           foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
+          border: "var(--accent-border)",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
           foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
+          border: "var(--destructive-border)",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar) / <alpha-value>)",
@@ -55,10 +66,12 @@ export default {
           primary: {
             DEFAULT: "hsl(var(--sidebar-primary) / <alpha-value>)",
             foreground: "hsl(var(--sidebar-primary-foreground) / <alpha-value>)",
+            border: "var(--sidebar-primary-border)",
           },
           accent: {
             DEFAULT: "hsl(var(--sidebar-accent) / <alpha-value>)",
             foreground: "hsl(var(--sidebar-accent-foreground) / <alpha-value>)",
+            border: "var(--sidebar-accent-border)",
           },
         },
         chart: {

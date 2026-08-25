@@ -13,7 +13,10 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    sourcemap: true,
+    // Bez sourcemap: `deploy-staging.sh` rsynkuje CAŁE dist/ do publicznego docroota
+    // (bez żadnej autoryzacji), więc mapy wystawiłyby pełne źródła panelu w internet.
+    // Produkcja też ich nie serwuje (mirror/frontend/index.html linkuje sam bundle).
+    sourcemap: false,
   },
   server: {
     port: 5173,

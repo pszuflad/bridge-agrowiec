@@ -107,3 +107,4 @@ zachowania jest odtworzona 1:1 z `deminified/frontend-index.js`.
 | O3 | ekran 404 po polsku i na design tokenach | oryginał miał angielski tekst na `bg-gray-50`, jedyny ekran poza tokenami |
 | O4 | pominięte konta testowe z hasłami w kodzie i martwy `list="konta-testowe-email"` | wyciek danych logowania; atrybut wskazywał na nieistniejącą `<datalist>` |
 | O5 | stan „Ładowanie…" w `AuthGate` zamiast `null` | oryginał migał białym ekranem przed przekierowaniem na `/login` |
+| O6 | `aria-label` na przycisku menu mobilnego | oryginał (`:16348-16357`) miał tam samą ikonę, bez nazwy dostępnej dla czytnika ekranu |

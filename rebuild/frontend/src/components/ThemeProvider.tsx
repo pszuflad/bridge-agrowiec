@@ -30,20 +30,24 @@ function czyCiemnyNaStarcie(): boolean {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [dark, setDark] = useState(czyCiemnyNaStarcie);
 
+  // Efekt TYLKO steruje klasą na <html>. Zapis siedzi w `toggle`, bo O2 zatwierdzało
+  // utrwalanie WYBORU użytkownika — zapisywanie przy każdym montażu zamroziłoby
+  // `prefers-color-scheme` z pierwszej wizyty i aplikacja przestałaby za nim podążać.
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
-    try {
-      localStorage.setItem(KLUCZ_MOTYWU, dark ? "dark" : "light");
-    } catch {
-      /* jw. — brak zapisu nie może psuć przełączania */
-    }
   }, [dark]);
 
-  return (
-    <Kontekst.Provider value={{ dark, toggle: () => setDark((poprzedni) => !poprzedni) }}>
-      {children}
-    </Kontekst.Provider>
-  );
+  function toggle() {
+    const nowy = !dark;
+    try {
+      localStorage.setItem(KLUCZ_MOTYWU, nowy ? "dark" : "light");
+    } catch {
+      /* brak zapisu nie może psuć samego przełączania */
+    }
+    setDark(nowy);
+  }
+
+  return <Kontekst.Provider value={{ dark, toggle }}>{children}</Kontekst.Provider>;
 }
 
 export const useMotyw = (): KontekstMotywu => useContext(Kontekst);

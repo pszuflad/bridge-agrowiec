@@ -105,7 +105,9 @@ export async function zadanie(
   sciezka: string,
   body?: unknown,
 ): Promise<Response> {
-  const maBody = body !== undefined;
+  // Oryginał testuje PRAWDZIWOŚĆ, nie „różne od undefined" (`_g(!!n)`, `n ? ... : void 0`,
+  // frontend-index.js:9045-9052). Różnica ujawnia się dla `null`/`0`/`""`/`false` jako body.
+  const maBody = Boolean(body);
   const odpowiedz = await fetch(`${BAZA_API}${sciezka}`, {
     method: metoda,
     headers: naglowki(maBody),

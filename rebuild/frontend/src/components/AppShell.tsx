@@ -46,6 +46,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           onClick={() => setMenuOtwarte((otwarte) => !otwarte)}
           data-testid="button-menu-mobile"
           className="text-sidebar-foreground hover:bg-sidebar-accent"
+          // ODSTĘPSTWO O6 (plan.md/README): oryginał miał tu samą ikonę, bez nazwy
+          // dostępnej dla czytnika ekranu. Reszta przycisku jest 1:1.
           aria-label={menuOtwarte ? "Zamknij menu" : "Otwórz menu"}
         >
           {menuOtwarte ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

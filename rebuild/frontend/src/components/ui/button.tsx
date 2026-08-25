@@ -15,7 +15,9 @@ const wariantyPrzycisku = cva(
       variant: {
         default: "bg-primary text-primary-foreground border border-primary-border",
         destructive: "bg-destructive text-destructive-foreground border border-destructive-border",
-        outline: "border [border-color:var(--button-outline)] active:shadow-none",
+        // `shadow-xs` jest w oryginale (:16187), ale ani produkcyjny arkusz, ani Tailwind 3
+        // nie generują dla niego reguły — zostaje dla dosłowności, bez efektu wizualnego.
+        outline: "border [border-color:var(--button-outline)] shadow-xs active:shadow-none",
         secondary: "border bg-secondary text-secondary-foreground border-secondary-border",
         ghost: "border border-transparent",
       },
