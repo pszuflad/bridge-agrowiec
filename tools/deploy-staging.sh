@@ -59,12 +59,26 @@ fi
 RELEASE="$STAGING_ROOT/releases/$SHA"
 log "backend: build -> $RELEASE"
 # `--include=dev` jest KONIECZNE: wyżej eksportujemy NODE_ENV=production (dla runtime),
-# a przy tej zmiennej `npm ci` pomija devDependencies — czyli TypeScript i Vite,
-# bez których nie ma czym zbudować. Zależności produkcyjne release'u instalujemy niżej.
-( cd rebuild/backend && npm ci --include=dev && npm run build )
+# a przy tej zmiennej `npm ci` pomija devDependencies (TypeScript), bez którego nie ma czym budować.
+# `--ignore-scripts`: prebuilt better-sqlite3 wymaga glibc 2.29 (box ma 2.28), a node-gyp 10 nie
+# zbuduje ze źródła na Pythonie 3.6 — więc pomijamy skrypty natywne i PODKŁADAMY działającą binarkę
+# z produkcji (ta sama wersja 11.7.0 + ten sam ABI node 20 = 115, więc jest w pełni zgodna).
+PROD_BSQLITE="/home/admin/private_apps/bridge/node_modules/better-sqlite3/build/Release/better_sqlite3.node"
+if [ ! -f "$PROD_BSQLITE" ]; then
+  log "BŁĄD: brak binarki better-sqlite3 produkcji ($PROD_BSQLITE) do podłożenia. Przerywam."
+  exit 1
+fi
+podloz_bsqlite() {  # $1 = docelowy katalog node_modules
+  mkdir -p "$1/better-sqlite3/build/Release"
+  cp -f "$PROD_BSQLITE" "$1/better-sqlite3/build/Release/better_sqlite3.node"
+}
+( cd rebuild/backend && npm ci --include=dev --ignore-scripts )
+podloz_bsqlite "rebuild/backend/node_modules"            # dla `npm run migrate` (uruchamiane z repo)
+( cd rebuild/backend && npm run build )
 mkdir -p "$RELEASE"
 cp -a rebuild/backend/dist rebuild/backend/package.json rebuild/backend/package-lock.json "$RELEASE"/
-( cd "$RELEASE" && npm ci --omit=dev )                    # tylko zależności produkcyjne
+( cd "$RELEASE" && npm ci --omit=dev --ignore-scripts )  # tylko zależności produkcyjne, bez skryptów natywnych
+podloz_bsqlite "$RELEASE/node_modules"                   # dla runtime (serwer)
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run migrate )   # migracje na bazie staging
 ln -sfn "$RELEASE" "$STAGING_ROOT/current"               # atomowa podmiana
 # zawsze uruchamiamy BIEŻĄCY release; delete+start jest odporne na (a) placeholder
