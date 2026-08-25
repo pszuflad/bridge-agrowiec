@@ -85,7 +85,10 @@ curl -s https://test.agritires.eu/api/health      # -> {"ok":true,"stage":"stagi
 
 ## Wyzwalacz CD — dwie opcje
 
-### Opcja A (zalecana): GitHub Actions po SSH — event-driven
+### Opcja A: GitHub Actions po SSH — event-driven
+> **Stan: NIEUŻYWANE** — obecnie działamy na Opcji B (cron). Plik workflow został usunięty z repo;
+> aby wrócić do tej opcji, odtwórz `.github/workflows/deploy-staging.yml` z historii gita i wykonaj kroki poniżej.
+
 Workflow `.github/workflows/deploy-staging.yml` uruchamia deploy **natychmiast po merge do develop**
 (tylko przy zmianach `rebuild/**`, `deploy/staging/**`, `tools/deploy-staging.sh`) oraz ręcznie
 (zakładka Actions → „Deploy staging" → Run workflow). Łączy się po SSH z VPS i odpala `deploy-staging.sh`.
@@ -123,7 +126,7 @@ ssh-keyscan -p <PORT_SSH> vpshd1242.cyber-folks.pl 2>/dev/null
 
 Uwagi: SSH VPS-a musi być osiągalne z internetu (runnery GitHuba mają publiczne IP) i nie może być zablokowane po IP. Branch protection już gwarantuje, że na `develop` trafia tylko kod z zielonym CI, więc deploy dostaje sprawdzony stan.
 
-### Opcja B (alternatywa/fallback): cron-poll w DirectAdmin
+### Opcja B (UŻYWANA): cron-poll w DirectAdmin
 Panel DirectAdmin → **Cron Jobs** (poll co 5 min; skrypt sam wykrywa brak zmian i kończy bez pracy):
 ```
 */5 * * * * /bin/bash /home/admin/private_apps/bridge-staging/repo/tools/deploy-staging.sh >> /home/admin/private_apps/bridge-staging/deploy.log 2>&1
