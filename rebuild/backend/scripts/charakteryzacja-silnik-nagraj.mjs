@@ -196,7 +196,8 @@ function nagraj() {
       `db/snapshot.db → products (projekcja ${KOLUMNY_KATALOGU.length} kolumn)`,
     );
 
-    const bezOpisuKatalogu = ({ katalog, ...reszta }) => reszta;
+    // Opis katalogu celowo pomijamy — różni się z definicji (pełny vs przycięty).
+    const bezOpisuKatalogu = (przebieg) => ({ ...przebieg, katalog: null });
     if (JSON.stringify(bezOpisuKatalogu(zPelnego)) !== JSON.stringify(bezOpisuKatalogu(przebieg))) {
       throw new Error(
         `${kod}: oryginał zachował się INACZEJ na pełnym i na przyciętym katalogu. ` +

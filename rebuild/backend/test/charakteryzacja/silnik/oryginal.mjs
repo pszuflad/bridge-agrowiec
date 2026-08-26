@@ -158,7 +158,7 @@ export function zaladujOryginal(zaleznosci) {
 
   const modul = { exports: {} };
   const wymagaj = createRequire(import.meta.url);
-  // eslint-disable-next-line no-new-func -- celowo: ładujemy wycinek produkcyjnego bundla
+  // Celowo `new Function`: ładujemy wycinek produkcyjnego bundla bez pliku tymczasowego.
   new Function("require", "module", "exports", zrodlo)(wymagaj, modul, modul.exports);
 
   modul.exports.ustawZaleznosci(zaleznosci);

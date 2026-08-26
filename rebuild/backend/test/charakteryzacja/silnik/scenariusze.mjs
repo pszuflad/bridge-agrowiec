@@ -160,6 +160,25 @@ export const SCENARIUSZE = [
     ],
   },
   {
+    nazwa: "wiele-ostrzezen-naraz",
+    opis:
+      "Brak kodu, brak EAN-u i brak rozmiaru naraz → DWA składniki ostrzeżenia sklejone " +
+      "separatorem ' • '. Bez tego przypadku separator nigdy by się nie pojawił w próbie.",
+    dostawca: "MO5",
+    katalog: [],
+    rekordy: [
+      {
+        kod: "",
+        ean: "",
+        nazwa: "Opona rolnicza uniwersalna",
+        kategoria: "Opony rolnicze",
+        marka: "BKT",
+        stan: 2,
+        cenaZakupu: 500,
+      },
+    ],
+  },
+  {
     nazwa: "ean-notacja-naukowa",
     opis:
       "EAN zapisany przez Excela jako notacja naukowa. DOWÓD na błąd cieniowania Lq() " +

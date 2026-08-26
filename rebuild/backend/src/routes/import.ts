@@ -9,7 +9,12 @@ import {
 } from "../import/archiwum.js";
 import { parsujBufor, urlDostawcy } from "../import/parsuj.js";
 import { pobierzZUrl } from "../import/pobierz.js";
-import { silnikStagingu3b, type SilnikStagingu, type StatystykiImportu } from "../import/tk.js";
+import {
+  PustyImportBlad,
+  silnikStagingu,
+  type SilnikStagingu,
+  type StatystykiImportu,
+} from "../import/tk.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { dostawcaPoKodzie, zapiszWynikImportu } from "../repos/suppliers.js";
@@ -48,7 +53,7 @@ export function trasyImportu({
   pobierz,
 }: ZaleznosciImportu): Router {
   const router = Router();
-  const uruchomImport = silnik ?? silnikStagingu3b(db);
+  const uruchomImport = silnik ?? silnikStagingu(db);
   const pobierzPlik = pobierz ?? pobierzZUrl;
 
   // `archiwizujBufor`/`aktualizujMeta` czytają katalog z env, więc podajemy im nadpisanie
@@ -138,15 +143,16 @@ export function trasyImportu({
       });
     }
 
-    if (sparsowane.rekordy.length === 0) {
-      return {
-        blad:
-          `Parser nie zwrócił ani jednej pozycji dla ${kodDostawcy} — import przerwany. ` +
-          `Sprawdź, czy plik ma właściwy format.`,
-      };
+    // Bezpiecznik pustego wejścia (odstępstwo D4 z 3b) przeniesiony DO silnika w 3c, żeby
+    // zakrywał także `POST /api/staging/import`, który pozycje bierze wprost z ciała żądania
+    // i powstanie dopiero w 3d. Tutaj zostaje wyłącznie tłumaczenie wyjątku na odpowiedź HTTP.
+    let statystyki: StatystykiImportu;
+    try {
+      statystyki = uruchomImport(kodDostawcy, sparsowane.rekordy);
+    } catch (e) {
+      if (e instanceof PustyImportBlad) return { blad: e.message };
+      throw e;
     }
-
-    const statystyki = uruchomImport(kodDostawcy, sparsowane.rekordy);
 
     // Oba bloki są w oryginale opakowane w try/catch: awaria statystyk dostawcy ani audytu
     // nie może wywrócić importu, który już się powiódł (extensions.cjs:151-172).
