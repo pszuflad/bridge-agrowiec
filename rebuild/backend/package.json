@@ -8,7 +8,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node scripts/copy-schema.mjs",
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-schema.mjs && node scripts/copy-parsery.mjs",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "migrate": "node dist/db/migrate-cli.js",
@@ -23,9 +23,12 @@
     "bcryptjs": "^3.0.2",
     "better-sqlite3": "11.7.0",
     "compression": "^1.8.1",
+    "csv-parse": "^5.5.6",
     "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
+    "iconv-lite": "^0.6.3",
     "jsonwebtoken": "^9.0.2",
+    "xlsx": "^0.18.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {

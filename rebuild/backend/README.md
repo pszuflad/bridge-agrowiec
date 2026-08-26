@@ -96,6 +96,14 @@ Testy nie używają mocków bazy: każdy dostaje **prawdziwą bazę SQLite** zbu
 `rebuild/schema/001_schema.sql` w katalogu tymczasowym. HTTP idzie przez supertest, więc **żaden
 port nie jest zajmowany** — testy są bezpieczne przy równolegle działającej aplikacji.
 
+### GATE charakteryzacji (import, od iteracji 3a)
+
+Import ma **własny, osobny gate**: `test/charakteryzacja.test.ts`. Nie dotyczy on API (parsery
+nie mają endpointu), tylko wierności portu parserów wobec produkcji — porównuje wyjście
+`src/import/legacy/**` z nagranym wyjściem oryginału na próbkach realnych plików MO1–MO10.
+Ta sama zasada co wyżej: **rozjazd = STOP**, wzorca nie „poprawiamy" pod nowy kod.
+Szczegóły: „Podsystem importu" niżej i `test/charakteryzacja/ZRODLA.md`.
+
 ### Dopisanie GATE-u w kolejnej iteracji
 
 Harness jest generyczny — nowa iteracja dokłada tylko ścieżki i fixtures:
@@ -135,10 +143,65 @@ src/
   routes/auth.ts       login · logout · me
   routes/products.ts   GET /api/products
   routes/suppliers.ts  GET /api/suppliers, GET /api/dostawcy (jeden handler)
+  import/parsuj.ts     brzeg wejścia importu: (plik|bufor + dostawca) → rekordy
+  import/typy.ts       KodDostawcy · RekordSurowy · WynikParsowania
+  import/legacy/       PORT VERBATIM parserów z produkcji — NIE EDYTOWAĆ (patrz niżej)
 test/
   gate/                harness GATE — współdzielony przez wszystkie iteracje
+  charakteryzacja/     próbki dostawców + wzorzec oryginału (ZRODLA.md)
   *.test.ts            testy iteracji
 ```
+
+## Podsystem importu — port parserów (iteracja 3a)
+
+`src/import/legacy/**` to **kopia bajt-w-bajt** podsystemu parserów z produkcji
+(`mirror/backend/`): `common.cjs`, `dictionaries/oznaczenia.json`, `parsers/adapter.cjs`,
+`tyre_params.cjs`, `dispatcher.cjs` i parsery `mo1_bohnenkamp` … `mo10_gri`.
+
+**Nie edytujemy tych plików ręcznie.** Ania wciąż rozwija parsery w produkcji, a wierny port
+pozwala przyjmować jej poprawki czystym `git diff`. Każda nasza edycja to zrywa — i zapala
+test integralności (`test/charakteryzacja.test.ts`, warstwa 1: sha256 vs `mirror/backend`).
+Podsystem jest też celowo wyłączony z ESLinta (`eslint.config.js` → `ignores`): to nie jest
+nasz kod i nie podlega naszemu stylowi.
+
+Układ odtwarza **dwa poziomy** katalogów oryginału, bo parsery robią `require('../common.cjs')`,
+a `common.cjs` liczy słownik jako `path.join(__dirname, 'dictionaries', …)`. Dzięki temu żadna
+linia portu nie wymagała zmiany. `scripts/copy-parsery.mjs` (wpięty w `npm run build`) kopiuje
+`.cjs` i słownik do `dist/`, bo `tsc` przenosi tylko to, co kompiluje, a deploy bierze samo `dist/`.
+
+Jedyna warstwa pisana przez nas to `src/import/parsuj.ts`:
+
+```ts
+parsujPlik(kodDostawcy, sciezkaPliku)          // → WynikParsowania
+parsujBufor(kodDostawcy, bufor, nazwaPliku?)   // → WynikParsowania (upload w 3b)
+```
+
+Potok kończy się na `adapter.recordsToSurowe()` — rekordach gotowych dla `staging_items`.
+Zapis do bazy (3b), dopasowanie `tk()` (3c) i endpointy importu są **poza** tym modułem.
+
+### Re-synchronizacja parserów z produkcją
+
+```bash
+# 1. Podmień port kopią z aktualnego lustra produkcji
+cp mirror/backend/common.cjs                    rebuild/backend/src/import/legacy/common.cjs
+cp mirror/backend/dictionaries/oznaczenia.json  rebuild/backend/src/import/legacy/dictionaries/
+cp mirror/backend/parsers/*.cjs                 rebuild/backend/src/import/legacy/parsers/   # bez *.bak_*
+
+# 2. Przenagraj wzorzec charakteryzacji z NOWEGO oryginału
+cd rebuild/backend && node scripts/charakteryzacja-nagraj.mjs
+
+# 3. Zobacz w git diff, co realnie zmieniło się w zachowaniu importu
+git diff test/charakteryzacja/
+
+# 4. Potwierdź, że port i wzorzec się zgadzają
+npm test -- test/charakteryzacja.test.ts
+```
+
+Krok 3 jest sensem całej konstrukcji: `MOx.expected.json` zamienia „Ania coś poprawiła
+w parserach" na konkretną listę pól, które zmieniły wartość.
+
+Szczegóły próbek (skąd pochodzą, jak je odtworzyć, gdzie są luki pokrycia):
+`test/charakteryzacja/ZRODLA.md`.
 
 ## Auth — co dokładnie odtwarzamy
 
