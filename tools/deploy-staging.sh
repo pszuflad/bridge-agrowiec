@@ -8,6 +8,7 @@
 #   - rebuild/backend:  `npm ci --include=dev` && `npm run build` -> katalog dist/, wejście dist/server.js
 #       server nasłuchuje na process.env.HOST:process.env.PORT, baza z process.env.DB_PATH
 #       `npm run migrate` stosuje schemat/migracje na DB_PATH (idempotentnie)
+#       `node scripts/kopia-bazy.cjs` robi kopię bazy przed migracjami (VACUUM INTO, rotacja)
 #       wymaga JWT_SECRET z $STAGING_ROOT/.env (sekret poza repo — docs/deploy-setup.md)
 #   - rebuild/frontend: `npm ci --include=dev` && `npm run build` -> katalog dist/ (base "/", API pod /api)
 #
@@ -79,6 +80,19 @@ mkdir -p "$RELEASE"
 cp -a rebuild/backend/dist rebuild/backend/package.json rebuild/backend/package-lock.json "$RELEASE"/
 ( cd "$RELEASE" && npm ci --omit=dev --ignore-scripts )  # tylko zależności produkcyjne, bez skryptów natywnych
 podloz_bsqlite "$RELEASE/node_modules"                   # dla runtime (serwer)
+# --- kopia bazy PRZED migracjami ---
+# Migracje potrafią PRZEBUDOWAĆ tabelę (SQLite nie ma `ALTER TABLE … ALTER COLUMN`, więc zmiana
+# typu kolumny to CREATE → INSERT SELECT → DROP → RENAME; tak działa `003_szerokosc_text.sql`).
+# Runner opakowuje każdą migrację w transakcję, więc NIEUDANA wycofa się w całości — ale udanej
+# nikt nie cofnie. Skrypt robi kopię TYLKO gdy są migracje do zastosowania (deploy chodzi z crona
+# przy każdej zmianie w rebuild/, a ten projekt już raz zasypał dysk backupami — CHANGELOG
+# produkcji, 292 pliki / ~6 GB). Trzyma 5 ostatnich kopii w $STAGING_ROOT/data/backups/.
+# Kopia idzie przez VACUUM INTO, nie `cp`: baza chodzi w WAL i samo `cp` pliku .db dałoby
+# snapshot niespójny. Błąd kopii PRZERYWA deploy (set -e) — lepiej nie wdrożyć niż migrować
+# bez punktu powrotu.
+log "kopia bazy przed migracjami"
+( cd rebuild/backend && DB_PATH="$DATA_DB" ETYKIETA="$SHA" node scripts/kopia-bazy.cjs 2>&1 | tee -a "$LOG" )
+
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run migrate )   # migracje na bazie staging
 ln -sfn "$RELEASE" "$STAGING_ROOT/current"               # atomowa podmiana
 # zawsze uruchamiamy BIEŻĄCY release; delete+start jest odporne na (a) placeholder
