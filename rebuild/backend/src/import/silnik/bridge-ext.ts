@@ -60,5 +60,19 @@ export const { applyDims, applyLinkMemory } = modul;
  * sygnaturę `silnikStagingu(db)`, której używa `src/routes/import.ts`.
  */
 export function uchwytSqlite(db: Baza): BazaSqlite {
-  return (db as unknown as { $client: BazaSqlite }).$client;
+  const uchwyt = (db as unknown as { $client?: BazaSqlite }).$client;
+
+  // ⚠ TWARDY BŁĄD ZAMIAST CICHEJ AWARII. `$client` to szczegół implementacyjny Drizzle,
+  // który może zniknąć przy aktualizacji. Gdyby zniknął, `applyLinkMemory` dostałoby
+  // `undefined`, a `bridge_ext` — z założenia defensywny — połknąłby to bez słowa
+  // (`if (!db) return`) i pamięć linków przestałaby działać po cichu. Ten sam rodzaj
+  // pułapki złapaliśmy już przy ładowaniu `tire_dims.js`, patrz `test/bridge-ext.test.ts`.
+  if (!uchwyt || typeof uchwyt.prepare !== "function") {
+    throw new Error(
+      "Nie udało się wyciągnąć uchwytu better-sqlite3 spod Drizzle (`db.$client`). " +
+        "Prawdopodobnie zmieniła się wersja drizzle-orm — bez tego uchwytu `bridge_ext` " +
+        "nie ma jak czytać pamięci linków.",
+    );
+  }
+  return uchwyt;
 }

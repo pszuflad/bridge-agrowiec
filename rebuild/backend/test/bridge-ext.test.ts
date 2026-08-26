@@ -69,4 +69,9 @@ describe("bridge_ext — most ESM→CJS działa, a nie tylko nie wybucha", () =>
     expect(uchwytSqlite(db as never)).toBe(sqlite);
     sqlite.close();
   });
+
+  it("uchwytSqlite() RZUCA, gdy Drizzle przestanie wystawiać `$client`", () => {
+    // Zamiast pozwolić, żeby `bridge_ext` po cichu nic nie zrobił po aktualizacji drizzle-orm.
+    expect(() => uchwytSqlite({} as never)).toThrow(/db\.\$client/);
+  });
 });
