@@ -1,17 +1,12 @@
 // Odtwarza próbki dostawców, dla których nie mamy realnego pliku wejściowego:
-// MO6 (Agrowiec/Uniglory), MO8 (Trelleborg) oraz MO9 (Agrorami).
+// MO6 (Agrowiec/Uniglory) oraz MO9 (Agrorami).
 //
-// MO7 (Nokian) i MO10 (GRI) miały tu wcześniej próbki odtworzone — od 2026-08-26 mamy od Ani
-// PRAWDZIWE pliki i te sekcje zostały usunięte. Odtworzenie się przy tym obroniło: 4 z 5
-// rekordów zgadzały się z prawdziwym plikiem we WSZYSTKICH 53 polach, a jedyna różnica
-// (MO10 PAB1035, stan 8 vs 6) to zmiana stanu magazynowego w czasie, nie błąd odtworzenia.
+// MO7 (Nokian), MO8 (Trelleborg) i MO10 (GRI) miały tu wcześniej próbki odtworzone — od
+// 2026-08-26 mamy od Ani PRAWDZIWE pliki i te sekcje zostały usunięte.
 //
 // DLACZEGO POZOSTAŁE ODTWARZAMY, ZAMIAST WZIĄĆ PLIK
-// Archiwum importów (mirror/backend/import_archive/, dostępne pod 72957d7^) obejmuje wyłącznie
-// okno 2026-08-21…25 i zawiera tylko MO1–MO5 oraz MO9. MO6 i MO8 w nim nie występują.
-// MO6 jest od 2026-08-26 wycofany z importu (decyzja produkcji) — próbkę zostawiamy, bo dalej
-// dowodzi wierności portu i nic nie kosztuje. Dla MO8 plik, który dostaliśmy, jest CSV-em,
-// z którego produkcyjny parser nie czyta nic (patrz ZRODLA.md) — czekamy na XLSX.
+// MO6 jest od 2026-08-26 wycofany z importu (decyzja produkcji) i nigdy nie był importem
+// automatycznym — próbkę zostawiamy, bo dalej dowodzi wierności portu i nic nie kosztuje.
 // MO9 ma w archiwum pliki CSV, ale produkcyjny parser (mo9_agrorami.cjs) je IGNORUJE —
 // od 2026-07-10 dane idą z API GraphQL, a nie z pliku.
 //
@@ -29,10 +24,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
 
-const wymagaj = createRequire(import.meta.url);
-const XLSX = wymagaj("xlsx");
 
 const backendDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const katalogProbek = join(backendDir, "test", "charakteryzacja", "probki");
@@ -61,23 +53,6 @@ zapisz(
     ),
   ]),
 );
-
-// ---------------------------------------------------------------- MO8 Trelleborg
-// XLSX, arkusz "Radial" (15 kolumn wg nagłówka pliku w mo8_trelleborg.cjs):
-// A Size(sekcja) B Size C TL/TT D LI-SI/PR E Pattern F IP Code G Code EAN H EPL in EUR
-// I Rim J OD K SW L RC M Note N Item description O PLN
-// Kolumna G celowo zawiera zapis w notacji naukowej ("8,05997E+12") — tak Excel psuje 13-cyfrowe
-// EAN-y i tak wygląda realny plik; adapter ma na to osobną obsługę (looksLikeMangledScientific).
-{
-  const arkusz = XLSX.utils.aoa_to_sheet([
-    ["Size", "Size", "TL / TT", "Load Index/Speed Ix / PR", "Pattern", "IP Code", "Code EAN", "EPL in EUR", "Rim", "OD", "SW", "RC", "Note", "Item description", "PLN"],
-    [null, "620/55B26.5", "TL", "166D", "T421", "1106900", "8,05997E+12", 1445.2, "20.00", 1595, 630, 745, "", "", 6175.5],
-    [null, "750/50B30.5", "TL", "173D", "T428", "1102700", "8,05997E+12", 1772.1, "25.00", 1770, 762, 823, "", "", 7572.5],
-  ]);
-  const skoroszyt = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(skoroszyt, arkusz, "Radial");
-  zapisz("MO8.xlsx", XLSX.write(skoroszyt, { bookType: "xlsx", type: "buffer" }));
-}
 
 // ---------------------------------------------------------------- MO9 Agrorami
 // Obiekty `item` w kształcie zapytania GraphQL z mo9_agrorami_api.cjs (sku, ean, name,

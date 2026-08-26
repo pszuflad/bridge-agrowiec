@@ -5,7 +5,7 @@
 Podsystem parserów z produkcji (5043 linie `.cjs` + słownik) został wciągnięty do
 `rebuild/backend/src/import/legacy/` jako **kopia bajt-w-bajt**, a nad nim stanął własny brzeg
 wejścia `parsujPlik`/`parsujBufor` w TS/ESM: (plik albo bufor + kod dostawcy) → rekordy po
-`adapter.recordsToSurowe()`. Gate charakteryzacji jest zielony dla **MO1–MO10** — 1214 rekordów
+`adapter.recordsToSurowe()`. Gate charakteryzacji jest zielony dla **MO1–MO10** — 1838 rekordów
 porównanych pole po polu z wyjściem **oryginalnych** parserów, plus sha256 port↔`mirror/backend`.
 Audyt na **pełnych** plikach MO1–MO5 potwierdza zgodność portu z oryginałem także poza próbką,
 a liczby rekordów zgadzają się z `.meta.json` z realnych przebiegów produkcji.
@@ -29,8 +29,8 @@ Bez bazy, bez `tk()`, bez endpointów — zgodnie z zakresem sesji 3a.
 - `rebuild/backend/scripts/charakteryzacja-nagraj.mjs` — nagrywa wzorzec z **oryginalnych** parserów
 - `rebuild/backend/test/charakteryzacja.test.ts` — gate (59 asercji)
 - `rebuild/backend/test/charakteryzacja/mo9-offline.mjs` (+ `.d.mts`) — MO9 bez sieci
-- `rebuild/backend/test/charakteryzacja/probki/` — 10 próbek (~340 KB)
-- `rebuild/backend/test/charakteryzacja/MOx.expected.json` — wzorzec (~2 MB)
+- `rebuild/backend/test/charakteryzacja/probki/` — 10 próbek (~440 KB)
+- `rebuild/backend/test/charakteryzacja/MOx.expected.json` — wzorzec (~2,7 MB)
 - `rebuild/backend/test/charakteryzacja/ZRODLA.md` — pochodzenie próbek i procedura odtwarzania
 
 **Zmienione:**
@@ -78,7 +78,7 @@ fixtures/kontraktu obowiązuje w pełni. Wszystkie istniejące gate'y z iteracji
 | Warstwa | Co dowodzi | Wynik |
 |---|---|---|
 | 1. Integralność portu | sha256 każdego z 16 plików == `mirror/backend` | ✅ |
-| 2. Charakteryzacja MO1–MO10 | port == wyjście oryginału, pole po polu | ✅ 1214 rekordów |
+| 2. Charakteryzacja MO1–MO10 | port == wyjście oryginału, pole po polu | ✅ 1838 rekordów |
 | 3. Przydatność próbki | > 0 rekordów, 0 błędów parsera, pola kluczowe wypełnione | ✅ |
 | 4. Brzeg wejścia | `parsujBufor` == `parsujPlik`; nieznany dostawca odrzucony; typ `KodDostawcy` == lista dispatchera | ✅ |
 | 5. Paginacja MO9 | 250 obiektów wraca przez wiele stron, bez gubienia i duplikatów | ✅ |
@@ -95,10 +95,10 @@ Wzorzec (`MOx.expected.json`) nagrany skryptem uruchamiającym **oryginalne** pa
 | MO5 | MO5_Handlopex_RZ | 146 | 0 | 0 | 54 |
 | MO6 | MO6_Agrowiec | 2 | 0 | 0 | 0 |
 | MO7 | MO7_Nokian | **285** | 0 | 0 | 0 |
-| MO8 | MO8_Trelleborg | 2 | 0 | 0 | 0 |
+| MO8 | MO8_Trelleborg | **626** | 0 | 0 | 0 |
 | MO9 | MO9_Agrorami | 12 | 0 | 0 | 0 |
 | MO10 | MO10_GRI | **223** | 0 | 0 | 0 |
-| **razem** | | **1214** | **0** | **156** | **154** |
+| **razem** | | **1838** | **0** | **156** | **154** |
 
 **Skuteczność gate'u zweryfikowana empirycznie.** Zielony test, którego nie da się złamać, niczego
 nie dowodzi — więc sprawdziliśmy. Celowe cofnięcie `capitalizeKategoria()` w porcie
@@ -167,7 +167,7 @@ Zakres 3a to odtworzenie zachowania, nie jego poprawianie. Poniższe rzeczy port
 2. **`nro` i `cho` nadal są liczbami 0/1.** Rekomendacja z backlogu #1 przewidywała, że „ta sama
    zasada dotyczy prawdopodobnie innych pól-flag" — i sprawdziła się. Po `sniegfix` i `flagsfix`
    pola `labelSnow`, `snow3pmsf`, `ms`, `cfo`, `stubbleResistant` zwracają `'Tak'`/`null`, ale
-   `nro` i `cho` zostały liczbowe (zweryfikowane na 1214 rekordach). Osobna decyzja.
+   `nro` i `cho` zostały liczbowe (zweryfikowane na 1838 rekordach). Osobna decyzja.
 3. **Adapter odrzuca duży odsetek rekordów MO4/MO5.** Na pełnym pliku MO4: 3771 rekordów parsera
    → 252 po `recordsToSurowe()`; MO5: 5184 → 1639. Odrzucanie robi `shouldRejectRecord()`
    (klasyfikator „czy to opona"). Zachowanie identyczne z produkcją, ale skala jest na tyle duża,
@@ -182,12 +182,12 @@ Zakres 3a to odtworzenie zachowania, nie jego poprawianie. Poniższe rzeczy port
 
 ## Luki pokrycia (świadome, do zamknięcia gdy pojawią się dane)
 
-- **MO6 i MO8 — po 2 wiersze.** MO6 jest wycofany z importu, więc pokrycie nie urośnie i nie musi.
-  MO8 czeka na plik w formacie, który produkcyjny parser faktycznie czyta (patrz Znaleziska).
-  Próbki odtworzone z realnych linii w `test_tyres.cjs`; świadomie **nie** dopisywaliśmy własnych
-  wierszy — zmyślone dane dostawcy nie dowodzą niczego.
-- **MO7 i MO10 — luka zamknięta 2026-08-26.** Ania dostarczyła prawdziwe pliki (285 i 223 rekordy),
-  które zastąpiły próbki odtworzone.
+- **MO6 — 2 wiersze, i tak ma zostać.** Dostawca jest wycofany z importu, a w katalogu nie ma ani
+  jednego produktu MO6 — pokrycie nie urośnie i nie musi. Próbka odtworzona z realnych linii
+  w `test_tyres.cjs`.
+- **MO7, MO8 i MO10 — luka zamknięta 2026-08-26.** Ania dostarczyła prawdziwe pliki
+  (285, 626 i 223 rekordy), które zastąpiły próbki odtworzone. Odtworzone zostają już tylko MO6
+  (wycofany) i MO9 (źródłem jest API, nie plik).
 - **MO9 — niepokryty transport HTTP.** Podstawiamy wyłącznie globalny `fetch`, więc realnie wykonuje
   się cały `fetchAll()`. Poza pokryciem zostaje samo żądanie sieciowe, odnawianie tokenu w czasie
   i zachowanie API przy błędach — to brzeg, należący do 3b. Ścieżka wielostronicowa **jest** pokryta,
@@ -468,3 +468,45 @@ Liczniki > 0 mają MO1 (8), MO2 (115), MO3 (29), MO4 (71), MO5 (109) — normaln
 **nie ma ani jednego rekordu `dostawca = 'MO6'`**. Zapis w raporcie i backlogu, że „pozycje MO6
 zostają jako historyczne", był przedwczesny — nie ma czego zachowywać. Zgadza się to ze słowami
 Ani („a jak nie ma nic w bazie, to też nie powinno tam nic być"). Wpis #7 poprawiony.
+
+
+## Uzupełnienie 2026-08-26 (4): prawdziwy plik MO8
+
+Ania dostarczyła `_Trelleborg List Price_AG_April 2026_New_EPL_PL_BAL.xlsx` — właściwy skoroszyt,
+nie eksport pojedynczego arkusza. Próbka MO8 podmieniona; charakteryzacja rośnie z 1214 do
+**1838 rekordów**, cała bateria dalej zielona (164/164).
+
+| | Wartość |
+|---|---|
+| Rekordów | **626** (Radial 276 + XPly 350) |
+| Błędów parsera | 0 |
+| Odrzucone `In preparation` | 32 |
+| Pominięte wiersze grupujące | 88 |
+
+Arkusze nazywają się dokładnie `Radial` i `XPly`, a kolumna `PLN` jest tam, gdzie opisuje nagłówek
+parsera (O w `Radial`, M w `XPly`) — czyli plik jest tym, pod który parser był pisany 2026-07-01.
+
+**Odtworzenie MO8 rozminęło się z rzeczywistością najbardziej z całej czwórki** i warto wiedzieć
+dlaczego, bo to wyznacza granicę metody:
+
+| Pole | Odtworzone | Realne |
+|---|---|---|
+| `ean` | `8059970000000` | `8059971007480` |
+| `model` / `bieznik` | `T421` | `T421 AMPT` |
+| `cenaZakupu` | `6175.5` | `11840` |
+
+Przyczyna nie leży w metodzie, tylko w źródle: wiersze MO8 w `test_tyres.cjs` to **ręcznie wpisane
+wejście do `normalizeTrelleborg()`**, a nie linie z pliku (widać to po polach, których parser
+w ogóle nie czyta z pliku — `Magazyn`, `RODZAJ`). EAN był tam zapisany jako `8,05997E+12`, czyli
+**już zepsuty przez Excela** — objaw ery CSV; prawdziwy XLSX trzyma pełną precyzję. Nazwy modeli
+i ceny pochodzą ze starszego wydania cennika.
+
+Dla porównania: przy MO7 i MO10, gdzie wiersze w `test_tyres.cjs` pochodziły wprost z plików
+dostawcy, zgodność wyniosła **4 z 5 rekordów co do pola**. Wniosek na przyszłość: rekonstrukcja
+jest wiarygodna dokładnie na tyle, na ile wiarygodne jest źródło wierszy — i zawsze warto
+docelowo zdobyć prawdziwy plik.
+
+**Znalezisko #8 pozostaje w mocy.** Fakt, że mamy teraz właściwy XLSX, nie unieważnia problemu:
+parser dalej po cichu zwraca zero rekordów, gdy dostanie CSV, a `tk()` dalej nie ma zabezpieczenia
+przed pustym wejściem. Ryzyko jest realne, bo Trelleborg to import ręczny — a plik CSV o tej samej
+nazwie i tej samej treści krąży obok właściwego skoroszytu (sami dostaliśmy najpierw jego).

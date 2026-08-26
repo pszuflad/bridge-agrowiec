@@ -20,8 +20,8 @@ cd rebuild/backend
 # 1. Próbki MO1–MO5 z historii repozytorium (nadpisuje probki/MO1..MO5.csv)
 node scripts/charakteryzacja-probki.mjs
 
-# 2. Próbki odtworzone: MO6, MO8, MO9 (nadpisuje probki/MO6.csv, MO8.xlsx, MO9.items.json)
-#    MO7 i MO10 to realne pliki od Ani — leżą w repo i NIE są generowane
+# 2. Próbki odtworzone: MO6, MO9 (nadpisuje probki/MO6.csv, MO9.items.json)
+#    MO7, MO8 i MO10 to realne pliki od Ani — leżą w repo i NIE są generowane
 node scripts/charakteryzacja-probki-odtworzone.mjs
 
 # 3. Wzorzec — uruchamia ORYGINALNE parsery z mirror/backend na tych próbkach
@@ -69,6 +69,8 @@ pełnych plików opisanym w `raport.md`.
 
 ### MO7 Nokian i MO10 GRI — realne pliki od Ani (2026-08-26)
 
+> MO8 Trelleborg też — opisany osobno niżej, bo doszedł po nich i ma własną historię.
+
 Oba pochodzą bezpośrednio od Ani i są w repo **bajt w bajt**, bez przycinania — ważą po
 ~25–40 KB, więc nie ma czego oszczędzać, a byte-exactness jest tu więcej warta niż wycinek
 (testujemy realne kodowanie i realne wyjście narzędzi dostawcy).
@@ -91,35 +93,46 @@ Bonus pokrycia: prawdziwy cennik Nokiana zawiera **6 pozycji VF Float King z cen
 (`cenaZakupu: null`, `uwagaCena: "na zapytanie"`) — czyli dokładnie przypadek z backlogu #4,
 który wcześniej nie był pokryty żadnymi danymi.
 
+### MO8 Trelleborg — realny plik (2026-08-26)
+
+`_Trelleborg List Price_AG_April 2026_New_EPL_PL_BAL.xlsx` — 101 KB, **626 rekordów**, zero błędów.
+XLSX z dwoma arkuszami, dokładnie jak opisuje nagłówek parsera: `Radial` (276 pozycji, `PLN`
+w kolumnie O) i `XPly` (350 pozycji, `PLN` w kolumnie M). Parser odrzuca po drodze 32 pozycje
+`In preparation` i pomija 88 wierszy grupujących — zgodnie z regułami z 2026-07-01.
+
+⚠ **Uwaga: nie mylić z plikiem CSV o tej samej nazwie.** Dostaliśmy najpierw wersję CSV
+(jeden arkusz wyeksportowany ze skoroszytu), z której produkcyjny parser czyta **zero rekordów**
+— i robi to po cichu, bez błędu. To osobne znalezisko, opisane w backlogu #8; nie jest problemem
+próbki, tylko odporności importu.
+
+**Próbka odtworzona (zastąpiona) różniła się od rzeczywistości najbardziej ze wszystkich** —
+warto wiedzieć dlaczego, bo to mówi coś o granicach metody:
+
+| Pole | Odtworzone z `test_tyres.cjs` | Realny plik |
+|---|---|---|
+| `ean` | `8059970000000` | `8059971007480` |
+| `model` / `bieznik` | `T421` | `T421 AMPT` |
+| `cenaZakupu` | `6175.5` | `11840` |
+
+EAN w `test_tyres.cjs` był zapisany jako `8,05997E+12` — czyli **już zepsuty przez Excela**,
+co jest objawem ery CSV; prawdziwy XLSX trzyma pełną precyzję. Nazwy modeli i ceny pochodzą
+z innego (starszego) wydania cennika. Próbka odtworzona **poprawnie reprodukowała to, co było
+w `test_tyres.cjs`** — po prostu tamte dane były starsze i pochodziły z gorszego źródła.
+Dla MO7 i MO10, gdzie wiersze w `test_tyres.cjs` pochodziły wprost z plików, zgodność wyniosła
+4 z 5 rekordów co do pola.
+
 ### MO6 Agrowiec — odtworzona, dostawca wycofany
 
 ⚠ **MO6 jest od 2026-08-26 wycofany z importu** (decyzja produkcji — Ania wyłącza go u siebie,
-my odtwarzamy ten stan). Próbkę i wzorzec **zostawiamy**: dalej dowodzą wierności portu, nic nie
-kosztują, a gdyby dostawca kiedyś wrócił — pokrycie jest gotowe. Sam parser `mo6_agrowiec.cjs`
-zostaje w porcie, bo port jest kopią produkcji; przestaje być po prostu wołany (wyłączenie
-dostawcy to konfiguracja `suppliers`, sesja 3b/I11).
+my odtwarzamy ten stan). Nigdy nie był zresztą importem automatycznym: Uniglory wgrywano ręcznie.
+W katalogu **nie ma ani jednego produktu MO6** (zweryfikowane na `db/snapshot.db`, stan 2026-08-13).
+
+Próbkę i wzorzec **zostawiamy**: dalej dowodzą wierności portu, nic nie kosztują, a gdyby dostawca
+kiedyś wrócił — pokrycie jest gotowe. Sam parser `mo6_agrowiec.cjs` zostaje w porcie, bo port jest
+kopią produkcji; przestaje być po prostu wołany.
 
 2 wiersze odtworzone z realnych linii w `test_tyres.cjs`; CSV, UTF-8 z BOM, nagłówki niemieckie
 (`Beschreibung`, `Hersteller`).
-
-### MO8 Trelleborg — odtworzona; realny plik NIE nadaje się na próbkę
-
-2 wiersze odtworzone z `test_tyres.cjs`: XLSX, arkusz `Radial`, 15 kolumn, EAN celowo w notacji
-naukowej Excela (`8,05997E+12` → parser odzyskuje `8059970000000`).
-
-⚠ **Plik, który dostaliśmy od Ani (`_Trelleborg List Price_AG_April 2026_New_EPL_PL_BAL.csv`),
-daje przez produkcyjny parser ZERO rekordów** — dlatego nie zastąpił próbki odtworzonej.
-Przyczyna jest jednoznaczna: `mo8_trelleborg.cjs` czyta plik przez `XLSX.readFile()` i iteruje
-**wyłącznie po arkuszach o nazwach `Radial` i `XPly`**. SheetJS wczytuje CSV jako pojedynczy
-arkusz `Sheet1`, więc filtr nie łapie nic — i parser kończy z `records: []`, `errors: []`,
-czyli **bez jednego sygnału błędu**. Ten plik ma układ kolumn arkusza XPly (13 kolumn, `PLN`
-w kolumnie M), więc dane w nim są, tylko opakowanie jest inne niż to, którego parser oczekuje.
-
-Do rozstrzygnięcia z Anią: czy pod produkcyjnym URL-em (`agroopony.eu/imports/Trelleborg.csv`)
-leży XLSX z arkuszami `Radial`/`XPly` (tak sugeruje przepisanie parsera z 2026-07-01 — „nowy
-format Trelleborg — plik XLSX z dwoma arkuszami"), a ten CSV jest osobnym eksportem? Do czasu
-odpowiedzi próbka MO8 zostaje odtworzona. Szczegóły i konsekwencje: `raport.md`, sekcja
-„Znaleziska".
 
 #### Pułapka kodowania MO7
 
@@ -182,9 +195,9 @@ zachowanie API przy błędach sieci). To brzeg, nie logika parsera, i należy do
 ## Co wchodzi do repozytorium, a co nie
 
 Próbki to cenniki zakupowe dostawców — wycinki (MO1–MO5, po 200 wierszy) albo pełne pliki tam,
-gdzie i tak są małe (MO7 39 KB, MO10 24 KB). Trafiają do repozytorium świadomie: pliki MO1–MO5
+gdzie i tak są małe (MO7 39 KB, MO8 101 KB, MO10 24 KB). Trafiają do repozytorium świadomie: pliki MO1–MO5
 były w nim obecne aż do commita `72957d7`, a bez próbek gate nie byłby odtwarzalny na czystym
-klonie ani w CI. Cały katalog waży ~2,3 MB zamiast dziesiątek MB.
+klonie ani w CI. Cały katalog waży ~3,1 MB zamiast dziesiątek MB.
 
 Pełne pliki **nie** są wersjonowane — `.gitignore` wyklucza `mirror/backend/import_archive/`.
 Audyt na pełnych plikach uruchamia się doraźnie z historii gita; wynik jest w `raport.md`.
