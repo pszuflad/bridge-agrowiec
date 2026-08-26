@@ -180,8 +180,28 @@ export function pozycjaStaginguPoId(db: Baza, id: number) {
 export function zapiszPozycjeStagingu(db: Baza, pozycje: NowaPozycjaStagingu[]): number {
   if (pozycje.length === 0) return 0;
   db.transaction((tx) => {
-    for (const pozycja of pozycje) tx.insert(stagingItems).values(pozycja).run();
+    for (const pozycja of pozycje) {
+      // Deduplikacja z `U.addStaging` (backend-index.cjs:44923-44927): pozycja o tym samym
+      // kodzie, typie zmiany i powodzie NIE jest wstawiana drugi raz. 3b tego nie miała, bo
+      // `powod` był wtedy stały, a pola treści puste — dopiero od 3c wiersze mają realny
+      // `powod` i powtórny import tego samego cennika zaczyna się o to opierać.
+      const istniejaca = tx
+        .select({ id: stagingItems.id })
+        .from(stagingItems)
+        .where(
+          and(
+            eq(stagingItems.kod, pozycja.kod),
+            eq(stagingItems.typZmiany, pozycja.typZmiany),
+            sql`COALESCE(${stagingItems.powod}, '') = COALESCE(${pozycja.powod ?? null}, '')`,
+          ),
+        )
+        .get();
+      if (istniejaca) continue;
+      tx.insert(stagingItems).values(pozycja).run();
+    }
   });
+  // Oryginał zwraca `c.length` (`:47850`) — długość BUFORA, nie liczbę wstawionych wierszy.
+  // Przy zdeduplikowanym powtórzeniu te dwie liczby się rozjeżdżają; kontrakt HTTP niesie tę.
   return pozycje.length;
 }
 

@@ -26,6 +26,24 @@ function probka(nazwa: string): Buffer {
   return readFileSync(join(KATALOG_PROBEK, nazwa));
 }
 
+/**
+ * Ile wierszy stagingu powinien zostawić import, którego statystyki widać w odpowiedzi.
+ *
+ * Do 3b ta liczba była po prostu równa liczbie rekordów z parsera, bo placeholder silnika
+ * przepuszczał wszystko. Od 3c silnik realnie klasyfikuje: odsiewa nie-opony, śmieci MO2
+ * i rekordy bez identyfikatora, więc równość trzeba wyprowadzić z liczników kontraktu,
+ * a nie zakładać. Katalog w tych testach jest pusty, więc nie ma dopasowań — każda przyjęta
+ * pozycja daje dokładnie jeden wiersz.
+ */
+function oczekiwanyStaging(cialo: Record<string, number | boolean>): number {
+  return (
+    Number(cialo.wczytanych) -
+    Number(cialo.odrzuconeNieOpony) -
+    Number(cialo.odrzuconeBrakDanych) -
+    Number(cialo.odrzuconeSmieciMO2)
+  );
+}
+
 function oczekiwaneRekordy(kodDostawcy: string): number {
   const wzorzec = JSON.parse(
     readFileSync(join(import.meta.dirname, "charakteryzacja", `${kodDostawcy}.expected.json`), "utf8"),
@@ -75,6 +93,9 @@ describe("endpointy importu", () => {
       const ciało = odp.body as Record<string, number | boolean>;
       expect(ciało.ok).toBe(true);
       expect(ciało.wczytanych).toBe(oczekiwane);
+      // MO1 nie ma w próbce ani nie-opon, ani śmieci, więc tu równość nadal zachodzi
+      // wprost — ale liczymy ją tą samą regułą co u pozostałych dostawców.
+      expect(oczekiwanyStaging(ciało)).toBe(oczekiwane);
       expect(ciało.doStagingu).toBe(oczekiwane);
       expect(ciało.nowe).toBe(oczekiwane);
       expect(policzStaging().c).toBe(oczekiwane);
@@ -294,12 +315,15 @@ describe("endpointy importu", () => {
     });
 
     it("prawidłowy skoroszyt MO8 przechodzi normalnie", async () => {
-      const oczekiwane = oczekiwaneRekordy("MO8");
       const odp = await wyslijPlik("MO8", probka("MO8.xlsx"), "trelleborg.xlsx");
 
       expect(odp.status).toBe(200);
-      expect((odp.body as { wczytanych: number }).wczytanych).toBe(oczekiwane);
-      expect(policzStaging().c).toBe(oczekiwane);
+      const cialo = odp.body as Record<string, number | boolean>;
+      expect(cialo.wczytanych).toBe(oczekiwaneRekordy("MO8"));
+      // Silnik 3c odsiewa z tej próbki jedną pozycję jako nie-oponę — potwierdzone
+      // uruchomieniem ORYGINALNEGO tk() (test/charakteryzacja/silnik/MO8.expected.json).
+      expect(cialo.odrzuconeNieOpony).toBe(1);
+      expect(policzStaging().c).toBe(oczekiwanyStaging(cialo));
     });
   });
 
@@ -345,7 +369,27 @@ describe("endpointy importu", () => {
     it("dostawca bez flagi importuje normalnie", async () => {
       const odp = await wyslijPlik("MO2", probka("MO2.csv"));
       expect(odp.status).toBe(200);
-      expect(policzStaging().c).toBe(oczekiwaneRekordy("MO2"));
+      const cialo = odp.body as Record<string, number | boolean>;
+      expect(cialo.wczytanych).toBe(oczekiwaneRekordy("MO2"));
+      expect(cialo.doStagingu).toBe(oczekiwanyStaging(cialo));
+
+      // ⚠ Wierszy jest MNIEJ niż `doStagingu` i tak ma być. Próbka MO2 zawiera dwa kody
+      // powtórzone (`MO2_13760840000`, `MO2_13763530000`), a `U.addStaging`
+      // (backend-index.cjs:44923) deduplikuje po (kod, typZmiany, powod). `doStagingu` liczy
+      // BUFOR, nie zapisy (`:47850`), więc obie liczby rozjeżdżają się o liczbę duplikatów.
+      // Potwierdzone uruchomieniem ORYGINAŁU na tej samej próbce: 200 w buforze, 198 zapisów.
+      expect(policzStaging().c).toBe(Number(cialo.doStagingu) - 2);
+    });
+
+    it("ponowny import tego samego cennika nie dokłada wierszy (deduplikacja addStaging)", async () => {
+      await wyslijPlik("MO2", probka("MO2.csv"));
+      const poPierwszym = policzStaging().c;
+
+      const odp = await wyslijPlik("MO2", probka("MO2.csv"));
+
+      expect(odp.status).toBe(200);
+      expect(poPierwszym).toBeGreaterThan(0);
+      expect(policzStaging().c).toBe(poPierwszym);
     });
   });
 

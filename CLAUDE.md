@@ -39,7 +39,15 @@ przypisania zakresu** traktujesz jako decyzję użytkownika i zapisujesz osobno.
 **5. Uważaj na duplikaty definicji w zdeminifikowanym oryginale.**
 `deminified/backend-index.cjs` ma funkcje zdefiniowane po dwa razy, gdzie wygrywa PÓŹNIEJSZA:
 `tk` (:47378 martwe / :47584 żywe), `Lq` (:46965 licznik cyfr / :47312 generator identyfikatora).
-Zanim oprzesz się na numerze linii, sprawdź, czy nie ma drugiej definicji tej samej nazwy.
+Duplikaty są **fizycznie w wysłanym bundlu** `mirror/backend/index.cjs`, nie artefaktem naszej
+deminifikacji — esbuild przy kolizji nazw by je przemianował, więc biorą się z łatek
+`patch_*.cjs` doklejanych do `index.cjs` po buildzie (w `mirror/backend/` jest ich kilkanaście;
+kolejna łatka Ani może dołożyć następny przypadek). Żeby wykryć: policz wystąpienia
+`function <nazwa>(` w `mirror/backend/index.cjs`, nie ufaj numerowi linii w deminifikacie.
+**Cieniowanie sięga dalej niż sama funkcja** — sprawdź też, KTO WOŁA zacienioną nazwę w innym
+miejscu: `ZT()` (:46971) woła `Lq(i)` licząc na licznik cyfr z :46965, a trafia w generator sha1
+z :47312, bo obie deklaracje `Lq` są w tym samym zakresie; efekt widoczny w produkcji: komunikat
+„zapis naukowy ma tylko null cyfr znaczących". Szczegóły: `docs/rebuild-backlog.md` #11.
 
 ---
 
