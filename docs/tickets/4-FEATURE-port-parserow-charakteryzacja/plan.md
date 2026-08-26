@@ -1,6 +1,6 @@
 # 4-FEATURE-port-parserow-charakteryzacja — Iteracja 3a: port + charakteryzacja parserów
 
-> Status: Draft
+> Status: Implemented
 > Branch: `feature/4-port-parserow-charakteryzacja`
 > Worktree: `.worktrees/4-FEATURE-port-parserow-charakteryzacja`
 

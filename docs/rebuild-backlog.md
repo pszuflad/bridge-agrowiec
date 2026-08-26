@@ -31,8 +31,8 @@ bundla do ~2026-08-05, MD5 `b745bf95`). Wcześniejsze zmiany są już w specyfik
 | **Kategoria** | BACKEND (import / parsery) |
 | **Pliki** | `parsers/adapter.cjs`, `parsers/tyre_params.cjs` (kopie `*.bak_pre_sniegfix_20260818090314`) |
 | **Commit** | `7bd31de` sync(vps) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** (decyzja 2026-08-26, ticket `4-FEATURE-port-parserow-charakteryzacja`) |
+| **Status** | ✔ zrobione w rebuild (wniesione **portem**, I3/3a) |
 
 **Opis biznesowy:**
 Kolumna „Śnieg" (zdolność zimowa opony) w katalogu pokazywała dla części opon
@@ -49,6 +49,21 @@ Dodano dwie funkcje normalizujące flagę: `normalizeLabelSnowValue(rawLabelSnow
 `null`. Wcześniej `enriched.labelSnow ?? enriched.snow3pmsf` oraz `normalizeQty(record.labelSnow)`
 wpychały surową flagę 0/1 do kolumny TEXT.
 
+**Zrealizowane (2026-08-26, I3/3a).** Wniesione **portem verbatim** `parsers/adapter.cjs`
++ `parsers/tyre_params.cjs` do `rebuild/backend/src/import/legacy/` — `normalizeLabelSnowValue()`
+i `normalizeLabelFlag()` działają w nowym stosie bez reimplementacji. Poprawka `flagsfix`
+(backlog #6) rozszerzyła tę samą konwencję na `cfo`/`stubbleResistant` i też weszła portem.
+Potwierdzone charakteryzacją MO1–MO10 (`rebuild/backend/test/charakteryzacja.test.ts`,
+711 rekordów wzorca): `labelSnow`, `snow3pmsf`, `ms`, `cfo` przyjmują wyłącznie `"Tak"`
+albo `null` — nigdy 0/1.
+
+⚠ **Otwarte, znalezione przy realizacji:** przewidywanie z rekomendacji poniżej („ta sama
+zasada dotyczy prawdopodobnie innych pól-flag") **sprawdziło się dla dwóch pól, których
+`flagsfix` nie objął**: `nro` i `cho` nadal przyjmują wartości **liczbowe 0/1**
+(zweryfikowane na tych samych 711 rekordach). Port odtwarza to wiernie, bo taka jest
+produkcja. Do rozstrzygnięcia jako osobna decyzja — patrz `raport.md` ticketa
+`4-FEATURE-port-parserow-charakteryzacja`, sekcja „Follow-up".
+
 **Rekomendacja (moja):** ✅ **nanieść** — to realna poprawka poprawności danych, którą
 nowy backend musi odtworzyć. Dotyczy warstwy import/adapter (kierunek A Fazy 4).
 Ta sama zasada dotyczy prawdopodobnie innych pól-flag etykiety UE (`label_ice`,
@@ -63,8 +78,8 @@ tego samego błędu „ilość zamiast flagi".
 | **Kategoria** | BACKEND (import/adapter, klasyfikator) + BAZA (dane) |
 | **Pliki** | `common.cjs`, `parsers/adapter.cjs`, `zastosowania/audit.cjs` (kopie `*.bak_pre_kategoriafix_20260818114801`) |
 | **Commit** | `740b273` sync(vps) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** (decyzja 2026-08-26, ticket `4-FEATURE-port-parserow-charakteryzacja`) |
+| **Status** | ✔ zrobione w rebuild (wniesione **portem**, I3/3a) |
 
 **Opis biznesowy:**
 Kategorie produktów miały **duplikaty różniące się tylko wielkością liter**
@@ -82,6 +97,12 @@ i dodano 5 brakujących wartości do słownika.
   w `tyre_params.cjs`) bez edycji każdego parsera.
 - `zastosowania/audit.cjs` — słownik `SLOWNIK` ujednolicony, żeby audyt nie zgłaszał
   naprawionych wartości jako błędnych.
+
+**Zrealizowane (2026-08-26, I3/3a).** Wniesione **portem verbatim** `common.cjs`
++ `parsers/adapter.cjs`. `capitalizeKategoria()` działa dokładnie tam, gdzie w produkcji —
+na końcu `recordToSurowe()`. Charakteryzacja to potwierdza wprost: eksperymentalne cofnięcie
+tego wywołania zapala 10 asercji gate'u (`przemysłowe` zamiast `Przemysłowe` itd.).
+Zakres 3a nie obejmuje `zastosowania/audit.cjs` (skrypt audytowy, nie potok importu).
 
 **Rekomendacja (moja):** ✅ **nanieść** — poprawka jakości danych + **dobry wzorzec
 architektoniczny**. Potwierdza regułę: **`adapter.recordToSurowe()` to centralne miejsce
@@ -140,6 +161,23 @@ liczbę z tekstu rozmiaru 1:1, z zerami końcowymi**, bez konwersji jednostek.
   fragment zserializowanego `snapshotJson`, poza zasięgiem porównania kształtu). Przenagranie tego jednego
   pliku po zmianie schematu jest więc kosztem jednorazowym i małym.
 
+**Warstwa parsera — zrobiona (2026-08-26, I3/3a), decyzja o schemacie nadal otwarta.**
+Port verbatim `tyre_params.cjs` wniósł stan końcowy `szertxt` do `rebuild/backend`: `parseSize()`
+zwraca `szerokosc` jako **string** z zerami końcowymi (`"10.00"`, `"400"`), a `widthCm` dalej liczy
+`wysokoscBokuCm`/`wysokoscRzeczywistaCm` z floata. W 3a nie ma bazy, więc dotyczy to wyłącznie
+kształtu rekordu w pamięci — **zmiana `products.szerokosc` REAL→TEXT i przenagranie
+`GET_products.json` pozostają do rozstrzygnięcia tutaj** (3b/I12).
+
+⚠ **Znalezione przy realizacji — `szertxt` NIE jest kompletny.** `normalizeJmk` (MO2)
+i `normalizeHandlopex` (MO4/MO5) mają fallback `size.szerokosc ?? parseWidthFallbackMm(record.szerokosc)`
+(`tyre_params.cjs:520` i `:1069`). `parseWidthFallbackMm()` to pozostałość po **cofniętym**
+`szerokoscfix` — przelicza cale na milimetry i zwraca **float**, nie string. Odpala się, gdy
+`parseSize()` nie rozbije rozmiaru: w próbce MO2 (200 wierszy) trafił 1 rekord, `rozmiar
+"6.5/80-12"` → `szerokosc 165.1` zamiast `"6.5"`. Efekt: kolumna `szerokosc` może dostać
+**liczbę w mm obok stringów w calach** — dokładnie ta niespójność, którą `szerorig`/`szertxt`
+miały zlikwidować. Port odtwarza to wiernie (nie naprawiamy zachowania w 3a), ale przy decyzji
+o REAL→TEXT trzeba to domknąć, inaczej TEXT dostanie wartości w dwóch różnych jednostkach.
+
 **Rekomendacja (moja):** ✅ **nanieść stan końcowy (szertxt)**, ❌ **pominąć szerokoscfix** (cofnięty).
 Realna poprawka poprawności danych. Wzorzec architektoniczny: `szerokosc` staje się polem
 **prezentacyjnym** (TEXT, oryginał), a liczby do obliczeń (`widthCm`) żyją osobno — nowy parser powinien
@@ -175,13 +213,21 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 | **Kategoria** | BAZA (nowa kolumna) + BACKEND (endpoint, patche) + FRONTEND (tooltip) |
 | **Pliki** | `db/schema.sql` (kolumna `uwaga_cena`), `uwaga_cena_patch.cjs` (nowy), `parsers/adapter.cjs`, `parsers/mo7_nokian.cjs`, `extensions.cjs` |
 | **Commity** | `33455c8`, `c5d3d63`, `16bc37c` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Do nowej wersji?** | ⬜ **do decyzji** (warstwa parsera już wniesiona portem — I3/3a, 2026-08-26; otwarte: schemat + endpoint) |
 | **Iteracja** | **→ I3** (schemat + endpoint + propagacja importu) **+ injection-tooltip** (późniejsza iteracja; wzorzec jak pending/selly/freq-injection) |
 | **Status** | — |
 
 **Opis biznesowy:** dostawcy czasem zwracają „cena na zapytanie" (np. „- zł" w Nokian dla wielkoformatowych VF Float King). Zamiast pokazywać 0/pustą cenę, produkt dostaje notatkę i jest „wstrzymany"; frontend pokazuje tooltip z powodem.
 
 **Szczegół techniczny:** nowa kolumna `products.uwaga_cena TEXT`; `uwaga_cena_patch.cjs`: idempotentny `ALTER TABLE ADD COLUMN` + monkey-patch `U.acceptStaging` (odczyt `uwagaCena` ze `snapshotJson`) i `U.addProductsBulk`; **nowy endpoint `GET /api/products/uwagi-cena`** (lista wstrzymanych, dla tooltipu). Parser `mo7_nokian.cjs` i `adapter.cjs` propagują pole `uwagaCena`.
+
+**Warstwa parsera — zrobiona (2026-08-26, I3/3a).** Port verbatim `parsers/adapter.cjs`
+i `parsers/mo7_nokian.cjs` wniósł propagację pola `uwagaCena` (`detectPriceOnRequest()`);
+to samo dotyczy MO8 Trelleborg, gdzie ten sam wzorzec doszedł 2026-08-25. Pole jest w typie
+`RekordSurowy` i przechodzi przez charakteryzację. **Nadal do zrobienia w 3b/I12:** kolumna
+`products.uwaga_cena`, propagacja w `acceptStaging` oraz endpoint `GET /api/products/uwagi-cena`.
+(W próbkach charakteryzacyjnych `uwagaCena` jest wszędzie `null` — żaden z 711 rekordów nie
+trafił na „cenę na zapytanie"; to luka pokrycia próbki, nie brak obsługi.)
 
 **Rekomendacja:** ✅ **nanieść, ale NIE jako łatka do I2.** Po przeglądzie raportu I2 (2026-08-25): `uwaga_cena` rozkłada się jak inne rzeczy odłożone przez I2 — **schemat** (nowa kolumna, razem z decyzją #3) + **endpoint `/api/products/uwagi-cena`** + **propagacja w imporcie** (`acceptStaging`, parser mo7/adapter) → **I3**; **frontend to skrypt injection do tooltipu** (wprost z komentarza w `uwaga_cena_patch.cjs`) → wchłonięcie injection w późniejszej iteracji. Katalog I2 odtworzył bundle **sprzed** `uwaga_cena`, a dołożenie pola do `GET /api/products` złamałoby GATE wobec zamrożonego `GET_products.json` (przenagranie fixtures należy do I12). Dlatego I2 zostaje zamknięte, a to wchodzi u swoich właścicieli.
 
@@ -191,11 +237,22 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 |---|---|
 | **Pliki** | `frazy_migruj.cjs` (nowy, +64), `common.cjs` (+23), `frazy_niedopasowane.json` (dane), `frazy_raport.json` |
 | **Commit** | `33455c8` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Do nowej wersji?** | ❌ **NIE** jako zadanie importu (rozstrzygnięte 2026-08-26, I3/3a — patrz niżej); do rozważenia przy I8 Selly |
 | **Iteracja** | → do zbadania przy **I3** (normalizacja w adapterze) lub **I7** (atrybuty) |
 | **Status** | — |
 
 **Opis:** system migracji/dopasowania „fraz" — najpewniej normalizacja `zastosowanie`/nazw. **Changelog Ani nieaktualny**, więc szczegóły do potwierdzenia z diffa przy realizacji. **Rekomendacja:** 🕒 zbadać przy I3 (prawdopodobnie część warstwy normalizacji adaptera).
+
+**ROZSTRZYGNIĘTE (2026-08-26, I3/3a) — to NIE jest normalizacja w adapterze.** Zbadane w kodzie:
+`frazy_migruj.cjs` to **samodzielny skrypt jednorazowy**, który czyta statyczny plik
+`/tmp/frazy_migracja.json` i woła `selly/client.cjs` (PUT do zewnętrznego Selly). W `common.cjs`
+słowo „frazy" **nie występuje ani razu** (grep: 0 trafień) — przyrost +23 linii w tym commicie
+dotyczy czegoś innego. Nic w potoku `parser → adapter → recordToSurowe()` się o to nie opiera.
+
+**Wniosek:** poza zakresem I3. To narzędzie operacyjne integracji Selly — jeśli w ogóle ma
+odpowiednik w odbudowie, to przy **I8 (Selly)**, nie przy imporcie ani atrybutach.
+**Rekomendacja: ❌ NIE** jako zadanie importu; do rozważenia w I8, gdy będziemy odtwarzać
+integrację Selly.
 
 ### #6 · 2026-08-21…25 · [BACKEND] · bieżące poprawki parserów (`flagsfix`, mo8, batch) → obsłużone PORTEM
 
@@ -205,7 +262,7 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 | **Commity** | `3be0ccc` (flagsfix), `08be0f3` (mo8), część `ba3cc6e` |
 | **Do nowej wersji?** | ✅ **TAK (automatycznie)** |
 | **Iteracja** | **→ I3 (port)** |
-| **Status** | — |
+| **Status** | ✔ zrobione w rebuild (I3/3a, 2026-08-26) |
 
 **Opis:** bieżące poprawki parserów Ani (flagi etykiet, MO8 Trelleborg, itd.). **Rekomendacja:** ✅ **objęte strategią „port parserów z najświeższego źródła" (I3/3a)** — nie wymagają osobnej implementacji; portując aktualny stan `parsers/`, dostajemy je wszystkie za darmo. To główny argument za portem, nie rewrite.
 
