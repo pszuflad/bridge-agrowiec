@@ -85,12 +85,28 @@ async function uruchomPort(kod: string): Promise<WynikParsowania> {
   };
 }
 
+/**
+ * Jedyny plik w `src/import/legacy/`, który NIE pochodzi z portu — marker modułowy
+ * dodany przez odbudowę (Iteracja 3d-1). Backend jest `"type": "module"`, więc bez niego
+ * `tire_dims.js` byłby ESM-em i `require('./tire_dims.js')` w `bridge_ext.cjs` by padło.
+ * Awaria byłaby CICHA (bridge_ext połyka wyjątek i zostawia `packageDims = null`), dlatego
+ * `bridge_ext.test.ts` pilnuje osobno, że wymiary naprawdę się liczą.
+ */
+const PLIKI_SPOZA_PORTU = ["package.json"];
+
 describe("1. Integralność portu — src/import/legacy jest kopią mirror/backend", () => {
-  const pliki = sciezkiPlikow(katalogPortu).map((p) => relative(katalogPortu, p));
+  const pliki = sciezkiPlikow(katalogPortu)
+    .map((p) => relative(katalogPortu, p))
+    .filter((p) => !PLIKI_SPOZA_PORTU.includes(p));
 
   it("obejmuje cały podsystem: common, słownik, adapter, tyre_params, dispatcher i 10 parserów", () => {
     expect(pliki).toContain("common.cjs");
     expect(pliki).toContain(join("dictionaries", "oznaczenia.json"));
+    // Iteracja 3d-1: rozszerzenia importu. Nie są częścią potoku parserów (żaden plik
+    // z `parsers/` ich nie `require`uje) — woła je dopiero silnik `tk()` i `acceptStaging`.
+    // Idą PARĄ, bo `bridge_ext` require'uje `tire_dims` po ścieżce względnej.
+    expect(pliki).toContain("bridge_ext.cjs");
+    expect(pliki).toContain("tire_dims.js");
     for (const nazwa of [
       "adapter.cjs",
       "tyre_params.cjs",
@@ -110,14 +126,24 @@ describe("1. Integralność portu — src/import/legacy jest kopią mirror/backe
     }
   });
 
-  it.each(sciezkiPlikow(katalogPortu).map((p) => relative(katalogPortu, p)))(
-    "%s jest bajt-w-bajt zgodny z oryginałem",
-    (wzgledna) => {
-      expect(sha256(join(katalogPortu, wzgledna))).toBe(
-        sha256(join(katalogOryginalu, wzgledna)),
-      );
-    },
-  );
+  it.each(
+    sciezkiPlikow(katalogPortu)
+      .map((p) => relative(katalogPortu, p))
+      .filter((p) => !PLIKI_SPOZA_PORTU.includes(p)),
+  )("%s jest bajt-w-bajt zgodny z oryginałem", (wzgledna) => {
+    expect(sha256(join(katalogPortu, wzgledna))).toBe(sha256(join(katalogOryginalu, wzgledna)));
+  });
+
+  /**
+   * Strażnik samego wyjątku: `PLIKI_SPOZA_PORTU` ma zostać listą jednoelementową.
+   * Gdyby ktoś dołożył tam kolejny plik, żeby „obejść" czerwony sha256, ten test zaświeci.
+   */
+  it("wyjątek od porównania sha256 obejmuje WYŁĄCZNIE marker modułowy", () => {
+    expect(PLIKI_SPOZA_PORTU).toEqual(["package.json"]);
+    expect(JSON.parse(readFileSync(join(katalogPortu, "package.json"), "utf-8")).type).toBe(
+      "commonjs",
+    );
+  });
 
   it("nie wciąga kopii zapasowych ani plików testowych producenta", () => {
     for (const plik of pliki) {
