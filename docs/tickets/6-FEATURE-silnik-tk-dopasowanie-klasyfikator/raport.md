@@ -126,7 +126,10 @@ kończący się pięcioma zerami". Ta reguła istnieje **wyłącznie w martwej `
 `cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` i **nigdy nie ustawia `AP.ean`** —
 produkcja nie aktualizuje EAN istniejącego produktu przy imporcie.
 
-Nie zaimplementowana. Oba dokumenty do sprostowania. Martwa `function tk` różni się od żywej
+Nie zaimplementowana. `docs/spec-backend.md` §5 zostaje sprostowana w tym tickecie (faza docs).
+`docs/incoming/backend-perplexity/backend_doc/03_IMPORT_tk.md` **zostaje bez zmian** — to materiał
+źródłowy od Perplexity, którego nie redagujemy; sprostowanie mieszka w naszej specyfikacji.
+Martwa `function tk` różni się od żywej
 także dopasowaniem (brak mapy EAN i `conflictEans`), składem `_KP` i liczeniem
 `cenaZakupuStara` — to porzucona wcześniejsza iteracja, nie wariant.
 
@@ -256,12 +259,20 @@ je przeimportować, nie łatać.
    `_srcConflict` w `snapshotJson` i udział `naruszono` w wymuszeniu `blad`.
    **Odnotowane wejście dla 3d:** sama `Gq()` (`:47319`) jest prostsza, niż zakładano — 30 linii
    i jedno zapytanie do `manual_overrides`. Kosztem 3d jest warstwa wokół niej, nie ona sama.
-4. **Sprostowanie `03_IMPORT_tk.md`** w punkcie reguły EAN (U3) — plik jest w `docs/incoming/`,
-   czyli w materiale źródłowym od Perplexity; sprostowanie nanosimy w `docs/spec-backend.md`,
-   a `docs/incoming/` zostaje jak jest (materiał zastany).
+4. **`docs/incoming/backend-perplexity/backend_doc/03_IMPORT_tk.md` zostaje z błędną regułą EAN.**
+   To materiał źródłowy od Perplexity, traktowany jak zastany — nie redagujemy go. Sprostowanie
+   jest w `docs/spec-backend.md` §5 (naniesione w tym tickecie). Gdyby ktoś sięgnął po materiał
+   źródłowy z pominięciem naszej specyfikacji, trafi na regułę, która w produkcji nie działa.
 5. **`db/snapshot.db` jest wymagany do PRZENAGRANIA wzorca**, nie do jego weryfikacji.
    Plik jest w `.gitignore` (32 MB), więc nagrywarka przyjmuje `BRIDGE_SNAPSHOT_DB=/ścieżka`.
    Same testy czytają wyłącznie zacommitowany `test/charakteryzacja/silnik/katalog/`.
-6. **Backlog #3 (`szerokosc` REAL→TEXT)** nie ruszony — decyzja należy do 3d/I12, jak ustalono.
+6. **Deduplikacja stagingu robi SELECT na pozycję** (`src/repos/staging.ts`) — dokładnie jak
+   `U.addStaging` (`:44923`), więc port jest wierny, ale to N zapytań w transakcji. Przy dzisiejszych
+   wolumenach (kilkadziesiąt wierszy na przebieg) bez znaczenia; warte uwagi w **3d**, gdy
+   `POST /api/staging/import` zacznie przyjmować duże bufory wprost z ciała żądania.
+7. **Wzorzec charakteryzacji zajmuje ~5 MB w repo** i będzie rósł, gdy 3d dołoży własne przebiegi
+   (wycofania, overrides). Jeśli suma zacznie przeszkadzać — kompresja JSON-ów albo `git lfs`;
+   dziś nie ma powodu, żeby ruszać.
+8. **Backlog #3 (`szerokosc` REAL→TEXT)** nie ruszony — decyzja należy do 3d/I12, jak ustalono.
    Silnik przepuszcza `szerokosc` jako string, `products.szerokosc` pozostaje REAL; różnica
    ujawnia się dopiero przy zapisie do katalogu, czyli w `acceptStaging` (3d).
