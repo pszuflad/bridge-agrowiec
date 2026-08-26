@@ -24,6 +24,7 @@
     "wycofaneWiersze": 0,
     "wycofaneLicznik": 0,
     "doStaginguZWycofaniami": 10,
+    "wierszyPoDeduplikacji": 10,
     "aktualizacjeZPetliWycofan": 4,
     "zapisyAutoZatwierdzenia": 17
   },

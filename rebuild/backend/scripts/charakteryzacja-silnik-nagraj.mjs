@@ -31,6 +31,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { stworzAtrapy } from "../test/charakteryzacja/silnik/atrapy.mjs";
+import { SCENARIUSZE } from "../test/charakteryzacja/silnik/scenariusze.mjs";
 import {
   KODY_DOSTAWCOW,
   UTWORZONO_WZORCOWE,
@@ -116,9 +117,40 @@ function uruchomOryginal(kod, rekordy, produkty, opisKatalogu) {
     katalog: { produktow: produkty.length, zrodlo: opisKatalogu },
     statystyki,
     staging: atrapy.staging,
+    wywolaniaStagingu: atrapy.wywolaniaStagingu,
     skasowane: atrapy.skasowane,
     fazy: atrapy.fazyAktualizacji(),
   });
+}
+
+/**
+ * Nagrywa scenariusze celowane. Wejście jest skrojone ręcznie, ale OCZEKIWANIE nadal pochodzi
+ * z uruchomionego oryginału — tak samo jak przy cennikach.
+ */
+function nagrajScenariusze() {
+  const wyniki = SCENARIUSZE.map((s) => {
+    const atrapy = stworzAtrapy({ produkty: s.katalog });
+    const oryginal = zaladujOryginal(atrapy.zaleznosci);
+    const statystyki = oryginal.tk(s.dostawca, s.rekordy);
+    const przebieg = normalizujPrzebieg({
+      dostawca: s.dostawca,
+      wejscie: { rekordow: s.rekordy.length, zrodlo: "test/charakteryzacja/silnik/scenariusze.mjs" },
+      katalog: { produktow: s.katalog.length, zrodlo: "scenariusze.mjs" },
+      statystyki,
+      staging: atrapy.staging,
+      wywolaniaStagingu: atrapy.wywolaniaStagingu,
+      skasowane: atrapy.skasowane,
+      fazy: atrapy.fazyAktualizacji(),
+    });
+    return { nazwa: s.nazwa, opis: s.opis, ...przebieg };
+  });
+
+  writeFileSync(
+    join(katalogWynikow, "scenariusze.expected.json"),
+    `${JSON.stringify(wyniki, null, 2)}\n`,
+  );
+
+  return wyniki;
 }
 
 /** Wiersze `products` danego dostawcy ze zrzutu produkcji, w kształcie naszego schematu. */
@@ -201,7 +233,22 @@ function nagraj() {
     `${JSON.stringify(integralnosc, null, 2)}\n`,
   );
 
+  const scenariusze = nagrajScenariusze();
+
   console.log(podsumowanie.join("\n"));
+  console.log("");
+  for (const w of scenariusze) {
+    const typy = w.staging.map((r) => r.typZmiany).join(",") || "-";
+    console.log(
+      `${w.nazwa.padEnd(38)} staging=${String(w.staging.length).padStart(2)} [${typy}] ` +
+        `nowe=${w.statystyki.nowe} zmienione=${w.statystyki.zmienione} ` +
+        `nieOpony=${w.statystyki.odrzuconeNieOpony} brakDanych=${w.statystyki.odrzuconeBrakDanych} ` +
+        `smieciMO2=${w.statystyki.odrzuconeSmieciMO2} auto=${w.statystyki.autoZatwierdzone} ` +
+        `bezZmian=${w.statystyki.bezZmian} skasowane=${w.skasowane.length} ` +
+        `resety=${w.resetyNieobecnosci.length} doStagingu=${w.statystyki.doStagingu}`,
+    );
+  }
+  console.log("");
   console.log(`\nZnacznik utworzono znormalizowany do "${UTWORZONO_WZORCOWE}".`);
   console.log(
     `Integralność wycinków mirrora: helpery ${integralnosc.helpery.sha256.slice(0, 12)}… ` +

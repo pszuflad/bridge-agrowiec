@@ -23,6 +23,7 @@
  */
 export function stworzAtrapy({ produkty, overrides = [] }) {
   const staging = [];
+  const wywolaniaStagingu = [];
   const skasowane = [];
   const aktualizacje = [];
   let nastepneIdStagingu = 1;
@@ -103,6 +104,7 @@ export function stworzAtrapy({ produkty, overrides = [] }) {
     },
 
     addStaging(pozycja) {
+      wywolaniaStagingu.push(pozycja);
       const powod = pozycja.powod ?? "";
       const istniejaca = staging.find(
         (w) =>
@@ -131,8 +133,14 @@ export function stworzAtrapy({ produkty, overrides = [] }) {
 
   return {
     zaleznosci: { U, ww, __BRIDGE_EXT, Qi: null },
-    /** Wiersze przekazane do `U.addStaging` — po deduplikacji, w kolejności zapisu. */
+    /** Wiersze faktycznie zapisane — czyli po deduplikacji `addStaging`. */
     staging,
+    /**
+     * Wszystkie wywołania `addStaging`, także te zdeduplikowane. `tk()` ustawia
+     * `doStagingu = c.length` (`:47849`), czyli liczy BUFOR, a nie zapisy — więc licznik
+     * trzeba odtworzyć stąd, nie z `staging`.
+     */
+    wywolaniaStagingu,
     /** `products.id` skasowane przez gałąź nie-opony (`:47689`). */
     skasowane,
     /** Wywołania `updateProduct` w kolejności; granica faz w `granicaWycofan()`. */

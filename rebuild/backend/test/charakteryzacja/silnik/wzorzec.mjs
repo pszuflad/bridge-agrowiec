@@ -93,6 +93,12 @@ export function normalizujPrzebieg(przebieg) {
   const wZakresie = wszystkie.filter((w) => w.typZmiany !== TYP_POZA_ZAKRESEM_3C);
   const wycofane = wszystkie.length - wZakresie.length;
 
+  // `doStagingu` to długość BUFORA (`:47849`), a nie liczba zapisanych wierszy — te dwie
+  // wartości rozjeżdżają się, gdy addStaging zdeduplikuje powtórzoną pozycję.
+  const buforWZakresie = przebieg.wywolaniaStagingu.filter(
+    (w) => w.typZmiany !== TYP_POZA_ZAKRESEM_3C,
+  ).length;
+
   const { wycofane: licznikWycofanych, doStagingu, ...licznikiWZakresie } = przebieg.statystyki;
   const { resetyDopasowania, autoZatwierdzenia } = rozdzielPetleGlowna(przebieg.fazy.petlaGlowna);
 
@@ -100,7 +106,7 @@ export function normalizujPrzebieg(przebieg) {
     dostawca: przebieg.dostawca,
     wejscie: przebieg.wejscie,
     katalog: przebieg.katalog,
-    statystyki: { ...licznikiWZakresie, doStagingu: wZakresie.length },
+    statystyki: { ...licznikiWZakresie, doStagingu: buforWZakresie },
     pozaZakresem3c: {
       opis:
         "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47788-47806) " +
@@ -109,6 +115,7 @@ export function normalizujPrzebieg(przebieg) {
       wycofaneWiersze: wycofane,
       wycofaneLicznik: licznikWycofanych,
       doStaginguZWycofaniami: doStagingu,
+      wierszyPoDeduplikacji: wZakresie.length,
       aktualizacjeZPetliWycofan: przebieg.fazy.petlaWycofan.length,
       zapisyAutoZatwierdzenia: autoZatwierdzenia.length,
     },
