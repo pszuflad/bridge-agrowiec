@@ -66,6 +66,10 @@ skutek bezpieczeństwa.
 > więc to nie jest odstępstwo. `GET /api/products/{id}` nie istnieje ani w produkcji, ani
 > w `contract/openapi.yaml` — nie został odtworzony (szczegóły endpointów: `spec-frontend.md`
 > / `docs/tickets/3-FEATURE-katalog-odczyt/`, nie zakres tego pliku).
+>
+> **Potwierdzone w 3b** (`5-FEATURE-staging-endpointy-importu`): `GET /api/staging` też wjechało
+> pod `requireAuth`, mimo że kontrakt ma dla niego `security: []` — świadome, dziedziczone
+> odstępstwo (D1), ten sam wzorzec co przy `/api/products`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -115,6 +119,15 @@ potwierdzone:
 > MO1–MO10 (potwierdza m.in., że MO9 realnie ignoruje plik i ciągnie dane z GraphQL Agrorami, zgodnie
 > z `05_PARSERY_MODULY.md`). `bridge_ext.cjs`/`tire_dims.js` i sam silnik `tk()` zostają poza zakresem
 > do sesji 3c. Szczegóły: `docs/tickets/4-FEATURE-port-parserow-charakteryzacja/`.
+>
+> **Odbudowa (3b, `5-FEATURE-staging-endpointy-importu`):** brzeg stagingu i importu
+> odtworzony (`GET /api/staging`+`/paged`+`/{id}`, `POST /api/import/parse-file`,
+> `/api/import/from-url`, `POST /api/ai-fallback/parse`); `tk()` sam pozostaje jawnym,
+> świadomie niewiernym placeholderem do 3c. Po drodze wyjaśniły się trzy osobne mechanizmy,
+> które łatwo pomylić: `/api/import/*` (bez fallbacku, `mirror/backend/extensions.cjs`),
+> `POST /api/dostawcy/:kod/upload` (rdzeń, fallback do starych parserów `Wc()`, nie AI —
+> Iteracja 11) i `POST /api/ai-fallback/parse` (stub, nigdy nie łączy się z OpenAI). Szczegóły:
+> `docs/tickets/5-FEATURE-staging-endpointy-importu/`.
 
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,

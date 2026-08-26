@@ -125,7 +125,7 @@ tego, co użytkownik realnie widzi w panelu, nie tylko statystyk importu.
 | **Kategoria** | BACKEND (parser/wymiary) + BAZA (typ kolumny) + FRONTEND (regeneracja eksportu) |
 | **Pliki (stan końcowy)** | `parsers/tyre_params.cjs`, `bridge_ext.cjs`, `db/schema.sql` (kolumna `products.szerokosc`); skasowane `probe.cjs/2/3`; kopie `*.bak_pre_szerokoscfix_*`, `*.bak_pre_szerorig_*`, `*.bak_pre_szertxt_*` |
 | **Commity** | `97ccb9f` (szerokoscfix — cofnięty) · `5c060b0` (szerorig) · `d5a43c9` (szertxt) |
-| **Do nowej wersji?** | 🕒 **PÓŹNIEJ** (decyzja 2026-08-20 — rozstrzygniemy przy tickecie importu/schematu) |
+| **Do nowej wersji?** | 🕒 **PÓŹNIEJ** (decyzja 2026-08-20 — potwierdzona 2026-08-26 przy tickecie 3b: odłożona do 3d/I12, D10) |
 | **Status** | — |
 
 **Opis biznesowy:**
@@ -235,6 +235,13 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
    REAL→TEXT, przenagrać `GET_products.json` — plus rozstrzygnąć, czy sortowanie po szerokości ma zostać
    leksykalne (po przejściu na TEXT stanie się jedynym wariantem). Szczegóły i dowody empiryczne:
    `docs/tickets/3-FEATURE-katalog-odczyt/raport.md`, sekcja „Rozjazd `szerokosc`".
+6. **Świadomie NIE ruszone przy 3b** (ticket `5-FEATURE-staging-endpointy-importu`, 2026-08-26).
+   `staging_items` nie ma kolumny `szerokosc` — wartość jedzie w `snapshot_json` jako TEXT, więc
+   staging zachowuje `szertxt` wiernie bez żadnej migracji; kolumnę `products.szerokosc` zapisuje
+   wyłącznie `acceptStaging`, czyli 3d. Zmiana REAL→TEXT nadal łamie zielony gate I2
+   (`GET_products.json` ma `"szerokosc": 620` jako liczbę), a przenagranie fixtures należy do I12.
+   Dochodzi argument merytoryczny: `szertxt` jest niekompletny — `parseWidthFallbackMm()` nadal
+   zwraca milimetry jako float (punkt wyżej); Ania to poprawia. Decyzja → 3d/I12.
 
 ### #4 · 2026-08-24 · [BAZA][BACKEND][FRONTEND] · `uwaga_cena` (cena „na zapytanie")
 
@@ -244,9 +251,9 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 | **Kategoria** | BAZA (nowa kolumna) + BACKEND (endpoint, patche) + FRONTEND (tooltip) |
 | **Pliki** | `db/schema.sql` (kolumna `uwaga_cena`), `uwaga_cena_patch.cjs` (nowy), `parsers/adapter.cjs`, `parsers/mo7_nokian.cjs`, `extensions.cjs` |
 | **Commity** | `33455c8`, `c5d3d63`, `16bc37c` |
-| **Do nowej wersji?** | ⬜ **do decyzji** (warstwa parsera już wniesiona portem — I3/3a, 2026-08-26; otwarte: schemat + endpoint) |
-| **Iteracja** | **→ I3** (schemat + endpoint + propagacja importu) **+ injection-tooltip** (późniejsza iteracja; wzorzec jak pending/selly/freq-injection) |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** (parser + kolumna wniesione — I3/3a i 3b, 2026-08-26; otwarte: endpoint + propagacja) |
+| **Iteracja** | **→ I3** (schemat: 3b ✔; endpoint + propagacja importu: 3d) **+ injection-tooltip** (późniejsza iteracja; wzorzec jak pending/selly/freq-injection) |
+| **Status** | 🔨 częściowo zrobione (kolumna `products.uwaga_cena` w rebuild, I3/3b, 2026-08-26) — endpoint i propagacja → 3d |
 
 **Opis biznesowy:** dostawcy czasem zwracają „cena na zapytanie" (np. „- zł" w Nokian dla wielkoformatowych VF Float King). Zamiast pokazywać 0/pustą cenę, produkt dostaje notatkę i jest „wstrzymany"; frontend pokazuje tooltip z powodem.
 
@@ -255,10 +262,19 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 **Warstwa parsera — zrobiona (2026-08-26, I3/3a).** Port verbatim `parsers/adapter.cjs`
 i `parsers/mo7_nokian.cjs` wniósł propagację pola `uwagaCena` (`detectPriceOnRequest()`);
 to samo dotyczy MO8 Trelleborg, gdzie ten sam wzorzec doszedł 2026-08-25. Pole jest w typie
-`RekordSurowy` i przechodzi przez charakteryzację. **Nadal do zrobienia w 3b/I12:** kolumna
-`products.uwaga_cena`, propagacja w `acceptStaging` oraz endpoint `GET /api/products/uwagi-cena`.
-(W próbkach charakteryzacyjnych `uwagaCena` jest wszędzie `null` — żaden z 711 rekordów nie
-trafił na „cenę na zapytanie"; to luka pokrycia próbki, nie brak obsługi.)
+`RekordSurowy` i przechodzi przez charakteryzację. (W próbkach charakteryzacyjnych `uwagaCena`
+jest wszędzie `null` — żaden z 711 rekordów nie trafił na „cenę na zapytanie"; to luka pokrycia
+próbki, nie brak obsługi.)
+
+**Kolumna — zrobiona (2026-08-26, I3/3b).** `products.uwaga_cena TEXT` dodana w migracji
+`rebuild/schema/002_import.sql` (ta sama migracja co #7). Wartość już dziś dociera do stagingu
+w `snapshot_json`, bo parsery z 3a propagują pole `uwagaCena`. Kolumna jest w bazie, ale
+świadomie NIE wychodzi w `GET /api/products` — pilnuje tego jawna projekcja kontraktowa
+(`rebuild/backend/src/repos/kolumny.ts`), dzięki czemu zamrożony `GET_products.json` (72 klucze)
+pozostaje nietknięty do czasu przenagrania fixtures w I12. **Nadal do zrobienia w 3d:**
+propagacja w `acceptStaging` (odczyt `uwagaCena` ze `snapshotJson`) oraz endpoint
+`GET /api/products/uwagi-cena` — u swojego pisarza, bo endpoint bez pisarza zwracałby zawsze
+pustą listę i nie dałoby się go sensownie przetestować.
 
 **Rekomendacja:** ✅ **nanieść, ale NIE jako łatka do I2.** Po przeglądzie raportu I2 (2026-08-25): `uwaga_cena` rozkłada się jak inne rzeczy odłożone przez I2 — **schemat** (nowa kolumna, razem z decyzją #3) + **endpoint `/api/products/uwagi-cena`** + **propagacja w imporcie** (`acceptStaging`, parser mo7/adapter) → **I3**; **frontend to skrypt injection do tooltipu** (wprost z komentarza w `uwaga_cena_patch.cjs`) → wchłonięcie injection w późniejszej iteracji. Katalog I2 odtworzył bundle **sprzed** `uwaga_cena`, a dołożenie pola do `GET /api/products` złamałoby GATE wobec zamrożonego `GET_products.json` (przenagranie fixtures należy do I12). Dlatego I2 zostaje zamknięte, a to wchodzi u swoich właścicieli.
 
@@ -308,7 +324,7 @@ integrację Selly.
 | **Pliki** | konfiguracja `suppliers` (nie kod parsera) |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja produkcji, potwierdzona 2026-08-26) |
 | **Iteracja** | **→ 3b** (uruchamianie importu) / **I11** (edycja dostawcy) |
-| **Status** | — |
+| **Status** | ✔ zrobione w rebuild (I3/3b, 2026-08-26) — strażnik importu; edycja dostawcy nadal I11 |
 
 **Opis biznesowy:** dostawca MO6 (Agrowiec / Uniglory) przestaje być importowany. Decyzja dotyczy
 **również żywej produkcji** — Ania wyłącza go u siebie — więc dla odbudowy to nadal wierne
@@ -343,6 +359,22 @@ ani czego kasować. Wpis `MO6` w mapie `URLS` w `dispatcher.cjs` jest zapisem ni
 mailem „raz na jakiś czas" i Marta wgrywa go ręcznie). Projektując endpointy importu, ścieżka
 uploadu pliku jest dla tych dostawców jedyną realną, a nie wariantem pobocznym auto-pulla.
 
+**Zrealizowane w 3b (2026-08-26).** Nowa kolumna `suppliers.import_wylaczony INTEGER NOT NULL
+DEFAULT 0` (migracja `rebuild/schema/002_import.sql`), ustawiona na `1` dla MO6; oba endpointy
+importu (`rebuild/backend/src/routes/import.ts`) odrzucają wywołanie dla wyłączonego dostawcy
+komunikatem „Dostawca MO6 jest wyłączony z importu" (400). Osobna kolumna zamiast
+`suppliers.status`: produkcyjne endpointy importu po każdym udanym przebiegu robią
+`updateSupplier({status:'aktywny'})` (`extensions.cjs:155-160`, `:247-252`), więc `status` sam
+kasowałby się jako flaga — do tego jest przeliczany w locie przy odczycie (`przeliczStatus`) i
+miesza stan zdrowia dostawcy z decyzją „importujemy czy nie". Parser `mo6_agrowiec.cjs` został
+w porcie bajt-w-bajt, zgodnie z ustaleniem wyżej — po prostu nie jest wołany.
+
+**Zastrzeżenie:** `UPDATE ... WHERE kod='MO6'` działa tylko, gdy wiersz MO6 istnieje w
+`suppliers`. W produkcyjnej bazie istnieje. W świeżej bazie zbudowanej z samego kanonu tabela
+jest pusta i flaga nie ma czego ustawić — wtedy strażnik przepuści MO6, bo adres z mapy `URLS`
+dispatchera wystarcza do przejścia bramki „znany dostawca". Domknięcie → I11 albo seed
+produkcyjny.
+
 ### #8 · 2026-08-26 · [BACKEND] · MO8 Trelleborg — cichy import zera pozycji przy pliku CSV
 
 | Pole | Wartość |
@@ -352,7 +384,7 @@ uploadu pliku jest dla tych dostawców jedyną realną, a nie wariantem poboczny
 | **Pliki** | `parsers/mo8_trelleborg.cjs` |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
 | **Iteracja** | **→ 3b**; do rozstrzygnięcia GDZIE naprawiamy — patrz „Gdzie naprawiamy" na końcu pliku |
-| **Status** | — |
+| **Status** | 🔨 częściowo zrobione (bezpiecznik D4 w rebuild, I3/3b, 2026-08-26) — poprawka parsera MO8 nadal do portu (#6, Wariant A) |
 
 **Opis biznesowy:** jeśli Trelleborg przyśle cennik jako CSV zamiast XLSX, import kończy się
 **zerem zaimportowanych pozycji i bez żadnego komunikatu błędu**. Wygląda jak udany import
@@ -408,6 +440,18 @@ to import ręczny.
 bajtów** (`PK\x03\x04` = XLSX) i ma osobną ścieżkę CSV, bo „dostawca zmienił format bez zmiany
 adresu URL" (komentarz Ani z 2026-07-14). MO8 tego nie ma. Minimalnie: zgłaszać błąd zamiast
 cichego zera, gdy w skoroszycie nie ma ani `Radial`, ani `XPly`.
+
+**Zrealizowane w 3b (2026-08-26): bezpiecznik D4.** Potwierdzone w kodzie, nie na słowo:
+`parsujBufor('MO8', <plik CSV>)` faktycznie zwraca 0 rekordów i 0 błędów. Endpointy importu
+(`rebuild/backend/src/routes/import.ts`) przy pustym wyniku parsowania zwracają `400` i **nie
+wołają silnika stagingu** ani nie dotykają liczników nieobecności — dla WSZYSTKICH dostawców, nie
+tylko MO8. To domyka eskalację opisaną wyżej: żaden import nie może już po cichu wycofać całego
+katalogu dostawcy. Poprawka samego parsera MO8 (czytanie obu formatów) nadal należy do Ani i
+wejdzie portem przez #6 — to się nie zmieniło.
+
+**Nowa obserwacja z 3b: ten sam cichy zerowy wynik daje też `MO10` przy śmieciowej treści** (0
+rekordów, 0 błędów) — problem nie jest specyficzny dla MO8, bezpiecznik D4 pokrywa oba przypadki
+jednakowo. Poprawka parsera MO10 to również poprawka Ani, portem (#6).
 
 ### #9 · 2026-08-26 · [BACKEND] · pola `nro` i `cho` zapisywane jako liczby 0/1
 

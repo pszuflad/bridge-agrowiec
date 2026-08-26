@@ -8,6 +8,7 @@ danych dla odbudowy backendu.
 | Plik | Co |
 |---|---|
 | `001_schema.sql` | Kompletny schemat: 26 tabel + 13 indeksów, idempotentny (`IF NOT EXISTS`) |
+| `002_import.sql` | Pierwsza migracja przyrostowa (Iteracja 3b): dokłada `suppliers.import_wylaczony` i `products.uwaga_cena`, ustawia wyłączenie MO6. Szczegóły: `docs/tickets/5-FEATURE-staging-endpointy-importu/plan.md` (D5, D9). |
 
 ## Skąd pochodzi
 
@@ -65,6 +66,8 @@ i procedura regeneracji: `rebuild/backend/README.md`, sekcja „Schemat Drizzle"
 
 Produkcja dokłada kolumny idempotentną funkcją `bw()` (w bundlu) — np. sierpniowa
 `nieobecnosc_pod_rzad`. W odbudowie odpowiednikiem są **numerowane migracje**
-(`002_*.sql`, `003_*.sql`). Mechanizm już istnieje: `npm run migrate` w `rebuild/backend`
-stosuje `rebuild/schema/*.sql` idempotentnie, z ewidencją zastosowanych plików w tabeli
-`_migracje`. `001_schema.sql` to punkt zerowy = stan produkcji na 2026-08-17.
+(`002_import.sql`, dalsze `003_*.sql`…). Mechanizm już istnieje i jest w użyciu:
+`npm run migrate` w `rebuild/backend` stosuje `rebuild/schema/*.sql` idempotentnie,
+z ewidencją zastosowanych plików w tabeli `_migracje`. `001_schema.sql` to punkt zerowy =
+stan produkcji na 2026-08-17; kolejne pliki dokładają kolumny, których zamrożony kontrakt
+nie zna (patrz `rebuild/backend/src/repos/kolumny.ts`, D6).

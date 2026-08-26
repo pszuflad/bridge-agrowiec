@@ -220,3 +220,58 @@ Dokłada dwie kolumny i ustawia `import_wylaczony = 1` dla MO6.
 7. **`MO10` przy śmieciowej treści też zwraca zero rekordów i zero błędów** — tak samo jak MO8
    z backlogu #8. Bezpiecznik D4 to pokrywa, ale sam parser MO10 mógłby zgłaszać błąd;
    to poprawka po stronie Ani (przyjdzie portem, backlog #6).
+
+## Aktualizacja dokumentacji
+
+Trzy doc-checkery pracowały równolegle nad rozłącznymi zestawami plików.
+
+### `docs/rebuild-roadmap.md`
+- §4 tablica postępu — Iteracja 3 dostała `3b · 2026-08-26`.
+- §5 Iteracja 3, status — dopisane `3b ✅ 2026-08-26`.
+- §5 blok „3a" — sekcja „Wejście z 3a do dalszych sesji" przestała wymieniać backlog #7 i #8
+  jako otwarte, bo oba zaadresowała 3b.
+- §5 blok „3b" — przepisany z opisu zamiaru na opis stanu: co dowieziono, **jak przebiegł
+  podział 3b/3c i dlaczego odbiega od pierwotnego założenia** (gałąź `nowa` w oryginale nie
+  upraszcza się przy pustym katalogu), co w związku z tym dochodzi 3c (`Hq()`, `Kq()`),
+  status gate'u wraz z tym, czego świadomie nie sprawdza, oraz „Wejście z 3b do dalszych sesji".
+- §5 — **usunięte fałszywe założenie o AI fallbacku** (`/api/import/ai-fallback/parse`
+  w bloku `catch`), zastąpione opisem realnej ścieżki i realnego mechanizmu `catch` (`Wc()`, I11).
+- §5 „Wejście z triażu" — backlog #4: kolumna dodana w 3b, propagacja i endpoint w 3d.
+- §5 „Ścieżki (GATE)" — rozbite na domknięte przez 3b (staging×3 odczyt, import×2, ai-fallback)
+  i pozostające (mutacje stagingu, overrides → 3d).
+
+### `docs/rebuild-backlog.md`
+- **#7 (MO6)** → ✔ zrobione (I3/3b). Opis realizacji, uzasadnienie osobnej kolumny zamiast
+  `suppliers.status` oraz zastrzeżenie o pustej tabeli `suppliers` w świeżej bazie.
+- **#8 (MO8)** → 🔨 częściowo. Bezpiecznik D4 dowieziony, poprawka parsera nadal u Ani.
+  Dopisana obserwacja, że **MO10 ma ten sam cichy zerowy wynik** — wpis dotyczy szerszego
+  problemu, niż zakładał.
+- **#4 (`uwaga_cena`)** → „Do nowej wersji?" z ⬜ na ✅ TAK; kolumna zrobiona w 3b, reszta w 3d.
+  Odnotowane, że kolumna świadomie nie wychodzi w `GET /api/products`.
+- **#3 (`szertxt`)** → decyzja przeniesiona na 3d/I12, z uzasadnieniem z 3b (staging nie ma
+  tej kolumny, więc nic nie naciska).
+
+### `docs/spec-backend.md`, `docs/prompts/mapa-kodu-do-wiki.md`
+- §2 spec — potwierdzenie, że `GET /api/staging` też poszło pod `requireAuth` (D1).
+- §5 spec — nota o stanie 3b i jednoliniowe rozróżnienie trzech mylonych mechanizmów.
+- Mapa kodu §8 — trzy nowe wiersze rozróżniające `/api/import/*`, `/api/dostawcy/:kod/upload`
+  (fallback `Wc()`, nie AI) i `/api/ai-fallback/parse`; przy `tk()` adnotacja o żywej
+  vs martwej definicji.
+- Mapa kodu §9 — sześć nowych znalezisk (trzy kształty stagingu, martwe kolumny
+  `zatwierdzil*`, ucięty stempel archiwum, nieescape'owane wieloznaczniki w `search`,
+  `NaN` → `LIMIT NULL`).
+
+### `rebuild/schema/README.md`, `rebuild/backend/README.md`, `.env.example`
+- Schema README — wiersz dla `002_import.sql`; uwaga o migracjach przyrostowych przestała być
+  hipotetyczna.
+- Backend README — zaktualizowany status i drzewo plików o dziewięć nowych modułów, wiersz
+  `IMPORT_ARCHIVE_DIR`, fixtures stagingu w sekcji GATE, nowa mini-sekcja o stagingu
+  i endpointach importu, sprostowana nota o regeneracji schematu Drizzle. Usunięte zdanie
+  z sekcji o porcie parserów, które twierdziło, że zapis do stagingu i endpointy są poza modułem.
+- `.env.example` — wpis `IMPORT_ARCHIVE_DIR`.
+
+### Wcześniej istniejące nieścisłości
+Doc-checkery nie znalazły w przydzielonych plikach nieścisłości spoza zakresu tego ticketa.
+Jedna uwaga: sekcja o `szerokosc` w opisie Iteracji 2 (`rebuild-roadmap.md`) odsyła ogólnie
+do „ticketu importu/schematu" — nadal prawdziwa, ale po decyzji D10 mogłaby wskazywać wprost
+3d/I12. Zostawiona bez zmian jako poza zakresem.
