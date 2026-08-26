@@ -125,8 +125,8 @@ tego, co użytkownik realnie widzi w panelu, nie tylko statystyk importu.
 | **Kategoria** | BACKEND (parser/wymiary) + BAZA (typ kolumny) + FRONTEND (regeneracja eksportu) |
 | **Pliki (stan końcowy)** | `parsers/tyre_params.cjs`, `bridge_ext.cjs`, `db/schema.sql` (kolumna `products.szerokosc`); skasowane `probe.cjs/2/3`; kopie `*.bak_pre_szerokoscfix_*`, `*.bak_pre_szerorig_*`, `*.bak_pre_szertxt_*` |
 | **Commity** | `97ccb9f` (szerokoscfix — cofnięty) · `5c060b0` (szerorig) · `d5a43c9` (szertxt) |
-| **Do nowej wersji?** | 🕒 **PÓŹNIEJ** (decyzja 2026-08-20 — potwierdzona 2026-08-26 przy tickecie 3b: odłożona do 3d/I12, D10) |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK — NANIESIONE** (decyzja użytkownika 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`, plan.md D3) |
+| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`). Zostaje JEDNO: przenagranie `GET_products.json` w **I12**. |
 
 **Opis biznesowy:**
 Kolumna „szerokość" opony była niespójna: ten sam rozmiar (np. „11.2-24") zapisywał się raz jako
@@ -152,21 +152,32 @@ liczbę z tekstu rozmiaru 1:1, z zerami końcowymi**, bez konwersji jednostek.
 - Skrypty jednorazowe Ani (`backfill_szerokosc_*`, `migrate_szer_to_text.cjs`, `patch_szertxt*`,
   `backup_szertxt.cjs`) — operacyjne, **nie są celem odbudowy** (nowy import od razu zapisuje poprawnie).
 
-**⚠ Rozjazdy do naprawienia u nas (po decyzji ✅):**
-- `rebuild/schema/001_schema.sql:44` ma jeszcze `szerokosc REAL` → zmienić na `TEXT` (produkcja: `db/schema.sql:258`).
-  Stan na 2026-08-25 (po Iteracji 2): nadal REAL, świadomie nietknięte (patrz niżej).
-- **Fixtures z Fazy 2** (`contract/fixtures/`) mają starą `szerokosc` (liczbową/mm). Od Iteracji 2 endpoint,
-  którego to dotyczy, już istnieje: `GET /api/products` + `contract/fixtures/GET_products.json` — jedyny
-  fixture, w którym `szerokosc` jest typowanym polem odpowiedzi (w `GET_staging.json` występuje tylko jako
-  fragment zserializowanego `snapshotJson`, poza zasięgiem porównania kształtu). Przenagranie tego jednego
-  pliku po zmianie schematu jest więc kosztem jednorazowym i małym.
+**⚠ Rozjazdy — stan po 3d-1 (2026-08-27):**
+- ✅ **Schemat ZROBIONY.** `001_schema.sql` zostaje NIETKNIĘTY (jest datowanym punktem zerowym =
+  stan produkcji 2026-08-17, `rebuild/schema/README.md`); zmianę wnosi migracja przyrostowa
+  `003_szerokosc_text.sql`, która przebudowuje tabelę (SQLite nie ma `ALTER COLUMN`). Strażnik
+  przed dryfem duplikatu DDL: `test/db.migracje.test.ts` porównuje kolumny żywej tabeli z kanonem.
+- ⬜ **Fixture — ZOSTAJE do I12.** `GET_products.json` ma `szerokosc` liczbową (nagrany przed
+  migracją produkcji). GATE I2 przepuszcza to przez **zadeklarowany, samoczyszczący się wyjątek**
+  `WYJATKI_SZEROKOSC` (`test/katalog.gate.test.ts`): niesie powód i wskazanie na I12, a gdy
+  przestanie cokolwiek pokrywać — zapali test i wymusi swoje usunięcie.
+- 🔎 **Warto wiedzieć przy przenagrywaniu:** `db/snapshot.db` (2026-08-13) jest STARSZY niż
+  migracja `szertxt` (2026-08-19) i ma jeszcze `szerokosc REAL`, więc sam nie nadaje się na
+  źródło wartości „z zerami końcowymi".
 
 **Warstwa parsera — zrobiona (2026-08-26, I3/3a), decyzja o schemacie nadal otwarta.**
 Port verbatim `tyre_params.cjs` wniósł stan końcowy `szertxt` do `rebuild/backend`: `parseSize()`
 zwraca `szerokosc` jako **string** z zerami końcowymi (`"10.00"`, `"400"`), a `widthCm` dalej liczy
 `wysokoscBokuCm`/`wysokoscRzeczywistaCm` z floata. W 3a nie ma bazy, więc dotyczy to wyłącznie
-kształtu rekordu w pamięci — **zmiana `products.szerokosc` REAL→TEXT i przenagranie
-`GET_products.json` pozostają do rozstrzygnięcia tutaj** (3b/I12).
+kształtu rekordu w pamięci. **Zmiana `products.szerokosc` REAL→TEXT została naniesiona
+w 3d-1 (2026-08-27); zostaje wyłącznie przenagranie `GET_products.json` w I12.**
+
+⭐ **Dlaczego to NIE była kosmetyka (ustalenie z 3d-1).** Port parsera od 3a produkuje napisy,
+ale SQLite stosuje TYPE AFFINITY: do kolumny `REAL` napis `"10.00"` wchodzi jako liczba `10.0`
+i zera przepadają — kanon fizycznie niszczył dokładnie to, po co `szertxt` powstał. Dopóki nikt
+tej kolumny nie zapisywał, było to nieszkodliwe; `acceptStaging` (sesja **3d-2**) jest jej
+JEDYNYM pisarzem, więc od jego wejścia każda zaakceptowana pozycja zapisywałaby uszkodzoną
+wartość. Stąd decyzja, żeby zmienić typ TERAZ, przed 3d-2.
 
 🔎 **PRZYCZYNA ŹRÓDŁOWA — namierzona 2026-08-26. Fallback na mm jest OBJAWEM, nie chorobą.**
 
@@ -276,10 +287,16 @@ próbki, nie brak obsługi.)
 w `snapshot_json`, bo parsery z 3a propagują pole `uwagaCena`. Kolumna jest w bazie, ale
 świadomie NIE wychodzi w `GET /api/products` — pilnuje tego jawna projekcja kontraktowa
 (`rebuild/backend/src/repos/kolumny.ts`), dzięki czemu zamrożony `GET_products.json` (72 klucze)
-pozostaje nietknięty do czasu przenagrania fixtures w I12. **Nadal do zrobienia w 3d:**
-propagacja w `acceptStaging` (odczyt `uwagaCena` ze `snapshotJson`) oraz endpoint
-`GET /api/products/uwagi-cena` — u swojego pisarza, bo endpoint bez pisarza zwracałby zawsze
-pustą listę i nie dałoby się go sensownie przetestować.
+pozostaje nietknięty do czasu przenagrania fixtures w I12.
+
+**Podział doprecyzowany 2026-08-27 (I3/3d-1, decyzja użytkownika — plan.md D4):**
+- **propagacja** w `acceptStaging` (odczyt `uwagaCena` ze `snapshotJson` → `products.uwaga_cena`)
+  → **3d-2**, u swojego pisarza;
+- **endpointy** → **I12**, razem z dopisaniem do `openapi.yaml`. ⚠ **Endpointy są DWA, nie jeden**
+  — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada
+  `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony
+  w locie: `uwaga_cena` dosłownie / brak ceny i stanu / brak ceny / brak stanu / „sprawdź ręcznie").
+  Ten sam patch monkey-patchuje też `addProductsBulk` — to trzeci pisarz, do uwzględnienia w 3d-2.
 
 **Potwierdzone przy 3c (2026-08-26).** Silnik dopasowania serializuje `snapshotJson` z rekordu
 PO `znormalizujPozycje()` (`Hq()`), która kopiuje wszystkie pola wejścia przez spread —

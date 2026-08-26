@@ -12,7 +12,7 @@
 
 Blok 3d roadmapy (`docs/rebuild-roadmap.md` §5) został **podzielony na dwie sesje**
 (decyzja użytkownika, patrz D0). Ten ticket to **3d-1 — SILNIK**: wszystko, co dzieje się
-wewnątrz `tk()`. Brzeg HTTP (`acceptStaging` + 8 endpointów) idzie osobno jako **3d-2 — API**.
+wewnątrz `tk()`. Brzeg HTTP (`acceptStaging` + 9 endpointów) idzie osobno jako **3d-2 — API**.
 
 ## Kontekst
 
@@ -52,13 +52,13 @@ Krok 13 ma je nanieść na `docs/rebuild-roadmap.md`:
    `applyLinkMemory`, `assignKodImportu`. Realnie `acceptStaging` (`:44900-44905`) woła
    dodatkowo `applyNazwaPamiec`, `applyWagaPamiec` i `rememberLink`, a `addProductsBulk`
    (`:44786-44797`) ten sam zestaw. Ma to bezpośredni wpływ na decyzję D2 (port całości).
-2. **Lista endpointów 3d jest krótsza o cztery.** Roadmapa wymienia 4 mutacje stagingu
+2. **Lista endpointów 3d jest krótsza o pięć.** Roadmapa wymienia 4 mutacje stagingu
    + „`GET /api/overrides`, `PUT/DELETE /api/overrides/{id}`". Zamrożony kontrakt i żywy kod
    zgodnie mówią co innego: overrides to `GET /api/overrides` + **`POST /api/overrides`**
    (upsert bez id, `:48650`) + `DELETE /api/overrides/{id}` (`:48675`) — **`PUT` nie istnieje**.
    Do tego kontrakt zamraża `PUT /api/staging/{id}` (`openapi.yaml:1125`) i
-   `DELETE /api/staging/{id}` (`:1105`), których roadmapa nie wymienia wcale. Razem **8**, nie 4.
-   `PUT /api/staging/{id}` (`:48597-48645`) jest przy tym **jedyną ścieżką, która TWORZY
+   `DELETE /api/staging/{id}` (`:1105`, kod `:48581`), których roadmapa nie wymienia wcale. Razem **9**, nie 4.
+   `PUT /api/staging/{id}` (`:48598-48645`) jest przy tym **jedyną ścieżką, która TWORZY
    poprawki Marty** — 3e (edycja w widoku `/staging`) bez niej nie ma czego wołać.
 3. **`acceptStaging` sięga do Iteracji 4.** Woła `__bridgePickMarkup`/`__bridgePickPromo`
    (`:44884-44892`) — narzuty i promocje. W I3 obie tabele są puste (brak endpointów do ich
@@ -104,7 +104,7 @@ dołożyła kolejne 4 endpointy (korekta 2 wyżej), więc wychodził największy
 Szew jest czysty: 3d-1 kończy się na `tk()`, 3d-2 zaczyna na brzegu HTTP. *Za:* każda połowa
 wielkości 3c, review do udźwignięcia. *Przeciw:* dwa PR-y i dwa przenagrania wzorca zamiast
 jednego. **Zakres 3d-2** (zapisany w roadmapie, nie realizowany tutaj): `acceptStaging`
-+ `assignKodImportu` w `addProductsBulk`, propagacja `uwagaCena`, 8 endpointów,
++ `assignKodImportu` w `addProductsBulk`, propagacja `uwagaCena`, 9 endpointów,
 `GET_overrides.json`.
 
 **D1 — port `bridge_ext.cjs` + `tire_dims.js` bajt-w-bajt, oba pliki W CAŁOŚCI, + sha256.**
@@ -286,7 +286,7 @@ należy do 3d-2 razem z `acceptStaging`/`addProductsBulk`.
 ## Poza zakresem
 
 - **`acceptStaging`, `assignKodImportu` w miejscu wywołania, propagacja `uwagaCena`,
-  8 endpointów mutacji stagingu i overrides, `GET_overrides.json`** → **3d-2** (D0).
+  9 endpointów mutacji stagingu i overrides, `GET_overrides.json`** → **3d-2** (D0).
 - **`GET /api/products/uwagi-cena` i `/hold-reasons` + dopisanie do `openapi.yaml`,
   przenagranie fixtures** → **I12** (D4).
 - **Narzuty i promocje w `acceptStaging`** (`__bridgePickMarkup`/`__bridgePickPromo`) → **I4**;

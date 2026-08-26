@@ -10,7 +10,7 @@ zmieniła typ na TEXT (backlog #3). Charakteryzacja silnika porównuje port z ur
 oryginałem **pole po polu na 12 620 realnych poprawkach Marty** i jest zielona; 8 celowych
 mutacji silnika zostało złapanych.
 
-Brzeg HTTP (`acceptStaging` + 8 endpointów) świadomie nie wchodzi — to sesja **3d-2** (D0).
+Brzeg HTTP (`acceptStaging` + 9 endpointów) świadomie nie wchodzi — to sesja **3d-2** (D0).
 
 ## Zmiany
 
@@ -137,7 +137,7 @@ wokół `bridge_ext`, zapisy pętli wycofań poza transakcją). Jedno NICE-TO-HA
 ## Follow-up
 
 - **3d-2 (API):** `acceptStaging` + `assignKodImportu` w `addProductsBulk`, propagacja
-  `uwagaCena`, 8 endpointów (`POST /api/staging/accept|reject|import|clear`,
+  `uwagaCena`, 9 endpointów (`POST /api/staging/accept|reject|import|clear`,
   `PUT`/`DELETE /api/staging/{id}`, `GET`/`POST /api/overrides`, `DELETE /api/overrides/{id}`),
   fixture `GET_overrides.json`. `src/repos/overrides.ts` czeka gotowe na `listOverrides`,
   `upsertOverride` i `deleteOverride` — dopisać TAM, nie w nowym pliku.
