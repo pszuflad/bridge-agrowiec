@@ -12,7 +12,7 @@ export default tseslint.config(
       "node_modules/**",
       "src/db/schema.ts",
       "src/import/legacy/**",
-      ".tmp-oryginal/**",
+      ".tmp/**",
     ],
   },
   js.configs.recommended,
@@ -24,6 +24,7 @@ export default tseslint.config(
         console: "readonly",
         process: "readonly",
         NodeJS: "readonly",
+        Buffer: "readonly",
       },
     },
     rules: {
