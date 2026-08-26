@@ -14,7 +14,8 @@
  *     (`reinforced` w fixture jest nullem).
  */
 import type { Baza, BazaSqlite } from "../../src/db/index.js";
-import { historiaCen, products, suppliers } from "../../src/db/schema.js";
+import { historiaCen, products, stagingItems, suppliers } from "../../src/db/schema.js";
+import { wczytajFixture } from "./fixtures.js";
 
 export type NowyProdukt = typeof products.$inferInsert;
 export type NowyDostawca = typeof suppliers.$inferInsert;
@@ -334,4 +335,65 @@ export function przelaczSzerokoscNaText(sqlite: BazaSqlite): void {
     for (const indeks of indeksy) if (indeks.sql) sqlite.exec(indeks.sql);
   })();
   sqlite.exec("PRAGMA foreign_keys = ON");
+}
+
+/**
+ * Pozycje stagingu zasiane WPROST z nagranych fixtures.
+ *
+ * Po co tak: pola `typZmiany`, `powod`, `snapshotJson`, `zmianaPct` i cała rodzina
+ * `ean*` nie powstają w parserze — produkuje je `tk()`, porównując cennik z istniejącym
+ * katalogiem (backend-index.cjs:47584-47851). Iteracja 3b celowo nie portuje `tk()`
+ * (plan.md D2), więc realny import nie wygeneruje wartości, które fixture zawiera.
+ *
+ * Rozdzielamy więc dwie rzeczy: WARSTWĘ ODCZYTU (projekcje, mapowanie kolumn na pola
+ * JSON, koperty, sortowanie, filtry) testujemy tutaj przeciw prawdziwym nagraniom
+ * produkcji, a warstwę PRODUKCJI danych — dopiero w 3c, po porcie `tk()`.
+ *
+ * Identyfikatory bierzemy z fixtures bez zmian, dzięki czemu odtwarza się też kolejność:
+ * `/api/staging` (bez `ORDER BY`, czyli po `rowid`) zwraca pięć pozycji o najniższych id,
+ * a `/api/staging/paged` (`ORDER BY id DESC`) — pięć o najwyższych.
+ */
+export function zasiejStagingZFixtures(db: Baza): void {
+  const wiersze = [
+    ...pozycjeZFixture("GET_staging.json"),
+    ...pozycjeZFixture("GET_staging_paged.json"),
+  ];
+  db.insert(stagingItems).values(wiersze).run();
+}
+
+type PozycjaFixture = Record<string, unknown>;
+
+function pozycjeZFixture(nazwaPliku: string): (typeof stagingItems.$inferInsert)[] {
+  const fixture = wczytajFixture(nazwaPliku);
+  const items = (fixture.body as { items: PozycjaFixture[] }).items;
+
+  return items.map((p) => ({
+    id: p.id as number,
+    typZmiany: p.typZmiany as string,
+    kod: p.kod as string,
+    nazwa: p.nazwa as string,
+    dostawca: p.dostawca as string,
+    magazyn: p.magazyn as string,
+    stanStary: (p.stanStary ?? null) as number | null,
+    stanNowy: (p.stanNowy ?? null) as number | null,
+    cenaZakupuStara: (p.cenaZakupuStara ?? null) as number | null,
+    cenaZakupuNowa: (p.cenaZakupuNowa ?? null) as number | null,
+    cenaSprzedazyNowa: (p.cenaSprzedazyNowa ?? null) as number | null,
+    zmianaPct: (p.zmianaPct ?? null) as number | null,
+    ostrzezenie: (p.ostrzezenie ?? null) as string | null,
+    powod: (p.powod ?? null) as string | null,
+    // Trzech pól poniżej NIE MA w `GET_staging_paged.json` — ten kształt ich nie zwraca
+    // (repos/staging.ts). Dla tamtych wierszy zostają nullem, i tak być powinno.
+    snapshotJson: (p.snapshotJson ?? null) as string | null,
+    eanRaw: (p.eanRaw ?? null) as string | null,
+    eanIsValid: (p.eanIsValid ?? null) as number | null,
+    eanSourceStatus: (p.eanSourceStatus ?? null) as string | null,
+    eanCandidates: (p.eanCandidates ?? null) as string | null,
+    magazynRaw: (p.magazynRaw ?? null) as string | null,
+    edytowanePola: (p.edytowanePola ?? null) as string | null,
+    utworzono: p.utworzono as string,
+    zatwierdzilUzytkownikId: (p.zatwierdzilUzytkownikId ?? null) as number | null,
+    // `paged` i `{id}` publikują tę kolumnę pod krótszą nazwą `zatwierdzono`.
+    zatwierdzonoData: (p.zatwierdzonoData ?? p.zatwierdzono ?? null) as string | null,
+  }));
 }

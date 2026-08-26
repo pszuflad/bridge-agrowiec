@@ -1,3 +1,4 @@
+import { dirname, join } from "node:path";
 import type { Express } from "express";
 import { wczytajEnv, type Env } from "../../src/config/env.js";
 import { stworzApp } from "../../src/app.js";
@@ -16,6 +17,8 @@ export type SrodowiskoTestowe = TestowaBaza & {
   env: Env;
   uzytkownik: { id: number; email: string; imieNazwisko: string };
   dane: DaneUzytkownika;
+  /** Katalog archiwum importu na czas testu — sprzątany razem z bazą. */
+  katalogArchiwum: string;
 };
 
 /**
@@ -27,13 +30,16 @@ export async function stworzSrodowiskoTestowe(
 ): Promise<SrodowiskoTestowe> {
   const baza = stworzTestowaBaze();
   const uzytkownik = await zasiejUzytkownika(baza.db, dane);
+  // Archiwum importu ląduje w katalogu tymczasowym testu, nie w repozytorium.
+  const katalogArchiwum = join(dirname(baza.sciezka), "import_archive");
   const env = wczytajEnv({
     NODE_ENV: "test",
     // HOST/PORT celowo pominięte — testy nie wołają listen() (supertest), więc nie
     // zajmujemy żadnego portu i nie ryzykujemy kolizji z równolegle pracującym agentem.
     DB_PATH: baza.sciezka,
     JWT_SECRET: SEKRET_TESTOWY,
+    IMPORT_ARCHIVE_DIR: katalogArchiwum,
   } as NodeJS.ProcessEnv);
   const app = stworzApp({ env, db: baza.db });
-  return { ...baza, app, env, uzytkownik, dane };
+  return { ...baza, app, env, uzytkownik, dane, katalogArchiwum };
 }

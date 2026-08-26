@@ -134,7 +134,10 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
 
 | Funkcjonalność | Gdzie w kodzie |
 |---|---|
-| Import cennika / różnicowanie | `tk()` w `index.cjs` + `parsers/` + `adapter.cjs` |
+| Import cennika / różnicowanie | `tk()` w `index.cjs` + `parsers/` + `adapter.cjs` — żywa wersja to `tk = function` (przesłania martwe `function tk` zdefiniowane wcześniej w bundlu) |
+| Import automatyczny — endpointy `/api/import/parse-file`, `/api/import/from-url` | `extensions.cjs:126-286` — **bez fallbacku**, wyjątek parsera kończy się zwykłym 500 |
+| Import ręczny per-dostawca — `POST /api/dostawcy/:kod/upload` | rdzeń `index.cjs`, multer, pole `plik`; fallback w `catch` to `Wc()` — stare wbudowane parsery per-dostawca, **nie AI** |
+| AI fallback (stub) — `POST /api/ai-fallback/parse` | rdzeń `index.cjs`; ręcznie wołany, nigdy nie wpięty w ścieżkę parsowania i **nigdy nie łączy się z OpenAI**: bez klucza `ai_fallback.klucz_api` w `config` zwraca 5 zmyślonych pozycji „symulacja", z kluczem — pustą listę |
 | Ceny (narzuty/promocje) | `recalcPricesFromRules()` w `index.cjs`, tabele `markups`/`promotions` |
 | Logowanie / JWT / auth | `we` w `index.cjs` (cookie `bridge_session`) |
 | Warstwa danych (CRUD) | obiekt `U` w `index.cjs` (~50 metod) |
@@ -166,6 +169,19 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
 - **Rozjazd kontraktu frontend↔backend:** React woła `/api/attributes` i
   `/api/attribute-kinds` (nie istnieją) — poprawne to `/api/atrybuty` i
   `/api/atrybuty/rodzaje`; różnicę łata `pending-injection.js`.
+- **Trzy różne kształty odpowiedzi stagingu** (24 / 20 / 21 pól) dla `GET /api/staging`,
+  `/paged` i `/{id}` — dwa różne moduły produkcji je obsługują (rdzeń vs
+  `pagination_module.cjs`). `/paged` i `/{id}` nie mają `eanCandidates`/`magazynRaw`, mają
+  `zatwierdzono` zamiast pary `zatwierdzilUzytkownikId`/`zatwierdzonoData`.
+- **`zatwierdzilUzytkownikId`/`zatwierdzonoData` w `staging_items` są martwe** — nic ich
+  nigdy nie ustawia w całym kodzie produkcji.
+- **Stempel czasu w nazwie pliku archiwum importu jest ucięty:** `archive_module.cjs:57`
+  zapowiada w komentarzu `RRRRMMDD__GGMMSS`, ale `slice(0, 15)` obcina ostatnią cyfrę
+  sekund (`RRRRMMDD__GGMMS`).
+- **`search` w `/api/staging/paged` nie escape'uje wieloznaczników LIKE** — `%` i `_`
+  z zapytania użytkownika działają jak wzorce (`pagination_module.cjs:40`).
+- **Nieparsowalne `page`/`pageSize` w `/paged` dają `NaN`** → SQLite wiąże je jako `NULL`
+  → `LIMIT NULL` = „bez limitu", więc np. `?pageSize=abc` zwraca wszystkie wiersze.
 
 ---
 

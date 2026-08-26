@@ -1,9 +1,12 @@
 # Bridge — backend (odbudowa)
 
 Nowy backend „Bridge dla Agrowca", budowany pionowymi plastrami wg
-[`docs/rebuild-roadmap.md`](../../docs/rebuild-roadmap.md). Stan: **Iteracja 2** —
-fundament + logowanie (`POST /api/login`, `POST /api/logout`, `GET /api/me`) oraz
-katalog odczyt (`GET /api/products`, `GET /api/suppliers`, `GET /api/dostawcy`), wszystkie za `requireAuth`.
+[`docs/rebuild-roadmap.md`](../../docs/rebuild-roadmap.md). Stan: fundament + logowanie
+(`POST /api/login`, `POST /api/logout`, `GET /api/me`, Iteracja 2), katalog odczyt
+(`GET /api/products`, `GET /api/suppliers`, `GET /api/dostawcy`, Iteracja 2) i staging +
+import (Iteracja 3, sesja 3b): `GET /api/staging`, `/paged`, `/{id}`,
+`POST /api/import/parse-file`, `/api/import/from-url`, `POST /api/ai-fallback/parse` —
+wszystkie za `requireAuth`.
 
 `GET /api/products` ma **dwa kształty odpowiedzi**, wiernie wg oryginału: bez parametru `limit`
 i bez `dostawca` → goła **tablica** wszystkich produktów; w każdym innym przypadku →
@@ -61,6 +64,7 @@ Wzór i opisy: [`.env.example`](.env.example).
 | `CORS_ORIGINS` | nie | *(puste)* | Lista po przecinku. Puste = CORS wyłączony. Staging jest same-origin, więc zostaje puste. Dla lokalnego dev frontendu: `http://localhost:5173`. |
 | `COOKIE_SECURE` | nie | wg `NODE_ENV` | Ręczne nadpisanie flagi `Secure`. |
 | `MIGRATIONS_DIR` | nie | auto | Nadpisuje wykrywanie katalogu z `*.sql`. |
+| `IMPORT_ARCHIVE_DIR` | nie | `<cwd>/import_archive` | Katalog archiwum plików importu (D11) — konfigurowalny, bo po `npm run build` `__dirname` wskazywałby `dist/`. |
 
 Na stagingu `JWT_SECRET` wczytywany jest z pliku **poza repo**
 (`~/private_apps/bridge-staging/.env`) przez `tools/deploy-staging.sh` —
@@ -80,7 +84,9 @@ Sprawdza dwie rzeczy:
 
 1. **Fixtures** — kształt odpowiedzi (klucze, typy, zagnieżdżenie) zgadza się **1:1** z nagraną
    odpowiedzią żywego backendu z `contract/fixtures/`. Dziś w zakresie: `GET_me.json`,
-   `GET_products.json`, `GET_suppliers.json`, `GET_dostawcy.json`.
+   `GET_products.json`, `GET_suppliers.json`, `GET_dostawcy.json`, `GET_staging.json`,
+   `GET_staging_paged.json`. `GET /api/staging/{id}` nie ma fixtura — jego kształt (21 kluczy)
+   jest wyprowadzony z oryginału i pilnowany testem zbioru kluczy, nie porównaniem z nagraniem.
 2. **Kontrakt** — ścieżka, metoda i zwrócony kod statusu są zadeklarowane w `contract/openapi.yaml`,
    a odpowiedź jest JSON-em.
 
@@ -123,7 +129,9 @@ sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/config", odpowiedz: o
 sprawdzZgodnoscZFixture("GET_config.json", odp.body);
 ```
 
-Zobacz `test/katalog.gate.test.ts` (Iteracja 2) jako gotowy przykład dla trzech ścieżek naraz.
+Zobacz `test/katalog.gate.test.ts` (Iteracja 2) jako gotowy przykład dla trzech ścieżek naraz,
+albo `test/staging.gate.test.ts` (3b) dla przypadku, gdy trzeba najpierw zasiać tabelę danymi
+z fixtures (`test/gate/dane.ts`), bo treść pozycji produkuje silnik jeszcze nieprzeportowany.
 
 ## Struktura
 
@@ -139,13 +147,22 @@ src/
   middleware/          optionalAuth · requireAuth · cors · errors
   repos/users.ts       dostęp do tabeli users
   repos/products.ts    listaProduktow / listaProduktowStronicowana
-  repos/suppliers.ts   listaDostawcow (liczbaProduktow, status, ostatnie aktualizacje)
+  repos/suppliers.ts   listaDostawcow, dostawcaPoKodzie, zapiszWynikImportu
+  repos/kolumny.ts     projekcjaKontraktowa() — jawna projekcja kolumn na granicy API (D6)
+  repos/staging.ts     trzy projekcje odczytu stagingu + zapiszPozycjeStagingu (transakcja)
+  repos/audit.ts       zapis do audit_log
+  repos/config.ts      odczyt pojedynczego klucza z tabeli config
   routes/auth.ts       login · logout · me
   routes/products.ts   GET /api/products
   routes/suppliers.ts  GET /api/suppliers, GET /api/dostawcy (jeden handler)
+  routes/staging.ts    GET /api/staging, /paged, /{id}
+  routes/import.ts     POST /api/import/parse-file, /api/import/from-url, /api/ai-fallback/parse
   import/parsuj.ts     brzeg wejścia importu: (plik|bufor + dostawca) → rekordy
   import/typy.ts       KodDostawcy · RekordSurowy · WynikParsowania
   import/legacy/       PORT VERBATIM parserów z produkcji — NIE EDYTOWAĆ (patrz niżej)
+  import/tk.ts         szew SilnikStagingu — implementacja 3b jawnie oznaczona jako niewierna
+  import/archiwum.ts   port archive_module.cjs — archiwizacja buforów importu, retencja
+  import/pobierz.ts    pobierzZUrl() — transport http/https dla POST /api/import/from-url
 test/
   gate/                harness GATE — współdzielony przez wszystkie iteracje
   charakteryzacja/     próbki dostawców + wzorzec oryginału (ZRODLA.md)
@@ -177,7 +194,9 @@ parsujBufor(kodDostawcy, bufor, nazwaPliku?)   // → WynikParsowania (upload w 
 ```
 
 Potok kończy się na `adapter.recordsToSurowe()` — rekordach gotowych dla `staging_items`.
-Zapis do bazy (3b), dopasowanie `tk()` (3c) i endpointy importu są **poza** tym modułem.
+Zapis do bazy i endpointy importu są od 3b w `repos/staging.ts` i `routes/import.ts` (niżej);
+dopasowanie `tk()` (klasyfikacja nowa/zmiana/wycofanie, EAN, overrides) zostaje **poza** tym
+modułem do 3c.
 
 ### Re-synchronizacja parserów z produkcją
 
@@ -202,6 +221,23 @@ w parserach" na konkretną listę pól, które zmieniły wartość.
 
 Szczegóły próbek (skąd pochodzą, jak je odtworzyć, gdzie są luki pokrycia):
 `test/charakteryzacja/ZRODLA.md`.
+
+## Staging i endpointy importu (iteracja 3b)
+
+`repos/staging.ts` czyta i zapisuje `staging_items` przez trzy **jawne projekcje kolumn**
+(24 / 20 / 21 kluczy — trzy różne kształty, bo w oryginale odczyt obsługują dwa różne moduły:
+rdzeń dla `/api/staging`, `pagination_module.cjs` dla `/paged` i `/{id}`). `routes/import.ts`
+odtwarza brzeg importu 1:1 z `mirror/backend/extensions.cjs`: `POST /api/import/parse-file`
+(surowy strumień, limit 25 MB), `POST /api/import/from-url` (http/https, 60 s, limit 10
+przekierowań — D12), archiwizacja przed parsowaniem (`import/archiwum.ts`, retencja 7 dni / 5 GB)
+i `POST /api/ai-fallback/parse` — stub, nigdy nie łączy się z OpenAI. Silnik dopasowania
+`tk()` (`import/tk.ts`) jest na razie jawnym, świadomie niewiernym placeholderem: każda
+przyjęta pozycja ma `typZmiany: "nowa"`, bez rozpoznawania zmian/wycofań — pełny port
+przychodzi w 3c. Szczegóły i lista świadomych odstępstw (D1–D13):
+`docs/tickets/5-FEATURE-staging-endpointy-importu/plan.md`.
+
+**Endpoint `POST /api/dostawcy/:kod/upload`** (rdzeń, multer, fallback do starych parserów
+`Wc()`) to inny mechanizm, spoza tej sesji — należy do Iteracji 11.
 
 ## Auth — co dokładnie odtwarzamy
 
@@ -237,7 +273,10 @@ dokładne (bez `trim`/`lowercase`) dopasowanie e-maila. Wszystko to zachowanie p
 na dole pliku. Źródłem prawdy o strukturze jest `rebuild/schema/001_schema.sql`
 (patrz [`rebuild/schema/README.md`](../schema/README.md)).
 
-Regeneracja po dodaniu migracji `002_*.sql`:
+Regeneracja po dodaniu kolejnej migracji (`003_*.sql`, …) — dwie kolumny z `002_import.sql`
+zostały dopisane ręcznie zamiast pełnej regeneracji, bo to najprostszy, najmniej ryzykowny
+sposób dla dwóch pól (patrz `repos/kolumny.ts`, D6, dla tego, jak nowe kolumny są ukrywane
+przed kontraktem):
 
 ```bash
 mkdir -p .tmp && rm -f .tmp/introspect.db

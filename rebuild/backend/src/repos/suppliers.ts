@@ -1,8 +1,16 @@
 import { asc, eq, sql } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { products, suppliers } from "../db/schema.js";
+import { KOLUMNY_POZA_KONTRAKTEM, projekcjaKontraktowa } from "./kolumny.js";
 
-export type Dostawca = typeof suppliers.$inferSelect;
+/**
+ * Kolumny wychodzące do API — wszystkie z tabeli MINUS wewnętrzne (plan.md D6).
+ * Bez tej projekcji `import_wylaczony` z migracji 002 dołożyłaby 19. klucz do odpowiedzi
+ * i złamała zamrożone `GET_suppliers.json` / `GET_dostawcy.json` (18 kluczy).
+ */
+const KOLUMNY_API = projekcjaKontraktowa(suppliers, KOLUMNY_POZA_KONTRAKTEM.suppliers);
+
+export type Dostawca = Omit<typeof suppliers.$inferSelect, "importWylaczony">;
 
 /** Kształt z contract/fixtures/GET_suppliers.json — 15 kolumn tabeli + 3 pola liczone w locie. */
 export type DostawcaZeStatystykami = Omit<Dostawca, "liczbaProduktow" | "status"> & {
@@ -91,7 +99,7 @@ export function przeliczStatus(
  * `suppliers.liczba_produktow` bywa nieaktualna — oryginał jej nie ufa i my też nie.
  */
 export function listaDostawcow(db: Baza, teraz = Date.now()): DostawcaZeStatystykami[] {
-  const wiersze = db.select().from(suppliers).orderBy(asc(suppliers.kod)).all();
+  const wiersze = db.select(KOLUMNY_API).from(suppliers).orderBy(asc(suppliers.kod)).all();
   const zmiany = ostatnieZmiany(db);
 
   return wiersze.map((dostawca) => {
@@ -111,4 +119,38 @@ export function listaDostawcow(db: Baza, teraz = Date.now()): DostawcaZeStatysty
       ostatniaAktualizacjaStanu: zmiana?.ostatnia_zmiana_stanu ?? null,
     };
   });
+}
+
+/**
+ * Pełny wiersz dostawcy — Z kolumnami wewnętrznymi (`importWylaczony`).
+ *
+ * Świadomie NIE używa projekcji kontraktowej: to odczyt na potrzeby logiki importu,
+ * nie na potrzeby odpowiedzi HTTP. Wynik nigdy nie trafia wprost do `res.json()`.
+ */
+export function dostawcaPoKodzie(db: Baza, kod: string) {
+  return db.select().from(suppliers).where(eq(suppliers.kod, kod)).get();
+}
+
+/**
+ * Zapis wyniku udanego importu — odpowiednik bloku z `extensions.cjs:155-160` i `:247-252`.
+ *
+ * ⚠ Oryginał ustawia tu `status: 'aktywny'` na sztywno. Odtwarzamy to, ale warto wiedzieć,
+ * że ta kolumna i tak jest przeliczana w locie przy odczycie (`przeliczStatus`), więc jej
+ * zapis ma znaczenie tylko dla dostawców bez `ostatniPlik` i bez produktów. To także powód,
+ * dla którego wyłączenie dostawcy z importu (plan.md D5) mieszka w osobnej kolumnie:
+ * `status` jest tu bezwarunkowo nadpisywany.
+ */
+export function zapiszWynikImportu(
+  db: Baza,
+  id: number,
+  dane: { ostatniPlik: string; liczbaProduktow: number },
+): void {
+  db.update(suppliers)
+    .set({
+      ostatniPlik: dane.ostatniPlik,
+      liczbaProduktow: dane.liczbaProduktow,
+      status: "aktywny",
+    })
+    .where(eq(suppliers.id, id))
+    .run();
 }
