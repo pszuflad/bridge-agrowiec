@@ -1,8 +1,16 @@
 import { asc, eq, sql } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { products, suppliers } from "../db/schema.js";
+import { KOLUMNY_POZA_KONTRAKTEM, projekcjaKontraktowa } from "./kolumny.js";
 
-export type Dostawca = typeof suppliers.$inferSelect;
+/**
+ * Kolumny wychodzące do API — wszystkie z tabeli MINUS wewnętrzne (plan.md D6).
+ * Bez tej projekcji `import_wylaczony` z migracji 002 dołożyłaby 19. klucz do odpowiedzi
+ * i złamała zamrożone `GET_suppliers.json` / `GET_dostawcy.json` (18 kluczy).
+ */
+const KOLUMNY_API = projekcjaKontraktowa(suppliers, KOLUMNY_POZA_KONTRAKTEM.suppliers);
+
+export type Dostawca = Omit<typeof suppliers.$inferSelect, "importWylaczony">;
 
 /** Kształt z contract/fixtures/GET_suppliers.json — 15 kolumn tabeli + 3 pola liczone w locie. */
 export type DostawcaZeStatystykami = Omit<Dostawca, "liczbaProduktow" | "status"> & {
@@ -91,7 +99,7 @@ export function przeliczStatus(
  * `suppliers.liczba_produktow` bywa nieaktualna — oryginał jej nie ufa i my też nie.
  */
 export function listaDostawcow(db: Baza, teraz = Date.now()): DostawcaZeStatystykami[] {
-  const wiersze = db.select().from(suppliers).orderBy(asc(suppliers.kod)).all();
+  const wiersze = db.select(KOLUMNY_API).from(suppliers).orderBy(asc(suppliers.kod)).all();
   const zmiany = ostatnieZmiany(db);
 
   return wiersze.map((dostawca) => {

@@ -32,9 +32,17 @@ describe("zastosujMigracje", () => {
         .get() as { c: number }
     ).c;
 
-  it("tworzy kanoniczny schemat: 26 tabel i 13 indeksów", () => {
+  /**
+   * Kolejność ma znaczenie — migracje stosowane są alfabetycznie i 002 zakłada, że
+   * tabele z 001 już istnieją. Lista jest tu jawna, żeby dołożenie pliku do
+   * `rebuild/schema/` było świadomą zmianą testu, a nie cichym rozszerzeniem.
+   */
+  const MIGRACJE = ["001_schema.sql", "002_import.sql"];
+
+  it("stosuje wszystkie migracje po kolei: 26 tabel i 13 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
-    expect(wynik.zastosowane).toEqual(["001_schema.sql"]);
+    expect(wynik.zastosowane).toEqual(MIGRACJE);
+    // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9) — liczba tabel i indeksów bez zmian.
     expect(policzTabele(sqlite)).toBe(26);
 
     const indeksy = (
@@ -61,7 +69,7 @@ describe("zastosujMigracje", () => {
 
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual([]);
-    expect(wynik.pominiete).toEqual(["001_schema.sql"]);
+    expect(wynik.pominiete).toEqual(MIGRACJE);
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);

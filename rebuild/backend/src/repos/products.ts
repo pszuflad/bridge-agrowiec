@@ -1,8 +1,16 @@
 import { eq, sql } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { products } from "../db/schema.js";
+import { KOLUMNY_POZA_KONTRAKTEM, projekcjaKontraktowa } from "./kolumny.js";
 
-export type Produkt = typeof products.$inferSelect;
+/**
+ * Kolumny wychodzące do API — wszystkie z tabeli MINUS wewnętrzne (plan.md D6).
+ * Bez tej projekcji `uwaga_cena` z migracji 002 dołożyłaby 73. klucz do odpowiedzi
+ * i złamała zamrożony `contract/fixtures/GET_products.json` (72 klucze).
+ */
+const KOLUMNY_API = projekcjaKontraktowa(products, KOLUMNY_POZA_KONTRAKTEM.products);
+
+export type Produkt = Omit<typeof products.$inferSelect, "uwagaCena">;
 
 /**
  * Odpowiednik `U.listProducts` (backend-index.cjs:44699-44701) — CAŁA tabela, bez
@@ -11,7 +19,7 @@ export type Produkt = typeof products.$inferSelect;
  * (frontend-index.js:23261). Kolejność wierszy = kolejność `rowid`, jak w oryginale.
  */
 export function listaProduktow(db: Baza): Produkt[] {
-  return db.select().from(products).all();
+  return db.select(KOLUMNY_API).from(products).all();
 }
 
 export type StronaProduktow = {
@@ -33,7 +41,7 @@ export function listaProduktowStronicowana(
 ): StronaProduktow {
   if (dostawca !== undefined) {
     const items = db
-      .select()
+      .select(KOLUMNY_API)
       .from(products)
       .where(eq(products.dostawca, dostawca))
       .limit(limit)
@@ -47,7 +55,7 @@ export function listaProduktowStronicowana(
     return { items, total: licznik?.c ?? 0 };
   }
 
-  const items = db.select().from(products).limit(limit).offset(offset).all();
+  const items = db.select(KOLUMNY_API).from(products).limit(limit).offset(offset).all();
   const licznik = db.select({ c: sql<number>`count(*)` }).from(products).get();
   return { items, total: licznik?.c ?? 0 };
 }

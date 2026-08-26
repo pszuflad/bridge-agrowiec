@@ -98,6 +98,10 @@ export const products = sqliteTable("products", {
 	zastosowanie: text(),
 	kodImportu: text("kod_importu"),
 	nieobecnoscPodRzad: integer("nieobecnosc_pod_rzad").default(0).notNull(),
+	// dopieszczenie (migracja 002, plan.md D9): kolumna spoza kanonu produkcji.
+	// NIE wychodzi w API — repos/products.ts wybiera kolumny projekcją kontraktową.
+	// Pisarz i `GET /api/products/uwagi-cena` dochodzą w 3d.
+	uwagaCena: text("uwaga_cena"),
 },
 (table) => [
 	index("idx_products_kod_importu").on(table.kodImportu),
@@ -209,6 +213,9 @@ export const suppliers = sqliteTable("suppliers", {
 	parser: text(),
 	kodowanie: text(),
 	uwagi: text(),
+	// dopieszczenie (migracja 002, plan.md D5): kolumna spoza kanonu produkcji.
+	// NIE wychodzi w API — repos/suppliers.ts wybiera kolumny projekcją kontraktową.
+	importWylaczony: integer("import_wylaczony").default(0).notNull(),
 });
 
 export const users = sqliteTable("users", {
