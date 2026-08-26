@@ -39,7 +39,10 @@ export const products = sqliteTable("products", {
 	magazynRaw: text("magazyn_raw"),
 	dataAktualizacji: text("data_aktualizacji").notNull(),
 	rozmiar: text(),
-	szerokosc: real(),
+	// Migracja 003 (backlog #3, saga `szertxt`): kolumna jest TEXT, nie REAL. Parser oddaje
+	// pierwszą liczbę z rozmiaru jako NAPIS, z zerami końcowymi („10.00", „800") — REAL by je
+	// zjadł przez type affinity. Nie zmieniać bez przenagrania GET_products.json (I12).
+	szerokosc: text(),
 	profil: real(),
 	srednica: real(),
 	konstrukcja: text(),

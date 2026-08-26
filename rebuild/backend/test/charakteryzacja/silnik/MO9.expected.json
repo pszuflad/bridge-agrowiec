@@ -6,28 +6,24 @@
   },
   "katalog": {
     "produktow": 861,
-    "zrodlo": "db/snapshot.db → products (projekcja 29 kolumn)"
+    "zrodlo": "db/snapshot.db → products (projekcja 34 kolumn)"
+  },
+  "overridy": {
+    "wierszy": 1273
   },
   "statystyki": {
+    "doStagingu": 12,
     "odrzuconeNieOpony": 0,
     "odrzuconeBrakDanych": 0,
     "odrzuconeSmieciMO2": 0,
     "nowe": 3,
     "zmienione": 9,
+    "wycofane": 0,
     "bezZmian": 0,
     "autoZatwierdzone": 0,
-    "szczegolyOdrzuconych": [],
-    "doStagingu": 12
+    "szczegolyOdrzuconych": []
   },
-  "pozaZakresem3c": {
-    "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-    "wycofaneWiersze": 0,
-    "wycofaneLicznik": 0,
-    "doStaginguZWycofaniami": 12,
-    "wierszyPoDeduplikacji": 12,
-    "aktualizacjeZPetliWycofan": 852,
-    "zapisyAutoZatwierdzenia": 0
-  },
+  "wierszyPoDeduplikacji": 12,
   "staging": [
     {
       "typZmiany": "nowa",
@@ -112,8 +108,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 41.80672268907563,
       "ostrzezenie": null,
-      "powod": "nazwa: 6.00-9 BKT PT-HD 10PR TT → 6.00-9 BKT PT - HD 10PR TT • model: PT-HD → PT - HD • kod dostawcy: 520192 → 106564 • rozmiar: 6.00x9 → 6.00-9 • szerokość: 6 → 6.00",
-      "snapshotJson": "{\"kod\":\"MO9_57305\",\"kodDostawcy\":\"106564\",\"ean\":\"8903094007806\",\"nazwa\":\"6.00-9 BKT PT - HD 10PR TT\",\"marka\":\"BKT\",\"model\":\"PT - HD\",\"bieznik\":\"PT - HD\",\"kategoria\":\"Przemysłowe\",\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":0,\"cenaZakupu\":270,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"6.00-9\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"6.00\",\"profil\":null,\"srednica\":9,\"konstrukcja\":\"D\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TT\",\"vfIf\":null,\"pr\":\"10\",\"wysokosc\":48.16,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":12,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":0,\"cho\":0,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"8903094007806\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8903094007806\\\"]\"}",
+      "powod": "nazwa: 6.00-9 BKT PT-HD 10PR TT → 6.00-9 BKT PT - HD 10PR TT • kod dostawcy: 520192 → 106564 • rozmiar: 6.00x9 → 6.00-9 • szerokość: 6 → 6.00",
+      "snapshotJson": "{\"kod\":\"MO9_57305\",\"kodDostawcy\":\"106564\",\"ean\":\"8903094007806\",\"nazwa\":\"6.00-9 BKT PT - HD 10PR TT\",\"marka\":\"BKT\",\"model\":\"PT-HD\",\"bieznik\":\"PT-HD\",\"kategoria\":\"Przemysłowe\",\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":0,\"cenaZakupu\":270,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"6.00-9\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"6.00\",\"profil\":null,\"srednica\":9,\"konstrukcja\":\"D\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TT\",\"vfIf\":null,\"pr\":\"10\",\"wysokosc\":48.16,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":12,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":0,\"cho\":0,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"8903094007806\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8903094007806\\\"]\"}",
       "eanRaw": "8903094007806",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -307,5 +303,7676 @@
     }
   ],
   "skasowane": [],
-  "resetyNieobecnosci": []
+  "historiaCen": [],
+  "zmianyProduktow": [
+    {
+      "id": 97794,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97795,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97796,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97797,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97798,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97799,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97800,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97801,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97802,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97803,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97804,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97805,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97806,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97807,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97808,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97809,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97810,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97811,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97812,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97813,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97814,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97815,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97816,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97817,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97818,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97819,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97820,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97821,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97822,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97823,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97824,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97825,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97826,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97827,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97828,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97829,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97830,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97831,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97832,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97833,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97834,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97835,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97836,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97837,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97838,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97839,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97840,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97841,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97842,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97843,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97844,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97845,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97846,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97847,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97848,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97849,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97850,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97851,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97852,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97853,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97854,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97855,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97856,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97857,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97858,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97859,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97860,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97861,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97862,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97863,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97864,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97865,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97866,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97867,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97868,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97869,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97870,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97871,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97872,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97873,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97874,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97875,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97876,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97877,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97878,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97879,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97880,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97881,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97882,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97883,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97884,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97885,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97886,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97887,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97888,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97889,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97890,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97891,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97892,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97893,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97894,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97895,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97896,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97897,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97901,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97904,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97905,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97907,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97908,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97909,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97910,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97911,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97912,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97913,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97914,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97915,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97916,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97917,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97918,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97919,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97920,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97921,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97922,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97923,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97924,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97926,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97927,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97928,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97929,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97930,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97931,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97933,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97934,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97935,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97936,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97939,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97942,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97945,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97948,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97951,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97952,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97953,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97954,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97956,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97959,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97961,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97970,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97971,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97972,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97977,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97978,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97980,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97981,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97983,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97984,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97985,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97986,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97987,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97988,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97989,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97990,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97991,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97993,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97994,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97995,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97996,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97997,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97998,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 97999,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98000,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98001,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98002,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98003,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98004,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98005,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98007,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98008,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98009,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98010,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98011,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98012,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98013,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98014,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98015,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98016,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98017,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98018,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98019,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98020,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98021,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98023,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98024,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98025,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98026,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98027,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98028,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98029,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98030,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98031,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98032,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98033,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98034,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98035,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98036,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98037,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98038,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98039,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98040,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98041,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98042,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98043,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98044,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98045,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98046,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98047,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98048,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98050,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98052,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98053,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98054,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98055,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98056,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98057,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98058,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98059,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98060,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98061,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98062,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98063,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98064,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98066,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98067,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98068,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98069,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98070,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98071,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98072,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98073,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98074,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98075,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98076,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98077,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98078,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98079,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98080,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98081,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98082,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98083,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98084,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98085,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98086,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98087,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98088,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98089,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98090,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98091,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98092,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98093,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98094,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98095,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98096,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98097,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98098,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98099,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98100,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98101,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98102,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98103,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98104,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98105,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98106,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98107,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98108,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98109,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98110,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98111,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98112,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98113,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98114,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98115,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98116,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98117,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98118,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98119,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98120,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98122,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98123,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98124,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98125,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98126,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98127,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98128,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98129,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98130,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98131,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98132,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98134,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98135,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98136,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98137,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98138,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98140,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98141,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98142,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98143,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98144,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98145,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98146,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98147,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98148,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98149,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98150,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98151,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98152,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98153,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98154,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98155,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98156,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98157,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98158,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98159,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98160,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98161,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98162,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98163,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98164,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98165,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98166,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98167,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98168,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98169,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98170,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98171,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98172,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98173,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98174,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98175,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98176,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98177,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98178,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98179,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98180,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98181,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98182,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98183,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98185,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98186,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98187,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98188,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98189,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98190,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98191,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98192,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98193,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98194,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98195,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98196,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98198,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98199,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98200,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98201,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98202,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98203,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98204,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98205,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98206,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98207,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98208,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98209,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98210,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98211,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98212,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98213,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98214,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98215,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98216,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98217,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98218,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98219,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98220,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98221,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98222,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98223,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98224,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98225,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98226,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98227,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98228,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98229,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98230,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98231,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98232,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98233,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98234,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98235,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98236,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98237,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98238,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98239,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98240,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98241,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98242,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98243,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98244,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98245,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98246,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98247,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98248,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98249,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98251,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98252,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98253,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98254,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98255,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98256,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98257,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98258,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98259,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98260,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98261,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98263,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98264,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98265,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98266,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98267,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98268,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98269,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98270,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98271,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98272,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98273,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98274,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98275,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98276,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98277,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98278,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98279,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98280,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98281,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98282,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98283,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98284,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98285,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98286,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98287,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98288,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98289,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98290,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98291,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98292,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98293,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98294,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98295,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98296,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98297,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98298,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98299,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98300,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98301,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98302,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98303,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98304,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98305,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98306,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98307,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98309,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98310,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98311,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98312,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98313,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98314,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98315,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98316,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98317,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98318,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98319,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98320,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98321,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98322,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98323,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98324,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98325,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98326,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98327,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98328,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98329,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98331,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98332,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98333,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98334,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98335,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98336,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98337,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98338,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98339,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98340,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98341,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98342,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98343,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98344,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98345,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98346,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98347,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98348,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98349,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98350,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98352,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98353,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98354,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98355,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98356,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98357,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98359,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98361,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98362,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98363,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98364,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98365,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98366,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98367,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98368,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98369,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98370,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98371,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98372,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98373,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98374,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98375,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98376,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98377,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98378,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98379,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98380,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98381,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98382,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98383,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98384,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98385,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98386,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98387,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98388,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98389,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98390,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98391,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98392,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98393,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98394,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98395,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98396,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98397,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98398,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98399,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98400,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98401,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98402,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98403,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98404,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98406,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98407,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98408,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98409,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98410,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98411,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98412,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98413,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98414,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98415,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98416,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98417,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98418,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98419,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98420,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98421,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98422,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98423,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98424,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98425,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98426,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98427,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98428,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98429,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98430,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98431,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98432,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98433,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98436,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98437,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98438,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98439,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98440,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98441,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98442,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98443,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98444,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98445,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98446,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98447,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98448,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98449,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98450,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98451,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98452,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98453,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98454,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98455,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98456,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98457,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98458,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98459,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98460,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98461,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98462,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98463,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98464,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98465,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98466,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98467,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98468,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98469,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98470,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98471,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98472,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98473,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98474,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98475,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98476,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98477,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98478,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98479,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98480,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98481,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98482,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98483,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98484,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98485,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98486,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98487,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98488,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98489,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98490,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98491,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98492,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98493,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98494,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98495,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98496,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98497,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98498,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98499,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98500,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98501,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98502,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98503,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98504,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98505,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98506,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98508,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98509,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98510,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98511,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98512,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98513,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98514,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98515,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98516,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98517,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98518,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98519,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98520,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98521,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98522,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98524,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98525,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98526,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98527,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98528,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98529,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98530,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98531,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98532,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98533,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98534,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98535,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98536,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98537,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98538,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98539,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98540,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98541,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98542,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98543,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98544,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98546,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98547,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98548,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98549,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98550,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98551,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98552,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98553,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98554,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98555,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98556,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98557,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98559,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98560,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98561,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98562,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98563,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98564,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98565,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98566,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98567,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98568,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98569,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98570,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98571,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98573,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98574,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98575,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98576,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98577,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98578,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98579,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98580,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98582,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98585,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98586,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98587,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98588,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98589,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98590,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98591,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98592,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98593,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98595,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98596,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98597,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98598,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98599,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98600,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98601,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98602,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98603,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98604,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98605,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98606,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98607,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98608,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98609,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98610,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98611,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98612,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98614,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98615,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98616,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98617,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98618,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98619,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98620,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98621,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98622,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98623,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98624,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98625,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98626,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98627,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98628,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98629,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98630,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98631,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98632,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98633,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98634,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98635,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98636,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98637,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98638,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98639,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98640,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98641,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98642,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98643,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98644,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98645,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98646,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98648,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98649,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98650,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98651,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98652,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98653,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98654,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98655,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98656,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98657,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98658,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98659,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98660,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98661,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98662,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98663,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98664,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98665,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98666,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98667,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98668,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98669,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98670,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98671,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98672,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98673,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98674,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98675,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98676,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98677,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98678,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98679,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98680,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98681,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98682,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98683,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98684,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98685,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98686,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98687,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98688,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98689,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98690,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98691,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98692,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98693,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98694,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98695,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98696,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98697,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98698,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98700,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98701,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98702,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 98703,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105085,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105086,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105087,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105088,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105089,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105090,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105091,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105092,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105093,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105094,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105095,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    }
+  ],
+  "zapytanDoPamieciLinkow": 0
 }

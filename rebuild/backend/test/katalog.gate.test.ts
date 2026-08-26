@@ -6,12 +6,16 @@
  *
  * Rozbieżność z fixture'em/kontraktem = STOP (nie poprawiamy fixture'a).
  *
- * ⚠ ZNANE, ZATWIERDZONE ODSTĘPSTWO — `szerokosc` (backlog #3, plan.md D1):
- * fixtures nagrano przed migracją `szertxt`, więc mają wartości liczbowe; aktualna
- * produkcja trzyma tam TEXT. GATE tego nie łapie i nie ma łapać: baza testowa powstaje
- * z kanonu (`001_schema.sql`, kolumna REAL), więc TYPY się zgadzają. Rozjazd dotyczy
- * WARTOŚCI na stagingu i jest odłożony do ticketu importu/schematu. Test-strażnik
- * pass-through jest w `produkty.test.ts`.
+ * ⚠ ZNANE, ZATWIERDZONE ODSTĘPSTWO — `szerokosc` (backlog #3, ticket 7 / plan.md D3).
+ * Do Iteracji 3d-1 kanon miał tu `REAL` i GATE rozjazdu NIE WIDZIAŁ — bo typy po obu
+ * stronach się zgadzały, mimo że produkcja od migracji `szertxt` trzyma tam TEXT.
+ * Migracja `003_szerokosc_text.sql` doprowadziła kanon do stanu produkcji, więc rozjazd
+ * WYSZEDŁ NA WIERZCH: `GET_products.json` nagrano PRZED tamtą migracją i ma tam liczby.
+ *
+ * Nie „poprawiamy" fixture'a (Krok 9 tego zabrania) i nie wyłączamy GATE'u — deklarujemy
+ * wyjątek (`WYJATKI_SZEROKOSC`), który mówi CO, DLACZEGO i KIEDY znika. Wyjątek jest
+ * samoczyszczący: gdy I12 przenagra fixtures, przestanie cokolwiek pokrywać i test
+ * zapali się, żądając usunięcia.
  */
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -20,11 +24,28 @@ import {
   sprawdzZgodnoscZKontraktem,
   stworzSrodowiskoTestowe,
   wczytajFixture,
+  type WyjatekGate,
   zasiejDostawcow,
   zasiejHistorieCen,
   zasiejProdukty,
   type SrodowiskoTestowe,
 } from "./gate/index.js";
+
+/**
+ * Jedyny zadeklarowany wyjątek GATE I2. Lista ma zostać jednoelementowa — pilnuje tego
+ * osobny test niżej, żeby nikt nie „rozszerzył" jej zamiast zgłosić nowy rozjazd.
+ */
+const WYJATKI_SZEROKOSC: WyjatekGate[] = [
+  {
+    sciezka: /^\$\.items\[\d+\]\.szerokosc$/,
+    powod:
+      "Produkcja po migracji `szertxt` trzyma `products.szerokosc` jako TEXT i oddaje napis " +
+      "z zerami końcowymi („10.00\"). `GET_products.json` nagrano PRZED tą migracją, więc ma " +
+      "tam liczby. Racja jest po stronie produkcji — fixture jest starszy niż zachowanie, " +
+      "które opisuje.",
+    domyka: "I12 — przenagranie contract/fixtures/GET_products.json",
+  },
+];
 
 describe("GATE — kontrakt i fixtures dla katalogu", () => {
   let srodowisko: SrodowiskoTestowe;
@@ -50,7 +71,19 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
 
     expect(odp.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/products", odpowiedz: odp });
-    sprawdzZgodnoscZFixture("GET_products.json", odp.body);
+    sprawdzZgodnoscZFixture("GET_products.json", odp.body, WYJATKI_SZEROKOSC);
+  });
+
+  /**
+   * Strażnik samego wyjątku. Zadeklarowany wyjątek to furtka w GATE — musi zostać
+   * JEDNA i musi dotyczyć wyłącznie `szerokosc`. Gdyby ktoś chciał przepchnąć kolejny
+   * rozjazd dopisaniem do listy zamiast zgłoszeniem go (Krok 9: „rozbieżność = STOP"),
+   * zapali się tutaj.
+   */
+  it("GATE ma dokładnie JEDEN zadeklarowany wyjątek i dotyczy on `szerokosc`", () => {
+    expect(WYJATKI_SZEROKOSC).toHaveLength(1);
+    expect(WYJATKI_SZEROKOSC[0]!.sciezka.source).toContain("szerokosc");
+    expect(WYJATKI_SZEROKOSC[0]!.domyka).toContain("I12");
   });
 
   /**

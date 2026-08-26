@@ -1,0 +1,4 @@
+{
+  "//": "NIE jest to część portu — to marker modułowy dodany przez odbudowę (ticket 7, Iteracja 3d-1). Backend ma \"type\": \"module\", więc bez tego pliku `tire_dims.js` (rozszerzenie .js, nie .cjs) byłby traktowany jako ESM i `require('./tire_dims.js')` w bridge_ext.cjs by padło. bridge_ext łapie ten wyjątek i milczy, więc awaria byłaby CICHA: packageDims=null, applyDims zwraca null, wymiary nigdy się nie liczą. Produkcja problemu nie ma, bo mirror/backend/package.json nie deklaruje \"type\" i cały katalog jest CommonJS. Ten plik przywraca tamto założenie dla portu. Strażnik sha256 w test/charakteryzacja.test.ts jawnie go pomija, a osobny test pilnuje, że applyDims naprawdę liczy wymiary.",
+  "type": "commonjs"
+}
