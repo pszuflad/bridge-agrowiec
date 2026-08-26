@@ -144,11 +144,19 @@ w kształt API:
 
 **Jak testujemy bez sieci.** `test/charakteryzacja/mo9-offline.mjs` podstawia **tylko globalny
 `fetch`**, odpowiadając nagraną odpowiedzią GraphQL zbudowaną z próbki (z odwzorowaniem
-keyset-paginacji). Dzięki temu realnie wykonuje się cały produkcyjny `fetchAll()` — generowanie
-tokenu, paginacja, wykrywanie błędów autoryzacji, odrzucanie quadów i `itemToRecord()`.
-Nie duplikujemy ani linijki portowanej logiki. Wynik przepuszczamy przez
-`JSON.parse(JSON.stringify(…))`, bo produkcja dostaje go tak samo — przez stdout procesu
-potomnego.
+keyset-paginacji: zwraca elementy o `id` większym od kursora, najwyżej `pageSize`). Dzięki temu
+realnie wykonuje się cały produkcyjny `fetchAll()` — generowanie tokenu, pętla paginacji,
+wykrywanie błędów autoryzacji, odrzucanie quadów i `itemToRecord()`. Nie duplikujemy ani
+linijki portowanej logiki. Wynik przepuszczamy przez `JSON.parse(JSON.stringify(…))`, bo
+produkcja dostaje go tak samo — przez stdout procesu potomnego.
+
+**Paginacja ma osobny test.** Sama charakteryzacja MO9 (12 obiektów) ćwiczy wyłącznie przypadek
+**jednostronicowy** — `fetchAllItems()` przerywa pętlę, gdy strona ma mniej niż `PAGE_SIZE` (=100)
+elementów. Dlatego warstwa 5 testu (`test/charakteryzacja.test.ts`) powiela realne obiekty próbki
+do 250 sztuk z rozłącznymi `id` i sprawdza, że wracają wszystkie: liczba 250 jest osiągalna
+**tylko** przez kontynuację paginacji, bo jedna strona zwraca najwyżej 100. Zweryfikowane
+instrumentacją: 3 żądania, kursor `0 → 900099 → 900199`. Treść tych powielonych rekordów nie ma
+znaczenia i nie wchodzi do wzorca — sprawdzany jest sam mechanizm kursora.
 
 ⚠ **Niepokryty zostaje wyłącznie transport HTTP** (realne żądanie, odnawianie tokenu w czasie,
 zachowanie API przy błędach sieci). To brzeg, nie logika parsera, i należy do sesji 3b.

@@ -24,7 +24,8 @@ import { createRequire } from "node:module";
 
 import { describe, expect, it } from "vitest";
 
-import { parsujBufor, parsujPlik } from "../src/import/parsuj.js";
+import { listaDostawcow, parsujBufor, parsujPlik } from "../src/import/parsuj.js";
+import { KODY_DOSTAWCOW } from "../src/import/typy.js";
 import type { RekordSurowy, WynikParsowania } from "../src/import/typy.js";
 import { pobierzMo9Offline } from "./charakteryzacja/mo9-offline.mjs";
 
@@ -192,5 +193,42 @@ describe("4. Brzeg wejścia — parsujBufor jest równoważny parsujPlik", () =>
 
   it("odrzuca nieznany kod dostawcy zamiast parsować cokolwiek", () => {
     expect(() => parsujPlik("MO99", join(katalogProbek, "MO1.csv"))).toThrow(/Nieznany dostawca/);
+  });
+
+  it("typ KodDostawcy nie rozjeżdża się z listą dispatchera z produkcji", () => {
+    // Gdy Ania doda albo przemianuje dostawcę w dispatcher.cjs, re-synchronizacja portu
+    // wniesie to automatycznie — a ten test przypomni, że nasz typ trzeba dociągnąć.
+    expect([...KODY_DOSTAWCOW].sort()).toEqual([...listaDostawcow()].sort());
+  });
+});
+
+describe("5. MO9 — keyset-paginacja realnie przechodzi przez wiele stron", () => {
+  // fetchAllItems() przerywa pętlę, gdy strona ma mniej niż PAGE_SIZE (=100) elementów,
+  // więc próbka 12 obiektów ćwiczy WYŁĄCZNIE przypadek jednostronicowy. Tutaj powielamy
+  // realne obiekty próbki na 250 sztuk z rozłącznymi id — treść rekordów nie ma tu
+  // znaczenia, sprawdzamy sam mechanizm kursora. Wynik 250 rekordów jest osiągalny
+  // TYLKO przez kontynuację paginacji: jedna strona zwraca najwyżej 100.
+  const DOCELOWA_LICZBA = 250; // > 2 pełne strony po 100
+
+  it("pobiera wszystkie elementy z wielu stron, bez gubienia i duplikowania", async () => {
+    const bazowe = JSON.parse(
+      readFileSync(join(katalogProbek, "MO9.items.json"), "utf-8"),
+    ) as { id: number; sku: string }[];
+
+    const wiele = Array.from({ length: DOCELOWA_LICZBA }, (_, i) => ({
+      ...bazowe[i % bazowe.length]!,
+      id: 900000 + i,
+      sku: `PAG${900000 + i}`,
+    }));
+
+    const api = wymagaj(join(katalogPortu, "parsers", "mo9_agrorami_api.cjs"));
+    const wynik = await pobierzMo9Offline(api, wiele);
+
+    expect(wynik.records).toHaveLength(DOCELOWA_LICZBA);
+
+    const kody = (wynik.records as { kod_dostawcy: string }[]).map((r) => r.kod_dostawcy);
+    expect(new Set(kody).size, "kursor cofnął się albo strona się powtórzyła").toBe(
+      DOCELOWA_LICZBA,
+    );
   });
 });

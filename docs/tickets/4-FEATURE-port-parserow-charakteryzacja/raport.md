@@ -49,7 +49,7 @@ Trzy, wszystkie na korzyść wierności — żadne nie zmienia zakresu ani decyz
 1. **MO9 charakteryzowany przez realny `fetchAll()`, nie przez skopiowaną pętlę.** Plan zakładał
    odtworzenie w skrypcie czystej części `fetchAll()` (odrzucanie quadów + `itemToRecord`).
    Okazało się, że moduł używa **globalnego `fetch`**, więc wystarczy podstawić sam transport HTTP
-   — i wtedy wykonuje się produkcyjny `fetchAll()` w całości: generowanie tokenu, keyset-paginacja,
+   — i wtedy wykonuje się produkcyjny `fetchAll()` w całości: generowanie tokenu, pętla paginacji,
    wykrywanie błędów autoryzacji, odrzucanie quadów, `itemToRecord()`. Lepiej niż w planie: zero
    duplikowania portowanej logiki, większe pokrycie. Wynik przechodzi przez
    `JSON.parse(JSON.stringify(…))`, bo produkcja dostaje go tak samo — przez stdout procesu potomnego.
@@ -73,14 +73,15 @@ fixtures/kontraktu obowiązuje w pełni. Wszystkie istniejące gate'y z iteracji
 
 ### GATE tej sesji: charakteryzacja — ✅ **zielony**
 
-`rebuild/backend/test/charakteryzacja.test.ts` — 59 asercji, cztery warstwy:
+`rebuild/backend/test/charakteryzacja.test.ts` — 61 asercji, pięć warstw:
 
 | Warstwa | Co dowodzi | Wynik |
 |---|---|---|
 | 1. Integralność portu | sha256 każdego z 16 plików == `mirror/backend` | ✅ |
 | 2. Charakteryzacja MO1–MO10 | port == wyjście oryginału, pole po polu | ✅ 711 rekordów |
 | 3. Przydatność próbki | > 0 rekordów, 0 błędów parsera, pola kluczowe wypełnione | ✅ |
-| 4. Brzeg wejścia | `parsujBufor` == `parsujPlik`; nieznany dostawca odrzucony | ✅ |
+| 4. Brzeg wejścia | `parsujBufor` == `parsujPlik`; nieznany dostawca odrzucony; typ `KodDostawcy` == lista dispatchera | ✅ |
+| 5. Paginacja MO9 | 250 obiektów wraca przez wiele stron, bez gubienia i duplikatów | ✅ |
 
 Wzorzec (`MOx.expected.json`) nagrany skryptem uruchamiającym **oryginalne** parsery z
 `mirror/backend/`; punkt przechwycenia = rekord po `adapter.recordsToSurowe()`.
@@ -188,7 +189,9 @@ Zakres 3a to odtworzenie zachowania, nie jego poprawianie. Poniższe rzeczy port
   podmienić próbkę i przenagrać wzorzec.
 - **MO9 — niepokryty transport HTTP.** Podstawiamy wyłącznie globalny `fetch`, więc realnie wykonuje
   się cały `fetchAll()`. Poza pokryciem zostaje samo żądanie sieciowe, odnawianie tokenu w czasie
-  i zachowanie API przy błędach — to brzeg, należący do 3b.
+  i zachowanie API przy błędach — to brzeg, należący do 3b. Ścieżka wielostronicowa **jest** pokryta,
+  ale osobnym testem (warstwa 5), nie samą charakteryzacją — 12-elementowa próbka mieści się
+  w jednej stronie.
 - **`uwagaCena` nigdzie nie jest niepuste.** Żaden z 711 rekordów nie trafił na „cenę na zapytanie",
   więc ścieżka `detectPriceOnRequest()` nie jest pokryta danymi. Kod jest w porcie i przechodzi
   przez typ; potrzebna próbka z takim wierszem (MO7 VF Float King albo MO8 wielkoformatowe VF).
@@ -210,3 +213,27 @@ Zebrane wyżej, tu w formie zadań:
    hardeningu w I12, gdy będzie wiadomo, czy pliki dostawców mogą pochodzić z niezaufanego źródła.
 7. **TS-yfikacja portu** — świadomie odłożona (roadmap §5). Dopóki Ania rozwija parsery,
    `.cjs` verbatim jest wart więcej niż typy.
+
+## Poprawki po review
+
+Review (`review.md`): **0 BLOCKER**, 1 SHOULD-FIX, 1 NICE-TO-HAVE. Obie zgłoszone rzeczy naprawione.
+
+1. **SHOULD-FIX — mock keyset-paginacji MO9 nie był realnie ćwiczony.** Słuszne: próbka ma
+   12 obiektów, a `PAGE_SIZE` w `mo9_agrorami_api.cjs` to 100, więc `fetchAllItems()` wykonywał
+   pętlę dokładnie raz i gałąź kontynuacji kursora nigdy nie startowała — a raport i `ZRODLA.md`
+   twierdziły, że paginacja jest pokryta. Zamiast złagodzić twierdzenie, **dołożyliśmy pokrycie**:
+   nowa warstwa 5 testu powiela realne obiekty próbki do 250 sztuk z rozłącznymi `id` i sprawdza,
+   że wracają wszystkie — liczba 250 jest osiągalna wyłącznie przez kontynuację paginacji, bo
+   jedna strona zwraca najwyżej 100. Potwierdzone instrumentacją: **3 żądania, kursor
+   `0 → 900099 → 900199`**. Powielone rekordy nie wchodzą do wzorca — testują sam mechanizm kursora.
+   Sformułowania w `ZRODLA.md` i w tym raporcie doprecyzowane: paginacja jest pokryta **osobnym
+   testem**, nie samą charakteryzacją.
+2. **NICE-TO-HAVE — walidacja kodu dostawcy wobec statycznej listy zamiast dispatchera.** Też
+   słuszne i to odstępstwo od Kroku 3 planu. `sprawdzKodDostawcy()` sprawdza teraz **oba** źródła:
+   `dispatcher.listDostawcy()` (autorytet runtime — to on wie, kto ma parser) oraz typ
+   `KodDostawcy` (potrzebny do zawężenia typu w TS). Dodatkowo nowy test pilnuje, żeby te dwie
+   listy się nie rozjechały przy re-synchronizacji `dispatcher.cjs` z produkcją.
+
+Przy okazji usunięta jedna asercja-tautologia z pierwszej wersji testu paginacji (porównywała
+dwie stałe). Po poprawkach: **61 asercji charakteryzacji**, cała bateria **164/164**,
+`lint`/`typecheck`/`build` czyste.

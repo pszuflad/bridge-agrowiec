@@ -56,10 +56,18 @@ export class BladImportu extends Error {
   }
 }
 
+/**
+ * Sprawdza kod dostawcy wobec DWÓCH źródeł: listy dispatchera z produkcji (autorytet
+ * runtime — to on wie, którzy dostawcy mają parser) i naszego typu `KodDostawcy`
+ * (potrzebnego do zawężenia typu). Rozjazd między nimi może się pojawić dopiero przy
+ * re-synchronizacji `dispatcher.cjs` z produkcją i wtedy ma zostać zauważony —
+ * pilnuje tego osobny test w `test/charakteryzacja.test.ts`.
+ */
 function sprawdzKodDostawcy(kodDostawcy: string): KodDostawcy {
-  if (!jestKodemDostawcy(kodDostawcy)) {
+  const znaneDispatcherowi = dispatcher.listDostawcy();
+  if (!znaneDispatcherowi.includes(kodDostawcy) || !jestKodemDostawcy(kodDostawcy)) {
     throw new BladImportu(
-      `Nieznany dostawca: ${kodDostawcy}. Obsługiwani: ${dispatcher.listDostawcy().join(", ")}`,
+      `Nieznany dostawca: ${kodDostawcy}. Obsługiwani: ${znaneDispatcherowi.join(", ")}`,
     );
   }
   return kodDostawcy;
