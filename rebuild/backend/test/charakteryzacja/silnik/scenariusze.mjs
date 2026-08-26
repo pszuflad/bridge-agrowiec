@@ -306,7 +306,7 @@ export const SCENARIUSZE = [
     opis:
       "Dwa identyczne rekordy dają dwa identyczne wiersze w buforze, ale addStaging " +
       "(backend-index.cjs:44923) deduplikuje po (kod, typZmiany, powod) → jeden wiersz. " +
-      "doStagingu i tak liczy bufor, nie zapisy (:47849).",
+      "doStagingu i tak liczy bufor, nie zapisy (:47850).",
     dostawca: "MO5",
     katalog: [],
     rekordy: [

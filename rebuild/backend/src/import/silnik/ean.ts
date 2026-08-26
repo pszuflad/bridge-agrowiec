@@ -113,7 +113,7 @@ export function normalizujEan(surowy: unknown): InfoEan {
   }
 
   if (ZAPIS_NAUKOWY.test(oczyszczony)) {
-    // `let a = Lq(i)` z `:46984`. Wywołanie jednoargumentowe — patrz uwaga o cieniowaniu wyżej:
+    // `let a = Lq(i)` z `:46987`. Wywołanie jednoargumentowe — patrz uwaga o cieniowaniu wyżej:
     // trafia w generator sha1 i zawsze zwraca `null`, więc `a < 13` jest zawsze prawdziwe.
     const cyfrZnaczacych = identyfikatorTechniczny(oczyszczony);
     const zaMaloCyfrZnaczacych = (cyfrZnaczacych as unknown as number) < 13;

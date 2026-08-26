@@ -200,7 +200,7 @@ export function zapiszPozycjeStagingu(db: Baza, pozycje: NowaPozycjaStagingu[]):
       tx.insert(stagingItems).values(pozycja).run();
     }
   });
-  // Oryginał zwraca `c.length` (`:47849`) — długość BUFORA, nie liczbę wstawionych wierszy.
+  // Oryginał zwraca `c.length` (`:47850`) — długość BUFORA, nie liczbę wstawionych wierszy.
   // Przy zdeduplikowanym powtórzeniu te dwie liczby się rozjeżdżają; kontrakt HTTP niesie tę.
   return pozycje.length;
 }

@@ -117,7 +117,7 @@ const pole = (obiekt: object, klucz: string): unknown =>
   (obiekt as Record<string, unknown>)[klucz];
 
 /**
- * Pola, których zmiana czyni z pozycji `zmiana_kluczowa` — `_KP` (backend-index.cjs:47762).
+ * Pola, których zmiana czyni z pozycji `zmiana_kluczowa` — `_KP` (backend-index.cjs:47751).
  * To one opisują TOŻSAMOŚĆ opony; zmiana czegokolwiek z tej listy wymaga oka człowieka.
  */
 const POLA_KLUCZOWE = [
@@ -140,7 +140,7 @@ const POLA_KLUCZOWE = [
  * raport ticketa, sekcja D4.
  *
  * ZAKRES 3c kończy się na klasyfikacji. Świadomie NIE MA tu:
- *   • efektów auto-zatwierdzania (`:47788-47806`) — decyzja i licznik są, zapis do produktu
+ *   • efektów auto-zatwierdzania (`:47791-47806`) — decyzja i licznik są, zapis do produktu
  *     i `historia_cen` należą do 3d (plan.md D5)
  *   • pętli wycofań po trzech nieobecnościach (`:47807-47847`) — 3d
  *   • realnych poprawek Marty — `zastosujPoprawkiMarty()` jest stubem (plan.md D6)
@@ -416,7 +416,7 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
         roznice.push(`${label}: ${stara || "—"} → ${nowa || "—"}`);
       }
 
-      // ——— Klasyfikacja zmiany (:47762-47773) ———
+      // ——— Klasyfikacja zmiany (:47751-47764) ———
       const zmianaKluczowa = POLA_KLUCZOWE.some((klucz) => {
         const stara = pole(dopasowany!, klucz);
         const nowa = pole(znormalizowana, klucz);
@@ -434,7 +434,7 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
         Boolean(uzytoIdTechnicznego) ||
         naruszono.length > 0;
 
-      // Auto-patch: pola, które oryginał zatwierdza BEZ pytania (:47768-47772).
+      // Auto-patch: pola, które oryginał zatwierdza BEZ pytania (:47760-47764).
       // 3c go LICZY, ale nie stosuje — patrz gałąź `else if` niżej (plan.md D5).
       const autoPatch: Record<string, unknown> = {};
       if (
@@ -466,7 +466,7 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
       }
       // ⚠ Żywy `tk()` NIE aktualizuje tu EAN-u. Reguła „8/12/13/14 cyfr i nie kończy się
       // pięcioma zerami", którą podaje `docs/spec-backend.md` §5, siedzi w MARTWEJ
-      // `function tk` (:47503-47512) i w produkcji nigdy się nie wykonuje (raport, D4).
+      // `function tk` (:47499-47512) i w produkcji nigdy się nie wykonuje (raport, D4).
 
       if (zmianaKluczowa || wymagaSprawdzenia) {
         statystyki.zmienione += 1;
@@ -504,7 +504,7 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
           utworzono,
         });
       } else if (Object.keys(autoPatch).length > 0) {
-        // ——— ZAKRES 3d: auto-zatwierdzanie (:47788-47806) ———
+        // ——— ZAKRES 3d: auto-zatwierdzanie (:47791-47806) ———
         // 3c podejmuje decyzję i liczy ją tak jak produkcja, ale NIE wykonuje jej skutków:
         // brakuje `aktualizujProdukt(db, dopasowany.id, {...autoPatch, dataAktualizacji})`,
         // wpisu do `historia_cen` oraz `applyDims`/`applyLinkMemory` z `bridge_ext`.

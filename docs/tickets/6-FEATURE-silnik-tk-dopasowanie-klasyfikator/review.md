@@ -41,7 +41,7 @@
   zweryfikowane linia po linii wobec `:47584-47851`. Auto-zatwierdzanie (D5) i pętla wycofań
   poprawnie pozostawione jako jawnie oznaczone gałęzie 3d.
 - `zapiszPozycjeStagingu` (D8) — dedup po `(kod, typZmiany, COALESCE(powod,''))` w transakcji,
-  zgodny z `U.addStaging` (:44923); `doStagingu` liczy bufor, nie zapisy (:47849).
+  zgodny z `U.addStaging` (:44923); `doStagingu` liczy bufor, nie zapisy (:47850).
 - `katalogDoImportu`/`aktualizujProdukt`/`usunProdukt` — wierny port `U.listProducts`
   (filtrowany w SQL zamiast w JS, bez zmiany zachowania), `U.updateProduct` (efekt uboczny ceny 0),
   `U.deleteProduct`.

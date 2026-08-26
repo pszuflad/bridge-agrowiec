@@ -376,7 +376,7 @@ describe("endpointy importu", () => {
       // ⚠ Wierszy jest MNIEJ niż `doStagingu` i tak ma być. Próbka MO2 zawiera dwa kody
       // powtórzone (`MO2_13760840000`, `MO2_13763530000`), a `U.addStaging`
       // (backend-index.cjs:44923) deduplikuje po (kod, typZmiany, powod). `doStagingu` liczy
-      // BUFOR, nie zapisy (`:47849`), więc obie liczby rozjeżdżają się o liczbę duplikatów.
+      // BUFOR, nie zapisy (`:47850`), więc obie liczby rozjeżdżają się o liczbę duplikatów.
       // Potwierdzone uruchomieniem ORYGINAŁU na tej samej próbce: 200 w buforze, 198 zapisów.
       expect(policzStaging().c).toBe(Number(cialo.doStagingu) - 2);
     });

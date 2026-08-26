@@ -54,8 +54,8 @@ const naCamel = (nazwa) => nazwa.replace(/_([a-z0-9])/g, (_, z) => z.toUpperCase
  * Kolumny `products` zapisywane do wzorca.
  *
  * Pierwsza grupa: wszystko, co ŻYWE `tk()` czyta z dopasowanego produktu — klucze map
- * dopasowania, pola porównywane przez `Vq` (`:47264`), pola kluczowe `_KP` (`:47762`),
- * pola auto-patcha `AP` (`:47768-47772`), `eanIsValid` z `_cb` i `nieobecnoscPodRzad`.
+ * dopasowania, pola porównywane przez `Vq` (`:47264`), pola kluczowe `_KP` (`:47751`),
+ * pola auto-patcha `AP` (`:47760-47764`), `eanIsValid` z `_cb` i `nieobecnoscPodRzad`.
  * Druga grupa: kolumny NOT NULL, bez których nie da się zasiać wiersza w naszej bazie
  * (gate treści importuje do prawdziwego SQLite).
  */

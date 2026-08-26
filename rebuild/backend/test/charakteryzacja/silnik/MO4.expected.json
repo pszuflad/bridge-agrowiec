@@ -20,7 +20,7 @@
     "doStagingu": 34
   },
   "pozaZakresem3c": {
-    "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47788-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
+    "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
     "wycofaneWiersze": 60,
     "wycofaneLicznik": 60,
     "doStaginguZWycofaniami": 94,

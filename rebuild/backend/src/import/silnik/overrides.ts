@@ -23,7 +23,7 @@ export interface WynikPoprawek {
  *   • ostrzeżenie „plik nadpisuje poprawke Marty: …" (`:47709`)
  *   • składnik `powod` o konflikcie z poprawką Marty (`:47740`)
  *   • gałąź `_srcConflict` w `snapshotJson` (`:47740`)
- *   • udział `p.length > 0` w wymuszeniu `typZmiany: "blad"` (`:47767`)
+ *   • udział `p.length > 0` w wymuszeniu `typZmiany: "blad"` (`:47758`)
  *
  * Podmiana tej funkcji na realną implementację jest jedyną zmianą, jakiej `tk()` do tego
  * potrzebuje — sygnatura jest już docelowa.

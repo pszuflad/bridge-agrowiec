@@ -103,15 +103,40 @@ skutek bezpieczeństwa.
 
 `03_IMPORT_tk.md` zawiera **realny diagram decyzyjny** wyprowadzony z kodu (z cytatami
 linii) — to bezpośrednie wejście do odbudowy (Faza 4, kierunek A). Kluczowe reguły
-potwierdzone:
-- dopasowanie po kodzie → po EAN → kod zastępczy `Lq()` tylko dla opony;
-- `Gq()` = `manual_overrides`: przy konflikcie **zachowuje wartość Marty**, zapisuje do `snapshotJson`;
+potwierdzone (zweryfikowane w 3c wobec żywego `tk = function` w
+`deminified/backend-index.cjs:47584-47851`):
+- dopasowanie po kodzie → po EAN → **po EAN znormalizowanym** (`:47698`, gdy surowy EAN
+  dostawcy nie trafił w mapę, dopasowanie po wartości z `Hq()`) → kod zastępczy `Lq()`
+  tylko dla opony;
+- `Gq()` = `manual_overrides`: przy konflikcie **zachowuje wartość Marty**, zapisuje do `snapshotJson`
+  (poza zakresem 3c — `Gq()` tam jest stubem przepuszczającym, realna logika to 3d);
 - `Zc()` = klasyfikator „czy opona";
-- auto-zatwierdzenie **tylko** zmian cena/marża/stan/magazyn → wpis do `historia_cen`;
-- wycofanie po **3 kolejnych** nieobecnościach (`WYCOFANIE_PROG_IMPORTOW=3` ↔ kolumna `nieobecnosc_pod_rzad`);
-- EAN auto-zmieniany tylko dla długości 8/12/13/14 i nie kończący się pięcioma zerami;
+- auto-zatwierdzenie **tylko** zmian cena/marża/stan/magazyn → wpis do `historia_cen`
+  (3c liczy tylko decyzję i licznik `autoZatwierdzone`; sam zapis efektu to 3d);
+- wycofanie po **3 kolejnych** nieobecnościach (`WYCOFANIE_PROG_IMPORTOW=3` ↔ kolumna `nieobecnosc_pod_rzad`) — pętla wycofań poza zakresem 3c, jest w 3d;
+- **SPROSTOWANIE (3c): nie ma reguły „EAN auto-zmieniany tylko dla długości 8/12/13/14 i nie
+  kończący się pięcioma zerami"**, mimo że tak twierdziły ta specyfikacja i
+  `docs/incoming/backend-perplexity/backend_doc/03_IMPORT_tk.md`. Ta reguła istnieje
+  **wyłącznie w martwej `function tk`** (`deminified/backend-index.cjs:47499-47512`),
+  nadpisanej przez późniejsze przypisanie `tk = function` (`:47584`). Żywy `tk()` buduje
+  auto-patch produktu tylko z `cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` i
+  **nigdy nie ustawia `AP.ean`** — produkcja nie aktualizuje EAN istniejącego produktu przy
+  imporcie. Reguła **nie wchodzi** do portu (decyzja D4, `docs/tickets/6-FEATURE-silnik-tk-dopasowanie-klasyfikator/plan.md`).
+  `03_IMPORT_tk.md` powtarza ten sam błąd i **zostaje bez zmian** — to materiał źródłowy
+  Perplexity, nieredagowany; sprostowanie mieszka tutaj;
 - `kod_importu` nadaje `bridge_ext.assignKodImportu` (nie sama `tk`), grupując po EAN
-  lub marka+rozmiar+bieznik+nazwa.
+  lub marka+rozmiar+bieznik+nazwa — potwierdzone: wywoływane wyłącznie w `addProductsBulk`
+  (`:44791`) i `acceptStaging` (`:44903`), obie poza `tk()` i poza zakresem 3c (3d).
+
+Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
+- `U.addStaging` (`:44923`) deduplikuje po `(kod, typ_zmiany, COALESCE(powod,''))` i przy
+  trafieniu nie zapisuje nic — licznik `doStagingu` liczy długość bufora, nie liczbę
+  realnych zapisów (`:47849-47850`).
+- `d.eanIsValid === false` w klasyfikatorze (`:47712`, `:47758`) jest w praktyce martwe:
+  `Hq()` (`:47357`) zapisuje w tym polu zawsze `1` albo `0`, nigdy `boolean`.
+- Pętla porównania pól po `Vq` (`:47749`) pomija przypadek „stara wartość pusta, nowa
+  niepusta" — uzupełnienie brakującego pola klasyfikuje pozycję jako zmienioną, ale nie
+  pojawia się jako składnik `powod`.
 
 > **Odbudowa (3a, `4-FEATURE-port-parserow-charakteryzacja`):** potok WEJŚCIA do `tk()` —
 > `dispatcher.parseByKod() → parser.parseFile() → adapter.recordsToSurowe()` — jest przeportowany
@@ -128,6 +153,17 @@ potwierdzone:
 > `POST /api/dostawcy/:kod/upload` (rdzeń, fallback do starych parserów `Wc()`, nie AI —
 > Iteracja 11) i `POST /api/ai-fallback/parse` (stub, nigdy nie łączy się z OpenAI). Szczegóły:
 > `docs/tickets/5-FEATURE-staging-endpointy-importu/`.
+>
+> **Odbudowa (3c, `6-FEATURE-silnik-tk-dopasowanie-klasyfikator`):** ciało silnika wymienione —
+> port `Zc`/`Hq`/`ZT`/`Kq`/`Vq`/`Xq`/`Lq` do czytelnego TS (`rebuild/backend/src/import/silnik/`),
+> wymiana ciała `tk()`, deduplikacja zapisu do stagingu (`U.addStaging`), bezpiecznik pustego
+> wejścia przeniesiony z trasy do silnika. Dowód wierności: żywe `tk()` (`:47584-47851`) da się
+> wyciąć z `mirror/backend/index.cjs` po kotwicach tekstowych i **uruchomić** na atrapach warstwy
+> danych, więc wzorzec charakteryzacji pochodzi z wykonanego kodu produkcji, nie z lektury —
+> 340 wierszy `staging_items` porównanych pole po polu z 1838 rekordów wejścia na katalogu 7405
+> produktów ze zrzutu produkcji, plus 18 scenariuszy celowanych i gate treści przez HTTP.
+> Do 3d zostają: efekty auto-zatwierdzania (decyzja i licznik liczone, zapis nie), pętla
+> wycofań, realne `Gq()`. Szczegóły: `docs/tickets/6-FEATURE-silnik-tk-dopasowanie-klasyfikator/`.
 
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,

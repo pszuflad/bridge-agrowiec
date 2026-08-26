@@ -137,7 +137,7 @@ export function stworzAtrapy({ produkty, overrides = [] }) {
     staging,
     /**
      * Wszystkie wywołania `addStaging`, także te zdeduplikowane. `tk()` ustawia
-     * `doStagingu = c.length` (`:47849`), czyli liczy BUFOR, a nie zapisy — więc licznik
+     * `doStagingu = c.length` (`:47850`), czyli liczy BUFOR, a nie zapisy — więc licznik
      * trzeba odtworzyć stąd, nie z `staging`.
      */
     wywolaniaStagingu,

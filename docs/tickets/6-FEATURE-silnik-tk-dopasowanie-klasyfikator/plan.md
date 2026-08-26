@@ -126,7 +126,7 @@ z jawną instrukcją, zamiast po cichu przesunąć wzorzec.
 ### D3 — Błąd cieniowania `Lq()` odtwarzamy 1:1
 
 W wysłanym bundlu obie definicje `Lq` są w **tym samym zakresie**, więc późniejsza (`:47312`,
-sha1) wygrywa dla całego pliku — także dla wywołania `Lq(i)` **wewnątrz `ZT()`** (:46984), które
+sha1) wygrywa dla całego pliku — także dla wywołania `Lq(i)` **wewnątrz `ZT()`** (:46987), które
 miało trafić w licznik cyfr znaczących (`:46965`). Sprawdzone uruchomieniem oryginału: wywołana
 z jednym argumentem funkcja sha1 zawsze zwraca `null`, warunek `null < 13` jest zawsze prawdziwy,
 więc dla każdego EAN-u w notacji naukowej rozwijającego się do 13 cyfr komunikat brzmi dosłownie:
@@ -146,7 +146,7 @@ decyzji Ani. W kodzie reprodukujemy to **wywołaniem tej samej funkcji z jednym 
 
 `docs/spec-backend.md` §5 i `03_IMPORT_tk.md` podają: „EAN auto-zmieniany tylko dla długości
 8/12/13/14 i nie kończący się pięcioma zerami". Sprawdzone: ta reguła istnieje **wyłącznie
-w martwej `function tk` (:47503-47512)**. Żywy `tk` buduje auto-patch `AP` tylko z
+w martwej `function tk` (:47499-47512)**. Żywy `tk` buduje auto-patch `AP` tylko z
 `cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` i **nigdy nie ustawia `AP.ean`** —
 produkcja realnie nie aktualizuje EAN istniejącego produktu przy imporcie.
 
@@ -198,7 +198,7 @@ istniejący wiersz bez zapisu. `zapiszPozycjeStagingu` z 3b robi insert w pętli
 W 3b to było niewidoczne, bo `powod` był stały i pola treści puste; od 3c pozycje mają realny
 `powod`, więc powtórny import tego samego cennika duplikowałby wiersze wbrew produkcji.
 Uzupełniamy `zapiszPozycjeStagingu` o ten warunek. `doStagingu` zostaje długością bufora
-(`c.length`), **nie** liczbą realnie wstawionych wierszy — tak jak w oryginale (:47849).
+(`c.length`), **nie** liczbą realnie wstawionych wierszy — tak jak w oryginale (:47850).
 
 ## Implementation plan
 

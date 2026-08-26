@@ -85,7 +85,7 @@ function rozdzielPetleGlowna(aktualizacje) {
  * Odsiewa to, czego 3c świadomie nie ma, i raportuje odsiane osobno, zamiast po cichu gubić:
  * wiersze `wycofana`, licznik `wycofane`, wywołania `updateProduct` z pętli wycofań i zapisy
  * auto-zatwierdzenia. `doStagingu` oryginał liczy jako długość CAŁEGO bufora razem
- * z wycofaniami (`:47849`), więc obok surowej wartości zapisujemy tę policzoną bez nich —
+ * z wycofaniami (`:47850`), więc obok surowej wartości zapisujemy tę policzoną bez nich —
  * to ta druga jest porównywalna z 3c.
  */
 export function normalizujPrzebieg(przebieg) {
@@ -93,7 +93,7 @@ export function normalizujPrzebieg(przebieg) {
   const wZakresie = wszystkie.filter((w) => w.typZmiany !== TYP_POZA_ZAKRESEM_3C);
   const wycofane = wszystkie.length - wZakresie.length;
 
-  // `doStagingu` to długość BUFORA (`:47849`), a nie liczba zapisanych wierszy — te dwie
+  // `doStagingu` to długość BUFORA (`:47850`), a nie liczba zapisanych wierszy — te dwie
   // wartości rozjeżdżają się, gdy addStaging zdeduplikuje powtórzoną pozycję.
   const buforWZakresie = przebieg.wywolaniaStagingu.filter(
     (w) => w.typZmiany !== TYP_POZA_ZAKRESEM_3C,
@@ -109,7 +109,7 @@ export function normalizujPrzebieg(przebieg) {
     statystyki: { ...licznikiWZakresie, doStagingu: buforWZakresie },
     pozaZakresem3c: {
       opis:
-        "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47788-47806) " +
+        "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) " +
         "należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). " +
         "Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
       wycofaneWiersze: wycofane,

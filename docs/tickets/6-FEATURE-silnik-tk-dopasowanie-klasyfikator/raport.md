@@ -89,7 +89,7 @@ przewidywać kolejne takie przypadki.
 ### U2. `ZT()` woła `Lq()` z sha1, nie licznik cyfr — żywy błąd produkcji (D3)
 
 Skoro obie definicje są w jednym zakresie, wygrywa późniejsza (`:47312`, sha1) — także dla
-wywołania `Lq(i)` **wewnątrz `ZT()`** (`:46984`), które miało trafić w licznik cyfr znaczących.
+wywołania `Lq(i)` **wewnątrz `ZT()`** (`:46987`), które miało trafić w licznik cyfr znaczących.
 Wywołana z jednym argumentem funkcja sha1 zawsze zwraca `null`, więc warunek `a < 13` jest
 zawsze prawdziwy i komunikat brzmi dosłownie:
 
@@ -122,7 +122,7 @@ Kod portu woła tę samą funkcję z jednym argumentem, zamiast wpisywać `null`
 `docs/spec-backend.md` §5 i `docs/incoming/backend-perplexity/backend_doc/03_IMPORT_tk.md`
 podają jako obowiązującą regułę: „EAN auto-zmieniany tylko dla długości 8/12/13/14 i nie
 kończący się pięcioma zerami". Ta reguła istnieje **wyłącznie w martwej `function tk`**
-(`:47503-47512`). Żywy `tk` (`:47584`) buduje auto-patch tylko z
+(`:47499-47512`). Żywy `tk` (`:47584`) buduje auto-patch tylko z
 `cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` i **nigdy nie ustawia `AP.ean`** —
 produkcja nie aktualizuje EAN istniejącego produktu przy imporcie.
 
@@ -139,18 +139,18 @@ także dopasowaniem (brak mapy EAN i `conflictEans`), składem `_KP` i liczeniem
 i przy trafieniu zwraca istniejący wiersz **bez zapisu**. W 3b było to niewidoczne, bo `powod`
 był stały; od 3c wiersze mają realny `powod`. Potwierdzone na danych: **próbka MO2 zawiera dwa
 powtórzone kody**, więc oryginał raportuje `doStagingu: 200`, a zapisuje 198 wierszy —
-`doStagingu` liczy BUFOR, nie zapisy (`:47849`). Nasz port zachowuje się identycznie.
+`doStagingu` liczy BUFOR, nie zapisy (`:47850`). Nasz port zachowuje się identycznie.
 
 ### U5. `d.eanIsValid === false` jest w praktyce martwe
 
-`Hq()` zapisuje w tym polu **1 albo 0**, nigdy boolean (`:47355`). Warunki `d.eanIsValid === false`
-w klasyfikatorze `nowa`/`blad` (`:47716`) i `_cb` (`:47767`) nigdy nie wypalają. To dlatego
+`Hq()` zapisuje w tym polu **1 albo 0**, nigdy boolean (`:47357`). Warunki `d.eanIsValid === false`
+w klasyfikatorze `nowa`/`blad` (`:47712`) i `_cb` (`:47758`) nigdy nie wypalają. To dlatego
 niepoprawny EAN sam z siebie nie robi z pozycji `blad` — robi to dopiero ostrzeżenie o EAN-ie
 przez inną ścieżkę. Odtworzone dosłownie, oznaczone komentarzem.
 
 ### U6. Uzupełnienie pustego pola NIE jest raportowane jako różnica
 
-Pętla po `Vq` (`:47756`) pomija przypadek „stara wartość pusta, nowa niepusta". Klasyfikację
+Pętla po `Vq` (`:47746`) pomija przypadek „stara wartość pusta, nowa niepusta". Klasyfikację
 i tak wywołuje, jeśli pole jest w `_KP`, ale w `powod` różnica się nie pojawia. Wygląda jak
 błąd, jest zachowaniem oryginału — pokryte w gate'cie treści.
 
@@ -276,3 +276,68 @@ je przeimportować, nie łatać.
 8. **Backlog #3 (`szerokosc` REAL→TEXT)** nie ruszony — decyzja należy do 3d/I12, jak ustalono.
    Silnik przepuszcza `szerokosc` jako string, `products.szerokosc` pozostaje REAL; różnica
    ujawnia się dopiero przy zapisie do katalogu, czyli w `acceptStaging` (3d).
+
+## Poprawki po review
+
+Review nie zgłosiło ani jednego zastrzeżenia do kodu — port został przeszedł linia po linii
+wobec żywego `tk()` bez znalezionego rozjazdu. Dwa BLOCKERY dotyczyły dokumentacji i zostały
+zdjęte w fazie docs (niżej). Poza tym:
+
+- **Usunięta sprzeczność w raporcie** — sekcja D4/U3 mówiła „oba dokumenty prostujemy", a
+  „Follow-up" sugerował odłożenie. Doprecyzowane: `docs/spec-backend.md` §5 prostujemy w tym
+  tickecie, `docs/incoming/…/03_IMPORT_tk.md` zostaje bez zmian jako materiał źródłowy.
+- **Skorygowane numery linii.** Weryfikując cytaty doc-checkera znalazłem, że kilka moich
+  odwołań do `deminified/backend-index.cjs` było przesuniętych o kilka wierszy. Poprawione
+  w 13 plikach (kod, testy, plan, raport): `Lq(i)` w `ZT()` `:46984`→**`:46987`**, zapis
+  `eanIsValid` w `Hq()` `:47355`→**`:47357`**, `d.eanIsValid === false` `:47716`→**`:47712`**,
+  `_cb` `:47767`→**`:47758`**, pętla `Vq` `:47756`→**`:47746`**, `_KP` `:47762`→**`:47751`**,
+  `doStagingu = c.length` `:47849`→**`:47850`**, budowa `AP` `:47768-47772`→**`:47760-47764`**,
+  gałąź auto-zatwierdzania `:47788-47806`→**`:47791-47806`**, martwa reguła EAN
+  `:47503-47512`→**`:47499-47512`**. Wzorzec charakteryzacji przenagrany, testy zielone.
+  W projekcie, w którym numery linii są nośne, to nie jest kosmetyka.
+- **Sprawdzone, a NIE zmienione:** roadmapa cytuje `assignKodImportu` „w `addProductsBulk`
+  (`:44746`) i `acceptStaging` (`:44827`)". Wygląda na rozjazd wobec faktycznych miejsc wywołania
+  (`:44791`, `:44903`), ale `:44746`/`:44827` to linie DEFINICJI tych funkcji — zapis jest
+  poprawny w swoim znaczeniu. Zostawione bez zmian.
+- **SHOULD-FIX z review** (N zapytań w dedupie stagingu, ~5 MB wzorca w repo) — oba świadomie
+  przyjęte, zapisane jako follow-up 6 i 7. Review sam nie prosił o zmianę.
+- **NICE-TO-HAVE z review** (zbędny `SELECT` po `UPDATE` w `aktualizujProdukt`) — zostawione.
+  `U.updateProduct` w oryginale (`:44738`) też zwraca zaktualizowany wiersz; port zachowuje
+  ten kontrakt, mimo że dzisiejszy wołający go ignoruje.
+
+## Aktualizacja dokumentacji
+
+### `docs/rebuild-roadmap.md`
+Blok 3c zamknięty (✅, ticket + PR + 2026-08-26), zaktualizowana §4 Tablica postępu i nagłówek
+Iteracji 3. Opis 3c przepisany na stan **faktycznie dowieziony**; usunięta błędna pozycja zakresu
+o regule EAN i zwinięta skonsumowana sekcja „Wejście z 3b". Do bloku **3d** dopisana sekcja
+„⚠ Wejście z 3c" (11 punktów: oznaczone punkty podmiany, stan bezpiecznika, deduplikacja
+`addStaging`, mutacje katalogu przez import, martwe `eanIsValid === false`, osiągalność gałęzi
+`Lq()` dopiero przez `POST /api/staging/import`, sposób przenagrania wzorca). Do bloku **3e**
+wpisany realny stan danych stagingu i lista komunikatów, które UI ma pokazywać. Naprawione dwa
+martwe cross-referencje.
+
+### `docs/rebuild-backlog.md`
+Wpis **#11** (błąd cieniowania `Lq`) — nowy. Zaktualizowane: **#3** (3c nie rusza schematu,
+decyzja o typie kolumny nadal 3d/I12), **#4** (`uwagaCena` przechodzi przez `snapshotJson`,
+materiał dla `acceptStaging` gotowy), **#8** (bezpiecznik domknięty w 3c, zakrywa też przyszły
+`POST /api/staging/import`; dopisane powiązanie z #11 — MO8 jako CSV to scenariusz, w którym
+błąd #11 realnie odpala). Procedura re-synchronizacji rozszerzona o **drugą warstwę wzorca**
+(silnik) i jej strażnik integralności. #6, #9, #10 zweryfikowane bez zmian.
+
+### `docs/spec-backend.md`
+§5 sprostowana: usunięta nieprawdziwa reguła auto-aktualizacji EAN (martwy kod), uzupełniony
+pominięty trzeci krok dopasowania (po EAN znormalizowanym, `:47698`), doprecyzowany zakres 3c
+przy `Gq()`, auto-zatwierdzaniu i wycofaniach, zweryfikowane miejsca wywołania
+`assignKodImportu`. Dodane trzy ustalenia z charakteryzacji (dedup `addStaging`, martwe
+`eanIsValid === false`, pomijanie „stara pusta → nowa niepusta" w `powod`) oraz nota
+„Odbudowa (3c)".
+
+### `CLAUDE.md`
+Punkt 5 o duplikatach uzupełniony o **mechanizm** (łatki `patch_*.cjs` doklejane po buildzie,
+nie artefakt deminifikacji), **sposób wykrywania** (liczyć `function <nazwa>(` w mirrorze,
+nie ufać numerowi linii) i **przykład cieniowania sięgającego poza samą funkcję** (`ZT()` → `Lq`).
+
+### Bez zmian
+`docs/plan.md`, `docs/audit-delta.md`, `docs/spec-frontend.md` — sprawdzone, nie zawierają
+treści zdezaktualizowanej przez 3c (opisują produkcję albo stan sprzed startu odbudowy).

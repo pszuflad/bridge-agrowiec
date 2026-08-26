@@ -242,6 +242,11 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
    (`GET_products.json` ma `"szerokosc": 620` jako liczbę), a przenagranie fixtures należy do I12.
    Dochodzi argument merytoryczny: `szertxt` jest niekompletny — `parseWidthFallbackMm()` nadal
    zwraca milimetry jako float (punkt wyżej); Ania to poprawia. Decyzja → 3d/I12.
+7. **Świadomie NIE ruszone przy 3c** (ticket `6-FEATURE-silnik-tk-dopasowanie-klasyfikator`,
+   2026-08-26). Silnik dopasowania (`tk()`) przepuszcza `szerokosc` jako string bez konwersji —
+   `products.szerokosc` w rebuild pozostaje `REAL`. Różnica ujawni się dopiero przy zapisie do
+   katalogu, czyli w `acceptStaging` (3d), gdy pole trafi z `snapshot_json` z powrotem do
+   kolumny produktu. Decyzja o typie kolumny nadal → 3d/I12.
 
 ### #4 · 2026-08-24 · [BAZA][BACKEND][FRONTEND] · `uwaga_cena` (cena „na zapytanie")
 
@@ -275,6 +280,11 @@ pozostaje nietknięty do czasu przenagrania fixtures w I12. **Nadal do zrobienia
 propagacja w `acceptStaging` (odczyt `uwagaCena` ze `snapshotJson`) oraz endpoint
 `GET /api/products/uwagi-cena` — u swojego pisarza, bo endpoint bez pisarza zwracałby zawsze
 pustą listę i nie dałoby się go sensownie przetestować.
+
+**Potwierdzone przy 3c (2026-08-26).** Silnik dopasowania serializuje `snapshotJson` z rekordu
+PO `znormalizujPozycje()` (`Hq()`), która kopiuje wszystkie pola wejścia przez spread —
+`uwagaCena` przechodzi bez zmian. Materiał dla `acceptStaging` (3d) jest więc już na miejscu
+w stagingu, nic dodatkowego nie trzeba było robić w 3c.
 
 **Rekomendacja:** ✅ **nanieść, ale NIE jako łatka do I2.** Po przeglądzie raportu I2 (2026-08-25): `uwaga_cena` rozkłada się jak inne rzeczy odłożone przez I2 — **schemat** (nowa kolumna, razem z decyzją #3) + **endpoint `/api/products/uwagi-cena`** + **propagacja w imporcie** (`acceptStaging`, parser mo7/adapter) → **I3**; **frontend to skrypt injection do tooltipu** (wprost z komentarza w `uwaga_cena_patch.cjs`) → wchłonięcie injection w późniejszej iteracji. Katalog I2 odtworzył bundle **sprzed** `uwaga_cena`, a dołożenie pola do `GET /api/products` złamałoby GATE wobec zamrożonego `GET_products.json` (przenagranie fixtures należy do I12). Dlatego I2 zostaje zamknięte, a to wchodzi u swoich właścicieli.
 
@@ -383,8 +393,8 @@ produkcyjny.
 | **Kategoria** | BACKEND (parser MO8) |
 | **Pliki** | `parsers/mo8_trelleborg.cjs` |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
-| **Iteracja** | **→ 3b**; do rozstrzygnięcia GDZIE naprawiamy — patrz „Gdzie naprawiamy" na końcu pliku |
-| **Status** | 🔨 częściowo zrobione (bezpiecznik D4 w rebuild, I3/3b, 2026-08-26) — poprawka parsera MO8 nadal do portu (#6, Wariant A) |
+| **Iteracja** | **→ 3b** (bezpiecznik, pierwsza wersja) **→ 3c** (bezpiecznik przeniesiony do `tk()`, zakrywa wszystkie trasy); poprawka parsera MO8 — patrz „Gdzie naprawiamy" na końcu pliku |
+| **Status** | 🔨 częściowo zrobione (bezpiecznik `PustyImportBlad` w `tk()`, I3/3c, 2026-08-26 — zakrywa wszystkie trasy silnika) — poprawka parsera MO8 nadal do portu (#6, Wariant A) |
 
 **Opis biznesowy:** jeśli Trelleborg przyśle cennik jako CSV zamiast XLSX, import kończy się
 **zerem zaimportowanych pozycji i bez żadnego komunikatu błędu**. Wygląda jak udany import
@@ -453,14 +463,17 @@ wejdzie portem przez #6 — to się nie zmieniło.
 rekordów, 0 błędów) — problem nie jest specyficzny dla MO8, bezpiecznik D4 pokrywa oba przypadki
 jednakowo. Poprawka parsera MO10 to również poprawka Ani, portem (#6).
 
-**⚠ Bezpiecznik z 3b NIE zakrywa wszystkich ścieżek (do domknięcia w 3d).** Bramka na pusty
-wynik parsowania stoi w `POST /api/import/parse-file` i `POST /api/import/from-url`. Trzecia
-trasa prowadząca do `tk()` — `POST /api/staging/import` (`backend-index.cjs:48502-48512`) —
-bierze pozycje **wprost z ciała żądania** (`body.surowe ?? body.items ?? []`) i waliduje tylko
-`Array.isArray`. Żądanie `{dostawcaKod:"MO5"}` bez pola `surowe` uruchamia więc dokładnie ten
-scenariusz, który ten wpis opisuje. Rekomendacja: przenieść bezpiecznik do samego `tk()`
-(zakryje wszystkie ścieżki naraz) zamiast powielać go na trzeciej trasie. Znalezione przy
-przeglądzie zakresu 3c/3d, 2026-08-26.
+**✅ Domknięte w 3c (2026-08-26, D7)** — dokładnie rekomendacją z akapitu wyżej. Bezpiecznik
+pustego wejścia przeniesiono z tras importu **DO samego `tk()`** (`PustyImportBlad`,
+`src/import/tk.ts`), więc od 3c zakrywa WSZYSTKIE trzy wejścia silnika naraz — także
+`POST /api/staging/import`, który powstanie dopiero w 3d i który wcześniej byłby trzecią,
+niezasłoniętą ścieżką (`backend-index.cjs:48502-48512`, pozycje wprost z ciała żądania).
+`routes/import.ts` stracił swój duplikat bramki i tylko tłumaczy wyjątek `PustyImportBlad` na 400.
+
+**Powiązanie z #11:** gałąź `ZT()`/`Lq()` opisana we wpisie #11 (komunikat „null cyfr
+znaczących") jest dziś osiągalna w produkcji m.in. właśnie w scenariuszu z tego wpisu — **MO8
+dostarczony jako CSV** zamiast XLSX — bo wtedy arkusz zapisuje EAN tekstem w notacji naukowej
+zamiast liczbą.
 
 
 ### #9 · 2026-08-26 · [BACKEND] · pola `nro` i `cho` zapisywane jako liczby 0/1
@@ -538,8 +551,6 @@ pliku `MO1__20260821__08471__bohnenkamp.csv`: 161 pozycji nie jest oponami, klas
 słowa, bez granic wyrazu, bo w niemieckich złożeniach nie ma separatora). Przy okazji warto
 przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 
----
-
 ### #11 · 2026-08-26 · [BACKEND] · `ZT()` woła `Lq()` z sha1 zamiast licznika cyfr — komunikat „null cyfr znaczących"
 
 | Pole | Wartość |
@@ -608,13 +619,19 @@ Wpisy **#3** (szerokość w mm), **#8** (MO8 i format pliku), **#9** (`nro`/`cho
 jest kopią **bajt-w-bajt** produkcji i pilnuje tego test integralności, więc trzeba rozstrzygnąć,
 po której stronie te zmiany powstają.
 
+**Od I3/3c wzorzec charakteryzacji ma DWIE warstwy, nie jedną** — patrz procedura niżej. Każda
+z tych czterech poprawek zmienia wyjście parsera (`test/charakteryzacja/*.expected.json`), a przez
+to pośrednio też wejście silnika dopasowania, czyli wzorzec
+`test/charakteryzacja/silnik/*.expected.json`. Przenagranie tylko połowy zostawia repo w stanie
+niespójnym z realnym zachowaniem.
+
 > ✅ **PODJĘTA DECYZJA: wariant A.** Poprawki #3, #8, #9 i #10 powstają **w produkcji**, u Ani.
 > My podciągamy je portem — patrz „Procedura po stronie odbudowy" na końcu tej sekcji.
 
 **Wariant A — Ania poprawia w produkcji, my podciągamy portem (WYBRANY).**
 - Żywa produkcja, z której Marta korzysta codziennie, przestaje produkować śmieci **od razu**,
   a nie dopiero po cutoverze.
-- Port zostaje bajt-w-bajt; re-synchronizacja to `cp` + przenagranie wzorca charakteryzacji,
+- Port zostaje bajt-w-bajt; re-synchronizacja to `cp` + przenagranie OBU wzorców charakteryzacji,
   a `git diff` na `MOx.expected.json` **pokaże pole po polu, co dokładnie się zmieniło** — czyli
   poprawka jest przy okazji zweryfikowana.
 - To jest dokładnie mechanizm, dla którego przyjęto strategię portu (patrz #6).
@@ -635,34 +652,56 @@ cp mirror/backend/parsers/adapter.cjs      rebuild/backend/src/import/legacy/par
 cp mirror/backend/parsers/tyre_params.cjs  rebuild/backend/src/import/legacy/parsers/
 # (analogicznie pozostałe zmienione pliki — BEZ *.bak_*)
 
-# 3. Przenagraj wzorzec charakteryzacji z NOWEGO oryginału
+# 3. Przenagraj wzorzec charakteryzacji PARSERÓW z NOWEGO oryginału
 cd rebuild/backend && node scripts/charakteryzacja-nagraj.mjs
 
-# 4. Obejrzyj, co poprawka realnie zmieniła — pole po polu
+# 4. Przenagraj wzorzec charakteryzacji SILNIKA (I3/3c) — DRUGI wzorzec, osobny krok.
+#    Wymaga db/snapshot.db (zrzut produkcji; .gitignore, 32 MB — nie ma go w świeżym klonie):
+BRIDGE_SNAPSHOT_DB=/ścieżka/do/snapshot.db node scripts/charakteryzacja-silnik-nagraj.mjs
+
+# 5. Obejrzyj, co poprawka realnie zmieniła — pole po polu, w OBU wzorcach
 git diff test/charakteryzacja/
 
-# 5. Potwierdź, że port i wzorzec się zgadzają
-npm test -- test/charakteryzacja.test.ts
+# 6. Potwierdź, że port i oba wzorce się zgadzają
+npm test -- test/charakteryzacja.test.ts test/silnik.charakteryzacja.test.ts
 ```
 
-**Krok 4 jest sensem wariantu A.** `git diff` na `MOx.expected.json` pokazuje dokładnie, które
-rekordy i które pola zmieniły wartość — czyli poprawka Ani zostaje przy okazji **zweryfikowana
-na 1838 rekordach z realnych plików dostawców**, zanim ktokolwiek zobaczy ją w panelu.
+**Krok 5 jest sensem wariantu A.** `git diff` na `MOx.expected.json` i na
+`test/charakteryzacja/silnik/*.expected.json` pokazuje dokładnie, które rekordy, wiersze stagingu
+i pola zmieniły wartość — czyli poprawka Ani zostaje przy okazji **zweryfikowana na 1838
+rekordach z realnych plików dostawców i na katalogu 7405 produktów**, zanim ktokolwiek zobaczy ją
+w panelu.
 
-Czego się spodziewać w diffie przy każdej z czterech poprawek:
+**Wzorzec silnika ma własny strażnik integralności**, niezależny od kroku 4:
+`test/charakteryzacja/silnik/integralnosc.json` trzyma sha256 fragmentu wyciętego
+z `mirror/backend/index.cjs` (żywy `tk()` + helpery). Zmiana w mirrorze — nawet niezwiązana
+z poprawką parsera — zapala ten test z jawną instrukcją przenagrania. To sygnał „zmieniła się
+produkcja", nie „popraw test".
 
-| Poprawka | Oczekiwana zmiana we wzorcu |
+Czego się spodziewać w diffie wzorca PARSERÓW przy każdej z czterech poprawek:
+
+| Poprawka | Oczekiwana zmiana we wzorcu parserów |
 |---|---|
 | #3 szerokość | `MO2.expected.json`: 1 rekord (`6.5/80-12`), `szerokosc` `165.1` → `"6.5"` albo `null` |
 | #9 `nro`/`cho` | wszystkie pliki: wartości `0` → `null`, `1` → `"Tak"` |
 | #10 `WULSTBAND` | `MO1.expected.json`: **ubędzie 16 rekordów** (199 → mniej, zależnie od próbki) |
 | #8 MO8 i format | wzorzec **bez zmian** (próbka MO8 to XLSX, który już działa) — zmiana widoczna dopiero przy pliku CSV |
 
-Jeśli diff pokaże **coś więcej** niż powyżej — to sygnał, że poprawka ma efekt uboczny, którego
-nikt się nie spodziewał. Dokładnie po to ten mechanizm istnieje.
+**Wpływ na wzorzec SILNIKA (I3/3c, krok 4 procedury) — obowiązkowy, nie opcjonalny:**
+
+| Poprawka | Wpływ na wzorzec silnika |
+|---|---|
+| #3 szerokość | `snapshotJson.szerokosc` dla dotkniętego rekordu zmieni wartość na wejściu do silnika; może przesunąć klasyfikację wiersza między `bezZmian` a `zmiana_kluczowa`, jeśli to jedyna wykryta różnica |
+| #9 `nro`/`cho` | jeśli `nro`/`cho` są jedyną różnicą wykrywaną przez `Vq`, klasyfikacja wiersza może się zmienić razem z `powod` |
+| #10 `WULSTBAND` | dotknięte rekordy znikają z wejścia silnika razem z parserem — ubędzie odpowiadających im wierszy stagingu (dokładna liczba zależy od tego, ile z nich w ogóle trafiało do stagingu) |
+| #8 MO8 i format | bez zmian, dopóki próbka MO8 to XLSX; dołożenie próbki CSV odblokuje też gałąź opisaną w #11 (`ZT()`/`Lq()`, EAN w notacji naukowej) |
+
+Jeśli diff pokaże **coś więcej** niż powyżej — w którymkolwiek z dwóch wzorców — to sygnał, że
+poprawka ma efekt uboczny, którego nikt się nie spodziewał. Dokładnie po to ten mechanizm istnieje.
 
 *Utworzono 2026-08-26 przy tickecie `4-FEATURE-port-parserow-charakteryzacja`; decyzja o wariancie
-A podjęta tego samego dnia.*
+A podjęta tego samego dnia. Rozszerzono 2026-08-26 przy tickecie
+`6-FEATURE-silnik-tk-dopasowanie-klasyfikator` (I3/3c) o drugą warstwę wzorca (silnik).*
 
 ---
 

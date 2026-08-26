@@ -212,8 +212,8 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
     expect(String(w.powod)).toContain("nazwa: STARA NAZWA → 340/85R24 BKT AGRIMAX RT 945");
 
     // ⚠ `kodDostawcy` RÓŻNI się (katalog ma null, cennik „GATE-EAN"), a mimo to w `powod`
-    // go nie ma — pętla po `Vq` (:47756) pomija przypadek „stara pusta, nowa niepusta".
-    // Klasyfikację i tak wywołuje, bo `kodDostawcy` jest w `_KP` (:47762). To zachowanie
+    // go nie ma — pętla po `Vq` (:47746) pomija przypadek „stara pusta, nowa niepusta".
+    // Klasyfikację i tak wywołuje, bo `kodDostawcy` jest w `_KP` (:47751). To zachowanie
     // oryginału, nie przeoczenie: uzupełnienie brakującego pola nie jest „zmianą" do pokazania.
     expect(String(w.powod)).not.toContain("kod dostawcy");
     expect(JSON.parse(String(w.snapshotJson)).kodDostawcy).toBe("GATE-EAN");
