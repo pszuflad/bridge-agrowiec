@@ -168,6 +168,32 @@ zwraca `szerokosc` jako **string** z zerami końcowymi (`"10.00"`, `"400"`), a `
 kształtu rekordu w pamięci — **zmiana `products.szerokosc` REAL→TEXT i przenagranie
 `GET_products.json` pozostają do rozstrzygnięcia tutaj** (3b/I12).
 
+🔎 **PRZYCZYNA ŹRÓDŁOWA — namierzona 2026-08-26. Fallback na mm jest OBJAWEM, nie chorobą.**
+
+Właściwy błąd siedzi w `parseSize()` (`tyre_params.cjs:214`), w regexie notacji ze slashem:
+
+```js
+/^(VF|IF)?(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)([RBD-])(\d{1,3}(?:\.\d+)?)$/i
+//          ^^^^^^^ szerokość wymaga 2-4 CYFR przed kropką
+```
+
+`\d{2,4}` nie dopuszcza **jednocyfrowej części całkowitej**, więc rozmiary małych opon
+rolniczych/przyczepkowych w ogóle nie są rozbijane. Zweryfikowane:
+
+| Rozmiar | `parseSize()` |
+|---|---|
+| `6.5/80-12`, `6.50/80-12` | ❌ szerokość, profil, średnica = `null` |
+| `9.5/65-15`, `7.5/80-12`, `5.5/65-12` | ❌ wszystko `null` |
+| `10.0/75-15.3`, `12.5/80-18`, `16.5/70-18`, `65/80-12` | ✅ rozbite poprawnie |
+
+Dopiero **dlatego** odpala się fallback `parseWidthFallbackMm(record.szerokosc)` i przelicza
+`6.5` cala na `165.1` mm. Naprawa samego fallbacku ukryłaby objaw, ale rozmiar dalej nie miałby
+profilu ani średnicy — a te idą do wyliczeń wymiarów i wagi gabarytowej.
+
+**Rekomendacja: naprawić regex** (`\d{2,4}` → `\d{1,4}`, do rozważenia także w dwóch
+bliźniaczych wzorcach w liniach 195 i 204), a dopiero potem zdecydować, co ma robić fallback.
+Po naprawie regexu fallback dla tych rozmiarów przestanie się w ogóle odpalać.
+
 ✅ **POTWIERDZONE PRZEZ ANIĘ (2026-08-26): fallback na milimetry to BŁĄD, nie zamierzone
 zachowanie.** „To jest ewidentnie błąd, który nie został naprawiony przy naprawie parserów […]
 to nie powinno się tak przeliczać na te milimetry, tylko powinno być w calach." Do usunięcia
@@ -409,6 +435,26 @@ wyłącznie `"Tak"` albo `null`.
 prawdopodobnie innych pól-flag etykiety UE — do sprawdzenia przy przepisywaniu adaptera"*.
 Sprawdzone; te dwa pola zostały pominięte.
 
+**Naprawa — dwie linie w `parsers/adapter.cjs` (596-597):**
+
+```js
+// było:
+nro: enriched.nro ?? null,
+cho: enriched.cho ?? null,
+// ma być:
+nro: tyre.normalizeLabelFlag(enriched.nro),
+cho: tyre.normalizeLabelFlag(enriched.cho),
+```
+
+`normalizeLabelFlag()` jest już zaimportowany jako `tyre.*` i używany linijkę niżej dla `cfo`
+i `stubbleResistant`. Zweryfikowane, że mapuje dokładnie tak, jak trzeba: `0 → null`,
+`1 → "Tak"`, `"0" → null`, `"1" → "Tak"`, `null/undefined → null`.
+
+Źródłem wartości `0`/`1` jest `parseTechnicalMarks()` (`tyre_params.cjs:377-378`,
+`/\bNRO\b/.test(upper) ? 1 : 0`) — **tego nie ruszamy**, bo `marks.nro` jest używany także
+wewnątrz normalizatorów jako wartość logiczna. Naprawa na końcu potoku, w adapterze, to ten sam
+wzorzec, który zadziałał przy `kategoriafix` (#2).
+
 **Rekomendacja (moja):** ✅ opakować oba w `normalizeLabelFlag()` w `recordToSurowe()` — jedna
 linia na pole, w tym samym miejscu i tą samą funkcją co reszta flag. Uwaga na dane zastane:
 kolumny mogą już zawierać `0`/`1` z wcześniejszych importów.
@@ -440,14 +486,17 @@ przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 
 ---
 
-## Gdzie naprawiamy zatwierdzone błędy parserów — decyzja do podjęcia
+## Gdzie naprawiamy zatwierdzone błędy parserów — ✅ WARIANT A (decyzja 2026-08-26)
 
 Wpisy **#3** (szerokość w mm), **#8** (MO8 i format pliku), **#9** (`nro`/`cho`) i **#10**
 (`WULSTBAND`) to **zatwierdzone poprawki dotykające kodu parserów**. Port w `rebuild/backend`
 jest kopią **bajt-w-bajt** produkcji i pilnuje tego test integralności, więc trzeba rozstrzygnąć,
 po której stronie te zmiany powstają.
 
-**Wariant A — Ania poprawia w produkcji, my podciągamy portem (rekomendowany).**
+> ✅ **PODJĘTA DECYZJA: wariant A.** Poprawki #3, #8, #9 i #10 powstają **w produkcji**, u Ani.
+> My podciągamy je portem — patrz „Procedura po stronie odbudowy" na końcu tej sekcji.
+
+**Wariant A — Ania poprawia w produkcji, my podciągamy portem (WYBRANY).**
 - Żywa produkcja, z której Marta korzysta codziennie, przestaje produkować śmieci **od razu**,
   a nie dopiero po cutoverze.
 - Port zostaje bajt-w-bajt; re-synchronizacja to `cp` + przenagranie wzorca charakteryzacji,
@@ -462,7 +511,43 @@ po której stronie te zmiany powstają.
 - Produkcja zachowuje błędy aż do cutoveru.
 - Sensowne tylko wtedy, gdy Ania nie chce już dotykać starego stosu.
 
-*Utworzono 2026-08-26 przy tickecie `4-FEATURE-port-parserow-charakteryzacja`.*
+### Procedura po stronie odbudowy (po każdej poprawce Ani)
+
+```bash
+# 1. Podciągnij lustro produkcji (tools/sync — albo poczekaj na commit sync(vps))
+# 2. Podmień port kopią z lustra
+cp mirror/backend/parsers/adapter.cjs      rebuild/backend/src/import/legacy/parsers/
+cp mirror/backend/parsers/tyre_params.cjs  rebuild/backend/src/import/legacy/parsers/
+# (analogicznie pozostałe zmienione pliki — BEZ *.bak_*)
+
+# 3. Przenagraj wzorzec charakteryzacji z NOWEGO oryginału
+cd rebuild/backend && node scripts/charakteryzacja-nagraj.mjs
+
+# 4. Obejrzyj, co poprawka realnie zmieniła — pole po polu
+git diff test/charakteryzacja/
+
+# 5. Potwierdź, że port i wzorzec się zgadzają
+npm test -- test/charakteryzacja.test.ts
+```
+
+**Krok 4 jest sensem wariantu A.** `git diff` na `MOx.expected.json` pokazuje dokładnie, które
+rekordy i które pola zmieniły wartość — czyli poprawka Ani zostaje przy okazji **zweryfikowana
+na 1838 rekordach z realnych plików dostawców**, zanim ktokolwiek zobaczy ją w panelu.
+
+Czego się spodziewać w diffie przy każdej z czterech poprawek:
+
+| Poprawka | Oczekiwana zmiana we wzorcu |
+|---|---|
+| #3 szerokość | `MO2.expected.json`: 1 rekord (`6.5/80-12`), `szerokosc` `165.1` → `"6.5"` albo `null` |
+| #9 `nro`/`cho` | wszystkie pliki: wartości `0` → `null`, `1` → `"Tak"` |
+| #10 `WULSTBAND` | `MO1.expected.json`: **ubędzie 16 rekordów** (199 → mniej, zależnie od próbki) |
+| #8 MO8 i format | wzorzec **bez zmian** (próbka MO8 to XLSX, który już działa) — zmiana widoczna dopiero przy pliku CSV |
+
+Jeśli diff pokaże **coś więcej** niż powyżej — to sygnał, że poprawka ma efekt uboczny, którego
+nikt się nie spodziewał. Dokładnie po to ten mechanizm istnieje.
+
+*Utworzono 2026-08-26 przy tickecie `4-FEATURE-port-parserow-charakteryzacja`; decyzja o wariancie
+A podjęta tego samego dnia.*
 
 ---
 
