@@ -2014,5 +2014,70 @@
     "historiaCen": [],
     "zmianyProduktow": [],
     "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "kasowanie-a-potem-wycofanie",
+    "opis": "Produkt przestał być oponą (kasowanie, :47689) i miał już 2 nieobecności. Kasowanie usuwa go z BAZY, ale nie z tablicy, po której chwilę później idzie pętla wycofań — więc produkcja wystawia wiersz `wycofana` dla pozycji, której już nie ma. Nagrywamy to jako zachowanie oryginału, nie naprawiamy.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 1,
+      "odrzuconeNieOpony": 1,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 0,
+      "wycofane": 1,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": [
+        {
+          "nazwa": "K1 — Felga stalowa 9x24",
+          "powod": "nie opona (wykryto \"felga\" w nazwie/kategorii)"
+        }
+      ]
+    },
+    "wierszyPoDeduplikacji": 1,
+    "staging": [
+      {
+        "typZmiany": "wycofana",
+        "kod": "K1",
+        "nazwa": "Felga stalowa 9x24",
+        "dostawca": "MO5",
+        "magazyn": "PL",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 0,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": null,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": null,
+        "powod": "Brak w cenniku — pozycja wycofana",
+        "snapshotJson": null,
+        "eanRaw": null,
+        "eanIsValid": null,
+        "eanSourceStatus": null,
+        "eanCandidates": null,
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [
+      131
+    ],
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   }
 ]

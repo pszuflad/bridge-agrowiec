@@ -512,4 +512,26 @@ export const SCENARIUSZE = [
       },
     ],
   },
+  {
+    nazwa: "kasowanie-a-potem-wycofanie",
+    opis:
+      "Produkt przestał być oponą (kasowanie, :47689) i miał już 2 nieobecności. Kasowanie " +
+      "usuwa go z BAZY, ale nie z tablicy, po której chwilę później idzie pętla wycofań — " +
+      "więc produkcja wystawia wiersz `wycofana` dla pozycji, której już nie ma. " +
+      "Nagrywamy to jako zachowanie oryginału, nie naprawiamy.",
+    dostawca: "MO5",
+    katalog: [
+      produkt({
+        id: 131,
+        kod: "K1",
+        nazwa: "Felga stalowa 9x24",
+        kategoria: "Felgi",
+        rozmiar: null,
+        nieobecnoscPodRzad: 2,
+      }),
+    ],
+    rekordy: [
+      { kod: "K1", nazwa: "Felga stalowa 9x24", kategoria: "Felgi", stan: 2, cenaZakupu: 300 },
+    ],
+  },
 ];

@@ -5,21 +5,29 @@
 export declare const KODY_DOSTAWCOW: string[];
 export declare const UTWORZONO_WZORCOWE: string;
 export declare const POLA_WIERSZA: string[];
-export declare const TYP_POZA_ZAKRESEM_3C: string;
 
 export interface WierszWzorca {
   [pole: string]: unknown;
+}
+
+/** Zmiana stanu jednego produktu: nazwa pola → wartość przed i po. */
+export interface ZmianaProduktu {
+  id: number;
+  zmiany: Record<string, { przed: unknown; po: unknown }>;
 }
 
 export interface PrzebiegWzorca {
   dostawca: string;
   wejscie: { rekordow: number; zrodlo: string };
   katalog: { produktow: number; zrodlo: string };
+  overridy: { wierszy: number };
   statystyki: Record<string, unknown>;
-  pozaZakresem3c: Record<string, unknown>;
+  wierszyPoDeduplikacji: number;
   staging: WierszWzorca[];
   skasowane: number[];
-  resetyNieobecnosci: { id: number; patch: Record<string, unknown> }[];
+  historiaCen: Record<string, unknown>[];
+  zmianyProduktow: ZmianaProduktu[];
+  zapytanDoPamieciLinkow: number;
 }
 
 export declare function normalizujPrzebieg(przebieg: unknown): PrzebiegWzorca;
