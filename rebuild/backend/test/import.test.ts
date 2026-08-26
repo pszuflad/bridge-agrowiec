@@ -260,6 +260,19 @@ describe("endpointy importu", () => {
       expect(audyt.c).toBe(0);
     });
 
+    /**
+     * Bezpiecznik nie jest łatką na jednego dostawcę. MO10 (GRI) przy śmieciowej treści
+     * też zwraca zero rekordów i ZERO błędów — cicho, tak samo jak MO8. Każda taka
+     * ścieżka podbijałaby w produkcji licznik nieobecności całego katalogu dostawcy.
+     */
+    it("działa dla dowolnego dostawcy, nie tylko MO8", async () => {
+      const odp = await wyslijPlik("MO10", Buffer.from("to nie jest skoroszyt"), "gri.csv");
+
+      expect(odp.status).toBe(400);
+      expect((odp.body as { error: string }).error).toMatch(/ani jednej pozycji/);
+      expect(policzStaging().c).toBe(0);
+    });
+
     it("prawidłowy skoroszyt MO8 przechodzi normalnie", async () => {
       const oczekiwane = oczekiwaneRekordy("MO8");
       const odp = await wyslijPlik("MO8", probka("MO8.xlsx"), "trelleborg.xlsx");
@@ -496,7 +509,12 @@ describe("endpointy importu", () => {
       expect(policzStaging().c).toBe(0);
     });
 
-    it("błąd parsera też kończy się 500 z adresem w ciele", async () => {
+    /**
+     * Śmieciowa treść nie wywraca parsera MO1 — zgłasza on jeden błąd wiersza i zwraca
+     * zero rekordów. Łapie to bezpiecznik D4, nie blok `catch`, więc odpowiedź to 400
+     * z adresem w ciele (jak w pozostałych błędach `from-url`).
+     */
+    it("śmieciowa treść kończy się 400 z adresem w ciele, bez zapisu do stagingu", async () => {
       const app = zPobieraczem(async () => Buffer.from("to nie jest xlsx"));
 
       const odp = await request(app)
@@ -504,8 +522,13 @@ describe("endpointy importu", () => {
         .set("Authorization", `Bearer ${token}`)
         .send({ dostawcaKod: "MO1" });
 
-      expect([400, 500]).toContain(odp.status);
-      expect((odp.body as { dostawcaKod: string }).dostawcaKod).toBe("MO1");
+      expect(odp.status).toBe(400);
+      expect(odp.body).toMatchObject({
+        dostawcaKod: "MO1",
+        url: "https://przyklad.test/cennik-mo1.csv",
+      });
+      expect((odp.body as { error: string }).error).toMatch(/ani jednej pozycji/);
+      expect(policzStaging().c).toBe(0);
     });
   });
 
