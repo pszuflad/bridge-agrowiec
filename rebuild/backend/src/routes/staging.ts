@@ -65,15 +65,28 @@ export function trasyStagingu({ db }: ZaleznosciStagingu): Router {
    * kolejność (pagination_module.cjs:16 przed :91).
    */
   router.get("/api/staging/paged", requireAuth, (req, res) => {
-    // `Math.max(1, …)` i `Math.min(200, Math.max(1, …))` — 1:1 z pagination_module.cjs:18-19.
-    const page = Math.max(1, parseInt(String(req.query.page ?? "1"), 10) || 1);
+    /*
+     * 1:1 z pagination_module.cjs:18-19 — łącznie z kolejnością operacji, która NIE jest
+     * tu obojętna:
+     *
+     *     Math.max(1, parseInt(req.query.page || '1', 10))
+     *     Math.min(200, Math.max(1, parseInt(req.query.pageSize || req.query.limit || '50', 10)))
+     *
+     * `||` działa na STRINGU z query, ZANIM wejdzie `parseInt`. Kusi, żeby napisać
+     * `parseInt(...) || 50`, ale to co innego: `"0"` jako string jest prawdziwościowe,
+     * więc oryginał parsuje je na `0` i podnosi do `1` przez `Math.max`. Wersja
+     * z fallbackiem po `parseInt` dałaby w tym miejscu `50` — inną stronę wyników.
+     *
+     * Konsekwencja tej samej wierności: wejście nieparsowalne (`pageSize=abc`) daje `NaN`,
+     * bo `Math.max(1, NaN)` to `NaN`. SQLite traktuje związany `NaN` jak `NULL`, a `LIMIT NULL`
+     * znaczy „bez limitu" — więc oryginał zwraca wtedy WSZYSTKIE wiersze, a w ciele
+     * odpowiedzi `pageSize` i `pages` serializują się jako `null`. Odtwarzamy to; testy
+     * w `staging.odczyt.test.ts` utrwalają, że to zastane zachowanie, a nie nasza pomyłka.
+     */
+    const page = Math.max(1, parseInt(String(req.query.page || "1"), 10));
     const pageSize = Math.min(
       MAX_PAGE_SIZE,
-      Math.max(
-        1,
-        parseInt(String(req.query.pageSize ?? req.query.limit ?? DOMYSLNY_PAGE_SIZE), 10) ||
-          DOMYSLNY_PAGE_SIZE,
-      ),
+      Math.max(1, parseInt(String(req.query.pageSize || req.query.limit || DOMYSLNY_PAGE_SIZE), 10)),
     );
 
     res.json(

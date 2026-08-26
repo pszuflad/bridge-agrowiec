@@ -1,6 +1,6 @@
 # 5-FEATURE-staging-endpointy-importu — Iteracja 3b: zapis do stagingu + endpointy importu
 
-> Status: Draft
+> Status: Implemented
 > Branch: `feature/5-staging-endpointy-importu`
 > Worktree: `.worktrees/5-FEATURE-staging-endpointy-importu`
 
@@ -221,6 +221,8 @@ po repo.
 | D8 | naprawa `ReferenceError` w `catch` `from-url` | oczywisty błąd blokujący obsługę błędu |
 | D9 | nowa kolumna `products.uwaga_cena` | backlog #4 ✅ TAK, zatwierdzone |
 | D11 | konfigurowalna ścieżka archiwum | wymóg techniczny (build do `dist/`) |
+| D12 | limit 10 przekierowań w `pobierzZUrl` | dodane w trakcie implementacji — oryginał nie ma licznika, pętla przekierowań wiesza żądanie |
+| D13 | limit 25 MB egzekwowany w trakcie strumieniowania | dodane po recenzji — odpowiedź identyczna, znika ryzyko wyczerpania pamięci |
 
 ## Implementation plan
 

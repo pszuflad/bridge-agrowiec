@@ -68,6 +68,7 @@ Plan zrealizowany 1:1 co do decyzji D1–D11. Trzy rzeczy doprecyzowane w trakci
 | D9 | nowa kolumna `products.uwaga_cena` (bez pisarza) | backlog #4; pisarz i endpoint w 3d | `projekcja.test.ts` — kolumna jest w tabeli, nie ma jej w API |
 | D11 | konfigurowalny katalog archiwum | po `npm run build` `__dirname` wskazuje `dist/` | `test/gate/aplikacja.ts` |
 | **D12** | **limit 10 przekierowań w `pobierzZUrl`** | **nowe** — oryginał rekursywnie podąża za `Location` bez licznika (`extensions.cjs:30-33`), więc pętla A→A daje przepełnienie stosu albo wiszące żądanie | `import.pobierz.test.ts` — „pętla przekierowań kończy się błędem" |
+| **D13** | **limit 25 MB egzekwowany w trakcie strumieniowania** | **nowe (po recenzji)** — oryginał buforuje CAŁE ciało, a rozmiar sprawdza dopiero po `Buffer.concat` (`extensions.cjs:224-230`); zalogowany użytkownik mógł tym wyczerpać pamięć procesu. Odpowiedź jest IDENTYCZNA (ten sam 400, ten sam komunikat) — zmienia się wyłącznie zużycie pamięci, więc kontrakt zostaje nietknięty | `import.test.ts` — „odrzuca plik większy niż 25 MB" |
 
 ## Znaleziska w oryginale (odtworzone wiernie, nie naprawione)
 
@@ -81,6 +82,15 @@ Plan zrealizowany 1:1 co do decyzji D1–D11. Trzy rzeczy doprecyzowane w trakci
    z testem utrwalającym, że to świadome.
 3. **`zatwierdzilUzytkownikId` i `zatwierdzonoData` są martwe** w całym kodzie produkcji —
    nic ich nigdy nie ustawia. Zostają jako NULL; kuszące „naprawienie" złamałoby fixture.
+4. **Nieparsowalne `page`/`pageSize` w `/paged` dają `NaN`, a nie wartość domyślną.**
+   `Math.max(1, parseInt("abc", 10))` to `NaN`, SQLite traktuje związany `NaN` jak `NULL`,
+   a `LIMIT NULL` znaczy „bez limitu" — więc `?pageSize=abc` zwraca WSZYSTKIE wiersze,
+   z `pageSize` i `pages` jako `null` w JSON-ie. Sprawdzone empirycznie na naszym stosie
+   (ten sam sterownik co produkcja). Odtworzone wiernie i utrwalone dwoma testami.
+5. **`parse-file` i `from-url` mają różne wejścia i różne komunikaty błędów** dla tego samego
+   warunku: `parse-file` czyta `query.dostawcaKod || body.dostawcaKod` i mówi
+   „Nieznany dostawca: X", a `from-url` czyta `body.dostawcaKod || body.dostawca` i mówi
+   „Brak URL dla dostawcy X". Powstały w różnym czasie; różnica jest zastana i zachowana.
 
 ## Sprostowania do opisu ticketa
 
@@ -123,6 +133,36 @@ wycofania po trzech nieobecnościach, auto-zatwierdzanie i `historia_cen`.
 Dlatego w 3b każda przyjęta pozycja ma `typZmiany: "nowa"`, a liczniki `odrzuconeNieOpony`,
 `zmienione`, `wycofane`, `bezZmian` i `autoZatwierdzone` zostają zerami.
 
+## Poprawki po recenzji
+
+Recenzja zgłosiła 1 BLOCKER, 4 SHOULD-FIX i 3 NICE-TO-HAVE. Wszystkie zasadne zarzuty
+zweryfikowane w oryginale przed poprawką i naniesione.
+
+- **BLOCKER — `pageSize`/`page` liczone innym wzorcem niż w oryginale.** Miałem
+  `parseInt(...) || domyślna`, a oryginał ma `string || string || '50'` PRZED `parseInt`
+  (`pagination_module.cjs:19`). Różnica jest realna: `?pageSize=0` dawało u mnie `50`,
+  a w produkcji daje `1` — czyli inną stronę wyników. Odtworzony dokładny wzorzec.
+  Mój wcześniejszy test utrwalał błędne zachowanie z błędnym uzasadnieniem („zero jest falsy") —
+  usunięty i zastąpiony czterema testami, które pilnują pułapki kolejności operacji oraz
+  zachowania przy `NaN` (znalezisko 4 wyżej).
+- **SHOULD-FIX — scalona bramka walidacyjna.** `odrzucNiedozwolonegoDostawce`/`kodZZadania`
+  łączyły dwa handlery, które w oryginale są osobne: `from-url` zwracał przez to zły komunikat,
+  a `parse-file` zaczął przyjmować alias `dostawca`, którego produkcja tam nie akceptuje.
+  Rozdzielone; wspólny został wyłącznie strażnik wyłączonego dostawcy, bo to NASZ dodatek (D5),
+  nie port. Poprawiony też komunikat `parse-file` na „Brak dostawcaKod (query lub body)".
+  Dodane cztery testy na te różnice.
+- **SHOULD-FIX — buforowanie całego ciała przed sprawdzeniem limitu 25 MB.** Zamiast tylko
+  odnotować, utwardzone — patrz D13. Odpowiedź bez zmian, znika ryzyko wyczerpania pamięci.
+- **SHOULD-FIX — brak testu na nieparsowalny `page`.** Dodany, razem z testami z BLOCKER-a.
+- **NICE-TO-HAVE** — `resume()` w `pobierzZUrl` opisane jako świadomy dodatek; walidacja listy
+  wykluczeń w `projekcjaKontraktowa` przeniesiona przed budowę projekcji. Trzecie (ponowny
+  `existsSync` w `wymusRetencje`) świadomie pominięte: oryginał ma tę samą strukturę,
+  a katalog tworzy `archiwizujBufor` przed każdym wywołaniem.
+
+Jeden test świadomie USUNIĘTY: sprawdzał granicę dokładnie 25 MB i kosztował 14 sekund,
+bo przepuszczał pełne 25 MB przez archiwum i parser. Ostre `>` jest widoczne w kodzie
+i opatrzone komentarzem; tak wolny test i tak zostałby prędzej czy później wyłączony.
+
 ## Wyniki testów
 
 - **Gate odbudowy (fixtures/kontrakt): ✓ zgodne.**
@@ -133,7 +173,7 @@ Dlatego w 3b każda przyjęta pozycja ma `typZmiany: "nowa"`, a liczniki `odrzuc
   - **Fixtures nie były modyfikowane.**
 - **GATE Iteracji 2 nadal zielony** — `katalog.gate.test.ts` przeszedł **bez żadnej zmiany w samym teście**, co jest dowodem, że projekcja z D6 działa.
 - **Charakteryzacja 3a nadal zielona** — 61 testów, 1838 rekordów wzorca, sha256 portu wobec `mirror/backend`.
-- **Unit/integracyjne: ✓ 233 testy w 18 plikach**, w tym 70 nowych w tej sesji.
+- **Unit/integracyjne: ✓ 241 testów w 18 plikach**, w tym 78 nowych w tej sesji.
 - `lint` ✓ · `typecheck` ✓ · `build` ✓ (kopiuje obie migracje do `dist/schema/`) · `test` ✓
 
 **Bez mocków warstwy danych.** Import testowany na prawdziwych cennikach z próbek 3a

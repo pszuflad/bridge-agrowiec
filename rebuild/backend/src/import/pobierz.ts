@@ -31,7 +31,10 @@ export function pobierzZUrl(url: string, pozostaloSkokow = MAX_PRZEKIEROWAN): Pr
       const status = odpowiedz.statusCode ?? 0;
 
       if (status >= 300 && status < 400 && odpowiedz.headers.location) {
-        odpowiedz.resume(); // bez tego gniazdo zostaje z niewyczytanym ciałem
+        // DODATEK (nieszkodliwy, nie zmienia obserwowalnego zachowania): oryginał porzuca
+        // odpowiedź bez wyczytania ciała, przez co gniazdo wisi z zaległymi danymi aż do
+        // zamknięcia. `resume()` opróżnia strumień; treść i tak jest tu nieużywana.
+        odpowiedz.resume();
         if (pozostaloSkokow <= 0) {
           reject(new Error(`Za dużo przekierowań dla ${url}`));
           return;
@@ -41,7 +44,7 @@ export function pobierzZUrl(url: string, pozostaloSkokow = MAX_PRZEKIEROWAN): Pr
       }
 
       if (status !== 200) {
-        odpowiedz.resume();
+        odpowiedz.resume(); // jw. — opróżniamy strumień, którego nie użyjemy
         reject(new Error(`HTTP ${status} dla ${url}`));
         return;
       }

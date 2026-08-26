@@ -178,7 +178,22 @@ describe("endpointy importu", () => {
         .send(probka("MO1.csv"));
 
       expect(odp.status).toBe(400);
-      expect((odp.body as { error: string }).error).toBe("Brak dostawcaKod");
+      expect((odp.body as { error: string }).error).toBe("Brak dostawcaKod (query lub body)");
+    });
+
+    /**
+     * Oryginał czyta dla tej trasy WYŁĄCZNIE `query.dostawcaKod || body.dostawcaKod`
+     * (extensions.cjs:214) — bez aliasu `dostawca`, który ma tylko `from-url`. Trzymamy
+     * tę różnicę, żeby nie poszerzać po cichu powierzchni API.
+     */
+    it("nie przyjmuje aliasu `dostawca` — to wejście ma tylko from-url", async () => {
+      const odp = await request(srodowisko.app)
+        .post("/api/import/parse-file")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ dostawca: "MO1" });
+
+      expect(odp.status).toBe(400);
+      expect((odp.body as { error: string }).error).toBe("Brak dostawcaKod (query lub body)");
     });
 
     it("odrzuca nieznanego dostawcę", async () => {
@@ -195,6 +210,11 @@ describe("endpointy importu", () => {
       expect((odp.body as { error: string }).error).toBe("Pusty plik");
     });
 
+    /**
+     * Limit jest egzekwowany W TRAKCIE strumieniowania (plan.md D13), więc żądanie zostaje
+     * przerwane, zanim całe ciało wyląduje w pamięci. Odpowiedź jest identyczna jak
+     * w oryginale — to utwardzenie niewidoczne w kontrakcie.
+     */
     it("odrzuca plik większy niż 25 MB", async () => {
       const odp = await wyslijPlik("MO1", Buffer.alloc(MAX_ROZMIAR_UPLOADU + 1));
 
@@ -202,6 +222,7 @@ describe("endpointy importu", () => {
       expect((odp.body as { error: string }).error).toBe("Plik większy niż 25 MB");
       expect(policzStaging().c).toBe(0);
     });
+
 
     it("wymaga zalogowania", async () => {
       const odp = await request(srodowisko.app)
@@ -468,6 +489,33 @@ describe("endpointy importu", () => {
         .get() as Record<string, string>;
       expect(wpis.akcja).toBe("import_z_url");
       expect(JSON.parse(String(wpis.szczegoly_json))).toMatchObject({ source: "from-url" });
+    });
+
+    /**
+     * Oryginał ma tu INNY komunikat niż `parse-file` dla tego samego warunku „brak URL":
+     * `Brak URL dla dostawcy X` (extensions.cjs:129-130) zamiast `Nieznany dostawca: X`
+     * (extensions.cjs:216-218). Różnica jest zastana i celowo zachowana.
+     */
+    it("nieznany dostawca daje komunikat o braku URL, inny niż w parse-file", async () => {
+      const app = zPobieraczem(async () => probka("MO1.csv"));
+      const odp = await request(app)
+        .post("/api/import/from-url")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ dostawcaKod: "MO99" });
+
+      expect(odp.status).toBe(400);
+      expect((odp.body as { error: string }).error).toBe("Brak URL dla dostawcy MO99");
+    });
+
+    it("nie czyta kodu dostawcy z query — oryginał bierze go tylko z ciała", async () => {
+      const app = zPobieraczem(async () => probka("MO1.csv"));
+      const odp = await request(app)
+        .post("/api/import/from-url?dostawcaKod=MO1")
+        .set("Authorization", `Bearer ${token}`)
+        .send({});
+
+      expect(odp.status).toBe(400);
+      expect((odp.body as { error: string }).error).toBe("Brak dostawcaKod");
     });
 
     it("akceptuje `dostawca` jako alias `dostawcaKod`", async () => {

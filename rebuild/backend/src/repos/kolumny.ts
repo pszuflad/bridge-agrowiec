@@ -20,11 +20,9 @@ export function projekcjaKontraktowa<T extends SQLiteTable, K extends keyof T["_
   wykluczone: readonly K[],
 ): Omit<T["_"]["columns"], K> {
   const kolumny = getTableColumns(tabela) as Record<string, unknown>;
-  const wynik: Record<string, unknown> = {};
-  for (const [nazwa, kolumna] of Object.entries(kolumny)) {
-    if ((wykluczone as readonly PropertyKey[]).includes(nazwa)) continue;
-    wynik[nazwa] = kolumna;
-  }
+
+  // Najpierw walidacja, potem budowa — literówka na liście wykluczeń ma zatrzymać start,
+  // a nie po cichu zbudować projekcję, która niczego nie ukrywa.
   for (const nazwa of wykluczone) {
     if (!(nazwa in kolumny)) {
       throw new Error(
@@ -32,6 +30,12 @@ export function projekcjaKontraktowa<T extends SQLiteTable, K extends keyof T["_
           `lista wykluczeń rozjechała się ze schematem.`,
       );
     }
+  }
+
+  const wynik: Record<string, unknown> = {};
+  for (const [nazwa, kolumna] of Object.entries(kolumny)) {
+    if ((wykluczone as readonly PropertyKey[]).includes(nazwa)) continue;
+    wynik[nazwa] = kolumna;
   }
   return wynik as Omit<T["_"]["columns"], K>;
 }

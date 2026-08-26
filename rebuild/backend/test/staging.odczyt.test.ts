@@ -134,12 +134,57 @@ describe("odczyt stagingu — reguły z oryginału", () => {
       const duzy = await zAuth("/api/staging/paged?pageSize=9999");
       expect((duzy.body as { pageSize: number }).pageSize).toBe(MAX_PAGE_SIZE);
 
-      const maly = await zAuth("/api/staging/paged?pageSize=0");
-      // `parseInt("0") || 50` → 50 (zero jest falsy), więc wpada domyślna wartość.
-      expect((maly.body as { pageSize: number }).pageSize).toBe(50);
-
       const ujemny = await zAuth("/api/staging/paged?pageSize=-5");
       expect((ujemny.body as { pageSize: number }).pageSize).toBe(1);
+    });
+
+    /**
+     * Pułapka kolejności operacji w oryginale (pagination_module.cjs:19): `||` działa na
+     * STRINGU z query, zanim wejdzie `parseInt`. Niepusty string `"0"` jest prawdziwościowy,
+     * więc fallback do `'50'` się NIE uruchamia — parsuje się `0`, a `Math.max(1, 0)` podnosi
+     * je do `1`. Napisanie `parseInt(...) || 50` dałoby tu `50`, czyli zupełnie inną stronę
+     * wyników. Ten test istnieje właśnie po to, żeby taka „drobna” przeróbka nie przeszła.
+     */
+    it("`pageSize=0` daje 1, a nie wartość domyślną", async () => {
+      const odp = await zAuth("/api/staging/paged?pageSize=0");
+      const ciało = odp.body as { pageSize: number; items: unknown[] };
+
+      expect(ciało.pageSize).toBe(1);
+      expect(ciało.items).toHaveLength(1);
+    });
+
+    it("pusty `pageSize` wpada w wartość domyślną", async () => {
+      const odp = await zAuth("/api/staging/paged?pageSize=");
+      expect((odp.body as { pageSize: number }).pageSize).toBe(50);
+    });
+
+    /**
+     * Konsekwencja tej samej wierności, co wyżej: `parseInt("abc")` daje `NaN`,
+     * a `Math.max(1, NaN)` to nadal `NaN`. SQLite traktuje związany `NaN` jak `NULL`,
+     * a `LIMIT NULL` znaczy „bez limitu" — więc oryginał zwraca WSZYSTKIE wiersze,
+     * a `pageSize`/`pages` serializują się w JSON-ie jako `null`.
+     *
+     * To zastane zachowanie, nie nasza pomyłka. Utrwalamy je, żeby 3c/3e wiedziały,
+     * czego się spodziewać, i żeby ewentualna decyzja o naprawie była świadoma.
+     */
+    it("nieparsowalny `pageSize` daje null i zdejmuje limit — jak w oryginale", async () => {
+      const odp = await zAuth("/api/staging/paged?pageSize=abc");
+      const ciało = odp.body as { pageSize: number | null; pages: number | null; items: unknown[] };
+
+      expect(odp.status).toBe(200);
+      expect(ciało.pageSize).toBeNull();
+      expect(ciało.pages).toBeNull();
+      expect(ciało.items).toHaveLength(LICZBA_POZYCJI);
+    });
+
+    it("nieparsowalny `page` daje null, a offset schodzi do zera", async () => {
+      const odp = await zAuth("/api/staging/paged?page=abc");
+      const ciało = odp.body as { page: number | null; items: { id: number }[] };
+
+      expect(odp.status).toBe(200);
+      expect(ciało.page).toBeNull();
+      // OFFSET NULL = 0, więc dostajemy pierwszą stronę mimo śmieciowego `page`.
+      expect(ciało.items[0]?.id).toBe(1119);
     });
 
     it("akceptuje `limit` jako alias `pageSize`", async () => {

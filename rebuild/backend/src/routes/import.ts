@@ -71,33 +71,44 @@ export function trasyImportu({
     return urlDostawcy(kod);
   };
 
-  const kodZZadania = (req: Request): string =>
+  /*
+   * Wejście i komunikaty błędów RÓŻNIĄ SIĘ między tymi dwiema trasami i nie jest to
+   * niedopatrzenie oryginału — powstały w różnym czasie i mają różnych wołających:
+   *
+   *   parse-file (extensions.cjs:214-218)   from-url (extensions.cjs:127-130)
+   *   ─────────────────────────────────     ────────────────────────────────
+   *   query.dostawcaKod || body.dostawcaKod  body.dostawcaKod || body.dostawca
+   *   "Brak dostawcaKod (query lub body)"    "Brak dostawcaKod"
+   *   "Nieznany dostawca: X"                 "Brak URL dla dostawcy X"
+   *
+   * Scalenie tego w jedną bramkę po cichu poszerzyłoby powierzchnię API (parse-file
+   * zacząłby przyjmować alias `dostawca`) i zmieniło treść błędu dla from-url. Dlatego
+   * odczyt kodu i pierwsze dwa sprawdzenia zostają osobne, a wspólny jest wyłącznie
+   * strażnik wyłączonego dostawcy — bo ten jest NASZYM dodatkiem, nie portem.
+   */
+
+  const kodDlaParseFile = (req: Request): string =>
     String(
-      (req.query?.dostawcaKod as string | undefined) ??
-        (req.body as { dostawcaKod?: string; dostawca?: string } | undefined)?.dostawcaKod ??
-        (req.body as { dostawca?: string } | undefined)?.dostawca ??
+      (req.query?.dostawcaKod as string | undefined) ||
+        (req.body as { dostawcaKod?: string } | undefined)?.dostawcaKod ||
         "",
     ).toUpperCase();
 
+  const kodDlaFromUrl = (req: Request): string => {
+    const cialo = req.body as { dostawcaKod?: string; dostawca?: string } | undefined;
+    return String(cialo?.dostawcaKod || cialo?.dostawca || "").toUpperCase();
+  };
+
   /**
-   * Bramka wspólna dla obu endpointów importu. Zwraca komunikat błędu albo `null`.
-   *
-   * Kolejność sprawdzeń jest ta co w oryginale (brak kodu → nieznany dostawca), z jednym
-   * krokiem dołożonym na końcu.
-   *
    * ⚠ ODSTĘPSTWO ŚWIADOME (plan.md D5, backlog #7): dostawca z `import_wylaczony = 1`
    * jest odrzucany. Produkcja takiej bramki nie ma — wycofanie MO6 sprowadzało się tam do
    * „nikt już nie wrzuca pliku". Nam to nie wystarcza, bo `POST /api/import/parse-file`
    * przyjąłby plik MO6 od każdego zalogowanego użytkownika.
+   *
+   * Sprawdzane PO oryginalnych walidacjach, żeby nie zmieniać ich kolejności ani treści.
    */
-  const odrzucNiedozwolonegoDostawce = (kod: string): string | null => {
-    if (!kod) return "Brak dostawcaKod";
-    if (!adresCennika(kod)) return `Nieznany dostawca: ${kod}`;
-    if (dostawcaPoKodzie(db, kod)?.importWylaczony) {
-      return `Dostawca ${kod} jest wyłączony z importu`;
-    }
-    return null;
-  };
+  const wylaczonyZImportu = (kod: string): boolean =>
+    Boolean(dostawcaPoKodzie(db, kod)?.importWylaczony);
 
   /**
    * Wspólny ogon obu ścieżek: parsowanie bufora → staging → aktualizacja dostawcy → audyt.
@@ -185,25 +196,56 @@ export function trasyImportu({
    * `application/octet-stream`. Ta sama kolejność middleware jest w oryginale.
    */
   router.post("/api/import/parse-file", requireAuth, async (req, res) => {
-    const kodDostawcy = kodZZadania(req);
-    const bladBramki = odrzucNiedozwolonegoDostawce(kodDostawcy);
-    if (bladBramki) {
-      res.status(400).json({ error: bladBramki });
+    const kodDostawcy = kodDlaParseFile(req);
+    if (!kodDostawcy) {
+      res.status(400).json({ error: "Brak dostawcaKod (query lub body)" });
+      return;
+    }
+    if (!adresCennika(kodDostawcy)) {
+      res.status(400).json({ error: `Nieznany dostawca: ${kodDostawcy}` });
+      return;
+    }
+    if (wylaczonyZImportu(kodDostawcy)) {
+      res.status(400).json({ error: `Dostawca ${kodDostawcy} jest wyłączony z importu` });
       return;
     }
 
     let idArchiwum: string | null = null;
     try {
+      /*
+       * ⚠ ODSTĘPSTWO ŚWIADOME (plan.md D13) — utwardzenie bez zmiany zachowania.
+       *
+       * Oryginał (extensions.cjs:224-230) buforuje CAŁE ciało żądania, a limit sprawdza
+       * dopiero potem: `const buf = Buffer.concat(chunks); if (buf.length > 25MB) …`.
+       * Zalogowany użytkownik mógł tym wysłać dowolnie duże ciało i wyczerpać pamięć
+       * procesu, zanim ktokolwiek sprawdzi rozmiar.
+       *
+       * Liczymy bajty w trakcie strumieniowania i przerywamy w chwili przekroczenia progu.
+       * Odpowiedź jest IDENTYCZNA — ten sam kod 400 i ten sam komunikat — więc z punktu
+       * widzenia kontraktu nic się nie zmienia; różni się wyłącznie zużycie pamięci.
+       */
       const kawalki: Buffer[] = [];
-      for await (const kawalek of req) kawalki.push(kawalek as Buffer);
-      const bufor = Buffer.concat(kawalki);
+      let rozmiar = 0;
+      let przekroczonyLimit = false;
+      for await (const kawalek of req) {
+        const czesc = kawalek as Buffer;
+        rozmiar += czesc.length;
+        // Ostro `>`, jak w oryginale — plik dokładnie 25 MB jeszcze przechodzi.
+        if (rozmiar > MAX_ROZMIAR_UPLOADU) {
+          przekroczonyLimit = true;
+          break;
+        }
+        kawalki.push(czesc);
+      }
 
-      if (bufor.length === 0) {
-        res.status(400).json({ error: "Pusty plik" });
+      if (przekroczonyLimit) {
+        res.status(400).json({ error: "Plik większy niż 25 MB" });
         return;
       }
-      if (bufor.length > MAX_ROZMIAR_UPLOADU) {
-        res.status(400).json({ error: "Plik większy niż 25 MB" });
+
+      const bufor = Buffer.concat(kawalki);
+      if (bufor.length === 0) {
+        res.status(400).json({ error: "Pusty plik" });
         return;
       }
 
@@ -255,14 +297,20 @@ export function trasyImportu({
    * statusem `blad` i odpowiedź 500.
    */
   router.post("/api/import/from-url", requireAuth, async (req, res) => {
-    const kodDostawcy = kodZZadania(req);
-    const bladBramki = odrzucNiedozwolonegoDostawce(kodDostawcy);
-    if (bladBramki) {
-      res.status(400).json({ error: bladBramki });
+    const kodDostawcy = kodDlaFromUrl(req);
+    if (!kodDostawcy) {
+      res.status(400).json({ error: "Brak dostawcaKod" });
       return;
     }
-
-    const url = adresCennika(kodDostawcy) as string;
+    const url = adresCennika(kodDostawcy);
+    if (!url) {
+      res.status(400).json({ error: `Brak URL dla dostawcy ${kodDostawcy}` });
+      return;
+    }
+    if (wylaczonyZImportu(kodDostawcy)) {
+      res.status(400).json({ error: `Dostawca ${kodDostawcy} jest wyłączony z importu` });
+      return;
+    }
     let bufor: Buffer | null = null;
     let idArchiwum: string | null = null;
 
