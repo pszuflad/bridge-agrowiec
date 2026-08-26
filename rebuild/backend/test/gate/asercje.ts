@@ -34,13 +34,36 @@ export function sprawdzZgodnoscZKontraktem(arg: {
 }
 
 /**
+ * ZADEKLAROWANY WYJĄTEK od porównania z fixture'em.
+ *
+ * Istnieje po to, żeby rozjazd, o którym WIEMY i który mamy udokumentowany, nie zmuszał nas
+ * ani do wyłączenia gate'a, ani do „poprawienia" fixture'a (czego zabrania Krok 9). Każdy
+ * wyjątek musi powiedzieć CO, DLACZEGO i KIEDY znika — inaczej po roku nikt nie odróżni
+ * świadomej decyzji od zapomnianego obejścia.
+ */
+export type WyjatekGate = {
+  /** Wzorzec ścieżki w odpowiedzi, np. /^\$\.items\[\d+\]\.szerokosc$/. */
+  sciezka: RegExp;
+  /** Co się rozjeżdża i dlaczego jest to zgodne z produkcją, a nie z fixture'em. */
+  powod: string;
+  /** Co domknie wyjątek — ticket albo iteracja. */
+  domyka: string;
+};
+
+/**
  * GATE, część 2 — FIXTURES: kształt odpowiedzi zgadza się 1:1 z nagraną odpowiedzią
  * produkcji (klucze, typy, zagnieżdżenie).
  *
  * Rozbieżność = STOP. Fixture'a NIE wolno „poprawiać" pod nowy kod — to on pokazuje,
- * co produkcja realnie zwraca (.claude/commands/feature.md, Krok 9).
+ * co produkcja realnie zwraca (.claude/commands/feature.md, Krok 9). Jedyną furtką są
+ * `wyjatki` — jawne, opisane i SAMOCZYSZCZĄCE SIĘ: wyjątek, który przestał być potrzebny,
+ * zapala test, zamiast po cichu zostać w kodzie na zawsze.
  */
-export function sprawdzZgodnoscZFixture(nazwaPliku: string, cialoOdpowiedzi: unknown): void {
+export function sprawdzZgodnoscZFixture(
+  nazwaPliku: string,
+  cialoOdpowiedzi: unknown,
+  wyjatki: WyjatekGate[] = [],
+): void {
   const fixture = wczytajFixture(nazwaPliku);
   const { roznice, ostrzezenia } = porownajKsztalt(cialoOdpowiedzi, fixture.body);
 
@@ -51,10 +74,25 @@ export function sprawdzZgodnoscZFixture(nazwaPliku: string, cialoOdpowiedzi: unk
     );
   }
 
+  const objete = (wyjatek: WyjatekGate) => roznice.filter((r) => wyjatek.sciezka.test(r.sciezka));
+  const pozostale = roznice.filter((r) => !wyjatki.some((w) => w.sciezka.test(r.sciezka)));
+
   expect(
-    roznice,
+    pozostale,
     `Kształt odpowiedzi nie zgadza się z contract/fixtures/${nazwaPliku}:\n` +
-      `${opiszRoznice(roznice)}\n` +
+      `${opiszRoznice(pozostale)}\n` +
       `To jest STOP — nie poprawiaj fixture'a, zgłoś rozjazd.`,
   ).toEqual([]);
+
+  // Wyjątek, który nic nie pokrywa, jest MARTWY — najczęściej dlatego, że fixture został
+  // w końcu przenagrany. Zapalamy się, żeby wymusić jego usunięcie zamiast cichego dryfu.
+  for (const wyjatek of wyjatki) {
+    expect(
+      objete(wyjatek).length,
+      `Zadeklarowany wyjątek GATE dla ${nazwaPliku} (${wyjatek.sciezka}) NIE wystąpił.\n` +
+        `Powód wpisany przy nim: ${wyjatek.powod}\n` +
+        `Domknięcie: ${wyjatek.domyka}\n` +
+        `Jeśli rozjazd zniknął (np. przenagrano fixture) — USUŃ ten wyjątek.`,
+    ).toBeGreaterThan(0);
+  }
 }

@@ -207,12 +207,34 @@ function nagrajScenariusze() {
   return wyniki;
 }
 
-/** Wiersze `products` danego dostawcy ze zrzutu produkcji, w kształcie naszego schematu. */
+/**
+ * Wiersze `products` danego dostawcy ze zrzutu produkcji, w kształcie naszego schematu.
+ *
+ * ⚠ `szerokosc` wymaga konwersji, bo `db/snapshot.db` to zrzut z 2026-08-13 — SPRZED
+ * produkcyjnej migracji `szertxt` (2026-08-19), więc kolumna jest tam jeszcze `REAL`.
+ * Nasz kanon po `003_szerokosc_text.sql` ma `TEXT`. Bez konwersji obie strony porównania
+ * dostawałyby RÓŻNE wejście (oryginał liczbę wprost ze zrzutu, port napis wyprodukowany
+ * przez TEXT affinity przy wstawianiu), a charakteryzacja mierzyłaby wiek zrzutu zamiast
+ * wierności silnika.
+ *
+ * Konwersja idzie przez `String(liczba)`, a NIE przez `CAST(… AS TEXT)` w SQLite. Różnica
+ * jest istotna: SQLite renderuje `REAL` 710 jako „710.0", podczas gdy parser (`tyre_params.cjs`,
+ * poprawka `szertxt`) zapisuje pierwszą liczbę z rozmiaru — czyli „710". Użycie `CAST`
+ * dokładało do wzorca sztuczne różnice „szerokość: 710.0 → 710", których w produkcji nie ma.
+ * `String()` daje „710" i „11.2", czyli dokładnie to, co pisze parser.
+ *
+ * Czego ta konwersja NIE odtworzy: prawdziwych zer końcowych („10.00"). REAL fizycznie ich
+ * nie przechowa — i to jest właśnie strata, przed którą migracja 003 chroni na przyszłość.
+ */
 function katalogDostawcy(zrzut, kod) {
   return zrzut
     .prepare("SELECT * FROM products WHERE dostawca = ? ORDER BY id")
     .all(kod)
-    .map((wiersz) => Object.fromEntries(Object.entries(wiersz).map(([k, v]) => [naCamel(k), v])));
+    .map((wiersz) => Object.fromEntries(Object.entries(wiersz).map(([k, v]) => [naCamel(k), v])))
+    .map((wiersz) => ({
+      ...wiersz,
+      szerokosc: wiersz.szerokosc == null ? null : String(wiersz.szerokosc),
+    }));
 }
 
 /**
