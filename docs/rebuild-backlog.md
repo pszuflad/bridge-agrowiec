@@ -453,6 +453,16 @@ wejdzie portem przez #6 — to się nie zmieniło.
 rekordów, 0 błędów) — problem nie jest specyficzny dla MO8, bezpiecznik D4 pokrywa oba przypadki
 jednakowo. Poprawka parsera MO10 to również poprawka Ani, portem (#6).
 
+**⚠ Bezpiecznik z 3b NIE zakrywa wszystkich ścieżek (do domknięcia w 3d).** Bramka na pusty
+wynik parsowania stoi w `POST /api/import/parse-file` i `POST /api/import/from-url`. Trzecia
+trasa prowadząca do `tk()` — `POST /api/staging/import` (`backend-index.cjs:48502-48512`) —
+bierze pozycje **wprost z ciała żądania** (`body.surowe ?? body.items ?? []`) i waliduje tylko
+`Array.isArray`. Żądanie `{dostawcaKod:"MO5"}` bez pola `surowe` uruchamia więc dokładnie ten
+scenariusz, który ten wpis opisuje. Rekomendacja: przenieść bezpiecznik do samego `tk()`
+(zakryje wszystkie ścieżki naraz) zamiast powielać go na trzeciej trasie. Znalezione przy
+przeglądzie zakresu 3c/3d, 2026-08-26.
+
+
 ### #9 · 2026-08-26 · [BACKEND] · pola `nro` i `cho` zapisywane jako liczby 0/1
 
 | Pole | Wartość |
