@@ -40,6 +40,7 @@ interface WynikParseraDostawcy {
 interface Dispatcher {
   parseByKod(kodDostawcy: string, sciezkaPliku: string): WynikParseraDostawcy;
   listDostawcy(): string[];
+  getUrl(kodDostawcy: string): string | undefined;
 }
 
 interface Adapter {
@@ -125,6 +126,20 @@ export function parsujBufor(
 /** Kody dostawców znane dispatcherowi z produkcji. */
 export function listaDostawcow(): string[] {
   return dispatcher.listDostawcy();
+}
+
+/**
+ * Adres cennika z mapy `URLS` dispatchera (`legacy/parsers/dispatcher.cjs:63`).
+ *
+ * ⚠ Mapa wymienia adresy dla WSZYSTKICH dziesięciu dostawców, ale dla części to zapis
+ * nieużywany: MO6 (Uniglory) i MO8 (Trelleborg) nigdy nie miały auto-pulla — pliki
+ * przychodzą mailem i Marta wgrywa je ręcznie (backlog #7 i #8). Obecność adresu w tej
+ * mapie nie znaczy więc, że dostawca jest pobierany automatycznie.
+ *
+ * Pierwszeństwo ma zawsze `suppliers.url` z bazy; to jest fallback (extensions.cjs:87-89).
+ */
+export function urlDostawcy(kodDostawcy: string): string | null {
+  return dispatcher.getUrl(kodDostawcy) ?? null;
 }
 
 export type { RekordSurowy, WynikParsowania, KodDostawcy };

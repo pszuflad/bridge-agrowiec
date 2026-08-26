@@ -120,3 +120,37 @@ export function listaDostawcow(db: Baza, teraz = Date.now()): DostawcaZeStatysty
     };
   });
 }
+
+/**
+ * Pełny wiersz dostawcy — Z kolumnami wewnętrznymi (`importWylaczony`).
+ *
+ * Świadomie NIE używa projekcji kontraktowej: to odczyt na potrzeby logiki importu,
+ * nie na potrzeby odpowiedzi HTTP. Wynik nigdy nie trafia wprost do `res.json()`.
+ */
+export function dostawcaPoKodzie(db: Baza, kod: string) {
+  return db.select().from(suppliers).where(eq(suppliers.kod, kod)).get();
+}
+
+/**
+ * Zapis wyniku udanego importu — odpowiednik bloku z `extensions.cjs:155-160` i `:247-252`.
+ *
+ * ⚠ Oryginał ustawia tu `status: 'aktywny'` na sztywno. Odtwarzamy to, ale warto wiedzieć,
+ * że ta kolumna i tak jest przeliczana w locie przy odczycie (`przeliczStatus`), więc jej
+ * zapis ma znaczenie tylko dla dostawców bez `ostatniPlik` i bez produktów. To także powód,
+ * dla którego wyłączenie dostawcy z importu (plan.md D5) mieszka w osobnej kolumnie:
+ * `status` jest tu bezwarunkowo nadpisywany.
+ */
+export function zapiszWynikImportu(
+  db: Baza,
+  id: number,
+  dane: { ostatniPlik: string; liczbaProduktow: number },
+): void {
+  db.update(suppliers)
+    .set({
+      ostatniPlik: dane.ostatniPlik,
+      liczbaProduktow: dane.liczbaProduktow,
+      status: "aktywny",
+    })
+    .where(eq(suppliers.id, id))
+    .run();
+}

@@ -113,7 +113,14 @@ export function archiwizujBufor(
     const teraz = new Date().toISOString();
     const katalogMiesiaca = zapewnijKatalog(join(korzen, teraz.slice(0, 7)));
 
-    // RRRRMMDD__GGMMSS — dokładnie ta transformacja co w oryginale (archive_module.cjs:57).
+    // Dokładnie ta transformacja co w oryginale (archive_module.cjs:57).
+    //
+    // ⚠ Komentarz w oryginale zapowiada `RRRRMMDD__GGMMSS`, ale `slice(0, 15)` ucina
+    // jedną cyfrę za wcześnie: wychodzi `RRRRMMDD__GGMMS` (godzina, minuta i DZIESIĄTKI
+    // sekund). Praktyczny skutek: dwa pliki tego samego dostawcy o tej samej nazwie,
+    // wgrane w tym samym dziesięciosekundowym oknie, nadpisują się nawzajem.
+    // Odtwarzamy to wiernie — naprawa zmieniłaby nazwy plików w archiwum, a te są
+    // identyfikatorem (`meta.id`), po którym `aktualizujMeta` odnajduje wpis.
     const stempel = teraz.replace(/[-:]/g, "").replace("T", "__").slice(0, 15);
     const nazwa = `${String(opcje.dostawcaKod || "XX").toUpperCase()}__${stempel}__${bezpiecznaNazwa(
       opcje.oryginalnaNazwa,

@@ -30,6 +30,10 @@ const schemaEnv = z.object({
   JWT_SECRET: z.string().min(1, "JWT_SECRET jest wymagany — patrz .env.example"),
   CORS_ORIGINS: listaOriginow,
   COOKIE_SECURE: flagaBool.optional(),
+  // Katalog archiwum plików importu. Oryginał trzyma go obok `__dirname`
+  // (mirror/backend/archive_module.cjs:24); u nas musi być konfigurowalny, bo po
+  // `npm run build` `__dirname` wskazuje `dist/` (plan.md D11).
+  IMPORT_ARCHIVE_DIR: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schemaEnv> & { cookieSecure: boolean };

@@ -7,6 +7,7 @@ import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
 import { trasyAuth } from "./routes/auth.js";
 import { trasyDostawcow } from "./routes/suppliers.js";
+import { trasyImportu } from "./routes/import.js";
 import { trasyProduktow } from "./routes/products.js";
 import { trasyStagingu } from "./routes/staging.js";
 
@@ -56,6 +57,7 @@ export function stworzApp({ env, db }: ZaleznosciApp): Express {
   app.use(trasyProduktow({ db }));
   app.use(trasyDostawcow({ db }));
   app.use(trasyStagingu({ db }));
+  app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
 
   app.use(nieZnalezionoHandler);
   app.use(bladHandler);
