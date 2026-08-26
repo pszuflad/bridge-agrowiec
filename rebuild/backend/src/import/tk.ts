@@ -547,7 +547,7 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
           try {
             zapiszHistorieCen(db, {
               produktId: dopasowany.id,
-              kod: dopasowany.kod ?? "",
+              kod: dopasowany.kod,
               ean: dopasowany.ean,
               dostawca: kodDostawcy,
               marka: dopasowany.marka,
@@ -594,7 +594,7 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
 
         doZapisu.push({
           typZmiany: "wycofana",
-          kod: produkt.kod ?? "",
+          kod: produkt.kod,
           nazwa: produkt.nazwa,
           dostawca: kodDostawcy,
           magazyn: produkt.magazyn,

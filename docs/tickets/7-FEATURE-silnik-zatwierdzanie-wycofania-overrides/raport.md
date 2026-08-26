@@ -126,6 +126,14 @@ poprawki Marty przestały być w ogóle nakładane. Klucz ma teraz jawny separat
 - `products.szerokosc` zmienia typ na TEXT: `GET /api/products` zwraca tam odtąd **string**,
   nie liczbę. Konsument frontendowy musi to znieść (I12 przenagra fixtures).
 
+## Review
+
+`docs/tickets/7-FEATURE-silnik-zatwierdzanie-wycofania-overrides/review.md` — zero BLOCKER-ów.
+Dwa ustalenia SHOULD-FIX naprawione w trakcie (cicha awaria portu `bridge_ext`, twardy błąd
+w `uchwytSqlite`), dwa świadomie zostawione jako wierne odtworzenie oryginału (cichy `catch`
+wokół `bridge_ext`, zapisy pętli wycofań poza transakcją). Jedno NICE-TO-HAVE zrobione
+(usunięte martwe `?? ""` przy `kod`).
+
 ## Follow-up
 
 - **3d-2 (API):** `acceptStaging` + `assignKodImportu` w `addProductsBulk`, propagacja
@@ -139,6 +147,9 @@ poprawki Marty przestały być w ogóle nakładane. Klucz ma teraz jawny separat
 - **I4:** `acceptStaging` w produkcji stosuje narzuty i promocje
   (`__bridgePickMarkup`/`__bridgePickPromo`, `:44884-44892`). W I3 obie tabele są puste, więc
   gałąź nie wchodzi i pominięcie jest bezpieczne — ale musi zostać domknięte w I4.
-- **Wydajność (niepilne):** `poprawkiDla()` robi SELECT na pozycję, tak jak oryginał. Przy
-  1838 rekordach × 12 620 poprawek jest to bez znaczenia; warte uwagi przy dużych buforach.
+- **Wydajność (niepilne, wiernie wobec oryginału):** `poprawkiDla()` robi SELECT na pozycję,
+  a pętla wycofań woła `aktualizujProdukt` per produkt POZA transakcją (dla MO5 to ~1900
+  osobnych zapisów). Oryginał robi jedno i drugie tak samo (`:47807-47847` jest poza
+  `ww.transaction`), więc zmiana byłaby świadomym odstępstwem. Przy dzisiejszych wolumenach
+  bez znaczenia; warte uwagi przy dużych buforach.
 - **Backlog #11** (cieniowanie `Lq()`) — nietknięte, czeka na decyzję Ani.
