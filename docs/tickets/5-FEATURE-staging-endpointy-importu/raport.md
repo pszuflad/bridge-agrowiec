@@ -91,6 +91,12 @@ Plan zrealizowany 1:1 co do decyzji D1–D11. Trzy rzeczy doprecyzowane w trakci
    warunku: `parse-file` czyta `query.dostawcaKod || body.dostawcaKod` i mówi
    „Nieznany dostawca: X", a `from-url` czyta `body.dostawcaKod || body.dostawca` i mówi
    „Brak URL dla dostawcy X". Powstały w różnym czasie; różnica jest zastana i zachowana.
+6. **`from-url` nie ma ŻADNEGO limitu rozmiaru pobieranego pliku.** Limit 25 MB dotyczy
+   wyłącznie uploadu (`parse-file`); `downloadUrl` w oryginale zbiera całą odpowiedź do pamięci
+   bez sufitu (`extensions.cjs:36-41`). Ryzyko jest mniejsze niż przy uploadzie, bo adres
+   pochodzi z konfiguracji dostawcy, a nie od użytkownika — ale zepsuty albo przejęty serwer
+   dostawcy nadal może wyczerpać pamięć. Odtworzone wiernie; utwardzenie to osobna decyzja
+   (follow-up 8), bo w przeciwieństwie do D13 zmieniłoby zachowanie widoczne w odpowiedzi.
 
 ## Sprostowania do opisu ticketa
 
@@ -208,6 +214,9 @@ Dokłada dwie kolumny i ustawia `import_wylaczony = 1` dla MO6.
    Warstwa zapisu i rotacji jest gotowa, brakuje trzech tras odczytu.
 5. **Scheduler auto-pull** (`runAutoPull`, codziennie 06:00, `extensions.cjs`) — poza zakresem 3b.
 6. **`POST /api/dostawcy/:kod/upload`** (rdzeń, multer, fallback `Wc()`) — Iteracja 11.
+8. **Limit rozmiaru dla `from-url`** — dziś pobranie jest nieograniczone (znalezisko 6).
+   W przeciwieństwie do D13 utwardzenie zmieniłoby zachowanie widoczne w odpowiedzi
+   (nowy kod błędu), więc wymaga świadomej decyzji, a nie cichej poprawki.
 7. **`MO10` przy śmieciowej treści też zwraca zero rekordów i zero błędów** — tak samo jak MO8
    z backlogu #8. Bezpiecznik D4 to pokrywa, ale sam parser MO10 mógłby zgłaszać błąd;
    to poprawka po stronie Ani (przyjdzie portem, backlog #6).

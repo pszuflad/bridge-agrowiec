@@ -1,61 +1,66 @@
 # 5-FEATURE-staging-endpointy-importu — Code review
 
+> **RUNDA 2** (weryfikacja poprawek z rundy 1)
 > Reviewed: 2026-08-26
 > Branch: feature/5-staging-endpointy-importu
-> Diff: 26 plików, 5 commitów (`0a6ffac`..`115d87f`)
+> Diff: 27 plików, 6 commitów (`0a6ffac`..`c005cb4`) — poprawki w `c005cb4`
+
+## Status znalezisk z rundy 1
+
+| # | Znalezisko rundy 1 | Status |
+|---|---|---|
+| BLOCKER | `pageSize=0` liczone przez `parseInt(...) \|\| domyślna` zamiast `string \|\| string \|\| '50'` PRZED `parseInt` — dawało `50` zamiast `1` | **NAPRAWIONE** — `src/routes/staging.ts:86-90` odtwarza dokładny wzorzec z `pagination_module.cjs:18-19`. Zweryfikowane linia po linii, potwierdzone testem `pageSize=0` → `1` (`test/staging.odczyt.test.ts:148-154`) |
+| SHOULD-FIX | wspólna bramka `odrzucNiedozwolonegoDostawce`/`kodZZadania` dawała `from-url` zły komunikat błędu (`Nieznany dostawca: X` zamiast `Brak URL dla dostawcy X`) | **NAPRAWIONE** — rozdzielone na `kodDlaParseFile`/`kodDlaFromUrl` (`src/routes/import.ts:90-100`) i osobne bramki inline w każdej trasie (`:199-211`, `:300-313`), komunikaty i kolejność sprawdzeń zgodne z `extensions.cjs:127-130` i `:214-218` |
+| SHOULD-FIX | `parse-file` przyjmował po scaleniu alias `body.dostawca`, którego oryginał tam nie ma; `from-url` przyjmował `query.dostawcaKod`, którego oryginał tam nie ma | **NAPRAWIONE** — `kodDlaParseFile` czyta wyłącznie `query.dostawcaKod \|\| body.dostawcaKod`, `kodDlaFromUrl` wyłącznie `body.dostawcaKod \|\| body.dostawca`. Pokryte testami (`import.test.ts` — „nie przyjmuje aliasu `dostawca`”, „nie czyta kodu dostawcy z query”) |
+| SHOULD-FIX | buforowanie CAŁEGO ciała żądania przed sprawdzeniem limitu 25 MB (DoS pamięciowy), nieodnotowane w „Znaleziska w oryginale” | **UTWARDZONE (D13)** — limit liczony w trakcie strumieniowania, pętla `for await` przerywana od razu po przekroczeniu progu; zweryfikowano empirycznie, że `break` niszczy leżący pod spodem strumień (`stream.destroy()`), więc nie zostaje zawieszone żądanie ani wyciek. Odpowiedź identyczna (ten sam 400/komunikat). Nowe odstępstwo D13 opisane w `plan.md` i `raport.md` |
+| SHOULD-FIX | brak testu na nieparsowalny `page` w `/paged` | **NAPRAWIONE** — dodany test „nieparsowalny `page` daje null, a offset schodzi do zera” (`test/staging.odczyt.test.ts:180-188`), plus analogiczny dla `pageSize` |
+| NICE-TO-HAVE | `resume()` w `pobierz.ts` bez komentarza uzasadniającego | **NAPRAWIONE** — komentarz dodany przy obu wywołaniach (`src/import/pobierz.ts:33-36,47`) |
+| NICE-TO-HAVE | walidacja wykluczeń w `kolumny.ts` biegła po budowie projekcji | **NAPRAWIONE** — walidacja przeniesiona przed budowę obiektu (`src/repos/kolumny.ts:24-38`) |
+| NICE-TO-HAVE | `wymusRetencje` nie sprawdza ponownie `existsSync` | **ŚWIADOMIE POMINIĘTE** — udokumentowane w raport.md („oryginał ma tę samą strukturę”), akceptowalne |
+
+Wszystkie znaleziska z rundy 1 zaadresowane. Zero pozostałości.
 
 ## BLOCKER
 
-- [ ] `rebuild/backend/src/routes/staging.ts:60-66` — `pageSize` w `/api/staging/paged` liczony inaczej niż w oryginale dla wartości `"0"`.
-  - Oryginał (`pagination_module.cjs:19`): `Math.min(200, Math.max(1, parseInt(req.query.pageSize || req.query.limit || '50', 10)))`. `||` działa NA STRINGU, zanim wejdzie `parseInt` — string `"0"` jest prawdziwościowo TRUE (niepusty string), więc fallback do `'50'` się NIE uruchamia. `parseInt("0",10)=0` → `Math.max(1,0)=1`. Czyli `pageSize=0` w oryginale daje **1**.
-  - Rebuild robi `parseInt(...) || DOMYSLNY_PAGE_SIZE` — `parseInt("0")` daje `0`, które jest falsy jako LICZBA, więc fallback się uruchamia i wychodzi **50**.
-  - To nie jest udokumentowane odstępstwo (brak wpisu D-cokolwiek), a test `staging.odczyt.test.ts:133-140` aktywnie utrwala złe zachowanie z błędnym komentarzem-uzasadnieniem („zero jest falsy, więc wpada domyślna wartość" — prawda dla liczby, nieprawda dla stringu wejściowego w oryginale).
-  - Ten sam błąd wzorca (`parseInt(...)||default` zamiast `str||default` przed `parseInt`) dotyczy też `page` (`routes/staging.ts:57-58`) dla wejść nieparsowalnych (np. `page=abc`): oryginał dostaje tam `NaN` (prawdopodobnie 500 przy bindowaniu do SQLite), rebuild cicho podstawia `1`. Mniej dotkliwe niż przypadek `pageSize=0`, bo dotyczy tylko śmieciowego wejścia, ale to ten sam nieprzeportowany fragment logiki.
-  - Sugestia: odtworzyć dokładnie wzorzec `string-fallback-przed-parseInt` z oryginału, albo — jeśli ma to być świadome odstępstwo (rozsądne, bo omija potencjalny 500) — dopisać je do plan.md/raport.md jako D13 i poprawić komentarz testu.
+Brak.
 
 ## SHOULD-FIX
 
-- [ ] `rebuild/backend/src/routes/import.ts:57-63,148-149` — wspólna funkcja `odrzucNiedozwolonegoDostawce` zwraca dla `from-url` komunikat `Nieznany dostawca: ${kod}` zamiast oryginalnego `Brak URL dla dostawcy ${kod}`.
-  - Oryginał ma DWA różne komunikaty dla tego samego warunku „brak URL": `parse-file` → `Nieznany dostawca: ${kod}` (`extensions.cjs:216-218`), `from-url` → `Brak URL dla dostawcy ${kod}` (`extensions.cjs:129-130`). Scalenie obu tras w jedną bramkę pod wspólnym komunikatem cicho zmienia treść błędu dla `from-url`.
-  - Brak testu na ten przypadek dla `from-url` (jest tylko dla `parse-file`, `import.test.ts:184-189`), więc rozjazd przeszedł niezauważony.
-  - Sugestia: albo osobne komunikaty per trasa, albo świadomie ujednolicić i to udokumentować + dopisać test dla `from-url` z nieznanym dostawcą.
-
-- [ ] `rebuild/backend/src/routes/import.ts:52-56` — `kodZZadania` jest dzielone między `parse-file` i `from-url`, ale akceptowane źródła kodu różnią się w oryginale.
-  - Oryginał `parse-file` czyta wyłącznie `req.query.dostawcaKod || req.body.dostawcaKod` (`extensions.cjs:214`) — bez aliasu `dostawca`. Oryginał `from-url` czyta `req.body.dostawcaKod || req.body.dostawca` (`extensions.cjs:127`) — bez query.
-  - Wspólna funkcja w rebuildzie akceptuje WSZYSTKIE trzy źródła dla OBU tras, czyli `parse-file` teraz przyjmuje też `body.dostawca` (czego oryginał nie robił), a `from-url` przyjmuje też `query.dostawcaKod` (nieużywane w praktyce, ale poszerza powierzchnię API). Niegroźne funkcjonalnie, ale to niezamierzone poszerzenie zachowania bez zatwierdzonej decyzji i bez testu.
-
-- [ ] `rebuild/backend/src/routes/import.ts:196-201` — czytanie surowego strumienia (`for await (const kawalek of req)`) akumuluje CAŁE ciało w pamięci PRZED sprawdzeniem limitu 25 MB, tak samo jak oryginał (`extensions.cjs:224-230`).
-  - Wiernie odtworzone, ale skoro instrukcja przeglądu prosiła o weryfikację tego punktu wprost: to jest realna słabość (DoS przez duże ciało żądania) odziedziczona z produkcji, nieodnotowana w sekcji „Znaleziska w oryginale" `raport.md` (są tam tylko 3 inne znaleziska). Warto dopisać jako czwarte, żeby przyszła sesja świadomie decydowała, czy to naprawiać (np. licznikiem bajtów w trakcie strumieniowania) czy zostawić.
-
-- [ ] `rebuild/backend/test/staging.odczyt.test.ts:150-153` — test „`page` poniżej 1 jest podnoszony do 1" sprawdza tylko `page=-3`, nie pokrywa przypadku `page` nieparsowalnego (`page=abc`), gdzie zachowanie (patrz BLOCKER wyżej) też się różni od oryginału. Warto dopisać, skoro `limit`/`offset` mają analogiczny test dla `"abc"` w `/api/staging`.
+Brak nowych.
 
 ## NICE-TO-HAVE
 
-- [ ] `rebuild/backend/src/import/pobierz.ts:29-30,35` — dodane `odpowiedz.resume()` przy przekierowaniu/błędnym statusie to dobra poprawka (unika zawieszonego gniazda), ale nie jest opisana jako świadome (nieszkodliwe) odstępstwo — warto jedno zdanie w komentarzu, żeby nie wyglądało na przeoczenie przy następnym audycie.
-- [ ] `rebuild/backend/src/import/archiwum.ts:120` — `wymusRetencje` w bloku `for (const miesiac of readdirSync(korzen))` na końcu nie sprawdza `existsSync(korzen)` ponownie (choć w praktyce katalog już istnieje, bo `archiwizujBufor` go tworzy) — czysto kosmetyczne, oryginał ma tę samą strukturę.
-- [ ] `rebuild/backend/src/repos/kolumny.ts:30-38` — pętla walidująca wykluczenia (`for (const nazwa of wykluczone)`) biegnie PO zbudowaniu projekcji; przy literówce funkcja i tak najpierw budowałaby (poprawny) obiekt, a dopiero potem rzucała. Działa poprawnie (test to potwierdza), ale kolejność (walidacja przed budową) byłaby czytelniejsza.
+- [ ] `rebuild/backend/src/import/pobierz.ts` — brak jakiegokolwiek limitu rozmiaru dla `from-url` (limit 25 MB dotyczy tylko `parse-file`). To wiernie odtworzony brak z oryginału (`extensions.cjs` też go nie ma), więc nie jest to regresja tej sesji — odnotowuję tylko jako coś, co warto mieć na radarze przy ewentualnym twardnieniu bezpieczeństwa poza zakresem tego ticketa.
+- [ ] `rebuild/backend/test/import.test.ts:225` — pusta linia nawiasowa (podwójny odstęp) po teście „odrzuca plik większy niż 25 MB” — kosmetyka, linter przepuszcza.
+
+## Weryfikacja szczegółowa (wg instrukcji z zadania)
+
+1. **BLOCKER paginacji** — porównanie linia po linii z `mirror/backend/pagination_module.cjs:18-19` potwierdza wierność: `page`/`pageSize` liczone przez `string || string || default` PRZED `parseInt`, bez fallbacku po `parseInt`. Sprawdzone przypadki: `page=0`→1 (przez tożsamy wzorzec do `pageSize`), `page=-3`→1 (test), `page=abc`→`NaN`→`null` w JSON (test), `pageSize=0`→1 (test, kluczowy przypadek z rundy 1), `pageSize=""`→50 (test), `pageSize=abc`→`NaN`→`null`, LIMIT NULL = bez limitu (test), `pageSize=9999`→200=MAX_PAGE_SIZE (test), `pageSize=-5`→1 (test), `limit` jako alias `pageSize` (test). Komentarze w kodzie i w testach są rzetelne i zgodne z faktycznym zachowaniem zweryfikowanym uruchomieniem testów (241/241 zielone).
+
+2. **Rozdzielenie bramek `import.ts`** — `kodDlaParseFile`/`kodDlaFromUrl` i trzy kolejne `if` w każdej trasie odtwarzają dokładnie kolejność i treść z `extensions.cjs:127-130` (from-url: brak kodu → brak URL) i `:214-218` (parse-file: brak kodu → nieznany dostawca). Strażnik `wylaczonyZImportu` (D5) jest wstawiony jako TRZECI, ostatni warunek w obu trasach — po oryginalnych dwóch — więc nie zmienia kolejności ani treści oryginalnych walidacji, zgodnie z komentarzem w kodzie.
+
+3. **D13 (limit w strumieniu)** — dla pliku ≤25 MB wynik identyczny jak przy pełnym buforowaniu (kod tylko przerywa pętlę WCZEŚNIEJ przy przekroczeniu, przed tym momentem zachowanie jest identyczne z oryginałem). Przerwanie `for await` przez `break` wywołuje `iterator.return()`, co niszczy leżący pod spodem strumień żądania (zweryfikowane empirycznie na izolowanym `Readable` — `destroyed: true`) — nie ma więc wiszącego żądania ani wycieku pamięci; pełny zestaw testów (w tym test „odrzuca plik większy niż 25 MB”) przechodzi zielono, co potwierdza brak zawieszenia. Pusty plik nadal daje „Pusty plik” — sprawdzenie `bufor.length === 0` jest niezmienione i wykonuje się po sprawdzeniu `przekroczonyLimit` tylko wtedy, gdy limit NIE został przekroczony, więc kolejność (najpierw limit, potem pustość) jest zachowana tak samo jak w oryginale (tam też limit sprawdzany jest po długości bufora, ale w tym wypadku nie ma kolizji, bo pusty plik nigdy nie przekroczy limitu).
+
+4. **Regresje w GATE/charakteryzacji** — `test/staging.gate.test.ts`, `test/katalog.gate.test.ts`, `test/charakteryzacja.test.ts` uruchomione osobno: 77/77 zielone. Pełny `npm test`: 241/241 zielone. `npm run lint` i `npm run typecheck` czyste.
+
+5. **Usunięcie testu granicy dokładnie 25 MB** — test ten nigdy nie trafił do żadnego commitu (sprawdzone w historii git — brak śladu `Buffer.alloc(MAX_ROZMIAR_UPLOADU)` bez `+1` w całej historii gałęzi), więc jego usunięcie nie jest widoczne jako regresja w diffie i nie da się go zweryfikować inaczej niż na słowo z raport.md. Uzasadnienie (14 s, ostre `>` widoczne w kodzie i opatrzone komentarzem, boundary pokryty pośrednio przez test `+1`) jest rozsądne — sam próg (`> MAX_ROZMIAR_UPLOADU`) jest jednoznaczny w kodzie i nie wymaga osobnego testu granicznego przy `===`, skoro test `+1` już potwierdza, że próg jest ostry, a nie `>=`. Nie zostawia realnej luki.
+
+6. **Rzetelność `raport.md`/`plan.md`** — `plan.md` ma zaktualizowaną tabelę D1–D13 (D12, D13 dopisane z uzasadnieniem) oraz `Status: Implemented`. `raport.md` ma nową sekcję „Poprawki po recenzji” z rzetelnym opisem wszystkich 4 zaadresowanych zarzutów (w tym błędnego uzasadnienia usuniętego testu z rundy 1) i sekcję „Znaleziska w oryginale” z DOKŁADNIE 5 pozycjami (dodano czwartą — `NaN`/`LIMIT NULL` — i piątą — różne komunikaty `parse-file`/`from-url`), zgodnie z instrukcją zadania. Treść zweryfikowana wobec kodu źródłowego produkcji (`pagination_module.cjs`, `extensions.cjs`) — bez rozbieżności.
 
 ## Plan compliance
 
 ### Done ✓
-- Migracja `002_import.sql` (`suppliers.import_wylaczony`, `products.uwaga_cena`, wyłączenie MO6) — krok 1
-- Jawna projekcja kontraktowa (`repos/kolumny.ts`) + użycie w `repos/products.ts`/`repos/suppliers.ts`, `katalog.gate.test.ts` zielony bez zmian — krok 1, D6
-- Repozytorium stagingu z trzema projekcjami (24/20/21) + zapis wsadowy w transakcji — krok 2
-- Trasy odczytu `GET /api/staging`, `/paged`, `/{id}`, `/paged` zarejestrowane przed `/:id` — krok 3
-- Szew `tk()` (`silnikStagingu3b`) z jawnie oznaczoną niewiernością, filtr śmieci MO2 port 1:1, odrzucenie bez kodu/EAN — krok 4, D2
-- Archiwum importu (`archiwum.ts`) — zapis, `.meta.json` 14 pól, retencja 7 dni / 5 GB, nigdy nie rzuca — krok 5, D3
-- Trasy importu `parse-file`/`from-url`/`ai-fallback/parse`, strażnik D5, bezpiecznik D4, naprawa `archOk` D8, limit przekierowań D12 — krok 6
-- Testy: GATE fixtures/kontrakt, odczyt, import end-to-end bez mocków (poza transportem HTTP), projekcja D6 — krok 7
-- `lint`/`typecheck`/`build`/`test` przechodzą (234/234 testów, zweryfikowane lokalnie)
+- Wszystko z rundy 1 (patrz historia — bez zmian w tej rundzie).
+- Dodatkowo: D12 i D13 udokumentowane w `plan.md` (tabela odstępstw) i `raport.md`.
 
 ### Missing or deviating ✗
-- Brak żadnego kroku z planu całkowicie pominiętego. Odchylenia dotyczą detali wewnątrz kroków 3 i 6 (patrz BLOCKER/SHOULD-FIX powyżej: `pageSize=0`, komunikat błędu `from-url`, poszerzone źródła `dostawcaKod`) — żadne z nich nie jest wymienione w tabeli „Świadome odstępstwa" w `raport.md`, więc formalnie są to nieudokumentowane rozjazdy z oryginałem, a nie zatwierdzone decyzje.
+Brak — wszystkie odchylenia zgłoszone w rundzie 1 są teraz albo naprawione, albo świadomie udokumentowane jako odstępstwo (D13) lub jako znalezisko w oryginale (pozycje 4 i 5 w `raport.md`).
 
 ### Definition of done
 - [x] Rekordy z parsera trafiają do `staging_items` przez Drizzle, w transakcji
-- [x] `GET /api/staging` oba kształty, `/paged` z filtrami, `/{id}` z 400/404 — **z zastrzeżeniem BLOCKER** (`pageSize=0` daje inny wynik niż oryginał)
-- [x] `POST /api/import/parse-file` działa na realnym cenniku
-- [x] `POST /api/import/from-url` pobiera, archiwizuje, parsuje, zapisuje
+- [x] `GET /api/staging` oba kształty, `/paged` z filtrami, `/{id}` z 400/404 — BLOCKER z rundy 1 naprawiony, weryfikacja linia-po-linii OK
+- [x] `POST /api/import/parse-file` działa na realnym cenniku, bramka walidacyjna wierna oryginałowi
+- [x] `POST /api/import/from-url` pobiera, archiwizuje, parsuje, zapisuje, bramka walidacyjna wierna oryginałowi
 - [x] `POST /api/ai-fallback/parse` odtworzony 1:1 w obu trybach
 - [x] Strażnik MO6 (D5) i bezpiecznik pustego wyniku (D4) pokryte testami
 - [x] Archiwum tworzy plik + `.meta.json` o poprawnych 14 polach
@@ -63,13 +68,13 @@
 - [x] Zbiory kluczy 24/20/21 pokryte testami
 - [x] `katalog.gate.test.ts` nadal zielony bez zmian w teście
 - [x] `charakteryzacja.test.ts` nadal zielony
-- [x] `lint`/`typecheck`/`build`/`test` czyste
-- [x] `raport.md` opisuje podział 3b/3c i odstępstwa D1–D12 (choć nie wszystkie rzeczywiste odstępstwa znalezione w tej recenzji są w niej ujęte — patrz „Missing or deviating")
+- [x] `lint`/`typecheck`/`build`/`test` czyste (241/241 testów, zweryfikowane w tej rundzie lokalnie)
+- [x] `raport.md`/`plan.md` opisują D1–D13 rzetelnie, w tym poprawki po recenzji i 5 znalezisk w oryginale
 
 ## Parallel-test concerns
 
-None — wszystkie nowe testy używają portu efemerycznego (`import.pobierz.test.ts`: `listen(0, "127.0.0.1")`), tymczasowej bazy SQLite per `stworzSrodowiskoTestowe()` i katalogu archiwum wyprowadzonego ze ścieżki tymczasowej bazy (`test/gate/aplikacja.ts`), czyszczonego w `afterAll`/`beforeEach`. Brak twardo zakodowanych portów, ścieżek czy współdzielonego stanu między agentami.
+None — poprawki nie dodały nowych plików testowych ani nowych zasobów współdzielonych; wzorce (port efemeryczny, tymczasowa baza SQLite, katalog archiwum per test) pozostają bez zmian.
 
 ## Overall assessment
 
-Bardzo solidna sesja: podział 3b/3c jest trafnie postawiony, szew `tk()` jest czytelny i gotowy do podmiany w 3c, archiwum i projekcja kontraktowa (D6) są dopracowane i dobrze przetestowane, a GATE fixtures/kontrakt przechodzi bez modyfikacji fixtures. Największy realny problem to rozjazd w liczeniu `pageSize` dla `/api/staging/paged` przy wartości `"0"` — subtelny, ale dokładnie tego typu błąd, przed którym miał chronić rygor „porównaj z oryginałem linia po linii"; test, który miał to złapać, sam utrwala złe zachowanie z błędnym uzasadnieniem. Drugi wątek to scalenie bramek walidacyjnych `parse-file`/`from-url` w jedną funkcję, które ujednolica komunikaty błędów i akceptowane pola wejściowe kosztem wierności wobec dwóch osobno napisanych oryginalnych handlerów. Oba są łatwe do naprawienia bez ruszania architektury.
+Wszystkie znaleziska z rundy 1 zostały rzetelnie zaadresowane — BLOCKER naprawiony z odtworzeniem dokładnego wzorca `string || string || default` PRZED `parseInt`, potwierdzonym testami, które faktycznie sprawdzają to, co deklarują (w przeciwieństwie do testu z rundy 1, który utrwalał błędne zachowanie). Rozdzielenie bramek walidacyjnych `parse-file`/`from-url` jest wykonane starannie, z komentarzem wprost tłumaczącym, dlaczego wspólna funkcja była błędem, i z testami na oba nowo odkryte rozjazdy. Utwardzenie limitu 25 MB (D13) jest bezpieczne — zweryfikowałem empirycznie, że przerwanie `for await` niszczy strumień żądania, więc nie ma ryzyka wiszącego połączenia — i jest właściwie udokumentowane jako świadome odstępstwo bez wpływu na kontrakt. Dokumentacja (`plan.md`, `raport.md`) jest rzetelna i spójna z kodem. Branch gotowy do merge z perspektywy tego ticketa.

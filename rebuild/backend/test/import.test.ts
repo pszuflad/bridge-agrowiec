@@ -223,7 +223,6 @@ describe("endpointy importu", () => {
       expect(policzStaging().c).toBe(0);
     });
 
-
     it("wymaga zalogowania", async () => {
       const odp = await request(srodowisko.app)
         .post("/api/import/parse-file?dostawcaKod=MO1")
