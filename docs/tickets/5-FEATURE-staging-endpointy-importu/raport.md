@@ -216,6 +216,13 @@ Dokłada dwie kolumny i ustawia `import_wylaczony = 1` dla MO6.
    Warstwa zapisu i rotacji jest gotowa, brakuje trzech tras odczytu.
 5. **Scheduler auto-pull** (`runAutoPull`, codziennie 06:00, `extensions.cjs`) — poza zakresem 3b.
 6. **`POST /api/dostawcy/:kod/upload`** (rdzeń, multer, fallback `Wc()`) — Iteracja 11.
+9. **Bezpiecznik D4 nie zakrywa `POST /api/staging/import`** (znalezione po recenzji, przy
+   przeglądzie zakresu 3c/3d). Ta trasa — należąca do 3d — bierze pozycje wprost z ciała
+   żądania (`body.surowe ?? body.items ?? []`, `backend-index.cjs:48502-48512`) i sprawdza
+   tylko `Array.isArray`, więc pusta tablica trafia prosto do `tk()`. To dokładnie scenariusz
+   z backlogu #8, przed którym D4 miał chronić. Rekomendacja dla 3d: przenieść bezpiecznik
+   do samego `tk()`, gdzie zakryje wszystkie trzy ścieżki, zamiast powielać go na trasie.
+   Odnotowane w `docs/rebuild-backlog.md` (#8) i w bloku 3d roadmapy.
 8. **Limit rozmiaru dla `from-url`** — dziś pobranie jest nieograniczone (znalezisko 6).
    W przeciwieństwie do D13 utwardzenie zmieniłoby zachowanie widoczne w odpowiedzi
    (nowy kod błędu), więc wymaga świadomej decyzji, a nie cichej poprawki.
