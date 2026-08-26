@@ -268,6 +268,69 @@ integrację Selly.
 
 **Opis:** bieżące poprawki parserów Ani (flagi etykiet, MO8 Trelleborg, itd.). **Rekomendacja:** ✅ **objęte strategią „port parserów z najświeższego źródła" (I3/3a)** — nie wymagają osobnej implementacji; portując aktualny stan `parsers/`, dostajemy je wszystkie za darmo. To główny argument za portem, nie rewrite.
 
+### #7 · 2026-08-26 · [BACKEND][KONFIGURACJA] · MO6 Agrowiec — wycofanie dostawcy z importu
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-08-26 |
+| **Kategoria** | BACKEND (konfiguracja dostawców) |
+| **Pliki** | konfiguracja `suppliers` (nie kod parsera) |
+| **Do nowej wersji?** | ✅ **TAK** (decyzja produkcji, potwierdzona 2026-08-26) |
+| **Iteracja** | **→ 3b** (uruchamianie importu) / **I11** (edycja dostawcy) |
+| **Status** | — |
+
+**Opis biznesowy:** dostawca MO6 (Agrowiec / Uniglory) przestaje być importowany. Decyzja dotyczy
+**również żywej produkcji** — Ania wyłącza go u siebie — więc dla odbudowy to nadal wierne
+odtworzenie stanu, nie nasze odstępstwo.
+
+**Co dokładnie oznacza:**
+- **Dane zostają.** Pozycje MO6 obecne w katalogu pozostają jako historyczne. Nic nie kasujemy,
+  nic nie backfillujemy; jeśli czegoś nie ma w bazie, nie ma go tam nadal.
+- **Parser `mo6_agrowiec.cjs` zostaje w porcie** (`rebuild/backend/src/import/legacy/parsers/`) —
+  port jest kopią bajt-w-bajt produkcji i wybiórcze usuwanie plików łamie jego główną własność
+  (test integralności sha256). Parser po prostu przestaje być wołany.
+- **Wyłączenie realizuje się w konfiguracji `suppliers`**, nie w warstwie parserów.
+- **Próbka charakteryzacyjna MO6 zostaje** — dalej dowodzi wierności portu, nic nie kosztuje,
+  a gdyby dostawca wrócił, pokrycie jest gotowe.
+
+**Sprawdzone, żeby nie stracić danych:** automatyczne wycofywanie po 3 nieobecnościach **nie
+zagraża** pozycjom MO6. Licznik `nieobecnosc_pod_rzad` rośnie wyłącznie wewnątrz `tk()`, a `tk()`
+działa na produktach jednego dostawcy (`deminified/backend-index.cjs:47598`). Skoro MO6 nie jest
+importowany, `tk('MO6', …)` nigdy się nie wykonuje. Ryzyko powstałoby tylko przy uruchomieniu
+importu MO6 z pustym plikiem — i dotyczy tak samo każdego innego dostawcy.
+
+**Do potwierdzenia z Anią:** czy usuwa `mo6_agrowiec.cjs` z serwera, czy tylko wyłącza dostawcę
+w konfiguracji. Jeśli usunie plik, test integralności portu zaświeci na czerwono przy najbliższej
+synchronizacji lustra — co jest zachowaniem pożądanym (po to ten test jest), ale lepiej wiedzieć
+zawczasu.
+
+### #8 · 2026-08-26 · [BACKEND] · MO8 Trelleborg — cichy import zera pozycji przy pliku CSV
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-08-26 (znalezione przy I3/3a) |
+| **Kategoria** | BACKEND (parser MO8) |
+| **Pliki** | `parsers/mo8_trelleborg.cjs` |
+| **Do nowej wersji?** | ⬜ **do decyzji** (to zmiana zachowania produkcji — decyzja Ani) |
+| **Iteracja** | → do rozstrzygnięcia; naturalnie **3b** (uruchamianie importu) |
+| **Status** | — |
+
+**Opis biznesowy:** jeśli Trelleborg przyśle cennik jako CSV zamiast XLSX, import kończy się
+**zerem zaimportowanych pozycji i bez żadnego komunikatu błędu**. Wygląda jak udany import
+pustego cennika.
+
+**Szczegół techniczny:** `mo8_trelleborg.cjs` czyta plik przez `XLSX.readFile()` i iteruje
+wyłącznie po arkuszach o nazwach `Radial` i `XPly`. SheetJS wczytuje CSV jako pojedynczy arkusz
+`Sheet1`, więc filtr nie łapie nic i parser zwraca `records: []`, `errors: []`. Zweryfikowane
+uruchomieniowo na realnym pliku od Ani (`_Trelleborg List Price_AG_April 2026_New_EPL_PL_BAL.csv`,
+446 wierszy, układ kolumn arkusza XPly) — 0 rekordów.
+
+**Rekomendacja (moja):** ✅ **naprawić**, ale wzorem istniejącego rozwiązania, nie od zera:
+`mo10_gri.cjs` ma dokładnie ten sam problem rozwiązany poprawnie — wykrywa format po **sygnaturze
+bajtów** (`PK\x03\x04` = XLSX) i ma osobną ścieżkę CSV, bo „dostawca zmienił format bez zmiany
+adresu URL" (komentarz Ani z 2026-07-14). MO8 tego nie ma. Minimalnie: zgłaszać błąd zamiast
+cichego zera, gdy w skoroszycie nie ma ani `Radial`, ani `XPly`.
+
 ---
 
 *Pominięte (nie kod, brak zadania rebuild):*

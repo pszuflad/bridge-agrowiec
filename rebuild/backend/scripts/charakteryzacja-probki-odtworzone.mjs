@@ -1,11 +1,19 @@
-// Odtwarza próbki dostawców, dla których w repozytorium NIE MA żadnego realnego pliku:
-// MO6 (Agrowiec/Uniglory), MO7 (Nokian), MO8 (Trelleborg), MO10 (GRI) oraz MO9 (Agrorami).
+// Odtwarza próbki dostawców, dla których nie mamy realnego pliku wejściowego:
+// MO6 (Agrowiec/Uniglory), MO8 (Trelleborg) oraz MO9 (Agrorami).
 //
-// DLACZEGO ODTWARZAMY, ZAMIAST WZIĄĆ PLIK
+// MO7 (Nokian) i MO10 (GRI) miały tu wcześniej próbki odtworzone — od 2026-08-26 mamy od Ani
+// PRAWDZIWE pliki i te sekcje zostały usunięte. Odtworzenie się przy tym obroniło: 4 z 5
+// rekordów zgadzały się z prawdziwym plikiem we WSZYSTKICH 53 polach, a jedyna różnica
+// (MO10 PAB1035, stan 8 vs 6) to zmiana stanu magazynowego w czasie, nie błąd odtworzenia.
+//
+// DLACZEGO POZOSTAŁE ODTWARZAMY, ZAMIAST WZIĄĆ PLIK
 // Archiwum importów (mirror/backend/import_archive/, dostępne pod 72957d7^) obejmuje wyłącznie
-// okno 2026-08-21…25 i zawiera tylko MO1–MO5 oraz MO9. Tych czterech dostawców po prostu w nim
-// nie ma. MO9 z kolei ma w archiwum pliki CSV, ale produkcyjny parser (mo9_agrorami.cjs) je
-// IGNORUJE — od 2026-07-10 dane idą z API GraphQL, a nie z pliku.
+// okno 2026-08-21…25 i zawiera tylko MO1–MO5 oraz MO9. MO6 i MO8 w nim nie występują.
+// MO6 jest od 2026-08-26 wycofany z importu (decyzja produkcji) — próbkę zostawiamy, bo dalej
+// dowodzi wierności portu i nic nie kosztuje. Dla MO8 plik, który dostaliśmy, jest CSV-em,
+// z którego produkcyjny parser nie czyta nic (patrz ZRODLA.md) — czekamy na XLSX.
+// MO9 ma w archiwum pliki CSV, ale produkcyjny parser (mo9_agrorami.cjs) je IGNORUJE —
+// od 2026-07-10 dane idą z API GraphQL, a nie z pliku.
 //
 // SKĄD DANE
 // Wiersze pochodzą z mirror/backend/parsers/test_tyres.cjs — pliku charakteryzacyjnego Ani,
@@ -24,7 +32,6 @@ import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
 const wymagaj = createRequire(import.meta.url);
-const iconv = wymagaj("iconv-lite");
 const XLSX = wymagaj("xlsx");
 
 const backendDir = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -55,26 +62,6 @@ zapisz(
   ]),
 );
 
-// ---------------------------------------------------------------- MO7 Nokian
-// UWAGA — KODOWANIE. mo7_nokian.cjs dekoduje plik jako cp1250, ale adapter.cjs (case MO7)
-// szuka bieżnika pod kluczami 'BIEÄąÂ»NIK' / 'BIEĹ»NIK' / 'BIEZNIK' — czyli pod nagłówkiem
-// ZNIEKSZTAŁCONYM, nie pod czystym "BIEŻNIK". "Ĺ»" to dokładnie to, co daje bajtowa para
-// UTF-8 znaku "Ż" (C5 BB) zdekodowana jako cp1250. Wniosek: realny plik Nokiana jest w UTF-8,
-// a produkcja czyta go jako cp1250 — i cały łańcuch (parser + adapter) jest napisany pod ten
-// właśnie rozjazd. Próbka MUSI więc być zapisana w UTF-8, inaczej adapter nie zobaczy bieżnika
-// i odtworzylibyśmy zachowanie, którego produkcja nie ma.
-zapisz(
-  "MO7.csv",
-  Buffer.from(
-    csv([
-      ["Kod produktu", "Rozmiar", "Rozmiar alternatywny", "MODEL", "PRODUCENT", "BIEŻNIK", "SF/SB", "TL/TT", "LI/SI", "PR", "RODZAJ", "EAN", "Zakup 1 szt", "Magazyn"],
-      ["T445733", "420/70R28", "", "Nokian Tyres Ground King SB", "NOKIAN", "Nokian Tyres Ground King SB", "SB", "TL", "144D / 141E", "", "ROLNICZA", "6419440427386", " 3 241 zł ", "5"],
-      ["T445763", "600/70R28", "", "Nokian Tyres Ground King SB", "NOKIAN", "Nokian Tyres Ground King SB", "SB", "TL", "164D / 160E", "", "ROLNICZA", "6419440463216", " 5 976 zł ", "5"],
-    ]),
-    "utf-8",
-  ),
-);
-
 // ---------------------------------------------------------------- MO8 Trelleborg
 // XLSX, arkusz "Radial" (15 kolumn wg nagłówka pliku w mo8_trelleborg.cjs):
 // A Size(sekcja) B Size C TL/TT D LI-SI/PR E Pattern F IP Code G Code EAN H EPL in EUR
@@ -91,23 +78,6 @@ zapisz(
   XLSX.utils.book_append_sheet(skoroszyt, arkusz, "Radial");
   zapisz("MO8.xlsx", XLSX.write(skoroszyt, { bookType: "xlsx", type: "buffer" }));
 }
-
-// ---------------------------------------------------------------- MO10 GRI
-// mo10_gri.cjs czyta CSV jako cp1250 (albo XLSX, wykrywany po sygnaturze PK\x03\x04).
-// Wybieramy wariant CSV — to on jest w tym parserze ścieżką domyślną. Nagłówki mają polskie
-// znaki ("Bieżnik", "ilość"), więc plik musi być realnie zakodowany w cp1250.
-zapisz(
-  "MO10.csv",
-  iconv.encode(
-    csv([
-      ["NR KAT", "EAN", "Bieżnik", "Rozmiar", "ilość", "cena netto/szt"],
-      ["PAB1001", "4792290022881", "GREEN EX FL700", "400/60-15.5 18PR I-3 TL", "8", "594 zl"],
-      ["PAB1035", "4792290037298", "GREEN EX RT100", "23.1-26 12PR R-1 TL", "8", "2 009 zl"],
-      ["PAR1226", "4792290039537", "GREEN XLR 85", "380/80R38 152A8/149D R-1W TL", "6", "1 681 zl"],
-    ]),
-    "cp1250",
-  ),
-);
 
 // ---------------------------------------------------------------- MO9 Agrorami
 // Obiekty `item` w kształcie zapytania GraphQL z mo9_agrorami_api.cjs (sku, ean, name,

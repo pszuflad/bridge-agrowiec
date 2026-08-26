@@ -5,7 +5,7 @@
 Podsystem parserów z produkcji (5043 linie `.cjs` + słownik) został wciągnięty do
 `rebuild/backend/src/import/legacy/` jako **kopia bajt-w-bajt**, a nad nim stanął własny brzeg
 wejścia `parsujPlik`/`parsujBufor` w TS/ESM: (plik albo bufor + kod dostawcy) → rekordy po
-`adapter.recordsToSurowe()`. Gate charakteryzacji jest zielony dla **MO1–MO10** — 711 rekordów
+`adapter.recordsToSurowe()`. Gate charakteryzacji jest zielony dla **MO1–MO10** — 1214 rekordów
 porównanych pole po polu z wyjściem **oryginalnych** parserów, plus sha256 port↔`mirror/backend`.
 Audyt na **pełnych** plikach MO1–MO5 potwierdza zgodność portu z oryginałem także poza próbką,
 a liczby rekordów zgadzają się z `.meta.json` z realnych przebiegów produkcji.
@@ -29,8 +29,8 @@ Bez bazy, bez `tk()`, bez endpointów — zgodnie z zakresem sesji 3a.
 - `rebuild/backend/scripts/charakteryzacja-nagraj.mjs` — nagrywa wzorzec z **oryginalnych** parserów
 - `rebuild/backend/test/charakteryzacja.test.ts` — gate (59 asercji)
 - `rebuild/backend/test/charakteryzacja/mo9-offline.mjs` (+ `.d.mts`) — MO9 bez sieci
-- `rebuild/backend/test/charakteryzacja/probki/` — 10 próbek (~250 KB)
-- `rebuild/backend/test/charakteryzacja/MOx.expected.json` — wzorzec (~1,2 MB)
+- `rebuild/backend/test/charakteryzacja/probki/` — 10 próbek (~340 KB)
+- `rebuild/backend/test/charakteryzacja/MOx.expected.json` — wzorzec (~2 MB)
 - `rebuild/backend/test/charakteryzacja/ZRODLA.md` — pochodzenie próbek i procedura odtwarzania
 
 **Zmienione:**
@@ -78,7 +78,7 @@ fixtures/kontraktu obowiązuje w pełni. Wszystkie istniejące gate'y z iteracji
 | Warstwa | Co dowodzi | Wynik |
 |---|---|---|
 | 1. Integralność portu | sha256 każdego z 16 plików == `mirror/backend` | ✅ |
-| 2. Charakteryzacja MO1–MO10 | port == wyjście oryginału, pole po polu | ✅ 711 rekordów |
+| 2. Charakteryzacja MO1–MO10 | port == wyjście oryginału, pole po polu | ✅ 1214 rekordów |
 | 3. Przydatność próbki | > 0 rekordów, 0 błędów parsera, pola kluczowe wypełnione | ✅ |
 | 4. Brzeg wejścia | `parsujBufor` == `parsujPlik`; nieznany dostawca odrzucony; typ `KodDostawcy` == lista dispatchera | ✅ |
 | 5. Paginacja MO9 | 250 obiektów wraca przez wiele stron, bez gubienia i duplikatów | ✅ |
@@ -94,11 +94,11 @@ Wzorzec (`MOx.expected.json`) nagrany skryptem uruchamiającym **oryginalne** pa
 | MO4 | MO4_Handlopex_WR | 101 | 0 | 0 | 99 |
 | MO5 | MO5_Handlopex_RZ | 146 | 0 | 0 | 54 |
 | MO6 | MO6_Agrowiec | 2 | 0 | 0 | 0 |
-| MO7 | MO7_Nokian | 2 | 0 | 0 | 0 |
+| MO7 | MO7_Nokian | **285** | 0 | 0 | 0 |
 | MO8 | MO8_Trelleborg | 2 | 0 | 0 | 0 |
 | MO9 | MO9_Agrorami | 12 | 0 | 0 | 0 |
-| MO10 | MO10_GRI | 3 | 0 | 0 | 0 |
-| **razem** | | **711** | **0** | **156** | **154** |
+| MO10 | MO10_GRI | **223** | 0 | 0 | 0 |
+| **razem** | | **1214** | **0** | **156** | **154** |
 
 **Skuteczność gate'u zweryfikowana empirycznie.** Zielony test, którego nie da się złamać, niczego
 nie dowodzi — więc sprawdziliśmy. Celowe cofnięcie `capitalizeKategoria()` w porcie
@@ -167,7 +167,7 @@ Zakres 3a to odtworzenie zachowania, nie jego poprawianie. Poniższe rzeczy port
 2. **`nro` i `cho` nadal są liczbami 0/1.** Rekomendacja z backlogu #1 przewidywała, że „ta sama
    zasada dotyczy prawdopodobnie innych pól-flag" — i sprawdziła się. Po `sniegfix` i `flagsfix`
    pola `labelSnow`, `snow3pmsf`, `ms`, `cfo`, `stubbleResistant` zwracają `'Tak'`/`null`, ale
-   `nro` i `cho` zostały liczbowe (zweryfikowane na 711 rekordach). Osobna decyzja.
+   `nro` i `cho` zostały liczbowe (zweryfikowane na 1214 rekordach). Osobna decyzja.
 3. **Adapter odrzuca duży odsetek rekordów MO4/MO5.** Na pełnym pliku MO4: 3771 rekordów parsera
    → 252 po `recordsToSurowe()`; MO5: 5184 → 1639. Odrzucanie robi `shouldRejectRecord()`
    (klasyfikator „czy to opona"). Zachowanie identyczne z produkcją, ale skala jest na tyle duża,
@@ -182,19 +182,21 @@ Zakres 3a to odtworzenie zachowania, nie jego poprawianie. Poniższe rzeczy port
 
 ## Luki pokrycia (świadome, do zamknięcia gdy pojawią się dane)
 
-- **MO6/MO7/MO8/MO10 — 2–3 wiersze na dostawcę.** W całej historii repozytorium nie ma ani jednego
-  pliku od tych dostawców; archiwizacja ruszyła 2026-08-21 i objęła tylko MO1–MO5 oraz MO9. Próbki
-  odtworzono z realnych linii zaszytych w `test_tyres.cjs`. Świadomie **nie** dopisywaliśmy własnych
-  wierszy — zmyślone dane dostawcy nie dowodzą niczego. Gdy pojawi się prawdziwy plik, wystarczy
-  podmienić próbkę i przenagrać wzorzec.
+- **MO6 i MO8 — po 2 wiersze.** MO6 jest wycofany z importu, więc pokrycie nie urośnie i nie musi.
+  MO8 czeka na plik w formacie, który produkcyjny parser faktycznie czyta (patrz Znaleziska).
+  Próbki odtworzone z realnych linii w `test_tyres.cjs`; świadomie **nie** dopisywaliśmy własnych
+  wierszy — zmyślone dane dostawcy nie dowodzą niczego.
+- **MO7 i MO10 — luka zamknięta 2026-08-26.** Ania dostarczyła prawdziwe pliki (285 i 223 rekordy),
+  które zastąpiły próbki odtworzone.
 - **MO9 — niepokryty transport HTTP.** Podstawiamy wyłącznie globalny `fetch`, więc realnie wykonuje
   się cały `fetchAll()`. Poza pokryciem zostaje samo żądanie sieciowe, odnawianie tokenu w czasie
   i zachowanie API przy błędach — to brzeg, należący do 3b. Ścieżka wielostronicowa **jest** pokryta,
   ale osobnym testem (warstwa 5), nie samą charakteryzacją — 12-elementowa próbka mieści się
   w jednej stronie.
-- **`uwagaCena` nigdzie nie jest niepuste.** Żaden z 711 rekordów nie trafił na „cenę na zapytanie",
-  więc ścieżka `detectPriceOnRequest()` nie jest pokryta danymi. Kod jest w porcie i przechodzi
-  przez typ; potrzebna próbka z takim wierszem (MO7 VF Float King albo MO8 wielkoformatowe VF).
+- **`uwagaCena` — luka zamknięta 2026-08-26.** Prawdziwy cennik Nokiana zawiera **6 pozycji
+  VF Float King z ceną „na zapytanie"** (`cenaZakupu: null`, `uwagaCena: "na zapytanie"`) — czyli
+  dokładnie przypadek z backlogu #4. Ścieżka `detectPriceOnRequest()` jest teraz pokryta realnymi
+  danymi.
 
 ## Follow-up
 
@@ -204,10 +206,15 @@ Zebrane wyżej, tu w formie zadań:
    albo świadomie go zostawić, PRZED zmianą `products.szerokosc` REAL→TEXT (3b/I12).
 2. **Zdecydować o `nro`/`cho`** — czy mają pójść za konwencją `'Tak'`/`null` jak reszta flag.
 3. **Potwierdzić skalę odrzuceń MO4/MO5** przy 3c (klasyfikator `Zc()`/`shouldRejectRecord()`).
-4. **Dograć próbkę z „ceną na zapytanie"** — domknie pokrycie `uwagaCena` (naturalnie przy 3b,
-   gdzie `uwaga_cena` dostaje kolumnę i endpoint).
-5. **Poprosić Anię o po jednym pliku od MO6/MO7/MO8/MO10** — podmiana próbki to jedna komenda,
-   a pokrycie tych czterech dostawców przestaje być symboliczne.
+4. ~~Dograć próbkę z „ceną na zapytanie"~~ — **zrobione 2026-08-26**, prawdziwy cennik Nokiana
+   zawiera 6 takich pozycji.
+5. ~~Poprosić Anię o pliki od MO6/MO7/MO8/MO10~~ — **częściowo zrobione 2026-08-26**: MO7 i MO10
+   podmienione na prawdziwe, MO6 wycofany (pokrycie nie jest już potrzebne). **Zostaje MO8.**
+5b. **MO8 Trelleborg — poprosić o plik w formacie, który parser czyta** (XLSX z arkuszami
+   `Radial`/`XPly`). Otrzymany CSV daje zero rekordów.
+5c. **MO8 — rozważyć wykrywanie formatu po sygnaturze bajtów**, tak jak robi to `mo10_gri.cjs`.
+   Dziś podanie CSV kończy się cichym importem zera pozycji, bez błędu. To zmiana zachowania
+   produkcji, więc wymaga decyzji Ani, nie naszej.
 6. **`xlsx@0.18.5`** — to najnowsza wersja SheetJS w npm i ma znane ostrzeżenia bezpieczeństwa
    (nowsze wydania dystrybuowane są poza npm). Wierność wygrywa na tym etapie; do przeglądu przy
    hardeningu w I12, gdy będzie wiadomo, czy pliki dostawców mogą pochodzić z niezaufanego źródła.
@@ -288,3 +295,85 @@ gita, nie z drzewa roboczego.
 Brak nierozwiązanych. Jedyny zgłoszony przez doc-checkery problem zastany (nieaktualny „Stan
 odbudowy" w `START.md`) został naprawiony, bo dotyczył jednego zdania w pliku i tak edytowanym
 w tym tickecie.
+
+## Uzupełnienie 2026-08-26: prawdziwe pliki od Ani + wycofanie MO6
+
+### Podmiana próbek MO7 i MO10 na realne pliki
+
+Ania dostarczyła pliki od trzech dostawców. Dwa zastąpiły próbki odtworzone; oba są w repo
+**bajt w bajt**, bez przycinania (ważą 39 KB i 24 KB — nie ma czego oszczędzać, a byte-exactness
+testuje realne kodowanie i realne wyjście narzędzi dostawcy).
+
+| Dostawca | Plik | Format | Rekordów | Było (odtworzone) |
+|---|---|---|---|---|
+| MO7 Nokian | `CennikNokianCSV (8).csv` | CSV, UTF-8, `;` | **285** | 2 |
+| MO10 GRI | `Plik GRI AGROWIEC 13.07.2026 (1).xlsx` | **XLSX** | **223** | 3 (CSV) |
+
+Charakteryzacja urosła z **711 do 1214 rekordów**. Cała bateria dalej zielona (164/164).
+
+**Metoda odtwarzania próbek się obroniła.** Porównanie rekordów, które występowały w obu
+wersjach — odtworzonej i prawdziwej:
+
+| Rekord | Wynik |
+|---|---|
+| `MO7_T445733` | identyczny we wszystkich 53 polach |
+| `MO7_T445763` | identyczny we wszystkich 53 polach |
+| `MO10_PAB1001` | identyczny we wszystkich 53 polach |
+| `MO10_PAR1226` | identyczny we wszystkich 53 polach |
+| `MO10_PAB1035` | jedna różnica: `stan` 8 → 6 |
+
+Jedyna rozbieżność to stan magazynowy, który zmienił się od czasu, gdy Ania zapisywała ten
+przypadek w `test_tyres.cjs` — nie błąd metody. Inaczej mówiąc: rekonstrukcja z realnych linii
+producenta odtworzyła rzeczywistość co do pola.
+
+**Dwie inferencje z kodu potwierdzone przez rzeczywistość:**
+1. **MO7 jest w UTF-8** — nagłówek zawiera bajty `C5 BB` (`Ż`), dokładnie jak przewidywał układ
+   fallbacków w `adapter.cjs` (`'BIEĹ»NIK'`). Parser czyta ten plik jako cp1250 i cały łańcuch
+   jest napisany pod ten rozjazd.
+2. **MO10 przychodzi dziś jako XLSX**, nie CSV — więc ścieżka XLSX w `mo10_gri.cjs` (wykrywanie
+   po sygnaturze `PK\x03\x04`) jest teraz realnie pokryta, a nie tylko ta CSV-owa.
+
+**Luka `uwagaCena` zamknięta przy okazji.** Prawdziwy cennik Nokiana zawiera 6 pozycji
+VF Float King z `cenaZakupu: null` i `uwagaCena: "na zapytanie"` — czyli przypadek z backlogu #4,
+który wcześniej nie miał żadnego pokrycia danymi.
+
+### MO8 Trelleborg — plik nie nadaje się na próbkę, i to jest znalezisko
+
+Trzeci plik (`_Trelleborg List Price_AG_April 2026_New_EPL_PL_BAL.csv`) przez produkcyjny parser
+daje **zero rekordów**. Przyczyna jest jednoznaczna i zweryfikowana uruchomieniowo:
+
+- `mo8_trelleborg.cjs` czyta plik przez `XLSX.readFile()` i iteruje **wyłącznie po arkuszach
+  o nazwach `Radial` i `XPly`**;
+- SheetJS wczytuje CSV jako pojedynczy arkusz **`Sheet1`**;
+- filtr nie łapie nic → `records: []`, `errors: []` → **import kończy się bez jednego sygnału błędu**.
+
+Dane w pliku są — ma układ kolumn arkusza XPly (13 kolumn, `PLN` w kolumnie M). Zmienia się tylko
+opakowanie. Próbka MO8 zostaje więc odtworzona (XLSX, 2 rekordy) do czasu, aż dostaniemy plik
+w formacie, który parser faktycznie czyta.
+
+**To jest realna luka w odporności importu, nie tylko kłopot z próbką.** Porównaj z MO10, gdzie
+Ania rozwiązała identyczny problem poprawnie: `mo10_gri.cjs` wykrywa format po sygnaturze bajtów
+(`PK\x03\x04` = XLSX) i ma osobną ścieżkę CSV, właśnie dlatego, że dostawca potrafi zmienić format
+bez zmiany URL-a. MO8 tego nie ma — dostanie CSV i cicho zaimportuje zero pozycji.
+
+Nie naprawiamy tego w 3a (zakres to odtwarzanie, nie poprawianie). Do rozstrzygnięcia z Anią —
+patrz „Follow-up".
+
+### MO6 Agrowiec — wycofany z importu
+
+Decyzja produkcji (2026-08-26): MO6 przestaje być importowany, **również w żywej produkcji** —
+więc dla nas to nadal wierne odtworzenie, nie odstępstwo. Ustalenia:
+
+- **Dane zostają.** Pozycje MO6 już w katalogu pozostają jako historyczne. Nic nie kasujemy,
+  nic nie backfillujemy.
+- **Parser zostaje w porcie.** `mo6_agrowiec.cjs` jest częścią kopii bajt-w-bajt; nie można go
+  wybiórczo usunąć bez złamania testu integralności. Przestaje być po prostu wołany.
+- **Wyłączenie dostawcy to konfiguracja `suppliers`** — sesja 3b (uruchamianie importu) / I11
+  (edycja dostawcy), nie warstwa parserów.
+- **Próbka i wzorzec MO6 zostają** — dalej dowodzą wierności portu i nic nie kosztują.
+- **Automatyczne wycofywanie po 3 nieobecnościach NIE zagraża tym danym** — zweryfikowane
+  w oryginale: `tk()` działa na produktach jednego dostawcy (`deminified/backend-index.cjs:47598`,
+  `r = U.listProducts().filter(u => u.dostawca === t)`), a licznik `nieobecnosc_pod_rzad` rośnie
+  wyłącznie wewnątrz `tk()`. Skoro MO6 nie jest importowany, `tk('MO6', …)` nigdy się nie wykonuje
+  i nic się nie wycofuje. Ryzyko istnieje tylko przy uruchomieniu importu MO6 z pustym plikiem —
+  ale to zachowanie dotyczy każdego dostawcy i jest zachowaniem oryginału.

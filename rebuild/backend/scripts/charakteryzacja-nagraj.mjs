@@ -40,7 +40,7 @@ export const PROBKI_PLIKOWE = {
   MO6: "MO6.csv",
   MO7: "MO7.csv",
   MO8: "MO8.xlsx",
-  MO10: "MO10.csv",
+  MO10: "MO10.xlsx",
 };
 
 /** Przygotowuje kopię oryginału pod rebuild/backend/ i zwraca require wskazujący na nią. */

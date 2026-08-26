@@ -20,7 +20,8 @@ cd rebuild/backend
 # 1. Próbki MO1–MO5 z historii repozytorium (nadpisuje probki/MO1..MO5.csv)
 node scripts/charakteryzacja-probki.mjs
 
-# 2. Próbki MO6–MO10 odtworzone z danych producenta (nadpisuje probki/MO6,MO7,MO8,MO10,MO9.items)
+# 2. Próbki odtworzone: MO6, MO8, MO9 (nadpisuje probki/MO6.csv, MO8.xlsx, MO9.items.json)
+#    MO7 i MO10 to realne pliki od Ani — leżą w repo i NIE są generowane
 node scripts/charakteryzacja-probki-odtworzone.mjs
 
 # 3. Wzorzec — uruchamia ORYGINALNE parsery z mirror/backend na tych próbkach
@@ -66,46 +67,59 @@ Każdy plik archiwum ma obok `.meta.json` z wynikiem **realnego przebiegu produk
 (`rekordy`, `parserErrors`, `odrzucone`, `sha256`) — niezależny oracle, użyty w audycie
 pełnych plików opisanym w `raport.md`.
 
-### MO6, MO7, MO8, MO10 — odtworzone z danych producenta
+### MO7 Nokian i MO10 GRI — realne pliki od Ani (2026-08-26)
 
-**Tych czterech dostawców nie ma w archiwum w ogóle.** Archiwizacja ruszyła 2026-08-21 i objęła
-wyłącznie MO1–MO5 oraz MO9; w całej historii repozytorium nie ma ani jednego ich pliku.
+Oba pochodzą bezpośrednio od Ani i są w repo **bajt w bajt**, bez przycinania — ważą po
+~25–40 KB, więc nie ma czego oszczędzać, a byte-exactness jest tu więcej warta niż wycinek
+(testujemy realne kodowanie i realne wyjście narzędzi dostawcy).
 
-Dane wierszy pochodzą z `mirror/backend/parsers/test_tyres.cjs` — pliku charakteryzacyjnego
-Ani, w którym zaszyte są **realne linie** z plików tych dostawców (z numerami linii w oryginale).
-Nagłówki, separator i kodowanie odczytano z komentarzy i kodu każdego parsera, a mapowanie
-kolumn na pola normalizatora — z `adapter.cjs` (blok `normalizeBySupplier`).
-
-| Dostawca | Format próbki | Wierszy | Uwagi |
+| Dostawca | Plik od Ani | Format | Rekordów |
 |---|---|---|---|
-| MO6 Agrowiec/Uniglory | CSV, UTF-8 z BOM, `;` | 2 | nagłówki niemieckie (`Beschreibung`, `Hersteller`) |
-| MO7 Nokian | CSV, **UTF-8** czytany jako cp1250, `;` | 2 | patrz „Pułapka kodowania MO7" niżej |
-| MO8 Trelleborg | XLSX, arkusz `Radial`, 15 kolumn | 2 | EAN celowo w notacji naukowej Excela |
-| MO10 GRI | CSV, cp1250, `;` | 3 | parser obsługuje też XLSX (wykrywanie po `PK\x03\x04`) |
+| MO7 Nokian | `CennikNokianCSV (8).csv` | CSV, **UTF-8**, `;` | 285 |
+| MO10 GRI | `Plik GRI AGROWIEC 13.07.2026 (1).xlsx` | **XLSX** | 223 |
 
-**Weryfikacja wierności odtworzenia.** Próbki przepuszczono przez ORYGINALNY `parseFile()` +
-`recordToSurowe()` i porównano z oczekiwaniami `test_tyres.cjs` dla tych samych linii. Zgadzają
-się wszystkie pola pochodzące z pliku: `kodDostawcy`, `ean` (w tym odzyskanie `8,05997E+12` →
-`8059970000000`), `marka`, `model`, `rozmiar`, `indeksNosnosci`, `indeksPredkosci`, `tlTt`, `pr`,
-`stan`, `cenaZakupu`, `oznaczenieBieznika`, `sb`. Kształt pliku nie jest więc zgadnięty.
+Wcześniej oba miały próbki odtworzone z `test_tyres.cjs`. **Odtworzenie się obroniło:**
+4 z 5 rekordów zgadzało się z prawdziwym plikiem we **wszystkich 53 polach**, a jedyna różnica
+(MO10 `PAB1035`, `stan` 8 vs 6) to zmiana stanu magazynowego w czasie, nie błąd metody.
+Rzeczywistość potwierdziła też dwie inferencje z kodu:
+- **MO7 jest faktycznie w UTF-8** (nagłówek zawiera bajty `C5 BB` dla `Ż`) — patrz „Pułapka
+  kodowania MO7" niżej;
+- **MO10 przychodzi dziś jako XLSX**, nie CSV — parser wykrywa to po sygnaturze `PK\x03\x04`,
+  więc ścieżka XLSX tego parsera jest teraz realnie pokryta.
 
-Rozbieżności wobec `test_tyres.cjs` są **oczekiwane** i mają znane przyczyny:
-- pola, które parser **ustawia na sztywno**, a nie czyta z pliku (MO8: `Magazyn` = 0, `RODZAJ` =
-  `rolnicze`) — w `test_tyres.cjs` są ręcznie wpisanym wejściem do `normalizeTrelleborg()`,
-  nie wynikiem `parseFile()`;
-- `kategoria` i nazwy **wielkimi literami** — `capitalizeKategoria()` i `toUpperPL()` działają
-  dopiero w `adapter.recordToSurowe()`, a `test_tyres.cjs` sprawdza wyjście `normalizeXxx()`
-  sprzed tego kroku (poprawki `kategoriafix` i `standaryzacja` — backlog #2).
+Bonus pokrycia: prawdziwy cennik Nokiana zawiera **6 pozycji VF Float King z ceną „na zapytanie"**
+(`cenaZakupu: null`, `uwagaCena: "na zapytanie"`) — czyli dokładnie przypadek z backlogu #4,
+który wcześniej nie był pokryty żadnymi danymi.
 
-⚠ **`test_tyres.cjs` jest miejscami nieaktualny** — np. dla MO10 oczekuje `szerokosc: 400`
-(liczba), podczas gdy obecny `tyre_params.cjs` po poprawce `szertxt` zwraca `"400"` (string).
-Nie jest to więc utrzymywany gate producenta, tylko źródło realnych danych wejściowych; wzorcem
-dla nas jest zawsze **aktualne wyjście oryginalnego kodu**, nagrane skryptem.
+### MO6 Agrowiec — odtworzona, dostawca wycofany
 
-⚠ **Ograniczenie pokrycia.** 2–3 wiersze na dostawcę to wszystko, co jest dostępne offline.
-Świadomie nie dopisujemy własnych wierszy, bo zmyślone dane dostawcy nie dowodzą niczego.
-Gdy pojawi się prawdziwy plik od któregoś z tych czterech dostawców, wystarczy podmienić próbkę
-i przenagrać wzorzec — test jest na to gotowy.
+⚠ **MO6 jest od 2026-08-26 wycofany z importu** (decyzja produkcji — Ania wyłącza go u siebie,
+my odtwarzamy ten stan). Próbkę i wzorzec **zostawiamy**: dalej dowodzą wierności portu, nic nie
+kosztują, a gdyby dostawca kiedyś wrócił — pokrycie jest gotowe. Sam parser `mo6_agrowiec.cjs`
+zostaje w porcie, bo port jest kopią produkcji; przestaje być po prostu wołany (wyłączenie
+dostawcy to konfiguracja `suppliers`, sesja 3b/I11).
+
+2 wiersze odtworzone z realnych linii w `test_tyres.cjs`; CSV, UTF-8 z BOM, nagłówki niemieckie
+(`Beschreibung`, `Hersteller`).
+
+### MO8 Trelleborg — odtworzona; realny plik NIE nadaje się na próbkę
+
+2 wiersze odtworzone z `test_tyres.cjs`: XLSX, arkusz `Radial`, 15 kolumn, EAN celowo w notacji
+naukowej Excela (`8,05997E+12` → parser odzyskuje `8059970000000`).
+
+⚠ **Plik, który dostaliśmy od Ani (`_Trelleborg List Price_AG_April 2026_New_EPL_PL_BAL.csv`),
+daje przez produkcyjny parser ZERO rekordów** — dlatego nie zastąpił próbki odtworzonej.
+Przyczyna jest jednoznaczna: `mo8_trelleborg.cjs` czyta plik przez `XLSX.readFile()` i iteruje
+**wyłącznie po arkuszach o nazwach `Radial` i `XPly`**. SheetJS wczytuje CSV jako pojedynczy
+arkusz `Sheet1`, więc filtr nie łapie nic — i parser kończy z `records: []`, `errors: []`,
+czyli **bez jednego sygnału błędu**. Ten plik ma układ kolumn arkusza XPly (13 kolumn, `PLN`
+w kolumnie M), więc dane w nim są, tylko opakowanie jest inne niż to, którego parser oczekuje.
+
+Do rozstrzygnięcia z Anią: czy pod produkcyjnym URL-em (`agroopony.eu/imports/Trelleborg.csv`)
+leży XLSX z arkuszami `Radial`/`XPly` (tak sugeruje przepisanie parsera z 2026-07-01 — „nowy
+format Trelleborg — plik XLSX z dwoma arkuszami"), a ten CSV jest osobnym eksportem? Do czasu
+odpowiedzi próbka MO8 zostaje odtworzona. Szczegóły i konsekwencje: `raport.md`, sekcja
+„Znaleziska".
 
 #### Pułapka kodowania MO7
 
@@ -114,10 +128,12 @@ kluczami `'BIEÄąÂ»NIK'`, `'BIEĹ»NIK'` i `'BIEZNIK'` — czyli pod nagłów
 nigdy pod czystym `BIEŻNIK`. `Ĺ»` to dokładnie to, co daje para bajtów UTF-8 znaku `Ż`
 (`C5 BB`) zdekodowana jako cp1250.
 
-Wniosek: realny plik Nokiana jest w **UTF-8**, a produkcja czyta go jako cp1250 — i cały łańcuch
-(parser + adapter) jest napisany pod ten rozjazd. Próbka musi być zapisana w UTF-8; gdyby zapisać
-ją „poprawnie" w cp1250, adapter nie zobaczyłby bieżnika i odtworzylibyśmy zachowanie, którego
-produkcja nie ma.
+Wniosek z kodu: realny plik Nokiana musi być w **UTF-8**, a produkcja czyta go jako cp1250 —
+i cały łańcuch (parser + adapter) jest napisany pod ten rozjazd.
+
+✅ **Potwierdzone na prawdziwym pliku (2026-08-26).** Nagłówek `CennikNokianCSV (8).csv` zaczyna
+się bajtami `B I E C5 BB N I K` — `C5 BB` to UTF-8 dla `Ż`. Inferencja z kodu była trafna;
+próbka w repo jest tym samym plikiem, więc pułapka jest odtworzona sama z siebie.
 
 ### MO9 — obiekty API zamiast pliku
 
@@ -165,10 +181,10 @@ zachowanie API przy błędach sieci). To brzeg, nie logika parsera, i należy do
 
 ## Co wchodzi do repozytorium, a co nie
 
-Próbki to wycinki cenników zakupowych dostawców. Trafiają do repozytorium świadomie:
-były w nim obecne aż do commita `72957d7`, a bez nich gate nie byłby odtwarzalny na czystym
-klonie ani w CI. Wycinek 200 wierszy zamiast pełnych plików trzyma cały katalog w granicach
-~1,5 MB zamiast dziesiątek MB.
+Próbki to cenniki zakupowe dostawców — wycinki (MO1–MO5, po 200 wierszy) albo pełne pliki tam,
+gdzie i tak są małe (MO7 39 KB, MO10 24 KB). Trafiają do repozytorium świadomie: pliki MO1–MO5
+były w nim obecne aż do commita `72957d7`, a bez próbek gate nie byłby odtwarzalny na czystym
+klonie ani w CI. Cały katalog waży ~2,3 MB zamiast dziesiątek MB.
 
 Pełne pliki **nie** są wersjonowane — `.gitignore` wyklucza `mirror/backend/import_archive/`.
 Audyt na pełnych plikach uruchamia się doraźnie z historii gita; wynik jest w `raport.md`.

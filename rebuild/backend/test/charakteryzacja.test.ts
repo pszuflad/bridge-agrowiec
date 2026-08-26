@@ -46,7 +46,7 @@ const PROBKI_PLIKOWE: Record<string, string> = {
   MO6: "MO6.csv",
   MO7: "MO7.csv",
   MO8: "MO8.xlsx",
-  MO10: "MO10.csv",
+  MO10: "MO10.xlsx",
 };
 
 const WSZYSCY_DOSTAWCY = [...Object.keys(PROBKI_PLIKOWE), "MO9"];
