@@ -289,8 +289,11 @@ integrację Selly.
 odtworzenie stanu, nie nasze odstępstwo.
 
 **Co dokładnie oznacza:**
-- **Dane zostają.** Pozycje MO6 obecne w katalogu pozostają jako historyczne. Nic nie kasujemy,
-  nic nie backfillujemy; jeśli czegoś nie ma w bazie, nie ma go tam nadal.
+- **W katalogu NIE MA żadnych produktów MO6** — zweryfikowane na kanonicznym snapshocie
+  (`db/snapshot.db`, stan 2026-08-13): tabela `products` nie zawiera ani jednego rekordu
+  z `dostawca = 'MO6'`. Kwestia „co z danymi historycznymi" jest więc bezprzedmiotowa; nie ma
+  czego zachowywać ani kasować. Zgadza się to ze słowami Ani: „a jak nie ma nic w bazie,
+  to też nie powinno tam nic być".
 - **Parser `mo6_agrowiec.cjs` zostaje w porcie** (`rebuild/backend/src/import/legacy/parsers/`) —
   port jest kopią bajt-w-bajt produkcji i wybiórcze usuwanie plików łamie jego główną własność
   (test integralności sha256). Parser po prostu przestaje być wołany.
@@ -328,6 +331,30 @@ uploadu pliku jest dla tych dostawców jedyną realną, a nie wariantem poboczny
 **Opis biznesowy:** jeśli Trelleborg przyśle cennik jako CSV zamiast XLSX, import kończy się
 **zerem zaimportowanych pozycji i bez żadnego komunikatu błędu**. Wygląda jak udany import
 pustego cennika.
+
+⚠ **ESKALACJA (2026-08-26, po prześledzeniu ścieżki uploadu): to nie jest tylko „import zera
+pozycji" — to uruchomienie licznika wycofania na CAŁYM katalogu dostawcy.**
+
+Prześledzona realna ścieżka, z której korzysta Marta (`POST /api/dostawcy/:kod/upload`,
+`backend-index.cjs:48243`):
+1. `nq(kod, bufor, rozszerzenie)` (`:48005`) zapisuje bufor do pliku tymczasowego i woła
+   `dispatcher.parseByKod()` — **bez żadnej konwersji formatu**;
+2. handler ma fallback na parser AI (`Wc`), ale **tylko w bloku `catch`** — odpala się wyłącznie,
+   gdy parsowanie **rzuci wyjątek**;
+3. MO8 na pliku CSV **nie rzuca** — zwraca `{records: [], errors: []}`, czyli „sukces". Fallback
+   AI nigdy nie startuje;
+4. `tk(kod, [])` (`:47584`) **nie ma zabezpieczenia przed pustym wejściem** — pętla
+   `for (let u of r) if (!o.has(u.id))` podnosi `nieobecnosc_pod_rzad` **każdemu** produktowi
+   tego dostawcy.
+
+**Skutek: trzy takie uploady pod rząd i cały katalog Trelleborga (624 pozycje) idzie do stagingu
+jako „wycofana".** Import wygląda przy tym na udany — alert w panelu mówi „wgrano plik
+(0 produktów)".
+
+**Czy to już się wydarzyło — nie.** Sprawdzone na kanonicznym snapshocie bazy (`db/snapshot.db`,
+stan 2026-08-13): MO8 ma 624 produkty i **wszystkie mają `nieobecnosc_pod_rzad = 0`**. Ten CSV
+nie był wgrywany panelem, przynajmniej do tej daty. Dla porównania liczniki > 0 mają MO1 (8),
+MO2 (115), MO3 (29), MO4 (71), MO5 (109) — to normalna rotacja cenników.
 
 **Szczegół techniczny:** `mo8_trelleborg.cjs` czyta plik przez `XLSX.readFile()` i iteruje
 wyłącznie po arkuszach o nazwach `Radial` i `XPly`. SheetJS wczytuje CSV jako pojedynczy arkusz

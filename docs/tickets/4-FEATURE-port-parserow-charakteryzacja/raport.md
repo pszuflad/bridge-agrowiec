@@ -438,3 +438,33 @@ Mapa `URLS` w `dispatcher.cjs` wymienia adresy dla wszystkich 10 dostawców, ale
 jest zapisem nieużywanym. **Dla 3b oznacza to, że ścieżka uploadu pliku jest dla tych dostawców
 jedyną realną**, a nie wariantem pobocznym auto-pulla — i że cichy import zera pozycji (#8) jest
 groźniejszy, niż wyglądał: nie ma cyklicznego przebiegu, który następnym razem by to nadrobił.
+
+
+## Uzupełnienie 2026-08-26 (3): MO8 — prześledzona realna ścieżka uploadu
+
+Na pytanie „czy ten CSV to nie jest to, czego potrzebujesz" sprawdziłem nie tylko własny test,
+ale **realną ścieżkę produkcyjną, z której korzysta Marta** (`POST /api/dostawcy/:kod/upload`).
+Wniosek się nie zmienia — plik nie nadaje się na próbkę — ale znalezisko #8 okazuje się
+poważniejsze, niż wyglądało.
+
+**Ścieżka uploadu nie robi nic dodatkowego z formatem.** `nq(kod, bufor, rozszerzenie)`
+(`backend-index.cjs:48005`) zapisuje bufor do pliku tymczasowego i woła `dispatcher.parseByKod()` —
+dokładnie to, co odtwarza nasze `parsujBufor()`. Żadnej konwersji, żadnego wykrywania formatu.
+
+**Fallback AI istnieje, ale nie ratuje tego przypadku.** Handler uploadu ma `catch`, w którym
+sięga po parser AI (`Wc`). Odpala się **wyłącznie przy rzuconym wyjątku**. MO8 na pliku CSV nie
+rzuca — zwraca `{records: [], errors: []}`, czyli formalnie sukces. Fallback nigdy nie startuje.
+
+**`tk()` nie ma zabezpieczenia przed pustym wejściem.** Przy `records = []` pętla
+`for (let u of r) if (!o.has(u.id))` (`:47808`) podnosi `nieobecnosc_pod_rzad` **każdemu**
+produktowi dostawcy. Trzy takie uploady pod rząd → **cały katalog Trelleborga (624 pozycje)
+trafia do stagingu jako „wycofana"**, a panel przez cały czas raportuje udany import.
+
+**Czy to się już wydarzyło — nie.** Kanoniczny snapshot bazy (`db/snapshot.db`, stan 2026-08-13):
+MO8 ma 624 produkty, **wszystkie z `nieobecnosc_pod_rzad = 0`**. Ten CSV nie był wgrywany panelem.
+Liczniki > 0 mają MO1 (8), MO2 (115), MO3 (29), MO4 (71), MO5 (109) — normalna rotacja cenników.
+
+**Korekta wcześniejszego zapisu o MO6.** Przy okazji sprawdzenia snapshotu: w tabeli `products`
+**nie ma ani jednego rekordu `dostawca = 'MO6'`**. Zapis w raporcie i backlogu, że „pozycje MO6
+zostają jako historyczne", był przedwczesny — nie ma czego zachowywać. Zgadza się to ze słowami
+Ani („a jak nie ma nic w bazie, to też nie powinno tam nic być"). Wpis #7 poprawiony.
