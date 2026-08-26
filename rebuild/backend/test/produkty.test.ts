@@ -13,7 +13,6 @@ import {
   PRODUKTY_TESTOWE,
   stworzSrodowiskoTestowe,
   zasiejDostawcow,
-  przelaczSzerokoscNaText,
   zasiejProdukty,
   type SrodowiskoTestowe,
 } from "./gate/index.js";
@@ -125,21 +124,20 @@ describe("GET /api/products", () => {
 });
 
 /**
- * TEST-STRAŻNIK ODSTĘPSTWA `szerokosc` (plan.md D1, backlog #3).
+ * TEST-STRAŻNIK KOLUMNY `szerokosc` (backlog #3, plan.md D3 ticketu 7).
  *
- * Baza staging to snapshot produkcji PO migracji `szertxt`, gdzie `products.szerokosc`
- * jest kolumną TEXT z zapisem zachowującym zera („10.00"). Kanon (`001_schema.sql`) ma
- * tam wciąż REAL.
+ * ⭐ CO SIĘ ZMIENIŁO W 3d-1: do tej sesji kanon miał tu `REAL`, a produkcja `TEXT` — i testy
+ * opisywały ten rozjazd. Migracja `003_szerokosc_text.sql` go zamknęła: kolumna jest TEXT
+ * po obu stronach.
  *
- * ⚠ Sam UPDATE na kolumnie REAL tego NIE odtworzy: SQLite stosuje type affinity i sam
- * zamieni napis „10.00" na liczbę 10.0. Dlatego test przebudowuje tabelę dokładnie tak,
- * jak zrobiła to migracja produkcji, i dopiero wtedy sprawdza, co odda endpoint.
- *
- * Utrwalamy pass-through: Drizzle `real()` nie mapuje wartości z drivera, więc backend
- * oddaje to, co leży w bazie — liczbę na kanonie, string na stagingu. Gdyby ktoś dodał
- * normalizację, ten test zaświeci i wymusi świadomą decyzję zamiast cichej zmiany.
+ * PO CO TO NADAL STOI: parser (port 3a, `tyre_params.cjs:288-298`) oddaje pierwszą liczbę
+ * z rozmiaru jako NAPIS z zerami końcowymi („10.00", „800"). SQLite stosuje TYPE AFFINITY,
+ * więc na kolumnie REAL napis „10.00" cicho stawał się liczbą 10.0 — dokładnie ta strata,
+ * przed którą `szertxt` miał chronić. Te testy utrwalają jedno i drugie: że kolumna JEST
+ * tekstowa i że backend niczego po drodze nie normalizuje (Drizzle `text()` to pass-through).
+ * Gdyby ktoś wrócił do `real()` albo dołożył konwersję, zapali się tutaj.
  */
-describe("GET /api/products — pass-through `szerokosc` (odstępstwo D1 / backlog #3)", () => {
+describe("GET /api/products — `szerokosc` jest tekstem i przechodzi bez konwersji", () => {
   let srodowisko: SrodowiskoTestowe;
   let token: string;
 
@@ -155,45 +153,41 @@ describe("GET /api/products — pass-through `szerokosc` (odstępstwo D1 / backl
 
   afterAll(() => srodowisko.posprzataj());
 
-  it("na kanonicznym schemacie (REAL) SQLite sam konwertuje napis na liczbę", () => {
+  it("kolumna jest zadeklarowana jako TEXT — kanon zgadza się z produkcją po migracji 003", () => {
+    const kolumna = srodowisko.sqlite
+      .prepare(`SELECT type FROM pragma_table_info('products') WHERE name = 'szerokosc'`)
+      .get() as { type: string } | undefined;
+    expect(kolumna?.type).toBe("TEXT");
+  });
+
+  it("zera końcowe PRZEŻYWAJĄ zapis — to jest cała stawka poprawki `szertxt`", () => {
     srodowisko.sqlite
       .prepare("UPDATE products SET szerokosc = '10.00' WHERE kod = ?")
       .run("MO1_100001");
+
     const wiersz = srodowisko.db.get<{ t: string; w: unknown }>(
       sql`SELECT typeof(szerokosc) AS t, szerokosc AS w FROM products WHERE kod = 'MO1_100001'`,
     );
-    // To jest powód, dla którego GATE nie łapie rozjazdu wartości: kanon FIZYCZNIE
-    // nie jest w stanie przechować tego, co trzyma staging.
-    expect(wiersz?.t).toBe("real");
-    expect(wiersz?.w).toBe(10);
+    // Na kolumnie REAL (kanon sprzed migracji 003) SQLite zamieniłby to na liczbę 10.
+    expect(wiersz?.t).toBe("text");
+    expect(wiersz?.w).toBe("10.00");
   });
 
-  it("po migracji kolumny na TEXT backend oddaje string BEZ konwersji", async () => {
-    przelaczSzerokoscNaText(srodowisko.sqlite);
-    srodowisko.sqlite
-      .prepare("UPDATE products SET szerokosc = '10.00' WHERE kod = ?")
-      .run("MO1_100001");
-
-    const wiersz = srodowisko.db.get<{ t: string }>(
-      sql`SELECT typeof(szerokosc) AS t FROM products WHERE kod = 'MO1_100001'`,
-    );
-    expect(wiersz?.t).toBe("text");
-
+  it("backend oddaje string BEZ konwersji", async () => {
     const odp = await request(srodowisko.app)
       .get("/api/products?dostawca=MO1")
       .set("Authorization", `Bearer ${token}`);
     const produkt = (odp.body as { items: { szerokosc: unknown }[] }).items[0];
 
-    // Dokładnie to zobaczy Ania na stagingu — i dokładnie tego fixture NIE ma.
     expect(produkt?.szerokosc).toBe("10.00");
     expect(typeof produkt?.szerokosc).toBe("string");
   });
 
-  it("wartości liczbowe na kolumnie TEXT wracają jako string — mieszanka jest po stronie danych, nie kodu", async () => {
+  it("wartości liczbowe też wracają jako string — mieszanka jest po stronie danych, nie kodu", async () => {
     const odp = await request(srodowisko.app)
       .get("/api/products?dostawca=MO2")
       .set("Authorization", `Bearer ${token}`);
     const produkt = (odp.body as { items: { szerokosc: unknown }[] }).items[0];
-    expect(produkt?.szerokosc).toBe("600.0");
+    expect(produkt?.szerokosc).toBe("600");
   });
 });

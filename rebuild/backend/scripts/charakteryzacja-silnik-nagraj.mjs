@@ -14,6 +14,11 @@
 // w .gitignore i NIE jedzie do repo, dlatego skrypt wypłaszcza wiersze do
 // `test/charakteryzacja/silnik/katalog/MOx.katalog.json` — i to te pliki czyta test.
 //
+// OVERRIDY = `manual_overrides` z tego samego zrzutu (12 620 wierszy). 3c jechała na pustej
+// liście, bo `Gq()` była wtedy przepuszczającym stubem; 3d-1 podaje realne poprawki Marty,
+// więc oryginał wykonuje prawdziwe `Gq()`. Wypłaszczane do
+// `test/charakteryzacja/silnik/overrides/MOx.overrides.json`.
+//
 // PROJEKCJA KOLUMN: pełne wiersze to 10 MB, więc zapisujemy tylko kolumny, których `tk()`
 // realnie dotyka (KOLUMNY_KATALOGU niżej). Kompletność tej listy NIE jest przyjmowana na
 // słowo — dla każdego dostawcy skrypt uruchamia oryginał DWA RAZY, na pełnym i na przyciętym
@@ -44,6 +49,7 @@ const repoDir = join(backendDir, "..", "..");
 const katalogCharakteryzacji3a = join(backendDir, "test", "charakteryzacja");
 const katalogWynikow = join(katalogCharakteryzacji3a, "silnik");
 const katalogKatalogow = join(katalogWynikow, "katalog");
+const katalogOverrides = join(katalogWynikow, "overrides");
 // `db/snapshot.db` jest w .gitignore, więc w worktree ticketa go nie ma — a skrypt bywa
 // uruchamiany właśnie stamtąd. Ścieżkę da się wskazać zmienną BRIDGE_SNAPSHOT_DB.
 const sciezkaZrzutu = process.env.BRIDGE_SNAPSHOT_DB ?? join(repoDir, "db", "snapshot.db");
@@ -85,11 +91,32 @@ const KOLUMNY_KATALOGU = [
   "magazyn",
   "magazynRaw",
   "nieobecnoscPodRzad",
+  // ZAKRES 3d-1: pola, które gałąź auto-zatwierdzania ZAPISUJE przez bridge_ext.applyDims
+  // i applyLinkMemory (`:47794`). Bez nich porównanie nie zobaczyłoby, że rozszerzenia
+  // importu w ogóle się wykonały.
+  "wysokosc",
+  "dlugosc",
+  "szerokoscPaczki",
+  "wysokoscPrzesylki",
+  "linkZdjecia",
   // poniżej: wymagane przez schemat, nieczytane przez tk()
   "kategoria",
   "vat",
   "status",
   "dataAktualizacji",
+];
+
+/**
+ * Kolumny `manual_overrides` czytane przez `Gq()` (`:47319-47348`). Poza kluczem
+ * (`supplierKod`/`supplierProductId`) funkcja sięga wyłącznie po te trzy pola —
+ * `reason`, `createdBy` i `createdAt` nie mają wpływu na zachowanie silnika.
+ */
+const KOLUMNY_OVERRIDES = [
+  "supplierKod",
+  "supplierProductId",
+  "fieldName",
+  "overrideValue",
+  "acknowledgedSourceValue",
 ];
 
 /**
@@ -103,24 +130,43 @@ const jsonPoWierszu = (elementy) =>
 const przytnij = (produkt) =>
   Object.fromEntries(KOLUMNY_KATALOGU.map((k) => [k, produkt[k] ?? null]));
 
+const przytnijOverride = (wiersz) =>
+  Object.fromEntries(KOLUMNY_OVERRIDES.map((k) => [k, wiersz[k] ?? null]));
+
+/**
+ * Znacznik `new Date().toISOString()`, który `tk()` wzięło na wejściu (`:47585`).
+ * Nie da się go odczytać z zewnątrz, więc czytamy go z pierwszego artefaktu, który go niesie.
+ */
+function znacznikPrzebiegu(atrapy) {
+  return atrapy.staging[0]?.utworzono ?? atrapy.historiaCen[0]?.zarejestrowanoAt ?? null;
+}
+
 /** Uruchamia ORYGINALNE `tk()` na podanym katalogu i zwraca znormalizowany przebieg. */
-function uruchomOryginal(kod, rekordy, produkty, opisKatalogu) {
-  const atrapy = stworzAtrapy({ produkty });
+function uruchomOryginal(kod, rekordy, produkty, overrides, opisKatalogu) {
+  const atrapy = stworzAtrapy({ produkty, overrides });
   const oryginal = zaladujOryginal(atrapy.zaleznosci);
   const statystyki = oryginal.tk(kod, rekordy);
-  return normalizujPrzebieg({
+  atrapy.sprawdzUkladPetli();
+
+  const przebieg = normalizujPrzebieg({
     dostawca: kod,
     wejscie: {
       rekordow: rekordy.length,
       zrodlo: `test/charakteryzacja/${kod}.expected.json → rekordy (wzorzec 3a)`,
     },
     katalog: { produktow: produkty.length, zrodlo: opisKatalogu },
+    overridy: { wierszy: overrides.length },
     statystyki,
     staging: atrapy.staging,
-    wywolaniaStagingu: atrapy.wywolaniaStagingu,
     skasowane: atrapy.skasowane,
-    fazy: atrapy.fazyAktualizacji(),
+    historiaCen: atrapy.historiaCen,
+    zmianyProduktow: atrapy.zmianyProduktow(),
+    zapytanDoPamieciLinkow: atrapy.zapytanDoPamieciLinkow(),
+    znacznikPrzebiegu: znacznikPrzebiegu(atrapy),
   });
+
+  atrapy.zamknij();
+  return przebieg;
 }
 
 /**
@@ -129,19 +175,27 @@ function uruchomOryginal(kod, rekordy, produkty, opisKatalogu) {
  */
 function nagrajScenariusze() {
   const wyniki = SCENARIUSZE.map((s) => {
-    const atrapy = stworzAtrapy({ produkty: s.katalog });
+    const overrides = s.overrides ?? [];
+    const atrapy = stworzAtrapy({ produkty: s.katalog, overrides });
     const oryginal = zaladujOryginal(atrapy.zaleznosci);
     const statystyki = oryginal.tk(s.dostawca, s.rekordy);
+    atrapy.sprawdzUkladPetli();
+
     const przebieg = normalizujPrzebieg({
       dostawca: s.dostawca,
       wejscie: { rekordow: s.rekordy.length, zrodlo: "test/charakteryzacja/silnik/scenariusze.mjs" },
       katalog: { produktow: s.katalog.length, zrodlo: "scenariusze.mjs" },
+      overridy: { wierszy: overrides.length },
       statystyki,
       staging: atrapy.staging,
-      wywolaniaStagingu: atrapy.wywolaniaStagingu,
       skasowane: atrapy.skasowane,
-      fazy: atrapy.fazyAktualizacji(),
+      historiaCen: atrapy.historiaCen,
+      zmianyProduktow: atrapy.zmianyProduktow(),
+      zapytanDoPamieciLinkow: atrapy.zapytanDoPamieciLinkow(),
+      znacznikPrzebiegu: znacznikPrzebiegu(atrapy),
     });
+
+    atrapy.zamknij();
     return { nazwa: s.nazwa, opis: s.opis, ...przebieg };
   });
 
@@ -153,10 +207,46 @@ function nagrajScenariusze() {
   return wyniki;
 }
 
-/** Wiersze `products` danego dostawcy ze zrzutu produkcji, w kształcie naszego schematu. */
+/**
+ * Wiersze `products` danego dostawcy ze zrzutu produkcji, w kształcie naszego schematu.
+ *
+ * ⚠ `szerokosc` wymaga konwersji, bo `db/snapshot.db` to zrzut z 2026-08-13 — SPRZED
+ * produkcyjnej migracji `szertxt` (2026-08-19), więc kolumna jest tam jeszcze `REAL`.
+ * Nasz kanon po `003_szerokosc_text.sql` ma `TEXT`. Bez konwersji obie strony porównania
+ * dostawałyby RÓŻNE wejście (oryginał liczbę wprost ze zrzutu, port napis wyprodukowany
+ * przez TEXT affinity przy wstawianiu), a charakteryzacja mierzyłaby wiek zrzutu zamiast
+ * wierności silnika.
+ *
+ * Konwersja idzie przez `String(liczba)`, a NIE przez `CAST(… AS TEXT)` w SQLite. Różnica
+ * jest istotna: SQLite renderuje `REAL` 710 jako „710.0", podczas gdy parser (`tyre_params.cjs`,
+ * poprawka `szertxt`) zapisuje pierwszą liczbę z rozmiaru — czyli „710". Użycie `CAST`
+ * dokładało do wzorca sztuczne różnice „szerokość: 710.0 → 710", których w produkcji nie ma.
+ * `String()` daje „710" i „11.2", czyli dokładnie to, co pisze parser.
+ *
+ * Czego ta konwersja NIE odtworzy: prawdziwych zer końcowych („10.00"). REAL fizycznie ich
+ * nie przechowa — i to jest właśnie strata, przed którą migracja 003 chroni na przyszłość.
+ */
 function katalogDostawcy(zrzut, kod) {
   return zrzut
     .prepare("SELECT * FROM products WHERE dostawca = ? ORDER BY id")
+    .all(kod)
+    .map((wiersz) => Object.fromEntries(Object.entries(wiersz).map(([k, v]) => [naCamel(k), v])))
+    .map((wiersz) => ({
+      ...wiersz,
+      szerokosc: wiersz.szerokosc == null ? null : String(wiersz.szerokosc),
+    }));
+}
+
+/**
+ * REALNE poprawki Marty danego dostawcy ze zrzutu produkcji (12 620 wierszy łącznie).
+ *
+ * To jest przełącznik, który 3c zostawiła włączony na pusto: dopiero z tymi danymi oryginał
+ * wykonuje prawdziwe `Gq()`. Ma to realne skutki dla klasyfikacji — najczęstszym polem jest
+ * `kategoria` (6944 wiersze), którą czyta klasyfikator „czy opona".
+ */
+function overridesDostawcy(zrzut, kod) {
+  return zrzut
+    .prepare("SELECT * FROM manual_overrides WHERE supplier_kod = ? ORDER BY id")
     .all(kod)
     .map((wiersz) => Object.fromEntries(Object.entries(wiersz).map(([k, v]) => [naCamel(k), v])));
 }
@@ -171,6 +261,7 @@ function rekordyZWzorca3a(kod) {
 
 function nagraj() {
   mkdirSync(katalogKatalogow, { recursive: true });
+  mkdirSync(katalogOverrides, { recursive: true });
 
   if (!existsSync(sciezkaZrzutu)) {
     throw new Error(
@@ -188,11 +279,21 @@ function nagraj() {
     const przyciety = pelny.map(przytnij);
     const rekordy = rekordyZWzorca3a(kod);
 
-    const zPelnego = uruchomOryginal(kod, rekordy, pelny, "db/snapshot.db → products (72 kolumny)");
+    const overridesPelne = overridesDostawcy(zrzut, kod);
+    const overrides = overridesPelne.map(przytnijOverride);
+
+    const zPelnego = uruchomOryginal(
+      kod,
+      rekordy,
+      pelny,
+      overridesPelne,
+      "db/snapshot.db → products (72 kolumny)",
+    );
     const przebieg = uruchomOryginal(
       kod,
       rekordy,
       przyciety,
+      overrides,
       `db/snapshot.db → products (projekcja ${KOLUMNY_KATALOGU.length} kolumn)`,
     );
 
@@ -201,11 +302,13 @@ function nagraj() {
     if (JSON.stringify(bezOpisuKatalogu(zPelnego)) !== JSON.stringify(bezOpisuKatalogu(przebieg))) {
       throw new Error(
         `${kod}: oryginał zachował się INACZEJ na pełnym i na przyciętym katalogu. ` +
-          "Projekcja KOLUMNY_KATALOGU gubi pole, które czyta tk() — uzupełnij listę.",
+          "Projekcja KOLUMNY_KATALOGU / KOLUMNY_OVERRIDES gubi pole, które czyta tk() — " +
+          "uzupełnij listę.",
       );
     }
 
     writeFileSync(join(katalogKatalogow, `${kod}.katalog.json`), jsonPoWierszu(przyciety));
+    writeFileSync(join(katalogOverrides, `${kod}.overrides.json`), jsonPoWierszu(overrides));
 
     writeFileSync(
       join(katalogWynikow, `${kod}.expected.json`),
@@ -220,8 +323,11 @@ function nagraj() {
         `blad=${przebieg.staging.filter((w) => w.typZmiany === "blad").length} ` +
         `nieOpony=${przebieg.statystyki.odrzuconeNieOpony} ` +
         `skasowane=${przebieg.skasowane.length} ` +
-        `resety=${przebieg.resetyNieobecnosci.length} ` +
         `auto=${przebieg.statystyki.autoZatwierdzone} ` +
+        `wycofane=${przebieg.statystyki.wycofane} ` +
+        `historia=${przebieg.historiaCen.length} ` +
+        `zmianyProd=${przebieg.zmianyProduktow.length} ` +
+        `overridy=${przebieg.overridy.wierszy} ` +
         `bezZmian=${przebieg.statystyki.bezZmian}`,
     );
   }
@@ -246,7 +352,9 @@ function nagraj() {
         `nieOpony=${w.statystyki.odrzuconeNieOpony} brakDanych=${w.statystyki.odrzuconeBrakDanych} ` +
         `smieciMO2=${w.statystyki.odrzuconeSmieciMO2} auto=${w.statystyki.autoZatwierdzone} ` +
         `bezZmian=${w.statystyki.bezZmian} skasowane=${w.skasowane.length} ` +
-        `resety=${w.resetyNieobecnosci.length} doStagingu=${w.statystyki.doStagingu}`,
+        `wycofane=${w.statystyki.wycofane} historia=${w.historiaCen.length} ` +
+        `zmianyProd=${w.zmianyProduktow.length} overridy=${w.overridy.wierszy} ` +
+        `doStagingu=${w.statystyki.doStagingu}`,
     );
   }
   console.log("");

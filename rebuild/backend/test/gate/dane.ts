@@ -13,7 +13,7 @@
  *  3. `NULL` w kolumnie boolean musi zostać `null`, a nie zamienić się w `false`
  *     (`reinforced` w fixture jest nullem).
  */
-import type { Baza, BazaSqlite } from "../../src/db/index.js";
+import type { Baza } from "../../src/db/index.js";
 import { historiaCen, products, stagingItems, suppliers } from "../../src/db/schema.js";
 import { wczytajFixture } from "./fixtures.js";
 
@@ -47,7 +47,7 @@ export const PRODUKTY_TESTOWE: NowyProdukt[] = [
     status: "aktywny",
     dataAktualizacji: "2026-08-04T14:30:34.149Z",
     rozmiar: "620/70R42",
-    szerokosc: 620,
+    szerokosc: "620",
     profil: 70,
     srednica: 42,
     konstrukcja: "R",
@@ -102,7 +102,7 @@ export const PRODUKTY_TESTOWE: NowyProdukt[] = [
     status: "aktywny",
     dataAktualizacji: "2026-08-04T14:30:34.147Z",
     rozmiar: "240/70R16",
-    szerokosc: 240,
+    szerokosc: "240",
     profil: 70,
     srednica: 16,
     konstrukcja: "R",
@@ -145,7 +145,7 @@ export const PRODUKTY_TESTOWE: NowyProdukt[] = [
     status: "wstrzymany",
     dataAktualizacji: "2026-08-01T09:00:00.000Z",
     rozmiar: "11.2-24",
-    szerokosc: 11.2,
+    szerokosc: "11.2",
     srednica: 24,
     konstrukcja: "-",
     tlTt: "TT",
@@ -176,7 +176,7 @@ export const PRODUKTY_TESTOWE: NowyProdukt[] = [
     status: "aktywny",
     dataAktualizacji: "2026-08-03T11:15:00.000Z",
     rozmiar: "600/50-22.5",
-    szerokosc: 600,
+    szerokosc: "600",
     profil: 50,
     srednica: 22.5,
     konstrukcja: "-",
@@ -296,46 +296,6 @@ export function zasiejHistorieCen(db: Baza): void {
     .run();
 }
 
-/**
- * Odtwarza na bazie testowej migrację produkcji `szertxt` (backlog #3): zmienia
- * `products.szerokosc` z REAL na TEXT.
- *
- * Po co: SQLite stosuje TYPE AFFINITY, więc do kolumny zadeklarowanej REAL nie da się
- * zapisać „10.00" — silnik sam zamieni ten napis na liczbę 10.0. Innymi słowy kanoniczny
- * schemat FIZYCZNIE nie jest w stanie odtworzyć tego, co leży na stagingu, i test
- * pass-through wymaga prawdziwej podmiany typu kolumny.
- *
- * Sposób jest ten sam, co w migracji Ani i jedyny możliwy w SQLite (nie ma ALTER COLUMN):
- * nowa tabela → przepisanie danych → podmiana nazwy → odtworzenie indeksów. DDL bierzemy
- * z `sqlite_master`, żeby nie powielać tu 72 kolumn i nie rozjechać się z kanonem.
- */
-export function przelaczSzerokoscNaText(sqlite: BazaSqlite): void {
-  const ddl = sqlite
-    .prepare<[], { sql: string }>("SELECT sql FROM sqlite_master WHERE type='table' AND name='products'")
-    .get();
-  if (!ddl) throw new Error("Brak tabeli products w bazie testowej");
-
-  const indeksy = sqlite
-    .prepare<[], { sql: string | null }>(
-      "SELECT sql FROM sqlite_master WHERE type='index' AND tbl_name='products' AND sql IS NOT NULL",
-    )
-    .all();
-
-  const ddlNowe = ddl.sql.replace(/\bszerokosc REAL\b/, "szerokosc TEXT");
-  if (ddlNowe === ddl.sql) {
-    throw new Error("Nie znaleziono `szerokosc REAL` w DDL tabeli products — kanon się zmienił?");
-  }
-
-  sqlite.exec("PRAGMA foreign_keys = OFF");
-  sqlite.transaction(() => {
-    sqlite.exec(ddlNowe.replace(/products/, "products_szertxt"));
-    sqlite.exec("INSERT INTO products_szertxt SELECT * FROM products");
-    sqlite.exec("DROP TABLE products");
-    sqlite.exec("ALTER TABLE products_szertxt RENAME TO products");
-    for (const indeks of indeksy) if (indeks.sql) sqlite.exec(indeks.sql);
-  })();
-  sqlite.exec("PRAGMA foreign_keys = ON");
-}
 
 /**
  * Pozycje stagingu zasiane WPROST z nagranych fixtures.

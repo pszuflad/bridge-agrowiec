@@ -6,95 +6,68 @@
   },
   "katalog": {
     "produktow": 220,
-    "zrodlo": "db/snapshot.db → products (projekcja 29 kolumn)"
+    "zrodlo": "db/snapshot.db → products (projekcja 34 kolumn)"
+  },
+  "overridy": {
+    "wierszy": 444
   },
   "statystyki": {
+    "doStagingu": 9,
     "odrzuconeNieOpony": 0,
     "odrzuconeBrakDanych": 0,
     "odrzuconeSmieciMO2": 0,
     "nowe": 7,
-    "zmienione": 3,
-    "bezZmian": 196,
-    "autoZatwierdzone": 17,
-    "szczegolyOdrzuconych": [],
-    "doStagingu": 10
+    "zmienione": 2,
+    "wycofane": 0,
+    "bezZmian": 199,
+    "autoZatwierdzone": 15,
+    "szczegolyOdrzuconych": []
   },
-  "pozaZakresem3c": {
-    "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-    "wycofaneWiersze": 0,
-    "wycofaneLicznik": 0,
-    "doStaginguZWycofaniami": 10,
-    "wierszyPoDeduplikacji": 10,
-    "aktualizacjeZPetliWycofan": 4,
-    "zapisyAutoZatwierdzenia": 17
-  },
+  "wierszyPoDeduplikacji": 9,
   "staging": [
     {
-      "typZmiany": "zmiana_kluczowa",
-      "kod": "MO10_PAR1237",
-      "nazwa": "360/70R24 GRI GREEN XLR70 122D R-1W TL",
+      "typZmiany": "blad",
+      "kod": "MO10_PAB1112",
+      "nazwa": "7.50-20 GRI GREEN EX FT2 8PR TT",
       "dostawca": "MO10",
       "magazyn": "—",
       "magazynRaw": null,
-      "stanStary": 8,
+      "stanStary": 5,
       "stanNowy": 8,
-      "cenaZakupuStara": 927,
-      "cenaZakupuNowa": 927,
+      "cenaZakupuStara": 315,
+      "cenaZakupuNowa": 315,
       "cenaSprzedazyNowa": null,
       "zmianaPct": 0,
-      "ostrzezenie": null,
-      "powod": "model: GREEN XLR 70 → GREEN XLR70",
-      "snapshotJson": "{\"kod\":\"MO10_PAR1237\",\"kodDostawcy\":\"PAR1237\",\"ean\":\"4792290029682\",\"nazwa\":\"360/70R24 GRI GREEN XLR70 122D R-1W TL\",\"marka\":\"GRI\",\"model\":\"GREEN XLR70\",\"bieznik\":\"GREEN XLR70\",\"kategoria\":\"Rolnicze\",\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":927,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"360/70R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"360\",\"profil\":70,\"srednica\":24,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"122\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":111.36,\"indeks1\":\"122\",\"indeks2\":\"D\",\"indeksy\":\"122D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-1W\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-1W\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"4792290029682\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290029682\\\"]\"}",
-      "eanRaw": "4792290029682",
+      "ostrzezenie": "plik nadpisuje poprawke Marty: szerokosc",
+      "powod": "konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje (pole(a): szerokosc: baza/Marta=\"7.5\" vs plik dostawcy=\"7.50\"). Po akceptacji: wartosc z pliku zostanie zapamietana jako potwierdzona, wiec ten sam konflikt nie pojawi sie ponownie przy nastepnym imporcie — ale sama wartosc produktu NIE zmieni sie. • plik nadpisuje poprawke Marty: szerokosc",
+      "snapshotJson": "{\"kod\":\"MO10_PAB1112\",\"kodDostawcy\":\"PAB1112\",\"ean\":\"4792290030237\",\"nazwa\":\"7.50-20 GRI GREEN EX FT2 8PR TT\",\"marka\":\"GRI\",\"model\":\"GREEN EX FT2\",\"bieznik\":\"GREEN EX FT2\",\"kategoria\":\"Przemysłowe\",\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":315,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"7.50-20\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"7.5\",\"profil\":null,\"srednica\":20,\"konstrukcja\":\"D\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TT\",\"vfIf\":null,\"pr\":\"8\",\"wysokosc\":82.42,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"32\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"4792290030237\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290030237\\\"]\",\"_srcConflict\":{\"szerokosc\":\"7.50\"}}",
+      "eanRaw": "4792290030237",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290029682\"]",
+      "eanCandidates": "[\"4792290030237\"]",
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
     {
-      "typZmiany": "zmiana_kluczowa",
-      "kod": "MO10_PAR1241",
-      "nazwa": "380/70R28 GRI GREEN XLR70 127D R-1W TL",
+      "typZmiany": "blad",
+      "kod": "MO10_PAB1354",
+      "nazwa": "15.0/55-17 GRI GREEN EX RIB5 14PR TL",
       "dostawca": "MO10",
       "magazyn": "—",
       "magazynRaw": null,
-      "stanStary": 8,
+      "stanStary": 1,
       "stanNowy": 8,
-      "cenaZakupuStara": 1118,
-      "cenaZakupuNowa": 1118,
+      "cenaZakupuStara": 402,
+      "cenaZakupuNowa": 402,
       "cenaSprzedazyNowa": null,
       "zmianaPct": 0,
-      "ostrzezenie": null,
-      "powod": "model: GREEN XLR 70 → GREEN XLR70",
-      "snapshotJson": "{\"kod\":\"MO10_PAR1241\",\"kodDostawcy\":\"PAR1241\",\"ean\":\"4792290041776\",\"nazwa\":\"380/70R28 GRI GREEN XLR70 127D R-1W TL\",\"marka\":\"GRI\",\"model\":\"GREEN XLR70\",\"bieznik\":\"GREEN XLR70\",\"kategoria\":\"Rolnicze\",\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":1118,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"380/70R28\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"380\",\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"127\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":124.32,\"indeks1\":\"127\",\"indeks2\":\"D\",\"indeksy\":\"127D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-1W\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-1W\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"4792290041776\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290041776\\\"]\"}",
-      "eanRaw": "4792290041776",
+      "ostrzezenie": "plik nadpisuje poprawke Marty: szerokosc",
+      "powod": "konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje (pole(a): szerokosc: baza/Marta=\"15\" vs plik dostawcy=\"15.0\"). Po akceptacji: wartosc z pliku zostanie zapamietana jako potwierdzona, wiec ten sam konflikt nie pojawi sie ponownie przy nastepnym imporcie — ale sama wartosc produktu NIE zmieni sie. • plik nadpisuje poprawke Marty: szerokosc",
+      "snapshotJson": "{\"kod\":\"MO10_PAB1354\",\"kodDostawcy\":\"PAB1354\",\"ean\":\"4792290043251\",\"nazwa\":\"15.0/55-17 GRI GREEN EX RIB5 14PR TL\",\"marka\":\"GRI\",\"model\":\"GREEN EX RIB5\",\"bieznik\":\"GREEN EX RIB5\",\"kategoria\":\"Rolnicze\",\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":402,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"15.0/55-17\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"15\",\"profil\":55,\"srednica\":17,\"konstrukcja\":\"D\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"14\",\"wysokosc\":85.1,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"25\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"4792290043251\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290043251\\\"]\",\"_srcConflict\":{\"szerokosc\":\"15.0\"}}",
+      "eanRaw": "4792290043251",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290041776\"]",
-      "edytowanePola": null,
-      "utworzono": "<utworzono: jeden znacznik na przebieg>"
-    },
-    {
-      "typZmiany": "zmiana_kluczowa",
-      "kod": "MO10_PAR1271",
-      "nazwa": "480/70R28 GRI GREEN XLR70 140D/143A8 R-1W TL",
-      "dostawca": "MO10",
-      "magazyn": "—",
-      "magazynRaw": null,
-      "stanStary": 8,
-      "stanNowy": 8,
-      "cenaZakupuStara": 1585,
-      "cenaZakupuNowa": 1585,
-      "cenaSprzedazyNowa": null,
-      "zmianaPct": 0,
-      "ostrzezenie": null,
-      "powod": "model: GREEN XLR 70 → GREEN XLR70",
-      "snapshotJson": "{\"kod\":\"MO10_PAR1271\",\"kodDostawcy\":\"PAR1271\",\"ean\":\"4792290042049\",\"nazwa\":\"480/70R28 GRI GREEN XLR70 140D/143A8 R-1W TL\",\"marka\":\"GRI\",\"model\":\"GREEN XLR70\",\"bieznik\":\"GREEN XLR70\",\"kategoria\":\"Rolnicze\",\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":1585,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"480/70R28\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"480\",\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"140/143\",\"indeksPredkosci\":\"D/A8\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":138.32,\"indeks1\":\"140/143\",\"indeks2\":\"D/A8\",\"indeksy\":\"140D/143A8\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-1W\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-1W\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"4792290042049\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290042049\\\"]\"}",
-      "eanRaw": "4792290042049",
-      "eanIsValid": 1,
-      "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290042049\"]",
+      "eanCandidates": "[\"4792290043251\"]",
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -261,5 +234,480 @@
     }
   ],
   "skasowane": [],
-  "resetyNieobecnosci": []
+  "historiaCen": [
+    {
+      "produktId": 103119,
+      "kod": "MO10_PAB1102",
+      "ean": "4792290022454",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN EX RIB3",
+      "rozmiar": "12.5/80-18",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 408,
+      "cenaSprzedazy": 531,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103087,
+      "kod": "MO10_PAB1256",
+      "ean": "4792290030053",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN EX RT100",
+      "rozmiar": "11.2-28",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 521,
+      "cenaSprzedazy": 679,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103077,
+      "kod": "MO10_PAB1822",
+      "ean": "4792290039018",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN EX RIB3",
+      "rozmiar": "400/60-15.5",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 401,
+      "cenaSprzedazy": 522,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103074,
+      "kod": "MO10_PAB2720",
+      "ean": "4792290039315",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN EX FL700 SR",
+      "rozmiar": "500/60-22.5",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 1297,
+      "cenaSprzedazy": 1691,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103048,
+      "kod": "MO10_PAR1249",
+      "ean": "4792290041813",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 85",
+      "rozmiar": "320/85R24",
+      "indeksNosnosci": "122",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 801,
+      "cenaSprzedazy": 1044,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103046,
+      "kod": "MO10_PAR1251",
+      "ean": "4792290041264",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 85",
+      "rozmiar": "380/85R24",
+      "indeksNosnosci": "131",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1098,
+      "cenaSprzedazy": 1431,
+      "stan": 7,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103043,
+      "kod": "MO10_PAR1254",
+      "ean": "4792290041844",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 85",
+      "rozmiar": "320/85R28",
+      "indeksNosnosci": "124",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 999,
+      "cenaSprzedazy": 1302,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103032,
+      "kod": "MO10_PAR1265",
+      "ean": "4792290041271",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 85",
+      "rozmiar": "420/85R38",
+      "indeksNosnosci": "144",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1823,
+      "cenaSprzedazy": 2376,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103031,
+      "kod": "MO10_PAR1266",
+      "ean": "4792290041950",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 85",
+      "rozmiar": "460/85R38",
+      "indeksNosnosci": "149",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2160,
+      "cenaSprzedazy": 2816,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103030,
+      "kod": "MO10_PAR1267",
+      "ean": "4792290041967",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 85",
+      "rozmiar": "520/85R38",
+      "indeksNosnosci": "155",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2777,
+      "cenaSprzedazy": 3620,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 103015,
+      "kod": "MO10_PAR1292",
+      "ean": "4792290042223",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 95",
+      "rozmiar": "340/85R48",
+      "indeksNosnosci": "152",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1919,
+      "cenaSprzedazy": 2501,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 102994,
+      "kod": "MO10_PAR1404",
+      "ean": "4792290023543",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 65",
+      "rozmiar": "650/65R42",
+      "indeksNosnosci": "165/168",
+      "indeksPredkosci": "D/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4275,
+      "cenaSprzedazy": 5573,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 102991,
+      "kod": "MO10_PAR1407",
+      "ean": "4792290023574",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR 65",
+      "rozmiar": "650/65R38",
+      "indeksNosnosci": "163/166",
+      "indeksPredkosci": "D/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3480,
+      "cenaSprzedazy": 4537,
+      "stan": 7,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 102974,
+      "kod": "MO10_PAR5611",
+      "ean": "4792290039667",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR IFLEX 70",
+      "rozmiar": "IF600/70R30",
+      "indeksNosnosci": "165",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3889,
+      "cenaSprzedazy": 5070,
+      "stan": 5,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 102964,
+      "kod": "MO10_PAR7103",
+      "ean": "4792290042933",
+      "dostawca": "MO10",
+      "marka": "GRI",
+      "model": "GREEN XLR F88",
+      "rozmiar": "650/55R26.5",
+      "indeksNosnosci": "170/167",
+      "indeksPredkosci": "D/E",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 2559,
+      "cenaSprzedazy": 3336,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "zmianyProduktow": [
+    {
+      "id": 102964,
+      "zmiany": {
+        "stan": {
+          "przed": 8,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102974,
+      "zmiany": {
+        "stan": {
+          "przed": 3,
+          "po": 5
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T12:13:36.497Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102991,
+      "zmiany": {
+        "stan": {
+          "przed": 8,
+          "po": 7
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102994,
+      "zmiany": {
+        "stan": {
+          "przed": 6,
+          "po": 8
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103015,
+      "zmiany": {
+        "stan": {
+          "przed": 8,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103030,
+      "zmiany": {
+        "stan": {
+          "przed": 0,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T12:13:36.473Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103031,
+      "zmiany": {
+        "stan": {
+          "przed": 8,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103032,
+      "zmiany": {
+        "stan": {
+          "przed": 7,
+          "po": 8
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103043,
+      "zmiany": {
+        "stan": {
+          "przed": 8,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103046,
+      "zmiany": {
+        "stan": {
+          "przed": 8,
+          "po": 7
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103048,
+      "zmiany": {
+        "stan": {
+          "przed": 1,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103074,
+      "zmiany": {
+        "stan": {
+          "przed": 7,
+          "po": 8
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103077,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 8
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T06:05:01.835Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103087,
+      "zmiany": {
+        "stan": {
+          "przed": 0,
+          "po": 1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T12:13:36.472Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 103119,
+      "zmiany": {
+        "stan": {
+          "przed": 0,
+          "po": 8
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-21T12:13:36.471Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104681,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104682,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104683,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104684,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    }
+  ],
+  "zapytanDoPamieciLinkow": 0
 }

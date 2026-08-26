@@ -6,9 +6,11 @@ import {
   type ProduktWewnetrzny,
 } from "../repos/products.js";
 import { zapiszPozycjeStagingu, type NowaPozycjaStagingu } from "../repos/staging.js";
+import { zapiszHistorieCen } from "../repos/historia.js";
 import { czyOpona } from "./silnik/klasyfikator.js";
 import { identyfikatorTechniczny } from "./silnik/identyfikator.js";
-import { zastosujPoprawkiMarty } from "./silnik/overrides.js";
+import { poprawkiMarty } from "./silnik/overrides.js";
+import { applyDims, applyLinkMemory, uchwytSqlite } from "./silnik/bridge-ext.js";
 import {
   bladZapisuNazwy,
   POLA_ROZNIC,
@@ -131,6 +133,15 @@ const POLA_KLUCZOWE = [
 ];
 
 /**
+ * Ile kolejnych importów bez pozycji w cenniku kończy się wycofaniem —
+ * `WYCOFANIE_PROG_IMPORTOW` (backend-index.cjs:47807).
+ *
+ * Liczą się nieobecności POD RZĄD: każde dopasowanie zeruje licznik (`:47702`), więc
+ * produkt znikający naprzemiennie nigdy nie dojdzie do progu.
+ */
+const WYCOFANIE_PROG_IMPORTOW = 3;
+
+/**
  * Silnik dopasowania i klasyfikacji — port żywego `tk = function` (backend-index.cjs:47584-47851).
  *
  * ⚠ W oryginale są DWIE definicje `tk`. Ta z `:47378` (`function tk`) jest MARTWA — nadpisuje
@@ -139,14 +150,18 @@ const POLA_KLUCZOWE = [
  * więc port idzie WYŁĄCZNIE za żywą. Szczegóły i konsekwencje dla `docs/spec-backend.md` §5:
  * raport ticketa, sekcja D4.
  *
- * ZAKRES 3c kończy się na klasyfikacji. Świadomie NIE MA tu:
- *   • efektów auto-zatwierdzania (`:47791-47806`) — decyzja i licznik są, zapis do produktu
- *     i `historia_cen` należą do 3d (plan.md D5)
- *   • pętli wycofań po trzech nieobecnościach (`:47807-47847`) — 3d
- *   • realnych poprawek Marty — `zastosujPoprawkiMarty()` jest stubem (plan.md D6)
- * Każde z tych miejsc jest niżej oznaczone komentarzem.
+ * ZAKRES: od 3d-1 silnik jest KOMPLETNY — dopasowanie i klasyfikacja (3c) plus skutki:
+ * auto-zatwierdzanie z zapisem do produktu i `historia_cen` (`:47791-47806`), pętla wycofań
+ * po trzech nieobecnościach (`:47807-47847`) i realne poprawki Marty przez `Gq()` (`:47319`).
+ *
+ * Poza tym plikiem zostaje `acceptStaging` (sesja 3d-2) — czyli to, co dzieje się, gdy
+ * człowiek zatwierdzi pozycję ze stagingu.
  */
 export function silnikStagingu(db: Baza): SilnikStagingu {
+  const zastosujPoprawkiMarty = poprawkiMarty(db);
+  // Surowy uchwyt drivera dla `bridge_ext` — odpowiednik `Qi` z oryginału (`:47795`).
+  const sqlite = uchwytSqlite(db);
+
   return (kodDostawcy, surowe) => {
     // ODSTĘPSTWO D7 — patrz `PustyImportBlad`.
     if (surowe.length === 0) throw new PustyImportBlad(kodDostawcy);
@@ -318,7 +333,6 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
       }
       if (bladNazwy) skladnikiOstrzezenia.push(`bledny zapis nazwy: ${bladNazwy}`);
       if (naruszono.length > 0) {
-        // Nie powstanie do czasu 3d — `zastosujPoprawkiMarty()` jest stubem (plan.md D6).
         skladnikiOstrzezenia.push(`plik nadpisuje poprawke Marty: ${naruszono.join(", ")}`);
       }
 
@@ -384,7 +398,6 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
       const roznice: string[] = [];
 
       if (naruszono.length > 0) {
-        // Nie powstanie do czasu 3d (plan.md D6) — razem z gałęzią `_srcConflict` niżej.
         roznice.push(
           `konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje ` +
             `(pole(a): ${naruszono
@@ -504,23 +517,114 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
           utworzono,
         });
       } else if (Object.keys(autoPatch).length > 0) {
-        // ——— ZAKRES 3d: auto-zatwierdzanie (:47791-47806) ———
-        // 3c podejmuje decyzję i liczy ją tak jak produkcja, ale NIE wykonuje jej skutków:
-        // brakuje `aktualizujProdukt(db, dopasowany.id, {...autoPatch, dataAktualizacji})`,
-        // wpisu do `historia_cen` oraz `applyDims`/`applyLinkMemory` z `bridge_ext`.
-        // To jedyne miejsce, które 3d musi tu dopisać (plan.md D5).
+        // ——— Auto-zatwierdzanie: zmiana idzie do katalogu BEZ pytania (:47791-47806) ———
+        //
+        // Tu import przestaje być propozycją i staje się decyzją. Wchodzą tylko te pozycje,
+        // gdzie nie ruszyło się NIC z tożsamości opony i nie ma żadnego powodu do sprawdzenia
+        // — czyli w praktyce sama cena, marża, stan albo magazyn.
+        //
+        // ⚠ KOLEJNOŚĆ MA ZNACZENIE i jest odtworzona 1:1: `applyDims` MUTUJE `autoPatch`
+        // (dokłada wymiary paczki), więc musi wykonać się PRZED zapisem produktu — inaczej
+        // wymiary nie trafiłyby do bazy.
         statystyki.autoZatwierdzone += 1;
+        autoPatch.dataAktualizacji = utworzono;
+
+        // Oryginał obejmuje rozszerzenia osobnym `try{}catch{}` (`:47793-47796`), bo
+        // `bridge_ext` ma być defensywny — błąd wymiarów nie może wywrócić importu.
+        try {
+          applyDims(autoPatch as Record<string, unknown>, dopasowany.rozmiar);
+          applyLinkMemory(sqlite, autoPatch as Record<string, unknown>, dopasowany);
+        } catch {
+          // celowo cicho — dokładnie jak `catch (_be) {}` w oryginale
+        }
+
+        try {
+          aktualizujProdukt(db, dopasowany.id, autoPatch as Partial<ProduktWewnetrzny>);
+
+          // ⚠ ZAGNIEŻDŻENIE JEST CELOWE (`:47799-47802`): nieudany zapis historii NIE cofa
+          // aktualizacji produktu ani nie przerywa importu. Zewnętrzny `catch` łapie tylko
+          // błąd samej aktualizacji.
+          try {
+            zapiszHistorieCen(db, {
+              produktId: dopasowany.id,
+              kod: dopasowany.kod,
+              ean: dopasowany.ean,
+              dostawca: kodDostawcy,
+              marka: dopasowany.marka,
+              model: dopasowany.model,
+              rozmiar: dopasowany.rozmiar,
+              indeksNosnosci: dopasowany.indeksNosnosci,
+              indeksPredkosci: dopasowany.indeksPredkosci,
+              kategoria: dopasowany.kategoria,
+              // Ceny i stan PO zmianie, tożsamość SPRZED — jak `AP.x ?? T.x` w oryginale.
+              cenaZakupu: (autoPatch.cenaZakupu as number | null) ?? dopasowany.cenaZakupu,
+              cenaSprzedazy: (autoPatch.cenaSprzedazy as number | null) ?? dopasowany.cenaSprzedazy,
+              stan: (autoPatch.stan as number | null) ?? dopasowany.stan,
+              zarejestrowanoAt: utworzono,
+            });
+          } catch {
+            // celowo cicho — `catch (_h) {}` w oryginale
+          }
+        } catch (blad) {
+          console.warn("[tk:auto]", blad instanceof Error ? blad.message : String(blad));
+        }
       } else {
         statystyki.bezZmian += 1;
       }
     }
 
-    // ——— ZAKRES 3d: pętla wycofań po trzech nieobecnościach (:47807-47847) ———
-    // Oryginał przechodzi tu po produktach, których import NIE dotknął (`dopasowaneId`),
-    // podbija `nieobecnoscPodRzad`, a przy trzeciej nieobecności dopisuje wiersz
-    // `typZmiany: "wycofana"` i zeruje licznik. Dlatego `statystyki.wycofane` zostaje zerem,
-    // a `dopasowaneId` jest już zbierane — 3d ma komplet wejścia.
-    void dopasowaneId;
+    // ——— Pętla wycofań: co zniknęło z cennika na dobre (:47807-47847) ———
+    //
+    // Drugie (i ostatnie) przejście po katalogu dostawcy. Produkt, którego import nie dotknął,
+    // dostaje +1 do licznika nieobecności. Przy TRZECIEJ nieobecności pod rząd trafia na
+    // staging jako `wycofana` — do decyzji człowieka, bo automat go nie usuwa — a licznik
+    // wraca do zera, żeby po odrzuceniu wycofania cykl liczył się od nowa.
+    for (const produkt of katalog) {
+      if (dopasowaneId.has(produkt.id)) continue;
+
+      const nieobecnosci = (produkt.nieobecnoscPodRzad || 0) + 1;
+
+      if (nieobecnosci >= WYCOFANIE_PROG_IMPORTOW) {
+        statystyki.wycofane += 1;
+
+        const eanProduktu = produkt.ean ? String(produkt.ean).trim() : "";
+        const kolidujace = eanProduktu ? konfliktyEan.get(eanProduktu) : undefined;
+        // Ostrzeżenie wymienia INNE pozycje z tym samym EAN-em — bez samego wycofywanego.
+        const inne = kolidujace?.filter((p) => p.kod !== produkt.kod) ?? [];
+
+        doZapisu.push({
+          typZmiany: "wycofana",
+          kod: produkt.kod,
+          nazwa: produkt.nazwa,
+          dostawca: kodDostawcy,
+          magazyn: produkt.magazyn,
+          magazynRaw: produkt.magazynRaw ?? null,
+          stanStary: produkt.stan,
+          stanNowy: 0,
+          cenaZakupuStara: produkt.cenaZakupu,
+          cenaZakupuNowa: null,
+          cenaSprzedazyNowa: null,
+          zmianaPct: null,
+          ostrzezenie: kolidujace
+            ? `Mozliwy duplikat EAN (${eanProduktu}) z inna pozycja w bazie: ` +
+              `${inne.map((p) => `${p.kod} "${p.nazwa || ""}"`).join(", ")}. ` +
+              `Sprawdz przed odrzuceniem.`
+            : null,
+          powod: "Brak w cenniku — pozycja wycofana",
+          snapshotJson: null,
+          eanRaw: null,
+          eanIsValid: null,
+          eanSourceStatus: null,
+          eanCandidates: null,
+          edytowanePola: null,
+          utworzono,
+        });
+
+        aktualizujProdukt(db, produkt.id, { nieobecnoscPodRzad: 0 });
+      } else {
+        aktualizujProdukt(db, produkt.id, { nieobecnoscPodRzad: nieobecnosci });
+      }
+    }
 
     // Zapis wsadowy w JEDNEJ transakcji (:47848-47850). `doStagingu` to długość bufora,
     // nie liczba wstawionych wierszy — patrz deduplikacja w `zapiszPozycjeStagingu()`.
