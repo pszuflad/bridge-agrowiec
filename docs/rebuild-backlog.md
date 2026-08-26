@@ -231,17 +231,19 @@ trafił na „cenę na zapytanie"; to luka pokrycia próbki, nie brak obsługi.)
 
 **Rekomendacja:** ✅ **nanieść, ale NIE jako łatka do I2.** Po przeglądzie raportu I2 (2026-08-25): `uwaga_cena` rozkłada się jak inne rzeczy odłożone przez I2 — **schemat** (nowa kolumna, razem z decyzją #3) + **endpoint `/api/products/uwagi-cena`** + **propagacja w imporcie** (`acceptStaging`, parser mo7/adapter) → **I3**; **frontend to skrypt injection do tooltipu** (wprost z komentarza w `uwaga_cena_patch.cjs`) → wchłonięcie injection w późniejszej iteracji. Katalog I2 odtworzył bundle **sprzed** `uwaga_cena`, a dołożenie pola do `GET /api/products` złamałoby GATE wobec zamrożonego `GET_products.json` (przenagranie fixtures należy do I12). Dlatego I2 zostaje zamknięte, a to wchodzi u swoich właścicieli.
 
-### #5 · 2026-08-24 · [BACKEND] · `frazy` (dopasowanie fraz — NIEZNANE szczegóły)
+### #5 · 2026-08-24 · [BACKEND] · `frazy` (dopasowanie fraz — rozstrzygnięte: poza zakresem importu)
 
 | Pole | Wartość |
 |---|---|
 | **Pliki** | `frazy_migruj.cjs` (nowy, +64), `common.cjs` (+23), `frazy_niedopasowane.json` (dane), `frazy_raport.json` |
 | **Commit** | `33455c8` |
 | **Do nowej wersji?** | ❌ **NIE** jako zadanie importu (rozstrzygnięte 2026-08-26, I3/3a — patrz niżej); do rozważenia przy I8 Selly |
-| **Iteracja** | → do zbadania przy **I3** (normalizacja w adapterze) lub **I7** (atrybuty) |
-| **Status** | — |
+| **Iteracja** | → rozstrzygnięte przy **I3/3a**: nie jest normalizacją w adapterze; do rozważenia przy **I8** (Selly) |
+| **Status** | ✔ zbadane i rozstrzygnięte (I3/3a, 2026-08-26) |
 
-**Opis:** system migracji/dopasowania „fraz" — najpewniej normalizacja `zastosowanie`/nazw. **Changelog Ani nieaktualny**, więc szczegóły do potwierdzenia z diffa przy realizacji. **Rekomendacja:** 🕒 zbadać przy I3 (prawdopodobnie część warstwy normalizacji adaptera).
+**Opis (stan na 2026-08-24, przed zbadaniem):** system migracji/dopasowania „fraz" — podejrzewany
+jako normalizacja `zastosowanie`/nazw w adapterze. Changelog Ani nieaktualny, szczegóły wymagały
+potwierdzenia z diffa — zbadane niżej.
 
 **ROZSTRZYGNIĘTE (2026-08-26, I3/3a) — to NIE jest normalizacja w adapterze.** Zbadane w kodzie:
 `frazy_migruj.cjs` to **samodzielny skrypt jednorazowy**, który czyta statyczny plik

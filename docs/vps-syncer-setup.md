@@ -131,6 +131,10 @@ tail -20 ~/bridge-sync/tools/vps-sync.log
 - `knowledge/` (eksport z Perplexity) wgrywasz z laptopa — serwer go nie dotyka.
 - `snapshot.db` (pełna baza) NIE trafia do gita. Gdy potrzebujesz binarnej bazy
   lokalnie do analizy, użyj `tools/acquire.sh` z laptopa (pobierze ją przez SSH).
+- `mirror/backend/import_archive/` jest wykluczony z rsync (`tools/vps-sync.sh`) i z gita
+  (`.gitignore`) — zrzuty importu dostawców puchły w repo (bloat, usunięte commitem
+  `72957d7`). W drzewie roboczym tych plików już nie ma; próbki do gate'u charakteryzacji
+  parserów (I3) wyciąga się z historii gita (`git show '72957d7^:mirror/backend/import_archive/...'`).
 - Częstotliwość: „co godzinę" to punkt startowy. Zmiany Ani i tak są zachowane
   na serwerze (kopie `.bak` + `CHANGELOG.md`), więc rzadszy sync = tylko grubsza
   historia, nie utrata danych. Możesz dać `0 */2 * * *` (co 2 h) albo gęściej.

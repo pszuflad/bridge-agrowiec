@@ -214,8 +214,9 @@ Masz wtedy: repo Git będące żywym lustrem produkcji, świeżą wiedzę, basel
 i działającą synchronizację. To domyka **Fazę 1** z [PLAN.md](PLAN.md). Dalej:
 zamrożenie kontraktu API (Faza 2) i odbudowa (Fazy 3–4).
 
-**Stan odbudowy: Iteracja 1 zamknięta** — `rebuild/backend/` (API + logowanie, sesja 1a),
-`rebuild/frontend/` (rama panelu, `/login`, 12 tras routera — sesja 1b) i `rebuild/schema/`.
+**Stan odbudowy: iteracje 0–2 zamknięte, iteracja 3 w toku (3a gotowe).** `rebuild/backend/`
+(API + logowanie + katalog do odczytu + portowany podsystem parserów), `rebuild/frontend/`
+(rama panelu, `/login`, `/katalog`, 12 tras routera) i `rebuild/schema/`.
 Podział na iteracje: `docs/rebuild-roadmap.md`; deploy stagingu: `docs/deploy-setup.md`.
 Uruchomienie lokalne (Node 20; dev frontendu proxuje `/api` na backend, więc backend musi
 działać osobno — szczegóły w README obu pakietów):
@@ -224,6 +225,10 @@ działać osobno — szczegóły w README obu pakietów):
 cd rebuild/backend  && npm ci && npm run dev    # terminal 1 → 127.0.0.1:5001 (wymaga .env z JWT_SECRET)
 cd rebuild/frontend && npm ci && npm run dev    # terminal 2 → http://localhost:5173
 ```
+
+Iteracja 3a doszła: `rebuild/backend/src/import/legacy/` to port bajt-w-bajt parserów dostawców
+z produkcji — **nie edytuj tych plików ręcznie** (test integralności to wychwyci). Gate tej sesji:
+`cd rebuild/backend && npm test -- test/charakteryzacja.test.ts`; szczegóły: `rebuild/backend/README.md`.
 
 Niezależnie, natychmiast (produkcja cierpi): feed MO3 nie działa od 2026-07-06,
 alertów nikt nie czyta.

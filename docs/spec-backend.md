@@ -109,6 +109,13 @@ potwierdzone:
 - `kod_importu` nadaje `bridge_ext.assignKodImportu` (nie sama `tk`), grupując po EAN
   lub marka+rozmiar+bieznik+nazwa.
 
+> **Odbudowa (3a, `4-FEATURE-port-parserow-charakteryzacja`):** potok WEJŚCIA do `tk()` —
+> `dispatcher.parseByKod() → parser.parseFile() → adapter.recordsToSurowe()` — jest przeportowany
+> 1:1 do `rebuild/backend/src/import/legacy/` i pokryty testem charakteryzacyjnym na próbkach
+> MO1–MO10 (potwierdza m.in., że MO9 realnie ignoruje plik i ciągnie dane z GraphQL Agrorami, zgodnie
+> z `05_PARSERY_MODULY.md`). `bridge_ext.cjs`/`tire_dims.js` i sam silnik `tk()` zostają poza zakresem
+> do sesji 3c. Szczegóły: `docs/tickets/4-FEATURE-port-parserow-charakteryzacja/`.
+
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,

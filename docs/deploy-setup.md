@@ -29,6 +29,9 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
   `process.env.HOST:process.env.PORT`, baza z `process.env.DB_PATH`; `npm run migrate` stosuje schemat/migracje (idempotentnie).
   Wymaga też **`JWT_SECRET`** — bez niego serwer celowo nie wstaje (brak zahardkodowanego fallbacku, patrz niżej).
   Spełnione od Iteracji 1a (`rebuild/backend/`, szczegóły: `rebuild/backend/README.md`).
+  Od Iteracji 3a `npm run build` dokłada krok kopiujący portowane parsery importu (`.cjs` +
+  słownik) do `dist/import/legacy/` — bez niego import nie miałby czym parsować plików
+  dostawców, bo deploy kopiuje wyłącznie `dist/` (szczegóły: `rebuild/backend/README.md`).
 - **rebuild/frontend**: `npm ci --include=dev` && `npm run build` → `dist/` (base `/`, API pod `/api`).
   Spełnione od Iteracji 1b (`rebuild/frontend/`, szczegóły: `rebuild/frontend/README.md`).
 
@@ -170,6 +173,9 @@ Cel: żaden PR ticketa nie wejdzie do `develop` bez zielonego CI — a właścic
 > Alternatywa (nowszy mechanizm): **Settings → Rules → Rulesets → New branch ruleset**, target `develop`, reguły „Require a pull request" + „Require status checks" (backend, frontend). Efekt ten sam.
 
 ## Znane pułapki środowiska (VPS)
+- **Nowe zależności parserów importu (Iteracja 3a) nie wymagają obejścia.** `csv-parse`,
+  `iconv-lite`, `xlsx` są czysto JS-owe (bez kompilacji natywnej) — `npm ci --omit=dev` w
+  release'ie instaluje je bez dodatkowych kroków, inaczej niż `better-sqlite3` niżej.
 - **better-sqlite3 vs glibc 2.28.** VPS ma glibc 2.28; prebuilt better-sqlite3 (11.7+/11.10) wymaga
   `GLIBC_2.29` i nie ładuje się, a node-gyp 10 nie zbuduje ze źródła na dostępnym Pythonie 3.6.
   **Obejście (w `deploy-staging.sh`):** `npm ci --ignore-scripts` + podłożenie działającej binarki

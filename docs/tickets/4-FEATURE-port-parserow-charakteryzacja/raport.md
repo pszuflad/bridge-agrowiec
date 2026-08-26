@@ -237,3 +237,54 @@ Review (`review.md`): **0 BLOCKER**, 1 SHOULD-FIX, 1 NICE-TO-HAVE. Obie zgłoszo
 Przy okazji usunięta jedna asercja-tautologia z pierwszej wersji testu paginacji (porównywała
 dwie stałe). Po poprawkach: **61 asercji charakteryzacji**, cała bateria **164/164**,
 `lint`/`typecheck`/`build` czyste.
+
+## Aktualizacje dokumentacji
+
+Trzy doc-checkery przeszły równolegle przez `docs/` i `START.md`.
+
+**`docs/spec-backend.md`** — §5 „Silnik importu `tk()`": dopisany krótki callout „Odbudowa (3a)"
+w stylu istniejących w tym pliku — potok WEJŚCIA do `tk()` (dispatcher → parser →
+`adapter.recordsToSurowe()`) jest przeportowany 1:1 i pokryty charakteryzacją MO1–MO10;
+`bridge_ext`/`tire_dims`/`tk()` zostają do 3c. Reszta pliku bez zmian (nie dotyczy ticketu).
+Zweryfikowano też, że `docs/incoming/backend-perplexity/backend_doc/05_PARSERY_MODULY.md` już
+poprawnie opisuje MO9 jako GraphQL, nie CSV — brak sprzeczności do naprawienia.
+
+**`docs/spec-frontend.md`** — bez zmian. Plik opisuje wyłącznie frontend produkcji; ticket
+nie dotyka UI.
+
+**`docs/deploy-setup.md`** — dwie wstawki: (1) „Kontrakt z aplikacją" — `npm run build` ma od 3a
+trzeci krok kopiujący portowane parsery do `dist/import/legacy/`, i dlaczego to ma znaczenie
+(deploy kopiuje wyłącznie `dist/`); (2) „Znane pułapki środowiska (VPS)" — trzy nowe zależności
+produkcyjne są czysto JS-owe i nie wymagają obejścia jak `better-sqlite3`. Zweryfikowane
+w `tools/deploy-staging.sh`: kopiuje całe `dist/`, potem `npm ci --omit=dev` w release, więc nowe
+zależności zainstalują się same.
+
+**`START.md`** — dopisane trzy zdania o tym, że `src/import/legacy/` to port bajt-w-bajt
+(nie edytować ręcznie), komenda gate'u charakteryzacji i odesłanie do README backendu.
+Dodatkowo **poprawiony zastany błąd** wskazany przez doc-checkera: „Stan odbudowy: Iteracja 1
+zamknięta" było nieaktualne niezależnie od tego ticketu → „iteracje 0–2 zamknięte, iteracja 3
+w toku (3a gotowe)".
+
+**`docs/plan.md`** — bez zmian. Dokument historyczny, jawnie oznaczony jako nieaktualny wobec
+roadmapy; jego zapis „Każdy parser MO1–MO10 osobno (są już czytelne — przenosimy wiernie)" jest
+zgodny z przyjętą strategią portu verbatim.
+
+**`docs/rebuild-roadmap.md`** — doc-checker **wyłapał sprzeczność, którą zostawiłem**: akapit
+„⭐ Strategia parserów" nadal wymieniał `bridge_ext.cjs` jako część portu 3a, mimo korekty D4
+kilka linii niżej. Naprawione po obu stronach; blok **3c** dostał wprost zapis, że przejmuje port
+`bridge_ext.cjs`/`tire_dims.js` wraz z `applyDims`/`applyLinkMemory`.
+
+**`docs/rebuild-backlog.md`** — domknięty wpis #5: nagłówek („NIEZNANE szczegóły" → „rozstrzygnięte:
+poza zakresem importu"), wiersz „Iteracja", status → ✔, oraz usunięta nieaktualna rekomendacja
+„🕒 zbadać przy I3", która stała w sprzeczności z akapitem „ROZSTRZYGNIĘTE" tuż pod nią.
+Statusy #1/#2/#3/#4/#6 zweryfikowane jako zgodne z treścią opisową — bez zmian.
+
+**`docs/vps-syncer-setup.md`** — jeden punkt w „Uwagach": `mirror/backend/import_archive/` jest
+wykluczony z rsync i z gita (`72957d7`), więc próbki do gate'u charakteryzacji pochodzą z historii
+gita, nie z drzewa roboczego.
+
+### Problemy zastane (zgłoszone, nie naprawiane w tym tickecie)
+
+Brak nierozwiązanych. Jedyny zgłoszony przez doc-checkery problem zastany (nieaktualny „Stan
+odbudowy" w `START.md`) został naprawiony, bo dotyczył jednego zdania w pliku i tak edytowanym
+w tym tickecie.
