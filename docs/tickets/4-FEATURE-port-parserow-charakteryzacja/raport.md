@@ -377,3 +377,64 @@ więc dla nas to nadal wierne odtworzenie, nie odstępstwo. Ustalenia:
   wyłącznie wewnątrz `tk()`. Skoro MO6 nie jest importowany, `tk('MO6', …)` nigdy się nie wykonuje
   i nic się nie wycofuje. Ryzyko istnieje tylko przy uruchomieniu importu MO6 z pustym plikiem —
   ale to zachowanie dotyczy każdego dostawcy i jest zachowaniem oryginału.
+
+
+## Uzupełnienie 2026-08-26 (2): odpowiedzi Ani i weryfikacja dwóch wątpliwości
+
+### Potwierdzone: dętki, duplikaty, MO9
+
+**Dętki są świadomie wyrzucane z katalogu** — „od początku tak miało być". Zamyka to obserwację
+o skali odrzuceń MO4/MO5: klasyfikator działa zgodnie z zamierzeniem.
+
+**Duplikaty w plikach Handlopeksu — zarzut nietrafiony, sprawdzone i wycofuję go.**
+Ania wyjaśniła model biznesowy: Handlopex to **jeden dostawca z dwoma magazynami** (Wrocław,
+Rzeszów), traktowany jako dwaj dostawcy MO4/MO5, bo cena i wysyłka różnią się między magazynami.
+Ta sama opona może leżeć w obu — i tak ma zostać, rozdzielone.
+
+To wyjaśnia duplikację **między** MO4 a MO5. Moja obserwacja dotyczyła jednak duplikatów
+**wewnątrz jednego pliku** (MO4: 3771 wierszy, 2821 unikalnych). Doszedłem więc do końca:
+
+| Zakres | Wierszy | Unikalnych |
+|---|---|---|
+| MO4 — cały plik | 3771 | 2821 |
+| MO4 — **po odrzuceniu dętek** (to, co realnie wchodzi do katalogu) | **252** | **252** |
+| MO5 — po odrzuceniu dętek | **1639** | **1639** |
+
+**Cała duplikacja siedzi w dętkach** (np. `DET036;DĘTKA 15 x 6.00 - 6 TR-13` występuje 24 razy),
+a dętki i tak są odrzucane. Wśród opon — **zero duplikatów**. Nie ma tu problemu do rozwiązania
+w 3b; wpis wycofany.
+
+**MO9 Agrorami — nic do szukania w dokumentacji dostawcy.** Ania opisała mechanizm tokenu
+(generowany godzinowo, panel odświeża go ok. 55 min) — to jest **już zaimplementowane w porcie
+i zweryfikowane w kodzie**: `mo9_agrorami_api.cjs:380-381` ma `TOKEN_TTL_MS = 55 min` i
+`TOKEN_BUFFER_MS = 5 min`, a `_getToken()` odświeża po ~50 min, z jednorazowym retry na 401.
+Do uruchomienia importu MO9 na stagingu (3b) potrzebne są wyłącznie `AGRORAMI_EMAIL` /
+`AGRORAMI_PASSWORD` w pliku `.env` środowiska staging — te same, których używa produkcja.
+
+### Cztery zatwierdzone poprawki → backlog #3, #8, #9, #10
+
+Wszystkie cztery znaleziska z sekcji „Znaleziska" zostały przez Anię potwierdzone jako **błędy
+do naprawienia**, nie zamierzone zachowanie:
+
+| # | Rzecz | Werdykt |
+|---|---|---|
+| #3 | `szerokosc` przeliczana na mm w MO2/MO4/MO5 | „ewidentnie błąd, nie został naprawiony przy naprawie parserów"; ma być w calach |
+| #9 | `nro`/`cho` jako 0/1 | „nie może tak być, mają być wszędzie albo Tak, albo puste" |
+| #10 | `WULSTBAND` jako opona | „trzeba dopisać do listy odrzucanych, to nie powinno być importowane" |
+| #8 | MO8 nie czyta CSV | „trzeba dorobić to samo w MO8" — wykrywanie formatu jak w MO10 |
+
+Żadna z nich **nie jest naniesiona w tym tickecie** — 3a odtwarza zachowanie, a to są zmiany
+zachowania. Doszła natomiast do backlogu sekcja **„Gdzie naprawiamy zatwierdzone błędy parserów"**
+z decyzją do podjęcia: czy Ania poprawia je w produkcji (a my podciągamy portem — rekomendowane),
+czy poprawiamy je u siebie, godząc się na rozjazd portu wobec lustra.
+
+### MO6 i MO8 to importy RĘCZNE — konsekwencja dla 3b
+
+Ania doprecyzowała, że **MO6 (Uniglory) nigdy nie był importem automatycznym** — wgrywano go
+ręcznie, więc wycofanie nie wymaga niczego wyłączać. Podobnie **MO8 (Trelleborg)**: plik
+przychodzi mailem „raz na jakiś czas", a **Marta wgrywa go ręcznie**.
+
+Mapa `URLS` w `dispatcher.cjs` wymienia adresy dla wszystkich 10 dostawców, ale dla części z nich
+jest zapisem nieużywanym. **Dla 3b oznacza to, że ścieżka uploadu pliku jest dla tych dostawców
+jedyną realną**, a nie wariantem pobocznym auto-pulla — i że cichy import zera pozycji (#8) jest
+groźniejszy, niż wyglądał: nie ma cyklicznego przebiegu, który następnym razem by to nadrobił.
