@@ -540,6 +540,67 @@ przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 
 ---
 
+### #11 · 2026-08-26 · [BACKEND] · `ZT()` woła `Lq()` z sha1 zamiast licznika cyfr — komunikat „null cyfr znaczących"
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-08-26 (znalezione przy I3/3c) |
+| **Kategoria** | BACKEND (silnik importu, normalizacja EAN) |
+| **Pliki** | `index.cjs` — `ZT()` (deminified `:46971`, wywołanie `:46984`), `Lq()` (`:46965` i `:47312`) |
+| **Do nowej wersji?** | ⬜ **DO DECYZJI ANI** |
+| **Iteracja** | odtworzone 1:1 w **3c**; naprawa u Ani — do rozstrzygnięcia |
+| **Status** | zgłoszone |
+
+**Opis biznesowy:** przy EAN-ie zapisanym w notacji naukowej (Excel zamienia „8059970000000"
+na „8,05997E+12") pozycja w stagingu dostaje ostrzeżenie o treści:
+
+```
+EAN: scientific_notation_uncertain (zapis naukowy ma tylko null cyfr znaczących — EAN niepewny)
+```
+
+Słowo **„null"** w miejscu liczby to nie literówka w tłumaczeniu — tak wygląda dziś komunikat
+w produkcji. Miało być np. „ma tylko 6 cyfr znaczących".
+
+**Szczegół techniczny:** `index.cjs` ma DWIE funkcje `Lq` w tym samym zakresie — `Lq(t)`
+liczącą cyfry znaczące zapisu naukowego (`:46965`) i `Lq(t, e)` generującą identyfikator sha1
+(`:47312`). W JavaScripcie przy dwóch deklaracjach funkcji o tej samej nazwie wygrywa
+PÓŹNIEJSZA, dla całego pliku. `ZT()` woła `Lq(i)` z jednym argumentem, licząc na licznik cyfr,
+ale trafia w generator sha1: ten składa klucz z `e?.ean|e?.nazwa|…`, a przy `e === undefined`
+klucz jest pusty i funkcja zwraca `null`. Dalej `a < 13` to `null < 13`, czyli **zawsze true**,
+więc gałąź „za mało cyfr znaczących" wykonuje się bezwarunkowo, a `${a}` drukuje „null".
+
+Licznik cyfr z `:46965` jest przez to **kodem całkowicie martwym** — w całym
+`mirror/backend/index.cjs` są tylko dwa miejsca wywołania `Lq(`, oba trafiają w wersję sha1.
+
+**Skąd się biorą duplikaty:** nie z buildu — esbuild przy kolizji nazw zmienia nazwę. Obie
+deklaracje są w wysłanym bundlu fizycznie, bo `index.cjs` jest po buildzie **łatany skryptami
+`patch_*.cjs`** (w `mirror/backend/` jest ich kilkanaście). Ten sam mechanizm dał drugą
+definicję `tk`. To warto mieć z tyłu głowy przy każdej kolejnej łatce.
+
+**Jak duży to problem — uczciwie:** dziś mniejszy, niż wygląda. Dziewięć z dziesięciu parserów
+woła `common.normalizeEan()` **przed** silnikiem, więc do `ZT()` trafiają już same cyfry.
+Dziesiąty (MO8 Trelleborg) przepuszcza wartość surową, ale przy pliku XLSX arkusz oddaje EAN
+jako liczbę. W charakteryzacji 3c na 1838 realnych rekordach ta gałąź nie odpaliła ani razu.
+
+Staje się osiągalna, gdy: **MO8 przyjdzie jako CSV** (Excel zapisuje wtedy EAN tekstem
+w notacji naukowej — to ten sam plik, który opisuje #8) albo gdy pozycje wejdą przez
+`POST /api/staging/import`, z pominięciem parserów.
+
+**Naprawa (propozycja):** nadać unikalną nazwę późniejszej definicji, np. `LqId`, i podmienić
+jej trzy miejsca wywołania w `tk()`. Wtedy `Lq(i)` w `ZT()` znów trafia w licznik cyfr.
+Można to zrobić kolejnym skryptem łatającym, tą samą drogą co dotychczasowe poprawki.
+
+**Uwaga na skutek uboczny naprawy:** dla EAN-u w notacji naukowej z **co najmniej 13 cyframi
+znaczącymi** komunikat nie tylko się zmieni, ale ZNIKNIE (`ean_validation_error` będzie `null`,
+jeśli suma kontrolna się zgadza). Samo ostrzeżenie „EAN: scientific_notation_uncertain" zostaje
+— status nie zależy od tego warunku. Czyli: mniej hałasu przy poprawnych EAN-ach, prawdziwa
+liczba cyfr przy obciętych.
+
+**Co zrobiła odbudowa:** odtworzyła zachowanie 1:1, łącznie z komunikatem, i wywołuje tę samą
+funkcję z jednym argumentem zamiast wpisywać `null` na sztywno — żeby mechanizm był widoczny
+w kodzie tam, gdzie działa (`rebuild/backend/src/import/silnik/ean.ts`). Gdy Ania zdecyduje
+o naprawie, wchodzi ona przez re-synchronizację i przenagranie wzorca charakteryzacji.
+
 ## Gdzie naprawiamy zatwierdzone błędy parserów — ✅ WARIANT A (decyzja 2026-08-26)
 
 Wpisy **#3** (szerokość w mm), **#8** (MO8 i format pliku), **#9** (`nro`/`cho`) i **#10**

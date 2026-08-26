@@ -99,8 +99,20 @@ zapis naukowy ma tylko null cyfr znaczących — EAN niepewny
 
 **Potwierdzone uruchomieniem oryginału**, nie odczytem: scenariusz `ean-notacja-naukowa`
 w nagranym wzorcu. Tekst trafia do `staging_items.ostrzezenie` i `powod`, czyli **jest widoczny
-dla Ani** (3e). Dotyczy dostawców z notacją naukową w EAN (MO8 Trelleborg, MO7 Nokian).
-Odtworzone 1:1 zgodnie z decyzją D3; zgłoszone do `docs/rebuild-backlog.md`.
+dla Ani** (3e). Odtworzone 1:1 zgodnie z decyzją D3; zgłoszone do `docs/rebuild-backlog.md` (#11).
+
+**Zasięg jest dziś WĘŻSZY, niż wynikałoby z samego kodu — i to trzeba powiedzieć wprost.**
+W nagranym wzorcu (340 wierszy, 1838 rekordów) ta gałąź nie odpaliła **ani razu**:
+`eanSourceStatus` to `ok` w 334 wierszach, `null` w 5, `no_valid_candidate` w 1. Powód:
+dziewięć z dziesięciu parserów woła `common.normalizeEan()` **przed** silnikiem, więc do `ZT()`
+trafiają już same cyfry albo `null`. Dziesiąty (MO8 Trelleborg, `mo8_trelleborg.cjs:251-256`)
+przepuszcza wartość surową, ale przy pliku XLSX arkusz oddaje EAN jako LICZBĘ, nie jako
+„8,05997E+12".
+
+Gałąź staje się osiągalna w dwóch sytuacjach: **MO8 dostarczony jako CSV** (scenariusz
+z backlogu #8, gdzie Excel zapisuje EAN tekstem w notacji naukowej) oraz
+**`POST /api/staging/import`** (3d), który bierze pozycje wprost z ciała żądania, z pominięciem
+parserów. Błąd jest więc realny i uzbrojony, ale dziś uśpiony na ścieżce plikowej.
 
 Kod portu woła tę samą funkcję z jednym argumentem, zamiast wpisywać `null` na sztywno —
 żeby mechanizm był widoczny tam, gdzie działa.
