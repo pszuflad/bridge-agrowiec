@@ -38,6 +38,11 @@ function produkt(pola) {
     magazyn: "PL",
     magazynRaw: "PL",
     nieobecnoscPodRzad: 0,
+    wysokosc: null,
+    dlugosc: null,
+    szerokoscPaczki: null,
+    wysokoscPrzesylki: null,
+    linkZdjecia: null,
     kategoria: "Opony rolnicze",
     vat: 23,
     status: "aktywny",
@@ -312,6 +317,199 @@ export const SCENARIUSZE = [
     rekordy: [
       { kod: "S17", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 },
       { kod: "S17", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 },
+    ],
+  },
+  // ——— ZAKRES 3d-1 ———————————————————————————————————————————————————————————
+  // Gałęzie, których 3c świadomie nie miała: efekty auto-zatwierdzania (`:47791-47806`),
+  // pętla wycofań (`:47807-47847`) i realne poprawki Marty przez `Gq()` (`:47319`).
+  // Realne cenniki ruszają je szeroko (283 auto-zatwierdzenia, 149 wierszy `wycofana`),
+  // ale nie pokazują GRANIC — a to one są tu do obronienia.
+
+  {
+    nazwa: "auto-cena-zakupu",
+    opis:
+      "Zmienia się WYŁĄCZNIE cena zakupu — żadne pole kluczowe, żaden powód do sprawdzenia. " +
+      "Oryginał auto-zatwierdza: aktualizuje produkt, dopisuje wiersz do historia_cen " +
+      "i przepuszcza patch przez applyDims. Do stagingu NIE trafia nic.",
+    dostawca: "MO5",
+    katalog: [
+      produkt({ id: 101, kod: "A1", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1, cenaZakupu: 1000 }),
+    ],
+    rekordy: [{ kod: "A1", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1234.5 }],
+  },
+  {
+    nazwa: "auto-stan-i-magazyn",
+    opis: "Zmienia się tylko stan i magazyn — druga połowa listy pól auto-patcha (:47763-47764).",
+    dostawca: "MO5",
+    katalog: [
+      produkt({ id: 102, kod: "A2", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1, stan: 4, magazyn: "PL" }),
+    ],
+    rekordy: [{ kod: "A2", ...OPONA, ean: EAN_POPRAWNY, stan: 19, magazyn: "DE", cenaZakupu: 1000 }],
+  },
+  {
+    nazwa: "auto-nie-dla-pola-kluczowego",
+    opis:
+      "Ta sama zmiana ceny, ale RAZEM ze zmianą modelu (pole kluczowe _KP). " +
+      "Auto-zatwierdzenie NIE następuje — pozycja idzie do człowieka jako zmiana_kluczowa.",
+    dostawca: "MO5",
+    katalog: [
+      produkt({ id: 103, kod: "A3", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1, cenaZakupu: 1000 }),
+    ],
+    rekordy: [
+      { kod: "A3", ...OPONA, model: "AGRIMAX RT 855", ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1234.5 },
+    ],
+  },
+
+  {
+    nazwa: "wycofanie-pierwsza-nieobecnosc",
+    opis:
+      "Produkt jest w katalogu, nie ma go w cenniku, licznik startuje z 0 → rośnie do 1. " +
+      "Wiersz `wycofana` NIE powstaje — próg to trzy nieobecności pod rząd.",
+    dostawca: "MO5",
+    katalog: [produkt({ id: 111, kod: "W1", ...OPONA, nieobecnoscPodRzad: 0 })],
+    rekordy: [{ kod: "INNY", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 }],
+  },
+  {
+    nazwa: "wycofanie-druga-nieobecnosc",
+    opis: "Licznik 1 → 2. Nadal bez wiersza `wycofana` — to jest granica, której nie wolno przesunąć.",
+    dostawca: "MO5",
+    katalog: [produkt({ id: 112, kod: "W2", ...OPONA, nieobecnoscPodRzad: 1 })],
+    rekordy: [{ kod: "INNY", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 }],
+  },
+  {
+    nazwa: "wycofanie-trzecia-nieobecnosc",
+    opis:
+      "Licznik 2 → 3 = próg WYCOFANIE_PROG_IMPORTOW. Powstaje wiersz `wycofana` " +
+      "(stanNowy 0, cenaZakupuNowa null, snapshotJson null), a licznik wraca do ZERA.",
+    dostawca: "MO5",
+    katalog: [produkt({ id: 113, kod: "W3", ...OPONA, nieobecnoscPodRzad: 2 })],
+    rekordy: [{ kod: "INNY", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 }],
+  },
+  {
+    nazwa: "wycofanie-reset-po-dopasowaniu",
+    opis:
+      "Produkt z licznikiem 2 ZOSTAJE dopasowany — licznik zeruje się w pętli głównej (:47702), " +
+      "a pętla wycofań go już nie widzi. Dowód, że wycofanie liczy nieobecności POD RZĄD.",
+    dostawca: "MO5",
+    katalog: [
+      produkt({ id: 114, kod: "W4", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1, nieobecnoscPodRzad: 2 }),
+    ],
+    rekordy: [{ kod: "W4", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 }],
+  },
+  {
+    nazwa: "wycofanie-ostrzezenie-duplikat-ean",
+    opis:
+      "Wycofywany produkt ma EAN, który w katalogu występuje pod drugą pozycją — wiersz " +
+      "`wycofana` dostaje ostrzeżenie o możliwym duplikacie (:47822), z pominięciem samego siebie.",
+    dostawca: "MO5",
+    katalog: [
+      produkt({ id: 115, kod: "W5", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1, nieobecnoscPodRzad: 2 }),
+      produkt({ id: 116, kod: "W6", ...OPONA, nazwa: "BLIZNIAK", ean: EAN_POPRAWNY, eanIsValid: 1, nieobecnoscPodRzad: 2 }),
+    ],
+    rekordy: [{ kod: "INNY", ...OPONA, ean: EAN_POPRAWNY_2, stan: 4, cenaZakupu: 1000 }],
+  },
+
+  {
+    nazwa: "override-wygrywa-nad-plikiem",
+    opis:
+      "Marta poprawiła kategorię, plik dostawcy przynosi inną. Override WYGRYWA, a konflikt " +
+      "jest meldowany: ostrzeżenie 'plik nadpisuje poprawke Marty', powód o zachowaniu wartości " +
+      "Marty i wartość z pliku w snapshotJson._srcConflict.",
+    dostawca: "MO5",
+    katalog: [produkt({ id: 121, kod: "O1", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1 })],
+    rekordy: [
+      { kod: "O1", ...OPONA, kategoria: "Rolnicze male", ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 },
+    ],
+    overrides: [
+      {
+        supplierKod: "MO5",
+        supplierProductId: "O1",
+        fieldName: "kategoria",
+        overrideValue: "Opony rolnicze",
+        acknowledgedSourceValue: null,
+      },
+    ],
+  },
+  {
+    nazwa: "override-potwierdzony-nie-melduje",
+    opis:
+      "Ten sam konflikt, ale wartość z pliku jest już zapamiętana w acknowledgedSourceValue " +
+      "(po wcześniejszej akceptacji). Override nadal wygrywa, lecz NARUSZENIA NIE MA — " +
+      "to jest mechanizm, który powstrzymuje ten sam alarm przy każdym imporcie.",
+    dostawca: "MO5",
+    katalog: [produkt({ id: 122, kod: "O2", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1 })],
+    rekordy: [
+      { kod: "O2", ...OPONA, kategoria: "Rolnicze male", ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 },
+    ],
+    overrides: [
+      {
+        supplierKod: "MO5",
+        supplierProductId: "O2",
+        fieldName: "kategoria",
+        overrideValue: "Opony rolnicze",
+        acknowledgedSourceValue: "Rolnicze male",
+      },
+    ],
+  },
+  {
+    nazwa: "override-zgodny-z-plikiem",
+    opis: "Plik przynosi dokładnie to, co ustawiła Marta — override nakłada się bezgłośnie.",
+    dostawca: "MO5",
+    katalog: [produkt({ id: 123, kod: "O3", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1 })],
+    rekordy: [{ kod: "O3", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 }],
+    overrides: [
+      {
+        supplierKod: "MO5",
+        supplierProductId: "O3",
+        fieldName: "kategoria",
+        overrideValue: "Opony rolnicze",
+        acknowledgedSourceValue: null,
+      },
+    ],
+  },
+  {
+    nazwa: "override-blokuje-auto-zatwierdzenie",
+    opis:
+      "Zmienia się sama cena (normalnie auto-zatwierdzenie), ale jednocześnie plik narusza " +
+      "poprawkę Marty. `naruszono` wymusza wymagaSprawdzenia (:47758), więc auto-zatwierdzenie " +
+      "NIE następuje — import nie może po cichu przejechać po ręcznej wartości.",
+    dostawca: "MO5",
+    katalog: [
+      produkt({ id: 124, kod: "O4", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1, cenaZakupu: 1000 }),
+    ],
+    rekordy: [
+      { kod: "O4", ...OPONA, model: "PODMIENIONY", ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1234.5 },
+    ],
+    overrides: [
+      {
+        supplierKod: "MO5",
+        supplierProductId: "O4",
+        fieldName: "model",
+        overrideValue: "AGRIMAX RT 765",
+        acknowledgedSourceValue: null,
+      },
+    ],
+  },
+  {
+    nazwa: "override-kategorii-nie-przestawia-klasyfikatora",
+    opis:
+      "Najczęstsze pole override'u w produkcji to kategoria (6944 z 12 620 wierszy), a kategorię " +
+      "czyta klasyfikator „czy opona\" — kuszące jest założenie, że poprawka Marty potrafi " +
+      "wyrzucić produkt z katalogu. NAGRANIE POKAZUJE, ŻE NIE: przy nazwie mówiącej wprost " +
+      "„Opona 480/70R28…\" klasyfikator zostaje przy oponie mimo kategorii „Akcesoria\", " +
+      "więc kasowania nie ma — jest zwykły konflikt z poprawką Marty. Scenariusz zostaje " +
+      "właśnie jako dowód tej granicy.",
+    dostawca: "MO5",
+    katalog: [produkt({ id: 125, kod: "O5", ...OPONA, ean: EAN_POPRAWNY, eanIsValid: 1 })],
+    rekordy: [{ kod: "O5", ...OPONA, ean: EAN_POPRAWNY, stan: 4, cenaZakupu: 1000 }],
+    overrides: [
+      {
+        supplierKod: "MO5",
+        supplierProductId: "O5",
+        fieldName: "kategoria",
+        overrideValue: "Akcesoria",
+        acknowledgedSourceValue: null,
+      },
     ],
   },
 ];

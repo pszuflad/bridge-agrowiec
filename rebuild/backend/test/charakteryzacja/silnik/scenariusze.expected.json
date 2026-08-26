@@ -11,26 +11,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "nowa",
@@ -57,7 +53,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "dopasowanie-po-kodzie",
@@ -71,26 +69,22 @@
       "produktow": 1,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 1,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "zmiana_kluczowa",
@@ -117,7 +111,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "dopasowanie-po-eanie",
@@ -131,26 +127,22 @@
       "produktow": 1,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 1,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "zmiana_kluczowa",
@@ -177,7 +169,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "dopasowanie-po-eanie-znormalizowanym",
@@ -191,26 +185,22 @@
       "produktow": 1,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 1,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "zmiana_kluczowa",
@@ -237,7 +227,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "identyfikator-zastepczy-lq",
@@ -251,26 +243,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "blad",
@@ -297,7 +285,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "nie-opona-z-kasowaniem-produktu",
@@ -311,12 +301,17 @@
       "produktow": 1,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 0,
       "odrzuconeNieOpony": 1,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
       "szczegolyOdrzuconych": [
@@ -324,23 +319,16 @@
           "nazwa": "S6 — Dętka 12.4-28",
           "powod": "nie opona (wykryto dętka (możliwe zepsute kodowanie))"
         }
-      ],
-      "doStagingu": 0
+      ]
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 0,
-      "wierszyPoDeduplikacji": 0,
-      "aktualizacjeZPetliWycofan": 1,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 0,
     "staging": [],
     "skasowane": [
       41
     ],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "konflikt-ean",
@@ -354,26 +342,22 @@
       "produktow": 2,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 2,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "blad",
@@ -400,7 +384,28 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [
+      {
+        "id": 51,
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 0,
+            "po": 1
+          }
+        }
+      },
+      {
+        "id": 52,
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 0,
+            "po": 1
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "bledny-zapis-nazwy",
@@ -414,26 +419,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "blad",
@@ -460,7 +461,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "brak-rozmiaru",
@@ -474,26 +477,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "blad",
@@ -520,7 +519,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "wiele-ostrzezen-naraz",
@@ -534,26 +535,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "blad",
@@ -580,7 +577,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "ean-notacja-naukowa",
@@ -594,26 +593,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "nowa",
@@ -640,7 +635,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "ean-nieczytelny",
@@ -654,26 +651,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 1,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "nowa",
@@ -700,7 +693,9 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "smieci-mo2",
@@ -714,12 +709,17 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 0,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 1,
       "nowe": 0,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
       "szczegolyOdrzuconych": [
@@ -727,21 +727,14 @@
           "nazwa": "6.50-16 BKT",
           "powod": "smieciowa pozycja MO2 (kod 999991 + brak EAN lub marka=rozmiar) - odrzucona przy imporcie"
         }
-      ],
-      "doStagingu": 0
+      ]
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 0,
-      "wierszyPoDeduplikacji": 0,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 0,
     "staging": [],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "brak-identyfikatora-i-danych",
@@ -755,12 +748,17 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 0,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 1,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
       "szczegolyOdrzuconych": [
@@ -768,21 +766,14 @@
           "nazwa": "Zawór TR-218A",
           "powod": "brak identyfikatora i za malo danych produktu"
         }
-      ],
-      "doStagingu": 0
+      ]
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 0,
-      "wierszyPoDeduplikacji": 0,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 0,
     "staging": [],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "bez-zmian",
@@ -796,29 +787,27 @@
       "produktow": 1,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 0,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 1,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 0
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 0,
-      "wierszyPoDeduplikacji": 0,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 0,
     "staging": [],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "auto-zatwierdzenie-decyzja",
@@ -832,29 +821,74 @@
       "produktow": 1,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 0,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 1,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 0
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 0,
-      "wierszyPoDeduplikacji": 0,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 1
-    },
+    "wierszyPoDeduplikacji": 0,
     "staging": [],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [
+      {
+        "produktId": 71,
+        "kod": "S15",
+        "ean": "5901234123457",
+        "dostawca": "MO5",
+        "marka": "BKT",
+        "model": "AGRIMAX RT 765",
+        "rozmiar": "480/70R28",
+        "indeksNosnosci": null,
+        "indeksPredkosci": null,
+        "kategoria": "Opony rolnicze",
+        "cenaZakupu": 1111,
+        "cenaSprzedazy": 1300,
+        "stan": 4,
+        "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "zmianyProduktow": [
+      {
+        "id": 71,
+        "zmiany": {
+          "cenaZakupu": {
+            "przed": 1000,
+            "po": 1111
+          },
+          "dataAktualizacji": {
+            "przed": "2026-01-01T00:00:00.000Z",
+            "po": "<utworzono: jeden znacznik na przebieg>"
+          },
+          "wysokosc": {
+            "przed": null,
+            "po": 139
+          },
+          "dlugosc": {
+            "przed": null,
+            "po": 139
+          },
+          "szerokoscPaczki": {
+            "przed": null,
+            "po": 53
+          },
+          "wysokoscPrzesylki": {
+            "przed": null,
+            "po": 154
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "reset-nieobecnosci",
@@ -868,26 +902,22 @@
       "produktow": 1,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 1,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 0,
       "zmienione": 1,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 1
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 1,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "zmiana_kluczowa",
@@ -914,14 +944,19 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": [
+    "historiaCen": [],
+    "zmianyProduktow": [
       {
         "id": 81,
-        "patch": {
-          "nieobecnoscPodRzad": 0
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 2,
+            "po": 0
+          }
         }
       }
-    ]
+    ],
+    "zapytanDoPamieciLinkow": 0
   },
   {
     "nazwa": "deduplikacja-addstaging",
@@ -935,26 +970,22 @@
       "produktow": 0,
       "zrodlo": "scenariusze.mjs"
     },
+    "overridy": {
+      "wierszy": 0
+    },
     "statystyki": {
+      "doStagingu": 2,
       "odrzuconeNieOpony": 0,
       "odrzuconeBrakDanych": 0,
       "odrzuconeSmieciMO2": 0,
       "nowe": 2,
       "zmienione": 0,
+      "wycofane": 0,
       "bezZmian": 0,
       "autoZatwierdzone": 0,
-      "szczegolyOdrzuconych": [],
-      "doStagingu": 2
+      "szczegolyOdrzuconych": []
     },
-    "pozaZakresem3c": {
-      "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      "wycofaneWiersze": 0,
-      "wycofaneLicznik": 0,
-      "doStaginguZWycofaniami": 2,
-      "wierszyPoDeduplikacji": 1,
-      "aktualizacjeZPetliWycofan": 0,
-      "zapisyAutoZatwierdzenia": 0
-    },
+    "wierszyPoDeduplikacji": 1,
     "staging": [
       {
         "typZmiany": "nowa",
@@ -981,6 +1012,1007 @@
       }
     ],
     "skasowane": [],
-    "resetyNieobecnosci": []
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "auto-cena-zakupu",
+    "opis": "Zmienia się WYŁĄCZNIE cena zakupu — żadne pole kluczowe, żaden powód do sprawdzenia. Oryginał auto-zatwierdza: aktualizuje produkt, dopisuje wiersz do historia_cen i przepuszcza patch przez applyDims. Do stagingu NIE trafia nic.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 0,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 0,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 1,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 0,
+    "staging": [],
+    "skasowane": [],
+    "historiaCen": [
+      {
+        "produktId": 101,
+        "kod": "A1",
+        "ean": "5901234123457",
+        "dostawca": "MO5",
+        "marka": "BKT",
+        "model": "AGRIMAX RT 765",
+        "rozmiar": "480/70R28",
+        "indeksNosnosci": null,
+        "indeksPredkosci": null,
+        "kategoria": "Opony rolnicze",
+        "cenaZakupu": 1234.5,
+        "cenaSprzedazy": 1300,
+        "stan": 4,
+        "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "zmianyProduktow": [
+      {
+        "id": 101,
+        "zmiany": {
+          "cenaZakupu": {
+            "przed": 1000,
+            "po": 1234.5
+          },
+          "magazyn": {
+            "przed": "PL",
+            "po": "—"
+          },
+          "dataAktualizacji": {
+            "przed": "2026-01-01T00:00:00.000Z",
+            "po": "<utworzono: jeden znacznik na przebieg>"
+          },
+          "wysokosc": {
+            "przed": null,
+            "po": 139
+          },
+          "dlugosc": {
+            "przed": null,
+            "po": 139
+          },
+          "szerokoscPaczki": {
+            "przed": null,
+            "po": 53
+          },
+          "wysokoscPrzesylki": {
+            "przed": null,
+            "po": 154
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "auto-stan-i-magazyn",
+    "opis": "Zmienia się tylko stan i magazyn — druga połowa listy pól auto-patcha (:47763-47764).",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 0,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 0,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 1,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 0,
+    "staging": [],
+    "skasowane": [],
+    "historiaCen": [
+      {
+        "produktId": 102,
+        "kod": "A2",
+        "ean": "5901234123457",
+        "dostawca": "MO5",
+        "marka": "BKT",
+        "model": "AGRIMAX RT 765",
+        "rozmiar": "480/70R28",
+        "indeksNosnosci": null,
+        "indeksPredkosci": null,
+        "kategoria": "Opony rolnicze",
+        "cenaZakupu": 1000,
+        "cenaSprzedazy": 1300,
+        "stan": 19,
+        "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "zmianyProduktow": [
+      {
+        "id": 102,
+        "zmiany": {
+          "stan": {
+            "przed": 4,
+            "po": 19
+          },
+          "magazyn": {
+            "przed": "PL",
+            "po": "DE"
+          },
+          "dataAktualizacji": {
+            "przed": "2026-01-01T00:00:00.000Z",
+            "po": "<utworzono: jeden znacznik na przebieg>"
+          },
+          "wysokosc": {
+            "przed": null,
+            "po": 139
+          },
+          "dlugosc": {
+            "przed": null,
+            "po": 139
+          },
+          "szerokoscPaczki": {
+            "przed": null,
+            "po": 53
+          },
+          "wysokoscPrzesylki": {
+            "przed": null,
+            "po": 154
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "auto-nie-dla-pola-kluczowego",
+    "opis": "Ta sama zmiana ceny, ale RAZEM ze zmianą modelu (pole kluczowe _KP). Auto-zatwierdzenie NIE następuje — pozycja idzie do człowieka jako zmiana_kluczowa.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 1,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 1,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 1,
+    "staging": [
+      {
+        "typZmiany": "zmiana_kluczowa",
+        "kod": "A3",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 4,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": 1234.5,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": 23.45,
+        "ostrzezenie": null,
+        "powod": "model: AGRIMAX RT 765 → AGRIMAX RT 855",
+        "snapshotJson": "{\"kod\":\"A3\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 855\",\"kategoria\":\"Opony rolnicze\",\"ean\":\"5901234123457\",\"stan\":4,\"cenaZakupu\":1234.5,\"eanRaw\":\"5901234123457\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123457\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336}",
+        "eanRaw": "5901234123457",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123457\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "wycofanie-pierwsza-nieobecnosc",
+    "opis": "Produkt jest w katalogu, nie ma go w cenniku, licznik startuje z 0 → rośnie do 1. Wiersz `wycofana` NIE powstaje — próg to trzy nieobecności pod rząd.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 1,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 1,
+      "zmienione": 0,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 1,
+    "staging": [
+      {
+        "typZmiany": "nowa",
+        "kod": "INNY",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": null,
+        "stanStary": null,
+        "stanNowy": 4,
+        "cenaZakupuStara": null,
+        "cenaZakupuNowa": 1000,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": null,
+        "powod": "Nowa pozycja w cenniku",
+        "snapshotJson": "{\"kod\":\"INNY\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 765\",\"kategoria\":\"Opony rolnicze\",\"ean\":\"5901234123457\",\"stan\":4,\"cenaZakupu\":1000,\"eanRaw\":\"5901234123457\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123457\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336}",
+        "eanRaw": "5901234123457",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123457\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [
+      {
+        "id": 111,
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 0,
+            "po": 1
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "wycofanie-druga-nieobecnosc",
+    "opis": "Licznik 1 → 2. Nadal bez wiersza `wycofana` — to jest granica, której nie wolno przesunąć.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 1,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 1,
+      "zmienione": 0,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 1,
+    "staging": [
+      {
+        "typZmiany": "nowa",
+        "kod": "INNY",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": null,
+        "stanStary": null,
+        "stanNowy": 4,
+        "cenaZakupuStara": null,
+        "cenaZakupuNowa": 1000,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": null,
+        "powod": "Nowa pozycja w cenniku",
+        "snapshotJson": "{\"kod\":\"INNY\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 765\",\"kategoria\":\"Opony rolnicze\",\"ean\":\"5901234123457\",\"stan\":4,\"cenaZakupu\":1000,\"eanRaw\":\"5901234123457\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123457\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336}",
+        "eanRaw": "5901234123457",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123457\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [
+      {
+        "id": 112,
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 1,
+            "po": 2
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "wycofanie-trzecia-nieobecnosc",
+    "opis": "Licznik 2 → 3 = próg WYCOFANIE_PROG_IMPORTOW. Powstaje wiersz `wycofana` (stanNowy 0, cenaZakupuNowa null, snapshotJson null), a licznik wraca do ZERA.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 2,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 1,
+      "zmienione": 0,
+      "wycofane": 1,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 2,
+    "staging": [
+      {
+        "typZmiany": "nowa",
+        "kod": "INNY",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": null,
+        "stanStary": null,
+        "stanNowy": 4,
+        "cenaZakupuStara": null,
+        "cenaZakupuNowa": 1000,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": null,
+        "powod": "Nowa pozycja w cenniku",
+        "snapshotJson": "{\"kod\":\"INNY\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 765\",\"kategoria\":\"Opony rolnicze\",\"ean\":\"5901234123457\",\"stan\":4,\"cenaZakupu\":1000,\"eanRaw\":\"5901234123457\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123457\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336}",
+        "eanRaw": "5901234123457",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123457\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      },
+      {
+        "typZmiany": "wycofana",
+        "kod": "W3",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "PL",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 0,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": null,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": null,
+        "powod": "Brak w cenniku — pozycja wycofana",
+        "snapshotJson": null,
+        "eanRaw": null,
+        "eanIsValid": null,
+        "eanSourceStatus": null,
+        "eanCandidates": null,
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [
+      {
+        "id": 113,
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 2,
+            "po": 0
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "wycofanie-reset-po-dopasowaniu",
+    "opis": "Produkt z licznikiem 2 ZOSTAJE dopasowany — licznik zeruje się w pętli głównej (:47702), a pętla wycofań go już nie widzi. Dowód, że wycofanie liczy nieobecności POD RZĄD.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 0,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 0,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 1,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 0,
+    "staging": [],
+    "skasowane": [],
+    "historiaCen": [
+      {
+        "produktId": 114,
+        "kod": "W4",
+        "ean": "5901234123457",
+        "dostawca": "MO5",
+        "marka": "BKT",
+        "model": "AGRIMAX RT 765",
+        "rozmiar": "480/70R28",
+        "indeksNosnosci": null,
+        "indeksPredkosci": null,
+        "kategoria": "Opony rolnicze",
+        "cenaZakupu": 1000,
+        "cenaSprzedazy": 1300,
+        "stan": 4,
+        "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "zmianyProduktow": [
+      {
+        "id": 114,
+        "zmiany": {
+          "magazyn": {
+            "przed": "PL",
+            "po": "—"
+          },
+          "nieobecnoscPodRzad": {
+            "przed": 2,
+            "po": 0
+          },
+          "dataAktualizacji": {
+            "przed": "2026-01-01T00:00:00.000Z",
+            "po": "<utworzono: jeden znacznik na przebieg>"
+          },
+          "wysokosc": {
+            "przed": null,
+            "po": 139
+          },
+          "dlugosc": {
+            "przed": null,
+            "po": 139
+          },
+          "szerokoscPaczki": {
+            "przed": null,
+            "po": 53
+          },
+          "wysokoscPrzesylki": {
+            "przed": null,
+            "po": 154
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "wycofanie-ostrzezenie-duplikat-ean",
+    "opis": "Wycofywany produkt ma EAN, który w katalogu występuje pod drugą pozycją — wiersz `wycofana` dostaje ostrzeżenie o możliwym duplikacie (:47822), z pominięciem samego siebie.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 2,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 0
+    },
+    "statystyki": {
+      "doStagingu": 3,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 1,
+      "zmienione": 0,
+      "wycofane": 2,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 3,
+    "staging": [
+      {
+        "typZmiany": "nowa",
+        "kod": "INNY",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": null,
+        "stanStary": null,
+        "stanNowy": 4,
+        "cenaZakupuStara": null,
+        "cenaZakupuNowa": 1000,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": null,
+        "powod": "Nowa pozycja w cenniku",
+        "snapshotJson": "{\"kod\":\"INNY\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 765\",\"kategoria\":\"Opony rolnicze\",\"ean\":\"5901234123464\",\"stan\":4,\"cenaZakupu\":1000,\"eanRaw\":\"5901234123464\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123464\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336}",
+        "eanRaw": "5901234123464",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123464\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      },
+      {
+        "typZmiany": "wycofana",
+        "kod": "W5",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "PL",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 0,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": null,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": "Mozliwy duplikat EAN (5901234123457) z inna pozycja w bazie: W6 \"BLIZNIAK\". Sprawdz przed odrzuceniem.",
+        "powod": "Brak w cenniku — pozycja wycofana",
+        "snapshotJson": null,
+        "eanRaw": null,
+        "eanIsValid": null,
+        "eanSourceStatus": null,
+        "eanCandidates": null,
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      },
+      {
+        "typZmiany": "wycofana",
+        "kod": "W6",
+        "nazwa": "BLIZNIAK",
+        "dostawca": "MO5",
+        "magazyn": "PL",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 0,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": null,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": null,
+        "ostrzezenie": "Mozliwy duplikat EAN (5901234123457) z inna pozycja w bazie: W5 \"Opona 480/70R28 BKT AGRIMAX RT 765\". Sprawdz przed odrzuceniem.",
+        "powod": "Brak w cenniku — pozycja wycofana",
+        "snapshotJson": null,
+        "eanRaw": null,
+        "eanIsValid": null,
+        "eanSourceStatus": null,
+        "eanCandidates": null,
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [
+      {
+        "id": 115,
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 2,
+            "po": 0
+          }
+        }
+      },
+      {
+        "id": 116,
+        "zmiany": {
+          "nieobecnoscPodRzad": {
+            "przed": 2,
+            "po": 0
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "override-wygrywa-nad-plikiem",
+    "opis": "Marta poprawiła kategorię, plik dostawcy przynosi inną. Override WYGRYWA, a konflikt jest meldowany: ostrzeżenie 'plik nadpisuje poprawke Marty', powód o zachowaniu wartości Marty i wartość z pliku w snapshotJson._srcConflict.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 1
+    },
+    "statystyki": {
+      "doStagingu": 1,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 1,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 1,
+    "staging": [
+      {
+        "typZmiany": "blad",
+        "kod": "O1",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 4,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": 1000,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": 0,
+        "ostrzezenie": "plik nadpisuje poprawke Marty: kategoria",
+        "powod": "konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje (pole(a): kategoria: baza/Marta=\"Opony rolnicze\" vs plik dostawcy=\"Rolnicze male\"). Po akceptacji: wartosc z pliku zostanie zapamietana jako potwierdzona, wiec ten sam konflikt nie pojawi sie ponownie przy nastepnym imporcie — ale sama wartosc produktu NIE zmieni sie. • plik nadpisuje poprawke Marty: kategoria",
+        "snapshotJson": "{\"kod\":\"O1\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 765\",\"kategoria\":\"Opony rolnicze\",\"ean\":\"5901234123457\",\"stan\":4,\"cenaZakupu\":1000,\"eanRaw\":\"5901234123457\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123457\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336,\"_srcConflict\":{\"kategoria\":\"Rolnicze male\"}}",
+        "eanRaw": "5901234123457",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123457\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "override-potwierdzony-nie-melduje",
+    "opis": "Ten sam konflikt, ale wartość z pliku jest już zapamiętana w acknowledgedSourceValue (po wcześniejszej akceptacji). Override nadal wygrywa, lecz NARUSZENIA NIE MA — to jest mechanizm, który powstrzymuje ten sam alarm przy każdym imporcie.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 1
+    },
+    "statystyki": {
+      "doStagingu": 0,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 0,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 1,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 0,
+    "staging": [],
+    "skasowane": [],
+    "historiaCen": [
+      {
+        "produktId": 122,
+        "kod": "O2",
+        "ean": "5901234123457",
+        "dostawca": "MO5",
+        "marka": "BKT",
+        "model": "AGRIMAX RT 765",
+        "rozmiar": "480/70R28",
+        "indeksNosnosci": null,
+        "indeksPredkosci": null,
+        "kategoria": "Opony rolnicze",
+        "cenaZakupu": 1000,
+        "cenaSprzedazy": 1300,
+        "stan": 4,
+        "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "zmianyProduktow": [
+      {
+        "id": 122,
+        "zmiany": {
+          "magazyn": {
+            "przed": "PL",
+            "po": "—"
+          },
+          "dataAktualizacji": {
+            "przed": "2026-01-01T00:00:00.000Z",
+            "po": "<utworzono: jeden znacznik na przebieg>"
+          },
+          "wysokosc": {
+            "przed": null,
+            "po": 139
+          },
+          "dlugosc": {
+            "przed": null,
+            "po": 139
+          },
+          "szerokoscPaczki": {
+            "przed": null,
+            "po": 53
+          },
+          "wysokoscPrzesylki": {
+            "przed": null,
+            "po": 154
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "override-zgodny-z-plikiem",
+    "opis": "Plik przynosi dokładnie to, co ustawiła Marta — override nakłada się bezgłośnie.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 1
+    },
+    "statystyki": {
+      "doStagingu": 0,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 0,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 1,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 0,
+    "staging": [],
+    "skasowane": [],
+    "historiaCen": [
+      {
+        "produktId": 123,
+        "kod": "O3",
+        "ean": "5901234123457",
+        "dostawca": "MO5",
+        "marka": "BKT",
+        "model": "AGRIMAX RT 765",
+        "rozmiar": "480/70R28",
+        "indeksNosnosci": null,
+        "indeksPredkosci": null,
+        "kategoria": "Opony rolnicze",
+        "cenaZakupu": 1000,
+        "cenaSprzedazy": 1300,
+        "stan": 4,
+        "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "zmianyProduktow": [
+      {
+        "id": 123,
+        "zmiany": {
+          "magazyn": {
+            "przed": "PL",
+            "po": "—"
+          },
+          "dataAktualizacji": {
+            "przed": "2026-01-01T00:00:00.000Z",
+            "po": "<utworzono: jeden znacznik na przebieg>"
+          },
+          "wysokosc": {
+            "przed": null,
+            "po": 139
+          },
+          "dlugosc": {
+            "przed": null,
+            "po": 139
+          },
+          "szerokoscPaczki": {
+            "przed": null,
+            "po": 53
+          },
+          "wysokoscPrzesylki": {
+            "przed": null,
+            "po": 154
+          }
+        }
+      }
+    ],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "override-blokuje-auto-zatwierdzenie",
+    "opis": "Zmienia się sama cena (normalnie auto-zatwierdzenie), ale jednocześnie plik narusza poprawkę Marty. `naruszono` wymusza wymagaSprawdzenia (:47758), więc auto-zatwierdzenie NIE następuje — import nie może po cichu przejechać po ręcznej wartości.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 1
+    },
+    "statystyki": {
+      "doStagingu": 1,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 1,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 1,
+    "staging": [
+      {
+        "typZmiany": "blad",
+        "kod": "O4",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 4,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": 1234.5,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": 23.45,
+        "ostrzezenie": "plik nadpisuje poprawke Marty: model",
+        "powod": "konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje (pole(a): model: baza/Marta=\"AGRIMAX RT 765\" vs plik dostawcy=\"PODMIENIONY\"). Po akceptacji: wartosc z pliku zostanie zapamietana jako potwierdzona, wiec ten sam konflikt nie pojawi sie ponownie przy nastepnym imporcie — ale sama wartosc produktu NIE zmieni sie. • plik nadpisuje poprawke Marty: model",
+        "snapshotJson": "{\"kod\":\"O4\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 765\",\"kategoria\":\"Opony rolnicze\",\"ean\":\"5901234123457\",\"stan\":4,\"cenaZakupu\":1234.5,\"eanRaw\":\"5901234123457\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123457\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336,\"_srcConflict\":{\"model\":\"PODMIENIONY\"}}",
+        "eanRaw": "5901234123457",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123457\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
+  },
+  {
+    "nazwa": "override-kategorii-nie-przestawia-klasyfikatora",
+    "opis": "Najczęstsze pole override'u w produkcji to kategoria (6944 z 12 620 wierszy), a kategorię czyta klasyfikator „czy opona\" — kuszące jest założenie, że poprawka Marty potrafi wyrzucić produkt z katalogu. NAGRANIE POKAZUJE, ŻE NIE: przy nazwie mówiącej wprost „Opona 480/70R28…\" klasyfikator zostaje przy oponie mimo kategorii „Akcesoria\", więc kasowania nie ma — jest zwykły konflikt z poprawką Marty. Scenariusz zostaje właśnie jako dowód tej granicy.",
+    "dostawca": "MO5",
+    "wejscie": {
+      "rekordow": 1,
+      "zrodlo": "test/charakteryzacja/silnik/scenariusze.mjs"
+    },
+    "katalog": {
+      "produktow": 1,
+      "zrodlo": "scenariusze.mjs"
+    },
+    "overridy": {
+      "wierszy": 1
+    },
+    "statystyki": {
+      "doStagingu": 1,
+      "odrzuconeNieOpony": 0,
+      "odrzuconeBrakDanych": 0,
+      "odrzuconeSmieciMO2": 0,
+      "nowe": 0,
+      "zmienione": 1,
+      "wycofane": 0,
+      "bezZmian": 0,
+      "autoZatwierdzone": 0,
+      "szczegolyOdrzuconych": []
+    },
+    "wierszyPoDeduplikacji": 1,
+    "staging": [
+      {
+        "typZmiany": "blad",
+        "kod": "O5",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "dostawca": "MO5",
+        "magazyn": "—",
+        "magazynRaw": "PL",
+        "stanStary": 4,
+        "stanNowy": 4,
+        "cenaZakupuStara": 1000,
+        "cenaZakupuNowa": 1000,
+        "cenaSprzedazyNowa": null,
+        "zmianaPct": 0,
+        "ostrzezenie": "plik nadpisuje poprawke Marty: kategoria",
+        "powod": "konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje (pole(a): kategoria: baza/Marta=\"Akcesoria\" vs plik dostawcy=\"Opony rolnicze\"). Po akceptacji: wartosc z pliku zostanie zapamietana jako potwierdzona, wiec ten sam konflikt nie pojawi sie ponownie przy nastepnym imporcie — ale sama wartosc produktu NIE zmieni sie. • plik nadpisuje poprawke Marty: kategoria",
+        "snapshotJson": "{\"kod\":\"O5\",\"nazwa\":\"Opona 480/70R28 BKT AGRIMAX RT 765\",\"rozmiar\":\"480/70R28\",\"marka\":\"BKT\",\"model\":\"AGRIMAX RT 765\",\"kategoria\":\"Akcesoria\",\"ean\":\"5901234123457\",\"stan\":4,\"cenaZakupu\":1000,\"eanRaw\":\"5901234123457\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5901234123457\\\"]\",\"magazynRaw\":null,\"magazyn\":\"—\",\"szerokosc\":480,\"profil\":70,\"srednica\":28,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":336,\"_srcConflict\":{\"kategoria\":\"Opony rolnicze\"}}",
+        "eanRaw": "5901234123457",
+        "eanIsValid": 1,
+        "eanSourceStatus": "ok",
+        "eanCandidates": "[\"5901234123457\"]",
+        "edytowanePola": null,
+        "utworzono": "<utworzono: jeden znacznik na przebieg>"
+      }
+    ],
+    "skasowane": [],
+    "historiaCen": [],
+    "zmianyProduktow": [],
+    "zapytanDoPamieciLinkow": 0
   }
 ]

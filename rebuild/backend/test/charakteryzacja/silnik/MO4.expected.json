@@ -6,28 +6,24 @@
   },
   "katalog": {
     "produktow": 423,
-    "zrodlo": "db/snapshot.db → products (projekcja 29 kolumn)"
+    "zrodlo": "db/snapshot.db → products (projekcja 34 kolumn)"
+  },
+  "overridy": {
+    "wierszy": 565
   },
   "statystyki": {
+    "doStagingu": 93,
     "odrzuconeNieOpony": 0,
     "odrzuconeBrakDanych": 0,
     "odrzuconeSmieciMO2": 0,
     "nowe": 6,
-    "zmienione": 28,
-    "bezZmian": 45,
-    "autoZatwierdzone": 22,
-    "szczegolyOdrzuconych": [],
-    "doStagingu": 34
+    "zmienione": 27,
+    "wycofane": 60,
+    "bezZmian": 44,
+    "autoZatwierdzone": 24,
+    "szczegolyOdrzuconych": []
   },
-  "pozaZakresem3c": {
-    "opis": "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-    "wycofaneWiersze": 60,
-    "wycofaneLicznik": 60,
-    "doStaginguZWycofaniami": 94,
-    "wierszyPoDeduplikacji": 34,
-    "aktualizacjeZPetliWycofan": 328,
-    "zapisyAutoZatwierdzenia": 22
-  },
+  "wierszyPoDeduplikacji": 93,
   "staging": [
     {
       "typZmiany": "zmiana_kluczowa",
@@ -66,8 +62,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": -0.01586697131251346,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/70R22.5 Continental CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF → 315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF • model: CONTI ECO HS5 → CONTI ECO 5",
-      "snapshotJson": "{\"kod\":\"MO4_CCCR22531570L5SH0\",\"kodDostawcy\":\"CCCR22531570L5SH0\",\"ean\":\"4019238084566\",\"nazwa\":\"315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI ECO 5\",\"bieznik\":\"CONTI ECO 5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":1890.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":101.25,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025\",\"waga\":60.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238084566\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238084566\\\"]\"}",
+      "powod": "nazwa: 315/70R22.5 Continental CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF → 315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_CCCR22531570L5SH0\",\"kodDostawcy\":\"CCCR22531570L5SH0\",\"ean\":\"4019238084566\",\"nazwa\":\"315/70R22.5 CONTINENTAL CONTI ECO HS5 156/150L 20PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI ECO HS5\",\"bieznik\":\"CONTI ECO HS5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":1890.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":101.25,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025\",\"waga\":60.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238084566\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238084566\\\"]\"}",
       "eanRaw": "4019238084566",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -89,8 +85,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 0.5025072745163015,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/70R22.5 Continental CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF → 315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF • model: CONTI HYBRID HS5 → CONTI HYBRID 5",
-      "snapshotJson": "{\"kod\":\"MO4_CCCR22531570LCH50\",\"kodDostawcy\":\"CCCR22531570LCH50\",\"ean\":\"4019238046120\",\"nazwa\":\"315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI HYBRID 5\",\"bieznik\":\"CONTI HYBRID 5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":1910.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":101.25,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025,2026\",\"waga\":61,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"70dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238046120\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238046120\\\"]\"}",
+      "powod": "nazwa: 315/70R22.5 Continental CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF → 315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_CCCR22531570LCH50\",\"kodDostawcy\":\"CCCR22531570LCH50\",\"ean\":\"4019238046120\",\"nazwa\":\"315/70R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 20PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI HYBRID HS5\",\"bieznik\":\"CONTI HYBRID HS5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":1910.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":101.25,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025,2026\",\"waga\":61,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"70dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238046120\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238046120\\\"]\"}",
       "eanRaw": "4019238046120",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -135,8 +131,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": -1.6147149677057056,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/80R22.5 Continental CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF → 315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF • model: CONTI ECO HS5 → CONTI ECO 5",
-      "snapshotJson": "{\"kod\":\"MO4_CCCR22531580L5SH0\",\"kodDostawcy\":\"CCCR22531580L5SH0\",\"ean\":\"4019238090406\",\"nazwa\":\"315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI ECO 5\",\"bieznik\":\"CONTI ECO 5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1821.82,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"18\",\"wysokosc\":107.55,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025\",\"waga\":65.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238090406\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238090406\\\"]\"}",
+      "powod": "nazwa: 315/80R22.5 Continental CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF → 315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_CCCR22531580L5SH0\",\"kodDostawcy\":\"CCCR22531580L5SH0\",\"ean\":\"4019238090406\",\"nazwa\":\"315/80R22.5 CONTINENTAL CONTI ECO HS5 156/150L 18PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI ECO HS5\",\"bieznik\":\"CONTI ECO HS5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1821.82,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"18\",\"wysokosc\":107.55,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025\",\"waga\":65.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238090406\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238090406\\\"]\"}",
       "eanRaw": "4019238090406",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -158,35 +154,12 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 0.5022496062547757,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/80R22.5 Continental CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF → 315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF • model: CONTI HYBRID HS5 → CONTI HYBRID 5",
-      "snapshotJson": "{\"kod\":\"MO4_CCCR22531580LCH50\",\"kodDostawcy\":\"CCCR22531580LCH50\",\"ean\":\"4019238067811\",\"nazwa\":\"315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI HYBRID 5\",\"bieznik\":\"CONTI HYBRID 5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":1959.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"18\",\"wysokosc\":107.55,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2024,2026\",\"waga\":64,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238067811\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238067811\\\"]\"}",
+      "powod": "nazwa: 315/80R22.5 Continental CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF → 315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_CCCR22531580LCH50\",\"kodDostawcy\":\"CCCR22531580LCH50\",\"ean\":\"4019238067811\",\"nazwa\":\"315/80R22.5 CONTINENTAL CONTI HYBRID HS5 156/150L 18PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI HYBRID HS5\",\"bieznik\":\"CONTI HYBRID HS5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":1959.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"18\",\"wysokosc\":107.55,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2024,2026\",\"waga\":64,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238067811\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238067811\\\"]\"}",
       "eanRaw": "4019238067811",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
       "eanCandidates": "[\"4019238067811\"]",
-      "edytowanePola": null,
-      "utworzono": "<utworzono: jeden znacznik na przebieg>"
-    },
-    {
-      "typZmiany": "zmiana_kluczowa",
-      "kod": "MO4_CCCR22538565K5SH0",
-      "nazwa": "385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF",
-      "dostawca": "MO4",
-      "magazyn": "Wroclaw",
-      "magazynRaw": "Wroclaw",
-      "stanStary": 4,
-      "stanNowy": 4,
-      "cenaZakupuStara": 2047.22,
-      "cenaZakupuNowa": 2037.42,
-      "cenaSprzedazyNowa": null,
-      "zmianaPct": -0.4786979415988489,
-      "ostrzezenie": null,
-      "powod": "model: CONTI ECO HS5 → CONTI ECO 5",
-      "snapshotJson": "{\"kod\":\"MO4_CCCR22538565K5SH0\",\"kodDostawcy\":\"CCCR22538565K5SH0\",\"ean\":\"4019238099546\",\"nazwa\":\"385/65R22.5 CONTINENTAL CONTI ECO HS5 164K 20PR TL M+S 3PMSF\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI ECO 5\",\"bieznik\":\"CONTI ECO 5\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":2037.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"385/65R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"385\",\"profil\":65,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"164\",\"indeksPredkosci\":\"K\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.21,\"indeks1\":\"164\",\"indeks2\":\"K\",\"indeksy\":\"164K\",\"dot\":\"2025\",\"waga\":70.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"4019238099546\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4019238099546\\\"]\"}",
-      "eanRaw": "4019238099546",
-      "eanIsValid": 1,
-      "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4019238099546\"]",
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -279,29 +252,6 @@
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
       "eanCandidates": "[\"8904288103175\"]",
-      "edytowanePola": null,
-      "utworzono": "<utworzono: jeden znacznik na przebieg>"
-    },
-    {
-      "typZmiany": "zmiana_kluczowa",
-      "kod": "MO4_DCPR250H4000ERM80",
-      "nazwa": "385/95R25 DOUBLE COIN REM8 80KM/H 170F TL",
-      "dostawca": "MO4",
-      "magazyn": "Wroclaw",
-      "magazynRaw": "Wroclaw",
-      "stanStary": 2,
-      "stanNowy": 2,
-      "cenaZakupuStara": 2498.02,
-      "cenaZakupuNowa": 2507.82,
-      "cenaSprzedazyNowa": null,
-      "zmianaPct": 0.3923107100823925,
-      "ostrzezenie": null,
-      "powod": "nazwa: 385/95R25 Double Coin REM8 170F TL → 385/95R25 DOUBLE COIN REM8 80KM/H 170F TL • model: REM8  → REM8 80KM/H",
-      "snapshotJson": "{\"kod\":\"MO4_DCPR250H4000ERM80\",\"kodDostawcy\":\"DCPR250H4000ERM80\",\"ean\":null,\"nazwa\":\"385/95R25 DOUBLE COIN REM8 80KM/H 170F TL\",\"marka\":\"DOUBLE COIN\",\"model\":\"REM8 80KM/H\",\"bieznik\":\"REM8 80KM/H\",\"kategoria\":\"Rolnicze\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":2507.82,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"385/95R25\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"385\",\"profil\":95,\"srednica\":25,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"170\",\"indeksPredkosci\":\"F\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":136.64,\"indeks1\":\"170\",\"indeks2\":\"F\",\"indeksy\":\"170F\",\"dot\":\"2025\",\"waga\":128.4,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null}",
-      "eanRaw": null,
-      "eanIsValid": null,
-      "eanSourceStatus": null,
-      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -503,8 +453,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 0.5018224076910784,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/80R22.5 Dunlop SP462 napęd 156L/154M TL M+S 3PMSF → 315/80R22.5 DUNLOP SP462 NAPĘD 156L/154M TL M+S 3PMSF • model: SP462 → SP462 NAPĘD",
-      "snapshotJson": "{\"kod\":\"MO4_GNCZ22531580KS460\",\"kodDostawcy\":\"GNCZ22531580KS460\",\"ean\":\"5452000453570\",\"nazwa\":\"315/80R22.5 DUNLOP SP462 NAPĘD 156L/154M TL M+S 3PMSF\",\"marka\":\"DUNLOP\",\"model\":\"SP462 NAPĘD\",\"bieznik\":\"SP462 NAPĘD\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1331.82,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/154\",\"indeksPredkosci\":\"L/M\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":107.55,\"indeks1\":\"156/154\",\"indeks2\":\"L/M\",\"indeksy\":\"156L/154M\",\"dot\":\"2025\",\"waga\":66.8,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"B\",\"labelNoise\":\"75dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"5452000453570\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5452000453570\\\"]\"}",
+      "powod": "nazwa: 315/80R22.5 Dunlop SP462 napęd 156L/154M TL M+S 3PMSF → 315/80R22.5 DUNLOP SP462 NAPĘD 156L/154M TL M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_GNCZ22531580KS460\",\"kodDostawcy\":\"GNCZ22531580KS460\",\"ean\":\"5452000453570\",\"nazwa\":\"315/80R22.5 DUNLOP SP462 NAPĘD 156L/154M TL M+S 3PMSF\",\"marka\":\"DUNLOP\",\"model\":\"SP462\",\"bieznik\":\"SP462\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1331.82,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/154\",\"indeksPredkosci\":\"L/M\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":107.55,\"indeks1\":\"156/154\",\"indeks2\":\"L/M\",\"indeksy\":\"156L/154M\",\"dot\":\"2025\",\"waga\":66.8,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"B\",\"labelNoise\":\"75dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"5452000453570\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"5452000453570\\\"]\"}",
       "eanRaw": "5452000453570",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -605,6 +555,29 @@
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "typZmiany": "blad",
+      "kod": "MO4_HLRD153G10758MA00",
+      "nazwa": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 130A6/126A8 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 2,
+      "stanNowy": 2,
+      "cenaZakupuStara": 233.24,
+      "cenaZakupuNowa": 233.24,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": "plik nadpisuje poprawke Marty: szerokosc",
+      "powod": "konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje (pole(a): szerokosc: baza/Marta=\"10\" vs plik dostawcy=\"10.0\"). Po akceptacji: wartosc z pliku zostanie zapamietana jako potwierdzona, wiec ten sam konflikt nie pojawi sie ponownie przy nastepnym imporcie — ale sama wartosc produktu NIE zmieni sie. • szerokość: 254 → 10 • plik nadpisuje poprawke Marty: szerokosc",
+      "snapshotJson": "{\"kod\":\"MO4_HLRD153G10758MA00\",\"kodDostawcy\":\"HLRD153G10758MA00\",\"ean\":\"8907375000937\",\"nazwa\":\"10.0/75-15.3 MRL MAW 200 IMPLEMENT 130A6/126A8 14PR TT\",\"marka\":\"MRL\",\"model\":\"MAW 200 IMPLEMENT\",\"bieznik\":\"MAW 200 IMPLEMENT\",\"kategoria\":\"Rolnicze\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":233.24,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"10.0/75-15.3\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"10\",\"profil\":75,\"srednica\":15.3,\"konstrukcja\":\"D\",\"indeksNosnosci\":\"130/126\",\"indeksPredkosci\":\"A6/A8\",\"tlTt\":\"TT\",\"vfIf\":null,\"pr\":\"14\",\"wysokosc\":76.96,\"indeks1\":\"130/126\",\"indeks2\":\"A6/A8\",\"indeksy\":\"130A6/126A8\",\"dot\":\"2026\",\"waga\":17.3,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"8907375000937\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8907375000937\\\"]\",\"_srcConflict\":{\"szerokosc\":\"10.0\"}}",
+      "eanRaw": "8907375000937",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": "[\"8907375000937\"]",
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
       "typZmiany": "nowa",
       "kod": "MO4_HLRD160E60006MF20",
       "nazwa": "6.00-16 MRL MTF 222 TWO RIB 88A6/80A8 6PR TT",
@@ -687,8 +660,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 0.5017605633802756,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/70R22.5 Mirage MG638 napęd 154/150L 20PR M+S 3PMSF → 315/70R22.5 MIRAGE MG638 NAPĘD 154/150L 20PR M+S 3PMSF • model: MG638 → MG638 NAPĘD",
-      "snapshotJson": "{\"kod\":\"MO4_IMCR22531570L6380\",\"kodDostawcy\":\"IMCR22531570L6380\",\"ean\":\"8935355525095\",\"nazwa\":\"315/70R22.5 MIRAGE MG638 NAPĘD 154/150L 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG638 NAPĘD\",\"bieznik\":\"MG638 NAPĘD\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":33,\"cenaZakupu\":685.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"154/150\",\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":101.25,\"indeks1\":\"154/150\",\"indeks2\":\"L\",\"indeksy\":\"154L/150L\",\"dot\":\"2026\",\"waga\":59.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"8935355525095\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8935355525095\\\"]\"}",
+      "powod": "nazwa: 315/70R22.5 Mirage MG638 napęd 154/150L 20PR M+S 3PMSF → 315/70R22.5 MIRAGE MG638 NAPĘD 154/150L 20PR M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_IMCR22531570L6380\",\"kodDostawcy\":\"IMCR22531570L6380\",\"ean\":\"8935355525095\",\"nazwa\":\"315/70R22.5 MIRAGE MG638 NAPĘD 154/150L 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG638\",\"bieznik\":\"MG638\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":33,\"cenaZakupu\":685.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"154/150\",\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":101.25,\"indeks1\":\"154/150\",\"indeks2\":\"L\",\"indeksy\":\"154L/150L\",\"dot\":\"2026\",\"waga\":59.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"8935355525095\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8935355525095\\\"]\"}",
       "eanRaw": "8935355525095",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -699,7 +672,7 @@
     {
       "typZmiany": "zmiana_kluczowa",
       "kod": "MO4_IMCR22531580L12M1",
-      "nazwa": "315/80R22.5 MIRAGE MG121 158/ PROWADZĄCA 20PR M+S 3PMSF",
+      "nazwa": "315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF",
       "dostawca": "MO4",
       "magazyn": "Wroclaw",
       "magazynRaw": "Wroclaw",
@@ -710,8 +683,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 3.99123707811323,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/80R22.5 Mirage MG121 158/150L prowadząca 20PR M+S 3PMSF → 315/80R22.5 MIRAGE MG121 158/ PROWADZĄCA 20PR M+S 3PMSF • model: MG121 prowadząca → MG121 158/ PROWADZĄCA",
-      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L12M1\",\"kodDostawcy\":\"IMCR22531580L12M1\",\"ean\":\"8935355525347\",\"nazwa\":\"315/80R22.5 MIRAGE MG121 158/ PROWADZĄCA 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG121 158/ PROWADZĄCA\",\"bieznik\":\"MG121 158/ PROWADZĄCA\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":759.5,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":null,\"indeks2\":\"L\",\"indeksy\":\"L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"8935355525347\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8935355525347\\\"]\"}",
+      "powod": "nazwa: 315/80R22.5 Mirage MG121 158/150L prowadząca 20PR M+S 3PMSF → 315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L12M1\",\"kodDostawcy\":\"IMCR22531580L12M1\",\"ean\":\"8935355525347\",\"nazwa\":\"315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG121 prowadząca\",\"bieznik\":\"MG121 prowadząca\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":759.5,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":null,\"indeks2\":\"L\",\"indeksy\":\"L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"8935355525347\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8935355525347\\\"]\"}",
       "eanRaw": "8935355525347",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -733,8 +706,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 1.8608342887379816,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/80R22.5 Mirage MG638 156/152L napęd 20PR M+S 3PMSF → 315/80R22.5 MIRAGE MG638 156/ NAPĘD 20PR M+S 3PMSF • model: MG638  napęd → MG638 156/ NAPĘD",
-      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L6380\",\"kodDostawcy\":\"IMCR22531580L6380\",\"ean\":\"6920758661633\",\"nazwa\":\"315/80R22.5 MIRAGE MG638 156/ NAPĘD 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG638 156/ NAPĘD\",\"bieznik\":\"MG638 156/ NAPĘD\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":9,\"cenaZakupu\":808.5,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":null,\"indeks2\":\"L\",\"indeksy\":\"L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"6920758661633\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"6920758661633\\\"]\"}",
+      "powod": "nazwa: 315/80R22.5 Mirage MG638 156/152L napęd 20PR M+S 3PMSF → 315/80R22.5 MIRAGE MG638 156/ NAPĘD 20PR M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L6380\",\"kodDostawcy\":\"IMCR22531580L6380\",\"ean\":\"6920758661633\",\"nazwa\":\"315/80R22.5 MIRAGE MG638 156/ NAPĘD 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG638  napęd\",\"bieznik\":\"MG638  napęd\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":9,\"cenaZakupu\":808.5,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":null,\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":null,\"indeks2\":\"L\",\"indeksy\":\"L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"eanRaw\":\"6920758661633\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"6920758661633\\\"]\"}",
       "eanRaw": "6920758661633",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -756,8 +729,8 @@
       "cenaSprzedazyNowa": null,
       "zmianaPct": 2.3547050004409487,
       "ostrzezenie": null,
-      "powod": "nazwa: 315/80R22.5 Mirage MG768 napęd 156/152L 20PR M+S → 315/80R22.5 MIRAGE MG768 NAPĘD 156/152L 20PR M+S • model: MG768 → MG768 NAPĘD",
-      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L7680\",\"kodDostawcy\":\"IMCR22531580L7680\",\"ean\":\"8935355525064\",\"nazwa\":\"315/80R22.5 MIRAGE MG768 NAPĘD 156/152L 20PR M+S\",\"marka\":\"MIRAGE\",\"model\":\"MG768 NAPĘD\",\"bieznik\":\"MG768 NAPĘD\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":14,\"cenaZakupu\":812.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/152\",\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":\"156/152\",\"indeks2\":\"L\",\"indeksy\":\"156L/152L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"8935355525064\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8935355525064\\\"]\"}",
+      "powod": "nazwa: 315/80R22.5 Mirage MG768 napęd 156/152L 20PR M+S → 315/80R22.5 MIRAGE MG768 NAPĘD 156/152L 20PR M+S",
+      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L7680\",\"kodDostawcy\":\"IMCR22531580L7680\",\"ean\":\"8935355525064\",\"nazwa\":\"315/80R22.5 MIRAGE MG768 NAPĘD 156/152L 20PR M+S\",\"marka\":\"MIRAGE\",\"model\":\"MG768\",\"bieznik\":\"MG768\",\"kategoria\":\"Ciężarowe\",\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":14,\"cenaZakupu\":812.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"R\",\"indeksNosnosci\":\"156/152\",\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":\"156/152\",\"indeks2\":\"L\",\"indeksy\":\"156L/152L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":null,\"wentyl\":null,\"eanRaw\":\"8935355525064\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"8935355525064\\\"]\"}",
       "eanRaw": "8935355525064",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
@@ -810,27 +783,5069 @@
       "eanCandidates": "[\"8935355525132\"]",
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_TRRD090E60000T990",
+      "nazwa": "6.00-9 TRELLEBORG T-991 10PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 164.23,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZRR340420858ARO0",
+      "nazwa": "420/85R34 OZKA AGRO 10 142A8/139B TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1857.64,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZRR300420708ARO0",
+      "nazwa": "420/70R30 OZKA AGRO 10 134A8/131B TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1549.35,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZRD240G24006KNK0",
+      "nazwa": "12.4-24 OZKA KNK 50 124A6 12PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 684.39,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZRD200G12006KNK0",
+      "nazwa": "11.2-20 OZKA KNK 50 113A6 8PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 464.31,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZRD160E60006KN40",
+      "nazwa": "6.00-16 Ozka KNK 33 88A6 6PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 1,
+      "stanNowy": 0,
+      "cenaZakupuStara": 152.51,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZPD280G69008IN80",
+      "nazwa": "16.9-28 Ozka IND 80 R-4 156A8 14PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1551.33,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZPD240G75008IN80",
+      "nazwa": "17.5L-24 OZKA IND 80 R-4 154A8 14PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1212.75,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZPD160E6500LKNW2",
+      "nazwa": "6.50-16 OZKA KNK 20 108/107L 10PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 282.74,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MIRD160E600063TF0",
+      "nazwa": "6.00-16 MITAS TF-03 88A6/80A8 6PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 243.54,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MIRD153G15808IM44",
+      "nazwa": "11.5/80-15.3 MITAS IM-04 141A8 16PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 484.11,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MIRD1452006071IM0",
+      "nazwa": "200/60-14.5 MITAS IM-10 102A8 10PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 262.35,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MIRD100E50000B1A1",
+      "nazwa": "5.00-10 MITAS B-16 4PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 108.9,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MCRR240420708RD20",
+      "nazwa": "420/70R24 CULTOR RD-02 130A8/130B TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1284.33,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MCRD340G8400AA190",
+      "nazwa": "18.4-34 CULTOR AS AGRI 19 146A6 10PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1563.21,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MCRD200E75006AS80",
+      "nazwa": "7.50-20 CULTOR AS FRONT 08 109A6/101A8 8PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 272.25,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MCRD160E65006AS80",
+      "nazwa": "6.50-16 CULTOR AS FRONT 08 97A6/89A8 8PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 224.8,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR225F3000KKMA1",
+      "nazwa": "13R22.5 LingLong KMA400 156/150K 18PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 2,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1048.24,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR22538565KETT0",
+      "nazwa": "385/65R22.5 LingLong ETT100 164K/158L 24PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 989.01,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR19526570MKLD1",
+      "nazwa": "265/70R19.5 LINGLONG KLD200 140/138M 16PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 602.91,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR17523575MKLD1",
+      "nazwa": "235/75R17.5 LingLong KLD200 132/130M 14PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 499.95,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR17521575MLLS0",
+      "nazwa": "215/75R17.5 LINGLONG -S20 126/124M 14PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 404.91,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR17521575JT2L0",
+      "nazwa": "215/75R17.5 LingLong -T20 135/133J 16PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 424.71,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR17520565JT2L0",
+      "nazwa": "205/65R17.5 LingLong -T20 129/127J 16PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 3,
+      "stanNowy": 0,
+      "cenaZakupuStara": 350.07,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR17520565JKL20",
+      "nazwa": "205/65R17.5 LingLong KLT200 129/127J 16PR TL M+S",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 391.05,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_KARD300G84006SGQ2",
+      "nazwa": "18.4-30 KABAT SGP-04 149A6 12PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1444.41,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_KARD160E90006P091",
+      "nazwa": "9.00-16 Kabat IMP-09 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 518.83,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_KARD160E75008SF51",
+      "nazwa": "7.50-16 KABAT SRF-05 103A8 8PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 262.35,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_KARD060156004IP60",
+      "nazwa": "15x6.00-6 Kabat IMP-06 6PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 72.83,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRR22560050DFL30",
+      "nazwa": "600/50R22.5 MRL FLR 335 SPOWER 162D/159E TL SB",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1826.55,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD380G69006MR20",
+      "nazwa": "16.9-38 MRL MRT 329 KIRTI 148A6/144A8 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1385.01,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD380G55006MR22",
+      "nazwa": "15.5-38 MRL MRT 329 KIRTI 142A6/138A8 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1123.65,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD260231006MR20",
+      "nazwa": "23.1-26 MRL MRT 329 KIRTI 161A6/157A8 18PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 2355.21,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD200E75006M222",
+      "nazwa": "7.50-20 MRL MTF 221 TWO RIB PREMIUM 109A6/101A8 8PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 293.04,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD153G15808MA06",
+      "nazwa": "11.5/80-15.3 MRL MAW 200 IMPLEMENT 141A6/137A8 16PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 310.86,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD153G15808MA05",
+      "nazwa": "11.5/80-15.3 MRL MAW 200 IMPLEMENT 139A6/135A8 14PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 274.23,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD153G15808MA01",
+      "nazwa": "11.5/80-15.3 MRL MAW 200 IMPLEMENT 139A6/135A8 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 272.25,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD153G10756MA06",
+      "nazwa": "10.0/75-15.3 MRL MAW 200 IMPLEMENT 123A6/119A8 10PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 197.01,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD090E600027MT0",
+      "nazwa": "6.00-9 MRL MT 007 MOBI 143J 12PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 121.08,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLRD080189003MGC0",
+      "nazwa": "18x8.50-8 MRL MG 41 SAW TOOTH 82A3 6PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 84.15,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLPD180G25808ATU2",
+      "nazwa": "12.5/80-18 MRL ATU 410 SUPER CAT 148A6 16PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 712.8,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_HLPD153G15808MP04",
+      "nazwa": "11.5/80-15.3 MRL MPT 446 139A8/143A6 14PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 446.49,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_GNCR17526570M4361",
+      "nazwa": "265/70R17.5 DUNLOP SP346 139/136M TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1084.25,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_GGCR22531570LKD31",
+      "nazwa": "315/70R22.5 GOODYEAR KMAX 154L/152M TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 4,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1862.98,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_GGCR22529560KFXD3",
+      "nazwa": "295/60R22.5 GOODYEAR FUELMAX DEMO 150K/149L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1435.5,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_EGCR22529560KGHD0",
+      "nazwa": "295/60R22.5 GOODTRIP GHD20 150/147K 18PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 701.91,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_CTCR22529560LWED0",
+      "nazwa": "295/60R22.5 CEAT WINMILE-D 150/147L 18PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 929.61,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_CTCR17521575KX3E0",
+      "nazwa": "215/75R17.5 CEAT WINMILE-X3-R 135/133K 16PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 450.45,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_CCCR22538565KHTC2",
+      "nazwa": "385/65R22.5 CONTINENTAL CONTI HYBRID HT3+ 164K 20PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1711.71,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_CCCR22538565KCH50",
+      "nazwa": "385/65R22.5 CONTINENTAL CONTI HYBRID HS5 164K 20PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1959.21,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_CCCR22531580LH5D0",
+      "nazwa": "315/80R22.5 CONTINENTAL CONTI HYBRID HD5 156/150L 18PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1909.71,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_BRCR22531580LURD1",
+      "nazwa": "315/80R22.5 Bridgestone DURD2 156/150L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1741.41,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_BRCR22531570LURD0",
+      "nazwa": "315/70R22.5 Bridgestone DURD2 154/150L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1741.41,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_BRCR22531560LSTE0",
+      "nazwa": "315/60R22.5 Bridgestone ECOPIA STEER 154/148L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1796.85,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_MIRD260L31008D010",
+      "nazwa": "23.1-26 MITAS TD-01 156A8 14PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 2582.91,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OZRD340G69006KNK0",
+      "nazwa": "16.9-34 OZKA KNK 50 148A6 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 1384.61,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_IMCR225F3000G7680",
+      "nazwa": "13R22.5 MIRAGE MG768 NAPĘD 156/152G 20PR M+S",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 0,
+      "stanNowy": 0,
+      "cenaZakupuStara": 826.65,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR22538555JLL83",
+      "nazwa": "385/55R22.5 LINGLONG LTL863 160J/158L 20PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 1,
+      "stanNowy": 0,
+      "cenaZakupuStara": 944.88,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_OTRD200E90006TN20",
+      "nazwa": "9.00-20 GTK TN52 133A6 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 1,
+      "stanNowy": 0,
+      "cenaZakupuStara": 572.09,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "wycofana",
+      "kod": "MO4_LLCR22531560LKTS1",
+      "nazwa": "315/60R22.5 LINGLONG KTS300 152/148L 16PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 6,
+      "stanNowy": 0,
+      "cenaZakupuStara": 804.46,
+      "cenaZakupuNowa": null,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Brak w cenniku — pozycja wycofana",
+      "snapshotJson": null,
+      "eanRaw": null,
+      "eanIsValid": null,
+      "eanSourceStatus": null,
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
     }
   ],
   "skasowane": [],
-  "resetyNieobecnosci": [
+  "historiaCen": [
+    {
+      "produktId": 100801,
+      "kod": "MO4_BFCR22529580M24F0",
+      "ean": "3286341972818",
+      "dostawca": "MO4",
+      "marka": "FIRESTONE",
+      "model": "FS424",
+      "rozmiar": "295/80R22.5",
+      "indeksNosnosci": "152/148",
+      "indeksPredkosci": "M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1396.5,
+      "cenaSprzedazy": 1811,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100800,
+      "kod": "MO4_BFCR22531570L24F0",
+      "ean": "3286341973211",
+      "dostawca": "MO4",
+      "marka": "FIRESTONE",
+      "model": "FS424",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "154/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1416.1,
+      "cenaSprzedazy": 1865,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100790,
+      "kod": "MO4_BRCR22538565KURT0",
+      "ean": "3286341085211",
+      "dostawca": "MO4",
+      "marka": "BRIDGESTONE",
+      "model": "DURT2",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1612.1,
+      "cenaSprzedazy": 2091,
+      "stan": 12,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100781,
+      "kod": "MO4_CCCR22531580MHED0",
+      "ean": "4019238032574",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "HDC1 ED",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1831.62,
+      "cenaSprzedazy": 2414,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100780,
+      "kod": "MO4_CCCR22538565K5SH0",
+      "ean": "4019238099546",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI ECO HS5",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "164",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 2037.42,
+      "cenaSprzedazy": 2669,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100766,
+      "kod": "MO4_DCPR250H4000ERM80",
+      "ean": null,
+      "dostawca": "MO4",
+      "marka": "DOUBLE COIN",
+      "model": "REM8 ",
+      "rozmiar": "385/95R25",
+      "indeksNosnosci": "170",
+      "indeksPredkosci": "F",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2507.82,
+      "cenaSprzedazy": 3240,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 104746,
+      "kod": "MO4_EGCR17523575KGHA0",
+      "ean": "8859625701241",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHA20",
+      "rozmiar": "235/75R17.5",
+      "indeksNosnosci": "143/141",
+      "indeksPredkosci": "K",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 420.42,
+      "cenaSprzedazy": 539,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100761,
+      "kod": "MO4_EGCR19544545JGH20",
+      "ean": "8859625701043",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHT22 TRAILER",
+      "rozmiar": "445/45R19.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "J",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 910.42,
+      "cenaSprzedazy": 1168,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100755,
+      "kod": "MO4_EGCR22531580LGHA0",
+      "ean": "8859625700091",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHA20",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "157/154",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 763.42,
+      "cenaSprzedazy": 984,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100752,
+      "kod": "MO4_EGCR22531580LGMA0",
+      "ean": "8859625700138",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GMA30 ON-OFF ROAD",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "157/154",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 792.82,
+      "cenaSprzedazy": 1031,
+      "stan": 14,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100751,
+      "kod": "MO4_EGCR22538555KGHT0",
+      "ean": "8859625700862",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHT50 TRAILER",
+      "rozmiar": "385/55R22.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 890.82,
+      "cenaSprzedazy": 1142,
+      "stan": 12,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100748,
+      "kod": "MO4_EGCR22538565KGHT1",
+      "ean": "8859625700213",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHT50 TRAILER",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 890.82,
+      "cenaSprzedazy": 1149,
+      "stan": 9,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100731,
+      "kod": "MO4_GNCR22531570L3640",
+      "ean": "4038526073761",
+      "dostawca": "MO4",
+      "marka": "DUNLOP",
+      "model": "SP346+ HL",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1635.62,
+      "cenaSprzedazy": 2116,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100728,
+      "kod": "MO4_GNCR22538565K4360",
+      "ean": "5452000424860",
+      "dostawca": "MO4",
+      "marka": "DUNLOP",
+      "model": "SP346",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160/158",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1739.5,
+      "cenaSprzedazy": 2249,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100712,
+      "kod": "MO4_HLPD200405706MI30",
+      "ean": "8907375028320",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "405/70-20",
+      "indeksNosnosci": "160/154",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 889.55,
+      "cenaSprzedazy": 1153,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100699,
+      "kod": "MO4_HLRD145200606R7B0",
+      "ean": "8907375022830",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "RIB 707",
+      "rozmiar": "200/60-14.5",
+      "indeksNosnosci": "113/109",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 185.22,
+      "cenaSprzedazy": 241,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 104877,
+      "kod": "MO4_HLRD153G10756MA01",
+      "ean": "8907375000906",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MAW 200 IMPLEMENT",
+      "rozmiar": "10.0/75-15.3",
+      "indeksNosnosci": "130/126",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 226.38,
+      "cenaSprzedazy": 293,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100690,
+      "kod": "MO4_HLRD153G10758MI33",
+      "ean": "8907375001026",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "10.0/75-15.3",
+      "indeksNosnosci": "136/130",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 330.26,
+      "cenaSprzedazy": 437,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100684,
+      "kod": "MO4_HLRD160E40008MI30",
+      "ean": "8907375026586",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "4.00-16",
+      "indeksNosnosci": "72/64",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 100.94,
+      "cenaSprzedazy": 131,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100683,
+      "kod": "MO4_HLRD160E40008MI31",
+      "ean": "8907375026494",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "4.00-16",
+      "indeksNosnosci": "69/62",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 96.04,
+      "cenaSprzedazy": 124,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100677,
+      "kod": "MO4_HLRD240G36006MR21",
+      "ean": "8907375012480",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MRT 329 KIRTI",
+      "rozmiar": "13.6-24",
+      "indeksNosnosci": "130/126",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 699.72,
+      "cenaSprzedazy": 909,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100672,
+      "kod": "MO4_HLRD320G24006MR20",
+      "ean": "8907375008582",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MRT 329 KIRTI",
+      "rozmiar": "12.4-32",
+      "indeksNosnosci": "125/121",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 769.3,
+      "cenaSprzedazy": 1003,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 100671,
+      "kod": "MO4_HLRD340G69006MR20",
+      "ean": "8907375018512",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MRT 329 KIRTI",
+      "rozmiar": "16.9-34",
+      "indeksNosnosci": "146/142",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1243.62,
+      "cenaSprzedazy": 1626,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "produktId": 104875,
+      "kod": "MO4_IMCR22529580L12M0",
+      "ean": "8935355525354",
+      "dostawca": "MO4",
+      "marka": "MIRAGE",
+      "model": "MG121 PROWADZĄCA",
+      "rozmiar": "295/80R22.5",
+      "indeksNosnosci": "154/149",
+      "indeksPredkosci": "L",
+      "kategoria": "ciężarowe",
+      "cenaZakupu": 681.1,
+      "cenaSprzedazy": 875,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "zmianyProduktow": [
+    {
+      "id": 100427,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100428,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100429,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100430,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100431,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100432,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100433,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100434,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100435,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100436,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100437,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100438,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100439,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100440,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100441,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100442,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100443,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100444,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100445,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100446,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100447,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100448,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100449,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100450,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100451,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100452,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100453,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100454,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100455,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100456,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100457,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100458,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100459,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100460,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100461,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 100462,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100463,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100464,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100465,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100466,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100467,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100468,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100469,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100470,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100471,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100472,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100473,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100474,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100475,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100476,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100477,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100478,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100479,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100480,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100481,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100482,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100483,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100484,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100485,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100486,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100487,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100488,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100489,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100490,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100491,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100492,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100493,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100494,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100495,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 100496,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100497,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100498,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100499,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100500,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100501,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100502,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100503,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100504,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100505,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100506,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100507,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100508,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100509,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100510,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100511,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100512,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100513,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100514,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 100515,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100516,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100517,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100518,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100519,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100520,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100521,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100522,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100523,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100524,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100525,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100526,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100527,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100528,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100529,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100530,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100531,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100532,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100533,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100534,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100535,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100536,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100537,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100538,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100539,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100540,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100541,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100542,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100543,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100544,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100545,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100546,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100547,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100548,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100549,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100550,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100551,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100552,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100553,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100554,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100555,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100556,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100557,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100558,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100559,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100560,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100561,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100562,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100563,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100564,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100565,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100566,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100567,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100568,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100569,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 100570,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100571,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100572,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100573,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100574,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100575,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100576,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100577,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100578,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 100579,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100580,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100581,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100582,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100583,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100584,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100585,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100586,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 100587,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100588,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100589,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100590,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100591,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100592,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100593,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100594,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100595,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100596,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100597,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100598,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100599,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100600,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100601,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100602,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100603,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100604,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100605,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100606,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100607,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100608,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100609,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100610,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100611,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100612,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100613,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100614,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100615,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100616,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100617,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100618,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100619,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100620,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100621,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100622,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100623,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100624,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100625,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100626,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100627,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100628,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100629,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100630,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100631,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100632,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100633,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100634,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100635,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100636,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100637,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100638,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100639,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100640,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100641,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100642,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100643,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100644,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100645,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100646,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100647,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100648,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100649,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100650,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100651,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100652,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100653,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100656,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100662,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100663,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100666,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100667,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100668,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100669,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100671,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1253.42,
+          "po": 1243.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100672,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 773.22,
+          "po": 769.3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100676,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100677,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 700.7,
+          "po": 699.72
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100678,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100679,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100680,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100681,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100682,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100683,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 96.33,
+          "po": 96.04
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100684,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 101.53,
+          "po": 100.94
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100687,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100688,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100689,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100690,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 332.22,
+          "po": 330.26
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-11T10:45:26.906Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100696,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100699,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 186.1,
+          "po": 185.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100700,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 100701,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100705,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100706,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100708,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100711,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100712,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100713,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100714,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100715,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100717,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100723,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100724,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100728,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1745.38,
+          "po": 1739.5
+        },
+        "stan": {
+          "przed": 4,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-11T06:44:42.030Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100729,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100730,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100731,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1646.4,
+          "po": 1635.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T11:47:18.295Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100732,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100733,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100735,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100736,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100737,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100738,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100739,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100741,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100742,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100743,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100744,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100746,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100747,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100748,
+      "zmiany": {
+        "stan": {
+          "przed": 10,
+          "po": 9
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T12:44:41.121Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100750,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100751,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T13:44:41.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100752,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 14
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T12:44:41.121Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
     {
       "id": 100755,
-      "patch": {
-        "nieobecnoscPodRzad": 0
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 758.52,
+          "po": 763.42
+        },
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100760,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100761,
+      "zmiany": {
+        "stan": {
+          "przed": 6,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T12:44:41.121Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100762,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100763,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100766,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2498.02,
+          "po": 2507.82
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100773,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100774,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100775,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100778,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100779,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100780,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2047.22,
+          "po": 2037.42
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-06T06:44:42.129Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100781,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1841.42,
+          "po": 1831.62
+        },
+        "stan": {
+          "przed": 4,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T09:33:55.919Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100782,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100790,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T12:44:41.121Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100792,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100793,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100794,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100795,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100796,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100797,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 100799,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
       }
     },
     {
       "id": 100800,
-      "patch": {
-        "nieobecnoscPodRzad": 0
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1430.55,
+          "po": 1416.1
+        },
+        "stan": {
+          "przed": 0,
+          "po": 2
+        },
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:29.842Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100801,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T13:44:41.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104631,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104652,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104676,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104731,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104732,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104733,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104734,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104735,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104736,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104737,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104738,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104739,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104740,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104741,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104742,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104743,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
       }
     },
     {
       "id": 104744,
-      "patch": {
-        "nieobecnoscPodRzad": 0
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104746,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T13:44:41.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104748,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104749,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104867,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104868,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104869,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104870,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 2
+        }
+      }
+    },
+    {
+      "id": 104871,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104872,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104873,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104874,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 104875,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104877,
+      "zmiany": {
+        "stan": {
+          "przed": 3,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104905,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105028,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105096,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105097,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105203,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105204,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105205,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105206,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105234,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 105255,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105256,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 105275,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
+      }
+    },
+    {
+      "id": 105276,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 105277,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 0,
+          "po": 1
+        }
       }
     }
-  ]
+  ],
+  "zapytanDoPamieciLinkow": 0
 }

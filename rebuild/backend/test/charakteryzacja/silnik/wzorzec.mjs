@@ -4,6 +4,11 @@
 // Jedno miejsce, bo obie strony MUSZĄ normalizować tak samo. Gdyby normalizacja rozjechała się
 // między nagraniem a porównaniem, test byłby zielony z powodu, który nie ma nic wspólnego
 // z wiernością portu.
+//
+// ⚠ ZMIANA W 3d-1: nie ma już sekcji `pozaZakresem3c`. 3c odsiewała z porównania wiersze
+// `wycofana`, licznik `wycofane` i zapisy auto-zatwierdzania, bo świadomie ich nie miała.
+// 3d-1 dowozi jedno i drugie, więc WSZYSTKO wraca do porównania, a dochodzą do niego dwie
+// nowe rzeczy: wiersze `historia_cen` i zmiany stanu produktów.
 
 /** Dostawcy objęci charakteryzacją — ci sami, co w gate 3a. */
 export const KODY_DOSTAWCOW = ["MO1", "MO2", "MO3", "MO4", "MO5", "MO6", "MO7", "MO8", "MO9", "MO10"];
@@ -14,6 +19,9 @@ export const KODY_DOSTAWCOW = ["MO1", "MO2", "MO3", "MO4", "MO5", "MO6", "MO7", 
  * Oryginał bierze JEDEN `new Date().toISOString()` na cały przebieg (`:47585`) i wstawia go
  * do każdego wiersza. Wartości nie da się porównać między przebiegami, ale JEDNOLITOŚĆ już tak
  * — i to jest tu realna własność do obronienia, bo 3b też ją odtwarzała.
+ *
+ * Ten sam znacznik trafia do `historia_cen.zarejestrowanoAt` (`:47800` podaje tam `n`)
+ * oraz do `products.dataAktualizacji` przy auto-zatwierdzeniu (`:47792`).
  */
 export const UTWORZONO_WZORCOWE = "<utworzono: jeden znacznik na przebieg>";
 
@@ -45,13 +53,6 @@ export const POLA_WIERSZA = [
   "utworzono",
 ];
 
-/**
- * `typZmiany` produkowane przez pętlę wycofań (`:47807-47847`), która należy do 3d.
- * Wyłączamy je z porównania świadomie — nie „bo się nie zgadza", tylko dlatego, że 3c
- * celowo tej pętli nie ma. Test wypisuje, ile wierszy odrzucił.
- */
-export const TYP_POZA_ZAKRESEM_3C = "wycofana";
-
 /** Sprowadza wiersz stagingu do porównywalnego kształtu: stałe pola, znormalizowany znacznik. */
 function normalizujWiersz(wiersz) {
   const wynik = {};
@@ -62,66 +63,73 @@ function normalizujWiersz(wiersz) {
 }
 
 /**
- * Rozdziela wywołania `updateProduct` z pętli głównej na te w zakresie 3c i te w 3d.
- *
- * W pętli głównej `tk()` woła `updateProduct` w dwóch miejscach: reset `nieobecnoscPodRzad`
- * przy dopasowaniu (`:47702`, zakres 3c) i zapis auto-zatwierdzenia (`:47800`, zakres 3d).
- * Ten drugi ZAWSZE niesie `dataAktualizacji` (`:47790`), pierwszy nigdy — i to jest jedyny
- * pewny rozróżnik po kształcie patcha.
+ * Znacznik czasu jest jeden na przebieg i nieporównywalny między uruchomieniami, więc
+ * wszędzie, gdzie występuje jako WARTOŚĆ, podstawiamy stały napis. Dotyczy
+ * `historia_cen.zarejestrowanoAt` i `products.dataAktualizacji`.
  */
-function rozdzielPetleGlowna(aktualizacje) {
-  const resetyDopasowania = [];
-  const autoZatwierdzenia = [];
-  for (const wpis of aktualizacje) {
-    if ("dataAktualizacji" in wpis.patch) autoZatwierdzenia.push(wpis);
-    else resetyDopasowania.push(wpis);
+const znormalizujZnacznik = (wartosc, znacznikPrzebiegu) =>
+  wartosc === znacznikPrzebiegu ? UTWORZONO_WZORCOWE : wartosc;
+
+/** Wiersz `historia_cen` w kształcie wzorca. */
+function normalizujHistorie(wiersz, znacznikPrzebiegu) {
+  return Object.fromEntries(
+    Object.entries(wiersz).map(([k, v]) => [k, znormalizujZnacznik(v, znacznikPrzebiegu)]),
+  );
+}
+
+/** Zmiana stanu produktu w kształcie wzorca — z podstawionym znacznikiem w `dataAktualizacji`. */
+function normalizujZmianeProduktu(wpis, znacznikPrzebiegu) {
+  const zmiany = {};
+  for (const [pole, { przed, po }] of Object.entries(wpis.zmiany)) {
+    zmiany[pole] = {
+      przed: znormalizujZnacznik(przed, znacznikPrzebiegu),
+      po: znormalizujZnacznik(po, znacznikPrzebiegu),
+    };
   }
-  return { resetyDopasowania, autoZatwierdzenia };
+  return { id: wpis.id, zmiany };
 }
 
 /**
  * Normalizuje cały przebieg silnika do postaci zapisywanej we wzorcu.
  *
- * Odsiewa to, czego 3c świadomie nie ma, i raportuje odsiane osobno, zamiast po cichu gubić:
- * wiersze `wycofana`, licznik `wycofane`, wywołania `updateProduct` z pętli wycofań i zapisy
- * auto-zatwierdzenia. `doStagingu` oryginał liczy jako długość CAŁEGO bufora razem
- * z wycofaniami (`:47850`), więc obok surowej wartości zapisujemy tę policzoną bez nich —
- * to ta druga jest porównywalna z 3c.
+ * @param przebieg.znacznikPrzebiegu wartość `new Date().toISOString()`, którą `tk()` wzięło
+ *   na wejściu (`:47585`). Nie da się jej odczytać z zewnątrz, więc obie strony podają ją
+ *   z wierszy stagingu — dla przebiegu, który nie zapisał ani jednego wiersza, zostaje `null`
+ *   i wtedy nie ma czego normalizować.
  */
 export function normalizujPrzebieg(przebieg) {
-  const wszystkie = przebieg.staging.map(normalizujWiersz);
-  const wZakresie = wszystkie.filter((w) => w.typZmiany !== TYP_POZA_ZAKRESEM_3C);
-  const wycofane = wszystkie.length - wZakresie.length;
-
-  // `doStagingu` to długość BUFORA (`:47850`), a nie liczba zapisanych wierszy — te dwie
-  // wartości rozjeżdżają się, gdy addStaging zdeduplikuje powtórzoną pozycję.
-  const buforWZakresie = przebieg.wywolaniaStagingu.filter(
-    (w) => w.typZmiany !== TYP_POZA_ZAKRESEM_3C,
-  ).length;
-
-  const { wycofane: licznikWycofanych, doStagingu, ...licznikiWZakresie } = przebieg.statystyki;
-  const { resetyDopasowania, autoZatwierdzenia } = rozdzielPetleGlowna(przebieg.fazy.petlaGlowna);
+  const znacznikPrzebiegu = przebieg.znacznikPrzebiegu ?? null;
 
   return {
     dostawca: przebieg.dostawca,
     wejscie: przebieg.wejscie,
     katalog: przebieg.katalog,
-    statystyki: { ...licznikiWZakresie, doStagingu: buforWZakresie },
-    pozaZakresem3c: {
-      opis:
-        "Pętla wycofań (backend-index.cjs:47807-47847) i EFEKTY auto-zatwierdzania (:47791-47806) " +
-        "należą do 3d — 3c liczy decyzję auto-zatwierdzenia, ale jej nie wykonuje (plan.md D5). " +
-        "Odsiane tutaj, żeby porównanie mierzyło wyłącznie zakres 3c.",
-      wycofaneWiersze: wycofane,
-      wycofaneLicznik: licznikWycofanych,
-      doStaginguZWycofaniami: doStagingu,
-      wierszyPoDeduplikacji: wZakresie.length,
-      aktualizacjeZPetliWycofan: przebieg.fazy.petlaWycofan.length,
-      zapisyAutoZatwierdzenia: autoZatwierdzenia.length,
-    },
-    staging: wZakresie,
+    overridy: przebieg.overridy,
+    statystyki: przebieg.statystyki,
+    /**
+     * `doStagingu` to długość BUFORA (`:47850`), a nie liczba zapisanych wierszy — te dwie
+     * wartości rozjeżdżają się, gdy `addStaging` zdeduplikuje powtórzoną pozycję. Trzymamy
+     * obie, żeby różnica była widoczna, a nie mylona z błędem.
+     */
+    wierszyPoDeduplikacji: przebieg.staging.length,
+    staging: przebieg.staging.map(normalizujWiersz),
     skasowane: [...przebieg.skasowane].sort((a, b) => a - b),
-    /** Wyłącznie reset `nieobecnoscPodRzad` przy dopasowaniu — jedyna mutacja produktu w 3c. */
-    resetyNieobecnosci: [...resetyDopasowania].sort((a, b) => a.id - b.id),
+    /** Wiersze `historia_cen` z gałęzi auto-zatwierdzania (`:47800`). */
+    historiaCen: przebieg.historiaCen.map((w) => normalizujHistorie(w, znacznikPrzebiegu)),
+    /**
+     * Zmiany stanu produktów — obejmują OBIE ścieżki, które ruszają katalog: auto-zatwierdzenie
+     * (ceny/stan/magazyn + wymiary z `applyDims`) i licznik `nieobecnoscPodRzad` (reset przy
+     * dopasowaniu oraz podbicie/zerowanie w pętli wycofań).
+     */
+    zmianyProduktow: przebieg.zmianyProduktow.map((w) =>
+      normalizujZmianeProduktu(w, znacznikPrzebiegu),
+    ),
+    /**
+     * Ile razy `applyLinkMemory` sięgnęło do tabel pamięci linków. W `tk()` dostaje PATCH
+     * (bez `kod` i bez `marka/model/rozmiar`), więc wszystkie ścieżki pamięci odpadają na
+     * warunku wstępnym i wartość jest 0. Trzymamy ją we wzorcu, żeby ewentualna zmiana
+     * w produkcji wyszła w diffie, zamiast przejść niezauważona.
+     */
+    zapytanDoPamieciLinkow: przebieg.zapytanDoPamieciLinkow,
   };
 }
