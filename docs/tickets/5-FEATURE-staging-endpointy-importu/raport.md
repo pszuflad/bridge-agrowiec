@@ -165,9 +165,11 @@ zweryfikowane w oryginale przed poprawką i naniesione.
   `existsSync` w `wymusRetencje`) świadomie pominięte: oryginał ma tę samą strukturę,
   a katalog tworzy `archiwizujBufor` przed każdym wywołaniem.
 
-Jeden test świadomie USUNIĘTY: sprawdzał granicę dokładnie 25 MB i kosztował 14 sekund,
-bo przepuszczał pełne 25 MB przez archiwum i parser. Ostre `>` jest widoczne w kodzie
-i opatrzone komentarzem; tak wolny test i tak zostałby prędzej czy później wyłączony.
+Jeden test napisany i ODRZUCONY jeszcze przed commitem (nie ma go w historii gałęzi):
+sprawdzał granicę dokładnie 25 MB i kosztował 14 sekund, bo przepuszczał pełne 25 MB przez
+archiwum i parser. Ostre `>` jest widoczne w kodzie i opatrzone komentarzem, a test z `+1`
+i tak dowodzi, że próg jest ostry, a nie `>=`; tak wolny test zostałby prędzej czy później
+wyłączony i wtedy nie chroniłby niczego.
 
 ## Wyniki testów
 
