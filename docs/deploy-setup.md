@@ -19,6 +19,8 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
 
 ## Fakty hosta (zwiad 2026-08-21)
 - Node **v20.20.2**, npm 10.8.2 → build na VPS OK. sqlite3 CLI **3.26** (stary → snapshot przez `.backup`, nie `VACUUM INTO`).
+  Dotyczy to WYŁĄCZNIE CLI: `better-sqlite3` 11.7.0 niesie własne SQLite **3.47**, więc kod aplikacji
+  (m.in. kopia bazy przed migracjami) `VACUUM INTO` używa bez przeszkód.
 - `mod_proxy` działa w `.htaccess` (flaga `[P]`) → **nie trzeba „Custom HTTPD Configurations"**.
 - User `admin`, **bez sudo** → wszystko na poziomie usera. Port **5001 wolny**.
 - Docroot subdomeny: `/home/admin/domains/agritires.eu/public_html/test`.
@@ -26,7 +28,8 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
 ## Kontrakt z aplikacją (spełniony — Iteracja 1a backend + 1b frontend)
 `deploy-staging.sh` zakłada, że:
 - **rebuild/backend**: `npm ci --include=dev` && `npm run build` → `dist/`, wejście `dist/server.js`; serwer nasłuchuje na
-  `process.env.HOST:process.env.PORT`, baza z `process.env.DB_PATH`; `npm run migrate` stosuje schemat/migracje (idempotentnie).
+  `process.env.HOST:process.env.PORT`, baza z `process.env.DB_PATH`; `npm run migrate` stosuje schemat/migracje (idempotentnie);
+  `node scripts/kopia-bazy.cjs` robi kopię bazy przed migracjami (tylko gdy są jakieś do zastosowania).
   Wymaga też **`JWT_SECRET`** — bez niego serwer celowo nie wstaje (brak zahardkodowanego fallbacku, patrz niżej).
   Spełnione od Iteracji 1a (`rebuild/backend/`, szczegóły: `rebuild/backend/README.md`).
   Od Iteracji 3a `npm run build` dokłada krok kopiujący portowane parsery importu (`.cjs` +
@@ -134,11 +137,39 @@ Panel DirectAdmin → **Cron Jobs** (poll co 5 min; skrypt sam wykrywa brak zmia
 **Nie używaj obu naraz na stałe.** Jeśli włączasz Opcję A, usuń tego crona (albo zostaw z rzadkim interwałem, np. co 30 min, jako awaryjny fallback — przy nakładce po prostu zrobi no-op).
 
 ## Rollback
+
+### Kod (release)
 ```bash
 ls -1dt ~/private_apps/bridge-staging/releases/*/     # lista release (najnowsze u góry)
 ln -sfn ~/private_apps/bridge-staging/releases/<stary-sha> ~/private_apps/bridge-staging/current
 pm2 reload bridge-backend-staging
 ```
+
+### Baza (po migracji, która zrobiła coś nie tak)
+
+Deploy robi kopię bazy **przed** zastosowaniem migracji — `tools/deploy-staging.sh` woła
+`rebuild/backend/scripts/kopia-bazy.cjs`. Kopie leżą w
+`~/private_apps/bridge-staging/data/backups/`, trzymane są **ostatnie 5**.
+
+```bash
+ls -1t ~/private_apps/bridge-staging/data/backups/    # najnowsza u góry
+pm2 stop bridge-backend-staging                       # NAJPIERW zatrzymaj serwer
+cd ~/private_apps/bridge-staging/data
+cp backups/data-nowy.db.bak_pre-migracje_<znacznik>_<sha> data-nowy.db
+rm -f data-nowy.db-wal data-nowy.db-shm               # resztki WAL po starej bazie
+pm2 start bridge-backend-staging
+```
+
+⚠ **Kopia powstaje TYLKO wtedy, gdy deploy ma jakieś migracje do zastosowania.** Deploy chodzi
+przy każdej zmianie w `rebuild/`, więc kopiowanie za każdym razem zasypałoby dysk — ten projekt
+już raz się na to nadział na produkcji (292 pliki backup, ~6 GB; `mirror/backend/CHANGELOG.md`).
+Jeśli w logu deployu widzisz „kopia niepotrzebna", to znaczy, że schemat się nie zmienił
+i nie ma czego cofać.
+
+⚠ **Kopia idzie przez `VACUUM INTO` z poziomu `node` + `better-sqlite3` (SQLite 3.47),
+a NIE przez `sqlite3` CLI hosta** — ten ma 3.26 i `VACUUM INTO` (SQLite ≥ 3.27) w ogóle nie zna.
+Zwykłe `cp` też odpada: baza chodzi w WAL, więc kopia samego pliku `.db` bywa niespójna.
+Jeśli robisz kopię ręcznie CLI-em, użyj `.backup` — tak jak w sekcji odświeżania danych niżej.
 
 ## Odświeżenie danych staging ze snapshotu produkcji (na żądanie)
 ```bash
