@@ -409,6 +409,13 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
       liczników — w 3d-1 jest to sprawdzone na poziomie `tk()`, nie przez HTTP.
     - **Ta trasa jako pierwsza realnie uruchomi gałąź identyfikatora zastępczego `Lq()`** —
       ścieżka plikowa w nią nie wchodzi, bo adapter sam nadaje `kod`.
+    - **⚠ Gdyby 3d-2 dokładała migrację: schemat staging NIE pochodzi z naszego kanonu.**
+      Baza staging powstaje przez `.backup` z produkcji, a `001_schema.sql` jest idempotentny,
+      więc na przywróconej bazie nic nie tworzy — zostaje kształt produkcji, a `_migracje`
+      odnotowuje kanon jako zastosowany. Kanon i staging mogą się więc po cichu różnić,
+      a bramki tego nie pokażą (testy budują własną bazę z kanonu). Wyszło to przy `szerokosc`
+      REAL/TEXT w 3d-1. Szczegóły i procedura sprawdzenia: `docs/deploy-setup.md`,
+      sekcja „Schemat bazy staging NIE pochodzi z naszego kanonu".
   - **Gate:** `GET_overrides.json` zielony; 8 ścieżek przez HTTP; `acceptStaging` porównany
     z oryginałem; pusty import nie dociera do stagingu.
 
