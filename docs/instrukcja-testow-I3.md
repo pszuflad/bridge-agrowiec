@@ -28,7 +28,8 @@ zmian, po zatwierdzanie i wycofania. Plus widok `/staging`, w którym te decyzje
 
 **Cennik wgrywasz z przeglądarki — nie potrzebujesz Pawła ani konsoli.**
 
-1. Wejdź w **Konfiguracja** w menu po lewej. Otworzy się na zakładce **Wgrywanie ręczne**.
+1. Wejdź w **Konfiguracja** w menu po lewej. Otworzy się na zakładce **Dostawcy** —
+   przejdź na **Wgrywanie ręczne**.
 2. Kliknij pole wyboru pliku i wskaż cennik z dysku. Możesz zaznaczyć **kilka plików naraz**.
 3. Przy każdym pliku zobaczysz, **jakiego dostawcę Bridge rozpoznał i dlaczego** — np.
    *MO1 · wysoka pewność · Nazwa pliku pasuje do wzorca*.
@@ -53,10 +54,9 @@ do 50 MB.
 - pliku cennika któregoś z dostawców (MO1…MO10, **poza MO6** — ten jest wyłączony z importu
   i Bridge odmówi jego wgrania; to poprawne zachowanie).
 
-> **Czego tu jeszcze nie ma.** Zakładki *Dostawcy*, *Spedycja*, *Shoper*, *Katalog* i *AI
-> Fallback* są na razie puste — każda mówi, co ją wypełni. Pobieranie cennika z URL na żądanie
-> („Synchronizuj teraz") wraz z alertami o awarii dostawcy dowozi blok **3f-2**, a automatyczny
-> polling — **3f-3**.
+> **Czego tu jeszcze nie ma.** Zakładki *Spedycja*, *Shoper*, *Katalog* i *AI Fallback* są
+> na razie puste — każda mówi, co ją wypełni. Automatyczne pobieranie cenników co N minut
+> dowozi blok **3f-3**; na razie synchronizację uruchamiasz ręcznie (sekcja 3.10).
 
 ---
 
@@ -181,6 +181,63 @@ została wycofana i po akceptacji produkt zostanie wstrzymany.
 **Po zaakceptowaniu:** produkt **zostaje w katalogu**, ale ze statusem *wstrzymany* i stanem 0.
 Nie znika — decyzja o skasowaniu należy do Ciebie, nie do automatu.
 
+### 3.10 ⭐ Pobranie cennika z URL — „Synchronizuj teraz"
+
+Pięciu dostawców (MO2, MO3, MO4, MO5, MO9) nie przysyła plików mailem — Bridge sam pobiera
+ich cennik spod adresu URL. Do tej pory dało się to uruchomić tylko z konsoli.
+
+1. Wejdź w **Konfiguracja → Dostawcy**.
+2. Znajdź kartę dostawcy z odznaką **url** — np. **MO2**. Zobaczysz na niej adres cennika,
+   odznakę *co 1 godz.*, status i napis *ostatnia próba: …*.
+3. Kliknij **Synchronizuj teraz**.
+
+**Oczekiwane:** przycisk zmienia się na *Synchronizuję…*, a po chwili pod kartą pojawia się
+zielony napis **„Pobrano N produktów"**. Wejdź w **Staging** — pozycje tam są, dokładnie tak
+samo jak po ręcznym wgraniu pliku. Na karcie odświeża się *ostatnia próba* i status
+**aktywny**.
+
+> **Przycisk „Synchronizuj teraz" jest TYLKO przy dostawcach `url`.** Przy MO1, MO7, MO8
+> i MO10 (`mail`) go nie ma i tak ma być — ich cenniki wgrywasz z dysku (sekcja 2).
+
+### 3.11 ⭐ Awaria dostawcy przestaje być cicha
+
+To jest sedno tego bloku: **do tej pory nieudane pobranie nie zostawiało po sobie NICZEGO.**
+
+1. Wejdź w **Konfiguracja → Dostawcy** i kliknij **Zmień** przy dowolnym dostawcy `url`.
+2. Wpisz w pole **Adres cennika (URL)** adres, którego nie ma — np.
+   `https://test.agritires.eu/nie-ma-takiego-pliku.csv`. Kliknij **Zapisz**.
+3. Kliknij **Synchronizuj teraz**.
+
+**Oczekiwane:** czerwony komunikat **„Błąd synchronizacji: HTTP 404"** (albo inny kod),
+a odznaka statusu na karcie zmienia się na **błąd**. *Ostatnia próba* aktualizuje się mimo
+niepowodzenia — to jest znacznik próby, nie sukcesu.
+
+**Co jeszcze się stało, choć tego nie widzisz:** Bridge zapisał **alert**. Widok alertów
+dowozi Iteracja 6; do tego czasu Paweł odczyta je z bazy. Jeśli serwer dostawcy w ogóle nie
+odpowie (zamiast zwrócić błąd), komunikat będzie inny — np. *„fetch failed"* albo *„This
+operation was aborted"* — i to też jest poprawne: to dosłowna treść błędu sieci.
+
+> **Nie zapomnij przywrócić prawidłowego adresu** po tym teście — kliknij **Zmień** i wpisz
+> z powrotem oryginalny URL.
+
+### 3.12 Zmiana częstotliwości i pozostałych pól dostawcy
+
+Dotąd zmiana „co ile sprawdzać cennik" była doklejonym skryptem obok właściwej aplikacji.
+Teraz jest jej normalną częścią.
+
+1. **Konfiguracja → Dostawcy** → **Zmień** przy dostawcy `url`.
+2. Wybierz wartość z listy **Co ile sprawdzać cennik** (5 min … 7 dni) albo wpisz własną
+   liczbę minut w polu poniżej. Puste pole = **bez harmonogramu**.
+3. Możesz tu też zmienić adres cennika, **sposób dostarczania** i **status**
+   (np. *wstrzymany*, żeby wyłączyć dostawcę z automatu).
+4. **Zapisz**.
+
+**Oczekiwane:** napis *Zapisano*, a odznaka na karcie pokazuje nową wartość — np. *co 4 godz.*
+
+**Sprawdź też blokadę:** ustaw dostawcy status **wstrzymany**, zapisz i kliknij
+**Synchronizuj teraz**. **Ręczna synchronizacja MA PRZEJŚĆ** mimo wstrzymania — wstrzymanie
+wyłącza tylko automat (blok 3f-3), nie Twoją decyzję.
+
 ---
 
 ## 4. ⚠ Rzeczy, które WYGLĄDAJĄ na błąd, a są poprawne
@@ -217,15 +274,29 @@ import jej nie produkuje.
 Statystyka liczy pozycje przetworzone, a staging skleja powtórzenia tej samej pozycji w jeden
 wiersz. Różnica jest poprawna.
 
+**8. Licznik „N produktów w katalogu" na karcie dostawcy zostaje ZEROWY po imporcie.**
+Ta liczba to realna zawartość katalogu, a świeżo zaimportowane pozycje siedzą w **stagingu** —
+do katalogu wchodzą dopiero po Twojej akceptacji. Czy import się udał, poznasz po polu
+*ostatnia próba* i po zawartości stagingu, nie po tym liczniku.
+
+**9. „Ostatnia próba" aktualizuje się także wtedy, gdy pobranie PADŁO.**
+Tak ma być — to znacznik ostatniej PRÓBY, nie ostatniego sukcesu. Gdyby aktualizował się tylko
+przy powodzeniu, nie dałoby się odróżnić dostawcy, który milczy od tygodnia, od takiego,
+którego Bridge próbuje bezskutecznie odpytywać co godzinę.
+
+**10. Ten sam dostawca produkuje wiele identycznych alertów o awarii.**
+Bridge zapisuje alert przy KAŻDEJ nieudanej próbie, bez sklejania powtórek — dokładnie jak
+stary Bridge. Liczba powtórzeń to informacja („pada od trzech dni, 23 razy na dobę"), a nie
+usterka. Zwijaniem powtórek w czytelną listę zajmie się widok alertów w **Iteracji 6**.
+
 ---
 
 ## 5. Czego jeszcze NIE MA — świadomie
 
 | Czego brakuje | Kiedy |
 |---|---|
-| Zakładka *Dostawcy* (edycja URL, częstotliwości, „Synchronizuj teraz") | **blok 3f-2** |
-| Alert, gdy pobranie cennika z URL padnie | **blok 3f-2** |
 | Automatyczne pobieranie cenników co N minut | **blok 3f-3** |
+| **Widok** alertów (same alerty już się zapisują) | Iteracja 6 |
 | Zakładki *Spedycja*, *Shoper*, *Katalog*, *AI Fallback* | Iteracja 11 |
 | Narzuty i promocje przeliczające cenę sprzedaży | Iteracja 4 |
 | Widok Historia (zmiany cen z importów) | Iteracja 5 |
@@ -255,6 +326,11 @@ Historia cen **jest zapisywana** przy każdym auto-zatwierdzeniu — brakuje tyl
 - [ ] Odrzucenie nie rusza katalogu
 - [ ] Akcje masowe (zaznaczone / widoczne / wszystkie)
 - [ ] Wycofanie po trzecim imporcie, produkt wstrzymany a nie skasowany
+- [ ] **„Synchronizuj teraz" pobiera cennik z URL i daje pozycje w stagingu** ⭐
+- [ ] **Zły adres → czerwony komunikat i status „błąd" na karcie — a nie cisza** ⭐
+- [ ] Przycisk synchronizacji jest tylko przy dostawcach `url`
+- [ ] Zmiana częstotliwości zapisuje się i widać ją na odznace
+- [ ] Dostawca „wstrzymany" DAJE się zsynchronizować ręcznie
 
 ---
 

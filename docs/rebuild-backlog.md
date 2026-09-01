@@ -835,3 +835,161 @@ trafień, a nie ich udział w sygnaturze. To osobna cecha oryginału i osobna de
 
 **Do rozważenia dla produkcji.** Ta sama jedna linia naprawia to w starym Bridge. Poza
 zakresem odbudowy — decyzja użytkownika, czy i kiedy.
+
+---
+
+### #14 · 2026-09-01 · [BACKEND][BEZPIECZEŃSTWO] · mutacje zapisują CAŁE ciało żądania — wzorzec systemowy, nie jednostkowy
+
+> **Znalezione przy bloku I3/3f-2 (2026-09-01).** Dla dostawców NAPRAWIONE decyzją
+> użytkownika; dla narzutów, promocji i produktów **czeka na iteracje 4 i 12**.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (warstwa danych + trasy mutacji) |
+| **Pliki** | `deminified/backend-index.cjs:45043` (`updateSupplier`), `:44975` (`updateMarkup`), `:44998` (`updatePromotion`), `:44824` (`updateStaging`), `:44728` (`updateProduct`); trasy `:48230`, `:48699`, `:48722`, `:48415` |
+| **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** (decyzja 2026-09-01, dotyczy dostawców; dla I4/I12 patrz „Co z tego wynika") |
+| **Status** | ✔ dostawcy naprawieni w rebuild (3f-2) · ⬜ narzuty/promocje (I4) · ⬜ produkty (I12) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** Metody warstwy danych przyjmują obiekt i wrzucają go do `SET` bez
+żadnego filtra:
+
+```js
+updateSupplier(t, e)  { X.update(Ot).set(e).where(se(Ot.id, t)).run(), … }   // :45043
+updateMarkup(t, e)    { X.update(Bt).set(e).where(se(Bt.id, t)).run(); … }   // :44975
+updatePromotion(t, e) { X.update(hn).set(e).where(se(hn.id, t)).run(); … }   // :44998
+```
+
+Trzy trasy podają im ciało żądania **wprost od użytkownika**:
+
+| Trasa | Co przekazuje | Iteracja odbudowy |
+|---|---|---|
+| `PATCH /api/dostawcy/:id` (`:48230`) | `c.body` — bez zmian | **3f-2 ✔** |
+| `PATCH /api/markups/:id` (`:48701`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4** |
+| `PATCH /api/promotions/:id` (`:48724`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4** |
+| `PUT`+`PATCH /api/products/:id` (`:48415-48424`, rejestracja `:48452`) | `c.body` bez klucza `_reason` | **Iteracja 12** |
+
+**⭐ Kluczowa obserwacja: produkcja NIE jest w tym konsekwentna.** `PUT /api/staging/:id`
+(`:48598`) ma jawną listę ośmiu pól i pętlę `if (!r.includes(v)) continue;` —
+`["nazwa","marka","model","kategoria","rozmiar","ean","cenaZakupuNowa","magazyn"]`. Czyli
+mechanizm istnieje w tym samym pliku, kilkadziesiąt linii dalej, i **został tam użyty
+świadomie**. Nasza lista dla dostawców nie jest więc wymysłem odbudowy — doprowadza resztę
+tras do wzorca, który produkcja już stosuje. Port stagingu z 3d-2 tę listę odtworzył 1:1
+(`rebuild/backend/src/routes/staging-mutacje.ts:34`, `POLA_EDYTOWALNE`).
+
+**Skutek dla dostawców (dlaczego naprawiliśmy TERAZ).** Każdy zalogowany użytkownik mógł
+jednym PATCH-em ustawić dowolną kolumnę: `liczbaProduktow`, `ostatniPlik`, `ostatniaSync`,
+`parser`, `kodowanie`. Dwa z nich są groźne poza samą nieporządnością:
+
+- `ostatniPlik` steruje `przeliczStatus()` (`:45028`) — dało się nim **podrobić status
+  „aktywny"** dostawcy, który od miesięcy nic nie zaimportował;
+- u nas doszłaby kolumna `importWylaczony` (migracja 002), czyli **bramka wyłączająca MO6
+  z importu (backlog #7) dałaby się zdjąć jednym żądaniem**. Bramka z furtką nie jest bramką
+  — i to przesądziło.
+
+**Naprawa w rebuild (3f-2).** `POLA_EDYTOWALNE_DOSTAWCY` w `rebuild/backend/src/repos/suppliers.ts`
+— dziesięć pól konfiguracyjnych; odcięte `importWylaczony`, `liczbaProduktow`, `ostatniPlik`,
+`ostatniaSync`, `id`, `kod`. Odpowiedź idzie w projekcji kontraktowej, bo oryginał odsyła
+CAŁY wiersz i `importWylaczony` wyciekłby do API. Testy:
+`rebuild/backend/test/dostawcy.patch.test.ts`.
+
+**Czego NIE ruszamy** (port 1:1, decyzja zaklepana w roadmapie): **niespójność audytu**.
+Zapis obejmuje dziesięć pól, a do `audit_log` wchodzą wyłącznie cztery — `status`, `url`,
+`czestotliwoscMinuty`, `sposobDostarczania` (`:48234`). Zmiana `uwagi` czy `parser` przechodzi
+bez śladu. Dlatego lista pól edytowalnych jest ŚWIADOMIE szersza niż czwórka audytowana:
+zawężenie jej do czwórki skasowałoby tę niespójność po cichu.
+
+**⚠ Przy okazji: komentarz w `mirror/frontend/assets/freq-injection.js:9-12` jest BŁĘDNY.**
+Mówi „whitelist pól: status, url, czestotliwoscMinuty, sposobDostarczania" — to jest lista
+AUDYTU, nie zapisu. Autor skryptu wziął jedną za drugą. Do 3f-2 żadnej listy zapisu nie było.
+Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archiwalne.
+
+**Co z tego wynika dla kolejnych iteracji:**
+
+- **Iteracja 4 (narzuty i promocje)** — `PATCH /api/markups/:id` i `/api/promotions/:id`
+  mają ten sam brak, a stawka jest wyższa niż przy dostawcach: `updateMarkup`
+  i `updatePromotion` wołają po zapisie `recalcPricesFromRules()`, czyli **przeliczają ceny
+  całego katalogu**. Zanim się je odtworzy, trzeba świadomie zdecydować listę pól — decyzja
+  jest tego samego rodzaju co tutaj i ma ten sam precedens (staging). Dwa pola,
+  `zmienilUzytkownikId` i `zmienionoData`, ustawia SERWER i one na listę wejść nie mogą.
+- **Iteracja 12 (produkty + hardening)** — `PATCH /api/products/:id` odsiewa wyłącznie klucz
+  `_reason`; cała reszta 72 kolumn jest zapisywalna. Ta trasa dodatkowo zapisuje
+  `manual_overrides` dla KAŻDEGO zmienionego pola, więc lista pól decyduje też o tym,
+  co import przestanie nadpisywać.
+- **Reguła, którą warto przyjąć na stałe:** trasa mutacji dostaje jawną listę pól, a kolumny
+  wyliczane i kolumny własne odbudowy (`importWylaczony`, `uwagaCena`) na tę listę **nigdy**
+  nie wchodzą.
+
+**Do rozważenia dla produkcji.** W starym Bridge to nadal działa. Poza zakresem odbudowy —
+decyzja użytkownika, czy i kiedy.
+
+---
+
+### #15 · 2026-09-01 · [BACKEND] · `L4()` nie czyści timera po odrzuconym `fetch`
+
+> **Znalezione i NAPRAWIONE przy bloku I3/3f-2 (2026-09-01).** Odstępstwo bez wpływu
+> na obserwowalne zachowanie.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (import z URL, scheduler) |
+| **Pliki** | `deminified/backend-index.cjs:48053-48057`; port: `rebuild/backend/src/import/synchronizuj.ts` |
+| **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** |
+| **Status** | ✔ naprawione w rebuild (3f-2), w produkcji **nadal obecne** |
+
+**Co robi produkcja.** `L4()` uzbraja 30-sekundowy timer przerywający pobranie i rozbraja go
+DOPIERO po powrocie z `await fetch`:
+
+```js
+let i = new AbortController,
+    r = setTimeout(() => i.abort(), 3e4),
+    a = await fetch(n.url, { signal: i.signal });
+if (clearTimeout(r), !a.ok) …          // :48057 — tylko na ścieżce udanej
+```
+
+Gdy `fetch` **odrzuci** (a to jest częsty przypadek — 339 alertów „Błąd pobierania"
+w `db/snapshot.db`), sterowanie skacze do `catch` i `clearTimeout` nie wykonuje się nigdy.
+Zostaje wiszący timer, który po 30 s woła `abort()` na zakończonym już kontrolerze.
+
+**Skutek.** Sam `abort()` jest bezczynny, ale **timer trzyma pętlę zdarzeń** przez pełne
+30 s po każdej nieudanej próbie. W produkcji nie widać tego, bo proces i tak żyje ciągle.
+Zaboli dwa razy: w testach (wiszący uchwyt wywraca sprzątanie) i przy schedulerze z **3f-3**,
+który powtarza to cyklicznie dla pięciu dostawców.
+
+**Naprawa w rebuild.** `clearTimeout` w bloku `finally` wokół samego `fetch`. Zachowanie
+obserwowalne — timeout, komunikat, alert, status — **bez żadnej zmiany**.
+
+**Powiązane:** 3f-3 ma dodatkowo dać `unref()` na interwałach schedulera; obie rzeczy dotyczą
+tego samego: żeby import nie zostawiał po sobie uchwytów.
+
+---
+
+### #16 · 2026-09-01 · [BACKEND] · alert „Błąd pobierania" obejmuje TAKŻE błędy parsera
+
+> **Znalezione przy bloku I3/3f-2 (2026-09-01). ODTWORZONE 1:1** — świadomie, bo widok
+> alertów z Iteracji 6 musi widzieć te same wartości co produkcja.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (alerty pisane przez import) |
+| **Pliki** | `deminified/backend-index.cjs:48100-48115`; port: `rebuild/backend/src/import/synchronizuj.ts` |
+| **Do nowej wersji?** | ✅ **TAK — port 1:1** (nazwa typu zostaje myląca) |
+| **Status** | ✔ odtworzone w rebuild (3f-2) |
+
+**Co robi produkcja.** `L4()` ma JEDEN blok `catch` wokół całości: pobrania, zapisu do
+archiwum, parsowania i wpisu do stagingu. Każdy wyjątek z tego zakresu daje alert
+`typ: "Błąd pobierania"` — także taki, w którym pobranie się powiodło, a wywrócił się parser.
+W oryginale było to częściowo maskowane fallbackiem `Wc()` (druga próba starym parserem);
+po decyzji o **braku fallbacku** (roadmapa §5, blok 3f — zaklepane) błąd parsera trafia
+do tego `catch` bezpośrednio.
+
+**Skutek.** Typ alertu myli przyczynę: „Błąd pobierania" przy cenniku, który pobrał się
+poprawnie. Powód jest w treści (`opis`), nie w typie.
+
+**Dlaczego mimo to odtwarzamy.** Zmiana typu przy zapisie rozjechałaby grupowanie w widoku
+alertów z **Iteracji 6** względem 339 wierszy historycznych, które są w bazie i mają stary
+typ. Zgodność z danymi produkcji jest tu więcej warta niż trafniejsza etykieta.
+
+**Co z tego wynika dla Iteracji 6.** Widok grupujący po `typ` zmiesza dwie przyczyny.
+Rozróżnia je treść: błąd sieci to dosłowny komunikat undici („fetch failed",
+„This operation was aborted", „terminated"), błąd parsera to komunikat z portu parserów.
+Wymóg zapisany w roadmapie, w bloku Iteracji 6.

@@ -151,7 +151,8 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 > świadomie niewiernym placeholderem do 3c. Po drodze wyjaśniły się trzy osobne mechanizmy,
 > które łatwo pomylić: `/api/import/*` (bez fallbacku, `mirror/backend/extensions.cjs`),
 > `POST /api/dostawcy/:kod/upload` (rdzeń, fallback do starych parserów `Wc()`, nie AI —
-> Iteracja 11) i `POST /api/ai-fallback/parse` (stub, nigdy nie łączy się z OpenAI). Szczegóły:
+> ⚠ **przypisanie „Iteracja 11" jest NIEAKTUALNE: trasa weszła w bloku 3f-1, 2026-09-01**)
+> i `POST /api/ai-fallback/parse` (stub, nigdy nie łączy się z OpenAI). Szczegóły:
 > `docs/tickets/5-FEATURE-staging-endpointy-importu/`.
 >
 > **Odbudowa (3c, `6-FEATURE-silnik-tk-dopasowanie-klasyfikator`):** ciało silnika wymienione —
@@ -165,6 +166,45 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 > Do 3d zostają: efekty auto-zatwierdzania (decyzja i licznik liczone, zapis nie), pętla
 > wycofań, realne `Gq()`. Szczegóły: `docs/tickets/6-FEATURE-silnik-tk-dopasowanie-klasyfikator/`.
 
+> **Odbudowa (3f-1 i 3f-2, 2026-09-01) — BRZEG OPERACYJNY IMPORTU.** Dowiezione:
+> `POST /api/dostawcy/:kod/upload` (rdzeń, multer 50 MB, pole `plik`),
+> `POST /api/dostawcy/:kod/synchronizuj-teraz`, `PATCH /api/dostawcy/:id` oraz alerty pisane
+> przez import. **Fallback `Wc()` NIE wchodzi** (decyzja zaklepana): gdy parser rzuci, leci
+> czytelny błąd i alert zamiast cichej drugiej próby innym kodem — luka otwarta, opisana
+> w roadmapie. Po drodze wyjaśniły się cztery rzeczy, których ta specyfikacja nie miała:
+>
+> 1. **⭐ PRODUKCJA MA DWA RÓŻNE POBIERACZE URL, nie jeden.** `downloadUrl`
+>    (`mirror/backend/extensions.cjs:26-45`) chodzi na `node:http`/`node:https`, ma timeout
+>    **60 s** i sam śledzi przekierowania rekurencją po `location`; obsługuje
+>    `POST /api/import/from-url`. `L4()` (rdzeń, `:48038-48116`) chodzi na `fetch`
+>    + `AbortController`, ma timeout **30 s** i przekierowania zostawia `fetch`; obsługuje
+>    `synchronizuj-teraz` oraz scheduler. Różnica jest obserwowalna: komunikaty undici
+>    („fetch failed", „This operation was aborted", „terminated") trafiają dosłownie
+>    do treści alertu — tak wygląda 339 alertów „Błąd pobierania" w `db/snapshot.db`.
+>    W odbudowie są to DWA osobne moduły (`src/import/pobierz.ts` i `src/import/synchronizuj.ts`)
+>    i mają takie zostać — decyzja użytkownika 2026-09-01.
+> 2. **⭐ SCHEDULER `D4()` (`:48118-48131`) — mechanizm, którego nie miała ani ta
+>    specyfikacja, ani roadmapa.** `setInterval` per dostawca, dobór:
+>    `sposobDostarczania === "url" && url && czestotliwoscMinuty && status !== "wstrzymany"`,
+>    ponowne wywołanie czyści poprzednie interwały. Uruchamiany bezwarunkowo przy starcie
+>    (`M4()`, `:48166`). W odbudowie wchodzi w bloku **3f-3**, za przełącznikiem
+>    `IMPORT_SCHEDULER` domyślnie WYŁĄCZONYM (świadome odstępstwo — produkcja przełącznika
+>    nie ma). Wyszukanie „scheduler / polling / setInterval" w tym pliku dawało wcześniej
+>    zero trafień, bo mechanizm nie był nigdzie przypisany.
+> 3. **Alerty PISZE import, nie widok.** `U.addAlert` (`:44954`) woła `L4()` przy błędzie HTTP
+>    (`typ: "Błąd HTTP"`) i przy każdym innym wyjątku (`typ: "Błąd pobierania"` + ustawienie
+>    `suppliers.status = "blad"`), oraz upload przy każdym wgraniu (`typ: "Ręczny upload"`).
+>    Iteracja 6 obejmuje wyłącznie ODCZYT. **Bez dławika** — każda nieudana próba to osobny
+>    wiersz; skala w produkcji: 339 „Błąd pobierania" wobec 4 „Błąd HTTP" i 2127
+>    „Synchronizacja", rekord 23/dobę dla jednego dostawcy. Konsekwencje dla widoku z I6
+>    zapisane w roadmapie i w backlogu #16.
+> 4. **`ostatniaSync` znaczy „kiedy PRÓBOWALIŚMY", nie „kiedy się udało".** `L4()` ustawia ją
+>    w OBU gałęziach błędu (`:48067`, `:48110`); nietknięty zostaje wtedy `ostatniPlik`.
+>
+> Do tego dwa defekty warstwy danych, oba w backlogu: **#14** (mutacje zapisują całe ciało
+> żądania — wzorzec systemowy, dotyka też I4 i I12) i **#15** (`L4()` nie czyści timera
+> po odrzuconym `fetch`). Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
+
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,
@@ -177,6 +217,14 @@ Do naniesienia w pozostałych dokumentach przy okazji:
   (nie „naprawione") — dopisać listę ~13 publicznych GET-ów.
 - Nowa pozycja bezpieczeństwa priorytet 1: **domknąć auth na wszystkich trasach
   danych**, zwłaszcza `/api/export/shoper`, `/api/audit-log`, `/api/history`, `/api/config`.
+- **Nowa pozycja bezpieczeństwa priorytet 2 (dopisane 2026-09-01, blok 3f-2): mutacje
+  zapisują CAŁE ciało żądania.** `updateSupplier`/`updateMarkup`/`updatePromotion` robią
+  `.set(e)` bez listy pól, a trasy podają im `req.body` wprost (`:48230`, `:48701`, `:48724`;
+  `PATCH /api/products/:id` odsiewa tylko `_reason`). Produkcja NIE jest w tym konsekwentna —
+  `PUT /api/staging/:id` (`:48598`) ma jawną listę ośmiu pól. Dostawcy naprawieni w 3f-2;
+  **narzuty i promocje czekają na Iterację 4** (tam stawka jest wyższa: `updateMarkup`
+  i `updatePromotion` wołają `recalcPricesFromRules()`, czyli przeliczają cały katalog),
+  **produkty na Iterację 12**. Pełny rozbiór: `rebuild-backlog.md` #14.
 
 ---
 

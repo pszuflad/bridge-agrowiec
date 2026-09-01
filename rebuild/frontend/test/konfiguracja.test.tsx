@@ -1,5 +1,7 @@
 /**
- * Widok `/konfiguracja` — szkielet sześciu zakładek i wypełniona zakładka „Wgrywanie ręczne".
+ * Widok `/konfiguracja` — szkielet sześciu zakładek i zakładka „Wgrywanie ręczne".
+ *
+ * Zakładka „Dostawcy" (3f-2) ma własny plik: `test/konfiguracja.dostawcy.test.tsx`.
  *
  * Mocki MSW karmione fixture'em `contract/fixtures/GET_suppliers.json`, tak jak w I2 i 3e:
  * lista dostawcy w selekcie ma mieć kształt, który realnie oddaje produkcja.
@@ -75,9 +77,17 @@ function zasiejSesje() {
   _zresetujStanSesji();
 }
 
+/**
+ * Otwiera `/konfiguracja` i PRZECHODZI na zakładkę „wgrywanie".
+ *
+ * Ekran otwiera się na „dostawcy" — tak jak oryginał (`:26298`). Do 3f-2 domyślną była
+ * „wgrywanie", bo była jedyną wypełnioną; teraz trzeba na nią kliknąć.
+ */
 async function otworzKonfiguracje() {
   window.history.pushState({}, "", "/konfiguracja");
   render(<App />);
+  await screen.findByTestId("tab-wgrywanie");
+  await userEvent.click(screen.getByTestId("tab-wgrywanie"));
   await screen.findByTestId("zakladka-wgrywanie");
 }
 
@@ -108,13 +118,16 @@ describe("Widok /konfiguracja", () => {
       }
     });
 
-    it("otwiera się na „wgrywanie” — jedynej wypełnionej w tym bloku", async () => {
-      await otworzKonfiguracje();
-      expect(screen.getByTestId("zakladka-wgrywanie")).toBeInTheDocument();
+    it("otwiera się na „dostawcy” — jak oryginał (`:26298`)", async () => {
+      window.history.pushState({}, "", "/konfiguracja");
+      render(<App />);
+
+      // Karta pierwszego dostawcy z fixtura jest widoczna BEZ klikania w zakładkę.
+      await screen.findByTestId(`supplier-config-${DOSTAWCY[0]!.kod}`);
+      expect(screen.queryByTestId("zakladka-wgrywanie")).not.toBeInTheDocument();
     });
 
     it.each([
-      ["dostawcy", "bloku 3f-2"],
       ["spedycja", "Iteracji 11"],
       ["shoper", "Iteracji 11"],
       ["katalog", "Iteracji 11"],

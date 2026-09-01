@@ -158,3 +158,108 @@ export function zapiszWynikImportu(
     .where(eq(suppliers.id, id))
     .run();
 }
+
+/**
+ * Pola dostawcy, które `PATCH /api/dostawcy/{id}` wolno zapisać.
+ *
+ * ⚠ ODSTĘPSTWO ŚWIADOME (decyzja użytkownika 2026-09-01, blok 3f-2). Oryginał listy NIE MA:
+ * `updateSupplier(t, e) { X.update(Ot).set(e) … }` (backend-index.cjs:45043) wrzuca do
+ * `SET` całe ciało żądania, więc każdy zalogowany użytkownik ustawia dowolną kolumnę.
+ * U nas to znaczy więcej niż w produkcji, bo mamy kolumnę, której produkcja nie ma:
+ * `importWylaczony` (migracja 002) wyłącza MO6 z importu i jest BRAMKĄ — a bramka,
+ * którą zdejmuje się jednym PATCH-em, nie jest bramką.
+ *
+ * Odcięte świadomie:
+ *  - `importWylaczony` — powód wyżej,
+ *  - `liczbaProduktow`, `ostatniPlik`, `ostatniaSync` — własność importu; `ostatniPlik`
+ *    steruje `przeliczStatus`, więc dało się nim podrobić „aktywny" bez jednego importu,
+ *  - `id`, `kod` — tożsamość wiersza.
+ *
+ * ⚠ Lista jest ŚWIADOMIE SZERSZA niż czwórka audytowana. Niespójność oryginału — zapis
+ * całym ciałem, audyt tylko z czterech pól — zostaje odtworzona 1:1 (roadmapa: decyzja
+ * zaklepana): `uwagi`, `parser`, `kodowanie`, `nazwa`, `email`, `formatPliku` dalej
+ * zmieniają się bez śladu w audycie. Zawężenie listy DO czwórki skasowałoby tę
+ * niespójność po cichu, a przy okazji uczyniłoby gate 3f-2 („pole spoza czwórki NIE
+ * trafia do audytu") niemożliwym do napisania.
+ */
+export const POLA_EDYTOWALNE_DOSTAWCY = [
+  "status",
+  "url",
+  "czestotliwoscMinuty",
+  "sposobDostarczania",
+  "nazwa",
+  "email",
+  "formatPliku",
+  "parser",
+  "kodowanie",
+  "uwagi",
+] as const satisfies readonly (keyof Dostawca)[];
+
+export type PoleEdytowalne = (typeof POLA_EDYTOWALNE_DOSTAWCY)[number];
+
+/**
+ * Cztery pola trafiające do audytu — 1:1 z oryginałem (backend-index.cjs:48234).
+ * Kolejność ma znaczenie: oryginał iteruje właśnie tak i tak układa klucze `szczegoly`.
+ */
+export const POLA_AUDYTOWANE_DOSTAWCY = [
+  "status",
+  "url",
+  "czestotliwoscMinuty",
+  "sposobDostarczania",
+] as const satisfies readonly PoleEdytowalne[];
+
+/** Pełny wiersz po `id` — odpowiednik `U.getSupplier` (backend-index.cjs:45037). */
+export function dostawcaPoId(db: Baza, id: number) {
+  return db.select().from(suppliers).where(eq(suppliers.id, id)).get();
+}
+
+/** Wiersz po `id` w projekcji kontraktowej — bez kolumn wewnętrznych. Do odpowiedzi HTTP. */
+export function dostawcaPoIdDoApi(db: Baza, id: number): Dostawca | undefined {
+  return db.select(KOLUMNY_API).from(suppliers).where(eq(suppliers.id, id)).get();
+}
+
+/**
+ * Przepuszcza ciało żądania przez listę pól edytowalnych. Zwraca WYŁĄCZNIE klucze, które
+ * w ciele faktycznie były — brak klucza to „nie ruszaj", a nie „ustaw na null".
+ */
+export function odsiejPolaEdytowalne(cialo: unknown): Partial<Pick<Dostawca, PoleEdytowalne>> {
+  if (typeof cialo !== "object" || cialo === null) return {};
+  const zrodlo = cialo as Record<string, unknown>;
+  const wynik: Record<string, unknown> = {};
+  for (const pole of POLA_EDYTOWALNE_DOSTAWCY) {
+    if (Object.hasOwn(zrodlo, pole)) wynik[pole] = zrodlo[pole];
+  }
+  return wynik as Partial<Pick<Dostawca, PoleEdytowalne>>;
+}
+
+/**
+ * Zapis odsianych pól — odpowiednik `U.updateSupplier` po nałożeniu listy z góry.
+ *
+ * Pusty patch NIE wywołuje `UPDATE` (drizzle rzuca na `set({})`), ale dalej zwraca wiersz:
+ * oryginał przy pustym ciele też odpowiada 200 z aktualnym dostawcą.
+ */
+export function aktualizujDostawce(
+  db: Baza,
+  id: number,
+  patch: Partial<Pick<Dostawca, PoleEdytowalne>>,
+): Dostawca | undefined {
+  if (Object.keys(patch).length > 0) {
+    db.update(suppliers).set(patch).where(eq(suppliers.id, id)).run();
+  }
+  return dostawcaPoIdDoApi(db, id);
+}
+
+/**
+ * Oznaczenie nieudanego pobrania — `U.updateSupplier(n.id, {status:"blad", ostatniaSync})`
+ * z obu gałęzi błędu `L4()` (backend-index.cjs:48065-48068, :48108-48111).
+ *
+ * ⚠ `ostatniaSync` jest ustawiana TAKŻE przy porażce. To nie pomyłka oryginału, tylko
+ * znaczenie tego pola: „kiedy ostatnio PRÓBOWALIŚMY", nie „kiedy ostatnio się udało".
+ * Ta druga informacja siedzi w `ostatniPlik`, którego gałąź błędu nie rusza.
+ */
+export function oznaczBladDostawcy(db: Baza, id: number, kiedy: string): void {
+  db.update(suppliers)
+    .set({ status: "blad", ostatniaSync: kiedy })
+    .where(eq(suppliers.id, id))
+    .run();
+}
