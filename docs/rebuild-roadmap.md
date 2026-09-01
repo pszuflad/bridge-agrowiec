@@ -150,7 +150,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a·3b·3c·**3d-1·3d-2** BE · 3e FE | 2 | 🔨 | 3a: PR #6 · 3b: PR #7 · 3c: PR #11 (2026-08-26) · 3d-1: PR #12 · 2026-08-27 |
+| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · **3d-2: 2026-09-01** — BE kompletny, zostaje 3e |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
@@ -308,7 +308,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
-- **Status:** 🔨 (3a ✅ 2026-08-26 · 3b ✅ 2026-08-26 · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27)  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
+- **Status:** 🔨 (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · **3d-2 ✅ 2026-09-01 — BACKEND ITERACJI 3 KOMPLETNY**; zostaje 3e FE)  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
   - **⚠ Blok 3d ZOSTAŁ PODZIELONY** (decyzja użytkownika, 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`). Powód: blok zbierał 8 punktów, a lektura źródeł dołożyła kolejne 4 endpointy, których roadmapa nie wymieniała (patrz blok 3d-2) — wychodził największy blok całej iteracji. Szew: **3d-1 kończy się na `tk()`, 3d-2 zaczyna na brzegu HTTP.**
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
 - **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~5000 linii: `common.cjs`, `tyre_params.cjs`, `adapter.cjs`, `dispatcher.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dictionaries/` — porcja 3a; `bridge_ext.cjs`/`tire_dims.js` nie są wołane przez żaden plik z `parsers/`, więc wypadły z portu 3a — a doprecyzowanie z 2026-08-26 przesunęło je do 3d — **ostatecznie przeportowane bajt-w-bajt w 3d-1, 2026-08-27**, razem z markerem `legacy/package.json`, bez którego `tire_dims.js` po cichu się nie ładował), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
@@ -370,9 +370,34 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     „710.0", czego parser nigdy nie zapisze, i wzorzec dostawał sztuczne różnice. Kto podmieni
     zrzut na nowszy, może tę konwersję usunąć.
 
-- **3d-2 · API: `acceptStaging` + endpointy mutacji stagingu i overrides** (BE) — ⬜.
+- **3d-2 · API: `acceptStaging` + endpointy mutacji stagingu i overrides** (BE) — ✅ **zrobione** (ticket `9-FEATURE-acceptstaging-endpointy-mutacji`, 2026-09-01).
   Brzeg HTTP silnika: `acceptStaging` (`:44827-44910`) + `assignKodImportu` w `addProductsBulk`
   (`:44746`, wywołanie `:44791`), propagacja `uwagaCena`, endpointy, fixture `GET_overrides.json`.
+  - **Rozliczenie gate'u:** 387 testów zielonych (było 354). **`GET_overrides.json` zielony —
+    ostatni nieodhaczony fixture Iteracji 3.** Charakteryzacja `acceptStaging` przeciw
+    URUCHOMIONEMU oryginałowi (19 testów, 16 scenariuszy, porównanie stanu siedmiu tabel),
+    28 testów endpointów przez HTTP, **16 mutacji — wszystkie złapane**.
+  - **⭐ `acceptStaging` DAŁO SIĘ wyciąć z bundla — plan B nie był potrzebny.** `tk()` było
+    samodzielną funkcją i szło nakarmić atrapami; `acceptStaging` jest metodą obiektu `U`
+    i rozmawia wprost z Drizzle, więc harness (`test/charakteryzacja/akceptacja/oryginal.mjs`)
+    wstrzykuje mu PRAWDZIWEGO Drizzle na bazie z naszego kanonu i porównuje KOŃCOWY STAN
+    dwóch identycznie zasianych baz. Kotwice: `function __bridgeCondMatch` →
+    `function recalcPricesFromRules` (pomocnicy narzutów) i `listStaging(){` → `listAlerts(){`
+    (metody warstwy danych). **Wzorzec do naśladowania przy każdej kolejnej metodzie `U`** —
+    m.in. `addProductsBulk` w I12.
+  - **⭐ Charakteryzacja DOWODZI, że pominięcie narzutów/promocji jest bezpieczne w I3.**
+    Pomocnicy `__bridgePickMarkup`/`__bridgePickPromo` są wycięci NAPRAWDĘ, nie jako zaślepki,
+    więc oryginał wykonuje pełną gałąź cenową na pustych tabelach i wychodzi z tym samym
+    wynikiem co nasz port. To zmierzone, nie wywnioskowane z lektury.
+  - **⚠ Dwie pułapki odtworzone 1:1:** (a) `assignKodImportu` czyta `existing.kod_importu`
+    w snake_case, a dostaje wiersz z Drizzle (`kodImportu`) — reguła „zachowaj istniejący
+    numer" NIGDY nie wypala, numer ratuje dopiero wyszukanie po grupie surowym SQL-em;
+    (b) `kod_importu` dla produktu bez grupy jest LOSOWY (`Math.random()`), więc
+    charakteryzacja porównuje go po kształcie, a odziedziczony po grupie — dosłownie.
+  - **⚠ Jedno odstępstwo techniczne od oryginału, bez zmiany zachowania:** rekord produktu
+    przechodzi przez `tylkoKolumnyProduktu()`, bo snapshot z parsera niesie pola pomocnicze
+    (`_srcConflict`), które produkcyjne Drizzle ignorowało, a nasze rzuca. Zapisujemy dokładnie
+    te kolumny, które zapisałaby produkcja — potwierdza to charakteryzacja.
   - **⚠ Wejście z 3d-1 — CZYTAJ PRZED STARTEM.**
     - **⭐ ENDPOINTÓW JEST DZIEWIĘĆ, NIE CZTERY. Poprzedni opis bloku 3d był tu BŁĘDNY** —
       sprostowane 2026-08-27 przez porównanie żywego kodu z zamrożonym kontraktem:
@@ -445,7 +470,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **#6** bieżące poprawki parserów (flagsfix, mo8…) → objęte **portem**, zero osobnej pracy.
   - **#4 `uwaga_cena`** (cena „na zapytanie") → kolumna `products.uwaga_cena` **dodana w 3b** (osobna migracja, bez #3); propagacja w imporcie (`acceptStaging`) → **3d-2**; endpointy → **I12**. **Sprostowanie 2026-08-27 (3d-1): endpointy są DWA, nie jeden** — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony w locie, 5 przypadków). Obu brak w zamrożonym kontrakcie — dopisać do openapi razem, w I12. Frontend tooltip = injection → późniejsza iteracja.
   - **#5 `frazy`** → ✅ **zbadane i rozstrzygnięte (3a, 2026-08-26): to NIE jest normalizacja w adapterze.** `frazy_migruj.cjs` to samodzielny skrypt jednorazowy czytający `/tmp/frazy_migracja.json` i wołający `selly/client.cjs` (PUT do Selly); w `common.cjs` słowo „frazy" nie występuje (0 trafień). **Poza zakresem I3** — do rozważenia przy I8 (Selly).
-- **Ścieżki (GATE):** staging×9 (3× odczyt ✅ 3b, 6× mutacje `accept`/`reject`/`import`/`clear`/`PUT {id}`/`DELETE {id}` → **3d-2**), import×2 ✅ 3b, ai-fallback ✅ 3b, overrides×3 (`GET`, **`POST`**, `DELETE {id}` — **NIE `PUT`**) → **3d-2**.  **Fixtures:** `GET_staging.json` ✅ 3b, `GET_staging_paged.json` ✅ 3b, `GET_overrides.json` → **3d-2**.
+- **Ścieżki (GATE):** staging×9 (3× odczyt ✅ 3b, 6× mutacje ✅ 3d-2), import×2 ✅ 3b, ai-fallback ✅ 3b, overrides×3 (`GET`, `POST`, `DELETE {id}` — `PUT` NIE ISTNIEJE) ✅ 3d-2.  **Fixtures:** `GET_staging.json` ✅ 3b, `GET_staging_paged.json` ✅ 3b, **`GET_overrides.json` ✅ 3d-2**.
 - **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji → 3d-2; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE; Ania przeklika pełny cykl importu na staging.
 
 ---
@@ -465,6 +490,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     regułę, ta luka przestaje być nieszkodliwa** — import zacznie się rozjeżdżać z produkcją.
     Do przeniesienia razem z pomocniczymi `__bridgeMarkupMatches`/`__bridgePromoMatches`
     (`:44600-44660`) i `recalcPricesFromRules` (`:44658`).
+    **Potwierdzone POMIAREM w 3d-2 (2026-09-01), nie lekturą:** charakteryzacja `acceptStaging`
+    wycina tych pomocników NAPRAWDĘ i uruchamia oryginalną gałąź cenową obok naszego portu,
+    który jej nie ma — na pustych tabelach obie strony dają identyczny wynik. Pierwsza reguła
+    wpisana w I4 natychmiast je rozjedzie, i wtedy ten test zapali się jako pierwszy.
 - **Frontend:** widok `/narzuty` (reguły narzutów + promocje). Kolumna „Promocja" w `/katalog` (I2)
   już istnieje w domyślnym zestawie, dziś renderuje puste — I4 dostarcza dla niej dane.
 - **Ścieżki (GATE):** markups×2, promotions×2.  **Fixtures:** `GET_markups.json`, `GET_promotions.json`.
@@ -505,6 +534,12 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 8 — Selly / sprzedawarka (+ wchłonięcie `selly-injection.js`)
+- **⚠ ZALEGŁOŚĆ Z ITERACJI 3 (zapisana 2026-09-01 przez 3d-2) — `products.zastosowanie`.**
+  `POST /api/staging/accept` woła w produkcji `__restoreZastosowanie()` (`:44105`), które po
+  każdej akceptacji odtwarza puste `zastosowanie` z CSV spoza repo. 3d-2 tego NIE przeportowała
+  (decyzja użytkownika) — pełny opis, podejrzenia co do przyczyny i rekomendacja:
+  **`docs/rebuild-backlog.md` #12**. Właściciel do ustalenia między tą iteracją a **I7**
+  (atrybuty); tu wisi, bo `selly_zastosowanie_category_map` mieszka w tym bloku.
 - **Status:** ⬜  **Sesje:** 8a BE · 8b FE  **Zależy od:** 2, 4
 - **Cel (Ania klika):** otwiera `/selly`, generuje/eksportuje CSV do marketplace, widzi status/log/słowniki — natywnie.
 - **Backend:** `/api/selly/status|ping|csv-status|log|dictionaries|categories|producers`, `POST /api/selly/generate-csv|sync-product|sync-supplier`; `GET /api/export/shoper`, `/api/export-shoper` (pełny katalog CSV — **z auth**, §3). Tabele `selly_kategoria_norm_map`, `selly_zastosowanie_category_map`.
@@ -573,7 +608,18 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
        zapali się, żądając usunięcia. **To jest sygnał do usunięcia wyjątku, nie do naprawy testu.**
        Przy okazji: `products.uwaga_cena` (migracja 002) jest dziś ukryta przed API jawną
        projekcją (`src/repos/kolumny.ts`) — ujawnienie jej wymaga tego samego przenagrania.
-    2. **Dopisać do `openapi.yaml` DWA endpointy `uwaga_cena`**, nie jeden:
+    2. **`POST /api/products` (bulk) ma dowieźć TEŻ rozszerzenia importu** (decyzja użytkownika
+       2026-09-01, ticket 9). `addProductsBulk` (`:44746`) woła `assignKodImportu`, `applyDims`,
+       `applyLinkMemory`, `applyNazwaPamiec` i `applyWagaPamiec` — dokładnie ten sam zestaw co
+       `acceptStaging`. 3d-2 świadomie tego NIE budowała, bo `addProductsBulk` ma tylko jedno
+       wywołanie (`:48308`) i jest nim właśnie ta trasa, odłożona tutaj — pisarz bez wywołania
+       nie dałby się przetestować end-to-end. **Port `bridge_ext` czeka gotowy w repo**
+       (`src/import/legacy/`), a most `src/import/silnik/bridge-ext.ts` typuje już wszystkie
+       potrzebne funkcje. Dowód wierności zbuduj tak jak 3d-2: `addProductsBulk` jest metodą
+       obiektu `U`, więc da się ją wyciąć z bundla tym samym harnessem
+       (`test/charakteryzacja/akceptacja/oryginal.mjs` — wystarczy poszerzyć kotwice).
+       ⚠ `addProductsBulk` ma też własną gałąź narzutów/promocji (`:44773-44783`) — patrz I4.
+    3. **Dopisać do `openapi.yaml` DWA endpointy `uwaga_cena`**, nie jeden:
        `GET /api/products/uwagi-cena` i `GET /api/products/hold-reasons`. Oba istnieją
        w produkcji jako monkey-patch `mirror/backend/uwaga_cena_patch.cjs` i obu brak
        w zamrożonym kontrakcie. `hold-reasons` liczy powód wstrzymania w locie (5 przypadków:

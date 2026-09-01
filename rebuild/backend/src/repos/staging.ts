@@ -211,3 +211,19 @@ export function usunWszystkiePozycjeStagingu(db: Baza): void {
 }
 
 export type PozycjaStaginguSzczegol = NonNullable<ReturnType<typeof pozycjaStaginguPoId>>;
+
+/**
+ * Aktualizacja pozycji stagingu — port `U.updateStaging` (`backend-index.cjs:44824`).
+ * Zwraca wiersz PO zmianie, bo `PUT /api/staging/{id}` oddaje go wprost w odpowiedzi.
+ */
+export function zaktualizujPozycjeStagingu(
+  db: Baza,
+  id: number,
+  zmiany: Record<string, unknown>,
+): PozycjaStaginguSzczegol | undefined {
+  db.update(stagingItems)
+    .set(zmiany as Partial<typeof stagingItems.$inferInsert>)
+    .where(eq(stagingItems.id, id))
+    .run();
+  return pozycjaStaginguPoId(db, id);
+}

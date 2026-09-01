@@ -722,6 +722,52 @@ A podjęta tego samego dnia. Rozszerzono 2026-08-26 przy tickecie
 
 ---
 
+### #12 · 2026-09-01 · [BACKEND] · `__restoreZastosowanie()` po każdej akceptacji — objaw czy naprawa?
+
+> **Zgłoszone przy tickecie `9-FEATURE-acceptstaging-endpointy-mutacji` (I3/3d-2).**
+> Świadomie NIE przeportowane — decyzja użytkownika, plan.md D2.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (import / dane) |
+| **Pliki** | `deminified/backend-index.cjs:44105` (funkcja), `:48546` (wywołanie); dane: `mirror/backend/zastosowania/zastosowania_master.csv` (6823 wiersze) |
+| **Do nowej wersji?** | ⬜ **DO DECYZJI** — najpierw ustalić przyczynę (niżej) |
+| **Status** | otwarte |
+
+**Co robi produkcja.** Endpoint `POST /api/staging/accept` po zatwierdzeniu pozycji woła
+`__restoreZastosowanie()`. Funkcja czyta CSV z **zahardkodowanej ścieżki produkcyjnej**
+(`/home/admin/private_apps/bridge/zastosowania/zastosowania_master.csv`, kolumny `kod,zastosowanie`)
+i wykonuje:
+
+```sql
+UPDATE products SET zastosowanie=? WHERE kod=? AND (zastosowanie IS NULL OR TRIM(zastosowanie)='')
+```
+
+czyli uzupełnia **wyłącznie puste** wartości. Wynik (`{ok, updated}`) trafia tylko do
+`console.log`, nie do odpowiedzi HTTP.
+
+**Dlaczego to wygląda na OBJAW, a nie na chorobę.** Odtwarzanie kolumny z pliku CSV po każdej
+akceptacji to obejście, nie funkcja. Ktoś albo coś kasuje `products.zastosowanie` — i to jest
+właściwe pytanie. Podejrzani: import (`acceptStaging` buduje rekord ze snapshotu, który
+`zastosowania` nie niesie, więc przy INSERCIE pole wychodzi puste) albo synchronizacja Selly.
+Zwróć uwagę, że warunek `zastosowanie IS NULL OR TRIM(...)=''` pasuje dokładnie do produktu
+świeżo wstawionego przez akceptację.
+
+**Dlaczego 3d-2 tego nie przeportowała.** Trzy powody, wszystkie do rozstrzygnięcia razem:
+1. **model wdrożenia** — CSV leży poza repo, a deploy kopiuje tylko `dist/`; port wymaga
+   decyzji, czy plik wciągamy do repo, czy czytamy ze ścieżki z konfiguracji;
+2. **przynależność** — z importem funkcja nie ma nic wspólnego; jej miejsce jest przy
+   atrybutach (**I7**) albo przy Selly (**I8**, gdzie żyje `selly_zastosowanie_category_map`);
+3. **brak szkody z pominięcia** — uzupełnia tylko puste wartości, więc jej brak niczego nie
+   psuje. Po prostu nie uzupełnia — a to Ania zauważy, jeśli coś jej `zastosowanie` czyści.
+
+**Rekomendacja:** przy I7 albo I8 najpierw ODTWORZYĆ przyczynę (zaimportować pozycję, zatwierdzić,
+sprawdzić, czy `zastosowanie` znika), a dopiero potem decydować, czy portować naprawę, czy
+usunąć potrzebę.
+
+
+---
+
 *Pominięte (nie kod, brak zadania rebuild):*
 - 2026-08-18 06:00 [FRONTEND] — regeneracja pliku eksportu `sellycsv-...csv` (odświeżenie
   danych, nie zmiana UI/kodu).

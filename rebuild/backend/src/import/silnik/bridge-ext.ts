@@ -26,10 +26,9 @@ export type WymiaryPaczki = {
 };
 
 /**
- * Podzbiór `bridge_ext`, który woła silnik importu. Moduł eksportuje 11 funkcji —
- * pozostałe (`assignKodImportu`, `applyNazwaPamiec`, `applyWagaPamiec`, `rememberLink`,
- * `ensure*Tables`, `mrKey`) wchodzą portem, ale ich wywołania siedzą w `acceptStaging`
- * i `addProductsBulk`, czyli w sesji 3d-2. Dopisz je tu, kiedy będą wołane.
+ * Podzbiór `bridge_ext`, który woła nasz kod: silnik importu (3d-1) i `acceptStaging` (3d-2).
+ * Poza mostem zostają `rememberNazwaPamiec`, `rememberWaga`, `ensure*Tables` i `mrKey` —
+ * w produkcji wołają je ścieżki spoza Iteracji 3 (m.in. `addProductsBulk`, odłożony do I12).
  */
 interface BridgeExt {
   /**
@@ -46,11 +45,49 @@ interface BridgeExt {
     produkt: Record<string, unknown>,
     istniejacy: unknown,
   ): void;
+  /**
+   * Nadaje `kodImportu` — sześciocyfrowy numer wspólny dla grupy (ten sam EAN albo
+   * marka+rozmiar+bieżnik+nazwa). MUTUJE przekazany obiekt.
+   *
+   * ⚠ NIESPÓJNOŚĆ ORYGINAŁU, ODTWARZANA 1:1: pierwsza reguła („istniejący produkt ma już
+   * numer — zachowaj go") czyta `existing.kod_importu` w snake_case, a `acceptStaging` podaje
+   * tam wiersz z Drizzle, czyli `kodImportu`. Reguła nigdy więc nie wypala. W praktyce numer
+   * i tak się zachowuje, bo reguła druga szuka po grupie SUROWYM SQL-em (poprawne snake_case)
+   * i trafia w ten sam produkt.
+   *
+   * Numer dla produktu bez grupy jest LOSOWY (`Math.random()` w `_kiGenUnique`), więc
+   * charakteryzacja porównuje go po kształcie, nie po wartości.
+   */
+  assignKodImportu(
+    sqlite: BazaSqlite | null,
+    produkt: Record<string, unknown>,
+    istniejacy: unknown,
+  ): void;
+  /** Odtwarza ręcznie ustawioną nazwę z `nazwa_pamiec` (klucz: `kodImportu`). MUTUJE. */
+  applyNazwaPamiec(sqlite: BazaSqlite | null, produkt: Record<string, unknown>): void;
+  /** Odtwarza wagę z `waga_pamiec` (klucz: `kod`), gdy import jej nie przyniósł. MUTUJE. */
+  applyWagaPamiec(
+    sqlite: BazaSqlite | null,
+    produkt: Record<string, unknown>,
+    istniejacy: unknown,
+  ): void;
+  /** Zapamiętuje link zdjęcia po `kod` i po `marka|model|rozmiar`. Wołać PO zapisie produktu. */
+  rememberLink(sqlite: BazaSqlite | null, produkt: Record<string, unknown>): void;
 }
 
 const modul = wymagaj("../legacy/bridge_ext.cjs") as BridgeExt;
 
-export const { applyDims, applyLinkMemory } = modul;
+export const {
+  applyDims,
+  applyLinkMemory,
+  assignKodImportu,
+  applyNazwaPamiec,
+  applyWagaPamiec,
+  rememberLink,
+} = modul;
+
+/** Komplet rozszerzeń w jednym obiekcie — tak wstrzykuje je oryginał jako `__BRIDGE_EXT`. */
+export const bridgeExt: BridgeExt = modul;
 
 /**
  * Surowy uchwyt better-sqlite3 spod Drizzle — odpowiednik `Qi` z oryginału.
