@@ -171,6 +171,33 @@ a NIE przez `sqlite3` CLI hosta** — ten ma 3.26 i `VACUUM INTO` (SQLite ≥ 3.
 Zwykłe `cp` też odpada: baza chodzi w WAL, więc kopia samego pliku `.db` bywa niespójna.
 Jeśli robisz kopię ręcznie CLI-em, użyj `.backup` — tak jak w sekcji odświeżania danych niżej.
 
+## ⚠ Schemat bazy staging NIE pochodzi z naszego kanonu
+
+Baza staging powstaje przez `.backup` z **produkcji**, a nie z `rebuild/schema/001_schema.sql`.
+`001_schema.sql` jest idempotentny (`CREATE TABLE IF NOT EXISTS`), więc na przywróconej bazie
+**nie tworzy niczego** — zostaje schemat produkcji. `npm run migrate` odnotowuje go jako
+zastosowany i od tej pory obie strony wyglądają na zgodne, choć wcale być takie nie muszą.
+
+**Skutek: kanon i staging mogą się po cichu różnić, a bramki tego nie pokażą.** Testy budują
+własną bazę z kanonu, więc mierzą kanon — nie to, co realnie leży na staging.
+
+Zdarzyło się to naprawdę: `products.szerokosc` był `TEXT` na produkcji i na staging (migracja
+`szertxt` Ani z 2026-08-19), a `REAL` w naszym kanonie — przez wiele iteracji nikt tego nie
+widział. Domknęła to migracja `003_szerokosc_text.sql` (I3/3d-1). Weryfikacja po wdrożeniu
+pokazała, że na staging kolumna była TEXT-em JUŻ WCZEŚNIEJ, więc migracja była dla danych
+praktycznie no-opem — i dlatego wartości z zerami końcowymi (`8.00`) przetrwały nietknięte.
+
+**Praktyczny wniosek przy pisaniu każdej kolejnej migracji:**
+- nie zakładaj, że tabela na staging ma dokładnie kształt z `001_schema.sql`;
+- migracje przebudowujące tabelę (`INSERT INTO nowa SELECT * FROM stara`) są wrażliwe na
+  liczbę i KOLEJNOŚĆ kolumn — przy rozjeździe albo padną, albo (gdy liczba się zgadza,
+  a kolejność nie) po cichu przestawią dane;
+- przed wdrożeniem migracji ruszającej strukturę warto porównać kształt:
+  ```bash
+  sqlite3 ~/private_apps/bridge-staging/data/data-nowy.db "PRAGMA table_info(products);"
+  ```
+  z tym, co daje świeża baza z kanonu (`npm run migrate` na pustym pliku).
+
 ## Odświeżenie danych staging ze snapshotu produkcji (na żądanie)
 ```bash
 sqlite3 /home/admin/private_apps/bridge/data.db \
