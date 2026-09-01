@@ -133,7 +133,7 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | **Wygląd** | design tokens: Inter + JetBrains Mono, primary `hsl(35 70% 45%)`, sidebar `hsl(215 28% 12%)`, tło `hsl(210 20% 98%)` | **wniesione w I1 (1b)** — źródłem jest surowy `mirror/frontend/assets/index-BVOkSOnE.css` (nie `04_DESIGN_TOKENS.md`, który ma 6 rozjazdów); test-strażnik w `rebuild/frontend/test/tokeny.test.ts` | ✅ ustalone |
 | **Auth flow** | `POST /api/login {email:trim,password}` → `{ok,user,token}`; `Bearer` gdy token + `credentials:include` równolegle; `bridge_user` w `localStorage` albo `sessionStorage` wg `bridge_remember`; Query `on401:returnNull,staleTime:Infinity,retry:false` | **odtworzone 1:1 w I1 (1b)** (`rebuild/frontend/src/lib/`) | ✅ ustalone |
 | **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | naprawić w I7 (wołać natywne) | ⬜ do zaklepania |
-| **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / I8 / I11 | ⬜ do zaklepania |
+| **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / I8 / **`freq-injection.js` ✅ wchłonięty w 3f-2 (2026-09-01)** | 🔨 częściowo |
 | **Lokalne vs API** | alerty i waga gabarytowa liczone lokalnie mimo endpointów (spec-frontend §4) | decydować per iteracja (I6, I9) | ⬜ per iteracja |
 | **Staging auto-accept — LOKALNIE czy przez API** | **rozstrzygnięte 2026-08-27 (3d-1) FAKTEM, nie preferencją: auto-zatwierdzanie jest BACKENDOWE.** Siedzi w gałęzi `else if` żywego `tk()` (`backend-index.cjs:47791-47806`) i od 3d-1 jest odtworzone razem ze skutkami (`updateProduct` + `historia_cen` + `applyDims`). Frontend NIE liczy go lokalnie: bundle woła `POST /api/staging/accept` (czyli API) i nie zawiera ani `autoZatwierdzone`, ani żadnej lokalnej logiki auto-akceptacji (grep po `mirror/frontend/assets/*.js`: 0 trafień). Zdanie ze `spec-frontend` §4 („instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu") mówi o rozjeździe INSTRUKCJI z KODEM, a nie o liczeniu czegokolwiek w przeglądarce. **Skutek dla 3e:** UI ma tylko pokazywać to, co przyszło ze stagingu — pozycje auto-zatwierdzone w ogóle się w nim nie pojawiają. Przestarzała jest instrukcja v5, nie kod. | — | ✅ ustalone |
 | **Utrzymanie roadmapy** | roadmapa jest wejściem dla NASTĘPNEJ sesji, a prompt jest jednorazowy — wiedza z bloku musi lądować tutaj, nie w prompcie | **zaklepane 2026-08-26:** po każdym zamkniętym bloku roadmapa opisuje STAN, nie zamiar; ustalenie dotyczące PRZYSZŁEGO bloku wpisuje się DO TEGO BLOKU (sesja 3c czyta blok 3c); **przypisanie funkcji do sesji weryfikuje się GRAFEM WYWOŁAŃ, nie nazwą** (`bridge_ext` trafił do złej sesji dwa razy — 3a i 3c); prompt nie koryguje roadmapy, tylko roadmapa siebie. Pełna reguła: `CLAUDE.md`, krok operacyjny: `.claude/commands/feature.md` Krok 13 | ✅ ustalone |
@@ -150,7 +150,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19** |
+| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
@@ -158,7 +158,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
 | 9 | Waga gabarytowa | 1 | 2 | ⬜ | |
 | 10 | Analityka + pulpit | 2–3 | 2, 3, 4 | ⬜ | |
-| 11 | Konfiguracja + dostawcy + spedycja (+ freq-injection) | 1–2 | 1 | ⬜ | |
+| 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ⬜ | |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
 
 ---
@@ -308,7 +308,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
-- **Status:** 🔨 **OTWARTA PONOWNIE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01 · **3f-1 ✅ 2026-09-01 · 3f-2/3f-3 ⬜**) — 2026-09-01 dołożono blok **3f** (brzeg operacyjny importu), wydzielony z I11 decyzją użytkownika. Powód: bez niego pełnego cyklu importu nie da się uruchomić z przeglądarki, a połowa dostawców jedzie w produkcji automatycznym pollingiem, którego roadmapa w ogóle nie miała  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
+- **Status:** 🔨 **OTWARTA PONOWNIE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01 · **3f-1 ✅ 2026-09-01 · 3f-2 ✅ 2026-09-01 · 3f-3 ⬜**) — 2026-09-01 dołożono blok **3f** (brzeg operacyjny importu), wydzielony z I11 decyzją użytkownika. Powód: bez niego pełnego cyklu importu nie da się uruchomić z przeglądarki, a połowa dostawców jedzie w produkcji automatycznym pollingiem, którego roadmapa w ogóle nie miała  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
   - **⚠ Blok 3d ZOSTAŁ PODZIELONY** (decyzja użytkownika, 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`). Powód: blok zbierał 8 punktów, a lektura źródeł dołożyła kolejne 4 endpointy, których roadmapa nie wymieniała (patrz blok 3d-2) — wychodził największy blok całej iteracji. Szew: **3d-1 kończy się na `tk()`, 3d-2 zaczyna na brzegu HTTP.**
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
 - **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~5000 linii: `common.cjs`, `tyre_params.cjs`, `adapter.cjs`, `dispatcher.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dictionaries/` — porcja 3a; `bridge_ext.cjs`/`tire_dims.js` nie są wołane przez żaden plik z `parsers/`, więc wypadły z portu 3a — a doprecyzowanie z 2026-08-26 przesunęło je do 3d — **ostatecznie przeportowane bajt-w-bajt w 3d-1, 2026-08-27**, razem z markerem `legacy/package.json`, bez którego `tire_dims.js` po cichu się nie ładował), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
@@ -480,9 +480,16 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 
     | Sposób dostarczania | Dostawcy | Częstotliwość |
     |---|---|---|
-    | `url` — automatyczny polling | MO2, MO3, MO4, MO5, MO9 | 40 / 60 / 60 / 60 / 1440 min |
+    | `url` — automatyczny polling | MO2, MO3, MO4, MO5, MO9 | **60 min każdy** |
     | `mail` — ręczne wgranie pliku | MO1, MO7, MO8, MO10 | — |
     | `upload` — ręczne wgranie | MO6 (wyłączony z importu) | — |
+
+    ⚠ **SPROSTOWANIE FAKTU 2026-09-01 (3f-2), zmierzone w `db/snapshot.db`:** wcześniejszy
+    zapis „40 / 60 / 60 / 60 / 1440 min" był nieprawdziwy. W bazie produkcji WSZYSCY
+    dostawcy `url` mają `czestotliwosc_minuty = 60` — MO2 też (nie 40), MO9 też (nie 1440).
+    `czestotliwoscMinuty = 10080` ma za to MO1, ale ma `sposobDostarczania = "mail"`, więc
+    scheduler i tak go pomija. **Skutek dla 3f-3: automat obejmie PIĘCIU dostawców po 60 min,
+    czyli 120 pobrań na dobę** — a nie mieszankę interwałów.
 
     **Połowa dostawców jedzie automatem.** Do 3f żadnej z tych ścieżek nie dało się uruchomić
     inaczej niż `curl`-em.
@@ -569,9 +576,71 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     `test/integracja/wgrywanie.integracja.test.ts` ma `@vitest-environment node` i minimalną
     atrapę `Storage`. Testy widoku (MSW) zostają w jsdom i działają.
 
-- **3f-2 · Dostawcy: URL, alerty i sterowanie** (BE+FE) — ⬜. Domyka ścieżkę URL i sprawia,
-  że **awaria dostawcy przestaje być cicha**.
-  - **Backend:** port `L4()` (`:48038-48116`): `!response.ok` → alert „Błąd HTTP"
+- **3f-2 · Dostawcy: URL, alerty i sterowanie** (BE+FE) — ✅ **2026-09-01.** Ścieżka URL
+  domknięta, **awaria dostawcy przestała być cicha**, a Ania steruje dostawcami z panelu
+  zamiast PATCH-em poza Reactem.
+  - **⭐ Rozstrzygnięcia sesji 3f-2 (2026-09-01, decyzje użytkownika) — NIE otwierać ponownie:**
+    - **DWA POBIERACZE ZOSTAJĄ OSOBNO (wariant „a").** `src/import/pobierz.ts` (port
+      `downloadUrl`, node:http, 60 s) bez zmian; `L4()` dostał własny moduł
+      `src/import/synchronizuj.ts` (fetch + AbortController, 30 s). Powód rozstrzygający:
+      różnica jest OBSERWOWALNA — komunikaty undici („fetch failed", „This operation was
+      aborted", „terminated") lądują dosłownie w treści alertu i tak wyglądają wszystkie
+      339 alertów „Błąd pobierania" w `db/snapshot.db`. Sklejenie zmieniłoby też transport
+      trasy `POST /api/import/from-url` z 3b i wymagałoby przemierzenia jej testów.
+    - **`PATCH /api/dostawcy/{id}` DOSTAŁ LISTĘ PÓL EDYTOWALNYCH** — świadome odstępstwo
+      (`POLA_EDYTOWALNE_DOSTAWCY` w `repos/suppliers.ts`): `status`, `url`,
+      `czestotliwoscMinuty`, `sposobDostarczania`, `nazwa`, `email`, `formatPliku`,
+      `parser`, `kodowanie`, `uwagi`. **Odcięte:** `importWylaczony` (inaczej bramkę D5 na
+      MO6 zdejmuje się jednym PATCH-em — bramka z furtką nie jest bramką),
+      `liczbaProduktow`/`ostatniPlik`/`ostatniaSync` (własność importu; `ostatniPlik`
+      steruje `przeliczStatus`, więc dawało się nim podrobić status „aktywny"), `id`/`kod`.
+      Odpowiedź idzie w projekcji kontraktowej — oryginał odsyła CAŁY wiersz, u nas
+      wyciekłby `importWylaczony`.
+      **Niespójność audytu ZOSTAJE 1:1** (zapis dziesięć pól, audyt cztery) — dlatego lista
+      edytowalnych jest świadomie SZERSZA niż czwórka audytowana. Zawężenie jej do czwórki
+      skasowałoby tę niespójność po cichu i uczyniło gate „pole spoza czwórki NIE trafia
+      do audytu" niemożliwym do napisania.
+    - **ALERTY BEZ DŁAWIKA — wiernie, problem przekazany do Iteracji 6.** Każda nieudana
+      próba zostawia osobny wiersz. Zmierzone w produkcji: 339 alertów „Błąd pobierania"
+      (MO3: 150, MO5: 102, MO4: 83, MO2: 4) wobec 4 × „Błąd HTTP" i 2127 × „Synchronizacja";
+      rekord to 23 alerty na dobę dla samego MO3 (2026-08-08…10), a MO3+MO4+MO5 razem
+      dawały wtedy ~60/dobę. Powód decyzji: liczba powtórzeń JEST sygnałem diagnostycznym
+      (to z niej wiadomo, że trzej dostawcy padali nieprzerwanie przez tydzień), a dławik
+      kasowałby go bezpowrotnie; właściwym miejscem na zwijanie powtórek jest ODCZYT,
+      czyli widok z I6, gdzie decyzja ma komplet informacji. Wymóg wpisany DO BLOKU I6.
+  - **Dowiezione:** BE `src/import/synchronizuj.ts` (port `L4()`), `repos/suppliers.ts`
+    rozszerzone o `POLA_EDYTOWALNE_DOSTAWCY`, `POLA_AUDYTOWANE_DOSTAWCY`, `dostawcaPoId`,
+    `dostawcaPoIdDoApi`, `odsiejPolaEdytowalne`, `aktualizujDostawce`, `oznaczBladDostawcy`;
+    `routes/suppliers.ts` + `PATCH /api/dostawcy/:id` i `POST /api/dostawcy/:kod/synchronizuj-teraz`.
+    FE `pages/konfiguracja/dostawcy.ts` + `Dostawcy.tsx`, zakładka „dostawcy" wypełniona,
+    `defaultValue="dostawcy"` przywrócone. Testy: `test/dostawcy.synchronizacja.test.ts` (12),
+    `test/dostawcy.patch.test.ts` (12), FE `test/konfiguracja.dostawcy.test.tsx` (12),
+    `test/integracja/dostawcy.integracja.test.ts` (6, żywy backend + żywy serwer dostawcy).
+  - **Gate — rozliczony:** serwer 500 → alert „Błąd HTTP" + `status: blad` ✅; serwer nie
+    odpowiada → alert „Błąd pobierania" + `status: blad` ✅; sukces → `ostatniaSync`,
+    `ostatniPlik`, `liczbaProduktow`, `status: aktywny` ✅; `wstrzymany` ręcznie PRZECHODZI,
+    automatem NIE ✅; `czestotliwoscMinuty` w audycie, pole spoza czwórki nie ✅; testy stawiają
+    LOKALNY serwer HTTP na porcie efemerycznym, `fetch` niemockowany ✅; regresja
+    `GET_dostawcy.json`/`GET_suppliers.json` i gate'y I1–I3 zielone ✅ (BE 425, FE 183).
+  - **⚠ Do wiadomości kolejnych sesji: `ostatniaSync` znaczy „kiedy PRÓBOWALIŚMY", nie
+    „kiedy się udało".** `L4()` ustawia ją w OBU gałęziach błędu (`:48067`, `:48110`),
+    nietknięty zostaje wtedy `ostatniPlik`. Widok podpisuje to pole „ostatnia próba".
+  - **⚠ Wyjątek PARSERA daje alert typu „Błąd pobierania" — i to jest WIERNE.** Oryginał ma
+    jeden blok `catch` wokół całości (`:48100`); po usunięciu fallbacku `Wc()` błąd parsera
+    trafia tam bezpośrednio. Nazwa typu jest myląca, ale zostaje 1:1 — powód i tak jest
+    w treści alertu, a widok z I6 grupuje po `typ` i musi widzieć te same wartości
+    co produkcja.
+  - **⚠ `freq-injection.js` JEST WCHŁONIĘTY — do skasowania z produkcji przy wdrożeniu.**
+    Presety `[5,15,30,60,120,240,360,720,1440,2880,10080]`, `fmt()` i kotwica
+    `data-testid="supplier-config-<KOD>"` są w `pages/konfiguracja/dostawcy.ts`. Zniknęła
+    mapa `kod → id` (skrypt musiał ją trzymać, bo pracował na DOM-ie; React ma cały rekord)
+    i cała warstwa `MutationObserver`. ⚠ Komentarz w samym skrypcie („whitelist pól:
+    status, url, czestotliwoscMinuty, sposobDostarczania") jest BŁĘDNY — to lista audytu,
+    nie zapisu; do 3f-2 żadnej listy zapisu nie było.
+  - **Oryginalna karta `ZT()` NIE MIAŁA żadnej edycji** (`frontend-index.js:25661-25806`) —
+    tylko „Synchronizuj" i „Wgraj plik". Edycja pól to nasz dodatek i właśnie po to
+    powstał skrypt injection.
+  - **Backend (dowiezione):** port `L4()` (`:48038-48116`): `!response.ok` → alert „Błąd HTTP"
     + `status: blad`; wyjątek → alert „Błąd pobierania" + `status: blad`; sukces →
     `ostatniaSync`, `ostatniPlik`, `liczbaProduktow`, `status: aktywny`. Flaga „ręcznie"
     pomija blokadę `status === "wstrzymany"`. Trasy:
@@ -593,7 +662,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     Nasz `pobierz.ts` jest portem **`downloadUrl`**, nie `L4()` — mówi to jego własny
     nagłówek. Zostaje bez zmian; `L4()` dostaje osobny moduł.
   - **`src/repos/alerts.ts` JUŻ ISTNIEJE** (3f-1) — `zapiszAlert` plus typy
-    `PoziomAlertu`/`StatusAlertu`, port `U.addAlert` (`:44953`). Dołóż wywołania dla
+    `PoziomAlertu`/`StatusAlertu`, port `U.addAlert` (`:44954`). Dołóż wywołania dla
     „Błąd HTTP" i „Błąd pobierania"; odczyt dalej należy do I6.
   - **⭐ CO ZOSTAWIŁA SESJA 3f-1 — czytaj przed planowaniem:**
     - **`zapiszWynikImportu` przyjmuje już opcjonalne `ostatniaSync`** (`repos/suppliers.ts`).
@@ -618,14 +687,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     CAŁYM ciałem żądania, ale do audit logu wpisuje wyłącznie zmiany w czterech polach —
     `status`, `url`, `czestotliwoscMinuty`, `sposobDostarczania`. Zmiana czegokolwiek innego
     przechodzi bez śladu w audycie.
-  - **Frontend:** zakładka **dostawcy** — lista z URL, częstotliwością, sposobem dostarczania,
-    statusem i `ostatniaSync`; akcje „Synchronizuj teraz" i edycja pól. To tu wchłaniamy
-    `freq-injection.js` (częstotliwość natywnie, zamiast PATCH-a poza Reactem).
-  - **Gate:** serwer zwraca 500 → alert „Błąd HTTP" + `status: blad`; serwer nie odpowiada →
-    alert „Błąd pobierania"; sukces → `ostatniaSync` i `status: aktywny`; dostawca `wstrzymany`
-    ręcznie PRZECHODZI, automatem NIE; zmiana `czestotliwoscMinuty` trafia do audytu, a pola
-    spoza czwórki — nie. Testy stawiają lokalny serwer HTTP na porcie efemerycznym, bez
-    mockowania `fetch`.
+  - **Frontend (dowiezione):** zakładka **dostawcy** — lista z URL, częstotliwością, sposobem
+    dostarczania, statusem i `ostatniaSync`; akcje „Synchronizuj teraz" i edycja pól,
+    z wchłoniętym `freq-injection.js`.
 
 - **3f-3 · Scheduler** (BE) — ⬜. Port `D4()` (`:48118-48131`) za `IMPORT_SCHEDULER`.
   - Osobno mimo małego rozmiaru, bo to jedyna część z **timerami w tle**, jedyna bez UI
@@ -635,6 +699,26 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     interwały (`clearInterval` po mapie). `unref()` na interwałach, żeby nie trzymały procesu.
   - **Gate:** dobiera właściwych dostawców; ponowne wywołanie nie mnoży timerów;
     **bez `IMPORT_SCHEDULER` nie startuje w ogóle**; `status: wstrzymany` wyklucza z automatu.
+  - **⭐ CO ZOSTAWIŁA SESJA 3f-2 — czytaj przed planowaniem:**
+    - **Funkcja do wołania JUŻ ISTNIEJE i nie pisz jej drugi raz.**
+      `synchronizujDostawce({db, katalogArchiwum, silnik})` z `src/import/synchronizuj.ts`
+      zwraca funkcję `(kod, opcje?) => Promise<WynikSynchronizacji>`. Scheduler woła ją
+      **BEZ opcji** — dokładnie tak jak oryginał (`L4(n.kod)`, `:48127`), więc blokada
+      `status === "wstrzymany"` DZIAŁA na automacie. Flaga `{recznie: true}` należy
+      wyłącznie do trasy `synchronizuj-teraz` (`q4()`), i tak jest przetestowane.
+    - **Jedna instancja na proces, nie dwie.** `trasyDostawcow` przyjmuje opcjonalne
+      `synchronizuj` właśnie po to, żeby `app.ts` mógł stworzyć JEDNĄ instancję i podać ją
+      i trasie, i schedulerowi. Bez tego oba dostaną własny `silnikStagingu`.
+    - **Ile realnie odpali automat:** pięciu dostawców `url` × 60 min = **120 pobrań/dobę**
+      (patrz sprostowanie faktu w bloku 3f — snapshot, nie „40/60/1440").
+    - **Alerty nie mają dławika** (decyzja 3f-2). Trwale padnięty dostawca da ~24 alerty
+      na dobę, trzej padnięci naraz ~72 — to zmierzone zachowanie produkcji, nie regres.
+      Dlatego `IMPORT_SCHEDULER` domyślnie WYŁĄCZONY ma tu drugie uzasadnienie: bez niego
+      staging nie zaleje sobie tabeli alertów w trakcie testów Ani.
+    - **`unref()` na interwałach jest KONIECZNY, nie kosmetyczny.** Wiszący timer trzyma
+      proces i wywraca `afterAll` w testach. Przy okazji: `L4()` produkcji nie czyści
+      swojego 30-sekundowego timera po odrzuconym `fetch` — nasz port czyści go w `finally`
+      (odstępstwo opisane w `synchronizuj.ts`), więc scheduler nie zostawia śmieci.
 - **Wejście z triażu (2026-08-25, `rebuild-backlog.md`):**
   - **#6** bieżące poprawki parserów (flagsfix, mo8…) → objęte **portem**, zero osobnej pracy.
   - **#4 `uwaga_cena`** (cena „na zapytanie") → kolumna `products.uwaga_cena` **dodana w 3b** (osobna migracja, bez #3); propagacja w imporcie (`acceptStaging`) → **3d-2**; endpointy → **I12**. **Sprostowanie 2026-08-27 (3d-1): endpointy są DWA, nie jeden** — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony w locie, 5 przypadków). Obu brak w zamrożonym kontrakcie — dopisać do openapi razem, w I12. Frontend tooltip = injection → późniejsza iteracja.
@@ -663,6 +747,23 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     wycina tych pomocników NAPRAWDĘ i uruchamia oryginalną gałąź cenową obok naszego portu,
     który jej nie ma — na pustych tabelach obie strony dają identyczny wynik. Pierwsza reguła
     wpisana w I4 natychmiast je rozjedzie, i wtedy ten test zapali się jako pierwszy.
+  - **⚠ WEJŚCIE Z BLOKU 3f-2 (2026-09-01): `PATCH /api/markups/{id}` i `/api/promotions/{id}`
+    zapisują CAŁE ciało żądania.** `updateMarkup` (`:44975`) i `updatePromotion` (`:44998`)
+    robią `X.update(...).set(e)` bez listy pól, a trasy (`:48701`, `:48724`) podają im
+    `{...c.body, zmienilUzytkownikId, zmienionoData}` — czyli wszystko, co przyszło od
+    użytkownika. **Stawka jest tu wyższa niż przy dostawcach:** obie metody wołają po zapisie
+    `recalcPricesFromRules()`, więc pole wpuszczone przez pomyłkę przelicza ceny CAŁEGO
+    katalogu. Analogiczna dziura w `PATCH /api/dostawcy/{id}` została w 3f-2 zamknięta listą
+    pól edytowalnych — **ta iteracja ma podjąć tę samą decyzję świadomie**, a nie odziedziczyć
+    ją przez przeoczenie. Precedens jest po obu stronach: produkcja SAMA używa listy pól
+    w `PUT /api/staging/:id` (`:48598`, osiem pól), więc lista nie jest wymysłem odbudowy.
+    Uwaga: `zmienilUzytkownikId` i `zmienionoData` ustawia SERWER — na listę wejść nie mogą.
+    Wzorzec do skopiowania: `POLA_EDYTOWALNE_DOSTAWCY` w `rebuild/backend/src/repos/suppliers.ts`
+    + testy `test/dostawcy.patch.test.ts`. Pełny rozbiór: `rebuild-backlog.md` #14.
+  - **⚠ Sprawdź, czy audyt nie ma tej samej niespójności co dostawcy.** Przy dostawcach
+    zapis obejmuje wszystkie pola, a audyt tylko cztery — i to jest odtworzone 1:1. Przy
+    narzutach oryginał loguje `c.body` w całości (`:48709`), więc niespójności tam NIE MA;
+    warto to potwierdzić przed portem, żeby nie skopiować rozwiązania z niewłaściwego miejsca.
 - **Frontend:** widok `/narzuty` (reguły narzutów + promocje). Kolumna „Promocja" w `/katalog` (I2)
   już istnieje w domyślnym zestawie, dziś renderuje puste — I4 dostarcza dla niej dane.
 - **Ścieżki (GATE):** markups×2, promotions×2.  **Fixtures:** `GET_markups.json`, `GET_promotions.json`.
@@ -674,6 +775,19 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1  **Zależy od:** 3
 - **Cel (Ania klika):** otwiera `/historia`, widzi zmiany cen/stanów z importów.
 - **Backend:** `GET /api/history`, `/api/history/meta`, `/api/history/paged` (`Wa` = `historia_cen`). Uwaga: w oryginale `meta`/`paged` były publiczne przez podwójną rejestrację — u nas z auth (§3).
+- **⚠ WEJŚCIE Z BLOKÓW 3d-2 / 3f-1 / 3f-2 (2026-09-01) — `audit_log` ma już swoich pisarzy.**
+  Nasz backend zapisuje dziś **dwanaście** akcji: `akceptacja_stagingu`, `czyszczenie_stagingu`,
+  `edycja_dostawcy`, `edycja_stagingu`, `import_cennika`, `import_pliku`, `import_z_url`,
+  `odrzucenie_stagingu`, `override`, `synchronizacja_reczna`, `upload_pliku`,
+  `usuniecie_override`. Oryginał ma ich 26 — reszta dochodzi z kolejnymi iteracjami. Dwie
+  rzeczy, na które widok musi być odporny, bo są w danych OD RAZU:
+  - **`synchronizacja_reczna` nie ma `szczegoly_json` (NULL).** Trasa
+    `POST /api/dostawcy/{kod}/synchronizuj-teraz` woła audyt bez czwartego argumentu
+    (`:48240`). Widok renderujący szczegóły musi znieść `null`, a nie zakładać obiektu.
+  - **`synchronizacja_reczna` powstaje TAKŻE dla dostawcy, który nie istnieje.** Oryginał
+    pisze audyt PRZED synchronizacją i bezwarunkowo, więc `encja_id` bywa kodem, którego
+    nie ma w `suppliers`. To port 1:1 (audyt zapisuje ZAMIAR, nie wynik) — widok nie może
+    zakładać, że `encja_id` da się złączyć z tabelą dostawców.
 - **Frontend:** widok `/historia` (tabela + paginacja + filtry).
 - **Ścieżki (GATE):** history×3.  **Fixtures:** `GET_history.json`, `GET_history_meta.json`, `GET_history_paged.json`.
 - **DoD:** historia renderuje realne wpisy; paginacja działa; fixtures przez GATE.
@@ -692,9 +806,24 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   i `updateAlertStatus`, nie twórz drugiego pliku. Alert „Ręczny upload" jest już pisany
   (`poziom: info`, `status: rozwiazany` przy powodzeniu; `poziom: ostrzezenie`,
   `status: nowy` przy nieudanym parsowaniu — to nasz dodatek, produkcja przy błędzie milczy).
+- **⭐ WEJŚCIE Z SESJI 3f-2 (2026-09-01) — WIDOK MUSI ZWIJAĆ POWTÓRKI.** Decyzją użytkownika
+  import pisze alert przy KAŻDEJ nieudanej próbie, **bez dławika po stronie zapisu**, bo
+  liczba powtórzeń jest sygnałem diagnostycznym i dławik kasowałby go bezpowrotnie. Ciężar
+  spada więc na TĘ iterację. Skala zmierzona w `db/snapshot.db`: **339 alertów „Błąd
+  pobierania"** (MO3: 150, MO5: 102, MO4: 83, MO2: 4) wobec 4 × „Błąd HTTP" i 2127 ×
+  „Synchronizacja"; rekord to 23 alerty na dobę dla samego MO3 (2026-08-08…10), a trzej
+  dostawcy naraz dawali ~60/dobę. Surowa lista jest w tej sytuacji bezużyteczna. **Wymóg:**
+  widok grupuje po (`dostawca`, `typ`, `status`) i pokazuje „MO3 — Błąd pobierania, 23 razy,
+  ostatnio 14:45", z rozwinięciem do pojedynczych wierszy. Po włączeniu schedulera z 3f-3
+  (120 pobrań/dobę) skala tylko rośnie.
+- **⚠ Typ alertu „Błąd pobierania" obejmuje TAKŻE błędy parsera** — oryginał ma jeden blok
+  `catch` wokół pobrania i parsowania (`:48100`). Grupowanie po `typ` zmiesza więc dwie
+  przyczyny; powód jest w treści (`opis`), nie w typie. Nie „naprawiać" tego zmianą typu
+  przy zapisie — to port 1:1 i widok ma się do niego dostosować.
 - **Frontend:** widok `/alerty`. **Decyzja:** status/obsługa lokalnie vs przez API (spec-frontend §4) — rekomendacja: przez API (spójność stanu).
 - **Ścieżki (GATE):** alerts×2.  **Fixtures:** `GET_alerts.json`.
-- **DoD:** alerty listują i zmieniają stan; decyzja lokalne/API zapisana; fixtures przez GATE.
+- **DoD:** alerty listują i zmieniają stan; **powtórki zwinięte, nie wysypane surowo**;
+  decyzja lokalne/API zapisana; fixtures przez GATE.
 
 ---
 
@@ -762,10 +891,13 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 
 ---
 
-### Iteracja 11 — Konfiguracja + dostawcy + spedycja (+ wchłonięcie `freq-injection.js`)
-- **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** 1
-- **Cel (Ania klika):** edytuje konfigurację, dostawców (w tym **częstotliwość importu** natywnie) i limity spedycji.
-- **Backend:** `GET/PUT /api/config` (`Jt`); `/api/dostawcy/{id}`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`, `/api/dostawcy/{kod}/upload`; `GET /api/spedycja` (`gn`). **`GET /api/dostawcy` i `GET /api/suppliers` (listy) już dostarczone w I2** — tu dochodzą tylko detal i mutacje dostawcy.
+### Iteracja 11 — Konfiguracja: spedycja, Shoper, katalog, AI
+- **Status:** ⬜  **Sesje:** 1  **Zależy od:** 1
+- **Cel (Ania klika):** edytuje konfigurację i limity spedycji. **Dostawcy i częstotliwość
+  importu WYSZŁY z tej iteracji do bloku 3f-2 ✅ 2026-09-01** — są zrobione.
+- **Backend:** `GET/PUT /api/config` (`Jt`), `GET /api/spedycja` (`gn`). **Wszystkie trasy
+  dostawców są już dowiezione:** listy w I2, `upload` w 3f-1, `PATCH /api/dostawcy/{id}`
+  i `POST /api/dostawcy/{kod}/synchronizuj-teraz` w 3f-2.
 - **⚠ ZAKRES POMNIEJSZONY 2026-09-01 — import wydzielony do bloku 3f.** Z tej iteracji WYSZŁY:
   `POST /api/dostawcy/{kod}/upload`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`,
   `PATCH /api/dostawcy/{id}`, zakładki **dostawcy** i **wgrywanie** oraz wchłonięcie
@@ -776,6 +908,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   i przypisanie zakładek do bloków siedzą w `src/pages/konfiguracja/zakladki.ts`: zmień tam
   `domykaBlok` na `null` i dołóż `<TabsContent>` w `Konfiguracja.tsx`. Trasa `/konfiguracja`
   jest już zdjęta z `placeholdery.ts` i wpięta wprost w `App.tsx`.
+  **Aktualizacja 2026-09-01 (3f-2):** zakładka **dostawcy** też jest już wypełniona
+  (`pages/konfiguracja/Dostawcy.tsx`), a `freq-injection.js` wchłonięty. Zostają CZTERY
+  zaślepki: spedycja, shoper, katalog, ai. Wzorzec karty z edycją i mutacją przez
+  `useMutation` — patrz `Dostawcy.tsx`; wzorzec testu — `test/konfiguracja.dostawcy.test.tsx`.
 - **Historyczne (zapisane 2026-09-01 przez 3e, przed wydzieleniem 3f):**
   Strona Konfiguracja ma w oryginale sześć zakładek: **dostawcy · wgrywanie · spedycja · shoper ·
   katalog · ai** (`frontend-index.js:791300-792300`). Zakładka **„wgrywanie"** (`JT`, `:784673`)
@@ -785,10 +921,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   `/staging` (3e) pokazuje dopiero wynik. Dopóki tego nie ma, Ania nie przeklika pełnego cyklu
   importu i gate 3e zostaje domknięty tylko częściowo (patrz blok 3e). Backend jest gotowy od 3b:
   `POST /api/import/parse-file` i `POST /api/import/from-url`.
-- **Frontend:** widoki `/konfiguracja` + edycja dostawcy z polem `czestotliwoscMinuty` (zamiast `freq-injection.js` PATCH poza Reactem). Eksport CSV w `/katalog` należy do I8, nie tu — produkcja
+- **Frontend:** cztery pozostałe zakładki `/konfiguracja`. Eksport CSV w `/katalog` należy do I8, nie tu — produkcja
   nie ma kluczy `shoper.separator`/`shoper.kolumny`, więc `/api/config` nie jest dla niego blokerem.
-- **Ścieżki (GATE):** config, dostawcy×3 (detal + 2 mutacje), spedycja.  **Fixtures:** `GET_config.json`, `GET_spedycja.json` (`GET_dostawcy.json`/`GET_suppliers.json` już zielone od I2).
-- **DoD:** konfiguracja/dostawcy/spedycja edytowalne; częstotliwość natywnie; fixtures przez GATE.
+- **Ścieżki (GATE):** config, spedycja (dostawcy×3 rozliczone w I2 / 3f-1 / 3f-2).  **Fixtures:** `GET_config.json`, `GET_spedycja.json` (`GET_dostawcy.json`/`GET_suppliers.json` już zielone od I2).
+- **DoD:** konfiguracja i spedycja edytowalne; fixtures przez GATE. **Częstotliwość natywnie —
+  ✅ dowiezione w 3f-2, nie powtarzać.**
 
 ---
 
@@ -800,6 +937,15 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     uwaga: oryginał sam ustawia `status: "wstrzymany"`, gdy któraś z cen spada do 0, `backend-index.cjs:44735-44741`),
     `PUT /api/products/{id}`, `DELETE /api/products/{id}`, `POST /api/products` (bulk). Katalog (I2) jest
     dziś wyłącznie do odczytu — te trasy domykają go do parytetu z produkcją.
+    - **⚠ WEJŚCIE Z BLOKU 3f-2 (2026-09-01): `PATCH /api/products/{id}` zapisuje CAŁE ciało
+      żądania.** Wspólny handler `PUT`/`PATCH` (`:48415-48424`, zarejestrowany w `:48452`) odsiewa wyłącznie klucz `_reason` i oddaje resztę do
+      `updateProduct`, czyli **wszystkie 72 kolumny są zapisywalne**. U nas doszłaby jeszcze
+      `uwagaCena` (migracja 002), dziś ukryta przed API projekcją kontraktową. Ta trasa
+      dodatkowo zapisuje `manual_overrides` dla KAŻDEGO zmienionego pola (`:48427`),
+      więc lista pól decyduje nie tylko o tym, co da się zapisać, ale też o tym, **czego import
+      przestanie nadpisywać**. Dostawcy dostali listę pól w 3f-2 — tu trzeba podjąć tę samą
+      decyzję świadomie. Wzorzec: `POLA_EDYTOWALNE_DOSTAWCY` w `repos/suppliers.ts`.
+      Rozbiór wzorca systemowego: `rebuild-backlog.md` #14.
   - **⚠ ZALEGŁOŚCI Z ITERACJI 3 — DOMKNĄĆ TUTAJ (zapisane 2026-08-27 przez 3d-1).**
     1. **Przenagrać `contract/fixtures/GET_products.json`.** Fixture pochodzi sprzed
        produkcyjnej migracji `szertxt` i trzyma `szerokosc` jako LICZBĘ, podczas gdy produkcja
@@ -826,6 +972,12 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
        w zamrożonym kontrakcie. `hold-reasons` liczy powód wstrzymania w locie (5 przypadków:
        `uwaga_cena` dosłownie / brak ceny i stanu / brak ceny / brak stanu / „sprawdź ręcznie").
   - **Finalny przegląd bezpieczeństwa:** potwierdzić auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego `JWT_SECRET` z fallbackiem.
+    **Dopisane 2026-09-01 (3f-2):** przejrzeć WSZYSTKIE trasy mutacji pod kątem
+    „`.set(req.body)` bez listy pól" i potwierdzić, że każda ma jawną listę — do tego czasu
+    powinny ją mieć staging (port 1:1 z 3d-2), dostawcy (3f-2), narzuty i promocje (I4)
+    oraz produkty (ta iteracja). **Zasada do przyjęcia na stałe: kolumny wyliczane i kolumny
+    własne odbudowy (`importWylaczony`, `uwagaCena`) nigdy nie wchodzą na listę pól
+    edytowalnych.** Kontekst i lista tras: `rebuild-backlog.md` #14.
   - **Odświeżenie kontraktu i fixtures** (zapowiedziane w §2, zebrane z iteracji 1–11).
     **⚠ Schematy ciał generujemy z `contract/fixtures/` — z nagrań produkcji, NIE z naszej implementacji.**
     Inaczej kontrakt przestaje być niezależnym dowodem i zaczynamy sprawdzać własną pracę własną pracą.

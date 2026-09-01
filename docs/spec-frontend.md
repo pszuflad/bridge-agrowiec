@@ -44,12 +44,14 @@ krzyżowa kontrola z kontraktem. Zweryfikowane też w naszym `deminified`:
 | `/api/attribute-kinds` | `/api/atrybuty/rodzaje` | `atrybuty_module.cjs:114` |
 
 **B. Trzy skrypty injection → wchłonąć do natywnego Reacta** (dziś łatają UI
-poza aplikacją; nowy frontend nie może od nich zależeć):
+poza aplikacją; nowy frontend nie może od nich zależeć). **Stan 2026-09-01: jeden z trzech
+wchłonięty** (`freq-injection.js`, blok 3f-2); zostają `pending-injection.js` (I7)
+i `selly-injection.js` (I8):
 | Skrypt | Co robi teraz | Co ma wejść natywnie |
 |---|---|---|
 | `pending-injection.js` (57 KB) | przejmuje ekran `/atrybuty` przez React Fiber + MutationObserver, nadpisuje cache Query | komponenty CRUD rodzajów/wartości + lista pending, jeden Query key `/api/atrybuty`, mutacje+invalidacje. **Bez Fiber/MutationObserver.** |
 | `selly-injection.js` (26 KB) | overlay panelu Selly na `/panel/api/selly`, routing przez hash | trasa Wouter `/selly` + komponenty w React/TanStack Query |
-| `freq-injection.js` (12 KB) | dokłada kontrolkę częstotliwości importu poza Reactem (PATCH) | pole `czestotliwoscMinuty` w edycji dostawcy |
+| ~~`freq-injection.js` (12 KB)~~ ✅ **WCHŁONIĘTY 2026-09-01 (blok 3f-2)** | dokładał kontrolkę częstotliwości importu poza Reactem (PATCH) | ✔ `rebuild/frontend/src/pages/konfiguracja/{dostawcy.ts,Dostawcy.tsx}` — presety, `fmt()` i kotwica `data-testid="supplier-config-<KOD>"` przeniesione 1:1; znikła mapa `kod → id` i `MutationObserver` |
 
 ## 3. Korekty do MOICH dokumentów
 
@@ -67,6 +69,11 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
 Dokument wyłapał miejsca, gdzie frontend liczy coś **lokalnie**, mimo że backend
 ma endpoint:
 - **Alerty** (`/alerty`) — status/obsługa trzymane lokalnie, choć `/api/alerts` istnieje.
+  ⚠ **Uzupełnienie 2026-09-01 (blok 3f-2):** to dotyczy wyłącznie ODCZYTU. **Alerty PISZE
+  backend** — import przy błędzie HTTP, błędzie pobierania i ręcznym uploadzie — i ta strona
+  jest już odbudowana (`src/repos/alerts.ts`). Iteracja 6 dostaje sam widok, ale z twardym
+  wymogiem: **musi zwijać powtórki**, bo zapis nie ma dławika (339 alertów „Błąd pobierania"
+  w produkcji, do 23/dobę na jednego dostawcę). Szczegóły w roadmapie, blok Iteracji 6.
 - **Waga gabarytowa** — liczona w przeglądarce, choć `POST /api/waga-gabarytowa/oblicz` istnieje.
 - **Staging** — instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu.
 - Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa (potwierdza deltę: te moduły dojrzały po czerwcu).
@@ -114,6 +121,31 @@ ma endpoint:
 > dokłada podgląd read-only jako świadome, zatwierdzone odstępstwo. Eksport CSV i słowniki
 > marek/kategorii z `GET /api/atrybuty` odłożone do kolejnych iteracji. Szczegóły:
 > `docs/tickets/3-FEATURE-katalog-odczyt/`.
+
+> **Odbudowa (3e, 3f-1, 3f-2 — 2026-09-01):** `/staging` i `/konfiguracja` odbudowane; router
+> ma **12 tras, 8 placeholderów**. Zakładka **Wgrywanie ręczne** (3f-1) i **Dostawcy** (3f-2)
+> wypełnione, cztery pozostałe (spedycja / shoper / katalog / ai) czekają na Iterację 11 —
+> ich zaślepki i przypisanie do bloków siedzą w `src/pages/konfiguracja/zakladki.ts`.
+> Fakty zweryfikowane w bundlu, których ta specyfikacja nie miała:
+>
+> - **⭐ Karta dostawcy `ZT()` (`frontend-index.js:25661-25806`) NIE MA żadnej edycji.**
+>   Pokazuje odznaki (format, sposób dostarczania, „co X min", status), link do URL-a, licznik
+>   produktów oraz dwie akcje: „Synchronizuj" (tylko przy `sposobDostarczania === "url"`)
+>   i „Wgraj plik" (przy `upload`/`mail`). Częstotliwość jest **tylko wyświetlana** — i to
+>   jest cała przyczyna, dla której powstał `freq-injection.js`. Edycja pól w odbudowie
+>   jest więc NASZYM dodatkiem, nie portem.
+> - **`POST /api/dostawcy/:kod/synchronizuj-teraz` odpowiada 200 TAKŻE przy niepowodzeniu.**
+>   Status siedzi w polu `ok` ciała, nie w kodzie HTTP; oryginalna karta czyta właśnie `t.ok`
+>   (`:25727`). Widok, który patrzyłby wyłącznie na kod HTTP, pokazałby awarię jako sukces.
+> - **`Konfiguracja` otwiera się na zakładce `dostawcy`** (`defaultValue`, `:26298`).
+> - **`liczbaProduktow` na karcie jest liczone w locie z tabeli `products`**, więc po imporcie
+>   zostaje zerowe do czasu zatwierdzenia stagingu — nie nadaje się na wskaźnik „ile wczytano".
+> - **⚠ Ograniczenie środowiska testowego:** `fetch` z ciałem `FormData` **nie działa
+>   w jsdom** — żądanie wisi do timeoutu. Testy wysyłające multipart muszą mieć
+>   `@vitest-environment node` (patrz `test/integracja/wgrywanie.integracja.test.ts`).
+>   Żądania JSON w jsdom działają normalnie.
+>
+> Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).
