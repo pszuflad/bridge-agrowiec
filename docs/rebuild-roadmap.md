@@ -571,18 +571,31 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 
 - **3f-2 · Dostawcy: URL, alerty i sterowanie** (BE+FE) — ⬜. Domyka ścieżkę URL i sprawia,
   że **awaria dostawcy przestaje być cicha**.
-  - **Backend:** `src/import/pobierz.ts` rozszerzone do pełnej semantyki `L4()`
-    (`:48038-48116`): timeout **30 s** przez `AbortController`; `!response.ok` → alert
-    „Błąd HTTP" + `status: blad`; wyjątek → alert „Błąd pobierania" + `status: blad`;
-    sukces → `ostatniaSync`, `ostatniPlik`, `liczbaProduktow`, `status: aktywny`. Flaga
-    `recznie` pomija blokadę `status === "wstrzymany"`. Nowe repo `src/repos/alerts.ts`
-    (samo `zapiszAlert`, port `U.addAlert` `:44953` — odczyt zostaje w I6).
-    Trasy: `POST /api/dostawcy/{kod}/synchronizuj-teraz` (`:48238`),
-    `PATCH /api/dostawcy/{id}` (`:48227`).
+  - **Backend:** port `L4()` (`:48038-48116`): `!response.ok` → alert „Błąd HTTP"
+    + `status: blad`; wyjątek → alert „Błąd pobierania" + `status: blad`; sukces →
+    `ostatniaSync`, `ostatniPlik`, `liczbaProduktow`, `status: aktywny`. Flaga „ręcznie"
+    pomija blokadę `status === "wstrzymany"`. Trasy:
+    `POST /api/dostawcy/{kod}/synchronizuj-teraz` (`:48238`), `PATCH /api/dostawcy/{id}`
+    (`:48227`).
+  - **⚠ SPROSTOWANIE 2026-09-01 (fakt zweryfikowany w wysłanym bundlu): PRODUKCJA MA DWA
+    RÓŻNE POBIERACZE, a nie jeden.** Wcześniejszy zapis „`pobierz.ts` rozszerzone do pełnej
+    semantyki `L4()`" był błędny — rozszerzenie tamtego modułu po cichu zmieniłoby zachowanie
+    `POST /api/import/from-url` z 3b, który go używa.
+
+    | | `downloadUrl` (extensions.cjs:25-46) | `L4()` (rdzeń, `:48038`) |
+    |---|---|---|
+    | Transport | `node:http` / `node:https` | `fetch` + `AbortController` |
+    | Timeout | **60 s** (`req.setTimeout`) | **30 s** (`setTimeout` → `abort`) |
+    | Przekierowania | ręcznie, rekurencją po `location` | zostawione `fetch` (sam śledzi) |
+    | Woła to | `POST /api/import/from-url` | `synchronizuj-teraz` + scheduler (3f-3) |
+    | Nasz port | ✅ `src/import/pobierz.ts` (3b) | ⬜ **do napisania w 3f-2** |
+
+    Nasz `pobierz.ts` jest portem **`downloadUrl`**, nie `L4()` — mówi to jego własny
+    nagłówek. Zostaje bez zmian; `L4()` dostaje osobny moduł.
+  - **`src/repos/alerts.ts` JUŻ ISTNIEJE** (3f-1) — `zapiszAlert` plus typy
+    `PoziomAlertu`/`StatusAlertu`, port `U.addAlert` (`:44953`). Dołóż wywołania dla
+    „Błąd HTTP" i „Błąd pobierania"; odczyt dalej należy do I6.
   - **⭐ CO ZOSTAWIŁA SESJA 3f-1 — czytaj przed planowaniem:**
-    - **`src/repos/alerts.ts` JUŻ ISTNIEJE** i ma `zapiszAlert` (port `U.addAlert` `:44953`)
-      wraz z typami `PoziomAlertu`/`StatusAlertu`. Nie pisz go od nowa — dołóż tylko
-      wywołania dla „Błąd HTTP" i „Błąd pobierania". Odczyt dalej należy do I6.
     - **`zapiszWynikImportu` przyjmuje już opcjonalne `ostatniaSync`** (`repos/suppliers.ts`).
       `L4()` ustawia oba znaczniki, więc podaj je oba — bez tego pola trasy z 3b zapisują
       tylko `ostatniPlik` i ta różnica jest w oryginale, nie u nas.
