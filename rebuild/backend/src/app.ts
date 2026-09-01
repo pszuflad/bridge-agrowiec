@@ -12,17 +12,41 @@ import { trasyProduktow } from "./routes/products.js";
 import { trasyStagingu } from "./routes/staging.js";
 import { trasyMutacjiStagingu } from "./routes/staging-mutacje.js";
 import { trasyOverrides } from "./routes/overrides.js";
+import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 
 export type ZaleznosciApp = {
   env: Env;
   db: Baza;
+  /**
+   * JEDNA instancja `synchronizujDostawce` na proces (nota 3f-2). `server.ts` tworzy ją raz
+   * i podaje TU oraz schedulerowi z 3f-3 — bez tego trasa i automat dostałyby własne
+   * `silnikStagingu`. Pominięta (testy, dev) ⇒ `trasyDostawcow` tworzy własną, jak dotąd.
+   */
+  synchronizuj?: (kod: string, opcje?: OpcjeSynchronizacji) => Promise<WynikSynchronizacji>;
+  /**
+   * Przeplanowanie schedulera po udanym `PATCH /api/dostawcy/{id}` (blok 3f-3).
+   *
+   * ODSTĘPSTWO ŚWIADOME, decyzja użytkownika 2026-09-01. Oryginalne `D4()` nie jest wołane
+   * z ŻADNEJ trasy — zweryfikowane grafem wywołań: jedyne wywołanie jest w `M4()` (`:48167`).
+   * Skutek w produkcji: Ania zmienia „co 4 godz.", dostaje „Zapisano", a automat chodzi ze
+   * starym interwałem AŻ DO RESTARTU procesu. Do 3f-2 było to niewidoczne (częstotliwość
+   * zmieniało się PATCH-em z konsoli), ale po wchłonięciu `freq-injection.js` jest na to
+   * przycisk w panelu, więc cisza po zapisie stała się zachowaniem mylącym.
+   * Pominięte (testy, dev) ⇒ zachowanie 1:1 z oryginałem, czyli brak przeplanowania.
+   */
+  przeplanujScheduler?: () => void;
 };
 
 /**
  * Fabryka aplikacji Express — BEZ `listen()`, żeby testy mogły ją tworzyć w pamięci
  * (supertest) bez zajmowania portu. Nasłuch startuje dopiero `server.ts`.
  */
-export function stworzApp({ env, db }: ZaleznosciApp): Express {
+export function stworzApp({
+  env,
+  db,
+  synchronizuj,
+  przeplanujScheduler,
+}: ZaleznosciApp): Express {
   const app = express();
 
   // Staging i produkcja stoją za proxy Apache (X-Forwarded-*) — bez tego
@@ -57,7 +81,14 @@ export function stworzApp({ env, db }: ZaleznosciApp): Express {
 
   app.use(trasyAuth({ db, jwtSecret: env.JWT_SECRET, cookieSecure: env.cookieSecure }));
   app.use(trasyProduktow({ db }));
-  app.use(trasyDostawcow({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
+  app.use(
+    trasyDostawcow({
+      db,
+      katalogArchiwum: env.IMPORT_ARCHIVE_DIR,
+      synchronizuj,
+      przeplanujScheduler,
+    }),
+  );
   app.use(trasyStagingu({ db }));
   app.use(trasyMutacjiStagingu({ db }));
   app.use(trasyOverrides({ db }));
