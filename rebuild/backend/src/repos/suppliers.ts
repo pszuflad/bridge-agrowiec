@@ -143,13 +143,17 @@ export function dostawcaPoKodzie(db: Baza, kod: string) {
 export function zapiszWynikImportu(
   db: Baza,
   id: number,
-  dane: { ostatniPlik: string; liczbaProduktow: number },
+  dane: { ostatniPlik: string; liczbaProduktow: number; ostatniaSync?: string },
 ): void {
   db.update(suppliers)
     .set({
       ostatniPlik: dane.ostatniPlik,
       liczbaProduktow: dane.liczbaProduktow,
       status: "aktywny",
+      // `ostatniaSync` ustawia WYŁĄCZNIE ten, kto ją poda. Rdzeniowy upload
+      // (backend-index.cjs:48260-48265) zapisuje oba znaczniki, a trasy z extensions.cjs
+      // (3b) tylko `ostatniPlik` — i ta różnica jest w oryginale, nie u nas.
+      ...(dane.ostatniaSync !== undefined ? { ostatniaSync: dane.ostatniaSync } : {}),
     })
     .where(eq(suppliers.id, id))
     .run();
