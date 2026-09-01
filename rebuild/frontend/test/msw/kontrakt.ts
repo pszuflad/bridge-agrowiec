@@ -43,3 +43,41 @@ export function dostawcyZFixtura(): Record<string, unknown>[] {
   const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Record<string, unknown>[] };
   return fixture.body;
 }
+
+/**
+ * Strona stagingu prosto z `contract/fixtures/GET_staging_paged.json` — koperta
+ * `{items,total,page,pageSize,pages}` z 50 nagranymi pozycjami.
+ *
+ * Ta sama zasada co przy produktach: widok testujemy przeciwko KSZTAŁTOWI, który realnie
+ * oddaje produkcja, a nie przeciwko mojemu wyobrażeniu o nim. Fixture ma tylko 20 pól
+ * w pozycji — bez `snapshotJson` — i właśnie o to chodzi: podgląd różnic MUSI dociągnąć
+ * pozycję osobno.
+ */
+export function stronaStaginguZFixtura(): {
+  items: Record<string, unknown>[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pages: number;
+} {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_staging_paged.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: { items: Record<string, unknown>[]; total: number; page: number; pageSize: number; pages: number };
+  };
+  const { items, total, page, pageSize, pages } = fixture.body;
+  return { items, total, page, pageSize, pages };
+}
+
+/**
+ * Pozycja ze `snapshotJson` prosto z `contract/fixtures/GET_staging.json` — kształt, jaki
+ * oddaje `GET /api/staging/{id}` (24 pola). Używana w teście podglądu różnic.
+ */
+export function pozycjaStaginguZFixtura(): Record<string, unknown> {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_staging.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: Record<string, unknown>[] | { items: Record<string, unknown>[] };
+  };
+  const pozycje = Array.isArray(fixture.body) ? fixture.body : fixture.body.items;
+  // Wybieramy pozycję, która NAPRAWDĘ ma snapshot — inaczej test podglądu byłby pusty.
+  return pozycje.find((p) => p.snapshotJson) ?? pozycje[0]!;
+}
