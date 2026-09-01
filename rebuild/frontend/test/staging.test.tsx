@@ -203,6 +203,21 @@ describe("Widok /staging", () => {
       expect(mutacje[0]!.body).toEqual({ allFiltered: true, typZmiany: "all" });
     });
 
+    it("„akceptuj wszystkie” też wysyła `allFiltered`, z aktualnym filtrem typu", async () => {
+      const uzytkownik = userEvent.setup();
+      vi.spyOn(window, "confirm").mockReturnValue(true);
+      await otworzStaging();
+
+      // Filtr ustawiony na coś innego niż domyślne — ma trafić do ciała żądania.
+      await uzytkownik.click(screen.getByTestId("select-filter-type"));
+      await uzytkownik.click(await screen.findByRole("option", { name: "Wycofane" }));
+      await uzytkownik.click(screen.getByTestId("button-accept-all"));
+
+      await waitFor(() => expect(mutacje).toHaveLength(1));
+      expect(mutacje[0]!.url).toContain("/api/staging/accept");
+      expect(mutacje[0]!.body).toEqual({ allFiltered: true, typZmiany: "wycofana" });
+    });
+
     it("odmowa w oknie potwierdzenia NIE wysyła żądania", async () => {
       const uzytkownik = userEvent.setup();
       vi.spyOn(window, "confirm").mockReturnValue(false);
