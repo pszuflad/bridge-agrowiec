@@ -65,6 +65,8 @@ Wzór i opisy: [`.env.example`](.env.example).
 | `COOKIE_SECURE` | nie | wg `NODE_ENV` | Ręczne nadpisanie flagi `Secure`. |
 | `MIGRATIONS_DIR` | nie | auto | Nadpisuje wykrywanie katalogu z `*.sql`. |
 | `IMPORT_ARCHIVE_DIR` | nie | `<cwd>/import_archive` | Katalog archiwum plików importu (D11) — konfigurowalny, bo po `npm run build` `__dirname` wskazywałby `dist/`. |
+| `IMPORT_SCHEDULER` | nie | **`false`** | Automatyczny polling dostawców `url` (port `D4()`, blok 3f-3). **Świadome odstępstwo:** produkcja ma go włączonego na sztywno. Włączony odpytuje pięciu dostawców co 60 min ze **realnych** serwerów i przy każdej nieudanej próbie dopisuje alert (bez dławika — decyzja 3f-2). Startuje w `server.ts` po `listen()`, gaszony w `zamknij()`. |
+| `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` | nie | **`false`** | Przebieg zaraz po starcie, poza cyklem — działa tylko z `IMPORT_SCHEDULER`. Bez niego pierwsze pobranie jest dopiero po pełnym interwale, jak w oryginale; z nim dostawcy ruszają od razu, z rozrzutem 5 s. Osobna zmienna, żeby proces produkcyjny został 1:1. |
 
 Na stagingu `JWT_SECRET` wczytywany jest z pliku **poza repo**
 (`~/private_apps/bridge-staging/.env`) przez `tools/deploy-staging.sh` —

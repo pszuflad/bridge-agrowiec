@@ -36,6 +36,12 @@ export type ZaleznosciDostawcow = {
    * której dotyczy gate.
    */
   synchronizuj?: (kod: string, opcje?: OpcjeSynchronizacji) => Promise<WynikSynchronizacji>;
+  /**
+   * Wołane po UDANYM `PATCH /api/dostawcy/:id` — scheduler z 3f-3 przebudowuje wtedy swoje
+   * interwały. Pominięte (testy, dev, `stworzApp` bez schedulera) ⇒ zachowanie 1:1
+   * z oryginałem. Powód odstępstwa i jego koszt: patrz komentarz przy samej trasie.
+   */
+  przeplanujScheduler?: () => void;
 };
 
 /** Limit uploadu — 50 MB, 1:1 z multerem produkcji (backend-index.cjs:48150). */
@@ -56,6 +62,7 @@ export function trasyDostawcow({
   katalogArchiwum,
   silnik,
   synchronizuj,
+  przeplanujScheduler,
 }: ZaleznosciDostawcow): Router {
   const router = Router();
   const uruchomImport = silnik ?? silnikStagingu(db);
@@ -295,6 +302,19 @@ export function trasyDostawcow({
         szczegoly: zmiany,
       });
     }
+
+    // ODSTĘPSTWO ŚWIADOME — PRZEPLANOWANIE SCHEDULERA (decyzja użytkownika 2026-09-01).
+    // Oryginalne `D4()` nie jest wołane z żadnej trasy, więc zmiana `czestotliwoscMinuty`
+    // czy `status` z panelu nie rusza automatu aż do restartu procesu. Odtwarzanie tej
+    // ciszy po wchłonięciu `freq-injection.js` znaczyłoby, że panel mówi „Zapisano" o czymś,
+    // co nie zadziała. Wołane BEZWARUNKOWO po udanym zapisie — sam scheduler jest
+    // nie-operacją, gdy nie działa (czyli zawsze przy wyłączonym `IMPORT_SCHEDULER`).
+    // ⚠ KOSZT PRZYJĘTY ŚWIADOMIE: przebudowa jest HURTOWA (`D4()` czyści całą mapę i stawia
+    // ją od nowa), więc PATCH zeruje odliczanie WSZYSTKIM dostawcom, nie tylko zmienionemu.
+    // Przy edycji raz na jakiś czas bez znaczenia; PATCH częstszy niż interwał zagłodziłby
+    // automat. Przeplanowanie NIGDY nie odpala przebiegu startowego — inaczej każdy zapis
+    // w panelu waliłby w pięć serwerów dostawców naraz.
+    przeplanujScheduler?.();
 
     // Oryginał odsyła CAŁY wiersz z bazy. My odsyłamy go w projekcji kontraktowej — bez
     // niej `importWylaczony` wyciekłoby do API jako 19. klucz obok 18 z fixtures.
