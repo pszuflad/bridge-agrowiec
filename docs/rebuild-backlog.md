@@ -993,3 +993,84 @@ typ. Zgodność z danymi produkcji jest tu więcej warta niż trafniejsza etykie
 Rozróżnia je treść: błąd sieci to dosłowny komunikat undici („fetch failed",
 „This operation was aborted", „terminated"), błąd parsera to komunikat z portu parserów.
 Wymóg zapisany w roadmapie, w bloku Iteracji 6.
+
+---
+
+### #17 · 2026-09-01 · [BACKEND] · scheduler dobiera po statusie PRZELICZANYM — samozakleszczenie po 30 dniach
+
+> **Znalezione przy bloku I3/3f-3 (2026-09-01). ODTWORZONE 1:1** — bo to zachowanie
+> produkcji, a nie usterka naszego portu. Luka otwarta, **właściciel do ustalenia.**
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (scheduler importu) |
+| **Pliki** | `deminified/backend-index.cjs:48121` (`D4`), `:45026` (`listSuppliers`), `:48039` (`L4`); port: `rebuild/backend/src/import/scheduler.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1**, z NASZĄ diagnostyką w logu |
+| **Status** | ✔ odtworzone w rebuild (3f-3), problem zgłoszony |
+
+**Co robi produkcja.** `D4()` dobiera dostawców do automatu z `U.listSuppliers()`, a ta
+funkcja **przelicza `status` w locie** (`:45026`) zamiast czytać kolumnę:
+
+```
+if (ostatniPlik) {
+  wiek > 30 dni  → "wstrzymany"
+  else           → liczbaProduktow === 0 ? "blad" : "aktywny"
+}
+else             → liczbaProduktow === 0 ? "wstrzymany" : status_z_kolumny
+```
+
+Warunek `status !== "wstrzymany"` w `D4()` widzi więc wartość WYLICZONĄ, a nie tę zapisaną.
+
+**Skutek 1 — samozakleszczenie.** Dostawca, którego ostatni udany import był ponad 30 dni
+temu, wypada z automatu. Skoro wypadł, nie zostanie odświeżony. Skoro nie zostanie
+odświeżony, jego `ostatniPlik` się nie odmłodzi — i **już nigdy nie wróci** bez ręcznego
+„Synchronizuj teraz". Dostawca padnięty na dłużej niż miesiąc cichnie na zawsze.
+W produkcji niewidoczne, bo proces żyje ciągle i odświeża znacznik co godzinę.
+
+**Skutek 2 — staging planuje ZERO.** Baza postawiona od zera (`ostatniPlik = null`, zero
+produktów w `products`) daje wyliczony status „wstrzymany" u WSZYSTKICH, więc automat
+planuje zero dostawców, mimo poprawnych URL-i i częstotliwości. To samo dotyczy stagingu
+ze snapshotu starszego niż 30 dni: `db/snapshot.db` ma u piątki `url`
+`ostatni_plik = 2026-08-13`, czyli **po 2026-09-13 ten snapshot planuje zero**.
+
+**Co zrobiliśmy w rebuild.** Dobór portowany 1:1. Dołożona wyłącznie **druga linia logu**
+(decyzja użytkownika 2026-09-01), wypisująca pominiętych dostawców z powodem — w tym
+jawnie „status wstrzymany PRZELICZONY — ostatni plik sprzed N dni (próg: 30)". Zero wpływu
+na dobór i na dane; różnica między `zaplanowano 0` a wiedzą, dlaczego zero.
+
+**Propozycja naprawy (do decyzji).** Filtrować po kolumnie `suppliers.status`, a nie po
+statusie prezentacyjnym — czyli w schedulerze czytać surowe wiersze zamiast
+`listaDostawcow()`. To zdejmuje oba skutki naraz i nie rusza niczego w odczycie API.
+**Nie robimy tego bez decyzji**, bo zmienia dobór dostawców do automatu.
+
+---
+
+### #18 · 2026-09-01 · [BACKEND][FRONTEND] · status „wstrzymany" z panelu nie jest widoczny na karcie dostawcy
+
+> **Znalezione przy bloku I3/3f-3 (2026-09-01). ODTWORZONE 1:1.** Ta sama przyczyna
+> co #17, inny objaw — i ten objaw Ania widzi. **Właściciel do ustalenia.**
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (projekcja odczytu) + FRONTEND (karta dostawcy) |
+| **Pliki** | `deminified/backend-index.cjs:45026`; port: `rebuild/backend/src/repos/suppliers.ts` (`przeliczStatus`) |
+| **Do nowej wersji?** | ✅ **port 1:1** |
+| **Status** | ✔ odtworzone w rebuild (I2), opisane Ani w `docs/instrukcja-testow-I3.md` §4 pkt 11 |
+
+**Objaw.** Ania ustawia dostawcy status **wstrzymany**, zapisuje, dostaje „Zapisano" —
+a karta dalej pokazuje *aktywny* albo *błąd*. Zapis PRZESZEDŁ (kolumna ma nową wartość),
+ale `GET /api/dostawcy` odsyła status wyliczony, który kolumnę nadpisuje. Wartość
+z pola **Status** przebija się do widoku wyłącznie w jednym przypadku: dostawca bez
+`ostatniPlik`, ale z produktami w katalogu.
+
+**Wstrzymanie mimo to DZIAŁA** — blokadę automatu realizuje `L4()` (`:48039`), które czyta
+status z SUROWEGO wiersza (`getSupplierByKod`). Stąd druga rzecz warta odnotowania:
+wstrzymany dostawca ze świeżym `ostatniPlik` **dostaje od schedulera timer** (bo `D4()`
+widzi status wyliczony „aktywny"), tylko każde odpalenie kończy się natychmiast na
+„Wstrzymany", bez pobrania. Efekt dla użytkownika jest właściwy, mechanizm — mylący.
+Pokryte testem w `test/scheduler.test.ts`, żeby nikt tego „nie poprawił" przypadkiem.
+
+**Propozycja naprawy (do decyzji).** Odsyłać oba pola osobno (`status` z kolumny +
+`statusWyliczony`) i pokazywać na karcie jedno, a w formularzu edycji drugie. Zmienia
+kontrakt `GET /api/dostawcy` (19. klucz), więc wymaga przenagrania `GET_dostawcy.json`
+i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.

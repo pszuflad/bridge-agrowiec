@@ -55,8 +55,9 @@ do 50 MB.
   i Bridge odmówi jego wgrania; to poprawne zachowanie).
 
 > **Czego tu jeszcze nie ma.** Zakładki *Spedycja*, *Shoper*, *Katalog* i *AI Fallback* są
-> na razie puste — każda mówi, co ją wypełni. Automatyczne pobieranie cenników co N minut
-> dowozi blok **3f-3**; na razie synchronizację uruchamiasz ręcznie (sekcja 3.10).
+> na razie puste — każda mówi, co ją wypełni. **Automatyczne pobieranie cenników co N minut
+> już jest** (sekcja 3.13), ale domyślnie WYŁĄCZONE — trzeba je świadomie włączyć; poza tym
+> synchronizację uruchamiasz ręcznie (sekcja 3.10).
 
 ---
 
@@ -233,10 +234,78 @@ Teraz jest jej normalną częścią.
 4. **Zapisz**.
 
 **Oczekiwane:** napis *Zapisano*, a odznaka na karcie pokazuje nową wartość — np. *co 4 godz.*
+⚠ Dotyczy to częstotliwości, URL-a i sposobu dostarczania. **Pole Status zachowuje się
+inaczej** — karta zwykle pokaże wartość wyliczoną, nie tę wybraną. To poprawne; wyjaśnienie
+w punkcie 11 rozdziału 4.
 
 **Sprawdź też blokadę:** ustaw dostawcy status **wstrzymany**, zapisz i kliknij
 **Synchronizuj teraz**. **Ręczna synchronizacja MA PRZEJŚĆ** mimo wstrzymania — wstrzymanie
 wyłącza tylko automat (blok 3f-3), nie Twoją decyzję.
+
+---
+
+### 3.13 ⭐ Automat — pobieranie cenników bez klikania (scheduler)
+
+Pięciu dostawców (**MO2, MO3, MO4, MO5, MO9**) ma w produkcji ustawione pobieranie
+**co 60 minut**. Ten sam mechanizm jest już w nowym Bridge, ale — inaczej niż w produkcji —
+**startuje wyłącznie wtedy, gdy ktoś świadomie go włączy**. Zrobiliśmy tak celowo: włączony
+automat odpytuje PRAWDZIWE serwery dostawców i podmienia dane pod Tobą w trakcie testów,
+a przy dostawcy, który akurat pada, dopisuje alert za każdym razem (patrz punkt 10 niżej).
+
+**Jak go włączyć (robi to Paweł na stagingu — tu masz, o co poprosić):**
+
+W pliku `.env` backendu:
+
+```
+IMPORT_SCHEDULER=true
+IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG=true
+```
+
+…i restart backendu. Druga zmienna jest po to, żebyś **nie czekała godziny** — bez niej
+pierwsze pobranie następuje dopiero po pełnym interwale (60 min), dokładnie jak w starym
+Bridge. Z nią pięciu dostawców rusza od razu po starcie, jeden po drugim co ~5 sekund.
+
+**Po czym POZNASZ, że działa** — w logu backendu, zaraz po starcie:
+
+```
+[scheduler] zaplanowano 5 dostawców z URL polling
+```
+
+Jeśli zobaczysz `zaplanowano 0`, **spójrz na linię pod spodem** — wypisuje każdego
+pominiętego dostawcę z powodem, np.:
+
+```
+[scheduler] pominięto: MO1 (sposób dostarczania: mail), MO6 (brak częstotliwości),
+            MO9 (status wstrzymany PRZELICZONY — ostatni plik sprzed 41 dni (próg: 30))
+```
+
+**Trzy powody, dla których automat potrafi zaplanować ZERO mimo poprawnych ustawień** —
+wszystkie odziedziczone po starym Bridge, żadnego nie zmienialiśmy:
+
+| Co widzisz w logu | Co się dzieje | Co z tym zrobić |
+|---|---|---|
+| `sposób dostarczania: mail` | Dostawca odbiera cennik mailem, nie spod URL | Nic — tak ma być |
+| `brak URL` / `brak częstotliwości` | Pole puste na karcie dostawcy | Uzupełnij w **Konfiguracja → Dostawcy** |
+| `status wstrzymany PRZELICZONY — ostatni plik sprzed N dni` | Dostawca nie miał udanego importu od ponad **30 dni**, więc Bridge sam liczy go jako wstrzymanego — i już nigdy go nie odpyta | Zrób raz **Synchronizuj teraz**; to odświeży znacznik i przy następnym restarcie dostawca wróci do automatu |
+| `status wstrzymany PRZELICZONY — brak pliku i zero produktów` | Świeża baza: dostawca nigdy nic nie zaimportował | Wgraj cennik albo zrób **Synchronizuj teraz** raz ręcznie |
+
+**Test właściwy** (przy włączonych obu zmiennych):
+
+1. Poproś o restart backendu z włączonym schedulerem.
+2. W ciągu ~30 sekund w **Konfiguracja → Dostawcy** odśwież stronę.
+3. **Oczekiwane:** u dostawców `url` pole **ostatnia próba** pokazuje przed chwilą,
+   a w **stagingu** przybyło pozycji. W tabeli alertów przybyły wpisy *Synchronizacja*
+   (albo *Błąd HTTP* / *Błąd pobierania*, jeśli któryś dostawca akurat nie odpowiada —
+   to też jest poprawny wynik testu, patrz 3.11).
+
+**Zmiana częstotliwości działa OD RAZU, bez restartu.** Ustaw dostawcy np. *co 5 min*
+i zapisz — automat przeplanuje się sam. ⚠ W starym Bridge tak **nie** było: tam zmiana
+częstotliwości nie ruszała automatu aż do restartu procesu, więc panel mówił „Zapisano"
+o czymś, co nie zadziałało. To jedna z niewielu rzeczy, które świadomie poprawiliśmy.
+
+⚠ **Uwaga uboczna:** zapis na karcie **któregokolwiek** dostawcy przebudowuje harmonogram
+**wszystkich** i zeruje im odliczanie. Przy edycji raz na jakiś czas to niewidoczne; nie
+klikaj „Zapisz" co kilka minut w kółko, bo automat nie zdąży się odpalić.
 
 ---
 
@@ -289,13 +358,32 @@ Bridge zapisuje alert przy KAŻDEJ nieudanej próbie, bez sklejania powtórek �
 stary Bridge. Liczba powtórzeń to informacja („pada od trzech dni, 23 razy na dobę"), a nie
 usterka. Zwijaniem powtórek w czytelną listę zajmie się widok alertów w **Iteracji 6**.
 
+**11. ⭐ Ustawiasz status *wstrzymany*, zapisujesz — a karta dalej pokazuje *aktywny*
+albo *błąd*.**
+To NIE jest zignorowany zapis. Bridge (stary i nowy tak samo) **wylicza status wyświetlany
+na bieżąco** i w większości przypadków nadpisuje nim to, co zapisałaś:
+
+| Sytuacja dostawcy | Co pokaże karta |
+|---|---|
+| ostatni import udany, są produkty w katalogu | *aktywny* |
+| ostatni import udany, zero produktów w katalogu | *błąd* |
+| ostatni import ponad **30 dni** temu | *wstrzymany* |
+| nigdy nic nie zaimportował | *wstrzymany* |
+| nigdy nic nie zaimportował, ale ma produkty | Twoja wartość z pola **Status** |
+
+**Twoje wstrzymanie mimo to DZIAŁA** — jest zapisane i to ono, a nie napis na karcie,
+blokuje automatyczne pobieranie. Sprawdzisz to tak: wstrzymaj dostawcę, poczekaj na cykl
+automatu i zobacz, że **ostatnia próba** się nie zmieniła, a **Synchronizuj teraz** dalej
+przechodzi. Zachowanie odtworzone 1:1 ze starego Bridge — zgłoszone osobno, czeka na
+decyzję, czy je prostować.
+
 ---
 
 ## 5. Czego jeszcze NIE MA — świadomie
 
 | Czego brakuje | Kiedy |
 |---|---|
-| Automatyczne pobieranie cenników co N minut | **blok 3f-3** |
+| ~~Automatyczne pobieranie cenników co N minut~~ | ✅ **jest** — sekcja 3.13, domyślnie wyłączone |
 | **Widok** alertów (same alerty już się zapisują) | Iteracja 6 |
 | Zakładki *Spedycja*, *Shoper*, *Katalog*, *AI Fallback* | Iteracja 11 |
 | Narzuty i promocje przeliczające cenę sprzedaży | Iteracja 4 |
@@ -311,6 +399,9 @@ Historia cen **jest zapisywana** przy każdym auto-zatwierdzeniu — brakuje tyl
 ## 6. Szybka lista kontrolna
 
 - [ ] **Cennik wgrany z przeglądarki daje pozycje w stagingu** ⭐
+- [ ] **Automat pobiera sam po włączeniu `IMPORT_SCHEDULER`** ⭐ (sekcja 3.13)
+- [ ] Log mówi `zaplanowano N dostawców z URL polling`, a przy `0` wypisuje powody
+- [ ] Zmiana częstotliwości wchodzi w życie bez restartu backendu
 - [ ] Rozpoznany dostawca zgadza się z plikiem (i da się go poprawić ręcznie)
 - [ ] Plik XLSX (MO8 / MO10) też się wgrywa
 - [ ] Zepsuty plik daje CZYTELNY błąd, a nie ciszę

@@ -150,7 +150,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2: 2026-09-01** |
+| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
@@ -308,7 +308,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
-- **Status:** 🔨 **OTWARTA PONOWNIE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01 · **3f-1 ✅ 2026-09-01 · 3f-2 ✅ 2026-09-01 · 3f-3 ⬜**) — 2026-09-01 dołożono blok **3f** (brzeg operacyjny importu), wydzielony z I11 decyzją użytkownika. Powód: bez niego pełnego cyklu importu nie da się uruchomić z przeglądarki, a połowa dostawców jedzie w produkcji automatycznym pollingiem, którego roadmapa w ogóle nie miała  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
+- **Status:** ✅ **ZAMKNIĘTA 2026-09-01** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01 · **3f-1 ✅ 2026-09-01 · 3f-2 ✅ 2026-09-01 · 3f-3 ✅ 2026-09-01**) — 2026-09-01 dołożono blok **3f** (brzeg operacyjny importu), wydzielony z I11 decyzją użytkownika. Powód: bez niego pełnego cyklu importu nie da się uruchomić z przeglądarki, a połowa dostawców jedzie w produkcji automatycznym pollingiem, którego roadmapa w ogóle nie miała  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
   - **⚠ Blok 3d ZOSTAŁ PODZIELONY** (decyzja użytkownika, 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`). Powód: blok zbierał 8 punktów, a lektura źródeł dołożyła kolejne 4 endpointy, których roadmapa nie wymieniała (patrz blok 3d-2) — wychodził największy blok całej iteracji. Szew: **3d-1 kończy się na `tk()`, 3d-2 zaczyna na brzegu HTTP.**
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
 - **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~5000 linii: `common.cjs`, `tyre_params.cjs`, `adapter.cjs`, `dispatcher.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dictionaries/` — porcja 3a; `bridge_ext.cjs`/`tire_dims.js` nie są wołane przez żaden plik z `parsers/`, więc wypadły z portu 3a — a doprecyzowanie z 2026-08-26 przesunęło je do 3d — **ostatecznie przeportowane bajt-w-bajt w 3d-1, 2026-08-27**, razem z markerem `legacy/package.json`, bez którego `tire_dims.js` po cichu się nie ładował), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
@@ -471,7 +471,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
       (backlog #11). UI ma je pokazywać, nie filtrować.
     - `zatwierdzilUzytkownikId`/`zatwierdzonoData` są w produkcji **martwe** — nic ich nigdy nie ustawia. Nie budować na nich UI.
   - **Gate:** fixtures FE + **Ania klika pełny cykl importu** na staging.
-- **3f · Brzeg operacyjny importu** — ⬜ **DOŁOŻONE DO ITERACJI 3 decyzją użytkownika (2026-09-01).**
+- **3f · Brzeg operacyjny importu** — ✅ **ZAMKNIĘTY 2026-09-01** (3f-1 ✅ · 3f-2 ✅ · 3f-3 ✅).
+  **DOŁOŻONY DO ITERACJI 3 decyzją użytkownika (2026-09-01).**
   Zakres wydzielony z **Iteracji 11**, żeby Ania mogła przetestować **każdą ścieżkę importu
   używanej dziś produkcji**, a nie tylko efekt w stagingu. Dzielone na trzy części **po
   ŚCIEŻKACH IMPORTU, nie po warstwach** — inaczej niż 3d — bo każda część ma się kończyć czymś,
@@ -691,32 +692,114 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     dostarczania, statusem i `ostatniaSync`; akcje „Synchronizuj teraz" i edycja pól,
     z wchłoniętym `freq-injection.js`.
 
-- **3f-3 · Scheduler** (BE) — ⬜. Port `D4()` (`:48118-48131`) za `IMPORT_SCHEDULER`.
-  - Osobno mimo małego rozmiaru, bo to jedyna część z **timerami w tle**, jedyna bez UI
-    i jedyna, która w razie pomyłki zacznie sama odpytywać serwery dostawców.
-  - Dobór dostawców 1:1 z oryginałem: `sposobDostarczania === "url"` && `url` &&
-    `czestotliwoscMinuty` && `status !== "wstrzymany"`. Ponowne wywołanie czyści poprzednie
-    interwały (`clearInterval` po mapie). `unref()` na interwałach, żeby nie trzymały procesu.
-  - **Gate:** dobiera właściwych dostawców; ponowne wywołanie nie mnoży timerów;
-    **bez `IMPORT_SCHEDULER` nie startuje w ogóle**; `status: wstrzymany` wyklucza z automatu.
-  - **⭐ CO ZOSTAWIŁA SESJA 3f-2 — czytaj przed planowaniem:**
-    - **Funkcja do wołania JUŻ ISTNIEJE i nie pisz jej drugi raz.**
-      `synchronizujDostawce({db, katalogArchiwum, silnik})` z `src/import/synchronizuj.ts`
-      zwraca funkcję `(kod, opcje?) => Promise<WynikSynchronizacji>`. Scheduler woła ją
-      **BEZ opcji** — dokładnie tak jak oryginał (`L4(n.kod)`, `:48127`), więc blokada
-      `status === "wstrzymany"` DZIAŁA na automacie. Flaga `{recznie: true}` należy
-      wyłącznie do trasy `synchronizuj-teraz` (`q4()`), i tak jest przetestowane.
-    - **Jedna instancja na proces, nie dwie.** `trasyDostawcow` przyjmuje opcjonalne
-      `synchronizuj` właśnie po to, żeby `app.ts` mógł stworzyć JEDNĄ instancję i podać ją
-      i trasie, i schedulerowi. Bez tego oba dostaną własny `silnikStagingu`.
+- **3f-3 · Scheduler** (BE) — ✅ **2026-09-01.** Port `D4()` (`:48118-48131`) za `IMPORT_SCHEDULER`.
+  **Pięciu dostawców URL odpytuje się samo — ale wyłącznie wtedy, gdy ktoś świadomie włączy.**
+  - **⭐ Rozstrzygnięcia sesji 3f-3 (2026-09-01, decyzje użytkownika) — NIE otwierać ponownie:**
+    - **START W `server.ts` PO `listen()`, nie w `stworzApp`** — świadome odstępstwo
+      w UMIEJSCOWIENIU, bez zmiany zachowania procesu produkcyjnego. Oryginał woła `D4()`
+      w `M4()` (`:48167`), czyli w odpowiedniku `stworzApp`, przed rejestracją tras
+      (zweryfikowane grafem wywołań: `function D4(` raz i `D4(` dwa razy łącznie
+      w `mirror/backend/index.cjs` — jedno wywołanie, żadnej trasy, żadnego duplikatu).
+      Powód odstępstwa: `stworzApp` buduje KAŻDY test suity (supertest, `test/gate/aplikacja.ts`),
+      więc wierne umiejscowienie przepuszczałoby całą suitę przez kod stawiający timery
+      i nie miałoby gdzie zawiesić sprzątania. `server.ts` ma już `zamknij()` na SIGTERM/SIGINT
+      i tam scheduler jest gaszony. W produkcji `stworzApp` jest wołane raz, tuż przed
+      `listen()`, więc zachowanie procesu jest identyczne. Pilnuje tego test czytający
+      `src/app.ts` i sprawdzający, że nie ma w nim `stworzScheduler` ani `setInterval`.
+    - **`PATCH /api/dostawcy/{id}` PRZEPLANOWUJE SCHEDULER** — świadome odstępstwo.
+      `D4()` nie jest wołane z żadnej trasy, więc w produkcji zmiana „co 4 godz." daje
+      „Zapisano", a automat chodzi ze starym interwałem AŻ DO RESTARTU procesu. Do 3f-2 było
+      to niewidoczne (częstotliwość zmieniało się PATCH-em z konsoli); po wchłonięciu
+      `freq-injection.js` jest na to przycisk w panelu, więc cisza po zapisie stała się
+      zachowaniem mylącym. ⚠ **Koszt przyjęty świadomie:** przebudowa jest HURTOWA (`D4()`
+      czyści całą mapę), więc PATCH zeruje odliczanie WSZYSTKIM dostawcom, nie tylko
+      zmienionemu — PATCH częstszy niż interwał zagłodziłby automat. Przeplanowanie **nigdy**
+      nie odpala przebiegu startowego (inaczej każdy zapis w panelu waliłby w pięć serwerów
+      dostawców naraz) i jest **nie-operacją**, gdy automat nie działa — czyli zawsze przy
+      wyłączonym `IMPORT_SCHEDULER`. Podpięte przez `przeplanujScheduler?: () => void`
+      w `ZaleznosciApp`/`ZaleznosciDostawcow`; pominięte (testy, dev) ⇒ zachowanie 1:1.
+    - **PRZEBIEG STARTOWY ZA OSOBNYM PRZEŁĄCZNIKIEM `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG`**
+      (domyślnie WYŁĄCZONY). `D4()` stawia sam `setInterval`, więc po włączeniu automatu
+      przez GODZINĘ nie dzieje się nic — dla produkcji bez znaczenia (proces żyje ciągle),
+      dla testów Ani na stagingu to różnica między „widzę, że działa" a „nie wiem, czy
+      wystartowało". Osobna zmienna, a nie zmiana samego `D4()`, **żeby proces produkcyjny
+      został 1:1**: przy obu domyślnych wartościach zachowanie jest identyczne z oryginałem.
+      Rozrzut `ODSTEP_PIERWSZEGO_PRZEBIEGU_MS = 5 s` między dostawcami, żeby piątka nie
+      ruszyła w tej samej sekundzie. Sprawa rozstrzygana ODRĘBNIE od samego przełącznika
+      `IMPORT_SCHEDULER`, który był zaklepany wcześniej.
+    - **DRUGA LINIA LOGU Z POWODAMI POMINIĘCIA** — dodatek wyłącznie logowy, zero wpływu
+      na dobór. Linia `[scheduler] zaplanowano N dostawców z URL polling` zostaje co do
+      znaku 1:1 (`:48130`); pod nią nasza `[scheduler] pominięto: MO1 (sposób dostarczania:
+      mail), …`. Powód: bez niej `zaplanowano 0` nie mówi, czy to konfiguracja, czy pułapka
+      opisana niżej. Włączony scheduler loguje też jawnie, gdy jest wyłączony.
+  - **⚠ ZNALEZIONE W TEJ SESJI — DWA POJĘCIA STATUSU (backlog #17 i #18, oba ODTWORZONE 1:1).**
+    `D4()` dobiera po `U.listSuppliers()`, a ta funkcja **przelicza `status` w locie**
+    (`:45026`); `L4()` sprawdza status z **surowego wiersza** (`getSupplierByKod`, `:48039`).
+    Trzy konsekwencje, wszystkie portowane bez zmian:
+    1. **Samozakleszczenie 30 dni** — dostawca bez udanego importu od ponad 30 dni ma
+       wyliczony status „wstrzymany", więc wypada z automatu, więc nigdy się nie odświeży,
+       więc już nie wróci bez ręcznego „Synchronizuj teraz" (backlog #17).
+    2. **Świeża baza planuje ZERO** — przy `ostatniPlik = null` i zerze produktów wyliczony
+       status to „wstrzymany" u WSZYSTKICH. Dotyczy też stagingu ze snapshotu: `db/snapshot.db`
+       ma u piątki `url` `ostatni_plik = 2026-08-13`, czyli **po 2026-09-13 planuje zero**.
+    3. **Wstrzymany dostawca ze świeżym `ostatniPlik` DOSTAJE timer** — bo `D4()` widzi
+       status wyliczony („aktywny"), a blokada siedzi dopiero w `L4()`. Pobrania nie ma,
+       więc skutek dla użytkownika jest właściwy, ale mechanizm inny niż sugeruje kod;
+       gate „wstrzymany wyklucza z automatu" jest rozliczony na poziomie **braku pobrania**,
+       nie braku timera. Objaw widoczny dla Ani (karta pokazuje „aktywny" po zapisaniu
+       „wstrzymany") opisany w `docs/instrukcja-testow-I3.md` §4 pkt 11 (backlog #18).
+    Propozycje napraw są w backlogu; **właściciel do ustalenia**, nie doklejamy ich do 3f-3,
+    bo #17 zmienia dobór dostawców, a #18 dokłada 19. klucz do kontraktu `GET /api/dostawcy`.
+  - **Dowiezione:** `src/import/scheduler.ts` (`stworzScheduler` → `uruchom` / `przeplanuj` /
+    `zatrzymaj` / `czyDziala` / `liczbaTimerow`); `config/env.ts` + `IMPORT_SCHEDULER`
+    i `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` (oba domyślnie wyłączone); `server.ts` — jedna
+    instancja `synchronizujDostawce` na proces podawana i trasie, i schedulerowi, start pod
+    warunkiem, gaszenie w `zamknij()`; `app.ts` + `routes/suppliers.ts` — przewód
+    `synchronizuj` i `przeplanujScheduler`. Testy: `test/scheduler.test.ts` (24).
+    Dokumentacja: `.env.example`, `docs/instrukcja-testow-I3.md` §3.13 i §4 pkt 11.
+  - **Gate — rozliczony:** bez `IMPORT_SCHEDULER` zero timerów ✅ (plus test pilnujący, że
+    `app.ts` nie zawiera `stworzScheduler` ani `setInterval`); dobór `url` + URL +
+    częstotliwość + status ✅; `czestotliwoscMinuty = 0` wypada ✅; trzykrotne `uruchom()`
+    nie mnoży timerów, a stary interwał jest GASZONY, nie tylko nadpisywany ✅;
+    `wstrzymany` — zero pobrań automatem, ręczna synchronizacja przechodzi ✅; interwał
+    faktycznie ODPALA pobranie — **żywy serwer HTTP na porcie efemerycznym, `fetch`
+    niemockowany, PRAWDZIWE timery** ✅; awaria dostawcy nie wywraca pętli ✅; po
+    `zatrzymaj()` nic nie wisi, interwały `unref`owane (sprawdzone
+    `process.getActiveResourcesInfo()`) ✅; scheduler woła synchronizację BEZ flagi
+    `recznie` ✅; PATCH przeplanowuje, ale nie odpala przebiegu startowego ✅; pułapki
+    30 dni i świeżej bazy pokryte testami ✅. Regresja: gate'y I1–I3 zielone, **BE 449
+    (425 + 24), FE 183** ✅. lint / typecheck / build / test czyste ✅.
+  - **⚠ SZTUCZKA TESTOWA DO WIADOMOŚCI KOLEJNYCH SESJI:** krótki interwał bez fałszywych
+    timerów bierze się z UŁAMKOWEJ `czestotliwoscMinuty` (0,005 min = 300 ms) wpisanej wprost
+    do bazy. SQLite trzyma taką wartość jako REAL mimo deklaracji kolumny INTEGER, więc kod
+    produkcyjny nie musi o tym wiedzieć — mnożenie `× 60 × 1000` jest to samo. Dzięki temu
+    cały plik testowy chodzi na prawdziwych timerach i prawdziwym HTTP w ~8 s.
+  - **⚠ `ostatniPlik` W ZASIEWIE TESTOWYM MUSI BYĆ ŚWIEŻY** — inaczej `przeliczStatus` daje
+    „wstrzymany" i dostawca w ogóle nie kwalifikuje się do automatu. Kosztowało to trzynaście
+    fałszywych porażek przy pierwszym uruchomieniu `test/scheduler.test.ts`.
+  - **Dobór dostawców — portowany 1:1:** `sposobDostarczania === "url"` && `url` &&
+    `czestotliwoscMinuty` && `status !== "wstrzymany"`, w tej kolejności (`:48123`). Ponowne
+    wywołanie czyści poprzednie interwały (`clearInterval` po mapie); `unref()` na
+    interwałach. ⚠ Warunek na status widzi wartość PRZELICZANĄ — patrz ostrzeżenie wyżej.
+  - **Dlaczego to był osobny blok:** jedyna część z timerami w tle, jedyna bez UI i jedyna,
+    która w razie pomyłki zaczyna sama odpytywać serwery dostawców.
+  - **⭐ WEJŚCIE Z SESJI 3f-2 — ROZLICZONE, zostaje jako zapis zmierzonych faktów:**
+    - **Funkcja pobierająca nie została napisana drugi raz** ✅ — scheduler woła
+      `synchronizujDostawce()` z `src/import/synchronizuj.ts` **BEZ opcji**, jak oryginał
+      (`L4(n.kod)`, `:48127`), więc blokada `status === "wstrzymany"` działa na automacie.
+      Flaga `{recznie: true}` została wyłącznie przy trasie `synchronizuj-teraz` (`q4()`);
+      osobny test sprawdza wprost, że scheduler przekazuje sam kod.
+    - **Jedna instancja na proces** ✅ — tworzy ją `server.ts` (nie `app.ts`, bo tam
+      przeniósł się start) i podaje i trasie, i schedulerowi.
     - **Ile realnie odpali automat:** pięciu dostawców `url` × 60 min = **120 pobrań/dobę**
       (patrz sprostowanie faktu w bloku 3f — snapshot, nie „40/60/1440").
     - **Alerty nie mają dławika** (decyzja 3f-2). Trwale padnięty dostawca da ~24 alerty
       na dobę, trzej padnięci naraz ~72 — to zmierzone zachowanie produkcji, nie regres.
       Dlatego `IMPORT_SCHEDULER` domyślnie WYŁĄCZONY ma tu drugie uzasadnienie: bez niego
       staging nie zaleje sobie tabeli alertów w trakcie testów Ani.
-    - **`unref()` na interwałach jest KONIECZNY, nie kosmetyczny.** Wiszący timer trzyma
-      proces i wywraca `afterAll` w testach. Przy okazji: `L4()` produkcji nie czyści
+    - **`unref()` na interwałach jest KONIECZNY, nie kosmetyczny** ✅ zrobione i sprawdzone
+      przez `process.getActiveResourcesInfo()`. Wiszący timer trzyma proces i wywraca
+      `afterAll` w testach. Przy okazji: `L4()` produkcji nie czyści
       swojego 30-sekundowego timera po odrzuconym `fetch` — nasz port czyści go w `finally`
       (odstępstwo opisane w `synchronizuj.ts`), więc scheduler nie zostawia śmieci.
 - **Wejście z triażu (2026-08-25, `rebuild-backlog.md`):**
@@ -724,7 +807,13 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **#4 `uwaga_cena`** (cena „na zapytanie") → kolumna `products.uwaga_cena` **dodana w 3b** (osobna migracja, bez #3); propagacja w imporcie (`acceptStaging`) → **3d-2**; endpointy → **I12**. **Sprostowanie 2026-08-27 (3d-1): endpointy są DWA, nie jeden** — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony w locie, 5 przypadków). Obu brak w zamrożonym kontrakcie — dopisać do openapi razem, w I12. Frontend tooltip = injection → późniejsza iteracja.
   - **#5 `frazy`** → ✅ **zbadane i rozstrzygnięte (3a, 2026-08-26): to NIE jest normalizacja w adapterze.** `frazy_migruj.cjs` to samodzielny skrypt jednorazowy czytający `/tmp/frazy_migracja.json` i wołający `selly/client.cjs` (PUT do Selly); w `common.cjs` słowo „frazy" nie występuje (0 trafień). **Poza zakresem I3** — do rozważenia przy I8 (Selly).
 - **Ścieżki (GATE):** staging×9 (3× odczyt ✅ 3b, 6× mutacje ✅ 3d-2), import×2 ✅ 3b, ai-fallback ✅ 3b, overrides×3 (`GET`, `POST`, `DELETE {id}` — `PUT` NIE ISTNIEJE) ✅ 3d-2.  **Fixtures:** `GET_staging.json` ✅ 3b, `GET_staging_paged.json` ✅ 3b, **`GET_overrides.json` ✅ 3d-2**.
-- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE ✅. **„Ania przeklika PEŁNY cykl importu" domknięte przez blok 3f-1 ✅ 2026-09-01** (wgrywanie z przeglądarki), a pełne pokrycie ścieżek produkcyjnych — 3f-2 (URL, alerty) i 3f-3 (automat). Do 2026-09-01 punkt ten wskazywał na I11; zakres został stamtąd wydzielony do 3f.
+- **DoD — ROZLICZONY 2026-09-01, ITERACJA ZAMKNIĘTA:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3f zielone** ✅; fixtures przez GATE ✅. **„Ania przeklika PEŁNY cykl importu"** ✅ — wgrywanie z przeglądarki 3f-1, ścieżka URL i alerty 3f-2, automat 3f-3. **Wszystkie trzy produkcyjne ścieżki importu (mail/upload → wgranie ręczne, url → „Synchronizuj teraz", url → automat) są uruchamialne z przeglądarki** ✅. Do 2026-09-01 punkt ten wskazywał na I11; zakres został stamtąd wydzielony do 3f.
+  **Stan bramek na zamknięcie:** BE **449 testów** w 30 plikach, FE **183** w 13; lint / typecheck / build czyste.
+- **⚠ CO ZOSTAJE OTWARTE PO ITERACJI 3 — świadomie, z właścicielem:** zamknięcie iteracji NIE znaczy, że nie ma tu długu. Cztery rzeczy wychodzą dalej i **żadna nie blokuje I4**:
+  - **Fallback `Wc()` NIE wchodzi** (decyzja zaklepana 2026-09-01, blok 3f) — dziesięć starych parserów zaszytych w bundlu, port wielkości sesji 3a. **Luka otwarta, właściciel do ustalenia.**
+  - **Alerty bez dławika** (decyzja 3f-2) → zwijanie powtórek należy do **widoku alertów w Iteracji 6**, wymóg wpisany w tamten blok. Po włączeniu automatu z 3f-3 tempo to ~24 alerty/dobę na trwale padniętego dostawcę.
+  - **Dwa pojęcia statusu dostawcy** (backlog **#17** i **#18**, znalezione w 3f-3, odtworzone 1:1) — samozakleszczenie po 30 dniach, świeża baza planująca zero, oraz „wstrzymany" niewidoczny na karcie. Propozycje napraw w backlogu; **właściciel do ustalenia**, bo #17 zmienia dobór dostawców do automatu, a #18 dokłada klucz do kontraktu `GET /api/dostawcy` (przenagranie `GET_dostawcy.json` i `GET_suppliers.json`).
+  - **`PATCH /api/markups/{id}` i `/api/promotions/{id}` zapisują CAŁE ciało żądania** (backlog #14, wejście z 3f-2) → **Iteracja 4**, wymóg wpisany w tamten blok.
 
 ---
 
