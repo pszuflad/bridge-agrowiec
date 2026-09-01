@@ -1,0 +1,282 @@
+# Iteracja 3 (Import) — instrukcja testów dla Ani
+
+**Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-01
+
+> **To jest STAGING, nie produkcja.** Baza to kopia produkcji z 2026-08-13. Cokolwiek tu
+> zaakceptujesz, odrzucisz albo zepsujesz — produkcji nie dotyka. Testuj bez skrupułów.
+
+---
+
+## 1. Co dowozi Iteracja 3
+
+Cały silnik importu: od wczytania cennika, przez dopasowanie pozycji do katalogu i klasyfikację
+zmian, po zatwierdzanie i wycofania. Plus widok `/staging`, w którym te decyzje podejmujesz.
+
+**Sedno do sprawdzenia — trzy reguły:**
+
+1. **Import zatwierdza SAM tylko to, co nieryzykowne** — samą cenę, marżę, stan albo magazyn.
+   Wszystko, co rusza tożsamość opony (nazwa, marka, model, rozmiar, indeksy, kod dostawcy),
+   idzie do Ciebie na `/staging`.
+2. **Twoja ręczna poprawka WYGRYWA z plikiem dostawcy.** Zawsze. Import jej nie nadpisze —
+   zgłosi konflikt i zostawi Twoją wartość.
+3. **Produkt znika z cennika → wycofanie po TRZECH nieobecnościach pod rząd**, nie po pierwszej.
+   Wycofanie nie kasuje produktu, tylko prosi Cię o decyzję.
+
+---
+
+## 2. Przygotowanie — zanim zaczniesz
+
+⚠ **Importu NIE da się dziś uruchomić z przeglądarki.** W starym Bridge wgrywanie cenników
+siedzi na stronie *Konfiguracja → wgrywanie*, a tej strony jeszcze nie odbudowaliśmy
+(planowana na Iterację 11). Backend importu działa w pełni — brakuje wyłącznie przycisku.
+
+**Dlatego cennik wgrywa Paweł** i daje znać, gdy staging jest wypełniony. Jeśli chcesz wgrać
+własny plik samodzielnie, komendy są w [sekcji 8](#8-dodatek--wgrywanie-cennika-z-konsoli).
+
+**Do testu potrzebujesz:**
+- konta w panelu (to samo co zwykle),
+- wiedzy, który cennik został wgrany (np. MO1 Bohnenkamp) — Paweł poda.
+
+---
+
+## 3. Scenariusze — po kolei
+
+Każdy scenariusz: **co zrobić** → **czego oczekiwać**. Jeśli wyjdzie inaczej — zapisz i zgłoś
+wg [sekcji 7](#7-jak-zgłaszać-problemy).
+
+### 3.1 Lista pozycji
+
+1. Zaloguj się i wejdź w **Staging** w menu po lewej.
+2. Zobacz tabelę.
+
+**Oczekiwane:** lista pozycji z kolumnami *Typ · Kod · Nazwa · Dostawca · Stan · Cena zakupu ·
+Cena sprzedaży · Magazyn · Zmiana · Powód / co sprawdzić · Akcje*. Kolumny „Stan" i „Cena zakupu"
+pokazują zmianę w formie `stara → nowa`, gdy wartość się zmieniła.
+
+**Odznaki typu:** zielona *Nowa*, niebieska *Zmiana kluczowa*, ciemnoczerwona *Błąd*,
+czerwona *Wycofana*.
+
+### 3.2 Filtr i wyszukiwarka
+
+1. Zmień **Typ sprawy** na *Błędy importu* → tabela pokazuje tylko pozycje z odznaką *Błąd*.
+2. Wróć na *Wszystkie*.
+3. Wpisz w wyszukiwarkę fragment kodu albo nazwy → lista się zawęża.
+
+**Oczekiwane:** filtrowanie i szukanie działają **na całym zbiorze**, nie tylko na bieżącej
+stronie — licznik „(N pozycji)" na dole ma się zmienić.
+
+### 3.3 Stronicowanie
+
+1. Na dole zmień **Na stronie** na 50 albo 100.
+2. Przejdź *Następna* / *Poprzednia* / *« Pierwsza*.
+
+**Oczekiwane:** zmiana rozmiaru strony wraca na stronę 1 (to celowe — inaczej łatwo wylądować
+poza zakresem i zobaczyć pustą tabelę).
+
+### 3.4 Podgląd różnic
+
+1. Kliknij **Szczegóły** przy dowolnej pozycji typu *Zmiana kluczowa* albo *Błąd*.
+
+**Oczekiwane:** okno z trzema rzeczami:
+- **Powód / co sprawdzić** — pełny opis, co się zmieniło i dlaczego pozycja trafiła do Ciebie,
+- **Podgląd różnic** — komplet pól pozycji po normalizacji,
+- **Edycja** — osiem pól do poprawienia.
+
+Jeśli pozycja ma ostrzeżenie (np. o konflikcie EAN albo błędnym zapisie nazwy) — pokaże się
+na pomarańczowo. **Ostrzeżenia mają być widoczne w całości, nie skracane.**
+
+### 3.5 ⭐ Edycja i poprawka — NAJWAŻNIEJSZY TEST
+
+To jest sedno całej iteracji. Sprawdza, czy Twoja ręczna decyzja przeżywa kolejny import.
+
+1. Otwórz **Szczegóły** dowolnej pozycji.
+2. Zmień jedno pole — np. **Kategoria** — na wartość, której nie ma w pliku dostawcy.
+3. W **Uzasadnienie** wpisz np. „test poprawki".
+4. Kliknij **Zapisz**.
+5. Otwórz tę pozycję ponownie.
+
+**Oczekiwane po zapisie:** okno się zamyka, a po ponownym otwarciu w podglądzie widać Twoją
+wartość, nie tę z pliku.
+
+**Oczekiwane po ponownym imporcie tego samego cennika** (poproś Pawła o powtórzenie importu):
+- pozycja wraca na staging z typem **Błąd**,
+- w **Powodzie** jest zdanie: *„konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty,
+  plik NIE nadpisuje"*,
+- w oknie szczegółów pojawia się pomarańczowa ramka **„Plik dostawcy chciał nadpisać poprawkę
+  Marty"** z wartością, której chciał plik,
+- **Twoja wartość jest nienaruszona.**
+
+**Oczekiwane po zaakceptowaniu takiej pozycji:** przy KOLEJNYM imporcie ten sam konflikt
+**już nie alarmuje** (system zapamiętał, że tę wartość z pliku już widziałaś i odrzuciłaś),
+ale Twoja poprawka dalej wygrywa.
+
+To jest cały mechanizm w jednym zdaniu: **plik nigdy nie wygrywa z Tobą, a alarm nie powtarza
+się w nieskończoność.**
+
+### 3.6 Akceptacja pojedynczej pozycji
+
+1. Zapamiętaj **Kod** pozycji.
+2. Zaznacz ją i kliknij **Akceptuj zaznaczone (1)**.
+3. Wejdź w **Katalog** i wyszukaj ten kod.
+
+**Oczekiwane:** pozycja znika ze stagingu, a produkt jest w katalogu z wartościami z pozycji.
+Produkt nowy dostaje: cenę sprzedaży = zakup × 1,25 (gdy plik jej nie podał), marżę 25%,
+kategorię „Rolnicze" i VAT 23%, jeśli plik nie powiedział inaczej.
+
+### 3.7 Odrzucenie
+
+1. Zaznacz pozycję i kliknij **Odrzuć zaznaczone**.
+
+**Oczekiwane:** pozycja znika ze stagingu, a **katalog się NIE zmienia**. Odrzucenie to
+„nie chcę tej zmiany", nie „skasuj produkt".
+
+### 3.8 Akcje masowe — trzy różne rzeczy
+
+| Przycisk | Co robi |
+|---|---|
+| **Akceptuj/Odrzuć zaznaczone** | tylko pozycje z zaznaczonym haczykiem |
+| **Akceptuj/Odrzuć widoczne** | wszystkie z BIEŻĄCEJ strony |
+| **Akceptuj/Odrzuć wszystkie (N)** | wszystkie pasujące do filtru, **niezależnie od strony** |
+
+1. Ustaw filtr na jakiś typ, kliknij **Odrzuć wszystkie (N)**.
+
+**Oczekiwane:** pytanie o potwierdzenie, a po zgodzie — zniknięcie wszystkich pozycji tego typu,
+także z dalszych stron. Licznik wraca do zera.
+
+> Potwierdzenie to nasz dodatek — stary Bridge pytał. Jeśli uznasz je za zbędne, powiedz,
+> usuniemy.
+
+### 3.9 Wycofania
+
+Wycofanie pojawia się, gdy produkt zniknie z cennika **trzy razy pod rząd**.
+
+1. Poproś Pawła o trzy importy cennika bez którejś pozycji.
+2. Po trzecim wejdź na staging i ustaw filtr **Wycofane**.
+
+**Oczekiwane:** pozycja z odznaką *Wycofana*, powodem „Brak w cenniku — pozycja wycofana"
+i stanem docelowym 0. W szczegółach **nie ma podglądu różnic** — jest komunikat, że pozycja
+została wycofana i po akceptacji produkt zostanie wstrzymany.
+
+**Po zaakceptowaniu:** produkt **zostaje w katalogu**, ale ze statusem *wstrzymany* i stanem 0.
+Nie znika — decyzja o skasowaniu należy do Ciebie, nie do automatu.
+
+---
+
+## 4. ⚠ Rzeczy, które WYGLĄDAJĄ na błąd, a są poprawne
+
+Przeczytaj, zanim coś zgłosisz — to najczęstsze fałszywe alarmy.
+
+**1. Zmian samej ceny i stanu NIE MA na stagingu.**
+Import zatwierdza je sam i wpisuje wprost do katalogu. Na staging trafia tylko to, co wymaga
+Twojej decyzji. Jeśli po imporcie staging jest chudy, a ceny w katalogu się zmieniły — tak ma być.
+Liczbę auto-zatwierdzeń widać w statystykach importu (Paweł poda).
+
+**2. Po pierwszym imporcie nie ma żadnych wycofań.**
+Próg to trzy nieobecności pod rząd. `wycofane: 0` przy pierwszym przebiegu jest poprawne.
+
+**3. Kolumna „szerokość" w katalogu pokazuje czasem `620.0` zamiast `620`.**
+To zastane dane sprzed Twojej poprawki `szertxt` — kolumna była wcześniej liczbowa i przy
+przejściu na tekst zostawiła po sobie takie zapisy. Nowe importy zapisują poprawnie (`620`,
+`14.9`, `10.00`), więc z czasem samo się wyprostuje.
+
+**4. Komunikat „zapis naukowy ma tylko null cyfr znaczących".**
+To **odtworzony błąd starego Bridge**, nie nowa usterka. W produkcji ta wiadomość wygląda
+identycznie. Zostawiliśmy ją celowo, żeby nic nie zmieniać po cichu — zgłoszona osobno
+i czeka na Twoją decyzję, czy naprawiamy.
+
+**5. MO6 (Uniglory) odmawia importu.**
+Komunikat: *„Dostawca MO6 jest wyłączony z importu"*. Tak ustaliliśmy — MO6 został świadomie
+wyłączony.
+
+**6. Filtr „Nowe produkty (stare)" nic nie znajduje.**
+To pozostałość po starszym oznaczeniu pozycji. Zostawiliśmy ją, bo jest w oryginale, ale nowy
+import jej nie produkuje.
+
+**7. Liczba „do akceptacji" w statystykach bywa większa niż liczba wierszy na stagingu.**
+Statystyka liczy pozycje przetworzone, a staging skleja powtórzenia tej samej pozycji w jeden
+wiersz. Różnica jest poprawna.
+
+---
+
+## 5. Czego jeszcze NIE MA — świadomie
+
+| Czego brakuje | Kiedy |
+|---|---|
+| Wgrywanie cenników z przeglądarki (*Konfiguracja → wgrywanie*) | Iteracja 11 |
+| Narzuty i promocje przeliczające cenę sprzedaży | Iteracja 4 |
+| Widok Historia (zmiany cen z importów) | Iteracja 5 |
+| Alerty | Iteracja 6 |
+| Atrybuty | Iteracja 7 |
+| Lista „cena na zapytanie" i powody wstrzymania | Iteracja 12 |
+
+Historia cen **jest zapisywana** przy każdym auto-zatwierdzeniu — brakuje tylko widoku.
+
+---
+
+## 6. Szybka lista kontrolna
+
+- [ ] Lista pozycji renderuje się z kompletem kolumn
+- [ ] Filtr typu zawęża listę
+- [ ] Wyszukiwarka działa na całym zbiorze
+- [ ] Stronicowanie i zmiana „Na stronie"
+- [ ] Podgląd różnic pokazuje powód i ostrzeżenia w całości
+- [ ] **Edycja zapisuje się i przeżywa kolejny import** ⭐
+- [ ] **Konflikt z poprawką jest zgłaszany, a wartość zachowana** ⭐
+- [ ] Akceptacja przenosi pozycję do katalogu
+- [ ] Odrzucenie nie rusza katalogu
+- [ ] Akcje masowe (zaznaczone / widoczne / wszystkie)
+- [ ] Wycofanie po trzecim imporcie, produkt wstrzymany a nie skasowany
+
+---
+
+## 7. Jak zgłaszać problemy
+
+Napisz Pawłowi, podając:
+
+1. **Co robiłaś** — konkretny krok z tej instrukcji albo opis kliknięć.
+2. **Czego oczekiwałaś** i **co się stało**.
+3. **Kod pozycji** i **dostawcę** (bez tego trudno odtworzyć).
+4. **Godzinę** (z dokładnością do minuty — po niej znajdziemy wpis w logach).
+5. **Zrzut ekranu**, jeśli coś wygląda nie tak.
+
+Najcenniejsze zgłoszenia to te z sekcji 3.5 — jeśli poprawka NIE przeżyła importu albo plik
+nadpisał Twoją wartość, to jest błąd krytyczny i chcemy o nim wiedzieć od razu.
+
+---
+
+## 8. Dodatek — wgrywanie cennika z konsoli
+
+Gdybyś chciała wgrać plik sama, bez czekania na Pawła.
+
+```bash
+# 1. Token (podstaw swój email i hasło)
+TOKEN=$(curl -s -X POST https://test.agritires.eu/api/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"TWOJ@EMAIL","password":"TWOJE_HASLO"}' \
+  | python3 -c 'import sys,json;print(json.load(sys.stdin)["token"])')
+
+# 2. Wgranie cennika (dostawcaKod: MO1…MO10, bez MO6)
+curl -s -X POST 'https://test.agritires.eu/api/import/parse-file?dostawcaKod=MO1&nazwa=cennik.csv' \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/octet-stream' \
+  --data-binary @cennik_MO1.csv
+```
+
+Odpowiedź to statystyki przebiegu:
+
+| Pole | Znaczenie |
+|---|---|
+| `doStagingu` | pozycje przetworzone do stagingu |
+| `nowe` / `zmienione` | nowe pozycje / zmiany wymagające decyzji |
+| `autoZatwierdzone` | **zatwierdzone automatycznie, prosto do katalogu** |
+| `wycofane` | pozycje wycofane w tym przebiegu (po trzeciej nieobecności) |
+| `bezZmian` | pozycje identyczne z katalogiem |
+| `odrzuconeNieOpony` | odrzucone jako nie-opony |
+
+Dostawcy z własnym adresem cennika mają też pobieranie po URL:
+
+```bash
+curl -s -X POST https://test.agritires.eu/api/import/from-url \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"dostawcaKod":"MO1"}'
+```
