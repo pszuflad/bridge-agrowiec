@@ -2,7 +2,8 @@
  * Widok `/konfiguracja` — szkielet sześciu zakładek z oryginału
  * (`deminified/frontend-index.js:26286-26382`).
  *
- * Blok 3f-1 wypełnia jedną zakładkę: „Wgrywanie ręczne". Pozostałe pięć istnieje,
+ * Bloki 3f-1 i 3f-2 wypełniają dwie zakładki: „Dostawcy" i „Wgrywanie ręczne".
+ * Pozostałe cztery istnieją,
  * jest osiągalnych i mówi wprost, co je dowiezie — bo szkielet bez nich rozjechałby
  * kolejność zakładek, którą Ania zna z produkcji. Przypisanie do bloków wynika z decyzji
  * użytkownika z 2026-09-01 (roadmapa §5, blok 3f) i mieszka w `konfiguracja/zakladki.ts`.
@@ -11,6 +12,7 @@ import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dostawcy } from "./konfiguracja/Dostawcy";
 import { Wgrywanie } from "./konfiguracja/Wgrywanie";
 import { ZAKLADKI_KONFIGURACJI } from "./konfiguracja/zakladki";
 
@@ -22,11 +24,11 @@ export function Konfiguracja() {
         subtitle="Dostawcy, wgrywanie ręczne, spedycja, Shoper i AI Fallback"
       />
       {/*
-       * Oryginał otwiera się na zakładce „dostawcy". My otwieramy na „wgrywanie",
-       * bo to jedyna wypełniona w tym bloku — wejście na pusty szkielet wyglądałoby
-       * jak zepsuty ekran. Wróci na „dostawcy", gdy 3f-2 tamtą zakładkę dowiezie.
+       * `defaultValue="dostawcy"` — jak w oryginale (`:26298`). 3f-1 otwierał ekran na
+       * „wgrywanie" tylko dlatego, że tamta zakładka była wtedy jedyną wypełnioną;
+       * po 3f-2 ta wymuszona zmiana jest już niepotrzebna.
        */}
-      <Tabs defaultValue="wgrywanie">
+      <Tabs defaultValue="dostawcy">
         <TabsList className="flex-wrap h-auto">
           {ZAKLADKI_KONFIGURACJI.map((z) => (
             <TabsTrigger key={z.wartosc} value={z.wartosc} data-testid={`tab-${z.wartosc}`}>
@@ -34,6 +36,10 @@ export function Konfiguracja() {
             </TabsTrigger>
           ))}
         </TabsList>
+
+        <TabsContent value="dostawcy" className="mt-4">
+          <Dostawcy />
+        </TabsContent>
 
         <TabsContent value="wgrywanie" className="mt-4">
           <Wgrywanie />
