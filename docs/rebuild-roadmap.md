@@ -150,7 +150,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · **3e: 2026-09-01** |
+| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
@@ -308,7 +308,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
-- **Status:** ✅ **ZROBIONE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01) — z jednym zastrzeżeniem: pełny cykl importu Z PRZEGLĄDARKI wymaga zakładki „wgrywanie" z **I11**, patrz blok 3e  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
+- **Status:** 🔨 **OTWARTA PONOWNIE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01 · **3f-1/3f-2/3f-3 ⬜**) — 2026-09-01 dołożono blok **3f** (brzeg operacyjny importu), wydzielony z I11 decyzją użytkownika. Powód: bez niego pełnego cyklu importu nie da się uruchomić z przeglądarki, a połowa dostawców jedzie w produkcji automatycznym pollingiem, którego roadmapa w ogóle nie miała  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
   - **⚠ Blok 3d ZOSTAŁ PODZIELONY** (decyzja użytkownika, 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`). Powód: blok zbierał 8 punktów, a lektura źródeł dołożyła kolejne 4 endpointy, których roadmapa nie wymieniała (patrz blok 3d-2) — wychodził największy blok całej iteracji. Szew: **3d-1 kończy się na `tk()`, 3d-2 zaczyna na brzegu HTTP.**
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
 - **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~5000 linii: `common.cjs`, `tyre_params.cjs`, `adapter.cjs`, `dispatcher.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dictionaries/` — porcja 3a; `bridge_ext.cjs`/`tire_dims.js` nie są wołane przez żaden plik z `parsers/`, więc wypadły z portu 3a — a doprecyzowanie z 2026-08-26 przesunęło je do 3d — **ostatecznie przeportowane bajt-w-bajt w 3d-1, 2026-08-27**, razem z markerem `legacy/package.json`, bez którego `tire_dims.js` po cichu się nie ładował), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
@@ -471,12 +471,105 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
       (backlog #11). UI ma je pokazywać, nie filtrować.
     - `zatwierdzilUzytkownikId`/`zatwierdzonoData` są w produkcji **martwe** — nic ich nigdy nie ustawia. Nie budować na nich UI.
   - **Gate:** fixtures FE + **Ania klika pełny cykl importu** na staging.
+- **3f · Brzeg operacyjny importu** — ⬜ **DOŁOŻONE DO ITERACJI 3 decyzją użytkownika (2026-09-01).**
+  Zakres wydzielony z **Iteracji 11**, żeby Ania mogła przetestować **każdą ścieżkę importu
+  używanej dziś produkcji**, a nie tylko efekt w stagingu. Dzielone na trzy części **po
+  ŚCIEŻKACH IMPORTU, nie po warstwach** — inaczej niż 3d — bo każda część ma się kończyć czymś,
+  co da się kliknąć. Podział BE/FE dałby Ani zero aż do końca drugiej części.
+  - **⭐ TAK IMPORT DZIAŁA W PRODUKCJI — obraz, którego roadmapa wcześniej nie miała:**
+
+    | Sposób dostarczania | Dostawcy | Częstotliwość |
+    |---|---|---|
+    | `url` — automatyczny polling | MO2, MO3, MO4, MO5, MO9 | 40 / 60 / 60 / 60 / 1440 min |
+    | `mail` — ręczne wgranie pliku | MO1, MO7, MO8, MO10 | — |
+    | `upload` — ręczne wgranie | MO6 (wyłączony z importu) | — |
+
+    **Połowa dostawców jedzie automatem.** Do 3f żadnej z tych ścieżek nie dało się uruchomić
+    inaczej niż `curl`-em.
+  - **⚠ LUKA 1, ZNALEZIONA PRZEGLĄDEM 2026-09-01: schedulera NIE BYŁO W ROADMAPIE.** `D4()`
+    (`backend-index.cjs:48118-48131`) ustawia `setInterval` per dostawca i cyklicznie woła
+    `L4(kod)`. Wyszukanie „scheduler / polling / setInterval" w tym pliku dawało **zero
+    trafień** — mechanizm nie był przypisany do żadnej iteracji. Wchodzi do **3f-3**.
+  - **⚠ LUKA 2: alerty PISANE przez import też nie miały właściciela.** Blok I6 obejmuje
+    wyłącznie odczyt. Tworzy je import: `L4()` przy błędzie HTTP (`typ: "Błąd HTTP"`)
+    i przy błędzie pobierania (`typ: "Błąd pobierania"`, dodatkowo `suppliers.status = "blad"`),
+    oraz `upload` przy każdym wgraniu (`typ: "Ręczny upload"`, `status: rozwiazany`).
+    **Dziś nasz `from-url` po nieudanym pobraniu MILCZY.** Wchodzi do **3f-2**.
+  - **Decyzje zaklepane 2026-09-01 (NIE otwierać ponownie):**
+    - **Zakres:** do 3f idzie `upload`, `synchronizuj-teraz`, `PATCH /api/dostawcy/{id}`,
+      alerty pisane przez import, zakładki **dostawcy** i **wgrywanie**. **W I11 zostaje**
+      `GET/PUT /api/config`, `GET /api/spedycja` i zakładki spedycja / shoper / katalog / ai.
+    - **Scheduler portowany wiernie, ale za przełącznikiem `IMPORT_SCHEDULER`, domyślnie
+      WYŁĄCZONYM.** Świadome odstępstwo: produkcja przełącznika nie ma. Powód — włączony
+      scheduler na staging odpytywałby realne serwery dostawców co 40–60 min i podmieniał dane
+      pod Anią w trakcie testów, co wygląda jak błąd, którym nie jest.
+    - **Fallback `Wc()` NIE wchodzi.** Upload używa portu parserów z 3a; gdy parser rzuci —
+      **czytelny błąd i alert**, zamiast cichej drugiej próby. `Wc()` (`:46910`) to osobny
+      zestaw dziesięciu starych parserów zaszytych w bundlu, niezależnych od `parsers/*.cjs`;
+      port wielkości sesji 3a, a fallback z definicji odpala się tylko wtedy, gdy główny parser
+      zawiódł. Wolimy o tym WIEDZIEĆ, niż to zamieść. **Luka otwarta — właściciel do ustalenia.**
+
+- **3f-1 · Wgrywanie plików** (BE+FE) — ⬜. `POST /api/dostawcy/{kod}/upload` (`:48243`) +
+  strona `/konfiguracja` ze szkieletem zakładek i wypełnioną zakładką **wgrywanie**.
+  - **Po tej części Ania wgrywa cennik z przeglądarki — i to ona DOMYKA GATE 3e** dla czterech
+    dostawców mailowych (MO1, MO7, MO8, MO10).
+  - **Backend:** multer (`memoryStorage`, limit **50 MB**, pole `plik`) — ta sama biblioteka
+    i konfiguracja co produkcja (`:48150`). Po sparsowaniu: `tk()`, `updateSupplier`
+    (`ostatniPlik`, `ostatniaSync`, `liczbaProduktow`, `status: aktywny`), alert
+    „Ręczny upload" z podsumowaniem, audit log. Odpowiedź zawiera `podglad` — pierwsze
+    5 rekordów.
+  - **⚠ FRONTEND ROBI WŁASNE PARSOWANIE CSV, zanim cokolwiek wyśle.** `oP()`
+    (`frontend-index.js`, w okolicy pierwszego wystąpienia `detekcja`) czyta plik w przeglądarce,
+    wykrywa separator, rozbija na nagłówki i wiersze, woła `FE(nazwaPliku, naglowki, pierwszaLinia)`
+    → `{kod, pewnosc, powod}`, buduje podgląd 8 pozycji mapując wiersze per dostawca (MO1 ma
+    własną gałąź `HE()`), a DOPIERO POTEM wysyła **oryginalny plik** przez `FormData`.
+    To jest realny kawałek pracy, nie detal — zakres do rozstrzygnięcia w prompcie sesji.
+  - **⚠ Dwa limity, które się NIE zgadzają — i tak jest w produkcji:** przeglądarka odrzuca
+    plik > **10 MB** i XLSX („Format XLSX nie jest jeszcze obsługiwany. Zapisz jako CSV."),
+    mimo że backend przyjmuje **50 MB** i XLSX obsługuje przez port parserów (MO8, MO10).
+  - **⚠ Produkcyjny upload NIE ARCHIWIZUJE bufora**, a nasz `POST /api/import/parse-file`
+    archiwizuje (3b, retencja 7 dni / 5 GB). Rozjazd do świadomego rozstrzygnięcia w sesji.
+  - **Gate:** wgranie poprawnego pliku daje pozycje w stagingu, alert i `ostatniPlik`;
+    plik nieparsowalny daje CZYTELNY błąd i alert (nie ciche przejście); brak pliku → 400;
+    nieznany dostawca → 404; regresja `GET_dostawcy.json` / `GET_suppliers.json`.
+
+- **3f-2 · Dostawcy: URL, alerty i sterowanie** (BE+FE) — ⬜. Domyka ścieżkę URL i sprawia,
+  że **awaria dostawcy przestaje być cicha**.
+  - **Backend:** `src/import/pobierz.ts` rozszerzone do pełnej semantyki `L4()`
+    (`:48038-48116`): timeout **30 s** przez `AbortController`; `!response.ok` → alert
+    „Błąd HTTP" + `status: blad`; wyjątek → alert „Błąd pobierania" + `status: blad`;
+    sukces → `ostatniaSync`, `ostatniPlik`, `liczbaProduktow`, `status: aktywny`. Flaga
+    `recznie` pomija blokadę `status === "wstrzymany"`. Nowe repo `src/repos/alerts.ts`
+    (samo `zapiszAlert`, port `U.addAlert` `:44953` — odczyt zostaje w I6).
+    Trasy: `POST /api/dostawcy/{kod}/synchronizuj-teraz` (`:48238`),
+    `PATCH /api/dostawcy/{id}` (`:48227`).
+  - **⚠ `PATCH /api/dostawcy/{id}` ma niespójność do odtworzenia 1:1:** aktualizuje dostawcę
+    CAŁYM ciałem żądania, ale do audit logu wpisuje wyłącznie zmiany w czterech polach —
+    `status`, `url`, `czestotliwoscMinuty`, `sposobDostarczania`. Zmiana czegokolwiek innego
+    przechodzi bez śladu w audycie.
+  - **Frontend:** zakładka **dostawcy** — lista z URL, częstotliwością, sposobem dostarczania,
+    statusem i `ostatniaSync`; akcje „Synchronizuj teraz" i edycja pól. To tu wchłaniamy
+    `freq-injection.js` (częstotliwość natywnie, zamiast PATCH-a poza Reactem).
+  - **Gate:** serwer zwraca 500 → alert „Błąd HTTP" + `status: blad`; serwer nie odpowiada →
+    alert „Błąd pobierania"; sukces → `ostatniaSync` i `status: aktywny`; dostawca `wstrzymany`
+    ręcznie PRZECHODZI, automatem NIE; zmiana `czestotliwoscMinuty` trafia do audytu, a pola
+    spoza czwórki — nie. Testy stawiają lokalny serwer HTTP na porcie efemerycznym, bez
+    mockowania `fetch`.
+
+- **3f-3 · Scheduler** (BE) — ⬜. Port `D4()` (`:48118-48131`) za `IMPORT_SCHEDULER`.
+  - Osobno mimo małego rozmiaru, bo to jedyna część z **timerami w tle**, jedyna bez UI
+    i jedyna, która w razie pomyłki zacznie sama odpytywać serwery dostawców.
+  - Dobór dostawców 1:1 z oryginałem: `sposobDostarczania === "url"` && `url` &&
+    `czestotliwoscMinuty` && `status !== "wstrzymany"`. Ponowne wywołanie czyści poprzednie
+    interwały (`clearInterval` po mapie). `unref()` na interwałach, żeby nie trzymały procesu.
+  - **Gate:** dobiera właściwych dostawców; ponowne wywołanie nie mnoży timerów;
+    **bez `IMPORT_SCHEDULER` nie startuje w ogóle**; `status: wstrzymany` wyklucza z automatu.
 - **Wejście z triażu (2026-08-25, `rebuild-backlog.md`):**
   - **#6** bieżące poprawki parserów (flagsfix, mo8…) → objęte **portem**, zero osobnej pracy.
   - **#4 `uwaga_cena`** (cena „na zapytanie") → kolumna `products.uwaga_cena` **dodana w 3b** (osobna migracja, bez #3); propagacja w imporcie (`acceptStaging`) → **3d-2**; endpointy → **I12**. **Sprostowanie 2026-08-27 (3d-1): endpointy są DWA, nie jeden** — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony w locie, 5 przypadków). Obu brak w zamrożonym kontrakcie — dopisać do openapi razem, w I12. Frontend tooltip = injection → późniejsza iteracja.
   - **#5 `frazy`** → ✅ **zbadane i rozstrzygnięte (3a, 2026-08-26): to NIE jest normalizacja w adapterze.** `frazy_migruj.cjs` to samodzielny skrypt jednorazowy czytający `/tmp/frazy_migracja.json` i wołający `selly/client.cjs` (PUT do Selly); w `common.cjs` słowo „frazy" nie występuje (0 trafień). **Poza zakresem I3** — do rozważenia przy I8 (Selly).
 - **Ścieżki (GATE):** staging×9 (3× odczyt ✅ 3b, 6× mutacje ✅ 3d-2), import×2 ✅ 3b, ai-fallback ✅ 3b, overrides×3 (`GET`, `POST`, `DELETE {id}` — `PUT` NIE ISTNIEJE) ✅ 3d-2.  **Fixtures:** `GET_staging.json` ✅ 3b, `GET_staging_paged.json` ✅ 3b, **`GET_overrides.json` ✅ 3d-2**.
-- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE ✅. **Jedyny niedomknięty punkt: „Ania przeklika PEŁNY cykl importu"** — wymaga zakładki „wgrywanie" z I11, bo w oryginale wgrywanie nie jest na `/staging` (blok 3e, decyzja 2026-09-01).
+- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE ✅. **„Ania przeklika PEŁNY cykl importu" domyka blok 3f-1** (wgrywanie z przeglądarki), a pełne pokrycie ścieżek produkcyjnych — 3f-2 (URL, alerty) i 3f-3 (automat). Do 2026-09-01 punkt ten wskazywał na I11; zakres został stamtąd wydzielony do 3f.
 
 ---
 
@@ -520,6 +613,12 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1  **Zależy od:** 3
 - **Cel (Ania klika):** otwiera `/alerty`, widzi i obsługuje alerty.
 - **Backend:** `GET /api/alerts`, `PATCH /api/alerts/{id}` (`Ki`).
+- **⚠ PISANIE alertów NIE należy do tej iteracji (ustalone 2026-09-01).** Ta iteracja dowozi
+  wyłącznie ODCZYT i zmianę statusu. Alerty tworzy IMPORT — przy błędzie HTTP, przy błędzie
+  pobierania i przy ręcznym uploadzie — i to wchodzi w blokach **3f-1** i **3f-2**, razem
+  z repozytorium `src/repos/alerts.ts` (samo `zapiszAlert`). Gdy zaczniesz tę iterację,
+  repo już będzie istniało: dopisz do niego `listAlerts` i `updateAlertStatus`, nie twórz
+  drugiego pliku.
 - **Frontend:** widok `/alerty`. **Decyzja:** status/obsługa lokalnie vs przez API (spec-frontend §4) — rekomendacja: przez API (spójność stanu).
 - **Ścieżki (GATE):** alerts×2.  **Fixtures:** `GET_alerts.json`.
 - **DoD:** alerty listują i zmieniają stan; decyzja lokalne/API zapisana; fixtures przez GATE.
@@ -594,7 +693,14 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** 1
 - **Cel (Ania klika):** edytuje konfigurację, dostawców (w tym **częstotliwość importu** natywnie) i limity spedycji.
 - **Backend:** `GET/PUT /api/config` (`Jt`); `/api/dostawcy/{id}`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`, `/api/dostawcy/{kod}/upload`; `GET /api/spedycja` (`gn`). **`GET /api/dostawcy` i `GET /api/suppliers` (listy) już dostarczone w I2** — tu dochodzą tylko detal i mutacje dostawcy.
-- **⭐ ZALEGŁOŚĆ Z ITERACJI 3 — TA ITERACJA DOMYKA GATE 3e (zapisane 2026-09-01 przez 3e).**
+- **⚠ ZAKRES POMNIEJSZONY 2026-09-01 — import wydzielony do bloku 3f.** Z tej iteracji WYSZŁY:
+  `POST /api/dostawcy/{kod}/upload`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`,
+  `PATCH /api/dostawcy/{id}`, zakładki **dostawcy** i **wgrywanie** oraz wchłonięcie
+  `freq-injection.js`. Powód: to wszystko jest częścią pętli importu, a Ania potrzebowała jej
+  w całości do testów Iteracji 3. **Zostaje tutaj:** `GET/PUT /api/config`, `GET /api/spedycja`
+  i zakładki spedycja / shoper / katalog / ai. Szkielet strony `/konfiguracja` z zakładkami
+  powstaje w **3f-1** — ta iteracja wypełnia cztery pozostałe.
+- **Historyczne (zapisane 2026-09-01 przez 3e, przed wydzieleniem 3f):**
   Strona Konfiguracja ma w oryginale sześć zakładek: **dostawcy · wgrywanie · spedycja · shoper ·
   katalog · ai** (`frontend-index.js:791300-792300`). Zakładka **„wgrywanie"** (`JT`, `:784673`)
   to wgrywanie cenników — wiele plików naraz, z auto-detekcją dostawcy po nazwie pliku
