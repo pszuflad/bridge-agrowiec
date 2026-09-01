@@ -24,7 +24,7 @@ export type NowyAlert = {
 };
 
 /**
- * Zapis alertu — port `U.addAlert` (backend-index.cjs:44953).
+ * Zapis alertu — port `U.addAlert` (backend-index.cjs:44954).
  *
  * ⚠ To jest CAŁE repo alertów w tej iteracji: sam zapis. Odczyt (`listAlerts`,
  * `updateAlertStatus`) należy do Iteracji 6 razem z widokiem `/alerty` i celowo nie
