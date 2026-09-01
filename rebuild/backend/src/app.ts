@@ -10,6 +10,8 @@ import { trasyDostawcow } from "./routes/suppliers.js";
 import { trasyImportu } from "./routes/import.js";
 import { trasyProduktow } from "./routes/products.js";
 import { trasyStagingu } from "./routes/staging.js";
+import { trasyMutacjiStagingu } from "./routes/staging-mutacje.js";
+import { trasyOverrides } from "./routes/overrides.js";
 
 export type ZaleznosciApp = {
   env: Env;
@@ -57,6 +59,8 @@ export function stworzApp({ env, db }: ZaleznosciApp): Express {
   app.use(trasyProduktow({ db }));
   app.use(trasyDostawcow({ db }));
   app.use(trasyStagingu({ db }));
+  app.use(trasyMutacjiStagingu({ db }));
+  app.use(trasyOverrides({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
 
   app.use(nieZnalezionoHandler);
