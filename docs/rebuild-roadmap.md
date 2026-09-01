@@ -150,7 +150,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01** |
+| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19** |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
@@ -308,7 +308,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
-- **Status:** 🔨 **OTWARTA PONOWNIE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01 · **3f-1/3f-2/3f-3 ⬜**) — 2026-09-01 dołożono blok **3f** (brzeg operacyjny importu), wydzielony z I11 decyzją użytkownika. Powód: bez niego pełnego cyklu importu nie da się uruchomić z przeglądarki, a połowa dostawców jedzie w produkcji automatycznym pollingiem, którego roadmapa w ogóle nie miała  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
+- **Status:** 🔨 **OTWARTA PONOWNIE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01 · **3f-1 ✅ 2026-09-01 · 3f-2/3f-3 ⬜**) — 2026-09-01 dołożono blok **3f** (brzeg operacyjny importu), wydzielony z I11 decyzją użytkownika. Powód: bez niego pełnego cyklu importu nie da się uruchomić z przeglądarki, a połowa dostawców jedzie w produkcji automatycznym pollingiem, którego roadmapa w ogóle nie miała  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
   - **⚠ Blok 3d ZOSTAŁ PODZIELONY** (decyzja użytkownika, 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`). Powód: blok zbierał 8 punktów, a lektura źródeł dołożyła kolejne 4 endpointy, których roadmapa nie wymieniała (patrz blok 3d-2) — wychodził największy blok całej iteracji. Szew: **3d-1 kończy się na `tk()`, 3d-2 zaczyna na brzegu HTTP.**
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
 - **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~5000 linii: `common.cjs`, `tyre_params.cjs`, `adapter.cjs`, `dispatcher.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dictionaries/` — porcja 3a; `bridge_ext.cjs`/`tire_dims.js` nie są wołane przez żaden plik z `parsers/`, więc wypadły z portu 3a — a doprecyzowanie z 2026-08-26 przesunęło je do 3d — **ostatecznie przeportowane bajt-w-bajt w 3d-1, 2026-08-27**, razem z markerem `legacy/package.json`, bez którego `tire_dims.js` po cichu się nie ładował), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
@@ -509,8 +509,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
       port wielkości sesji 3a, a fallback z definicji odpala się tylko wtedy, gdy główny parser
       zawiódł. Wolimy o tym WIEDZIEĆ, niż to zamieść. **Luka otwarta — właściciel do ustalenia.**
 
-- **3f-1 · Wgrywanie plików** (BE+FE) — ⬜. `POST /api/dostawcy/{kod}/upload` (`:48243`) +
-  strona `/konfiguracja` ze szkieletem zakładek i wypełnioną zakładką **wgrywanie**.
+- **3f-1 · Wgrywanie plików** (BE+FE) — ✅ **2026-09-01 (#19).** `POST /api/dostawcy/{kod}/upload`
+  (`:48243`) + strona `/konfiguracja` ze szkieletem sześciu zakładek i wypełnioną zakładką
+  **wgrywanie**. Ania wgrywa cennik z przeglądarki; **gate 3e domknięty dla wszystkich
+  czterech dostawców mailowych** (MO1, MO7 — CSV; MO8, MO10 — XLSX).
   - **Po tej części Ania wgrywa cennik z przeglądarki — i to ona DOMYKA GATE 3e** dla czterech
     dostawców mailowych (MO1, MO7, MO8, MO10).
   - **Backend:** multer (`memoryStorage`, limit **50 MB**, pole `plik`) — ta sama biblioteka
@@ -518,20 +520,54 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     (`ostatniPlik`, `ostatniaSync`, `liczbaProduktow`, `status: aktywny`), alert
     „Ręczny upload" z podsumowaniem, audit log. Odpowiedź zawiera `podglad` — pierwsze
     5 rekordów.
-  - **⚠ FRONTEND ROBI WŁASNE PARSOWANIE CSV, zanim cokolwiek wyśle.** `oP()`
-    (`frontend-index.js`, w okolicy pierwszego wystąpienia `detekcja`) czyta plik w przeglądarce,
-    wykrywa separator, rozbija na nagłówki i wiersze, woła `FE(nazwaPliku, naglowki, pierwszaLinia)`
-    → `{kod, pewnosc, powod}`, buduje podgląd 8 pozycji mapując wiersze per dostawca (MO1 ma
-    własną gałąź `HE()`), a DOPIERO POTEM wysyła **oryginalny plik** przez `FormData`.
-    To jest realny kawałek pracy, nie detal — zakres do rozstrzygnięcia w prompcie sesji.
-  - **⚠ Dwa limity, które się NIE zgadzają — i tak jest w produkcji:** przeglądarka odrzuca
-    plik > **10 MB** i XLSX („Format XLSX nie jest jeszcze obsługiwany. Zapisz jako CSV."),
-    mimo że backend przyjmuje **50 MB** i XLSX obsługuje przez port parserów (MO8, MO10).
-  - **⚠ Produkcyjny upload NIE ARCHIWIZUJE bufora**, a nasz `POST /api/import/parse-file`
-    archiwizuje (3b, retencja 7 dni / 5 GB). Rozjazd do świadomego rozstrzygnięcia w sesji.
-  - **Gate:** wgranie poprawnego pliku daje pozycje w stagingu, alert i `ostatniPlik`;
-    plik nieparsowalny daje CZYTELNY błąd i alert (nie ciche przejście); brak pliku → 400;
-    nieznany dostawca → 404; regresja `GET_dostawcy.json` / `GET_suppliers.json`.
+  - **Rozstrzygnięcia sesji 3f-1 (2026-09-01, decyzje użytkownika):**
+    - **Parsowanie klienckie — wariant „b": SAMA DETEKCJA, bez podglądu pozycji.** Portowane
+      `FE()` + tablica `qu` + `nP`/`rP`/`$y`/`LE` (`src/pages/konfiguracja/detekcja.ts`,
+      ok. 175 linii). Podgląd 8 pozycji z `oP()` (`tP()`, gałąź `HE()` dla MO1 i parser
+      rozmiarów opon, ok. 305 linii) **NIE wchodzi** — byłby drugą implementacją mapowania,
+      które ma już wierny port po stronie backendu (`src/import/legacy/`, charakteryzacja
+      sha256 z 3a), i to tę kopię nic by nie pilnowało. Podgląd bierzemy z pola `podglad`
+      (5 rekordów) w odpowiedzi uploadu — z portu parserów, czyli ze źródła prawdy.
+    - **Limity: XLSX DOPUSZCZONY, próg 10 MB ZDJĘTY** — świadome odstępstwo. Wierne
+      odtworzenie oznaczałoby, że MO8 i MO10 (oba XLSX, oba przychodzą mailem) są przez tę
+      zakładkę niewgrywalne, czyli że gate 3e domknąłby się dla dwóch dostawców zamiast
+      czterech. Oba ograniczenia były zresztą artefaktem tego, że `oP()` czytało CAŁY plik
+      przez `arrayBuffer()`, żeby obejrzeć pierwsze 2048 znaków; my czytamy `slice(0, 64 KB)`,
+      więc rozmiar przestał mieć znaczenie, a XLSX-a rozpoznajemy po nazwie pliku.
+      Jedynym limitem zostaje **50 MB multera** po stronie backendu.
+    - **Archiwizujemy — i to jest WIERNE.** ⚠ Wcześniejsza nota „produkcyjny upload NIE
+      archiwizuje" była **nieprawdziwa i została skasowana**: archiwizacja siedzi wewnątrz
+      `nq()` (`:48013-48022`, `zrodlo: "rdzen-nq"`, PRZED `parseByKod`), a upload idzie przez
+      `nq()`. Zweryfikowane w wysłanym bundlu `mirror/backend/index.cjs`. Archiwizujemy tak
+      samo — przed parsowaniem — żeby plik, który wywrócił parser, też został zapisany.
+  - **⚠ ODSTĘPSTWO: `LE()` odsiewa puste nagłówki — naprawa defektu produkcji.** Oryginał
+    dopasowuje nagłówki luźno w obie strony (`a.includes(b) || b.includes(a)`), a pusty łańcuch
+    jest podciągiem KAŻDEGO tokenu. Cennik z kończącym średnikiem ma pustą ostatnią kolumnę,
+    więc każda sygnatura dostaje komplet trafień i wygrywa najdłuższa, czyli **MO9**. Zmierzone
+    na próbkach: MO4 2/6 → 8/8, MO5 2/6 → 8/8, MO7 6/6 → 8/8 — wszystkie trzy rozpoznają się
+    jako **MO9 „z wysoką pewnością"**, gdy nazwa pliku nie pasuje do wzorca. Skutek jest cichy
+    i kosztowny: cennik Handlopexu wgrany na katalog MO9. Pomijamy puste nagłówki; test
+    regresyjny w `test/konfiguracja.detekcja.test.ts`.
+  - **Zmierzone zachowanie detekcji, którego NIE ruszamy** (port 1:1): MO4 i MO5 mają
+    identyczną sygnaturę nagłówków — po treści są nierozróżnialne i wygrywa MO4; rozstrzyga
+    nazwa pliku. MO3 po samych nagłówkach przegrywa z MO9 (5 trafień własnych vs 6 cudzych),
+    bo oryginał porównuje LICZBĘ trafień, nie udział. Oba przypadki mają wzorce nazwy pliku.
+  - **Gate — rozliczony:** wgranie poprawnego pliku daje pozycje w stagingu, alert
+    „Ręczny upload", `ostatniPlik`/`ostatniaSync`/`liczbaProduktow` i wpis w audycie ✅;
+    plik nieparsowalny daje CZYTELNY błąd i alert `poziom: ostrzezenie` ✅; brak pliku → 400 ✅
+    (przed sprawdzeniem dostawcy, jak w oryginale); nieznany dostawca → 404 ✅; MO6 → 400 ✅;
+    test integracyjny przez ŻYWY backend ✅ (`test/integracja/wgrywanie.integracja.test.ts`);
+    regresja `GET_dostawcy.json` / `GET_suppliers.json` i gate'y I1–I3 zielone ✅.
+  - **Dowiezione:** BE `src/routes/suppliers.ts` (multer memoryStorage 50 MB, pole `plik`),
+    `src/repos/alerts.ts` (SAMO `zapiszAlert`), `zapiszWynikImportu` rozszerzone o `ostatniaSync`.
+    FE `src/pages/Konfiguracja.tsx`, `konfiguracja/{detekcja,wgrywanie,zakladki,typy}.ts`,
+    `konfiguracja/Wgrywanie.tsx`, `components/ui/tabs.tsx` + `TabsContent`.
+    `/konfiguracja` zdjęte z `placeholdery.ts` — router dalej ma **12 tras**.
+  - **⚠ Do wiadomości kolejnych sesji FE: multipart przez `fetch` NIE DZIAŁA w jsdom** —
+    żądanie wisi do timeoutu. Sprawdzone sondą na trywialnym serwerze HTTP; w środowisku
+    `node` to samo żądanie przechodzi w kilkadziesiąt ms. Dlatego
+    `test/integracja/wgrywanie.integracja.test.ts` ma `@vitest-environment node` i minimalną
+    atrapę `Storage`. Testy widoku (MSW) zostają w jsdom i działają.
 
 - **3f-2 · Dostawcy: URL, alerty i sterowanie** (BE+FE) — ⬜. Domyka ścieżkę URL i sprawia,
   że **awaria dostawcy przestaje być cicha**.
@@ -543,6 +579,28 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     (samo `zapiszAlert`, port `U.addAlert` `:44953` — odczyt zostaje w I6).
     Trasy: `POST /api/dostawcy/{kod}/synchronizuj-teraz` (`:48238`),
     `PATCH /api/dostawcy/{id}` (`:48227`).
+  - **⭐ CO ZOSTAWIŁA SESJA 3f-1 — czytaj przed planowaniem:**
+    - **`src/repos/alerts.ts` JUŻ ISTNIEJE** i ma `zapiszAlert` (port `U.addAlert` `:44953`)
+      wraz z typami `PoziomAlertu`/`StatusAlertu`. Nie pisz go od nowa — dołóż tylko
+      wywołania dla „Błąd HTTP" i „Błąd pobierania". Odczyt dalej należy do I6.
+    - **`zapiszWynikImportu` przyjmuje już opcjonalne `ostatniaSync`** (`repos/suppliers.ts`).
+      `L4()` ustawia oba znaczniki, więc podaj je oba — bez tego pola trasy z 3b zapisują
+      tylko `ostatniPlik` i ta różnica jest w oryginale, nie u nas.
+    - **Zakładka „dostawcy" ma gotowe miejsce.** `src/pages/Konfiguracja.tsx` renderuje
+      zaślepki z `konfiguracja/zakladki.ts` — dla `dostawcy` ustaw `domykaBlok: null`
+      i dołóż `<TabsContent value="dostawcy">`. Zdejmij też komentarz przy `defaultValue`:
+      3f-1 otwiera ekran na „wgrywanie" TYLKO dlatego, że tamta zakładka była wtedy jedyną
+      wypełnioną — po 3f-2 wraca `defaultValue="dostawcy"`, jak w oryginale (`:26298`).
+    - **`GET /api/dostawcy` liczy `liczbaProduktow` W LOCIE z tabeli `products`**
+      (`repos/suppliers.ts:106-111`), a nie z kolumny `suppliers.liczba_produktow`. Po
+      imporcie pozycje siedzą w STAGINGU, więc to pole zostaje zerowe do czasu zatwierdzenia.
+      Nie buduj na nim UI „ile wczytano" — do tego jest `ostatniPlik`/`ostatniaSync`.
+      Kosztowało to jedną fałszywą asercję w teście integracyjnym 3f-1.
+    - **Multipart przez `fetch` nie działa w jsdom** — jeśli 3f-2 doda test wysyłający
+      `FormData`, musi mieć `@vitest-environment node`. Szczegóły w bloku 3f-1.
+    - **Klient uploadu jest w `src/pages/konfiguracja/wgrywanie.ts`** (`wgrajPlik`), a detekcja
+      w `detekcja.ts`. „Synchronizuj teraz" to inna ścieżka (bez pliku) — nowy moduł, nie
+      dopisek do tamtego.
   - **⚠ `PATCH /api/dostawcy/{id}` ma niespójność do odtworzenia 1:1:** aktualizuje dostawcę
     CAŁYM ciałem żądania, ale do audit logu wpisuje wyłącznie zmiany w czterech polach —
     `status`, `url`, `czestotliwoscMinuty`, `sposobDostarczania`. Zmiana czegokolwiek innego
@@ -569,7 +627,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **#4 `uwaga_cena`** (cena „na zapytanie") → kolumna `products.uwaga_cena` **dodana w 3b** (osobna migracja, bez #3); propagacja w imporcie (`acceptStaging`) → **3d-2**; endpointy → **I12**. **Sprostowanie 2026-08-27 (3d-1): endpointy są DWA, nie jeden** — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony w locie, 5 przypadków). Obu brak w zamrożonym kontrakcie — dopisać do openapi razem, w I12. Frontend tooltip = injection → późniejsza iteracja.
   - **#5 `frazy`** → ✅ **zbadane i rozstrzygnięte (3a, 2026-08-26): to NIE jest normalizacja w adapterze.** `frazy_migruj.cjs` to samodzielny skrypt jednorazowy czytający `/tmp/frazy_migracja.json` i wołający `selly/client.cjs` (PUT do Selly); w `common.cjs` słowo „frazy" nie występuje (0 trafień). **Poza zakresem I3** — do rozważenia przy I8 (Selly).
 - **Ścieżki (GATE):** staging×9 (3× odczyt ✅ 3b, 6× mutacje ✅ 3d-2), import×2 ✅ 3b, ai-fallback ✅ 3b, overrides×3 (`GET`, `POST`, `DELETE {id}` — `PUT` NIE ISTNIEJE) ✅ 3d-2.  **Fixtures:** `GET_staging.json` ✅ 3b, `GET_staging_paged.json` ✅ 3b, **`GET_overrides.json` ✅ 3d-2**.
-- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE ✅. **„Ania przeklika PEŁNY cykl importu" domyka blok 3f-1** (wgrywanie z przeglądarki), a pełne pokrycie ścieżek produkcyjnych — 3f-2 (URL, alerty) i 3f-3 (automat). Do 2026-09-01 punkt ten wskazywał na I11; zakres został stamtąd wydzielony do 3f.
+- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE ✅. **„Ania przeklika PEŁNY cykl importu" domknięte przez blok 3f-1 ✅ 2026-09-01** (wgrywanie z przeglądarki), a pełne pokrycie ścieżek produkcyjnych — 3f-2 (URL, alerty) i 3f-3 (automat). Do 2026-09-01 punkt ten wskazywał na I11; zakres został stamtąd wydzielony do 3f.
 
 ---
 
@@ -616,9 +674,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **⚠ PISANIE alertów NIE należy do tej iteracji (ustalone 2026-09-01).** Ta iteracja dowozi
   wyłącznie ODCZYT i zmianę statusu. Alerty tworzy IMPORT — przy błędzie HTTP, przy błędzie
   pobierania i przy ręcznym uploadzie — i to wchodzi w blokach **3f-1** i **3f-2**, razem
-  z repozytorium `src/repos/alerts.ts` (samo `zapiszAlert`). Gdy zaczniesz tę iterację,
-  repo już będzie istniało: dopisz do niego `listAlerts` i `updateAlertStatus`, nie twórz
-  drugiego pliku.
+  z repozytorium `src/repos/alerts.ts` (samo `zapiszAlert`). **Repo POWSTAŁO w 3f-1
+  ✅ 2026-09-01** wraz z typami `PoziomAlertu`/`StatusAlertu` — dopisz do niego `listAlerts`
+  i `updateAlertStatus`, nie twórz drugiego pliku. Alert „Ręczny upload" jest już pisany
+  (`poziom: info`, `status: rozwiazany` przy powodzeniu; `poziom: ostrzezenie`,
+  `status: nowy` przy nieudanym parsowaniu — to nasz dodatek, produkcja przy błędzie milczy).
 - **Frontend:** widok `/alerty`. **Decyzja:** status/obsługa lokalnie vs przez API (spec-frontend §4) — rekomendacja: przez API (spójność stanu).
 - **Ścieżki (GATE):** alerts×2.  **Fixtures:** `GET_alerts.json`.
 - **DoD:** alerty listują i zmieniają stan; decyzja lokalne/API zapisana; fixtures przez GATE.
@@ -698,8 +758,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   `PATCH /api/dostawcy/{id}`, zakładki **dostawcy** i **wgrywanie** oraz wchłonięcie
   `freq-injection.js`. Powód: to wszystko jest częścią pętli importu, a Ania potrzebowała jej
   w całości do testów Iteracji 3. **Zostaje tutaj:** `GET/PUT /api/config`, `GET /api/spedycja`
-  i zakładki spedycja / shoper / katalog / ai. Szkielet strony `/konfiguracja` z zakładkami
-  powstaje w **3f-1** — ta iteracja wypełnia cztery pozostałe.
+  i zakładki spedycja / shoper / katalog / ai. **Szkielet strony `/konfiguracja` z sześcioma
+  zakładkami POWSTAŁ w 3f-1 ✅ 2026-09-01** — ta iteracja wypełnia cztery pozostałe. Zaślepki
+  i przypisanie zakładek do bloków siedzą w `src/pages/konfiguracja/zakladki.ts`: zmień tam
+  `domykaBlok` na `null` i dołóż `<TabsContent>` w `Konfiguracja.tsx`. Trasa `/konfiguracja`
+  jest już zdjęta z `placeholdery.ts` i wpięta wprost w `App.tsx`.
 - **Historyczne (zapisane 2026-09-01 przez 3e, przed wydzieleniem 3f):**
   Strona Konfiguracja ma w oryginale sześć zakładek: **dostawcy · wgrywanie · spedycja · shoper ·
   katalog · ai** (`frontend-index.js:791300-792300`). Zakładka **„wgrywanie"** (`JT`, `:784673`)

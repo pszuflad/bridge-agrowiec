@@ -24,22 +24,39 @@ zmian, po zatwierdzanie i wycofania. Plus widok `/staging`, w którym te decyzje
 
 ---
 
-## 2. Przygotowanie — zanim zaczniesz
+## 2. Przygotowanie — wgraj cennik sama
 
-⚠ **Importu NIE da się dziś uruchomić z przeglądarki.** W starym Bridge wgrywanie cenników
-siedzi na stronie *Konfiguracja → wgrywanie*, a tej strony jeszcze nie odbudowaliśmy.
-Backend importu działa w pełni — brakuje wyłącznie przycisku.
+**Cennik wgrywasz z przeglądarki — nie potrzebujesz Pawła ani konsoli.**
 
-> **To się wkrótce zmieni.** Blok **3f-1** dowozi wgrywanie z przeglądarki, **3f-2** — pobieranie
-> z URL na żądanie wraz z alertami o awarii dostawcy, a **3f-3** — automatyczny polling.
-> Po 3f-1 ta sekcja przestanie być potrzebna i instrukcja zostanie zaktualizowana.
+1. Wejdź w **Konfiguracja** w menu po lewej. Otworzy się na zakładce **Wgrywanie ręczne**.
+2. Kliknij pole wyboru pliku i wskaż cennik z dysku. Możesz zaznaczyć **kilka plików naraz**.
+3. Przy każdym pliku zobaczysz, **jakiego dostawcę Bridge rozpoznał i dlaczego** — np.
+   *MO1 · wysoka pewność · Nazwa pliku pasuje do wzorca*.
+4. **Sprawdź ten kod, zanim wgrasz.** Jeśli jest zły albo pusty — wybierz dostawcę z listy
+   obok. Napis zmieni się wtedy na *wybrane ręcznie*.
+5. Kliknij **Wgraj**.
 
-**Dlatego cennik wgrywa Paweł** i daje znać, gdy staging jest wypełniony. Jeśli chcesz wgrać
-własny plik samodzielnie, komendy są w [sekcji 8](#8-dodatek--wgrywanie-cennika-z-konsoli).
+**Oczekiwane:** przy pliku pojawia się podsumowanie — *Wczytano N pozycji · do stagingu: N ·
+nowe · zmienione · wycofane · auto-zatwierdzone* — a pod nim **podgląd pierwszych 5 pozycji**
+tak, jak je zrozumiał Bridge. Potem wejdź w **Staging**: pozycje tam są.
+
+**Obsługiwane pliki:** CSV oraz **XLSX** (tak wygląda cennik MO8 Trelleborg i MO10 GRI),
+do 50 MB.
+
+> **Jeśli plik się nie wczyta**, dostaniesz czerwony komunikat z powodem — np. że parser nie
+> rozumie formatu. **To jest zamierzone i chcemy o tym wiedzieć.** Bridge celowo NIE próbuje
+> po cichu drugiego parsera: wolimy pokazać błąd, niż wgrać dane, których nikt nie sprawdził.
+> Zgłoś taki przypadek razem z plikiem — patrz [sekcja 7](#7-jak-zgłaszać-problemy).
 
 **Do testu potrzebujesz:**
 - konta w panelu (to samo co zwykle),
-- wiedzy, który cennik został wgrany (np. MO1 Bohnenkamp) — Paweł poda.
+- pliku cennika któregoś z dostawców (MO1…MO10, **poza MO6** — ten jest wyłączony z importu
+  i Bridge odmówi jego wgrania; to poprawne zachowanie).
+
+> **Czego tu jeszcze nie ma.** Zakładki *Dostawcy*, *Spedycja*, *Shoper*, *Katalog* i *AI
+> Fallback* są na razie puste — każda mówi, co ją wypełni. Pobieranie cennika z URL na żądanie
+> („Synchronizuj teraz") wraz z alertami o awarii dostawcy dowozi blok **3f-2**, a automatyczny
+> polling — **3f-3**.
 
 ---
 
@@ -206,7 +223,10 @@ wiersz. Różnica jest poprawna.
 
 | Czego brakuje | Kiedy |
 |---|---|
-| Wgrywanie cenników z przeglądarki (*Konfiguracja → wgrywanie*) | **blok 3f-1** (wkrótce) |
+| Zakładka *Dostawcy* (edycja URL, częstotliwości, „Synchronizuj teraz") | **blok 3f-2** |
+| Alert, gdy pobranie cennika z URL padnie | **blok 3f-2** |
+| Automatyczne pobieranie cenników co N minut | **blok 3f-3** |
+| Zakładki *Spedycja*, *Shoper*, *Katalog*, *AI Fallback* | Iteracja 11 |
 | Narzuty i promocje przeliczające cenę sprzedaży | Iteracja 4 |
 | Widok Historia (zmiany cen z importów) | Iteracja 5 |
 | Alerty | Iteracja 6 |
@@ -219,6 +239,11 @@ Historia cen **jest zapisywana** przy każdym auto-zatwierdzeniu — brakuje tyl
 
 ## 6. Szybka lista kontrolna
 
+- [ ] **Cennik wgrany z przeglądarki daje pozycje w stagingu** ⭐
+- [ ] Rozpoznany dostawca zgadza się z plikiem (i da się go poprawić ręcznie)
+- [ ] Plik XLSX (MO8 / MO10) też się wgrywa
+- [ ] Zepsuty plik daje CZYTELNY błąd, a nie ciszę
+- [ ] MO6 zostaje odrzucony jako wyłączony z importu
 - [ ] Lista pozycji renderuje się z kompletem kolumn
 - [ ] Filtr typu zawęża listę
 - [ ] Wyszukiwarka działa na całym zbiorze
@@ -250,7 +275,13 @@ nadpisał Twoją wartość, to jest błąd krytyczny i chcemy o nim wiedzieć od
 
 ## 8. Dodatek — wgrywanie cennika z konsoli
 
-Gdybyś chciała wgrać plik sama, bez czekania na Pawła.
+Ta sekcja NIE jest już potrzebna do testów — cennik wgrywasz klikając, wg
+[sekcji 2](#2-przygotowanie--wgraj-cennik-sama). Zostaje dla Pawła i na wypadek, gdyby
+trzeba było wgrać plik skryptem albo porównać wynik obu dróg.
+
+⚠ To INNY endpoint niż przycisk w panelu: `POST /api/import/parse-file` (poniżej) kontra
+`POST /api/dostawcy/{kod}/upload` (zakładka *Wgrywanie ręczne*). Oba kończą się pozycjami
+w stagingu, ale ten z panelu dodatkowo zapisuje alert „Ręczny upload" i znaczniki na dostawcy.
 
 ```bash
 # 1. Token (podstaw swój email i hasło)
