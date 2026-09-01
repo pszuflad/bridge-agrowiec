@@ -150,7 +150,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE | 2 | 🔨 | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · **3d-2: 2026-09-01** — BE kompletny, zostaje 3e |
+| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · **3e: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
@@ -308,7 +308,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 3 — Import — rdzeń (najcenniejszy zasób)
-- **Status:** 🔨 (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · **3d-2 ✅ 2026-09-01 — BACKEND ITERACJI 3 KOMPLETNY**; zostaje 3e FE)  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
+- **Status:** ✅ **ZROBIONE** (3a ✅ · 3b ✅ · 3c ✅ 2026-08-26 · 3d-1 ✅ 2026-08-27 · 3d-2 ✅ · 3e ✅ 2026-09-01) — z jednym zastrzeżeniem: pełny cykl importu Z PRZEGLĄDARKI wymaga zakładki „wgrywanie" z **I11**, patrz blok 3e  **Sesje (6, bottom-up):** 3a BE (port+charakteryzacja) · 3b BE (staging) · 3c BE (dopasowanie `tk()`) · **3d-1 BE (silnik: zatwierdzanie+wycofania+overrides)** · **3d-2 BE (API: `acceptStaging` + endpointy)** · 3e FE (`/staging`)  **Zależy od:** 2
   - **⚠ Blok 3d ZOSTAŁ PODZIELONY** (decyzja użytkownika, 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`). Powód: blok zbierał 8 punktów, a lektura źródeł dołożyła kolejne 4 endpointy, których roadmapa nie wymieniała (patrz blok 3d-2) — wychodził największy blok całej iteracji. Szew: **3d-1 kończy się na `tk()`, 3d-2 zaczyna na brzegu HTTP.**
 - **Cel (Ania klika):** uruchamia import (URL/plik), widzi wynik w `/staging`, akceptuje/odrzuca, a zmiany widać w katalogu (I2) i historii (I5).
 - **⭐ Strategia parserów — PORT, nie rewrite (kluczowa decyzja):** parsery to **czytelne, utrzymywane źródło** (~5000 linii: `common.cjs`, `tyre_params.cjs`, `adapter.cjs`, `dispatcher.cjs`, parsery `mo1_bohnenkamp`…`mo10_gri`, `dictionaries/` — porcja 3a; `bridge_ext.cjs`/`tire_dims.js` nie są wołane przez żaden plik z `parsers/`, więc wypadły z portu 3a — a doprecyzowanie z 2026-08-26 przesunęło je do 3d — **ostatecznie przeportowane bajt-w-bajt w 3d-1, 2026-08-27**, razem z markerem `legacy/package.json`, bez którego `tire_dims.js` po cichu się nie ładował), które Ania wciąż edytuje. **Portujemy podsystem 1:1 jako moduły JS**, przepisujemy tylko **brzegi**: wejście (pobieranie plików/API dostawców) i wyjście (zapis do stagingu przez naszą warstwę Drizzle). Backend TS/ESM konsumuje moduły `.cjs` bez problemu; TS-yfikacja później, opcjonalnie. **Zysk:** wierność + łatwa re-synchronizacja z Anią (diff/patch) + bieżące poprawki parserów (backlog **#6**) wchodzą **automatycznie** przez port najświeższego źródła. Nie wymyślamy parserów od zera. Uczciwie: port przynosi trochę legacy — czyścimy stopniowo, poprawność > estetyka.
@@ -444,8 +444,13 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **Gate:** `GET_overrides.json` zielony; 8 ścieżek przez HTTP; `acceptStaging` porównany
     z oryginałem; pusty import nie dociera do stagingu.
 
-- **3e · `/staging` (FE) + weryfikacja Ani** — widok `/staging`: przegląd pozycji importu, accept/reject, podgląd różnic. **Decyzja:** staging auto-accept vs ręczny (spec-frontend §4).
-  - **⚠ Wejście z 3b — CZYTAJ PRZED STARTEM.**
+- **3e · `/staging` (FE) + weryfikacja Ani** — ✅ **zrobione** (ticket `10-FEATURE-widok-staging`, 2026-09-01). Widok w pełnej parzystości z oryginałem: filtr typu (6 opcji), wyszukiwarka, stronicowanie 25/50/100, zaznaczanie, **trzy warianty akcji masowych** (zaznaczone / widoczne / wszystkie przefiltrowane), podgląd różnic i **edycja pozycji**. Decyzja o auto-accept była już rozstrzygnięta w §3 (jest backendowy) — ten blok jej nie otwierał.
+  - **⭐ EDYCJA DAJE INTERFEJS POPRAWKOM MARTY.** `PUT /api/staging/{id}` to jedyna ścieżka tworząca `manual_overrides`; do 3e cały mechanizm z 3d-1/3d-2 działał, ale nikt nie mógł go użyć. Test integracyjny sprawdza to przez ŻYWY backend: edycja w widoku → wpis w `manual_overrides`.
+  - **Rozliczenie gate'u:** 126 testów FE (było 110) — 16 testów widoku na fixture'ach przez MSW + 6 integracyjnych bez mocków, przez uruchomiony backend. **6 mutacji, wszystkie złapane** (jedna początkowo nie — brakowało symetrycznego testu ciała `allFiltered` dla akceptacji; test dołożony).
+  - **⚠ GATE DOMYKA SIĘ TYLKO CZĘŚCIOWO — I TO JEST FAKT, NIE NIEDORÓBKA.** Pierwotne brzmienie („Ania klika PEŁNY cykl importu") zakładało, że wgrywanie pliku jest na `/staging`. **Nie jest**: w oryginale to zakładka „wgrywanie" na stronie Konfiguracja, przypisanej do **I11**. Bez niej nie ma z przeglądarki jak ZACZĄĆ importu. Decyzja użytkownika (2026-09-01): 3e buduje sam widok, import przygotowujemy my (`POST /api/import/parse-file`, instrukcja w raporcie ticketa), a Ania weryfikuje przegląd, filtry, akcje masowe, edycję i podgląd różnic. **Pełny cykl z przeglądarki domknie I11.**
+  - **⚠ `GET /api/atrybuty` w tym widoku jest MARTWE.** Oryginał je pobiera (`fe.js:20630-20633`), ale zmienna z wynikiem nie występuje nigdzie w regionie widoku. Świadomie NIE przeportowane — I7 nie był i nie jest blokerem dla stagingu.
+  - **Trzy rzeczy wzięte z oryginału dosłownie:** etykiety i kolory typów (`fe.js:597593`: `nowa` → „Nowa"/emerald, `zmiana_kluczowa` → „Zmiana kluczowa"/blue, `blad` → „Błąd"/red-700, `wycofana` → „Wycofana"/red-600); sześć opcji filtra (`fe.js:597086`) **łącznie z „Nowe produkty (stare)" dla wartości `nowy`, której nasz silnik nie produkuje**; komplet `data-testid` (`button-accept-*`, `checkbox-select-all`, `input-search-staging`, `select-filter-type`).
+  - **Wejście z 3b (wykorzystane w 3e — zostaje jako zapis stanu):**
     - **Trzy trasy odczytu mają TRZY RÓŻNE kształty** (`src/repos/staging.ts`): `/api/staging` — 24 pola, `/paged` — 20, `/{id}` — 21. Konkretnie: `/paged` **nie zwraca `snapshotJson`**, więc podgląd różnic musi dociągnąć pozycję z `GET /api/staging/{id}`. `/paged` nie ma też `eanCandidates`, `magazynRaw` ani pary `zatwierdzilUzytkownikId`/`zatwierdzonoData` (zamiast niej jedno pole `zatwierdzono`).
     - **`GET /api/staging` wymaga auth (odstępstwo D1)** — kontrakt opisuje ją jako publiczną, my wymagamy tokenu, tak jak `/api/products` od I2. Klient musi wysyłać `Authorization`.
     - `/api/staging` bez parametru `limit` zwraca **gołą tablicę**, z `limit` — kopertę `{items,total,limit,offset}`. `/paged` sortuje `id DESC`, `/api/staging` nie sortuje wcale.
@@ -471,7 +476,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **#4 `uwaga_cena`** (cena „na zapytanie") → kolumna `products.uwaga_cena` **dodana w 3b** (osobna migracja, bez #3); propagacja w imporcie (`acceptStaging`) → **3d-2**; endpointy → **I12**. **Sprostowanie 2026-08-27 (3d-1): endpointy są DWA, nie jeden** — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony w locie, 5 przypadków). Obu brak w zamrożonym kontrakcie — dopisać do openapi razem, w I12. Frontend tooltip = injection → późniejsza iteracja.
   - **#5 `frazy`** → ✅ **zbadane i rozstrzygnięte (3a, 2026-08-26): to NIE jest normalizacja w adapterze.** `frazy_migruj.cjs` to samodzielny skrypt jednorazowy czytający `/tmp/frazy_migracja.json` i wołający `selly/client.cjs` (PUT do Selly); w `common.cjs` słowo „frazy" nie występuje (0 trafień). **Poza zakresem I3** — do rozważenia przy I8 (Selly).
 - **Ścieżki (GATE):** staging×9 (3× odczyt ✅ 3b, 6× mutacje ✅ 3d-2), import×2 ✅ 3b, ai-fallback ✅ 3b, overrides×3 (`GET`, `POST`, `DELETE {id}` — `PUT` NIE ISTNIEJE) ✅ 3d-2.  **Fixtures:** `GET_staging.json` ✅ 3b, `GET_staging_paged.json` ✅ 3b, **`GET_overrides.json` ✅ 3d-2**.
-- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji → 3d-2; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE; Ania przeklika pełny cykl importu na staging.
+- **DoD:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3e zielone**; fixtures przez GATE ✅. **Jedyny niedomknięty punkt: „Ania przeklika PEŁNY cykl importu"** — wymaga zakładki „wgrywanie" z I11, bo w oryginale wgrywanie nie jest na `/staging` (blok 3e, decyzja 2026-09-01).
 
 ---
 
@@ -522,6 +527,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 7 — Atrybuty (+ wchłonięcie `pending-injection.js`)
+- **⚠ Nota z 3e (2026-09-01): `GET /api/atrybuty` w widoku `/staging` jest MARTWE.** Oryginał
+  je tam pobiera (`frontend-index.js:20630-20633`), ale zmienna z wynikiem nie występuje nigdzie
+  w regionie widoku — to pozostałość, nie funkcja. 3e świadomie tego nie przeportowała. Jeśli
+  ta iteracja chciałaby ożywić słowniki w stagingu (np. podpowiedzi kategorii przy edycji),
+  będzie to **nowa decyzja**, a nie odtworzenie produkcji.
 - **Status:** ⬜  **Sesje:** 7a BE · 7b FE  **Zależy od:** 2
 - **Cel (Ania klika):** zarządza rodzajami/wartościami atrybutów, obsługuje kolejkę „pending" (akceptuj / jako alias / z edycją / odrzuć) — **natywnie w Reakcie**, bez skryptu injection.
 - **Backend:** `/api/atrybuty`, `/atrybuty/liczniki`, `/atrybuty/uzycie`, `/atrybuty/wartosci(+{id})`, `/atrybuty/rodzaje(+{value})`, `/atrybuty/pending`, `/atrybuty/pending/{id}/akceptuj|akceptuj-jako-alias|akceptuj-z-edycja|odrzuc`, `/atrybuty/scan-pending`. Tabele `atrybuty_wartosci_pending`, `..._odrzucone`.
@@ -584,6 +594,15 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** 1
 - **Cel (Ania klika):** edytuje konfigurację, dostawców (w tym **częstotliwość importu** natywnie) i limity spedycji.
 - **Backend:** `GET/PUT /api/config` (`Jt`); `/api/dostawcy/{id}`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`, `/api/dostawcy/{kod}/upload`; `GET /api/spedycja` (`gn`). **`GET /api/dostawcy` i `GET /api/suppliers` (listy) już dostarczone w I2** — tu dochodzą tylko detal i mutacje dostawcy.
+- **⭐ ZALEGŁOŚĆ Z ITERACJI 3 — TA ITERACJA DOMYKA GATE 3e (zapisane 2026-09-01 przez 3e).**
+  Strona Konfiguracja ma w oryginale sześć zakładek: **dostawcy · wgrywanie · spedycja · shoper ·
+  katalog · ai** (`frontend-index.js:791300-792300`). Zakładka **„wgrywanie"** (`JT`, `:784673`)
+  to wgrywanie cenników — wiele plików naraz, z auto-detekcją dostawcy po nazwie pliku
+  i nagłówkach; osobno każdy dostawca ma własny przycisk „Wgraj plik" (`ZT`, ok. `:772483`).
+  **To jedyne miejsce w całej aplikacji, z którego da się ZACZĄĆ import z przeglądarki** —
+  `/staging` (3e) pokazuje dopiero wynik. Dopóki tego nie ma, Ania nie przeklika pełnego cyklu
+  importu i gate 3e zostaje domknięty tylko częściowo (patrz blok 3e). Backend jest gotowy od 3b:
+  `POST /api/import/parse-file` i `POST /api/import/from-url`.
 - **Frontend:** widoki `/konfiguracja` + edycja dostawcy z polem `czestotliwoscMinuty` (zamiast `freq-injection.js` PATCH poza Reactem). Eksport CSV w `/katalog` należy do I8, nie tu — produkcja
   nie ma kluczy `shoper.separator`/`shoper.kolumny`, więc `/api/config` nie jest dla niego blokerem.
 - **Ścieżki (GATE):** config, dostawcy×3 (detal + 2 mutacje), spedycja.  **Fixtures:** `GET_config.json`, `GET_spedycja.json` (`GET_dostawcy.json`/`GET_suppliers.json` już zielone od I2).
