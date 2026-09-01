@@ -27,8 +27,12 @@ zmian, po zatwierdzanie i wycofania. Plus widok `/staging`, w którym te decyzje
 ## 2. Przygotowanie — zanim zaczniesz
 
 ⚠ **Importu NIE da się dziś uruchomić z przeglądarki.** W starym Bridge wgrywanie cenników
-siedzi na stronie *Konfiguracja → wgrywanie*, a tej strony jeszcze nie odbudowaliśmy
-(planowana na Iterację 11). Backend importu działa w pełni — brakuje wyłącznie przycisku.
+siedzi na stronie *Konfiguracja → wgrywanie*, a tej strony jeszcze nie odbudowaliśmy.
+Backend importu działa w pełni — brakuje wyłącznie przycisku.
+
+> **To się wkrótce zmieni.** Blok **3f-1** dowozi wgrywanie z przeglądarki, **3f-2** — pobieranie
+> z URL na żądanie wraz z alertami o awarii dostawcy, a **3f-3** — automatyczny polling.
+> Po 3f-1 ta sekcja przestanie być potrzebna i instrukcja zostanie zaktualizowana.
 
 **Dlatego cennik wgrywa Paweł** i daje znać, gdy staging jest wypełniony. Jeśli chcesz wgrać
 własny plik samodzielnie, komendy są w [sekcji 8](#8-dodatek--wgrywanie-cennika-z-konsoli).
@@ -202,7 +206,7 @@ wiersz. Różnica jest poprawna.
 
 | Czego brakuje | Kiedy |
 |---|---|
-| Wgrywanie cenników z przeglądarki (*Konfiguracja → wgrywanie*) | Iteracja 11 |
+| Wgrywanie cenników z przeglądarki (*Konfiguracja → wgrywanie*) | **blok 3f-1** (wkrótce) |
 | Narzuty i promocje przeliczające cenę sprzedaży | Iteracja 4 |
 | Widok Historia (zmiany cen z importów) | Iteracja 5 |
 | Alerty | Iteracja 6 |
