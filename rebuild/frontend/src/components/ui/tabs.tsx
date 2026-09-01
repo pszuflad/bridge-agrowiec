@@ -37,3 +37,18 @@ export const TabsTrigger = forwardRef<
   />
 ));
 TabsTrigger.displayName = RadixTabs.Trigger.displayName;
+
+export const TabsContent = forwardRef<
+  ElementRef<typeof RadixTabs.Content>,
+  ComponentPropsWithoutRef<typeof RadixTabs.Content>
+>(({ className, ...reszta }, ref) => (
+  <RadixTabs.Content
+    ref={ref}
+    className={cn(
+      "ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+      className,
+    )}
+    {...reszta}
+  />
+));
+TabsContent.displayName = RadixTabs.Content.displayName;

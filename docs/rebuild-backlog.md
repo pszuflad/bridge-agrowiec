@@ -778,3 +778,60 @@ usunąć potrzebę.
   ujęty w #4/#6.
 - `archive_module.cjs` (nowy, obsługa `import_archive`) — archiwizacja zrzutów importu; my `import_archive`
   wykluczyliśmy z mirrora, więc **→ później (Ix)**, nie cel wczesnych iteracji.
+
+---
+
+### #13 · 2026-09-01 · [FRONTEND] · `LE()` — pusta kolumna daje komplet trafień każdej sygnaturze
+
+> **Znalezione i NAPRAWIONE przy tickecie `13-FEATURE-wgrywanie-plikow` (I3/3f-1).**
+> Odstępstwo od portu 1:1 — decyzja użytkownika, 2026-09-01.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (detekcja dostawcy przy wgrywaniu) |
+| **Pliki** | `deminified/frontend-index.js:18377` (`LE`), `:18388` (`FE`), `:18309` (tablica `qu`); port: `rebuild/frontend/src/pages/konfiguracja/detekcja.ts` |
+| **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** (decyzja 2026-09-01) |
+| **Status** | ✔ naprawione w rebuild (3f-1), w produkcji **nadal obecne** |
+
+**Co robi produkcja.** `LE(naglowkiPliku, sygnatura)` liczy, ile nagłówków sygnatury dostawcy
+występuje w pliku, dopasowując luźno w OBIE strony:
+
+```js
+n.some(e => e.includes(t) || t.includes(e))
+```
+
+Luźne dopasowanie jest celowe („Cena netto" ma trafiać i w „cena", i w „cena netto szt").
+Problem jest gdzie indziej: **pusty łańcuch jest podciągiem każdego tokenu**, więc
+`"id".includes("")` daje `true`. Wystarczy jedna pusta kolumna w wierszu nagłówków, żeby
+KAŻDA sygnatura dostała komplet trafień — a pustą kolumnę ma każdy cennik kończący wiersz
+średnikiem.
+
+**Skutek.** Wygrywa sygnatura najdłuższa, czyli MO9 (8 tokenów). Zmierzone na próbkach
+z `rebuild/backend/test/charakteryzacja/probki/`, przy nazwie pliku niepasującej do wzorca:
+
+| Cennik | Trafienia MO9 (produkcja) | Trafienia MO9 (po naprawie) | Rozpoznanie |
+|---|---|---|---|
+| MO4 Handlopex WR | 8 / 8 | 2 / 8 | MO9 → **MO4** |
+| MO5 Handlopex RZ | 8 / 8 | 2 / 8 | MO9 → **MO4*** |
+| MO7 Nokian | 8 / 8 | 6 / 8 | MO9 → **MO7** |
+
+(\* MO4 i MO5 mają identyczną sygnaturę nagłówków — rozróżnia je wyłącznie nazwa pliku.)
+
+Wszystkie trzy pokazują się jako **MO9 „z wysoką pewnością"**. Etykieta pewności każe Ani
+zaufać wynikowi, a wgranie cennika Handlopexu na katalog MO9 przepisuje dane cudzego dostawcy.
+
+**Dlaczego w produkcji nie bije mocniej.** Wzorce NAZWY PLIKU sprawdzane są PIERWSZE i pokrywają
+wszystkich dziesięciu dostawców, a pliki od Ani mają nazwy zgodne z wzorcami. Detekcja po
+nagłówkach jest ścieżką awaryjną — i to ona jest zepsuta.
+
+**Naprawa w rebuild.** `policzTrafienia()` pomija nagłówki puste po normalizacji (i puste
+tokeny sygnatury). Reszta `LE()` — łącznie z luźnym dopasowaniem w obie strony — bez zmian.
+Test regresyjny: `rebuild/frontend/test/konfiguracja.detekcja.test.ts`, sekcja
+„pusty nagłówek nie jest dopasowaniem (odstępstwo 3f-1)".
+
+**Czego NIE ruszamy** (port 1:1, zachowanie zmierzone i zapisane w teście): MO3 po samych
+nagłówkach przegrywa z MO9 (5 trafień własnych vs 6 cudzych), bo `FE()` porównuje LICZBĘ
+trafień, a nie ich udział w sygnaturze. To osobna cecha oryginału i osobna decyzja.
+
+**Do rozważenia dla produkcji.** Ta sama jedna linia naprawia to w starym Bridge. Poza
+zakresem odbudowy — decyzja użytkownika, czy i kiedy.

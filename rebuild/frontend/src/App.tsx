@@ -17,6 +17,7 @@ import { AuthGate } from "@/components/AuthGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { queryClient } from "@/lib/queryClient";
 import { Katalog } from "@/pages/Katalog";
+import { Konfiguracja } from "@/pages/Konfiguracja";
 import { Staging } from "@/pages/Staging";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
@@ -30,6 +31,7 @@ export function Trasy() {
         <Route path="/login" component={Login} />
         <Route path="/katalog" component={Katalog} />
         <Route path="/staging" component={Staging} />
+        <Route path="/konfiguracja" component={Konfiguracja} />
         {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
           <Route key={path} path={path}>
             <WidokWPrzygotowaniu tytul={tytul} opis={opis} iteracja={iteracja} />

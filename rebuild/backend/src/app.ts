@@ -57,7 +57,7 @@ export function stworzApp({ env, db }: ZaleznosciApp): Express {
 
   app.use(trasyAuth({ db, jwtSecret: env.JWT_SECRET, cookieSecure: env.cookieSecure }));
   app.use(trasyProduktow({ db }));
-  app.use(trasyDostawcow({ db }));
+  app.use(trasyDostawcow({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
   app.use(trasyStagingu({ db }));
   app.use(trasyMutacjiStagingu({ db }));
   app.use(trasyOverrides({ db }));
