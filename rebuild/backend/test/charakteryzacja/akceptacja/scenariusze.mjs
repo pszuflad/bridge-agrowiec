@@ -59,6 +59,43 @@ export function pozycja(pola) {
   };
 }
 
+/** Wiersz `markups`. `zakres` i `wartosc` są NOT NULL, reszta ma sensowne domyślne. */
+export function narzut(pola) {
+  return {
+    typ: "globalny",
+    zakres: "",
+    warunki: null,
+    nazwa: "Reguła",
+    wartosc: 6,
+    jednostka: "procent",
+    priorytet: 50,
+    status: "aktywny",
+    zmienilUzytkownikId: 1,
+    zmienionoData: "2026-01-01T00:00:00.000Z",
+    ...pola,
+  };
+}
+
+/**
+ * Wiersz `promotions`. `start`/`koniec` są NOT NULL, ale silnik ich NIE CZYTA — patrz
+ * scenariusz `promocja-wygasla-nadal-obniza-cene`.
+ */
+export function promocja(pola) {
+  return {
+    nazwa: "Promocja",
+    rabatPct: 10,
+    zasieg: "BKT",
+    warunki: null,
+    priorytet: 50,
+    start: "2026-01-01",
+    koniec: "2026-12-31",
+    status: "aktywna",
+    zmienilUzytkownikId: 1,
+    zmienionoData: "2026-01-01T00:00:00.000Z",
+    ...pola,
+  };
+}
+
 export const SCENARIUSZE = [
   {
     nazwa: "nowa-pozycja-wchodzi-do-katalogu",
@@ -195,5 +232,155 @@ export const SCENARIUSZE = [
       "Snapshot bez `ean` → produkt bez EAN-u, mimo `eanRaw` w pozycji.",
     katalog: [],
     pozycja: pozycja({ eanRaw: EAN_2, snapshot: { ean: undefined } }),
+  },
+  // ——— ITERACJA 4a: gałąź cenowa (`:44882-44895`) ———
+  //
+  // ⭐ TO JEST TA CZĘŚĆ PRÓBY, NA KTÓRĄ 3d-2 CZEKAŁA. Do tej pory wszystkie scenariusze miały
+  // `markups`/`promotions` PUSTE, więc oryginał wykonywał gałąź cenową i wychodził z niej bez
+  // zmiany — dokładnie jak nasz port, który jej nie miał. Poniższe scenariusze wpisują reguły
+  // do obu tabel, więc gałąź realnie liczy i port musi trafić w te same liczby, nie „w okolice".
+  //
+  // Domyślne wejście: zakup 1000, VAT 23, marka BKT, kategoria „Rolnicze", dostawca MO5.
+  // Bez reguł dałoby to `cenaSprzedazy = 1250` (zakup × 1,25) i `marzaPct = 25`.
+  {
+    nazwa: "narzut-globalny-ustala-cene",
+    opis:
+      "Jedna reguła globalna 6% → cena idzie z formuły floor(1000 × 1,06 × 1,23) = 1303, " +
+      "a `marzaPct` przyjmuje PROCENT NARZUTU (6), nie policzoną marżę.",
+    katalog: [],
+    narzuty: [narzut({ nazwa: "Reguła Globalna", wartosc: 6 })],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "narzut-specyficzny-bije-globalny-mimo-nizszego-priorytetu",
+    opis:
+      "Reguła po dostawcy z priorytetem 1 wygrywa z globalną o priorytecie 99 — `__bridgePickMarkup` " +
+      "przerywa na pierwszej SPECYFICZNEJ, a globalną trzyma tylko jako zapasową.",
+    katalog: [],
+    narzuty: [
+      narzut({ typ: "globalny", zakres: "", wartosc: 6, priorytet: 99 }),
+      narzut({ typ: "dostawca", zakres: "MO5", wartosc: 20, priorytet: 1 }),
+    ],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "narzut-z-warunkami-jest-koniunkcja",
+    opis:
+      "Reguła `globalny` z niepustymi `warunki` staje się SPECYFICZNA i wymaga spełnienia " +
+      "WSZYSTKICH warunków (marka BKT i kategoria zawierająca „roln\").",
+    katalog: [],
+    narzuty: [
+      narzut({
+        typ: "globalny",
+        zakres: "",
+        wartosc: 15,
+        warunki: JSON.stringify([
+          { typ: "marka", wartosc: "BKT" },
+          { typ: "kategoria", wartosc: "roln" },
+        ]),
+      }),
+    ],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "narzut-z-warunkami-niespelnionymi-nie-wchodzi",
+    opis:
+      "Ten sam kształt reguły, ale drugi warunek nie pasuje → żadna reguła nie pasuje, gałąź " +
+      "cenowa się nie wykonuje i zostaje domyślne zakup × 1,25 z marżą 25.",
+    katalog: [],
+    narzuty: [
+      narzut({
+        typ: "globalny",
+        zakres: "",
+        wartosc: 15,
+        warunki: JSON.stringify([
+          { typ: "marka", wartosc: "BKT" },
+          { typ: "kategoria", wartosc: "osobowe" },
+        ]),
+      }),
+    ],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "narzut-nieaktywny-jest-pomijany",
+    opis: "`status` inny niż „aktywny\" wyklucza regułę — cena zostaje domyślna.",
+    katalog: [],
+    narzuty: [narzut({ wartosc: 40, status: "wylaczony" })],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "uszkodzone-warunki-degraduja-do-typu-i-zakresu",
+    opis:
+      "Niepoprawny JSON w `warunki` jest połykany i traktowany jak brak warunków, więc reguła " +
+      "`dostawca`/`MO5` dalej działa.",
+    katalog: [],
+    narzuty: [narzut({ typ: "dostawca", zakres: "MO5", wartosc: 12, warunki: "{to nie json" })],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "sama-promocja-obniza-cene-przy-zerowym-narzucie",
+    opis:
+      "Bez narzutu, z promocją 10% po `zasieg` → floor(1000 × 1 × 0,9 × 1,23) = 1107, " +
+      "a `marzaPct` spada do 0, bo bierze się z NARZUTU, nie z rabatu.",
+    katalog: [],
+    promocje: [promocja({ rabatPct: 10, zasieg: "BKT,MICHELIN" })],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "narzut-i-promocja-mnoza-sie-po-kolei",
+    opis: "Narzut 20% i rabat 10% składają się multiplikatywnie, nie sumują.",
+    katalog: [],
+    narzuty: [narzut({ wartosc: 20 })],
+    promocje: [promocja({ rabatPct: 10 })],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "promocja-wygasla-nadal-obniza-cene",
+    opis:
+      "⚠ DEFEKT PRODUKCJI ODTWARZANY 1:1 (plan.md D4): `__bridgePromoMatches` nie czyta " +
+      "`start` ani `koniec`, więc promocja sprzed lat dalej działa, dopóki ma status „aktywna\".",
+    katalog: [],
+    promocje: [promocja({ rabatPct: 30, start: "2020-01-01", koniec: "2020-03-31" })],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "promocja-po-warunkach-wygrywa-nad-zasiegiem",
+    opis:
+      "Niepuste `warunki` całkowicie zastępują `zasieg` — promocja pasuje mimo `zasieg`, " +
+      "który z produktem nie ma nic wspólnego.",
+    katalog: [],
+    promocje: [
+      promocja({
+        rabatPct: 25,
+        zasieg: "COSINNEGO",
+        warunki: JSON.stringify([{ typ: "dostawca", wartosc: "MO5" }]),
+      }),
+    ],
+    pozycja: pozycja({}),
+  },
+  {
+    nazwa: "regula-nadpisuje-cene-sprzedazy-z-pozycji",
+    opis:
+      "⚠ Reguła cenowa NADPISUJE `cenaSprzedazyNowa` wpisaną ręcznie w stagingu — człowiek " +
+      "przegrywa z regułą. Zaskakujące, ale tak liczy produkcja.",
+    katalog: [],
+    narzuty: [narzut({ wartosc: 6 })],
+    pozycja: pozycja({ cenaZakupuNowa: 1000, cenaSprzedazyNowa: 2000 }),
+  },
+  {
+    nazwa: "regula-nie-wchodzi-przy-zerowej-cenie-zakupu",
+    opis:
+      "Próg `cenaZakupu > 0` odcina gałąź WCZEŚNIEJ niż dopasowanie reguł — mimo aktywnego " +
+      "narzutu produkt zostaje `wstrzymany` z ceną 0.",
+    katalog: [],
+    narzuty: [narzut({ wartosc: 40 })],
+    pozycja: pozycja({ cenaZakupuNowa: 0 }),
+  },
+  {
+    nazwa: "regula-przelicza-takze-aktualizowany-produkt",
+    opis: "Gałąź cenowa działa tak samo na ścieżce UPDATE, nie tylko przy nowym produkcie.",
+    katalog: [produkt({ cenaZakupu: 900, cenaSprzedazy: 1125, marzaPct: 25 })],
+    narzuty: [narzut({ typ: "kategoria", zakres: "Rolnicze", wartosc: 8 })],
+    pozycja: pozycja({ cenaZakupuNowa: 1234.5, stanNowy: 9 }),
   },
 ];
