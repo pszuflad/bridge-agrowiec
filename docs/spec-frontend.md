@@ -151,6 +151,16 @@ ma endpoint:
 >
 > Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
 
+> **Backend gotowy dla `/narzuty` (4a, `15-FEATURE-narzuty-promocje-ceny` — 2026-09-02),
+> widok sam jeszcze NIE ISTNIEJE (sesja 4b, poza zakresem 4a).** Dla 4b: `GET /api/markups`
+> i `GET /api/promotions` zwracają **gołe tablice**, nie koperty; pole `warunki` w obu
+> tabelach to **string ze zserializowanym JSON-em**, nie tablica; aktywny status to
+> `"aktywny"` przy narzucie i `"aktywna"` (żeński) przy promocji; silnik cen **ignoruje**
+> daty `start`/`koniec` promocji — wyłączenie promocji to zmiana `status`, nie upływ daty;
+> `PATCH /api/promotions/{id}` na nieistniejące id oddaje **200 z pustym ciałem** (bliźniacza
+> trasa narzutu ma 404); każda mutacja narzutu/promocji przelicza ceny CAŁEGO katalogu
+> synchronicznie w handlerze. Szczegóły: `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`.
+>
 > **Odbudowa (I5, `15-FEATURE-historia-zmian`, 2026-09-02):** `/historia` odbudowany — router
 > ma **12 tras, 7 placeholderów**. Tabela + filtry (szukaj / typ / dostawca) + paginacja 25/50/100.
 > Widok woła **wyłącznie** `GET /api/history/paged` i `GET /api/history/meta`

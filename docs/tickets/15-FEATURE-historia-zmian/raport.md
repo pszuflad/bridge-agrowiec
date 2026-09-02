@@ -166,7 +166,7 @@ Trzy doc-checkery równolegle, każdy nanosił zmiany sam.
 
 ### `docs/rebuild-backlog.md`
 
-- **Nowy wpis #19 (⬜ DO DECYZJI)** — „widok `/historia` nie pokazuje importów z URL ani ręcznych
+- **Nowy wpis #21 (⬜ DO DECYZJI)** — „widok `/historia` nie pokazuje importów z URL ani ręcznych
   synchronizacji". Opisuje, co robi produkcja, dlaczego odtworzyliśmy to 1:1 (D2) i dlaczego mimo
   to warto, żeby Ania zdecydowała: od 3f-3 automatyczny import z URL jest głównym kanałem
   zasilania danych, a historia go nie pokazuje. **Nie oznaczone jako ✅** — to nie nasza decyzja.

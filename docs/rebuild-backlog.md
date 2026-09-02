@@ -841,14 +841,15 @@ zakresem odbudowy — decyzja użytkownika, czy i kiedy.
 ### #14 · 2026-09-01 · [BACKEND][BEZPIECZEŃSTWO] · mutacje zapisują CAŁE ciało żądania — wzorzec systemowy, nie jednostkowy
 
 > **Znalezione przy bloku I3/3f-2 (2026-09-01).** Dla dostawców NAPRAWIONE decyzją
-> użytkownika; dla narzutów, promocji i produktów **czeka na iteracje 4 i 12**.
+> użytkownika; dla narzutów i promocji NAPRAWIONE w bloku 4a (2026-09-02); dla
+> produktów **czeka na Iterację 12**.
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (warstwa danych + trasy mutacji) |
 | **Pliki** | `deminified/backend-index.cjs:45043` (`updateSupplier`), `:44975` (`updateMarkup`), `:44998` (`updatePromotion`), `:44824` (`updateStaging`), `:44728` (`updateProduct`); trasy `:48230`, `:48699`, `:48722`, `:48415` |
-| **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** (decyzja 2026-09-01, dotyczy dostawców; dla I4/I12 patrz „Co z tego wynika") |
-| **Status** | ✔ dostawcy naprawieni w rebuild (3f-2) · ⬜ narzuty/promocje (I4) · ⬜ produkty (I12) · w produkcji **nadal obecne** |
+| **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** (decyzja 2026-09-01, dotyczy dostawców; dla narzutów/promocji NAPRAWIONE 4a, dla produktów patrz „Co z tego wynika") |
+| **Status** | ✔ dostawcy naprawieni w rebuild (3f-2) · ✔ narzuty i promocje naprawione w rebuild (4a, 2026-09-02) · ⬜ produkty (I12) · w produkcji **nadal obecne** |
 
 **Co robi produkcja.** Metody warstwy danych przyjmują obiekt i wrzucają go do `SET` bez
 żadnego filtra:
@@ -864,8 +865,8 @@ Trzy trasy podają im ciało żądania **wprost od użytkownika**:
 | Trasa | Co przekazuje | Iteracja odbudowy |
 |---|---|---|
 | `PATCH /api/dostawcy/:id` (`:48230`) | `c.body` — bez zmian | **3f-2 ✔** |
-| `PATCH /api/markups/:id` (`:48701`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4** |
-| `PATCH /api/promotions/:id` (`:48724`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4** |
+| `PATCH /api/markups/:id` (`:48701`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4a ✔** |
+| `PATCH /api/promotions/:id` (`:48724`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4a ✔** |
 | `PUT`+`PATCH /api/products/:id` (`:48415-48424`, rejestracja `:48452`) | `c.body` bez klucza `_reason` | **Iteracja 12** |
 
 **⭐ Kluczowa obserwacja: produkcja NIE jest w tym konsekwentna.** `PUT /api/staging/:id`
@@ -905,12 +906,22 @@ Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archi
 
 **Co z tego wynika dla kolejnych iteracji:**
 
-- **Iteracja 4 (narzuty i promocje)** — `PATCH /api/markups/:id` i `/api/promotions/:id`
-  mają ten sam brak, a stawka jest wyższa niż przy dostawcach: `updateMarkup`
-  i `updatePromotion` wołają po zapisie `recalcPricesFromRules()`, czyli **przeliczają ceny
-  całego katalogu**. Zanim się je odtworzy, trzeba świadomie zdecydować listę pól — decyzja
-  jest tego samego rodzaju co tutaj i ma ten sam precedens (staging). Dwa pola,
-  `zmienilUzytkownikId` i `zmienionoData`, ustawia SERWER i one na listę wejść nie mogą.
+- **Iteracja 4a (narzuty i promocje) — NAPRAWIONE (2026-09-02).** `POLA_EDYTOWALNE_NARZUTU`
+  (`rebuild/backend/src/repos/markups.ts`: `typ, zakres, warunki, nazwa, wartosc, jednostka,
+  priorytet, status`) i `POLA_EDYTOWALNE_PROMOCJI` (`rebuild/backend/src/repos/promotions.ts`:
+  `nazwa, rabatPct, zasieg, warunki, priorytet, start, koniec, status`) odcinają `id`,
+  `zmienilUzytkownikId`, `zmienionoData` (ustawia je SERWER). Testy:
+  `rebuild/backend/test/narzuty.patch.test.ts`. **Różnica wobec dostawców:** filtr działa
+  także na **POST**, nie tylko na PATCH (plan.md D3) — u dostawców trasy POST nie ma, więc
+  ta powierzchnia ataku tam nie istniała. **Nowa niespójność, wprowadzona świadomie (D2):**
+  audyt loguje **surowe `req.body`** (port 1:1 z `:48699-48737`, wszystkie sześć wywołań
+  `be(...)` przekazują `c.body` w całości), podczas gdy zapis idzie przez filtr pól. Skutek:
+  `szczegoly_json` może zawierać pole, które NIE zostało zapisane — audyt opisuje ZAMIAR, nie
+  stan bazy. To **odwrotność** sytuacji u dostawców opisanej wyżej w tym wpisie: tam
+  niespójność audytu jest własnością ORYGINAŁU i była odtwarzana 1:1; tu jest NASZA, cena
+  naprawy zapisu. Uzasadnienie: ten sam sens co przy `synchronizacja_reczna` z I3 (audyt
+  powstaje nawet dla nieistniejącego dostawcy), a przy okazji próba mass-assignmentu zostaje
+  w dzienniku jako sygnał bezpieczeństwa, zamiast zniknąć bez śladu.
 - **Iteracja 12 (produkty + hardening)** — `PATCH /api/products/:id` odsiewa wyłącznie klucz
   `_reason`; cała reszta 72 kolumn jest zapisywalna. Ta trasa dodatkowo zapisuje
   `manual_overrides` dla KAŻDEGO zmienionego pola, więc lista pól decyduje też o tym,
@@ -1077,7 +1088,80 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 
 ---
 
-### #19 · 2026-09-02 · [BACKEND] · widok `/historia` nie pokazuje importów z URL ani ręcznych synchronizacji
+### #19 · 2026-09-02 · [BACKEND] · silnik cen IGNORUJE daty promocji — wygasła promocja nadal obniża cenę
+
+> **Znalezione przy bloku I4/4a (2026-09-02). ODTWORZONE 1:1** — naprawa świadomie
+> odłożona, bo wymagałaby wyjątku w charakteryzacji importu. **Właściciel do ustalenia.**
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (silnik cen) |
+| **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`) |
+| **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **do decyzji** (odrzucona w tym tickecie, patrz niżej) |
+| **Status** | ✔ odtworzone w rebuild (4a), defekt zgłoszony |
+
+**Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
+`koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
+po `warunki`/`zasieg`. Kolumny `start` i `koniec` są w schemacie **NOT NULL** i nigdzie
+w silniku nieużywane — istnieją, ale są martwe dla logiki cen.
+
+**Skutek.** Wygasła promocja nadal obniża ceny **w nieskończoność**. Jedynym sposobem jej
+wyłączenia jest ręczna zmiana `status` na coś innego niż `"aktywna"`; upływ daty `koniec`
+nie robi nic. Dotyczy obu ścieżek silnika: masowego `przeliczCenyZRegul`
+(`recalcPricesFromRules`) wołanego po każdej mutacji narzutu/promocji, i gałęzi cenowej
+importu (`acceptStaging`, wpiętej w 4a).
+
+**Decyzja użytkownika (2026-09-02): odtworzyć 1:1, naprawy NIE robimy teraz.** Uzasadnienie:
+naprawa wymagałaby wyjątku w charakteryzacji importu (test z bloku 3d-2, rozszerzony w 4a
+o trzynaście scenariuszy cenowych, w tym `promocja-wygasla-nadal-obniza-cene`), czyli
+osłabienia najmocniejszej siatki bezpieczeństwa, jaką w tym projekcie mamy. Odtworzone
+dosłownie w `promocjaPasuje`, z testem pilnującym tego zachowania:
+`rebuild/backend/test/ceny.silnik.test.ts` („⚠ promocja WYGASŁA nadal działa — silnik nie
+czyta start ani koniec") i scenariuszem charakteryzacji
+`rebuild/backend/test/charakteryzacja/akceptacja/scenariusze.mjs`
+(`promocja-wygasla-nadal-obniza-cene`).
+
+**Do rozważenia dla produkcji.** Naprawa jest jednoliniowa (dodać warunek na `start`/`koniec`
+w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
+decyzja użytkownika, czy i kiedy.
+
+---
+
+### #20 · 2026-09-02 · [BACKEND] · `PATCH /api/promotions/{id}` nie ma 404 — bliźniacza trasa narzutu ma
+
+> **Znalezione przy bloku I4/4a (2026-09-02). ODTWORZONE 1:1.** Nota dla sesji 4b
+> (frontend): odpowiedź na nieistniejące id NIE zawiera obiektu.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (trasy mutacji) |
+| **Pliki** | `deminified/backend-index.cjs:48699` (`PATCH /api/markups/:id`, ma 404), `:48722-48731` (`PATCH /api/promotions/:id`, brak 404); port: `rebuild/backend/src/routes/markups.ts`, `rebuild/backend/src/routes/promotions.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1** |
+| **Status** | ✔ odtworzone w rebuild (4a), asymetria zgłoszona |
+
+**Co robi produkcja.** `e.patch("/api/markups/:id", …)` (`:48699`) sprawdza jawnie
+`if (!p) return u.status(404)`. Bliźniacza trasa `e.patch("/api/promotions/:id", …)`
+(`:48722-48731`) tego sprawdzenia **NIE MA** — dla nieistniejącego id `updatePromotion`
+zwraca `undefined`, a trasa mimo to oddaje **200 z pustym ciałem**. Dodatkowo audyt
+`edycja_promocji` powstaje także wtedy — zapis ZAMIARU, nie wyniku, ten sam wzorzec co
+przy `synchronizacja_reczna` (I3) i przy DELETE obu zasobów (`deleteMarkup`/
+`deletePromotion` kasują w próżnię bez 404, audyt powstaje mimo to — port 1:1, bez
+osobnego wpisu, bo tu obie trasy CRUD są zgodne między sobą).
+
+**Skutek.** Klient, który PATCH-uje nieistniejącą promocję, dostaje sukces (`200`) zamiast
+błędu — nie ma sposobu odróżnić „zaktualizowano" od „id nie istniało" po samym kodzie
+odpowiedzi, trzeba czytać ciało.
+
+**Decyzja użytkownika (2026-09-02): port 1:1**, zgodnie z zasadą „odtwarzasz zachowanie
+1:1, odstępstwo wymaga decyzji" — asymetria między dwiema bliźniaczymi trasami jest
+zachowaniem produkcji, nie usterką portu. **Nota dla sesji 4b:** frontend nie może zakładać,
+że odpowiedź PATCH-a promocji zawiera obiekt promocji przy nieistniejącym id. Testy:
+`rebuild/backend/test/narzuty.patch.test.ts` (404 przy narzucie, 200 z pustym ciałem przy
+promocji).
+
+**Do rozważenia dla produkcji.** Jednoliniowa naprawa (dodać ten sam strażnik co przy
+narzutach). Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy.
+### #21 · 2026-09-02 · [BACKEND] · widok `/historia` nie pokazuje importów z URL ani ręcznych synchronizacji
 
 > **Zgłoszone przy tickecie `15-FEATURE-historia-zmian` (I5). Port 1:1** — świadomie,
 > decyzja użytkownika, plan.md D2.

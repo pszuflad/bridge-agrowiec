@@ -18,7 +18,9 @@ import {
   auditLog,
   history,
   historiaCen,
+  markups,
   products,
+  promotions,
   stagingItems,
   suppliers,
 } from "../../src/db/schema.js";
@@ -363,6 +365,60 @@ function pozycjeZFixture(nazwaPliku: string): (typeof stagingItems.$inferInsert)
     // `paged` i `{id}` publikują tę kolumnę pod krótszą nazwą `zatwierdzono`.
     zatwierdzonoData: (p.zatwierdzonoData ?? p.zatwierdzono ?? null) as string | null,
   }));
+}
+
+/**
+ * Zasiew reguł narzutu wprost z `contract/fixtures/GET_markups.json` (Iteracja 4a).
+ *
+ * Ta sama metoda co przy stagingu: wiersz bierzemy z NAGRANIA produkcji, a nie z własnej
+ * wyobraźni, więc porównanie odpowiedzi z fixture'em sprawdza całą warstwę odczytu —
+ * typy kolumn, mapowanie snake_case → camelCase i to, że `warunki` wychodzi jako STRING
+ * z JSON-em w środku, a nie jako rozpakowana tablica.
+ */
+export function zasiejNarzutyZFixtures(db: Baza): void {
+  const fixture = wczytajFixture("GET_markups.json");
+  const wiersze = (fixture.body as Record<string, unknown>[]).map((r) => ({
+    id: r.id as number,
+    typ: r.typ as string,
+    zakres: r.zakres as string,
+    warunki: (r.warunki ?? null) as string | null,
+    nazwa: (r.nazwa ?? null) as string | null,
+    wartosc: r.wartosc as number,
+    jednostka: r.jednostka as string,
+    priorytet: r.priorytet as number,
+    status: r.status as string,
+    zmienilUzytkownikId: (r.zmienilUzytkownikId ?? null) as number | null,
+    zmienionoData: (r.zmienionoData ?? null) as string | null,
+  }));
+  if (wiersze.length > 0) db.insert(markups).values(wiersze).run();
+}
+
+/**
+ * Promocja do sprawdzenia KSZTAŁTU odpowiedzi `/api/promotions`.
+ *
+ * ⚠ OGRANICZENIE SIATKI, NAZWANE WPROST: `GET_promotions.json` jest PUSTĄ TABLICĄ, więc
+ * produkcja nie nagrała ani jednego wiersza promocji. Kształt poniżej pochodzi ze schematu
+ * (`rebuild/schema/001_schema.sql:156-168`), nie z nagrania — i tylko tyle może dowodzić
+ * test, który go używa. Sam fixture pilnuje wyłącznie tego, że pusty katalog promocji
+ * zwraca `[]` z kodem 200.
+ */
+export const PROMOCJA_TESTOWA = {
+  id: 1,
+  nazwa: "Wyprzedaż zimowa",
+  rabatPct: 10,
+  zasieg: "BKT,MICHELIN",
+  warunki: null,
+  priorytet: 50,
+  start: "2026-01-01",
+  koniec: "2026-03-31",
+  status: "aktywna",
+  zmienilUzytkownikId: 1,
+  zmienionoData: "2026-07-31T13:07:21.578Z",
+} as const;
+
+/** Wstawia `PROMOCJA_TESTOWA` — do testów kształtu, nie do porównania z fixture'em. */
+export function zasiejPromocjeTestowa(db: Baza): void {
+  db.insert(promotions).values({ ...PROMOCJA_TESTOWA }).run();
 }
 
 // ─── Iteracja 5: historia ────────────────────────────────────────────────────────────────

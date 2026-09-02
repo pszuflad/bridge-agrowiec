@@ -145,6 +145,11 @@ się w nieskończoność.**
 Produkt nowy dostaje: cenę sprzedaży = zakup × 1,25 (gdy plik jej nie podał), marżę 25%,
 kategorię „Rolnicze" i VAT 23%, jeśli plik nie powiedział inaczej.
 
+> ⚠ To dotyczy stanu z **pustymi** tabelami narzutów/promocji. Od Iteracji 4a: jeśli w
+> `/api/markups` lub `/api/promotions` jest choć jedna pasująca, aktywna reguła, akceptacja
+> liczy cenę sprzedaży **z tej reguły** (i nadpisuje nią nawet wartość wpisaną ręcznie
+> w podglądzie stagingu), nie ze wzoru `zakup × 1,25`.
+
 ### 3.7 Odrzucenie
 
 1. Zaznacz pozycję i kliknij **Odrzuć zaznaczone**.
@@ -386,7 +391,7 @@ decyzję, czy je prostować.
 | ~~Automatyczne pobieranie cenników co N minut~~ | ✅ **jest** — sekcja 3.13, domyślnie wyłączone |
 | **Widok** alertów (same alerty już się zapisują) | Iteracja 6 |
 | Zakładki *Spedycja*, *Shoper*, *Katalog*, *AI Fallback* | Iteracja 11 |
-| Narzuty i promocje przeliczające cenę sprzedaży | Iteracja 4 |
+| ~~Narzuty i promocje przeliczające cenę sprzedaży~~ | ✅ **jest** (backend, 4a) — brakuje widoku `/narzuty` (4b) |
 | Widok Historia (zmiany cen z importów) | Iteracja 5 |
 | Alerty | Iteracja 6 |
 | Atrybuty | Iteracja 7 |
