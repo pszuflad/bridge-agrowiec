@@ -6,6 +6,7 @@ import { optionalAuth } from "./middleware/auth.js";
 import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
 import { trasyAuth } from "./routes/auth.js";
+import { trasyHistorii } from "./routes/history.js";
 import { trasyDostawcow } from "./routes/suppliers.js";
 import { trasyImportu } from "./routes/import.js";
 import { trasyProduktow } from "./routes/products.js";
@@ -92,6 +93,7 @@ export function stworzApp({
   app.use(trasyStagingu({ db }));
   app.use(trasyMutacjiStagingu({ db }));
   app.use(trasyOverrides({ db }));
+  app.use(trasyHistorii({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
 
   app.use(nieZnalezionoHandler);
