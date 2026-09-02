@@ -81,3 +81,36 @@ export function pozycjaStaginguZFixtura(): Record<string, unknown> {
   // Wybieramy pozycję, która NAPRAWDĘ ma snapshot — inaczej test podglądu byłby pusty.
   return pozycje.find((p) => p.snapshotJson) ?? pozycje[0]!;
 }
+
+/**
+ * Strona historii prosto z `contract/fixtures/GET_history_paged.json` — koperta
+ * `{items,total,pages,page,limit}` z 50 nagranymi wpisami. Ta sama zasada co wyżej:
+ * test widoku sprawdza zgodność z kontraktem, a nie z moim wyobrażeniem o kształcie.
+ */
+export function stronaHistoriiZFixtura(): {
+  items: Record<string, unknown>[];
+  total: number;
+  pages: number;
+  page: number;
+  limit: number;
+} {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_history_paged.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: {
+      items: Record<string, unknown>[];
+      total: number;
+      pages: number;
+      page: number;
+      limit: number;
+    };
+  };
+  const { items, total, pages, page, limit } = fixture.body;
+  return { items, total, pages, page, limit };
+}
+
+/** Lista dostawców do filtra historii z `contract/fixtures/GET_history_meta.json`. */
+export function metaHistoriiZFixtura(): { dostawcy: string[] } {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_history_meta.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: { dostawcy: string[] } };
+  return { dostawcy: fixture.body.dostawcy };
+}

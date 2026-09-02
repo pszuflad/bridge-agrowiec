@@ -9,7 +9,9 @@
  *
  * ⚠ POZYCJE AUTO-ZATWIERDZONE TU NIE TRAFIAJĄ. Import wpisuje je wprost do katalogu
  * (§3 roadmapy, „Staging auto-accept"), więc widok nie ma czego dla nich pokazywać i nie ma
- * ich liczyć. Widać je dopiero w historii cen (Iteracja 5).
+ * ich liczyć. Ślad po nich zostaje w tabeli `historia_cen`, której czytelnika dowozi
+ * Iteracja 10 (`/api/analytics/prices/product-history`) — NIE widok `/historia` z Iteracji 5.
+ * Ten ostatni jest logiem zdarzeń z `audit_log` i pojedynczych auto-zatwierdzeń nie pokazuje.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
