@@ -63,6 +63,8 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
 - **12 tras** (nie 11): `/login`, `/`, `/staging`, `/katalog`, `/narzuty`,
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
+  Odbudowane dotąd: `/login`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`, `/narzuty`
+  (6 widoków); pozostałe 6 to placeholdery (`src/pages/placeholdery.ts`).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
@@ -151,15 +153,27 @@ ma endpoint:
 >
 > Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
 
-> **Backend gotowy dla `/narzuty` (4a, `15-FEATURE-narzuty-promocje-ceny` — 2026-09-02),
-> widok sam jeszcze NIE ISTNIEJE (sesja 4b, poza zakresem 4a).** Dla 4b: `GET /api/markups`
-> i `GET /api/promotions` zwracają **gołe tablice**, nie koperty; pole `warunki` w obu
-> tabelach to **string ze zserializowanym JSON-em**, nie tablica; aktywny status to
-> `"aktywny"` przy narzucie i `"aktywna"` (żeński) przy promocji; silnik cen **ignoruje**
-> daty `start`/`koniec` promocji — wyłączenie promocji to zmiana `status`, nie upływ daty;
-> `PATCH /api/promotions/{id}` na nieistniejące id oddaje **200 z pustym ciałem** (bliźniacza
-> trasa narzutu ma 404); każda mutacja narzutu/promocji przelicza ceny CAŁEGO katalogu
-> synchronicznie w handlerze. Szczegóły: `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`.
+> **Odbudowa (4b, `16-FEATURE-widok-narzuty-promocje` — 2026-09-02):** `/narzuty`
+> odbudowany — dwie zakładki, „Narzuty" (tabela reguł + symulator ceny krok po kroku) i
+> „Promocje" (tabela), pełny CRUD obu zasobów przez React Query (bez optimistic update/
+> IndexedDB oryginału — świadome odstępstwo), wspólny dialog z builderem warunków.
+> `GET /api/markups` i `GET /api/promotions` zwracają **gołe tablice**, nie koperty; pole
+> `warunki` w obu tabelach to **string ze zserializowanym JSON-em**, nie tablica; aktywny
+> status to `"aktywny"` przy narzucie i `"aktywna"` (żeński) przy promocji; silnik cen
+> **ignoruje** daty `start`/`koniec` promocji — wyłączenie promocji to zmiana `status`, nie
+> upływ daty (formularz o tym ostrzega — nota przy polach dat); `PATCH /api/promotions/{id}`
+> na nieistniejące id oddaje **200 z pustym ciałem** (bliźniacza trasa narzutu ma 404),
+> klient to znosi; każda mutacja narzutu/promocji przelicza ceny CAŁEGO katalogu synchronicznie
+> w handlerze. Builder warunków wystawia **9 typów** (oryginał 6; dołożone `konstrukcja`,
+> `srednica`, `vfIf`, które silnik rozumie). Etykieta statusu promocji liczona z dat przy
+> każdym odczycie (jak oryginał), bez zapisu na serwer, plus widoczny znacznik rozbieżności,
+> gdy etykieta nie zgadza się z kolumną `status` z bazy. Ostrzeżenie „poniżej kosztu" przed
+> zapisem promocji — pasek na żywo w formularzu + dialog potwierdzenia (oryginał używał
+> `window.confirm`). **Kolumna „Promocja" w `/katalog` zostaje MARTWA** — w produkcji
+> `_reguly` nie jest ustawiane nigdzie i `GET /api/products` nie niesie danych o promocji;
+> to port 1:1, nie brakujące dane do dociągnięcia. Dołożony `Toaster` do drzewa aplikacji
+> (`App.tsx`) — pierwszy widok używający toastów; `TooltipProvider` dalej czeka. Szczegóły:
+> `docs/tickets/16-FEATURE-widok-narzuty-promocje/`, backend: `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`.
 >
 > **Odbudowa (I5, `15-FEATURE-historia-zmian`, 2026-09-02):** `/historia` odbudowany — router
 > ma **12 tras, 7 placeholderów**. Tabela + filtry (szukaj / typ / dostawca) + paginacja 25/50/100.

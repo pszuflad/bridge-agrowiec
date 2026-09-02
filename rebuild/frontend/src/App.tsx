@@ -4,7 +4,8 @@
  * Oryginał: QueryClientProvider > ThemeProvider > TooltipProvider > [Toaster, Router > AuthGate > Switch].
  * `TooltipProvider` i `Toaster` dochodzą w iteracji, która pierwsza ich użyje —
  * Iteracja 1 nie ma ani jednego tooltipa ani toasta, a wnoszenie nieużywanych
- * providerów to martwy kod.
+ * providerów to martwy kod. **`Toaster` wszedł w sesji 4b** (`/narzuty` woła toast przy
+ * każdym zapisie, usunięciu i błędzie walidacji); `TooltipProvider` dalej czeka.
  *
  * ODSTĘPSTWO O1 (plan.md): oryginał używał routingu po hashu (`useHashLocation`
  * + `window.location.hash ||= "#/"`) — obejście z Replita dające adresy `/#/katalog`.
@@ -16,9 +17,11 @@ import { Route, Switch } from "wouter";
 import { AuthGate } from "@/components/AuthGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { queryClient } from "@/lib/queryClient";
+import { ToastProvider } from "@/components/ui/toast";
 import { Historia } from "@/pages/Historia";
 import { Katalog } from "@/pages/Katalog";
 import { Konfiguracja } from "@/pages/Konfiguracja";
+import { Narzuty } from "@/pages/Narzuty";
 import { Staging } from "@/pages/Staging";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
@@ -34,6 +37,7 @@ export function Trasy() {
         <Route path="/staging" component={Staging} />
         <Route path="/konfiguracja" component={Konfiguracja} />
         <Route path="/historia" component={Historia} />
+        <Route path="/narzuty" component={Narzuty} />
         {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
           <Route key={path} path={path}>
             <WidokWPrzygotowaniu tytul={tytul} opis={opis} iteracja={iteracja} />
@@ -49,7 +53,9 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Trasy />
+        <ToastProvider>
+          <Trasy />
+        </ToastProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

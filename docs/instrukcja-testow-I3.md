@@ -391,7 +391,7 @@ decyzję, czy je prostować.
 | ~~Automatyczne pobieranie cenników co N minut~~ | ✅ **jest** — sekcja 3.13, domyślnie wyłączone |
 | **Widok** alertów (same alerty już się zapisują) | Iteracja 6 |
 | Zakładki *Spedycja*, *Shoper*, *Katalog*, *AI Fallback* | Iteracja 11 |
-| ~~Narzuty i promocje przeliczające cenę sprzedaży~~ | ✅ **jest** (backend, 4a) — brakuje widoku `/narzuty` (4b) |
+| ~~Narzuty i promocje przeliczające cenę sprzedaży~~ | ✅ **jest** — backend (4a) i widok `/narzuty` z zakładkami Narzuty/Promocje (4b) |
 | Widok Historia (zmiany cen z importów) | Iteracja 5 |
 | Alerty | Iteracja 6 |
 | Atrybuty | Iteracja 7 |
