@@ -128,6 +128,41 @@ describe("Narzuty i promocje — lista pól edytowalnych i audyt", () => {
       const odp = await patch("/api/markups/9999", { wartosc: 12 });
       expect(odp.status).toBe(404);
     });
+
+    /**
+     * ⚠ 404 NIE JEST SKRÓTEM. Oryginał (`:48699-48710`) wykonuje `UPDATE … WHERE id = NaN`,
+     * potem `recalcPricesFromRules()` na CAŁYM katalogu, i dopiero odczyt wiersza daje 404.
+     * Przeliczenie jest więc obserwowalnym skutkiem żądania z bezsensownym `id` — gdyby port
+     * skracał drogę na `Number.isNaN`, ceny by się nie ruszyły i rozjechalibyśmy się z
+     * produkcją po cichu. Ten test mierzy właśnie to.
+     */
+    it("nienumeryczne id: 404, ale katalog i tak zostaje przeliczony", async () => {
+      srodowisko.db
+        .insert(products)
+        .values({
+          kod: "P1",
+          nazwa: "Opona",
+          marka: "BKT",
+          kategoria: "Rolnicze",
+          dostawca: "MO5",
+          magazyn: "PL",
+          stan: 4,
+          cenaZakupu: 1000,
+          // Cena celowo NIEZGODNA z regułą z fixture'a (globalna 6%) i z promocją testową
+          // (rabat 10%): 1000 × 1,06 × 0,9 × 1,23 = 1173,42 → 1173.
+          cenaSprzedazy: 1,
+          marzaPct: 0,
+          vat: 23,
+          status: "aktywny",
+          dataAktualizacji: "2026-01-01T00:00:00.000Z",
+        })
+        .run();
+
+      const odp = await patch("/api/markups/abc", { wartosc: 12 });
+
+      expect(odp.status).toBe(404);
+      expect(srodowisko.db.select().from(products).all()[0]!.cenaSprzedazy).toBe(1173);
+    });
   });
 
   describe("2. PATCH promocji", () => {

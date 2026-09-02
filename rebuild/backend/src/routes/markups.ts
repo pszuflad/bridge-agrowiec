@@ -78,15 +78,19 @@ export function trasyNarzutow({ db }: ZaleznosciNarzutow): Router {
    * z niewłaściwego miejsca.
    */
   router.patch("/api/markups/:id", requireAuth, (req: Request, res: Response) => {
-    // `parseInt` jak w oryginale (`:48700`): „abc" → NaN → brak wiersza → 404.
+    // `parseInt` jak w oryginale (`:48700`): „abc" → NaN.
+    //
+    // ⚠ NIE SKRACAMY TU DROGI NA NaN. Kusi, żeby od razu oddać 404, ale oryginał tego nie
+    // robi: leci `UPDATE … WHERE id = NaN` (zero wierszy — better-sqlite3 przyjmuje NaN
+    // i po prostu nic nie dopasowuje), PO NIM `recalcPricesFromRules()` na całym katalogu,
+    // i dopiero odczyt wiersza rozstrzyga 404. Przeliczenie jest więc OBSERWOWALNYM
+    // skutkiem żądania z bezsensownym `id` — pominięcie go byłoby cichym odstępstwem.
     const id = Number.parseInt(String(req.params.id ?? ""), 10);
-    const narzut = Number.isNaN(id)
-      ? undefined
-      : aktualizujNarzut(db, id, {
-          ...odsiejPolaNarzutu(req.body),
-          zmienilUzytkownikId: req.user?.id ?? null,
-          zmienionoData: new Date().toISOString(),
-        });
+    const narzut = aktualizujNarzut(db, id, {
+      ...odsiejPolaNarzutu(req.body),
+      zmienilUzytkownikId: req.user?.id ?? null,
+      zmienionoData: new Date().toISOString(),
+    });
 
     if (!narzut) {
       res.status(404).json({ error: "Nie znaleziono" });
