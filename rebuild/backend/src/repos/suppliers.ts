@@ -2,6 +2,7 @@ import { asc, eq, sql } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { products, suppliers } from "../db/schema.js";
 import { KOLUMNY_POZA_KONTRAKTEM, projekcjaKontraktowa } from "./kolumny.js";
+import { odsiejPola } from "./pola-edytowalne.js";
 
 /**
  * Kolumny wychodzące do API — wszystkie z tabeli MINUS wewnętrzne (plan.md D6).
@@ -223,13 +224,7 @@ export function dostawcaPoIdDoApi(db: Baza, id: number): Dostawca | undefined {
  * w ciele faktycznie były — brak klucza to „nie ruszaj", a nie „ustaw na null".
  */
 export function odsiejPolaEdytowalne(cialo: unknown): Partial<Pick<Dostawca, PoleEdytowalne>> {
-  if (typeof cialo !== "object" || cialo === null) return {};
-  const zrodlo = cialo as Record<string, unknown>;
-  const wynik: Record<string, unknown> = {};
-  for (const pole of POLA_EDYTOWALNE_DOSTAWCY) {
-    if (Object.hasOwn(zrodlo, pole)) wynik[pole] = zrodlo[pole];
-  }
-  return wynik as Partial<Pick<Dostawca, PoleEdytowalne>>;
+  return odsiejPola(cialo, POLA_EDYTOWALNE_DOSTAWCY) as Partial<Pick<Dostawca, PoleEdytowalne>>;
 }
 
 /**
