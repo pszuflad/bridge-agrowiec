@@ -116,3 +116,27 @@ Rzeczy zauważone po drodze, świadomie NIE zrobione w tym ticketcie:
    (`listAudit(5e3)`). Przy większym `audit_log` starsze wpisy stają się niedostępne niezależnie
    od numeru strony, a `total` przestaje być liczbą wszystkich wpisów. To zastane zachowanie
    produkcji, odtworzone celowo i opisane w `repos/audit.ts`.
+
+## Review fixes applied
+
+Runda 1 review (`review.md`): 1 BLOCKER, 1 SHOULD-FIX, 2 NICE-TO-HAVE.
+
+- **BLOCKER — roadmapa nie zamknięta.** Zasadny: blok I5 dalej miał status `⬜`, błędny fakt
+  „`Wa` = `historia_cen`" i brak noty w bloku I10 (decyzja D3). Realizowane w Fazie 5 (Krok 13-14),
+  bo aktualizacja `docs/` to osobny etap ticketa — nie było to pominięcie, tylko kolejność.
+- **SHOULD-FIX — mylący komentarz** przy `stronaHistoriiZFixtura`
+  (`rebuild/frontend/test/msw/kontrakt.ts`): mówił „50 nagranymi wpisami", a `items` ma pięć
+  (50 to `_przyciete.items`, czyli stan sprzed sanityzacji). Poprawione, z wyjaśnieniem, dlaczego
+  `total`/`pages` celowo nie zgadzają się z długością `items`.
+- **NICE-TO-HAVE — niezatwierdzone odstępstwo w `sformatujDate`.** Strażnik `Number.isNaN`
+  usunięty: oryginał go nie ma, a w praktyce był to martwy kod (`repos/audit.ts` zapisuje
+  wyłącznie `new Date().toISOString()`). Zamiast dopisywać decyzję D7 dla czegoś, co nigdy się
+  nie uruchamia, wolałem wrócić do 1:1. Powód zostawiony w docstringu.
+- **NICE-TO-HAVE — kruche literały w testach.** `total === 12` / `pages === 3` w
+  `historia.odczyt.test.ts` zastąpione wartościami liczonymi z seeda: nowe
+  `liczbaRozpoznanychWpisowHistorii()` w `test/gate/dane.ts` przepuszcza wiersze seeda przez ten
+  sam zbiór pięciu rozpoznawanych akcji, a test wyprowadza z niej `total`, `pages` i długość
+  ostatniej strony. Zmiana seeda (np. przy `/api/audit-log` w I12) zmieni teraz oczekiwania
+  razem z danymi.
+
+Po poprawkach: backend 529/529, frontend 199/199, `lint`/`typecheck`/`build` czyste po obu stronach.

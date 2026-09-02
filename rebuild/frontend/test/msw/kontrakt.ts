@@ -84,8 +84,13 @@ export function pozycjaStaginguZFixtura(): Record<string, unknown> {
 
 /**
  * Strona historii prosto z `contract/fixtures/GET_history_paged.json` — koperta
- * `{items,total,pages,page,limit}` z 50 nagranymi wpisami. Ta sama zasada co wyżej:
- * test widoku sprawdza zgodność z kontraktem, a nie z moim wyobrażeniem o kształcie.
+ * `{items,total,pages,page,limit}`. Ta sama zasada co wyżej: test widoku sprawdza zgodność
+ * z kontraktem, a nie z moim wyobrażeniem o kształcie.
+ *
+ * ⚠ `items` ma PIĘĆ wpisów, nie 50 — nagranie przycięto przy sanityzacji, a `50` z pola
+ * `_przyciete.items` mówi, ile ich było PRZED przycięciem (`contract/README.md`). Pola
+ * `total`/`pages` pochodzą z pełnej odpowiedzi produkcji i celowo nie zgadzają się
+ * z długością `items`; to nie jest niespójność do „naprawienia" w fixture.
  */
 export function stronaHistoriiZFixtura(): {
   items: Record<string, unknown>[];

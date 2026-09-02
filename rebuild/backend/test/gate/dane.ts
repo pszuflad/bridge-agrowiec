@@ -421,7 +421,28 @@ export function zasiejDziennikZmianZFixtures(db: Baza): void {
  * Razem: 12 wierszy rozpoznawanych i 3 odsiane. Żaden z odsianych nie może wywrócić odczytu.
  */
 export function zasiejAudytHistorii(db: Baza): void {
-  const wiersze: (typeof auditLog.$inferInsert)[] = [
+  db.insert(auditLog).values(wierszeAudytuHistorii()).run();
+}
+
+/**
+ * Ile wierszy z `zasiejAudytHistorii` przechodzi przez odsiew akcji, czyli ile wpisów ma
+ * zobaczyć `/api/history/paged`. Liczone z seeda, nie wpisane na sztywno — inaczej każda
+ * przyszła zmiana seeda (np. przy pracach nad `/api/audit-log` w I12) cicho wywalałaby
+ * asercje w `historia.odczyt.test.ts` bez powiedzenia dlaczego.
+ */
+export function liczbaRozpoznanychWpisowHistorii(): number {
+  const rozpoznawane = new Set([
+    "upload_pliku",
+    "import_cennika",
+    "eksport_csv",
+    "eksport_shoper",
+    "edycja_produktu",
+  ]);
+  return wierszeAudytuHistorii().filter((w) => rozpoznawane.has(w.akcja)).length;
+}
+
+function wierszeAudytuHistorii(): (typeof auditLog.$inferInsert)[] {
+  return [
     // — najstarsze: pułapki, które mają wypaść z wyniku —
     {
       uzytkownikId: 1,
@@ -492,8 +513,6 @@ export function zasiejAudytHistorii(db: Baza): void {
     // — najświeższe: pięć edycji produktu odpowiadających fixture'owi `/paged` —
     ...edycjeZFixture(),
   ];
-
-  db.insert(auditLog).values(wiersze).run();
 }
 
 /**

@@ -82,14 +82,14 @@ export function adresStrony(opcje: {
 }
 
 /**
- * Data w formacie z oryginału (`:25502`):
+ * Data w formacie z oryginału (`:25502`), bez żadnej obudowy:
  * `new Date(kiedy).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" })`.
  *
- * `kiedy` jest kolumną tekstową bez walidacji, więc nieparsowalna wartość dałaby
- * „Invalid Date". Pokazujemy wtedy surowy tekst — mniej mylące niż komunikat przeglądarki.
+ * `kiedy` jest kolumną tekstową bez walidacji, więc wartość nieparsowalna wyświetli się jako
+ * „Invalid Date" — dokładnie jak w produkcji. Strażnik `Number.isNaN` byłby odstępstwem,
+ * którego nikt nie zatwierdził, a w praktyce martwym kodem: `repos/audit.ts` zapisuje
+ * wyłącznie `new Date().toISOString()`.
  */
 export function sformatujDate(kiedy: string): string {
-  const data = new Date(kiedy);
-  if (Number.isNaN(data.getTime())) return kiedy;
-  return data.toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
+  return new Date(kiedy).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
 }

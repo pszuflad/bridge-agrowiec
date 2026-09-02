@@ -10,11 +10,18 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { zapiszAudyt } from "../src/repos/audit.js";
 import {
+  liczbaRozpoznanychWpisowHistorii,
   stworzSrodowiskoTestowe,
   zasiejAudytHistorii,
   zasiejDziennikZmianZFixtures,
   type SrodowiskoTestowe,
 } from "./gate/index.js";
+
+/**
+ * Ile wpisów ma zobaczyć widok — wyliczone z seeda, żeby jego przyszła zmiana zmieniła
+ * oczekiwania razem z danymi, zamiast wywalać testy literałem.
+ */
+const WIDOCZNYCH = liczbaRozpoznanychWpisowHistorii();
 
 type WpisOdpowiedzi = {
   id: number;
@@ -110,8 +117,8 @@ describe("Historia — odczyt", () => {
       expect(wszystkie.items.every((w) => ["import", "eksport", "edycja"].includes(w.typ))).toBe(
         true,
       );
-      // Seed: 5 edycji + 6 importów + 1 eksport = 12 rozpoznanych, 3 odsiane.
-      expect(wszystkie.total).toBe(12);
+      // Seed: 5 edycji + 6 importów + 1 eksport rozpoznane, 3 wiersze odsiane.
+      expect(wszystkie.total).toBe(WIDOCZNYCH);
     });
   });
 
@@ -148,30 +155,37 @@ describe("Historia — odczyt", () => {
       expect(razem.items.every((w) => w.typ === "import" && w.dostawca === "MO1")).toBe(true);
 
       const domyslnie = await paged("?typ=all&dostawca=all&limit=200");
-      expect(domyslnie.total).toBe(12);
+      expect(domyslnie.total).toBe(WIDOCZNYCH);
     });
   });
 
   describe("GET /api/history/paged — paginacja", () => {
     it("tnie wynik na strony i liczy `pages` z `total`", async () => {
+      const stron = Math.ceil(WIDOCZNYCH / 4);
       const pierwsza = await paged("?limit=4&page=1");
-      expect(pierwsza).toMatchObject({ total: 12, pages: 3, page: 1, limit: 4 });
+      expect(pierwsza).toMatchObject({ total: WIDOCZNYCH, pages: stron, page: 1, limit: 4 });
       expect(pierwsza.items).toHaveLength(4);
 
-      const ostatnia = await paged("?limit=4&page=3");
-      expect(ostatnia.items).toHaveLength(4);
+      const ostatnia = await paged(`?limit=4&page=${stron}`);
+      expect(ostatnia.items).toHaveLength(WIDOCZNYCH - (stron - 1) * 4);
 
-      // Strony nie zachodzą na siebie — 8 różnych wpisów, nie 4 powtórzone dwa razy.
+      // Strony nie zachodzą na siebie — suma id jest tak liczna, jak suma obu stron.
       const rozlaczne = new Set([
         ...pierwsza.items.map((w) => w.id),
         ...ostatnia.items.map((w) => w.id),
       ]);
-      expect(rozlaczne.size).toBe(8);
+      expect(rozlaczne.size).toBe(pierwsza.items.length + ostatnia.items.length);
     });
 
     it("strona poza zakresem daje pustą listę, ale poprawne `total`/`pages`", async () => {
       const poza = await paged("?limit=4&page=99");
-      expect(poza).toMatchObject({ items: [], total: 12, pages: 3, page: 99, limit: 4 });
+      expect(poza).toMatchObject({
+        items: [],
+        total: WIDOCZNYCH,
+        pages: Math.ceil(WIDOCZNYCH / 4),
+        page: 99,
+        limit: 4,
+      });
     });
 
     it("clamp parametrów: `page=0` → 1, `limit=abc` → 50, `limit=999` → 200", async () => {
