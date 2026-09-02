@@ -51,6 +51,19 @@ export function DialogHeader({ className, ...reszta }: HTMLAttributes<HTMLDivEle
   return <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...reszta} />;
 }
 
+/**
+ * Stopka dialogu — dochodzi w 4b, pierwszej iteracji z dialogiem MAJĄCYM przyciski akcji
+ * (katalog używa dialogu tylko do podglądu). Klasy 1:1 z produkcji (`:18287`).
+ */
+export function DialogFooter({ className, ...reszta }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)}
+      {...reszta}
+    />
+  );
+}
+
 export const DialogTitle = forwardRef<
   ElementRef<typeof Radix.Title>,
   ComponentPropsWithoutRef<typeof Radix.Title>
