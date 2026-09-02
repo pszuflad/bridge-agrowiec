@@ -7,7 +7,8 @@
 import { eq, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
-import { products, stagingItems } from "../db/schema.js";
+import { markups, products, promotions, stagingItems } from "../db/schema.js";
+import { zastosujRegulyCenowe } from "../repos/ceny.js";
 import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
 import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
 
@@ -130,13 +131,27 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
       ? "wstrzymany"
       : "aktywny";
 
-  // ——— ŚWIADOMIE POMINIĘTE: narzuty i promocje (:44882-44895) ———
-  // Oryginał przelicza tu `cenaSprzedazy` regułami z tabel `markups`/`promotions`
-  // (`__bridgePickMarkup`/`__bridgePickPromo`). To zakres ITERACJI 4. W I3 obie tabele są
-  // puste, więc gałąź `if (__mm || __pp)` nigdy nie wchodzi i pominięcie jest bez skutku —
-  // dowodzi tego charakteryzacja, która uruchamia ORYGINALNĄ gałąź cenową obok naszego portu.
-  // Od chwili, gdy I4 pozwoli wpisać pierwszą regułę, ta luka przestaje być nieszkodliwa.
-  // Zapisane w bloku „Iteracja 4" roadmapy.
+  // ——— Narzuty i promocje (:44882-44895) ———
+  // Luka zostawiona świadomie przez Iterację 3 (puste tabele ⇒ gałąź bezczynna), domknięta
+  // w 4a. Od chwili, gdy w `markups`/`promotions` jest pierwsza reguła, TO ONA ustala cenę
+  // sprzedaży — nadpisując zarówno domyślne `zakup × 1,25`, jak i `cenaSprzedazyNowa`
+  // wpisaną ręcznie w stagingu. Sama formuła i wybór reguły mieszkają w `repos/ceny.ts`.
+  //
+  // Trzy szczegóły przepisane dosłownie, bo każdy z nich jest widoczny w wyniku:
+  //  • obie tabele czytane są przy KAŻDEJ akceptowanej pozycji, bez cache'owania — oryginał
+  //    robi `X.select().from(Bt).all()` w środku metody, więc reguła dodana w trakcie
+  //    zatwierdzania partii zadziała od następnej pozycji;
+  //  • `try/catch` obejmuje TAKŻE odczyt tabel (`:44883`), nie tylko liczenie;
+  //  • próg `cenaZakupu > 0` odcina gałąź wcześniej niż `if (__mm || __pp)`.
+  try {
+    if (Number(rekord.cenaZakupu) > 0) {
+      const narzuty = db.select().from(markups).all();
+      const promocje = db.select().from(promotions).all();
+      zastosujRegulyCenowe(rekord, narzuty, promocje);
+    }
+  } catch {
+    // jak `catch {}` w oryginale — błąd reguł nie może zablokować akceptacji pozycji
+  }
 
   const istniejacy = db.select().from(products).where(eq(products.kod, pozycja.kod)).get();
 

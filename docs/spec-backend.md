@@ -70,6 +70,10 @@ skutek bezpieczeństwa.
 > **Potwierdzone w 3b** (`5-FEATURE-staging-endpointy-importu`): `GET /api/staging` też wjechało
 > pod `requireAuth`, mimo że kontrakt ma dla niego `security: []` — świadome, dziedziczone
 > odstępstwo (D1), ten sam wzorzec co przy `/api/products`.
+>
+> **Potwierdzone w 4a** (`15-FEATURE-narzuty-promocje-ceny`): `GET/POST /api/markups`
+> i `GET/POST /api/promotions` (oraz `PATCH`/`DELETE` po `{id}`) wjechały pod `requireAuth`,
+> ten sam wzorzec D1, mimo że oryginał i `security: []` w openapi mają je publiczne.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -217,14 +221,16 @@ Do naniesienia w pozostałych dokumentach przy okazji:
   (nie „naprawione") — dopisać listę ~13 publicznych GET-ów.
 - Nowa pozycja bezpieczeństwa priorytet 1: **domknąć auth na wszystkich trasach
   danych**, zwłaszcza `/api/export/shoper`, `/api/audit-log`, `/api/history`, `/api/config`.
-- **Nowa pozycja bezpieczeństwa priorytet 2 (dopisane 2026-09-01, blok 3f-2): mutacje
+- **Pozycja bezpieczeństwa priorytet 2 (dopisane 2026-09-01, blok 3f-2): mutacje
   zapisują CAŁE ciało żądania.** `updateSupplier`/`updateMarkup`/`updatePromotion` robią
   `.set(e)` bez listy pól, a trasy podają im `req.body` wprost (`:48230`, `:48701`, `:48724`;
   `PATCH /api/products/:id` odsiewa tylko `_reason`). Produkcja NIE jest w tym konsekwentna —
   `PUT /api/staging/:id` (`:48598`) ma jawną listę ośmiu pól. Dostawcy naprawieni w 3f-2;
-  **narzuty i promocje czekają na Iterację 4** (tam stawka jest wyższa: `updateMarkup`
-  i `updatePromotion` wołają `recalcPricesFromRules()`, czyli przeliczają cały katalog),
-  **produkty na Iterację 12**. Pełny rozbiór: `rebuild-backlog.md` #14.
+  **narzuty i promocje naprawione w Iteracji 4a** (`POLA_EDYTOWALNE_NARZUTU`/
+  `POLA_EDYTOWALNE_PROMOCJI`, filtr na PATCH i POST — `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`),
+  z jednym świadomym odstępstwem: audyt loguje SUROWE `req.body`, więc dziennik może wskazać pole,
+  które faktycznie nie zostało zapisane; **produkty zostają na Iterację 12**. Pełny rozbiór:
+  `rebuild-backlog.md` #14.
 
 ---
 

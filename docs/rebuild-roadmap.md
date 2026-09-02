@@ -151,7 +151,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
-| 4 | Narzuty + promocje (ceny) | 1–2 | 2, 3 | ⬜ | |
+| 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | 🔨 | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 (4b FE niezrobione) |
 | 5 | Historia | 1 | 3 | ⬜ | |
 | 6 | Alerty | 1 | 3 | ⬜ | |
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
@@ -294,7 +294,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   | Mutacje produktów (`POST`, `PATCH`/`PUT`/`DELETE {id}`, `clear`) + menu „Akcje" i modal edycji w `/katalog` | **I12** | ✅ dopisane do zakresu I12 |
   | Odświeżenie kontraktu + nagranie fixtures zapisujących i wariantu „goła tablica" `GET /api/products` | **I12** | ✅ dopisane do zakresu I12 |
   | Słowniki marek/kategorii z `GET /api/atrybuty` (znosi degradację z D3) | **I7** | ✅ odnotowane w I7 |
-  | Dane kolumny „Promocja" (dziś renderuje `—`) | **I4** | ✅ odnotowane w I4 |
+  | Dane kolumny „Promocja" (dziś renderuje `—`) | **I4b** | dane z backendu gotowe od 4a; kolumna czeka na widok 4b |
   | `GET /api/config` (produkcja nie ma kluczy eksportu — patrz I8) | **I11** | ✅ odnotowane w I11 |
   | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8** | ✅ dopisane do zakresu I8 — zależność od `/api/config` okazała się nominalna |
   | Decyzja o `szerokosc` (backlog #3) | ticket importu/schematu (I3) | ✅ ustalenia w `rebuild-backlog.md` #3, odsyłacz w I3 |
@@ -414,7 +414,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
       (`:44884-44892`) — narzuty i promocje. W I3 obie tabele są PUSTE (nie ma endpointów,
       które by je wypełniły), więc gałąź `if (__mm || __pp)` nigdy nie wchodzi i pominięcie
       jej jest bezpieczne. **Ale musi zostać ZAPISANE jako luka do domknięcia w I4**, a nie
-      przemilczane.
+      przemilczane. **✅ Domknięte w 4a (2026-09-02)** — patrz blok Iteracja 4.
     - **`bridge_ext` jest już w repo i czeka gotowy** (`src/import/legacy/`). 3d-2 dołoży
       wywołania `assignKodImportu`, `applyNazwaPamiec`, `applyWagaPamiec` i `rememberLink` —
       wszystkie cztery woła `acceptStaging`/`addProductsBulk`. Typowany most jest
@@ -813,50 +813,63 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **Fallback `Wc()` NIE wchodzi** (decyzja zaklepana 2026-09-01, blok 3f) — dziesięć starych parserów zaszytych w bundlu, port wielkości sesji 3a. **Luka otwarta, właściciel do ustalenia.**
   - **Alerty bez dławika** (decyzja 3f-2) → zwijanie powtórek należy do **widoku alertów w Iteracji 6**, wymóg wpisany w tamten blok. Po włączeniu automatu z 3f-3 tempo to ~24 alerty/dobę na trwale padniętego dostawcę.
   - **Dwa pojęcia statusu dostawcy** (backlog **#17** i **#18**, znalezione w 3f-3, odtworzone 1:1) — samozakleszczenie po 30 dniach, świeża baza planująca zero, oraz „wstrzymany" niewidoczny na karcie. Propozycje napraw w backlogu; **właściciel do ustalenia**, bo #17 zmienia dobór dostawców do automatu, a #18 dokłada klucz do kontraktu `GET /api/dostawcy` (przenagranie `GET_dostawcy.json` i `GET_suppliers.json`).
-  - **`PATCH /api/markups/{id}` i `/api/promotions/{id}` zapisują CAŁE ciało żądania** (backlog #14, wejście z 3f-2) → **Iteracja 4**, wymóg wpisany w tamten blok.
+  - **`PATCH /api/markups/{id}` i `/api/promotions/{id}` zapisywały CAŁE ciało żądania** (backlog #14, wejście z 3f-2) → **domknięte w 4a** (`POLA_EDYTOWALNE_NARZUTU`/`POLA_EDYTOWALNE_PROMOCJI`, filtr na PATCH i POST).
 
 ---
 
 ### Iteracja 4 — Narzuty + promocje (ceny)
-- **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** 2, 3
+- **Status:** 🔨 częściowo — **4a (BE) ✅ zrobione 2026-09-02**, **4b (FE) ⬜ nie zaczęte**
+  **Sesje:** 4a BE · 4b FE  **Zależy od:** 2, 3
 - **Cel (Ania klika):** ustawia narzut/promocję, widzi przeliczoną `cena_sprzedazy`/marżę w katalogu.
-- **Backend:** markups `Bt` (`GET/POST /api/markups`, `PUT/DELETE /api/markups/{id}`), promotions `hn` (`/api/promotions`, `/api/promotions/{id}`). Reguły przeliczania ceny sprzedaży.
-  - **⚠ ZALEGŁOŚĆ Z ITERACJI 3 — DOMKNĄĆ TUTAJ (zapisane 2026-08-27 przez 3d-1).** Narzuty
-    i promocje wchodzą do ceny NIE TYLKO przez `/api/markups`, ale też w DWÓCH miejscach
-    importu: `acceptStaging` (`backend-index.cjs:44884-44892`) i `addProductsBulk`
-    (`:44773-44783`) wołają `__bridgePickMarkup`/`__bridgePickPromo` i przeliczają
-    `cenaSprzedazy` = `floor(zakup × (1+narzut/100) × (1−rabat/100) × (1+vat/100))`,
-    ustawiając przy okazji `marzaPct` i `status`. Iteracja 3 świadomie tego NIE portuje,
-    bo w I3 tabele `markups`/`promotions` są puste, więc gałąź `if (__mm || __pp)` nigdy
-    nie wchodzi i zachowanie jest identyczne. **Od momentu, gdy I4 pozwoli wpisać pierwszą
-    regułę, ta luka przestaje być nieszkodliwa** — import zacznie się rozjeżdżać z produkcją.
-    Do przeniesienia razem z pomocniczymi `__bridgeMarkupMatches`/`__bridgePromoMatches`
-    (`:44600-44660`) i `recalcPricesFromRules` (`:44658`).
-    **Potwierdzone POMIAREM w 3d-2 (2026-09-01), nie lekturą:** charakteryzacja `acceptStaging`
-    wycina tych pomocników NAPRAWDĘ i uruchamia oryginalną gałąź cenową obok naszego portu,
-    który jej nie ma — na pustych tabelach obie strony dają identyczny wynik. Pierwsza reguła
-    wpisana w I4 natychmiast je rozjedzie, i wtedy ten test zapali się jako pierwszy.
-  - **⚠ WEJŚCIE Z BLOKU 3f-2 (2026-09-01): `PATCH /api/markups/{id}` i `/api/promotions/{id}`
-    zapisują CAŁE ciało żądania.** `updateMarkup` (`:44975`) i `updatePromotion` (`:44998`)
-    robią `X.update(...).set(e)` bez listy pól, a trasy (`:48701`, `:48724`) podają im
-    `{...c.body, zmienilUzytkownikId, zmienionoData}` — czyli wszystko, co przyszło od
-    użytkownika. **Stawka jest tu wyższa niż przy dostawcach:** obie metody wołają po zapisie
-    `recalcPricesFromRules()`, więc pole wpuszczone przez pomyłkę przelicza ceny CAŁEGO
-    katalogu. Analogiczna dziura w `PATCH /api/dostawcy/{id}` została w 3f-2 zamknięta listą
-    pól edytowalnych — **ta iteracja ma podjąć tę samą decyzję świadomie**, a nie odziedziczyć
-    ją przez przeoczenie. Precedens jest po obu stronach: produkcja SAMA używa listy pól
-    w `PUT /api/staging/:id` (`:48598`, osiem pól), więc lista nie jest wymysłem odbudowy.
-    Uwaga: `zmienilUzytkownikId` i `zmienionoData` ustawia SERWER — na listę wejść nie mogą.
-    Wzorzec do skopiowania: `POLA_EDYTOWALNE_DOSTAWCY` w `rebuild/backend/src/repos/suppliers.ts`
-    + testy `test/dostawcy.patch.test.ts`. Pełny rozbiór: `rebuild-backlog.md` #14.
-  - **⚠ Sprawdź, czy audyt nie ma tej samej niespójności co dostawcy.** Przy dostawcach
-    zapis obejmuje wszystkie pola, a audyt tylko cztery — i to jest odtworzone 1:1. Przy
-    narzutach oryginał loguje `c.body` w całości (`:48709`), więc niespójności tam NIE MA;
-    warto to potwierdzić przed portem, żeby nie skopiować rozwiązania z niewłaściwego miejsca.
-- **Frontend:** widok `/narzuty` (reguły narzutów + promocje). Kolumna „Promocja" w `/katalog` (I2)
-  już istnieje w domyślnym zestawie, dziś renderuje puste — I4 dostarcza dla niej dane.
-- **Ścieżki (GATE):** markups×2, promotions×2.  **Fixtures:** `GET_markups.json`, `GET_promotions.json`.
-- **DoD:** narzuty/promocje liczą ceny zgodnie z oryginałem; fixtures przez GATE; ceny widoczne w katalogu.
+
+- **4a · CRUD `/api/markups`/`/api/promotions` + silnik cen + wpięcie w import** (BE) — ✅
+  **zrobione** (ticket `15-FEATURE-narzuty-promocje-ceny`, 2026-09-02).
+  Osiem tras za `requireAuth`: `GET/POST/PATCH/DELETE /api/markups` i `/api/promotions`.
+  **To `PATCH`, nie `PUT`** — sprostowanie starego opisu tego bloku: oryginał
+  `e.patch("/api/markups/:id", …)` (`:48699`) i `e.patch("/api/promotions/:id", …)` (`:48722`),
+  `contract/openapi.yaml:739-751`/`:901-913` też mają wyłącznie `patch`.
+  Silnik cen `rebuild/backend/src/repos/ceny.ts` (`dopasujWarunek`, `narzutPasuje`,
+  `promocjaPasuje`, `wybierzNarzut`, `wybierzPromocje`, `zastosujRegulyCenowe`,
+  `przeliczCenyZRegul`) — port `:44572-44693`. Każda mutacja narzutu/promocji przelicza CAŁY
+  katalog synchronicznie (`try/catch`, jak oryginał).
+  - **Zaległość z Iteracji 3 DOMKNIĘTA dla `acceptStaging`.** Gałąź cenowa wpięta
+    w `rebuild/backend/src/import/akceptacja.ts`, w tym samym miejscu sekwencji co oryginał
+    (`:44884-44892`). Charakteryzacja 3d-2 rozszerzona o 13 scenariuszy z regułami narzutów
+    i promocji w tabelach, zielona — port liczy ceny tymi samymi liczbami co uruchomiony
+    oryginał. Przydatność próby zmierzona, nie założona: po tymczasowym wyłączeniu wpięcia
+    pada 10 z 13 nowych scenariuszy, plus osobna kontrola negatywna na samym oryginale.
+    **`addProductsBulk` NIE wchodzi w zakres 4a — czeka na I12 (patrz tamten blok).**
+  - **Lista pól edytowalnych zamyka backlog #14 dla narzutów i promocji.**
+    `POLA_EDYTOWALNE_NARZUTU` (`rebuild/backend/src/repos/markups.ts`, 8 pól) i
+    `POLA_EDYTOWALNE_PROMOCJI` (`promotions.ts`, 8 pól); filtr działa na PATCH **i** POST.
+  - **Audyt loguje SUROWE `c.body` w całości** (`:48699-48737`, wszystkie sześć wywołań
+    `be(...)`) — potwierdzone lekturą, port 1:1. Niespójności znanej od dostawców (audyt
+    tylko wybranych pól, zapis przez filtr) tu NIE MA.
+  - **Rozliczenie gate'u:** `GET_markups.json`/`GET_promotions.json` przez fixtures i kontrakt
+    + 401 na wszystkich ośmiu operacjach; 34 testy silnika cen; 18 testów pól
+    edytowalnych/audytu/przeliczania; **523 testy w 33 plikach** ogółem; lint/typecheck/build
+    czyste. Pełny wywód (formuła cenowa, decyzje D1–D5): `docs/tickets/
+    15-FEATURE-narzuty-promocje-ceny/plan.md` i `raport.md`.
+
+- **4b · Widok `/narzuty` + kolumna „Promocja" w `/katalog`** (FE) — ⬜ **nie zaczęte.**
+  Backend gotowy od 4a. Zanim ktoś zacznie — pułapki portu 1:1, którymi widok musi się liczyć:
+  - **`PATCH /api/promotions/{id}` NIE MA 404** — dla nieistniejącego id oddaje **200 z pustym
+    ciałem** (`res.json(undefined)` → puste `text`, nie `{}`). Bliźniacza trasa narzutu 404 MA.
+    Asymetria oryginału (`:48709` vs `:48722-48731`), port 1:1 — **widok nie może zakładać,
+    że w odpowiedzi jest obiekt.**
+  - **Silnik cen IGNORUJE daty `start`/`koniec` promocji** — wygasła promocja nadal obniża
+    ceny (port 1:1, `__bridgePromoMatches` `:44615-44628`). Wyłączenie promocji w UI to zmiana
+    `status` na coś innego niż `"aktywna"`, a NIE upływ daty.
+  - Aktywny status promocji to `"aktywna"` (rodzaj żeński), narzutu — `"aktywny"`.
+  - `warunki` w obu tabelach to **STRING ze zserializowanym JSON-em**, nie tablica.
+  - Odpowiedzi `GET` to **gołe tablice**, nie koperty.
+  - Każda mutacja narzutu/promocji **przelicza ceny CAŁEGO katalogu** synchronicznie — UI
+    powinien się liczyć z zauważalnym czasem odpowiedzi przy ~7 400 produktach.
+- **Ścieżki (GATE):** markups×2 (`GET/POST` + `PATCH/DELETE {id}`), promotions×2 (jw.) —
+  osiem operacji, **✅ zielone od 4a**.  **Fixtures:** `GET_markups.json`, `GET_promotions.json`
+  — **✅ zielone od 4a**.
+- **DoD:** ✅ narzuty/promocje liczą ceny zgodnie z oryginałem (4a); ✅ fixtures przez GATE (4a);
+  ⬜ ceny widoczne w katalogu i widok `/narzuty` (4b).
 
 ---
 
@@ -1054,7 +1067,16 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
        potrzebne funkcje. Dowód wierności zbuduj tak jak 3d-2: `addProductsBulk` jest metodą
        obiektu `U`, więc da się ją wyciąć z bundla tym samym harnessem
        (`test/charakteryzacja/akceptacja/oryginal.mjs` — wystarczy poszerzyć kotwice).
-       ⚠ `addProductsBulk` ma też własną gałąź narzutów/promocji (`:44773-44783`) — patrz I4.
+       ⚠ Gałąź cenowa `:44773-44783` **jest już gotowa** — wywołaj
+       `zastosujRegulyCenowe(rekord, narzuty, promocje)` z `rebuild/backend/src/repos/ceny.ts`
+       w tym samym miejscu sekwencji co oryginał (po wartościach domyślnych, przed
+       `bridge_ext`), opakowaną w
+       `try { if (Number(rekord.cenaZakupu) > 0) { …selecty obu tabel… } } catch {}`.
+       **Nie pisz jej od nowa.** Decyzja użytkownika **D1 z 4a** (2026-09-02, `docs/tickets/
+       15-FEATURE-narzuty-promocje-ceny/plan.md`): 4a świadomie NIE portowało `addProductsBulk`,
+       bo ta metoda i `POST /api/products` w odbudowie nie istnieją, a roadmapa przypisuje je
+       do I12 — przypisanie utrzymane po weryfikacji grafem wywołań (jedyne wywołanie
+       `addProductsBulk` to trasa `:48308`, nieportowana).
     3. **Dopisać do `openapi.yaml` DWA endpointy `uwaga_cena`**, nie jeden:
        `GET /api/products/uwagi-cena` i `GET /api/products/hold-reasons`. Oba istnieją
        w produkcji jako monkey-patch `mirror/backend/uwaga_cena_patch.cjs` i obu brak
@@ -1063,7 +1085,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **Finalny przegląd bezpieczeństwa:** potwierdzić auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego `JWT_SECRET` z fallbackiem.
     **Dopisane 2026-09-01 (3f-2):** przejrzeć WSZYSTKIE trasy mutacji pod kątem
     „`.set(req.body)` bez listy pól" i potwierdzić, że każda ma jawną listę — do tego czasu
-    powinny ją mieć staging (port 1:1 z 3d-2), dostawcy (3f-2), narzuty i promocje (I4)
+    powinny ją mieć staging (port 1:1 z 3d-2), dostawcy (3f-2), narzuty i promocje (✅ 4a)
     oraz produkty (ta iteracja). **Zasada do przyjęcia na stałe: kolumny wyliczane i kolumny
     własne odbudowy (`importWylaczony`, `uwagaCena`) nigdy nie wchodzą na listę pól
     edytowalnych.** Kontekst i lista tras: `rebuild-backlog.md` #14.
