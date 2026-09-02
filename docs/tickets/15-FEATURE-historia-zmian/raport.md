@@ -147,7 +147,7 @@ Trzy doc-checkery równolegle, każdy nanosił zmiany sam.
 
 ### `docs/rebuild-roadmap.md`
 
-- **§4 Tablica postępu** — wiersz „5 | Historia": `⬜` → `✅ | PR #23 · 2026-09-02`.
+- **§4 Tablica postępu** — wiersz „5 | Historia": `⬜` → `✅ | PR #24 · 2026-09-02`.
 - **§5 Iteracja 5** — blok przepisany ze stanu planowanego na dowieziony: status zamknięty
   (data + ID ticketa + PR); sprostowany fakt `Wa` = tabela `history` (nie `historia_cen`),
   z rozbiciem, co czyta która trasa; filtr pięciu akcji zapisany jako fakt rozstrzygnięty (D2)
