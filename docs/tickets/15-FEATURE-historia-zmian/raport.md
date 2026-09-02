@@ -199,3 +199,27 @@ Trzy doc-checkery równolegle, każdy nanosił zmiany sam.
 Żaden z trzech agentów nie znalazł nieaktualności poza tymi, które ten ticket sam zgłosił
 i naprawił. Sekcje niezwiązane z historią (design tokens, blueprint auth, rozjazd
 `/api/attributes`) zostawione bez zmian.
+
+## Instrukcja testów dla Ani
+
+`docs/instrukcja-testow-I5.md` (nowy, wzorowany na `instrukcja-testow-I3.md`).
+
+Dokument jest zbudowany wokół jednego problemu: **nazwa ekranu obiecuje coś innego, niż ekran
+robi.** „Historia" brzmi jak lista zmian cen, a jest logiem zdarzeń. Gdyby Ania weszła na ten
+ekran bez ostrzeżenia, jej pierwszym zgłoszeniem byłoby „nie widzę zmian cen" — a to jest
+zachowanie zgodne z produkcją i przez nas zamierzone. Dlatego rozdział 3 („Czego ten ekran NIE
+pokazuje") stoi przed jakąkolwiek instrukcją klikania.
+
+Druga rzecz wyłożona wprost: **jedyne kliknięcie, które doda wiersz do Historii, to wgranie
+cennika przez przeglądarkę.** Zweryfikowane grafem wywołań — `synchronizuj.ts` i `scheduler.ts`
+nie zapisują audytu w ogóle, a `synchronizacja_reczna` z `routes/suppliers.ts:348` nie przechodzi
+przez filtr pięciu akcji. Bez tego zdania Ania kliknęłaby „Synchronizuj teraz", zobaczyła brak
+zmiany i zgłosiła nieistniejącą usterkę.
+
+Instrukcja **zadaje jej dwa pytania** zamiast zakładać odpowiedzi: czy log bez importów z URL
+jej wystarcza (backlog #21) i czy brak zmian cen per opona na tym ekranie jest do przyjęcia.
+Oba są oznaczone jako „nie ma złej odpowiedzi" — to decyzje jej, nie nasze.
+
+Przy okazji sprostowany nieaktualny wiersz w `docs/instrukcja-testow-I3.md` §13, który
+obiecywał „Widok Historia (zmiany cen z importów) — Iteracja 5". Zmiany cen to Iteracja 10;
+dopisane sprostowanie z odesłaniem do nowej instrukcji.

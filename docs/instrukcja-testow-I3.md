@@ -392,12 +392,18 @@ decyzję, czy je prostować.
 | **Widok** alertów (same alerty już się zapisują) | Iteracja 6 |
 | Zakładki *Spedycja*, *Shoper*, *Katalog*, *AI Fallback* | Iteracja 11 |
 | ~~Narzuty i promocje przeliczające cenę sprzedaży~~ | ✅ **jest** (backend, 4a) — brakuje widoku `/narzuty` (4b) |
-| Widok Historia (zmiany cen z importów) | Iteracja 5 |
+| Ekran ze **zmianami cen poszczególnych opon** z auto-zatwierdzenia | Iteracja 10 |
 | Alerty | Iteracja 6 |
 | Atrybuty | Iteracja 7 |
 | Lista „cena na zapytanie" i powody wstrzymania | Iteracja 12 |
 
-Historia cen **jest zapisywana** przy każdym auto-zatwierdzeniu — brakuje tylko widoku.
+Zmiany cen **są zapisywane** przy każdym auto-zatwierdzeniu — brakuje tylko ekranu, który
+je pokaże, i przychodzi on w Iteracji 10, nie 5.
+
+> **Sprostowanie (2026-09-02, Iteracja 5).** Ekran **Historia** już działa i ma własną
+> instrukcję: `docs/instrukcja-testow-I5.md`. Ale **nie pokazuje zmian cen** — to log
+> zdarzeń (import / eksport / ręczna edycja produktu). Wcześniejsze zdanie w tym miejscu
+> obiecywało co innego; poprawione.
 
 ---
 

@@ -919,6 +919,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   akcja→typ i clamp odtworzone 1:1; NULL/zepsuty JSON i `encja_id` niezłączalny nie wywracają
   odczytu (testy); widok wpięty, filtry i paginacja działają; `lint`/`typecheck`/`test`/`build`
   czyste po obu stronach. Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
+- **Weryfikacja Ani:** `docs/instrukcja-testow-I5.md`. Instrukcja stawia na wejściu dwa pytania
+  DO NIEJ, bo obu nie rozstrzygamy sami: (1) czy Historia bez importów z URL i synchronizacji
+  jej wystarcza (backlog #21), (2) czy brak zmian cen per opona na tym ekranie jej nie
+  przeszkadza (te idą do I10).
 
 ---
 
