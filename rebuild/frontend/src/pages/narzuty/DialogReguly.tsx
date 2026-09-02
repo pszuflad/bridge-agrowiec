@@ -42,7 +42,7 @@ import {
   type Narzut,
   type Promocja,
 } from "./api";
-import { produktyPonizejKosztu } from "./ceny";
+import { produktyPonizejKosztu, type PozycjaPonizejKosztu } from "./ceny";
 import { statusZDat, STATUS_NARZUTU_AKTYWNY } from "./status";
 import {
   TYPY_WARUNKU,
@@ -66,6 +66,18 @@ export type WlasciwosciDialogu = {
 const DOMYSLNY_OKRES_MS = 2_592_000_000;
 
 const naDate = (iso: string): string => (iso ? iso.slice(0, 10) : "");
+const dzisiaj = (): string => new Date().toISOString().slice(0, 10);
+const zaMiesiac = (): string => new Date(Date.now() + DOMYSLNY_OKRES_MS).toISOString().slice(0, 10);
+
+/**
+ * Domyślna wartość pola „Wartość narzutu / Rabat" — 15% dla narzutu, 10% dla promocji
+ * (`frontend-index.js:24219`). NIE zero: pusta reguła z zerowym narzutem zbiłaby ceny
+ * do gołego zakupu z VAT-em.
+ */
+const DOMYSLNA_WARTOSC = { narzut: 15, promocja: 10 } as const;
+
+/** Nowa reguła startuje z JEDNYM pustym warunkiem typu `kategoria` (`:24216-24218`). */
+const PIERWSZY_WARUNEK: Warunek = { typ: "kategoria", wartosc: "" };
 
 export function DialogReguly({
   trybInicjalny,
@@ -81,13 +93,18 @@ export function DialogReguly({
   const [tryb, ustawTryb] = useState<TrybReguly>(trybInicjalny);
   const [nazwa, ustawNazwe] = useState("");
   const [globalna, ustawGlobalna] = useState(true);
-  const [warunki, ustawWarunki] = useState<Warunek[]>([]);
-  const [wartosc, ustawWartosc] = useState("0");
-  const [start, ustawStart] = useState("");
-  const [koniec, ustawKoniec] = useState("");
-  const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<
-    { produkt: Produkt; cenaSprzedazy: number }[] | null
-  >(null);
+  const [warunki, ustawWarunki] = useState<Warunek[]>([PIERWSZY_WARUNEK]);
+  const [wartosc, ustawWartosc] = useState(String(DOMYSLNA_WARTOSC[trybInicjalny]));
+  const [start, ustawStart] = useState(dzisiaj);
+  const [koniec, ustawKoniec] = useState(zaMiesiac);
+  /**
+   * ⚠ PRIORYTET NIE MA POLA W FORMULARZU — w oryginale ten input stoi pod `display:none`
+   * (`:24468-24472`), więc użytkownik go nie zmienia. Trzymamy go w stanie WYŁĄCZNIE po to,
+   * żeby przy edycji odesłać wartość, którą reguła już ma (`:24216`, `priorytet: C`).
+   * Bez tego zapis zbijałby każdy priorytet do 50 i po cichu zmieniał, KTÓRA reguła wygrywa.
+   */
+  const [priorytet, ustawPriorytet] = useState(50);
+  const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<PozycjaPonizejKosztu[] | null>(null);
 
   const { data: produkty } = useQuery<Produkt[]>({ queryKey: ["/api/products"] });
   const katalog = produkty ?? [];
@@ -102,6 +119,7 @@ export function DialogReguly({
       ustawWarunki(w);
       ustawGlobalna(w.length === 0);
       ustawWartosc(String(edytowanyNarzut.wartosc));
+      ustawPriorytet(edytowanyNarzut.priorytet ?? 50);
       return;
     }
     if (edytowanaPromocja) {
@@ -111,8 +129,9 @@ export function DialogReguly({
       ustawWarunki(w);
       ustawGlobalna(w.length === 0);
       ustawWartosc(String(edytowanaPromocja.rabatPct));
-      ustawStart(naDate(edytowanaPromocja.start));
-      ustawKoniec(naDate(edytowanaPromocja.koniec));
+      ustawPriorytet(edytowanaPromocja.priorytet ?? 50);
+      ustawStart(naDate(edytowanaPromocja.start) || dzisiaj());
+      ustawKoniec(naDate(edytowanaPromocja.koniec) || zaMiesiac());
     }
   }, [otwarty, edytowanyNarzut, edytowanaPromocja]);
 
@@ -137,51 +156,82 @@ export function DialogReguly({
 
   const zapis = useMutation<unknown, Error, void>({
     mutationFn: async () => {
-      const listaWarunkow = globalna ? [] : warunki;
+      const listaWarunkow = globalna ? [] : warunki.filter((w) => w.wartosc.trim());
       const serializowane = zapiszWarunki(listaWarunkow);
       const liczba = Number(wartosc);
 
       if (tryb === "promocja") {
-        const teraz = new Date().toISOString();
-        const startIso = start ? new Date(start).toISOString() : teraz;
-        const koniecIso = koniec
-          ? new Date(koniec).toISOString()
-          : new Date(Date.now() + DOMYSLNY_OKRES_MS).toISOString();
+        const startIso = new Date(start).toISOString();
+        const koniecIso = new Date(koniec).toISOString();
+        /**
+         * ⚠ `zasieg` dla reguły globalnej to napis „globalny", NIE pusty (`:24613`).
+         * Różnica jest znacząca: `promocjaPasuje` odrzuca promocję z PUSTYM `zasieg`,
+         * więc pusty napis dałby promocję, która nie obniża niczego.
+         */
+        const zasieg = globalna
+          ? "globalny"
+          : listaWarunkow.map((w) => `${w.typ}:${w.wartosc}`).join(" + ");
 
-        const cialo = {
-          nazwa,
-          rabatPct: liczba,
-          // `zasieg` z warunków sklejonych plusami — `Cb()` (`:9322`).
-          zasieg: listaWarunkow.map((w) => `${w.typ}:${w.wartosc}`).join(" + "),
-          warunki: serializowane,
-          priorytet: 50,
-          start: startIso,
-          koniec: koniecIso,
-          status: edytowanaPromocja?.status ?? statusZDat(startIso, koniecIso),
-        };
         if (edytowanaPromocja) {
-          const wynik = await zapiszPromocje(edytowanaPromocja.id, cialo);
+          // PATCH wysyła SIEDEM pól — bez `status` (`Eb()`, `:9369-9390`). Status promocji
+          // ustala serwer przy tworzeniu, a etykietę na liście liczymy z dat (plan.md D5).
+          const wynik = await zapiszPromocje(edytowanaPromocja.id, {
+            nazwa,
+            warunki: serializowane,
+            zasieg,
+            rabatPct: liczba,
+            priorytet,
+            start: startIso,
+            koniec: koniecIso,
+          });
           // 200 z PUSTYM ciałem znaczy „nie ma takiej promocji" — patrz `api.ts`.
           if (wynik === null) throw new Error("Promocja nie istnieje — mogła zostać usunięta.");
           return wynik;
         }
-        return await dodajPromocje(cialo);
+
+        // POST dokłada `status` wyliczony z dat — `Cb()` (`:9324`).
+        return await dodajPromocje({
+          nazwa,
+          warunki: serializowane,
+          zasieg,
+          rabatPct: liczba,
+          priorytet,
+          start: startIso,
+          koniec: koniecIso,
+          status: statusZDat(startIso, koniecIso),
+        });
       }
 
-      // `typ`/`zakres` z PIERWSZEGO warunku — `Nb()` (`:9204-9207`).
+      // `typ`/`zakres` z PIERWSZEGO warunku; przy globalnej — „globalny"/"" (`:24623-24624`).
+      // Fallback typu to „marka", nie „globalny" — dosłownie jak oryginał.
       const pierwszy = listaWarunkow[0];
-      const cialo = {
-        typ: pierwszy?.typ ?? "globalny",
-        zakres: pierwszy?.wartosc ?? "",
-        warunki: serializowane,
+      const typ = globalna ? "globalny" : (pierwszy?.typ ?? "marka");
+      const zakres = globalna ? "" : (pierwszy?.wartosc ?? "");
+
+      if (edytowanyNarzut) {
+        // PATCH wysyła SZEŚĆ pól — bez `jednostka` i `status` (`Ag()` woła `{...t}`, `:9267`).
+        // Pominięcie `status` jest istotne: przełącznik w tabeli nie może zostać cofnięty
+        // przez zapis z formularza, który o statusie nic nie wie.
+        return await zapiszNarzut(edytowanyNarzut.id, {
+          nazwa,
+          warunki: serializowane,
+          typ,
+          zakres,
+          wartosc: liczba,
+          priorytet,
+        });
+      }
+
+      return await dodajNarzut({
         nazwa,
+        warunki: serializowane,
+        typ,
+        zakres,
         wartosc: liczba,
+        priorytet,
         jednostka: "procent",
-        priorytet: 50,
-        status: edytowanyNarzut?.status ?? STATUS_NARZUTU_AKTYWNY,
-      };
-      if (edytowanyNarzut) return await zapiszNarzut(edytowanyNarzut.id, cialo);
-      return await dodajNarzut(cialo);
+        status: STATUS_NARZUTU_AKTYWNY,
+      });
     },
     onSuccess: () => {
       odswiez();
@@ -201,6 +251,22 @@ export function DialogReguly({
     onError: (e) => toast({ title: "Nie udało się zapisać", description: e.message, variant: "destructive" }),
   });
 
+  /**
+   * Produkty, które po tej promocji zjadą pod cenę zakupu — liczone NA ŻYWO, przy każdej
+   * zmianie formularza. Oryginał pokazuje z tego czerwony pasek pod polem wartości
+   * (`:24473-24513`) i NIEZALEŻNIE pyta o potwierdzenie przy zapisie (`:24563-24597`),
+   * tą samą metodą. Zachowujemy oba.
+   */
+  const ponizejKosztu =
+    tryb === "promocja"
+      ? produktyPonizejKosztu(
+          katalog,
+          globalna ? [] : warunki.filter((w) => w.wartosc.trim()),
+          globalna,
+          Number(wartosc),
+        )
+      : [];
+
   /** Walidacje 1:1 z oryginałem (`:24549`, `:24553`, `:24559`). */
   function sprawdzIZapisz() {
     const liczba = Number(wartosc);
@@ -217,30 +283,11 @@ export function DialogReguly({
       return;
     }
 
-    // Kontrola „poniżej kosztu" — port `:24598`. U nas własnym dialogiem zamiast
-    // `window.confirm` (plan.md D6): tamten blokuje wątek i nie da się go przetestować.
-    if (tryb === "promocja" && katalog.length > 0) {
-      const podglad: Promocja = {
-        id: edytowanaPromocja?.id ?? -1,
-        nazwa,
-        rabatPct: liczba,
-        zasieg: (globalna ? [] : warunki).map((w) => `${w.typ}:${w.wartosc}`).join(" + "),
-        warunki: zapiszWarunki(globalna ? [] : warunki),
-        priorytet: 50,
-        start: start || new Date().toISOString(),
-        koniec: koniec || new Date(Date.now() + DOMYSLNY_OKRES_MS).toISOString(),
-        status: "aktywna",
-        zmienilUzytkownikId: null,
-        zmienionoData: null,
-      };
-      const ponizej = produktyPonizejKosztu(katalog, [], [podglad]) as {
-        produkt: Produkt;
-        cenaSprzedazy: number;
-      }[];
-      if (ponizej.length > 0) {
-        ustawDoPotwierdzenia(ponizej);
-        return;
-      }
+    // Kontrola „poniżej kosztu" przy ZAPISIE — port `:24563-24597`. U nas własnym dialogiem
+    // zamiast `window.confirm` (plan.md D6): tamten blokuje wątek i nie da się go przetestować.
+    if (tryb === "promocja" && ponizejKosztu.length > 0) {
+      ustawDoPotwierdzenia(ponizejKosztu);
+      return;
     }
 
     zapis.mutate();
@@ -256,11 +303,13 @@ export function DialogReguly({
           onClick={() => {
             ustawTryb(trybInicjalny);
             ustawNazwe("");
-            ustawWarunki([]);
-            ustawGlobalna(true);
-            ustawWartosc("0");
-            ustawStart("");
-            ustawKoniec("");
+            // Nowa reguła: jeden pusty warunek, „globalna" ODZNACZONA (`:24221`).
+            ustawWarunki([PIERWSZY_WARUNEK]);
+            ustawGlobalna(false);
+            ustawWartosc(String(DOMYSLNA_WARTOSC[trybInicjalny]));
+            ustawPriorytet(50);
+            ustawStart(dzisiaj());
+            ustawKoniec(zaMiesiac());
             ustawOtwarty(true);
           }}
           data-testid={trybInicjalny === "promocja" ? "button-add-promotion" : "button-add-markup"}
@@ -426,6 +475,23 @@ export function DialogReguly({
               />
             </div>
 
+            {/*
+              Czerwony pasek NA ŻYWO — port `:24473-24513`. Osobny od potwierdzenia przy
+              zapisie i celowo: pokazuje skutek JUŻ przy wpisywaniu rabatu, zanim ktokolwiek
+              kliknie „Zapisz". Liczony tą samą metodą co potwierdzenie.
+            */}
+            {tryb === "promocja" && ponizejKosztu.length > 0 ? (
+              <div
+                className="p-2 rounded border border-red-500 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 text-xs"
+                data-testid="ostrzezenie-ponizej-kosztu"
+              >
+                <div className="font-semibold">
+                  ⚠ UWAGA: {ponizejKosztu.length} produkt(ów) będzie miało cenę sprzedaży
+                  PONIŻEJ ceny zakupu
+                </div>
+              </div>
+            ) : null}
+
             {tryb === "promocja" ? (
               <div className="space-y-2">
                 <div className="grid grid-cols-2 gap-3">
@@ -497,17 +563,19 @@ export function DialogReguly({
               {doPotwierdzenia?.length} produkt(ów) będzie miało cenę sprzedaży PONIŻEJ ceny
               zakupu:
             </p>
+            {/* Format wiersza i próg „pierwszych dziesięć" 1:1 z oryginałem (`:24596`). */}
             <ul className="max-h-48 overflow-y-auto text-xs font-mono space-y-0.5">
-              {doPotwierdzenia?.slice(0, 20).map((p) => (
-                <li key={p.produkt.kod}>
-                  {p.produkt.kod} — zakup {p.produkt.cenaZakupu as number}, sprzedaż{" "}
-                  {p.cenaSprzedazy}
+              {doPotwierdzenia?.slice(0, 10).map((p) => (
+                <li key={String(p.produkt.kod)}>
+                  • {String(p.produkt.marka ?? "")} {String(p.produkt.kod ?? "")} — zakup{" "}
+                  {Number(p.produkt.cenaZakupu).toFixed(2)} zł, po rabacie{" "}
+                  {p.poRabacie.toFixed(2)} zł
                 </li>
               ))}
             </ul>
-            {doPotwierdzenia && doPotwierdzenia.length > 20 ? (
+            {doPotwierdzenia && doPotwierdzenia.length > 10 ? (
               <p className="text-xs text-muted-foreground">
-                …i {doPotwierdzenia.length - 20} więcej.
+                …i {doPotwierdzenia.length - 10} więcej.
               </p>
             ) : null}
             <p>Czy na pewno chcesz zapisać tę promocję?</p>

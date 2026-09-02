@@ -92,3 +92,53 @@ tam, gdzie były.
    (backlog #19 po stronie backendu). Znacznik rozbieżności czyni to widocznym, ale nie
    naprawia; naprawa należy do silnika.
 5. **`TooltipProvider`** dalej nie wszedł — czeka na iterację, która pierwsza użyje tooltipa.
+
+## Review fixes applied
+
+Review zgłosiło 2 BLOCKER-y i 3 SHOULD-FIX. Weryfikacja w oryginale potwierdziła oba blokery
+i **odsłoniła trzy dalsze rozjazdy**, których review nie miało jak zobaczyć, bo dotyczą
+wartości domyślnych formularza. Wszystkie naprawione.
+
+**BLOCKER 1 — `priorytet` zbijany do 50 przy każdym zapisie.** Potwierdzone: oryginał trzyma
+priorytet w stanie `C = t?.priorytet ?? n?.priorytet ?? 50` (`:24220`) i odsyła go przy edycji
+(`priorytet: C`, `:24626`); samo pole stoi pod `display:none` (`:24468-24472`), więc użytkownik
+go nie zmienia, ale wartość jest zachowywana. Mój port wpisywał tam na sztywno 50, co po cichu
+zmieniałoby, KTÓRA reguła wygrywa dla produktu. Naprawione: stan `priorytet`, inicjowany
+z edytowanej reguły, odsyłany bez zmian. Test regresyjny: „PATCH zachowuje priorytet reguły,
+zamiast zbijać go do 50" (reguła z priorytetem 99).
+
+**BLOCKER 2 — brak aktualizacji roadmapy i backlogu.** To nie jest przeoczenie, tylko kolejność
+procesu: plan.md (Krok 11) przewiduje te zmiany w Fazie 5, po review. Wykonane niżej,
+w sekcji „Docs updates".
+
+**SHOULD-FIX — ostrzeżenie „poniżej kosztu" liczone silnikiem zamiast metodą oryginału.**
+Potwierdzone i naprawione. Oryginał liczy to TRZECIM, własnym sposobem (`:24563-24597`):
+bierze AKTUALNĄ `cenaSprzedazy` z katalogu i mnoży przez `(1 − rabat/100)`, a dopasowanie ma
+swoje — globalna obejmuje WSZYSTKIE produkty, `marka`/`kategoria`/`dostawca`/`produkt` po
+równości, `rozmiar`/`bieznik` przez zawieranie, nieznany typ odrzuca. Mój port używał silnika
+cen, przez co liczby się nie zgadzały, a promocja globalna nie ostrzegała o niczym. Przepisane
+1:1 (`produktyPonizejKosztu` w `ceny.ts`, z jawną notą, że to NIE jest silnik z góry pliku).
+
+**SHOULD-FIX — brak czerwonego paska ostrzegawczego na żywo.** Potwierdzone: oryginał ma DWA
+ostrzeżenia liczone tą samą metodą — pasek w formularzu, aktualizowany przy każdej zmianie
+(`:24473-24513`), i potwierdzenie przy zapisie. Plan miał tylko to drugie. Pasek dodany.
+
+**Rozjazdy znalezione przy weryfikacji, poza zgłoszeniem review:**
+1. **Domyślne nowej reguły były złe.** Oryginał (`:24216-24222`): checkbox „globalna"
+   ODZNACZONY, jeden pusty warunek typu `kategoria`, wartość 15% dla narzutu i 10% dla rabatu,
+   daty prefilled na dziś i dziś+30 dni. Mój port startował z zaznaczoną „globalną", pustą
+   listą warunków, wartością 0 i pustymi datami. Poprawione, z osobnym opisem testowym.
+2. **`zasieg` promocji globalnej to napis „globalny", nie pusty** (`:24613`). Różnica jest
+   znacząca, nie kosmetyczna: `promocjaPasuje` odrzuca promocję z PUSTYM `zasieg`, więc mój
+   port tworzył promocję globalną, która nie obniżała niczego. Poprawione + test.
+   **To unieważnia punkt 2 z „Follow-up" wyżej** — promocja globalna działa, o ile `zasieg`
+   jest ustawiony tak jak w oryginale.
+3. **Edycja wysyła MNIEJ pól niż tworzenie.** `Ag()`/`Eb()` przekazują `{...t}`, czyli sześć
+   pól przy narzucie (bez `jednostka` i `status`) i siedem przy promocji (bez `status`).
+   Mój port wysyłał komplet ośmiu w obu przypadkach. To ma konsekwencje: wysyłanie `status`
+   z formularza cofałoby przełącznik aktywności z tabeli, a przy promocji nadpisywałoby
+   status wyliczony przy tworzeniu. Poprawione, z osobnymi testami na oba zbiory pól.
+4. Fallback typu przy regule nieglobalnej to `"marka"`, nie `"globalny"` (`:24623`).
+
+Po poprawkach: `lint`, `typecheck`, `build` czyste, **275 testów w 18 plikach** zielonych
+(było 261 — doszło 14 testów pilnujących powyższych rzeczy).

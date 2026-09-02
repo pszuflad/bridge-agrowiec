@@ -169,23 +169,79 @@ export function policzCene(
 }
 
 /**
- * Produkty, które po zapisie reguły zejdą z ceną sprzedaży PONIŻEJ ceny zakupu.
+ * Produkty, które po zapisie promocji zejdą z ceną sprzedaży PONIŻEJ ceny zakupu.
  *
- * Port zabezpieczenia z `el()` (`:24598`): oryginał liczy to przed zapisem promocji
- * i pyta o potwierdzenie. Nas interesuje ta sama lista — u nas trafia do dialogu (D6).
- * Produkty bez dodatniej ceny zakupu pomijamy: gałąź cenowa i tak ich nie dotyczy.
+ * ⚠ TO NIE JEST SILNIK CEN Z GÓRY TEGO PLIKU — i tak ma zostać. Oryginał liczy to ostrzeżenie
+ * TRZECIM, własnym sposobem (`el()`, `frontend-index.js:24563-24597` przy zapisie
+ * i `:24473-24513` na żywo w formularzu), różnym i od `Tb()`, i od backendu:
+ *
+ *  • bierze AKTUALNĄ `cenaSprzedazy` produktu z katalogu i mnoży ją przez `(1 − rabat/100)`,
+ *    zamiast przeliczać cenę od zakupu przez narzut i VAT. To jest przybliżenie — backend
+ *    po zapisie i tak przeliczy katalog formułą `floor(zakup × … )` — ale przybliżenie
+ *    ROZSĄDNE, bo pyta „o ile spadnie to, co widzisz w katalogu";
+ *  • ma własne dopasowanie: reguła globalna obejmuje WSZYSTKIE produkty (`_isGlobal` ⇒ `true`),
+ *    `marka`/`kategoria`/`dostawca`/`produkt` porównują się przez RÓWNOŚĆ, a `rozmiar`/`bieznik`
+ *    przez zawieranie; pusta wartość i nieznany typ dają `false`. To znaczy m.in., że
+ *    ostrzeżenie NIE obejmie warunku typu `konstrukcja`, `srednica` ani `vfIf`;
+ *  • pomija produkty, w których `cenaZakupu` albo `cenaSprzedazy` nie są liczbami.
+ *
+ * Odtwarzamy to 1:1, bo D6 mówi wprost „zachowujemy zabezpieczenie i JEGO WYLICZENIE".
+ * Podmiana na silnik z góry pliku zmieniłaby i liczby, i zbiór ostrzeganych produktów —
+ * w szczególności promocja globalna przestałaby ostrzegać o czymkolwiek, bo `promocjaPasuje`
+ * odrzuca promocję z pustym `zasieg`.
  */
+export type ProduktZKatalogu = ProduktDoWyceny & { cenaSprzedazy?: number | null };
+
+/** Port `_matchProd`/`_mtc` — dopasowanie WYŁĄCZNIE na potrzeby ostrzeżenia. */
+function dopasujDoOstrzezenia(
+  produkt: ProduktZKatalogu,
+  warunki: Warunek[],
+  globalna: boolean,
+): boolean {
+  if (globalna) return true;
+  if (warunki.length === 0) return false;
+  return warunki.every((w) => {
+    const v = String(w.wartosc ?? "").toLowerCase().trim();
+    if (!v) return false;
+    switch (w.typ) {
+      case "marka":
+        return tekst(produkt.marka) === v;
+      case "kategoria":
+        return tekst(produkt.kategoria) === v;
+      case "dostawca":
+        return tekst(produkt.dostawca) === v;
+      case "produkt":
+        return tekst(produkt.kod) === v;
+      case "rozmiar":
+        return tekst(produkt.rozmiar).includes(v);
+      case "bieznik":
+        return tekst(produkt.bieznik).includes(v);
+      default:
+        return false;
+    }
+  });
+}
+
+/** Wynik ostrzeżenia: produkt i jego cena PO rabacie, policzona jak w oryginale. */
+export type PozycjaPonizejKosztu = { produkt: ProduktZKatalogu; poRabacie: number };
+
 export function produktyPonizejKosztu(
-  produkty: ProduktDoWyceny[],
-  narzuty: Narzut[],
-  promocje: Promocja[],
-): { produkt: ProduktDoWyceny; cenaSprzedazy: number }[] {
-  const wynik: { produkt: ProduktDoWyceny; cenaSprzedazy: number }[] = [];
+  produkty: ProduktZKatalogu[],
+  warunki: Warunek[],
+  globalna: boolean,
+  rabatPct: number,
+): PozycjaPonizejKosztu[] {
+  const rabat = Number.isFinite(rabatPct) ? rabatPct : 0;
+  const wynik: PozycjaPonizejKosztu[] = [];
+
   for (const produkt of produkty) {
-    const zakup = Number(produkt.cenaZakupu ?? 0);
-    if (zakup <= 0) continue;
-    const { cenaSprzedazy } = policzCene(produkt, narzuty, promocje);
-    if (cenaSprzedazy < zakup) wynik.push({ produkt, cenaSprzedazy });
+    // Oryginał wymaga, żeby OBIE ceny były liczbami — `null` albo tekst dyskwalifikuje wiersz.
+    if (typeof produkt.cenaZakupu !== "number" || typeof produkt.cenaSprzedazy !== "number") {
+      continue;
+    }
+    if (!dopasujDoOstrzezenia(produkt, warunki, globalna)) continue;
+    const poRabacie = produkt.cenaSprzedazy * (1 - rabat / 100);
+    if (poRabacie < produkt.cenaZakupu) wynik.push({ produkt, poRabacie });
   }
   return wynik;
 }

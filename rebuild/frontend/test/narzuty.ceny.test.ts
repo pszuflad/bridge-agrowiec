@@ -200,24 +200,57 @@ describe("4. Wybór promocji", () => {
   });
 });
 
-describe("5. Kontrola „poniżej kosztu\"", () => {
-  it("wyłapuje produkt, którego cena sprzedaży zejdzie poniżej zakupu", () => {
-    // 1000 × (1−0,8) × 1,23 = 246 „na papierze", ale 1−80/100 to w liczbach
-    // zmiennoprzecinkowych 0,19999999999999996, więc iloczyn wychodzi 245,99999999999997
-    // i `Math.floor` daje 245. Backend liczy TĄ SAMĄ formułą, więc zapisze dokładnie 245 —
-    // i dlatego oczekujemy tu 245, a nie „ładniejszego" 246.
-    const ostry = promocja({ rabatPct: 80 });
-    const wynik = produktyPonizejKosztu([PRODUKT], [], [ostry]);
+describe("5. Ostrzeżenie „poniżej kosztu\" — port 1:1, NIE silnik cen", () => {
+  /**
+   * ⚠ Ta funkcja CELOWO nie używa formuły z góry pliku. Oryginał liczy ostrzeżenie trzecim,
+   * własnym sposobem (`el()`, `:24563-24597`): bierze AKTUALNĄ `cenaSprzedazy` z katalogu
+   * i mnoży przez `(1 − rabat)`, a dopasowanie ma swoje — globalna obejmuje WSZYSTKO,
+   * `marka`/`kategoria`/`dostawca`/`produkt` po RÓWNOŚCI, `rozmiar`/`bieznik` przez zawieranie.
+   * Testy poniżej pilnują właśnie tych różnic, żeby ktoś ich „nie ujednolicił".
+   */
+  const wKatalogu = { ...PRODUKT, cenaSprzedazy: 1230 };
+
+  it("liczy od AKTUALNEJ ceny sprzedaży, nie od zakupu przez narzut i VAT", () => {
+    // 1230 × 0,5 = 615 < 1000 (zakup). Silnik cen dałby tu inną liczbę — i o to chodzi.
+    const wynik = produktyPonizejKosztu([wKatalogu], [], true, 50);
     expect(wynik).toHaveLength(1);
-    expect(wynik[0]!.cenaSprzedazy).toBe(245);
+    expect(wynik[0]!.poRabacie).toBeCloseTo(615, 6);
+  });
+
+  it("promocja globalna obejmuje WSZYSTKIE produkty", () => {
+    expect(produktyPonizejKosztu([wKatalogu], [], true, 90)).toHaveLength(1);
+  });
+
+  it("bez warunków i bez „globalna\" nie ostrzega o niczym", () => {
+    expect(produktyPonizejKosztu([wKatalogu], [], false, 90)).toHaveLength(0);
+  });
+
+  it("dopasowanie po marce jest przez RÓWNOŚĆ, nie zawieranie", () => {
+    const warunek = [{ typ: "marka", wartosc: "BK" }];
+    expect(produktyPonizejKosztu([wKatalogu], warunek, false, 90)).toHaveLength(0);
+    const dokladny = [{ typ: "marka", wartosc: "BKT" }];
+    expect(produktyPonizejKosztu([wKatalogu], dokladny, false, 90)).toHaveLength(1);
+  });
+
+  it("rozmiar dopasowuje się przez zawieranie", () => {
+    const zRozmiarem = { ...wKatalogu, rozmiar: "480/70R28" };
+    expect(produktyPonizejKosztu([zRozmiarem], [{ typ: "rozmiar", wartosc: "70R28" }], false, 90))
+      .toHaveLength(1);
+  });
+
+  /** Typy dołożone w 4b (D4) są dla silnika ważne, ale ostrzeżenie ich NIE ZNA — jak oryginał. */
+  it("⚠ warunek typu `srednica` nie jest rozpoznawany przez ostrzeżenie", () => {
+    const zSrednica = { ...wKatalogu, srednica: 42 };
+    expect(produktyPonizejKosztu([zSrednica], [{ typ: "srednica", wartosc: "42" }], false, 90))
+      .toHaveLength(0);
+  });
+
+  it("pomija produkt, w którym któraś cena nie jest liczbą", () => {
+    const bezCeny = { ...PRODUKT, cenaSprzedazy: null };
+    expect(produktyPonizejKosztu([bezCeny], [], true, 90)).toHaveLength(0);
   });
 
   it("nie zgłasza produktu, który zostaje powyżej kosztu", () => {
-    expect(produktyPonizejKosztu([PRODUKT], [narzut({ wartosc: 6 })], [])).toHaveLength(0);
-  });
-
-  it("pomija produkty bez dodatniej ceny zakupu — gałąź cenowa ich nie dotyczy", () => {
-    const zerowy = { ...PRODUKT, cenaZakupu: 0 };
-    expect(produktyPonizejKosztu([zerowy], [], [promocja({ rabatPct: 90 })])).toHaveLength(0);
+    expect(produktyPonizejKosztu([wKatalogu], [], true, 5)).toHaveLength(0);
   });
 });
