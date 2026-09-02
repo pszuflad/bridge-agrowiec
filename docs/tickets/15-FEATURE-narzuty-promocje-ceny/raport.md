@@ -116,3 +116,61 @@ i `rebuild-roadmap.md` to zaplanowana Faza 5 (doc-checker), a współdzielona `c
 jest świadomym DRY zgodnym z planem (ta sama kolejność mnożeń co w oryginale, wynik identyczny).
 
 Po poprawce: `lint`, `typecheck`, `build` czyste, **523 testy w 33 plikach** zielone.
+
+## Docs updates
+
+### `docs/rebuild-roadmap.md`
+- Tablica postępu §4: Iteracja 4 rozbita na sesje `4a BE · 4b FE`, status `⬜ → 🔨`, PR/data
+  wskazuje ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02.
+- **Cały blok „Iteracja 4" przepisany** i rozbity na 4a (✅ zrobione) i 4b (⬜ nie zaczęte),
+  wzorem struktury sesji z Iteracji 3.
+- **Usunięty błąd roadmapy:** „PUT/DELETE /api/markups/{id}" → **PATCH**, z dowodem
+  (`:48699`/`:48722` + `openapi.yaml:739-751`/`:901-913`).
+- Trzy nieaktualne ostrzeżenia przepisane na fakty: zaległość z I3 (domknięta dla
+  `acceptStaging`), PATCH zapisujący całe ciało (listy pól), audyt (loguje `c.body` w całości —
+  niespójności dostawców tu nie ma).
+- **Noty dla przyszłych sesji trafiły DO ICH BLOKÓW** (zasada 2 z `CLAUDE.md`):
+  - **blok 4b** — sześć pułapek portu 1:1: brak 404 w `PATCH /api/promotions/{id}`, ignorowane
+    daty promocji, `aktywna` vs `aktywny`, `warunki` jako string JSON, gołe tablice w `GET`,
+    koszt synchronicznego przeliczania całego katalogu;
+  - **blok I12** — jawny wymóg wywołania gotowej `zastosujRegulyCenowe` przy porcie
+    `addProductsBulk`, wraz z zapisem decyzji D1 i jej uzasadnieniem (graf wywołań: jedyne
+    wywołanie `addProductsBulk` to nieportowana trasa `:48308`).
+- Iteracja 2: „Dane kolumny «Promocja»" przekierowane z `I4` na `I4b`.
+- Iteracja 3 (blok 3d-2 i sekcja „co zostaje otwarte"): dopisane domknięcie w 4a.
+
+### `docs/rebuild-backlog.md`
+- **Wpis #14** zaktualizowany (6 edycji): status `⬜ narzuty/promocje (I4)` →
+  `✔ naprawione w rebuild (4a, 2026-09-02)`; tabela tras oznaczona; akapit o Iteracji 4
+  przepisany z zamiaru na stan (nazwy list pól, odcięte kolumny, plik testów).
+  Dopisane dwie rzeczy: filtr działa także na **POST** (różnica wobec dostawców) oraz
+  **nowa niespójność wprowadzona świadomie przez 4a** — audyt loguje surowe ciało przy
+  filtrowanym zapisie; zaznaczono, że to **odwrotność** sytuacji u dostawców (tam niespójność
+  jest własnością oryginału, tu jest nasza i jest ceną naprawy).
+- **Nowy wpis #19** — silnik cen ignoruje daty promocji (`start`/`koniec` nigdy nie czytane);
+  wygasła promocja obniża ceny w nieskończoność; port 1:1, naprawa ⬜ do decyzji.
+- **Nowy wpis #20** — `PATCH /api/promotions/{id}` bez 404 wobec bliźniaczej trasy narzutu,
+  która 404 ma; port 1:1 + nota dla sesji 4b.
+- Reszta pliku przegrepowana (`markup|promoc|narzut|recalcPrices|cena_sprzedazy|I4`) — poza
+  #14 nic nieaktualnego.
+
+### `docs/spec-backend.md`
+- §2: dopisane potwierdzenie, że osiem tras narzutów/promocji stoi za `requireAuth` mimo
+  `security: []` w openapi (ten sam wzorzec D1 co produkty/staging).
+- §6: „narzuty i promocje czekają na Iterację 4" → „naprawione w Iteracji 4a", wraz
+  z zastrzeżeniem D2 (audyt loguje surowe ciało, może pokazać pole niezapisane).
+
+### `docs/spec-frontend.md`
+- §5: nowy blok — widok `/narzuty` NIE jest zbudowany (4b), plus charakterystyka API,
+  na której 4b musi się oprzeć (gołe tablice, `warunki` jako string, nazwy statusów,
+  ignorowane daty, asymetria 404, synchroniczne przeliczanie katalogu).
+
+### `docs/instrukcja-testow-I3.md`
+- §3.6: zastrzeżenie, że „cena sprzedaży = zakup × 1,25" obowiązuje wyłącznie przy PUSTYCH
+  tabelach `markups`/`promotions`; od 4a pasująca reguła ustala cenę i nadpisuje także
+  `cenaSprzedazyNowa` wpisaną ręcznie w stagingu.
+- §5 („Czego jeszcze NIE MA"): wiersz o narzutach/promocjach rozliczony — backend ✅ (4a),
+  brakuje tylko widoku `/narzuty` (4b).
+
+### Pre-existing issues
+Żaden z trzech doc-checkerów nie znalazł zastanych nieścisłości poza zakresem tego ticketa.
