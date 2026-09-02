@@ -1,7 +1,7 @@
 /**
  * Trasy-placeholdery wraz z przypisaniem do iteracji, która je wypełni.
- * Iteracja 2 zdjęła stąd `/katalog`, sesja 3e — `/staging`, a sesja 3f-1 — `/konfiguracja`;
- * każda z nich ma własny komponent
+ * Iteracja 2 zdjęła stąd `/katalog`, sesja 3e — `/staging`, sesja 3f-1 — `/konfiguracja`,
+ * a Iteracja 5 — `/historia`; każda z nich ma własny komponent
  * wpięty bezpośrednio w `App.tsx`, więc liczba tras routera nie zmienia się (dalej 12).
  * Tytuły pokrywają się z etykietami sidebara (`components/nawigacja.ts`),
  * opisy pochodzą z celów iteracji w `docs/rebuild-roadmap.md` §5.
@@ -40,12 +40,6 @@ export const PLACEHOLDERY: OpisPlaceholdera[] = [
     tytul: "Analityka",
     opis: "Dashboardy EAN, cen, dostawców, dostępności i rotacji.",
     iteracja: "Iteracji 10",
-  },
-  {
-    path: "/historia",
-    tytul: "Historia",
-    opis: "Zmiany cen i stanów pochodzące z importów.",
-    iteracja: "Iteracji 5",
   },
   {
     path: "/waga-gabarytowa",

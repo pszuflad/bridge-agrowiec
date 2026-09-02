@@ -152,7 +152,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | 🔨 | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 (4b FE niezrobione) |
-| 5 | Historia | 1 | 3 | ⬜ | |
+| 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
 | 6 | Alerty | 1 | 3 | ⬜ | |
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
@@ -463,7 +463,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
       obecność `snapshotJson`, wywróci się na tym typie.
     - **Auto-zatwierdzone pozycje NIE POJAWIAJĄ SIĘ w stagingu** — import wpisuje je wprost
       do katalogu (§3, wiersz „Staging auto-accept"). UI nie ma czego dla nich pokazywać
-      i nie ma ich liczyć; widać je dopiero w `historia_cen` (Iteracja 5).
+      i nie ma ich liczyć; widać je dopiero w `historia_cen` (**Iteracja 10** — sprostowane
+      2026-09-02: widok `/historia` z I5 czyta `audit_log`, nie `historia_cen`).
       Pola `ean*` i `snapshotJson` niosą realną treść (`snapshotJson` to rekord PO `Hq()`).
       W `ostrzezenie` pojawiają się komunikaty przeznaczone dla człowieka, w tym „Konflikt EAN —
       …", „błędny zapis nazwy: …", „nie wykryto rozmiaru opony (sprawdź ręcznie)" oraz —
@@ -874,25 +875,50 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 5 — Historia
-- **Status:** ⬜  **Sesje:** 1  **Zależy od:** 3
-- **Cel (Ania klika):** otwiera `/historia`, widzi zmiany cen/stanów z importów.
-- **Backend:** `GET /api/history`, `/api/history/meta`, `/api/history/paged` (`Wa` = `historia_cen`). Uwaga: w oryginale `meta`/`paged` były publiczne przez podwójną rejestrację — u nas z auth (§3).
-- **⚠ WEJŚCIE Z BLOKÓW 3d-2 / 3f-1 / 3f-2 (2026-09-01) — `audit_log` ma już swoich pisarzy.**
-  Nasz backend zapisuje dziś **dwanaście** akcji: `akceptacja_stagingu`, `czyszczenie_stagingu`,
-  `edycja_dostawcy`, `edycja_stagingu`, `import_cennika`, `import_pliku`, `import_z_url`,
-  `odrzucenie_stagingu`, `override`, `synchronizacja_reczna`, `upload_pliku`,
-  `usuniecie_override`. Oryginał ma ich 26 — reszta dochodzi z kolejnymi iteracjami. Dwie
-  rzeczy, na które widok musi być odporny, bo są w danych OD RAZU:
-  - **`synchronizacja_reczna` nie ma `szczegoly_json` (NULL).** Trasa
-    `POST /api/dostawcy/{kod}/synchronizuj-teraz` woła audyt bez czwartego argumentu
-    (`:48240`). Widok renderujący szczegóły musi znieść `null`, a nie zakładać obiektu.
-  - **`synchronizacja_reczna` powstaje TAKŻE dla dostawcy, który nie istnieje.** Oryginał
-    pisze audyt PRZED synchronizacją i bezwarunkowo, więc `encja_id` bywa kodem, którego
-    nie ma w `suppliers`. To port 1:1 (audyt zapisuje ZAMIAR, nie wynik) — widok nie może
-    zakładać, że `encja_id` da się złączyć z tabelą dostawców.
-- **Frontend:** widok `/historia` (tabela + paginacja + filtry).
+- **Status:** ✅ **2026-09-02** (`15-FEATURE-historia-zmian`, PR #24)  **Sesje:** 1  **Zależy od:** 3
+- **Cel (Ania klika):** otwiera `/historia`, widzi log importów/eksportów/edycji z audytu — ✅ dowiezione.
+- **Backend — sprostowanie faktu, na którym stał ten blok: `Wa` to tabela `history`, NIE `historia_cen`**
+  (`deminified/backend-index.cjs:43833`, jedno wystąpienie `Wa =`, brak cieniowania).
+  `GET /api/history` czyta `history` (`listHistory()`, `:44962`); `GET /api/history/meta` i
+  `/paged` **nie** czytają `history` ani `historia_cen` — czytają **`audit_log`**
+  (`listAudit(5000)`, `:45068`) i mapują `akcja → typ` sztywnym słownikiem pięciu wartości
+  (`:48341`/`:48363`), reszta akcji odpada (`filter(Boolean)`). `historia_cen` (RAW SQL,
+  `analytics_module.cjs`) do tego widoku nie należy w ogóle — jej pisarz i czytelnik są opisane
+  w bloku **Iteracja 10**. Wszystkie trzy trasy za `requireAuth` (odstępstwo D1, §3) — w
+  oryginale `meta`/`paged` są publiczne przez potrójną (nie podwójną) rejestrację, patrz niżej.
+- **Filtr pięciu akcji audytu — FAKT rozstrzygnięty, port 1:1 (decyzja D2).** Backend rozpoznaje
+  wyłącznie `upload_pliku`, `import_cennika`, `eksport_csv`, `eksport_shoper`, `edycja_produktu`.
+  Z dwunastu akcji, które nasz backend zapisuje dziś (3d-2/3f-1/3f-2), przez ten filtr przechodzą
+  **dwie**: `upload_pliku` i `import_cennika`. `import_z_url`, `import_pliku`,
+  `synchronizacja_reczna` i reszta są w tym widoku niewidoczne — dokładnie jak w produkcji, to
+  port 1:1, nie usterka. **`synchronizacja_reczna` (NULL `szczegoly_json`, `encja_id`
+  niezłączalny z `suppliers`) i tak wypada na tym filtrze i do widoku nie dociera** — ostrzeżenie
+  o niej dotyczy `/api/audit-log`, przeniesione do bloku **Iteracja 12**.
+  Parser `szczegoly_json` (`src/historia/mapowanie.ts::parsujSzczegoly`, `try/catch` → `{}`,
+  1:1 z `:48338-48342`) znosi NULL i zepsuty JSON dla WSZYSTKICH wierszy audytu (przed filtrem
+  akcji), pokryte testami jednostkowymi i integracyjnymi.
+- **Frontend:** widok `/historia` — tabela (Data/Typ/Dostawca/Użytkownik/Pozycji/Szczegóły) +
+  filtry (szukaj/typ/dostawca) + paginacja 25/50/100, wpięty w router/shell.
+  `isLoading`/`isError` wg wzorca `Staging.tsx` (odstępstwo D5).
+- **Fakty do zapamiętania (dla kolejnych sesji):**
+  - **Tabela `history` nie ma w rebuildzie pisarza.** Jedyny pisarz oryginału to ręczna edycja
+    produktu w katalogu (`PUT`/`PATCH /api/products/:id`, `:48435`/`:48475`) — poza zakresem
+    tego ticketa. Do czasu jej sportowania `GET /api/history` zwraca na stagingu `[]`.
+  - **Rejestracji `/meta`+`/paged` w oryginale są TRZY, nie dwie:** rdzeń bez auth (`:48335`,
+    `:48352`) + `mirror/backend/pagination_module.cjs:136,168` z auth, ładowany dwukrotnie
+    (`extensions.cjs:449-451` + wprost z `index.cjs`). Wygrywa rdzeń, więc w produkcji trasy są
+    publiczne. `docs/spec-backend.md` §2 mówiło o dwóch — sprostowane w tym samym tickecie.
+  - **Clamp paginacji różni się od `/api/staging/paged`:** tu fallback `|| 1`/`|| 50` stoi PO
+    `parseInt`, więc `NaN` nie wycieka; w `pagination_module` używanym przez staging `||` działa
+    na stringu i `NaN` dochodzi do SQLite. Zastane, nie do ujednolicenia.
+  - **`/paged` czyta tylko 5000 najświeższych wierszy audytu PRZED filtrowaniem** —
+    przy większym `audit_log` starsze wpisy stają się niedostępne niezależnie od strony, a
+    `total` przestaje być liczbą wszystkich wpisów. Port 1:1.
 - **Ścieżki (GATE):** history×3.  **Fixtures:** `GET_history.json`, `GET_history_meta.json`, `GET_history_paged.json`.
-- **DoD:** historia renderuje realne wpisy; paginacja działa; fixtures przez GATE.
+- **DoD:** ✅ trzy trasy za auth przechodzą GATE (kształt 1:1 + komplet kluczy); mapowanie
+  akcja→typ i clamp odtworzone 1:1; NULL/zepsuty JSON i `encja_id` niezłączalny nie wywracają
+  odczytu (testy); widok wpięty, filtry i paginacja działają; `lint`/`typecheck`/`test`/`build`
+  czyste po obu stronach. Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
 
 ---
 
@@ -986,6 +1012,16 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ### Iteracja 10 — Analityka + pulpit
 - **Status:** ⬜  **Sesje:** 2–3 (podział po grupach: EAN / ceny / dostawcy / dostępność-rotacja / KPI)  **Zależy od:** 2, 3, 4
 - **Cel (Ania klika):** otwiera `/analityka` (20+ dashboardów) i pulpit `/` (agregaty).
+- **⚠ WEJŚCIE Z ITERACJI 5 (decyzja D3, 2026-09-02) — `historia_cen` ma pisarza, brak czytelnika.**
+  Tabela `historia_cen` jest zapisywana od bloku 3d-1 (`rebuild/backend/src/repos/historia.ts`,
+  `zapiszHistorieCen` — migawka cenowa przy auto-zatwierdzeniu importu w `tk()`). I5 tej tabeli
+  **nie dotknęła w ogóle** — widok `/historia` to log zdarzeń z `audit_log`
+  (import/eksport/edycja), nie lista zmian cen per produkt. Czytelnika dowozi TA iteracja:
+  `GET /api/analytics/prices/product-history` (`mirror/backend/analytics_module.cjs:26-95`,
+  fixture `contract/fixtures/GET_analytics_prices_product-history.json`).
+- **Tu też należy `GET /api/history` jako źródło danych dla Pulpitu** (`frontend-index.js:16852`).
+  Endpoint jest już zaimplementowany i przetestowany w I5 (`src/routes/history.ts`), czyta
+  tabelę `history`; na stagingu zwraca dziś `[]`, bo ta tabela nie ma jeszcze pisarza (patrz I5).
 - **Backend:** 27 tras `/api/analytics/*` (KPI, marże, EAN coverage/comparison/unique/rank/details, ceny inflation/last-import/product-history, dostawcy stats/lifecycle/stability/stock, dostępność products/sell-through, rotacja inactive, sezonowość, importy-timeline, top-zmiany, filters, status, bootstrap-current, export/{view}, market/group-prices, lifecycle/models).
 - **Frontend:** widok `/analityka` (`fe.js:27804`) + pulpit `/`.
 - **Ścieżki (GATE):** analytics×27.  **Fixtures:** wszystkie `GET_analytics_*.json` (25).
@@ -1035,6 +1071,15 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** wszystkie (finalny przegląd)
 - **Cel (Ania klika):** zmienia hasło w `/moje-konto`; admin zarządza użytkownikami/konfiguracją dostawców i utrzymaniem.
 - **Backend:** `POST /api/password/change`; `GET /api/users`; `GET/PUT /api/admin/supplier-config(+{kod})`, `/api/admin/suppliers-list`; `POST /api/maintenance/usun-nieopony`, `POST /api/products/clear`; `GET /api/audit-log`.
+  - **⚠ WEJŚCIE Z ITERACJI 5 (2026-09-02) — `GET /api/audit-log` musi znieść to samo, co `/api/history/{meta,paged}` już znosi.**
+    `synchronizacja_reczna` nie ma `szczegoly_json` (trasa `POST /api/dostawcy/{kod}/synchronizuj-teraz`
+    woła audyt bez czwartego argumentu, `:48240` — NULL) i powstaje TAKŻE dla dostawcy, który nie
+    istnieje (audyt pisany przed synchronizacją i bezwarunkowo, więc `encja_id` bywa kodem spoza
+    `suppliers`). W widoku `/historia` ta akcja jest odfiltrowana (nie ma jej w słowniku pięciu
+    rozpoznawanych akcji), więc problem tam nie wystąpił — ale `/api/audit-log` pokazuje surowy
+    audyt bez filtra typu, więc TU widok musi znieść `null` i niezłączalny `encja_id` wprost.
+    Parser `parsujSzczegoly` z I5 (`src/historia/mapowanie.ts`) już to potrafi (`try/catch` → `{}`),
+    da się z niego skorzystać bez pisania drugiej wersji.
   - **Mutacje produktów odłożone z I2:** `PATCH /api/products/{id}` (edycja, wstrzymanie/aktywacja —
     uwaga: oryginał sam ustawia `status: "wstrzymany"`, gdy któraś z cen spada do 0, `backend-index.cjs:44735-44741`),
     `PUT /api/products/{id}`, `DELETE /api/products/{id}`, `POST /api/products` (bulk). Katalog (I2) jest

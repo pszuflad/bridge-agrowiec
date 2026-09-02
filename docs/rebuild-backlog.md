@@ -1161,3 +1161,35 @@ promocji).
 
 **Do rozważenia dla produkcji.** Jednoliniowa naprawa (dodać ten sam strażnik co przy
 narzutach). Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy.
+### #21 · 2026-09-02 · [BACKEND] · widok `/historia` nie pokazuje importów z URL ani ręcznych synchronizacji
+
+> **Zgłoszone przy tickecie `15-FEATURE-historia-zmian` (I5). Port 1:1** — świadomie,
+> decyzja użytkownika, plan.md D2.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (historia / mapowanie audytu) |
+| **Pliki** | `deminified/backend-index.cjs:48341,48363` (słownik `akcja → typ`); port: `rebuild/backend/src/historia/mapowanie.ts` |
+| **Do nowej wersji?** | ⬜ **DO DECYZJI** |
+| **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · rozszerzenie słownika — nie zaczęte |
+
+**Co robi produkcja.** `/api/history/meta` i `/paged` mapują `akcja` z `audit_log` na `typ`
+sztywnym słownikiem pięciu wartości (`upload_pliku`, `import_cennika` → import;
+`eksport_csv`, `eksport_shoper` → eksport; `edycja_produktu` → edycja) i **odrzucają**
+wszystko inne. Z dwunastu akcji, które dziś zapisuje rebuild, przez ten filtr przechodzą
+tylko dwie — `upload_pliku` i `import_cennika`. Niewidoczne zostają m.in. `import_z_url`
+i `import_pliku` (trasy importu z I3) oraz `synchronizacja_reczna` (automat z 3f-3).
+
+**Dlaczego to jest jak w produkcji, a nie usterka.** Zachowanie odtworzone 1:1 (decyzja D2,
+`docs/tickets/15-FEATURE-historia-zmian/plan.md`) — w oryginale te akcje też są niewidoczne
+w tym widoku.
+
+**Dlaczego mimo to warto zdecydować.** Od 3f-3 automatyczny import z URL jest głównym
+kanałem zasilania danych. Historia, która go nie pokazuje, może dla Ani wyglądać na
+dziurawą, mimo że ekran działa zgodnie ze specyfikacją oryginału. Rozszerzenie słownika
+o nasze akcje importu/synchronizacji byłoby świadomym odstępstwem od produkcji.
+
+**Rekomendacja:** do decyzji Ani — czy rozszerzyć słownik `akcja → typ` o `import_z_url`,
+`import_pliku`, `synchronizacja_reczna` (i ew. inne), czy zostawić 1:1. Szczegóły
+i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
+`raport.md` (Follow-up #2).

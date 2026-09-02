@@ -14,7 +14,16 @@
  *     (`reinforced` w fixture jest nullem).
  */
 import type { Baza } from "../../src/db/index.js";
-import { historiaCen, markups, products, promotions, stagingItems, suppliers } from "../../src/db/schema.js";
+import {
+  auditLog,
+  history,
+  historiaCen,
+  markups,
+  products,
+  promotions,
+  stagingItems,
+  suppliers,
+} from "../../src/db/schema.js";
 import { wczytajFixture } from "./fixtures.js";
 
 export type NowyProdukt = typeof products.$inferInsert;
@@ -410,4 +419,174 @@ export const PROMOCJA_TESTOWA = {
 /** Wstawia `PROMOCJA_TESTOWA` — do testów kształtu, nie do porównania z fixture'em. */
 export function zasiejPromocjeTestowa(db: Baza): void {
   db.insert(promotions).values({ ...PROMOCJA_TESTOWA }).run();
+}
+
+// ─── Iteracja 5: historia ────────────────────────────────────────────────────────────────
+//
+// Dwa seedy, bo trzy trasy historii czytają DWIE różne tabele (routes/history.ts):
+// `GET /api/history` → `history`, a `/meta` i `/paged` → `audit_log`.
+
+/**
+ * Tabela `history` prosto z `contract/fixtures/GET_history.json`.
+ *
+ * `GET /api/history` to czysty `SELECT … ORDER BY data DESC`, więc nagranie produkcji
+ * jest tu jednocześnie wejściem i oczekiwanym wyjściem — dokładnie ten wariant seedu,
+ * co `zasiejStagingZFixtures`.
+ */
+export function zasiejDziennikZmianZFixtures(db: Baza): void {
+  const fixture = wczytajFixture("GET_history.json");
+  const wiersze = (fixture.body as Record<string, unknown>[]).map((w) => ({
+    id: w["id"] as number,
+    data: w["data"] as string,
+    kodProduktu: w["kodProduktu"] as string,
+    nazwa: w["nazwa"] as string,
+    pole: w["pole"] as string,
+    staraWartosc: (w["staraWartosc"] ?? null) as string | null,
+    nowaWartosc: (w["nowaWartosc"] ?? null) as string | null,
+    zrodlo: w["zrodlo"] as string,
+    kto: w["kto"] as string,
+    wykonalUzytkownikId: (w["wykonalUzytkownikId"] ?? null) as number | null,
+  }));
+  db.insert(history).values(wiersze).run();
+}
+
+/**
+ * Wiersze `audit_log` dla `/api/history/meta` i `/paged`.
+ *
+ * ⚠ INACZEJ NIŻ POZOSTAŁE SEEDY: tu fixture jest WYJŚCIEM, nie wejściem. `/paged` nie
+ * publikuje wierszy audytu, tylko wynik mapowania (`historia/mapowanie.ts`), więc seed
+ * musi odtworzyć DANE ŹRÓDŁOWE, z których to mapowanie da kształt zgodny z
+ * `GET_history_paged.json`. Dzięki temu GATE sprawdza całą drogę audyt → widok,
+ * a nie samo przepisanie wiersza.
+ *
+ * Zawartość dobrana tak, żeby pokryć wszystkie trzy typy i pułapki, które są w bazie
+ * produkcyjnej OD RAZU (ostrzeżenia z bloku I5 roadmapy):
+ *
+ *  • pięć `edycja_produktu` — NAJŚWIEŻSZE, żeby to one wypełniły pierwszą stronę
+ *    i dały się porównać z fixture'em 1:1 (`zmienionePola` z `szczegoly_json.zmiany`);
+ *  • `upload_pliku` i `import_cennika` dla pięciu dostawców — zasilają `meta.dostawcy`
+ *    i pokrywają obie gałęzie fallbacku `liczbaPozycji` (`liczbaProduktow` vs `wczytanych`);
+ *  • `eksport_shoper` — jedyne wejście dające niepuste `format`;
+ *  • `synchronizacja_reczna` z `szczegoly_json = NULL` i `encja_id` spoza `suppliers`
+ *    (dostawca „MO99" nie istnieje) — dokładnie ten wiersz, przed którym ostrzega roadmapa;
+ *  • dwa wiersze z niepoprawnym JSON-em w `szczegoly_json` (`JSON.parse` na nich rzuca):
+ *    jeden przy akcji nierozpoznanej, drugi przy `upload_pliku` — ten drugi przechodzi
+ *    przez PEŁNE mapowanie, więc dowodzi, że parser broni całej drogi, a nie tylko odsiewu;
+ *  • wiersz z akcją spoza słownika pięciu rozpoznawanych.
+ *
+ * Razem: 12 wierszy rozpoznawanych i 3 odsiane. Żaden z odsianych nie może wywrócić odczytu.
+ */
+export function zasiejAudytHistorii(db: Baza): void {
+  db.insert(auditLog).values(wierszeAudytuHistorii()).run();
+}
+
+/**
+ * Ile wierszy z `zasiejAudytHistorii` przechodzi przez odsiew akcji, czyli ile wpisów ma
+ * zobaczyć `/api/history/paged`. Liczone z seeda, nie wpisane na sztywno — inaczej każda
+ * przyszła zmiana seeda (np. przy pracach nad `/api/audit-log` w I12) cicho wywalałaby
+ * asercje w `historia.odczyt.test.ts` bez powiedzenia dlaczego.
+ */
+export function liczbaRozpoznanychWpisowHistorii(): number {
+  const rozpoznawane = new Set([
+    "upload_pliku",
+    "import_cennika",
+    "eksport_csv",
+    "eksport_shoper",
+    "edycja_produktu",
+  ]);
+  return wierszeAudytuHistorii().filter((w) => rozpoznawane.has(w.akcja)).length;
+}
+
+function wierszeAudytuHistorii(): (typeof auditLog.$inferInsert)[] {
+  return [
+    // — najstarsze: pułapki, które mają wypaść z wyniku —
+    {
+      uzytkownikId: 1,
+      uzytkownikImie: "Marta Bieguniak",
+      akcja: "synchronizacja_reczna",
+      encjaTyp: "dostawca",
+      // Kod dostawcy, którego NIE MA w `suppliers` — audyt zapisuje ZAMIAR przed operacją.
+      encjaId: "MO99",
+      szczegolyJson: null,
+      kiedy: "2026-07-28T05:00:00.000Z",
+    },
+    {
+      uzytkownikId: 1,
+      uzytkownikImie: "Marta Bieguniak",
+      akcja: "import_z_url",
+      encjaTyp: "dostawca",
+      encjaId: "MO6",
+      // Nie jest poprawnym JSON-em — `JSON.parse` rzuci, mapowanie ma to znieść.
+      szczegolyJson: "{niepoprawny json",
+      kiedy: "2026-07-28T05:01:00.000Z",
+    },
+    {
+      uzytkownikId: null,
+      uzytkownikImie: null,
+      akcja: "czyszczenie_stagingu",
+      encjaTyp: null,
+      encjaId: null,
+      szczegolyJson: JSON.stringify({ usunieto: 12 }),
+      kiedy: "2026-07-28T05:02:00.000Z",
+    },
+
+    // — akcje rozpoznawane: eksport i importy —
+    {
+      uzytkownikId: 1,
+      uzytkownikImie: "Marta Bieguniak",
+      // Zepsuty JSON przy akcji ROZPOZNAWANEJ — przechodzi przez PEŁNE mapowanie, a nie
+      // wypada na odsiewie jak `import_z_url` wyżej. Ma dać `{}` i wpis z pustymi polami.
+      akcja: "upload_pliku",
+      encjaTyp: "dostawca",
+      encjaId: "MO6",
+      szczegolyJson: "{tez niepoprawny",
+      kiedy: "2026-07-28T05:05:00.000Z",
+    },
+    {
+      uzytkownikId: 1,
+      uzytkownikImie: "Marta Bieguniak",
+      akcja: "eksport_shoper",
+      encjaTyp: null,
+      encjaId: null,
+      szczegolyJson: JSON.stringify({ liczbaProduktow: 7412 }),
+      kiedy: "2026-07-28T05:10:00.000Z",
+    },
+    ...["MO1", "MO10", "MO2", "MO3", "MO6"].map((kod, i) => ({
+      uzytkownikId: 1,
+      uzytkownikImie: "Marta Bieguniak",
+      akcja: i % 2 === 0 ? "upload_pliku" : "import_cennika",
+      encjaTyp: "dostawca",
+      encjaId: kod,
+      szczegolyJson:
+        i % 2 === 0
+          ? // `upload_pliku` (routes/suppliers.ts) — ma `nazwaPliku` i `liczbaProduktow`.
+            JSON.stringify({ nazwaPliku: `${kod.toLowerCase()}-cennik.xlsx`, liczbaProduktow: 120 + i })
+          : // `import_cennika` (routes/staging-mutacje.ts) — bez pliku, liczba pod `wczytanych`.
+            JSON.stringify({ wczytanych: 200 + i, doStagingu: 5 }),
+      kiedy: `2026-07-28T05:${String(20 + i).padStart(2, "0")}:00.000Z`,
+    })),
+
+    // — najświeższe: pięć edycji produktu odpowiadających fixture'owi `/paged` —
+    ...edycjeZFixture(),
+  ];
+}
+
+/**
+ * Pięć wpisów `edycja_produktu` odtworzonych z `GET_history_paged.json` — ze znaczników
+ * `kiedy`, kodów produktu i list `zmienionePola` z nagrania. To jedyna droga, żeby GATE
+ * porównał wartości, a nie sam kształt: `typ`, `kodProduktu` i `zmienionePola` muszą wyjść
+ * dokładnie takie, jak zapisała je produkcja.
+ */
+function edycjeZFixture(): (typeof auditLog.$inferInsert)[] {
+  const fixture = wczytajFixture("GET_history_paged.json");
+  const items = (fixture.body as { items: Record<string, unknown>[] }).items;
+  return items.map((wpis) => ({
+    uzytkownikId: 1,
+    uzytkownikImie: wpis["uzytkownik"] as string,
+    akcja: "edycja_produktu",
+    encjaTyp: "produkt",
+    encjaId: wpis["kodProduktu"] as string,
+    szczegolyJson: JSON.stringify({ zmiany: wpis["zmienionePola"] as string[] }),
+    kiedy: wpis["kiedy"] as string,
+  }));
 }
