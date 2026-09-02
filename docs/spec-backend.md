@@ -48,10 +48,12 @@ POST /api/waga-gabarytowa/oblicz
 Najgroźniejsze: **`/api/export/shoper`** (każdy pobierze cały katalog),
 **`/api/audit-log`** i **`/api/history`** (log działań i zmian), **`/api/config`**.
 
-Dodatkowo subtelność z podwójnej rejestracji: `/api/history/meta` i
-`/api/history/paged` są **publiczne**, bo żywy handler to ten z rdzenia (bez `we`),
-przesłaniający wersję modułową (która auth by miała). Kolejność rejestracji ma
-skutek bezpieczeństwa.
+Dodatkowo subtelność z rejestracji tras — sprostowane w I5: rejestracje `/api/history/meta`
+i `/api/history/paged` są **trzy**, nie dwie. Rdzeń rejestruje je bez `we` (`:48335`, `:48352`);
+`mirror/backend/pagination_module.cjs:136,168` rejestruje je ponownie z `we`, a ten moduł jest
+ładowany dwukrotnie (`extensions.cjs:449-451` oraz wprost z `index.cjs`). Express bierze
+pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie trasy są
+**faktycznie publiczne** — wniosek się nie zmienia, tylko liczba rejestracji.
 
 > **Odbudowa (I1a, `1-FEATURE-backend-fundament-logowanie`):** w `rebuild/backend`
 > zasada jest odwrócona od startu — `requireAuth` nakłada się jawnie na trasy danych,
@@ -70,6 +72,14 @@ skutek bezpieczeństwa.
 > **Potwierdzone w 3b** (`5-FEATURE-staging-endpointy-importu`): `GET /api/staging` też wjechało
 > pod `requireAuth`, mimo że kontrakt ma dla niego `security: []` — świadome, dziedziczone
 > odstępstwo (D1), ten sam wzorzec co przy `/api/products`.
+>
+> **Potwierdzone w I5** (`15-FEATURE-historia-zmian`, 2026-09-02): `GET /api/history`,
+> `/api/history/meta` i `/api/history/paged` też wjechały pod `requireAuth`, mimo
+> `security: []` w kontrakcie — ten sam wzorzec D1. Przy okazji sprostowane tabele: `/api/history`
+> czyta `history` (`Wa`, goła tablica wierszy, 10 pól), `/meta` i `/paged` czytają `audit_log`
+> (`Za`) i zwracają odpowiednio `{ dostawcy: string[] }` oraz `{ items, total, pages, page, limit }`
+> z 11 polami na `item` — żadna z tras nie dotyka `historia_cen`. Szczegóły:
+> `docs/tickets/15-FEATURE-historia-zmian/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -208,7 +218,9 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,
-`gn`=spedycja, `Jt`=config) — zgodna z moją lipcową rekonstrukcją.
+`gn`=spedycja, `Jt`=config) — zgodna z moją lipcową rekonstrukcją. ⚠ `Wa` to tabela SQL
+**`history`**, odrębna od `historia_cen` (pisana od 3d-1, czytelnik dopiero w I10) — zweryfikowane
+w I5, `docs/tickets/15-FEATURE-historia-zmian/plan.md`.
 
 ## 6. Korekty do propagacji
 

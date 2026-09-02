@@ -100,11 +100,11 @@ dotyczą wyłącznie komentarzy.
 
 Rzeczy zauważone po drodze, świadomie NIE zrobione w tym ticketcie:
 
-1. **`docs/spec-backend.md:51-54` mówi o „podwójnej rejestracji" `/api/history/meta` i `/paged`
-   — rejestracji są TRZY.** Rdzeń (`:48335`, `:48352`, bez `we`), `pagination_module.cjs:136,168`
-   (z `we`) i ten sam moduł ładowany drugi raz przez `extensions.cjs:449-451`. Wynik ten sam
-   (wygrywa rdzeń, trasy są publiczne), więc na implementację to nie wpływa — ale opis w spec
-   jest niedokładny. Do poprawy przy okazji I12 (hardening bezpieczeństwa).
+1. ~~`docs/spec-backend.md` mówi o „podwójnej rejestracji" — rejestracji są TRZY.~~
+   **ZROBIONE w Fazie 5 tego ticketa** (nie przeniesione dalej). Rdzeń (`:48335`, `:48352`, bez
+   `we`), `pagination_module.cjs:136,168` (z `we`) i ten sam moduł ładowany drugi raz przez
+   `extensions.cjs:449-451`. Wniosek się nie zmienił (wygrywa rdzeń, trasy są publiczne),
+   poprawiona tylko liczba rejestracji.
 2. **Widok `/historia` nie pokaże importów z URL ani ręcznych synchronizacji.** `import_z_url`,
    `import_pliku` i `synchronizacja_reczna` nie są w słowniku pięciu rozpoznawanych akcji, więc
    wypadają — tak samo jak w produkcji (D2). Jeśli Ania uzna to za lukę, jest to zmiana do
@@ -140,3 +140,62 @@ Runda 1 review (`review.md`): 1 BLOCKER, 1 SHOULD-FIX, 2 NICE-TO-HAVE.
   razem z danymi.
 
 Po poprawkach: backend 529/529, frontend 199/199, `lint`/`typecheck`/`build` czyste po obu stronach.
+
+## Docs updates
+
+Trzy doc-checkery równolegle, każdy nanosił zmiany sam.
+
+### `docs/rebuild-roadmap.md`
+
+- **§4 Tablica postępu** — wiersz „5 | Historia": `⬜` → `✅ | PR #23 · 2026-09-02`.
+- **§5 Iteracja 5** — blok przepisany ze stanu planowanego na dowieziony: status zamknięty
+  (data + ID ticketa + PR); sprostowany fakt `Wa` = tabela `history` (nie `historia_cen`),
+  z rozbiciem, co czyta która trasa; filtr pięciu akcji zapisany jako fakt rozstrzygnięty (D2)
+  z listą przechodzących i odpadających; ostrzeżenie o `synchronizacja_reczna` przeformułowane
+  na „wypada na filtrze, do widoku nie dociera" i przeniesione tam, gdzie realnie uderza.
+  Dopisane fakty na przyszłość: brak pisarza tabeli `history`, potrójna rejestracja tras,
+  różnica clampu paginacji wobec `/api/staging/paged`, limit 5000 wierszy audytu przed
+  filtrowaniem. DoD odhaczone.
+- **§5 Iteracja 10** — nowa nota „WEJŚCIE Z ITERACJI 5" (decyzja D3): `historia_cen` ma pisarza
+  z 3d-1, czytelnika dowozi I10 (`GET /api/analytics/prices/product-history`); `GET /api/history`
+  jest gotowe i czeka jako źródło dla Pulpitu, na stagingu zwraca dziś `[]`.
+- **§5 Iteracja 12** — nowa nota: ostrzeżenie o `synchronizacja_reczna` (NULL `szczegoly_json`,
+  `encja_id` niezłączalny) przeniesione tu z I5, bo `/api/audit-log` czyta surowy log bez filtra
+  typu i musi to jawnie znieść; wskazany gotowy parser z I5 do reużycia.
+- **§5 blok 3e** — sprostowana błędna wzmianka „widać je dopiero w `historia_cen` (Iteracja 5)".
+
+### `docs/rebuild-backlog.md`
+
+- **Nowy wpis #19 (⬜ DO DECYZJI)** — „widok `/historia` nie pokazuje importów z URL ani ręcznych
+  synchronizacji". Opisuje, co robi produkcja, dlaczego odtworzyliśmy to 1:1 (D2) i dlaczego mimo
+  to warto, żeby Ania zdecydowała: od 3f-3 automatyczny import z URL jest głównym kanałem
+  zasilania danych, a historia go nie pokazuje. **Nie oznaczone jako ✅** — to nie nasza decyzja.
+- Zweryfikowano grepem, że żaden istniejący wpis nie dotyczy historii / `audit_log` / `Wa`.
+- Świadomie NIE dopisano limitu 5000 wierszy audytu: backlog rejestruje decyzje Ani, a to jest
+  odziedziczone ograniczenie techniczne bez alternatywy do rozstrzygnięcia (zostaje jako
+  komentarz w `repos/audit.ts` i fakt w roadmapie).
+
+### `docs/spec-backend.md`
+
+- §2 — „podwójna rejestracja" `/api/history/meta` i `/paged` sprostowana na **trzy** rejestracje;
+  wniosek (trasy faktycznie publiczne) bez zmian. **To domyka follow-up #1 tego raportu** —
+  nie przechodzi dalej do I12.
+- §2 — nowy blok „Potwierdzone w I5": trzy trasy za `requireAuth` (D1) oraz sprostowanie, że
+  `/api/history` czyta `history` (goła tablica, 10 pól), a `/meta`/`/paged` czytają `audit_log`
+  i zwracają `{dostawcy}` / `{items,total,pages,page,limit}` z 11-polowymi wpisami.
+- §5 — przy mapowaniu `Wa` dopisane, że to tabela SQL `history`, odrębna od `historia_cen`
+  (pisana od 3d-1, czytana dopiero od I10).
+
+### `docs/spec-frontend.md`
+
+- §4 — doprecyzowane, których endpointów widok Historii faktycznie używa (`/paged` + `/meta`,
+  nigdy gołego `GET /api/history`).
+- §5 (Blueprint odbudowy) — nowy blok „Odbudowa (I5)": zdjęty placeholder `/historia`
+  (12 tras routera, 7 placeholderów zostaje), widok to log zdarzeń a nie lista zmian cen
+  (bez „przed → po"), wołane endpointy, odstępstwo D5.
+
+### Problemy zastane
+
+Żaden z trzech agentów nie znalazł nieaktualności poza tymi, które ten ticket sam zgłosił
+i naprawił. Sekcje niezwiązane z historią (design tokens, blueprint auth, rozjazd
+`/api/attributes`) zostawione bez zmian.

@@ -76,7 +76,11 @@ ma endpoint:
   w produkcji, do 23/dobę na jednego dostawcę). Szczegóły w roadmapie, blok Iteracji 6.
 - **Waga gabarytowa** — liczona w przeglądarce, choć `POST /api/waga-gabarytowa/oblicz` istnieje.
 - **Staging** — instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu.
-- Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa (potwierdza deltę: te moduły dojrzały po czerwcu).
+- Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa
+  (potwierdza deltę: te moduły dojrzały po czerwcu). Doprecyzowanie z I5: widok Historii woła
+  **wyłącznie** `GET /api/history/paged` i `GET /api/history/meta` — gołej `GET /api/history`
+  (log 10-polowy z tabeli `history`) nie woła w ogóle; tę trasę wołają Pulpit (I10) i cache
+  edycji katalogu.
 
 ## 5. Blueprint odbudowy (potwierdzony w kodzie)
 
@@ -146,6 +150,17 @@ ma endpoint:
 >   Żądania JSON w jsdom działają normalnie.
 >
 > Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
+
+> **Odbudowa (I5, `15-FEATURE-historia-zmian`, 2026-09-02):** `/historia` odbudowany — router
+> ma **12 tras, 7 placeholderów**. Tabela + filtry (szukaj / typ / dostawca) + paginacja 25/50/100.
+> Widok woła **wyłącznie** `GET /api/history/paged` i `GET /api/history/meta`
+> (`frontend-index.js:25374-25390`); gołej `GET /api/history` nie woła. To log **zdarzeń**
+> (import/eksport/edycja), nie lista zmian cen — podtytuł oryginału to „Log każdego importu,
+> eksportu i ręcznej edycji produktu w katalogu" (`:25393`), a kolumna „Szczegóły" pokazuje przy
+> edycji tylko nazwy zmienionych pól, bez „przed → po" (te wartości siedzą w `GET /api/history`,
+> którego ten ekran nie woła). **Odstępstwo D5:** nasz widok ma stany `isLoading`/`isError`,
+> jak `Staging.tsx`; oryginał ich nie ma (`data = {}` domyślnie, więc podczas ładowania i przy
+> błędzie renderuje „Brak wpisów w historii."). Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).
