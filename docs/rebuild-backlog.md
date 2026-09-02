@@ -1319,3 +1319,57 @@ tych, które 4b dołożyła do buildera warunków (D4 tego ticketa) ponad 6 typ�
 bez zmian, wygląd dialogu inny (Radix zamiast `window.confirm`, bo ten blokuje wątek i nie
 da się go stylować/testować). Odtworzone świadomie, ⬜ do rozważenia w przyszłości, czy
 ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
+
+---
+
+### #25 · 2026-09-02 · [FRONTEND] · promocja „globalna" nie obniża żadnych cen, ale ostrzega o całym katalogu
+
+> **Znalezione przy pisaniu instrukcji testów I4 (ticket `17-DOCS-instrukcja-testow-i4`),
+> POMIAREM, nie lekturą.** Dotyczy zarówno produkcji, jak i odbudowy — port jest 1:1.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
+| **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
+| **Do nowej wersji?** | ⬜ **do decyzji** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Status** | odtworzone świadomie w 4b · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
+bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
+Dopasowanie promocji (`Tb`, `:9473-9479`, u nas `promocjaPasuje`) przy pustych `warunki`
+sprawdza natomiast, czy **`zasieg` ZAWIERA markę albo kategorię produktu**:
+
+```js
+const r = (e.zasieg ?? "").toLowerCase();
+return !!r && (r.includes((t.marka ?? "").toLowerCase()) || r.includes((t.kategoria ?? "").toLowerCase()))
+```
+
+Napis `"globalny"` nie zawiera ani `"bkt"`, ani `"rolnicze"` — więc **promocja globalna nie
+pasuje do żadnego normalnego produktu**. Pasuje wyłącznie do pozycji z PUSTĄ marką albo pustą
+kategorią, bo `"globalny".includes("")` jest prawdą.
+
+**Zmierzone** (`promocjaPasuje` z `rebuild/frontend/src/pages/narzuty/ceny.ts`, port `Tb` 1:1):
+
+| Produkt | `zasieg: "globalny"`, `warunki: "[]"` |
+|---|---|
+| marka `BKT`, kategoria `Rolnicze` | **`false`** — promocja NIE działa |
+| marka `null`, kategoria `null` | `true` |
+
+**Skutek — i tu jest sedno.** Ostrzeżenie „poniżej kosztu" liczy dopasowanie **innym kodem**
+(`_matchProd`, wpis #24), w którym `if (_isGlobal) return true`, czyli globalna obejmuje
+**WSZYSTKIE** produkty. Użytkownik dostaje więc czerwony pasek „⚠ UWAGA: 7400 produktów będzie
+miało cenę sprzedaży PONIŻEJ ceny zakupu", potwierdza zapis — i **nie zmienia się ani jedna
+cena**. Dwa mechanizmy w tym samym oknie odpowiadają na to samo pytanie przeciwnie.
+
+Dla narzutów problemu NIE MA: tam „globalna" wysyła `typ: "globalny"`, a `narzutPasuje`
+zwraca dla tego typu `true` bezwarunkowo. Niespójność dotyczy wyłącznie promocji.
+
+**Co z tego wynika.**
+- **Obejście na dziś:** promocjom ZAWSZE ustawiać warunek (choćby szeroki, np. kategoria).
+  Zapisane w `docs/instrukcja-testow-I4.md` §3.7 i §4 pkt 4.
+- **Naprawa** jest jednolinijkowa po stronie dopasowania (traktować `zasieg === "globalny"`
+  jak dopasowanie do wszystkiego, tak jak robi to ostrzeżenie), ale jest **zmianą zachowania
+  produkcji**: promocje, które dziś nic nie robią, zaczęłyby nagle obniżać ceny całego
+  katalogu. Wymaga świadomej decyzji użytkownika i sprawdzenia, czy w produkcyjnej bazie nie
+  leżą uśpione promocje globalne.
+- Alternatywa: usunąć checkbox „globalna" z formularza promocji, skoro w tej roli nie działa.

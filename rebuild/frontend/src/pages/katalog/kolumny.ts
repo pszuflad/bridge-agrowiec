@@ -80,9 +80,12 @@ export const KOLUMNY: DefinicjaKolumny[] = [
 /**
  * Kolumny widoczne domyślnie (`Nn`, frontend-index.js:23021).
  *
- * UWAGA: `promocja` jest tu celowo — oryginał ją pokazuje, ale wartość liczą reguły
- * cenowe z Iteracji 4. Do tego czasu komórka renderuje „—", dokładnie jak w produkcji
- * dla produktu bez promocji.
+ * ⚠ `promocja` jest tu celowo i renderuje „—" ZAWSZE, nie „do czasu Iteracji 4".
+ * Sprostowanie z sesji 4b: kolumna czyta `produkt._reguly?.promocja`, a `_reguly` nie jest
+ * ustawiane NIGDZIE w produkcyjnym bundlu (jedno wystąpienie, wyłącznie odczyt) ani nie
+ * przychodzi z `GET /api/products` (żadne z 66 pól w `contract/fixtures/GET_products.json`).
+ * Kolumna jest w produkcji MARTWA i taka zostaje — port 1:1, decyzja użytkownika.
+ * Pełny opis: `docs/rebuild-backlog.md` #22.
  */
 export const KOLUMNY_DOMYSLNE: string[] = [
   "nazwa",
