@@ -1092,24 +1092,33 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 
 > **Znalezione przy bloku I4/4a (2026-09-02). ODTWORZONE 1:1** — naprawa świadomie
 > odłożona, bo wymagałaby wyjątku w charakteryzacji importu. **Właściciel do ustalenia.**
+> **Uzupełnione w 4b (frontend):** widok `/narzuty` odtwarza dokładnie ten sam defekt
+> po stronie klienta i teraz go pokazuje — patrz „Co robi produkcja" niżej.
 
 | Pole | Wartość |
 |---|---|
-| **Kategoria** | BACKEND (silnik cen) |
-| **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`) |
+| **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
+| **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
 | **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **do decyzji** (odrzucona w tym tickecie, patrz niżej) |
-| **Status** | ✔ odtworzone w rebuild (4a), defekt zgłoszony |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony |
 
 **Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
 `koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
 po `warunki`/`zasieg`. Kolumny `start` i `koniec` są w schemacie **NOT NULL** i nigdzie
-w silniku nieużywane — istnieją, ale są martwe dla logiki cen.
+w silniku nieużywane — istnieją, ale są martwe dla logiki cen. **Front produkcji dodatkowo
+maskuje ten defekt na liście.** `Qd(start, koniec)` (`:9309-9314`) przelicza etykietę statusu
+z dat i woła to `_b()` (`:9508-9514`) przy KAŻDYM odczycie `/api/promotions` (`queryFn`,
+`:9568`) — wynik idzie do lokalnej tablicy, do cache'u zapytania i do IndexedDB
+(`Gr()` → `un()`, `:9183-9193`), **ale nigdy na serwer**. Kolumna `status` w bazie zostaje
+nietknięta i to jej używa silnik cen.
 
 **Skutek.** Wygasła promocja nadal obniża ceny **w nieskończoność**. Jedynym sposobem jej
 wyłączenia jest ręczna zmiana `status` na coś innego niż `"aktywna"`; upływ daty `koniec`
 nie robi nic. Dotyczy obu ścieżek silnika: masowego `przeliczCenyZRegul`
 (`recalcPricesFromRules`) wołanego po każdej mutacji narzutu/promocji, i gałęzi cenowej
-importu (`acceptStaging`, wpiętej w 4a).
+importu (`acceptStaging`, wpiętej w 4a). **Na liście `/narzuty` skutek jest niewidoczny**:
+etykieta pokazuje „zakończona" (liczona z dat), a backend promocję nadal stosuje — Ania nie
+ma jak zauważyć rozjazdu, patrząc tylko na badge.
 
 **Decyzja użytkownika (2026-09-02): odtworzyć 1:1, naprawy NIE robimy teraz.** Uzasadnienie:
 naprawa wymagałaby wyjątku w charakteryzacji importu (test z bloku 3d-2, rozszerzony w 4a
@@ -1125,19 +1134,30 @@ czyta start ani koniec") i scenariuszem charakteryzacji
 w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
 
+**Uzupełnienie 4b (frontend, 2026-09-02).** Widok `/narzuty` portuje `_b()`/`Qd()` 1:1
+(`rebuild/frontend/src/pages/narzuty/status.ts`) — etykieta statusu promocji liczona z dat
+przy każdym odczycie, bez zapisu na serwer, dokładnie jak produkcja. Ponad port dołożony
+**widoczny znacznik rozbieżności** (`rozbieznosc-statusu-{id}`, `data-testid` w
+`TabelaPromocji.tsx`): gdy etykieta wyliczona z dat nie zgadza się z kolumną `status` z
+serwera, wiersz pokazuje ostrzeżenie w stylu „wg dat zakończona, ale nadal obniża ceny".
+To **nie jest naprawa** — dane i mechanika bez zmian, znika wyłącznie niewidzialność defektu
+na liście (plan.md D5, decyzja użytkownika 2026-09-02). Naprawa (czytanie dat w silniku)
+zostaje po stronie backendu i jest nadal ⬜ do decyzji.
+
 ---
 
 ### #20 · 2026-09-02 · [BACKEND] · `PATCH /api/promotions/{id}` nie ma 404 — bliźniacza trasa narzutu ma
 
 > **Znalezione przy bloku I4/4a (2026-09-02). ODTWORZONE 1:1.** Nota dla sesji 4b
-> (frontend): odpowiedź na nieistniejące id NIE zawiera obiektu.
+> (frontend): odpowiedź na nieistniejące id NIE zawiera obiektu. **Zrealizowane w 4b** —
+> klient czyta ciało warunkowo, patrz niżej.
 
 | Pole | Wartość |
 |---|---|
-| **Kategoria** | BACKEND (trasy mutacji) |
-| **Pliki** | `deminified/backend-index.cjs:48699` (`PATCH /api/markups/:id`, ma 404), `:48722-48731` (`PATCH /api/promotions/:id`, brak 404); port: `rebuild/backend/src/routes/markups.ts`, `rebuild/backend/src/routes/promotions.ts` |
+| **Kategoria** | BACKEND (trasy mutacji) [+FRONTEND — klient, 4b] |
+| **Pliki** | `deminified/backend-index.cjs:48699` (`PATCH /api/markups/:id`, ma 404), `:48722-48731` (`PATCH /api/promotions/:id`, brak 404); port: `rebuild/backend/src/routes/markups.ts`, `rebuild/backend/src/routes/promotions.ts`. Frontend: `rebuild/frontend/src/pages/narzuty/api.ts` (`odczytajCialo`) |
 | **Do nowej wersji?** | ✅ **port 1:1** |
-| **Status** | ✔ odtworzone w rebuild (4a), asymetria zgłoszona |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), asymetria zgłoszona |
 
 **Co robi produkcja.** `e.patch("/api/markups/:id", …)` (`:48699`) sprawdza jawnie
 `if (!p) return u.status(404)`. Bliźniacza trasa `e.patch("/api/promotions/:id", …)`
@@ -1161,6 +1181,16 @@ promocji).
 
 **Do rozważenia dla produkcji.** Jednoliniowa naprawa (dodać ten sam strażnik co przy
 narzutach). Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy.
+
+**Uzupełnienie 4b (frontend, 2026-09-02).** Klient promocji (`rebuild/frontend/src/pages/narzuty/api.ts`,
+`odczytajCialo`) czyta odpowiedź przez `text()` i parsuje warunkowo — gołe `.json()` rzucałoby
+wyjątkiem na pustym ciele, które trasa oddaje dla nieistniejącego id. Pusta odpowiedź jest
+raportowana wywołującemu jako „nie znaleziono", nie jak sukces. Pokryte testem
+`rebuild/frontend/test/narzuty.api.test.ts`. Status wpisu bez zmian — to nadal port 1:1
+asymetrii tras, nie jej naprawa.
+
+---
+
 ### #21 · 2026-09-02 · [BACKEND] · widok `/historia` nie pokazuje importów z URL ani ręcznych synchronizacji
 
 > **Zgłoszone przy tickecie `15-FEATURE-historia-zmian` (I5). Port 1:1** — świadomie,
@@ -1193,3 +1223,99 @@ o nasze akcje importu/synchronizacji byłoby świadomym odstępstwem od produkcj
 `import_pliku`, `synchronizacja_reczna` (i ew. inne), czy zostawić 1:1. Szczegóły
 i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 `raport.md` (Follow-up #2).
+
+---
+
+### #22 · 2026-09-02 · [FRONTEND] · kolumna „Promocja" w `/katalog` jest MARTWA
+
+> **Znalezione przy bloku I4/4b (2026-09-02). Port 1:1** — decyzja użytkownika D1
+> (`docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md`).
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (katalog) |
+| **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
+| **Do nowej wersji?** | ✅ **port 1:1** — ożywienie ⬜ **do decyzji** (kandydat na I12) |
+| **Status** | ✔ odtworzone w rebuild (4b), martwota potwierdzona |
+
+**Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
+**nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
+(potwierdzone `grep`em). Żadne z 66 pól produktu w `contract/fixtures/GET_products.json`
+nie niesie promocji ani rabatu. Kolumna jest mimo to w domyślnym zestawie kolumn katalogu
+i od zawsze renderuje `—`.
+
+**Skutek.** Ania widzi w `/katalog` pustą kolumnę, która obiecuje pokazać obowiązującą
+promocję, a nigdy nic nie pokaże — bo dane, które by ją zasiliły, nie istnieją nigdzie
+w systemie produkcyjnym.
+
+**Decyzja użytkownika (2026-09-02): port 1:1** — odbudowa ma to samo zachowanie
+w `rebuild/frontend/src/pages/katalog/formatowanie.tsx`. Ożywienie wymagałoby danych
+z backendu (pole dopasowanej promocji przy produkcie); liczenie po stronie klienta
+duplikowałoby silnik dopasowania reguł (`rebuild/backend/src/repos/ceny.ts`) — drugie
+miejsce, które musiałoby zgadzać się z pierwszym.
+
+**Do rozważenia dla produkcji/odbudowy.** Ożywienie kolumny (backend dokłada pole przy
+produkcie, wyliczone tym samym silnikiem co ceny) — kandydat na I12, poza zakresem 4b.
+
+---
+
+### #23 · 2026-09-02 · [FRONTEND] · `Mb()` liczy ceny inaczej niż własny backend
+
+> **Znalezione przy bloku I4/4b (2026-09-02). NIE portowane — świadome odstępstwo**
+> (decyzja użytkownika D8, `docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md`).
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (silnik cen klienta — symulator) |
+| **Pliki** | `deminified/frontend-index.js:9481-9506` (`Mb`); zamiennik w odbudowie: `rebuild/frontend/src/pages/narzuty/ceny.ts` (liczy jak `rebuild/backend/src/repos/ceny.ts`) |
+| **Do nowej wersji?** | ❌ **NIE — świadomie NIE portujemy rozjazdu** |
+| **Status** | ✔ w rebuild klient liczy zgodnie z backendem (4b); defekt oryginału opisany, w produkcji nadal obecny |
+
+**Co robi produkcja.** Klientowy silnik cen `Mb()` (`:9481-9506`) rozjeżdża się z własnym
+backendem w trzech miejscach: (1) test „czy reguła jest specyficzna" sprawdza PRAWDZIWOŚĆ
+napisu `warunki` (`"globalny" !== n.typ || n.warunki`, `:9485`) zamiast liczby warunków po
+sparsowaniu — więc reguła z `warunki: "[]"` (dokładnie ta z `contract/fixtures/GET_markups.json`)
+jest dla frontendu specyficzna, a dla backendu globalna, i przy dwóch regułach naraz każda
+strona wybierze inną; (2) brak domyślnych `priorytet ?? 50` i `vat ?? 23`; (3) brak
+`Math.floor`.
+
+**Skutek.** Symulator ceny w produkcji potrafi pokazać rozbicie ceny, której w katalogu
+nie ma — bo liczy inną formułą i innym doborem reguły niż silnik, który faktycznie ustawia
+`cenaSprzedazy`.
+
+**Decyzja użytkownika (2026-09-02): 4b świadomie NIE portuje tej rozbieżności.**
+`rebuild/frontend/src/pages/narzuty/ceny.ts` liczy tak samo jak
+`rebuild/backend/src/repos/ceny.ts`, a zgodności obu implementacji pilnują bliźniacze
+testy po obu stronach (`narzuty.ceny.test.ts` / `ceny.silnik.test.ts`). Uzasadnienie:
+błędne wyjaśnienie ceny jest gorsze niż jego brak, a od tej samej logiki zależy ostrzeżenie
+o sprzedaży poniżej kosztu. W produkcji defekt **nadal obecny**.
+
+---
+
+### #24 · 2026-09-02 · [FRONTEND] · ostrzeżenie „poniżej kosztu" to TRZECI, osobny sposób liczenia
+
+> **Znalezione przy bloku I4/4b (2026-09-02). Port 1:1** — decyzja użytkownika D6
+> (`docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md`).
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (dialog reguł — kontrola przed zapisem) |
+| **Pliki** | `deminified/frontend-index.js:24563-24597` (przy zapisie), `:24473-24513` (pasek na żywo); port: `rebuild/frontend/src/pages/narzuty/ceny.ts` (`produktyPonizejKosztu`), `DialogReguly.tsx` |
+| **Do nowej wersji?** | ✅ **port 1:1** |
+| **Status** | ✔ odtworzone w rebuild (4b), zweryfikowane liniowo w review rundy 2 |
+
+**Co robi produkcja.** `el()` liczy ostrzeżenie „poniżej kosztu" (przy zapisie i na żywo)
+jako `cenaSprzedazy × (1 − rabat/100)` porównywane z `cenaZakupu`, z WŁASNYM dopasowaniem
+(`_matchProd`): globalna obejmuje wszystkie produkty, `marka`/`kategoria`/`dostawca`/`produkt`
+po RÓWNOŚCI, `rozmiar`/`bieznik` przez zawieranie, nieznany typ odrzuca. To nie jest ani
+`Mb()` (symulator, #23), ani silnik backendu (`rebuild/backend/src/repos/ceny.ts`) — trzeci,
+niezależny sposób liczenia tej samej rzeczy.
+
+**Skutek.** Ostrzeżenie jest przybliżeniem (backend i tak przeliczy katalog od ceny zakupu
+swoim silnikiem) i **nie obejmuje warunków typu `konstrukcja`, `srednica`, `vfIf`** — także
+tych, które 4b dołożyła do buildera warunków (D4 tego ticketa) ponad 6 typów oryginału.
+
+**Decyzja użytkownika (2026-09-02): port 1:1** (D6) — zachowanie, wyliczenie i treść listy
+bez zmian, wygląd dialogu inny (Radix zamiast `window.confirm`, bo ten blokuje wątek i nie
+da się go stylować/testować). Odtworzone świadomie, ⬜ do rozważenia w przyszłości, czy
+ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.

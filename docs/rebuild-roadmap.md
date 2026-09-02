@@ -151,7 +151,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
-| 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | 🔨 | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 (4b FE niezrobione) |
+| 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 |
 | 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
 | 6 | Alerty | 1 | 3 | ⬜ | |
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
@@ -294,7 +294,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   | Mutacje produktów (`POST`, `PATCH`/`PUT`/`DELETE {id}`, `clear`) + menu „Akcje" i modal edycji w `/katalog` | **I12** | ✅ dopisane do zakresu I12 |
   | Odświeżenie kontraktu + nagranie fixtures zapisujących i wariantu „goła tablica" `GET /api/products` | **I12** | ✅ dopisane do zakresu I12 |
   | Słowniki marek/kategorii z `GET /api/atrybuty` (znosi degradację z D3) | **I7** | ✅ odnotowane w I7 |
-  | Dane kolumny „Promocja" (dziś renderuje `—`) | **I4b** | dane z backendu gotowe od 4a; kolumna czeka na widok 4b |
+  | Dane kolumny „Promocja" (dziś renderuje `—`) | — | **sprostowanie (4b, 2026-09-02): kolumna zostaje MARTWA, port 1:1 (decyzja D1).** Oryginał nie ustawia `_reguly` NIGDZIE w bundlu i żadne z 66 pól `GET_products.json` nie niesie promocji — nie było skąd wziąć danych. Kandydat na I12, jeśli backend kiedyś dołoży pole. |
   | `GET /api/config` (produkcja nie ma kluczy eksportu — patrz I8) | **I11** | ✅ odnotowane w I11 |
   | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8** | ✅ dopisane do zakresu I8 — zależność od `/api/config` okazała się nominalna |
   | Decyzja o `szerokosc` (backlog #3) | ticket importu/schematu (I3) | ✅ ustalenia w `rebuild-backlog.md` #3, odsyłacz w I3 |
@@ -819,7 +819,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 4 — Narzuty + promocje (ceny)
-- **Status:** 🔨 częściowo — **4a (BE) ✅ zrobione 2026-09-02**, **4b (FE) ⬜ nie zaczęte**
+- **Status:** ✅ **zrobione — ITERACJA ZAMKNIĘTA** — **4a (BE) ✅ 2026-09-02** (ticket
+  `15-FEATURE-narzuty-promocje-ceny`), **4b (FE) ✅ 2026-09-02** (ticket
+  `16-FEATURE-widok-narzuty-promocje`)
   **Sesje:** 4a BE · 4b FE  **Zależy od:** 2, 3
 - **Cel (Ania klika):** ustawia narzut/promocję, widzi przeliczoną `cena_sprzedazy`/marżę w katalogu.
 
@@ -852,25 +854,52 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     czyste. Pełny wywód (formuła cenowa, decyzje D1–D5): `docs/tickets/
     15-FEATURE-narzuty-promocje-ceny/plan.md` i `raport.md`.
 
-- **4b · Widok `/narzuty` + kolumna „Promocja" w `/katalog`** (FE) — ⬜ **nie zaczęte.**
-  Backend gotowy od 4a. Zanim ktoś zacznie — pułapki portu 1:1, którymi widok musi się liczyć:
+- **4b · Widok `/narzuty`** (FE) — ✅ **zrobione 2026-09-02** (ticket
+  `16-FEATURE-widok-narzuty-promocje`). Dwie zakładki (`Tabs`, domyślna „narzuty"): tabela
+  narzutów + symulator ceny w pierwszej, tabela promocji w drugiej; wspólny dialog
+  dodawania/edycji z builderem warunków — **9 typów** (6 z oryginału + `konstrukcja`/
+  `srednica`/`vfIf`, świadome rozszerzenie). Pełny CRUD obu zasobów na React Query, **bez**
+  IndexedDB/optimistic update oryginału (świadome odstępstwo — backend przelicza ~7 400
+  produktów synchronicznie przy każdej mutacji, więc widok pokazuje uczciwy stan ładowania
+  zamiast iluzji natychmiastowości). Kontrola „poniżej kosztu" przed zapisem promocji własnym
+  dialogiem + pasek ostrzegawczy na żywo w formularzu, liczone **metodą oryginału**
+  (`cenaSprzedazy × (1−rabat)`, matcher osobny od silnika cen). Silnik cen po stronie klienta
+  (symulator + kontrola kosztu) świadomie liczy **zgodnie z backendem** (`repos/ceny.ts`), nie
+  z oryginalnym `Mb()`, który się z nim rozjeżdża. `Toaster` wszedł do drzewa aplikacji
+  (`src/App.tsx`) — pierwsza iteracja, która go realnie używa; istniejące widoki dalej mają
+  komunikaty inline, `TooltipProvider` nadal czeka na pierwszą iterację z tooltipem.
+  `/narzuty` zdjęte z `placeholdery.ts`, **liczba tras routera dalej 12**. **278 testów
+  w 18 plikach** (frontend), lint/typecheck/build czyste. Pełny wywód, D1–D8 i lista
+  odstępstw: `docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md` i `raport.md`.
+  - **Kolumna „Promocja" w `/katalog` zostaje MARTWA (D1) — sprostowanie starego zapisu tego
+    bloku.** Oryginał nie ustawia `_reguly` NIGDZIE w bundlu (jedno wystąpienie, wyłącznie
+    odczyt) i żadne z 66 pól `GET_products.json` nie niesie promocji ani rabatu — nie było
+    skąd wziąć danych. 4b portuje 1:1, kolumna nadal renderuje `—`. Ożywienie wymagałoby
+    duplikować silnik dopasowania reguł w przeglądarce (patrz nota w Iteracji 12).
   - **`PATCH /api/promotions/{id}` NIE MA 404** — dla nieistniejącego id oddaje **200 z pustym
     ciałem** (`res.json(undefined)` → puste `text`, nie `{}`). Bliźniacza trasa narzutu 404 MA.
-    Asymetria oryginału (`:48709` vs `:48722-48731`), port 1:1 — **widok nie może zakładać,
-    że w odpowiedzi jest obiekt.**
-  - **Silnik cen IGNORUJE daty `start`/`koniec` promocji** — wygasła promocja nadal obniża
-    ceny (port 1:1, `__bridgePromoMatches` `:44615-44628`). Wyłączenie promocji w UI to zmiana
-    `status` na coś innego niż `"aktywna"`, a NIE upływ daty.
+    Klient promocji 4b czyta `text()` i parsuje warunkowo — pusta odpowiedź to „nie znaleziono".
+  - **Silnik cen backendu IGNORUJE daty `start`/`koniec` promocji** — wygasła promocja nadal
+    obniża ceny (port 1:1, `__bridgePromoMatches`). Frontend produkcji mimo to **przelicza
+    etykietę statusu z dat przy każdym odczycie** `/api/promotions` (`_b()`,
+    `frontend-index.js:9508`, wołane z `queryFn` `:9568`) i zapisuje wynik do IndexedDB —
+    **nigdy na serwer**; kolumna `status`, której używa silnik cen, zostaje nietknięta. Skutek
+    w produkcji: lista pokazuje „zakończona" przy promocji, którą backend nadal stosuje. 4b
+    odtworzyło to 1:1 i dołożyło widoczny **znacznik rozbieżności** na wierszu, gdy przeliczona
+    etykieta nie zgadza się z kolumną `status` z serwera, plus naprawiony badge `"zaplanowana"`
+    (oryginał ma tu literówkę i wyświetla ją jako „zakończona"). Wyłączenie promocji „na
+    sztywno" to nadal zmiana `status`, a nie upływ daty — silnika to nie rusza (backlog #19).
   - Aktywny status promocji to `"aktywna"` (rodzaj żeński), narzutu — `"aktywny"`.
-  - `warunki` w obu tabelach to **STRING ze zserializowanym JSON-em**, nie tablica.
+  - `warunki` w obu tabelach to **STRING ze zserializowanym JSON-em**, nie tablica — 4b wysyła
+    dokładnie tak.
   - Odpowiedzi `GET` to **gołe tablice**, nie koperty.
-  - Każda mutacja narzutu/promocji **przelicza ceny CAŁEGO katalogu** synchronicznie — UI
-    powinien się liczyć z zauważalnym czasem odpowiedzi przy ~7 400 produktach.
 - **Ścieżki (GATE):** markups×2 (`GET/POST` + `PATCH/DELETE {id}`), promotions×2 (jw.) —
   osiem operacji, **✅ zielone od 4a**.  **Fixtures:** `GET_markups.json`, `GET_promotions.json`
   — **✅ zielone od 4a**.
 - **DoD:** ✅ narzuty/promocje liczą ceny zgodnie z oryginałem (4a); ✅ fixtures przez GATE (4a);
-  ⬜ ceny widoczne w katalogu i widok `/narzuty` (4b).
+  ✅ widok `/narzuty` z pełnym CRUD, builderem warunków, symulatorem i kontrolą kosztu (4b);
+  kolumna „Promocja" w `/katalog` świadomie zostaje martwa (D1) — przeliczona `cena_sprzedazy`
+  jest widoczna w katalogu, ale nie ta kolumna.
 
 ---
 
@@ -969,6 +998,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **DoD:** pełen CRUD + workflow pending natywnie; martwe ścieżki naprawione; fixtures przez GATE; parytet z `pending-injection.js` (57 KB) bez samego skryptu.
 - **Efekt uboczny dla I2:** `/api/atrybuty` domyka degradację D3 z I2 — listy marek/kategorii w `/katalog`
   dziś powstają wyłącznie z danych produktów, po I7 mogą korzystać ze słowników.
+- **Efekt uboczny dla I4b:** oryginalny dialog reguł (`/narzuty`) zasila listy marek i kategorii
+  z `GET /api/attributes` (`:24204-24211`) — marki to suma słownika atrybutów i marek z
+  produktów, kategorie WYŁĄCZNIE ze słownika. 4b nie miał tego endpointu, więc buduje obie
+  listy z danych produktów (ta sama degradacja co D3 w I2). Po I7 warto podpiąć `/api/atrybuty`
+  w `DialogReguly.tsx` — wtedy kategoria spoza katalogu też będzie wybieralna.
 
 ---
 
@@ -1080,6 +1114,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     audyt bez filtra typu, więc TU widok musi znieść `null` i niezłączalny `encja_id` wprost.
     Parser `parsujSzczegoly` z I5 (`src/historia/mapowanie.ts`) już to potrafi (`try/catch` → `{}`),
     da się z niego skorzystać bez pisania drugiej wersji.
+  - **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć (dziś martwa, D1 z 4b, 2026-09-02)
+    — dane musi dostarczyć backend** (pole przy produkcie), bo liczenie po stronie klienta
+    duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś
+    zaplanowanej pracy — nota informacyjna, nie zadanie.
   - **Mutacje produktów odłożone z I2:** `PATCH /api/products/{id}` (edycja, wstrzymanie/aktywacja —
     uwaga: oryginał sam ustawia `status: "wstrzymany"`, gdy któraś z cen spada do 0, `backend-index.cjs:44735-44741`),
     `PUT /api/products/{id}`, `DELETE /api/products/{id}`, `POST /api/products` (bulk). Katalog (I2) jest

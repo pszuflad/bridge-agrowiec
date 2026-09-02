@@ -165,3 +165,51 @@ tak jak w oryginale (`:24214-24223`) — mój `useEffect` synchronizujący formu
 To nie jest kosmetyka: efekt kasowałby zmiany użytkownika przy każdym przerysowaniu rodzica.
 
 Po rundzie 2: `lint`, `typecheck`, `build` czyste, **278 testów w 18 plikach** zielonych.
+
+## Docs updates
+
+### `docs/rebuild-roadmap.md`
+- **Iteracja 4 ZAMKNIĘTA** — status `🔨 częściowo` → `✅`, oba pod-bloki (4a, 4b) z datami
+  i ticketami; tablica postępu w §4 zaktualizowana.
+- **Blok 4b przepisany ze stanu „⬜ nie zaczęte / pułapki do uważania" na stan dowieziony.**
+  Sześć dawnych „pułapek" przepisanych na fakty.
+- **Usunięta nieprawda o kolumnie „Promocja"** — roadmapa obiecywała, że 4b „dostarcza dla niej
+  dane". Zastąpione jawnym sprostowaniem, że kolumna zostaje martwa (D1), z uzasadnieniem.
+  Poprawiony też wpis w bloku Iteracji 2, który wskazywał na `I4b`.
+- **Doprecyzowany fakt o statusie promocji** — frontend produkcji przelicza etykietę z dat przy
+  każdym odczycie (`_b()`), ale nigdy nie zapisuje na serwer; 4b portuje to 1:1 i dokłada
+  znacznik rozbieżności.
+- **Noty dla przyszłych bloków trafiły DO NICH** (zasada 2 z `CLAUDE.md`): **I7** — dialog
+  w oryginale zasila marki i kategorie z `GET /api/attributes`, 4b buduje je z produktów, więc
+  po I7 warto podpiąć słownik; **I12** — ożywienie kolumny „Promocja" wymaga danych z backendu,
+  nie liczenia po stronie klienta.
+
+### `docs/rebuild-backlog.md`
+- **#19** (silnik ignoruje daty promocji) — uzupełniony o odkrycie z 4b: etykieta statusu JEST
+  przeliczana z dat przy każdym odczycie, ale wynik nigdy nie wraca na serwer, więc lista
+  potrafi pokazać „zakończona" przy promocji, która nadal obniża ceny. Znacznik rozbieżności
+  czyni to widocznym; naprawa dalej ⬜ do decyzji, po stronie backendu.
+- **#20** (`PATCH /api/promotions/{id}` bez 404) — dopisany skutek dla frontendu i test, który
+  go pilnuje.
+- **#22 (nowy)** — kolumna „Promocja" w `/katalog` jest MARTWA; port 1:1, ożywienie ⬜ do decyzji.
+- **#23 (nowy)** — `Mb()` z oryginału rozjeżdża się z własnym backendem; 4b świadomie tego nie
+  portuje (D8), w produkcji defekt nadal obecny.
+- **#24 (nowy)** — ostrzeżenie „poniżej kosztu" to trzeci, osobny sposób liczenia, nieobejmujący
+  warunków `konstrukcja`/`srednica`/`vfIf`; port 1:1 (D6).
+
+### `docs/spec-frontend.md`
+- §3: dopisane, które z 12 tras są już zbudowane, a które zostają placeholderami.
+- §5: blok „widok `/narzuty` NIE ISTNIEJE" (z sesji 4a) przepisany na opis stanu — zakładki,
+  CRUD, builder 9 typów, etykieta statusu ze znacznikiem, ostrzeżenie „poniżej kosztu",
+  martwa kolumna „Promocja" jako świadomy port 1:1, nowy `Toaster`.
+
+### `docs/spec-backend.md`
+Bez zmian — 4b nie ruszało backendu, a plik nie zawierał twierdzeń, które ticket unieważnił.
+
+### `docs/instrukcja-testow-I3.md`
+§5: wiersz o narzutach i promocjach rozliczony — backend (4a) i widok `/narzuty` (4b) gotowe.
+
+### Pre-existing issues
+`docs/instrukcja-testow-I3.md:395` — wiersz „Widok Historia | Iteracja 5" jest nieaktualny,
+bo `/historia` powstało w tickecie `15-FEATURE-historia-zmian`. Poprzedza ten ticket i nie
+dotyczy narzutów, więc świadomie nietknięte.
