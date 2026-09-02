@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Uzytkownik } from "@/lib/api";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
+import type { Narzut, Promocja } from "@/pages/narzuty/api";
 
 const katalogTestow = dirname(fileURLToPath(import.meta.url));
 const korzenRepo = resolve(katalogTestow, "../../../..");
@@ -119,3 +120,47 @@ export function metaHistoriiZFixtura(): { dostawcy: string[] } {
   const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: { dostawcy: string[] } };
   return { dostawcy: fixture.body.dostawcy };
 }
+
+/**
+ * Reguły narzutu z `contract/fixtures/GET_markups.json` — jeden pełny wiersz nagrany
+ * z produkcji. Ta sama zasada co przy produktach i dostawcach: widok sprawdzamy przeciwko
+ * kształtowi, który realnie oddaje backend, a nie przeciwko mojemu wyobrażeniu o nim.
+ *
+ * ⚠ `warunki` przychodzi jako STRING (`"[]"`), nie tablica — i to jest część kontraktu,
+ * nie szczegół zapisu.
+ */
+export function narzutyZFixtura(): Narzut[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_markups.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Narzut[] };
+  return fixture.body;
+}
+
+/**
+ * Promocje — z fixture'a, czyli PUSTA TABLICA.
+ *
+ * ⚠ OGRANICZENIE SIATKI, NAZWANE WPROST: `contract/fixtures/GET_promotions.json` nie zawiera
+ * ani jednego wiersza, bo produkcja nie miała żadnej promocji w chwili nagrywania. Kształt
+ * wiersza NIE JEST więc pokryty nagraniem — testy, które go potrzebują, budują dane
+ * z `PROMOCJA_TESTOWA` poniżej, opartej o schemat (`rebuild/schema/001_schema.sql:156-168`).
+ * To słabsze świadectwo niż przy narzutach i trzeba o tym pamiętać przy czytaniu wyników.
+ */
+export function promocjeZFixtura(): Promocja[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_promotions.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Promocja[] };
+  return fixture.body;
+}
+
+/** Promocja ze SCHEMATU (nie z nagrania) — patrz nota przy `promocjeZFixtura`. */
+export const PROMOCJA_TESTOWA: Promocja = {
+  id: 1,
+  nazwa: "Wyprzedaż zimowa",
+  rabatPct: 10,
+  zasieg: "BKT,MICHELIN",
+  warunki: null,
+  priorytet: 50,
+  start: "2026-01-01T00:00:00.000Z",
+  koniec: "2026-03-31T00:00:00.000Z",
+  status: "aktywna",
+  zmienilUzytkownikId: 1,
+  zmienionoData: "2026-07-31T13:07:21.578Z",
+};
