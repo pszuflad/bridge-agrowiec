@@ -142,3 +142,26 @@ ostrzeżenia liczone tą samą metodą — pasek w formularzu, aktualizowany prz
 
 Po poprawkach: `lint`, `typecheck`, `build` czyste, **275 testów w 18 plikach** zielonych
 (było 261 — doszło 14 testów pilnujących powyższych rzeczy).
+
+### Review runda 2
+
+0 BLOCKER-ów, 2 SHOULD-FIX — oba naprawione.
+
+**Symulator odbiegał od `UT()`.** Przepisany 1:1 (`:24972-25120`): szukajka po pięciu polach
+sklejonych spacją (`rozmiar`, `marka`, `model`, `nazwa`, `kod`), limit **50** trafień z notą
+„Pokazane pierwsze 50 — zawęź wyszukiwanie", komunikat „Brak wyników dla…", wybrany produkt
+z przyciskiem „Zmień", cztery wiersze rozbicia z **deltami** względem kroku poprzedniego
+i wyróżnionym VAT-em, `data-testid` z oryginału (`input-simulator-search`,
+`simulator-result-{id}`, `button-simulator-clear`). Dołożony **jeden wiersz ponad oryginał**
+(D8): `UT()` kończy się na kwocie z VAT-em, ale to nie jest liczba, która ląduje w katalogu —
+backend zaokrągla ją w dół. Symulator różniący się od katalogu o grosze tłumaczyłby cenę,
+której tam nie ma. Trzy nowe testy, w tym sprawdzenie, że rozbicie zgadza się z `cenaSprzedazy`
+z `contract/fixtures/GET_products.json`.
+
+**Formularz resetował pola przy otwarciu.** Oryginał tego NIE robi — `el()` nie ma ani resetu,
+ani `useEffect`, więc wpisane wcześniej wartości wracają przy kolejnym otwarciu. Reset był moim
+dodatkiem. Usunięty, a przy okazji **cały stan przeniesiony do inicjalizatorów `useState`**,
+tak jak w oryginale (`:24214-24223`) — mój `useEffect` synchronizujący formularz zniknął.
+To nie jest kosmetyka: efekt kasowałby zmiany użytkownika przy każdym przerysowaniu rodzica.
+
+Po rundzie 2: `lint`, `typecheck`, `build` czyste, **278 testów w 18 plikach** zielonych.

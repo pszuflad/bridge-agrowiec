@@ -13,7 +13,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -89,51 +89,61 @@ export function DialogReguly({
   const { toast } = useToast();
   const edycja = edytowanyNarzut ?? edytowanaPromocja;
 
+  /**
+   * ⚠ CAŁY STAN USTAWIA SIĘ RAZ, W INICJALIZATORACH — bez `useEffect`. Tak robi oryginał
+   * (`:24214-24223`): `el()` dostaje edytowany obiekt propsem i wylicza z niego wartości
+   * początkowe. Efekt synchronizujący byłby nie tylko zbędny, ale i zmieniłby zachowanie:
+   * skasowałby zmiany wpisane przez użytkownika przy każdym przerysowaniu rodzica.
+   */
+  const warunkiEdytowanej = edytowanyNarzut
+    ? odczytajWarunki(edytowanyNarzut.warunki)
+    : edytowanaPromocja
+      ? odczytajWarunki(edytowanaPromocja.warunki)
+      : [];
+
   const [otwarty, ustawOtwarty] = useState(Boolean(edycja));
-  const [tryb, ustawTryb] = useState<TrybReguly>(trybInicjalny);
-  const [nazwa, ustawNazwe] = useState("");
-  const [globalna, ustawGlobalna] = useState(true);
-  const [warunki, ustawWarunki] = useState<Warunek[]>([PIERWSZY_WARUNEK]);
-  const [wartosc, ustawWartosc] = useState(String(DOMYSLNA_WARTOSC[trybInicjalny]));
-  const [start, ustawStart] = useState(dzisiaj);
-  const [koniec, ustawKoniec] = useState(zaMiesiac);
+  const [tryb, ustawTryb] = useState<TrybReguly>(
+    edytowanaPromocja ? "promocja" : edytowanyNarzut ? "narzut" : trybInicjalny,
+  );
+  const [nazwa, ustawNazwe] = useState(
+    edytowanyNarzut?.nazwa ?? edytowanaPromocja?.nazwa ?? "",
+  );
+  /** Nowa reguła startuje z JEDNYM pustym warunkiem typu `kategoria` (`:24216-24218`). */
+  const [warunki, ustawWarunki] = useState<Warunek[]>(
+    edycja ? warunkiEdytowanej : [PIERWSZY_WARUNEK],
+  );
+  const [wartosc, ustawWartosc] = useState(
+    String(
+      edytowanyNarzut?.wartosc ??
+        edytowanaPromocja?.rabatPct ??
+        DOMYSLNA_WARTOSC[trybInicjalny],
+    ),
+  );
+  /**
+   * ⚠ „Globalna" jest zaznaczona TYLKO przy edycji reguły, która nie ma warunków
+   * (`!!i && 0 === P.length`, `:24221`). Nowa reguła startuje z NIEzaznaczonym checkboxem
+   * i jednym pustym warunkiem — nie odwrotnie.
+   */
+  const [globalna, ustawGlobalna] = useState(Boolean(edycja) && warunkiEdytowanej.length === 0);
+  const [start, ustawStart] = useState(
+    naDate(edytowanaPromocja?.start ?? "") || dzisiaj(),
+  );
+  const [koniec, ustawKoniec] = useState(
+    naDate(edytowanaPromocja?.koniec ?? "") || zaMiesiac(),
+  );
   /**
    * ⚠ PRIORYTET NIE MA POLA W FORMULARZU — w oryginale ten input stoi pod `display:none`
    * (`:24468-24472`), więc użytkownik go nie zmienia. Trzymamy go w stanie WYŁĄCZNIE po to,
-   * żeby przy edycji odesłać wartość, którą reguła już ma (`:24216`, `priorytet: C`).
+   * żeby przy edycji odesłać wartość, którą reguła już ma (`priorytet: C`, `:24626`).
    * Bez tego zapis zbijałby każdy priorytet do 50 i po cichu zmieniał, KTÓRA reguła wygrywa.
    */
-  const [priorytet, ustawPriorytet] = useState(50);
+  const [priorytet] = useState(
+    edytowanyNarzut?.priorytet ?? edytowanaPromocja?.priorytet ?? 50,
+  );
   const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<PozycjaPonizejKosztu[] | null>(null);
 
   const { data: produkty } = useQuery<Produkt[]>({ queryKey: ["/api/products"] });
   const katalog = produkty ?? [];
-
-  // Wypełnienie formularza przy edycji; przy dodawaniu — wartości domyślne z `Cb()`.
-  useEffect(() => {
-    if (!otwarty) return;
-    if (edytowanyNarzut) {
-      const w = odczytajWarunki(edytowanyNarzut.warunki);
-      ustawTryb("narzut");
-      ustawNazwe(edytowanyNarzut.nazwa ?? "");
-      ustawWarunki(w);
-      ustawGlobalna(w.length === 0);
-      ustawWartosc(String(edytowanyNarzut.wartosc));
-      ustawPriorytet(edytowanyNarzut.priorytet ?? 50);
-      return;
-    }
-    if (edytowanaPromocja) {
-      const w = odczytajWarunki(edytowanaPromocja.warunki);
-      ustawTryb("promocja");
-      ustawNazwe(edytowanaPromocja.nazwa);
-      ustawWarunki(w);
-      ustawGlobalna(w.length === 0);
-      ustawWartosc(String(edytowanaPromocja.rabatPct));
-      ustawPriorytet(edytowanaPromocja.priorytet ?? 50);
-      ustawStart(naDate(edytowanaPromocja.start) || dzisiaj());
-      ustawKoniec(naDate(edytowanaPromocja.koniec) || zaMiesiac());
-    }
-  }, [otwarty, edytowanyNarzut, edytowanaPromocja]);
 
   const zamknij = () => {
     ustawOtwarty(false);
@@ -300,18 +310,15 @@ export function DialogReguly({
       {edycja ? null : (
         <Button
           size="sm"
-          onClick={() => {
-            ustawTryb(trybInicjalny);
-            ustawNazwe("");
-            // Nowa reguła: jeden pusty warunek, „globalna" ODZNACZONA (`:24221`).
-            ustawWarunki([PIERWSZY_WARUNEK]);
-            ustawGlobalna(false);
-            ustawWartosc(String(DOMYSLNA_WARTOSC[trybInicjalny]));
-            ustawPriorytet(50);
-            ustawStart(dzisiaj());
-            ustawKoniec(zaMiesiac());
-            ustawOtwarty(true);
-          }}
+          /*
+            ⚠ CELOWO BEZ RESETU PÓL. Oryginał (`el()`) nie czyści formularza ani przy
+            otwarciu, ani po zapisie — stan siedzi w `useState` komponentu, który się nie
+            odmontowuje, więc wpisane wcześniej wartości WRACAJĄ przy kolejnym otwarciu.
+            Dokładanie resetu wyglądałoby na drobiazg, a jest zmianą zachowania: po dodaniu
+            reguły „+6% dla MO5" następne otwarcie ma w produkcji te same pola gotowe do
+            drobnej korekty, i na tym ktoś mógł polegać.
+          */
+          onClick={() => ustawOtwarty(true)}
           data-testid={trybInicjalny === "promocja" ? "button-add-promotion" : "button-add-markup"}
         >
           <Plus className="w-4 h-4 mr-1" />

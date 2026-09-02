@@ -94,7 +94,7 @@ describe("1. Układ strony", () => {
   it("zakładka „Narzuty\" niesie także symulator ceny", async () => {
     zamockujApi();
     await otworzNarzuty();
-    expect(screen.getByTestId("input-symulator-szukaj")).toBeInTheDocument();
+    expect(screen.getByTestId("input-simulator-search")).toBeInTheDocument();
   });
 
   it("`/narzuty` nie jest już widokiem w przygotowaniu", async () => {
@@ -260,5 +260,47 @@ describe("3. Tabela promocji", () => {
   it("nagłówek nie twierdzi, że status zmienia się automatycznie", async () => {
     await otworzPromocje([]);
     expect(screen.queryByText(/Status zmienia się automatycznie wg dat/)).not.toBeInTheDocument();
+  });
+});
+
+describe("4. Symulator ceny", () => {
+  /**
+   * Symulator tłumaczy, DLACZEGO produkt ma taką cenę. Fixture ma regułę globalną +6%,
+   * a pierwszy produkt zakup 5562,4 zł przy VAT 23% ⇒ floor(5562,4 × 1,06 × 1,23) = 7252.
+   * Ta sama liczba siedzi w `contract/fixtures/GET_products.json` jako `cenaSprzedazy` —
+   * czyli symulator odtwarza to, co backend realnie policzył. Gdyby liczył jak `Mb()`
+   * z oryginału (plan.md D8), rozjechałby się przy drugiej regule w tabeli.
+   */
+  it("⭐ rozbicie ceny zgadza się z cenaSprzedazy z fixture'a produktów", async () => {
+    zamockujApi();
+    await otworzNarzuty();
+
+    const produkt = PRODUKTY[0]!;
+    await userEvent.type(screen.getByTestId("input-simulator-search"), String(produkt.kod));
+    await userEvent.click(await screen.findByTestId(`simulator-result-${produkt.id}`));
+
+    const cena = await screen.findByTestId("symulator-cena");
+    expect(cena).toHaveTextContent(`${Number(produkt.cenaSprzedazy).toFixed(2)} zł`);
+  });
+
+  it("pusta fraza nie pokazuje listy, a brak trafień mówi to wprost", async () => {
+    zamockujApi();
+    await otworzNarzuty();
+
+    expect(screen.queryByText(/Brak wyników/)).not.toBeInTheDocument();
+    await userEvent.type(screen.getByTestId("input-simulator-search"), "nieistniejacafraza");
+    expect(await screen.findByText(/Brak wyników dla/)).toBeInTheDocument();
+  });
+
+  it("„Zmień\" wraca do wyszukiwarki", async () => {
+    zamockujApi();
+    await otworzNarzuty();
+
+    const produkt = PRODUKTY[0]!;
+    await userEvent.type(screen.getByTestId("input-simulator-search"), String(produkt.kod));
+    await userEvent.click(await screen.findByTestId(`simulator-result-${produkt.id}`));
+    await userEvent.click(await screen.findByTestId("button-simulator-clear"));
+
+    expect(await screen.findByTestId("input-simulator-search")).toBeInTheDocument();
   });
 });
