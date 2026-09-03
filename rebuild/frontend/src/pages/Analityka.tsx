@@ -76,10 +76,12 @@ export function Analityka() {
 
   // Blok 10c — cztery trasy EAN, które oryginalny frontend realnie woła (`fe.js:27839-27851`).
   // `ean/details` i `ean-porownanie` hooka nie mają: w oryginale nie mają konsumenta (D6).
-  const { data: porownanieEan, isPending: eanWczytywany } = usePorownanieEan();
-  const { data: unikalneEan } = useUnikalneEan();
-  const { data: pokrycieEan } = usePokrycieEan();
-  const { data: rankingEan } = useRankingDostawcowEan();
+  // Każde zapytanie niesie SWÓJ stan ładowania — cztery lecą niezależnie, więc jedna
+  // wspólna flaga kazałaby jednej tabeli kłamać o stanie drugiej.
+  const porownanieEan = usePorownanieEan();
+  const unikalneEan = useUnikalneEan();
+  const pokrycieEan = usePokrycieEan();
+  const rankingEan = useRankingDostawcowEan();
 
   return (
     <div>
@@ -119,12 +121,11 @@ export function Analityka() {
 
         <TabsContent value="ean" className="mt-4">
           <SekcjaEan
-            porownanie={porownanieEan}
-            unikalne={unikalneEan}
-            pokrycie={pokrycieEan}
-            ranking={rankingEan}
+            porownanie={{ dane: porownanieEan.data, ladowanie: porownanieEan.isPending }}
+            unikalne={{ dane: unikalneEan.data, ladowanie: unikalneEan.isPending }}
+            pokrycie={{ dane: pokrycieEan.data, ladowanie: pokrycieEan.isPending }}
+            ranking={{ dane: rankingEan.data, ladowanie: rankingEan.isPending }}
             wybor={wybor}
-            ladowanie={eanWczytywany}
           />
         </TabsContent>
 

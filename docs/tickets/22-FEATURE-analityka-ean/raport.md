@@ -160,3 +160,53 @@ Brak. Zmiany są addytywne: sześć nowych tras, jedna wypełniona zakładka. Tr
 - **`ean/unique` używa `MAX()` do wyciągnięcia kolumn spoza `GROUP BY`.** Gdy jeden dostawca ma
   pod tym samym EAN-em kilka kodów, w tabeli pokazuje się NAJWYŻSZA cena i NAJWYŻSZY stan,
   a nie wartości jednej konkretnej oferty.
+
+---
+
+## Review fixes applied
+
+Review (`review.md`): **0 BLOCKER**, 1 SHOULD-FIX, 2 NICE-TO-HAVE. Wszystkie trzy naprawione.
+
+### SHOULD-FIX — niedeterminizm pełnego zestawu testów frontendu ✓
+
+Zreprodukowałem: **trzy z trzech** pełnych przebiegów `npx vitest run` padały na dwóch plikach
+(`406/408`), a te same pliki puszczone osobno przechodziły zawsze. Winne były dwa progi czasowe,
+oba domyślne:
+
+- `findBy*`/`waitFor` Testing Library (1 s) — testy renderujące CAŁĄ `<App/>` nie zdążały
+  doładować leniwego chunku `/analityka` z Rechartsem i szukały `text-page-title`, którego
+  jeszcze nie było;
+- `testTimeout` vitest (5 s) — `tokeny.test.ts` (buduje arkusz Tailwinda, ~8 s pod obciążeniem).
+
+To nie był defekt bloku 10c — próg był ciasny już wcześniej, a nasze dziesięć nowych testów
+widoku dołożyło obciążenia i przewróciło go na stałe. Poprawki:
+
+- `rebuild/frontend/vitest.config.ts` — `testTimeout`/`hookTimeout` na 20 s,
+- `rebuild/frontend/test/setup.ts` — `configure({ asyncUtilTimeout: 5_000 })`.
+
+Podniesienie progu nie spowalnia testów przechodzących: `findBy*` kończy się w chwili
+pojawienia się elementu. **Weryfikacja: trzy pełne przebiegi z rzędu 408/408.**
+
+⚠ To zmiana we WSPÓLNEJ konfiguracji — bloki 10b/10d/10e dokładają kolejne ciężkie testy
+widoku i zastaną próg już podniesiony.
+
+### NICE-TO-HAVE 1 — jeden `ladowanie` dla czterech tabel ✓
+
+`SekcjaEan` brała `isPending` wyłącznie z `usePorownanieEan()` i sterowała nim tekstem pustej
+tabeli we wszystkich czterech tabelach. Cztery zapytania lecą niezależnie, więc tabela wciąż
+czekająca na odpowiedź mogła pokazać „Brak danych" zamiast „Wczytywanie…". Propsy zmienione
+na pary `{dane, ladowanie}` — każda karta odpowiada za swój stan. (`SekcjaMarze` z 10a ma jedno
+zapytanie i tam pojedyncza flaga zostaje poprawna.)
+
+### NICE-TO-HAVE 2 — ręczne zaokrąglanie ✓
+
+`Math.round(x * 10000) / 100` w liczbie udziału EAN-ów wspólnych zastąpione wspólnym
+`zaokraglij()` dodanym do `pages/analityka/formatowanie.ts` — z komentarzem, czym różni się
+od `formatuj()` (zostaje w domenie liczb, nie zamienia na napis) i wskazówką dla bloków 10d/10e,
+żeby nie namnażać wariantów tej samej operacji.
+
+### Po poprawkach
+
+- Backend: ✓ 723/723 · Frontend: ✓ 408/408 (trzy przebiegi z rzędu)
+- Lint / typecheck / build: ✓ czyste w obu pakietach
+- Chunk `Analityka` 392,22 kB, wspólny bundle 484,03 kB — bez zmian względem stanu przed review

@@ -56,7 +56,7 @@ import {
   type WymiarFiltra,
   type WyborFiltrow,
 } from "./filtrowanie";
-import { formatuj, formatujProcent } from "./formatowanie";
+import { formatuj, formatujProcent, zaokraglij } from "./formatowanie";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
 
 /**
@@ -132,8 +132,23 @@ function NaglowekKarty({ tytul, children }: { tytul: string; children?: React.Re
   );
 }
 
+/**
+ * Wynik jednego zapytania razem z jego WŁASNYM stanem ładowania.
+ *
+ * ⚠ Cztery zapytania tej zakładki lecą niezależnie, więc jeden wspólny `ladowanie` kłamałby:
+ * tabela, która ma już dane, pokazywałaby „Wczytywanie…", albo — gorzej — tabela wciąż
+ * czekająca na odpowiedź pokazywałaby „Brak danych". `SekcjaMarze` (10a) ma jedno zapytanie
+ * i tam pojedyncza flaga wystarcza; tutaj każda karta odpowiada za siebie.
+ */
+type Zapytanie<T> = { dane: { rows: T[] } | null | undefined; ladowanie: boolean };
+
 type PunktPokrycia = { podpis: string; liczbaDostawcow: number; liczbaEAN: number };
 type PunktRankingu = { dostawca: string; najtanszyPct: number; wspolnePozycje: number; najtanszy: number };
+
+/** Tekst pustej tabeli — rozstrzyga stan JEJ zapytania, nie zakładki jako całości. */
+function tekstPusty(ladowanie: boolean): string {
+  return ladowanie ? "Wczytywanie…" : "Brak danych";
+}
 
 export function SekcjaEan({
   porownanie,
@@ -141,28 +156,26 @@ export function SekcjaEan({
   pokrycie,
   ranking,
   wybor,
-  ladowanie,
 }: {
-  porownanie: { rows: WierszPorownaniaEan[] } | null | undefined;
-  unikalne: { rows: WierszUnikalnegoEan[] } | null | undefined;
-  pokrycie: { rows: WierszPokryciaEan[] } | null | undefined;
-  ranking: { rows: WierszRankinguEan[] } | null | undefined;
+  porownanie: Zapytanie<WierszPorownaniaEan>;
+  unikalne: Zapytanie<WierszUnikalnegoEan>;
+  pokrycie: Zapytanie<WierszPokryciaEan>;
+  ranking: Zapytanie<WierszRankinguEan>;
   wybor: WyborFiltrow;
-  ladowanie: boolean;
 }) {
-  const wierszePorownania = porownanie?.rows ?? [];
+  const wierszePorownania = porownanie.dane?.rows ?? [];
   // Stabilna referencja — `?? []` tworzyłby nową pustą tablicę przy każdym renderze
   // i unieważniał oba `useMemo` niżej.
-  const wierszePokrycia = useMemo(() => pokrycie?.rows ?? [], [pokrycie]);
+  const wierszePokrycia = useMemo(() => pokrycie.dane?.rows ?? [], [pokrycie.dane]);
 
   // Dwie karty niosą kolumnę `dostawca` i tylko one realnie filtrują (patrz `filtrowanie.ts`).
   const wierszeUnikalne = useMemo(
-    () => zastosujFiltrDostawcy(unikalne?.rows ?? [], wybor),
-    [unikalne, wybor],
+    () => zastosujFiltrDostawcy(unikalne.dane?.rows ?? [], wybor),
+    [unikalne.dane, wybor],
   );
   const wierszeRankingu = useMemo(
-    () => zastosujFiltrDostawcy(ranking?.rows ?? [], wybor),
-    [ranking, wybor],
+    () => zastosujFiltrDostawcy(ranking.dane?.rows ?? [], wybor),
+    [ranking.dane, wybor],
   );
 
   /**
@@ -177,7 +190,7 @@ export function SekcjaEan({
     const wspolne = wierszePokrycia
       .filter((w) => w.liczbaDostawcow >= 2)
       .reduce((suma, w) => suma + w.liczbaEAN, 0);
-    return { wszystkie, wspolne, procent: Math.round((wspolne / wszystkie) * 10000) / 100 };
+    return { wszystkie, wspolne, procent: zaokraglij((wspolne / wszystkie) * 100) };
   }, [wierszePokrycia]);
 
   const punktyPokrycia = useMemo<PunktPokrycia[]>(
@@ -216,9 +229,8 @@ export function SekcjaEan({
     "dostawcy",
   );
 
-  const unikalneWszystkie = unikalne?.rows.length ?? 0;
+  const unikalneWszystkie = unikalne.dane?.rows.length ?? 0;
   const unikalneOdfiltrowane = unikalneWszystkie - wierszeUnikalne.length;
-  const tekstPusty = ladowanie ? "Wczytywanie…" : "Brak danych";
 
   return (
     <div className="space-y-4">
@@ -236,7 +248,7 @@ export function SekcjaEan({
           <TabelaAnalityki
             dane={wierszePorownania}
             kolumny={KOLUMNY_PORWNANIA}
-            tekstPusty={tekstPusty}
+            tekstPusty={tekstPusty(porownanie.ladowanie)}
             testId="tabela-ean-porownanie"
           />
         </CardContent>
@@ -261,7 +273,7 @@ export function SekcjaEan({
           <TabelaAnalityki
             dane={wierszeUnikalne}
             kolumny={KOLUMNY_UNIKALNYCH}
-            tekstPusty={tekstPusty}
+            tekstPusty={tekstPusty(unikalne.ladowanie)}
             testId="tabela-ean-unikalne"
           />
         </CardContent>
@@ -377,7 +389,7 @@ export function SekcjaEan({
               <TabelaAnalityki
                 dane={wierszePokrycia}
                 kolumny={KOLUMNY_POKRYCIA}
-                tekstPusty={tekstPusty}
+                tekstPusty={tekstPusty(pokrycie.ladowanie)}
                 testId="tabela-ean-pokrycie"
               />
             </div>
@@ -467,7 +479,7 @@ export function SekcjaEan({
               <TabelaAnalityki
                 dane={wierszeRankingu}
                 kolumny={KOLUMNY_RANKINGU}
-                tekstPusty={tekstPusty}
+                tekstPusty={tekstPusty(ranking.ladowanie)}
                 testId="tabela-ean-ranking"
               />
             </div>
