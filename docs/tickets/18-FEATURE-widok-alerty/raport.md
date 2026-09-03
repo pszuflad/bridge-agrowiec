@@ -106,3 +106,34 @@ Brak. Nowe trasy i nowy widok; jedyna zmiana istniejącego zachowania to zdjęci
    agregacja po stronie backendu. Nie w tej iteracji — zmieniłaby kontrakt.
 4. **Brak fixture'a dla `PATCH /api/alerts/{id}`** — warto go nagrać przy najbliższej okazji
    kontaktu z żywą produkcją, żeby GATE dla tej trasy przestał stać na samym kodzie oryginału.
+
+## Review fixes applied
+
+Review (`review.md`) dał **0 BLOCKER-ów**, 4 SHOULD-FIX i 3 NICE-TO-HAVE. Naniesione wszystkie
+SHOULD-FIX i dwa z trzech NICE-TO-HAVE:
+
+- **`docs/rebuild-backlog.md` — wpis #26** o pominiętych pseudo-alertach katalogowych (⬜ do
+  decyzji). To był jedyny nieodhaczony punkt Definition of done: plan (D1) wymagał, żeby wiedza
+  o porzuconej funkcji trafiła tam, gdzie następna sesja będzie jej szukać, a nie tylko do
+  sekcji Follow-up raportu.
+- **`TabelaAlertow.tsx` — `aria-label` na przycisku rozwijania grupy.** Przycisk zawierał
+  wyłącznie ikony SVG, więc czytnik ekranu ogłaszał go jako bezimienny „button" mimo poprawnego
+  `aria-expanded`. Etykieta niesie kierunek akcji i nazwę grupy („Rozwiń grupę MO3 — Błąd
+  pobierania").
+- **`TabelaAlertow.tsx` — `useMemo` na `wartosciFiltrow`/`filtrujAlerty`/`pogrupujAlerty`.**
+  Bez tego rozwinięcie dowolnej grupy (zmiana stanu komponentu) przeliczało grupowanie całego
+  zbioru od nowa. Dziś nieszkodliwe, ale scheduler z 3f-3 dokłada ~120 alertów na dobę.
+- **`alerty.gate.test.ts` — `try/finally` wokół przywrócenia stanu z fixture'a.** Przy nieudanej
+  asercji baza zostawała w stanie niezgodnym z nagraniem i wyniki kolejnych testów w pliku
+  przestawały cokolwiek znaczyć.
+- **`grupowanie.ts` — komentarz przy zastępniku `" brak"`** (wiodąca spacja): to nie literówka,
+  tylko zabezpieczenie przed zderzeniem z realnym kodem dostawcy „brak" — kolumna nie ma `CHECK`.
+- **`TabelaAlertow.tsx` — odmiana licznika przez liczbę** („1 grupa / 2 grupy / 5 grup").
+
+Nie naniesiono trzeciego NICE-TO-HAVE (dublowanie w `routes/alerts.ts` komentarza o braku
+walidacji `status`) — sam reviewer zaznaczył, że komentarz już to mówi w repo i dublowanie nie
+jest konieczne. Zachowanie `String(undefined)` przy ciele bez pola `status` jest portem 1:1
+(oryginał czyta `c.body.status` bez sprawdzenia) i objęte decyzją D4.
+
+Bramki po poprawkach: BE 611 testów / lint / typecheck / build ✓; FE 309 testów / lint /
+typecheck / build ✓.
