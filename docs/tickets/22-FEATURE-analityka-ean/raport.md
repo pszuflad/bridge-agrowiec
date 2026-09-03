@@ -1,0 +1,162 @@
+# 22-FEATURE-analityka-ean — raport z implementacji
+
+## Summary
+
+Blok 10c Iteracji 10 dowieziony w całości: sześć tras `/api/analytics/ean*` w backendzie
+(agregaty przepisane 1:1 z `mirror/backend/analytics_module.cjs`) i wypełniona zakładka
+„EAN i ceny" z trzema kartami oryginału. Wszystkie sześć fixtures przechodzi GATE, a pięć
+z nich reprodukuje się **co do wartości i kolejności** na snapshocie produkcji — to mocniejszy
+dowód niż sam kształt. Dwie trasy bez konsumenta w oryginalnym froncie (`ean/details`,
+`ean-porownanie`) dowiezione jako trasy bez UI.
+
+## Changes
+
+### Backend
+
+- `rebuild/backend/src/repos/analityka.ts` — **+6 funkcji agregujących** (`porownanieEan`,
+  `szczegolyEan`, `unikalneEan`, `pokrycieEan`, `rankingDostawcowEan`, `porownanieEanLegacy`),
+  wspólny `ofertyEan` oraz porty pomocników oryginału: `liczba` (`num`), `zaokraglij` (`round`),
+  `tekst` (`String(x || '')`), `mediana` (`median`). Trzy nazwane limity: 1000, 1000, 200.
+- `rebuild/backend/src/routes/analytics.ts` — **+6 rejestracji** z `requireAuth`, w kolejności
+  oryginału. Parametry `req.query` przekazywane SUROWO do repozytorium (luźne parsowanie
+  oryginału jest częścią odtwarzanego zachowania).
+- **Nowy:** `rebuild/backend/test/analityka.ean.gate.test.ts` — GATE dla sześciu ścieżek
+  (13 testów).
+- **Nowy:** `rebuild/backend/test/analityka.ean.test.ts` — 26 testów jednostkowych semantyki.
+
+### Frontend
+
+- `rebuild/frontend/src/pages/analityka/api.ts` — **+4 typy i +4 hooki** (`usePorownanieEan`,
+  `useUnikalneEan`, `usePokrycieEan`, `useRankingDostawcowEan`).
+- `rebuild/frontend/src/pages/analityka/filtrowanie.ts` — **+4 deklaracje wymiarów** per karta
+  i generyczne `zastosujFiltrDostawcy`.
+- **Nowy:** `rebuild/frontend/src/pages/analityka/SekcjaEan.tsx` — trzy karty oryginału.
+- `rebuild/frontend/src/pages/Analityka.tsx` — zakładka `ean` dostaje `SekcjaEan` zamiast
+  zaślepki; cztery hooki wołane na poziomie widoku.
+- `rebuild/frontend/src/components/ui/chart.tsx` — **+`PROMIEN_SLUPKA_PIONOWEGO`** (wspólna
+  infrastruktura; bloki 10d/10e zastaną ją gotową).
+- `rebuild/frontend/test/msw/kontrakt.ts` — **+4 loadery** fixtures EAN (zdejmują `_przyciete`).
+- `rebuild/frontend/test/analityka.test.tsx` — cztery handlery EAN w `zamockujApi`
+  (widok pobiera je przy każdym wejściu, więc bez nich `onUnhandledRequest: "error"` wywala test).
+- **Nowy:** `rebuild/frontend/test/analityka.ean.test.tsx` — 10 testów widoku.
+- **Nowy:** `rebuild/frontend/test/analityka.ean.filtrowanie.test.ts` — 7 testów jednostkowych.
+
+**Świadoma decyzja o układzie plików testowych:** nowe pliki zamiast dopisków do
+`analityka.gate.test.ts` / `analityka.agregaty.test.ts` / `analityka.test.tsx`. Bloki 10b–10e
+idą równolegle i każdy dokłada do tej samej rodziny tras i tego samego widoku — wspólne pliki
+byłyby gwarantowanym konfliktem przy merge'u czterech gałęzi.
+
+## Deviations from plan
+
+Trzy odstępstwa od `plan.md`, wszystkie w stronę mocniejszego dowodu:
+
+1. **Testy w nowych plikach, nie dopisane do istniejących** (uzasadnienie wyżej). Plan
+   zakładał rozszerzenie plików z 10a.
+2. **Weryfikacja na snapshocie produkcji** — plan przewidywał tylko fixtures + testy
+   jednostkowe. Dołożyłem przebieg wszystkich sześciu agregatów na kopii `db/snapshot.db`;
+   wynik niżej.
+3. **Notka „histogram pokrycia ignoruje filtr dostawcy"** — plan mówił o jednej notce na kartę
+   „2.6". W praktyce karta ma dwie tabele reagujące RÓŻNIE na to samo zaznaczenie (ranking
+   filtruje, histogram nie), więc doszła osobna, jednozdaniowa notka po stronie histogramu.
+   Bez niej użytkownik widziałby zawężoną jedną tabelę i niezmienioną drugą, bez wyjaśnienia.
+
+Punkt 6 planu („test dokumentujący martwą gałąź `spreadPct = null`") zrealizowany jako komentarz
+w `repos/analityka.ts`, nie jako test — gałąź jest przy `cena_zakupu > 0` **nieosiągalna**, więc
+testu, który by ją wywołał, napisać się nie da bez ominięcia SQL-a. Zachowany jest natomiast
+`| null` w typie i w kształcie odpowiedzi.
+
+## Test results
+
+### Gate odbudowy (fixtures/kontrakt): ✓ zgodne
+
+Sześć ścieżek `contract/openapi.yaml` — wszystkie zadeklarowane, wszystkie z `security`
+i kodami 200/400/401 (kontrakt nie ma dla analityki schematów odpowiedzi, więc dowodzi
+istnienia ścieżki, statusu i JSON-a — nie kształtu):
+
+| Ścieżka | Fixture | Wynik |
+|---|---|---|
+| `GET /api/analytics/ean/comparison` | `GET_analytics_ean_comparison.json` | ✓ kształt + 401 |
+| `GET /api/analytics/ean/unique` | `GET_analytics_ean_unique.json` | ✓ kształt + 401 |
+| `GET /api/analytics/ean/coverage` | `GET_analytics_ean_coverage.json` | ✓ kształt + 401 |
+| `GET /api/analytics/ean/supplier-rank` | `GET_analytics_ean_supplier-rank.json` | ✓ kształt + 401 |
+| `GET /api/analytics/ean/details` | `GET_analytics_ean_details.json` | ✓ kształt + 401 |
+| `GET /api/analytics/ean-porownanie` | `GET_analytics_ean-porownanie.json` | ✓ kształt + 401 |
+
+Plus asercja wprost, że żadna z sześciu odpowiedzi nie zawiera `_przyciete`
+ani `_body_przyciete_z`.
+
+**⚠ Gate musiał najpierw przestać być pusty.** `gate/ksztalt.ts:50` iteruje po elementach
+ODPOWIEDZI — pusta odpowiedź przechodzi za darmo, przepuszczając dowolny kształt wiersza.
+Domyślny zasiew (`PRODUKTY_TESTOWE`) nie ma ani jednego EAN-u u dwóch dostawców, więc
+`comparison`, `supplier-rank` i `ean-porownanie` wychodziły na nim puste. Test dosypuje pięć
+produktów z dwoma dzielonymi EAN-ami i po każdym zapytaniu asercją sprawdza, że wierszy JEST.
+
+### Weryfikacja na snapshocie produkcji: ✓ wartości i kolejność 1:1
+
+Sześć agregatów przepuszczonych przez kopię `db/snapshot.db` (kopia w katalogu tymczasowym,
+oryginał nietknięty). Wynik zestawiony z fixtures:
+
+| Trasa | Snapshot | Fixture | Zgodność |
+|---|---|---|---|
+| `ean/comparison` | 769 wierszy, czoło: `8059971008746` spread 10348 zł / 273,03% | te same 5 wierszy | **wartości i kolejność identyczne** |
+| `ean/unique` | 1000 wierszy (limit) | `_przyciete: {rows: 1000}` | **identyczne** |
+| `ean/coverage` | 5109 / 676 / 90 / 2 / 1 | 5109 / 676 / 90 / 2 / 1 | **identyczne** |
+| `ean/supplier-rank` | 9 wierszy, MO9 100% → MO3 59,75% | `_przyciete: {rows: 9}`, te same 5 | **identyczne** |
+| `ean-porownanie` | 200 wierszy (limit) | `_body_przyciete_z: 200` | **identyczne** |
+| `ean/details` bez `?ean` | `{ean: null, offers: []}` | to samo | **identyczne** |
+
+Dwie gałęzie bez fixture'a zachowują się zgodnie z oryginałem:
+`ean/details?ean=8059971008746` → cztery klucze, dwie oferty z `pozycjaCenowa` 1 i 2,
+`mediana: 8964`, `srednia: 8964`; `ean-porownanie?ean=…` → goła tablica tych samych ofert
+bez `pozycjaCenowa`.
+
+### Testy
+
+- **Backend unit + gate:** ✓ 723 testy w 45 plikach (w tym 13 nowych gate + 26 nowych jednostkowych)
+- **Frontend:** ✓ 408 testów w 28 plikach (w tym 10 nowych widoku + 7 jednostkowych)
+- **Lint / typecheck / build:** ✓ czyste w `rebuild/backend/` i `rebuild/frontend/`
+
+Rozmiary po buildzie: chunk `Analityka` 391,91 kB (był 385 kB po 10a), wspólny bundle
+484,03 kB. Wzrost wspólnego bundla NIE pochodzi z tego bloku — `SekcjaEan.tsx`,
+`analityka/api.ts`, `analityka/filtrowanie.ts` i `components/ui/chart.tsx` są importowane
+wyłącznie przez `Analityka.tsx`, który jest ładowany leniwie (zweryfikowane grepem po
+`src/`); wszystkie nasze zmiany siedzą w chunku `Analityka`.
+
+## Breaking changes
+
+Brak. Zmiany są addytywne: sześć nowych tras, jedna wypełniona zakładka. Trasy z 10a
+(`filters`, `status`, `kpi`, `margins`, `bootstrap-current`) i nagłówek KPI nietknięte.
+
+## Follow-up
+
+Świadomie odłożone, każde z powodem:
+
+1. **Przepięcie nagłówka KPI na kafle oryginału** (decyzja D1). Oryginał liczy „EAN wspólne"
+   z `ean/comparison.rows.length` i „Pozycje unikalne" z `ean/unique.rows.length`
+   (`frontend-index.js:28002-28017`) — dane są od teraz dostępne, więc odstępstwo O-10a-1 da
+   się zdjąć jedną zmianą w `NaglowekKpi.tsx`. Wymaga decyzji użytkownika; odnotowane
+   w roadmapie przy bloku 10f.
+2. **Przyciski „CSV"** przy kartach „2.1-2.4" (`M("ean-comparison")`) i „2.5" (`M("unique")`)
+   — należą do bloku **10f** razem z `GET /api/analytics/export/{view}`.
+3. **UI dla `ean/details` i `ean-porownanie`** — oryginał go nie ma i nie będzie miał, chyba
+   że użytkownik zdecyduje inaczej. Obie trasy wyglądają na zaczątek ekranu „szczegóły jednego
+   EAN-u", którego nikt nie dokończył.
+4. **Kontrolka progu `minDiffPct`** (decyzja D3) — parametr działa w API, ale oryginał nie ma
+   dla niego kontrolki. Dołożenie jej byłoby nową funkcją, nie odbudową.
+
+### Zaobserwowane w oryginale, NIE naprawiane (charakterystyka, nie błąd)
+
+- **`ean/supplier-rank.wspolnePozycje` myli nazwą.** CTE `ranked` nie wymaga, żeby EAN był
+  u dwóch dostawców — bierze każdą aktywną ofertę z niepustym EAN-em i ceną > 0. Licznik to
+  więc „ile ofert dostawcy wpadło do rankingu", a nie „ile pozycji dzieli z kimkolwiek".
+  Skutek widoczny w produkcji: **MO9 ma 846/846 = 100%**, bo wszystkie jego EAN-y są unikalne
+  — jest jedyny, więc zawsze najtańszy. Kolumna w UI nosi etykietę „Wspólne" z oryginału.
+  Odtworzone 1:1 i opisane w kodzie; gdyby Ania uznała to za mylące, jest to zmiana zachowania
+  i osobna decyzja.
+- **`ean/details` nie używa `RANK()`.** `pozycjaCenowa` liczy się z kolejności wierszy (`i + 1`),
+  więc dwie oferty o identycznej cenie dostają różne pozycje. `ean/supplier-rank` używa dla
+  odmiany prawdziwego `RANK()` i tam remisy dzielą pozycję 1 — suma `najtanszy` po dostawcach
+  może przez to przekroczyć liczbę EAN-ów. Obie niespójności są w oryginale.
+- **`ean/unique` używa `MAX()` do wyciągnięcia kolumn spoza `GROUP BY`.** Gdy jeden dostawca ma
+  pod tym samym EAN-em kilka kodów, w tabeli pokazuje się NAJWYŻSZA cena i NAJWYŻSZY stan,
+  a nie wartości jednej konkretnej oferty.
