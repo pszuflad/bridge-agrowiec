@@ -1000,10 +1000,15 @@ poprawnie. Powód jest w treści (`opis`), nie w typie.
 alertów z **Iteracji 6** względem 339 wierszy historycznych, które są w bazie i mają stary
 typ. Zgodność z danymi produkcji jest tu więcej warta niż trafniejsza etykieta.
 
-**Co z tego wynika dla Iteracji 6.** Widok grupujący po `typ` zmiesza dwie przyczyny.
-Rozróżnia je treść: błąd sieci to dosłowny komunikat undici („fetch failed",
-„This operation was aborted", „terminated"), błąd parsera to komunikat z portu parserów.
-Wymóg zapisany w roadmapie, w bloku Iteracji 6.
+**Co dowiozła Iteracja 6** (2026-09-03, ticket `18-FEATURE-widok-alerty`). Widok grupuje po
+`(dostawca, typ, status)`, więc dwie przyczyny „Błędu pobierania" faktycznie lądują w jednej
+grupie — zgodnie z zapowiedzią wyżej. Rozróżnienie sieć/parser zostaje w treści (`opis`)
+pojedynczego wpisu i jest widoczne dopiero po rozwinięciu grupy: błąd sieci to dosłowny
+komunikat undici („fetch failed", „This operation was aborted", „terminated"), błąd parsera to
+komunikat z portu parserów. Wyszukiwarka po `opis`, która mogłaby to filtrować bez rozwijania,
+została w tym samym ticketcie **odrzucona przez użytkownika** (decyzja D8) — patrz
+`docs/tickets/18-FEATURE-widok-alerty/plan.md`, logika grupowania w
+`rebuild/frontend/src/pages/alerty/grupowanie.ts`.
 
 ---
 

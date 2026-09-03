@@ -137,3 +137,87 @@ jest konieczne. Zachowanie `String(undefined)` przy ciele bez pola `status` jest
 
 Bramki po poprawkach: BE 611 testów / lint / typecheck / build ✓; FE 309 testów / lint /
 typecheck / build ✓.
+
+## Docs updates
+
+Cztery doc-checkery przejrzały równolegle 11 plików w `docs/` + `CLAUDE.md`. Siedem zmienionych,
+cztery bez zmian z uzasadnieniem.
+
+### `docs/rebuild-roadmap.md`
+
+- **§3 Zasady przekrojowe, wiersz „Lokalne vs API"** — usunięte mylące zdanie „alerty i waga
+  gabarytowa liczone lokalnie mimo endpointów"; zapisane, że I6 rozstrzygnęła to przez API (D3),
+  z wyjaśnieniem, że oryginał nie liczył lokalnie tych samych alertów — liczył inny zestaw
+  danych. Waga gabarytowa zostaje otwarta dla I9.
+- **§4 Tablica postępu, wiersz 6** — ⬜ → ✅ (`18-FEATURE-widok-alerty`, 2026-09-03).
+- **Blok 3f-3 / „Co zostaje otwarte po Iteracji 3"** — punkt „Alerty bez dławika" zamknięty jako
+  dowieziony w I6; dodany NOWY punkt o wzroście rozmiaru odpowiedzi `GET /api/alerts` po
+  włączeniu schedulera (follow-up D9), z decyzją limit/agregacja do podjęcia przy uruchamianiu
+  automatu na produkcji. Nota trafiła DO BLOKU, którego dotyczy, nie do zamkniętej Iteracji 6.
+- **Blok „Iteracja 6"** — przepisany na stan faktyczny (status ✅, dowieziony zakres, pliki,
+  rozliczony GATE). **Usunięte obalone zdanie** „status/obsługa lokalnie vs przez API —
+  rekomendacja: przez API", zastąpione dowodem z linii kodu (`HT()` `:25177-25340`,
+  `pv()` `:16631-16705`, IndexedDB `:9165-9193`) i notą o pominięciu pseudo-alertów (backlog #26).
+- **Blok „Iteracja 10"** — dodana nota „wejście z Iteracji 6": gotowy klient `pobierzAlerty()`
+  i `pogrupujAlerty()` do ponownego użycia na pulpicie („najświeższe alerty"), `queryKey`
+  `["/api/alerts"]`.
+- **Blok „Iteracja 12"** — zweryfikowany, `GET /api/audit-log` już tam przypisany, bez zmian.
+
+### `docs/rebuild-backlog.md`
+
+- **Wpis #26** (nowy, dodany w fazie review fixes) — pseudo-alerty katalogowe pominięte,
+  ⬜ do decyzji, z opisem czterech możliwych miejsc powrotu.
+- **Wpis #16** („Błąd pobierania" obejmuje błędy parsera) — sekcja „Co z tego wynika dla
+  Iteracji 6" przepisana z czasu przyszłego na stan faktyczny: widok grupuje po
+  `(dostawca, typ, status)`, a rozróżnienie sieć/parser widać wyłącznie w `opis` po rozwinięciu
+  grupy, bo wyszukiwarka po `opis` została odrzucona (D8). Dodane odwołanie do
+  `pages/alerty/grupowanie.ts`.
+
+### `docs/spec-backend.md`
+
+- **§2 („auth CZĘŚCIOWY")** — dodany akapit „Potwierdzone w I6": `GET /api/alerts` pod
+  `requireAuth` wzorcem D1, z jawną notą, że daje to **401 spoza listy kodów kontraktu**
+  (kontrakt zna dla tej ścieżki tylko 200/400). `PATCH /api/alerts/{id}` opisany jako mający
+  auth od zawsze, ale **bez nagranej fixture** — jego kształt (zawsze `{ok:true}`, brak
+  walidacji, brak audytu, brak 404) stoi wyłącznie na kodzie oryginału.
+- Reszta sekcji o alertach (pisanie przez import z 3f-1/3f-2, mapa Drizzle `Ki`=alerts)
+  sprawdzona i zgodna — bez zmian.
+
+### `docs/spec-frontend.md`
+
+- **§3 lista tras** — `/alerty` przeniesiony z placeholderów do widoków odbudowanych
+  (7 widoków / 5 placeholderów).
+- **§4 „Zachowania lokalne vs API"** — **sprostowany** mylący zapis „status/obsługa trzymane
+  lokalnie, choć `/api/alerts` istnieje" (przekreślony, nie zostawiony obok sprzeczności).
+  Nowy tekst nazywa rzecz po imieniu: to były dwa różne zestawy danych.
+- **§5 blueprint** — nowy akapit „Odbudowa (I6)" w stylu wpisów I5/4b.
+
+### `docs/instrukcja-testow-I3.md`
+
+- **§3.11** — „widok alertów dowozi Iteracja 6; do tego czasu Paweł odczyta je z bazy"
+  zastąpione wskazaniem widoku `/alerty`.
+- **§3.13** — dopisana **pułapka testowa**: wpisy „Synchronizacja" mają status `rozwiazany`,
+  więc domyślny filtr `status = nowy` je chowa — trzeba zdjąć filtr, inaczej testujący uzna,
+  że alert nie powstał. „Błąd HTTP" i „Błąd pobierania" widać od razu.
+- **§4 pkt 10** — „zwijaniem powtórek zajmie się Iteracja 6" zamienione na opis działania.
+- **§5 tabela „Czego jeszcze NIE MA"** — usunięty zdublowany wiersz, widok alertów przeniesiony
+  do formy „✅ jest".
+
+### `docs/instrukcja-testow-I4.md`
+
+- **§5 tabela „Czego jeszcze NIE MA"** — usunięty wiersz „Widok alertów | Iteracja 6".
+
+### Bez zmian (z uzasadnieniem)
+
+- **`CLAUDE.md`** — plik zasad, nie stanu; nic w nim nie zostało obalone.
+- **`docs/plan.md`** — dokument historyczny, jego nagłówek sam odsyła do roadmapy/backlogu jako
+  źródeł aktualnych; jedyna wzmianka o `/alerty` jest w liście kolejności Fazy 3, nie w statusie.
+- **`docs/deploy-setup.md`** — opisuje wyłącznie infrastrukturę (Apache/PM2/CI), nie ma listy
+  tras API ani widoków.
+- **`docs/audit-delta.md`** — śledzi rozjazd audytu z lipca/sierpnia 2026, sprzed startu
+  odbudowy; nie wspomina `/alerty` ani stanu rebuildu.
+
+### Pre-existing issues
+
+Żaden z doc-checkerów nie zgłosił wcześniejszych nieścisłości poza tymi, które ten ticket sam
+zidentyfikował i sprostował.

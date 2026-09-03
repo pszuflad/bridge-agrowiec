@@ -84,6 +84,14 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > (`Za`) i zwracają odpowiednio `{ dostawcy: string[] }` oraz `{ items, total, pages, page, limit }`
 > z 11 polami na `item` — żadna z tras nie dotyka `historia_cen`. Szczegóły:
 > `docs/tickets/15-FEATURE-historia-zmian/`.
+>
+> **Potwierdzone w I6** (`18-FEATURE-widok-alerty`, 2026-09-03): `GET /api/alerts` też
+> wjechało pod `requireAuth`, mimo `security: []` w `contract/openapi.yaml:67` — ten sam
+> wzorzec D1; bez tokenu trasa oddaje **401, kod spoza listy kontraktu** (kontrakt zna tylko
+> 200/400 dla tej ścieżki). `PATCH /api/alerts/{id}` ma auth zgodnie z kontraktem od zawsze,
+> ale dla niej **nie ma nagranej próbki** w `contract/fixtures/` — jej kształt (`{ok:true}`,
+> zawsze, także dla nieistniejącego `id`, bez walidacji `status`, bez `audit_log`) stoi
+> wyłącznie na kodzie oryginału. Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
