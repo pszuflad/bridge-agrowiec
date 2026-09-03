@@ -6,8 +6,9 @@
  * Mocki MSW karmione fixture'em `contract/fixtures/GET_suppliers.json`, tak jak w I2 i 3e:
  * lista dostawcy w selekcie ma mieć kształt, który realnie oddaje produkcja.
  *
- * Zakres: że sześć zakładek istnieje w kolejności oryginału, że pięć niewypełnionych mówi,
- * co je dowiezie, że wybór pliku uruchamia detekcję, że da się dostawcę nadpisać ręcznie,
+ * Zakres: że sześć zakładek istnieje w kolejności oryginału, że każda z nich pokazuje swoją
+ * zawartość (od I11 nie ma już żadnej zaślepki), że wybór pliku uruchamia detekcję,
+ * że da się dostawcę nadpisać ręcznie,
  * że wysłanie idzie multipartem pod właściwy adres — i że NIEUDANY UPLOAD JEST WIDOCZNY
  * (gate 3f-1), a nie znika po cichu.
  */
@@ -21,11 +22,19 @@ import { KLUCZE_STORAGE } from "@/lib/api";
 import { _zresetujStanSesji } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
 import { ZAKLADKI_KONFIGURACJI } from "@/pages/konfiguracja/zakladki";
-import { dostawcyZFixtura, TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
+import {
+  dostawcyZFixtura,
+  konfiguracjaZFixtura,
+  spedycjaZFixtura,
+  TOKEN_TESTOWY,
+  uzytkownikZFixtura,
+} from "./msw/kontrakt";
 import { server } from "./msw/server";
 
 const UZYTKOWNIK = uzytkownikZFixtura();
 const DOSTAWCY = dostawcyZFixtura();
+const KONFIGURACJA = konfiguracjaZFixtura();
+const SPEDYCJA = spedycjaZFixtura();
 
 /** Żądania uploadu: adres + treść pola `plik` — na nich sprawdzamy multipart. */
 let uploady: { url: string; trescPliku: string | null }[] = [];
@@ -52,6 +61,10 @@ function zamockujApi(odpowiedzUploadu?: () => Response) {
   server.use(
     http.get("*/api/dostawcy", () => HttpResponse.json(DOSTAWCY)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
+    // Od I11 zakładki spedycja/shoper/ai realnie pobierają dane, więc szkielet ekranu
+    // potrzebuje tych mocków — bez nich `onUnhandledRequest: "error"` wywala test.
+    http.get("*/api/config", () => HttpResponse.json(KONFIGURACJA)),
+    http.get("*/api/spedycja", () => HttpResponse.json(SPEDYCJA)),
     http.post("*/api/dostawcy/:kod/upload", async ({ request }) => {
       const dane = await request.formData();
       /*
@@ -127,17 +140,19 @@ describe("Widok /konfiguracja", () => {
       expect(screen.queryByTestId("zakladka-wgrywanie")).not.toBeInTheDocument();
     });
 
+    // Po I11 nie ma już zaślepek — każda z sześciu zakładek pokazuje własną kartę.
+    // Test pilnuje, żeby dołożenie siódmej zakładki bez zawartości nie przeszło niezauważone.
     it.each([
-      ["spedycja", "Iteracji 11"],
-      ["shoper", "Iteracji 11"],
-      ["katalog", "Iteracji 11"],
-      ["ai", "Iteracji 11"],
-    ])("zakładka %s mówi, że powstanie w %s", async (wartosc, gdzie) => {
+      ["spedycja", "Limity spedycyjne per dostawca"],
+      ["shoper", "Eksport CSV do Shoper"],
+      ["katalog", "Domyślne kolumny katalogu"],
+      ["ai", "AI Fallback (OpenAI ChatGPT)"],
+    ])("zakładka %s pokazuje kartę „%s”", async (wartosc, naglowek) => {
       await otworzKonfiguracje();
       await userEvent.click(screen.getByTestId(`tab-${wartosc}`));
 
-      const zaslepka = await screen.findByTestId(`zaslepka-${wartosc}`);
-      expect(zaslepka).toHaveTextContent(gdzie);
+      expect(await screen.findByText(naglowek)).toBeInTheDocument();
+      expect(screen.queryByTestId(`zaslepka-${wartosc}`)).not.toBeInTheDocument();
     });
   });
 

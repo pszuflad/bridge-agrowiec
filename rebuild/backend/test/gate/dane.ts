@@ -15,12 +15,18 @@
  */
 import type { Baza } from "../../src/db/index.js";
 import {
+  KONFIGURACJA_POCZATKOWA,
+  SPEDYCJA_POCZATKOWA,
+} from "../../src/db/seed-poczatkowy.js";
+import {
   auditLog,
+  config,
   history,
   historiaCen,
   markups,
   products,
   promotions,
+  spedycjaLimity,
   stagingItems,
   suppliers,
 } from "../../src/db/schema.js";
@@ -589,4 +595,21 @@ function edycjeZFixture(): (typeof auditLog.$inferInsert)[] {
     szczegolyJson: JSON.stringify({ zmiany: wpis["zmienionePola"] as string[] }),
     kiedy: wpis["kiedy"] as string,
   }));
+}
+
+/**
+ * Dane startowe spedycji i konfiguracji — dokładnie te, które produkcja zasiewa przy
+ * pierwszym starcie (`zw()`, `backend-index.cjs:45710-45716`). Źródłem jest wspólny moduł
+ * `src/db/seed-poczatkowy.ts`, więc GATE porównuje z fixture'ami TE SAME wartości,
+ * które trafiają do bazy deweloperskiej.
+ *
+ * ⚠ Dla `/api/config` klucze SĄ danymi, a `porownajKsztalt` porównuje zbiory kluczy obiektu.
+ * Zasianie choćby jednego klucza więcej (np. `shoper.kolumny`, którego produkcja jeszcze
+ * nie zapisała) wywali GATE — i słusznie, bo odpowiedź przestałaby się zgadzać z nagraniem.
+ */
+export function zasiejKonfiguracjeStartowa(db: Baza): void {
+  db.insert(spedycjaLimity).values(SPEDYCJA_POCZATKOWA).run();
+  db.insert(config)
+    .values(Object.entries(KONFIGURACJA_POCZATKOWA).map(([klucz, wartosc]) => ({ klucz, wartosc })))
+    .run();
 }

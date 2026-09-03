@@ -28,7 +28,11 @@ było je potem przenosić.
 Zanim zaczniesz blok, sprawdź `grep`em, kto naprawdę woła funkcje z jego zakresu, i popraw
 roadmapę, jeśli się rozjeżdża. Dwa razy przypisała `bridge_ext.cjs` do złej sesji — raz do 3a
 (wykryte w 3a), raz do 3c (wykryte przy planowaniu 3c) — bo zakres pisano z nazw funkcji,
-a nie z tego, gdzie są wywoływane.
+a nie z tego, gdzie są wywoływane. Ta sama nieufność dotyczy kształtu API: w I11 roadmapa
+dwukrotnie opisała endpoint niezgodnie ze stanem faktycznym (`PUT /api/config` zamiast
+realnego `POST /api/config` z ciałem `{klucz, wartosc}`, i pominięcie istniejącego
+`POST /api/spedycja`) — metodę i kształt ciała sprawdzaj w `contract/openapi.yaml` i w
+oryginale, zanim uwierzysz roadmapie.
 
 **4. Prompt nie koryguje roadmapy — roadmapa koryguje siebie.**
 Jeśli piszesz prompt do kolejnej sesji i musisz w nim zaprzeczyć roadmapie, to znak, że

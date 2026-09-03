@@ -5,8 +5,10 @@ import type { Baza } from "./db/index.js";
 import { optionalAuth } from "./middleware/auth.js";
 import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
+import { trasyAlertow } from "./routes/alerts.js";
 import { trasyAnalityki } from "./routes/analytics.js";
 import { trasyAuth } from "./routes/auth.js";
+import { trasyKonfiguracji } from "./routes/config.js";
 import { trasyHistorii } from "./routes/history.js";
 import { trasyDostawcow } from "./routes/suppliers.js";
 import { trasyImportu } from "./routes/import.js";
@@ -16,6 +18,8 @@ import { trasyMutacjiStagingu } from "./routes/staging-mutacje.js";
 import { trasyOverrides } from "./routes/overrides.js";
 import { trasyNarzutow } from "./routes/markups.js";
 import { trasyPromocji } from "./routes/promotions.js";
+import { trasySpedycji } from "./routes/spedycja.js";
+import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 
 export type ZaleznosciApp = {
@@ -100,7 +104,11 @@ export function stworzApp({
   app.use(trasyPromocji({ db }));
   app.use(trasyHistorii({ db }));
   app.use(trasyAnalityki({ db }));
+  app.use(trasyAlertow({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
+  app.use(trasyKonfiguracji({ db }));
+  app.use(trasySpedycji({ db }));
+  app.use(trasyWagiGabarytowej({ db }));
 
   app.use(nieZnalezionoHandler);
   app.use(bladHandler);

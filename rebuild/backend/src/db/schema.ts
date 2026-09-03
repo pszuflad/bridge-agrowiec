@@ -245,7 +245,10 @@ export const auditLog = sqliteTable("audit_log", {
 
 export const spedycjaLimity = sqliteTable("spedycja_limity", {
 	id: integer().primaryKey({ autoIncrement: true }),
-	dostawcaKod: text("dostawca_kod").notNull(),
+	// UNIQUE jest w `rebuild/schema/001_schema.sql:206` i w oryginale
+	// (`backend-index.cjs:43952-43959`); odbicie Drizzle je gubiło. Na tym ograniczeniu
+	// stoi upsert w `repos/spedycja.ts` — bez niego `onConflictDoUpdate` nie ma o co zaczepić.
+	dostawcaKod: text("dostawca_kod").notNull().unique(),
 	progNetto: real("prog_netto"),
 	kosztPonizej: real("koszt_ponizej"),
 	kosztPowyzej: real("koszt_powyzej"),

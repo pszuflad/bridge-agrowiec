@@ -218,10 +218,12 @@ To jest sedno tego bloku: **do tej pory nieudane pobranie nie zostawiało po sob
 a odznaka statusu na karcie zmienia się na **błąd**. *Ostatnia próba* aktualizuje się mimo
 niepowodzenia — to jest znacznik próby, nie sukcesu.
 
-**Co jeszcze się stało, choć tego nie widzisz:** Bridge zapisał **alert**. Widok alertów
-dowozi Iteracja 6; do tego czasu Paweł odczyta je z bazy. Jeśli serwer dostawcy w ogóle nie
-odpowie (zamiast zwrócić błąd), komunikat będzie inny — np. *„fetch failed"* albo *„This
-operation was aborted"* — i to też jest poprawne: to dosłowna treść błędu sieci.
+**Co jeszcze się stało, choć tego nie widzisz na tym ekranie:** Bridge zapisał **alert**.
+Zobaczysz go w widoku **Alerty** (menu po lewej; osobne testy tego widoku ma
+[instrukcja I6](instrukcja-testow-I6.md)) — typ *Błąd HTTP* albo *Błąd pobierania*,
+status **nowy**, widoczny od razu (domyślny filtr statusu go nie chowa). Jeśli serwer dostawcy
+w ogóle nie odpowie (zamiast zwrócić błąd), komunikat będzie inny — np. *„fetch failed"* albo
+*„This operation was aborted"* — i to też jest poprawne: to dosłowna treść błędu sieci.
 
 > **Nie zapomnij przywrócić prawidłowego adresu** po tym teście — kliknij **Zmień** i wpisz
 > z powrotem oryginalny URL.
@@ -299,9 +301,12 @@ wszystkie odziedziczone po starym Bridge, żadnego nie zmienialiśmy:
 1. Poproś o restart backendu z włączonym schedulerem.
 2. W ciągu ~30 sekund w **Konfiguracja → Dostawcy** odśwież stronę.
 3. **Oczekiwane:** u dostawców `url` pole **ostatnia próba** pokazuje przed chwilą,
-   a w **stagingu** przybyło pozycji. W tabeli alertów przybyły wpisy *Synchronizacja*
-   (albo *Błąd HTTP* / *Błąd pobierania*, jeśli któryś dostawca akurat nie odpowiada —
-   to też jest poprawny wynik testu, patrz 3.11).
+   a w **stagingu** przybyło pozycji. Przybyły też wpisy w widoku **Alerty** — *Synchronizacja*
+   (albo *Błąd HTTP* / *Błąd pobierania*, jeśli któryś dostawca akurat nie odpowiada — to też
+   jest poprawny wynik testu, patrz 3.11).
+   > ⚠ *Synchronizacja* ma status **rozwiązany**, więc domyślny filtr `status = nowy` w widoku
+   > Alerty go chowa — zdejmij filtr statusu, żeby zobaczyć te wpisy. *Błąd HTTP*/*Błąd
+   > pobierania* mają status **nowy** i są widoczne od razu.
 
 **Zmiana częstotliwości działa OD RAZU, bez restartu.** Ustaw dostawcy np. *co 5 min*
 i zapisz — automat przeplanuje się sam. ⚠ W starym Bridge tak **nie** było: tam zmiana
@@ -359,9 +364,10 @@ przy powodzeniu, nie dałoby się odróżnić dostawcy, który milczy od tygodni
 którego Bridge próbuje bezskutecznie odpytywać co godzinę.
 
 **10. Ten sam dostawca produkuje wiele identycznych alertów o awarii.**
-Bridge zapisuje alert przy KAŻDEJ nieudanej próbie, bez sklejania powtórek — dokładnie jak
-stary Bridge. Liczba powtórzeń to informacja („pada od trzech dni, 23 razy na dobę"), a nie
-usterka. Zwijaniem powtórek w czytelną listę zajmie się widok alertów w **Iteracji 6**.
+Bridge zapisuje alert przy KAŻDEJ nieudanej próbie, bez sklejania powtórek w bazie — dokładnie
+jak stary Bridge. Liczba powtórzeń to informacja („pada od trzech dni, 23 razy na dobę"), a nie
+usterka. Widok **Alerty** zwija je sam — grupuje po (dostawca, typ, status) z licznikiem
+i czasem ostatniego wystąpienia, rozwijalne do pojedynczych wpisów.
 
 **11. ⭐ Ustawiasz status *wstrzymany*, zapisujesz — a karta dalej pokazuje *aktywny*
 albo *błąd*.**
@@ -389,11 +395,10 @@ decyzję, czy je prostować.
 | Czego brakuje | Kiedy |
 |---|---|
 | ~~Automatyczne pobieranie cenników co N minut~~ | ✅ **jest** — sekcja 3.13, domyślnie wyłączone |
-| **Widok** alertów (same alerty już się zapisują) | Iteracja 6 |
 | Zakładki *Spedycja*, *Shoper*, *Katalog*, *AI Fallback* | Iteracja 11 |
 | ~~Narzuty i promocje przeliczające cenę sprzedaży~~ | ✅ **jest** — backend (4a) i widok `/narzuty` (4b); testy: [instrukcja I4](instrukcja-testow-I4.md) |
 | Widok Historia (zmiany cen z importów) | Iteracja 5 |
-| Alerty | Iteracja 6 |
+| ~~Widok alertów~~ | ✅ **jest** — `/alerty`, grupuje powtórki po (dostawca, typ, status); domyślny filtr `status=nowy` (patrz punkt 10 wyżej) |
 | Atrybuty | Iteracja 7 |
 | Lista „cena na zapytanie" i powody wstrzymania | Iteracja 12 |
 

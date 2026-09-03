@@ -64,20 +64,31 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
   Odbudowane dotąd: `/login`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`, `/narzuty`,
-  `/analityka` (7 widoków, `/analityka` ładowana leniwie — `lazy`+`Suspense`); pozostałe
-  5 to placeholdery (`src/pages/placeholdery.ts`).
+  `/alerty`, `/waga-gabarytowa`, `/analityka` (9 widoków; `/analityka` ładowana leniwie —
+  `lazy`+`Suspense`); pozostałe 3 to placeholdery (`src/pages/placeholdery.ts`).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
 Dokument wyłapał miejsca, gdzie frontend liczy coś **lokalnie**, mimo że backend
 ma endpoint:
-- **Alerty** (`/alerty`) — status/obsługa trzymane lokalnie, choć `/api/alerts` istnieje.
-  ⚠ **Uzupełnienie 2026-09-01 (blok 3f-2):** to dotyczy wyłącznie ODCZYTU. **Alerty PISZE
-  backend** — import przy błędzie HTTP, błędzie pobierania i ręcznym uploadzie — i ta strona
-  jest już odbudowana (`src/repos/alerts.ts`). Iteracja 6 dostaje sam widok, ale z twardym
-  wymogiem: **musi zwijać powtórki**, bo zapis nie ma dławika (339 alertów „Błąd pobierania"
-  w produkcji, do 23/dobę na jednego dostawcę). Szczegóły w roadmapie, blok Iteracji 6.
+- ~~**Alerty** (`/alerty`) — status/obsługa trzymane lokalnie, choć `/api/alerts` istnieje.~~
+  ⚠ **Sprostowanie (I6, `18-FEATURE-widok-alerty`, 2026-09-03):** to był mylący zapis — nie
+  chodziło o miejsce przechowywania statusu TYCH SAMYCH alertów, tylko o dwa różne zestawy
+  danych. Oryginalny widok `/alerty` (`HT()`, `fe.js:25177-25340`) **nie woła `/api/alerts`
+  w ogóle** — liczy pseudo-alerty katalogowe z `GET /api/products` (marża ujemna, niska marża,
+  „nie-opona", `pv()`, `:16631-16705`) i trzyma ich status w IndexedDB (`alerty-statusy`).
+  Alerty z `/api/alerts` **pisze import** (błąd HTTP, błąd pobierania, ręczny upload —
+  `src/repos/alerts.ts`), a oryginalny widok ich w ogóle nie czyta. Odbudowa (I6) stawia widok
+  `/alerty` na REALNYCH alertach importu z `/api/alerts`, ze statusem przez `PATCH
+  /api/alerts/{id}` (świadome odejście od oryginału), z grupowaniem powtórek w widoku, bo zapis
+  nie ma dławika (339 alertów „Błąd pobierania" w produkcji, do 23/dobę na jednego dostawcę).
+  Pseudo-alerty katalogowe oryginału **świadomie pominięte** — `docs/rebuild-backlog.md` #26
+  (⬜ do decyzji). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
 - **Waga gabarytowa** — liczona w przeglądarce, choć `POST /api/waga-gabarytowa/oblicz` istnieje.
+  Nie jest to przeoczenie: BE liczy inny wzór (paletowy/oponowy), a widok — wolumetryczny
+  kurierski z wyborem przewoźnika, objętością m³ i wagą do wyceny; podpięcie pod endpoint
+  odebrałoby te funkcje. Odbudowa (I9) zachowała ten stan świadomie (D1),
+  `docs/tickets/18-FEATURE-waga-gabarytowa/`.
 - **Staging** — instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu.
 - Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa
   (potwierdza deltę: te moduły dojrzały po czerwcu). Doprecyzowanie z I5: widok Historii woła
@@ -131,8 +142,8 @@ ma endpoint:
 
 > **Odbudowa (3e, 3f-1, 3f-2 — 2026-09-01):** `/staging` i `/konfiguracja` odbudowane; router
 > ma **12 tras, 8 placeholderów**. Zakładka **Wgrywanie ręczne** (3f-1) i **Dostawcy** (3f-2)
-> wypełnione, cztery pozostałe (spedycja / shoper / katalog / ai) czekają na Iterację 11 —
-> ich zaślepki i przypisanie do bloków siedzą w `src/pages/konfiguracja/zakladki.ts`.
+> wypełnione, cztery pozostałe (spedycja / shoper / katalog / ai) czekały wtedy na Iterację 11 —
+> dowiezione 2026-09-03, patrz blok I11 niżej.
 > Fakty zweryfikowane w bundlu, których ta specyfikacja nie miała:
 >
 > - **⭐ Karta dostawcy `ZT()` (`frontend-index.js:25661-25806`) NIE MA żadnej edycji.**
@@ -187,8 +198,48 @@ ma endpoint:
 > jak `Staging.tsx`; oryginał ich nie ma (`data = {}` domyślnie, więc podczas ładowania i przy
 > błędzie renderuje „Brak wpisów w historii."). Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
 >
+> **Odbudowa (I6, `18-FEATURE-widok-alerty`, 2026-09-03):** `/alerty` odbudowany — router ma
+> **12 tras, 5 placeholderów**. Widok stoi na `GET /api/alerts` (bez limitu) i **zwija powtórki**
+> w grupy `(dostawca, typ, status)` z licznikiem i czasem ostatniego wystąpienia, bo import
+> pisze alert przy każdej nieudanej próbie bez dławika (do 23×/dobę dla jednego dostawcy);
+> rozwinięcie grupy pokazuje pojedyncze wpisy. Domyślny filtr `status=nowy`; zmiana statusu
+> (pojedyncza i grupowa, w obie strony) idzie przez `PATCH /api/alerts/{id}`, bez IndexedDB/
+> localStorage — świadome odejście od oryginału, który dla `/alerty` liczył zupełnie inne dane
+> (patrz §4, sprostowanie). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+
+> **Odbudowa (I9, `18-FEATURE-waga-gabarytowa`, 2026-09-03):** `/waga-gabarytowa` odbudowany —
+> router ma **12 tras, 4 placeholdery**. Ustalenie ticketa: BE i FE liczą **dwa różne wzory**,
+> nie ten sam w dwóch miejscach (BE: formuła paletowa/oponowa, patrz `spec-backend.md`; FE:
+> waga wolumetryczna kurierska `dł×szer×wys / dzielnik`, dzielnik per przewoźnik — GEIS 10000,
+> DPD 6000, GLS 4000, InPost/UPS/DHL 5000 — plus objętość m³ i waga do wyceny
+> `max(gabarytowa, rzeczywista)`). Widok liczy **wyłącznie lokalnie, zero wywołań API** (D1).
+> Formularz: Długość/Szerokość/Wysokość w cm (domyślnie 60/50/50), opcjonalna Waga rzeczywista,
+> select Przewoźnik; pełny edytor przewoźników i dzielników (dodawanie, usuwanie z blokadą
+> „min. 1", zmiana nazwy/dzielnika, „Przywróć domyślne"). Stan trwały w IndexedDB przez
+> `magazynKV` (cztery klucze `waga-gabarytowa-*`). Mechanizm „waga pamięć" (`waga_pamiec`) to
+> osobna, import-side logika bez związku z tym widokiem. Szczegóły:
+> `docs/tickets/18-FEATURE-waga-gabarytowa/`.
+
+> **Odbudowa (I11, `18-FEATURE-konfiguracja-config-spedycja`, 2026-09-03):** `/konfiguracja`
+> domknięte — ostatnie cztery zakładki (spedycja / shoper / katalog / ai) wypełnione, zaślepki
+> i pole `domykaBlok` zniknęły; wszystkie sześć zakładek są dziś wypełnione. Trzy rzeczy, które
+> łatwo się domyślić błędnie: **zakładka „spedycja" świadomie NIE jest portem 1:1** (D2) — w
+> produkcji `GET/POST /api/spedycja` istnieje, ale UI nigdy go nie woła (dane żyją w
+> module-level tablicy i IndexedDB, `frontend-index.js:10381`), odbudowa woła realne
+> `GET/POST /api/spedycja`, więc limity są trwałe i wspólne, nie lokalne dla przeglądarki.
+> **Zakładka „katalog" nie dotyka `/api/config`** — to „Domyślne kolumny katalogu" w IndexedDB
+> (`konfig-domyslne-kolumny`) + „Przywróć fabryczne"; destrukcyjny przycisk „Usuń wszystko
+> z katalogu" (`POST /api/products/clear`) zostaje poza zakresem do Iteracji 12 (D3).
+> **Edytora `waga_gab.*` nie ma i nie będzie** — w oryginale nie istnieje żaden (0 wystąpień
+> w bundlu), mimo że podtytuł ekranu Konfiguracji to sugeruje. Zakładka „shoper" zapisuje
+> `shoper.kolumny`/`shoper.separator` (2× `POST /api/config`), kluczy tych nie ma jeszcze
+> w `contract/fixtures/GET_config.json` (nikt ich w produkcji nie zapisał) — czyta je dopiero
+> eksport CSV z Iteracji 8; zakładka „ai" zapisuje trzy klucze `ai_fallback.*`
+> (3× `POST /api/config`), `aktywny` wyprowadzony z obecności klucza, nie z osobnego pola.
+> Szczegóły: `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
+
 > **Odbudowa (10a, `19-FEATURE-analityka-fundament`, 2026-09-03):** `/analityka` odbudowany —
-> router ma **12 tras, 5 placeholderów**. Oryginał (`zM`, `frontend-index.js:27804-28640`) ma
+> router ma **12 tras, 3 placeholdery**. Oryginał (`zM`, `frontend-index.js:27804-28640`) ma
 > **pięć** zakładek — `dostawcy` „Dostawcy" · `ean` „EAN i ceny" · `ceny` „Ceny w czasie" ·
 > `dostepnosc` „Dostępność" · `marza` „Marża i rotacja", domyślna `dostawcy` — **zero wykresów**
 > (grep `recharts`/`chart.js`/`d3`/`apexcharts`/`echarts`/`nivo` po `mirror/frontend/assets/*.js`:

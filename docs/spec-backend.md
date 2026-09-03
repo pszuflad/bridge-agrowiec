@@ -85,6 +85,31 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > z 11 polami na `item` — żadna z tras nie dotyka `historia_cen`. Szczegóły:
 > `docs/tickets/15-FEATURE-historia-zmian/`.
 >
+> **Potwierdzone w I6** (`18-FEATURE-widok-alerty`, 2026-09-03): `GET /api/alerts` też
+> wjechało pod `requireAuth`, mimo `security: []` w `contract/openapi.yaml:67` — ten sam
+> wzorzec D1; bez tokenu trasa oddaje **401, kod spoza listy kontraktu** (kontrakt zna tylko
+> 200/400 dla tej ścieżki). `PATCH /api/alerts/{id}` ma auth zgodnie z kontraktem od zawsze,
+> ale dla niej **nie ma nagranej próbki** w `contract/fixtures/` — jej kształt (`{ok:true}`,
+> zawsze, także dla nieistniejącego `id`, bez walidacji `status`, bez `audit_log`) stoi
+> wyłącznie na kodzie oryginału. Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+>
+> **Potwierdzone w I9** (`18-FEATURE-waga-gabarytowa`, 2026-09-03): `POST
+> /api/waga-gabarytowa/oblicz` wjechało pod `requireAuth`, mimo `security: []` w kontrakcie —
+> ten sam wzorzec D1 (odstępstwo D2). Formuła jest **paletowa/oponowa**, nie ta sama co
+> wolumetryczna licząca się na froncie (patrz `spec-frontend.md`): szerokość zaokrąglana do
+> progów półpalety (≤55 cm → 60 cm) i palety (≤80 cm → 80 cm), doliczona wysokość palety,
+> mnożnik `0.000167`, wszystko sterowane configiem `waga_gab.*`. Odpowiedź ma pięć pól
+> (`wagaGabarytowa`, `szerokoscEfektywna`, `wysokoscZPaleta`, `wspolczynnik`, `opis`); brak
+> walidacji — każde wejście, łącznie z pustym ciałem, daje 200 (kontrakt deklaruje 400,
+> nieosiągalne w oryginale). Szczegóły: `docs/tickets/18-FEATURE-waga-gabarytowa/`.
+>
+> **Potwierdzone w I11** (`18-FEATURE-konfiguracja-config-spedycja`, 2026-09-03):
+> `GET /api/config` i `GET /api/spedycja` też wjechały pod `requireAuth`, mimo `security: []`
+> w kontrakcie — ten sam wzorzec D1. `POST` na obu zasobach kontrakt i tak ma za auth
+> (bearer/cookie), więc tam odstępstwa nie ma. **Klucze `waga_gab.*`, które czyta formuła
+> z I9, są od teraz edytowalne przez `POST /api/config`** (whitelista 13 kluczy). Szczegóły:
+> `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
+>
 > **Potwierdzone w 10a** (`19-FEATURE-analityka-fundament`, 2026-09-03): pięć tras
 > `/api/analytics/*` (`filters`, `status`, `kpi`, `margins`, `bootstrap-current`) wjechały pod
 > `requireAuth` — ale to **NIE jest odstępstwo D1**, inaczej niż w powyższych wpisach: kontrakt
@@ -232,10 +257,13 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,
 `gn`=spedycja, `Jt`=config) — zgodna z moją lipcową rekonstrukcją. ⚠ `Wa` to tabela SQL
-**`history`**, odrębna od `historia_cen` — zweryfikowane w I5, `docs/tickets/15-FEATURE-historia-zmian/plan.md`.
-`historia_cen` ma od bloku **10a** dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i
-`POST /api/analytics/bootstrap-current`, oraz pierwszego czytelnika — `GET /api/analytics/status`
-zwraca z niej agregat `{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
+**`history`**, odrębna od `historia_cen` — zweryfikowane w I5,
+`docs/tickets/15-FEATURE-historia-zmian/plan.md`. `Jt`/`gn` odtworzone w I11:
+`rebuild/backend/src/routes/{config,spedycja}.ts`, `src/repos/{config,spedycja}.ts`
+(`docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`). `historia_cen` ma od bloku **10a**
+dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/bootstrap-current`,
+oraz pierwszego czytelnika — `GET /api/analytics/status` zwraca z niej agregat
+`{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
 `GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
 `docs/tickets/19-FEATURE-analityka-fundament/plan.md`.
 

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Uzytkownik } from "@/lib/api";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
+import type { Alert } from "@/pages/alerty/api";
 import type { Filtry, Kpi, Marze, StatusHistorii } from "@/pages/analityka/api";
 
 const katalogTestow = dirname(fileURLToPath(import.meta.url));
@@ -165,6 +166,63 @@ export const PROMOCJA_TESTOWA: Promocja = {
   zmienilUzytkownikId: 1,
   zmienionoData: "2026-07-31T13:07:21.578Z",
 };
+
+/**
+ * Konfiguracja z `contract/fixtures/GET_config.json` — płaski obiekt, 11 kluczy, same
+ * stringi. Ta sama zasada co przy produktach i dostawcach: zakładki „Shoper" i „AI Fallback"
+ * testujemy przeciwko KSZTAŁTOWI, który realnie oddaje produkcja.
+ *
+ * ⚠ Nagranie NIE zawiera `shoper.kolumny` ani `shoper.separator` — nikt ich w produkcji
+ * nie zapisał. Zakładka Shoper musi więc wystartować od wartości domyślnych i właśnie
+ * to sprawdza test.
+ */
+export function konfiguracjaZFixtura(): Record<string, string> {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_config.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Record<string, string> };
+  return fixture.body;
+}
+
+/**
+ * Limity spedycyjne z `contract/fixtures/GET_spedycja.json` — 5 wierszy z 10 nagranych
+ * (`_body_przyciete_z`). Fixture pokrywa oba warianty progu: liczbę (MO1, MO2) i `null`
+ * (MO3–MO5), więc test tabeli ma na czym sprawdzić „dostawca bez progu".
+ */
+export function spedycjaZFixtura(): {
+  id: number;
+  dostawcaKod: string;
+  progNetto: number | null;
+  kosztPonizej: number | null;
+  kosztPowyzej: number | null;
+  dodatkoweReguly: string | null;
+}[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_spedycja.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: {
+      id: number;
+      dostawcaKod: string;
+      progNetto: number | null;
+      kosztPonizej: number | null;
+      kosztPowyzej: number | null;
+      dodatkoweReguly: string | null;
+    }[];
+  };
+  return fixture.body;
+}
+
+/**
+ * Alerty z `contract/fixtures/GET_alerts.json` — pięć nagranych wierszy.
+ *
+ * ⚠ OGRANICZENIE SIATKI, NAZWANE WPROST: wszystkie pięć to `Synchronizacja`/`info`/
+ * `rozwiazany`, każdy dla INNEGO dostawcy — czyli w nagraniu NIE MA ANI JEDNEJ POWTÓRKI,
+ * a to właśnie powtórki są sednem tej iteracji (339 alertów „Błąd pobierania" w
+ * `db/snapshot.db`). Fixture daje więc KSZTAŁT wiersza, ale nie rozkład danych; testy
+ * zwijania budują powtórki z tego kształtu przez `zPowtorkami` w `alerty.grupowanie.test.ts`.
+ */
+export function alertyZFixtura(): Alert[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_alerts.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Alert[] };
+  return fixture.body;
+}
 
 /**
  * Analityka (blok 10a) — cztery odpowiedzi prosto z nagrań produkcji.
