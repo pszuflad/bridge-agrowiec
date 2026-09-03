@@ -104,3 +104,29 @@ Trasa `/waga-gabarytowa` przestaje pokazywać placeholder — to cel iteracji.
 4. **Lista przewoźników żyje tylko w przeglądarce.** IndexedDB per urządzenie — zmiany Ani
    nie przeniosą się na inny komputer i giną przy czyszczeniu danych witryny. Tak działa
    produkcja; przeniesienie listy na backend byłoby nową funkcją, nie odbudową.
+
+## Review fixes applied
+
+Reviewer zgłosił 1 BLOCKER, 1 SHOULD-FIX, 1 NICE-TO-HAVE. Formułę backendu i widok frontendu
+porównał z oryginałem linia po linii, przeliczył samodzielnie wszystkie oczekiwane liczby
+w teście formuły (36.072, 33.4, 240.48, 3.707, 54) i odpalił komplet bramek — bez zastrzeżeń.
+
+- **BLOCKER — `docs/rebuild-roadmap.md` i `docs/rebuild-backlog.md` nieaktualne.** Zasadny:
+  roadmapa nadal pokazywała blok I9 jako otwarty, z nierozstrzygniętą decyzją „lokalnie vs API".
+  Domknięte w Fazie 5 ticketa (aktualizacja dokumentacji) — patrz sekcja „Docs updates".
+- **SHOULD-FIX — niedokumentowany `req.body ?? {}`** (`src/routes/waga-gabarytowa.ts`).
+  Dopisany komentarz: oryginał sięga po `c.body` wprost, strażnik chroni przed 500 przy żądaniu
+  bez ciała i nie zmienia zachowania (puste ciało liczy się jako same zera).
+- **NICE-TO-HAVE — `aria-label` na przycisku usuwania**, którego oryginał nie ma. Usunięty:
+  w tym projekcie 1:1 wygrywa, a każde odstępstwo ma być decyzją użytkownika, nie inicjatywą
+  implementacji. Trafia do follow-up jako temat ogólnorepozytoryjny, nie lokalny (punkt 5).
+
+Po poprawkach: `lint`, `typecheck`, `test` czyste po obu stronach (FE 307/307, BE gate 6/6).
+
+## Follow-up (uzupełnienie)
+
+5. **Dostępność ikonowych przycisków — temat ogólnorepozytoryjny, nie tylko tego widoku.**
+   Oryginał nie daje etykiet tekstowych przyciskom z samą ikoną (tu: usuwanie przewoźnika),
+   więc czytnik ekranu nie ma czego przeczytać. Odtwarzamy to wiernie, bo poprawka jest
+   odstępstwem od 1:1. Jeśli Ania zechce dostępność, to osobna decyzja obejmująca WSZYSTKIE
+   takie przyciski w odbudowie, a nie łatka w jednym widoku.

@@ -35,6 +35,9 @@ export function trasyWagiGabarytowej({ db }: ZaleznosciWagiGabarytowej): Router 
    */
   router.post("/api/waga-gabarytowa/oblicz", requireAuth, (req: Request, res: Response) => {
     const ustawienia = odczytajUstawieniaWagiGabarytowej(db);
+    // `req.body ?? {}` — oryginał sięga po `c.body` wprost, bo jego `express.json()` zawsze
+    // coś zostawia. Nasz `app.ts` też, ale strażnik jest tani i chroni przed 500 przy żądaniu
+    // bez ciała. Zachowanie bez zmian: puste ciało i tak liczy się jako same zera.
     res.json(obliczWageGabarytowa(req.body ?? {}, ustawienia));
   });
 

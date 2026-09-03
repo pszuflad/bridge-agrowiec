@@ -171,7 +171,6 @@ export function TabelaPrzewoznikow({
                       size="sm"
                       onClick={() => usun(przewoznik.id)}
                       data-testid={`button-usun-${przewoznik.id}`}
-                      aria-label={`Usuń ${przewoznik.nazwa}`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
