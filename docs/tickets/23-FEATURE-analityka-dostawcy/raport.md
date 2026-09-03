@@ -54,10 +54,12 @@ Trzy, wszystkie drobne i wewnątrz zatwierdzonych decyzji:
    `100.01 - 100` w podwójnej precyzji to 0.010000000000005…, czyli więcej niż próg `0.01`.
    To zachowanie oryginału (ten sam SQL, ta sama arytmetyka), więc test je **charakteryzuje**
    zamiast wymuszać — z komentarzem wyjaśniającym, skąd bierze się ta niespodzianka.
-2. **Podniesiony limit czekania na leniwy chunk `/analityka`** w obu plikach testów widoku
-   (domyślna sekunda → 15 s). Zakładka `dostawcy` jest domyślna, więc każde wejście na widok
-   pobiera teraz o trzy zapytania więcej i pierwszy import chunku z Recharts bywa wolniejszy
-   niż sekunda. To koszt narzędzi, nie zachowanie aplikacji — bez tego testy migotały.
+2. **Podniesiony limit czekania na leniwy chunk `/analityka`** w obu plikach testów widoku.
+   Zakładka `dostawcy` jest domyślna, więc każde wejście na widok pobiera teraz o trzy
+   zapytania więcej, a pierwszy import chunku z Recharts w jsdomie bywa wolniejszy niż
+   domyślna sekunda. To koszt narzędzi, nie zachowanie aplikacji — bez tego testy migotały.
+   Limity są DWA i oba trzeba było ruszyć: `findByTestId(..., { timeout })` czeka najwyżej
+   tyle, ile pozwala `testTimeout` vitest (domyślnie 5 s) — patrz „Review fixes applied".
 3. **Trasy dostawców dołożone do mocków `analityka.test.tsx` (blok 10a).** Nie było tego
    w planie, ale jest konieczne: `onUnhandledRequest: "error"` wywaliłby każdy test w tamtym
    pliku, odkąd domyślna zakładka wypuszcza własne zapytania.
@@ -103,3 +105,28 @@ Brak. Cztery nowe trasy `GET`; żadna istniejąca odpowiedź nie zmieniła kszta
 - **Kafle KPI oryginału.** 10a wzięło `/api/analytics/kpi` zamiast oryginalnych czterech kafli
   (odstępstwo O-10a-1), bo dwa z nich wymagają tras bloku 10c. To wciąż otwarte — decyzja
   należy do sesji 10c lub 10f.
+
+## Review fixes applied
+
+Review: **0 BLOCKER · 1 SHOULD-FIX · 1 NICE-TO-HAVE**
+(`docs/tickets/23-FEATURE-analityka-dostawcy/review.md`). Oba ustalenia naprawione.
+
+- **SHOULD-FIX — ochrona przed migotaniem testów widoku była POZORNA.** Podniesienie
+  `findByTestId(..., { timeout: 15_000 })` nie działa samo z siebie: zapytanie czeka najwyżej
+  tyle, ile pozwala `testTimeout` vitest, a ten stał na domyślnych 5 s. Pod obciążeniem
+  (scenariusz, który ten projekt wprost zakłada — kilku agentów na jednej maszynie) test padłby
+  na „Test timed out in 5000ms", zanim limit zapytania miałby szansę zadziałać.
+  Naprawione `vi.setConfig({ testTimeout: 20_000 })` w obu plikach testów widoku — **plikowo,
+  nie globalnie**, bo dotyczy to wyłącznie widoków ładowanych leniwie; reszta zestawu zachowuje
+  ostry pięciosekundowy limit. Nota przy wywołaniu wyjaśnia mechanikę dwóch limitów.
+- **NICE-TO-HAVE** — rozdzielony akapit w `pages/analityka/README.md`, w którym zdanie o bloku
+  10d skleiło się ze zdaniem o blokach 10b–10e.
+
+Zweryfikowane po naprawie: `lint`, `typecheck` czyste, oba pliki testów widoku zielone (31/31).
+
+### Pre-existing issues (spoza tego ticketa)
+
+- `rebuild/backend/test/scheduler.test.ts` potrafi paść pod pełnym `npm test` backendu
+  (u recenzenta 702/703), a w izolacji przechodzi 24/24. Plik nie występuje w diffie tego
+  brancha — to wcześniejsza niestabilność timingowa pod obciążeniem, nie regresja bloku 10d.
+  U mnie pełny zestaw przeszedł 703/703, więc objaw jest przerywany.

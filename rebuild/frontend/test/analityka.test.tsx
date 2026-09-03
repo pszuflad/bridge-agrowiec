@@ -14,7 +14,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
@@ -33,6 +33,17 @@ import {
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
+
+/**
+ * ⚠ DWA LIMITY, NIE JEDEN. `findByTestId(..., { timeout })` czeka najwyżej tyle, ile pozwala
+ * `testTimeout` vitest — a ten stoi domyślnie na 5 s (`vitest.config.ts` go nie podnosi).
+ * Samo podniesienie limitu zapytania byłoby więc ochroną pozorną: test padłby wcześniej na
+ * „Test timed out in 5000ms". Podnosimy oba, plikowo (nie globalnie), bo dotyczy to wyłącznie
+ * widoków ładowanych leniwie: chunk `/analityka` ciągnie Recharts i jego pierwszy import
+ * w jsdomie trwa ~1,5 s, a pod obciążeniem równoległej pracy kilku agentów na tej samej
+ * maszynie — dłużej. To koszt narzędzi, nie zachowanie aplikacji.
+ */
+vi.setConfig({ testTimeout: 20_000 });
 
 const UZYTKOWNIK = uzytkownikZFixtura();
 const FILTRY = filtryZFixtura();
@@ -71,8 +82,7 @@ async function otworzAnalityke() {
   window.history.pushState({}, "", "/analityka");
   render(<App />);
   // Trasa jest ładowana leniwie (osobny chunk z Recharts), więc czekamy na tytuł strony.
-  // Dłuższy limit niż domyślna sekunda: pierwszy import tego chunku w procesie testowym
-  // potrafi trwać kilka sekund, a to koszt narzędzi, nie zachowanie aplikacji.
+  // Limit dłuższy niż domyślna sekunda — mieści się w podniesionym `testTimeout` wyżej.
   return await screen.findByTestId("text-page-title", undefined, { timeout: 15_000 });
 }
 

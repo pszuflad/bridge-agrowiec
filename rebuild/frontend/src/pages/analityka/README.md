@@ -3,8 +3,10 @@
 Ten katalog powstał w bloku **10a** (ticket `19-FEATURE-analityka-fundament`) i jest
 szablonem dla reszty Iteracji 10. Blok **10d** (`23-FEATURE-analityka-dostawcy`) wypełnił
 wg niego zakładkę `dostawcy` — trzy sekcje w `Sekcja{Stabilnosc,CyklZycia,Stan}Dostawcow.tsx`
-są drugim, niezależnym od marż przykładem tego wzorca (w tym sekcją bez wykresu). Bloki 10b–10e **dokładają zakładki, nie przemeblowują
-widoku** — zakładki, ich kolejność i etykiety już są i pochodzą z oryginału.
+są drugim, niezależnym od marż przykładem tego wzorca (w tym sekcją bez wykresu).
+
+Bloki 10b–10e **dokładają zakładki, nie przemeblowują widoku** — zakładki, ich kolejność
+i etykiety już są i pochodzą z oryginału.
 
 Zanim napiszesz linijkę kodu: przeczytaj „Trzy pułapki" na końcu. Każda z nich kosztowała
 w 10a osobne dochodzenie.
