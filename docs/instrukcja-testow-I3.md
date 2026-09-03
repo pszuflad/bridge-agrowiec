@@ -219,7 +219,8 @@ a odznaka statusu na karcie zmienia się na **błąd**. *Ostatnia próba* aktual
 niepowodzenia — to jest znacznik próby, nie sukcesu.
 
 **Co jeszcze się stało, choć tego nie widzisz na tym ekranie:** Bridge zapisał **alert**.
-Zobaczysz go w widoku **Alerty** (menu po lewej) — typ *Błąd HTTP* albo *Błąd pobierania*,
+Zobaczysz go w widoku **Alerty** (menu po lewej; osobne testy tego widoku ma
+[instrukcja I6](instrukcja-testow-I6.md)) — typ *Błąd HTTP* albo *Błąd pobierania*,
 status **nowy**, widoczny od razu (domyślny filtr statusu go nie chowa). Jeśli serwer dostawcy
 w ogóle nie odpowie (zamiast zwrócić błąd), komunikat będzie inny — np. *„fetch failed"* albo
 *„This operation was aborted"* — i to też jest poprawne: to dosłowna treść błędu sieci.
