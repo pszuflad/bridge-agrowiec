@@ -114,27 +114,31 @@ describe("GATE — kontrakt i fixtures dla alertów", () => {
     const cel = (fixture.body as WierszAlertu[])[0]!;
     expect(cel.status).toBe("rozwiazany");
 
-    const odp = await request(srodowisko.app)
-      .patch(`/api/alerts/${String(cel.id)}`)
-      .set("Authorization", `Bearer ${token}`)
-      .send({ status: "nowy" });
+    try {
+      const odp = await request(srodowisko.app)
+        .patch(`/api/alerts/${String(cel.id)}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: "nowy" });
 
-    expect(odp.status).toBe(200);
-    sprawdzZgodnoscZKontraktem({
-      metoda: "PATCH",
-      sciezka: `/api/alerts/${String(cel.id)}`,
-      odpowiedz: odp,
-    });
-    expect(odp.body).toEqual({ ok: true });
+      expect(odp.status).toBe(200);
+      sprawdzZgodnoscZKontraktem({
+        metoda: "PATCH",
+        sciezka: `/api/alerts/${String(cel.id)}`,
+        odpowiedz: odp,
+      });
+      expect(odp.body).toEqual({ ok: true });
 
-    const poZmianie = (await zAuth("/api/alerts")).body as WierszAlertu[];
-    expect(poZmianie.find((a) => a.id === cel.id)?.status).toBe("nowy");
-
-    // Przywrócenie stanu z fixture'a — kolejne testy w tym pliku porównują się z nim.
-    await request(srodowisko.app)
-      .patch(`/api/alerts/${String(cel.id)}`)
-      .set("Authorization", `Bearer ${token}`)
-      .send({ status: String(cel.status) });
+      const poZmianie = (await zAuth("/api/alerts")).body as WierszAlertu[];
+      expect(poZmianie.find((a) => a.id === cel.id)?.status).toBe("nowy");
+    } finally {
+      // Przywrócenie stanu z fixture'a MUSI się wykonać także po nieudanej asercji —
+      // inaczej kolejne testy w tym pliku porównywałyby się z bazą, która już nie
+      // odpowiada nagraniu, i ich wynik nie znaczyłby nic.
+      await request(srodowisko.app)
+        .patch(`/api/alerts/${String(cel.id)}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: String(cel.status) });
+    }
   });
 
   /**

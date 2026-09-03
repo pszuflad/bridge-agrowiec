@@ -1373,3 +1373,45 @@ zwraca dla tego typu `true` bezwarunkowo. Niespójność dotyczy wyłącznie pro
   katalogu. Wymaga świadomej decyzji użytkownika i sprawdzenia, czy w produkcyjnej bazie nie
   leżą uśpione promocje globalne.
 - Alternatywa: usunąć checkbox „globalna" z formularza promocji, skoro w tej roli nie działa.
+
+---
+
+### #26 · 2026-09-03 · [FRONTEND] · widok `/alerty` w oryginale NIE czyta `/api/alerts` — pseudo-alerty katalogowe pominięte
+
+> **Znalezione przy Iteracji 6 (2026-09-03), ticket `18-FEATURE-widok-alerty`.**
+> **POMINIĘTE ŚWIADOMIE, decyzja użytkownika** — nowy `/alerty` stoi na realnych alertach
+> importu. Ten wpis pilnuje, żeby wiedza o porzuconej funkcji nie zginęła.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (widok `/alerty`) |
+| **Pliki** | `deminified/frontend-index.js:25177-25340` (`HT()`), `:16631-16705` (`pv()`), `:9165-9193` (IndexedDB `cn`/`un`) |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte (Iteracja 6 dowiozła INNY widok pod tym adresem) |
+
+**Co robi produkcja.** Ekran `/alerty` w oryginale **nie woła `GET /api/alerts` ani razu**,
+mimo że backend obsługuje tę trasę od zawsze (`backend-index.cjs:48688-48691`). Zamiast tego
+pobiera `GET /api/products` i wylicza po stronie klienta **pseudo-alerty katalogowe** (`pv()`):
+marża ujemna, marża poniżej progu i „nie-opona" w katalogu opon. Stan ich obsługi trzyma
+w **IndexedDB** (klucz `alerty-statusy`), nie na serwerze — więc oznaczenie „przejrzany" żyje
+w jednej przeglądarce i ginie razem z jej danymi. Operuje przy tym poziomem `krytyczny`
+i statusem `przejrzany`, których backend **nigdy nie produkuje** (w `db/snapshot.db` nie ma
+ani jednego takiego wiersza). Potwierdza to `docs/incoming/frontend-perplexity/dokumentacja/02_WIDOKI.md`
+§`/alerty` pkt 6.
+
+**Co dowiozła Iteracja 6.** Widok na REALNYCH alertach importu z `/api/alerts` (błąd HTTP,
+błąd pobierania, synchronizacja, ręczny upload), ze statusem trzymanym na serwerze i powtórkami
+zwiniętymi w grupy `(dostawca, typ, status)`. To odpowiedź na pytanie „lokalnie czy przez API"
+ze `spec-frontend.md` §4 — z tym, że pytanie było źle postawione: chodziło nie o miejsce
+przechowywania statusu tych samych alertów, tylko o **dwa różne zestawy danych**.
+
+**Dlaczego nie odtworzyliśmy pseudo-alertów.** Alerty importu niosą informację o tym, co się
+w nocy nie pobrało — 339 wierszy „Błąd pobierania" w snapshocie, do 23 na dobę dla jednego
+dostawcy. Pseudo-alerty katalogowe to inne zagadnienie (jakość danych cenowych), a wrzucone
+na ten sam ekran mieszałyby dwa pojęcia „alertu" w jednej liście i psuły grupowanie
+(nie mają `dostawca`, `typ` ani `data` w sensie tabeli `alerts`).
+
+**Do decyzji.** Czy pseudo-alerty katalogowe wracają w ogóle, a jeśli tak — to gdzie:
+(a) osobna zakładka w `/alerty`, (b) własny widok „jakość danych", (c) kolumna/filtr
+w `/katalog`, gdzie te produkty i tak są widoczne, (d) nie wracają wcale. Powiązane: marża
+liczona w `pv()` to **czwarty** sposób liczenia ceny w oryginale — patrz wpisy #23 i #24.

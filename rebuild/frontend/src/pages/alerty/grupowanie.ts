@@ -45,7 +45,14 @@ export const FILTRY_POCZATKOWE: FiltryAlertow = {
   typ: null,
 };
 
-/** `dostawca` bywa `null` (alerty niezwiązane z żadnym dostawcą) — musi mieć własną grupę. */
+/**
+ * `dostawca` bywa `null` (alerty niezwiązane z żadnym dostawcą) — musi mieć własną grupę.
+ *
+ * Zastępnik ma WIODĄCĄ SPACJĘ celowo: kody dostawców to `MO2`…`MO9`, ale kolumna jest zwykłym
+ * tekstem bez `CHECK`, więc nic nie broni Ani wpisać dostawcy o kodzie „brak". Spacja jest
+ * jedynym znakiem, którego kod dostawcy nigdy nie ma na początku, i dzięki niej alert bez
+ * dostawcy nie wpadnie do jego grupy.
+ */
 function kluczGrupy(alert: Alert): string {
   return `${alert.dostawca ?? " brak"}|${alert.typ}|${alert.status}`;
 }

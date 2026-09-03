@@ -126,7 +126,7 @@ describe("2. Zwijanie powtórek — sedno iteracji", () => {
 
     const grupy = screen.getAllByTestId(/^group-alert-/);
     expect(grupy).toHaveLength(2);
-    expect(screen.getByTestId("text-alert-summary")).toHaveTextContent("2 grup / 24 alertów");
+    expect(screen.getByTestId("text-alert-summary")).toHaveTextContent("2 grupy / 24 alerty");
   });
 
   it("grupa powtórek pokazuje licznik i czas ostatniego wystąpienia", async () => {
@@ -174,7 +174,7 @@ describe("3. Filtry", () => {
     await otworzAlerty();
 
     expect(screen.queryByTestId("group-alert-MO9|Synchronizacja|rozwiazany")).not.toBeInTheDocument();
-    expect(screen.getByTestId("text-alert-summary")).toHaveTextContent("24 alertów");
+    expect(screen.getByTestId("text-alert-summary")).toHaveTextContent("24 alerty");
   });
 
   it("zdjęcie filtra statusu odsłania alerty rozwiązane", async () => {

@@ -14,7 +14,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, ChevronDown, ChevronRight, CircleAlert, Info } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -54,6 +54,19 @@ function ikonaPoziomu(poziom: string) {
   if (poziom === "ostrzezenie")
     return <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />;
   return <Info className="h-4 w-4 shrink-0 text-muted-foreground" />;
+}
+
+/**
+ * Odmiana rzeczownika przez liczbę po polsku: 1 grupa, 2 grupy, 5 grup.
+ * Reguła: końcówka 2-4 (poza nastkami 12-14) bierze formę mnogą „lekką".
+ */
+function odmien(ile: number, jedna: string, dwie: string, wiele: string): string {
+  const ostatnia = ile % 10;
+  const dwieOstatnie = ile % 100;
+  if (ile === 1) return `1 ${jedna}`;
+  if (ostatnia >= 2 && ostatnia <= 4 && (dwieOstatnie < 12 || dwieOstatnie > 14))
+    return `${ile} ${dwie}`;
+  return `${ile} ${wiele}`;
 }
 
 /** Docelowy status akcji: to przełącznik w obie strony, nie jednokierunkowe „zamknij". */
@@ -119,9 +132,13 @@ export function TabelaAlertow() {
 
   // Wartości filtrów liczymy z PEŁNEGO zbioru, nie z przefiltrowanego — inaczej wybranie
   // dostawcy wyczyściłoby listę pozostałych i nie dałoby się jej zmienić bez resetu.
-  const dostepne = wartosciFiltrow(alerty);
-  const widoczne = filtrujAlerty(alerty, filtry);
-  const grupy = pogrupujAlerty(widoczne);
+  const dostepne = useMemo(() => wartosciFiltrow(alerty), [alerty]);
+
+  // `useMemo` nie jest tu przedwczesną optymalizacją: rozwinięcie DOWOLNEJ grupy zmienia stan
+  // komponentu, więc bez tego każde kliknięcie w chevron przeliczałoby grupowanie całego
+  // zbioru od nowa. Dziś to ~3000 wierszy, ale scheduler z 3f-3 dokłada ~120 alertów na dobę.
+  const widoczne = useMemo(() => filtrujAlerty(alerty, filtry), [alerty, filtry]);
+  const grupy = useMemo(() => pogrupujAlerty(widoczne), [widoczne]);
 
   const ustawFiltr = (pole: keyof FiltryAlertow) => (wartosc: string) =>
     ustawFiltry((poprzednie) => ({
@@ -183,7 +200,8 @@ export function TabelaAlertow() {
             className="ml-auto font-mono text-xs text-muted-foreground"
             data-testid="text-alert-summary"
           >
-            {grupy.length} grup / {widoczne.length} alertów
+            {odmien(grupy.length, "grupa", "grupy", "grup")} /{" "}
+            {odmien(widoczne.length, "alert", "alerty", "alertów")}
           </div>
         </CardContent>
       </Card>
@@ -245,6 +263,7 @@ function WierszGrupy({
             type="button"
             onClick={onRozwin}
             aria-expanded={rozwinieta}
+            aria-label={`${rozwinieta ? "Zwiń" : "Rozwiń"} grupę ${grupa.dostawca ?? "bez dostawcy"} — ${grupa.typ}`}
             className="flex items-center gap-1 text-left"
             data-testid={`button-expand-${grupa.klucz}`}
           >
