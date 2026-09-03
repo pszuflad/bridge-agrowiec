@@ -13,6 +13,7 @@
  * więc używamy zwykłych ścieżek.
  */
 import { QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
 import { Route, Switch } from "wouter";
 import { AuthGate } from "@/components/AuthGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -30,25 +31,49 @@ import { NotFound } from "@/pages/NotFound";
 import { PLACEHOLDERY } from "@/pages/placeholdery";
 import { WidokWPrzygotowaniu } from "@/pages/WidokWPrzygotowaniu";
 
+/**
+ * `/analityka` jest JEDYNĄ trasą ładowaną leniwie — i to nie z upodobania do code-splittingu,
+ * tylko z pomiaru. Recharts (wniesiony w bloku 10a, używany wyłącznie przez ten widok) podnosi
+ * wspólny bundle z 451 kB do 837 kB (gzip 140 → 254 kB). Ładowany statycznie kazałby płacić
+ * tę cenę przy każdym wejściu na logowanie, katalog czy staging. Osobny chunk zdejmuje ją
+ * ze wszystkich pozostałych widoków.
+ *
+ * Bloki 10b–10e dokładają kolejne wykresy DO TEGO SAMEGO chunku — nie trzeba nic zmieniać.
+ */
+const Analityka = lazy(async () => ({
+  default: (await import("@/pages/Analityka")).Analityka,
+}));
+
 export function Trasy() {
   return (
     <AuthGate>
-      <Switch>
-        <Route path="/login" component={Login} />
-        <Route path="/katalog" component={Katalog} />
-        <Route path="/staging" component={Staging} />
-        <Route path="/konfiguracja" component={Konfiguracja} />
-        <Route path="/historia" component={Historia} />
-        <Route path="/narzuty" component={Narzuty} />
-        <Route path="/alerty" component={Alerty} />
-        <Route path="/waga-gabarytowa" component={WagaGabarytowa} />
-        {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
-          <Route key={path} path={path}>
-            <WidokWPrzygotowaniu tytul={tytul} opis={opis} iteracja={iteracja} />
-          </Route>
-        ))}
-        <Route component={NotFound} />
-      </Switch>
+      <Suspense
+        fallback={
+          <div className="p-8 text-sm text-muted-foreground">Wczytywanie…</div>
+        }
+      >
+        <Switch>
+          <Route path="/login" component={Login} />
+          <Route path="/katalog" component={Katalog} />
+          <Route path="/staging" component={Staging} />
+          <Route path="/konfiguracja" component={Konfiguracja} />
+          <Route path="/historia" component={Historia} />
+          <Route path="/narzuty" component={Narzuty} />
+          <Route path="/alerty" component={Alerty} />
+          <Route path="/waga-gabarytowa" component={WagaGabarytowa} />
+          <Route path="/analityka" component={Analityka} />
+          {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
+            <Route key={path} path={path}>
+              <WidokWPrzygotowaniu
+                tytul={tytul}
+                opis={opis}
+                iteracja={iteracja}
+              />
+            </Route>
+          ))}
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
     </AuthGate>
   );
 }

@@ -1561,3 +1561,34 @@ takiej zakładki nie ma i I11 jej nie dodaje (plan.md D7).
 
 **Do rozważenia dla produkcji.** Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy
 dodać walidację klucza albo zawęzić maskowanie w starym Bridge.
+
+---
+
+### #31 · 2026-09-03 · [BACKEND] · `POST /api/analytics/bootstrap-current` nie jest idempotentne — każde wywołanie dubluje migawkę
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (trasa analityki, tabela `historia_cen`) |
+| **Pliki** | `mirror/backend/analytics_module.cjs:81-91` (handler, `INSERT … SELECT` bez `ON CONFLICT`); port: `rebuild/backend/src/repos/analityka.ts` (`zbudujSnapshotBiezacy`), `rebuild/backend/src/routes/analytics.ts` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **10a**; trasa świadomie bez przycisku w UI (decyzja D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`) |
+| **Status** | ✔ odtworzone w rebuild (10a) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** Handler robi `INSERT INTO historia_cen (…) SELECT … FROM products
+WHERE status='aktywny'` bez żadnego `ON CONFLICT`/`WHERE NOT EXISTS`. Każde wywołanie dokłada
+po jednym wierszu `historia_cen` na każdy aktywny produkt, niezależnie od tego, czy migawka
+z tego dnia już istnieje — dwa wywołania pod rząd dublują całą partię.
+
+**Skutek.** Statystyki liczone z `historia_cen` (snapshoty, zakres dat) rosną liniowo z liczbą
+wywołań, nie z liczbą realnych zdarzeń cenowych. Oryginalny frontend nigdy nie woła tej trasy
+(grep `bootstrap` po `frontend-index.js` — zero trafień), więc w produkcji ryzyko jest dziś
+teoretyczne — uruchamia się ją tylko ręcznie/skryptem.
+
+**Co zrobiła odbudowa.** Port 1:1, nieidempotentność udokumentowana w nagłówku funkcji
+i pokryta testem charakteryzacyjnym (`bootstrap-current` zwraca `inserted` równe liczbie
+aktywnych produktów i rośnie przy drugim wywołaniu). Trasa przechodzi GATE (openapi + 401 +
+test jednostkowy), ale świadomie nie dostała przycisku w UI, żeby nikt nie kliknął jej dwa razy.
+
+**Naprawa (propozycja).** `INSERT … SELECT` z `WHERE NOT EXISTS (SELECT 1 FROM historia_cen
+WHERE …)` per produkt/dzień, albo unikalny indeks na `(produkt, data)` + `ON CONFLICT DO NOTHING`.
+Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy naprawiać zachowanie produkcji.

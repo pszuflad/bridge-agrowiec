@@ -64,8 +64,8 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
   Odbudowane dotąd: `/login`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`, `/narzuty`,
-  `/alerty`, `/waga-gabarytowa` (8 widoków); pozostałe 4 to placeholdery
-  (`src/pages/placeholdery.ts`).
+  `/alerty`, `/waga-gabarytowa`, `/analityka` (9 widoków; `/analityka` ładowana leniwie —
+  `lazy`+`Suspense`); pozostałe 3 to placeholdery (`src/pages/placeholdery.ts`).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
@@ -237,6 +237,33 @@ ma endpoint:
 > eksport CSV z Iteracji 8; zakładka „ai" zapisuje trzy klucze `ai_fallback.*`
 > (3× `POST /api/config`), `aktywny` wyprowadzony z obecności klucza, nie z osobnego pola.
 > Szczegóły: `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
+
+> **Odbudowa (10a, `19-FEATURE-analityka-fundament`, 2026-09-03):** `/analityka` odbudowany —
+> router ma **12 tras, 3 placeholdery**. Oryginał (`zM`, `frontend-index.js:27804-28640`) ma
+> **pięć** zakładek — `dostawcy` „Dostawcy" · `ean` „EAN i ceny" · `ceny` „Ceny w czasie" ·
+> `dostepnosc` „Dostępność" · `marza` „Marża i rotacja", domyślna `dostawcy` — **zero wykresów**
+> (grep `recharts`/`chart.js`/`d3`/`apexcharts`/`echarts`/`nivo` po `mirror/frontend/assets/*.js`:
+> brak trafień; cała wizualizacja to tabela `.slice(0,300)` + pasek postępu z dwóch `<div>`) i
+> **brak paska filtrów** (`/api/analytics/filters` jest pobierane, ale renderowane jest wyłącznie
+> `f.dostawcy.length` w kaflu KPI). Cztery kafle nagłówka oryginału liczą się z
+> `filters.dostawcy.length`, `ean/comparison`, `ean/unique` i `status.snapshots` —
+> `GET /api/analytics/kpi` **nie jest wołane przez oryginalny frontend ani razu** (sam backend
+> nazywa je „backward-compatible aliases used by previous frontend build").
+>
+> Odbudowa robi 10a jako **świadomie inny ekran niż oryginał**, decyzją użytkownika 2026-09-03
+> (D1–D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`): zakładki i etykiety zostają 1:1,
+> ale nagłówek KPI (O-10a-1) czyta z `GET /api/analytics/kpi` zamiast czterech aliasów oryginału,
+> dochodzi globalny pasek sześciu wyszukiwalnych filtrów działający **po stronie klienta**
+> (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
+> „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
+> (O-10a-3). Wypełniona jest wyłącznie karta „Marża per dostawca/kategoria/marka" — pozostałe
+> zakładki są puste, ale nazwane (O-10a-4); wzorzec sekcji dashboardu jest udokumentowany
+> w `rebuild/frontend/src/pages/analityka/README.md`. Trasa jest ładowana **leniwie**
+> (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku ~385 kB, więc płaci za niego tylko
+> wejście na `/analityka`, nie wspólny bundle. Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
+>
+> **Dla bloków 10b–10f:** karty oryginału zakładka po zakładce (tytuły, kolumny, etykiety PL,
+> kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu — `docs/analityka-bloki-10b-10f.md`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

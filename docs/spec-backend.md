@@ -109,6 +109,17 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > (bearer/cookie), więc tam odstępstwa nie ma. **Klucze `waga_gab.*`, które czyta formuła
 > z I9, są od teraz edytowalne przez `POST /api/config`** (whitelista 13 kluczy). Szczegóły:
 > `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
+>
+> **Potwierdzone w 10a** (`19-FEATURE-analityka-fundament`, 2026-09-03): pięć tras
+> `/api/analytics/*` (`filters`, `status`, `kpi`, `margins`, `bootstrap-current`) wjechały pod
+> `requireAuth` — ale to **NIE jest odstępstwo D1**, inaczej niż w powyższych wpisach: kontrakt
+> już deklarował `security: [bearerAuth, cookieAuth]` i oryginał już miał `requireAuth` w każdej
+> z 27 rejestracji modułu `analytics_module.cjs`. Przy okazji: `currentWhere()` (`:60-74`),
+> zbudowana pod filtrowanie `margins` po sześciu wymiarach, ma **zero wywołań w całym module** —
+> martwy kod w produkcji; odbudowa jej świadomie nie ożywia (`GET /margins` bez query params,
+> filtrowanie po stronie klienta). Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
+> Semantyka **wszystkich 27 tras** modułu (numer linii handlera, parametry query, LIMIT-y,
+> kształt odpowiedzi — trzy różne koperty!) jest spisana w `docs/analityka-bloki-10b-10f.md`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -248,10 +259,15 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,
 `gn`=spedycja, `Jt`=config) — zgodna z moją lipcową rekonstrukcją. ⚠ `Wa` to tabela SQL
-**`history`**, odrębna od `historia_cen` (pisana od 3d-1, czytelnik dopiero w I10) — zweryfikowane
-w I5, `docs/tickets/15-FEATURE-historia-zmian/plan.md`. `Jt`/`gn` odtworzone w I11:
+**`history`**, odrębna od `historia_cen` — zweryfikowane w I5,
+`docs/tickets/15-FEATURE-historia-zmian/plan.md`. `Jt`/`gn` odtworzone w I11:
 `rebuild/backend/src/routes/{config,spedycja}.ts`, `src/repos/{config,spedycja}.ts`
-(`docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`).
+(`docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`). `historia_cen` ma od bloku **10a**
+dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/bootstrap-current`,
+oraz pierwszego czytelnika — `GET /api/analytics/status` zwraca z niej agregat
+`{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
+`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
+`docs/tickets/19-FEATURE-analityka-fundament/plan.md`.
 
 ## 6. Korekty do propagacji
 

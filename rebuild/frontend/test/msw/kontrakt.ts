@@ -5,6 +5,7 @@ import type { Uzytkownik } from "@/lib/api";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
+import type { Filtry, Kpi, Marze, StatusHistorii } from "@/pages/analityka/api";
 
 const katalogTestow = dirname(fileURLToPath(import.meta.url));
 const korzenRepo = resolve(katalogTestow, "../../../..");
@@ -221,4 +222,49 @@ export function alertyZFixtura(): Alert[] {
   const sciezka = resolve(korzenRepo, "contract/fixtures/GET_alerts.json");
   const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Alert[] };
   return fixture.body;
+}
+
+/**
+ * Analityka (blok 10a) — cztery odpowiedzi prosto z nagrań produkcji.
+ *
+ * ⚠ FIXTURES NIOSĄ KLUCZ `_przyciete`, KTÓREGO API NIE ZWRACA. To adnotacja nagrywarki
+ * (`contract/README.md:29` — duże tablice przycięto do 5 elementów), a nie pole odpowiedzi;
+ * backend `rebuild/backend/src/repos/analityka.ts` go nie produkuje i GATE tego pilnuje.
+ * Loadery poniżej ZDEJMUJĄ go z ciała, żeby mock MSW oddawał to, co realnie oddaje backend —
+ * inaczej test widoku pracowałby na kształcie, którego w produkcji nie ma.
+ */
+function bezKluczyTechnicznych<T extends Record<string, unknown>>(cialo: T): T {
+  return Object.fromEntries(Object.entries(cialo).filter(([k]) => !k.startsWith("_"))) as T;
+}
+
+function analitykaZFixtura<T extends Record<string, unknown>>(nazwaPliku: string): T {
+  const sciezka = resolve(korzenRepo, "contract/fixtures", nazwaPliku);
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: T };
+  return bezKluczyTechnicznych(fixture.body);
+}
+
+/** `GET /api/analytics/filters` — sześć list po 5 nagranych pozycji. */
+export function filtryZFixtura(): Filtry {
+  return analitykaZFixtura<Filtry>("GET_analytics_filters.json");
+}
+
+/** `GET /api/analytics/status` — `hasHistory: true`, 15597 snapshotów. */
+export function statusAnalitykiZFixtura(): StatusHistorii {
+  return analitykaZFixtura<StatusHistorii>("GET_analytics_status.json");
+}
+
+/** `GET /api/analytics/kpi` — cztery liczby nagłówka. */
+export function kpiZFixtura(): Kpi {
+  return analitykaZFixtura<Kpi>("GET_analytics_kpi.json");
+}
+
+/**
+ * `GET /api/analytics/margins` — 5 nagranych grup.
+ *
+ * ⚠ `low` i `high` są PUSTE, bo cała produkcja mieściła się w marży (5, 80). Widok ich
+ * i tak nie renderuje (oryginał też nie), ale trzeba wiedzieć, że ich kształtu to nagranie
+ * nie dowodzi — robi to test jednostkowy backendu.
+ */
+export function marzeZFixtura(): Marze {
+  return analitykaZFixtura<Marze>("GET_analytics_margins.json");
 }
