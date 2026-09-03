@@ -92,3 +92,49 @@ export const ETYKIETY_WYMIAROW: Record<WymiarFiltra, string> = {
   indeksyNosnosci: "Indeksy nośności",
   indeksyPredkosci: "Indeksy prędkości",
 };
+
+// ════════════════════════════════════════════════════════════════════════════════════════
+//  BLOK 10c — EAN. Które wymiary globalnego filtra mają w tej zakładce na czym zadziałać.
+// ════════════════════════════════════════════════════════════════════════════════════════
+//
+// Odpowiedź wynika z SELECT-ów, nie z życzeń: wiersz może być filtrowany tylko po kolumnie,
+// którą realnie niesie. Cztery trasy EAN grupują po `ean`, więc większość wymiarów katalogu
+// (marka, model, rozmiar, oba indeksy) `GROUP BY` po prostu zwinął — nie ma ich w odpowiedzi
+// i nie da się ich odtworzyć po stronie klienta.
+//
+//   • `ean/comparison`  → `ean, nazwa, dostawcy(LICZBA), cenaMin, cenaMax, srednia, oferty`
+//   • `ean/coverage`    → `liczbaDostawcow, liczbaEAN`
+//   • `ean/unique`      → `ean, nazwa, dostawca, cenaZakupu, stan`
+//   • `ean/supplier-rank` → `dostawca, wspolnePozycje, najtanszy, najtanszyPct`
+//
+// Tylko dwie ostatnie mają kolumnę `dostawca`. Przy pierwszych dwóch `dostawcy` to LICZBA
+// dostawców, nie ich nazwy — filtr po dostawcy nie ma się o co zaczepić. Zamiast po cichu
+// zwracać pustą tabelę, sekcja wypisuje wymiary pominięte (`wymiaryNieobslugiwane`).
+
+/** Porównanie cen po EAN — wiersz nie niesie ŻADNEJ z sześciu kolumn filtra. */
+export const WYMIARY_EAN_PORWNANIE: WymiarFiltra[] = [];
+
+/** Histogram pokrycia — wiersz to dwie liczby, nie ma czego filtrować. */
+export const WYMIARY_EAN_POKRYCIE: WymiarFiltra[] = [];
+
+/** Pozycje unikalne — jedyna kolumna filtra w wierszu to `dostawca`. */
+export const WYMIARY_EAN_UNIKALNE: WymiarFiltra[] = ["dostawcy"];
+
+/** Ranking dostawców — jedyna kolumna filtra w wierszu to `dostawca`. */
+export const WYMIARY_EAN_RANKING: WymiarFiltra[] = ["dostawcy"];
+
+/**
+ * Filtr po dostawcy dla wierszy, które niosą kolumnę `dostawca`.
+ *
+ * Semantyka ta sama, co w `zastosujFiltryMarz`: pusty zbiór = wymiar nie filtruje. Jeden
+ * wymiar, więc OR/AND nie mają tu jeszcze czego rozstrzygać — zostają w gestii wywołań
+ * z sekcji o bogatszych wierszach (10b, 10d, 10e).
+ */
+export function zastosujFiltrDostawcy<T extends { dostawca: string }>(
+  wiersze: T[],
+  wybor: WyborFiltrow,
+): T[] {
+  const dostawcy = wybor.dostawcy;
+  if (dostawcy.size === 0) return wiersze;
+  return wiersze.filter((w) => dostawcy.has(w.dostawca));
+}

@@ -101,3 +101,83 @@ export function useKpi(): UseQueryResult<Kpi | null> {
 export function useMarze(): UseQueryResult<Marze | null> {
   return useQuery<Marze | null>({ queryKey: ["/api/analytics/margins"] });
 }
+
+// ════════════════════════════════════════════════════════════════════════════════════════
+//  BLOK 10c — EAN. Cztery trasy, które ORYGINALNY frontend realnie woła (`fe.js:27839-27851`).
+// ════════════════════════════════════════════════════════════════════════════════════════
+//
+// ⚠ DWÓCH TRAS TEGO BLOKU TU NIE MA I BYĆ NIE MOŻE: `GET /api/analytics/ean/details`
+// i `GET /api/analytics/ean-porownanie`. Obie istnieją w backendzie (blok 10c je dowiózł),
+// obie przyjmują `?ean` — i obie mają ZERO wywołań w produkcyjnym bundlu
+// (`docs/analityka-bloki-10b-10f.md` §1.1). Dopisanie im hooka byłoby pierwszym krokiem do
+// ekranu, którego oryginał nie ma; to samo rozstrzygnięcie co przy
+// `POST /api/analytics/bootstrap-current` w 10a (decyzja D6, 2026-09-03).
+//
+// ⚠ `ean/comparison` PRZYJMUJE `minDiffPct`, a hook go NIE PODAJE — i to jest wierność, nie
+// niedopatrzenie. Oryginał woła `d("/api/analytics/ean/comparison")` bez query (`:27839`)
+// i nie ma dla tego progu żadnej kontrolki w UI. Gdyby kiedyś miała powstać, parametr idzie
+// do `queryKey` (wzorzec z `README.md` §2.2), a nie do `useMemo` — trasa filtruje po stronie
+// backendu (decyzja D3, 2026-09-03).
+
+/** Wiersz „2.1-2.4 Porównanie cen po EAN" — EAN u co najmniej dwóch dostawców. */
+export type WierszPorownaniaEan = {
+  ean: string;
+  nazwa: string;
+  /** Liczba dostawców, nie ich nazwy — `COUNT(DISTINCT dostawca)` zwinął kolumnę. */
+  dostawcy: number;
+  cenaMin: number;
+  cenaMax: number;
+  srednia: number;
+  oferty: number;
+  spreadZl: number;
+  /** `null` przy zerowej cenie minimalnej — gałąź w praktyce nieosiągalna, ale w kształcie jest. */
+  spreadPct: number | null;
+};
+
+/** Wiersz „2.5 Pozycje unikalne" — EAN dostępny u dokładnie jednego dostawcy. */
+export type WierszUnikalnegoEan = {
+  ean: string;
+  nazwa: string;
+  dostawca: string;
+  cenaZakupu: number;
+  stan: number;
+};
+
+/** Wiersz histogramu pokrycia — „ilu dostawców ma dany EAN" → „ile takich EAN-ów". */
+export type WierszPokryciaEan = {
+  liczbaDostawcow: number;
+  liczbaEAN: number;
+};
+
+/** Wiersz rankingu dostawców — jak często dostawca jest najtańszy. */
+export type WierszRankinguEan = {
+  dostawca: string;
+  /** ⚠ Myli nazwą: to WSZYSTKIE oferty dostawcy w rankingu, także EAN-y unikalne. */
+  wspolnePozycje: number;
+  najtanszy: number;
+  najtanszyPct: number;
+};
+
+export function usePorownanieEan(): UseQueryResult<{ rows: WierszPorownaniaEan[] } | null> {
+  return useQuery<{ rows: WierszPorownaniaEan[] } | null>({
+    queryKey: ["/api/analytics/ean/comparison"],
+  });
+}
+
+export function useUnikalneEan(): UseQueryResult<{ rows: WierszUnikalnegoEan[] } | null> {
+  return useQuery<{ rows: WierszUnikalnegoEan[] } | null>({
+    queryKey: ["/api/analytics/ean/unique"],
+  });
+}
+
+export function usePokrycieEan(): UseQueryResult<{ rows: WierszPokryciaEan[] } | null> {
+  return useQuery<{ rows: WierszPokryciaEan[] } | null>({
+    queryKey: ["/api/analytics/ean/coverage"],
+  });
+}
+
+export function useRankingDostawcowEan(): UseQueryResult<{ rows: WierszRankinguEan[] } | null> {
+  return useQuery<{ rows: WierszRankinguEan[] } | null>({
+    queryKey: ["/api/analytics/ean/supplier-rank"],
+  });
+}

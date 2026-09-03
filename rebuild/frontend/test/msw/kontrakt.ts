@@ -5,7 +5,16 @@ import type { Uzytkownik } from "@/lib/api";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
-import type { Filtry, Kpi, Marze, StatusHistorii } from "@/pages/analityka/api";
+import type {
+  Filtry,
+  Kpi,
+  Marze,
+  StatusHistorii,
+  WierszPokryciaEan,
+  WierszPorownaniaEan,
+  WierszRankinguEan,
+  WierszUnikalnegoEan,
+} from "@/pages/analityka/api";
 
 const katalogTestow = dirname(fileURLToPath(import.meta.url));
 const korzenRepo = resolve(katalogTestow, "../../../..");
@@ -267,4 +276,31 @@ export function kpiZFixtura(): Kpi {
  */
 export function marzeZFixtura(): Marze {
   return analitykaZFixtura<Marze>("GET_analytics_margins.json");
+}
+
+/**
+ * Analityka EAN (blok 10c) — cztery odpowiedzi, które oryginalny frontend realnie woła.
+ *
+ * Te same zasady co wyżej: ciało prosto z nagrania, `_przyciete` zdjęte. Fixtures
+ * `ean/comparison`, `ean/unique` i `ean/supplier-rank` niosą ten klucz, `ean/coverage` nie —
+ * loader radzi sobie z obiema sytuacjami.
+ *
+ * ⚠ NIE MA TU LOADERÓW DLA `ean/details` I `ean-porownanie`. Obie trasy istnieją
+ * w backendzie, ale oryginalny frontend ich nie woła (`docs/analityka-bloki-10b-10f.md` §1.1),
+ * więc nie ma czego mockować — nasz widok też ich nie wywołuje (decyzja D6).
+ */
+export function porownanieEanZFixtura(): { rows: WierszPorownaniaEan[] } {
+  return analitykaZFixtura<{ rows: WierszPorownaniaEan[] }>("GET_analytics_ean_comparison.json");
+}
+
+export function unikalneEanZFixtura(): { rows: WierszUnikalnegoEan[] } {
+  return analitykaZFixtura<{ rows: WierszUnikalnegoEan[] }>("GET_analytics_ean_unique.json");
+}
+
+export function pokrycieEanZFixtura(): { rows: WierszPokryciaEan[] } {
+  return analitykaZFixtura<{ rows: WierszPokryciaEan[] }>("GET_analytics_ean_coverage.json");
+}
+
+export function rankingEanZFixtura(): { rows: WierszRankinguEan[] } {
+  return analitykaZFixtura<{ rows: WierszRankinguEan[] }>("GET_analytics_ean_supplier-rank.json");
 }

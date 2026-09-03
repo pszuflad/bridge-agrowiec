@@ -26,7 +26,11 @@ import {
   filtryZFixtura,
   kpiZFixtura,
   marzeZFixtura,
+  pokrycieEanZFixtura,
+  porownanieEanZFixtura,
+  rankingEanZFixtura,
   statusAnalitykiZFixtura,
+  unikalneEanZFixtura,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
@@ -43,6 +47,12 @@ function zamockujApi(marze: Marze = MARZE) {
     http.get("*/api/analytics/status", () => HttpResponse.json(STATUS)),
     http.get("*/api/analytics/kpi", () => HttpResponse.json(KPI)),
     http.get("*/api/analytics/margins", () => HttpResponse.json(marze)),
+    // Cztery trasy EAN (blok 10c) — widok pobiera je przy każdym wejściu, niezależnie od
+    // aktywnej zakładki, więc bez tych handlerów `onUnhandledRequest: "error"` wywala test.
+    http.get("*/api/analytics/ean/comparison", () => HttpResponse.json(porownanieEanZFixtura())),
+    http.get("*/api/analytics/ean/unique", () => HttpResponse.json(unikalneEanZFixtura())),
+    http.get("*/api/analytics/ean/coverage", () => HttpResponse.json(pokrycieEanZFixtura())),
+    http.get("*/api/analytics/ean/supplier-rank", () => HttpResponse.json(rankingEanZFixtura())),
   );
 }
 

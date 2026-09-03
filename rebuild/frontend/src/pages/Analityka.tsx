@@ -17,9 +17,15 @@
  *              (uzasadnienie w `FiltryGlobalne.tsx`),
  *  • O-10a-3 — wykres w sekcji marż; oryginał nie ma ani jednego wykresu
  *              (uzasadnienie w `components/ui/chart.tsx`),
- *  • O-10a-4 — cztery zakładki są puste do czasu bloków 10b–10e. To zakres bloku,
+ *  • O-10a-4 — pozostałe zakładki są puste do czasu bloków 10b, 10d i 10e. To zakres bloku,
  *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
  *              wstawiają treść, zamiast przemeblowywać widok.
+ *
+ * ─── CO DOŁOŻYŁ BLOK 10c (2026-09-03, `22-FEATURE-analityka-ean`) ──────────────────────
+ * Zakładka „EAN i ceny" niesie trzy karty oryginału (`SekcjaEan.tsx`). Nagłówek KPI ZOSTAJE
+ * na `GET /api/analytics/kpi` — oryginał liczy dwa z czterech kafli z `ean/comparison`
+ * i `ean/unique` (`:28002-28017`) i te dane są już dostępne, ale przepięcie to osobna
+ * decyzja użytkownika (D1 bloku 10c), nie skutek uboczny wypełniania zakładki.
  *
  * ─── CZEGO TU NIE MA ──────────────────────────────────────────────────────────────────
  * `POST /api/analytics/bootstrap-current` nie ma i mieć nie będzie przycisku (decyzja D4).
@@ -31,10 +37,20 @@ import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useFiltry, useKpi, useMarze, useStatusHistorii } from "./analityka/api";
+import {
+  useFiltry,
+  useKpi,
+  useMarze,
+  usePokrycieEan,
+  usePorownanieEan,
+  useRankingDostawcowEan,
+  useStatusHistorii,
+  useUnikalneEan,
+} from "./analityka/api";
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
 import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
+import { SekcjaEan } from "./analityka/SekcjaEan";
 import { SekcjaMarze } from "./analityka/SekcjaMarze";
 
 /**
@@ -57,6 +73,13 @@ export function Analityka() {
   const { data: status } = useStatusHistorii();
   const { data: kpi } = useKpi();
   const { data: marze, isPending: marzeWczytywane } = useMarze();
+
+  // Blok 10c — cztery trasy EAN, które oryginalny frontend realnie woła (`fe.js:27839-27851`).
+  // `ean/details` i `ean-porownanie` hooka nie mają: w oryginale nie mają konsumenta (D6).
+  const { data: porownanieEan, isPending: eanWczytywany } = usePorownanieEan();
+  const { data: unikalneEan } = useUnikalneEan();
+  const { data: pokrycieEan } = usePokrycieEan();
+  const { data: rankingEan } = useRankingDostawcowEan();
 
   return (
     <div>
@@ -95,9 +118,13 @@ export function Analityka() {
         </TabsContent>
 
         <TabsContent value="ean" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10c"
-            zakres="Porównanie EAN, pokrycie, pozycje unikalne i ranking dostawców."
+          <SekcjaEan
+            porownanie={porownanieEan}
+            unikalne={unikalneEan}
+            pokrycie={pokrycieEan}
+            ranking={rankingEan}
+            wybor={wybor}
+            ladowanie={eanWczytywany}
           />
         </TabsContent>
 
