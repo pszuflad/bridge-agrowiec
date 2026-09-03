@@ -106,11 +106,57 @@ Scan `ls docs/tickets/` (if the folder doesn't exist — create it). The repo ma
 
 **CRITICAL: the number is GLOBALLY UNIQUE** — one counter for all types. Never repeat a number, even if another type already "had" it. No `BUG-6` next to `DOCS-6` or `12-BUG-x` next to `12-CHORE-y`. Every ticket gets a fresh number.
 
-To find max N across both formats:
+**⚠ RÓWNOLEGŁE KARTY — `ls docs/tickets/` SAM Z SIEBIE NIE WYSTARCZY.** Folder ticketa
+równoległej sesji leży w JEJ worktree i nie istnieje w głównym repo, dopóki jej PR się nie
+zmerguje. Skan samego `docs/tickets/` widzi więc tylko tickety ZAMKNIĘTE. Zdarzyło się to
+2026-09-03: trzy karty odczytały „max = 17" i wszystkie trzy wzięły numer 18
+(`18-FEATURE-widok-alerty`, `18-FEATURE-waga-gabarytowa`, `18-FEATURE-konfiguracja-config-spedycja`).
+
+Dlatego numer bierzesz JEDNYM poleceniem, które (a) skanuje wszystkie cztery źródła naraz
+i (b) **rezerwuje numer atomowo**. `mkdir` albo się uda, albo padnie — nie ma stanu pośredniego,
+więc przy dwóch kartach w tej samej sekundzie pierwsza wygrywa, a druga przeskakuje wyżej.
+Katalog rezerwacji leży w `.worktrees/` (jest w `.gitignore`, więc nie zaśmieca repo)
+i jest WSPÓLNY dla wszystkich kart, bo wszystkie dzielą jedno główne repo.
+
 ```bash
-ls docs/tickets/ 2>/dev/null | grep -oE '(^[0-9]+|-[0-9]+-)' | grep -oE '[0-9]+' | sort -n | tail -1
+# Uruchom w GŁÓWNYM repo, nie w worktree. Wypisze numer, który jest już Twój.
+mkdir -p .worktrees/.numery
+git fetch origin --quiet 2>/dev/null
+max=$( {
+    # tickety zamknięte + worktree żywych kart: "18-FEATURE-slug" albo legacy "FEATURE-18-slug"
+    { ls docs/tickets/ 2>/dev/null
+      git worktree list --porcelain | sed -n 's|.*/\.worktrees/||p'
+    } | sed -nE 's|^([0-9]+)-.*|\1|p; s|^[A-Z]+-([0-9]+)-.*|\1|p'
+    # rezerwacje innych kart
+    ls .worktrees/.numery 2>/dev/null | sed -nE 's|^([0-9]+)$|\1|p'
+    # branche ticketowe — TYLKO numer stojący ZARAZ po prefiksie typu
+    { git branch -a --format='%(refname:short)' 2>/dev/null
+      git ls-remote --heads origin 2>/dev/null | sed 's|.*refs/heads/||'
+    } | sed -nE 's#^(remotes/[^/]+/)?(feature|fix|refactor|docs|chore)/([0-9]+)-.*#\3#p'
+  } | sort -n | tail -1 )
+n=$(( ${max:-0} + 1 ))
+while ! mkdir .worktrees/.numery/$n 2>/dev/null; do n=$(( n + 1 )); done
+echo "NUMER TICKETA: $n"
 ```
-New ticket = max + 1 (or `1` if folder is empty/missing).
+
+⚠ Dwie pułapki, obie zweryfikowane biegiem tego skryptu — nie „upraszczaj" ich z powrotem:
+- **Numery z branchy dopasowuj TYLKO zaraz po prefiksie typu** (`feature/18-`), nigdy gołym
+  `-[0-9]+-`. W repo jest `chore/triaz-2026-08-25` (slug z procedury triażu jest datą) — luźny
+  wzorzec odczytał z niego „max = 2026" i przydzielił ticket numer 2027.
+- **W `sed` dla branchy delimiterem jest `#`, nie `|`**, bo `|` jest tu alternatywą w ERE.
+  Z `|` jako delimiterem sed pada na „unknown option to `s`", a skrypt po cichu leci dalej
+  z pominiętym źródłem.
+
+Cztery skanowane źródła i po co każde:
+- `docs/tickets/` — tickety zamknięte (zmergowane).
+- `.worktrees/.numery/` — **rezerwacje**, w tym kart, które dopiero zaczęły i nie mają jeszcze
+  ani folderu, ani brancha. To jest ta warstwa, której wcześniej brakowało.
+- `git worktree list` — tickety żywych, równoległych kart.
+- lokalne i zdalne branche — tickety, które już wypchnęły branch, ale nie zostały zmergowane.
+
+Rezerwacji **nie kasujemy** po zamknięciu ticketa — katalog jest znacznikiem najwyższego użytego
+numeru i ma rosnąć. Jeśli `.worktrees/` zostanie kiedyś wyczyszczone, historię numerów odtwarzają
+trzy pozostałe źródła.
 
 **Ticket ID format (always new):**
 - `{N}-{TYPE}-{slug}`
