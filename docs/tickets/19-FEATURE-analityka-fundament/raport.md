@@ -208,3 +208,60 @@ Dodatkowe pozycje follow-up wynikające z review:
 7. **Indeksy pod agregaty analityki.** `GET /margins` i `GET /filters` robią pełny skan
    `products` (~6900 wierszy — dziś pojedyncze milisekundy). Oryginał ma tak samo, więc
    dołożenie indeksu byłoby odstępstwem; warto wrócić, gdyby katalog urósł o rząd wielkości.
+
+---
+
+## Aktualizacja dokumentacji
+
+Cztery pliki, dwa doc-checkery równolegle (roadmapa osobno, żeby nie ścigać się o ten sam plik).
+
+### `docs/rebuild-roadmap.md` — domyka BLOCKER z review
+
+- §4 Tablica postępu, wiersz 10: ⬜ → 🔨 (pierwszy z sześciu bloków; iteracja trwa),
+  w kolumnie PR/data `10a: ticket 19-FEATURE-analityka-fundament · 2026-09-03`.
+- §5, blok 10a oznaczony ✅ i **przepisany na STAN zamiast zamiaru** — usunięte cztery
+  założenia, które ten ticket obalił („`margins` jako wzorzec filtr→zapytanie", „infrastruktura
+  wykresów" jako odbudowa, „6 globalnych filtrów", „nagłówek KPI 4 kafle" jako 1:1), zastąpione
+  faktami o oryginale z numerami linii + odstępstwami O-10a-1..4 jako decyzjami D1–D4.
+- **Ustalenia dla przyszłych bloków wpisane DO TYCH BLOKÓW** (obowiązek #2 z `CLAUDE.md`):
+  nowy blok „Wzorzec i pułapki dla 10b–10e" (podział plików, reguła query-param vs `useMemo`
+  z konkretnymi trasami, trzy pułapki, brak schematów w openapi, auth nie jest odstępstwem D1);
+  10e — `rotation/inactive` i `lifecycle/models` idą pod istniejącą kartą marż w tej samej
+  zakładce; 10f — los przycisku „CSV" i status `bootstrap-current`; nowy blok „Techniczne (z 10a)"
+  z lazy-loadingiem, liczbami bundla i nowymi zależnościami.
+- **Poprawka liczbowa:** 10b miało „fixtures tej grupy (6)" — po przeniesieniu `margins` do 10a
+  jest ich 5. Dopisany rozdział fixtures per blok (10a: 4 · 10b: 5 · 10c: 6 · 10d: 4 · 10e: 6 = 25).
+- **Weryfikacja grafem, nie nazwą** (obowiązek #3): `grep -c` na trasach modułu → **27**,
+  `ls contract/fixtures/ | grep -c analytics` → **25**. Zgadza się z zapisem roadmapy; sprawdzone
+  niezależnie także przeze mnie.
+
+### `docs/rebuild-backlog.md`
+
+- Przeszukany pod kątem wpisów dotyczących analityki, `historia_cen`, marż i filtrów katalogu —
+  **żaden istniejący wpis nie dotyczy tego zakresu**, więc nic nie zmieniało statusu.
+- **Nowy wpis #26** — `POST /api/analytics/bootstrap-current` nie jest idempotentne
+  (`INSERT … SELECT` bez `ON CONFLICT`, `analytics_module.cjs:81-91`): każde wywołanie dubluje
+  migawkę całego katalogu. Odtworzone 1:1 w 10a (odbudowa nie naprawia po cichu), oznaczone
+  **⬜ do decyzji Ani** z propozycją naprawy.
+
+### `docs/spec-backend.md`
+
+- Dopisane „Potwierdzone w 10a": `requireAuth` na pięciu trasach analityki **nie jest
+  odstępstwem D1** — inaczej niż przy `markups`/`promotions`/`history` kontrakt już wymagał
+  auth i oryginał już go miał. Odnotowana martwa `currentWhere()` i decyzja, żeby jej nie ożywiać.
+- **Sprostowane nieaktualne zdanie:** „`historia_cen` (pisana od 3d-1, czytelnik dopiero w I10)" —
+  od 10a ma dwóch pisarzy i pierwszego czytelnika (`GET /api/analytics/status`). Dodane
+  zastrzeżenie, że `margins` liczy z `products.marza_pct`, a nie z `historia_cen`.
+
+### `docs/spec-frontend.md`
+
+- §3: „6 widoków / 6 placeholderów" → „7 widoków (w tym `/analityka`, ładowana leniwie) /
+  5 placeholderów".
+- Nowy blok o odbudowie 10a: cztery zweryfikowane fakty o prawdziwym ekranie oryginału
+  (pięć zakładek, domyślna „Dostawcy", zero wykresów, brak paska filtrów, `/api/analytics/kpi`
+  nigdy niewołane) i cztery nazwane odstępstwa jako decyzje użytkownika z 2026-09-03.
+
+### Pre-existing issues
+
+Oba doc-checkery zgłosiły **brak** — w edytowanych fragmentach nie znaleziono nieścisłości
+spoza zakresu tego ticketa.
