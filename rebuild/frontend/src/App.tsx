@@ -18,6 +18,7 @@ import { AuthGate } from "@/components/AuthGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { queryClient } from "@/lib/queryClient";
 import { ToastProvider } from "@/components/ui/toast";
+import { Alerty } from "@/pages/Alerty";
 import { Historia } from "@/pages/Historia";
 import { Katalog } from "@/pages/Katalog";
 import { Konfiguracja } from "@/pages/Konfiguracja";
@@ -38,6 +39,7 @@ export function Trasy() {
         <Route path="/konfiguracja" component={Konfiguracja} />
         <Route path="/historia" component={Historia} />
         <Route path="/narzuty" component={Narzuty} />
+        <Route path="/alerty" component={Alerty} />
         {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
           <Route key={path} path={path}>
             <WidokWPrzygotowaniu tytul={tytul} opis={opis} iteracja={iteracja} />
