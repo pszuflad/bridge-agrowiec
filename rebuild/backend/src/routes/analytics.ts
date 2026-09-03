@@ -15,13 +15,24 @@
 // `POST /api/analytics/bootstrap-current` (metod zapisujących nie nagrywano,
 // `contract/README.md:38`), który zamiast tego ma test jednostkowy w `analityka.agregaty.test.ts`.
 //
-// Pozostałe 22 trasy modułu dowożą bloki 10b–10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+// Blok 10d dołożył cztery trasy dostawców (`:110`, `:133`, `:143`, `:332`) — pozostałe 18 tras
+// modułu dowożą bloki 10b, 10c, 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
 
 import { Router, type Request, type Response } from "express";
 
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
-import { kpi, listyFiltrow, marze, statusHistorii, zbudujSnapshotBiezacy } from "../repos/analityka.js";
+import {
+  cyklZyciaDostawcow,
+  kpi,
+  listyFiltrow,
+  marze,
+  stabilnoscDostawcow,
+  stanDostawcow,
+  statusHistorii,
+  statystykiDostawcow,
+  zbudujSnapshotBiezacy,
+} from "../repos/analityka.js";
 
 export type ZaleznosciAnalityki = {
   db: Baza;
@@ -56,9 +67,41 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
     res.json(listyFiltrow(db));
   });
 
+  // ─── Blok 10d · dostawcy ──────────────────────────────────────────────────────────────
+  //
+  // Trzy trasy z sekcji „Part 1: supplier analysis" oryginału, w jego kolejności rejestracji.
+  // ŻADNA nie czyta `req.query` — filtrowanie zakładki `dostawcy` jest klienckie, tak jak
+  // w sekcji marż z 10a. Czwarta trasa bloku (`dostawcy-stats`) siedzi niżej, w sekcji aliasów,
+  // bo tam ją zarejestrował oryginał.
+
+  /** Stabilność cennika dostawcy (`:110-131`). Dwie gałęzie kształtu wiersza — patrz repo. */
+  router.get("/api/analytics/suppliers/stability", requireAuth, (_req: Request, res: Response) => {
+    res.json(stabilnoscDostawcow(db));
+  });
+
+  /** Nowości i wycofania — dziennik stagingu, nie katalog (`:133-141`). */
+  router.get("/api/analytics/suppliers/lifecycle", requireAuth, (_req: Request, res: Response) => {
+    res.json(cyklZyciaDostawcow(db));
+  });
+
+  /** Stan i dostępność dostawcy (`:143-154`). Bez limitu — wiersz na dostawcę. */
+  router.get("/api/analytics/suppliers/stock", requireAuth, (_req: Request, res: Response) => {
+    res.json(stanDostawcow(db));
+  });
+
   /** Cztery liczby nagłówka KPI (`:325-331`). W oryginalnym froncie bez konsumenta — patrz repo. */
   router.get("/api/analytics/kpi", requireAuth, (_req: Request, res: Response) => {
     res.json(kpi(db));
+  });
+
+  /**
+   * Statystyki dostawców (`:332`) — GOŁA TABLICA, bez koperty.
+   *
+   * Alias zgodności bez konsumenta w oryginalnym froncie (0 trafień w bundlu). Dowieziona pod
+   * GATE, świadomie bez hooka i bez karty w UI (decyzja D3 bloku 10d) — szczegóły w repo.
+   */
+  router.get("/api/analytics/dostawcy-stats", requireAuth, (_req: Request, res: Response) => {
+    res.json(statystykiDostawcow(db));
   });
 
   /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Bez parametrów query. */
