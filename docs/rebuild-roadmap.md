@@ -134,7 +134,7 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | **Auth flow** | `POST /api/login {email:trim,password}` → `{ok,user,token}`; `Bearer` gdy token + `credentials:include` równolegle; `bridge_user` w `localStorage` albo `sessionStorage` wg `bridge_remember`; Query `on401:returnNull,staleTime:Infinity,retry:false` | **odtworzone 1:1 w I1 (1b)** (`rebuild/frontend/src/lib/`) | ✅ ustalone |
 | **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | naprawić w I7 (wołać natywne) | ⬜ do zaklepania |
 | **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / I8 / **`freq-injection.js` ✅ wchłonięty w 3f-2 (2026-09-01)** | 🔨 częściowo |
-| **Lokalne vs API** | **I6 rozstrzygnięte 2026-09-03 (D3): przez API.** `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie, zero IndexedDB/localStorage. Wcześniejszy zapis w tym wierszu mylił — oryginalny widok `/alerty` (`HT()`, `frontend-index.js:25177-25340`) w ogóle nie czytał `/api/alerts`: liczył pseudo-alerty katalogowe z `GET /api/products` i trzymał ich status w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`); to inny zestaw danych, nie kwestia miejsca przechowywania statusu. Waga gabarytowa — nadal do decyzji w I9. | — | ✅ I6 · ⬜ I9 |
+| **Lokalne vs API** | **Oba tematy rozstrzygnięte 2026-09-03, każdy INNYM rozstrzygnięciem — bo to były dwa różne problemy, nie jeden.** **I6 (alerty, D3): przez API.** `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie, zero IndexedDB/localStorage. Wcześniejszy zapis w tym wierszu mylił — oryginalny widok `/alerty` (`HT()`, `frontend-index.js:25177-25340`) w ogóle nie czytał `/api/alerts`: liczył pseudo-alerty katalogowe z `GET /api/products` i trzymał ich status w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`); to inny zestaw danych, nie kwestia miejsca przechowywania statusu. **I9 (waga gabarytowa, D1): lokalnie, FAKTEM.** To DWA różne kalkulatory pod jedną nazwą (paletowy w BE vs wolumetryczny w FE), nie jeden wzór w dwóch miejscach — nie było czego deduplikować. Dowieziono oba 1:1, FE liczy lokalnie i endpointu nie woła, jak produkcja. **Wniosek na przyszłość: pytanie „lokalnie czy przez API” rozstrzyga się dopiero po sprawdzeniu, czy obie strony liczą TO SAMO** — dwa razy z rzędu okazało się, że nie. | — | ✅ I6 · ✅ I9 |
 | **Staging auto-accept — LOKALNIE czy przez API** | **rozstrzygnięte 2026-08-27 (3d-1) FAKTEM, nie preferencją: auto-zatwierdzanie jest BACKENDOWE.** Siedzi w gałęzi `else if` żywego `tk()` (`backend-index.cjs:47791-47806`) i od 3d-1 jest odtworzone razem ze skutkami (`updateProduct` + `historia_cen` + `applyDims`). Frontend NIE liczy go lokalnie: bundle woła `POST /api/staging/accept` (czyli API) i nie zawiera ani `autoZatwierdzone`, ani żadnej lokalnej logiki auto-akceptacji (grep po `mirror/frontend/assets/*.js`: 0 trafień). Zdanie ze `spec-frontend` §4 („instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu") mówi o rozjeździe INSTRUKCJI z KODEM, a nie o liczeniu czegokolwiek w przeglądarce. **Skutek dla 3e:** UI ma tylko pokazywać to, co przyszło ze stagingu — pozycje auto-zatwierdzone w ogóle się w nim nie pojawiają. Przestarzała jest instrukcja v5, nie kod. | — | ✅ ustalone |
 | **Utrzymanie roadmapy** | roadmapa jest wejściem dla NASTĘPNEJ sesji, a prompt jest jednorazowy — wiedza z bloku musi lądować tutaj, nie w prompcie | **zaklepane 2026-08-26:** po każdym zamkniętym bloku roadmapa opisuje STAN, nie zamiar; ustalenie dotyczące PRZYSZŁEGO bloku wpisuje się DO TEGO BLOKU (sesja 3c czyta blok 3c); **przypisanie funkcji do sesji weryfikuje się GRAFEM WYWOŁAŃ, nie nazwą** (`bridge_ext` trafił do złej sesji dwa razy — 3a i 3c); prompt nie koryguje roadmapy, tylko roadmapa siebie. Pełna reguła: `CLAUDE.md`, krok operacyjny: `.claude/commands/feature.md` Krok 13 | ✅ ustalone |
 | **Stack / decyzje szkieletu** | TypeScript vs JS; framework testów; drizzle introspect vs ręczny; layout `rebuild/` | **zaklepane w I1:** TypeScript (strict, ESM) + Vitest po obu stronach; BE: Express 4 + better-sqlite3 + `drizzle-kit introspect`; FE: Vite + Tailwind 3 + shadcn/ui, testy z Testing Library + MSW; layout `rebuild/backend/` + `rebuild/frontend/` (ewentualnie `rebuild/shared/`) | ✅ ustalone |
@@ -156,7 +156,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
-| 9 | Waga gabarytowa | 1 | 2 | ⬜ | |
+| 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ⬜ | |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ⬜ | |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
@@ -1046,12 +1046,30 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 9 — Waga gabarytowa
-- **Status:** ⬜  **Sesje:** 1  **Zależy od:** 2
-- **Cel (Ania klika):** otwiera `/waga-gabarytowa`, liczy wagę gabarytową dla opony.
-- **Backend:** `POST /api/waga-gabarytowa/oblicz`. **Decyzja:** liczyć w przeglądarce (jak dziś) vs przez API (spec-frontend §4) — rekomendacja: przez API (jedno źródło logiki).
-- **Frontend:** widok `/waga-gabarytowa` (formularz + wynik).
-- **Ścieżki (GATE):** `POST /api/waga-gabarytowa/oblicz` (brak fixtura GET — walidacja przez openapi + test logiki).
-- **DoD:** kalkulacja zgodna z oryginałem; decyzja lokalne/API zapisana.
+- **Status:** ✅ **zrobione** (2026-09-03, ticket `18-FEATURE-waga-gabarytowa`)  **Sesje:** 1  **Zależy od:** 2
+- **Cel (Ania klika):** otwiera `/waga-gabarytowa`, liczy wagę gabarytową dla opony — **zrobione**.
+- **⚠ Backend i frontend to DWA RÓŻNE kalkulatory, nie jeden wzór w dwóch miejscach** — ustalone
+  grafem wywołań, obala poprzednie założenie tego bloku. Backend (`POST /api/waga-gabarytowa/oblicz`,
+  `deminified/backend-index.cjs:48749-48769`) liczy wagę **paletową/oponową**: zaokrągla szerokość
+  do progów półpalety (≤55→60 cm stała) / palety (≤80→80 cm), dolicza wysokość palety (+10 cm),
+  mnoży przez współczynnik `0.000167`, wszystko z configu `waga_gab.*`. Frontend
+  (`deminified/frontend-index.js:26514-26953`) liczy wagę **wolumetryczną kurierską**
+  (`dł×szer×wys/dzielnik`, dzielnik per przewoźnik: GEIS 10000, DPD 6000, GLS 4000,
+  InPost/UPS/DHL 5000) + objętość m³ + „waga do wyceny", lokalnie, stan w IndexedDB, **zero
+  wywołań API**. **Decyzja D1 (dowieziona):** oba 1:1, każdy jak w oryginale; FE nie woła
+  endpointu. Szczegóły: `docs/tickets/18-FEATURE-waga-gabarytowa/plan.md`.
+- **Backend:** `POST /api/waga-gabarytowa/oblicz` dowieziony, formuła 1:1, za `requireAuth`
+  (⚠ odstępstwo świadome D2 — produkcja i kontrakt mają trasę publiczną `security: []`,
+  kontynuacja D1 z I1; kontraktu nie ruszano). Endpoint **bez konsumenta** — FE go nie woła.
+- **Frontend:** widok `/waga-gabarytowa` dowieziony — formularz + wynik + pełny edytor
+  przewoźników/dzielników (D3), trwałość w IndexedDB przez `magazynKV`.
+- **Ścieżki (GATE):** `POST /api/waga-gabarytowa/oblicz` — **fixtures faktycznie brak**
+  (potwierdzone), siatka oparta na `sprawdzZgodnoscZKontraktem` + teście jednostkowym formuły
+  jako głównym dowodzie zgodności; 401 bez tokenu asertowany wprost poza checkerem (kontrakt
+  tego kodu nie zna dla tej ścieżki — ten sam zabieg co `GET /api/markups`).
+- **DoD:** kalkulacja zgodna z oryginałem po obu stronach; decyzja lokalne/API rozstrzygnięta
+  (D1) — rekomendacja „przez API" odrzucona, bo opierała się na fałszywej przesłance
+  (wzory nie są tożsame).
 
 ---
 
@@ -1098,6 +1116,14 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Backend:** `GET/PUT /api/config` (`Jt`), `GET /api/spedycja` (`gn`). **Wszystkie trasy
   dostawców są już dowiezione:** listy w I2, `upload` w 3f-1, `PATCH /api/dostawcy/{id}`
   i `POST /api/dostawcy/{kod}/synchronizuj-teraz` w 3f-2.
+- **⚠ WEJŚCIE Z ITERACJI 9 (2026-09-03) — cztery klucze `waga_gab.*` nie są zasiewane w bazie.**
+  Oryginał sieje je do tabeli `config` przy starcie (`allConfig()`, `backend-index.cjs:45633-45637`):
+  `waga_gab.szer_polpaleta`=55, `waga_gab.szer_paleta`=80, `waga_gab.wys_palety`=10,
+  `waga_gab.wspolczynnik`=0.000167. I9 dowiozła tylko ODCZYT z fallbackiem na te same wartości
+  domyślne zaszyte w kodzie (`rebuild/backend/src/repos/config.ts`, `DOMYSLNE_WAGA_GAB`) — formuła
+  działa poprawnie, ale bez zasiewu Ania nie zobaczy tych czterech pól w widoku konfiguracji.
+  **Zasiew configu należy do TEJ iteracji.** Jest też piąty klucz opisowy
+  `waga_gab.opis_wspolczynnik` („DPD 1/6000 (1 m³ = 167 kg)"), którego kalkulator nie używa.
 - **⚠ ZAKRES POMNIEJSZONY 2026-09-01 — import wydzielony do bloku 3f.** Z tej iteracji WYSZŁY:
   `POST /api/dostawcy/{kod}/upload`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`,
   `PATCH /api/dostawcy/{id}`, zakładki **dostawcy** i **wgrywanie** oraz wchłonięcie
