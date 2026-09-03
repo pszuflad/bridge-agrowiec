@@ -49,6 +49,9 @@ const KOLUMNY_FILTROW = {
 
 export type NazwaFiltru = keyof typeof KOLUMNY_FILTROW;
 
+/** Nazwa kolumny dopuszczonej do `sql.raw` — domknięta zbiorem wartości `KOLUMNY_FILTROW`. */
+type KolumnaFiltru = (typeof KOLUMNY_FILTROW)[NazwaFiltru];
+
 /** Pozycja listy filtra — kolumna jest aliasowana na `value`, tak jak w oryginale. */
 export type WartoscFiltru = { value: string };
 
@@ -57,11 +60,11 @@ export type ListyFiltrow = Record<NazwaFiltru, WartoscFiltru[]>;
 /**
  * Jedna lista `DISTINCT` — wspólny kształt sześciu zapytań z `:98-107`.
  *
- * `sql.raw` dostaje nazwę kolumny WYŁĄCZNIE ze stałej `KOLUMNY_FILTROW`, czyli z literału
- * zamkniętego w tym module. Do tej funkcji nie ma drogi z `req.query` i mieć jej nie może —
- * gdyby kiedyś powstała, `sql.raw` trzeba zamienić na białą listę sprawdzaną w runtime.
+ * `sql.raw` dostaje nazwę kolumny WYŁĄCZNIE ze stałej `KOLUMNY_FILTROW` — i pilnuje tego
+ * TYP `KolumnaFiltru`, nie komentarz: dowolny inny napis nie skompiluje się w wywołaniu.
+ * Drogi z `req.query` tu nie ma i powstać nie może bez rozszerzenia tego typu.
  */
-function listaWartosci(db: Baza, kolumna: string, limit: number | null): WartoscFiltru[] {
+function listaWartosci(db: Baza, kolumna: KolumnaFiltru, limit: number | null): WartoscFiltru[] {
   const kol = sql.raw(kolumna);
   return db.all<WartoscFiltru>(sql`
     SELECT DISTINCT ${kol} AS value

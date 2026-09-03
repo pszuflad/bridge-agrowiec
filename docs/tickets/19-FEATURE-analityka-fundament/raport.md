@@ -42,7 +42,7 @@ zostało zbudowane ponad oryginał, jest nazwane jako odstępstwa O-10a-1..4.
 - `src/pages/placeholdery.ts` — zdjęty wpis `/analityka`.
 - `package.json` — `recharts@^3.10.1`, `@radix-ui/react-popover@^1.1.0`.
 - `test/msw/kontrakt.ts` — cztery loadery fixtures analityki, zdejmujące klucze techniczne.
-- **Nowe:** `test/analityka.test.tsx` (17 testów), `test/analityka.filtrowanie.test.ts` (9 testów).
+- **Nowe:** `test/analityka.test.tsx` (19 testów), `test/analityka.filtrowanie.test.ts` (9 testów).
 
 ---
 
@@ -70,6 +70,16 @@ tylko przy wejściu na `/analityka`. Bloki 10b–10e dokładają wykresy do tego
 Oryginał robi `slice(0, 300)` i nie mówi o tym użytkownikowi ani słowa (`:27953`). Przy
 filtrach klienckich cichy limit wyglądałby na zepsuty filtr, więc pod tabelą stoi jedno
 zdanie z liczbą uciętych wierszy. Sam limit zostaje 1:1.
+
+**4. `test/gate/dane.ts` nie został zmieniony, wbrew zapowiedzi w kroku 3 planu.**
+Plan przewidywał dołożenie wariantu seedu z wieloma `dostawca`/`kategoria`/`marka`, żeby
+`margins.rows` miał więcej niż jedną grupę. Okazało się to niepotrzebne: istniejące
+`PRODUKTY_TESTOWE` dają trzy produkty aktywne w **dwóch** grupach (MO9/Rolnicze/BKT ×2
+i MO2/Przyczepy/ALLIANCE ×1), a wszystkie mają `marzaPct: 6`, więc `low` i `high` wychodzą
+puste — dokładnie tak jak w nagraniu produkcji. Grupowanie jest więc realnie sprawdzone,
+a wspólny plik seedu został nietknięty (mniej ryzyka dla 38 pozostałych plików testowych).
+Bogatsze dane, potrzebne do sprawdzenia progów i sortowań, budują się lokalnie
+w `analityka.agregaty.test.ts` przez helper `produkt()`.
 
 Poza tym implementacja jest zgodna z planem. Kroki 1–8 wykonane w kolejności; wzorzec
 udokumentowany w `rebuild/frontend/src/pages/analityka/README.md`, jak zapowiadał krok 8.
@@ -115,7 +125,7 @@ podaje `requireAuth` w każdej rejestracji. Zgodność pełna.
 ### Testy jednostkowe i widoku
 
 - **Backend:** ✓ 631/631 (38 plików), w tym 11 nowych GATE + 17 nowych semantyki agregatów.
-- **Frontend:** ✓ 304/304 (20 plików), w tym 17 nowych widoku (MSW na fixtures) + 9 filtrowania.
+- **Frontend:** ✓ 306/306 (20 plików), w tym 19 nowych widoku (MSW na fixtures) + 9 filtrowania.
 - **Integracyjne / E2E:** pominięte świadomie — projekt nie ma harnessu E2E, a widok jest
   pokryty testem MSW renderującym całą `App` na nagranych odpowiedziach.
 
@@ -124,7 +134,7 @@ podaje `requireAuth` w każdej rejestracji. Zgodność pełna.
 | | lint | typecheck | build | test |
 |---|---|---|---|---|
 | `rebuild/backend` | ✓ | ✓ | ✓ | ✓ 631 |
-| `rebuild/frontend` | ✓ | ✓ | ✓ | ✓ 304 |
+| `rebuild/frontend` | ✓ | ✓ | ✓ | ✓ 306 |
 
 ### Walidacja palety wykresów (skill `dataviz`)
 
@@ -174,3 +184,27 @@ zmieniła adresu.
 5. **Nagranie fixture'a dla `POST /api/analytics/bootstrap-current`.** Faza 4 planu kontraktu
    przewiduje nagrywanie metod zapisujących przeciwko `db/snapshot.db`. Dopóki go nie ma,
    ta trasa ma najsłabsze pokrycie z całej piątki.
+
+---
+
+## Poprawki po review
+
+Reviewer zweryfikował backend i frontend linia po linii wobec oryginału i potwierdził
+wierność niezależnie. Zgłosił 1 BLOCKER, 2 SHOULD-FIX i 3 NICE-TO-HAVE.
+
+| Zgłoszenie | Reakcja |
+|---|---|
+| **BLOCKER** — `docs/rebuild-roadmap.md` nie odnotowuje zamknięcia bloku 10a | Zrobione w fazie dokumentacji tego samego ticketa (Krok 13–15 procesu), która następuje PO review. Nie było to przeoczenie, tylko kolejność kroków — patrz sekcja „Aktualizacja dokumentacji" niżej |
+| **SHOULD-FIX** — brak testu limitu 300 wierszy i stopki „Pokazano 300 z N" | Naprawione: dwa nowe testy w `test/analityka.test.tsx` (305 wierszy → 300 w DOM-ie + stopka z liczbą uciętych; poniżej limitu stopki nie ma) |
+| **SHOULD-FIX** — `test/gate/dane.ts` nie zmieniony wbrew planowi | Nie zmieniam kodu: seed okazał się wystarczający. Dopisane do „Odstępstw od planu" jako punkt 4 z uzasadnieniem |
+| **NICE-TO-HAVE** — `listaWartosci` przyjmuje `string`, nie zawężony typ | Naprawione: nowy typ `KolumnaFiltru` zamienia gwarancję z komentarza w gwarancję kompilatora |
+| **NICE-TO-HAVE** — brak nawigacji strzałkami w `WyborZWyszukiwarka` | Follow-up (punkt 6 niżej). Dziś działa Tab + Enter/Spacja na natywnych `<button>` |
+| **NICE-TO-HAVE** — brak indeksów na `products(status)` i `products(dostawca, kategoria, marka)` | Nie zmieniam: oryginał też ich nie ma, więc to nie regresja. Follow-up (punkt 7 niżej) |
+
+Dodatkowe pozycje follow-up wynikające z review:
+
+6. **Nawigacja strzałkami w wyszukiwalnym multi-selekcie** (roving tabindex). Przy 200
+   widocznych pozycjach byłaby wygodniejsza niż Tab.
+7. **Indeksy pod agregaty analityki.** `GET /margins` i `GET /filters` robią pełny skan
+   `products` (~6900 wierszy — dziś pojedyncze milisekundy). Oryginał ma tak samo, więc
+   dołożenie indeksu byłoby odstępstwem; warto wrócić, gdyby katalog urósł o rząd wielkości.

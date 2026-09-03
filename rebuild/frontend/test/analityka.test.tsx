@@ -219,6 +219,38 @@ describe("3. Sekcja marż — dashboard-wzorzec", () => {
     expect(screen.queryByText("NISKA1")).not.toBeInTheDocument();
   });
 
+  it("renderuje najwyżej 300 wierszy i mówi, ile ucięto", async () => {
+    // Limit jest z oryginału (`frontend-index.js:27953` — `e.slice(0, 300)`) i zostaje.
+    // Stopka jest naszym dodatkiem: przy filtrach klienckich cichy limit wyglądałby
+    // na zepsuty filtr (patrz raport.md, „Odstępstwa od planu" #3).
+    const duzo: Marze["rows"] = Array.from({ length: 305 }, (_, i) => ({
+      dostawca: `MO${i}`,
+      kategoria: "Rolnicze",
+      marka: `MARKA${i}`,
+      produkty: 1,
+      avgMarza: i,
+      minMarza: i,
+      maxMarza: i,
+    }));
+    zamockujApi({ rows: duzo, low: [], high: [] });
+    await otworzZakladkeMarz();
+
+    const tabela = await screen.findByTestId("tabela-marze");
+    // 300 wierszy danych + wiersz nagłówka.
+    expect(within(tabela).getAllByRole("row")).toHaveLength(301);
+    expect(tabela).toHaveTextContent("Pokazano 300 z 305 wierszy");
+    // Wiersz 301. istnieje w danych, ale nie trafia do DOM-u.
+    expect(within(tabela).queryByText("MARKA300")).not.toBeInTheDocument();
+  });
+
+  it("nie pokazuje stopki o ucięciu, gdy wierszy jest mniej niż limit", async () => {
+    zamockujApi();
+    await otworzZakladkeMarz();
+
+    const tabela = await screen.findByTestId("tabela-marze");
+    expect(tabela).not.toHaveTextContent("Pokazano");
+  });
+
   it("pokazuje komunikat pustej tabeli w brzmieniu oryginału", async () => {
     zamockujApi({ rows: [], low: [], high: [] });
     await otworzZakladkeMarz();
