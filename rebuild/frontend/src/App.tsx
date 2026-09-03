@@ -23,6 +23,7 @@ import { Katalog } from "@/pages/Katalog";
 import { Konfiguracja } from "@/pages/Konfiguracja";
 import { Narzuty } from "@/pages/Narzuty";
 import { Staging } from "@/pages/Staging";
+import { WagaGabarytowa } from "@/pages/WagaGabarytowa";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
 import { PLACEHOLDERY } from "@/pages/placeholdery";
@@ -38,6 +39,7 @@ export function Trasy() {
         <Route path="/konfiguracja" component={Konfiguracja} />
         <Route path="/historia" component={Historia} />
         <Route path="/narzuty" component={Narzuty} />
+        <Route path="/waga-gabarytowa" component={WagaGabarytowa} />
         {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
           <Route key={path} path={path}>
             <WidokWPrzygotowaniu tytul={tytul} opis={opis} iteracja={iteracja} />
