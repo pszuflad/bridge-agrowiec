@@ -116,8 +116,8 @@ Sprawdzone: `docs/rebuild-roadmap.md` blok „Iteracja 11” przepisany ze stanu
 `GET/PUT /api/config`, „cztery zaślepki”) na stan faktyczny (✅ 2026-09-03, `POST /api/config`
 z `{klucz, wartosc}`, `POST /api/spedycja` dopisane, DoD z checkboxami ✅). Sprostowanie
 `PUT`→`POST` poprawione też w bloku 3f (linia 507), gdzie było powielone. Backlog: wpis #14
-rozszerzony o `POST /api/spedycja`/`POST /api/config` jako naprawione w I11; nowe wpisy #26
-(spedycja przez sieć, D2) i #27 (whitelista configu, D4) — oba z pełnym opisem „co robi
+rozszerzony o `POST /api/spedycja`/`POST /api/config` jako naprawione w I11; nowe wpisy #29
+(spedycja przez sieć, D2) i #30 (whitelista configu, D4) — oba z pełnym opisem „co robi
 produkcja” / „decyzja użytkownika”, zgodnie z konwencją reszty backlogu.
 
 **Sprawdzone zgodnie z zasadą #2 z `CLAUDE.md`** („ustalenie o przyszłym bloku wpisz DO TEGO

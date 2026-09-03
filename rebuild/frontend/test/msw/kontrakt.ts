@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Uzytkownik } from "@/lib/api";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
+import type { Alert } from "@/pages/alerty/api";
 
 const katalogTestow = dirname(fileURLToPath(import.meta.url));
 const korzenRepo = resolve(katalogTestow, "../../../..");
@@ -204,5 +205,20 @@ export function spedycjaZFixtura(): {
       dodatkoweReguly: string | null;
     }[];
   };
+  return fixture.body;
+}
+
+/**
+ * Alerty z `contract/fixtures/GET_alerts.json` — pięć nagranych wierszy.
+ *
+ * ⚠ OGRANICZENIE SIATKI, NAZWANE WPROST: wszystkie pięć to `Synchronizacja`/`info`/
+ * `rozwiazany`, każdy dla INNEGO dostawcy — czyli w nagraniu NIE MA ANI JEDNEJ POWTÓRKI,
+ * a to właśnie powtórki są sednem tej iteracji (339 alertów „Błąd pobierania" w
+ * `db/snapshot.db`). Fixture daje więc KSZTAŁT wiersza, ale nie rozkład danych; testy
+ * zwijania budują powtórki z tego kształtu przez `zPowtorkami` w `alerty.grupowanie.test.ts`.
+ */
+export function alertyZFixtura(): Alert[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_alerts.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Alert[] };
   return fixture.body;
 }

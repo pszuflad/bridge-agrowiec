@@ -134,7 +134,7 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | **Auth flow** | `POST /api/login {email:trim,password}` → `{ok,user,token}`; `Bearer` gdy token + `credentials:include` równolegle; `bridge_user` w `localStorage` albo `sessionStorage` wg `bridge_remember`; Query `on401:returnNull,staleTime:Infinity,retry:false` | **odtworzone 1:1 w I1 (1b)** (`rebuild/frontend/src/lib/`) | ✅ ustalone |
 | **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | naprawić w I7 (wołać natywne) | ⬜ do zaklepania |
 | **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / I8 / **`freq-injection.js` ✅ wchłonięty w 3f-2 (2026-09-01)** | 🔨 częściowo |
-| **Lokalne vs API** | alerty i waga gabarytowa liczone lokalnie mimo endpointów (spec-frontend §4) | decydować per iteracja (I6, I9) | ⬜ per iteracja |
+| **Lokalne vs API** | **Oba tematy rozstrzygnięte 2026-09-03, każdy INNYM rozstrzygnięciem — bo to były dwa różne problemy, nie jeden.** **I6 (alerty, D3): przez API.** `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie, zero IndexedDB/localStorage. Wcześniejszy zapis w tym wierszu mylił — oryginalny widok `/alerty` (`HT()`, `frontend-index.js:25177-25340`) w ogóle nie czytał `/api/alerts`: liczył pseudo-alerty katalogowe z `GET /api/products` i trzymał ich status w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`); to inny zestaw danych, nie kwestia miejsca przechowywania statusu. **I9 (waga gabarytowa, D1): lokalnie, FAKTEM.** To DWA różne kalkulatory pod jedną nazwą (paletowy w BE vs wolumetryczny w FE), nie jeden wzór w dwóch miejscach — nie było czego deduplikować. Dowieziono oba 1:1, FE liczy lokalnie i endpointu nie woła, jak produkcja. **Wniosek na przyszłość: pytanie „lokalnie czy przez API” rozstrzyga się dopiero po sprawdzeniu, czy obie strony liczą TO SAMO** — dwa razy z rzędu okazało się, że nie. | — | ✅ I6 · ✅ I9 |
 | **Staging auto-accept — LOKALNIE czy przez API** | **rozstrzygnięte 2026-08-27 (3d-1) FAKTEM, nie preferencją: auto-zatwierdzanie jest BACKENDOWE.** Siedzi w gałęzi `else if` żywego `tk()` (`backend-index.cjs:47791-47806`) i od 3d-1 jest odtworzone razem ze skutkami (`updateProduct` + `historia_cen` + `applyDims`). Frontend NIE liczy go lokalnie: bundle woła `POST /api/staging/accept` (czyli API) i nie zawiera ani `autoZatwierdzone`, ani żadnej lokalnej logiki auto-akceptacji (grep po `mirror/frontend/assets/*.js`: 0 trafień). Zdanie ze `spec-frontend` §4 („instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu") mówi o rozjeździe INSTRUKCJI z KODEM, a nie o liczeniu czegokolwiek w przeglądarce. **Skutek dla 3e:** UI ma tylko pokazywać to, co przyszło ze stagingu — pozycje auto-zatwierdzone w ogóle się w nim nie pojawiają. Przestarzała jest instrukcja v5, nie kod. | — | ✅ ustalone |
 | **Utrzymanie roadmapy** | roadmapa jest wejściem dla NASTĘPNEJ sesji, a prompt jest jednorazowy — wiedza z bloku musi lądować tutaj, nie w prompcie | **zaklepane 2026-08-26:** po każdym zamkniętym bloku roadmapa opisuje STAN, nie zamiar; ustalenie dotyczące PRZYSZŁEGO bloku wpisuje się DO TEGO BLOKU (sesja 3c czyta blok 3c); **przypisanie funkcji do sesji weryfikuje się GRAFEM WYWOŁAŃ, nie nazwą** (`bridge_ext` trafił do złej sesji dwa razy — 3a i 3c); prompt nie koryguje roadmapy, tylko roadmapa siebie. Pełna reguła: `CLAUDE.md`, krok operacyjny: `.claude/commands/feature.md` Krok 13 | ✅ ustalone |
 | **Stack / decyzje szkieletu** | TypeScript vs JS; framework testów; drizzle introspect vs ręczny; layout `rebuild/` | **zaklepane w I1:** TypeScript (strict, ESM) + Vitest po obu stronach; BE: Express 4 + better-sqlite3 + `drizzle-kit introspect`; FE: Vite + Tailwind 3 + shadcn/ui, testy z Testing Library + MSW; layout `rebuild/backend/` + `rebuild/frontend/` (ewentualnie `rebuild/shared/`) | ✅ ustalone |
@@ -153,11 +153,11 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 |
 | 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
-| 6 | Alerty | 1 | 3 | ⬜ | |
+| 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
-| 9 | Waga gabarytowa | 1 | 2 | ⬜ | |
-| 10 | Analityka + pulpit | 2–3 | 2, 3, 4 | ⬜ | |
+| 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
+| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ⬜ | |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ⬜ | |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
 
@@ -811,9 +811,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Ścieżki (GATE):** staging×9 (3× odczyt ✅ 3b, 6× mutacje ✅ 3d-2), import×2 ✅ 3b, ai-fallback ✅ 3b, overrides×3 (`GET`, `POST`, `DELETE {id}` — `PUT` NIE ISTNIEJE) ✅ 3d-2.  **Fixtures:** `GET_staging.json` ✅ 3b, `GET_staging_paged.json` ✅ 3b, **`GET_overrides.json` ✅ 3d-2**.
 - **DoD — ROZLICZONY 2026-09-01, ITERACJA ZAMKNIĘTA:** charakteryzacja parserów zielona (port 1:1 z oryginałem na próbkach MO1–MO10) ✅ 3a; import przetwarza plik/URL do stagingu ✅ 3b; `tk()` odtwarza dopasowanie ✅ 3c oraz auto-approve/wycofanie ✅ 3d-1; overrides Marty respektowane (import nie nadpisuje) ✅ 3d-1; `acceptStaging` + endpointy mutacji ✅ 3d-2; widok `/staging` ✅ 3e; **wszystkie gate'y 3a–3f zielone** ✅; fixtures przez GATE ✅. **„Ania przeklika PEŁNY cykl importu"** ✅ — wgrywanie z przeglądarki 3f-1, ścieżka URL i alerty 3f-2, automat 3f-3. **Wszystkie trzy produkcyjne ścieżki importu (mail/upload → wgranie ręczne, url → „Synchronizuj teraz", url → automat) są uruchamialne z przeglądarki** ✅. Do 2026-09-01 punkt ten wskazywał na I11; zakres został stamtąd wydzielony do 3f.
   **Stan bramek na zamknięcie:** BE **449 testów** w 30 plikach, FE **183** w 13; lint / typecheck / build czyste.
-- **⚠ CO ZOSTAJE OTWARTE PO ITERACJI 3 — świadomie, z właścicielem:** zamknięcie iteracji NIE znaczy, że nie ma tu długu. Cztery rzeczy wychodzą dalej i **żadna nie blokuje I4**:
+- **⚠ CO ZOSTAJE OTWARTE PO ITERACJI 3 — świadomie, z właścicielem:** zamknięcie iteracji NIE znaczy, że nie ma tu długu. Pięć rzeczy wychodzą dalej i **żadna nie blokuje I4**:
   - **Fallback `Wc()` NIE wchodzi** (decyzja zaklepana 2026-09-01, blok 3f) — dziesięć starych parserów zaszytych w bundlu, port wielkości sesji 3a. **Luka otwarta, właściciel do ustalenia.**
-  - **Alerty bez dławika** (decyzja 3f-2) → zwijanie powtórek należy do **widoku alertów w Iteracji 6**, wymóg wpisany w tamten blok. Po włączeniu automatu z 3f-3 tempo to ~24 alerty/dobę na trwale padniętego dostawcę.
+  - **Alerty bez dławika** (decyzja 3f-2) → zwijanie powtórek dowiezione **widokiem alertów w Iteracji 6 ✅ 2026-09-03**. Po włączeniu automatu z 3f-3 tempo to ~24 alerty/dobę na trwale padniętego dostawcę.
+  - **Rozmiar odpowiedzi `GET /api/alerts` rośnie ze schedulerem** (follow-up z Iteracji 6, `18-FEATURE-widok-alerty`) — `GET /api/alerts` jest bez limitu 1:1 (D9); po włączeniu automatu z 3f-3 (120 pobrań/dobę → część kończy się alertem) tabela `alerts` rośnie liniowo, dziś ~3000 wierszy, za rok rzędu 45 tys. Wtedy potrzebna decyzja: limit czasowy w zapytaniu albo agregacja po stronie backendu — zmieniłaby kontrakt, nie robić bez decyzji użytkownika. **Właściciel do ustalenia** przy włączaniu schedulera na produkcji.
   - **Dwa pojęcia statusu dostawcy** (backlog **#17** i **#18**, znalezione w 3f-3, odtworzone 1:1) — samozakleszczenie po 30 dniach, świeża baza planująca zero, oraz „wstrzymany" niewidoczny na karcie. Propozycje napraw w backlogu; **właściciel do ustalenia**, bo #17 zmienia dobór dostawców do automatu, a #18 dokłada klucz do kontraktu `GET /api/dostawcy` (przenagranie `GET_dostawcy.json` i `GET_suppliers.json`).
   - **`PATCH /api/markups/{id}` i `/api/promotions/{id}` zapisywały CAŁE ciało żądania** (backlog #14, wejście z 3f-2) → **domknięte w 4a** (`POLA_EDYTOWALNE_NARZUTU`/`POLA_EDYTOWALNE_PROMOCJI`, filtr na PATCH i POST).
 
@@ -953,35 +954,46 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 6 — Alerty
-- **Status:** ⬜  **Sesje:** 1  **Zależy od:** 3
-- **Cel (Ania klika):** otwiera `/alerty`, widzi i obsługuje alerty.
-- **Backend:** `GET /api/alerts`, `PATCH /api/alerts/{id}` (`Ki`).
-- **⚠ PISANIE alertów NIE należy do tej iteracji (ustalone 2026-09-01).** Ta iteracja dowozi
-  wyłącznie ODCZYT i zmianę statusu. Alerty tworzy IMPORT — przy błędzie HTTP, przy błędzie
-  pobierania i przy ręcznym uploadzie — i to wchodzi w blokach **3f-1** i **3f-2**, razem
-  z repozytorium `src/repos/alerts.ts` (samo `zapiszAlert`). **Repo POWSTAŁO w 3f-1
-  ✅ 2026-09-01** wraz z typami `PoziomAlertu`/`StatusAlertu` — dopisz do niego `listAlerts`
-  i `updateAlertStatus`, nie twórz drugiego pliku. Alert „Ręczny upload" jest już pisany
-  (`poziom: info`, `status: rozwiazany` przy powodzeniu; `poziom: ostrzezenie`,
-  `status: nowy` przy nieudanym parsowaniu — to nasz dodatek, produkcja przy błędzie milczy).
-- **⭐ WEJŚCIE Z SESJI 3f-2 (2026-09-01) — WIDOK MUSI ZWIJAĆ POWTÓRKI.** Decyzją użytkownika
-  import pisze alert przy KAŻDEJ nieudanej próbie, **bez dławika po stronie zapisu**, bo
-  liczba powtórzeń jest sygnałem diagnostycznym i dławik kasowałby go bezpowrotnie. Ciężar
-  spada więc na TĘ iterację. Skala zmierzona w `db/snapshot.db`: **339 alertów „Błąd
-  pobierania"** (MO3: 150, MO5: 102, MO4: 83, MO2: 4) wobec 4 × „Błąd HTTP" i 2127 ×
-  „Synchronizacja"; rekord to 23 alerty na dobę dla samego MO3 (2026-08-08…10), a trzej
-  dostawcy naraz dawali ~60/dobę. Surowa lista jest w tej sytuacji bezużyteczna. **Wymóg:**
-  widok grupuje po (`dostawca`, `typ`, `status`) i pokazuje „MO3 — Błąd pobierania, 23 razy,
-  ostatnio 14:45", z rozwinięciem do pojedynczych wierszy. Po włączeniu schedulera z 3f-3
-  (120 pobrań/dobę) skala tylko rośnie.
+- **Status:** ✅ **2026-09-03** (`18-FEATURE-widok-alerty`)  **Sesje:** 1  **Zależy od:** 3
+- **Cel (Ania klika):** otwiera `/alerty`, widzi i obsługuje alerty (zmiana statusu) — ✅ dowiezione.
+- **Backend:** `GET /api/alerts` + `PATCH /api/alerts/{id}` w NOWYM
+  `rebuild/backend/src/routes/alerts.ts` (wzorzec `routes/overrides.ts`), obie za `requireAuth`
+  (odstępstwo D2, precedens I1 — oryginał i `openapi.yaml` mają `GET` publiczny). Repo
+  `src/repos/alerts.ts` (istniejące od 3f-1, `zapiszAlert` + typy `PoziomAlertu`/`StatusAlertu`)
+  rozszerzone o `listAlerts`/`updateAlertStatus` — port `U.listAlerts`/`U.updateAlertStatus` 1:1:
+  bez limitu (D9), `PATCH` bez audytu/walidacji/404 (D4 — `status` dowolny string, zawsze
+  `{ok:true}`, także dla nieistniejącego `id`).
+- **⚠ Oryginalny widok `/alerty` NIE czytał `/api/alerts` — pseudo-alerty katalogowe świadomie
+  pominięte (D1).** `HT()` (`deminified/frontend-index.js:25177-25340`) pobierał
+  `GET /api/products` i liczył pseudo-alerty katalogowe (`pv()`, `:16631-16705`: marża ujemna,
+  niska marża, „nie-opona"), a status trzymał w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`),
+  operując poziomem `krytyczny` i statusem `przejrzany`, których backend NIGDY nie produkuje.
+  To nie był wybór miejsca przechowywania statusu tych samych alertów — to dwa różne zestawy
+  danych. Widok tej iteracji stoi WYŁĄCZNIE na `/api/alerts` (alerty importu); pseudo-alerty
+  katalogowe pominięte świadomie, wpis **`docs/rebuild-backlog.md` #26** (⬜ do decyzji).
+- **Widok zwija powtórki — wymóg z 3f-2 rozliczony.** Grupowanie po (`dostawca`, `typ`, `status`)
+  w `pages/alerty/grupowanie.ts` (`pogrupujAlerty`/`filtrujAlerty`/`wartosciFiltrow`): grupa
+  domyślnie zwinięta, licznik + czas ostatniego wystąpienia („MO3 — Błąd pobierania · 23× ·
+  ostatnio 14:45"), rozwinięcie do pojedynczych wpisów; dowiedzione testem na danych z
+  powtórkami (24 alerty → 2 grupy w DOM, pojedyncze `opis`y nieobecne przed rozwinięciem).
+  Domyślny filtr `status = nowy` (D7), filtry status/dostawca/typ z wartości w danych (D8).
+  Zmiana statusu — na grupie i na pojedynczym wpisie, w obie strony, WYŁĄCZNIE przez API (D3):
+  `PATCH /api/alerts/{id}` jedyne źródło prawdy, zero IndexedDB/localStorage; akcja grupowa to
+  N `PATCH`-y z limitem równoległości 8 (`pages/alerty/api.ts`, największa grupa w produkcji —
+  150 wpisów).
 - **⚠ Typ alertu „Błąd pobierania" obejmuje TAKŻE błędy parsera** — oryginał ma jeden blok
   `catch` wokół pobrania i parsowania (`:48100`). Grupowanie po `typ` zmiesza więc dwie
-  przyczyny; powód jest w treści (`opis`), nie w typie. Nie „naprawiać" tego zmianą typu
-  przy zapisie — to port 1:1 i widok ma się do niego dostosować.
-- **Frontend:** widok `/alerty`. **Decyzja:** status/obsługa lokalnie vs przez API (spec-frontend §4) — rekomendacja: przez API (spójność stanu).
-- **Ścieżki (GATE):** alerts×2.  **Fixtures:** `GET_alerts.json`.
-- **DoD:** alerty listują i zmieniają stan; **powtórki zwinięte, nie wysypane surowo**;
-  decyzja lokalne/API zapisana; fixtures przez GATE.
+  przyczyny; powód jest w treści (`opis`), nie w typie. Nie naprawione zmianą typu przy
+  zapisie — port 1:1, widok się dostosował.
+- **Frontend:** `pages/Alerty.tsx` + `pages/alerty/{api,grupowanie,TabelaAlertow}.tsx`, wpięty
+  w `App.tsx`; placeholder `/alerty` zdjęty z `pages/placeholdery.ts` (liczba tras routera bez zmian).
+- **Ścieżki (GATE):** alerts×2 ✅.  **Fixtures:** `GET_alerts.json` ✅ (dla `PATCH` brak nagranej
+  próbki — kształt stoi wyłącznie na kodzie oryginału `:48688-48691`; follow-up: nagrać przy
+  najbliższym kontakcie z produkcją).
+- **DoD:** ✅ obie trasy za `requireAuth`, GATE fixtures/kontrakt zielony; widok listuje zwinięte
+  grupy, rozwijalne, filtry status/dostawca/typ działają; decyzja D3 (przez API) i D1 (pominięcie
+  pseudo-alertów katalogowych, backlog #26) zapisane; lint/typecheck/build/test czyste w BE i FE.
+  Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
 
 ---
 
@@ -1043,17 +1055,35 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 9 — Waga gabarytowa
-- **Status:** ⬜  **Sesje:** 1  **Zależy od:** 2
-- **Cel (Ania klika):** otwiera `/waga-gabarytowa`, liczy wagę gabarytową dla opony.
-- **Backend:** `POST /api/waga-gabarytowa/oblicz`. **Decyzja:** liczyć w przeglądarce (jak dziś) vs przez API (spec-frontend §4) — rekomendacja: przez API (jedno źródło logiki).
-- **Frontend:** widok `/waga-gabarytowa` (formularz + wynik).
-- **Ścieżki (GATE):** `POST /api/waga-gabarytowa/oblicz` (brak fixtura GET — walidacja przez openapi + test logiki).
-- **DoD:** kalkulacja zgodna z oryginałem; decyzja lokalne/API zapisana.
+- **Status:** ✅ **zrobione** (2026-09-03, ticket `18-FEATURE-waga-gabarytowa`)  **Sesje:** 1  **Zależy od:** 2
+- **Cel (Ania klika):** otwiera `/waga-gabarytowa`, liczy wagę gabarytową dla opony — **zrobione**.
+- **⚠ Backend i frontend to DWA RÓŻNE kalkulatory, nie jeden wzór w dwóch miejscach** — ustalone
+  grafem wywołań, obala poprzednie założenie tego bloku. Backend (`POST /api/waga-gabarytowa/oblicz`,
+  `deminified/backend-index.cjs:48749-48769`) liczy wagę **paletową/oponową**: zaokrągla szerokość
+  do progów półpalety (≤55→60 cm stała) / palety (≤80→80 cm), dolicza wysokość palety (+10 cm),
+  mnoży przez współczynnik `0.000167`, wszystko z configu `waga_gab.*`. Frontend
+  (`deminified/frontend-index.js:26514-26953`) liczy wagę **wolumetryczną kurierską**
+  (`dł×szer×wys/dzielnik`, dzielnik per przewoźnik: GEIS 10000, DPD 6000, GLS 4000,
+  InPost/UPS/DHL 5000) + objętość m³ + „waga do wyceny", lokalnie, stan w IndexedDB, **zero
+  wywołań API**. **Decyzja D1 (dowieziona):** oba 1:1, każdy jak w oryginale; FE nie woła
+  endpointu. Szczegóły: `docs/tickets/18-FEATURE-waga-gabarytowa/plan.md`.
+- **Backend:** `POST /api/waga-gabarytowa/oblicz` dowieziony, formuła 1:1, za `requireAuth`
+  (⚠ odstępstwo świadome D2 — produkcja i kontrakt mają trasę publiczną `security: []`,
+  kontynuacja D1 z I1; kontraktu nie ruszano). Endpoint **bez konsumenta** — FE go nie woła.
+- **Frontend:** widok `/waga-gabarytowa` dowieziony — formularz + wynik + pełny edytor
+  przewoźników/dzielników (D3), trwałość w IndexedDB przez `magazynKV`.
+- **Ścieżki (GATE):** `POST /api/waga-gabarytowa/oblicz` — **fixtures faktycznie brak**
+  (potwierdzone), siatka oparta na `sprawdzZgodnoscZKontraktem` + teście jednostkowym formuły
+  jako głównym dowodzie zgodności; 401 bez tokenu asertowany wprost poza checkerem (kontrakt
+  tego kodu nie zna dla tej ścieżki — ten sam zabieg co `GET /api/markups`).
+- **DoD:** kalkulacja zgodna z oryginałem po obu stronach; decyzja lokalne/API rozstrzygnięta
+  (D1) — rekomendacja „przez API" odrzucona, bo opierała się na fałszywej przesłance
+  (wzory nie są tożsame).
 
 ---
 
 ### Iteracja 10 — Analityka + pulpit
-- **Status:** ⬜  **Sesje:** 2–3 (podział po grupach: EAN / ceny / dostawcy / dostępność-rotacja / KPI)  **Zależy od:** 2, 3, 4
+- **Status:** ⬜  **Sesje (6 bloków, dekompozycja 2026-09-02):** 10a fundament → [10b·10c·10d·10e równolegle] → 10f  **Zależy od:** 2, 3, 4
 - **Cel (Ania klika):** otwiera `/analityka` (20+ dashboardów) i pulpit `/` (agregaty).
 - **⚠ WEJŚCIE Z ITERACJI 5 (decyzja D3, 2026-09-02) — `historia_cen` ma pisarza, brak czytelnika.**
   Tabela `historia_cen` jest zapisywana od bloku 3d-1 (`rebuild/backend/src/repos/historia.ts`,
@@ -1065,10 +1095,26 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Tu też należy `GET /api/history` jako źródło danych dla Pulpitu** (`frontend-index.js:16852`).
   Endpoint jest już zaimplementowany i przetestowany w I5 (`src/routes/history.ts`), czyta
   tabelę `history`; na stagingu zwraca dziś `[]`, bo ta tabela nie ma jeszcze pisarza (patrz I5).
-- **Backend:** 27 tras `/api/analytics/*` (KPI, marże, EAN coverage/comparison/unique/rank/details, ceny inflation/last-import/product-history, dostawcy stats/lifecycle/stability/stock, dostępność products/sell-through, rotacja inactive, sezonowość, importy-timeline, top-zmiany, filters, status, bootstrap-current, export/{view}, market/group-prices, lifecycle/models).
-- **Frontend:** widok `/analityka` (`fe.js:27804`) + pulpit `/`.
-- **Ścieżki (GATE):** analytics×27.  **Fixtures:** wszystkie `GET_analytics_*.json` (25).
-- **DoD:** dashboardy renderują realne agregaty; fixtures przez GATE; pulpit pokazuje kluczowe metryki.
+- **⭐ Kolejność:** **10a MUSI być pierwszy** — stawia szkielet `/analityka` (`fe.js:27804`), kontrolki filtrów, nagłówek KPI i wzorzec wykresu; sesja 10a ładuje skill `dataviz`. Po merge 10a bloki **10b/10c/10d/10e są niezależne → równoległe**. **10f na końcu** (Pulpit agreguje gotowe metryki).
+- **10a · Fundament analityki** (BE+FE) — `bootstrap-current` (POST, akcja seedująca `historia_cen`), `filters`, `status`, `kpi`, **`margins` (dashboard-WZORZEC, decyzja A 2026-09-02)**; szkielet strony `/analityka`, 6 globalnych filtrów wyszukiwalnych, nagłówek KPI (4 kafle) + `margins` jako pełny wzorzec *filtr→zapytanie→tabela/wykres*; infrastruktura wykresów (Recharts przez shadcn + `dataviz`; tabele ≤300 wierszy).
+  - Gate: fixtures kpi/filters/status/**margins** (kształt 1:1 + openapi; bootstrap-current tylko openapi); strona renderuje KPI + filtry + wzorcowy dashboard na snapshocie.
+- **10b · Ceny** (BE+FE) — `prices/inflation`, `prices/last-import`, `prices/product-history` (**czytelnik `historia_cen`**, D3), `market/group-prices`, `top-zmiany` (**`margins` przeniesione do 10a jako wzorzec**).
+  - Gate: fixtures tej grupy (6) + dashboardy na realnych agregatach.
+- **10c · EAN** (BE+FE) — `ean/comparison`, `ean/coverage`, `ean/details`, `ean/supplier-rank`, `ean/unique`, `ean-porownanie`.
+  - Gate: fixtures EAN (6).
+- **10d · Dostawcy** (BE+FE) — `dostawcy-stats`, `suppliers/lifecycle`, `suppliers/stability`, `suppliers/stock`.
+  - Gate: fixtures dostawców (4).
+- **10e · Dostępność / rotacja / cykl** (BE+FE) — `availability/products`, `availability/sell-through`, `rotation/inactive`, `lifecycle/models`, `seasonality/monthly`, `importy-timeline`.
+  - Gate: fixtures tej grupy (6).
+- **10f · Export + Pulpit** (BE+FE) — `analytics/export/{view}` + pulpit `/` (home; czyta `GET /api/history` z I5 + KPI z 10a + alerty z I6).
+  - **WEJŚCIE Z ITERACJI 6 (2026-09-03, `18-FEATURE-widok-alerty`) — klient dla „najświeższych
+    alertów" na pulpicie JUŻ ISTNIEJE.** `pobierzAlerty()` (`pages/alerty/api.ts`) i grupowanie
+    `pogrupujAlerty()` (`pages/alerty/grupowanie.ts`) są gotowe do ponownego użycia; `queryKey`
+    to `["/api/alerts"]`. Nie pisać drugiego klienta. ⚠ Pulpit oryginału filtrował alerty po
+    statusie `nowy` i ograniczał do pięciu (`02_WIDOKI.md` §/ pkt 5) — `filtrujAlerty` to robi.
+  - Gate: export waliduje wg openapi (brak fixtura GET); pulpit pokazuje kluczowe metryki.
+- **Ścieżki (GATE):** analytics×27; fixtures `GET_analytics_*.json` (25) rozdzielone po blokach 10a–10e; `export/{view}` bez fixtura GET (walidacja openapi).
+- **DoD:** wszystkie bloki 10a–10f zielone; dashboardy renderują realne agregaty; fixtures przez GATE; pulpit pokazuje kluczowe metryki.
 
 ---
 
@@ -1087,6 +1133,18 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   kontrakt ma `security: []` dla obu GET-ów, jak w I1a/I2/3b/3d-2/4a/I5). Trasy dostawców są już
   dowiezione: listy w I2, `upload` w 3f-1, `PATCH /api/dostawcy/{id}` i
   `POST /api/dostawcy/{kod}/synchronizuj-teraz` w 3f-2.
+- **⚠ WEJŚCIE Z ITERACJI 9 (2026-09-03) — ROZLICZONE.** I9 zgłosiła, że czterech kluczy
+  `waga_gab.*` nikt nie zasiewa w bazie: formuła wagi gabarytowej działała na wartościach
+  domyślnych zaszytych w kodzie (`repos/config.ts`, `DOMYSLNE_WAGA_GAB`), a nie na configu.
+  **Zasiew jest w tej iteracji:** `src/db/seed-poczatkowy.ts` (port `vR`, `:45633-45644`) sieje
+  komplet **11 kluczy**, w tym pięć `waga_gab.*` — z opisowym `waga_gab.opis_wspolczynnik`
+  („DPD 1/6000 (1 m³ = 167 kg)"), którego kalkulator nie używa. Korzystają z niego `seed-dev.ts`
+  i harness GATE, więc `GET /api/config` oddaje te klucze i zgadza się z fixture'em co do znaku.
+  **Uwaga dla przyszłych sesji:** zasiew NIE oznacza, że Ania te pola zobaczy — edytora
+  `waga_gab.*` nie ma ani w oryginale, ani tutaj (D7). Klucze są zapisywalne przez
+  `POST /api/config` (są na whiteliście), ale bez UI. Dołożenie edytora to nowa funkcja, nie
+  odbudowa. ⚠ `DOMYSLNE_WAGA_GAB` (4 wartości) i `KONFIGURACJA_POCZATKOWA` (11) to **dwa porty
+  tego samego `vR`** — rozjazd między nimi byłby cichy.
 - **Frontend:** cztery pozostałe zakładki wypełnione — **`/konfiguracja` nie ma już ani jednej
   zaślepki**, sześć z sześciu gotowe. Pola `domykaBlok` i `opis` zniknęły z `zakladki.ts` razem
   z blokiem renderującym zaślepki w `Konfiguracja.tsx`.

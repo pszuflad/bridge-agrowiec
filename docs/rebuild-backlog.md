@@ -934,7 +934,7 @@ Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archi
   kolumn do odsiania; klucz spoza listy → `400`. Oryginał (`U.setConfig(l, p)`, `:48745`)
   przyjmuje dowolny klucz — literówka w nazwie zakłada w tabeli nowy, martwy wiersz. Audyt
   spedycji zachował się tak jak przy narzutach (surowe ciało, port 1:1). Szczegóły:
-  `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/plan.md` D4/D5, oraz backlog #26/#27
+  `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/plan.md` D4/D5, oraz backlog #29/#30
   (odstępstwa od 1:1 zatwierdzone przy tej samej okazji).
 - **Iteracja 12 (produkty + hardening)** — `PATCH /api/products/:id` odsiewa wyłącznie klucz
   `_reason`; cała reszta 72 kolumn jest zapisywalna. Ta trasa dodatkowo zapisuje
@@ -1014,10 +1014,15 @@ poprawnie. Powód jest w treści (`opis`), nie w typie.
 alertów z **Iteracji 6** względem 339 wierszy historycznych, które są w bazie i mają stary
 typ. Zgodność z danymi produkcji jest tu więcej warta niż trafniejsza etykieta.
 
-**Co z tego wynika dla Iteracji 6.** Widok grupujący po `typ` zmiesza dwie przyczyny.
-Rozróżnia je treść: błąd sieci to dosłowny komunikat undici („fetch failed",
-„This operation was aborted", „terminated"), błąd parsera to komunikat z portu parserów.
-Wymóg zapisany w roadmapie, w bloku Iteracji 6.
+**Co dowiozła Iteracja 6** (2026-09-03, ticket `18-FEATURE-widok-alerty`). Widok grupuje po
+`(dostawca, typ, status)`, więc dwie przyczyny „Błędu pobierania" faktycznie lądują w jednej
+grupie — zgodnie z zapowiedzią wyżej. Rozróżnienie sieć/parser zostaje w treści (`opis`)
+pojedynczego wpisu i jest widoczne dopiero po rozwinięciu grupy: błąd sieci to dosłowny
+komunikat undici („fetch failed", „This operation was aborted", „terminated"), błąd parsera to
+komunikat z portu parserów. Wyszukiwarka po `opis`, która mogłaby to filtrować bez rozwijania,
+została w tym samym ticketcie **odrzucona przez użytkownika** (decyzja D8) — patrz
+`docs/tickets/18-FEATURE-widok-alerty/plan.md`, logika grupowania w
+`rebuild/frontend/src/pages/alerty/grupowanie.ts`.
 
 ---
 
@@ -1390,7 +1395,97 @@ zwraca dla tego typu `true` bezwarunkowo. Niespójność dotyczy wyłącznie pro
 
 ---
 
-### #26 · 2026-09-03 · [FRONTEND][BACKEND] · zakładka „Spedycja" połączona z backendem — w produkcji dane żyją wyłącznie w IndexedDB
+### #26 · 2026-09-03 · [FRONTEND] · widok `/alerty` w oryginale NIE czyta `/api/alerts` — pseudo-alerty katalogowe pominięte
+
+> **Znalezione przy Iteracji 6 (2026-09-03), ticket `18-FEATURE-widok-alerty`.**
+> **POMINIĘTE ŚWIADOMIE, decyzja użytkownika** — nowy `/alerty` stoi na realnych alertach
+> importu. Ten wpis pilnuje, żeby wiedza o porzuconej funkcji nie zginęła.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (widok `/alerty`) |
+| **Pliki** | `deminified/frontend-index.js:25177-25340` (`HT()`), `:16631-16705` (`pv()`), `:9165-9193` (IndexedDB `cn`/`un`) |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte (Iteracja 6 dowiozła INNY widok pod tym adresem) |
+
+**Co robi produkcja.** Ekran `/alerty` w oryginale **nie woła `GET /api/alerts` ani razu**,
+mimo że backend obsługuje tę trasę od zawsze (`backend-index.cjs:48688-48691`). Zamiast tego
+pobiera `GET /api/products` i wylicza po stronie klienta **pseudo-alerty katalogowe** (`pv()`):
+marża ujemna, marża poniżej progu i „nie-opona" w katalogu opon. Stan ich obsługi trzyma
+w **IndexedDB** (klucz `alerty-statusy`), nie na serwerze — więc oznaczenie „przejrzany" żyje
+w jednej przeglądarce i ginie razem z jej danymi. Operuje przy tym poziomem `krytyczny`
+i statusem `przejrzany`, których backend **nigdy nie produkuje** (w `db/snapshot.db` nie ma
+ani jednego takiego wiersza). Potwierdza to `docs/incoming/frontend-perplexity/dokumentacja/02_WIDOKI.md`
+§`/alerty` pkt 6.
+
+**Co dowiozła Iteracja 6.** Widok na REALNYCH alertach importu z `/api/alerts` (błąd HTTP,
+błąd pobierania, synchronizacja, ręczny upload), ze statusem trzymanym na serwerze i powtórkami
+zwiniętymi w grupy `(dostawca, typ, status)`. To odpowiedź na pytanie „lokalnie czy przez API"
+ze `spec-frontend.md` §4 — z tym, że pytanie było źle postawione: chodziło nie o miejsce
+przechowywania statusu tych samych alertów, tylko o **dwa różne zestawy danych**.
+
+**Dlaczego nie odtworzyliśmy pseudo-alertów.** Alerty importu niosą informację o tym, co się
+w nocy nie pobrało — 339 wierszy „Błąd pobierania" w snapshocie, do 23 na dobę dla jednego
+dostawcy. Pseudo-alerty katalogowe to inne zagadnienie (jakość danych cenowych), a wrzucone
+na ten sam ekran mieszałyby dwa pojęcia „alertu" w jednej liście i psuły grupowanie
+(nie mają `dostawca`, `typ` ani `data` w sensie tabeli `alerts`).
+
+**Do decyzji.** Czy pseudo-alerty katalogowe wracają w ogóle, a jeśli tak — to gdzie:
+(a) osobna zakładka w `/alerty`, (b) własny widok „jakość danych", (c) kolumna/filtr
+w `/katalog`, gdzie te produkty i tak są widoczne, (d) nie wracają wcale. Powiązane: marża
+liczona w `pv()` to **czwarty** sposób liczenia ceny w oryginale — patrz wpisy #23 i #24.
+
+---
+
+### #27 · 2026-09-03 · [FRONTEND] · lista przewoźników i dzielników żyje wyłącznie w IndexedDB przeglądarki
+
+> **Znalezione przy tickecie `18-FEATURE-waga-gabarytowa` (I9). Port 1:1** — decyzja D3
+> (`docs/tickets/18-FEATURE-waga-gabarytowa/plan.md`).
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (widok `/waga-gabarytowa`, edytor przewoźników) |
+| **Pliki** | `deminified/frontend-index.js:9165-9193` (store IndexedDB); port: `rebuild/frontend/src/lib/magazynKV.ts`, `pages/waga-gabarytowa/przewoznicy.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1** — przeniesienie na backend ⬜ **do decyzji** |
+| **Status** | ✔ odtworzone w rebuild (I9) |
+
+**Co robi produkcja.** Edytor przewoźników i dzielników (dodawanie własnego, zmiana nazwy/
+dzielnika per wiersz, usuwanie z blokadą „min. 1 przewoźnik", „Przywróć domyślne") trzyma
+cały stan wyłącznie w IndexedDB przeglądarki (baza `bridge-store-v2`). Zmiany Ani nie
+przenoszą się między urządzeniami i giną przy czyszczeniu danych witryny.
+
+**Decyzja użytkownika (2026-09-03): port 1:1** — odbudowa ma to samo zachowanie
+(`magazynKV`, ten sam mechanizm co inne dane lokalne widoku). Przeniesienie listy
+przewoźników na backend (persystencja niezależna od urządzenia) byłoby nową funkcją,
+nie odbudową — do rozważenia osobno.
+
+---
+
+### #28 · 2026-09-03 · [BACKEND] · `POST /api/waga-gabarytowa/oblicz` nie ma konsumenta
+
+> **Znalezione przy tickecie `18-FEATURE-waga-gabarytowa` (I9). Port 1:1** — decyzja D1
+> (`docs/tickets/18-FEATURE-waga-gabarytowa/plan.md`).
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (endpoint kalkulatora paletowego) |
+| **Pliki** | `deminified/backend-index.cjs:48749-48769`; port: `rebuild/backend/src/waga-gabarytowa/formula.ts`, `routes/waga-gabarytowa.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1** — podłączenie pod UI ⬜ **do decyzji** |
+| **Status** | ✔ zrobione w rebuild (I9), przetestowane jednostkowo i przez GATE, bez wywołań z frontendu |
+
+**Co robi produkcja.** Endpoint liczy wagę gabarytową wg formuły **paletowej/oponowej**
+(progi półpalety/palety, sterowana configiem `waga_gab.*`), ale żaden fragment frontendu go
+nie woła — widok `/waga-gabarytowa` liczy **innym, wolumetrycznym** wzorem, lokalnie,
+z dzielnikiem per przewoźnik (patrz #27). Dwa merytorycznie różne kalkulatory pod tą samą
+nazwą, oba odtworzone 1:1 w I9 (D1).
+
+**Decyzja użytkownika (2026-09-03): dowieźć oba, bez podłączania FE do endpointu.** Gdyby
+formuła paletowa miała się kiedyś pojawić w UI, to osobna decyzja produktowa (nowy widok
+albo zakładka), nie podmiana istniejącego kalkulatora wolumetrycznego.
+
+---
+
+### #29 · 2026-09-03 · [FRONTEND][BACKEND] · zakładka „Spedycja" połączona z backendem — w produkcji dane żyją wyłącznie w IndexedDB
 
 > **Znalezione i naprawione przy tickecie `18-FEATURE-konfiguracja-config-spedycja` (I11,
 > 2026-09-03). Decyzja użytkownika D2 — odstępstwo świadome od 1:1.**
@@ -1425,7 +1520,7 @@ dopiero po zmianie w wierszu) to port 1:1 z `qT()`. Zapis filtruje ciało whitel
 
 ---
 
-### #27 · 2026-09-03 · [BACKEND] · `POST /api/config` filtruje klucze whitelistą — oryginał przyjmuje dowolny
+### #30 · 2026-09-03 · [BACKEND] · `POST /api/config` filtruje klucze whitelistą — oryginał przyjmuje dowolny
 
 > **Znalezione i naprawione przy tickecie `18-FEATURE-konfiguracja-config-spedycja` (I11,
 > 2026-09-03). Decyzja użytkownika D4 — odstępstwo świadome od 1:1.**

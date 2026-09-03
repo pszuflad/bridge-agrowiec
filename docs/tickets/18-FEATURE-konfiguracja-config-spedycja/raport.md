@@ -228,9 +228,9 @@ Cztery doc-checkery równolegle; siedem plików sprawdzonych, pięć zmienionych
 ### `docs/rebuild-backlog.md` — zaktualizowany (1375 → 1468 linii)
 - **Wpis #14** (mutacje zapisują całe ciało) rozszerzony: `POST /api/spedycja` i
   `POST /api/config` naprawione w I11, dopisane do tabeli tras i plików.
-- **Nowy wpis #26** — zakładka „Spedycja" połączona z backendem (✅ TAK, D2), z jawnym
+- **Nowy wpis #29** — zakładka „Spedycja" połączona z backendem (✅ TAK, D2), z jawnym
   rozróżnieniem od wpisu #19 (cache promocji): tam dane realnie idą przez sieć, tu nie szło nic.
-- **Nowy wpis #27** — `POST /api/config` z whitelistą (✅ TAK, D4). Dołączone do niego trzy
+- **Nowy wpis #30** — `POST /api/config` z whitelistą (✅ TAK, D4). Dołączone do niego trzy
   fakty informacyjne: maskowanie audytu po nazwie klucza (`shoper.token_api` jawnie),
   `GET /api/config` oddaje sekrety niezamaskowane, brak edytora `waga_gab.*` (D7).
 
