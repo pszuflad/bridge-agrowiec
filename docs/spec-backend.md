@@ -118,6 +118,8 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > zbudowana pod filtrowanie `margins` po sześciu wymiarach, ma **zero wywołań w całym module** —
 > martwy kod w produkcji; odbudowa jej świadomie nie ożywia (`GET /margins` bez query params,
 > filtrowanie po stronie klienta). Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
+> Semantyka **wszystkich 27 tras** modułu (numer linii handlera, parametry query, LIMIT-y,
+> kształt odpowiedzi — trzy różne koperty!) jest spisana w `docs/analityka-bloki-10b-10f.md`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
