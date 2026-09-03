@@ -64,7 +64,8 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
   Odbudowane dotąd: `/login`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`, `/narzuty`,
-  `/alerty` (7 widoków); pozostałe 5 to placeholdery (`src/pages/placeholdery.ts`).
+  `/alerty`, `/waga-gabarytowa` (8 widoków); pozostałe 4 to placeholdery
+  (`src/pages/placeholdery.ts`).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
@@ -84,6 +85,10 @@ ma endpoint:
   Pseudo-alerty katalogowe oryginału **świadomie pominięte** — `docs/rebuild-backlog.md` #26
   (⬜ do decyzji). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
 - **Waga gabarytowa** — liczona w przeglądarce, choć `POST /api/waga-gabarytowa/oblicz` istnieje.
+  Nie jest to przeoczenie: BE liczy inny wzór (paletowy/oponowy), a widok — wolumetryczny
+  kurierski z wyborem przewoźnika, objętością m³ i wagą do wyceny; podpięcie pod endpoint
+  odebrałoby te funkcje. Odbudowa (I9) zachowała ten stan świadomie (D1),
+  `docs/tickets/18-FEATURE-waga-gabarytowa/`.
 - **Staging** — instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu.
 - Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa
   (potwierdza deltę: te moduły dojrzały po czerwcu). Doprecyzowanie z I5: widok Historii woła
@@ -201,6 +206,19 @@ ma endpoint:
 > (pojedyncza i grupowa, w obie strony) idzie przez `PATCH /api/alerts/{id}`, bez IndexedDB/
 > localStorage — świadome odejście od oryginału, który dla `/alerty` liczył zupełnie inne dane
 > (patrz §4, sprostowanie). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+
+> **Odbudowa (I9, `18-FEATURE-waga-gabarytowa`, 2026-09-03):** `/waga-gabarytowa` odbudowany —
+> router ma **12 tras, 4 placeholdery**. Ustalenie ticketa: BE i FE liczą **dwa różne wzory**,
+> nie ten sam w dwóch miejscach (BE: formuła paletowa/oponowa, patrz `spec-backend.md`; FE:
+> waga wolumetryczna kurierska `dł×szer×wys / dzielnik`, dzielnik per przewoźnik — GEIS 10000,
+> DPD 6000, GLS 4000, InPost/UPS/DHL 5000 — plus objętość m³ i waga do wyceny
+> `max(gabarytowa, rzeczywista)`). Widok liczy **wyłącznie lokalnie, zero wywołań API** (D1).
+> Formularz: Długość/Szerokość/Wysokość w cm (domyślnie 60/50/50), opcjonalna Waga rzeczywista,
+> select Przewoźnik; pełny edytor przewoźników i dzielników (dodawanie, usuwanie z blokadą
+> „min. 1", zmiana nazwy/dzielnika, „Przywróć domyślne"). Stan trwały w IndexedDB przez
+> `magazynKV` (cztery klucze `waga-gabarytowa-*`). Mechanizm „waga pamięć" (`waga_pamiec`) to
+> osobna, import-side logika bez związku z tym widokiem. Szczegóły:
+> `docs/tickets/18-FEATURE-waga-gabarytowa/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

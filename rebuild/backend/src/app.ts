@@ -16,6 +16,7 @@ import { trasyMutacjiStagingu } from "./routes/staging-mutacje.js";
 import { trasyOverrides } from "./routes/overrides.js";
 import { trasyNarzutow } from "./routes/markups.js";
 import { trasyPromocji } from "./routes/promotions.js";
+import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 
 export type ZaleznosciApp = {
@@ -101,6 +102,7 @@ export function stworzApp({
   app.use(trasyHistorii({ db }));
   app.use(trasyAlertow({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
+  app.use(trasyWagiGabarytowej({ db }));
 
   app.use(nieZnalezionoHandler);
   app.use(bladHandler);
