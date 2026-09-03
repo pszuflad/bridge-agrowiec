@@ -1,18 +1,19 @@
 /**
- * Widok `/konfiguracja` — szkielet sześciu zakładek z oryginału
- * (`deminified/frontend-index.js:26286-26382`).
+ * Widok `/konfiguracja` — sześć zakładek z oryginału
+ * (`deminified/frontend-index.js:26286-26382`), wszystkie wypełnione.
  *
- * Bloki 3f-1 i 3f-2 wypełniają dwie zakładki: „Dostawcy" i „Wgrywanie ręczne".
- * Pozostałe cztery istnieją,
- * jest osiągalnych i mówi wprost, co je dowiezie — bo szkielet bez nich rozjechałby
- * kolejność zakładek, którą Ania zna z produkcji. Przypisanie do bloków wynika z decyzji
- * użytkownika z 2026-09-01 (roadmapa §5, blok 3f) i mieszka w `konfiguracja/zakladki.ts`.
+ * Dowożone kolejno: „Wgrywanie ręczne" w bloku 3f-1, „Dostawcy" w 3f-2, a „Spedycja",
+ * „Shoper", „Katalog" i „AI Fallback" w Iteracji 11. Kolejność i etykiety zakładek
+ * mieszkają w `konfiguracja/zakladki.ts` i są 1:1 z produkcją — Ania zna je z pamięci.
  */
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Ai } from "./konfiguracja/Ai";
 import { Dostawcy } from "./konfiguracja/Dostawcy";
+import { Katalog } from "./konfiguracja/Katalog";
+import { Shoper } from "./konfiguracja/Shoper";
+import { Spedycja } from "./konfiguracja/Spedycja";
 import { Wgrywanie } from "./konfiguracja/Wgrywanie";
 import { ZAKLADKI_KONFIGURACJI } from "./konfiguracja/zakladki";
 
@@ -45,18 +46,29 @@ export function Konfiguracja() {
           <Wgrywanie />
         </TabsContent>
 
-        {ZAKLADKI_KONFIGURACJI.filter((z) => z.domykaBlok !== null).map((z) => (
-          <TabsContent key={z.wartosc} value={z.wartosc} className="mt-4">
-            <Card>
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground" data-testid={`zaslepka-${z.wartosc}`}>
-                  {z.opis} Ta zakładka powstanie w{" "}
-                  <span className="font-medium text-foreground">{z.domykaBlok}</span>.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        ))}
+        <TabsContent value="spedycja" className="mt-4">
+          <Spedycja />
+        </TabsContent>
+
+        {/*
+         * Shoper i AI inicjalizują stan formularza wartościami z `GET /api/config`, więc
+         * muszą się zamontować dopiero, gdy config jest już pobrany. `TabsContent` z Radiksa
+         * montuje zawartość leniwie — dopóki zakładka nie jest aktywna, komponent nie
+         * istnieje — a zapytanie ma `staleTime: Infinity`, więc przy wejściu w zakładkę dane
+         * albo są w cache'u, albo karta pokazuje „Wczytywanie…" i montuje formularz po
+         * odpowiedzi. Bez tego pola startowałyby puste i nadpisałyby zapisaną konfigurację.
+         */}
+        <TabsContent value="shoper" className="mt-4">
+          <Shoper />
+        </TabsContent>
+
+        <TabsContent value="katalog" className="mt-4">
+          <Katalog />
+        </TabsContent>
+
+        <TabsContent value="ai" className="mt-4">
+          <Ai />
+        </TabsContent>
       </Tabs>
     </AppShell>
   );

@@ -164,3 +164,45 @@ export const PROMOCJA_TESTOWA: Promocja = {
   zmienilUzytkownikId: 1,
   zmienionoData: "2026-07-31T13:07:21.578Z",
 };
+
+/**
+ * Konfiguracja z `contract/fixtures/GET_config.json` — płaski obiekt, 11 kluczy, same
+ * stringi. Ta sama zasada co przy produktach i dostawcach: zakładki „Shoper" i „AI Fallback"
+ * testujemy przeciwko KSZTAŁTOWI, który realnie oddaje produkcja.
+ *
+ * ⚠ Nagranie NIE zawiera `shoper.kolumny` ani `shoper.separator` — nikt ich w produkcji
+ * nie zapisał. Zakładka Shoper musi więc wystartować od wartości domyślnych i właśnie
+ * to sprawdza test.
+ */
+export function konfiguracjaZFixtura(): Record<string, string> {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_config.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Record<string, string> };
+  return fixture.body;
+}
+
+/**
+ * Limity spedycyjne z `contract/fixtures/GET_spedycja.json` — 5 wierszy z 10 nagranych
+ * (`_body_przyciete_z`). Fixture pokrywa oba warianty progu: liczbę (MO1, MO2) i `null`
+ * (MO3–MO5), więc test tabeli ma na czym sprawdzić „dostawca bez progu".
+ */
+export function spedycjaZFixtura(): {
+  id: number;
+  dostawcaKod: string;
+  progNetto: number | null;
+  kosztPonizej: number | null;
+  kosztPowyzej: number | null;
+  dodatkoweReguly: string | null;
+}[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_spedycja.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: {
+      id: number;
+      dostawcaKod: string;
+      progNetto: number | null;
+      kosztPonizej: number | null;
+      kosztPowyzej: number | null;
+      dodatkoweReguly: string | null;
+    }[];
+  };
+  return fixture.body;
+}
