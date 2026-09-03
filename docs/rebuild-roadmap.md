@@ -507,7 +507,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **Decyzje zaklepane 2026-09-01 (NIE otwierać ponownie):**
     - **Zakres:** do 3f idzie `upload`, `synchronizuj-teraz`, `PATCH /api/dostawcy/{id}`,
       alerty pisane przez import, zakładki **dostawcy** i **wgrywanie**. **W I11 zostaje**
-      `GET/PUT /api/config`, `GET /api/spedycja` i zakładki spedycja / shoper / katalog / ai.
+      `GET/POST /api/config`, `GET/POST /api/spedycja` i zakładki spedycja / shoper / katalog / ai
+      — ✅ dowiezione 2026-09-03 (patrz blok I11).
     - **Scheduler portowany wiernie, ale za przełącznikiem `IMPORT_SCHEDULER`, domyślnie
       WYŁĄCZONYM.** Świadome odstępstwo: produkcja przełącznika nie ma. Powód — włączony
       scheduler na staging odpytywałby realne serwery dostawców co 40–60 min i podmieniał dane
@@ -1040,6 +1041,14 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     13-kolumnowa lista `TT` (`frontend-index.js:22706-22731`). **Wniosek: I8 dowozi ten przycisk w pełni
     wiernie, nie czekając na I11** — wystarczy czytać konfigurację defensywnie (brak wartości → fallback);
     gdy I11 doda `GET /api/config`, kod nie wymaga zmiany. Kolumny bierze z konfiguratora katalogu (I2).
+  - **Aktualizacja 2026-09-03 (I11 dowieziona):** `GET/POST /api/config` już działa i zakładka
+    „Shoper" w `/konfiguracja` już zapisuje `shoper.kolumny`/`shoper.separator` (domyślne
+    mapowanie 12 par `klucz:naglowek` i separator `;` siedzą w
+    `src/pages/konfiguracja/Shoper.tsx`) — ale **nikt ich jeszcze nie czyta**. To ta iteracja ma
+    je podłączyć do przycisku „Pobierz CSV (Shoper)". **Uwaga na dwie różne trasy eksportu:**
+    `shoper.format_eksportu` czyta `GET /api/export/shoper` (`backend-index.cjs:48853-48863`) —
+    to INNA trasa niż `GET /api/export-shoper`. Obie są publiczne w oryginale i obie poza
+    zakresem I11.
 - **Ścieżki (GATE):** selly×10, export×2.  **Fixtures:** `GET_selly_status.json`, `_ping`, `_csv-status`, `_log`, `_dictionaries`.
 - **DoD:** panel Selly natywny; eksport CSV (serwerowy **oraz** przycisk w `/katalog` odłożony z I2) działa i jest chroniony auth; fixtures przez GATE; parytet z `selly-injection.js` (26 KB).
 
@@ -1110,48 +1119,63 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 11 — Konfiguracja: spedycja, Shoper, katalog, AI
-- **Status:** ⬜  **Sesje:** 1  **Zależy od:** 1
-- **Cel (Ania klika):** edytuje konfigurację i limity spedycji. **Dostawcy i częstotliwość
-  importu WYSZŁY z tej iteracji do bloku 3f-2 ✅ 2026-09-01** — są zrobione.
-- **Backend:** `GET/PUT /api/config` (`Jt`), `GET /api/spedycja` (`gn`). **Wszystkie trasy
-  dostawców są już dowiezione:** listy w I2, `upload` w 3f-1, `PATCH /api/dostawcy/{id}`
-  i `POST /api/dostawcy/{kod}/synchronizuj-teraz` w 3f-2.
-- **⚠ WEJŚCIE Z ITERACJI 9 (2026-09-03) — cztery klucze `waga_gab.*` nie są zasiewane w bazie.**
-  Oryginał sieje je do tabeli `config` przy starcie (`allConfig()`, `backend-index.cjs:45633-45637`):
-  `waga_gab.szer_polpaleta`=55, `waga_gab.szer_paleta`=80, `waga_gab.wys_palety`=10,
-  `waga_gab.wspolczynnik`=0.000167. I9 dowiozła tylko ODCZYT z fallbackiem na te same wartości
-  domyślne zaszyte w kodzie (`rebuild/backend/src/repos/config.ts`, `DOMYSLNE_WAGA_GAB`) — formuła
-  działa poprawnie, ale bez zasiewu Ania nie zobaczy tych czterech pól w widoku konfiguracji.
-  **Zasiew configu należy do TEJ iteracji.** Jest też piąty klucz opisowy
-  `waga_gab.opis_wspolczynnik` („DPD 1/6000 (1 m³ = 167 kg)"), którego kalkulator nie używa.
-- **⚠ ZAKRES POMNIEJSZONY 2026-09-01 — import wydzielony do bloku 3f.** Z tej iteracji WYSZŁY:
-  `POST /api/dostawcy/{kod}/upload`, `POST /api/dostawcy/{kod}/synchronizuj-teraz`,
-  `PATCH /api/dostawcy/{id}`, zakładki **dostawcy** i **wgrywanie** oraz wchłonięcie
-  `freq-injection.js`. Powód: to wszystko jest częścią pętli importu, a Ania potrzebowała jej
-  w całości do testów Iteracji 3. **Zostaje tutaj:** `GET/PUT /api/config`, `GET /api/spedycja`
-  i zakładki spedycja / shoper / katalog / ai. **Szkielet strony `/konfiguracja` z sześcioma
-  zakładkami POWSTAŁ w 3f-1 ✅ 2026-09-01** — ta iteracja wypełnia cztery pozostałe. Zaślepki
-  i przypisanie zakładek do bloków siedzą w `src/pages/konfiguracja/zakladki.ts`: zmień tam
-  `domykaBlok` na `null` i dołóż `<TabsContent>` w `Konfiguracja.tsx`. Trasa `/konfiguracja`
-  jest już zdjęta z `placeholdery.ts` i wpięta wprost w `App.tsx`.
-  **Aktualizacja 2026-09-01 (3f-2):** zakładka **dostawcy** też jest już wypełniona
-  (`pages/konfiguracja/Dostawcy.tsx`), a `freq-injection.js` wchłonięty. Zostają CZTERY
-  zaślepki: spedycja, shoper, katalog, ai. Wzorzec karty z edycją i mutacją przez
-  `useMutation` — patrz `Dostawcy.tsx`; wzorzec testu — `test/konfiguracja.dostawcy.test.tsx`.
-- **Historyczne (zapisane 2026-09-01 przez 3e, przed wydzieleniem 3f):**
-  Strona Konfiguracja ma w oryginale sześć zakładek: **dostawcy · wgrywanie · spedycja · shoper ·
-  katalog · ai** (`frontend-index.js:791300-792300`). Zakładka **„wgrywanie"** (`JT`, `:784673`)
-  to wgrywanie cenników — wiele plików naraz, z auto-detekcją dostawcy po nazwie pliku
-  i nagłówkach; osobno każdy dostawca ma własny przycisk „Wgraj plik" (`ZT`, ok. `:772483`).
-  **To jedyne miejsce w całej aplikacji, z którego da się ZACZĄĆ import z przeglądarki** —
-  `/staging` (3e) pokazuje dopiero wynik. Dopóki tego nie ma, Ania nie przeklika pełnego cyklu
-  importu i gate 3e zostaje domknięty tylko częściowo (patrz blok 3e). Backend jest gotowy od 3b:
-  `POST /api/import/parse-file` i `POST /api/import/from-url`.
-- **Frontend:** cztery pozostałe zakładki `/konfiguracja`. Eksport CSV w `/katalog` należy do I8, nie tu — produkcja
-  nie ma kluczy `shoper.separator`/`shoper.kolumny`, więc `/api/config` nie jest dla niego blokerem.
-- **Ścieżki (GATE):** config, spedycja (dostawcy×3 rozliczone w I2 / 3f-1 / 3f-2).  **Fixtures:** `GET_config.json`, `GET_spedycja.json` (`GET_dostawcy.json`/`GET_suppliers.json` już zielone od I2).
-- **DoD:** konfiguracja i spedycja edytowalne; fixtures przez GATE. **Częstotliwość natywnie —
-  ✅ dowiezione w 3f-2, nie powtarzać.**
+- **Status:** ✅ **2026-09-03** (`18-FEATURE-konfiguracja-config-spedycja`)  **Sesje:** 1  **Zależy od:** 1
+- **Cel (Ania klika):** edytuje konfigurację i limity spedycji — ✅ dowiezione. Dostawcy i
+  częstotliwość importu wyszły z tej iteracji do bloku 3f-2 ✅ 2026-09-01, wgrywanie do 3f-1.
+- **Backend:** **nie ma `PUT /api/config`** — zapis to `POST /api/config` z ciałem
+  `{klucz, wartosc}`, **jeden klucz na żądanie** (`Jt`, `:48740-48748`); zakładki AI i Shoper
+  wysyłają przy zapisie serię osobnych POST-ów. Whitelista **13 kluczy** (D4, odstępstwo
+  świadome — oryginał przyjmuje dowolny klucz spoza schematu); audyt `edycja_konfiguracji`
+  maskuje wartość `"***"` tylko gdy nazwa klucza zawiera `klucz_api` (1:1, `:48746`) — więc
+  `shoper.token_api` trafia do dziennika jawnie. `GET/POST /api/spedycja` (`gn`) — upsert po
+  `dostawca_kod`, audyt `edycja_spedycji` (surowe ciało, nie odsiane, ten sam wybór co
+  `markups.ts` w 4a). Wszystkie cztery trasy za `requireAuth` (D1, odstępstwo dziedziczone —
+  kontrakt ma `security: []` dla obu GET-ów, jak w I1a/I2/3b/3d-2/4a/I5). Trasy dostawców są już
+  dowiezione: listy w I2, `upload` w 3f-1, `PATCH /api/dostawcy/{id}` i
+  `POST /api/dostawcy/{kod}/synchronizuj-teraz` w 3f-2.
+- **⚠ WEJŚCIE Z ITERACJI 9 (2026-09-03) — ROZLICZONE.** I9 zgłosiła, że czterech kluczy
+  `waga_gab.*` nikt nie zasiewa w bazie: formuła wagi gabarytowej działała na wartościach
+  domyślnych zaszytych w kodzie (`repos/config.ts`, `DOMYSLNE_WAGA_GAB`), a nie na configu.
+  **Zasiew jest w tej iteracji:** `src/db/seed-poczatkowy.ts` (port `vR`, `:45633-45644`) sieje
+  komplet **11 kluczy**, w tym pięć `waga_gab.*` — z opisowym `waga_gab.opis_wspolczynnik`
+  („DPD 1/6000 (1 m³ = 167 kg)"), którego kalkulator nie używa. Korzystają z niego `seed-dev.ts`
+  i harness GATE, więc `GET /api/config` oddaje te klucze i zgadza się z fixture'em co do znaku.
+  **Uwaga dla przyszłych sesji:** zasiew NIE oznacza, że Ania te pola zobaczy — edytora
+  `waga_gab.*` nie ma ani w oryginale, ani tutaj (D7). Klucze są zapisywalne przez
+  `POST /api/config` (są na whiteliście), ale bez UI. Dołożenie edytora to nowa funkcja, nie
+  odbudowa. ⚠ `DOMYSLNE_WAGA_GAB` (4 wartości) i `KONFIGURACJA_POCZATKOWA` (11) to **dwa porty
+  tego samego `vR`** — rozjazd między nimi byłby cichy.
+- **Frontend:** cztery pozostałe zakładki wypełnione — **`/konfiguracja` nie ma już ani jednej
+  zaślepki**, sześć z sześciu gotowe. Pola `domykaBlok` i `opis` zniknęły z `zakladki.ts` razem
+  z blokiem renderującym zaślepki w `Konfiguracja.tsx`.
+  - **Spedycja** (`Spedycja.tsx`, port `qT`) — tabela per dostawca (iteruje po `GET /api/dostawcy`,
+    nie po wierszach limitów), zapis `POST /api/spedycja`. **Odstępstwo od 1:1 (D2, decyzja
+    użytkownika):** w produkcji ta zakładka NIGDY nie łączy się z backendem —
+    `setQueryDefaults(["/api/spedycja"], {queryFn: …})` + IndexedDB
+    (`frontend-index.js:10365-10381`), limity żyją tylko w przeglądarce jednej osoby. Rebuild
+    wybrał realny backend (dane trwałe, wspólne) — `GET/POST /api/spedycja` istnieją i UI je woła.
+  - **Shoper** (`Shoper.tsx`, port `GK`) — mapowanie kolumn CSV (`shoper.kolumny`) i separator
+    (`shoper.separator`), zapis = 2× `POST /api/config`. Klucze są teraz zapisywane, ale **nikt
+    ich jeszcze nie czyta — czyta je dopiero eksport w I8** (patrz blok I8, aktualizacja).
+  - **Ai** (`Ai.tsx`, port `YT`) — klucz i model AI Fallback, zapis = 3× `POST /api/config`
+    (`ai_fallback.aktywny` wyprowadzony z niepustości klucza, 1:1, `:26000`).
+  - **Katalog** (`Katalog.tsx`, port `XT`, bez części destrukcyjnej — D3) — **koryguje wcześniejsze
+    założenie roadmapy: ta zakładka nie edytuje żadnego klucza `/api/config`.** To „Domyślne
+    kolumny katalogu" w IndexedDB (`magazynKV`, klucz `konfig-domyslne-kolumny`) + „Przywróć
+    fabryczne". Kluczy `waga_gab.*` nie edytuje w oryginale NIC (0 wystąpień w
+    `frontend-index.js`, D7) — zostają w bazie i na whiteliście (czyta je
+    `POST /api/waga-gabarytowa/oblicz`), ale bez UI. Przycisk „Usuń wszystko z katalogu"
+    (`POST /api/products/clear`) zostaje **poza zakresem — dokłada go Iteracja 12** (D3, patrz
+    blok I12), miejsce wpięcia jest w komponencie oznaczone adnotacją.
+- **Ścieżki (GATE):** `GET/POST /api/config`, `GET/POST /api/spedycja` (dostawcy×3 rozliczone
+  w I2 / 3f-1 / 3f-2).  **Fixtures:** `GET_config.json` (11 kluczy seeda `vR`, wartości co do
+  znaku — puste `ai_fallback.klucz_api`/pola Shopera to realne dane seeda, nie maskowanie),
+  `GET_spedycja.json` (10 wierszy `xR`, fixture przycięty do 5). Zero zadeklarowanych wyjątków.
+- **DoD:** ✅ `GET/POST /api/config` i `/api/spedycja` za `requireAuth`; ✅ whitelista 13 kluczy +
+  maskowanie audytu; ✅ upsert spedycji po `dostawca_kod`; ✅ sześć zakładek `/konfiguracja`
+  wypełnionych, zaślepki i `domykaBlok`/`opis` zniknęły; ✅ GATE zielony bez wyjątków; ✅ backend
+  629/629, frontend 302/302, `lint`/`typecheck`/`build` czyste. Szczegóły:
+  `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
 
 ---
 
@@ -1168,6 +1192,20 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     audyt bez filtra typu, więc TU widok musi znieść `null` i niezłączalny `encja_id` wprost.
     Parser `parsujSzczegoly` z I5 (`src/historia/mapowanie.ts`) już to potrafi (`try/catch` → `{}`),
     da się z niego skorzystać bez pisania drugiej wersji.
+  - **⚠ WEJŚCIE Z ITERACJI 11 (2026-09-03) — `GET /api/audit-log` zobaczy dwie NOWE akcje.**
+    `edycja_konfiguracji` (encja `config`, `encjaId` = nazwa klucza, `szczegoly_json` =
+    `{"wartosc": …}`, zamaskowane `"***"` TYLKO gdy nazwa klucza zawiera `klucz_api` — więc
+    `shoper.token_api` jest w dzienniku jawny, 1:1 z `:48746`) i `edycja_spedycji` (encja
+    `spedycja`, `encjaId` = kod dostawcy, `szczegoly_json` = **surowe ciało żądania**, nie
+    odsiane — nawet dla kodu spoza `suppliers`, bo trasa tego nie waliduje, 1:1 z `:48737`).
+  - **⚠ WEJŚCIE Z ITERACJI 11 (2026-09-03) — przycisk „Usuń wszystko z katalogu" należy do
+    zakładki „Katalog" w `/konfiguracja`, nie do widoku `/katalog`.** Port karty `XT()`
+    (`Katalog.tsx`, `frontend-index.js:26020-26145`) jest już zrobiony BEZ tego przycisku
+    (D3 ticketu 18). Ta iteracja dokłada `POST /api/products/clear` z ciałem
+    `{potwierdzenie: "WYCZYSC"}`, poprzedzone `window.confirm` o treści „Usunąć wszystko
+    z katalogu? Ta operacja usuwa wszystkie produkty i służy tylko do testów parsera." —
+    po sukcesie unieważnia `["/api/products"]`, `["/api/alerts"]`, `["/api/analytics"]`.
+    Miejsce wpięcia jest w `Katalog.tsx` oznaczone adnotacją.
   - **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć (dziś martwa, D1 z 4b, 2026-09-02)
     — dane musi dostarczyć backend** (pole przy produkcie), bo liczenie po stronie klienta
     duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś

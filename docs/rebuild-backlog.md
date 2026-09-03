@@ -841,15 +841,15 @@ zakresem odbudowy — decyzja użytkownika, czy i kiedy.
 ### #14 · 2026-09-01 · [BACKEND][BEZPIECZEŃSTWO] · mutacje zapisują CAŁE ciało żądania — wzorzec systemowy, nie jednostkowy
 
 > **Znalezione przy bloku I3/3f-2 (2026-09-01).** Dla dostawców NAPRAWIONE decyzją
-> użytkownika; dla narzutów i promocji NAPRAWIONE w bloku 4a (2026-09-02); dla
-> produktów **czeka na Iterację 12**.
+> użytkownika; dla narzutów i promocji NAPRAWIONE w bloku 4a (2026-09-02); dla spedycji
+> i configu NAPRAWIONE w Iteracji 11 (2026-09-03); dla produktów **czeka na Iterację 12**.
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (warstwa danych + trasy mutacji) |
-| **Pliki** | `deminified/backend-index.cjs:45043` (`updateSupplier`), `:44975` (`updateMarkup`), `:44998` (`updatePromotion`), `:44824` (`updateStaging`), `:44728` (`updateProduct`); trasy `:48230`, `:48699`, `:48722`, `:48415` |
-| **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** (decyzja 2026-09-01, dotyczy dostawców; dla narzutów/promocji NAPRAWIONE 4a, dla produktów patrz „Co z tego wynika") |
-| **Status** | ✔ dostawcy naprawieni w rebuild (3f-2) · ✔ narzuty i promocje naprawione w rebuild (4a, 2026-09-02) · ⬜ produkty (I12) · w produkcji **nadal obecne** |
+| **Pliki** | `deminified/backend-index.cjs:45043` (`updateSupplier`), `:44975` (`updateMarkup`), `:44998` (`updatePromotion`), `:44824` (`updateStaging`), `:44728` (`updateProduct`), `:45077-45085` (`upsertSpedycja`), `:45083-45089` (`U.setConfig`); trasy `:48230`, `:48699`, `:48722`, `:48415`, `:48736`, `:48745` |
+| **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** (decyzja 2026-09-01, dotyczy dostawców; dla narzutów/promocji NAPRAWIONE 4a, dla spedycji/configu NAPRAWIONE I11, dla produktów patrz „Co z tego wynika") |
+| **Status** | ✔ dostawcy naprawieni w rebuild (3f-2) · ✔ narzuty i promocje naprawione w rebuild (4a, 2026-09-02) · ✔ spedycja i config naprawione w rebuild (I11, 2026-09-03) · ⬜ produkty (I12) · w produkcji **nadal obecne** |
 
 **Co robi produkcja.** Metody warstwy danych przyjmują obiekt i wrzucają go do `SET` bez
 żadnego filtra:
@@ -868,6 +868,7 @@ Trzy trasy podają im ciało żądania **wprost od użytkownika**:
 | `PATCH /api/markups/:id` (`:48701`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4a ✔** |
 | `PATCH /api/promotions/:id` (`:48724`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4a ✔** |
 | `PUT`+`PATCH /api/products/:id` (`:48415-48424`, rejestracja `:48452`) | `c.body` bez klucza `_reason` | **Iteracja 12** |
+| `POST /api/spedycja` (`:48736`) | `c.body` — bez zmian | **Iteracja 11 ✔** |
 
 **⭐ Kluczowa obserwacja: produkcja NIE jest w tym konsekwentna.** `PUT /api/staging/:id`
 (`:48598`) ma jawną listę ośmiu pól i pętlę `if (!r.includes(v)) continue;` —
@@ -922,6 +923,19 @@ Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archi
   naprawy zapisu. Uzasadnienie: ten sam sens co przy `synchronizacja_reczna` z I3 (audyt
   powstaje nawet dla nieistniejącego dostawcy), a przy okazji próba mass-assignmentu zostaje
   w dzienniku jako sygnał bezpieczeństwa, zamiast zniknąć bez śladu.
+- **Iteracja 11 (spedycja i config) — NAPRAWIONE (2026-09-03).** Ten sam wzorzec na dwóch
+  nowych trasach ticketu `18-FEATURE-konfiguracja-config-spedycja`. `POST /api/spedycja`
+  (`repos/spedycja.ts`, `odsiejPolaSpedycji`) filtruje ciało do pięciu pól — `dostawcaKod,
+  progNetto, kosztPonizej, kosztPowyzej, dodatkoweReguly` (`id` odcięte) — dokładnie ten sam
+  ruch co przy narzutach/promocjach w 4a; oryginał podaje `c.body` wprost do `upsertSpedycja`
+  (`:48736`). `POST /api/config` dostał **wariant tego samego wzorca dla innego kształtu
+  zasobu**: zamiast filtra pól obiektu — zamknięta lista 13 dozwolonych KLUCZY
+  (`KLUCZE_KONFIGURACJI`, `repos/config.ts`), bo `config` to magazyn klucz-wartość bez
+  kolumn do odsiania; klucz spoza listy → `400`. Oryginał (`U.setConfig(l, p)`, `:48745`)
+  przyjmuje dowolny klucz — literówka w nazwie zakłada w tabeli nowy, martwy wiersz. Audyt
+  spedycji zachował się tak jak przy narzutach (surowe ciało, port 1:1). Szczegóły:
+  `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/plan.md` D4/D5, oraz backlog #29/#30
+  (odstępstwa od 1:1 zatwierdzone przy tej samej okazji).
 - **Iteracja 12 (produkty + hardening)** — `PATCH /api/products/:id` odsiewa wyłącznie klucz
   `_reason`; cała reszta 72 kolumn jest zapisywalna. Ta trasa dodatkowo zapisuje
   `manual_overrides` dla KAŻDEGO zmienionego pola, więc lista pól decyduje też o tym,
@@ -1468,3 +1482,82 @@ nazwą, oba odtworzone 1:1 w I9 (D1).
 **Decyzja użytkownika (2026-09-03): dowieźć oba, bez podłączania FE do endpointu.** Gdyby
 formuła paletowa miała się kiedyś pojawić w UI, to osobna decyzja produktowa (nowy widok
 albo zakładka), nie podmiana istniejącego kalkulatora wolumetrycznego.
+
+---
+
+### #29 · 2026-09-03 · [FRONTEND][BACKEND] · zakładka „Spedycja" połączona z backendem — w produkcji dane żyją wyłącznie w IndexedDB
+
+> **Znalezione i naprawione przy tickecie `18-FEATURE-konfiguracja-config-spedycja` (I11,
+> 2026-09-03). Decyzja użytkownika D2 — odstępstwo świadome od 1:1.**
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (zakładka `/konfiguracja` → Spedycja) + BACKEND (trasy już istniały, nieużywane) |
+| **Pliki** | `deminified/frontend-index.js:10381` (`Ee.setQueryDefaults(["/api/spedycja"], …)`), `:10365-10371` (`un("spedycja", …)`, zapis do IndexedDB), `:25808-25938` (`qT()`, render); backend `deminified/backend-index.cjs:48735-48739` (`GET`/`POST /api/spedycja`, sprawne, ale nieużywane przez UI); port: `rebuild/backend/src/routes/spedycja.ts`, `rebuild/frontend/src/pages/konfiguracja/Spedycja.tsx` |
+| **Do nowej wersji?** | ✅ **TAK — odstępstwo od 1:1** (decyzja użytkownika 2026-09-03, ticket `18-FEATURE-konfiguracja-config-spedycja`, plan.md D2) |
+| **Status** | ✔ zrobione w rebuild (I11, 2026-09-03) |
+
+**Co robi produkcja.** Zakładka „Spedycja" nie wysyła ani nie pobiera niczego z serwera.
+`Ee.setQueryDefaults(["/api/spedycja"], { queryFn: async () => [...an] })` (`:10381`)
+podstawia zapytaniu tablicę z pamięci modułu (`an`), a zapis idzie do IndexedDB
+(`un("spedycja", …)`, `:10365-10371`). Backend ma przy tym sprawne `GET`/`POST /api/spedycja`
+(`:48735-48739`) — po prostu nikt ich z UI nie woła. Limity spedycyjne żyją więc wyłącznie
+w przeglądarce jednej osoby: inny komputer, albo wyczyszczone dane witryny, i limitów nie ma.
+
+**To NIE jest to samo, co cache IndexedDB przy promocjach (wpis #19).** Tam dane realnie idą
+przez sieć, a IndexedDB jest tylko cache'em zapytania. Tu przez sieć nie idzie NIC.
+
+**Decyzja użytkownika (2026-09-03): podpiąć widok pod istniejące trasy backendu.** Limity są
+teraz trwałe i wspólne dla wszystkich, zamiast lokalne dla jednej przeglądarki. Reszta
+zakładki (układ tabeli, `data-testid`, konwersje pól, pojawianie się przycisku „Zapisz"
+dopiero po zmianie w wierszu) to port 1:1 z `qT()`. Zapis filtruje ciało whitelistą pól
+(`odsiejPolaSpedycji` — `dostawcaKod, progNetto, kosztPonizej, kosztPowyzej, dodatkoweReguly`,
+`id` odcięte) — ten sam wzorzec co wpis #14. Szczegóły: plan.md D2 i D5 ticketu
+`18-FEATURE-konfiguracja-config-spedycja`.
+
+**Do rozważenia dla produkcji.** Poza zakresem odbudowy — w starym Bridge zakładka nadal nie
+łączy się z serwerem.
+
+---
+
+### #30 · 2026-09-03 · [BACKEND] · `POST /api/config` filtruje klucze whitelistą — oryginał przyjmuje dowolny
+
+> **Znalezione i naprawione przy tickecie `18-FEATURE-konfiguracja-config-spedycja` (I11,
+> 2026-09-03). Decyzja użytkownika D4 — odstępstwo świadome od 1:1.**
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (trasa mutacji configu) |
+| **Pliki** | `deminified/backend-index.cjs:48745` (`U.setConfig`), `:45083-45089` (zapis bez walidacji klucza), `:48746` (maskowanie audytu `klucz.includes("klucz_api")`), `:45633-45644` (seed `vR`, 11 kluczy), `:48750-48760` (`POST /api/waga-gabarytowa/oblicz`, czyta `waga_gab.*`); port: `rebuild/backend/src/repos/config.ts` (`KLUCZE_KONFIGURACJI`, `czyKluczDozwolony`), `src/routes/config.ts` |
+| **Do nowej wersji?** | ✅ **TAK — odstępstwo od 1:1** (decyzja użytkownika 2026-09-03, ticket `18-FEATURE-konfiguracja-config-spedycja`, plan.md D4) |
+| **Status** | ✔ zrobione w rebuild (I11, 2026-09-03) |
+
+**Co robi produkcja.** `U.setConfig(klucz, wartosc)` (`:48745`, `:45083-45089`) zapisuje
+DOWOLNY klucz bez walidacji — `config` to magazyn klucz-wartość bez schematu. Literówka
+w nazwie (np. „shoper.separaator") zakłada w tabeli nowy, martwy wiersz i funkcja cicho
+przestaje działać; nic tego nie sygnalizuje.
+
+**Decyzja użytkownika (2026-09-03): zamknięta lista 13 kluczy, klucz spoza listy → `400`.**
+Ten sam wzorzec dyscypliny co `odsiejPola` przy dostawcach/narzutach/promocjach/spedycji
+(wpis #14) — z tą różnicą, że tu filtrujemy dozwolone KLUCZE zasobu klucz-wartość, nie pola
+obiektu. Lista: 11 kluczy z seeda produkcji `vR` (5× `waga_gab.*`, 3× `ai_fallback.*`,
+`shoper.adres_sklepu`, `shoper.token_api`, `shoper.format_eksportu`) + `shoper.kolumny`
+i `shoper.separator`, które zapisuje zakładka Shoper, a których w produkcji nikt jeszcze nie
+zapisał (dlatego nie ma ich w `contract/fixtures/GET_config.json`). Szczegóły: plan.md D4.
+
+**Dwie powiązane własności oryginału, odtworzone 1:1 (nie są zmianą tego ticketa):**
+- **Maskowanie w audycie patrzy na NAZWĘ klucza, nie na listę sekretów** —
+  `klucz.includes("klucz_api") ? "***" : wartosc` (`:48746`). Efekt: `ai_fallback.klucz_api`
+  jest maskowany w `audit_log`, ale **`shoper.token_api` trafia do dziennika JAWNIE**.
+  Pilnowane testem; zawężenie/poszerzenie maski to osobna decyzja.
+- **`GET /api/config` oddaje sekrety niezamaskowane** (bo widok potrzebuje wartości do pola
+  edycji) — w produkcji trasa jest przy tym PUBLICZNA (bez auth); w odbudowie stoi za
+  `requireAuth` (wzorzec D1 z I1a, utrwalony w I2, 3b, 3d-2, 4a i I5).
+
+**Pięć kluczy `waga_gab.*` nie mają w oryginale ŻADNEGO edytora** (0 wystąpień `waga_gab`
+w `frontend-index.js`), choć czyta je `POST /api/waga-gabarytowa/oblicz` (`:48750-48760`).
+Podtytuł ekranu Konfiguracji sugerujący „osobną zakładkę wagi gabarytowej" jest martwy —
+takiej zakładki nie ma i I11 jej nie dodaje (plan.md D7).
+
+**Do rozważenia dla produkcji.** Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy
+dodać walidację klucza albo zawęzić maskowanie w starym Bridge.
