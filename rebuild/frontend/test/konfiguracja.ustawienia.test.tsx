@@ -19,7 +19,7 @@
  */
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "@/App";
@@ -43,12 +43,18 @@ const KONFIGURACJA = konfiguracjaZFixtura();
 
 let zapisy: { klucz: string; wartosc: string }[] = [];
 
-function zamockujApi(odpowiedzZapisu: () => Response = () => HttpResponse.json({ ok: true })) {
+function zamockujApi(
+  odpowiedzZapisu: () => Response = () => HttpResponse.json({ ok: true }),
+  { opoznienieConfigu = 0, config = KONFIGURACJA }: { opoznienieConfigu?: number; config?: Record<string, string> } = {},
+) {
   server.use(
     http.get("*/api/dostawcy", () => HttpResponse.json(DOSTAWCY)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
     http.get("*/api/spedycja", () => HttpResponse.json(SPEDYCJA)),
-    http.get("*/api/config", () => HttpResponse.json(KONFIGURACJA)),
+    http.get("*/api/config", async () => {
+      if (opoznienieConfigu > 0) await delay(opoznienieConfigu);
+      return HttpResponse.json(config);
+    }),
     http.post("*/api/config", async ({ request }) => {
       zapisy.push((await request.json()) as { klucz: string; wartosc: string });
       return odpowiedzZapisu();
@@ -129,6 +135,61 @@ describe("Zakładka „AI Fallback”", () => {
     await userEvent.click(await screen.findByTestId("button-save-ai"));
 
     expect(await screen.findByTestId("komunikat-ai")).toHaveTextContent(/Błąd zapisu/);
+  });
+});
+
+/**
+ * REGRESJA — pierwsze wejście w zakładkę, gdy config NIE JEST jeszcze w cache'u.
+ *
+ * `useState` bierze wartość początkową wyłącznie przy pierwszym renderze, więc gdyby
+ * formularz montował się razem z zapytaniem, pola zamarzłyby na wartościach domyślnych,
+ * a „Zapisz" nadpisałby prawdziwą konfigurację. Mock BEZ opóźnienia tego nie wykrywa
+ * i nie wykrył: w nagraniu `ai_fallback.model` to akurat `"gpt-4o-mini"`, a `klucz_api`
+ * jest puste — czyli dokładnie wartości domyślne formularza. Dlatego opóźniamy odpowiedź
+ * ORAZ podstawiamy wartości JAWNIE różne od domyślnych.
+ */
+describe("pierwsze wejście w zakładkę (config spoza cache'u)", () => {
+  const CONFIG_NIEDOMYSLNY = {
+    ...KONFIGURACJA,
+    "ai_fallback.klucz_api": "sk-proj-zapisany-wczesniej",
+    "ai_fallback.model": "gpt-4o",
+    "shoper.kolumny": "ean:EAN\nnazwa:Nazwa",
+    "shoper.separator": "|",
+  };
+
+  it("AI: pola pokazują wartości z serwera, a nie domyślne", async () => {
+    zamockujApi(undefined, { opoznienieConfigu: 50, config: CONFIG_NIEDOMYSLNY });
+    await otworzZakladke("ai");
+
+    // `findBy*` czeka — o to właśnie chodzi: formularz ma się pojawić PO odpowiedzi.
+    expect(await screen.findByTestId("input-openai-model")).toHaveValue("gpt-4o");
+    expect(screen.getByTestId("input-openai-key")).toHaveValue("sk-proj-zapisany-wczesniej");
+  });
+
+  it("AI: zapis BEZ edycji odsyła wartości z serwera, nie pustkę", async () => {
+    // Sedno usterki: Ania wchodzi w zakładkę i klika „Zapisz", niczego nie zmieniając.
+    // Zapis nie ma prawa skasować klucza API, który już tam był.
+    zamockujApi(undefined, { opoznienieConfigu: 50, config: CONFIG_NIEDOMYSLNY });
+    await otworzZakladke("ai");
+    await screen.findByTestId("input-openai-model");
+
+    await userEvent.click(screen.getByTestId("button-save-ai"));
+
+    await waitFor(() => expect(zapisy).toHaveLength(3));
+    expect(zapisy).toEqual([
+      { klucz: "ai_fallback.klucz_api", wartosc: "sk-proj-zapisany-wczesniej" },
+      { klucz: "ai_fallback.model", wartosc: "gpt-4o" },
+      { klucz: "ai_fallback.aktywny", wartosc: "true" },
+    ]);
+  });
+
+  it("Shoper: mapowanie i separator pochodzą z serwera, gdy są zapisane", async () => {
+    zamockujApi(undefined, { opoznienieConfigu: 50, config: CONFIG_NIEDOMYSLNY });
+    await otworzZakladke("shoper");
+
+    const kolumny = await screen.findByTestId<HTMLTextAreaElement>("input-shoper-kolumny");
+    expect(kolumny.value).toBe("ean:EAN\nnazwa:Nazwa");
+    expect(screen.getByTestId("input-shoper-separator")).toHaveValue("|");
   });
 });
 

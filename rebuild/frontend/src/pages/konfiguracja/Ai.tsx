@@ -9,6 +9,14 @@
  * ⚠ `ai_fallback.aktywny` NIE MA własnego pola w formularzu — jest wyprowadzane z klucza
  * przy zapisie (`wartosc: t ? "true" : "false"`, `:26000`). Dołożenie przełącznika byłoby
  * wymyślaniem nowego zachowania, a przy okazji rozjechałoby odznakę ze stanem zapisanym.
+ *
+ * ⚠ PODZIAŁ NA DWA KOMPONENTY JEST KONIECZNY, nie kosmetyczny. Formularz inicjalizuje
+ * `useState` wartościami z configu, a `useState` bierze wartość początkową WYŁĄCZNIE przy
+ * pierwszym renderze. Gdyby pobieranie i formularz siedziały w jednym komponencie, pierwsze
+ * wejście w zakładkę (config jeszcze nie w cache'u) zamrażałoby pola na wartościach
+ * domyślnych — a kliknięcie „Zapisz" nadpisałoby wtedy prawdziwy klucz API pustką.
+ * Dlatego `FormularzAi` montuje się DOPIERO z gotowymi danymi. Tak też działa oryginał:
+ * config pobiera strona (`eM()`, `:26277-26290`) i wstrzykuje kartom propsem `cfg`.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -24,16 +32,30 @@ import { KLUCZ_KONFIGURACJI, zapiszKlucze, type Konfiguracja } from "./config";
 const MODEL_DOMYSLNY = "gpt-4o-mini";
 
 export function Ai() {
-  const klient = useQueryClient();
-  const { data: konfiguracja, isLoading } = useQuery<Konfiguracja>({
-    queryKey: KLUCZ_KONFIGURACJI,
-  });
+  const { data: konfiguracja } = useQuery<Konfiguracja>({ queryKey: KLUCZ_KONFIGURACJI });
 
-  // `useState` z wartością z configu jako stanem POCZĄTKOWYM — jak w oryginale, gdzie karta
-  // dostaje `cfg` propsem i inicjalizuje nim stan. Klucz `key` na komponencie w
-  // `Konfiguracja.tsx` pilnuje, żeby po dociągnięciu configu formularz wystartował od nowa.
-  const [kluczApi, ustawKluczApi] = useState(konfiguracja?.["ai_fallback.klucz_api"] ?? "");
-  const [model, ustawModel] = useState(konfiguracja?.["ai_fallback.model"] ?? MODEL_DOMYSLNY);
+  // `null` to wygasła sesja (`zapytanieZwracajaceNullNa401`, `lib/queryClient.ts`) —
+  // traktujemy ją jak brak danych, zamiast montować formularz na pustce.
+  if (!konfiguracja) {
+    return (
+      <Card className="border-card-border">
+        <CardContent className="p-5">
+          <p className="text-sm text-muted-foreground">Wczytywanie…</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  return <FormularzAi konfiguracja={konfiguracja} />;
+}
+
+function FormularzAi({ konfiguracja }: { konfiguracja: Konfiguracja }) {
+  const klient = useQueryClient();
+
+  // Stan POCZĄTKOWY z configu — jak w oryginale, gdzie karta dostaje `cfg` propsem.
+  // Późniejsze odświeżenie configu świadomie NIE nadpisuje pól: to samo robi oryginał
+  // (`useState(e[...])`, `:25943`), a nadpisywanie kasowałoby niezapisane zmiany.
+  const [kluczApi, ustawKluczApi] = useState(konfiguracja["ai_fallback.klucz_api"] ?? "");
+  const [model, ustawModel] = useState(konfiguracja["ai_fallback.model"] ?? MODEL_DOMYSLNY);
   const [komunikat, ustawKomunikat] = useState<{ tresc: string; blad: boolean } | null>(null);
 
   /** Odznaka patrzy na POLE, nie na zapisany `ai_fallback.aktywny` — 1:1 z `:25944`. */
@@ -52,16 +74,6 @@ export function Ai() {
     },
     onError: (e) => ustawKomunikat({ tresc: `Błąd zapisu: ${e.message}`, blad: true }),
   });
-
-  if (isLoading) {
-    return (
-      <Card className="border-card-border">
-        <CardContent className="p-5">
-          <p className="text-sm text-muted-foreground">Wczytywanie…</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="border-card-border">

@@ -14,6 +14,11 @@
  * ⚠ Sam eksport CSV, który te klucze czyta, należy do Iteracji 8. Do tego czasu zakładka
  * je zapisuje, a nikt ich nie odczytuje — tak samo jak w produkcji przed dowiezieniem
  * eksportu per dostawca.
+ *
+ * ⚠ PODZIAŁ NA DWA KOMPONENTY JEST KONIECZNY — pełne uzasadnienie w nagłówku `Ai.tsx`.
+ * W skrócie: `useState` bierze wartość początkową tylko przy pierwszym renderze, więc
+ * formularz musi się montować dopiero z gotowym configem, inaczej pierwsze wejście
+ * w zakładkę zamraża pola na domyślnych i „Zapisz" nadpisuje zapisane mapowanie.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -43,16 +48,28 @@ const MAPOWANIE_DOMYSLNE = [
 const SEPARATOR_DOMYSLNY = ";";
 
 export function Shoper() {
-  const klient = useQueryClient();
-  const { data: konfiguracja, isLoading } = useQuery<Konfiguracja>({
-    queryKey: KLUCZ_KONFIGURACJI,
-  });
+  const { data: konfiguracja } = useQuery<Konfiguracja>({ queryKey: KLUCZ_KONFIGURACJI });
 
-  const [kolumny, ustawKolumny] = useState(
-    konfiguracja?.["shoper.kolumny"] ?? MAPOWANIE_DOMYSLNE,
-  );
+  // `null` to wygasła sesja (`zapytanieZwracajaceNullNa401`, `lib/queryClient.ts`).
+  if (!konfiguracja) {
+    return (
+      <Card className="border-card-border">
+        <CardContent className="p-5">
+          <p className="text-sm text-muted-foreground">Wczytywanie…</p>
+        </CardContent>
+      </Card>
+    );
+  }
+  return <FormularzShopera konfiguracja={konfiguracja} />;
+}
+
+function FormularzShopera({ konfiguracja }: { konfiguracja: Konfiguracja }) {
+  const klient = useQueryClient();
+
+  // Brak klucza w configu = produkcja nigdy go nie zapisała → wartość domyślna karty.
+  const [kolumny, ustawKolumny] = useState(konfiguracja["shoper.kolumny"] ?? MAPOWANIE_DOMYSLNE);
   const [separator, ustawSeparator] = useState(
-    konfiguracja?.["shoper.separator"] ?? SEPARATOR_DOMYSLNY,
+    konfiguracja["shoper.separator"] ?? SEPARATOR_DOMYSLNY,
   );
   const [komunikat, ustawKomunikat] = useState<{ tresc: string; blad: boolean } | null>(null);
 
@@ -71,16 +88,6 @@ export function Shoper() {
     },
     onError: (e) => ustawKomunikat({ tresc: `Błąd zapisu: ${e.message}`, blad: true }),
   });
-
-  if (isLoading) {
-    return (
-      <Card className="border-card-border">
-        <CardContent className="p-5">
-          <p className="text-sm text-muted-foreground">Wczytywanie…</p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="border-card-border">

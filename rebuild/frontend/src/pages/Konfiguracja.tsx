@@ -51,12 +51,11 @@ export function Konfiguracja() {
         </TabsContent>
 
         {/*
-         * Shoper i AI inicjalizują stan formularza wartościami z `GET /api/config`, więc
-         * muszą się zamontować dopiero, gdy config jest już pobrany. `TabsContent` z Radiksa
-         * montuje zawartość leniwie — dopóki zakładka nie jest aktywna, komponent nie
-         * istnieje — a zapytanie ma `staleTime: Infinity`, więc przy wejściu w zakładkę dane
-         * albo są w cache'u, albo karta pokazuje „Wczytywanie…" i montuje formularz po
-         * odpowiedzi. Bez tego pola startowałyby puste i nadpisałyby zapisaną konfigurację.
+         * Shoper i AI inicjalizują stan formularza wartościami z `GET /api/config`. Za to,
+         * żeby formularz zobaczył je już przy pierwszym renderze, odpowiadają SAME zakładki:
+         * każda dzieli się na komponent pobierający i formularz montowany dopiero z gotowymi
+         * danymi (patrz nagłówek `Ai.tsx`). Leniwe montowanie `TabsContent` tu nie wystarcza
+         * — chroni tylko wtedy, gdy config jest już w cache'u.
          */}
         <TabsContent value="shoper" className="mt-4">
           <Shoper />
