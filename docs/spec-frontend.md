@@ -130,8 +130,8 @@ ma endpoint:
 
 > **Odbudowa (3e, 3f-1, 3f-2 — 2026-09-01):** `/staging` i `/konfiguracja` odbudowane; router
 > ma **12 tras, 8 placeholderów**. Zakładka **Wgrywanie ręczne** (3f-1) i **Dostawcy** (3f-2)
-> wypełnione, cztery pozostałe (spedycja / shoper / katalog / ai) czekają na Iterację 11 —
-> ich zaślepki i przypisanie do bloków siedzą w `src/pages/konfiguracja/zakladki.ts`.
+> wypełnione, cztery pozostałe (spedycja / shoper / katalog / ai) czekały wtedy na Iterację 11 —
+> dowiezione 2026-09-03, patrz blok I11 niżej.
 > Fakty zweryfikowane w bundlu, których ta specyfikacja nie miała:
 >
 > - **⭐ Karta dostawcy `ZT()` (`frontend-index.js:25661-25806`) NIE MA żadnej edycji.**
@@ -185,6 +185,24 @@ ma endpoint:
 > którego ten ekran nie woła). **Odstępstwo D5:** nasz widok ma stany `isLoading`/`isError`,
 > jak `Staging.tsx`; oryginał ich nie ma (`data = {}` domyślnie, więc podczas ładowania i przy
 > błędzie renderuje „Brak wpisów w historii."). Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
+
+> **Odbudowa (I11, `18-FEATURE-konfiguracja-config-spedycja`, 2026-09-03):** `/konfiguracja`
+> domknięte — ostatnie cztery zakładki (spedycja / shoper / katalog / ai) wypełnione, zaślepki
+> i pole `domykaBlok` zniknęły; wszystkie sześć zakładek są dziś wypełnione. Trzy rzeczy, które
+> łatwo się domyślić błędnie: **zakładka „spedycja" świadomie NIE jest portem 1:1** (D2) — w
+> produkcji `GET/POST /api/spedycja` istnieje, ale UI nigdy go nie woła (dane żyją w
+> module-level tablicy i IndexedDB, `frontend-index.js:10381`), odbudowa woła realne
+> `GET/POST /api/spedycja`, więc limity są trwałe i wspólne, nie lokalne dla przeglądarki.
+> **Zakładka „katalog" nie dotyka `/api/config`** — to „Domyślne kolumny katalogu" w IndexedDB
+> (`konfig-domyslne-kolumny`) + „Przywróć fabryczne"; destrukcyjny przycisk „Usuń wszystko
+> z katalogu" (`POST /api/products/clear`) zostaje poza zakresem do Iteracji 12 (D3).
+> **Edytora `waga_gab.*` nie ma i nie będzie** — w oryginale nie istnieje żaden (0 wystąpień
+> w bundlu), mimo że podtytuł ekranu Konfiguracji to sugeruje. Zakładka „shoper" zapisuje
+> `shoper.kolumny`/`shoper.separator` (2× `POST /api/config`), kluczy tych nie ma jeszcze
+> w `contract/fixtures/GET_config.json` (nikt ich w produkcji nie zapisał) — czyta je dopiero
+> eksport CSV z Iteracji 8; zakładka „ai" zapisuje trzy klucze `ai_fallback.*`
+> (3× `POST /api/config`), `aktywny` wyprowadzony z obecności klucza, nie z osobnego pola.
+> Szczegóły: `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

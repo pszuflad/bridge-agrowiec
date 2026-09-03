@@ -168,3 +168,83 @@ narzutach w I4a; powód siedzi w komentarzu przy trasie i w sekcji „Odstępstw
 ### Wyniki po poprawkach
 - Backend: ✓ 629/629, frontend: ✓ **302/302** (trzy nowe testy regresyjne).
 - `lint`, `typecheck`, `build` czyste w obu pakietach.
+
+---
+
+## Docs updates
+
+Cztery doc-checkery równolegle; siedem plików sprawdzonych, pięć zmienionych.
+
+### `docs/rebuild-roadmap.md` — zaktualizowany (4 miejsca)
+- **Blok „Iteracja 11" przepisany z zamiaru na stan.** Status ⬜ → ✅ 2026-09-03
+  (`18-FEATURE-konfiguracja-config-spedycja`). Sprostowane `GET/PUT /api/config` →
+  `POST /api/config` z `{klucz, wartosc}`; dopisane `POST /api/spedycja`, którego roadmapa
+  w ogóle nie wymieniała. Poprawione błędne założenie, że zakładka „katalog" edytuje klucze
+  configu — nie edytuje żadnego. Dopisane D1, D2, D4, D7, maskowanie w audycie, wynik GATE
+  i testów. Usunięte nieaktualne fragmenty („ZAKRES POMNIEJSZONY", „Historyczne (3e)",
+  „CZTERY zaślepki") zamiast dopisywania sprostowań obok.
+- **Blok 3f, „Decyzje zaklepane 2026-09-01"** — to samo sprostowanie `GET/PUT` → `GET/POST`
+  plus znacznik dowiezienia.
+- **Blok Iteracji 8** — nowa nota: `shoper.kolumny`/`shoper.separator` są już zapisywane,
+  ale nikt ich nie czyta do I8; rozróżnienie `/api/export/shoper` (czyta
+  `shoper.format_eksportu`) od `/api/export-shoper` — to dwie różne trasy.
+- **Blok Iteracji 12** — dwie noty „⚠ WEJŚCIE Z ITERACJI 11": `GET /api/audit-log` zobaczy
+  nowe akcje `edycja_konfiguracji` i `edycja_spedycji` (z ich kształtem i maskowaniem);
+  przycisk „Usuń wszystko z katalogu" należy do zakładki „Katalog" w `/konfiguracja`, nie do
+  widoku `/katalog` — miejsce wpięcia gotowe, wraz z treścią `window.confirm` i listą
+  unieważnianych zapytań.
+
+### `docs/rebuild-backlog.md` — zaktualizowany (1375 → 1468 linii)
+- **Wpis #14** (mutacje zapisują całe ciało) rozszerzony: `POST /api/spedycja` i
+  `POST /api/config` naprawione w I11, dopisane do tabeli tras i plików.
+- **Nowy wpis #26** — zakładka „Spedycja" połączona z backendem (✅ TAK, D2), z jawnym
+  rozróżnieniem od wpisu #19 (cache promocji): tam dane realnie idą przez sieć, tu nie szło nic.
+- **Nowy wpis #27** — `POST /api/config` z whitelistą (✅ TAK, D4). Dołączone do niego trzy
+  fakty informacyjne: maskowanie audytu po nazwie klucza (`shoper.token_api` jawnie),
+  `GET /api/config` oddaje sekrety niezamaskowane, brak edytora `waga_gab.*` (D7).
+
+### `docs/spec-backend.md` — zaktualizowany (2 miejsca)
+- §2 — nota „Potwierdzone w I11" w tej samej formie co noty I2/3b/4a/I5: oba GET-y wjechały
+  pod `requireAuth` mimo `security: []`; POST-y kontrakt i tak ma za auth.
+- §5 — `Jt`/`gn` oznaczone jako odtworzone w `rebuild/`.
+- Sprawdzone, że fałszywa teza o `PUT /api/config` do tego pliku nie przewędrowała.
+
+### `docs/spec-frontend.md` — zaktualizowany (2 miejsca)
+- Blok „Odbudowa (3e, 3f-1, 3f-2)" — zdanie „cztery pozostałe czekają na Iterację 11"
+  poprawione na stan faktyczny.
+- Nowy blok „Odbudowa (I11, 2026-09-03)": `/konfiguracja` 6/6 zakładek + trzy fakty
+  zapisane z góry, żeby nie urosły w błędne założenia (spedycja NIE jest portem 1:1 — D2;
+  katalog NIE dotyka `/api/config` — D3; edytora `waga_gab.*` nie ma i nie będzie — D7).
+
+### `CLAUDE.md` — zaktualizowany (1 miejsce)
+Zasada nr 3 („weryfikuj grafem wywołań, nie nazwą") rozszerzona o kształt API: w I11 roadmapa
+dwukrotnie opisała endpoint niezgodnie ze stanem faktycznym, więc metodę i kształt ciała
+sprawdzaj w `contract/openapi.yaml` i w oryginale, zanim uwierzysz roadmapie. Rozszerzenie
+istniejącej zasady zamiast dokładania nowej.
+
+### Bez zmian (sprawdzone, nic do poprawy)
+- `docs/plan.md` — jawnie oznaczony jako dokument historyczny z fazy wstępnej; nie śledzi
+  statusu iteracji (nie ma tam ani I11, ani I1-I10).
+- `docs/prompts/mapa-kodu-do-wiki.md` — czysta mapa starego kodu, zero odniesień do
+  `rebuild/`; dopisanie ich byłoby wprowadzeniem nowej struktury pliku, nie utrzymaniem.
+- `docs/instrukcja-testow-I4.md` — dotyczy innej iteracji, nie odwołuje się do
+  `/konfiguracja`.
+
+### Pre-existing issues (znalezione przy okazji, NIE naprawione)
+- **`docs/spec-frontend.md:131-132` i `:178-179`** — liczniki placeholderów („8", potem „7")
+  nie składają się z sekwencją; §3 tego samego pliku mówi o 6 placeholderach. Rozjazd sprzed
+  tego ticketu (I11 nie zmienia liczby tras). Wymaga decyzji: poprawić liczby, czy uznać je
+  za opis stanu „na moment danego bloku". **Do rozstrzygnięcia przez użytkownika.**
+- **`docs/rebuild-roadmap.md:450`** — „Pełny cykl z przeglądarki domknie I11" jest już
+  nieaktualne (zakres importu wydzielono do 3f), ale zdanie jest sprostowane w tym samym
+  pliku przy linii 812. Zostawione świadomie.
+
+### Follow-up wynikający z przeglądu dokumentacji
+- **Brak `docs/instrukcja-testow-I11.md`** — nie było w zakresie tego ticketu, ale I11 wnosi
+  realną zmianę user-facing (Ania edytuje trwałe limity spedycji, klucz AI, mapowanie CSV).
+  Konwencja jest gotowa w `instrukcja-testow-I4.md`. Scenariusze, które taka instrukcja
+  musiałaby objąć: edycja limitu spedycji **z podkreśleniem, że zapis idzie teraz do backendu
+  i jest wspólny dla wszystkich** (D2 — to „fałszywy alarm" względem tego, co Ania zna);
+  zapis AI i Shopera jako seria kilku POST-ów na jedno kliknięcie (możliwy zapis częściowy
+  przy błędzie w środku serii); „Domyślne kolumny katalogu" jako operacja **czysto lokalna**;
+  adnotacja przy braku przycisku czyszczenia katalogu (D3, I12).
