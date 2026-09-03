@@ -1373,3 +1373,51 @@ zwraca dla tego typu `true` bezwarunkowo. Niespójność dotyczy wyłącznie pro
   katalogu. Wymaga świadomej decyzji użytkownika i sprawdzenia, czy w produkcyjnej bazie nie
   leżą uśpione promocje globalne.
 - Alternatywa: usunąć checkbox „globalna" z formularza promocji, skoro w tej roli nie działa.
+
+---
+
+### #26 · 2026-09-03 · [FRONTEND] · lista przewoźników i dzielników żyje wyłącznie w IndexedDB przeglądarki
+
+> **Znalezione przy tickecie `18-FEATURE-waga-gabarytowa` (I9). Port 1:1** — decyzja D3
+> (`docs/tickets/18-FEATURE-waga-gabarytowa/plan.md`).
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (widok `/waga-gabarytowa`, edytor przewoźników) |
+| **Pliki** | `deminified/frontend-index.js:9165-9193` (store IndexedDB); port: `rebuild/frontend/src/lib/magazynKV.ts`, `pages/waga-gabarytowa/przewoznicy.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1** — przeniesienie na backend ⬜ **do decyzji** |
+| **Status** | ✔ odtworzone w rebuild (I9) |
+
+**Co robi produkcja.** Edytor przewoźników i dzielników (dodawanie własnego, zmiana nazwy/
+dzielnika per wiersz, usuwanie z blokadą „min. 1 przewoźnik", „Przywróć domyślne") trzyma
+cały stan wyłącznie w IndexedDB przeglądarki (baza `bridge-store-v2`). Zmiany Ani nie
+przenoszą się między urządzeniami i giną przy czyszczeniu danych witryny.
+
+**Decyzja użytkownika (2026-09-03): port 1:1** — odbudowa ma to samo zachowanie
+(`magazynKV`, ten sam mechanizm co inne dane lokalne widoku). Przeniesienie listy
+przewoźników na backend (persystencja niezależna od urządzenia) byłoby nową funkcją,
+nie odbudową — do rozważenia osobno.
+
+---
+
+### #27 · 2026-09-03 · [BACKEND] · `POST /api/waga-gabarytowa/oblicz` nie ma konsumenta
+
+> **Znalezione przy tickecie `18-FEATURE-waga-gabarytowa` (I9). Port 1:1** — decyzja D1
+> (`docs/tickets/18-FEATURE-waga-gabarytowa/plan.md`).
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (endpoint kalkulatora paletowego) |
+| **Pliki** | `deminified/backend-index.cjs:48749-48769`; port: `rebuild/backend/src/waga-gabarytowa/formula.ts`, `routes/waga-gabarytowa.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1** — podłączenie pod UI ⬜ **do decyzji** |
+| **Status** | ✔ zrobione w rebuild (I9), przetestowane jednostkowo i przez GATE, bez wywołań z frontendu |
+
+**Co robi produkcja.** Endpoint liczy wagę gabarytową wg formuły **paletowej/oponowej**
+(progi półpalety/palety, sterowana configiem `waga_gab.*`), ale żaden fragment frontendu go
+nie woła — widok `/waga-gabarytowa` liczy **innym, wolumetrycznym** wzorem, lokalnie,
+z dzielnikiem per przewoźnik (patrz #26). Dwa merytorycznie różne kalkulatory pod tą samą
+nazwą, oba odtworzone 1:1 w I9 (D1).
+
+**Decyzja użytkownika (2026-09-03): dowieźć oba, bez podłączania FE do endpointu.** Gdyby
+formuła paletowa miała się kiedyś pojawić w UI, to osobna decyzja produktowa (nowy widok
+albo zakładka), nie podmiana istniejącego kalkulatora wolumetrycznego.

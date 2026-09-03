@@ -130,3 +130,51 @@ Po poprawkach: `lint`, `typecheck`, `test` czyste po obu stronach (FE 307/307, B
    więc czytnik ekranu nie ma czego przeczytać. Odtwarzamy to wiernie, bo poprawka jest
    odstępstwem od 1:1. Jeśli Ania zechce dostępność, to osobna decyzja obejmująca WSZYSTKIE
    takie przyciski w odbudowie, a nie łatka w jednym widoku.
+
+## Docs updates
+
+### `docs/rebuild-roadmap.md`
+- §4 tablica postępu — wiersz „9 | Waga gabarytowa": `⬜` → `✅`, `ticket 18-FEATURE-waga-gabarytowa · 2026-09-03`.
+- §5 blok „Iteracja 9" oznaczony jako zrobiony. **Usunięta obalona rekomendacja** „liczyć przez API
+  — jedno źródło logiki"; zastąpiona ustalonym faktem (dwa różne kalkulatory biznesowe) i decyzją D1
+  z uzasadnieniem. Dopisane odstępstwo D2 z precedensem `GET /api/markups`.
+- **Ustalenie dla PRZYSZŁEGO bloku wpisane do tego bloku, nie do I9** (CLAUDE.md, obowiązek 2):
+  blok Iteracji 11 dostał notę „⚠ WEJŚCIE Z ITERACJI 9" — cztery klucze `waga_gab.*` (plus opisowy
+  piąty `waga_gab.opis_wspolczynnik`) nie są zasiewane w bazie odbudowy; I9 dowiozła sam odczyt
+  z fallbackiem, zasiew configu należy do I11.
+- §3 „Zasady przekrojowe", wiersz „Lokalne vs API" — status rozdzielony per iteracja:
+  `⬜ per iteracja` → `🔨 częściowo (I9 ✅, I6 ⬜)`.
+- Bloki 3d-2 i I12 sprawdzone: `applyWagaPamiec`/`waga_pamiec` już poprawnie opisane jako
+  import-side, bez związku z `/waga-gabarytowa`. Bez zmian, bez duplikowania.
+
+### `docs/rebuild-backlog.md`
+- **Nowy wpis #26** — lista przewoźników i dzielników żyje wyłącznie w IndexedDB przeglądarki
+  (`✅ port 1:1` na stan obecny, `⬜ do decyzji` na ewentualne przeniesienie na backend).
+- **Nowy wpis #27** — `POST /api/waga-gabarytowa/oblicz` bez konsumenta (`⬜ do decyzji`),
+  z odsyłaczem do #26.
+- Żaden istniejący wpis nie dotyczył tego ticketa — przeszukane pod kątem wagi gabarytowej,
+  `waga_gab`, `waga_pamiec`, przewoźników, dzielników i `bridge_ext`. Backlog nigdzie nie mieszał
+  `waga_pamiec` z kalkulatorem, więc nie było czego prostować.
+- Kandydat odrzucony: wpis o dostępności przycisków ikonowych — backlog nie prowadzi żadnego
+  wątku przekrojowego a11y, a temat nie jest „zmianą produkcji do naniesienia", tylko standardem
+  implementacyjnym. Zostaje w follow-up raportu (punkt 5).
+
+### `docs/spec-frontend.md`
+- §3 — licznik odbudowanych widoków: 6 → **7** (`/waga-gabarytowa`), placeholderów 6 → 5.
+- §4 „Zachowania lokalne vs API" — wpis o wadze gabarytowej uzupełniony o **powód**: BE liczy inny
+  wzór (paletowy), FE wolumetryczny z wyborem przewoźnika, więc to nie jest duplikat do usunięcia.
+  Odnotowane, że I9 zachowała ten stan świadomie (D1).
+- §5 „Blueprint odbudowy" — nowy blok dla I9 w stylu wpisów I5 i 4b.
+
+### `docs/spec-backend.md`
+- §2 — nowy blok „Potwierdzone w I9" (jak wpisy I2/3b/4a/I5): `requireAuth` (D2), formuła paletowa
+  z progami i configiem `waga_gab.*`, pięć pól odpowiedzi, brak walidacji (zawsze 200).
+- Lista publicznych endpointów produkcji — bez zmian, opisuje stan oryginału i nadal jest prawdziwa.
+
+### `CLAUDE.md`
+Bez zmian. Doc-checker zweryfikował w kodzie ostrzeżenie o duplikatach definicji w zdeminifikowanym
+oryginale: `grep -c "waga-gabarytowa" mirror/backend/index.cjs` → 1 wystąpienie, żaden `patch_*.cjs`
+tej trasy nie dotyka. Nic w pliku nie stało się nieprawdą.
+
+### Pre-existing issues
+Żaden z trzech doc-checkerów nie znalazł zastanych nieścisłości niezwiązanych z tym ticketem.
