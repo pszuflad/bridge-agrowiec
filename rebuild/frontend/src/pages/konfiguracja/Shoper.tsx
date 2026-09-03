@@ -48,10 +48,18 @@ const MAPOWANIE_DOMYSLNE = [
 const SEPARATOR_DOMYSLNY = ";";
 
 export function Shoper() {
-  const { data: konfiguracja } = useQuery<Konfiguracja>({ queryKey: KLUCZ_KONFIGURACJI });
+  const { data: konfiguracja, isLoading } = useQuery<Konfiguracja>({
+    queryKey: KLUCZ_KONFIGURACJI,
+  });
 
-  // `null` to wygasła sesja (`zapytanieZwracajaceNullNa401`, `lib/queryClient.ts`).
-  if (!konfiguracja) {
+  // Rozdzielone świadomie: `isLoading` to „zapytanie jeszcze trwa", a `data === null` to
+  // WYGASŁA SESJA (`zapytanieZwracajaceNullNa401`, `lib/queryClient.ts:13-16`). Spinner
+  // należy się tylko pierwszemu; przy 401 pokazujemy formularz na pustej konfiguracji, bo
+  // `staleTime: Infinity` znaczy, że drugiej odpowiedzi już nie będzie i „Wczytywanie…"
+  // wisiałoby w nieskończoność. To ta sama degradacja, co w reszcie aplikacji: pusty widok
+  // teraz, twardy błąd dopiero przy zapisie. Oryginał robi to samo — strona domyśla
+  // `cfg = {}` (`frontend-index.js:26290`).
+  if (isLoading) {
     return (
       <Card className="border-card-border">
         <CardContent className="p-5">
@@ -60,7 +68,7 @@ export function Shoper() {
       </Card>
     );
   }
-  return <FormularzShopera konfiguracja={konfiguracja} />;
+  return <FormularzShopera konfiguracja={konfiguracja ?? {}} />;
 }
 
 function FormularzShopera({ konfiguracja }: { konfiguracja: Konfiguracja }) {

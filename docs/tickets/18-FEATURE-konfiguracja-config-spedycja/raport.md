@@ -165,8 +165,39 @@ narzutach w I4a; powód siedzi w komentarzu przy trasie i w sekcji „Odstępstw
 - Komunikat 400 z `POST /api/config` wylicza całą listę dozwolonych kluczy. Trasa jest za
   `requireAuth`, a komunikat realnie pomaga w diagnozie, więc zostaje.
 
-### Wyniki po poprawkach
+### Wyniki po poprawkach (iteracja 1)
 - Backend: ✓ 629/629, frontend: ✓ **302/302** (trzy nowe testy regresyjne).
+- `lint`, `typecheck`, `build` czyste w obu pakietach.
+
+---
+
+## Review — iteracja 2
+
+Oba BLOCKER-y zamknięte i potwierdzone empirycznie przez reviewera (odtworzył regresję,
+przywracając stary wzorzec — testy padły dokładnie tam, gdzie miały). **0 BLOCKER-ów.**
+
+### SHOULD-FIX — wieczne „Wczytywanie…" przy wygasłej sesji *(naprawione)*
+
+Poprzednia poprawka wprowadziła guard `if (!konfiguracja)`, który traktował jednakowo dwa
+różne stany: „zapytanie jeszcze trwa" i „sesja wygasła". `zapytanieZwracajaceNullNa401`
+oddaje przy 401 `null` zamiast rzucać, a `staleTime: Infinity` znaczy, że drugiej odpowiedzi
+nie będzie — więc przy wygasłej sesji zakładka zostawała na spinnerze **na zawsze**, bez
+żadnej informacji zwrotnej. Reszta aplikacji (`Dostawcy.tsx`, `Spedycja.tsx`) degraduje się
+inaczej: pusty widok teraz, twardy błąd dopiero przy mutacji (`lib/queryClient.ts:13-16`).
+
+Rozdzielone: spinner reaguje wyłącznie na `isLoading`, a po rozstrzygnięciu zapytania
+formularz montuje się na `konfiguracja ?? {}`. To jest zarazem bliżej oryginału, który
+domyśla `cfg = {}` (`frontend-index.js:26290`). Utrata danych nie wraca: przy wygasłej sesji
+zapis i tak dostanie 401 i pokaże błąd.
+
+Dołożony test `„wygasła sesja nie zostawia zakładki na wiecznym «Wczytywanie…»"`.
+
+### Pozostałe pozycje
+- SHOULD-FIX (audyt spedycji loguje surowe ciało) — świadomie bez zmian, patrz wyżej.
+- 3× NICE-TO-HAVE — follow-up, patrz wyżej.
+
+### Wyniki końcowe
+- Backend: ✓ **629/629**, frontend: ✓ **303/303**.
 - `lint`, `typecheck`, `build` czyste w obu pakietach.
 
 ---

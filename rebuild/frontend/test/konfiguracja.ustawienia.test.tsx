@@ -183,6 +183,19 @@ describe("pierwsze wejście w zakładkę (config spoza cache'u)", () => {
     ]);
   });
 
+  it("wygasła sesja nie zostawia zakładki na wiecznym „Wczytywanie…”", async () => {
+    // `zapytanieZwracajaceNullNa401` oddaje `null` zamiast rzucać (`lib/queryClient.ts`),
+    // a `staleTime: Infinity` znaczy, że drugiej odpowiedzi nie będzie. Gdyby spinner
+    // reagował na „brak danych" zamiast na „trwa zapytanie", wisiałby tu bez końca.
+    // Zamiast tego degradujemy się jak reszta aplikacji: pusty formularz, a twardy błąd
+    // dopiero przy próbie zapisu.
+    server.use(http.get("*/api/config", () => new HttpResponse(null, { status: 401 })));
+    await otworzZakladke("ai");
+
+    expect(await screen.findByTestId("input-openai-model")).toHaveValue("gpt-4o-mini");
+    expect(screen.queryByText("Wczytywanie…")).not.toBeInTheDocument();
+  });
+
   it("Shoper: mapowanie i separator pochodzą z serwera, gdy są zapisane", async () => {
     zamockujApi(undefined, { opoznienieConfigu: 50, config: CONFIG_NIEDOMYSLNY });
     await otworzZakladke("shoper");
