@@ -157,7 +157,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
 | 9 | Waga gabarytowa | 1 | 2 | ⬜ | |
-| 10 | Analityka + pulpit | 2–3 | 2, 3, 4 | ⬜ | |
+| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ⬜ | |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ⬜ | |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
 
@@ -1056,7 +1056,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 10 — Analityka + pulpit
-- **Status:** ⬜  **Sesje:** 2–3 (podział po grupach: EAN / ceny / dostawcy / dostępność-rotacja / KPI)  **Zależy od:** 2, 3, 4
+- **Status:** ⬜  **Sesje (6 bloków, dekompozycja 2026-09-02):** 10a fundament → [10b·10c·10d·10e równolegle] → 10f  **Zależy od:** 2, 3, 4
 - **Cel (Ania klika):** otwiera `/analityka` (20+ dashboardów) i pulpit `/` (agregaty).
 - **⚠ WEJŚCIE Z ITERACJI 5 (decyzja D3, 2026-09-02) — `historia_cen` ma pisarza, brak czytelnika.**
   Tabela `historia_cen` jest zapisywana od bloku 3d-1 (`rebuild/backend/src/repos/historia.ts`,
@@ -1068,14 +1068,26 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **Tu też należy `GET /api/history` jako źródło danych dla Pulpitu** (`frontend-index.js:16852`).
   Endpoint jest już zaimplementowany i przetestowany w I5 (`src/routes/history.ts`), czyta
   tabelę `history`; na stagingu zwraca dziś `[]`, bo ta tabela nie ma jeszcze pisarza (patrz I5).
-- **WEJŚCIE Z ITERACJI 6 (2026-09-03) — klient dla „najświeższych alertów" na pulpicie już
-  istnieje.** `pobierzAlerty()` (`pages/alerty/api.ts`) i grupowanie `pogrupujAlerty()`
-  (`pages/alerty/grupowanie.ts`) są gotowe do ponownego użycia; `queryKey` to `["/api/alerts"]`.
-  Nie pisać drugiego klienta.
-- **Backend:** 27 tras `/api/analytics/*` (KPI, marże, EAN coverage/comparison/unique/rank/details, ceny inflation/last-import/product-history, dostawcy stats/lifecycle/stability/stock, dostępność products/sell-through, rotacja inactive, sezonowość, importy-timeline, top-zmiany, filters, status, bootstrap-current, export/{view}, market/group-prices, lifecycle/models).
-- **Frontend:** widok `/analityka` (`fe.js:27804`) + pulpit `/`.
-- **Ścieżki (GATE):** analytics×27.  **Fixtures:** wszystkie `GET_analytics_*.json` (25).
-- **DoD:** dashboardy renderują realne agregaty; fixtures przez GATE; pulpit pokazuje kluczowe metryki.
+- **⭐ Kolejność:** **10a MUSI być pierwszy** — stawia szkielet `/analityka` (`fe.js:27804`), kontrolki filtrów, nagłówek KPI i wzorzec wykresu; sesja 10a ładuje skill `dataviz`. Po merge 10a bloki **10b/10c/10d/10e są niezależne → równoległe**. **10f na końcu** (Pulpit agreguje gotowe metryki).
+- **10a · Fundament analityki** (BE+FE) — `bootstrap-current` (POST, akcja seedująca `historia_cen`), `filters`, `status`, `kpi`, **`margins` (dashboard-WZORZEC, decyzja A 2026-09-02)**; szkielet strony `/analityka`, 6 globalnych filtrów wyszukiwalnych, nagłówek KPI (4 kafle) + `margins` jako pełny wzorzec *filtr→zapytanie→tabela/wykres*; infrastruktura wykresów (Recharts przez shadcn + `dataviz`; tabele ≤300 wierszy).
+  - Gate: fixtures kpi/filters/status/**margins** (kształt 1:1 + openapi; bootstrap-current tylko openapi); strona renderuje KPI + filtry + wzorcowy dashboard na snapshocie.
+- **10b · Ceny** (BE+FE) — `prices/inflation`, `prices/last-import`, `prices/product-history` (**czytelnik `historia_cen`**, D3), `market/group-prices`, `top-zmiany` (**`margins` przeniesione do 10a jako wzorzec**).
+  - Gate: fixtures tej grupy (6) + dashboardy na realnych agregatach.
+- **10c · EAN** (BE+FE) — `ean/comparison`, `ean/coverage`, `ean/details`, `ean/supplier-rank`, `ean/unique`, `ean-porownanie`.
+  - Gate: fixtures EAN (6).
+- **10d · Dostawcy** (BE+FE) — `dostawcy-stats`, `suppliers/lifecycle`, `suppliers/stability`, `suppliers/stock`.
+  - Gate: fixtures dostawców (4).
+- **10e · Dostępność / rotacja / cykl** (BE+FE) — `availability/products`, `availability/sell-through`, `rotation/inactive`, `lifecycle/models`, `seasonality/monthly`, `importy-timeline`.
+  - Gate: fixtures tej grupy (6).
+- **10f · Export + Pulpit** (BE+FE) — `analytics/export/{view}` + pulpit `/` (home; czyta `GET /api/history` z I5 + KPI z 10a + alerty z I6).
+  - **WEJŚCIE Z ITERACJI 6 (2026-09-03, `18-FEATURE-widok-alerty`) — klient dla „najświeższych
+    alertów" na pulpicie JUŻ ISTNIEJE.** `pobierzAlerty()` (`pages/alerty/api.ts`) i grupowanie
+    `pogrupujAlerty()` (`pages/alerty/grupowanie.ts`) są gotowe do ponownego użycia; `queryKey`
+    to `["/api/alerts"]`. Nie pisać drugiego klienta. ⚠ Pulpit oryginału filtrował alerty po
+    statusie `nowy` i ograniczał do pięciu (`02_WIDOKI.md` §/ pkt 5) — `filtrujAlerty` to robi.
+  - Gate: export waliduje wg openapi (brak fixtura GET); pulpit pokazuje kluczowe metryki.
+- **Ścieżki (GATE):** analytics×27; fixtures `GET_analytics_*.json` (25) rozdzielone po blokach 10a–10e; `export/{view}` bez fixtura GET (walidacja openapi).
+- **DoD:** wszystkie bloki 10a–10f zielone; dashboardy renderują realne agregaty; fixtures przez GATE; pulpit pokazuje kluczowe metryki.
 
 ---
 
