@@ -148,10 +148,14 @@ Po poprawkach: `lint`, `typecheck`, `test` czyste po obu stronach (FE 307/307, B
   import-side, bez związku z `/waga-gabarytowa`. Bez zmian, bez duplikowania.
 
 ### `docs/rebuild-backlog.md`
-- **Nowy wpis #26** — lista przewoźników i dzielników żyje wyłącznie w IndexedDB przeglądarki
+- **Nowy wpis #27** — lista przewoźników i dzielników żyje wyłącznie w IndexedDB przeglądarki
   (`✅ port 1:1` na stan obecny, `⬜ do decyzji` na ewentualne przeniesienie na backend).
-- **Nowy wpis #27** — `POST /api/waga-gabarytowa/oblicz` bez konsumenta (`⬜ do decyzji`),
-  z odsyłaczem do #26.
+- **Nowy wpis #28** — `POST /api/waga-gabarytowa/oblicz` bez konsumenta (`⬜ do decyzji`),
+  z odsyłaczem do #27.
+
+  > Numery nadane pierwotnie jako #26/#27 zderzyły się z wpisem #26 wniesionym równolegle
+  > przez Iterację 6 (`18-FEATURE-widok-alerty`), zmergowaną wcześniej. Przenumerowane przy
+  > scalaniu `develop` — numer #26 należy do wpisu o pseudo-alertach katalogowych.
 - Żaden istniejący wpis nie dotyczył tego ticketa — przeszukane pod kątem wagi gabarytowej,
   `waga_gab`, `waga_pamiec`, przewoźników, dzielników i `bridge_ext`. Backlog nigdzie nie mieszał
   `waga_pamiec` z kalkulatorem, więc nie było czego prostować.

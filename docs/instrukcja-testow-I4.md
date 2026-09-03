@@ -332,7 +332,6 @@ trafiła się w danych, tak właśnie zadziała.
 | Przełącznik statusu przy promocjach (jak przy narzutach) | ⬜ decyzja |
 | Edycja priorytetu reguły z formularza | ⬜ decyzja — w starym Bridge pole jest ukryte |
 | Słownik kategorii i marek w warunkach | Iteracja 7 |
-| Widok alertów | Iteracja 6 |
 | Atrybuty | Iteracja 7 |
 
 ---

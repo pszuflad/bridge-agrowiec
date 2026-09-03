@@ -95,6 +95,14 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > walidacji — każde wejście, łącznie z pustym ciałem, daje 200 (kontrakt deklaruje 400,
 > nieosiągalne w oryginale). Szczegóły: `docs/tickets/18-FEATURE-waga-gabarytowa/`.
 
+> **Potwierdzone w I6** (`18-FEATURE-widok-alerty`, 2026-09-03): `GET /api/alerts` też
+> wjechało pod `requireAuth`, mimo `security: []` w `contract/openapi.yaml:67` — ten sam
+> wzorzec D1; bez tokenu trasa oddaje **401, kod spoza listy kontraktu** (kontrakt zna tylko
+> 200/400 dla tej ścieżki). `PATCH /api/alerts/{id}` ma auth zgodnie z kontraktem od zawsze,
+> ale dla niej **nie ma nagranej próbki** w `contract/fixtures/` — jej kształt (`{ok:true}`,
+> zawsze, także dla nieistniejącego `id`, bez walidacji `status`, bez `audit_log`) stoi
+> wyłącznie na kodzie oryginału. Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).
