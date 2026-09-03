@@ -5,6 +5,7 @@ import type { Baza } from "./db/index.js";
 import { optionalAuth } from "./middleware/auth.js";
 import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
+import { trasyAnalityki } from "./routes/analytics.js";
 import { trasyAuth } from "./routes/auth.js";
 import { trasyHistorii } from "./routes/history.js";
 import { trasyDostawcow } from "./routes/suppliers.js";
@@ -98,6 +99,7 @@ export function stworzApp({
   app.use(trasyNarzutow({ db }));
   app.use(trasyPromocji({ db }));
   app.use(trasyHistorii({ db }));
+  app.use(trasyAnalityki({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
 
   app.use(nieZnalezionoHandler);
