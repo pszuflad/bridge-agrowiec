@@ -8,7 +8,9 @@ Każdy fakt niżej jest **zweryfikowany w kodzie** (`mirror/backend/analytics_mo
 
 **Zakres:** 27 tras `/api/analytics/*`. Blok 10a zamknął pięć z nich
 (`filters`, `status`, `kpi`, `margins`, `bootstrap-current` — ticket
-`19-FEATURE-analityka-fundament`). Ten dokument opisuje **pozostałe 22**.
+`19-FEATURE-analityka-fundament`). Blok 10c zamknął sześć tras EAN (§5 — data
+2026-09-03, ticket `22-FEATURE-analityka-ean`). Ten dokument opisuje **pozostałe 16**
+(bloki 10b, 10d, 10e, 10f).
 
 **Zanim zaczniesz blok:** przeczytaj `rebuild/frontend/src/pages/analityka/README.md` —
 wzorzec sekcji dashboardu, którego bloki 10b–10e mają się trzymać 1:1.
@@ -32,8 +34,8 @@ a to wymaga decyzji użytkownika, nie domysłu.
 | `GET /api/analytics/dostawcy-stats` | 10d | |
 | `GET /api/analytics/top-zmiany` | 10b | |
 | `GET /api/analytics/importy-timeline` | 10e | fixture jest **pustą tablicą** |
-| `GET /api/analytics/ean-porownanie` | 10c | przyjmuje `?ean` |
-| `GET /api/analytics/ean/details` | 10c | przyjmuje `?ean`; fixture ma puste `offers` |
+| `GET /api/analytics/ean-porownanie` | ✅ 10c | przyjmuje `?ean`; dowieziona jako trasa bez UI (decyzja D6) |
+| `GET /api/analytics/ean/details` | ✅ 10c | przyjmuje `?ean`; fixture ma puste `offers`; dowieziona jako trasa bez UI (decyzja D6) |
 | `POST /api/analytics/bootstrap-current` | ✅ 10a | dowieziona jako trasa bez UI (decyzja D4) |
 
 **Pobierana, ale nigdzie nierenderowana** — osobny przypadek, jeszcze bardziej mylący:
@@ -78,13 +80,21 @@ w każdej z 27 rejestracji. Nie odnotowuj tego jako różnicy.
 na tej liście, GATE przepuści **dowolny** kształt wiersza — kształt trzeba pokryć testem
 jednostkowym przeciw SQL-owi oryginału, tak jak 10a zrobiło dla `margins.low`/`high`.
 
+**Problem jest szerszy, niż tylko puste pola fixture'a.** `test/gate/ksztalt.ts:50` iteruje
+po elementach ODPOWIEDZI, więc **pusta ODPOWIEDŹ przechodzi gate za darmo** — niezależnie
+od tego, czy fixture jest pusty. Domyślny zasiew `PRODUKTY_TESTOWE` nie ma ani jednego EAN-u
+u dwóch dostawców, więc w 10c trzy trasy (`ean/comparison`, `ean/supplier-rank`,
+`ean-porownanie`) wychodziły na nim puste i gate przepuszczał dowolny kształt wiersza —
+mimo że fixtures tych tras NIE są puste. **Wniosek dla 10b/10d/10e: zasiej dane dające
+NIEPUSTE odpowiedzi i asercją sprawdź `rows.length > 0` PRZED porównaniem z fixture'em.**
+
 | Fixture | Puste pola | Blok |
 |---|---|---|
 | `GET_analytics_availability_products.json` | `rows` | 10e |
 | `GET_analytics_availability_sell-through.json` | `rows` | 10e |
 | `GET_analytics_rotation_inactive.json` | `rows` | 10e |
 | `GET_analytics_importy-timeline.json` | **cała odpowiedź** | 10e |
-| `GET_analytics_ean_details.json` | `offers` | 10c |
+| `GET_analytics_ean_details.json` | `offers` (i cała gałąź z `?ean`) | ✅ 10c (pokryte testem) |
 | `GET_analytics_margins.json` | `low`, `high` | ✅ 10a (pokryte testem) |
 
 **Blok 10e ma tu najsłabszą siatkę z całej iteracji** — cztery z sześciu jego fixtures są
@@ -99,7 +109,7 @@ puste albo częściowo puste. Zaplanuj na to testy jednostkowe od razu, nie po r
 | `{ hasHistory, rows }` | `suppliers/stability`, `availability/products`, `availability/sell-through`, `prices/inflation`, `seasonality/monthly`, `lifecycle/models`, `prices/product-history` (+ `stats`) |
 | `{ rows }` (bez `hasHistory`) | `suppliers/lifecycle`, `suppliers/stock`, `ean/comparison`, `ean/unique`, `ean/coverage`, `ean/supplier-rank`, `prices/last-import` |
 | **goła tablica** (bez koperty) | `dostawcy-stats`, `top-zmiany`, `importy-timeline` |
-| inne | `market/group-prices` → `{ group, rows }` · `rotation/inactive` → `{ days, rows }` · `ean/details` → `{ ean, offers }` |
+| inne | `market/group-prices` → `{ group, rows }` · `rotation/inactive` → `{ days, rows }` · `ean/details` bez `?ean` → `{ ean: null, offers: [] }`; **z `?ean`** → `{ ean, offers, mediana, srednia }`, patrz §5 |
 
 `hasHistory` liczy się z `historia_cen` przez pomocnika `hasHistory(db)` (`:58`) i mówi UI,
 czy widok czasowy ma z czego rysować.
@@ -142,42 +152,83 @@ to poprawne zachowanie, nie awaria.
 
 ---
 
-## 5. Blok 10c — EAN
+## 5. Blok 10c — EAN ✅ zamknięty 2026-09-03 (`22-FEATURE-analityka-ean`)
 
 Trasy: `ean/comparison`, `ean/coverage`, `ean/details`, `ean/supplier-rank`, `ean/unique`,
-`ean-porownanie`. Fixtures: 6.
+`ean-porownanie`. Fixtures: 6. Backend: `rebuild/backend/src/repos/analityka.ts` +
+`routes/analytics.ts`. Frontend: `pages/analityka/SekcjaEan.tsx`.
 
 | Trasa | Linia | Query | LIMIT | Kształt |
 |---|---|---|---|---|
 | `ean/comparison` | `:188` | `minDiffPct` | 1000 | `{ rows }` |
-| `ean/details` | `:202` | `ean` | — | `{ ean, offers }` |
+| `ean/details` | `:202` | `ean` | — | **bez `?ean`** → `{ean: null, offers: []}`; **z `?ean`** → `{ean, offers, mediana, srednia}` |
 | `ean/unique` | `:210` | — | 1000 | `{ rows }` |
 | `ean/coverage` | `:219` | — | — | `{ rows }` |
 | `ean/supplier-rank` | `:224` | — | — | `{ rows }` |
-| `ean-porownanie` | `:335` | `ean` | 200 | goła tablica |
+| `ean-porownanie` | `:335` | `ean` | 200 | goła tablica (dwie różne gałęzie, patrz niżej) |
+
+**`ean/details` z `?ean` ma cztery klucze, nie dwa** (`analytics_module.cjs:202-208`).
+Fixture nagrał wyłącznie gałąź bez parametru (`{ean: null, offers: []}`), więc różnicy nie
+widać w kontrakcie — kształt jest pokryty testem jednostkowym, nie gate'em. Każda oferta
+w `offers` dostaje dodatkowo `pozycjaCenowa: i + 1` liczoną z **kolejności wierszy po
+sortowaniu**, NIE funkcją okna — dwie oferty o identycznej cenie dostają różne pozycje
+(w odróżnieniu od `ean/supplier-rank`, który używa prawdziwego `RANK()` i tam remisy dzielą
+pozycję).
+
+**`ean-porownanie` ma DWIE gałęzie SQL zależne od `?ean`** (`:335-338`) i to nie jest alias
+`ean/comparison` — to osobny, prostszy SQL:
+- **bez `?ean`** → agregat 2-dostawcowy (to nagrał fixture): pięć kolumn
+  (`ean, nazwa, dostawcy, cenaMin, cenaMax`, bez `srednia`/`oferty`/`spreadZl`/`spreadPct`),
+  WHERE **bez** `cena_zakupu > 0`, LIMIT **200** (nie 1000).
+- **z `?ean`** → goła tablica ofert, ten sam SELECT co `ean/details.offers`, ale **bez**
+  `pozycjaCenowa`.
+
+**Dwa fakty, które kosztowały dochodzenie w 10c:**
+- `spreadZl`/`spreadPct` w `ean/comparison` liczą się w **JS, po SQL** — filtr `minDiffPct`
+  działa **PO** obcięciu do LIMIT 1000, nie przed nim.
+- `ean/supplier-rank.wspolnePozycje` **myli nazwą**: CTE `ranked` nie wymaga, żeby EAN był
+  u dwóch dostawców — liczy WSZYSTKIE aktywne oferty dostawcy z niepustym EAN-em i ceną > 0.
+  Stąd w fixture `MO9` wychodzi 846/846 = **100%** (wszystkie jego EAN-y są unikalne, więc
+  jest zawsze najtańszy). `RANK()` (nie `ROW_NUMBER()`) sprawia, że przy remisie każdy
+  z remisujących liczy się jako najtańszy — suma `najtanszy` po dostawcach może przez to
+  przekroczyć liczbę EAN-ów.
+- `ean/unique` używa `MAX()` do wyciągnięcia kolumn spoza `GROUP BY` — gdy jeden dostawca ma
+  pod tym samym EAN-em kilka kodów, w tabeli widać NAJWYŻSZĄ cenę i NAJWYŻSZY stan, nie
+  wartości jednej konkretnej oferty.
+- `ean/unique` i `ean/coverage` **nie filtrują** po `cena_zakupu > 0` (w odróżnieniu od
+  `comparison` i `supplier-rank`).
 
 **Zakładka w UI: `ean` „EAN i ceny"** (`fe.js:28175-28294`). Trzy karty:
 
 1. **„2.1-2.4 Porównanie cen po EAN"** ← `ean/comparison`
-   Kolumny: EAN · Nazwa · Dostawcy · Min · Max · Spread zł · Spread %. CSV (`ean-comparison`).
+   Kolumny: EAN · Nazwa · Dostawcy · Min · Max · Spread zł · Spread %. CSV (`ean-comparison`,
+   `M("ean-comparison")` `fe.js:28190` — bez UI do 10f).
    ⚠ `minDiffPct` jest parametrem trasy, ale **oryginalny front go nie podaje** — woła
-   `ean/comparison` bez query. Kontrolki filtra dla niego w UI nie ma.
+   `ean/comparison` bez query. Kontrolki filtra dla niego w UI nie ma (backend go ma i jest
+   pokryty testem jednostkowym).
 2. **„2.5 Pozycje unikalne"** ← `ean/unique`
-   Kolumny: EAN · Nazwa · Dostawca · Cena · Stan. CSV (`unique`).
+   Kolumny: EAN · Nazwa · Dostawca · Cena · Stan. CSV (`unique`, `M("unique")` `fe.js:28234`
+   — bez UI do 10f).
 3. **„2.6 Pokrycie wspólne i ranking dostawcy"** — **jedna karta, DWIE tabele**:
    - `ean/coverage` → Liczba dostawców · EAN (fixture: `{liczbaDostawcow, liczbaEAN}`)
    - `ean/supplier-rank` → Dostawca · Wspólne · Najtańszy · Najtańszy %
      (fixture: `{dostawca, wspolnePozycje, najtanszy, najtanszyPct}`)
 
-**Bez UI w oryginale:** `ean/details` i `ean-porownanie` — obie przyjmują `?ean` i obie mają
-zero wywołań w bundlu. Wyglądają na zaczątek „szczegółów jednego EAN-u", którego nikt nie
-dokończył. Decyzja użytkownika przed planem.
+**Bez UI w oryginale (decyzja D6 z ticketu):** `ean/details` i `ean-porownanie` — obie
+przyjmują `?ean` i obie mają zero wywołań w bundlu. Wyglądają na zaczątek „szczegółów jednego
+EAN-u", którego nikt nie dokończył. Dowiezione jako trasy bez UI, tak jak
+`bootstrap-current` w 10a.
 
 **Kafle KPI oryginału zależą od tego bloku.** Oryginalny nagłówek `/analityka` liczy dwa
 z czterech kafli z `ean/comparison.rows.length` („EAN wspólne") i `ean/unique.rows.length`
 („Pozycje unikalne"). Blok 10a świadomie wziął `GET /api/analytics/kpi` zamiast nich
-(odstępstwo O-10a-1), żeby nie czekać na 10c. **Jeśli użytkownik zechce wrócić do kafli
-oryginału, to jest moment** — dane będą już dostępne.
+(odstępstwo O-10a-1), żeby nie czekać na 10c. **Dane są teraz dostępne, ale przepięcie
+nagłówka na oryginalne kafle jest osobną decyzją użytkownika** — 10c jej nie podjął
+(decyzja D1 z `docs/tickets/22-FEATURE-analityka-ean/plan.md`); zmiana byłaby jednym
+edytem `NaglowekKpi.tsx`, gdy ktoś zdecyduje.
+
+**Co 10c zostawia następnym:** przyciski CSV kart „2.1-2.4" i „2.5" idą do bloku **10f**
+razem z `GET /api/analytics/export/{view}` (§8.1).
 
 ---
 

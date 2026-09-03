@@ -15,7 +15,7 @@ w 10a osobne dochodzenie.
 |---|---|
 | `api.ts` | typy z fixtures + hooki TanStack Query. **Jedyne** miejsce, które wie o HTTP |
 | `filtrowanie.ts` | stan globalnych filtrów, semantyka OR/AND, deklaracja wymiarów obsługiwanych przez sekcję |
-| `formatowanie.ts` | port `_()` i `D()` z oryginału — liczby `pl-PL`, `—` dla pustych, procenty |
+| `formatowanie.ts` | port `_()` i `D()` z oryginału — liczby `pl-PL`, `—` dla pustych, procenty. `zaokraglij(wartosc, miejsca)` — do liczb, które sekcja LICZY SAMA (nie mylić z `formatuj()`, które zamienia na napis) |
 | `TabelaAnalityki.tsx` | port `I()` z oryginału — kolumny, wyrównanie, `slice(0, 300)` |
 | `NaglowekKpi.tsx` | banner historii + cztery kafle. Nie ruszać — to nagłówek całej strony |
 | `FiltryGlobalne.tsx` | sześć kontrolek. Nie ruszać — filtry są wspólne dla zakładek |
@@ -77,6 +77,15 @@ export const WYMIARY_MOJEJ_SEKCJI: WymiarFiltra[] = ["dostawcy", "marki", "model
 const pominiete = wymiaryNieobslugiwane(wybor, WYMIARY_MOJEJ_SEKCJI);
 ```
 
+Dla wierszy z kolumną `dostawca` jest już generyczne `zastosujFiltrDostawcy()`
+(`filtrowanie.ts`) — nie pisz własnej wersji filtra po dostawcy dla każdej tabeli.
+
+⚠ **Gdy karta ma dwie tabele reagujące RÓŻNIE na ten sam filtr** (jedna filtruje, druga nie
+— bo jej wiersz nie niesie odpowiedniej kolumny), powiedz o tym wprost osobną notką przy
+tabeli, która filtra NIE stosuje. Bez tego wygląda to jak zacięty filtr, nie jak świadome
+ograniczenie (wzorzec: karta „2.6" w `SekcjaEan.tsx` z 10c — ranking dostawców filtruje,
+histogram pokrycia nie).
+
 ### 2.4 Tabela
 
 Zawsze przez `TabelaAnalityki`. Kolumny przepisz **1:1 z oryginału** — etykiety PL,
@@ -88,6 +97,10 @@ Zawsze przez `TabelaAnalityki`. Kolumny przepisz **1:1 z oryginału** — etykie
 
 Limit 300 renderowanych wierszy jest z oryginału (`frontend-index.js:27953`) i zostaje.
 Stopkę „Pokazano 300 z N" dokłada sam komponent.
+
+**Karta z dwiema tabelami** (wzorzec z 10c, `SekcjaEan.tsx`, karta „2.6"): gdy oryginał
+łączy dwa agregaty w jedną kartę, użyj `grid gap-4 p-4 md:grid-cols-2` i połóż każdą tabelę
+(ewentualnie z własnym wykresem nad nią) w swojej kolumnie grida.
 
 ### 2.5 Wykres (opcjonalny, ale jeśli już — to tak)
 
@@ -106,6 +119,10 @@ palety projektu) — łamanie ich to błąd, nie kwestia gustu:
 
 1. **Forma z zadania, nie z upodobania.** Porównanie wielkości → słupek (poziomy, gdy nazwy
    kategorii są długie). Zmiana w czasie → linia. Kilka liczb nagłówkowych → kafle, nie wykres.
+   Dla słupka **pionowego** użyj `PROMIEN_SLUPKA_PIONOWEGO` (`chart.tsx`), nie
+   `PROMIEN_SLUPKA` — Recharts liczy `radius` zawsze w kolejności [lewy-górny, prawy-górny,
+   prawy-dolny, lewy-dolny] niezależnie od orientacji, więc wariant poziomy na wykresie
+   pionowym zaokrągli złą krawędź słupka.
 2. **Nigdy dwie osie Y.** Dwie miary o różnej skali → dwa wykresy albo indeksowanie do wspólnej bazy.
 3. **≤ 4 serie.** Piąta i dalsze składają się w „Pozostałe" albo idą w small multiples.
 4. **Sloty koloru w kolejności `KOLORY_WYKRESU`** — 1 → 2 → 4 → 3 → 5. Sloty 3 i 5 mają
@@ -138,6 +155,17 @@ Dwa pliki, wzorowane na `test/analityka.test.tsx` i `test/analityka.filtrowanie.
   loader obok istniejących; **musi zdejmować klucze na `_`** (patrz pułapka 1).
 - **jednostka** — czysta funkcja filtrowania/przeliczania, bez DOM-u.
 
+**Każdy blok zakłada WŁASNE pliki testowe** (`analityka.<blok>.gate.test.ts`,
+`analityka.<blok>.test.tsx`, `analityka.<blok>.filtrowanie.test.ts` — wzorzec z 10c),
+zamiast dopisywać do plików 10a. Bloki 10b–10e idą równolegle i wspólne pliki testowe to
+gwarantowany konflikt przy merge'u. **Jedyny wyjątek:** handlery MSW nowej zakładki trzeba
+dodać do `zamockujApi` w `test/analityka.test.tsx` — widok pobiera wszystkie trasy przy
+każdym wejściu, a `onUnhandledRequest: "error"` wywala test bez nich.
+
+⚠ **Progi czasowe już podniesione** (10c, po tym jak pełny `vitest run` padał losowo pod
+obciążeniem): `vitest.config.ts` ma `testTimeout`/`hookTimeout` 20 s, `test/setup.ts` ma
+`asyncUtilTimeout` 5 s. Nie trzeba tego robić drugi raz.
+
 ---
 
 ## 3. Trzy pułapki, które kosztowały czas w 10a
@@ -166,10 +194,14 @@ trafień nie ma, budujesz coś nowego — a to wymaga decyzji użytkownika, nie 
 
 Ściąga, żeby kolejne bloki nie musiały tego odtwarzać z gita.
 
-**1:1 z oryginałem:** tytuł i podtytuł strony · banner o zasięgu historii cen (z surowym
+**1:1 z oryginałem (10a):** tytuł i podtytuł strony · banner o zasięgu historii cen (z surowym
 znacznikiem ISO) · pięć zakładek, ich kolejność i etykiety PL · domyślna zakładka
 „Dostawcy" · karta „Marża per dostawca/kategoria/marka" z siedmioma kolumnami · limit 300
 wierszy · pobieranie `margins.low`/`high` bez renderowania ich.
+
+**1:1 z oryginałem (10c, zakładka „EAN i ceny"):** trzy karty i ich tytuły z numeracją
+oryginału („2.1-2.4", „2.5", „2.6") · komplet kolumn i wyrównania (`right`/`mono`) ·
+układ karty „2.6" jako jednej karty z dwiema tabelami.
 
 **Świadome odstępstwa** (decyzje użytkownika D1–D4 z 2026-09-03, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`):
 
@@ -181,3 +213,10 @@ wierszy · pobieranie `margins.low`/`high` bez renderowania ich.
 | O-10a-4 | Cztery zakładki puste do czasu 10b–10e | zakres bloku, nie zmiana zachowania |
 | — | `/analityka` ładowana leniwie | Recharts podnosił wspólny bundle z 451 do 837 kB, a używa go tylko ten widok |
 | — | `POST bootstrap-current` bez przycisku | trasa nieidempotentna, a oryginalny frontend nigdy jej nie woła |
+
+Odstępstwa bloku 10c (decyzje D1–D6, `docs/tickets/22-FEATURE-analityka-ean/plan.md`):
+
+| # | Co | Dlaczego |
+|---|---|---|
+| O-10c-1 | Dwa wykresy w karcie „2.6" (histogram pokrycia + ranking dostawców) + liczba nagłówkowa „% EAN-ów u ≥2 dostawców" | D2; oryginał nie ma wykresów, infrastruktura z O-10a-3 stoi |
+| O-10c-2 | Notka o wymiarach filtra, których dana tabela w karcie nie stosuje | D4; oryginał nie ma globalnych filtrów (odstępstwo O-10a-2) |

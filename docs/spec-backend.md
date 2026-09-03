@@ -120,6 +120,15 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > filtrowanie po stronie klienta). Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
 > Semantyka **wszystkich 27 tras** modułu (numer linii handlera, parametry query, LIMIT-y,
 > kształt odpowiedzi — trzy różne koperty!) jest spisana w `docs/analityka-bloki-10b-10f.md`.
+>
+> **Potwierdzone w 10c** (`22-FEATURE-analityka-ean`, 2026-09-03): sześć tras
+> `/api/analytics/ean/{comparison,details,unique,coverage,supplier-rank}` i legacy
+> `ean-porownanie` doszły pod `requireAuth` — ten sam brak-odstępstwa co 10a, kontrakt już
+> deklarował `security` na tych ścieżkach. `ean-porownanie` **nie jest** aliasem
+> `ean/comparison`: inny WHERE (bez `cena_zakupu > 0`), LIMIT 200 zamiast 1000, i **goła
+> tablica** zamiast koperty `{rows}`. `ean/comparison` czyta query `minDiffPct`, `ean/details`
+> i `ean-porownanie` czytają `ean` — trasy analityki NIE są bezparametrowe wszystkie naraz.
+> Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 

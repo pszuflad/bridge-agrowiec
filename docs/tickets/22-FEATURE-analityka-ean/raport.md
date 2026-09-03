@@ -210,3 +210,72 @@ od `formatuj()` (zostaje w domenie liczb, nie zamienia na napis) i wskazówką d
 - Backend: ✓ 723/723 · Frontend: ✓ 408/408 (trzy przebiegi z rzędu)
 - Lint / typecheck / build: ✓ czyste w obu pakietach
 - Chunk `Analityka` 392,22 kB, wspólny bundle 484,03 kB — bez zmian względem stanu przed review
+
+---
+
+## Docs updates
+
+Trzy doc-checkery równolegle, pięć plików sprawdzonych, cztery zaktualizowane.
+
+### `docs/rebuild-roadmap.md`
+
+- Tabela statusu Iteracji 10 — dopisany `10c: 22-FEATURE-analityka-ean · 2026-09-03`; lista bloków
+  otwartych zawężona do 10b/10d/10e (+10f).
+- Blok **10c** oznaczony ✅ z datą i ID ticketa; opis zamieniony z planowanego na faktycznie
+  dowieziony (sześć tras, trzy karty, dwa wykresy O-10c-1, dwie trasy bez UI, pominięte
+  `minDiffPct` w UI i CSV).
+- **Poprawiony fakt:** sekcja „Wzorzec i pułapki dla 10b–10e" sugerowała, że query params mają
+  tylko `market/group-prices`, `prices/product-history` i `rotation/inactive` — dopisane trzy
+  trasy EAN, z zastrzeżeniem, że oryginalny front żadnego z tych parametrów nie wysyła.
+- **Poprawiony fakt:** rozmiary bundla FE — obok stanu po 10a (385/452 kB) dopisany stan po 10c
+  (392/484 kB) z notą, że wzrost wspólnego bundla nie pochodzi z tego bloku.
+- **Nowa sekcja „Wzorzec i gotowa infrastruktura z 10c (dla 10b/10d/10e)"** —
+  `PROMIEN_SLUPKA_PIONOWEGO`, `zaokraglij()`, `zastosujFiltrDostawcy()`, zasada własnych plików
+  testowych per blok, podniesione progi czasowe testów.
+- **Do bloku 10f (nie do 10c) dopisane „WEJŚCIE Z BLOKU 10c"** — dane do przepięcia nagłówka KPI
+  czekają na decyzję użytkownika; przyciski „CSV" kart EAN do dowiezienia razem z eksportem.
+
+### `docs/analityka-bloki-10b-10f.md`
+
+- Zakres dokumentu z „pozostałe 22 trasy" na „pozostałe 16"; blok 10c oznaczony jako zamknięty
+  w intro, §1.1 i §5.
+- **Poprawiony rozjazd:** §3 i §5 podawały kształt `ean/details` jako `{ean, offers}` — teraz
+  opisane obie gałęzie, z czterema kluczami i `pozycjaCenowa` liczoną z kolejności wierszy.
+- **Poprawiony rozjazd:** §5 dostało opis dwóch gałęzi SQL `ean-porownanie` i pełną listę różnic
+  wobec `ean/comparison` (WHERE, LIMIT 200 vs 1000, kolumny, koperta).
+- **Wzmocnione ostrzeżenie §2:** gate iteruje po elementach ODPOWIEDZI, więc pusta odpowiedź
+  przechodzi za darmo niezależnie od fixture'a — wniosek dla 10d/10e o zasiewie i asercji
+  `rows.length > 0`.
+- Dopisane fakty, których dokument nie miał: `spreadZl`/`spreadPct` liczone w JS po SQL;
+  `wspolnePozycje` mylące nazwą; `MAX()` w `ean/unique`; brak `cena_zakupu > 0`
+  w `unique`/`coverage`.
+
+### `rebuild/frontend/src/pages/analityka/README.md` (wzorzec dla 10b–10e)
+
+`zaokraglij()` w tabeli plików · `zastosujFiltrDostawcy()` i notka o karcie z dwiema tabelami
+reagującymi różnie na ten sam filtr (§2.3) · wzorzec karty dwutabelowej (§2.4) ·
+`PROMIEN_SLUPKA_PIONOWEGO` i kolejność `radius` w Recharts (§2.5) · zasada własnych plików
+testowych per blok + wyjątek dla handlerów MSW + podniesione progi czasowe (§2.7) ·
+nowa sekcja „1:1 z oryginałem (10c)" i tabela odstępstw O-10c-1/O-10c-2 (§4).
+
+### `docs/spec-backend.md` i `docs/spec-frontend.md`
+
+- **spec-backend:** §2 dostało akapit „Potwierdzone w 10c" — sześć tras EAN pod `requireAuth`
+  (nie odstępstwo, kontrakt już miał `security`), `ean-porownanie` jako osobna trasa z gołą
+  tablicą, oraz sprostowanie, że trasy analityki JEDNAK czytają query params.
+- **spec-frontend:** §5 — poprawione nieaktualne zdanie „wypełniona tylko zakładka Marża"
+  (teraz także `ean`, czekają `dostawcy`/`ceny`/`dostepnosc`); nowy akapit o bloku 10c
+  z decyzjami D1 i D6 oraz odstępstwem O-10c-1.
+
+### `docs/rebuild-backlog.md` — bez zmian (świadomie)
+
+Wpis **#31** (nieidempotentny `bootstrap-current`) to jedyny wpis o analityce i ten ticket go
+nie dotknął. Trzy zachowania oryginału odtworzone 1:1 i opisane w „Follow-up" wyżej
+(`wspolnePozycje`, `pozycjaCenowa`, `MAX()` w `unique`) **nie pasują do konwencji tego pliku** —
+backlog rejestruje zmiany Ani z żywej produkcji, przechodzące przez pipeline diff/mail
+z obowiązkową kolumną decyzji (✅/❌/⬜/🕒), a nie obserwacje charakteryzacyjne z odbudowy.
+Zostały w `raport.md`.
+
+### Pre-existing issues zgłoszone przez doc-checkery
+
+Brak — żaden nie znalazł nieścisłości wykraczających poza zakres tego ticketa.
