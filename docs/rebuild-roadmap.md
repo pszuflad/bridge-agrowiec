@@ -1057,9 +1057,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   Endpoint jest już zaimplementowany i przetestowany w I5 (`src/routes/history.ts`), czyta
   tabelę `history`; na stagingu zwraca dziś `[]`, bo ta tabela nie ma jeszcze pisarza (patrz I5).
 - **⭐ Kolejność:** **10a MUSI być pierwszy** — stawia szkielet `/analityka` (`fe.js:27804`), kontrolki filtrów, nagłówek KPI i wzorzec wykresu; sesja 10a ładuje skill `dataviz`. Po merge 10a bloki **10b/10c/10d/10e są niezależne → równoległe**. **10f na końcu** (Pulpit agreguje gotowe metryki).
-- **10a · Fundament analityki** (BE+FE) — `bootstrap-current`, `filters`, `status`, `kpi`; szkielet strony, kontrolki filtrów, nagłówek KPI + jeden dashboard jako wzorzec; infrastruktura wykresów.
-  - Gate: fixtures kpi/filters/status/bootstrap (kształt 1:1 + openapi); strona renderuje KPI na snapshocie.
-- **10b · Ceny** (BE+FE) — `prices/inflation`, `prices/last-import`, `prices/product-history` (**czytelnik `historia_cen`**, D3), `margins`, `market/group-prices`, `top-zmiany`.
+- **10a · Fundament analityki** (BE+FE) — `bootstrap-current` (POST, akcja seedująca `historia_cen`), `filters`, `status`, `kpi`, **`margins` (dashboard-WZORZEC, decyzja A 2026-09-02)**; szkielet strony `/analityka`, 6 globalnych filtrów wyszukiwalnych, nagłówek KPI (4 kafle) + `margins` jako pełny wzorzec *filtr→zapytanie→tabela/wykres*; infrastruktura wykresów (Recharts przez shadcn + `dataviz`; tabele ≤300 wierszy).
+  - Gate: fixtures kpi/filters/status/**margins** (kształt 1:1 + openapi; bootstrap-current tylko openapi); strona renderuje KPI + filtry + wzorcowy dashboard na snapshocie.
+- **10b · Ceny** (BE+FE) — `prices/inflation`, `prices/last-import`, `prices/product-history` (**czytelnik `historia_cen`**, D3), `market/group-prices`, `top-zmiany` (**`margins` przeniesione do 10a jako wzorzec**).
   - Gate: fixtures tej grupy (6) + dashboardy na realnych agregatach.
 - **10c · EAN** (BE+FE) — `ean/comparison`, `ean/coverage`, `ean/details`, `ean/supplier-rank`, `ean/unique`, `ean-porownanie`.
   - Gate: fixtures EAN (6).
