@@ -1,0 +1,223 @@
+# 18-FEATURE-widok-alerty — raport z implementacji
+
+## Podsumowanie
+
+Iteracja 6 dowieziona: backend oddaje `GET /api/alerts` i `PATCH /api/alerts/{id}` (obie za
+`requireAuth`), a widok `/alerty` listuje alerty **zwinięte w grupy** `(dostawca, typ, status)`
+z licznikiem powtórzeń i czasem ostatniego wystąpienia, rozwijalne do pojedynczych wpisów.
+Zmiana statusu idzie przez API — na całej grupie i na pojedynczym alercie, w obie strony.
+Domyślny filtr `status = nowy` chowa 2127 wpisów „Synchronizacja", które w produkcji stanowią
+83% tabeli.
+
+Największe ustalenie ticketa: **oryginalny widok `/alerty` nie czytał `/api/alerts` w ogóle** —
+liczył pseudo-alerty z `GET /api/products` i trzymał ich stan w IndexedDB. Budowa widoku na
+realnych alertach importu jest więc świadomym odejściem od oryginału (D1), a nie portem UI.
+
+## Zmiany
+
+### Backend
+
+- `rebuild/backend/src/repos/alerts.ts` — dopisane `listAlerts` (port `U.listAlerts`,
+  `backend-index.cjs:44951`, `order by data desc`, bez limitu) i `updateAlertStatus` (port
+  `:44957`), plus typ `Alert`. Sprostowany nagłówek `zapiszAlert`, który twierdził, że odczyt
+  celowo nie powstaje w tym pliku — po tej iteracji to nieprawda.
+- **Nowy:** `rebuild/backend/src/routes/alerts.ts` — `trasyAlertow({db})` z dwiema trasami.
+  GET za `requireAuth` (odstępstwo D1 z I1, komentarz jak w `routes/overrides.ts`); PATCH
+  odtworzony 1:1 wraz z tym, czego w nim NIE MA — bez 404, bez walidacji `status`, bez audytu.
+- `rebuild/backend/src/app.ts` — import i montaż `trasyAlertow({ db })`.
+- **Nowy:** `rebuild/backend/test/alerty.gate.test.ts` — 8 testów GATE.
+
+### Frontend
+
+- **Nowy:** `rebuild/frontend/src/pages/alerty/api.ts` — `pobierzAlerty` (pełna lista, bez
+  limitu), `zmienStatusAlertu`, `zmienStatusAlertow` (zbiorczo, porcjami po 8 — kontrakt nie
+  ma trasy masowej, a największa grupa w produkcji liczy 150 wpisów).
+- **Nowy:** `rebuild/frontend/src/pages/alerty/grupowanie.ts` — `pogrupujAlerty`,
+  `filtrujAlerty`, `wartosciFiltrow`, `sformatujOstatnia`, `FILTRY_POCZATKOWE`.
+- **Nowy:** `rebuild/frontend/src/pages/alerty/TabelaAlertow.tsx` — lista grup z filtrami,
+  rozwijaniem i mutacjami.
+- **Nowy:** `rebuild/frontend/src/pages/Alerty.tsx` — `PageHeader` + tabela.
+- `rebuild/frontend/src/App.tsx` — trasa `/alerty` wpięta w `Switch`.
+- `rebuild/frontend/src/pages/placeholdery.ts` — wpis `/alerty` zdjęty, komentarz zaktualizowany.
+- `rebuild/frontend/test/msw/kontrakt.ts` — `alertyZFixtura()` z notą o ograniczeniu nagrania
+  (pięć wierszy, zero powtórek).
+- **Nowe:** `rebuild/frontend/test/alerty.grupowanie.test.ts` (18 testów),
+  `rebuild/frontend/test/alerty.test.tsx` (13 testów).
+
+## Odstępstwa od planu
+
+Brak — zakres i wszystkie decyzje D1–D9 zrealizowane 1:1 z `plan.md`. Jedyna korekta w trakcie
+dotyczyła danych testowych, nie kodu produkcyjnego: pierwsza wersja asercji o kolejności grup
+zakładała, że najświeższa jest „Synchronizacja", podczas gdy w wygenerowanym zbiorze ostatnia
+próba MO3 wypada później; asercja została zastąpiona sprawdzeniem pełnej kolejności trzech grup.
+
+## Decyzja „lokalnie vs przez API" (wymóg DoD)
+
+**Przez API** (D3). `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie alertu —
+żadnego IndexedDB ani `localStorage`, mimo że oryginał trzymał obsługę pseudo-alertów właśnie
+w IndexedDB (`fe.js:9165-9193`, klucz `alerty-statusy`).
+
+Powód: alert zamknięty na jednym urządzeniu ma być zamknięty na każdym, a stan lokalny znika
+przy wyczyszczeniu danych przeglądarki. Backend i tak ma tę trasę od zawsze — trzymanie stanu
+lokalnie oznaczałoby, że kolumna `alerts.status` żyje własnym życiem obok UI. Koszt: każda
+zmiana to request, a akcja na grupie to N requestów (stąd dławik równoległości).
+
+## Wyniki testów
+
+- **Gate odbudowy (fixtures/kontrakt): ✓ zgodne.** Sprawdzone ścieżki: `GET /api/alerts`
+  (`contract/openapi.yaml:63-70`) przeciwko `contract/fixtures/GET_alerts.json` — kształt 1:1
+  (goła tablica, 7 pól w każdej pozycji), kolejność `data` MALEJĄCO identyczna z nagraniem,
+  walidacja względem kontraktu przez `sprawdzZgodnoscZKontraktem`; `PATCH /api/alerts/{id}`
+  (`:71-84`) — 200 `{ok:true}`, 401 bez tokenu, oba kody zadeklarowane w kontrakcie.
+  Fixture zasiewa bazę WPROST, bez tłumaczenia wartości.
+  - ⚠ **Dla `PATCH` nie ma nagranej próbki** — `contract/fixtures/` nie zawiera pliku dla tej
+    trasy. Jej kształt (`{ok:true}`, brak 404) stoi wyłącznie na kodzie oryginału
+    `backend-index.cjs:48688-48691` i jest przypięty testami, żeby ta wiedza gdzieś żyła.
+  - ⚠ **Świadomy rozjazd z kontraktem przy `GET`**: `openapi.yaml:67` deklaruje `security: []`
+    (trasa publiczna) i wyłącznie kody 200/400. Wymagamy `requireAuth`, więc bez tokenu
+    oddajemy 401 — kod spoza listy kontraktu. Test tego przypadku celowo **nie** woła
+    `sprawdzZgodnoscZKontraktem`, z komentarzem: to jest odstępstwo D1, a nie zgodność.
+- **Backend:** ✓ 611 testów / 37 plików (8 nowych). `lint`, `typecheck`, `build` czyste.
+- **Frontend:** ✓ 309 testów / 20 plików (31 nowych). `lint`, `typecheck`, `build` czyste.
+- **Integracyjne / E2E:** nie uruchamiane — ticket nie dotyka integracji z systemami
+  zewnętrznymi ani przepływu wymagającego E2E; plan tego nie przewidywał.
+
+Kluczowy test wymogu iteracji (`alerty.test.tsx`): 24 alerty ze statusem `nowy` renderują się
+jako **2 wiersze grup**, a treść pojedynczych wpisów **nie jest obecna w DOM** przed
+rozwinięciem — surowe renderowanie listy wywali ten test.
+
+## Breaking changes
+
+Brak. Nowe trasy i nowy widok; jedyna zmiana istniejącego zachowania to zdjęcie placeholdera
+`/alerty` (widok „w przygotowaniu" zastąpiony realnym ekranem). Liczba tras routera bez zmian.
+
+## Follow-up
+
+1. **Pseudo-alerty katalogowe z oryginału** (marża ujemna, niska marża, „nie-opona";
+   `fe.js:25177-25340` + `pv()` `:16631-16705`) — świadomie nieportowane (D1). Wpis do
+   `docs/rebuild-backlog.md` jako ⬜ do decyzji: czy w ogóle je odtwarzamy, a jeśli tak, to
+   pod jakim adresem — mieszanie ich z alertami importu na jednym ekranie jest mylące.
+2. **Wyszukiwarka po treści `opis`** — odrzucona przez użytkownika w Q&A (D8). Bez niej
+   odróżnienie błędu sieci od błędu parsera wewnątrz typu „Błąd pobierania" wymaga rozwinięcia
+   grupy i przeczytania wpisów.
+3. **Rozmiar odpowiedzi `GET /api/alerts`** — 1:1 bez limitu (D9). Dziś ~3000 wierszy; po
+   włączeniu schedulera z 3f-3 (120 pobrań/dobę) tabela rośnie o ~120 wpisów dziennie, więc
+   za rok będzie ich ~45 tys. Wtedy potrzebna będzie decyzja: limit czasowy w zapytaniu albo
+   agregacja po stronie backendu. Nie w tej iteracji — zmieniłaby kontrakt.
+4. **Brak fixture'a dla `PATCH /api/alerts/{id}`** — warto go nagrać przy najbliższej okazji
+   kontaktu z żywą produkcją, żeby GATE dla tej trasy przestał stać na samym kodzie oryginału.
+
+## Review fixes applied
+
+Review (`review.md`) dał **0 BLOCKER-ów**, 4 SHOULD-FIX i 3 NICE-TO-HAVE. Naniesione wszystkie
+SHOULD-FIX i dwa z trzech NICE-TO-HAVE:
+
+- **`docs/rebuild-backlog.md` — wpis #26** o pominiętych pseudo-alertach katalogowych (⬜ do
+  decyzji). To był jedyny nieodhaczony punkt Definition of done: plan (D1) wymagał, żeby wiedza
+  o porzuconej funkcji trafiła tam, gdzie następna sesja będzie jej szukać, a nie tylko do
+  sekcji Follow-up raportu.
+- **`TabelaAlertow.tsx` — `aria-label` na przycisku rozwijania grupy.** Przycisk zawierał
+  wyłącznie ikony SVG, więc czytnik ekranu ogłaszał go jako bezimienny „button" mimo poprawnego
+  `aria-expanded`. Etykieta niesie kierunek akcji i nazwę grupy („Rozwiń grupę MO3 — Błąd
+  pobierania").
+- **`TabelaAlertow.tsx` — `useMemo` na `wartosciFiltrow`/`filtrujAlerty`/`pogrupujAlerty`.**
+  Bez tego rozwinięcie dowolnej grupy (zmiana stanu komponentu) przeliczało grupowanie całego
+  zbioru od nowa. Dziś nieszkodliwe, ale scheduler z 3f-3 dokłada ~120 alertów na dobę.
+- **`alerty.gate.test.ts` — `try/finally` wokół przywrócenia stanu z fixture'a.** Przy nieudanej
+  asercji baza zostawała w stanie niezgodnym z nagraniem i wyniki kolejnych testów w pliku
+  przestawały cokolwiek znaczyć.
+- **`grupowanie.ts` — komentarz przy zastępniku `" brak"`** (wiodąca spacja): to nie literówka,
+  tylko zabezpieczenie przed zderzeniem z realnym kodem dostawcy „brak" — kolumna nie ma `CHECK`.
+- **`TabelaAlertow.tsx` — odmiana licznika przez liczbę** („1 grupa / 2 grupy / 5 grup").
+
+Nie naniesiono trzeciego NICE-TO-HAVE (dublowanie w `routes/alerts.ts` komentarza o braku
+walidacji `status`) — sam reviewer zaznaczył, że komentarz już to mówi w repo i dublowanie nie
+jest konieczne. Zachowanie `String(undefined)` przy ciele bez pola `status` jest portem 1:1
+(oryginał czyta `c.body.status` bez sprawdzenia) i objęte decyzją D4.
+
+Bramki po poprawkach: BE 611 testów / lint / typecheck / build ✓; FE 309 testów / lint /
+typecheck / build ✓.
+
+## Docs updates
+
+Cztery doc-checkery przejrzały równolegle 11 plików w `docs/` + `CLAUDE.md`. Siedem zmienionych,
+cztery bez zmian z uzasadnieniem.
+
+### `docs/rebuild-roadmap.md`
+
+- **§3 Zasady przekrojowe, wiersz „Lokalne vs API"** — usunięte mylące zdanie „alerty i waga
+  gabarytowa liczone lokalnie mimo endpointów"; zapisane, że I6 rozstrzygnęła to przez API (D3),
+  z wyjaśnieniem, że oryginał nie liczył lokalnie tych samych alertów — liczył inny zestaw
+  danych. Waga gabarytowa zostaje otwarta dla I9.
+- **§4 Tablica postępu, wiersz 6** — ⬜ → ✅ (`18-FEATURE-widok-alerty`, 2026-09-03).
+- **Blok 3f-3 / „Co zostaje otwarte po Iteracji 3"** — punkt „Alerty bez dławika" zamknięty jako
+  dowieziony w I6; dodany NOWY punkt o wzroście rozmiaru odpowiedzi `GET /api/alerts` po
+  włączeniu schedulera (follow-up D9), z decyzją limit/agregacja do podjęcia przy uruchamianiu
+  automatu na produkcji. Nota trafiła DO BLOKU, którego dotyczy, nie do zamkniętej Iteracji 6.
+- **Blok „Iteracja 6"** — przepisany na stan faktyczny (status ✅, dowieziony zakres, pliki,
+  rozliczony GATE). **Usunięte obalone zdanie** „status/obsługa lokalnie vs przez API —
+  rekomendacja: przez API", zastąpione dowodem z linii kodu (`HT()` `:25177-25340`,
+  `pv()` `:16631-16705`, IndexedDB `:9165-9193`) i notą o pominięciu pseudo-alertów (backlog #26).
+- **Blok „Iteracja 10"** — dodana nota „wejście z Iteracji 6": gotowy klient `pobierzAlerty()`
+  i `pogrupujAlerty()` do ponownego użycia na pulpicie („najświeższe alerty"), `queryKey`
+  `["/api/alerts"]`.
+- **Blok „Iteracja 12"** — zweryfikowany, `GET /api/audit-log` już tam przypisany, bez zmian.
+
+### `docs/rebuild-backlog.md`
+
+- **Wpis #26** (nowy, dodany w fazie review fixes) — pseudo-alerty katalogowe pominięte,
+  ⬜ do decyzji, z opisem czterech możliwych miejsc powrotu.
+- **Wpis #16** („Błąd pobierania" obejmuje błędy parsera) — sekcja „Co z tego wynika dla
+  Iteracji 6" przepisana z czasu przyszłego na stan faktyczny: widok grupuje po
+  `(dostawca, typ, status)`, a rozróżnienie sieć/parser widać wyłącznie w `opis` po rozwinięciu
+  grupy, bo wyszukiwarka po `opis` została odrzucona (D8). Dodane odwołanie do
+  `pages/alerty/grupowanie.ts`.
+
+### `docs/spec-backend.md`
+
+- **§2 („auth CZĘŚCIOWY")** — dodany akapit „Potwierdzone w I6": `GET /api/alerts` pod
+  `requireAuth` wzorcem D1, z jawną notą, że daje to **401 spoza listy kodów kontraktu**
+  (kontrakt zna dla tej ścieżki tylko 200/400). `PATCH /api/alerts/{id}` opisany jako mający
+  auth od zawsze, ale **bez nagranej fixture** — jego kształt (zawsze `{ok:true}`, brak
+  walidacji, brak audytu, brak 404) stoi wyłącznie na kodzie oryginału.
+- Reszta sekcji o alertach (pisanie przez import z 3f-1/3f-2, mapa Drizzle `Ki`=alerts)
+  sprawdzona i zgodna — bez zmian.
+
+### `docs/spec-frontend.md`
+
+- **§3 lista tras** — `/alerty` przeniesiony z placeholderów do widoków odbudowanych
+  (7 widoków / 5 placeholderów).
+- **§4 „Zachowania lokalne vs API"** — **sprostowany** mylący zapis „status/obsługa trzymane
+  lokalnie, choć `/api/alerts` istnieje" (przekreślony, nie zostawiony obok sprzeczności).
+  Nowy tekst nazywa rzecz po imieniu: to były dwa różne zestawy danych.
+- **§5 blueprint** — nowy akapit „Odbudowa (I6)" w stylu wpisów I5/4b.
+
+### `docs/instrukcja-testow-I3.md`
+
+- **§3.11** — „widok alertów dowozi Iteracja 6; do tego czasu Paweł odczyta je z bazy"
+  zastąpione wskazaniem widoku `/alerty`.
+- **§3.13** — dopisana **pułapka testowa**: wpisy „Synchronizacja" mają status `rozwiazany`,
+  więc domyślny filtr `status = nowy` je chowa — trzeba zdjąć filtr, inaczej testujący uzna,
+  że alert nie powstał. „Błąd HTTP" i „Błąd pobierania" widać od razu.
+- **§4 pkt 10** — „zwijaniem powtórek zajmie się Iteracja 6" zamienione na opis działania.
+- **§5 tabela „Czego jeszcze NIE MA"** — usunięty zdublowany wiersz, widok alertów przeniesiony
+  do formy „✅ jest".
+
+### `docs/instrukcja-testow-I4.md`
+
+- **§5 tabela „Czego jeszcze NIE MA"** — usunięty wiersz „Widok alertów | Iteracja 6".
+
+### Bez zmian (z uzasadnieniem)
+
+- **`CLAUDE.md`** — plik zasad, nie stanu; nic w nim nie zostało obalone.
+- **`docs/plan.md`** — dokument historyczny, jego nagłówek sam odsyła do roadmapy/backlogu jako
+  źródeł aktualnych; jedyna wzmianka o `/alerty` jest w liście kolejności Fazy 3, nie w statusie.
+- **`docs/deploy-setup.md`** — opisuje wyłącznie infrastrukturę (Apache/PM2/CI), nie ma listy
+  tras API ani widoków.
+- **`docs/audit-delta.md`** — śledzi rozjazd audytu z lipca/sierpnia 2026, sprzed startu
+  odbudowy; nie wspomina `/alerty` ani stanu rebuildu.
+
+### Pre-existing issues
+
+Żaden z doc-checkerów nie zgłosił wcześniejszych nieścisłości poza tymi, które ten ticket sam
+zidentyfikował i sprostował.

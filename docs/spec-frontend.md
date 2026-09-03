@@ -63,19 +63,26 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
 - **12 tras** (nie 11): `/login`, `/`, `/staging`, `/katalog`, `/narzuty`,
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
-  Odbudowane dotąd: `/login`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`, `/narzuty`
-  (6 widoków); pozostałe 6 to placeholdery (`src/pages/placeholdery.ts`).
+  Odbudowane dotąd: `/login`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`, `/narzuty`,
+  `/alerty` (7 widoków); pozostałe 5 to placeholdery (`src/pages/placeholdery.ts`).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
 Dokument wyłapał miejsca, gdzie frontend liczy coś **lokalnie**, mimo że backend
 ma endpoint:
-- **Alerty** (`/alerty`) — status/obsługa trzymane lokalnie, choć `/api/alerts` istnieje.
-  ⚠ **Uzupełnienie 2026-09-01 (blok 3f-2):** to dotyczy wyłącznie ODCZYTU. **Alerty PISZE
-  backend** — import przy błędzie HTTP, błędzie pobierania i ręcznym uploadzie — i ta strona
-  jest już odbudowana (`src/repos/alerts.ts`). Iteracja 6 dostaje sam widok, ale z twardym
-  wymogiem: **musi zwijać powtórki**, bo zapis nie ma dławika (339 alertów „Błąd pobierania"
-  w produkcji, do 23/dobę na jednego dostawcę). Szczegóły w roadmapie, blok Iteracji 6.
+- ~~**Alerty** (`/alerty`) — status/obsługa trzymane lokalnie, choć `/api/alerts` istnieje.~~
+  ⚠ **Sprostowanie (I6, `18-FEATURE-widok-alerty`, 2026-09-03):** to był mylący zapis — nie
+  chodziło o miejsce przechowywania statusu TYCH SAMYCH alertów, tylko o dwa różne zestawy
+  danych. Oryginalny widok `/alerty` (`HT()`, `fe.js:25177-25340`) **nie woła `/api/alerts`
+  w ogóle** — liczy pseudo-alerty katalogowe z `GET /api/products` (marża ujemna, niska marża,
+  „nie-opona", `pv()`, `:16631-16705`) i trzyma ich status w IndexedDB (`alerty-statusy`).
+  Alerty z `/api/alerts` **pisze import** (błąd HTTP, błąd pobierania, ręczny upload —
+  `src/repos/alerts.ts`), a oryginalny widok ich w ogóle nie czyta. Odbudowa (I6) stawia widok
+  `/alerty` na REALNYCH alertach importu z `/api/alerts`, ze statusem przez `PATCH
+  /api/alerts/{id}` (świadome odejście od oryginału), z grupowaniem powtórek w widoku, bo zapis
+  nie ma dławika (339 alertów „Błąd pobierania" w produkcji, do 23/dobę na jednego dostawcę).
+  Pseudo-alerty katalogowe oryginału **świadomie pominięte** — `docs/rebuild-backlog.md` #26
+  (⬜ do decyzji). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
 - **Waga gabarytowa** — liczona w przeglądarce, choć `POST /api/waga-gabarytowa/oblicz` istnieje.
 - **Staging** — instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu.
 - Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa
@@ -185,6 +192,15 @@ ma endpoint:
 > którego ten ekran nie woła). **Odstępstwo D5:** nasz widok ma stany `isLoading`/`isError`,
 > jak `Staging.tsx`; oryginał ich nie ma (`data = {}` domyślnie, więc podczas ładowania i przy
 > błędzie renderuje „Brak wpisów w historii."). Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
+>
+> **Odbudowa (I6, `18-FEATURE-widok-alerty`, 2026-09-03):** `/alerty` odbudowany — router ma
+> **12 tras, 5 placeholderów**. Widok stoi na `GET /api/alerts` (bez limitu) i **zwija powtórki**
+> w grupy `(dostawca, typ, status)` z licznikiem i czasem ostatniego wystąpienia, bo import
+> pisze alert przy każdej nieudanej próbie bez dławika (do 23×/dobę dla jednego dostawcy);
+> rozwinięcie grupy pokazuje pojedyncze wpisy. Domyślny filtr `status=nowy`; zmiana statusu
+> (pojedyncza i grupowa, w obie strony) idzie przez `PATCH /api/alerts/{id}`, bez IndexedDB/
+> localStorage — świadome odejście od oryginału, który dla `/alerty` liczył zupełnie inne dane
+> (patrz §4, sprostowanie). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).
