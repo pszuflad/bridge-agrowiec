@@ -130,3 +130,69 @@ Zweryfikowane po naprawie: `lint`, `typecheck` czyste, oba pliki testów widoku 
   (u recenzenta 702/703), a w izolacji przechodzi 24/24. Plik nie występuje w diffie tego
   brancha — to wcześniejsza niestabilność timingowa pod obciążeniem, nie regresja bloku 10d.
   U mnie pełny zestaw przeszedł 703/703, więc objaw jest przerywany.
+
+## Docs updates
+
+Cztery doc-checkery, równolegle. Zakres wyznaczony przez obowiązek z `CLAUDE.md`: roadmapa
+i backlog są przy zamknięciu bloku iteracji **zawsze** w zakresie, a ustalenia dotyczące
+przyszłych bloków muszą trafić **do tych bloków**, nie do właśnie zamkniętego.
+
+### `docs/rebuild-roadmap.md` — 6 edycji
+
+- §4, wiersz Iteracji 10 — dołożone `10d: 23-FEATURE-analityka-dostawcy · 2026-09-03`
+  (status całej iteracji zostaje 🔨, bo 10b/10c/10e są otwarte).
+- Nagłówek Iteracji 10 i sekcja „⭐ Kolejność" — lista bloków niezależnych skurczona
+  do 10b/10c/10e; 10a i 10d opisane jako zrobione.
+- **Blok 10d** — opis zamiaru zastąpiony opisem STANU: ✅, data, ID ticketa, cztery trasy,
+  trzy karty (tytuły + liczba kolumn), wynik GATE (4/4 fixtures, zero wyjątków, 703/408 testów)
+  i rejestr O-10d-1, O-10d-2, D1, D3, D4, D5 w stylu bloku 10a.
+- **Blok 10e — „WEJŚCIE Z BLOKU 10d"**: `PasekDostepnosci.tsx` jest gotowy, karta „4.1" ma go
+  zaimportować, nie pisać drugi raz.
+- **Blok 10f — „WEJŚCIE Z BLOKU 10d"**: przyciski „CSV" trzeba dołożyć także do trzech kart
+  zakładki `dostawcy`, z ostrzeżeniem, że trasa eksportu ma własny SQL, inny niż dashboard.
+
+Nietknięte: „Wzorzec i pułapki dla 10b–10e" (nadal aktualny) i wiersz „Ścieżki (GATE)"
+(już poprawnie liczył 10d jako 4 fixtures).
+
+### `docs/analityka-bloki-10b-10f.md` — 6 edycji (364 → 404 linie)
+
+- Nagłówek — „10a zamknął pięć… pozostałe 22" → „zamknięte dziewięć (10a: 5, 10d: 4)… pozostałe 18".
+- **§2** — dopisany DRUGI rodzaj luki w siatce, który wyszedł w tym bloku: fixture może być
+  niepusty, a i tak nie dowodzić kształtu, bo nagrano tylko jedną z dwóch gałęzi handlera.
+  Sformułowane jako reguła dla kolejnych bloków (dotyczy czterech tras 10e z `hasHistory`).
+- **§6** — blok oznaczony ✅ ZAMKNIĘTY, lista powstałych plików, „decyzja użytkownika" przy
+  `dostawcy-stats` zastąpiona rozstrzygnięciem D3, dopisane dwa quirki (7 kolumn vs gałęzie SQL;
+  próg zmiany ceny jako porównanie float).
+- **§7 (blok 10e)** — „jeśli 10d wszedł wcześniej… jeśli nie, wydziel go" zastąpione faktem
+  wraz z sygnaturą `<PasekDostepnosci wartosc={w.dostepnoscPct} />`.
+- **§8.1 (blok 10f)** — odnotowane trzy przyciski CSV czekające na ten blok.
+- **§9** — inwentarz „czego nie musisz budować" powiększony o `PasekDostepnosci`,
+  `zastosujFiltryDostawcow`/`WYMIARY_DOSTAWCOW` i trzy sekcje 10d jako drugi przykład wzorca
+  (w tym pierwszy przykład sekcji BEZ wykresu).
+
+### `docs/rebuild-backlog.md` — bez zmian (wynik prawidłowy)
+
+Przeszukane pod kątem: `analytics`/`analityk`, czterech ścieżek tras, `historia_cen`,
+`staging_items` (`typ_zmiany`/`powod`/`utworzono`) oraz `marza_pct`/`cena_zakupu`/`stan`
+w kontekście agregatów. Żaden wpis nie dotyczy tego ticketa. Jedyny wpis dotykający
+`historia_cen` to **#31** (nieidempotentny `POST bootstrap-current` z 10a) — ten ticket go nie
+woła i nie rozstrzyga otwartej decyzji, więc status `⬜ do decyzji Ani` zostaje bez zmian.
+Nowego wpisu **nie zakładano**: backlog rejestruje świadome zmiany wobec produkcji, a ten
+ticket odtwarza zachowanie 1:1.
+
+### `docs/spec-backend.md` + `docs/spec-frontend.md` — 3 edycje
+
+- `spec-backend.md` §2 — akapit „Potwierdzone w 10d" z czterema trasami, dwiema gałęziami
+  `suppliers/stability` i gołą tablicą `dostawcy-stats` bez konsumenta.
+- `spec-backend.md` §5 — sprostowane: `historia_cen` ma od 10d **dwóch** czytelników, nie
+  jednego (drugim jest `suppliers/stability` z oknem `LAG()`).
+- `spec-frontend.md` §5 — akapit „Odbudowa (10d)": trzy karty 1:1, quirk „—" (D1), wspólny
+  `PasekDostepnosci`, wykres (O-10d-1), filtrowanie klienckie, brak CSV (10f),
+  `dostawcy-stats` bez UI (D3).
+
+### Pre-existing issues zgłoszone przez doc-checkery
+
+- `docs/plan.md:137` — „ekran analityki (31 gotowych endpointów bez UI)" jest nieaktualne
+  **od bloku 10a**, nie od tego ticketa. Dokument jest jawnie oznaczony jako historyczny i ma
+  banner kierujący do `docs/rebuild-roadmap.md` jako źródła prawdy, więc nie był przepisywany —
+  decyzja, czy w ogóle aktualizować dokumenty historyczne, należy do właściciela repo.
