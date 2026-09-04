@@ -5,7 +5,15 @@ import type { Uzytkownik } from "@/lib/api";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
-import type { Filtry, Kpi, Marze, StatusHistorii } from "@/pages/analityka/api";
+import type {
+  Filtry,
+  HistoriaCenyProduktu,
+  Kpi,
+  Marze,
+  StatusHistorii,
+  WierszInflacji,
+  WierszZmianyCeny,
+} from "@/pages/analityka/api";
 
 const katalogTestow = dirname(fileURLToPath(import.meta.url));
 const korzenRepo = resolve(katalogTestow, "../../../..");
@@ -267,4 +275,43 @@ export function kpiZFixtura(): Kpi {
  */
 export function marzeZFixtura(): Marze {
   return analitykaZFixtura<Marze>("GET_analytics_margins.json");
+}
+
+/**
+ * Analityka — ceny (blok 10b). Trzy nagrania obsługujące trzy karty zakładki
+ * „Ceny w czasie", przepuszczone przez ten sam `analitykaZFixtura`, więc bez `_przyciete`.
+ *
+ * ⚠ CZEGO TU NIE MA I BYĆ NIE MA: loaderów dla `GET_analytics_top-zmiany.json`
+ * i `GET_analytics_market_group-prices.json`. Obie trasy mają backend, ale **nie mają
+ * klienta w UI** (decyzje D1 i D2 użytkownika z 2026-09-03) — oryginał ich nie renderuje.
+ * Skoro widok ich nie woła, mock nie ma czego udawać. Osobno testuje je GATE backendu.
+ */
+
+/** `GET /api/analytics/prices/last-import` — 5 nagranych wierszy z 500. */
+export function ostatniImportZFixtura(): { rows: WierszZmianyCeny[] } {
+  return analitykaZFixtura<{ rows: WierszZmianyCeny[] }>(
+    "GET_analytics_prices_last-import.json",
+  );
+}
+
+/**
+ * `GET /api/analytics/prices/inflation` — 5 nagranych wierszy z 17.
+ *
+ * Nagranie trafiło w środek szeregu, więc `inflacjaPct` jest wszędzie liczbą. Że kolumna
+ * bywa `null` (pierwszy miesiąc dostawcy), dowodzi test jednostkowy backendu.
+ */
+export function inflacjaZFixtura(): { hasHistory: boolean; rows: WierszInflacji[] } {
+  return analitykaZFixtura<{ hasHistory: boolean; rows: WierszInflacji[] }>(
+    "GET_analytics_prices_inflation.json",
+  );
+}
+
+/**
+ * `GET /api/analytics/prices/product-history` — 5 nagranych wierszy z 15 597.
+ *
+ * ⚠ `stats` w tym nagraniu JEST i musi być, bo backend je zwraca. Widok ich świadomie
+ * nie renderuje (decyzja D4) — dokładnie jak `margins.low`/`high` w 10a.
+ */
+export function historiaCenyZFixtura(): HistoriaCenyProduktu {
+  return analitykaZFixtura<HistoriaCenyProduktu>("GET_analytics_prices_product-history.json");
 }

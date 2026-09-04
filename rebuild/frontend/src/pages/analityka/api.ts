@@ -18,6 +18,8 @@
  */
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
+import { BAZA_API, naglowki, rzucGdyBlad } from "@/lib/api";
+
 /** Pozycja listy filtra — kolumna aliasowana na `value` (`analytics_module.cjs:98-107`). */
 export type WartoscFiltru = { value: string };
 
@@ -100,4 +102,125 @@ export function useKpi(): UseQueryResult<Kpi | null> {
 
 export function useMarze(): UseQueryResult<Marze | null> {
   return useQuery<Marze | null>({ queryKey: ["/api/analytics/margins"] });
+}
+
+// ─── BLOK 10b · CENY ────────────────────────────────────────────────────────────────────
+//
+// Trzy hooki dla trzech kart zakładki „Ceny w czasie". Tras jest w bloku pięć, ale
+// `top-zmiany` i `market/group-prices` NIE MAJĄ tu klienta i mieć nie mają — pierwsza
+// ma zero wywołań w bundlu produkcji, druga jest wołana i ignorowana (martwy fetch).
+// Decyzje D1 i D2 użytkownika z 2026-09-03; backend obie dowozi, UI ich nie tyka.
+// Dopisanie im hooka „skoro już jest trasa" to budowanie nowej funkcjonalności.
+
+/** Wiersz karty „3.1" — `GET_analytics_prices_last-import.json`. */
+export type WierszZmianyCeny = {
+  kod: string;
+  nazwa: string;
+  dostawca: string;
+  cenaStara: number | null;
+  cenaNowa: number | null;
+  zmianaPct: number | null;
+  utworzono: string;
+};
+
+/** Wiersz karty „3.2 / 3.3" — `GET_analytics_prices_product-history.json`. */
+export type WierszHistoriiCeny = {
+  data: string;
+  dostawca: string;
+  kod: string;
+  ean: string | null;
+  cenaZakupu: number | null;
+  cenaSprzedazy: number | null;
+  stan: number | null;
+};
+
+/**
+ * Trzy liczby, które backend liczy i oddaje — i których widok NIE RENDERUJE.
+ *
+ * ⚠ To nie jest przeoczenie, tylko wierność (decyzja D4): oryginalny frontend destrukturyzuje
+ * `stats` z odpowiedzi i nigdzie ich nie pokazuje (`grep ".stats" ` po bundlu → zero użyć).
+ * Dokładnie ta sama sytuacja co `margins.low`/`high` w 10a. Typ jest tu, bo kształt
+ * odpowiedzi go zawiera i GATE go pilnuje.
+ */
+export type StatystykiCeny = {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+};
+
+export type HistoriaCenyProduktu = {
+  hasHistory: boolean;
+  rows: WierszHistoriiCeny[];
+  stats: StatystykiCeny;
+};
+
+/** Wiersz karty „3.6" — `GET_analytics_prices_inflation.json`. `inflacjaPct` jest nullowalne. */
+export type WierszInflacji = {
+  dostawca: string;
+  miesiac: string;
+  sredniaCena: number | null;
+  inflacjaPct: number | null;
+};
+
+export function useZmianyCenOstatniegoImportu(): UseQueryResult<{
+  rows: WierszZmianyCeny[];
+} | null> {
+  return useQuery<{ rows: WierszZmianyCeny[] } | null>({
+    queryKey: ["/api/analytics/prices/last-import"],
+  });
+}
+
+export function useInflacjaCen(): UseQueryResult<{
+  hasHistory: boolean;
+  rows: WierszInflacji[];
+} | null> {
+  return useQuery<{ hasHistory: boolean; rows: WierszInflacji[] } | null>({
+    queryKey: ["/api/analytics/prices/inflation"],
+  });
+}
+
+/** Odpowiedź „nie pytaliśmy" — ten sam kształt, co pusta odpowiedź backendu. */
+const PUSTA_HISTORIA: HistoriaCenyProduktu = {
+  hasHistory: false,
+  rows: [],
+  stats: { min: null, max: null, avg: null },
+};
+
+/**
+ * `GET /api/analytics/prices/product-history?ean=&kod=` — jedyny hook analityki z realnymi
+ * parametrami zapytania.
+ *
+ * ⚠ DLACZEGO WŁASNY `queryFn`, A NIE KLUCZ-ŚCIEŻKA. Domyślny `queryFn` skleja segmenty
+ * klucza (`queryKey.join("/")`, `lib/queryClient.ts`), więc parametr musiałby jechać jako
+ * segment `"?ean=…"` doklejony po ukośniku. Oryginał robi to inaczej i to on rozstrzyga:
+ * pisze własny `queryFn` z jawnym query stringiem, a klucz trzyma jako
+ * `["/api/analytics/prices/product-history", ean, kod]` — czyli segmenty klucza NIE SĄ
+ * tam ścieżką (`deminified/frontend-index.js:27870-27877`). Odtwarzamy tę wersję: URL
+ * wychodzi taki sam jak w produkcji, a klucz dalej poprawnie rozdziela cache po parametrach.
+ *
+ * ⚠ NIE ODPYTUJEMY, DOPÓKI OBA POLA SĄ PUSTE — port warunku `n || a ? fetch(…) : {rows:[],
+ * stats:{}}` (`:27871`). To jest istotne, bo trasa NIE MA LIMIT-u: bez tego warunku samo
+ * wejście na zakładkę ściągałoby całą tabelę `historia_cen` (15 597 wierszy w nagraniu).
+ *
+ * `401 → null` zgodnie z konwencją całej aplikacji (`on401: "returnNull"`), której domyślny
+ * `queryFn` pilnuje za nas, a tutaj musimy odtworzyć ręcznie.
+ */
+export function useHistoriaCenyProduktu(
+  ean: string,
+  kod: string,
+): UseQueryResult<HistoriaCenyProduktu | null> {
+  return useQuery<HistoriaCenyProduktu | null>({
+    queryKey: ["/api/analytics/prices/product-history", ean, kod],
+    queryFn: async () => {
+      if (!ean && !kod) return PUSTA_HISTORIA;
+
+      const url =
+        `${BAZA_API}/api/analytics/prices/product-history` +
+        `?ean=${encodeURIComponent(ean)}&kod=${encodeURIComponent(kod)}`;
+      const odpowiedz = await fetch(url, { headers: naglowki(false), credentials: "include" });
+      if (odpowiedz.status === 401) return null;
+      await rzucGdyBlad(odpowiedz);
+      return (await odpowiedz.json()) as HistoriaCenyProduktu;
+    },
+  });
 }

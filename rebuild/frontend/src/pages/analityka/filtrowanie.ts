@@ -75,6 +75,36 @@ export function zastosujFiltryMarz(wiersze: GrupaMarzy[], wybor: WyborFiltrow): 
   );
 }
 
+/**
+ * Wymiary stosowane przez sekcję cen (blok 10b).
+ *
+ * Wiersze `prices/last-import` i `prices/inflation` niosą z sześciu wymiarów katalogu
+ * WYŁĄCZNIE `dostawca` — pierwsza czyta `staging_items` (bez marki i modelu), druga
+ * grupuje po dostawcy i miesiącu. Pozostałe pięć filtrów nie ma tu na czym zadziałać
+ * i sekcja mówi o tym wprost przez `wymiaryNieobslugiwane`, zamiast po cichu zwracać
+ * pustą tabelę.
+ *
+ * Trzeciej karty („3.2 / 3.3 Historia ceny") to nie dotyczy: `prices/product-history`
+ * realnie czyta `?ean` i `?kod`, więc filtruje BACKEND, a parametry idą do `queryKey`.
+ */
+export const WYMIARY_CEN: WymiarFiltra[] = ["dostawcy"];
+
+/**
+ * Filtr po dostawcy dla dowolnego wiersza, który tę kolumnę niesie.
+ *
+ * Semantyka jak w `zastosujFiltryMarz`: pusty zbiór nie filtruje, a zaznaczenie kilku
+ * dostawców działa jak OR. Osobna, generyczna funkcja zamiast dwóch kopii, bo obie karty
+ * tabelaryczne bloku 10b potrzebują dokładnie tego samego.
+ */
+export function zastosujFiltrDostawcow<T extends { dostawca: string }>(
+  wiersze: T[],
+  wybor: WyborFiltrow,
+): T[] {
+  const dostawcy = wybor.dostawcy;
+  if (dostawcy.size === 0) return wiersze;
+  return wiersze.filter((w) => dostawcy.has(w.dostawca));
+}
+
 /** Wymiary zaznaczone przez użytkownika, na które dana sekcja nie ma jak odpowiedzieć. */
 export function wymiaryNieobslugiwane(
   wybor: WyborFiltrow,

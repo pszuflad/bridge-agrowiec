@@ -1,8 +1,10 @@
-# Wzorzec sekcji dashboardu — obowiązuje bloki 10b–10e
+# Wzorzec sekcji dashboardu — obowiązuje bloki 10c–10e
 
 Ten katalog powstał w bloku **10a** (ticket `19-FEATURE-analityka-fundament`) i jest
 szablonem dla reszty Iteracji 10. Bloki 10b–10e **dokładają zakładki, nie przemeblowują
-widoku** — zakładki, ich kolejność i etykiety już są i pochodzą z oryginału.
+widoku** — zakładki, ich kolejność i etykiety już są i pochodzą z oryginału. Blok **10b**
+(`24-FEATURE-analityka-ceny`) wypełnił zakładkę `ceny` i doprecyzował dwie rzeczy, które
+10a zostawiło otwarte: sposób podawania parametrów zapytania (§2.2) i debounce (§2.2a).
 
 Zanim napiszesz linijkę kodu: przeczytaj „Trzy pułapki" na końcu. Każda z nich kosztowała
 w 10a osobne dochodzenie.
@@ -52,10 +54,40 @@ Typ ma `| null`, bo `on401: "returnNull"` z oryginału oznacza, że na wygasłej
 czy handler czyta `req.query`:
 
 - **czyta** (`rotation/inactive?days`, `market/group-prices?group`,
-  `prices/product-history?ean&kod`) → parametr idzie do `queryKey`, filtrowanie na backendzie:
+  `prices/product-history?ean&kod`) → parametr idzie do `queryKey`, filtrowanie na backendzie.
+
+  ⚠ **SPROSTOWANE W 10b.** Ta sekcja radziła wcześniej doklejać parametr jako segment
+  klucza (`["…/inactive", "?days=60"]`) i liczyć na to, że domyślny `queryFn` sklei go
+  ze ścieżką. Oryginał robi to INACZEJ i to on rozstrzyga: pisze **własny `queryFn`**
+  z jawnym query stringiem, a klucz trzyma jako listę wartości — segmenty klucza NIE SĄ
+  tam ścieżką (`deminified/frontend-index.js:27870-27877`, `:27899-27905`):
+
   ```ts
-  useQuery({ queryKey: ["/api/analytics/rotation/inactive", `?days=${dni}`] });
+  useQuery({
+    queryKey: ["/api/analytics/prices/product-history", ean, kod],
+    queryFn: async () => {
+      if (!ean && !kod) return PUSTA_ODPOWIEDZ;   // port `n || a ? fetch(…) : …`
+      const url = `${BAZA_API}/api/analytics/prices/product-history`
+        + `?ean=${encodeURIComponent(ean)}&kod=${encodeURIComponent(kod)}`;
+      const odpowiedz = await fetch(url, { headers: naglowki(false), credentials: "include" });
+      if (odpowiedz.status === 401) return null;   // konwencja `on401: "returnNull"`
+      await rzucGdyBlad(odpowiedz);
+      return await odpowiedz.json();
+    },
+  });
   ```
+
+  Gotowy przykład: `useHistoriaCenyProduktu` w `api.ts`. Pamiętaj o `401 → null` — przy
+  własnym `queryFn` nikt nie zrobi tego za Ciebie.
+
+### 2.2a Pole tekstowe sterujące zapytaniem → debounce
+
+`useOpoznionaWartosc(wartosc)` (300 ms) stoi w tym katalogu od 10b. Nie pisz drugiego.
+
+To **świadome odstępstwo O-10b-1**: oryginał wysyła zapytanie na każde naciśnięcie klawisza,
+a trasy przyjmujące `?ean` nie mają LIMIT-u. Blok 10c ma `ean/details?ean`
+i `ean-porownanie?ean` w dokładnie tej samej sytuacji — użyj tego hooka i odnotuj
+odstępstwo w swoim `plan.md`, zamiast wymyślać je od nowa.
 - **nie czyta** (jak `margins`) → filtruj klientem, przez `zastosujFiltry*` w `useMemo`.
 
 Czego **nie** wolno: ożywiać `currentWhere()` (`analytics_module.cjs:60-74`). Ta funkcja jest
@@ -111,7 +143,12 @@ palety projektu) — łamanie ich to błąd, nie kwestia gustu:
 4. **Sloty koloru w kolejności `KOLORY_WYKRESU`** — 1 → 2 → 4 → 3 → 5. Sloty 3 i 5 mają
    najniższą chromę (walidator: `#33998d` 0.094, `#435670` 0.049), więc idą na końcu.
 5. **Kolor należy do BYTU, nie do pozycji.** Filtr zmieniający liczbę serii nie może
-   przemalować ocalałych.
+   przemalować ocalałych. Praktycznie znaczy to tyle: **zestaw serii licz z odpowiedzi
+   SUROWEJ, nie z wierszy po filtrze** — inaczej odznaczenie jednego bytu przesunie
+   pozostałe o slot. Wzorzec: `dostawcyNaWykres()` w `SekcjaCeny.tsx`.
+6. **Sprawdź, czy w danych jest w ogóle szereg.** Linia przez jeden punkt to nie wykres
+   czasowy. `SekcjaCeny` wymaga dwóch różnych miesięcy (`MIN_MIESIECY_NA_WYKRESIE`)
+   i przy jednym pokazuje samą tabelę — tak jak wygląda cały oryginał.
 6. **Legenda przy ≥2 seriach, nigdy przy jednej** (tytuł już nazywa, co jest rysowane).
 7. **Etykiety noszą tokeny tekstu**, nigdy koloru serii. Wartości przy końcach słupków,
    selektywnie — nie liczba przy każdym punkcie.
@@ -181,3 +218,22 @@ wierszy · pobieranie `margins.low`/`high` bez renderowania ich.
 | O-10a-4 | Cztery zakładki puste do czasu 10b–10e | zakres bloku, nie zmiana zachowania |
 | — | `/analityka` ładowana leniwie | Recharts podnosił wspólny bundle z 451 do 837 kB, a używa go tylko ten widok |
 | — | `POST bootstrap-current` bez przycisku | trasa nieidempotentna, a oryginalny frontend nigdy jej nie woła |
+
+## 5. Co ustalił blok 10b (`24-FEATURE-analityka-ceny`, 2026-09-04)
+
+**1:1 z oryginałem:** trzy karty zakładki `ceny` w kolejności i z tytułami oryginału ·
+etykiety i wyrównania wszystkich kolumn · brak kolumny „EAN" w tabeli historii, choć API
+ją zwraca · statyczny tekst „Wykres/tabela zapełnią się po zebraniu historii cen."
+renderowany zawsze · brak zapytania o `product-history`, dopóki oba pola są puste ·
+`stats` pobierane i nierenderowane.
+
+| # | Odstępstwo | Dlaczego |
+|---|---|---|
+| O-10b-1 | debounce 300 ms na polach EAN/Kod | oryginał pyta na każdy klawisz, a trasa nie ma LIMIT-u |
+| O-10b-2 | wykres liniowy w karcie inflacji | rozszerzenie O-10a-3 |
+| D1 | `top-zmiany` — backend bez UI | zero wywołań w bundlu produkcji |
+| D2 | `market/group-prices` — backend bez UI | martwy fetch: wołana i ignorowana |
+
+**Gotowe do reużycia przez 10c–10e:** `useOpoznionaWartosc` (debounce),
+`zastosujFiltrDostawcow` (generyczny filtr po dostawcy dla dowolnego wiersza z tą kolumną),
+`WYMIARY_CEN` jako przykład deklaracji wymiarów obsługiwanych przez sekcję.
