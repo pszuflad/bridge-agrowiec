@@ -197,6 +197,21 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `shoper.format_eksportu`, filtruje `?supplier=` i zawsze oddaje jeden `text/csv`. Szczegóły:
 > `docs/tickets/28-FEATURE-selly-eksport-backend/`.
 
+> **Potwierdzone w 12a** (`35-FEATURE-mutacje-produktow-backend`, 2026-09-05): katalog domknięty
+> do parytetu ZAPISU — `POST /api/products` (bulk), `PUT`/`PATCH`/`DELETE /api/products/{id}`,
+> `GET /api/products/uwagi-cena` i `/hold-reasons`, wszystkie pod `requireAuth` (**NIE jest to
+> odstępstwo D1** — oryginał wpina `we` w każdą z nich). **Sprostowanie faktu o oryginale:**
+> `PUT` i `PATCH /api/products/:id` NIE są w produkcji wspólnym handlerem, jak dotąd zakładano —
+> to dwie osobne, niemal identyczne funkcje, różniące się wyłącznie kolejnością audytu względem
+> pętli override/history (stan końcowy bazy identyczny); odbudowa świadomie portuje jeden wspólny
+> handler. `U.addProductsBulk` woła **sześć** rozszerzeń `bridge_ext`, nie pięć (dochodzi
+> `rememberLink` po zapisie produktu), a `mirror/backend/uwaga_cena_patch.cjs` monkey-patchuje
+> TAKŻE `addProductsBulk` (propagacja kolumny `uwaga_cena`), nie tylko dostarcza dwa endpointy
+> GET. **Tabela `history` (`Wa`) dostała w rebuildzie pierwszego pisarza** — ręczna edycja
+> produktu w katalogu — więc `GET /api/history` przestał zwracać `[]` na stagingu (domyka stan
+> przejściowy zapisany w I5, patrz §5 niżej). Szczegóły:
+> `docs/tickets/35-FEATURE-mutacje-produktow-backend/`.
+
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).
@@ -371,8 +386,9 @@ Do naniesienia w pozostałych dokumentach przy okazji:
   **narzuty i promocje naprawione w Iteracji 4a** (`POLA_EDYTOWALNE_NARZUTU`/
   `POLA_EDYTOWALNE_PROMOCJI`, filtr na PATCH i POST — `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`),
   z jednym świadomym odstępstwem: audyt loguje SUROWE `req.body`, więc dziennik może wskazać pole,
-  które faktycznie nie zostało zapisane; **produkty zostają na Iterację 12**. Pełny rozbiór:
-  `rebuild-backlog.md` #14.
+  które faktycznie nie zostało zapisane; **produkty naprawione w 12a** —
+  `POLA_EDYTOWALNE_PRODUKTU` (42 pola, wyprowadzone z dialogu edycji `LT()`), zamiast zapisu
+  całych 70 kolumn. Pełny rozbiór: `rebuild-backlog.md` #14.
 
 ---
 

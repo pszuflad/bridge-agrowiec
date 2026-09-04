@@ -75,6 +75,7 @@ zastępczego (tylko dla opony), `Hq` = normalizacja pozycji/EAN/rozmiaru.
 | `bridge_ext.cjs` | Wymiary opon, pamięci (link/nazwa/waga), **`assignKodImportu`** (grupowanie po EAN albo marka+rozmiar+bieznik+nazwa), tabele `*_pamiec` |
 | `common.cjs` | Normalizatory: EAN, cena, ilość (przy EAN w notacji naukowej zwraca `lossy:true`) |
 | `tire_dims.js` | Formuły wymiarów opon (arkusz firmowy) |
+| `uwaga_cena_patch.cjs` | Przykład `patch_*.cjs` doklejanego do `index.cjs` po buildzie: `ALTER TABLE products ADD uwaga_cena`, monkey-patch `U.acceptStaging` **i** `U.addProductsBulk` (propagacja `uwaga_cena`), plus dwie trasy `GET /api/products/{uwagi-cena,hold-reasons}` |
 
 ## 4. Backend — parsery (`parsers/`)
 
@@ -182,6 +183,10 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
   z zapytania użytkownika działają jak wzorce (`pagination_module.cjs:40`).
 - **Nieparsowalne `page`/`pageSize` w `/paged` dają `NaN`** → SQLite wiąże je jako `NULL`
   → `LIMIT NULL` = „bez limitu", więc np. `?pageSize=abc` zwraca wszystkie wiersze.
+- **`PUT` i `PATCH /api/products/:id` to DWIE osobne funkcje w rdzeniu, nie jeden wspólny
+  handler** — kod niemal identyczny, różni się wyłącznie kolejnością audytu względem pętli
+  zapisu `manual_overrides`/`history` (stan końcowy bazy identyczny). Łatwo pomylić z
+  prawdziwym cieniowaniem nazw (§0) — to po prostu dwie rejestracje z dwiema funkcjami.
 
 ---
 
