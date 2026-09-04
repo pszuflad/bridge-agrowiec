@@ -173,3 +173,84 @@ teraz opisana w komentarzu przy trasie.
 o roadmapie, którą domyka Faza 5.
 
 Po poprawkach: `npm run lint`, `typecheck`, `build` czyste, `npm test` — 954/954 zielone.
+
+## Aktualizacje dokumentacji (Faza 5)
+
+Cztery doc-checkery, dziesięć plików sprawdzonych, osiem zaktualizowanych.
+
+### `docs/rebuild-roadmap.md`
+- §4, tablica postępu: wiersz 8 (Selly) ⬜ → 🔨, sesje ujednolicone do `8a BE · 8b FE` (było
+  błędne `1a/1b`), dopisany ticket i data dla 8a.
+- §5, blok „Iteracja 8": status `⬜` → `🔨 częściowo` z rozbiciem `8a ✅ 2026-09-04` / `8b ⬜`.
+- **Usunięte jako obalone** (poprawione w miejscu, nie dopisane obok): błędny podział tras
+  (7 GET + 3 POST → **5 GET + 5 POST**); sugestia, że panel Selly dostaje auth dopiero u nas
+  (oryginał ma go za auth w `extensions.cjs:456-458`); zapis o tabelach `selly_*` sugerujący
+  pracę do wykonania (już istniały w schemacie).
+- **Dopisany fakt:** sześć z dziesięciu tras panelu wychodzi do realnego API Selly.pl;
+  lokalne są tylko `status`, `log`, `csv-status`, `generate-csv` — prompt 8a zakładał
+  odwrotnie w obie strony.
+- **Ustalenia dla 8b trafiły DO BLOKU 8b**, nie do 8a (CLAUDE.md, obowiązek 2): gotowość
+  backendu, zachowanie 500 przy braku `SELLY_*` z propozycją UX, rozjazd `?dostawca=` kontra
+  `?supplier=`, ZIP kontra pojedynczy CSV, eksport jako nawigacja przeglądarki (cookie, nie
+  Bearer), rozróżnienie `shoper.format_eksportu` od `shoper.kolumny`/`separator`.
+- Wiersze „Ścieżki (GATE)" i „DoD" rozliczone stanem faktycznym.
+- §3 nietknięte — nie ma tam dedykowanej listy tras publicznych, którym dokładamy auth,
+  więc doc-checker świadomie jej nie tworzył.
+
+### `docs/rebuild-backlog.md`
+- **#12** nietknięty przez doc-checkera (zaktualizowany wcześniej przez Mastera po review,
+  zweryfikowany przez reviewera).
+- **#5** („frazy" Selly): zaktualizowane pola statusu + akapit wyjaśniający, że backend Selly
+  jest dowieziony w 8a, ale `frazy_migruj.cjs` świadomie poza zakresem — wpis zostaje ⬜.
+- **#37 (nowy):** `refreshDict` jest nieatomowe — DELETE + INSERT przeplatane z czterema
+  wywołaniami HTTP, bez transakcji. Port 1:1, ⬜ do decyzji.
+- **#38 (nowy):** `selly_dict` z `PRIMARY KEY (slownik, klucz)` po `toLowerCase()` — dwie
+  kategorie różniące się tylko wielkością liter kolidują. Zastane, ⬜ do decyzji.
+- Sprawdzone i celowo nieruszone: #21, #30, #32 — żaden nie zawiera twierdzeń obalonych
+  przez 8a.
+
+### `docs/spec-backend.md`
+- §2: nowy blok „Potwierdzone w 8a" — sprostowanie 5 GET + 5 POST, fakt że panel Selly jest
+  za auth już w oryginale, podział zewnętrzne/lokalne, doprecyzowanie, że odstępstwo D1
+  dotyczy wyłącznie dwóch tras eksportu, wraz z różnicą ich formatów.
+
+### `CLAUDE.md`
+- Sekcja pułapek: nowy akapit o projekcji drizzle `select()` (camelCase pól modelu kontra
+  `snake_case` fixture'a z `SELECT *`), z przykładem `GET /api/selly/log` wykrytym dopiero
+  przez GATE, nie przez code review.
+- Sekcja „Środowisko": bullet o opcjonalnej integracji Selly.pl, atrapie klienta w testach
+  i ostrzeżeniu, że `sync-supplier` z `dry_run=false` realnie modyfikuje cudzy sklep.
+
+### `docs/deploy-setup.md`
+- Krok „4a. Sekrety środowiska": opcjonalne `SELLY_SHOP_URL/CLIENT_ID/CLIENT_SECRET/SCOPE`
+  (bez nich 500 „Brak konfiguracji" — zamierzone) i `SELLY_CSV_*` z domyślnymi produkcyjnymi.
+- „Znane pułapki środowiska (VPS)": `archiver` jest czysto JS-owy, instaluje się tak samo jak
+  `csv-parse`/`iconv-lite`/`xlsx`, bez obejść.
+
+### `docs/spec-frontend.md`
+- §2 i §5 (bloki I2, I11): odnotowana gotowość backendu pod `/selly` i pod przycisk CSV.
+- **Sprostowany fakt:** zdanie „czyta je dopiero eksport CSV z Iteracji 8" o kluczach
+  `shoper.kolumny`/`shoper.separator` było nieprawdziwe — `GET /api/export/shoper` czyta
+  `shoper.format_eksportu`, czyli zupełnie inny klucz. Tamte dwa czeka dopiero przycisk w 8b.
+
+### `contract/README.md`
+- Sekcja „Czego wciąż NIE ma": dwie trwałe kategorie tras bez fixture'ów — eksport CSV/ZIP
+  (nagrywarka zapisywała wyłącznie JSON) i mutacje wołające zewnętrzne API Selly (nagranie
+  zmieniałoby cudzy sklep), z notą o tym, co je pokrywa zamiast fixture'a.
+
+### `docs/plan.md` — bez zmian
+Dokument historyczny z fazy wstępnej (2026-07-24), jawnie odsyłający do
+`docs/rebuild-roadmap.md` jako bieżącego źródła prawdy. Jego sekcja o eksporcie do Selly
+opisuje stan ORYGINAŁU sprzed odbudowy, nie status naszej pracy — ten ticket niczego tam
+nie obala.
+
+## Pre-existing issues (zgłoszone przez doc-checkery, NIE naprawiane w tym tickecie)
+
+- `docs/rebuild-backlog.md` #21 (`/api/historia` filtruje akcje audytu stałym słownikiem):
+  wpis mówi o „dwunastu akcjach, które dziś zapisuje rebuild" — liczba jest już nieaktualna
+  (stan z 2026-09-02). Narastało to przez wiele ticketów po I5 (narzuty, promocje), a 8a
+  dokłada kolejne cztery (`selly_dodanie_producenta`, `selly_dodanie_kategorii`,
+  `selly_sync_produktu`, `selly_sync_dostawcy`) plus `eksport_csv`/`eksport_shoper`. Żadna
+  z nich nie przechodzi przez pięciowartościowy filtr `akcja→typ`, czyli są kolejnym
+  przykładem zjawiska już opisanego w tym wpisie. Poprawienie liczby wymagałoby przeliczenia
+  akcji z wielu ticketów — poza zakresem 8a.

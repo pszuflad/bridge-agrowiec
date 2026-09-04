@@ -61,6 +61,12 @@ postać pliku: `GET /api/analytics/export/{view}` dla `availability-products` i 
 oddaje sam BOM (pusty CSV) zamiast `rows: []`, mimo danych w bazie — nie ufaj też pustemu
 plikowi eksportu.
 
+Ta sama nieufność dotyczy projekcji Drizzle: `select()` bez jawnej listy pól oddaje nazwy PÓL
+modelu (camelCase), a fixture nagrany z oryginału (który robi `SELECT *` przez `better-sqlite3`)
+ma nazwy KOLUMN (`snake_case`) — trafiło to na `GET /api/selly/log` (siedem kluczy naraz) i
+wykrył to dopiero GATE, nie code review. Dla trasy, której fixture ma klucze `snake_case`,
+projekcję trzeba wypisać jawnie.
+
 ---
 
 ## Środowisko
@@ -71,3 +77,8 @@ plikowi eksportu.
   w `rebuild/backend/`.
 - Zakładaj, że projekt może być uruchomiony i że równolegle pracuje ktoś inny — testy używają
   bazy w katalogu tymczasowym i portów efemerycznych, i tak ma zostać.
+- Backend ma opcjonalną integrację zewnętrzną z Selly.pl (`SELLY_*` w env, od I8/8a) — testy
+  NIGDY nie wołają prawdziwego Selly, klient stoi za interfejsem i jest wstrzykiwany, atrapa
+  w `rebuild/backend/test/gate/selly-atrapa.ts`. Uwaga: `POST /api/selly/sync-supplier` z
+  `dry_run=false` realnie modyfikuje cudzy sklep — nie odpalaj tego ręcznie bez sekretów
+  testowych.

@@ -40,6 +40,14 @@ Sanityzacja: brak sekretów (config: klucze puste; users: bez hashy; zero JWT/Be
 bo modyfikowałyby produkcję. Nagramy je osobno przeciwko **kopii bazy**
 (`db/snapshot.db`) w Fazie 4.
 
+**Dwie kategorie tras trwale bez fixtures** (Iteracja 8, `28-FEATURE-selly-eksport-backend`,
+2026-09-04) — nie chodzi o zaległość do domknięcia, tylko o strukturalny brak: nagrywarka
+zapisywała wyłącznie JSON, więc `GET /api/export-shoper` i `GET /api/export/shoper`
+(`text/csv`/`application/zip`) nie mają i nie mogą mieć fixture'a — pokrycie idzie przez
+kontrakt + test formatu bajtowego. `POST /api/selly/{producers,categories,sync-product,
+sync-supplier}` wołają zewnętrzne API Selly — nagranie zmieniałoby cudzy sklep; pokrycie
+przez kontrakt + testy na atrapie klienta (`rebuild/backend/test/gate/selly-atrapa.ts`).
+
 ## ⚠ Uwaga bezpieczeństwa wbudowana w kontrakt
 
 Operacje z `security: []` są **publiczne bez logowania** — to **stan faktyczny**,

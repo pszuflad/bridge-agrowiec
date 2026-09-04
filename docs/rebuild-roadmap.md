@@ -155,7 +155,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
-| 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
+| 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | 🔨 | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ⬜ |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
@@ -1023,13 +1023,46 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **⚠ ZALEGŁOŚĆ Z ITERACJI 3 (zapisana 2026-09-01 przez 3d-2) — `products.zastosowanie`.**
   `POST /api/staging/accept` woła w produkcji `__restoreZastosowanie()` (`:44105`), które po
   każdej akceptacji odtwarza puste `zastosowanie` z CSV spoza repo. 3d-2 tego NIE przeportowała
-  (decyzja użytkownika) — pełny opis, podejrzenia co do przyczyny i rekomendacja:
-  **`docs/rebuild-backlog.md` #12**. Właściciel do ustalenia między tą iteracją a **I7**
-  (atrybuty); tu wisi, bo `selly_zastosowanie_category_map` mieszka w tym bloku.
-- **Status:** ⬜  **Sesje:** 8a BE · 8b FE  **Zależy od:** 2, 4
+  (decyzja użytkownika); 8a (2026-09-04) tę decyzję potwierdziła (D3) — nadal NIE portujemy.
+  **Właścicielstwo rozstrzygnięte: I8, nie I7** — `selly_zastosowanie_category_map` i jej jedyny
+  konsument (`mapujZastosowanieNaKategorie`, `src/selly/mapper.ts`) mieszkają w tym bloku.
+  Konsekwencja dla Selly (gałąź `fallback_kategoria`/`skipped`) jest zmierzona i zamrożona
+  w testach: **`docs/rebuild-backlog.md` #12**.
+- **Status:** 🔨 częściowo — **8a (BE) ✅ 2026-09-04** (`28-FEATURE-selly-eksport-backend`) ·
+  **8b (FE) ⬜**  **Zależy od:** 2, 4
 - **Cel (Ania klika):** otwiera `/selly`, generuje/eksportuje CSV do marketplace, widzi status/log/słowniki — natywnie.
-- **Backend:** `/api/selly/status|ping|csv-status|log|dictionaries|categories|producers`, `POST /api/selly/generate-csv|sync-product|sync-supplier`; `GET /api/export/shoper`, `/api/export-shoper` (pełny katalog CSV — **z auth**, §3). Tabele `selly_kategoria_norm_map`, `selly_zastosowanie_category_map`.
-- **Frontend:** trasa Wouter `/selly` + komponenty React/TanStack (zamiast overlay + routing przez hash).
+- **Backend (8a ✅ 2026-09-04):** panel Selly — **5 GET** (`status`, `ping`, `csv-status`, `log`,
+  `dictionaries`) + **5 POST** (`categories`, `producers`, `generate-csv`, `sync-product`,
+  `sync-supplier`) — w oryginale JUŻ za auth (`extensions.cjs:456-458`, `requireAuth: we`), u nas
+  bez zmiany. `GET /api/export/shoper`, `/api/export-shoper` (pełny katalog CSV) są w oryginale
+  publiczne — u nas **+`requireAuth`** (odstępstwo świadome §3, D1). Tabele
+  `selly_kategoria_norm_map`, `selly_zastosowanie_category_map` już istniały w schemacie
+  (`rebuild/schema/001_schema.sql:257-311`) — migracja nie była potrzebna.
+  **Sześć z dziesięciu tras panelu gadają z realnym API Selly.pl** (OAuth2 `client_credentials`,
+  sekrety `SELLY_SHOP_URL/CLIENT_ID/CLIENT_SECRET/SCOPE`): `ping`, `dictionaries`, `producers`,
+  `categories`, `sync-product`, `sync-supplier`. Lokalne (czysty SQLite/plik, zero HTTP) są tylko
+  cztery: `status`, `log`, `csv-status`, **`generate-csv`**. Szczegóły portu (klient/mapper/
+  generator CSV, decyzje D1–D8): `docs/tickets/28-FEATURE-selly-eksport-backend/`.
+- **Frontend (8b ⬜ — ta sesja czyta ten blok, nie 8a):** trasa Wouter `/selly` + komponenty
+  React/TanStack (zamiast overlay + routing przez hash).
+  - Backend 8a jest gotowy: 12 tras działa za `requireAuth`, kształty zgodne z 5 fixture'ami
+    (`GET_selly_status/ping/csv-status/log/dictionaries.json`).
+  - **Bez sekretów `SELLY_*` sześć tras zewnętrznych oddaje 500** z komunikatem `[Selly] Brak
+    konfiguracji: SELLY_SHOP_URL / SELLY_CLIENT_ID / SELLY_CLIENT_SECRET` — zachowanie 1:1
+    z produkcją (plan.md D6), NIE błąd do naprawienia w backendzie. Panel 8b musi to obsłużyć
+    sensownie; propozycja: rozpoznawać ten komunikat i pokazywać „Selly nieskonfigurowane"
+    zamiast surowej awarii serwera.
+  - **Dwie trasy eksportu mają RÓŻNE parametry filtrujące:** `GET /api/export-shoper` bierze
+    `?dostawca=`, a `GET /api/export/shoper` bierze `?supplier=`. Rozjazd jest w oryginale
+    i został odtworzony 1:1 — 8b musi użyć właściwej nazwy dla właściwej trasy, inaczej filtr
+    po cichu nie zadziała.
+  - `GET /api/export-shoper` bez parametru (albo `dostawca=wszyscy`) oddaje **ZIP**
+    (`application/zip`, `shoper_wszyscy_{data}.zip`) z osobnym CSV per dostawca, nie CSV.
+    `GET /api/export/shoper` zawsze oddaje jeden CSV.
+  - **Eksport to NAWIGACJA przeglądarki, nie `fetch`** — żądanie nie niesie nagłówka
+    `Authorization`, działa wyłącznie na cookie `bridge_session`. Backend to obsługuje i ma na to
+    test, ale 8b nie może próbować dokładać tam Bearera przez `fetch` z pobieraniem bloba, bo
+    zmieni to sposób autoryzacji.
   - **Eksport CSV odłożony z I2 — należy do TEJ iteracji** (rozstrzygnięte 2026-08-25): przycisk
     „Pobierz CSV (Shoper)" w `/katalog` (`frontend-index.js:23384-23422`). Uzasadnienie: to eksport
     Shoperowy, a I8 wnosi już jego serwerowy odpowiednik (`GET /api/export/shoper`,
@@ -1047,10 +1080,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     `src/pages/konfiguracja/Shoper.tsx`) — ale **nikt ich jeszcze nie czyta**. To ta iteracja ma
     je podłączyć do przycisku „Pobierz CSV (Shoper)". **Uwaga na dwie różne trasy eksportu:**
     `shoper.format_eksportu` czyta `GET /api/export/shoper` (`backend-index.cjs:48853-48863`) —
-    to INNA trasa niż `GET /api/export-shoper`. Obie są publiczne w oryginale i obie poza
-    zakresem I11.
-- **Ścieżki (GATE):** selly×10, export×2.  **Fixtures:** `GET_selly_status.json`, `_ping`, `_csv-status`, `_log`, `_dictionaries`.
-- **DoD:** panel Selly natywny; eksport CSV (serwerowy **oraz** przycisk w `/katalog` odłożony z I2) działa i jest chroniony auth; fixtures przez GATE; parytet z `selly-injection.js` (26 KB).
+    to INNA trasa niż `GET /api/export-shoper`. Obie są publiczne w oryginale (obie poza
+    zakresem I11) i obie już stoją za `requireAuth` u nas od 8a.
+- **Ścieżki (GATE):** selly×10 (5 GET + 5 POST), export×2.  **Fixtures:** `GET_selly_status.json`, `_ping`, `_csv-status`, `_log`, `_dictionaries`. — **GATE 8a ✅ zielony** (12/12 ścieżek, 5/5 fixtures 1:1, 954/954 testów).
+- **DoD:** panel Selly natywny (8b ⬜); eksport CSV — serwerowy ✅ (8a, za `requireAuth`) + przycisk w `/katalog` odłożony z I2 ⬜ (8b); fixtures przez GATE ✅ (8a); parytet z `selly-injection.js` (26 KB, 8b).
 
 ---
 
