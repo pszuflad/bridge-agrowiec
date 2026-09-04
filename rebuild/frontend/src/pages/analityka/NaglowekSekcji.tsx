@@ -35,6 +35,14 @@ export type NaglowekSekcjiProps = {
   prefiksTestu: string;
   /** Miejsce na kontrolki po prawej stronie tytułu (przycisk „CSV" dołoży blok 10f). */
   obok?: ReactNode;
+  /**
+   * Karta ma własny padding i nie chce kreski pod nagłówkiem.
+   *
+   * Tak jest w oryginale DOKŁADNIE JEDEN raz — karta „Rotacja / produkty bez aktualizacji"
+   * stoi na `CardContent` z `p-4 space-y-3` (`frontend-index.js:28563`), gdy wszystkie
+   * pozostałe karty analityki mają `p-0` i kreskę pod nagłówkiem. Nie ujednolicamy tego.
+   */
+  bezRamki?: boolean;
 };
 
 export function NaglowekSekcji({
@@ -46,11 +54,12 @@ export function NaglowekSekcji({
   rzeczownik,
   prefiksTestu,
   obok,
+  bezRamki = false,
 }: NaglowekSekcjiProps) {
   const odfiltrowane = wszystkie - widoczne;
 
   return (
-    <div className="border-b px-4 py-3">
+    <div className={bezRamki ? undefined : "border-b px-4 py-3"}>
       <div className="flex items-center justify-between gap-2">
         <div className="text-sm font-semibold">{tytul}</div>
         {obok}

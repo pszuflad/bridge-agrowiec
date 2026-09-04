@@ -7,10 +7,11 @@
  * `req.query` (`analytics_module.cjs:300`). Pozostałe sekcje filtrują się klientem. Rozstrzyga
  * o tym oryginał, nie wygoda — opis wzorca w `README.md` obok.
  *
- * Stan pola mieszka TUTAJ, a nie w `Analityka.tsx`. Oryginał trzyma go w komponencie widoku
- * (`useState("60")`, `:27805`), bo tam ma wszystkie zapytania; u nas jest jedynym zapytaniem
- * zależnym od kontrolki, więc trzymanie go obok tej kontrolki jest i krótsze, i odporniejsze
- * na przypadkowe współdzielenie.
+ * ⚠ STAN POLA MIESZKA W `Analityka.tsx`, NIE TUTAJ — i to nie jest kwestia gustu. Radix
+ * `Tabs.Content` bez `forceMount` ODMONTOWUJE nieaktywną zakładkę, więc stan trzymany w tej
+ * sekcji ginąłby przy każdym przejściu na inną zakładkę i wracał do „60". Oryginał trzyma go
+ * w komponencie widoku (`useState("60")`, `:27805`), gdzie przełączanie zakładek go nie rusza —
+ * odtwarzamy to samo rozmieszczenie.
  *
  * ⚠ BEZ DEBOUNCE'A — i to jest wierność, nie przeoczenie. Oryginał odpytuje backend przy
  * każdym znaku (`onChange: e => l(e.target.value)`), a `staleTime: Infinity` w naszym kliencie
@@ -22,7 +23,7 @@
  *
  * Bez przycisku „CSV" (`M("rotation-inactive")`, `:28572`) — trasa eksportu należy do 10f.
  */
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,9 +38,6 @@ import {
 } from "./filtrowanie";
 import { NaglowekSekcji } from "./NaglowekSekcji";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
-
-/** Wartość początkowa pola — `useState("60")` oryginału (`:27805`). Napis, nie liczba. */
-const DNI_POCZATKOWE = "60";
 
 /**
  * Wiersz rotacji niesie CZTERY z sześciu wymiarów — to najbogatsza sekcja tego bloku.
@@ -60,8 +58,15 @@ const KOLUMNY: KolumnaTabeli<WierszRotacji>[] = [
   { key: "stan", label: "Stan", right: true },
 ];
 
-export function SekcjaRotacji({ wybor }: { wybor: WyborFiltrow }) {
-  const [dni, ustawDni] = useState(DNI_POCZATKOWE);
+export function SekcjaRotacji({
+  wybor,
+  dni,
+  onZmianaDni,
+}: {
+  wybor: WyborFiltrow;
+  dni: string;
+  onZmianaDni: (wartosc: string) => void;
+}) {
   const { data, isPending } = useRotacjeNieaktywnych(dni);
 
   const wiersze = useMemo(
@@ -70,9 +75,12 @@ export function SekcjaRotacji({ wybor }: { wybor: WyborFiltrow }) {
   );
 
   return (
+    // ⚠ JEDYNA KARTA ANALITYKI Z WŁASNYM PADDINGIEM: oryginał daje jej `p-4 space-y-3`
+    // (`frontend-index.js:28563`), a nie `p-0` z kreską pod nagłówkiem jak wszystkim innym.
     <Card className="border-card-border">
-      <CardContent className="p-0">
+      <CardContent className="space-y-3 p-4">
         <NaglowekSekcji
+          bezRamki
           tytul="Rotacja / produkty bez aktualizacji"
           wszystkie={data?.rows.length ?? 0}
           widoczne={wiersze.length}
@@ -82,11 +90,11 @@ export function SekcjaRotacji({ wybor }: { wybor: WyborFiltrow }) {
           prefiksTestu="rotacja"
         />
 
-        <div className="flex items-center gap-2 border-b px-4 py-3">
+        <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Bez ruchu dni</span>
           <Input
             value={dni}
-            onChange={(e) => ustawDni(e.target.value)}
+            onChange={(e) => onZmianaDni(e.target.value)}
             className="w-24 font-mono"
             aria-label="Bez ruchu dni"
             data-testid="pole-dni-rotacji"

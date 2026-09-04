@@ -67,6 +67,9 @@ function ZakladkaWPrzygotowaniu({ blok, zakres }: { blok: string; zakres: string
   );
 }
 
+/** Wartość początkowa pola „Bez ruchu dni" — `useState("60")` oryginału. Napis, nie liczba. */
+const DNI_ROTACJI_POCZATKOWE = "60";
+
 export function Analityka() {
   const [wybor, ustawWybor] = useState<WyborFiltrow>(pustyWybor);
 
@@ -75,12 +78,15 @@ export function Analityka() {
   const { data: kpi } = useKpi();
   const { data: marze, isPending: marzeWczytywane } = useMarze();
 
-  // Blok 10e. Zapytanie rotacji NIE jest tutaj — zależy od kontrolki „Bez ruchu dni",
-  // więc mieszka razem z nią w `SekcjaRotacji` (jedyny filtr serwerowy całej analityki).
+  // Blok 10e. Wartość pola „Bez ruchu dni" mieszka TU, a nie w sekcji rotacji — tak jak
+  // w oryginale (`useState("60")`, `frontend-index.js:27805`). Powód jest praktyczny:
+  // `Tabs.Content` odmontowuje nieaktywną zakładkę, więc stan trzymany w sekcji wracałby
+  // do „60" po każdym przejściu na inną zakładkę. Samo zapytanie zostaje w sekcji.
   const { data: dostepnosc, isPending: dostepnoscWczytywana } = useDostepnoscProduktow();
   const { data: tempo, isPending: tempoWczytywane } = useTempoSchodzenia();
   const { data: sezonowosc, isPending: sezonowoscWczytywana } = useSezonowoscMiesieczna();
   const { data: cyklZycia, isPending: cyklWczytywany } = useCyklZyciaModeli();
+  const [dniRotacji, ustawDniRotacji] = useState(DNI_ROTACJI_POCZATKOWE);
 
   return (
     <div>
@@ -157,7 +163,7 @@ export function Analityka() {
         */}
         <TabsContent value="marza" className="mt-4 space-y-4">
           <SekcjaMarze dane={marze} wybor={wybor} ladowanie={marzeWczytywane} />
-          <SekcjaRotacji wybor={wybor} />
+          <SekcjaRotacji wybor={wybor} dni={dniRotacji} onZmianaDni={ustawDniRotacji} />
           <SekcjaCykluZycia dane={cyklZycia} wybor={wybor} ladowanie={cyklWczytywany} />
         </TabsContent>
       </Tabs>

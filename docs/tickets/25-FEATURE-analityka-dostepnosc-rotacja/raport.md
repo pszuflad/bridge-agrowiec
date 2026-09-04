@@ -124,3 +124,29 @@ Brak. Sześć nowych tras `GET`, żadna istniejąca nie zmieniła kształtu odpo
 5. **`node_modules` w głównym repo** warto odświeżyć (`npm ci` w `rebuild/frontend`) — brakuje
    w nim zależności dodanej w 10a. Nie ruszałem tego, bo to katalog współdzielony z innymi
    równoległymi sesjami.
+
+## Poprawki po review
+
+Review: **0 BLOCKER**, 2 SHOULD-FIX, 1 NICE-TO-HAVE
+(`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/review.md`). Reviewer niezależnie
+potwierdził odkrycie o brakującej kolumnie `nazwa` oraz zgodność wszystkich sześciu zapytań
+SQL z oryginałem znak po znaku.
+
+Obie uwagi SHOULD-FIX naprawione:
+
+1. **Stan pola „Bez ruchu dni" ginął przy zmianie zakładki.** `Tabs.Content` bez `forceMount`
+   odmontowuje nieaktywną zakładkę, więc `useState` trzymany w `SekcjaRotacji` wracał do „60"
+   po każdym przejściu na inną zakładkę i z powrotem — czego oryginał nie robi, bo trzyma tę
+   wartość w komponencie widoku (`frontend-index.js:27805`). Stan przeniesiony do
+   `Analityka.tsx`; sekcja dostaje `dni` i `onZmianaDni` w propsach. Dołożony test regresji
+   („wpisana wartość przeżywa przejście na inną zakładkę i z powrotem").
+2. **Layout karty rotacji.** Oryginał daje jej `CardContent` z `p-4 space-y-3`
+   (`frontend-index.js:28563`) — jako jedynej karcie analityki; pozostałe mają `p-0` i kreskę
+   pod nagłówkiem. Karta dostała układ oryginału, a `NaglowekSekcji` — flagę `bezRamki`
+   obsługującą ten jeden przypadek.
+
+NICE-TO-HAVE (nazwa stałej `LIMIT_TEMPA_SCHODZENIA` zamiast zapowiedzianej w planie
+`LIMIT_SELL_THROUGH`) zostawiony bez zmian: polska nazwa jest spójna z resztą pliku,
+a plan był w tym miejscu roboczym szkicem, nie kontraktem.
+
+Po poprawkach: frontend 414 testów / 28 plików ✓, `lint`/`typecheck`/`build` czyste.

@@ -258,4 +258,23 @@ describe("3. „Bez ruchu dni” — jedyny filtr serwerowy analityki", () => {
     // wstawiłby ukośnik przed znakiem zapytania (`api.ts`, `useRotacjeNieaktywnych`).
     await waitFor(() => expect(zapytaniaRotacji).toContain("365"));
   });
+
+  it("wpisana wartość przeżywa przejście na inną zakładkę i z powrotem", async () => {
+    zamockujApi();
+    const uzytkownik = await otworzZakladke("tab-marza");
+
+    const pole = await screen.findByTestId("pole-dni-rotacji");
+    await uzytkownik.clear(pole);
+    await uzytkownik.type(pole, "365");
+    await waitFor(() => expect(zapytaniaRotacji).toContain("365"));
+
+    // `Tabs.Content` bez `forceMount` ODMONTOWUJE nieaktywną zakładkę, więc stan trzymany
+    // w samej sekcji wracałby tu do „60". Oryginał trzyma go w komponencie widoku
+    // (`frontend-index.js:27805`) i my tak samo — ten test tego pilnuje.
+    await uzytkownik.click(await screen.findByTestId("tab-dostepnosc"));
+    await screen.findByTestId("tabela-sezonowosc");
+    await uzytkownik.click(await screen.findByTestId("tab-marza"));
+
+    expect(await screen.findByTestId("pole-dni-rotacji")).toHaveValue("365");
+  });
 });
