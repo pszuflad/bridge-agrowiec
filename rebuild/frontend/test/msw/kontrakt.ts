@@ -6,15 +6,22 @@ import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
 import type {
-  CyklZycia,
+  CyklZyciaModeli,
   Dostepnosc,
   Filtry,
   Kpi,
   Marze,
   Rotacja,
   Sezonowosc,
+  StabilnoscDostawcow,
   StatusHistorii,
   TempoSchodzenia,
+  WierszCykluZycia,
+  WierszPokryciaEan,
+  WierszPorownaniaEan,
+  WierszRankinguEan,
+  WierszStanuDostawcy,
+  WierszUnikalnegoEan,
 } from "@/pages/analityka/api";
 
 const katalogTestow = dirname(fileURLToPath(import.meta.url));
@@ -280,6 +287,57 @@ export function marzeZFixtura(): Marze {
 }
 
 /**
+ * Analityka EAN (blok 10c) — cztery odpowiedzi, które oryginalny frontend realnie woła.
+ *
+ * Te same zasady co wyżej: ciało prosto z nagrania, `_przyciete` zdjęte. Fixtures
+ * `ean/comparison`, `ean/unique` i `ean/supplier-rank` niosą ten klucz, `ean/coverage` nie —
+ * loader radzi sobie z obiema sytuacjami.
+ *
+ * ⚠ NIE MA TU LOADERÓW DLA `ean/details` I `ean-porownanie`. Obie trasy istnieją
+ * w backendzie, ale oryginalny frontend ich nie woła (`docs/analityka-bloki-10b-10f.md` §1.1),
+ * więc nie ma czego mockować — nasz widok też ich nie wywołuje (decyzja D6).
+ */
+export function porownanieEanZFixtura(): { rows: WierszPorownaniaEan[] } {
+  return analitykaZFixtura<{ rows: WierszPorownaniaEan[] }>("GET_analytics_ean_comparison.json");
+}
+
+export function unikalneEanZFixtura(): { rows: WierszUnikalnegoEan[] } {
+  return analitykaZFixtura<{ rows: WierszUnikalnegoEan[] }>("GET_analytics_ean_unique.json");
+}
+
+export function pokrycieEanZFixtura(): { rows: WierszPokryciaEan[] } {
+  return analitykaZFixtura<{ rows: WierszPokryciaEan[] }>("GET_analytics_ean_coverage.json");
+}
+
+export function rankingEanZFixtura(): { rows: WierszRankinguEan[] } {
+  return analitykaZFixtura<{ rows: WierszRankinguEan[] }>("GET_analytics_ean_supplier-rank.json");
+}
+
+/**
+ * `GET /api/analytics/suppliers/stability` — 5 nagranych dostawców, `hasHistory: true`.
+ *
+ * ⚠ NAGRANIE POKAZUJE TYLKO JEDNĄ Z DWÓCH GAŁĘZI. Backend ma drugą (pusta `historia_cen`),
+ * o INNYM zestawie kolumn — `produkty`/`sredniaCena`/`sredniStan` zamiast `punkty`. Widok
+ * renderuje mimo to stałe siedem kolumn oryginału, więc część z nich zawsze pokazuje „—";
+ * test tej gałęzi buduje wiersz sam, bo fixture jej nie zna.
+ */
+export function stabilnoscDostawcowZFixtura(): StabilnoscDostawcow {
+  return analitykaZFixtura<StabilnoscDostawcow>("GET_analytics_suppliers_stability.json");
+}
+
+/** `GET /api/analytics/suppliers/lifecycle` — 5 z 500 nagranych pozycji stagingu. */
+export function cyklZyciaDostawcowZFixtura(): { rows: WierszCykluZycia[] } {
+  return analitykaZFixtura<{ rows: WierszCykluZycia[] }>(
+    "GET_analytics_suppliers_lifecycle.json",
+  );
+}
+
+/** `GET /api/analytics/suppliers/stock` — 5 z 9 nagranych dostawców. */
+export function stanDostawcowZFixtura(): { rows: WierszStanuDostawcy[] } {
+  return analitykaZFixtura<{ rows: WierszStanuDostawcy[] }>("GET_analytics_suppliers_stock.json");
+}
+
+/**
  * Analityka (blok 10e) — sześć odpowiedzi prosto z nagrań produkcji.
  *
  * ⚠ CZTERY Z SZEŚCIU NAGRAŃ SĄ PUSTE i to nie jest przypadek nagrywarki:
@@ -311,8 +369,8 @@ export function sezonowoscZFixtura(): Sezonowosc {
 }
 
 /** `GET /api/analytics/lifecycle/models` — 5 nagranych modeli. */
-export function cyklZyciaZFixtura(): CyklZycia {
-  return analitykaZFixtura<CyklZycia>("GET_analytics_lifecycle_models.json");
+export function cyklZyciaModeliZFixtura(): CyklZyciaModeli {
+  return analitykaZFixtura<CyklZyciaModeli>("GET_analytics_lifecycle_models.json");
 }
 
 /** `GET /api/analytics/rotation/inactive` — `days: 60`, `rows: []`. */

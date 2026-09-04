@@ -256,22 +256,48 @@ ma endpoint:
 > dochodzi globalny pasek sześciu wyszukiwalnych filtrów działający **po stronie klienta**
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
-> (O-10a-3). W 10a wypełniona jest wyłącznie karta „Marża per dostawca/kategoria/marka" —
-> pozostałe zakładki są puste, ale nazwane (O-10a-4); patrz **10e** niżej, gdzie dwie z nich
-> dostają treść. Wzorzec sekcji dashboardu jest udokumentowany
+> (O-10a-3). Wypełniona jest karta „Marża per dostawca/kategoria/marka" (O-10a-4); pozostałe
+> w tym bloku są puste, ale nazwane — `ean` dowieziona w 10c, `dostawcy` w 10d
+> i `dostepnosc` w 10e (patrz niżej), `ceny` czeka na 10b. Wzorzec sekcji dashboardu
+> jest udokumentowany
 > w `rebuild/frontend/src/pages/analityka/README.md`. Trasa jest ładowana **leniwie**
-> (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku ~385 kB, więc płaci za niego tylko
+> (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku (~398 kB po 10c i 10d), więc płaci za niego tylko
 > wejście na `/analityka`, nie wspólny bundle. Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
 >
-> **Dla bloków 10b–10f:** karty oryginału zakładka po zakładce (tytuły, kolumny, etykiety PL,
-> kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu — `docs/analityka-bloki-10b-10f.md`.
+> **Dla bloków 10b i 10f:** karty oryginału zakładka po zakładce (tytuły, kolumny,
+> etykiety PL, kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu —
+> `docs/analityka-bloki-10b-10f.md`.
+>
+> **Odbudowa (10c, `22-FEATURE-analityka-ean`, 2026-09-03):** zakładka „EAN i ceny" wypełniona —
+> trzy karty 1:1 z oryginałem („Porównanie cen po EAN", „Pozycje unikalne", „Pokrycie wspólne
+> i ranking dostawcy"), zasilane czterema z sześciu nowych tras `/api/analytics/ean*`
+> (`comparison`, `unique`, `coverage`, `supplier-rank`); `ean/details` i `ean-porownanie`
+> dowiezione jako trasy **bez UI** — oryginał ich też nie woła (D6). Karta „Pokrycie i ranking"
+> dostaje dwa wykresy (histogram pokrycia, ranking dostawców po `najtanszyPct`) nad tabelami —
+> drugie zastosowanie wzorca z 10a (O-10c-1). Nagłówek KPI **zostaje** na `GET /api/analytics/kpi`
+> (D1, odstępstwo O-10a-1 utrzymane) — dane do przepięcia na kafle oryginału
+> (`ean/comparison.rows.length`, `ean/unique.rows.length`) są od teraz gotowe, przepięcie czeka
+> na decyzję użytkownika. Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
+>
+> **Odbudowa (10d, `23-FEATURE-analityka-dostawcy`, 2026-09-03):** zakładka `dostawcy` — domyślna
+> zakładka `/analityka` — wypełniona trzema kartami 1:1: „1.1 Stabilność cennika dostawcy" (7
+> kolumn; dwie gałęzie backendu zwracają różny komplet kolumn, więc część komórek zawsze pokazuje
+> „—" — zastane zachowanie oryginału, odtworzone świadomie, D1), „1.2 Nowości i wycofania" (6
+> kolumn, data w surowym ISO jak oryginał) i „1.4 / 1.5 Stan i dostępność dostawcy" (5 kolumn,
+> „Dostępność" jako pasek postępu przez wspólny `PasekDostepnosci.tsx`, drugim konsumentem będzie
+> blok 10e; nad tabelą wykres słupkowy dostępności — odstępstwo O-10d-1, oryginał nie ma żadnych
+> wykresów). Filtrowanie klienckie jak w 10a: wiersze tych tras niosą wyłącznie wymiar `dostawca`,
+> pozostałe pięć filtrów globalnych są pomijane z widoczną notką. Przyciski „CSV" trzech kart
+> (obecne w oryginale) pominięte — trasa `GET /api/analytics/export/{view}` to blok 10f. Trasa
+> `GET /api/analytics/dostawcy-stats` odtworzona pod GATE, bez konsumenta w UI (D3, jak w
+> oryginale). Szczegóły: `docs/tickets/23-FEATURE-analityka-dostawcy/`.
 >
 > **Odbudowa (10e, `25-FEATURE-analityka-dostepnosc-rotacja`, 2026-09-04):** zakładka
 > `dostepnosc` dostaje trzy karty („Historia dostępności pozycji", „Tempo schodzenia z
 > magazynu", „Sezonowy wzorzec cen"), zakładka `marza` dostaje dwie kolejne pod kartą marż z
 > 10a („Rotacja / produkty bez aktualizacji", „Cykl życia modelu") — `ZakladkaWPrzygotowaniu`
-> zostaje tylko w zakładkach 10b/10c/10d. Jedyny filtr serwerowy bloku: pole „Bez ruchu dni"
-> (`?days` w `rotation/inactive`). Drugi wykres w widoku (O-10e-1, kontynuacja O-10a-3):
+> zostaje już tylko w zakładce `ceny` (blok 10b). Jedyny filtr serwerowy całej analityki: pole
+> „Bez ruchu dni" (`?days` w `rotation/inactive`). Kolejny wykres (O-10e-1, kontynuacja O-10a-3):
 > linia „średnia cena zakupu wg miesiąca" nad kartą sezonowości, jedna seria. **Dwie z pięciu
 > kart („Historia dostępności pozycji", „Tempo schodzenia z magazynu") pokazują „Brak danych"
 > niezależnie od stanu bazy** — port 1:1 zapytania, które w produkcji zawsze zawodzi (brak

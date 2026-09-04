@@ -6,10 +6,15 @@ sesja 10a musiała się dowiedzieć sama i co kosztowało ją osobną rundę pyt
 Każdy fakt niżej jest **zweryfikowany w kodzie** (`mirror/backend/analytics_module.cjs`,
 `deminified/frontend-index.js`, `contract/fixtures/`), nie przepisany z opisu iteracji.
 
-**Zakres:** 27 tras `/api/analytics/*`. Blok 10a zamknął pięć z nich (`filters`, `status`,
-`kpi`, `margins`, `bootstrap-current` — ticket `19-FEATURE-analityka-fundament`), blok 10e
-dołożył kolejnych sześć (§7 — ticket `25-FEATURE-analityka-dostepnosc-rotacja`). Ten
-dokument opisuje wciąż aktualne bloki **10b, 10c, 10d, 10f** (16 tras) + stan faktyczny 10e.
+**Zakres:** 27 tras `/api/analytics/*`. Zamknięte piętnaście: blok 10a — pięć
+(`filters`, `status`, `kpi`, `margins`, `bootstrap-current` — ticket
+`19-FEATURE-analityka-fundament`); blok 10c — sześć tras EAN (§5, ticket
+`22-FEATURE-analityka-ean`); blok 10d — cztery trasy dostawców (`suppliers/stability`,
+`suppliers/lifecycle`, `suppliers/stock`, `dostawcy-stats` — §6, ticket
+`23-FEATURE-analityka-dostawcy`) — wszystkie trzy 2026-09-03; blok 10e — sześć tras
+dostępności, rotacji i cyklu życia (§7, ticket `25-FEATURE-analityka-dostepnosc-rotacja`,
+2026-09-04). Ten dokument opisuje **pozostałe 6** (bloki 10b i 10f) oraz stan faktyczny
+bloków już zamkniętych.
 
 **Zanim zaczniesz blok:** przeczytaj `rebuild/frontend/src/pages/analityka/README.md` —
 wzorzec sekcji dashboardu, którego bloki 10b–10d mają się trzymać 1:1.
@@ -33,8 +38,8 @@ a to wymaga decyzji użytkownika, nie domysłu.
 | `GET /api/analytics/dostawcy-stats` | 10d | |
 | `GET /api/analytics/top-zmiany` | 10b | |
 | `GET /api/analytics/importy-timeline` | 10e | fixture jest **pustą tablicą** |
-| `GET /api/analytics/ean-porownanie` | 10c | przyjmuje `?ean` |
-| `GET /api/analytics/ean/details` | 10c | przyjmuje `?ean`; fixture ma puste `offers` |
+| `GET /api/analytics/ean-porownanie` | ✅ 10c | przyjmuje `?ean`; dowieziona jako trasa bez UI (decyzja D6) |
+| `GET /api/analytics/ean/details` | ✅ 10c | przyjmuje `?ean`; fixture ma puste `offers`; dowieziona jako trasa bez UI (decyzja D6) |
 | `POST /api/analytics/bootstrap-current` | ✅ 10a | dowieziona jako trasa bez UI (decyzja D4) |
 
 **Pobierana, ale nigdzie nierenderowana** — osobny przypadek, jeszcze bardziej mylący:
@@ -79,14 +84,32 @@ w każdej z 27 rejestracji. Nie odnotowuj tego jako różnicy.
 na tej liście, GATE przepuści **dowolny** kształt wiersza — kształt trzeba pokryć testem
 jednostkowym przeciw SQL-owi oryginału, tak jak 10a zrobiło dla `margins.low`/`high`.
 
+**Problem jest szerszy, niż tylko puste pola fixture'a.** `test/gate/ksztalt.ts:50` iteruje
+po elementach ODPOWIEDZI, więc **pusta ODPOWIEDŹ przechodzi gate za darmo** — niezależnie
+od tego, czy fixture jest pusty. Domyślny zasiew `PRODUKTY_TESTOWE` nie ma ani jednego EAN-u
+u dwóch dostawców, więc w 10c trzy trasy (`ean/comparison`, `ean/supplier-rank`,
+`ean-porownanie`) wychodziły na nim puste i gate przepuszczał dowolny kształt wiersza —
+mimo że fixtures tych tras NIE są puste. **Wniosek dla 10b: zasiej dane dające
+NIEPUSTE odpowiedzi i asercją sprawdź `rows.length > 0` PRZED porównaniem z fixture'em.**
+
+**⚠ PUSTKA MA DWIE RÓŻNE PRZYCZYNY I TRZEBA JE ROZRÓŻNIAĆ.** Fixture bywa pusty, bo w chwili
+nagrania nie było danych — ale bywa też pusty, bo **trasa jest zepsuta i nie zwraca nic nigdy**.
+Blok 10e trafił na drugi przypadek: `availability/products` i `availability/sell-through` pytają
+`historia_cen` o kolumnę `nazwa`, której ta tabela nie ma, `safeAll()` połyka `no such column`
+i obie trasy oddają `rows: []` — mimo 15 597 migawek widocznych w `GET_analytics_status.json`.
+Zanim uznasz pusty fixture za „brak danych w chwili nagrania", sprawdź, czy kolumny z SQL-a
+trasy w ogóle istnieją w `rebuild/schema/001_schema.sql` (§10, punkt 7). Szczegóły:
+`docs/rebuild-backlog.md` #32 i #33.
+
 | Fixture | Puste pola | Blok | Przyczyna |
 |---|---|---|---|
-| `GET_analytics_availability_products.json` | `rows` | ✅ 10e | **trasa zepsuta, nie brak danych** — patrz niżej |
-| `GET_analytics_availability_sell-through.json` | `rows` | ✅ 10e | **trasa zepsuta, nie brak danych** — patrz niżej |
-| `GET_analytics_rotation_inactive.json` | `rows` | ✅ 10e | brak danych w chwili nagrania |
-| `GET_analytics_importy-timeline.json` | **cała odpowiedź** | ✅ 10e | brak danych w chwili nagrania (`audit_log` pusty) |
-| `GET_analytics_ean_details.json` | `offers` | 10c | brak danych w chwili nagrania |
+| `GET_analytics_availability_products.json` | `rows` | ✅ 10e | **trasa zepsuta** (brak kolumny `nazwa`) |
+| `GET_analytics_availability_sell-through.json` | `rows` | ✅ 10e | **trasa zepsuta** (brak kolumny `nazwa`) |
+| `GET_analytics_rotation_inactive.json` | `rows` | ✅ 10e (pokryte testem) | brak danych w chwili nagrania |
+| `GET_analytics_importy-timeline.json` | **cała odpowiedź** | ✅ 10e (pokryte testem) | brak danych w chwili nagrania (`audit_log`) |
+| `GET_analytics_ean_details.json` | `offers` (i cała gałąź z `?ean`) | ✅ 10c (pokryte testem) | brak danych w chwili nagrania |
 | `GET_analytics_margins.json` | `low`, `high` | ✅ 10a (pokryte testem) | brak danych w chwili nagrania |
+| `GET_analytics_suppliers_stability.json` | — (tablica niepusta) | ✅ 10d (pokryte testem) | — |
 
 **Blok 10e miał tu najsłabszą siatkę z całej iteracji** — cztery z sześciu jego fixtures były
 puste albo częściowo puste. Nadrobione testem jednostkowym `analityka.dostepnosc.agregaty.test.ts`.
@@ -102,6 +125,16 @@ niezależnie od danych. Szczegóły i warianty naprawy: `docs/rebuild-backlog.md
 kolumny) i **#33** (druga, dziś zamaskowana pułapka SQL w `sell-through` — funkcja okna
 liczona po niepełnym `GROUP BY`).
 
+**Drugi rodzaj luki: tablica niepusta, ale nagrana tylko na jednej gałęzi handlera.**
+`GET_analytics_suppliers_stability.json` nie jest pusty — ale nagrano go przy
+`hasHistory: true`, więc **gałąź zapasowa (`hasHistory: false`, inny zestaw kolumn) nie ma
+w nagraniu żadnego świadka**; GATE jej nie widzi. Pokrywa ją test jednostkowy
+`rebuild/backend/test/analityka.dostawcy.agregaty.test.ts`. Reguła dla kolejnych bloków:
+**handler z dwiema gałęziami zależnymi od `hasHistory` ma zwykle tylko jedną nagraną —
+drugą trzeba pokryć testem jednostkowym**, nawet gdy fixture wygląda na kompletny. Dotyczy
+też bloku 10e: `availability/products`, `availability/sell-through`, `seasonality/monthly`,
+`lifecycle/models` mają ten sam wzorzec `hasHistory`.
+
 ---
 
 ## 3. Trzy kształty odpowiedzi — nie zakładaj jednego
@@ -111,7 +144,7 @@ liczona po niepełnym `GROUP BY`).
 | `{ hasHistory, rows }` | `suppliers/stability`, `availability/products`, `availability/sell-through`, `prices/inflation`, `seasonality/monthly`, `lifecycle/models`, `prices/product-history` (+ `stats`) |
 | `{ rows }` (bez `hasHistory`) | `suppliers/lifecycle`, `suppliers/stock`, `ean/comparison`, `ean/unique`, `ean/coverage`, `ean/supplier-rank`, `prices/last-import` |
 | **goła tablica** (bez koperty) | `dostawcy-stats`, `top-zmiany`, `importy-timeline` |
-| inne | `market/group-prices` → `{ group, rows }` · `rotation/inactive` → `{ days, rows }` · `ean/details` → `{ ean, offers }` |
+| inne | `market/group-prices` → `{ group, rows }` · `rotation/inactive` → `{ days, rows }` · `ean/details` bez `?ean` → `{ ean: null, offers: [] }`; **z `?ean`** → `{ ean, offers, mediana, srednia }`, patrz §5 |
 
 `hasHistory` liczy się z `historia_cen` przez pomocnika `hasHistory(db)` (`:58`) i mówi UI,
 czy widok czasowy ma z czego rysować.
@@ -154,49 +187,97 @@ to poprawne zachowanie, nie awaria.
 
 ---
 
-## 5. Blok 10c — EAN
+## 5. Blok 10c — EAN ✅ zamknięty 2026-09-03 (`22-FEATURE-analityka-ean`)
 
 Trasy: `ean/comparison`, `ean/coverage`, `ean/details`, `ean/supplier-rank`, `ean/unique`,
-`ean-porownanie`. Fixtures: 6.
+`ean-porownanie`. Fixtures: 6. Backend: `rebuild/backend/src/repos/analityka.ts` +
+`routes/analytics.ts`. Frontend: `pages/analityka/SekcjaEan.tsx`.
 
 | Trasa | Linia | Query | LIMIT | Kształt |
 |---|---|---|---|---|
 | `ean/comparison` | `:188` | `minDiffPct` | 1000 | `{ rows }` |
-| `ean/details` | `:202` | `ean` | — | `{ ean, offers }` |
+| `ean/details` | `:202` | `ean` | — | **bez `?ean`** → `{ean: null, offers: []}`; **z `?ean`** → `{ean, offers, mediana, srednia}` |
 | `ean/unique` | `:210` | — | 1000 | `{ rows }` |
 | `ean/coverage` | `:219` | — | — | `{ rows }` |
 | `ean/supplier-rank` | `:224` | — | — | `{ rows }` |
-| `ean-porownanie` | `:335` | `ean` | 200 | goła tablica |
+| `ean-porownanie` | `:335` | `ean` | 200 | goła tablica (dwie różne gałęzie, patrz niżej) |
+
+**`ean/details` z `?ean` ma cztery klucze, nie dwa** (`analytics_module.cjs:202-208`).
+Fixture nagrał wyłącznie gałąź bez parametru (`{ean: null, offers: []}`), więc różnicy nie
+widać w kontrakcie — kształt jest pokryty testem jednostkowym, nie gate'em. Każda oferta
+w `offers` dostaje dodatkowo `pozycjaCenowa: i + 1` liczoną z **kolejności wierszy po
+sortowaniu**, NIE funkcją okna — dwie oferty o identycznej cenie dostają różne pozycje
+(w odróżnieniu od `ean/supplier-rank`, który używa prawdziwego `RANK()` i tam remisy dzielą
+pozycję).
+
+**`ean-porownanie` ma DWIE gałęzie SQL zależne od `?ean`** (`:335-338`) i to nie jest alias
+`ean/comparison` — to osobny, prostszy SQL:
+- **bez `?ean`** → agregat 2-dostawcowy (to nagrał fixture): pięć kolumn
+  (`ean, nazwa, dostawcy, cenaMin, cenaMax`, bez `srednia`/`oferty`/`spreadZl`/`spreadPct`),
+  WHERE **bez** `cena_zakupu > 0`, LIMIT **200** (nie 1000).
+- **z `?ean`** → goła tablica ofert, ten sam SELECT co `ean/details.offers`, ale **bez**
+  `pozycjaCenowa`.
+
+**Dwa fakty, które kosztowały dochodzenie w 10c:**
+- `spreadZl`/`spreadPct` w `ean/comparison` liczą się w **JS, po SQL** — filtr `minDiffPct`
+  działa **PO** obcięciu do LIMIT 1000, nie przed nim.
+- `ean/supplier-rank.wspolnePozycje` **myli nazwą**: CTE `ranked` nie wymaga, żeby EAN był
+  u dwóch dostawców — liczy WSZYSTKIE aktywne oferty dostawcy z niepustym EAN-em i ceną > 0.
+  Stąd w fixture `MO9` wychodzi 846/846 = **100%** (wszystkie jego EAN-y są unikalne, więc
+  jest zawsze najtańszy). `RANK()` (nie `ROW_NUMBER()`) sprawia, że przy remisie każdy
+  z remisujących liczy się jako najtańszy — suma `najtanszy` po dostawcach może przez to
+  przekroczyć liczbę EAN-ów.
+- `ean/unique` używa `MAX()` do wyciągnięcia kolumn spoza `GROUP BY` — gdy jeden dostawca ma
+  pod tym samym EAN-em kilka kodów, w tabeli widać NAJWYŻSZĄ cenę i NAJWYŻSZY stan, nie
+  wartości jednej konkretnej oferty.
+- `ean/unique` i `ean/coverage` **nie filtrują** po `cena_zakupu > 0` (w odróżnieniu od
+  `comparison` i `supplier-rank`).
 
 **Zakładka w UI: `ean` „EAN i ceny"** (`fe.js:28175-28294`). Trzy karty:
 
 1. **„2.1-2.4 Porównanie cen po EAN"** ← `ean/comparison`
-   Kolumny: EAN · Nazwa · Dostawcy · Min · Max · Spread zł · Spread %. CSV (`ean-comparison`).
+   Kolumny: EAN · Nazwa · Dostawcy · Min · Max · Spread zł · Spread %. CSV (`ean-comparison`,
+   `M("ean-comparison")` `fe.js:28190` — bez UI do 10f).
    ⚠ `minDiffPct` jest parametrem trasy, ale **oryginalny front go nie podaje** — woła
-   `ean/comparison` bez query. Kontrolki filtra dla niego w UI nie ma.
+   `ean/comparison` bez query. Kontrolki filtra dla niego w UI nie ma (backend go ma i jest
+   pokryty testem jednostkowym).
 2. **„2.5 Pozycje unikalne"** ← `ean/unique`
-   Kolumny: EAN · Nazwa · Dostawca · Cena · Stan. CSV (`unique`).
+   Kolumny: EAN · Nazwa · Dostawca · Cena · Stan. CSV (`unique`, `M("unique")` `fe.js:28234`
+   — bez UI do 10f).
 3. **„2.6 Pokrycie wspólne i ranking dostawcy"** — **jedna karta, DWIE tabele**:
    - `ean/coverage` → Liczba dostawców · EAN (fixture: `{liczbaDostawcow, liczbaEAN}`)
    - `ean/supplier-rank` → Dostawca · Wspólne · Najtańszy · Najtańszy %
      (fixture: `{dostawca, wspolnePozycje, najtanszy, najtanszyPct}`)
 
-**Bez UI w oryginale:** `ean/details` i `ean-porownanie` — obie przyjmują `?ean` i obie mają
-zero wywołań w bundlu. Wyglądają na zaczątek „szczegółów jednego EAN-u", którego nikt nie
-dokończył. Decyzja użytkownika przed planem.
+**Bez UI w oryginale (decyzja D6 z ticketu):** `ean/details` i `ean-porownanie` — obie
+przyjmują `?ean` i obie mają zero wywołań w bundlu. Wyglądają na zaczątek „szczegółów jednego
+EAN-u", którego nikt nie dokończył. Dowiezione jako trasy bez UI, tak jak
+`bootstrap-current` w 10a.
 
 **Kafle KPI oryginału zależą od tego bloku.** Oryginalny nagłówek `/analityka` liczy dwa
 z czterech kafli z `ean/comparison.rows.length` („EAN wspólne") i `ean/unique.rows.length`
 („Pozycje unikalne"). Blok 10a świadomie wziął `GET /api/analytics/kpi` zamiast nich
-(odstępstwo O-10a-1), żeby nie czekać na 10c. **Jeśli użytkownik zechce wrócić do kafli
-oryginału, to jest moment** — dane będą już dostępne.
+(odstępstwo O-10a-1), żeby nie czekać na 10c. **Dane są teraz dostępne, ale przepięcie
+nagłówka na oryginalne kafle jest osobną decyzją użytkownika** — 10c jej nie podjął
+(decyzja D1 z `docs/tickets/22-FEATURE-analityka-ean/plan.md`); zmiana byłaby jednym
+edytem `NaglowekKpi.tsx`, gdy ktoś zdecyduje.
+
+**Co 10c zostawia następnym:** przyciski CSV kart „2.1-2.4" i „2.5" idą do bloku **10f**
+razem z `GET /api/analytics/export/{view}` (§8.1).
 
 ---
 
-## 6. Blok 10d — Dostawcy
+## 6. Blok 10d — Dostawcy ✅ ZAMKNIĘTY (2026-09-03, `23-FEATURE-analityka-dostawcy`)
 
 Trasy: `dostawcy-stats`, `suppliers/lifecycle`, `suppliers/stability`, `suppliers/stock`.
-Fixtures: 4.
+Fixtures: 4. Zrealizowane 1:1 wg tej sekcji (potwierdzone odczytem
+`deminified/frontend-index.js:28054-28172`).
+
+**Pliki:** backend — `rebuild/backend/src/repos/analityka.ts` (sekcja „BLOK 10d · DOSTAWCY":
+`stabilnoscDostawcow`, `cyklZyciaDostawcow`, `stanDostawcow`, `statystykiDostawcow`),
+`rebuild/backend/src/routes/analytics.ts` (cztery trasy `GET`). Frontend —
+`pages/analityka/Sekcja{StabilnoscDostawcow,CyklZyciaDostawcow,StanDostawcow}.tsx`,
+`pages/analityka/PasekDostepnosci.tsx` (wspólny komponent, patrz §7 i §9).
 
 | Trasa | Linia | Query | LIMIT | Kształt |
 |---|---|---|---|---|
@@ -210,21 +291,33 @@ całego widoku** (`useState("dostawcy")`, `fe.js:27805`). Trzy karty:
 
 1. **„1.1 Stabilność cennika dostawcy"** ← `suppliers/stability`
    Kolumny: Dostawca · Produkty · Punkty historii · Zmiany · Śr. zmiana % · Max % · Śr. stan.
-   CSV (`suppliers-stability`).
+   CSV (`suppliers-stability`, czeka na 10f — patrz §8.1).
+   ⚠ **Karta renderuje 7 kolumn, ale żadna z dwóch gałęzi backendu (`hasHistory`) nie zwraca
+   ich wszystkich** — gałąź `true` nie ma `produkty`/`sredniStan`, gałąź `false` nie ma
+   `punkty` i ma trzy `NULL`-e (`liczbaZmian`, `sredniaZmianaPct`, `maxZmianaPct`); gałąź
+   `false` zwraca też `sredniaCena`, dla której w UI **nie ma kolumny** (ciche zignorowanie).
+   Zastane zachowanie produkcji, odtworzone 1:1 — puste komórki „—", bez adnotacji (10d,
+   decyzja D1: `docs/tickets/23-FEATURE-analityka-dostawcy/plan.md`).
+   ⚠ **Próg zmiany ceny `ABS(...) > 0.01` jest porównaniem FLOAT** — w podwójnej precyzji
+   `100.01 - 100 = 0.010000000000005…`, czyli różnica równa dokładnie groszowi LICZY SIĘ jako
+   zmiana. Odtworzone i scharakteryzowane testem jednostkowym, nie „naprawione".
 2. **„1.2 Nowości i wycofania"** ← `suppliers/lifecycle`
-   Kolumny: Data · Dostawca · Typ · Kod · Nazwa · Powód. CSV (`suppliers-lifecycle`).
+   Kolumny: Data · Dostawca · Typ · Kod · Nazwa · Powód. CSV (`suppliers-lifecycle`,
+   czeka na 10f — patrz §8.1).
 3. **„1.4 / 1.5 Stan i dostępność dostawcy"** ← `suppliers/stock`
    Kolumny: Dostawca · Produkty · Śr. stan · Dostępne · Dostępność.
    ⚠ Kolumna „Dostępność" renderuje się **paskiem postępu**, nie liczbą — pomocnik `O(e)`
    (`fe.js:27921`) dostaje `e.dostepnoscPct` i rysuje `<div>` szerokości 24 z zagnieżdżonym
    `<div>` o `width: n%` plus podpis `n%` monospace. To **jedyna nietabelaryczna wizualizacja
    w całym oryginalnym widoku** i występuje dwa razy: tutaj (`zM+366`) oraz w karcie „4.1"
-   bloku 10e (`zM+650`). Kto pisze ją pierwszy, wydziela ją do wspólnego komponentu obok
-   `TabelaAnalityki` — drugi blok ma ją zastać gotową. CSV (`suppliers-stock`).
+   bloku 10e (`zM+650`). **10d wydzieliła ją jako wspólny komponent**
+   (`pages/analityka/PasekDostepnosci.tsx`, port `O()` 1:1) — 10e ją reużywa, patrz §7.
+   CSV (`suppliers-stock`, czeka na 10f — patrz §8.1).
 
-**Bez UI w oryginale:** `dostawcy-stats` (zero wywołań). Zwraca gołą tablicę
-`{dostawca, liczbaProduktow, avgMarza, avgCenaZakupu, dostepnych}` — merytorycznie
-nakłada się na `suppliers/stock`. Decyzja użytkownika.
+**Bez UI w oryginale (decyzja D3, zaklepana treścią ticketa):** `dostawcy-stats` (zero
+wywołań). Dowieziona w backendzie pod GATE, bez hooka i bez karty — tak jak w oryginale.
+Zwraca gołą tablicę `{dostawca, liczbaProduktow, avgMarza, avgCenaZakupu, dostepnych}` —
+merytorycznie nakłada się na `suppliers/stock`.
 
 **⚠ Uwaga na zderzenie nazw z Iteracją 3f-2.** `/api/dostawcy` (widok Konfiguracja →
 Dostawcy) to **inny zasób** niż `/api/analytics/dostawcy-stats`. Pierwszy jest już
@@ -267,9 +360,10 @@ z pustym fixture'em, obie gałęzie `hasHistory`, zaciski `?days`).
 (`rebuild/frontend/src/pages/analityka/`):
 1. **„4.1 Historia dostępności pozycji"** ← `availability/products`
    Kolumny: Dostawca · Kod · EAN · Nazwa · Dostępność · Miesiące braków. CSV — dokłada 10f.
-   ⚠ „Dostępność" to **pasek postępu** `O(e.dostepnoscPct)` (`zM+650`), wydzielony do
-   `pages/analityka/PasekDostepnosci.tsx` — ten sam komponent ma reużyć blok 10d w karcie
-   „1.4/1.5" (§9). ⚠ Karta jest dziś **trwale pusta w produkcji** — patrz box wyżej i §2.
+   ⚠ „Dostępność" to **pasek postępu** `O(e.dostepnoscPct)` (`zM+650`) — ten sam, co w karcie
+   „1.4 / 1.5" bloku 10d. Komponent jest wspólny i obie karty na nim stoją:
+   `rebuild/frontend/src/pages/analityka/PasekDostepnosci.tsx` (wydzielony w 10d, użyty w 10e).
+   ⚠ Karta jest **trwale pusta w produkcji** — patrz §2 i `docs/rebuild-backlog.md` #32.
 2. **„4.2 Tempo schodzenia z magazynu"** ← `availability/sell-through`
    Kolumny: Dostawca · Kod · Nazwa · Zeszło sztuk. CSV — dokłada 10f. ⚠ Też trwale pusta
    w produkcji.
@@ -316,12 +410,19 @@ pierwszego wiersza. Pusty wynik = sam BOM.
 `unique` · `prices-last` · `availability-products` · `sell-through` · `margins` ·
 `rotation-inactive`.
 
-⚠ Przycisk „CSV" **nie istnieje w odbudowie** — 10a i 10e świadomie go pominęły (trasa
-eksportu należy do tego bloku). 10f dokłada go do sekcji marż z 10a **i do trzech kart
-dowiezionych przez 10e** — „4.1 Historia dostępności" (`availability-products`), „4.2 Tempo
-schodzenia" (`sell-through`) i „Rotacja / produkty bez aktualizacji" (`rotation-inactive`) —
-**i do każdej innej sekcji, która ma go w oryginale**, lista wyżej mówi dokładnie do których.
-W oryginale przycisk siedzi w nagłówku karty, po prawej:
+**⚠ Dwa widoki eksportu mają dokładnie tę samą wadę, co ich odpowiedniki dashboardu (§2,
+backlog #32).** `export/availability-products` i `export/sell-through`
+(`analytics_module.cjs:316-317`) czytają `nazwa` z `historia_cen` tak samo jak
+`availability/products`/`sell-through` — w produkcji ta kolumna nie istnieje, więc oba pliki
+CSV oddają sam znacznik BOM, bez wiersza danych. 10f musi to wiedzieć **zanim** zaplanuje
+⚠ Przycisk „CSV" **nie istnieje w odbudowie** — 10a świadomie go pominęło w sekcji marż,
+a 10d — świadomie (decyzja D5) — w trzech kartach zakładki `dostawcy`
+(`suppliers-stability`, `suppliers-lifecycle`, `suppliers-stock`): przycisk wiodący donikąd
+byłby gorszy niż jego brak, dopóki trasa eksportu nie istnieje. 10f dokłada go do wszystkich
+czterech sekcji, do **trzech kart dowiezionych przez 10e** — „4.1 Historia dostępności"
+(`availability-products`), „4.2 Tempo schodzenia" (`sell-through`) i „Rotacja / produkty bez
+aktualizacji" (`rotation-inactive`) — **i do każdej innej sekcji, która ma go w oryginale**;
+lista wyżej mówi dokładnie do których. W oryginale przycisk siedzi w nagłówku karty, po prawej:
 `<Button variant="outline" size="sm">CSV</Button>`.
 
 **⚠ Dwa widoki eksportu mają dokładnie tę samą wadę, co ich odpowiedniki dashboardu (§2,
@@ -367,7 +468,7 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 
 ---
 
-## 9. Czego blok NIE musi już budować — inwentarz z 10a i 10e
+## 9. Czego blok NIE musi już budować — inwentarz z 10a, 10d i 10e
 
 | Rzecz | Gdzie |
 |---|---|
@@ -381,9 +482,12 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 | Nagłówek KPI + banner historii | `pages/analityka/NaglowekKpi.tsx` |
 | Wzorzec sekcji, krok po kroku | `pages/analityka/README.md` |
 | Wzorcowa sekcja do skopiowania | `pages/analityka/SekcjaMarze.tsx` |
-| Pasek postępu dostępności (port `O()`) — **10d ma go REUŻYĆ w kartach „1.4/1.5", nie pisać drugiego** | `pages/analityka/PasekDostepnosci.tsx` (z 10e) |
-| Nagłówek karty (tytuł + notki o filtrach) | `pages/analityka/NaglowekSekcji.tsx` (z 10e) |
-| Generyczny filtr kliencki `zastosujFiltry(wiersze, wybor, mapowanie)` + `wymiaryZMapowania` | `pages/analityka/filtrowanie.ts` (z 10e; `zastosujFiltryMarz` z 10a zostaje cienką nakładką) |
+| Pasek postępu dostępności (port `O()`) | `pages/analityka/PasekDostepnosci.tsx` (10d, użyty też w 10e) |
+| Filtr kliencki po dostawcy | `zastosujFiltryDostawcow` + `WYMIARY_DOSTAWCOW` w `pages/analityka/filtrowanie.ts` (10d) |
+| **Generyczny** filtr kliencki `zastosujFiltry(wiersze, wybor, mapowanie)` + `wymiaryZMapowania` | `pages/analityka/filtrowanie.ts` (10e) — dowolny podzbiór sześciu wymiarów, `zastosujFiltryMarz` z 10a jest jego cienką nakładką |
+| Nagłówek karty (tytuł + notka o odfiltrowanych + notka o wymiarach pominiętych) | `pages/analityka/NaglowekSekcji.tsx` (10e) |
+| Drugi przykład wzorca sekcji (kopiuj obok `SekcjaMarze.tsx`) | trzy sekcje 10d: `SekcjaStabilnoscDostawcow.tsx`, `SekcjaCyklZyciaDostawcow.tsx`, `SekcjaStanDostawcow.tsx` — `SekcjaStabilnoscDostawcow` to pierwszy przykład sekcji **bez wykresu**, przydatny dla bloków, które wykresu nie potrzebują |
+| Sekcja z filtrem SERWEROWYM (parametr w `queryKey`, stan kontrolki w `Analityka.tsx`) | `pages/analityka/SekcjaRotacji.tsx` (10e) |
 
 **Czego NIE ruszać:**
 - tokenów `--chart-1..5` — pochodzą z arkusza produkcji, chroni je `test/tokeny.test.ts`;

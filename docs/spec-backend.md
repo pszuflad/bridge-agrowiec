@@ -121,6 +121,24 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > Semantyka **wszystkich 27 tras** modułu (numer linii handlera, parametry query, LIMIT-y,
 > kształt odpowiedzi — trzy różne koperty!) jest spisana w `docs/analityka-bloki-10b-10f.md`.
 >
+> **Potwierdzone w 10c** (`22-FEATURE-analityka-ean`, 2026-09-03): sześć tras
+> `/api/analytics/ean/{comparison,details,unique,coverage,supplier-rank}` i legacy
+> `ean-porownanie` doszły pod `requireAuth` — ten sam brak-odstępstwa co 10a, kontrakt już
+> deklarował `security` na tych ścieżkach. `ean-porownanie` **nie jest** aliasem
+> `ean/comparison`: inny WHERE (bez `cena_zakupu > 0`), LIMIT 200 zamiast 1000, i **goła
+> tablica** zamiast koperty `{rows}`. `ean/comparison` czyta query `minDiffPct`, `ean/details`
+> i `ean-porownanie` czytają `ean` — trasy analityki NIE są bezparametrowe wszystkie naraz.
+> Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
+>
+> **Potwierdzone w 10d** (`23-FEATURE-analityka-dostawcy`, 2026-09-03): kolejne cztery trasy —
+> `GET /api/analytics/{suppliers/stability, suppliers/lifecycle, suppliers/stock,
+> dostawcy-stats}` — też pod `requireAuth`, ten sam wniosek co w 10a (nie jest to odstępstwo D1).
+> `suppliers/stability` ma dwie gałęzie SQL zależne od `hasHistory(db)`: z historią liczy oknem
+> `LAG()` nad `historia_cen` (drugi czytelnik tej tabeli obok `GET /api/analytics/status`), bez
+> historii liczy z `products` — kształt wiersza jest różny między gałęziami. `dostawcy-stats`
+> zwraca **gołą tablicę** (bez koperty) i nie ma konsumenta w oryginalnym frontendzie. Szczegóły:
+> `docs/tickets/23-FEATURE-analityka-dostawcy/`.
+>
 > **Potwierdzone w 10e** (`25-FEATURE-analityka-dostepnosc-rotacja`, 2026-09-04): kolejne sześć
 > tras `/api/analytics/*` (`availability/products`, `availability/sell-through`,
 > `seasonality/monthly`, `lifecycle/models`, `rotation/inactive`, `importy-timeline`), wszystkie
@@ -276,12 +294,17 @@ zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotio
 `rebuild/backend/src/routes/{config,spedycja}.ts`, `src/repos/{config,spedycja}.ts`
 (`docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`). `historia_cen` ma od bloku **10a**
 dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/bootstrap-current`,
-oraz pierwszego czytelnika — `GET /api/analytics/status` zwraca z niej agregat
-`{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
-`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
-`docs/tickets/19-FEATURE-analityka-fundament/plan.md`. **`historia_cen` nie ma kolumny
-`nazwa`** — `availability/products` i `availability/sell-through` (blok 10e) o nią pytają
-(`MAX(nazwa)`) i zawsze dostają pustą listę, patrz §2 wyżej i `rebuild-backlog.md` #32.
+oraz od bloku **10d** dwóch czytelników — `GET /api/analytics/status` zwraca z niej agregat
+`{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`), a
+`GET /api/analytics/suppliers/stability` (gałąź `hasHistory: true`) liczy z niej zmiany cen
+oknem `LAG()`. `GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`.
+Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/plan.md`,
+`docs/tickets/23-FEATURE-analityka-dostawcy/`.
+
+⚠ **`historia_cen` NIE MA kolumny `nazwa`** — a `availability/products`
+i `availability/sell-through` (blok 10e) o nią pytają (`MAX(nazwa)`), więc oba zapytania
+wywracają się na `no such column`, `safeAll()` połyka błąd i obie trasy zawsze oddają pustą
+listę. Patrz §2 wyżej i `docs/rebuild-backlog.md` #32.
 
 ## 6. Korekty do propagacji
 

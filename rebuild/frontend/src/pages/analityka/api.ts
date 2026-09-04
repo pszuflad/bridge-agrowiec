@@ -102,6 +102,164 @@ export function useMarze(): UseQueryResult<Marze | null> {
   return useQuery<Marze | null>({ queryKey: ["/api/analytics/margins"] });
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════
+//  BLOK 10c — EAN. Cztery trasy, które ORYGINALNY frontend realnie woła (`fe.js:27839-27851`).
+// ════════════════════════════════════════════════════════════════════════════════════════
+//
+// ⚠ DWÓCH TRAS TEGO BLOKU TU NIE MA I BYĆ NIE MOŻE: `GET /api/analytics/ean/details`
+// i `GET /api/analytics/ean-porownanie`. Obie istnieją w backendzie (blok 10c je dowiózł),
+// obie przyjmują `?ean` — i obie mają ZERO wywołań w produkcyjnym bundlu
+// (`docs/analityka-bloki-10b-10f.md` §1.1). Dopisanie im hooka byłoby pierwszym krokiem do
+// ekranu, którego oryginał nie ma; to samo rozstrzygnięcie co przy
+// `POST /api/analytics/bootstrap-current` w 10a (decyzja D6, 2026-09-03).
+//
+// ⚠ `ean/comparison` PRZYJMUJE `minDiffPct`, a hook go NIE PODAJE — i to jest wierność, nie
+// niedopatrzenie. Oryginał woła `d("/api/analytics/ean/comparison")` bez query (`:27839`)
+// i nie ma dla tego progu żadnej kontrolki w UI. Gdyby kiedyś miała powstać, parametr idzie
+// do `queryKey` (wzorzec z `README.md` §2.2), a nie do `useMemo` — trasa filtruje po stronie
+// backendu (decyzja D3, 2026-09-03).
+
+/** Wiersz „2.1-2.4 Porównanie cen po EAN" — EAN u co najmniej dwóch dostawców. */
+export type WierszPorownaniaEan = {
+  ean: string;
+  nazwa: string;
+  /** Liczba dostawców, nie ich nazwy — `COUNT(DISTINCT dostawca)` zwinął kolumnę. */
+  dostawcy: number;
+  cenaMin: number;
+  cenaMax: number;
+  srednia: number;
+  oferty: number;
+  spreadZl: number;
+  /** `null` przy zerowej cenie minimalnej — gałąź w praktyce nieosiągalna, ale w kształcie jest. */
+  spreadPct: number | null;
+};
+
+/** Wiersz „2.5 Pozycje unikalne" — EAN dostępny u dokładnie jednego dostawcy. */
+export type WierszUnikalnegoEan = {
+  ean: string;
+  nazwa: string;
+  dostawca: string;
+  cenaZakupu: number;
+  stan: number;
+};
+
+/** Wiersz histogramu pokrycia — „ilu dostawców ma dany EAN" → „ile takich EAN-ów". */
+export type WierszPokryciaEan = {
+  liczbaDostawcow: number;
+  liczbaEAN: number;
+};
+
+/** Wiersz rankingu dostawców — jak często dostawca jest najtańszy. */
+export type WierszRankinguEan = {
+  dostawca: string;
+  /** ⚠ Myli nazwą: to WSZYSTKIE oferty dostawcy w rankingu, także EAN-y unikalne. */
+  wspolnePozycje: number;
+  najtanszy: number;
+  najtanszyPct: number;
+};
+
+export function usePorownanieEan(): UseQueryResult<{ rows: WierszPorownaniaEan[] } | null> {
+  return useQuery<{ rows: WierszPorownaniaEan[] } | null>({
+    queryKey: ["/api/analytics/ean/comparison"],
+  });
+}
+
+export function useUnikalneEan(): UseQueryResult<{ rows: WierszUnikalnegoEan[] } | null> {
+  return useQuery<{ rows: WierszUnikalnegoEan[] } | null>({
+    queryKey: ["/api/analytics/ean/unique"],
+  });
+}
+
+export function usePokrycieEan(): UseQueryResult<{ rows: WierszPokryciaEan[] } | null> {
+  return useQuery<{ rows: WierszPokryciaEan[] } | null>({
+    queryKey: ["/api/analytics/ean/coverage"],
+  });
+}
+
+export function useRankingDostawcowEan(): UseQueryResult<{ rows: WierszRankinguEan[] } | null> {
+  return useQuery<{ rows: WierszRankinguEan[] } | null>({
+    queryKey: ["/api/analytics/ean/supplier-rank"],
+  });
+}
+
+// ─── BLOK 10d · DOSTAWCY ────────────────────────────────────────────────────────────────
+//
+// Trzy hooki zakładki `dostawcy` — DOMYŚLNEJ zakładki całego widoku. Czwarta trasa bloku,
+// `GET /api/analytics/dostawcy-stats`, ŚWIADOMIE NIE MA TU HOOKA: oryginalny frontend nie
+// woła jej ani razu (0 trafień w bundlu), więc dorobienie jej ekranu byłoby budowaniem
+// czegoś nowego zamiast odbudowy (decyzja D3 bloku 10d). Backend ją dowozi, GATE ją pokrywa.
+//
+// Żadna z tych tras nie przyjmuje parametrów query (`analytics_module.cjs:110`, `:133`, `:143`)
+// — filtrowanie jest klienckie, przez `zastosujFiltryDostawcow` w `useMemo`.
+
+/**
+ * Wiersz karty „1.1 Stabilność cennika dostawcy".
+ *
+ * ⚠ DWA KSZTAŁTY, ZALEŻNE OD `hasHistory`, I TAK JEST W PRODUKCJI. Gałąź z historią liczy
+ * z `historia_cen` (`punkty`, `liczbaZmian`, `sredniaZmianaPct`, `maxZmianaPct`), gałąź
+ * zapasowa — z katalogu (`produkty`, `sredniaCena`, `sredniStan` i trzy `null`-e). Klucze,
+ * których dana gałąź nie zwraca, po prostu NIE ISTNIEJĄ w wierszu.
+ *
+ * Tabela renderuje mimo to stały zestaw siedmiu kolumn oryginału, więc część z nich zawsze
+ * pokazuje „—" — patrz `SekcjaStabilnoscDostawcow.tsx`. Pola są opcjonalne właśnie po to,
+ * żeby ten fakt był widoczny w typie, a nie odkrywany w przeglądarce.
+ */
+export type WierszStabilnosci = {
+  dostawca: string;
+  punkty?: number;
+  produkty?: number;
+  sredniaCena?: number | null;
+  sredniStan?: number | null;
+  liczbaZmian: number | null;
+  sredniaZmianaPct: number | null;
+  maxZmianaPct: number | null;
+};
+
+export type StabilnoscDostawcow = {
+  hasHistory: boolean;
+  rows: WierszStabilnosci[];
+};
+
+/** Wiersz karty „1.2 Nowości i wycofania" — pozycja stagingu, nie produkt katalogu. */
+export type WierszCykluZycia = {
+  dostawca: string;
+  /** `nowa` albo `wycofana`. */
+  typ: string;
+  kod: string;
+  nazwa: string;
+  /** Surowy znacznik ISO — tabela pokazuje go monospace, bez formatowania (jak oryginał). */
+  kiedy: string;
+  powod: string | null;
+};
+
+/** Wiersz karty „1.4 / 1.5 Stan i dostępność dostawcy". */
+export type WierszStanuDostawcy = {
+  dostawca: string;
+  produkty: number;
+  sredniStan: number | null;
+  dostepne: number;
+  /** 0–100; kolumna „Dostępność" rysuje z tego PASEK POSTĘPU, nie liczbę. */
+  dostepnoscPct: number | null;
+};
+
+export function useStabilnoscDostawcow(): UseQueryResult<StabilnoscDostawcow | null> {
+  return useQuery<StabilnoscDostawcow | null>({
+    queryKey: ["/api/analytics/suppliers/stability"],
+  });
+}
+
+export function useCyklZyciaDostawcow(): UseQueryResult<{ rows: WierszCykluZycia[] } | null> {
+  return useQuery<{ rows: WierszCykluZycia[] } | null>({
+    queryKey: ["/api/analytics/suppliers/lifecycle"],
+  });
+}
+
+export function useStanDostawcow(): UseQueryResult<{ rows: WierszStanuDostawcy[] } | null> {
+  return useQuery<{ rows: WierszStanuDostawcy[] } | null>({
+    queryKey: ["/api/analytics/suppliers/stock"],
+  });
+}
+
 // ─────────────────────────────────────────────────────────────────────────────────────────
 // BLOK 10e — dostępność, tempo schodzenia, sezonowość, rotacja, cykl życia modelu.
 //
@@ -158,8 +316,13 @@ export type WierszSezonowosci = {
 
 export type Sezonowosc = { hasHistory: boolean; rows: WierszSezonowosci[] };
 
-/** Wiersz „4.6 Cykl życia modelu". Kształt potwierdzony fixture'em. */
-export type WierszCykluZycia = {
+/**
+ * Wiersz „4.6 Cykl życia modelu". Kształt potwierdzony fixture'em.
+ *
+ * ⚠ NIE MYLIĆ z `WierszCykluZycia` wyżej — tamten opisuje cykl życia DOSTAWCY
+ * (`suppliers/lifecycle`, blok 10d). Dwie różne trasy, podobne nazwy.
+ */
+export type WierszCykluZyciaModelu = {
   marka: string | null;
   model: string;
   pierwszyRaz: string | null;
@@ -167,7 +330,7 @@ export type WierszCykluZycia = {
   produkty: number;
 };
 
-export type CyklZycia = { hasHistory: boolean; rows: WierszCykluZycia[] };
+export type CyklZyciaModeli = { hasHistory: boolean; rows: WierszCykluZyciaModelu[] };
 
 /** Wiersz „Rotacja / produkty bez aktualizacji". */
 export type WierszRotacji = {
@@ -201,8 +364,8 @@ export function useSezonowoscMiesieczna(): UseQueryResult<Sezonowosc | null> {
   return useQuery<Sezonowosc | null>({ queryKey: ["/api/analytics/seasonality/monthly"] });
 }
 
-export function useCyklZyciaModeli(): UseQueryResult<CyklZycia | null> {
-  return useQuery<CyklZycia | null>({ queryKey: ["/api/analytics/lifecycle/models"] });
+export function useCyklZyciaModeli(): UseQueryResult<CyklZyciaModeli | null> {
+  return useQuery<CyklZyciaModeli | null>({ queryKey: ["/api/analytics/lifecycle/models"] });
 }
 
 /**

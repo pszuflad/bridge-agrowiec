@@ -186,3 +186,48 @@ sam odsyła do roadmapy).
 
 **Pre-existing issues:** żaden z czterech przeglądów nie znalazł nieścisłości spoza zakresu
 tego ticketa.
+
+## Scalenie z `develop` (2026-09-04)
+
+W międzyczasie weszły bloki **10c** (`22-FEATURE-analityka-ean`) i **10d**
+(`23-FEATURE-analityka-dostawcy`), oba dotykające tych samych plików. Dwanaście konfliktów,
+wszystkie rozwiązane przez **zachowanie obu stron**; nic nie zostało odrzucone.
+
+**Kolizje nazw — trzy, wszystkie realne:**
+
+1. **`PasekDostepnosci.tsx` powstał dwa razy** (konflikt add/add) — dokładnie to ryzyko, które
+   zapowiadała decyzja D4. Obie implementacje okazały się identyczne co do zachowania, klas
+   i `data-testid`; zostawiona wersja z `develop` (10d wszedł pierwszy), bo jej komentarz
+   nazywa obu konsumentów z numerami linii oryginału. Moja kopia usunięta.
+2. **`WierszCykluZycia` / `LIMIT_CYKLU_ZYCIA`** znaczyły co innego po obu stronach: w 10d —
+   cykl życia DOSTAWCY (`suppliers/lifecycle`, `staging_items`), u mnie — cykl życia MODELU
+   (`lifecycle/models`, `historia_cen`). Moje nazwy doprecyzowane na `WierszCykluZyciaModelu`,
+   `CyklZyciaModeli` i `LIMIT_CYKLU_ZYCIA_MODELI` (backend i frontend), plik sekcji przemianowany
+   na `SekcjaCykluZyciaModeli.tsx`, loader fixture'a na `cyklZyciaModeliZFixtura()`. Przy obu
+   typach stoi teraz komentarz „nie mylić z…", bo nazwy pozostają myląco podobne.
+3. **`czyJestHistoria`** (port `hasHistory`) napisały niezależnie oba bloki — została jedna,
+   z `develop`.
+
+**Rozstrzygnięcia merytoryczne:**
+
+- **Limity czasu w testach widoku.** 10d wprowadziło konwencję dwóch limitów
+  (`vi.setConfig({ testTimeout: 20_000 })` + `findByTestId(..., { timeout: 15_000 })`),
+  bo samo podniesienie limitu zapytania jest ochroną pozorną — test pada wcześniej na
+  `testTimeout`. Moje doraźne 5 s zastąpione tą konwencją, także w `analityka.dostepnosc.test.tsx`.
+- **Handlery MSW.** Widok pobiera komplet tras przy każdym wejściu, niezależnie od aktywnej
+  zakładki, więc oba pliki testów widoku dostały pełny zestaw handlerów (10a + 10c + 10d + 10e).
+- **Filtrowanie klienckie.** W `filtrowanie.ts` stoją obok siebie węższe `zastosujFiltryDostawcow`
+  (10c/10d) i generyczne `zastosujFiltry` (10e). Nie ujednolicam ich w ramach rozwiązywania
+  konfliktu — to zmiana w kodzie zmergowanych bloków; README opisuje oba i mówi, kiedy sięgać
+  po który.
+- **Kolejność rejestracji tras** w `routes/analytics.ts`: bloki stoją po sobie, a nie w kolejności
+  z oryginału (blok EAN z 10c wypadł za blok 10e). Nie ma to wpływu na zachowanie — wszystkie
+  ścieżki są literalne — i jest odnotowane w komentarzu, żeby nie wyglądało na przeoczenie.
+- **Dokumentacja.** Noty 10c, 10d i 10e stoją obok siebie chronologicznie; tam gdzie któraś
+  strona pisała o przyszłości, która już nastała (np. „blok 10e ma reużyć `PasekDostepnosci`"),
+  zdanie zamienione na opis stanu. W `analityka-bloki-10b-10f.md` §2 połączone dwa ostrzeżenia:
+  o pustej ODPOWIEDZI przechodzącej gate za darmo (10c) i o dwóch różnych przyczynach pustego
+  fixture'a (10e).
+
+**Po scaleniu:** backend 776 testów / 49 plików ✓, frontend 444 testy / 31 plików ✓,
+`lint`, `typecheck`, `build` czyste po obu stronach.

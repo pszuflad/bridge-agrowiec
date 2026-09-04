@@ -1,8 +1,18 @@
 import "@testing-library/jest-dom/vitest";
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll } from "vitest";
 import { queryClient } from "@/lib/queryClient";
 import { server } from "./msw/server";
+
+/**
+ * Limit `findBy*` i `waitFor` — domyślna sekunda Testing Library jest za krótka dla testów,
+ * które renderują całą `<App/>` z leniwie ładowaną trasą `/analityka`: pod obciążeniem
+ * (vitest puszcza pliki równolegle) chunk z Rechartsem nie zdąża się doładować i test szuka
+ * `text-page-title`, którego jeszcze nie ma. Osobny knob od `testTimeout` w `vitest.config.ts`,
+ * bo dotyczy wyłącznie oczekiwania na DOM. Nie spowalnia przechodzących testów — oczekiwanie
+ * kończy się w chwili pojawienia się elementu.
+ */
+configure({ asyncUtilTimeout: 5_000 });
 
 beforeAll(() => {
   // jsdom nie implementuje `matchMedia`, a `ThemeProvider` (jak oryginał) pyta o

@@ -19,7 +19,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
@@ -28,22 +28,36 @@ import { queryClient } from "@/lib/queryClient";
 import type { Dostepnosc } from "@/pages/analityka/api";
 import {
   TOKEN_TESTOWY,
-  cyklZyciaZFixtura,
+  cyklZyciaDostawcowZFixtura,
+  cyklZyciaModeliZFixtura,
   dostepnoscProduktowZFixtura,
   filtryZFixtura,
   kpiZFixtura,
   marzeZFixtura,
+  pokrycieEanZFixtura,
+  porownanieEanZFixtura,
+  rankingEanZFixtura,
   rotacjaZFixtura,
   sezonowoscZFixtura,
+  stabilnoscDostawcowZFixtura,
+  stanDostawcowZFixtura,
   statusAnalitykiZFixtura,
   tempoSchodzeniaZFixtura,
+  unikalneEanZFixtura,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
 
+/**
+ * ⚠ DWA LIMITY, NIE JEDEN — konwencja z `analityka.test.tsx` (blok 10d). Chunk `/analityka`
+ * ciągnie Recharts i jego pierwszy import w jsdomie trwa ~1,5 s, a pod obciążeniem dłużej;
+ * samo podniesienie limitu zapytania nie wystarczy, bo test padłby wcześniej na `testTimeout`.
+ */
+vi.setConfig({ testTimeout: 20_000 });
+
 const UZYTKOWNIK = uzytkownikZFixtura();
 const SEZONOWOSC = sezonowoscZFixtura();
-const CYKL_ZYCIA = cyklZyciaZFixtura();
+const CYKL_ZYCIA = cyklZyciaModeliZFixtura();
 
 /** Adresy `?days=…`, pod które widok realnie poszedł — dowód, że filtr jest serwerowy. */
 let zapytaniaRotacji: string[] = [];
@@ -54,6 +68,19 @@ function zamockujApi(dostepnosc: Dostepnosc = dostepnoscProduktowZFixtura()) {
     http.get("*/api/analytics/status", () => HttpResponse.json(statusAnalitykiZFixtura())),
     http.get("*/api/analytics/kpi", () => HttpResponse.json(kpiZFixtura())),
     http.get("*/api/analytics/margins", () => HttpResponse.json(marzeZFixtura())),
+    // Widok pobiera KOMPLET tras przy każdym wejściu, niezależnie od aktywnej zakładki —
+    // bez handlerów bloków 10c i 10d `onUnhandledRequest: "error"` wywaliłby każdy test.
+    http.get("*/api/analytics/suppliers/stability", () =>
+      HttpResponse.json(stabilnoscDostawcowZFixtura()),
+    ),
+    http.get("*/api/analytics/suppliers/lifecycle", () =>
+      HttpResponse.json(cyklZyciaDostawcowZFixtura()),
+    ),
+    http.get("*/api/analytics/suppliers/stock", () => HttpResponse.json(stanDostawcowZFixtura())),
+    http.get("*/api/analytics/ean/comparison", () => HttpResponse.json(porownanieEanZFixtura())),
+    http.get("*/api/analytics/ean/unique", () => HttpResponse.json(unikalneEanZFixtura())),
+    http.get("*/api/analytics/ean/coverage", () => HttpResponse.json(pokrycieEanZFixtura())),
+    http.get("*/api/analytics/ean/supplier-rank", () => HttpResponse.json(rankingEanZFixtura())),
     http.get("*/api/analytics/availability/products", () => HttpResponse.json(dostepnosc)),
     http.get("*/api/analytics/availability/sell-through", () =>
       HttpResponse.json(tempoSchodzeniaZFixtura()),
@@ -77,9 +104,8 @@ async function otworzZakladke(testId: string) {
   const uzytkownik = userEvent.setup();
   window.history.pushState({}, "", "/analityka");
   render(<App />);
-  // Limit jak w `analityka.test.tsx` — leniwy chunk analityki ładuje się wolniej
-  // pod pełnym zestawem testów.
-  await screen.findByTestId("text-page-title", {}, { timeout: 5000 });
+  // Limit dłuższy niż domyślna sekunda — mieści się w podniesionym `testTimeout` wyżej.
+  await screen.findByTestId("text-page-title", undefined, { timeout: 15_000 });
   await uzytkownik.click(await screen.findByTestId(testId));
   return uzytkownik;
 }

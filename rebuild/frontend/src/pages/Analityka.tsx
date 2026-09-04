@@ -17,12 +17,28 @@
  *              (uzasadnienie w `FiltryGlobalne.tsx`),
  *  • O-10a-3 — wykres w sekcji marż; oryginał nie ma ani jednego wykresu
  *              (uzasadnienie w `components/ui/chart.tsx`),
- *  • O-10a-4 — zakładki puste do czasu bloków 10b–10d. To zakres bloku, nie zmiana
- *              zachowania: nazwy i kolejność już są, więc kolejne sesje wstawiają treść,
- *              zamiast przemeblowywać widok. Blok 10e wypełnił „Dostępność" i dołożył
- *              dwie karty pod marżami;
+ *  • O-10a-4 — pozostałe zakładki są puste do czasu bloku 10b. To zakres bloku,
+ *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
+ *              wstawiają treść, zamiast przemeblowywać widok.
+ *  • O-10d-1 — wykres dostępności w karcie „1.4 / 1.5" zakładki `dostawcy` (decyzja D2
+ *              z 2026-09-03) — kontynuacja O-10a-3, uzasadnienie w `SekcjaStanDostawcow.tsx`.
+ *
+ * ─── CO DOŁOŻYŁ BLOK 10c (2026-09-03, `22-FEATURE-analityka-ean`) ──────────────────────
+ * Zakładka „EAN i ceny" niesie trzy karty oryginału (`SekcjaEan.tsx`). Nagłówek KPI ZOSTAJE
+ * na `GET /api/analytics/kpi` — oryginał liczy dwa z czterech kafli z `ean/comparison`
+ * i `ean/unique` (`:28002-28017`) i te dane są już dostępne, ale przepięcie to osobna
+ * decyzja użytkownika (D1 bloku 10c), nie skutek uboczny wypełniania zakładki.
+ *
+ * ─── CO DOŁOŻYŁ BLOK 10e (2026-09-04, `25-FEATURE-analityka-dostepnosc-rotacja`) ───────
+ * Zakładka „Dostępność" niesie trzy karty oryginału (4.1, 4.2, 4.4), a pod kartą marż
+ * w zakładce „Marża i rotacja" stają dwie kolejne (rotacja, cykl życia modelu) — tak jak
+ * w produkcji (`frontend-index.js:28516-28640`), bez tworzenia nowej zakładki.
  *  • O-10e-1 — wykres liniowy w karcie „4.4 Sezonowy wzorzec cen"
  *              (uzasadnienie w `analityka/SekcjaSezonowosci.tsx`).
+ *
+ * ⚠ Karty „4.1" i „4.2" pokazują „Brak danych" NIEZALEŻNIE od stanu bazy i tak jest też
+ * w produkcji: ich zapytania pytają `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma
+ * (`docs/rebuild-backlog.md` #32). To nie jest usterka odbudowy.
  *
  * ─── CZEGO TU NIE MA ──────────────────────────────────────────────────────────────────
  * `POST /api/analytics/bootstrap-current` nie ma i mieć nie będzie przycisku (decyzja D4).
@@ -35,23 +51,34 @@ import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
+  useCyklZyciaDostawcow,
   useCyklZyciaModeli,
   useDostepnoscProduktow,
   useFiltry,
   useKpi,
   useMarze,
+  usePokrycieEan,
+  usePorownanieEan,
+  useRankingDostawcowEan,
   useSezonowoscMiesieczna,
+  useStabilnoscDostawcow,
+  useStanDostawcow,
   useStatusHistorii,
   useTempoSchodzenia,
+  useUnikalneEan,
 } from "./analityka/api";
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
 import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
-import { SekcjaCykluZycia } from "./analityka/SekcjaCykluZycia";
+import { SekcjaCyklZyciaDostawcow } from "./analityka/SekcjaCyklZyciaDostawcow";
+import { SekcjaCykluZyciaModeli } from "./analityka/SekcjaCykluZyciaModeli";
 import { SekcjaDostepnosciProduktow } from "./analityka/SekcjaDostepnosciProduktow";
+import { SekcjaEan } from "./analityka/SekcjaEan";
 import { SekcjaMarze } from "./analityka/SekcjaMarze";
 import { SekcjaRotacji } from "./analityka/SekcjaRotacji";
 import { SekcjaSezonowosci } from "./analityka/SekcjaSezonowosci";
+import { SekcjaStabilnoscDostawcow } from "./analityka/SekcjaStabilnoscDostawcow";
+import { SekcjaStanDostawcow } from "./analityka/SekcjaStanDostawcow";
 import { SekcjaTempaSchodzenia } from "./analityka/SekcjaTempaSchodzenia";
 
 /**
@@ -77,6 +104,18 @@ export function Analityka() {
   const { data: status } = useStatusHistorii();
   const { data: kpi } = useKpi();
   const { data: marze, isPending: marzeWczytywane } = useMarze();
+  const { data: stabilnosc, isPending: stabilnoscWczytywana } = useStabilnoscDostawcow();
+  const { data: cyklZycia, isPending: cyklZyciaWczytywany } = useCyklZyciaDostawcow();
+  const { data: stan, isPending: stanWczytywany } = useStanDostawcow();
+
+  // Blok 10c — cztery trasy EAN, które oryginalny frontend realnie woła (`fe.js:27839-27851`).
+  // `ean/details` i `ean-porownanie` hooka nie mają: w oryginale nie mają konsumenta (D6).
+  // Każde zapytanie niesie SWÓJ stan ładowania — cztery lecą niezależnie, więc jedna
+  // wspólna flaga kazałaby jednej tabeli kłamać o stanie drugiej.
+  const porownanieEan = usePorownanieEan();
+  const unikalneEan = useUnikalneEan();
+  const pokrycieEan = usePokrycieEan();
+  const rankingEan = useRankingDostawcowEan();
 
   // Blok 10e. Wartość pola „Bez ruchu dni" mieszka TU, a nie w sekcji rotacji — tak jak
   // w oryginale (`useState("60")`, `frontend-index.js:27805`). Powód jest praktyczny:
@@ -85,7 +124,7 @@ export function Analityka() {
   const { data: dostepnosc, isPending: dostepnoscWczytywana } = useDostepnoscProduktow();
   const { data: tempo, isPending: tempoWczytywane } = useTempoSchodzenia();
   const { data: sezonowosc, isPending: sezonowoscWczytywana } = useSezonowoscMiesieczna();
-  const { data: cyklZycia, isPending: cyklWczytywany } = useCyklZyciaModeli();
+  const { data: cyklZyciaModeli, isPending: cyklModeliWczytywany } = useCyklZyciaModeli();
   const [dniRotacji, ustawDniRotacji] = useState(DNI_ROTACJI_POCZATKOWE);
 
   return (
@@ -117,17 +156,34 @@ export function Analityka() {
           </TabsTrigger>
         </TabsList>
 
+        {/*
+          Zakładka DOMYŚLNA całego widoku (`:27805`, `useState("dostawcy")`). Trzy karty
+          w kolejności oryginału (`:28050-28174`) — blok 10d wstawia treść w gotowe miejsce,
+          nie przemeblowuje zakładek.
+        */}
         <TabsContent value="dostawcy" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10d"
-            zakres="Statystyki dostawców, stabilność, cykl życia i stany magazynowe."
-          />
+          <div className="space-y-4">
+            <SekcjaStabilnoscDostawcow
+              dane={stabilnosc}
+              wybor={wybor}
+              ladowanie={stabilnoscWczytywana}
+            />
+            <SekcjaCyklZyciaDostawcow
+              dane={cyklZycia}
+              wybor={wybor}
+              ladowanie={cyklZyciaWczytywany}
+            />
+            <SekcjaStanDostawcow dane={stan} wybor={wybor} ladowanie={stanWczytywany} />
+          </div>
         </TabsContent>
 
         <TabsContent value="ean" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10c"
-            zakres="Porównanie EAN, pokrycie, pozycje unikalne i ranking dostawców."
+          <SekcjaEan
+            porownanie={{ dane: porownanieEan.data, ladowanie: porownanieEan.isPending }}
+            unikalne={{ dane: unikalneEan.data, ladowanie: unikalneEan.isPending }}
+            pokrycie={{ dane: pokrycieEan.data, ladowanie: pokrycieEan.isPending }}
+            ranking={{ dane: rankingEan.data, ladowanie: rankingEan.isPending }}
+            wybor={wybor}
           />
         </TabsContent>
 
@@ -164,7 +220,11 @@ export function Analityka() {
         <TabsContent value="marza" className="mt-4 space-y-4">
           <SekcjaMarze dane={marze} wybor={wybor} ladowanie={marzeWczytywane} />
           <SekcjaRotacji wybor={wybor} dni={dniRotacji} onZmianaDni={ustawDniRotacji} />
-          <SekcjaCykluZycia dane={cyklZycia} wybor={wybor} ladowanie={cyklWczytywany} />
+          <SekcjaCykluZyciaModeli
+            dane={cyklZyciaModeli}
+            wybor={wybor}
+            ladowanie={cyklModeliWczytywany}
+          />
         </TabsContent>
       </Tabs>
     </div>
