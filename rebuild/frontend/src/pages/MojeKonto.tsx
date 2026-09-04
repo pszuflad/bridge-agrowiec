@@ -23,7 +23,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
-import { MIN_DLUGOSC_HASLA, zmienHaslo } from "./moje-konto/api";
+import { BladOdpowiedziSerwera, MIN_DLUGOSC_HASLA, zmienHaslo } from "./moje-konto/api";
 
 export function MojeKonto() {
   const uzytkownik = useUzytkownik();
@@ -53,11 +53,22 @@ export function MojeKonto() {
       ustawNowe("");
       ustawPowtorz("");
     } catch (blad) {
-      toast({
-        title: "Nie udało się zmienić hasła",
-        description: blad instanceof Error ? blad.message : "Nieznany błąd",
-        variant: "destructive",
-      });
+      // DWA RÓŻNE TOASTY, 1:1 z oryginałem (`:27684-27698`): odpowiedź błędu z serwera
+      // dostaje „Nie udało się zmienić hasła", a awaria samego `fetch` — „Błąd".
+      // Zlanie ich w jeden mówiłoby przy zerwanym łączu, że to serwer odrzucił hasło.
+      if (blad instanceof BladOdpowiedziSerwera) {
+        toast({
+          title: "Nie udało się zmienić hasła",
+          description: blad.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Błąd",
+          description: blad instanceof Error ? blad.message : "Nieznany błąd",
+          variant: "destructive",
+        });
+      }
     } finally {
       ustawZapisywanie(false);
     }

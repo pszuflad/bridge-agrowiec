@@ -169,6 +169,23 @@ describe("Widok /moje-konto", () => {
     expect(screen.queryByText(/401:/)).toBeNull();
   });
 
+  /**
+   * ⚠ AWARIA SIECI TO INNY TOAST NIŻ ODRZUCENIE PRZEZ SERWER. Oryginał ma dwa osobne
+   * bloki (`:27684` i `:27694`): odpowiedź błędu → „Nie udało się zmienić hasła",
+   * wyjątek z `fetch` → „Błąd". Zlanie ich w jeden mówiłoby przy zerwanym łączu, że to
+   * serwer odrzucił hasło.
+   */
+  it("awaria sieci daje toast „Błąd”, nie „Nie udało się zmienić hasła”", async () => {
+    server.use(http.post("*/api/password/change", () => HttpResponse.error()));
+    await otworzKonto();
+
+    await wypelnij("stare-haslo", "nowe-haslo-123", "nowe-haslo-123");
+    await userEvent.click(screen.getByTestId("button-submit-change-password"));
+
+    expect(await screen.findByText("Błąd")).toBeInTheDocument();
+    expect(screen.queryByText("Nie udało się zmienić hasła")).toBeNull();
+  });
+
   it("po nieudanym zapisie zostawia wpisane hasła w polach", async () => {
     zamockujApi(() => HttpResponse.json({ error: "Coś poszło nie tak" }, { status: 400 }));
     await otworzKonto();

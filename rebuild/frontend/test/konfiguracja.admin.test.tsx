@@ -357,6 +357,27 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
     expect(await screen.findByText("Katalog wyczyszczony")).toBeInTheDocument();
   });
 
+  /**
+   * ⚠ TRZY KLUCZE, NIE JEDEN (`:26117-26125`). Alerty i analityka liczą się z katalogu, więc
+   * bez ich unieważnienia Ania po wyczyszczeniu widziałaby alerty o produktach, których
+   * już nie ma. Ten test pilnuje kompletu — sam toast niczego by o tym nie powiedział.
+   */
+  it("unieważnia dokładnie trzy klucze zapytań po udanym czyszczeniu", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const uniewaznienia: unknown[] = [];
+    vi.spyOn(queryClient, "invalidateQueries").mockImplementation((filtry) => {
+      uniewaznienia.push((filtry as { queryKey?: unknown })?.queryKey);
+      return Promise.resolve();
+    });
+    await otworzZakladke("katalog");
+
+    await userEvent.click(await screen.findByTestId("button-clear-products-work"));
+
+    await waitFor(() => expect(czyszczenia).toHaveLength(1));
+    await waitFor(() => expect(uniewaznienia).toHaveLength(3));
+    expect(uniewaznienia).toEqual([["/api/products"], ["/api/alerts"], ["/api/analytics"]]);
+  });
+
   it("pokazuje błąd z ciała odpowiedzi", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     server.use(

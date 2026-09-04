@@ -1,0 +1,161 @@
+# 36-FEATURE-konto-admin-maintenance — raport z implementacji
+
+## Podsumowanie
+
+Iteracja 12, sesja 12b dowieziona w całości: osiem operacji backendu (konto, admin, utrzymanie,
+surowy audyt) za `requireAuth`, pełny widok `/moje-konto`, przycisk „Usuń wszystko z katalogu"
+w zakładce „Katalog" oraz dwie nowe zakładki `/konfiguracja` — „Admin" i „Dziennik".
+GATE przeszedł na czterech fixtures; siatka bezpieczeństwa została **zweryfikowana odwrotnie**
+(celowe sparsowanie `szczegolyJson` zapaliło STOP, po czym zmianę wycofano). Backend:
+1086 testów / 70 plików. Frontend: 686 testów / 46 plików. Bramki czyste po obu stronach.
+
+## Zmiany
+
+### Backend
+
+- **Nowy:** `src/routes/konto.ts` — `POST /api/password/change` + `GET /api/users`
+  (port `:48195-48223`), mapowanie kodu błędu na status (401 tylko dla `WRONG_OLD_PASSWORD`).
+- **Nowy:** `src/auth/zmiana-hasla.ts` — port `P4()` (`:47905-47931`) z zachowaną kolejnością
+  czterech sprawdzeń; reużywa `porownajHaslo`/`zahashujHaslo`.
+- **Nowy:** `src/routes/admin.ts` — `GET /api/admin/supplier-config`,
+  `PATCH /api/admin/supplier-config/{kod}`, `GET /api/admin/suppliers-list` (port
+  `extensions.cjs:296-405`) oraz `GET /api/audit-log` (port `:48735`).
+- **Nowy:** `src/routes/maintenance.ts` — `POST /api/maintenance/usun-nieopony` (port
+  `:48392-48405`, reużywa `czyOpona()` z silnika importu) i `POST /api/products/clear`
+  (port `:48315-48334` wraz z kopią pliku bazy).
+- `src/repos/users.ts` — `listaUzytkownikow` (projekcja jawna trzech pól) i `zapiszHasloUzytkownika`.
+- `src/repos/products.ts` — `wyczyscProdukty` (port `U.clearProducts`).
+- `src/app.ts` — rejestracja trzech routerów; `ZaleznosciApp` przyjmuje opcjonalny `sqlite`
+  (potrzebny wyłącznie do checkpointu WAL przed kopią bazy).
+- `src/server.ts`, `test/gate/aplikacja.ts` — przekazanie uchwytu `sqlite`.
+- **Nowe testy:** `test/konto.haslo.test.ts` (11), `test/admin.supplier-config.test.ts` (20),
+  `test/audit-log.test.ts` (9), `test/maintenance.test.ts` (12), `test/admin.gate.test.ts` (10).
+- `test/gate/dane.ts` — `DOSTAWCY_ADMINA` (10 kodów dispatchera), `zasiejDostawcowAdmina`,
+  `zasiejAudytSurowy`.
+
+### Frontend
+
+- **Nowy:** `src/pages/MojeKonto.tsx` + `src/pages/moje-konto/api.ts` — port `lM()`
+  (`frontend-index.js:27624-27780`), teksty i `data-testid` 1:1.
+- **Nowy:** `src/pages/konfiguracja/Admin.tsx`, `DialogKonfiguracjiDostawcy.tsx`, `admin.ts`
+  — zakładka „Admin" (dostawcy + użytkownicy + utrzymanie).
+- **Nowy:** `src/pages/konfiguracja/Dziennik.tsx`, `dziennik.ts` — zakładka „Dziennik"
+  (surowy audyt, filtry, `parsujSzczegoly` z kotwicą do backendu).
+- **Nowy:** `src/pages/konfiguracja/katalog.ts` — klient `POST /api/products/clear`.
+- `src/pages/konfiguracja/Katalog.tsx` — przycisk „Usuń wszystko z katalogu"
+  (`window.confirm` + trzy `invalidateQueries`); nagłówek pliku zaktualizowany.
+- `src/pages/konfiguracja/zakladki.ts` — dwie nowe pozycje + nota, że lista NIE jest już
+  lustrem oryginału.
+- `src/pages/Konfiguracja.tsx`, `src/App.tsx` — wpięcie zakładek i trasy `/moje-konto`.
+- **Usunięte:** `src/pages/placeholdery.ts`, `src/pages/WidokWPrzygotowaniu.tsx` — ostatni
+  placeholder zniknął, oba pliki stały się martwe. Nota o 13 trasach przeniesiona do nagłówka
+  `App.tsx`; odsyłacz w `test/shell.test.tsx` poprawiony.
+- **Nowe testy:** `test/moje-konto.test.tsx` (10), `test/konfiguracja.admin.test.tsx` (17),
+  `test/konfiguracja.dziennik.parser.test.ts` (18); `test/konfiguracja.test.tsx` rozbity na
+  asercję sześciu zakładek oryginału i osobną dla dwóch dołożonych.
+- `test/msw/kontrakt.ts` — cztery loadery fixtures (`konfiguracjaDostawcowZFixtura`,
+  `listaDostawcowZFixtura`, `uzytkownicyZFixtura`, `audytZFixtura`).
+
+## Odstępstwa od planu
+
+**Jedno, na plus wobec planu.** Plan zakładał, że `delete lastRunPerSupplier[kod]`
+(`extensions.cjs:387-389`) zostanie pominięte, bo scheduler odbudowy trzyma stan inaczej.
+Przy implementacji okazało się, że odpowiednik JEST gotowy: `przeplanujScheduler` (3f-3),
+podawany już do `trasyDostawcow`. Podpięty do `PATCH` przy zmianie częstotliwości — port
+wierniejszy niż planowany.
+
+Reszta bez odstępstw. Decyzje D1–D8 z planu zrealizowane w całości.
+
+## Wyniki testów
+
+- **Gate odbudowy (fixtures/kontrakt): ✓ zgodne.** Sprawdzone ścieżki i pliki:
+  - `GET /api/users` ↔ `GET_users.json` — kształt 1:1 + komplet kluczy;
+  - `GET /api/admin/supplier-config` ↔ `GET_admin_supplier-config.json` — 1:1, lista 10 pozycji;
+  - `GET /api/admin/suppliers-list` ↔ `GET_admin_suppliers-list.json` — 1:1, lista 10 pozycji;
+  - `GET /api/audit-log` ↔ `GET_audit-log.json` — 1:1, `szczegolyJson` pozostaje **stringiem**.
+  - Mutacje (`PATCH supplier-config/{kod}`, `POST password/change`, `POST usun-nieopony`,
+    `POST products/clear`) — walidacja wyłącznie względem `openapi.yaml` (ścieżka, metoda,
+    kod odpowiedzi); fixtures zapisujących nie ma, dojdą w 12d.
+  - **Kontrola siatki:** celowe sparsowanie `szczegolyJson` w handlerze zapaliło GATE
+    („typ object, oczekiwano string" ×4, STOP) — zmianę wycofano. Gate realnie broni kontraktu,
+    nie przechodzi „z rozpędu".
+- Backend: ✓ **1086 testów / 70 plików**; `lint`, `typecheck`, `build` czyste.
+- Frontend: ✓ **686 testów / 46 plików**; `lint`, `typecheck`, `build` czyste.
+- E2E: pominięte — projekt nie ma harnessu E2E, ścieżki pokryte integracyjnie
+  (realny SQLite w katalogu tymczasowym po stronie BE, MSW po stronie FE).
+
+Dwa testy wykryły błędy **w samych testach**, nie w kodzie, i oba zostały opisane w komentarzu,
+bo łatwo je powtórzyć:
+- `Number.NaN` w ciele żądania nie dociera jako `NaN` — `JSON.stringify` zamienia go na `null`,
+  czyli na legalne polecenie wyczyszczenia pola (żądanie kończy się 200, nie 400);
+- domyślna kategoria `"opony"` w danych testowych uznawała za oponę KAŻDĄ pozycję, bo
+  `czyOpona()` skleja nazwę z kategorią — test straciłby przedmiot.
+
+## Breaking changes
+
+Brak w API. Dwie zmiany wewnętrzne warte odnotowania:
+
+1. `ZaleznosciApp` przyjmuje nowe, **opcjonalne** pole `sqlite`. Pominięcie = kopia bazy przed
+   czyszczeniem katalogu powstaje bez checkpointu WAL (czyli dokładnie jak w oryginale).
+2. `src/pages/placeholdery.ts` i `src/pages/WidokWPrzygotowaniu.tsx` **usunięte**. Nic ich już
+   nie importuje; liczba tras routera bez zmian (13).
+
+## Follow-up
+
+- **Tabela `users` nie ma kolumny roli.** „Admin" nie jest technicznie odróżnialny od zwykłego
+  użytkownika — zakładki „Admin" i „Dziennik" widzi każdy zalogowany, tak samo jak w produkcji
+  (gdzie strony `/admin/*` chroni sam `requireAuth`). Wprowadzenie ról to zmiana schematu
+  i decyzja Ani, nie tej sesji. Kandydat do rozstrzygnięcia w 12e (finalny przegląd
+  bezpieczeństwa).
+- **`parsujSzczegoly` istnieje w repo w dwóch miejscach** (backend `historia/mapowanie.ts:87`,
+  frontend `konfiguracja/dziennik.ts`) — świadomie, decyzją użytkownika (D4), wzorem
+  `waga-gabarytowa/obliczenia.ts` vs `formula.ts`. Gdyby `rebuild/` kiedyś dostało wspólny
+  pakiet, to jeden z pierwszych kandydatów do przeniesienia.
+- **Fixtures dla mutacji nie istnieją** (`POST password/change`, `PATCH supplier-config/{kod}`,
+  `POST usun-nieopony`, `POST products/clear`) — GATE sprawdza dla nich wyłącznie kontrakt.
+  Przenagranie należy do 12d.
+- **`openapi.yaml` nie deklaruje `401` dla `GET /api/audit-log`** (trasa jest tam publiczna),
+  więc test 401 dla tej jednej ścieżki nie może przejść przez `sprawdzZgodnoscZKontraktem`.
+  Do uporządkowania przy odświeżaniu kontraktu w 12d — razem z resztą realnych kodów błędów.
+- **Kopia bazy przy `products/clear` nie jest sprzątana.** Każde czyszczenie katalogu zostawia
+  plik `<baza>.bak_before_clear_<ts>` i nikt ich nie usuwa — tak samo jak w produkcji. Przy
+  częstym używaniu przycisku katalog danych będzie rósł. Zastane, nie naprawiane w tej sesji.
+
+## Review fixes applied
+
+Review: 1 BLOCKER / 3 SHOULD-FIX / 3 NICE-TO-HAVE.
+
+**BLOCKER (roadmapa nietknięta) — nie było pominięciem, tylko kolejnością.** Aktualizacja
+`docs/rebuild-roadmap.md` i `docs/rebuild-backlog.md` należy do Fazy 5 procesu (doc-checkery),
+która w chwili review jeszcze nie nastąpiła. Wykonana zaraz po review — patrz „Docs updates".
+
+**SHOULD-FIX 1 — mylący komentarz w `historia/mapowanie.ts` (naprawione).** Zdanie „Ten sam
+parser obsłuży `/api/audit-log` w I12" zastąpione notą, która mówi wprost: ta trasa NIE używa
+tej funkcji i nie ma używać (fixture zamraża string, sparsowanie łamie GATE), a parsowanie
+robi front, który ma własną kopię — z odsyłaczem w obie strony.
+
+**SHOULD-FIX 2 — dwa toasty w `/moje-konto` (naprawione).** Oryginał rozróżnia odpowiedź
+błędu („Nie udało się zmienić hasła" + `error` z ciała, `:27684`) od awarii `fetch`
+(„Błąd" + `e.message`, `:27694`); port zlewał oba w jeden. Dołożona klasa
+`BladOdpowiedziSerwera` w `moje-konto/api.ts` rozdziela przypadki, komponent ma dwie gałęzie.
+Nowy test: awaria sieci daje „Błąd", a NIE „Nie udało się zmienić hasła".
+
+**SHOULD-FIX 3 — brak `try/catch` w trasach admina: rozstrzygnięte inaczej, jako świadome
+pominięcie.** Oryginał oddaje klientowi `e.message` (`extensions.cjs:313-315,334-336,394-396`),
+ale odbudowa ma w tej sprawie własną, wcześniejszą decyzję: `middleware/errors.ts` zwraca
+`{error: "Błąd serwera"}` i loguje szczegóły serwerowo, „nie wypuszczamy stack trace'ów ani
+treści błędu do klienta". Komunikat SQLite potrafi nieść nazwy kolumn i fragmenty danych, więc
+port 1:1 byłby tu wyciekiem informacji, nie wiernością. Status odpowiedzi jest ten sam (500),
+różni się tylko treść `error`; gałęzie 400/404 obsługujemy wprost. Pominięcie opisane
+w nagłówku `routes/admin.ts`. (Uwaga na marginesie: review sugerowało wzorowanie się na
+`GET /api/admin/suppliers-list`, „które go ma" — ta trasa również go nie ma; wzorzec jest
+w całej odbudowie spójny.)
+
+**NICE-TO-HAVE 1 — test trzech `invalidateQueries` (dołożony).** Sprawdza komplet i kolejność
+kluczy `["/api/products"]`, `["/api/alerts"]`, `["/api/analytics"]` po udanym czyszczeniu.
+Pozostałe dwa (pamięciożerność `listaProduktow` w `usun-nieopony`, brak timeoutu w `fetch`)
+zostają jako follow-up: pierwsze to port 1:1 zachowania oryginału, drugie to wzorzec całego
+frontu i temat na 12e.
+
+Po poprawkach: backend **1086 testów / 70 plików**, frontend **688 testów / 46 plików**,
+`lint`/`typecheck`/`build` czyste po obu stronach.

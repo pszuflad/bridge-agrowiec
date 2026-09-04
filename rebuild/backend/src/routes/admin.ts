@@ -13,6 +13,20 @@ import {
   type PoleEdytowalne,
 } from "../repos/suppliers.js";
 
+/*
+ * ⚠ ŚWIADOME POMINIĘCIE: `try/catch` z `res.status(500).json({error: e.message})`.
+ *
+ * Wszystkie trzy trasy admina mają w oryginale własne opakowanie błędów, które oddaje
+ * KLIENTOWI treść wyjątku (`extensions.cjs:313-315,334-336,394-396`). Nie portujemy go,
+ * bo odbudowa podjęła w tej sprawie inną, jawną decyzję: `middleware/errors.ts` oddaje
+ * `{error: "Błąd serwera"}` i loguje szczegóły po stronie serwera, „nie wypuszczamy stack
+ * trace'ów ani treści błędu do klienta". Komunikat SQLite potrafi zawierać nazwy kolumn
+ * i fragmenty danych, więc port 1:1 byłby tu wyciekiem informacji, a nie wiernością.
+ *
+ * Skutek dla klienta: przy awarii bazy status jest ten sam (500), zmienia się tylko treść
+ * `error`. Żadna gałąź walidacji (400/404) tym nie objęta — te obsługujemy wprost.
+ * Ten sam wzorzec mają pozostałe routery odbudowy (m.in. `routes/config.ts`).
+ */
 export type ZaleznosciAdmina = {
   db: Baza;
   /**
