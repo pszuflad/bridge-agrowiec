@@ -15,8 +15,16 @@
 // `POST /api/analytics/bootstrap-current` (metod zapisujących nie nagrywano,
 // `contract/README.md:38`), który zamiast tego ma test jednostkowy w `analityka.agregaty.test.ts`.
 //
-// Blok 10d dołożył cztery trasy dostawców (`:110`, `:133`, `:143`, `:332`) — pozostałe 18 tras
-// modułu dowożą bloki 10b, 10c, 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+// Blok 10c dołożył sześć tras EAN (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców
+// (`:110`, `:133`, `:143`, `:332`). Razem z pięcioma trasami 10a daje to 15 z 27 tras modułu;
+// pozostałe 12 dowożą bloki 10b, 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+//
+// ⚠ TRZY TRASY EAN CZYTAJĄ `req.query` — i to jest jedyne miejsce w tym pliku, gdzie parametr
+// żądania w ogóle dociera do repozytorium (trasy dostawców z 10d żadnego nie mają). Trasy
+// podają go SUROWO (`req.query.x`), bo oryginał parsuje go dopiero w handlerze (`num()`,
+// `String(x || '')`) i jego luźna semantyka — tablica z powtórzonego parametru, wartość
+// nieliczbowa, pusty napis — jest częścią odtwarzanego zachowania. Rozpakowanie tego
+// wcześniej zmieniłoby wynik.
 
 import { Router, type Request, type Response } from "express";
 
@@ -27,10 +35,16 @@ import {
   kpi,
   listyFiltrow,
   marze,
+  pokrycieEan,
+  porownanieEan,
+  porownanieEanLegacy,
+  rankingDostawcowEan,
   stabilnoscDostawcow,
   stanDostawcow,
   statusHistorii,
   statystykiDostawcow,
+  szczegolyEan,
+  unikalneEan,
   zbudujSnapshotBiezacy,
 } from "../repos/analityka.js";
 
@@ -107,6 +121,48 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
   /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Bez parametrów query. */
   router.get("/api/analytics/margins", requireAuth, (_req: Request, res: Response) => {
     res.json(marze(db));
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────────────────
+  //  Blok 10c — EAN. Kolejność rejestracji 1:1 z oryginałem („Part 2", `:187-235`).
+  // ──────────────────────────────────────────────────────────────────────────────────────
+
+  /** Porównanie cen po EAN u ≥2 dostawców (`:188-200`). Parametr `minDiffPct` — próg spreadu. */
+  router.get("/api/analytics/ean/comparison", requireAuth, (req: Request, res: Response) => {
+    res.json(porownanieEan(db, req.query.minDiffPct));
+  });
+
+  /**
+   * Oferty jednego EAN-u (`:202-208`). Parametr `ean`; bez niego `{ean: null, offers: []}`.
+   * Bez konsumenta w oryginalnym froncie — trasa bez UI (decyzja D6), patrz repo.
+   */
+  router.get("/api/analytics/ean/details", requireAuth, (req: Request, res: Response) => {
+    res.json(szczegolyEan(db, req.query.ean));
+  });
+
+  /** EAN-y dostępne u dokładnie jednego dostawcy (`:210-217`). Bez parametrów query. */
+  router.get("/api/analytics/ean/unique", requireAuth, (_req: Request, res: Response) => {
+    res.json(unikalneEan(db));
+  });
+
+  /** Rozkład „ilu dostawców ma dany EAN" (`:219-222`). Bez parametrów query i bez LIMIT-u. */
+  router.get("/api/analytics/ean/coverage", requireAuth, (_req: Request, res: Response) => {
+    res.json(pokrycieEan(db));
+  });
+
+  /** Ranking: jak często dostawca jest najtańszy (`:224-235`). Bez parametrów query. */
+  router.get("/api/analytics/ean/supplier-rank", requireAuth, (_req: Request, res: Response) => {
+    res.json(rankingDostawcowEan(db));
+  });
+
+  /**
+   * Starsza, NIEZALEŻNA trasa porównania (`:335-338`) — goła tablica, inny WHERE, inny LIMIT.
+   * Nie jest aliasem `ean/comparison`; różnice wypisane przy `porownanieEanLegacy`.
+   * W oryginale rejestrowana dopiero w sekcji aliasów, za `top-zmiany` — zachowujemy to
+   * miejsce w kolejności, na końcu routera.
+   */
+  router.get("/api/analytics/ean-porownanie", requireAuth, (req: Request, res: Response) => {
+    res.json(porownanieEanLegacy(db, req.query.ean));
   });
 
   return router;

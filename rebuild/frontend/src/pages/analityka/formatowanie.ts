@@ -26,6 +26,20 @@ export function formatujProcent(wartosc: unknown): string {
 }
 
 /**
+ * Zaokrąglenie liczbowe do `miejsca` miejsc po przecinku — port `round()` backendu
+ * (`analytics_module.cjs:52`), potrzebny wszędzie tam, gdzie sekcja LICZY coś sama,
+ * zamiast pokazywać liczbę z odpowiedzi.
+ *
+ * ⚠ To NIE jest to samo co `formatuj()`. Tamto zamienia liczbę w napis dla użytkownika
+ * (locale `pl-PL`, „—" dla pustych); to zostaje w domenie liczb, żeby wynik dało się dalej
+ * porównywać i sumować. Bloki 10d/10e: używajcie tego zamiast własnego `Math.round(x * 100) / 100`.
+ */
+export function zaokraglij(wartosc: number, miejsca = 2): number {
+  const m = Math.pow(10, miejsca);
+  return Math.round(wartosc * m) / m;
+}
+
+/**
  * Data w komunikacie o zasięgu historii. Oryginał przepuszcza znacznik ISO przez `_()`,
  * czyli pokazuje go surowo (`:27922` — `"…od " + _(p.od)`); zachowujemy to zamiast
  * ładniejszego formatu, bo to jedyny napis tego nagłówka, który Ania zna z produkcji.

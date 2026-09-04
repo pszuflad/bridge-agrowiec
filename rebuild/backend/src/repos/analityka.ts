@@ -307,6 +307,355 @@ export function zbudujSnapshotBiezacy(db: Baza): WynikBootstrapu {
   return { ok: true, inserted: wynik.changes, at: teraz };
 }
 
+// ════════════════════════════════════════════════════════════════════════════════════════
+//  BLOK 10c — EAN (`analytics_module.cjs:188-235` „Part 2: EAN comparison" oraz `:335-338`)
+// ════════════════════════════════════════════════════════════════════════════════════════
+//
+// ⚠ TRZY TRASY TEGO BLOKU CZYTAJĄ `req.query`, wbrew temu, co mówiła nota zakresu:
+// `ean/comparison` bierze `minDiffPct`, `ean/details` i `ean-porownanie` biorą `ean`.
+// Filtrowanie KLIENCKIE dotyczy wyłącznie globalnego paska sześciu filtrów katalogu
+// (decyzja D2 z 10a, `currentWhere()` pozostaje martwym kodem) — z parametrami tych tras
+// nie ma nic wspólnego. Parametry odtwarzamy 1:1, łącznie z ich luźnym parsowaniem.
+//
+// ⚠ CZEGO TU NIE MA: własnego `try/catch` z kodem 500. Oryginał woła `safeAll` (`:49`),
+// które połyka wyjątek i zwraca pustą tablicę — trasa nigdy nie oddaje 500 na błędzie SQL.
+// Na poprawnym schemacie te SELECT-y nie rzucają, więc dokładanie obsługi błędu byłoby
+// dorabianiem zachowania, którego produkcja nie ma.
+
+/** Port `num(v, d)` (`:51`) — `Number()` bez sanityzacji, `d` gdy wynik nieskończony. */
+function liczba(wartosc: unknown, domyslna: number): number {
+  const n = Number(wartosc);
+  return Number.isFinite(n) ? n : domyslna;
+}
+
+/** Port `round(v, p)` (`:52`) — zaokrąglenie po pomnożeniu przez potęgę dziesiątki. */
+function zaokraglij(wartosc: unknown, miejsca = 2): number {
+  const n = liczba(wartosc, 0);
+  const m = Math.pow(10, miejsca);
+  return Math.round(n * m) / m;
+}
+
+/** Port `String(req.query.x || '')` — wartość falsy (w tym brak parametru) daje pusty napis. */
+function tekst(wartosc: unknown): string {
+  return wartosc ? String(wartosc) : "";
+}
+
+/**
+ * Port `median(values)` (`:53`) — mediana bez zaokrąglania.
+ *
+ * Sortowanie jest NUMERYCZNE (`(x, y) => x - y`), nie leksykalne; wartości nieliczbowe
+ * odpadają, pusta lista daje `null`, a przy parzystej długości wychodzi średnia dwóch
+ * środkowych — czyli wynik, który nie musi być żadną z ofert.
+ */
+function mediana(wartosci: (number | null)[]): number | null {
+  const a = wartosci
+    .map(Number)
+    .filter((v) => Number.isFinite(v))
+    .sort((x, y) => x - y);
+  if (!a.length) return null;
+  const srodek = Math.floor(a.length / 2);
+  return a.length % 2 ? a[srodek]! : (a[srodek - 1]! + a[srodek]!) / 2;
+}
+
+/** LIMIT porównania cen po EAN (`:198`). */
+const LIMIT_PORWNANIA_EAN = 1000;
+/** LIMIT listy pozycji unikalnych (`:215`). */
+const LIMIT_UNIKALNYCH_EAN = 1000;
+/** LIMIT starszej trasy `ean-porownanie` — INNY niż w `ean/comparison` (`:338`). */
+const LIMIT_PORWNANIA_EAN_LEGACY = 200;
+
+export type WierszPorownaniaEan = {
+  ean: string;
+  nazwa: string;
+  dostawcy: number;
+  cenaMin: number;
+  cenaMax: number;
+  srednia: number;
+  oferty: number;
+  /** `null`, gdy `cenaMin` wynosi zero — gałąź nieosiągalna przy `cena_zakupu > 0` w WHERE. */
+  spreadPct: number | null;
+  spreadZl: number;
+};
+
+/**
+ * `GET /api/analytics/ean/comparison` — EAN-y dostępne u co najmniej dwóch dostawców (`:188-200`).
+ *
+ * Sortowanie idzie po BEZWZGLĘDNEJ różnicy cen (`MAX - MIN` malejąco), a nie po `spreadPct`,
+ * więc na górze siedzą pozycje o największym rozrzucie w złotówkach. Frontend zachowuje ten
+ * porządek — to część odpowiedzi, nie decyzja widoku.
+ *
+ * ⚠ `spreadZl` i `spreadPct` NIE SĄ liczone w SQL, tylko w JS po zapytaniu — i to ma znaczenie
+ * dla kolejności: filtr `minDiffPct` działa więc PO obcięciu do 1000 wierszy, a nie przed nim.
+ * Podniesienie progu nie „dosypie" pozycji z dalszej części rankingu; to zachowanie oryginału.
+ *
+ * ⚠ `spreadPct` ma gałąź `cenaMin ? … : null`, która jest w oryginale NIEOSIĄGALNA — WHERE
+ * wymaga `cena_zakupu > 0`, więc `MIN(cena_zakupu)` nigdy nie wyjdzie zerem. Odtwarzamy ją
+ * mimo to: usunięcie zmieniłoby kształt typu (`number` zamiast `number | null`) i różniłoby
+ * się od kodu, który realnie działa w produkcji.
+ *
+ * `minDiffPct` odcina wiersze o spreadzie procentowym poniżej progu. Falsy próg (brak
+ * parametru, `0`, wartość nieliczbowa) wyłącza filtr — `!minDiff` w oryginale, odtworzone
+ * dosłownie razem z `(spreadPct || 0)` po drugiej stronie porównania.
+ */
+export function porownanieEan(db: Baza, minDiffPct: unknown = undefined): { rows: WierszPorownaniaEan[] } {
+  const minDiff = liczba(minDiffPct, 0);
+
+  const surowe = db.all<{
+    ean: string;
+    nazwa: string;
+    dostawcy: number;
+    cenaMin: number;
+    cenaMax: number;
+    srednia: number;
+    oferty: number;
+  }>(sql`
+    SELECT ean, MAX(nazwa) AS nazwa, COUNT(DISTINCT dostawca) AS dostawcy,
+           MIN(cena_zakupu) AS cenaMin, MAX(cena_zakupu) AS cenaMax,
+           ROUND(AVG(cena_zakupu), 2) AS srednia, COUNT(*) AS oferty
+    FROM products
+    WHERE status = 'aktywny' AND ean IS NOT NULL AND ean != '' AND cena_zakupu > 0
+    GROUP BY ean
+    HAVING COUNT(DISTINCT dostawca) >= 2
+    ORDER BY (MAX(cena_zakupu) - MIN(cena_zakupu)) DESC
+    LIMIT ${LIMIT_PORWNANIA_EAN}
+  `);
+
+  const rows = surowe
+    .map((r) => ({
+      ...r,
+      spreadZl: zaokraglij(r.cenaMax - r.cenaMin),
+      spreadPct: r.cenaMin ? zaokraglij(((r.cenaMax - r.cenaMin) / r.cenaMin) * 100) : null,
+    }))
+    .filter((r) => !minDiff || (r.spreadPct ?? 0) >= minDiff);
+
+  return { rows };
+}
+
+export type OfertaEan = {
+  dostawca: string;
+  kod: string;
+  nazwa: string;
+  cenaZakupu: number;
+  cenaSprzedazy: number;
+  stan: number;
+  marzaPct: number;
+};
+
+export type OfertaEanZPozycja = OfertaEan & { pozycjaCenowa: number };
+
+export type SzczegolyEan =
+  | { ean: null; offers: never[] }
+  | {
+      ean: string;
+      offers: OfertaEanZPozycja[];
+      mediana: number | null;
+      srednia: number | null;
+    };
+
+/** Wspólny SELECT ofert jednego EAN-u — `ean/details` (`:205`) i `ean-porownanie` (`:337`). */
+function ofertyEan(db: Baza, ean: string): OfertaEan[] {
+  return db.all<OfertaEan>(sql`
+    SELECT dostawca, kod, nazwa,
+           cena_zakupu AS cenaZakupu,
+           cena_sprzedazy AS cenaSprzedazy,
+           stan,
+           marza_pct AS marzaPct
+    FROM products
+    WHERE ean = ${ean} AND status = 'aktywny'
+    ORDER BY cena_zakupu ASC
+  `);
+}
+
+/**
+ * `GET /api/analytics/ean/details` — oferty jednego EAN-u (`:202-208`).
+ *
+ * ⚠ ODPOWIEDŹ MA DWA RÓŻNE KSZTAŁTY, a fixture nagrał tylko pierwszy z nich.
+ * Bez `?ean` → `{ean: null, offers: []}` (dokładnie to jest w
+ * `contract/fixtures/GET_analytics_ean_details.json`). Z `?ean` → CZTERY klucze:
+ * `{ean, offers, mediana, srednia}`, a każda oferta dostaje dodatkowo `pozycjaCenowa`.
+ * `docs/analityka-bloki-10b-10f.md` §3 opisywał tę trasę jako `{ean, offers}` — to prawda
+ * wyłącznie dla gałęzi pustej. Kształt gałęzi z `ean` nie jest pokryty żadnym fixture'em,
+ * więc dowodzi go test jednostkowy w `analityka.agregaty.test.ts`.
+ *
+ * `pozycjaCenowa` to pozycja w rankingu cenowym liczona z KOLEJNOŚCI wierszy (`i + 1` po
+ * `ORDER BY cena_zakupu ASC`), a nie funkcją okna — dwie oferty o identycznej cenie dostaną
+ * więc różne pozycje, zależnie od tego, jak SQLite je uszereguje. Tak działa oryginał;
+ * `ean/supplier-rank` używa dla odmiany prawdziwego `RANK()` i tam remisy dzielą pozycję.
+ *
+ * ⚠ TRASA NIE MA KONSUMENTA W ORYGINALNYM FRONTENDZIE (`docs/analityka-bloki-10b-10f.md` §1.1
+ * — zero trafień w bundlu). Dowozimy ją jako trasę bez UI, tak jak 10a dowiozło
+ * `POST /api/analytics/bootstrap-current`; dorobienie jej ekranu byłoby budowaniem nowego,
+ * nie odbudową (decyzja D6, 2026-09-03).
+ */
+export function szczegolyEan(db: Baza, ean: unknown): SzczegolyEan {
+  const szukany = tekst(ean);
+  if (!szukany) return { ean: null, offers: [] };
+
+  const offers = ofertyEan(db, szukany);
+  const ceny = offers.map((o) => o.cenaZakupu).filter((v) => v != null);
+
+  return {
+    ean: szukany,
+    offers: offers.map((o, i) => ({ ...o, pozycjaCenowa: i + 1 })),
+    mediana: mediana(ceny),
+    srednia: ceny.length ? zaokraglij(ceny.reduce((a, b) => a + b, 0) / ceny.length) : null,
+  };
+}
+
+export type WierszUnikalnegoEan = {
+  ean: string;
+  nazwa: string;
+  dostawca: string;
+  cenaZakupu: number;
+  stan: number;
+};
+
+/**
+ * `GET /api/analytics/ean/unique` — EAN-y dostępne u dokładnie jednego dostawcy (`:210-217`).
+ *
+ * ⚠ `MAX(...)` przy `nazwa`, `dostawca`, `cena_zakupu` i `stan` nie jest tu agregatem
+ * merytorycznym, tylko sposobem na wyciągnięcie kolumn spoza `GROUP BY`. Przy `HAVING
+ * COUNT(DISTINCT dostawca) = 1` dostawca jest jeden, więc `MAX(dostawca)` zwraca jego nazwę —
+ * ale `MAX(cena_zakupu)` i `MAX(stan)` biorą NAJWYŻSZE wartości z ofert tego dostawcy, gdy ma
+ * on pod jednym EAN-em kilka kodów. To zachowanie oryginału i zostaje bez zmian.
+ *
+ * Inaczej niż `ean/comparison`, ta trasa NIE wymaga `cena_zakupu > 0` — pozycje z zerową ceną
+ * zakupu są w niej widoczne.
+ */
+export function unikalneEan(db: Baza): { rows: WierszUnikalnegoEan[] } {
+  const rows = db.all<WierszUnikalnegoEan>(sql`
+    SELECT ean, MAX(nazwa) AS nazwa, MAX(dostawca) AS dostawca,
+           MAX(cena_zakupu) AS cenaZakupu, MAX(stan) AS stan
+    FROM products
+    WHERE status = 'aktywny' AND ean IS NOT NULL AND ean != ''
+    GROUP BY ean
+    HAVING COUNT(DISTINCT dostawca) = 1
+    ORDER BY nazwa
+    LIMIT ${LIMIT_UNIKALNYCH_EAN}
+  `);
+  return { rows };
+}
+
+export type WierszPokryciaEan = {
+  liczbaDostawcow: number;
+  liczbaEAN: number;
+};
+
+/**
+ * `GET /api/analytics/ean/coverage` — rozkład: ilu dostawców ma dany EAN (`:219-222`).
+ *
+ * Histogram, nie ranking: jeden wiersz na każdą występującą liczbę dostawców, posortowany
+ * rosnąco. BEZ LIMIT-u — wierszy jest tyle, ilu maksymalnie dostawców dzieli jeden EAN
+ * (w nagraniu produkcji: pięć). Podobnie jak `unique`, nie filtruje po `cena_zakupu > 0`.
+ */
+export function pokrycieEan(db: Baza): { rows: WierszPokryciaEan[] } {
+  const rows = db.all<WierszPokryciaEan>(sql`
+    SELECT dostawcy AS liczbaDostawcow, COUNT(*) AS liczbaEAN
+    FROM (
+      SELECT ean, COUNT(DISTINCT dostawca) AS dostawcy
+      FROM products
+      WHERE status = 'aktywny' AND ean IS NOT NULL AND ean != ''
+      GROUP BY ean
+    )
+    GROUP BY dostawcy
+    ORDER BY dostawcy
+  `);
+  return { rows };
+}
+
+export type WierszRankinguEan = {
+  dostawca: string;
+  wspolnePozycje: number;
+  najtanszy: number;
+  najtanszyPct: number;
+};
+
+/**
+ * `GET /api/analytics/ean/supplier-rank` — jak często dostawca jest najtańszy (`:224-235`).
+ *
+ * ⚠ `wspolnePozycje` MYLI NAZWĄ. CTE `ranked` nie wymaga, żeby EAN był u dwóch dostawców —
+ * bierze każdą aktywną ofertę z niepustym EAN-em i ceną większą od zera. Licznik to więc
+ * „ile ofert dostawcy w ogóle wpadło do rankingu", a nie „ile pozycji dzieli z kimkolwiek".
+ * Dlatego dostawca, którego wszystkie EAN-y są unikalne, wychodzi z `najtanszyPct = 100`
+ * — jest jedyny, więc zawsze najtańszy. Fixture to potwierdza (`MO9`: 846/846 = 100%).
+ * Odtwarzamy 1:1; kolumna w UI nosi etykietę „Wspólne" z oryginału.
+ *
+ * `RANK()` (nie `ROW_NUMBER()`) sprawia, że przy remisie cenowym KAŻDY z remisujących dostaje
+ * pozycję 1 i liczy się jako najtańszy — suma `najtanszy` po dostawcach może więc przekroczyć
+ * liczbę EAN-ów. To też jest zachowanie oryginału.
+ *
+ * BEZ LIMIT-u — wierszy jest tyle, ilu dostawców.
+ */
+export function rankingDostawcowEan(db: Baza): { rows: WierszRankinguEan[] } {
+  const rows = db.all<WierszRankinguEan>(sql`
+    WITH ranked AS (
+      SELECT ean, dostawca, cena_zakupu,
+             RANK() OVER (PARTITION BY ean ORDER BY cena_zakupu ASC) AS pozycja
+      FROM products
+      WHERE status = 'aktywny' AND ean IS NOT NULL AND ean != '' AND cena_zakupu > 0
+    )
+    SELECT dostawca,
+           COUNT(*) AS wspolnePozycje,
+           SUM(CASE WHEN pozycja = 1 THEN 1 ELSE 0 END) AS najtanszy,
+           ROUND(100.0 * SUM(CASE WHEN pozycja = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS najtanszyPct
+    FROM ranked
+    GROUP BY dostawca
+    ORDER BY najtanszyPct DESC
+  `);
+  return { rows };
+}
+
+export type WierszPorownaniaEanLegacy = {
+  ean: string;
+  nazwa: string;
+  dostawcy: number;
+  cenaMin: number;
+  cenaMax: number;
+};
+
+/** Goła tablica — bez koperty `{rows}`, inaczej niż wszystkie trasy `ean/*`. */
+export type PorownanieEanLegacy = WierszPorownaniaEanLegacy[] | OfertaEan[];
+
+/**
+ * `GET /api/analytics/ean-porownanie` — STARSZA, NIEZALEŻNA trasa (`:335-338`).
+ *
+ * ⚠ TO NIE JEST ALIAS `ean/comparison` i nie wolno go tak zaimplementować. Różnice, wszystkie
+ * istotne dla wyniku:
+ *
+ *   | | `ean/comparison` | `ean-porownanie` |
+ *   |---|---|---|
+ *   | koperta | `{rows}` | goła tablica |
+ *   | WHERE | + `cena_zakupu > 0` | bez tego warunku |
+ *   | kolumny | + `srednia`, `oferty`, `spreadZl`, `spreadPct` | tylko pięć |
+ *   | LIMIT | 1000 | 200 |
+ *   | parametr | `minDiffPct` | `ean` |
+ *
+ * Brak `cena_zakupu > 0` znaczy, że pozycje z ceną zakupu zero — których `ean/comparison`
+ * nie widzi — tutaj wchodzą do agregatu i mogą wyzerować `cenaMin`.
+ *
+ * ⚠ DRUGA GAŁĄŹ, NIENAGRANA W FIXTURE. Z `?ean` trasa oddaje gołą tablicę ofert tego EAN-u —
+ * ten sam SELECT co `ean/details`, ale BEZ `pozycjaCenowa`, `mediana` i `srednia`. Fixture
+ * `GET_analytics_ean-porownanie.json` nagrał wariant bez parametru, więc gałąź z `ean` pokrywa
+ * test jednostkowy.
+ *
+ * ⚠ ZERO KONSUMENTÓW W ORYGINALNYM FRONTENDZIE (§1.1) — trasa bez UI, decyzja D6.
+ */
+export function porownanieEanLegacy(db: Baza, ean: unknown): PorownanieEanLegacy {
+  const szukany = tekst(ean);
+  if (szukany) return ofertyEan(db, szukany);
+
+  return db.all<WierszPorownaniaEanLegacy>(sql`
+    SELECT ean, MAX(nazwa) AS nazwa, COUNT(DISTINCT dostawca) AS dostawcy,
+           MIN(cena_zakupu) AS cenaMin, MAX(cena_zakupu) AS cenaMax
+    FROM products
+    WHERE status = 'aktywny' AND ean IS NOT NULL AND ean != ''
+    GROUP BY ean
+    HAVING COUNT(DISTINCT dostawca) >= 2
+    ORDER BY (MAX(cena_zakupu) - MIN(cena_zakupu)) DESC
+    LIMIT ${LIMIT_PORWNANIA_EAN_LEGACY}
+  `);
+}
+
 // ─── BLOK 10d · DOSTAWCY ────────────────────────────────────────────────────────────────
 //
 // Cztery trasy „Part 1: supplier analysis" (`analytics_module.cjs:110-154`) plus alias
