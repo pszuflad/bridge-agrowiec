@@ -157,7 +157,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
-| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | 🔨 | 10a: ticket `19-FEATURE-analityka-fundament` · 2026-09-03 |
+| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | 🔨 | 10a: ticket `19-FEATURE-analityka-fundament` · 2026-09-03 · 10e: ticket `25-FEATURE-analityka-dostepnosc-rotacja` · 2026-09-04 |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ⬜ | |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
 
@@ -1109,9 +1109,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   Endpoint jest już zaimplementowany i przetestowany w I5 (`src/routes/history.ts`), czyta
   tabelę `history`; na stagingu zwraca dziś `[]`, bo ta tabela nie ma jeszcze pisarza (patrz I5).
 - **⭐ Kolejność:** 10a zrobione (2026-09-03) — szkielet `/analityka`, filtry globalne, nagłówek
-  KPI i wzorzec sekcji/wykresu stoją. Bloki **10b/10c/10d/10e są teraz niezależne → równoległe**,
-  każdy dokłada zakładkę wg wzorca, **nie przemebluje widoku**. **10f na końcu** (Pulpit + CSV
-  agregują gotowe metryki).
+  KPI i wzorzec sekcji/wykresu stoją. Bloki **10b/10c/10d/10e są niezależne → równoległe**,
+  każdy dokłada zakładkę wg wzorca, **nie przemebluje widoku**; 10e zrobione (2026-09-04),
+  10b/10c/10d w toku. **10f na końcu** (Pulpit + CSV agregują gotowe metryki).
 - **10a · Fundament analityki** ✅ (BE+FE) — `19-FEATURE-analityka-fundament` · 2026-09-03.
   Backend: pięć tras za `requireAuth` (`filters`, `status`, `kpi`, `margins`,
   `bootstrap-current` POST), agregaty 1:1 z `analytics_module.cjs`. Frontend: szkielet
@@ -1154,6 +1154,10 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   `security`) — kształt niosą wyłącznie fixtures. Auth nie jest tu odstępstwem D1: wszystkie
   trasy analityki mają w kontrakcie `security: [{bearerAuth},{cookieAuth}]`, a oryginał
   wszędzie podaje `requireAuth` — zgodność pełna.
+  **Od 10e (2026-09-04) doszły dwa reużywalne kawałki, którymi 10b/10c/10d nie muszą pisać
+  drugi raz:** generyk `zastosujFiltry(wiersze, wybor, mapowanie)` + `wymiaryZMapowania` w
+  `pages/analityka/filtrowanie.ts` (istniejące `zastosujFiltryMarz` to już tylko cienka
+  nakładka na ten generyk) oraz wspólny nagłówek karty `pages/analityka/NaglowekSekcji.tsx`.
 - **Techniczne (z 10a):** `/analityka` ładowana leniwie (`lazy`+`Suspense` w `App.tsx`) —
   Recharts podnosił wspólny bundle FE z 451 kB do 837 kB, a używa go tylko ten widok; po
   podziale wspólny 452 kB, chunk `Analityka` 385 kB. 10b–10e dokładają wykresy do tego samego
@@ -1166,11 +1170,26 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §5.
   - Gate: fixtures EAN (6).
 - **10d · Dostawcy** (BE+FE) — `dostawcy-stats`, `suppliers/lifecycle`, `suppliers/stability`, `suppliers/stock`.
+  - **WEJŚCIE Z BLOKU 10e (2026-09-04).** Karty „1.4/1.5" mają **reużyć**
+    `pages/analityka/PasekDostepnosci.tsx` (port helpera `O()`, wpisany do inwentarza
+    `pages/analityka/README.md` §9) zamiast pisać drugi taki pasek postępu.
   - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §6.
   - Gate: fixtures dostawców (4).
-- **10e · Dostępność / rotacja / cykl** (BE+FE) — `availability/products`, `availability/sell-through`, `rotation/inactive`, `lifecycle/models`, `seasonality/monthly`, `importy-timeline`. `rotation/inactive` i `lifecycle/models` dokładają się **pod** istniejącą kartą marż w zakładce `marza` (już wypełnioną w 10a), w tej samej zakładce — tak jest w oryginale (`deminified/frontend-index.js:28516-28640`). `availability/*` wypełnia zakładkę `dostepnosc`.
+- **10e · Dostępność / rotacja / cykl** ✅ (BE+FE) — `25-FEATURE-analityka-dostepnosc-rotacja` ·
+  2026-09-04. Sześć tras (`availability/products`, `availability/sell-through`,
+  `rotation/inactive`, `lifecycle/models`, `seasonality/monthly`, `importy-timeline`), agregaty
+  1:1 z `analytics_module.cjs:156-334`. `rotation/inactive` i `lifecycle/models` dokładają się
+  **pod** kartą marż z 10a w zakładce `marza` (jak w oryginale, `deminified/frontend-index.js:28516-28640`);
+  `availability/*` + sezonowość (jedyny wykres bloku, jedna seria — O-10e-1) wypełniają zakładkę
+  `dostepnosc`. `importy-timeline` — backend bez UI, oryginał tej trasy nie woła (D2).
+  `?days` (rotacja) jedyny filtr serwerowy bloku; stan pola mieszka w `Analityka.tsx`, nie w
+  sekcji (inaczej `Tabs.Content` bez `forceMount` resetuje go przy zmianie zakładki).
+  **⚠ Odkrycie: `historia_cen` nie ma kolumny `nazwa`** — obie karty `availability/*` (4.1, 4.2)
+  odtworzone 1:1 (port `safeAll`) zwracają w produkcji trwale `rows: []` mimo 15 597 migawek w
+  historii; ⬜ do decyzji Ani, `docs/rebuild-backlog.md` #32/#33 (dotyczy też dwóch widoków
+  eksportu CSV — wejście dla 10f, patrz niżej).
   - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §7.
-  - Gate: fixtures tej grupy (6).
+  - Gate: fixtures tej grupy (6) — zielone.
 - **10f · Export + Pulpit** (BE+FE) — `analytics/export/{view}` + pulpit `/` (home; czyta `GET /api/history` z I5 + KPI z 10a + alerty z I6).
   - **WEJŚCIE Z ITERACJI 6 (2026-09-03, `18-FEATURE-widok-alerty`) — klient dla „najświeższych
     alertów" na pulpicie JUŻ ISTNIEJE.** `pobierzAlerty()` (`pages/alerty/api.ts`) i grupowanie
@@ -1183,6 +1202,13 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     `POST /api/analytics/bootstrap-current` istnieje od 10a bez przycisku (decyzja D4 — trasa
     nieidempotentna, `INSERT…SELECT` bez `ON CONFLICT`); jeśli miałby dostać UI, to tu,
     jako nowa decyzja użytkownika.
+  - **WEJŚCIE Z BLOKU 10e (2026-09-04, `25-FEATURE-analityka-dostepnosc-rotacja`).** (a)
+    Przycisk „CSV" świadomie pominięty na kartach „4.1 Historia dostępności", „4.2 Tempo
+    schodzenia" i „Rotacja / produkty bez aktualizacji" — trasa `export/{view}` jeszcze nie
+    istniała; 10f go dokłada. (b) Dwa widoki eksportu są w produkcji zepsute tak samo jak
+    dashboard: `export/availability-products` i `export/sell-through`
+    (`analytics_module.cjs:316-317`) biorą `nazwa` z `historia_cen`, a tej kolumny nie ma —
+    oddadzą sam znacznik BOM. Przed startem sprawdzić `docs/rebuild-backlog.md` #32.
   - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §8.
   - Gate: export waliduje wg openapi (brak fixtura GET); pulpit pokazuje kluczowe metryki.
 - **Ścieżki (GATE):** analytics×27; fixtures `GET_analytics_*.json` (25) rozdzielone po blokach 10a–10e (10a: 4 · 10b: 5 · 10c: 6 · 10d: 4 · 10e: 6); `export/{view}` i `bootstrap-current` bez fixtura (walidacja openapi). Zweryfikowane 2026-09-03 (`grep -c "app.get('/api/analytics\|app.post('/api/analytics" mirror/backend/analytics_module.cjs` → 27; `ls contract/fixtures/ | grep -c analytics` → 25) — rozdział po przeniesieniu `margins` do 10a nadal się zgadza.

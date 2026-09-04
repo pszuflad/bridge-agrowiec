@@ -332,7 +332,7 @@ export function zbudujSnapshotBiezacy(db: Baza): WynikBootstrapu {
  *
  *   `historia_cen` NIE MA KOLUMNY `nazwa`. Nie ma jej ani `rebuild/schema/001_schema.sql`,
  *   ani zrzut produkcji `db/schema.sql`, ani `ensureSchema()` samego modułu analityki
- *   (`analytics_module.cjs:25-48`). A `availability/products` (`:161`) i
+ *   (`analytics_module.cjs:24-49`). A `availability/products` (`:161`) i
  *   `availability/sell-through` (`:176`) pytają tę tabelę o `MAX(nazwa)`. SQLite odpowiada
  *   `no such column: nazwa`, `safeAll` połyka wyjątek i obie trasy oddają `rows: []`.
  *

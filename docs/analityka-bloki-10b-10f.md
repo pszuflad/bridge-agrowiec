@@ -6,12 +6,13 @@ sesja 10a musiała się dowiedzieć sama i co kosztowało ją osobną rundę pyt
 Każdy fakt niżej jest **zweryfikowany w kodzie** (`mirror/backend/analytics_module.cjs`,
 `deminified/frontend-index.js`, `contract/fixtures/`), nie przepisany z opisu iteracji.
 
-**Zakres:** 27 tras `/api/analytics/*`. Blok 10a zamknął pięć z nich
-(`filters`, `status`, `kpi`, `margins`, `bootstrap-current` — ticket
-`19-FEATURE-analityka-fundament`). Ten dokument opisuje **pozostałe 22**.
+**Zakres:** 27 tras `/api/analytics/*`. Blok 10a zamknął pięć z nich (`filters`, `status`,
+`kpi`, `margins`, `bootstrap-current` — ticket `19-FEATURE-analityka-fundament`), blok 10e
+dołożył kolejnych sześć (§7 — ticket `25-FEATURE-analityka-dostepnosc-rotacja`). Ten
+dokument opisuje wciąż aktualne bloki **10b, 10c, 10d, 10f** (16 tras) + stan faktyczny 10e.
 
 **Zanim zaczniesz blok:** przeczytaj `rebuild/frontend/src/pages/analityka/README.md` —
-wzorzec sekcji dashboardu, którego bloki 10b–10e mają się trzymać 1:1.
+wzorzec sekcji dashboardu, którego bloki 10b–10d mają się trzymać 1:1.
 
 ---
 
@@ -78,17 +79,28 @@ w każdej z 27 rejestracji. Nie odnotowuj tego jako różnicy.
 na tej liście, GATE przepuści **dowolny** kształt wiersza — kształt trzeba pokryć testem
 jednostkowym przeciw SQL-owi oryginału, tak jak 10a zrobiło dla `margins.low`/`high`.
 
-| Fixture | Puste pola | Blok |
-|---|---|---|
-| `GET_analytics_availability_products.json` | `rows` | 10e |
-| `GET_analytics_availability_sell-through.json` | `rows` | 10e |
-| `GET_analytics_rotation_inactive.json` | `rows` | 10e |
-| `GET_analytics_importy-timeline.json` | **cała odpowiedź** | 10e |
-| `GET_analytics_ean_details.json` | `offers` | 10c |
-| `GET_analytics_margins.json` | `low`, `high` | ✅ 10a (pokryte testem) |
+| Fixture | Puste pola | Blok | Przyczyna |
+|---|---|---|---|
+| `GET_analytics_availability_products.json` | `rows` | ✅ 10e | **trasa zepsuta, nie brak danych** — patrz niżej |
+| `GET_analytics_availability_sell-through.json` | `rows` | ✅ 10e | **trasa zepsuta, nie brak danych** — patrz niżej |
+| `GET_analytics_rotation_inactive.json` | `rows` | ✅ 10e | brak danych w chwili nagrania |
+| `GET_analytics_importy-timeline.json` | **cała odpowiedź** | ✅ 10e | brak danych w chwili nagrania (`audit_log` pusty) |
+| `GET_analytics_ean_details.json` | `offers` | 10c | brak danych w chwili nagrania |
+| `GET_analytics_margins.json` | `low`, `high` | ✅ 10a (pokryte testem) | brak danych w chwili nagrania |
 
-**Blok 10e ma tu najsłabszą siatkę z całej iteracji** — cztery z sześciu jego fixtures są
-puste albo częściowo puste. Zaplanuj na to testy jednostkowe od razu, nie po review.
+**Blok 10e miał tu najsłabszą siatkę z całej iteracji** — cztery z sześciu jego fixtures były
+puste albo częściowo puste. Nadrobione testem jednostkowym `analityka.dostepnosc.agregaty.test.ts`.
+
+**⚠ Pusty fixture ma DWIE różne przyczyny — nie zakładaj automatycznie „brak danych".**
+`availability/products` i `availability/sell-through` mają `rows: []` NIE dlatego, że w chwili
+nagrania nie było historii cen (fixture `GET_analytics_status.json` pokazuje 15 597 migawek),
+tylko dlatego, że obie trasy pytają `historia_cen` o kolumnę `nazwa`, której ta tabela **nie
+ma** (ani w `db/schema.sql`, ani w `rebuild/schema/001_schema.sql`, ani w `ensureSchema()`
+modułu analityki) — SQLite rzuca `no such column: nazwa`, a `safeAll()` (`:51`) połyka wyjątek
+i oddaje pustą listę. Obie karty zakładki „Dostępność" są więc w produkcji **trwale** puste,
+niezależnie od danych. Szczegóły i warianty naprawy: `docs/rebuild-backlog.md` **#32** (brak
+kolumny) i **#33** (druga, dziś zamaskowana pułapka SQL w `sell-through` — funkcja okna
+liczona po niepełnym `GROUP BY`).
 
 ---
 
@@ -222,10 +234,18 @@ tamtej logiki — sprawdź `repos/suppliers.ts`, zanim napiszesz cokolwiek noweg
 
 ---
 
-## 7. Blok 10e — Dostępność / rotacja / cykl
+## 7. Blok 10e — Dostępność / rotacja / cykl — ✅ ZROBIONE (2026-09-04, `25-FEATURE-analityka-dostepnosc-rotacja`)
+
+Sekcja niżej opisuje **stan faktyczny po dowiezieniu**, nie zamiar. Szczegóły decyzji i
+odkryć: `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/{plan,raport,review}.md`.
 
 Trasy: `availability/products`, `availability/sell-through`, `rotation/inactive`,
 `lifecycle/models`, `seasonality/monthly`, `importy-timeline`. Fixtures: 6.
+
+**⚠ Dwie karty tej zakładki są w produkcji trwale puste** — `historia_cen` nie ma kolumny
+`nazwa`, o którą pytają `availability/products` i `availability/sell-through`; szczegóły
+w §2 i backlog **#32**/**#33**. Odbudowa odtworzyła to 1:1 (port `safeAll` →
+`bezpiecznieWiersze`), zamrożone testami charakteryzacyjnymi.
 
 | Trasa | Linia | Query | LIMIT | Kształt |
 |---|---|---|---|---|
@@ -236,36 +256,47 @@ Trasy: `availability/products`, `availability/sell-through`, `rotation/inactive`
 | `rotation/inactive` | `:299` | `days` | 1000 | `{ days, rows }` — **fixture pusty** |
 | `importy-timeline` | `:334` | — | 200 | goła tablica — **fixture pusty** |
 
-**Ten blok ma najsłabszą siatkę bezpieczeństwa w całej iteracji** — patrz §2.
+**Ten blok miał najsłabszą siatkę bezpieczeństwa w całej iteracji** — patrz §2. Nadrobione
+testem jednostkowym `analityka.dostepnosc.agregaty.test.ts` (kształt wiersza czterech tras
+z pustym fixture'em, obie gałęzie `hasHistory`, zaciski `?days`).
 
 **Dwie zakładki, nie jedna:**
 
-**`dostepnosc` „Dostępność"** (`fe.js:28417-28515`) — trzy karty:
+**`dostepnosc` „Dostępność"** (`fe.js:28417-28515`) — trzy karty, dowiezione jako
+`SekcjaDostepnosciProduktow.tsx`, `SekcjaTempaSchodzenia.tsx`, `SekcjaSezonowosci.tsx`
+(`rebuild/frontend/src/pages/analityka/`):
 1. **„4.1 Historia dostępności pozycji"** ← `availability/products`
-   Kolumny: Dostawca · Kod · EAN · Nazwa · Dostępność · Miesiące braków. CSV (`availability-products`).
-   ⚠ „Dostępność" to **pasek postępu** `O(e.dostepnoscPct)` (`zM+650`) — ten sam, co w karcie
-   „1.4 / 1.5" bloku 10d. Jeśli 10d wszedł wcześniej, komponent już jest; jeśli nie, wydziel go.
+   Kolumny: Dostawca · Kod · EAN · Nazwa · Dostępność · Miesiące braków. CSV — dokłada 10f.
+   ⚠ „Dostępność" to **pasek postępu** `O(e.dostepnoscPct)` (`zM+650`), wydzielony do
+   `pages/analityka/PasekDostepnosci.tsx` — ten sam komponent ma reużyć blok 10d w karcie
+   „1.4/1.5" (§9). ⚠ Karta jest dziś **trwale pusta w produkcji** — patrz box wyżej i §2.
 2. **„4.2 Tempo schodzenia z magazynu"** ← `availability/sell-through`
-   Kolumny: Dostawca · Kod · Nazwa · Zeszło sztuk. CSV (`sell-through`).
+   Kolumny: Dostawca · Kod · Nazwa · Zeszło sztuk. CSV — dokłada 10f. ⚠ Też trwale pusta
+   w produkcji.
 3. **„4.4 Sezonowy wzorzec cen"** ← `seasonality/monthly`
-   Kolumny: Miesiąc · Marka · Śr. cena · Dostępność.
+   Kolumny: Miesiąc · Marka · Śr. cena · Dostępność. Jedyny wykres bloku: linia „średnia
+   cena wg miesiąca" nad tabelą (odstępstwo **O-10e-1** — oryginał nie ma tu wykresu).
 
-**`marza` „Marża i rotacja"** — **ta zakładka jest już częściowo wypełniona przez 10a.**
-Sekcja marż stoi na górze; dokładasz **pod nią**, w tej samej zakładce, w kolejności oryginału:
+**`marza` „Marża i rotacja"** — **sekcja marż z 10a zostaje pierwsza, nietknięta;** pod nią
+doszły, w kolejności oryginału, `SekcjaRotacji.tsx` i `SekcjaCykluZycia.tsx`:
 2. **„Rotacja / produkty bez aktualizacji"** ← `rotation/inactive`
-   Kolumny: Ostatnia aktualizacja · Dostawca · Kod · Nazwa · Stan. CSV (`rotation-inactive`).
+   Kolumny: Ostatnia aktualizacja · Dostawca · Kod · Nazwa · Stan. CSV — dokłada 10f.
    ⚠ **Ma realną kontrolkę:** pole tekstowe „Bez ruchu dni" (`i`/`l`, `useState("60")`),
-   wartość idzie do `?days` i **do `queryKey`** — to jest wzorzec „filtr → query param",
+   wartość idzie do `?days` i **do `queryKey`** jako jeden segment z pełnym adresem
+   (`["/api/analytics/rotation/inactive?days=60"]`) — to jest wzorzec „filtr → query param",
    w odróżnieniu od filtrów klienckich z 10a. Backend zaciska `days` do `[1, 730]`
-   (`Math.min(730, Math.max(1, parseInt(req.query.days || '60', 10)))`).
+   (`Math.min(730, Math.max(1, parseInt(req.query.days || '60', 10)))`); stan pola mieszka
+   w `Analityka.tsx` (nie w sekcji), inaczej przełączenie zakładek go resetuje — poprawka
+   z review. Karta ma jako jedyna layout `p-4 space-y-3` bez `border-b`.
 3. **„4.6 Cykl życia modelu"** ← `lifecycle/models`
    Kolumny: Marka · Model · Pierwszy raz · Ostatni raz · Produkty. Bez CSV.
 
-W `Analityka.tsx` te dwie karty zastępują `ZakladkaWPrzygotowaniu` z `blok="10e"`
-w zakładce `marza` — komponent jest już tam osadzony jako miejsce docelowe.
+W `Analityka.tsx` te dwie karty zastąpiły `ZakladkaWPrzygotowaniu` z `blok="10e"`
+w zakładce `marza`.
 
-**Bez UI w oryginale:** `importy-timeline` (zero wywołań, fixture pusty). Czyta `audit_log`
-dla akcji importu. Decyzja użytkownika.
+**Bez UI, backend 1:1 (decyzja D2):** `importy-timeline`. Zero wywołań w oryginale, fixture
+pusty, czyta `audit_log` dla akcji importu — trasa istnieje i przechodzi GATE, żadna
+zakładka jej nie konsumuje (ten sam wzorzec co `bootstrap-current` w 10a).
 
 ---
 
@@ -285,10 +316,20 @@ pierwszego wiersza. Pusty wynik = sam BOM.
 `unique` · `prices-last` · `availability-products` · `sell-through` · `margins` ·
 `rotation-inactive`.
 
-⚠ Przycisk „CSV" **nie istnieje w odbudowie** — 10a świadomie go pominęło (trasa eksportu
-należy do tego bloku). 10f dokłada go do sekcji marż **i do każdej innej sekcji, która ma
-go w oryginale** — lista wyżej mówi dokładnie do których. W oryginale przycisk siedzi
-w nagłówku karty, po prawej: `<Button variant="outline" size="sm">CSV</Button>`.
+⚠ Przycisk „CSV" **nie istnieje w odbudowie** — 10a i 10e świadomie go pominęły (trasa
+eksportu należy do tego bloku). 10f dokłada go do sekcji marż z 10a **i do trzech kart
+dowiezionych przez 10e** — „4.1 Historia dostępności" (`availability-products`), „4.2 Tempo
+schodzenia" (`sell-through`) i „Rotacja / produkty bez aktualizacji" (`rotation-inactive`) —
+**i do każdej innej sekcji, która ma go w oryginale**, lista wyżej mówi dokładnie do których.
+W oryginale przycisk siedzi w nagłówku karty, po prawej:
+`<Button variant="outline" size="sm">CSV</Button>`.
+
+**⚠ Dwa widoki eksportu mają dokładnie tę samą wadę, co ich odpowiedniki dashboardu (§2,
+backlog #32).** `export/availability-products` i `export/sell-through`
+(`analytics_module.cjs:316-317`) czytają `nazwa` z `historia_cen` tak samo jak
+`availability/products`/`sell-through` — w produkcji ta kolumna nie istnieje, więc oba pliki
+CSV oddają sam znacznik BOM, bez wiersza danych. 10f musi to wiedzieć **zanim** zaplanuje
+te dwa przyciski, inaczej pusty CSV wygląda jak własny błąd bloku.
 
 **⚠ EKSPORT NIE ZWRACA TEGO, CO WIDAĆ W TABELI. Każdy `{view}` ma WŁASNY SQL, inny niż trasa
 dashboardu o tej samej nazwie** — to nie jest „ta sama odpowiedź w innym formacie". Dwa
@@ -326,7 +367,7 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 
 ---
 
-## 9. Czego blok NIE musi już budować — inwentarz z 10a
+## 9. Czego blok NIE musi już budować — inwentarz z 10a i 10e
 
 | Rzecz | Gdzie |
 |---|---|
@@ -340,6 +381,9 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 | Nagłówek KPI + banner historii | `pages/analityka/NaglowekKpi.tsx` |
 | Wzorzec sekcji, krok po kroku | `pages/analityka/README.md` |
 | Wzorcowa sekcja do skopiowania | `pages/analityka/SekcjaMarze.tsx` |
+| Pasek postępu dostępności (port `O()`) — **10d ma go REUŻYĆ w kartach „1.4/1.5", nie pisać drugiego** | `pages/analityka/PasekDostepnosci.tsx` (z 10e) |
+| Nagłówek karty (tytuł + notki o filtrach) | `pages/analityka/NaglowekSekcji.tsx` (z 10e) |
+| Generyczny filtr kliencki `zastosujFiltry(wiersze, wybor, mapowanie)` + `wymiaryZMapowania` | `pages/analityka/filtrowanie.ts` (z 10e; `zastosujFiltryMarz` z 10a zostaje cienką nakładką) |
 
 **Czego NIE ruszać:**
 - tokenów `--chart-1..5` — pochodzą z arkusza produkcji, chroni je `test/tokeny.test.ts`;
@@ -362,3 +406,8 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 4. Sprawdź kształt koperty (`{rows}` vs `{hasHistory, rows}` vs goła tablica) — §3.
 5. Odpowiedź nowego backendu **nie może** zawierać `_przyciete`.
 6. Nie odnotowuj `requireAuth` jako odstępstwa D1 — kontrakt już go wymaga.
+7. **Sprawdź, czy kolumny, o które pyta SQL trasy, istnieją w schemacie**
+   (`rebuild/schema/001_schema.sql`). Oryginalny `safeAll()` zamienia błąd schematu (kolumna
+   nie istnieje) w pustą odpowiedź — zepsuta trasa wygląda identycznie jak trasa bez danych,
+   tak jak w 10e (`availability/products`, `availability/sell-through` — §2, backlog #32).
+   Pusty fixture sam tego nie ujawni.

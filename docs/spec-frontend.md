@@ -256,14 +256,27 @@ ma endpoint:
 > dochodzi globalny pasek sześciu wyszukiwalnych filtrów działający **po stronie klienta**
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
-> (O-10a-3). Wypełniona jest wyłącznie karta „Marża per dostawca/kategoria/marka" — pozostałe
-> zakładki są puste, ale nazwane (O-10a-4); wzorzec sekcji dashboardu jest udokumentowany
+> (O-10a-3). W 10a wypełniona jest wyłącznie karta „Marża per dostawca/kategoria/marka" —
+> pozostałe zakładki są puste, ale nazwane (O-10a-4); patrz **10e** niżej, gdzie dwie z nich
+> dostają treść. Wzorzec sekcji dashboardu jest udokumentowany
 > w `rebuild/frontend/src/pages/analityka/README.md`. Trasa jest ładowana **leniwie**
 > (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku ~385 kB, więc płaci za niego tylko
 > wejście na `/analityka`, nie wspólny bundle. Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
 >
 > **Dla bloków 10b–10f:** karty oryginału zakładka po zakładce (tytuły, kolumny, etykiety PL,
 > kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu — `docs/analityka-bloki-10b-10f.md`.
+>
+> **Odbudowa (10e, `25-FEATURE-analityka-dostepnosc-rotacja`, 2026-09-04):** zakładka
+> `dostepnosc` dostaje trzy karty („Historia dostępności pozycji", „Tempo schodzenia z
+> magazynu", „Sezonowy wzorzec cen"), zakładka `marza` dostaje dwie kolejne pod kartą marż z
+> 10a („Rotacja / produkty bez aktualizacji", „Cykl życia modelu") — `ZakladkaWPrzygotowaniu`
+> zostaje tylko w zakładkach 10b/10c/10d. Jedyny filtr serwerowy bloku: pole „Bez ruchu dni"
+> (`?days` w `rotation/inactive`). Drugi wykres w widoku (O-10e-1, kontynuacja O-10a-3):
+> linia „średnia cena zakupu wg miesiąca" nad kartą sezonowości, jedna seria. **Dwie z pięciu
+> kart („Historia dostępności pozycji", „Tempo schodzenia z magazynu") pokazują „Brak danych"
+> niezależnie od stanu bazy** — port 1:1 zapytania, które w produkcji zawsze zawodzi (brak
+> kolumny `nazwa` w `historia_cen`, patrz `spec-backend.md` §2 i `rebuild-backlog.md` #32).
+> Szczegóły: `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

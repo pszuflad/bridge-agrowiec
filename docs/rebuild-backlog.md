@@ -1593,6 +1593,11 @@ test jednostkowy), ale świadomie nie dostała przycisku w UI, żeby nikt nie kl
 WHERE …)` per produkt/dzień, albo unikalny indeks na `(produkt, data)` + `ON CONFLICT DO NOTHING`.
 Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy naprawiać zachowanie produkcji.
 
+**Powiązanie z #32/#33.** Inny błąd tej samej tabeli `historia_cen`, niezależny od tego wpisu:
+`INSERT` powyżej nie odwołuje się do kolumny `nazwa` (jej też nie ma w `historia_cen`), więc
+naprawa #32 na ten insert nie wpływa. Trzy wpisy dotyczą tej samej tabeli, ale trzech osobnych
+usterek — nie scalać.
+
 ---
 
 ### #32 · 2026-09-04 · [BACKEND] · `historia_cen` NIE MA kolumny `nazwa` — obie karty „Dostępności" są trwale puste
@@ -1600,7 +1605,7 @@ Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy naprawiać zachowan
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (dwie trasy analityki, tabela `historia_cen`) |
-| **Pliki** | `mirror/backend/analytics_module.cjs:161` (`availability/products`), `:176` (`availability/sell-through`), `:316-317` (te same dwa widoki eksportu); schemat: `db/schema.sql`, `rebuild/schema/001_schema.sql`, `analytics_module.cjs:25-48`; port: `rebuild/backend/src/repos/analityka.ts` |
+| **Pliki** | `mirror/backend/analytics_module.cjs:161` (`availability/products`), `:176` (`availability/sell-through`), `:316-317` (te same dwa widoki eksportu); schemat: `db/schema.sql`, `rebuild/schema/001_schema.sql`, `analytics_module.cjs:24-49` (`ensureSchema`); port: `rebuild/backend/src/repos/analityka.ts` |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
 | **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) |
 | **Status** | ✔ odtworzone w rebuild (10e) · w produkcji **nadal obecne** |
@@ -1610,7 +1615,7 @@ Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy naprawiać zachowan
 `GET /api/analytics/availability/sell-through` bierze `MAX(nazwa)` w CTE `seq` z tej samej
 tabeli. **Tabela `historia_cen` nie ma kolumny `nazwa`** — nie ma jej ani zrzut produkcji
 (`db/schema.sql`), ani `rebuild/schema/001_schema.sql`, ani `ensureSchema()` samego modułu
-analityki, który tę tabelę tworzy (`analytics_module.cjs:25-48`). SQLite odpowiada
+analityki, który tę tabelę tworzy (`analytics_module.cjs:24-49`). SQLite odpowiada
 `no such column: nazwa`, a `safeAll()` (`:51`) połyka wyjątek i zwraca pustą listę.
 
 **Dowód z nagrań, nie z rozumowania.** `contract/fixtures/GET_analytics_status.json` pokazuje

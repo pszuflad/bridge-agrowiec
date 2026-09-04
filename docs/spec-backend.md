@@ -120,6 +120,18 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > filtrowanie po stronie klienta). Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
 > Semantyka **wszystkich 27 tras** modułu (numer linii handlera, parametry query, LIMIT-y,
 > kształt odpowiedzi — trzy różne koperty!) jest spisana w `docs/analityka-bloki-10b-10f.md`.
+>
+> **Potwierdzone w 10e** (`25-FEATURE-analityka-dostepnosc-rotacja`, 2026-09-04): kolejne sześć
+> tras `/api/analytics/*` (`availability/products`, `availability/sell-through`,
+> `seasonality/monthly`, `lifecycle/models`, `rotation/inactive`, `importy-timeline`), wszystkie
+> pod `requireAuth`, odtworzone 1:1 z `analytics_module.cjs`. Jedyna z sześciu czytająca
+> `req.query` to `rotation/inactive` (`?days`, zaciskane do [1, 730], domyślnie 60).
+> `importy-timeline` nie ma konsumenta w UI (świadoma decyzja, jak `bootstrap-current` w 10a).
+> **Odkrycie o produkcji:** `historia_cen` nie ma kolumny `nazwa`, o którą pytają
+> `availability/products` i `availability/sell-through` — oba zapytania wywracają się na
+> `no such column`, `safeAll()` połyka błąd, więc obie trasy oddają `rows: []` mimo 15 597
+> migawek w historii; odtworzone 1:1, do decyzji w `docs/rebuild-backlog.md` #32. Szczegóły:
+> `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -267,7 +279,9 @@ dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/boot
 oraz pierwszego czytelnika — `GET /api/analytics/status` zwraca z niej agregat
 `{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
 `GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
-`docs/tickets/19-FEATURE-analityka-fundament/plan.md`.
+`docs/tickets/19-FEATURE-analityka-fundament/plan.md`. **`historia_cen` nie ma kolumny
+`nazwa`** — `availability/products` i `availability/sell-through` (blok 10e) o nią pytają
+(`MAX(nazwa)`) i zawsze dostają pustą listę, patrz §2 wyżej i `rebuild-backlog.md` #32.
 
 ## 6. Korekty do propagacji
 

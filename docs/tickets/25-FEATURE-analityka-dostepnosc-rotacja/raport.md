@@ -150,3 +150,39 @@ NICE-TO-HAVE (nazwa stałej `LIMIT_TEMPA_SCHODZENIA` zamiast zapowiedzianej w pl
 a plan był w tym miejscu roboczym szkicem, nie kontraktem.
 
 Po poprawkach: frontend 414 testów / 28 plików ✓, `lint`/`typecheck`/`build` czyste.
+
+## Aktualizacja dokumentacji
+
+Cztery równoległe przeglądy `docs/` po zamknięciu bloku.
+
+**`docs/rebuild-roadmap.md`** — blok 10e oznaczony ✅ z datą (2026-09-04) i ID ticketa, opis
+przepisany na zakres faktycznie dowieziony; tablica postępu §4 uzupełniona; nota o generyku
+filtrowania i `NaglowekSekcji` dopisana do wspólnej sekcji dla 10b–10e. **Ustalenia trafiły do
+bloków, których dotyczą, nie do zamkniętego 10e:** do **10d** — nakaz reużycia
+`PasekDostepnosci.tsx` w kartach „1.4/1.5"; do **10f** — brakujące przyciski „CSV" dla trzech
+kart 10e oraz ostrzeżenie, że `export/availability-products` i `export/sell-through` mają tę samą
+wadę co trasy dashboardu. Istniejący opis wzorca `queryKey` w roadmapie był poprawny i został bez zmian.
+
+**`docs/rebuild-backlog.md`** — wpisy #32 i #33 zweryfikowane niezależnie wobec kodu i nagrań
+(brak kolumny `nazwa` w trzech źródłach schematu, numery linii SQL, dowód z fixtures, źródło
+duplikatu w `import/tk.ts`); poprawiony zakres linii `ensureSchema()` na `analytics_module.cjs:24-49`
+(ta sama korekta naniesiona w komentarzu `repos/analityka.ts`). Do wpisu **#31** dopisane
+powiązanie z #32/#33 wraz z wyraźnym „nie scalać" — trzy usterki tej samej tabeli, ale niezależne.
+
+**`docs/analityka-bloki-10b-10f.md`** — §7 oznaczona ✅ ZROBIONE i przepisana na stan faktyczny;
+§2 rozbudowana o kolumnę „Przyczyna", która rozróżnia dwa powody pustego fixture'a („nie było
+danych w chwili nagrania" kontra „trasa jest zepsuta i nigdy nic nie zwraca") — dotychczas
+dokument sugerował tylko pierwszy; §8.1 ostrzega blok 10f o tej samej wadzie w dwóch widokach
+eksportu; §9 uzupełniona o trzy pozycje do reużycia; §10 o punkt kontrolny „sprawdź, czy kolumny
+z SQL trasy istnieją w schemacie, bo `safeAll` maskuje błąd schematu jako pustą odpowiedź".
+
+**`docs/spec-backend.md` / `docs/spec-frontend.md` / `CLAUDE.md`** — spec backendu dostała notę
+o sześciu trasach 10e i o brakującej kolumnie `nazwa` (także przy opisie `historia_cen`); spec
+frontendu — opis pięciu kart, filtru `?days`, wykresu O-10e-1 oraz ostrzeżenie, że dwie karty
+pokazują „Brak danych" niezależnie od stanu bazy. W `CLAUDE.md` dopisane jedno zdanie do sekcji
+o pułapkach: `safeAll()` zamienia błąd SQL w pustą listę, więc **nie ufaj `rows: []`** — zepsuta
+trasa wygląda identycznie jak trasa bez danych. `docs/plan.md` bez zmian (dokument historyczny,
+sam odsyła do roadmapy).
+
+**Pre-existing issues:** żaden z czterech przeglądów nie znalazł nieścisłości spoza zakresu
+tego ticketa.
