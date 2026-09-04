@@ -2143,3 +2143,68 @@ Backend 7a też `origin` nie eksponuje (zgodnie z fixture).
 **Do decyzji.** Czy `origin` ma w ogóle trafiać do odpowiedzi API (wtedy filtr miałby sens do
 odtworzenia), czy pole zostaje wyłącznie wewnętrzne (baza), a filtr w produkcji zostaje
 uznany za martwy kod, którego nie warto portować.
+
+---
+
+### #46 · 2026-09-04 · [DEPLOY] · staging mógł nadpisać PRODUKCYJNY plik CSV dla Selly
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | DEPLOY / BEZPIECZEŃSTWO DANYCH (staging pisał po produkcji) |
+| **Pliki** | `rebuild/backend/src/config/env.ts:89-97` (wartości domyślne), `tools/deploy-staging.sh` (brak nadpisania), `rebuild/backend/src/selly/generator-csv.ts` (zapis pliku), `docs/deploy-setup.md:4` (wspólny VPS) |
+| **Do nowej wersji?** | ✅ **TAK — naprawione** w tickecie `34-FEATURE-selly-blokada-srodowiska` |
+| **Status** | ✅ zamknięte 2026-09-04 |
+
+**Co znaleziono.** `SELLY_CSV_DIR` ma wartość domyślną
+`/home/admin/domains/agritires.eu/public_html/panel/ex-port-files` — katalog **produkcyjny**.
+Jest to poprawne dla produkcji (odtwarza dwa zahardkodowane miejsca oryginału,
+`mirror/backend/selly/routes.cjs:300-301` i `generate_selly_export.cjs:8-9`), ale staging stoi
+**na tym samym VPS i tym samym userze `admin`**, a `tools/deploy-staging.sh` tej zmiennej
+nie ustawiał. Kliknięcie **„Wygeneruj CSV teraz"** na `/selly` na stagingu nadpisywało więc
+produkcyjny plik CSV treścią wygenerowaną **z bazy stagingowej**, a Selly zaciąga ten plik
+o 6:00 jako prawdziwy katalog.
+
+**Dlaczego to było groźniejsze niż brak sekretów Selly.** `POST /api/selly/generate-csv` jest
+trasą **lokalną** — działa **bez żadnych sekretów `SELLY_*`**. Zabezpieczenie oparte na tym,
+że staging nie ma danych dostępowych, w ogóle tej ścieżki nie dotyczyło. Instrukcja testów
+opisywała ten tryb jako „ryzyko: zero" — **błędnie**; sprostowane razem z naprawą.
+
+**Jak naprawione.** `tools/deploy-staging.sh` eksportuje bezpieczne `SELLY_CSV_DIR`/`_PLIK`/
+`_URL` (własny katalog stagingu) **przed** wczytaniem `.env`, więc poprawka jest wersjonowana
+w repo i działa przy każdym deployu, zamiast zależeć od tego, czy ktoś pamiętał dopisać linijkę
+na serwerze. Wartości domyślnych w `env.ts` **nie zmieniono** — dla produkcji są poprawne
+i wierne oryginałowi. Przy okazji dołożono `SELLY_TRYB` (patrz niżej).
+
+---
+
+### #47 · 2026-09-04 · [DEPLOY] · brak sekretów Selly to zabezpieczenie przez NIEOBECNOŚĆ
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | DEPLOY / BEZPIECZEŃSTWO (integracja z cudzym, żywym sklepem) |
+| **Pliki** | `rebuild/backend/src/selly/tryb.ts` (nowe), `src/config/env.ts` (`SELLY_TRYB`), `src/app.ts`, `tools/deploy-staging.sh` |
+| **Do nowej wersji?** | ✅ **TAK — dowiezione** (`34-FEATURE-selly-blokada-srodowiska`, decyzja użytkownika) |
+| **Status** | ✅ zamknięte 2026-09-04 |
+
+**Co znaleziono.** Do ticketa 34 jedynym zabezpieczeniem stagingu przed wysłaniem czegokolwiek
+do żywego sklepu Selly był **brak zmiennych `SELLY_*`**. Działa to skutecznie (zweryfikowane:
+`sprawdzKonfiguracje()` rzuca przed pierwszym żądaniem sieciowym, klient powstaje w jednym
+miejscu, żaden cron Selly nie dotyka), ale jest to zabezpieczenie przez **nieobecność, a nie
+zakaz** — skopiowanie `.env` z produkcji „żeby coś sprawdzić" czyni staging żywym po cichu
+i nic tego nie sygnalizuje.
+
+**Jak rozwiązane.** `SELLY_TRYB` = `wylaczony` (domyślnie) / `tylko-odczyt` / `pelny`,
+egzekwowany w obwolucie klienta (`src/selly/tryb.ts`), nie w trasach — dzięki czemu blokada
+obejmuje wszystkie dziesięć tras naraz, a test kompletności pilnuje, że lista metod zapisujących
+pokrywa się z interfejsem `KlientSelly` (nowa metoda zapisu nie ominie blokady po cichu).
+
+Tryb `tylko-odczyt` daje **dry-run za darmo**: dry-run nigdy nie woła metody zapisującej, więc
+działa bez ani jednej linijki kodu na ten temat.
+
+**Odstępstwo świadome** (produkcja przełącznika nie ma), wzorowane na `IMPORT_SCHEDULER`
+z bloku 3f-3, dodanym z tego samego powodu. Domyślnie wyłączony, bo pomyłka daje wtedy widoczny
+błąd, a nie cichy zapis do cudzego sklepu.
+
+**Nie objęte:** blokada sieciowa (egress) na VPS — byłaby najmocniejsza, bo nie zależy od
+poprawności naszego kodu, ale wymaga uprawnień, których na cyber_Folks bez roota
+prawdopodobnie nie ma. ⬜ Do sprawdzenia.

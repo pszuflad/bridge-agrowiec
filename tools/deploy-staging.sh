@@ -27,6 +27,23 @@ BRANCH="develop"
 LOG="$STAGING_ROOT/deploy.log"
 export PORT=5001 HOST=127.0.0.1 NODE_ENV=production DB_PATH="$DATA_DB"
 
+# --- Selly: staging NIE dotyka ani sklepu, ani produkcyjnego pliku CSV (ticket 34) ---
+# Ustawiane TUTAJ, a nie w .env, bo to zabezpieczenie ma być wersjonowane i działać przy
+# każdym deployu, a nie zależeć od tego, czy ktoś pamiętał dopisać linijkę na serwerze.
+# Wartości można nadpisać świadomie w $STAGING_ROOT/.env — plik wczytywany jest NIŻEJ.
+#
+#  1. SELLY_TRYB=wylaczony — klient odmawia każdej operacji, także z poprawnymi sekretami.
+#     Sam brak SELLY_* to zabezpieczenie przez NIEOBECNOŚĆ: skopiowanie .env z produkcji
+#     „żeby coś sprawdzić" czyniło staging żywym po cichu.
+#  2. ⚠ SELLY_CSV_* — domyślne wartości w kodzie wskazują katalog PRODUKCYJNY
+#     (public_html/panel/ex-port-files), bo tam jest ich miejsce na produkcji. Staging stoi
+#     na TYM SAMYM VPS, więc bez tego nadpisania przycisk „Wygeneruj CSV teraz" podmieniłby
+#     produkcyjny plik treścią z bazy stagingowej — a Selly zaciąga go o 6:00.
+export SELLY_TRYB=wylaczony
+export SELLY_CSV_DIR="$DOCROOT/ex-port-files"
+export SELLY_CSV_PLIK="sellycsv-staging.csv"
+export SELLY_CSV_URL="https://test.agritires.eu/ex-port-files/sellycsv-staging.csv"
+
 # Sekrety środowiska (JWT_SECRET) — plik POZA repo, tworzony raz ręcznie na VPS.
 # Format: jedna para KLUCZ=wartość na linię. Instrukcja: docs/deploy-setup.md.
 if [ -f "$STAGING_ROOT/.env" ]; then set -a; . "$STAGING_ROOT/.env"; set +a; fi

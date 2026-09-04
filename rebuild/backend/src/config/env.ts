@@ -71,6 +71,29 @@ const schemaEnv = z.object({
    * daje 500 na sześciu trasach zewnętrznych, a nie martwy proces. Cztery trasy lokalne
    * (`status`, `log`, `csv-status`, `generate-csv`) działają bez nich (plan.md D6).
    */
+  /**
+   * Twarda blokada integracji Selly na poziomie ŚRODOWISKA — DOMYŚLNIE `wylaczony`.
+   *
+   * ODSTĘPSTWO ŚWIADOME, decyzja użytkownika 2026-09-04 (ticket
+   * `34-FEATURE-selly-blokada-srodowiska`, D2). Produkcja takiego przełącznika nie ma —
+   * tam integracja jest zawsze pełna. Wzorzec i uzasadnienie 1:1 jak przy `IMPORT_SCHEDULER`
+   * wyżej: staging stoi na TYM SAMYM VPS co produkcja i patrzy na TEN SAM sklep Selly, więc
+   * „brak sekretów" jest zabezpieczeniem przez NIEOBECNOŚĆ, a nie przez zakaz — skopiowanie
+   * `.env` z produkcji czyni staging żywym i nic tego nie sygnalizuje.
+   *
+   * Dlaczego domyślnie WYŁĄCZONY, mimo że produkcja działa inaczej: pomyłka w konfiguracji
+   * daje wtedy widoczny błąd („nie działa"), a nie cichy zapis do cudzego, żywego sklepu.
+   * Ta asymetria skutków przeważa nad wiernością wartości domyślnej.
+   *
+   *  - `wylaczony`    — klient odmawia KAŻDEJ operacji, także z poprawnymi sekretami;
+   *  - `tylko-odczyt` — przechodzą odczyty (w tym `sync-supplier` z `dry_run: true`),
+   *                     blokowane są wszystkie zapisy do sklepu;
+   *  - `pelny`        — zachowanie 1:1 z produkcją.
+   *
+   * Egzekwowane w `src/selly/tryb.ts`, wpinane w `app.ts`. Sekrety niżej są nadal wymagane —
+   * tryb ich nie zastępuje, tylko dokłada drugi zamek.
+   */
+  SELLY_TRYB: z.enum(["wylaczony", "tylko-odczyt", "pelny"]).default("wylaczony"),
   SELLY_SHOP_URL: z.string().default(""),
   SELLY_CLIENT_ID: z.string().default(""),
   SELLY_CLIENT_SECRET: z.string().default(""),

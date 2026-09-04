@@ -26,6 +26,7 @@ import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
+import { opakujKlientaTrybem } from "./selly/tryb.js";
 
 export type ZaleznosciApp = {
   env: Env;
@@ -149,14 +150,23 @@ export function stworzApp({
   app.use(
     trasySelly({
       db,
+      /*
+       * ⚠ Blokada trybu obejmuje TYLKO klienta budowanego z env (ticket 34, D3).
+       * Klient wstrzyknięty z zewnątrz (`klientSelly`) idzie nietknięty — to atrapa testowa
+       * (`test/gate/selly-atrapa.ts`), a test sam decyduje, co sprawdza; opakowanie jej
+       * domyślnym `wylaczony` wywróciłoby GATE 8a/8b, który z blokadą nie ma nic wspólnego.
+       */
       klient:
         klientSelly ??
-        stworzKlientaSelly({
-          shopUrl: env.SELLY_SHOP_URL,
-          clientId: env.SELLY_CLIENT_ID,
-          clientSecret: env.SELLY_CLIENT_SECRET,
-          scope: env.SELLY_SCOPE,
-        }),
+        opakujKlientaTrybem(
+          stworzKlientaSelly({
+            shopUrl: env.SELLY_SHOP_URL,
+            clientId: env.SELLY_CLIENT_ID,
+            clientSecret: env.SELLY_CLIENT_SECRET,
+            scope: env.SELLY_SCOPE,
+          }),
+          env.SELLY_TRYB,
+        ),
       sciezkiCsv: {
         katalog: env.SELLY_CSV_DIR,
         plik: env.SELLY_CSV_PLIK,
