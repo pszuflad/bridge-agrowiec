@@ -146,3 +146,81 @@ nie „naprawił" wstecz):
 
 Bramki po poprawkach: `lint`, `typecheck`, `build` czyste; suita **917 testów / 58 plików**
 zielona (71 w domenie atrybutów).
+
+## Docs updates
+
+### `docs/rebuild-roadmap.md`
+- §3, wiersz „Martwe ścieżki FE": „naprawić w I7" → „naprawić w **7b**", z faktem, że trasy
+  `/api/atrybuty(/rodzaje)` w odbudowie działają od 7a. Status ⬜ zostaje — front dalej woła
+  martwe ścieżki.
+- §4 (tablica postępu), wiersz 7: `⬜` → `🔨`; przy okazji poprawiona błędna etykieta sesji
+  (`1a BE · 1b FE` → `7a BE · 7b FE`); dopisany ticket i data.
+- §5 Iteracja 7 przepisana na STAN: status `🔨 iteracja w połowie` (7a ✅ 2026-09-04, 7b ⬜),
+  blok rozbity na podbloki 7a/7b w stylu I4. Do 7a: zakres faktycznie dowieziony
+  (13 ścieżek / 18 operacji z jawnie wypisanym `DELETE /api/atrybuty/pending`), trzy fakty
+  ustalone przez ticket (brak atrybutów w rdzeniu — graf wywołań; `requireAuth` = 1:1;
+  seed + hook skanu z jedynym odstępstwem) i rozliczenie gate'u.
+- §5, „Ścieżki (GATE)": „atrybuty×13" doprecyzowane — 13 ścieżek, ale 18 operacji, bo
+  `/api/atrybuty/pending` ma GET i DELETE.
+- **Do bloku 7b** (nie do zamkniętego 7a — `CLAUDE.md` §2) wpisane sześć ustaleń, których front
+  nie odgadnie: brak `utworzony` w `/rodzaje`, goła mapa bez `ok` w `/liczniki`, `count` bez
+  limitu vs lista 200 w `/uzycie`, brak paginacji w `/pending`, `sugerowane_aliasy` = max 5
+  malejąco (+ brak normalizacji wielkości liter), różnica skutków trzech wariantów akceptacji
+  (w tym „nie ma tabeli aliasów" i „DELETE = schowaj, nie odrzuć") oraz kształt `{ok:false,error}`
+  przy braku 403/404/409 w kontrakcie.
+- Efekty uboczne dla I2 i I4b przepisane z warunkowych („po I7 mogą…") na „do zrobienia od
+  zaraz", a noty dopisane TAM, gdzie przeczytają je właściwe sesje: I2/D3, tabela „Co I2
+  świadomie odłożyła" oraz podblok 4b (`DialogReguly.tsx`).
+- Nota z 3e o martwym `GET /api/atrybuty` w `/staging` — **bez zmian**, 7a jej nie ruszała.
+
+### `docs/rebuild-backlog.md`
+Potwierdzone, że wpisów o atrybutach/kolejce/aliasach nie było. Dodane pięć nowych, wszystkie
+**⬜ do decyzji** (format 1:1 jak #33–#36), każdy z dowodem `plik:linia`:
+- **#37** akcje kolejki pending nie zostawiają śladu w audycie (mimo masowego `UPDATE products`),
+- **#38** seed słownika `bieznik` z `products.model` — z dowodem w nagraniu: wszystkie 5 pozycji
+  `GET_atrybuty_pending.json` to rodzaj `bieznik` i każda sugeruje samą siebie ze `podobienstwo: 100`,
+- **#39** dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13),
+- **#40** porównanie wartości bez normalizacji („BKT"/„bkt" = 0),
+- **#41** `openapi.yaml` nie zna kodów 403/404/409 (skierowane do zakresu I12).
+
+### `docs/spec-backend.md`
+- §2: dopisany blok „Potwierdzone w 7a" (13 ścieżek / 18 operacji; `requireAuth` jako
+  odtworzenie 1:1, nie odstępstwo D1; domknięcie korekty z §1 — klaster `index.cjs:295` martwy;
+  dwa kształty: `utworzony` tylko w `GET /api/atrybuty`, `liczniki` jako goła mapa bez `ok`;
+  brak audytu dla pending).
+- §4, wiersz „Endpointy modułowe": „Atrybuty 11" → „Atrybuty 11 **+ Pending 7** (razem 18
+  operacji na 13 ścieżkach)" — stare cięcie było poprawne, ale mylące, bo pending nie miał liczby.
+
+### `docs/spec-frontend.md`
+- §2A: nota „Stan 2026-09-04 (7a)" pod tabelą martwych ścieżek — backend gotowy, 7b ma tylko
+  wołać właściwe trasy, plus ostrzeżenie o różnicy pola `utworzony`.
+- §2B, wiersz `pending-injection.js`: dopisane „Wyczyść wszystko" (`DELETE /api/atrybuty/pending`).
+
+### `docs/plan.md` — bez zmian
+Dokument jawnie historyczny (nagłówek: „Ten dokument jest historyczny", źródłem prawdy jest
+roadmapa). Trzy wzmianki o atrybutach opisują stan sprzed odbudowy i nadal są prawdziwe.
+
+### `CLAUDE.md` — bez zmian
+Ostrzeżenie o duplikatach definicji zostaje: ticket potwierdził tylko, że w JEGO zakresie
+duplikatów nie ma, co nie jest argumentem za osłabianiem reguły. Sekcja „Środowisko" aktualna.
+
+### Korekta merytoryczna wykryta przy okazji docs
+Doc-checker backlogu sprawdził obie mapy pozycja po pozycji i obalił tezę powtórzoną w planie
+i w komentarzach kodu, jakoby mapa kolejki miała `wentyl`, którego nie ma mapa liczników.
+**`wentyl` jest w OBU**; mapa 13-pozycyjna jest dokładnym PODZBIOREM 15-pozycyjnej, a jedyna
+różnica to `model` i `zastosowanie` (zweryfikowane programowo). Poprawione w
+`repos/atrybuty.ts`, `repos/atrybuty-pending.ts` i w `plan.md` (D6).
+
+### Pre-existing issues (zgłoszone, NIE naprawiane — poza zakresem ticketa)
+- `docs/rebuild-roadmap.md` §4, wiersz 8 (Selly): kolumna Sesje ma `1a BE · 1b FE`, a blok I8
+  mówi `8a BE · 8b FE` — ta sama literówka co w wierszu 7 (tamten poprawiony, bo dotyczy I7).
+- `docs/rebuild-roadmap.md` §3, wiersz „Skrypty injection": wskazuje „I7 / I8" bez rozróżnienia
+  sesji; wchłonięcie `pending-injection.js` należy do 7b.
+- `docs/rebuild-backlog.md` legenda statusów (`:22`) zna tylko `—`/`🔨`/`✔`, a wpisy #33+ używają
+  rozbudowanych wariantów; rozjazd zastany.
+- `docs/rebuild-backlog.md:16`: deklarowany zakres pliku to „zmiany Ani z żywej produkcji", ale
+  od ok. #11 pełni też rolę rejestru zastanych defektów wykrytych przy odbudowie.
+- `docs/plan.md:8`: nota nagłówkowa mówi „I1 i I2 zamknięte; kolejne w toku", a zamkniętych jest
+  dziś znacznie więcej. Dokument historyczny — świadomie nietknięty.
+- `docs/spec-backend.md:207`: „Unikalne pary metoda+ścieżka ~113" nie było w tym tickecie
+  weryfikowane i miesza „definicje" ze „ścieżkami".

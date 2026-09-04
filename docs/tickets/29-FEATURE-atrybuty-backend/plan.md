@@ -168,7 +168,7 @@ odstępstwa do odnotowania.
 **D6 — Dwie ODDZIELNE mapy rodzaj→kolumna, odtworzone osobno.** `liczniki`/`uzycie` używają
 `RODZAJ_KOLUMNA` (**15** rodzajów, `atrybuty_module.cjs:251-267`, w tym `model` i `zastosowanie`),
 a scan i akceptacje pending — `RODZAJE_KOLUMNY` (**13** rodzajów, `pending_module.cjs:22-36`,
-BEZ `model` i `zastosowanie`, ZA TO z `wentyl`). Konsekwencja produkcyjna: dla wpisu pending
+BEZ `model` i `zastosowanie` — dokładny podzbiór tamtej, `wentyl` jest w obu). Konsekwencja produkcyjna: dla wpisu pending
 rodzaju `model`/`zastosowanie` `akceptuj-z-edycja` zwróciłby 400 — ale takie wpisy nie powstają,
 bo scan ich nie tworzy. Nie unifikujemy map; komentarz opisuje, dlaczego.
 

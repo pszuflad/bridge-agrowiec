@@ -17,8 +17,9 @@ import { atrybutyWartosciPending } from "../db/schema.js";
 /**
  * Mapa rodzaj → kolumna `products` dla kolejki (port `:22-36`, **13 pozycji**).
  *
- * ⚠ RÓŻNI SIĘ od 15-pozycyjnej `RODZAJ_KOLUMNA` w `repos/atrybuty.ts`: tu NIE MA `model`
- * ani `zastosowanie`, jest za to `wentyl` (którego tamta też ma). Rozbieżność jest w oryginale
+ * ⚠ RÓŻNI SIĘ od 15-pozycyjnej `RODZAJ_KOLUMNA` w `repos/atrybuty.ts`: ta mapa jest jej
+ * dokładnym PODZBIOREM — brakuje dokładnie dwóch pozycji, `model` i `zastosowanie`
+ * (`wentyl` i wszystkie pozostałe są w obu). Rozbieżność jest w oryginale
  * — dwa moduły pisano osobno — i decyduje o dwóch rzeczach naraz: co skan w ogóle wykrywa
  * i dla jakich rodzajów zadziała akceptacja przepisująca produkty. Nie unifikujemy (plan.md D6).
  */

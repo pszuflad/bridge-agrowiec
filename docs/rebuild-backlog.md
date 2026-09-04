@@ -1779,3 +1779,163 @@ komponentu `AppShell.tsx`, to konstrukcja rebuild-u).
 
 **Do decyzji.** Czy ujednolicić przez wspólny layout w `App.tsx` (jedno miejsce), czy dołożyć
 `AppShell` pojedynczo do siedmiu widoków.
+
+---
+
+### #37 · 2026-09-04 · [BACKEND][BEZPIECZEŃSTWO] · akcje kolejki pending nie zostawiają ŻADNEGO śladu w audycie
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (trasy kolejki atrybutów, audyt) |
+| **Pliki** | `mirror/backend/pending_module.cjs:199` (`const { we } = ctx` — bez `be`), `:287-289` i `:331` (masowy `UPDATE products`); dla kontrastu `mirror/backend/atrybuty_module.cjs:142,161,177,208,226,243` (sześć zapisów `be(...)`); port: `rebuild/backend/src/routes/atrybuty.ts` (`audytuj()` wołane tylko przy CRUD słownika) |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D4) |
+| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** `registerPending` (`:199`) destrukturyzuje z ctx wyłącznie `we`
+(middleware auth) — funkcja audytu `be` **nie trafia do modułu w ogóle** (w całym
+`pending_module.cjs` nie ma ani jednego wystąpienia `be`). Żadna z siedmiu tras kolejki
+(`akceptuj`, `akceptuj-z-edycja`, `akceptuj-jako-alias`, `odrzuc`, `scan-pending`,
+`DELETE /api/atrybuty/pending`, `GET /api/atrybuty/pending`) nie pisze do `audit_log`.
+Bliźniaczy `atrybuty_module.cjs` audyt MA — sześć akcji CRUD słownika
+(`atrybut_rodzaj_dodano|zmieniono|usunieto`, `atrybut_wartosc_dodano|zmieniono|usunieto`).
+
+**Skutek.** Dwie z tych tras robią masowy `UPDATE products SET <kolumna>=? WHERE <kolumna>=?`
+(`:287-289` akceptacja z edycją, `:331` akceptacja jako alias) — jedno kliknięcie przepisuje
+markę albo bieżnik w CAŁYM katalogu. Po fakcie nie da się ustalić, kto to zrobił, kiedy ani
+jaka była wartość poprzednia: dziennik `history` (zmiany pól produktu) też nie dostaje wpisu,
+bo UPDATE idzie surowym SQL-em z pominięciem pisarza.
+
+**Co zrobiła odbudowa.** Port 1:1 (D4): `routes/atrybuty.ts` woła `audytuj()` wyłącznie przy
+sześciu trasach CRUD słownika, kolejka pending nie loguje nic. Luka opisana komentarzem w kodzie.
+
+**Do decyzji.** Czy dołożyć audyt akcjom kolejki (osobne akcje `atrybut_pending_*`, z liczbą
+przepisanych produktów w szczegółach). Naprawa jest tania i nie zmienia kształtu żadnej
+odpowiedzi — koszt to rozjazd z produkcją w zawartości `audit_log`, widocznej przez
+`GET /api/history/paged`.
+
+---
+
+### #38 · 2026-09-04 · [BACKEND] · seed słownika `bieznik` bierze wartości z `products.model`, nie z `products.bieznik`
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (seed słownika atrybutów, uruchamiany przy każdym starcie procesu) |
+| **Pliki** | `mirror/backend/atrybuty_module.cjs:79-83` (`SELECT DISTINCT model` → `insWartosc('bieznik', …)`), `:75-78` (analogiczny, poprawny seed marki), `:99` (`seed(db)` przy rejestracji modułu); `rebuild/schema/001_schema.sql:53` (`products.bieznik TEXT` istnieje); dowód skutku: `contract/fixtures/GET_atrybuty_pending.json`; port: `rebuild/backend/src/repos/atrybuty.ts:355` (`zasiejSlownikAtrybutow`) |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D1) |
+| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** `seed()` zasila słownik `marka` z `SELECT DISTINCT marka FROM products`,
+a zaraz potem słownik `bieznik` z `SELECT DISTINCT model FROM products` — **z kolumny `model`**,
+mimo że `products`
+ma własną kolumnę `bieznik`. Seed leci przy KAŻDYM starcie procesu (`registerAtrybuty:99`),
+więc katalog wartości `bieznik` jest po każdym restarcie na nowo dosypywany nazwami modeli.
+
+**Skutek — widoczny wprost w nagraniu produkcji.** Wszystkie 5 pozycji w
+`GET_atrybuty_pending.json` to rodzaj `bieznik` i KAŻDA sugeruje SAMĄ SIEBIE z
+`podobienstwo: 100` („AGRI STAR II", „HAKKAPELIITTA TRI", „TORQUEMAX", „FARMAX R85",
+„AGRIFLEX 372 +"). Mechanizm: skan dopisał wartość do kolejki, gdy nie było jej jeszcze
+w słowniku; kolejny start procesu wsypał ją do słownika z `products.model`; skan nie usuwa
+z kolejki pozycji, które trafiły już do katalogu, więc wpis wisi dalej i jako „sugerowany alias"
+dostaje swój własny odpowiednik. Ania widzi w kolejce propozycję „zamień X na X".
+
+**Co zrobiła odbudowa.** Port 1:1 (D1), z komentarzem w `repos/atrybuty.ts` opisującym quirk
+i jego ślad w fixture.
+
+**Do decyzji.** Czy przestawić seed na `products.bieznik`. Ryzyko: zawartość słownika `bieznik`
+rozjedzie się z produkcją (wypadną z niego nazwy modeli, dojdą realne bieżniki), a to zmienia
+wyniki `scan-pending`, listę sugerowanych aliasów i zamrożony `GET_atrybuty_pending.json` —
+czyli wymaga przenagrania fixture'a. Sprzątanie samego objawu (usuwanie z kolejki pozycji
+obecnych już w słowniku) to osobna, mniejsza zmiana.
+
+---
+
+### #39 · 2026-09-04 · [BACKEND] · dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13) — pozycji pending rodzaju `model`/`zastosowanie` nie dałoby się zaakceptować
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (mapowanie atrybut → kolumna `products`) |
+| **Pliki** | `mirror/backend/atrybuty_module.cjs:251-267` (`RODZAJ_KOLUMNA`, 15 pozycji — `liczniki` i `uzycie`), `mirror/backend/pending_module.cjs:22-36` (`RODZAJE_KOLUMNY`, 13 pozycji — skan i akceptacje), `:283-284` i `:326-327` (400 „Nieznany rodzaj"); port: `rebuild/backend/src/repos/atrybuty.ts:49` i `rebuild/backend/src/repos/atrybuty-pending.ts:25` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D6) |
+| **Status** | ✔ odtworzone w rebuild (7a) · **nieosiągalne dzisiejszą ścieżką UI** |
+
+**Co robi produkcja.** Dwa moduły trzymają własne, niezależne mapy „rodzaj atrybutu → kolumna
+`products`". `liczniki` i `uzycie` używają mapy 15-pozycyjnej; skan kolejki i obie akceptacje
+przepisujące produkty — 13-pozycyjnej, która jest jej **podzbiorem** bez `model`
+i `zastosowanie` (wbrew intuicji `wentyl` jest w OBU — te dwa rodzaje to jedyna różnica).
+
+**Skutek.** Dla pozycji kolejki rodzaju `model` albo `zastosowanie` `akceptuj-z-edycja`
+i `akceptuj-jako-alias` odbiłyby żądanie `400 {ok:false, error:"Nieznany rodzaj: model"}`
+i wpisu nie dałoby się rozstrzygnąć inaczej niż odrzuceniem. Dziś nieosiągalne, bo skan
+iteruje po tej samej 13-pozycyjnej mapie i takich pozycji nie tworzy — ale wystarczy dopisać
+rodzaj do mapy skanu (albo wstawić wiersz do `atrybuty_wartosci_pending` ręcznie), żeby mina
+odpaliła.
+
+**Co zrobiła odbudowa.** Obie mapy odtworzone osobno (D6), każda przy swoim repozytorium,
+z komentarzem opisującym rozjazd i jego konsekwencję.
+
+**Do decyzji.** Czy zunifikować mapy. ⚠ Uwaga na kierunek: dołożenie `model` i `zastosowanie`
+do mapy SKANU sprawi, że `scan-pending` zacznie zgłaszać nowe wartości także tych rodzajów
+(dla `model` to praktycznie cały katalog — patrz **#38**) i zaleje kolejkę. Bezpieczniejszy
+wariant to zostawić zakres skanu bez zmian, a pełną mapę dać tylko akceptacjom.
+
+---
+
+### #40 · 2026-09-04 · [BACKEND] · porównanie wartości bez normalizacji — „BKT" i „bkt" mają podobieństwo 0
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (algorytm sugerowania aliasów w kolejce atrybutów) |
+| **Pliki** | `mirror/backend/pending_module.cjs:41-55` (`levenshtein`), `:57-62` (`similarity`), `:65-72` (`shouldSuggestAlias`); port: `rebuild/backend/src/repos/atrybuty-pending.ts:57,80,96`, testy `rebuild/backend/test/atrybuty.podobienstwo.test.ts` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`) |
+| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** `similarity` liczy odległość Levenshteina na SUROWYCH napisach — bez
+`toLowerCase()`, bez `trim()`, bez zwijania wielokrotnych spacji. Jedyna normalizacja w całym
+module to reguła „nie sugeruj, gdy różnica to wyłącznie `+`" (`:65-72`). Próg sugestii:
+`sim ≥ 0.9`.
+
+**Skutek.** „BKT" wobec „bkt" to dystans 3 na 3 znaki, czyli podobieństwo **0** — kolejka
+nigdy nie zaproponuje aliasu dla wartości różniącej się tylko wielkością liter, choć dla
+człowieka to ta sama marka. Im krótsza wartość, tym gorzej: różnica w jednej literze mieści
+się w progu 0,9 dopiero od 10 znaków. To ten sam rodzaj rozjazdu, który w katalogu prostował
+`kategoriafix` (**#2** — duplikaty różniące się wyłącznie wielkością liter).
+
+**Co zrobiła odbudowa.** Port 1:1, jawnie odnotowany w `plan.md` („bez normalizacji wielkości
+liter i spacji — oryginał jej nie ma"); testy jednostkowe zamrażają wyniki policzone ze wzoru
+oryginału.
+
+**Do decyzji.** Czy porównywać wartości po normalizacji (`trim().toLowerCase()`, zwinięte
+spacje), zostawiając w słowniku i w `products` formę oryginalną. Ryzyko: sugestii będzie
+WIĘCEJ i będą inne niż dziś, a przycisk „akceptuj jako alias" przepisuje produkty w całym
+katalogu — rośnie więc koszt pomyłki (tym bardziej, że nie ma z tego audytu, **#37**). Zmiana
+rozjeżdża pole `sugerowane_aliasy` z zamrożonym `GET_atrybuty_pending.json`.
+
+---
+
+### #41 · 2026-09-04 · [BACKEND][KONTRAKT] · `contract/openapi.yaml` nie zna kodów 403/404/409 — GATE nie może ich objąć
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | KONTRAKT (opis API, nie kod) — problem systemowy, ujawniony przy atrybutach |
+| **Pliki** | `contract/openapi.yaml` — w CAŁYM pliku zero wystąpień `403:` / `404:` / `409:` (sprawdzone grepem); trasy, które te kody zwracają: `mirror/backend/atrybuty_module.cjs:174` (403), `:158,:173,:225,:241` i `mirror/backend/pending_module.cjs:257,281,318,349` (404), `atrybuty_module.cjs:146,:212,:230` (409); dowód po naszej stronie: `rebuild/backend/test/atrybuty.crud.test.ts` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — kandydat do zakresu **I12** („Odświeżenie kontraktu + nagranie fixtures", `docs/rebuild-roadmap.md:296`) |
+| **Iteracja** | ujawnione przy **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`) |
+| **Status** | — nie zaczęte (luka po stronie kontraktu, kod jest zgodny z oryginałem) |
+
+**Co znaleziono.** Zamrożony kontrakt deklaruje dla operacji wyłącznie 200/401/400. Moduł
+atrybutów zwraca ponadto **403** (próba usunięcia wbudowanego rodzaju `core=1`), **404**
+(„Nie znaleziono", „Pozycja pending nie istnieje") i **409** (duplikat rodzaju albo wartości)
+— wszystkie w kształcie `{ok:false, error}`, odtworzone co do znaku.
+
+**Skutek.** `sprawdzZgodnoscZKontraktem` nie może objąć tych odpowiedzi, więc GATE ich nie
+pilnuje — dowodzą ich tylko testy integracyjne. Rozjazd kodu z kontraktem na tych trzech
+kodach nie zapali się maszynowo, i to nie tylko przy atrybutach: brak dotyczy całego pliku.
+
+**Do decyzji.** Dopisać 403/404/409 do `openapi.yaml` przy odświeżaniu kontraktu w I12, razem
+z pozostałymi zaległościami kontraktowymi (**#4** — `GET /api/products/uwagi-cena` i
+`/hold-reasons`; przenagranie fixtures po **#3**). Ryzyko dla runtime'u zerowe — to zmiana
+opisu, nie zachowania; koszt to przegląd wszystkich tras, bo luka jest systemowa.

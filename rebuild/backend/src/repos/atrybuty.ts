@@ -40,8 +40,8 @@ export type Wartosc = {
  * Mapa rodzaj atrybutu → kolumna `products` (port `:251-267`, **15 pozycji**).
  *
  * ⚠ TO NIE JEST TA SAMA MAPA, CO W KOLEJCE PENDING. `repos/atrybuty-pending.ts` ma własną,
- * 13-pozycyjną: bez `model` i `zastosowanie`, za to z `wentyl`. Rozbieżność jest w oryginale
- * (dwa moduły pisane osobno) i ma widoczny skutek: dla pozycji pending rodzaju `model` albo
+ * 13-pozycyjną: dokładny PODZBIÓR tej mapy, bez `model` i `zastosowanie` (`wentyl` i cała
+ * reszta są w obu). Rozbieżność jest w oryginale — dwa moduły pisano osobno — i ma widoczny skutek: dla pozycji pending rodzaju `model` albo
  * `zastosowanie` akceptacja z edycją zwróciłaby 400 „Nieznany rodzaj". W praktyce takie
  * pozycje nie powstają, bo skan ich nie tworzy. Nie unifikujemy map — unifikacja zmieniłaby
  * zachowanie obu tras naraz.

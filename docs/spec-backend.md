@@ -167,6 +167,21 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > danych. Format CSV: separator średnik, BOM zawsze na początku (także przy pustym wyniku),
 > cudzysłowy podwajane, nagłówek z kluczy pierwszego wiersza. Szczegóły:
 > `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
+>
+> **Potwierdzone w 7a** (`29-FEATURE-atrybuty-backend`, 2026-09-04): atrybuty to **13 ścieżek /
+> 18 operacji** (`atrybuty_module.cjs` 11 + `pending_module.cjs` 7; operacji jest więcej niż
+> ścieżek, bo `/api/atrybuty/pending` ma GET i DELETE — `pending_module.cjs:377`). Wszystkie
+> wjechały pod `requireAuth`, ale to **NIE jest odstępstwo D1**: oryginał wpina middleware auth
+> `we` w każdą trasę obu modułów (`extensions.cjs:80,105`). Domknięta korekta z §1: klaster
+> atrybutów w rdzeniu (`mirror/backend/index.cjs:295` — `ATTR_CORE_KINDS`, `listAtrybuty`,
+> `upsertAtrybutRodzaj`…) jest **martwy**, `grep "'/api/atrybuty" index.cjs` = 0 trafień —
+> żywe są wyłącznie oba moduły Extensions. Dwa kształty, które łatwo przeoczyć:
+> `GET /api/atrybuty` oddaje rodzaje **z** polem `utworzony`, a `GET /api/atrybuty/rodzaje`
+> **bez** (SELECT `atrybuty_module.cjs:116` go nie pobiera), zaś `GET /api/atrybuty/liczniki`
+> oddaje **gołą mapę** `"<rodzaj>::<wartosc>": liczba`, bez koperty `ok`. Audyt piszą tylko
+> 3 trasy CRUD rodzajów i 3 wartości — kolejka pending nie loguje nic, mimo że
+> `akceptuj-z-edycja`/`akceptuj-jako-alias` robią masowy `UPDATE products`. Szczegóły:
+> `docs/tickets/29-FEATURE-atrybuty-backend/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -189,7 +204,7 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 | Element | Wartość | Weryfikacja |
 |---|---|---|
 | Endpointy rdzenia | **49** rejestracji | zgodne z naszym `deminified` |
-| Endpointy modułowe | 66 def. (64 żywe po deduplikacji) | Atrybuty 11, Analytics 27, Pending, Paginacja 4, Selly |
+| Endpointy modułowe | 66 def. (64 żywe po deduplikacji) | Atrybuty 11 **+ Pending 7** (razem 18 operacji na 13 ścieżkach — patrz 7a w §2), Analytics 27, Paginacja 4, Selly |
 | Unikalne pary metoda+ścieżka | ~113 | 49 + 66 − 2 przesłonięte |
 | Metody `U.*` | **50 zdefiniowanych** / 47 używanych | Perplexity liczy definicje (`04_WARSTWA_DANYCH`), ja użycia — obie liczby poprawne |
 | Tabele | 27 (z `sqlite_sequence`) / 26 użytkowych | bez zmian od lipca |
