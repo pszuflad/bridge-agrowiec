@@ -333,6 +333,12 @@ export function trasySelly({ db, klient, sciezkiCsv }: ZaleznosciSelly): Router 
   /**
    * Status mapowania per dostawca (`routes.cjs:252-280`) — ile produktów jest w Bridge,
    * ile doszło do Selly, ile ma tam błąd. Opcjonalny filtr `?dostawca=`.
+   *
+   * ⚠ DROBNA RÓŻNICA WOBEC ORYGINAŁU, ŚWIADOMA: przy powtórzonym parametrze
+   * (`?dostawca=a&dostawca=b`) Express oddaje TABLICĘ. Oryginał wrzuciłby ją wprost do
+   * `db.prepare(...).all(dostawca)` i better-sqlite3 by rzucił (500); my sprawdzamy typ
+   * i traktujemy taki parametr jak jego brak. Panel takich żądań nie generuje, a 500
+   * z wnętrza sterownika bazy nie jest zachowaniem, które warto odtwarzać wiernie.
    */
   router.get("/api/selly/status", requireAuth, (req: Request, res: Response) => {
     try {

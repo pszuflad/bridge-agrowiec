@@ -1,6 +1,6 @@
 # 28-FEATURE-selly-eksport-backend — Iteracja 8, sesja 8a (backend Selly + eksport Shoper)
 
-> Status: Draft → Approved → Implemented → Shipped
+> Status: Draft → Approved → **Implemented** → Shipped
 > Branch: `feature/28-selly-eksport-backend`
 > Worktree: `.worktrees/28-FEATURE-selly-eksport-backend`
 
@@ -249,12 +249,12 @@ Atrapa dotyczy wyłącznie zewnętrznego Selly, którego nie mamy prawa dotykać
 
 ## Definition of done
 
-- [ ] 10 tras Selly + 2 trasy eksportu odpowiadają, wszystkie za `requireAuth`
-- [ ] 5 fixtures Selly zgodne 1:1 (kształt) i żadna odpowiedź nie niesie `_przyciete`
-- [ ] Wszystkie 12 ścieżek waliduje się względem `contract/openapi.yaml`
-- [ ] Format obu CSV eksportu odtworzony wiernie (BOM, `;`, `\r\n`, kolumny, escaping); ZIP działa
-- [ ] Generator 59-kolumnowy zgodny z `generate_selly_export.cjs`
-- [ ] 401 bez tokenu na wszystkich 12 trasach; eksport działa na samo cookie
-- [ ] `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` czyste
-- [ ] Backlog #12 zaktualizowany o konsekwencję dla mapowania kategorii Selly (D3)
+- [x] 10 tras Selly + 2 trasy eksportu odpowiadają, wszystkie za `requireAuth`
+- [x] 5 fixtures Selly zgodne 1:1 (kształt) i żadna odpowiedź nie niesie `_przyciete`
+- [x] Wszystkie 12 ścieżek waliduje się względem `contract/openapi.yaml`
+- [x] Format obu CSV eksportu odtworzony wiernie (BOM, `;`, `\r\n`, kolumny, escaping); ZIP działa
+- [x] Generator 59-kolumnowy zgodny z `generate_selly_export.cjs`
+- [x] 401 bez tokenu na wszystkich 12 trasach; eksport działa na samo cookie
+- [x] `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` czyste
+- [x] Backlog #12 zaktualizowany o konsekwencję dla mapowania kategorii Selly (D3)
 - [ ] Roadmapa: blok 8a zamknięty, sprostowane POST-y i auth panelu, notatki dla 8b w bloku 8b

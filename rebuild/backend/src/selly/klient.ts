@@ -13,7 +13,7 @@
  *
  * Autoryzacja: OAuth2 `client_credentials`, ciało JSON, `POST {SHOP_URL}/api/auth/access_token`.
  * Token JWT ważny 3600 s, cache w pamięci, auto-refresh przy 401. Limit Selly to 50 rekordów
- * na zapytanie GET — stąd `Math.min(limit, 50)` w listach.
+ * na zapytanie GET; `slowniki.ts` podaje go jawnie, bo oryginał NIE capuje go w słownikach.
  *
  * RÓŻNICA STRUKTURALNA, NIE BEHAWIORALNA (plan.md D8): oryginał trzyma `tokenCache` jako
  * zmienną modułu (`client.cjs:26`). U nas cache siedzi w instancji. Dla pojedynczego procesu
@@ -268,21 +268,20 @@ export function stworzKlientaSelly(konfiguracja: KonfiguracjaSelly): KlientSelly
       };
     },
 
-    async listProducers(query = {}) {
-      const { limit, ...reszta } = query;
-      return (await dane("GET", "/api/producers", {
-        query: { ...reszta, ...(limit === undefined ? {} : { limit: Math.min(limit, 50) }) },
-      })) as OdpowiedzListy<ProducentSelly>;
-    },
+    /**
+     * ⚠ BEZ `Math.min(limit, 50)`, mimo że Selly przy 50 rekordach ma twardy limit.
+     * Oryginał capuje `limit` WYŁĄCZNIE w `listProducts` i `listOrders` (`client.cjs:129,203`),
+     * a w słownikach przekazuje wartość wprost (`:181-186`) — jedyny wołający i tak podaje
+     * `limit: 50` (`slowniki.ts`). Dodanie capa tutaj byłoby logiką spoza oryginału.
+     */
+    listProducers: async (query = {}) =>
+      (await dane("GET", "/api/producers", { query })) as OdpowiedzListy<ProducentSelly>,
 
     createProducer: (producent) => dane("POST", "/api/producers", { body: producent }),
 
-    async listCategories(query = {}) {
-      const { limit, ...reszta } = query;
-      return (await dane("GET", "/api/categories", {
-        query: { ...reszta, ...(limit === undefined ? {} : { limit: Math.min(limit, 50) }) },
-      })) as OdpowiedzListy<KategoriaSelly>;
-    },
+    /** Bez capa na `limit` — jak `listProducers` wyżej. */
+    listCategories: async (query = {}) =>
+      (await dane("GET", "/api/categories", { query })) as OdpowiedzListy<KategoriaSelly>,
 
     createCategory: (kategoria) => dane("POST", "/api/categories", { body: kategoria }),
 

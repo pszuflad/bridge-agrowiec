@@ -30,7 +30,7 @@ import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-import { asc } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { products } from "../db/schema.js";
@@ -152,8 +152,12 @@ function esc(wartosc: unknown): string {
  * Tylko produkty `status='aktywny'`, kolejność po `id`. Plik kończy się `\r\n`.
  */
 export function zbudujCsvSelly(db: Baza): { tresc: string; wiersze: number } {
-  const wiersze = db.select().from(products).orderBy(asc(products.id)).all();
-  const aktywne = wiersze.filter((p) => p.status === "aktywny");
+  const aktywne = db
+    .select()
+    .from(products)
+    .where(eq(products.status, "aktywny"))
+    .orderBy(asc(products.id))
+    .all();
 
   const linie: string[] = [KOLUMNY.map(([naglowek]) => naglowek).join(";")];
 

@@ -46,6 +46,22 @@ function dataDoNazwy(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/**
+ * Konstruktor archiwum ZIP, importowany LENIWIE i zapamiętywany — port `rV()`
+ * (`deminified/backend-index.cjs:48139-48149`), łącznie z cache'owaniem w zmiennej modułu.
+ *
+ * `archiver` jest ESM-only i ciągnie kilkanaście zależności, których jedenaście pozostałych
+ * tras tego ticketa nie potrzebuje; import w środku żądania trzyma je poza ścieżką startu
+ * procesu. Cache jest po to, żeby `await import()` nie wisiał w każdym żądaniu ZIP-a —
+ * Node i tak trzyma moduł w swoim rejestrze, ale oryginał robi to jawnie i tak zostaje.
+ */
+let ZipArchiveCache: typeof import("archiver").ZipArchive | undefined;
+
+async function konstruktorZip(): Promise<typeof import("archiver").ZipArchive> {
+  if (!ZipArchiveCache) ZipArchiveCache = (await import("archiver")).ZipArchive;
+  return ZipArchiveCache;
+}
+
 export function trasyEksportuShoper({ db }: ZaleznosciEksportuShoper): Router {
   const router = Router();
 
@@ -72,9 +88,7 @@ export function trasyEksportuShoper({ db }: ZaleznosciEksportuShoper): Router {
       res.setHeader("Content-Disposition", `attachment; filename="shoper_wszyscy_${data}.zip"`);
 
       void (async () => {
-        // Dynamiczny import jak w oryginale (`:48139-48142`) — `archiver` jest ESM-only
-        // i ładuje kilkanaście zależności, których cztery pozostałe trasy nie potrzebują.
-        const { ZipArchive } = await import("archiver");
+        const ZipArchive = await konstruktorZip();
         const archiwum = new ZipArchive({ zlib: { level: 9 } });
 
         archiwum.on("error", (blad: Error) => {

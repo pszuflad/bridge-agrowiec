@@ -726,13 +726,19 @@ A podjęta tego samego dnia. Rozszerzono 2026-08-26 przy tickecie
 
 > **Zgłoszone przy tickecie `9-FEATURE-acceptstaging-endpointy-mutacji` (I3/3d-2).**
 > Świadomie NIE przeportowane — decyzja użytkownika, plan.md D2.
+>
+> **Aktualizacja 2026-09-04, ticket `28-FEATURE-selly-eksport-backend` (I8/8a).**
+> Właścicielstwo ROZSTRZYGNIĘTE: wpis należy do **I8**, nie do I7 — `selly_zastosowanie_category_map`
+> i jej jedyny konsument (`mapujZastosowanieNaKategorie`, `rebuild/backend/src/selly/mapper.ts`)
+> mieszkają w tej iteracji. Decyzja użytkownika z tej samej daty: **nadal NIE portujemy**
+> (kontynuacja 3d-2), ale konsekwencja jest teraz zmierzona i opisana niżej.
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (import / dane) |
 | **Pliki** | `deminified/backend-index.cjs:44105` (funkcja), `:48546` (wywołanie); dane: `mirror/backend/zastosowania/zastosowania_master.csv` (6823 wiersze) |
 | **Do nowej wersji?** | ⬜ **DO DECYZJI** — najpierw ustalić przyczynę (niżej) |
-| **Status** | otwarte |
+| **Status** | otwarte; właściciel ustalony (I8), konsekwencja dla Selly zmierzona 2026-09-04 |
 
 **Co robi produkcja.** Endpoint `POST /api/staging/accept` po zatwierdzeniu pozycji woła
 `__restoreZastosowanie()`. Funkcja czyta CSV z **zahardkodowanej ścieżki produkcyjnej**
@@ -764,6 +770,41 @@ Zwróć uwagę, że warunek `zastosowanie IS NULL OR TRIM(...)=''` pasuje dokła
 **Rekomendacja:** przy I7 albo I8 najpierw ODTWORZYĆ przyczynę (zaimportować pozycję, zatwierdzić,
 sprawdzić, czy `zastosowanie` znika), a dopiero potem decydować, czy portować naprawę, czy
 usunąć potrzebę.
+
+---
+
+#### Konsekwencja dla Selly — zmierzona w 8a (2026-09-04)
+
+Punkt 3 wyżej („brak szkody z pominięcia") był prawdziwy DOPÓKI nie istniał konsument
+`products.zastosowanie`. Po 8a konsument istnieje i szkoda jest konkretna.
+
+`mapujZastosowanieNaKategorie` (`rebuild/backend/src/selly/mapper.ts`, port `mapper.cjs:135-170`)
+wyznacza kategorię produktu w Selly **z pola `zastosowanie`**: pierwsza wartość to kategoria
+główna, kolejne (po `" + "`) idą do `multi_cat`. Puste `zastosowanie` przełącza funkcję w gałąź
+`source: "fallback_kategoria"`, czyli produkt trafia do Selly **wyłącznie do kategorii głównej
+wyliczonej z `products.kategoria`** — bez podkategorii z `selly_zastosowanie_category_map`
+i bez żadnej kategorii dodatkowej. Jeśli w dodatku `products.kategoria` nie ma odpowiednika
+w `selly_kategoria_norm_map`, `category_id` wychodzi `null`, walidacja odrzuca payload
+(`Brak category_id (nieznana kategoria)`) i produkt zostaje policzony jako `skipped`
+w `POST /api/selly/sync-supplier` — czyli **w ogóle nie dojdzie do sklepu**.
+
+Obie gałęzie są zamrożone w testach (`rebuild/backend/test/selly.mapper.test.ts`,
+`selly.synchronizacja.test.ts`), więc skutek tej decyzji jest widoczny w kodzie, nie tylko tutaj.
+
+**Co to zmienia w rekomendacji.** Kolejność „najpierw przyczyna, potem naprawa" zostaje bez
+zmian, ale zyskuje mierzalny test akceptacyjny: po zaimportowaniu i zatwierdzeniu pozycji
+sprawdź nie tylko, czy `zastosowanie` znika, ale też ile produktów wpada w
+`fallback_kategoria`/`fallback_empty` przy synchronizacji z Selly. To jest liczba, którą widać
+w `selly_sync_log.szczegoly_json` jako `skipped` — porównywalna między przebiegami.
+
+**Opcje, gdyby decyzja się zmieniła** (spisane 2026-09-04, żeby następna sesja nie zaczynała
+od zera):
+- **(A)** wciągnąć `zastosowania_master.csv` do repo jako seed — odtwarza zachowanie 1:1,
+  wymaga dostarczenia pliku przez operatora produkcji (6823 wiersze, dziś poza repo);
+- **(B)** portować funkcję ze ścieżką z konfiguracji/env, bez pliku działa jako no-op z logiem;
+- **(C)** naprawić przyczynę w akceptacji stagingu (snapshot nie niesie `zastosowania`,
+  więc INSERT zostawia pole puste) — czystsze, ale to odstępstwo od zachowania oryginału;
+- **(D)** zostawić jak jest i traktować jako znaną degradację (stan na 2026-09-04).
 
 
 ---

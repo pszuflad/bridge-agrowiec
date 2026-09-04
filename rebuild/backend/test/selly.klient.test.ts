@@ -253,8 +253,14 @@ describe("klient Selly — OAuth2 i warstwa HTTP", () => {
     );
   });
 
-  /** Limit Selly to 50 rekordów na zapytanie listujące — większa wartość jest ścinana. */
-  it("`limit` w listach jest ścinany do 50", async () => {
+  /**
+   * ⚠ `limit` w słownikach idzie do Selly WPROST, bez capowania. Selly ma twardy limit 50
+   * rekordów na zapytanie, ale oryginał capuje go wyłącznie w `listProducts` i `listOrders`
+   * (`client.cjs:129,203`), a w `listProducers`/`listCategories` przekazuje wartość surową
+   * (`:181-186`). Jedyny wołający (`slowniki.ts`) i tak podaje `limit: 50`, więc dodanie tu
+   * capa byłoby logiką spoza oryginału — a ten test pilnuje, żeby nikt jej nie dołożył.
+   */
+  it("`limit` w słownikach idzie do Selly bez capowania", async () => {
     const udawany = udawanySelly((zad, res) => {
       if (zad.sciezka === "/api/auth/access_token") {
         odpowiedz(res, 200, { access_token: "TOKEN", expires_in: 3600 });
@@ -275,7 +281,7 @@ describe("klient Selly — OAuth2 i warstwa HTTP", () => {
     await klient.listProducers({ limit: 500 });
 
     const daneowe = udawany.zadania.find((z) => z.sciezka.startsWith("/api/producers"));
-    expect(daneowe?.sciezka).toBe("/api/producers?limit=50");
+    expect(daneowe?.sciezka).toBe("/api/producers?limit=500");
   });
 
   /**
