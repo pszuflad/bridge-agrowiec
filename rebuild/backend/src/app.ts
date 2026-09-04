@@ -20,9 +20,12 @@ import { trasyMutacjiStagingu } from "./routes/staging-mutacje.js";
 import { trasyOverrides } from "./routes/overrides.js";
 import { trasyNarzutow } from "./routes/markups.js";
 import { trasyPromocji } from "./routes/promotions.js";
+import { trasySelly } from "./routes/selly.js";
+import { trasyEksportuShoper } from "./routes/export-shoper.js";
 import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
+import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
 
 export type ZaleznosciApp = {
   env: Env;
@@ -45,6 +48,15 @@ export type ZaleznosciApp = {
    * Pominięte (testy, dev) ⇒ zachowanie 1:1 z oryginałem, czyli brak przeplanowania.
    */
   przeplanujScheduler?: () => void;
+  /**
+   * Klient REST Selly (Iteracja 8a). Pominięty ⇒ `stworzApp` buduje własny z `env`.
+   *
+   * Wstrzykiwany po to, żeby testy mogły podać ATRAPĘ (plan.md D2): sześć tras panelu wychodzi
+   * do realnego sklepu `agroopony.selly24.pl`, a `POST /api/selly/sync-supplier`
+   * z `dry_run=false` tworzy i modyfikuje tam produkty. Żaden bieg `npm test` nie może tego
+   * dotknąć nawet przez pomyłkę.
+   */
+  klientSelly?: KlientSelly;
 };
 
 /**
@@ -56,6 +68,7 @@ export function stworzApp({
   db,
   synchronizuj,
   przeplanujScheduler,
+  klientSelly,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -133,6 +146,25 @@ export function stworzApp({
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
   app.use(trasyKonfiguracji({ db }));
   app.use(trasySpedycji({ db }));
+  app.use(
+    trasySelly({
+      db,
+      klient:
+        klientSelly ??
+        stworzKlientaSelly({
+          shopUrl: env.SELLY_SHOP_URL,
+          clientId: env.SELLY_CLIENT_ID,
+          clientSecret: env.SELLY_CLIENT_SECRET,
+          scope: env.SELLY_SCOPE,
+        }),
+      sciezkiCsv: {
+        katalog: env.SELLY_CSV_DIR,
+        plik: env.SELLY_CSV_PLIK,
+        url: env.SELLY_CSV_URL,
+      },
+    }),
+  );
+  app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyAtrybutow({ db }));
 

@@ -311,9 +311,9 @@ w stagingu, nic dodatkowego nie trzeba było robić w 3c.
 |---|---|
 | **Pliki** | `frazy_migruj.cjs` (nowy, +64), `common.cjs` (+23), `frazy_niedopasowane.json` (dane), `frazy_raport.json` |
 | **Commit** | `33455c8` |
-| **Do nowej wersji?** | ❌ **NIE** jako zadanie importu (rozstrzygnięte 2026-08-26, I3/3a — patrz niżej); do rozważenia przy I8 Selly |
-| **Iteracja** | → rozstrzygnięte przy **I3/3a**: nie jest normalizacją w adapterze; do rozważenia przy **I8** (Selly) |
-| **Status** | ✔ zbadane i rozstrzygnięte (I3/3a, 2026-08-26) |
+| **Do nowej wersji?** | ❌ **NIE** jako zadanie importu (rozstrzygnięte 2026-08-26, I3/3a — patrz niżej); ⬜ **DO DECYZJI** jako osobne narzędzie Selly, świadomie poza zakresem I8/8a |
+| **Iteracja** | → rozstrzygnięte przy **I3/3a**: nie jest normalizacją w adapterze; backend Selly (panel + synchronizacja produktów/dostawców) dowieziony w **I8/8a**, ale BEZ `frazy` — poza zakresem tej sesji (`docs/tickets/28-FEATURE-selly-eksport-backend/plan.md`, „Poza zakresem") |
+| **Status** | ✔ zbadane i rozstrzygnięte (I3/3a, 2026-08-26); narzędzie `frazy` samo nadal nieportowane po 8a |
 
 **Opis (stan na 2026-08-24, przed zbadaniem):** system migracji/dopasowania „fraz" — podejrzewany
 jako normalizacja `zastosowanie`/nazw w adapterze. Changelog Ani nieaktualny, szczegóły wymagały
@@ -329,6 +329,12 @@ dotyczy czegoś innego. Nic w potoku `parser → adapter → recordToSurowe()` s
 odpowiednik w odbudowie, to przy **I8 (Selly)**, nie przy imporcie ani atrybutach.
 **Rekomendacja: ❌ NIE** jako zadanie importu; do rozważenia w I8, gdy będziemy odtwarzać
 integrację Selly.
+
+**Aktualizacja 2026-09-04, ticket `28-FEATURE-selly-eksport-backend` (I8/8a).** Backend Selly
+(10 tras panelu — słowniki, producenci/kategorie, synchronizacja produktu/dostawcy, status/log,
+eksport CSV) jest już dowieziony. `frazy_migruj.cjs` to osobny, jednorazowy skrypt operacyjny
+(czyta `/tmp/frazy_migracja.json`, woła Selly bezpośrednio) i celowo NIE wszedł w zakres 8a —
+pozostaje ⬜ do decyzji, czy w ogóle potrzebuje odpowiednika w odbudowie.
 
 ### #6 · 2026-08-21…25 · [BACKEND] · bieżące poprawki parserów (`flagsfix`, mo8, batch) → obsłużone PORTEM
 
@@ -726,13 +732,19 @@ A podjęta tego samego dnia. Rozszerzono 2026-08-26 przy tickecie
 
 > **Zgłoszone przy tickecie `9-FEATURE-acceptstaging-endpointy-mutacji` (I3/3d-2).**
 > Świadomie NIE przeportowane — decyzja użytkownika, plan.md D2.
+>
+> **Aktualizacja 2026-09-04, ticket `28-FEATURE-selly-eksport-backend` (I8/8a).**
+> Właścicielstwo ROZSTRZYGNIĘTE: wpis należy do **I8**, nie do I7 — `selly_zastosowanie_category_map`
+> i jej jedyny konsument (`mapujZastosowanieNaKategorie`, `rebuild/backend/src/selly/mapper.ts`)
+> mieszkają w tej iteracji. Decyzja użytkownika z tej samej daty: **nadal NIE portujemy**
+> (kontynuacja 3d-2), ale konsekwencja jest teraz zmierzona i opisana niżej.
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (import / dane) |
 | **Pliki** | `deminified/backend-index.cjs:44105` (funkcja), `:48546` (wywołanie); dane: `mirror/backend/zastosowania/zastosowania_master.csv` (6823 wiersze) |
 | **Do nowej wersji?** | ⬜ **DO DECYZJI** — najpierw ustalić przyczynę (niżej) |
-| **Status** | otwarte |
+| **Status** | otwarte; właściciel ustalony (I8), konsekwencja dla Selly zmierzona 2026-09-04 |
 
 **Co robi produkcja.** Endpoint `POST /api/staging/accept` po zatwierdzeniu pozycji woła
 `__restoreZastosowanie()`. Funkcja czyta CSV z **zahardkodowanej ścieżki produkcyjnej**
@@ -764,6 +776,41 @@ Zwróć uwagę, że warunek `zastosowanie IS NULL OR TRIM(...)=''` pasuje dokła
 **Rekomendacja:** przy I7 albo I8 najpierw ODTWORZYĆ przyczynę (zaimportować pozycję, zatwierdzić,
 sprawdzić, czy `zastosowanie` znika), a dopiero potem decydować, czy portować naprawę, czy
 usunąć potrzebę.
+
+---
+
+#### Konsekwencja dla Selly — zmierzona w 8a (2026-09-04)
+
+Punkt 3 wyżej („brak szkody z pominięcia") był prawdziwy DOPÓKI nie istniał konsument
+`products.zastosowanie`. Po 8a konsument istnieje i szkoda jest konkretna.
+
+`mapujZastosowanieNaKategorie` (`rebuild/backend/src/selly/mapper.ts`, port `mapper.cjs:135-170`)
+wyznacza kategorię produktu w Selly **z pola `zastosowanie`**: pierwsza wartość to kategoria
+główna, kolejne (po `" + "`) idą do `multi_cat`. Puste `zastosowanie` przełącza funkcję w gałąź
+`source: "fallback_kategoria"`, czyli produkt trafia do Selly **wyłącznie do kategorii głównej
+wyliczonej z `products.kategoria`** — bez podkategorii z `selly_zastosowanie_category_map`
+i bez żadnej kategorii dodatkowej. Jeśli w dodatku `products.kategoria` nie ma odpowiednika
+w `selly_kategoria_norm_map`, `category_id` wychodzi `null`, walidacja odrzuca payload
+(`Brak category_id (nieznana kategoria)`) i produkt zostaje policzony jako `skipped`
+w `POST /api/selly/sync-supplier` — czyli **w ogóle nie dojdzie do sklepu**.
+
+Obie gałęzie są zamrożone w testach (`rebuild/backend/test/selly.mapper.test.ts`,
+`selly.synchronizacja.test.ts`), więc skutek tej decyzji jest widoczny w kodzie, nie tylko tutaj.
+
+**Co to zmienia w rekomendacji.** Kolejność „najpierw przyczyna, potem naprawa" zostaje bez
+zmian, ale zyskuje mierzalny test akceptacyjny: po zaimportowaniu i zatwierdzeniu pozycji
+sprawdź nie tylko, czy `zastosowanie` znika, ale też ile produktów wpada w
+`fallback_kategoria`/`fallback_empty` przy synchronizacji z Selly. To jest liczba, którą widać
+w `selly_sync_log.szczegoly_json` jako `skipped` — porównywalna między przebiegami.
+
+**Opcje, gdyby decyzja się zmieniła** (spisane 2026-09-04, żeby następna sesja nie zaczynała
+od zera):
+- **(A)** wciągnąć `zastosowania_master.csv` do repo jako seed — odtwarza zachowanie 1:1,
+  wymaga dostarczenia pliku przez operatora produkcji (6823 wiersze, dziś poza repo);
+- **(B)** portować funkcję ze ścieżką z konfiguracji/env, bez pliku działa jako no-op z logiem;
+- **(C)** naprawić przyczynę w akceptacji stagingu (snapshot nie niesie `zastosowania`,
+  więc INSERT zostawia pole puste) — czystsze, ale to odstępstwo od zachowania oryginału;
+- **(D)** zostawić jak jest i traktować jako znaną degradację (stan na 2026-09-04).
 
 
 ---
@@ -1782,7 +1829,62 @@ komponentu `AppShell.tsx`, to konstrukcja rebuild-u).
 
 ---
 
-### #37 · 2026-09-04 · [BACKEND][BEZPIECZEŃSTWO] · akcje kolejki pending nie zostawiają ŻADNEGO śladu w audycie
+### #37 · 2026-09-04 · [BACKEND] · odświeżanie słowników Selly nieatomowe — padnięcie sieci w połowie zostawia mieszany stan
+
+> **Znalezione przy tickecie `28-FEATURE-selly-eksport-backend` (I8/8a). ODTWORZONE 1:1** —
+> bo to zachowanie produkcji, a nie usterka naszego portu. **DO DECYZJI**, gdy kiedyś
+> dotkniemy tego kodu.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (Selly, odświeżanie słowników) |
+| **Pliki** | `mirror/backend/selly/routes.cjs:26-61` (`refreshDict`); port: `rebuild/backend/src/selly/slowniki.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1** (odtworzone zachowanie oryginału, świadomie) |
+| **Status** | ✔ odtworzone w rebuild (I8/8a), luka nieusunięta |
+
+**Co robi produkcja.** `refreshDict()` odświeża jeden słownik Selly (producenci, kategorie,
+stawki VAT, magazyny): najpierw `DELETE` całej zawartości z `selly_dict` dla danego słownika,
+potem wstawia wpisy po jednym wierszu na podstawie odpowiedzi z czterech osobnych wywołań HTTP
+do zewnętrznego API Selly. Całość NIE jest owinięta w transakcję.
+
+**Skutek.** Padnięcie sieci albo błąd Selly w połowie odświeżania zostawia część słowników
+odświeżoną, a część skasowaną-i-niewstawioną-na-nowo (albo częściowo wstawioną) — panel może
+przez jakiś czas widzieć niepełne mapowanie nazwa→id, dopóki kolejne odświeżenie się nie uda.
+
+**Co zrobiliśmy w rebuild.** Port 1:1 — ten sam wzorzec DELETE-a-potem-INSERT przeplatany
+z HTTP, bez transakcji (`src/selly/slowniki.ts`).
+
+**Do decyzji.** Czy owinąć `refreshDict`/`ensureDict` w transakcję DB (co nie chroni przed
+częściowo pobranymi danymi z Selly, tylko przed połówkowym zapisem lokalnym) — do rozważenia,
+jeśli kiedyś ten kod będzie dotykany ponownie.
+
+---
+
+### #38 · 2026-09-04 · [BACKEND] · `selly_dict` — klucz po `toLowerCase()` w kluczu głównym gubi kategorie różniące się tylko wielkością liter
+
+> **Znalezione przy tickecie `28-FEATURE-selly-eksport-backend` (I8/8a). ODTWORZONE 1:1** —
+> zastane zachowanie produkcji, nieruszane. **DO DECYZJI.**
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (BAZA) · Selly, tabela `selly_dict` |
+| **Pliki** | `rebuild/schema/001_schema.sql:257-311` / `src/db/schema.ts:331-403` (`PRIMARY KEY (slownik, klucz)`); zapis: `rebuild/backend/src/selly/slowniki.ts` |
+| **Do nowej wersji?** | ✅ **port 1:1** (schemat już istniał, zachowanie odtworzone świadomie) |
+| **Status** | ✔ odtworzone w rebuild (I8/8a), luka nieusunięta |
+
+**Co robi produkcja.** `selly_dict` ma klucz główny złożony `(slownik, klucz)`, gdzie `klucz`
+to nazwa kategorii/producenta z Selly po `toLowerCase()`. Dwie pozycje w Selly różniące się
+wyłącznie wielkością liter (np. dwie kategorie o nazwach różniących się tylko capsem) zwijają
+się w jeden wiersz — wygrywa ta, która przyszła później w odpowiedzi API.
+
+**Skutek.** Mapowanie nazwa→id dla takiej pary jest niedeterministyczne (zależy od kolejności
+w odpowiedzi Selly) i traci jedną z dwóch pozycji.
+
+**Co zrobiliśmy w rebuild.** Zastany schemat i zachowanie, nieruszane — poza zakresem 8a.
+
+**Do decyzji.** Czy to w ogóle występuje w realnych danych Selly (do zbadania, jeśli kiedyś
+pojawi się kolizja) i czy warto zmieniać klucz na case-sensitive po stronie bazy.
+### #39 · 2026-09-04 · [BACKEND][BEZPIECZEŃSTWO] · akcje kolejki pending nie zostawiają ŻADNEGO śladu w audycie
 
 | Pole | Wartość |
 |---|---|
@@ -1816,7 +1918,7 @@ odpowiedzi — koszt to rozjazd z produkcją w zawartości `audit_log`, widoczne
 
 ---
 
-### #38 · 2026-09-04 · [BACKEND] · seed słownika `bieznik` bierze wartości z `products.model`, nie z `products.bieznik`
+### #40 · 2026-09-04 · [BACKEND] · seed słownika `bieznik` bierze wartości z `products.model`, nie z `products.bieznik`
 
 | Pole | Wartość |
 |---|---|
@@ -1851,7 +1953,7 @@ obecnych już w słowniku) to osobna, mniejsza zmiana.
 
 ---
 
-### #39 · 2026-09-04 · [BACKEND] · dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13) — pozycji pending rodzaju `model`/`zastosowanie` nie dałoby się zaakceptować
+### #41 · 2026-09-04 · [BACKEND] · dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13) — pozycji pending rodzaju `model`/`zastosowanie` nie dałoby się zaakceptować
 
 | Pole | Wartość |
 |---|---|
@@ -1878,12 +1980,12 @@ z komentarzem opisującym rozjazd i jego konsekwencję.
 
 **Do decyzji.** Czy zunifikować mapy. ⚠ Uwaga na kierunek: dołożenie `model` i `zastosowanie`
 do mapy SKANU sprawi, że `scan-pending` zacznie zgłaszać nowe wartości także tych rodzajów
-(dla `model` to praktycznie cały katalog — patrz **#38**) i zaleje kolejkę. Bezpieczniejszy
+(dla `model` to praktycznie cały katalog — patrz **#40**) i zaleje kolejkę. Bezpieczniejszy
 wariant to zostawić zakres skanu bez zmian, a pełną mapę dać tylko akceptacjom.
 
 ---
 
-### #40 · 2026-09-04 · [BACKEND] · porównanie wartości bez normalizacji — „BKT" i „bkt" mają podobieństwo 0
+### #42 · 2026-09-04 · [BACKEND] · porównanie wartości bez normalizacji — „BKT" i „bkt" mają podobieństwo 0
 
 | Pole | Wartość |
 |---|---|
@@ -1911,12 +2013,12 @@ oryginału.
 **Do decyzji.** Czy porównywać wartości po normalizacji (`trim().toLowerCase()`, zwinięte
 spacje), zostawiając w słowniku i w `products` formę oryginalną. Ryzyko: sugestii będzie
 WIĘCEJ i będą inne niż dziś, a przycisk „akceptuj jako alias" przepisuje produkty w całym
-katalogu — rośnie więc koszt pomyłki (tym bardziej, że nie ma z tego audytu, **#37**). Zmiana
+katalogu — rośnie więc koszt pomyłki (tym bardziej, że nie ma z tego audytu, **#39**). Zmiana
 rozjeżdża pole `sugerowane_aliasy` z zamrożonym `GET_atrybuty_pending.json`.
 
 ---
 
-### #41 · 2026-09-04 · [BACKEND][KONTRAKT] · `contract/openapi.yaml` nie zna kodów 403/404/409 — GATE nie może ich objąć
+### #43 · 2026-09-04 · [BACKEND][KONTRAKT] · `contract/openapi.yaml` nie zna kodów 403/404/409 — GATE nie może ich objąć
 
 | Pole | Wartość |
 |---|---|

@@ -183,6 +183,20 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `akceptuj-z-edycja`/`akceptuj-jako-alias` robią masowy `UPDATE products`. Szczegóły:
 > `docs/tickets/29-FEATURE-atrybuty-backend/`.
 
+> **Potwierdzone w 8a** (`28-FEATURE-selly-eksport-backend`, 2026-09-04): panel Selly to **5 GET
+> + 5 POST**, nie 7+3 jak zakładała robocza notatka — `categories` i `producers` są POST-ami
+> (`mirror/backend/selly/routes.cjs:115,128`). Panel w oryginale **już stoi za `requireAuth`**
+> (`extensions.cjs:456-458`) — **NIE jest to odstępstwo D1**. Sześć z dziesięciu tras panelu
+> (`ping`, `dictionaries`, `producers`, `categories`, `sync-product`, `sync-supplier`) gadają
+> z zewnętrznym API Selly.pl (OAuth2 `client_credentials`, sekrety `SELLY_*` w env); lokalne są
+> tylko `status`, `log`, `csv-status`, `generate-csv`. **Odstępstwo D1 dotyczy wyłącznie dwóch
+> tras eksportu** — `GET /api/export-shoper` i `GET /api/export/shoper` — publicznych w
+> `contract/openapi.yaml:611,619` (`security: []`), a u nas pod `requireAuth`. Trasy to DWA różne
+> formaty, nie alias: `export-shoper` ma stały 7-kolumnowy nagłówek, filtr `?dostawca=` i bez
+> parametru oddaje `application/zip` (plik per dostawca); `export/shoper` bierze kolumny z
+> `shoper.format_eksportu`, filtruje `?supplier=` i zawsze oddaje jeden `text/csv`. Szczegóły:
+> `docs/tickets/28-FEATURE-selly-eksport-backend/`.
+
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).

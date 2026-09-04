@@ -176,12 +176,12 @@ zielona (71 w domenie atrybutów).
 ### `docs/rebuild-backlog.md`
 Potwierdzone, że wpisów o atrybutach/kolejce/aliasach nie było. Dodane pięć nowych, wszystkie
 **⬜ do decyzji** (format 1:1 jak #33–#36), każdy z dowodem `plik:linia`:
-- **#37** akcje kolejki pending nie zostawiają śladu w audycie (mimo masowego `UPDATE products`),
-- **#38** seed słownika `bieznik` z `products.model` — z dowodem w nagraniu: wszystkie 5 pozycji
+- **#39** akcje kolejki pending nie zostawiają śladu w audycie (mimo masowego `UPDATE products`),
+- **#40** seed słownika `bieznik` z `products.model` — z dowodem w nagraniu: wszystkie 5 pozycji
   `GET_atrybuty_pending.json` to rodzaj `bieznik` i każda sugeruje samą siebie ze `podobienstwo: 100`,
-- **#39** dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13),
-- **#40** porównanie wartości bez normalizacji („BKT"/„bkt" = 0),
-- **#41** `openapi.yaml` nie zna kodów 403/404/409 (skierowane do zakresu I12).
+- **#41** dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13),
+- **#42** porównanie wartości bez normalizacji („BKT"/„bkt" = 0),
+- **#43** `openapi.yaml` nie zna kodów 403/404/409 (skierowane do zakresu I12).
 
 ### `docs/spec-backend.md`
 - §2: dopisany blok „Potwierdzone w 7a" (13 ścieżek / 18 operacji; `requireAuth` jako

@@ -58,6 +58,11 @@ i `selly-injection.js` (I8):
 | `selly-injection.js` (26 KB) | overlay panelu Selly na `/panel/api/selly`, routing przez hash | trasa Wouter `/selly` + komponenty w React/TanStack Query |
 | ~~`freq-injection.js` (12 KB)~~ ✅ **WCHŁONIĘTY 2026-09-01 (blok 3f-2)** | dokładał kontrolkę częstotliwości importu poza Reactem (PATCH) | ✔ `rebuild/frontend/src/pages/konfiguracja/{dostawcy.ts,Dostawcy.tsx}` — presety, `fmt()` i kotwica `data-testid="supplier-config-<KOD>"` przeniesione 1:1; znikła mapa `kod → id` i `MutationObserver` |
 
+> **Backend gotowy od 2026-09-04 (Iteracja 8, sesja 8a, `28-FEATURE-selly-eksport-backend`):**
+> 10 tras panelu Selly (`/api/selly/*`) i 2 trasy eksportu Shopera (`/api/export-shoper`,
+> `/api/export/shoper`), wszystkie za `requireAuth`, gotowe pod natywny widok `/selly` i przycisk
+> „Pobierz CSV (Shoper)" w `/katalog` — front dowozi sesja 8b, jeszcze niezrobiona.
+
 ## 3. Korekty do MOICH dokumentów
 
 Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
@@ -142,7 +147,8 @@ ma endpoint:
 > zapis w IndexedDB), z `nazwa`/`ean`/`dostawca` zawsze widocznymi i przyklejonymi do lewej;
 > nagłówki mają statyczną, przygaszoną ikonę sortowania — bez wskazania aktywnej kolumny/kierunku.
 > Oryginał **nie ma** szczegółu produktu w trybie odczytu (tylko modal edycji) — odbudowa
-> dokłada podgląd read-only jako świadome, zatwierdzone odstępstwo. Eksport CSV i słowniki
+> dokłada podgląd read-only jako świadome, zatwierdzone odstępstwo. Eksport CSV (backend gotowy
+> od I8, `28-FEATURE-selly-eksport-backend`, patrz przypis o Selly niżej) i słowniki
 > marek/kategorii z `GET /api/atrybuty` odłożone do kolejnych iteracji. Szczegóły:
 > `docs/tickets/3-FEATURE-katalog-odczyt/`.
 
@@ -239,8 +245,12 @@ ma endpoint:
 > **Edytora `waga_gab.*` nie ma i nie będzie** — w oryginale nie istnieje żaden (0 wystąpień
 > w bundlu), mimo że podtytuł ekranu Konfiguracji to sugeruje. Zakładka „shoper" zapisuje
 > `shoper.kolumny`/`shoper.separator` (2× `POST /api/config`), kluczy tych nie ma jeszcze
-> w `contract/fixtures/GET_config.json` (nikt ich w produkcji nie zapisał) — czyta je dopiero
-> eksport CSV z Iteracji 8; zakładka „ai" zapisuje trzy klucze `ai_fallback.*`
+> w `contract/fixtures/GET_config.json` (nikt ich w produkcji nie zapisał). ⚠ **Sprostowanie
+> (I8, `28-FEATURE-selly-eksport-backend`, 2026-09-04):** to NIE są te same klucze, które czyta
+> backendowa trasa eksportu — `GET /api/export/shoper` czyta `shoper.format_eksportu`
+> (domyślnie `ean;nazwa;producent;rozmiar;cena_netto;magazyn;vat`), inny klucz i inna droga niż
+> `shoper.kolumny`/`shoper.separator` zapisywane tu przez I11; podpięcie zakładki pod realny
+> eksport zostaje zadaniem 8b. Zakładka „ai" zapisuje trzy klucze `ai_fallback.*`
 > (3× `POST /api/config`), `aktywny` wyprowadzony z obecności klucza, nie z osobnego pola.
 > Szczegóły: `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
 

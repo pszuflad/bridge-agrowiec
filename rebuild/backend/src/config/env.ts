@@ -62,6 +62,39 @@ const schemaEnv = z.object({
    * jak w oryginale.
    */
   IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG: flagaBoolDomyslnieWylaczona,
+  /**
+   * ── Integracja Selly.pl (Iteracja 8a) ─────────────────────────────────────
+   *
+   * Sekrety klienta REST Selly — 1:1 z oryginałem (`mirror/backend/selly/client.cjs:21-24`),
+   * łącznie z nazwami zmiennych. OPCJONALNE, i to jest świadome: `assertConfig()`
+   * (`client.cjs:28-32`) rzuca dopiero przy PIERWSZYM wywołaniu API, więc brak konfiguracji
+   * daje 500 na sześciu trasach zewnętrznych, a nie martwy proces. Cztery trasy lokalne
+   * (`status`, `log`, `csv-status`, `generate-csv`) działają bez nich (plan.md D6).
+   */
+  SELLY_SHOP_URL: z.string().default(""),
+  SELLY_CLIENT_ID: z.string().default(""),
+  SELLY_CLIENT_SECRET: z.string().default(""),
+  SELLY_SCOPE: z.string().min(1).default("READWRITE"),
+  /**
+   * Codzienny eksport CSV dla Selly (pull po stronie marketplace'u): katalog, nazwa pliku
+   * i publiczny URL. Oryginał ma je zahardkodowane w DWÓCH miejscach
+   * (`mirror/backend/selly/routes.cjs:300-301` i `:361`) oraz w skrypcie generatora
+   * (`mirror/backend/generate_selly_export.cjs:8-9`).
+   *
+   * ODSTĘPSTWO ŚWIADOME (plan.md D4, decyzja użytkownika 2026-09-04): ścieżki idą do env
+   * z domyślnymi = wartości produkcyjne, więc przy pustym `.env` zachowanie jest identyczne
+   * jak w oryginale. Bez tego testy musiałyby pisać po `/home/admin`, a `csv-status` na
+   * każdym innym środowisku zwracałby „Brak pliku CSV" niezależnie od stanu faktycznego.
+   */
+  SELLY_CSV_DIR: z
+    .string()
+    .min(1)
+    .default("/home/admin/domains/agritires.eu/public_html/panel/ex-port-files"),
+  SELLY_CSV_PLIK: z.string().min(1).default("sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
+  SELLY_CSV_URL: z
+    .string()
+    .min(1)
+    .default("https://agritires.eu/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
 });
 
 export type Env = z.infer<typeof schemaEnv> & { cookieSecure: boolean };
