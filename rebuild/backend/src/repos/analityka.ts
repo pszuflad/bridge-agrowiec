@@ -306,3 +306,381 @@ export function zbudujSnapshotBiezacy(db: Baza): WynikBootstrapu {
 
   return { ok: true, inserted: wynik.changes, at: teraz };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// BLOK 10e — dostępność, tempo schodzenia, sezonowość, cykl życia, rotacja, oś czasu importów
+// (`analytics_module.cjs:156-184`, `:279-289`, `:299-303`, `:334`).
+//
+// Sześć tras, TRZY różne koperty odpowiedzi: `{hasHistory, rows}` (cztery z nich),
+// `{days, rows}` (rotacja) i GOŁA TABLICA (oś czasu importów). Nie ujednolicamy ich —
+// każdy kształt jest potwierdzony osobnym fixture'em.
+//
+// ⚠ CZTERY Z SZEŚCIU FIXTURES SĄ PUSTE (`availability/products`, `availability/sell-through`,
+// `rotation/inactive` mają `rows: []`, `importy-timeline` jest pustą tablicą), a
+// `test/gate/ksztalt.ts:50` nie zagląda do elementów pustej tablicy. GATE dowodzi dla nich
+// wyłącznie koperty; kształt WIERSZA niesie `test/analityka.dostepnosc.agregaty.test.ts`,
+// przepisany z SQL-a oryginału. Zmieniając cokolwiek niżej, zmieniasz kontrakt, którego
+// nie pilnuje żadne nagranie produkcji.
+// ─────────────────────────────────────────────────────────────────────────────────────────
+
+/** Limity sześciu zapytań bloku (`:165`, `:181`, `:288`, `:302`, `:334`). */
+const LIMIT_DOSTEPNOSCI = 500;
+const LIMIT_TEMPA_SCHODZENIA = 500;
+const LIMIT_CYKLU_ZYCIA = 1000;
+const LIMIT_ROTACJI = 1000;
+const LIMIT_OSI_IMPORTOW = 200;
+
+/**
+ * Czy `historia_cen` ma choć jeden wiersz — port `hasHistory(db)` (`:58`).
+ *
+ * Cztery trasy tego bloku rozgałęziają się na tej jednej liczbie i zwracają ją w odpowiedzi,
+ * żeby UI wiedziało, czy widok czasowy ma z czego rysować. `statusHistorii` wyżej liczy to
+ * samo przy okazji zasięgu dat — osobny helper jest tu dlatego, że oryginał też ma osobny
+ * i woła go raz na trasę.
+ */
+function czyJestHistoria(db: Baza): boolean {
+  const wiersz = db.get<{ c: number }>(sql`SELECT COUNT(*) AS c FROM historia_cen`);
+  return !!(wiersz && wiersz.c > 0);
+}
+
+/** Wiersz „4.1 Historia dostępności" liczony z `historia_cen` (`:160-166`). */
+export type WierszDostepnosciZHistorii = {
+  kod: string;
+  ean: string | null;
+  dostawca: string;
+  nazwa: string | null;
+  /** Ile migawek złożyło się na procent — kolumna istnieje TYLKO w tej gałęzi. */
+  snapshoty: number;
+  dostepnoscPct: number | null;
+  /** Sklejone `GROUP_CONCAT`-em miesiące `YYYY-MM`, w których stan był ≤ 0. */
+  miesiaceBrakow: string | null;
+};
+
+/** Wiersz tej samej karty liczony z `products`, gdy historii nie ma (`:168`). */
+export type WierszDostepnosciZKatalogu = {
+  kod: string;
+  ean: string | null;
+  dostawca: string;
+  nazwa: string;
+  /** Bieżący stan — kolumna istnieje TYLKO w tej gałęzi. */
+  stan: number;
+  dostepnoscPct: number;
+  miesiaceBrakow: null;
+};
+
+export type WierszDostepnosci = WierszDostepnosciZHistorii | WierszDostepnosciZKatalogu;
+
+export type Dostepnosc = { hasHistory: boolean; rows: WierszDostepnosci[] };
+
+/**
+ * `GET /api/analytics/availability/products` — „4.1 Historia dostępności pozycji" (`:156-171`).
+ *
+ * ⚠ DWIE GAŁĘZIE ZWRACAJĄ RÓŻNE KOLUMNY, i to nie jest przeoczenie oryginału do naprawienia.
+ * Z historią wiersz niesie `snapshoty` (ile migawek), bez historii — `stan` (bieżący zapas);
+ * `miesiaceBrakow` w gałęzi zapasowej jest zawsze `NULL`, bo z jednej migawki nie da się
+ * odtworzyć miesięcy braków. Wspólne pozostaje to, co realnie renderuje oryginalna tabela
+ * (`frontend-index.js:28437-28455`): dostawca, kod, EAN, nazwa, dostępność, miesiące braków.
+ *
+ * Sortowanie `dostepnoscPct ASC` w gałęzi z historią i `stan ASC` w zapasowej — obie stawiają
+ * na górze pozycje najgorzej dostępne, ale liczą to z innych danych.
+ */
+export function dostepnoscProduktow(db: Baza): Dostepnosc {
+  const jestHistoria = czyJestHistoria(db);
+
+  if (jestHistoria) {
+    return {
+      hasHistory: true,
+      rows: db.all<WierszDostepnosciZHistorii>(sql`
+        SELECT kod, ean, dostawca, MAX(nazwa) AS nazwa,
+               COUNT(*) AS snapshoty,
+               ROUND(100.0 * SUM(CASE WHEN stan > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS dostepnoscPct,
+               GROUP_CONCAT(CASE WHEN stan <= 0 THEN substr(zarejestrowano_at, 1, 7) END) AS miesiaceBrakow
+        FROM historia_cen
+        GROUP BY dostawca, kod
+        ORDER BY dostepnoscPct ASC
+        LIMIT ${LIMIT_DOSTEPNOSCI}
+      `),
+    };
+  }
+
+  return {
+    hasHistory: false,
+    rows: db.all<WierszDostepnosciZKatalogu>(sql`
+      SELECT kod, ean, dostawca, nazwa, stan,
+             CASE WHEN stan > 0 THEN 100 ELSE 0 END AS dostepnoscPct,
+             NULL AS miesiaceBrakow
+      FROM products
+      WHERE status = 'aktywny'
+      ORDER BY stan ASC
+      LIMIT ${LIMIT_DOSTEPNOSCI}
+    `),
+  };
+}
+
+/** Wiersz „4.2 Tempo schodzenia z magazynu" (`:180`). */
+export type WierszTempaSchodzenia = {
+  dostawca: string;
+  kod: string;
+  nazwa: string | null;
+  /** Suma spadków stanu między kolejnymi migawkami; wzrosty liczą się jako zero. */
+  zeszloSztuk: number | null;
+};
+
+export type TempoSchodzenia = { hasHistory: boolean; rows: WierszTempaSchodzenia[] };
+
+/**
+ * `GET /api/analytics/availability/sell-through` — „4.2 Tempo schodzenia z magazynu" (`:173-184`).
+ *
+ * ⚠⚠ TO ZAPYTANIE JEST W ORYGINALE NIEPOPRAWNE I ODTWARZAMY JE DOSŁOWNIE (decyzja D1
+ * użytkownika, 2026-09-03; ticket `25-FEATURE-analityka-dostepnosc-rotacja`).
+ *
+ * CTE `seq` bierze `stan` GOŁY — bez agregatu — obok `GROUP BY dostawca, kod, zarejestrowano_at`,
+ * a funkcja okna `LAG(stan) OVER (…)` liczy się PO tej agregacji. SQLite na to pozwala
+ * (SQL92 nie), więc:
+ *
+ *  • gdy na `(dostawca, kod, zarejestrowano_at)` przypada DOKŁADNIE JEDEN wiersz — a tak jest
+ *    w zdecydowanej większości przypadków — `GROUP BY` jest bezczynne i wynik wychodzi
+ *    poprawny: `LAG` porównuje kolejne migawki po dacie;
+ *  • gdy wierszy jest ≥ 2, SQLite bierze `stan` z ARBITRALNEGO wiersza grupy
+ *    (implementation-defined; empirycznie: z wstawionego jako pierwszy), a `MAX(nazwa)`
+ *    z całej grupy. Wynik przestaje być określony przez standard.
+ *
+ * Drugi przypadek JEST osiągalny w tej odbudowie: `import/tk.ts:171,548-564` liczy
+ * `zarejestrowanoAt` RAZ na cały import, więc dwie linie tego samego `kod` w jednym cenniku
+ * dają dwa wiersze `historia_cen` o identycznym kluczu grupowania. Fixture
+ * `GET_analytics_availability_sell-through.json` ma `rows: []`, więc GATE tego nie wykryje —
+ * zachowanie charakteryzuje test w `test/analityka.dostepnosc.agregaty.test.ts`, a sprawa
+ * czeka na decyzję w `docs/rebuild-backlog.md` (wpis o pułapce `GROUP BY` + `LAG`).
+ *
+ * Bez historii oryginał NIE MA gałęzi zapasowej — zwraca pustą listę (`:174`).
+ */
+export function tempoSchodzenia(db: Baza): TempoSchodzenia {
+  const jestHistoria = czyJestHistoria(db);
+  if (!jestHistoria) return { hasHistory: false, rows: [] };
+
+  return {
+    hasHistory: true,
+    rows: db.all<WierszTempaSchodzenia>(sql`
+      WITH seq AS (
+        SELECT dostawca, kod, MAX(nazwa) AS nazwa, stan,
+               LAG(stan) OVER (PARTITION BY dostawca, kod ORDER BY zarejestrowano_at) AS prev_stan
+        FROM historia_cen
+        GROUP BY dostawca, kod, zarejestrowano_at
+      )
+      SELECT dostawca, kod, nazwa,
+             SUM(CASE WHEN prev_stan > stan THEN prev_stan - stan ELSE 0 END) AS zeszloSztuk
+      FROM seq
+      GROUP BY dostawca, kod
+      ORDER BY zeszloSztuk DESC
+      LIMIT ${LIMIT_TEMPA_SCHODZENIA}
+    `),
+  };
+}
+
+/** Wiersz „4.4 Sezonowy wzorzec cen" (`:281`). Kształt potwierdzony fixture'em. */
+export type WierszSezonowosci = {
+  /** Sam NUMER miesiąca (`"01"`–`"12"`), bez roku — `substr(zarejestrowano_at, 6, 2)`. */
+  miesiac: string;
+  /** Pusty napis jest realną wartością: fixture ma wiersz z `marka: ""`. */
+  marka: string | null;
+  sredniaCena: number | null;
+  dostepnoscPct: number | null;
+};
+
+export type Sezonowosc = { hasHistory: boolean; rows: WierszSezonowosci[] };
+
+/**
+ * `GET /api/analytics/seasonality/monthly` — „4.4 Sezonowy wzorzec cen" (`:279-283`).
+ *
+ * ⚠ MIESIĄC BEZ ROKU. `substr(zarejestrowano_at, 6, 2)` wycina dwa znaki na pozycji 6, czyli
+ * numer miesiąca ze znacznika `YYYY-MM-DD…`. Dane z sierpnia 2025 i sierpnia 2026 wpadną
+ * więc do JEDNEJ grupy `"08"` — to jest sens „wzorca sezonowego" i zostaje bez zmian.
+ *
+ * `WHERE cena_zakupu > 0` odcina migawki bez ceny, żeby nie zaniżały średniej. Jedyna trasa
+ * bloku BEZ limitu — oryginał ufa, że dwanaście miesięcy × marki się zmieści.
+ */
+export function sezonowoscMiesieczna(db: Baza): Sezonowosc {
+  const jestHistoria = czyJestHistoria(db);
+  if (!jestHistoria) return { hasHistory: false, rows: [] };
+
+  return {
+    hasHistory: true,
+    rows: db.all<WierszSezonowosci>(sql`
+      SELECT substr(zarejestrowano_at, 6, 2) AS miesiac, marka,
+             ROUND(AVG(cena_zakupu), 2) AS sredniaCena,
+             ROUND(AVG(CASE WHEN stan > 0 THEN 100 ELSE 0 END), 2) AS dostepnoscPct
+      FROM historia_cen
+      WHERE cena_zakupu > 0
+      GROUP BY miesiac, marka
+      ORDER BY marka, miesiac
+    `),
+  };
+}
+
+/** Wiersz „4.6 Cykl życia modelu" (`:287-288`). Kształt potwierdzony fixture'em. */
+export type WierszCykluZycia = {
+  marka: string | null;
+  model: string;
+  pierwszyRaz: string | null;
+  ostatniRaz: string | null;
+  produkty: number;
+};
+
+export type CyklZycia = { hasHistory: boolean; rows: WierszCykluZycia[] };
+
+/**
+ * `GET /api/analytics/lifecycle/models` — „4.6 Cykl życia modelu" (`:285-289`).
+ *
+ * ⚠ GAŁĘZIE RÓŻNIĄ SIĘ NIE TYLKO ŹRÓDŁEM, ALE I SORTOWANIEM ORAZ LICZNIKIEM — 1:1 z oryginałem:
+ *  • z historią: daty z `zarejestrowano_at`, `COUNT(DISTINCT kod)`, `ORDER BY ostatniRaz DESC`
+ *    (najświeższe modele na górze),
+ *  • bez historii: daty z `data_aktualizacji`, `COUNT(*)`, `ORDER BY produkty DESC`
+ *    (najliczniejsze modele na górze).
+ *
+ * ⚠ Gałąź zapasowa NIE filtruje po `status = 'aktywny'` — obejmuje też produkty wycofane.
+ * Tak jest w oryginale (`:288`) i tego nie zmieniamy; ta sama asymetria co przy `filters`.
+ */
+export function cyklZyciaModeli(db: Baza): CyklZycia {
+  const jestHistoria = czyJestHistoria(db);
+
+  if (jestHistoria) {
+    return {
+      hasHistory: true,
+      rows: db.all<WierszCykluZycia>(sql`
+        SELECT marka, model,
+               MIN(zarejestrowano_at) AS pierwszyRaz,
+               MAX(zarejestrowano_at) AS ostatniRaz,
+               COUNT(DISTINCT kod) AS produkty
+        FROM historia_cen
+        WHERE model IS NOT NULL AND model != ''
+        GROUP BY marka, model
+        ORDER BY ostatniRaz DESC
+        LIMIT ${LIMIT_CYKLU_ZYCIA}
+      `),
+    };
+  }
+
+  return {
+    hasHistory: false,
+    rows: db.all<WierszCykluZycia>(sql`
+      SELECT marka, model,
+             MIN(data_aktualizacji) AS pierwszyRaz,
+             MAX(data_aktualizacji) AS ostatniRaz,
+             COUNT(*) AS produkty
+      FROM products
+      WHERE model IS NOT NULL AND model != ''
+      GROUP BY marka, model
+      ORDER BY produkty DESC
+      LIMIT ${LIMIT_CYKLU_ZYCIA}
+    `),
+  };
+}
+
+/** Widełki i wartość domyślna parametru `?days` (`:300`). */
+export const DNI_ROTACJI_MIN = 1;
+export const DNI_ROTACJI_MAX = 730;
+export const DNI_ROTACJI_DOMYSLNE = 60;
+
+/** Wiersz „Rotacja / produkty bez aktualizacji" (`:301`). */
+export type WierszRotacji = {
+  kod: string;
+  nazwa: string;
+  dostawca: string;
+  marka: string | null;
+  model: string | null;
+  rozmiar: string | null;
+  stan: number;
+  ostatniaAktualizacja: string | null;
+};
+
+export type Rotacja = {
+  /**
+   * Zaciśnięta liczba dni, odbita w odpowiedzi. Bywa `null`: `parseInt("abc")` daje `NaN`,
+   * a `JSON.stringify(NaN)` — `null`. Patrz `zacisnijDniRotacji`.
+   */
+  days: number;
+  rows: WierszRotacji[];
+};
+
+/**
+ * Port wyrażenia `Math.min(730, Math.max(1, parseInt(req.query.days || '60', 10)))` (`:300`).
+ *
+ * ⚠ ODTWARZAMY TEŻ PRZYPADEK PATOLOGICZNY, bo oryginalne pole „Bez ruchu dni" jest zwykłym
+ * inputem tekstowym i użytkownik może wpisać w nie cokolwiek:
+ *  • `""`/brak → `'60'` (alternatywa `||` łapie pusty napis) → 60;
+ *  • `"5"` → 5; `"0"` → 1; `"9999"` → 730 (zaciski);
+ *  • `"abc"` → `NaN`, które przechodzi przez oba zaciski nietknięte i trafia do zapytania.
+ *    better-sqlite3 wiąże `NaN` jako `NULL` (sprawdzone, nie rzuca), więc warunek
+ *    `data_aktualizacji < datetime('now','-' || NULL || ' days')` jest `NULL`, czyli fałszem,
+ *    i zostają wyłącznie produkty z pustą datą aktualizacji. W odpowiedzi `days` jest wtedy
+ *    `null`. Dokładnie to samo robi produkcja — nie „naprawiamy" tego walidacją 400.
+ */
+export function zacisnijDniRotacji(surowe: unknown): number {
+  const napis = surowe ? String(surowe) : String(DNI_ROTACJI_DOMYSLNE);
+  return Math.min(DNI_ROTACJI_MAX, Math.max(DNI_ROTACJI_MIN, parseInt(napis, 10)));
+}
+
+/**
+ * `GET /api/analytics/rotation/inactive` — „Rotacja / produkty bez aktualizacji" (`:299-303`).
+ *
+ * ⚠ JEDYNA TRASA CAŁEGO BLOKU 10e, KTÓRA CZYTA `req.query`. Filtrowanie po dniach dzieje się
+ * więc na BACKENDZIE, a nie klientem — i dlatego `?days` należy do klucza zapytania po stronie
+ * frontendu, w odróżnieniu od globalnych filtrów katalogu (patrz `pages/analityka/README.md` §2.2).
+ *
+ * `data_aktualizacji IS NULL` wpada do wyniku zawsze: produkt bez daty aktualizacji jest
+ * „bez ruchu" niezależnie od progu. Sortowanie `ASC` stawia najstarsze na górze, a `NULL`-e
+ * w SQLite sortują się przed wszystkim — czyli produkty bez daty są pierwsze.
+ */
+export function rotacjaNieaktywnych(db: Baza, dni: number): Rotacja {
+  return {
+    days: dni,
+    rows: db.all<WierszRotacji>(sql`
+      SELECT kod, nazwa, dostawca, marka, model, rozmiar, stan,
+             data_aktualizacji AS ostatniaAktualizacja
+      FROM products
+      WHERE status = 'aktywny'
+        AND (data_aktualizacji IS NULL
+             OR data_aktualizacji < datetime('now', '-' || ${dni} || ' days'))
+      ORDER BY data_aktualizacji ASC
+      LIMIT ${LIMIT_ROTACJI}
+    `),
+  };
+}
+
+/** Wpis osi czasu importów (`:334`). Odpowiedź to GOŁA TABLICA takich wierszy, bez koperty. */
+export type WpisOsiImportow = {
+  id: number;
+  kiedy: string;
+  uzytkownik: string | null;
+  /** `encja_id` audytu — w praktyce kod dostawcy, którego dotyczył import. */
+  dostawca: string | null;
+  /** Surowy JSON z audytu, oddawany bez parsowania — tak jak w oryginale. */
+  szczegolyJson: string | null;
+};
+
+/**
+ * `GET /api/analytics/importy-timeline` — oś czasu importów z `audit_log` (`:334`).
+ *
+ * ⚠ TRASA BEZ KONSUMENTA W ORYGINALNYM FRONCIE, tak jak `kpi` i `bootstrap-current`
+ * (`docs/analityka-bloki-10b-10f.md` §1.1 — zero trafień w całym bundlu produkcji). Odbudowa
+ * dowozi ją, bo należy do kontraktu, ale ŻADNA zakładka jej nie woła (decyzja D2 użytkownika,
+ * 2026-09-03) — dokładanie karty byłoby wymyślaniem nowego ekranu, nie odbudową. Fixture jest
+ * pustą tablicą, więc kształt wiersza pokrywa test jednostkowy.
+ *
+ * Trzeci wariant w `IN` — `'import'` — jest martwy po obu stronach: odbudowa zapisuje
+ * `import_z_url` i `import_pliku` (`routes/import.ts:170`), a `import_cennika` ze stagingu
+ * (`routes/staging-mutacje.ts:149`) do tego zestawu nie należy ani tu, ani w oryginale.
+ * Zostaje w zapytaniu, bo jest w oryginale.
+ */
+export function osCzasuImportow(db: Baza): WpisOsiImportow[] {
+  return db.all<WpisOsiImportow>(sql`
+    SELECT id, kiedy,
+           uzytkownik_imie AS uzytkownik,
+           encja_id AS dostawca,
+           szczegoly_json AS szczegolyJson
+    FROM audit_log
+    WHERE akcja IN ('import_z_url', 'import_pliku', 'import')
+    ORDER BY id DESC
+    LIMIT ${LIMIT_OSI_IMPORTOW}
+  `);
+}
