@@ -6,6 +6,14 @@ import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
 import type {
+  Liczniki,
+  OdpowiedzPending,
+  OdpowiedzSlownika,
+  PozycjaPending,
+  Rodzaj,
+  Wartosc,
+} from "@/pages/atrybuty/api";
+import type {
   CyklZyciaModeli,
   Dostepnosc,
   Filtry,
@@ -447,4 +455,62 @@ export function rotacjaZFixtura(): Rotacja {
 export function importyTimelineZFixtura(): unknown[] {
   const sciezka = resolve(korzenRepo, "contract/fixtures/GET_analytics_importy-timeline.json");
   return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: unknown[] }).body;
+}
+
+
+/**
+ * Atrybuty — sesja 7b. Wszystkie fabryki czytają `contract/fixtures/GET_atrybuty*.json`,
+ * czyli nagrane odpowiedzi żywej produkcji; zmiana kształtu fixtura ma wywalić testy widoku.
+ *
+ * ⚠ Fixtures są PRZYCIĘTE (klucz `_przyciete`): 5 z 15 rodzajów, 5 z 5144 wartości,
+ * 5 z 498 pozycji kolejki. Test nie może zakładać, że widzi komplet rodzajów `core` —
+ * `vfIf`, `bieznik` i `rodzaj` są poza wycinkiem, choć backend je zna.
+ */
+function atrybutyFixture<T>(nazwa: string): T {
+  const sciezka = resolve(korzenRepo, `contract/fixtures/${nazwa}`);
+  return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: T }).body;
+}
+
+/** `GET /api/atrybuty` — rodzaje (Z polem `utworzony`) ORAZ wartości. */
+export function slownikZFixtura(): OdpowiedzSlownika {
+  const { ok, rodzaje, wartosci } = atrybutyFixture<OdpowiedzSlownika>("GET_atrybuty.json");
+  return { ok, rodzaje, wartosci };
+}
+
+/** `GET /api/atrybuty/rodzaje` — te same rodzaje, ale BEZ `utworzony` (różnica celowa). */
+export function rodzajeZFixtura(): Rodzaj[] {
+  return atrybutyFixture<{ rodzaje: Rodzaj[] }>("GET_atrybuty_rodzaje.json").rodzaje;
+}
+
+/** `GET /api/atrybuty/wartosci` — pięć nagranych wartości rodzaju `bieznik`. */
+export function wartosciZFixtura(): Wartosc[] {
+  return atrybutyFixture<{ wartosci: Wartosc[] }>("GET_atrybuty_wartosci.json").wartosci;
+}
+
+/**
+ * `GET /api/atrybuty/pending` — pięć nagranych pozycji z `count: 498`.
+ *
+ * `count` ZOSTAJE oryginalny (498), mimo że `items` ma 5 pozycji: tak wygląda przycięty
+ * fixture i tak samo zachowa się widok, który liczy „Wyświetlono X z Y” z DŁUGOŚCI listy,
+ * nie z `count`.
+ */
+export function pendingZFixtura(): OdpowiedzPending {
+  const { ok, count, items } = atrybutyFixture<OdpowiedzPending>("GET_atrybuty_pending.json");
+  return { ok, count, items };
+}
+
+/** Pojedyncza pozycja kolejki po `id` — wygodne przy testach akcji. */
+export function pozycjaPendingZFixtura(indeks = 0): PozycjaPending {
+  const pozycja = pendingZFixtura().items[indeks];
+  if (!pozycja) throw new Error(`Fixture kolejki nie ma pozycji o indeksie ${indeks}`);
+  return pozycja;
+}
+
+/**
+ * `GET /api/atrybuty/liczniki` — GOŁA MAPA `"<rodzaj>::<wartosc>": liczba`, BEZ klucza `ok`.
+ * Nagranie ma 5348 kluczy, więc do testów bierzemy je w całości tylko jako źródło kształtu.
+ */
+export function licznikiZFixtura(): Liczniki {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_atrybuty_liczniki.json");
+  return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: Liczniki }).body;
 }

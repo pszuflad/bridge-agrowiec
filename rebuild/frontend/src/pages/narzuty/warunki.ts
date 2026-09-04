@@ -41,8 +41,13 @@ export const TYPY_WARUNKU = [
 
 export type TypWarunku = (typeof TYPY_WARUNKU)[number]["value"];
 
-/** Typy, dla których wartość wybiera się z listy zbudowanej z danych katalogu, a nie wpisuje. */
-export const TYPY_ZE_SLOWNIKA: readonly string[] = ["dostawca", "kategoria", "marka"];
+/**
+ * Typy, dla których wartość WYBIERA się z listy, a nie wpisuje, mieszkają teraz w `slownik.ts`
+ * (`opcjeWarunku`) — razem z regułą, skąd ta lista pochodzi. Dawna stała `TYPY_ZE_SLOWNIKA`
+ * wymieniała trzy typy i milcząco zakładała, że wszystkie trzy powstają z danych katalogu;
+ * po sesji 7b to nieprawda dla żadnego z nich (marki = słownik ∪ katalog, kategorie = sam
+ * słownik, dostawcy = `/api/suppliers`), a doszły jeszcze `konstrukcja` i `vfIf`.
+ */
 
 /** Podpowiedzi w polu wartości — 1:1 z oryginałem (`:24318`). */
 export function placeholderWartosci(typ: string): string {

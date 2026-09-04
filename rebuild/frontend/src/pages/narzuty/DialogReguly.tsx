@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
+import type { OdpowiedzSlownika } from "@/pages/atrybuty/api";
 import {
   dodajNarzut,
   dodajPromocje,
@@ -46,12 +47,12 @@ import { produktyPonizejKosztu, type PozycjaPonizejKosztu } from "./ceny";
 import { statusZDat, STATUS_NARZUTU_AKTYWNY } from "./status";
 import {
   TYPY_WARUNKU,
-  TYPY_ZE_SLOWNIKA,
   odczytajWarunki,
   placeholderWartosci,
   zapiszWarunki,
   type Warunek,
 } from "./warunki";
+import { opcjeWarunku, placeholderWyboru, type Dostawca } from "./slownik";
 
 export type TrybReguly = "narzut" | "promocja";
 
@@ -145,6 +146,16 @@ export function DialogReguly({
   const { data: produkty } = useQuery<Produkt[]>({ queryKey: ["/api/products"] });
   const katalog = produkty ?? [];
 
+  /**
+   * Słownik atrybutów i dostawcy — dwa źródła list wyboru w warunkach reguły.
+   *
+   * Klucz `["/api/atrybuty"]` jest WSPÓLNY z widokiem `/atrybuty` (konwencja
+   * `queryKey.join("/") === URL` z `lib/queryClient.ts`), więc CRUD słownika unieważnia
+   * jednym `invalidateQueries` i listę na tamtym ekranie, i te selecty.
+   */
+  const { data: slownikAtrybutow } = useQuery<OdpowiedzSlownika>({ queryKey: ["/api/atrybuty"] });
+  const { data: dostawcy } = useQuery<Dostawca[]>({ queryKey: ["/api/suppliers"] });
+
   const zamknij = () => {
     ustawOtwarty(false);
     ustawDoPotwierdzenia(null);
@@ -158,11 +169,17 @@ export function DialogReguly({
     void klient.invalidateQueries({ queryKey: ["/api/products"] });
   };
 
-  /** Wartości słownikowe do selectów — zbierane z katalogu, jak w oryginale (`:24247`). */
-  const slownik = (pole: "dostawca" | "kategoria" | "marka"): string[] =>
-    [...new Set(katalog.map((p) => String(p[pole] ?? "")).filter(Boolean))].sort((a, b) =>
-      a.localeCompare(b, "pl"),
-    );
+  /**
+   * Opcje selecta wartości. Reguła scalania (marki = suma słownika i katalogu, kategorie
+   * wyłącznie ze słownika, dostawcy z `/api/suppliers`) siedzi w `slownik.ts` — osobno,
+   * żeby dała się przetestować bez renderowania dialogu.
+   */
+  const opcje = (typ: string) =>
+    opcjeWarunku(typ, {
+      slownik: slownikAtrybutow?.wartosci ?? [],
+      produkty: katalog,
+      dostawcy: dostawcy ?? [],
+    });
 
   const zapis = useMutation<unknown, Error, void>({
     mutationFn: async () => {
@@ -421,7 +438,7 @@ export function DialogReguly({
                       </SelectContent>
                     </Select>
 
-                    {TYPY_ZE_SLOWNIKA.includes(warunek.typ) ? (
+                    {opcje(warunek.typ) ? (
                       <Select
                         value={warunek.wartosc}
                         onValueChange={(v) =>
@@ -431,12 +448,12 @@ export function DialogReguly({
                         }
                       >
                         <SelectTrigger className="flex-1" data-testid={`select-warunek-wartosc-${i}`}>
-                          <SelectValue placeholder={`— wybierz ${warunek.typ === "kategoria" ? "kategorię" : warunek.typ === "dostawca" ? "dostawcę" : "markę"} —`} />
+                          <SelectValue placeholder={placeholderWyboru(warunek.typ)} />
                         </SelectTrigger>
                         <SelectContent>
-                          {slownik(warunek.typ as "dostawca" | "kategoria" | "marka").map((v) => (
-                            <SelectItem key={v} value={v}>
-                              {v}
+                          {(opcje(warunek.typ) ?? []).map((o) => (
+                            <SelectItem key={o.wartosc} value={o.wartosc}>
+                              {o.etykieta}
                             </SelectItem>
                           ))}
                         </SelectContent>
