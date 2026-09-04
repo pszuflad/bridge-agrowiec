@@ -22,6 +22,7 @@ const scheduler = stworzScheduler({
 const app = stworzApp({
   env,
   db,
+  sqlite,
   synchronizuj,
   przeplanujScheduler: () => scheduler.przeplanuj(),
 });

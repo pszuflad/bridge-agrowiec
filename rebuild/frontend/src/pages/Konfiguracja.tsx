@@ -9,7 +9,9 @@
 import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Admin } from "./konfiguracja/Admin";
 import { Ai } from "./konfiguracja/Ai";
+import { Dziennik } from "./konfiguracja/Dziennik";
 import { Dostawcy } from "./konfiguracja/Dostawcy";
 import { Katalog } from "./konfiguracja/Katalog";
 import { Shoper } from "./konfiguracja/Shoper";
@@ -63,6 +65,14 @@ export function Konfiguracja() {
 
         <TabsContent value="katalog" className="mt-4">
           <Katalog />
+        </TabsContent>
+
+        <TabsContent value="admin" className="mt-4">
+          <Admin />
+        </TabsContent>
+
+        <TabsContent value="dziennik" className="mt-4">
+          <Dziennik />
         </TabsContent>
 
         <TabsContent value="ai" className="mt-4">

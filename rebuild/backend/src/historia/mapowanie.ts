@@ -81,8 +81,16 @@ export function typWpisu(akcja: string): TypWpisu | null {
  *  2. tekst, który nie jest poprawnym JSON-em — `JSON.parse` rzuca, oryginał to łyka.
  *
  * Odsiew akcji następuje DOPIERO PO parsowaniu, więc ten kod dotyka także wierszy, które
- * nigdy nie trafią do widoku (np. `synchronizacja_reczna`). Ten sam parser obsłuży
- * `/api/audit-log` w I12.
+ * nigdy nie trafią do widoku (np. `synchronizacja_reczna`).
+ *
+ * ⚠ `GET /api/audit-log` (I12b) NIE UŻYWA tej funkcji i nie ma jej używać. Ta trasa oddaje
+ * `szczegoly_json` SUROWO, jako string (`u.json(U.listAudit(500))`, `:48735`), a
+ * `contract/fixtures/GET_audit-log.json` to zamraża — sparsowanie po stronie backendu
+ * łamie GATE (sprawdzone: „typ object, oczekiwano string"). Parsowaniem zajmuje się
+ * KONSUMENT, czyli widok „Dziennik" we froncie, który ma własną kopię tej funkcji
+ * w `rebuild/frontend/src/pages/konfiguracja/dziennik.ts` (świadoma decyzja D4 ticketu 36:
+ * BE i FE to rozłączne projekty bez wspólnego pakietu). Zmieniając tę implementację,
+ * zmień też tamtą — obie są pokryte testami na te same trzy wejścia.
  */
 export function parsujSzczegoly(szczegolyJson: string | null): Record<string, unknown> {
   if (!szczegolyJson) return {};

@@ -6,7 +6,7 @@
  * ⚠ Jedenasta pozycja, „Selly", weszła w sesji 8b i JAKO JEDYNA nie pochodzi z `l2`
  * oryginału — produkcja dokładała ten link wstrzykiwanym skryptem
  * (`mirror/frontend/assets/selly-injection.js:255-280`), za „Konfiguracją". Stąd 11
- * zamiast 10 i 13 tras zamiast 12; uzasadnienie w `src/pages/placeholdery.ts`.
+ * zamiast 10 i 13 tras zamiast 12; uzasadnienie w nagłówku `src/App.tsx`.
  */
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";

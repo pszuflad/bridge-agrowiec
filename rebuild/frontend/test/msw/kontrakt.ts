@@ -567,3 +567,40 @@ export function licznikiZFixtura(): Liczniki {
   const sciezka = resolve(korzenRepo, "contract/fixtures/GET_atrybuty_liczniki.json");
   return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: Liczniki }).body;
 }
+
+/**
+ * Konfiguracja dostawców z `contract/fixtures/GET_admin_supplier-config.json` — 5 wierszy
+ * z 10 nagranych (marker `_przyciete`). Zwracamy `body.dostawcy`, czyli to, co widok dostaje
+ * po zdjęciu koperty `{ok, dostawcy}`.
+ */
+export function konfiguracjaDostawcowZFixtura(): unknown[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_admin_supplier-config.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: { dostawcy: unknown[] } };
+  return fixture.body.dostawcy;
+}
+
+/** Lista dostawców ze statystykami — `contract/fixtures/GET_admin_suppliers-list.json`. */
+export function listaDostawcowZFixtura(): unknown[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_admin_suppliers-list.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: { dostawcy: unknown[] } };
+  return fixture.body.dostawcy;
+}
+
+/** Użytkownicy z `contract/fixtures/GET_users.json` — goła tablica trzech pól, bez hasła. */
+export function uzytkownicyZFixtura(): unknown[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_users.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: unknown[] };
+  return fixture.body;
+}
+
+/**
+ * Surowy audyt z `contract/fixtures/GET_audit-log.json` — 5 wierszy z 500 nagranych.
+ *
+ * ⚠ `szczegolyJson` jest w tym nagraniu STRINGIEM, nie obiektem. To celowe i wiążące:
+ * backend oddaje surową kolumnę, a parsowanie robi widok.
+ */
+export function audytZFixtura(): unknown[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_audit-log.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: unknown[] };
+  return fixture.body;
+}
