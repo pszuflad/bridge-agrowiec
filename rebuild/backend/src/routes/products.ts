@@ -218,7 +218,10 @@ export function trasyProduktow({ db }: ZaleznosciProduktow): Router {
 
     const teraz = new Date().toISOString();
     for (const [pole, nowa] of Object.entries(zmiany)) {
-      // ⚠ Porównanie luźne (`!==`) na wartości SPRZED zapisu, dokładnie jak `:48426`.
+      // ⚠ Porównanie ŚCISŁE (`!==`) na wartości SPRZED zapisu, dokładnie jak `:48426`.
+      // Skutek uboczny, który jest zachowaniem oryginału: `"9"` z JSON-a i `9` z bazy to dla
+      // niego DWIE różne wartości, więc przysłanie liczby jako napisu tworzy poprawkę i wpis
+      // dziennika mimo braku zmiany merytorycznej.
       // Pole wysłane z niezmienioną wartością nie tworzy ani poprawki, ani wpisu dziennika.
       const stara = (przed as unknown as Record<string, unknown>)[pole];
       if (stara === nowa) continue;
