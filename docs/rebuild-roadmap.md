@@ -1220,6 +1220,15 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
      przed tym NIE chronił. Naprawione w `tools/deploy-staging.sh` (wersjonowane, nie ręcznie
      w `.env`); wartości domyślne w `env.ts` zostają — dla produkcji są poprawne.
   Szczegóły: `docs/rebuild-backlog.md` #46 i #47.
+- **📄 Instrukcja testów dla Ani: `docs/instrukcja-testow-I8.md`** (`33-DOCS-instrukcja-testow-i8`).
+  ⚠ Jedyna instrukcja w projekcie, która NIE zaczyna się od „to staging, testuj bez skrupułów":
+  `POST /api/selly/sync-supplier` z `dry_run=false` realnie modyfikuje sklep Selly, a staging
+  i produkcja mogą wskazywać ten sam sklep. Dokument opisuje **trzy tryby testowania**
+  odpowiadające trzem wartościom `SELLY_TRYB` (A: `wylaczony` — ustawiany automatycznie przy
+  deployu stagingu, pokrywa ~80% zakresu; B: `tylko-odczyt` — połączenie i dry-run, zapis
+  wymuszenie zablokowany; C: `pelny` — pełna wysyłka).
+  **Sandbox:** Bridge go nie ma; istnienie instancji testowej po stronie Selly.pl jest do
+  ustalenia z nimi, nie z repo. Praktycznym zamiennikiem jest `SELLY_TRYB` (ticket 34).
 
 ---
 
