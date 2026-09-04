@@ -15,13 +15,15 @@
 // `POST /api/analytics/bootstrap-current` (metod zapisujących nie nagrywano,
 // `contract/README.md:38`), który zamiast tego ma test jednostkowy w `analityka.agregaty.test.ts`.
 //
-// Blok 10c dołożył sześć tras EAN (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców
-// (`:110`, `:133`, `:143`, `:332`). Razem z pięcioma trasami 10a daje to 15 z 27 tras modułu;
-// pozostałe 12 dowożą bloki 10b, 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+// Blok 10b dołożył pięć tras cen (`:237-268`, `:333`), blok 10c — sześć tras EAN
+// (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców (`:110`, `:133`, `:143`, `:332`).
+// Razem z pięcioma trasami 10a daje to 20 z 27 tras modułu; pozostałe siedem dowożą bloki
+// 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
 //
-// ⚠ TRZY TRASY EAN CZYTAJĄ `req.query` — i to jest jedyne miejsce w tym pliku, gdzie parametr
-// żądania w ogóle dociera do repozytorium (trasy dostawców z 10d żadnego nie mają). Trasy
-// podają go SUROWO (`req.query.x`), bo oryginał parsuje go dopiero w handlerze (`num()`,
+// ⚠ PIĘĆ TRAS CZYTA `req.query` — trzy z bloku 10c (`ean/comparison`, `ean/details`,
+// `ean-porownanie`) i dwie z 10b (`market/group-prices`, `prices/product-history`); trasy
+// dostawców z 10d nie mają żadnego parametru. Trasy EAN podają go SUROWO (`req.query.x`),
+// bo oryginał parsuje go dopiero w handlerze (`num()`,
 // `String(x || '')`) i jego luźna semantyka — tablica z powtórzonego parametru, wartość
 // nieliczbowa, pusty napis — jest częścią odtwarzanego zachowania. Rozpakowanie tego
 // wcześniej zmieniłoby wynik.
@@ -31,7 +33,10 @@ import { Router, type Request, type Response } from "express";
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import {
+  cenyGrupRynku,
   cyklZyciaDostawcow,
+  historiaCenProduktu,
+  inflacjaCennika,
   kpi,
   listyFiltrow,
   marze,
@@ -44,8 +49,11 @@ import {
   statusHistorii,
   statystykiDostawcow,
   szczegolyEan,
+  topZmiany,
   unikalneEan,
+  zacisnijGrupeRynku,
   zbudujSnapshotBiezacy,
+  zmianyCenOstatniegoImportu,
 } from "../repos/analityka.js";
 
 export type ZaleznosciAnalityki = {
@@ -163,6 +171,71 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
    */
   router.get("/api/analytics/ean-porownanie", requireAuth, (req: Request, res: Response) => {
     res.json(porownanieEanLegacy(db, req.query.ean));
+  });
+
+  // ─── BLOK 10b · CENY ──────────────────────────────────────────────────────────────
+  //
+  // Pięć tras zakładki „Ceny w czasie", w KOLEJNOŚCI REJESTRACJI Z ORYGINAŁU
+  // (`:237`, `:245`, `:250`, `:263`, `:333`). Kolejność nie wpływa tu na dopasowanie —
+  // ścieżki się nie nakładają — ale trzymamy ją, żeby porównanie z modułem oryginału
+  // szło linijka w linijkę.
+  //
+  // ⚠ DWIE Z NICH NIE MAJĄ UI I TAK MA ZOSTAĆ (decyzje D1 i D2 użytkownika, 2026-09-03):
+  // `top-zmiany` ma zero wywołań w bundlu produkcji, a `market/group-prices` jest wołana
+  // i ignorowana (martwy fetch). Uzasadnienie w nagłówku sekcji 10b w `repos/analityka.ts`.
+
+  /**
+   * Rozrzut cen w obrębie marki/modelu/rozmiaru (`:237-242`). BEZ UI (decyzja D2).
+   *
+   * `?group` zaciskamy do whitelisty `marka|model|rozmiar` — to jedyne miejsce w tym
+   * routerze, gdzie wartość z `req.query` w ogóle dociera do warstwy zapytań, i dociera
+   * jako wartość TYPU `GrupaRynku`, nie jako napis. Odpowiedź niesie `group` PO
+   * zaciśnięciu, dokładnie jak `res.json({ group, rows })` w oryginale.
+   */
+  router.get("/api/analytics/market/group-prices", requireAuth, (req: Request, res: Response) => {
+    res.json(cenyGrupRynku(db, zacisnijGrupeRynku(req.query.group)));
+  });
+
+  /** Zmiany cen z ostatnich importów — karta „3.1" (`:245-248`). Bez parametrów query. */
+  router.get("/api/analytics/prices/last-import", requireAuth, (_req: Request, res: Response) => {
+    res.json(zmianyCenOstatniegoImportu(db));
+  });
+
+  /**
+   * Historia ceny wybranej opony — karta „3.2 / 3.3" (`:250-261`).
+   *
+   * `String(req.query.x || "")` jest portem dosłownym i pełni tu robotę: pusty napis
+   * znaczy „nie zawężaj", a wartość nieoczekiwanego typu (tablica przy `?ean=a&ean=b`)
+   * zamienia się w napis, zamiast wysadzać zapytanie.
+   */
+  router.get(
+    "/api/analytics/prices/product-history",
+    requireAuth,
+    (req: Request, res: Response) => {
+      res.json(
+        historiaCenProduktu(db, {
+          ean: String(req.query.ean || ""),
+          kod: String(req.query.kod || ""),
+        }),
+      );
+    },
+  );
+
+  /** Inflacja cennika per dostawca i miesiąc — karta „3.6" (`:263-276`). */
+  router.get("/api/analytics/prices/inflation", requireAuth, (_req: Request, res: Response) => {
+    res.json(inflacjaCennika(db));
+  });
+
+  /**
+   * Sto największych zmian ceny co do modułu (`:333`). BEZ UI (decyzja D1).
+   *
+   * ⚠ ODPOWIEDŹ TO GOŁA TABLICA, bez koperty — jeden z trzech takich przypadków w całym
+   * module (obok `dostawcy-stats` i `importy-timeline`). Fixture to potwierdza i dlatego
+   * jego adnotacja przycięcia siedzi na najwyższym poziomie jako `_body_przyciete_z`,
+   * a nie jako `_przyciete.rows`.
+   */
+  router.get("/api/analytics/top-zmiany", requireAuth, (_req: Request, res: Response) => {
+    res.json(topZmiany(db));
   });
 
   return router;

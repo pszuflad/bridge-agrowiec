@@ -6,13 +6,15 @@ sesja 10a musiała się dowiedzieć sama i co kosztowało ją osobną rundę pyt
 Każdy fakt niżej jest **zweryfikowany w kodzie** (`mirror/backend/analytics_module.cjs`,
 `deminified/frontend-index.js`, `contract/fixtures/`), nie przepisany z opisu iteracji.
 
-**Zakres:** 27 tras `/api/analytics/*`. Zamknięte dziewięć: blok 10a — pięć
+**Zakres:** 27 tras `/api/analytics/*`. Zamknięte **dwadzieścia**: blok 10a — pięć
 (`filters`, `status`, `kpi`, `margins`, `bootstrap-current` — ticket
 `19-FEATURE-analityka-fundament`); blok 10c — sześć tras EAN (§5, ticket
 `22-FEATURE-analityka-ean`); blok 10d — cztery trasy dostawców (`suppliers/stability`,
 `suppliers/lifecycle`, `suppliers/stock`, `dostawcy-stats` — §6, ticket
-`23-FEATURE-analityka-dostawcy`). Wszystkie trzy zamknięte 2026-09-03. Ten dokument opisuje
-**pozostałe 12** (bloki 10b, 10e, 10f).
+`23-FEATURE-analityka-dostawcy`) — te trzy zamknięte 2026-09-03; blok 10b — pięć tras cen
+(`prices/inflation`, `prices/last-import`, `prices/product-history`, `market/group-prices`,
+`top-zmiany` — §4, ticket `24-FEATURE-analityka-ceny`, zamknięty 2026-09-04).
+Ten dokument opisuje **pozostałe 7** (bloki 10e i 10f).
 
 **Zanim zaczniesz blok:** przeczytaj `rebuild/frontend/src/pages/analityka/README.md` —
 wzorzec sekcji dashboardu, którego bloki 10b–10e mają się trzymać 1:1.
@@ -34,7 +36,7 @@ a to wymaga decyzji użytkownika, nie domysłu.
 |---|---|---|
 | `GET /api/analytics/kpi` | ✅ 10a | backend sam nazywa ją „backward-compatible alias used by previous frontend build" (`:324`) |
 | `GET /api/analytics/dostawcy-stats` | 10d | |
-| `GET /api/analytics/top-zmiany` | 10b | |
+| `GET /api/analytics/top-zmiany` | ✅ 10b | backend dowieziony bez UI (decyzja D1, `docs/tickets/24-FEATURE-analityka-ceny/plan.md`) |
 | `GET /api/analytics/importy-timeline` | 10e | fixture jest **pustą tablicą** |
 | `GET /api/analytics/ean-porownanie` | ✅ 10c | przyjmuje `?ean`; dowieziona jako trasa bez UI (decyzja D6) |
 | `GET /api/analytics/ean/details` | ✅ 10c | przyjmuje `?ean`; fixture ma puste `offers`; dowieziona jako trasa bez UI (decyzja D6) |
@@ -42,10 +44,11 @@ a to wymaga decyzji użytkownika, nie domysłu.
 
 **Pobierana, ale nigdzie nierenderowana** — osobny przypadek, jeszcze bardziej mylący:
 
-- `GET /api/analytics/market/group-prices` (**blok 10b**). Widok `/analityka` wykonuje to
+- `GET /api/analytics/market/group-prices` (**✅ blok 10b**). Widok `/analityka` wykonuje to
   zapytanie przy każdym wejściu, z `group=marka` na sztywno (`zM+53`), trzyma wynik
   w zmiennej `z`... i nigdy jej nie używa. Selektor grupy (`c`/`u`, `useState("marka")`)
-  też nie ma żadnej kontrolki w UI. To martwy fetch.
+  też nie ma żadnej kontrolki w UI. To martwy fetch — backend dowieziony bez UI (decyzja D2,
+  `docs/tickets/24-FEATURE-analityka-ceny/plan.md`).
 
 Ten sam wzorzec dotyczy `GET /api/analytics/filters`: oryginał pobiera sześć list,
 a renderuje z nich wyłącznie `dostawcy.length` w kaflu KPI.
@@ -73,6 +76,20 @@ niosą fixtures.**
 Konsekwencja: `auth` nie jest tu odstępstwem D1. Wszystkie trasy analityki mają
 w kontrakcie `security: [{bearerAuth}, {cookieAuth}]`, a oryginał podaje `requireAuth`
 w każdej z 27 rejestracji. Nie odnotowuj tego jako różnicy.
+
+### 1.4 Trasy z parametrami NIE używają klucza-ścieżki (odkryte w 10b)
+
+Oryginał dla `market/group-prices?group`, `prices/product-history?ean&kod` i
+`rotation/inactive?days` pisze **własny `queryFn` z jawnym query stringiem**, a `queryKey`
+trzyma jako listę wartości — segmenty klucza NIE są tam ścieżką
+(`deminified/frontend-index.js:27856-27860`, `:27870-27877`, `:27899-27905`). Nie doklejaj
+segmentu `"?…"` do `queryKey` licząc na domyślny `queryFn`, który skleja `queryKey.join("/")`
+— to nie odtwarza oryginału. Wzorzec do skopiowania: `useHistoriaCenyProduktu`
+w `rebuild/frontend/src/pages/analityka/api.ts`; pełny opis: `pages/analityka/README.md`
+§2.2. **Uwaga: przy własnym `queryFn` trzeba samemu obsłużyć `401 → null`** (konwencja
+`on401: "returnNull"` całej aplikacji). Dotyczy bloków 10c (`ean/details?ean`,
+`ean-porownanie?ean`) i 10e (`rotation/inactive?days`) — gotowy hook debounce
+(`pages/analityka/useOpoznionaWartosc.ts`) i wzorzec `queryFn` już są, patrz §5 i §7.
 
 ---
 
@@ -103,7 +120,20 @@ NIEPUSTE odpowiedzi i asercją sprawdź `rows.length > 0` PRZED porównaniem z f
 **Blok 10e ma tu najsłabszą siatkę z całej iteracji** — cztery z sześciu jego fixtures są
 puste albo częściowo puste. Zaplanuj na to testy jednostkowe od razu, nie po review.
 
-**Drugi rodzaj luki: tablica niepusta, ale nagrana tylko na jednej gałęzi handlera.**
+**Druga połowa problemu (wykryta w 10b): `ksztalt.ts` porównuje elementy tablicy PARAMI**,
+więc nie tylko pusta tablica w fixture, ale i **pusta ODPOWIEDŹ testowa** przechodzi bez
+jednego porównania — nawet gdy fixture ma niepuste wiersze. Konsekwencja praktyczna: test
+GATE musi asercją wymusić niepustą odpowiedź (`expect(rows.length).toBeGreaterThan(0)` przed
+porównaniem), a zasiew musi ją zapewnić. Przykład z 10b: `zasiejHistorieCen` z 10a ma trzy
+wiersze jednego dostawcy, w jednym miesiącu, bez `ean` — na takich danych `prices/inflation`
+zwróciłoby same `inflacjaPct: null`, a `prices/product-history` same `ean: null`, co harness
+zgłasza tylko jako OSTRZEŻENIE, nie różnicę. Dlatego 10b dołożyło osobny zasiew
+`zasiejHistorieCenDlaCen` (`test/gate/dane.ts`) — kilku dostawców × dwa miesiące × niepusty
+`ean` — zamiast dorabiać kolejne dane do zasiewu 10a. **Dotyczy szczególnie bloku 10e** (patrz
+§7) — ten sam wzorzec: osobny, bogatszy zasiew zamiast liczenia na to, co GATE i tak przepuści.
+
+**Trzeci rodzaj luki (wykryty w 10d): tablica niepusta, ale nagrana tylko na jednej gałęzi
+handlera.**: tablica niepusta, ale nagrana tylko na jednej gałęzi handlera.**
 `GET_analytics_suppliers_stability.json` nie jest pusty — ale nagrano go przy
 `hasHistory: true`, więc **gałąź zapasowa (`hasHistory: false`, inny zestaw kolumn) nie ma
 w nagraniu żadnego świadka**; GATE jej nie widzi. Pokrywa ją test jednostkowy
@@ -131,6 +161,8 @@ czy widok czasowy ma z czego rysować.
 
 ## 4. Blok 10b — Ceny
 
+**✅ Zrobione 2026-09-04 (`24-FEATURE-analityka-ceny`).**
+
 Trasy: `prices/inflation`, `prices/last-import`, `prices/product-history`,
 `market/group-prices`, `top-zmiany`. Fixtures: 5.
 
@@ -150,18 +182,33 @@ Trasy: `prices/inflation`, `prices/last-import`, `prices/product-history`,
    Kolumny: Data · Dostawca · Kod · Cena zakupu · Cena sprzedaży · Stan.
    **To jedyna karta z realnymi kontrolkami wejścia** — dwa pola tekstowe (`n` = EAN,
    `a` = kod), a zapytanie leci dopiero, gdy **któreś** z nich jest niepuste (`zM+69`:
-   `n || a ? fetch(…) : …`). Parametry idą do `queryKey`, nie do `useMemo`.
+   `n || a ? fetch(…) : …`). Parametry idą własnym `queryFn`, nie doklejone do `queryKey`
+   jako ścieżka — patrz §1.4. `stats` (`{min, max, avg}`) **backend zwraca, frontend go nie
+   renderuje** — oryginał też go nigdzie nie pokazuje (zero użyć w bundlu), dokładnie jak
+   `margins.low`/`high` w 10a (decyzja D4).
+   **Odstępstwo O-10b-1:** pola EAN/Kod mają debounce 300 ms (`useOpoznionaWartosc`) —
+   oryginał strzela zapytaniem na każde naciśnięcie klawisza, a trasa nie ma LIMIT-u i skanuje
+   całą `historia_cen`.
 3. **„3.6 Inflacja cennika"** ← `prices/inflation`
    Kolumny: Miesiąc · Dostawca · Śr. cena · Zmiana %.
+   **Odstępstwo O-10b-2:** wykres liniowy nad tabelą (szereg czasowy, oryginał bez wykresów) —
+   pokazuje się dopiero od dwóch różnych miesięcy w danych, inaczej sama tabela.
 
-**Bez UI w oryginale:** `top-zmiany` (zero wywołań) i `market/group-prices` (martwy fetch —
-patrz §1.1). Dla obu potrzebna decyzja użytkownika: pominąć, czy dołożyć jako nazwane
-odstępstwo. **To jest pytanie do zadania PRZED planem, nie w trakcie.**
+**Bez UI w oryginale (rozstrzygnięte):** `top-zmiany` — backend TAK, UI NIE (**D1**) —
+i `market/group-prices` — backend TAK, UI NIE (**D2**, martwy fetch, patrz §1.1). Obie trasy
+mają zero konsumentów/martwy fetch w oryginale; dołożenie karty byłoby nową funkcjonalnością,
+nie odbudową. Szczegóły: `docs/tickets/24-FEATURE-analityka-ceny/plan.md`.
 
 **⚠ `prices/product-history` to pierwszy prawdziwy czytelnik `historia_cen`** (decyzja D3
 z roadmapy). Tabela ma pisarzy od 3d-1 (auto-zatwierdzanie importu) i od 10a
 (`bootstrap-current`). Na stagingu może być pusta — wtedy `hasHistory: false` i tabela pusta;
 to poprawne zachowanie, nie awaria.
+
+**Zweryfikowane na snapshocie produkcji** (`db/snapshot.db`) — agregaty odtwarzają wartości
+nagrań, nie tylko kształt: `group-prices` → 92 wiersze (fixture `_przyciete: 92`), `inflation`
+→ 17 (fixture 17, pierwszy wiersz `MO1 / 2026-08 / 3138.08 / 44.06` identyczny), `top-zmiany`
+→ pierwszy wiersz identyczny z fixture, `product-history` → `min 24.26` / `max 27230`
+identyczne. Taniej i mocniej niż sam GATE — warto powtórzyć w kolejnych blokach.
 
 ---
 
@@ -210,6 +257,10 @@ pozycję).
   wartości jednej konkretnej oferty.
 - `ean/unique` i `ean/coverage` **nie filtrują** po `cena_zakupu > 0` (w odróżnieniu od
   `comparison` i `supplier-rank`).
+
+`ean/details?ean` i `ean-porownanie?ean` idą przez własny `queryFn`, nie klucz-ścieżkę —
+patrz §1.4; gotowy hook debounce (`pages/analityka/useOpoznionaWartosc.ts`) i wzorzec
+`queryFn` (`useHistoriaCenyProduktu`, `pages/analityka/api.ts`) są od 10b.
 
 **Zakładka w UI: `ean` „EAN i ceny"** (`fe.js:28175-28294`). Trzy karty:
 
@@ -319,7 +370,9 @@ Trasy: `availability/products`, `availability/sell-through`, `rotation/inactive`
 | `rotation/inactive` | `:299` | `days` | 1000 | `{ days, rows }` — **fixture pusty** |
 | `importy-timeline` | `:334` | — | 200 | goła tablica — **fixture pusty** |
 
-**Ten blok ma najsłabszą siatkę bezpieczeństwa w całej iteracji** — patrz §2.
+**Ten blok ma najsłabszą siatkę bezpieczeństwa w całej iteracji** — patrz §2. Wzorzec z 10b
+(osobny, bogatszy zasiew zamiast dosiewania do istniejącego, żeby GATE realnie dowodził
+kształtu) dotyczy tu wprost czterech z sześciu tras.
 
 **Dwie zakładki, nie jedna:**
 
@@ -342,7 +395,8 @@ Sekcja marż stoi na górze; dokładasz **pod nią**, w tej samej zakładce, w k
    ⚠ **Ma realną kontrolkę:** pole tekstowe „Bez ruchu dni" (`i`/`l`, `useState("60")`),
    wartość idzie do `?days` i **do `queryKey`** — to jest wzorzec „filtr → query param",
    w odróżnieniu od filtrów klienckich z 10a. Backend zaciska `days` do `[1, 730]`
-   (`Math.min(730, Math.max(1, parseInt(req.query.days || '60', 10)))`).
+   (`Math.min(730, Math.max(1, parseInt(req.query.days || '60', 10)))`). Idzie przez własny
+   `queryFn`, nie klucz-ścieżkę — patrz §1.4, wzorzec i debounce gotowe od 10b.
 3. **„4.6 Cykl życia modelu"** ← `lifecycle/models`
    Kolumny: Marka · Model · Pierwszy raz · Ostatni raz · Produkty. Bez CSV.
 
@@ -414,7 +468,7 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 
 ---
 
-## 9. Czego blok NIE musi już budować — inwentarz z 10a i 10d
+## 9. Czego blok NIE musi już budować — inwentarz z 10a, 10b i 10d
 
 | Rzecz | Gdzie |
 |---|---|
@@ -429,8 +483,10 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 | Wzorzec sekcji, krok po kroku | `pages/analityka/README.md` |
 | Wzorcowa sekcja do skopiowania | `pages/analityka/SekcjaMarze.tsx` |
 | Pasek postępu dostępności (port `O()`) | `pages/analityka/PasekDostepnosci.tsx` (10d) — reużyj, patrz §7 |
-| Filtr kliencki po dostawcy | `zastosujFiltryDostawcow` + `WYMIARY_DOSTAWCOW` w `pages/analityka/filtrowanie.ts` (10d) |
-| Drugi przykład wzorca sekcji (kopiuj obok `SekcjaMarze.tsx`) | trzy sekcje 10d: `SekcjaStabilnoscDostawcow.tsx`, `SekcjaCyklZyciaDostawcow.tsx`, `SekcjaStanDostawcow.tsx` — `SekcjaStabilnoscDostawcow` to pierwszy przykład sekcji **bez wykresu**, przydatny dla bloków, które wykresu nie potrzebują |
+| Filtr kliencki po dostawcy — generyczny, dla dowolnego wiersza z kolumną `dostawca` | `zastosujFiltryDostawcow` + `WYMIARY_DOSTAWCOW` w `pages/analityka/filtrowanie.ts` (10d; używa go też sekcja cen z 10b) |
+| Debounce 300 ms na polu tekstowym sterującym zapytaniem (10b) | `pages/analityka/useOpoznionaWartosc.ts` |
+| Własny `queryFn` z jawnym query stringiem, klucz jako lista wartości a nie ścieżka (10b) — patrz §1.4 | `pages/analityka/api.ts` (`useHistoriaCenyProduktu`) |
+| Kolejne przykłady wzorca sekcji (kopiuj obok `SekcjaMarze.tsx`) | trzy sekcje 10d: `SekcjaStabilnoscDostawcow.tsx` (pierwszy przykład sekcji **bez wykresu**), `SekcjaCyklZyciaDostawcow.tsx`, `SekcjaStanDostawcow.tsx`; oraz `SekcjaCeny.tsx` z 10b — wzorzec wykresu **liniowego** (szereg czasowy) obok słupkowego z marż |
 
 **Czego NIE ruszać:**
 - tokenów `--chart-1..5` — pochodzą z arkusza produkcji, chroni je `test/tokeny.test.ts`;

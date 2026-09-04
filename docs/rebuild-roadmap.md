@@ -157,7 +157,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
-| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | 🔨 | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 |
+| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | 🔨 | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 2026-09-04 |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ⬜ | |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
 
@@ -1093,15 +1093,16 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   `bootstrap-current`, plus martwy fetch `market/group-prices`), lista fixtures z pustymi
   tablicami i lista tego, co 10a już zbudowało. Sesja 10a musiała ustalić to sama i kosztowało
   ją to osobną rundę pytań — kolejne bloki mają to gotowe.
-- **⚠ `historia_cen` — stan po 10a (sprostowane 2026-09-03).**
+- **⚠ `historia_cen` — stan po 10b (sprostowane 2026-09-04).**
   Tabela ma dziś **dwóch pisarzy**: blok 3d-1 (`rebuild/backend/src/repos/historia.ts`,
   `zapiszHistorieCen` — migawka cenowa przy auto-zatwierdzeniu importu w `tk()`) oraz blok 10a
   (`POST /api/analytics/bootstrap-current` — migawka całego aktywnego katalogu). I5 tej tabeli
   **nie dotknęła w ogóle** — widok `/historia` to log zdarzeń z `audit_log`
   (import/eksport/edycja), nie lista zmian cen per produkt.
   **Pierwszego czytelnika dowiozło 10a:** `GET /api/analytics/status` (agregat
-  `{hasHistory, snapshots, od, do}`). Czytelnika per produkt dowozi **blok 10b**:
-  `GET /api/analytics/prices/product-history` (`mirror/backend/analytics_module.cjs:250`,
+  `{hasHistory, snapshots, od, do}`). Czytelnika per produkt dowiózł **blok 10b** ✅
+  (`24-FEATURE-analityka-ceny`, 2026-09-04): `GET /api/analytics/prices/product-history`
+  (`mirror/backend/analytics_module.cjs:250`,
   fixture `contract/fixtures/GET_analytics_prices_product-history.json`).
   ⚠ Z tej tabeli liczy się też `hasHistory` w siedmiu innych trasach — na pustej tabeli
   zwracają `{hasHistory: false, rows: []}` i to jest poprawne zachowanie, nie awaria.
@@ -1110,7 +1111,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   tabelę `history`; na stagingu zwraca dziś `[]`, bo ta tabela nie ma jeszcze pisarza (patrz I5).
 - **⭐ Kolejność:** 10a zrobione (2026-09-03) — szkielet `/analityka`, filtry globalne, nagłówek
   KPI i wzorzec sekcji/wykresu stoją. 10c i 10d zrobione (2026-09-03) — zakładki `ean`
-  i `dostawcy` wypełnione. Bloki **10b i 10e są nadal niezależne → równoległe**, każdy dokłada zakładkę wg wzorca,
+  i `dostawcy` wypełnione. 10b zrobione (2026-09-04) — zakładka `ceny` wypełniona.
+  Został **10e** — jedyny blok przed 10f, dokłada zakładkę wg wzorca,
   **nie przemebluje widoku**. **10f na końcu** (Pulpit + CSV agregują gotowe metryki).
 - **10a · Fundament analityki** ✅ (BE+FE) — `19-FEATURE-analityka-fundament` · 2026-09-03.
   Backend: pięć tras za `requireAuth` (`filters`, `status`, `kpi`, `margins`,
@@ -1138,21 +1140,29 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - Gate: fixtures kpi/filters/status/margins (kształt 1:1 + openapi; bootstrap-current tylko
     openapi, brak fixtura zapisu) — zielony za pierwszym uruchomieniem, zero `WyjatekGate`.
   - **Wzorzec sekcji dashboardu dla 10b–10e:** `rebuild/frontend/src/pages/analityka/README.md`.
-- **Wzorzec i pułapki dla 10b–10e (z 10a, obowiązujące 1:1):** podział plików `api.ts` /
+- **Wzorzec i pułapki dla 10c–10e (z 10a/10b, obowiązujące 1:1):** podział plików `api.ts` /
   `filtrowanie.ts` / `Sekcja<Nazwa>.tsx`; reużyć `TabelaAnalityki` (port `I()`, limit 300
   wierszy), `KontenerWykresu` + paletę (zamrożona, `--chart-1..5`, chroni
   `test/tokeny.test.ts`, nie zmieniać), `WyborZWyszukiwarka`, `formatowanie.ts`,
-  `FiltryGlobalne`. Filtr idzie do `queryKey` tylko tam, gdzie **oryginalna trasa naprawdę
+  `FiltryGlobalne`. Parametr idzie do zapytania tylko tam, gdzie **oryginalna trasa naprawdę
   czyta `req.query`** (potwierdzone: `market/group-prices?group`, `prices/product-history?ean&kod`
   w 10b; `rotation/inactive?days` w 10e; `ean/comparison?minDiffPct`, `ean/details?ean`,
   `ean-porownanie?ean` w 10c — backend odtwarza te trzy parametry 1:1, ale **oryginalny front
   żadnego z nich nie podaje**, więc hooki 10c wołają te trasy bez query, D3 w
   `22-FEATURE-analityka-ean`) — reszta filtruje klientem przez `zastosujFiltry`+
   `useMemo`. **⚠ Nie ufaj samemu faktowi „trasa czyta query" jako sygnałowi, że front go
-  wysyła** — zweryfikuj grepem hook w `deminified/frontend-index.js`, tak jak w 10c. Trzy
-  pułapki z 10a: (a) `_przyciete` w fixtures to adnotacja nagrywarki, nie pole
-  API — zwrócenie go wywala GATE; (b) puste tablice w fixture (np. `margins.low`/`high`) nie
-  dowodzą kształtu wiersza (`test/gate/ksztalt.ts:50` ich nie sprawdza) — pokryć testem
+  wysyła** — zweryfikuj grepem hook w `deminified/frontend-index.js`, tak jak w 10c.
+  **⚠ Sprostowane w 10b — JAK parametr trafia do URL:** oryginał NIE skleja segmentów
+  `queryKey` w ścieżkę, tylko pisze własny `queryFn` z jawnym query stringiem (`?ean=&kod=`),
+  a klucz trzyma jako listę wartości (`deminified/frontend-index.js:27870-27877`). Wzorzec do
+  skopiowania: `useHistoriaCenyProduktu` w `pages/analityka/api.ts`; pełny opis
+  w `pages/analityka/README.md` §2.2. Dotyczy `rotation/inactive?days` w 10e.
+  Trzy pułapki z 10a: (a) `_przyciete` w fixtures to adnotacja nagrywarki, nie pole
+  API — zwrócenie go wywala GATE; (b) puste tablice **po ŻADNEJ ze stron** (fixture lub
+  odpowiedź testowa) nie dowodzą kształtu wiersza — `test/gate/ksztalt.ts:50` porównuje
+  elementy tablicy parami, więc pusta odpowiedź przechodzi bez dowodu tak samo jak pusta
+  fixture; testy GATE muszą asercją wymuszać niepustą odpowiedź, a zasiew musi ją zapewnić
+  (wzorem `zasiejHistorieCenDlaCen` z 10b, `test/gate/dane.ts`) — pokryć też testem
   jednostkowym; (c) przed odtwarzaniem czegokolwiek zgrepować ścieżkę w
   `deminified/frontend-index.js` — `kpi` ma fixture, a oryginalny FE go nie woła.
   `openapi.yaml` nie ma schematów odpowiedzi dla żadnej trasy analityki (tylko kody +
@@ -1184,9 +1194,37 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   `testTimeout`/`hookTimeout` 20 s, `test/setup.ts` `asyncUtilTimeout` 5 s) — bez tego pełny
   `vitest run` był niedeterministyczny pod obciążeniem (znaleziono przy review 10c), nie trzeba
   tego robić drugi raz.
-- **10b · Ceny** (BE+FE) — `prices/inflation`, `prices/last-import`, `prices/product-history` (**czytelnik `historia_cen`**, D3), `market/group-prices`, `top-zmiany` (**`margins` przeniesione do 10a jako wzorzec**).
+- **10b · Ceny** ✅ (BE+FE) — `24-FEATURE-analityka-ceny` · 2026-09-04.
+  Backend: pięć tras za `requireAuth` (`market/group-prices`, `prices/last-import`,
+  `prices/product-history`, `prices/inflation`, `top-zmiany`), agregaty 1:1 z
+  `mirror/backend/analytics_module.cjs:237-268,333`. Frontend: zakładka `ceny` z trzema
+  kartami 1:1 z oryginałem (`deminified/frontend-index.js:28295-28416`) — „3.1 Zmiany cen
+  z ostatnich importów”, „3.2 / 3.3 Historia ceny wybranej opony”, „3.6 Inflacja cennika”.
+  Nowe pliki: `pages/analityka/SekcjaCeny.tsx`, `pages/analityka/useOpoznionaWartosc.ts`
+  (debounce, reużywalny w 10c/10e — patrz niżej).
+  - **D1** — `top-zmiany`: backend TAK, UI NIE (zero wywołań w bundlu produkcji — trasa bez
+    konsumenta).
+  - **D2** — `market/group-prices`: backend TAK, UI NIE (potwierdzony martwy fetch:
+    `group=marka` na sztywno, wynik nigdzie nieużyty, selektora grupy w UI nie ma).
+  - **D3** → **O-10b-1** (odstępstwo) — debounce 300 ms na polach EAN/Kod. Oryginał pyta na
+    każde naciśnięcie klawisza, a trasa nie ma LIMIT-u i skanuje `historia_cen` (15 597
+    wierszy w nagraniu).
+  - **D4** — `stats {min,max,avg}` z `product-history` pobierane i NIERENDEROWANE, dokładnie
+    jak `margins.low`/`high` w 10a.
+  - **O-10b-2** (odstępstwo, rozszerzenie O-10a-3) — wykres liniowy w karcie inflacji.
+    Próg `MIN_MIESIECY_NA_WYKRESIE = 2` — linia przez jeden punkt to nie szereg czasowy;
+    karta wtedy pokazuje samą tabelę.
+  - Przycisk „CSV” przy karcie „3.1” świadomie pominięty (trasa `export/{view}` — **10f**).
+  - Gate: pięć fixtures (kształt 1:1 + kontrakt + 401), zielony za pierwszym uruchomieniem,
+    zero `WyjatekGate`; zasiew `zasiejHistorieCenDlaCen` w `test/gate/dane.ts` (wielu
+    dostawców × dwa miesiące × niepusty `ean` — patrz pułapka (b) niżej). Backend 719
+    testów ✓, frontend 410 ✓, lint/typecheck/build ✓ w obu projektach.
+  - Agregaty sprawdzone dodatkowo na snapshocie produkcji (`db/snapshot.db`) — odtwarzają
+    wartości nagrań, nie tylko kształt: `group-prices` 92 wiersze (fixture 92), `inflation`
+    17 (fixture 17, pierwszy wiersz identyczny), `top-zmiany` pierwszy wiersz identyczny,
+    `product-history` min/max identyczne.
+  - Chunk `Analityka`: 385 kB (10a) → 436 kB po scaleniu 10b z 10c i 10d; wspólny bundle bez zmian.
   - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §4.
-  - Gate: fixtures tej grupy (5) + dashboardy na realnych agregatach.
 - **10c · EAN** ✅ (BE+FE) — `22-FEATURE-analityka-ean` · 2026-09-03. Sześć tras za `requireAuth`
   (`ean/comparison`, `ean/coverage`, `ean/details`, `ean/supplier-rank`, `ean/unique`,
   `ean-porownanie`), agregaty 1:1 z `analytics_module.cjs`, zweryfikowane liczbowo na kopii
@@ -1223,6 +1261,15 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - D5 — przyciski „CSV" świadomie pominięte we wszystkich trzech kartach (trasa eksportu → 10f).
   - 📄 Szczegóły: `docs/tickets/23-FEATURE-analityka-dostawcy/`.
 - **10e · Dostępność / rotacja / cykl** (BE+FE) — `availability/products`, `availability/sell-through`, `rotation/inactive`, `lifecycle/models`, `seasonality/monthly`, `importy-timeline`. `rotation/inactive` i `lifecycle/models` dokładają się **pod** istniejącą kartą marż w zakładce `marza` (już wypełnioną w 10a), w tej samej zakładce — tak jest w oryginale (`deminified/frontend-index.js:28516-28640`). `availability/*` wypełnia zakładkę `dostepnosc`.
+  - **Z 10b (`24-FEATURE-analityka-ceny`, 2026-09-04):** `rotation/inactive?days` — ten sam
+    wzorzec parametru co `prices/product-history?ean&kod`: własny `queryFn` z jawnym query
+    stringiem, klucz jako lista wartości (nie sklejać segmentu w URL), patrz
+    `useHistoriaCenyProduktu` w `pages/analityka/api.ts` i README §2.2. **Uwaga o pustych
+    fixtures:** cztery z sześciu fixtures tego bloku są puste — `test/gate/ksztalt.ts`
+    porównuje elementy tablicy parami, więc nie dowodzi kształtu ani z pustej fixture, ani
+    z pustej odpowiedzi testowej (obie strony!). Testy GATE tego bloku muszą mieć własny
+    zasiew dający niepustą odpowiedź i jawną asercję `rows.length > 0`, wzorem
+    `zasiejHistorieCenDlaCen` (`test/gate/dane.ts`, dodane w 10b).
   - **WEJŚCIE Z BLOKU 10d (2026-09-03, `23-FEATURE-analityka-dostawcy`) — pasek postępu
     dostępności jest już gotowy.** `rebuild/frontend/src/pages/analityka/PasekDostepnosci.tsx`
     (port `O(e)`, `deminified/frontend-index.js:27919-27936`). Karta „4.1 Historia dostępności
@@ -1241,6 +1288,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     `POST /api/analytics/bootstrap-current` istnieje od 10a bez przycisku (decyzja D4 — trasa
     nieidempotentna, `INSERT…SELECT` bez `ON CONFLICT`); jeśli miałby dostać UI, to tu,
     jako nowa decyzja użytkownika.
+  - **WEJŚCIE Z BLOKU 10b (2026-09-04, `24-FEATURE-analityka-ceny`).** Przycisk „CSV” przy
+    karcie „3.1 Zmiany cen z ostatnich importów” (`deminified/frontend-index.js:28310`, widok
+    eksportu `prices-last`) świadomie pominięty w 10b — 10f go dokłada.
   - **WEJŚCIE Z BLOKU 10c (2026-09-03, `22-FEATURE-analityka-ean`) — DWIE rzeczy czekają tu na
     decyzję/dowóz.** (1) Nagłówek KPI: dane do dwóch z czterech oryginalnych kafli („EAN
     wspólne" = `ean/comparison.rows.length`, „Pozycje unikalne" = `ean/unique.rows.length`,

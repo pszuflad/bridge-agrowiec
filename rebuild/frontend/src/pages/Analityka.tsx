@@ -16,8 +16,9 @@
  *  • O-10a-2 — globalny pasek sześciu filtrów, którego oryginał nie ma
  *              (uzasadnienie w `FiltryGlobalne.tsx`),
  *  • O-10a-3 — wykres w sekcji marż; oryginał nie ma ani jednego wykresu
- *              (uzasadnienie w `components/ui/chart.tsx`),
- *  • O-10a-4 — pozostałe zakładki są puste do czasu bloków 10b, 10d i 10e. To zakres bloku,
+ *              (uzasadnienie w `components/ui/chart.tsx`); blok 10b rozszerza to
+ *              o wykres inflacji (O-10b-2),
+ *  • O-10a-4 — zakładka `dostepnosc` jest pusta do czasu bloku 10e. To zakres bloku,
  *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
  *              wstawiają treść, zamiast przemeblowywać widok.
  *  • O-10d-1 — wykres dostępności w karcie „1.4 / 1.5" zakładki `dostawcy` (decyzja D2
@@ -55,6 +56,7 @@ import {
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
 import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
+import { SekcjaCeny } from "./analityka/SekcjaCeny";
 import { SekcjaCyklZyciaDostawcow } from "./analityka/SekcjaCyklZyciaDostawcow";
 import { SekcjaEan } from "./analityka/SekcjaEan";
 import { SekcjaMarze } from "./analityka/SekcjaMarze";
@@ -154,11 +156,13 @@ export function Analityka() {
           />
         </TabsContent>
 
+        {/*
+          Wypełnione w bloku 10b. Karty są TRZY, a nie pięć: `top-zmiany`
+          i `market/group-prices` mają w tym bloku backend, ale świadomie nie mają UI
+          (decyzje D1 i D2) — oryginał ich nie renderuje. Szczegóły w `SekcjaCeny.tsx`.
+        */}
         <TabsContent value="ceny" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10b"
-            zakres="Inflacja cen, ostatni import, historia cen produktu, ceny rynkowe i największe zmiany."
-          />
+          <SekcjaCeny wybor={wybor} />
         </TabsContent>
 
         <TabsContent value="dostepnosc" className="mt-4">

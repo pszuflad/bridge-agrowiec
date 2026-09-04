@@ -282,12 +282,16 @@ zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotio
 `rebuild/backend/src/routes/{config,spedycja}.ts`, `src/repos/{config,spedycja}.ts`
 (`docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`). `historia_cen` ma od bloku **10a**
 dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/bootstrap-current`,
-oraz od bloku **10d** dwóch czytelników — `GET /api/analytics/status` zwraca z niej agregat
-`{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`), a
-`GET /api/analytics/suppliers/stability` (gałąź `hasHistory: true`) liczy z niej zmiany cen
-oknem `LAG()`. `GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`.
-Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/plan.md`,
-`docs/tickets/23-FEATURE-analityka-dostawcy/`.
+oraz trzech czytelników. `GET /api/analytics/status` (10a) zwraca z niej agregat
+`{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
+`GET /api/analytics/suppliers/stability` (10d, gałąź `hasHistory: true`) liczy z niej zmiany
+cen oknem `LAG()`. `GET /api/analytics/prices/product-history` (10b) jest pierwszym
+czytelnikiem PER PRODUKT — filtruje po `?ean`/`?kod` (AND), bez LIMIT-u; `prices/inflation`
+z tego samego bloku liczy z niej inflację miesięczną, też oknem `LAG()`.
+`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
+`docs/tickets/19-FEATURE-analityka-fundament/plan.md` (10a),
+`docs/tickets/24-FEATURE-analityka-ceny/plan.md` (10b),
+`docs/tickets/23-FEATURE-analityka-dostawcy/` (10d).
 
 ## 6. Korekty do propagacji
 
