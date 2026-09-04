@@ -11,6 +11,7 @@ import { trasyAnalityki } from "./routes/analytics.js";
 import { zasiejSlownikAtrybutow } from "./repos/atrybuty.js";
 import { trasyAuth } from "./routes/auth.js";
 import { trasyKonfiguracji } from "./routes/config.js";
+import { trasyKonta } from "./routes/konto.js";
 import { trasyHistorii } from "./routes/history.js";
 import { trasyDostawcow } from "./routes/suppliers.js";
 import { trasyImportu } from "./routes/import.js";
@@ -145,6 +146,7 @@ export function stworzApp({
   app.use(trasyAlertow({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
   app.use(trasyKonfiguracji({ db }));
+  app.use(trasyKonta({ db }));
   app.use(trasySpedycji({ db }));
   app.use(
     trasySelly({
