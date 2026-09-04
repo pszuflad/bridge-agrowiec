@@ -7,7 +7,7 @@ surowy audyt) za `requireAuth`, pełny widok `/moje-konto`, przycisk „Usuń ws
 w zakładce „Katalog" oraz dwie nowe zakładki `/konfiguracja` — „Admin" i „Dziennik".
 GATE przeszedł na czterech fixtures; siatka bezpieczeństwa została **zweryfikowana odwrotnie**
 (celowe sparsowanie `szczegolyJson` zapaliło STOP, po czym zmianę wycofano). Backend:
-1086 testów / 70 plików. Frontend: 686 testów / 46 plików. Bramki czyste po obu stronach.
+1086 testów / 70 plików. Frontend: 688 testów / 46 plików. Bramki czyste po obu stronach.
 
 ## Zmiany
 
@@ -80,7 +80,7 @@ Reszta bez odstępstw. Decyzje D1–D8 z planu zrealizowane w całości.
     („typ object, oczekiwano string" ×4, STOP) — zmianę wycofano. Gate realnie broni kontraktu,
     nie przechodzi „z rozpędu".
 - Backend: ✓ **1086 testów / 70 plików**; `lint`, `typecheck`, `build` czyste.
-- Frontend: ✓ **686 testów / 46 plików**; `lint`, `typecheck`, `build` czyste.
+- Frontend: ✓ **688 testów / 46 plików**; `lint`, `typecheck`, `build` czyste.
 - E2E: pominięte — projekt nie ma harnessu E2E, ścieżki pokryte integracyjnie
   (realny SQLite w katalogu tymczasowym po stronie BE, MSW po stronie FE).
 
