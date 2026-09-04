@@ -150,6 +150,23 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `no such column`, `safeAll()` połyka błąd, więc obie trasy oddają `rows: []` mimo 15 597
 > migawek w historii; odtworzone 1:1, do decyzji w `docs/rebuild-backlog.md` #32. Szczegóły:
 > `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
+>
+> **Potwierdzone w 10f** (`26-FEATURE-analityka-export-pulpit`, 2026-09-04): `GET
+> /api/analytics/export/{view}` — 27. i **ostatnia** trasa modułu analityki (moduł kompletny
+> 27/27), pod `requireAuth`, ten sam wniosek co w 10a (nie odstępstwo D1). Jedyna
+> sparametryzowana trasa analityki czytająca `req.params` zamiast `req.query`, i **jedyna trasa
+> całego backendu, która nie oddaje JSON-a** — nagłówki `text/csv; charset=utf-8` +
+> `Content-Disposition: attachment; filename={view}.csv`, bez sanityzacji `filename` (port 1:1).
+> Dziesięć widoków (`suppliers-stability`, `suppliers-lifecycle`, `suppliers-stock`,
+> `ean-comparison`, `unique`, `prices-last`, `availability-products`, `sell-through`, `margins`,
+> `rotation-inactive`), **każdy z własnym SQL-em**, innym niż trasa dashboardu o tej samej
+> nazwie (np. `export/margins` liczy per produkt, dashboard `/margins` grupuje). LIMIT 5000 mają
+> tylko 6 z 10 (bez limitu: `suppliers-stability`, `suppliers-stock`, `ean-comparison`,
+> `unique`). Nieznany `{view}` → **200 i sam BOM, nie 404**. `availability-products` i
+> `sell-through` dziedziczą usterkę #32 (`historia_cen.nazwa`) i zawsze oddają sam BOM mimo
+> danych. Format CSV: separator średnik, BOM zawsze na początku (także przy pustym wyniku),
+> cudzysłowy podwajane, nagłówek z kluczy pierwszego wiersza. Szczegóły:
+> `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 

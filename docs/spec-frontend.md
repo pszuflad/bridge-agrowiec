@@ -63,9 +63,10 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
 - **12 tras** (nie 11): `/login`, `/`, `/staging`, `/katalog`, `/narzuty`,
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
-  Odbudowane dotąd: `/login`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`, `/narzuty`,
-  `/alerty`, `/waga-gabarytowa`, `/analityka` (9 widoków; `/analityka` ładowana leniwie —
-  `lazy`+`Suspense`); pozostałe 3 to placeholdery (`src/pages/placeholdery.ts`).
+  Odbudowane dotąd: `/login`, `/`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`,
+  `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka` (10 widoków; `/analityka` ładowana
+  leniwie — `lazy`+`Suspense`); pozostałe 2 to placeholdery (`/atrybuty`, `/moje-konto`,
+  `src/pages/placeholdery.ts`).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
@@ -313,6 +314,24 @@ ma endpoint:
 > zero konsumentów / martwy fetch w oryginale, ten sam wzorzec co `bootstrap-current` w 10a);
 > `stats {min,max,avg}` z `product-history` jest pobierane i nierenderowane (D4, jak
 > `margins.low`/`high` w 10a). Szczegóły: `docs/tickets/24-FEATURE-analityka-ceny/`.
+
+> **Odbudowa (10f, `26-FEATURE-analityka-export-pulpit`, 2026-09-04) — zamyka Iterację 10.**
+> Dwie części. **Export CSV:** przycisk „CSV" doszedł do wszystkich dziesięciu kart
+> `/analityka` (pominięty świadomie przez 10a–10e), jako **nawigacja przeglądarki**
+> (`window.location.href`, nie `fetch`) na `GET /api/analytics/export/{view}` — cookie sesji
+> starcza, bo `SameSite=Lax` przechodzi przy nawigacji GET najwyższego poziomu; adres nie niesie
+> żadnych parametrów/filtrów. **Pulpit `/`:** ostatni placeholder Iteracji 10 odtworzony — cztery
+> klikalne kafle KPI (ikona, trend, `href`) liczone **lokalnie** z `GET /api/products` i
+> `GET /api/staging` (port `Si()`, nie `NaglowekKpi` z 10a — inny layout, inne liczby, D2),
+> karta „Najnowsze powiadomienia" (≤5, `poziom ∈ {krytyczny,ostrzezenie}` ∧ `status==="nowy"`,
+> sort poziom→data malejąco, karta nieobecna gdy brak alertów) i tabela „Ostatnia aktywność
+> dostawców" (9 kolumn) z `GET /api/suppliers`. **Odstępstwo O-10f-1 (D1):** oryginalny Pulpit
+> (`N2`, `frontend-index.js:16836-17090`) nie woła ani `/api/analytics/*`, ani `/api/alerts` —
+> alerty wyprowadza klientem z `/api/products` przez `pv()`; odbudowa karmi ten sam layout
+> realnymi alertami z `GET /api/alerts` (kontynuacja D1 z I6, `docs/rebuild-backlog.md` #26).
+> Kafel „Ostatni eksport CSV" jest **trwale martwy** (D3) — szuka `typ==="eksport"` w
+> `GET /api/history`, a ten wiersz nie ma pola `typ`. Szczegóły:
+> `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

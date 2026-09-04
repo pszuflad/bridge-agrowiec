@@ -1435,6 +1435,15 @@ na ten sam ekran mieszałyby dwa pojęcia „alertu" w jednej liście i psuły g
 w `/katalog`, gdzie te produkty i tak są widoczne, (d) nie wracają wcale. Powiązane: marża
 liczona w `pv()` to **czwarty** sposób liczenia ceny w oryginale — patrz wpisy #23 i #24.
 
+**Decyzja utrzymana po raz drugi w bloku 10f (2026-09-04).** Pulpit `/` oryginału
+(`deminified/frontend-index.js:16836-17090`, funkcja `N2`) liczy te same pseudo-alerty przez
+`pv()` (`:16631-16745`) i pokazuje pięć najnowszych w karcie „Najnowsze powiadomienia".
+Odbudowa karmi ten sam układ realnymi alertami importu z `GET /api/alerts` (decyzja D1
+z 2026-09-04, `docs/tickets/26-FEATURE-analityka-export-pulpit/plan.md`, odstępstwo O-10f-1) —
+dobór (poziom `krytyczny`/`ostrzezenie`, status `nowy`), sortowanie (poziom, potem data
+malejąco) i limit pięciu są portem 1:1, zmieniło się wyłącznie ŹRÓDŁO. Pseudo-alerty
+katalogowe są teraz porzucone na DWÓCH ekranach (`/alerty` i `/`), nie jednym.
+
 ---
 
 ### #27 · 2026-09-03 · [FRONTEND] · lista przewoźników i dzielników żyje wyłącznie w IndexedDB przeglądarki
@@ -1605,10 +1614,10 @@ usterek — nie scalać.
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (dwie trasy analityki, tabela `historia_cen`) |
-| **Pliki** | `mirror/backend/analytics_module.cjs:161` (`availability/products`), `:176` (`availability/sell-through`), `:316-317` (te same dwa widoki eksportu); schemat: `db/schema.sql`, `rebuild/schema/001_schema.sql`, `analytics_module.cjs:24-49` (`ensureSchema`); port: `rebuild/backend/src/repos/analityka.ts` |
+| **Pliki** | `mirror/backend/analytics_module.cjs:161` (`availability/products`), `:176` (`availability/sell-through`), `:316-317` (te same dwa widoki eksportu); schemat: `db/schema.sql`, `rebuild/schema/001_schema.sql`, `analytics_module.cjs:24-49` (`ensureSchema`); port: `rebuild/backend/src/repos/analityka.ts` (dashboard), `rebuild/backend/src/repos/analityka-eksport.ts` (eksport CSV) |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
-| **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) |
-| **Status** | ✔ odtworzone w rebuild (10e) · w produkcji **nadal obecne** |
+| **Iteracja** | odtworzone 1:1 w **10e** (dashboard, `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) i **10f** (eksport CSV, `docs/tickets/26-FEATURE-analityka-export-pulpit/`) |
+| **Status** | ✔ odtworzone w rebuild (10e + 10f) · w produkcji **nadal obecne** |
 
 **Co robi produkcja.** `GET /api/analytics/availability/products` w gałęzi z historią robi
 `SELECT kod, ean, dostawca, MAX(nazwa) AS nazwa, … FROM historia_cen`, a
@@ -1633,7 +1642,11 @@ które w tej sytuacji oddają sam znacznik BOM — to jest wejście dla bloku **
 **Co zrobiła odbudowa.** Port 1:1, łącznie z portem `safeAll` (`bezpiecznieWiersze`
 w `repos/analityka.ts`), żeby zachowanie było identyczne z produkcją zamiast dawać 500.
 Zamrożone dwoma testami charakteryzacyjnymi backendu i jednym testem widoku — gdyby te trasy
-kiedyś zaczęły zwracać wiersze, testy o tym powiedzą.
+kiedyś zaczęły zwracać wiersze, testy o tym powiedzą. **Blok 10f odtworzył tę samą wadę**
+w dwóch widokach eksportu CSV (`export/availability-products`, `export/sell-through`, port
+w `repos/analityka-eksport.ts`) — oba oddają sam znacznik BOM mimo danych w `historia_cen`,
+zamrożone `test/analityka.eksport.agregaty.test.ts` (poziom repo) i
+`test/analityka.eksport.gate.test.ts` (przez HTTP).
 
 **Naprawa (propozycja).** Trzy warianty, każdy to zmiana zachowania produkcji:
 (a) `LEFT JOIN products p ON p.kod = h.kod` i `MAX(p.nazwa)` — pełne kolumny oryginału, ale
@@ -1650,7 +1663,7 @@ użytkownika, czy i kiedy naprawiać.
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (trasa analityki, poprawność SQL) |
-| **Pliki** | `mirror/backend/analytics_module.cjs:175-179`; port: `rebuild/backend/src/repos/analityka.ts` (`tempoSchodzenia`); źródło duplikatu: `rebuild/backend/src/import/tk.ts:171,548-564` |
+| **Pliki** | `mirror/backend/analytics_module.cjs:175-179` (dashboard), `:317` (widok eksportu `sell-through`); port: `rebuild/backend/src/repos/analityka.ts` (`tempoSchodzenia`), `rebuild/backend/src/repos/analityka-eksport.ts` (eksport); źródło duplikatu: `rebuild/backend/src/import/tk.ts:171,548-564` |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — dziś zamaskowane przez #32 |
 | **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) |
 | **Status** | ✔ odtworzone w rebuild (10e) · **nieosiągalne, dopóki żyje #32** |
@@ -1673,7 +1686,96 @@ sprawy trzeba rozstrzygać razem.
 
 **Co zrobiła odbudowa.** Port 1:1 z komentarzem opisującym pułapkę i testem
 charakteryzacyjnym, który zamraża realny efekt (pusta lista mimo danych do policzenia).
+To samo dotyczy widoku eksportu `export/sell-through` (port w `repos/analityka-eksport.ts`,
+blok **10f**) — tam też dziś zamaskowane przez #32.
 
 **Naprawa (propozycja).** Rozdzielić agregację od funkcji okna: najpierw CTE zwijające
 duplikaty (`MAX(stan)` albo `MIN(id)` per klucz), dopiero na nim `LAG`. Poza zakresem
 odbudowy — decyzja użytkownika, razem z #32.
+
+---
+
+### #34 · 2026-09-04 · [FRONTEND] · kafel „Ostatni eksport CSV" na Pulpicie jest TRWALE MARTWY
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (widok `/`, Pulpit) |
+| **Pliki** | `deminified/frontend-index.js:16852` (`N2`); `contract/fixtures/GET_history.json`; nagłówek `rebuild/backend/src/routes/history.ts`; port: `rebuild/frontend/src/pages/pulpit/kpi.ts` (`ostatniEksport`/`ostatniImport`) |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`, decyzja D3) |
+| **Status** | ✔ odtworzone w rebuild (10f) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** Pulpit oryginału (`N2`) robi `r.find(e => "eksport" === e.typ)` na
+odpowiedzi `GET /api/history`, a druga zmienna analogicznie szuka `"import"`. `GET /api/history`
+oddaje wiersze tabeli `history` — dziennik zmian PÓL PRODUKTU, kształt
+`{id, data, kodProduktu, nazwa, pole, staraWartosc, nowaWartosc, zrodlo, kto,
+wykonalUzytkownikId}` (`contract/fixtures/GET_history.json`). **Pola `typ` tam nie ma.**
+Rozróżnienie dwóch tabel opisuje nagłówek `routes/history.ts`. Pole `typ` niesie INNA trasa:
+`GET /api/history/paged` (czyta `audit_log`, wartości m.in. `eksport_csv`, `import_cennika`).
+
+**Skutek.** Kafel pokazuje „—" i „Brak eksportów ani importów" ZAWSZE, niezależnie od danych.
+
+**Co zrobiła odbudowa.** Port 1:1 (decyzja użytkownika D3, 2026-09-04), z komentarzem w
+`pages/pulpit/kpi.ts` (funkcja `ostatniEksport`/`ostatniImport` — sygnatura celowo nie pozwala
+odczytać `typ`) i dwoma testami zamrażającymi (`test/pulpit.kpi.test.ts`, `test/pulpit.test.tsx`).
+
+**Do decyzji.** Czy podpiąć kafel pod `audit_log` (`/api/history/paged` albo `/meta`), czy
+zostawić martwy.
+
+---
+
+### #35 · 2026-09-04 · [BACKEND] · `Content-Disposition` w eksporcie CSV bierze `{view}` bez sanityzacji
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (trasa `GET /api/analytics/export/:view`) |
+| **Pliki** | `mirror/backend/analytics_module.cjs:308` (nagłówek), `:321` (nieznany widok → `sendRows([])`); port: `rebuild/backend/src/routes/analytics.ts:324-335` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`) |
+| **Status** | ✔ odtworzone w rebuild (10f) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** `analytics_module.cjs:308`:
+``res.setHeader('Content-Disposition', `attachment; filename=${view}.csv`)`` — `view` pochodzi
+wprost z `req.params`, bez cudzysłowów i bez `filename*`.
+
+**Skutek.** Node odrzuca wartość nagłówka ze znakiem sterującym, więc `{view}` z `\n` kończy
+w `catch` jako 500 (nie jako wstrzyknięcie nagłówka) — ale nazwa pliku nadal przyjmuje dowolny
+„legalny" napis.
+
+**Co zrobiła odbudowa.** Port 1:1 w `routes/analytics.ts`, bez sanityzacji, z komentarzem
+w kodzie.
+
+**Do decyzji.** Czy ograniczyć `{view}` do listy znanych widoków (odpowiedź 404/400 zamiast
+pustego CSV) albo owinąć nazwę w cudzysłowy. ⚠ Powiązanie: to zmieniłoby też zachowanie
+„nieznany `{view}` → 200 i sam BOM", które jest portem `return sendRows([])` (`:321`).
+
+---
+
+### #36 · 2026-09-04 · [FRONTEND] · niejednolite renderowanie `AppShell` w widokach odbudowy
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (architektura, nie usterka produkcji) |
+| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,WidokWPrzygotowaniu}.tsx`; NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`) |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** |
+| **Status** | — nie zaczęte (zastane, ujawnione przy **10f**) |
+
+**Co znaleziono.** `App.tsx` rejestruje trasy bezpośrednio pod `<Switch>`, bez wspólnego
+layoutu — każdy widok sam decyduje, czy owinąć się w `AppShell` (komponent z sidebarem,
+`components/AppShell.tsx:59-87`). Dziś robią to tylko `Pulpit`, `Konfiguracja` i
+`WidokWPrzygotowaniu`; siedem pozostałych widoków (`Katalog`, `Staging`, `Historia`, `Narzuty`,
+`Alerty`, `WagaGabarytowa`, `Analityka`) zwraca samą treść (np. `Katalog.tsx:172`:
+`<div className="p-6 max-w-full">` bez `AppShell` ani `Sidebar` w drzewie) — sprawdzone
+`grep`em, sidebar na tych siedmiu ekranach faktycznie nie renderuje się.
+
+**Skąd wzięło się przy 10f.** Zastane, nie wprowadzone przez ten blok: `/` było placeholderem
+(`WidokWPrzygotowaniu`, który ramę renderuje), więc problem był niewidoczny. 10f zdjęło
+placeholder i Pulpit musiał dołożyć `AppShell` samodzielnie, żeby nie zgubić nawigacji —
+przy tej okazji rozjazd między widokami stał się widoczny.
+
+**Skutek.** Wizualna regresja wobec oczekiwanego layoutu (sidebar znika) na siedmiu ekranach —
+raczej porządek architektury odbudowy niż wierność wobec oryginału (oryginał nie ma pojęcia
+komponentu `AppShell.tsx`, to konstrukcja rebuild-u).
+
+**Do decyzji.** Czy ujednolicić przez wspólny layout w `App.tsx` (jedno miejsce), czy dołożyć
+`AppShell` pojedynczo do siedmiu widoków.

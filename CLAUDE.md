@@ -56,7 +56,10 @@ z :47312, bo obie deklaracje `Lq` są w tym samym zakresie; efekt widoczny w pro
 Ta sama nieufność dotyczy pustych odpowiedzi: `safeAll()` w module analityki zamienia błąd SQL
 (np. odwołanie do nieistniejącej kolumny) w pustą listę, więc zepsuta trasa wygląda identycznie
 jak trasa bez danych — nie ufaj `rows: []`, sprawdź, czy dane w bazie faktycznie są. Przykład:
-`docs/rebuild-backlog.md` #32 (`historia_cen` bez kolumny `nazwa`).
+`docs/rebuild-backlog.md` #32 (`historia_cen` bez kolumny `nazwa`). Ta sama pułapka ma też
+postać pliku: `GET /api/analytics/export/{view}` dla `availability-products` i `sell-through`
+oddaje sam BOM (pusty CSV) zamiast `rows: []`, mimo danych w bazie — nie ufaj też pustemu
+plikowi eksportu.
 
 ---
 

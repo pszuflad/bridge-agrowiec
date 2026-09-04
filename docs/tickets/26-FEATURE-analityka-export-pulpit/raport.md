@@ -124,3 +124,104 @@ Brak zmian w kontrakcie API. Dwie zmiany zachowania widoczne dla użytkownika, o
    eksportu, nie tylko dashboardu — dziś zamaskowany przez #32, odsłoni się przy jego naprawie.
 5. **Przepięcie kafli `NaglowekKpi` na dane z 10c** (odstępstwo O-10a-1) — nadal otwarte,
    nie w zakresie tego bloku.
+
+---
+
+## Review
+
+`docs/tickets/26-FEATURE-analityka-export-pulpit/review.md` — **1 BLOCKER, 0 SHOULD-FIX,
+2 NICE-TO-HAVE**.
+
+Zakres merytoryczny został zweryfikowany linia po linii wobec oryginału i uznany za zgodny
+co do joty: dziesięć zapytań eksportu (kolumny, aliasy, `GROUP BY`/`HAVING`/`ORDER BY`
+i LIMIT dokładnie tam, gdzie ma go oryginał — 6/10), format CSV, zachowanie dla nieznanego
+`{view}` (200 + BOM, nie 404), autoryzacja przez samo cookie, Pulpit wobec `N2`, mapowanie
+dziesięciu przycisków CSV. Testy uznane za rzeczowe — zasiew w `analityka.eksport.agregaty.test.ts`
+realnie gwarantuje niepuste wyniki tam, gdzie test twierdzi, że sprawdza kształt wiersza.
+Wszystkie cztery bramki potwierdzone niezależnie po obu stronach.
+
+**BLOCKER** dotyczył wyłącznie pominiętego Kroku 8 planu — nieruszonej dokumentacji projektu
+(roadmapa nadal pokazywała Iterację 10 jako `🔨` / „Zostaje 10f"). **Domknięty w Fazie 5**,
+patrz niżej. Oba **NICE-TO-HAVE** (brak sanityzacji `filename`, niejednolity `AppShell`) też
+sprowadzały się do braku wpisów w backlogu — dziś są to wpisy **#35** i **#36**.
+
+Nie było poprawek kodu po review.
+
+## Docs updates
+
+Cztery równoległe doc-checkery, osiem plików.
+
+### `docs/rebuild-roadmap.md`
+- §4: Iteracja 10 `🔨` → **✅**, dopisany `10f: 26-FEATURE-analityka-export-pulpit · 2026-09-04`,
+  usunięte „Zostaje 10f".
+- §5: nagłówek Iteracji 10 `🔨` → **✅ zrobione**, wypisane wszystkie sześć bloków z datami.
+- **Blok 10f przepisany od zera** — sześć akapitów „WEJŚCIE Z BLOKU 10a/10b/10c/10d/10e"
+  (czas przyszły, zapowiedź) zastąpione opisem stanu faktycznie dowiezionego.
+- **Sprostowane dwa błędy roadmapy:** (1) uogólnienie „LIMIT 5000" na wszystkie widoki
+  eksportu — dotyczy tylko 6/10, z listą i namiarem na `analytics_module.cjs:311-320`;
+  (2) teza, że Pulpit reużywa `useKpi()`/`useStatusHistorii()`/`NaglowekKpi` — oryginał
+  (`frontend-index.js:16836-17090`) nie woła ŻADNEJ trasy `/api/analytics/*`.
+- Dopisane fakty: nieznany `{view}` → 200 + sam BOM; autoryzacja na samym cookie; decyzje
+  D1 (O-10f-1) i D3; doprecyzowane, dlaczego `export/{view}` i `bootstrap-current` nie mają
+  fixtura (z różnych powodów — CSV vs metoda zapisująca).
+- Tematy otwarte przeniesione do sekcji „Otwarte, BEZ przypisania do przyszłego bloku"
+  (Iteracja 10 była ostatnią analityki): O-10a-1, backlog #26, #32, #33.
+
+### `docs/rebuild-backlog.md`
+- **#26** — decyzja utrzymana po raz drugi (10f): pseudo-alerty `pv()` porzucone teraz na
+  DWÓCH ekranach, nie jednym.
+- **#32** — dopisane, że 10f odtworzył oba widoki eksportu oddające sam BOM; zamrożone dwoma
+  testami. Status nadal ⬜.
+- **#33** — dopisane, że dotyczy także `export/sell-through`, dziś zamaskowanego przez #32.
+- **#34 (nowy)** — kafel „Ostatni eksport CSV" trwale martwy (`GET /api/history` bez pola `typ`).
+- **#35 (nowy)** — `Content-Disposition` bierze `{view}` bez sanityzacji.
+- **#36 (nowy)** — niejednolite renderowanie `AppShell`; **potwierdzone grepem**, że siedem
+  widoków (`Katalog`, `Staging`, `Historia`, `Narzuty`, `Alerty`, `WagaGabarytowa`, `Analityka`)
+  faktycznie nie renderuje sidebara, bo `App.tsx` nie ma wspólnego layoutu.
+
+### `docs/analityka-bloki-10b-10f.md`
+- Nagłówek: 26/27 → **27/27**, Iteracja 10 zamknięta.
+- §8 oznaczone ✅ i przepisane na opis stanu; **usunięty zdublowany akapit** o dwóch pustych
+  widokach eksportu (był wklejony dwa razy).
+- §8.1 — sprostowany LIMIT; dopisane 200+BOM, dowód cookie testem integracyjnym, wyjaśnienie
+  braku fixtura i `sprawdzZgodnoscZKontraktemNieJson()`.
+- §8.2 — **przepisany od zera**, obalona teza o reużyciu hooków analityki i `pobierzAlerty()`;
+  dopisane decyzje D1, D2, D3.
+- §9 — inwentarz do reużycia poszerzony o `PrzyciskCsv`/`adresEksportu()`, `naCsv`,
+  `KafelKpi`, `sformatujWzglednie`, `handleryPulpitu()`, `sprawdzZgodnoscZKontraktemNieJson()`.
+- §10 — nowy punkt kontrolny: sprawdź, czy trasa oddaje JSON, zanim użyjesz wspólnej asercji GATE.
+
+### `rebuild/frontend/src/pages/analityka/README.md`
+- Nagłówek „obowiązuje bloki 10c–10e" → Iteracja 10 zamknięta (10a–10f).
+- Nowa sekcja „Co ustalił blok 10f": przycisk CSV w dziesięciu kartach, trzy sposoby wpięcia,
+  **dlaczego to musi być `window.location.href`, a nie `fetch`**, ostrzeżenie, że eksport nie
+  odzwierciedla tabeli, i dwa puste widoki (#32).
+- §4 — dopisane odstępstwo **O-10f-1**.
+
+### `docs/spec-backend.md`
+- Dopisany blok „Potwierdzone w 10f": `export/{view}` jako 27/27, jedyna trasa z parametrem
+  ścieżki, **jedyna trasa całego backendu, która nie oddaje JSON-a**, nagłówki, podział LIMIT-u,
+  200+BOM, odziedziczona usterka `historia_cen.nazwa`.
+
+### `docs/spec-frontend.md`
+- §3: `/` dopisane do widoków odbudowanych (9 → 10), placeholdery 3 → 2 (`/atrybuty`, `/moje-konto`).
+- Nowy blok o obu połówkach 10f — eksport CSV (nawigacja, bez parametrów, na cookie) i Pulpit
+  (cztery kafle lokalne, karta powiadomień, tabela dostawców), z O-10f-1 i martwym kaflem.
+
+### `CLAUDE.md`
+- Akapit o `safeAll()` i backlogu #32 rozszerzony o jedno zdanie: ta sama pułapka ma też postać
+  PLIKU — pusty CSV (sam BOM) mimo danych w bazie. „Nie ufaj też pustemu plikowi eksportu."
+
+### `rebuild/backend/README.md`
+- Sekcja GATE — poprawione nieprawdziwe już twierdzenie, że odpowiedzi sprawdzane przez GATE są
+  zawsze JSON-em; nazwany wyjątek i nowy pomocnik.
+
+### Pre-existing issues (zgłoszone, NIE naprawiane — poza zakresem 10f)
+- **`rebuild/backend/README.md` — sekcje „Stan:" i drzewo struktury `src/` są zamrożone na
+  Iteracji 3b.** Nie wspominają narzutów/promocji (4a/4b), historii (I5), alertów (I6), wagi
+  gabarytowej (I9), konfiguracji (I11) ani **całego modułu analityki** (10a–10f) — dziś
+  największego w backendzie. Doc-checker świadomie nie łatał tam samego 10f, bo dopisanie dwóch
+  plików do drzewa zamrożonego osiem iteracji wcześniej pogłębiłoby rozjazd, zamiast go zmniejszyć.
+  Wymaga osobnego przejścia.
+- `docs/analityka-bloki-10b-10f.md` nie ma osobnych sekcji dla bloków 10d i 10e (tylko wzmianki) —
+  luka sprzed tego ticketu.
