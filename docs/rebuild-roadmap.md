@@ -1210,6 +1210,29 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **DoD:** ✅ panel Selly natywny; ✅ eksport CSV — serwerowy (8a, za `requireAuth`) + przycisk
   w `/katalog` odłożony z I2 (8b); ✅ fixtures przez GATE (8a i 8b); ✅ parytet z
   `selly-injection.js` odnotowany faktyczną wielkością pliku (**30 936 B**).
+- **🔒 Zabezpieczenie środowisk (2026-09-04, `34-FEATURE-selly-blokada-srodowiska`).**
+  Dołożone PO zamknięciu 8b, na wniosek użytkownika. Dwie rzeczy:
+  1. **`SELLY_TRYB`** (`wylaczony` / `tylko-odczyt` / `pelny`, **domyślnie `wylaczony`**) —
+     twarda blokada w obwolucie klienta (`src/selly/tryb.ts`), niezależna od tego, czy sekrety
+     `SELLY_*` są ustawione. Odstępstwo świadome, wzorowane na `IMPORT_SCHEDULER` z 3f-3 i z tego
+     samego powodu. Tryb `tylko-odczyt` przepuszcza dry-run bez ani jednej linijki kodu na ten
+     temat — bo dry-run nigdy nie woła metody zapisującej. **Produkcja musi ustawić `pelny`
+     jawnie.**
+  2. ⚠ **`SELLY_CSV_DIR` wskazywał domyślnie katalog PRODUKCYJNY**, a staging stoi na TYM SAMYM
+     VPS (`docs/deploy-setup.md:4`) — „Wygeneruj CSV teraz" na stagingu nadpisywał plik, po który
+     Selly przychodzi o 6:00, treścią z bazy stagingowej. To trasa LOKALNA, więc brak sekretów
+     przed tym NIE chronił. Naprawione w `tools/deploy-staging.sh` (wersjonowane, nie ręcznie
+     w `.env`); wartości domyślne w `env.ts` zostają — dla produkcji są poprawne.
+  Szczegóły: `docs/rebuild-backlog.md` #46 i #47.
+- **📄 Instrukcja testów dla Ani: `docs/instrukcja-testow-I8.md`** (`33-DOCS-instrukcja-testow-i8`).
+  ⚠ Jedyna instrukcja w projekcie, która NIE zaczyna się od „to staging, testuj bez skrupułów":
+  `POST /api/selly/sync-supplier` z `dry_run=false` realnie modyfikuje sklep Selly, a staging
+  i produkcja mogą wskazywać ten sam sklep. Dokument opisuje **trzy tryby testowania**
+  odpowiadające trzem wartościom `SELLY_TRYB` (A: `wylaczony` — ustawiany automatycznie przy
+  deployu stagingu, pokrywa ~80% zakresu; B: `tylko-odczyt` — połączenie i dry-run, zapis
+  wymuszenie zablokowany; C: `pelny` — pełna wysyłka).
+  **Sandbox:** Bridge go nie ma; istnienie instancji testowej po stronie Selly.pl jest do
+  ustalenia z nimi, nie z repo. Praktycznym zamiennikiem jest `SELLY_TRYB` (ticket 34).
 
 ---
 

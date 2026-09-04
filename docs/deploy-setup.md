@@ -85,12 +85,27 @@ printf 'JWT_SECRET=%s\n' "$(node -e "console.log(require('crypto').randomBytes(4
 chmod 600 ~/private_apps/bridge-staging/.env
 ```
 
-> **Selly.pl i eksport CSV (opcjonalne, od Iteracji 8a):** `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`,
-> `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` (domyślnie `READWRITE`) — bez nich sześć tras zewnętrznych
-> panelu Selly oddaje 500 „Brak konfiguracji" (zachowanie zamierzone, 1:1 z produkcją), cztery
-> lokalne trasy (`status`, `log`, `csv-status`, `generate-csv`) działają bez nich normalnie.
-> `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` mają domyślne wartości równe ścieżkom
-> produkcyjnym — NIE wymagają ustawiania. Wzór: `rebuild/backend/.env.example`.
+> **Selly.pl i eksport CSV (od Iteracji 8a; zabezpieczenia z ticketa 34):**
+>
+> **Staging nie wymaga tu ŻADNEJ ręcznej konfiguracji** — `tools/deploy-staging.sh` ustawia
+> bezpieczne wartości sam, przy każdym deployu (linie zaraz po `export PORT=…`). Poniższe
+> dotyczy sytuacji, w której ktoś chciałby to świadomie zmienić.
+>
+> - `SELLY_TRYB` — **twarda blokada, domyślnie `wylaczony`**: klient odmawia każdej operacji,
+>   także z poprawnymi sekretami. `tylko-odczyt` przepuszcza odczyty i dry-run, blokując zapisy;
+>   `pelny` to zachowanie 1:1 z produkcją. **Produkcja musi ustawić `pelny` jawnie.**
+> - `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`, `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` (domyślnie
+>   `READWRITE`) — bez nich sześć tras zewnętrznych oddaje 500 „Brak konfiguracji" (zachowanie
+>   zamierzone, 1:1 z produkcją). Cztery trasy lokalne (`status`, `log`, `csv-status`,
+>   `generate-csv`) działają bez nich normalnie.
+> - ⚠ **`SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` mają domyślne wartości wskazujące
+>   katalog PRODUKCYJNY** (`public_html/panel/ex-port-files`) — bo tam jest ich miejsce na
+>   produkcji. Staging stoi na TYM SAMYM VPS, więc bez nadpisania przycisk „Wygeneruj CSV teraz"
+>   podmieniłby produkcyjny plik treścią z bazy stagingowej, a Selly zaciągnąłby go o 6:00.
+>   **Każde środowisko inne niż produkcja musi je nadpisać** — dla stagingu robi to skrypt
+>   deployu. Znalezione i domknięte w tickecie `34-FEATURE-selly-blokada-srodowiska`.
+>
+> Wzór: `rebuild/backend/.env.example`.
 
 ```bash
 # 5. Smoke test
