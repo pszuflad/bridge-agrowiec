@@ -15,13 +15,25 @@
 // `POST /api/analytics/bootstrap-current` (metod zapisujących nie nagrywano,
 // `contract/README.md:38`), który zamiast tego ma test jednostkowy w `analityka.agregaty.test.ts`.
 //
-// Pozostałe 22 trasy modułu dowożą bloki 10b–10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+// Pozostałe 17 tras modułu dowożą bloki 10c–10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
 
 import { Router, type Request, type Response } from "express";
 
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
-import { kpi, listyFiltrow, marze, statusHistorii, zbudujSnapshotBiezacy } from "../repos/analityka.js";
+import {
+  cenyGrupRynku,
+  historiaCenProduktu,
+  inflacjaCennika,
+  kpi,
+  listyFiltrow,
+  marze,
+  statusHistorii,
+  topZmiany,
+  zacisnijGrupeRynku,
+  zbudujSnapshotBiezacy,
+  zmianyCenOstatniegoImportu,
+} from "../repos/analityka.js";
 
 export type ZaleznosciAnalityki = {
   db: Baza;
@@ -64,6 +76,71 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
   /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Bez parametrów query. */
   router.get("/api/analytics/margins", requireAuth, (_req: Request, res: Response) => {
     res.json(marze(db));
+  });
+
+  // ─── BLOK 10b · CENY ──────────────────────────────────────────────────────────────
+  //
+  // Pięć tras zakładki „Ceny w czasie", w KOLEJNOŚCI REJESTRACJI Z ORYGINAŁU
+  // (`:237`, `:245`, `:250`, `:263`, `:333`). Kolejność nie wpływa tu na dopasowanie —
+  // ścieżki się nie nakładają — ale trzymamy ją, żeby porównanie z modułem oryginału
+  // szło linijka w linijkę.
+  //
+  // ⚠ DWIE Z NICH NIE MAJĄ UI I TAK MA ZOSTAĆ (decyzje D1 i D2 użytkownika, 2026-09-03):
+  // `top-zmiany` ma zero wywołań w bundlu produkcji, a `market/group-prices` jest wołana
+  // i ignorowana (martwy fetch). Uzasadnienie w nagłówku sekcji 10b w `repos/analityka.ts`.
+
+  /**
+   * Rozrzut cen w obrębie marki/modelu/rozmiaru (`:237-242`). BEZ UI (decyzja D2).
+   *
+   * `?group` zaciskamy do whitelisty `marka|model|rozmiar` — to jedyne miejsce w tym
+   * routerze, gdzie wartość z `req.query` w ogóle dociera do warstwy zapytań, i dociera
+   * jako wartość TYPU `GrupaRynku`, nie jako napis. Odpowiedź niesie `group` PO
+   * zaciśnięciu, dokładnie jak `res.json({ group, rows })` w oryginale.
+   */
+  router.get("/api/analytics/market/group-prices", requireAuth, (req: Request, res: Response) => {
+    res.json(cenyGrupRynku(db, zacisnijGrupeRynku(req.query.group)));
+  });
+
+  /** Zmiany cen z ostatnich importów — karta „3.1" (`:245-248`). Bez parametrów query. */
+  router.get("/api/analytics/prices/last-import", requireAuth, (_req: Request, res: Response) => {
+    res.json(zmianyCenOstatniegoImportu(db));
+  });
+
+  /**
+   * Historia ceny wybranej opony — karta „3.2 / 3.3" (`:250-261`).
+   *
+   * `String(req.query.x || "")` jest portem dosłownym i pełni tu robotę: pusty napis
+   * znaczy „nie zawężaj", a wartość nieoczekiwanego typu (tablica przy `?ean=a&ean=b`)
+   * zamienia się w napis, zamiast wysadzać zapytanie.
+   */
+  router.get(
+    "/api/analytics/prices/product-history",
+    requireAuth,
+    (req: Request, res: Response) => {
+      res.json(
+        historiaCenProduktu(db, {
+          ean: String(req.query.ean || ""),
+          kod: String(req.query.kod || ""),
+        }),
+      );
+    },
+  );
+
+  /** Inflacja cennika per dostawca i miesiąc — karta „3.6" (`:263-276`). */
+  router.get("/api/analytics/prices/inflation", requireAuth, (_req: Request, res: Response) => {
+    res.json(inflacjaCennika(db));
+  });
+
+  /**
+   * Sto największych zmian ceny co do modułu (`:333`). BEZ UI (decyzja D1).
+   *
+   * ⚠ ODPOWIEDŹ TO GOŁA TABLICA, bez koperty — jeden z trzech takich przypadków w całym
+   * module (obok `dostawcy-stats` i `importy-timeline`). Fixture to potwierdza i dlatego
+   * jego adnotacja przycięcia siedzi na najwyższym poziomie jako `_body_przyciete_z`,
+   * a nie jako `_przyciete.rows`.
+   */
+  router.get("/api/analytics/top-zmiany", requireAuth, (_req: Request, res: Response) => {
+    res.json(topZmiany(db));
   });
 
   return router;

@@ -4,10 +4,11 @@
 // czytelne źródło modułu doklejanego do `index.cjs` — numery linii w komentarzach odnoszą
 // się do niego i są stabilne.
 //
-// ⚠ ZAKRES 10a TO PIĘĆ Z DWUDZIESTU SIEDMIU TRAS MODUŁU. Pozostałe dwadzieścia dwie
-// (ceny, EAN, dostawcy, dostępność, rotacja, cykl życia, export) dowożą bloki 10b–10f.
-// Dokładając je tutaj, trzymaj się układu tego pliku: jedna funkcja = jedna trasa,
-// SQL przepisany dosłownie, limity i progi jako nazwane stałe.
+// ⚠ ZAKRES: DZIESIĘĆ Z DWUDZIESTU SIEDMIU TRAS MODUŁU — pięć z bloku 10a (fundament)
+// i pięć z bloku 10b (ceny, sekcja na dole pliku). Pozostałe siedemnaście (EAN, dostawcy,
+// dostępność, rotacja, cykl życia, export) dowożą bloki 10c–10f. Dokładając je tutaj,
+// trzymaj się układu tego pliku: jedna funkcja = jedna trasa, SQL przepisany dosłownie,
+// limity i progi jako nazwane stałe.
 //
 // ⚠ CZEGO TU NIE MA I BYĆ NIE MOŻE: pola `_przyciete`. W `contract/fixtures/` ono jest,
 // ale to adnotacja NAGRYWARKI fixtures (`contract/README.md:29` — duże tablice przycięto
@@ -305,4 +306,330 @@ export function zbudujSnapshotBiezacy(db: Baza): WynikBootstrapu {
   `);
 
   return { ok: true, inserted: wynik.changes, at: teraz };
+}
+
+// ─── BLOK 10b · CENY ────────────────────────────────────────────────────────────────────
+//
+// Pięć tras zakładki „Ceny w czasie" (`analytics_module.cjs:237-268`, `:333`). Trzy z nich
+// mają w oryginale kartę w UI, dwie NIE MAJĄ ŻADNEJ i to jest udokumentowany stan produkcji:
+//
+//   • `top-zmiany` — ZERO wywołań w całym bundlu frontendu (grep po `mirror/frontend/assets/*.js`
+//     i `deminified/frontend-index.js`). Trasa bez konsumenta, jak `kpi` przed 10a.
+//   • `market/group-prices` — wołana przy każdym wejściu na `/analityka` z `group=marka`
+//     na sztywno (`frontend-index.js:27856-27860`), wynik ląduje w zmiennej `z`, po czym
+//     `z` NIE JEST UŻYTE ANI RAZU w całym komponencie. Martwy fetch; selektora grupy w UI
+//     nie ma w ogóle.
+//
+// Obie dowozimy jako trasy (są w kontrakcie i mają fixtures), obie zostają BEZ UI —
+// decyzje D1 i D2 użytkownika z 2026-09-03. Dołożenie im karty byłoby budowaniem nowej
+// funkcjonalności, a nie odbudową.
+
+/** Ile wierszy oddaje `market/group-prices` (`:240`). */
+const LIMIT_GRUP_RYNKU = 500;
+/** Ile wierszy oddaje `prices/last-import` (`:246`). */
+const LIMIT_OSTATNIEGO_IMPORTU = 500;
+/** Ile wierszy oddaje `prices/inflation` (`:272`). */
+const LIMIT_INFLACJI = 500;
+/** Ile wierszy oddaje `top-zmiany` (`:333`). */
+const LIMIT_TOP_ZMIAN = 100;
+
+/**
+ * Port `hasHistory(db)` (`:58`) — czy `historia_cen` ma cokolwiek.
+ *
+ * To OSOBNE zapytanie od `statusHistorii()`, mimo że obie liczą to samo `COUNT(*)`.
+ * W oryginale też są osobne (`:58` kontra `:93-96`) i wołane niezależnie, a my odtwarzamy
+ * strukturę wywołań, nie optymalizujemy jej. Siedem tras spoza tego bloku zależy od tej
+ * samej bramki — na pustej tabeli zwracają `{hasHistory: false, rows: []}` i to jest
+ * POPRAWNE zachowanie, nie awaria.
+ */
+export function czyJestHistoria(db: Baza): boolean {
+  const wiersz = db.get<{ c: number }>(sql`SELECT COUNT(*) AS c FROM historia_cen`);
+  return !!(wiersz && wiersz.c > 0);
+}
+
+/**
+ * Port `round(v, p = 2)` (`:54`) — zaokrąglenie przez mnożnik, nie przez `toFixed`.
+ *
+ * Różnica jest widoczna: `toFixed` oddaje string, a oryginał zwraca LICZBĘ i taką liczbę
+ * niesie fixture (`stats.avg: 1561.39`). `Math.round(n * 100) / 100` odtwarza to 1:1.
+ */
+function zaokraglij(wartosc: number): number {
+  return Math.round(wartosc * 100) / 100;
+}
+
+/** Wymiary, po których `market/group-prices` potrafi grupować (`:238`). */
+export const GRUPY_RYNKU = ["marka", "model", "rozmiar"] as const;
+
+export type GrupaRynku = (typeof GRUPY_RYNKU)[number];
+
+/**
+ * Wymiar → kolumna `products`. Mapa jest tożsamościowa i taka też jest w oryginale:
+ * `const col = group === 'rozmiar' ? 'rozmiar' : group` (`:239`) to warunek, który
+ * niczego nie zmienia. Zapisujemy go jako mapę, a nie jako martwy `if`, bo mapa
+ * jednocześnie DOMYKA TYPEM to, co trafia do `sql.raw` — dokładnie jak `KOLUMNY_FILTROW`
+ * wyżej. Innej drogi z `req.query` do surowego SQL-a w tym pliku nie ma.
+ */
+const KOLUMNY_GRUP_RYNKU: Record<GrupaRynku, string> = {
+  marka: "marka",
+  model: "model",
+  rozmiar: "rozmiar",
+};
+
+/**
+ * Zaciśnięcie `?group` do whitelisty — port `['marka','model','rozmiar'].includes(...)`
+ * (`:238`). Wartość spoza listy, pusta i brakująca dają `marka`, a odpowiedź niesie
+ * wartość PO zaciśnięciu, nie surowe query (`res.json({ group, rows })`, `:241`).
+ */
+export function zacisnijGrupeRynku(wartosc: unknown): GrupaRynku {
+  return GRUPY_RYNKU.includes(wartosc as GrupaRynku) ? (wartosc as GrupaRynku) : "marka";
+}
+
+export type WierszCenGrupy = {
+  grupa: string;
+  oferty: number;
+  srednia: number | null;
+  min: number | null;
+  max: number | null;
+};
+
+export type CenyGrupRynku = {
+  group: GrupaRynku;
+  rows: WierszCenGrupy[];
+};
+
+/**
+ * `GET /api/analytics/market/group-prices` — rozrzut cen w obrębie marki/modelu/rozmiaru
+ * (`:237-242`).
+ *
+ * ⚠ TRASA BEZ KONSUMENTA W UI (decyzja D2) — uzasadnienie w nagłówku sekcji wyżej.
+ *
+ * Sortowanie po `oferty DESC`, czyli najliczniejsze grupy pierwsze — nie po cenie.
+ * Grupy o pustym albo nieustalonym wymiarze wypadają (`IS NOT NULL AND != ''`), tak jak
+ * w listach filtrów.
+ */
+export function cenyGrupRynku(db: Baza, group: GrupaRynku): CenyGrupRynku {
+  const kol = sql.raw(KOLUMNY_GRUP_RYNKU[group]);
+  const rows = db.all<WierszCenGrupy>(sql`
+    SELECT ${kol} AS grupa,
+           COUNT(*) AS oferty,
+           ROUND(AVG(cena_zakupu), 2) AS srednia,
+           MIN(cena_zakupu) AS min,
+           MAX(cena_zakupu) AS max
+    FROM products
+    WHERE status = 'aktywny' AND ${kol} IS NOT NULL AND ${kol} != ''
+    GROUP BY ${kol}
+    ORDER BY oferty DESC
+    LIMIT ${LIMIT_GRUP_RYNKU}
+  `);
+
+  return { group, rows };
+}
+
+export type WierszZmianyCeny = {
+  kod: string;
+  nazwa: string;
+  dostawca: string;
+  cenaStara: number | null;
+  cenaNowa: number | null;
+  zmianaPct: number | null;
+  utworzono: string;
+};
+
+/**
+ * `GET /api/analytics/prices/last-import` — karta „3.1 Zmiany cen z ostatnich importów"
+ * (`:245-248`).
+ *
+ * ⚠ WARUNEK `WHERE` RÓŻNI TĘ TRASĘ OD `top-zmiany` I TO NIE JEST PRZEOCZENIE ORYGINAŁU.
+ * Tutaj muszą być OBIE ceny (`stara IS NOT NULL AND nowa IS NOT NULL`), bo karta pokazuje
+ * kolumny „Było"/„Jest" — wiersz z pustym „Jest" nie miałby czego pokazać. `top-zmiany`
+ * wymaga tylko ceny starej i dlatego zwraca też pozycje, których tu nie widać.
+ * Odtwarzamy obie wersje dosłownie.
+ *
+ * `ORDER BY id DESC` = najświeższe pozycje stagingu pierwsze; „ostatni import" jest więc
+ * przybliżeniem przez kolejność wstawiania, a nie filtrem po identyfikatorze importu.
+ */
+export function zmianyCenOstatniegoImportu(db: Baza): { rows: WierszZmianyCeny[] } {
+  const rows = db.all<WierszZmianyCeny>(sql`
+    SELECT kod, nazwa, dostawca,
+           cena_zakupu_stara AS cenaStara,
+           cena_zakupu_nowa AS cenaNowa,
+           zmiana_pct AS zmianaPct,
+           utworzono
+    FROM staging_items
+    WHERE cena_zakupu_stara IS NOT NULL AND cena_zakupu_nowa IS NOT NULL
+    ORDER BY id DESC
+    LIMIT ${LIMIT_OSTATNIEGO_IMPORTU}
+  `);
+
+  return { rows };
+}
+
+/**
+ * `GET /api/analytics/top-zmiany` — sto największych ruchów ceny co do modułu (`:333`).
+ *
+ * ⚠ TRASA BEZ KONSUMENTA W UI (decyzja D1) — zero wywołań w bundlu produkcji.
+ *
+ * `ORDER BY ABS(zmiana_pct) DESC` sortuje po sile zmiany bez względu na kierunek, więc
+ * podwyżka o 30% i obniżka o 30% stoją obok siebie. Pozycje bez `zmiana_pct` mają
+ * `ABS(NULL) = NULL` i w SQLite lądują na końcu porządku malejącego — zostają w wyniku,
+ * bo `WHERE` ich nie odsiewa.
+ */
+export function topZmiany(db: Baza): WierszZmianyCeny[] {
+  return db.all<WierszZmianyCeny>(sql`
+    SELECT kod, nazwa, dostawca,
+           cena_zakupu_stara AS cenaStara,
+           cena_zakupu_nowa AS cenaNowa,
+           zmiana_pct AS zmianaPct,
+           utworzono
+    FROM staging_items
+    WHERE cena_zakupu_stara IS NOT NULL
+    ORDER BY ABS(zmiana_pct) DESC
+    LIMIT ${LIMIT_TOP_ZMIAN}
+  `);
+}
+
+export type WierszHistoriiCeny = {
+  data: string;
+  dostawca: string;
+  kod: string;
+  ean: string | null;
+  cenaZakupu: number | null;
+  cenaSprzedazy: number | null;
+  stan: number | null;
+};
+
+/** Trzy liczby liczone w JS nad pobranymi wierszami — `null`, gdy nie ma z czego liczyć. */
+export type StatystykiCeny = {
+  min: number | null;
+  max: number | null;
+  avg: number | null;
+};
+
+export type HistoriaCenyProduktu = {
+  hasHistory: boolean;
+  rows: WierszHistoriiCeny[];
+  stats: StatystykiCeny;
+};
+
+/**
+ * `GET /api/analytics/prices/product-history` — karta „3.2 / 3.3 Historia ceny wybranej
+ * opony" (`:250-261`).
+ *
+ * ⚠ TO PIERWSZY CZYTELNIK `historia_cen` PER PRODUKT (decyzja D3 roadmapy, `§5 Iteracja 10`).
+ * Tabela ma dziś dwóch pisarzy: auto-zatwierdzanie importu (`repos/historia.ts`, blok 3d-1)
+ * i `POST bootstrap-current` (blok 10a). Na stagingu bez importów bywa pusta — wtedy
+ * `hasHistory: false`, pusta tabela i `stats` w `null`-ach. To POPRAWNE zachowanie.
+ *
+ * ⚠ TRASA NIE MA LIMIT-U i bez parametrów zwraca CAŁĄ tabelę — fixture nagrano właśnie
+ * tak (`_przyciete.rows: 15597`). Nie dokładamy limitu, bo zmieniłby odpowiedź, którą
+ * dowodzi nagranie; ochronę przed zalewaniem tej trasy zapytaniami robi frontend
+ * (odstępstwo O-10b-1 — debounce, plus warunek „nie pytaj, gdy oba pola puste").
+ *
+ * Gdy historii nie ma, oryginał W OGÓLE nie odpytuje bazy (`hist ? safeAll(...) : []`,
+ * `:257`) — odtwarzamy także to, bo różnica jest obserwowalna w logu zapytań.
+ *
+ * Oba parametry są opcjonalne i łączą się przez AND: sam `ean` zawęża do jednego produktu
+ * u wszystkich dostawców, sam `kod` — do jednej pozycji jednego dostawcy, oba naraz do
+ * części wspólnej.
+ */
+export function historiaCenProduktu(
+  db: Baza,
+  { ean, kod }: { ean: string; kod: string },
+): HistoriaCenyProduktu {
+  const hasHistory = czyJestHistoria(db);
+
+  // Port `where`/`params` z `:253-256`: `WHERE 1=1` plus dokładane warunki. Wartości idą
+  // parametrem zapytania (`sql` interpoluje je jako bind), więc `req.query` nigdy nie
+  // trafia do treści SQL-a.
+  const warunki = [sql`1 = 1`];
+  if (ean) warunki.push(sql`ean = ${ean}`);
+  if (kod) warunki.push(sql`kod = ${kod}`);
+
+  const rows = hasHistory
+    ? db.all<WierszHistoriiCeny>(sql`
+        SELECT zarejestrowano_at AS data, dostawca, kod, ean,
+               cena_zakupu AS cenaZakupu,
+               cena_sprzedazy AS cenaSprzedazy,
+               stan
+        FROM historia_cen
+        WHERE ${sql.join(warunki, sql` AND `)}
+        ORDER BY zarejestrowano_at
+      `)
+    : [];
+
+  return { hasHistory, rows, stats: statystykiCen(rows) };
+}
+
+/**
+ * Port `stats` z `:259-260` — liczone w JS nad WIERSZAMI, nie w SQL-u.
+ *
+ * `filter(v => v != null)` oryginału jest luźnym porównaniem i odsiewa `null` oraz
+ * `undefined`, ale ZOSTAWIA zero — pozycja o cenie zakupu 0 wchodzi więc do minimum.
+ * Zachowujemy to; zmiana progu na `> 0` (jak w `inflation`) byłaby cichą poprawką.
+ */
+export function statystykiCen(rows: Pick<WierszHistoriiCeny, "cenaZakupu">[]): StatystykiCeny {
+  const ceny = rows
+    .map((r) => r.cenaZakupu)
+    .filter((v): v is number => v !== null && v !== undefined);
+
+  if (ceny.length === 0) return { min: null, max: null, avg: null };
+
+  return {
+    min: Math.min(...ceny),
+    max: Math.max(...ceny),
+    avg: zaokraglij(ceny.reduce((a, b) => a + b, 0) / ceny.length),
+  };
+}
+
+export type WierszInflacji = {
+  dostawca: string;
+  miesiac: string;
+  sredniaCena: number | null;
+  inflacjaPct: number | null;
+};
+
+/**
+ * `GET /api/analytics/prices/inflation` — karta „3.6 Inflacja cennika" (`:263-276`).
+ *
+ * Jedyne w tym bloku zapytanie okienkowe. Trzy kroki: średnia cena zakupu per dostawca
+ * i miesiąc (`substr(zarejestrowano_at, 1, 7)` — miesiąc bierze się z PREFIKSU znacznika
+ * ISO, więc format daty jest tu częścią kontraktu), potem `LAG` po miesiącach w obrębie
+ * dostawcy, na końcu zmiana procentowa.
+ *
+ * ⚠ `inflacjaPct` JEST NULLOWALNE Z DWÓCH POWODÓW i oba są normalne: pierwszy miesiąc
+ * dostawcy nie ma poprzednika (`LAG` daje `NULL`), a `CASE WHEN prev_price > 0` bez gałęzi
+ * `ELSE` oddaje `NULL` również wtedy, gdy poprzednia średnia wyszła zerem. Fixture pokazuje
+ * w tych kolumnach liczby, bo nagranie trafiło w środek szeregu.
+ *
+ * `WHERE cena_zakupu > 0` odsiewa pozycje bez ceny i zerowe — inaczej wyzerowałyby średnią
+ * miesiąca. To jedyny filtr; `status` produktu nie ma tu znaczenia, bo `historia_cen` jest
+ * migawką, a nie widokiem katalogu.
+ */
+export function inflacjaCennika(db: Baza): { hasHistory: boolean; rows: WierszInflacji[] } {
+  const hasHistory = czyJestHistoria(db);
+
+  const rows = hasHistory
+    ? db.all<WierszInflacji>(sql`
+        WITH month_avg AS (
+          SELECT dostawca,
+                 substr(zarejestrowano_at, 1, 7) AS miesiac,
+                 AVG(cena_zakupu) AS avg_price
+          FROM historia_cen
+          WHERE cena_zakupu > 0
+          GROUP BY dostawca, miesiac
+        ), seq AS (
+          SELECT dostawca, miesiac, avg_price,
+                 LAG(avg_price) OVER (PARTITION BY dostawca ORDER BY miesiac) AS prev_price
+          FROM month_avg
+        )
+        SELECT dostawca, miesiac,
+               ROUND(avg_price, 2) AS sredniaCena,
+               ROUND(CASE WHEN prev_price > 0 THEN (avg_price - prev_price) / prev_price * 100 END, 2) AS inflacjaPct
+        FROM seq
+        ORDER BY miesiac DESC, dostawca
+        LIMIT ${LIMIT_INFLACJI}
+      `)
+    : [];
+
+  return { hasHistory, rows };
 }
