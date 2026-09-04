@@ -65,23 +65,30 @@ Nic nie ustawiasz. Tak staging wygląda dziś, jeśli nikt nie zmieniał konfigu
   mapowanie dostawców i **cały przycisk CSV w Katalogu**.
 - ✅ Przetestujesz też **komunikat o braku konfiguracji** — sekcja 4.1.
 - ❌ Nie przetestujesz: testu połączenia i synchronizacji produktów.
-- 🔒 **Ryzyko: zero.** Nie ma fizycznej możliwości, żeby cokolwiek poszło do Selly.
+- 🔒 **Ryzyko: zero** — pod warunkiem, że staging jest wdrożony z zabezpieczeniami
+  z ticketa `34-FEATURE-selly-blokada-srodowiska` (są w `tools/deploy-staging.sh`, więc
+  wchodzą same przy deployu). Dwa zamki: `SELLY_TRYB=wylaczony` odcina sklep, a własna
+  ścieżka `SELLY_CSV_*` odcina produkcyjny plik CSV. Szczegóły: sekcja 7.1.
 
 **Zacznij od tego trybu.** Przejdź sekcje 3, 4, 6 i 7 — to jakieś 80% instrukcji.
 
 ### Tryb B — podłączony, ale tylko do odczytu i „na sucho"
 
-Paweł wpisuje dane dostępowe na serwerze, a Ty **używasz wyłącznie**:
-przycisku **„Odśwież"**, sekcji **„Status połączenia"** i przycisku **„Test dry-run (5 szt.)"**.
+Paweł wpisuje dane dostępowe **i ustawia `SELLY_TRYB=tylko-odczyt`**. To ważna różnica wobec
+pierwszej wersji tej instrukcji: **nie musisz już o niczym pamiętać.** Serwer fizycznie odmawia
+zapisu do sklepu, nawet jeśli klikniesz „Wyślij do Selly" — zobaczysz wtedy komunikat
+*„Zapis do Selly zablokowany na tym środowisku"*.
 
 - ✅ Dokładasz: test połączenia i pełną ścieżkę przygotowania danych do wysyłki.
-- ❌ **Nie klikasz „Wyślij do Selly" ani „Sync" w tabeli.**
-- 🔒 Ryzyko: niskie, ale **nie zerowe** — patrz ostrzeżenie o pierwszym dry-runie w
+- ✅ **Dry-run działa normalnie** — to właśnie po to ten tryb istnieje.
+- 🔒 Ryzyko: **zapis niemożliwy z poziomu aplikacji.** Jedyne, co wychodzi na zewnątrz, to
+  odczyty — patrz uwaga o pierwszym dry-runie w
   [sekcji 5.2](#52-test-dry-run-5-szt--siatka-bezpieczeństwa).
 
 ### Tryb C — pełny zapis do sklepu
 
-Wysyłasz produkty naprawdę. **Tylko po wyraźnym ustaleniu z Pawłem i tylko na sklepie,
+Wysyłasz produkty naprawdę. Wymaga **jawnego** ustawienia `SELLY_TRYB=pelny` — samo wpisanie
+danych dostępowych już nie wystarcza. **Tylko po wyraźnym ustaleniu z Pawłem i tylko na sklepie,
 na którym wolno to robić.**
 
 - 🔒 **Ryzyko: realne i nieodwracalne z poziomu Bridge'a.**
@@ -96,10 +103,17 @@ powiedzieć wprost, jak jest:
 > odbudowa przeniosła go do konfiguracji, więc **da się** wskazać inny sklep, ale żaden „testowy
 > Selly" nie jest nigdzie przygotowany ani skonfigurowany.
 
+**Zamiast sandboxa dostaliśmy jednak coś, co działa podobnie** (ticket
+`34-FEATURE-selly-blokada-srodowiska`): przełącznik **`SELLY_TRYB`**, który blokuje integrację
+**po stronie serwera, niezależnie od tego, czy dane dostępowe są wpisane**. Wcześniej jedynym
+zabezpieczeniem był ich brak — czyli ochrona przez nieobecność, którą znosiło przypadkowe
+skopiowanie konfiguracji z produkcji.
+
 Masz więc trzy możliwości, w kolejności od najbezpieczniejszej:
 
-1. **Tryb A (bez danych dostępowych)** — to jest praktyczny odpowiednik sandboxa i pokrywa
-   większość tej instrukcji. **Rekomendacja: zacznij tutaj.**
+1. **Tryb A (`SELLY_TRYB=wylaczony`, ustawiany automatycznie przy deployu stagingu)** — to jest
+   praktyczny odpowiednik sandboxa i pokrywa większość tej instrukcji.
+   **Rekomendacja: zacznij tutaj.**
 2. **Zapytać Selly.pl, czy udostępniają instancję testową.** Jeśli tak — jej adres wpisuje się
    w `SELLY_SHOP_URL` i wtedy nawet tryb C jest bezpieczny. *Nie wiem, czy Selly.pl coś takiego
    oferuje — tego trzeba się dowiedzieć u nich, nie w tym repo.*
@@ -114,11 +128,15 @@ czy działa". Do sprawdzenia, czy panel żyje, wystarczy tryb A.
 Plik `~/private_apps/bridge-staging/.env` na serwerze, potem `pm2 reload bridge-backend-staging`:
 
 ```
+SELLY_TRYB=tylko-odczyt        # ⚠ bez tego integracja pozostaje ZABLOKOWANA (domyślnie `wylaczony`)
 SELLY_SHOP_URL=https://<adres-sklepu>
 SELLY_CLIENT_ID=<...>
 SELLY_CLIENT_SECRET=<...>
 SELLY_SCOPE=READWRITE          # do samych odczytów wystarczy READ, jeśli Selly to obsługuje
 ```
+
+`SELLY_CSV_*` **nie wymaga ustawiania** — `tools/deploy-staging.sh` podstawia stagingowi własny
+katalog i nazwę pliku, żeby nie dało się nadpisać produkcyjnego CSV.
 
 Wzór wszystkich zmiennych: `rebuild/backend/.env.example`. Szczegóły wdrożenia:
 `docs/deploy-setup.md`.
@@ -302,10 +320,21 @@ To przycisk awaryjny „zrób plik od razu, nie czekaj do 6:00". **Nadpisuje ist
       N produktów (X MB) w Y s"*.
 - [ ] Tabela wyżej odświeża się sama.
 
-> **⚠ Pytanie do Pawła, zanim Ania to kliknie na produkcji:** ścieżka pliku jest domyślnie
-> **ścieżką produkcyjną**. Na stagingu to nieszkodliwe (plik powstaje obok), ale **na produkcji
-> ten przycisk podmienia dokładnie ten plik, po który przychodzi Selly**. Jeśli wygenerowany
-> plik byłby wadliwy, Selly zaciągnie wadliwy. Na stagingu — klikaj bez obaw.
+> **⚠ SPROSTOWANIE (2026-09-04, ticket `34-FEATURE-selly-blokada-srodowiska`).** Pierwsza
+> wersja tej instrukcji mówiła w tym miejscu „na stagingu klikaj bez obaw". **To była
+> nieprawda** i warto wiedzieć dlaczego, bo to nie jest oczywiste:
+>
+> Ścieżka pliku CSV była domyślnie **ścieżką produkcyjną**, a staging stoi na **tym samym
+> serwerze** co produkcja. Ten przycisk na stagingu nadpisywał więc **produkcyjny** plik
+> treścią z bazy **stagingowej** — a Selly zaciąga go o 6:00. Co gorsza, jest to trasa
+> **lokalna**: działa **bez żadnych danych dostępowych do Selly**, więc „tryb A" przed tym
+> nie chronił.
+>
+> **Naprawione.** `tools/deploy-staging.sh` ustawia teraz stagingowi własny katalog i własną
+> nazwę pliku (`sellycsv-staging.csv`), automatycznie przy każdym wdrożeniu. Na stagingu
+> **możesz klikać bez obaw** — plik powstaje w katalogu stagingu i produkcji nie dotyka.
+>
+> **Na produkcji ten przycisk nadal podmienia plik, po który przychodzi Selly** — tam ostrożnie.
 
 ---
 
@@ -425,7 +454,8 @@ Skrót całej instrukcji. Kolumna „Tryb" mówi, w którym trybie da się to sp
 |---|---|---|
 | ☐ | Menu po lewej ma **11 pozycji**, „Selly" jest ostatnia, pod „Konfiguracją" | A |
 | ☐ | Ekran ma **pięć kart** w kolejności z sekcji 3 | A |
-| ☐ | Bez konfiguracji: **„Selly nieskonfigurowane"** po ludzku, nie surowy błąd | A |
+| ☐ | Karta połączenia mówi **„Integracja Selly wyłączona na tym środowisku"** i że to ustawienie CELOWE | A |
+| ☐ | Komunikat **nie sugeruje awarii** ani „brakujących sekretów" — to dwa różne stany | A |
 | ☐ | Brak konfiguracji psuje **tylko kartę połączenia**, reszta działa | A |
 | ☐ | „W Bridge" w mapowaniu zgadza się z liczbami w Katalogu | A |
 | ☐ | Każda karta ma działający **„Odśwież"** | A |
