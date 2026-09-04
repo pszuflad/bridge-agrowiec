@@ -69,8 +69,16 @@ export const KOLOR_SIATKI = "hsl(var(--border))";
 /** Etykiety osi noszą token tekstu, nigdy koloru serii. */
 export const KOLOR_ETYKIET = "hsl(var(--muted-foreground))";
 
-/** Zaokrąglenie końca słupka: 4px na końcu z danymi, kwadrat przy linii bazowej. */
+/** Zaokrąglenie końca słupka POZIOMEGO: 4px na końcu z danymi, kwadrat przy linii bazowej. */
 export const PROMIEN_SLUPKA: [number, number, number, number] = [0, 4, 4, 0];
+/**
+ * To samo dla słupka PIONOWEGO — zaokrąglona góra, kwadratowy dół.
+ *
+ * Osobna stała, bo Recharts liczy `radius` w kolejności [lewy-górny, prawy-górny,
+ * prawy-dolny, lewy-dolny] niezależnie od orientacji: użycie poziomego wariantu na wykresie
+ * pionowym zaokrągliłoby prawą krawędź słupka zamiast jego końca z danymi.
+ */
+export const PROMIEN_SLUPKA_PIONOWEGO: [number, number, number, number] = [4, 4, 0, 0];
 /** Grubość słupka — kapujemy poniżej 24px, resztę pasma zostawiamy jako powietrze. */
 export const GRUBOSC_SLUPKA = 18;
 

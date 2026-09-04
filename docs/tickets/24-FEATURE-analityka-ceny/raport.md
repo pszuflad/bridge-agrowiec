@@ -220,3 +220,26 @@ testów tego widoku pierwszy import w jsdomie przestał mieścić się w domyśl
 **Bramki po scaleniu (uruchomione ponownie, komplet):** backend **738 testów** ✓ (47 plików),
 frontend **427 testów** ✓ (28 plików, dwa kolejne przebiegi stabilne), `lint` ✓, `typecheck` ✓,
 `build` ✓ w obu projektach. Chunk `Analityka`: 429 kB (10a: 385 → 10b+10d: 429).
+
+## Drugie scalenie z `develop` (blok 10c)
+
+Zanim PR zdążył zostać otwarty, na `develop` wszedł jeszcze blok **10c**
+(`22-FEATURE-analityka-ean`, PR #35). Drugie scalenie, dziewięć konfliktów, ta sama zasada:
+gałąź ticketa dokłada wyłącznie swój blok, resztę bierze z `develop`.
+
+**Trzecia duplikacja wykryta i usunięta:** `zaokraglij` (port `round()`,
+`analytics_module.cjs:54`) — 10b i 10c dopisały ją niezależnie. Zostaje **wersja 10c**
+(pełniejszy port: przyjmuje `unknown`, przepuszcza przez `liczba()`/`num()` i ma
+konfigurowalną liczbę miejsc), moja węższa wersja skasowana. Razem z `liczba` i
+`czyJestHistoria` przeniesiona do sekcji **„WSPÓLNE POMOCNIKI BLOKÓW 10b–10f"** nad
+sekcjami wszystkich bloków, z notą wyjaśniającą, dlaczego tam stoi — trzy pomocniki z
+`:51-58` oryginału zostały dopisane niezależnie przez różne równoległe sesje i bez tego
+czwarta dopisze czwartą kopię.
+
+Po scaleniu `repos/analityka.ts` ma cztery sekcje bloków (10b → 10c → 10d) nad wspólnymi
+pomocnikami, a `routes/analytics.ts` — **20 z 27 tras** modułu; nagłówki obu plików
+przeliczone, łącznie ze sprostowaniem noty „trzy trasy czytają `req.query`" (jest ich pięć:
+trzy z 10c i dwie z 10b).
+
+**Bramki po drugim scaleniu:** backend **777 testów** ✓ (49 plików), frontend **440** ✓
+(30 plików), `lint` ✓ `typecheck` ✓ `build` ✓ w obu projektach. Chunk `Analityka`: 436 kB.

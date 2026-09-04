@@ -256,15 +256,27 @@ ma endpoint:
 > dochodzi globalny pasek sześciu wyszukiwalnych filtrów działający **po stronie klienta**
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
-> (O-10a-3). Wypełniona jest wyłącznie karta „Marża per dostawca/kategoria/marka" — pozostałe
-> zakładki są puste, ale nazwane (O-10a-4; zakładka `ceny` wypełniona w bloku 10b, patrz
-> niżej); wzorzec sekcji dashboardu jest udokumentowany
+> (O-10a-3). Wypełniona jest karta „Marża per dostawca/kategoria/marka" (O-10a-4); pozostałe
+> w tym bloku są puste, ale nazwane — `ean` dowieziona w 10c, `dostawcy` w 10d i `ceny`
+> w 10b (patrz niżej), `dostepnosc` czeka na 10e. Wzorzec sekcji dashboardu jest udokumentowany
 > w `rebuild/frontend/src/pages/analityka/README.md`. Trasa jest ładowana **leniwie**
-> (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku ~385 kB, więc płaci za niego tylko
+> (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku (~398 kB po 10c i 10d), więc płaci za niego tylko
 > wejście na `/analityka`, nie wspólny bundle. Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
 >
-> **Dla bloków 10b–10f:** karty oryginału zakładka po zakładce (tytuły, kolumny, etykiety PL,
-> kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu — `docs/analityka-bloki-10b-10f.md`.
+> **Dla bloków 10b, 10e i 10f:** karty oryginału zakładka po zakładce (tytuły, kolumny,
+> etykiety PL, kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu —
+> `docs/analityka-bloki-10b-10f.md`.
+>
+> **Odbudowa (10c, `22-FEATURE-analityka-ean`, 2026-09-03):** zakładka „EAN i ceny" wypełniona —
+> trzy karty 1:1 z oryginałem („Porównanie cen po EAN", „Pozycje unikalne", „Pokrycie wspólne
+> i ranking dostawcy"), zasilane czterema z sześciu nowych tras `/api/analytics/ean*`
+> (`comparison`, `unique`, `coverage`, `supplier-rank`); `ean/details` i `ean-porownanie`
+> dowiezione jako trasy **bez UI** — oryginał ich też nie woła (D6). Karta „Pokrycie i ranking"
+> dostaje dwa wykresy (histogram pokrycia, ranking dostawców po `najtanszyPct`) nad tabelami —
+> drugie zastosowanie wzorca z 10a (O-10c-1). Nagłówek KPI **zostaje** na `GET /api/analytics/kpi`
+> (D1, odstępstwo O-10a-1 utrzymane) — dane do przepięcia na kafle oryginału
+> (`ean/comparison.rows.length`, `ean/unique.rows.length`) są od teraz gotowe, przepięcie czeka
+> na decyzję użytkownika. Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
 >
 > **Odbudowa (10d, `23-FEATURE-analityka-dostawcy`, 2026-09-03):** zakładka `dostawcy` — domyślna
 > zakładka `/analityka` — wypełniona trzema kartami 1:1: „1.1 Stabilność cennika dostawcy" (7

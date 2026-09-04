@@ -112,6 +112,41 @@ export const ETYKIETY_WYMIAROW: Record<WymiarFiltra, string> = {
   indeksyPredkosci: "Indeksy prędkości",
 };
 
+// ════════════════════════════════════════════════════════════════════════════════════════
+//  BLOK 10c — EAN. Które wymiary globalnego filtra mają w tej zakładce na czym zadziałać.
+// ════════════════════════════════════════════════════════════════════════════════════════
+//
+// Odpowiedź wynika z SELECT-ów, nie z życzeń: wiersz może być filtrowany tylko po kolumnie,
+// którą realnie niesie. Cztery trasy EAN grupują po `ean`, więc większość wymiarów katalogu
+// (marka, model, rozmiar, oba indeksy) `GROUP BY` po prostu zwinął — nie ma ich w odpowiedzi
+// i nie da się ich odtworzyć po stronie klienta.
+//
+//   • `ean/comparison`  → `ean, nazwa, dostawcy(LICZBA), cenaMin, cenaMax, srednia, oferty`
+//   • `ean/coverage`    → `liczbaDostawcow, liczbaEAN`
+//   • `ean/unique`      → `ean, nazwa, dostawca, cenaZakupu, stan`
+//   • `ean/supplier-rank` → `dostawca, wspolnePozycje, najtanszy, najtanszyPct`
+//
+// Tylko dwie ostatnie mają kolumnę `dostawca`. Przy pierwszych dwóch `dostawcy` to LICZBA
+// dostawców, nie ich nazwy — filtr po dostawcy nie ma się o co zaczepić. Zamiast po cichu
+// zwracać pustą tabelę, sekcja wypisuje wymiary pominięte (`wymiaryNieobslugiwane`).
+
+/** Porównanie cen po EAN — wiersz nie niesie ŻADNEJ z sześciu kolumn filtra. */
+export const WYMIARY_EAN_PORWNANIE: WymiarFiltra[] = [];
+
+/** Histogram pokrycia — wiersz to dwie liczby, nie ma czego filtrować. */
+export const WYMIARY_EAN_POKRYCIE: WymiarFiltra[] = [];
+
+/** Pozycje unikalne — jedyna kolumna filtra w wierszu to `dostawca`. */
+export const WYMIARY_EAN_UNIKALNE: WymiarFiltra[] = ["dostawcy"];
+
+/** Ranking dostawców — jedyna kolumna filtra w wierszu to `dostawca`. */
+export const WYMIARY_EAN_RANKING: WymiarFiltra[] = ["dostawcy"];
+
+// Samego filtrowania po dostawcy sekcja EAN NIE definiuje po raz drugi — używa
+// `zastosujFiltryDostawcow` niżej (blok 10d). Funkcja jest generyczna po `{dostawca: string}`,
+// więc obsługuje i wiersze dostawców, i wiersze EAN; dwie identyczne implementacje pod różnymi
+// nazwami byłyby czystym długiem (wykryte przy scalaniu 10c z 10d, 2026-09-04).
+
 /**
  * Filtrowanie sekcji zakładki `dostawcy` (blok 10d).
  *
