@@ -200,3 +200,44 @@ nie została zaktualizowana, więc sesja 7b dostanie nieaktualny stan i nie zoba
 seed w `stworzApp` zamienia brak tabel atrybutów w awarię startu całego backendu, czego oryginał
 nie robił. Reszta to drobne rozjazdy wierności na krawędziach walidacji i dwie luki w sile GATE
 (asercja słownika przechodzi na pustej mapie i fałszywie zapali się przy `sezon`/`wentyl`).
+
+## Iteracja 2 — weryfikacja poprawek
+
+> Zweryfikowane 2026-09-04 przez Mastera (reviewer-subagent padł na limicie sesji w trakcie
+> drugiego przebiegu). Weryfikacja jest **empiryczna** — sprawdzenia uruchomione, nie wywnioskowane
+> z lektury kodu. Testy weryfikacyjne były tymczasowe i zostały usunięte po przebiegu; trwały
+> dowód dla każdego punktu leży w suicie ticketa.
+
+| # | Zarzut z iteracji 1 | Status | Dowód |
+|---|---|---|---|
+| 1 | BLOCKER: roadmapa nietknięta | **NAPRAWIONE** | §5 I7: `🔨 iteracja w połowie`, 7a ✅ z datą i ID ticketa, 7b ⬜; `DELETE /api/atrybuty/pending` w wyliczeniu; „13 ścieżek / 18 operacji" doprecyzowane; **sześć ustaleń wpisanych do bloku 7b**, nie do zamkniętego 7a. §3 wiersz „Martwe ścieżki FE" → „naprawić w 7b" (`:135`), §4 wiersz 7 → `🔨` z ticketem (`:157`, przy okazji poprawiona etykieta sesji `1a BE` → `7a BE`) |
+| 2 | Seed wywraca start na bazie bez tabel | **NAPRAWIONE** | `stworzApp` na świeżej, niezmigrowanej bazie nie rzuca (uruchomione); błąd ląduje w logu jako „[atrybuty] seed pominięty" |
+| 3 | `wartosc: 0` / `false` przechodzi | **NAPRAWIONE** | `{wartosc:0}` i `{wartosc:false}` → `400 {ok:false,error:"Brak rodzaj lub wartosc"}`; `PUT {wartosc:0}` → „Brak wartosc". **Sprawdzona też regresja w drugą stronę:** napis `"0"` nadal przechodzi (200), bo oryginał go przepuszcza |
+| 4 | 500 bez klucza `ok` | **NAPRAWIONE** | Po `DROP TABLE atrybuty_rodzaje` trasa `GET /api/atrybuty` oddaje `500 {ok:false,error:"Błąd serwera"}`. Handler jest ZAKRESOWY: po `DROP TABLE promotions` `GET /api/promotions` nadal idzie globalnym `bladHandler` i oddaje `{error:…}` bez `ok` — czyli nic spoza tego routera nie zostało przechwycone |
+| 5 | Audyt bez `try/catch` | **NAPRAWIONE** | Po `DROP TABLE audit_log` `POST /api/atrybuty/rodzaje` nadal zwraca `200 {ok:true}` |
+| 6 | Asercja słownika przechodzi na `{}` | **NAPRAWIONE** | Oblewa dla `{}`, dla obcego rodzaju (`widmo::X`) i dla nadmiarowego klucza `ok`. **Nie zapala się** dla `sezon::Zimowe` — czyli fałszywy alarm z iteracji 1 jest usunięty, bo zbiór rodzajów bierze się z mapy kodu, a nie z 13 prefiksów nagrania |
+| 7 | Brak testu `slice(0,5)` i sortowania | **NAPRAWIONE i ZWERYFIKOWANE MUTACJĄ** | `MAKS_SUGESTII` 5→4 → test czerwony; sortowanie odwrócone na rosnące → test czerwony; źródło przywrócone (`git status` czysty) |
+| 8 | Słaby dowód `ORDER BY nazwa` | **NAPRAWIONE i ZWERYFIKOWANE MUTACJĄ** | Podmiana `ORDER BY nazwa` na `ORDER BY kod DESC` → test czerwony; źródło przywrócone |
+| 9 | `raport.md` nieśledzony | **NAPRAWIONE** | W commicie `fd8523e`, aktualizowany w `46ad759` |
+| 10 | Utwardzenia nieodnotowane | **NAPRAWIONE** | `raport.md` → „Review fixes applied", sekcja „Świadomie NIE zmienione": pola nie-`string`, `Object.hasOwn`, `parametr()` dla tablicy, `beforeAll` w teście GATE |
+
+### Korekta merytoryczna wprowadzona po iteracji 1
+
+Teza powtórzona w `plan.md` (D6) i w komentarzach obu repozytoriów — jakoby mapa kolejki miała
+`wentyl`, którego nie ma mapa liczników — **jest fałszywa**. Sprawdzone programowo na
+`atrybuty_module.cjs:251-267` (15 pozycji) i `pending_module.cjs:22-36` (13 pozycji):
+
+```
+tylko w liczniki: [ 'model', 'zastosowanie' ]
+tylko w pending:  []
+wentyl w obu:     true
+```
+
+Mapa 13-pozycyjna jest **dokładnym podzbiorem** 15-pozycyjnej. Wniosek dla zachowania nie zmienia
+się (pozycja pending rodzaju `model`/`zastosowanie` dostałaby 400), ale opis był mylący —
+poprawiony w `repos/atrybuty.ts`, `repos/atrybuty-pending.ts` i `plan.md`.
+
+### Nowe problemy
+
+**Brak.** Bramki po poprawkach i po merge `origin/develop` (dwa nowe pliki docs, bez konfliktów):
+`lint`, `typecheck`, `build` czyste, suita **917 testów / 58 plików** zielona.
