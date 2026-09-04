@@ -245,6 +245,22 @@ export function alertyZFixtura(): Alert[] {
 }
 
 /**
+ * Dziennik zmian pól produktu z `contract/fixtures/GET_history.json` — GOŁA TABLICA,
+ * to jest odpowiedź `GET /api/history` (tabela `history`), a nie `/api/history/paged`.
+ *
+ * ⚠ WIERSZ NIE MA POLA `typ` — i właśnie na tym wywraca się kafel „Ostatni eksport CSV"
+ * Pulpitu, w produkcji i w odbudowie (blok 10f, decyzja D3). Loader podaje kształt
+ * nagrania bez żadnych poprawek, żeby test widoku widział dokładnie ten problem.
+ */
+export function dziennikZmianZFixtura(): Record<string, unknown>[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_history.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: Record<string, unknown>[];
+  };
+  return fixture.body;
+}
+
+/**
  * Analityka (blok 10a) — cztery odpowiedzi prosto z nagrań produkcji.
  *
  * ⚠ FIXTURES NIOSĄ KLUCZ `_przyciete`, KTÓREGO API NIE ZWRACA. To adnotacja nagrywarki

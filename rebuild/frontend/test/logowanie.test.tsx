@@ -11,6 +11,7 @@ import { KLUCZE_STORAGE, zapiszToken } from "@/lib/api";
 import { _zresetujStanSesji } from "@/lib/auth";
 import { server } from "./msw/server";
 import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
+import { handleryPulpitu } from "./msw/pulpit";
 
 const UZYTKOWNIK = uzytkownikZFixtura();
 
@@ -18,6 +19,8 @@ beforeEach(() => {
   zapiszToken(null);
   _zresetujStanSesji();
   window.history.pushState({}, "", "/login");
+  // Udane logowanie przenosi na `/`, a od bloku 10f jest tam Pulpit z pięcioma zapytaniami.
+  server.use(...handleryPulpitu());
 });
 
 describe("ekran logowania", () => {

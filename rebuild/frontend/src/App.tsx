@@ -29,6 +29,7 @@ import { WagaGabarytowa } from "@/pages/WagaGabarytowa";
 import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
 import { PLACEHOLDERY } from "@/pages/placeholdery";
+import { Pulpit } from "@/pages/Pulpit";
 import { WidokWPrzygotowaniu } from "@/pages/WidokWPrzygotowaniu";
 
 /**
@@ -53,6 +54,7 @@ export function Trasy() {
         }
       >
         <Switch>
+          <Route path="/" component={Pulpit} />
           <Route path="/login" component={Login} />
           <Route path="/katalog" component={Katalog} />
           <Route path="/staging" component={Staging} />

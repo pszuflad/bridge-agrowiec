@@ -185,11 +185,20 @@ describe("1. Trzy karty 1:1 z oryginałem (`frontend-index.js:28175-28294`)", ()
     expect(wiersz!.textContent).toContain(pierwszy.nazwa);
   });
 
-  it("NIE ma przycisków CSV — trasa eksportu należy do bloku 10f", async () => {
+  /**
+   * ⚠ ZAKTUALIZOWANE W BLOKU 10f. Do 2026-09-04 ten test zamrażał BRAK przycisków „CSV" —
+   * 10c pominęło je świadomie, bo trasa `GET /api/analytics/export/{view}` jeszcze nie
+   * istniała. Teraz istnieje, więc przyciski są tam, gdzie w oryginale: przy kartach
+   * „2.1-2.4" i „2.5", ale NIE przy „2.6". Komplet sprawdza `analityka.eksport.test.tsx`;
+   * tutaj pilnujemy tylko liczby, żeby nie przybyło ich po cichu w tej zakładce.
+   */
+  it("ma przyciski CSV przy kartach „2.1-2.4” i „2.5”, ale nie przy „2.6”", async () => {
     await otworzZakladkeEan();
     await screen.findByTestId("tabela-ean-porownanie");
 
-    expect(screen.queryByRole("button", { name: "CSV" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "CSV" })).toHaveLength(2);
+    expect(screen.getByTestId("csv-ean-comparison")).toBeInTheDocument();
+    expect(screen.getByTestId("csv-unique")).toBeInTheDocument();
   });
 });
 

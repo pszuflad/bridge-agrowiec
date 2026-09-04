@@ -13,6 +13,7 @@ import { _zresetujStanSesji } from "@/lib/auth";
 import { POZYCJE_NAWIGACJI } from "@/components/nawigacja";
 import { server } from "./msw/server";
 import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
+import { handleryPulpitu } from "./msw/pulpit";
 
 const UZYTKOWNIK = uzytkownikZFixtura();
 
@@ -28,6 +29,10 @@ beforeEach(() => {
   sessionStorage.clear();
   zasiejSesje();
   window.history.pushState({}, "", "/");
+  // Od bloku 10f `/` to Pulpit, który pobiera pięć tras. Ten plik sprawdza ramę aplikacji,
+  // nie treść pulpitu, więc dostaje puste odpowiedzi — bez nich `onUnhandledRequest: "error"`
+  // wywaliłby każdy test tego pliku.
+  server.use(...handleryPulpitu());
 });
 
 describe("sidebar", () => {
