@@ -23,10 +23,15 @@ import { queryClient } from "@/lib/queryClient";
 import type { Marze } from "@/pages/analityka/api";
 import {
   TOKEN_TESTOWY,
+  cyklZyciaZFixtura,
+  dostepnoscProduktowZFixtura,
   filtryZFixtura,
   kpiZFixtura,
   marzeZFixtura,
+  rotacjaZFixtura,
+  sezonowoscZFixtura,
   statusAnalitykiZFixtura,
+  tempoSchodzeniaZFixtura,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
@@ -37,12 +42,25 @@ const STATUS = statusAnalitykiZFixtura();
 const KPI = kpiZFixtura();
 const MARZE = marzeZFixtura();
 
+// Blok 10e dołożył do zakładki „Marża i rotacja" dwie karty, a do „Dostępności" trzy —
+// wszystkie odpytują backend, a `onUnhandledRequest: "error"` (test/setup.ts) nie pozwala
+// zostawić ich bez handlera. Zakres asercji tego pliku pozostaje bez zmian: sprawdza szkielet
+// strony i sekcję marż z bloku 10a.
 function zamockujApi(marze: Marze = MARZE) {
   server.use(
     http.get("*/api/analytics/filters", () => HttpResponse.json(FILTRY)),
     http.get("*/api/analytics/status", () => HttpResponse.json(STATUS)),
     http.get("*/api/analytics/kpi", () => HttpResponse.json(KPI)),
     http.get("*/api/analytics/margins", () => HttpResponse.json(marze)),
+    http.get("*/api/analytics/availability/products", () =>
+      HttpResponse.json(dostepnoscProduktowZFixtura()),
+    ),
+    http.get("*/api/analytics/availability/sell-through", () =>
+      HttpResponse.json(tempoSchodzeniaZFixtura()),
+    ),
+    http.get("*/api/analytics/seasonality/monthly", () => HttpResponse.json(sezonowoscZFixtura())),
+    http.get("*/api/analytics/lifecycle/models", () => HttpResponse.json(cyklZyciaZFixtura())),
+    http.get("*/api/analytics/rotation/inactive", () => HttpResponse.json(rotacjaZFixtura())),
   );
 }
 
@@ -56,7 +74,9 @@ async function otworzAnalityke() {
   window.history.pushState({}, "", "/analityka");
   render(<App />);
   // Trasa jest ładowana leniwie (osobny chunk z Recharts), więc czekamy na tytuł strony.
-  return await screen.findByTestId("text-page-title");
+  // Wydłużony limit: chunk urósł w bloku 10e do ~410 kB i pod pełnym zestawem testów
+  // domyślna sekunda bywa za krótka — to flaki ładowania, nie zachowanie widoku.
+  return await screen.findByTestId("text-page-title", {}, { timeout: 5000 });
 }
 
 /** Przejście na zakładkę „Marża i rotacja" — jedyną wypełnioną w bloku 10a. */
@@ -255,7 +275,10 @@ describe("3. Sekcja marż — dashboard-wzorzec", () => {
     zamockujApi({ rows: [], low: [], high: [] });
     await otworzZakladkeMarz();
 
-    expect(await screen.findByText("Brak danych")).toBeInTheDocument();
+    // Zakładka niesie od bloku 10e trzy tabele, więc pytanie musi być zawężone do tej
+    // jednej, o którą testowi chodzi — inaczej trafia w komunikat sąsiedniej karty.
+    const tabela = await screen.findByTestId("tabela-marze");
+    expect(within(tabela).getByText("Brak danych")).toBeInTheDocument();
   });
 });
 

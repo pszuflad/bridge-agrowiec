@@ -17,9 +17,12 @@
  *              (uzasadnienie w `FiltryGlobalne.tsx`),
  *  • O-10a-3 — wykres w sekcji marż; oryginał nie ma ani jednego wykresu
  *              (uzasadnienie w `components/ui/chart.tsx`),
- *  • O-10a-4 — cztery zakładki są puste do czasu bloków 10b–10e. To zakres bloku,
- *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
- *              wstawiają treść, zamiast przemeblowywać widok.
+ *  • O-10a-4 — zakładki puste do czasu bloków 10b–10d. To zakres bloku, nie zmiana
+ *              zachowania: nazwy i kolejność już są, więc kolejne sesje wstawiają treść,
+ *              zamiast przemeblowywać widok. Blok 10e wypełnił „Dostępność" i dołożył
+ *              dwie karty pod marżami;
+ *  • O-10e-1 — wykres liniowy w karcie „4.4 Sezonowy wzorzec cen"
+ *              (uzasadnienie w `analityka/SekcjaSezonowosci.tsx`).
  *
  * ─── CZEGO TU NIE MA ──────────────────────────────────────────────────────────────────
  * `POST /api/analytics/bootstrap-current` nie ma i mieć nie będzie przycisku (decyzja D4).
@@ -31,11 +34,25 @@ import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useFiltry, useKpi, useMarze, useStatusHistorii } from "./analityka/api";
+import {
+  useCyklZyciaModeli,
+  useDostepnoscProduktow,
+  useFiltry,
+  useKpi,
+  useMarze,
+  useSezonowoscMiesieczna,
+  useStatusHistorii,
+  useTempoSchodzenia,
+} from "./analityka/api";
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
 import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
+import { SekcjaCykluZycia } from "./analityka/SekcjaCykluZycia";
+import { SekcjaDostepnosciProduktow } from "./analityka/SekcjaDostepnosciProduktow";
 import { SekcjaMarze } from "./analityka/SekcjaMarze";
+import { SekcjaRotacji } from "./analityka/SekcjaRotacji";
+import { SekcjaSezonowosci } from "./analityka/SekcjaSezonowosci";
+import { SekcjaTempaSchodzenia } from "./analityka/SekcjaTempaSchodzenia";
 
 /**
  * Zakładka jeszcze niewypełniona. Mówi wprost, który blok ją dowozi — inaczej pusty panel
@@ -57,6 +74,13 @@ export function Analityka() {
   const { data: status } = useStatusHistorii();
   const { data: kpi } = useKpi();
   const { data: marze, isPending: marzeWczytywane } = useMarze();
+
+  // Blok 10e. Zapytanie rotacji NIE jest tutaj — zależy od kontrolki „Bez ruchu dni",
+  // więc mieszka razem z nią w `SekcjaRotacji` (jedyny filtr serwerowy całej analityki).
+  const { data: dostepnosc, isPending: dostepnoscWczytywana } = useDostepnoscProduktow();
+  const { data: tempo, isPending: tempoWczytywane } = useTempoSchodzenia();
+  const { data: sezonowosc, isPending: sezonowoscWczytywana } = useSezonowoscMiesieczna();
+  const { data: cyklZycia, isPending: cyklWczytywany } = useCyklZyciaModeli();
 
   return (
     <div>
@@ -108,24 +132,33 @@ export function Analityka() {
           />
         </TabsContent>
 
-        <TabsContent value="dostepnosc" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10e"
-            zakres="Dostępność produktów, wyprzedaż, sezonowość i oś czasu importów."
+        {/*
+          Trzy karty w kolejności oryginału (`frontend-index.js:28417-28515`): 4.1, 4.2, 4.4.
+          Numeracja jest z produkcji i ma luki — „4.3" i „4.5" siedzą w innych zakładkach.
+
+          ⚠ Dwie pierwsze karty są w produkcji TRWALE PUSTE (`historia_cen` nie ma kolumny
+          `nazwa`, o którą pytają ich zapytania). Odtwarzamy to zachowanie 1:1; szczegóły
+          w nagłówkach obu sekcji i w `repos/analityka.ts`.
+        */}
+        <TabsContent value="dostepnosc" className="mt-4 space-y-4">
+          <SekcjaDostepnosciProduktow
+            dane={dostepnosc}
+            wybor={wybor}
+            ladowanie={dostepnoscWczytywana}
           />
+          <SekcjaTempaSchodzenia dane={tempo} wybor={wybor} ladowanie={tempoWczytywane} />
+          <SekcjaSezonowosci dane={sezonowosc} wybor={wybor} ladowanie={sezonowoscWczytywana} />
         </TabsContent>
 
         {/*
-          Jedyna wypełniona zakładka 10a. W oryginale niesie trzy karty: marże,
-          rotację (`rotation/inactive`) i cykl życia modelu (`lifecycle/models`) —
-          te dwie należą do bloku 10e i dołożą się TUTAJ, pod sekcją marż.
+          Trzy karty, w kolejności oryginału (`frontend-index.js:28516-28640`): marże z bloku
+          10a NA GÓRZE, pod nimi rotacja i cykl życia z 10e. To JEDNA zakładka, a nie nowa —
+          `rotation/inactive` i `lifecycle/models` należą tu, bo tak jest w produkcji.
         */}
         <TabsContent value="marza" className="mt-4 space-y-4">
           <SekcjaMarze dane={marze} wybor={wybor} ladowanie={marzeWczytywane} />
-          <ZakladkaWPrzygotowaniu
-            blok="10e"
-            zakres="Rotacja (produkty bez aktualizacji) i cykl życia modelu dołączą do tej zakładki."
-          />
+          <SekcjaRotacji wybor={wybor} />
+          <SekcjaCykluZycia dane={cyklZycia} wybor={wybor} ladowanie={cyklWczytywany} />
         </TabsContent>
       </Tabs>
     </div>
