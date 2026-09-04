@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KLUCZ_KOLUMN_KATALOGU, odczytajKV, zapiszKV } from "@/lib/magazynKV";
+import { pobierzSlownik, type OdpowiedzSlownika } from "@/pages/atrybuty/api";
 import { KLUCZ_KONFIGURACJI, type Konfiguracja } from "./konfiguracja/config";
 import {
   listaKategorii,
@@ -91,6 +92,24 @@ export function Katalog() {
   // normalny stan, a nie awaria — wpadamy wtedy w fallbacki `TT` i `";"`.
   const { data: konfiguracja = {} } = useQuery<Konfiguracja>({ queryKey: KLUCZ_KONFIGURACJI });
   const { toast } = useToast();
+  /**
+   * Słownik atrybutów zasila listy filtrów marek i kategorii — port `:23285-23287`
+   * (sesja 7c, domknięcie degradacji D3 z I2). Klucz i `queryFn` są WSPÓLNE z widokiem
+   * `/atrybuty` i z dialogiem reguł, więc CRUD słownika odświeża wszystkie trzy miejsca
+   * jednym `invalidateQueries`.
+   *
+   * ⚠ To JEDYNE zapytanie w tym pliku z własnym `queryFn`: `pobierzSlownik` RZUCA na 401,
+   * podczas gdy domyślny `queryFn` (`/api/products`, `/api/config`) oddaje wtedy `null`.
+   * Różnica jest celowa — wspólny klucz musi mieć jeden loader, inaczej o zachowaniu
+   * decydowałaby kolejność montowania widoków. Dla filtrów skutek jest ten sam: brak danych
+   * degraduje listy do samych produktów.
+   */
+  const { data: slownik } = useQuery<OdpowiedzSlownika>({
+    queryKey: ["/api/atrybuty"],
+    queryFn: pobierzSlownik,
+  });
+  // `?? []` tworzyłoby nową tablicę przy każdym renderze i zabijało memoizację list niżej.
+  const wartosciSlownika = useMemo(() => slownik?.wartosci ?? [], [slownik]);
 
   const [zakladka, setZakladka] = useState("all");
   const [fraza, setFraza] = useState("");
@@ -160,8 +179,14 @@ export function Katalog() {
     [produkty, zakladka],
   );
 
-  const marki_ = useMemo(() => listaMarek(wZakladce), [wZakladce]);
-  const kategorie_ = useMemo(() => listaKategorii(wZakladce), [wZakladce]);
+  const marki_ = useMemo(
+    () => listaMarek(wZakladce, wartosciSlownika),
+    [wZakladce, wartosciSlownika],
+  );
+  const kategorie_ = useMemo(
+    () => listaKategorii(wZakladce, wartosciSlownika),
+    [wZakladce, wartosciSlownika],
+  );
 
   const odfiltrowane = useMemo(
     () => zastosujFiltry(wZakladce, { fraza, marki, kategorie, status, sortKolumna, sortKierunek }),

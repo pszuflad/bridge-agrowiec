@@ -167,11 +167,12 @@ ma endpoint:
 > nagłówki mają statyczną, przygaszoną ikonę sortowania — bez wskazania aktywnej kolumny/kierunku.
 > Oryginał **nie ma** szczegółu produktu w trybie odczytu (tylko modal edycji) — odbudowa
 > dokłada podgląd read-only jako świadome, zatwierdzone odstępstwo. Eksport CSV (backend gotowy
-> od I8, `28-FEATURE-selly-eksport-backend`, patrz przypis o Selly niżej) i słowniki
-> marek/kategorii dla filtrów **tego widoku** (`/katalog`) z `GET /api/atrybuty` odłożone do
-> sesji 7c (po merge 8b) — nie mylić z dialogiem reguł w `/narzuty`, który ten sam słownik już
-> czyta od 7b (patrz blok „Odbudowa (7b…)" niżej). Szczegóły:
-> `docs/tickets/3-FEATURE-katalog-odczyt/`.
+> od I8, `28-FEATURE-selly-eksport-backend`) dowieziony w 8b, a **słowniki marek/kategorii dla
+> filtrów tego widoku — w sesji 7c** (`32-FEATURE-katalog-slowniki-atrybutow`, 2026-09-04):
+> obie listy to SUMA słownika i danych katalogu, z filtrem „bez cyfr" wyłącznie na gałęzi
+> produktowej marek i zwykłym `sort()` dla kategorii (`:23285-23295`). ⚠ Nie mylić z dialogiem
+> reguł w `/narzuty`, gdzie kategorie idą WYŁĄCZNIE ze słownika. Szczegóły:
+> `docs/tickets/3-FEATURE-katalog-odczyt/` i `docs/tickets/32-FEATURE-katalog-slowniki-atrybutow/`.
 
 > **Odbudowa (3e, 3f-1, 3f-2 — 2026-09-01):** `/staging` i `/konfiguracja` odbudowane; router
 > ma **12 tras, 8 placeholderów**. Zakładka **Wgrywanie ręczne** (3f-1) i **Dostawcy** (3f-2)
@@ -404,8 +405,9 @@ ma endpoint:
 > `POST /api/staging/accept`). **Część B** domyka degradację z 4b: dialog reguł w `/narzuty`
 > czyta ten sam słownik (marki = suma słownika i produktów, kategorie = wyłącznie słownik,
 > dostawcy = osobne `GET /api/suppliers` po `kod`), zweryfikowane w oryginale
-> (`:24203-24313`) — dictionary marek/kategorii dla filtrów `/katalog` (blok I2 wyżej) zostaje
-> osobno odłożona do sesji 7c. Szczegóły: `docs/tickets/31-FEATURE-atrybuty-frontend/`.
+> (`:24203-24313`). Listy marek/kategorii dla filtrów `/katalog` (blok I2 wyżej) domknęła
+> **sesja 7c** — INNĄ regułą: tam kategorie sumują słownik z katalogiem, tu idą wyłącznie
+> ze słownika. Szczegóły: `docs/tickets/31-FEATURE-atrybuty-frontend/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

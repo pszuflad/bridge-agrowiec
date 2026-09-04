@@ -1909,7 +1909,7 @@ pojawi się kolizja) i czy warto zmieniać klucz na case-sensitive po stronie ba
 | **Pliki** | `mirror/backend/pending_module.cjs:199` (`const { we } = ctx` — bez `be`), `:287-289` i `:331` (masowy `UPDATE products`); dla kontrastu `mirror/backend/atrybuty_module.cjs:142,161,177,208,226,243` (sześć zapisów `be(...)`); port: `rebuild/backend/src/routes/atrybuty.ts` (`audytuj()` wołane tylko przy CRUD słownika) |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D4) |
-| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** |
+| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 7 |
 
 **Co robi produkcja.** `registerPending` (`:199`) destrukturyzuje z ctx wyłącznie `we`
 (middleware auth) — funkcja audytu `be` **nie trafia do modułu w ogóle** (w całym
@@ -1948,7 +1948,7 @@ podaje `produktow_zaktualizowano`. To nie zastępuje wpisu w dzienniku.
 | **Pliki** | `mirror/backend/atrybuty_module.cjs:79-83` (`SELECT DISTINCT model` → `insWartosc('bieznik', …)`), `:75-78` (analogiczny, poprawny seed marki), `:99` (`seed(db)` przy rejestracji modułu); `rebuild/schema/001_schema.sql:53` (`products.bieznik TEXT` istnieje); dowód skutku: `contract/fixtures/GET_atrybuty_pending.json`; port: `rebuild/backend/src/repos/atrybuty.ts:355` (`zasiejSlownikAtrybutow`) |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D1) |
-| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** |
+| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 1 |
 
 **Co robi produkcja.** `seed()` zasila słownik `marka` z `SELECT DISTINCT marka FROM products`,
 a zaraz potem słownik `bieznik` z `SELECT DISTINCT model FROM products` — **z kolumny `model`**,
@@ -1988,7 +1988,7 @@ bo wartość zasiana z `model` trafia do słownika `bieznik`.
 | **Pliki** | `mirror/backend/atrybuty_module.cjs:251-267` (`RODZAJ_KOLUMNA`, 15 pozycji — `liczniki` i `uzycie`), `mirror/backend/pending_module.cjs:22-36` (`RODZAJE_KOLUMNY`, 13 pozycji — skan i akceptacje), `:283-284` i `:326-327` (400 „Nieznany rodzaj"); port: `rebuild/backend/src/repos/atrybuty.ts:49` i `rebuild/backend/src/repos/atrybuty-pending.ts:25` |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D6) |
-| **Status** | ✔ odtworzone w rebuild (7a) · **nieosiągalne dzisiejszą ścieżką UI** |
+| **Status** | ✔ odtworzone w rebuild (7a) · **nieosiągalne dzisiejszą ścieżką UI** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 4 |
 
 **Co robi produkcja.** Dwa moduły trzymają własne, niezależne mapy „rodzaj atrybutu → kolumna
 `products`". `liczniki` i `uzycie` używają mapy 15-pozycyjnej; skan kolejki i obie akceptacje
@@ -2025,7 +2025,7 @@ a widok `/atrybuty` pokaże ten komunikat użytkowniczce (`komunikatBledu()` w
 | **Pliki** | `mirror/backend/pending_module.cjs:41-55` (`levenshtein`), `:57-62` (`similarity`), `:65-72` (`shouldSuggestAlias`); port: `rebuild/backend/src/repos/atrybuty-pending.ts:57,80,96`, testy `rebuild/backend/test/atrybuty.podobienstwo.test.ts` |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`) |
-| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** |
+| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 2 |
 
 **Co robi produkcja.** `similarity` liczy odległość Levenshteina na SUROWYCH napisach — bez
 `toLowerCase()`, bez `trim()`, bez zwijania wielokrotnych spacji. Jedyna normalizacja w całym
@@ -2126,7 +2126,7 @@ odstępstwo od parytetu 1:1 (odbudowa jest tu LEPSZA od produkcji świadomie).
 | **Pliki** | `mirror/frontend/assets/pending-injection.js:741-744,766-772` (filtr i kolumna po `w.origin`, domyślka `'user'`); backend nie zwraca pola: `mirror/backend/atrybuty_module.cjs:185-196` (`GET /api/atrybuty/wartosci` → `{id,rodzaj,wartosc}`), potwierdzone w `contract/fixtures/GET_atrybuty_wartosci.json`; pominięte w porcie: `rebuild/frontend/src/pages/atrybuty/PanelWartosci.tsx` |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** — czy `origin` ma być w ogóle wystawiane przez backend |
 | **Iteracja** | ujawnione przy **7b** (`docs/tickets/31-FEATURE-atrybuty-frontend/`, decyzja D4) |
-| **Status** | — nie zaczęte (zastane, ujawnione przy 7b) |
+| **Status** | — nie zaczęte (zastane, ujawnione przy 7b) · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §5 |
 
 **Co znaleziono.** `pending-injection.js` filtruje i pokazuje kolumnę „Źródło" po polu
 `w.origin` (`catalog`/`user`/`preset`, z domyślką `'user'`, gdy pole brakuje), ale ŻADNA trasa

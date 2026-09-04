@@ -123,31 +123,62 @@ export function sortuj(
 }
 
 /**
- * Lista marek do filtra (frontend-index.js:23287-23290): suma wartości słownikowych
- * i marek obecnych w danych, z pominięciem marek zawierających cyfrę (w oryginale
- * `!/\d/.test(e)` — odsiewa śmieci z importu w rodzaju „11.2-24"), posortowana po polsku.
+ * Wartość słownika atrybutów w zakresie, którego potrzebują filtry katalogu.
  *
- * ODSTĘPSTWO ŚWIADOME (plan.md D3): oryginał dokłada tu wartości z `GET /api/atrybuty`,
- * który należy do Iteracji 7. Do tego czasu lista powstaje wyłącznie z danych, więc
- * nie pokaże marki, która nie ma ani jednego produktu.
+ * Typ jest lokalny i STRUKTURALNY (nie import z `pages/atrybuty/api.ts`) celowo: ten moduł
+ * jest czystą logiką bez zależności — tak samo trzyma tu własną definicję `Produkt`.
+ * Kształt zgodny z `GET /api/atrybuty` → `wartosci[]`.
  */
-export function listaMarek(produkty: Produkt[]): string[] {
-  const marki = produkty
+export type WartoscSlownika = { rodzaj: string; wartosc: string };
+
+/**
+ * Lista marek do filtra — port `frontend-index.js:23287-23291`.
+ *
+ * SUMA dwóch źródeł: wartości słownikowych rodzaju `marka` ORAZ marek obecnych w danych.
+ *
+ * ⚠ FILTR „BEZ CYFR" DOTYCZY WYŁĄCZNIE MAREK Z PRODUKTÓW (`!/\d/.test(e)` — odsiewa śmieci
+ * z importu w rodzaju „11.2-24"). Wartości ze słownika wchodzą BEZ tego filtra, bo w oryginale
+ * `filter` wisi tylko na gałęzi produktowej (`:23288`), a nie na złączeniu. To nie przeoczenie
+ * portu — sprawdzone w kodzie przy zamykaniu sesji 7c.
+ *
+ * Sort: `localeCompare(…, "pl")`.
+ */
+export function listaMarek(produkty: Produkt[], wartosciSlownika: WartoscSlownika[] = []): string[] {
+  const zProduktow = produkty
     .map((p) => p.marka)
     .filter((marka): marka is string => Boolean(marka) && !/\d/.test(marka as string));
-  return Array.from(new Set(marki)).sort((a, b) => a.localeCompare(b, "pl"));
+  const zeSlownika = wartosciSlownika
+    .filter((wartosc) => wartosc.rodzaj === "marka")
+    .map((wartosc) => wartosc.wartosc);
+  return Array.from(new Set([...zeSlownika, ...zProduktow]))
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b, "pl"));
 }
 
 /**
- * Lista kategorii (frontend-index.js:23291-23294). W przeciwieństwie do marek oryginał
- * NIE odsiewa tu wartości z cyframi i sortuje domyślnym `sort()`, nie `localeCompare`.
- * Zachowujemy tę asymetrię — jest w oryginale.
+ * Lista kategorii — port `frontend-index.js:23292-23295`. Też SUMA słownika i danych.
+ *
+ * ⚠ DWIE ASYMETRIE WOBEC MAREK, obie w oryginale i obie zachowane: kategorie NIE mają filtra
+ * „bez cyfr" (ani dla produktów, ani dla słownika) i sortują się domyślnym `sort()`,
+ * a nie `localeCompare`.
+ *
+ * ⚠ NIE MYLIĆ Z DIALOGIEM REGUŁ w `/narzuty` (sesja 7b): tam kategorie idą WYŁĄCZNIE ze
+ * słownika (`:24210`), bo regułę cenową można założyć na kategorię spoza katalogu.
+ * Tutaj filtr ma zawężać to, co widać w tabeli, więc źródła się sumują.
  */
-export function listaKategorii(produkty: Produkt[]): string[] {
-  const kategorie = produkty
+export function listaKategorii(
+  produkty: Produkt[],
+  wartosciSlownika: WartoscSlownika[] = [],
+): string[] {
+  const zProduktow = produkty
     .map((p) => p.kategoria)
     .filter((kategoria): kategoria is string => Boolean(kategoria));
-  return Array.from(new Set(kategorie)).sort();
+  const zeSlownika = wartosciSlownika
+    .filter((wartosc) => wartosc.rodzaj === "kategoria")
+    .map((wartosc) => wartosc.wartosc);
+  return Array.from(new Set([...zeSlownika, ...zProduktow]))
+    .filter(Boolean)
+    .sort();
 }
 
 export type KryteriaFiltrow = {
