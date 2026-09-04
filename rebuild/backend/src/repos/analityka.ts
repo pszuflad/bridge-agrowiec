@@ -323,6 +323,41 @@ export function zbudujSnapshotBiezacy(db: Baza): WynikBootstrapu {
 // nie pilnuje żadne nagranie produkcji.
 // ─────────────────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Port `safeAll(db, sql, params)` (`:51`) — zapytanie, które RZUCA, oddaje pustą listę.
+ *
+ * ⚠⚠ TO NIE JEST DEFENSYWA „NA WSZELKI WYPADEK". W oryginale każde z 27 zapytań analityki
+ * idzie przez `safeAll`/`safeGet`, a w dwóch trasach TEGO BLOKU ten `catch` jest jedyną
+ * rzeczą, która stoi między produkcją a błędem 500 — i widać to w nagraniach:
+ *
+ *   `historia_cen` NIE MA KOLUMNY `nazwa`. Nie ma jej ani `rebuild/schema/001_schema.sql`,
+ *   ani zrzut produkcji `db/schema.sql`, ani `ensureSchema()` samego modułu analityki
+ *   (`analytics_module.cjs:25-48`). A `availability/products` (`:161`) i
+ *   `availability/sell-through` (`:176`) pytają tę tabelę o `MAX(nazwa)`. SQLite odpowiada
+ *   `no such column: nazwa`, `safeAll` połyka wyjątek i obie trasy oddają `rows: []`.
+ *
+ * Dowód, że tak jest NA PRODUKCJI, a nie tylko u nas: `GET_analytics_status.json` pokazuje
+ * 15 597 migawek historii, a `GET_analytics_availability_products.json`
+ * i `GET_analytics_availability_sell-through.json` mają mimo to `hasHistory: true`
+ * i `rows: []`. Obie karty zakładki „Dostępność" są w produkcji trwale puste.
+ *
+ * Odtwarzamy to bez zmian — odbudowa odtwarza zastane zachowanie, a naprawa (dołożenie
+ * `JOIN products` albo usunięcie kolumny z zapytania) byłaby świadomym odstępstwem, którego
+ * nie pokrywa żaden fixture. Sprawa czeka na decyzję w `docs/rebuild-backlog.md`.
+ *
+ * ⚠ ASYMETRIA WOBEC 10a, ŻEBY NIE ZASKOCZYŁA: pięć funkcji bloku 10a (`filters`, `status`,
+ * `kpi`, `margins`, bootstrap) NIE przechodzi przez ten helper — ich zapytania nie mogą się
+ * wywrócić na schemacie, więc 10a nie miało powodu go portować. Jeśli kiedyś trzeba będzie
+ * ujednolicić, to osobna decyzja, nie skutek uboczny tego bloku.
+ */
+function bezpiecznieWiersze<T>(db: Baza, zapytanie: ReturnType<typeof sql>): T[] {
+  try {
+    return db.all<T>(zapytanie);
+  } catch {
+    return [];
+  }
+}
+
 /** Limity sześciu zapytań bloku (`:165`, `:181`, `:288`, `:302`, `:334`). */
 const LIMIT_DOSTEPNOSCI = 500;
 const LIMIT_TEMPA_SCHODZENIA = 500;
@@ -390,7 +425,9 @@ export function dostepnoscProduktow(db: Baza): Dostepnosc {
   if (jestHistoria) {
     return {
       hasHistory: true,
-      rows: db.all<WierszDostepnosciZHistorii>(sql`
+      rows: bezpiecznieWiersze<WierszDostepnosciZHistorii>(
+        db,
+        sql`
         SELECT kod, ean, dostawca, MAX(nazwa) AS nazwa,
                COUNT(*) AS snapshoty,
                ROUND(100.0 * SUM(CASE WHEN stan > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS dostepnoscPct,
@@ -405,7 +442,9 @@ export function dostepnoscProduktow(db: Baza): Dostepnosc {
 
   return {
     hasHistory: false,
-    rows: db.all<WierszDostepnosciZKatalogu>(sql`
+    rows: bezpiecznieWiersze<WierszDostepnosciZKatalogu>(
+      db,
+      sql`
       SELECT kod, ean, dostawca, nazwa, stan,
              CASE WHEN stan > 0 THEN 100 ELSE 0 END AS dostepnoscPct,
              NULL AS miesiaceBrakow
@@ -460,7 +499,9 @@ export function tempoSchodzenia(db: Baza): TempoSchodzenia {
 
   return {
     hasHistory: true,
-    rows: db.all<WierszTempaSchodzenia>(sql`
+    rows: bezpiecznieWiersze<WierszTempaSchodzenia>(
+      db,
+      sql`
       WITH seq AS (
         SELECT dostawca, kod, MAX(nazwa) AS nazwa, stan,
                LAG(stan) OVER (PARTITION BY dostawca, kod ORDER BY zarejestrowano_at) AS prev_stan
@@ -505,7 +546,9 @@ export function sezonowoscMiesieczna(db: Baza): Sezonowosc {
 
   return {
     hasHistory: true,
-    rows: db.all<WierszSezonowosci>(sql`
+    rows: bezpiecznieWiersze<WierszSezonowosci>(
+      db,
+      sql`
       SELECT substr(zarejestrowano_at, 6, 2) AS miesiac, marka,
              ROUND(AVG(cena_zakupu), 2) AS sredniaCena,
              ROUND(AVG(CASE WHEN stan > 0 THEN 100 ELSE 0 END), 2) AS dostepnoscPct
@@ -546,7 +589,9 @@ export function cyklZyciaModeli(db: Baza): CyklZycia {
   if (jestHistoria) {
     return {
       hasHistory: true,
-      rows: db.all<WierszCykluZycia>(sql`
+      rows: bezpiecznieWiersze<WierszCykluZycia>(
+        db,
+        sql`
         SELECT marka, model,
                MIN(zarejestrowano_at) AS pierwszyRaz,
                MAX(zarejestrowano_at) AS ostatniRaz,
@@ -562,7 +607,9 @@ export function cyklZyciaModeli(db: Baza): CyklZycia {
 
   return {
     hasHistory: false,
-    rows: db.all<WierszCykluZycia>(sql`
+    rows: bezpiecznieWiersze<WierszCykluZycia>(
+      db,
+      sql`
       SELECT marka, model,
              MIN(data_aktualizacji) AS pierwszyRaz,
              MAX(data_aktualizacji) AS ostatniRaz,
@@ -634,7 +681,9 @@ export function zacisnijDniRotacji(surowe: unknown): number {
 export function rotacjaNieaktywnych(db: Baza, dni: number): Rotacja {
   return {
     days: dni,
-    rows: db.all<WierszRotacji>(sql`
+    rows: bezpiecznieWiersze<WierszRotacji>(
+      db,
+      sql`
       SELECT kod, nazwa, dostawca, marka, model, rozmiar, stan,
              data_aktualizacji AS ostatniaAktualizacja
       FROM products
@@ -673,7 +722,9 @@ export type WpisOsiImportow = {
  * Zostaje w zapytaniu, bo jest w oryginale.
  */
 export function osCzasuImportow(db: Baza): WpisOsiImportow[] {
-  return db.all<WpisOsiImportow>(sql`
+  return bezpiecznieWiersze<WpisOsiImportow>(
+    db,
+    sql`
     SELECT id, kiedy,
            uzytkownik_imie AS uzytkownik,
            encja_id AS dostawca,
