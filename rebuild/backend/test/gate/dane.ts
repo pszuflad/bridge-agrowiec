@@ -738,3 +738,103 @@ export function zasiejMapySelly(db: Baza): void {
     ])
     .run();
 }
+
+/**
+ * Komplet DZIESIĘCIU dostawców — po jednym na każdy kod dispatchera (`import/parsuj.ts`).
+ *
+ * `DOSTAWCY_TESTOWI` (trzy wiersze) nie nadaje się do GATE tras admina: obie listy idą po
+ * kodach dispatchera, więc siedmiu brakujących dostawców wyszłoby z `czestotliwoscMinuty`,
+ * `ostatniPlik` i `url` równymi `null` — a fixture ma tam wartości. Porównanie kształtu
+ * puszcza `null` jako ostrzeżenie, ale wtedy GATE przestałby cokolwiek dowodzić akurat dla
+ * tych pól. Wartości są wzięte z `contract/fixtures/GET_admin_suppliers-list.json`.
+ */
+export const DOSTAWCY_ADMINA: NowyDostawca[] = [
+  "MO1",
+  "MO2",
+  "MO3",
+  "MO4",
+  "MO5",
+  "MO6",
+  "MO7",
+  "MO8",
+  "MO9",
+  "MO10",
+].map((kod, i) => ({
+  kod,
+  nazwa: `Dostawca ${kod}`,
+  email: null,
+  formatPliku: "csv",
+  sposobDostarczania: "url",
+  // Co drugi dostawca ma własny adres w bazie, reszta schodzi na fallback dispatchera —
+  // dzięki temu GATE widzi OBIE wartości `urlEfektywnyZDb`, a nie tylko jedną.
+  url: i % 2 === 0 ? `https://przyklad.test/${kod.toLowerCase()}.csv` : "",
+  czestotliwoscMinuty: 60,
+  status: "aktywny",
+  ostatniPlik: "2026-08-17T15:49:19.820Z",
+  ostatniaSync: "2026-08-17T15:49:19.820Z",
+  liczbaProduktow: 100 + i,
+  parser: kod.toLowerCase(),
+  kodowanie: "UTF-8",
+  uwagi: null,
+}));
+
+export function zasiejDostawcowAdmina(db: Baza): void {
+  db.insert(suppliers).values(DOSTAWCY_ADMINA).run();
+}
+
+/**
+ * Audyt dla GATE `GET /api/audit-log` — wiersze odwzorowujące kształt z
+ * `contract/fixtures/GET_audit-log.json` PLUS trzy przypadki brzegowe, których nagranie
+ * produkcji akurat nie złapało, a które w bazie występują:
+ *  • `szczegoly_json` = NULL (`synchronizacja_reczna`, `:48240`),
+ *  • `encja_id` niezłączalny z `suppliers` (audyt zapisuje zamiar, nie stan),
+ *  • dwie akcje dołożone w Iteracji 11 (`edycja_konfiguracji`, `edycja_spedycji`).
+ *
+ * Fixture jest tu WYJŚCIEM: gate sprawdza, czy surowy wiersz `audit_log` wychodzi z trasy
+ * w tym samym kształcie, w jakim nagrano go z produkcji — ze `szczegolyJson` jako STRING.
+ */
+export function zasiejAudytSurowy(db: Baza): void {
+  db.insert(auditLog)
+    .values([
+      {
+        uzytkownikId: 0,
+        uzytkownikImie: "SYSTEM-AUTOPULL",
+        akcja: "auto_pull",
+        encjaTyp: "dostawca",
+        encjaId: "MO3",
+        szczegolyJson:
+          '{"source":"scheduler","url":"https://przyklad.test/mo3.csv","wczytanych":590,' +
+          '"parserErrors":0,"odrzucone":715,"doStagingu":215,"nowe":31,"zmienione":145,' +
+          '"wycofane":39,"bezZmian":414,"autoZatwierdzone":0,"szczegolyOdrzuconych":[]}',
+        kiedy: "2026-08-17T15:49:19.820Z",
+      },
+      {
+        uzytkownikId: 1,
+        uzytkownikImie: "Marta Bieguniak",
+        akcja: "synchronizacja_reczna",
+        encjaTyp: "dostawca",
+        encjaId: "MO99",
+        szczegolyJson: null,
+        kiedy: "2026-08-17T15:00:00.000Z",
+      },
+      {
+        uzytkownikId: 1,
+        uzytkownikImie: "Marta Bieguniak",
+        akcja: "edycja_konfiguracji",
+        encjaTyp: "config",
+        encjaId: "ai_fallback.klucz_api",
+        szczegolyJson: '{"wartosc":"***"}',
+        kiedy: "2026-08-16T09:00:00.000Z",
+      },
+      {
+        uzytkownikId: 1,
+        uzytkownikImie: "Marta Bieguniak",
+        akcja: "edycja_spedycji",
+        encjaTyp: "spedycja",
+        encjaId: "MO77",
+        szczegolyJson: '{"kod":"MO77","kosztDostawy":33.5}',
+        kiedy: "2026-08-15T09:00:00.000Z",
+      },
+    ])
+    .run();
+}
