@@ -120,15 +120,30 @@ describe("Widok /konfiguracja", () => {
   });
 
   describe("szkielet zakładek", () => {
-    it("ma sześć zakładek w kolejności oryginału", async () => {
+    /**
+     * ⚠ SZEŚĆ PIERWSZYCH zakładek jest 1:1 z oryginałem (`:26299-26338`) — ich nazwy
+     * i KOLEJNOŚĆ są tu asercją wierności. Dwie ostatnie („Admin", „Dziennik") dołożyła
+     * Iteracja 12b jako świadome odstępstwo (plan.md D1/D3), więc sprawdzamy je osobno:
+     * mają istnieć, ale NIE MOGĄ wcisnąć się między zakładki produkcyjne.
+     */
+    it("ma sześć zakładek oryginału w jego kolejności, przed zakładkami odbudowy", async () => {
       await otworzKonfiguracje();
 
       const etykiety = ["Dostawcy", "Wgrywanie ręczne", "Spedycja", "Shoper", "Katalog", "AI Fallback"];
-      for (const [i, z] of ZAKLADKI_KONFIGURACJI.entries()) {
+      for (const [i, etykieta] of etykiety.entries()) {
+        const z = ZAKLADKI_KONFIGURACJI[i]!;
         const zakladka = screen.getByTestId(`tab-${z.wartosc}`);
         expect(zakladka).toBeInTheDocument();
-        expect(zakladka).toHaveTextContent(etykiety[i]!);
+        expect(zakladka).toHaveTextContent(etykieta);
       }
+    });
+
+    it("ma zakładki „Admin” i „Dziennik” dołożone w I12b, na końcu listy", async () => {
+      await otworzKonfiguracje();
+
+      expect(ZAKLADKI_KONFIGURACJI.map((z) => z.wartosc).slice(6)).toEqual(["admin", "dziennik"]);
+      expect(screen.getByTestId("tab-admin")).toHaveTextContent("Admin");
+      expect(screen.getByTestId("tab-dziennik")).toHaveTextContent("Dziennik");
     });
 
     it("otwiera się na „dostawcy” — jak oryginał (`:26298`)", async () => {
