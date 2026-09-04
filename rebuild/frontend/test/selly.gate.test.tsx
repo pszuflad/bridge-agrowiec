@@ -78,15 +78,53 @@ describe("GATE 8b — widok konsumuje kształty z fixtures", () => {
     expect(tytul).toHaveTextContent("Integracja Selly.pl");
   });
 
-  it("`GET_selly_ping` — sklep, prefiks tokenu i sonda VAT trafiają na ekran", async () => {
+  it("`GET_selly_ping` — linia połączenia 1:1 z oryginałem", async () => {
     zamockujSelly();
     await otworzSelly();
 
     const sekcja = await screen.findByTestId("selly-ping");
+    expect(sekcja).toHaveTextContent("✓ Połączono");
     expect(sekcja).toHaveTextContent(PING.shop);
-    expect(sekcja).toHaveTextContent(PING.token_prefix);
+    expect(sekcja).toHaveTextContent(`token wygasa za ${PING.expires_in_seconds}s`);
     expect(sekcja).toHaveTextContent(PING.vat_probe);
-    expect(sekcja).toHaveTextContent(String(PING.expires_in_seconds));
+  });
+
+  it("`token_prefix` NIE trafia na ekran — oryginał go nie renderuje", async () => {
+    zamockujSelly();
+    await otworzSelly();
+
+    // Fixture go niesie, ale `loadPing` (:553-559) pokazuje tylko cztery rzeczy.
+    // To fragment tokenu dostępowego — nie wystawiamy go, nawet skróconego.
+    const sekcja = await screen.findByTestId("selly-ping");
+    expect(sekcja).not.toHaveTextContent(PING.token_prefix);
+  });
+
+  it("`GET_selly_csv-status` — zdanie podsumowania i odznaka statusu", async () => {
+    zamockujSelly();
+    await otworzSelly();
+
+    // Fixture ma `status: "ok"`, więc obie rzeczy lecą gałęzią sukcesu (:580-584).
+    expect(await screen.findByTestId("selly-podsumowanie-csv")).toHaveTextContent(
+      "✓ Synchronizacja OK — plik wygenerowany dzisiaj",
+    );
+    expect(await screen.findByTestId("selly-tabela-csv")).toHaveTextContent("OK");
+  });
+
+  it("`GET_selly_csv-status` — nieaktualny plik daje powód z API i odznakę BŁĄD", async () => {
+    server.use(
+      http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
+      http.get("*/api/selly/csv-status", () =>
+        HttpResponse.json({ ...CSV, status: "stary", powod: "plik z wczoraj" }),
+      ),
+      http.get("*/api/selly/status", () => HttpResponse.json({ items: DOSTAWCY })),
+      http.get("*/api/selly/log", () => HttpResponse.json({ items: LOG })),
+    );
+    await otworzSelly();
+
+    expect(await screen.findByTestId("selly-podsumowanie-csv")).toHaveTextContent(
+      "✗ Błąd synchronizacji — plik z wczoraj",
+    );
+    expect(await screen.findByTestId("selly-tabela-csv")).toHaveTextContent("BŁĄD");
   });
 
   it("`GET_selly_csv-status` — liczba wierszy i rozmiar w formacie oryginału", async () => {
@@ -97,7 +135,6 @@ describe("GATE 8b — widok konsumuje kształty z fixtures", () => {
     // 6898 → „6 898” (pl-PL, spacja niełamliwa) i 2.38 → „2.38 MB”.
     expect(tabela).toHaveTextContent((CSV.wiersze as number).toLocaleString("pl-PL"));
     expect(tabela).toHaveTextContent(`${CSV.rozmiar_mb} MB`);
-    expect(tabela).toHaveTextContent(CSV.status);
   });
 
   it("`GET_selly_csv-status` — link do pliku jest NAWIGACJĄ, nie fetchem", async () => {

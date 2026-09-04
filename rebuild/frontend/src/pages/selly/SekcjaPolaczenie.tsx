@@ -27,29 +27,23 @@ export function SekcjaPolaczenie({
           stan={stanPolaczenia(ladowanie, Boolean(blad), dane?.ok)}
           tytul="Status połączenia"
         />
-        {ladowanie && <p className="text-sm text-muted-foreground">Sprawdzam...</p>}
+        {ladowanie && <p className="text-sm text-muted-foreground">Sprawdzam połączenie...</p>}
         {!ladowanie && blad != null && <BladSekcji blad={blad} />}
         {!ladowanie && blad == null && dane && (
-          // Układ linii 1:1 z `selly-injection.js:562-565`: sklep, prefiks tokenu,
-          // czas życia tokenu i wynik sondy stawek VAT.
-          <dl className="grid gap-1 text-sm sm:grid-cols-2" data-testid="selly-ping">
-            <div>
-              <dt className="inline text-muted-foreground">Sklep: </dt>
-              <dd className="inline font-mono">{dane.shop}</dd>
-            </div>
-            <div>
-              <dt className="inline text-muted-foreground">Token: </dt>
-              <dd className="inline font-mono">{dane.token_prefix}</dd>
-            </div>
-            <div>
-              <dt className="inline text-muted-foreground">Wygasa za: </dt>
-              <dd className="inline">{dane.expires_in_seconds} s</dd>
-            </div>
-            <div>
-              <dt className="inline text-muted-foreground">Stawki VAT: </dt>
-              <dd className="inline">{dane.vat_probe}</dd>
-            </div>
-          </dl>
+          /*
+           * Jedna linia, dokładnie jak `selly-injection.js:553-559`:
+           *   „✓ Połączono · <shop> · token wygasa za <N>s · <vat_probe>"
+           *
+           * ⚠ `token_prefix` z fixtura NIE jest tu pokazywany — oryginał go nie renderuje,
+           * mimo że API go zwraca. Nie dokładamy go, bo to prefiks tokenu dostępowego:
+           * pokazywanie fragmentu sekretu na ekranie byłoby zmianą zachowania w złą stronę.
+           */
+          <p className="text-sm" data-testid="selly-ping">
+            <span className="text-emerald-600">✓ Połączono</span> ·{" "}
+            <strong>{dane.shop}</strong> · token wygasa za{" "}
+            <strong>{dane.expires_in_seconds}s</strong> ·{" "}
+            <span className="font-mono">{dane.vat_probe || ""}</span>
+          </p>
         )}
       </CardContent>
     </Card>

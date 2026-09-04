@@ -92,6 +92,45 @@ describe("1. Etykieta przycisku — trzy warianty oryginału", () => {
   });
 });
 
+describe("1b. Trzeci wariant etykiety — konkretny dostawca", () => {
+  /**
+   * ⚠ Fixtures są celowo rozjechane i tak zostaje: `GET_products.json` ma wyłącznie
+   * produkty MO9, a `GET_suppliers.json` — dostawców MO1, MO2, MO3, MO4, MO10. Każda
+   * zakładka dostawcy jest więc PUSTA, co przy okazji daje darmowe pokrycie drugiego
+   * wariantu toastu „Brak produktów do eksportu".
+   */
+  const KOD = (DOSTAWCY[0] as { kod: string }).kod;
+
+  it("etykieta brzmi „Pobierz CSV dla Shopera” dla dostawcy przy pustym wyborze kolumn", async () => {
+    const uzytkownik = userEvent.setup();
+    zamockujApi();
+    await otworzKatalog();
+
+    // Ten wariant wymaga OBU warunków naraz: pustego wyboru kolumn (gałąź Shoperowa)
+    // ORAZ wybranej zakładki konkretnego dostawcy.
+    await uzytkownik.click(screen.getByTestId("button-columns"));
+    await uzytkownik.click(await screen.findByRole("button", { name: "Żadna" }));
+    await uzytkownik.keyboard("{Escape}");
+    await uzytkownik.click(await screen.findByTestId(`tab-supplier-${KOD}`));
+
+    const przycisk = await screen.findByTestId("button-export-katalog");
+    await waitFor(() => expect(przycisk).toHaveTextContent("Pobierz CSV dla Shopera"));
+  });
+
+  it("pusta zakładka dostawcy → toast z opisem „Dostawca <kod> nie ma produktów”", async () => {
+    const uzytkownik = userEvent.setup();
+    zamockujApi();
+    await otworzKatalog();
+
+    await uzytkownik.click(await screen.findByTestId(`tab-supplier-${KOD}`));
+    await uzytkownik.click(await screen.findByTestId("button-export-katalog"));
+
+    expect(await screen.findByText("Brak produktów do eksportu")).toBeInTheDocument();
+    expect(screen.getByText(`Dostawca ${KOD} nie ma produktów`)).toBeInTheDocument();
+    expect(pobrania).toHaveLength(0);
+  });
+});
+
 describe("2. Gałąź „wybrane kolumny” (domyślna)", () => {
   it("nazywa plik `katalog_wszyscy_wybrane_<data>.csv`", async () => {
     const uzytkownik = userEvent.setup();

@@ -25,19 +25,17 @@ export function formatujLiczbe(wartosc: number | null | undefined): string {
 }
 
 /**
- * Data ostatniej synchronizacji CSV — `selly-injection.js:583-585`.
- * Pełna data w locale `pl-PL` plus wiek w nawiasie, liczony z `wiek_minut` (nie z zegara
- * przeglądarki — API podaje go samo, więc nie wprowadzamy własnego źródła czasu).
+ * Data ostatniej synchronizacji CSV — `selly-injection.js:585-587`.
+ *
+ * Sama data; wiek („(N min temu)") dokłada widok osobnym elementem, bo oryginał koloruje
+ * go zależnie od `wygenerowany_dzisiaj` — zielono, gdy plik jest z dziś, bursztynowo gdy nie.
+ * Sklejenie obu w jeden string uniemożliwiłoby to rozróżnienie.
  */
-export function formatujOstatniaSynchronizacje(
-  znacznik: string | null | undefined,
-  wiekMinut: number | null | undefined,
-): string {
+export function formatujDateSynchronizacji(znacznik: string | null | undefined): string {
   if (!znacznik) return "—";
   const data = new Date(znacznik);
   if (Number.isNaN(data.getTime())) return "—";
-  const opis = data.toLocaleString("pl-PL");
-  return wiekMinut == null ? opis : `${opis} (${wiekMinut} min temu)`;
+  return data.toLocaleString("pl-PL");
 }
 
 /**

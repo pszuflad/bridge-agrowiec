@@ -87,8 +87,16 @@ export function Selly() {
 
   const synchronizacja = useMutation({
     mutationFn: (parametry: ParametrySynchronizacji) => synchronizujDostawce(parametry),
-    // Oryginał odświeża status i log po KAŻDYM syncu, także po dry-runie (:737-738).
-    onSettled: () => {
+    /*
+     * Odświeżenie TYLKO po sukcesie — tak jak oryginał.
+     *
+     * `doSync` przy `!r.ok` wypisuje błąd i robi `return` (`selly-injection.js:705-710`),
+     * więc `loadStatus()`/`loadLog()` na końcu funkcji (`:737-738`) w ogóle się nie
+     * wykonują. `onSettled` odpalałoby je także po błędzie — po nieudanym syncu ekran
+     * przeładowywałby się bez powodu, sugerując, że coś się jednak stało.
+     * Dry-run odświeża tak samo jak pełny sync, bo oryginał ich w tym miejscu nie rozróżnia.
+     */
+    onSuccess: () => {
       void klient.invalidateQueries({ queryKey: KLUCZ_STATUS });
       void klient.invalidateQueries({ queryKey: KLUCZ_LOG });
     },

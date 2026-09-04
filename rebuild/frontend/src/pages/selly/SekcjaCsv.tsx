@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { StatusCsv, WynikGenerowaniaCsv } from "./api";
 import { BladSekcji } from "./BladSekcji";
+import { Badge } from "@/components/ui/badge";
 import {
+  formatujDateSynchronizacji,
   formatujLiczbe,
-  formatujOstatniaSynchronizacje,
   formatujRozmiar,
   stanPlikuCsv,
 } from "./formatowanie";
@@ -94,6 +95,21 @@ export function SekcjaCsv({
           <p className="text-sm text-muted-foreground">Sprawdzam status pliku CSV...</p>
         )}
         {!ladowanie && blad != null && <BladSekcji blad={blad} />}
+        {!ladowanie && blad == null && dane && (
+          // Zdanie podsumowania nad tabelą — `selly-injection.js:580-582`.
+          // Przy błędzie powód z API, a gdy go brak — zapasowy tekst oryginału.
+          <p className="text-sm" data-testid="selly-podsumowanie-csv">
+            {dane.status === "ok" ? (
+              <span className="text-emerald-600">
+                ✓ Synchronizacja OK — plik wygenerowany dzisiaj
+              </span>
+            ) : (
+              <span className="text-destructive">
+                ✗ Błąd synchronizacji — {dane.powod || "plik nieaktualny lub pusty"}
+              </span>
+            )}
+          </p>
+        )}
 
         {generowanie && (
           <p className="text-sm text-amber-600">
@@ -119,16 +135,24 @@ export function SekcjaCsv({
               <tr>
                 <td className="py-1 text-muted-foreground">Status</td>
                 <td className="py-1">
-                  {dane.status}
-                  {dane.powod ? ` — ${dane.powod}` : ""}
+                  <Badge variant={dane.status === "ok" ? "default" : "destructive"}>
+                    {dane.status === "ok" ? "OK" : "BŁĄD"}
+                  </Badge>
                 </td>
               </tr>
               <tr>
                 <td className="py-1 text-muted-foreground">Ostatnia synchronizacja</td>
                 <td className="py-1">
-                  {formatujOstatniaSynchronizacje(
-                    dane.ostatnia_synchronizacja,
-                    dane.wiek_minut,
+                  {formatujDateSynchronizacji(dane.ostatnia_synchronizacja)}
+                  {dane.wiek_minut != null && (
+                    <span
+                      className={
+                        dane.wygenerowany_dzisiaj ? "text-emerald-600" : "text-amber-600"
+                      }
+                    >
+                      {" "}
+                      ({dane.wiek_minut} min temu)
+                    </span>
                   )}
                 </td>
               </tr>

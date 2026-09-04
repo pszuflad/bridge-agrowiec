@@ -309,3 +309,41 @@ describe("5. Odświeżanie", () => {
     await waitFor(() => expect(pobraniaLogu).toBeGreaterThan(1));
   });
 });
+
+describe("6. Odświeżanie NIE dzieje się po błędzie syncu", () => {
+  it("nieudany sync zostawia status i log w spokoju (jak oryginał)", async () => {
+    const uzytkownik = userEvent.setup();
+    let pobraniaStatusu = 0;
+    let pobraniaLogu = 0;
+
+    server.use(
+      http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
+      http.get("*/api/selly/csv-status", () => HttpResponse.json(CSV)),
+      http.get("*/api/selly/status", () => {
+        pobraniaStatusu += 1;
+        return HttpResponse.json({ items: DOSTAWCY });
+      }),
+      http.get("*/api/selly/log", () => {
+        pobraniaLogu += 1;
+        return HttpResponse.json({ items: LOG });
+      }),
+      http.post("*/api/selly/sync-supplier", () =>
+        HttpResponse.text("[Selly] HTTP 500 z API", { status: 500 }),
+      ),
+    );
+
+    await otworzSelly();
+    await waitFor(() => expect(pobraniaLogu).toBe(1));
+    const poWejsciu = { status: pobraniaStatusu, log: pobraniaLogu };
+
+    await uzytkownik.click(screen.getByTestId("selly-button-wyslij"));
+    await uzytkownik.click(await screen.findByTestId("selly-potwierdz"));
+
+    // Błąd ma się pokazać…
+    expect(await screen.findByTestId("selly-blad")).toHaveTextContent("HTTP 500 z API");
+    // …a listy NIE mają się przeładować: `doSync` przy `!r.ok` robi `return` przed
+    // `loadStatus()`/`loadLog()` (`selly-injection.js:705-710`).
+    expect(pobraniaStatusu).toBe(poWejsciu.status);
+    expect(pobraniaLogu).toBe(poWejsciu.log);
+  });
+});
