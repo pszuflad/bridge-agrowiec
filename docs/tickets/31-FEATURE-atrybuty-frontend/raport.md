@@ -155,3 +155,61 @@ degraduje się do pustych list.
    (`DialogNowaWartosc.tsx`) nie zostawiał śladu, choć oryginał loguje
    (`console.warn("[atrybuty] POST rodzaj failed", e)`, `:10258`) i taka jest konwencja repo.
    Dodany `console.warn` — użytkowniczki nadal nie zawiadamiamy, ale diagnostyka zostaje.
+
+## Aktualizacja dokumentacji
+
+Cztery pliki `docs/` sprawdzone równolegle; dwa dodatkowe (`docs/plan.md`, `docs/spec-backend.md`)
+zweryfikowane i świadomie zostawione bez zmian.
+
+**`docs/rebuild-roadmap.md`** (+79/−49)
+- §3: wiersz „Martwe ścieżki FE" ⬜ → ✅ (naprawione w 7b); wiersz „Skrypty injection" —
+  `pending-injection.js` ✅ wchłonięty, zostaje tylko `selly-injection.js` (I8).
+- §4: wiersz iteracji 7 ma sesje „7a BE · 7b FE · 7c FE", status 🔨, daty per sesja.
+- Podblok 7b oznaczony ✅ (2026-09-04, ticket `31-FEATURE-atrybuty-frontend`); sześć „ustaleń
+  z 7a" (wiedza zużyta) zastąpione opisem faktycznie dowiezionego zakresu wraz z odstępstwami
+  D2/D4/D7, nieodtworzonym kaflem D3 i trzema operacjami bez konsumenta w UI (D5).
+- Dopisany fakt o TRZECH warstwach ekranu produkcyjnego (luka w `mapa-kodu-do-wiki.md:57`).
+- **Obie noty „DO ZROBIENIA OD ZARAZ" USUNIĘTE** (nie przekreślone): I4b jako wykonana,
+  I2 przeniesiona do nowego bloku.
+- **Założony podblok 7c** z kompletem zweryfikowanych faktów o `/katalog` (patrz niżej).
+- Ponadto agent sprostował dwa miejsca poza zleceniem, oba nieaktualne: notę w bloku Iteracji 4
+  (opisywała degradację `DialogReguly.tsx` jako wciąż aktualną) i wiersz w tabeli „Co I2
+  świadomie odłożyła" (przekierowany z ogólnego „I7" na konkretną sesję 7c).
+
+**`docs/rebuild-backlog.md`** (+91)
+- **#44** [FRONTEND] przycisk „Nowy rodzaj" w produkcji nie zapisuje rodzaju — ✅ TAK,
+  naprawione w odbudowie (7b).
+- **#45** [FRONTEND] filtr „Źródło" w liście wartości jest martwy — ⬜ do decyzji Ani.
+- Uzupełnienia (bez zmiany rozstrzygnięć) w #36, #39, #40, #41, #42, #43 — opisują skutki
+  tych defektów widoczne teraz na ekranie `/atrybuty`.
+
+**`docs/spec-frontend.md`** (+44/−10)
+- §1 i §2A: martwe ścieżki opisane jako błąd ORYGINAŁU, z notą o stanie odbudowy.
+- §2B: `pending-injection.js` oznaczony jako wchłonięty, z listą komponentów, które go zastąpiły.
+- §3: `/atrybuty` przeniesiony z placeholderów do widoków odbudowanych (został 1 placeholder).
+- Nota przy `/katalog` doprecyzowana: odłożenie słowników dotyczy WYŁĄCZNIE filtrów `/katalog`
+  (sesja 7c) i nie należy jej mylić z dialogiem reguł, który słownik czyta od 7b.
+- Nowy blok „Odbudowa (7b…)" w §5 — trzy warstwy produkcji, układ widoku, odstępstwa.
+
+**`docs/instrukcja-testow-I4.md`** (+22/−8)
+- Punkt 9 sekcji 4 przepisany: opis źródeł list wyboru w dialogu reguł po zmianie (marka = suma,
+  kategoria = wyłącznie słownik z praktycznym skutkiem dla testera, dostawca jako `KOD · Nazwa`
+  z zapisem kodu, konstrukcja i VF/IF jako listy zamiast pól tekstowych) plus wskazówka, co
+  zrobić, gdy lista kategorii jest pusta.
+- Z tabeli „Czego jeszcze NIE MA" usunięte dwa wiersze wskazujące na Iterację 7 — dowiezione.
+
+**Bez zmian (zweryfikowane):** `docs/plan.md` — dokument jawnie historyczny (Faza wstępna),
+jego wzmianki o atrybutach to zapis ówczesnego kontekstu; `docs/spec-backend.md` — nigdzie nie
+twierdzi, że trasy `/api/atrybuty*` nie mają konsumenta, a ticket nie zmienia backendu.
+
+**Pre-existing issues zgłoszone przez doc-checkerów:** brak.
+
+## Do decyzji użytkownika (nowe, wykryte w tej sesji)
+
+1. **Backlog #45** — czy `origin` ma być wystawiane przez backend (wtedy filtr „Źródło" miałby
+   sens), czy pole zostaje wyłącznie wewnętrzne.
+2. **Dialog edycji produktu `LT()`** (`deminified/frontend-index.js:23909-23980`) — czwarty
+   konsument słownika atrybutów, w odbudowie NIEPRZEPORTOWANY i nieprzypisany do żadnej sesji
+   roadmapy (`src/pages/katalog/` ma tylko `PodgladProduktu.tsx`, bez edycji; I2 świadomie
+   dowiozła podgląd read-only zamiast modalu edycji). Zapisane w roadmapie jako otwarte pytanie
+   o przypisanie zakresu — wymaga decyzji, nie jest zadaniem 7c.
