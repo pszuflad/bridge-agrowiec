@@ -197,6 +197,22 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `shoper.format_eksportu`, filtruje `?supplier=` i zawsze oddaje jeden `text/csv`. Szczegóły:
 > `docs/tickets/28-FEATURE-selly-eksport-backend/`.
 
+> **Potwierdzone w 12b** (`36-FEATURE-konto-admin-maintenance`, 2026-09-05): `GET /api/audit-log`
+> wjechało pod `requireAuth`, mimo `security: []` w kontrakcie — ten sam wzorzec D1/D2 (dziennik
+> audytu ujawnia e-maile, nazwy plików i URL-e dostawców). Trasa oddaje **surowy**
+> `listaAudytu(db, 500)`, bez mapowania: `szczegolyJson` w odpowiedzi jest STRINGIEM, nie obiektem
+> (fixture to zamraża) — parsowanie należy do frontu (`spec-frontend.md`). Sesja dowiozła też
+> siedem innych operacji, wszystkie za `requireAuth`: `POST /api/password/change` (port `P4()`,
+> kolejność `USER_NOT_FOUND`→400, `WRONG_OLD_PASSWORD`→401, `WEAK_PASSWORD`→400,
+> `SAME_PASSWORD`→400 przez `bcrypt.compare`, nie porównanie stringów), `GET /api/users`
+> (projekcja jawna `{id, email, imieNazwisko}`, `hasloHash` nie wycieka), `GET /api/admin/supplier-config`
+> + **`PATCH`** `/api/admin/supplier-config/{kod}` (nie `PUT` — pętla po 10 kodach dispatchera,
+> nie po tabeli `suppliers`, więc lista ma zawsze 10 pozycji), `GET /api/admin/suppliers-list`,
+> `POST /api/maintenance/usun-nieopony` (port `czyOpona()`/`Zc()`) i `POST /api/products/clear`
+> (wymaga ciała `{potwierdzenie:"WYCZYSC"}` porównywanego ściśle; kopia pliku bazy z
+> `wal_checkpoint(TRUNCATE)` przed `DELETE FROM products` bez `WHERE`). Szczegóły:
+> `docs/tickets/36-FEATURE-konto-admin-maintenance/`.
+
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).

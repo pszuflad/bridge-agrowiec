@@ -159,3 +159,54 @@ frontu i temat na 12e.
 
 Po poprawkach: backend **1086 testów / 70 plików**, frontend **688 testów / 46 plików**,
 `lint`/`typecheck`/`build` czyste po obu stronach.
+
+## Docs updates
+
+Cztery pliki `docs/` zaktualizowane równolegle przez doc-checkery, po review.
+
+### `docs/rebuild-roadmap.md`
+- **Sprostowane fakty:** `GET/PUT /api/admin/supplier-config(+{kod})` → `PATCH
+  /api/admin/supplier-config/{kod}` z dowodem z dwóch źródeł (`contract/openapi.yaml:28-41`,
+  `mirror/backend/extensions.cjs:344`). Usunięta myląca nota, jakoby `GET /api/audit-log` miał
+  reużyć `parsujSzczegoly` z I5 — zastąpiona faktem: trasa oddaje surowy `listAudit()` bez
+  mapowania (`:48735`), parser żyje we froncie (D4), a parsowanie w backendzie łamie fixture.
+- **Iteracja 12 rozbita na jawne podsesje 12a–12e** (wzorem 3a–3f); §4 (tabela postępu),
+  §6 i nagłówek §4 zaktualizowane. Blok 12b odhaczony (2026-09-05, ID ticketa) z faktycznym
+  zakresem, odstępstwami D1/D2/D3/D5 i notą o `przeplanujScheduler`.
+- **Ustalenia rozdzielone do WŁAŚCIWYCH bloków** (nie do zamkniętego 12b): 12a — nie mylić
+  `wyczyscProdukty` (bulk, z 12b) z `usunProdukt(id)`; 12c — `/moje-konto` gotowe, więc
+  `/katalog` zostaje ostatnim widokiem z odstępstwem D4 z I2; 12d — brak nagrań czterech
+  mutacji + brak `401` dla `GET /api/audit-log` w `openapi.yaml`; 12e — brak kolumny roli
+  w `users` i niesprzątane kopie `.bak_before_clear_*`.
+- Nota w bloku I11 o przycisku „Usuń wszystko z katalogu" („poza zakresem do Iteracji 12")
+  poprawiona na „dowieziony w 12b".
+
+### `docs/rebuild-backlog.md`
+- **Nowe wpisy:** **#46** brak kolumny roli w `users` (⬜ do decyzji, stan zastany zgodny
+  z produkcją, nie regresja); **#47** niesprzątane kopie bazy po `products/clear` (⬜);
+  **#48** dwie kopie `parsujSzczegoly` — wpis dotyczy pytania „czy `rebuild/` ma dostać
+  wspólny pakiet", samą duplikację oznaczono jako świadomą i zrobioną.
+- **#36 (AppShell)** sprostowany: `WidokWPrzygotowaniu.tsx` usunięty, `MojeKonto.tsx` dopisany
+  do listy widoków renderujących sidebar; licznik poprawiony.
+- Wpisów o `PUT` dla supplier-config ani o parsowaniu `audit-log` w backlogu nie było
+  (sprawdzone grepem) — nie było czego prostować.
+
+### `docs/spec-backend.md`
+- Dopisany akapit „Potwierdzone w 12b" z ośmioma operacjami: kolejność kodów błędu `P4()`,
+  projekcja jawna w `GET /api/users`, pętla po dispatcherze (nie po `suppliers`) w obu listach
+  admina, metoda `PATCH`, surowy `audit-log` ze `szczegolyJson` jako stringiem, kopia bazy
+  z checkpointem WAL.
+
+### `docs/spec-frontend.md`
+- Usunięte nieprawdziwe już zdania: „pozostał 1 placeholder (`/moje-konto`)" oraz „przycisk
+  zostaje poza zakresem do Iteracji 12 (D3)".
+- Dopisany blok „Odbudowa (12b)": `/moje-konto` (dwa różne toasty błędu), zerowanie
+  placeholderów, dwie nowe zakładki jako odstępstwo D1, przycisk czyszczenia katalogu
+  i `window.confirm` jako świadomy wyjątek od reguły Radix z 7b.
+
+### Pre-existing issues (NIE naprawiane — poza zakresem ticketa)
+- `docs/rebuild-backlog.md:1841,1846` (#36) — tekst mówi „na ośmiu ekranach", a wypisana lista
+  widoków bez `AppShell` ma siedem pozycji. Niejasne, czy to błąd, czy liczono coś dodatkowego.
+- `docs/spec-frontend.md:389` (blok 7b) mówi „router ma 12 tras, 1 placeholder", a blok 8b
+  (linie 69-83, ta sama data) już mówi o 13 trasach po dodaniu `/selly`. Rozbieżność wymaga
+  ustalenia realnej chronologii 7b vs 8b — obie noty mają datę 2026-09-04.

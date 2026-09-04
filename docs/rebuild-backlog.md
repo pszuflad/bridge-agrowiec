@@ -1805,14 +1805,14 @@ pustego CSV) albo owinąć nazwę w cudzysłowy. ⚠ Powiązanie: to zmieniłoby
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (regresja wierności wobec oryginału, nie tylko architektura odbudowy) |
-| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,WidokWPrzygotowaniu,Atrybuty,Selly}.tsx`; NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`); oryginał: `deminified/frontend-index.js:16329` (`mn()`, sidebar+topbar) |
+| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,Atrybuty,Selly,MojeKonto}.tsx` (`MojeKonto.tsx` od I12/12b); NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`); `WidokWPrzygotowaniu.tsx` USUNIĘTY w 12b (ostatni placeholder zniknął); oryginał: `deminified/frontend-index.js:16329` (`mn()`, sidebar+topbar) |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** |
 | **Status** | — nie zaczęte (zastane, ujawnione przy **10f**, powiększone przy **8b** o `/selly`) |
 
 **Co znaleziono.** `App.tsx` rejestruje trasy bezpośrednio pod `<Switch>`, bez wspólnego
 layoutu — każdy widok sam decyduje, czy owinąć się w `AppShell` (komponent z sidebarem,
 `components/AppShell.tsx:59-87`). Dziś robią to `Pulpit`, `Konfiguracja`,
-`WidokWPrzygotowaniu`, (od 7b) `Atrybuty` i (od 8b) `Selly`; **siedem** pozostałych widoków
+(od 7b) `Atrybuty`, (od 8b) `Selly` i (od 12b) `MojeKonto`; **siedem** pozostałych widoków
 (`Katalog`, `Staging`, `Historia`, `Narzuty`, `Alerty`, `WagaGabarytowa`, `Analityka`) zwraca
 samą treść (np. `Katalog.tsx:172`: `<div className="p-6 max-w-full">` bez `AppShell` ani
 `Sidebar` w drzewie) — sprawdzone `grep`em, sidebar na tych siedmiu ekranach faktycznie się
@@ -1829,13 +1829,14 @@ routera (:28641-28680) owija nią swój zwracany JSX — potwierdzone po kolei d
 też nie mają sidebara (stąd wniosek „to nie wierność, to architektura odbudowy") — **to było
 błędne ustalenie, niepoparte pełnym odczytem funkcji** (sprawdzono tylko początek definicji,
 nie faktyczny `return`). Poprawny wniosek: oryginał pokazuje sidebar na WSZYSTKICH ekranach
-zalogowanego użytkownika — odbudowa na pięciu z dwunastu.
+zalogowanego użytkownika — odbudowa na sześciu z jedenastu (po dołożeniu `MojeKonto.tsx` w 12b).
 
 **Skąd wzięło się przy 10f.** Zastane, nie wprowadzone przez ten blok: `/` było placeholderem
-(`WidokWPrzygotowaniu`, który ramę renderuje), więc problem był niewidoczny. 10f zdjęło
-placeholder i Pulpit musiał dołożyć `AppShell` samodzielnie, żeby nie zgubić nawigacji —
-przy tej okazji rozjazd między widokami stał się widoczny. 8b dołożyła kolejny widok
-(`Selly.tsx`) do tej samej, już istniejącej luki — zastane, poza zakresem tego ticketa.
+(`WidokWPrzygotowaniu`, komponent który ramę renderował — usunięty w 12b, gdy zniknął ostatni
+placeholder), więc problem był niewidoczny. 10f zdjęło placeholder i Pulpit musiał dołożyć
+`AppShell` samodzielnie, żeby nie zgubić nawigacji — przy tej okazji rozjazd między widokami
+stał się widoczny. 8b dołożyła kolejny widok (`Selly.tsx`) do tej samej, już istniejącej luki
+— zastane, poza zakresem tego ticketa.
 
 **Skutek.** Wizualna regresja wobec ZACHOWANIA ORYGINAŁU (sidebar znika) na ośmiu ekranach —
 Ania na produkcji nigdy nie traci sidebara przechodząc między widokami, w odbudowie traci go
@@ -2143,3 +2144,91 @@ Backend 7a też `origin` nie eksponuje (zgodnie z fixture).
 **Do decyzji.** Czy `origin` ma w ogóle trafiać do odpowiedzi API (wtedy filtr miałby sens do
 odtworzenia), czy pole zostaje wyłącznie wewnętrzne (baza), a filtr w produkcji zostaje
 uznany za martwy kod, którego nie warto portować.
+
+---
+
+### #46 · 2026-09-05 · [BACKEND][BEZPIECZEŃSTWO] · tabela `users` nie ma kolumny roli — „admin" nie jest technicznie odróżnialny
+
+> **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Zastane** — stan
+> zgodny z produkcją, nie regresja odbudowy.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (schemat, autoryzacja) |
+| **Pliki** | `rebuild/schema/001_schema.sql` (`users`: `id, email, haslo_hash, imie_nazwisko, utworzono, ostatnie_logowanie` — bez roli); oryginał: strony `/admin/*` chronione samym `requireAuth`, `mirror/backend/extensions.cjs:296+` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte (zastane, ujawnione przy 12b) |
+
+**Co znaleziono.** Tabela `users` nie ma kolumny roli/uprawnień — każdy zalogowany użytkownik
+jest technicznie równy każdemu innemu. 12b dołożyła zakładki „Admin" i „Dziennik" w
+`/konfiguracja` (dostawcy, użytkownicy, utrzymanie, surowy audyt) chronione wyłącznie
+`requireAuth`, tak jak w oryginale chronione są serwerowe strony `/admin/*`.
+
+**Skutek.** Każdy zalogowany użytkownik widzi i może użyć zakładek admina (edycja
+konfiguracji dostawców, usuwanie nie-opon, czyszczenie całego katalogu, podgląd dziennika
+audytu z e-mailami i URL-ami dostawców) — nie tylko faktyczny administrator.
+
+**Dlaczego to jest jak w produkcji, a nie usterka.** Oryginał ma ten sam brak rozróżnienia —
+strony admina chroni tam sam middleware autoryzacji, bez sprawdzania roli. 12b odtworzyła to
+1:1, świadomie (patrz `docs/tickets/36-FEATURE-konto-admin-maintenance/plan.md`, Kontekst).
+
+**Do decyzji.** Czy wprowadzić kolumnę roli w `users` (zmiana schematu) i realną autoryzację
+dla zakładek admina — decyzja Ani, kandydat do rozstrzygnięcia przy 12e (finalny przegląd
+bezpieczeństwa).
+
+---
+
+### #47 · 2026-09-05 · [BACKEND] · kopie bazy po `POST /api/products/clear` nigdy nie są sprzątane
+
+> **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Zastane** — stan
+> zgodny z produkcją, port 1:1.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (utrzymanie, miejsce na dysku) |
+| **Pliki** | `deminified/backend-index.cjs:48319-48331` (`copyFileSync` best-effort przed czyszczeniem); port: `rebuild/backend/src/routes/maintenance.ts` (`POST /api/products/clear`, D5 ticketa 36) |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte (zastane, ujawnione przy 12b) |
+
+**Co znaleziono.** Przed czyszczeniem katalogu trasa robi best-effort kopię
+`<baza>.bak_before_clear_<ISO>` (w odbudowie z checkpointem WAL, D5) — i nic nigdy tych
+plików nie usuwa, ani w oryginale, ani w porcie.
+
+**Skutek.** Każde użycie przycisku „Usuń wszystko z katalogu" (`/konfiguracja` → „Katalog")
+zostawia nowy plik kopii; przy częstym użyciu (np. testowanie parsera) katalog danych rośnie
+bez ograniczeń.
+
+**Dlaczego to jest jak w produkcji, a nie usterka.** Zachowanie odtworzone 1:1 — oryginał ma
+ten sam brak retencji.
+
+**Do decyzji.** Czy wprowadzić rotację/retencję kopii (np. limit liczby plików albo TTL) —
+decyzja Ani, nie blokuje 12b.
+
+---
+
+### #48 · 2026-09-05 · [BACKEND][FRONTEND] · `parsujSzczegoly` istnieje w repo w dwóch kopiach (backend i frontend)
+
+> **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Świadoma decyzja
+> użytkownika D4 tego ticketa** — nie jest to błąd do naprawienia.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND + FRONTEND (architektura odbudowy — brak wspólnego pakietu) |
+| **Pliki** | `rebuild/backend/src/historia/mapowanie.ts:87` i `rebuild/frontend/src/pages/konfiguracja/dziennik.ts` (kotwice do siebie, testy na te same trzy wejścia: NULL, zepsuty JSON, wartość nie-obiektowa) |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | ✔ obie kopie zrobione w rebuild (12b), zamierzony duplikat |
+
+**Co znaleziono.** `rebuild/backend` i `rebuild/frontend` to dwa rozłączne projekty bez
+wspólnego pakietu (w całym froncie nie ma ani jednego importu kodu z backendu). `GET
+/api/audit-log` oddaje surowy `szczegoly_json` (string) — parsowanie robi wyłącznie front,
+przy renderowaniu kolumny „Szczegóły" w zakładce „Dziennik". Wzorzec ma precedens
+(`waga-gabarytowa/obliczenia.ts` obok `backend/waga-gabarytowa/formula.ts`).
+
+**Dlaczego to nie jest usterka.** Decyzja D4 planu 36-FEATURE: wspólny pakiet (`rebuild/shared/`)
+zmieniałby strukturę całej odbudowy (buildy, tsconfigi, lint, deploy obu stron) za 12 linii
+kodu; alias Vite/tsconfig do pliku backendu wciągałby `drizzle-orm` i schemat bazy do grafu
+typów frontu. Obie kopie mają komentarz-kotwicę wskazujący na drugą.
+
+**Do decyzji.** Czy `rebuild/` powinien kiedyś dostać wspólny pakiet dla logiki
+współdzielonej BE/FE — nie blokuje 12b, kandydat do rozważenia przy większej liczbie takich
+duplikatów.

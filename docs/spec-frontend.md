@@ -92,10 +92,10 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
 - **12 tras** (nie 11): `/login`, `/`, `/staging`, `/katalog`, `/narzuty`,
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
-  Odbudowane dotąd: `/login`, `/`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`,
-  `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/atrybuty` (11 widoków; `/analityka`
-  ładowana leniwie — `lazy`+`Suspense`); pozostał wyłącznie 1 placeholder (`/moje-konto`,
-  `src/pages/placeholdery.ts`).
+  Odbudowane: wszystkich 12 (`/analityka` ładowana leniwie — `lazy`+`Suspense`; ostatni,
+  `/moje-konto`, w sesji 12b, 2026-09-05) — zero placeholderów, `src/pages/placeholdery.ts`
+  i `WidokWPrzygotowaniu.tsx` usunięte. Router odbudowy ma dziś **13 tras** (12 oryginału +
+  `/selly` z 8b) — nota o liczbie przeniesiona do nagłówka `src/App.tsx`.
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
@@ -263,7 +263,8 @@ ma endpoint:
 > `GET/POST /api/spedycja`, więc limity są trwałe i wspólne, nie lokalne dla przeglądarki.
 > **Zakładka „katalog" nie dotyka `/api/config`** — to „Domyślne kolumny katalogu" w IndexedDB
 > (`konfig-domyslne-kolumny`) + „Przywróć fabryczne"; destrukcyjny przycisk „Usuń wszystko
-> z katalogu" (`POST /api/products/clear`) zostaje poza zakresem do Iteracji 12 (D3).
+> z katalogu" (`POST /api/products/clear`) dowieziony w sesji 12b — D3 tamtej sesji zniesione,
+> patrz blok 12b niżej.
 > **Edytora `waga_gab.*` nie ma i nie będzie** — w oryginale nie istnieje żaden (0 wystąpień
 > w bundlu), mimo że podtytuł ekranu Konfiguracji to sugeruje. Zakładka „shoper" zapisuje
 > `shoper.kolumny`/`shoper.separator` (2× `POST /api/config`), kluczy tych nie ma jeszcze
@@ -408,6 +409,23 @@ ma endpoint:
 > (`:24203-24313`). Listy marek/kategorii dla filtrów `/katalog` (blok I2 wyżej) domknęła
 > **sesja 7c** — INNĄ regułą: tam kategorie sumują słownik z katalogiem, tu idą wyłącznie
 > ze słownika. Szczegóły: `docs/tickets/31-FEATURE-atrybuty-frontend/`.
+
+> **Odbudowa (12b, `36-FEATURE-konto-admin-maintenance`, 2026-09-05):** `/moje-konto` odbudowany
+> natywnie — port `lM()` 1:1: karta „Dane konta" z sesji (bez fetcha do `/api/me`) + formularz
+> zmiany hasła z trzema komunikatami inline i **dwoma różnymi toastami błędu** (odpowiedź
+> serwera → „Nie udało się zmienić hasła"; awaria sieci → „Błąd"). Router ma dziś **13 tras,
+> zero placeholderów** (patrz §3 wyżej i nagłówek `App.tsx`). `/konfiguracja` dostał dwie nowe
+> zakładki, **„Admin" i „Dziennik"** (8 zamiast 6) — świadome odstępstwo D1: te ekrany NIE
+> ISTNIEJĄ w oryginalnym SPA (grep zero trafień), produkcja je obsługuje serwerowymi stronami
+> HTML poza Reactem. „Admin" wystawia tabelę dostawców (edycja przez dialog, nie inline) +
+> kartę „Użytkownicy" (`GET /api/users`, read-only) + kartę „Utrzymanie" (`usun-nieopony`);
+> „Dziennik" pokazuje surowy `GET /api/audit-log` (kolumna „Szczegóły" przez `parsujSzczegoly`
+> lokalny, kopię backendowego z `historia/mapowanie.ts`, D4 — backend nie parsuje, fixture
+> zamraża string). Ponieważ tabela `users` nie ma kolumny roli, obie zakładki widzi każdy
+> zalogowany, jak w produkcji. Zakładka „Katalog" dostała zapowiadany w I11 przycisk „Usuń
+> wszystko z katalogu" — `window.confirm` (świadomy wyjątek od zamiany na Radix z 7b, bo dialog
+> blokujący jest tu zaletą przy operacji nieodwracalnej), `POST /api/products/clear`, trzy
+> `invalidateQueries`. Szczegóły: `docs/tickets/36-FEATURE-konto-admin-maintenance/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).
