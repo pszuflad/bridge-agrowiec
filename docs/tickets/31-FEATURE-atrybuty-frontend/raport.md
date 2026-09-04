@@ -139,3 +139,19 @@ Review: 0 BLOCKER, 3 SHOULD-FIX, 2 NICE-TO-HAVE — wszystkie rozliczone.
    następny czytelnik nie wziął tego za przeoczenie.
 
 Po poprawkach: **564 testy / 38 plików** oraz 17 integracyjnych; lint, typecheck, build czyste.
+
+## Poprawki po review (iteracja 2)
+
+Review iteracji 2: **0 BLOCKER, 0 SHOULD-FIX, 1 nowa uwaga NICE-TO-HAVE** — naniesiona.
+
+Reviewer zweryfikował poprawki działaniem, nie na słowo: powtórzył test mutacyjny (trzy mutacje,
+w tym podmiana kod↔etykieta dostawcy — wszystkie łapane), potwierdził w oryginale wzorzec
+`fetch(...).catch(console.warn)` przy zakładaniu rodzaju oraz cytat dla „Anuluj nie czyści pól",
+i sprawdził, że wspólny `queryFn` NIE wywala `/narzuty` na wygasłej sesji (brak `throwOnError`
+i Suspense w `QueryClient`, odczyt zabezpieczony `slownikAtrybutow?.wartosci ?? []`) — dialog
+degraduje się do pustych list.
+
+6. **NICE-TO-HAVE: pusty `catch`** przy połykaniu błędu zakładania rodzaju
+   (`DialogNowaWartosc.tsx`) nie zostawiał śladu, choć oryginał loguje
+   (`console.warn("[atrybuty] POST rodzaj failed", e)`, `:10258`) i taka jest konwencja repo.
+   Dodany `console.warn` — użytkowniczki nadal nie zawiadamiamy, ale diagnostyka zostaje.

@@ -65,8 +65,10 @@ export function DialogNowaWartosc({
          */
         try {
           await dodajRodzaj({ value, label: wpisany });
-        } catch {
-          /* rodzaj mógł powstać równolegle — próbujemy dodać wartość mimo to */
+        } catch (blad) {
+          // Logujemy jak oryginał (`console.warn("[atrybuty] POST rodzaj failed", e)`, `:10258`)
+          // — użytkowniczki nie zawiadamiamy, ale ślad w konsoli zostaje.
+          console.warn("[atrybuty] nie udało się założyć rodzaju", blad);
         }
       }
       // Jedyny błąd, który dochodzi do `onError`, pochodzi więc z dodawania WARTOŚCI.

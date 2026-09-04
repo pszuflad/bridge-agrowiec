@@ -126,3 +126,117 @@ dedykowany test na adres+ciało. Kontrakt typów zgadza się z fixtures co do jo
 zastrzeżenia to luka w pokryciu testowego okablowania `DialogReguly.tsx` (część B) względem
 tego, co faktycznie zakładał plan, plus drobna niespójność samego raportu — żadne z nich nie
 blokuje merge'a.
+
+---
+
+# Iteracja 2 — weryfikacja poprawek
+
+> Reviewed: 2026-09-04
+> Branch: feature/31-atrybuty-frontend
+> Diff od iteracji 1: commit `08821fe` (6 plików, w tym raport.md/review.md)
+
+## Metodyka weryfikacji
+
+Wszystkie trzy twierdzenia Mastera sprawdzone eksperymentalnie, nie tylko czytaniem kodu:
+
+1. **Testy części B — zweryfikowane mutacyjnie, zgodnie z instrukcją.** Trzy mutacje w
+   `src/pages/narzuty/slownik.ts` (przywrócone po każdej przez `cp` z backupu, `git status`
+   czysty po przywróceniu):
+   - kategorie liczone jak marki (suma słownika + katalogu) → padają **dwa** testy:
+     „KATEGORIA spoza katalogu jest wybieralna” i „KATEGORIE nie biorą się z katalogu”;
+   - kategorie wyłącznie z katalogu (odtworzenie degradacji 4b) → pada
+     „KATEGORIE nie biorą się z katalogu”;
+   - `dostawcyDoWyboru` zwraca etykietę zamiast kodu jako `wartosc` → pada
+     „DOSTAWCA idzie z /api/suppliers […] w warunku ląduje KOD” z jawnym diffem
+     `MO1` vs `MO1 · Bohnenkamp`.
+   Baseline (bez mutacji) i po przywróceniu: 30/30 zielone. Test dostawcy realnie dowodzi, że
+   w warunku ląduje `kod`, nie etykieta — potwierdzone.
+2. **Sprzeczność raportu — usunięta.** `raport.md` sekcja „Zmiany” opisuje teraz dokładnie to,
+   co jest w diffie (5 nowych `it(...)`, 25 → 30, plus mocki), zgodnie z `git show 08821fe`.
+3. **Detekcja duplikatu po etapie mutacji — zweryfikowana względem oryginału.**
+   `deminified/frontend-index.js:10243-10250` (`window.__atrybutyAddRodzaj`) faktycznie kończy
+   się `fetch(...).catch(function(e){ console.warn(...) })` — POST rodzaju jest fire-and-forget,
+   błąd nigdy nie dociera do UI. `Hb()` (`:10020-10030`) faktycznie zwraca `null` wyłącznie dla
+   duplikatu WARTOŚCI (`Kb()` sprawdza `rodzaj+wartosc`, nie samo istnienie rodzaju). Cytaty w
+   komentarzu (`DialogNowaWartosc.tsx:59-64`) zgadzają się z oryginałem co do sensu (numery linii
+   przesunięte o kilka, bez znaczenia). Nowe zachowanie (etap zamiast treści) jest ściślej wierne
+   niż wersja z iteracji 1.
+4. **Wspólny `queryFn` na `/api/atrybuty` — sprawdzone, że nie wywala `/narzuty`.**
+   `pobierzSlownik()` rzuca `Error` przez `rzucGdyBlad` (`lib/api.ts:95-99`), ale w
+   `DialogReguly.tsx:156-162` żaden `throwOnError`/Suspense nie jest włączony (domyślny
+   `QueryClient` z `queryClient.ts:28-43` tego nie ustawia), więc błąd zapytania zatrzymuje się
+   w stanie `isError` TanStack Query — nie propaguje się do renderu. Odczyt jest też zabezpieczony
+   `slownikAtrybutow?.wartosci ?? []` (`DialogReguly.tsx:186`), więc efekt błędu/401 to puste listy
+   w selectach warunków, nie crash widoku `/narzuty`. Potwierdzone czytaniem + brakiem błędu przy
+   `npm test` (testy dialogu montują komponent bez zamockowanego `/api/atrybuty` w części
+   scenariuszy 1–5 i przechodzą).
+5. **„Anuluj” nie czyści pól — cytat z oryginału potwierdzony.** `sg()`
+   (`deminified/frontend-index.js:27199-27266`): `onClick: () => t(!1)` na przycisku „Anuluj”
+   (`:27265`) nie woła `r("")`/`o("")`; reset stanu (`r(""), o(""), t(!1)`) siedzi wyłącznie
+   w gałęzi sukcesu `l()` (`:27203-27208`). Komentarz w `DialogNowyRodzaj.tsx:106-111` zgadza się
+   z oryginałem.
+
+## Regresje
+
+Brak. Pełne bramki po poprawce, uruchomione w tym worktree:
+- `npm run lint` — czyste
+- `npm run typecheck` — czyste
+- `npm run build` — czyste (2408 modułów, bez błędów; ostrzeżenie o rozmiarze chunku istniało
+  już wcześniej, niezwiązane z tym ticketem)
+- `npm test` — **564/564** zielone, 38 plików (zgodne z raportem)
+- `npm run test:integracja` — **39/39** zielone
+
+## BLOCKER
+
+Brak.
+
+## SHOULD-FIX
+
+Brak nowych. Wszystkie trzy z iteracji 1 rozliczone i zweryfikowane działaniem (nie tylko
+deklaracją), patrz „Metodyka weryfikacji” wyżej.
+
+## NICE-TO-HAVE
+
+- [ ] `rebuild/frontend/src/pages/atrybuty/DialogNowaWartosc.tsx:66-70` — pusty blok `catch` przy
+      połykaniu błędu `dodajRodzaj` nie loguje nic do konsoli, w odróżnieniu od (a) oryginału,
+      który tu kończy się `console.warn` (`:10243-10250`), i (b) istniejącej konwencji w tym
+      repo dla analogicznych „cichych” błędów (`src/lib/magazynKV.ts:51` —
+      `console.warn("IndexedDB save failed:", blad)`). Bez wpływu na użytkowniczkę, ale utrudnia
+      diagnozę w devtools, gdyby zakładanie rodzaju realnie zaczęło padać (np. zmiana kontraktu
+      backendu). Rozważyć dodanie `console.warn` w tym `catch`.
+
+- [ ] (z iteracji 1, wciąż aktualne, nieszkodliwe) `DialogNowaWartosc.tsx:147-148` i
+      `DialogNowyRodzaj.tsx:107-108` — „Anuluj” nie czyści pól; teraz udokumentowane komentarzem
+      jako świadome zachowanie 1:1 z oryginałem — nie wymaga dalszej akcji.
+
+## Plan compliance
+
+Bez zmian względem iteracji 1 — poprawki z `08821fe` domykają lukę w pokryciu testowym części B
+(Definition of done, punkt „kategoria spoza katalogu wybieralna”, teraz potwierdzony też na
+poziomie `DialogReguly.tsx`, nie tylko `slownik.ts`) i usuwają jedyną wewnętrzną niespójność
+`raport.md`.
+
+### Definition of done — aktualizacja
+- [x] `DialogReguly.tsx` czyta słownik z `/api/atrybuty`, dostawców z `/api/suppliers`;
+      kategoria spoza katalogu wybieralna — **teraz potwierdzone testem okablowania dialogu**
+      (`narzuty.dialog.test.tsx`, sekcja 6), nie tylko testem jednostkowym `slownik.ts`
+- [x] testy komponentów i logiki zielone, w tym testy łapiące odwrócenie reguły marki/kategorie
+      **na dwóch poziomach** (czysta funkcja i okablowanie dialogu)
+- [x] testy `/narzuty` z 4b nadal przechodzą (30/30, było 25/25 — przyrost to nowy blok części B)
+- [x] lint / typecheck / build czyste — zweryfikowane ponownie w tej iteracji
+- [ ] roadmapa: nadal poza zakresem code review (do weryfikacji przez Mastera)
+
+## Parallel-test concerns
+
+Bez zmian — None. Nowe testy (blok 6 w `narzuty.dialog.test.tsx`) używają tego samego MSW
+bez sieci co reszta pliku.
+
+## Overall assessment
+
+Wszystkie trzy poprawki są rzeczywiste, nie kosmetyczne: testy części B faktycznie łapią
+odwrócenie reguły marki/kategorie i pomyłkę kod/etykieta dostawcy (sprawdzone mutacyjnie w obu
+kierunkach), detekcja duplikatu po etapie mutacji jest ściślej wierna oryginałowi niż wersja
+sprzed poprawki, a wspólny `queryFn` nie wprowadza ryzyka crasha `/narzuty` na wygasłej sesji
+(zabezpieczone przez `?? []` i brak `throwOnError`). Jedyna pozostała uwaga to brakujący
+`console.warn` w połkniętym błędzie `dodajRodzaj` — kosmetyczna, nie blokuje merge'a. Ticket
+gotowy do merge'a.
