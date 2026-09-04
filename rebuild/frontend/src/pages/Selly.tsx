@@ -19,6 +19,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -123,7 +124,21 @@ export function Selly() {
   };
 
   return (
-    <div className="space-y-4 p-6">
+    /*
+     * Rama z sidebarem jest częścią WIDOKU, nie routera — tak samo jak w oryginale,
+     * gdzie każdy zalogowany widok zwraca `mn(…)` (`deminified/frontend-index.js:16329`;
+     * dwanaście wywołań, m.in. katalog :23315, analityka :25392).
+     *
+     * ⚠ Odbudowa ma tu ZASTANY rozjazd: `AppShell` wpinają dziś tylko `Pulpit`,
+     * `Konfiguracja` i `WidokWPrzygotowaniu`, więc `/katalog`, `/staging`, `/narzuty`,
+     * `/alerty`, `/waga-gabarytowa`, `/analityka` i `/historia` renderują się BEZ sidebara,
+     * choć oryginał pokazuje go wszędzie poza `/login` i 404. To regres wierności spoza
+     * zakresu 8b — opisany w `docs/rebuild-backlog.md` #36. `/selly` idzie za ORYGINAŁEM,
+     * a nie za tym rozjazdem: panel Selly w produkcji był overlayem NAD `<main>`, czyli
+     * wewnątrz ramy, a wstrzykiwany skrypt podświetlał przy tym swoją pozycję w sidebarze
+     * (`selly-injection.js:255-280`).
+     */
+    <AppShell>
       <PageHeader
         title="Integracja Selly.pl"
         subtitle="Synchronizacja produktów z Bridge do sklepu w Selly przez API v3."
@@ -151,11 +166,17 @@ export function Selly() {
         ladowanie={status.isPending}
         blad={status.error}
         onOdswiez={() => void klient.invalidateQueries({ queryKey: KLUCZ_STATUS })}
-        // ⚠ W oryginale ten przycisk odpalał pełny sync natychmiast (:641-644).
-        // D3: przechodzi przez to samo potwierdzenie co „Wyślij do Selly".
-        onSync={(kod) =>
-          ustawPotwierdzenie({ rodzaj: "sync", dostawca: kod, limit, tylkoZmienione })
-        }
+        /*
+         * ⚠ W oryginale ten przycisk odpalał pełny sync NATYCHMIAST (:641-644).
+         * D3: przechodzi przez to samo potwierdzenie co „Wyślij do Selly".
+         *
+         * Poza tym zachowanie 1:1 — łącznie z przestawieniem selecta w sekcji „Sync
+         * dostawcy" (`:643`), żeby po operacji było widać, kogo dotyczyła.
+         */
+        onSync={(kod) => {
+          ustawDostawce(kod);
+          ustawPotwierdzenie({ rodzaj: "sync", dostawca: kod, limit, tylkoZmienione });
+        }}
         syncTrwa={synchronizacja.isPending}
       />
 
@@ -188,7 +209,7 @@ export function Selly() {
         onZamknij={() => ustawPotwierdzenie(null)}
         onPotwierdz={wykonajPotwierdzone}
       />
-    </div>
+    </AppShell>
   );
 }
 

@@ -13,9 +13,9 @@ import { NaglowekKarty } from "./Wskaznik";
 
 /** `success` → default, `error` → destructive, reszta → secondary (`:667`). */
 const WARIANT_ODZNAKI = {
-  ok: "default",
+  sukces: "default",
   blad: "destructive",
-  ladowanie: "secondary",
+  inny: "secondary",
 } as const;
 
 export function SekcjaLog({

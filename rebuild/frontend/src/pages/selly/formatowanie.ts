@@ -9,6 +9,15 @@
 export type StanWskaznika = "ok" | "blad" | "ladowanie";
 
 /**
+ * Wariant odznaki statusu operacji w logu.
+ *
+ * ⚠ Celowo OSOBNY typ od `StanWskaznika`, mimo że oryginał używa dla obu tych samych klas
+ * CSS (`ok`/`err`/`warn`). Wpis w logu jest zakończony — „trwa ładowanie" nie jest jego
+ * możliwym stanem, a wspólny typ kusił do mylącego mapowania `zakonczono → ladowanie`.
+ */
+export type WariantOperacji = "sukces" | "blad" | "inny";
+
+/**
  * Rozmiar pliku CSV — `selly-injection.js:588`.
  * Oryginał NIE przelicza jednostek: bierze gotowe `rozmiar_mb` z API i dokleja „ MB".
  */
@@ -57,10 +66,10 @@ export function formatujDateLogu(rozpoczeto: string | null | undefined): string 
  * realne wpisy z produkcji lądują w gałęzi „warn". To nie jest błąd portu — tak samo
  * zachowuje się oryginał.
  */
-export function wariantStatusuOperacji(status: string | null | undefined): StanWskaznika {
-  if (status === "success") return "ok";
+export function wariantStatusuOperacji(status: string | null | undefined): WariantOperacji {
+  if (status === "success") return "sukces";
   if (status === "error") return "blad";
-  return "ladowanie";
+  return "inny";
 }
 
 /** Kropka statusu połączenia — `selly-injection.js:552-561`. */

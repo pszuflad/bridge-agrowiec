@@ -133,7 +133,7 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | **Wygląd** | design tokens: Inter + JetBrains Mono, primary `hsl(35 70% 45%)`, sidebar `hsl(215 28% 12%)`, tło `hsl(210 20% 98%)` | **wniesione w I1 (1b)** — źródłem jest surowy `mirror/frontend/assets/index-BVOkSOnE.css` (nie `04_DESIGN_TOKENS.md`, który ma 6 rozjazdów); test-strażnik w `rebuild/frontend/test/tokeny.test.ts` | ✅ ustalone |
 | **Auth flow** | `POST /api/login {email:trim,password}` → `{ok,user,token}`; `Bearer` gdy token + `credentials:include` równolegle; `bridge_user` w `localStorage` albo `sessionStorage` wg `bridge_remember`; Query `on401:returnNull,staleTime:Infinity,retry:false` | **odtworzone 1:1 w I1 (1b)** (`rebuild/frontend/src/lib/`) | ✅ ustalone |
 | **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | naprawić w I7 (wołać natywne) | ⬜ do zaklepania |
-| **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / I8 / **`freq-injection.js` ✅ wchłonięty w 3f-2 (2026-09-01)** | 🔨 częściowo |
+| **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / **`selly-injection.js` ✅ wchłonięty w I8 (2026-09-04)** / **`freq-injection.js` ✅ wchłonięty w 3f-2 (2026-09-01)** | 🔨 częściowo — pozostał `pending-injection.js` (I7) |
 | **Lokalne vs API** | **Oba tematy rozstrzygnięte 2026-09-03, każdy INNYM rozstrzygnięciem — bo to były dwa różne problemy, nie jeden.** **I6 (alerty, D3): przez API.** `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie, zero IndexedDB/localStorage. Wcześniejszy zapis w tym wierszu mylił — oryginalny widok `/alerty` (`HT()`, `frontend-index.js:25177-25340`) w ogóle nie czytał `/api/alerts`: liczył pseudo-alerty katalogowe z `GET /api/products` i trzymał ich status w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`); to inny zestaw danych, nie kwestia miejsca przechowywania statusu. **I9 (waga gabarytowa, D1): lokalnie, FAKTEM.** To DWA różne kalkulatory pod jedną nazwą (paletowy w BE vs wolumetryczny w FE), nie jeden wzór w dwóch miejscach — nie było czego deduplikować. Dowieziono oba 1:1, FE liczy lokalnie i endpointu nie woła, jak produkcja. **Wniosek na przyszłość: pytanie „lokalnie czy przez API” rozstrzyga się dopiero po sprawdzeniu, czy obie strony liczą TO SAMO** — dwa razy z rzędu okazało się, że nie. | — | ✅ I6 · ✅ I9 |
 | **Staging auto-accept — LOKALNIE czy przez API** | **rozstrzygnięte 2026-08-27 (3d-1) FAKTEM, nie preferencją: auto-zatwierdzanie jest BACKENDOWE.** Siedzi w gałęzi `else if` żywego `tk()` (`backend-index.cjs:47791-47806`) i od 3d-1 jest odtworzone razem ze skutkami (`updateProduct` + `historia_cen` + `applyDims`). Frontend NIE liczy go lokalnie: bundle woła `POST /api/staging/accept` (czyli API) i nie zawiera ani `autoZatwierdzone`, ani żadnej lokalnej logiki auto-akceptacji (grep po `mirror/frontend/assets/*.js`: 0 trafień). Zdanie ze `spec-frontend` §4 („instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu") mówi o rozjeździe INSTRUKCJI z KODEM, a nie o liczeniu czegokolwiek w przeglądarce. **Skutek dla 3e:** UI ma tylko pokazywać to, co przyszło ze stagingu — pozycje auto-zatwierdzone w ogóle się w nim nie pojawiają. Przestarzała jest instrukcja v5, nie kod. | — | ✅ ustalone |
 | **Utrzymanie roadmapy** | roadmapa jest wejściem dla NASTĘPNEJ sesji, a prompt jest jednorazowy — wiedza z bloku musi lądować tutaj, nie w prompcie | **zaklepane 2026-08-26:** po każdym zamkniętym bloku roadmapa opisuje STAN, nie zamiar; ustalenie dotyczące PRZYSZŁEGO bloku wpisuje się DO TEGO BLOKU (sesja 3c czyta blok 3c); **przypisanie funkcji do sesji weryfikuje się GRAFEM WYWOŁAŃ, nie nazwą** (`bridge_ext` trafił do złej sesji dwa razy — 3a i 3c); prompt nie koryguje roadmapy, tylko roadmapa siebie. Pełna reguła: `CLAUDE.md`, krok operacyjny: `.claude/commands/feature.md` Krok 13 | ✅ ustalone |
@@ -155,7 +155,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
-| 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | 🔨 | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ⬜ |
+| 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
@@ -1028,9 +1028,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   konsument (`mapujZastosowanieNaKategorie`, `src/selly/mapper.ts`) mieszkają w tym bloku.
   Konsekwencja dla Selly (gałąź `fallback_kategoria`/`skipped`) jest zmierzona i zamrożona
   w testach: **`docs/rebuild-backlog.md` #12**.
-- **Status:** 🔨 częściowo — **8a (BE) ✅ 2026-09-04** (`28-FEATURE-selly-eksport-backend`) ·
-  **8b (FE) ⬜**  **Zależy od:** 2, 4
-- **Cel (Ania klika):** otwiera `/selly`, generuje/eksportuje CSV do marketplace, widzi status/log/słowniki — natywnie.
+- **Status:** ✅ **zrobione (2026-09-04)** — **8a (BE)** `28-FEATURE-selly-eksport-backend` ·
+  **8b (FE)** `30-FEATURE-selly-panel-frontend`  **Zależy od:** 2, 4
+- **Cel (Ania klika):** otwiera `/selly`, generuje/eksportuje CSV do marketplace, widzi status/log/słowniki — natywnie. **Zrobione.**
 - **Backend (8a ✅ 2026-09-04):** panel Selly — **5 GET** (`status`, `ping`, `csv-status`, `log`,
   `dictionaries`) + **5 POST** (`categories`, `producers`, `generate-csv`, `sync-product`,
   `sync-supplier`) — w oryginale JUŻ za auth (`extensions.cjs:456-458`, `requireAuth: we`), u nas
@@ -1043,47 +1043,63 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   `categories`, `sync-product`, `sync-supplier`. Lokalne (czysty SQLite/plik, zero HTTP) są tylko
   cztery: `status`, `log`, `csv-status`, **`generate-csv`**. Szczegóły portu (klient/mapper/
   generator CSV, decyzje D1–D8): `docs/tickets/28-FEATURE-selly-eksport-backend/`.
-- **Frontend (8b ⬜ — ta sesja czyta ten blok, nie 8a):** trasa Wouter `/selly` + komponenty
-  React/TanStack (zamiast overlay + routing przez hash).
-  - Backend 8a jest gotowy: 12 tras działa za `requireAuth`, kształty zgodne z 5 fixture'ami
-    (`GET_selly_status/ping/csv-status/log/dictionaries.json`).
-  - **Bez sekretów `SELLY_*` sześć tras zewnętrznych oddaje 500** z komunikatem `[Selly] Brak
-    konfiguracji: SELLY_SHOP_URL / SELLY_CLIENT_ID / SELLY_CLIENT_SECRET` — zachowanie 1:1
-    z produkcją (plan.md D6), NIE błąd do naprawienia w backendzie. Panel 8b musi to obsłużyć
-    sensownie; propozycja: rozpoznawać ten komunikat i pokazywać „Selly nieskonfigurowane"
-    zamiast surowej awarii serwera.
-  - **Dwie trasy eksportu mają RÓŻNE parametry filtrujące:** `GET /api/export-shoper` bierze
-    `?dostawca=`, a `GET /api/export/shoper` bierze `?supplier=`. Rozjazd jest w oryginale
-    i został odtworzony 1:1 — 8b musi użyć właściwej nazwy dla właściwej trasy, inaczej filtr
-    po cichu nie zadziała.
-  - `GET /api/export-shoper` bez parametru (albo `dostawca=wszyscy`) oddaje **ZIP**
-    (`application/zip`, `shoper_wszyscy_{data}.zip`) z osobnym CSV per dostawca, nie CSV.
-    `GET /api/export/shoper` zawsze oddaje jeden CSV.
-  - **Eksport to NAWIGACJA przeglądarki, nie `fetch`** — żądanie nie niesie nagłówka
-    `Authorization`, działa wyłącznie na cookie `bridge_session`. Backend to obsługuje i ma na to
-    test, ale 8b nie może próbować dokładać tam Bearera przez `fetch` z pobieraniem bloba, bo
-    zmieni to sposób autoryzacji.
-  - **Eksport CSV odłożony z I2 — należy do TEJ iteracji** (rozstrzygnięte 2026-08-25): przycisk
-    „Pobierz CSV (Shoper)" w `/katalog` (`frontend-index.js:23384-23422`). Uzasadnienie: to eksport
-    Shoperowy, a I8 wnosi już jego serwerowy odpowiednik (`GET /api/export/shoper`,
-    `backend-index.cjs:48843`) — jedna iteracja ma trzymać obie drogi emisji CSV spójnie.
-  - **⚠ Zależność od `/api/config` jest NOMINALNA, nie realna** (zweryfikowane w `contract/fixtures/GET_config.json`):
-    produkcja **nie ma** ani klucza `shoper.separator`, ani `shoper.kolumny` — ma tylko
-    `shoper.format_eksportu`, którego katalog nie czyta (konsumuje go serwerowy eksport,
-    `backend-index.cjs:48843`). Przycisk zawsze wpada więc w fallbacki: separator `";"` i zahardkodowana
-    13-kolumnowa lista `TT` (`frontend-index.js:22706-22731`). **Wniosek: I8 dowozi ten przycisk w pełni
-    wiernie, nie czekając na I11** — wystarczy czytać konfigurację defensywnie (brak wartości → fallback);
-    gdy I11 doda `GET /api/config`, kod nie wymaga zmiany. Kolumny bierze z konfiguratora katalogu (I2).
-  - **Aktualizacja 2026-09-03 (I11 dowieziona):** `GET/POST /api/config` już działa i zakładka
-    „Shoper" w `/konfiguracja` już zapisuje `shoper.kolumny`/`shoper.separator` (domyślne
-    mapowanie 12 par `klucz:naglowek` i separator `;` siedzą w
-    `src/pages/konfiguracja/Shoper.tsx`) — ale **nikt ich jeszcze nie czyta**. To ta iteracja ma
-    je podłączyć do przycisku „Pobierz CSV (Shoper)". **Uwaga na dwie różne trasy eksportu:**
-    `shoper.format_eksportu` czyta `GET /api/export/shoper` (`backend-index.cjs:48853-48863`) —
-    to INNA trasa niż `GET /api/export-shoper`. Obie są publiczne w oryginale (obie poza
-    zakresem I11) i obie już stoją za `requireAuth` u nas od 8a.
-- **Ścieżki (GATE):** selly×10 (5 GET + 5 POST), export×2.  **Fixtures:** `GET_selly_status.json`, `_ping`, `_csv-status`, `_log`, `_dictionaries`. — **GATE 8a ✅ zielony** (12/12 ścieżek, 5/5 fixtures 1:1, 954/954 testów).
-- **DoD:** panel Selly natywny (8b ⬜); eksport CSV — serwerowy ✅ (8a, za `requireAuth`) + przycisk w `/katalog` odłożony z I2 ⬜ (8b); fixtures przez GATE ✅ (8a); parytet z `selly-injection.js` (26 KB, 8b).
+- **Frontend (8b ✅ 2026-09-04, `30-FEATURE-selly-panel-frontend`):** `/selly` jest natywną
+  trasą Wouter (React/TanStack), pokrywa cały zakres żywego
+  `mirror/frontend/assets/selly-injection.js` (**30 936 B**, nie 26 KB — poprzedni wpis mylił
+  jednostki; `VERSION='v5-csvstatus-genbtn'`): pięć sekcji („Status połączenia", „Codzienna
+  synchronizacja CSV", „Mapowanie dostawców", „Sync dostawcy", „Historia operacji"), sześć tras
+  API (`ping`, `csv-status`, `generate-csv`, `status`, `log?limit=10`, `sync-supplier`). Przycisk
+  eksportu CSV w `/katalog`, odłożony z I2, jest dowieziony — w 100% kliencki, jak w oryginale.
+  Szczegóły portu: `docs/tickets/30-FEATURE-selly-panel-frontend/plan.md`.
+  - **`mirror/frontend/selly.html` (8 587 B, mtime 2026-07-31 08:53) to martwy POPRZEDNIK** —
+    brak przycisku „Wygeneruj CSV teraz"/`generate-csv`, nielinkowany z niczego, dostępny tylko
+    po bezpośrednim URL. Żywy jest `selly-injection.js` (mtime 09:19, plik `.bak_pre_genbtn`
+    obok). Plik zostaje w `mirror/` nietknięty (`mirror/` jest lustrem produkcji, D6) — to
+    ustalenie ma nie być odkrywane drugi raz.
+  - **D4 — brak sekretów `SELLY_*`:** sześć tras zewnętrznych oddaje 500 z `[Selly] Brak
+    konfiguracji: …` (1:1 z produkcją), panel rozpoznaje ten konkretny komunikat i pokazuje
+    „Selly nieskonfigurowane"; każdy inny błąd leci surowo, jak w oryginale.
+  - **D3 — potwierdzenie przed pełnym syncem (świadome odstępstwo).** `POST
+    /api/selly/sync-supplier` z `dry_run:false` realnie modyfikuje cudzy, żywy sklep. Dialog
+    potwierdzenia obejmuje **oba** wejścia: przycisk „Wyślij do Selly" ORAZ przycisk **„Sync"
+    per wiersz w tabeli „Mapowanie dostawców"** (`selly-injection.js:637-646`) — w oryginale ten
+    drugi odpalał pełny, niedry-runowy sync jednym kliknięciem, bez pytania; to najgroźniejszy
+    przycisk panelu i 8b go ubezpiecza. „Test dry-run" leci bez pytania (nic nie zapisuje).
+  - **D5 — lista dostawców do „Sync dostawcy" liczona dynamicznie z `GET /api/selly/status`**
+    (`items[].dostawca`, sortowanie MO1…MO10 numeryczne), zamiast zahardkodowanego
+    `['MO1'…'MO10']` z oryginału (`:499`) — bez dodatkowego żądania, bo `/status` i tak jest
+    wołane do tabeli mapowania.
+  - **D7 — ikona sidebara `PackageOpen` z lucide** zamiast wklejonego SVG „karton" z oryginału
+    (`Package` zajęte przez „Katalog").
+  - **O1 — `/selly` jako trasa Wouter + 11. pozycja sidebara.** W oryginale Selly **nie było
+    trasą Reacta w ogóle** — injection dokładał link i overlayował `<main>` po fladze
+    `sessionStorage.sellyViewActive`, hash zostawał `#/`. Stąd router ma teraz **13 tras**
+    (oryginał 12), sidebar **11 pozycji** (oryginał 10) — komentarze liczbowe w `App.tsx`/
+    `placeholdery.ts`/`nawigacja.ts` niosą to uzasadnienie.
+  - **⭐ Sprostowanie faktograficzne — przycisk „Pobierz CSV (Shoper)" w `/katalog` domyślnie
+    NIE jest w trybie Shoper.** Stan wybranych kolumn inicjalizuje się jako 15 kolumn
+    domyślnych (`frontend-index.js:23272`, hook `_T()` :23039) i warunek „zero kolumn wybranych"
+    zachodzi **wyłącznie**, gdy Ania odznaczy w konfiguratorze WSZYSTKIE kolumny. Domyślna
+    ścieżka codziennego użycia to więc gałąź „wybrane kolumny": separator wymuszony na `";"`
+    (konfiguracja Shoper IGNOROWANA), plik `katalog_wszyscy_wybrane_<data>.csv`, etykieta
+    **„Pobierz CSV (15 kol.)"**. Format Shoper (zahardkodowana 13-kolumnowa lista `TT`, klucze
+    `shoper.kolumny`/`shoper.separator` z `/konfiguracja` → „Shoper", zapisywane tam od I11) jest
+    osiągalny dopiero po odznaczeniu wszystkich kolumn — kod czyta oba źródła i podłącza je
+    poprawnie, tylko druga gałąź jest praktycznie nieosiągalna w codziennym użyciu. Poprzedni
+    wpis w tym miejscu („przycisk zawsze wpada w fallbacki, `shoper.kolumny`/`shoper.separator`
+    trzeba dopiero podłączyć") był nieaktualny — klucze SĄ podłączone od tej sesji, obie gałęzie
+    odtworzone 1:1 i zamrożone testami. Dwie trasy eksportu serwerowego z 8a
+    (`GET /api/export-shoper` z `?dostawca=`, `GET /api/export/shoper` z `?supplier=`, pierwsza
+    bez parametru oddająca ZIP) zostają bez konsumenta we froncie — zgodnie z produkcją (D2 planu).
+- **Ścieżki (GATE):** selly×10 (5 GET + 5 POST), export×2.  **Fixtures 8a:** `GET_selly_status.json`,
+  `_ping`, `_csv-status`, `_log`, `_dictionaries`. — **GATE 8a ✅ zielony** (12/12 ścieżek,
+  5/5 fixtures 1:1, 954/954 testów). **GATE 8b ✅ zielony** — panel konsumuje **cztery** z pięciu
+  fixtures (`_ping`, `_csv-status`, `_status`, `_log`); piąty, `_dictionaries`, świadomie poza
+  zakresem, bo trasa `dictionaries` nie ma konsumenta w UI (D1 planu 8b). Testy frontendu
+  **572/572**; build: wspólny chunk 514,52 kB (gzip 156,65 kB), `Analityka` 444,15 kB.
+- **DoD:** ✅ panel Selly natywny; ✅ eksport CSV — serwerowy (8a, za `requireAuth`) + przycisk
+  w `/katalog` odłożony z I2 (8b); ✅ fixtures przez GATE (8a i 8b); ✅ parytet z
+  `selly-injection.js` odnotowany faktyczną wielkością pliku (**30 936 B**).
 
 ---
 
@@ -1470,6 +1486,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     z katalogu? Ta operacja usuwa wszystkie produkty i służy tylko do testów parsera." —
     po sukcesie unieważnia `["/api/products"]`, `["/api/alerts"]`, `["/api/analytics"]`.
     Miejsce wpięcia jest w `Katalog.tsx` oznaczone adnotacją.
+  - **⚠ WEJŚCIE Z ITERACJI 8 (2026-09-04) — `AppShell` (sidebar) jest wpinany przez WIDOK, nie
+    przez router.** `/`, `/konfiguracja` i placeholdery renderują sidebar; `/katalog`, `/staging`,
+    `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/historia` i `/selly` — nie. Zastane
+    zachowanie sprzed I8, spoza jej zakresu, wygląda na niezamierzone — warte decyzji przy
+    finalnym przeglądzie tej iteracji.
   - **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć (dziś martwa, D1 z 4b, 2026-09-02)
     — dane musi dostarczyć backend** (pole przy produkcie), bo liczenie po stronie klienta
     duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś

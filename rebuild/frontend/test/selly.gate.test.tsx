@@ -186,3 +186,16 @@ describe("GATE 8b — widok konsumuje kształty z fixtures", () => {
     expect(tabela).not.toHaveTextContent("_przyciete");
   });
 });
+
+describe("GATE 8b — rama z sidebarem", () => {
+  it("`/selly` renderuje sidebar z podświetloną własną pozycją", async () => {
+    zamockujSelly();
+    await otworzSelly();
+
+    // Oryginał pokazuje ramę na KAŻDYM zalogowanym widoku (`mn(…)`, dwanaście wywołań),
+    // a wstrzykiwany panel Selly siedział NAD `<main>`, czyli wewnątrz niej.
+    const link = await screen.findByTestId("link-nav-selly");
+    expect(link).toHaveTextContent("Selly");
+    expect(link).toHaveAttribute("href", "/selly");
+  });
+});

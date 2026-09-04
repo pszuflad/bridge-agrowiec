@@ -1,6 +1,6 @@
 # 30-FEATURE-selly-panel-frontend — Panel Selly `/selly` + przycisk CSV w `/katalog` (I8, sesja 8b)
 
-> Status: Draft
+> Status: Draft → Approved → **Implemented**
 > Branch: `feature/30-selly-panel-frontend`
 > Worktree: `.worktrees/30-FEATURE-selly-panel-frontend`
 
@@ -147,7 +147,7 @@ Kolejność = kolejność commitów.
 
 ### Krok 1 — Klient API panelu (`src/pages/selly/api.ts`)
 Typy z fixtures **dosłownie**: `PingSelly`, `StatusCsv`, `WierszStatusuDostawcy`
-(`{dostawca, w_bridge, w_selly, z_bledami}`), `WpisLogu` (14 pól z `GET_selly_log.json`),
+(`{dostawca, w_bridge, w_selly, z_bledami}`), `WpisLogu` (12 pól z `GET_selly_log.json`),
 `WynikGenerowaniaCsv`, `WynikSynchronizacji`. Funkcje `pobierzPing`, `pobierzStatusCsv`,
 `pobierzStatusDostawcow`, `pobierzLog`, `wygenerujCsv`, `synchronizujDostawce`.
 Wzorzec: `pages/alerty/api.ts` (własny `fetch` + `rzucGdyBlad`, nie domyślny `queryFn`,

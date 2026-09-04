@@ -66,8 +66,9 @@ Brak co do zakresu. Trzy rozstrzygnięcia szczegółowe podjęte w trakcie, wszy
   byłby martwym kodem udającym pokrycie.
   Ticket **nie dotyka backendu ani kontraktu** — nie zmieniono żadnego pliku w
   `rebuild/backend/` ani `contract/`.
-- **Unit: ✓ 566/566** (40 plików, `npm test`). Nowe: 9 GATE + 13 zachowania panelu
-  + 5 braku konfiguracji + 25 formatu CSV + 10 przycisku = 62 testy.
+- **Unit: ✓ 572/572** (40 plików, `npm test`) — po poprawkach z review. Nowe w tym tickecie:
+  11 GATE + 14 zachowania panelu + 5 braku konfiguracji + 25 formatu CSV + 12 przycisku
+  eksportu = 67 testów, plus jeden dołożony do `shell.test.tsx`.
 - **Lint: ✓** `eslint .` czysty.
 - **Typecheck: ✓** trzy projekty TS czyste.
 - **Build: ✓** wspólny chunk 514,52 kB (gzip 156,65), `Analityka` 444,15 kB (gzip 127,34).
@@ -120,3 +121,59 @@ obok). Żywy jest `selly-injection.js`. Plik zostaje w `mirror/` nietknięty (D6
   decyzji.
 - **Backlog #12** (`products.zastosowanie`, `__restoreZastosowanie`) — bez zmian, decyzja
   podtrzymana w 8a (D3).
+
+
+## Review fixes applied
+
+Review (`review.md`) zwrócił **1 BLOCKER / 4 SHOULD-FIX / 5 NICE-TO-HAVE**. Wszystkie
+zweryfikowałem samodzielnie w `mirror/frontend/assets/selly-injection.js` przed poprawieniem —
+cztery uwagi merytoryczne okazały się trafne i wskazywały na **ciche odstępstwa od oryginału,
+których plan nie przewidywał** (a więc dokładnie to, czego reguła 1:1 zabrania).
+
+### Poprawione — wierność portu
+
+1. **`SekcjaPolaczenie.tsx`** — oryginał (`:553-559`) renderuje jedną linię:
+   `✓ Połączono · <shop> · token wygasa za <N>s · <vat_probe>`. Mój port pokazywał listę
+   czterech pól, gubił „✓ Połączono" i **dokładał `token_prefix`, którego oryginał NIE
+   pokazuje**. Przywrócone 1:1; `token_prefix` usunięty z widoku — to fragment tokenu
+   dostępowego, więc jego wystawianie było odstępstwem w złą stronę. Test pilnuje obu rzeczy.
+
+2. **`SekcjaCsv.tsx`** — trzy zgubione elementy (`:580-588`):
+   - zdanie podsumowania nad tabelą (`✓ Synchronizacja OK — plik wygenerowany dzisiaj` /
+     `✗ Błąd synchronizacji — <powod || "plik nieaktualny lub pusty">`),
+   - komórka „Status" to **odznaka `OK`/`BŁĄD`**, nie surowe pole `status` z API,
+   - wiek pliku kolorowany flagą `wygenerowany_dzisiaj` (zielono/bursztynowo).
+   Przy okazji `formatujOstatniaSynchronizacje` rozbite na `formatujDateSynchronizacji` —
+   wiek musi być osobnym elementem DOM, żeby dało się go kolorować. Testy pokrywają obie
+   gałęzie (`status: "ok"` i nieaktualny plik).
+
+3. **`Selly.tsx` — `onSettled` → `onSuccess`** dla `sync-supplier`. Oryginalny `doSync` przy
+   `!r.ok` wypisuje błąd i robi `return` (`:705-710`), więc `loadStatus()`/`loadLog()` (`:737-738`)
+   **nie wykonują się po błędzie**. `onSettled` przeładowywał listy także po nieudanym syncu,
+   sugerując, że coś się jednak stało. Test pilnuje, że po 500 liczniki pobrań nie rosną.
+
+4. **Trzeci wariant etykiety eksportu bez testu** — dodany. Przy okazji wyszło, że fixtures są
+   celowo rozjechane (`GET_products.json` ma wyłącznie MO9, `GET_suppliers.json` — MO1…MO10),
+   więc każda zakładka dostawcy jest pusta; dało to darmowe pokrycie **drugiego wariantu
+   toastu** („Dostawca <kod> nie ma produktów"), którego też brakowało.
+
+### Poprawione — NICE-TO-HAVE
+
+5. **`Selly.tsx`** — klik „Sync" w wierszu tabeli mapowania przestawia teraz także `<select>`
+   w sekcji „Sync dostawcy", jak oryginał (`:643`). Kolejne ciche odstępstwo, choć nieszkodliwe.
+6. **`formatowanie.ts`** — `wariantStatusuOperacji` zwracał `"ladowanie"` dla zakończonego wpisu
+   w logu. Rozdzielone: `WariantOperacji` (`sukces`/`blad`/`inny`) osobno od `StanWskaznika`.
+7. Komentarz „14 pól" → **12 pól** (policzone) w `api.ts` i `plan.md`.
+8. `plan.md` — status `Draft` → `Implemented`.
+9. Liczby testów w tym raporcie sprostowane (było „9 GATE… = 62 testy").
+
+### BLOCKER — dokumentacja
+
+Review słusznie wskazał, że DoD ticketa wymaga aktualizacji `docs/rebuild-roadmap.md`
+i `docs/spec-frontend.md`, a diff ich nie dotykał. Zrobione w fazie „Docs updates" niżej —
+to normalny etap tego przepływu, wykonywany po review, nie przeoczenie.
+
+### Nie poprawione świadomie
+
+Brak. Wszystkie uwagi z review zostały albo naprawione, albo (w przypadku BLOCKER-a)
+zrealizowane w fazie dokumentacji.

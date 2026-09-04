@@ -44,19 +44,30 @@ krzyżowa kontrola z kontraktem. Zweryfikowane też w naszym `deminified`:
 | `/api/attribute-kinds` | `/api/atrybuty/rodzaje` | `atrybuty_module.cjs:114` |
 
 **B. Trzy skrypty injection → wchłonąć do natywnego Reacta** (dziś łatają UI
-poza aplikacją; nowy frontend nie może od nich zależeć). **Stan 2026-09-01: jeden z trzech
-wchłonięty** (`freq-injection.js`, blok 3f-2); zostają `pending-injection.js` (I7)
-i `selly-injection.js` (I8):
+poza aplikacją; nowy frontend nie może od nich zależeć). **Stan 2026-09-04: dwa z trzech
+wchłonięte** (`freq-injection.js` blok 3f-2, `selly-injection.js` blok 8b); zostaje
+`pending-injection.js` (I7):
 | Skrypt | Co robi teraz | Co ma wejść natywnie |
 |---|---|---|
 | `pending-injection.js` (57 KB) | przejmuje ekran `/atrybuty` przez React Fiber + MutationObserver, nadpisuje cache Query | komponenty CRUD rodzajów/wartości + lista pending, jeden Query key `/api/atrybuty`, mutacje+invalidacje. **Bez Fiber/MutationObserver.** |
-| `selly-injection.js` (26 KB) | overlay panelu Selly na `/panel/api/selly`, routing przez hash | trasa Wouter `/selly` + komponenty w React/TanStack Query |
+| ~~`selly-injection.js` (30 936 B)~~ ✅ **WCHŁONIĘTY 2026-09-04 (blok 8b)** | overlay panelu Selly na `/panel/api/selly` (hash-routing, flaga `sessionStorage.sellyViewActive`) | ✔ trasa Wouter `/selly` (odstępstwo O1 — w produkcji Selly nie było trasą Reacta) + pięć sekcji i sześć tras 1:1, ikona `PackageOpen` (D7) |
 | ~~`freq-injection.js` (12 KB)~~ ✅ **WCHŁONIĘTY 2026-09-01 (blok 3f-2)** | dokładał kontrolkę częstotliwości importu poza Reactem (PATCH) | ✔ `rebuild/frontend/src/pages/konfiguracja/{dostawcy.ts,Dostawcy.tsx}` — presety, `fmt()` i kotwica `data-testid="supplier-config-<KOD>"` przeniesione 1:1; znikła mapa `kod → id` i `MutationObserver` |
 
-> **Backend gotowy od 2026-09-04 (Iteracja 8, sesja 8a, `28-FEATURE-selly-eksport-backend`):**
-> 10 tras panelu Selly (`/api/selly/*`) i 2 trasy eksportu Shopera (`/api/export-shoper`,
-> `/api/export/shoper`), wszystkie za `requireAuth`, gotowe pod natywny widok `/selly` i przycisk
-> „Pobierz CSV (Shoper)" w `/katalog` — front dowozi sesja 8b, jeszcze niezrobiona.
+> **Iteracja 8 zamknięta (8a + 8b, 2026-09-04).** 8a (`28-FEATURE-selly-eksport-backend`)
+> dowiozła 10 tras panelu Selly (`/api/selly/*`) i 2 trasy eksportu Shopera
+> (`/api/export-shoper`, `/api/export/shoper`) za `requireAuth`. 8b
+> (`30-FEATURE-selly-panel-frontend`) dowiozła natywną trasę `/selly`, odtwarzającą żywy
+> `selly-injection.js` **1:1**: pięć sekcji („Status połączenia", „Codzienna synchronizacja
+> CSV", „Mapowanie dostawców" — z przyciskiem „Sync" per wiersz odpalającym PEŁNY,
+> niedry-runowy sync bez pytania w oryginale — „Sync dostawcy", „Historia operacji") i sześć
+> wołanych tras (`ping`, `csv-status`, `generate-csv`, `status`, `log?limit=10`,
+> `sync-supplier`). **Cztery z dziesięciu tras 8a zostają bez konsumenta w UI**
+> (`dictionaries`, `producers`, `categories`, `sync-product`) — tak jak w produkcji, gdzie
+> używano ich z konsoli (D1); obie trasy eksportu (`export-shoper`, `export/shoper`) też
+> zostają bez konsumenta (D2). `mirror/frontend/selly.html` (8 587 B) to martwy poprzednik
+> injection, bez linku z niczego — zostaje nietknięty w `mirror/` (D6). `/selly` nie jest
+> jedną z 12 oryginalnych tras (odstępstwo O1) — router odbudowy ma dziś **13 tras**, sidebar
+> **11 pozycji**. Szczegóły: `docs/tickets/30-FEATURE-selly-panel-frontend/`.
 
 ## 3. Korekty do MOICH dokumentów
 
@@ -244,8 +255,22 @@ ma endpoint:
 > (I8, `28-FEATURE-selly-eksport-backend`, 2026-09-04):** to NIE są te same klucze, które czyta
 > backendowa trasa eksportu — `GET /api/export/shoper` czyta `shoper.format_eksportu`
 > (domyślnie `ean;nazwa;producent;rozmiar;cena_netto;magazyn;vat`), inny klucz i inna droga niż
-> `shoper.kolumny`/`shoper.separator` zapisywane tu przez I11; podpięcie zakładki pod realny
-> eksport zostaje zadaniem 8b. Zakładka „ai" zapisuje trzy klucze `ai_fallback.*`
+> `shoper.kolumny`/`shoper.separator` zapisywane tu przez I11. ⚠ **Sprostowanie (8b,
+> `30-FEATURE-selly-panel-frontend`, 2026-09-04):** przycisk „Pobierz CSV (Shoper)" w
+> `/katalog` NIE woła `GET /api/export/shoper` — czyta `shoper.kolumny`/`shoper.separator`
+> po stronie klienta i buduje CSV z produktów już wczytanych do katalogu (Blob z BOM, kotwica
+> `download`), zerowe trafienia na `export-shoper`/`export/shoper` w
+> `deminified/frontend-index.js` i w `mirror/frontend/assets/*.js` potwierdzają, że tak samo
+> działał oryginał (D2) — eksport jest w 100% kliencki, nie linkuj go do serwerowej trasy.
+> Domyślnie działa jednak INNA gałąź niż nazwa sugeruje: stan wybranych kolumn startuje
+> z 15 kolumn domyślnych, więc dopiero po odznaczeniu w konfiguratorze WSZYSTKICH kolumn
+> włącza się gałąź czytająca `shoper.kolumny`/`shoper.separator` (a przy ich braku wbudowaną
+> 13-kolumnową listę). Stąd trzy warianty etykiety: **„Pobierz CSV (15 kol.)"** (domyślnie,
+> separator wymuszony na `";"`, `shoper.separator` ignorowany), **„Pobierz CSV (Shoper)"**
+> (po odznaczeniu wszystkiego, widok „wszyscy dostawcy") i **„Pobierz CSV dla Shopera"**
+> (jw., wybrany konkretny dostawca). Szczegóły:
+> `docs/tickets/30-FEATURE-selly-panel-frontend/`.
+> Zakładka „ai" zapisuje trzy klucze `ai_fallback.*`
 > (3× `POST /api/config`), `aktywny` wyprowadzony z obecności klucza, nie z osobnego pola.
 > Szczegóły: `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
 

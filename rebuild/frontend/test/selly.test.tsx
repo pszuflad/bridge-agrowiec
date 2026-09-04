@@ -231,6 +231,8 @@ describe("3. Potwierdzenie przed pełnym syncem (odstępstwo D3)", () => {
     await waitFor(() => expect(syncy).toHaveLength(1));
     expect(syncy[0]?.dostawca).toBe("MO2");
     expect(syncy[0]?.dry_run).toBe(false);
+    // Oryginał przestawia przy okazji select w sekcji „Sync dostawcy" (`:643`).
+    expect(screen.getByTestId("selly-select-dostawca")).toHaveValue("MO2");
   });
 
   it("generowanie CSV pyta tekstem z oryginału i wysyła dopiero po potwierdzeniu", async () => {

@@ -55,7 +55,7 @@ export type WierszStatusuDostawcy = {
 };
 
 /**
- * Wpis z `contract/fixtures/GET_selly_log.json` (`items[]`) — 14 pól.
+ * Wpis z `contract/fixtures/GET_selly_log.json` (`items[]`) — 12 pól.
  *
  * `szczegoly_json` to STRING z zserializowanym JSON-em, nie obiekt. Panel go nie parsuje
  * (oryginał też nie, `:648-680`) — wyświetla wyłącznie kolumny liczbowe i status.
