@@ -143,6 +143,11 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 
 ## 4. Tablica postępu
 
+> **Stan na 2026-09-04: została JEDNA iteracja — I12** (konto, admin, hardening). Iteracje 0–11
+> są zamknięte, wszystkie trzy skrypty injection wchłonięte, martwe ścieżki FE naprawione.
+> I12 zebrała po drodze wejścia z I2, I5, I7 i I11 — czytaj jej blok w całości, bo urosła
+> ponad pierwotny zakres (m.in. mutacje produktów i dialog edycji produktu z `/katalog`).
+
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
 | # | Iteracja | Sesje | Zależy od | Status | PR / data |
@@ -154,7 +159,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 |
 | 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
-| 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | 🔨 | 7a: `29-FEATURE-atrybuty-backend` · 2026-09-04 · 7b: `31-FEATURE-atrybuty-frontend` · 2026-09-04 · 7c: ⬜ |
+| 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
@@ -1009,10 +1014,13 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   w regionie widoku — to pozostałość, nie funkcja. 3e świadomie tego nie przeportowała. Jeśli
   ta iteracja chciałaby ożywić słowniki w stagingu (np. podpowiedzi kategorii przy edycji),
   będzie to **nowa decyzja**, a nie odtworzenie produkcji.
-- **Status:** 🔨 **iteracja w połowie** — **7a (BE) ✅ 2026-09-04** (ticket
-  `29-FEATURE-atrybuty-backend`), **7b (FE) ✅ 2026-09-04** (ticket
-  `31-FEATURE-atrybuty-frontend`), **7c (FE) ⬜ do zrobienia** (po merge sesji 8b)
+- **Status:** ✅ **ZAMKNIĘTA 2026-09-04** — **7a (BE)** `29-FEATURE-atrybuty-backend` ·
+  **7b (FE)** `31-FEATURE-atrybuty-frontend` · **7c (FE)** `32-FEATURE-katalog-slowniki-atrybutow`
   **Sesje:** 7a BE · 7b FE · 7c FE  **Zależy od:** 2
+  - **Podział na trzy sesje był decyzją użytkownika (2026-09-04), nie planem pierwotnym.** Część
+    katalogowa została wydzielona z 7b do 7c, bo kolidowała plikowo z równoległą sesją 8b
+    (`Katalog.tsx`). 7c weszła po merge 8b i rebase — konflikt wypadł dokładnie tam, gdzie
+    przewidywano (dwa miejsca), i sprowadził się do zachowania obu zmian.
 - **Cel (Ania klika):** zarządza rodzajami/wartościami atrybutów, obsługuje kolejkę „pending" (akceptuj / jako alias / z edycją / odrzuć) — **natywnie w Reakcie**, bez skryptu injection.
 - **Ekran produkcyjny `/atrybuty` ma TRZY warstwy, nie dwie** (ustalenie 7b; mapa kodu
   `docs/prompts/mapa-kodu-do-wiki.md:57` wymienia tylko injection): poza bazowym widokiem React
@@ -1084,41 +1092,36 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   `/api/atrybuty/pending`, które ma i GET, i DELETE. **✅ zielone od 7a**.  **Fixtures:**
   `GET_atrybuty.json`, `_liczniki`, `_pending`, `_rodzaje`, `_uzycie`, `_wartosci`
   — **✅ zielone od 7a**.
-- **DoD:** ✅ pełen CRUD + workflow pending w backendzie (7a); ✅ fixtures przez GATE (7a);
-  ✅ widok natywny, ✅ martwe ścieżki naprawione, ✅ parytet z `pending-injection.js` (57 KB)
-  bez samego skryptu (7b). **Iteracja zamyka się dopiero po 7c** (`/katalog`, listy filtrów
-  ze słownika).
+- **DoD — wszystko dowiezione:** ✅ pełen CRUD + workflow pending w backendzie (7a);
+  ✅ fixtures przez GATE (7a); ✅ widok natywny, ✅ martwe ścieżki naprawione, ✅ parytet
+  z `pending-injection.js` (57 KB) bez samego skryptu (7b); ✅ listy filtrów `/katalog`
+  ze słownika, czyli domknięcie degradacji D3 z I2 (7c).
 
-- **7c · `/katalog` — listy filtrów ze słownika** (FE) — ⬜ **do zrobienia.** Zależność
-  kolejnościowa: startuje PO merge sesji 8b (`30-FEATURE-selly-panel-frontend`), bo dotyka
-  `src/pages/Katalog.tsx`, na którym 8b pracuje równolegle.
-  - **Efekt uboczny dla I2 (degradacja D3):** `rebuild/frontend/src/pages/katalog/filtrowanie.ts:136-149`
-    buduje listy marek i kategorii WYŁĄCZNIE z danych produktów; `/api/atrybuty` działa od 7a,
-    więc degradacja czeka już tylko na podpięcie.
-  - **Oryginał woła NATYWNĄ ścieżkę:** `useQuery(["/api/atrybuty"])` w
-    `deminified/frontend-index.js:23286` — w `/katalog` klucz Query jest ZGODNY z backendem
-    (inaczej niż w dialogu reguł 7b, gdzie był martwy `["/api/attributes"]` karmiony mostkiem).
-  - **Reguła budowy list (`:23287-23295`) i jej ASYMETRIA:**
-    - MARKI (`:23288-23291`): z produktów `map(marka).filter(e => e && !/\d/.test(e))` —
-      **filtr „bez cyfr" dotyczy TYLKO marek z produktów**; wartości ze słownika
-      (`rodzaj === "marka"`) wchodzą BEZ tego filtra; suma przez `Set`, sort
-      `localeCompare(…, "pl")`.
-    - KATEGORIE (`:23292-23295`): z produktów BEZ filtra cyfr + wartości słownika
-      (`rodzaj === "kategoria"`); suma przez `Set`, **zwykły `.sort()` bez `localeCompare`**.
-    - ⚠ **Rozstrzygnięte:** filtr „bez cyfr" NIE obejmuje wartości słownikowych — to fakt,
-      nie pytanie otwarte.
-    - ⚠ **W `/katalog` KATEGORIE to SUMA słownika i produktów** — INNA reguła niż w dialogu
-      reguł `/narzuty` (7b), gdzie kategorie idą WYŁĄCZNIE ze słownika (`:24210`). Nie kopiować
-      reguły z 7b do 7c.
-  - **CZWARTY konsument słownika, prawdopodobnie NIEPRZEPORTOWANY:** `LT()`
-    (`deminified/frontend-index.js:23909-23980`) — dialog EDYCJI produktu, czyta
-    `["/api/atrybuty"]` (`:23917`) i buduje selecty pomocnikiem
-    `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare "pl")`
-    (`:23966`), a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
-    (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma tylko
-    `PodgladProduktu.tsx` (bez edycji) — **7b nie znalazła tego dialogu przypisanego do żadnej
-    sesji w roadmapie.** Otwarte pytanie o przypisanie zakresu — decyzja użytkownika, nie
-    zadanie 7c.
+- **7c · `/katalog` — listy filtrów ze słownika** (FE) — ✅ **zrobione** (ticket
+  `32-FEATURE-katalog-slowniki-atrybutow`, 2026-09-04). Domknięta **degradacja D3 z Iteracji 2**:
+  listy marek i kategorii w filtrach katalogu to teraz SUMA słownika atrybutów i danych katalogu,
+  a nie same dane. Marka bez ani jednego produktu jest wybieralna.
+  - **Reguła odtworzona 1:1 (`deminified/frontend-index.js:23285-23295`), z obiema asymetriami:**
+    - MARKI: z produktów `map(marka).filter(e => e && !/\d/.test(e))` + wartości słownika
+      (`rodzaj === "marka"`); suma przez `Set`, sort `localeCompare(…, "pl")`.
+      **Filtr „bez cyfr" wisi WYŁĄCZNIE na gałęzi produktowej** (`:23288`), więc wartość
+      słownikowa z cyfrą zostaje na liście, a śmieć z importu w rodzaju „11.2-24" wypada.
+    - KATEGORIE: z produktów BEZ filtra cyfr + wartości słownika; suma przez `Set`,
+      **zwykły `.sort()`**, nie `localeCompare`.
+  - **⚠ To INNA reguła niż w dialogu reguł `/narzuty` (7b)**, gdzie kategorie idą WYŁĄCZNIE
+    ze słownika (`:24210`), bo regułę cenową zakłada się także na kategorię spoza katalogu.
+    Tu filtr zawęża to, co widać w tabeli, więc źródła się sumują. Osobny test pilnuje, żeby
+    ktoś nie skopiował jednej reguły w miejsce drugiej.
+  - **Zakres zmiany:** `src/pages/katalog/filtrowanie.ts` (drugie źródło + lokalny, strukturalny
+    typ `WartoscSlownika`, domyślne `= []` dla zgodności wstecz), `src/pages/Katalog.tsx`
+    (jedno `useQuery` na wspólnym kluczu `["/api/atrybuty"]` z `queryFn: pobierzSlownik` — ten sam
+    loader co w `/atrybuty` i w dialogu reguł, więc CRUD słownika odświeża wszystkie trzy miejsca
+    jednym `invalidateQueries`). Testy: +7 przypadków w `test/katalog.filtrowanie.test.ts`,
+    mock `/api/atrybuty` w `test/katalog.test.tsx`. Suita **640 testów / 43 pliki**, bramki czyste.
+  - **Nota dla przyszłych sesji:** widok pobiera KOMPLET swoich tras przy każdym wejściu
+    (`/api/products`, `/api/suppliers`, `/api/config`, `/api/atrybuty`), a testy stoją na
+    `onUnhandledRequest: "error"` — dołożenie kolejnego zapytania do `Katalog.tsx` wymaga
+    dołożenia mocka w `test/katalog.test.tsx`, inaczej padnie cały plik.
 
 ---
 
@@ -1203,14 +1206,29 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **DoD:** ✅ panel Selly natywny; ✅ eksport CSV — serwerowy (8a, za `requireAuth`) + przycisk
   w `/katalog` odłożony z I2 (8b); ✅ fixtures przez GATE (8a i 8b); ✅ parytet z
   `selly-injection.js` odnotowany faktyczną wielkością pliku (**30 936 B**).
+- **🔒 Zabezpieczenie środowisk (2026-09-04, `34-FEATURE-selly-blokada-srodowiska`).**
+  Dołożone PO zamknięciu 8b, na wniosek użytkownika. Dwie rzeczy:
+  1. **`SELLY_TRYB`** (`wylaczony` / `tylko-odczyt` / `pelny`, **domyślnie `wylaczony`**) —
+     twarda blokada w obwolucie klienta (`src/selly/tryb.ts`), niezależna od tego, czy sekrety
+     `SELLY_*` są ustawione. Odstępstwo świadome, wzorowane na `IMPORT_SCHEDULER` z 3f-3 i z tego
+     samego powodu. Tryb `tylko-odczyt` przepuszcza dry-run bez ani jednej linijki kodu na ten
+     temat — bo dry-run nigdy nie woła metody zapisującej. **Produkcja musi ustawić `pelny`
+     jawnie.**
+  2. ⚠ **`SELLY_CSV_DIR` wskazywał domyślnie katalog PRODUKCYJNY**, a staging stoi na TYM SAMYM
+     VPS (`docs/deploy-setup.md:4`) — „Wygeneruj CSV teraz" na stagingu nadpisywał plik, po który
+     Selly przychodzi o 6:00, treścią z bazy stagingowej. To trasa LOKALNA, więc brak sekretów
+     przed tym NIE chronił. Naprawione w `tools/deploy-staging.sh` (wersjonowane, nie ręcznie
+     w `.env`); wartości domyślne w `env.ts` zostają — dla produkcji są poprawne.
+  Szczegóły: `docs/rebuild-backlog.md` #46 i #47.
 - **📄 Instrukcja testów dla Ani: `docs/instrukcja-testow-I8.md`** (`33-DOCS-instrukcja-testow-i8`).
   ⚠ Jedyna instrukcja w projekcie, która NIE zaczyna się od „to staging, testuj bez skrupułów":
   `POST /api/selly/sync-supplier` z `dry_run=false` realnie modyfikuje sklep Selly, a staging
   i produkcja mogą wskazywać ten sam sklep. Dokument opisuje **trzy tryby testowania**
-  (A: bez sekretów — zero ryzyka i ~80% zakresu; B: podłączony, tylko odczyt i dry-run;
-  C: pełny zapis) oraz odpowiada na pytanie o sandbox: **Bridge nie ma sandboxa Selly**,
-  konfigurowalny jest wyłącznie `SELLY_SHOP_URL`; istnienie instancji testowej po stronie
-  Selly.pl jest do ustalenia z nimi, nie z repo.
+  odpowiadające trzem wartościom `SELLY_TRYB` (A: `wylaczony` — ustawiany automatycznie przy
+  deployu stagingu, pokrywa ~80% zakresu; B: `tylko-odczyt` — połączenie i dry-run, zapis
+  wymuszenie zablokowany; C: `pelny` — pełna wysyłka).
+  **Sandbox:** Bridge go nie ma; istnienie instancji testowej po stronie Selly.pl jest do
+  ustalenia z nimi, nie z repo. Praktycznym zamiennikiem jest `SELLY_TRYB` (ticket 34).
 
 ---
 
@@ -1606,6 +1624,19 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     — dane musi dostarczyć backend** (pole przy produkcie), bo liczenie po stronie klienta
     duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś
     zaplanowanej pracy — nota informacyjna, nie zadanie.
+  - **⚠ WEJŚCIE Z SESJI 7c (2026-09-04) — DIALOG EDYCJI PRODUKTU `LT()` NIE JEST PRZEPORTOWANY
+    i to TU jest jego miejsce.** Fakt ustalony grafem wywołań przy zamykaniu Iteracji 7 (nie
+    z nazwy funkcji): `LT()` (`deminified/frontend-index.js:23909-23980`) to modal edycji produktu
+    otwierany z `/katalog`. Czyta `["/api/atrybuty"]` (`:23917`) i buduje selecty pomocnikiem
+    `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare "pl")` (`:23966`),
+    a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
+    (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma wyłącznie
+    `PodgladProduktu.tsx` — podgląd READ-ONLY, dołożony w I2 jako świadome odstępstwo
+    (oryginał nie ma szczegółu produktu w trybie odczytu, ma tylko ten modal edycji).
+    **Konsekwencja: to jest FRONTEND do mutacji wymienionych niżej** — bez niego trasy
+    `PATCH`/`PUT`/`DELETE /api/products/{id}` nie mają z czego być wołane, a `GET /api/overrides`
+    (gotowe od 3d-2) nie ma konsumenta. Iteracja 7 znalazła ten dialog jako CZWARTEGO konsumenta
+    słownika atrybutów, ale świadomie go nie portowała: to edycja katalogu, nie atrybuty.
   - **Mutacje produktów odłożone z I2:** `PATCH /api/products/{id}` (edycja, wstrzymanie/aktywacja —
     uwaga: oryginał sam ustawia `status: "wstrzymany"`, gdy któraś z cen spada do 0, `backend-index.cjs:44735-44741`),
     `PUT /api/products/{id}`, `DELETE /api/products/{id}`, `POST /api/products` (bulk). Katalog (I2) jest
@@ -1680,6 +1711,12 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ## 6. Po zakończeniu wszystkich iteracji
+
+> **Stan 2026-09-04:** zostało do zrobienia wyłącznie **I12**. Po jej zamknięciu wykonaj punkty
+> niżej. Do rozliczenia backlogu dochodzą wpisy dołożone przez I7: **#44** (przycisk „Nowy rodzaj"
+> w produkcji nie zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło"
+> — ⬜ do decyzji Ani).
+
 - Pełny przegląd 12 widoków + parytet fixtures/kontraktu (55/55).
 - Plan cutoveru (big-bang): przełączenie Apache/PM2 na nowy stos, ta sama baza `data.db`.
 - Rozliczenie backlogu (`docs/rebuild-backlog.md`) — wszystkie wpisy TAK naniesione, NIE świadomie pominięte.

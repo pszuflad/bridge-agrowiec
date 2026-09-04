@@ -131,6 +131,25 @@ export function czyBrakKonfiguracjiSelly(blad: unknown): boolean {
   return blad instanceof Error && blad.message.includes(PREFIKS_BRAKU_KONFIGURACJI);
 }
 
+/**
+ * Prefiksy blokady środowiskowej (`SELLY_TRYB`, backend `src/selly/tryb.ts`, ticket 34).
+ *
+ * To INNY stan niż brak konfiguracji: tam naprawą jest „uzupełnij sekrety", tu — „to
+ * środowisko ma zakaz i tak ma być". Mylenie ich kosztowałoby zgłoszenie awarii, której nie ma.
+ */
+const PREFIKS_INTEGRACJA_WYLACZONA = "[Selly] Integracja wyłączona";
+const PREFIKS_ZAPIS_ZABLOKOWANY = "[Selly] Zapis do Selly zablokowany";
+
+/** Czy błąd to blokada CAŁEJ integracji (`SELLY_TRYB=wylaczony`). */
+export function czyIntegracjaWylaczona(blad: unknown): boolean {
+  return blad instanceof Error && blad.message.includes(PREFIKS_INTEGRACJA_WYLACZONA);
+}
+
+/** Czy błąd to blokada samych ZAPISÓW (`SELLY_TRYB=tylko-odczyt`). */
+export function czyZapisZablokowany(blad: unknown): boolean {
+  return blad instanceof Error && blad.message.includes(PREFIKS_ZAPIS_ZABLOKOWANY);
+}
+
 async function pobierz<T>(sciezka: string): Promise<T> {
   const odpowiedz = await fetch(`${BAZA_API}${sciezka}`, {
     headers: naglowki(false),
