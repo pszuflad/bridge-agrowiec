@@ -100,3 +100,49 @@ Brak dla istniejących tras. Dwie zmiany zachowania procesu, obie zatwierdzone:
    wartości). Koszt kwadratowy; jeśli 7b zauważy wolne ładowanie widoku, to jest przyczyna.
 6. **Kontrakt nie zna kodów 403/404/409** — przy najbliższym odświeżaniu `openapi.yaml` warto
    je dopisać, żeby gate mógł je obejmować.
+
+## Review fixes applied
+
+Po review (`review.md`, iteracja 1) — poprawione wszystkie SHOULD-FIX dotyczące kodu i testów
+oraz jedno NICE-TO-HAVE:
+
+- **`src/app.ts`** — `zasiejSlownikAtrybutow(db)` w `try/catch`. Bez tego baza bez tabel
+  atrybutów (stary `DB_PATH` bez `npm run migrate`) wywracała START CAŁEGO backendu przed
+  `listen()`; wcześniej taka baza pozwalała mu wstać i psuła tylko konkretne trasy. Oryginał
+  problemu nie miał, bo wołał `ensureSchema()` przed `seed()` — my schematu w runtime nie
+  tworzymy, więc tę samą odporność daje złapanie błędu.
+- **`src/routes/atrybuty.ts`** — walidacja `wartosc` sprowadzona do warunku FALSY, 1:1
+  z oryginałem (`:201`, `:222`). Wcześniej `{wartosc: 0}` i `{wartosc: false}` przechodziły
+  i lądowały w słowniku jako napisy „0" i „false"; produkcja odrzuca oba `400 {ok:false,…}`.
+- **`src/routes/atrybuty.ts`** — dodany handler błędów na poziomie routera: nieprzewidziany
+  wyjątek oddaje `500 {ok:false, error}` zamiast `{error}` z globalnego `bladHandler`.
+  Kształt (klucz `ok`) jest tym, co czyta UI. **Treść komunikatu celowo NIE jest kopią
+  oryginału** — nie wypuszczamy `e.message`, zgodnie z zasadą z `middleware/errors.ts`
+  obowiązującą w całej odbudowie. Odtworzony jest kształt, nie treść.
+- **`src/routes/atrybuty.ts`** — zapis audytu opakowany w `audytuj()`, które połyka błąd, jak
+  `try { be(…) } catch (_) {}` w oryginale. Awaria zapisu do `audit_log` nie zamienia już
+  wykonanego CRUD-u w odpowiedź 500.
+- **`test/gate/asercje.ts`** — asercja słownika wzmocniona: (a) pusta mapa to teraz błąd
+  (pusty wynik jest realnym trybem awarii tej trasy, bo `licznikiAtrybutow` połyka wyjątek per
+  kolumna), (b) zbiór dozwolonych rodzajów bierzemy z mapy w kodzie, a nie z fixture'a —
+  nagranie ma 13 prefiksów, bo `sezon` i `wentyl` były w produkcji puste, więc pierwszy produkt
+  testowy z `sezon` zapaliłby fałszywy STOP, (c) doszedł dowód w drugą stronę: każdy prefiks
+  z fixture'a musi być w mapie, co złapie wypadnięcie wpisu.
+- **`test/atrybuty.pending.test.ts`** — dołożony test `slice(0, 5)` i sortowania malejącego
+  sugestii aliasów (zapowiedziany w planie, brakujący). Bez niego odwrócenie sortowania albo
+  `slice(0, 4)` przechodziło całą suitę, a to pole napędza przycisk „akceptuj jako alias" w 7b.
+- **`test/atrybuty.crud.test.ts`** — dowód na `ORDER BY nazwa` postawiony na trzech produktach
+  (wcześniej dwa, co przy `Array.sort()` wychodziło i bez sortowania).
+
+Świadomie NIE zmienione (odnotowane jako utwardzenia wobec oryginału, żeby nikt ich później
+nie „naprawił" wstecz):
+- pola ciała spoza `string` są ignorowane (`{label: 123}` → 400 „Brak label"), gdy oryginał
+  wywala się na `(123||'').trim()` → 500;
+- `Object.hasOwn` przy sięganiu do map rodzaj→kolumna: `?rodzaj=constructor` daje 400 „Nieznany
+  rodzaj atrybutu", gdy oryginał trafiłby prototypem w interpolację SQL i oddał 500;
+- `parametr()` traktuje `?rodzaj=a&rodzaj=b` (tablicę) jak brak filtra;
+- `test/atrybuty.gate.test.ts` zostaje na `beforeAll` (jedno środowisko na plik) — asercje są
+  odporne na kolejność, a plik jest wyraźnie szybszy niż przy `beforeEach`.
+
+Bramki po poprawkach: `lint`, `typecheck`, `build` czyste; suita **917 testów / 58 plików**
+zielona (71 w domenie atrybutów).
