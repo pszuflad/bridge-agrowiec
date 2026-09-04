@@ -166,7 +166,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
-| 12 | Konto + admin + hardening bezpieczeństwa | 12a·12b BE · 12c FE · 12d · 12e | wszystkie | 🔨 | 12a: ticket `35-FEATURE-mutacje-produktow-backend` · 2026-09-05 |
+| 12 | Konto + admin + hardening bezpieczeństwa | 12a·12b BE · 12c FE · 12d · 12e | wszystkie | 🔨 | 12a: ticket `35-FEATURE-mutacje-produktow-backend` · 2026-09-05 · 12c: ticket `37-FEATURE-katalog-edycja-produktu` · 2026-09-05 |
 
 ---
 
@@ -1593,9 +1593,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 12 — Konto + admin + hardening bezpieczeństwa
-- **Status:** 🔨 **w toku** — sesja 12a zrobiona, cztery zostały.
+- **Status:** 🔨 **w toku** — sesje 12a i 12c zrobione, trzy zostały.
   **Sesje:** 12a BE ✅ (mutacje produktów) · 12b BE ⬜ (konto/admin/maintenance) ·
-  12c FE ⬜ (dialog edycji `LT()` + menu „Akcje") · 12d ⬜ (przenagranie fixtures + schematy
+  12c FE ✅ (dialog edycji `LT()` + menu „Akcje") · 12d ⬜ (przenagranie fixtures + schematy
   ciał) · 12e ⬜ (finalny audyt + przegląd 12 widoków z Anią)  **Zależy od:** wszystkie (finalny przegląd)
 - **Cel (Ania klika):** zmienia hasło w `/moje-konto`; admin zarządza użytkownikami/konfiguracją
   dostawców i utrzymaniem; edytuje/wstrzymuje/usuwa produkty wprost z `/katalog`.
@@ -1676,31 +1676,44 @@ Domyka katalog (I2) do parytetu ZAPISU z produkcją. Dowiezione:
   `uwagaCena`) nigdy nie wchodzą na listę pól edytowalnych. Kontekst i lista tras:
   `rebuild-backlog.md` #14 (dla produktów domknięty w 12a).
 
-#### Sesja 12c — Frontend: dialog edycji `LT()` + menu „Akcje" w `/katalog` — ⬜
-- **⚠ WEJŚCIE Z SESJI 7c (2026-09-04) — DIALOG EDYCJI PRODUKTU `LT()` NIE JEST PRZEPORTOWANY
-  i to TU jest jego miejsce.** Fakt ustalony grafem wywołań przy zamykaniu Iteracji 7 (nie
-  z nazwy funkcji): `LT()` (`deminified/frontend-index.js:23909-23980`) to modal edycji produktu
-  otwierany z `/katalog`. Czyta `["/api/atrybuty"]` (`:23917`) i buduje selecty pomocnikiem
-  `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare "pl")` (`:23966`),
-  a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
-  (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma wyłącznie
-  `PodgladProduktu.tsx` — podgląd READ-ONLY, dołożony w I2 jako świadome odstępstwo
-  (oryginał nie ma szczegółu produktu w trybie odczytu, ma tylko ten modal edycji).
-- **Backend do wołania jest już KOMPLET od 12a** (2026-09-05): `PATCH`/`PUT`/`DELETE
-  /api/products/{id}` gotowe, `GET /api/overrides` gotowe od 3d-2. Bez FE te trasy nie mają
-  z czego być wołane.
-- **⚠ WEJŚCIE Z SESJI 12a (2026-09-05) — `szerokosc` w dialogu wymaga uwagi przed portem.**
-  Produkcyjny `LT()` renderuje `szerokosc` jako `type="number"` z `parseFloat`
-  (`frontend-index.js:24076-24079`), a kanon ma tam TEXT (migracja `003_szerokosc_text.sql`) —
-  ręczna edycja zgubi zera końcowe („10.00" → „10"), których broniła saga `szertxt`. To zastane
-  zachowanie produkcji, nie regres odbudowy, ale port pola musi o tym wiedzieć.
-- **Menu „Akcje" w wierszu tabeli** (Edytuj / Wstrzymaj-Aktywuj / Usuń, „Historia" `disabled` —
-  tak jak w oryginale) zastępuje modal podglądu read-only, który I2 wniosła jako świadome
-  odstępstwo D4 — po tej sesji odstępstwo znika.
+#### Sesja 12c — Frontend: dialog edycji `LT()` + menu „Akcje" w `/katalog` — ✅ zrobiona 2026-09-05 (`37-FEATURE-katalog-edycja-produktu`)
+Domyka katalog (I2) do parytetu edycji z produkcją. Dowiezione:
+- `src/pages/katalog/DialogEdycjiProduktu.tsx` — port `LT()`, 42 pola formularza opisane
+  deklaratywnie w `poleEdycji.ts` (etykiety dosłowne, bez polskich znaków, jak w oryginale),
+  selecty słownikowe z `["/api/atrybuty"]`, znaczniki i kasowanie override'ów
+  (`["/api/overrides", dostawca, kod]`, `DELETE /api/overrides/{id}`); warstwa mutacji
+  w `src/pages/katalog/api.ts` (`PATCH`/`DELETE /api/products/{id}`, tylko dotknięte pola).
+- `src/pages/katalog/MenuAkcji.tsx` — menu wierszowe w tabeli. **Kolejność 1:1 z
+  `deminified/frontend-index.js:23763-23814`: Edytuj → Historia (`disabled`) → separator →
+  Wstrzymaj/Aktywuj → Usuń** (nie „Edytuj / Wstrzymaj-Aktywuj / Usuń, Historia na końcu", jak
+  wcześniej sugerował ten wpis — „Historia" stoi DRUGA). **„Wstrzymaj/Aktywuj" to JEDNA pozycja
+  przełączająca** (`:23796`, `:23807`), etykieta i cel wynikają z bieżącego `status`, nie dwie
+  osobne akcje.
+- **`PodgladProduktu.tsx` USUNIĘTY — odstępstwo D4 z I2 zniesione.** Nagłówek ostatniej kolumny
+  tabeli wrócił z „Podgląd" na **„Akcje"**, 1:1 z `:23693-23695`.
+- **Invalidacje po mutacjach — wyłącznie `["/api/products"]`.** `Og()` (`:9149`) i `jb()`
+  (`:9152`) w oryginale wołają tylko `Uo("/api/products")` — **bez** `["/api/alerts"]` ani
+  `["/api/analytics"]`. Odbudowa dokłada `["/api/history"]` (patrz `Yb()` niżej); pilnuje tego
+  asercja negatywna w teście, żeby kolejna sesja nie „poprawiła" tego z powrotem.
+- **`Yb()` (`:10290-10303`) NIE jest wywołaniem API** — to lokalny dziennik w IndexedDB,
+  który nadpisuje cache `["/api/history"]` przez `setQueryData`. Świadomie NIE portowany
+  (decyzja D2): od 12a historię pisze naprawdę backend, a `queryClient` ma
+  `staleTime: Infinity`, więc port zastępuje `Yb` jawną invalidacją `["/api/history"]`.
+- **`szerokosc` — decyzja D3: port 1:1 z zastaną wadą produkcji**, świadomie, udokumentowany
+  w kodzie i pokryty testem. Pole zostaje `type="number" step="0.01"` + `parseFloat`
+  (`frontend-index.js:24076-24079`), mimo że kanon trzyma `szerokosc` jako TEXT — ręczna edycja
+  gubi zera końcowe („10.00" → „10"), tak samo jak w produkcji.
+- „Usuń" pyta przez `DialogPotwierdzenia` z dosłownym tekstem `Usunąć {kod}?` (D1, kontynuacja
+  precedensu D2 z 7b / D6 z narzutów) zamiast `window.confirm`.
+- Suita FE: **683 testy / 45 plików** (było 646/43 baseline); lint/typecheck/build czyste.
+  Backend nietknięty (ticket czysto frontendowy). Szczegóły:
+  `docs/tickets/37-FEATURE-katalog-edycja-produktu/`.
+- **Nota zamknięta:** pozycja „Historia" w menu jest martwa 1:1 z produkcją; backend ma dane
+  od 12a, więc jej ożywienie byłoby NOWĄ funkcją, nie portem — nie zadanie tej sesji.
 - **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć** (dziś martwa, D1 z 4b, 2026-09-02)
   — dane musi dostarczyć backend (pole przy produkcie), bo liczenie po stronie klienta
   duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś
-  zaplanowanej pracy — nota informacyjna, nie zadanie tej sesji.
+  zaplanowanej pracy — nota informacyjna.
 
 #### Sesja 12d — Przenagranie fixtures + schematy ciał w `openapi.yaml` — ⬜
 **⚠ ZALEGŁOŚCI Z ITERACJI 3 (zapisane 2026-08-27 przez 3d-1) — stan na 2026-09-05: punkty 2 i 3
@@ -1708,7 +1721,8 @@ domknięte w 12a, punkt 1 nadal otwarty.**
 1. **[OTWARTE] Przenagrać `contract/fixtures/GET_products.json`.** Fixture pochodzi sprzed
    produkcyjnej migracji `szertxt` i trzyma `szerokosc` jako LICZBĘ, podczas gdy produkcja
    i nasz kanon (migracja `003_szerokosc_text.sql`) mają tam TEXT. GATE I2 przepuszcza to
-   dziś przez **zadeklarowany wyjątek** `WYJATKI_SZEROKOSC` w `test/katalog.gate.test.ts`.
+   dziś przez **zadeklarowany wyjątek** `WYJATKI_SZEROKOSC` w **`rebuild/backend/test/katalog.gate.test.ts`**
+   (test BACKENDU, nie frontendu — sprostowanie z 12c, poprzedni wpis sugerował ścieżkę frontową).
    Wyjątek jest SAMOCZYSZCZĄCY — po przenagraniu przestanie cokolwiek pokrywać i test
    zapali się, żądając usunięcia. **To jest sygnał do usunięcia wyjątku, nie do naprawy testu.**
    Przy okazji: `products.uwaga_cena` (migracja 002) jest dziś ukryta przed API jawną
@@ -1721,6 +1735,10 @@ domknięte w 12a, punkt 1 nadal otwarty.**
   `GET /api/products/hold-reasons` — GATE 12a stał na kodzie oryginału (charakteryzacja +
   porównanie z monkey-patchem), nie na fixtures. Tu je trzeba nagrać i dopiero wtedy dopisać
   schematy ciał do tych sześciu operacji.
+  **Potwierdzone przez 12c (2026-09-05):** front konsumujący te trasy jest już gotowy i GATE
+  frontu stał na kontrakcie żądania (metoda/ścieżka/klucze payloadu), nie na nagraniu — kształt
+  ODPOWIEDZI `PATCH`/`PUT` (pełny produkt) i `DELETE` (`{ok:true}`) opiera się wyłącznie na
+  kodzie 12a, bez wyroczni z produkcji, aż to przenagranie powstanie.
 - **Odświeżenie kontraktu poza produktami** (zapowiedziane w §2, zebrane z iteracji 1–11).
   **⚠ Schematy ciał generujemy z `contract/fixtures/` — z nagrań produkcji, NIE z naszej implementacji.**
   Inaczej kontrakt przestaje być niezależnym dowodem i zaczynamy sprawdzać własną pracę własną pracą.
@@ -1733,6 +1751,10 @@ domknięte w 12a, punkt 1 nadal otwarty.**
 #### Sesja 12e — Finalny audyt bezpieczeństwa + przegląd 12 widoków — ⬜
 - **Potwierdzić:** auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego
   `JWT_SECRET` z fallbackiem; domknięcie przeglądu list pól edytowalnych zaczętego w 12b.
+- **⚠ WEJŚCIE Z SESJI 12c (2026-09-05) — `Staging.tsx:177,210` to JEDYNE miejsce w odbudowie
+  z surowym `window.confirm`.** Po tym tickecie wszystkie inne miejsca (D2 z 7b, D6 z narzutów,
+  D1 z 12c) używają `DialogPotwierdzenia` z dosłownym tekstem. Kandydat do domknięcia w tym
+  audycie.
 - **⚠ WEJŚCIE Z ITERACJI 8 (2026-09-04) — `AppShell` (sidebar) jest wpinany przez WIDOK, nie
   przez router.** `/`, `/konfiguracja` i placeholdery renderują sidebar; `/katalog`, `/staging`,
   `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/historia` i `/selly` — nie. Zastane
@@ -1745,7 +1767,7 @@ domknięte w 12a, punkt 1 nadal otwarty.**
   `GET_admin_suppliers-list.json`, `GET_audit-log.json` (12b) + fixtures zapisujące dla
   sześciu operacji produktów, nagrywane w 12d (dziś ich nie ma — `contract/README.md`).
 - **DoD Iteracji 12:** konto/admin/maintenance działają (12b); **mutacje produktów ✅ (12a)
-  i akcje wierszowe w `/katalog` domknięte** (12c, odstępstwo D4 z I2 zniesione); audyt
+  i akcje wierszowe w `/katalog` ✅ domknięte** (12c, odstępstwo D4 z I2 zniesione); audyt
   bezpieczeństwa domknięty (12e); kontrakt i fixtures odświeżone (12d); fixtures przez GATE;
   **kompletny przegląd 12 widoków z Anią** (12e).
 
@@ -1753,8 +1775,9 @@ domknięte w 12a, punkt 1 nadal otwarty.**
 
 ## 6. Po zakończeniu wszystkich iteracji
 
-> **Stan 2026-09-05:** zostało do zrobienia wyłącznie **I12**, w toku (sesja 12a — mutacje
-> produktów — zrobiona, 12b–12e zostały). Po jej zamknięciu wykonaj punkty niżej. Do rozliczenia
+> **Stan 2026-09-05:** zostało do zrobienia wyłącznie **I12**, w toku (sesje 12a — mutacje
+> produktów — i 12c — dialog edycji + menu „Akcje" — zrobione, 12b/12d/12e zostały). Po jej
+> zamknięciu wykonaj punkty niżej. Do rozliczenia
 > backlogu dochodzą wpisy dołożone przez I7: **#44** (przycisk „Nowy rodzaj" w produkcji nie
 > zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło" — ⬜ do decyzji
 > Ani) oraz przez 12a: **#14** (produkty domknięte) i **#4** (endpointy `uwaga_cena` i propagacja

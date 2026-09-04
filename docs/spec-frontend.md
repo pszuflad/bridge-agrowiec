@@ -165,8 +165,9 @@ ma endpoint:
 > (`frontend-index.js:23261-23312`). Tabela ma 59 konfigurowalnych kolumn (15 domyślnych,
 > zapis w IndexedDB), z `nazwa`/`ean`/`dostawca` zawsze widocznymi i przyklejonymi do lewej;
 > nagłówki mają statyczną, przygaszoną ikonę sortowania — bez wskazania aktywnej kolumny/kierunku.
-> Oryginał **nie ma** szczegółu produktu w trybie odczytu (tylko modal edycji) — odbudowa
-> dokłada podgląd read-only jako świadome, zatwierdzone odstępstwo. Eksport CSV (backend gotowy
+> Oryginał **nie ma** szczegółu produktu w trybie odczytu (tylko modal edycji) — I2 dokładała
+> chwilowo podgląd read-only jako odstępstwo D4; **zniesione w 12c** (patrz blok niżej), gdzie
+> dialog edycji zastąpił podgląd, tak jak w oryginale. Eksport CSV (backend gotowy
 > od I8, `28-FEATURE-selly-eksport-backend`) dowieziony w 8b, a **słowniki marek/kategorii dla
 > filtrów tego widoku — w sesji 7c** (`32-FEATURE-katalog-slowniki-atrybutow`, 2026-09-04):
 > obie listy to SUMA słownika i danych katalogu, z filtrem „bez cyfr" wyłącznie na gałęzi
@@ -408,6 +409,27 @@ ma endpoint:
 > (`:24203-24313`). Listy marek/kategorii dla filtrów `/katalog` (blok I2 wyżej) domknęła
 > **sesja 7c** — INNĄ regułą: tam kategorie sumują słownik z katalogiem, tu idą wyłącznie
 > ze słownika. Szczegóły: `docs/tickets/31-FEATURE-atrybuty-frontend/`.
+
+> **Odbudowa (12c, `37-FEATURE-katalog-edycja-produktu`, 2026-09-05):** `/katalog` dostał ZAPIS —
+> **odstępstwo D4 z I2 zniesione**, `PodgladProduktu.tsx` usunięty. Ostatnia kolumna tabeli to
+> menu „Akcje" (nagłówek zmieniony z „Podgląd"): Edytuj → Historia (`disabled`) → separator →
+> Wstrzymaj/Aktywuj (jedna pozycja przełączająca) → Usuń. Dialog edycji (port `LT()`) ma 42 pola
+> w kolejności i z etykietami oryginału (bez polskich znaków, np. „Cena sprzedazy",
+> „Bieznik/model"); `dostawca` jest widoczne, ale `disabled`, więc nigdy nie trafia do payloadu;
+> pole „Bieznik/model" zapisuje jednocześnie `model` i `bieznik`; cztery pola (`rozmiar`,
+> `indeksNosnosci`, `indeksPredkosci`, `sezon`) są selectem tylko gdy słownik ma wartości danego
+> rodzaju, inaczej input. Zapis to `PATCH /api/products/{id}` z **wyłącznie dotkniętymi polami**
+> (pole nadmiarowe zamroziłoby wartość przed kolejnym importem przez `manual_overrides`);
+> usunięcie to `DELETE /api/products/{id}`. Dialog czyta `GET /api/overrides?dostawca&kod`,
+> pokazuje znacznik override przy polach z poprawką i kasuje je przez `DELETE /api/overrides/{id}`.
+> Invalidacje po każdej mutacji: wyłącznie `["/api/products"]` (1:1 z oryginałem) **plus
+> `["/api/history"]`** (odstępstwo D2 — oryginalny `Yb()` nie jest API, tylko lokalnym dziennikiem
+> w IndexedDB; zastąpiony invalidacją realnego źródła historii z 12a) — świadomie **bez**
+> `["/api/alerts"]`/`["/api/analytics"]`, bo oryginał ich też nie unieważnia. **Odstępstwo D1:**
+> „Usuń" pyta przez `DialogPotwierdzenia` (Radix) zamiast `window.confirm`, tekst dosłowny
+> `Usunąć {kod}?`. **D3:** `szerokosc` portowana 1:1 z wadą oryginału — ręczna edycja gubi zera
+> końcowe („10.00" → „10"), mimo że kolumna jest TEXT. Szczegóły:
+> `docs/tickets/37-FEATURE-katalog-edycja-produktu/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

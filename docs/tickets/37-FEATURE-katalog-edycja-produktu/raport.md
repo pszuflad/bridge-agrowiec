@@ -137,3 +137,48 @@ Brak zmian łamiących API. Zmiany wewnętrzne frontendu:
   odejścia od oryginału (pole tekstowe zamiast `type="number"`).
 - **Pozycja „Historia" w menu jest martwa** — tak jak w produkcji. Ożywienie jej (podpięcie
   do `/historia` z filtrem na produkt) byłoby NOWĄ funkcją; backend ma już dane od 12a.
+
+## Docs updates
+
+Trzy doc-checkery równolegle. Wynik:
+
+### `docs/rebuild-roadmap.md` (8 miejsc)
+- §4 tabela indeksu — wpis `12c: 37-FEATURE-katalog-edycja-produktu · 2026-09-05`.
+- Nagłówek Iteracji 12 — „sesja 12a zrobiona, cztery zostały" → „sesje 12a i 12c zrobione,
+  trzy zostały"; `12c FE ⬜` → ✅. **Sesja 12b nietknięta** (idzie równolegle w innym worktree).
+- Sekcja 12c przepisana z planu na STAN dowiezionego zakresu.
+- **Trzy sprostowania faktów:** kolejność menu (Historia stoi DRUGA, nie na końcu);
+  Wstrzymaj/Aktywuj to JEDNA pozycja przełączająca; invalidacje to wyłącznie
+  `["/api/products"]` (+ `["/api/history"]` z D2) — usunięty warunkowy zapis z promptu.
+- **Nowy fakt:** `Yb()` (`:10290-10303`) to lokalny dziennik IndexedDB, nie endpoint.
+- **Nota do bloku 12d:** sześć operacji mutacji nadal bez nagrań + poprawiona ścieżka
+  `rebuild/backend/test/katalog.gate.test.ts` (było „`test/katalog.gate.test.ts`", co
+  sugerowało frontend).
+- **Nota do bloku 12e:** `Staging.tsx:177,210` — jedyny surowy `window.confirm`.
+- Rozliczona nota z 12a o `szerokosc` — z ostrzeżenia „wymaga uwagi przed portem" na fakt (D3).
+
+### `docs/rebuild-backlog.md`
+- **#3** (saga szerokości) — dopisane, że wada ręcznej edycji została zaniesiona do frontu
+  1:1 w 12c (D3), ze wskazaniem `poleEdycji.ts`; status wymienia 12c obok 12a.
+- **#14** (mass-assignment) — nowy akapit „Front dogonił backend w sesji 12c": formularz
+  wysyła dokładnie 42 pola z listy backendu, pilnowane testem `katalog.poleEdycji.test.ts`.
+- **#22** (martwa kolumna „Promocja") — sprawdzony, **bez zmian**; 12c go nie dotknęła.
+- **#48 NOWY** (FRONTEND, ⬜ **do decyzji** — nie ✅, bo decyzja należy do użytkownika):
+  `Staging.tsx:177,210` jako jedyne miejsce z surowym `window.confirm`; 12e wskazane jako
+  naturalny moment domknięcia. Numeracja zweryfikowana — #47 był najwyższy.
+- Odstępstwo D4 z I2 nie miało w backlogu własnego wpisu, więc nie było czego korygować.
+
+### `docs/spec-frontend.md`
+- Linia ~169 — **usunięta nieprawda**: „odbudowa dokłada podgląd read-only jako świadome,
+  zatwierdzone odstępstwo". Zastąpiona informacją, że D4 było chwilowe i zostało zniesione w 12c.
+- Nowy blok „Odbudowa (12c…)" — menu „Akcje", 42-polowy dialog, `PATCH`/`DELETE` tylko
+  z dotkniętymi polami, `GET`/`DELETE /api/overrides`, invalidacje, odstępstwa D1 i D3.
+
+### Bez zmian (z uzasadnieniem)
+- `docs/spec-backend.md` — żaden fragment nie twierdził, że trasy mutacji produktów albo
+  `/api/overrides` nie mają konsumenta w UI, więc dodanie frontu niczego tam nie unieważniło.
+- `CLAUDE.md` — ticket czysto frontendowy, nie obalił żadnej z opisanych pułapek ani nie
+  ujawnił nowej tego kalibru.
+
+### Pre-existing issues
+Żaden z trzech doc-checkerów nie znalazł sprzeczności w treści niezwiązanej z tym ticketem.
