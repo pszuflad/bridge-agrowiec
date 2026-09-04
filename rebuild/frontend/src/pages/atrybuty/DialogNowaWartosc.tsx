@@ -54,10 +54,22 @@ export function DialogNowaWartosc({
     mutationFn: async ({ rodzaj: wpisany, wartosc: tresc }) => {
       const value = slugRodzaju(wpisany);
       if (!value) return;
-      // Rodzaju jeszcze nie ma — zakładamy go, etykietą jest tekst wpisany przez użytkowniczkę.
       if (!rodzaje.some((r) => r.value === value)) {
-        await dodajRodzaj({ value, label: wpisany });
+        /*
+         * Błąd zakładania rodzaju POŁYKAMY — i to jest wierne: oryginał wysyła ten POST
+         * jako `fetch(...).catch(console.warn)` (`:10250-10259`), więc nieudane utworzenie
+         * rodzaju nigdy nie przerywa dodawania wartości ani nie pokazuje się użytkowniczce.
+         * Ma to też skutek praktyczny: gdy w wyścigu (druga karta, druga osoba) ktoś założy
+         * ten sam rodzaj między odczytem listy a tym zapisem, dostaniemy 409 na RODZAJU —
+         * wartość i tak trzeba wtedy dodać, a komunikat o duplikacie ma dotyczyć WARTOŚCI.
+         */
+        try {
+          await dodajRodzaj({ value, label: wpisany });
+        } catch {
+          /* rodzaj mógł powstać równolegle — próbujemy dodać wartość mimo to */
+        }
       }
+      // Jedyny błąd, który dochodzi do `onError`, pochodzi więc z dodawania WARTOŚCI.
       await dodajWartosc(value, tresc);
     },
     onSuccess: (_wynik, { rodzaj: wpisany, wartosc: tresc }) => {
@@ -68,7 +80,12 @@ export function DialogNowaWartosc({
     },
     onError: (e, { rodzaj: wpisany, wartosc: tresc }) => {
       const tekst = komunikatBledu(e);
-      // 409 z `/wartosci` to dokładnie przypadek, który oryginał nazywa „Już istnieje”.
+      /*
+       * Duplikat rozpoznajemy po ETAPIE, nie po treści: do `onError` trafiają wyłącznie
+       * błędy z `dodajWartosc` (błąd rodzaju jest połknięty wyżej), więc „już istnieje”
+       * może tu znaczyć tylko duplikat WARTOŚCI — tak jak w oryginale, gdzie `Hb()` oddaje
+       * `false` właśnie dla wartości już obecnej w rodzaju (`:9018-9021`, `:27009-27014`).
+       */
       const duplikat = /już istnieje/i.test(tekst);
       toast({
         title: duplikat ? "Już istnieje" : "Nie zapisano",

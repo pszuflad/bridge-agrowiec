@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
-import type { OdpowiedzSlownika } from "@/pages/atrybuty/api";
+import { pobierzSlownik, type OdpowiedzSlownika } from "@/pages/atrybuty/api";
 import {
   dodajNarzut,
   dodajPromocje,
@@ -153,7 +153,14 @@ export function DialogReguly({
    * `queryKey.join("/") === URL` z `lib/queryClient.ts`), więc CRUD słownika unieważnia
    * jednym `invalidateQueries` i listę na tamtym ekranie, i te selecty.
    */
-  const { data: slownikAtrybutow } = useQuery<OdpowiedzSlownika>({ queryKey: ["/api/atrybuty"] });
+  const { data: slownikAtrybutow } = useQuery<OdpowiedzSlownika>({
+    queryKey: ["/api/atrybuty"],
+    // Ten sam `queryFn` co w widoku `/atrybuty`. Klucz jest współdzielony (plan.md D9), więc
+    // gdyby każde miejsce wnosiło własny loader, o zachowaniu na wygasłej sesji decydowałaby
+    // KOLEJNOŚĆ MONTOWANIA komponentów: domyślny `queryFn` oddaje `null` na 401, a
+    // `pobierzSlownik()` rzuca. Jeden loader = jedno zachowanie.
+    queryFn: pobierzSlownik,
+  });
   const { data: dostawcy } = useQuery<Dostawca[]>({ queryKey: ["/api/suppliers"] });
 
   const zamknij = () => {

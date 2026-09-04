@@ -104,6 +104,12 @@ export function DialogNowyRodzaj() {
           </div>
         </div>
         <DialogFooter>
+          {/*
+           * „Anuluj” zamyka BEZ czyszczenia pól — pola resetuje dopiero udany zapis. To nie
+           * przeoczenie, tylko zachowanie oryginału (`sg()`, `:27265`: `onClick: () => t(!1)`,
+           * a `r("")`/`o("")` wykonuje się wyłącznie w gałęzi sukcesu, `:27203`). Dzięki temu
+           * przypadkowe zamknięcie nie kasuje wpisanego tekstu.
+           */}
           <Button variant="outline" onClick={() => ustawOtwarty(false)}>
             Anuluj
           </Button>
