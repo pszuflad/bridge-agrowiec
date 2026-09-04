@@ -8,11 +8,8 @@
  * dostawcy, a także układ karty „2.6": JEDNA karta, DWIE niezależne tabele w gridzie
  * dwukolumnowym (`:28258-28262`).
  *
- * ─── CZEGO TU CELOWO NIE MA ───────────────────────────────────────────────────────────
- * Przycisków „CSV" przy kartach „2.1-2.4" (`onClick: () => M("ean-comparison")`, `:28190`)
- * i „2.5" (`M("unique")`, `:28234`). Trasa `GET /api/analytics/export/{view}` należy do bloku
- * **10f** i jeszcze nie istnieje — przycisk wiodący donikąd byłby gorszy niż jego brak.
- * Ta sama decyzja co w `SekcjaMarze.tsx` (10a); 10f dokłada wszystkie naraz.
+ * Przyciski „CSV" przy kartach „2.1-2.4" (`M("ean-comparison")`, `:28190`) i „2.5"
+ * (`M("unique")`, `:28234`) dołożył blok 10f. Karta „2.6" nie ma go ani w oryginale, ani tu.
  *
  * ─── ŚWIADOME ODSTĘPSTWA (decyzje użytkownika D2 i D4, 2026-09-03) ────────────────────
  *  • O-10c-1 — dwa wykresy w karcie „2.6" plus liczba nagłówkowa „% EAN-ów u ≥2 dostawców".
@@ -58,6 +55,7 @@ import {
 } from "./filtrowanie";
 import { formatuj, formatujProcent, zaokraglij } from "./formatowanie";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
+import { PrzyciskCsv } from "./eksport";
 
 /**
  * Ilu dostawców trafia na wykres rankingu. W produkcji jest ich kilkanaście, więc limit
@@ -122,11 +120,26 @@ function NotkaPominietych({
   );
 }
 
-/** Wspólny nagłówek karty — w oryginale to `px-4 py-3 border-b` z tytułem `font-semibold text-sm`. */
-function NaglowekKarty({ tytul, children }: { tytul: string; children?: React.ReactNode }) {
+/**
+ * Wspólny nagłówek karty — w oryginale to `px-4 py-3 border-b` z tytułem `font-semibold text-sm`.
+ * `obok` to miejsce na akcje po prawej stronie tytułu (blok 10f: przycisk „CSV"); układ jest
+ * ten sam, co w `NaglowekSekcji` i co w oryginale (`frontend-index.js:28183`, `:28227`).
+ */
+function NaglowekKarty({
+  tytul,
+  obok,
+  children,
+}: {
+  tytul: string;
+  obok?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
   return (
     <div className="border-b px-4 py-3">
-      <div className="text-sm font-semibold">{tytul}</div>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-sm font-semibold">{tytul}</div>
+        {obok}
+      </div>
       {children}
     </div>
   );
@@ -237,7 +250,7 @@ export function SekcjaEan({
       {/* ── Karta „2.1-2.4" (`:28180-28220`) ─────────────────────────────────────────── */}
       <Card className="border-card-border">
         <CardContent className="p-0">
-          <NaglowekKarty tytul="2.1-2.4 Porównanie cen po EAN">
+          <NaglowekKarty tytul="2.1-2.4 Porównanie cen po EAN" obok={<PrzyciskCsv widok="ean-comparison" />}>
             <NotkaPominietych
               wybor={wybor}
               obslugiwane={WYMIARY_EAN_PORWNANIE}
@@ -257,7 +270,7 @@ export function SekcjaEan({
       {/* ── Karta „2.5" (`:28221-28255`) ─────────────────────────────────────────────── */}
       <Card className="border-card-border">
         <CardContent className="p-0">
-          <NaglowekKarty tytul="2.5 Pozycje unikalne">
+          <NaglowekKarty tytul="2.5 Pozycje unikalne" obok={<PrzyciskCsv widok="unique" />}>
             {unikalneOdfiltrowane > 0 && (
               <div className="mt-1 text-xs text-muted-foreground" data-testid="ean-unikalne-licznik-filtra">
                 Filtry ukryły {formatuj(unikalneOdfiltrowane)} z {formatuj(unikalneWszystkie)} pozycji.

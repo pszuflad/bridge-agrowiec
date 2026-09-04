@@ -33,7 +33,7 @@ export type NaglowekSekcjiProps = {
   rzeczownik: string;
   /** Przedrostek `data-testid` obu notek. */
   prefiksTestu: string;
-  /** Miejsce na kontrolki po prawej stronie tytułu (przycisk „CSV" dołoży blok 10f). */
+  /** Miejsce na kontrolki po prawej stronie tytułu — blok 10f wstawia tu `PrzyciskCsv`. */
   obok?: ReactNode;
   /**
    * Karta ma własny padding i nie chce kreski pod nagłówkiem.

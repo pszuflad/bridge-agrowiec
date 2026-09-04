@@ -3,9 +3,12 @@
  * (port `deminified/frontend-index.js:28421-28457`).
  *
  * Sześć kolumn 1:1 z oryginałem, z paskiem postępu w kolumnie „Dostępność" (`O(e.dostepnoscPct)`,
- * `:28451`). Bez przycisku „CSV": w oryginale karta go ma (`M("availability-products")`,
- * `:28430`), ale trasa `GET /api/analytics/export/{view}` należy do bloku 10f i jeszcze nie
- * istnieje — przycisk wiodący donikąd byłby gorszy niż jego brak. Ten sam wybór zrobiło 10a.
+ * `:28451`) i przyciskiem „CSV" w nagłówku (`M("availability-products")`, `:28430`), który
+ * dołożył blok 10f razem z trasą `GET /api/analytics/export/{view}`.
+ *
+ * ⚠ TEN EKSPORT ODDAJE PUSTY PLIK — i tak jest też w produkcji. `export/availability-products`
+ * pyta `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma, więc CSV to sam znacznik BOM.
+ * Ta sama przyczyna, dla której pusta jest tabela poniżej: `docs/rebuild-backlog.md` #32.
  *
  * ⚠ TA TABELA JEST PUSTA, GDY ISTNIEJE HISTORIA CEN — I TAK JEST TEŻ W PRODUKCJI.
  * Zapytanie gałęzi historycznej pyta `historia_cen` o kolumnę `nazwa`, której ta tabela nie
@@ -27,6 +30,7 @@ import {
   type WyborFiltrow,
 } from "./filtrowanie";
 import { NaglowekSekcji } from "./NaglowekSekcji";
+import { PrzyciskCsv } from "./eksport";
 import { PasekDostepnosci } from "./PasekDostepnosci";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
 
@@ -74,6 +78,7 @@ export function SekcjaDostepnosciProduktow({
           wyjasnieniePominietych="Ta sekcja grupuje po dostawcy i kodzie, więc nie stosuje filtrów:"
           rzeczownik="pozycji"
           prefiksTestu="dostepnosc-produktow"
+          obok={<PrzyciskCsv widok="availability-products" />}
         />
         <TabelaAnalityki
           dane={wiersze}

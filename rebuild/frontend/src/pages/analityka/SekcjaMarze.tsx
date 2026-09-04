@@ -5,10 +5,10 @@
  * nagłówek karty i siedem kolumn tabeli są 1:1 z oryginałem. Wykres nad tabelą jest
  * odstępstwem (O-10a-3) — oryginał nie ma żadnych wykresów.
  *
- * ⚠ CZEGO TU CELOWO NIE MA: przycisku „CSV". W oryginale karta ma go
- * (`onClick: () => M("margins")` → `GET /api/analytics/export/margins`, `:28524`), ale trasa
- * eksportu należy do bloku 10f i jeszcze nie istnieje — przycisk wiodący donikąd byłby gorszy
- * niż jego brak. Dokłada go 10f razem z `analytics/export/{view}`.
+ * Przycisk „CSV" (`onClick: () => M("margins")`, `:28524`) dołożył blok 10f razem z trasą
+ * `GET /api/analytics/export/{view}`. ⚠ Eksport zwraca INNE wiersze niż ta tabela: dashboard
+ * grupuje po dostawcy/kategorii/marce, a `export/margins` oddaje pozycje PER PRODUKT
+ * (`backend/src/repos/analityka-eksport.ts`). To nie jest ta sama odpowiedź w innym formacie.
  *
  * ⚠ CZEGO NIE RENDERUJEMY, CHOĆ PRZYCHODZI: `low` i `high` z odpowiedzi. Produkcyjny frontend
  * też ich nie pokazuje — pobiera i ignoruje. Odtwarzamy to zachowanie.
@@ -51,6 +51,7 @@ import {
 } from "./filtrowanie";
 import { formatuj, formatujProcent } from "./formatowanie";
 import { NaglowekSekcji } from "./NaglowekSekcji";
+import { PrzyciskCsv } from "./eksport";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
 
 /**
@@ -123,6 +124,7 @@ export function SekcjaMarze({
           wyjasnieniePominietych="Ta sekcja grupuje po dostawcy, kategorii i marce, więc nie stosuje filtrów:"
           rzeczownik="grup"
           prefiksTestu="marze"
+          obok={<PrzyciskCsv widok="margins" />}
         />
 
         {/*

@@ -20,10 +20,7 @@
  *    bo tak wygląda odpowiedź produkcji, ale oryginalny widok ich nie pokazuje — dokładnie
  *    jak `margins.low`/`high` w 10a (decyzja D4).
  *
- *  • PRZYCISKU „CSV" przy karcie „3.1". W oryginale on tam jest (`onClick: () => M("prices-last")`,
- *    `:28310`), ale trasa `GET /api/analytics/export/{view}` należy do bloku 10f i jeszcze
- *    nie istnieje. Przycisk wiodący donikąd byłby gorszy niż jego brak — tak samo
- *    rozstrzygnęła to `SekcjaMarze`.
+ * Przycisk „CSV" przy karcie „3.1" (`M("prices-last")`, `:28310`) dołożył blok 10f.
  *
  * ─── ŚWIADOME ODSTĘPSTWA ──────────────────────────────────────────────────────────────
  *
@@ -64,6 +61,7 @@ import {
 import { formatuj } from "./formatowanie";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
 import { useOpoznionaWartosc } from "./useOpoznionaWartosc";
+import { PrzyciskCsv } from "./eksport";
 
 /** Kolumny karty „3.1" — 1:1 z `:28315-28340`. */
 const KOLUMNY_OSTATNI_IMPORT: KolumnaTabeli<WierszZmianyCeny>[] = [
@@ -168,16 +166,22 @@ function KartaCen({
   tytul,
   children,
   notka,
+  obok,
 }: {
   tytul: string;
   children: React.ReactNode;
   notka?: React.ReactNode;
+  /** Akcje po prawej stronie tytułu — blok 10f wstawia tu przycisk „CSV". */
+  obok?: React.ReactNode;
 }) {
   return (
     <Card className="border-card-border">
       <CardContent className="p-0">
         <div className="border-b px-4 py-3">
-          <div className="text-sm font-semibold">{tytul}</div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm font-semibold">{tytul}</div>
+            {obok}
+          </div>
           {notka}
         </div>
         {children}
@@ -256,6 +260,7 @@ export function SekcjaCeny({ wybor }: { wybor: WyborFiltrow }) {
     <div className="space-y-4">
       <KartaCen
         tytul="3.1 Zmiany cen z ostatnich importów"
+        obok={<PrzyciskCsv widok="prices-last" />}
         notka={
           <NotkaFiltrow
             odfiltrowane={(ostatniImport?.rows.length ?? 0) - wierszeImportu.length}
