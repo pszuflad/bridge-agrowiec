@@ -14,10 +14,12 @@
 // sprostowane w bloku I5 (ticket 15-FEATURE-historia-zmian). `Wa = Nt("history", …)`.
 //
 // PISARZ tej tabeli w oryginale jest dokładnie jeden: ręczna edycja produktu w katalogu
-// (`PUT`/`PATCH /api/products/:id` → `addHistory()`, :48435 i :48475). To mutacja katalogu,
-// której rebuild jeszcze nie portuje, więc do tego czasu tabela jest pusta, a
-// `GET /api/history` zwraca `[]`. Czytelnik i tak powstaje teraz: endpoint jest w kontrakcie,
-// ma fixture i wołają go Pulpit (I10) oraz optymistyczny cache edycji katalogu.
+// (`PUT`/`PATCH /api/products/:id` → `addHistory()`, :48435 i :48475).
+//
+// ⭐ SPORTOWANY W ITERACJI 12a (ticket 35). Do tej pory tabela nie miała w rebuildzie pisarza
+// i `GET /api/history` zwracał na stagingu `[]` — I5 odnotowała to jako stan przejściowy.
+// Od tej sesji trasa mutacji produktu zapisuje tu jeden wiersz na KAŻDE zmienione pole,
+// więc endpoint przestaje być pusty.
 
 import { desc } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
@@ -36,4 +38,21 @@ export type WpisDziennikaZmian = typeof history.$inferSelect;
  */
 export function listaDziennikaZmian(db: Baza): WpisDziennikaZmian[] {
   return db.select().from(history).orderBy(desc(history.data)).all();
+}
+
+/** Nowy wpis dziennika — kształt argumentu `U.addHistory` (`:48435-48445`). */
+export type NowyWpisDziennikaZmian = typeof history.$inferInsert;
+
+/**
+ * Port `U.addHistory()` (`backend-index.cjs:44957-44960`), wołany przez trasę edycji produktu.
+ *
+ * Jeden wiersz = JEDNO zmienione pole. Trasa woła to w pętli po polach, których wartość
+ * faktycznie się zmieniła — pole wysłane z niezmienioną wartością wpisu nie tworzy.
+ *
+ * ⚠ `staraWartosc`/`nowaWartosc` są TEKSTEM i powstają przez `String(...)` po stronie trasy,
+ * dokładnie jak w oryginale (`:48441-48442`) — łącznie z tym, że `null` staje się napisem
+ * `"null"`, a nie pustym polem. Zastane, odtwarzane 1:1.
+ */
+export function zapiszWpisDziennika(db: Baza, wpis: NowyWpisDziennikaZmian): void {
+  db.insert(history).values(wpis).run();
 }
