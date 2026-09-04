@@ -92,3 +92,23 @@ export const ETYKIETY_WYMIAROW: Record<WymiarFiltra, string> = {
   indeksyNosnosci: "Indeksy nośności",
   indeksyPredkosci: "Indeksy prędkości",
 };
+
+/**
+ * Filtrowanie sekcji zakładki `dostawcy` (blok 10d).
+ *
+ * Wszystkie trzy wiersze tej zakładki (`suppliers/stability`, `suppliers/lifecycle`,
+ * `suppliers/stock`) niosą JEDEN wspólny wymiar katalogu — `dostawca`. Marki, modelu,
+ * rozmiaru ani indeksów w tych odpowiedziach nie ma: dwie z tras grupują po dostawcy,
+ * a trzecia czyta staging, gdzie tych kolumn nie ma w ogóle. Pozostałe pięć wymiarów jest
+ * więc ŚWIADOMIE POMIJANE, a sekcja mówi o tym notką — tak samo jak sekcja marż z 10a.
+ */
+export const WYMIARY_DOSTAWCOW: WymiarFiltra[] = ["dostawcy"];
+
+export function zastosujFiltryDostawcow<T extends { dostawca: string }>(
+  wiersze: T[],
+  wybor: WyborFiltrow,
+): T[] {
+  const dostawcy = wybor.dostawcy;
+  if (dostawcy.size === 0) return wiersze;
+  return wiersze.filter((w) => dostawcy.has(w.dostawca));
+}

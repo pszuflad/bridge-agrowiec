@@ -101,3 +101,81 @@ export function useKpi(): UseQueryResult<Kpi | null> {
 export function useMarze(): UseQueryResult<Marze | null> {
   return useQuery<Marze | null>({ queryKey: ["/api/analytics/margins"] });
 }
+
+// ─── BLOK 10d · DOSTAWCY ────────────────────────────────────────────────────────────────
+//
+// Trzy hooki zakładki `dostawcy` — DOMYŚLNEJ zakładki całego widoku. Czwarta trasa bloku,
+// `GET /api/analytics/dostawcy-stats`, ŚWIADOMIE NIE MA TU HOOKA: oryginalny frontend nie
+// woła jej ani razu (0 trafień w bundlu), więc dorobienie jej ekranu byłoby budowaniem
+// czegoś nowego zamiast odbudowy (decyzja D3 bloku 10d). Backend ją dowozi, GATE ją pokrywa.
+//
+// Żadna z tych tras nie przyjmuje parametrów query (`analytics_module.cjs:110`, `:133`, `:143`)
+// — filtrowanie jest klienckie, przez `zastosujFiltryDostawcow` w `useMemo`.
+
+/**
+ * Wiersz karty „1.1 Stabilność cennika dostawcy".
+ *
+ * ⚠ DWA KSZTAŁTY, ZALEŻNE OD `hasHistory`, I TAK JEST W PRODUKCJI. Gałąź z historią liczy
+ * z `historia_cen` (`punkty`, `liczbaZmian`, `sredniaZmianaPct`, `maxZmianaPct`), gałąź
+ * zapasowa — z katalogu (`produkty`, `sredniaCena`, `sredniStan` i trzy `null`-e). Klucze,
+ * których dana gałąź nie zwraca, po prostu NIE ISTNIEJĄ w wierszu.
+ *
+ * Tabela renderuje mimo to stały zestaw siedmiu kolumn oryginału, więc część z nich zawsze
+ * pokazuje „—" — patrz `SekcjaStabilnoscDostawcow.tsx`. Pola są opcjonalne właśnie po to,
+ * żeby ten fakt był widoczny w typie, a nie odkrywany w przeglądarce.
+ */
+export type WierszStabilnosci = {
+  dostawca: string;
+  punkty?: number;
+  produkty?: number;
+  sredniaCena?: number | null;
+  sredniStan?: number | null;
+  liczbaZmian: number | null;
+  sredniaZmianaPct: number | null;
+  maxZmianaPct: number | null;
+};
+
+export type StabilnoscDostawcow = {
+  hasHistory: boolean;
+  rows: WierszStabilnosci[];
+};
+
+/** Wiersz karty „1.2 Nowości i wycofania" — pozycja stagingu, nie produkt katalogu. */
+export type WierszCykluZycia = {
+  dostawca: string;
+  /** `nowa` albo `wycofana`. */
+  typ: string;
+  kod: string;
+  nazwa: string;
+  /** Surowy znacznik ISO — tabela pokazuje go monospace, bez formatowania (jak oryginał). */
+  kiedy: string;
+  powod: string | null;
+};
+
+/** Wiersz karty „1.4 / 1.5 Stan i dostępność dostawcy". */
+export type WierszStanuDostawcy = {
+  dostawca: string;
+  produkty: number;
+  sredniStan: number | null;
+  dostepne: number;
+  /** 0–100; kolumna „Dostępność" rysuje z tego PASEK POSTĘPU, nie liczbę. */
+  dostepnoscPct: number | null;
+};
+
+export function useStabilnoscDostawcow(): UseQueryResult<StabilnoscDostawcow | null> {
+  return useQuery<StabilnoscDostawcow | null>({
+    queryKey: ["/api/analytics/suppliers/stability"],
+  });
+}
+
+export function useCyklZyciaDostawcow(): UseQueryResult<{ rows: WierszCykluZycia[] } | null> {
+  return useQuery<{ rows: WierszCykluZycia[] } | null>({
+    queryKey: ["/api/analytics/suppliers/lifecycle"],
+  });
+}
+
+export function useStanDostawcow(): UseQueryResult<{ rows: WierszStanuDostawcy[] } | null> {
+  return useQuery<{ rows: WierszStanuDostawcy[] } | null>({
+    queryKey: ["/api/analytics/suppliers/stock"],
+  });
+}

@@ -6,9 +6,11 @@ sesja 10a musiała się dowiedzieć sama i co kosztowało ją osobną rundę pyt
 Każdy fakt niżej jest **zweryfikowany w kodzie** (`mirror/backend/analytics_module.cjs`,
 `deminified/frontend-index.js`, `contract/fixtures/`), nie przepisany z opisu iteracji.
 
-**Zakres:** 27 tras `/api/analytics/*`. Blok 10a zamknął pięć z nich
+**Zakres:** 27 tras `/api/analytics/*`. Zamknięte dziewięć: blok 10a — pięć
 (`filters`, `status`, `kpi`, `margins`, `bootstrap-current` — ticket
-`19-FEATURE-analityka-fundament`). Ten dokument opisuje **pozostałe 22**.
+`19-FEATURE-analityka-fundament`); blok 10d — cztery (`suppliers/stability`,
+`suppliers/lifecycle`, `suppliers/stock`, `dostawcy-stats` — ticket
+`23-FEATURE-analityka-dostawcy`). Ten dokument opisuje **pozostałe 18**.
 
 **Zanim zaczniesz blok:** przeczytaj `rebuild/frontend/src/pages/analityka/README.md` —
 wzorzec sekcji dashboardu, którego bloki 10b–10e mają się trzymać 1:1.
@@ -86,9 +88,20 @@ jednostkowym przeciw SQL-owi oryginału, tak jak 10a zrobiło dla `margins.low`/
 | `GET_analytics_importy-timeline.json` | **cała odpowiedź** | 10e |
 | `GET_analytics_ean_details.json` | `offers` | 10c |
 | `GET_analytics_margins.json` | `low`, `high` | ✅ 10a (pokryte testem) |
+| `GET_analytics_suppliers_stability.json` | — (tablica niepusta) | ✅ 10d (pokryte testem) |
 
 **Blok 10e ma tu najsłabszą siatkę z całej iteracji** — cztery z sześciu jego fixtures są
 puste albo częściowo puste. Zaplanuj na to testy jednostkowe od razu, nie po review.
+
+**Drugi rodzaj luki: tablica niepusta, ale nagrana tylko na jednej gałęzi handlera.**
+`GET_analytics_suppliers_stability.json` nie jest pusty — ale nagrano go przy
+`hasHistory: true`, więc **gałąź zapasowa (`hasHistory: false`, inny zestaw kolumn) nie ma
+w nagraniu żadnego świadka**; GATE jej nie widzi. Pokrywa ją test jednostkowy
+`rebuild/backend/test/analityka.dostawcy.agregaty.test.ts`. Reguła dla kolejnych bloków:
+**handler z dwiema gałęziami zależnymi od `hasHistory` ma zwykle tylko jedną nagraną —
+drugą trzeba pokryć testem jednostkowym**, nawet gdy fixture wygląda na kompletny. Dotyczy
+też bloku 10e: `availability/products`, `availability/sell-through`, `seasonality/monthly`,
+`lifecycle/models` mają ten sam wzorzec `hasHistory`.
 
 ---
 
@@ -181,10 +194,17 @@ oryginału, to jest moment** — dane będą już dostępne.
 
 ---
 
-## 6. Blok 10d — Dostawcy
+## 6. Blok 10d — Dostawcy ✅ ZAMKNIĘTY (2026-09-03, `23-FEATURE-analityka-dostawcy`)
 
 Trasy: `dostawcy-stats`, `suppliers/lifecycle`, `suppliers/stability`, `suppliers/stock`.
-Fixtures: 4.
+Fixtures: 4. Zrealizowane 1:1 wg tej sekcji (potwierdzone odczytem
+`deminified/frontend-index.js:28054-28172`).
+
+**Pliki:** backend — `rebuild/backend/src/repos/analityka.ts` (sekcja „BLOK 10d · DOSTAWCY":
+`stabilnoscDostawcow`, `cyklZyciaDostawcow`, `stanDostawcow`, `statystykiDostawcow`),
+`rebuild/backend/src/routes/analytics.ts` (cztery trasy `GET`). Frontend —
+`pages/analityka/Sekcja{StabilnoscDostawcow,CyklZyciaDostawcow,StanDostawcow}.tsx`,
+`pages/analityka/PasekDostepnosci.tsx` (wspólny komponent, patrz §7 i §9).
 
 | Trasa | Linia | Query | LIMIT | Kształt |
 |---|---|---|---|---|
@@ -198,21 +218,33 @@ całego widoku** (`useState("dostawcy")`, `fe.js:27805`). Trzy karty:
 
 1. **„1.1 Stabilność cennika dostawcy"** ← `suppliers/stability`
    Kolumny: Dostawca · Produkty · Punkty historii · Zmiany · Śr. zmiana % · Max % · Śr. stan.
-   CSV (`suppliers-stability`).
+   CSV (`suppliers-stability`, czeka na 10f — patrz §8.1).
+   ⚠ **Karta renderuje 7 kolumn, ale żadna z dwóch gałęzi backendu (`hasHistory`) nie zwraca
+   ich wszystkich** — gałąź `true` nie ma `produkty`/`sredniStan`, gałąź `false` nie ma
+   `punkty` i ma trzy `NULL`-e (`liczbaZmian`, `sredniaZmianaPct`, `maxZmianaPct`); gałąź
+   `false` zwraca też `sredniaCena`, dla której w UI **nie ma kolumny** (ciche zignorowanie).
+   Zastane zachowanie produkcji, odtworzone 1:1 — puste komórki „—", bez adnotacji (10d,
+   decyzja D1: `docs/tickets/23-FEATURE-analityka-dostawcy/plan.md`).
+   ⚠ **Próg zmiany ceny `ABS(...) > 0.01` jest porównaniem FLOAT** — w podwójnej precyzji
+   `100.01 - 100 = 0.010000000000005…`, czyli różnica równa dokładnie groszowi LICZY SIĘ jako
+   zmiana. Odtworzone i scharakteryzowane testem jednostkowym, nie „naprawione".
 2. **„1.2 Nowości i wycofania"** ← `suppliers/lifecycle`
-   Kolumny: Data · Dostawca · Typ · Kod · Nazwa · Powód. CSV (`suppliers-lifecycle`).
+   Kolumny: Data · Dostawca · Typ · Kod · Nazwa · Powód. CSV (`suppliers-lifecycle`,
+   czeka na 10f — patrz §8.1).
 3. **„1.4 / 1.5 Stan i dostępność dostawcy"** ← `suppliers/stock`
    Kolumny: Dostawca · Produkty · Śr. stan · Dostępne · Dostępność.
    ⚠ Kolumna „Dostępność" renderuje się **paskiem postępu**, nie liczbą — pomocnik `O(e)`
    (`fe.js:27921`) dostaje `e.dostepnoscPct` i rysuje `<div>` szerokości 24 z zagnieżdżonym
    `<div>` o `width: n%` plus podpis `n%` monospace. To **jedyna nietabelaryczna wizualizacja
    w całym oryginalnym widoku** i występuje dwa razy: tutaj (`zM+366`) oraz w karcie „4.1"
-   bloku 10e (`zM+650`). Kto pisze ją pierwszy, wydziela ją do wspólnego komponentu obok
-   `TabelaAnalityki` — drugi blok ma ją zastać gotową. CSV (`suppliers-stock`).
+   bloku 10e (`zM+650`). **10d wydzieliła ją jako wspólny komponent**
+   (`pages/analityka/PasekDostepnosci.tsx`, port `O()` 1:1) — 10e ją reużywa, patrz §7.
+   CSV (`suppliers-stock`, czeka na 10f — patrz §8.1).
 
-**Bez UI w oryginale:** `dostawcy-stats` (zero wywołań). Zwraca gołą tablicę
-`{dostawca, liczbaProduktow, avgMarza, avgCenaZakupu, dostepnych}` — merytorycznie
-nakłada się na `suppliers/stock`. Decyzja użytkownika.
+**Bez UI w oryginale (decyzja D3, zaklepana treścią ticketa):** `dostawcy-stats` (zero
+wywołań). Dowieziona w backendzie pod GATE, bez hooka i bez karty — tak jak w oryginale.
+Zwraca gołą tablicę `{dostawca, liczbaProduktow, avgMarza, avgCenaZakupu, dostepnych}` —
+merytorycznie nakłada się na `suppliers/stock`.
 
 **⚠ Uwaga na zderzenie nazw z Iteracją 3f-2.** `/api/dostawcy` (widok Konfiguracja →
 Dostawcy) to **inny zasób** niż `/api/analytics/dostawcy-stats`. Pierwszy jest już
@@ -244,7 +276,9 @@ Trasy: `availability/products`, `availability/sell-through`, `rotation/inactive`
 1. **„4.1 Historia dostępności pozycji"** ← `availability/products`
    Kolumny: Dostawca · Kod · EAN · Nazwa · Dostępność · Miesiące braków. CSV (`availability-products`).
    ⚠ „Dostępność" to **pasek postępu** `O(e.dostepnoscPct)` (`zM+650`) — ten sam, co w karcie
-   „1.4 / 1.5" bloku 10d. Jeśli 10d wszedł wcześniej, komponent już jest; jeśli nie, wydziel go.
+   „1.4 / 1.5" bloku 10d. **10d wszedł, komponent istnieje**
+   (`rebuild/frontend/src/pages/analityka/PasekDostepnosci.tsx`) — zaimportuj go, nie pisz
+   drugi raz: `<PasekDostepnosci wartosc={w.dostepnoscPct} />`.
 2. **„4.2 Tempo schodzenia z magazynu"** ← `availability/sell-through`
    Kolumny: Dostawca · Kod · Nazwa · Zeszło sztuk. CSV (`sell-through`).
 3. **„4.4 Sezonowy wzorzec cen"** ← `seasonality/monthly`
@@ -285,10 +319,13 @@ pierwszego wiersza. Pusty wynik = sam BOM.
 `unique` · `prices-last` · `availability-products` · `sell-through` · `margins` ·
 `rotation-inactive`.
 
-⚠ Przycisk „CSV" **nie istnieje w odbudowie** — 10a świadomie go pominęło (trasa eksportu
-należy do tego bloku). 10f dokłada go do sekcji marż **i do każdej innej sekcji, która ma
-go w oryginale** — lista wyżej mówi dokładnie do których. W oryginale przycisk siedzi
-w nagłówku karty, po prawej: `<Button variant="outline" size="sm">CSV</Button>`.
+⚠ Przycisk „CSV" **nie istnieje w odbudowie** — 10a świadomie go pominęło w sekcji marż,
+a 10d — świadomie (decyzja D5) — w trzech kartach zakładki `dostawcy`
+(`suppliers-stability`, `suppliers-lifecycle`, `suppliers-stock`): przycisk wiodący donikąd
+byłby gorszy niż jego brak, dopóki trasa eksportu nie istnieje. 10f dokłada go do wszystkich
+czterech sekcji **i do każdej innej sekcji, która ma go w oryginale** — lista wyżej mówi
+dokładnie do których. W oryginale przycisk siedzi w nagłówku karty, po prawej:
+`<Button variant="outline" size="sm">CSV</Button>`.
 
 **⚠ EKSPORT NIE ZWRACA TEGO, CO WIDAĆ W TABELI. Każdy `{view}` ma WŁASNY SQL, inny niż trasa
 dashboardu o tej samej nazwie** — to nie jest „ta sama odpowiedź w innym formacie". Dwa
@@ -326,7 +363,7 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 
 ---
 
-## 9. Czego blok NIE musi już budować — inwentarz z 10a
+## 9. Czego blok NIE musi już budować — inwentarz z 10a i 10d
 
 | Rzecz | Gdzie |
 |---|---|
@@ -340,6 +377,9 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 | Nagłówek KPI + banner historii | `pages/analityka/NaglowekKpi.tsx` |
 | Wzorzec sekcji, krok po kroku | `pages/analityka/README.md` |
 | Wzorcowa sekcja do skopiowania | `pages/analityka/SekcjaMarze.tsx` |
+| Pasek postępu dostępności (port `O()`) | `pages/analityka/PasekDostepnosci.tsx` (10d) — reużyj, patrz §7 |
+| Filtr kliencki po dostawcy | `zastosujFiltryDostawcow` + `WYMIARY_DOSTAWCOW` w `pages/analityka/filtrowanie.ts` (10d) |
+| Drugi przykład wzorca sekcji (kopiuj obok `SekcjaMarze.tsx`) | trzy sekcje 10d: `SekcjaStabilnoscDostawcow.tsx`, `SekcjaCyklZyciaDostawcow.tsx`, `SekcjaStanDostawcow.tsx` — `SekcjaStabilnoscDostawcow` to pierwszy przykład sekcji **bez wykresu**, przydatny dla bloków, które wykresu nie potrzebują |
 
 **Czego NIE ruszać:**
 - tokenów `--chart-1..5` — pochodzą z arkusza produkcji, chroni je `test/tokeny.test.ts`;

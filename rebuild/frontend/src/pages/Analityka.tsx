@@ -20,6 +20,8 @@
  *  • O-10a-4 — cztery zakładki są puste do czasu bloków 10b–10e. To zakres bloku,
  *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
  *              wstawiają treść, zamiast przemeblowywać widok.
+ *  • O-10d-1 — wykres dostępności w karcie „1.4 / 1.5" zakładki `dostawcy` (decyzja D2
+ *              z 2026-09-03) — kontynuacja O-10a-3, uzasadnienie w `SekcjaStanDostawcow.tsx`.
  *
  * ─── CZEGO TU NIE MA ──────────────────────────────────────────────────────────────────
  * `POST /api/analytics/bootstrap-current` nie ma i mieć nie będzie przycisku (decyzja D4).
@@ -31,11 +33,22 @@ import { useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useFiltry, useKpi, useMarze, useStatusHistorii } from "./analityka/api";
+import {
+  useCyklZyciaDostawcow,
+  useFiltry,
+  useKpi,
+  useMarze,
+  useStabilnoscDostawcow,
+  useStanDostawcow,
+  useStatusHistorii,
+} from "./analityka/api";
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
 import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
+import { SekcjaCyklZyciaDostawcow } from "./analityka/SekcjaCyklZyciaDostawcow";
 import { SekcjaMarze } from "./analityka/SekcjaMarze";
+import { SekcjaStabilnoscDostawcow } from "./analityka/SekcjaStabilnoscDostawcow";
+import { SekcjaStanDostawcow } from "./analityka/SekcjaStanDostawcow";
 
 /**
  * Zakładka jeszcze niewypełniona. Mówi wprost, który blok ją dowozi — inaczej pusty panel
@@ -57,6 +70,9 @@ export function Analityka() {
   const { data: status } = useStatusHistorii();
   const { data: kpi } = useKpi();
   const { data: marze, isPending: marzeWczytywane } = useMarze();
+  const { data: stabilnosc, isPending: stabilnoscWczytywana } = useStabilnoscDostawcow();
+  const { data: cyklZycia, isPending: cyklZyciaWczytywany } = useCyklZyciaDostawcow();
+  const { data: stan, isPending: stanWczytywany } = useStanDostawcow();
 
   return (
     <div>
@@ -87,11 +103,25 @@ export function Analityka() {
           </TabsTrigger>
         </TabsList>
 
+        {/*
+          Zakładka DOMYŚLNA całego widoku (`:27805`, `useState("dostawcy")`). Trzy karty
+          w kolejności oryginału (`:28050-28174`) — blok 10d wstawia treść w gotowe miejsce,
+          nie przemeblowuje zakładek.
+        */}
         <TabsContent value="dostawcy" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10d"
-            zakres="Statystyki dostawców, stabilność, cykl życia i stany magazynowe."
-          />
+          <div className="space-y-4">
+            <SekcjaStabilnoscDostawcow
+              dane={stabilnosc}
+              wybor={wybor}
+              ladowanie={stabilnoscWczytywana}
+            />
+            <SekcjaCyklZyciaDostawcow
+              dane={cyklZycia}
+              wybor={wybor}
+              ladowanie={cyklZyciaWczytywany}
+            />
+            <SekcjaStanDostawcow dane={stan} wybor={wybor} ladowanie={stanWczytywany} />
+          </div>
         </TabsContent>
 
         <TabsContent value="ean" className="mt-4">
