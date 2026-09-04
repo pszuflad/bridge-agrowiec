@@ -1,5 +1,5 @@
-// Analityka — pięć tras bloku 10a. Port `registerAnalyticsRoutes`
-// (`mirror/backend/analytics_module.cjs:76-107`, `:292-297`, `:325-331`).
+// Analityka — trasy bloków 10a, 10c, 10d i 10e. Port `registerAnalyticsRoutes`
+// (`mirror/backend/analytics_module.cjs:76-107`, `:110-143`, `:156-235`, `:279-303`, `:325-338`).
 //
 // ⚠ AUTH NIE JEST TU ODSTĘPSTWEM. Inaczej niż przy `markups`/`promotions`/`history`, gdzie
 // `contract/openapi.yaml` opisuje trasy jako publiczne (`security: []`), a odbudowa świadomie
@@ -16,9 +16,10 @@
 // `contract/README.md:38`), który zamiast tego ma test jednostkowy w `analityka.agregaty.test.ts`.
 //
 // Blok 10b dołożył pięć tras cen (`:237-268`, `:333`), blok 10c — sześć tras EAN
-// (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców (`:110`, `:133`, `:143`, `:332`).
-// Razem z pięcioma trasami 10a daje to 20 z 27 tras modułu; pozostałe siedem dowożą bloki
-// 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+// (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców (`:110`, `:133`, `:143`, `:332`),
+// blok 10e — sześć tras dostępności, rotacji i cyklu życia (`:156-184`, `:279-303`, `:334`).
+// Razem z pięcioma trasami 10a daje to 26 z 27 tras modułu; ostatnią — `export/{view}` —
+// dowozi blok 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
 //
 // ⚠ PIĘĆ TRAS CZYTA `req.query` — trzy z bloku 10c (`ean/comparison`, `ean/details`,
 // `ean-porownanie`) i dwie z 10b (`market/group-prices`, `prices/product-history`); trasy
@@ -26,7 +27,9 @@
 // bo oryginał parsuje go dopiero w handlerze (`num()`,
 // `String(x || '')`) i jego luźna semantyka — tablica z powtórzonego parametru, wartość
 // nieliczbowa, pusty napis — jest częścią odtwarzanego zachowania. Rozpakowanie tego
-// wcześniej zmieniłoby wynik.
+// wcześniej zmieniłoby wynik. Czwartym takim parametrem jest `?days` w `rotation/inactive`
+// (blok 10e) — z tą różnicą, że tam zaciski oryginału są na tyle osobne, że mieszkają
+// w nazwanej funkcji `zacisnijDniRotacji`, żeby dało się je pokryć testem bez serwera.
 
 import { Router, type Request, type Response } from "express";
 
@@ -35,22 +38,29 @@ import { requireAuth } from "../middleware/auth.js";
 import {
   cenyGrupRynku,
   cyklZyciaDostawcow,
+  cyklZyciaModeli,
+  dostepnoscProduktow,
   historiaCenProduktu,
   inflacjaCennika,
   kpi,
   listyFiltrow,
   marze,
+  osCzasuImportow,
   pokrycieEan,
   porownanieEan,
   porownanieEanLegacy,
   rankingDostawcowEan,
+  rotacjaNieaktywnych,
+  sezonowoscMiesieczna,
   stabilnoscDostawcow,
   stanDostawcow,
   statusHistorii,
   statystykiDostawcow,
   szczegolyEan,
+  tempoSchodzenia,
   topZmiany,
   unikalneEan,
+  zacisnijDniRotacji,
   zacisnijGrupeRynku,
   zbudujSnapshotBiezacy,
   zmianyCenOstatniegoImportu,
@@ -129,6 +139,59 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
   /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Bez parametrów query. */
   router.get("/api/analytics/margins", requireAuth, (_req: Request, res: Response) => {
     res.json(marze(db));
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  // BLOK 10e — dostępność / rotacja / cykl.
+  //
+  // Pięć z tych sześciu tras ma konsumenta w zakładkach `dostepnosc` i `marza`; szósta,
+  // `importy-timeline`, świadomie go NIE MA (decyzja D2 — oryginalny bundle też jej nie woła).
+  //
+  // Kolejność WEWNĄTRZ bloku jest jak w oryginale; blok EAN z 10c stoi niżej, choć w module
+  // rejestruje się między `availability/*` (`:156-184`) a `seasonality/monthly` (`:279`).
+  // Nie ma to znaczenia dla zachowania — wszystkie ścieżki są literalne, więc Express dopasowuje
+  // je niezależnie od kolejności rejestracji; scalanie bloków w jedną sekwencję kosztowałoby
+  // przemeblowanie pliku bez zysku.
+  // ───────────────────────────────────────────────────────────────────────────────────────
+
+  /** „4.1 Historia dostępności pozycji" (`:156-171`). Dwie gałęzie, różne kolumny — patrz repo. */
+  router.get("/api/analytics/availability/products", requireAuth, (_req: Request, res: Response) => {
+    res.json(dostepnoscProduktow(db));
+  });
+
+  /** „4.2 Tempo schodzenia z magazynu" (`:173-184`). SQL odtworzony 1:1 z pułapką — patrz repo. */
+  router.get(
+    "/api/analytics/availability/sell-through",
+    requireAuth,
+    (_req: Request, res: Response) => {
+      res.json(tempoSchodzenia(db));
+    },
+  );
+
+  /** „4.4 Sezonowy wzorzec cen" (`:279-283`). Miesiąc bez roku, jedyna trasa bloku bez limitu. */
+  router.get("/api/analytics/seasonality/monthly", requireAuth, (_req: Request, res: Response) => {
+    res.json(sezonowoscMiesieczna(db));
+  });
+
+  /** „4.6 Cykl życia modelu" (`:285-289`). Gałęzie różnią się sortowaniem i licznikiem. */
+  router.get("/api/analytics/lifecycle/models", requireAuth, (_req: Request, res: Response) => {
+    res.json(cyklZyciaModeli(db));
+  });
+
+  /**
+   * „Rotacja / produkty bez aktualizacji" (`:299-303`).
+   *
+   * ⚠ JEDYNA TRASA ANALITYKI DOWIEZIONA DO TEJ PORY, KTÓRA CZYTA `req.query`. Zaciskanie
+   * `days` do [1, 730] — łącznie z tym, co wychodzi dla napisu nieliczbowego — siedzi
+   * w `zacisnijDniRotacji`, żeby dało się je pokryć testem bez podnoszenia serwera.
+   */
+  router.get("/api/analytics/rotation/inactive", requireAuth, (req: Request, res: Response) => {
+    res.json(rotacjaNieaktywnych(db, zacisnijDniRotacji(req.query.days)));
+  });
+
+  /** Oś czasu importów z `audit_log` (`:334`). GOŁA TABLICA, bez koperty. Bez UI (decyzja D2). */
+  router.get("/api/analytics/importy-timeline", requireAuth, (_req: Request, res: Response) => {
+    res.json(osCzasuImportow(db));
   });
 
   // ──────────────────────────────────────────────────────────────────────────────────────

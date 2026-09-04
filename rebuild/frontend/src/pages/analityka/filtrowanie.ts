@@ -63,15 +63,58 @@ export function czyPusty(wybor: WyborFiltrow): boolean {
  */
 export const WYMIARY_MARZ: WymiarFiltra[] = ["dostawcy", "marki"];
 
-export function zastosujFiltryMarz(wiersze: GrupaMarzy[], wybor: WyborFiltrow): GrupaMarzy[] {
-  const dostawcy = wybor.dostawcy;
-  const marki = wybor.marki;
-  if (dostawcy.size === 0 && marki.size === 0) return wiersze;
+export const MAPOWANIE_MARZ: MapowanieWymiarow<GrupaMarzy> = {
+  dostawcy: (w) => w.dostawca,
+  marki: (w) => w.marka,
+};
 
-  return wiersze.filter(
-    (w) =>
-      (dostawcy.size === 0 || dostawcy.has(w.dostawca)) &&
-      (marki.size === 0 || marki.has(w.marka)),
+export function zastosujFiltryMarz(wiersze: GrupaMarzy[], wybor: WyborFiltrow): GrupaMarzy[] {
+  return zastosujFiltry(wiersze, wybor, MAPOWANIE_MARZ);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────
+// GENERYK — jedno filtrowanie dla wszystkich sekcji (dołożone w bloku 10e).
+//
+// 10a miało jedną sekcję i jedną funkcję filtrującą. 10e dokłada pięć sekcji, z których
+// każda niesie INNY podzbiór sześciu wymiarów (wiersz sezonowości zna tylko markę, wiersz
+// rotacji zna cztery wymiary), więc piąta kopia tej samej pętli byłaby czystym powielaniem.
+// Sekcja deklaruje MAPOWANIE „wymiar → pole wiersza", a semantyka OR/AND zostaje jedna.
+// ─────────────────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Które wymiary filtra sekcja umie zastosować i skąd bierze dla nich wartość.
+ *
+ * Wymiar NIEOBECNY w mapie to wymiar, którego wiersz tej sekcji nie niesie — nie filtruje
+ * więc niczym i trafia do notki z `wymiaryNieobslugiwane`. To jest świadoma deklaracja,
+ * a nie przeoczenie: pusta tabela „bo filtr nie miał na czym zadziałać" byłaby gorsza.
+ */
+export type MapowanieWymiarow<T> = Partial<Record<WymiarFiltra, (wiersz: T) => string | null>>;
+
+/** Wymiary zadeklarowane przez sekcję — do przekazania do `wymiaryNieobslugiwane`. */
+export function wymiaryZMapowania<T>(mapowanie: MapowanieWymiarow<T>): WymiarFiltra[] {
+  return WYMIARY_FILTRA.filter((w) => mapowanie[w] !== undefined);
+}
+
+/**
+ * Filtrowanie klienckie: **OR wewnątrz wymiaru, AND między wymiarami** — ta sama semantyka,
+ * którą oryginał zapisał w `currentWhere()` dla backendu (`analytics_module.cjs:60-74`).
+ *
+ * Wiersz z pustą wartością wymiaru (`null`) odpada, gdy ten wymiar filtruje — zaznaczenie
+ * konkretnej marki nie może przepuszczać wierszy bez marki.
+ */
+export function zastosujFiltry<T>(
+  wiersze: T[],
+  wybor: WyborFiltrow,
+  mapowanie: MapowanieWymiarow<T>,
+): T[] {
+  const czynne = wymiaryZMapowania(mapowanie).filter((w) => wybor[w].size > 0);
+  if (czynne.length === 0) return wiersze;
+
+  return wiersze.filter((wiersz) =>
+    czynne.every((wymiar) => {
+      const wartosc = mapowanie[wymiar]?.(wiersz);
+      return wartosc !== null && wartosc !== undefined && wybor[wymiar].has(wartosc);
+    }),
   );
 }
 

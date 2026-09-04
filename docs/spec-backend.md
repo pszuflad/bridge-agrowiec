@@ -138,6 +138,18 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > historii liczy z `products` — kształt wiersza jest różny między gałęziami. `dostawcy-stats`
 > zwraca **gołą tablicę** (bez koperty) i nie ma konsumenta w oryginalnym frontendzie. Szczegóły:
 > `docs/tickets/23-FEATURE-analityka-dostawcy/`.
+>
+> **Potwierdzone w 10e** (`25-FEATURE-analityka-dostepnosc-rotacja`, 2026-09-04): kolejne sześć
+> tras `/api/analytics/*` (`availability/products`, `availability/sell-through`,
+> `seasonality/monthly`, `lifecycle/models`, `rotation/inactive`, `importy-timeline`), wszystkie
+> pod `requireAuth`, odtworzone 1:1 z `analytics_module.cjs`. Jedyna z sześciu czytająca
+> `req.query` to `rotation/inactive` (`?days`, zaciskane do [1, 730], domyślnie 60).
+> `importy-timeline` nie ma konsumenta w UI (świadoma decyzja, jak `bootstrap-current` w 10a).
+> **Odkrycie o produkcji:** `historia_cen` nie ma kolumny `nazwa`, o którą pytają
+> `availability/products` i `availability/sell-through` — oba zapytania wywracają się na
+> `no such column`, `safeAll()` połyka błąd, więc obie trasy oddają `rows: []` mimo 15 597
+> migawek w historii; odtworzone 1:1, do decyzji w `docs/rebuild-backlog.md` #32. Szczegóły:
+> `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -292,6 +304,11 @@ z tego samego bloku liczy z niej inflację miesięczną, też oknem `LAG()`.
 `docs/tickets/19-FEATURE-analityka-fundament/plan.md` (10a),
 `docs/tickets/24-FEATURE-analityka-ceny/plan.md` (10b),
 `docs/tickets/23-FEATURE-analityka-dostawcy/` (10d).
+
+⚠ **`historia_cen` NIE MA kolumny `nazwa`** — a `availability/products`
+i `availability/sell-through` (blok 10e) o nią pytają (`MAX(nazwa)`), więc oba zapytania
+wywracają się na `no such column`, `safeAll()` połyka błąd i obie trasy zawsze oddają pustą
+listę. Patrz §2 wyżej i `docs/rebuild-backlog.md` #32.
 
 ## 6. Korekty do propagacji
 

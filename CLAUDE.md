@@ -53,6 +53,11 @@ miejscu: `ZT()` (:46971) woła `Lq(i)` licząc na licznik cyfr z :46965, a trafi
 z :47312, bo obie deklaracje `Lq` są w tym samym zakresie; efekt widoczny w produkcji: komunikat
 „zapis naukowy ma tylko null cyfr znaczących". Szczegóły: `docs/rebuild-backlog.md` #11.
 
+Ta sama nieufność dotyczy pustych odpowiedzi: `safeAll()` w module analityki zamienia błąd SQL
+(np. odwołanie do nieistniejącej kolumny) w pustą listę, więc zepsuta trasa wygląda identycznie
+jak trasa bez danych — nie ufaj `rows: []`, sprawdź, czy dane w bazie faktycznie są. Przykład:
+`docs/rebuild-backlog.md` #32 (`historia_cen` bez kolumny `nazwa`).
+
 ---
 
 ## Środowisko

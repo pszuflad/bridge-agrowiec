@@ -6,12 +6,17 @@ import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
 import type {
+  CyklZyciaModeli,
+  Dostepnosc,
   Filtry,
   HistoriaCenyProduktu,
   Kpi,
   Marze,
+  Rotacja,
+  Sezonowosc,
   StabilnoscDostawcow,
   StatusHistorii,
+  TempoSchodzenia,
   WierszCykluZycia,
   WierszInflacji,
   WierszPokryciaEan,
@@ -373,4 +378,57 @@ export function cyklZyciaDostawcowZFixtura(): { rows: WierszCykluZycia[] } {
 /** `GET /api/analytics/suppliers/stock` — 5 z 9 nagranych dostawców. */
 export function stanDostawcowZFixtura(): { rows: WierszStanuDostawcy[] } {
   return analitykaZFixtura<{ rows: WierszStanuDostawcy[] }>("GET_analytics_suppliers_stock.json");
+}
+
+/**
+ * Analityka (blok 10e) — sześć odpowiedzi prosto z nagrań produkcji.
+ *
+ * ⚠ CZTERY Z SZEŚCIU NAGRAŃ SĄ PUSTE i to nie jest przypadek nagrywarki:
+ *  • `availability/products` i `availability/sell-through` mają `hasHistory: true` i `rows: []`,
+ *    bo ich zapytania pytają `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma —
+ *    obie karty są w produkcji trwale puste (dowód: `GET_analytics_status.json` pokazuje
+ *    15 597 migawek historii). Testy widoku muszą więc pokazywać „Brak danych" jako stan
+ *    POPRAWNY, a nie awarię;
+ *  • `rotation/inactive` ma `rows: []`, bo w chwili nagrania każdy produkt był świeższy niż 60 dni;
+ *  • `importy-timeline` to pusta tablica — i JEDYNA odpowiedź analityki bez koperty.
+ *
+ * Kształt wierszy, których te nagrania nie pokazują, pokrywają testy jednostkowe backendu
+ * (`analityka.dostepnosc.agregaty.test.ts`).
+ */
+
+/** `GET /api/analytics/availability/products` — `rows: []` mimo historii. */
+export function dostepnoscProduktowZFixtura(): Dostepnosc {
+  return analitykaZFixtura<Dostepnosc>("GET_analytics_availability_products.json");
+}
+
+/** `GET /api/analytics/availability/sell-through` — `rows: []` mimo historii. */
+export function tempoSchodzeniaZFixtura(): TempoSchodzenia {
+  return analitykaZFixtura<TempoSchodzenia>("GET_analytics_availability_sell-through.json");
+}
+
+/** `GET /api/analytics/seasonality/monthly` — 5 nagranych wierszy miesiąc × marka. */
+export function sezonowoscZFixtura(): Sezonowosc {
+  return analitykaZFixtura<Sezonowosc>("GET_analytics_seasonality_monthly.json");
+}
+
+/** `GET /api/analytics/lifecycle/models` — 5 nagranych modeli. */
+export function cyklZyciaModeliZFixtura(): CyklZyciaModeli {
+  return analitykaZFixtura<CyklZyciaModeli>("GET_analytics_lifecycle_models.json");
+}
+
+/** `GET /api/analytics/rotation/inactive` — `days: 60`, `rows: []`. */
+export function rotacjaZFixtura(): Rotacja {
+  return analitykaZFixtura<Rotacja>("GET_analytics_rotation_inactive.json");
+}
+
+/**
+ * `GET /api/analytics/importy-timeline` — GOŁA TABLICA, więc bez `analitykaZFixtura`
+ * (ten helper zdejmuje klucze techniczne z OBIEKTU). Nagranie jest puste.
+ *
+ * Trasa nie ma konsumenta w UI (decyzja D2) — loader istnieje dla testów kontraktu klienta,
+ * nie dla widoku.
+ */
+export function importyTimelineZFixtura(): unknown[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_analytics_importy-timeline.json");
+  return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: unknown[] }).body;
 }

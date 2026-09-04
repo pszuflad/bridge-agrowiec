@@ -24,15 +24,20 @@ import type { Marze } from "@/pages/analityka/api";
 import {
   TOKEN_TESTOWY,
   cyklZyciaDostawcowZFixtura,
+  cyklZyciaModeliZFixtura,
+  dostepnoscProduktowZFixtura,
   filtryZFixtura,
   kpiZFixtura,
   marzeZFixtura,
   pokrycieEanZFixtura,
   porownanieEanZFixtura,
   rankingEanZFixtura,
+  rotacjaZFixtura,
+  sezonowoscZFixtura,
   stabilnoscDostawcowZFixtura,
   stanDostawcowZFixtura,
   statusAnalitykiZFixtura,
+  tempoSchodzeniaZFixtura,
   unikalneEanZFixtura,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
@@ -59,10 +64,12 @@ const CYKL_ZYCIA = cyklZyciaDostawcowZFixtura();
 const STAN = stanDostawcowZFixtura();
 
 /**
- * Trzy trasy dostawców też muszą tu być, choć ten plik ich nie bada: zakładka `dostawcy`
- * jest DOMYŚLNA, więc mountuje się przy każdym wejściu na `/analityka` i wypuszcza swoje
- * zapytania. Bez handlerów `onUnhandledRequest: "error"` wywaliłby każdy test w tym pliku.
- * Zawartość tej zakładki bada `analityka.dostawcy.test.tsx` (blok 10d).
+ * Trasy dostawców, EAN-u i bloku 10e też muszą tu być, choć ten plik ich nie bada: widok
+ * pobiera KOMPLET tras przy każdym wejściu na `/analityka`, niezależnie od aktywnej zakładki.
+ * Bez handlerów `onUnhandledRequest: "error"` (test/setup.ts) wywaliłby każdy test w tym pliku.
+ * Zawartość tych zakładek badają `analityka.dostawcy.test.tsx` (10d), `analityka.ean.test.tsx`
+ * (10c) i `analityka.dostepnosc.test.tsx` (10e); tutaj sprawdzamy szkielet strony i sekcję
+ * marż z bloku 10a.
  */
 function zamockujApi(marze: Marze = MARZE) {
   server.use(
@@ -81,6 +88,18 @@ function zamockujApi(marze: Marze = MARZE) {
     http.get("*/api/analytics/ean/unique", () => HttpResponse.json(unikalneEanZFixtura())),
     http.get("*/api/analytics/ean/coverage", () => HttpResponse.json(pokrycieEanZFixtura())),
     http.get("*/api/analytics/ean/supplier-rank", () => HttpResponse.json(rankingEanZFixtura())),
+    // Pięć tras dostępności, rotacji i cyklu życia (blok 10e):
+    http.get("*/api/analytics/availability/products", () =>
+      HttpResponse.json(dostepnoscProduktowZFixtura()),
+    ),
+    http.get("*/api/analytics/availability/sell-through", () =>
+      HttpResponse.json(tempoSchodzeniaZFixtura()),
+    ),
+    http.get("*/api/analytics/seasonality/monthly", () => HttpResponse.json(sezonowoscZFixtura())),
+    http.get("*/api/analytics/lifecycle/models", () =>
+      HttpResponse.json(cyklZyciaModeliZFixtura()),
+    ),
+    http.get("*/api/analytics/rotation/inactive", () => HttpResponse.json(rotacjaZFixtura())),
   );
 }
 
@@ -294,7 +313,10 @@ describe("3. Sekcja marż — dashboard-wzorzec", () => {
     zamockujApi({ rows: [], low: [], high: [] });
     await otworzZakladkeMarz();
 
-    expect(await screen.findByText("Brak danych")).toBeInTheDocument();
+    // Zakładka niesie od bloku 10e trzy tabele, więc pytanie musi być zawężone do tej
+    // jednej, o którą testowi chodzi — inaczej trafia w komunikat sąsiedniej karty.
+    const tabela = await screen.findByTestId("tabela-marze");
+    expect(within(tabela).getByText("Brak danych")).toBeInTheDocument();
   });
 });
 

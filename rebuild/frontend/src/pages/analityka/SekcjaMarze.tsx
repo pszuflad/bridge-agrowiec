@@ -16,6 +16,9 @@
  * ─── WZORZEC DLA 10b–10e ──────────────────────────────────────────────────────────────
  * Ten plik jest szablonem: hook z `api.ts` → `useMemo` z filtrami (albo parametr w `queryKey`,
  * gdy oryginalna trasa go ma) → wykres → `TabelaAnalityki`. Pełny opis: `README.md` obok.
+ *
+ * Nagłówek karty wraz z notkami o filtrach wyprowadził blok 10e do `NaglowekSekcji.tsx`,
+ * kiedy sekcji zrobiło się sześć — markup i `data-testid` zostały bez zmian.
  */
 import { useMemo } from "react";
 import {
@@ -41,13 +44,13 @@ import {
 
 import type { GrupaMarzy, Marze } from "./api";
 import {
-  ETYKIETY_WYMIAROW,
   WYMIARY_MARZ,
   wymiaryNieobslugiwane,
   zastosujFiltryMarz,
   type WyborFiltrow,
 } from "./filtrowanie";
 import { formatuj, formatujProcent } from "./formatowanie";
+import { NaglowekSekcji } from "./NaglowekSekcji";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
 
 /**
@@ -108,25 +111,19 @@ export function SekcjaMarze({
 
   const pominiete = wymiaryNieobslugiwane(wybor, WYMIARY_MARZ);
   const wszystkie = dane?.rows.length ?? 0;
-  const odfiltrowane = wszystkie - wiersze.length;
 
   return (
     <Card className="border-card-border">
       <CardContent className="p-0">
-        <div className="border-b px-4 py-3">
-          <div className="text-sm font-semibold">Marża per dostawca/kategoria/marka</div>
-          {odfiltrowane > 0 && (
-            <div className="mt-1 text-xs text-muted-foreground" data-testid="marze-licznik-filtra">
-              Filtry ukryły {formatuj(odfiltrowane)} z {formatuj(wszystkie)} grup.
-            </div>
-          )}
-          {pominiete.length > 0 && (
-            <div className="mt-1 text-xs text-muted-foreground" data-testid="marze-pominiete">
-              Ta sekcja grupuje po dostawcy, kategorii i marce, więc nie stosuje filtrów:{" "}
-              {pominiete.map((w) => ETYKIETY_WYMIAROW[w]).join(", ")}.
-            </div>
-          )}
-        </div>
+        <NaglowekSekcji
+          tytul="Marża per dostawca/kategoria/marka"
+          wszystkie={wszystkie}
+          widoczne={wiersze.length}
+          pominiete={pominiete}
+          wyjasnieniePominietych="Ta sekcja grupuje po dostawcy, kategorii i marce, więc nie stosuje filtrów:"
+          rzeczownik="grup"
+          prefiksTestu="marze"
+        />
 
         {/*
           FORMA (skill `dataviz`, `references/choosing-a-form.md`): porównanie wielkości

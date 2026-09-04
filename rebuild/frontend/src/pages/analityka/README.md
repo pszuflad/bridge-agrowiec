@@ -12,6 +12,11 @@ szablonem dla reszty Iteracji 10. Wypełniły go dotąd dwa bloki:
 Bloki **dokładają zakładki, nie przemeblowują widoku** — zakładki, ich kolejność
 i etykiety już są i pochodzą z oryginału.
 
+**Blok 10e jest zrobiony** (ticket `25-FEATURE-analityka-dostepnosc-rotacja`): wypełnił
+zakładkę „Dostępność" trzema kartami i dołożył dwie pod kartą marż w zakładce „Marża
+i rotacja". Wraz z nim doszły trzy rzeczy do REUŻYCIA, nie do przepisania — `PasekDostepnosci`,
+`NaglowekSekcji` i generyczne `zastosujFiltry` (patrz §1 i §2.3).
+
 Zanim napiszesz linijkę kodu: przeczytaj „Trzy pułapki" na końcu. Każda z nich kosztowała
 w 10a osobne dochodzenie.
 
@@ -28,6 +33,8 @@ w 10a osobne dochodzenie.
 | `PasekDostepnosci.tsx` | port `O()` z oryginału — pasek postępu w komórce „Dostępność". Wydzielony w 10d, bo woła go też karta „4.1" bloku 10e |
 | `NaglowekKpi.tsx` | banner historii + cztery kafle. Nie ruszać — to nagłówek całej strony |
 | `FiltryGlobalne.tsx` | sześć kontrolek. Nie ruszać — filtry są wspólne dla zakładek |
+| `NaglowekSekcji.tsx` | tytuł karty + notka „filtry ukryły N z M" + notka o wymiarach pominiętych |
+| `PasekDostepnosci.tsx` | port `O()` — pasek procentu dostępności w komórce tabeli (10e) |
 | `Sekcja<Nazwa>.tsx` | **to piszesz w swoim bloku** |
 | `../Analityka.tsx` | montuje sekcje w zakładkach; podmieniasz `ZakladkaWPrzygotowaniu` na swoją sekcję |
 
@@ -70,6 +77,14 @@ czy handler czyta `req.query`:
   tam ścieżką (`deminified/frontend-index.js:27870-27877`, `:27899-27905`):
 
   ```ts
+  // Wariant prosty (10e, `rotation/inactive?days`) — CAŁY adres w JEDNYM segmencie klucza.
+  // `queryKey.join("/")` z `lib/queryClient.ts` wstawiłby przy dwóch segmentach ukośnik przed
+  // znakiem zapytania (`…/inactive/?days=60`). Ten sam wzorzec niosą `pages/Staging.tsx`
+  // i `pages/Historia.tsx` (`adresStrony`); domyślny `queryFn` wystarcza.
+  useQuery({ queryKey: [`/api/analytics/rotation/inactive?days=${dni}`] });
+
+  // Wariant z własnym `queryFn` (10b, `prices/product-history`) — potrzebny tylko wtedy, gdy
+  // zapytanie ma się NIE wykonać przy pustych parametrach.
   useQuery({
     queryKey: ["/api/analytics/prices/product-history", ean, kod],
     queryFn: async () => {
@@ -108,15 +123,25 @@ Filtry są globalne, ale wiersz Twojej sekcji nie musi nieść wszystkich sześc
 `margins` grupuje po `dostawca`/`kategoria`/`marka`, więc model, rozmiar i oba indeksy
 w odpowiedzi **nie istnieją** — `GROUP BY` je zwinął.
 
-Nie zwijaj wtedy tabeli do zera i nie udawaj, że filtr zadziałał. Wypisz wymiary
-obsługiwane i pokaż notkę:
+Nie zwijaj wtedy tabeli do zera i nie udawaj, że filtr zadziałał. Zadeklaruj MAPOWANIE
+„wymiar → pole wiersza"; wymiar nieobecny w mapie to wymiar, którego sekcja nie stosuje,
+i o którym `NaglowekSekcji` powie użytkownikowi wprost:
 
 ```ts
-export const WYMIARY_MOJEJ_SEKCJI: WymiarFiltra[] = ["dostawcy", "marki", "modele"];
-const pominiete = wymiaryNieobslugiwane(wybor, WYMIARY_MOJEJ_SEKCJI);
+const MAPOWANIE: MapowanieWymiarow<MojWiersz> = {
+  dostawcy: (w) => w.dostawca,
+  marki: (w) => w.marka,
+};
+
+const wiersze = useMemo(() => zastosujFiltry(dane?.rows ?? [], wybor, MAPOWANIE), [dane, wybor]);
+const pominiete = wymiaryNieobslugiwane(wybor, wymiaryZMapowania(MAPOWANIE));
 ```
 
-Dla wierszy z kolumną `dostawca` jest już generyczne `zastosujFiltryDostawcow()`
+Semantyka jest jedna dla wszystkich sekcji: **OR wewnątrz wymiaru, AND między wymiarami**,
+a wiersz z pustą wartością odpada, gdy ten wymiar filtruje. Generyk `zastosujFiltry` powstał
+w 10e, kiedy sekcji zrobiło się sześć — nie pisz kolejnej kopii tej pętli.
+
+Dla wierszy z kolumną `dostawca` jest też węższe `zastosujFiltryDostawcow()`
 (`filtrowanie.ts`, blok 10d) — nie pisz własnej wersji filtra po dostawcy dla każdej tabeli.
 Bloki 10c i 10d napisały tę samą funkcję równolegle pod dwiema nazwami i duplikat trzeba było
 usuwać przy scalaniu (2026-09-04); zanim dołożysz pomocnika, sprawdź, czy sąsiedni blok już go
@@ -126,7 +151,8 @@ nie wniósł.
 — bo jej wiersz nie niesie odpowiedniej kolumny), powiedz o tym wprost osobną notką przy
 tabeli, która filtra NIE stosuje. Bez tego wygląda to jak zacięty filtr, nie jak świadome
 ograniczenie (wzorzec: karta „2.6" w `SekcjaEan.tsx` z 10c — ranking dostawców filtruje,
-histogram pokrycia nie).
+histogram pokrycia nie). Sekcje 10e robią to samo przez `NaglowekSekcji`, który dostaje
+wynik `wymiaryNieobslugiwane(...)` i sam wypisuje pominięte wymiary.
 
 ### 2.4 Tabela
 
@@ -190,9 +216,16 @@ i dlaczego to nie blokuje) siedzi w nagłówku `components/ui/chart.tsx`.
 
 ### 2.6 Wepnij w zakładkę
 
-W `../Analityka.tsx` podmień `ZakladkaWPrzygotowaniu` na swoją sekcję. Zakładka `marza`
-niesie już sekcję marż — blok 10e dokłada rotację i cykl życia **pod nią**, w tej samej
-zakładce, bo tak jest w oryginale (`frontend-index.js:28516-28640`).
+W `../Analityka.tsx` podmień `ZakladkaWPrzygotowaniu` na swoją sekcję. Wzorzec dokładania
+do zakładki JUŻ WYPEŁNIONEJ pokazuje blok 10e: zakładka `marza` niesie sekcję marż z 10a
+na górze, a rotację i cykl życia **pod nią**, w tej samej zakładce, bo tak jest w oryginale
+(`frontend-index.js:28516-28640`).
+
+⚠ Dokładając kartę do zakładki, która już ma tabelę, sprawdź testy poprzedniego bloku:
+zapytania w rodzaju `getByText("Brak danych")` przestają być jednoznaczne i muszą zejść
+do `within(getByTestId("tabela-…"))`. To jedyna zmiana, jakiej 10e musiało dokonać
+w testach 10a — poza dopisaniem handlerów MSW dla nowych tras, bez których
+`onUnhandledRequest: "error"` zgłasza żądanie bez mocka.
 
 ### 2.7 Testy
 
@@ -261,6 +294,21 @@ układ karty „2.6" jako jednej karty z dwiema tabelami.
 | — | `/analityka` ładowana leniwie | Recharts podnosił wspólny bundle z 451 do 837 kB, a używa go tylko ten widok |
 | — | `POST bootstrap-current` bez przycisku | trasa nieidempotentna, a oryginalny frontend nigdy jej nie woła |
 
+**Blok 10e — co dołożył** (ticket `25-FEATURE-analityka-dostepnosc-rotacja`, decyzje D1–D4
+użytkownika z 2026-09-03):
+
+| # | Co | Dlaczego |
+|---|---|---|
+| O-10e-1 | Wykres liniowy w karcie „4.4 Sezonowy wzorzec cen" | jedna seria (średnia po wszystkich markach), bo marek bywa kilkadziesiąt, a limit to 4 serie; pełny podział jest w tabeli pod wykresem |
+| — | `GET /api/analytics/importy-timeline` bez UI | oryginalny bundle nie woła tej trasy ani razu — karta byłaby nowym ekranem, nie odbudową |
+
+**1:1 z oryginałem, choć wygląda na defekt:** karty „4.1 Historia dostępności pozycji"
+i „4.2 Tempo schodzenia z magazynu" są **puste zawsze**. Ich zapytania pytają `historia_cen`
+o kolumnę `nazwa`, której ta tabela nie ma — produkcja połyka błąd i zwraca `rows: []` mimo
+15 597 migawek w historii (dowód w fixtures). Odtwarzamy to zachowanie; sprawa czeka na
+decyzję jako wpis **#32** w `docs/rebuild-backlog.md`. Nie „naprawiaj" tego przy okazji
+innego bloku — to jest zmiana zachowania produkcji i wymaga decyzji użytkownika.
+
 ## 5. Co ustalił blok 10b (`24-FEATURE-analityka-ceny`, 2026-09-04)
 
 **1:1 z oryginałem:** trzy karty zakładki `ceny` w kolejności i z tytułami oryginału ·
@@ -276,7 +324,7 @@ renderowany zawsze · brak zapytania o `product-history`, dopóki oba pola są p
 | D1 | `top-zmiany` — backend bez UI | zero wywołań w bundlu produkcji |
 | D2 | `market/group-prices` — backend bez UI | martwy fetch: wołana i ignorowana |
 
-**Gotowe do reużycia przez 10c–10e:** `useOpoznionaWartosc` (debounce),
+**Gotowe do reużycia:** `useOpoznionaWartosc` (debounce),
 `zastosujFiltryDostawcow` (generyczny filtr po dostawcy, wspólny z blokiem 10d),
 `WYMIARY_CEN` jako przykład deklaracji wymiarów obsługiwanych przez sekcję.
 

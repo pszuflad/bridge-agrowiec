@@ -18,7 +18,8 @@
  *  • O-10a-3 — wykres w sekcji marż; oryginał nie ma ani jednego wykresu
  *              (uzasadnienie w `components/ui/chart.tsx`); blok 10b rozszerza to
  *              o wykres inflacji (O-10b-2),
- *  • O-10a-4 — zakładka `dostepnosc` jest pusta do czasu bloku 10e. To zakres bloku,
+ *  • O-10a-4 — zakładki były puste do czasu bloków 10b–10e; dziś niesie treść komplet
+ *              pięciu. To był zakres bloków,
  *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
  *              wstawiają treść, zamiast przemeblowywać widok.
  *  • O-10d-1 — wykres dostępności w karcie „1.4 / 1.5" zakładki `dostawcy` (decyzja D2
@@ -29,6 +30,17 @@
  * na `GET /api/analytics/kpi` — oryginał liczy dwa z czterech kafli z `ean/comparison`
  * i `ean/unique` (`:28002-28017`) i te dane są już dostępne, ale przepięcie to osobna
  * decyzja użytkownika (D1 bloku 10c), nie skutek uboczny wypełniania zakładki.
+ *
+ * ─── CO DOŁOŻYŁ BLOK 10e (2026-09-04, `25-FEATURE-analityka-dostepnosc-rotacja`) ───────
+ * Zakładka „Dostępność" niesie trzy karty oryginału (4.1, 4.2, 4.4), a pod kartą marż
+ * w zakładce „Marża i rotacja" stają dwie kolejne (rotacja, cykl życia modelu) — tak jak
+ * w produkcji (`frontend-index.js:28516-28640`), bez tworzenia nowej zakładki.
+ *  • O-10e-1 — wykres liniowy w karcie „4.4 Sezonowy wzorzec cen"
+ *              (uzasadnienie w `analityka/SekcjaSezonowosci.tsx`).
+ *
+ * ⚠ Karty „4.1" i „4.2" pokazują „Brak danych" NIEZALEŻNIE od stanu bazy i tak jest też
+ * w produkcji: ich zapytania pytają `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma
+ * (`docs/rebuild-backlog.md` #32). To nie jest usterka odbudowy.
  *
  * ─── CZEGO TU NIE MA ──────────────────────────────────────────────────────────────────
  * `POST /api/analytics/bootstrap-current` nie ma i mieć nie będzie przycisku (decyzja D4).
@@ -42,15 +54,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
   useCyklZyciaDostawcow,
+  useCyklZyciaModeli,
+  useDostepnoscProduktow,
   useFiltry,
   useKpi,
   useMarze,
   usePokrycieEan,
   usePorownanieEan,
   useRankingDostawcowEan,
+  useSezonowoscMiesieczna,
   useStabilnoscDostawcow,
   useStanDostawcow,
   useStatusHistorii,
+  useTempoSchodzenia,
   useUnikalneEan,
 } from "./analityka/api";
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
@@ -58,23 +74,22 @@ import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
 import { SekcjaCeny } from "./analityka/SekcjaCeny";
 import { SekcjaCyklZyciaDostawcow } from "./analityka/SekcjaCyklZyciaDostawcow";
+import { SekcjaCykluZyciaModeli } from "./analityka/SekcjaCykluZyciaModeli";
+import { SekcjaDostepnosciProduktow } from "./analityka/SekcjaDostepnosciProduktow";
 import { SekcjaEan } from "./analityka/SekcjaEan";
 import { SekcjaMarze } from "./analityka/SekcjaMarze";
+import { SekcjaRotacji } from "./analityka/SekcjaRotacji";
+import { SekcjaSezonowosci } from "./analityka/SekcjaSezonowosci";
 import { SekcjaStabilnoscDostawcow } from "./analityka/SekcjaStabilnoscDostawcow";
 import { SekcjaStanDostawcow } from "./analityka/SekcjaStanDostawcow";
+import { SekcjaTempaSchodzenia } from "./analityka/SekcjaTempaSchodzenia";
 
-/**
- * Zakładka jeszcze niewypełniona. Mówi wprost, który blok ją dowozi — inaczej pusty panel
- * wygląda jak awaria. Znika razem z wstawieniem treści przez odpowiednią sesję.
- */
-function ZakladkaWPrzygotowaniu({ blok, zakres }: { blok: string; zakres: string }) {
-  return (
-    <div className="rounded border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-      <div className="font-medium">Dashboardy w przygotowaniu — blok {blok}</div>
-      <div className="mt-1 text-xs">{zakres}</div>
-    </div>
-  );
-}
+// `ZakladkaWPrzygotowaniu` — komponent-zaślepka z bloku 10a — zniknął przy scaleniu 10b i 10e
+// (2026-09-04): wszystkie pięć zakładek niesie już treść, więc nie miał czego zastępować.
+// Historia w `docs/tickets/19-FEATURE-analityka-fundament/`.
+
+/** Wartość początkowa pola „Bez ruchu dni" — `useState("60")` oryginału. Napis, nie liczba. */
+const DNI_ROTACJI_POCZATKOWE = "60";
 
 export function Analityka() {
   const [wybor, ustawWybor] = useState<WyborFiltrow>(pustyWybor);
@@ -95,6 +110,16 @@ export function Analityka() {
   const unikalneEan = useUnikalneEan();
   const pokrycieEan = usePokrycieEan();
   const rankingEan = useRankingDostawcowEan();
+
+  // Blok 10e. Wartość pola „Bez ruchu dni" mieszka TU, a nie w sekcji rotacji — tak jak
+  // w oryginale (`useState("60")`, `frontend-index.js:27805`). Powód jest praktyczny:
+  // `Tabs.Content` odmontowuje nieaktywną zakładkę, więc stan trzymany w sekcji wracałby
+  // do „60" po każdym przejściu na inną zakładkę. Samo zapytanie zostaje w sekcji.
+  const { data: dostepnosc, isPending: dostepnoscWczytywana } = useDostepnoscProduktow();
+  const { data: tempo, isPending: tempoWczytywane } = useTempoSchodzenia();
+  const { data: sezonowosc, isPending: sezonowoscWczytywana } = useSezonowoscMiesieczna();
+  const { data: cyklZyciaModeli, isPending: cyklModeliWczytywany } = useCyklZyciaModeli();
+  const [dniRotacji, ustawDniRotacji] = useState(DNI_ROTACJI_POCZATKOWE);
 
   return (
     <div>
@@ -165,23 +190,36 @@ export function Analityka() {
           <SekcjaCeny wybor={wybor} />
         </TabsContent>
 
-        <TabsContent value="dostepnosc" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10e"
-            zakres="Dostępność produktów, wyprzedaż, sezonowość i oś czasu importów."
+        {/*
+          Trzy karty w kolejności oryginału (`frontend-index.js:28417-28515`): 4.1, 4.2, 4.4.
+          Numeracja jest z produkcji i ma luki — „4.3" i „4.5" siedzą w innych zakładkach.
+
+          ⚠ Dwie pierwsze karty są w produkcji TRWALE PUSTE (`historia_cen` nie ma kolumny
+          `nazwa`, o którą pytają ich zapytania). Odtwarzamy to zachowanie 1:1; szczegóły
+          w nagłówkach obu sekcji i w `repos/analityka.ts`.
+        */}
+        <TabsContent value="dostepnosc" className="mt-4 space-y-4">
+          <SekcjaDostepnosciProduktow
+            dane={dostepnosc}
+            wybor={wybor}
+            ladowanie={dostepnoscWczytywana}
           />
+          <SekcjaTempaSchodzenia dane={tempo} wybor={wybor} ladowanie={tempoWczytywane} />
+          <SekcjaSezonowosci dane={sezonowosc} wybor={wybor} ladowanie={sezonowoscWczytywana} />
         </TabsContent>
 
         {/*
-          Jedyna wypełniona zakładka 10a. W oryginale niesie trzy karty: marże,
-          rotację (`rotation/inactive`) i cykl życia modelu (`lifecycle/models`) —
-          te dwie należą do bloku 10e i dołożą się TUTAJ, pod sekcją marż.
+          Trzy karty, w kolejności oryginału (`frontend-index.js:28516-28640`): marże z bloku
+          10a NA GÓRZE, pod nimi rotacja i cykl życia z 10e. To JEDNA zakładka, a nie nowa —
+          `rotation/inactive` i `lifecycle/models` należą tu, bo tak jest w produkcji.
         */}
         <TabsContent value="marza" className="mt-4 space-y-4">
           <SekcjaMarze dane={marze} wybor={wybor} ladowanie={marzeWczytywane} />
-          <ZakladkaWPrzygotowaniu
-            blok="10e"
-            zakres="Rotacja (produkty bez aktualizacji) i cykl życia modelu dołączą do tej zakładki."
+          <SekcjaRotacji wybor={wybor} dni={dniRotacji} onZmianaDni={ustawDniRotacji} />
+          <SekcjaCykluZyciaModeli
+            dane={cyklZyciaModeli}
+            wybor={wybor}
+            ladowanie={cyklModeliWczytywany}
           />
         </TabsContent>
       </Tabs>
