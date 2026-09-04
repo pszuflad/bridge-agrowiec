@@ -77,11 +77,15 @@ a nie na porównaniu z fixture'em:
 2. **`GET_overrides.json` jest wiążący** dla odczytu override'ów: klucze **camelCase**
    (`fieldName`, `overrideValue`, `id`, `supplierProductId`) — zgodne z `l[t.fieldName]`
    w oryginale, **bez pułapki snake_case** z `CLAUDE.md`. Test czyta ten plik.
-3. **`GET_products.json` i `GET_atrybuty.json`** — istniejący GATE katalogu
-   (`test/katalog.gate.test.ts`) zostaje nietknięty i musi dalej przechodzić.
+3. **`GET_products.json` i `GET_atrybuty.json`** — front konsumuje je przez mocki MSW
+   zbudowane wprost z nagrań (`test/msw/kontrakt.ts`), więc zmiana kształtu fixture'u wywali
+   testy widoku.
 
-`WYJATKI_SZEROKOSC` w `test/katalog.gate.test.ts` **zostaje bez zmian** — jego usunięcie jest
-zadaniem 12d po przenagraniu `GET_products.json`, nie tego ticketa.
+⚠ **GATE katalogu (`rebuild/backend/test/katalog.gate.test.ts`) jest testem BACKENDU, nie
+frontu** — razem z wyjątkiem `WYJATKI_SZEROKOSC`. Ten ticket nie zmienia ani jednego pliku
+backendu, więc tamten gate jest nietknięty Z KONSTRUKCJI (dowód: `git diff --name-only
+origin/develop...HEAD` nie zawiera `rebuild/backend/`), a nie dlatego, że go tu uruchamiamy.
+Usunięcie `WYJATKI_SZEROKOSC` należy do 12d, po przenagraniu `GET_products.json`.
 
 ## Decisions
 

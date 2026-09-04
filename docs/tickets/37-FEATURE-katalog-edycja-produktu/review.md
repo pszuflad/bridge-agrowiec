@@ -1,114 +1,109 @@
 # 37-FEATURE-katalog-edycja-produktu — Code review
 
-> Reviewed: 2026-09-05
+> Reviewed: 2026-09-05 (runda 2)
 > Branch: `feature/37-katalog-edycja-produktu`
-> Diff: 12 plików, 2 commity (`16deca5`, `8b4c612`)
+> Diff: 14 plików, 3 commity (`16deca5`, `8b4c612`, `8956edf`)
+
+## Runda 2 — status poprawek z rundy 1
+
+| # | Ustalenie z rundy 1 | Status |
+|---|---|---|
+| SHOULD-FIX | Nagłówek kolumny „Podgląd" zamiast „Akcje" (`TabelaProduktow.tsx:140-142`) | **Naprawione** (`8956edf`) |
+| NICE-TO-HAVE | `kodDostawcy ?? ""` zamiast `\|\|` w tytule dialogu (`DialogEdycjiProduktu.tsx:291`) | **Naprawione** (`8956edf`) |
+| NICE-TO-HAVE | Brak blokady podwójnego kliknięcia toggle'a statusu | **Świadomie nienaniesione** — słusznie: to zastana wada oryginału (`:23791-23799`), a nie regres tego ticketa; naprawa byłaby niezatwierdzonym odstępstwem. Zostawione jako obserwacja w `raport.md`, nie jako dług — akceptuję. |
+
+### Weryfikacja poprawki 1 (nagłówek „Akcje")
+
+`rebuild/frontend/src/pages/katalog/TabelaProduktow.tsx:138-144` — tekst zmieniony na „Akcje",
+dodany `data-testid="header-akcje"`, komentarz nad kodem przestał kłamać (już nie twierdzi
+fałszywie, że „kolumna wróciła do oryginału", tylko opisuje historię zmiany etykiety). Zgodne
+z oryginałem `deminified/frontend-index.js:23693-23695` (`children: "Akcje"`).
+
+Nowy test (`test/katalog.edycja.test.tsx:140-149`):
+```ts
+expect(screen.getByTestId("header-akcje")).toHaveTextContent("Akcje");
+expect(screen.queryByText("Podgląd")).not.toBeInTheDocument();
+```
+Nie jest trywialny: pierwsza asercja idzie po `data-testid` dodanym w tej samej poprawce i
+sprawdza KONKRETNĄ treść — bez cofnięcia zmiany w `TabelaProduktow.tsx` ten test realnie by nie
+przeszedł (sprawdzone uruchomieniem całego pliku, 12/12 zielone). Druga asercja
+(`queryByText("Podgląd")`) jest defensywna wobec regresu do starej etykiety gdziekolwiek w
+drzewie, nie tylko w tym jednym `<th>` — rozsądne dopełnienie, nie zastępuje pierwszej, którą
+uważam za właściwy dowód. Żadna z dwóch nie może przejść fałszywie zielono z powodu tekstu
+pojawiającego się „gdzie indziej”: `data-testid="header-akcje"` jest unikatowy, a fraza
+„Podgląd” nie występuje już nigdzie w widoku `/katalog` po usunięciu `PodgladProduktu.tsx` (12c).
+
+### Weryfikacja poprawki 2 (`kodDostawcy`)
+
+`rebuild/frontend/src/pages/katalog/DialogEdycjiProduktu.tsx:288-292` —
+`String(produkt.kodDostawcy || produkt.kod)`, dokładnie `e.kodDostawcy || e.kod` z `:24037`.
+`kodDostawcy` ma typ `unknown` (indeks `[pole: string]: unknown` w `Produkt`), `tsc` przepuszcza
+`||` na `unknown` bez zawężenia — potwierdzone `npm run typecheck` (czysto). Nie wprowadza
+regresu: dla typowych wartości (string niepusty/pusty, `null`, `undefined`) zachowanie identyczne
+z poprzednim `?? ""`; różni się tylko dla teoretycznej liczby `0`, o co dokładnie chodziło.
+
+### Nic nowego nie znalazłem w zmienionych plikach
+
+Diff `8956edf` jest chirurgicznie mały (2 linijki produkcyjnego kodu + komentarze + jeden nowy
+test) i nie dotyka niczego poza tym, co było przedmiotem poprawki. Sprawdzone dodatkowo:
+- `git diff --stat` całej gałęzi nadal pokazuje wyłącznie pliki z pierwotnego zakresu ticketa —
+  backend (`rebuild/backend/`) w dalszym ciągu nietknięty (`git diff origin/develop...HEAD --stat -- rebuild/backend/` puste).
+- `lint` / `typecheck` / `build` — czyste.
+- Pełna suita: **683 testy / 45 plików, zielone** (potwierdzone lokalnie, zgadza się z raportem).
+- Korekta własnej metodologii z rundy 1: plik `test/katalog.gate.test.ts`, o którym mówi
+  plan/raport, jest testem **backendowym** (`rebuild/backend/test/katalog.gate.test.ts`), nie
+  frontendowym — w rundzie 1 sprawdziłem niewłaściwą (nieistniejącą) ścieżkę we frontendzie,
+  co dało pusty, ale niediagnostyczny wynik. Wniosek się nie zmienia (GATE nietknięty, bo
+  backend w ogóle nie jest częścią diffu), ale odnotowuję to jako sprostowanie do protokołu,
+  nie jako nowy problem w kodzie.
 
 ## BLOCKER
 
-Brak. Nie znalazłem błędów logicznych, luk bezpieczeństwa, naruszeń Definition of done ani
-rozjazdu z kontraktem, które kwalifikowałyby się jako blokujące. Bramki (`lint`, `typecheck`,
-`build`, `test`) uruchomione lokalnie — wszystkie czyste, 682/682 testów zielonych, `katalog.gate.test.ts`
-przechodzi nietknięty.
+Brak.
 
 ## SHOULD-FIX
 
-- [ ] `rebuild/frontend/src/pages/katalog/TabelaProduktow.tsx:140-142` — nagłówek ostatniej
-  kolumny nadal pokazuje tekst „Podgląd", mimo że odstępstwo D4 zostało zniesione i kolumna
-  od tej sesji mieści pełne menu „Akcje" (Edytuj/Historia/Wstrzymaj-Aktywuj/Usuń).
-  - Powód: oryginał ma tu dosłownie „Akcje" (`deminified/frontend-index.js:23693-23696`).
-    Komentarz tuż nad kodem (linie 14-16, dopisany w TYM tickecie) mówi wprost „kolumna
-    wróciła do oryginału" — kod temu przeczy. Żaden test nie sprawdza treści tego nagłówka
-    (`test/katalog.test.tsx` i `katalog.edycja.test.tsx` adresują menu przez `data-testid`/rolę,
-    nie przez nagłówek tabeli), więc regres przeszedł niezauważony przez GATE. To dokładnie ten
-    rodzaj literalnej niezgodności tekstu, o który dba reszta tego ticketa (etykiety pól, toasty,
-    tekst potwierdzenia usunięcia) — tu akurat nie dopilnowano.
-  - Sugestia: zmienić `children: "Podgląd"` na `"Akcje"` (jedna linijka) i dodać asercję
-    w `katalog.test.tsx` lub `katalog.edycja.test.tsx` sprawdzającą treść `header`/`<th>` tej
-    kolumny, żeby podobny regres złapał GATE, a nie code review.
+Brak — jedyna pozycja z rundy 1 naprawiona i zweryfikowana.
 
 ## NICE-TO-HAVE
 
-- [ ] `rebuild/frontend/src/pages/katalog/DialogEdycjiProduktu.tsx:291` — nagłówek dialogu liczy
-  `String(produkt.kodDostawcy ?? "") || produkt.kod`, podczas gdy oryginał robi
-  `e.kodDostawcy || e.kod` (`:24038`). Różnica ujawni się tylko, gdyby `kodDostawcy` było liczbą
-  `0` (`String(0)` = `"0"`, string prawdziwościowy, więc wygrałby zamiast `kod`) — w praktyce to
-  pole tekstowe z zewnętrznego importu dostawcy, więc ryzyko czysto teoretyczne. Nie blokuję,
-  tylko odnotowuję na wypadek, gdyby kiedyś `kodDostawcy` zaczęło przychodzić jako liczba.
-- [ ] `rebuild/frontend/src/pages/katalog/MenuAkcji.tsx:85-89` — pozycja „Wstrzymaj/Aktywuj" nie
-  ma żadnego stanu `disabled`/`pending` na czas trwania mutacji, więc dwuklik przed odświeżeniem
-  UI wyśle dwa `PATCH` pod rząd (drugi z odwróconą, już nieaktualną etykietą). Oryginał ma tę
-  samą wadę (`:23791-23799`, zero blokady), więc to nie jest odstępstwo — tylko wskazówka, gdyby
-  ktoś kiedyś chciał to poprawić przy okazji.
+- [ ] `rebuild/frontend/src/pages/katalog/MenuAkcji.tsx:85-89` — nadal brak blokady podwójnego
+  kliknięcia „Wstrzymaj/Aktywuj” w trakcie trwania mutacji. Świadomie nienaniesione (patrz wyżej)
+  — zostawiam jako otwartą, nieblokującą obserwację, tak jak w rundzie 1.
 
 ## Plan compliance
 
 ### Done ✓
-- Krok 1 (`src/pages/katalog/api.ts`) — port `Og`/`jb`/odczytu i kasowania override'ów, bez
-  własnego `fetch`, na `zadanie()`.
-- Krok 2 (`src/pages/katalog/poleEdycji.ts`) — 42 pola jako dane, kolejność i dosłowne etykiety
-  zweryfikowane linia po linii wobec `:24041-24095`, `KLUCZE_PAYLOADU` zgodne z
-  `POLA_EDYTOWALNE_PRODUKTU` (potwierdzone testem i ręcznie).
-- Krok 3 (`DialogEdycjiProduktu.tsx`) — port `LT()`: stan `zmiany` startuje pusty, `useEffect`
-  resetuje przy zmianie `produkt?.id` PRZED wczesnym `return null` (kolejność hooków poprawna —
-  `useQuery`×2, `useMemo`×2, `useEffect`, dopiero potem `if (!produkt) return null`), override'y
-  mapowane po `fieldName` (camelCase, zgodnie z fixture'em), pole scalone „Bieznik/model" pisze
-  oba klucze.
-- Krok 4 (`MenuAkcji.tsx` + `TabelaProduktow.tsx`) — kolejność pozycji 1:1 (Edytuj → Historia
-  disabled → separator → Wstrzymaj/Aktywuj → Usuń), toggle jako jedna pozycja — potwierdzone
-  testem `katalog.edycja.test.tsx:126-138`. Wyjątek: nagłówek kolumny, patrz SHOULD-FIX.
-- Krok 5 (`Katalog.tsx`) — trzy `useMutation`, toasty dosłowne (`Zapisano zmiany` /
-  `Wstrzymano`/`Aktywowano` / `Usunięto produkt`), invalidacje `["/api/products"]` +
-  `["/api/history"]` bez `["/api/alerts"]`/`["/api/analytics"]`, `DialogPotwierdzenia` z tekstem
-  `Usunąć {kod}?`.
-- Krok 6 — `PodgladProduktu.tsx` usunięty, brak martwych importów, `KOLUMNY`/`formatujKomorke`
-  mają innych konsumentów.
-- Krok 7 — testy: `katalog.poleEdycji.test.ts` (18), `katalog.edycja.test.tsx` (18),
-  `katalog.test.tsx` zaktualizowany, `test/msw/kontrakt.ts` ma `overridesZFixtura()`.
-- Cztery decyzje D1–D4 zrealizowane zgodnie z opisem w planie.
+Bez zmian względem rundy 1 — wszystkie kroki Implementation planu zrealizowane, teraz łącznie
+z poprawnym nagłówkiem kolumny „Akcje” i wiernym fallbackiem `kodDostawcy`.
 
 ### Missing or deviating ✗
-- Nagłówek kolumny „Akcje" w `TabelaProduktow.tsx` nie został przywrócony mimo zniesienia D4
-  (patrz SHOULD-FIX) — jedyne miejsce w diffie, gdzie deklarowany stan („kolumna wróciła do
-  oryginału") rozjeżdża się z kodem.
-- Odstępstwo `onError` z toastem `destructive` — NIE jest w liście D1–D4, ale jest jawnie
-  opisane i uzasadnione w `raport.md` („Odstępstwa od planu") jako spójne z konwencją reszty
-  odbudowy (`narzuty/TabelaNarzutow.tsx`, `Staging.tsx`). Traktuję to jako świadome,
-  udokumentowane odstępstwo, nie jako przeoczenie — zgodnie z regułą „plan.md może nie
-  przewidzieć wszystkiego, ale odstępstwo musi być zapisane", co tu ma miejsce.
+Brak. Jedyna rozbieżność z rundy 1 (nagłówek kolumny) usunięta.
 
 ### Definition of done
 - [x] Dialog edycji zastępuje podgląd read-only; `PodgladProduktu.tsx` usunięty, D4 zniesione.
 - [x] 42 pola w kolejności oryginału, dosłowne etykiety, `dostawca` disabled, „Bieznik/model"
       pisze `model`+`bieznik`, cztery pola warunkowe działają jako select przy niepustym słowniku.
-- [x] `PATCH` wysyła wyłącznie dotknięte pola i wyłącznie klucze z `POLA_EDYTOWALNE_PRODUKTU`
-      (dowiedzione testem `katalog.poleEdycji.test.ts:44-49`).
-- [x] Menu „Akcje" w kolejności 1:1, toggle jako jedna pozycja (samo menu — patrz uwaga o
-      nagłówku kolumny w SHOULD-FIX, to nie jest część menu, ale wizualne otoczenie kolumny).
+- [x] `PATCH` wysyła wyłącznie dotknięte pola i wyłącznie klucze z `POLA_EDYTOWALNE_PRODUKTU`.
+- [x] Menu „Akcje” w kolejności 1:1, toggle jako jedna pozycja — **teraz łącznie z poprawnym
+      nagłówkiem kolumny „Akcje”** (naprawione w tej rundzie).
 - [x] Usuwanie woła `DELETE` po potwierdzeniu w `DialogPotwierdzenia` z tekstem `Usunąć {kod}?`;
       anulowanie nie wysyła żądania.
 - [x] Override'y widoczne i kasowalne przez `DELETE /api/overrides/{id}`, invalidacja
       `["/api/overrides", dostawca, kod]`.
-- [x] Invalidacje `["/api/products"]` + `["/api/history"]`, bez `["/api/alerts"]`/`["/api/analytics"]`
-      (asercja negatywna w teście).
-- [x] Toasty z dosłownymi tekstami oryginału (cztery przypadki, zweryfikowane wobec
-      `:23800-23808`, `:23899-23902`).
-- [x] `lint`/`typecheck`/`build`/`test` czyste (zweryfikowane lokalnie: 682/682, `katalog.gate.test.ts`
-      przechodzi nietknięty).
+- [x] Invalidacje `["/api/products"]` + `["/api/history"]`, bez `["/api/alerts"]`/`["/api/analytics"]`.
+- [x] Toasty z dosłownymi tekstami oryginału.
+- [x] `lint`/`typecheck`/`build`/`test` czyste (683/683 zweryfikowane lokalnie po poprawkach).
 
 ## Parallel-test concerns
 
-None — wszystkie nowe testy używają MSW + efemerycznego `queryClient.clear()`/`localStorage.clear()`
-w `beforeEach`, bez portów ani plików tymczasowych ze stałą ścieżką.
+None — bez zmian względem rundy 1.
 
 ## Overall assessment
 
-Bardzo wierny port — pole po polu, etykieta po etykiecie, zgodny z `LT()` i menu wierszowym co
-do znaku, z solidnym testem strażniczym na zgodność `KLUCZE_PAYLOADU`/`POLA_EDYTOWALNE_PRODUKTU`
-(odporny na typowe zmiany formatowania, bo liczy długość i porównuje posortowane listy zamiast
-ufać samemu dopasowaniu regexu). Cztery decyzje D1–D4 zrealizowane zgodnie z planem, bez
-niezatwierdzonych odstępstw poza jednym udokumentowanym (`onError`). Jedyna realna usterka to
-zapomniana zmiana nagłówka kolumny „Podgląd" → „Akcje" — nieszkodliwa funkcjonalnie, ale
-sprzeczna z własnym komentarzem kodu i z duchem całego ticketu, który dba o literalną zgodność
-tekstów. Kierunek i jakość implementacji nie budzą zastrzeżeń, można mergować po (lub nawet bez)
-poprawki nagłówka — to kosmetyczny, jednolinijkowy fix.
+Obie poprawki trafne, minimalne i poprawnie zweryfikowane testem, który realnie coś dowodzi
+(nietrywialna asercja na `data-testid` dodanym w tej samej poprawce). Świadoma decyzja o
+nienaprawianiu trzeciej, najmniej istotnej uwagi (brak blokady dwukliku) jest właściwa — to
+zastane zachowanie oryginału, a nie coś wniesionego przez ten ticket, więc naprawa bez decyzji
+użytkownika byłaby nieautoryzowanym odstępstwem. Zakres diffu poza poprawkami się nie ruszył,
+bramki czyste, backend nietknięty. **Gotowe do merge'a.**

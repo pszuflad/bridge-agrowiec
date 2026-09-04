@@ -52,9 +52,14 @@ klasa co odstępstwo D5 z I2 (`isLoading`/`isError`) — nie zmienia zachowania 
     `contract/openapi.yaml:870-909` (metoda + ścieżka) oraz test porównujący `KLUCZE_PAYLOADU`
     frontu z `POLA_EDYTOWALNE_PRODUKTU` czytanym ZE ŹRÓDŁA backendu — obie listy mają
     dokładnie te same 42 pozycje.
-  - **`GET_products.json`, `GET_atrybuty.json`** — istniejący GATE katalogu
-    (`test/katalog.gate.test.ts`) przechodzi **nietknięty**, razem z zadeklarowanym wyjątkiem
-    `WYJATKI_SZEROKOSC` (jego usunięcie należy do 12d).
+  - **`GET_products.json`, `GET_atrybuty.json`** — konsumowane przez mocki MSW budowane
+    wprost z nagrań (`test/msw/kontrakt.ts`), więc zmiana kształtu fixture'u wywala testy widoku.
+  - **⚠ SPROSTOWANIE (review, runda 2):** GATE katalogu `katalog.gate.test.ts` leży
+    w **`rebuild/backend/test/`** — to test BACKENDU, nie frontu, i plan.md początkowo mylnie
+    liczył go jako nogę bramki tej sesji. Ten ticket nie zmienia ANI JEDNEGO pliku backendu
+    (`git diff --name-only origin/develop...HEAD` → zero trafień w `rebuild/backend/`), więc
+    tamten gate wraz z `WYJATKI_SZEROKOSC` jest nietknięty z konstrukcji. Backendowej suity
+    nie uruchamiałem i nie twierdzę, że ją zweryfikowałem.
   - **Czego GATE NIE mógł sprawdzić:** sześć operacji mutacji produktów **nie ma nagranych
     fixtures** — ich przenagranie to jawnie zadanie sesji 12d. Kształt odpowiedzi `PATCH`
     (pełny produkt) i `DELETE` (`{ok:true}`) stoi więc na kodzie 12a, nie na nagraniu produkcji.
@@ -82,6 +87,11 @@ Review: 0 BLOCKER, 1 SHOULD-FIX, 2 NICE-TO-HAVE. Naniesione:
 - **NICE-TO-HAVE (nie naniesione, świadomie)** — brak blokady podwójnego kliknięcia przełącznika
   statusu. **Ta sama wada jest w oryginale**, więc naprawa byłaby odstępstwem bez decyzji
   użytkownika. Odnotowane jako obserwacja, nie dług.
+
+**Runda 2 review: 0 BLOCKER, 0 SHOULD-FIX, 1 NICE-TO-HAVE** (ta sama, świadomie odrzucona
+uwaga o dwukliku). Reviewer sprostował przy okazji własną metodologię z rundy 1: sprawdzał
+`katalog.gate.test.ts` pod ścieżką frontendową, a ten test leży w backendzie — poprawione
+w sekcji o gate wyżej.
 
 Po poprawkach: **683 testy / 45 plików**, lint/typecheck/build czyste.
 
@@ -120,7 +130,7 @@ Brak zmian łamiących API. Zmiany wewnętrzne frontendu:
   Poza zakresem 12c; kandydat na drobny ticket porządkowy albo na domknięcie w 12e.
 - **Przenagranie fixtures dla sześciu operacji mutacji produktów** — sesja 12d. Do tego czasu
   kształt odpowiedzi `PATCH`/`DELETE` nie ma wyroczni z produkcji.
-- **`WYJATKI_SZEROKOSC` w `test/katalog.gate.test.ts`** — do usunięcia w 12d po przenagraniu
+- **`WYJATKI_SZEROKOSC` w `rebuild/backend/test/katalog.gate.test.ts`** — do usunięcia w 12d po przenagraniu
   `GET_products.json`. Wyjątek jest samoczyszczący.
 - **Ręczna edycja `szerokosc` gubi zera końcowe** („10.00" → „10") — port 1:1 zastanej wady
   produkcji (D3). Kandydat na wpis w backlogu, jeśli Ania uzna to za problem; naprawa wymaga
