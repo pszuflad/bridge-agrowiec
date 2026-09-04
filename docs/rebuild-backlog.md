@@ -1803,14 +1803,14 @@ pustego CSV) albo owinąć nazwę w cudzysłowy. ⚠ Powiązanie: to zmieniłoby
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (architektura, nie usterka produkcji) |
-| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,WidokWPrzygotowaniu}.tsx`; NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`) |
+| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,WidokWPrzygotowaniu,Atrybuty}.tsx`; NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`) |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** |
 | **Status** | — nie zaczęte (zastane, ujawnione przy **10f**) |
 
 **Co znaleziono.** `App.tsx` rejestruje trasy bezpośrednio pod `<Switch>`, bez wspólnego
 layoutu — każdy widok sam decyduje, czy owinąć się w `AppShell` (komponent z sidebarem,
-`components/AppShell.tsx:59-87`). Dziś robią to tylko `Pulpit`, `Konfiguracja` i
-`WidokWPrzygotowaniu`; siedem pozostałych widoków (`Katalog`, `Staging`, `Historia`, `Narzuty`,
+`components/AppShell.tsx:59-87`). Dziś robią to `Pulpit`, `Konfiguracja`, `WidokWPrzygotowaniu`
+i (od 7b) `Atrybuty`; siedem pozostałych widoków (`Katalog`, `Staging`, `Historia`, `Narzuty`,
 `Alerty`, `WagaGabarytowa`, `Analityka`) zwraca samą treść (np. `Katalog.tsx:172`:
 `<div className="p-6 max-w-full">` bez `AppShell` ani `Sidebar` w drzewie) — sprawdzone
 `grep`em, sidebar na tych siedmiu ekranach faktycznie nie renderuje się.
@@ -1916,6 +1916,11 @@ przepisanych produktów w szczegółach). Naprawa jest tania i nie zmienia kszta
 odpowiedzi — koszt to rozjazd z produkcją w zawartości `audit_log`, widocznej przez
 `GET /api/history/paged`.
 
+**Uzupełnienie 7b.** Sesja frontendowa nie naprawiła luki (poza zakresem), ale UI ostrzega
+przed masowym `UPDATE products`: dialogi „Akceptuj z edycją" i „jako alias" pokazują liczbę
+produktów, których dotknie zmiana (`GET /api/atrybuty/uzycie` → `count`), a toast po sukcesie
+podaje `produktow_zaktualizowano`. To nie zastępuje wpisu w dzienniku.
+
 ---
 
 ### #40 · 2026-09-04 · [BACKEND] · seed słownika `bieznik` bierze wartości z `products.model`, nie z `products.bieznik`
@@ -1951,6 +1956,11 @@ wyniki `scan-pending`, listę sugerowanych aliasów i zamrożony `GET_atrybuty_p
 czyli wymaga przenagrania fixture'a. Sprzątanie samego objawu (usuwanie z kolejki pozycji
 obecnych już w słowniku) to osobna, mniejsza zmiana.
 
+**Uzupełnienie 7b.** Skutek jest teraz widoczny NA EKRANIE, nie tylko w fixture: w kolejce
+pending pozycja „AGRI STAR II" dostaje self-match z `podobienstwo: 100` (widać w
+`contract/fixtures/GET_atrybuty_pending.json` i w widoku `/atrybuty` → panel „Do akceptacji"),
+bo wartość zasiana z `model` trafia do słownika `bieznik`.
+
 ---
 
 ### #41 · 2026-09-04 · [BACKEND] · dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13) — pozycji pending rodzaju `model`/`zastosowanie` nie dałoby się zaakceptować
@@ -1982,6 +1992,11 @@ z komentarzem opisującym rozjazd i jego konsekwencję.
 do mapy SKANU sprawi, że `scan-pending` zacznie zgłaszać nowe wartości także tych rodzajów
 (dla `model` to praktycznie cały katalog — patrz **#40**) i zaleje kolejkę. Bezpieczniejszy
 wariant to zostawić zakres skanu bez zmian, a pełną mapę dać tylko akceptacjom.
+
+**Uzupełnienie 7b.** Konsekwencja widoczna teraz w UI: dla pozycji kolejki rodzaju
+`model`/`zastosowanie` akcje „Akceptuj z edycją" i „jako alias" zwrócą 400 „Nieznany rodzaj",
+a widok `/atrybuty` pokaże ten komunikat użytkowniczce (`komunikatBledu()` w
+`rebuild/frontend/src/pages/atrybuty/api.ts`).
 
 ---
 
@@ -2016,6 +2031,9 @@ WIĘCEJ i będą inne niż dziś, a przycisk „akceptuj jako alias" przepisuje 
 katalogu — rośnie więc koszt pomyłki (tym bardziej, że nie ma z tego audytu, **#39**). Zmiana
 rozjeżdża pole `sugerowane_aliasy` z zamrożonym `GET_atrybuty_pending.json`.
 
+**Uzupełnienie 7b.** Skutek widoczny w kolejce: „BKT" i „bkt" nie dostają sugestii aliasu,
+kolumna „Sugerowane aliasy" w widoku `/atrybuty` pokazuje dla nich „brak podobnych".
+
 ---
 
 ### #43 · 2026-09-04 · [BACKEND][KONTRAKT] · `contract/openapi.yaml` nie zna kodów 403/404/409 — GATE nie może ich objąć
@@ -2041,3 +2059,70 @@ kodach nie zapali się maszynowo, i to nie tylko przy atrybutach: brak dotyczy c
 z pozostałymi zaległościami kontraktowymi (**#4** — `GET /api/products/uwagi-cena` i
 `/hold-reasons`; przenagranie fixtures po **#3**). Ryzyko dla runtime'u zerowe — to zmiana
 opisu, nie zachowania; koszt to przegląd wszystkich tras, bo luka jest systemowa.
+
+**Uzupełnienie 7b.** Sesja frontendowa `31-FEATURE-atrybuty-frontend` obsłużyła te kody po
+stronie klienta mimo luki w kontrakcie: `komunikatBledu()` w
+`rebuild/frontend/src/pages/atrybuty/api.ts` rozpakowuje `{ok:false,error}` i pokazuje
+komunikat serwera, a `rebuild/frontend/test/integracja/atrybuty.integracja.test.ts` sprawdza
+403 i 409 na żywym backendzie. Luka w `contract/openapi.yaml` **nadal istnieje** — GATE jej
+nie pilnuje.
+
+---
+
+### #44 · 2026-09-04 · [FRONTEND] · przycisk „Nowy rodzaj" w produkcji NIE ZAPISUJE rodzaju
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (dialog „Nowy rodzaj atrybutu", widok `/atrybuty`) |
+| **Pliki** | `deminified/frontend-index.js:27195-27277` (`sg()`, dialog), `:9965-9977` (`Lb()`); mostek wbudowany w bundle `:9960-10268` (patchuje `Hb`/`Qb`/`Gb` i definiuje `window.__atrybutyAddRodzaj`, ale `Lb` zostawia nietknięte — `grep "Lb *="` daje zero trafień); port: `rebuild/frontend/src/pages/atrybuty/api.ts` (`dodajRodzaj`), `rebuild/frontend/src/pages/atrybuty/DialogNowyRodzaj.tsx` |
+| **Do nowej wersji?** | ✅ **TAK — już naprawione w odbudowie (7b)** |
+| **Iteracja** | znalezione i naprawione w **7b** (`docs/tickets/31-FEATURE-atrybuty-frontend/`, decyzja D5) |
+| **Status** | ✔ naprawione w rebuild · w produkcji **nadal obecne** |
+
+**Co znaleziono.** Dialog „Nowy rodzaj atrybutu" (`sg()`) woła `Lb()`, które dopisuje rodzaj
+WYŁĄCZNIE do lokalnej tablicy `dt` i cache'u Query (`setQueryData(["/api/attribute-kinds"], …)`)
+— i nic więcej. Mostek wbudowany w bundle opatchował zapis WARTOŚCI (`Hb`/`Qb`/`Gb` →
+POST/PUT/DELETE `/atrybuty/wartosci`) i wystawił `window.__atrybutyAddRodzaj`
+(POST `/rodzaje`), ale `Lb` pominął.
+
+**Skutek.** Rodzaj utworzony przyciskiem „Nowy rodzaj" **znika po odświeżeniu strony** (żyje
+tylko w karcie przeglądarki), mimo że użytkowniczka dostaje toast „Rodzaj dodany". Ten SAM
+rodzaj wpisany w polu „Rodzaj" dialogu „Dodaj wartość" (`rg()`, `:27006` →
+`__atrybutyAddRodzaj`) zapisuje się normalnie — dwie ścieżki do tego samego celu zachowują się
+różnie.
+
+**Co zrobiła odbudowa.** **Nie odtworzyła cichej utraty danych.** `DialogNowyRodzaj.tsx` woła
+`POST /api/atrybuty/rodzaje` (backend istnieje od 7a). Uzasadnienie: to skutek rozjazdu
+bazowego bundla z mostkiem, a nie zachowanie produktu; decyzja D5 planu 7b („dodawanie rodzaju
+TAK") tego wymagała.
+
+**Do decyzji.** Brak — status końcowy, nie czeka na rozstrzygnięcie. Wpis dokumentuje
+odstępstwo od parytetu 1:1 (odbudowa jest tu LEPSZA od produkcji świadomie).
+
+---
+
+### #45 · 2026-09-04 · [FRONTEND] · filtr „Źródło" w liście wartości atrybutów jest martwy
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (panel wartości, widok `/atrybuty`) |
+| **Pliki** | `mirror/frontend/assets/pending-injection.js:741-744,766-772` (filtr i kolumna po `w.origin`, domyślka `'user'`); backend nie zwraca pola: `mirror/backend/atrybuty_module.cjs:185-196` (`GET /api/atrybuty/wartosci` → `{id,rodzaj,wartosc}`), potwierdzone w `contract/fixtures/GET_atrybuty_wartosci.json`; pominięte w porcie: `rebuild/frontend/src/pages/atrybuty/PanelWartosci.tsx` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — czy `origin` ma być w ogóle wystawiane przez backend |
+| **Iteracja** | ujawnione przy **7b** (`docs/tickets/31-FEATURE-atrybuty-frontend/`, decyzja D4) |
+| **Status** | — nie zaczęte (zastane, ujawnione przy 7b) |
+
+**Co znaleziono.** `pending-injection.js` filtruje i pokazuje kolumnę „Źródło" po polu
+`w.origin` (`catalog`/`user`/`preset`, z domyślką `'user'`, gdy pole brakuje), ale ŻADNA trasa
+backendu tego pola nie zwraca — `GET /api/atrybuty` i `GET /api/atrybuty/wartosci` oddają
+`{id, rodzaj, wartosc}`. Kolumna `origin` istnieje w schemacie bazy, ale nie w odpowiedzi API.
+
+**Skutek.** W produkcji filtr zawsze pokazuje „user" dla wszystkich wartości i nie zawęża
+niczego; liczniki przy pozostałych źródłach są zerowe — element UI, który nic nie robi.
+
+**Co zrobiła odbudowa.** **Pominęła filtr i kolumnę** (decyzja D4 planu 7b, zatwierdzona przez
+użytkownika) — odtwarzanie martwego elementu UI byłoby parytetem usterki, nie zachowania.
+Backend 7a też `origin` nie eksponuje (zgodnie z fixture).
+
+**Do decyzji.** Czy `origin` ma w ogóle trafiać do odpowiedzi API (wtedy filtr miałby sens do
+odtworzenia), czy pole zostaje wyłącznie wewnętrzne (baza), a filtr w produkcji zostaje
+uznany za martwy kod, którego nie warto portować.

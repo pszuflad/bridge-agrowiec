@@ -311,10 +311,22 @@ Bo w starym Bridge też go nie ma — jest ukryte. O tym, która reguła wygrywa
 **8. Usunięcie reguły nie pyta o potwierdzenie.**
 Zamierzone, patrz [3.6](#36-usunięcie-reguły).
 
-**9. Lista kategorii i marek w warunkach pochodzi tylko z produktów w katalogu.**
-Stary Bridge dokłada tam jeszcze słownik atrybutów. Słownika jeszcze nie mamy — wchodzi
-w **Iteracji 7**. Skutkiem jest to, że kategorii, której nie ma na żadnym produkcie, nie
-wybierzesz z listy.
+**9. Listy wyboru w warunkach reguły mają teraz różne źródła — to zamierzone.**
+Od Iteracji 7 działa widok **Atrybuty** (słownik marek, kategorii i innych wartości) i zasila
+listy w dialogu reguły:
+- **Marka** — suma słownika atrybutów i marek z katalogu produktów, więc na liście mogą być
+  marki, których żaden produkt jeszcze nie ma.
+- **Kategoria** — **wyłącznie ze słownika atrybutów**, nie z produktów. Skutek praktyczny: da
+  się teraz założyć regułę na kategorię, której nie ma jeszcze żaden produkt w katalogu. Jeśli
+  natomiast jakaś kategoria występuje na produktach, ale nie ma jej w słowniku — na liście jej
+  nie zobaczysz. To zachowanie oryginału, nie usterka. Jeśli lista kategorii jest pusta, to
+  znaczy, że w widoku **Atrybuty** nie ma jeszcze żadnej wartości rodzaju „kategoria" — trzeba
+  ją tam dodać.
+- **Dostawca** — z listy dostawców, pozycje w formie `KOD · Nazwa` (np. `MO1 · Bohnenkamp`); w
+  regule zapisuje się sam kod.
+- **Konstrukcja** i **VF/IF** — to teraz listy wyboru ze słownika, a nie pola do wpisania tekstu.
+- Pozostałe typy warunku (Rozmiar, Bieżnik, Konkretny produkt, Średnica) — bez zmian, nadal pola
+  tekstowe.
 
 **10. Reguła z literówką w typie warunku łapie wszystko.**
 Jeśli warunek ma nieznany typ, silnik traktuje go jako spełniony. To zachowanie oryginału.
@@ -331,8 +343,6 @@ trafiła się w danych, tak właśnie zadziała.
 | Wyłączanie promocji datą (dziś tylko usunięcie) | ⬜ decyzja — wymaga zmiany w silniku cen |
 | Przełącznik statusu przy promocjach (jak przy narzutach) | ⬜ decyzja |
 | Edycja priorytetu reguły z formularza | ⬜ decyzja — w starym Bridge pole jest ukryte |
-| Słownik kategorii i marek w warunkach | Iteracja 7 |
-| Atrybuty | Iteracja 7 |
 
 ---
 
