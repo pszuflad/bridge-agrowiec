@@ -231,3 +231,25 @@ wszystkie rozwiązane przez **zachowanie obu stron**; nic nie zostało odrzucone
 
 **Po scaleniu:** backend 776 testów / 49 plików ✓, frontend 444 testy / 31 plików ✓,
 `lint`, `typecheck`, `build` czyste po obu stronach.
+
+### Druga runda scalenia — blok 10b (2026-09-04)
+
+W trakcie rozwiązywania pierwszej rundy do `develop` wszedł **10b** (`24-FEATURE-analityka-ceny`).
+Siedem konfliktów, żadnej kolizji nazw — 10b i 10e nie dzieliły ani typu, ani komponentu.
+Rozstrzygnięcia:
+
+- **`ZakladkaWPrzygotowaniu` USUNIĘTA z `Analityka.tsx`.** 10b wypełnił zakładkę `ceny`,
+  10e — `dostepnosc`; komponent-zaślepka z bloku 10a przestał mieć co zastępować i zostawał
+  jako martwy kod. W jego miejsce komentarz mówiący, kiedy i dlaczego zniknął.
+- **Klucz zapytania dla `?days`.** Roadmapa niosła notę 10b zapowiadającą dla `rotation/inactive`
+  własny `queryFn` z kluczem-listą, wzorem `prices/product-history?ean&kod`. 10e poszło prościej —
+  cały adres w jednym segmencie klucza, jak `pages/Staging.tsx` i `pages/Historia.tsx` — bo
+  własny `queryFn` jest potrzebny wyłącznie tam, gdzie zapytanie ma się NIE wykonać przy pustych
+  parametrach, a `?days` ma zawsze wartość domyślną. Nota w roadmapie i w README poprawiona:
+  opisuje teraz oba warianty i kryterium wyboru między nimi.
+- **Ostrzeżenie 10b o pustych fixtures rozliczone** — GATE tego bloku ma własny, poszerzony
+  zasiew i jawną asercję `rows.length > 0` dla dwóch tras, których nagrania nie są puste.
+
+**Po drugiej rundzie:** backend 811 testów / 51 plików ✓, frontend 463 testy / 32 plików ✓,
+`lint`, `typecheck`, `build` czyste. **Iteracja 10 ma wypełnione wszystkie pięć zakładek
+`/analityka`; zostaje blok 10f** (eksport CSV + pulpit).

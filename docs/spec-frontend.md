@@ -257,8 +257,8 @@ ma endpoint:
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
 > (O-10a-3). Wypełniona jest karta „Marża per dostawca/kategoria/marka" (O-10a-4); pozostałe
-> w tym bloku są puste, ale nazwane — `ean` dowieziona w 10c, `dostawcy` w 10d
-> i `dostepnosc` w 10e (patrz niżej), `ceny` czeka na 10b. Wzorzec sekcji dashboardu
+> w tym bloku są puste, ale nazwane — wypełniły je kolejne bloki: `ean` w 10c, `dostawcy`
+> w 10d, `ceny` w 10b i `dostepnosc` w 10e (patrz niżej). Wzorzec sekcji dashboardu
 > jest udokumentowany
 > w `rebuild/frontend/src/pages/analityka/README.md`. Trasa jest ładowana **leniwie**
 > (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku (~398 kB po 10c i 10d), więc płaci za niego tylko
@@ -303,6 +303,16 @@ ma endpoint:
 > niezależnie od stanu bazy** — port 1:1 zapytania, które w produkcji zawsze zawodzi (brak
 > kolumny `nazwa` w `historia_cen`, patrz `spec-backend.md` §2 i `rebuild-backlog.md` #32).
 > Szczegóły: `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
+
+> **Odbudowa (10b, `24-FEATURE-analityka-ceny`, 2026-09-04):** zakładka `ceny`
+> („Ceny w czasie") wypełniona — trzy karty oryginału 1:1: „3.1 Zmiany cen z ostatnich
+> importów", „3.2 / 3.3 Historia ceny wybranej opony" (pola EAN/Kod produktu z debounce
+> 300 ms — świadome odstępstwo O-10b-1, bo trasa bez LIMIT-u skanuje 15 597 wierszy) i
+> „3.6 Inflacja cennika" (dołożony wykres liniowy, O-10b-2, rozszerzenie wzorca O-10a-3).
+> Backend dowozi też `market/group-prices` i `top-zmiany`, ale **bez UI** (decyzje D1/D2 —
+> zero konsumentów / martwy fetch w oryginale, ten sam wzorzec co `bootstrap-current` w 10a);
+> `stats {min,max,avg}` z `product-history` jest pobierane i nierenderowane (D4, jak
+> `margins.low`/`high` w 10a). Szczegóły: `docs/tickets/24-FEATURE-analityka-ceny/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

@@ -16,8 +16,10 @@
  *  • O-10a-2 — globalny pasek sześciu filtrów, którego oryginał nie ma
  *              (uzasadnienie w `FiltryGlobalne.tsx`),
  *  • O-10a-3 — wykres w sekcji marż; oryginał nie ma ani jednego wykresu
- *              (uzasadnienie w `components/ui/chart.tsx`),
- *  • O-10a-4 — pozostałe zakładki są puste do czasu bloku 10b. To zakres bloku,
+ *              (uzasadnienie w `components/ui/chart.tsx`); blok 10b rozszerza to
+ *              o wykres inflacji (O-10b-2),
+ *  • O-10a-4 — zakładki były puste do czasu bloków 10b–10e; dziś niesie treść komplet
+ *              pięciu. To był zakres bloków,
  *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
  *              wstawiają treść, zamiast przemeblowywać widok.
  *  • O-10d-1 — wykres dostępności w karcie „1.4 / 1.5" zakładki `dostawcy` (decyzja D2
@@ -70,6 +72,7 @@ import {
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
 import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
+import { SekcjaCeny } from "./analityka/SekcjaCeny";
 import { SekcjaCyklZyciaDostawcow } from "./analityka/SekcjaCyklZyciaDostawcow";
 import { SekcjaCykluZyciaModeli } from "./analityka/SekcjaCykluZyciaModeli";
 import { SekcjaDostepnosciProduktow } from "./analityka/SekcjaDostepnosciProduktow";
@@ -81,18 +84,9 @@ import { SekcjaStabilnoscDostawcow } from "./analityka/SekcjaStabilnoscDostawcow
 import { SekcjaStanDostawcow } from "./analityka/SekcjaStanDostawcow";
 import { SekcjaTempaSchodzenia } from "./analityka/SekcjaTempaSchodzenia";
 
-/**
- * Zakładka jeszcze niewypełniona. Mówi wprost, który blok ją dowozi — inaczej pusty panel
- * wygląda jak awaria. Znika razem z wstawieniem treści przez odpowiednią sesję.
- */
-function ZakladkaWPrzygotowaniu({ blok, zakres }: { blok: string; zakres: string }) {
-  return (
-    <div className="rounded border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
-      <div className="font-medium">Dashboardy w przygotowaniu — blok {blok}</div>
-      <div className="mt-1 text-xs">{zakres}</div>
-    </div>
-  );
-}
+// `ZakladkaWPrzygotowaniu` — komponent-zaślepka z bloku 10a — zniknął przy scaleniu 10b i 10e
+// (2026-09-04): wszystkie pięć zakładek niesie już treść, więc nie miał czego zastępować.
+// Historia w `docs/tickets/19-FEATURE-analityka-fundament/`.
 
 /** Wartość początkowa pola „Bez ruchu dni" — `useState("60")` oryginału. Napis, nie liczba. */
 const DNI_ROTACJI_POCZATKOWE = "60";
@@ -187,11 +181,13 @@ export function Analityka() {
           />
         </TabsContent>
 
+        {/*
+          Wypełnione w bloku 10b. Karty są TRZY, a nie pięć: `top-zmiany`
+          i `market/group-prices` mają w tym bloku backend, ale świadomie nie mają UI
+          (decyzje D1 i D2) — oryginał ich nie renderuje. Szczegóły w `SekcjaCeny.tsx`.
+        */}
         <TabsContent value="ceny" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10b"
-            zakres="Inflacja cen, ostatni import, historia cen produktu, ceny rynkowe i największe zmiany."
-          />
+          <SekcjaCeny wybor={wybor} />
         </TabsContent>
 
         {/*

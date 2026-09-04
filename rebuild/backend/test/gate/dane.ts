@@ -313,6 +313,43 @@ export function zasiejHistorieCen(db: Baza): void {
 
 
 /**
+ * Historia cen pod GATE bloku 10b — kilku dostawców, po dwa miesiące, z niepustym `ean`.
+ *
+ * ⚠ PO CO OSOBNY ZASIEW, SKORO `zasiejHistorieCen` JUŻ ISTNIEJE. Tamten ma trzy wiersze
+ * JEDNEGO dostawcy, w JEDNYM miesiącu i BEZ `ean` — i to mu wystarcza, bo służy testom
+ * dostawców. Dla tras cen dałby fałszywie zielony gate na dwa sposoby naraz:
+ *
+ *  • `prices/inflation` liczy `LAG` po miesiącach w obrębie dostawcy. Przy jednym miesiącu
+ *    `inflacjaPct` wychodzi `NULL` w KAŻDYM wierszu, a `gate/ksztalt.ts` traktuje „odpowiedź
+ *    ma null tam, gdzie fixture miał liczbę" jako OSTRZEŻENIE, nie różnicę — czyli kolumna
+ *    przeszłaby bez dowodu, że w ogóle umiemy ją policzyć.
+ *  • `prices/product-history` zwraca `ean`. Przy zasiewie bez EAN-ów kolumna byłaby
+ *    nullem w każdym wierszu i znowu skończyłoby się na ostrzeżeniu.
+ *
+ * Stąd: trzej dostawcy, dwa miesiące (2026-06 i 2026-07), rosnące ceny, w tym jeden wiersz
+ * z `cenaZakupu: 0` — po to, żeby test mógł sprawdzić, że `inflation` go odsiewa
+ * (`WHERE cena_zakupu > 0`), a `stats` w `product-history` JUŻ NIE (`filter(v => v != null)`
+ * przepuszcza zero). Ta jedna różnica progu między dwiema trasami tego samego bloku jest
+ * w oryginale i łatwo ją przeoczyć.
+ */
+export function zasiejHistorieCenDlaCen(db: Baza): void {
+  db.insert(historiaCen)
+    .values([
+      // MO1 — dwa miesiące, cena rośnie: `inflacjaPct` policzone dla lipca.
+      { kod: "MO1_A1", ean: "5901234123457", dostawca: "MO1", cenaZakupu: 1000, cenaSprzedazy: 1300, stan: 4, zarejestrowanoAt: "2026-06-10T08:00:00.000Z" },
+      { kod: "MO1_A1", ean: "5901234123457", dostawca: "MO1", cenaZakupu: 1200, cenaSprzedazy: 1560, stan: 3, zarejestrowanoAt: "2026-07-10T08:00:00.000Z" },
+      // MO2 — dwa miesiące, cena spada: ujemna inflacja w drugim miesiącu.
+      { kod: "MO2_B2", ean: "5901234123464", dostawca: "MO2", cenaZakupu: 800, cenaSprzedazy: 1040, stan: 10, zarejestrowanoAt: "2026-06-15T08:00:00.000Z" },
+      { kod: "MO2_B2", ean: "5901234123464", dostawca: "MO2", cenaZakupu: 600, cenaSprzedazy: 780, stan: 12, zarejestrowanoAt: "2026-07-15T08:00:00.000Z" },
+      // MO3 — jeden miesiąc: pierwszy wiersz dostawcy zawsze ma `inflacjaPct: null`.
+      { kod: "MO3_C3", ean: "5901234123471", dostawca: "MO3", cenaZakupu: 450.5, cenaSprzedazy: 585.65, stan: 0, zarejestrowanoAt: "2026-07-20T08:00:00.000Z" },
+      // Wiersz o cenie zerowej — patrz nota wyżej o różnicy progów.
+      { kod: "MO3_C3", ean: "5901234123471", dostawca: "MO3", cenaZakupu: 0, cenaSprzedazy: 0, stan: 0, zarejestrowanoAt: "2026-07-21T08:00:00.000Z" },
+    ])
+    .run();
+}
+
+/**
  * Pozycje stagingu zasiane WPROST z nagranych fixtures.
  *
  * Po co tak: pola `typZmiany`, `powod`, `snapshotJson`, `zmianaPct` i cała rodzina
