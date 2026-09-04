@@ -21,7 +21,9 @@
  * przechodzi do backendu i wraca jako `days: null` z pustą listą; zaciskanie do [1, 730]
  * należy do backendu i tylko do niego.
  *
- * Bez przycisku „CSV" (`M("rotation-inactive")`, `:28572`) — trasa eksportu należy do 10f.
+ * Przycisk „CSV" (`M("rotation-inactive")`, `:28572`) dołożył blok 10f. ⚠ Eksport NIE niesie
+ * parametru `?days` — oddaje cały aktywny katalog, nie ten podzbiór, który widać w tabeli
+ * (`backend/src/repos/analityka-eksport.ts`).
  */
 import { useMemo } from "react";
 
@@ -37,6 +39,7 @@ import {
   type WyborFiltrow,
 } from "./filtrowanie";
 import { NaglowekSekcji } from "./NaglowekSekcji";
+import { PrzyciskCsv } from "./eksport";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
 
 /**
@@ -88,6 +91,7 @@ export function SekcjaRotacji({
           wyjasnieniePominietych="Odpowiedź tej sekcji nie niesie indeksów, więc nie stosuje filtrów:"
           rzeczownik="produktów"
           prefiksTestu="rotacja"
+          obok={<PrzyciskCsv widok="rotation-inactive" />}
         />
 
         <div className="flex items-center gap-2">

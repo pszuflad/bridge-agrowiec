@@ -6,7 +6,7 @@
  * `:28165`). Wykres nad tabelą jest odstępstwem (O-10d-1, decyzja D2) — oryginał nie ma
  * ani jednego wykresu; kontynuujemy tu wzorzec z sekcji marż bloku 10a.
  *
- * ⚠ CZEGO TU CELOWO NIE MA: przycisku „CSV" (`M("suppliers-stock")`, `:28144`) — blok 10f.
+ * Przycisk „CSV" (`M("suppliers-stock")`, `:28144`) dołożył blok 10f.
  */
 import { useMemo } from "react";
 import {
@@ -41,6 +41,7 @@ import {
 import { formatuj, formatujProcent } from "./formatowanie";
 import { PasekDostepnosci } from "./PasekDostepnosci";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
+import { PrzyciskCsv } from "./eksport";
 
 /**
  * Górna granica liczby słupków. `GROUP BY dostawca` zwija katalog do jednego wiersza na
@@ -113,7 +114,13 @@ export function SekcjaStanDostawcow({
     <Card className="border-card-border">
       <CardContent className="p-0">
         <div className="border-b px-4 py-3">
-          <div className="text-sm font-semibold">1.4 / 1.5 Stan i dostępność dostawcy</div>
+          {/* Ten nagłówek nie idzie przez `NaglowekSekcji`: karta liczy własne notki o filtrach.
+              Układ „tytuł po lewej, akcje po prawej" jest jednak ten sam, co tam i co w oryginale
+              (`frontend-index.js:28147`). */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm font-semibold">1.4 / 1.5 Stan i dostępność dostawcy</div>
+            <PrzyciskCsv widok="suppliers-stock" />
+          </div>
           {odfiltrowane > 0 && (
             <div className="mt-1 text-xs text-muted-foreground" data-testid="stan-licznik-filtra">
               Filtry ukryły {formatuj(odfiltrowane)} z {formatuj(wszystkie)} dostawców.

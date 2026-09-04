@@ -13,7 +13,7 @@
  * `kiedy` przez ten sam `_()`, co liczby (`mono: 1`, `:28113`), a ten napisów nie tyka.
  * Zachowujemy to, bo taki widok Ania zna z produkcji.
  *
- * ⚠ CZEGO TU CELOWO NIE MA: przycisku „CSV" (`M("suppliers-lifecycle")`, `:28106`) — blok 10f.
+ * Przycisk „CSV" (`M("suppliers-lifecycle")`, `:28106`) dołożył blok 10f.
  */
 import { useMemo } from "react";
 
@@ -29,6 +29,7 @@ import {
 } from "./filtrowanie";
 import { formatuj } from "./formatowanie";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
+import { PrzyciskCsv } from "./eksport";
 
 /** Sześć kolumn 1:1 z oryginałem (`:28113-28132`). Pierwsze cztery monospace. */
 const KOLUMNY: KolumnaTabeli<WierszCykluZycia>[] = [
@@ -62,7 +63,13 @@ export function SekcjaCyklZyciaDostawcow({
     <Card className="border-card-border">
       <CardContent className="p-0">
         <div className="border-b px-4 py-3">
-          <div className="text-sm font-semibold">1.2 Nowości i wycofania</div>
+          {/* Ten nagłówek nie idzie przez `NaglowekSekcji`: karta liczy własne notki o filtrach.
+              Układ „tytuł po lewej, akcje po prawej" jest jednak ten sam, co tam i co w oryginale
+              (`frontend-index.js:28109`). */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm font-semibold">1.2 Nowości i wycofania</div>
+            <PrzyciskCsv widok="suppliers-lifecycle" />
+          </div>
           {odfiltrowane > 0 && (
             <div
               className="mt-1 text-xs text-muted-foreground"

@@ -2,8 +2,9 @@
  * Karta „4.2 Tempo schodzenia z magazynu" — zakładka „Dostępność"
  * (port `deminified/frontend-index.js:28459-28487`).
  *
- * Cztery kolumny 1:1 z oryginałem. Bez przycisku „CSV" (`M("sell-through")`, `:28468`) —
- * trasa eksportu należy do bloku 10f.
+ * Cztery kolumny 1:1 z oryginałem; przycisk „CSV" (`M("sell-through")`, `:28468`) dołożył
+ * blok 10f. ⚠ Ten eksport oddaje PUSTY plik (sam BOM) z tej samej przyczyny, dla której pusta
+ * jest tabela poniżej — `MAX(nazwa)` z `historia_cen`, `docs/rebuild-backlog.md` #32.
  *
  * ⚠ TA TABELA JEST PUSTA ZAWSZE, I TAK JEST TEŻ W PRODUKCJI. Bez historii cen backend
  * oryginału nie ma gałęzi zapasowej i zwraca pustą listę (`analytics_module.cjs:174`),
@@ -24,6 +25,7 @@ import {
   type WyborFiltrow,
 } from "./filtrowanie";
 import { NaglowekSekcji } from "./NaglowekSekcji";
+import { PrzyciskCsv } from "./eksport";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
 
 const MAPOWANIE: MapowanieWymiarow<WierszTempaSchodzenia> = { dostawcy: (w) => w.dostawca };
@@ -60,6 +62,7 @@ export function SekcjaTempaSchodzenia({
           wyjasnieniePominietych="Ta sekcja grupuje po dostawcy i kodzie, więc nie stosuje filtrów:"
           rzeczownik="pozycji"
           prefiksTestu="tempo-schodzenia"
+          obok={<PrzyciskCsv widok="sell-through" />}
         />
         <TabelaAnalityki
           dane={wiersze}

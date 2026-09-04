@@ -6,17 +6,18 @@ sesja 10a musiała się dowiedzieć sama i co kosztowało ją osobną rundę pyt
 Każdy fakt niżej jest **zweryfikowany w kodzie** (`mirror/backend/analytics_module.cjs`,
 `deminified/frontend-index.js`, `contract/fixtures/`), nie przepisany z opisu iteracji.
 
-**Zakres:** 27 tras `/api/analytics/*`. Zamknięte **dwadzieścia sześć**: blok 10a — pięć
-(`filters`, `status`, `kpi`, `margins`, `bootstrap-current` — ticket
-`19-FEATURE-analityka-fundament`); blok 10c — sześć tras EAN (§5, ticket
-`22-FEATURE-analityka-ean`); blok 10d — cztery trasy dostawców (`suppliers/stability`,
-`suppliers/lifecycle`, `suppliers/stock`, `dostawcy-stats` — §6, ticket
+**Zakres:** 27 tras `/api/analytics/*`. Zamknięte **wszystkie dwadzieścia siedem (27/27)** —
+**Iteracja 10 jest zamknięta**: blok 10a — pięć (`filters`, `status`, `kpi`, `margins`,
+`bootstrap-current` — ticket `19-FEATURE-analityka-fundament`); blok 10c — sześć tras EAN
+(§5, ticket `22-FEATURE-analityka-ean`); blok 10d — cztery trasy dostawców
+(`suppliers/stability`, `suppliers/lifecycle`, `suppliers/stock`, `dostawcy-stats` — §6, ticket
 `23-FEATURE-analityka-dostawcy`) — te trzy zamknięte 2026-09-03; blok 10b — pięć tras cen
 (`prices/inflation`, `prices/last-import`, `prices/product-history`, `market/group-prices`,
 `top-zmiany` — §4, ticket `24-FEATURE-analityka-ceny`); blok 10e — sześć tras dostępności,
 rotacji i cyklu życia (§7, ticket `25-FEATURE-analityka-dostepnosc-rotacja`) — te dwa
-2026-09-04. Ten dokument opisuje **ostatnią trasę** (`export/{view}`, blok 10f wraz z pulpitem)
-oraz stan faktyczny bloków już zamkniętych.
+2026-09-04; blok 10f — ostatnia trasa (`export/{view}`, §8, ticket
+`26-FEATURE-analityka-export-pulpit`) wraz z Pulpitem `/` — zamknięty 2026-09-04. Ten
+dokument opisuje stan faktyczny wszystkich sześciu bloków.
 
 **Zanim zaczniesz blok:** przeczytaj `rebuild/frontend/src/pages/analityka/README.md` —
 wzorzec sekcji dashboardu, którego bloki 10b–10d mają się trzymać 1:1.
@@ -449,12 +450,24 @@ zakładka jej nie konsumuje (ten sam wzorzec co `bootstrap-current` w 10a).
 
 ---
 
-## 8. Blok 10f — Export + Pulpit
+## 8. Blok 10f — Export + Pulpit ✅ ZROBIONE (2026-09-04, `26-FEATURE-analityka-export-pulpit`)
+
+Sekcja niżej opisuje **stan faktyczny po dowiezieniu**, nie zamiar. Szczegóły decyzji
+użytkownika (D1–D5) i odkryć: `docs/tickets/26-FEATURE-analityka-export-pulpit/{plan,raport,review}.md`.
 
 ### 8.1 `GET /api/analytics/export/{view}` (`:305`)
 
-Jedyna trasa analityki z **parametrem ścieżki**, nie query. `LIMIT 5000`, oddaje CSV przez
-pomocnika `sendRows`. Nie ma fixture'a GET — walidacja tylko wg openapi.
+Jedyna trasa analityki z **parametrem ścieżki**, nie query. Oddaje CSV przez pomocnika
+`sendRows`. Nie ma fixture'a GET — walidacja tylko wg openapi.
+
+**⚠ „LIMIT 5000" NIE dotyczy wszystkich dziesięciu widoków — zweryfikowane
+(`analytics_module.cjs:311-320`).** Mają go tylko sześć: `suppliers-lifecycle`, `prices-last`,
+`availability-products`, `sell-through`, `margins`, `rotation-inactive`. Cztery —
+`suppliers-stability`, `suppliers-stock`, `ean-comparison`, `unique` — **nie mają żadnego
+LIMIT-u**. Odbudowa (`rebuild/backend/src/repos/analityka-eksport.ts`) portuje SQL dosłownie,
+bez dokładania limitu tam, gdzie oryginał go nie ma.
+
+**Nieznany `{view}` → 200 i sam BOM, NIE 404** (`:321`, `return sendRows([])`).
 
 CSV budują `toCsv`/`csvEscape` (`:56-57`): separator **średnik**, BOM `﻿` na początku,
 cudzysłowy podwajane, pola z `;`/`"`/nowa linia w cudzysłowach. Nagłówek to klucze
@@ -469,23 +482,15 @@ pierwszego wiersza. Pusty wynik = sam BOM.
 backlog #32).** `export/availability-products` i `export/sell-through`
 (`analytics_module.cjs:316-317`) czytają `nazwa` z `historia_cen` tak samo jak
 `availability/products`/`sell-through` — w produkcji ta kolumna nie istnieje, więc oba pliki
-CSV oddają sam znacznik BOM, bez wiersza danych. 10f musi to wiedzieć **zanim** zaplanuje
-⚠ Przycisk „CSV" **nie istnieje w odbudowie** — 10a świadomie go pominęło w sekcji marż,
-a 10d — świadomie (decyzja D5) — w trzech kartach zakładki `dostawcy`
-(`suppliers-stability`, `suppliers-lifecycle`, `suppliers-stock`): przycisk wiodący donikąd
-byłby gorszy niż jego brak, dopóki trasa eksportu nie istnieje. 10f dokłada go do wszystkich
-czterech sekcji, do **trzech kart dowiezionych przez 10e** — „4.1 Historia dostępności"
-(`availability-products`), „4.2 Tempo schodzenia" (`sell-through`) i „Rotacja / produkty bez
-aktualizacji" (`rotation-inactive`) — **i do każdej innej sekcji, która ma go w oryginale**;
-lista wyżej mówi dokładnie do których. W oryginale przycisk siedzi w nagłówku karty, po prawej:
-`<Button variant="outline" size="sm">CSV</Button>`.
+CSV oddają sam znacznik BOM, bez wiersza danych. Odbudowa to odtworzyła 1:1, zamrożone testem
+charakteryzacyjnym (`analityka.eksport.gate.test.ts`).
 
-**⚠ Dwa widoki eksportu mają dokładnie tę samą wadę, co ich odpowiedniki dashboardu (§2,
-backlog #32).** `export/availability-products` i `export/sell-through`
-(`analytics_module.cjs:316-317`) czytają `nazwa` z `historia_cen` tak samo jak
-`availability/products`/`sell-through` — w produkcji ta kolumna nie istnieje, więc oba pliki
-CSV oddają sam znacznik BOM, bez wiersza danych. 10f musi to wiedzieć **zanim** zaplanuje
-te dwa przyciski, inaczej pusty CSV wygląda jak własny błąd bloku.
+**Przycisk „CSV" jest teraz w odbudowie, we wszystkich dziesięciu kartach, które mają go
+w oryginale** (`pages/analityka/eksport.tsx`, `<PrzyciskCsv widok="…"/>`) — łącznie z trzema
+kartami zakładki `dostawcy` (`suppliers-stability`, `suppliers-lifecycle`, `suppliers-stock`,
+świadomie pominiętymi przez 10d, decyzja D5 tamtego bloku) i trzema kartami dowiezionymi przez
+10e (`availability-products`, `sell-through`, `rotation-inactive`). W oryginale przycisk siedzi
+w nagłówku karty, po prawej: `<Button variant="outline" size="sm">CSV</Button>`.
 
 **⚠ EKSPORT NIE ZWRACA TEGO, CO WIDAĆ W TABELI. Każdy `{view}` ma WŁASNY SQL, inny niż trasa
 dashboardu o tej samej nazwie** — to nie jest „ta sama odpowiedź w innym formacie". Dwa
@@ -501,29 +506,74 @@ przykłady, oba zweryfikowane:
   (`produkty, punkty, sredniaCena, sredniStan`).
 
 Nie zakładaj więc, że da się zbudować CSV z danych, które sekcja już ma w pamięci — każdy
-widok eksportu trzeba portować osobno, z jego własnego zapytania.
+widok eksportu jest portowany osobno, z własnego zapytania (`repos/analityka-eksport.ts`).
+Eksport nie niesie też żadnych parametrów: `adresEksportu()` (port `M()`) nie dokleja query
+stringu — plik CSV nie odzwierciedla filtrów ani parametrów widocznych w tabeli.
 
-Eksport w oryginale to zwykła nawigacja przeglądarki (`window.location.href = …`), więc
-**nie leci przez `fetch` i nie niesie nagłówka `Authorization`** — działa tylko na cookie
-sesji. W odbudowie trasa jest za `requireAuth`; jeśli link ma zadziałać, musi polegać na
-cookie `bridge_session` (`credentials: include` nie dotyczy nawigacji). Sprawdź to wcześnie,
-bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
+**Autoryzacja: sama nawigacja przeglądarki, bez `Authorization`, dowiedzione testem
+integracyjnym.** Eksport w oryginale to `window.location.href = …`
+(`frontend-index.js:27938-27940`), więc żądanie nie leci przez `fetch` i nie niesie nagłówka
+`Authorization` — działa tylko na cookie `bridge_session`. Działa, bo cookie ma
+`HttpOnly; Path=/; SameSite=Lax` (`src/auth/cookie.ts`), a `Lax` wysyła cookie przy nawigacji
+GET najwyższego poziomu, i bo staging jest same-origin (`docs/deploy-setup.md`), więc kwestia
+cross-site się nie pojawia. To nie jest samo rozumowanie — dowodzi tego prawdziwy serwer w
+`rebuild/backend/test/analityka.eksport.gate.test.ts`: `POST /api/login` → wyjęcie
+`Set-Cookie` → `GET /api/analytics/export/margins` z samym nagłówkiem `Cookie`, bez
+`Authorization` → 200 `text/csv`.
+
+**GATE: fixture dla tej trasy nie istnieje i istnieć nie może.** Nagrywarka zapisywała
+wyłącznie odpowiedzi JSON (`contract/README.md`), a `export/{view}` oddaje `text/csv`.
+Kontrakt (`openapi.yaml:178-188`) nie deklaruje dla tej ścieżki żadnego `content`, więc CSV
+go nie narusza — sprawdzana jest tylko ścieżka i status 200, przez nową
+`sprawdzZgodnoscZKontraktemNieJson()` (`rebuild/backend/test/gate/asercje.ts`), z osobną
+asercją `content-type`/`content-disposition`. **Wspólna maszyneria GATE
+(`test/gate/kontrakt.ts`) nie została zmieniona** — bloki 1–10e działają jak działały. Kształt
+CSV niosą testy jednostkowe (`analityka.csv.test.ts`, `analityka.eksport.agregaty.test.ts`).
 
 ### 8.2 Pulpit `/` (home)
 
-- Czyta `GET /api/history` (I5, `rebuild/backend/src/routes/history.ts`) — na stagingu
-  zwraca dziś `[]`, bo tabela `history` nie ma jeszcze pisarza.
-- **Klient alertów już istnieje** (I6, `18-FEATURE-widok-alerty`): `pobierzAlerty()`
-  (`pages/alerty/api.ts`), `pogrupujAlerty()` i `filtrujAlerty()` (`pages/alerty/grupowanie.ts`),
-  `queryKey: ["/api/alerts"]`. Nie pisz drugiego klienta. Pulpit oryginału filtruje alerty
-  po statusie `nowy` i ogranicza do pięciu.
-- KPI z 10a: hooki `useKpi()` i `useStatusHistorii()` w `pages/analityka/api.ts` są gotowe
-  do reużycia; kafle są w `pages/analityka/NaglowekKpi.tsx`.
-- `/` jest ostatnim placeholderem Iteracji 10 w `src/pages/placeholdery.ts`.
+**Oryginalny Pulpit nie woła ANI JEDNEJ trasy `/api/analytics/*` i nie woła `/api/alerts`.**
+Zweryfikowane w `deminified/frontend-index.js:16836-17090` (funkcja `N2`) — to obaliło
+wcześniejszy zapis tej sekcji, który zakładał reużycie `useKpi()`/`useStatusHistorii()`/
+`NaglowekKpi.tsx` z 10a i `pobierzAlerty()` z I6 wprost:
+
+- pobiera `["/api/products"]`, `["/api/staging"]`, `["/api/suppliers"]`, `["/api/history"]`;
+- cztery kafle KPI liczy **klientem** (`e?.length`, filtry `b2()` = „w tym tygodniu",
+  `j2()` = „dzisiaj"), a kafel to komponent `Si()` (`:16794-16836`) z **ikoną, `href`
+  i trendem up/none** — zupełnie inny niż `Kafel` z `NaglowekKpi.tsx`, który pokazuje inne
+  cztery liczby (odstępstwo O-10a-1);
+- alerty wyprowadza **klientem** z `/api/products` przez `pv()` (`:16631-16745`) —
+  pseudo-alerty katalogowe (marża ujemna/niska, „nie-opona", brak importu ≥7/≥30 dni),
+  filtrowane po `status === "nowy"`.
+
+**Blok 10f to rozstrzygnął decyzjami D1/D2 użytkownika z 2026-09-04**
+(`docs/tickets/26-FEATURE-analityka-export-pulpit/plan.md`):
+
+- **D1 — karta powiadomień i kafel alertów stoją na realnych `/api/alerts`**
+  (`pobierzAlerty()` z I6), nie na porcie `pv()` — kontynuacja odstępstwa D1 z Iteracji 6
+  (backlog #26). Dobór (status `nowy`, poziom krytyczny/ostrzeżenie, sort poziom→data malejąco,
+  `slice(0,5)`) jest portem 1:1 z `N2`, zmienione jest tylko ŹRÓDŁO danych. Zapisane jako
+  odstępstwo **O-10f-1**.
+- **D2 — kafle KPI to wierny port `Si()`**, nie `NaglowekKpi` — ikona, wartość, trend, `href`,
+  liczone lokalnie z `/api/products` i `/api/staging`, klikalne skróty do `/katalog`,
+  `/staging`, `/alerty`, `/historia`. `NaglowekKpi` (10a) zostaje wyłącznie nagłówkiem
+  `/analityka`, Pulpit go nie używa.
+
+Dodatkowo (D3, ta sama runda decyzji): kafel „Ostatni eksport CSV" jest **trwale martwy** —
+oryginał szuka `r.find(e => e.typ === "eksport")` w odpowiedzi `GET /api/history`, a ta trasa
+oddaje tabelę `history`, której wiersz **nie ma pola `typ`**. Odtworzone 1:1 (zawsze pokazuje
+„—"), zamrożone testem, usterka w `docs/rebuild-backlog.md`.
+
+- Czyta `GET /api/history` (I5) — na stagingu dziś `[]`, bo tabela `history` nie ma jeszcze
+  pisarza; pusta odpowiedź renderuje widok normalnie (kafel „—"), nie jest traktowana jak błąd.
+- Klient alertów: `pobierzAlerty()` (`pages/alerty/api.ts`), `queryKey: ["/api/alerts"]` —
+  Pulpit nie pisze drugiego klienta, tylko go konsumuje (D1 wyżej).
+- `/` przestało być placeholderem `src/pages/placeholdery.ts` — zostają tam tylko `/atrybuty`
+  i `/moje-konto`.
 
 ---
 
-## 9. Czego blok NIE musi już budować — inwentarz z 10a, 10b, 10d i 10e
+## 9. Czego blok NIE musi już budować — inwentarz z 10a, 10b, 10d, 10e i 10f
 
 | Rzecz | Gdzie |
 |---|---|
@@ -545,6 +595,12 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
 | Własny `queryFn` z jawnym query stringiem, klucz jako lista wartości a nie ścieżka (10b) — patrz §1.4 | `pages/analityka/api.ts` (`useHistoriaCenyProduktu`) |
 | Sekcja z filtrem SERWEROWYM w najprostszym wariancie (cały adres w jednym segmencie klucza, stan kontrolki w `Analityka.tsx`) | `pages/analityka/SekcjaRotacji.tsx` (10e) |
 | Kolejne przykłady wzorca sekcji (kopiuj obok `SekcjaMarze.tsx`) | trzy sekcje 10d: `SekcjaStabilnoscDostawcow.tsx` (pierwszy przykład sekcji **bez wykresu**), `SekcjaCyklZyciaDostawcow.tsx`, `SekcjaStanDostawcow.tsx`; `SekcjaCeny.tsx` z 10b i `SekcjaSezonowosci.tsx` z 10e — wzorzec wykresu **liniowego** (szereg czasowy) obok słupkowego z marż |
+| Przycisk „CSV" (port `M()`) — nawigacja `window.location.href`, bez query stringu | `pages/analityka/eksport.tsx` (`PrzyciskCsv`, `adresEksportu()`) |
+| Format CSV (port `toCsv`/`csvEscape`) | `backend/src/analityka/csv.ts` (`naCsv`, `escapujKomorke`) |
+| Kafel KPI Pulpitu (port `Si()`: ikona, wartość, trend, `href`) | `pages/pulpit/KafelKpi.tsx` |
+| Względne formatowanie czasu (port `Bu()`) — NIE to samo, co `sformatujOstatnia()` z alertów | `pages/pulpit/czas.ts` (`sformatujWzglednie`) |
+| Handlery MSW pięciu tras Pulpitu, dla testów renderujących `<App/>` pod `/` bez chęci testować sam Pulpit | `test/msw/pulpit.ts` (`handleryPulpitu()`) |
+| Asercja GATE dla trasy, która NIE oddaje JSON-a (kontrakt bez `content`) | `backend/test/gate/asercje.ts` (`sprawdzZgodnoscZKontraktemNieJson()`) |
 
 **Czego NIE ruszać:**
 - tokenów `--chart-1..5` — pochodzą z arkusza produkcji, chroni je `test/tokeny.test.ts`;
@@ -572,3 +628,7 @@ bo to jest ta rzecz, która „działa u mnie" i pada na stagingu.
    nie istnieje) w pustą odpowiedź — zepsuta trasa wygląda identycznie jak trasa bez danych,
    tak jak w 10e (`availability/products`, `availability/sell-through` — §2, backlog #32).
    Pusty fixture sam tego nie ujawni.
+8. **Sprawdź, czy trasa w ogóle oddaje JSON.** Jeśli nie (jak `export/{view}`, `text/csv`) —
+   wspólna asercja kontraktu (`sprawdzZgodnoscZKontraktem()`) się nie nadaje, bo zawsze wymusza
+   `application/json`; użyj `sprawdzZgodnoscZKontraktemNieJson()` (§8.1) i doasertuj
+   `content-type` osobno. Fixture'a dla takiej trasy nie będzie — nagrywarka zapisuje tylko JSON.

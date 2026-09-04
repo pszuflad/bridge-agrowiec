@@ -90,7 +90,11 @@ Sprawdza dwie rzeczy:
    `GET_staging_paged.json`. `GET /api/staging/{id}` nie ma fixtura — jego kształt (21 kluczy)
    jest wyprowadzony z oryginału i pilnowany testem zbioru kluczy, nie porównaniem z nagraniem.
 2. **Kontrakt** — ścieżka, metoda i zwrócony kod statusu są zadeklarowane w `contract/openapi.yaml`,
-   a odpowiedź jest JSON-em.
+   a odpowiedź jest JSON-em. **Jedyny wyjątek:** `GET /api/analytics/export/{view}` (blok 10f)
+   oddaje `text/csv`, nie JSON — kontrakt dla tej ścieżki nie deklaruje `content`, więc `text/csv`
+   go nie narusza; weryfikacja idzie przez osobny pomocnik `sprawdzZgodnoscZKontraktemNieJson()`
+   (`test/gate/asercje.ts`) plus jawne asercje `content-type`/`content-disposition` — wspólna
+   maszyneria (`sprawdzZgodnoscZKontraktem`) zostaje nietknięta dla pozostałych tras.
 
 > ⚠ **Zakres walidacji kontraktu.** `openapi.yaml` (wersja 2.3) zamraża ścieżki, metody, `security`
 > i kody odpowiedzi, ale **nie zawiera schematów ciał** (request body to `{type: object}`, odpowiedzi

@@ -1,21 +1,24 @@
-# Wzorzec sekcji dashboardu — obowiązuje bloki 10c–10e
+# Wzorzec sekcji dashboardu — Iteracja 10 zamknięta (10a–10f)
 
 Ten katalog powstał w bloku **10a** (ticket `19-FEATURE-analityka-fundament`) i jest
-szablonem dla reszty Iteracji 10. Wypełniły go dotąd dwa bloki:
+szablonem, którego trzymały się wszystkie kolejne bloki Iteracji 10. Iteracja jest
+**zamknięta** (2026-09-04), moduł ma komplet 27/27 tras:
 
 - **10d** (`23-FEATURE-analityka-dostawcy`) — zakładka `dostawcy`; trzy sekcje
   w `Sekcja{Stabilnosc,CyklZycia,Stan}Dostawcow.tsx` są drugim, niezależnym od marż
   przykładem tego wzorca (w tym sekcją bez wykresu);
 - **10b** (`24-FEATURE-analityka-ceny`) — zakładka `ceny`; doprecyzował dwie rzeczy, które
-  10a zostawiło otwarte: sposób podawania parametrów zapytania (§2.2) i debounce (§2.2a).
+  10a zostawiło otwarte: sposób podawania parametrów zapytania (§2.2) i debounce (§2.2a);
+- **10e** (`25-FEATURE-analityka-dostepnosc-rotacja`) — wypełnił zakładkę „Dostępność"
+  trzema kartami i dołożył dwie pod kartą marż w zakładce „Marża i rotacja"; wniósł trzy
+  rzeczy do REUŻYCIA — `PasekDostepnosci`, `NaglowekSekcji` i generyczne `zastosujFiltry`
+  (patrz §1 i §2.3);
+- **10f** (`26-FEATURE-analityka-export-pulpit`) — ostatni blok: dołożył przycisk „CSV"
+  do wszystkich dziesięciu kart, które mają go w oryginale, i odtworzył Pulpit `/`
+  (osobny widok, poza tym katalogiem) — patrz §7.
 
 Bloki **dokładają zakładki, nie przemeblowują widoku** — zakładki, ich kolejność
 i etykiety już są i pochodzą z oryginału.
-
-**Blok 10e jest zrobiony** (ticket `25-FEATURE-analityka-dostepnosc-rotacja`): wypełnił
-zakładkę „Dostępność" trzema kartami i dołożył dwie pod kartą marż w zakładce „Marża
-i rotacja". Wraz z nim doszły trzy rzeczy do REUŻYCIA, nie do przepisania — `PasekDostepnosci`,
-`NaglowekSekcji` i generyczne `zastosujFiltry` (patrz §1 i §2.3).
 
 Zanim napiszesz linijkę kodu: przeczytaj „Trzy pułapki" na końcu. Każda z nich kosztowała
 w 10a osobne dochodzenie.
@@ -302,6 +305,14 @@ użytkownika z 2026-09-03):
 | O-10e-1 | Wykres liniowy w karcie „4.4 Sezonowy wzorzec cen" | jedna seria (średnia po wszystkich markach), bo marek bywa kilkadziesiąt, a limit to 4 serie; pełny podział jest w tabeli pod wykresem |
 | — | `GET /api/analytics/importy-timeline` bez UI | oryginalny bundle nie woła tej trasy ani razu — karta byłaby nowym ekranem, nie odbudową |
 
+**Blok 10f — co dołożył** (ticket `26-FEATURE-analityka-export-pulpit`, decyzje D1–D5
+użytkownika z 2026-09-04; szczegóły w §7):
+
+| # | Co | Dlaczego |
+|---|---|---|
+| O-10f-1 | Karta powiadomień i kafel alertów Pulpitu na realnych `/api/alerts`, zamiast pseudo-alertów katalogowych `pv()` | D1 — kontynuacja odstępstwa D1 z Iteracji 6 (backlog #26) |
+| — | Przycisk „CSV" w dziesięciu kartach `/analityka` | D4 — trasa `export/{view}` wreszcie istnieje; 10a i 10d świadomie ją pomijały do tego momentu |
+
 **1:1 z oryginałem, choć wygląda na defekt:** karty „4.1 Historia dostępności pozycji"
 i „4.2 Tempo schodzenia z magazynu" są **puste zawsze**. Ich zapytania pytają `historia_cen`
 o kolumnę `nazwa`, której ta tabela nie ma — produkcja połyka błąd i zwraca `rows: []` mimo
@@ -336,3 +347,41 @@ Odstępstwa bloku 10c (decyzje D1–D6, `docs/tickets/22-FEATURE-analityka-ean/p
 |---|---|---|
 | O-10c-1 | Dwa wykresy w karcie „2.6" (histogram pokrycia + ranking dostawców) + liczba nagłówkowa „% EAN-ów u ≥2 dostawców" | D2; oryginał nie ma wykresów, infrastruktura z O-10a-3 stoi |
 | O-10c-2 | Notka o wymiarach filtra, których dana tabela w karcie nie stosuje | D4; oryginał nie ma globalnych filtrów (odstępstwo O-10a-2) |
+
+## 7. Co ustalił blok 10f (`26-FEATURE-analityka-export-pulpit`, 2026-09-04) — ostatni blok Iteracji 10
+
+Dołożył ostatnią, 27. trasę modułu (`GET /api/analytics/export/{view}`) i przycisk „CSV"
+w dziesięciu kartach, które mają go w oryginale — logika w `pages/analityka/eksport.tsx`
+(`PrzyciskCsv`, `adresEksportu()`), nie w tym katalogu wprost, bo przycisk jest współdzielony
+przez sekcje z kilku bloków.
+
+**Wpięcie w karty — trzy warianty tego samego układu „tytuł po lewej, akcje po prawej":**
+cztery sekcje (`SekcjaMarze`, `SekcjaDostepnosciProduktow`, `SekcjaRotacji`,
+`SekcjaTempaSchodzenia`) dostają przycisk przez gotowy slot `obok?: ReactNode`
+w `NaglowekSekcji` (§1); `SekcjaEan` i `SekcjaCeny` (karta `prices-last`) mają własne nagłówki
+inline i dostały analogiczny prop `obok` o identycznym markupie; trzy sekcje dostawców
+(`SekcjaStabilnoscDostawcow`, `SekcjaCyklZyciaDostawcow`, `SekcjaStanDostawcow`) mają nagłówek
+inline bez wspólnego propa — przycisk jest tam wstawiony wprost w tym samym układzie
+(`flex items-center justify-between gap-2`), bo te trzy karty i tak nie przechodzą przez
+`NaglowekSekcji` (nie liczą notek o filtrach).
+
+**Dlaczego to musi być `window.location.href`, a nie `fetch`:** oryginał eksportuje przez
+zwykłą nawigację przeglądarki, więc żądanie **nie niesie nagłówka `Authorization`** i
+uwierzytelnia się wyłącznie cookie'em `bridge_session`. `fetch` + `blob` zmieniłby model
+autoryzacji i **zerwał zgodność z produkcją** — działa tylko dzięki temu, że cookie ma
+`SameSite=Lax` (wysyłane przy nawigacji GET najwyższego poziomu) i staging jest same-origin;
+dowiedzione testem integracyjnym na prawdziwym serwerze
+(`rebuild/backend/test/analityka.eksport.gate.test.ts`).
+
+⚠ **Eksport NIE zwraca tego, co widać w tabeli.** Każdy `{view}` ma własny SQL po stronie
+backendu, inny niż trasa dashboardu o tej samej nazwie, i nie niesie żadnych filtrów ani
+parametrów — `adresEksportu()` nie dokleja query stringu. Dwa widoki
+(`availability-products`, `sell-through`) oddają **pusty plik** (sam BOM) z powodu backlogu
+#32 (`historia_cen` bez kolumny `nazwa`) — odtworzone 1:1, nie naprawiane.
+
+| # | Co | Dlaczego |
+|---|---|---|
+| O-10f-1 | Karta powiadomień i kafel alertów Pulpitu na realnych `/api/alerts`, zamiast pseudo-alertów katalogowych `pv()` z oryginału | D1 — kontynuacja odstępstwa D1 z Iteracji 6 (backlog #26); „Zobacz wszystkie" prowadzi do `/alerty`, który i tak stoi na `/api/alerts` |
+
+Pulpit `/` (`src/pages/Pulpit.tsx`, `src/pages/pulpit/`) jest osobnym widokiem poza tym
+katalogiem — szczegóły w `docs/analityka-bloki-10b-10f.md` §8.2.

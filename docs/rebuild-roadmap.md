@@ -157,7 +157,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
-| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | 🔨 | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04. **Zostaje 10f.** |
+| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
 
@@ -1083,7 +1083,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 10 — Analityka + pulpit
-- **Status:** 🔨  **Sesje (6 bloków, dekompozycja 2026-09-02):** 10a fundament → [10b·10c·10d·10e równolegle] → 10f  **Zależy od:** 2, 3, 4  **10a i 10d zrobione** (2026-09-03), 10b/10c/10e nadal niezależne od siebie, 10f na końcu.
+- **Status:** ✅ **zrobione**  **Sesje (6 bloków, dekompozycja 2026-09-02):** 10a fundament → [10b·10c·10d·10e równolegle] → 10f  **Zależy od:** 2, 3, 4  **Wszystkie sześć bloków zamknięte:** 10a i 10d — 2026-09-03; 10c — 2026-09-03; 10b i 10e — 2026-09-04; 10f (`26-FEATURE-analityka-export-pulpit`) — 2026-09-04, zamyka iterację.
 - **Cel (Ania klika):** otwiera `/analityka` (20+ dashboardów) i pulpit `/` (agregaty).
 - **📄 ŚCIĄGA WYKONAWCZA DLA BLOKÓW 10b–10f: `docs/analityka-bloki-10b-10f.md`.**
   Przeczytaj JĄ, zanim napiszesz plan bloku. Per trasa: numer linii handlera, parametry query,
@@ -1113,7 +1113,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   KPI i wzorzec sekcji/wykresu stoją. 10c i 10d zrobione (2026-09-03), 10b i 10e (2026-09-04)
   — **wszystkie pięć zakładek widoku `/analityka` niesie treść**, a zakładka `marza` ma komplet
   trzech kart oryginału. Komponent-zaślepka `ZakladkaWPrzygotowaniu` zniknął z `Analityka.tsx`,
-  bo nie ma już czego zastępować. **Zostaje 10f** (Pulpit + CSV agregują gotowe metryki).
+  bo nie ma już czego zastępować. **10f zrobione 2026-09-04** — moduł analityki kompletny,
+  27/27 tras, Pulpit `/` odtworzony, Iteracja 10 zamknięta.
 - **10a · Fundament analityki** ✅ (BE+FE) — `19-FEATURE-analityka-fundament` · 2026-09-03.
   Backend: pięć tras za `requireAuth` (`filters`, `status`, `kpi`, `margins`,
   `bootstrap-current` POST), agregaty 1:1 z `analytics_module.cjs`. Frontend: szkielet
@@ -1287,49 +1288,64 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     się NIE wykonać przy pustych parametrach — a `?days` ma zawsze wartość domyślną.
   - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §7.
   - Gate: fixtures tej grupy (6) — zielone.
-- **10f · Export + Pulpit** (BE+FE) — `analytics/export/{view}` + pulpit `/` (home; czyta `GET /api/history` z I5 + KPI z 10a + alerty z I6).
-  - **WEJŚCIE Z ITERACJI 6 (2026-09-03, `18-FEATURE-widok-alerty`) — klient dla „najświeższych
-    alertów" na pulpicie JUŻ ISTNIEJE.** `pobierzAlerty()` (`pages/alerty/api.ts`) i grupowanie
-    `pogrupujAlerty()` (`pages/alerty/grupowanie.ts`) są gotowe do ponownego użycia; `queryKey`
-    to `["/api/alerts"]`. Nie pisać drugiego klienta. ⚠ Pulpit oryginału filtrował alerty po
-    statusie `nowy` i ograniczał do pięciu (`02_WIDOKI.md` §/ pkt 5) — `filtrujAlerty` to robi.
-  - **WEJŚCIE Z BLOKU 10a (2026-09-03, `19-FEATURE-analityka-fundament`).** Przycisk „CSV"
-    świadomie pominięty w 10a (`onClick: () => M("margins")`, `frontend-index.js:28524`) —
-    10f dokłada go do sekcji marż i każdej innej sekcji, która go ma w oryginale.
-    `POST /api/analytics/bootstrap-current` istnieje od 10a bez przycisku (decyzja D4 — trasa
-    nieidempotentna, `INSERT…SELECT` bez `ON CONFLICT`); jeśli miałby dostać UI, to tu,
-    jako nowa decyzja użytkownika.
-  - **WEJŚCIE Z BLOKU 10b (2026-09-04, `24-FEATURE-analityka-ceny`).** Przycisk „CSV” przy
-    karcie „3.1 Zmiany cen z ostatnich importów” (`deminified/frontend-index.js:28310`, widok
-    eksportu `prices-last`) świadomie pominięty w 10b — 10f go dokłada.
-  - **WEJŚCIE Z BLOKU 10c (2026-09-03, `22-FEATURE-analityka-ean`) — DWIE rzeczy czekają tu na
-    decyzję/dowóz.** (1) Nagłówek KPI: dane do dwóch z czterech oryginalnych kafli („EAN
-    wspólne" = `ean/comparison.rows.length`, „Pozycje unikalne" = `ean/unique.rows.length`,
-    `frontend-index.js:28002-28017`) są od 10c dostępne — przepięcie z `/api/analytics/kpi`
-    (odstępstwo O-10a-1) da się zdjąć jedną zmianą w `NaglowekKpi.tsx`, ale to świadoma decyzja
-    użytkownika, nie automat (10c jej nie ruszyło, żeby nie powiększać swojego diffu). (2)
-    Przyciski „CSV" pominięte w 10c: `M("ean-comparison")` (`frontend-index.js:28190`) dla
-    karty „2.1-2.4" i `M("unique")` (`:28234`) dla karty „2.5" — dochodzą tu razem z przyciskiem
-    z 10a i `GET /api/analytics/export/{view}`.
-  - **WEJŚCIE Z BLOKU 10d (2026-09-03, `23-FEATURE-analityka-dostawcy`).** Przycisk „CSV"
-    świadomie pominięty w trzech kartach zakładki `dostawcy` (decyzja D5) — 10f dokłada go tam
-    też: `M("suppliers-stability")`, `M("suppliers-lifecycle")`, `M("suppliers-stock")`
-    (`deminified/frontend-index.js:28063`, `:28106`, `:28144`), obok sekcji marż z 10a.
-    ⚠ Eksport ma **własny SQL**, inny niż trasa dashboardu o tej samej nazwie:
-    `export/suppliers-stability` liczy ZAWSZE z `historia_cen` i oddaje kolumny
-    `produkty, punkty, sredniaCena, sredniStan` (`docs/analityka-bloki-10b-10f.md` §8.1) —
-    nie da się go zbudować z danych, które sekcja ma już w pamięci.
-  - **WEJŚCIE Z BLOKU 10e (2026-09-04, `25-FEATURE-analityka-dostepnosc-rotacja`).** (a)
-    Przycisk „CSV" świadomie pominięty na kartach „4.1 Historia dostępności", „4.2 Tempo
-    schodzenia" i „Rotacja / produkty bez aktualizacji" — trasa `export/{view}` jeszcze nie
-    istniała; 10f go dokłada. (b) Dwa widoki eksportu są w produkcji zepsute tak samo jak
-    dashboard: `export/availability-products` i `export/sell-through`
-    (`analytics_module.cjs:316-317`) biorą `nazwa` z `historia_cen`, a tej kolumny nie ma —
-    oddadzą sam znacznik BOM. Przed startem sprawdzić `docs/rebuild-backlog.md` #32.
-  - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §8.
-  - Gate: export waliduje wg openapi (brak fixtura GET); pulpit pokazuje kluczowe metryki.
-- **Ścieżki (GATE):** analytics×27; fixtures `GET_analytics_*.json` (25) rozdzielone po blokach 10a–10e (10a: 4 · 10b: 5 · 10c: 6 · 10d: 4 · 10e: 6); `export/{view}` i `bootstrap-current` bez fixtura (walidacja openapi). Zweryfikowane 2026-09-03 (`grep -c "app.get('/api/analytics\|app.post('/api/analytics" mirror/backend/analytics_module.cjs` → 27; `ls contract/fixtures/ | grep -c analytics` → 25) — rozdział po przeniesieniu `margins` do 10a nadal się zgadza.
-- **DoD:** wszystkie bloki 10a–10f zielone; dashboardy renderują realne agregaty; fixtures przez GATE; pulpit pokazuje kluczowe metryki.
+- **10f · Export + Pulpit** ✅ (BE+FE) — `26-FEATURE-analityka-export-pulpit` · 2026-09-04.
+  Zamyka Iterację 10: moduł analityki kompletny, **27/27 tras**. Backend: 27. i ostatnia trasa
+  `GET /api/analytics/export/{view}` (`analytics_module.cjs:305`) — dziesięć widoków CSV,
+  **każdy z WŁASNYM SQL-em** portowanym z `analytics_module.cjs:311-320`, innym niż trasa
+  dashboardu o tej samej nazwie (np. `export/suppliers-stability` liczy zawsze z `historia_cen`
+  i oddaje kolumny `produkty, punkty, sredniaCena, sredniStan` — nie da się go zbudować z danych,
+  które sekcja dashboardu ma już w pamięci). Frontend: przyciski „CSV" dołożone do dziesięciu
+  kart `/analityka`, świadomie pominiętych przez 10a–10e (`M("margins")` z 10a,
+  `M("prices-last")` z 10b, `M("ean-comparison")`/`M("unique")` z 10c,
+  `M("suppliers-stability")`/`M("suppliers-lifecycle")`/`M("suppliers-stock")` z 10d,
+  trzy karty 10e), oraz odtworzony Pulpit `/` — **ostatni placeholder Iteracji 10** zdjęty
+  z `pages/placeholdery.ts` (zostają dwa wpisy: `/atrybuty`, `/moje-konto`; router dalej 12 tras).
+  - **Sprostowanie wobec wcześniejszego zapisu w tym pliku i w `docs/analityka-bloki-10b-10f.md`
+    §8.2 — Pulpit oryginału NIE woła żadnej trasy `/api/analytics/*`.** Zweryfikowane
+    w `deminified/frontend-index.js:16836-17090` (`N2`): pobiera wyłącznie `/api/products`,
+    `/api/staging`, `/api/suppliers`, `/api/history`; cztery kafle KPI liczy **klientem**
+    (port `Si()`: ikona, `href`, trend) — to inne cztery liczby niż nagłówek `NaglowekKpi`
+    z 10a i inny layout (D2). Jedyna trasa analityki, z którą Pulpit ma coś wspólnego, to
+    zero — 10a/10c dostarczyły dane dla `/analityka`, nie dla `/`.
+  - **D1 (kontynuacja D1 z I6, backlog #26) — alerty Pulpitu na realnym `/api/alerts`, NIE na
+    pseudo-alertach katalogowych `pv()` z oryginału** (odstępstwo O-10f-1). Reużyty gotowy
+    klient `pobierzAlerty()` (`pages/alerty/api.ts`, Iteracja 6) i logika filtrowania — bez
+    drugiego klienta. Karta „Najnowsze powiadomienia" renderuje się tylko gdy `o.length > 0`,
+    limit 5, sort poziom→data malejąco.
+  - **D3 — kafel „Ostatni eksport CSV" odtworzony 1:1 jako TRWALE MARTWY.** Szuka
+    `typ === "eksport"` w `GET /api/history` (I5), a ta trasa oddaje tabelę `history`, której
+    wiersz nie ma pola `typ` (niesie je `GET /api/history/paged` z `audit_log`). Pokazuje zawsze
+    „—"; naprawa czeka na decyzję Ani (`docs/rebuild-backlog.md`).
+  - **Fakt — „LIMIT 5000" NIE dotyczy wszystkich dziesięciu widoków eksportu.** Mają go tylko
+    sześć: `suppliers-lifecycle`, `prices-last`, `availability-products`, `sell-through`,
+    `margins`, `rotation-inactive`; `suppliers-stability`, `suppliers-stock`, `ean-comparison`
+    i `unique` **nie mają żadnego limitu** (`analytics_module.cjs:311-320`, zweryfikowane linia
+    po linii). Portowane dosłownie, bez dokładania limitu, którego oryginał nie ma.
+  - **Fakt — nieznany `{view}` → 200 i sam BOM, NIE 404** (`sendRows([])`, `analytics_module.cjs:321`).
+  - **Fakt — eksport w oryginale to nawigacja przeglądarki** (`window.location.href`,
+    `frontend-index.js:27938-27940`), **bez nagłówka `Authorization`, na samym cookie
+    `bridge_session`** — działa, bo cookie ma `SameSite=Lax` (wysyłane przy nawigacji GET
+    najwyższego poziomu) i staging jest same-origin; dowiedzione testem integracyjnym na
+    prawdziwym serwerze.
+  - **Otwarte, BEZ przypisania do konkretnego przyszłego bloku** (Iteracja 10 była ostatnią
+    analityki):
+    - O-10a-1 (nagłówek KPI `/analityka` czyta `/api/analytics/kpi` zamiast danych z
+      `filters`/`ean/*`/`status`) — dane potrzebne do przepięcia są od 10c dostępne, ale
+      przepięcie to osobna decyzja użytkownika, nikt jej nie podjął;
+    - backlog #26 (pseudo-alerty katalogowe `pv()` zamiast `/api/alerts`) — D1 utrzymuje
+      decyzję z I6 po raz drugi, teraz też na Pulpicie;
+    - backlog #32/#33 (`historia_cen` bez kolumny `nazwa`, okno po niepełnym `GROUP BY`) —
+      dotyczą teraz TAKŻE dwóch widoków eksportu (`export/availability-products`,
+      `export/sell-through`), nie tylko dashboardu 10e.
+  - 📄 Szczegóły trasa po trasie i karty oryginału: `docs/analityka-bloki-10b-10f.md` §8;
+    pełny kontekst decyzji: `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
+  - Gate: `export/{view}` — kontrakt (ścieżka + status 200 wg `openapi.yaml:178-188`) plus
+    jawna asercja `content-type: text/csv`; **fixture nie istnieje i istnieć nie może** —
+    nagrywarka zapisywała wyłącznie JSON, trasa oddaje `text/csv`, a kontrakt dla tej ścieżki
+    nie deklaruje żadnego `content`, więc CSV go nie narusza; kształt niosą testy jednostkowe.
+    Backend 847 testów / 54 pliki, frontend 504 / 35, lint/typecheck/build czyste w obu.
+- **Ścieżki (GATE):** analytics×27; fixtures `GET_analytics_*.json` (25) rozdzielone po blokach 10a–10e (10a: 4 · 10b: 5 · 10c: 6 · 10d: 4 · 10e: 6); `export/{view}` i `bootstrap-current` bez fixtura — walidacja tylko wg openapi (ścieżka + status), z różnych powodów: `export/{view}` oddaje `text/csv`, nie JSON, więc nagrywarka (zapisuje tylko JSON) nie mogła jej nagrać; `bootstrap-current` to `POST` nieidempotentny (`INSERT…SELECT` bez `ON CONFLICT`, zapisuje do `historia_cen`) — mutację nagrywarka pomija z innego powodu, mimo że sama odpowiedź jest JSON-em (`{ok, inserted, at}`). Zweryfikowane 2026-09-03 (`grep -c "app.get('/api/analytics\|app.post('/api/analytics" mirror/backend/analytics_module.cjs` → 27; `ls contract/fixtures/ | grep -c analytics` → 25) — rozdział po przeniesieniu `margins` do 10a nadal się zgadza.
+- **DoD:** ✅ wszystkie bloki 10a–10f zielone; ✅ dashboardy renderują realne agregaty; ✅ fixtures przez GATE (poza deklarowaną luką `export/{view}`/`bootstrap-current`); ✅ pulpit pokazuje kluczowe metryki (kafle KPI liczone klientem, alerty z `/api/alerts` — D1).
 
 ---
 

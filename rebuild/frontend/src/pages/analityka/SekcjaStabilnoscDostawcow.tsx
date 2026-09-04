@@ -23,9 +23,10 @@
  * strony i tłumaczy, skąd biorą się puste kolumny. To jest ZASTANE ZACHOWANIE, nie bug
  * do naprawienia — jeśli kiedyś ma się zmienić, wymaga osobnej, nazwanej decyzji.
  *
- * ⚠ CZEGO TU CELOWO NIE MA: przycisku „CSV" (`onClick: () => M("suppliers-stability")`,
- * `:28063`). Trasa `GET /api/analytics/export/{view}` należy do bloku 10f i jeszcze nie
- * istnieje — tak samo postąpiło 10a w sekcji marż.
+ * Przycisk „CSV" (`onClick: () => M("suppliers-stability")`, `:28063`) dołożył blok 10f.
+ * ⚠ Eksport liczy ZAWSZE z `historia_cen` i oddaje inne kolumny niż ta tabela
+ * (`produkty, punkty, sredniaCena, sredniStan`) — nie da się go zbudować z danych, które
+ * sekcja ma już w pamięci.
  */
 import { useMemo } from "react";
 
@@ -41,6 +42,7 @@ import {
 } from "./filtrowanie";
 import { formatuj } from "./formatowanie";
 import { TabelaAnalityki, type KolumnaTabeli } from "./TabelaAnalityki";
+import { PrzyciskCsv } from "./eksport";
 
 /** Siedem kolumn 1:1 z oryginałem (`:28070-28093`), z zachowanym wyrównaniem i monospace. */
 const KOLUMNY: KolumnaTabeli<WierszStabilnosci>[] = [
@@ -75,7 +77,13 @@ export function SekcjaStabilnoscDostawcow({
     <Card className="border-card-border">
       <CardContent className="p-0">
         <div className="border-b px-4 py-3">
-          <div className="text-sm font-semibold">1.1 Stabilność cennika dostawcy</div>
+          {/* Ten nagłówek nie idzie przez `NaglowekSekcji`: karta liczy własne notki o filtrach.
+              Układ „tytuł po lewej, akcje po prawej" jest jednak ten sam, co tam i co w oryginale
+              (`frontend-index.js:28065`). */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-sm font-semibold">1.1 Stabilność cennika dostawcy</div>
+            <PrzyciskCsv widok="suppliers-stability" />
+          </div>
           {odfiltrowane > 0 && (
             <div
               className="mt-1 text-xs text-muted-foreground"

@@ -18,8 +18,14 @@
 // Blok 10b dołożył pięć tras cen (`:237-268`, `:333`), blok 10c — sześć tras EAN
 // (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców (`:110`, `:133`, `:143`, `:332`),
 // blok 10e — sześć tras dostępności, rotacji i cyklu życia (`:156-184`, `:279-303`, `:334`).
-// Razem z pięcioma trasami 10a daje to 26 z 27 tras modułu; ostatnią — `export/{view}` —
-// dowozi blok 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+// Razem z pięcioma trasami 10a dało to 26 z 27 tras modułu; ostatnią — `export/{view}` —
+// dowiózł blok 10f (`:305-322`), domykając Iterację 10. Moduł jest kompletny: 27/27.
+//
+// ⚠ JEDNA TRASA NIE ODDAJE JSON-A. `export/{view}` zwraca `text/csv`, więc wspólna asercja
+// GATE `sprawdzZgodnoscZKontraktem()` (`test/gate/asercje.ts`) jej NIE dotyczy — ta funkcja
+// wymaga `application/json` dla każdej sprawdzanej odpowiedzi. Kontrakt na to pozwala:
+// `openapi.yaml:178-188` nie deklaruje dla tej ścieżki żadnego `content`. Sposób sprawdzania
+// (ścieżka + status z kontraktu, content-type osobno) siedzi w `analityka.eksport.gate.test.ts`.
 //
 // ⚠ PIĘĆ TRAS CZYTA `req.query` — trzy z bloku 10c (`ean/comparison`, `ean/details`,
 // `ean-porownanie`) i dwie z 10b (`market/group-prices`, `prices/product-history`); trasy
@@ -33,8 +39,10 @@
 
 import { Router, type Request, type Response } from "express";
 
+import { naCsv } from "../analityka/csv.js";
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
+import { WIDOKI_EKSPORTU } from "../repos/analityka-eksport.js";
 import {
   cenyGrupRynku,
   cyklZyciaDostawcow,
@@ -299,6 +307,37 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
    */
   router.get("/api/analytics/top-zmiany", requireAuth, (_req: Request, res: Response) => {
     res.json(topZmiany(db));
+  });
+
+  /**
+   * `GET /api/analytics/export/{view}` — CSV, blok 10f (`:305-322`). 27. i ostatnia trasa
+   * modułu, i jedyna w całym backendzie, która NIE oddaje JSON-a.
+   *
+   * ⚠ JEDYNA TRASA ANALITYKI Z PARAMETREM ŚCIEŻKI. Pozostałe cztery sparametryzowane
+   * (`?ean`, `?kod`, `?group`, `?days`) czytają `req.query`; tu wartość siedzi w ścieżce
+   * i jest jednocześnie nazwą pliku.
+   *
+   * ⚠ NIEZNANY `{view}` DAJE 200 I PUSTY PLIK, NIE 404. W oryginale ostatnią instrukcją
+   * łańcucha `if`-ów jest `return sendRows([])` (`:321`), więc `/export/cokolwiek` odpowiada
+   * poprawnym CSV-em złożonym z samego BOM-u. Odtwarzamy to: `?? []` niżej.
+   *
+   * ⚠ `filename` W `Content-Disposition` IDZIE Z `req.params.view` BEZ SANITYZACJI — port 1:1
+   * (`:308`). Node odrzuci wartość nagłówka ze znakiem sterującym, więc `{view}` z `\n`
+   * kończy w `catch` jako 500; wartości „dziwne, ale legalne" trafiają do nazwy pliku tak,
+   * jak w produkcji. Nie domykamy tego tutaj — obserwacja jest w `docs/rebuild-backlog.md`.
+   *
+   * Zapytania i ich pułapki: `repos/analityka-eksport.ts`. Format CSV: `analityka/csv.ts`.
+   */
+  router.get("/api/analytics/export/:view", requireAuth, (req: Request, res: Response) => {
+    const widok = req.params.view ?? "";
+    try {
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename=${widok}.csv`);
+      res.send(naCsv(WIDOKI_EKSPORTU[widok]?.(db) ?? []));
+    } catch (e) {
+      // Port `catch (e) { res.status(500).json({ error: e.message }) }` (`:322`).
+      res.status(500).json({ error: e instanceof Error ? e.message : String(e) });
+    }
   });
 
   return router;
