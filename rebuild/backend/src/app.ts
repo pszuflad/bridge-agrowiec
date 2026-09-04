@@ -6,7 +6,9 @@ import { optionalAuth } from "./middleware/auth.js";
 import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
 import { trasyAlertow } from "./routes/alerts.js";
+import { trasyAtrybutow } from "./routes/atrybuty.js";
 import { trasyAnalityki } from "./routes/analytics.js";
+import { zasiejSlownikAtrybutow } from "./repos/atrybuty.js";
 import { trasyAuth } from "./routes/auth.js";
 import { trasyKonfiguracji } from "./routes/config.js";
 import { trasyHistorii } from "./routes/history.js";
@@ -69,6 +71,29 @@ export function stworzApp({
   klientSelly,
 }: ZaleznosciApp): Express {
   const app = express();
+
+  // Seed słownika atrybutów — 1:1 z pozycją `seed()` w oryginale, który woła je przy
+  // rejestracji modułu (`mirror/backend/atrybuty_module.cjs:99`), czyli przy każdym starcie
+  // procesu. Decyzja użytkownika (ticket 29-FEATURE-atrybuty-backend, plan.md D1).
+  //
+  // ⚠ To NIE jest migracja i nie należy jej za taką brać: seed dosypuje 6 wbudowanych rodzajów
+  // ORAZ wartości `marka`/`bieznik` odczytane z aktualnej zawartości `products`, więc jego wynik
+  // zmienia się z każdym importem. Steruje tym, co Ania zobaczy w kolejce pending — wartość
+  // obecna w słowniku jest przy skanie pomijana. Szczegóły i quirk „bieżnik z modelu”:
+  // `repos/atrybuty.ts`.
+  //
+  // W `try/catch`, bo seed NIE JEST krytyczny dla startu: na bazie bez tabel atrybutów (stary
+  // `DB_PATH`, na którym nie puszczono `npm run migrate`) niezabezpieczone wywołanie wywracałoby
+  // CAŁY backend przed `listen()`, choć dotąd taka baza pozwalała mu wstać i psuła tylko
+  // konkretne trasy. Oryginał nie miał tego problemu, bo wołał `ensureSchema()` przed `seed()`
+  // (`atrybuty_module.cjs:98-99`) — my schematu w runtime nie tworzymy (kanonem jest
+  // `001_schema.sql`), więc tę samą odporność daje złapanie błędu. Ta sama defensywa, co
+  // w oryginale wokół SELECT-ów z `products` („products może nie istnieć", `:78`).
+  try {
+    zasiejSlownikAtrybutow(db);
+  } catch (e) {
+    console.error("[atrybuty] seed pominięty:", e instanceof Error ? e.message : e);
+  }
 
   // Staging i produkcja stoją za proxy Apache (X-Forwarded-*) — bez tego
   // req.ip i req.protocol pokazywałyby adres proxy zamiast klienta.
@@ -141,6 +166,7 @@ export function stworzApp({
   );
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
+  app.use(trasyAtrybutow({ db }));
 
   app.use(nieZnalezionoHandler);
   app.use(bladHandler);

@@ -43,13 +43,18 @@ krzyżowa kontrola z kontraktem. Zweryfikowane też w naszym `deminified`:
 | `/api/attributes` | `/api/atrybuty` | `atrybuty_module.cjs:103` |
 | `/api/attribute-kinds` | `/api/atrybuty/rodzaje` | `atrybuty_module.cjs:114` |
 
+**Stan 2026-09-04 (7a, `29-FEATURE-atrybuty-backend`):** natywny backend atrybutów jest gotowy
+(13 ścieżek / 18 operacji, `rebuild/backend/src/routes/atrybuty.ts`) — 7b ma tylko wołać właściwe
+ścieżki. Uwaga na różnicę pól: `GET /api/atrybuty` zwraca rodzaje z `utworzony`,
+`GET /api/atrybuty/rodzaje` — bez.
+
 **B. Trzy skrypty injection → wchłonąć do natywnego Reacta** (dziś łatają UI
 poza aplikacją; nowy frontend nie może od nich zależeć). **Stan 2026-09-01: jeden z trzech
 wchłonięty** (`freq-injection.js`, blok 3f-2); zostają `pending-injection.js` (I7)
 i `selly-injection.js` (I8):
 | Skrypt | Co robi teraz | Co ma wejść natywnie |
 |---|---|---|
-| `pending-injection.js` (57 KB) | przejmuje ekran `/atrybuty` przez React Fiber + MutationObserver, nadpisuje cache Query | komponenty CRUD rodzajów/wartości + lista pending, jeden Query key `/api/atrybuty`, mutacje+invalidacje. **Bez Fiber/MutationObserver.** |
+| `pending-injection.js` (57 KB) | przejmuje ekran `/atrybuty` przez React Fiber + MutationObserver, nadpisuje cache Query | komponenty CRUD rodzajów/wartości + lista pending, jeden Query key `/api/atrybuty`, mutacje+invalidacje, w tym „Wyczyść wszystko" (`DELETE /api/atrybuty/pending`, `:990`). **Bez Fiber/MutationObserver.** |
 | `selly-injection.js` (26 KB) | overlay panelu Selly na `/panel/api/selly`, routing przez hash | trasa Wouter `/selly` + komponenty w React/TanStack Query |
 | ~~`freq-injection.js` (12 KB)~~ ✅ **WCHŁONIĘTY 2026-09-01 (blok 3f-2)** | dokładał kontrolkę częstotliwości importu poza Reactem (PATCH) | ✔ `rebuild/frontend/src/pages/konfiguracja/{dostawcy.ts,Dostawcy.tsx}` — presety, `fmt()` i kotwica `data-testid="supplier-config-<KOD>"` przeniesione 1:1; znikła mapa `kod → id` i `MutationObserver` |
 
