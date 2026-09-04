@@ -58,7 +58,7 @@ import {
   ETYKIETY_WYMIAROW,
   WYMIARY_CEN,
   wymiaryNieobslugiwane,
-  zastosujFiltrDostawcow,
+  zastosujFiltryDostawcow,
   type WyborFiltrow,
 } from "./filtrowanie";
 import { formatuj } from "./formatowanie";
@@ -235,11 +235,11 @@ export function SekcjaCeny({ wybor }: { wybor: WyborFiltrow }) {
   );
 
   const wierszeImportu = useMemo(
-    () => zastosujFiltrDostawcow(ostatniImport?.rows ?? [], wybor),
+    () => zastosujFiltryDostawcow(ostatniImport?.rows ?? [], wybor),
     [ostatniImport, wybor],
   );
   const wierszeInflacji = useMemo(
-    () => zastosujFiltrDostawcow(inflacja?.rows ?? [], wybor),
+    () => zastosujFiltryDostawcow(inflacja?.rows ?? [], wybor),
     [inflacja, wybor],
   );
 

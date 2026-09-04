@@ -18,7 +18,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
@@ -38,6 +38,17 @@ import {
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
+
+/**
+ * ⚠ DWA LIMITY, NIE JEDEN — ten sam problem i to samo rozwiązanie, co w
+ * `analityka.dostawcy.test.tsx` (blok 10d). `findByTestId(..., { timeout })` czeka najwyżej
+ * tyle, ile pozwala `testTimeout` vitest, a ten stoi domyślnie na 5 s. Chunk `/analityka`
+ * jest ładowany leniwie i ciągnie Recharts, którego pierwszy import w jsdomie trwa ~1,5 s —
+ * a pod obciążeniem (trzy pliki testów tego widoku plus równoległa praca kilku agentów na
+ * tej samej maszynie) znacznie dłużej. To koszt narzędzi, nie zachowanie aplikacji, więc
+ * limit podnosimy PLIKOWO, nie globalnie.
+ */
+vi.setConfig({ testTimeout: 20_000 });
 
 const UZYTKOWNIK = uzytkownikZFixtura();
 const FILTRY = filtryZFixtura();
@@ -122,7 +133,8 @@ async function otworzZakladkeCen(opcje?: Parameters<typeof userEvent.setup>[0]) 
   window.history.pushState({}, "", "/analityka");
   render(<App />);
   // Trasa jest ładowana leniwie (osobny chunk z Recharts), więc czekamy na tytuł strony.
-  await screen.findByTestId("text-page-title");
+  // Limit dłuższy niż domyślna sekunda — mieści się w podniesionym `testTimeout` wyżej.
+  await screen.findByTestId("text-page-title", undefined, { timeout: 15_000 });
   await uzytkownik.click(await screen.findByTestId("tab-ceny"));
   return uzytkownik;
 }

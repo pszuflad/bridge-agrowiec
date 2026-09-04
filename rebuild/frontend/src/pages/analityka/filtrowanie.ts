@@ -85,25 +85,14 @@ export function zastosujFiltryMarz(wiersze: GrupaMarzy[], wybor: WyborFiltrow): 
  * pustą tabelę.
  *
  * Trzeciej karty („3.2 / 3.3 Historia ceny") to nie dotyczy: `prices/product-history`
- * realnie czyta `?ean` i `?kod`, więc filtruje BACKEND, a parametry idą do `queryKey`.
+ * realnie czyta `?ean` i `?kod`, więc filtruje BACKEND, a parametry idą do zapytania.
+ *
+ * ⚠ Wartość jest ta sama co `WYMIARY_DOSTAWCOW` (blok 10d) i to ZBIEG OKOLICZNOŚCI, nie
+ * powód do scalenia: każda sekcja deklaruje swoje wymiary osobno, bo wynikają z kolumn JEJ
+ * odpowiedzi. Gdyby kiedyś `prices/last-import` zaczął zwracać markę, zmienia się ta stała
+ * i tylko ta. Samo filtrowanie jest już wspólne — `zastosujFiltryDostawcow` niżej.
  */
 export const WYMIARY_CEN: WymiarFiltra[] = ["dostawcy"];
-
-/**
- * Filtr po dostawcy dla dowolnego wiersza, który tę kolumnę niesie.
- *
- * Semantyka jak w `zastosujFiltryMarz`: pusty zbiór nie filtruje, a zaznaczenie kilku
- * dostawców działa jak OR. Osobna, generyczna funkcja zamiast dwóch kopii, bo obie karty
- * tabelaryczne bloku 10b potrzebują dokładnie tego samego.
- */
-export function zastosujFiltrDostawcow<T extends { dostawca: string }>(
-  wiersze: T[],
-  wybor: WyborFiltrow,
-): T[] {
-  const dostawcy = wybor.dostawcy;
-  if (dostawcy.size === 0) return wiersze;
-  return wiersze.filter((w) => dostawcy.has(w.dostawca));
-}
 
 /** Wymiary zaznaczone przez użytkownika, na które dana sekcja nie ma jak odpowiedzieć. */
 export function wymiaryNieobslugiwane(
@@ -122,3 +111,30 @@ export const ETYKIETY_WYMIAROW: Record<WymiarFiltra, string> = {
   indeksyNosnosci: "Indeksy nośności",
   indeksyPredkosci: "Indeksy prędkości",
 };
+
+/**
+ * Filtrowanie sekcji zakładki `dostawcy` (blok 10d).
+ *
+ * Wszystkie trzy wiersze tej zakładki (`suppliers/stability`, `suppliers/lifecycle`,
+ * `suppliers/stock`) niosą JEDEN wspólny wymiar katalogu — `dostawca`. Marki, modelu,
+ * rozmiaru ani indeksów w tych odpowiedziach nie ma: dwie z tras grupują po dostawcy,
+ * a trzecia czyta staging, gdzie tych kolumn nie ma w ogóle. Pozostałe pięć wymiarów jest
+ * więc ŚWIADOMIE POMIJANE, a sekcja mówi o tym notką — tak samo jak sekcja marż z 10a.
+ */
+export const WYMIARY_DOSTAWCOW: WymiarFiltra[] = ["dostawcy"];
+
+/**
+ * Filtr po dostawcy dla DOWOLNEGO wiersza, który tę kolumnę niesie.
+ *
+ * Używa go zakładka `dostawcy` (10d) i obie tabelaryczne karty zakładki `ceny` (10b).
+ * Semantyka jak w `zastosujFiltryMarz`: pusty zbiór nie filtruje, a zaznaczenie kilku
+ * dostawców działa jak OR.
+ */
+export function zastosujFiltryDostawcow<T extends { dostawca: string }>(
+  wiersze: T[],
+  wybor: WyborFiltrow,
+): T[] {
+  const dostawcy = wybor.dostawcy;
+  if (dostawcy.size === 0) return wiersze;
+  return wiersze.filter((w) => dostawcy.has(w.dostawca));
+}

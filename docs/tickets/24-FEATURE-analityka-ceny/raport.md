@@ -180,3 +180,43 @@ wypełniona) + nowy akapit „Odbudowa (10b…)" w konwencji pozostałych blokó
 **`CLAUDE.md`** — bez zmian (plik zasad, nie dziennik postępu; nic się nie zdezaktualizowało).
 
 **Pre-existing issues zgłoszone przez doc-checkery:** brak nowych.
+
+## Scalenie z `develop` (blok 10d wszedł w międzyczasie)
+
+Podczas przygotowania PR na `develop` wylądował blok **10d** (`23-FEATURE-analityka-dostawcy`).
+Scalone do gałęzi ticketa, dziewięć konfliktów rozwiązanych ręcznie — wszystkie w plikach,
+które oba bloki DOKŁADAJĄ (żaden nie przemeblowuje cudzego kodu):
+
+| Plik | Rozstrzygnięcie |
+|---|---|
+| `repos/analityka.ts` | obie sekcje (10b i 10d) zachowane; **`czyJestHistoria` wydzielone NAD nie** jako wspólny pomocnik — oba bloki dopisały własną kopię niezależnie |
+| `routes/analytics.ts` | scalone importy i obie sekcje tras; nagłówek pliku przeliczony (14 z 27 tras) |
+| `pages/Analityka.tsx` | oba importy sekcji, obie zakładki |
+| `pages/analityka/api.ts` | obie sekcje hooków |
+| `pages/analityka/filtrowanie.ts` | **usunięty duplikat** — patrz niżej |
+| `test/msw/kontrakt.ts` | oba komplety loaderów |
+| `pages/analityka/README.md`, `docs/rebuild-roadmap.md`, `docs/analityka-bloki-10b-10f.md`, `docs/spec-backend.md` | treści obu bloków połączone, liczniki tras przeliczone |
+
+**Dwie realne duplikacje wykryte przy scalaniu i usunięte** (a nie zakleszczone przez
+mechaniczne „weź obie strony"):
+
+1. **`czyJestHistoria`** — 10b i 10d dopisały niezależnie identyczną funkcję (port
+   `hasHistory`, `analytics_module.cjs:58`). Zostaje **jedna**, wyeksportowana, w osobnej
+   sekcji „wspólny pomocnik" nad obiema sekcjami bloków, z notą, żeby trzeci blok nie dopisał
+   trzeciej kopii.
+2. **Generyczny filtr po dostawcy** — mój `zastosujFiltrDostawcow` i `zastosujFiltryDostawcow`
+   z 10d miały identyczne ciało i prawie identyczną nazwę. Zostaje **wersja 10d** (jest już
+   na `develop`, ma testy jednostkowe i trzech konsumentów); `SekcjaCeny` przełączona na nią.
+   `WYMIARY_CEN` i `WYMIARY_DOSTAWCOW` zostają osobno mimo tej samej wartości — to deklaracje
+   per sekcja, wynikające z kolumn JEJ odpowiedzi (wzorzec `WYMIARY_MARZ` z 10a); zbieżność
+   jest przypadkowa i opisana w komentarzu.
+
+**Jedna poprawka testu wymuszona przez scalenie:** `analityka.ceny.test.tsx` dostał
+`vi.setConfig({ testTimeout: 20_000 })` i dłuższy limit na `findByTestId` przy leniwym
+chunku — dokładnie ten sam zabieg, który blok 10d zastosował u siebie po review. Powód nie
+jest w kodzie aplikacji: chunk `/analityka` ciągnie Recharts, a po dołożeniu trzeciego pliku
+testów tego widoku pierwszy import w jsdomie przestał mieścić się w domyślnych 5 s.
+
+**Bramki po scaleniu (uruchomione ponownie, komplet):** backend **738 testów** ✓ (47 plików),
+frontend **427 testów** ✓ (28 plików, dwa kolejne przebiegi stabilne), `lint` ✓, `typecheck` ✓,
+`build` ✓ w obu projektach. Chunk `Analityka`: 429 kB (10a: 385 → 10b+10d: 429).

@@ -10,8 +10,11 @@ import type {
   HistoriaCenyProduktu,
   Kpi,
   Marze,
+  StabilnoscDostawcow,
   StatusHistorii,
+  WierszCykluZycia,
   WierszInflacji,
+  WierszStanuDostawcy,
   WierszZmianyCeny,
 } from "@/pages/analityka/api";
 
@@ -314,4 +317,28 @@ export function inflacjaZFixtura(): { hasHistory: boolean; rows: WierszInflacji[
  */
 export function historiaCenyZFixtura(): HistoriaCenyProduktu {
   return analitykaZFixtura<HistoriaCenyProduktu>("GET_analytics_prices_product-history.json");
+}
+
+/**
+ * `GET /api/analytics/suppliers/stability` — 5 nagranych dostawców, `hasHistory: true`.
+ *
+ * ⚠ NAGRANIE POKAZUJE TYLKO JEDNĄ Z DWÓCH GAŁĘZI. Backend ma drugą (pusta `historia_cen`),
+ * o INNYM zestawie kolumn — `produkty`/`sredniaCena`/`sredniStan` zamiast `punkty`. Widok
+ * renderuje mimo to stałe siedem kolumn oryginału, więc część z nich zawsze pokazuje „—";
+ * test tej gałęzi buduje wiersz sam, bo fixture jej nie zna.
+ */
+export function stabilnoscDostawcowZFixtura(): StabilnoscDostawcow {
+  return analitykaZFixtura<StabilnoscDostawcow>("GET_analytics_suppliers_stability.json");
+}
+
+/** `GET /api/analytics/suppliers/lifecycle` — 5 z 500 nagranych pozycji stagingu. */
+export function cyklZyciaDostawcowZFixtura(): { rows: WierszCykluZycia[] } {
+  return analitykaZFixtura<{ rows: WierszCykluZycia[] }>(
+    "GET_analytics_suppliers_lifecycle.json",
+  );
+}
+
+/** `GET /api/analytics/suppliers/stock` — 5 z 9 nagranych dostawców. */
+export function stanDostawcowZFixtura(): { rows: WierszStanuDostawcy[] } {
+  return analitykaZFixtura<{ rows: WierszStanuDostawcy[] }>("GET_analytics_suppliers_stock.json");
 }

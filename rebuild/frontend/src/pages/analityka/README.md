@@ -1,10 +1,16 @@
 # Wzorzec sekcji dashboardu — obowiązuje bloki 10c–10e
 
 Ten katalog powstał w bloku **10a** (ticket `19-FEATURE-analityka-fundament`) i jest
-szablonem dla reszty Iteracji 10. Bloki 10b–10e **dokładają zakładki, nie przemeblowują
-widoku** — zakładki, ich kolejność i etykiety już są i pochodzą z oryginału. Blok **10b**
-(`24-FEATURE-analityka-ceny`) wypełnił zakładkę `ceny` i doprecyzował dwie rzeczy, które
-10a zostawiło otwarte: sposób podawania parametrów zapytania (§2.2) i debounce (§2.2a).
+szablonem dla reszty Iteracji 10. Wypełniły go dotąd dwa bloki:
+
+- **10d** (`23-FEATURE-analityka-dostawcy`) — zakładka `dostawcy`; trzy sekcje
+  w `Sekcja{Stabilnosc,CyklZycia,Stan}Dostawcow.tsx` są drugim, niezależnym od marż
+  przykładem tego wzorca (w tym sekcją bez wykresu);
+- **10b** (`24-FEATURE-analityka-ceny`) — zakładka `ceny`; doprecyzował dwie rzeczy, które
+  10a zostawiło otwarte: sposób podawania parametrów zapytania (§2.2) i debounce (§2.2a).
+
+Bloki **dokładają zakładki, nie przemeblowują widoku** — zakładki, ich kolejność
+i etykiety już są i pochodzą z oryginału.
 
 Zanim napiszesz linijkę kodu: przeczytaj „Trzy pułapki" na końcu. Każda z nich kosztowała
 w 10a osobne dochodzenie.
@@ -19,6 +25,7 @@ w 10a osobne dochodzenie.
 | `filtrowanie.ts` | stan globalnych filtrów, semantyka OR/AND, deklaracja wymiarów obsługiwanych przez sekcję |
 | `formatowanie.ts` | port `_()` i `D()` z oryginału — liczby `pl-PL`, `—` dla pustych, procenty |
 | `TabelaAnalityki.tsx` | port `I()` z oryginału — kolumny, wyrównanie, `slice(0, 300)` |
+| `PasekDostepnosci.tsx` | port `O()` z oryginału — pasek postępu w komórce „Dostępność". Wydzielony w 10d, bo woła go też karta „4.1" bloku 10e |
 | `NaglowekKpi.tsx` | banner historii + cztery kafle. Nie ruszać — to nagłówek całej strony |
 | `FiltryGlobalne.tsx` | sześć kontrolek. Nie ruszać — filtry są wspólne dla zakładek |
 | `Sekcja<Nazwa>.tsx` | **to piszesz w swoim bloku** |
@@ -235,5 +242,5 @@ renderowany zawsze · brak zapytania o `product-history`, dopóki oba pola są p
 | D2 | `market/group-prices` — backend bez UI | martwy fetch: wołana i ignorowana |
 
 **Gotowe do reużycia przez 10c–10e:** `useOpoznionaWartosc` (debounce),
-`zastosujFiltrDostawcow` (generyczny filtr po dostawcy dla dowolnego wiersza z tą kolumną),
+`zastosujFiltryDostawcow` (generyczny filtr po dostawcy, wspólny z blokiem 10d),
 `WYMIARY_CEN` jako przykład deklaracji wymiarów obsługiwanych przez sekcję.

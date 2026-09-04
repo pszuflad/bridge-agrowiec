@@ -265,6 +265,19 @@ ma endpoint:
 >
 > **Dla bloków 10b–10f:** karty oryginału zakładka po zakładce (tytuły, kolumny, etykiety PL,
 > kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu — `docs/analityka-bloki-10b-10f.md`.
+>
+> **Odbudowa (10d, `23-FEATURE-analityka-dostawcy`, 2026-09-03):** zakładka `dostawcy` — domyślna
+> zakładka `/analityka` — wypełniona trzema kartami 1:1: „1.1 Stabilność cennika dostawcy" (7
+> kolumn; dwie gałęzie backendu zwracają różny komplet kolumn, więc część komórek zawsze pokazuje
+> „—" — zastane zachowanie oryginału, odtworzone świadomie, D1), „1.2 Nowości i wycofania" (6
+> kolumn, data w surowym ISO jak oryginał) i „1.4 / 1.5 Stan i dostępność dostawcy" (5 kolumn,
+> „Dostępność" jako pasek postępu przez wspólny `PasekDostepnosci.tsx`, drugim konsumentem będzie
+> blok 10e; nad tabelą wykres słupkowy dostępności — odstępstwo O-10d-1, oryginał nie ma żadnych
+> wykresów). Filtrowanie klienckie jak w 10a: wiersze tych tras niosą wyłącznie wymiar `dostawca`,
+> pozostałe pięć filtrów globalnych są pomijane z widoczną notką. Przyciski „CSV" trzech kart
+> (obecne w oryginale) pominięte — trasa `GET /api/analytics/export/{view}` to blok 10f. Trasa
+> `GET /api/analytics/dostawcy-stats` odtworzona pod GATE, bez konsumenta w UI (D3, jak w
+> oryginale). Szczegóły: `docs/tickets/23-FEATURE-analityka-dostawcy/`.
 
 > **Odbudowa (10b, `24-FEATURE-analityka-ceny`, 2026-09-04):** zakładka `ceny`
 > („Ceny w czasie") wypełniona — trzy karty oryginału 1:1: „3.1 Zmiany cen z ostatnich

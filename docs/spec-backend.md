@@ -120,6 +120,15 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > filtrowanie po stronie klienta). Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
 > Semantyka **wszystkich 27 tras** modułu (numer linii handlera, parametry query, LIMIT-y,
 > kształt odpowiedzi — trzy różne koperty!) jest spisana w `docs/analityka-bloki-10b-10f.md`.
+>
+> **Potwierdzone w 10d** (`23-FEATURE-analityka-dostawcy`, 2026-09-03): kolejne cztery trasy —
+> `GET /api/analytics/{suppliers/stability, suppliers/lifecycle, suppliers/stock,
+> dostawcy-stats}` — też pod `requireAuth`, ten sam wniosek co w 10a (nie jest to odstępstwo D1).
+> `suppliers/stability` ma dwie gałęzie SQL zależne od `hasHistory(db)`: z historią liczy oknem
+> `LAG()` nad `historia_cen` (drugi czytelnik tej tabeli obok `GET /api/analytics/status`), bez
+> historii liczy z `products` — kształt wiersza jest różny między gałęziami. `dostawcy-stats`
+> zwraca **gołą tablicę** (bez koperty) i nie ma konsumenta w oryginalnym frontendzie. Szczegóły:
+> `docs/tickets/23-FEATURE-analityka-dostawcy/`.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -264,14 +273,16 @@ zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotio
 `rebuild/backend/src/routes/{config,spedycja}.ts`, `src/repos/{config,spedycja}.ts`
 (`docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`). `historia_cen` ma od bloku **10a**
 dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/bootstrap-current`,
-oraz pierwszego czytelnika — `GET /api/analytics/status` zwraca z niej agregat
+oraz trzech czytelników. `GET /api/analytics/status` (10a) zwraca z niej agregat
 `{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
-`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Od bloku
-**10b** doszedł pierwszy czytelnik PER PRODUKT: `GET /api/analytics/prices/product-history`
-filtruje po `?ean`/`?kod` (AND), bez LIMIT-u; ten sam blok dowiózł też
-`prices/last-import`, `prices/inflation`, `market/group-prices` i `top-zmiany`. Szczegóły:
+`GET /api/analytics/suppliers/stability` (10d, gałąź `hasHistory: true`) liczy z niej zmiany
+cen oknem `LAG()`. `GET /api/analytics/prices/product-history` (10b) jest pierwszym
+czytelnikiem PER PRODUKT — filtruje po `?ean`/`?kod` (AND), bez LIMIT-u; `prices/inflation`
+z tego samego bloku liczy z niej inflację miesięczną, też oknem `LAG()`.
+`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
 `docs/tickets/19-FEATURE-analityka-fundament/plan.md` (10a),
-`docs/tickets/24-FEATURE-analityka-ceny/plan.md` (10b).
+`docs/tickets/24-FEATURE-analityka-ceny/plan.md` (10b),
+`docs/tickets/23-FEATURE-analityka-dostawcy/` (10d).
 
 ## 6. Korekty do propagacji
 
