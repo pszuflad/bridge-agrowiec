@@ -59,6 +59,10 @@ function zamockujApi(opcje: { produkty?: Produkt[]; config?: Record<string, stri
     http.get("*/api/products", () => HttpResponse.json(opcje.produkty ?? PRODUKTY)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
     http.get("*/api/config", () => HttpResponse.json(opcje.config ?? {})),
+    // Od sesji 7c katalog czyta też słownik atrybutów (listy filtrów marek i kategorii).
+    // Ten test go nie dotyczy, ale widok pobiera KOMPLET swoich tras przy każdym wejściu,
+    // a `onUnhandledRequest: "error"` nie wybacza braków.
+    http.get("*/api/atrybuty", () => HttpResponse.json({ ok: true, rodzaje: [], wartosci: [] })),
   );
 }
 
