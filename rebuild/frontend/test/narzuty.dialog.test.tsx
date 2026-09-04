@@ -18,11 +18,14 @@ import { _zresetujStanSesji } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
 import type { Promocja } from "@/pages/narzuty/api";
 import { TYPY_WARUNKU } from "@/pages/narzuty/warunki";
+import type { Wartosc } from "@/pages/atrybuty/api";
 import {
   PROMOCJA_TESTOWA,
   TOKEN_TESTOWY,
+  dostawcyZFixtura,
   narzutyZFixtura,
   produktyZFixtura,
+  slownikZFixtura,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
@@ -30,6 +33,33 @@ import { server } from "./msw/server";
 const UZYTKOWNIK = uzytkownikZFixtura();
 const NARZUTY = narzutyZFixtura();
 const PRODUKTY = produktyZFixtura();
+const DOSTAWCY = dostawcyZFixtura() as unknown as { id: number; kod: string; nazwa: string }[];
+
+/**
+ * ⚠ SŁOWNIK ATRYBUTÓW JEST ŹRÓDŁEM LIST W TYM DIALOGU OD SESJI 7b (część B).
+ *
+ * Wcześniej marki i kategorie powstawały z `GET /api/products` — degradacja z 4b, wzięta
+ * stąd, że w chwili budowy dialogu endpoint atrybutów nie istniał. Oryginał czyta je
+ * z klucza `["/api/attributes"]`, który w produkcji wypełnia mostek wbudowany w bundle
+ * (`deminified/frontend-index.js:9960-10268`). Po wyrzuceniu injection przez 7b dialog musiał
+ * przejść na natywne `/api/atrybuty`, inaczej listy byłyby PUSTE.
+ *
+ * Fixture `GET_atrybuty.json` daje KSZTAŁT i rodzaje (`kategoria`, `konstrukcja` są w wycinku),
+ * ale jego pięć nagranych wartości to same `bieznik` — dokładamy więc wiersze tego samego
+ * kształtu, żeby dało się przećwiczyć regułę scalania. „Quady” celowo NIE MA w katalogu:
+ * to dowód, że kategorię spoza katalogu da się wybrać.
+ */
+const SLOWNIK_FIXTURE = slownikZFixtura();
+const WARTOSCI_DODATKOWE: Wartosc[] = [
+  { id: 900001, rodzaj: "kategoria", wartosc: "Rolnicze" },
+  { id: 900002, rodzaj: "kategoria", wartosc: "Quady" },
+  { id: 900003, rodzaj: "marka", wartosc: "Alliance" },
+  { id: 900004, rodzaj: "konstrukcja", wartosc: "R" },
+];
+const SLOWNIK = {
+  ...SLOWNIK_FIXTURE,
+  wartosci: [...SLOWNIK_FIXTURE.wartosci, ...WARTOSCI_DODATKOWE],
+};
 
 /**
  * Pola wysyłane przy TWORZENIU — komplet z `POLA_EDYTOWALNE_NARZUTU`/`_PROMOCJI` (4a).
@@ -54,6 +84,8 @@ function zamockujApi(promocje: Promocja[] = []) {
     http.get("*/api/markups", () => HttpResponse.json(NARZUTY)),
     http.get("*/api/promotions", () => HttpResponse.json(promocje)),
     http.get("*/api/products", () => HttpResponse.json(PRODUKTY)),
+    http.get("*/api/atrybuty", () => HttpResponse.json(SLOWNIK)),
+    http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
     http.post("*/api/markups", async ({ request }) => {
       const cialo = (await request.json()) as Record<string, unknown>;
       wyslane.push({ metoda: "POST", sciezka: "/api/markups", cialo });
@@ -369,7 +401,95 @@ describe("5. Odstępstwa świadome", () => {
   });
 });
 
-describe("6. Ostrzeżenie „poniżej kosztu\" (plan.md D6)", () => {
+describe("6. Listy wyboru ze słownika atrybutów (sesja 7b, część B)", () => {
+  it("KATEGORIA spoza katalogu jest wybieralna — lista idzie WYŁĄCZNIE ze słownika", async () => {
+    zamockujApi();
+    const zapisz = await otworzDialogNarzutu();
+
+    // ⚠ SEDNO CZĘŚCI B. „Quady” nie ma ŻADEN produkt w `GET_products.json`, więc przed 7b
+    // (gdy lista powstawała z katalogu) tej opcji po prostu nie było. Test „Rolnicze” tego
+    // nie łapie, bo ta kategoria jest i w słowniku, i w katalogu — przeszedłby także dla
+    // starego, zdegradowanego źródła.
+    expect(PRODUKTY.some((p) => p.kategoria === "Quady")).toBe(false);
+    await wybierzKategorie("Quady");
+    await userEvent.click(zapisz);
+
+    await waitFor(() => expect(wyslane).toHaveLength(1));
+    expect(JSON.parse(wyslane[0]!.cialo.warunki as string)).toEqual([
+      { typ: "kategoria", wartosc: "Quady" },
+    ]);
+  });
+
+  it("KATEGORIE nie biorą się z katalogu — kategoria obecna TYLKO w produktach nie ma opcji", async () => {
+    // Odwrócenie reguły (kategorie z katalogu) natychmiast wywali ten test.
+    const kategoriaTylkoWKatalogu = PRODUKTY.map((p) => p.kategoria).find(
+      (k) => k && !SLOWNIK.wartosci.some((w) => w.rodzaj === "kategoria" && w.wartosc === k),
+    );
+    expect(kategoriaTylkoWKatalogu).toBeTruthy();
+
+    zamockujApi();
+    await otworzDialogNarzutu();
+    await userEvent.click(screen.getByTestId("select-warunek-wartosc-0"));
+
+    expect(
+      screen.queryByRole("option", { name: kategoriaTylkoWKatalogu as string }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("MARKA to SUMA słownika i katalogu — obie z osobna są na liście", async () => {
+    zamockujApi();
+    await otworzDialogNarzutu();
+
+    await userEvent.click(screen.getByTestId("select-warunek-typ-0"));
+    await userEvent.click(await screen.findByRole("option", { name: "Marka" }));
+    await userEvent.click(screen.getByTestId("select-warunek-wartosc-0"));
+
+    // ze słownika (żaden produkt w fixture jej nie ma)
+    expect(await screen.findByRole("option", { name: "Alliance" })).toBeInTheDocument();
+    // z katalogu (nie ma jej w słowniku) — gdyby marki brały się tylko ze słownika, padnie
+    const markaZKatalogu = PRODUKTY.find((p) => p.marka && p.marka !== "—")!.marka as string;
+    expect(await screen.findByRole("option", { name: markaZKatalogu })).toBeInTheDocument();
+  });
+
+  it("DOSTAWCA idzie z /api/suppliers — etykieta „kod · nazwa”, a w warunku ląduje KOD", async () => {
+    zamockujApi();
+    const zapisz = await otworzDialogNarzutu();
+
+    await userEvent.click(screen.getByTestId("select-warunek-typ-0"));
+    await userEvent.click(await screen.findByRole("option", { name: "Dostawca" }));
+    await userEvent.click(screen.getByTestId("select-warunek-wartosc-0"));
+
+    const pierwszy = DOSTAWCY[0]!;
+    await userEvent.click(
+      await screen.findByRole("option", { name: `${pierwszy.kod} · ${pierwszy.nazwa}` }),
+    );
+    await userEvent.click(zapisz);
+
+    await waitFor(() => expect(wyslane).toHaveLength(1));
+    // Silnik cen porównuje `produkt.dostawca === wartosc` (`repos/ceny.ts:52`), a
+    // `products.dostawca` trzyma KOD dostawcy — etykieta nie może tu trafić.
+    expect(JSON.parse(wyslane[0]!.cialo.warunki as string)).toEqual([
+      { typ: "dostawca", wartosc: pierwszy.kod },
+    ]);
+  });
+
+  it("KONSTRUKCJA dostaje select ze słownika, nie pole tekstowe", async () => {
+    zamockujApi();
+    await otworzDialogNarzutu();
+
+    await userEvent.click(screen.getByTestId("select-warunek-typ-0"));
+    await userEvent.click(
+      await screen.findByRole("option", { name: "Konstrukcja (fragment tekstu)" }),
+    );
+
+    // Oryginał ma dla tego typu gotowy select (`:24286-24300`) — 4b dało pole tekstowe.
+    expect(screen.queryByTestId("input-warunek-wartosc-0")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByTestId("select-warunek-wartosc-0"));
+    expect(await screen.findByRole("option", { name: "R" })).toBeInTheDocument();
+  });
+});
+
+describe("7. Ostrzeżenie „poniżej kosztu\" (plan.md D6)", () => {
   /**
    * Oryginał ma DWA ostrzeżenia liczone tą samą metodą: czerwony pasek NA ŻYWO w formularzu
    * (`:24473-24513`) i potwierdzenie przy zapisie (`:24563-24597`, u nas dialogiem zamiast

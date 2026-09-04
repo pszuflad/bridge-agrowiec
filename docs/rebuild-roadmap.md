@@ -132,8 +132,8 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | **Stack FE** | React 18 · Wouter v3 · TanStack Query · Radix/shadcn · Tailwind | **postawione w I1 (1b)** (`rebuild/frontend/`); routing po ścieżkach, nie po hashu (odstępstwo O1) | ✅ ustalone |
 | **Wygląd** | design tokens: Inter + JetBrains Mono, primary `hsl(35 70% 45%)`, sidebar `hsl(215 28% 12%)`, tło `hsl(210 20% 98%)` | **wniesione w I1 (1b)** — źródłem jest surowy `mirror/frontend/assets/index-BVOkSOnE.css` (nie `04_DESIGN_TOKENS.md`, który ma 6 rozjazdów); test-strażnik w `rebuild/frontend/test/tokeny.test.ts` | ✅ ustalone |
 | **Auth flow** | `POST /api/login {email:trim,password}` → `{ok,user,token}`; `Bearer` gdy token + `credentials:include` równolegle; `bridge_user` w `localStorage` albo `sessionStorage` wg `bridge_remember`; Query `on401:returnNull,staleTime:Infinity,retry:false` | **odtworzone 1:1 w I1 (1b)** (`rebuild/frontend/src/lib/`) | ✅ ustalone |
-| **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | naprawić w I7 (wołać natywne) | ⬜ do zaklepania |
-| **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonąć natywnie: I7 / **`selly-injection.js` ✅ wchłonięty w I8 (2026-09-04)** / **`freq-injection.js` ✅ wchłonięty w 3f-2 (2026-09-01)** | 🔨 częściowo — pozostał `pending-injection.js` (I7) |
+| **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | **naprawione w 7b (2026-09-04, ticket `31-FEATURE-atrybuty-frontend`)** — front woła wyłącznie `/api/atrybuty(/rodzaje)` | ✅ zrobione |
+| **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonięte natywnie WSZYSTKIE TRZY: **`freq-injection.js` ✅ 3f-2 (2026-09-01)**, **`pending-injection.js` ✅ 7b (2026-09-04, `31-FEATURE-atrybuty-frontend`)**, **`selly-injection.js` ✅ 8b (2026-09-04, `30-FEATURE-selly-panel-frontend`)** | ✅ zrobione |
 | **Lokalne vs API** | **Oba tematy rozstrzygnięte 2026-09-03, każdy INNYM rozstrzygnięciem — bo to były dwa różne problemy, nie jeden.** **I6 (alerty, D3): przez API.** `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie, zero IndexedDB/localStorage. Wcześniejszy zapis w tym wierszu mylił — oryginalny widok `/alerty` (`HT()`, `frontend-index.js:25177-25340`) w ogóle nie czytał `/api/alerts`: liczył pseudo-alerty katalogowe z `GET /api/products` i trzymał ich status w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`); to inny zestaw danych, nie kwestia miejsca przechowywania statusu. **I9 (waga gabarytowa, D1): lokalnie, FAKTEM.** To DWA różne kalkulatory pod jedną nazwą (paletowy w BE vs wolumetryczny w FE), nie jeden wzór w dwóch miejscach — nie było czego deduplikować. Dowieziono oba 1:1, FE liczy lokalnie i endpointu nie woła, jak produkcja. **Wniosek na przyszłość: pytanie „lokalnie czy przez API” rozstrzyga się dopiero po sprawdzeniu, czy obie strony liczą TO SAMO** — dwa razy z rzędu okazało się, że nie. | — | ✅ I6 · ✅ I9 |
 | **Staging auto-accept — LOKALNIE czy przez API** | **rozstrzygnięte 2026-08-27 (3d-1) FAKTEM, nie preferencją: auto-zatwierdzanie jest BACKENDOWE.** Siedzi w gałęzi `else if` żywego `tk()` (`backend-index.cjs:47791-47806`) i od 3d-1 jest odtworzone razem ze skutkami (`updateProduct` + `historia_cen` + `applyDims`). Frontend NIE liczy go lokalnie: bundle woła `POST /api/staging/accept` (czyli API) i nie zawiera ani `autoZatwierdzone`, ani żadnej lokalnej logiki auto-akceptacji (grep po `mirror/frontend/assets/*.js`: 0 trafień). Zdanie ze `spec-frontend` §4 („instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu") mówi o rozjeździe INSTRUKCJI z KODEM, a nie o liczeniu czegokolwiek w przeglądarce. **Skutek dla 3e:** UI ma tylko pokazywać to, co przyszło ze stagingu — pozycje auto-zatwierdzone w ogóle się w nim nie pojawiają. Przestarzała jest instrukcja v5, nie kod. | — | ✅ ustalone |
 | **Utrzymanie roadmapy** | roadmapa jest wejściem dla NASTĘPNEJ sesji, a prompt jest jednorazowy — wiedza z bloku musi lądować tutaj, nie w prompcie | **zaklepane 2026-08-26:** po każdym zamkniętym bloku roadmapa opisuje STAN, nie zamiar; ustalenie dotyczące PRZYSZŁEGO bloku wpisuje się DO TEGO BLOKU (sesja 3c czyta blok 3c); **przypisanie funkcji do sesji weryfikuje się GRAFEM WYWOŁAŃ, nie nazwą** (`bridge_ext` trafił do złej sesji dwa razy — 3a i 3c); prompt nie koryguje roadmapy, tylko roadmapa siebie. Pełna reguła: `CLAUDE.md`, krok operacyjny: `.claude/commands/feature.md` Krok 13 | ✅ ustalone |
@@ -154,7 +154,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 |
 | 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
-| 7 | Atrybuty (+ pending-injection) | 1a BE · 1b FE | 2 | ⬜ | |
+| 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | 🔨 | 7a: `29-FEATURE-atrybuty-backend` · 2026-09-04 · 7b: `31-FEATURE-atrybuty-frontend` · 2026-09-04 · 7c: ⬜ |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
@@ -271,7 +271,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     (10,0 MB → 0,84 MB, 12× dla pełnego katalogu), kontrakt API się nie zmienia.
   - **D3 — świadomie NIE dołożono `GET /api/config` (I11) ani `GET /api/atrybuty` (I7):** katalog
     degraduje się łagodnie — listy marek/kategorii budowane tylko z danych produktów, eksport CSV
-    (zależny od `/api/config`) odłożony.
+    (zależny od `/api/config`) odłożony. **Oba endpointy już istnieją** (`/api/config` od I11,
+    `/api/atrybuty` od 7a — 2026-09-04), więc degradacja jest do zdjęcia w dowolnym momencie.
   - **D5 — `src/db/schema.ts` ma teraz sekcje „dopieszczeń" po introspekcji** (`snow3pmsf` + 10×
     `mode:"boolean"`, komentarz z cytatem oryginału). **⚠ Kolejne iteracje muszą je nanieść ponownie,
     jeśli ktoś przegeneruje `schema.ts` przez `drizzle-kit pull`.**
@@ -293,7 +294,7 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   |---|---|---|
   | Mutacje produktów (`POST`, `PATCH`/`PUT`/`DELETE {id}`, `clear`) + menu „Akcje" i modal edycji w `/katalog` | **I12** | ✅ dopisane do zakresu I12 |
   | Odświeżenie kontraktu + nagranie fixtures zapisujących i wariantu „goła tablica" `GET /api/products` | **I12** | ✅ dopisane do zakresu I12 |
-  | Słowniki marek/kategorii z `GET /api/atrybuty` (znosi degradację z D3) | **I7** | ✅ odnotowane w I7 |
+  | Słowniki marek/kategorii z `GET /api/atrybuty` (znosi degradację z D3) | **7c** | endpoint gotowy od 7a; podpięcie w `/katalog` czeka na 7c (po merge 8b) — patrz blok Iteracji 7 |
   | Dane kolumny „Promocja" (dziś renderuje `—`) | — | **sprostowanie (4b, 2026-09-02): kolumna zostaje MARTWA, port 1:1 (decyzja D1).** Oryginał nie ustawia `_reguly` NIGDZIE w bundlu i żadne z 66 pól `GET_products.json` nie niesie promocji — nie było skąd wziąć danych. Kandydat na I12, jeśli backend kiedyś dołoży pole. |
   | `GET /api/config` (produkcja nie ma kluczy eksportu — patrz I8) | **I11** | ✅ odnotowane w I11 |
   | Sam przycisk „Pobierz CSV (Shoper)" w `/katalog` | **I8** | ✅ dopisane do zakresu I8 — zależność od `/api/config` okazała się nominalna |
@@ -891,6 +892,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     etykieta nie zgadza się z kolumną `status` z serwera, plus naprawiony badge `"zaplanowana"`
     (oryginał ma tu literówkę i wyświetla ją jako „zakończona"). Wyłączenie promocji „na
     sztywno" to nadal zmiana `status`, a nie upływ daty — silnika to nie rusza (backlog #19).
+  - **Listy marek i kategorii w `DialogReguly.tsx` powstawały z danych produktów** (ta sama
+    degradacja co D3 w I2), bo 4b nie miało endpointu słowników — **domknięte w 7b
+    (2026-09-04, ticket `31-FEATURE-atrybuty-frontend`):** dialog czyta `["/api/atrybuty"]`,
+    marki = suma słownika i katalogu, kategorie WYŁĄCZNIE ze słownika, kategoria spoza
+    katalogu jest wybieralna. Szczegóły w bloku Iteracji 7 (podblok 7b).
   - Aktywny status promocji to `"aktywna"` (rodzaj żeński), narzutu — `"aktywny"`.
   - `warunki` w obu tabelach to **STRING ze zserializowanym JSON-em**, nie tablica — 4b wysyła
     dokładnie tak.
@@ -1003,19 +1009,116 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   w regionie widoku — to pozostałość, nie funkcja. 3e świadomie tego nie przeportowała. Jeśli
   ta iteracja chciałaby ożywić słowniki w stagingu (np. podpowiedzi kategorii przy edycji),
   będzie to **nowa decyzja**, a nie odtworzenie produkcji.
-- **Status:** ⬜  **Sesje:** 7a BE · 7b FE  **Zależy od:** 2
+- **Status:** 🔨 **iteracja w połowie** — **7a (BE) ✅ 2026-09-04** (ticket
+  `29-FEATURE-atrybuty-backend`), **7b (FE) ✅ 2026-09-04** (ticket
+  `31-FEATURE-atrybuty-frontend`), **7c (FE) ⬜ do zrobienia** (po merge sesji 8b)
+  **Sesje:** 7a BE · 7b FE · 7c FE  **Zależy od:** 2
 - **Cel (Ania klika):** zarządza rodzajami/wartościami atrybutów, obsługuje kolejkę „pending" (akceptuj / jako alias / z edycją / odrzuć) — **natywnie w Reakcie**, bez skryptu injection.
-- **Backend:** `/api/atrybuty`, `/atrybuty/liczniki`, `/atrybuty/uzycie`, `/atrybuty/wartosci(+{id})`, `/atrybuty/rodzaje(+{value})`, `/atrybuty/pending`, `/atrybuty/pending/{id}/akceptuj|akceptuj-jako-alias|akceptuj-z-edycja|odrzuc`, `/atrybuty/scan-pending`. Tabele `atrybuty_wartosci_pending`, `..._odrzucone`.
-- **Frontend:** widok `/atrybuty` natywnie (bez React Fiber/MutationObserver); jeden Query key `/api/atrybuty`, mutacje + invalidacje. **Naprawa martwych ścieżek:** wołać `/api/atrybuty(/rodzaje)`, nie `/api/attributes(-kinds)`.
-- **Ścieżki (GATE):** atrybuty×13.  **Fixtures:** `GET_atrybuty.json`, `_liczniki`, `_pending`, `_rodzaje`, `_uzycie`, `_wartosci`.
-- **DoD:** pełen CRUD + workflow pending natywnie; martwe ścieżki naprawione; fixtures przez GATE; parytet z `pending-injection.js` (57 KB) bez samego skryptu.
-- **Efekt uboczny dla I2:** `/api/atrybuty` domyka degradację D3 z I2 — listy marek/kategorii w `/katalog`
-  dziś powstają wyłącznie z danych produktów, po I7 mogą korzystać ze słowników.
-- **Efekt uboczny dla I4b:** oryginalny dialog reguł (`/narzuty`) zasila listy marek i kategorii
-  z `GET /api/attributes` (`:24204-24211`) — marki to suma słownika atrybutów i marek z
-  produktów, kategorie WYŁĄCZNIE ze słownika. 4b nie miał tego endpointu, więc buduje obie
-  listy z danych produktów (ta sama degradacja co D3 w I2). Po I7 warto podpiąć `/api/atrybuty`
-  w `DialogReguly.tsx` — wtedy kategoria spoza katalogu też będzie wybieralna.
+- **Ekran produkcyjny `/atrybuty` ma TRZY warstwy, nie dwie** (ustalenie 7b; mapa kodu
+  `docs/prompts/mapa-kodu-do-wiki.md:57` wymienia tylko injection): poza bazowym widokiem React
+  i `pending-injection.js` w samym bundlu siedzi **mostek** (`deminified/frontend-index.js:9960-10268`)
+  — `setQueryDefaults`/`setQueryData` na martwych kluczach, `fetch("/panel/api/atrybuty")` oraz
+  **write-through**: opatchowane `Hb`/`Qb`/`Gb` wysyłają POST/PUT/DELETE na `/atrybuty/wartosci`,
+  a `window.__atrybutyAddRodzaj` POST-uje na `/rodzaje`. Licznik użycia i modal podglądu
+  produktów są WBUDOWANE w bazowy bundle (`:29404-29469`), nie w injection.
+
+- **7a · Backend atrybutów + kolejka pending** — ✅ **zrobione** (ticket
+  `29-FEATURE-atrybuty-backend`, 2026-09-04). **13 ścieżek / 18 operacji** za `requireAuth`:
+  `/api/atrybuty`, `/atrybuty/liczniki`, `/atrybuty/uzycie`, `/atrybuty/rodzaje` (`GET`/`POST`)
+  + `/rodzaje/{value}` (`PUT`/`DELETE`), `/atrybuty/wartosci` (`GET`/`POST`) + `/wartosci/{id}`
+  (`PUT`/`DELETE`), `/atrybuty/pending` (**`GET` i `DELETE`**),
+  `/atrybuty/pending/{id}/akceptuj|akceptuj-jako-alias|akceptuj-z-edycja|odrzuc`,
+  `POST /atrybuty/scan-pending`. Tabele `atrybuty_wartosci_pending`, `..._odrzucone` — kanon
+  `001_schema.sql` miał je już w komplecie, **migracji nie było**.
+  - **`DELETE /api/atrybuty/pending` realnie istnieje** (`pending_module.cjs:377-390`) i woła ją
+    UI produkcji (`pending-injection.js:990`) — czyści kolejkę (`?rodzaj=` zawęża zakres),
+    zwraca `{ok, usunieto, rodzaj}`. Stare wyliczenie tego bloku ją pomijało; jest w kontrakcie
+    i w zakresie 7a.
+  - **Atrybutów NIE MA w rdzeniu backendu — zweryfikowane grafem wywołań.**
+    `grep "'/api/atrybuty" mirror/backend/index.cjs` = 0 trafień; klaster `ATTR_CORE_KINDS` /
+    `listAtrybuty` / `upsertAtrybutRodzaj` (`mirror/backend/index.cjs:295`) jest MARTWY — żadna
+    trasa go nie rejestruje i nie został odtworzony. Żywe źródło to dwa moduły Extensions:
+    `atrybuty_module.cjs` (11 tras) i `pending_module.cjs` (7 tras).
+  - **`requireAuth` na wszystkich 18 operacjach to odtworzenie 1:1, NIE odstępstwo** — oryginał
+    wpina middleware auth (`we`) w każdą trasę obu modułów (`extensions.cjs:80,105`). W tym
+    zakresie nie ma czego odnotowywać jako zmianę wobec produkcji.
+  - **Dwa skutki dla procesu, oba 1:1 z produkcją:** `stworzApp` sieje słownik przy każdym
+    starcie (`zasiejSlownikAtrybutow`, w `try/catch` — baza bez tabel atrybutów nie wywraca
+    startu), a `POST /api/staging/accept` uruchamia skan kolejki. Jedyne odstępstwo: skan idzie
+    przed odpowiedzią zamiast w `res.on('finish')` — ciało i kod odpowiedzi bez zmian.
+  - **Rozliczenie gate'u:** 18 operacji obecnych w `contract/openapi.yaml`, każda oddaje 401 bez
+    tokenu; z sześciu fixtures pięć sprawdzanych kształtem 1:1 (`_uzycie` nagrany jako **400**),
+    a `GET_atrybuty_liczniki.json` przez nową asercję `sprawdzZgodnoscZFixtureSlownika` (5348 kluczy dynamicznych — porównanie
+    dosłowne nie miałoby sensu). 71 testów w domenie atrybutów, suita **917 testów / 58 plików**,
+    lint/typecheck/build czyste. Pełny wywód (D1–D6, quirki produkcji — m.in. seed `bieznik`
+    z `products.model` i dwie rozjeżdżone mapy rodzaj→kolumna, 15 dla liczników i 13 dla
+    kolejki): `docs/tickets/29-FEATURE-atrybuty-backend/`.
+
+- **7b · Widok `/atrybuty`** (FE) — ✅ **zrobione** (ticket `31-FEATURE-atrybuty-frontend`,
+  2026-09-04). Widok natywny: kafle rodzajów → panel wartości (CRUD) → kolejka „Do akceptacji"
+  z badge'em; bez React Fiber, `MutationObservera`, `tick()`/`cleanup()`, chowania treści
+  bazowego widoku i wstrzykiwania CSS. Placeholder zdjęty — w `src/pages/placeholdery.ts`
+  został wyłącznie `/moje-konto` (Iteracja 12). Martwe ścieżki naprawione: zero wywołań
+  `/api/attributes(-kinds)` w `rebuild/frontend/src` (pozostałe trafienia grepa to komentarze
+  i `data-testid` przeniesione 1:1 z oryginału). **Gate:** 564 testy / 38 plików (było 504)
+  + 17 testów integracyjnych przeciw żywemu backendowi; lint/typecheck/build czyste.
+  - **Zatwierdzone odstępstwa (D2, D4, D7):** `window.prompt`/`confirm` zastąpione dialogami
+    Radix z zachowaniem dosłownych tekstów; pominięty martwy filtr „Źródło" (żadna trasa nie
+    zwraca `origin`); dialogi akcji masowych pokazują liczbę produktów, których dotknie
+    `UPDATE` (`GET /atrybuty/uzycie` → `count`), a toast — `produktow_zaktualizowano` (bo
+    backend tych akcji NIE audytuje, backlog #39).
+  - **NIE odtworzono kafla „Wszystkie atrybuty" (D3)** — istnieje tylko w bazowym Reakcie,
+    injection go chowa, Ania go nie widzi.
+  - **Trzy operacje backendu 7a nie mają konsumenta w UI i to jest zgodne z produkcją (D5):**
+    `PUT /api/atrybuty/rodzaje/{value}` (zero wywołań w całym froncie), `DELETE
+    /api/atrybuty/rodzaje/{value}` („Usuń rodzaj" jest w bazowym Reakcie, ale injection chowa
+    kafle, a mostek tej ścieżki nie patchuje → w produkcji nieosiągalne), `POST
+    /api/atrybuty/scan-pending` (skan odpala backend po `POST /api/staging/accept`).
+  - **CZĘŚĆ B — `DialogReguly.tsx` (`/narzuty`) czyta słownik z `["/api/atrybuty"]`, dostawców
+    z `["/api/suppliers"]`:** marki = suma słownika i katalogu (bez `"—"`), kategorie WYŁĄCZNIE
+    ze słownika (kategoria spoza katalogu jest wybieralna), `konstrukcja`/`vfIf` przełączone
+    z pól tekstowych na selecty słownikowe (oryginał ma dla nich gotowe selecty, `:24286-24313`
+    — były nieosiągalne tylko przez sześciopozycyjną listę typów), dostawcy value=`kod`,
+    etykieta `"kod · nazwa"`, bez dedupu i sortowania (`:24193`) — degradacja z I4b zamknięta.
+- **Ścieżki (GATE):** atrybuty — **13 ścieżek, ale 18 operacji**: różnica bierze się z
+  `/api/atrybuty/pending`, które ma i GET, i DELETE. **✅ zielone od 7a**.  **Fixtures:**
+  `GET_atrybuty.json`, `_liczniki`, `_pending`, `_rodzaje`, `_uzycie`, `_wartosci`
+  — **✅ zielone od 7a**.
+- **DoD:** ✅ pełen CRUD + workflow pending w backendzie (7a); ✅ fixtures przez GATE (7a);
+  ✅ widok natywny, ✅ martwe ścieżki naprawione, ✅ parytet z `pending-injection.js` (57 KB)
+  bez samego skryptu (7b). **Iteracja zamyka się dopiero po 7c** (`/katalog`, listy filtrów
+  ze słownika).
+
+- **7c · `/katalog` — listy filtrów ze słownika** (FE) — ⬜ **do zrobienia.** Zależność
+  kolejnościowa: startuje PO merge sesji 8b (`30-FEATURE-selly-panel-frontend`), bo dotyka
+  `src/pages/Katalog.tsx`, na którym 8b pracuje równolegle.
+  - **Efekt uboczny dla I2 (degradacja D3):** `rebuild/frontend/src/pages/katalog/filtrowanie.ts:136-149`
+    buduje listy marek i kategorii WYŁĄCZNIE z danych produktów; `/api/atrybuty` działa od 7a,
+    więc degradacja czeka już tylko na podpięcie.
+  - **Oryginał woła NATYWNĄ ścieżkę:** `useQuery(["/api/atrybuty"])` w
+    `deminified/frontend-index.js:23286` — w `/katalog` klucz Query jest ZGODNY z backendem
+    (inaczej niż w dialogu reguł 7b, gdzie był martwy `["/api/attributes"]` karmiony mostkiem).
+  - **Reguła budowy list (`:23287-23295`) i jej ASYMETRIA:**
+    - MARKI (`:23288-23291`): z produktów `map(marka).filter(e => e && !/\d/.test(e))` —
+      **filtr „bez cyfr" dotyczy TYLKO marek z produktów**; wartości ze słownika
+      (`rodzaj === "marka"`) wchodzą BEZ tego filtra; suma przez `Set`, sort
+      `localeCompare(…, "pl")`.
+    - KATEGORIE (`:23292-23295`): z produktów BEZ filtra cyfr + wartości słownika
+      (`rodzaj === "kategoria"`); suma przez `Set`, **zwykły `.sort()` bez `localeCompare`**.
+    - ⚠ **Rozstrzygnięte:** filtr „bez cyfr" NIE obejmuje wartości słownikowych — to fakt,
+      nie pytanie otwarte.
+    - ⚠ **W `/katalog` KATEGORIE to SUMA słownika i produktów** — INNA reguła niż w dialogu
+      reguł `/narzuty` (7b), gdzie kategorie idą WYŁĄCZNIE ze słownika (`:24210`). Nie kopiować
+      reguły z 7b do 7c.
+  - **CZWARTY konsument słownika, prawdopodobnie NIEPRZEPORTOWANY:** `LT()`
+    (`deminified/frontend-index.js:23909-23980`) — dialog EDYCJI produktu, czyta
+    `["/api/atrybuty"]` (`:23917`) i buduje selecty pomocnikiem
+    `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare "pl")`
+    (`:23966`), a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
+    (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma tylko
+    `PodgladProduktu.tsx` (bez edycji) — **7b nie znalazła tego dialogu przypisanego do żadnej
+    sesji w roadmapie.** Otwarte pytanie o przypisanie zakresu — decyzja użytkownika, nie
+    zadanie 7c.
 
 ---
 

@@ -18,6 +18,7 @@ import {
   wyczyscStaging,
   zatwierdzPozycjeStagingu,
 } from "../import/akceptacja.js";
+import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
 import { PustyImportBlad, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
 import type { RekordSurowy } from "../import/typy.js";
 
@@ -178,6 +179,24 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
       encjaId: cialo.allFiltered ? "wszystkie_filtrowane" : identyfikatory.join(","),
       szczegoly: szczegolyMasowe(cialo, identyfikatory.length),
     });
+
+    // Wykrycie nowych wartości atrybutów po akceptacji — port hooka z Iteracji 7a
+    // (`mirror/backend/pending_module.cjs:145-192`). Produkcja instaluje go monkey-patchem na
+    // `router.stack` i odpala skan w `res.on('finish')` przy 2xx; tutaj wołamy go wprost.
+    //
+    // ODSTĘPSTWO ŚWIADOME W UMIEJSCOWIENIU (decyzja użytkownika, plan.md D2 ticketa
+    // 29-FEATURE-atrybuty-backend): skan idzie PRZED odpowiedzią, nie po jej wysłaniu. Ciało
+    // i kod odpowiedzi są identyczne, zmienia się tylko moment — klient dostaje odpowiedź po
+    // skanie, za to kolejka pending jest spójna już w chwili, gdy front ją odpytuje.
+    // Bez tego wywołania kolejka rosłaby wyłącznie z ręcznego `POST /api/atrybuty/scan-pending`.
+    //
+    // Błąd skanu NIE MOŻE wywrócić zaakceptowanej akceptacji — łapiemy go i logujemy,
+    // dokładnie jak oryginał (`:154-156`).
+    try {
+      skanujNoweWartosci(db);
+    } catch (e) {
+      console.error("[pending] skan po /api/staging/accept:", e instanceof Error ? e.message : e);
+    }
 
     return res.json({ ok: true, accepted: identyfikatory.length });
   });

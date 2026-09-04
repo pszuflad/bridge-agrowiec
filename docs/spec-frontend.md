@@ -35,6 +35,11 @@ teraz **potrójnie potwierdzony**: mój audyt → dokumentacja Perplexity → mo
 krzyżowa kontrola z kontraktem. Zweryfikowane też w naszym `deminified`:
 `/api/attributes` 8 trafień, `/api/attribute-kinds` 6.
 
+> To opis błędu **oryginału**. Odbudowa (7b, `31-FEATURE-atrybuty-frontend`, 2026-09-04) go nie
+> ma — `grep -rn "attributes\|attribute-kinds" rebuild/frontend/src` zwraca zero wywołań (zostały
+> tylko komentarze i dwa `data-testid` przeniesione 1:1: `button-add-attribute`,
+> `button-save-attribute`). Szczegóły niżej, §2 i §5.
+
 ## 2. ⭐ Mapa do naprawy przy odbudowie (konkretna lista)
 
 **A. Dwie martwe ścieżki → zamiana na natywne API:**
@@ -43,14 +48,22 @@ krzyżowa kontrola z kontraktem. Zweryfikowane też w naszym `deminified`:
 | `/api/attributes` | `/api/atrybuty` | `atrybuty_module.cjs:103` |
 | `/api/attribute-kinds` | `/api/atrybuty/rodzaje` | `atrybuty_module.cjs:114` |
 
+**Stan 2026-09-04 (7a, `29-FEATURE-atrybuty-backend`):** natywny backend atrybutów jest gotowy
+(13 ścieżek / 18 operacji, `rebuild/backend/src/routes/atrybuty.ts`). Uwaga na różnicę pól:
+`GET /api/atrybuty` zwraca rodzaje z `utworzony`, `GET /api/atrybuty/rodzaje` — bez.
+
+**Stan 2026-09-04 (7b, `31-FEATURE-atrybuty-frontend`):** front woła właściwe ścieżki — widok
+natywny `/atrybuty` i dialog reguł w `/narzuty` (część B). Szczegóły widoku: blok „Odbudowa (7b…)"
+w §5 niżej.
+
 **B. Trzy skrypty injection → wchłonąć do natywnego Reacta** (dziś łatają UI
-poza aplikacją; nowy frontend nie może od nich zależeć). **Stan 2026-09-04: dwa z trzech
-wchłonięte** (`freq-injection.js` blok 3f-2, `selly-injection.js` blok 8b); zostaje
-`pending-injection.js` (I7):
-| Skrypt | Co robi teraz | Co ma wejść natywnie |
+poza aplikacją). **Stan 2026-09-04: wchłonięte WSZYSTKIE TRZY** — `freq-injection.js`
+(2026-09-01), `pending-injection.js` i `selly-injection.js` (oba 2026-09-04). Nowy frontend
+nie zależy już od żadnego z nich:
+| Skrypt | Co robiło | Co weszło natywnie |
 |---|---|---|
-| `pending-injection.js` (57 KB) | przejmuje ekran `/atrybuty` przez React Fiber + MutationObserver, nadpisuje cache Query | komponenty CRUD rodzajów/wartości + lista pending, jeden Query key `/api/atrybuty`, mutacje+invalidacje. **Bez Fiber/MutationObserver.** |
-| ~~`selly-injection.js` (30 936 B)~~ ✅ **WCHŁONIĘTY 2026-09-04 (blok 8b)** | overlay panelu Selly na `/panel/api/selly` (hash-routing, flaga `sessionStorage.sellyViewActive`) | ✔ trasa Wouter `/selly` (odstępstwo O1 — w produkcji Selly nie było trasą Reacta) + pięć sekcji i sześć tras 1:1, ikona `PackageOpen` (D7) |
+| ~~`pending-injection.js` (57 KB)~~ ✅ **WCHŁONIĘTY 2026-09-04 (7b, `31-FEATURE-atrybuty-frontend`)** | przejmował ekran `/atrybuty` przez React Fiber + MutationObserver, nadpisywał cache Query | ✔ `src/pages/Atrybuty.tsx` + `src/pages/atrybuty/` (`KafleRodzajow`, `PanelWartosci`, `PanelPending`, `DialogProduktow`, `DialogNowyRodzaj`, `DialogNowaWartosc`, `api.ts`); jeden Query key `["/api/atrybuty"]`, mutacje + invalidacje, „Wyczyść wszystko" przez `DELETE /api/atrybuty/pending`. Bez React Fiber i `MutationObserver`. |
+| ~~`selly-injection.js` (30 936 B)~~ ✅ **WCHŁONIĘTY 2026-09-04 (8b, `30-FEATURE-selly-panel-frontend`)** | overlay panelu Selly na `/panel/api/selly` (hash-routing, flaga `sessionStorage.sellyViewActive`) | ✔ trasa Wouter `/selly` (odstępstwo O1 — w produkcji Selly nie było trasą Reacta) + pięć sekcji i sześć tras 1:1, ikona `PackageOpen` (D7) |
 | ~~`freq-injection.js` (12 KB)~~ ✅ **WCHŁONIĘTY 2026-09-01 (blok 3f-2)** | dokładał kontrolkę częstotliwości importu poza Reactem (PATCH) | ✔ `rebuild/frontend/src/pages/konfiguracja/{dostawcy.ts,Dostawcy.tsx}` — presety, `fmt()` i kotwica `data-testid="supplier-config-<KOD>"` przeniesione 1:1; znikła mapa `kod → id` i `MutationObserver` |
 
 > **Iteracja 8 zamknięta (8a + 8b, 2026-09-04).** 8a (`28-FEATURE-selly-eksport-backend`)
@@ -80,8 +93,8 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
   `/alerty`, `/analityka`, `/historia`, `/konfiguracja`, `/waga-gabarytowa`,
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
   Odbudowane dotąd: `/login`, `/`, `/katalog`, `/staging`, `/konfiguracja`, `/historia`,
-  `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka` (10 widoków; `/analityka` ładowana
-  leniwie — `lazy`+`Suspense`); pozostałe 2 to placeholdery (`/atrybuty`, `/moje-konto`,
+  `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/atrybuty` (11 widoków; `/analityka`
+  ładowana leniwie — `lazy`+`Suspense`); pozostał wyłącznie 1 placeholder (`/moje-konto`,
   `src/pages/placeholdery.ts`).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
@@ -155,7 +168,9 @@ ma endpoint:
 > Oryginał **nie ma** szczegółu produktu w trybie odczytu (tylko modal edycji) — odbudowa
 > dokłada podgląd read-only jako świadome, zatwierdzone odstępstwo. Eksport CSV (backend gotowy
 > od I8, `28-FEATURE-selly-eksport-backend`, patrz przypis o Selly niżej) i słowniki
-> marek/kategorii z `GET /api/atrybuty` odłożone do kolejnych iteracji. Szczegóły:
+> marek/kategorii dla filtrów **tego widoku** (`/katalog`) z `GET /api/atrybuty` odłożone do
+> sesji 7c (po merge 8b) — nie mylić z dialogiem reguł w `/narzuty`, który ten sam słownik już
+> czyta od 7b (patrz blok „Odbudowa (7b…)" niżej). Szczegóły:
 > `docs/tickets/3-FEATURE-katalog-odczyt/`.
 
 > **Odbudowa (3e, 3f-1, 3f-2 — 2026-09-01):** `/staging` i `/konfiguracja` odbudowane; router
@@ -367,6 +382,30 @@ ma endpoint:
 > Kafel „Ostatni eksport CSV" jest **trwale martwy** (D3) — szuka `typ==="eksport"` w
 > `GET /api/history`, a ten wiersz nie ma pola `typ`. Szczegóły:
 > `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
+
+> **Odbudowa (7b, `31-FEATURE-atrybuty-frontend`, 2026-09-04):** `/atrybuty` odbudowany natywnie —
+> router ma **12 tras, 1 placeholder** (`/moje-konto`). Produkcyjny ekran ma **trzy warstwy**, nie
+> dwie: bazowy React (kafle na lokalnych tablicach, nie na API) + **mostek wbudowany w bundle**
+> (`setQueryDefaults`/`setQueryData` na martwych kluczach `/api/attributes(-kinds)`, zasilany
+> `fetch("/panel/api/atrybuty")`, plus write-through `Hb`/`Qb`/`Gb` → POST/PUT/DELETE na
+> `/atrybuty/wartosci` i `window.__atrybutyAddRodzaj` → POST `/rodzaje`,
+> `deminified/frontend-index.js:9960-10268`) + `pending-injection.js`, który chował kafle
+> bazowego widoku i renderował własny DOM; licznik użycia i modal „Produkty używające atrybutu"
+> są wbudowane w bazowy bundle (`:29404-29469`), nie w injection. Odbudowa zastępuje wszystkie
+> trzy warstwy jednym natywnym widokiem pod wspólnym Query key `["/api/atrybuty"]` — bez React
+> Fiber i `MutationObserver`: nagłówek + `Nowy rodzaj` · `Dodaj wartość` · `Do akceptacji [badge]`
+> → kafle rodzajów (tag `wbudowany`/`własny`, licznik wartości, sekcja „Sieroty w DB") → panel
+> wartości (szukajka, CRUD, tabela Wartość/Akcje: Podgląd/Edytuj/Usuń) · panel kolejki (filtr
+> rodzaju, szukajka, „Wyświetlono X z Y", dwa przyciski czyszczące, tabela
+> Rodzaj/Wartość/Wystąpień/Sugerowane aliasy/Akcje). **Odstępstwo D2:** `window.prompt`/`confirm`
+> oryginału zamienione na dialogi Radix z tymi samymi tekstami. **D5:** `PUT`/`DELETE
+> /rodzaje/{value}` i `POST /scan-pending` zostają bez konsumenta w UI — nieosiągalne też w
+> produkcji (mostek ich nie patchuje / injection chowa przycisk / skan odpala backend sam po
+> `POST /api/staging/accept`). **Część B** domyka degradację z 4b: dialog reguł w `/narzuty`
+> czyta ten sam słownik (marki = suma słownika i produktów, kategorie = wyłącznie słownik,
+> dostawcy = osobne `GET /api/suppliers` po `kod`), zweryfikowane w oryginale
+> (`:24203-24313`) — dictionary marek/kategorii dla filtrów `/katalog` (blok I2 wyżej) zostaje
+> osobno odłożona do sesji 7c. Szczegóły: `docs/tickets/31-FEATURE-atrybuty-frontend/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

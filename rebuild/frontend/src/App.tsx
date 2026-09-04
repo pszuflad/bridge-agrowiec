@@ -20,6 +20,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { queryClient } from "@/lib/queryClient";
 import { ToastProvider } from "@/components/ui/toast";
 import { Alerty } from "@/pages/Alerty";
+import { Atrybuty } from "@/pages/Atrybuty";
 import { Historia } from "@/pages/Historia";
 import { Katalog } from "@/pages/Katalog";
 import { Konfiguracja } from "@/pages/Konfiguracja";
@@ -63,6 +64,7 @@ export function Trasy() {
           <Route path="/historia" component={Historia} />
           <Route path="/narzuty" component={Narzuty} />
           <Route path="/alerty" component={Alerty} />
+          <Route path="/atrybuty" component={Atrybuty} />
           <Route path="/waga-gabarytowa" component={WagaGabarytowa} />
           <Route path="/analityka" component={Analityka} />
           <Route path="/selly" component={Selly} />
