@@ -9,7 +9,7 @@
  *  1. **Separatorem jest ŚREDNIK, nie przecinek.** Excel w polskiej lokalizacji dzieli
  *     kolumny po średniku; przecinek dałby jedną kolumnę na wiersz. Dlatego też cudzysłów
  *     zakłada się na pola zawierające `;`, a nie `,`.
- *  2. **Na początku pliku stoi BOM (`﻿`).** Bez niego Excel czyta plik jako windows-1250
+ *  2. **Na początku pliku stoi BOM (`U+FEFF`).** Bez niego Excel czyta plik jako windows-1250
  *     i „ą" zamienia w krzaki. BOM wychodzi z funkcji ZAWSZE — także dla pustego wyniku,
  *     który jest wtedy plikiem złożonym z samego znacznika.
  *  3. **Nagłówek bierze się z kluczy PIERWSZEGO wiersza**, a nie z sumy kluczy wszystkich

@@ -34,6 +34,42 @@ export function sprawdzZgodnoscZKontraktem(arg: {
 }
 
 /**
+ * GATE, część 1b — KONTRAKT dla odpowiedzi, która NIE jest JSON-em.
+ *
+ * Istnieje dla dokładnie jednej trasy w całym backendzie: `GET /api/analytics/export/{view}`
+ * oddaje `text/csv`, bo tak robi oryginał (`analytics_module.cjs:305-322`). Wariant podstawowy
+ * (`sprawdzZgodnoscZKontraktem`) zawsze podaje `contentType` do `sprawdzOdpowiedz()`, a ta
+ * zgłasza naruszenie dla wszystkiego, co nie jest `application/json` — więc dla CSV-a
+ * zapaliłaby się zawsze, choć kontrakt niczego takiego nie wymaga:
+ * `contract/openapi.yaml:178-188` nie deklaruje dla tej ścieżki ŻADNEGO `content`.
+ *
+ * Dlatego tu pomijamy `contentType` (parametr jest opcjonalny po stronie `sprawdzOdpowiedz`,
+ * `gate/kontrakt.ts:81`) i sprawdzamy dwie rzeczy, które kontrakt realnie niesie: że ścieżka
+ * i metoda istnieją w `openapi.yaml` oraz że zwrócony status jest tam zadeklarowany.
+ * Typ odpowiedzi asertuje wywołujący, osobno i wprost — patrz `analityka.eksport.gate.test.ts`.
+ *
+ * ⚠ NIE UŻYWAĆ jej do obchodzenia gate'a przy trasach JSON-owych. Jeśli trasa oddaje JSON,
+ * ma iść przez `sprawdzZgodnoscZKontraktem`; pominięcie sprawdzenia typu byłoby wtedy
+ * osłabieniem siatki, a nie dopasowaniem jej do kontraktu.
+ */
+export function sprawdzZgodnoscZKontraktemNieJson(arg: {
+  metoda: string;
+  sciezka: string;
+  odpowiedz: Pick<OdpowiedzHttp, "status">;
+}): void {
+  const { metoda, sciezka, odpowiedz } = arg;
+  const naruszenia = wczytajKontrakt().sprawdzOdpowiedz({
+    metoda,
+    sciezka,
+    status: odpowiedz.status,
+  });
+  expect(
+    naruszenia,
+    `Naruszenia kontraktu (contract/openapi.yaml):\n${naruszenia.join("\n")}`,
+  ).toEqual([]);
+}
+
+/**
  * ZADEKLAROWANY WYJĄTEK od porównania z fixture'em.
  *
  * Istnieje po to, żeby rozjazd, o którym WIEMY i który mamy udokumentowany, nie zmuszał nas

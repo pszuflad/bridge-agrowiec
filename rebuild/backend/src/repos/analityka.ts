@@ -1256,8 +1256,12 @@ export function statystykiDostawcow(db: Baza): WierszStatystykDostawcy[] {
  * `kpi`, `margins`, bootstrap) NIE przechodzi przez ten helper — ich zapytania nie mogą się
  * wywrócić na schemacie, więc 10a nie miało powodu go portować. Jeśli kiedyś trzeba będzie
  * ujednolicić, to osobna decyzja, nie skutek uboczny tego bloku.
+ *
+ * Wyeksportowany w bloku 10f: wszystkie dziesięć zapytań `export/{view}`
+ * (`repos/analityka-eksport.ts`) przechodzi przez ten sam helper, bo oryginał woła tam
+ * dokładnie to samo `safeAll` (`analytics_module.cjs:305-321`).
  */
-function bezpiecznieWiersze<T>(db: Baza, zapytanie: ReturnType<typeof sql>): T[] {
+export function bezpiecznieWiersze<T>(db: Baza, zapytanie: ReturnType<typeof sql>): T[] {
   try {
     return db.all<T>(zapytanie);
   } catch {
