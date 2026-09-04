@@ -97,6 +97,12 @@ export function Katalog() {
    * (sesja 7c, domknięcie degradacji D3 z I2). Klucz i `queryFn` są WSPÓLNE z widokiem
    * `/atrybuty` i z dialogiem reguł, więc CRUD słownika odświeża wszystkie trzy miejsca
    * jednym `invalidateQueries`.
+   *
+   * ⚠ To JEDYNE zapytanie w tym pliku z własnym `queryFn`: `pobierzSlownik` RZUCA na 401,
+   * podczas gdy domyślny `queryFn` (`/api/products`, `/api/config`) oddaje wtedy `null`.
+   * Różnica jest celowa — wspólny klucz musi mieć jeden loader, inaczej o zachowaniu
+   * decydowałaby kolejność montowania widoków. Dla filtrów skutek jest ten sam: brak danych
+   * degraduje listy do samych produktów.
    */
   const { data: slownik } = useQuery<OdpowiedzSlownika>({
     queryKey: ["/api/atrybuty"],
