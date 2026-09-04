@@ -137,6 +137,16 @@ describe("1. Menu „Akcje” — kształt 1:1 z oryginałem", () => {
     ]);
   });
 
+  it("nagłówek ostatniej kolumny to „Akcje”, nie „Podgląd”", async () => {
+    // Etykieta jechała za zakresem: I2 nazwała kolumnę „Podgląd", bo mieściła tylko modal
+    // read-only. Oryginał ma tam „Akcje" (`:23693-23695`) i od 12c znów tak jest.
+    zamockujApi();
+    await otworzKatalog();
+
+    expect(screen.getByTestId("header-akcje")).toHaveTextContent("Akcje");
+    expect(screen.queryByText("Podgląd")).not.toBeInTheDocument();
+  });
+
   it("„Historia” jest wyłączona — produkcja nigdy nie podpięła tego wejścia", async () => {
     zamockujApi();
     await otworzKatalog();

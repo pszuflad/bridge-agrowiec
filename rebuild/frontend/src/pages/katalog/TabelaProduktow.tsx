@@ -135,10 +135,13 @@ export function TabelaProduktow({
                 testId={`header-${kolumna.key}`}
               />
             ))}
-            {/* Oryginał ma tu „Akcje" (frontend-index.js:23695). W I2 kolumna mieści wyłącznie
-                podgląd read-only (plan.md D4), więc etykieta mówi, co naprawdę robi. */}
-            <th className="px-3 py-2.5 font-medium text-right sticky right-0 bg-muted/50 z-10">
-              Podgląd
+            {/* „Akcje" 1:1 z oryginałem (frontend-index.js:23693-23695). Do 12c stało tu
+                „Podgląd", bo kolumna mieściła wyłącznie modal read-only (odstępstwo D4). */}
+            <th
+              className="px-3 py-2.5 font-medium text-right sticky right-0 bg-muted/50 z-10"
+              data-testid="header-akcje"
+            >
+              Akcje
             </th>
           </tr>
         </thead>

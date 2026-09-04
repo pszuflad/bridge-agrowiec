@@ -288,7 +288,8 @@ export function DialogEdycjiProduktu({
           <DialogTitle>
             Edycja produktu{" "}
             <span className="font-mono text-sm text-muted-foreground">
-              ({String(produkt.kodDostawcy ?? "") || produkt.kod})
+              {/* `||`, nie `??` — 1:1 z `:24037`: pusty `kodDostawcy` ma ustąpić `kod`owi. */}
+              ({String(produkt.kodDostawcy || produkt.kod)})
             </span>
           </DialogTitle>
         </DialogHeader>
