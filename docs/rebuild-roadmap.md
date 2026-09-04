@@ -1203,6 +1203,14 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **DoD:** ✅ panel Selly natywny; ✅ eksport CSV — serwerowy (8a, za `requireAuth`) + przycisk
   w `/katalog` odłożony z I2 (8b); ✅ fixtures przez GATE (8a i 8b); ✅ parytet z
   `selly-injection.js` odnotowany faktyczną wielkością pliku (**30 936 B**).
+- **📄 Instrukcja testów dla Ani: `docs/instrukcja-testow-I8.md`** (`33-DOCS-instrukcja-testow-i8`).
+  ⚠ Jedyna instrukcja w projekcie, która NIE zaczyna się od „to staging, testuj bez skrupułów":
+  `POST /api/selly/sync-supplier` z `dry_run=false` realnie modyfikuje sklep Selly, a staging
+  i produkcja mogą wskazywać ten sam sklep. Dokument opisuje **trzy tryby testowania**
+  (A: bez sekretów — zero ryzyka i ~80% zakresu; B: podłączony, tylko odczyt i dry-run;
+  C: pełny zapis) oraz odpowiada na pytanie o sandbox: **Bridge nie ma sandboxa Selly**,
+  konfigurowalny jest wyłącznie `SELLY_SHOP_URL`; istnienie instancji testowej po stronie
+  Selly.pl jest do ustalenia z nimi, nie z repo.
 
 ---
 
