@@ -6,6 +6,12 @@ import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
 import type {
+  PingSelly,
+  StatusCsv,
+  WierszStatusuDostawcy,
+  WpisLogu,
+} from "@/pages/selly/api";
+import type {
   CyklZyciaModeli,
   Dostepnosc,
   Filtry,
@@ -447,4 +453,52 @@ export function rotacjaZFixtura(): Rotacja {
 export function importyTimelineZFixtura(): unknown[] {
   const sciezka = resolve(korzenRepo, "contract/fixtures/GET_analytics_importy-timeline.json");
   return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: unknown[] }).body;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Selly (Iteracja 8) — cztery fixture'y, które konsumuje panel `/selly`.
+ *
+ *  Piąty nagrany plik, `GET_selly_dictionaries.json`, NIE MA tu loadera świadomie:
+ *  trasa `dictionaries` nie ma konsumenta w żywym panelu (decyzja D1 planu 8b), więc
+ *  helper bez wywołania byłby martwym kodem udającym pokrycie.
+ * ------------------------------------------------------------------ */
+
+/** `GET /api/selly/ping` — sonda połączenia z API Selly.pl. */
+export function pingSellyZFixtura(): PingSelly {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_selly_ping.json");
+  return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: PingSelly }).body;
+}
+
+/** `GET /api/selly/csv-status` — 6898 wierszy, 2.38 MB, `status: "ok"`. */
+export function statusCsvZFixtura(): StatusCsv {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_selly_csv-status.json");
+  return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: StatusCsv }).body;
+}
+
+/**
+ * `GET /api/selly/status` — 5 nagranych dostawców (nagrywarka przycięła z 9).
+ *
+ * ⚠ `_przyciete` jest adnotacją nagrywarki, NIE polem API — zwrócenie go z mocka
+ * przepuściłoby do widoku klucz, którego produkcja nie oddaje (pułapka (a) z bloku 10a).
+ * Bierzemy więc samo `items`.
+ */
+export function statusDostawcowZFixtura(): WierszStatusuDostawcy[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_selly_status.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: { items: WierszStatusuDostawcy[] };
+  };
+  return fixture.body.items;
+}
+
+/**
+ * `GET /api/selly/log` — nagrane wpisy `selly_sync_log`.
+ *
+ * ⚠ Klucze są `snake_case` (`liczba_ok`, `dostawca_kod`, `rozpoczeto`), bo oryginał robi
+ * `SELECT *` przez better-sqlite3. To ta sama pułapka, którą GATE złapał w backendzie 8a
+ * (nota w `CLAUDE.md` o projekcjach Drizzle) — typ `WpisLogu` musi trzymać się fixtura.
+ */
+export function logSellyZFixtura(): WpisLogu[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_selly_log.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: { items: WpisLogu[] } };
+  return fixture.body.items;
 }
