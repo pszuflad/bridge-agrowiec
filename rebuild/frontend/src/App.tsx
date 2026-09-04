@@ -30,6 +30,7 @@ import { Login } from "@/pages/Login";
 import { NotFound } from "@/pages/NotFound";
 import { PLACEHOLDERY } from "@/pages/placeholdery";
 import { Pulpit } from "@/pages/Pulpit";
+import { Selly } from "@/pages/Selly";
 import { WidokWPrzygotowaniu } from "@/pages/WidokWPrzygotowaniu";
 
 /**
@@ -64,6 +65,7 @@ export function Trasy() {
           <Route path="/alerty" component={Alerty} />
           <Route path="/waga-gabarytowa" component={WagaGabarytowa} />
           <Route path="/analityka" component={Analityka} />
+          <Route path="/selly" component={Selly} />
           {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
             <Route key={path} path={path}>
               <WidokWPrzygotowaniu
