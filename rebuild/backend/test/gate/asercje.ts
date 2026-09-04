@@ -132,3 +132,85 @@ export function sprawdzZgodnoscZFixture(
     ).toBeGreaterThan(0);
   }
 }
+
+/**
+ * GATE, część 2b — FIXTURES dla odpowiedzi będącej SŁOWNIKIEM DYNAMICZNYM.
+ *
+ * Istnieje dla dokładnie jednej trasy: `GET /api/atrybuty/liczniki`
+ * (`mirror/backend/atrybuty_module.cjs:270-286`). Ta trasa nie zwraca rekordów o stałym
+ * kształcie, tylko GOŁĄ MAPĘ `"<rodzaj>::<wartosc>" → liczba produktów` — w nagraniu
+ * produkcji ma 5 348 kluczy, a każdy z nich to konkretna marka, rozmiar czy bieżnik
+ * z ówczesnego katalogu.
+ *
+ * Dlaczego nie `sprawdzZgodnoscZFixture`: `porownajKsztalt` porównuje obiekty klucz po
+ * kluczu, a brakujący i nadmiarowy klucz to twarda różnica (`gate/ksztalt.ts:56-75`).
+ * Baza testowa ma inne produkty niż produkcja, więc dosłowne porównanie zapaliłoby tysiące
+ * różnic — i to bez cienia wartości dowodowej, bo nie chodzi o to, żeby test miał te same
+ * MARKI, tylko żeby odpowiedź miała ten sam KSZTAŁT.
+ *
+ * Co więc dowodzimy (decyzja użytkownika, plan.md D3 ticketa 29-FEATURE-atrybuty-backend):
+ *  1. odpowiedź jest płaskim obiektem — bez zagnieżdżeń,
+ *  2. NIE MA w niej klucza `ok` — ta trasa jako jedyna w module oddaje `res.json(wynik)`
+ *     zamiast `res.json({ok:true, …})`; dodanie `ok` byłoby zmianą kontraktu,
+ *  3. każdy klucz ma postać `<rodzaj>::<wartosc>`, a `<rodzaj>` należy do zbioru rodzajów
+ *     WYCZYTANEGO Z FIXTURE'A — czyli z tego, co produkcja realnie zwróciła,
+ *  4. każda wartość to dodatnia liczba całkowita (`COUNT(*)` z grupowania).
+ *
+ * Czego NIE dowodzimy i dlaczego: konkretnych liczb ani konkretnych wartości atrybutów —
+ * zależą od zawartości `products`, która w bazie testowej jest z definicji inna.
+ * Ciężar dowodu dla samego liczenia leży w `test/atrybuty.crud.test.ts`.
+ */
+export function sprawdzZgodnoscZFixtureSlownika(
+  nazwaPliku: string,
+  cialoOdpowiedzi: unknown,
+): void {
+  const fixture = wczytajFixture(nazwaPliku);
+
+  const rodzajeZFixture = new Set(
+    Object.keys(fixture.body as Record<string, unknown>)
+      .filter((klucz) => !klucz.startsWith("_"))
+      .map((klucz) => klucz.split("::")[0]),
+  );
+  expect(
+    rodzajeZFixture.size,
+    `Fixture ${nazwaPliku} nie zawiera ani jednego klucza "<rodzaj>::<wartosc>" — ` +
+      "czy to na pewno nagranie słownika dynamicznego?",
+  ).toBeGreaterThan(0);
+
+  expect(
+    typeof cialoOdpowiedzi === "object" &&
+      cialoOdpowiedzi !== null &&
+      !Array.isArray(cialoOdpowiedzi),
+    `Odpowiedź nie jest obiektem, a fixture ${nazwaPliku} nagrał mapę.`,
+  ).toBe(true);
+
+  const mapa = cialoOdpowiedzi as Record<string, unknown>;
+
+  expect(
+    Object.hasOwn(mapa, "ok"),
+    `Odpowiedź ma klucz "ok", którego nagranie produkcji (${nazwaPliku}) NIE ma — ` +
+      "ta trasa oddaje gołą mapę (`res.json(wynik)`).",
+  ).toBe(false);
+
+  const bledy: string[] = [];
+  for (const [klucz, wartosc] of Object.entries(mapa)) {
+    const rozdzielnik = klucz.indexOf("::");
+    if (rozdzielnik <= 0) {
+      bledy.push(`klucz "${klucz}" nie ma postaci <rodzaj>::<wartosc>`);
+      continue;
+    }
+    const rodzaj = klucz.slice(0, rozdzielnik);
+    if (!rodzajeZFixture.has(rodzaj)) {
+      bledy.push(`rodzaj "${rodzaj}" (klucz "${klucz}") nie występuje w ${nazwaPliku}`);
+    }
+    if (typeof wartosc !== "number" || !Number.isInteger(wartosc) || wartosc <= 0) {
+      bledy.push(`wartość dla "${klucz}" to ${String(wartosc)}, oczekiwano dodatniego int`);
+    }
+  }
+
+  expect(
+    bledy,
+    `Kształt słownika nie zgadza się z contract/fixtures/${nazwaPliku}:\n${bledy.join("\n")}\n` +
+      "To jest STOP — nie poprawiaj fixture'a, zgłoś rozjazd.",
+  ).toEqual([]);
+}
