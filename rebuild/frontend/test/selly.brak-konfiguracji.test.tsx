@@ -18,7 +18,11 @@ import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
 import { _zresetujStanSesji } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
-import { czyBrakKonfiguracjiSelly } from "@/pages/selly/api";
+import {
+  czyBrakKonfiguracjiSelly,
+  czyIntegracjaWylaczona,
+  czyZapisZablokowany,
+} from "@/pages/selly/api";
 import {
   TOKEN_TESTOWY,
   logSellyZFixtura,
@@ -121,5 +125,71 @@ describe("panel przy INNYM błędzie serwera", () => {
     const blad = await screen.findByTestId("selly-blad");
     expect(blad).toHaveTextContent("HTTP 401 z API");
     expect(screen.queryByTestId("selly-nieskonfigurowane")).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ *  Blokada środowiskowa `SELLY_TRYB` (ticket 34)
+ *
+ *  Osobny stan od braku konfiguracji i osobna naprawa: tam „uzupełnij sekrety",
+ *  tu „to środowisko ma zakaz i tak ma być". Pomylenie ich kosztowałoby Anię
+ *  zgłoszenie awarii, której nie ma.
+ * ------------------------------------------------------------------ */
+
+const KOMUNIKAT_WYLACZONA = "[Selly] Integracja wyłączona na tym środowisku (SELLY_TRYB=wylaczony)";
+const KOMUNIKAT_ZAPIS = "[Selly] Zapis do Selly zablokowany na tym środowisku (SELLY_TRYB=tylko-odczyt)";
+
+describe("rozpoznawanie blokady środowiskowej", () => {
+  it("odróżnia wyłączoną integrację od zablokowanego zapisu", () => {
+    expect(czyIntegracjaWylaczona(new Error(`500: ${KOMUNIKAT_WYLACZONA}`))).toBe(true);
+    expect(czyZapisZablokowany(new Error(`500: ${KOMUNIKAT_WYLACZONA}`))).toBe(false);
+
+    expect(czyZapisZablokowany(new Error(`500: ${KOMUNIKAT_ZAPIS}`))).toBe(true);
+    expect(czyIntegracjaWylaczona(new Error(`500: ${KOMUNIKAT_ZAPIS}`))).toBe(false);
+  });
+
+  it("blokada to NIE to samo co brak konfiguracji", () => {
+    // Trzy różne stany, trzy różne komunikaty — żaden nie może łapać cudzego.
+    expect(czyBrakKonfiguracjiSelly(new Error(`500: ${KOMUNIKAT_WYLACZONA}`))).toBe(false);
+    expect(czyIntegracjaWylaczona(new Error(`500: ${KOMUNIKAT_BRAKU}`))).toBe(false);
+    expect(czyZapisZablokowany(new Error(`500: ${KOMUNIKAT_BRAKU}`))).toBe(false);
+  });
+
+  it("NIE łapie innych błędów", () => {
+    expect(czyIntegracjaWylaczona(new Error("500: [Selly] HTTP 401 z API"))).toBe(false);
+    expect(czyZapisZablokowany(new Error("503: Service Unavailable"))).toBe(false);
+    expect(czyIntegracjaWylaczona(null)).toBe(false);
+  });
+});
+
+describe("panel przy SELLY_TRYB=wylaczony", () => {
+  it("pokazuje komunikat o celowym wyłączeniu, nie o brakujących sekretach", async () => {
+    zamockujBezKonfiguracji(KOMUNIKAT_WYLACZONA);
+    await otworzSelly();
+
+    const komunikat = await screen.findByTestId("selly-integracja-wylaczona");
+    expect(komunikat).toHaveTextContent("Integracja Selly wyłączona na tym środowisku");
+    expect(komunikat).toHaveTextContent("SELLY_TRYB=wylaczony");
+    // Diagnoza „brakuje sekretów" byłaby tu myląca — klient odmawia przed ich sprawdzeniem.
+    expect(screen.queryByTestId("selly-nieskonfigurowane")).toBeNull();
+    expect(screen.queryByTestId("selly-blad")).toBeNull();
+  });
+
+  it("sekcje lokalne działają dalej", async () => {
+    zamockujBezKonfiguracji(KOMUNIKAT_WYLACZONA);
+    await otworzSelly();
+
+    expect(await screen.findByTestId("selly-tabela-status")).toHaveTextContent("MO1");
+  });
+});
+
+describe("panel przy SELLY_TRYB=tylko-odczyt", () => {
+  it("mówi wprost, że dry-run nadal działa", async () => {
+    zamockujBezKonfiguracji(KOMUNIKAT_ZAPIS);
+    await otworzSelly();
+
+    const komunikat = await screen.findByTestId("selly-zapis-zablokowany");
+    expect(komunikat).toHaveTextContent("Zapis do Selly zablokowany");
+    expect(komunikat).toHaveTextContent("dry-run");
   });
 });
