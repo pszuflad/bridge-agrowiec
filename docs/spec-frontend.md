@@ -257,13 +257,24 @@ ma endpoint:
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
 > (O-10a-3). Wypełniona jest wyłącznie karta „Marża per dostawca/kategoria/marka" — pozostałe
-> zakładki są puste, ale nazwane (O-10a-4); wzorzec sekcji dashboardu jest udokumentowany
+> zakładki są puste, ale nazwane (O-10a-4; zakładka `ceny` wypełniona w bloku 10b, patrz
+> niżej); wzorzec sekcji dashboardu jest udokumentowany
 > w `rebuild/frontend/src/pages/analityka/README.md`. Trasa jest ładowana **leniwie**
 > (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku ~385 kB, więc płaci za niego tylko
 > wejście na `/analityka`, nie wspólny bundle. Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
 >
 > **Dla bloków 10b–10f:** karty oryginału zakładka po zakładce (tytuły, kolumny, etykiety PL,
 > kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu — `docs/analityka-bloki-10b-10f.md`.
+
+> **Odbudowa (10b, `24-FEATURE-analityka-ceny`, 2026-09-04):** zakładka `ceny`
+> („Ceny w czasie") wypełniona — trzy karty oryginału 1:1: „3.1 Zmiany cen z ostatnich
+> importów", „3.2 / 3.3 Historia ceny wybranej opony" (pola EAN/Kod produktu z debounce
+> 300 ms — świadome odstępstwo O-10b-1, bo trasa bez LIMIT-u skanuje 15 597 wierszy) i
+> „3.6 Inflacja cennika" (dołożony wykres liniowy, O-10b-2, rozszerzenie wzorca O-10a-3).
+> Backend dowozi też `market/group-prices` i `top-zmiany`, ale **bez UI** (decyzje D1/D2 —
+> zero konsumentów / martwy fetch w oryginale, ten sam wzorzec co `bootstrap-current` w 10a);
+> `stats {min,max,avg}` z `product-history` jest pobierane i nierenderowane (D4, jak
+> `margins.low`/`high` w 10a). Szczegóły: `docs/tickets/24-FEATURE-analityka-ceny/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

@@ -123,3 +123,60 @@ Rzeczy zauważone i świadomie odłożone — **żadna nie jest w zakresie tego 
 4. **`market/group-prices` grupuje po `model` bez `LIMIT`-u sensownego dla UI** — 500 grup
    przy 92 markach. Nieistotne, dopóki trasa nie ma konsumenta; gdyby kiedyś dostała UI
    (nowa decyzja użytkownika), selektor grupy trzeba połączyć z paginacją albo wyszukiwarką.
+
+## Poprawki po review
+
+Review (`review.md`): **0 BLOCKER**, 1 SHOULD-FIX, 2 NICE-TO-HAVE.
+
+- **SHOULD-FIX — roadmapa/backlog nieaktualne:** to Faza 5 ticketa, wykonana po review
+  (patrz „Aktualizacja dokumentacji" niżej).
+- **NICE-TO-HAVE — podwójna numeracja „6." w `pages/analityka/README.md`:** poprawione
+  (commit `review fix - numeracja reguł wykresu w README`).
+- **NICE-TO-HAVE — brak zwijania piątej i dalszych serii w „Pozostałe" na wykresie:**
+  nie zmieniam. To ten sam wzorzec, co w `SekcjaMarze.tsx` z 10a (nadmiarowe byty zostają
+  w tabeli pod wykresem, a nie w sztucznej serii zbiorczej), a średnia z cen kilku
+  dostawców byłaby liczbą, której nie da się poprawnie podpisać. Zmiana wzorca dla obu
+  sekcji naraz to osobna decyzja, nie wtrącenie w bloku 10b.
+
+Review potwierdziło samodzielnie: SQL porównany linia po linii z
+`analytics_module.cjs:237-268,333`, etykiety i kolumny z `frontend-index.js:28295-28416`,
+domknięcie drogi `req.query` → `sql.raw` typem, paleta `--chart-1..5` nietknięta
+(`tokeny.test.ts` ✓).
+
+## Aktualizacja dokumentacji
+
+**`docs/rebuild-roadmap.md`** — blok 10b oznaczony jako zrobiony (2026-09-04 + ID ticketa)
+z pełnym rozliczeniem w stylu bloku 10a: pięć tras BE, trzy karty FE, decyzje D1–D4,
+odstępstwa O-10b-1/O-10b-2, gate, weryfikacja na snapshocie, wzrost chunka. Zaktualizowany
+wiersz tabeli iteracji i akapit o `historia_cen` (z zapowiedzi „czytelnika per produkt
+dowozi 10b" na fakt). **Usunięty nieaktualny zapis** o parametrze filtra idącym „do
+`queryKey`" — zastąpiony sprostowaniem, że oryginał pisze własny `queryFn` z jawnym query
+stringiem. Pułapka o pustych tablicach rozszerzona o drugą połowę (pusta ODPOWIEDŹ też
+przechodzi bez dowodu). Ustalenia przekazane **do bloków, których dotyczą**: 10c (gotowy
+hook debounce + wzorzec parametru), 10e (ten sam wzorzec dla `?days` + ostrzeżenie
+o czterech pustych fixtures i wymóg własnego zasiewu), 10f (pominięty przycisk CSV
+przy karcie „3.1").
+
+**`docs/analityka-bloki-10b-10f.md`** — nagłówek zaktualizowany (10a+10b zamknęły dziesięć
+tras z 27, dokument opisuje pozostałe 17). §1.1 — `top-zmiany` i `market/group-prices`
+oznaczone jako rozstrzygnięte decyzjami D1/D2. **Nowy §1.4** — czwarta pułapka iteracji:
+trasy z parametrami nie używają klucza-ścieżki, tylko własnego `queryFn` (z ostrzeżeniem
+o ręcznej obsłudze `401 → null`). §2 rozszerzone o drugą połowę problemu pustych tablic
+wraz z konkretnym przykładem (`zasiejHistorieCen` kontra `zasiejHistorieCenDlaCen`).
+§4 rozliczony jako zrobiony, z dopisanym nowym faktem o oryginale (`stats` nierenderowane).
+§9 (inwentarz) uzupełniony o cztery pozycje z 10b.
+
+**`docs/rebuild-backlog.md`** — bez zmian. Sprawdzone wszystkie wzmianki o `historia_cen`
+i o pięciu trasach cen; jedyny pasujący wpis (#31 — nieidempotentny
+`POST bootstrap-current`, „⬜ do decyzji Ani") dotyczy trasy, której ten blok nie tykał.
+
+**`docs/spec-backend.md`** — sprostowane zdanie sugerujące, że `GET /api/analytics/status`
+jest jedynym czytelnikiem `historia_cen`; dopisany `prices/product-history` jako pierwszy
+czytelnik PER PRODUKT.
+
+**`docs/spec-frontend.md`** — adnotacja przy „pozostałe zakładki są puste" (zakładka `ceny`
+wypełniona) + nowy akapit „Odbudowa (10b…)" w konwencji pozostałych bloków.
+
+**`CLAUDE.md`** — bez zmian (plik zasad, nie dziennik postępu; nic się nie zdezaktualizowało).
+
+**Pre-existing issues zgłoszone przez doc-checkery:** brak nowych.

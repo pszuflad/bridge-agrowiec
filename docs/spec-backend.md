@@ -266,8 +266,12 @@ zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotio
 dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/bootstrap-current`,
 oraz pierwszego czytelnika — `GET /api/analytics/status` zwraca z niej agregat
 `{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
-`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
-`docs/tickets/19-FEATURE-analityka-fundament/plan.md`.
+`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Od bloku
+**10b** doszedł pierwszy czytelnik PER PRODUKT: `GET /api/analytics/prices/product-history`
+filtruje po `?ean`/`?kod` (AND), bez LIMIT-u; ten sam blok dowiózł też
+`prices/last-import`, `prices/inflation`, `market/group-prices` i `top-zmiany`. Szczegóły:
+`docs/tickets/19-FEATURE-analityka-fundament/plan.md` (10a),
+`docs/tickets/24-FEATURE-analityka-ceny/plan.md` (10b).
 
 ## 6. Korekty do propagacji
 
