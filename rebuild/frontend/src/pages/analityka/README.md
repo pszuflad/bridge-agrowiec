@@ -4,6 +4,11 @@ Ten katalog powstał w bloku **10a** (ticket `19-FEATURE-analityka-fundament`) i
 szablonem dla reszty Iteracji 10. Bloki 10b–10e **dokładają zakładki, nie przemeblowują
 widoku** — zakładki, ich kolejność i etykiety już są i pochodzą z oryginału.
 
+**Blok 10e jest zrobiony** (ticket `25-FEATURE-analityka-dostepnosc-rotacja`): wypełnił
+zakładkę „Dostępność" trzema kartami i dołożył dwie pod kartą marż w zakładce „Marża
+i rotacja". Wraz z nim doszły trzy rzeczy do REUŻYCIA, nie do przepisania — `PasekDostepnosci`,
+`NaglowekSekcji` i generyczne `zastosujFiltry` (patrz §1 i §2.3).
+
 Zanim napiszesz linijkę kodu: przeczytaj „Trzy pułapki" na końcu. Każda z nich kosztowała
 w 10a osobne dochodzenie.
 
@@ -19,6 +24,8 @@ w 10a osobne dochodzenie.
 | `TabelaAnalityki.tsx` | port `I()` z oryginału — kolumny, wyrównanie, `slice(0, 300)` |
 | `NaglowekKpi.tsx` | banner historii + cztery kafle. Nie ruszać — to nagłówek całej strony |
 | `FiltryGlobalne.tsx` | sześć kontrolek. Nie ruszać — filtry są wspólne dla zakładek |
+| `NaglowekSekcji.tsx` | tytuł karty + notka „filtry ukryły N z M" + notka o wymiarach pominiętych |
+| `PasekDostepnosci.tsx` | port `O()` — pasek procentu dostępności w komórce tabeli (10e) |
 | `Sekcja<Nazwa>.tsx` | **to piszesz w swoim bloku** |
 | `../Analityka.tsx` | montuje sekcje w zakładkach; podmieniasz `ZakladkaWPrzygotowaniu` na swoją sekcję |
 
@@ -54,7 +61,10 @@ czy handler czyta `req.query`:
 - **czyta** (`rotation/inactive?days`, `market/group-prices?group`,
   `prices/product-history?ean&kod`) → parametr idzie do `queryKey`, filtrowanie na backendzie:
   ```ts
-  useQuery({ queryKey: ["/api/analytics/rotation/inactive", `?days=${dni}`] });
+  // CAŁY adres w JEDNYM segmencie klucza — `queryKey.join("/")` z `lib/queryClient.ts`
+  // wstawiłby przy dwóch segmentach ukośnik przed znakiem zapytania (`…/inactive/?days=60`).
+  // Ten sam wzorzec niosą `pages/Staging.tsx` i `pages/Historia.tsx` (`adresStrony`).
+  useQuery({ queryKey: [`/api/analytics/rotation/inactive?days=${dni}`] });
   ```
 - **nie czyta** (jak `margins`) → filtruj klientem, przez `zastosujFiltry*` w `useMemo`.
 
@@ -69,13 +79,23 @@ Filtry są globalne, ale wiersz Twojej sekcji nie musi nieść wszystkich sześc
 `margins` grupuje po `dostawca`/`kategoria`/`marka`, więc model, rozmiar i oba indeksy
 w odpowiedzi **nie istnieją** — `GROUP BY` je zwinął.
 
-Nie zwijaj wtedy tabeli do zera i nie udawaj, że filtr zadziałał. Wypisz wymiary
-obsługiwane i pokaż notkę:
+Nie zwijaj wtedy tabeli do zera i nie udawaj, że filtr zadziałał. Zadeklaruj MAPOWANIE
+„wymiar → pole wiersza"; wymiar nieobecny w mapie to wymiar, którego sekcja nie stosuje,
+i o którym `NaglowekSekcji` powie użytkownikowi wprost:
 
 ```ts
-export const WYMIARY_MOJEJ_SEKCJI: WymiarFiltra[] = ["dostawcy", "marki", "modele"];
-const pominiete = wymiaryNieobslugiwane(wybor, WYMIARY_MOJEJ_SEKCJI);
+const MAPOWANIE: MapowanieWymiarow<MojWiersz> = {
+  dostawcy: (w) => w.dostawca,
+  marki: (w) => w.marka,
+};
+
+const wiersze = useMemo(() => zastosujFiltry(dane?.rows ?? [], wybor, MAPOWANIE), [dane, wybor]);
+const pominiete = wymiaryNieobslugiwane(wybor, wymiaryZMapowania(MAPOWANIE));
 ```
+
+Semantyka jest jedna dla wszystkich sekcji: **OR wewnątrz wymiaru, AND między wymiarami**,
+a wiersz z pustą wartością odpada, gdy ten wymiar filtruje. Generyk powstał w 10e, kiedy
+sekcji zrobiło się sześć — nie pisz szóstej kopii tej pętli.
 
 ### 2.4 Tabela
 
@@ -126,9 +146,16 @@ i dlaczego to nie blokuje) siedzi w nagłówku `components/ui/chart.tsx`.
 
 ### 2.6 Wepnij w zakładkę
 
-W `../Analityka.tsx` podmień `ZakladkaWPrzygotowaniu` na swoją sekcję. Zakładka `marza`
-niesie już sekcję marż — blok 10e dokłada rotację i cykl życia **pod nią**, w tej samej
-zakładce, bo tak jest w oryginale (`frontend-index.js:28516-28640`).
+W `../Analityka.tsx` podmień `ZakladkaWPrzygotowaniu` na swoją sekcję. Wzorzec dokładania
+do zakładki JUŻ WYPEŁNIONEJ pokazuje blok 10e: zakładka `marza` niesie sekcję marż z 10a
+na górze, a rotację i cykl życia **pod nią**, w tej samej zakładce, bo tak jest w oryginale
+(`frontend-index.js:28516-28640`).
+
+⚠ Dokładając kartę do zakładki, która już ma tabelę, sprawdź testy poprzedniego bloku:
+zapytania w rodzaju `getByText("Brak danych")` przestają być jednoznaczne i muszą zejść
+do `within(getByTestId("tabela-…"))`. To jedyna zmiana, jakiej 10e musiało dokonać
+w testach 10a — poza dopisaniem handlerów MSW dla nowych tras, bez których
+`onUnhandledRequest: "error"` zgłasza żądanie bez mocka.
 
 ### 2.7 Testy
 
@@ -181,3 +208,18 @@ wierszy · pobieranie `margins.low`/`high` bez renderowania ich.
 | O-10a-4 | Cztery zakładki puste do czasu 10b–10e | zakres bloku, nie zmiana zachowania |
 | — | `/analityka` ładowana leniwie | Recharts podnosił wspólny bundle z 451 do 837 kB, a używa go tylko ten widok |
 | — | `POST bootstrap-current` bez przycisku | trasa nieidempotentna, a oryginalny frontend nigdy jej nie woła |
+
+**Blok 10e — co dołożył** (ticket `25-FEATURE-analityka-dostepnosc-rotacja`, decyzje D1–D4
+użytkownika z 2026-09-03):
+
+| # | Co | Dlaczego |
+|---|---|---|
+| O-10e-1 | Wykres liniowy w karcie „4.4 Sezonowy wzorzec cen" | jedna seria (średnia po wszystkich markach), bo marek bywa kilkadziesiąt, a limit to 4 serie; pełny podział jest w tabeli pod wykresem |
+| — | `GET /api/analytics/importy-timeline` bez UI | oryginalny bundle nie woła tej trasy ani razu — karta byłaby nowym ekranem, nie odbudową |
+
+**1:1 z oryginałem, choć wygląda na defekt:** karty „4.1 Historia dostępności pozycji"
+i „4.2 Tempo schodzenia z magazynu" są **puste zawsze**. Ich zapytania pytają `historia_cen`
+o kolumnę `nazwa`, której ta tabela nie ma — produkcja połyka błąd i zwraca `rows: []` mimo
+15 597 migawek w historii (dowód w fixtures). Odtwarzamy to zachowanie; sprawa czeka na
+decyzję jako wpis **#32** w `docs/rebuild-backlog.md`. Nie „naprawiaj" tego przy okazji
+innego bloku — to jest zmiana zachowania produkcji i wymaga decyzji użytkownika.

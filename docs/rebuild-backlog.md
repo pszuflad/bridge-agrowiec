@@ -1592,3 +1592,83 @@ test jednostkowy), ale świadomie nie dostała przycisku w UI, żeby nikt nie kl
 **Naprawa (propozycja).** `INSERT … SELECT` z `WHERE NOT EXISTS (SELECT 1 FROM historia_cen
 WHERE …)` per produkt/dzień, albo unikalny indeks na `(produkt, data)` + `ON CONFLICT DO NOTHING`.
 Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy naprawiać zachowanie produkcji.
+
+---
+
+### #32 · 2026-09-04 · [BACKEND] · `historia_cen` NIE MA kolumny `nazwa` — obie karty „Dostępności" są trwale puste
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (dwie trasy analityki, tabela `historia_cen`) |
+| **Pliki** | `mirror/backend/analytics_module.cjs:161` (`availability/products`), `:176` (`availability/sell-through`), `:316-317` (te same dwa widoki eksportu); schemat: `db/schema.sql`, `rebuild/schema/001_schema.sql`, `analytics_module.cjs:25-48`; port: `rebuild/backend/src/repos/analityka.ts` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) |
+| **Status** | ✔ odtworzone w rebuild (10e) · w produkcji **nadal obecne** |
+
+**Co robi produkcja.** `GET /api/analytics/availability/products` w gałęzi z historią robi
+`SELECT kod, ean, dostawca, MAX(nazwa) AS nazwa, … FROM historia_cen`, a
+`GET /api/analytics/availability/sell-through` bierze `MAX(nazwa)` w CTE `seq` z tej samej
+tabeli. **Tabela `historia_cen` nie ma kolumny `nazwa`** — nie ma jej ani zrzut produkcji
+(`db/schema.sql`), ani `rebuild/schema/001_schema.sql`, ani `ensureSchema()` samego modułu
+analityki, który tę tabelę tworzy (`analytics_module.cjs:25-48`). SQLite odpowiada
+`no such column: nazwa`, a `safeAll()` (`:51`) połyka wyjątek i zwraca pustą listę.
+
+**Dowód z nagrań, nie z rozumowania.** `contract/fixtures/GET_analytics_status.json` pokazuje
+**15 597 migawek** w `historia_cen`, a mimo to
+`GET_analytics_availability_products.json` i `GET_analytics_availability_sell-through.json`
+mają `hasHistory: true` i `rows: []`. Nie jest to więc „pusta baza w chwili nagrania" —
+te dwie trasy nie zwróciły ani jednego wiersza mając 15 597 migawek do policzenia.
+
+**Skutek.** Obie karty zakładki „Dostępność" w oryginale — „4.1 Historia dostępności pozycji"
+i „4.2 Tempo schodzenia z magazynu" (`deminified/frontend-index.js:28421-28487`) — pokazują
+użytkownikowi „Brak danych" **od zawsze**, niezależnie od danych. Ta sama wada dotyczy dwóch
+widoków eksportu CSV (`export/availability-products`, `export/sell-through`, `:316-317`),
+które w tej sytuacji oddają sam znacznik BOM — to jest wejście dla bloku **10f**.
+
+**Co zrobiła odbudowa.** Port 1:1, łącznie z portem `safeAll` (`bezpiecznieWiersze`
+w `repos/analityka.ts`), żeby zachowanie było identyczne z produkcją zamiast dawać 500.
+Zamrożone dwoma testami charakteryzacyjnymi backendu i jednym testem widoku — gdyby te trasy
+kiedyś zaczęły zwracać wiersze, testy o tym powiedzą.
+
+**Naprawa (propozycja).** Trzy warianty, każdy to zmiana zachowania produkcji:
+(a) `LEFT JOIN products p ON p.kod = h.kod` i `MAX(p.nazwa)` — pełne kolumny oryginału, ale
+nazwa znika dla pozycji usuniętych z katalogu; (b) usunięcie `nazwa` z obu zapytań — karty
+zaczynają działać, pozycję rozpoznaje się po kodzie i EAN-ie; (c) dołożenie kolumny `nazwa`
+do `historia_cen` i wypełnianie jej przy zapisie — najbliżej pierwotnego zamiaru autora,
+ale wymaga migracji i nie wypełni danych historycznych. Poza zakresem odbudowy — decyzja
+użytkownika, czy i kiedy naprawiać.
+
+---
+
+### #33 · 2026-09-04 · [BACKEND] · `sell-through`: funkcja okna liczona PO niepełnym `GROUP BY` — wynik niedeterministyczny przy duplikacie
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (trasa analityki, poprawność SQL) |
+| **Pliki** | `mirror/backend/analytics_module.cjs:175-179`; port: `rebuild/backend/src/repos/analityka.ts` (`tempoSchodzenia`); źródło duplikatu: `rebuild/backend/src/import/tk.ts:171,548-564` |
+| **Do nowej wersji?** | ⬜ **do decyzji Ani** — dziś zamaskowane przez #32 |
+| **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) |
+| **Status** | ✔ odtworzone w rebuild (10e) · **nieosiągalne, dopóki żyje #32** |
+
+**Co robi produkcja.** CTE `seq` wybiera `stan` **gołe, bez agregatu**, obok
+`GROUP BY dostawca, kod, zarejestrowano_at`, i liczy na tym
+`LAG(stan) OVER (PARTITION BY dostawca, kod ORDER BY zarejestrowano_at)`. To nie jest poprawny
+SQL wg standardu; SQLite na to pozwala i liczy okno **po** agregacji. Sprawdzone empirycznie
+na SQLite 3.47.2: gdy na `(dostawca, kod, zarejestrowano_at)` przypada jeden wiersz, wynik jest
+poprawny; gdy przypada ich ≥ 2, SQLite bierze `stan` z **arbitralnego** wiersza grupy
+(implementation-defined — w teście trafił wiersz wstawiony jako pierwszy).
+
+**Kiedy duplikat powstaje.** `import/tk.ts:171,548-564` liczy znacznik `zarejestrowanoAt`
+**raz na cały import**, więc dwie linie tego samego `kod` w jednym cenniku dostawcy dają dwa
+wiersze `historia_cen` o identycznym kluczu grupowania. Ta sama konstrukcja jest w legacy.
+
+**Dlaczego to dziś nie boli.** Zapytanie i tak nigdy nie dobiega do końca — wywraca się
+wcześniej na `MAX(nazwa)` (wpis **#32**). Naprawa #32 **odsłoni** ten problem, więc obie
+sprawy trzeba rozstrzygać razem.
+
+**Co zrobiła odbudowa.** Port 1:1 z komentarzem opisującym pułapkę i testem
+charakteryzacyjnym, który zamraża realny efekt (pusta lista mimo danych do policzenia).
+
+**Naprawa (propozycja).** Rozdzielić agregację od funkcji okna: najpierw CTE zwijające
+duplikaty (`MAX(stan)` albo `MIN(id)` per klucz), dopiero na nim `LAG`. Poza zakresem
+odbudowy — decyzja użytkownika, razem z #32.
