@@ -149,10 +149,10 @@ palety projektu) — łamanie ich to błąd, nie kwestia gustu:
 6. **Sprawdź, czy w danych jest w ogóle szereg.** Linia przez jeden punkt to nie wykres
    czasowy. `SekcjaCeny` wymaga dwóch różnych miesięcy (`MIN_MIESIECY_NA_WYKRESIE`)
    i przy jednym pokazuje samą tabelę — tak jak wygląda cały oryginał.
-6. **Legenda przy ≥2 seriach, nigdy przy jednej** (tytuł już nazywa, co jest rysowane).
-7. **Etykiety noszą tokeny tekstu**, nigdy koloru serii. Wartości przy końcach słupków,
+7. **Legenda przy ≥2 seriach, nigdy przy jednej** (tytuł już nazywa, co jest rysowane).
+8. **Etykiety noszą tokeny tekstu**, nigdy koloru serii. Wartości przy końcach słupków,
    selektywnie — nie liczba przy każdym punkcie.
-8. **Tabela pod wykresem jest obowiązkowa.** To nie ozdoba: walidator zgłasza dla
+9. **Tabela pod wykresem jest obowiązkowa.** To nie ozdoba: walidator zgłasza dla
    `--chart-1` i `--chart-4` kontrast do tła poniżej 3:1 (2.61 i 2.76), a skill `dataviz`
    mówi wprost, że takiego ostrzeżenia nie wolno zignorować — zdejmuje je widoczna etykieta
    albo widok tabelaryczny. Mamy oba.
