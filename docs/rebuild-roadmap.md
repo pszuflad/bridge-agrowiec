@@ -143,10 +143,12 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 
 ## 4. Tablica postępu
 
-> **Stan na 2026-09-04: została JEDNA iteracja — I12** (konto, admin, hardening). Iteracje 0–11
-> są zamknięte, wszystkie trzy skrypty injection wchłonięte, martwe ścieżki FE naprawione.
-> I12 zebrała po drodze wejścia z I2, I5, I7 i I11 — czytaj jej blok w całości, bo urosła
-> ponad pierwotny zakres (m.in. mutacje produktów i dialog edycji produktu z `/katalog`).
+> **Stan na 2026-09-05: została JEDNA iteracja — I12** (konto, admin, hardening), w toku —
+> sesja **12a (mutacje produktów, BE) zrobiona**, cztery zostały (12b–12e). Iteracje 0–11 są
+> zamknięte, wszystkie trzy skrypty injection wchłonięte, martwe ścieżki FE naprawione.
+> I12 zebrała po drodze wejścia z I2, I5, I7 i I11 — czytaj jej blok w całości (podzielony na
+> sesje 12a–12e), bo urosła ponad pierwotny zakres (m.in. mutacje produktów i dialog edycji
+> produktu z `/katalog`).
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
@@ -164,7 +166,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
-| 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
+| 12 | Konto + admin + hardening bezpieczeństwa | 12a·12b BE · 12c FE · 12d · 12e | wszystkie | 🔨 | 12a: ticket `35-FEATURE-mutacje-produktow-backend` · 2026-09-05 |
 
 ---
 
@@ -943,9 +945,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   filtry (szukaj/typ/dostawca) + paginacja 25/50/100, wpięty w router/shell.
   `isLoading`/`isError` wg wzorca `Staging.tsx` (odstępstwo D5).
 - **Fakty do zapamiętania (dla kolejnych sesji):**
-  - **Tabela `history` nie ma w rebuildzie pisarza.** Jedyny pisarz oryginału to ręczna edycja
-    produktu w katalogu (`PUT`/`PATCH /api/products/:id`, `:48435`/`:48475`) — poza zakresem
-    tego ticketa. Do czasu jej sportowania `GET /api/history` zwraca na stagingu `[]`.
+  - **Tabela `history` dostała pisarza w sesji 12a (`35-FEATURE-mutacje-produktow-backend`,
+    2026-09-05).** Jedyny pisarz oryginału to ręczna edycja produktu w katalogu
+    (`PUT`/`PATCH /api/products/:id`, `:48435`/`:48475`) — sportowana jako
+    `zapiszWpisDziennika` (`src/repos/dziennik-zmian.ts`), wołana z handlera edycji produktu.
+    Od tej sesji `GET /api/history` przestał zwracać na stagingu `[]`.
   - **Rejestracji `/meta`+`/paged` w oryginale są TRZY, nie dwie:** rdzeń bez auth (`:48335`,
     `:48352`) + `mirror/backend/pagination_module.cjs:136,168` z auth, ładowany dwukrotnie
     (`extensions.cjs:449-451` + wprost z `index.cjs`). Wygrywa rdzeń, więc w produkcji trasy są
@@ -1589,133 +1593,172 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 12 — Konto + admin + hardening bezpieczeństwa
-- **Status:** ⬜  **Sesje:** 1–2  **Zależy od:** wszystkie (finalny przegląd)
-- **Cel (Ania klika):** zmienia hasło w `/moje-konto`; admin zarządza użytkownikami/konfiguracją dostawców i utrzymaniem.
-- **Backend:** `POST /api/password/change`; `GET /api/users`; `GET/PUT /api/admin/supplier-config(+{kod})`, `/api/admin/suppliers-list`; `POST /api/maintenance/usun-nieopony`, `POST /api/products/clear`; `GET /api/audit-log`.
-  - **⚠ WEJŚCIE Z ITERACJI 5 (2026-09-02) — `GET /api/audit-log` musi znieść to samo, co `/api/history/{meta,paged}` już znosi.**
-    `synchronizacja_reczna` nie ma `szczegoly_json` (trasa `POST /api/dostawcy/{kod}/synchronizuj-teraz`
-    woła audyt bez czwartego argumentu, `:48240` — NULL) i powstaje TAKŻE dla dostawcy, który nie
-    istnieje (audyt pisany przed synchronizacją i bezwarunkowo, więc `encja_id` bywa kodem spoza
-    `suppliers`). W widoku `/historia` ta akcja jest odfiltrowana (nie ma jej w słowniku pięciu
-    rozpoznawanych akcji), więc problem tam nie wystąpił — ale `/api/audit-log` pokazuje surowy
-    audyt bez filtra typu, więc TU widok musi znieść `null` i niezłączalny `encja_id` wprost.
-    Parser `parsujSzczegoly` z I5 (`src/historia/mapowanie.ts`) już to potrafi (`try/catch` → `{}`),
-    da się z niego skorzystać bez pisania drugiej wersji.
-  - **⚠ WEJŚCIE Z ITERACJI 11 (2026-09-03) — `GET /api/audit-log` zobaczy dwie NOWE akcje.**
-    `edycja_konfiguracji` (encja `config`, `encjaId` = nazwa klucza, `szczegoly_json` =
-    `{"wartosc": …}`, zamaskowane `"***"` TYLKO gdy nazwa klucza zawiera `klucz_api` — więc
-    `shoper.token_api` jest w dzienniku jawny, 1:1 z `:48746`) i `edycja_spedycji` (encja
-    `spedycja`, `encjaId` = kod dostawcy, `szczegoly_json` = **surowe ciało żądania**, nie
-    odsiane — nawet dla kodu spoza `suppliers`, bo trasa tego nie waliduje, 1:1 z `:48737`).
-  - **⚠ WEJŚCIE Z ITERACJI 11 (2026-09-03) — przycisk „Usuń wszystko z katalogu" należy do
-    zakładki „Katalog" w `/konfiguracja`, nie do widoku `/katalog`.** Port karty `XT()`
-    (`Katalog.tsx`, `frontend-index.js:26020-26145`) jest już zrobiony BEZ tego przycisku
-    (D3 ticketu 18). Ta iteracja dokłada `POST /api/products/clear` z ciałem
-    `{potwierdzenie: "WYCZYSC"}`, poprzedzone `window.confirm` o treści „Usunąć wszystko
-    z katalogu? Ta operacja usuwa wszystkie produkty i służy tylko do testów parsera." —
-    po sukcesie unieważnia `["/api/products"]`, `["/api/alerts"]`, `["/api/analytics"]`.
-    Miejsce wpięcia jest w `Katalog.tsx` oznaczone adnotacją.
-  - **⚠ WEJŚCIE Z ITERACJI 8 (2026-09-04) — `AppShell` (sidebar) jest wpinany przez WIDOK, nie
-    przez router.** `/`, `/konfiguracja` i placeholdery renderują sidebar; `/katalog`, `/staging`,
-    `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/historia` i `/selly` — nie. Zastane
-    zachowanie sprzed I8, spoza jej zakresu, wygląda na niezamierzone — warte decyzji przy
-    finalnym przeglądzie tej iteracji.
-  - **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć (dziś martwa, D1 z 4b, 2026-09-02)
-    — dane musi dostarczyć backend** (pole przy produkcie), bo liczenie po stronie klienta
-    duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś
-    zaplanowanej pracy — nota informacyjna, nie zadanie.
-  - **⚠ WEJŚCIE Z SESJI 7c (2026-09-04) — DIALOG EDYCJI PRODUKTU `LT()` NIE JEST PRZEPORTOWANY
-    i to TU jest jego miejsce.** Fakt ustalony grafem wywołań przy zamykaniu Iteracji 7 (nie
-    z nazwy funkcji): `LT()` (`deminified/frontend-index.js:23909-23980`) to modal edycji produktu
-    otwierany z `/katalog`. Czyta `["/api/atrybuty"]` (`:23917`) i buduje selecty pomocnikiem
-    `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare "pl")` (`:23966`),
-    a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
-    (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma wyłącznie
-    `PodgladProduktu.tsx` — podgląd READ-ONLY, dołożony w I2 jako świadome odstępstwo
-    (oryginał nie ma szczegółu produktu w trybie odczytu, ma tylko ten modal edycji).
-    **Konsekwencja: to jest FRONTEND do mutacji wymienionych niżej** — bez niego trasy
-    `PATCH`/`PUT`/`DELETE /api/products/{id}` nie mają z czego być wołane, a `GET /api/overrides`
-    (gotowe od 3d-2) nie ma konsumenta. Iteracja 7 znalazła ten dialog jako CZWARTEGO konsumenta
-    słownika atrybutów, ale świadomie go nie portowała: to edycja katalogu, nie atrybuty.
-  - **Mutacje produktów odłożone z I2:** `PATCH /api/products/{id}` (edycja, wstrzymanie/aktywacja —
-    uwaga: oryginał sam ustawia `status: "wstrzymany"`, gdy któraś z cen spada do 0, `backend-index.cjs:44735-44741`),
-    `PUT /api/products/{id}`, `DELETE /api/products/{id}`, `POST /api/products` (bulk). Katalog (I2) jest
-    dziś wyłącznie do odczytu — te trasy domykają go do parytetu z produkcją.
-    - **⚠ WEJŚCIE Z BLOKU 3f-2 (2026-09-01): `PATCH /api/products/{id}` zapisuje CAŁE ciało
-      żądania.** Wspólny handler `PUT`/`PATCH` (`:48415-48424`, zarejestrowany w `:48452`) odsiewa wyłącznie klucz `_reason` i oddaje resztę do
-      `updateProduct`, czyli **wszystkie 72 kolumny są zapisywalne**. U nas doszłaby jeszcze
-      `uwagaCena` (migracja 002), dziś ukryta przed API projekcją kontraktową. Ta trasa
-      dodatkowo zapisuje `manual_overrides` dla KAŻDEGO zmienionego pola (`:48427`),
-      więc lista pól decyduje nie tylko o tym, co da się zapisać, ale też o tym, **czego import
-      przestanie nadpisywać**. Dostawcy dostali listę pól w 3f-2 — tu trzeba podjąć tę samą
-      decyzję świadomie. Wzorzec: `POLA_EDYTOWALNE_DOSTAWCY` w `repos/suppliers.ts`.
-      Rozbiór wzorca systemowego: `rebuild-backlog.md` #14.
-  - **⚠ ZALEGŁOŚCI Z ITERACJI 3 — DOMKNĄĆ TUTAJ (zapisane 2026-08-27 przez 3d-1).**
-    1. **Przenagrać `contract/fixtures/GET_products.json`.** Fixture pochodzi sprzed
-       produkcyjnej migracji `szertxt` i trzyma `szerokosc` jako LICZBĘ, podczas gdy produkcja
-       i nasz kanon (migracja `003_szerokosc_text.sql`) mają tam TEXT. GATE I2 przepuszcza to
-       dziś przez **zadeklarowany wyjątek** `WYJATKI_SZEROKOSC` w `test/katalog.gate.test.ts`.
-       Wyjątek jest SAMOCZYSZCZĄCY — po przenagraniu przestanie cokolwiek pokrywać i test
-       zapali się, żądając usunięcia. **To jest sygnał do usunięcia wyjątku, nie do naprawy testu.**
-       Przy okazji: `products.uwaga_cena` (migracja 002) jest dziś ukryta przed API jawną
-       projekcją (`src/repos/kolumny.ts`) — ujawnienie jej wymaga tego samego przenagrania.
-    2. **`POST /api/products` (bulk) ma dowieźć TEŻ rozszerzenia importu** (decyzja użytkownika
-       2026-09-01, ticket 9). `addProductsBulk` (`:44746`) woła `assignKodImportu`, `applyDims`,
-       `applyLinkMemory`, `applyNazwaPamiec` i `applyWagaPamiec` — dokładnie ten sam zestaw co
-       `acceptStaging`. 3d-2 świadomie tego NIE budowała, bo `addProductsBulk` ma tylko jedno
-       wywołanie (`:48308`) i jest nim właśnie ta trasa, odłożona tutaj — pisarz bez wywołania
-       nie dałby się przetestować end-to-end. **Port `bridge_ext` czeka gotowy w repo**
-       (`src/import/legacy/`), a most `src/import/silnik/bridge-ext.ts` typuje już wszystkie
-       potrzebne funkcje. Dowód wierności zbuduj tak jak 3d-2: `addProductsBulk` jest metodą
-       obiektu `U`, więc da się ją wyciąć z bundla tym samym harnessem
-       (`test/charakteryzacja/akceptacja/oryginal.mjs` — wystarczy poszerzyć kotwice).
-       ⚠ Gałąź cenowa `:44773-44783` **jest już gotowa** — wywołaj
-       `zastosujRegulyCenowe(rekord, narzuty, promocje)` z `rebuild/backend/src/repos/ceny.ts`
-       w tym samym miejscu sekwencji co oryginał (po wartościach domyślnych, przed
-       `bridge_ext`), opakowaną w
-       `try { if (Number(rekord.cenaZakupu) > 0) { …selecty obu tabel… } } catch {}`.
-       **Nie pisz jej od nowa.** Decyzja użytkownika **D1 z 4a** (2026-09-02, `docs/tickets/
-       15-FEATURE-narzuty-promocje-ceny/plan.md`): 4a świadomie NIE portowało `addProductsBulk`,
-       bo ta metoda i `POST /api/products` w odbudowie nie istnieją, a roadmapa przypisuje je
-       do I12 — przypisanie utrzymane po weryfikacji grafem wywołań (jedyne wywołanie
-       `addProductsBulk` to trasa `:48308`, nieportowana).
-    3. **Dopisać do `openapi.yaml` DWA endpointy `uwaga_cena`**, nie jeden:
-       `GET /api/products/uwagi-cena` i `GET /api/products/hold-reasons`. Oba istnieją
-       w produkcji jako monkey-patch `mirror/backend/uwaga_cena_patch.cjs` i obu brak
-       w zamrożonym kontrakcie. `hold-reasons` liczy powód wstrzymania w locie (5 przypadków:
-       `uwaga_cena` dosłownie / brak ceny i stanu / brak ceny / brak stanu / „sprawdź ręcznie").
-  - **Finalny przegląd bezpieczeństwa:** potwierdzić auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego `JWT_SECRET` z fallbackiem.
-    **Dopisane 2026-09-01 (3f-2):** przejrzeć WSZYSTKIE trasy mutacji pod kątem
-    „`.set(req.body)` bez listy pól" i potwierdzić, że każda ma jawną listę — do tego czasu
-    powinny ją mieć staging (port 1:1 z 3d-2), dostawcy (3f-2), narzuty i promocje (✅ 4a)
-    oraz produkty (ta iteracja). **Zasada do przyjęcia na stałe: kolumny wyliczane i kolumny
-    własne odbudowy (`importWylaczony`, `uwagaCena`) nigdy nie wchodzą na listę pól
-    edytowalnych.** Kontekst i lista tras: `rebuild-backlog.md` #14.
-  - **Odświeżenie kontraktu i fixtures** (zapowiedziane w §2, zebrane z iteracji 1–11).
-    **⚠ Schematy ciał generujemy z `contract/fixtures/` — z nagrań produkcji, NIE z naszej implementacji.**
-    Inaczej kontrakt przestaje być niezależnym dowodem i zaczynamy sprawdzać własną pracę własną pracą.
-    Zakres:
-    dopisać do `contract/openapi.yaml` realne kody błędów (m.in. `401` dla `GET /api/me` i `POST /api/login`)
-    oraz schematy ciał, których wersja 2.3 nie zamraża; **przenagrać fixtures POST/PUT/PATCH/DELETE
-    przeciw kopii bazy**; dograć wariant `GET /api/products` **bez parametrów** (goła tablica — główna
-    ścieżka katalogu, dziś bez siatki fixtures, opisana tylko testami w `rebuild/backend/test/produkty.test.ts`).
-    Jeśli backlog #3 zostanie do tego czasu przyjęty, tu wpada też przenagranie `GET_products.json`
-    z `szerokosc` jako TEXT.
-- **Frontend:** `/moje-konto` (pełne) + ekrany admin.
-  - **Dokończenie `/katalog` z I2:** menu „Akcje" w wierszu tabeli (Edytuj / Wstrzymaj-Aktywuj / Usuń,
-    „Historia" `disabled` — tak jak w oryginale) i modal EDYCJI produktu. Zastępuje modal podglądu
-    read-only, który I2 wniosła jako świadome odstępstwo D4 — po tej iteracji odstępstwo znika.
-- **Ścieżki (GATE):** password, users, admin×3, maintenance, products/clear, audit-log, **products×4 (POST + PATCH/PUT/DELETE `{id}`)**.  **Fixtures:** `GET_users.json`, `GET_admin_supplier-config.json`, `GET_admin_suppliers-list.json`, `GET_audit-log.json` + fixtures zapisujące nagrane w tej iteracji (dziś ich nie ma — `contract/README.md`).
-- **DoD:** konto/admin/maintenance działają; **mutacje produktów i akcje wierszowe w `/katalog` domknięte** (odstępstwo D4 z I2 zniesione); audyt bezpieczeństwa domknięty; kontrakt i fixtures odświeżone; fixtures przez GATE; **kompletny przegląd 12 widoków z Anią**.
+- **Status:** 🔨 **w toku** — sesja 12a zrobiona, cztery zostały.
+  **Sesje:** 12a BE ✅ (mutacje produktów) · 12b BE ⬜ (konto/admin/maintenance) ·
+  12c FE ⬜ (dialog edycji `LT()` + menu „Akcje") · 12d ⬜ (przenagranie fixtures + schematy
+  ciał) · 12e ⬜ (finalny audyt + przegląd 12 widoków z Anią)  **Zależy od:** wszystkie (finalny przegląd)
+- **Cel (Ania klika):** zmienia hasło w `/moje-konto`; admin zarządza użytkownikami/konfiguracją
+  dostawców i utrzymaniem; edytuje/wstrzymuje/usuwa produkty wprost z `/katalog`.
+
+#### Sesja 12a — Backend: mutacje produktów — ✅ zrobiona 2026-09-05 (`35-FEATURE-mutacje-produktow-backend`)
+Domyka katalog (I2) do parytetu ZAPISU z produkcją. Dowiezione:
+- `POST /api/products` (bulk) — port `addProductsBulk` (`:44746-44806`) w `src/import/bulk.ts`,
+  z gałęzią cenową (`zastosujRegulyCenowe` z `repos/ceny.ts`, obie tabele czytane przy KAŻDYM
+  rekordzie wewnątrz transakcji, próg `cenaZakupu > 0`), **sześcioma** rozszerzeniami
+  `bridge_ext` — piąta i szósta to `applyWagaPamiec` i **`rememberLink`**, to ostatnie wołane
+  PO zapisie produktu (`:44801-44803`, tak samo jak w `acceptStaging`) — i natywną propagacją
+  `uwagaCena`. Dwa dopuszczalne kształty ciała: goła tablica albo `{items: […]}`. Odpowiedź
+  `{ok, dodano}` niesie LICZBĘ.
+- **`PUT`/`PATCH /api/products/{id}` — wspólny handler w odbudowie, ale to ŚWIADOME, kosmetyczne
+  odstępstwo (D2), nie fakt o oryginale.** Oryginał ma DWIE osobne funkcje: `:48415-48449` to
+  handler wyłącznie `PUT` (`e.put(…, i)`, `:48451`); `PATCH` ma własną, niemal identyczną funkcję
+  (`:48452-48487`), różniącą się wyłącznie kolejnością audytu względem pętli override/history —
+  stan końcowy bazy i odpowiedź są identyczne, więc port scala je w jedną funkcję.
+  **Lista 42 pól edytowalnych** (`POLA_EDYTOWALNE_PRODUKTU` w `repos/products.ts`) — zbiór pól,
+  które produkcyjny dialog `LT()` realnie wysyła (`deminified/frontend-index.js:24020-24090`);
+  odcina kolumny wyliczane, `id`/`kod`/`dataAktualizacji`, `uwagaCena` i `dostawca` (dialog ma go
+  `disabled`, a `manual_overrides` kluczuje się po nim). Domyka backlog #14 dla produktów.
+  **Trasa pisze do DWÓCH tabel, nie jednej** — `manual_overrides` (`:48427`) ORAZ `U.addHistory`
+  (`:48435-48445`, port `zapiszWpisDziennika` w `dziennik-zmian.ts`) per zmienione pole.
+  Auto-status `wstrzymany` przy cenie spadającej do 0 (`:44729-44738`, `backend-index.cjs`),
+  z wyłącznikiem przy jawnym `status` w ciele.
+- `DELETE /api/products/{id}` — bez kaskad (osierocone `manual_overrides`/`history` to zastane
+  zachowanie oryginału).
+- `GET /api/products/uwagi-cena` i `GET /api/products/hold-reasons` — port monkey-patcha
+  `mirror/backend/uwaga_cena_patch.cjs` (który patchuje TAKŻE `U.addProductsBulk`, `:72-93` —
+  propaguje `uwagaCena` z payloadu do kolumny; nie jest wyłącznie źródłem tych dwóch
+  endpointów), w tym klucz `uwaga_cena` w **snake_case** (produkcja czyta surowym
+  `better-sqlite3`) i pięć powodów wstrzymania z dosłownymi tekstami.
+- **⭐ Tabela `history` dostała PIERWSZEGO PISARZA** (`zapiszWpisDziennika`) — domyka fakt
+  zapisany przez I5 (patrz jej blok wyżej): `GET /api/history` przestał zwracać na stagingu `[]`.
+- `contract/openapi.yaml`: dopisane `404` przy trzech operacjach `/api/products/{id}` + dwie
+  ścieżki `uwaga_cena` (bez schematów ciał — te powstają z nagrań produkcji w 12d).
+- Dowód wierności: harness charakteryzacji poszerzony o TRZECI wycinek bundla (kotwice
+  `updateProduct(t,e){` → `listStaging(){`); dwa wycinki z 3d-2 nietknięte. 22 testy
+  porównawcze. Suita backendu **1103 testy / 68 plików** (było 1024/64); lint/typecheck/build
+  czyste. Szczegóły: `docs/tickets/35-FEATURE-mutacje-produktow-backend/`.
+
+#### Sesja 12b — Backend: konto/admin/maintenance — ⬜
+`POST /api/password/change`; `GET /api/users`; `GET/PUT /api/admin/supplier-config(+{kod})`,
+`/api/admin/suppliers-list`; `POST /api/maintenance/usun-nieopony`, `POST /api/products/clear`;
+`GET /api/audit-log`.
+- **⚠ WEJŚCIE Z ITERACJI 5 (2026-09-02) — `GET /api/audit-log` musi znieść to samo, co `/api/history/{meta,paged}` już znosi.**
+  `synchronizacja_reczna` nie ma `szczegoly_json` (trasa `POST /api/dostawcy/{kod}/synchronizuj-teraz`
+  woła audyt bez czwartego argumentu, `:48240` — NULL) i powstaje TAKŻE dla dostawcy, który nie
+  istnieje (audyt pisany przed synchronizacją i bezwarunkowo, więc `encja_id` bywa kodem spoza
+  `suppliers`). W widoku `/historia` ta akcja jest odfiltrowana (nie ma jej w słowniku pięciu
+  rozpoznawanych akcji), więc problem tam nie wystąpił — ale `/api/audit-log` pokazuje surowy
+  audyt bez filtra typu, więc TU widok musi znieść `null` i niezłączalny `encja_id` wprost.
+  Parser `parsujSzczegoly` z I5 (`src/historia/mapowanie.ts`) już to potrafi (`try/catch` → `{}`),
+  da się z niego skorzystać bez pisania drugiej wersji.
+- **⚠ WEJŚCIE Z ITERACJI 11 (2026-09-03) — `GET /api/audit-log` zobaczy dwie NOWE akcje.**
+  `edycja_konfiguracji` (encja `config`, `encjaId` = nazwa klucza, `szczegoly_json` =
+  `{"wartosc": …}`, zamaskowane `"***"` TYLKO gdy nazwa klucza zawiera `klucz_api` — więc
+  `shoper.token_api` jest w dzienniku jawny, 1:1 z `:48746`) i `edycja_spedycji` (encja
+  `spedycja`, `encjaId` = kod dostawcy, `szczegoly_json` = **surowe ciało żądania**, nie
+  odsiane — nawet dla kodu spoza `suppliers`, bo trasa tego nie waliduje, 1:1 z `:48737`).
+  **Od 12a `GET /api/audit-log` zobaczy też `edycja_produktu` i `usuniecie_produktu`** —
+  `encjaId` niespójne między tymi dwiema akcjami (`kod` vs `id` jako tekst), port 1:1
+  (`docs/tickets/35-FEATURE-mutacje-produktow-backend/raport.md`, sekcja „Follow-up").
+- **⚠ WEJŚCIE Z ITERACJI 11 (2026-09-03) — przycisk „Usuń wszystko z katalogu" należy do
+  zakładki „Katalog" w `/konfiguracja`, nie do widoku `/katalog`.** Port karty `XT()`
+  (`Katalog.tsx`, `frontend-index.js:26020-26145`) jest już zrobiony BEZ tego przycisku
+  (D3 ticketu 18). Ta sesja dokłada `POST /api/products/clear` z ciałem
+  `{potwierdzenie: "WYCZYSC"}`, poprzedzone `window.confirm` o treści „Usunąć wszystko
+  z katalogu? Ta operacja usuwa wszystkie produkty i służy tylko do testów parsera." —
+  po sukcesie unieważnia `["/api/products"]`, `["/api/alerts"]`, `["/api/analytics"]`.
+  Miejsce wpięcia jest w `Katalog.tsx` oznaczone adnotacją. **Osobna trasa od `DELETE /api/products/{id}`
+  (12a) — ta kasuje CAŁY katalog, nie pojedynczy produkt.**
+- **Finalny przegląd bezpieczeństwa (kontynuacja w 12e):** przejrzeć WSZYSTKIE trasy mutacji
+  pod kątem „`.set(req.body)` bez listy pól" i potwierdzić, że każda ma jawną listę — mają ją
+  już staging (3d-2), dostawcy (3f-2), narzuty i promocje (4a) oraz **produkty (12a)**.
+  **Zasada przyjęta na stałe:** kolumny wyliczane i kolumny własne odbudowy (`importWylaczony`,
+  `uwagaCena`) nigdy nie wchodzą na listę pól edytowalnych. Kontekst i lista tras:
+  `rebuild-backlog.md` #14 (dla produktów domknięty w 12a).
+
+#### Sesja 12c — Frontend: dialog edycji `LT()` + menu „Akcje" w `/katalog` — ⬜
+- **⚠ WEJŚCIE Z SESJI 7c (2026-09-04) — DIALOG EDYCJI PRODUKTU `LT()` NIE JEST PRZEPORTOWANY
+  i to TU jest jego miejsce.** Fakt ustalony grafem wywołań przy zamykaniu Iteracji 7 (nie
+  z nazwy funkcji): `LT()` (`deminified/frontend-index.js:23909-23980`) to modal edycji produktu
+  otwierany z `/katalog`. Czyta `["/api/atrybuty"]` (`:23917`) i buduje selecty pomocnikiem
+  `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare "pl")` (`:23966`),
+  a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
+  (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma wyłącznie
+  `PodgladProduktu.tsx` — podgląd READ-ONLY, dołożony w I2 jako świadome odstępstwo
+  (oryginał nie ma szczegółu produktu w trybie odczytu, ma tylko ten modal edycji).
+- **Backend do wołania jest już KOMPLET od 12a** (2026-09-05): `PATCH`/`PUT`/`DELETE
+  /api/products/{id}` gotowe, `GET /api/overrides` gotowe od 3d-2. Bez FE te trasy nie mają
+  z czego być wołane.
+- **⚠ WEJŚCIE Z SESJI 12a (2026-09-05) — `szerokosc` w dialogu wymaga uwagi przed portem.**
+  Produkcyjny `LT()` renderuje `szerokosc` jako `type="number"` z `parseFloat`
+  (`frontend-index.js:24076-24079`), a kanon ma tam TEXT (migracja `003_szerokosc_text.sql`) —
+  ręczna edycja zgubi zera końcowe („10.00" → „10"), których broniła saga `szertxt`. To zastane
+  zachowanie produkcji, nie regres odbudowy, ale port pola musi o tym wiedzieć.
+- **Menu „Akcje" w wierszu tabeli** (Edytuj / Wstrzymaj-Aktywuj / Usuń, „Historia" `disabled` —
+  tak jak w oryginale) zastępuje modal podglądu read-only, który I2 wniosła jako świadome
+  odstępstwo D4 — po tej sesji odstępstwo znika.
+- **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć** (dziś martwa, D1 z 4b, 2026-09-02)
+  — dane musi dostarczyć backend (pole przy produkcie), bo liczenie po stronie klienta
+  duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś
+  zaplanowanej pracy — nota informacyjna, nie zadanie tej sesji.
+
+#### Sesja 12d — Przenagranie fixtures + schematy ciał w `openapi.yaml` — ⬜
+**⚠ ZALEGŁOŚCI Z ITERACJI 3 (zapisane 2026-08-27 przez 3d-1) — stan na 2026-09-05: punkty 2 i 3
+domknięte w 12a, punkt 1 nadal otwarty.**
+1. **[OTWARTE] Przenagrać `contract/fixtures/GET_products.json`.** Fixture pochodzi sprzed
+   produkcyjnej migracji `szertxt` i trzyma `szerokosc` jako LICZBĘ, podczas gdy produkcja
+   i nasz kanon (migracja `003_szerokosc_text.sql`) mają tam TEXT. GATE I2 przepuszcza to
+   dziś przez **zadeklarowany wyjątek** `WYJATKI_SZEROKOSC` w `test/katalog.gate.test.ts`.
+   Wyjątek jest SAMOCZYSZCZĄCY — po przenagraniu przestanie cokolwiek pokrywać i test
+   zapali się, żądając usunięcia. **To jest sygnał do usunięcia wyjątku, nie do naprawy testu.**
+   Przy okazji: `products.uwaga_cena` (migracja 002) jest dziś ukryta przed API jawną
+   projekcją (`src/repos/kolumny.ts`) — ujawnienie jej wymaga tego samego przenagrania.
+2. **[✅ zrobione w 12a]** `POST /api/products` (bulk) dowozi rozszerzenia importu.
+3. **[✅ zrobione w 12a]** `openapi.yaml` ma dwa endpointy `uwaga_cena`.
+- **⚠ WEJŚCIE Z SESJI 12a (2026-09-05) — sześć operacji tej sesji nie mają nagrań.**
+  `contract/fixtures/` nie ma ani jednego nagrania dla `POST /api/products`,
+  `PATCH`/`PUT`/`DELETE /api/products/{id}`, `GET /api/products/uwagi-cena`,
+  `GET /api/products/hold-reasons` — GATE 12a stał na kodzie oryginału (charakteryzacja +
+  porównanie z monkey-patchem), nie na fixtures. Tu je trzeba nagrać i dopiero wtedy dopisać
+  schematy ciał do tych sześciu operacji.
+- **Odświeżenie kontraktu poza produktami** (zapowiedziane w §2, zebrane z iteracji 1–11).
+  **⚠ Schematy ciał generujemy z `contract/fixtures/` — z nagrań produkcji, NIE z naszej implementacji.**
+  Inaczej kontrakt przestaje być niezależnym dowodem i zaczynamy sprawdzać własną pracę własną pracą.
+  Zakres: dopisać do `contract/openapi.yaml` realne kody błędów (m.in. `401` dla `GET /api/me`
+  i `POST /api/login`) oraz schematy ciał, których wersja 2.3 nie zamraża; **przenagrać fixtures
+  POST/PUT/PATCH/DELETE przeciw kopii bazy**; dograć wariant `GET /api/products` **bez
+  parametrów** (goła tablica — główna ścieżka katalogu, dziś bez siatki fixtures, opisana tylko
+  testami w `rebuild/backend/test/produkty.test.ts`).
+
+#### Sesja 12e — Finalny audyt bezpieczeństwa + przegląd 12 widoków — ⬜
+- **Potwierdzić:** auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego
+  `JWT_SECRET` z fallbackiem; domknięcie przeglądu list pól edytowalnych zaczętego w 12b.
+- **⚠ WEJŚCIE Z ITERACJI 8 (2026-09-04) — `AppShell` (sidebar) jest wpinany przez WIDOK, nie
+  przez router.** `/`, `/konfiguracja` i placeholdery renderują sidebar; `/katalog`, `/staging`,
+  `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/historia` i `/selly` — nie. Zastane
+  zachowanie sprzed I8, spoza jej zakresu, wygląda na niezamierzone — warte decyzji przy tym
+  przeglądzie.
+- **Kompletny przegląd 12 widoków z Anią.**
+- **Ścieżki (GATE) całej Iteracji 12:** password, users, admin×3, maintenance, products/clear,
+  audit-log (12b); **products×6 — gotowe od 12a** (`POST` + `PATCH`/`PUT`/`DELETE {id}` +
+  `uwagi-cena` + `hold-reasons`).  **Fixtures:** `GET_users.json`, `GET_admin_supplier-config.json`,
+  `GET_admin_suppliers-list.json`, `GET_audit-log.json` (12b) + fixtures zapisujące dla
+  sześciu operacji produktów, nagrywane w 12d (dziś ich nie ma — `contract/README.md`).
+- **DoD Iteracji 12:** konto/admin/maintenance działają (12b); **mutacje produktów ✅ (12a)
+  i akcje wierszowe w `/katalog` domknięte** (12c, odstępstwo D4 z I2 zniesione); audyt
+  bezpieczeństwa domknięty (12e); kontrakt i fixtures odświeżone (12d); fixtures przez GATE;
+  **kompletny przegląd 12 widoków z Anią** (12e).
 
 ---
 
 ## 6. Po zakończeniu wszystkich iteracji
 
-> **Stan 2026-09-04:** zostało do zrobienia wyłącznie **I12**. Po jej zamknięciu wykonaj punkty
-> niżej. Do rozliczenia backlogu dochodzą wpisy dołożone przez I7: **#44** (przycisk „Nowy rodzaj"
-> w produkcji nie zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło"
-> — ⬜ do decyzji Ani).
+> **Stan 2026-09-05:** zostało do zrobienia wyłącznie **I12**, w toku (sesja 12a — mutacje
+> produktów — zrobiona, 12b–12e zostały). Po jej zamknięciu wykonaj punkty niżej. Do rozliczenia
+> backlogu dochodzą wpisy dołożone przez I7: **#44** (przycisk „Nowy rodzaj" w produkcji nie
+> zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło" — ⬜ do decyzji
+> Ani) oraz przez 12a: **#14** (produkty domknięte) i **#4** (endpointy `uwaga_cena` i propagacja
+> bulku domknięte).
 
 - Pełny przegląd 12 widoków + parytet fixtures/kontraktu (55/55).
 - Plan cutoveru (big-bang): przełączenie Apache/PM2 na nowy stos, ta sama baza `data.db`.

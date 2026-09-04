@@ -7,7 +7,7 @@ przepisywaniu.
 
 | Plik | Co | Stan |
 |---|---|---|
-| `openapi.yaml` | 94 ścieżki / 111 operacji: metoda, ścieżka, auth, parametry | ✅ **zamrożone** (z zweryfikowanego inwentarza, Krok 2.3) |
+| `openapi.yaml` | 96 ścieżek / 113 operacji: metoda, ścieżka, auth, parametry | ✅ **zamrożone** (z zweryfikowanego inwentarza, Krok 2.3; +2 ścieżki `uwaga_cena` dopisane w 12a) |
 | `fixtures/` | nagrane odpowiedzi GET z żywego backendu (kształt) | ✅ **Krok 2.4** — 55 GET-ów, 54×200 |
 
 ## Co jest zamrożone teraz (2.3)
@@ -38,7 +38,9 @@ Sanityzacja: brak sekretów (config: klucze puste; users: bez hashy; zero JWT/Be
 
 **Czego wciąż NIE ma:** POST/PUT/PATCH/DELETE (zapisujące) — świadomie pominięte,
 bo modyfikowałyby produkcję. Nagramy je osobno przeciwko **kopii bazy**
-(`db/snapshot.db`) w Fazie 4.
+(`db/snapshot.db`) w Fazie 4 (sesja 12d) — obejmie to też sześć operacji mutacji produktów
+dowiezionych w 12a (`35-FEATURE-mutacje-produktow-backend`), dla których gate na razie stoi
+na charakteryzacji kodu oryginału, nie na fixtures.
 
 **Dwie kategorie tras trwale bez fixtures** (Iteracja 8, `28-FEATURE-selly-eksport-backend`,
 2026-09-04) — nie chodzi o zaległość do domknięcia, tylko o strukturalny brak: nagrywarka

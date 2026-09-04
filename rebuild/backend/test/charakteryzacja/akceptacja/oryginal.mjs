@@ -23,7 +23,13 @@
 //      na pustych tabelach `markups`/`promotions` i wychodzi z tym samym wynikiem, co nasz
 //      port, który tej gałęzi nie ma. Gdyby ktoś wpisał regułę, obie strony by się rozjechały
 //      — i o to chodzi.
-//   2. METODY WARSTWY DANYCH — `listStaging(){` → `listAlerts(){`. Daje `listStaging`,
+//   2. METODY PRODUKTÓW — `updateProduct(t,e){` → `listStaging(){`. Daje `updateProduct`,
+//      `deleteProduct`, `clearProducts`, `addProductsBulk` — zakres sesji 12a.
+//      ⭐ DOŁOŻONE W 12a. Fragment jest w bundlu CIĄGŁY z następnym (kończy się dokładnie tam,
+//      gdzie tamten się zaczyna), więc dałoby się je scalić w jeden — ale wtedy zmieniłby się
+//      skrót wycinka pilnowanego od 3d-2. Trzymamy je osobno, żeby przenagranie jednego
+//      zakresu nie unieważniało drugiego.
+//   3. METODY WARSTWY DANYCH — `listStaging(){` → `listAlerts(){`. Daje `listStaging`,
 //      `listStagingPaged`, `getStaging`, `updateStaging`, `acceptStaging`, `rejectStaging`,
 //      `clearStaging`, `addStaging`, `listOverrides`, `getOverridesFor`, `upsertOverride`,
 //      `deleteOverride` — czyli komplet, którego dotyka 3d-2.
@@ -51,6 +57,7 @@ export const SCIEZKA_BUNDLA = join(backendDir, "..", "..", "mirror", "backend", 
 const KOTWICE = {
   poczatekPomocnikow: "function __bridgeCondMatch",
   koniecPomocnikow: "function recalcPricesFromRules",
+  poczatekProduktow: "updateProduct(t,e){",
   poczatekMetod: "listStaging(){",
   koniecMetod: "listAlerts(){",
 };
@@ -79,26 +86,38 @@ export function wytnijFragmenty() {
 
   const poczatekPomocnikow = pozycjaJedyna(zrodlo, KOTWICE.poczatekPomocnikow, "poczatekPomocnikow");
   const koniecPomocnikow = pozycjaJedyna(zrodlo, KOTWICE.koniecPomocnikow, "koniecPomocnikow");
+  const poczatekProduktow = pozycjaJedyna(zrodlo, KOTWICE.poczatekProduktow, "poczatekProduktow");
   const poczatekMetod = pozycjaJedyna(zrodlo, KOTWICE.poczatekMetod, "poczatekMetod");
   const koniecMetod = pozycjaJedyna(zrodlo, KOTWICE.koniecMetod, "koniecMetod");
 
-  if (!(poczatekPomocnikow < koniecPomocnikow && koniecPomocnikow < poczatekMetod && poczatekMetod < koniecMetod)) {
+  if (
+    !(
+      poczatekPomocnikow < koniecPomocnikow &&
+      koniecPomocnikow < poczatekProduktow &&
+      poczatekProduktow < poczatekMetod &&
+      poczatekMetod < koniecMetod
+    )
+  ) {
     throw new Error(
       "Kotwice wystąpiły w nieoczekiwanej kolejności — układ bundla się zmienił. " +
         `Pozycje: pomocnicy=${poczatekPomocnikow}..${koniecPomocnikow}, ` +
+        `produkty=${poczatekProduktow}..${poczatekMetod}, ` +
         `metody=${poczatekMetod}..${koniecMetod}.`,
     );
   }
 
   const pomocnicy = zrodlo.slice(poczatekPomocnikow, koniecPomocnikow);
+  const produkty = zrodlo.slice(poczatekProduktow, poczatekMetod);
   const metody = zrodlo.slice(poczatekMetod, koniecMetod);
   const skrot = (tekst) => createHash("sha256").update(tekst, "utf-8").digest("hex");
 
   return {
     pomocnicy,
+    produkty,
     metody,
     integralnosc: {
       pomocnicy: { sha256: skrot(pomocnicy), dlugosc: pomocnicy.length },
+      produkty: { sha256: skrot(produkty), dlugosc: produkty.length },
       metody: { sha256: skrot(metody), dlugosc: metody.length },
     },
   };
@@ -122,7 +141,7 @@ const WSTRZYKIWANE = ["X", "he", "He", "Yt", "Bt", "hn", "se", "A", "Ii", "Qi", 
  * @param {Record<string, unknown>} [podmianaBridgeExt]  podmiana `__BRIDGE_EXT` (domyślnie nasz port)
  */
 export function zaladujOryginal(baza, podmianaBridgeExt) {
-  const { pomocnicy, metody, integralnosc } = wytnijFragmenty();
+  const { pomocnicy, produkty, metody, integralnosc } = wytnijFragmenty();
 
   const zrodlo = [
     '"use strict";',
@@ -131,7 +150,10 @@ export function zaladujOryginal(baza, podmianaBridgeExt) {
     // Metody wycięte z obiektu `U` — kończą się przecinkiem, więc domykamy klamrą.
     // `acceptStaging` woła `U.getOverridesFor`/`U.upsertOverride` po nazwie, nie przez `this`,
     // więc `U` MUSI być zwykłą zmienną w tym samym zakresie.
-    `var U = { ${metody} };`,
+    // Oba wycinki metod trafiają do JEDNEGO obiektu `U` — w bundlu są sąsiadującymi
+    // fragmentami tej samej literalnej definicji, więc sklejenie odtwarza oryginalny układ.
+    // `addProductsBulk` woła `this`-owe metody wyłącznie przez nazwy z tego samego zakresu.
+    `var U = { ${produkty} ${metody} };`,
     `module.exports = {`,
     `  ustawZaleznosci(z) { ${WSTRZYKIWANE.map((n) => `${n} = z.${n};`).join(" ")} },`,
     `  U,`,

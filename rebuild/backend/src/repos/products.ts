@@ -2,6 +2,7 @@ import { eq, sql } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { products } from "../db/schema.js";
 import { KOLUMNY_POZA_KONTRAKTEM, projekcjaKontraktowa } from "./kolumny.js";
+import { odsiejPola } from "./pola-edytowalne.js";
 
 /**
  * Kolumny wychodzące do API — wszystkie z tabeli MINUS wewnętrzne (plan.md D6).
@@ -105,7 +106,13 @@ export function aktualizujProdukt(
     if (cenaSprzedazy === 0 || cenaZakupu === 0) doZapisu = { ...patch, status: "wstrzymany" };
   }
 
-  db.update(products).set(doZapisu).where(eq(products.id, id)).run();
+  // ⚠ PUSTY PATCH NIE WYWOŁUJE `UPDATE` — drizzle rzuca na `set({})`. Oryginał tej gałęzi
+  // nie potrzebował, bo podawał całe ciało żądania; u nas `PATCH` z samymi polami spoza listy
+  // edytowalnych daje pusty patch i musi odpowiedzieć 200 z aktualnym produktem, a nie 500.
+  // Ten sam ruch co `aktualizujDostawce` w 3f-2.
+  if (Object.keys(doZapisu).length > 0) {
+    db.update(products).set(doZapisu).where(eq(products.id, id)).run();
+  }
   return db.select().from(products).where(eq(products.id, id)).get() ?? null;
 }
 
@@ -121,4 +128,146 @@ export function usunProdukt(db: Baza, id: number): boolean {
   if (!istnieje) return false;
   db.delete(products).where(eq(products.id, id)).run();
   return true;
+}
+
+/**
+ * Odsiewa z rekordu klucze, których tabela `products` nie ma.
+ *
+ * PO CO: rekord powstaje ze snapshotu parsera albo z ciała żądania i niesie pola pomocnicze
+ * (`_srcConflict`, `rozmiarWykryty`, `uwagaCena` w bulku). Oryginał podaje całość Drizzle'owi,
+ * który po cichu ignoruje nieznane klucze — nasza wersja Drizzle rzuca. Odsiew jest więc
+ * mostem między dwoma zachowaniami ORM-a, a NIE listą pól edytowalnych: zapisujemy dokładnie
+ * te kolumny, które zapisałaby produkcja.
+ *
+ * ⚠ To nie jest `POLA_EDYTOWALNE_PRODUKTU`. Tamta lista broni trasy `PATCH`/`PUT` przed
+ * mass-assignmentem; ta przepuszcza WSZYSTKIE kolumny, bo import ma je zapisywać — łącznie
+ * z wyliczanymi, które sam produkuje.
+ */
+export function tylkoKolumnyProduktu(rekord: Record<string, unknown>): Record<string, unknown> {
+  const znane = new Set(Object.keys(products));
+  return Object.fromEntries(Object.entries(rekord).filter(([klucz]) => znane.has(klucz)));
+}
+
+/**
+ * Pola, które wolno zmienić przez `PATCH`/`PUT /api/products/{id}` (ticket 35, D1).
+ *
+ * ⚠ ODSTĘPSTWO OD 1:1, ŚWIADOME I ZATWIERDZONE. Oryginał (`:48415-48424` dla `PUT`,
+ * `:48452-48487` dla `PATCH`) odsiewa z ciała wyłącznie klucz `_reason` i oddaje CAŁĄ resztę
+ * do `updateProduct`, czyli wszystkie 70 kolumn jest zapisywalnych przez każdego zalogowanego.
+ * Rozbiór wzorca i historia decyzji: `docs/rebuild-backlog.md` #14. Ten wpis domykamy tu dla
+ * produktów — tak jak 3f-2 dla dostawców, 4a dla narzutów i promocji, I11 dla spedycji i configu.
+ *
+ * ⭐ SKĄD DOKŁADNIE TA LISTA — nie jest wymysłem odbudowy. To zbiór pól, które produkcyjny
+ * dialog edycji produktu potrafi wysłać: `LT()`, `deminified/frontend-index.js:24020-24090`.
+ * Handler zapisu (`:24107-24124`) wysyła wyłącznie klucze dotknięte przez użytkownika, więc
+ * lista jest jednocześnie górną granicą tego, co produkcja realnie zapisuje tą trasą.
+ *
+ * ⚠ LISTA DECYDUJE TEŻ, CZEGO IMPORT PRZESTANIE NADPISYWAĆ. Trasa zapisuje `manual_overrides`
+ * dla KAŻDEGO zmienionego pola (`:48427`), a silnik importu te poprawki respektuje. Pole
+ * dopisane tutaj bez potrzeby to pole, które da się przypadkiem zamrozić przed importem.
+ *
+ * CZEGO TU NIE MA I DLACZEGO:
+ *  • WYLICZANE przez import — `marzaPct`, `magazyn`, `magazynRaw`, `eanRaw`, `eanIsValid`,
+ *    `eanSourceStatus`, `eanCandidates`, `kodImportu`, `nieobecnoscPodRzad`, `indeksy`,
+ *    `indeks1`, `indeks2`, `dostepnosc`, `rodzaj`, `sku`, `zastosowanie`, `reinforced`,
+ *    `extraLoad`, `cutResistant`, `heatResistant` oraz cztery wymiary paczki (`dlugosc`,
+ *    `szerokoscPaczki`, `wysokosc`, `wysokoscPrzesylki`), które liczy `applyDims`.
+ *  • TOŻSAMOŚĆ i pola serwera — `id`, `kod`, `dataAktualizacji`.
+ *  • WŁASNE ODBUDOWY — `uwagaCena` (migracja 002). Reguła stała z backlogu #14: kolumny
+ *    wyliczane i kolumny własne odbudowy NIGDY nie wchodzą na listę pól edytowalnych.
+ *    Jedynym pisarzem `uwagaCena` zostaje import (`acceptStaging` i `POST /api/products`).
+ *  • `dostawca` — dialog produkcji renderuje to pole, ale jako `disabled` (`:24028`), więc
+ *    nigdy go nie wysyła. Dodatkowo `manual_overrides` kluczuje się po `supplierKod =
+ *    produkt.dostawca`: zmiana dostawcy osierociłaby wszystkie własne poprawki produktu.
+ *  • `hf`, `ls` — kolumny istnieją w tabeli, ale dialog ich nie ma; nikt ich ręcznie nie edytuje.
+ */
+export const POLA_EDYTOWALNE_PRODUKTU = [
+  // ——— Nagłówek produktu ———
+  "nazwa",
+  "marka",
+  "kategoria",
+  "kodDostawcy",
+  "stan",
+  "vat",
+  "cenaZakupu",
+  "cenaSprzedazy",
+  "ean",
+  "status",
+  "linkZdjecia",
+  // ——— Parametry techniczne ———
+  "rozmiar",
+  "rozmiarAlternatywny",
+  "szerokosc",
+  "profil",
+  "srednica",
+  "konstrukcja",
+  "indeksNosnosci",
+  "indeksPredkosci",
+  "vfIf",
+  "pr",
+  "tlTt",
+  "dot",
+  "waga",
+  // ⚠ Jedno pole dialogu („Bieznik/model", `:24085`) pisze OBA klucze naraz.
+  "model",
+  "bieznik",
+  "oznaczenieBieznika",
+  "sezon",
+  "wentyl",
+  // ——— Flagi (w dialogu selecty Tak/Nie/—) ———
+  "ms",
+  "snow3pmsf",
+  "cfo",
+  "sb",
+  "sf",
+  "nro",
+  "cho",
+  "stubbleResistant",
+  // ——— Etykieta UE ———
+  "labelRolling",
+  "labelWet",
+  "labelNoise",
+  "labelIce",
+  "labelSnow",
+] as const satisfies readonly (keyof ProduktWewnetrzny)[];
+
+/**
+ * Pojedynczy produkt po `id` — port `U.getProduct` (`backend-index.cjs:44722-44724`).
+ *
+ * Oddaje PEŁNY wiersz (z `uwagaCena`), bo trasa edycji porównuje po nim wartości sprzed
+ * zapisu. Do odpowiedzi HTTP idzie dopiero przez `wKontrakcie()`.
+ */
+export function produktPoId(db: Baza, id: number): ProduktWewnetrzny | null {
+  return db.select().from(products).where(eq(products.id, id)).get() ?? null;
+}
+
+/**
+ * Zawęża pełny wiersz produktu do kształtu, który zna kontrakt.
+ *
+ * PO CO OSOBNO OD `KOLUMNY_API`: tamta projekcja działa na poziomie zapytania SQL, a tu mamy
+ * już gotowy wiersz z pamięci (trasa `PATCH`/`PUT` czyta go, żeby porównać wartości sprzed
+ * zapisu). Bez tego `uwagaCena` z migracji 002 wyciekłaby do odpowiedzi 73. kluczem — dokładnie
+ * to, przed czym broni `KOLUMNY_POZA_KONTRAKTEM`.
+ */
+export function wKontrakcie(produkt: ProduktWewnetrzny): Produkt {
+  const kopia = { ...produkt } as Record<string, unknown>;
+  for (const ukryta of KOLUMNY_POZA_KONTRAKTEM.products) delete kopia[ukryta];
+  return kopia as Produkt;
+}
+
+/** Klucz z listy pól edytowalnych — dla typowania patcha trasy `PATCH`/`PUT`. */
+export type PoleEdytowalneProduktu = (typeof POLA_EDYTOWALNE_PRODUKTU)[number];
+
+/**
+ * Ciało żądania przepuszczone przez `POLA_EDYTOWALNE_PRODUKTU`.
+ *
+ * Ten sam wzorzec co `odsiejPolaEdytowalne()` dla dostawców (3f-2): filtr mieszka w repo,
+ * a nie w trasie, żeby lista pól i jej użycie stały obok siebie.
+ */
+export function odsiejPolaEdytowalneProduktu(
+  cialo: unknown,
+): Partial<Pick<ProduktWewnetrzny, PoleEdytowalneProduktu>> {
+  return odsiejPola(cialo, POLA_EDYTOWALNE_PRODUKTU) as Partial<
+    Pick<ProduktWewnetrzny, PoleEdytowalneProduktu>
+  >;
 }
