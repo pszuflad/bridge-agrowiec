@@ -83,7 +83,16 @@ umask 077
 printf 'JWT_SECRET=%s\n' "$(node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))")" \
   > ~/private_apps/bridge-staging/.env
 chmod 600 ~/private_apps/bridge-staging/.env
+```
 
+> **Selly.pl i eksport CSV (opcjonalne, od Iteracji 8a):** `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`,
+> `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` (domyślnie `READWRITE`) — bez nich sześć tras zewnętrznych
+> panelu Selly oddaje 500 „Brak konfiguracji" (zachowanie zamierzone, 1:1 z produkcją), cztery
+> lokalne trasy (`status`, `log`, `csv-status`, `generate-csv`) działają bez nich normalnie.
+> `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` mają domyślne wartości równe ścieżkom
+> produkcyjnym — NIE wymagają ustawiania. Wzór: `rebuild/backend/.env.example`.
+
+```bash
 # 5. Smoke test
 curl -s https://test.agritires.eu/api/health      # -> {"ok":true,"stage":"staging-placeholder",...}
 #   i otwórz https://test.agritires.eu — kafelek powinien pokazać "backend OK"
@@ -234,6 +243,8 @@ Cel: żaden PR ticketa nie wejdzie do `develop` bez zielonego CI — a właścic
 - **Nowe zależności parserów importu (Iteracja 3a) nie wymagają obejścia.** `csv-parse`,
   `iconv-lite`, `xlsx` są czysto JS-owe (bez kompilacji natywnej) — `npm ci --omit=dev` w
   release'ie instaluje je bez dodatkowych kroków, inaczej niż `better-sqlite3` niżej.
+- **`archiver` (Iteracja 8a, ZIP eksportu Shopera) też nie wymaga obejścia** — czysto JS-owy,
+  bez kompilacji natywnej, ten sam tryb instalacji co wyżej.
 - **better-sqlite3 vs glibc 2.28.** VPS ma glibc 2.28; prebuilt better-sqlite3 (11.7+/11.10) wymaga
   `GLIBC_2.29` i nie ładuje się, a node-gyp 10 nie zbuduje ze źródła na dostępnym Pythonie 3.6.
   **Obejście (w `deploy-staging.sh`):** `npm ci --ignore-scripts` + podłożenie działającej binarki
