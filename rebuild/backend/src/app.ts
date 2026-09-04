@@ -1,7 +1,7 @@
 import compression from "compression";
 import express, { type Express } from "express";
 import type { Env } from "./config/env.js";
-import type { Baza } from "./db/index.js";
+import type { Baza, BazaSqlite } from "./db/index.js";
 import { optionalAuth } from "./middleware/auth.js";
 import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
@@ -12,6 +12,7 @@ import { zasiejSlownikAtrybutow } from "./repos/atrybuty.js";
 import { trasyAuth } from "./routes/auth.js";
 import { trasyKonfiguracji } from "./routes/config.js";
 import { trasyAdmina } from "./routes/admin.js";
+import { trasyUtrzymania } from "./routes/maintenance.js";
 import { trasyKonta } from "./routes/konto.js";
 import { trasyHistorii } from "./routes/history.js";
 import { trasyDostawcow } from "./routes/suppliers.js";
@@ -32,6 +33,12 @@ import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
 export type ZaleznosciApp = {
   env: Env;
   db: Baza;
+  /**
+   * Uchwyt do SQLite stojącego pod `db`. Potrzebny WYŁĄCZNIE `POST /api/products/clear`,
+   * żeby przed kopią pliku bazy zrzucić WAL (`routes/maintenance.ts`, plan.md D5).
+   * Pominięty ⇒ kopia powstaje bez checkpointu, czyli dokładnie jak w oryginale.
+   */
+  sqlite?: BazaSqlite;
   /**
    * JEDNA instancja `synchronizujDostawce` na proces (nota 3f-2). `server.ts` tworzy ją raz
    * i podaje TU oraz schedulerowi z 3f-3 — bez tego trasa i automat dostałyby własne
@@ -68,6 +75,7 @@ export type ZaleznosciApp = {
 export function stworzApp({
   env,
   db,
+  sqlite,
   synchronizuj,
   przeplanujScheduler,
   klientSelly,
@@ -149,6 +157,7 @@ export function stworzApp({
   app.use(trasyKonfiguracji({ db }));
   app.use(trasyKonta({ db }));
   app.use(trasyAdmina({ db, przeplanujScheduler }));
+  app.use(trasyUtrzymania({ db, dbPath: env.DB_PATH, sqlite }));
   app.use(trasySpedycji({ db }));
   app.use(
     trasySelly({

@@ -65,6 +65,6 @@ export async function stworzSrodowiskoTestowe(
     // SELLY_SHOP_URL/CLIENT_ID/CLIENT_SECRET celowo PUSTE — środowisko testowe nie ma
     // i nie może mieć sekretów do cudzego sklepu.
   } as NodeJS.ProcessEnv);
-  const app = stworzApp({ env, db: baza.db, klientSelly: opcje.klientSelly });
+  const app = stworzApp({ env, db: baza.db, sqlite: baza.sqlite, klientSelly: opcje.klientSelly });
   return { ...baza, app, env, uzytkownik, dane, katalogArchiwum, katalogCsvSelly };
 }

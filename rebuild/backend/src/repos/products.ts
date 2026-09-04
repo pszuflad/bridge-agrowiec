@@ -122,3 +122,18 @@ export function usunProdukt(db: Baza, id: number): boolean {
   db.delete(products).where(eq(products.id, id)).run();
   return true;
 }
+
+/**
+ * Czyszczenie CAŁEGO katalogu — port `U.clearProducts()` (`backend-index.cjs:44744`,
+ * wołane wyłącznie przez `POST /api/products/clear`, `:48332`).
+ *
+ * `DELETE FROM products` BEZ `WHERE` — operacja nieodwracalna, dotykająca wszystkich
+ * dostawców naraz. Ochronę stanowi wyłącznie `{potwierdzenie: "WYCZYSC"}` sprawdzane
+ * w trasie oraz kopia pliku bazy robiona tuż przed (`routes/maintenance.ts`).
+ *
+ * @returns liczba usuniętych wierszy — oryginał jej nie zwraca (`u.json({ok:true})`),
+ *   ale jest potrzebna testom i logowi; kształt odpowiedzi HTTP pozostaje bez zmian.
+ */
+export function wyczyscProdukty(db: Baza): number {
+  return db.delete(products).run().changes;
+}
