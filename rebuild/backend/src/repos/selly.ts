@@ -59,8 +59,46 @@ export function statusSelly(db: Baza, dostawca?: string): StatusDostawcy[] {
     .all();
 }
 
-/** Wiersz dziennika — pełny kształt tabeli, jak w `SELECT *` oryginału. */
-export type WpisLoguSelly = typeof sellySyncLog.$inferSelect;
+/**
+ * Wiersz dziennika w kształcie, w jakim oddaje go API.
+ *
+ * ⚠ KLUCZE SĄ `snake_case`, i to jest wymóg kontraktu, nie stylistyka. Oryginał robi
+ * `SELECT * FROM selly_sync_log` przez better-sqlite3, więc do JSON-a idą nazwy KOLUMN
+ * (`dostawca_kod`, `liczba_ok`, `szczegoly_json`, `uzytkownik_id`, `uzytkownik_imie`) —
+ * dokładnie tak są zamrożone w `contract/fixtures/GET_selly_log.json`. Drizzle `select()`
+ * bez jawnej projekcji oddałby nazwy PÓL modelu (`dostawcaKod`, `liczbaOk`…) i rozjechałby
+ * fixture na siedmiu kluczach naraz. Stąd projekcja niżej — nie skracać jej do `select()`.
+ */
+export type WpisLoguSelly = {
+  id: number;
+  operacja: string;
+  dostawca_kod: string | null;
+  liczba_ok: number;
+  liczba_blad: number;
+  liczba_skip: number;
+  szczegoly_json: string | null;
+  uzytkownik_id: number | null;
+  uzytkownik_imie: string | null;
+  rozpoczeto: string;
+  zakonczono: string | null;
+  status: string;
+};
+
+/** Projekcja `snake_case` — patrz nota przy `WpisLoguSelly`. */
+const KOLUMNY_LOGU = {
+  id: sellySyncLog.id,
+  operacja: sellySyncLog.operacja,
+  dostawca_kod: sellySyncLog.dostawcaKod,
+  liczba_ok: sellySyncLog.liczbaOk,
+  liczba_blad: sellySyncLog.liczbaBlad,
+  liczba_skip: sellySyncLog.liczbaSkip,
+  szczegoly_json: sellySyncLog.szczegolyJson,
+  uzytkownik_id: sellySyncLog.uzytkownikId,
+  uzytkownik_imie: sellySyncLog.uzytkownikImie,
+  rozpoczeto: sellySyncLog.rozpoczeto,
+  zakonczono: sellySyncLog.zakonczono,
+  status: sellySyncLog.status,
+};
 
 /** Górna granica `?limit` (`routes.cjs:285`) — większa wartość jest ścinana, nie odrzucana. */
 export const MAKS_LIMIT_LOGU = 200;
@@ -77,7 +115,7 @@ export const DOMYSLNY_LIMIT_LOGU = 20;
  */
 export function logSelly(db: Baza, limit: number = DOMYSLNY_LIMIT_LOGU): WpisLoguSelly[] {
   return db
-    .select()
+    .select(KOLUMNY_LOGU)
     .from(sellySyncLog)
     .orderBy(desc(sellySyncLog.rozpoczeto))
     .limit(limit)

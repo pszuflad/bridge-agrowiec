@@ -26,6 +26,9 @@ import {
   markups,
   products,
   promotions,
+  sellyKategoriaNormMap,
+  sellySyncLog,
+  sellyZastosowanieCategoryMap,
   spedycjaLimity,
   stagingItems,
   suppliers,
@@ -648,5 +651,90 @@ export function zasiejKonfiguracjeStartowa(db: Baza): void {
   db.insert(spedycjaLimity).values(SPEDYCJA_POCZATKOWA).run();
   db.insert(config)
     .values(Object.entries(KONFIGURACJA_POCZATKOWA).map(([klucz, wartosc]) => ({ klucz, wartosc })))
+    .run();
+}
+
+/**
+ * Dziennik operacji Selly wprost z `contract/fixtures/GET_selly_log.json` (Iteracja 8a).
+ *
+ * Ta sama metoda co przy stagingu i narzutach: wiersz bierzemy z NAGRANIA produkcji.
+ * Dzięki temu porównanie odpowiedzi z fixture'em sprawdza całą warstwę odczytu, w tym
+ * rzecz, która najłatwiej się psuje — projekcję `snake_case`. Drizzle `select()` bez jawnej
+ * projekcji oddałby `dostawcaKod` zamiast `dostawca_kod` (repos/selly.ts), a wtedy test
+ * zapala się na siedmiu kluczach naraz.
+ *
+ * `szczegoly_json` zostaje NAPISEM — produkcja nie rozpakowuje go przed wysłaniem, a niesie
+ * w środku realne błędy zewnętrznego Selly (`[Selly] HTTP 400 ... Brak kategorii o id 1`).
+ */
+export function zasiejLogSellyZFixtures(db: Baza): void {
+  const fixture = wczytajFixture("GET_selly_log.json");
+  const items = (fixture.body as { items: Record<string, unknown>[] }).items;
+  db.insert(sellySyncLog)
+    .values(
+      items.map((w) => ({
+        id: w["id"] as number,
+        operacja: w["operacja"] as string,
+        dostawcaKod: (w["dostawca_kod"] ?? null) as string | null,
+        liczbaOk: w["liczba_ok"] as number,
+        liczbaBlad: w["liczba_blad"] as number,
+        liczbaSkip: w["liczba_skip"] as number,
+        szczegolyJson: (w["szczegoly_json"] ?? null) as string | null,
+        uzytkownikId: (w["uzytkownik_id"] ?? null) as number | null,
+        uzytkownikImie: (w["uzytkownik_imie"] ?? null) as string | null,
+        rozpoczeto: w["rozpoczeto"] as string,
+        zakonczono: (w["zakonczono"] ?? null) as string | null,
+        status: w["status"] as string,
+      })),
+    )
+    .run();
+}
+
+/**
+ * Mapy kategorii Selly (Iteracja 8a) — `selly_kategoria_norm_map`
+ * i `selly_zastosowanie_category_map`.
+ *
+ * ⚠ TYCH DANYCH NIE MA W ŻADNYM FIXTURZE — produkcja nie wystawia tych tabel przez API,
+ * a nagrywarka zapisywała tylko odpowiedzi HTTP. Wartości są więc DOBRANE, nie nagrane,
+ * i mają jeden cel: pokryć trzy ścieżki `mapujZastosowanieNaKategorie`
+ * (`zastosowanie` / `fallback_kategoria` / `fallback_empty`) oraz flagę
+ * `dziedziczy_kategorie_produktu`. Id-ki kategorii pochodzą z
+ * `contract/fixtures/GET_selly_dictionaries.json`, żeby były spójne ze słownikiem.
+ *
+ * „Ciągnik" i „Forwarder" to wartości `zastosowanie` z `PRODUKTY_TESTOWE`; „(ogólne)"
+ * odwzorowuje przypadek dziedziczenia, a „Koparka" — drugą wartość w łańcuchu `a + b`,
+ * czyli tę, która idzie do `multi_cat`.
+ */
+export function zasiejMapySelly(db: Baza): void {
+  db.insert(sellyKategoriaNormMap)
+    .values([
+      { kategoriaRaw: "Rolnicze", kategoriaGlownaNorm: "rolnicze", categoryIdGlowna: 1 },
+      { kategoriaRaw: "Leśne", kategoriaGlownaNorm: "lesne", categoryIdGlowna: 2 },
+      { kategoriaRaw: "Przemysłowe", kategoriaGlownaNorm: "przemyslowe", categoryIdGlowna: 3 },
+      // „Przyczepy" (produkt MO2_200002) świadomie POZA mapą — to jest przypadek
+      // `fallback_kategoria` z wynikiem `null`, czyli produkt, którego walidacja odrzuci.
+    ])
+    .run();
+
+  db.insert(sellyZastosowanieCategoryMap)
+    .values([
+      {
+        zastosowanie: "Ciągnik",
+        categoryIdGlowna: 1,
+        categoryIdZastosowanie: 11,
+        dziedziczyKategorieProduktu: 0,
+      },
+      {
+        zastosowanie: "Koparka",
+        categoryIdGlowna: 3,
+        categoryIdZastosowanie: 33,
+        dziedziczyKategorieProduktu: 0,
+      },
+      {
+        zastosowanie: "(ogólne)",
+        categoryIdGlowna: null,
+        categoryIdZastosowanie: null,
+        dziedziczyKategorieProduktu: 1,
+      },
+    ])
     .run();
 }
