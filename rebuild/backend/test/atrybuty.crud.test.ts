@@ -310,10 +310,20 @@ describe("atrybuty — CRUD słownika", () => {
       expect(zlyRodzaj.body).toEqual({ ok: false, error: "Nieznany rodzaj atrybutu: widmo" });
     });
 
-    it("użycie zwraca produkty posortowane po nazwie, `count` niezależnie od limitu", async () => {
+    it("użycie zwraca produkty posortowane po nazwie", async () => {
+      // Trzeci produkt BKT o nazwie sortującej się PRZED dwoma zasianymi — bez niego wynik
+      // dwuelementowy wyglądałby na posortowany także przy braku `ORDER BY`.
+      srodowisko.db.run(sql`
+        INSERT INTO products (kod, nazwa, marka, kategoria, dostawca, magazyn, stan,
+                              cena_zakupu, cena_sprzedazy, marza_pct, data_aktualizacji, rozmiar)
+        VALUES ('MO1_AAA', '000 pierwsza alfabetycznie', 'BKT', 'Rolnicze', 'MO1', '—', 1,
+                100, 130, 30, '2026-08-04T14:30:34.149Z', '11.2-24')
+      `);
+
       const odp = await get("/api/atrybuty/uzycie?rodzaj=marka&wartosc=BKT");
       const cialo = odp.body as { count: number; products: { nazwa: string; kod: string }[] };
-      expect(cialo.count).toBe(2);
+      expect(cialo.count).toBe(3);
+      expect(cialo.products[0]!.kod).toBe("MO1_AAA");
       expect(cialo.products.map((p) => p.nazwa)).toEqual(
         [...cialo.products.map((p) => p.nazwa)].sort(),
       );

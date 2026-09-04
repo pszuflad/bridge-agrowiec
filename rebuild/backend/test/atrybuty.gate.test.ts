@@ -19,6 +19,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { atrybutyWartosci, atrybutyWartosciPending } from "../src/db/schema.js";
+import { RODZAJ_KOLUMNA } from "../src/repos/atrybuty.js";
 import {
   sprawdzZgodnoscZFixture,
   sprawdzZgodnoscZFixtureSlownika,
@@ -224,7 +225,11 @@ describe("GATE — atrybuty (Iteracja 7a)", () => {
       sciezka: "/api/atrybuty/liczniki",
       odpowiedz: odp,
     });
-    sprawdzZgodnoscZFixtureSlownika("GET_atrybuty_liczniki.json", odp.body);
+    sprawdzZgodnoscZFixtureSlownika(
+      "GET_atrybuty_liczniki.json",
+      odp.body,
+      Object.keys(RODZAJ_KOLUMNA),
+    );
 
     const mapa = odp.body as Record<string, number>;
     expect(mapa["marka::BKT"]).toBe(2);

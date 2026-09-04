@@ -68,7 +68,19 @@ export function stworzApp({
   // zmienia się z każdym importem. Steruje tym, co Ania zobaczy w kolejce pending — wartość
   // obecna w słowniku jest przy skanie pomijana. Szczegóły i quirk „bieżnik z modelu”:
   // `repos/atrybuty.ts`.
-  zasiejSlownikAtrybutow(db);
+  //
+  // W `try/catch`, bo seed NIE JEST krytyczny dla startu: na bazie bez tabel atrybutów (stary
+  // `DB_PATH`, na którym nie puszczono `npm run migrate`) niezabezpieczone wywołanie wywracałoby
+  // CAŁY backend przed `listen()`, choć dotąd taka baza pozwalała mu wstać i psuła tylko
+  // konkretne trasy. Oryginał nie miał tego problemu, bo wołał `ensureSchema()` przed `seed()`
+  // (`atrybuty_module.cjs:98-99`) — my schematu w runtime nie tworzymy (kanonem jest
+  // `001_schema.sql`), więc tę samą odporność daje złapanie błędu. Ta sama defensywa, co
+  // w oryginale wokół SELECT-ów z `products` („products może nie istnieć", `:78`).
+  try {
+    zasiejSlownikAtrybutow(db);
+  } catch (e) {
+    console.error("[atrybuty] seed pominięty:", e instanceof Error ? e.message : e);
+  }
 
   // Staging i produkcja stoją za proxy Apache (X-Forwarded-*) — bez tego
   // req.ip i req.protocol pokazywałyby adres proxy zamiast klienta.

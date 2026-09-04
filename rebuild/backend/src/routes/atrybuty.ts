@@ -57,6 +57,19 @@ function blad(res: Response, status: number, komunikat: string): Response {
   return res.status(status).json({ ok: false, error: komunikat });
 }
 
+/**
+ * Audyt nie może wywrócić udanej operacji — oryginał opakowuje każde `be(…)` w
+ * `try { … } catch (_) {}` (`atrybuty_module.cjs:142`, `:161`, `:177`, `:208`, `:226`, `:243`).
+ * Bez tego awaria zapisu do `audit_log` zamieniłaby wykonany już CRUD w odpowiedź 500.
+ */
+function audytuj(db: Baza, wpis: Parameters<typeof zapiszAudyt>[1]): void {
+  try {
+    zapiszAudyt(db, wpis);
+  } catch (e) {
+    console.error("[atrybuty] audyt pominięty:", e instanceof Error ? e.message : e);
+  }
+}
+
 /** Czy wyjątek pochodzi z naruszenia UNIQUE — oryginał sprawdza to napisem (`:145`, `:211`). */
 function naruszenieUnique(e: unknown): boolean {
   return e instanceof Error && e.message.includes("UNIQUE");
@@ -109,7 +122,7 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
       throw e;
     }
 
-    zapiszAudyt(db, {
+    audytuj(db, {
       uzytkownikId: req.user?.id ?? null,
       uzytkownikImie: req.user?.imieNazwisko ?? null,
       akcja: "atrybut_rodzaj_dodano",
@@ -134,7 +147,7 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
     if (!rodzajPoValue(db, value)) return blad(res, 404, "Nie znaleziono");
     zmienRodzaj(db, value, cialo);
 
-    zapiszAudyt(db, {
+    audytuj(db, {
       uzytkownikId: req.user?.id ?? null,
       uzytkownikImie: req.user?.imieNazwisko ?? null,
       akcja: "atrybut_rodzaj_zmieniono",
@@ -155,7 +168,7 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
 
     usunRodzaj(db, value);
 
-    zapiszAudyt(db, {
+    audytuj(db, {
       uzytkownikId: req.user?.id ?? null,
       uzytkownikImie: req.user?.imieNazwisko ?? null,
       akcja: "atrybut_rodzaj_usunieto",
@@ -176,7 +189,10 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
   router.post("/api/atrybuty/wartosci", requireAuth, (req: Request, res: Response) => {
     const cialo = (req.body ?? {}) as { rodzaj?: unknown; wartosc?: unknown };
     const rodzaj = typeof cialo.rodzaj === "string" ? cialo.rodzaj : "";
-    if (!rodzaj || cialo.wartosc == null || cialo.wartosc === "") {
+    // Warunek FALSY, nie „null albo pusty napis" — 1:1 z `if (!rodzaj || !wartosc)` (`:201`).
+    // Różnica jest obserwowalna: `{wartosc: 0}` i `{wartosc: false}` produkcja odrzuca,
+    // a wpuszczone trafiłyby do słownika jako napisy „0" i „false".
+    if (!rodzaj || !cialo.wartosc) {
       return blad(res, 400, "Brak rodzaj lub wartosc");
     }
     if (!czyRodzajIstnieje(db, rodzaj)) return blad(res, 400, `Rodzaj '${rodzaj}' nie istnieje`);
@@ -194,7 +210,7 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
       throw e;
     }
 
-    zapiszAudyt(db, {
+    audytuj(db, {
       uzytkownikId: req.user?.id ?? null,
       uzytkownikImie: req.user?.imieNazwisko ?? null,
       akcja: "atrybut_wartosc_dodano",
@@ -210,7 +226,8 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
   router.put("/api/atrybuty/wartosci/:id", requireAuth, (req: Request, res: Response) => {
     const id = Number.parseInt(String(req.params.id ?? ""), 10);
     const cialo = (req.body ?? {}) as { wartosc?: unknown };
-    if (cialo.wartosc == null || cialo.wartosc === "") return blad(res, 400, "Brak wartosc");
+    // Jak wyżej: warunek falsy, 1:1 z `if (!wartosc)` (`:222`).
+    if (!cialo.wartosc) return blad(res, 400, "Brak wartosc");
 
     let zmienione: number;
     try {
@@ -221,7 +238,7 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
     }
     if (zmienione === 0) return blad(res, 404, "Nie znaleziono");
 
-    zapiszAudyt(db, {
+    audytuj(db, {
       uzytkownikId: req.user?.id ?? null,
       uzytkownikImie: req.user?.imieNazwisko ?? null,
       akcja: "atrybut_wartosc_zmieniono",
@@ -242,7 +259,7 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
 
     usunWartosc(db, id);
 
-    zapiszAudyt(db, {
+    audytuj(db, {
       uzytkownikId: req.user?.id ?? null,
       uzytkownikImie: req.user?.imieNazwisko ?? null,
       akcja: "atrybut_wartosc_usunieto",
@@ -413,6 +430,31 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
   router.post("/api/atrybuty/scan-pending", requireAuth, (_req: Request, res: Response) => {
     res.json({ ok: true, ...skanujNoweWartosci(db) });
   });
+
+  /**
+   * Błąd nieprzewidziany — 500 W KSZTAŁCIE TEGO MODUŁU, czyli z kluczem `ok`.
+   *
+   * Każdy handler oryginału ma własne `try/catch` oddające `500 {ok:false, error:e.message}`
+   * (`atrybuty_module.cjs:108-110` i analogicznie w pozostałych). Bez tego elementu błąd
+   * poleciałby do globalnego `bladHandler`, który zwraca `{error:"Błąd serwera"}` BEZ `ok` —
+   * a `ok` jest tym, co czyta UI (`pending-injection.js`) i co będzie czytał front 7b.
+   * Realny scenariusz: `SQLITE_BUSY` przy równoległym zapisie.
+   *
+   * ⚠ ŚWIADOMA RÓŻNICA WOBEC ORYGINAŁU W TREŚCI, NIE W KSZTAŁCIE: nie wypuszczamy `e.message`,
+   * tylko generyczny komunikat — to obowiązująca w całej odbudowie zasada z
+   * `middleware/errors.ts` (szczegóły idą do logów, nie do klienta). Kształt ciała jest
+   * odtworzony, treść komunikatu celowo nie.
+   */
+  router.use(
+    (err: unknown, req: Request, res: Response, next: (blad?: unknown) => void): void => {
+      if (res.headersSent) {
+        next(err);
+        return;
+      }
+      console.error(`[atrybuty] ${req.method} ${req.originalUrl}`, err);
+      res.status(500).json({ ok: false, error: "Błąd serwera" });
+    },
+  );
 
   return router;
 }

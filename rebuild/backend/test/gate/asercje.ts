@@ -152,9 +152,18 @@ export function sprawdzZgodnoscZFixture(
  *  1. odpowiedź jest płaskim obiektem — bez zagnieżdżeń,
  *  2. NIE MA w niej klucza `ok` — ta trasa jako jedyna w module oddaje `res.json(wynik)`
  *     zamiast `res.json({ok:true, …})`; dodanie `ok` byłoby zmianą kontraktu,
- *  3. każdy klucz ma postać `<rodzaj>::<wartosc>`, a `<rodzaj>` należy do zbioru rodzajów
- *     WYCZYTANEGO Z FIXTURE'A — czyli z tego, co produkcja realnie zwróciła,
- *  4. każda wartość to dodatnia liczba całkowita (`COUNT(*)` z grupowania).
+ *  3. mapa NIE JEST PUSTA — pusta przeszłaby każdą pozostałą asercję, a jest realnym trybem
+ *     awarii tej trasy: `licznikiAtrybutow` połyka wyjątek per kolumna (`continue`),
+ *     więc rozjazd nazw kolumn kończy się nie błędem, tylko cichym `{}`,
+ *  4. każdy klucz ma postać `<rodzaj>::<wartosc>`, a `<rodzaj>` należy do zbioru rodzajów
+ *     PODANEGO PRZEZ WYWOŁUJĄCEGO (mapa z kodu),
+ *  5. każdy prefiks OBECNY W FIXTURZE należy do tej samej mapy — to dowód w drugą stronę:
+ *     gdyby z mapy wypadł wpis, który produkcja realnie zwracała, gate się zapali,
+ *  6. każda wartość to dodatnia liczba całkowita (`COUNT(*)` z grupowania).
+ *
+ * Zbiór rodzajów NIE MOŻE pochodzić z samego fixture'a: nagranie ma 13 prefiksów, bo `sezon`
+ * i `wentyl` były w produkcji puste, a mapa ma ich 15. Pierwszy produkt testowy z wypełnionym
+ * `sezon` zapaliłby wtedy fałszywy STOP przy poprawnym kodzie.
  *
  * Czego NIE dowodzimy i dlaczego: konkretnych liczb ani konkretnych wartości atrybutów —
  * zależą od zawartości `products`, która w bazie testowej jest z definicji inna.
@@ -163,19 +172,27 @@ export function sprawdzZgodnoscZFixture(
 export function sprawdzZgodnoscZFixtureSlownika(
   nazwaPliku: string,
   cialoOdpowiedzi: unknown,
+  znaneRodzaje: readonly string[],
 ): void {
   const fixture = wczytajFixture(nazwaPliku);
+  const dozwolone = new Set(znaneRodzaje);
 
   const rodzajeZFixture = new Set(
     Object.keys(fixture.body as Record<string, unknown>)
       .filter((klucz) => !klucz.startsWith("_"))
-      .map((klucz) => klucz.split("::")[0]),
+      .map((klucz) => klucz.split("::")[0] ?? klucz),
   );
   expect(
     rodzajeZFixture.size,
     `Fixture ${nazwaPliku} nie zawiera ani jednego klucza "<rodzaj>::<wartosc>" — ` +
       "czy to na pewno nagranie słownika dynamicznego?",
   ).toBeGreaterThan(0);
+
+  // Dowód w drugą stronę: rodzaj, który produkcja realnie zwracała, musi być w mapie z kodu.
+  expect(
+    [...rodzajeZFixture].filter((rodzaj) => !dozwolone.has(rodzaj)),
+    `Rodzaje obecne w ${nazwaPliku}, których nie ma w mapie kodu — wypadł wpis z mapy?`,
+  ).toEqual([]);
 
   expect(
     typeof cialoOdpowiedzi === "object" &&
@@ -185,6 +202,12 @@ export function sprawdzZgodnoscZFixtureSlownika(
   ).toBe(true);
 
   const mapa = cialoOdpowiedzi as Record<string, unknown>;
+
+  expect(
+    Object.keys(mapa).length,
+    `Odpowiedź jest PUSTA, a to realny tryb awarii tej trasy (połknięty wyjątek per kolumna), ` +
+      `nie brak danych. Fixture ${nazwaPliku} ma klucze — dane testowe też powinny je dać.`,
+  ).toBeGreaterThan(0);
 
   expect(
     Object.hasOwn(mapa, "ok"),
@@ -200,8 +223,8 @@ export function sprawdzZgodnoscZFixtureSlownika(
       continue;
     }
     const rodzaj = klucz.slice(0, rozdzielnik);
-    if (!rodzajeZFixture.has(rodzaj)) {
-      bledy.push(`rodzaj "${rodzaj}" (klucz "${klucz}") nie występuje w ${nazwaPliku}`);
+    if (!dozwolone.has(rodzaj)) {
+      bledy.push(`rodzaj "${rodzaj}" (klucz "${klucz}") nie jest znanym rodzajem atrybutu`);
     }
     if (typeof wartosc !== "number" || !Number.isInteger(wartosc) || wartosc <= 0) {
       bledy.push(`wartość dla "${klucz}" to ${String(wartosc)}, oczekiwano dodatniego int`);

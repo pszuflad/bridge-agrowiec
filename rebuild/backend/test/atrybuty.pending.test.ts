@@ -383,6 +383,48 @@ describe("atrybuty — kolejka pending", () => {
       );
     });
 
+    /**
+     * Sugestie są sortowane MALEJĄCO po podobieństwie i przycinane do PIĘCIU (`:242-243`).
+     * Bez tego testu odwrócenie sortowania albo `slice(0, 4)` przeszłoby całą suitę, a to
+     * pole widzi front 7b — na nim opiera się przycisk „akceptuj jako alias".
+     */
+    it("zwraca najwyżej 5 sugestii, malejąco po podobieństwie", async () => {
+      // Rodzaj musi istnieć w słowniku — `atrybuty_wartosci.rodzaj` ma klucz obcy.
+      const { zasiejSlownikAtrybutow } = await import("../src/repos/atrybuty.js");
+      zasiejSlownikAtrybutow(srodowisko.db);
+
+      // Siedmiu kandydatów w promieniu ≥ 0,9 od „ROZMIAR TESTOWY XX" (18 znaków, więc jedna
+      // zmiana to 0,944, dwie 0,889 — wszystkie poniżej progu prócz jednoznakowych).
+      const kanoniczne = [
+        "ROZMIAR TESTOWY XA",
+        "ROZMIAR TESTOWY XB",
+        "ROZMIAR TESTOWY XC",
+        "ROZMIAR TESTOWY XD",
+        "ROZMIAR TESTOWY XE",
+        "ROZMIAR TESTOWY XF",
+        // Ten jest identyczny — podobieństwo 100, więc musi wylądować NA SZCZYCIE listy.
+        "ROZMIAR TESTOWY XX",
+      ];
+      for (const wartosc of kanoniczne) {
+        srodowisko.db.insert(atrybutyWartosci).values({ rodzaj: "bieznik", wartosc }).run();
+      }
+      srodowisko.db
+        .insert(atrybutyWartosciPending)
+        .values({ rodzaj: "bieznik", wartosc: "ROZMIAR TESTOWY XX", ileWystapien: 1, dostawcy: "" })
+        .run();
+
+      const items = ((await get("/api/atrybuty/pending?rodzaj=bieznik")).body as {
+        items: { wartosc: string; sugerowane_aliasy: { podobienstwo: number }[] }[];
+      }).items;
+      const sugestie = items.find((i) => i.wartosc === "ROZMIAR TESTOWY XX")!.sugerowane_aliasy;
+
+      expect(sugestie).toHaveLength(5);
+      expect(sugestie[0]!.podobienstwo).toBe(100);
+      expect(sugestie.map((s) => s.podobienstwo)).toEqual(
+        [...sugestie.map((s) => s.podobienstwo)].sort((a, b) => b - a),
+      );
+    });
+
     it("filtr `?rodzaj=` zawęża listę, `count` liczy zwrócone pozycje", async () => {
       await skanuj();
       const odp = (await get("/api/atrybuty/pending?rodzaj=marka")).body as {
