@@ -158,7 +158,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 8 | Selly / sprzedawarka (+ selly-injection) | 1a BE · 1b FE | 2, 4 | ⬜ | |
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | 🔨 | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04. **Zostaje 10f.** |
-| 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ⬜ | |
+| 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 1–2 | wszystkie | ⬜ | |
 
 ---
