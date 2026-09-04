@@ -311,9 +311,9 @@ w stagingu, nic dodatkowego nie trzeba było robić w 3c.
 |---|---|
 | **Pliki** | `frazy_migruj.cjs` (nowy, +64), `common.cjs` (+23), `frazy_niedopasowane.json` (dane), `frazy_raport.json` |
 | **Commit** | `33455c8` |
-| **Do nowej wersji?** | ❌ **NIE** jako zadanie importu (rozstrzygnięte 2026-08-26, I3/3a — patrz niżej); ⬜ **DO DECYZJI** jako osobne narzędzie Selly, świadomie poza zakresem I8/8a |
-| **Iteracja** | → rozstrzygnięte przy **I3/3a**: nie jest normalizacją w adapterze; backend Selly (panel + synchronizacja produktów/dostawców) dowieziony w **I8/8a**, ale BEZ `frazy` — poza zakresem tej sesji (`docs/tickets/28-FEATURE-selly-eksport-backend/plan.md`, „Poza zakresem") |
-| **Status** | ✔ zbadane i rozstrzygnięte (I3/3a, 2026-08-26); narzędzie `frazy` samo nadal nieportowane po 8a |
+| **Do nowej wersji?** | ❌ **NIE** jako zadanie importu (rozstrzygnięte 2026-08-26, I3/3a — patrz niżej); ⬜ **DO DECYZJI** jako osobne narzędzie Selly, świadomie poza zakresem całej I8 (8a+8b, zamknięta 2026-09-04) |
+| **Iteracja** | → rozstrzygnięte przy **I3/3a**: nie jest normalizacją w adapterze; backend Selly dowieziony w **I8/8a**, natywny panel `/selly` we froncie w **I8/8b**, oba BEZ `frazy` — poza zakresem obu sesji (`docs/tickets/28-FEATURE-selly-eksport-backend/plan.md`, „Poza zakresem"; `docs/tickets/30-FEATURE-selly-panel-frontend/plan.md`, D1) |
+| **Status** | ✔ zbadane i rozstrzygnięte (I3/3a, 2026-08-26); narzędzie `frazy` samo nadal nieportowane po zamknięciu I8 |
 
 **Opis (stan na 2026-08-24, przed zbadaniem):** system migracji/dopasowania „fraz" — podejrzewany
 jako normalizacja `zastosowanie`/nazw w adapterze. Changelog Ani nieaktualny, szczegóły wymagały
@@ -330,11 +330,13 @@ odpowiednik w odbudowie, to przy **I8 (Selly)**, nie przy imporcie ani atrybutac
 **Rekomendacja: ❌ NIE** jako zadanie importu; do rozważenia w I8, gdy będziemy odtwarzać
 integrację Selly.
 
-**Aktualizacja 2026-09-04, ticket `28-FEATURE-selly-eksport-backend` (I8/8a).** Backend Selly
-(10 tras panelu — słowniki, producenci/kategorie, synchronizacja produktu/dostawcy, status/log,
-eksport CSV) jest już dowieziony. `frazy_migruj.cjs` to osobny, jednorazowy skrypt operacyjny
-(czyta `/tmp/frazy_migracja.json`, woła Selly bezpośrednio) i celowo NIE wszedł w zakres 8a —
-pozostaje ⬜ do decyzji, czy w ogóle potrzebuje odpowiednika w odbudowie.
+**Aktualizacja 2026-09-04 — I8 zamknięta w całości (8a + 8b).** Backend Selly (10 tras panelu —
+słowniki, producenci/kategorie, synchronizacja produktu/dostawcy, status/log, eksport CSV,
+ticket `28-FEATURE-selly-eksport-backend`) i natywny panel `/selly` we froncie
+(ticket `30-FEATURE-selly-panel-frontend`) są dowiezione. `frazy_migruj.cjs` to osobny,
+jednorazowy skrypt operacyjny (czyta `/tmp/frazy_migracja.json`, woła Selly bezpośrednio) i
+celowo NIE wszedł w zakres żadnej z sesji — pozostaje ⬜ do decyzji, czy w ogóle potrzebuje
+odpowiednika w odbudowie.
 
 ### #6 · 2026-08-21…25 · [BACKEND] · bieżące poprawki parserów (`flagsfix`, mo8, batch) → obsłużone PORTEM
 
@@ -744,7 +746,7 @@ A podjęta tego samego dnia. Rozszerzono 2026-08-26 przy tickecie
 | **Kategoria** | BACKEND (import / dane) |
 | **Pliki** | `deminified/backend-index.cjs:44105` (funkcja), `:48546` (wywołanie); dane: `mirror/backend/zastosowania/zastosowania_master.csv` (6823 wiersze) |
 | **Do nowej wersji?** | ⬜ **DO DECYZJI** — najpierw ustalić przyczynę (niżej) |
-| **Status** | otwarte; właściciel ustalony (I8), konsekwencja dla Selly zmierzona 2026-09-04 |
+| **Status** | otwarte; I8 (8a+8b) zamknięta 2026-09-04 BEZ portowania — decyzja „nie portujemy" podtrzymana, konsekwencja dla Selly zmierzona |
 
 **Co robi produkcja.** Endpoint `POST /api/staging/accept` po zatwierdzeniu pozycji woła
 `__restoreZastosowanie()`. Funkcja czyta CSV z **zahardkodowanej ścieżki produkcyjnej**
@@ -773,9 +775,9 @@ Zwróć uwagę, że warunek `zastosowanie IS NULL OR TRIM(...)=''` pasuje dokła
 3. **brak szkody z pominięcia** — uzupełnia tylko puste wartości, więc jej brak niczego nie
    psuje. Po prostu nie uzupełnia — a to Ania zauważy, jeśli coś jej `zastosowanie` czyści.
 
-**Rekomendacja:** przy I7 albo I8 najpierw ODTWORZYĆ przyczynę (zaimportować pozycję, zatwierdzić,
-sprawdzić, czy `zastosowanie` znika), a dopiero potem decydować, czy portować naprawę, czy
-usunąć potrzebę.
+**Rekomendacja:** przy I7 albo w kolejnej sesji dotykającej Selly (I8 zamknięta bez tego)
+najpierw ODTWORZYĆ przyczynę (zaimportować pozycję, zatwierdzić, sprawdzić, czy `zastosowanie`
+znika), a dopiero potem decydować, czy portować naprawę, czy usunąć potrzebę.
 
 ---
 
@@ -1802,30 +1804,45 @@ pustego CSV) albo owinąć nazwę w cudzysłowy. ⚠ Powiązanie: to zmieniłoby
 
 | Pole | Wartość |
 |---|---|
-| **Kategoria** | FRONTEND (architektura, nie usterka produkcji) |
-| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,WidokWPrzygotowaniu,Atrybuty}.tsx`; NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`) |
+| **Kategoria** | FRONTEND (regresja wierności wobec oryginału, nie tylko architektura odbudowy) |
+| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,WidokWPrzygotowaniu,Atrybuty,Selly}.tsx`; NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`); oryginał: `deminified/frontend-index.js:16329` (`mn()`, sidebar+topbar) |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** |
-| **Status** | — nie zaczęte (zastane, ujawnione przy **10f**) |
+| **Status** | — nie zaczęte (zastane, ujawnione przy **10f**, powiększone przy **8b** o `/selly`) |
 
 **Co znaleziono.** `App.tsx` rejestruje trasy bezpośrednio pod `<Switch>`, bez wspólnego
 layoutu — każdy widok sam decyduje, czy owinąć się w `AppShell` (komponent z sidebarem,
-`components/AppShell.tsx:59-87`). Dziś robią to `Pulpit`, `Konfiguracja`, `WidokWPrzygotowaniu`
-i (od 7b) `Atrybuty`; siedem pozostałych widoków (`Katalog`, `Staging`, `Historia`, `Narzuty`,
-`Alerty`, `WagaGabarytowa`, `Analityka`) zwraca samą treść (np. `Katalog.tsx:172`:
-`<div className="p-6 max-w-full">` bez `AppShell` ani `Sidebar` w drzewie) — sprawdzone
-`grep`em, sidebar na tych siedmiu ekranach faktycznie nie renderuje się.
+`components/AppShell.tsx:59-87`). Dziś robią to `Pulpit`, `Konfiguracja`,
+`WidokWPrzygotowaniu`, (od 7b) `Atrybuty` i (od 8b) `Selly`; **siedem** pozostałych widoków
+(`Katalog`, `Staging`, `Historia`, `Narzuty`, `Alerty`, `WagaGabarytowa`, `Analityka`) zwraca
+samą treść (np. `Katalog.tsx:172`: `<div className="p-6 max-w-full">` bez `AppShell` ani
+`Sidebar` w drzewie) — sprawdzone `grep`em, sidebar na tych siedmiu ekranach faktycznie się
+nie renderuje.
+
+**Poprawka 2026-09-04 (przy 8b): to JEST rozjazd z oryginałem, nie tylko porządek wewnętrzny.**
+Sprawdzone w `deminified/frontend-index.js`: funkcja `mn()` (:16329) to dokładny odpowiednik
+`AppShell` (sidebar + topbar mobilny) i **każdy** komponent widoku podpięty pod trasę w tabeli
+routera (:28641-28680) owija nią swój zwracany JSX — potwierdzone po kolei dla `N2` (`/`),
+`JP` (`/staging`), `AT` (`/katalog`), `VT` (`/narzuty`), `HT` (`/alerty`), `GT` (`/historia`),
+`eM` (`/konfiguracja`), `nM` (`/waga-gabarytowa`), `iM` (`/atrybuty`), `lM` (`/moje-konto`) i
+`zM` (`/analityka`) — bez wyjątku (12 wywołań `mn(` w bundlu). Tylko `/login` i nieznana trasa
+(404) go nie mają. Wcześniejsza wersja tego wpisu twierdziła, że katalog/analityka w oryginale
+też nie mają sidebara (stąd wniosek „to nie wierność, to architektura odbudowy") — **to było
+błędne ustalenie, niepoparte pełnym odczytem funkcji** (sprawdzono tylko początek definicji,
+nie faktyczny `return`). Poprawny wniosek: oryginał pokazuje sidebar na WSZYSTKICH ekranach
+zalogowanego użytkownika — odbudowa na pięciu z dwunastu.
 
 **Skąd wzięło się przy 10f.** Zastane, nie wprowadzone przez ten blok: `/` było placeholderem
 (`WidokWPrzygotowaniu`, który ramę renderuje), więc problem był niewidoczny. 10f zdjęło
 placeholder i Pulpit musiał dołożyć `AppShell` samodzielnie, żeby nie zgubić nawigacji —
-przy tej okazji rozjazd między widokami stał się widoczny.
+przy tej okazji rozjazd między widokami stał się widoczny. 8b dołożyła kolejny widok
+(`Selly.tsx`) do tej samej, już istniejącej luki — zastane, poza zakresem tego ticketa.
 
-**Skutek.** Wizualna regresja wobec oczekiwanego layoutu (sidebar znika) na siedmiu ekranach —
-raczej porządek architektury odbudowy niż wierność wobec oryginału (oryginał nie ma pojęcia
-komponentu `AppShell.tsx`, to konstrukcja rebuild-u).
+**Skutek.** Wizualna regresja wobec ZACHOWANIA ORYGINAŁU (sidebar znika) na ośmiu ekranach —
+Ania na produkcji nigdy nie traci sidebara przechodząc między widokami, w odbudowie traci go
+na większości.
 
 **Do decyzji.** Czy ujednolicić przez wspólny layout w `App.tsx` (jedno miejsce), czy dołożyć
-`AppShell` pojedynczo do siedmiu widoków.
+`AppShell` pojedynczo do ośmiu widoków.
 
 ---
 

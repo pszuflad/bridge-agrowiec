@@ -11,14 +11,19 @@
  * snapshotu produkcji) zdejmuje kompresja włączona po stronie backendu
  * (`rebuild/backend/src/app.ts`) — po gzipie 0,84 MB, czyli 12× mniej.
  *
- * Zakres Iteracji 2 to ODCZYT. Menu „Akcje" (Edytuj/Wstrzymaj/Usuń), eksport CSV do
- * Shopera oraz zaciąganie słowników z `GET /api/atrybuty` i `GET /api/config` należą
- * do późniejszych iteracji — patrz „Poza zakresem" w plan.md.
+ * Zakres Iteracji 2 to ODCZYT. Menu „Akcje" (Edytuj/Wstrzymaj/Usuń) oraz zaciąganie
+ * słowników z `GET /api/atrybuty` należą do późniejszych iteracji — patrz „Poza zakresem"
+ * w plan.md Iteracji 2.
+ *
+ * **Eksport CSV dowieziony w sesji 8b** (`30-FEATURE-selly-panel-frontend`): przycisk
+ * obok konfiguratora kolumn, logika w `katalog/eksport.ts`, konfiguracja czytana
+ * defensywnie z `GET /api/config`.
  */
 import { useQuery } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
+import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KLUCZ_KOLUMN_KATALOGU, odczytajKV, zapiszKV } from "@/lib/magazynKV";
+import { KLUCZ_KONFIGURACJI, type Konfiguracja } from "./konfiguracja/config";
 import {
   listaKategorii,
   listaMarek,
@@ -40,6 +46,15 @@ import {
   type Produkt,
   type TrybStatusu,
 } from "./katalog/filtrowanie";
+import {
+  dataDoNazwyPliku,
+  KOLUMNY_SHOPER,
+  odsiejDoEksportu,
+  parsujKolumnyShoper,
+  pobierzPlik,
+  SEPARATOR_DOMYSLNY,
+  zbudujCsv,
+} from "./katalog/eksport";
 import { KonfiguratorKolumn } from "./katalog/KonfiguratorKolumn";
 import { KOLUMNY, KOLUMNY_DOMYSLNE, uzupelnijKodImportu } from "./katalog/kolumny";
 import { PodgladProduktu } from "./katalog/PodgladProduktu";
@@ -71,6 +86,11 @@ export function Katalog() {
     queryKey: ["/api/products"],
   });
   const { data: dostawcy = [] } = useQuery<Dostawca[]>({ queryKey: ["/api/suppliers"] });
+  // Konfiguracja czytana DEFENSYWNIE: produkcja nie ma ani `shoper.kolumny`, ani
+  // `shoper.separator` (`contract/fixtures/GET_config.json`), więc brak wartości to
+  // normalny stan, a nie awaria — wpadamy wtedy w fallbacki `TT` i `";"`.
+  const { data: konfiguracja = {} } = useQuery<Konfiguracja>({ queryKey: KLUCZ_KONFIGURACJI });
+  const { toast } = useToast();
 
   const [zakladka, setZakladka] = useState("all");
   const [fraza, setFraza] = useState("");
@@ -159,6 +179,74 @@ export function Katalog() {
     }
   };
 
+  /**
+   * Eksport CSV — port 1:1 z `frontend-index.js:23384-23422`.
+   *
+   * ⚠ PRIORYTET ŹRÓDŁA KOLUMN, w tej kolejności:
+   *   1. wybór użytkownika z konfiguratora (`kolumnyWybrane`) — gdy NIEPUSTY,
+   *   2. `shoper.kolumny` z `/api/config` — gdy wybór pusty,
+   *   3. `KOLUMNY_SHOPER` (`TT`) — gdy w konfiguracji nic nie ma.
+   *
+   * ⚠ Separator z konfiguracji obowiązuje TYLKO w gałęzi Shoperowej. Przy wybranych
+   * kolumnach jest WYMUSZONY na `";"` i konfiguracja jest ignorowana (:23404) — to nie
+   * jest pomyłka oryginału, tylko jego zachowanie.
+   *
+   * ⚠ Ponieważ `kolumnyWybrane` startuje z 15 kolumn domyślnych, gałąź Shoperowa jest
+   * osiągalna dopiero po odznaczeniu WSZYSTKICH kolumn w konfiguratorze. Szerzej:
+   * nagłówek `katalog/eksport.ts`.
+   *
+   * ⚠ Historii NIE zapisujemy. Oryginał woła `Xb()` (:10305), ale to wyłącznie
+   * optymistyczny `setQueryData(["/api/history"])`, bez żądania do serwera; odbudowa
+   * świadomie nie ma tego kanału (decyzja D3 bloku 10f).
+   */
+  const eksportujCsv = (): void => {
+    const data = dataDoNazwyPliku();
+    const doEksportu = odsiejDoEksportu(wZakladce);
+
+    if (doEksportu.length === 0) {
+      toast({
+        title: "Brak produktów do eksportu",
+        description:
+          zakladka === "all" ? "Katalog jest pusty" : `Dostawca ${zakladka} nie ma produktów`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const separatorKonfiguracji = konfiguracja["shoper.separator"] || SEPARATOR_DOMYSLNY;
+    const kolumnyKonfiguracji = konfiguracja["shoper.kolumny"]
+      ? parsujKolumnyShoper(konfiguracja["shoper.kolumny"])
+      : KOLUMNY_SHOPER;
+
+    const bezWyboru = kolumnyWybrane.size === 0;
+    const kolumny = bezWyboru
+      ? kolumnyKonfiguracji
+      : KOLUMNY.filter((kolumna) => kolumnyWybrane.has(kolumna.key));
+    const separator = bezWyboru ? separatorKonfiguracji : SEPARATOR_DOMYSLNY;
+
+    const tresc = zbudujCsv(doEksportu, kolumny, separator);
+    const kodDostawcy = zakladka === "all" ? "wszyscy" : zakladka;
+    const nazwa = bezWyboru
+      ? `shoper_${kodDostawcy}_${data}.csv`
+      : `katalog_${kodDostawcy}_wybrane_${data}.csv`;
+
+    pobierzPlik(nazwa, tresc);
+    toast({
+      title: "Eksport gotowy",
+      description: bezWyboru
+        ? `${doEksportu.length} produktów (format Shoper) → ${nazwa}`
+        : `${doEksportu.length} produktów, ${kolumny.length} kolumn → ${nazwa}`,
+    });
+  };
+
+  /** Trzy warianty etykiety — `frontend-index.js:23421`. */
+  const etykietaEksportu =
+    kolumnyWybrane.size === 0
+      ? zakladka === "all"
+        ? "Pobierz CSV (Shoper)"
+        : "Pobierz CSV dla Shopera"
+      : `Pobierz CSV (${kolumnyWybrane.size} kol.)`;
+
   const wybranyDostawca =
     zakladka === "all" ? null : (dostawcyPosortowani.find((d) => d.kod === zakladka) ?? null);
   const podtytul =
@@ -176,6 +264,10 @@ export function Katalog() {
         actions={
           <div className="flex gap-2">
             <KonfiguratorKolumn wybrane={kolumnyWybrane} onZmiana={zmienKolumny} />
+            <Button onClick={eksportujCsv} data-testid="button-export-katalog">
+              <Download className="mr-2 h-4 w-4" />
+              {etykietaEksportu}
+            </Button>
           </div>
         }
       />

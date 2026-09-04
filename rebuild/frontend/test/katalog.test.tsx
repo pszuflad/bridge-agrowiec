@@ -36,6 +36,11 @@ function zamockujApi(produkty: Produkt[] = PRODUKTY) {
   server.use(
     http.get("*/api/products", () => HttpResponse.json(produkty)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
+    // Od sesji 8b katalog czyta też `/api/config` (klucze `shoper.*` dla przycisku
+    // eksportu). Widok pobiera KOMPLET swoich tras przy każdym wejściu, niezależnie od
+    // tego, co dany test sprawdza, a `onUnhandledRequest:"error"` nie wybacza braków.
+    // Pusty obiekt = stan produkcji: tych kluczy tam nie ma (`GET_config.json`).
+    http.get("*/api/config", () => HttpResponse.json({})),
   );
 }
 

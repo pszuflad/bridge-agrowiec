@@ -1,7 +1,12 @@
 /**
  * Rama aplikacji — `deminified/frontend-index.js:16329-16456`.
- * Sidebar ma 10 POZYCJI nawigacji (router ma 12 tras: dochodzą `/login` i `/moje-konto`,
+ * Sidebar ma 11 POZYCJI nawigacji (router ma 13 tras: dochodzą `/login` i `/moje-konto`,
  * przy czym `/moje-konto` jest linkiem w stopce, a `/login` nie ma w żadnym menu).
+ *
+ * ⚠ Jedenasta pozycja, „Selly", weszła w sesji 8b i JAKO JEDYNA nie pochodzi z `l2`
+ * oryginału — produkcja dokładała ten link wstrzykiwanym skryptem
+ * (`mirror/frontend/assets/selly-injection.js:255-280`), za „Konfiguracją". Stąd 11
+ * zamiast 10 i 13 tras zamiast 12; uzasadnienie w `src/pages/placeholdery.ts`.
  */
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -36,7 +41,7 @@ beforeEach(() => {
 });
 
 describe("sidebar", () => {
-  it("ma dokładnie 10 pozycji nawigacji w kolejności z oryginału", () => {
+  it("ma dokładnie 11 pozycji nawigacji w kolejności z oryginału (+ Selly na końcu)", () => {
     render(<App />);
     const nawigacja = screen.getByRole("navigation");
 
@@ -55,8 +60,17 @@ describe("sidebar", () => {
       "Analityka",
       "Historia",
       "Konfiguracja",
+      "Selly",
     ]);
-    expect(POZYCJE_NAWIGACJI).toHaveLength(10);
+    expect(POZYCJE_NAWIGACJI).toHaveLength(11);
+  });
+
+  it("pozycja „Selly” prowadzi na `/selly`", () => {
+    render(<App />);
+
+    const link = screen.getByTestId("link-nav-selly");
+    expect(link).toHaveTextContent("Selly");
+    expect(link).toHaveAttribute("href", "/selly");
   });
 
   it("„Moje konto” i „Wyloguj” są w stopce, poza listą nawigacji", () => {
