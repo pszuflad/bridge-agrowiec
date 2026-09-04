@@ -115,3 +115,101 @@ w samej odpowiedzi (liczba wywołań atrapy, zawartość ZIP-a, autoryzacja prze
 Jedyny realny problem to rozjazd między tym, co `raport.md` deklaruje jako zrobione
 (aktualizacja backlogu #12), a tym, co faktycznie trafiło do diffu — to trzeba naprawić przed
 merge, żeby dokumentacja projektu nie zaczęła kłamać sama do siebie.
+
+---
+
+## Iteracja 2 — weryfikacja poprawek
+
+> Reviewed: 2026-09-04
+> Commit poprawek: `23157d9` („review fix - backlog #12, cache archiver, cap spoza oryginału")
+> Bramki (uruchomione ponownie samodzielnie): `npm run lint`/`typecheck`/`build` czyste,
+> `npm test` — **954/954 zielone, 61 plików**.
+
+### 1. BLOCKER — backlog #12 — **naprawione**
+
+`git diff origin/develop...HEAD -- docs/rebuild-backlog.md` pokazuje realną, nietrywialną
+zmianę: rozstrzygnięcie właścicielstwa (I8, nie I7) i nowa sekcja „Konsekwencja dla Selly —
+zmierzona w 8a" z opisem obu gałęzi mapowania.
+
+Zweryfikowano zgodność z kodem, nie tylko z opisem:
+- `src/selly/mapper.ts:100-105` — puste `zastosowanie` → `wartosci.length === 0` →
+  `source: "fallback_kategoria"`, `category_id = mapujKategorieGlownaId(...)`,
+  `extra_cat_ids: []` — dokładnie tak, jak opisuje backlog (brak podkategorii, brak `multi_cat`).
+- `src/selly/mapper.ts:284-293` (`walidujPayload`) — `if (!payload.category_id) errors.push("Brak
+  category_id (nieznana kategoria)")` — potwierdza ścieżkę „walidacja odrzuca payload", gdy
+  `products.kategoria` nie ma odpowiednika w `selly_kategoria_norm_map`.
+- `src/routes/selly.ts:270-278` (`sync-supplier`) — `walidacja.ok === false` → `skipped++` —
+  potwierdza twierdzenie backlogu, że taki produkt liczy się jako `skipped` i „w ogóle nie
+  dojdzie do sklepu" (bo `continue` pomija wywołanie klienta).
+- Obie ścieżki faktycznie są zamrożone w `test/selly.mapper.test.ts` (branże `fallback_kategoria`
+  / `fallback_empty`) i `test/selly.synchronizacja.test.ts` (`skipped` w podsumowaniu).
+
+Treść jest uczciwa wobec stanu faktycznego, komentarz w `src/selly/mapper.ts:9-17` odsyła do
+tej samej sekcji backlogu. `raport.md` już nie twierdzi nieprawdy — sekcja „Poprawki po review"
+opisuje dokładnie to, co zaszło w diffie. **BLOCKER zamknięty.**
+
+### 2. SHOULD-FIX — cache `archiver` — **naprawione**
+
+`src/routes/export-shoper.ts:59-69` — `let ZipArchiveCache` w zmiennej modułu +
+`konstruktorZip()`, wzorem `rV()`/`oh` z oryginału (`deminified/backend-index.cjs:48138-48149`,
+zweryfikowano ponownie 1:1: `var oh = null; async function rV() { if (!oh) {...} }`). Jedyny
+konsument ZIP-a (`GET /api/export-shoper` bez `?dostawca` albo `dostawca=wszyscy`) woła
+`await konstruktorZip()` zamiast bezpośredniego `import()`. Wyścig przy równoległych żądaniach
+nieszkodliwy — najgorszy przypadek to kilka równoległych `import("archiver")` zanim pierwszy się
+rozstrzygnie, a Node i tak cache'uje moduł w swoim rejestrze; wynik zawsze ten sam konstruktor.
+Test `test/eksport-shoper.format.test.ts` nadal zieleni się (zawartość ZIP-a per dostawca,
+nagłówki) — mechanizm cache'owania nie jest wprost testowany, ale to OK, bo zachowanie
+obserwowalne jest identyczne z i bez cache'a; nie ma potrzeby osobnego testu na samą optymalizację.
+
+### 3. SHOULD-FIX — `Math.min(limit, 50)` w słownikach — **naprawione**
+
+Cap usunięty z `listProducers`/`listCategories` (`src/selly/klient.ts:277-284`), z komentarzem
+wyjaśniającym asymetrię wobec `listProducts`/`listOrders`. Zweryfikowano w oryginale
+(`mirror/backend/selly/client.cjs:129,181-186,203`): `listProducts`/`listOrders` capują
+(`Math.min(limit, 50)` w query), `listProducers`/`listCategories` przekazują `query` wprost bez
+capowania — potwierdzone.
+
+Test `test/selly.klient.test.ts:263-284` przepisany poprawnie i NIE jest tautologiczny: podaje
+`limit: 500` (jawnie powyżej dawnego capa 50) i asercją `daneowe?.sciezka).toBe("/api/producers?
+limit=500")` sprawdza, że wartość dochodzi do Selly nieścięta — gdyby ktoś przywrócił
+`Math.min(limit, 50)`, test faktycznie by czerwienił (ścieżka byłaby `?limit=50`).
+
+### 4. NICE-TO-HAVE — `?dostawca` jako tablica — **udokumentowane, bez zmiany zachowania**
+
+`src/routes/selly.ts:334-341` — komentarz opisuje uczciwie różnicę wobec oryginału (better-sqlite3
+rzuciłby 500 na tablicy, tu ciche `undefined`) i uzasadnienie (panel takich żądań nie generuje).
+Zgodne z tym, co Master zadeklarował — wystarczające jako NICE-TO-HAVE, nic więcej nie wymagane.
+
+### 5. NICE-TO-HAVE — filtr statusu w SQL — **naprawione**
+
+`src/selly/generator-csv.ts:154-160` (`zbudujCsvSelly`) — filtr `eq(products.status, "aktywny")`
+przeniesiony do `.where(...)` zapytania Drizzle, `orderBy(asc(products.id))` zachowane.
+Zweryfikowano zgodność z oryginałem: `test/selly.generator-csv.test.ts:88` ma referencyjne
+zapytanie `SELECT * FROM products WHERE status = 'aktywny' ORDER BY id` — identyczny warunek
+i porządek jak w nowym kodzie. Test `it("bierze wyłącznie produkty ze statusem \`aktywny\`"` 
+(`test/selly.generator-csv.test.ts:62-68`) nadal pokrywa tę ścieżkę i przechodzi.
+
+### 6. NICE-TO-HAVE — DoD w `plan.md` — **naprawione, zgodnie z procedurą**
+
+`docs/tickets/28-FEATURE-selly-eksport-backend/plan.md:252-260` — wszystkie pozycje odhaczone
+poza ostatnią („Roadmapa: blok 8a zamknięty…"), która świadomie zostaje `[ ]` do Fazy 5
+(doc-checkery). Zgodne z procedurą ticketa — nie zgłaszane ponownie jako brak.
+
+### Nowe problemy wprowadzone poprawkami
+
+Brak. Żadna z pięciu poprawek nie wprowadza nowej regresji ani nowego odstępstwa od oryginału —
+każda została zweryfikowana zarówno przeciw kodowi źródłowemu oryginału
+(`mirror/backend/selly/client.cjs`, `deminified/backend-index.cjs:48138-48149`,
+`mirror/backend/generate_selly_export.cjs`), jak i przeciw testom, które faktycznie pilnują
+zgłoszonego zachowania (nie tautologicznie).
+
+### Status po iteracji 2
+
+- **BLOCKER: 0** (był 1, naprawiony).
+- **SHOULD-FIX otwarte: 1** — roadmapa (`docs/rebuild-roadmap.md` §5, blok „Iteracja 8"), świadomie
+  odłożone do Fazy 5 zgodnie z procedurą ticketa; nie blokuje mergu tej iteracji.
+- **NICE-TO-HAVE: 0 otwartych** (2 z 3 naprawione, 1 świadomie zostawione jako udokumentowana
+  różnica — zaakceptowane).
+
+Ticket gotowy do merge z perspektywy code review; jedyny pozostały punkt (roadmapa) jest
+formalnie poza zakresem tej iteracji i ma właściciela (Faza 5).
