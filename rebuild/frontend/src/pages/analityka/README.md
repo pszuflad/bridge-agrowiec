@@ -1,8 +1,12 @@
 # Wzorzec sekcji dashboardu — obowiązuje bloki 10b–10e
 
 Ten katalog powstał w bloku **10a** (ticket `19-FEATURE-analityka-fundament`) i jest
-szablonem dla reszty Iteracji 10. Bloki 10b–10e **dokładają zakładki, nie przemeblowują
-widoku** — zakładki, ich kolejność i etykiety już są i pochodzą z oryginału.
+szablonem dla reszty Iteracji 10. Blok **10d** (`23-FEATURE-analityka-dostawcy`) wypełnił
+wg niego zakładkę `dostawcy` — trzy sekcje w `Sekcja{Stabilnosc,CyklZycia,Stan}Dostawcow.tsx`
+są drugim, niezależnym od marż przykładem tego wzorca (w tym sekcją bez wykresu).
+
+Bloki 10b–10e **dokładają zakładki, nie przemeblowują widoku** — zakładki, ich kolejność
+i etykiety już są i pochodzą z oryginału.
 
 Zanim napiszesz linijkę kodu: przeczytaj „Trzy pułapki" na końcu. Każda z nich kosztowała
 w 10a osobne dochodzenie.
@@ -17,6 +21,7 @@ w 10a osobne dochodzenie.
 | `filtrowanie.ts` | stan globalnych filtrów, semantyka OR/AND, deklaracja wymiarów obsługiwanych przez sekcję |
 | `formatowanie.ts` | port `_()` i `D()` z oryginału — liczby `pl-PL`, `—` dla pustych, procenty. `zaokraglij(wartosc, miejsca)` — do liczb, które sekcja LICZY SAMA (nie mylić z `formatuj()`, które zamienia na napis) |
 | `TabelaAnalityki.tsx` | port `I()` z oryginału — kolumny, wyrównanie, `slice(0, 300)` |
+| `PasekDostepnosci.tsx` | port `O()` z oryginału — pasek postępu w komórce „Dostępność". Wydzielony w 10d, bo woła go też karta „4.1" bloku 10e |
 | `NaglowekKpi.tsx` | banner historii + cztery kafle. Nie ruszać — to nagłówek całej strony |
 | `FiltryGlobalne.tsx` | sześć kontrolek. Nie ruszać — filtry są wspólne dla zakładek |
 | `Sekcja<Nazwa>.tsx` | **to piszesz w swoim bloku** |
@@ -77,8 +82,11 @@ export const WYMIARY_MOJEJ_SEKCJI: WymiarFiltra[] = ["dostawcy", "marki", "model
 const pominiete = wymiaryNieobslugiwane(wybor, WYMIARY_MOJEJ_SEKCJI);
 ```
 
-Dla wierszy z kolumną `dostawca` jest już generyczne `zastosujFiltrDostawcy()`
-(`filtrowanie.ts`) — nie pisz własnej wersji filtra po dostawcy dla każdej tabeli.
+Dla wierszy z kolumną `dostawca` jest już generyczne `zastosujFiltryDostawcow()`
+(`filtrowanie.ts`, blok 10d) — nie pisz własnej wersji filtra po dostawcy dla każdej tabeli.
+Bloki 10c i 10d napisały tę samą funkcję równolegle pod dwiema nazwami i duplikat trzeba było
+usuwać przy scalaniu (2026-09-04); zanim dołożysz pomocnika, sprawdź, czy sąsiedni blok już go
+nie wniósł.
 
 ⚠ **Gdy karta ma dwie tabele reagujące RÓŻNIE na ten sam filtr** (jedna filtruje, druga nie
 — bo jej wiersz nie niesie odpowiedniej kolumny), powiedz o tym wprost osobną notką przy

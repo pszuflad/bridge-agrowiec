@@ -29,7 +29,7 @@ dowód niż sam kształt. Dwie trasy bez konsumenta w oryginalnym froncie (`ean/
 - `rebuild/frontend/src/pages/analityka/api.ts` — **+4 typy i +4 hooki** (`usePorownanieEan`,
   `useUnikalneEan`, `usePokrycieEan`, `useRankingDostawcowEan`).
 - `rebuild/frontend/src/pages/analityka/filtrowanie.ts` — **+4 deklaracje wymiarów** per karta
-  i generyczne `zastosujFiltrDostawcy`.
+  i użycie generycznego `zastosujFiltryDostawcow` (patrz „Scalenie z blokiem 10d” niżej).
 - **Nowy:** `rebuild/frontend/src/pages/analityka/SekcjaEan.tsx` — trzy karty oryginału.
 - `rebuild/frontend/src/pages/Analityka.tsx` — zakładka `ean` dostaje `SekcjaEan` zamiast
   zaślepki; cztery hooki wołane na poziomie widoku.
@@ -230,7 +230,7 @@ Trzy doc-checkery równolegle, pięć plików sprawdzonych, cztery zaktualizowan
 - **Poprawiony fakt:** rozmiary bundla FE — obok stanu po 10a (385/452 kB) dopisany stan po 10c
   (392/484 kB) z notą, że wzrost wspólnego bundla nie pochodzi z tego bloku.
 - **Nowa sekcja „Wzorzec i gotowa infrastruktura z 10c (dla 10b/10d/10e)"** —
-  `PROMIEN_SLUPKA_PIONOWEGO`, `zaokraglij()`, `zastosujFiltrDostawcy()`, zasada własnych plików
+  `PROMIEN_SLUPKA_PIONOWEGO`, `zaokraglij()`, filtr po dostawcy, zasada własnych plików
   testowych per blok, podniesione progi czasowe testów.
 - **Do bloku 10f (nie do 10c) dopisane „WEJŚCIE Z BLOKU 10c"** — dane do przepięcia nagłówka KPI
   czekają na decyzję użytkownika; przyciski „CSV" kart EAN do dowiezienia razem z eksportem.
@@ -252,7 +252,7 @@ Trzy doc-checkery równolegle, pięć plików sprawdzonych, cztery zaktualizowan
 
 ### `rebuild/frontend/src/pages/analityka/README.md` (wzorzec dla 10b–10e)
 
-`zaokraglij()` w tabeli plików · `zastosujFiltrDostawcy()` i notka o karcie z dwiema tabelami
+`zaokraglij()` w tabeli plików · filtr po dostawcy i notka o karcie z dwiema tabelami
 reagującymi różnie na ten sam filtr (§2.3) · wzorzec karty dwutabelowej (§2.4) ·
 `PROMIEN_SLUPKA_PIONOWEGO` i kolejność `radius` w Recharts (§2.5) · zasada własnych plików
 testowych per blok + wyjątek dla handlerów MSW + podniesione progi czasowe (§2.7) ·
@@ -279,3 +279,50 @@ Zostały w `raport.md`.
 ### Pre-existing issues zgłoszone przez doc-checkery
 
 Brak — żaden nie znalazł nieścisłości wykraczających poza zakres tego ticketa.
+
+---
+
+## Scalenie z blokiem 10d (2026-09-04)
+
+Blok **10d** (`23-FEATURE-analityka-dostawcy`) wszedł do `develop`, zanim ten PR został
+zmergowany — oba bloki dokładały do tych samych plików, więc merge dał **11 konfliktów**.
+Wszystkie rozwiązane; bramki po scaleniu: backend **742/742**, frontend **421/421**,
+lint/typecheck/build czyste w obu pakietach.
+
+### Konflikty typu „oba bloki dopisały swój rozdział" — zachowane obie strony
+
+`repos/analityka.ts` · `routes/analytics.ts` · `analityka/api.ts` · `test/msw/kontrakt.ts` ·
+`Analityka.tsx` · `test/analityka.test.tsx` · `docs/spec-backend.md`.
+Po scaleniu router rejestruje **15 z 27** tras modułu (5 z 10a + 6 z 10c + 4 z 10d).
+
+⚠ **Pułapka warta zapamiętania przed 10b i 10e:** git zostawia wspólny ogon pliku
+(`` `); `` + `}`) POZA blokiem konfliktu, więc naiwne sklejenie „nasz blok + ich blok + reszta"
+ucina domknięcie ostatniej funkcji NASZEJ strony. Wywaliło to typecheck w dwóch plikach
+(`repos/analityka.ts`, `api.ts`) i było widoczne dopiero po uruchomieniu bramek — nie przy
+samym przeglądaniu diffu.
+
+### Realny duplikat — usunięty
+
+10c i 10d napisały **tę samą funkcję** filtrującą po dostawcy, bajt w bajt identyczną, pod
+dwiema nazwami: `zastosujFiltrDostawcy` (10c) i `zastosujFiltryDostawcow` (10d). Zostawiona
+wersja **10d** (jest już na `develop`); `SekcjaEan.tsx` i testy 10c przepięte na nią, wersja
+10c usunięta. Z `analityka.ean.filtrowanie.test.ts` wypadł też duplikat testów tej funkcji —
+`analityka.filtrowanie.test.ts` (10d) pokrywa ją w komplecie; został tylko zakres EAN-owy
+(deklaracje `WYMIARY_EAN_*` i `wymiaryNieobslugiwane` dla nich).
+
+### Testy widoku wymagały handlerów drugiego bloku
+
+Widok `/analityka` pobiera **komplet** tras przy każdym wejściu, niezależnie od aktywnej
+zakładki, a `onUnhandledRequest: "error"` wywala test przy pierwszym niezamockowanym żądaniu.
+Dlatego `analityka.ean.test.tsx` dostał trzy handlery dostawców, a `analityka.dostawcy.test.tsx`
+— cztery handlery EAN. Zasada dopisana do `README.md` §2.7 i do roadmapy jako wyjątek od reguły
+„każdy blok własne pliki testowe".
+
+### Dokumentacja — scalone narracje i sprostowane liczby
+
+`docs/rebuild-roadmap.md` (4 konflikty), `docs/analityka-bloki-10b-10f.md`,
+`docs/spec-backend.md`, `docs/spec-frontend.md`. Poza samym scaleniem poprawione fakty, które
+scalenie unieważniło: liczba tras pozostałych do dowiezienia (**12**, nie 16 ani 18), lista
+bloków wciąż otwartych (**10b, 10e, 10f**), rozmiar chunku `Analityka` (**398 kB**) oraz sekcja
+„gotowa infrastruktura" — z poprawioną nazwą filtra, dopisanym `PasekDostepnosci.tsx` z 10d
+i ostrzeżeniem przed powtórzeniem duplikatu.

@@ -13,9 +13,11 @@ import type { GrupaMarzy } from "@/pages/analityka/api";
 import {
   czyPusty,
   pustyWybor,
+  WYMIARY_DOSTAWCOW,
   WYMIARY_FILTRA,
   WYMIARY_MARZ,
   wymiaryNieobslugiwane,
+  zastosujFiltryDostawcow,
   zastosujFiltryMarz,
   type WyborFiltrow,
 } from "@/pages/analityka/filtrowanie";
@@ -88,5 +90,42 @@ describe("stan wyboru", () => {
 
   it("`czyPusty` wykrywa zaznaczenie w dowolnym wymiarze", () => {
     expect(czyPusty(wybor({ indeksyPredkosci: ["A"] }))).toBe(false);
+  });
+});
+
+/**
+ * Filtrowanie zakładki `dostawcy` (blok 10d). Funkcja jest generyczna, bo obsługuje trzy
+ * różne wiersze — stabilności, cyklu życia i stanu — a łączy je jedno pole: `dostawca`.
+ */
+describe("zastosujFiltryDostawcow", () => {
+  const WIERSZE_DOSTAWCOW = [
+    { dostawca: "MO1", produkty: 10 },
+    { dostawca: "MO2", produkty: 20 },
+    { dostawca: "MO3", produkty: 30 },
+  ];
+
+  it("bez zaznaczenia zwraca wejście bez zmian — i to ten sam obiekt", () => {
+    expect(zastosujFiltryDostawcow(WIERSZE_DOSTAWCOW, pustyWybor())).toBe(WIERSZE_DOSTAWCOW);
+  });
+
+  it("zaznaczenie kilku dostawców działa jak OR wewnątrz wymiaru", () => {
+    const wynik = zastosujFiltryDostawcow(WIERSZE_DOSTAWCOW, wybor({ dostawcy: ["MO1", "MO3"] }));
+    expect(wynik.map((w) => w.dostawca)).toEqual(["MO1", "MO3"]);
+  });
+
+  it("zachowuje kolejność odpowiedzi — sortowanie należy do backendu, nie do filtra", () => {
+    const wynik = zastosujFiltryDostawcow(WIERSZE_DOSTAWCOW, wybor({ dostawcy: ["MO3", "MO1"] }));
+    expect(wynik.map((w) => w.dostawca)).toEqual(["MO1", "MO3"]);
+  });
+
+  it("dostawca spoza odpowiedzi zwija tabelę do zera, zamiast być ignorowany", () => {
+    expect(zastosujFiltryDostawcow(WIERSZE_DOSTAWCOW, wybor({ dostawcy: ["MO10"] }))).toEqual([]);
+  });
+
+  it("pozostałe pięć wymiarów jest dla tej zakładki nieobsługiwane", () => {
+    // Wiersze zakładki `dostawcy` niosą wyłącznie `dostawca` — dwie trasy grupują po nim,
+    // a trzecia czyta staging, gdzie marki ani modelu nie ma w ogóle.
+    const w = wybor({ dostawcy: ["MO1"], marki: ["BKT"], modele: ["1000"] });
+    expect(wymiaryNieobslugiwane(w, WYMIARY_DOSTAWCOW)).toEqual(["marki", "modele"]);
   });
 });

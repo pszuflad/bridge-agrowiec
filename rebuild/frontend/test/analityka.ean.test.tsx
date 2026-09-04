@@ -29,10 +29,13 @@ import {
   TOKEN_TESTOWY,
   filtryZFixtura,
   kpiZFixtura,
+  cyklZyciaDostawcowZFixtura,
   marzeZFixtura,
   pokrycieEanZFixtura,
   porownanieEanZFixtura,
   rankingEanZFixtura,
+  stabilnoscDostawcowZFixtura,
+  stanDostawcowZFixtura,
   statusAnalitykiZFixtura,
   unikalneEanZFixtura,
   uzytkownikZFixtura,
@@ -56,6 +59,16 @@ function zamockujApi() {
     http.get("*/api/analytics/ean/unique", () => HttpResponse.json(UNIKALNE)),
     http.get("*/api/analytics/ean/coverage", () => HttpResponse.json(POKRYCIE)),
     http.get("*/api/analytics/ean/supplier-rank", () => HttpResponse.json(RANKING)),
+    // Trzy trasy zakładki `dostawcy` (blok 10d) — widok pobiera KOMPLET tras przy każdym
+    // wejściu, niezależnie od aktywnej zakładki, więc bez nich `onUnhandledRequest: "error"`
+    // wywala test. Treść nieistotna dla asercji tego pliku.
+    http.get("*/api/analytics/suppliers/stability", () =>
+      HttpResponse.json(stabilnoscDostawcowZFixtura()),
+    ),
+    http.get("*/api/analytics/suppliers/lifecycle", () =>
+      HttpResponse.json(cyklZyciaDostawcowZFixtura()),
+    ),
+    http.get("*/api/analytics/suppliers/stock", () => HttpResponse.json(stanDostawcowZFixtura())),
   );
 }
 

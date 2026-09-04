@@ -257,11 +257,15 @@ ma endpoint:
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
 > (O-10a-3). Wypełniona jest karta „Marża per dostawca/kategoria/marka" (O-10a-4); pozostałe
-> w tym bloku są puste, ale nazwane — `ean` dowieziona w 10c (patrz niżej), `dostawcy`/`ceny`/
-> `dostepnosc` czekają na 10b/10d/10e. Wzorzec sekcji dashboardu jest udokumentowany
+> w tym bloku są puste, ale nazwane — `ean` dowieziona w 10c i `dostawcy` w 10d (patrz niżej),
+> `ceny` i `dostepnosc` czekają na 10b i 10e. Wzorzec sekcji dashboardu jest udokumentowany
 > w `rebuild/frontend/src/pages/analityka/README.md`. Trasa jest ładowana **leniwie**
-> (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku ~385 kB, więc płaci za niego tylko
+> (`lazy`+`Suspense`) — Recharts trafia do osobnego chunku (~398 kB po 10c i 10d), więc płaci za niego tylko
 > wejście na `/analityka`, nie wspólny bundle. Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
+>
+> **Dla bloków 10b, 10e i 10f:** karty oryginału zakładka po zakładce (tytuły, kolumny,
+> etykiety PL, kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu —
+> `docs/analityka-bloki-10b-10f.md`.
 >
 > **Odbudowa (10c, `22-FEATURE-analityka-ean`, 2026-09-03):** zakładka „EAN i ceny" wypełniona —
 > trzy karty 1:1 z oryginałem („Porównanie cen po EAN", „Pozycje unikalne", „Pokrycie wspólne
@@ -274,9 +278,18 @@ ma endpoint:
 > (`ean/comparison.rows.length`, `ean/unique.rows.length`) są od teraz gotowe, przepięcie czeka
 > na decyzję użytkownika. Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
 >
-> **Dla bloków 10b, 10d, 10e, 10f:** karty oryginału zakładka po zakładce (tytuły, kolumny,
-> etykiety PL, kontrolki, przyciski CSV) plus lista tras bez konsumenta w bundlu —
-> `docs/analityka-bloki-10b-10f.md`.
+> **Odbudowa (10d, `23-FEATURE-analityka-dostawcy`, 2026-09-03):** zakładka `dostawcy` — domyślna
+> zakładka `/analityka` — wypełniona trzema kartami 1:1: „1.1 Stabilność cennika dostawcy" (7
+> kolumn; dwie gałęzie backendu zwracają różny komplet kolumn, więc część komórek zawsze pokazuje
+> „—" — zastane zachowanie oryginału, odtworzone świadomie, D1), „1.2 Nowości i wycofania" (6
+> kolumn, data w surowym ISO jak oryginał) i „1.4 / 1.5 Stan i dostępność dostawcy" (5 kolumn,
+> „Dostępność" jako pasek postępu przez wspólny `PasekDostepnosci.tsx`, drugim konsumentem będzie
+> blok 10e; nad tabelą wykres słupkowy dostępności — odstępstwo O-10d-1, oryginał nie ma żadnych
+> wykresów). Filtrowanie klienckie jak w 10a: wiersze tych tras niosą wyłącznie wymiar `dostawca`,
+> pozostałe pięć filtrów globalnych są pomijane z widoczną notką. Przyciski „CSV" trzech kart
+> (obecne w oryginale) pominięte — trasa `GET /api/analytics/export/{view}` to blok 10f. Trasa
+> `GET /api/analytics/dostawcy-stats` odtworzona pod GATE, bez konsumenta w UI (D3, jak w
+> oryginale). Szczegóły: `docs/tickets/23-FEATURE-analityka-dostawcy/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

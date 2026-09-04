@@ -52,7 +52,7 @@ import {
   WYMIARY_EAN_RANKING,
   WYMIARY_EAN_UNIKALNE,
   wymiaryNieobslugiwane,
-  zastosujFiltrDostawcy,
+  zastosujFiltryDostawcow,
   type WymiarFiltra,
   type WyborFiltrow,
 } from "./filtrowanie";
@@ -170,11 +170,11 @@ export function SekcjaEan({
 
   // Dwie karty niosą kolumnę `dostawca` i tylko one realnie filtrują (patrz `filtrowanie.ts`).
   const wierszeUnikalne = useMemo(
-    () => zastosujFiltrDostawcy(unikalne.dane?.rows ?? [], wybor),
+    () => zastosujFiltryDostawcow(unikalne.dane?.rows ?? [], wybor),
     [unikalne.dane, wybor],
   );
   const wierszeRankingu = useMemo(
-    () => zastosujFiltrDostawcy(ranking.dane?.rows ?? [], wybor),
+    () => zastosujFiltryDostawcow(ranking.dane?.rows ?? [], wybor),
     [ranking.dane, wybor],
   );
 

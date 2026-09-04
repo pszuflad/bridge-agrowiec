@@ -123,14 +123,23 @@ export const WYMIARY_EAN_UNIKALNE: WymiarFiltra[] = ["dostawcy"];
 /** Ranking dostawców — jedyna kolumna filtra w wierszu to `dostawca`. */
 export const WYMIARY_EAN_RANKING: WymiarFiltra[] = ["dostawcy"];
 
+// Samego filtrowania po dostawcy sekcja EAN NIE definiuje po raz drugi — używa
+// `zastosujFiltryDostawcow` niżej (blok 10d). Funkcja jest generyczna po `{dostawca: string}`,
+// więc obsługuje i wiersze dostawców, i wiersze EAN; dwie identyczne implementacje pod różnymi
+// nazwami byłyby czystym długiem (wykryte przy scalaniu 10c z 10d, 2026-09-04).
+
 /**
- * Filtr po dostawcy dla wierszy, które niosą kolumnę `dostawca`.
+ * Filtrowanie sekcji zakładki `dostawcy` (blok 10d).
  *
- * Semantyka ta sama, co w `zastosujFiltryMarz`: pusty zbiór = wymiar nie filtruje. Jeden
- * wymiar, więc OR/AND nie mają tu jeszcze czego rozstrzygać — zostają w gestii wywołań
- * z sekcji o bogatszych wierszach (10b, 10d, 10e).
+ * Wszystkie trzy wiersze tej zakładki (`suppliers/stability`, `suppliers/lifecycle`,
+ * `suppliers/stock`) niosą JEDEN wspólny wymiar katalogu — `dostawca`. Marki, modelu,
+ * rozmiaru ani indeksów w tych odpowiedziach nie ma: dwie z tras grupują po dostawcy,
+ * a trzecia czyta staging, gdzie tych kolumn nie ma w ogóle. Pozostałe pięć wymiarów jest
+ * więc ŚWIADOMIE POMIJANE, a sekcja mówi o tym notką — tak samo jak sekcja marż z 10a.
  */
-export function zastosujFiltrDostawcy<T extends { dostawca: string }>(
+export const WYMIARY_DOSTAWCOW: WymiarFiltra[] = ["dostawcy"];
+
+export function zastosujFiltryDostawcow<T extends { dostawca: string }>(
   wiersze: T[],
   wybor: WyborFiltrow,
 ): T[] {

@@ -20,6 +20,8 @@
  *  • O-10a-4 — pozostałe zakładki są puste do czasu bloków 10b, 10d i 10e. To zakres bloku,
  *              nie zmiana zachowania: nazwy i kolejność już są, więc kolejne sesje
  *              wstawiają treść, zamiast przemeblowywać widok.
+ *  • O-10d-1 — wykres dostępności w karcie „1.4 / 1.5" zakładki `dostawcy` (decyzja D2
+ *              z 2026-09-03) — kontynuacja O-10a-3, uzasadnienie w `SekcjaStanDostawcow.tsx`.
  *
  * ─── CO DOŁOŻYŁ BLOK 10c (2026-09-03, `22-FEATURE-analityka-ean`) ──────────────────────
  * Zakładka „EAN i ceny" niesie trzy karty oryginału (`SekcjaEan.tsx`). Nagłówek KPI ZOSTAJE
@@ -38,20 +40,26 @@ import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
+  useCyklZyciaDostawcow,
   useFiltry,
   useKpi,
   useMarze,
   usePokrycieEan,
   usePorownanieEan,
   useRankingDostawcowEan,
+  useStabilnoscDostawcow,
+  useStanDostawcow,
   useStatusHistorii,
   useUnikalneEan,
 } from "./analityka/api";
 import { FiltryGlobalne } from "./analityka/FiltryGlobalne";
 import { pustyWybor, type WyborFiltrow } from "./analityka/filtrowanie";
 import { NaglowekKpi } from "./analityka/NaglowekKpi";
+import { SekcjaCyklZyciaDostawcow } from "./analityka/SekcjaCyklZyciaDostawcow";
 import { SekcjaEan } from "./analityka/SekcjaEan";
 import { SekcjaMarze } from "./analityka/SekcjaMarze";
+import { SekcjaStabilnoscDostawcow } from "./analityka/SekcjaStabilnoscDostawcow";
+import { SekcjaStanDostawcow } from "./analityka/SekcjaStanDostawcow";
 
 /**
  * Zakładka jeszcze niewypełniona. Mówi wprost, który blok ją dowozi — inaczej pusty panel
@@ -73,6 +81,9 @@ export function Analityka() {
   const { data: status } = useStatusHistorii();
   const { data: kpi } = useKpi();
   const { data: marze, isPending: marzeWczytywane } = useMarze();
+  const { data: stabilnosc, isPending: stabilnoscWczytywana } = useStabilnoscDostawcow();
+  const { data: cyklZycia, isPending: cyklZyciaWczytywany } = useCyklZyciaDostawcow();
+  const { data: stan, isPending: stanWczytywany } = useStanDostawcow();
 
   // Blok 10c — cztery trasy EAN, które oryginalny frontend realnie woła (`fe.js:27839-27851`).
   // `ean/details` i `ean-porownanie` hooka nie mają: w oryginale nie mają konsumenta (D6).
@@ -112,11 +123,25 @@ export function Analityka() {
           </TabsTrigger>
         </TabsList>
 
+        {/*
+          Zakładka DOMYŚLNA całego widoku (`:27805`, `useState("dostawcy")`). Trzy karty
+          w kolejności oryginału (`:28050-28174`) — blok 10d wstawia treść w gotowe miejsce,
+          nie przemeblowuje zakładek.
+        */}
         <TabsContent value="dostawcy" className="mt-4">
-          <ZakladkaWPrzygotowaniu
-            blok="10d"
-            zakres="Statystyki dostawców, stabilność, cykl życia i stany magazynowe."
-          />
+          <div className="space-y-4">
+            <SekcjaStabilnoscDostawcow
+              dane={stabilnosc}
+              wybor={wybor}
+              ladowanie={stabilnoscWczytywana}
+            />
+            <SekcjaCyklZyciaDostawcow
+              dane={cyklZycia}
+              wybor={wybor}
+              ladowanie={cyklZyciaWczytywany}
+            />
+            <SekcjaStanDostawcow dane={stan} wybor={wybor} ladowanie={stanWczytywany} />
+          </div>
         </TabsContent>
 
         <TabsContent value="ean" className="mt-4">

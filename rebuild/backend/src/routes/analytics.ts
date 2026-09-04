@@ -15,20 +15,23 @@
 // `POST /api/analytics/bootstrap-current` (metod zapisujących nie nagrywano,
 // `contract/README.md:38`), który zamiast tego ma test jednostkowy w `analityka.agregaty.test.ts`.
 //
-// Blok 10c dokłada sześć tras EAN (`:188-235`, `:335-338`). Pozostałe 16 tras modułu dowożą
-// bloki 10b, 10d, 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
+// Blok 10c dołożył sześć tras EAN (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców
+// (`:110`, `:133`, `:143`, `:332`). Razem z pięcioma trasami 10a daje to 15 z 27 tras modułu;
+// pozostałe 12 dowożą bloki 10b, 10e i 10f (`docs/rebuild-roadmap.md` §5, Iteracja 10).
 //
 // ⚠ TRZY TRASY EAN CZYTAJĄ `req.query` — i to jest jedyne miejsce w tym pliku, gdzie parametr
-// żądania w ogóle dociera do repozytorium. Trasy podają go SUROWO (`req.query.x`), bo
-// oryginał parsuje go dopiero w handlerze (`num()`, `String(x || '')`) i jego luźna semantyka
-// — tablica z powtórzonego parametru, wartość nieliczbowa, pusty napis — jest częścią
-// odtwarzanego zachowania. Rozpakowanie tego wcześniej zmieniłoby wynik.
+// żądania w ogóle dociera do repozytorium (trasy dostawców z 10d żadnego nie mają). Trasy
+// podają go SUROWO (`req.query.x`), bo oryginał parsuje go dopiero w handlerze (`num()`,
+// `String(x || '')`) i jego luźna semantyka — tablica z powtórzonego parametru, wartość
+// nieliczbowa, pusty napis — jest częścią odtwarzanego zachowania. Rozpakowanie tego
+// wcześniej zmieniłoby wynik.
 
 import { Router, type Request, type Response } from "express";
 
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import {
+  cyklZyciaDostawcow,
   kpi,
   listyFiltrow,
   marze,
@@ -36,7 +39,10 @@ import {
   porownanieEan,
   porownanieEanLegacy,
   rankingDostawcowEan,
+  stabilnoscDostawcow,
+  stanDostawcow,
   statusHistorii,
+  statystykiDostawcow,
   szczegolyEan,
   unikalneEan,
   zbudujSnapshotBiezacy,
@@ -75,9 +81,41 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
     res.json(listyFiltrow(db));
   });
 
+  // ─── Blok 10d · dostawcy ──────────────────────────────────────────────────────────────
+  //
+  // Trzy trasy z sekcji „Part 1: supplier analysis" oryginału, w jego kolejności rejestracji.
+  // ŻADNA nie czyta `req.query` — filtrowanie zakładki `dostawcy` jest klienckie, tak jak
+  // w sekcji marż z 10a. Czwarta trasa bloku (`dostawcy-stats`) siedzi niżej, w sekcji aliasów,
+  // bo tam ją zarejestrował oryginał.
+
+  /** Stabilność cennika dostawcy (`:110-131`). Dwie gałęzie kształtu wiersza — patrz repo. */
+  router.get("/api/analytics/suppliers/stability", requireAuth, (_req: Request, res: Response) => {
+    res.json(stabilnoscDostawcow(db));
+  });
+
+  /** Nowości i wycofania — dziennik stagingu, nie katalog (`:133-141`). */
+  router.get("/api/analytics/suppliers/lifecycle", requireAuth, (_req: Request, res: Response) => {
+    res.json(cyklZyciaDostawcow(db));
+  });
+
+  /** Stan i dostępność dostawcy (`:143-154`). Bez limitu — wiersz na dostawcę. */
+  router.get("/api/analytics/suppliers/stock", requireAuth, (_req: Request, res: Response) => {
+    res.json(stanDostawcow(db));
+  });
+
   /** Cztery liczby nagłówka KPI (`:325-331`). W oryginalnym froncie bez konsumenta — patrz repo. */
   router.get("/api/analytics/kpi", requireAuth, (_req: Request, res: Response) => {
     res.json(kpi(db));
+  });
+
+  /**
+   * Statystyki dostawców (`:332`) — GOŁA TABLICA, bez koperty.
+   *
+   * Alias zgodności bez konsumenta w oryginalnym froncie (0 trafień w bundlu). Dowieziona pod
+   * GATE, świadomie bez hooka i bez karty w UI (decyzja D3 bloku 10d) — szczegóły w repo.
+   */
+  router.get("/api/analytics/dostawcy-stats", requireAuth, (_req: Request, res: Response) => {
+    res.json(statystykiDostawcow(db));
   });
 
   /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Bez parametrów query. */

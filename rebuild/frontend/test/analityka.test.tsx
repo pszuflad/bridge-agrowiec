@@ -14,7 +14,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
@@ -23,32 +23,60 @@ import { queryClient } from "@/lib/queryClient";
 import type { Marze } from "@/pages/analityka/api";
 import {
   TOKEN_TESTOWY,
+  cyklZyciaDostawcowZFixtura,
   filtryZFixtura,
   kpiZFixtura,
   marzeZFixtura,
   pokrycieEanZFixtura,
   porownanieEanZFixtura,
   rankingEanZFixtura,
+  stabilnoscDostawcowZFixtura,
+  stanDostawcowZFixtura,
   statusAnalitykiZFixtura,
   unikalneEanZFixtura,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
 
+/**
+ * ⚠ DWA LIMITY, NIE JEDEN. `findByTestId(..., { timeout })` czeka najwyżej tyle, ile pozwala
+ * `testTimeout` vitest — a ten stoi domyślnie na 5 s (`vitest.config.ts` go nie podnosi).
+ * Samo podniesienie limitu zapytania byłoby więc ochroną pozorną: test padłby wcześniej na
+ * „Test timed out in 5000ms". Podnosimy oba, plikowo (nie globalnie), bo dotyczy to wyłącznie
+ * widoków ładowanych leniwie: chunk `/analityka` ciągnie Recharts i jego pierwszy import
+ * w jsdomie trwa ~1,5 s, a pod obciążeniem równoległej pracy kilku agentów na tej samej
+ * maszynie — dłużej. To koszt narzędzi, nie zachowanie aplikacji.
+ */
+vi.setConfig({ testTimeout: 20_000 });
+
 const UZYTKOWNIK = uzytkownikZFixtura();
 const FILTRY = filtryZFixtura();
 const STATUS = statusAnalitykiZFixtura();
 const KPI = kpiZFixtura();
 const MARZE = marzeZFixtura();
+const STABILNOSC = stabilnoscDostawcowZFixtura();
+const CYKL_ZYCIA = cyklZyciaDostawcowZFixtura();
+const STAN = stanDostawcowZFixtura();
 
+/**
+ * Trzy trasy dostawców też muszą tu być, choć ten plik ich nie bada: zakładka `dostawcy`
+ * jest DOMYŚLNA, więc mountuje się przy każdym wejściu na `/analityka` i wypuszcza swoje
+ * zapytania. Bez handlerów `onUnhandledRequest: "error"` wywaliłby każdy test w tym pliku.
+ * Zawartość tej zakładki bada `analityka.dostawcy.test.tsx` (blok 10d).
+ */
 function zamockujApi(marze: Marze = MARZE) {
   server.use(
     http.get("*/api/analytics/filters", () => HttpResponse.json(FILTRY)),
     http.get("*/api/analytics/status", () => HttpResponse.json(STATUS)),
     http.get("*/api/analytics/kpi", () => HttpResponse.json(KPI)),
     http.get("*/api/analytics/margins", () => HttpResponse.json(marze)),
-    // Cztery trasy EAN (blok 10c) — widok pobiera je przy każdym wejściu, niezależnie od
-    // aktywnej zakładki, więc bez tych handlerów `onUnhandledRequest: "error"` wywala test.
+    // Widok pobiera KOMPLET tras przy każdym wejściu, niezależnie od aktywnej zakładki,
+    // więc bez tych handlerów `onUnhandledRequest: "error"` wywala test.
+    // Trzy trasy dostawców (blok 10d):
+    http.get("*/api/analytics/suppliers/stability", () => HttpResponse.json(STABILNOSC)),
+    http.get("*/api/analytics/suppliers/lifecycle", () => HttpResponse.json(CYKL_ZYCIA)),
+    http.get("*/api/analytics/suppliers/stock", () => HttpResponse.json(STAN)),
+    // Cztery trasy EAN (blok 10c):
     http.get("*/api/analytics/ean/comparison", () => HttpResponse.json(porownanieEanZFixtura())),
     http.get("*/api/analytics/ean/unique", () => HttpResponse.json(unikalneEanZFixtura())),
     http.get("*/api/analytics/ean/coverage", () => HttpResponse.json(pokrycieEanZFixtura())),
@@ -66,7 +94,8 @@ async function otworzAnalityke() {
   window.history.pushState({}, "", "/analityka");
   render(<App />);
   // Trasa jest ładowana leniwie (osobny chunk z Recharts), więc czekamy na tytuł strony.
-  return await screen.findByTestId("text-page-title");
+  // Limit dłuższy niż domyślna sekunda — mieści się w podniesionym `testTimeout` wyżej.
+  return await screen.findByTestId("text-page-title", undefined, { timeout: 15_000 });
 }
 
 /** Przejście na zakładkę „Marża i rotacja" — jedyną wypełnioną w bloku 10a. */
