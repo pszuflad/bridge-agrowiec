@@ -182,9 +182,9 @@ Cztery pliki `docs/` zaktualizowane równolegle przez doc-checkery, po review.
   poprawiona na „dowieziony w 12b".
 
 ### `docs/rebuild-backlog.md`
-- **Nowe wpisy:** **#46** brak kolumny roli w `users` (⬜ do decyzji, stan zastany zgodny
-  z produkcją, nie regresja); **#47** niesprzątane kopie bazy po `products/clear` (⬜);
-  **#48** dwie kopie `parsujSzczegoly` — wpis dotyczy pytania „czy `rebuild/` ma dostać
+- **Nowe wpisy:** **#48** brak kolumny roli w `users` (⬜ do decyzji, stan zastany zgodny
+  z produkcją, nie regresja); **#49** niesprzątane kopie bazy po `products/clear` (⬜);
+  **#50** dwie kopie `parsujSzczegoly` — wpis dotyczy pytania „czy `rebuild/` ma dostać
   wspólny pakiet", samą duplikację oznaczono jako świadomą i zrobioną.
 - **#36 (AppShell)** sprostowany: `WidokWPrzygotowaniu.tsx` usunięty, `MojeKonto.tsx` dopisany
   do listy widoków renderujących sidebar; licznik poprawiony.
@@ -210,3 +210,36 @@ Cztery pliki `docs/` zaktualizowane równolegle przez doc-checkery, po review.
 - `docs/spec-frontend.md:389` (blok 7b) mówi „router ma 12 tras, 1 placeholder", a blok 8b
   (linie 69-83, ta sama data) już mówi o 13 trasach po dodaniu `/selly`. Rozbieżność wymaga
   ustalenia realnej chronologii 7b vs 8b — obie noty mają datę 2026-09-04.
+
+## Scalenie z `develop` (2026-09-05)
+
+`develop` dostał w międzyczasie trzy tickety — **33** (instrukcja testów I8), **34** (blokada
+środowiskowa Selly) i **35 = sesja 12a** (mutacje produktów, BE). Cztery konflikty, wszystkie
+rozwiązane przez **zachowanie obu stron**; żadna zmiana nie została porzucona.
+
+- **`rebuild/backend/src/repos/products.ts`** — konflikt czysto addytywny: 12b dopisało
+  `wyczyscProdukty` (bulk `DELETE FROM products`), 12a — `tylkoKolumnyProduktu`,
+  `POLA_EDYTOWALNE_PRODUKTU`, `produktPoId`, `wKontrakcie` i `odsiejPolaEdytowalneProduktu`.
+  Obie gałęzie zachowane obok siebie.
+- **`docs/spec-backend.md`** — dwie niezależne noty („Potwierdzone w 12a" i „…w 12b"),
+  zachowane obie, w kolejności sesji.
+- **`docs/rebuild-roadmap.md`** — cztery starcia (wstęp §4, wiersz tabeli, cały blok I12, §6).
+  **Za bazę wzięta struktura z `develop`** (nagłówki `#### Sesja 12a…12e` są czytelniejsze niż
+  lista punktów, którą wniosła 12b), a w nią wpięty stan faktyczny 12b. Skutki:
+  - sekcja „Sesja 12b — ⬜" zastąpiona wersją odhaczoną; **`develop` nadal miał w niej stary błąd
+    `GET/PUT /api/admin/supplier-config`** — sprostowany razem z notą, że to trzecia z rzędu
+    pomyłka roadmapy w opisie metody endpointu;
+  - zachowana nota z 12a, że `GET /api/audit-log` zobaczy też `edycja_produktu`
+    i `usuniecie_produktu` (z niespójnym `encjaId`: `kod` vs `id` jako tekst);
+  - wejścia 12b dołożone do bloków **12d** (brak nagrań czterech mutacji, brak `401` dla
+    `audit-log` w kontrakcie) i **12e** (brak kolumny roli, niesprzątane kopie bazy);
+  - GATE i DoD Iteracji 12 odhaczone dla obu zamkniętych sesji.
+- **`docs/rebuild-backlog.md`** — ⚠ **kolizja numerów**: ticket 34 zajął na `develop` wpisy
+  **#46** i **#47**, a doc-checker 12b nadał te same numery swoim trzem wpisom. Nasze
+  przenumerowane na **#48** (brak kolumny roli), **#49** (niesprzątane kopie bazy) i **#50**
+  (dwie kopie `parsujSzczegoly`); odsyłacze w roadmapie i w tym raporcie poprawione.
+  Numeracja sprawdzona — brak duplikatów.
+
+**Bramki po scaleniu:** backend **1184 testy / 75 plików**, frontend **694 testy / 46 plików**,
+`lint`/`typecheck`/`build` czyste po obu stronach. Przyrost wobec stanu sprzed merge'a
+(1086/688) pochodzi z testów ticketu 35 i 34.

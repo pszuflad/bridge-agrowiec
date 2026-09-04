@@ -126,7 +126,7 @@ tego, co użytkownik realnie widzi w panelu, nie tylko statystyk importu.
 | **Pliki (stan końcowy)** | `parsers/tyre_params.cjs`, `bridge_ext.cjs`, `db/schema.sql` (kolumna `products.szerokosc`); skasowane `probe.cjs/2/3`; kopie `*.bak_pre_szerokoscfix_*`, `*.bak_pre_szerorig_*`, `*.bak_pre_szertxt_*` |
 | **Commity** | `97ccb9f` (szerokoscfix — cofnięty) · `5c060b0` (szerorig) · `d5a43c9` (szertxt) |
 | **Do nowej wersji?** | ✅ **TAK — NANIESIONE** (decyzja użytkownika 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`, plan.md D3) |
-| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`). Zostaje JEDNO: przenagranie `GET_products.json` w **I12**. |
+| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`); potwierdzone w I12a (2026-09-05), że kanon nie ożywił starego wyjątku. Zostaje JEDNO: przenagranie `GET_products.json` w **sesji 12d**. |
 
 **Opis biznesowy:**
 Kolumna „szerokość" opony była niespójna: ten sam rozmiar (np. „11.2-24") zapisywał się raz jako
@@ -157,20 +157,28 @@ liczbę z tekstu rozmiaru 1:1, z zerami końcowymi**, bez konwersji jednostek.
   stan produkcji 2026-08-17, `rebuild/schema/README.md`); zmianę wnosi migracja przyrostowa
   `003_szerokosc_text.sql`, która przebudowuje tabelę (SQLite nie ma `ALTER COLUMN`). Strażnik
   przed dryfem duplikatu DDL: `test/db.migracje.test.ts` porównuje kolumny żywej tabeli z kanonem.
-- ⬜ **Fixture — ZOSTAJE do I12.** `GET_products.json` ma `szerokosc` liczbową (nagrany przed
+- ⬜ **Fixture — ZOSTAJE do sesji 12d.** `GET_products.json` ma `szerokosc` liczbową (nagrany przed
   migracją produkcji). GATE I2 przepuszcza to przez **zadeklarowany, samoczyszczący się wyjątek**
-  `WYJATKI_SZEROKOSC` (`test/katalog.gate.test.ts`): niesie powód i wskazanie na I12, a gdy
-  przestanie cokolwiek pokrywać — zapali test i wymusi swoje usunięcie.
+  `WYJATKI_SZEROKOSC` (`test/katalog.gate.test.ts`): niesie powód i wskazanie na 12d, a gdy
+  przestanie cokolwiek pokrywać — zapali test i wymusi swoje usunięcie. Przenagranie
+  `GET_products.json` (`szerokosc` jako TEXT) i zdjęcie tego wyjątku nadal czeka na sesję 12d.
 - 🔎 **Warto wiedzieć przy przenagrywaniu:** `db/snapshot.db` (2026-08-13) jest STARSZY niż
   migracja `szertxt` (2026-08-19) i ma jeszcze `szerokosc REAL`, więc sam nie nadaje się na
   źródło wartości „z zerami końcowymi".
+- ⚠ **Znalezione w I12a (2026-09-05), istotne dla sesji 12c.** Produkcyjny dialog edycji `LT()`
+  renderuje `szerokosc` jako `type="number"` z `parseFloat` (`deminified/frontend-index.js:24076-24079`),
+  więc RĘCZNA edycja wysyła LICZBĘ do kolumny TEXT i gubi zera końcowe („10.00" → „10") —
+  dokładnie to, czego broniła cała saga `szertxt`. Import ich nie gubi (parser pisze napis,
+  kolumna jest TEXT); traci je tylko ścieżka ręcznej edycji. To zastane zachowanie produkcji,
+  nie regres odbudowy. `szerokosc` jest mimo to na liście pól edytowalnych produktu
+  (`POLA_EDYTOWALNE_PRODUKTU`, backlog #14), bo produkcja to pole realnie edytuje.
 
 **Warstwa parsera — zrobiona (2026-08-26, I3/3a), decyzja o schemacie nadal otwarta.**
 Port verbatim `tyre_params.cjs` wniósł stan końcowy `szertxt` do `rebuild/backend`: `parseSize()`
 zwraca `szerokosc` jako **string** z zerami końcowymi (`"10.00"`, `"400"`), a `widthCm` dalej liczy
 `wysokoscBokuCm`/`wysokoscRzeczywistaCm` z floata. W 3a nie ma bazy, więc dotyczy to wyłącznie
 kształtu rekordu w pamięci. **Zmiana `products.szerokosc` REAL→TEXT została naniesiona
-w 3d-1 (2026-08-27); zostaje wyłącznie przenagranie `GET_products.json` w I12.**
+w 3d-1 (2026-08-27); zostaje wyłącznie przenagranie `GET_products.json` w sesji 12d.**
 
 ⭐ **Dlaczego to NIE była kosmetyka (ustalenie z 3d-1).** Port parsera od 3a produkuje napisy,
 ale SQLite stosuje TYPE AFFINITY: do kolumny `REAL` napis `"10.00"` wchodzi jako liczba `10.0`
@@ -267,9 +275,9 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 | **Kategoria** | BAZA (nowa kolumna) + BACKEND (endpoint, patche) + FRONTEND (tooltip) |
 | **Pliki** | `db/schema.sql` (kolumna `uwaga_cena`), `uwaga_cena_patch.cjs` (nowy), `parsers/adapter.cjs`, `parsers/mo7_nokian.cjs`, `extensions.cjs` |
 | **Commity** | `33455c8`, `c5d3d63`, `16bc37c` |
-| **Do nowej wersji?** | ✅ **TAK** (parser + kolumna wniesione — I3/3a i 3b, 2026-08-26; otwarte: endpoint + propagacja) |
-| **Iteracja** | **→ I3** (schemat: 3b ✔; endpoint + propagacja importu: 3d) **+ injection-tooltip** (późniejsza iteracja; wzorzec jak pending/selly/freq-injection) |
-| **Status** | 🔨 częściowo zrobione (kolumna `products.uwaga_cena` w rebuild, I3/3b, 2026-08-26) — endpoint i propagacja → 3d |
+| **Do nowej wersji?** | ✅ **TAK — DOMKNIĘTE** (parser i kolumna I3/3a-3b; propagacja `acceptStaging` 3d-2; oba endpointy + propagacja bulku I12a, 2026-09-05) |
+| **Iteracja** | **→ I3** (schemat: 3b ✔; propagacja importu: 3d-2 ✔) **→ I12a** (endpointy + propagacja bulku ✔) **+ injection-tooltip** (późniejsza iteracja; wzorzec jak pending/selly/freq-injection) |
+| **Status** | ✅ **ZREALIZOWANE w rebuild (I12a, 2026-09-05)** — kolumna, obaj pisarze (`acceptStaging`, `addProductsBulk`) i oba czytelniki (`uwagi-cena`, `hold-reasons`) gotowe; nadal otwarte: ujawnienie `uwagaCena` w `GET /api/products` → 12d |
 
 **Opis biznesowy:** dostawcy czasem zwracają „cena na zapytanie" (np. „- zł" w Nokian dla wielkoformatowych VF Float King). Zamiast pokazywać 0/pustą cenę, produkt dostaje notatkę i jest „wstrzymany"; frontend pokazuje tooltip z powodem.
 
@@ -291,12 +299,25 @@ pozostaje nietknięty do czasu przenagrania fixtures w I12.
 
 **Podział doprecyzowany 2026-08-27 (I3/3d-1, decyzja użytkownika — plan.md D4):**
 - **propagacja** w `acceptStaging` (odczyt `uwagaCena` ze `snapshotJson` → `products.uwaga_cena`)
-  → **3d-2**, u swojego pisarza;
-- **endpointy** → **I12**, razem z dopisaniem do `openapi.yaml`. ⚠ **Endpointy są DWA, nie jeden**
-  — produkcja realizuje to monkey-patchem `mirror/backend/uwaga_cena_patch.cjs`, który dokłada
-  `GET /api/products/uwagi-cena` ORAZ `GET /api/products/hold-reasons` (powód wstrzymania liczony
-  w locie: `uwaga_cena` dosłownie / brak ceny i stanu / brak ceny / brak stanu / „sprawdź ręcznie").
-  Ten sam patch monkey-patchuje też `addProductsBulk` — to trzeci pisarz, do uwzględnienia w 3d-2.
+  → **3d-2 ✔**, u swojego pisarza;
+- **endpointy** → **I12 ✔ (sesja 12a, 2026-09-05)**, razem z dopisaniem do `openapi.yaml`.
+  ⚠ **Endpointy są DWA, nie jeden** — produkcja realizuje to monkey-patchem
+  `mirror/backend/uwaga_cena_patch.cjs`, który dokłada `GET /api/products/uwagi-cena` ORAZ
+  `GET /api/products/hold-reasons` (powód wstrzymania liczony w locie: `uwaga_cena` dosłownie /
+  brak ceny i stanu / brak ceny / brak stanu / „sprawdź ręcznie"). Ten sam patch monkey-patchuje
+  też `addProductsBulk` — trzeci pisarz, **domknięty natywnie w tej samej sesji** (`src/import/bulk.ts`,
+  pętla po całej partii PO transakcji, 1:1 z `uwaga_cena_patch.cjs:72-93`: brak klucza w pozycji
+  CZYŚCI kolumnę, kolejność `it.uwagaCena !== undefined ? it.uwagaCena : (it.uwaga_cena || null)`).
+
+**Domknięcie w I12a (2026-09-05).** Oba czytelniki dowiezione: `GET /api/products/uwagi-cena`
+(`{ok, items:[{id, kod, ean, uwaga_cena}]}` — klucz w **snake_case**, bo produkcja czyta te
+wiersze surowym `better-sqlite3`; projekcja w odbudowie wypisana jawnie z aliasem) i
+`GET /api/products/hold-reasons` (`{ok, items:[{id, kod, ean, reason}]}`, powód liczony w locie,
+pięć przypadków, `uwaga_cena` bije wszystkie pozostałe warunki). Obie ścieżki dopisane do
+`contract/openapi.yaml` (bez schematów ciał — te powstają z nagrań produkcji w 12d). **Nadal
+otwarte:** kolumna `uwagaCena` jest wciąż ukryta przed `GET /api/products` projekcją
+kontraktową (`repos/kolumny.ts`, `KOLUMNY_POZA_KONTRAKTEM`) — ujawnienie wymaga przenagrania
+`contract/fixtures/GET_products.json` → sesja 12d.
 
 **Potwierdzone przy 3c (2026-08-26).** Silnik dopasowania serializuje `snapshotJson` z rekordu
 PO `znormalizujPozycje()` (`Hq()`), która kopiuje wszystkie pola wejścia przez spread —
@@ -891,14 +912,15 @@ zakresem odbudowy — decyzja użytkownika, czy i kiedy.
 
 > **Znalezione przy bloku I3/3f-2 (2026-09-01).** Dla dostawców NAPRAWIONE decyzją
 > użytkownika; dla narzutów i promocji NAPRAWIONE w bloku 4a (2026-09-02); dla spedycji
-> i configu NAPRAWIONE w Iteracji 11 (2026-09-03); dla produktów **czeka na Iterację 12**.
+> i configu NAPRAWIONE w Iteracji 11 (2026-09-03); dla produktów NAPRAWIONE w Iteracji 12,
+> sesji 12a (2026-09-05).
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (warstwa danych + trasy mutacji) |
 | **Pliki** | `deminified/backend-index.cjs:45043` (`updateSupplier`), `:44975` (`updateMarkup`), `:44998` (`updatePromotion`), `:44824` (`updateStaging`), `:44728` (`updateProduct`), `:45077-45085` (`upsertSpedycja`), `:45083-45089` (`U.setConfig`); trasy `:48230`, `:48699`, `:48722`, `:48415`, `:48736`, `:48745` |
 | **Do nowej wersji?** | ❌ **NIE — defektu nie odtwarzamy** (decyzja 2026-09-01, dotyczy dostawców; dla narzutów/promocji NAPRAWIONE 4a, dla spedycji/configu NAPRAWIONE I11, dla produktów patrz „Co z tego wynika") |
-| **Status** | ✔ dostawcy naprawieni w rebuild (3f-2) · ✔ narzuty i promocje naprawione w rebuild (4a, 2026-09-02) · ✔ spedycja i config naprawione w rebuild (I11, 2026-09-03) · ⬜ produkty (I12) · w produkcji **nadal obecne** |
+| **Status** | ✔ dostawcy naprawieni w rebuild (3f-2) · ✔ narzuty i promocje naprawione w rebuild (4a, 2026-09-02) · ✔ spedycja i config naprawione w rebuild (I11, 2026-09-03) · ✔ produkty naprawione w rebuild (I12a, 2026-09-05) · w produkcji **nadal obecne** |
 
 **Co robi produkcja.** Metody warstwy danych przyjmują obiekt i wrzucają go do `SET` bez
 żadnego filtra:
@@ -916,8 +938,17 @@ Trzy trasy podają im ciało żądania **wprost od użytkownika**:
 | `PATCH /api/dostawcy/:id` (`:48230`) | `c.body` — bez zmian | **3f-2 ✔** |
 | `PATCH /api/markups/:id` (`:48701`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4a ✔** |
 | `PATCH /api/promotions/:id` (`:48724`) | `{...c.body, zmienilUzytkownikId, zmienionoData}` | **Iteracja 4a ✔** |
-| `PUT`+`PATCH /api/products/:id` (`:48415-48424`, rejestracja `:48452`) | `c.body` bez klucza `_reason` | **Iteracja 12** |
+| `PUT /api/products/:id` (`:48415-48449`) i `PATCH /api/products/:id` (`:48452-48487`, osobna funkcja) | `c.body` bez klucza `_reason` | **I12a ✔** |
 | `POST /api/spedycja` (`:48736`) | `c.body` — bez zmian | **Iteracja 11 ✔** |
+
+**Sprostowanie faktu o oryginale (I12a, 2026-09-05).** `PUT` i `PATCH /api/products/:id` NIE
+są jednym wspólnym handlerem, jak wcześniej twierdził ten wpis — `:48415-48449` obsługuje
+wyłącznie `PUT` (`e.put(…, i)`, `:48451`), a `PATCH` ma własną, niemal identyczną funkcję
+(`:48452-48487`); jedyna różnica to kolejność audytu względem pętli override/history, stan
+końcowy identyczny. Odbudowa świadomie portuje jeden wspólny handler (D2, plan.md).
+**Drugi sprostowany fakt: trasa edycji pisze do DWÓCH tabel, nie jednej** — poza
+`manual_overrides` (`:48427`) woła też `U.addHistory` (`:48435-48445`) do tabeli `history`.
+Ma to znaczenie dla tego wpisu, bo lista pól steruje też liczbą wpisów w dzienniku zmian.
 
 **⭐ Kluczowa obserwacja: produkcja NIE jest w tym konsekwentna.** `PUT /api/staging/:id`
 (`:48598`) ma jawną listę ośmiu pól i pętlę `if (!r.includes(v)) continue;` —
@@ -985,13 +1016,42 @@ Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archi
   spedycji zachował się tak jak przy narzutach (surowe ciało, port 1:1). Szczegóły:
   `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/plan.md` D4/D5, oraz backlog #29/#30
   (odstępstwa od 1:1 zatwierdzone przy tej samej okazji).
-- **Iteracja 12 (produkty + hardening)** — `PATCH /api/products/:id` odsiewa wyłącznie klucz
-  `_reason`; cała reszta 72 kolumn jest zapisywalna. Ta trasa dodatkowo zapisuje
-  `manual_overrides` dla KAŻDEGO zmienionego pola, więc lista pól decyduje też o tym,
-  co import przestanie nadpisywać.
+- **Iteracja 12 (produkty + hardening) — NAPRAWIONE (I12a, 2026-09-05).**
+  `POLA_EDYTOWALNE_PRODUKTU` w `rebuild/backend/src/repos/products.ts` — **42 pola**,
+  filtrowane wspólnym `odsiejPola` z `repos/pola-edytowalne.ts` (ten sam mechanizm co
+  dostawcy/narzuty/promocje/spedycja).
+  **⭐ Lista NIE jest wymysłem odbudowy** — to dokładnie zbiór pól, które produkcyjny dialog
+  edycji produktu potrafi wysłać: `LT()`, `deminified/frontend-index.js:24020-24090`; handler
+  zapisu (`:24107-24124`) wysyła wyłącznie klucze dotknięte przez użytkownika. To jeszcze
+  mocniejszy argument niż przy dostawcach, gdzie listę trzeba było złożyć z sensu kolumn.
+  Odcięte i dlaczego: kolumny **wyliczane** przez import (`marzaPct`, `magazyn`, `magazynRaw`,
+  `eanRaw`, `eanIsValid`, `eanSourceStatus`, `eanCandidates`, `kodImportu`,
+  `nieobecnoscPodRzad`, `indeksy`, `indeks1`, `indeks2`, `dostepnosc`, `rodzaj`, `sku`,
+  `zastosowanie`, `reinforced`, `extraLoad`, `cutResistant`, `heatResistant` oraz cztery
+  wymiary paczki liczone przez `applyDims`); **tożsamość i pola serwera** (`id`, `kod`,
+  `dataAktualizacji`); **kolumna własna odbudowy** `uwagaCena` (migracja 002); oraz
+  `dostawca` — dialog produkcji renderuje to pole, ale jako `disabled` (`:24028`), więc nigdy
+  go nie wysyła, a `manual_overrides` kluczuje się po `supplierKod = produkt.dostawca`, więc
+  zmiana dostawcy osierociłaby wszystkie własne poprawki produktu.
+  **Konsekwencja szersza niż zapis:** trasa zapisuje `manual_overrides` dla KAŻDEGO
+  zmienionego pola, a silnik importu te poprawki respektuje — więc lista pól decyduje też
+  o tym, czego import przestanie nadpisywać. Pole dopisane bez potrzeby to pole, które da się
+  przypadkiem zamrozić przed importem.
+  **Audyt jest tu SPÓJNY z zapisem**, inaczej niż przy narzutach/promocjach w 4a: audyt
+  `edycja_produktu` loguje `{zmiany: Object.keys(…)}` liczone PO odsianiu listą, więc
+  `szczegoly_json` opisuje stan bazy, a nie zamiar (przy narzutach/promocjach audyt loguje
+  surowe ciało — różnica wobec 4a, opisana wyżej w tym wpisie).
+  **Nowa gałąź, której wzorzec dostawców nie miał:** wprowadzenie listy pól sprawia, że
+  `PATCH` z samymi polami spoza listy daje pusty patch, a Drizzle rzuca na `set({})`.
+  `aktualizujProdukt` dostało więc gałąź „pusty patch → bez UPDATE, zwróć aktualny wiersz" —
+  ten sam ruch co `aktualizujDostawce` w 3f-2. Bez niego trasa oddawałaby 500 tam, gdzie
+  produkcja oddaje 200. Testy: `rebuild/backend/test/produkty.mutacje.test.ts`.
+  Wszystkie trasy mutacji produktów mają po tej sesji jawną listę pól — nic nie zostaje do
+  finalnego audytu.
 - **Reguła, którą warto przyjąć na stałe:** trasa mutacji dostaje jawną listę pól, a kolumny
   wyliczane i kolumny własne odbudowy (`importWylaczony`, `uwagaCena`) na tę listę **nigdy**
-  nie wchodzą.
+  nie wchodzą. Potwierdzone w I12a: `uwagaCena` odcięta z `POLA_EDYTOWALNE_PRODUKTU` mimo że
+  oryginał technicznie pozwalał ją zapisać przez `PATCH`/`PUT`.
 
 **Do rozważenia dla produkcji.** W starym Bridge to nadal działa. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
@@ -2147,7 +2207,70 @@ uznany za martwy kod, którego nie warto portować.
 
 ---
 
-### #46 · 2026-09-05 · [BACKEND][BEZPIECZEŃSTWO] · tabela `users` nie ma kolumny roli — „admin" nie jest technicznie odróżnialny
+### #46 · 2026-09-04 · [DEPLOY] · staging mógł nadpisać PRODUKCYJNY plik CSV dla Selly
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | DEPLOY / BEZPIECZEŃSTWO DANYCH (staging pisał po produkcji) |
+| **Pliki** | `rebuild/backend/src/config/env.ts:89-97` (wartości domyślne), `tools/deploy-staging.sh` (brak nadpisania), `rebuild/backend/src/selly/generator-csv.ts` (zapis pliku), `docs/deploy-setup.md:4` (wspólny VPS) |
+| **Do nowej wersji?** | ✅ **TAK — naprawione** w tickecie `34-FEATURE-selly-blokada-srodowiska` |
+| **Status** | ✅ zamknięte 2026-09-04 |
+
+**Co znaleziono.** `SELLY_CSV_DIR` ma wartość domyślną
+`/home/admin/domains/agritires.eu/public_html/panel/ex-port-files` — katalog **produkcyjny**.
+Jest to poprawne dla produkcji (odtwarza dwa zahardkodowane miejsca oryginału,
+`mirror/backend/selly/routes.cjs:300-301` i `generate_selly_export.cjs:8-9`), ale staging stoi
+**na tym samym VPS i tym samym userze `admin`**, a `tools/deploy-staging.sh` tej zmiennej
+nie ustawiał. Kliknięcie **„Wygeneruj CSV teraz"** na `/selly` na stagingu nadpisywało więc
+produkcyjny plik CSV treścią wygenerowaną **z bazy stagingowej**, a Selly zaciąga ten plik
+o 6:00 jako prawdziwy katalog.
+
+**Dlaczego to było groźniejsze niż brak sekretów Selly.** `POST /api/selly/generate-csv` jest
+trasą **lokalną** — działa **bez żadnych sekretów `SELLY_*`**. Zabezpieczenie oparte na tym,
+że staging nie ma danych dostępowych, w ogóle tej ścieżki nie dotyczyło. Instrukcja testów
+opisywała ten tryb jako „ryzyko: zero" — **błędnie**; sprostowane razem z naprawą.
+
+**Jak naprawione.** `tools/deploy-staging.sh` eksportuje bezpieczne `SELLY_CSV_DIR`/`_PLIK`/
+`_URL` (własny katalog stagingu) **przed** wczytaniem `.env`, więc poprawka jest wersjonowana
+w repo i działa przy każdym deployu, zamiast zależeć od tego, czy ktoś pamiętał dopisać linijkę
+na serwerze. Wartości domyślnych w `env.ts` **nie zmieniono** — dla produkcji są poprawne
+i wierne oryginałowi. Przy okazji dołożono `SELLY_TRYB` (patrz niżej).
+
+---
+
+### #47 · 2026-09-04 · [DEPLOY] · brak sekretów Selly to zabezpieczenie przez NIEOBECNOŚĆ
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | DEPLOY / BEZPIECZEŃSTWO (integracja z cudzym, żywym sklepem) |
+| **Pliki** | `rebuild/backend/src/selly/tryb.ts` (nowe), `src/config/env.ts` (`SELLY_TRYB`), `src/app.ts`, `tools/deploy-staging.sh` |
+| **Do nowej wersji?** | ✅ **TAK — dowiezione** (`34-FEATURE-selly-blokada-srodowiska`, decyzja użytkownika) |
+| **Status** | ✅ zamknięte 2026-09-04 |
+
+**Co znaleziono.** Do ticketa 34 jedynym zabezpieczeniem stagingu przed wysłaniem czegokolwiek
+do żywego sklepu Selly był **brak zmiennych `SELLY_*`**. Działa to skutecznie (zweryfikowane:
+`sprawdzKonfiguracje()` rzuca przed pierwszym żądaniem sieciowym, klient powstaje w jednym
+miejscu, żaden cron Selly nie dotyka), ale jest to zabezpieczenie przez **nieobecność, a nie
+zakaz** — skopiowanie `.env` z produkcji „żeby coś sprawdzić" czyni staging żywym po cichu
+i nic tego nie sygnalizuje.
+
+**Jak rozwiązane.** `SELLY_TRYB` = `wylaczony` (domyślnie) / `tylko-odczyt` / `pelny`,
+egzekwowany w obwolucie klienta (`src/selly/tryb.ts`), nie w trasach — dzięki czemu blokada
+obejmuje wszystkie dziesięć tras naraz, a test kompletności pilnuje, że lista metod zapisujących
+pokrywa się z interfejsem `KlientSelly` (nowa metoda zapisu nie ominie blokady po cichu).
+
+Tryb `tylko-odczyt` daje **dry-run za darmo**: dry-run nigdy nie woła metody zapisującej, więc
+działa bez ani jednej linijki kodu na ten temat.
+
+**Odstępstwo świadome** (produkcja przełącznika nie ma), wzorowane na `IMPORT_SCHEDULER`
+z bloku 3f-3, dodanym z tego samego powodu. Domyślnie wyłączony, bo pomyłka daje wtedy widoczny
+błąd, a nie cichy zapis do cudzego sklepu.
+
+**Nie objęte:** blokada sieciowa (egress) na VPS — byłaby najmocniejsza, bo nie zależy od
+poprawności naszego kodu, ale wymaga uprawnień, których na cyber_Folks bez roota
+prawdopodobnie nie ma. ⬜ Do sprawdzenia.
+
+### #48 · 2026-09-05 · [BACKEND][BEZPIECZEŃSTWO] · tabela `users` nie ma kolumny roli — „admin" nie jest technicznie odróżnialny
 
 > **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Zastane** — stan
 > zgodny z produkcją, nie regresja odbudowy.
@@ -2178,7 +2301,7 @@ bezpieczeństwa).
 
 ---
 
-### #47 · 2026-09-05 · [BACKEND] · kopie bazy po `POST /api/products/clear` nigdy nie są sprzątane
+### #49 · 2026-09-05 · [BACKEND] · kopie bazy po `POST /api/products/clear` nigdy nie są sprzątane
 
 > **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Zastane** — stan
 > zgodny z produkcją, port 1:1.
@@ -2206,7 +2329,7 @@ decyzja Ani, nie blokuje 12b.
 
 ---
 
-### #48 · 2026-09-05 · [BACKEND][FRONTEND] · `parsujSzczegoly` istnieje w repo w dwóch kopiach (backend i frontend)
+### #50 · 2026-09-05 · [BACKEND][FRONTEND] · `parsujSzczegoly` istnieje w repo w dwóch kopiach (backend i frontend)
 
 > **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Świadoma decyzja
 > użytkownika D4 tego ticketa** — nie jest to błąd do naprawienia.

@@ -10,6 +10,8 @@ import type { Baza } from "../db/index.js";
 import { markups, products, promotions, stagingItems } from "../db/schema.js";
 import { zastosujRegulyCenowe } from "../repos/ceny.js";
 import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
+// Wspólny z `bulk.ts` od 12a — obie ścieżki importu zapisują tę samą tabelę tym samym odsiewem.
+import { tylkoKolumnyProduktu } from "../repos/products.js";
 import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
 
 /**
@@ -206,19 +208,6 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
   // ——— Pozycja stagingu znika (:44910) ———
   db.delete(stagingItems).where(eq(stagingItems.id, id)).run();
   return true;
-}
-
-/**
- * Odsiewa ze zbudowanego rekordu klucze, których tabela `products` nie ma.
- *
- * PO CO: snapshot pochodzi z parsera i niesie pola pomocnicze (`_srcConflict`, `rozmiarWykryty`
- * itp.). Oryginał podaje całość Drizzle'owi, który po cichu ignoruje nieznane klucze — nasza
- * wersja Drizzle rzuca. Odsiew jest więc mostem między dwoma zachowaniami ORM-a, a nie
- * zmianą logiki: zapisujemy dokładnie te kolumny, które zapisałaby produkcja.
- */
-function tylkoKolumnyProduktu(rekord: RekordProduktu): Record<string, unknown> {
-  const znane = new Set(Object.keys(products));
-  return Object.fromEntries(Object.entries(rekord).filter(([klucz]) => znane.has(klucz)));
 }
 
 /** Odrzucenie pozycji — port `U.rejectStaging` (`:44917`). Zwykłe skasowanie wiersza. */

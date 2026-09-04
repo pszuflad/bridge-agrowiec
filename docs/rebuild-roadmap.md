@@ -146,9 +146,9 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 > **Stan na 2026-09-05: została JEDNA iteracja — I12** (konto, admin, hardening), w toku.
 > Iteracje 0–11 są zamknięte, wszystkie trzy skrypty injection wchłonięte, martwe ścieżki FE
 > naprawione. I12 zebrała po drodze wejścia z I2, I5, I7 i I11 i jest podzielona na pięć sesji
-> (12a–12e); **12b zamknięta** (konto/admin/maintenance), **12a/12c/12d/12e** wciąż otwarte —
-> czytaj blok I12 w całości, bo urósł ponad pierwotny zakres (m.in. mutacje produktów i dialog
-> edycji produktu z `/katalog`).
+> (12a–12e); **12a zamknięta** (mutacje produktów, BE) i **12b zamknięta** (konto/admin/
+> maintenance) — obie 2026-09-05, równolegle; **12c/12d/12e** wciąż otwarte. Czytaj blok I12
+> w całości, bo urósł ponad pierwotny zakres (m.in. dialog edycji produktu z `/katalog`).
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
@@ -166,7 +166,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
-| 12 | Konto + admin + hardening bezpieczeństwa | 12a·12b·12c·12d·12e | wszystkie | 🔨 | 12b: `36-FEATURE-konto-admin-maintenance` · 2026-09-05 |
+| 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | 🔨 | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` — obie 2026-09-05 |
 
 ---
 
@@ -945,9 +945,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   filtry (szukaj/typ/dostawca) + paginacja 25/50/100, wpięty w router/shell.
   `isLoading`/`isError` wg wzorca `Staging.tsx` (odstępstwo D5).
 - **Fakty do zapamiętania (dla kolejnych sesji):**
-  - **Tabela `history` nie ma w rebuildzie pisarza.** Jedyny pisarz oryginału to ręczna edycja
-    produktu w katalogu (`PUT`/`PATCH /api/products/:id`, `:48435`/`:48475`) — poza zakresem
-    tego ticketa. Do czasu jej sportowania `GET /api/history` zwraca na stagingu `[]`.
+  - **Tabela `history` dostała pisarza w sesji 12a (`35-FEATURE-mutacje-produktow-backend`,
+    2026-09-05).** Jedyny pisarz oryginału to ręczna edycja produktu w katalogu
+    (`PUT`/`PATCH /api/products/:id`, `:48435`/`:48475`) — sportowana jako
+    `zapiszWpisDziennika` (`src/repos/dziennik-zmian.ts`), wołana z handlera edycji produktu.
+    Od tej sesji `GET /api/history` przestał zwracać na stagingu `[]`.
   - **Rejestracji `/meta`+`/paged` w oryginale są TRZY, nie dwie:** rdzeń bez auth (`:48335`,
     `:48352`) + `mirror/backend/pagination_module.cjs:136,168` z auth, ładowany dwukrotnie
     (`extensions.cjs:449-451` + wprost z `index.cjs`). Wygrywa rdzeń, więc w produkcji trasy są
@@ -1208,6 +1210,29 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 - **DoD:** ✅ panel Selly natywny; ✅ eksport CSV — serwerowy (8a, za `requireAuth`) + przycisk
   w `/katalog` odłożony z I2 (8b); ✅ fixtures przez GATE (8a i 8b); ✅ parytet z
   `selly-injection.js` odnotowany faktyczną wielkością pliku (**30 936 B**).
+- **🔒 Zabezpieczenie środowisk (2026-09-04, `34-FEATURE-selly-blokada-srodowiska`).**
+  Dołożone PO zamknięciu 8b, na wniosek użytkownika. Dwie rzeczy:
+  1. **`SELLY_TRYB`** (`wylaczony` / `tylko-odczyt` / `pelny`, **domyślnie `wylaczony`**) —
+     twarda blokada w obwolucie klienta (`src/selly/tryb.ts`), niezależna od tego, czy sekrety
+     `SELLY_*` są ustawione. Odstępstwo świadome, wzorowane na `IMPORT_SCHEDULER` z 3f-3 i z tego
+     samego powodu. Tryb `tylko-odczyt` przepuszcza dry-run bez ani jednej linijki kodu na ten
+     temat — bo dry-run nigdy nie woła metody zapisującej. **Produkcja musi ustawić `pelny`
+     jawnie.**
+  2. ⚠ **`SELLY_CSV_DIR` wskazywał domyślnie katalog PRODUKCYJNY**, a staging stoi na TYM SAMYM
+     VPS (`docs/deploy-setup.md:4`) — „Wygeneruj CSV teraz" na stagingu nadpisywał plik, po który
+     Selly przychodzi o 6:00, treścią z bazy stagingowej. To trasa LOKALNA, więc brak sekretów
+     przed tym NIE chronił. Naprawione w `tools/deploy-staging.sh` (wersjonowane, nie ręcznie
+     w `.env`); wartości domyślne w `env.ts` zostają — dla produkcji są poprawne.
+  Szczegóły: `docs/rebuild-backlog.md` #46 i #47.
+- **📄 Instrukcja testów dla Ani: `docs/instrukcja-testow-I8.md`** (`33-DOCS-instrukcja-testow-i8`).
+  ⚠ Jedyna instrukcja w projekcie, która NIE zaczyna się od „to staging, testuj bez skrupułów":
+  `POST /api/selly/sync-supplier` z `dry_run=false` realnie modyfikuje sklep Selly, a staging
+  i produkcja mogą wskazywać ten sam sklep. Dokument opisuje **trzy tryby testowania**
+  odpowiadające trzem wartościom `SELLY_TRYB` (A: `wylaczony` — ustawiany automatycznie przy
+  deployu stagingu, pokrywa ~80% zakresu; B: `tylko-odczyt` — połączenie i dry-run, zapis
+  wymuszenie zablokowany; C: `pelny` — pełna wysyłka).
+  **Sandbox:** Bridge go nie ma; istnienie instancji testowej po stronie Selly.pl jest do
+  ustalenia z nimi, nie z repo. Praktycznym zamiennikiem jest `SELLY_TRYB` (ticket 34).
 
 ---
 
@@ -1568,158 +1593,214 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 12 — Konto + admin + hardening bezpieczeństwa
-- **Status:** 🔨 (12b ✅ 2026-09-05 · 12a/12c/12d/12e ⬜)  **Sesje:** 12a·12b·12c·12d·12e
-  **Zależy od:** wszystkie (finalny przegląd)
-- **Cel (Ania klika):** zmienia hasło w `/moje-konto` ✅ (12b); admin zarządza użytkownikami,
-  konfiguracją dostawców i utrzymaniem ✅ (12b); katalog dostaje pełne mutacje i akcje wierszowe
-  ⬜ (12a/12c).
+- **Status:** 🔨 **w toku** — sesje 12a i 12b zrobione (obie 2026-09-05, równolegle), trzy zostały.
+  **Sesje:** 12a BE ✅ (mutacje produktów) · 12b BE+FE ✅ (konto/admin/maintenance) ·
+  12c FE ⬜ (dialog edycji `LT()` + menu „Akcje") · 12d ⬜ (przenagranie fixtures + schematy
+  ciał) · 12e ⬜ (finalny audyt + przegląd 12 widoków z Anią)  **Zależy od:** wszystkie (finalny przegląd)
+- **Cel (Ania klika):** zmienia hasło w `/moje-konto` ✅ (12b); admin zarządza użytkownikami/
+  konfiguracją dostawców i utrzymaniem ✅ (12b); edytuje/wstrzymuje/usuwa produkty wprost
+  z `/katalog` — backend gotowy (12a), UI zostaje do 12c.
 
-- **12b · Konto + admin + maintenance** (BE+FE) — ✅ **2026-09-05**
-  (`36-FEATURE-konto-admin-maintenance`). Osiem operacji backendu za `requireAuth`:
-  `POST /api/password/change`, `GET /api/users`, `GET /api/admin/supplier-config`,
-  **`PATCH /api/admin/supplier-config/{kod}`** (nie `PUT` — zapisany wcześniej w tym pliku błąd
-  metody, potwierdzone `contract/openapi.yaml:28-41` i `mirror/backend/extensions.cjs:344`),
-  `GET /api/admin/suppliers-list`, `POST /api/maintenance/usun-nieopony`,
-  `POST /api/products/clear` (ciało `{potwierdzenie:"WYCZYSC"}`), `GET /api/audit-log`.
-  `GET /api/audit-log` **oddaje surowy `listAudit()` bez żadnego mapowania** (`e.get("/api/audit-log",
-  (c,u)=>u.json(U.listAudit(500)))`, `deminified/backend-index.cjs:48735`) — znosi `szczegoly_json
-  = NULL` (`synchronizacja_reczna`, wejście z I5) i `encja_id` niezłączalny z `suppliers`, i pokazuje
-  surowo dwie nowe akcje z I11 (`edycja_konfiguracji`, `edycja_spedycji`); parser `parsujSzczegoly`
-  **żyje we froncie** (`pages/konfiguracja/dziennik.ts`, druga świadoma kopia — D4), bo backend
-  parsować nie może bez łamania fixture'a `GET_audit-log.json` (`szczegolyJson` zamrożony jako
-  string). GATE zielony na czterech fixtures (`GET_users.json`, `GET_admin_supplier-config.json`,
-  `GET_admin_suppliers-list.json`, `GET_audit-log.json`); cztery mutacje sprawdzane tylko wobec
-  `openapi.yaml` — nagrań nie ma, domyka 12d. Frontend: `/moje-konto` (port `lM()`), przycisk
-  „Usuń wszystko z katalogu" w zakładce „Katalog" (`POST /api/products/clear`, `window.confirm`,
-  trzy `invalidateQueries`), DWIE NOWE zakładki `/konfiguracja` — **„Admin"** i **„Dziennik"**
-  (świadome odstępstwa D1/D3 — tych ekranów NIE MA w oryginalnym React SPA, produkcja ma dla nich
-  serwerowe HTML-e poza SPA, `extensions.cjs:290-295,410-415`). **Ostatni placeholder frontu
-  zniknął** — `pages/placeholdery.ts` i `WidokWPrzygotowaniu.tsx` USUNIĘTE, nota o 13 trasach
-  przeniesiona do nagłówka `App.tsx`. Odstępstwa: **D2** — `requireAuth` na wszystkich ośmiu
-  trasach w tym `/api/audit-log`, mimo `security: []` w kontrakcie (kontynuacja D1 z I1); **D5** —
-  kopia bazy przed `products/clear` z checkpointem WAL (baza chodzi w WAL, goła kopia byłaby
-  bezpiecznikiem pozornym). Port wierniejszy od planowanego: `delete lastRunPerSupplier[kod]`
-  (`extensions.cjs:387`) ma gotowy odpowiednik `przeplanujScheduler` (3f-3) i został podpięty do
-  `PATCH` przy zmianie częstotliwości. Szczegóły: `docs/tickets/36-FEATURE-konto-admin-maintenance/`.
+#### Sesja 12a — Backend: mutacje produktów — ✅ zrobiona 2026-09-05 (`35-FEATURE-mutacje-produktow-backend`)
+Domyka katalog (I2) do parytetu ZAPISU z produkcją. Dowiezione:
+- `POST /api/products` (bulk) — port `addProductsBulk` (`:44746-44806`) w `src/import/bulk.ts`,
+  z gałęzią cenową (`zastosujRegulyCenowe` z `repos/ceny.ts`, obie tabele czytane przy KAŻDYM
+  rekordzie wewnątrz transakcji, próg `cenaZakupu > 0`), **sześcioma** rozszerzeniami
+  `bridge_ext` — piąta i szósta to `applyWagaPamiec` i **`rememberLink`**, to ostatnie wołane
+  PO zapisie produktu (`:44801-44803`, tak samo jak w `acceptStaging`) — i natywną propagacją
+  `uwagaCena`. Dwa dopuszczalne kształty ciała: goła tablica albo `{items: […]}`. Odpowiedź
+  `{ok, dodano}` niesie LICZBĘ.
+- **`PUT`/`PATCH /api/products/{id}` — wspólny handler w odbudowie, ale to ŚWIADOME, kosmetyczne
+  odstępstwo (D2), nie fakt o oryginale.** Oryginał ma DWIE osobne funkcje: `:48415-48449` to
+  handler wyłącznie `PUT` (`e.put(…, i)`, `:48451`); `PATCH` ma własną, niemal identyczną funkcję
+  (`:48452-48487`), różniącą się wyłącznie kolejnością audytu względem pętli override/history —
+  stan końcowy bazy i odpowiedź są identyczne, więc port scala je w jedną funkcję.
+  **Lista 42 pól edytowalnych** (`POLA_EDYTOWALNE_PRODUKTU` w `repos/products.ts`) — zbiór pól,
+  które produkcyjny dialog `LT()` realnie wysyła (`deminified/frontend-index.js:24020-24090`);
+  odcina kolumny wyliczane, `id`/`kod`/`dataAktualizacji`, `uwagaCena` i `dostawca` (dialog ma go
+  `disabled`, a `manual_overrides` kluczuje się po nim). Domyka backlog #14 dla produktów.
+  **Trasa pisze do DWÓCH tabel, nie jednej** — `manual_overrides` (`:48427`) ORAZ `U.addHistory`
+  (`:48435-48445`, port `zapiszWpisDziennika` w `dziennik-zmian.ts`) per zmienione pole.
+  Auto-status `wstrzymany` przy cenie spadającej do 0 (`:44729-44738`, `backend-index.cjs`),
+  z wyłącznikiem przy jawnym `status` w ciele.
+- `DELETE /api/products/{id}` — bez kaskad (osierocone `manual_overrides`/`history` to zastane
+  zachowanie oryginału).
+- `GET /api/products/uwagi-cena` i `GET /api/products/hold-reasons` — port monkey-patcha
+  `mirror/backend/uwaga_cena_patch.cjs` (który patchuje TAKŻE `U.addProductsBulk`, `:72-93` —
+  propaguje `uwagaCena` z payloadu do kolumny; nie jest wyłącznie źródłem tych dwóch
+  endpointów), w tym klucz `uwaga_cena` w **snake_case** (produkcja czyta surowym
+  `better-sqlite3`) i pięć powodów wstrzymania z dosłownymi tekstami.
+- **⭐ Tabela `history` dostała PIERWSZEGO PISARZA** (`zapiszWpisDziennika`) — domyka fakt
+  zapisany przez I5 (patrz jej blok wyżej): `GET /api/history` przestał zwracać na stagingu `[]`.
+- `contract/openapi.yaml`: dopisane `404` przy trzech operacjach `/api/products/{id}` + dwie
+  ścieżki `uwaga_cena` (bez schematów ciał — te powstają z nagrań produkcji w 12d).
+- Dowód wierności: harness charakteryzacji poszerzony o TRZECI wycinek bundla (kotwice
+  `updateProduct(t,e){` → `listStaging(){`); dwa wycinki z 3d-2 nietknięte. 22 testy
+  porównawcze. Suita backendu **1103 testy / 68 plików** (było 1024/64); lint/typecheck/build
+  czyste. Szczegóły: `docs/tickets/35-FEATURE-mutacje-produktow-backend/`.
 
-- **12a · Mutacje produktów** (BE) — ⬜. Zakres: `POST /api/products` (bulk),
-  `PATCH/PUT/DELETE /api/products/{id}`. Katalog (I2) jest dziś wyłącznie do odczytu — te trasy
-  domykają go do parytetu z produkcją.
-  - **⚠ WEJŚCIE Z BLOKU 3f-2 (2026-09-01): `PATCH /api/products/{id}` zapisuje CAŁE ciało
-    żądania.** Wspólny handler `PUT`/`PATCH` (`:48415-48424`, zarejestrowany w `:48452`) odsiewa
-    wyłącznie klucz `_reason` i oddaje resztę do `updateProduct`, czyli **wszystkie 72 kolumny są
-    zapisywalne** (oryginał sam ustawia `status: "wstrzymany"`, gdy któraś z cen spada do 0,
-    `backend-index.cjs:44735-44741`). U nas doszłaby jeszcze `uwagaCena` (migracja 002), dziś
-    ukryta przed API projekcją kontraktową. Ta trasa dodatkowo zapisuje `manual_overrides` dla
-    KAŻDEGO zmienionego pola (`:48427`), więc lista pól decyduje nie tylko o tym, co da się
-    zapisać, ale też o tym, **czego import przestanie nadpisywać**. Dostawcy dostali listę pól
-    w 3f-2 — tu trzeba podjąć tę samą decyzję świadomie. Wzorzec: `POLA_EDYTOWALNE_DOSTAWCY`
-    w `repos/suppliers.ts`. Rozbiór wzorca systemowego: `rebuild-backlog.md` #14.
-  - **`POST /api/products` (bulk) ma dowieźć TEŻ rozszerzenia importu** (decyzja użytkownika
-    2026-09-01, ticket 9). `addProductsBulk` (`:44746`) woła `assignKodImportu`, `applyDims`,
-    `applyLinkMemory`, `applyNazwaPamiec` i `applyWagaPamiec` — dokładnie ten sam zestaw co
-    `acceptStaging`. 3d-2 świadomie tego NIE budowała, bo `addProductsBulk` ma tylko jedno
-    wywołanie (`:48308`) i jest nim właśnie ta trasa, odłożona tutaj. **Port `bridge_ext` czeka
-    gotowy w repo** (`src/import/legacy/`), a most `src/import/silnik/bridge-ext.ts` typuje już
-    wszystkie potrzebne funkcje. Dowód wierności zbuduj tak jak 3d-2: `addProductsBulk` jest
-    metodą obiektu `U`, więc da się ją wyciąć z bundla tym samym harnessem
-    (`test/charakteryzacja/akceptacja/oryginal.mjs` — wystarczy poszerzyć kotwice). ⚠ Gałąź
-    cenowa `:44773-44783` **jest już gotowa** — wywołaj `zastosujRegulyCenowe(rekord, narzuty,
-    promocje)` z `rebuild/backend/src/repos/ceny.ts` w tym samym miejscu sekwencji co oryginał
-    (po wartościach domyślnych, przed `bridge_ext`), opakowaną w
-    `try { if (Number(rekord.cenaZakupu) > 0) { …selecty obu tabel… } } catch {}`. **Nie pisz jej
-    od nowa.** Decyzja użytkownika **D1 z 4a** (`docs/tickets/15-FEATURE-narzuty-promocje-ceny/plan.md`):
-    4a świadomie NIE portowało `addProductsBulk`; przypisanie do I12 utrzymane po weryfikacji
-    grafem wywołań (jedyne wywołanie `addProductsBulk` to trasa `:48308`, nieportowana).
-  - **⚠ Nie mylić z `repos/products.ts::wyczyscProdukty`** (dołożone w 12b — bulk
-    `DELETE FROM products` bez `WHERE`, pisarz `POST /api/products/clear`). To osobna funkcja od
-    `usunProdukt(id)`, którą ta sesja ma dopiero napisać dla `DELETE /api/products/{id}`.
+#### Sesja 12b — Konto/admin/maintenance (BE+FE) — ✅ zrobiona 2026-09-05 (`36-FEATURE-konto-admin-maintenance`)
+Osiem operacji backendu za `requireAuth`: `POST /api/password/change`, `GET /api/users`,
+`GET /api/admin/supplier-config`, **`PATCH /api/admin/supplier-config/{kod}`**,
+`GET /api/admin/suppliers-list`, `POST /api/maintenance/usun-nieopony`,
+`POST /api/products/clear` (ciało `{potwierdzenie:"WYCZYSC"}`), `GET /api/audit-log`.
+- **⚠ SPROSTOWANIE FAKTU: metoda to `PATCH`, NIE `PUT`.** Ten plik pisał wcześniej
+  `GET/PUT /api/admin/supplier-config(+{kod})` — błędnie. Metody `PUT` na tej ścieżce nie ma
+  nigdzie: `contract/openapi.yaml:28-41` ma `patch:`, oryginał `mirror/backend/extensions.cjs:344`
+  ma `app.patch(...)`. Trzecia z rzędu pomyłka roadmapy w opisie metody endpointu (po `PUT
+  /api/config` w I11) — metodę sprawdzaj w kontrakcie i w oryginale, zanim jej użyjesz.
+- **⚠ SPROSTOWANIE FAKTU: `GET /api/audit-log` NIE parsuje `szczegoly_json` i nie ma parsować.**
+  Wcześniejsza nota w tym pliku mówiła, że da się tu skorzystać z `parsujSzczegoly` z I5 „bez
+  pisania drugiej wersji" — to nieprawda. Cała trasa oryginału to
+  `e.get("/api/audit-log",(c,u)=>u.json(U.listAudit(500)))` (`deminified/backend-index.cjs:48735`),
+  a `contract/fixtures/GET_audit-log.json` zamraża `szczegolyJson` jako **STRING**. Sparsowanie
+  po stronie backendu ŁAMIE GATE — sprawdzone empirycznie („typ object, oczekiwano string").
+  Parser żyje we froncie (`pages/konfiguracja/dziennik.ts`) jako druga, świadoma kopia (D4):
+  `rebuild/backend` i `rebuild/frontend` to rozłączne projekty bez wspólnego pakietu.
+  Backlog **#50**.
+- **Trasa znosi wiersze, których `/historia` nie pokazuje:** `szczegoly_json = NULL`
+  (`synchronizacja_reczna`, `:48240`, wejście z I5) i `encja_id` niezłączalny z `suppliers`
+  (audyt zapisuje ZAMIAR, przed sprawdzeniem, czy dostawca istnieje) — dowiedzione testem na
+  danych, nie tylko typem. Widać tu surowo także `edycja_konfiguracji` i `edycja_spedycji`
+  (I11) oraz **`edycja_produktu` i `usuniecie_produktu` (12a)** — `encjaId` niespójne między
+  tymi dwiema akcjami (`kod` vs `id` jako tekst), port 1:1
+  (`docs/tickets/35-FEATURE-mutacje-produktow-backend/raport.md`, „Follow-up").
+- **Frontend:** `/moje-konto` (port `lM()`, `frontend-index.js:27624-27780`) — **ostatni
+  placeholder frontu zniknął**, `pages/placeholdery.ts` i `WidokWPrzygotowaniu.tsx` USUNIĘTE,
+  nota o 13 trasach przeniesiona do nagłówka `App.tsx`. Przycisk „Usuń wszystko z katalogu"
+  w zakładce „Katalog" (`window.confirm`, trzy `invalidateQueries`) — **odstępstwo D3 ticketu 18
+  zniesione, karta kompletna wobec oryginału**. ⚠ To OSOBNA trasa od `DELETE /api/products/{id}`
+  (12a): kasuje CAŁY katalog, nie pojedynczy produkt.
+- **DWIE NOWE zakładki `/konfiguracja` — „Admin" i „Dziennik" — to ŚWIADOME ODSTĘPSTWO (D1/D3).**
+  Tych ekranów NIE MA w oryginalnym React SPA (zero trafień w `deminified/frontend-index.js`
+  i `mirror/frontend/assets/*.js` dla `admin/supplier-config`, `admin/suppliers-list`,
+  `/api/users`, `usun-nieopony`, `audit-log`); produkcja obsługuje te trasy serwerowymi
+  stronami HTML poza SPA (`extensions.cjs:290-295,410-415`). `zakladki.ts` przestał być
+  lustrem oryginału — porównując z `:26299-26338`, oczekuj sześciu pozycji, nie ośmiu.
+- **Pozostałe odstępstwa:** **D2** — `requireAuth` na wszystkich ośmiu trasach, w tym na
+  `/api/audit-log`, mimo `security: []` w kontrakcie (kontynuacja D1 z I1); **D5** — kopia
+  bazy przed `products/clear` robi `wal_checkpoint(TRUNCATE)` przed `copyFileSync`, bo baza
+  chodzi w WAL i goła kopia `.db` byłaby bezpiecznikiem pozornym.
+- **Port wierniejszy od planowanego:** `delete lastRunPerSupplier[kod]` (`extensions.cjs:387`)
+  ma w odbudowie gotowy odpowiednik `przeplanujScheduler` (3f-3) — podpięty do `PATCH` przy
+  zmianie częstotliwości.
+- **GATE:** zielony na czterech fixtures (`GET_users.json`, `GET_admin_supplier-config.json`,
+  `GET_admin_suppliers-list.json`, `GET_audit-log.json`); obie listy admina idą po **kodach
+  dispatchera (10), nie po tabeli `suppliers`**, więc mają 10 pozycji także przy pustej bazie.
+  Cztery mutacje sprawdzane wyłącznie wobec `openapi.yaml` — nagrań nie ma, domyka 12d.
+- **Finalny przegląd bezpieczeństwa (kontynuacja w 12e):** przejrzeć WSZYSTKIE trasy mutacji
+  pod kątem „`.set(req.body)` bez listy pól" i potwierdzić, że każda ma jawną listę — mają ją
+  już staging (3d-2), dostawcy (3f-2), narzuty i promocje (4a) oraz **produkty (12a)**.
+  **Zasada przyjęta na stałe:** kolumny wyliczane i kolumny własne odbudowy (`importWylaczony`,
+  `uwagaCena`) nigdy nie wchodzą na listę pól edytowalnych. Kontekst i lista tras:
+  `rebuild-backlog.md` #14 (dla produktów domknięty w 12a).
+- Szczegóły: `docs/tickets/36-FEATURE-konto-admin-maintenance/`.
 
-- **12c · Dialog edycji `LT()` + menu „Akcje" w `/katalog`** (FE) — ⬜. `/moje-konto` jest już
-  zrobione (12b), więc `/katalog` zostaje **ostatnim widokiem z odstępstwem D4 z I2** (podgląd
-  read-only zamiast edycji).
-  - **DIALOG EDYCJI PRODUKTU `LT()` NIE JEST PRZEPORTOWANY** (fakt ustalony grafem wywołań przy
-    zamykaniu Iteracji 7, nie z nazwy funkcji). `LT()` (`deminified/frontend-index.js:23909-23980`)
-    to modal edycji produktu otwierany z `/katalog`. Czyta `["/api/atrybuty"]` (`:23917`) i buduje
-    selecty pomocnikiem `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare
-    "pl")` (`:23966`), a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
-    (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma wyłącznie
-    `PodgladProduktu.tsx` — podgląd READ-ONLY, dołożony w I2 jako świadome odstępstwo. Konsekwencja:
-    to jest FRONTEND do mutacji z 12a — bez niego trasy `PATCH`/`PUT`/`DELETE /api/products/{id}`
-    nie mają z czego być wołane, a `GET /api/overrides` (gotowe od 3d-2) nie ma konsumenta.
-  - **Menu „Akcje" w wierszu tabeli** (Edytuj / Wstrzymaj-Aktywuj / Usuń, „Historia" `disabled` —
-    tak jak w oryginale) — otwiera modal edycji zamiast podglądu.
+#### Sesja 12c — Frontend: dialog edycji `LT()` + menu „Akcje" w `/katalog` — ⬜
+- **⚠ WEJŚCIE Z SESJI 7c (2026-09-04) — DIALOG EDYCJI PRODUKTU `LT()` NIE JEST PRZEPORTOWANY
+  i to TU jest jego miejsce.** Fakt ustalony grafem wywołań przy zamykaniu Iteracji 7 (nie
+  z nazwy funkcji): `LT()` (`deminified/frontend-index.js:23909-23980`) to modal edycji produktu
+  otwierany z `/katalog`. Czyta `["/api/atrybuty"]` (`:23917`) i buduje selecty pomocnikiem
+  `(o?.wartosci||[]).filter(t => t.rodzaj === e).map(...).sort(localeCompare "pl")` (`:23966`),
+  a obok czyta `["/api/overrides", dostawca, kod]` i kasuje override'y
+  (`DELETE /api/overrides/{id}`). W odbudowie `src/pages/katalog/` ma wyłącznie
+  `PodgladProduktu.tsx` — podgląd READ-ONLY, dołożony w I2 jako świadome odstępstwo
+  (oryginał nie ma szczegółu produktu w trybie odczytu, ma tylko ten modal edycji).
+- **Backend do wołania jest już KOMPLET od 12a** (2026-09-05): `PATCH`/`PUT`/`DELETE
+  /api/products/{id}` gotowe, `GET /api/overrides` gotowe od 3d-2. Bez FE te trasy nie mają
+  z czego być wołane.
+- **⚠ WEJŚCIE Z SESJI 12a (2026-09-05) — `szerokosc` w dialogu wymaga uwagi przed portem.**
+  Produkcyjny `LT()` renderuje `szerokosc` jako `type="number"` z `parseFloat`
+  (`frontend-index.js:24076-24079`), a kanon ma tam TEXT (migracja `003_szerokosc_text.sql`) —
+  ręczna edycja zgubi zera końcowe („10.00" → „10"), których broniła saga `szertxt`. To zastane
+  zachowanie produkcji, nie regres odbudowy, ale port pola musi o tym wiedzieć.
+- **Menu „Akcje" w wierszu tabeli** (Edytuj / Wstrzymaj-Aktywuj / Usuń, „Historia" `disabled` —
+  tak jak w oryginale) zastępuje modal podglądu read-only, który I2 wniosła jako świadome
+  odstępstwo D4 — po tej sesji odstępstwo znika.
+- **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć** (dziś martwa, D1 z 4b, 2026-09-02)
+  — dane musi dostarczyć backend (pole przy produkcie), bo liczenie po stronie klienta
+  duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś
+  zaplanowanej pracy — nota informacyjna, nie zadanie tej sesji.
 
-- **12d · Przenagranie fixtures + odświeżenie `openapi.yaml`** (zapowiedziane w §2, zebrane
-  z iteracji 1–11) — ⬜. **⚠ Schematy ciał generujemy z `contract/fixtures/` — z nagrań produkcji,
-  NIE z naszej implementacji.** Inaczej kontrakt przestaje być niezależnym dowodem i zaczynamy
-  sprawdzać własną pracę własną pracą. Zakres:
-  - dopisać realne kody błędów (m.in. `401` dla `GET /api/me` i `POST /api/login`) oraz schematy
-    ciał, których wersja 2.3 nie zamraża; przenagrać fixtures POST/PUT/PATCH/DELETE przeciw kopii
-    bazy; dograć wariant `GET /api/products` **bez parametrów** (goła tablica — dziś bez siatki
-    fixtures, opisana tylko testami w `test/produkty.test.ts`);
-  - **wejście z 12b (2026-09-05):** brak nagrań dla WSZYSTKICH CZTERECH mutacji tego ticketu
-    (`POST /api/password/change`, `PATCH /api/admin/supplier-config/{kod}`,
-    `POST /api/maintenance/usun-nieopony`, `POST /api/products/clear`) — GATE je dziś sprawdza
-    wyłącznie wobec `openapi.yaml`;
-  - **wejście z 12b (2026-09-05):** `openapi.yaml` **nie deklaruje `401` dla `GET /api/audit-log`**
-    (trasa jest tam publiczna, `security: []`, mimo D2 nakładającego `requireAuth`), więc test 401
-    dla tej ścieżki nie może przejść przez `sprawdzZgodnoscZKontraktem` — do uporządkowania razem
-    z resztą realnych kodów błędów;
-  - **zaległość z Iteracji 3 (2026-08-27, 3d-1):** przenagrać `contract/fixtures/GET_products.json` —
-    fixture pochodzi sprzed produkcyjnej migracji `szertxt` i trzyma `szerokosc` jako LICZBĘ,
-    podczas gdy produkcja i nasz kanon (`003_szerokosc_text.sql`) mają tam TEXT; GATE I2 przepuszcza
-    to przez zadeklarowany wyjątek `WYJATKI_SZEROKOSC` w `test/katalog.gate.test.ts`, SAMOCZYSZCZĄCY —
-    po przenagraniu przestanie cokolwiek pokrywać i test zapali się, żądając usunięcia (to jest
-    sygnał do usunięcia wyjątku, nie do naprawy testu); przy okazji ujawnić `products.uwaga_cena`
-    (migracja 002), dziś ukrytą przed API projekcją `src/repos/kolumny.ts`;
-  - **zaległość z Iteracji 3 (2026-08-27, 3d-1):** dopisać do `openapi.yaml` DWA endpointy
-    `uwaga_cena` — `GET /api/products/uwagi-cena` i `GET /api/products/hold-reasons`. Oba istnieją
-    w produkcji jako monkey-patch `mirror/backend/uwaga_cena_patch.cjs`, obu brak w zamrożonym
-    kontrakcie I w odbudowie (`hold-reasons` liczy powód wstrzymania w locie: 5 przypadków —
-    `uwaga_cena` dosłownie / brak ceny i stanu / brak ceny / brak stanu / „sprawdź ręcznie").
+#### Sesja 12d — Przenagranie fixtures + schematy ciał w `openapi.yaml` — ⬜
+**⚠ ZALEGŁOŚCI Z ITERACJI 3 (zapisane 2026-08-27 przez 3d-1) — stan na 2026-09-05: punkty 2 i 3
+domknięte w 12a, punkt 1 nadal otwarty.**
+1. **[OTWARTE] Przenagrać `contract/fixtures/GET_products.json`.** Fixture pochodzi sprzed
+   produkcyjnej migracji `szertxt` i trzyma `szerokosc` jako LICZBĘ, podczas gdy produkcja
+   i nasz kanon (migracja `003_szerokosc_text.sql`) mają tam TEXT. GATE I2 przepuszcza to
+   dziś przez **zadeklarowany wyjątek** `WYJATKI_SZEROKOSC` w `test/katalog.gate.test.ts`.
+   Wyjątek jest SAMOCZYSZCZĄCY — po przenagraniu przestanie cokolwiek pokrywać i test
+   zapali się, żądając usunięcia. **To jest sygnał do usunięcia wyjątku, nie do naprawy testu.**
+   Przy okazji: `products.uwaga_cena` (migracja 002) jest dziś ukryta przed API jawną
+   projekcją (`src/repos/kolumny.ts`) — ujawnienie jej wymaga tego samego przenagrania.
+2. **[✅ zrobione w 12a]** `POST /api/products` (bulk) dowozi rozszerzenia importu.
+3. **[✅ zrobione w 12a]** `openapi.yaml` ma dwa endpointy `uwaga_cena`.
+- **⚠ WEJŚCIE Z SESJI 12a (2026-09-05) — sześć operacji tej sesji nie mają nagrań.**
+  `contract/fixtures/` nie ma ani jednego nagrania dla `POST /api/products`,
+  `PATCH`/`PUT`/`DELETE /api/products/{id}`, `GET /api/products/uwagi-cena`,
+  `GET /api/products/hold-reasons` — GATE 12a stał na kodzie oryginału (charakteryzacja +
+  porównanie z monkey-patchem), nie na fixtures. Tu je trzeba nagrać i dopiero wtedy dopisać
+  schematy ciał do tych sześciu operacji.
+- **⚠ WEJŚCIE Z SESJI 12b (2026-09-05) — cztery mutacje tej sesji też nie mają nagrań.**
+  `contract/fixtures/` nie ma nic dla `POST /api/password/change`,
+  `PATCH /api/admin/supplier-config/{kod}`, `POST /api/maintenance/usun-nieopony`
+  i `POST /api/products/clear` — GATE 12b sprawdza je wyłącznie wobec `openapi.yaml`
+  (ścieżka, metoda, kod odpowiedzi). Nagrać razem z sześcioma operacjami produktów z 12a.
+- **⚠ WEJŚCIE Z SESJI 12b (2026-09-05) — `openapi.yaml` nie deklaruje `401` dla
+  `GET /api/audit-log`.** Trasa jest w kontrakcie PUBLICZNA (`security: []`, `:533-539`),
+  a w odbudowie stoi za `requireAuth` (odstępstwo D2), więc test 401 dla tej jednej ścieżki
+  NIE MOŻE przejść przez `sprawdzZgodnoscZKontraktem` — sprawdzamy go osobno, w
+  `test/audit-log.test.ts`. Do uporządkowania razem z resztą realnych kodów błędów.
+- **Odświeżenie kontraktu poza produktami** (zapowiedziane w §2, zebrane z iteracji 1–11).
+  **⚠ Schematy ciał generujemy z `contract/fixtures/` — z nagrań produkcji, NIE z naszej implementacji.**
+  Inaczej kontrakt przestaje być niezależnym dowodem i zaczynamy sprawdzać własną pracę własną pracą.
+  Zakres: dopisać do `contract/openapi.yaml` realne kody błędów (m.in. `401` dla `GET /api/me`
+  i `POST /api/login`) oraz schematy ciał, których wersja 2.3 nie zamraża; **przenagrać fixtures
+  POST/PUT/PATCH/DELETE przeciw kopii bazy**; dograć wariant `GET /api/products` **bez
+  parametrów** (goła tablica — główna ścieżka katalogu, dziś bez siatki fixtures, opisana tylko
+  testami w `rebuild/backend/test/produkty.test.ts`).
 
-- **12e · Finalny audyt bezpieczeństwa** — ⬜. Potwierdzić auth na WSZYSTKICH trasach danych,
-  zamknięty CORS, brak zahardkodowanego `JWT_SECRET` z fallbackiem.
-  - **Dopisane 2026-09-01 (3f-2):** przejrzeć WSZYSTKIE trasy mutacji pod kątem „`.set(req.body)`
-    bez listy pól" i potwierdzić, że każda ma jawną listę — mają ją staging (port 1:1 z 3d-2),
-    dostawcy (3f-2), narzuty i promocje (✅ 4a); produkty zależą od 12a. **Zasada do przyjęcia na
-    stałe:** kolumny wyliczane i kolumny własne odbudowy (`importWylaczony`, `uwagaCena`) nigdy
-    nie wchodzą na listę pól edytowalnych. Kontekst i lista tras: `rebuild-backlog.md` #14.
-  - **wejście z 12b (2026-09-05):** tabela `users` (`rebuild/schema/001_schema.sql`) **nie ma
-    kolumny roli** — „admin" nie jest technicznie odróżnialny od zwykłego użytkownika, zakładki
-    „Admin" i „Dziennik" widzi każdy zalogowany (tak samo jak strony `/admin/*` w produkcji,
-    chronione samym `requireAuth`). Wprowadzenie ról = zmiana schematu i decyzja Ani.
-  - **wejście z 12b (2026-09-05):** kopie `<baza>.bak_before_clear_<ts>` po `products/clear` NIE
-    są sprzątane (jak w produkcji) — katalog danych rośnie przy częstym używaniu przycisku.
-  - **⚠ WEJŚCIE Z ITERACJI 8 (2026-09-04) — `AppShell` (sidebar) jest wpinany przez WIDOK, nie
-    przez router.** `/`, `/konfiguracja` i placeholdery renderują sidebar; `/katalog`, `/staging`,
-    `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/historia` i `/selly` — nie. Zastane
-    zachowanie sprzed I8, spoza jej zakresu, wygląda na niezamierzone — warte decyzji tutaj.
-  - **Jeśli kolumna „Promocja" w `/katalog` ma kiedyś ożyć (dziś martwa, D1 z 4b, 2026-09-02)
-    — dane musi dostarczyć backend** (pole przy produkcie), bo liczenie po stronie klienta
-    duplikowałoby silnik dopasowania z `repos/ceny.ts` w przeglądarce. Nie ma na to dziś
-    zaplanowanej pracy — nota informacyjna, nie zadanie.
-  - **Kompletny przegląd 12 widoków z Anią**, decyzja o sidebarze wpinanym przez widok.
-
-- **Ścieżki (GATE):** password, users, admin×3, maintenance, products/clear, audit-log — ✅ 12b.
-  **products×4** (POST + PATCH/PUT/DELETE `{id}`) — ⬜ 12a.
-  **Fixtures:** `GET_users.json`, `GET_admin_supplier-config.json`, `GET_admin_suppliers-list.json`,
-  `GET_audit-log.json` — ✅ 12b. Fixtures zapisujące (cztery mutacje 12b + products×4 z 12a) —
-  ⬜ 12d.
-- **DoD:** konto/admin/maintenance działają ✅ 12b; **mutacje produktów i akcje wierszowe
-  w `/katalog` domknięte** (odstępstwo D4 z I2 zniesione) — ⬜ 12a/12c; audyt bezpieczeństwa
-  domknięty — ⬜ 12e; kontrakt i fixtures odświeżone — ⬜ 12d; fixtures przez GATE; **kompletny
-  przegląd 12 widoków z Anią** — ⬜ 12e.
+#### Sesja 12e — Finalny audyt bezpieczeństwa + przegląd 12 widoków — ⬜
+- **Potwierdzić:** auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego
+  `JWT_SECRET` z fallbackiem; domknięcie przeglądu list pól edytowalnych zaczętego w 12b.
+- **⚠ WEJŚCIE Z ITERACJI 8 (2026-09-04) — `AppShell` (sidebar) jest wpinany przez WIDOK, nie
+  przez router.** `/`, `/konfiguracja` i placeholdery renderują sidebar; `/katalog`, `/staging`,
+  `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/historia` i `/selly` — nie. Zastane
+  zachowanie sprzed I8, spoza jej zakresu, wygląda na niezamierzone — warte decyzji przy tym
+  przeglądzie.
+- **⚠ WEJŚCIE Z SESJI 12b (2026-09-05) — tabela `users` NIE MA KOLUMNY ROLI.**
+  `rebuild/schema/001_schema.sql`: `id, email, haslo_hash, imie_nazwisko, utworzono,
+  ostatnie_logowanie`. Skutek: „admin" nie jest technicznie odróżnialny od zwykłego
+  użytkownika — nowe zakładki „Admin" i „Dziennik" widzi KAŻDY zalogowany. To stan zgodny
+  z produkcją (strony `/admin/*` chroni tam sam `requireAuth`), więc nie jest to regresja
+  odbudowy; wprowadzenie ról to zmiana schematu i decyzja Ani. Backlog **#48**.
+- **⚠ WEJŚCIE Z SESJI 12b (2026-09-05) — kopie bazy po `products/clear` nie są sprzątane.**
+  Trasa zostawia `<baza>.bak_before_clear_<ISO>` przed każdym czyszczeniem (port `:48319-48331`)
+  i nikt tych plików nigdy nie usuwa — tak samo jak w produkcji. Przy częstym używaniu
+  przycisku katalog danych rośnie bez ograniczeń. Backlog **#49** (retencja/rotacja).
+- **Kompletny przegląd 12 widoków z Anią.**
+- **Ścieżki (GATE) całej Iteracji 12:** password, users, admin×3, maintenance, products/clear,
+  audit-log — **✅ gotowe od 12b**; **products×6 — ✅ gotowe od 12a** (`POST` + `PATCH`/`PUT`/`DELETE {id}` +
+  `uwagi-cena` + `hold-reasons`).  **Fixtures:** `GET_users.json`, `GET_admin_supplier-config.json`,
+  `GET_admin_suppliers-list.json`, `GET_audit-log.json` — **✅ zielone od 12b** + fixtures
+  zapisujące dla sześciu operacji produktów (12a) i czterech mutacji 12b, nagrywane w 12d
+  (dziś ich nie ma — `contract/README.md`).
+- **DoD Iteracji 12:** konto/admin/maintenance działają **✅ (12b)**; **mutacje produktów ✅ (12a)
+  i akcje wierszowe w `/katalog` domknięte** (12c, odstępstwo D4 z I2 zniesione); audyt
+  bezpieczeństwa domknięty (12e); kontrakt i fixtures odświeżone (12d); fixtures przez GATE;
+  **kompletny przegląd 12 widoków z Anią** (12e).
 
 ---
 
 ## 6. Po zakończeniu wszystkich iteracji
 
-> **Stan 2026-09-05:** zostało do zrobienia wyłącznie **I12**, sesje **12a/12c/12d/12e** (12b
-> zamknięta 2026-09-05). Po zamknięciu ostatniej z nich wykonaj punkty niżej. Do rozliczenia
+> **Stan 2026-09-05:** zostało do zrobienia wyłącznie **I12**, sesje **12c/12d/12e** (12a i 12b
+> zamknięte 2026-09-05). Po zamknięciu ostatniej z nich wykonaj punkty niżej. Do rozliczenia
 > backlogu dochodzą wpisy dołożone przez I7: **#44** (przycisk „Nowy rodzaj" w produkcji nie
-> zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło" — ⬜ do decyzji Ani).
+> zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło" — ⬜ do decyzji
+> Ani); przez 12a: **#14** (produkty domknięte) i **#4** (endpointy `uwaga_cena` i propagacja
+> bulku domknięte); przez 12b: **#48** (brak kolumny roli w `users`), **#49** (niesprzątane kopie
+> bazy po `products/clear`) i **#50** (dwie kopie `parsujSzczegoly`) — wszystkie trzy ⬜ do decyzji.
 
 - Pełny przegląd 12 widoków + parytet fixtures/kontraktu (55/55).
 - Plan cutoveru (big-bang): przełączenie Apache/PM2 na nowy stos, ta sama baza `data.db`.

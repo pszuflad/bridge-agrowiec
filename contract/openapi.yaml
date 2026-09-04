@@ -831,6 +831,42 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  # ————————————————————————————————————————————————————————————————————————————————————
+  # uwaga_cena — DWIE ścieżki spoza pierwotnego zamrożenia (dopisane w Iteracji 12a).
+  #
+  # W produkcji nie ma ich w rdzeniu backendu: instaluje je monkey-patch
+  # `mirror/backend/uwaga_cena_patch.cjs`, doklejany do `index.cjs` po buildzie. Dlatego
+  # zamrożenie 2.3 ich nie objęło — nie jako pominięcie, tylko dlatego, że zwiad czytał bundle.
+  # Roadmapa wymienia ich dopisanie jako zaległość Iteracji 3 do domknięcia w I12.
+  #
+  # Schematy odpowiedzi zostają nieopisane ŚWIADOMIE: generujemy je z nagrań produkcji
+  # w sesji 12d, nie z naszej implementacji — inaczej kontrakt przestałby być niezależnym
+  # dowodem i sprawdzalibyśmy własną pracę własną pracą (roadmap §5, I12).
+  # ————————————————————————————————————————————————————————————————————————————————————
+  /api/products/uwagi-cena:
+    get:
+      tags: [products]
+      summary: "GET /api/products/uwagi-cena"
+      description: >-
+        Produkty z niepustą `uwaga_cena` („cena na zapytanie"). Źródło:
+        `mirror/backend/uwaga_cena_patch.cjs:96-110`.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 12d (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Błąd odczytu" }
+  /api/products/hold-reasons:
+    get:
+      tags: [products]
+      summary: "GET /api/products/hold-reasons"
+      description: >-
+        Powód wstrzymania liczony W LOCIE dla każdego produktu ze statusem `wstrzymany`
+        (pięć przypadków). Źródło: `mirror/backend/uwaga_cena_patch.cjs:120-147`.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt do zamrożenia w 12d (fixtures)" }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Błąd odczytu" }
   /api/products/{id}:
     delete:
       tags: [products]
@@ -841,6 +877,7 @@ paths:
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
+        "404": { description: "Nie znaleziono produktu" }
         "400": { description: "Błędne żądanie" }
     patch:
       tags: [products]
@@ -854,6 +891,7 @@ paths:
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
+        "404": { description: "Nie znaleziono produktu" }
         "400": { description: "Błędne żądanie" }
     put:
       tags: [products]
@@ -867,6 +905,7 @@ paths:
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
+        "404": { description: "Nie znaleziono produktu" }
         "400": { description: "Błędne żądanie" }
   /api/promotions:
     get:
