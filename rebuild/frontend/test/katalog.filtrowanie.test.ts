@@ -168,6 +168,87 @@ describe("listy słownikowe filtrów", () => {
     ];
     expect(listaKategorii(dane)).toEqual(["Przyczepy", "Rolnicze"]);
   });
+
+  /**
+   * Sesja 7c — domknięcie degradacji D3 z I2: listy filtrów to SUMA słownika atrybutów
+   * i danych katalogu (`frontend-index.js:23287-23295`). Do tej pory powstawały wyłącznie
+   * z produktów, więc marka bez ani jednego produktu nie dawała się wybrać.
+   */
+  describe("suma ze słownikiem atrybutów (7c)", () => {
+    const SLOWNIK = [
+      { rodzaj: "marka", wartosc: "Michelin" },
+      { rodzaj: "marka", wartosc: "BKT" },
+      // ⚠ Wartość słownikowa Z CYFRĄ — filtr „bez cyfr” jej NIE dotyczy (patrz test niżej).
+      { rodzaj: "marka", wartosc: "Gruma 3" },
+      { rodzaj: "kategoria", wartosc: "Quady" },
+      { rodzaj: "bieznik", wartosc: "AGRO 10" },
+    ];
+
+    it("marki: dokłada wartości słownikowe do marek z katalogu, bez duplikatów", () => {
+      const dane = [produkt({ id: 1, marka: "BKT" }), produkt({ id: 2, marka: "Alliance" })];
+
+      const wynik = listaMarek(dane, SLOWNIK);
+
+      expect(wynik).toContain("Michelin"); // tylko słownik
+      expect(wynik).toContain("Alliance"); // tylko katalog
+      expect(wynik.filter((m) => m === "BKT")).toHaveLength(1); // w obu źródłach
+    });
+
+    it("marki: filtr „bez cyfr” dotyczy WYŁĄCZNIE marek z produktów", () => {
+      // W oryginale `filter(!/\d/)` wisi na gałęzi produktowej (`:23288`), nie na złączeniu.
+      const dane = [produkt({ id: 1, marka: "11.2-24" })];
+
+      const wynik = listaMarek(dane, SLOWNIK);
+
+      expect(wynik).not.toContain("11.2-24"); // śmieć z importu — odsiany
+      expect(wynik).toContain("Gruma 3"); // ze słownika — zostaje mimo cyfry
+    });
+
+    it("marki: sortowanie po polsku obejmuje oba źródła", () => {
+      const dane = [produkt({ id: 1, marka: "Zeta" })];
+
+      expect(listaMarek(dane, [{ rodzaj: "marka", wartosc: "Ćma" }])).toEqual(["Ćma", "Zeta"]);
+    });
+
+    it("kategorie: SUMA słownika i katalogu — inaczej niż w dialogu reguł", () => {
+      /*
+       * ⚠ To jest miejsce, w którym łatwo skopiować niewłaściwą regułę. W `/narzuty`
+       * (sesja 7b) kategorie idą WYŁĄCZNIE ze słownika, bo regułę cenową zakłada się także
+       * na kategorię spoza katalogu. Tutaj filtr zawęża to, co widać w tabeli, więc oba
+       * źródła się sumują — tak jak w oryginale (`:23292-23295`).
+       */
+      const dane = [produkt({ id: 1, kategoria: "Rolnicze" })];
+
+      const wynik = listaKategorii(dane, SLOWNIK);
+
+      expect(wynik).toContain("Rolnicze"); // z katalogu — NIE znika
+      expect(wynik).toContain("Quady"); // ze słownika
+    });
+
+    it("kategorie: zwykły sort() i brak filtra cyfr — obie asymetrie zachowane", () => {
+      const dane = [produkt({ id: 1, kategoria: "Ćwiartki" }), produkt({ id: 2, kategoria: "1 os" })];
+
+      const wynik = listaKategorii(dane, [{ rodzaj: "kategoria", wartosc: "Zimowe" }]);
+
+      expect(wynik).toContain("1 os"); // cyfry NIE są odsiewane
+      // Domyślny `sort()` układa po kodach znaków, więc „Ć" ląduje ZA „Z" — inaczej niż marki.
+      expect(wynik).toEqual(["1 os", "Zimowe", "Ćwiartki"]);
+    });
+
+    it("wartości innych rodzajów nie zanieczyszczają list", () => {
+      const dane = [produkt({ id: 1, marka: "BKT", kategoria: "Rolnicze" })];
+
+      expect(listaMarek(dane, SLOWNIK)).not.toContain("AGRO 10");
+      expect(listaKategorii(dane, SLOWNIK)).not.toContain("AGRO 10");
+    });
+
+    it("brak słownika degraduje listy do samych produktów — stan sprzed 7c", () => {
+      const dane = [produkt({ id: 1, marka: "BKT", kategoria: "Rolnicze" })];
+
+      expect(listaMarek(dane, [])).toEqual(["BKT"]);
+      expect(listaKategorii(dane, [])).toEqual(["Rolnicze"]);
+    });
+  });
 });
 
 describe("zastosujFiltry — pełny łańcuch", () => {

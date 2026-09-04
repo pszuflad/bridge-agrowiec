@@ -36,11 +36,16 @@ function zamockujApi(produkty: Produkt[] = PRODUKTY) {
   server.use(
     http.get("*/api/products", () => HttpResponse.json(produkty)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
-    // Od sesji 8b katalog czyta też `/api/config` (klucze `shoper.*` dla przycisku
-    // eksportu). Widok pobiera KOMPLET swoich tras przy każdym wejściu, niezależnie od
-    // tego, co dany test sprawdza, a `onUnhandledRequest:"error"` nie wybacza braków.
-    // Pusty obiekt = stan produkcji: tych kluczy tam nie ma (`GET_config.json`).
+    // Widok pobiera KOMPLET swoich tras przy każdym wejściu, niezależnie od tego, co dany
+    // test sprawdza, a `onUnhandledRequest:"error"` nie wybacza braków — stąd oba mocki niżej.
+    //
+    // 8b: `/api/config` (klucze `shoper.*` dla przycisku eksportu). Pusty obiekt = stan
+    // produkcji, gdzie tych kluczy nie ma (`GET_config.json`).
     http.get("*/api/config", () => HttpResponse.json({})),
+    // 7c: słownik atrybutów — listy filtrów marek i kategorii to SUMA słownika i danych
+    // katalogu. Pusty słownik = zachowanie sprzed 7c (listy wyłącznie z produktów), czyli
+    // dokładnie to, czego pilnują asercje niżej.
+    http.get("*/api/atrybuty", () => HttpResponse.json({ ok: true, rodzaje: [], wartosci: [] })),
   );
 }
 
