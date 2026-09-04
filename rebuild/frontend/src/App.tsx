@@ -7,6 +7,14 @@
  * providerów to martwy kod. **`Toaster` wszedł w sesji 4b** (`/narzuty` woła toast przy
  * każdym zapisie, usunięciu i błędzie walidacji); `TooltipProvider` dalej czeka.
  *
+ * TRZYNAŚCIE TRAS, gdy oryginał ma dwanaście (`deminified/frontend-index.js:28644-28677`).
+ * Różnicę robi `/selly`, dołożona w sesji 8b: w produkcji Selly NIE BYŁO trasą Reacta —
+ * wstrzykiwany `mirror/frontend/assets/selly-injection.js` trzymał adres na `#/` i overlayował
+ * `<main>`, a stan „jesteśmy w Selly" siedział w `sessionStorage.sellyViewActive`. Odbudowa
+ * zamienia to na zwykłą trasę Wouter (odstępstwo O1 ticketu 30), więc 13 jest liczbą poprawną,
+ * a nie rozjazdem do naprawienia. Nota mieszkała w `pages/placeholdery.ts`, usuniętym w I12b
+ * razem z ostatnim placeholderem (`/moje-konto`).
+ *
  * ODSTĘPSTWO O1 (plan.md): oryginał używał routingu po hashu (`useHashLocation`
  * + `window.location.hash ||= "#/"`) — obejście z Replita dające adresy `/#/katalog`.
  * Nowy build stoi za Apache z poprawnym SPA fallbackiem (`deploy/staging/htaccess:16-20`),
@@ -28,11 +36,10 @@ import { Narzuty } from "@/pages/Narzuty";
 import { Staging } from "@/pages/Staging";
 import { WagaGabarytowa } from "@/pages/WagaGabarytowa";
 import { Login } from "@/pages/Login";
+import { MojeKonto } from "@/pages/MojeKonto";
 import { NotFound } from "@/pages/NotFound";
-import { PLACEHOLDERY } from "@/pages/placeholdery";
 import { Pulpit } from "@/pages/Pulpit";
 import { Selly } from "@/pages/Selly";
-import { WidokWPrzygotowaniu } from "@/pages/WidokWPrzygotowaniu";
 
 /**
  * `/analityka` jest JEDYNĄ trasą ładowaną leniwie — i to nie z upodobania do code-splittingu,
@@ -68,15 +75,7 @@ export function Trasy() {
           <Route path="/waga-gabarytowa" component={WagaGabarytowa} />
           <Route path="/analityka" component={Analityka} />
           <Route path="/selly" component={Selly} />
-          {PLACEHOLDERY.map(({ path, tytul, opis, iteracja }) => (
-            <Route key={path} path={path}>
-              <WidokWPrzygotowaniu
-                tytul={tytul}
-                opis={opis}
-                iteracja={iteracja}
-              />
-            </Route>
-          ))}
+          <Route path="/moje-konto" component={MojeKonto} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>
