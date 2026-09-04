@@ -126,7 +126,7 @@ tego, co użytkownik realnie widzi w panelu, nie tylko statystyk importu.
 | **Pliki (stan końcowy)** | `parsers/tyre_params.cjs`, `bridge_ext.cjs`, `db/schema.sql` (kolumna `products.szerokosc`); skasowane `probe.cjs/2/3`; kopie `*.bak_pre_szerokoscfix_*`, `*.bak_pre_szerorig_*`, `*.bak_pre_szertxt_*` |
 | **Commity** | `97ccb9f` (szerokoscfix — cofnięty) · `5c060b0` (szerorig) · `d5a43c9` (szertxt) |
 | **Do nowej wersji?** | ✅ **TAK — NANIESIONE** (decyzja użytkownika 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`, plan.md D3) |
-| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`); potwierdzone w I12a (2026-09-05), że kanon nie ożywił starego wyjątku. Zostaje JEDNO: przenagranie `GET_products.json` w **sesji 12d**. |
+| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`); potwierdzone w I12a (2026-09-05), że kanon nie ożywił starego wyjątku; 12c (2026-09-05) doniosła wadę ręcznej edycji do frontu (D3, 1:1). Zostaje JEDNO: przenagranie `GET_products.json` w **sesji 12d**. |
 
 **Opis biznesowy:**
 Kolumna „szerokość" opony była niespójna: ten sam rozmiar (np. „11.2-24") zapisywał się raz jako
@@ -165,13 +165,16 @@ liczbę z tekstu rozmiaru 1:1, z zerami końcowymi**, bez konwersji jednostek.
 - 🔎 **Warto wiedzieć przy przenagrywaniu:** `db/snapshot.db` (2026-08-13) jest STARSZY niż
   migracja `szertxt` (2026-08-19) i ma jeszcze `szerokosc REAL`, więc sam nie nadaje się na
   źródło wartości „z zerami końcowymi".
-- ⚠ **Znalezione w I12a (2026-09-05), istotne dla sesji 12c.** Produkcyjny dialog edycji `LT()`
-  renderuje `szerokosc` jako `type="number"` z `parseFloat` (`deminified/frontend-index.js:24076-24079`),
-  więc RĘCZNA edycja wysyła LICZBĘ do kolumny TEXT i gubi zera końcowe („10.00" → „10") —
-  dokładnie to, czego broniła cała saga `szertxt`. Import ich nie gubi (parser pisze napis,
-  kolumna jest TEXT); traci je tylko ścieżka ręcznej edycji. To zastane zachowanie produkcji,
-  nie regres odbudowy. `szerokosc` jest mimo to na liście pól edytowalnych produktu
-  (`POLA_EDYTOWALNE_PRODUKTU`, backlog #14), bo produkcja to pole realnie edytuje.
+- ⚠ **Znalezione w I12a (2026-09-05), potwierdzone i ZANIESIONE w sesji 12c (2026-09-05,
+  decyzja D3, `docs/tickets/37-FEATURE-katalog-edycja-produktu/plan.md`).** Produkcyjny dialog
+  edycji `LT()` renderuje `szerokosc` jako `type="number"` z `parseFloat`
+  (`deminified/frontend-index.js:24076-24079`), więc RĘCZNA edycja wysyła LICZBĘ do kolumny TEXT
+  i gubi zera końcowe („10.00" → „10") — dokładnie to, czego broniła cała saga `szertxt`. Import
+  ich nie gubi (parser pisze napis, kolumna jest TEXT); traci je tylko ścieżka ręcznej edycji.
+  To zastane zachowanie produkcji, nie regres odbudowy — 12c odtworzyła je 1:1 świadomie
+  (`rebuild/frontend/src/pages/katalog/poleEdycji.ts`), pole jest mimo to na liście pól
+  edytowalnych produktu (`POLA_EDYTOWALNE_PRODUKTU`, backlog #14), bo produkcja to pole
+  realnie edytuje.
 
 **Warstwa parsera — zrobiona (2026-08-26, I3/3a), decyzja o schemacie nadal otwarta.**
 Port verbatim `tyre_params.cjs` wniósł stan końcowy `szertxt` do `rebuild/backend`: `parseSize()`
@@ -1048,6 +1051,11 @@ Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archi
   produkcja oddaje 200. Testy: `rebuild/backend/test/produkty.mutacje.test.ts`.
   Wszystkie trasy mutacji produktów mają po tej sesji jawną listę pól — nic nie zostaje do
   finalnego audytu.
+  **Front dogonił backend w sesji 12c (2026-09-05).** Dialog edycji produktu
+  (`rebuild/frontend/src/pages/katalog/DialogEdycjiProduktu.tsx` + `poleEdycji.ts`) wysyła
+  dokładnie tę listę 42 pól i nic ponadto — pilnuje tego `rebuild/frontend/test/katalog.poleEdycji.test.ts`,
+  który czyta `POLA_EDYTOWALNE_PRODUKTU` wprost ze źródła backendu i porównuje z kluczami
+  wysyłanymi przez formularz.
 - **Reguła, którą warto przyjąć na stałe:** trasa mutacji dostaje jawną listę pól, a kolumny
   wyliczane i kolumny własne odbudowy (`importWylaczony`, `uwagaCena`) na tę listę **nigdy**
   nie wchodzą. Potwierdzone w I12a: `uwagaCena` odcięta z `POLA_EDYTOWALNE_PRODUKTU` mimo że
@@ -2268,3 +2276,32 @@ błąd, a nie cichy zapis do cudzego sklepu.
 **Nie objęte:** blokada sieciowa (egress) na VPS — byłaby najmocniejsza, bo nie zależy od
 poprawności naszego kodu, ale wymaga uprawnień, których na cyber_Folks bez roota
 prawdopodobnie nie ma. ⬜ Do sprawdzenia.
+
+---
+
+### #48 · 2026-09-05 · [FRONTEND] · `Staging.tsx` — jedyne miejsce w odbudowie z surowym `window.confirm`
+
+> **Znalezione przy sesji 12c (2026-09-05, `37-FEATURE-katalog-edycja-produktu`), follow-up
+> z tego ticketa.** Nie jest defektem produkcji — to niespójność WEWNĄTRZ odbudowy.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (spójność wzorca potwierdzeń) |
+| **Pliki** | `rebuild/frontend/src/pages/Staging.tsx:177,210` (surowy `confirm(...)`); wzorzec reszty odbudowy: `rebuild/frontend/src/components/DialogPotwierdzenia.tsx` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte, zidentyfikowane w 12c |
+
+**Co znaleziono.** Po sesji 12c (dialog edycji produktu zastąpił `window.confirm` przez
+`DialogPotwierdzenia` przy usuwaniu produktu — odstępstwo D1, kontynuacja precedensu D2 z 7b
+i D6 z narzutów) `Staging.tsx:177,210` (masowe „Zaakceptować wszystkie pasujące pozycje?" /
+„Odrzucić wszystkie pasujące pozycje?") zostało **jedynym miejscem w całej odbudowie**, które
+nadal blokuje wątek surowym `confirm()` zamiast Radixowego dialogu. Reszta widoków jest już
+spójna: 7b (dostawcy), narzuty/promocje (D6), i teraz katalog (D1 z 12c).
+
+**Skutek.** Brak regresu wobec produkcji (oryginał też używa `window.confirm` w tych miejscach)
+— to czysto wewnętrzna niespójność odbudowy: jeden widok blokuje wątek i nie da się go
+przetestować bez podmiany globalu, podczas gdy reszta już nie.
+
+**Do decyzji.** Czy ujednolicić `Staging.tsx` do `DialogPotwierdzenia` (odstępstwo od 1:1,
+analogiczne do D1/D2/D6). Naturalny moment domknięcia: **12e** (finalny audyt + przegląd
+12 widoków) albo osobny drobny ticket porządkowy.
