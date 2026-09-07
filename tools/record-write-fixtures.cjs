@@ -138,6 +138,8 @@ function zainstalujZaleznosci(katalog) {
 /**
  * Dwie zmiany w KOPII bazy, obie konieczne i obie opisane.
  *
+ * (Trzecia, zasiew `uwaga_cena`, MUSI iść po starcie serwera — patrz `zasiejUwageCeny`.)
+ *
  * 1. Wygaszenie schedulera. `startScheduler` (`mirror/backend/extensions.cjs:811-838`)
  *    tika co 60 s i dla każdego dostawcy z ustawionym `czestotliwosc_minuty` odpala
  *    `runAutoPull`, czyli REALNE pobranie pliku z URL-a dostawcy. W snapshocie ma to
@@ -159,6 +161,7 @@ function przygotujBaze(katalog) {
   const db = new Database(path.join(katalog, "data.db"));
   const wynik = db.prepare("UPDATE suppliers SET czestotliwosc_minuty = NULL").run();
   log(`      scheduler wygaszony dla ${wynik.changes} dostawców`);
+
   db.close();
 
   const zrodlo = fs.readFileSync(path.join(katalog, "migrate_szer_to_text.cjs"), "utf8");
@@ -178,6 +181,46 @@ function przygotujBaze(katalog) {
     stdio: ["ignore", "ignore", "inherit"],
   });
   log("      migracja szertxt zastosowana (products.szerokosc → TEXT)");
+}
+
+/**
+ * Jeden wiersz z `uwaga_cena` — ZASIEW DANYCH w kopii, nie zmiana zachowania.
+ *
+ * ⚠ MUSI iść PO starcie oryginału. Kolumny `uwaga_cena` nie ma w snapshocie (2026-08-13,
+ * starszy niż patch z 2026-08-24) — dokłada ją dopiero `uwaga_cena_patch.cjs:26-34`
+ * idempotentnym `ALTER TABLE` przy każdym boocie. Zasiew przed startem wywracał się
+ * na „no such column".
+ *
+ * Po co w ogóle: bez ani jednego wiersza `GET /api/products/uwagi-cena` oddaje
+ * `{ok:true, items:[]}`, a pusta tablica we wzorcu NIE narzuca kształtu elementów
+ * (`rebuild/backend/test/gate/ksztalt.ts`). Taki fixture nie zamroziłby czterech pól
+ * pozycji ani — co ważniejsze — klucza `uwaga_cena` w SNAKE_CASE. Produkcja czyta tę
+ * trasę surowym `better-sqlite3`, więc oddaje nazwy KOLUMN; gołe `select()` Drizzle'a
+ * dałoby `uwagaCena` i rozjechało kształt. To ta sama pułapka, którą CLAUDE.md opisuje
+ * na `GET /api/selly/log` — tam przeszła code review i złapał ją dopiero GATE.
+ *
+ * SQL samej trasy pozostaje oryginału; my dostarczamy wyłącznie dane wejściowe.
+ */
+function zasiejUwageCeny(katalog) {
+  const Database = require(path.join(katalog, "node_modules", "better-sqlite3"));
+  const db = new Database(path.join(katalog, "data.db"));
+  try {
+    const wynik = db
+      .prepare(
+        "UPDATE products SET uwaga_cena = 'na zapytanie', status = 'wstrzymany' " +
+          "WHERE id = (SELECT id FROM products WHERE ean IS NOT NULL ORDER BY id LIMIT 1)",
+      )
+      .run();
+    if (wynik.changes !== 1) {
+      throw new Error(
+        "Nie udało się zasiać `uwaga_cena` — bez tego fixture /uwagi-cena zamrozi pustą " +
+          "listę i nie ochroni klucza snake_case. Sprawdź, czy kopia ma produkty z EAN-em.",
+      );
+    }
+    log("      zasiane uwaga_cena w 1 wierszu (dla /uwagi-cena)");
+  } finally {
+    db.close();
+  }
 }
 
 async function uruchomOryginal(katalog, port) {
@@ -595,6 +638,7 @@ async function main() {
     przygotujBaze(katalog);
     const port = await wolnyPort();
     proces = await uruchomOryginal(katalog, port);
+    zasiejUwageCeny(katalog);
 
     const Database = require(path.join(katalog, "node_modules", "better-sqlite3"));
     const db = new Database(path.join(katalog, "data.db"), { readonly: true });

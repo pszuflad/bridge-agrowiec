@@ -23,7 +23,7 @@
     "eanCandidates": null,
     "status": "wstrzymany",
     "magazynRaw": null,
-    "dataAktualizacji": "2026-09-07T23:28:35.327Z",
+    "dataAktualizacji": "2026-09-07T23:32:38.269Z",
     "rozmiar": "10.00/75x15.3",
     "szerokosc": null,
     "profil": null,
@@ -74,7 +74,7 @@
     "wentyl": null,
     "cfo": null,
     "zastosowanie": null,
-    "kodImportu": "931054",
+    "kodImportu": "701918",
     "nieobecnoscPodRzad": 0
   },
   "request": {

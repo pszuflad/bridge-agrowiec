@@ -5,7 +5,14 @@
   "json": true,
   "body": {
     "ok": true,
-    "items": []
+    "items": [
+      {
+        "id": 97794,
+        "kod": "MO9_336320",
+        "ean": "8903094073627",
+        "uwaga_cena": "na zapytanie"
+      }
+    ]
   },
   "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
   "_opis": "Monkey-patch produkcji (uwaga_cena_patch.cjs) — klucz `uwaga_cena` w snake_case."

@@ -23,7 +23,7 @@
         "eanIsValid": 1,
         "eanSourceStatus": "ok",
         "eanCandidates": "[\"8903094073627\"]",
-        "status": "aktywny",
+        "status": "wstrzymany",
         "magazynRaw": null,
         "dataAktualizacji": "2026-08-04T14:30:34.149Z",
         "rozmiar": "620/70R42",
