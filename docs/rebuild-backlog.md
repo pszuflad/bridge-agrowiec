@@ -126,7 +126,7 @@ tego, co użytkownik realnie widzi w panelu, nie tylko statystyk importu.
 | **Pliki (stan końcowy)** | `parsers/tyre_params.cjs`, `bridge_ext.cjs`, `db/schema.sql` (kolumna `products.szerokosc`); skasowane `probe.cjs/2/3`; kopie `*.bak_pre_szerokoscfix_*`, `*.bak_pre_szerorig_*`, `*.bak_pre_szertxt_*` |
 | **Commity** | `97ccb9f` (szerokoscfix — cofnięty) · `5c060b0` (szerorig) · `d5a43c9` (szertxt) |
 | **Do nowej wersji?** | ✅ **TAK — NANIESIONE** (decyzja użytkownika 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`, plan.md D3) |
-| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`); potwierdzone w I12a (2026-09-05), że kanon nie ożywił starego wyjątku. Zostaje JEDNO: przenagranie `GET_products.json` w **sesji 12d**. |
+| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`); potwierdzone w I12a (2026-09-05), że kanon nie ożywił starego wyjątku; 12c (2026-09-05) doniosła wadę ręcznej edycji do frontu (D3, 1:1). Zostaje JEDNO: przenagranie `GET_products.json` w **sesji 12d**. |
 
 **Opis biznesowy:**
 Kolumna „szerokość" opony była niespójna: ten sam rozmiar (np. „11.2-24") zapisywał się raz jako
@@ -165,13 +165,16 @@ liczbę z tekstu rozmiaru 1:1, z zerami końcowymi**, bez konwersji jednostek.
 - 🔎 **Warto wiedzieć przy przenagrywaniu:** `db/snapshot.db` (2026-08-13) jest STARSZY niż
   migracja `szertxt` (2026-08-19) i ma jeszcze `szerokosc REAL`, więc sam nie nadaje się na
   źródło wartości „z zerami końcowymi".
-- ⚠ **Znalezione w I12a (2026-09-05), istotne dla sesji 12c.** Produkcyjny dialog edycji `LT()`
-  renderuje `szerokosc` jako `type="number"` z `parseFloat` (`deminified/frontend-index.js:24076-24079`),
-  więc RĘCZNA edycja wysyła LICZBĘ do kolumny TEXT i gubi zera końcowe („10.00" → „10") —
-  dokładnie to, czego broniła cała saga `szertxt`. Import ich nie gubi (parser pisze napis,
-  kolumna jest TEXT); traci je tylko ścieżka ręcznej edycji. To zastane zachowanie produkcji,
-  nie regres odbudowy. `szerokosc` jest mimo to na liście pól edytowalnych produktu
-  (`POLA_EDYTOWALNE_PRODUKTU`, backlog #14), bo produkcja to pole realnie edytuje.
+- ⚠ **Znalezione w I12a (2026-09-05), potwierdzone i ZANIESIONE w sesji 12c (2026-09-05,
+  decyzja D3, `docs/tickets/37-FEATURE-katalog-edycja-produktu/plan.md`).** Produkcyjny dialog
+  edycji `LT()` renderuje `szerokosc` jako `type="number"` z `parseFloat`
+  (`deminified/frontend-index.js:24076-24079`), więc RĘCZNA edycja wysyła LICZBĘ do kolumny TEXT
+  i gubi zera końcowe („10.00" → „10") — dokładnie to, czego broniła cała saga `szertxt`. Import
+  ich nie gubi (parser pisze napis, kolumna jest TEXT); traci je tylko ścieżka ręcznej edycji.
+  To zastane zachowanie produkcji, nie regres odbudowy — 12c odtworzyła je 1:1 świadomie
+  (`rebuild/frontend/src/pages/katalog/poleEdycji.ts`), pole jest mimo to na liście pól
+  edytowalnych produktu (`POLA_EDYTOWALNE_PRODUKTU`, backlog #14), bo produkcja to pole
+  realnie edytuje.
 
 **Warstwa parsera — zrobiona (2026-08-26, I3/3a), decyzja o schemacie nadal otwarta.**
 Port verbatim `tyre_params.cjs` wniósł stan końcowy `szertxt` do `rebuild/backend`: `parseSize()`
@@ -1048,6 +1051,11 @@ Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archi
   produkcja oddaje 200. Testy: `rebuild/backend/test/produkty.mutacje.test.ts`.
   Wszystkie trasy mutacji produktów mają po tej sesji jawną listę pól — nic nie zostaje do
   finalnego audytu.
+  **Front dogonił backend w sesji 12c (2026-09-05).** Dialog edycji produktu
+  (`rebuild/frontend/src/pages/katalog/DialogEdycjiProduktu.tsx` + `poleEdycji.ts`) wysyła
+  dokładnie tę listę 42 pól i nic ponadto — pilnuje tego `rebuild/frontend/test/katalog.poleEdycji.test.ts`,
+  który czyta `POLA_EDYTOWALNE_PRODUKTU` wprost ze źródła backendu i porównuje z kluczami
+  wysyłanymi przez formularz.
 - **Reguła, którą warto przyjąć na stałe:** trasa mutacji dostaje jawną listę pól, a kolumny
   wyliczane i kolumny własne odbudowy (`importWylaczony`, `uwagaCena`) na tę listę **nigdy**
   nie wchodzą. Potwierdzone w I12a: `uwagaCena` odcięta z `POLA_EDYTOWALNE_PRODUKTU` mimo że
@@ -2355,3 +2363,47 @@ typów frontu. Obie kopie mają komentarz-kotwicę wskazujący na drugą.
 **Do decyzji.** Czy `rebuild/` powinien kiedyś dostać wspólny pakiet dla logiki
 współdzielonej BE/FE — nie blokuje 12b, kandydat do rozważenia przy większej liczbie takich
 duplikatów.
+
+---
+
+### #51 · 2026-09-05 · [FRONTEND] · wzorzec potwierdzeń rozjechał się — trzy miejsca z surowym `window.confirm`, dwa bez uzasadnienia
+
+> **Znalezione przy scalaniu sesji 12b i 12c (2026-09-07).** Nie jest defektem produkcji —
+> to niespójność WEWNĄTRZ odbudowy, widoczna dopiero po zestawieniu obu równoległych sesji.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (spójność wzorca potwierdzeń) |
+| **Pliki** | `rebuild/frontend/src/pages/Staging.tsx:177,210` · `rebuild/frontend/src/pages/konfiguracja/Admin.tsx:233` (oba bez uzasadnienia) · `rebuild/frontend/src/pages/konfiguracja/Katalog.tsx:45` (świadomy, udokumentowany wyjątek) · wzorzec reszty: `rebuild/frontend/src/components/DialogPotwierdzenia.tsx` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte, zidentyfikowane przy scalaniu 12b+12c |
+
+**Co znaleziono.** Odbudowa ma dziś TRZY reguły potwierdzania naraz, choć 7b (D2) ustanowiła
+jedną: `window.confirm` zastępujemy `DialogPotwierdzenia` z **dosłownym** tekstem oryginału.
+
+1. **Zgodne z wzorcem** — dostawcy/atrybuty (D2, 7b), narzuty i promocje (D6), katalog:
+   usuwanie produktu (D1, 12c).
+2. **Świadomy, UDOKUMENTOWANY wyjątek** — `konfiguracja/Katalog.tsx:45` („Usuń wszystko
+   z katalogu", 12b). Uzasadnienie stoi w komentarzu przy kodzie: operacja jest nieodwracalna
+   i dotyka wszystkich dostawców naraz, więc blokujący dialog przeglądarki jest tu zaletą.
+   **To jest w porządku** — wyjątek z powodem zapisanym w miejscu, w którym stoi.
+3. **Bez żadnego uzasadnienia** — `Staging.tsx:177,210` (masowa akceptacja/odrzucenie pozycji,
+   zastane sprzed 7b) oraz `konfiguracja/Admin.tsx:233` („Usuń pozycje, które nie są oponami",
+   dołożone w 12b **bez komentarza**, choć bliźniaczy przycisk w tym samym tickecie taki
+   komentarz dostał).
+
+**Skutek.** Brak regresu wobec produkcji (oryginał wszędzie używa `window.confirm`) — to czysto
+wewnętrzna niespójność. Realny koszt jest testowy: te trzy miejsca wymagają podmiany globalu
+`window.confirm`, żeby dały się przetestować, podczas gdy reszta widoków nie.
+
+**Dlaczego wpis powstał dopiero teraz.** Sesje 12b i 12c szły RÓWNOLEGLE. 12c zamknęła katalog
+zgodnie z wzorcem i odnotowała w swoim raporcie `Staging.tsx` jako „jedyne pozostałe miejsce" —
+co przestało być prawdą w chwili scalenia z 12b, która dołożyła dwa kolejne. **Twierdzenia
+„jedyne miejsce w całej odbudowie" nie da się bezpiecznie postawić z wnętrza jednej z dwóch
+równoległych kart** — to samo w sobie jest lekcją do zapamiętania.
+
+**Do decyzji.** Czy (a) ujednolicić `Staging.tsx` i `Admin.tsx` do `DialogPotwierdzenia`,
+czy (b) zostawić natywny dialog, ale **dopisać uzasadnienie** tam, gdzie go nie ma — tak jak
+ma je `konfiguracja/Katalog.tsx`. Wariant (b) jest tańszy i wystarcza, jeśli powodem jest
+nieodwracalność operacji (obie są masowe i nieodwracalne). Naturalny moment domknięcia:
+**12e** (finalny audyt + przegląd 12 widoków).

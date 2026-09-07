@@ -11,15 +11,15 @@
  *  3. Sortowanie jest w pełni po stronie klienta i działa na całym odfiltrowanym
  *     zbiorze, nie na bieżącej stronie.
  *
- * ODSTĘPSTWO (plan.md D4): ostatnia kolumna w oryginale to menu „Akcje" (Edytuj,
- * Historia, Wstrzymaj, Usuń). Mutacje są poza Iteracją 2, więc w jej miejscu jest
- * przycisk otwierający podgląd read-only.
+ * Ostatnia kolumna to menu „Akcje" (`MenuAkcji.tsx`) — do sesji 12c stał tu przycisk
+ * podglądu read-only, którym Iteracja 2 zastąpiła menu na czas braku mutacji (odstępstwo
+ * D4). Mutacje dowiozła 12a, więc odstępstwo jest zniesione i kolumna wróciła do oryginału.
  */
-import { ArrowUpDown, Eye } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import { useState, type CSSProperties } from "react";
-import { Button } from "@/components/ui/button";
 import { formatujKomorke } from "./formatowanie";
 import type { Produkt } from "./filtrowanie";
+import { MenuAkcji } from "./MenuAkcji";
 import { KOLUMNY_PRZYKLEJONE, type DefinicjaKolumny } from "./kolumny";
 import { useWirtualizacja } from "./wirtualizacja";
 
@@ -62,7 +62,9 @@ export function TabelaProduktow({
   onSortuj,
   ladowanie,
   bylyJakiesProdukty,
-  onPodglad,
+  onEdytuj,
+  onPrzelaczStatus,
+  onUsun,
 }: {
   /** Wiersze BIEŻĄCEJ strony (paginacja dzieje się wyżej). */
   produkty: Produkt[];
@@ -76,7 +78,9 @@ export function TabelaProduktow({
   ladowanie: boolean;
   /** Czy przed filtrowaniem cokolwiek było — rozstrzyga, który komunikat pustki pokazać. */
   bylyJakiesProdukty: boolean;
-  onPodglad: (produkt: Produkt) => void;
+  onEdytuj: (produkt: Produkt) => void;
+  onPrzelaczStatus: (produkt: Produkt) => void;
+  onUsun: (produkt: Produkt) => void;
 }) {
   const [rozwinieteNazwy, setRozwinieteNazwy] = useState<Set<number>>(() => new Set());
   const okno = useWirtualizacja(produkty.length);
@@ -131,10 +135,13 @@ export function TabelaProduktow({
                 testId={`header-${kolumna.key}`}
               />
             ))}
-            {/* Oryginał ma tu „Akcje" (frontend-index.js:23695). W I2 kolumna mieści wyłącznie
-                podgląd read-only (plan.md D4), więc etykieta mówi, co naprawdę robi. */}
-            <th className="px-3 py-2.5 font-medium text-right sticky right-0 bg-muted/50 z-10">
-              Podgląd
+            {/* „Akcje" 1:1 z oryginałem (frontend-index.js:23693-23695). Do 12c stało tu
+                „Podgląd", bo kolumna mieściła wyłącznie modal read-only (odstępstwo D4). */}
+            <th
+              className="px-3 py-2.5 font-medium text-right sticky right-0 bg-muted/50 z-10"
+              data-testid="header-akcje"
+            >
+              Akcje
             </th>
           </tr>
         </thead>
@@ -212,17 +219,12 @@ export function TabelaProduktow({
               })}
 
               <td className="px-3 py-2 text-right sticky right-0 bg-background">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 w-7 p-0"
-                  onClick={() => onPodglad(produkt)}
-                  title="Podgląd produktu"
-                  data-testid={`button-podglad-${produkt.id}`}
-                >
-                  <Eye className="w-4 h-4" />
-                  <span className="sr-only">Podgląd produktu</span>
-                </Button>
+                <MenuAkcji
+                  produkt={produkt}
+                  onEdytuj={onEdytuj}
+                  onPrzelaczStatus={onPrzelaczStatus}
+                  onUsun={onUsun}
+                />
               </td>
             </tr>
           ))}

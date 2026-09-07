@@ -3,9 +3,9 @@
  * produkcji (`contract/fixtures/GET_products.json`, `GET_suppliers.json`).
  *
  * Zakres: że ekran faktycznie renderuje dane, że filtry i szukajka zawężają listę,
- * że paginacja przełącza strony i że podgląd produktu pokazuje pola. Sama logika
- * filtrowania ma osobny, gęstszy zestaw testów (`katalog.filtrowanie.test.ts`) —
- * tutaj sprawdzamy spięcie, nie reguły.
+ * że paginacja przełącza strony i że menu „Akcje" otwiera dialog edycji. Sama logika
+ * filtrowania ma osobny, gęstszy zestaw testów (`katalog.filtrowanie.test.ts`), a przepływy
+ * mutacji — `katalog.edycja.test.tsx`. Tutaj sprawdzamy spięcie, nie reguły.
  */
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -46,6 +46,9 @@ function zamockujApi(produkty: Produkt[] = PRODUKTY) {
     // katalogu. Pusty słownik = zachowanie sprzed 7c (listy wyłącznie z produktów), czyli
     // dokładnie to, czego pilnują asercje niżej.
     http.get("*/api/atrybuty", () => HttpResponse.json({ ok: true, rodzaje: [], wartosci: [] })),
+    // 12c: dialog edycji pyta o override'y otwieranego produktu. Handler musi tu być nawet
+    // w testach, które dialogu nie otwierają — `onUnhandledRequest:"error"` wywraca CAŁY plik.
+    http.get("*/api/overrides", () => HttpResponse.json([])),
   );
 }
 
@@ -260,31 +263,32 @@ describe("katalog — kolumny i podgląd produktu", () => {
     expect(await screen.findByTestId("header-szerokosc")).toBeInTheDocument();
   });
 
-  it("podgląd produktu pokazuje jego dane i wszystkie 59 pól", async () => {
+  it("menu „Akcje” otwiera dialog edycji produktu", async () => {
     zamockujApi();
     render(<App />);
     const pierwszy = PRODUKTY[0] as Produkt;
     await screen.findByTestId(`row-product-${pierwszy.id}`);
 
-    await userEvent.click(screen.getByTestId(`button-podglad-${pierwszy.id}`));
+    await userEvent.click(screen.getByTestId(`button-actions-${pierwszy.id}`));
+    await userEvent.click(await screen.findByTestId(`button-edit-${pierwszy.id}`));
 
-    const dialog = await screen.findByTestId("dialog-podglad-produktu");
-    expect(within(dialog).getByTestId("text-podglad-nazwa")).toHaveTextContent(pierwszy.nazwa);
-    expect(within(dialog).getByTestId("podglad-pole-cenaZakupu")).toHaveTextContent("5562.40");
-    expect(within(dialog).getAllByTestId(/^podglad-pole-/)).toHaveLength(59);
+    const dialog = await screen.findByTestId("dialog-edycja-produktu");
+    expect(within(dialog).getByLabelText("Nazwa")).toHaveValue(pierwszy.nazwa);
+    expect(within(dialog).getByTestId("button-save-edit")).toBeInTheDocument();
   });
 
-  /** Podgląd jest READ-ONLY (plan.md D4) — mutacje należą do późniejszej iteracji. */
-  it("podgląd nie zawiera żadnego pola do edycji ani przycisku zapisu", async () => {
+  /**
+   * Odstępstwo D4 z Iteracji 2 (modal podglądu READ-ONLY w miejscu dialogu edycji) zostało
+   * zniesione w 12c. Ten test pilnuje, żeby podgląd nie wrócił tylnymi drzwiami — oryginał
+   * nie ma szczegółu produktu w trybie odczytu w żadnej postaci.
+   */
+  it("nie ma już modalu podglądu read-only (zniesione odstępstwo D4)", async () => {
     zamockujApi();
     render(<App />);
     const pierwszy = PRODUKTY[0] as Produkt;
     await screen.findByTestId(`row-product-${pierwszy.id}`);
 
-    await userEvent.click(screen.getByTestId(`button-podglad-${pierwszy.id}`));
-    const dialog = await screen.findByTestId("dialog-podglad-produktu");
-
-    expect(within(dialog).queryAllByRole("textbox")).toHaveLength(0);
-    expect(within(dialog).queryByRole("button", { name: /zapisz/i })).not.toBeInTheDocument();
+    expect(screen.queryByTestId(`button-podglad-${pierwszy.id}`)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("dialog-podglad-produktu")).not.toBeInTheDocument();
   });
 });

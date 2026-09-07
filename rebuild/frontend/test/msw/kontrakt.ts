@@ -5,6 +5,7 @@ import type { Uzytkownik } from "@/lib/api";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
+import type { Override } from "@/pages/katalog/api";
 import type {
   PingSelly,
   StatusCsv,
@@ -78,6 +79,20 @@ export function produktyZFixtura(): Produkt[] {
 export function dostawcyZFixtura(): Record<string, unknown>[] {
   const sciezka = resolve(korzenRepo, "contract/fixtures/GET_suppliers.json");
   const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Record<string, unknown>[] };
+  return fixture.body;
+}
+
+/**
+ * Override'y z `contract/fixtures/GET_overrides.json` — ręczne poprawki pól produktu.
+ *
+ * ⚠ Klucze fixture'u są **camelCase** (`fieldName`, `overrideValue`), mimo że kolumny
+ * w SQLite nazywają się `field_name`. To jest wyrocznia dla dialogu edycji, który mapuje
+ * override'y po `fieldName` — pułapka „projekcja Drizzle vs `SELECT *`" (CLAUDE.md §5)
+ * tu NIE występuje i test ma tego pilnować.
+ */
+export function overridesZFixtura(): Override[] {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_overrides.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: Override[] };
   return fixture.body;
 }
 

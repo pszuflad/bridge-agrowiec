@@ -11,17 +11,20 @@
  * snapshotu produkcji) zdejmuje kompresja włączona po stronie backendu
  * (`rebuild/backend/src/app.ts`) — po gzipie 0,84 MB, czyli 12× mniej.
  *
- * Zakres Iteracji 2 to ODCZYT. Menu „Akcje" (Edytuj/Wstrzymaj/Usuń) oraz zaciąganie
- * słowników z `GET /api/atrybuty` należą do późniejszych iteracji — patrz „Poza zakresem"
- * w plan.md Iteracji 2.
+ * **Zapis dowieziony w sesji 12c** (`37-FEATURE-katalog-edycja-produktu`): menu „Akcje"
+ * w wierszu (Edytuj / Historia `disabled` / Wstrzymaj-Aktywuj / Usuń) plus dialog edycji
+ * (`DialogEdycjiProduktu`, port `LT()`), wołające trasy mutacji z sesji 12a. Tym samym
+ * zniknęło odstępstwo D4 Iteracji 2 — modal podglądu read-only, który stał w miejscu
+ * dialogu edycji. Słowniki z `GET /api/atrybuty` zaciąga widok od 7c.
  *
  * **Eksport CSV dowieziony w sesji 8b** (`30-FEATURE-selly-panel-frontend`): przycisk
  * obok konfiguratora kolumn, logika w `katalog/eksport.ts`, konfiguracja czytana
  * defensywnie z `GET /api/config`.
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
 import { PageHeader } from "@/components/PageHeader";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
@@ -56,9 +59,11 @@ import {
   SEPARATOR_DOMYSLNY,
   zbudujCsv,
 } from "./katalog/eksport";
+import { usunProdukt, zapiszProdukt } from "./katalog/api";
+import { DialogEdycjiProduktu } from "./katalog/DialogEdycjiProduktu";
 import { KonfiguratorKolumn } from "./katalog/KonfiguratorKolumn";
 import { KOLUMNY, KOLUMNY_DOMYSLNE, uzupelnijKodImportu } from "./katalog/kolumny";
-import { PodgladProduktu } from "./katalog/PodgladProduktu";
+import { przeciwnyStatus } from "./katalog/MenuAkcji";
 import { TabelaProduktow } from "./katalog/TabelaProduktow";
 import { WyborWielokrotny } from "./katalog/WyborWielokrotny";
 
@@ -92,6 +97,7 @@ export function Katalog() {
   // normalny stan, a nie awaria — wpadamy wtedy w fallbacki `TT` i `";"`.
   const { data: konfiguracja = {} } = useQuery<Konfiguracja>({ queryKey: KLUCZ_KONFIGURACJI });
   const { toast } = useToast();
+  const klient = useQueryClient();
   /**
    * Słownik atrybutów zasila listy filtrów marek i kategorii — port `:23285-23287`
    * (sesja 7c, domknięcie degradacji D3 z I2). Klucz i `queryFn` są WSPÓLNE z widokiem
@@ -120,7 +126,75 @@ export function Katalog() {
   const [sortKierunek, setSortKierunek] = useState<KierunekSortowania>("asc");
   const [strona, setStrona] = useState(0);
   const [rozmiarStrony, setRozmiarStrony] = useState<number>(25);
-  const [podglad, setPodglad] = useState<Produkt | null>(null);
+  const [edytowany, setEdytowany] = useState<Produkt | null>(null);
+  const [doUsuniecia, setDoUsuniecia] = useState<Produkt | null>(null);
+
+  /**
+   * Klucze unieważniane po KAŻDEJ mutacji produktu.
+   *
+   * ⚠ `["/api/products"]` to KOMPLET tego, co robi oryginał — `Og` i `jb` wołają
+   * `Uo("/api/products")` i nic więcej (`frontend-index.js:9149,9152`). Świadomie NIE
+   * dokładamy `["/api/alerts"]` ani `["/api/analytics"]`: `/alerty` w ogóle nie czyta
+   * `/api/products` (backlog #26), więc taka invalidacja byłaby pustym żądaniem.
+   *
+   * ⚠ `["/api/history"]` to ODSTĘPSTWO ŚWIADOME (plan.md 12c, D2), a nie przeoczenie.
+   * Oryginał odświeżał historię po edycji, ale robił to `Yb()` (`:10290`) — lokalnym
+   * dziennikiem w IndexedDB nadpisującym cache przez `setQueryData`, bez żadnego API.
+   * Od 12a wpis `history` pisze NAPRAWDĘ backend, w handlerze `PATCH`/`DELETE`. Portu
+   * `Yb` zaniechaliśmy (drugie, konkurencyjne źródło historii — wzorzec odrzucony już
+   * w I6/D3), a nasz klient ma `staleTime: Infinity`, więc bez tej invalidacji
+   * `/historia` kłamałaby aż do przeładowania strony — czyli gorzej niż produkcja.
+   */
+  function odswiezPoMutacji(): void {
+    void klient.invalidateQueries({ queryKey: ["/api/products"] });
+    void klient.invalidateQueries({ queryKey: ["/api/history"] });
+  }
+
+  /** Toast po udanej edycji i po przełączeniu statusu — dosłownie z `:23899` / `:23800`. */
+  function toastProduktu(tytul: string, produkt: Produkt): void {
+    toast({ title: tytul, description: `${produkt.kod} — ${produkt.nazwa.slice(0, 40)}` });
+  }
+
+  const edycja = useMutation<Produkt, Error, { produkt: Produkt; zmiany: Record<string, unknown> }>(
+    {
+      mutationFn: ({ produkt, zmiany }) => zapiszProdukt(produkt.id, zmiany),
+      onSettled: odswiezPoMutacji,
+      onSuccess: (zapisany) => {
+        setEdytowany(null);
+        toastProduktu("Zapisano zmiany", zapisany);
+      },
+      onError: (e) =>
+        toast({ title: "Nie udało się zapisać", description: e.message, variant: "destructive" }),
+    },
+  );
+
+  const przelaczenie = useMutation<Produkt, Error, Produkt>({
+    mutationFn: (produkt) => zapiszProdukt(produkt.id, { status: przeciwnyStatus(produkt.status) }),
+    onSettled: odswiezPoMutacji,
+    onSuccess: (zapisany, produkt) => {
+      // Tytuł opisuje SKUTEK, więc czyta status docelowy, a nie ten sprzed zapisu (`:23799`).
+      const docelowy = przeciwnyStatus(produkt.status);
+      toastProduktu(docelowy === "wstrzymany" ? "Wstrzymano" : "Aktywowano", zapisany);
+    },
+    onError: (e) =>
+      toast({
+        title: "Nie udało się zmienić statusu",
+        description: e.message,
+        variant: "destructive",
+      }),
+  });
+
+  const kasowanie = useMutation<void, Error, Produkt>({
+    mutationFn: (produkt) => usunProdukt(produkt.id),
+    onSettled: odswiezPoMutacji,
+    onSuccess: (_wynik, produkt) => {
+      setDoUsuniecia(null);
+      // Jedyny toast bez nazwy — oryginał podaje sam kod (`:23808`), bo produktu już nie ma.
+      toast({ title: "Usunięto produkt", description: produkt.kod });
+    },
+    onError: (e) =>
+      toast({ title: "Nie udało się usunąć", description: e.message, variant: "destructive" }),
+  });
 
   // Wybór kolumn: start z domyślnych, potem podmiana tym, co leży w IndexedDB
   // (frontend-index.js:23195-23212). `zaladowano` chroni przed nadpisaniem wyboru
@@ -454,7 +528,9 @@ export function Katalog() {
               onSortuj={przelaczSortowanie}
               ladowanie={isLoading}
               bylyJakiesProdukty={wZakladce.length > 0}
-              onPodglad={setPodglad}
+              onEdytuj={setEdytowany}
+              onPrzelaczStatus={(produkt) => przelaczenie.mutate(produkt)}
+              onUsun={setDoUsuniecia}
             />
 
             {liczbaStron > 1 && (
@@ -525,7 +601,29 @@ export function Katalog() {
         </Card>
       )}
 
-      <PodgladProduktu produkt={podglad} onZamknij={() => setPodglad(null)} />
+      <DialogEdycjiProduktu
+        produkt={edytowany}
+        onZamknij={() => setEdytowany(null)}
+        onZapisz={(produkt, zmiany) => edycja.mutate({ produkt, zmiany })}
+        zapisywanie={edycja.isPending}
+      />
+
+      {/*
+        ODSTĘPSTWO ŚWIADOME (plan.md 12c, D1): oryginał pyta natywnym
+        `window.confirm(`Usunąć ${kod}?`)` (`:23805`). Treść przenosimy DOSŁOWNIE,
+        zmienia się wyłącznie nośnik — tak jak w 7b (D2) i w narzutach (D6).
+      */}
+      <DialogPotwierdzenia
+        otwarty={doUsuniecia !== null}
+        tytul="Usunięcie produktu"
+        tresc={doUsuniecia ? `Usunąć ${doUsuniecia.kod}?` : ""}
+        etykietaPotwierdzenia="Usuń"
+        wariantPotwierdzenia="destructive"
+        zajety={kasowanie.isPending}
+        onPotwierdz={() => doUsuniecia && kasowanie.mutate(doUsuniecia)}
+        onZamknij={() => setDoUsuniecia(null)}
+        testId="dialog-usun-produkt"
+      />
     </div>
   );
 }
