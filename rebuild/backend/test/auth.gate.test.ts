@@ -59,26 +59,34 @@ describe("GATE — kontrakt i fixtures dla logowania", () => {
   });
 
   /**
-   * ROZJAZD KONTRAKT ↔ PRODUKCJA (opisany w plan.md, „Kontrakt i fixtures", pkt 1).
+   * ROZJAZD KONTRAKT ↔ PRODUKCJA — DOMKNIĘTY 2026-09-08 (ticket 38, sesja 12d).
    *
-   * `openapi.yaml:754-761` opisuje `GET /api/me` jako `security: []` z kodami 200/400 —
-   * bo inwentarz 2.3 patrzył na to, czy operacja ma wpięty wspólny middleware `we`.
-   * Oryginał chroni tę trasę ręcznym `if (!req.user)` (backend-index.cjs:48179-48183)
-   * i realnie zwraca 401. WZORCEM JEST PRODUKCJA — odtwarzamy 401.
+   * Kontrakt 2.3 opisywał `GET /api/me` jako `security: []` z kodami 200/400 — bo inwentarz
+   * patrzył na to, czy operacja ma wpięty wspólny middleware `we`. Oryginał chroni tę trasę
+   * ręcznym `if (!req.user)` (`backend-index.cjs:48179-48183`) i realnie zwraca 401.
+   * Do tego ticketu ten test UTRWALAŁ rozjazd (`expect(kody).not.toContain("401")`), żeby
+   * odświeżenie kontraktu od razu tu zaświeciło — i zaświeciło.
    *
-   * Dlatego dla tej odpowiedzi NIE wołamy sprawdzZgodnoscZKontraktem: kontrakt nie
-   * deklaruje 401 dla /api/me i nigdy nie deklarował. Rozjazd zgłoszony w raporcie,
-   * do domknięcia przy odświeżeniu kontraktu (Iteracja 12 — audyt bezpieczeństwa).
+   * ⭐ 401 nie zostało wpisane „bo tak działa nasz backend". Zmierzone na URUCHOMIONYM
+   * ORYGINALE postawionym na kopii bazy: `GET /api/me` bez tokenu → 401. Ta sama próba
+   * pokazała, że pozostałe 14 tras z `security: []`, które odbudowa chroni, produkcja
+   * realnie oddaje BEZ logowania — dlatego u nich `401` niesie adnotację `x-odbudowa-auth`,
+   * a tutaj nie: tu 401 to produkcja, nie nasze odstępstwo.
    */
-  it("GET /api/me bez tokenu — 401 jak produkcja (kontrakt tego kodu nie deklaruje)", async () => {
+  it("GET /api/me bez tokenu — 401 jak produkcja, teraz też zadeklarowane w kontrakcie", async () => {
     const odp = await request(srodowisko.app).get("/api/me");
     expect(odp.status).toBe(401);
     expect(odp.body).toEqual({ error: "Nieautoryzowany" });
 
+    sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/me", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("GET_me_401.json", odp.body);
+
     const { wczytajKontrakt } = await import("./gate/kontrakt.js");
     const operacja = wczytajKontrakt().znajdzOperacje("GET", "/api/me");
-    // Utrwalamy rozjazd, żeby odświeżenie kontraktu o kod 401 od razu tu zaświeciło.
-    expect(operacja?.kody).not.toContain("401");
+    expect(operacja?.kody).toContain("401");
+    // `security` ZOSTAJE puste: kontrakt opisuje produkcję, a produkcja nie ma tu middleware'u
+    // auth — 401 bierze się z ręcznego sprawdzenia w handlerze (D4).
+    expect(operacja?.wymagaAuth).toBe(false);
   });
 
   it("POST /api/login — zgodny z kontraktem (200 i 400)", async () => {
@@ -87,16 +95,33 @@ describe("GATE — kontrakt i fixtures dla logowania", () => {
       .send({ email: srodowisko.dane.email, password: srodowisko.dane.haslo });
     expect(ok.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/login", odpowiedz: ok });
+    sprawdzZgodnoscZFixture("POST_login.json", ok.body);
 
     const bledne = await request(srodowisko.app).post("/api/login").send({});
     expect(bledne.status).toBe(400);
     sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/login", odpowiedz: bledne });
   });
 
+  /**
+   * 401 przy ZŁYM HAŚLE to inny przypadek niż 400 przy braku pól — i kontrakt 2.3 nie
+   * deklarował go wcale. Kod dopisany w tym tickecie na podstawie nagrania z oryginału,
+   * nie z naszego backendu.
+   */
+  it("POST /api/login ze złym hasłem — 401 z kształtem 1:1 z nagrania oryginału", async () => {
+    const odp = await request(srodowisko.app)
+      .post("/api/login")
+      .send({ email: srodowisko.dane.email, password: "zdecydowanie-nie-to-haslo" });
+
+    expect(odp.status).toBe(401);
+    sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/login", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("POST_login_401.json", odp.body);
+  });
+
   it("POST /api/logout — zgodny z kontraktem", async () => {
     const odp = await request(srodowisko.app).post("/api/logout").send({});
     expect(odp.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/logout", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("POST_logout.json", odp.body);
   });
 
   it("wszystkie trzy ścieżki iteracji istnieją w contract/openapi.yaml", async () => {
