@@ -3,6 +3,7 @@
  * więc jego porównywarka kształtu musi realnie wyłapywać rozjazdy (i nie zgłaszać fałszywek).
  */
 import { describe, expect, it } from "vitest";
+import { sprawdzZgodnoscZFixture, type WyjatekGate } from "./gate/asercje.js";
 import { KATALOG_FIXTURES, katalogRepo } from "./gate/repo.js";
 import { porownajKsztalt } from "./gate/ksztalt.js";
 import { wczytajFixture } from "./gate/fixtures.js";
@@ -107,5 +108,51 @@ describe("dostęp do źródeł prawdy", () => {
     expect(katalogRepo()).toBeTruthy();
     expect(KATALOG_FIXTURES()).toContain("fixtures");
     expect(wczytajFixture("GET_me.json").endpoint).toBe("/api/me");
+  });
+});
+
+/**
+ * Zadeklarowane wyjątki — mechanizm bez użytkownika od 2026-09-08.
+ *
+ * Do tego dnia jedynym wyjątkiem w całej odbudowie był `WYJATKI_SZEROKOSC`
+ * (`test/katalog.gate.test.ts`) i to on trzymał tę furtkę pod testem. Przenagranie
+ * `GET_products.json` w tickecie 38 domknęło rozjazd i wyjątek zniknął — razem
+ * z jedynym dowodem, że furtka w ogóle działa. Te dwa testy zastępują tamten dowód,
+ * żeby następna sesja, która będzie musiała zadeklarować rozjazd, dostała mechanizm
+ * sprawdzony, a nie taki, którego od miesięcy nikt nie uruchamiał.
+ */
+describe("sprawdzZgodnoscZFixture — zadeklarowane wyjątki", () => {
+  const wyjatekEmail: WyjatekGate[] = [
+    { sciezka: /^\$\.email$/, powod: "test harnessu", domyka: "nigdy — to test" },
+  ];
+
+  it("przepuszcza różnicę objętą wyjątkiem", () => {
+    expect(() =>
+      sprawdzZgodnoscZFixture(
+        "GET_me.json",
+        { id: 1, email: 42, imieNazwisko: "X", iat: 1, exp: 2 },
+        wyjatekEmail,
+      ),
+    ).not.toThrow();
+  });
+
+  it("nie przepuszcza różnicy POZA wyjątkiem", () => {
+    expect(() =>
+      sprawdzZgodnoscZFixture(
+        "GET_me.json",
+        { id: "1", email: 42, imieNazwisko: "X", iat: 1, exp: 2 },
+        wyjatekEmail,
+      ),
+    ).toThrow(/\$\.id/);
+  });
+
+  it("zapala się, gdy wyjątek przestał cokolwiek pokrywać (samoczyszczenie)", () => {
+    expect(() =>
+      sprawdzZgodnoscZFixture(
+        "GET_me.json",
+        { id: 1, email: "a@b.c", imieNazwisko: "X", iat: 1, exp: 2 },
+        wyjatekEmail,
+      ),
+    ).toThrow(/NIE wystąpił/);
   });
 });
