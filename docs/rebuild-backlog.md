@@ -1873,14 +1873,14 @@ pustego CSV) albo owinąć nazwę w cudzysłowy. ⚠ Powiązanie: to zmieniłoby
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (regresja wierności wobec oryginału, nie tylko architektura odbudowy) |
-| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,WidokWPrzygotowaniu,Atrybuty,Selly}.tsx`; NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`); oryginał: `deminified/frontend-index.js:16329` (`mn()`, sidebar+topbar) |
+| **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,Atrybuty,Selly,MojeKonto}.tsx` (`MojeKonto.tsx` od I12/12b); NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`); `WidokWPrzygotowaniu.tsx` USUNIĘTY w 12b (ostatni placeholder zniknął); oryginał: `deminified/frontend-index.js:16329` (`mn()`, sidebar+topbar) |
 | **Do nowej wersji?** | ⬜ **do decyzji Ani** |
 | **Status** | — nie zaczęte (zastane, ujawnione przy **10f**, powiększone przy **8b** o `/selly`) |
 
 **Co znaleziono.** `App.tsx` rejestruje trasy bezpośrednio pod `<Switch>`, bez wspólnego
 layoutu — każdy widok sam decyduje, czy owinąć się w `AppShell` (komponent z sidebarem,
 `components/AppShell.tsx:59-87`). Dziś robią to `Pulpit`, `Konfiguracja`,
-`WidokWPrzygotowaniu`, (od 7b) `Atrybuty` i (od 8b) `Selly`; **siedem** pozostałych widoków
+(od 7b) `Atrybuty`, (od 8b) `Selly` i (od 12b) `MojeKonto`; **siedem** pozostałych widoków
 (`Katalog`, `Staging`, `Historia`, `Narzuty`, `Alerty`, `WagaGabarytowa`, `Analityka`) zwraca
 samą treść (np. `Katalog.tsx:172`: `<div className="p-6 max-w-full">` bez `AppShell` ani
 `Sidebar` w drzewie) — sprawdzone `grep`em, sidebar na tych siedmiu ekranach faktycznie się
@@ -1897,13 +1897,14 @@ routera (:28641-28680) owija nią swój zwracany JSX — potwierdzone po kolei d
 też nie mają sidebara (stąd wniosek „to nie wierność, to architektura odbudowy") — **to było
 błędne ustalenie, niepoparte pełnym odczytem funkcji** (sprawdzono tylko początek definicji,
 nie faktyczny `return`). Poprawny wniosek: oryginał pokazuje sidebar na WSZYSTKICH ekranach
-zalogowanego użytkownika — odbudowa na pięciu z dwunastu.
+zalogowanego użytkownika — odbudowa na sześciu z jedenastu (po dołożeniu `MojeKonto.tsx` w 12b).
 
 **Skąd wzięło się przy 10f.** Zastane, nie wprowadzone przez ten blok: `/` było placeholderem
-(`WidokWPrzygotowaniu`, który ramę renderuje), więc problem był niewidoczny. 10f zdjęło
-placeholder i Pulpit musiał dołożyć `AppShell` samodzielnie, żeby nie zgubić nawigacji —
-przy tej okazji rozjazd między widokami stał się widoczny. 8b dołożyła kolejny widok
-(`Selly.tsx`) do tej samej, już istniejącej luki — zastane, poza zakresem tego ticketa.
+(`WidokWPrzygotowaniu`, komponent który ramę renderował — usunięty w 12b, gdy zniknął ostatni
+placeholder), więc problem był niewidoczny. 10f zdjęło placeholder i Pulpit musiał dołożyć
+`AppShell` samodzielnie, żeby nie zgubić nawigacji — przy tej okazji rozjazd między widokami
+stał się widoczny. 8b dołożyła kolejny widok (`Selly.tsx`) do tej samej, już istniejącej luki
+— zastane, poza zakresem tego ticketa.
 
 **Skutek.** Wizualna regresja wobec ZACHOWANIA ORYGINAŁU (sidebar znika) na ośmiu ekranach —
 Ania na produkcji nigdy nie traci sidebara przechodząc między widokami, w odbudowie traci go
@@ -2277,31 +2278,132 @@ błąd, a nie cichy zapis do cudzego sklepu.
 poprawności naszego kodu, ale wymaga uprawnień, których na cyber_Folks bez roota
 prawdopodobnie nie ma. ⬜ Do sprawdzenia.
 
+### #48 · 2026-09-05 · [BACKEND][BEZPIECZEŃSTWO] · tabela `users` nie ma kolumny roli — „admin" nie jest technicznie odróżnialny
+
+> **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Zastane** — stan
+> zgodny z produkcją, nie regresja odbudowy.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (schemat, autoryzacja) |
+| **Pliki** | `rebuild/schema/001_schema.sql` (`users`: `id, email, haslo_hash, imie_nazwisko, utworzono, ostatnie_logowanie` — bez roli); oryginał: strony `/admin/*` chronione samym `requireAuth`, `mirror/backend/extensions.cjs:296+` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte (zastane, ujawnione przy 12b) |
+
+**Co znaleziono.** Tabela `users` nie ma kolumny roli/uprawnień — każdy zalogowany użytkownik
+jest technicznie równy każdemu innemu. 12b dołożyła zakładki „Admin" i „Dziennik" w
+`/konfiguracja` (dostawcy, użytkownicy, utrzymanie, surowy audyt) chronione wyłącznie
+`requireAuth`, tak jak w oryginale chronione są serwerowe strony `/admin/*`.
+
+**Skutek.** Każdy zalogowany użytkownik widzi i może użyć zakładek admina (edycja
+konfiguracji dostawców, usuwanie nie-opon, czyszczenie całego katalogu, podgląd dziennika
+audytu z e-mailami i URL-ami dostawców) — nie tylko faktyczny administrator.
+
+**Dlaczego to jest jak w produkcji, a nie usterka.** Oryginał ma ten sam brak rozróżnienia —
+strony admina chroni tam sam middleware autoryzacji, bez sprawdzania roli. 12b odtworzyła to
+1:1, świadomie (patrz `docs/tickets/36-FEATURE-konto-admin-maintenance/plan.md`, Kontekst).
+
+**Do decyzji.** Czy wprowadzić kolumnę roli w `users` (zmiana schematu) i realną autoryzację
+dla zakładek admina — decyzja Ani, kandydat do rozstrzygnięcia przy 12e (finalny przegląd
+bezpieczeństwa).
+
 ---
 
-### #48 · 2026-09-05 · [FRONTEND] · `Staging.tsx` — jedyne miejsce w odbudowie z surowym `window.confirm`
+### #49 · 2026-09-05 · [BACKEND] · kopie bazy po `POST /api/products/clear` nigdy nie są sprzątane
 
-> **Znalezione przy sesji 12c (2026-09-05, `37-FEATURE-katalog-edycja-produktu`), follow-up
-> z tego ticketa.** Nie jest defektem produkcji — to niespójność WEWNĄTRZ odbudowy.
+> **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Zastane** — stan
+> zgodny z produkcją, port 1:1.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (utrzymanie, miejsce na dysku) |
+| **Pliki** | `deminified/backend-index.cjs:48319-48331` (`copyFileSync` best-effort przed czyszczeniem); port: `rebuild/backend/src/routes/maintenance.ts` (`POST /api/products/clear`, D5 ticketa 36) |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — nie zaczęte (zastane, ujawnione przy 12b) |
+
+**Co znaleziono.** Przed czyszczeniem katalogu trasa robi best-effort kopię
+`<baza>.bak_before_clear_<ISO>` (w odbudowie z checkpointem WAL, D5) — i nic nigdy tych
+plików nie usuwa, ani w oryginale, ani w porcie.
+
+**Skutek.** Każde użycie przycisku „Usuń wszystko z katalogu" (`/konfiguracja` → „Katalog")
+zostawia nowy plik kopii; przy częstym użyciu (np. testowanie parsera) katalog danych rośnie
+bez ograniczeń.
+
+**Dlaczego to jest jak w produkcji, a nie usterka.** Zachowanie odtworzone 1:1 — oryginał ma
+ten sam brak retencji.
+
+**Do decyzji.** Czy wprowadzić rotację/retencję kopii (np. limit liczby plików albo TTL) —
+decyzja Ani, nie blokuje 12b.
+
+---
+
+### #50 · 2026-09-05 · [BACKEND][FRONTEND] · `parsujSzczegoly` istnieje w repo w dwóch kopiach (backend i frontend)
+
+> **Znalezione przy tickecie `36-FEATURE-konto-admin-maintenance` (I12/12b). Świadoma decyzja
+> użytkownika D4 tego ticketa** — nie jest to błąd do naprawienia.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND + FRONTEND (architektura odbudowy — brak wspólnego pakietu) |
+| **Pliki** | `rebuild/backend/src/historia/mapowanie.ts:87` i `rebuild/frontend/src/pages/konfiguracja/dziennik.ts` (kotwice do siebie, testy na te same trzy wejścia: NULL, zepsuty JSON, wartość nie-obiektowa) |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | ✔ obie kopie zrobione w rebuild (12b), zamierzony duplikat |
+
+**Co znaleziono.** `rebuild/backend` i `rebuild/frontend` to dwa rozłączne projekty bez
+wspólnego pakietu (w całym froncie nie ma ani jednego importu kodu z backendu). `GET
+/api/audit-log` oddaje surowy `szczegoly_json` (string) — parsowanie robi wyłącznie front,
+przy renderowaniu kolumny „Szczegóły" w zakładce „Dziennik". Wzorzec ma precedens
+(`waga-gabarytowa/obliczenia.ts` obok `backend/waga-gabarytowa/formula.ts`).
+
+**Dlaczego to nie jest usterka.** Decyzja D4 planu 36-FEATURE: wspólny pakiet (`rebuild/shared/`)
+zmieniałby strukturę całej odbudowy (buildy, tsconfigi, lint, deploy obu stron) za 12 linii
+kodu; alias Vite/tsconfig do pliku backendu wciągałby `drizzle-orm` i schemat bazy do grafu
+typów frontu. Obie kopie mają komentarz-kotwicę wskazujący na drugą.
+
+**Do decyzji.** Czy `rebuild/` powinien kiedyś dostać wspólny pakiet dla logiki
+współdzielonej BE/FE — nie blokuje 12b, kandydat do rozważenia przy większej liczbie takich
+duplikatów.
+
+---
+
+### #51 · 2026-09-05 · [FRONTEND] · wzorzec potwierdzeń rozjechał się — trzy miejsca z surowym `window.confirm`, dwa bez uzasadnienia
+
+> **Znalezione przy scalaniu sesji 12b i 12c (2026-09-07).** Nie jest defektem produkcji —
+> to niespójność WEWNĄTRZ odbudowy, widoczna dopiero po zestawieniu obu równoległych sesji.
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (spójność wzorca potwierdzeń) |
-| **Pliki** | `rebuild/frontend/src/pages/Staging.tsx:177,210` (surowy `confirm(...)`); wzorzec reszty odbudowy: `rebuild/frontend/src/components/DialogPotwierdzenia.tsx` |
+| **Pliki** | `rebuild/frontend/src/pages/Staging.tsx:177,210` · `rebuild/frontend/src/pages/konfiguracja/Admin.tsx:233` (oba bez uzasadnienia) · `rebuild/frontend/src/pages/konfiguracja/Katalog.tsx:45` (świadomy, udokumentowany wyjątek) · wzorzec reszty: `rebuild/frontend/src/components/DialogPotwierdzenia.tsx` |
 | **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — nie zaczęte, zidentyfikowane w 12c |
+| **Status** | — nie zaczęte, zidentyfikowane przy scalaniu 12b+12c |
 
-**Co znaleziono.** Po sesji 12c (dialog edycji produktu zastąpił `window.confirm` przez
-`DialogPotwierdzenia` przy usuwaniu produktu — odstępstwo D1, kontynuacja precedensu D2 z 7b
-i D6 z narzutów) `Staging.tsx:177,210` (masowe „Zaakceptować wszystkie pasujące pozycje?" /
-„Odrzucić wszystkie pasujące pozycje?") zostało **jedynym miejscem w całej odbudowie**, które
-nadal blokuje wątek surowym `confirm()` zamiast Radixowego dialogu. Reszta widoków jest już
-spójna: 7b (dostawcy), narzuty/promocje (D6), i teraz katalog (D1 z 12c).
+**Co znaleziono.** Odbudowa ma dziś TRZY reguły potwierdzania naraz, choć 7b (D2) ustanowiła
+jedną: `window.confirm` zastępujemy `DialogPotwierdzenia` z **dosłownym** tekstem oryginału.
 
-**Skutek.** Brak regresu wobec produkcji (oryginał też używa `window.confirm` w tych miejscach)
-— to czysto wewnętrzna niespójność odbudowy: jeden widok blokuje wątek i nie da się go
-przetestować bez podmiany globalu, podczas gdy reszta już nie.
+1. **Zgodne z wzorcem** — dostawcy/atrybuty (D2, 7b), narzuty i promocje (D6), katalog:
+   usuwanie produktu (D1, 12c).
+2. **Świadomy, UDOKUMENTOWANY wyjątek** — `konfiguracja/Katalog.tsx:45` („Usuń wszystko
+   z katalogu", 12b). Uzasadnienie stoi w komentarzu przy kodzie: operacja jest nieodwracalna
+   i dotyka wszystkich dostawców naraz, więc blokujący dialog przeglądarki jest tu zaletą.
+   **To jest w porządku** — wyjątek z powodem zapisanym w miejscu, w którym stoi.
+3. **Bez żadnego uzasadnienia** — `Staging.tsx:177,210` (masowa akceptacja/odrzucenie pozycji,
+   zastane sprzed 7b) oraz `konfiguracja/Admin.tsx:233` („Usuń pozycje, które nie są oponami",
+   dołożone w 12b **bez komentarza**, choć bliźniaczy przycisk w tym samym tickecie taki
+   komentarz dostał).
 
-**Do decyzji.** Czy ujednolicić `Staging.tsx` do `DialogPotwierdzenia` (odstępstwo od 1:1,
-analogiczne do D1/D2/D6). Naturalny moment domknięcia: **12e** (finalny audyt + przegląd
-12 widoków) albo osobny drobny ticket porządkowy.
+**Skutek.** Brak regresu wobec produkcji (oryginał wszędzie używa `window.confirm`) — to czysto
+wewnętrzna niespójność. Realny koszt jest testowy: te trzy miejsca wymagają podmiany globalu
+`window.confirm`, żeby dały się przetestować, podczas gdy reszta widoków nie.
+
+**Dlaczego wpis powstał dopiero teraz.** Sesje 12b i 12c szły RÓWNOLEGLE. 12c zamknęła katalog
+zgodnie z wzorcem i odnotowała w swoim raporcie `Staging.tsx` jako „jedyne pozostałe miejsce" —
+co przestało być prawdą w chwili scalenia z 12b, która dołożyła dwa kolejne. **Twierdzenia
+„jedyne miejsce w całej odbudowie" nie da się bezpiecznie postawić z wnętrza jednej z dwóch
+równoległych kart** — to samo w sobie jest lekcją do zapamiętania.
+
+**Do decyzji.** Czy (a) ujednolicić `Staging.tsx` i `Admin.tsx` do `DialogPotwierdzenia`,
+czy (b) zostawić natywny dialog, ale **dopisać uzasadnienie** tam, gdzie go nie ma — tak jak
+ma je `konfiguracja/Katalog.tsx`. Wariant (b) jest tańszy i wystarcza, jeśli powodem jest
+nieodwracalność operacji (obie są masowe i nieodwracalne). Naturalny moment domknięcia:
+**12e** (finalny audyt + przegląd 12 widoków).

@@ -8,23 +8,64 @@
  * to, co Ania zobaczy po kliknięciu „Domyślne" w panelu kolumn katalogu. Żadnego żądania
  * sieciowego stąd nie wychodzi — w oryginale też nie.
  *
- * ⚠ ZAKRES POMNIEJSZONY (plan.md D3, decyzja użytkownika): oryginał ma tu jeszcze
- * destrukcyjny przycisk „Usuń wszystko z katalogu" (`POST /api/products/clear`
- * z `{potwierdzenie: "WYCZYSC"}`, `:26101-26130`). Ten endpoint należy do Iteracji 12
- * i tam zostaje — razem z przyciskiem.
+ * Destrukcyjny przycisk „Usuń wszystko z katalogu" (`:26101-26134`) dołożyła Iteracja 12b
+ * razem z trasą `POST /api/products/clear` — karta jest od tego momentu KOMPLETNA wobec
+ * oryginału (odstępstwo D3 ticketu 18 zniesione).
  */
+import { useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
 import { KLUCZ_KOLUMN_KATALOGU, odczytajKV, zapiszKV } from "@/lib/magazynKV";
 import { KOLUMNY, KOLUMNY_DOMYSLNE } from "../katalog/kolumny";
+import { TEKST_POTWIERDZENIA, wyczyscKatalog } from "./katalog";
 
 export function Katalog() {
   const [wybrane, ustawWybrane] = useState<Set<string>>(new Set(KOLUMNY_DOMYSLNE));
   const [wczytano, ustawWczytano] = useState(false);
   const [komunikat, ustawKomunikat] = useState<string | null>(null);
   const [zapisywanie, ustawZapisywanie] = useState(false);
+  const [czyszczenie, ustawCzyszczenie] = useState(false);
+  const { toast } = useToast();
+  const klientZapytan = useQueryClient();
+
+  /**
+   * Czyszczenie CAŁEGO katalogu — port `:26101-26134`.
+   *
+   * ⚠ `window.confirm` jest tu ŚWIADOMY, mimo że reszta odbudowy zastąpiła natywne dialogi
+   * komponentami Radix (odstępstwo D2 sesji 7b). Ta operacja jest nieodwracalna i dotyka
+   * wszystkich dostawców naraz, więc blokujący dialog przeglądarki — którego nie da się
+   * kliknąć „obok" ani zamknąć Escapem bez decyzji — jest tu zaletą, nie zaniedbaniem.
+   * Treść pytania dosłownie z oryginału.
+   */
+  async function wyczysc() {
+    if (!window.confirm(TEKST_POTWIERDZENIA)) return;
+
+    ustawCzyszczenie(true);
+    try {
+      await wyczyscKatalog();
+      toast({
+        title: "Katalog wyczyszczony",
+        description: "Usunięto wszystkie pozycje z katalogu",
+      });
+      // Trzy klucze 1:1 z oryginałem (`:26117-26125`). Alerty i analityka liczą się
+      // z katalogu, więc bez ich unieważnienia pokazywałyby dane sprzed czyszczenia.
+      for (const klucz of ["/api/products", "/api/alerts", "/api/analytics"]) {
+        void klientZapytan.invalidateQueries({ queryKey: [klucz] });
+      }
+    } catch (blad) {
+      toast({
+        title: "Błąd czyszczenia",
+        description: blad instanceof Error ? blad.message : String(blad),
+        variant: "destructive",
+      });
+    } finally {
+      ustawCzyszczenie(false);
+    }
+  }
 
   useEffect(() => {
     void (async () => {
@@ -136,10 +177,17 @@ export function Katalog() {
             </p>
           ) : null}
 
-          <p className="text-xs text-muted-foreground border-t pt-3">
-            Czyszczenie katalogu („Usuń wszystko z katalogu") powstanie w Iteracji 12 razem
-            z trasą <code className="font-mono">POST /api/products/clear</code>.
-          </p>
+          <div className="border-t pt-3">
+            <Button
+              variant="destructive"
+              onClick={() => void wyczysc()}
+              disabled={zapisywanie || czyszczenie}
+              data-testid="button-clear-products-work"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {czyszczenie ? "Czyszczenie..." : "Usuń wszystko z katalogu"}
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

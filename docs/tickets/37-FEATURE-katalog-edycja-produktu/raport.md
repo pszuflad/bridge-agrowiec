@@ -125,9 +125,10 @@ Brak zmian łamiących API. Zmiany wewnętrzne frontendu:
 
 ## Follow-up (świadomie odłożone)
 
-- **`Staging.tsx:177,210` nadal używa surowego `window.confirm`** — jedyne takie miejsce
-  w odbudowie po tym tickecie. Niespójne z odstępstwem D2 (7b) / D6 (narzuty) / D1 (ta sesja).
-  Poza zakresem 12c; kandydat na drobny ticket porządkowy albo na domknięcie w 12e.
+- **Wzorzec potwierdzeń rozjechał się na trzy miejsca z surowym `window.confirm`** —
+  `Staging.tsx:177,210` i `konfiguracja/Admin.tsx:233` bez uzasadnienia, `konfiguracja/Katalog.tsx:45`
+  jako świadomy, udokumentowany wyjątek (12b). Niespójne z D2 (7b) / D6 (narzuty) / D1 (ta sesja).
+  Poza zakresem 12c; **backlog #51**, domknięcie w 12e. ⚠ Patrz „Korekty po scaleniu z 12b" niżej.
 - **Przenagranie fixtures dla sześciu operacji mutacji produktów** — sesja 12d. Do tego czasu
   kształt odpowiedzi `PATCH`/`DELETE` nie ma wyroczni z produkcji.
 - **`WYJATKI_SZEROKOSC` w `rebuild/backend/test/katalog.gate.test.ts`** — do usunięcia w 12d po przenagraniu
@@ -154,7 +155,8 @@ Trzy doc-checkery równolegle. Wynik:
 - **Nota do bloku 12d:** sześć operacji mutacji nadal bez nagrań + poprawiona ścieżka
   `rebuild/backend/test/katalog.gate.test.ts` (było „`test/katalog.gate.test.ts`", co
   sugerowało frontend).
-- **Nota do bloku 12e:** `Staging.tsx:177,210` — jedyny surowy `window.confirm`.
+- **Nota do bloku 12e:** surowy `window.confirm` w `Staging.tsx:177,210` (skorygowana po
+  scaleniu — patrz niżej).
 - Rozliczona nota z 12a o `szerokosc` — z ostrzeżenia „wymaga uwagi przed portem" na fakt (D3).
 
 ### `docs/rebuild-backlog.md`
@@ -164,8 +166,8 @@ Trzy doc-checkery równolegle. Wynik:
   wysyła dokładnie 42 pola z listy backendu, pilnowane testem `katalog.poleEdycji.test.ts`.
 - **#22** (martwa kolumna „Promocja") — sprawdzony, **bez zmian**; 12c go nie dotknęła.
 - **#48 NOWY** (FRONTEND, ⬜ **do decyzji** — nie ✅, bo decyzja należy do użytkownika):
-  `Staging.tsx:177,210` jako jedyne miejsce z surowym `window.confirm`; 12e wskazane jako
-  naturalny moment domknięcia. Numeracja zweryfikowana — #47 był najwyższy.
+  surowy `window.confirm`; 12e wskazane jako naturalny moment domknięcia.
+  ⚠ **Wpis przenumerowany na #51 i przepisany przy scaleniu z 12b — patrz niżej.**
 - Odstępstwo D4 z I2 nie miało w backlogu własnego wpisu, więc nie było czego korygować.
 
 ### `docs/spec-frontend.md`
@@ -182,3 +184,41 @@ Trzy doc-checkery równolegle. Wynik:
 
 ### Pre-existing issues
 Żaden z trzech doc-checkerów nie znalazł sprzeczności w treści niezwiązanej z tym ticketem.
+
+## Korekty po scaleniu z sesją 12b (2026-09-07)
+
+Sesje 12b (`36-FEATURE-konto-admin-maintenance`) i 12c szły RÓWNOLEGLE i 12b zdążyła się
+zmergować pierwsza. Scalenie `origin/develop` do tej gałęzi dało konflikty **wyłącznie w trzech
+plikach dokumentacji** (`rebuild-roadmap.md`, `rebuild-backlog.md`, `spec-frontend.md`) —
+**kod scalił się czysto**, bo obie sesje ruszały rozłączne pliki. Przy rozwiązywaniu wyszły
+dwie rzeczy, które trzeba było naprawić, a nie tylko skleić:
+
+1. **Kolizja numerów w backlogu.** 12b założyła wpisy **#48, #49 i #50**, a doc-checker tej
+   sesji nadał mojemu wpisowi numer **#48** — bo w chwili pisania widział tylko stan sprzed
+   merge'a. To dokładnie ta pułapka, którą opisuje procedura numerowania ticketów, tyle że
+   dla backlogu. **Wpis przenumerowany na #51.**
+2. **Teza wpisu przestała być prawdziwa.** Twierdził, że `Staging.tsx:177,210` to „jedyne
+   miejsce w odbudowie z surowym `window.confirm`". 12b dołożyła dwa kolejne:
+   `konfiguracja/Katalog.tsx:45` (**świadomy, udokumentowany** wyjątek — operacja nieodwracalna,
+   blokujący dialog jest tam zaletą) oraz `konfiguracja/Admin.tsx:233` (**bez uzasadnienia**,
+   choć bliźniaczy przycisk w tym samym tickecie komentarz dostał). Wpis przepisany: nie „jedyne
+   miejsce", tylko „wzorzec rozjechał się na trzy miejsca, dwa bez uzasadnienia" — z rozróżnieniem
+   wyjątku uzasadnionego od nieuzasadnionego i z propozycją tańszego wariantu domknięcia
+   (dopisać uzasadnienie zamiast przepisywać na Radix). Ta sama korekta naniesiona na notę
+   do bloku 12e w roadmapie.
+
+**Lekcja zapisana w roadmapie i backlogu:** twierdzenia typu „jedyne miejsce w całej odbudowie"
+nie da się bezpiecznie postawić z wnętrza jednej z dwóch równoległych kart — weryfikuje się
+je dopiero po scaleniu.
+
+Pozostałe konflikty były zwykłym współistnieniem obu sesji (tabela indeksu, status Iteracji 12,
+blok 12d, GATE/DoD, §6) — obie strony zachowane. Przy okazji zaktualizowany stan iteracji:
+**12a, 12b i 12c zamknięte, zostały 12d i 12e**, a cel „Ania edytuje/wstrzymuje/usuwa produkty
+z `/katalog`" oznaczony jako dowieziony (backend 12a + UI 12c).
+
+**Bramki powtórzone na scalonym drzewie, obie strony:**
+- Frontend: lint / typecheck / build czyste, **731 testów / 48 plików** (12c samo w sobie
+  dawało 683/45; różnica to testy dołożone przez 12b).
+- Backend: lint / typecheck / build czyste, **1184 testy / 75 plików**. Uruchomiony, mimo że
+  12c nie zmienia w nim ani jednej linii — merge wciągnął zmiany 12b, więc zielony backend
+  na TEJ gałęzi jest dowodem, że scalenie niczego nie zepsuło.
