@@ -1,0 +1,11 @@
+{
+  "endpoint": "/api/logout",
+  "method": "POST",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Ostatnie w kolejce — unieważnia sesję."
+}

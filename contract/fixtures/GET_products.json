@@ -27,7 +27,7 @@
         "magazynRaw": null,
         "dataAktualizacji": "2026-08-04T14:30:34.149Z",
         "rozmiar": "620/70R42",
-        "szerokosc": 620,
+        "szerokosc": "620",
         "profil": 70,
         "srednica": 42,
         "konstrukcja": "R",
@@ -101,7 +101,7 @@
         "magazynRaw": null,
         "dataAktualizacji": "2026-08-04T14:30:34.147Z",
         "rozmiar": "240/70R16",
-        "szerokosc": 240,
+        "szerokosc": "240",
         "profil": 70,
         "srednica": 16,
         "konstrukcja": "R",
@@ -175,7 +175,7 @@
         "magazynRaw": null,
         "dataAktualizacji": "2026-08-04T14:30:34.146Z",
         "rozmiar": "8.00x20",
-        "szerokosc": 8,
+        "szerokosc": "8.00",
         "profil": null,
         "srednica": 20,
         "konstrukcja": "D",
@@ -249,7 +249,7 @@
         "magazynRaw": null,
         "dataAktualizacji": "2026-08-04T14:30:34.145Z",
         "rozmiar": "540/65R28",
-        "szerokosc": 540,
+        "szerokosc": "540",
         "profil": 65,
         "srednica": 28,
         "konstrukcja": "R",
@@ -323,7 +323,7 @@
         "magazynRaw": null,
         "dataAktualizacji": "2026-08-04T14:30:34.144Z",
         "rozmiar": "600/60R28",
-        "szerokosc": 600,
+        "szerokosc": "600",
         "profil": 60,
         "srednica": 28,
         "konstrukcja": "R",
@@ -379,5 +379,7 @@
     "total": 7405,
     "limit": 5,
     "offset": 0
-  }
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "PRZENAGRANE w tickecie 38 (sesja 12d): `szerokosc` jest TEKSTEM z zerami końcowymi, zgodnie z produkcyjną migracją `szertxt`. Poprzednie nagranie było starsze niż migracja."
 }

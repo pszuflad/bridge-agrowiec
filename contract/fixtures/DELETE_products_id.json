@@ -1,0 +1,11 @@
+{
+  "endpoint": "/api/products/105282",
+  "method": "DELETE",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Bez kaskad — osierocone manual_overrides/history to zastane zachowanie oryginału."
+}

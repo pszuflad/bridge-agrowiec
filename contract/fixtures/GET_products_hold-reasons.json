@@ -1,0 +1,46 @@
+{
+  "endpoint": "/api/products/hold-reasons",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "items": [
+      {
+        "id": 98705,
+        "kod": "MO5_VRRR38042085885T0",
+        "ean": "8714692623769",
+        "reason": "Brak stanu magazynowego u dostawcy"
+      },
+      {
+        "id": 98709,
+        "kod": "MO5_VRRR28048065DTV60",
+        "ean": "8714692360503",
+        "reason": "Brak stanu magazynowego u dostawcy"
+      },
+      {
+        "id": 98714,
+        "kod": "MO5_VRRR24038070DTX70",
+        "ean": "8714692360701",
+        "reason": "Brak stanu magazynowego u dostawcy"
+      },
+      {
+        "id": 98718,
+        "kod": "MO5_VRRR20036070DTX70",
+        "ean": "8714692344756",
+        "reason": "Brak stanu magazynowego u dostawcy"
+      },
+      {
+        "id": 98727,
+        "kod": "MO5_VRPR240400808END0",
+        "ean": "8714692335419",
+        "reason": "Brak stanu magazynowego u dostawcy"
+      }
+    ],
+    "_przyciete": {
+      "items": 507
+    }
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Monkey-patch produkcji (uwaga_cena_patch.cjs) — pięć powodów wstrzymania."
+}

@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/products/uwagi-cena",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "items": []
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Monkey-patch produkcji (uwaga_cena_patch.cjs) — klucz `uwaga_cena` w snake_case."
+}
