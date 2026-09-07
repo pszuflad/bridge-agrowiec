@@ -55,6 +55,79 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
   });
 
   /**
+   * GŁÓWNA ścieżka katalogu, do 12d bez ani jednego fixture'a.
+   *
+   * `GET /api/products` BEZ parametrów to inna gałąź i INNY KSZTAŁT niż `?limit=`:
+   * oryginał oddaje wtedy gołą tablicę, nie kopertę `{items,total,limit,offset}`
+   * (`deminified/backend-index.cjs:48291-48295`). Do tego ticketu pokrywały ją wyłącznie
+   * testy jednostkowe w `produkty.test.ts` — czyli nasz opis zachowania, nie nagranie produkcji.
+   */
+  it("GET /api/products bez parametrów zwraca GOŁĄ TABLICĘ 1:1 z fixture'em", async () => {
+    const odp = await request(srodowisko.app)
+      .get("/api/products")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(odp.status).toBe(200);
+    expect(Array.isArray(odp.body), "bez parametrów musi być goła tablica").toBe(true);
+    sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/products", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("GET_products_bez-parametrow.json", odp.body);
+  });
+
+  /**
+   * Dwa warianty tej samej trasy MUSZĄ się różnić kształtem — inaczej któryś z nich
+   * przestał odtwarzać produkcję. Bez tego testu regres „zawsze koperta" albo
+   * „zawsze tablica" przeszedłby przez oba fixtures osobno, bo każdy z nich
+   * porównuje tylko swój wariant.
+   */
+  it("oba warianty GET /api/products mają RÓŻNE kształty, zgodnie z gałęzią oryginału", async () => {
+    const bez = await request(srodowisko.app)
+      .get("/api/products")
+      .set("Authorization", `Bearer ${token}`);
+    const zLimitem = await request(srodowisko.app)
+      .get("/api/products?limit=5")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(Array.isArray(bez.body)).toBe(true);
+    expect(Array.isArray(zLimitem.body)).toBe(false);
+    expect(Object.keys(zLimitem.body as object).sort()).toEqual([
+      "items",
+      "limit",
+      "offset",
+      "total",
+    ]);
+  });
+
+  /**
+   * STRAŻNIK DECYZJI D1 (ticket 38). `products.uwaga_cena` istnieje w bazie od migracji 002,
+   * ale API jej NIE oddaje — i to jest ODTWORZENIE produkcji, nie nasz dług.
+   * Oryginał czyta produkty przez `X.select().from(he)` (`deminified/backend-index.cjs:44699`),
+   * czyli Drizzle bez jawnej listy kolumn, więc oddaje pola MODELU; model `he` o `uwagaCena`
+   * nie wie (zero trafień w całym bundlu), a `uwaga_cena_patch.cjs` patchuje `acceptStaging`
+   * i `addProductsBulk`, ale NIE `listProducts`. Potwierdzone nagraniem: oba fixtures
+   * produktów i obie mutacje `{id}` mają 72 klucze, żaden nie ma `uwagaCena`.
+   *
+   * Roadmapa (12d pkt 1) i backlog #3 twierdziły, że przenagranie fixtures „przy okazji ujawni"
+   * tę kolumnę. To było błędne — ujawnienie byłoby ODSTĘPSTWEM od produkcji. Ten test pilnuje,
+   * żeby nikt nie zdjął jej z `KOLUMNY_POZA_KONTRAKTEM` w dobrej wierze.
+   */
+  it("GET /api/products NIE oddaje uwagaCena — tak jak produkcja (D1)", async () => {
+    for (const sciezka of ["/api/products", "/api/products?limit=5"]) {
+      const odp = await request(srodowisko.app)
+        .get(sciezka)
+        .set("Authorization", `Bearer ${token}`);
+      const pozycje = (Array.isArray(odp.body) ? odp.body : (odp.body as { items: unknown[] }).items) as Record<string, unknown>[];
+
+      expect(pozycje.length, sciezka).toBeGreaterThan(0);
+      for (const pozycja of pozycje) {
+        expect(Object.keys(pozycja), `${sciezka} — kolumna spoza kontraktu`).not.toContain(
+          "uwagaCena",
+        );
+        expect(Object.keys(pozycja), sciezka).toHaveLength(72);
+      }
+    }
+  });
+
+  /**
    * Niezmiennik, którego samo `porownajKsztalt` nie złapie: fixture ma 5 pozycji, więc
    * pole obecne tylko w części z nich mogłoby się prześlizgnąć. Tu porównujemy KOMPLETNY
    * zbiór 72 kluczy — to on pilnuje poprawek D5 (`snow3pmsf`, tryb boolean).
