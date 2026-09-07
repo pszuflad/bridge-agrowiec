@@ -19596,9 +19596,10 @@ paths:
   # zamrożenie 2.3 ich nie objęło — nie jako pominięcie, tylko dlatego, że zwiad czytał bundle.
   # Roadmapa wymienia ich dopisanie jako zaległość Iteracji 3 do domknięcia w I12.
   #
-  # Schematy odpowiedzi zostają nieopisane ŚWIADOMIE: generujemy je z nagrań produkcji
-  # w sesji 12d, nie z naszej implementacji — inaczej kontrakt przestałby być niezależnym
-  # dowodem i sprawdzalibyśmy własną pracę własną pracą (roadmap §5, I12).
+  # Schematy odpowiedzi mają obie te ścieżki od sesji 12d (ticket 38): wygenerowane
+  # z nagrań ORYGINAŁU postawionego na kopii bazy, nie z naszej implementacji.
+  # Klucz `uwaga_cena` jest w nich w SNAKE_CASE i tak ma zostać — produkcja czyta te
+  # dwie trasy surowym `better-sqlite3`, więc oddaje nazwy kolumn, nie pól modelu.
   # ————————————————————————————————————————————————————————————————————————————————————
   /api/products/uwagi-cena:
     get:
