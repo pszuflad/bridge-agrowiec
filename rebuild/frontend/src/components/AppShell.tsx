@@ -1,8 +1,14 @@
 /**
  * Rama aplikacji — wierne odtworzenie `deminified/frontend-index.js:16329-16456` (`mn`).
  *
- * Tak jak w oryginale, shell jest opakowaniem KAŻDEGO widoku z osobna (a nie warstwą
- * routera) — widok sam się w niego zawija. Zachowane wszystkie `data-testid`.
+ * Wpinany przez ROUTER (`App.tsx`, `TRASY_Z_RAMA`) — jedna deklaracja dla wszystkich
+ * dwunastu tras zalogowanego użytkownika. W oryginale zawijał się w niego każdy widok
+ * z osobna (`mn(…)` w ciele komponentu trasy), ale w odbudowie robiło tak tylko pięć z nich
+ * i na siedmiu ekranach sidebar znikał — poprawione w finalnym audycie 12e (backlog #36).
+ * Zachowane wszystkie `data-testid`.
+ *
+ * Padding treści (`px-4 sm:px-6 lg:px-8 py-6 md:py-8`) należy do ramy — widok NIE dokłada
+ * własnego, bo zdublowałby margines.
  */
 import { KeyRound, LogOut, Menu, Moon, Sun, X } from "lucide-react";
 import { useState, type ReactNode } from "react";

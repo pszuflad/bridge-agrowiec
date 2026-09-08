@@ -21,8 +21,9 @@
  * więc używamy zwykłych ścieżek.
  */
 import { QueryClientProvider } from "@tanstack/react-query";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ComponentType } from "react";
 import { Route, Switch } from "wouter";
+import { AppShell } from "@/components/AppShell";
 import { AuthGate } from "@/components/AuthGate";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { queryClient } from "@/lib/queryClient";
@@ -54,6 +55,37 @@ const Analityka = lazy(async () => ({
   default: (await import("@/pages/Analityka")).Analityka,
 }));
 
+/**
+ * Dwanaście tras zalogowanego użytkownika — każda w ramie z sidebarem (`AppShell`).
+ *
+ * ⚠ RAMĘ WPINA ROUTER, NIE WIDOK (finalny audyt 12e, D1, backlog #36). Do 12e robił to każdy
+ * widok z osobna — tak jak w oryginale, gdzie komponent każdej trasy zwraca `mn(…)`
+ * (`deminified/frontend-index.js:16329`, dwanaście wywołań) — ale w odbudowie zawijało się tak
+ * tylko PIĘĆ z dwunastu widoków, więc na `/katalog`, `/staging`, `/historia`, `/narzuty`,
+ * `/alerty`, `/waga-gabarytowa` i `/analityka` sidebar po prostu znikał. Struktura wewnętrzna
+ * odchodzi tu od oryginału (tabela zamiast powtórzenia w każdym widoku), ale DOM i zachowanie
+ * są zgodne z produkcją, a rozjazd nie ma już jak wrócić przy kolejnym widoku.
+ *
+ * `/login` i 404 zostają poza ramą — tak samo jak w oryginale, gdzie jako jedyne nie wołają
+ * `mn()`. `/selly` jest w ramie mimo że w produkcji nie było trasą Reacta: wstrzykiwany panel
+ * był overlayem NAD `<main>`, czyli WEWNĄTRZ ramy, i podświetlał swoją pozycję w sidebarze
+ * (`mirror/frontend/assets/selly-injection.js:255-280`).
+ */
+const TRASY_Z_RAMA: [string, ComponentType][] = [
+  ["/", Pulpit],
+  ["/katalog", Katalog],
+  ["/staging", Staging],
+  ["/konfiguracja", Konfiguracja],
+  ["/historia", Historia],
+  ["/narzuty", Narzuty],
+  ["/alerty", Alerty],
+  ["/atrybuty", Atrybuty],
+  ["/waga-gabarytowa", WagaGabarytowa],
+  ["/analityka", Analityka],
+  ["/selly", Selly],
+  ["/moje-konto", MojeKonto],
+];
+
 export function Trasy() {
   return (
     <AuthGate>
@@ -63,19 +95,14 @@ export function Trasy() {
         }
       >
         <Switch>
-          <Route path="/" component={Pulpit} />
           <Route path="/login" component={Login} />
-          <Route path="/katalog" component={Katalog} />
-          <Route path="/staging" component={Staging} />
-          <Route path="/konfiguracja" component={Konfiguracja} />
-          <Route path="/historia" component={Historia} />
-          <Route path="/narzuty" component={Narzuty} />
-          <Route path="/alerty" component={Alerty} />
-          <Route path="/atrybuty" component={Atrybuty} />
-          <Route path="/waga-gabarytowa" component={WagaGabarytowa} />
-          <Route path="/analityka" component={Analityka} />
-          <Route path="/selly" component={Selly} />
-          <Route path="/moje-konto" component={MojeKonto} />
+          {TRASY_Z_RAMA.map(([sciezka, Widok]) => (
+            <Route key={sciezka} path={sciezka}>
+              <AppShell>
+                <Widok />
+              </AppShell>
+            </Route>
+          ))}
           <Route component={NotFound} />
         </Switch>
       </Suspense>

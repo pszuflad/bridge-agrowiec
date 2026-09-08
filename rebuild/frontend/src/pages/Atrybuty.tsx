@@ -23,7 +23,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,7 +76,10 @@ export function Atrybuty() {
   }
 
   return (
-    <AppShell>
+    <>
+      {/* Rama z sidebarem (AppShell) wpinana jest przez ROUTER — patrz `App.tsx`,
+          `TRASY_Z_RAMA`. Do 12e każdy widok zawijał się w nią sam, tak jak `mn()`
+          w oryginale, ale robiło to tylko 5 z 12 widoków (backlog #36). */}
       <PageHeader
         title="Atrybuty"
         subtitle="Centralna lista wartości słownikowych używanych w aplikacji"
@@ -135,6 +137,6 @@ export function Atrybuty() {
         wartosc={podglad?.wartosc ?? null}
         onZamknij={() => ustawPodglad(null)}
       />
-    </AppShell>
+    </>
   );
 }
