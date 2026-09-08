@@ -125,7 +125,11 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
   // wzięła się z narzutu 25%, czy przyszła gotowa z pliku. To niespójność oryginału —
   // odtwarzamy ją, bo produkcja tak liczy.
   rekord.marzaPct = 25;
-  rekord.marka = rekord.marka ?? snapshot.marka ?? (pozycja.nazwa.split(" ")[0] || "—");
+  // P3 (produkcja 2026-08-31 14:58, backlog #56): fallback marki to stałe „UNKNOWN".
+  // Wcześniej było tu `pozycja.nazwa.split(" ")[0] || "—"`, co wpisywało jako markę pierwsze
+  // słowo nazwy — czyli zwykle „Opona", a przy MO2 JMK rozmiar. Wartość degenerowana wyglądała
+  // na prawdziwą markę i nikt jej nie poprawiał; „UNKNOWN" widać od razu i idzie do ręcznej naprawy.
+  rekord.marka = rekord.marka ?? snapshot.marka ?? "UNKNOWN";
   rekord.kategoria = rekord.kategoria ?? snapshot.kategoria ?? "Rolnicze";
   rekord.vat = rekord.vat ?? 23;
   rekord.status =

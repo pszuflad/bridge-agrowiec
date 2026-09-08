@@ -182,7 +182,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
-| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`. 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08 |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`. 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. Zostają 13c/13d/13e |
 
 ---
 
@@ -1950,24 +1950,23 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   (9 plików + całe drzewo `legacy/**`) zielone; field-char MO1–MO10 przenagrane i zielone. **Ponad
   pierwotny zakres (decyzja użytkownika w trakcie):** przenagrano też wzorzec charakteryzacji SILNIKA
   (`test/charakteryzacja/silnik/MO*.expected.json`) — stan przejściowy, patrz blok 13b niżej.
-- **13b — Silnik `tk()`/`acceptStaging`: P3 + CAPS/Xq** [BE] — reimplementacja TS (te zmiany są w
-  `index.cjs`, nie w `legacy/`): **P3** fallback marki → `"UNKNOWN"` (zamiast `nazwa.split`), **CAPS/Xq**
-  equality case-insensitive. **Bramki:** kotwica sha „wycięty fragment `index.cjs`" + `silnik.charakteryzacja`
-  + `akceptacja.charakteryzacja` (marka „UNKNOWN"). ⚠ **Cieniowanie (CLAUDE.md §5):** P3 i Xq siedzą w
-  `index.cjs` — policz `function tk(`/`Xq(` i weź ŻYWĄ definicję, nie numer linii z deminifikatu.
-  **Zależy od:** 13a (silnik konsumuje wyjście parserów).
-  ⚠ **Stan przejściowy odziedziczony z 13a.** `test/charakteryzacja/silnik/MO*.expected.json` już
-  jest przenagrany (13a, decyzja użytkownika), ale utrwala kombinację **silnik 25.08 + parsery
-  08.09**, która nigdy nie istniała na produkcji — 13b MUSI go przenagrać ponownie PO bumpie
-  `mirror/backend/index.cjs`, komendą (wymaga `db/snapshot.db`, poza worktree ticketa,
-  `.gitignore` — wskaż ścieżkę do głównego repo):
-  `BRIDGE_SNAPSHOT_DB=<repo>/db/snapshot.db node scripts/charakteryzacja-silnik-nagraj.mjs`
-  (zależność udokumentowana w nagłówku skryptu, linie 8-11 i 28). MO8 ma we wzorcu **31 wierszy
-  stagingu zamiast 25** (`doStagingu` 25→31, `zmienione` 24→30, `bezZmian` 600→594) — sześć nowych
-  to konflikty z poprawkami Marty ze zderzenia nowych parserów ze zrzutem `db/snapshot.db` z
-  2026-08-13; NIE jest to regresja silnika, nie ścigać fantomu. Wzorce **akceptacji**
-  (`test/charakteryzacja/akceptacja/`) NIE zależą od wzorca 3a — 33 testy były zielone przez cały
-  czas, 13b nie musi tego odkrywać na nowo.
+- **13b — Silnik `tk()`/`acceptStaging`: P3 + CAPS/Xq — ✅ zrobione 2026-09-09
+  (`43-CHORE-i13b-silnik-p3-caps`).** Reimplementacja TS (te zmiany są w `index.cjs`, nie w
+  `legacy/`): **P3** fallback marki → `"UNKNOWN"` (zamiast `nazwa.split`) — **w `U.acceptStaging`,
+  NIE w `tk()`** (sprostowanie faktu: offset fallbacku 1 350 905, przed obiema definicjami `tk`);
+  **CAPS/Xq** — `wartosciRowne()` (port `Xq`) equality case-insensitive. **Bramki zielone:** kotwica
+  sha „wycięty fragment `index.cjs`" (`helpery` 584611d4→62d7202a, `silnik` bez zmian) +
+  `silnik.charakteryzacja` + `akceptacja.charakteryzacja` (nowy scenariusz marka „UNKNOWN"). Pełny
+  przebieg 80 plików / 1234 testy. **Cieniowanie (CLAUDE.md §5), zweryfikowane liczeniem w
+  `mirror/backend/index.cjs@main`:** `function tk(` 1× (martwa, `_KP` 5 pól), `tk=function(` 1×
+  (**ŻYWA**, łatka po bundlu, `_KP` 7 pól), `function Xq(` 1× — **brak cieniowania**, jedna
+  definicja wspólna dla obu `tk`.
+  **Zależność:** 13a (silnik konsumuje wyjście parserów) — spełniona.
+  **Stan przejściowy z 13a rozliczony.** `test/charakteryzacja/silnik/MO*.expected.json` przenagrany
+  ponownie PO bumpie `mirror/backend/index.cjs` na 08.09 — fragment `helpery` (zawiera `Xq`) zmienił
+  sha, fragment `silnik` (żywy `tk`) **bez zmian**, zgodnie z przewidywaniem. Przy przenagraniu
+  zmieniło się **57 pól `powod`** w MO1–MO5 i **zero innych pól**; wszystkie te wiersze zostały
+  `typZmiany: "zmiana_kluczowa"` — patrz nota niżej w bloku **13c**, bo to tam się rozstrzyga.
 - **13c — Migracje danych + fixtures konwencji** [BAZA + BE] — migracje istniejących rekordów (wzór:
   #2 kategoriafix, #3 szertxt): **nazwa→UPPER** (CAPS), **konstrukcja kody→słowa** wg
   `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs` (decyzja Anny 2026-09-01: `L` 46 rek. i `B` 11 rek. →
@@ -1978,6 +1977,22 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   (staging 25→31, zderzenie nowych parserów ze starym `db/snapshot.db`) powinno zniknąć po tej migracji.
   **Bramki/fixtures:** przenagraj `katalog.gate`, `analityka.*`, `produkty.*` — pokażą Wielką literę
   kategorii, słowa konstrukcji, WIELKIE nazwy.
+  ⚠ **Rozjazd CHANGELOG↔kod (znalezisko 13b) — to TA karta go rozstrzyga.** CHANGELOG Ani
+  (2026-09-01 12:30) i backlog #59 twierdzą, że case-insensitive `Xq` sprawia, iż „Kleber GRIPKER"
+  vs „KLEBER GRIPKER" NIE generuje `staging_items` typu `zmiana_kluczowa`. **Kod produkcji tego nie
+  robi** — w żywym `tk` klasyfikacja `_ck` liczy się BEZ `Xq`, jest case-SENSITIVE
+  (`_KP=["rozmiar","indeksNosnosci","indeksPredkosci","model","marka","nazwa","kodDostawcy"]`,
+  porównanie `String(vS??"")!==String(vN??"")`); diff 08.09 tego fragmentu nie tknął. `Xq` wpływa
+  realnie tylko na narrację `powod` (`POLA_ROZNIC`) i na auto-patch PIĘCIU pól: `cenaZakupu`/
+  `cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` — **bez `ean`**, bo `AP.ean` istnieje wyłącznie
+  w MARTWEJ definicji `tk`; żywy `tk` ma dokładnie 6 wywołań `Xq` (1 w pętli `powod` + 5 wyżej). Dowód empiryczny z 13b: przenagranie wzorca zmieniło
+  57 pól `powod` i ZERO innych pól — wiersze zostały `typZmiany: "zmiana_kluczowa"`. **Dopiero
+  migracja danych tej karty (`UPPER(nazwa)` + `DELETE` wierszy staging CASE_ONLY) usuwa szum
+  case-only** — nie kod silnika, 13b tego nie mogła załatwić.
+  ⚠ **Drugie przesunięcie wzorca do przewidzenia.** Po migracji `UPPER(nazwa)` wzorzec
+  charakteryzacji silnika (`MO1–MO5.expected.json`) może się przesunąć DRUGI raz — tym razem przez
+  zmianę DANYCH wejściowych (nazwy w bazie stają się WIELKIE), nie kodu. Policzyć diff `powod` i
+  potwierdzić, że `typZmiany` nadal się zgadza, tak jak w 13b.
   **Zależy od:** 13a, 13b. Tu wpina się decyzja 13f (tl_tt).
 - **13d — Selly REST sync (NOWY podsystem)** [BE] — reimplementacja TS 7 plików `selly/*`
   (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/`routes_sync`) +
