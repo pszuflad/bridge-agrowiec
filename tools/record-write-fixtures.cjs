@@ -200,6 +200,10 @@ function przygotujBaze(katalog) {
  * na `GET /api/selly/log` — tam przeszła code review i złapał ją dopiero GATE.
  *
  * SQL samej trasy pozostaje oryginału; my dostarczamy wyłącznie dane wejściowe.
+ *
+ * ⚠ KOLEJNOŚĆ MA ZNACZENIE: wołane PO nagraniu `GET /api/products`, żeby zmieniony wiersz
+ * nie wszedł do fixture'ów katalogu. Zasiew dotyka produktu o najniższym id z EAN-em,
+ * a ten jest pierwszą pozycją listy — nagrany wcześniej, pokazywałby nasz `status`.
  */
 function zasiejUwageCeny(katalog) {
   const Database = require(path.join(katalog, "node_modules", "better-sqlite3"));
@@ -404,7 +408,7 @@ const PRODUKT_TESTOWY = {
   status: "aktywny",
 };
 
-async function odegrajScenariusze(port, db) {
+async function odegrajScenariusze(port, db, katalog) {
   log("[5/6] Nagrywanie…");
 
   // — AUTH ————————————————————————————————————————————————————————————————
@@ -468,6 +472,12 @@ async function odegrajScenariusze(port, db) {
       "zgodnie z produkcyjną migracją `szertxt`. Poprzednie nagranie było starsze niż migracja.",
     port,
   });
+
+  // ⚠ ZASIEW DOPIERO TUTAJ — po nagraniu obu wariantów `GET /api/products`.
+  // Wcześniej stał przed nimi i jego wiersz (`status: "wstrzymany"`) wchodził jako PIERWSZA
+  // pozycja do `GET_products.json` i `GET_products_bez-parametrow.json`, czyli nasza ingerencja
+  // trafiała do fixture'ów, które mają być czystym zapisem produkcji. Wykryte w code review.
+  zasiejUwageCeny(katalog);
 
   await nagraj({
     plik: "GET_products_uwagi-cena.json",
@@ -638,12 +648,11 @@ async function main() {
     przygotujBaze(katalog);
     const port = await wolnyPort();
     proces = await uruchomOryginal(katalog, port);
-    zasiejUwageCeny(katalog);
 
     const Database = require(path.join(katalog, "node_modules", "better-sqlite3"));
     const db = new Database(path.join(katalog, "data.db"), { readonly: true });
     try {
-      await odegrajScenariusze(port, db);
+      await odegrajScenariusze(port, db, katalog);
     } finally {
       db.close();
     }
@@ -659,7 +668,15 @@ async function main() {
   }
 }
 
-main().catch((blad) => {
-  console.error(`\nBŁĄD: ${blad.message}`);
-  process.exit(1);
-});
+// Uruchamiane jako skrypt — nagrywa. Wymagane jako moduł — oddaje czyste funkcje
+// sanityzacji, żeby dało się je przetestować bez stawiania serwera. Maskowanie już raz
+// przepuściło token JWT do repo (naprawione w tym samym tickecie), więc ma własne testy:
+// `rebuild/backend/test/nagrywarka.sanityzacja.test.ts`.
+if (require.main === module) {
+  main().catch((blad) => {
+    console.error(`\nBŁĄD: ${blad.message}`);
+    process.exit(1);
+  });
+}
+
+module.exports = { zamaskuj, przytnij, KLUCZE_WRAZLIWE, LIMIT_TABLICY };

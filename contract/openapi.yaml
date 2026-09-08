@@ -17047,7 +17047,9 @@ components:
             type: "string"
           kodowanie:
             type: "string"
-          uwagi: {}
+          uwagi:
+            type: "string"
+            nullable: true
           ostatniaAktualizacjaCeny:
             type: "string"
             nullable: true
@@ -17333,6 +17335,7 @@ components:
           type: "string"
           nullable: true
         pr:
+          type: "string"
           nullable: true
         tlTt:
           type: "string"
@@ -18048,6 +18051,7 @@ components:
           dostawcaKod:
             type: "string"
           progNetto:
+            type: "integer"
             nullable: true
           kosztPonizej:
             type: "integer"

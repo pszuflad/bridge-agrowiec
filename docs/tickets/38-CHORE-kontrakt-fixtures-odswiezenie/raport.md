@@ -142,13 +142,48 @@ migruje własny skrypt Ani `migrate_szer_to_text.cjs` (podmieniona wyłącznie z
   - `POST /api/login` (200 i 401), `POST /api/logout`, `GET /api/me` (401)
   - `GET /api/suppliers`, `GET /api/dostawcy` — bez zmian, dalej zielone
   - **Zero zadeklarowanych wyjątków** — `WYJATKI_SZEROKOSC` usunięty, nic nie weszło na jego miejsce.
-- **Unit + integracyjne:** ✓ **1199 testów / 76 plików** (przed ticketem 1192/75).
+- **Unit + integracyjne:** ✓ **1209 testów / 77 plików** (przed ticketem 1192/75).
 - `npm run lint` ✓ · `npm run typecheck` ✓ · `npm run build` ✓
 - Nagrywarka i generator: uruchomione wielokrotnie; generator **idempotentny**
   (`md5sum` bez zmian), tryb `--sprawdz` wpięty w testy.
 - **Kontrola wycieku:** zero trafień `eyJhbGciOi`/`Bearer` w `contract/fixtures/` — token
   z `POST /api/login` był w pierwszym biegu zapisany jawnie (błąd maskowania na najwyższym
   poziomie ciała), wykryty i naprawiony przed commitem.
+
+## Review fixes applied
+
+Review zgłosiło 1 BLOCKER i 3 SHOULD-FIX. Wszystkie trafne, wszystkie naprawione.
+
+1. **BLOCKER — roadmapa i backlog nietknięte.** Nie były jeszcze w tym momencie zaktualizowane
+   (to osobny etap procesu), ale zarzut jest słuszny: bez nich sesja 12e przeczytałaby jako fakt
+   dokładnie to twierdzenie, które D1 obaliła. Naniesione — patrz „Docs updates".
+
+2. **SHOULD-FIX — zasiew `uwaga_cena` skaził fixtures katalogu.** `zasiejUwageCeny` szedł PRZED
+   nagraniem `GET /api/products`, a zasiewa wiersz o najniższym `id` z EAN-em — czyli PIERWSZĄ
+   pozycję listy. Do `GET_products.json` i `GET_products_bez-parametrow.json` wchodził więc nasz
+   `status: "wstrzymany"` zamiast produkcyjnego `aktywny`. To podważało sens tych dwóch nagrań,
+   bo miały być czystym zapisem produkcji. Zasiew przesunięty za nagrania katalogu; oba fixtures
+   przenagrane i mają z powrotem `status: "aktywny"`.
+
+3. **SHOULD-FIX — `scalDwa` uciszał rozjazdy typów.** Przy niezgodnych typach zwracał `{}`,
+   czyli schemat „akceptuję wszystko" — rozjazd znikał, a kontrakt przestawał cokolwiek o polu
+   mówić. To wzorzec, przed którym wprost ostrzega `CLAUDE.md`. Teraz rozjazd jest zapisywany
+   jawnie jako `oneOf`.
+   **Ta poprawka odsłoniła drugi, wcześniejszy błąd:** warunki na `nullable` nie łapały przypadku
+   „oba nullable, jeden bez typu", więc `{type:"string",nullable:true}` scalone z `{nullable:true}`
+   dawało zdegenerowane `oneOf`, które niczego nie zawęża. Dotyczyło trzech pól
+   (`products.pr`, `dostawcy.uwagi`, `spedycja.progNetto`). Naprawione — po poprawce zero
+   `oneOf` z rozjazdu typów, a `pr` to poprawnie `{type: string, nullable: true}`.
+
+4. **SHOULD-FIX — brak testów maskowania.** Kod, który w tym samym tickecie raz przepuścił token
+   JWT do repo, nie miał ani jednego testu. Nagrywarka eksportuje teraz czyste funkcje
+   (`zamaskuj`, `przytnij`) i ma **10 testów** w `rebuild/backend/test/nagrywarka.sanityzacja.test.ts`:
+   regres z najwyższego poziomu ciała, każdy zadeklarowany klucz wrażliwy w dwóch pozycjach,
+   maskowanie wewnątrz przyciętych tablic, konwencja adnotacji — plus **skan wszystkich nagrań
+   w repo** pod kątem JWT/`Bearer` i niezamaskowanych pól, niezależny od tego, czym je nagrano.
+
+Po poprawkach: **1209 testów / 77 plików**, lint/typecheck/build czyste, generator dalej
+idempotentny.
 
 ## Breaking changes
 

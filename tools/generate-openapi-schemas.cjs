@@ -89,16 +89,47 @@ function scalWiele(schematy) {
   return schematy.reduce((a, b) => scalDwa(a, b));
 }
 
+/** Suma wariantów, bez powtórek — używana, gdy pole ma w nagraniu więcej niż jeden typ. */
+function suma(...schematy) {
+  const warianty = [];
+  for (const schemat of schematy) {
+    for (const wariant of schemat.oneOf ?? [schemat]) {
+      if (!warianty.some((w) => JSON.stringify(w) === JSON.stringify(wariant))) warianty.push(wariant);
+    }
+  }
+  return warianty.length === 1 ? warianty[0] : { oneOf: warianty };
+}
+
+/**
+ * Schemat „bez typu" — powstaje z `null` w nagraniu (`{nullable: true}`) albo z pustej
+ * tablicy (`{}`). Nie niesie informacji o typie, więc scalony z czymkolwiek ma tylko
+ * dołożyć `nullable`, a nie tworzyć wariantu.
+ */
+const bezTypu = (x) => x.type === undefined && x.oneOf === undefined;
+
 function scalDwa(a, b) {
+  // ⚠ Ta gałąź MUSI iść przed porównaniem typów. Wcześniej stały tu warunki
+  // `a.nullable && !b.nullable`, które nie łapały przypadku „oba nullable, jeden bez typu":
+  // `{type:"string", nullable:true}` + `{nullable:true}` przelatywało dalej i produkowało
+  // zdegenerowane `oneOf: [ {type:string,nullable}, {nullable} ]` — wariant, który niczego
+  // nie zawęża. Widoczne stało się dopiero po zamianie cichego `{}` na jawną sumę.
+  if (bezTypu(a) && bezTypu(b)) return a.nullable || b.nullable ? { nullable: true } : {};
+  if (bezTypu(a)) return a.nullable ? { ...b, nullable: true } : b;
+  if (bezTypu(b)) return b.nullable ? { ...a, nullable: true } : a;
   if (a.nullable && !b.nullable) return { ...b, nullable: true };
   if (b.nullable && !a.nullable) return { ...a, nullable: true };
+  if (a.oneOf || b.oneOf) return suma(a, b);
   if (a.type !== b.type) {
-    // `integer` i `number` w jednej kolumnie to liczba; reszta rozjazdów typu
-    // znaczy, że nagranie ma kolumnę o niestałym typie — wtedy nie zgadujemy.
+    // `integer` i `number` w jednej kolumnie to po prostu liczba.
     if (["integer", "number"].includes(a.type) && ["integer", "number"].includes(b.type)) {
       return { ...a, type: "number" };
     }
-    return {};
+    // ⚠ Każdy inny rozjazd typu to FAKT o nagraniu: produkcja oddaje w tym polu raz jedno,
+    // raz drugie. Wcześniejsza wersja zwracała tu `{}`, czyli schemat „akceptuję wszystko" —
+    // rozjazd znikał po cichu i kontrakt przestawał cokolwiek o tym polu mówić. To ten sam
+    // wzorzec, przed którym ostrzega CLAUDE.md (pusty wynik udający brak problemu).
+    // Zapisujemy go jawnie jako `oneOf`, żeby był widoczny w kontrakcie i w review.
+    return suma(a, b);
   }
   if (a.type === "object") {
     const properties = { ...a.properties };
