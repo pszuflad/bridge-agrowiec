@@ -9,6 +9,10 @@ danych dla odbudowy backendu.
 |---|---|
 | `001_schema.sql` | Kompletny schemat: 26 tabel + 13 indeksów, idempotentny (`IF NOT EXISTS`) |
 | `002_import.sql` | Pierwsza migracja przyrostowa (Iteracja 3b): dokłada `suppliers.import_wylaczony` i `products.uwaga_cena`, ustawia wyłączenie MO6. Szczegóły: `docs/tickets/5-FEATURE-staging-endpointy-importu/plan.md` (D5, D9). |
+| `003_szerokosc_text.sql` | Iteracja 3d-1: `products.szerokosc` REAL → TEXT (backlog #3, saga `szertxt`). Przebudowa tabeli, bo SQLite nie ma `ALTER COLUMN`. |
+| `004_kategoria_wielka_litera.sql` | **Iteracja 13c:** historyczne `products.kategoria` z małej litery → forma kanoniczna (backlog #2 `kategoriafix` + #57 `katunify`). |
+| `005_konstrukcja_slowa.sql` | **Iteracja 13c:** `products.konstrukcja` kody `R`/`D`/`L`/`B`/`-` → `Radialna`/`Diagonalna` (backlog #58). |
+| `006_nazwa_caps.sql` | **Iteracja 13c:** `products.nazwa` → `UPPER`, `manual_overrides` pole `nazwa` → `UPPER`, skasowanie wierszy `staging_items` CASE_ONLY (backlog #59). |
 
 ## Skąd pochodzi
 
@@ -66,7 +70,17 @@ i procedura regeneracji: `rebuild/backend/README.md`, sekcja „Schemat Drizzle"
 
 Produkcja dokłada kolumny idempotentną funkcją `bw()` (w bundlu) — np. sierpniowa
 `nieobecnosc_pod_rzad`. W odbudowie odpowiednikiem są **numerowane migracje**
-(`002_import.sql`, dalsze `003_*.sql`…). Mechanizm już istnieje i jest w użyciu:
+(`002_import.sql`, dalsze `003_*.sql`…). Od Iteracji 13c pliki `004`–`006` niosą także
+**migracje DANYCH**, nie tylko struktury — odtwarzają jednorazowe skrypty i SQL, którymi
+Ania ujednoliciła konwencje na produkcji (`mirror/backend/apply_kategoria.cjs`, wpisy
+`CHANGELOG.md` z 2026-09-01 11:35 i 12:30). Numer pliku = kolejność chronologiczna produkcji.
+
+⚠ Migracja danych MUSI być idempotentna także TREŚCIOWO, nie tylko przez ewidencję
+`_migracje`: cutover idzie na tej samej `data.db`, którą produkcja już zmigrowała, więc
+pierwszy przebieg u nas trafia na dane już zmienione. Każda z `004`–`006` mapuje po kluczu
+znormalizowanym i ma warunek „pomiń wiersz, który już ma formę docelową"; dowodzi tego
+`rebuild/backend/test/db.migracje.test.ts`, wykonując ten sam SQL drugi raz z pominięciem
+ewidencji i żądając zera zmienionych wierszy. Mechanizm już istnieje i jest w użyciu:
 `npm run migrate` w `rebuild/backend` stosuje `rebuild/schema/*.sql` idempotentnie,
 z ewidencją zastosowanych plików w tabeli `_migracje`. `001_schema.sql` to punkt zerowy =
 stan produkcji na 2026-08-17; kolejne pliki dokładają kolumny, których zamrożony kontrakt
