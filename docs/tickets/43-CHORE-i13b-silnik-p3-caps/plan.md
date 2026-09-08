@@ -65,7 +65,7 @@ _ck=_KP.some(pk=>{ …; return String(vS??"")!==String(vN??"") })   // case-SENS
 ```
 
 `Xq` wpływa realnie tylko na (a) narrację `powod` (pętla po `Vq`/`POLA_ROZNIC`) i (b) auto-patch pól
-`ean`/`cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn`. Szum case-only w produkcji usunęła
+`cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn`. Szum case-only w produkcji usunęła
 migracja danych `UPPER(nazwa)` + `DELETE` 769 wierszy CASE_ONLY — czyli **13c**, nie kod silnika.
 
 ## Kontrakt i fixtures (zakres) — siatka bezpieczeństwa

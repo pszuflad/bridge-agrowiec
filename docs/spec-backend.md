@@ -408,6 +408,22 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 > żądania — wzorzec systemowy, dotyka też I4 i I12) i **#15** (`L4()` nie czyści timera
 > po odrzuconym `fetch`). Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
 
+> **Odbudowa (13b, `43-CHORE-i13b-silnik-p3-caps`, 2026-09-09) — dwie zmiany produkcji
+> 25.08→08.09 doniesione do portu.** Fallback marki (**P3**, 2026-08-31) NIE siedzi w `tk()` —
+> jest w `U.acceptStaging`, przed obiema definicjami `tk`; zmienił się z
+> `nazwa.split(" ")[0] || "—"` na literał `"UNKNOWN"` (port: `src/import/akceptacja.ts`; `??`
+> przepuszcza tylko `null`/`undefined`, więc pusty łańcuch fallbacku nie uruchamia). Helper
+> równości `Xq()` (**CAPS**, 2026-09-01, port `wartosciRowne()` w `src/import/silnik/pozycja.ts`)
+> doszedł do porównania `toUpperCase()===toUpperCase()`; niesymetryczna obsługa pustych wartości
+> nietknięta. ⚠ **Rozjazd CHANGELOG↔kod:** wbrew narracji Ani, `Xq()` NIE wycisza klasyfikacji
+> `zmiana_kluczowa` — ta liczy się osobno i literalnie, case-sensitive
+> (`_KP.some(...String(vS??"")!==String(vN??"")...)`), diff 08.09 tego fragmentu nie dotknął.
+> `Xq()` zmienia tylko narrację `powod` (`POLA_ROZNIC`, w tym `ean`) i próg auto-patchu pól
+> cenowo-magazynowych (`cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` — bez `ean`,
+> zgodnie z ustaleniem 3c wyżej). Szum case-only w `zmiana_kluczowa` usuwa dopiero migracja
+> danych `UPPER(nazwa)` — **13c**, poza zakresem tej karty. Szczegóły:
+> `docs/tickets/43-CHORE-i13b-silnik-p3-caps/`.
+
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,

@@ -2576,15 +2576,15 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Iteracja** | **→ 13a** (PORT, Wariant A) |
 | **Status** | ✅ sportowane w `42-CHORE-i13a-resync-parserow` (2026-09-08) — kod wszedł kopią bajtową, ale NIEPOTWIERDZONY pomiarem: `expandLoadIndexSlash` wymaga drugiego członu BEZ liczby (`144A8/B`), a próbka MO9 ma wyłącznie indeksy z liczbą w obu członach (`115A6/108A8`, `133A6/129A8`, `148A8/144B`, `153A6/149A8`, `88A6/80A8`, `91A6/83A8`) — funkcja przechodzi bez efektu. |
 
-### #56 · 2026-08-31 · [BACKEND] · P3 — fallback marki `tk()` → `"UNKNOWN"` zamiast `nazwa.split`
+### #56 · 2026-08-31 · [BACKEND] · P3 — fallback marki `acceptStaging` → `"UNKNOWN"` zamiast `nazwa.split`
 | pole | wartość |
 |---|---|
-| **Kategoria** | BACKEND (silnik importu `tk()`) |
-| **Pliki** | `mirror/backend/index.cjs` ⚠ (cieniowanie — sprawdź żywą definicję `tk`, CLAUDE.md §5) |
+| **Kategoria** | BACKEND (`U.acceptStaging`, NIE `tk()`) |
+| **Pliki** | `mirror/backend/index.cjs`, offset 1 350 905 — ciało `U.acceptStaging`, PRZED obiema definicjami `tk` (1 432 657 martwa / 1 438 815 żywa) — cieniowanie `tk()` (CLAUDE.md §5) jest bez znaczenia dla P3. Sprostowanie: wcześniejszy opis „fallback marki w `tk()`" był błędny — zmierzone w 13b. |
 | **Zmiana Ani** | Usunięto degenerowany `n.nazwa.split(" ")[0]` (wpisywał rozmiar/losowe słowo jako markę, np. MO2 JMK); przy pustym `Producent` wpisuje `"UNKNOWN"` — widoczne od razu do ręcznej naprawy. |
 | **Do nowej wersji?** | ✅ TAK |
-| **Iteracja** | **→ 13a** (PORT, Wariant A) |
-| **Status** | ⬜ do portu · powiązane z #26 (JMK marka=rozmiar, backfill w 13e) |
+| **Iteracja** | **→ 13b** |
+| **Status** | ✅ zrobione w 13b (`43-CHORE-i13b-silnik-p3-caps`, 2026-09-09) · powiązane z #26 (JMK marka=rozmiar, backfill w 13e) |
 
 ### #57 · 2026-09-01 · [BACKEND] · katunify — kategorie do Wielkiej litery we wszystkich parserach
 | pole | wartość |
@@ -2603,18 +2603,18 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Pliki** | parsery + `generate_selly_export.cjs`; FE bundle `.bak_konstr` |
 | **Zmiana Ani** | `R`→`Radialna`, `D`/`L`/`B`→`Diagonalna` (L = część rozmiaru „Low Section Height"; B = bias-belted Trelleborg AMPT/Nokian Ground Kare). W bazie 2 wartości: Radialna 4390 + Diagonalna 3015. Prośba Anny — słowa zamiast kodów w kolumnie i eksporcie. |
 | **Do nowej wersji?** | ✅ TAK |
-| **Iteracja** | **→ 13b** (BE+migracja) + **13d** (FE `konstr`) |
+| **Iteracja** | część parserowa **→ 13a** (zrobione), migracja historycznych wartości **→ 13c**, FE (kolumna/eksport) **→ 13e**. ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13b (BE+migracja) + 13d (FE)" — niezgodne z tabelą mapowania (migracja katunify/konstr → 13c) i z roadmapą (FE = 13e; 13d to Selly). Do 13b nie należy żadna część. |
 | **Status** | ✅ część parserowa sportowana i POTWIERDZONA pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): `konstrukcja` `R`→`Radialna`, `D`→`Diagonalna`, wszystkich 10 dostawców (MO1 199, MO2 200, MO3 44, MO4 101, MO5 146, MO6 2, MO7 285, MO8 625, MO9 12, MO10 223 rek.). Mechanizm: `normalizeKonstrukcja()` + `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs`. Migracja danych historycznych (kody `L`/`B`/`-` → `Diagonalna`) pozostaje 13c. |
 
 ### #59 · 2026-09-01 · [BACKEND][BAZA] · CAPS — `products.nazwa` = WIELKIE LITERY + `Xq()` case-insensitive
 | pole | wartość |
 |---|---|
 | **Kategoria** | BACKEND (helper equality `Xq`) + BAZA (migracja) |
-| **Pliki** | `mirror/backend/index.cjs` ⚠ (cieniowanie `Xq`, CLAUDE.md §5) |
+| **Pliki** | `mirror/backend/index.cjs` (`Xq`, offset 1 430 238 — **jedna definicja, brak cieniowania**; cieniowanie w tym pliku dotyczy `tk`, nie `Xq` — zweryfikowane liczeniem w 13b, CLAUDE.md §5) |
 | **Zmiana Ani** | `Xq(t,e)` porównuje `A.toUpperCase()===B.toUpperCase()` (plik „Kleber GRIPKER" vs baza „KLEBER GRIPKER" NIE generuje `staging_items` zmiana_kluczowa). Migracja: `UPPER(nazwa)` 747 products + 38 `manual_overrides` (pole nazwa) + DELETE 769 staging CASE_ONLY. |
 | **Do nowej wersji?** | ✅ TAK |
-| **Iteracja** | **→ 13b** (migracja + wpływ na klasyfikację stagingu) |
-| **Status** | ⬜ do portu |
+| **Iteracja** | część silnikowa (helper `Xq`) **→ 13b** (zrobione), część migracyjna (`UPPER(nazwa)` + DELETE staging CASE_ONLY) **→ 13c** |
+| **Status** | ✅ część silnikowa (`wartosciRowne`/`Xq`) zrobiona w 13b (`43-CHORE-i13b-silnik-p3-caps`, 2026-09-09). ⚠ **Rozjazd CHANGELOG↔kod, zmierzone w 13b:** klasyfikacja `zmiana_kluczowa` (`_ck` w żywym `tk`) liczy się BEZ `Xq`, literalnym `String(vS??"")!==String(vN??"")` — case-only różnica w polach klucza NADAL generuje `zmiana_kluczowa` w produkcji, wbrew narracji CHANGELOG Ani z 2026-09-01 12:30. Dowód: przenagranie wzorca charakteryzacji zmieniło 57 pól `powod` i ZERO innych; wiersze zostały `typZmiany: "zmiana_kluczowa"`. `Xq` wpływa realnie tylko na narrację `powod` i na auto-patch `ean`/`cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn`. Szum case-only usuwa dopiero migracja `UPPER(nazwa)` + DELETE 769 wierszy CASE_ONLY — **13c**, nie kod silnika. Część migracyjna: ⬜ do portu (13c). |
 
 ### #60 · 2026-09-07…08 · [BACKEND][BAZA] · Selly REST sync — NOWY podsystem (model wariantowy)
 | pole | wartość |
@@ -2623,7 +2623,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Pliki** | `mirror/backend/selly/{discovery,sync_delta,sync_full,mapper_v2,rate_limiter,scheduler_selly,routes_sync}.cjs`; schemat `selly_products` (+ `selly_products_old`) |
 | **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
 | **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
-| **Iteracja** | **→ 13c** (nowa, BE-heavy). ⚠ **BLOKADA: Tor 2 `sync_full` niedomknięty u Ani 08.09** — czekać. Rozważyć podział 13c-1/13c-2/13c-3. |
+| **Iteracja** | **→ 13d** (nowa, BE-heavy). ⚠ **BLOKADA: Tor 2 `sync_full` niedomknięty u Ani 08.09** — czekać. Rozważyć podział 13d-1/13d-2/13d-3. ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13c" — niezgodne z tabelą mapowania i roadmapą (Selly REST = 13d). |
 | **Status** | ⬜ do portu (po domknięciu Tor 2 u Ani) |
 
 ### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
@@ -2633,7 +2633,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Pliki** | `mirror/frontend/assets/index-BRIDGEONE….js`, `index-PRICEFMT….js` (+ kopie `.bak_{tr_fix,ackalerts,szer_marka,konstr}`) |
 | **Zmiana Ani** | Rebrand na „Bridge ONE" (title „Bridge ONE — konsolidacja cenników opon") + drobne: `tr_fix`, `ackalerts` (potwierdzanie alertów), `szer_marka` (kolumna szerokość/marka), `PRICEFMT` (formatowanie ceny). Bundle minified — najpierw rozłożyć diff, `.bak` daje tylko etykietę. |
 | **Do nowej wersji?** | ⬜ do decyzji (zakres rebrandu — czy odbudowa też nazywa się „Bridge ONE") |
-| **Iteracja** | **→ 13d** (FE; `konstr` łączy się z #58) |
+| **Iteracja** | **→ 13e** (FE; `konstr` łączy się z #58). ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13d" — niezgodne z tabelą mapowania i roadmapą (FE = 13e; 13d to Selly). |
 | **Status** | ⬜ do rozłożenia diffu + decyzji |
 
 ### #62 · 2026-08-26…09-04 · [BAZA] · Backfille danych (tl_tt / szerokości ułamkowe / JMK) — DECYZJA

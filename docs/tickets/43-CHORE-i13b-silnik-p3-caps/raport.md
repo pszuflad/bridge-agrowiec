@@ -59,7 +59,7 @@ _ck=_KP.some(pk=>{ …; return String(vS??"")!==String(vN??"") })   // case-SENS
 ```
 
 Fragment nie został tknięty diffem 08.09. `Xq` wpływa realnie tylko na narrację `powod`
-(`POLA_ROZNIC`) i na auto-patch pól `ean`/`cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn`.
+(`POLA_ROZNIC`) i na auto-patch pięciu pól: `cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn`.
 
 **Dowód empiryczny z przenagrania wzorca:** zmieniło się **57 pól `powod` i ZERO innych pól**;
 wiersze, których `powod` stracił człon `nazwa: Michelin → MICHELIN`, **zostały**
@@ -114,7 +114,7 @@ Brak w sensie kontraktu API. Zmiana zachowania (świadoma, odtwarzająca produkc
 
 - Produkt zatwierdzany z pozycji bez marki dostaje `marka = "UNKNOWN"` zamiast pierwszego słowa
   nazwy. Dotyczy tylko NOWYCH akceptacji — istniejących rekordów w bazie nie rusza.
-- Różnica wyłącznie w wielkości liter w polach cenowo-magazynowych i EAN nie jest już traktowana
+- Różnica wyłącznie w wielkości liter w polach cenowo-magazynowych nie jest już traktowana
   jako zmiana (mniej auto-zatwierdzeń „pustych"), a w narracji `powod` nie pojawiają się człony
   różniące się tylko wielkością liter.
 
@@ -137,3 +137,54 @@ Brak w sensie kontraktu API. Zmiana zachowania (świadoma, odtwarzająca produkc
 - **NICE-TO-HAVE (poprawione):** `plan.md` przestawiony ze statusu `Draft` na `Implemented`.
 - **BLOCKER (adresowany):** synchronizacja `docs/rebuild-roadmap.md` i `docs/rebuild-backlog.md`
   była zaplanowana jako Krok 6 i wykonana po review — patrz sekcja „Docs updates" niżej.
+
+## Docs updates
+
+Trzej doc-checkerzy równolegle, każdy na rozłącznym zbiorze plików.
+
+### `docs/rebuild-roadmap.md`
+- Tabela zbiorcza (wiersz iteracji 13): dopisane `13b: ✅ 43-CHORE-i13b-silnik-p3-caps · 2026-09-09`
+  + nota „zostają 13c/13d/13e".
+- Blok 13b: oznaczony ✅ z datą i ID ticketa; **sprostowany fakt** — fallback marki (P3) leży
+  w `U.acceptStaging`, NIE w `tk()` (błędne twierdzenie usunięte, nie dopisane obok); dopisany
+  zweryfikowany wynik badania cieniowania; dopisane wyniki bramek.
+- **Blok 13c** (obowiązek 2 z `CLAUDE.md` — ustalenie o przyszłym bloku trafia DO TEGO BLOKU):
+  nota o rozjeździe CHANGELOG↔kod (`Xq` nie wycisza `zmiana_kluczowa`; robi to dopiero migracja
+  `UPPER(nazwa)` + `DELETE` CASE_ONLY) oraz ostrzeżenie, że po tej migracji wzorzec
+  `MO1–MO5.expected.json` może przesunąć się DRUGI raz — tym razem przez zmianę danych, nie kodu.
+
+### `docs/rebuild-backlog.md`
+- **#56** — sprostowany tytuł i opis (`U.acceptStaging`, nie `tk()`); `Iteracja` 13a → **13b**;
+  `Status` → ✅ zrobione w 13b (2026-09-09). Sprostowane ostrzeżenie o cieniowaniu.
+- **#59** — `Pliki`: `Xq` ma JEDNĄ definicję, brak cieniowania (cieniowanie dotyczy `tk`).
+  `Iteracja` ROZBITA: część silnikowa → **13b (zrobione)**, migracja `UPPER(nazwa)` → **13c**.
+  Dopisane ustalenie o rozjeździe CHANGELOG↔kod wraz z dowodem (57 pól `powod`, zero innych).
+- **#58** — `Iteracja` rozbita zgodnie z tabelą mapowania: parsery → 13a, migracja → 13c,
+  FE → **13e** (było błędnie „13d").
+- **#60** — `Iteracja` 13c → **13d** (Selly); poprawiony też podpodział `13c-1/2/3` → `13d-1/2/3`.
+- **#61** — `Iteracja` 13d → **13e** (FE).
+- **#57** — sprawdzone, już poprawne po 13a; bez zmian.
+
+### `docs/spec-backend.md`
+- §5 „Silnik importu `tk()`": nowy blockquote „Odbudowa (13b…)" opisujący P3 (z niuansem
+  `??` vs pusty łańcuch) i CAPS, wraz z rozjazdem CHANGELOG↔kod. Wzorzec zgodny z blokami
+  3a/3b/3c/3f-1/3f-2, które ten plik już zawiera.
+
+### `docs/audit-delta.md`
+- Bez zmian. Linia 119 to zrzut stanu bazy z 2026-08-17, sprzed obu zmian produkcji — dane
+  historyczne, nie twierdzenie o bieżącym zachowaniu.
+
+### Sprostowanie w moich artefaktach (znalezione przez doc-checkera)
+`plan.md` i `raport.md` wymieniały `ean` wśród pól auto-patchowanych przez `Xq`. To nieprawda:
+`AP.ean` istnieje wyłącznie w MARTWEJ definicji `tk`. Żywy `tk` ma 6 wywołań `Xq` — jedno
+w pętli `powod` i pięć w auto-patchu (`cenaZakupu`, `cenaSprzedazy`, `marzaPct`, `stan`,
+`magazyn`). Zweryfikowane bezpośrednio na `mirror/backend/index.cjs`; oba pliki poprawione.
+Komentarze w kodzie były od początku poprawne (mówią „pola cenowo-magazynowe").
+
+## Pre-existing issues (do decyzji użytkownika, POZA zakresem tego ticketa)
+
+- `docs/rebuild-backlog.md` #56, pole `Status` — odnośnik „powiązane z #26 (JMK marka=rozmiar,
+  backfill w 13e)" wskazuje na wpis **#26**, który dotyczy widoku `/alerty` (frontend), nie JMK.
+  Wygląda na nieaktualne odwołanie sprzed renumeracji wpisów. Dodatkowo „backfill w 13e" jest
+  podejrzane — decyzja o backfillach zapadła w **13f** (`41-CHORE-i13f-decyzja-backfille`:
+  backfilli NIE odtwarzamy). Zostawione bez zmian, bo poprawny cel odnośnika jest niepewny.
