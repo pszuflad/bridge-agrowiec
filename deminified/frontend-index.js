@@ -16581,7 +16581,7 @@ function Pe({
     ...n
   })
 }
-const h2 = ["dętka", "detka", "tube", "inner tube", "ochraniacz", "flap", "tube flap", "obręcz", "obrecz", "felga", "felgi", "wheel", "rim", "wentyl", "valve", "zawór", "zawor", "tr-", "łańcuch", "lancuch", "chain", "śruba", "sruba", "nakrętka", "nakretka", "płyn", "plyn", "smar", "klej", "sealant", "balast", "amortyzator", "tarcza", "łożysko", "lozysko", "bearing"],
+const h2 = ["dętka", "detka", "tube", "inner tube", "ochraniacz", "flap", "tube flap", "obręcz", "obrecz", "felga", "felgi", "wheel", "rim", "wentyl", "valve", "zawór", "zawor", "łańcuch", "lancuch", "chain", "śruba", "sruba", "nakrętka", "nakretka", "płyn", "plyn", "smar", "klej", "sealant", "balast", "amortyzator", "tarcza", "łożysko", "lozysko", "bearing"],
   y2 = ["opona", "opony", "tire", "tyre", "bieżnik", "bieznik", "tread", "radial", "diagonal"],
   g2 = [/\b\d{2,3}(?:[.,]\d{1,2})?\s*[\/\-x×]\s*\d{1,3}\s*(?:R|-|–)\s*\d{1,3}(?:[.,]\d)?[A-Z]?\b/, /\b\d{1,2}[.,]\d{1,2}\s*[-R]\s*\d{1,3}(?:[.,]\d)?[A-Z]?\b/, /\b\d{1,2}[.,]\d{2}\s*[\-–]\s*\d{1,3}[A-Z]?\b/, /\b\d{1,3}\s*[x×]\s*\d{1,2}(?:[.,]\d{1,2})?\s*(?:[\-–]\s*\d{1,3})?\b/, /\b\d{2,3}\s*R\s*\d{1,3}(?:[.,]\d)?[A-Z]?\b/, /\b\d{2,3}\s*[\-–]\s*\d{1,2}\b(?=\s+(?:[A-Z]|\[|\d))/],
   x2 = new RegExp(g2.map(e => e.source).join("|"), "i");
@@ -16634,7 +16634,7 @@ function pv(e, t = {}) {
     const e = `${r.kod||"-"} · ${(r.nazwa||"").slice(0,60)}`,
       a = r.dataAktualizacji || (new Date).toISOString();
     if ("number" == typeof r.marzaPct && r.marzaPct < 0) {
-      const o = `${r.id}-marza-ujemna`;
+      const o = `${r.id}-marza-ujemna-${Math.round(r.marzaPct*10)/10}`;
       n.push({
         id: o,
         productId: r.id,
@@ -16646,7 +16646,7 @@ function pv(e, t = {}) {
         status: t[o] || "nowy"
       })
     } else if ("number" == typeof r.marzaPct && r.marzaPct < 5) {
-      const o = `${r.id}-marza-niska`;
+      const o = `${r.id}-marza-niska-${Math.round(r.marzaPct*10)/10}`;
       n.push({
         id: o,
         productId: r.id,
@@ -16687,7 +16687,7 @@ function pv(e, t = {}) {
     }
     const i = v2(o, r.kategoria);
     if (!i.isTire && "wysoka" === i.confidence) {
-      const o = `${r.id}-nie-opona`;
+      const o = `${r.id}-nie-opona-${(r.nazwa||'')+'|'+(r.kategoria||'')}`;
       n.push({
         id: o,
         productId: r.id,
@@ -16711,7 +16711,7 @@ function pv(e, t = {}) {
     if (w2.has(e) || !o) continue;
     const a = Math.floor((r - o) / 864e5);
     if (a >= 30) {
-      const r = `dostawca-${e}-brak-importu`;
+      const r = `dostawca-${e}-brak-importu-${a}`;
       n.push({
         id: r,
         productId: -1,
@@ -16723,7 +16723,7 @@ function pv(e, t = {}) {
         status: t[r] || "nowy"
       })
     } else if (a >= 7) {
-      const r = `dostawca-${e}-brak-importu`;
+      const r = `dostawca-${e}-brak-importu-${a}`;
       n.push({
         id: r,
         productId: -1,
@@ -16834,6 +16834,13 @@ function Si({
 }
 
 function N2() {
+  const [$AS0, $AS1] = m.useState({});
+  m.useEffect(() => {
+    const f = () => cn("alerty-statusy").then(v => $AS1(v || {}));
+    f();
+    window.addEventListener("alerty-statusy-updated", f);
+    return () => window.removeEventListener("alerty-statusy-updated", f)
+  }, []);
   const {
     data: e
   } = tt({
@@ -16850,7 +16857,7 @@ function N2() {
     data: r = []
   } = tt({
     queryKey: ["/api/history"]
-  }), a = m.useMemo(() => pv(e ?? [], {}).filter(e => "nowy" === e.status), [e]), o = m.useMemo(() => {
+  }), a = m.useMemo(() => pv(e ?? [], $AS0).filter(e => "nowy" === e.status), [e, $AS0]), o = m.useMemo(() => {
     const e = {
       krytyczny: 0,
       ostrzezenie: 1,
@@ -23101,13 +23108,6 @@ function Wfmt(s, r) {
   if (!isFinite(N)) return String(s);
   if (r) {
     const rs = String(r);
-    if (!rs.includes("/")) {
-      const xm = rs.match(/^([0-9]+(?:[.,][0-9]+)?)\s*[xX]\s*([0-9]+(?:[.,][0-9]+)?)/);
-      if (xm) {
-        const seg1 = xm[1].replace(",", ".");
-        if (Number(seg1) === N) return `${seg1}x${xm[2].replace(",",".")}`
-      }
-    }
     const M = rs.match(/[0-9]+(?:[.,][0-9]+)?/g) || [];
     for (const t of M) {
       const q = t.replace(",", ".");
@@ -23286,7 +23286,7 @@ function AT() {
     queryKey: ["/api/atrybuty"]
   }), L = m.useMemo(() => {
     const e = M.map(e => e.marka).filter(e => e && !/\d/.test(e)),
-      t = (I?.wartosci || []).filter(e => "marka" === e.rodzaj).map(e => e.wartosc);
+      t = (I?.wartosci || []).filter(e => "marka" === e.rodzaj).map(e => e.wartosc).filter(e => e && !/\d/.test(e));
     return Array.from(new Set([...t, ...e])).filter(Boolean).sort((e, t) => e.localeCompare(t, "pl"))
   }, [M, I]), F = m.useMemo(() => {
     const e = M.map(e => e.kategoria),
@@ -25188,7 +25188,7 @@ function HT() {
   }, []), m.useEffect(() => {
     if (!l) return;
     const e = setTimeout(() => {
-      un(qy, o)
+      un(qy, o).then(() => window.dispatchEvent(new Event("alerty-statusy-updated")))
     }, 300);
     return () => clearTimeout(e)
   }, [o, l]);
@@ -25199,7 +25199,7 @@ function HT() {
         [e]: t
       }))
     },
-    p = m.useMemo(() => u.filter(e => "all" === t || e.poziom === t).filter(e => "all" === r || e.status === r).sort((e, t) => {
+    p = m.useMemo(() => u.filter(e => "all" === t || e.poziom === t).filter(e => "all" === r || e.status === r).filter(e => e.status !== "rozwiazany" || r === "rozwiazany").sort((e, t) => {
       const n = {
         krytyczny: 0,
         ostrzezenie: 1,

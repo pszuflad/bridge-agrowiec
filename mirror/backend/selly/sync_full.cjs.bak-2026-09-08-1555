@@ -217,22 +217,11 @@ async function ensureAndUpdate(db, row, dictMaps, opts) {
  * @param {Object} opts - { dryRun: bool, maxProducts: int, autoCreate: bool, limit: int }
  */
 async function syncFullForDostawca(db, dostawca, opts = {}) {
-  const { dryRun = false, maxProducts = 5000, autoCreate = true, buildCache = true } = opts;
+  const { dryRun = false, maxProducts = 5000, autoCreate = true } = opts;
 
   if (!dostawca) throw new Error('sync_full: dostawca wymagany');
 
   const startTs = Date.now();
-
-  // Zbuduj cache Selly product_code/provider_code (dla scieszek B/C bez EAN)
-  if (buildCache && autoCreate) {
-    try {
-      const cacheRes = await disc.buildProductCodeCache();
-      console.log(`[sync_full] Cache Selly: ${cacheRes.hit}, ${cacheRes.providerSize || cacheRes.size} entries`);
-    } catch (e) {
-      console.warn(`[sync_full] Cache Selly build ERROR (fallback: tylko EAN): ${e.message}`);
-    }
-  }
-
   const rows = collectFullSyncItems(db, dostawca);
   const limited = rows.slice(0, maxProducts);
 

@@ -1,3 +1,56 @@
+2026-09-08 15:56
+obszar: backend
+
+pliki:
+- selly/discovery.cjs (backup .bak-2026-09-08-1540)
+- selly/sync_full.cjs (backup .bak-2026-09-08-1555)
+- selly/scheduler_selly.cjs (backup .bak-2026-09-08-1555)
+
+zmiana:
+- discovery.cjs: nowa funkcja buildProductCodeCache() paginuje /api/products (~75s, 314 stron)
+  i buduje w pamieci Map<product_code|provider_code, product_id>; ensureMapping po EAN
+  i sibling probuje cache Selly (najpierw product_code=dostawca+kod_importu bez _, potem
+  provider_code=kod_importu); w createProduct dodano guard "produkt juz istnieje w Selly"
+  z fallbackiem do createVariant + retry z rebuild na 400 conflict
+- sync_full.cjs: syncFullForDostawca przed collectFullSyncItems wywoluje
+  disc.buildProductCodeCache() (nowy parametr opts.buildCache=true domyslnie);
+  dzieki temu sciezki B/C znajduja produkty istniejace w Selly z pustym cache Bridge
+- scheduler_selly.cjs: aktywny Tor 2 - runFullBatch() codziennie 04:30 CEST wedle
+  rotacji per dzien (FULL_ROTATION), cache Selly budowany jeden raz per batch
+  (buildCache: i===0), fallbackowo rotacja MO1..MO10 z MO7 i MO8 raz w miesiacu
+- PM2 restart bridge-backend - schedular zaladowany z komunikatem
+  "Tor2: codziennie 4:30"
+
+powod:
+Ukonczenie Toru 2. Odkrycie 2026-09-08: 140 kandydatow bez mappingu we wszystkich
+dostawcach (MO2..MO10) to zerwane linki cache Bridge - produkty istnieja w Selly
+z provider_code=kod_importu, ale rekord w selly_products zostal skasowany.
+Selly nie wspiera filtrowania GET /api/products po product_code/provider_code
+(zignorowane q[], filter[], search, code), wiec jedyny sposob to jednorazowa
+paginacja i cache w pamieci procesu. Weryfikacja: MO3_11580153BKTAW90910 (BKT,
+ki=258723, bez EAN) - discovery znalazl w Selly cache pid=6053, znalazl wariant
+MO3 vid=7088, zapisal mapping - status ok, nastepne sync = cache_hit.
+
+---
+
+2026-09-08 15:19
+obszar: backend
+
+pliki: selly/sync_full.cjs (+ .bak-2026-09-08-1520)
+
+zmiana: sync_full.cjs - usunieto PUT features na wariancie i produkcie po odkryciu ze Selly PUT /api/products/{pid} zwraca 400 "Malformed JSON input" gdy body zawiera pole 'features' (metadata endpoint podaje fields_edit BEZ 'features'). Sciezka A ograniczona do PUT pol produktu (name, weight, provider_code, price_purchase, visible, ean). Sciezka B/C - podobnie: features produktu ustawiane przy POST /api/products (discovery.createProduct z buildProductPayload), features wariantu (Magazyny) ustawiane przy POST /variants (discovery.createVariant). Zweryfikowano realny test A na MO3_10075153A (pid=6229): features produktu (8) i wariantu (1 Magazyny) nienaruszone, VAT nietkniety, zaktualizowane pola produktu OK.
+
+powod: pierwszy realny test Tor 2 - sciezka A - odkryto niezgodnosc formatu features w API Selly.
+
+2026-09-08 15:12
+obszar: backend
+
+pliki: selly/mapper_v2.cjs (+ .bak-2026-09-08-1509), selly/sync_full.cjs (+ .bak-2026-09-08-1509)
+
+zmiana: mapper_v2 v2.1 - usunieto vat_rate z toSellyPayloadV2 (Anna: VAT nadawany w Selly na kategorii). Dodano buildProductPayload(row, dictMaps) dla POST /api/products (Tor 2 auto-create). sync_full.cjs przepisany od zera pod model wariantow: nowy SELECT z JOIN po (kod_importu, dostawca), 3 sciezki (A: PUT produkt+PUT wariant features mirror, B: discovery.createVariant, C: discovery.createProduct), uzywa apiWithRetry z discovery. loadDictMaps czyta z selly_kategoria_norm_map (poprawna hierarchia Selly 1/137/259/377), nie z selly_dict.categories.
+
+powod: Anna 2026-09-08: dokonczenie Tor 2 (pelny sync produktow) bez VAT. Test dry-run 3/3 MO3 przeszedl.
+
 2026-09-08 12:50
 obszar: backend
 
@@ -59,7 +112,7 @@ pliki:
   Wywołanie w fetchAllItems (linia 590): `const fullName = expandLoadIndexSlash((it.name || '').trim());`
   Klasa liter prędkości: ABCDEFGJKMNPQSTUVWY (bez X/R/L/H — separatory rozmiaru).
 - data.db (bak: data.db.bak_mo9expand_20260904_0930, 219 MB, cp po PRAGMA wal_checkpoint(TRUNCATE))
-  UPDATE products SET nazwa=<rozwinięta> WHERE nazwa MATCH `\b\d+[SPEED]\d?/[SPEED]\d?(?!\d)` — 82 rekordy zaktualizowane
+  UPDATE products SET nazwa=<rozwinięta> WHERE nazwa MATCH `\d+[SPEED]\d?/[SPEED]\d?(?!\d)` — 82 rekordy zaktualizowane
   audit_log: 82 wpisy uzytkownik_imie='system (2026-09-04 expand LI slash)' z powodem 'expand_load_index_slash'
 
 zmiana:
@@ -200,7 +253,7 @@ zmiana:
   B10 - sufiksy w polu `model` (Handlopex MO4/MO5):
   - Parser tyre_params.cjs (extractHandlopexModel):
     * HANDLOPEX_STOPWORDS_RE: dodane KPL, NACZEPA (nie TR\d+ globalnie - regresja LASSA/MITAS/BKT)
-    * Nowa regula: /\/\s*TR\d{1,3}\b/ - usuwa /TR87 (wentyl Trelleborg light industrial, tylko po ukosniku)
+    * Nowa regula: /\/\s*TR\d{1,3}/ - usuwa /TR87 (wentyl Trelleborg light industrial, tylko po ukosniku)
     * Nowa regula: /\[\s*\d{2,3}\s*\/\s*\d{2,3}\s*[A-Z]?\d?\s*\]?/ - obsluga NIESPARZONEJ klamry
       (Handlopex czasem wysyla nazwe bez ]: "KLS200 18PR [148/145 M TL")
   - UPDATE 11 rekordow w bazie:
@@ -247,7 +300,7 @@ obszar: backend + baza danych
 
 pliki: parsers/tyre_params.cjs (+ .bak_p2_4_20260825_1601), data.db (+ .bak_p2_4_20260825_1602)
 
-zmiana: Rozszerzenie parseSize w tyre_params.cjs o 3 warianty zapisu rozmiaru + jednorazowy UPDATE 12 rekordow w bazie. (A) normalizeSizeText: separator L-series rozszerzony z [-R] na [-Rx], obsluguje "28LX26", "7,5Lx15" itd. (B) parseSize: dodano wzorzec "W/PLxD"/"W/PL-D" dla L-series z profilem, np. "400/45Lx17" (BKT TERRA TRAX) — konstrukcja=L. (C) parseSize: rozszerzenie regex "W/P[RBD-]D" z (\\d{2,4}) na (\\d{1,4}) zeby zlapac ulamkowe szerokosci "6.5/75-14" (MITAS TS-02). Test node: 19 case (12 anomalii + 7 regresja) — 19/19 OK. Po deploy PM2 restart + jednorazowy UPDATE parserem: 12/12 rekordow zyskalo konstrukcja+szerokosc+profil+srednica; pusta_konstrukcja=0 w products.
+zmiana: Rozszerzenie parseSize w tyre_params.cjs o 3 warianty zapisu rozmiaru + jednorazowy UPDATE 12 rekordow w bazie. (A) normalizeSizeText: separator L-series rozszerzony z [-R] na [-Rx], obsluguje "28LX26", "7,5Lx15" itd. (B) parseSize: dodano wzorzec "W/PLxD"/"W/PL-D" dla L-series z profilem, np. "400/45Lx17" (BKT TERRA TRAX) — konstrukcja=L. (C) parseSize: rozszerzenie regex "W/P[RBD-]D" z (\d{2,4}) na (\d{1,4}) zeby zlapac ulamkowe szerokosci "6.5/75-14" (MITAS TS-02). Test node: 19 case (12 anomalii + 7 regresja) — 19/19 OK. Po deploy PM2 restart + jednorazowy UPDATE parserem: 12/12 rekordow zyskalo konstrukcja+szerokosc+profil+srednica; pusta_konstrukcja=0 w products.
 
 powód: audyt anomalii katalogu 25.08 — 12 rekordow z pusta konstrukcja (10 BKT MO9 L-series z separatorem x/X, 1 BKT TERRA TRAX z profilem, 1 MITAS z ulamkowa szerokoscia).
 

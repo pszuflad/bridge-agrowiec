@@ -1,13 +1,18 @@
 // selly/discovery.cjs
-// Znajdowanie/tworzenie mapowan Bridge <-> Selly.
-// Model wariantow: 1 produkt Selly = N wariantow (kazdy = inny dostawca).
-// Cache: selly_products (kod_importu, dostawca) -> (product_id, variant_id).
+// Znajduje lub tworzy mapping (kod_importu, dostawca) -> (selly_product_id, selly_variant_id) w Selly.
+// Strategia lazy: pytamy Selly dopiero jak sync chce cos wyslac dla nieznanego produktu.
 //
-// Odkrycie 2026-09-08: Selly NIE wspiera filtrowania GET /api/products po product_code/provider_code.
-// Zamiast tego uzywamy jednorazowego buildProductCodeCache() ktory paginuje cala liste.
+// Publiczne API:
+//   ensureMapping(db, bridgeRow) -> { product_id, variant_id, feature_id_magazyn, action }
+//     bridgeRow: { kod, kod_importu, dostawca, ean, nazwa, marka, ... }
+//     action: 'cache_hit' | 'found_variant' | 'created_variant' | 'created_product' | 'not_found'
+//
+// Uwagi:
+//   - Wymaga zainstalowanego globalLimiter z rate_limiter.cjs (opcjonalnie, jesli undefined - bez limitu).
+//   - Wymaga selly/client.cjs.
+//   - Nie zapisuje ceny/stanu - to robi sync_delta/sync_full po ensureMapping.
 
 const client = require('./client.cjs');
-const mapper = require('./mapper_v2.cjs');
 let globalLimiter = null;
 try { globalLimiter = require('./rate_limiter.cjs').globalLimiter; } catch (_) {}
 
@@ -31,11 +36,15 @@ async function apiWithRetry(method, path, opts = {}, maxRetries = 3) {
   return { status: 429, data: { message: 'Max retries exceeded' } };
 }
 
-// ---- Feature ID Magazyny per dostawca (nauczone runtime) ----
+// Mapa feature_id (Magazyny) - poznajemy stopniowo z GET /variants.
+// Znane z produkcji: MO2=5, MO3=4, MO4=3, MO5=2, MO9=1
+// Reszta uzupelni sie automatycznie przy pierwszym POST wariantu z tym dostawca.
 const WAREHOUSE_FEATURE_IDS = {
   MO1: null, MO2: 5, MO3: 4, MO4: 3, MO5: 2, MO6: null,
   MO7: null, MO8: null, MO9: 1, MO10: null,
 };
+
+// Cache dostawca -> feature_id (uzupelniany runtime po odkryciu w Selly)
 const featureIdCache = { ...WAREHOUSE_FEATURE_IDS };
 
 function getFeatureIdForWarehouse(dostawca) {
@@ -43,89 +52,9 @@ function getFeatureIdForWarehouse(dostawca) {
 }
 
 function learnFeatureId(dostawca, featureId) {
-  if (featureIdCache[dostawca] == null && featureId) {
+  if (dostawca && featureId && !featureIdCache[dostawca]) {
     featureIdCache[dostawca] = featureId;
-    console.log(`[discovery] Nauczylem sie: ${dostawca} = feature_id ${featureId}`);
   }
-}
-
-// ---- Cache product_code -> product_id (budowany raz na cykl sync_full) ----
-let productCodeCache = null; // Map<string, number>
-let providerCodeCache = null; // Map<string, number> (dla oporcyjnego dopasowania)
-let productCodeCacheBuiltAt = 0;
-
-/**
- * Zbuduj pelen cache product_code -> product_id z paginacji /api/products.
- * Selly nie wspiera filtrow, wiec musimy pobrac wszystkie strony (314 stron x 20 = ~6261 produktow).
- * Cache trzymany w pamieci procesu, wazny na czas jednego cyklu sync_full (~kilka minut).
- *
- * @param {Object} opts - { force: bool, maxAgeMs: number, onProgress: fn(page, total) }
- */
-async function buildProductCodeCache(opts = {}) {
-  const { force = false, maxAgeMs = 10 * 60 * 1000, onProgress = null } = opts;
-  const now = Date.now();
-  if (!force && productCodeCache && (now - productCodeCacheBuiltAt) < maxAgeMs) {
-    return { hit: 'cached', size: productCodeCache.size };
-  }
-
-  const codeMap = new Map();
-  const providerMap = new Map();
-  const t0 = Date.now();
-
-  // Pobierz page 1 zeby poznac page_count
-  const first = await apiWithRetry('GET', '/api/products?sort_by=product_id&sort=ASC');
-  const meta = first.data?.__metadata || {};
-  const pageCount = meta.page_count || 1;
-  const totalCount = meta.total_count || 0;
-
-  for (const p of (first.data?.data || [])) {
-    if (p.product_code) codeMap.set(String(p.product_code), p.product_id);
-    if (p.provider_code) {
-      // Klucz zlozony (dostawca->kod) niemozliwy tu bo Selly nie zwraca dostawcy per produkt.
-      // Wystarczy provider_code sam (moze byc kolizja miedzy dostawcami, ale w Bridge kod_importu jest unikalny w skali sklepu).
-      providerMap.set(String(p.provider_code), p.product_id);
-    }
-  }
-
-  for (let page = 2; page <= pageCount; page++) {
-    const r = await apiWithRetry('GET', `/api/products?sort_by=product_id&sort=ASC&page=${page}`);
-    for (const p of (r.data?.data || [])) {
-      if (p.product_code) codeMap.set(String(p.product_code), p.product_id);
-      if (p.provider_code) providerMap.set(String(p.provider_code), p.product_id);
-    }
-    if (onProgress && page % 20 === 0) onProgress(page, pageCount);
-  }
-
-  productCodeCache = codeMap;
-  providerCodeCache = providerMap;
-  productCodeCacheBuiltAt = now;
-
-  const durationMs = Date.now() - t0;
-  console.log(`[discovery] Cache built: ${codeMap.size} product_codes, ${providerMap.size} provider_codes z ${totalCount} produktow, ${durationMs}ms`);
-  return { hit: 'built', size: codeMap.size, providerSize: providerMap.size, totalCount, pageCount, durationMs };
-}
-
-/**
- * Znajdz product_id po product_code w cache. Jesli cache nie zbudowany - zwroc null (nie buduje sam).
- */
-function findProductByCode(productCode) {
-  if (!productCodeCache) return null;
-  return productCodeCache.get(String(productCode)) || null;
-}
-
-/**
- * Znajdz product_id po provider_code (kod_importu Bridge) w cache.
- */
-function findProductByProviderCode(providerCode) {
-  if (!providerCodeCache) return null;
-  return providerCodeCache.get(String(providerCode)) || null;
-}
-
-/**
- * Wymus rebuild cache (do wywolania z endpointu diagnostycznego lub przed rozpoczeciem sync_full).
- */
-async function rebuildProductCodeCache(onProgress = null) {
-  return buildProductCodeCache({ force: true, onProgress });
 }
 
 /**
@@ -174,6 +103,9 @@ function findVariantForDostawca(variants, dostawca) {
 
 /**
  * Utworz nowy wariant dla istniejacego produktu Selly.
+ * @param {number} productId
+ * @param {Object} bridgeRow - { ean, kod_importu, dostawca, stan, cena_sprzedazy, vat_rate }
+ * @returns {Object|null} { variant_id, feature_id_magazyn }
  */
 async function createVariant(productId, bridgeRow) {
   const featureId = getFeatureIdForWarehouse(bridgeRow.dostawca);
@@ -183,8 +115,9 @@ async function createVariant(productId, bridgeRow) {
     vat: bridgeRow.vat_rate ?? 23,
     ean: bridgeRow.ean || '',
     default: 0,
-    attributes: [], // Selly wymaga tego pola nawet gdy puste
+    attributes: [], // Selly wymaga tego pola nawet gdy puste (HTTP 400 "Brak wymaganego argumentu attributes")
   };
+  // Jesli znamy feature_id - dodajemy Magazyny do wariantu
   if (featureId) {
     body.features = [{ feature_id: featureId, name: 'Magazyny', value: bridgeRow.dostawca }];
   }
@@ -194,6 +127,7 @@ async function createVariant(productId, bridgeRow) {
     if (!created?.variant_id) {
       return { error: 'POST variant nie zwrocil variant_id: ' + JSON.stringify(r.data) };
     }
+    // Jesli nie mielismy feature_id - odkryj po fakcie
     if (!featureId) {
       const mag = (created.features || []).find(f => f.name === 'Magazyny');
       if (mag) learnFeatureId(bridgeRow.dostawca, mag.feature_id);
@@ -206,32 +140,18 @@ async function createVariant(productId, bridgeRow) {
 
 /**
  * Utworz nowy produkt Selly z pierwszym wariantem.
- * ZMIANA 2026-09-08: przed POST sprawdza cache product_code - moze produkt juz istnieje w Selly
- * i tylko trzeba go dolinkowac (fallback do createVariant).
+ * Wymaga mappera_v2.cjs do zbudowania payloadu.
+ * @param {Object} bridgeRow - pelny wiersz z products (z JOIN)
+ * @param {Object} dictMaps - { catMap, prodMap, whMap } ze slownikow
+ * @returns {Object|null} { product_id, variant_id, feature_id_magazyn }
  */
 async function createProduct(bridgeRow, dictMaps) {
+  const mapper = require('./mapper_v2.cjs');
   const payload = mapper.buildProductPayload(bridgeRow, dictMaps);
-  if (payload._error) {
-    return { error: payload._error };
-  }
-
-  // KROK PROTECT: sprawdz czy product_code juz istnieje w Selly
-  if (productCodeCache && payload.product_code) {
-    const existingId = findProductByCode(payload.product_code);
-    if (existingId) {
-      console.log(`[discovery] Produkt z product_code=${payload.product_code} juz istnieje w Selly (id=${existingId}), fallback do createVariant`);
-      const created = await createVariant(existingId, bridgeRow);
-      if (created.error) return { error: 'createVariant (via cache): ' + created.error };
-      return {
-        product_id: existingId,
-        variant_id: created.variant_id,
-        feature_id_magazyn: created.feature_id_magazyn,
-        _viaCache: true,
-      };
-    }
-  }
+  if (!payload) return { error: 'mapper zwrocil null' };
 
   try {
+    // 1. Utworz produkt (bez wariantow - Selly stworzy default variant)
     const r = await apiWithRetry('POST', '/api/products', { body: payload });
     const created = r.data?.data;
     if (!created?.product_id) {
@@ -239,66 +159,43 @@ async function createProduct(bridgeRow, dictMaps) {
     }
     const productId = created.product_id;
 
-    // Aktualizuj cache lokalny (uniknij ponownego rebuild w tym samym cyklu)
-    if (productCodeCache && payload.product_code) {
-      productCodeCache.set(String(payload.product_code), productId);
-    }
-    if (providerCodeCache && payload.provider_code) {
-      providerCodeCache.set(String(payload.provider_code), productId);
-    }
-
-    // Produkt utworzony z default variantem - znajdz go w warianach
+    // 2. Sprawdz jaki wariant powstal (Selly zwykle tworzy default variant automatycznie)
     const variants = await fetchVariants(productId);
-    const defaultV = variants.find(v => v.default === 1) || variants[0];
-    if (!defaultV) {
-      return { error: 'POST product utworzyl produkt ' + productId + ' ale brak default variant' };
-    }
+    let variant = variants.find(v => v.default === 1) || variants[0];
 
-    // Dodaj Magazyny do wariantu jesli nie mial
-    const hasMag = (defaultV.features || []).find(f => f.name === 'Magazyny');
-    let featureId = getFeatureIdForWarehouse(bridgeRow.dostawca);
-    let variantId = defaultV.variant_id;
-
-    if (!hasMag && featureId) {
-      // TODO: aktualizacja wariantu przez PUT z features - w discovery to obsluguje createVariant przy nowych
-      // tu default variant juz istnieje wiec musimy zrobic PUT z features
-      try {
-        await apiWithRetry('PUT', `/api/products/${productId}/variants/${variantId}`, {
-          body: { features: [{ feature_id: featureId, name: 'Magazyny', value: bridgeRow.dostawca }] }
-        });
-      } catch (e) {
-        console.warn(`[discovery] Nie udalo sie dopisac Magazyny do default variant ${variantId}: ${e.message}`);
+    // 3. Jesli default wariant nie ma feature Magazyny - dopisz przez PUT
+    if (variant) {
+      const mag = (variant.features || []).find(f => f.name === 'Magazyny');
+      if (!mag) {
+        const featureId = getFeatureIdForWarehouse(bridgeRow.dostawca);
+        if (featureId) {
+          await apiWithRetry('PUT', `/api/products/${productId}/variants/${variant.variant_id}`, {
+            body: {
+              quantity: bridgeRow.stan ?? 0,
+              price: bridgeRow.cena_sprzedazy ?? 0,
+              features: [{ feature_id: featureId, name: 'Magazyny', value: bridgeRow.dostawca }],
+            }
+          });
+        }
       }
-    } else if (hasMag) {
-      featureId = hasMag.feature_id;
-      learnFeatureId(bridgeRow.dostawca, featureId);
+      return {
+        product_id: productId,
+        variant_id: variant.variant_id,
+        feature_id_magazyn: (mag ? mag.feature_id : getFeatureIdForWarehouse(bridgeRow.dostawca))
+      };
     }
-
-    return { product_id: productId, variant_id: variantId, feature_id_magazyn: featureId };
+    return { error: 'POST product utworzyl produkt ' + productId + ' ale brak default variant' };
   } catch (e) {
-    // Post-mortem: jesli 400 "Istnieje produkt o tym kodzie" - to znaczy ze cache jest niekompletny
-    // (np. produkt dodany w miedzyczasie). Wymus rebuild i retry.
-    if (e.status === 400 && /Istnieje produkt o tym kodzie/i.test(e.message)) {
-      console.warn(`[discovery] POST product 400 (conflict) mimo cache. Rebuild i retry.`);
-      await rebuildProductCodeCache();
-      const existingId = findProductByCode(payload.product_code);
-      if (existingId) {
-        const created = await createVariant(existingId, bridgeRow);
-        if (created.error) return { error: 'createVariant po rebuild: ' + created.error };
-        return {
-          product_id: existingId,
-          variant_id: created.variant_id,
-          feature_id_magazyn: created.feature_id_magazyn,
-          _viaRebuild: true,
-        };
-      }
-    }
     return { error: e.message };
   }
 }
 
 /**
- * Glowna funkcja discovery - zapewnia mapping (cache/find/create).
+ * GLOWNA FUNKCJA: zapewnij mapping dla bridgeRow.
+ * @param {Object} db - better-sqlite3
+ * @param {Object} bridgeRow - { kod, kod_importu, dostawca, ean, ... }
+ * @param {Object} dictMaps - opcjonalnie, potrzebne tylko przy tworzeniu nowego produktu
+ * @returns {Object} { product_id, variant_id, feature_id_magazyn, action, error? }
  */
 async function ensureMapping(db, bridgeRow, dictMaps = null) {
   const { kod, kod_importu, dostawca, ean } = bridgeRow;
@@ -325,7 +222,7 @@ async function ensureMapping(db, bridgeRow, dictMaps = null) {
     productId = await findProductByEan(ean);
   }
 
-  // 3. Sibling w cache Bridge (inny dostawca tego samego kod_importu)
+  // 3. Jesli inny wariant tego samego kod_importu jest juz w cache - uzyj jego product_id
   if (!productId) {
     const sibling = db.prepare(
       'SELECT selly_product_id FROM selly_products WHERE kod_importu = ? AND selly_product_id IS NOT NULL LIMIT 1'
@@ -333,28 +230,12 @@ async function ensureMapping(db, bridgeRow, dictMaps = null) {
     if (sibling) productId = sibling.selly_product_id;
   }
 
-  // 3b. NOWE: Selly product_code cache (produkt bez EAN, bez sibling)
-  if (!productId && productCodeCache) {
-    // Odtworz wygenerowany kod (musi byc zgodny z mapper.buildProductPayload)
-    const guess = (kod || '').replace(/_/g, '');
-    productId = findProductByCode(guess);
-    if (productId) {
-      console.log(`[discovery] Znaleziono w Selly przez product_code cache: ${guess} -> ${productId}`);
-    }
-    // Fallback po provider_code (kod_importu Bridge)
-    if (!productId) {
-      productId = findProductByProviderCode(kod_importu);
-      if (productId) {
-        console.log(`[discovery] Znaleziono w Selly przez provider_code cache: ${kod_importu} -> ${productId}`);
-      }
-    }
-  }
-
   // 4. Znaleziony produkt? Sprawdz warianty
   if (productId) {
     const variants = await fetchVariants(productId);
     const variant = findVariantForDostawca(variants, dostawca);
     if (variant) {
+      // Wariant istnieje - zapisz mapping
       const featureId = ((variant.features || []).find(f => f.name === 'Magazyny') || {}).feature_id;
       db.prepare(`
         INSERT INTO selly_products (kod_importu, dostawca, bridge_kod, selly_product_id, selly_variant_id,
@@ -373,7 +254,7 @@ async function ensureMapping(db, bridgeRow, dictMaps = null) {
         action: 'found_variant',
       };
     }
-    // Produkt jest, brak wariantu dla dostawcy - utworz
+    // Produkt jest, ale nie ma wariantu dla naszego dostawcy - utworz
     const created = await createVariant(productId, bridgeRow);
     if (created.error) {
       return { error: 'createVariant: ' + created.error, action: 'not_found' };
@@ -413,14 +294,14 @@ async function ensureMapping(db, bridgeRow, dictMaps = null) {
       selly_variant_id=excluded.selly_variant_id,
       feature_id_magazyn=excluded.feature_id_magazyn
   `).run(kod_importu, dostawca, kod, created.product_id, created.variant_id,
-         dictMaps.catMap?.get(String(bridgeRow.kategoria || '').toLowerCase()) || null,
-         dictMaps.prodMap?.get(String(bridgeRow.marka || '').toLowerCase()) || null,
+         dictMaps.catMap?.get(bridgeRow.kategoria) || null,
+         dictMaps.prodMap?.get(bridgeRow.marka) || null,
          created.feature_id_magazyn || null);
   return {
     product_id: created.product_id,
     variant_id: created.variant_id,
     feature_id_magazyn: created.feature_id_magazyn,
-    action: created._viaCache || created._viaRebuild ? 'created_variant' : 'created_product',
+    action: 'created_product',
   };
 }
 
@@ -434,9 +315,5 @@ module.exports = {
   getFeatureIdForWarehouse,
   learnFeatureId,
   apiWithRetry,
-  buildProductCodeCache,
-  rebuildProductCodeCache,
-  findProductByCode,
-  findProductByProviderCode,
   WAREHOUSE_FEATURE_IDS: featureIdCache,
 };

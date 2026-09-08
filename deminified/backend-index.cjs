@@ -44878,7 +44878,7 @@ var U = {
     };
     n.cenaSprzedazyNowa != null && (a.cenaSprzedazy = n.cenaSprzedazyNowa);
     let s = a.cenaZakupu ?? 0;
-    a.cenaSprzedazy == null && (a.cenaSprzedazy = Math.round(s * 1.25 * 100) / 100), a.marzaPct = 25, a.marka = a.marka ?? r.marka ?? (n.nazwa.split(" ")[0] || "\u2014"), a.kategoria = a.kategoria ?? r.kategoria ?? "Rolnicze", a.vat = a.vat ?? 23, a.status = (Number(a.cenaSprzedazy) === 0 || Number(a.cenaZakupu) === 0) ? "wstrzymany" : "aktywny";
+    a.cenaSprzedazy == null && (a.cenaSprzedazy = Math.round(s * 1.25 * 100) / 100), a.marzaPct = 25, a.marka = a.marka ?? r.marka ?? "UNKNOWN", a.kategoria = a.kategoria ?? r.kategoria ?? "Rolnicze", a.vat = a.vat ?? 23, a.status = (Number(a.cenaSprzedazy) === 0 || Number(a.cenaZakupu) === 0) ? "wstrzymany" : "aktywny";
     try {
       if (Number(a.cenaZakupu) > 0) {
         const __mk = X.select().from(Bt).all(),
@@ -47306,7 +47306,11 @@ var Uq = 10,
   }];
 
 function Xq(t, e) {
-  return t == null || t === "" ? e == null || e === "" : e == null || e === "" ? !1 : String(t) === String(e)
+  if (t == null || t === "") return e == null || e === "";
+  if (e == null || e === "") return !1;
+  var A = String(t),
+    B = String(e);
+  return A === B || A.toUpperCase() === B.toUpperCase()
 }
 
 function Lq(t, e) {

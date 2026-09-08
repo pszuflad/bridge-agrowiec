@@ -144,30 +144,38 @@ async function fetchVariantFeatures(productId, variantId) {
 }
 
 /**
- * Sciezka A: wariant istnieje w cache - PUT tylko pola produktu.
- *
- * ODKRYCIE 2026-09-08: Selly PUT /api/products/{pid} NIE akceptuje pola `features`
- * (HTTP 400 "Malformed JSON input"). Metadata endpoint zwraca `fields_edit` bez `features`.
- * Features produktowe (Biez̈nik, Rozmiar, ...) sa zapisywane TYLKO przy POST /api/products.
- * Features wariantowe (Magazyny) sa juz ustawione przez discovery.createVariant.
- * Wiec sciezka A ogranicza sie do PUT pol produktu.
+ * Sciezka A: wariant istnieje w cache - PUT produkt + PUT wariant (features).
  */
 async function updateExistingVariant(db, row, opts) {
   const { dryRun } = opts;
   const productId = row.selly_product_id;
   const variantId = row.selly_variant_id;
 
-  // Payload produktu (bez VAT, bez ceny, bez stanu, BEZ features)
+  // 1. Pobierz aktualne features wariantu (dla mirror mode)
+  const existingFeatures = await fetchVariantFeatures(productId, variantId);
+
+  // 2. Payload produktu (bez VAT, bez ceny, bez stanu)
   const productPayload = mapper.toSellyPayloadV2(row, { includeFeatures: false });
 
   if (dryRun) {
-    return { action: 'dry_A', payload_product: productPayload };
+    return { action: 'dry_A', payload_product: productPayload,
+             features_count: mapper.buildFeaturesMirror(row, existingFeatures).length };
   }
 
-  // PUT /api/products/{pid} (pola produktu: name/weight/provider_code/price_purchase/visible/ean)
+  // 3. PUT /api/products/{pid} (pola produktu)
   const putProduct = await apiWithRetry('PUT', `/api/products/${productId}`, { body: productPayload });
   if (putProduct.status < 200 || putProduct.status >= 300) {
     throw new Error(`PUT product HTTP ${putProduct.status}: ${JSON.stringify(putProduct.data).slice(0, 300)}`);
+  }
+
+  // 4. PUT /api/products/{pid}/variants/{vid} (features mirror)
+  const featuresMirror = mapper.buildFeaturesMirror(row, existingFeatures);
+  const putVariant = await apiWithRetry('PUT',
+    `/api/products/${productId}/variants/${variantId}`,
+    { body: { features: featuresMirror } }
+  );
+  if (putVariant.status < 200 || putVariant.status >= 300) {
+    throw new Error(`PUT variant HTTP ${putVariant.status}: ${JSON.stringify(putVariant.data).slice(0, 300)}`);
   }
 
   markProductSynced(db, row);
@@ -193,13 +201,23 @@ async function ensureAndUpdate(db, row, dictMaps, opts) {
     throw new Error('ensureMapping: ' + (mapping.error || 'brak variant_id'));
   }
 
-  // 2. Aktualizuj pola produktu (bez features - patrz komentarz w updateExistingVariant).
-  //    Features produktowe zostaly juz zapisane przez discovery.createProduct (sciezka C),
-  //    a Magazyny na wariancie przez discovery.createVariant (sciezka B).
+  // 2. Aktualizuj produkt (features juz zostaly ustawione przy tworzeniu przez discovery,
+  //    ale PUT produktu dokona synchronizacji name/weight/ean/provider_code)
   const productPayload = mapper.toSellyPayloadV2(row, { includeFeatures: false });
   const putProduct = await apiWithRetry('PUT', `/api/products/${mapping.product_id}`, { body: productPayload });
   if (putProduct.status < 200 || putProduct.status >= 300) {
     throw new Error(`PUT product po discovery HTTP ${putProduct.status}: ${JSON.stringify(putProduct.data).slice(0, 300)}`);
+  }
+
+  // 3. Uzupelnij features wariantu (mirror z istniejacych)
+  const existingFeatures = await fetchVariantFeatures(mapping.product_id, mapping.variant_id);
+  const featuresMirror = mapper.buildFeaturesMirror(row, existingFeatures);
+  const putVariant = await apiWithRetry('PUT',
+    `/api/products/${mapping.product_id}/variants/${mapping.variant_id}`,
+    { body: { features: featuresMirror } }
+  );
+  if (putVariant.status < 200 || putVariant.status >= 300) {
+    throw new Error(`PUT variant features HTTP ${putVariant.status}: ${JSON.stringify(putVariant.data).slice(0, 300)}`);
   }
 
   markProductSynced(db, row);
@@ -217,22 +235,11 @@ async function ensureAndUpdate(db, row, dictMaps, opts) {
  * @param {Object} opts - { dryRun: bool, maxProducts: int, autoCreate: bool, limit: int }
  */
 async function syncFullForDostawca(db, dostawca, opts = {}) {
-  const { dryRun = false, maxProducts = 5000, autoCreate = true, buildCache = true } = opts;
+  const { dryRun = false, maxProducts = 5000, autoCreate = true } = opts;
 
   if (!dostawca) throw new Error('sync_full: dostawca wymagany');
 
   const startTs = Date.now();
-
-  // Zbuduj cache Selly product_code/provider_code (dla scieszek B/C bez EAN)
-  if (buildCache && autoCreate) {
-    try {
-      const cacheRes = await disc.buildProductCodeCache();
-      console.log(`[sync_full] Cache Selly: ${cacheRes.hit}, ${cacheRes.providerSize || cacheRes.size} entries`);
-    } catch (e) {
-      console.warn(`[sync_full] Cache Selly build ERROR (fallback: tylko EAN): ${e.message}`);
-    }
-  }
-
   const rows = collectFullSyncItems(db, dostawca);
   const limited = rows.slice(0, maxProducts);
 
