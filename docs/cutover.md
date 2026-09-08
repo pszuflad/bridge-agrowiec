@@ -14,7 +14,7 @@ Przełączamy **jednym ruchem** (big-bang, bez okresu współbieżnego działani
 |---|---|---|
 | Backend | `mirror/backend/index.cjs` + kilkanaście łatek `patch_*.cjs`, PM2 `bridge-backend`, `0.0.0.0:5000` | `rebuild/backend` → `dist/server.js`, PM2, ten sam port |
 | Frontend | zbudowany bundle w `public_html/panel` + trzy skrypty wstrzykiwane (`selly-injection.js`, `pending-injection.js`, `freq-injection.js`) | build `rebuild/frontend`, **skrypty wstrzykiwane znikają** — wszystkie trzy wchłonięte (I7, I8, 3f-2) |
-| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie migrujemy danych, nie przenosimy plików |
+| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie przenosimy plików do innej bazy, ale `npm run migrate` na niej stosuje migracje SCHEMATU (001–003) i DANYCH (004–006, konwencje 13c) |
 | Apache | `public_html/panel/.htaccess`, proxy `/api/*` | ten sam mechanizm, przekierowanie na nowy proces |
 
 **Baza jest wspólnym mianownikiem i to jest największe ryzyko całej operacji** — dlatego
@@ -32,7 +32,7 @@ przed oknem, żeby nie zgłosiła tego jako błąd.
 - [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na staging
       (`docs/przeglad-12-widokow.md`). To jest warunek nadrzędny — bez niego nie zaczynamy.
 - [ ] **Bramki zielone** na `develop`: `lint`, `typecheck`, `build`, `test` po obu stronach
-      (backend: 79 plików / 1223 testy; frontend: 48 plików / 747 testów + 5 plików integracyjnych).
+      (backend: 80 plików / 1240 testów; frontend: 48 plików / 747 testów + 5 plików integracyjnych).
 - [ ] **Sekrety produkcyjne przygotowane** w pliku `.env` poza repo (rozdział 4). Bez
       `JWT_SECRET` i `DB_PATH` backend **nie wstanie** — to celowy fail-fast, nie usterka.
 - [ ] **Schemat produkcji zweryfikowany** wg rozdziału 3, na KOPII, nie na żywej bazie.
@@ -236,6 +236,29 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    DB_PATH=/home/admin/private_apps/bridge/data.db npm run migrate
    ```
    Wynik wypisuje, co zastosowano i co pominięto. **Każdy błąd = przerwij i wróć do rozdziału 7.**
+   Od 13c dochodzą trzy migracje DANYCH — `004_kategoria_wielka_litera.sql`,
+   `005_konstrukcja_slowa.sql`, `006_nazwa_caps.sql` — które odtwarzają konwencje wprowadzone
+   przez Anię na produkcji 18.08 i 09-01. **Na żywej bazie mają nie zmienić ani jednego wiersza** —
+   produkcja te dane już zmigrowała, więc to jest oczekiwany no-op, dowód wierności, nie usterka.
+
+   ⚠ **`npm run migrate` tego NIE pokaże** — wypisuje wyłącznie, które PLIKI zastosował, a które
+   pominął (`migrate-cli.ts`), bez liczby zmienionych wierszy. Sprawdź to osobno, na KOPII bazy
+   z kroku 1, PRZED uruchomieniem migracji na żywej:
+
+   ```bash
+   sqlite3 /sciezka/do/kopii.db <<'SQL'
+   SELECT 'konstrukcja', konstrukcja, COUNT(*) FROM products GROUP BY 2;
+   SELECT 'kategoria', kategoria, COUNT(*) FROM products GROUP BY 2;
+   SELECT 'nazwa nie-UPPER', COUNT(*) FROM products WHERE nazwa <> UPPER(nazwa);
+   SELECT 'override nazwa nie-UPPER', COUNT(*) FROM manual_overrides
+     WHERE field_name = 'nazwa' AND override_value <> UPPER(override_value);
+   SQL
+   ```
+
+   Oczekiwane na bazie produkcji po 09-01: `konstrukcja` wyłącznie `Radialna`/`Diagonalna`,
+   `kategoria` wyłącznie w formach z Wielkiej litery, oba liczniki nie-UPPER równe **0**.
+   Jeśli którykolwiek wyjdzie inaczej, baza NIE ma jeszcze tej konwencji — zatrzymaj się
+   i wyjaśnij rozbieżność, zanim puścisz migracje na żywej.
 
 6. **Frontend na miejsce.** Podmień zawartość `public_html/panel` buildem z
    `rebuild/frontend/dist` i wgraj `.htaccess` z regułą proxy oraz SPA fallbackiem (wzór:

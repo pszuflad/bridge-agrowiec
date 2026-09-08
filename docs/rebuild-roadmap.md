@@ -182,7 +182,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
-| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`. 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. Zostają 13c/13d/13e |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`. 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. Zostają 13d/13e |
 
 ---
 
@@ -1967,17 +1967,35 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   sha, fragment `silnik` (żywy `tk`) **bez zmian**, zgodnie z przewidywaniem. Przy przenagraniu
   zmieniło się **57 pól `powod`** w MO1–MO5 i **zero innych pól**; wszystkie te wiersze zostały
   `typZmiany: "zmiana_kluczowa"` — patrz nota niżej w bloku **13c**, bo to tam się rozstrzyga.
-- **13c — Migracje danych + fixtures konwencji** [BAZA + BE] — migracje istniejących rekordów (wzór:
-  #2 kategoriafix, #3 szertxt): **nazwa→UPPER** (CAPS), **konstrukcja kody→słowa** wg
-  `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs` (decyzja Anny 2026-09-01: `L` 46 rek. i `B` 11 rek. →
-  `Diagonalna`, `-` → `Diagonalna`), weryfikacja czy katunify wymaga migracji historycznych kategorii.
-  **Znalezisko 13a:** `katunify` NIE unifikuje kategorię `'rolnicze małe'` — w warstwie parserów
-  zostaje z małej litery (MO2, 3 rek.); Wielką literę nadaje dopiero `mirror/backend/apply_kategoria.cjs:12`,
-  spoza warstwy parserów — sprawdzić przy migracji historycznych kategorii. Sześć konfliktów MO8 z 13b
-  (staging 25→31, zderzenie nowych parserów ze starym `db/snapshot.db`) powinno zniknąć po tej migracji.
-  **Bramki/fixtures:** przenagraj `katalog.gate`, `analityka.*`, `produkty.*` — pokażą Wielką literę
-  kategorii, słowa konstrukcji, WIELKIE nazwy.
-  ⚠ **Rozjazd CHANGELOG↔kod (znalezisko 13b) — to TA karta go rozstrzyga.** CHANGELOG Ani
+- **13c — Migracje danych + fixtures konwencji** [BAZA + BE] — ✅ zrobione 2026-09-09
+  (`44-CHORE-i13c-migracje-konwencji`). Trzy migracje SQL, stosowane runnerem `npm run migrate`
+  w transakcji, w kolejności chronologicznej produkcji: `rebuild/schema/004_kategoria_wielka_litera.sql`,
+  `005_konstrukcja_slowa.sql`, `006_nazwa_caps.sql`. Pomiar na kopii `db/snapshot.db` (7405
+  produktów): pierwszy przebieg zmienił **537 / 7392 / 2647** wierszy (kolejno kategoria /
+  konstrukcja / nazwa+overrides), **drugi przebieg 0 / 0 / 0** — idempotencja TREŚCIOWA
+  (przybita testem, nie tylko przez ewidencję `_migracje`). `staging_items` stracił **723**
+  wiersze CASE_ONLY. Fixtures przenagrane: `GET_products.json`, `GET_products_bez-parametrow.json`,
+  `PUT_products_id.json`, `PATCH_products_id.json`. **Bramki:** 80 plików / 1240 testów zielone,
+  `lint`/`typecheck`/`build` zielone, `tools/generate-openapi-schemas.cjs --sprawdz` zielone.
+  **Znalezisko 13a rozstrzygnięte:** `katunify` NIE unifikował kategorii `'rolnicze małe'` w
+  warstwie parserów (MO2, 3 rek.) — Wielką literę nadaje `mirror/backend/apply_kategoria.cjs:12`,
+  spoza warstwy parserów. **katunify WYMAGAŁ migracji historycznych kategorii** — 537 rekordów
+  z małej litery (dokładnie liczba z backlogu #2). Stan po migracji odpowiada DOKŁADNIE
+  rozkładowi zweryfikowanemu przez Anię na produkcji (CHANGELOG 2026-09-01 10:35): Rolnicze 4533,
+  Ciężarowe 1463, Przemysłowe 1195, Leśne 214. Mapa migracji = unia `KATEGORIA_CANONICAL_MAP`
+  (`common.cjs`) i mapy z `apply_kategoria.cjs`, bo obie są cząstkowe (szczegóły:
+  `docs/tickets/44-CHORE-i13c-migracje-konwencji/plan.md` D4).
+  ⚠ **Sprostowanie:** ta karta NIE jest wzorowana na „#2 kategoriafix" — #2 migracji nigdy nie
+  dostał, zamknięto go portem `capitalizeKategoria()` w 3a. Jedynym wcześniejszym wzorcem
+  migracji było #3 (`003_szerokosc_text.sql`); kategoria migrację dostaje dopiero w tej karcie.
+  ⚠ **Sprostowanie:** produkcja (CHANGELOG 2026-09-01 11:35) migrowała `konstrukcja` wyłącznie dla
+  kluczy `R`/`D`/`L`/`B`. Klucz `'-'` → `Diagonalna` istnieje tylko w `KONSTRUKCJA_CANONICAL_MAP`
+  jako mapowanie dla PRZYSZŁYCH importów, nie jako migracja, którą Ania faktycznie wykonała —
+  nasza migracja go obejmuje (bo mapuje wg mapy kanonicznej), ale to była nasza decyzja (D3),
+  nie odtworzenie kroku produkcji.
+  **Bramki/fixtures:** przenagrane, pokazują Wielką literę kategorii, słowa konstrukcji, WIELKIE
+  nazwy.
+  ⚠ **Rozjazd CHANGELOG↔kod (znalezisko 13b) — ta karta go rozstrzyga.** CHANGELOG Ani
   (2026-09-01 12:30) i backlog #59 twierdzą, że case-insensitive `Xq` sprawia, iż „Kleber GRIPKER"
   vs „KLEBER GRIPKER" NIE generuje `staging_items` typu `zmiana_kluczowa`. **Kod produkcji tego nie
   robi** — w żywym `tk` klasyfikacja `_ck` liczy się BEZ `Xq`, jest case-SENSITIVE
@@ -1986,14 +2004,20 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   realnie tylko na narrację `powod` (`POLA_ROZNIC`) i na auto-patch PIĘCIU pól: `cenaZakupu`/
   `cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` — **bez `ean`**, bo `AP.ean` istnieje wyłącznie
   w MARTWEJ definicji `tk`; żywy `tk` ma dokładnie 6 wywołań `Xq` (1 w pętli `powod` + 5 wyżej). Dowód empiryczny z 13b: przenagranie wzorca zmieniło
-  57 pól `powod` i ZERO innych pól — wiersze zostały `typZmiany: "zmiana_kluczowa"`. **Dopiero
-  migracja danych tej karty (`UPPER(nazwa)` + `DELETE` wierszy staging CASE_ONLY) usuwa szum
-  case-only** — nie kod silnika, 13b tego nie mogła załatwić.
-  ⚠ **Drugie przesunięcie wzorca do przewidzenia.** Po migracji `UPPER(nazwa)` wzorzec
-  charakteryzacji silnika (`MO1–MO5.expected.json`) może się przesunąć DRUGI raz — tym razem przez
-  zmianę DANYCH wejściowych (nazwy w bazie stają się WIELKIE), nie kodu. Policzyć diff `powod` i
-  potwierdzić, że `typZmiany` nadal się zgadza, tak jak w 13b.
-  **Zależy od:** 13a, 13b. Tu wpina się decyzja 13f (tl_tt).
+  57 pól `powod` i ZERO innych pól — wiersze zostały `typZmiany: "zmiana_kluczowa"`. **Migracja
+  danych tej karty (`UPPER(nazwa)` + `DELETE` wierszy staging CASE_ONLY, reguła R3 — każdy
+  segment `powod` case-only) usunęła ten szum** — 723 wiersze skasowane (16 wierszy z polskim
+  diakrytykiem w case-only różnicy ZOSTAJE nietknięte na zawsze, bo SQLite `UPPER()` jest
+  ASCII-only również w predykacie DELETE, nie tylko w `UPDATE nazwa=UPPER(nazwa)` — zamierzone,
+  wierne 1:1 produkcji, przybite testem-strażnikiem). **NIEZWERYFIKOWANE w tej karcie:** czy
+  sześć konfliktów MO8 z 13b (staging 25→31) zniknęło po tej migracji — 13c nie mierzyła tego
+  scenariusza, nie zgadywać wyniku.
+  ⚠ **Zmierzony fakt (obala wcześniejszą zapowiedź „drugie przesunięcie wzorca"):** przenagranie
+  `test/charakteryzacja/silnik/MO*.expected.json` po migracji `UPPER(nazwa)` dało **diff = 0**.
+  Powód: harness `scripts/charakteryzacja-silnik-nagraj.mjs:210-227` karmi ORAZ oryginał, ORAZ
+  nasz port surowym `db/snapshot.db`, którego 13c nie dotyka — obie strony dostają identyczne
+  wejście, więc migracja danych nie mogła przesunąć wzorca zbudowanego na innym źródle.
+  **Zależy od:** 13a, 13b (spełnione).
 - **13d — Selly REST sync (NOWY podsystem)** [BE] — reimplementacja TS 7 plików `selly/*`
   (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/`routes_sync`) +
   przeprojektowana `selly_products` (klucz `(kod_importu,dostawca)`→`(selly_product_id,selly_variant_id)`
@@ -2005,7 +2029,17 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
 - **13e — Frontend: Bridge ONE + drobne** [FE] — rebrand „Bridge ONE" (title „Bridge ONE — konsolidacja
   cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`, `konstr` (FE strona
   konstrukcji — sparowane z 13c). Bundle zminifikowane — **najpierw rozłóż diff bundla**, `.bak` daje tylko
-  etykietę. **Zależy od:** 13c (konstr); rebrand+drobne mogą iść częściowo równolegle.
+  etykietę. **Zależy od:** 13c (konstr, ✅ spełnione 2026-09-09); rebrand+drobne mogą iść częściowo równolegle.
+  **Ustalenia z 13c (`44-CHORE-i13c-migracje-konwencji`) dla tej karty:**
+  - Migracja `konstrukcja` JUŻ WESZŁA — `products.konstrukcja` oddaje `Radialna`/`Diagonalna`,
+    nie kody jednoliterowe.
+  - **Bez pilności:** bundle produkcji od 2026-09-01 ma pass-through wartości surowej
+    (`n||""`/`n||null`), więc panel pokazuje pełne słowo bez zmiany kodu FE — mapowanie kodów
+    w panelu zostało tam jako defensywny bezpiecznik (CHANGELOG 2026-09-01 11:35).
+  - `products.nazwa` jest teraz WIELKIMI literami — jeśli FE gdzieś formatuje nazwę
+    (capitalize/title-case), zderzy się to z konwencją katalogu.
+  - ⚠ ASCII-only `UPPER` zostawia małe polskie diakrytyki w środku wyrazów (np. „PROWADZąCA").
+    To jest stan produkcji, nie błąd odbudowy — FE nie powinien tego „poprawiać".
 
 **Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → { **13d** gdy Ania domknie Tor 2, **13e** }.
 13d jest niezależne od 13a–13c (inny podsystem), więc może startować równolegle po 13a. 13a jest twardym

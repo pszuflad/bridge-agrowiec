@@ -72,6 +72,14 @@ wychodzi przez `GET /api/products`, mimo że fizycznie jest w tabeli (zmierzone 
 72 klucze bez `uwagaCena`). Obecność kolumny w bazie produkcji nie znaczy, że API ją oddaje —
 sprawdzaj model, nie schemat tabeli.
 
+**`UPPER()`/`LOWER()` w SQLite są ASCII-only.** `UPPER('prowadząca')` daje `'PROWADZąCA'` —
+małe `ą` przechodzi nietknięte. Skutek zmierzony w 13c: migracja `006_nazwa_caps.sql` zostawia
+16 wierszy `staging_items`, które semantycznie SĄ case-only, ale predykat `UPPER(A)=UPPER(B)`
+ich nie łapie. To NIE jest błąd do naprawy — produkcja użyła tego samego `UPPER()`, więc ma tę
+samą resztkę i jest to spójne (baza ma `PROWADZąCA`, plik dostawcy z `PROWADZĄCA` nadal się od
+niej różni). Morał: przy porównaniach case-insensitive w SQL sprawdź, czy dane mają polskie
+znaki, i nie „popraw" tego na wariant Unicode-aware bez sprawdzenia, co zrobił oryginał.
+
 ---
 
 ## Środowisko

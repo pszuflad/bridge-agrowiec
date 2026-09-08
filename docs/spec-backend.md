@@ -424,6 +424,16 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 > danych `UPPER(nazwa)` — **13c**, poza zakresem tej karty. Szczegóły:
 > `docs/tickets/43-CHORE-i13b-silnik-p3-caps/`.
 
+> **Odbudowa (13c, `44-CHORE-i13c-migracje-konwencji`, 2026-09-09) — trzy migracje DANYCH
+> odtwarzają konwencje produkcji z 18.08 i 09-01.** `products.kategoria` (historyczne wpisy
+> małą literą), `products.konstrukcja` (kody `R`/`D`/`L`/`B` → `Radialna`/`Diagonalna`) i
+> `products.nazwa`/`manual_overrides.override_value` (pole `nazwa`) → `UPPER` przechodzą przez
+> `rebuild/schema/004`–`006`, uruchamiane `npm run migrate` w transakcji; są no-opem na bazie,
+> którą produkcja już zmigrowała. `UPPER(nazwa)` domyka wcześniejszy szum case-only w
+> `zmiana_kluczowa` zapowiedziany w bloku 13b wyżej — `DELETE` kasuje wiersze CASE_ONLY (SQLite
+> `UPPER()` jest ASCII-only, więc 16 wierszy z polskim diakrytykiem zostaje, tak jak w
+> produkcji). Szczegóły i pomiary: `docs/tickets/44-CHORE-i13c-migracje-konwencji/`.
+
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,

@@ -208,3 +208,82 @@ Rzeczy zauważone i świadomie NIE zrobione w 13c.
 5. **`konstrukcja` z wartością `'X'` (1 rek. w snapshocie) i 12 NULL-i** — poza mapą kanoniczną,
    nietknięte przez migrację i przez produkcję. Produkcja pozbyła się ich backfillem, którego
    decyzją 13f nie odtwarzamy.
+
+## Docs updates
+
+Trzej doc-checkerzy równolegle, każdy na rozłącznym zbiorze plików.
+
+### `docs/rebuild-roadmap.md`
+- Wiersz zbiorczy I13: dopisane `13c: ✅ 44-CHORE-i13c-migracje-konwencji · 2026-09-09`,
+  „Zostają 13c/13d/13e" → „Zostają 13d/13e".
+- Blok 13c przepisany z ZAMIARU na ROZLICZENIE: trzy migracje, pomiar 537/7392/2647 → 0/0/0,
+  723 skasowane wiersze staging, cztery przenagrane fixtures, bramki 80/1240.
+  Otwarte pytanie bloku („czy katunify wymaga migracji") ma teraz odpowiedź: TAK, 537 rekordów.
+- **Trzy obalone twierdzenia usunięte, nie dopisane obok** (`CLAUDE.md` obowiązek 4):
+  „wzór: #2 kategoriafix" (#2 nigdy nie miał migracji), „decyzja Anny: `-` → Diagonalna" jako
+  opis kroku produkcji (produkcja objęła tylko `R`/`D`/`L`/`B`), „⚠ Drugie przesunięcie wzorca
+  do przewidzenia" (zmierzone: diff = 0, z uzasadnieniem).
+- Zdanie o sześciu konfliktach MO8 z 13b oznaczone jako **NIEZWERYFIKOWANE w tej karcie**
+  zamiast zgadywania wyniku.
+- **Ustalenia dla 13e wpisane DO BLOKU 13e** (`CLAUDE.md` obowiązek 2): migracja już weszła,
+  brak pilności (bundle produkcji ma pass-through od 09-01), `nazwa` jest CAPS — uwaga na
+  formatowanie w FE, ASCII-only `UPPER` zostawia małe diakrytyki i FE nie ma tego „poprawiać".
+- Blok 13d sprawdzony — nie zawiera zdania zależnego od konwencji konstrukcji, nic nie dopisano.
+
+### `docs/rebuild-backlog.md`
+- **#57** — `Iteracja`/`Status` z czasu przyszłego na ✅ zrobione w 13c; dopisany pomiar 537 rek.
+  i wyjaśnienie unii dwóch cząstkowych map produkcji.
+- **#58** — ✅ zrobione w 13c, pomiar 7392; **sprostowanie faktu**: `'-'` nie był częścią
+  migracji produkcji; nota o nietkniętych `X`/`NULL`.
+- **#59** — **WPIS DOMKNIĘTY W CAŁOŚCI** (silnik 13b + migracja 13c); dopisana „resztka
+  diakrytyczna" jako zmierzony fakt o produkcji wraz z wyjaśnieniem rozjazdu 739/723.
+- **#2** — dopisane, że port naprawiał tylko u źródła, a stronę DANYCH domknęła dopiero
+  migracja 13c (to jest sprostowanie premisy promptu startowego).
+- **#65 (nowy wpis)** — `manual_overrides` nieprzemigrowane (3 rek. `konstrukcja='D'`,
+  14 rek. `kategoria` małą literą), `Do nowej wersji?` → ⬜ **do decyzji**, bo naprawa byłaby
+  świadomym odstępstwem od 1:1.
+- Tabela „Mapowanie zmian → karty I13": wiersz 13c oznaczony zrobionym.
+
+### `docs/spec-backend.md`
+- Nowy blockquote „Odbudowa (13c…)" po istniejącym bloku 13b, w tej samej konwencji —
+  domyka forward-ref z 13b („szum case-only usuwa dopiero migracja `UPPER(nazwa)` — 13c").
+  Poza tym forward-refem plik nie zawierał twierdzeń o kodach `konstrukcja` ani o konwencji
+  wielkości liter, więc nic więcej nie wymagało korekty.
+
+### `docs/cutover.md`
+- Wiersz tabeli „Baza": „nie migrujemy danych" doprecyzowane — nie przenosimy plików do innej
+  bazy, ale `npm run migrate` stosuje na niej migracje schematu (001–003) i DANYCH (004–006).
+- Krok 5 („Migracje na ŻYWEJ bazie"): 004–006 mają być no-opem na produkcji — to dowód
+  wierności, nie usterka.
+- Nieaktualna liczba testów backendu 79/1223 → 80/1240.
+- ⚠ **Korekta Mastera na dopisie doc-checkera:** twierdził, że `npm run migrate` wypisuje liczbę
+  zmienionych wierszy. **Nieprawda** — `migrate-cli.ts` wypisuje wyłącznie, które PLIKI
+  zastosował i które pominął. Zastąpione konkretnym zapytaniem `sqlite3` na KOPII bazy,
+  uruchamianym PRZED migracją na żywej, z wypisanymi wartościami oczekiwanymi.
+
+### `contract/README.md`
+- Sekcja „Skąd się biorą nagrania": dopisany krok 4 procedury piaskownicy
+  (`migrujKonwencje()`), pozostałe przenumerowane. Zapisana **zasada**: stan wejściowy
+  piaskownicy doprowadzamy do stanu produkcji artefaktami PRODUKCJI, nigdy plikami
+  `rebuild/schema/` — inaczej nagranie byłoby dowodem na naszą własną migrację.
+  Odnotowany wyjątek: `DELETE` staging CASE_ONLY celowo nieodtwarzany (CHANGELOG podaje go
+  z placeholderami, przepisanie byłoby zgadywaniem).
+
+### `CLAUDE.md`
+- Nowy akapit w serii pułapek „nie ufaj X": **`UPPER()`/`LOWER()` w SQLite są ASCII-only**,
+  ze skutkiem zmierzonym w 13c (16 wierszy `staging_items` niezłapanych przez predykat
+  CASE_ONLY) i morałem, żeby nie „poprawiać" tego na wariant Unicode-aware bez sprawdzenia,
+  co zrobił oryginał.
+
+### Pre-existing issues (do wiadomości użytkownika, POZA zakresem tego ticketa)
+
+- `docs/cutover.md` linia 3 — nagłówek „Wersja dokumentu: 2026-09-08 (ticket 39…)" nie jest
+  bumpowany przy kolejnych korektach treści. Plik nie ma konwencji aktualizowania tej daty,
+  a 44 nie dotyka nagłówka merytorycznie — zostawione bez zmian.
+- `docs/rebuild-roadmap.md` — linia „Kolejność: 13f → 13a → 13b → 13c → {13d, 13e}" opisuje
+  plan sprzed realizacji. Nie jest fałszywa (kolejność faktycznie tak przebiegła), zostawiona.
+- **`migrate-cli.ts` nie raportuje liczby zmienionych wierszy.** Dla migracji SCHEMATU to nie
+  miało znaczenia, ale od 13c pliki niosą DANE i „ile wierszy ruszyło" jest istotną informacją
+  operacyjną — zwłaszcza przy cutoverze, gdzie oczekiwanym wynikiem jest zero. Obejście
+  (zapytanie na kopii) jest w `cutover.md`; docelowa poprawka runnera to kandydat na osobny
+  ticket, świadomie poza zakresem 13c.
