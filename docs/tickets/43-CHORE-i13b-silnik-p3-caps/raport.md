@@ -94,10 +94,16 @@ warte zapisania, bo „puste pole Producent" z CHANGELOG-u może oznaczać jedno
   negatywna). Scenariusz `brak-marki-daje-unknown` przypina wartość mierzoną na ORYGINALE.
 - **Testy jednostkowe:** ✓ nowy `silnik.rownosc.test.ts` — 8 testów, bez mocków.
 - **Pełny przebieg:** ✓ **80 plików, 1234 testy, wszystkie zielone.**
-- **Kontrola mutacyjna:** po tymczasowym cofnięciu obu zmian w `src/` pada **6 testów** —
-  potwierdzenie, że nowe pokrycie faktycznie gryzie, a nie tylko przechodzi. Wśród nich dwa
-  ISTNIEJĄCE scenariusze akceptacji (`pozycja-bez-snapshotu`, `uszkodzony-snapshot-nie-wywraca-akceptacji`),
-  które też przechodzą przez gałąź fallbacku — czyli P3 ma szersze pokrycie, niż zakładał plan.
+- **Kontrola mutacyjna:** po tymczasowym cofnięciu obu zmian w `src/` pada **11 testów w 3 plikach**
+  (zmierzone na PEŁNYM przebiegu) — potwierdzenie, że nowe pokrycie faktycznie gryzie, a nie tylko
+  przechodzi. Rozkład:
+  - `silnik.rownosc.test.ts` — 3 (nowy plik),
+  - `akceptacja.charakteryzacja.test.ts` — 3, w tym dwa ISTNIEJĄCE scenariusze
+    (`pozycja-bez-snapshotu`, `uszkodzony-snapshot-nie-wywraca-akceptacji`), które też przechodzą
+    przez gałąź fallbacku,
+  - `silnik.charakteryzacja.test.ts` — 5 (MO1–MO5, rozjazd `powod` względem przenagranego wzorca).
+
+  Czyli obie zmiany mają pokrycie szersze, niż zakładał plan.
 - **Bramki:** `lint` ✓, `typecheck` ✓, `build` ✓.
 
 **Żadna bramka nie wymagała migracji nazwy z 13c** — nic nie zostało wyłączone ani zeskipowane.
@@ -122,3 +128,12 @@ Brak w sensie kontraktu API. Zmiana zachowania (świadoma, odtwarzająca produkc
 - **Poza zakresem I13:** `marka: ""` (pusty łańcuch) omija fallback i zostaje pusta. Jeśli któryś
   parser oddaje `""` zamiast `null` dla pustego pola Producent, P3 go nie złapie. Zachowanie
   oryginału odtworzone wiernie — ale warte sprawdzenia przy okazji przeglądu parserów.
+
+## Poprawki po review
+
+- **SHOULD-FIX (poprawione):** liczba padających testów w kontroli mutacyjnej była zaniżona —
+  raportowała 6, bo mierzyłem tylko na dwóch plikach testowych. Przemierzone na pełnym przebiegu:
+  **11 testów w 3 plikach**. Sekcja „Wyniki testów" poprawiona wraz z rozkładem.
+- **NICE-TO-HAVE (poprawione):** `plan.md` przestawiony ze statusu `Draft` na `Implemented`.
+- **BLOCKER (adresowany):** synchronizacja `docs/rebuild-roadmap.md` i `docs/rebuild-backlog.md`
+  była zaplanowana jako Krok 6 i wykonana po review — patrz sekcja „Docs updates" niżej.

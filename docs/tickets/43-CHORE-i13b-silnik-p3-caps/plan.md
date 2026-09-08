@@ -1,6 +1,6 @@
 # 43-CHORE-i13b-silnik-p3-caps — I13/13b: silnik `tk()`/`acceptStaging` — P3 + CAPS/Xq
 
-> Status: Draft
+> Status: Implemented
 > Branch: `chore/43-i13b-silnik-p3-caps`
 > Worktree: `.worktrees/43-CHORE-i13b-silnik-p3-caps`
 
