@@ -216,6 +216,10 @@ describe("3. Przydatność próby — zielony wynik nie może brać się z puste
       "promocja-wygasla-nadal-obniza-cene",
       "regula-nadpisuje-cene-sprzedazy-z-pozycji",
       "regula-nie-wchodzi-przy-zerowej-cenie-zakupu",
+      // Fallback marki (13b/P3) — bez tych nazw gałąź fallbacku nie jest w ogóle wykonywana,
+      // bo każdy inny scenariusz ma markę wypełnioną ze snapshotu.
+      "brak-marki-daje-unknown",
+      "marka-pusty-lancuch-nie-uruchamia-fallbacku",
     ]) {
       expect(nazwy, `brak scenariusza ${wymagana}`).toContain(wymagana);
     }
@@ -242,6 +246,32 @@ describe("3. Przydatność próby — zielony wynik nie może brać się z puste
       expect(produkt.cenaSprzedazy, "narzut 6% nie wszedł w cenę").toBe(1303);
       expect(produkt.marzaPct, "marża powinna przyjąć PROCENT NARZUTU").toBe(6);
       expect(produkt.cenaSprzedazy).not.toBe(1250);
+    } finally {
+      baza.posprzataj();
+    }
+  });
+
+  /**
+   * ⭐ KONTROLA NEGATYWNA FALLBACKU MARKI (13b/P3). Scenariusz `brak-marki-daje-unknown` jest
+   * zielony także wtedy, gdy port i oryginał zgodnie wpiszą cokolwiek innego — na przykład stare
+   * `nazwa.split(" ")[0]`, czyli „Opona". Ten test przypina KONKRETNĄ wartość, i to zmierzoną
+   * na uruchomionym ORYGINALE: jeśli ktoś cofnie `mirror/backend/index.cjs` do stanu sprzed
+   * 2026-08-31, zapali się tutaj, a nie dopiero przy cutoverze.
+   */
+  it("ORYGINAŁ przy braku marki wpisuje „UNKNOWN\", a nie pierwsze słowo nazwy", () => {
+    const scenariusz = SCENARIUSZE.find((s) => s.nazwa === "brak-marki-daje-unknown")!;
+    const baza = stworzTestowaBaze();
+    try {
+      const id = zasiej(baza, scenariusz);
+      const { U } = zaladujOryginal(baza);
+      U.acceptStaging(id, 1);
+
+      const produkt = baza.db.select().from(products).all()[0] as unknown as Wiersz;
+      expect(produkt.marka, "P3 nie wszedł — fallback marki jest sprzed 2026-08-31").toBe(
+        "UNKNOWN",
+      );
+      // Nazwa pozycji to „Opona 480/70R28 …", więc stary fallback dałby dokładnie to.
+      expect(produkt.marka).not.toBe("Opona");
     } finally {
       baza.posprzataj();
     }

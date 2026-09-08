@@ -101,9 +101,32 @@ export const SCENARIUSZE = [
     nazwa: "nowa-pozycja-wchodzi-do-katalogu",
     opis:
       "Pozycji nie ma w katalogu → INSERT z wartościami domyślnymi: cena sprzedaży = zakup × 1,25, " +
-      "marża 25, kategoria „Rolnicze\", marka z pierwszego słowa nazwy, VAT 23.",
+      "marża 25, kategoria „Rolnicze\", VAT 23. Marka przychodzi ze snapshotu, więc fallback " +
+      "się tu NIE wykonuje — od tego są dwa scenariusze niżej.",
     katalog: [],
     pozycja: pozycja({}),
+  },
+  {
+    // P3 (produkcja 2026-08-31 14:58, backlog #56). Przed tą zmianą fallbackiem było
+    // `nazwa.split(" ")[0]`, więc ta sama pozycja dostawała markę „Opona” — wartość wyglądającą
+    // na prawdziwą, której nikt nie poprawiał. Scenariusz istnieje po to, żeby gałąź fallbacku
+    // była w ogóle WYKONYWANA: wszystkie pozostałe scenariusze i wszystkie fixtures kontraktu
+    // mają markę wypełnioną, więc bez tego wpisu zmiana przeszłaby bez pokrycia.
+    nazwa: "brak-marki-daje-unknown",
+    opis:
+      "Snapshot BEZ pola `marka` → fallback wpisuje „UNKNOWN\" (P3). Wcześniej byłoby to " +
+      "pierwsze słowo nazwy, czyli „Opona\".",
+    katalog: [],
+    pozycja: pozycja({ snapshot: { marka: undefined } }),
+  },
+  {
+    // Dopełnienie powyższego: `??` przepuszcza tylko `null`/`undefined`, więc marka pusta jako
+    // PUSTY ŁAŃCUCH fallbacku nie uruchamia i zostaje pusta. To zachowanie oryginału, nie nasze —
+    // mierzone na żywo, tak jak reszta scenariuszy.
+    nazwa: "marka-pusty-lancuch-nie-uruchamia-fallbacku",
+    opis: "Snapshot z `marka: \"\"` → fallback NIE wchodzi, marka zostaje pusta.",
+    katalog: [],
+    pozycja: pozycja({ snapshot: { marka: "" } }),
   },
   {
     nazwa: "istniejaca-pozycja-jest-aktualizowana",
