@@ -250,3 +250,57 @@ MO8 w notacji metrycznej WxSxD (`690x180-15`, `560x140-12`, `610x145-13`, `645x1
 teraz szerokość z drugiej liczby (`'690'` → `'180'`). Wpis usunięty z listy „nieuruchomionych",
 b4 dopisane do tabeli zmierzonych przesunięć. Lista faktycznie nieuruchomionych zawęża się
 do trzech pozycji: `katunify` (#57), `mo9expand` (#55) i gałąź CSV z `bug4` (#8).
+
+## Docs updates
+
+### `docs/rebuild-roadmap.md`
+
+- §5 tabela statusów — wiersz „13 | Delty produkcji…" uzupełniony o zamknięcie 13f
+  (`41-CHORE-i13f-decyzja-backfille`) i 13a (`42-CHORE-i13a-resync-parserow`), oba 2026-09-08.
+- Akapit „Oś podziału = MECHANIZM PORTU…" — dopisany fakt operacyjny dotyczący **każdej** karty I13,
+  nie tylko 13a: gałąź `main` nie zawiera katalogu `rebuild/`, więc port dociąga się przez
+  `git show main:mirror/backend/<plik> > <port>`, nie `git checkout main -- rebuild/...`.
+- Bullet **13a** — przepisany z zamiaru na stan: nagłówek „✅ zrobione 2026-09-08", zakres faktycznie
+  dowieziony z rozbiciem każdej zmiany na liczbę rekordów, rozdzielenie zmian potwierdzonych
+  pomiarem od tych, których próbki nie uruchamiają, sprostowanie o `b4`, oraz informacja
+  o ponadplanowym przenagraniu wzorca silnika.
+- Bullet **13b** — nowy akapit „Stan przejściowy odziedziczony z 13a" (zgodnie z obowiązkiem #2
+  z `CLAUDE.md`: ustalenie o przyszłym bloku wpisane DO NIEGO): konieczność ponownego przenagrania
+  po bumpie `index.cjs`, komenda z `BRIDGE_SNAPSHOT_DB`, nota o MO8 (31 vs 25 wierszy — nie regresja),
+  nota że wzorce akceptacji nie zależą od wzorca 3a.
+- Bullet **13c** — dopisane `KONSTRUKCJA_CANONICAL_MAP` (decyzja Anny 2026-09-01), znalezisko
+  o `'rolnicze małe'` z odniesieniem do `apply_kategoria.cjs:12`, oraz nota że sześć konfliktów MO8
+  powinno zniknąć po migracji.
+
+### `docs/rebuild-backlog.md`
+
+- Intro sekcji „Delty produkcji Ani 26.08–08.09" — odnotowane zamknięcie 13a.
+- Statusy 10 wpisów zaktualizowane z rozróżnieniem, którego wcześniej nie było:
+  **sportowane i potwierdzone pomiarem** (#9, #10, #53, #54, #58, #63, #64) kontra
+  **sportowane, ale niepotwierdzone** (#8, #55, #57 — próbki nie uruchamiają tego kodu).
+- **#64** domknięty: realny zakres `odswinch` (+26/−1, dwa hunki w `parseSize()`), z odesłaniem
+  do raportu zamiast powielania treści.
+- **#53** — sprostowanie: `b4` nie istniało w produkcji przed 25.08.
+- **#54** — doprecyzowanie: kod siedzi w `tyre_params.cjs`, nie w `mo4_mo5_handlopex.cjs`.
+- **#57** — dopisane znalezisko o `'rolnicze małe'`.
+- **#57, pole „Iteracja" — sprostowanie przypisania karty.** Wpis mówił `→ 13b (migracja + fixtures)`,
+  co przeczyło dwóm innym źródłom: tabeli mapowania w tej samej sekcji („katunify(migracja) #57 | **13c**")
+  i roadmapie (blok 13c: „weryfikacja czy katunify wymaga migracji historycznych kategorii").
+  Opis w nawiasie był dosłowną definicją 13c — błędny był sam numer, więc poprawiono go jako fakt,
+  a nie jako zmianę zakresu. To dokładnie ten wzorzec błędu, przed którym ostrzega `CLAUDE.md`
+  (obowiązek #3: przypisanie funkcji do sesji weryfikuj, nie ufaj zapisowi).
+
+### `docs/spec-backend.md`, `docs/spec-frontend.md`, `docs/cutover.md`, `docs/audit-delta.md`
+
+Sprawdzone, **zero zmian** — i to jest poprawny wynik. Żadne twierdzenie w tych plikach nie zostało
+obalone, bo wszystkie dotyczą warstwy API / bazy / UI / planu wdrożenia, a zmiana 13a żyje wyłącznie
+w warstwie parserów, przed zapisem do bazy. Odnotowane potencjalne kolizje okazały się pozorne:
+`spec-frontend.md` wspomina `konstrukcja` jako typ warunku w builderze narzutów (bez przywiązania
+do reprezentacji wartości), a `audit-delta.md` ma wpis „konstrukcja R→Radialna" dotyczący
+transformacji przy **eksporcie CSV na froncie** (22.07–17.08), nie normalizacji przy imporcie.
+Aktualizacja tych dokumentów należy do **13c**, gdy zmiana dotrze do bazy i API.
+
+## Pre-existing issues (zastane, poza zakresem ticketa)
+
+Brak — jedyny zgłoszony rozjazd (przypisanie #57 do 13b) okazał się literówką w numerze karty
+i został poprawiony w ramach tego ticketa, bo pozostałe dwa źródła były zgodne.

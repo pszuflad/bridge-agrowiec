@@ -472,7 +472,7 @@ produkcyjny.
 | **Pliki** | `parsers/mo8_trelleborg.cjs` |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
 | **Iteracja** | **→ 3b** (bezpiecznik, pierwsza wersja) **→ 3c** (bezpiecznik przeniesiony do `tk()`, zakrywa wszystkie trasy); poprawka parsera MO8 — patrz „Gdzie naprawiamy" na końcu pliku |
-| **Status** | 🔨 częściowo zrobione (bezpiecznik `PustyImportBlad` w `tk()`, I3/3c, 2026-08-26 — zakrywa wszystkie trasy silnika) — poprawka parsera MO8 nadal do portu (#6, Wariant A). **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#4 — detekcja CSV vs XLSX przez `isZipBuffer` w `mo8_trelleborg.cjs`, dedykowany parser CSV; 704 rek. z 704 wierszy). Port w I13/13a.** |
+| **Status** | 🔨 częściowo zrobione (bezpiecznik `PustyImportBlad` w `tk()`, I3/3c, 2026-08-26 — zakrywa wszystkie trasy silnika) — poprawka parsera MO8 nadal do portu (#6, Wariant A). **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#4 — detekcja CSV vs XLSX przez `isZipBuffer` w `mo8_trelleborg.cjs`, dedykowany parser CSV; 704 rek. z 704 wierszy). ✅ sportowane w `42-CHORE-i13a-resync-parserow` (2026-09-08) — kod wszedł kopią bajtową, ale NIEPOTWIERDZONY pomiarem: próbka MO8 to stały plik `MO8.xlsx`, gałąź CSV (`isZipBuffer`) nieuruchomiona.** |
 
 **Opis biznesowy:** jeśli Trelleborg przyśle cennik jako CSV zamiast XLSX, import kończy się
 **zerem zaimportowanych pozycji i bez żadnego komunikatu błędu**. Wygląda jak udany import
@@ -563,7 +563,7 @@ zamiast liczbą.
 | **Pliki** | `parsers/adapter.cjs` (`recordToSurowe` — `nro`, `cho`), normalizatory w `tyre_params.cjs` |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
 | **Iteracja** | **→ 3b**; gdzie naprawiamy — patrz koniec pliku |
-| **Status** | **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#2 — NRO/CHO → `'Tak'`/null; `tyre_params.cjs:423-424` + `adapter.cjs:596-597` `normalizeLabelFlag`; UPDATE bazy: 16×`Tak` NRO, 13×`Tak` CHO, reszta NULL). Port w I13/13a.** |
+| **Status** | **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#2 — NRO/CHO → `'Tak'`/null; `tyre_params.cjs:423-424` + `adapter.cjs:596-597` `normalizeLabelFlag`; UPDATE bazy: 16×`Tak` NRO, 13×`Tak` CHO, reszta NULL). ✅ sportowane i POTWIERDZONE pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): `nro` `1`→`'Tak'`, `nro`/`cho` `0`→`null`; MO1 199, MO3 44, MO9 12 rek.** |
 
 **Opis biznesowy:** oznaczenia NRO i CHO zapisują się jako `0`/`1` zamiast „Tak"/pustego pola —
 czyli dokładnie ten sam objaw, który poprawki `sniegfix` (18.08) i `flagsfix` (25.08) usunęły
@@ -613,7 +613,7 @@ kolumny mogą już zawierać `0`/`1` z wcześniejszych importów.
 | **Pliki** | `parsers/adapter.cjs` (`shouldRejectRecord` → `accessoryRe`) |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
 | **Iteracja** | **→ 3c** (klasyfikator) lub wcześniej u źródła; patrz koniec pliku |
-| **Status** | **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#1 — filtr dętki/akcesoria case-insensitive w `mo1_bohnenkamp.cjs` i `mo9_agrorami_api.cjs` + usunięcie 16 rek. WULSTBAND ze `staging_items`). ⚠ To była REGRESJA po katunify (#57): filtr porównywał małą literą z Wielką od 18.08. Port w I13/13a — RAZEM z katunify, patrz nota kolejności w bloku I13.** |
+| **Status** | **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#1 — filtr dętki/akcesoria case-insensitive w `mo1_bohnenkamp.cjs` i `mo9_agrorami_api.cjs` + usunięcie 16 rek. WULSTBAND ze `staging_items`). ⚠ To była REGRESJA po katunify (#57): filtr porównywał małą literą z Wielką od 18.08. ✅ sportowane i POTWIERDZONE pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): MO1 `odrzuconePrzezAdapter` 1→0 przy tych samych 199 kodach (bug1) — rekord odrzucany już w parserze, nie dopiero w adapterze. Uwaga: katunify (#57), choć sportowane w tym samym syncu, NIE jest potwierdzone pomiarem — patrz #57.** |
 
 **Opis biznesowy:** 16 pozycji `WULSTBAND` z cennika Bohnenkampa trafia do katalogu jako opony.
 To taśma ochronna obręczy, nie opona — wpada z pustym rozmiarem. Ania: *„dokładnie, trzeba to
@@ -2531,6 +2531,8 @@ Finalny audyt 12e potwierdził kompletność i celowość tej listy.
 > `db/schema.sql`, `mirror/backend/parsers/*.cjs`, `mirror/backend/selly/*`. Audytowe #3/#8/#9/#10
 > to nasze findingi, na które Ania zareagowała (CHANGELOG „Bug #1/#2/#3/#4") — mają noty domykające
 > u siebie. Poniżej wpisy NOWE. Realizacja: I13 (13a–13f).
+> **13a ✅ zamknięte 2026-09-08** (`42-CHORE-i13a-resync-parserow`) — 9 plików warstwy parserów
+> sportowane bajt-w-bajt; statusy poszczególnych wpisów niżej.
 
 **Mapowanie zmian → karty I13** (podział wg MECHANIZMU PORTU — parsery to kopia bajtowa `legacy/`,
 więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok I13):
@@ -2552,7 +2554,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Nowy wzorzec `^(\d{3,4})x(\d{3})-(\d{1,3}(?:\.\d+)?)$` z warunkiem pierwsza≥400, druga≥100 (`690x180-15`): 1. liczba = średnica zewn. mm, 2. = szerokość mm, 3. = felga cale; konstrukcja=`D`, profil=NULL, `rozmiar` zachowuje etykietę. Ochrona `Number(sz)<400` przed nadpisaniem `szerokoscRaw`. Regresja: 10.5x80-18, 100/100-4, 30.5L-32, 380/105R50, 31x15.5-15 — bez zmian. |
 | **Do nowej wersji?** | ✅ TAK |
 | **Iteracja** | **→ 13a** (PORT, Wariant A) |
-| **Status** | ⬜ do portu |
+| **Status** | ✅ sportowane i POTWIERDZONE pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): 4 rek., wszystkie MO8 (`690x180-15`, `560x140-12`, `610x145-13`, `645x160-14`) — szerokość z DRUGIEJ liczby (`'690'`→`'180'`), `profil`→`null`, `wysokosc` przeliczona. Sprostowanie: wcześniejsze założenie, że b4 weszło do produkcji przed 25.08, było błędne (`grep -c "POPRAWKA 2026-08-31"` na baseline zwraca 0) — b4 wchodzi dopiero tym syncem. |
 
 ### #54 · 2026-08-31 · [BACKEND] · B10 — sufiksy w polu `model` (Handlopex MO4/MO5)
 | pole | wartość |
@@ -2562,7 +2564,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | `HANDLOPEX_STOPWORDS_RE` += KPL, NACZEPA (NIE `TR\d+` globalnie — regresja LASSA/MITAS/BKT); reguła `/\/\s*TR\d{1,3}\b/` usuwa `/TR87` tylko po ukośniku; reguła na NIESPARZONĄ klamrę `[148/145 M TL`. |
 | **Do nowej wersji?** | ✅ TAK |
 | **Iteracja** | **→ 13a** (PORT, Wariant A) |
-| **Status** | ⬜ do portu |
+| **Status** | ✅ sportowane i POTWIERDZONE pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): MO4, 2 rek. (`TH31 /NACZEPA`→`TH31`) — sufiks `/NACZEPA` usunięty z `model`, `bieznik`, `nazwa`. Kod siedzi w `parsers/tyre_params.cjs` (`extractHandlopexModel`, `HANDLOPEX_STOPWORDS_RE`), nie w `mo4_mo5_handlopex.cjs` (0 zmian). |
 
 ### #55 · 2026-09-04 · [BACKEND] · mo9expand — rozwijanie skróconego indeksu obciążenia po `/`
 | pole | wartość |
@@ -2572,7 +2574,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | `(?<!\d)(\d{2,3})([KLASA]\d?)\/([KLASA]\d?)(?!\d)` → `144A8/B`→`144A8/144B`; `270/95R48` nietknięte. Klasa liter prędkości bez X/R/L/H. UPDATE 82 rek. w bazie (audit_log system). |
 | **Do nowej wersji?** | ✅ TAK |
 | **Iteracja** | **→ 13a** (PORT, Wariant A) |
-| **Status** | ⬜ do portu |
+| **Status** | ✅ sportowane w `42-CHORE-i13a-resync-parserow` (2026-09-08) — kod wszedł kopią bajtową, ale NIEPOTWIERDZONY pomiarem: `expandLoadIndexSlash` wymaga drugiego członu BEZ liczby (`144A8/B`), a próbka MO9 ma wyłącznie indeksy z liczbą w obu członach (`115A6/108A8`, `133A6/129A8`, `148A8/144B`, `153A6/149A8`, `88A6/80A8`, `91A6/83A8`) — funkcja przechodzi bez efektu. |
 
 ### #56 · 2026-08-31 · [BACKEND] · P3 — fallback marki `tk()` → `"UNKNOWN"` zamiast `nazwa.split`
 | pole | wartość |
@@ -2591,8 +2593,8 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Pliki** | `common.cjs`, `parsers/{mo2_jmk,mo6_agrowiec,mo7_nokian,mo8_trelleborg}.cjs`, `tyre_params.cjs` |
 | **Zmiana Ani** | Unifikacja do Wielkiej litery: „Rolnicze", „Leśne", „Ciężarowe", „Przemysłowe", „Dętki", „Akcesoria" — zgodnie z `classifyByName` i `products.kategoria` (decyzja Anny 2026-09-01, Opcja B). |
 | **Do nowej wersji?** | ✅ TAK |
-| **Iteracja** | **→ 13b** (migracja + fixtures). ⚠ SPOWODOWAŁO regresję #10/Bug#1 — port RAZEM z case-insensitive filtrem (kolejność w bloku I13). Rozszerza #2 kategoriafix. |
-| **Status** | ⬜ do portu |
+| **Iteracja** | część parserowa **→ 13a** (zrobione), migracja historycznych kategorii **→ 13c**. ⚠ Sprostowanie 42-CHORE-i13a: pole mówiło „→ 13b (migracja + fixtures)", co przeczyło i tabeli mapowania na początku tej sekcji („katunify(migracja) #57 | 13c"), i roadmapie (blok 13c: „weryfikacja czy katunify wymaga migracji historycznych kategorii"). Opis w nawiasie był definicją 13c — błędny był sam numer. ⚠ SPOWODOWAŁO regresję #10/Bug#1 — port RAZEM z case-insensitive filtrem (kolejność w bloku I13). Rozszerza #2 kategoriafix. |
+| **Status** | ✅ część parserowa (`KATEGORIA_MAP` w `mo2`/`mo6`/`mo7` + fallback w `common.cjs`) sportowana w `42-CHORE-i13a-resync-parserow` (2026-09-08), ale NIEPOTWIERDZONA pomiarem: rozkład `kategoria` identyczny przed i po syncu u wszystkich 10 dostawców — próbki nie mają surowej kolumny kategorii, więc parser leci fallbackiem `classifyByName`, który zwracał Wielką literę już przed 25.08. **Dodatkowe znalezisko dla 13c:** katunify NIE unifikuje `'rolnicze małe'` — w warstwie parserów zostaje z małej litery (MO2, 3 rek.); Wielką literę nadaje dopiero `mirror/backend/apply_kategoria.cjs:12`, spoza warstwy parserów. Migracja danych historycznych pozostaje 13c. |
 
 ### #58 · 2026-09-01 · [BACKEND][BAZA][FRONTEND] · konstrukcja — kody `R/D/L/B` → pełne słowa
 | pole | wartość |
@@ -2602,7 +2604,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | `R`→`Radialna`, `D`/`L`/`B`→`Diagonalna` (L = część rozmiaru „Low Section Height"; B = bias-belted Trelleborg AMPT/Nokian Ground Kare). W bazie 2 wartości: Radialna 4390 + Diagonalna 3015. Prośba Anny — słowa zamiast kodów w kolumnie i eksporcie. |
 | **Do nowej wersji?** | ✅ TAK |
 | **Iteracja** | **→ 13b** (BE+migracja) + **13d** (FE `konstr`) |
-| **Status** | ⬜ do portu |
+| **Status** | ✅ część parserowa sportowana i POTWIERDZONA pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): `konstrukcja` `R`→`Radialna`, `D`→`Diagonalna`, wszystkich 10 dostawców (MO1 199, MO2 200, MO3 44, MO4 101, MO5 146, MO6 2, MO7 285, MO8 625, MO9 12, MO10 223 rek.). Mechanizm: `normalizeKonstrukcja()` + `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs`. Migracja danych historycznych (kody `L`/`B`/`-` → `Diagonalna`) pozostaje 13c. |
 
 ### #59 · 2026-09-01 · [BACKEND][BAZA] · CAPS — `products.nazwa` = WIELKIE LITERY + `Xq()` case-insensitive
 | pole | wartość |
@@ -2652,7 +2654,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | (A) `normalizeSizeText`: separator L-series rozszerzony z `[-R]` na `[-Rx]` — obsługa `28LX26`, `7,5Lx15`. (B) `parseSize`: wzorzec `W/PLxD`/`W/PL-D` dla L-series z profilem (`400/45Lx17` BKT TERRA TRAX, konstrukcja=L). (C) regex `W/P[RBD-]D` z `(\d{2,4})` na `(\d{1,4})` — łapie ułamkowe `6.5/75-14` (MITAS TS-02). Test node: 19/19 (12 anomalii + 7 regresja). UPDATE 12 rek. |
 | **Do nowej wersji?** | ✅ TAK |
 | **Iteracja** | **→ 13a** (kopia `tyre_params.cjs` wnosi to atomowo z b4/b10/odswinch) |
-| **Status** | ⬜ do portu |
+| **Status** | ✅ sportowane i POTWIERDZONE pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): 7 rek. (MO2 1, MO8 6) — ułamkowe szerokości z profilem (`6.5/80-12`, `9.0/75-16`, `4.00/4.50-21`). |
 
 ### #64 · 2026-09-04 · [BACKEND] · odswinch — zmiana w `tyre_params.cjs` NIEZALOGOWANA w CHANGELOG
 | pole | wartość |
@@ -2662,4 +2664,4 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | ⚠ Brak wpisu w `CHANGELOG.md` — istnieje tylko kopia `.bak_odswinch_20260904_1403`. Etykieta sugeruje „odśwież/inch" (obsługa cali/felgi?). **DO ROZŁOŻENIA:** `git diff` między `tyre_params.cjs.bak_odswinch_20260904_1403` a wersją po niej w `mirror/`, żeby ustalić realny zakres. |
 | **Do nowej wersji?** | ✅ TAK (jest w produkcji 08.09) |
 | **Iteracja** | **→ 13a** (kopia `tyre_params.cjs` wnosi to atomowo; charakteryzacja wychwyci behawior) |
-| **Status** | ⬜ do portu + rozłożenia diffu |
+| **Status** | ✅ sportowane i domknięte opisem realnego zakresu w `42-CHORE-i13a-resync-parserow` (2026-09-08): **+26/−1, dwa hunki, oba w `parseSize()`** — nowy wariant calowej notacji **OD×SW−Rim** (`16x6-8`, `23x10-12`, `18x7.50-8`; musi stać PRZED wzorcem `WxP-D`) + rozszerzenie strażnika `isWxSxD` o wariant calowy (`isWxSxDcale`). POTWIERDZONE pomiarem: 98 rek. (MO1 1, MO2 22, MO3 1, MO4 4, MO8 68, MO10 2). Pełny rozkład: `docs/tickets/42-CHORE-i13a-resync-parserow/raport.md`, sekcja „Rozłożenie `odswinch` (#64)". |
