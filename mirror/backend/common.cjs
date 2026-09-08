@@ -404,7 +404,8 @@ function normalizeRecord(rec) {
     // Adapter propaguje to do output i finalnie do products.uwaga_cena.
     uwaga_cena: rec.uwaga_cena || null,
     stan_magazynowy: normalizeQty(rec.stan_magazynowy),
-    kategoria: rec.kategoria || 'rolnicze',
+    // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
+    kategoria: rec.kategoria || 'Rolnicze',
     oznaczenia_techniczne: rec.oznaczenia_techniczne || [],
     dostawca: rec.dostawca,
     // POPRAWKA 2026-06-30 (v4): DOT w osobnej kolumnie
@@ -602,6 +603,26 @@ function capitalizeKategoria(value) {
   return KATEGORIA_CANONICAL_MAP[key] || value;
 }
 
+// POPRAWKA 2026-09-01 (unifikacja konstrukcji): mapowanie kodów wewnętrznych parsera
+// (R/D/L/B/-) na pełne słowa dla bazy i UI. `parseSize()` w tyre_params.cjs nadal
+// operuje na kodach jednoznakowych (to jego wewnętrzna flaga), ale w kazdym
+// output rekordu przechodzimy przez `normalizeKonstrukcja()`. Idempotentna —
+// 'Radialna'/'Diagonalna' przechodzą bez zmian.
+// Decyzja Anny 2026-09-01: L (46 rek., część rozmiaru typu 17.5L-24) i B
+// (11 rek., bias-belted — Trelleborg AMPT, Nokian Ground Kare) → Diagonalna,
+// zgodnie z dotychczasowym mapowaniem frontendu panelu.
+const KONSTRUKCJA_CANONICAL_MAP = {
+  'r': 'Radialna', 'radialna': 'Radialna', 'radial': 'Radialna',
+  'd': 'Diagonalna', 'diagonalna': 'Diagonalna', 'diagonal': 'Diagonalna',
+  'l': 'Diagonalna', 'b': 'Diagonalna',
+  '-': 'Diagonalna'
+};
+function normalizeKonstrukcja(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const key = String(value).trim().toLowerCase();
+  return KONSTRUKCJA_CANONICAL_MAP[key] || value;
+}
+
 module.exports = {
   normalizeEan,
   normalizePrice,
@@ -610,6 +631,7 @@ module.exports = {
   normalizeText,
   classifyByName,
   capitalizeKategoria,
+  normalizeKonstrukcja,
   extractTechnicalMarks,
   extractSize,
   normalizeRecord,
