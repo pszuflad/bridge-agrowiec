@@ -430,6 +430,12 @@ export function silnikStagingu(db: Baza): SilnikStagingu {
       }
 
       // ——— Klasyfikacja zmiany (:47751-47764) ———
+      // ⚠ Porównanie jest tu literalne (`String(…) !== String(…)`), a NIE przez `wartosciRowne`,
+      // więc CAPS/`Xq` z 2026-09-01 go nie dotyczy — różnica tylko w wielkości liter w `marka`
+      // czy `nazwa` NADAL daje `zmiana_kluczowa`. CHANGELOG oryginału twierdzi inaczej, ale kod
+      // produkcji wygląda dokładnie tak i diff 08.09 tego fragmentu nie tknął. Szum case-only
+      // usunęła w produkcji migracja danych (`UPPER(nazwa)` + kasowanie wierszy CASE_ONLY),
+      // nie kod silnika — u nas idzie to kartą 13c. Odtwarzamy kod, nie narrację.
       const zmianaKluczowa = POLA_KLUCZOWE.some((klucz) => {
         const stara = pole(dopasowany!, klucz);
         const nowa = pole(znormalizowana, klucz);

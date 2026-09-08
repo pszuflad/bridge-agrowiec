@@ -176,9 +176,18 @@ export const POLA_ROZNIC: ReadonlyArray<{ key: string; label: string }> = [
  * (są różne). Gdy nowa jest pusta, a stara nie — też `false`. Ale dwie puste są sobie równe,
  * niezależnie od tego, czy to `null`, `undefined` czy `""`. Poza pustymi porównuje przez
  * `String()`, więc `6.5` i `"6.5"` są równe, a `6.5` i `"6.50"` już nie.
+ *
+ * CAPS (produkcja 2026-09-01 12:30, backlog #59 — część silnikowa): porównanie jest dodatkowo
+ * case-insensitive, więc „Kleber GRIPKER" i „KLEBER GRIPKER" są równe.
+ *
+ * ⚠ To NIE wycisza `zmiana_kluczowa` — klasyfikacja w `tk.ts` liczy się bez tego helpera
+ * (patrz `POLA_KLUCZOWE` tamże). Wbrew opisowi w CHANGELOG oryginału `Xq` wpływa wyłącznie na
+ * narrację `powod` (`POLA_ROZNIC`) i na auto-patch pól cenowo-magazynowych.
  */
 export function wartosciRowne(stara: unknown, nowa: unknown): boolean {
   if (stara == null || stara === "") return nowa == null || nowa === "";
   if (nowa == null || nowa === "") return false;
-  return String(stara) === String(nowa);
+  const a = String(stara);
+  const b = String(nowa);
+  return a === b || a.toUpperCase() === b.toUpperCase();
 }
