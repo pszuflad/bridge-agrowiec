@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,6 +51,14 @@ export function Staging() {
   const [zaznaczone, ustawZaznaczone] = useState<Set<number>>(new Set());
   const [szczegolyId, ustawSzczegolyId] = useState<number | null>(null);
   const [komunikat, ustawKomunikat] = useState<string | null>(null);
+  /**
+   * Która z dwóch operacji masowych czeka na potwierdzenie (`null` = żadna).
+   *
+   * ODSTĘPSTWO ŚWIADOME (finalny audyt 12e, D5, backlog #51): oryginał pyta natywnym
+   * `confirm()`, tak jak przed 7b robiła to cała odbudowa. Treści pytań przenosimy DOSŁOWNIE,
+   * zmienia się wyłącznie nośnik — ten sam wzorzec co D2 z 7b, D6 z narzutów i D1 z 12c.
+   */
+  const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<"akceptuj" | "odrzuc" | null>(null);
 
   // Zmiana filtra, szukanej frazy albo rozmiaru strony cofa na stronę 1 — inaczej łatwo
   // wylądować poza zakresem wyników i zobaczyć pustą tabelę, która wygląda jak brak danych.
@@ -173,10 +182,7 @@ export function Staging() {
               variant="outline"
               data-testid="button-accept-all"
               disabled={razem === 0 || akcja.isPending}
-              onClick={() => {
-                if (!confirm(`Zaakceptować wszystkie pasujące pozycje (${razem})?`)) return;
-                akcja.mutate(() => zatwierdzWszystkie(typZmiany));
-              }}
+              onClick={() => ustawDoPotwierdzenia("akceptuj")}
             >
               Akceptuj wszystkie ({razem})
             </Button>
@@ -206,10 +212,7 @@ export function Staging() {
               variant="destructive"
               data-testid="button-reject-all"
               disabled={razem === 0 || akcja.isPending}
-              onClick={() => {
-                if (!confirm(`Odrzucić wszystkie pasujące pozycje (${razem})?`)) return;
-                akcja.mutate(() => odrzucWszystkie(typZmiany));
-              }}
+              onClick={() => ustawDoPotwierdzenia("odrzuc")}
             >
               Odrzuć wszystkie ({razem})
             </Button>
@@ -293,6 +296,36 @@ export function Staging() {
       </div>
 
       <SzczegolyPozycji id={szczegolyId} zamknij={() => ustawSzczegolyId(null)} />
+
+      {/* Teksty DOSŁOWNIE takie, jakie stały w `confirm()` do 12e — parytet treści zostaje. */}
+      <DialogPotwierdzenia
+        otwarty={doPotwierdzenia === "akceptuj"}
+        tytul="Akceptacja wszystkich pozycji"
+        tresc={`Zaakceptować wszystkie pasujące pozycje (${razem})?`}
+        etykietaPotwierdzenia="Akceptuj wszystkie"
+        zajety={akcja.isPending}
+        onPotwierdz={() => {
+          ustawDoPotwierdzenia(null);
+          akcja.mutate(() => zatwierdzWszystkie(typZmiany));
+        }}
+        onZamknij={() => ustawDoPotwierdzenia(null)}
+        testId="dialog-akceptuj-wszystkie"
+      />
+
+      <DialogPotwierdzenia
+        otwarty={doPotwierdzenia === "odrzuc"}
+        tytul="Odrzucenie wszystkich pozycji"
+        tresc={`Odrzucić wszystkie pasujące pozycje (${razem})?`}
+        etykietaPotwierdzenia="Odrzuć wszystkie"
+        wariantPotwierdzenia="destructive"
+        zajety={akcja.isPending}
+        onPotwierdz={() => {
+          ustawDoPotwierdzenia(null);
+          akcja.mutate(() => odrzucWszystkie(typZmiany));
+        }}
+        onZamknij={() => ustawDoPotwierdzenia(null)}
+        testId="dialog-odrzuc-wszystkie"
+      />
     </div>
   );
 }

@@ -14,6 +14,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
@@ -43,6 +44,15 @@ export function Admin() {
   const klientZapytan = useQueryClient();
   const [edytowany, ustawEdytowanego] = useState<KonfiguracjaDostawcy | null>(null);
   const [bladZapisu, ustawBladZapisu] = useState<string | null>(null);
+  /**
+   * Potwierdzenie usuwania nie-opon.
+   *
+   * ODSTĘPSTWO ŚWIADOME (finalny audyt 12e, D5, backlog #51): do 12e stał tu natywny
+   * `window.confirm`, dołożony w 12b bez uzasadnienia — w odróżnieniu od bliźniaczego
+   * przycisku w `konfiguracja/Katalog.tsx`, gdzie natywny dialog JEST świadomym, opisanym
+   * wyjątkiem. Treść pytania przenosimy DOSŁOWNIE, zmienia się wyłącznie nośnik.
+   */
+  const [potwierdzNieOpony, ustawPotwierdzNieOpony] = useState(false);
 
   const konfiguracja = useQuery({
     queryKey: KLUCZ_KONFIGURACJI,
@@ -228,15 +238,7 @@ export function Admin() {
 
           <Button
             variant="destructive"
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Usunąć z katalogu wszystkie pozycje, które nie są oponami? Operacji nie da się cofnąć.",
-                )
-              ) {
-                czyszczenieNieOpon.mutate();
-              }
-            }}
+            onClick={() => ustawPotwierdzNieOpony(true)}
             disabled={czyszczenieNieOpon.isPending}
             data-testid="button-usun-nieopony"
           >
@@ -283,6 +285,21 @@ export function Admin() {
           bladZapisu={bladZapisu}
         />
       )}
+
+      <DialogPotwierdzenia
+        otwarty={potwierdzNieOpony}
+        tytul="Usunięcie pozycji, które nie są oponami"
+        tresc="Usunąć z katalogu wszystkie pozycje, które nie są oponami? Operacji nie da się cofnąć."
+        etykietaPotwierdzenia="Usuń"
+        wariantPotwierdzenia="destructive"
+        zajety={czyszczenieNieOpon.isPending}
+        onPotwierdz={() => {
+          ustawPotwierdzNieOpony(false);
+          czyszczenieNieOpon.mutate();
+        }}
+        onZamknij={() => ustawPotwierdzNieOpony(false)}
+        testId="dialog-usun-nieopony"
+      />
     </div>
   );
 }
