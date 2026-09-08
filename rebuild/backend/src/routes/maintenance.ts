@@ -1,7 +1,8 @@
 // Utrzymanie katalogu — `POST /api/maintenance/usun-nieopony` i `POST /api/products/clear`.
 // Port `deminified/backend-index.cjs:48315-48334` i `:48392-48405` (obie trasy w rdzeniu, z `we`).
 
-import { copyFileSync, existsSync } from "node:fs";
+import { copyFileSync, existsSync, readdirSync, unlinkSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { Router } from "express";
 
 import type { Baza, BazaSqlite } from "../db/index.js";
@@ -55,6 +56,45 @@ function zrobKopieBazy(dbPath: string | undefined, sqlite: BazaSqlite | undefine
   } catch (blad) {
     console.error(
       "[products/clear] backup przed czyszczeniem nie powiodl sie:",
+      blad instanceof Error ? blad.message : blad,
+    );
+  }
+  usunNadmiarKopii(dbPath);
+}
+
+/** Ile kopii `.bak_before_clear_*` zostaje po sprzątaniu (12e, D2d / backlog #49). */
+const LIMIT_KOPII_PRZED_CZYSZCZENIEM = 5;
+
+/**
+ * Retencja kopii — ODSTĘPSTWO ŚWIADOME od oryginału (finalny audyt 12e, D2d, backlog #49).
+ *
+ * Oryginał nie sprząta tych plików NIGDY (`:48319-48331` tylko kopiuje), więc każde użycie
+ * przycisku „Usuń wszystko z katalogu" zostawia kolejną kopię całej bazy — przy testowaniu
+ * parsera katalog danych rośnie bez ograniczeń. Zostawiamy `LIMIT_KOPII_PRZED_CZYSZCZENIEM`
+ * najnowszych i kasujemy starsze.
+ *
+ * Odstępstwo jest czysto operacyjne (miejsce na dysku): nie dotyka bazy, kształtu ani kodu
+ * odpowiedzi HTTP. Sprzątanie jest BEST-EFFORT jak sama kopia — błąd logujemy i idziemy dalej,
+ * bo niemożność skasowania starego pliku nie może zablokować czyszczenia katalogu.
+ *
+ * Sortowanie po nazwie wystarcza za sortowanie po czasie: znacznik to ISO 8601 ze stałą
+ * liczbą znaków (`:` i `.` zamienione na `-`), więc porządek leksykalny = chronologiczny.
+ */
+function usunNadmiarKopii(dbPath: string): void {
+  try {
+    const katalog = dirname(dbPath);
+    const prefiks = `${basename(dbPath)}.bak_before_clear_`;
+    const kopie = readdirSync(katalog)
+      .filter((nazwa) => nazwa.startsWith(prefiks))
+      .sort();
+    const doUsuniecia = kopie.length - LIMIT_KOPII_PRZED_CZYSZCZENIEM;
+    if (doUsuniecia <= 0) return;
+    for (const nazwa of kopie.slice(0, doUsuniecia)) {
+      unlinkSync(join(katalog, nazwa));
+    }
+  } catch (blad) {
+    console.error(
+      "[products/clear] sprzatanie starych kopii nie powiodlo sie:",
       blad instanceof Error ? blad.message : blad,
     );
   }
