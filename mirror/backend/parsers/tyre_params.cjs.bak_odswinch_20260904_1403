@@ -277,20 +277,6 @@ function parseSize(value) {
             result.konstrukcja = 'D';
             result.srednica = parseNumber(match[3]);
           } else {
-          // POPRAWKA 2026-09-04: notacja "ODxSW-R" w calach dla malych opon wozkowych/mikroopon.
-          // Rozroznienie od klasycznej "WxP-D" (bias-ply typu "10.5x80-18"): dla wozkowych
-          // pierwsza liczba (OD, srednica zewnetrzna opony w calach) > trzeciej (felga w calach)
-          // i cala liczba < 30. Klasyczna bias-ply ma A<C zawsze (szerokosc < felga).
-          // Przyklady: "16x6-8" (BKT MAGLIFT: OD=16", SW=6", felga=8"), "23x10-12", "18x7.50-8".
-          // Wartosc SW (druga liczba) to rzeczywista szerokosc w calach; OD nie zapisujemy.
-          // MUSI byc PRZED klasyczna "WxP-D".
-          match = size.match(/^(\d{1,2}(?:\.\d+)?)x(\d{1,2}(?:\.\d+)?)-(\d{1,2}(?:\.\d+)?)$/i);
-          if (match && parseNumber(match[1]) > parseNumber(match[3]) && parseNumber(match[1]) < 30) {
-            result.szerokosc = parseNumber(match[2]);
-            result.profil = null;
-            result.konstrukcja = 'D';
-            result.srednica = parseNumber(match[3]);
-          } else {
           // POPRAWKA 2026-06-18 (3): zapis "WxP-D" (3 liczby, separator "x" miedzy
           // szerokoscia i profilem, np. "10.5x80-18") — tradycyjna notacja bias-ply.
           match = size.match(/^(\d{1,3}(?:\.\d+)?)x(\d{1,3}(?:\.\d+)?)-(\d{1,3}(?:\.\d+)?)$/i);
@@ -310,7 +296,6 @@ function parseSize(value) {
             }
           }
           }
-        }
         }
       }
     }
@@ -339,17 +324,7 @@ function parseSize(value) {
     // POPRAWKA 2026-08-31: dla notacji WxSxD (stara diagonalna rolnicza) NIE nadpisujemy
     // szerokosc pierwsza liczba z rozmiaru — tam pierwsza liczba to srednica zewnetrzna mm,
     // a szerokosc siedzi na drugim miejscu. Wykrywamy przez size ~ /^\d{3,4}x\d{3}-\d/.
-    // POPRAWKA 2026-09-04: dodano wariant calowy "OD x SW - Rim" dla malych opon
-    // wozkowych (16x6-8, 23x10-12) — tam rowniez pierwsza liczba z 'size' to OD (cale),
-    // a rzeczywista szerokosc jest w result.szerokosc po parsowaniu. Bez tego blok
-    // "szerokoscRaw z pierwszej liczby" nadpisywalby prawidlowa szerokosc pierwsza
-    // liczba z rozmiaru (OD).
-    const isWxSxDcale = /^\d{1,2}(?:\.\d+)?x\d{1,2}(?:\.\d+)?-\d{1,2}/.test(size)
-      && (function(){
-           const m = size.match(/^(\d{1,2}(?:\.\d+)?)x\d{1,2}(?:\.\d+)?-(\d{1,2}(?:\.\d+)?)/);
-           return m && parseFloat(m[1]) > parseFloat(m[2]) && parseFloat(m[1]) < 30;
-         })();
-    const isWxSxD = (/^\d{3,4}x\d{3}-\d/.test(size) && Number(String(result.szerokosc)) < 400) || isWxSxDcale;
+    const isWxSxD = /^\d{3,4}x\d{3}-\d/.test(size) && Number(String(result.szerokosc)) < 400;
     if (isWxSxD) {
       // pierwsza liczba z 'size' to OD mm, druga to SW mm (juz w result.szerokosc jako number).
       // Ustawiamy szerokoscRaw z aktualnego result.szerokosc (SW), nie z pierwszej liczby.

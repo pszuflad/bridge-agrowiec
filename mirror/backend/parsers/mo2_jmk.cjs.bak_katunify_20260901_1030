@@ -14,20 +14,17 @@ const c = require('../common.cjs');
 
 const DOSTAWCA = 'MO2_JMK';
 
-// POPRAWKA 2026-09-01 (unifikacja kategorii): wartości z Wielkiej litery, zgodnie
-// z konwencją `classifyByName` i `products.kategoria`. Klucze zostają małe, bo
-// `rodzajRaw` jest `.toLowerCase()`-owane przed lookupem.
 const RODZAJ_MAP = {
-  'rolnicze': 'Rolnicze',
-  'leśne': 'Leśne',
-  'lesne': 'Leśne',
-  'przemysłowe': 'Przemysłowe',
-  'przemyslowe': 'Przemysłowe',
-  'ciężarowe': 'Ciężarowe',
-  'ciezarowe': 'Ciężarowe',
-  'dętki': 'Dętki',
-  'detki': 'Dętki',
-  'akcesoria': 'Akcesoria'
+  'rolnicze': 'rolnicze',
+  'leśne': 'leśne',
+  'lesne': 'leśne',
+  'przemysłowe': 'przemysłowe',
+  'przemyslowe': 'przemysłowe',
+  'ciężarowe': 'ciężarowe',
+  'ciezarowe': 'ciężarowe',
+  'dętki': 'dętki',
+  'detki': 'dętki',
+  'akcesoria': 'akcesoria'
 };
 
 function parseFile(filePath) {

@@ -12,20 +12,17 @@ const c = require('../common.cjs');
 const DOSTAWCA = 'MO6_Agrowiec';
 
 // Mapowanie kategorii z pliku → naszych
-// POPRAWKA 2026-09-01 (unifikacja kategorii): wartości z Wielkiej litery, zgodnie
-// z konwencją `classifyByName` i `products.kategoria`. Klucze zostają małe, bo
-// `kategoriaRaw` jest `.toLowerCase()`-owane przed lookupem.
 const KATEGORIA_MAP = {
-  'rolnicze': 'Rolnicze',
-  'leśne': 'Leśne',
-  'lesne': 'Leśne',
-  'przemysłowe': 'Przemysłowe',
-  'przemyslowe': 'Przemysłowe',
-  'ciężarowe': 'Ciężarowe',
-  'ciezarowe': 'Ciężarowe',
-  'dętki': 'Dętki',
-  'detki': 'Dętki',
-  'akcesoria': 'Akcesoria'
+  'rolnicze': 'rolnicze',
+  'leśne': 'leśne',
+  'lesne': 'leśne',
+  'przemysłowe': 'przemysłowe',
+  'przemyslowe': 'przemysłowe',
+  'ciężarowe': 'ciężarowe',
+  'ciezarowe': 'ciężarowe',
+  'dętki': 'dętki',
+  'detki': 'dętki',
+  'akcesoria': 'akcesoria'
 };
 
 function parseFile(filePath) {

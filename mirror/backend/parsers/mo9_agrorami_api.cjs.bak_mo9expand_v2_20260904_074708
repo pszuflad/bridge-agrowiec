@@ -57,7 +57,7 @@ const _SPEED_LETTER_CLASS_MO9 = 'ABCDEFGJKMNPQSTUVWY';
 function expandLoadIndexSlash(name) {
   if (!name) return name;
   const re = new RegExp(
-    '(?<!\\d)(\\d{2,3})([' + _SPEED_LETTER_CLASS_MO9 + ']\\d?)\\/([' + _SPEED_LETTER_CLASS_MO9 + ']\\d?)(?!\\d)',
+    '(\\b\\d{2,3})([' + _SPEED_LETTER_CLASS_MO9 + ']\\d?)\\/([' + _SPEED_LETTER_CLASS_MO9 + ']\\d?)(?!\\d)',
     'g'
   );
   return String(name).replace(re, function (m, num, s1, s2) { return num + s1 + '/' + num + s2; });

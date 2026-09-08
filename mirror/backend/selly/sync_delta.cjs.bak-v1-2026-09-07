@@ -1,0 +1,232 @@
+// backend/selly/sync_delta.cjs
+// Tor 1 — DELTA sync: wysyla do Selly tylko produkty ktorym zmienil sie stan lub cena
+// od ostatniego sync. Uruchamiany po kazdym imporcie dostawcy (auto-pull HH:54)
+// z opoznieniem 60 sek (HH:55).
+//
+// Uzywa bulk endpointow Selly:
+//   PUT /api/products/helper/price_update       (bulkPriceUpdate)
+//   PUT /api/products/helper/warehouse_quantity (bulkWarehouseQuantity)
+//
+// Rate limit Selly: 500 req/60 sek. Bulk pozwala update do ~100 produktow/1 request.
+//
+// Klucz: selly_products.bridge_kod jest BEZ podkreslnika (MO219539),
+// products.kod jest Z podkreslnikiem (MO2_19539). JOIN przez REPLACE.
+//
+// Data: 2026-09-07
+
+'use strict';
+
+const client = require('./client.cjs');
+const { globalLimiter } = require('./rate_limiter.cjs');
+
+const BATCH_SIZE = 100; // Selly bulk endpointy przyjmuja do ~100 na request
+
+/**
+ * Zbierz produkty ktore wymagaja sync delta dla danego dostawcy.
+ */
+function collectDeltaCandidates(db, dostawca) {
+  const rows = db.prepare(`
+    SELECT
+      sp.selly_product_id,
+      sp.bridge_kod,
+      sp.cena_sprzedazy_wyslana AS last_price,
+      sp.cena_zakupu_wyslana    AS last_price_purchase,
+      sp.stan_wyslany           AS last_stan,
+      p.cena_sprzedazy          AS cur_price,
+      p.cena_zakupu             AS cur_price_purchase,
+      p.stan                    AS cur_stan,
+      p.kod                     AS bridge_kod_full,
+      p.dostawca                AS dostawca
+    FROM selly_products sp
+    JOIN products p ON REPLACE(p.kod, '_', '') = sp.bridge_kod
+    WHERE p.dostawca = ?
+      AND p.status = 'aktywny'
+  `).all(dostawca);
+
+  const priceChanges = [];
+  const stockChanges = [];
+
+  for (const r of rows) {
+    const curPrice    = Number(r.cur_price || 0);
+    const curPurchase = Number(r.cur_price_purchase || 0);
+    const curStan     = Number(r.cur_stan || 0);
+    const lastPrice    = r.last_price == null    ? null : Number(r.last_price);
+    const lastPurchase = r.last_price_purchase == null ? null : Number(r.last_price_purchase);
+    const lastStan     = r.last_stan == null     ? null : Number(r.last_stan);
+
+    const priceChanged   = lastPrice    == null || curPrice    !== lastPrice;
+    const purchaseChanged = lastPurchase == null || curPurchase !== lastPurchase;
+    const stockChanged   = lastStan     == null || curStan     !== lastStan;
+
+    if (priceChanged || purchaseChanged) {
+      priceChanges.push({
+        product_id: r.selly_product_id,
+        price: curPrice,
+        _bridge_kod: r.bridge_kod,
+        _cur_price: curPrice,
+        _cur_price_purchase: curPurchase,
+      });
+    }
+    if (stockChanged || purchaseChanged) {
+      // purchase_price mozna wyslac razem ze stanem przez warehouse_quantity helper
+      stockChanges.push({
+        product_id: r.selly_product_id,
+        warehouse_id: 1, // TODO: mapowanie dostawca -> warehouse_id (obecnie glowny)
+        quantity: curStan,
+        purchase_price: curPurchase,
+        _bridge_kod: r.bridge_kod,
+        _cur_stan: curStan,
+      });
+    }
+  }
+
+  return { priceChanges, stockChanges, totalRows: rows.length };
+}
+
+/**
+ * Zapisz podsumowanie w selly_sync_log.
+ */
+function logSyncRun(db, dostawca, operacja, stats) {
+  const endTs = new Date();
+  const startTs = new Date(endTs.getTime() - (stats.durationMs || 0));
+  const iso = d => d.toISOString().replace('T', ' ').substring(0, 19);
+  const status = stats.errors > 0 ? 'blad' : 'zakonczono';
+  db.prepare(`
+    INSERT INTO selly_sync_log (operacja, dostawca_kod, liczba_ok, liczba_blad, liczba_skip,
+                                szczegoly_json, rozpoczeto, zakonczono, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    operacja,
+    dostawca,
+    stats.synced || 0,
+    stats.errors || 0,
+    stats.skipped || 0,
+    JSON.stringify(stats.details || {}).substring(0, 4000),
+    iso(startTs),
+    iso(endTs),
+    status
+  );
+}
+
+/**
+ * Zaktualizuj snapshoty w selly_products po udanym batchu.
+ */
+function updateSnapshots(db, sentBatch, kind) {
+  const stmt = db.prepare(`
+    UPDATE selly_products
+    SET ${kind === 'price'
+        ? 'cena_sprzedazy_wyslana = ?'
+        : 'stan_wyslany = ?, cena_zakupu_wyslana = ?'},
+        ostatnia_sync = datetime('now'),
+        ostatni_status = 'ok',
+        ostatni_blad = NULL
+    WHERE selly_product_id = ?
+  `);
+  const tx = db.transaction((items) => {
+    for (const it of items) {
+      if (kind === 'price') {
+        stmt.run(it._cur_price, it.product_id);
+      } else {
+        stmt.run(it._cur_stan, it._cur_price_purchase || 0, it.product_id);
+      }
+    }
+  });
+  tx(sentBatch);
+}
+
+/**
+ * Podziel tablice na chunki po BATCH_SIZE.
+ */
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+/**
+ * Glowna funkcja Toru 1: sync delta dla jednego dostawcy.
+ */
+async function syncDeltaForDostawca(db, dostawca, opts = {}) {
+  const startTs = Date.now();
+  const stats = {
+    synced: 0, errors: 0, skipped: 0, durationMs: 0,
+    priceBatches: 0, stockBatches: 0,
+    details: { priceErrors: [], stockErrors: [] },
+  };
+
+  try {
+    const { priceChanges, stockChanges, totalRows } = collectDeltaCandidates(db, dostawca);
+    stats.totalRows = totalRows;
+    stats.priceCandidates = priceChanges.length;
+    stats.stockCandidates = stockChanges.length;
+
+    if (priceChanges.length === 0 && stockChanges.length === 0) {
+      stats.durationMs = Date.now() - startTs;
+      logSyncRun(db, dostawca, 'update_prices', stats);
+      return { ok: true, dostawca, ...stats, message: 'brak zmian' };
+    }
+
+    // --- Ceny (bulk) ---
+    for (const batch of chunk(priceChanges, BATCH_SIZE)) {
+      await globalLimiter.acquire();
+      stats.priceBatches++;
+      try {
+        // Selly przyjmuje tylko: product_id, price (+ opcjonalne pola)
+        const payload = batch.map(b => ({ product_id: b.product_id, price: b.price }));
+        await client.bulkPriceUpdate(payload);
+        updateSnapshots(db, batch, 'price');
+        stats.synced += batch.length;
+      } catch (e) {
+        stats.errors += batch.length;
+        stats.details.priceErrors.push({
+          batchSize: batch.length,
+          firstBridgeKod: batch[0]._bridge_kod,
+          error: e.message,
+        });
+      }
+    }
+
+    // --- Stany + purchase_price (bulk) ---
+    for (const batch of chunk(stockChanges, BATCH_SIZE)) {
+      await globalLimiter.acquire();
+      stats.stockBatches++;
+      try {
+        const payload = batch.map(b => ({
+          product_id: b.product_id,
+          warehouse_id: b.warehouse_id,
+          quantity: b.quantity,
+          purchase_price: b.purchase_price,
+        }));
+        await client.bulkWarehouseQuantity(payload);
+        updateSnapshots(db, batch, 'stock');
+        stats.synced += batch.length;
+      } catch (e) {
+        stats.errors += batch.length;
+        stats.details.stockErrors.push({
+          batchSize: batch.length,
+          firstBridgeKod: batch[0]._bridge_kod,
+          error: e.message,
+        });
+      }
+    }
+
+  } catch (e) {
+    stats.errors++;
+    stats.details.fatal = e.message;
+  }
+
+  stats.durationMs = Date.now() - startTs;
+  logSyncRun(db, dostawca, 'update_prices', stats);
+
+  return {
+    ok: stats.errors === 0,
+    dostawca,
+    ...stats,
+    limiter: globalLimiter.getStats(),
+  };
+}
+
+module.exports = {
+  syncDeltaForDostawca,
+  collectDeltaCandidates,
+};

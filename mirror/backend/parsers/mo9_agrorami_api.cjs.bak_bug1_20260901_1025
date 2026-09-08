@@ -35,34 +35,6 @@ const c = require('../common.cjs');
 
 const TECH_MARKERS = ['IF', 'VF', 'IND', 'CHO', 'CFO', 'NRO'];
 
-// Rozwinięcie skróconego zapisu indeksu obciążenia po ukośniku (2026-09-04).
-// KONTEKST: API GraphQL Agrorami zwraca nazwy w formacie skróconym, np.
-//   "Opona BKT AGRIMAX RT 855 TL 210/95R18 (108A8/B)"
-// Podczas gdy KONWENCJA BAZY (2111 rekordów / 9 dostawców) to zapis rozwinięty:
-//   "210/95R18 BKT AGRIMAX RT 855 108A8/108B TL"
-// Rozwijamy tu zanim nazwa trafi do parseAgroramiName / normalizeRecord,
-// dzięki czemu wszystkie moduły (rozmiar/oznaczenia/finalna nazwa) widzą
-// spójny format. Decyzja Anny 2026-09-04 (opcja C).
-//
-// Reguła: dopasuj "NNN LITERAcyfra? / LITERAcyfra?" i wstaw NNN też przed drugą
-// literą. Zabezpieczenia:
-//   - druga część BEZ liczby przed literą (jeśli jest liczba, to inny indeks
-//     — nie ruszamy, np. "149A8/146B", "172A8/186A2")
-//   - po ukośniku MUSI być litera z klas prędkości ISO/ETRTO (z wyłączeniem
-//     X/R/L/H które są separatorami rozmiaru, np. "270/95R48", "17.5LR24")
-//   - opcjonalna cyfra po literze (A8, A2, B — wszystkie działają)
-// Zweryfikowane na 1117 items z API (2026-09-04): 98 rekordów rozwijanych,
-// 0 fałszywych trafień w rozmiarach.
-const _SPEED_LETTER_CLASS_MO9 = 'ABCDEFGJKMNPQSTUVWY';
-function expandLoadIndexSlash(name) {
-  if (!name) return name;
-  const re = new RegExp(
-    '(?<!\\d)(\\d{2,3})([' + _SPEED_LETTER_CLASS_MO9 + ']\\d?)\\/([' + _SPEED_LETTER_CLASS_MO9 + ']\\d?)(?!\\d)',
-    'g'
-  );
-  return String(name).replace(re, function (m, num, s1, s2) { return num + s1 + '/' + num + s2; });
-}
-
 // Rozmiar: cyfry [+ / + cyfry opcjonalnie] + separator (x/X/R/L/-) [+ L] + cyfry [+ -cyfry]
 // Przykłady dopasowań: "520/85R38", "8,25x20", "17,5LR24", "20X10,00-10", "9,0/70X16"
 // POPRAWKA 2026-07-21 (anomalia 1: ucieta 4-cyfrowa szerokosc): pierwsza grupa szerokosci
@@ -408,18 +380,15 @@ const REQUEST_TIMEOUT_MS = 30000;
 const TOKEN_BUFFER_MS = 5 * 60 * 1000; // odśwież 5 min przed wygaśnięciem
 const TOKEN_TTL_MS = 55 * 60 * 1000;   // zakładamy ~1h, odświeżamy po 55 min
 
-// ---- Mapowanie kategorii Agrorami → słownik Bridge ----
-// POPRAWKA 2026-09-01: wartości z Wielkiej litery (jak w reszcie systemu — `classifyByName`,
-// `capitalizeKategoria`, `products.kategoria`). Klucze zostają małe, bo `catNames` są
-// `.toLowerCase()`-owane przed lookupem.
+// ---- Mapowanie kategorii Agrorami → słownik Bridge (zgodne z mo9_agrorami.cjs) ----
 const KATEGORIA_MAP = {
-  'rolnicze': 'Rolnicze',
-  'leśne': 'Leśne', 'lesne': 'Leśne',
-  'przemysłowe': 'Przemysłowe', 'przemyslowe': 'Przemysłowe',
-  'ciężarowe': 'Ciężarowe', 'ciezarowe': 'Ciężarowe',
-  'dętki': 'Dętki', 'detki': 'Dętki',
-  'akcesoria': 'Akcesoria',
-  'inne': 'Rolnicze' // DECYZJA ANNY: inne → rolnicze
+  'rolnicze': 'rolnicze',
+  'leśne': 'leśne', 'lesne': 'leśne',
+  'przemysłowe': 'przemysłowe', 'przemyslowe': 'przemysłowe',
+  'ciężarowe': 'ciężarowe', 'ciezarowe': 'ciężarowe',
+  'dętki': 'dętki', 'detki': 'dętki',
+  'akcesoria': 'akcesoria',
+  'inne': 'rolnicze' // DECYZJA ANNY: inne → rolnicze
 };
 
 // Override rozmiaru dla pozycji, gdzie dostawca wpisuje indeks zamiast wymiaru (jak w CSV parserze)
@@ -583,11 +552,7 @@ function itemToRecord(it) {
   // więc rozmiar próbujemy wyłuskać z nazwy (c.extractSize), a resztę zostawiamy
   // normalizatorowi (normalizeAgrorami parsuje rozmiar+marki z pól, a nazwa końcowa
   // i tak jest budowana od nowa). Producenta bierzemy z pola `manufacturer` jeśli jest.
-  // POPRAWKA 2026-09-04: rozwinięcie skróconego LI po ukośniku (144A8/B → 144A8/144B),
-  // patrz komentarz przy expandLoadIndexSlash powyżej. Musi być PRZED parseAgroramiName
-  // i przed użyciami fullName w klasyfikacji/normalizacji, żeby cała reszta widziała
-  // spójny format.
-  const fullName = expandLoadIndexSlash((it.name || '').trim());
+  const fullName = (it.name || '').trim();
   // UWAGA (naprawione 2026-07-10): pole `manufacturer` z API Agrorami to LICZBOWE ID
   // atrybutu Magento (np. 15), NIE nazwa marki jako string — zweryfikowane na żywo:
   // wszystkie produkty w kategorii 148 ("Opony BKT") mają manufacturer=15 albo null.
@@ -632,9 +597,8 @@ function itemToRecord(it) {
     kategoria = c.classifyByName(fullName);
   }
   // Override FLOT/Flotation (zgodnie z CSV parserem)
-  // POPRAWKA 2026-09-01: kategorie z Wielkiej litery (jak w reszcie systemu).
-  if (kategoria === 'Leśne' && /\bFLOT\b|Flotation|Flotmaster/i.test(fullName)) {
-    kategoria = 'Rolnicze';
+  if (kategoria === 'leśne' && /\bFLOT\b|Flotation|Flotmaster/i.test(fullName)) {
+    kategoria = 'rolnicze';
   }
 
   // STAN: in_stock_real → magazyn (string, np. "5+"). null → null.

@@ -575,10 +575,7 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     szerokosc: enriched.szerokosc ?? null,
     profil: enriched.profil ?? null,
     srednica: enriched.srednica ?? null,
-    // POPRAWKA 2026-09-01 (unifikacja konstrukcji): centralne mapowanie na pełne słowa
-    // ('Radialna'/'Diagonalna'). Wewnetrzne kody parsera (R/D/L/B/-) tu są rozwijane.
-    // Idempotentne — wartości już pełne przechodzą bez zmian.
-    konstrukcja: common.normalizeKonstrukcja(enriched.konstrukcja),
+    konstrukcja: enriched.konstrukcja ?? null,
     indeksNosnosci: enriched.indeksNosnosci ?? null,
     indeksPredkosci: enriched.indeksPredkosci ?? null,
     tlTt: enriched.tlTt ?? null,

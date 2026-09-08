@@ -1,12 +1,3 @@
-2026-09-08 12:50
-obszar: backend
-
-pliki: selly/discovery.cjs (bak: selly/discovery.cjs.bak-2026-09-08-1250)
-
-zmiana: createVariant() dodaje wymagane pole `attributes: []` do body POST /api/products/{pid}/variants. Wczesniej Selly odrzucal request z HTTP 400 "Brak wymaganego argumentu attributes" gdy discovery probowal utworzyc nowy wariant magazynu na istniejacym produkcie. Dodatkowo wyczyszczono martwy status error w selly_products id=7875 (MO9_8435, product 812) - wariant faktycznie istnieje i PUT dziala, blad byl artefaktem z pierwszego cyklu 7.09.
-
-powod: podczas analizy pojedynczego bledu error='ok' w tabeli selly_products (5068 -> 6614 wpisow po nocy, tylko 1 wisi jako error). Diagnoza wykazala ze problem byl kombinatorycznie niemozliwy (variant_id != NULL ale status=error z createVariant) - klasyczny wyscig z rownolegle biegajacym importem. Fix zapobiegnie takim bledom w przyszlosci.
-
 2026-09-07 20:35
 obszar: backend
 
