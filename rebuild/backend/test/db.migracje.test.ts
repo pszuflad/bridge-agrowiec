@@ -344,6 +344,42 @@ describe("migracje danych — konwencje 13c", () => {
   });
 
   /**
+   * ⚠ RESZTKA DIAKRYTYCZNA — 16 wierszy na `db/snapshot.db`, których `DELETE` NIE zabiera.
+   *
+   * `UPPER()` SQLite jest ASCII-only nie tylko w `UPDATE … nazwa=UPPER(nazwa)`, ale RÓWNIEŻ
+   * w predykacie CASE_ONLY. Dla „prowadząca" vs „PROWADZĄCA" zostawia małe `ą` po jednej
+   * stronie i duże `Ą` po drugiej, więc wiersz nie jest uznany za case-only i ZOSTAJE.
+   *
+   * ⭐ TO JEST ZACHOWANIE ZAMIERZONE I SPÓJNE, nie przeoczenie. Skoro `UPPER(nazwa)` zostawia
+   * w bazie „PROWADZąCA", to plik dostawcy z „PROWADZĄCA" NADAL się od niej różni — wiersz
+   * `zmiana_kluczowa` jest tam zasadny. Produkcja użyła tego samego SQLite-owego `UPPER()`,
+   * więc ma tę samą resztkę. Ten test istnieje po to, żeby przestawienie predykatu na
+   * porównanie Unicode-aware (skasowałoby wiersze, których produkcja nie skasowała) zapaliło
+   * czerwone, zamiast przejść jako „poprawka".
+   */
+  it("006 — case-only na polskim diakrytyku NIE jest kasowany (ASCII-only `UPPER`, jak produkcja)", () => {
+    const zDiakrytykiem = dodajStaging(
+      "nazwa: 315/80R22.5 Dunlop SP362 prowadząca 156K TL" +
+        " → 315/80R22.5 DUNLOP SP362 PROWADZĄCA 156K TL",
+    );
+    const bezDiakrytyku = dodajStaging(
+      "nazwa: 540/65R30 Kleber GRIPKER 143D TL → 540/65R30 KLEBER GRIPKER 143D TL",
+    );
+
+    wykonajMigracjeDanych();
+
+    const zyje = (id: unknown) =>
+      (sqlite.prepare("SELECT count(*) AS c FROM staging_items WHERE id = ?").get(id) as {
+        c: number;
+      }).c === 1;
+
+    expect(zyje(zDiakrytykiem), "różnica na `ą`/`Ą` jest poza zasięgiem ASCII-only `UPPER`").toBe(
+      true,
+    );
+    expect(zyje(bezDiakrytyku), "czysto ASCII-owy case-only ma zniknąć").toBe(false);
+  });
+
+  /**
    * ⭐ TEN TEST JEST POWODEM, DLA KTÓREGO MIGRACJE MAJĄ WARUNEK „pomiń wiersz w formie
    * docelowej". Odtwarza scenariusz cutoveru: dane są już zmigrowane, a migracja rusza
    * pierwszy raz.

@@ -58,6 +58,22 @@ UPDATE manual_overrides
 -- snapshocie 739 wierszy, „każdy segment jest case-only" — również 739. Rozjazd = 0, więc
 -- reguła ostrożniejsza nic nie kosztuje. (Naiwna R1 dawała 738 i gubiła wielosegmentowe.)
 --
+-- ⚠ TE 739 TO POMIAR RÓWNOWAŻNOŚCI REGUŁ, LICZONY W JS (`toUpperCase()`, Unicode-aware).
+-- SAM `DELETE` kasuje na tym samym snapshocie **723 wiersze**, i to jest liczba właściwa.
+-- Różnica 16 wierszy bierze się stąd, że `UPPER()` SQLite jest ASCII-only nie tylko
+-- w `UPDATE … nazwa=UPPER(nazwa)` wyżej, ale RÓWNIEŻ w tym predykacie: dla
+-- „prowadząca" vs „PROWADZĄCA" (id 710497 w snapshocie) `UPPER` zostawia małe `ą` po lewej
+-- i duże `Ą` po prawej, więc wiersz nie jest uznany za case-only i ZOSTAJE — na zawsze,
+-- bo ponowne uruchomienie też go nie złapie.
+--
+-- ⭐ TO NIE JEST BŁĄD DO NAPRAWY. Produkcja użyła dokładnie tego samego SQLite-owego `UPPER()`
+-- w swoim `DELETE`, więc ma tę samą resztkę. Co więcej, tak MUSI być spójnie: skoro
+-- `UPDATE nazwa=UPPER(nazwa)` zostawia w bazie „PROWADZąCA", to plik dostawcy z „PROWADZĄCA"
+-- NADAL się od niej różni i wiersz `zmiana_kluczowa` jest tam zasadny. Przestawienie samego
+-- predykatu na porównanie Unicode-aware skasowałoby wiersze, których produkcja nie skasowała,
+-- i zgubiłoby realną (choć brzydką) różnicę. Nie „poprawiaj" tej liczby na 739 licząc
+-- narzędziem znającym Unicode.
+--
 -- Warunek wejścia `powod LIKE 'nazwa:%'` jest za produkcją — wiersz, którego różnice zaczynają
 -- się od innego pola, zostaje nietknięty nawet gdy jest case-only.
 
@@ -85,8 +101,15 @@ DELETE FROM staging_items
        HAVING COUNT(*) = SUM(
                 CASE
                   -- Segment ma kształt `etykieta: STARA → NOWA` i obie strony różnią się
-                  -- wyłącznie wielkością liter. Pierwsze `: ` należy do etykiety (nazwy pól
-                  -- w `POLA_ROZNIC` nie zawierają dwukropka), więc `instr` trafia właściwie.
+                  -- wyłącznie wielkością liter.
+                  --
+                  -- ZAŁOŻENIE, wypisane wprost: pierwsze `: ` w segmencie należy do etykiety,
+                  -- a pierwsze ` → ` do separatora wartości. Trzyma się, bo etykiety
+                  -- z `POLA_ROZNIC` nie zawierają dwukropka, a wartości pól katalogu (nazwa,
+                  -- marka, model, rozmiar, kod dostawcy, EAN) nie zawierają znaku „→".
+                  -- Gdyby kiedyś zawierały, offsety by się rozjechały — ale wyłącznie
+                  -- w kierunku BEZPIECZNYM: porównanie by nie wyszło i wiersz by ZOSTAŁ.
+                  -- Nie da się tak doprowadzić do skasowania wiersza z realną zmianą.
                   WHEN instr(segment, ' → ') > 0
                    AND instr(segment, ': ') > 0
                    AND instr(segment, ': ') < instr(segment, ' → ')

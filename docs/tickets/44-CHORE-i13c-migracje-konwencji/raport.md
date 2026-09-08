@@ -23,7 +23,7 @@ z żywego oryginału postawionego na bazie doprowadzonej do stanu produkcji po 0
 - `rebuild/schema/README.md` — trzy pliki dopisane do tabeli; nowa sekcja o tym, że od 13c
   migracje niosą także DANE, i dlaczego idempotencja treściowa jest tu wymogiem.
 - `rebuild/backend/test/db.migracje.test.ts` — `MIGRACJE` rozszerzone o trzy pliki; nowy
-  `describe("migracje danych — konwencje 13c")` z sześcioma testami.
+  `describe("migracje danych — konwencje 13c")` z siedmioma testami.
 - `tools/record-write-fixtures.cjs` — `przygotujBaze()` dostaje krok `migrujKonwencje()`;
   zaktualizowane opisy dwóch nagrań `GET /api/products`.
 - `contract/fixtures/GET_products.json`, `GET_products_bez-parametrow.json`,
@@ -46,7 +46,26 @@ Odstępstwa od ORYGINAŁU (świadome, opisane w `plan.md` D6/D7 i w nagłówkach
   są no-opem na bazie cutoveru. Zysk: idempotencja i odporność na stan bazy odbudowy.
 - **D5 — reguła CASE_ONLY ostrożniejsza niż skrót z CHANGELOG-a** (każdy segment `powod`
   case-only, nie tylko segment `nazwa`). Zmierzona równoważność na realnych danych: obie reguły
-  dają 739 wierszy, rozjazd 0.
+  dają **739** wierszy, rozjazd 0. ⚠ Te 739 to pomiar RÓWNOWAŻNOŚCI REGUŁ, liczony w JS
+  (`toUpperCase()`, Unicode-aware). Sam `DELETE` kasuje **723** wiersze i to jest liczba
+  właściwa — patrz „Resztka diakrytyczna" niżej.
+
+### Resztka diakrytyczna — 739 (JS) vs 723 (SQL), różnica 16 wierszy
+
+Wyszło przy review i jest zapisane w nagłówku `006_nazwa_caps.sql` oraz przybite testem
+`006 — case-only na polskim diakrytyku NIE jest kasowany`.
+
+`UPPER()` SQLite jest ASCII-only nie tylko w `UPDATE … nazwa=UPPER(nazwa)`, ale **również
+w predykacie CASE_ONLY**. Dla „prowadząca" vs „PROWADZĄCA" (id 710497 w snapshocie) zostawia
+małe `ą` po lewej i duże `Ą` po prawej, więc wiersz nie jest uznany za case-only i ZOSTAJE —
+na zawsze, bo ponowne uruchomienie też go nie złapie. Stąd `DELETE` kasuje 723, a nie 739.
+
+**To jest spójne i zamierzone, nie przeoczenie.** Skoro `UPPER(nazwa)` zostawia w bazie
+„PROWADZąCA", to plik dostawcy z „PROWADZĄCA" nadal się od niej różni i wiersz
+`zmiana_kluczowa` jest tam zasadny. Produkcja użyła tego samego SQLite-owego `UPPER()`
+w swoim `DELETE`, więc ma tę samą resztkę. Przestawienie predykatu na porównanie Unicode-aware
+skasowałoby 16 wierszy, których produkcja nie skasowała — dlatego test pilnuje, żeby taka
+„poprawka" zapaliła czerwone.
 
 ## Sprostowania faktów (znalezione w trakcie, wymagają korekty docs)
 
@@ -104,13 +123,14 @@ Fixtures, które pokazują `nazwa` mieszaną wielkością liter **i tak ma być*
 ### Testy jednostkowe i integracyjne
 
 - **Pełny przebieg:** 80 plików, **1240 testów, wszystkie zielone** (po przenagraniu fixtures).
-- **Nowe:** `test/db.migracje.test.ts` — 6 testów migracji danych (łącznie 11 w pliku):
+- **Nowe:** `test/db.migracje.test.ts` — 7 testów migracji danych (łącznie 12 w pliku):
   mapowanie kategorii z zachowaniem wartości spoza map; kody konstrukcji z zachowaniem `X`/NULL;
   `UPPER` na `nazwa` i override `nazwa` z nietykalnością pozostałych pól override;
   ASCII-only `UPPER` przybity wprost jako fakt o produkcji; cztery przypadki CASE_ONLY
   (jednosegmentowy kasowany, wielosegmentowy case-only kasowany, realna zmiana w drugim polu
   ZOSTAJE, `ostrzezenie` ZOSTAJE, `powod` spoza `nazwa:%` ZOSTAJE, inny `typ_zmiany` ZOSTAJE);
-  idempotencja treściowa.
+  idempotencja treściowa; resztka diakrytyczna (case-only na `ą`/`Ą` NIE jest kasowany —
+  strażnik przed „poprawieniem" predykatu na Unicode).
 - **Pomiar na realnych danych** (kopia `db/snapshot.db`, 7405 produktów), przebieg 1 → przebieg 2:
 
   | Migracja | Zmienionych (1. przebieg) | Zmienionych (2. przebieg) |
@@ -143,6 +163,21 @@ Brak w API. Zmiana jest w DANYCH i jest zamierzona:
 
 Migracja jest jednokierunkowa. `scripts/kopia-bazy.cjs` (kopia przed migracją, ticket 8) działa
 bez zmian, a runner stosuje każdy plik w transakcji.
+
+## Poprawki po review
+
+- **SHOULD-FIX (poprawione):** nagłówek `006_nazwa_caps.sql` i `raport.md` podawały 739 jako
+  liczbę kasowanych wierszy CASE_ONLY, a `DELETE` kasuje 723 — dokument przeczył sam sobie.
+  739 to pomiar RÓWNOWAŻNOŚCI reguł R2≡R3 liczony w JS (Unicode), 723 to realny wynik SQL-a.
+  Przyczyna (ASCII-only `UPPER` również w PREDYKACIE, nie tylko w `UPDATE`) opisana w nagłówku
+  migracji i w sekcji „Resztka diakrytyczna"; dołożony test-strażnik.
+- **NICE-TO-HAVE (poprawione):** predykat CASE_ONLY ma teraz wypisane wprost założenie, że
+  pierwsze `: ` należy do etykiety, a pierwsze ` → ` do separatora, wraz z uzasadnieniem, że
+  złamanie tego założenia działa wyłącznie w kierunku bezpiecznym (wiersz zostaje).
+- **NICE-TO-HAVE (poprawione):** narracja 739/723 ujednolicona między sekcjami raportu.
+- **BLOCKER ×2 (adresowane):** synchronizacja `docs/rebuild-roadmap.md` i
+  `docs/rebuild-backlog.md` była zaplanowana jako osobny krok po review — patrz sekcja
+  „Docs updates" niżej.
 
 ## Follow-up
 
