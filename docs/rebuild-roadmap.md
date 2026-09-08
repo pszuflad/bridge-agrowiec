@@ -177,7 +177,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | 🔨 | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08. **Została 12e.** |
-| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13a BE · 13b BE+BAZA · 13c BE(nowy) · 13d FE · 13e decyzja | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Wykonanie: osobne tickety `/feature` per sesja |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`, prompty w tickecie 40 |
 
 ---
 
@@ -1867,54 +1867,65 @@ Domyka zaległość #1 z I3 (3d-1, `WYJATKI_SZEROKOSC`) i braki nagrań z 12a/12
   przed `git push`; naprawione w `d88ac15` na main). Dwa tygodnie zmian produkcji wciągnięto RĘCZNIE
   w commit **`6872aea`** (64 pliki). **Źródło prawdy tej iteracji:** `mirror/backend/CHANGELOG.md`
   (wpisy 2026-08-25…09-08), `db/schema.sql`, `mirror/backend/parsers/*.cjs`, `mirror/backend/selly/*`.
-  Backlog: nowe wpisy **#53–#61** + domknięcie audytowych **#3/#8/#9/#10** (to były NASZE findingi
+  Backlog: nowe wpisy **#53–#64** + domknięcie audytowych **#3/#8/#9/#10** (to były NASZE findingi
   „audytu Claude'a", na które Ania wprost zareagowała — patrz CHANGELOG „Bug #1/#2/#3/#4").
 - **Cel:** odtworzyć w `rebuild/` te zmiany 1:1 (PORT parserów, migracje, nowy podsystem Selly),
   żeby cutover big-bang szedł ze stanu produkcji z 08.09, nie z 25.08.
 
+**Oś podziału = MECHANIZM PORTU, nie logiczne grupy zmian.** `src/import/legacy/**` jest bajt-w-bajt
+kopią `mirror/backend/**` (parsery WYKONUJĄ się jako oryginalny kod), a silnik `tk()`/`acceptStaging`
+to reimplementacja TS porównywana z żywym oryginałem. Dlatego nie da się rozdzielić „b4" od „katunify"
+w `tyre_params.cjs` — to jeden plik, kopia jest atomowa. Karty idą więc po WARSTWACH: parsery (kopia) →
+silnik (TS) → migracje/fixtures → Selly → FE → decyzja. Każda karta bumpuje SPÓJNY wycinek `mirror/`
+z main@08.09 + port + przenagrywa swoje bramki → develop zielony po każdej. Mapowanie zmian→kart:
+`docs/rebuild-backlog.md` (sekcja „Delty produkcji…", tabela na początku). Prompty startowe:
+`docs/tickets/40-CHORE-triaz-i13-plan/prompty-13a-13f.md`.
+
 **Podział na sesje (każda = osobny ticket `/feature`):**
 
-- **13a — Poprawki parserów (batch)** [BE] — grupa B. PORT przez Wariant A (mechanizm z #6,
-  `docs/rebuild-backlog.md` §„Gdzie naprawiamy…"). Zakres: **Bug#1** WULSTBAND (filtr dętki/akcesoria
-  case-insensitive, mo1/mo9 — regresja PO katunify, patrz zależność niżej), **Bug#2** NRO/CHO →
-  `Tak`/null (tyre_params:423-424 + adapter:596-597), **Bug#4** MO8 detekcja CSV vs XLSX (`isZipBuffer`),
-  **B10** Handlopex sufiksy w `model` (STOPWORDS KPL/NACZEPA, `/TR\d`, niesparzona klamra), **B4**
-  parser rozmiaru WxSxD (`690x180-15`), **mo9expand** `expandLoadIndexSlash` (`144A8/B`→`144A8/144B`),
-  **P3** fallback marki `tk()` → `"UNKNOWN"`. **GATE:** charakteryzacja (realne pliki dostawców →
-  identyczne rekordy) + fixtures. ⚠ **Cieniowanie (CLAUDE.md §5):** P3 dotyka `tk()` w `index.cjs` —
-  sprawdź, która definicja żywa, zanim uwierzysz numerowi linii z deminifikatu.
-- **13b — Unifikacje konwencji + migracje** [BE + BAZA] — grupa C. **katunify** (kategorie do Wielkiej
-  litery we wszystkich parserach + `common.cjs`), **konstrukcja** (kody `R/D/L/B` → `Radialna`/`Diagonalna`;
-  L i B → Diagonalna), **CAPS** (`products.nazwa` = WIELKIE LITERY + helper `Xq()` case-insensitive).
-  Każda z trzech ma **migrację danych** (wzór: #2 kategoriafix, #3 szertxt) i **przesuwa fixtures**
-  (kategoria/konstrukcja/nazwa się zmieniają — GATE trzeba przenagrać). ⚠ **Cieniowanie:** CAPS dotyka
-  `Xq()` w `index.cjs`. ⚠ **KOLEJNOŚĆ:** katunify (13b) SPOWODOWAŁO regresję Bug#1 (13a) — filtr
-  porównywał małą literą z Wielką. W odbudowie: albo 13b przed 13a, albo oba w jednym tickecie;
-  nie da się odtworzyć katunify bez jednoczesnego case-insensitive filtra.
-- **13c — Selly REST sync (model wariantowy)** [BE, NOWY PODSYSTEM] — grupa A. **To wykracza poza I8**
-  (I8 = eksport CSV + panel). Ania 07–08.09 dołożyła synchronizację Bridge→Selly przez REST API,
-  bo cena/stan w Selly są **per wariant** (19% produktów ma >1 wariant), a bulk-endpoint zwracał
-  HTTP 400. Nowe pliki: `selly/discovery.cjs` (lazy discovery po EAN, `ensureMapping`, `apiWithRetry`),
-  `sync_delta.cjs` (Tor 1: `PUT .../variants/{vid}` {quantity,price}), `rate_limiter.cjs` (token bucket
-  250/60s), `scheduler_selly.cjs` (HH:55 + fallback), `routes_sync.cjs` (7 endpointów `/api/selly/sync-*`),
-  `mapper_v2.cjs` (21 features, `provider_code=kod_importu` — bugfix), `sync_full.cjs` (Tor 2, nocny).
-  Tabela **`selly_products` przeprojektowana**: klucz `(kod_importu, dostawca)` → `(selly_product_id,
-  selly_variant_id)` + `feature_id_magazyn`; stara → `selly_products_old`. **⚠ BLOKADA:** Tor 2
-  (`sync_full`) był u Ani NIEDOMKNIĘTY 08.09 („refactor sync_full w następnej sesji") — **poczekaj,
-  aż Ania go domknie**, inaczej portujesz ruchomy cel. Rozważ podział: 13c-1 discovery+delta (Tor 1),
-  13c-2 sync_full (Tor 2, gdy gotowe u Ani), 13c-3 przyciski sync w panelu FE. Duży ticket.
-- **13d — Frontend: Bridge ONE + drobne** [FE] — grupa E. Rebrand na **„Bridge ONE"** (title
-  „Bridge ONE — konsolidacja cenników opon") + etykiety z kopii `.bak`: `tr_fix`, `ackalerts`,
-  `szer_marka`, `PRICEFMT` (formatowanie ceny), `konstr` (FE strona unifikacji konstrukcji — idzie
-  logicznie z 13b). Bundle są zminifikowane (`index-BRIDGEONE….js`, `index-PRICEFMT….js`) — **najpierw
-  rozłóż diff bundla**, nazwa `.bak` daje tylko etykietę, nie treść.
-- **13e — Backfille danych (DECYZJA użytkownika, nie kod)** [BAZA] — grupa D. **tl_tt** backfill 628 rek.
-  (reguły A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT), **szerokości
-  ułamkowe** 10 rek. (parser już poprawny od 18.08), **JMK marka/model** 14 rek. + 27 `manual_overrides`.
-  **Pytanie otwarte:** odbudowa buduje bazę importem od zera — jednorazowe backfille historycznych
-  rekordów są w większości nieistotne. ALE reguły tl_tt B/C to **logika klasyfikacji**, nie sam import —
-  jeśli mają obowiązywać na przyszłych importach, trzeba je dodać do parsera/mapowania, nie tylko jako
-  UPDATE. Do rozstrzygnięcia z użytkownikiem PRZED 13e.
+- **13f — Backfille: DECYZJA (najpierw, nie kod)** [decyzja] — rozstrzygnąć PRZED 13a/13c. **tl_tt**
+  628 rek. (reguły A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT),
+  **szerokości ułamkowe** 10 rek. (parser już poprawny), **JMK marka/model** 14 rek. + 27 overrides.
+  Pytanie: odbudowa buduje bazę importem od zera — backfille historyczne w większości nieistotne, ALE
+  reguły tl_tt B/C to **logika klasyfikacji** — jeśli mają działać na przyszłych importach, idą do
+  parsera/mapowania (wtedy część 13a/13c), nie jako jednorazowy UPDATE. Wynik decyzji wpina się w 13a/13c.
+- **13a — Parsery: re-sync warstwy `legacy` (kopia bajtowa)** [BE, FUNDAMENT] — skopiuj z mirror@08.09
+  do `src/import/legacy/`: `common.cjs`, `parsers/{adapter,tyre_params,mo1_bohnenkamp,mo2_jmk,mo6_agrowiec,
+  mo7_nokian,mo8_trelleborg,mo9_agrorami_api}.cjs`. Kopia wnosi ATOMOWO: **b4** (WxSxD), **b10** (Handlopex
+  sufiksy `model`), **p2_4** (parseSize L-series `28LX26`/`400/45Lx17`/ułamki), **mo9expand** (`144A8/B`→
+  `144A8/144B`), **odswinch** (⚠ niezalogowana w CHANGELOG — rozłóż diffem `tyre_params.cjs`), **bug1**
+  (filtr dętki/akcesoria case-insensitive mo1/mo9), **bug2** (NRO/CHO→`Tak`/null; tyre_params + adapter),
+  **bug4** (MO8 detekcja CSV/XLSX `isZipBuffer`), **katunify** (kategorie Wielka litera w parserach+common),
+  **konstr** (kody→słowa w parserach). **Bramki:** `charakteryzacja` byte-for-byte (9 plików) + field-char
+  MO1–MO10; przenagraj `MO*.expected.json`. Bo parsery wykonują się jako oryginał, zachowanie jest
+  poprawne z automatu — praca to kopia + przenagranie i sprawdzenie, co się przesuwa niżej.
+- **13b — Silnik `tk()`/`acceptStaging`: P3 + CAPS/Xq** [BE] — reimplementacja TS (te zmiany są w
+  `index.cjs`, nie w `legacy/`): **P3** fallback marki → `"UNKNOWN"` (zamiast `nazwa.split`), **CAPS/Xq**
+  equality case-insensitive. **Bramki:** kotwica sha „wycięty fragment `index.cjs`" + `silnik.charakteryzacja`
+  + `akceptacja.charakteryzacja` (marka „UNKNOWN"). ⚠ **Cieniowanie (CLAUDE.md §5):** P3 i Xq siedzą w
+  `index.cjs` — policz `function tk(`/`Xq(` i weź ŻYWĄ definicję, nie numer linii z deminifikatu.
+  **Zależy od:** 13a (silnik konsumuje wyjście parserów).
+- **13c — Migracje danych + fixtures konwencji** [BAZA + BE] — migracje istniejących rekordów (wzór:
+  #2 kategoriafix, #3 szertxt): **nazwa→UPPER** (CAPS), **konstrukcja kody→słowa**, weryfikacja czy
+  katunify wymaga migracji historycznych kategorii. **Bramki/fixtures:** przenagraj `katalog.gate`,
+  `analityka.*`, `produkty.*` — pokażą Wielką literę kategorii, słowa konstrukcji, WIELKIE nazwy.
+  **Zależy od:** 13a, 13b. Tu wpina się decyzja 13f (tl_tt).
+- **13d — Selly REST sync (NOWY podsystem)** [BE] — reimplementacja TS 7 plików `selly/*`
+  (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/`routes_sync`) +
+  przeprojektowana `selly_products` (klucz `(kod_importu,dostawca)`→`(selly_product_id,selly_variant_id)`
+  + `feature_id_magazyn`; stara → `selly_products_old`). Model wariantowy: cena/stan PER WARIANT
+  (`PUT .../variants/{vid}`), rate limiter 250/60s + `apiWithRetry`, `provider_code=kod_importu`.
+  **⚠ BLOKADA:** Tor 2 (`sync_full`) NIEDOMKNIĘTY u Ani 08.09 — poczekaj, aż domknie, inaczej portujesz
+  ruchomy cel. Podział: 13d-1 discovery+delta (Tor 1), 13d-2 sync_full (Tor 2, gdy gotowe), 13d-3 przyciski
+  sync w panelu FE. **Zależy od:** 8; **wykracza poza I8** (I8 = eksport CSV). Niezależne od 13a–13c.
+- **13e — Frontend: Bridge ONE + drobne** [FE] — rebrand „Bridge ONE" (title „Bridge ONE — konsolidacja
+  cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`, `konstr` (FE strona
+  konstrukcji — sparowane z 13c). Bundle zminifikowane — **najpierw rozłóż diff bundla**, `.bak` daje tylko
+  etykietę. **Zależy od:** 13c (konstr); rebrand+drobne mogą iść częściowo równolegle.
+
+**Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → { **13d** gdy Ania domknie Tor 2, **13e** }.
+13d jest niezależne od 13a–13c (inny podsystem), więc może startować równolegle po 13a. 13a jest twardym
+fundamentem — nie zaczynaj 13b/13c przed jego merge.
 
 ## 6. Po zakończeniu wszystkich iteracji
 

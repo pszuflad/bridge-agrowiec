@@ -2478,7 +2478,19 @@ błędów — zmierzone, nie założone").
 > milczał — patrz roadmapa blok I13). Źródło prawdy: `mirror/backend/CHANGELOG.md` (te daty),
 > `db/schema.sql`, `mirror/backend/parsers/*.cjs`, `mirror/backend/selly/*`. Audytowe #3/#8/#9/#10
 > to nasze findingi, na które Ania zareagowała (CHANGELOG „Bug #1/#2/#3/#4") — mają noty domykające
-> u siebie. Poniżej wpisy NOWE. Realizacja: I13 (13a–13e).
+> u siebie. Poniżej wpisy NOWE. Realizacja: I13 (13a–13f).
+
+**Mapowanie zmian → karty I13** (podział wg MECHANIZMU PORTU — parsery to kopia bajtowa `legacy/`,
+więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok I13):
+
+| Zmiana (wpis) | Karta | Warstwa |
+|---|---|---|
+| B4 #53, B10 #54, mo9expand #55, katunify(parser) #57, konstr(parser) #58, WULSTBAND #10, NRO/CHO #9, MO8-CSV #8, **p2_4 #63**, **odswinch #64** | **13a** | parsery — kopia `src/import/legacy/**` + charakteryzacja |
+| P3 #56, CAPS/Xq #59 (część silnikowa) | **13b** | silnik `tk()`/`acceptStaging` — reimpl TS |
+| katunify(migracja) #57, konstr(migracja) #58, CAPS(nazwa) #59 | **13c** | migracje danych + przenagranie fixtures |
+| Selly REST #60 | **13d** | nowy podsystem TS (blokada: Tor 2 u Ani) |
+| Bridge ONE + drobne #61 | **13e** | frontend |
+| backfille #62 | **13f** | DECYZJA (najpierw) |
 
 ### #53 · 2026-08-31 · [BACKEND] · B4 — parser rozmiaru WxSxD (stara diagonalna rolnicza)
 | pole | wartość |
@@ -2577,5 +2589,25 @@ błędów — zmierzone, nie założone").
 | **Pliki** | `data.db` (bez zmian kodu, poza regułami tl_tt) |
 | **Zmiana Ani** | **tl_tt** 628 rek. (A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT). **Szerokości ułamkowe** 10 rek. (parser już poprawny — #3). **JMK** 14 rek. marka/model + 27 `manual_overrides` (feed bez `Producent`). |
 | **Do nowej wersji?** | ⬜ **DECYZJA** — odbudowa buduje bazę importem od zera; backfille historyczne w większości nieistotne, ALE reguły tl_tt B/C to logika klasyfikacji (jeśli mają obowiązywać na przyszłych importach → do parsera, nie UPDATE) |
-| **Iteracja** | **→ 13e** (po rozstrzygnięciu z użytkownikiem) |
+| **Iteracja** | **→ 13f** (po rozstrzygnięciu z użytkownikiem) |
 | **Status** | ⬜ do decyzji |
+
+### #63 · 2026-08-25 · [BACKEND] · p2_4 — rozszerzenie `parseSize` o L-series z profilem i ułamki
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser rozmiaru) |
+| **Pliki** | `parsers/tyre_params.cjs` (`normalizeSizeText`, `parseSize`; bak `.bak_p2_4_20260825_1601`) |
+| **Zmiana Ani** | (A) `normalizeSizeText`: separator L-series rozszerzony z `[-R]` na `[-Rx]` — obsługa `28LX26`, `7,5Lx15`. (B) `parseSize`: wzorzec `W/PLxD`/`W/PL-D` dla L-series z profilem (`400/45Lx17` BKT TERRA TRAX, konstrukcja=L). (C) regex `W/P[RBD-]D` z `(\d{2,4})` na `(\d{1,4})` — łapie ułamkowe `6.5/75-14` (MITAS TS-02). Test node: 19/19 (12 anomalii + 7 regresja). UPDATE 12 rek. |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13a** (kopia `tyre_params.cjs` wnosi to atomowo z b4/b10/odswinch) |
+| **Status** | ⬜ do portu |
+
+### #64 · 2026-09-04 · [BACKEND] · odswinch — zmiana w `tyre_params.cjs` NIEZALOGOWANA w CHANGELOG
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser) — do charakteryzacji |
+| **Pliki** | `parsers/tyre_params.cjs` (bak `.bak_odswinch_20260904_1403`) |
+| **Zmiana Ani** | ⚠ Brak wpisu w `CHANGELOG.md` — istnieje tylko kopia `.bak_odswinch_20260904_1403`. Etykieta sugeruje „odśwież/inch" (obsługa cali/felgi?). **DO ROZŁOŻENIA:** `git diff` między `tyre_params.cjs.bak_odswinch_20260904_1403` a wersją po niej w `mirror/`, żeby ustalić realny zakres. |
+| **Do nowej wersji?** | ✅ TAK (jest w produkcji 08.09) |
+| **Iteracja** | **→ 13a** (kopia `tyre_params.cjs` wnosi to atomowo; charakteryzacja wychwyci behawior) |
+| **Status** | ⬜ do portu + rozłożenia diffu |

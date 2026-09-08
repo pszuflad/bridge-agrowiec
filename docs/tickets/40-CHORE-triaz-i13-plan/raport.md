@@ -41,3 +41,19 @@ Iterację 13 w roadmapie + wpisy backlogu.
 ## Bramki
 Nie dotyczy (chore dokumentacyjny; zero zmian w `rebuild/`). Zmiana `tools/vps-sync.sh` poszła osobno
 na `main` (poza bramkami CI develop — to narzędzie VPS, nie deployowane przez CD).
+
+## Aktualizacja 2026-09-08 — podział I13 zrewidowany + rewert mirror na develop
+
+- **Merge main→develop** (`00097f8`) wciągnął `mirror/` do 08.09 → 12 bramek wierności czerwonych
+  (byte-for-byte + charakteryzacja + acceptStaging). To poprawny sygnał (dług portu), nie błąd.
+  Decyzja użytkownika: **cofnąć `mirror/` na develop do 25.08** (`6594525`), stan 08.09 zostaje na main
+  jako źródło prawdy; każdy ticket I13 dociąga swój wycinek. CI develop znów zielone (potwierdzone).
+- **Podział I13 przeprojektowany** z „grupa A–E" na oś **MECHANIZMU PORTU** (decyzja użytkownika):
+  parsery-kopia (13a) / silnik-TS (13b) / migracje+fixtures (13c) / Selly (13d) / FE (13e) / decyzja (13f).
+  Powód: `src/import/legacy/**` to kopia bajtowa `mirror/backend/**`, więc zmian w jednym pliku `.cjs`
+  (np. b4 vs katunify w `tyre_params.cjs`) NIE DA SIĘ rozdzielić — kopia jest atomowa. Stary podział
+  bug/unifikacje kolidował plikowo.
+- **Inwentaryzacja CHANGELOG** (17 wpisów) wyłapała 2 zmiany spoza pierwotnego planu: **p2_4** (#63,
+  parseSize L-series) i **odswinch** (#64, `tyre_params.cjs`, NIEZALOGOWANA w CHANGELOG — do rozłożenia
+  diffem). Oba wchodzą w 13a razem z kopią `tyre_params.cjs`.
+- **Prompty startowe** do wszystkich kart: `prompty-13a-13f.md` (w tym tickecie).
