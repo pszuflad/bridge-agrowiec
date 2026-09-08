@@ -272,6 +272,32 @@ przestanie być możliwe. To jest zamierzone.
 
 ---
 
+## Poprawki po review
+
+**SHOULD-FIX — retencja kopii: jeden zepsuty plik blokował całą retencję.**
+`usunNadmiarKopii` (`src/routes/maintenance.ts`) miał JEDEN `try/catch` wokół całej pętli
+kasowania. Plik, którego nie da się usunąć (brak uprawnień, wpis będący katalogiem), sortuje
+się jako **najstarszy**, więc przerywał pętlę zanim doszła do pozostałych — i to **trwale**,
+przy każdym kolejnym czyszczeniu, bo za każdym razem trafiał na początek listy. Retencja
+przestawała działać na stałe po jednym takim pliku.
+
+Naprawione przez przeniesienie `try` do WNĘTRZA pętli: jeden zepsuty plik kosztuje teraz jeden
+pominięty plik, a nie całą retencję. Zewnętrzny `try` obsługuje już tylko awarię odczytu
+katalogu.
+
+Test `„błąd sprzątania nie przerywa czyszczenia"` sprawdzał wcześniej wyłącznie status 200 —
+przechodziłby także z wadliwą wersją. Rozszerzony: teraz asertuje, że **pozostałe dwie stare
+kopie faktycznie zniknęły**, mimo nieusuwalnej najstarszej. Zweryfikowane negatywnie —
+z `try` wokół pętli test pada na `expected [ …(8) ] to not include '…2020-01-01…'`.
+
+**BLOCKER z review — aktualizacja `docs/rebuild-roadmap.md` i `docs/rebuild-backlog.md`** —
+to Krok 8 planu, wykonywany w Fazie 5 (doc-checkerzy), po review. Zrobione poniżej, w sekcji
+„Docs updates".
+
+**NICE-TO-HAVE — `LIMIT_KOPII_PRZED_CZYSZCZENIEM` na stałe w kodzie** — zostawione świadomie,
+zgodnie z planem (D2d). Wyprowadzenie limitu do env dokłada zmienną do listy cutoveru za
+korzyść, o którą nikt nie prosił; do rozważenia, gdyby Ania chciała inną wartość.
+
 ## Follow-up
 
 Rzeczy zauważone i **świadomie niezrobione** w tym tickecie:

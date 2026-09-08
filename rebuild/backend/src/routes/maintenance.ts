@@ -90,9 +90,22 @@ function usunNadmiarKopii(dbPath: string): void {
     const doUsuniecia = kopie.length - LIMIT_KOPII_PRZED_CZYSZCZENIEM;
     if (doUsuniecia <= 0) return;
     for (const nazwa of kopie.slice(0, doUsuniecia)) {
-      unlinkSync(join(katalog, nazwa));
+      // ⚠ `try` MUSI być WEWNĄTRZ pętli, nie wokół niej. Plik, którego nie da się skasować
+      // (brak uprawnień, wpis będący katalogiem), sortuje się jako NAJSTARSZY, więc przy
+      // wspólnym `try` blokowałby sprzątanie wszystkich pozostałych kopii — i to trwale,
+      // przy każdym kolejnym czyszczeniu. Jeden zepsuty plik ma kosztować jeden pominięty
+      // plik, a nie całą retencję.
+      try {
+        unlinkSync(join(katalog, nazwa));
+      } catch (blad) {
+        console.error(
+          `[products/clear] nie udalo sie usunac starej kopii ${nazwa}:`,
+          blad instanceof Error ? blad.message : blad,
+        );
+      }
     }
   } catch (blad) {
+    // Tu trafia już tylko awaria samego odczytu katalogu.
     console.error(
       "[products/clear] sprzatanie starych kopii nie powiodlo sie:",
       blad instanceof Error ? blad.message : blad,

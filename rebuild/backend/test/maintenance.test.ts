@@ -313,10 +313,11 @@ describe("POST /api/products/clear", () => {
    * systemu plików — wpis o pasującej nazwie, który jest KATALOGIEM, więc `unlinkSync` na nim
    * pada. Trasa ma mimo to oddać 200 i wyczyścić produkty.
    */
-  it("błąd sprzątania nie przerywa czyszczenia katalogu", async () => {
+  it("błąd sprzątania nie przerywa ani czyszczenia, ani kasowania POZOSTAŁYCH kopii", async () => {
     const katalog = dirname(srodowisko.sciezka);
     const nazwaBazy = basename(srodowisko.sciezka);
-    mkdirSync(join(katalog, `${nazwaBazy}.bak_before_clear_2019-01-01T00-00-00-000Z`));
+    const zepsuta = `${nazwaBazy}.bak_before_clear_2019-01-01T00-00-00-000Z`;
+    mkdirSync(join(katalog, zepsuta));
     for (const rok of ["2020", "2021", "2022", "2023", "2024", "2025"]) {
       writeFileSync(join(katalog, `${nazwaBazy}.bak_before_clear_${rok}-01-01T00-00-00-000Z`), "x");
     }
@@ -326,6 +327,16 @@ describe("POST /api/products/clear", () => {
     expect(odp.status).toBe(200);
     expect(odp.body).toEqual({ ok: true });
     expect(listaProduktow(srodowisko.db)).toHaveLength(0);
+
+    // 7 podłożonych + 1 świeża = 8; do skasowania 3 najstarsze. Najstarsza (`zepsuta`) jest
+    // katalogiem i skasować się nie da — ale POZOSTAŁE DWIE muszą zniknąć mimo to. Gdyby
+    // `try` obejmował całą pętlę, jeden zepsuty wpis blokowałby retencję trwale: zawsze
+    // sortuje się jako najstarszy, więc przy każdym kolejnym czyszczeniu wywracałby ją znowu.
+    const zostaly = kopie().sort();
+    expect(zostaly).toContain(zepsuta);
+    expect(zostaly).not.toContain(`${nazwaBazy}.bak_before_clear_2020-01-01T00-00-00-000Z`);
+    expect(zostaly).not.toContain(`${nazwaBazy}.bak_before_clear_2021-01-01T00-00-00-000Z`);
+    expect(zostaly).toHaveLength(6);
 
     // Sprzątamy sami: `beforeEach` kasuje kopie zwykłym `rmSync`, który na katalogu padłby.
     rmSync(join(katalog, `${nazwaBazy}.bak_before_clear_2019-01-01T00-00-00-000Z`), {
