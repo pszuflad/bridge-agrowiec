@@ -192,8 +192,7 @@ function parseCsvBuffer(buffer) {
         rozmiar_alternatywny: row['Rozmiar alternatywny'] || null,
         cena_zakupu: row['Cena'] || row['Cena '],
         stan_magazynowy: row['Magazyn'] || 0,
-        // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
-        kategoria: c.classifyByName(`Opona Trelleborg ${rozmiar}`) || 'Rolnicze',
+        kategoria: c.classifyByName(`Opona Trelleborg ${rozmiar}`) || 'rolnicze',
         oznaczenia_techniczne: [],
         dostawca: DOSTAWCA,
         surowe_pola: row,  // adapter case MO8 czyta bezpośrednio surowe klucze CSV
@@ -347,8 +346,7 @@ function parseFile(filePath) {
 
         // Kategoria — klasyfikacja po nazwie
         let kategoria = c.classifyByName(nazwa);
-        // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
-        if (!kategoria) kategoria = 'Rolnicze';
+        if (!kategoria) kategoria = 'rolnicze';
 
         // Oznaczenia techniczne
         const oznaczenia = [
@@ -398,7 +396,7 @@ function parseFile(filePath) {
             'LI/SI': [liSi, liSiAlt].filter(Boolean).join('/') || null,
             'PR': pr,
             'PRODUCENT': 'Trelleborg',
-            'RODZAJ': 'Rolnicze',
+            'RODZAJ': 'rolnicze',
             'BIEZNIK': pattern || null,
             'Kod producenta': ipCode || null,
             'EAN': ean,

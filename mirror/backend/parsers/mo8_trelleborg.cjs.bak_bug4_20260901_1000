@@ -30,22 +30,9 @@
 // wywołują parseByKod bez await, więc parser musi zwracać obiekt bez Promise.
 
 const XLSX = require('xlsx');
-const fs = require('fs');
-const { parse } = require('csv-parse/sync');
 const c = require('../common.cjs');
 
 const DOSTAWCA = 'MO8_Trelleborg';
-
-// POPRAWKA 2026-09-01 (Bug #4 od Claude'a): dostawca pod URL Trelleborg.csv
-// może wysyłać ZARÓWNO XLSX jak i prawdziwy CSV (kolumny "Rozmiar;VF/IF;CFO;...").
-// Bez detekcji formatu XLSX.readFile na CSV zwracał workbook bez arkuszy Radial/XPly,
-// import kończył się cichym 0 rekordów, a 624 opony trafiały do wycofania po 3 dniach.
-// Wzorzec detekcji: sygnatura ZIP PK\x03\x04 (identycznie jak w mo10_gri.cjs).
-function isZipBuffer(buffer) {
-  return buffer.length >= 4 &&
-    buffer[0] === 0x50 && buffer[1] === 0x4B &&
-    buffer[2] === 0x03 && buffer[3] === 0x04;
-}
 
 // ------------------------------- Helpers -------------------------------
 
@@ -152,72 +139,8 @@ function isSectionRow(rowVals) {
 
 // -------------------------- Główna funkcja parsowania --------------------
 
-// Parser CSV (fallback gdy dostawca wysyła CSV zamiast XLSX).
-// Kolumny źródła (UTF-8, separator ";"):
-//   Rozmiar; VF/IF; CFO; Rozmiar alternatywny; TT/TL; LI/SI; PR;
-//   PRODUCENT; RODZAJ; BIEŻNIK; Kod producenta; EAN Code; Cena; Rabat; Magazyn
-// Klucze zwracamy zgodnie z tym co czyta adapter.cjs case MO8 (normalizeTrelleborg).
-function parseCsvBuffer(buffer) {
-  const text = buffer.toString('utf-8');
-  const rows = parse(text, {
-    delimiter: ';',
-    columns: true,
-    skip_empty_lines: true,
-    relax_column_count: true,
-    trim: true,
-  });
-
-  const records = [];
-  const errors = [];
-  const stats = { format: 'csv', total_wierszy: rows.length, importowane: 0, odrzucone_bez_rozmiaru: 0 };
-
-  for (let idx = 0; idx < rows.length; idx++) {
-    const row = rows[idx];
-    try {
-      // Adapter case MO8 szuka kluczy zawierających 'BIE' i 'ean' (regex), więc
-      // podwójnie zakodowana polska nazwa BIEŻNIK w headerze zostanie znaleziona.
-      const rozmiar = (row['Rozmiar'] || '').toString().trim();
-      if (!rozmiar) {
-        stats.odrzucone_bez_rozmiaru++;
-        continue;
-      }
-
-      const rec = c.normalizeRecord({
-        ean: c.normalizeEan(row['EAN Code']),
-        kod_dostawcy: row['Kod producenta'] || null,
-        nazwa: `Opona Trelleborg ${row['Kod producenta'] || ''} ${rozmiar}`.trim(),
-        producent: 'Trelleborg',
-        model_bieznik: row['Kod producenta'] || '',
-        rozmiar,
-        rozmiar_alternatywny: row['Rozmiar alternatywny'] || null,
-        cena_zakupu: row['Cena'] || row['Cena '],
-        stan_magazynowy: row['Magazyn'] || 0,
-        // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
-        kategoria: c.classifyByName(`Opona Trelleborg ${rozmiar}`) || 'Rolnicze',
-        oznaczenia_techniczne: [],
-        dostawca: DOSTAWCA,
-        surowe_pola: row,  // adapter case MO8 czyta bezpośrednio surowe klucze CSV
-      });
-      records.push(rec);
-      stats.importowane++;
-    } catch (e) {
-      errors.push({ row: idx + 1, error: e.message });
-    }
-  }
-
-  return { records, errors, dostawca: DOSTAWCA, stats };
-}
-
 function parseFile(filePath) {
-  // Detekcja formatu: XLSX (ZIP PK\x03\x04) vs CSV.
-  const buffer = fs.readFileSync(filePath);
-
-  if (!isZipBuffer(buffer)) {
-    // Dostawca wysyła prawdziwy CSV — używamy dedykowanego parsera.
-    return parseCsvBuffer(buffer);
-  }
-
-  // Prawdziwy XLSX — oryginalna ścieżka SheetJS z arkuszami Radial/XPly.
+  // SheetJS: synchroniczne czytanie pliku
   const workbook = XLSX.readFile(filePath, {
     cellFormula: false,   // wynik formuły zamiast obiektu
     cellDates: false,
@@ -347,8 +270,7 @@ function parseFile(filePath) {
 
         // Kategoria — klasyfikacja po nazwie
         let kategoria = c.classifyByName(nazwa);
-        // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
-        if (!kategoria) kategoria = 'Rolnicze';
+        if (!kategoria) kategoria = 'rolnicze';
 
         // Oznaczenia techniczne
         const oznaczenia = [
@@ -398,7 +320,7 @@ function parseFile(filePath) {
             'LI/SI': [liSi, liSiAlt].filter(Boolean).join('/') || null,
             'PR': pr,
             'PRODUCENT': 'Trelleborg',
-            'RODZAJ': 'Rolnicze',
+            'RODZAJ': 'rolnicze',
             'BIEZNIK': pattern || null,
             'Kod producenta': ipCode || null,
             'EAN': ean,

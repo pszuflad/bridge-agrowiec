@@ -95,10 +95,7 @@ function parseFile(filePath) {
       const kategoria = c.classifyByName(nazwa);
 
       // Anna 01.07: odrzucamy dętki (Dong Ah, SCHLAUCH) i akcesoria (WULSTBAND, obręcze, O-RING)
-      // POPRAWKA 2026-09-01 (Bug #1 od Claude'a): classifyByName od 2026-08-18 zwraca
-      // kategorie z Wielkiej litery ('Dętki'/'Akcesoria'), a filtr porównywał z małą —
-      // od 18.08 przepuszczał 16 WULSTBAND do staging_items. Porównujemy case-insensitive.
-      if (kategoria && (kategoria.toLowerCase() === 'dętki' || kategoria.toLowerCase() === 'akcesoria')) {
+      if (kategoria === 'dętki' || kategoria === 'akcesoria') {
         continue;
       }
 

@@ -94,11 +94,7 @@ function normalizeSizeText(value) {
   // wymagal scisle "L-" bez spacji, wiec te zapisy nigdy nie byly rozpoznawane (rozmiar
   // i wysokosc wychodzily null, mimo ze rozmiar byl obecny w tekscie nazwy). Normalizujemy
   // do kanonicznej postaci "L-" bez wzgledu na oryginalny separator/odstepy.
-  // POPRAWKA 2026-08-25: dopisano separator 'x'/'X' do normalizacji L-series (BKT MO9
-  // uzywa notacji "28LX26", "12,5LX15", "7,5Lx15" itd.) — dotad regex zawieral tylko
-  // [-R], wiec te zapisy nie normalizowaly sie do kanonicznej "L-" i parseSize dawal
-  // wszystkie pola null. Rozszerzenie o [-Rx] rozwiazuje 9 rekordow MO9 BKT bez konstrukcji.
-  text = text.replace(/(\d{1,3}(?:[.,]\d+)?)\s*L\s*[-Rx]\s*(\d{1,3}(?:[.,]\d+)?)/gi, '$1L-$2');
+  text = text.replace(/(\d{1,3}(?:[.,]\d+)?)\s*L\s*[-R]\s*(\d{1,3}(?:[.,]\d+)?)/gi, '$1L-$2');
   return text.replace(/\s+/g, ' ').trim();
 }
 
@@ -196,18 +192,7 @@ function parseSize(value) {
   // ucinaloby prefiks szerokosci). Flaga matched3PartSlashX chroni wynik przed
   // nadpisaniem przez dalsze warunki w kaskadzie (analogicznie do ochrony L-series).
   let matched3PartSlashX = false;
-  // POPRAWKA 2026-08-25 (B): dodano wariant "W/PLxD" — L-series z profilem, np.
-  // "400/45Lx17" (BKT TERRA TRAX). Sprawdzane PRZED klasycznym "W/PxD" bo bez
-  // wychwycenia 'L' regex nizej odciolby prefiks i traktowal jako flotacyjna D.
-  let matchLp = size.match(/^(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)L[-x](\d{1,3}(?:\.\d+)?)$/i);
-  if (matchLp) {
-    result.szerokosc = parseNumber(matchLp[1]);
-    result.profil = parseNumber(matchLp[2]);
-    result.konstrukcja = 'L';
-    result.srednica = parseNumber(matchLp[3]);
-    matched3PartSlashX = true;
-  }
-  let match = matched3PartSlashX ? null : size.match(/^(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)x(\d{1,3}(?:\.\d+)?)$/i);
+  let match = size.match(/^(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)x(\d{1,3}(?:\.\d+)?)$/i);
   if (match) {
     result.szerokosc = parseNumber(match[1]);
     result.profil = parseNumber(match[2]);
@@ -215,7 +200,7 @@ function parseSize(value) {
     result.srednica = parseNumber(match[3]);
     matched3PartSlashX = true;
     match = null;
-  } else if (!matched3PartSlashX) {
+  } else {
     match = size.match(/^(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)L-(\d{1,3}(?:\.\d+)?)$/i);
   }
   if (match) {
@@ -226,10 +211,7 @@ function parseSize(value) {
     result.srednica = parseNumber(match[3]);
     match = null;
   } else if (!matched3PartSlashX) {
-    // POPRAWKA 2026-08-25 (C): szerokosc {2,4} -> {1,4} zeby zlapac ulamkowe pojedyncze cyfry
-    // np. "6.5/75-14" (MITAS TS-02) — bez tego 1 cyfra przed kropka wypadala z regexa
-    // i konstrukcja/szerokosc/profil/srednica pozostawaly null.
-    match = size.match(/^(VF|IF)?(\d{1,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)([RBD-])(\d{1,3}(?:\.\d+)?)$/i);
+    match = size.match(/^(VF|IF)?(\d{2,4}(?:\.\d+)?)\/(\d{1,3}(?:\.\d+)?)([RBD-])(\d{1,3}(?:\.\d+)?)$/i);
   }
   if (match) {
     result.szerokosc = parseNumber(match[2]);
@@ -261,36 +243,6 @@ function parseSize(value) {
           result.konstrukcja = 'L';
           result.srednica = parseNumber(match[2]);
         } else {
-          // POPRAWKA 2026-08-31: notacja "OD x SW - rim" (stara diagonalna rolnicza/mikroopon).
-          // Trzy calkowite liczby: pierwsza = srednica zewnetrzna mm (>=400), druga = szerokosc
-          // przekroju mm (>=100 i calkowita), trzecia = felga w calach. Przyklady: 690x180-15
-          // (Trelleborg TRACTION, Mitas TS-07), 645x160-14 / 610x145-13 / 560x140-12 (T-528).
-          // MUSI byc PRZED klasyczna "WxP-D", bo tam druga liczba jest interpretowana jako
-          // profil (%) — dla starej notacji rolniczej ta liczba to szerokosc w mm i staje
-          // sie 180 (profil) zamiast 180 (SW). Wynik zgodnie z decyzja Anny (wariant A):
-          // szerokosc = SW mm, profil = null, srednica = felga cale, konstrukcja = 'D'.
-          // Kolumna "rozmiar" zachowuje oryginalna etykiete "OD x SW - rim".
-          match = size.match(/^(\d{3,4})x(\d{3})-(\d{1,3}(?:\.\d+)?)$/i);
-          if (match && parseNumber(match[1]) >= 400 && parseNumber(match[2]) >= 100) {
-            result.szerokosc = parseNumber(match[2]);
-            result.profil = null;
-            result.konstrukcja = 'D';
-            result.srednica = parseNumber(match[3]);
-          } else {
-          // POPRAWKA 2026-09-04: notacja "ODxSW-R" w calach dla malych opon wozkowych/mikroopon.
-          // Rozroznienie od klasycznej "WxP-D" (bias-ply typu "10.5x80-18"): dla wozkowych
-          // pierwsza liczba (OD, srednica zewnetrzna opony w calach) > trzeciej (felga w calach)
-          // i cala liczba < 30. Klasyczna bias-ply ma A<C zawsze (szerokosc < felga).
-          // Przyklady: "16x6-8" (BKT MAGLIFT: OD=16", SW=6", felga=8"), "23x10-12", "18x7.50-8".
-          // Wartosc SW (druga liczba) to rzeczywista szerokosc w calach; OD nie zapisujemy.
-          // MUSI byc PRZED klasyczna "WxP-D".
-          match = size.match(/^(\d{1,2}(?:\.\d+)?)x(\d{1,2}(?:\.\d+)?)-(\d{1,2}(?:\.\d+)?)$/i);
-          if (match && parseNumber(match[1]) > parseNumber(match[3]) && parseNumber(match[1]) < 30) {
-            result.szerokosc = parseNumber(match[2]);
-            result.profil = null;
-            result.konstrukcja = 'D';
-            result.srednica = parseNumber(match[3]);
-          } else {
           // POPRAWKA 2026-06-18 (3): zapis "WxP-D" (3 liczby, separator "x" miedzy
           // szerokoscia i profilem, np. "10.5x80-18") — tradycyjna notacja bias-ply.
           match = size.match(/^(\d{1,3}(?:\.\d+)?)x(\d{1,3}(?:\.\d+)?)-(\d{1,3}(?:\.\d+)?)$/i);
@@ -309,8 +261,6 @@ function parseSize(value) {
               result.srednica = parseNumber(match[2]);
             }
           }
-          }
-        }
         }
       }
     }
@@ -336,35 +286,14 @@ function parseSize(value) {
   // (potrzebny do widthCm/wysokoscBokuCm), wiec dodajemy osobne pole szerokoscRaw
   // jako string 1:1 z rozmiaru. Trafi do kolumny products.szerokosc (TEXT).
   if (result.szerokosc !== null && size) {
-    // POPRAWKA 2026-08-31: dla notacji WxSxD (stara diagonalna rolnicza) NIE nadpisujemy
-    // szerokosc pierwsza liczba z rozmiaru — tam pierwsza liczba to srednica zewnetrzna mm,
-    // a szerokosc siedzi na drugim miejscu. Wykrywamy przez size ~ /^\d{3,4}x\d{3}-\d/.
-    // POPRAWKA 2026-09-04: dodano wariant calowy "OD x SW - Rim" dla malych opon
-    // wozkowych (16x6-8, 23x10-12) — tam rowniez pierwsza liczba z 'size' to OD (cale),
-    // a rzeczywista szerokosc jest w result.szerokosc po parsowaniu. Bez tego blok
-    // "szerokoscRaw z pierwszej liczby" nadpisywalby prawidlowa szerokosc pierwsza
-    // liczba z rozmiaru (OD).
-    const isWxSxDcale = /^\d{1,2}(?:\.\d+)?x\d{1,2}(?:\.\d+)?-\d{1,2}/.test(size)
-      && (function(){
-           const m = size.match(/^(\d{1,2}(?:\.\d+)?)x\d{1,2}(?:\.\d+)?-(\d{1,2}(?:\.\d+)?)/);
-           return m && parseFloat(m[1]) > parseFloat(m[2]) && parseFloat(m[1]) < 30;
-         })();
-    const isWxSxD = (/^\d{3,4}x\d{3}-\d/.test(size) && Number(String(result.szerokosc)) < 400) || isWxSxDcale;
-    if (isWxSxD) {
-      // pierwsza liczba z 'size' to OD mm, druga to SW mm (juz w result.szerokosc jako number).
-      // Ustawiamy szerokoscRaw z aktualnego result.szerokosc (SW), nie z pierwszej liczby.
-      result.szerokoscRaw = String(result.szerokosc);
+    const rawMatch = size.match(/(\d+(?:[.,]\d+)?)/);
+    if (rawMatch) {
+      result.szerokoscRaw = rawMatch[1].replace(',', '.');
+      // POPRAWKA 2026-08-19 (v3): nadpisuje result.szerokosc stringiem 1:1 z rozmiaru
+      // (10.0, 14.9, 800, 10.00). Kolumna products.szerokosc jest teraz TEXT.
+      // wysokoscBokuCm/wysokoscRzeczywistaCm sa juz policzone powyzej z floata,
+      // wiec ta zmiana ich nie ruszy. Zachowujemy zera koncowe zgodnie z prosba Anny.
       result.szerokosc = result.szerokoscRaw;
-    } else {
-      const rawMatch = size.match(/(\d+(?:[.,]\d+)?)/);
-      if (rawMatch) {
-        result.szerokoscRaw = rawMatch[1].replace(',', '.');
-        // POPRAWKA 2026-08-19 (v3): nadpisuje result.szerokosc stringiem 1:1 z rozmiaru
-        // (10.0, 14.9, 800, 10.00). Kolumna products.szerokosc jest teraz TEXT.
-        // wysokoscBokuCm/wysokoscRzeczywistaCm sa juz policzone powyzej z floata,
-        // wiec ta zmiana ich nie ruszy. Zachowujemy zera koncowe zgodnie z prosba Anny.
-        result.szerokosc = result.szerokoscRaw;
-      }
     }
   }
 
@@ -445,12 +374,8 @@ function parseTechnicalMarks(...values) {
     // miedzy F a cyfra). Akceptujemy zarowno samodzielne VF/IF jak i przyklejone do
     // szerokosci (prefix rozmiaru), np. "VF320", "IF710".
     vfIf: /\bVF(?:\b|(?=\d))/.test(upper) ? 'VF' : /\bIF(?:\b|(?=\d))/.test(upper) ? 'IF' : null,
-    // POPRAWKA 2026-09-01 (Bug #2 od Claude'a, rozszerzenie flagsfix 2026-08-25):
-    // NRO/CHO to flagi Michelin (Non Rim-Off / CHargement O…), takie same jak cfo/ms/snow.
-    // Wcześniej zwracane jako 1/0 (INTEGER) — w panelu wyświetlały się jako liczby zamiast "Tak"/pusto.
-    // Konwencja projektu: flagi UE → 'Tak' lub null.
-    nro: /\bNRO\b/.test(upper) ? 'Tak' : null,
-    cho: /\bCHO\b/.test(upper) ? 'Tak' : null,
+    nro: /\bNRO\b/.test(upper) ? 1 : 0,
+    cho: /\bCHO\b/.test(upper) ? 1 : 0,
     cfo: /\bCFO\b/.test(upper) ? 1 : 0,
     sb: /\bSB\b|\bSTEEL BELTED\b/.test(upper) ? 1 : 0,
     sf: /\bSF\b/.test(upper) ? 1 : 0,
@@ -865,25 +790,23 @@ function normalizeGrasdorf(record) {
   const zastosowanieTxt = cleanText(record.zastosowanie).toLowerCase();
   let kategoria;
   if (zastosowanieTxt) {
-    // POPRAWKA 2026-09-01 (unifikacja kategorii): wartości z Wielkiej litery.
-    if (/le[s\u015b]n|forest|skidder/.test(zastosowanieTxt)) kategoria = 'Le\u015bne';
-    else if (/ci[e\u0119]\u017carow|truck/.test(zastosowanieTxt)) kategoria = 'Ci\u0119\u017carowe';
-    else if (/przemys|industrial/.test(zastosowanieTxt)) kategoria = 'Przemys\u0142owe';
-    else if (/rolnicz|agric|agro/.test(zastosowanieTxt)) kategoria = 'Rolnicze';
+    if (/le[s\u015b]n|forest|skidder/.test(zastosowanieTxt)) kategoria = 'le\u015bne';
+    else if (/ci[e\u0119]\u017carow|truck/.test(zastosowanieTxt)) kategoria = 'ci\u0119\u017carowe';
+    else if (/przemys|industrial/.test(zastosowanieTxt)) kategoria = 'przemys\u0142owe';
+    else if (/rolnicz|agric|agro/.test(zastosowanieTxt)) kategoria = 'rolnicze';
   }
   if (!kategoria) {
     const katSource = `${record.category || ''} ${record.name || ''} ${record.additionalName || ''}`.toLowerCase();
-    if (/forest|skidder|le[s\u015b]n/.test(katSource)) kategoria = 'Le\u015bne';
-    else if (/truck|ciezarow|cie\u017carow|3pmsf|drive\b|trailer\b|\bfrt\b/.test(katSource)) kategoria = 'Ci\u0119\u017carowe';
-    else if (/industrial|loader|grader|compactor|earthmover/.test(katSource)) kategoria = 'Przemys\u0142owe';
+    if (/forest|skidder|le[s\u015b]n/.test(katSource)) kategoria = 'le\u015bne';
+    else if (/truck|ciezarow|cie\u017carow|3pmsf|drive\b|trailer\b|\bfrt\b/.test(katSource)) kategoria = 'ci\u0119\u017carowe';
+    else if (/industrial|loader|grader|compactor|earthmover/.test(katSource)) kategoria = 'przemys\u0142owe';
     // UWAGA: /przemys/ nie jest tu używany, bo path produktu często zawiera "Opony rolnicze i przemysłowe".
-    else if (/opona rolnicza|rolnicz|agric|agro|tractor/.test(katSource)) kategoria = 'Rolnicze';
-    else kategoria = 'Rolnicze';
+    else if (/opona rolnicza|rolnicz|agric|agro|tractor/.test(katSource)) kategoria = 'rolnicze';
+    else kategoria = 'rolnicze';
   }
   // Wymuszamy TL dla ciezarowych (decyzja Anny: "Ciezarowe opony zawsze sa TL").
-  // POPRAWKA 2026-09-01: porównanie z Wielkiej litery.
   let tlTtFinal = normalizeTlTt(record.typ) || marks.tlTt;
-  if (!tlTtFinal && kategoria === 'Ci\u0119\u017carowe') tlTtFinal = 'TL';
+  if (!tlTtFinal && (kategoria === 'ci\u0119\u017carowe' || kategoria === 'ciezarowe')) tlTtFinal = 'TL';
   const result = {
     odrzucony: false,
     kategoria,
@@ -1011,11 +934,7 @@ function removeHandlopexSizeVariants(text, size) {
 // Anna 02.07: słowa opisowe do usunięcia z modelu i nazwy Handlopex
 // Zachowujemy: prowadząca, napęd (info która oś)
 // DOT\d{2,4}: rok DOT trafiał do modelu (Anna 02.07 runda 2)
-// POPRAWKA 2026-08-31 (B10, Anna): dodane KPL (komplet z detka) i NACZEPA (sufiks handlowy
-// Handlopex - powiaz z kolumna zastosowanie), aby nie wpadaly do modelu.
-// UWAGA: NIE dodajemy TR\d+ globalnie - to trafi w LASSA TR68/70, MITAS TR12, BKT TR387/390/678,
-// SECURITY TR603, CONTINENTAL HTR2. Wentyl typu TR87 usuwamy tylko po ukosniku ("/TR87") ponizej.
-const HANDLOPEX_STOPWORDS_RE = /\b(?:budowlan[ay]|zima|jode[łl]ka|uniwersaln[aey]|steel\s+belted|DOT\s*\d{2,4}|KPL|NACZEPA)\b/gi;
+const HANDLOPEX_STOPWORDS_RE = /\b(?:budowlan[ay]|zima|jode[łl]ka|uniwersaln[aey]|steel\s+belted|DOT\s*\d{2,4})\b/gi;
 
 // Anna 02.07 runda 2: usuwa alternatywny/calowy rozmiar w środku nazwy
 // Przykłady:
@@ -1045,14 +964,6 @@ function extractHandlopexModel(nazwa, marka, size) {
   text = text
     .replace(/\([^)]*\)/g, ' ')
     .replace(/\[[^\]]*\]/g, ' ')
-    // POPRAWKA 2026-08-31 (B10): Handlopex czasem wysyla nazwe z NIESPARZONA klamra,
-    // np. "KLS200  18PR  [148/145 M  TL" (brak zamykajacej ]). Wzorzec pierwotny .replace(\[[^\]]*\]/g)
-    // nie lapal tego przypadku i "[148/145" wpadalo do modelu. Dopasuj [DDD/DDD z opcjonalnym SI po spacji.
-    .replace(/\[\s*\d{2,3}\s*\/\s*\d{2,3}\s*[A-Z]?\d?\s*\]?/g, ' ')
-    // POPRAWKA 2026-08-31 (B10, Anna): wentyl typu TR87 w formacie "/TR\d+" (Trelleborg light industrial
-    // sprzedawany jako KPL) - usuwamy tylko po ukosniku, zeby nie zbic LASSA TR68/70, MITAS TR12,
-    // BKT TR387/390/678, SECURITY TR603.
-    .replace(/\/\s*TR\d{1,3}\b/gi, ' ')
     .replace(HANDLOPEX_STOPWORDS_RE, ' ')  // Anna 02.07: usuwamy budowlana/zima/jodełka/steel belted/DOTxxxx
     .replace(INCH_ALT_SIZE_RE, ' ')         // Anna 02.07 runda 2: usuwa 7.00-15, 6.00-12 itp.
     .replace(INCH_ALT_SIZE_CONSTR_RE, ' ')  // Anna 02.07 runda 5: usuwa 19.5L-24, 12.5/80-18 itp.
@@ -1142,8 +1053,7 @@ function normalizeHandlopex(record) {
   const sb = /\bsteel\s+belted\b/i.test(record.nazwa || '') ? 1 : 0;
   const simpleInchSize = !!(size.rozmiar && /^\d{1,3}(?:\.\d+)?-\d{1,3}(?:\.\d+)?$/.test(size.rozmiar));
   const result = {
-    // POPRAWKA 2026-09-01 (unifikacja kategorii): wartości z Wielkiej litery.
-    kategoria: record.kategoria || (/16PR|AWE 713|SET/i.test(record.nazwa || '') ? 'Przemys\u0142owe' : /R\d{2}\.5|M\+S|3PMSF/i.test(record.nazwa || '') ? 'Ci\u0119\u017carowe' : 'Rolnicze'),
+    kategoria: record.kategoria || (/16PR|AWE 713|SET/i.test(record.nazwa || '') ? 'przemys\u0142owe' : /R\d{2}\.5|M\+S|3PMSF/i.test(record.nazwa || '') ? 'ci\u0119\u017carowe' : 'rolnicze'),
     kodDostawcy: emptyToNull(record.symbolHandlopex),
     ean: emptyToNull(record.ean),
     marka,
@@ -1246,10 +1156,7 @@ function normalizeNokian(record) {
   const model = stripBrandFromModel(record.model || record.bieznik, marka);
   const sbSf = cleanText(record.sfSb).toUpperCase();
   const result = {
-    // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
-    // Uwaga: gdy `record.rodzaj` nie zawiera 'rolnicz', przekazujemy oryginalny tekst
-    // — `capitalizeKategoria` w `adapter.cjs` normalizuje wielkość liter dla znanych kategorii.
-    kategoria: /rolnicz/i.test(record.rodzaj || '') ? 'Rolnicze' : cleanText(record.rodzaj) || null,
+    kategoria: /rolnicz/i.test(record.rodzaj || '') ? 'rolnicze' : cleanText(record.rodzaj).toLowerCase() || null,
     kodDostawcy: emptyToNull(record.kodProduktu),
     ean: emptyToNull(record.ean),
     marka,
@@ -1370,17 +1277,15 @@ function normalizeAgrorami(record) {
     const txt = `${record.bieznik || ''} ${record.producent || ''} ${record.rozmiar || ''}`.toLowerCase();
     // Przemyslowe: wozki widlowe, loadery, skid steer, kompaktory, portowe
     const reIndustrial = /\b(maglift|liftmax|lift\s*max|loader|con\s*star|earthmax|skid\s*power|pac\s*master|pacmaster|trac\s*master|rock\s*grip|giant\s*trax|jumbotrax|suretrax|bk-?loader|gr\s*288|xl\s*grip|v-line|pl\s*801|pt\s*-?\s*hd|lg\s*30[68]|lg\s*408|multimax|mp\s*5[1-9]\d|mp\s*[56]00|rib\s*774|sp\s*imp|airomax|am27|as\s*(504|509|2001)|aw\s*(70[258]|909)|at\s*(111|621)|fs\s*216|tf\s*(8181|9090)|ind\b|imp\b|port\b)/i;
-    // POPRAWKA 2026-09-01 (unifikacja kategorii): wartości z Wielkiej litery.
-    if (/forest|skidder|le[sś]n/.test(txt)) kategoria = 'Le\u015bne';
-    else if (/truck|ciezarow|cie\u017carow|3pmsf/.test(txt)) kategoria = 'Ci\u0119\u017carowe';
-    else if (reIndustrial.test(txt)) kategoria = 'Przemys\u0142owe';
-    else kategoria = 'Rolnicze';
+    if (/forest|skidder|le[sś]n/.test(txt)) kategoria = 'le\u015bne';
+    else if (/truck|ciezarow|cie\u017carow|3pmsf/.test(txt)) kategoria = 'ci\u0119\u017carowe';
+    else if (reIndustrial.test(txt)) kategoria = 'przemys\u0142owe';
+    else kategoria = 'rolnicze';
   } else {
     kategoria = katRaw;
   }
-  // POPRAWKA 2026-09-01: porównanie z Wielkiej litery.
   let tlTt = normalizeTlTt(record.tlTt) || marks.tlTt;
-  if (!tlTt && kategoria === 'Ci\u0119\u017carowe') tlTt = 'TL';
+  if (!tlTt && (kategoria === 'ciezarowe' || kategoria === 'ci\u0119\u017carowe')) tlTt = 'TL';
   const result = {
     kategoria,
     // NAPRAWIONE 2026-07-13: kodDostawcy MUSI pochodzic z record.kod_dostawcy (ktore
@@ -1581,8 +1486,7 @@ function normalizeGri(record) {
   const rozmiarZPrefiksem = size.rozmiar ? `${sizePrefix}${size.rozmiar}` : size.rozmiar;
 
   const result = {
-    // POPRAWKA 2026-09-01 (unifikacja kategorii): wartości z Wielkiej litery.
-    kategoria: industrial ? 'Przemys\u0142owe' : (tread && /^[ILEGC]-/.test(tread) ? 'Przemys\u0142owe' : 'Rolnicze'),
+    kategoria: industrial ? 'przemys\u0142owe' : (tread && /^[ILEGC]-/.test(tread) ? 'przemys\u0142owe' : 'rolnicze'),
     kodDostawcy: emptyToNull(record.kodDostawcy || record.nrKat),
     ean: emptyToNull(record.ean),
     marka: 'GRI',
@@ -1742,8 +1646,7 @@ function normalizeBohnenkamp(row) {
     const altSizes = alt.map(v => v.replace(/[()]/g, '').trim()).filter(Boolean);
     const valve = emptyToNull(spec);
     return {
-      // POPRAWKA 2026-09-01 (unifikacja kategorii): wartość z Wielkiej litery i z ogonkiem.
-      kategoria: 'D\u0119tki',
+      kategoria: 'detki',
       kodDostawcy: emptyToNull(kodDostawcy),
       ean: emptyToNull(ean),
       marka: emptyToNull(producent || producent2),
@@ -1780,8 +1683,7 @@ function normalizeBohnenkamp(row) {
   const textDoKlasyfikacji = [cleanName, model, spec].filter(Boolean).join(' ');
   const kategoriaDetected = commonHelpers.classifyByName(textDoKlasyfikacji, size.rozmiar);
   const result = {
-    // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
-    kategoria: kategoriaDetected || 'Rolnicze',
+    kategoria: kategoriaDetected || 'rolnicze',
     kodDostawcy: emptyToNull(kodDostawcy),
     ean: emptyToNull(ean),
     marka: emptyToNull(producent || producent2),

@@ -12,21 +12,18 @@ const c = require('../common.cjs');
 const DOSTAWCA = 'MO7_Nokian';
 
 // Mapowanie rodzaju z pliku → kategorii
-// POPRAWKA 2026-09-01 (unifikacja kategorii): wartości z Wielkiej litery, zgodnie
-// z konwencją `classifyByName` i `products.kategoria`. Klucze UPPERCASE bo Nokian
-// wysyła `RODZAJ` dużymi literami.
 const RODZAJ_MAP = {
-  'ROLNICZA': 'Rolnicze',
-  'ROLNICZE': 'Rolnicze',
-  'LEŚNA': 'Leśne',
-  'LESNA': 'Leśne',
-  'LEŚNE': 'Leśne',
-  'PRZEMYSŁOWA': 'Przemysłowe',
-  'PRZEMYSLOWA': 'Przemysłowe',
-  'PRZEMYSŁOWE': 'Przemysłowe',
-  'CIĘŻAROWA': 'Ciężarowe',
-  'CIEZAROWA': 'Ciężarowe',
-  'CIĘŻAROWE': 'Ciężarowe'
+  'ROLNICZA': 'rolnicze',
+  'ROLNICZE': 'rolnicze',
+  'LEŚNA': 'leśne',
+  'LESNA': 'leśne',
+  'LEŚNE': 'leśne',
+  'PRZEMYSŁOWA': 'przemysłowe',
+  'PRZEMYSLOWA': 'przemysłowe',
+  'PRZEMYSŁOWE': 'przemysłowe',
+  'CIĘŻAROWA': 'ciężarowe',
+  'CIEZAROWA': 'ciężarowe',
+  'CIĘŻAROWE': 'ciężarowe'
 };
 
 function parseFile(filePath) {
