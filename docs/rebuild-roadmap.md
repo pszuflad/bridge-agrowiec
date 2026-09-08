@@ -1975,7 +1975,7 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   konstrukcja / nazwa+overrides), **drugi przebieg 0 / 0 / 0** — idempotencja TREŚCIOWA
   (przybita testem, nie tylko przez ewidencję `_migracje`). `staging_items` stracił **723**
   wiersze CASE_ONLY. Fixtures przenagrane: `GET_products.json`, `GET_products_bez-parametrow.json`,
-  `PUT_products_id.json`, `PATCH_products_id.json`. **Bramki:** 80 plików / 1240 testów zielone,
+  `PUT_products_id.json`, `PATCH_products_id.json`. **Bramki:** 80 plików / 1241 testów zielone,
   `lint`/`typecheck`/`build` zielone, `tools/generate-openapi-schemas.cjs --sprawdz` zielone.
   **Znalezisko 13a rozstrzygnięte:** `katunify` NIE unifikował kategorii `'rolnicze małe'` w
   warstwie parserów (MO2, 3 rek.) — Wielką literę nadaje `mirror/backend/apply_kategoria.cjs:12`,

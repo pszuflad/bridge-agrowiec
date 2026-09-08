@@ -122,7 +122,8 @@ Fixtures, które pokazują `nazwa` mieszaną wielkością liter **i tak ma być*
 
 ### Testy jednostkowe i integracyjne
 
-- **Pełny przebieg:** 80 plików, **1240 testów, wszystkie zielone** (po przenagraniu fixtures).
+- **Pełny przebieg:** 80 plików, **1241 testów, wszystkie zielone** (po przenagraniu fixtures
+  i po dołożeniu testu-strażnika resztki diakrytycznej z review).
 - **Nowe:** `test/db.migracje.test.ts` — 7 testów migracji danych (łącznie 12 w pliku):
   mapowanie kategorii z zachowaniem wartości spoza map; kody konstrukcji z zachowaniem `X`/NULL;
   `UPPER` na `nazwa` i override `nazwa` z nietykalnością pozostałych pól override;
@@ -217,7 +218,7 @@ Trzej doc-checkerzy równolegle, każdy na rozłącznym zbiorze plików.
 - Wiersz zbiorczy I13: dopisane `13c: ✅ 44-CHORE-i13c-migracje-konwencji · 2026-09-09`,
   „Zostają 13c/13d/13e" → „Zostają 13d/13e".
 - Blok 13c przepisany z ZAMIARU na ROZLICZENIE: trzy migracje, pomiar 537/7392/2647 → 0/0/0,
-  723 skasowane wiersze staging, cztery przenagrane fixtures, bramki 80/1240.
+  723 skasowane wiersze staging, cztery przenagrane fixtures, bramki 80/1241.
   Otwarte pytanie bloku („czy katunify wymaga migracji") ma teraz odpowiedź: TAK, 537 rekordów.
 - **Trzy obalone twierdzenia usunięte, nie dopisane obok** (`CLAUDE.md` obowiązek 4):
   „wzór: #2 kategoriafix" (#2 nigdy nie miał migracji), „decyzja Anny: `-` → Diagonalna" jako
@@ -255,7 +256,8 @@ Trzej doc-checkerzy równolegle, każdy na rozłącznym zbiorze plików.
   bazy, ale `npm run migrate` stosuje na niej migracje schematu (001–003) i DANYCH (004–006).
 - Krok 5 („Migracje na ŻYWEJ bazie"): 004–006 mają być no-opem na produkcji — to dowód
   wierności, nie usterka.
-- Nieaktualna liczba testów backendu 79/1223 → 80/1240.
+- Nieaktualna liczba testów backendu 79/1223 → 80/1241 (doc-checker wpisał 1240 ze stanu
+  sprzed testu-strażnika; Master poprawił po finalnym przebiegu).
 - ⚠ **Korekta Mastera na dopisie doc-checkera:** twierdził, że `npm run migrate` wypisuje liczbę
   zmienionych wierszy. **Nieprawda** — `migrate-cli.ts` wypisuje wyłącznie, które PLIKI
   zastosował i które pominął. Zastąpione konkretnym zapytaniem `sqlite3` na KOPII bazy,

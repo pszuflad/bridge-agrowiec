@@ -32,7 +32,7 @@ przed oknem, żeby nie zgłosiła tego jako błąd.
 - [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na staging
       (`docs/przeglad-12-widokow.md`). To jest warunek nadrzędny — bez niego nie zaczynamy.
 - [ ] **Bramki zielone** na `develop`: `lint`, `typecheck`, `build`, `test` po obu stronach
-      (backend: 80 plików / 1240 testów; frontend: 48 plików / 747 testów + 5 plików integracyjnych).
+      (backend: 80 plików / 1241 testów; frontend: 48 plików / 747 testów + 5 plików integracyjnych).
 - [ ] **Sekrety produkcyjne przygotowane** w pliku `.env` poza repo (rozdział 4). Bez
       `JWT_SECRET` i `DB_PATH` backend **nie wstanie** — to celowy fail-fast, nie usterka.
 - [ ] **Schemat produkcji zweryfikowany** wg rozdziału 3, na KOPII, nie na żywej bazie.
