@@ -1,64 +1,142 @@
 # 42-CHORE-i13a-resync-parserow — Code review
 
-> Reviewed: 2026-09-08
+> Reviewed: 2026-09-08 (iteracja 2)
 > Branch: chore/42-i13a-resync-parserow
-> Diff: 38 plików zmienionych (9 par mirror+port, 18 wzorców charakteryzacji parserów+silnika, 2 pliki dokumentacji ticketa nowe/nietrackowane), 3 commity (`bb020fb`, `9b26ceb`, `5887c0b`)
+> Diff: 43 pliki zmienione (9 par mirror+port, 18 wzorców charakteryzacji parserów+silnika,
+> `docs/rebuild-roadmap.md`, `docs/rebuild-backlog.md`, dokumenty ticketa), 5 commitów
+> (`bb020fb`, `9b26ceb`, `5887c0b`, `5f3ffc8`, `daf0c0f`)
+
+## Kontekst tej iteracji
+
+Iteracja 1 zgłosiła 3 BLOCKER-y i 1 SHOULD-FIX (treść zachowana w historii gita jako pierwsza
+wersja tego pliku). Ta iteracja **weryfikuje niezależnie**, czy zamknięcia w commitach `5f3ffc8`
+i `daf0c0f` są rzetelne, a nie tylko odhaczone. Wszystkie poniższe liczby przeliczono samodzielnie
+(nie przepisano z raportu) skryptami porównującymi JSON `origin/develop` vs `HEAD`.
 
 ## BLOCKER
 
-- [ ] `docs/rebuild-roadmap.md` (blok „Iteracja 13", ok. linii 185, 1930) — 13a nadal opisane jako zaplanowane, nie jako zrobione.
-  - Reason: DoD karty wprost wymaga „`docs/rebuild-roadmap.md` blok I13: 13a oznaczone jako zrobione (data + ID ticketa)". `git diff origin/develop...HEAD -- docs/rebuild-roadmap.md` jest **pusty** — plik nie był w ogóle dotknięty w tej gałęzi. Tabela w §5 (linia 185) nadal ma status `⬜`, a opis karty 13a (linia 1930) nie ma żadnej wzmianki o realizacji. Precedens z tej samej roadmapy: ticket `41-CHORE-i13f-decyzja-backfille` (commit `e116ce6`) aktualizował `rebuild-roadmap.md` i `rebuild-backlog.md` w tym samym commicie co decyzję — więc to nie jest praca odłożona na później, tylko pominięty krok tej karty.
-  - Suggestion: dopisać do bloku 13a datę zamknięcia + ID `42-CHORE-i13a-resync-parserow`, zakres faktycznie dowieziony (9 plików, przenagranie parserów + świadome przenagranie silnika), i — zgodnie z zasadą CLAUDE.md #2 — wszelkie ustalenia dla 13b (stan przejściowy „silnik 25.08 + parsery 08.09", konieczność re-recordu po bumpie `index.cjs`) wpisać DO bloku 13b, nie do 13a.
+Brak. Wszystkie trzy BLOCKER-y z iteracji 1 są faktycznie zamknięte, ze zweryfikowanym pokryciem:
 
-- [ ] `docs/rebuild-backlog.md` (wpisy #8, #9, #10, #53, #54, #55, #57, #58, #63, #64) — statusy części parserowej nie zaktualizowane mimo ukończonego portu.
-  - Reason: DoD wprost wymaga aktualizacji tych statusów „w części parserowej". `git diff` na `rebuild-backlog.md` jest pusty. #53/#54/#55/#63/#64 nadal mają `**Status:** ⬜ do portu` — mimo że port tych zmian właśnie się odbył i jest potwierdzony bajt-w-bajt zgodny z produkcją. #8/#9/#10 mają status z 2026-09-01 zapowiadający „Port w I13/13a" w czasie przyszłym, bez potwierdzenia, że port faktycznie nastąpił w tym tickecie.
-  - Suggestion: dla każdego z 10 wpisów dopisać potwierdzenie portu (np. „✅ sportowane w `42-CHORE-i13a-resync-parserow`, 2026-09-08") — zgodnie z zasadą CLAUDE.md „Po każdym zamkniętym bloku roadmapa/backlog opisuje STAN, nie zamiar."
-
-- [ ] `docs/tickets/42-CHORE-i13a-resync-parserow/raport.md` (sekcja „Zależność parsery→silnik") i commit `5887c0b` — twierdzenie „Zero różnic strukturalnych" jest nieprawdziwe dla MO8.
-  - Reason: Zweryfikowano niezależnie porównaniem JSON przed/po dla wszystkich 10 `silnik/MOx.expected.json`. Dla MO8 pole `statystyki` zmienia się strukturalnie: `doStagingu` 25→31, `zmienione` 24→30, `bezZmian` 600→594 — sześć rekordów przeszło z „bez zmian" do pełnych wpisów `staging` (z kompletem nowych pól: `kod`, `eanRaw`, `eanCandidates`, `cenaZakupuStara/Nowa`, `stanStary`, `typZmiany`, `ostrzezenie` itd.), bo reparsowana szerokość (efekt `odswinch`/`p2_4`) przestała się zgadzać z wartością zapisaną w katalogu produkcyjnym. To jest realna zmiana **liczby i zawartości rekordów** silnika, nie tylko przesunięcie tekstu w `powod`/`snapshotJson`, jak twierdzi raport i treść commita (powtórzona identycznie w obu miejscach). Dla pozostałych 9 dostawców twierdzenie jest prawdziwe (zweryfikowano — brak zmian w `statystyki`). Nie podważa to poprawności technicznej samego przenagrania (silnik nadal woła oryginalny `tk()`, `index.cjs` nienaruszony — to potwierdzone), ale zaniża w dokumentacji faktyczny zakres świadomego odstępstwa, na którym ma polegać 13b.
-  - Suggestion: poprawić opis w raporcie (i ewentualnie dopisek w rozwinięciu do 13b) — wskazać wprost, że MO8 ma dodatkowo zmianę strukturalną w liczbie rekordów `staging` (25→31), wynikającą z przeliczonych szerokości, a nie tylko kosmetyczną zmianę treści pól tekstowych.
+1. **Roadmapa (`docs/rebuild-roadmap.md`)** — 13a ma teraz nagłówek „✅ zrobione 2026-09-08
+   (`42-CHORE-i13a-resync-parserow`)” z faktycznie dowiezionym zakresem (rozbicie na b4/b10/p2_4/
+   mo9expand/odswinch/bug1/bug2/bug4/katunify/konstr, każde z liczbą rekordów). **Obowiązek #2
+   z CLAUDE.md dotrzymany**: nota „Stan przejściowy odziedziczony z 13a” (konieczność re-recordu
+   wzorca silnika po bumpie `index.cjs`, komenda z `BRIDGE_SNAPSHOT_DB`, ostrzeżenie o MO8 31 vs 25)
+   wylądowała fizycznie WEWNĄTRZ bloku „13b” (po `**Zależy od:** 13a`), a nie w zamkniętym bloku
+   13a — sprawdzone czytaniem pliku, nie tylko diffu. Analogicznie `KONSTRUKCJA_CANONICAL_MAP` i
+   znalezisko o `'rolnicze małe'` trafiły do bloku 13c.
+2. **Backlog (`docs/rebuild-backlog.md`)** — wszystkich 10 wpisów (#8/#9/#10/#53/#54/#55/#57/#58/
+   #63/#64) ma zaktualizowany status z rozróżnieniem „sportowane i potwierdzone pomiarem” vs
+   „sportowane, ale niepotwierdzone przez próbki” (#8, #55, #57 — kod jest, próbki go nie
+   uruchamiają). #64 ma pełny opis realnego zakresu (+26/−1, dwa hunki w `parseSize()`).
+3. **„Zero różnic strukturalnych” dla MO8** — sprostowane w `raport.md` (sekcja „Zależność
+   parsery→silnik”), z ustaloną przyczyną. Zweryfikowano niezależnie: `statystyki` starego i nowego
+   `silnik/MO8.expected.json` dają dokładnie `doStagingu 25→31`, `zmienione 24→30`,
+   `bezZmian 600→594`; pozostałych 9 dostawców — `statystyki` bit-identyczne (potwierdzone
+   programowo). Sześć nowych `kod`-ów w stagingu (`MO8_0198600`, `MO8_0198800`, `MO8_0207900`,
+   `MO8_0209500`, `MO8_1159100`, `MO8_1169800`) to co do jednego `typZmiany: "blad"` z tekstem
+   „konflikt z poprawka Marty” na polach `konstrukcja`/`szerokosc` — dokładnie ten sam zestaw
+   kodów i pól, co podaje raport.
 
 ## SHOULD-FIX
 
-- [ ] `docs/tickets/42-CHORE-i13a-resync-parserow/raport.md` (tabela „Co realnie zmieniło się") — liczba rekordów MO8 dotkniętych przez `odswinch` (~72) jest przybliżeniem trudnym do zweryfikowania osobno od `p2_4`, bo oba efekty nakładają się w tym samym pliku (łącznie 78 zmienionych linii `szerokosc` w MO8). Nie jest to błąd, ale warto doprecyzować w raporcie, że rozbicie 72/78 jest szacunkiem, a nie zmierzoną wartością — obecnie brzmi jak twarda liczba.
+Brak. Poprzedni SHOULD-FIX („rozbicie 72/78 to szacunek, nie zmierzona wartość”) został nie
+tylko opatrzony zastrzeżeniem, ale **rzeczywiście zmierzony i zweryfikowany niezależnie**:
+klasyfikacja wszystkich rekordów o zmienionej `szerokosc` (skrypt porównujący `origin/develop`
+vs `HEAD` dla MO1–MO10, wzorcem pola `rozmiar`) daje **dokładnie**:
+
+- `odswinch`: 98 (MO1 1, MO2 22, MO3 1, MO4 4, MO8 68, MO10 2)
+- `p2_4`: 7 (MO2 1, MO8 6)
+- `b4`: 4 (wszystkie MO8)
+- razem 109, **0 niesklasyfikowanych**
+
+— identycznie z tabelą w raporcie. Sprawdzono też pochodne sumy w roadmapie („konstr… 1837 rek.”,
+„bug2… 255 rek.”) — obie to proste sumy z tabeli raportu, zgadzają się arytmetycznie i (dla bug2)
+potwierdzone programowo, że rzeczywiście każdy rekord MO1/MO3/MO9 ma zmieniony `nro`/`cho`
+(typ 0/1 → null/'Tak', stąd 100% pokrycie tych trzech próbek).
 
 ## NICE-TO-HAVE
 
-- [ ] Brak dalszych uwag — pozostała część zmian (9 plików parserów, przenagranie wzorców pola-po-polu) jest kopią bajtową kodu producenta i nie podlega ocenie stylu zgodnie z zasadami karty.
+- [ ] `docs/tickets/42-CHORE-i13a-resync-parserow/plan.md:3` — nagłówek statusu nadal generyczny
+  „Draft → Approved → Implemented → Shipped” bez wskazania aktualnego stanu (powinno być
+  pogrubione/zaznaczone „Shipped”, skoro karta zamknięta). Kosmetyka, nie wpływa na treść.
+
+## Weryfikacja dodatkowa — sprostowania spoza pierwotnych 3 BLOCKER-ów
+
+**b4 (#53) — sprostowanie, że weszło TYM syncem, nie przed 25.08.**
+Zweryfikowano niezależnie: `git show origin/develop:mirror/backend/parsers/tyre_params.cjs | grep -c
+"POPRAWKA 2026-08-31"` → **0**; ten sam grep na `HEAD` → **5** (w tym dwa fragmenty bezpośrednio
+odpowiadające za logikę b4 — blok `parseSize` OD×SW-Rim i strażnik `szerokoscRaw`, reszta to B10).
+Sprostowanie w raporcie i backlogu jest zasadne.
+
+**#57 (katunify) — zmiana przypisania „→ 13b” na „13a (parser) + 13c (migracja)”.**
+Zweryfikowano NIEZALEŻNIE oba źródła, na które powołuje się Master, **na stanie `origin/develop`
+sprzed tego ticketa** (żeby wykluczyć, że tabela/roadmapa zostały dopisane ad hoc na potrzeby
+uzasadnienia):
+- Tabela mapowania w tym samym pliku backlogu (linia ok. 2544, niezmieniona w tym diffie) już na
+  `origin/develop` mówiła `katunify(migracja) #57 | 13c`.
+- Blok 13c w `docs/rebuild-roadmap.md` już na `origin/develop` (linia 1948, poza diffem) zawierał
+  „weryfikacja czy katunify wymaga migracji historycznych kategorii”.
+
+Obie wzmianki istniały PRZED tym ticketem i obie mówiły 13c — pole „Iteracja” we wpisie #57
+(„→ 13b (migracja + fixtures)”) było więc wewnętrznie sprzeczne z resztą tego samego dokumentu.
+To jest korekta faktu (usunięcie literówki numeru karty, zgodnie z obowiązkiem #3 CLAUDE.md —
+przypisanie zweryfikowane niezależnie, nie na słowo), **nie zmiana zakresu** — opis w nawiasie
+(„migracja + fixtures”) się nie zmienił, zmienił się tylko numer karty, do której ten opis pasuje.
+Kwalifikacja jako „korekta faktu, nie decyzja użytkownika” jest prawidłowa.
+
+**Bramki backendu — uruchomione ponownie w tej iteracji, niezależnie:**
+`npm run lint` ✓ (cicho), `npm run typecheck` ✓ (cicho), `npm run build` ✓, `npm test` →
+**79 plików / 1223 testy, wszystkie zielone** — identycznie z deklaracją raportu.
+
+**Commity `5f3ffc8` i `daf0c0f` dotykają wyłącznie `docs/`** (`git show --stat` obu commitów) —
+zero zmian w 9 plikach parserów i w plikach `*.expected.json`; wierność kopii bajtowej
+potwierdzona w iteracji 1 pozostaje nienaruszona.
 
 ## Plan compliance
 
 ### Done ✓
-- Krok 0/1: 9 plików zsynchronizowanych RÓWNOLEGLE w `mirror/backend/` i `rebuild/backend/src/import/legacy/`; zweryfikowano niezależnie `cmp`/`diff` każdego z 9 plików przeciw blobowi `main` — identyczne bajt-w-bajt w obu kopiach.
-- Integralność całego drzewa portu: wszystkie 18 plików `src/import/legacy/**` (poza `package.json`) zweryfikowane jako identyczne z `mirror/backend/**`; brak plików `.bak_*` czy testów producenta w porcie.
-- Zakres: `git diff origin/develop...HEAD --name-only` pokrywa się dokładnie z 9 parami plików + 18 plikami `*.expected.json` — nic z 13b/13c/13d/13e nie zostało ruszone (`index.cjs`, `selly/`, migracje, frontend — zero zmian, potwierdzone).
-- Krok 2: rozłożenie `odswinch` (#64) diffem `.bak_odswinch_20260904_1403` vs `tyre_params.cjs@main` zweryfikowane niezależnie — dokładnie +26/−1, dwa hunki, oba w `parseSize()`, zgodnie z opisem w raporcie. Plik `.bak_` nie trafił do portu.
-- Krok 3: przenagranie `MOx.expected.json` przez `scripts/charakteryzacja-nagraj.mjs`, który jednoznacznie w kodzie i komentarzu uruchamia oryginalne parsery z `mirror/backend` (kopiowane do `.tmp/oryginal/`), nie port — potwierdzone czytaniem skryptu.
-- Twierdzenia raportu zweryfikowane niezależnie i potwierdzone: liczba rekordów niezmieniona u wszystkich 10 dostawców (2686 wstawień == 2686 usunięć w diffie wzorca); jedyny przesunięty licznik to MO1 `odrzuconePrzezAdapter` 1→0; `katunify` nieuruchamiane próbkami (zero zmian pola `kategoria` w całym diffie); `mo9expand` nieuruchamiane (indeksy MO9 bez zmian wartości); `b4` istniało już przed 25.08 (potwierdzone na baseline `origin/develop`); `b10` dotyczy dokładnie 2 rekordów MO4.
-- Przenagranie wzorca silnika (`5887c0b`, decyzja 6 z promptu): potwierdzono, że `mirror/backend/index.cjs` ma zerowy diff w tej gałęzi, że `charakteryzacja-silnik-nagraj.mjs` bierze wejście z wzorca 3a i wycina oryginalny `tk()` z `index.cjs` (nie z portu TS), oraz że `silnik/katalog/` i `silnik/overrides/` mają zerowy diff.
-- Bramki: `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` — wszystkie zielone, `79 plików / 1223 testy`, zgodnie z deklaracją raportu.
+- Wszystkie punkty z iteracji 1 (kopia bajtowa 9 plików, integralność drzewa `legacy/**`,
+  przenagranie wzorców, bramki) — nienaruszone, bo commity tej iteracji dotyczą tylko `docs/`.
+- DoD „roadmapa: 13a oznaczone jako zrobione, ustalenia dla 13b/13c DO ICH bloków” — spełnione,
+  zweryfikowano fizyczne położenie akapitów w pliku (nie tylko obecność treści w diffie).
+- DoD „backlog: statusy 10 wpisów zaktualizowane” — spełnione.
+- DoD „raport zawiera rzetelny opis zakresu silnika (bez zaniżenia)” — spełnione, MO8 opisane
+  z realną liczbą rekordów i przyczyną.
 
 ### Missing lub deviating ✗
-- DoD „`docs/rebuild-roadmap.md` blok I13: 13a oznaczone jako zrobione" — NIE wykonane (zerowy diff pliku).
-- DoD „`docs/rebuild-backlog.md`: statusy #8, #9, #10, #53, #54, #55, #57, #58, #63, #64 zaktualizowane" — NIE wykonane (zerowy diff pliku).
-- Raport zaniża skalę przenagrania wzorca silnika dla MO8 (patrz BLOCKER wyżej) — nie jest to pominięcie kroku planu, ale nieścisłość w opisie tego, co plan (decyzja 6 z promptu) wymagał ocenić rzetelnie.
+- Brak. Wszystkie punkty DoD, które w iteracji 1 były niespełnione, są teraz spełnione i
+  zweryfikowane niezależnie.
 
 ### Definition of done
 - [x] 9 plików zsynchronizowanych z `main` RÓWNOLEGLE w `mirror/backend/` i `rebuild/backend/src/import/legacy/`
-- [x] `cmp` mirror↔port cichy dla wszystkich 9; warstwa 1 gate'a (sha256 całego drzewa `legacy/**`) zielona
-- [x] Żaden plik spoza listy 9 nie został ruszony (potwierdzone `git diff --stat`)
-- [x] `MOx.expected.json` przenagrane skryptem `charakteryzacja-nagraj.mjs` (osobny commit)
+- [x] `cmp` mirror↔port cichy dla wszystkich 9; warstwa 1 gate'a zielona
+- [x] Żaden plik spoza listy 9 nie został ruszony
+- [x] `MOx.expected.json` przenagrane skryptem `charakteryzacja-nagraj.mjs`
 - [x] Warstwy 2 i 3 gate'a charakteryzacji zielone (MO1–MO10)
-- [x] Wzorce charakteryzacji silnika i akceptacji: akceptacja nietknięta i zielona; silnik ŚWIADOMIE przenagrany za zgodą użytkownika (zatwierdzone odstępstwo od pierwotnej decyzji 3 z planu) i zielony — literalnie DoD nie jest spełnione („nietknięte"), ale odstępstwo jest udokumentowane jako zaakceptowane w trakcie pracy
-- [x] `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` w `rebuild/backend/` zielone
-- [ ] `raport.md` zawiera rozłożony diffem realny zakres `odswinch`, podsumowanie przesunięć per dostawca i potwierdzenie zakresu silnika — obecne, ale z nieścisłością („zero różnic strukturalnych" nieprawdziwe dla MO8, patrz BLOCKER)
-- [ ] `docs/rebuild-roadmap.md` blok I13: 13a oznaczone jako zrobione — NIE spełnione
-- [ ] `docs/rebuild-backlog.md`: statusy #8/#9/#10/#53/#54/#55/#57/#58/#63/#64 zaktualizowane — NIE spełnione
+- [x] Wzorce charakteryzacji silnika i akceptacji: świadome odstępstwo (przenagranie silnika)
+      zaakceptowane przez użytkownika w trakcie, udokumentowane jako stan przejściowy w bloku 13b
+- [x] `npm run lint`, `npm run typecheck`, `npm run build`, `npm test` zielone — potwierdzone
+      ponownie w tej iteracji (79/1223)
+- [x] `raport.md` zawiera rozłożony diffem realny zakres `odswinch`, podsumowanie przesunięć per
+      dostawca (zmierzone, nie szacowane) i rzetelny opis zakresu silnika (MO8 sprostowane)
+- [x] `docs/rebuild-roadmap.md` blok I13: 13a oznaczone jako zrobione, ustalenia dla 13b/13c
+      wpisane DO ICH bloków — zweryfikowane fizycznym położeniem w pliku
+- [x] `docs/rebuild-backlog.md`: statusy 10 wpisów zaktualizowane
 
 ## Parallel-test concerns
 
-Brak nowych testów jednostkowych (zgodnie z planem — kod parserów jest kopią bajtową, field-characterization mierzy zachowanie). `npm test` uruchomiony lokalnie na bazie w katalogu tymczasowym / portach efemerycznych zgodnie z konwencją projektu — brak sygnałów zależności od zasobów współdzielonych w zmienionych plikach (same fixtures + kod producenta, żadnych nowych plików testowych). None — wszystkie testy równoległe do innych agentów.
+Brak nowych testów jednostkowych — zmiany tej iteracji to wyłącznie `docs/`. `npm test`
+uruchomiony ponownie lokalnie, zielony. Brak zależności od zasobów współdzielonych.
+None — wszystkie testy równoległe do innych agentów.
 
 ## Overall assessment
 
-Techniczne wykonanie karty jest solidne i w pełni zweryfikowane niezależnie: kopia bajtowa 9 plików jest rzeczywiście identyczna z `main` w obu miejscach (mirror i port), zakres nie wykracza poza 9 par + wzorce, wszystkie twierdzenia merytoryczne raportu o przesunięciach charakteryzacji (konstr, bug1, bug2, odswinch, b10, katunify/mo9expand/b4 nieuruchomione) potwierdziły się co do joty, a wszystkie cztery bramki backendu są zielone z dokładnie deklarowaną liczbą testów. Główne zastrzeżenia dotyczą nie kodu, lecz dokumentacji stanu: roadmapa i backlog — mimo wyraźnego wymogu w DoD i mimo świeżego precedensu z ticketu 41 w tej samej gałęzi roadmapy — nie zostały w ogóle dotknięte, a opis przenagrania wzorca silnika istotnie zaniża skalę zmiany dla MO8 (nie tylko kosmetyka tekstu, ale realna zmiana liczby rekordów w stagingu). Oba te punkty trzeba domknąć przed uznaniem karty za w pełni zamkniętą, bo od nich zależy, czy 13b wystartuje z rzetelnym obrazem stanu przejściowego.
+Zamknięcie jest rzetelne, nie kosmetyczne: każda z trzech poprawek BLOCKER i jedna SHOULD-FIX
+została zweryfikowana niezależnie — nie na podstawie treści raportu, tylko przeliczeniem JSON-ów,
+grepem na `origin/develop` vs `HEAD` i czytaniem fizycznego położenia akapitów w plikach roadmapy/
+backlogu. Wszystkie zmierzone liczby (98/7/4 rekordów, MO8 25→31/24→30/600→594, sześć konkretnych
+kodów konfliktu z Martą, 0→5 wystąpień „POPRAWKA 2026-08-31”) zgadzają się co do joty z tym, co
+podaje raport. Korekta przypisania #57 jest uzasadniona dwoma źródłami istniejącymi w dokumencie
+PRZED tym ticketem, więc kwalifikacja jako „fakt, nie decyzja” jest prawidłowa. Karta gotowa do
+zamknięcia bez zastrzeżeń.
