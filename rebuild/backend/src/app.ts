@@ -113,6 +113,13 @@ export function stworzApp({
 
   // Kolejność jak w oryginale: najpierw CORS (żeby preflight OPTIONS nie przechodził
   // przez parser ciała), potem parsery (backend-index.cjs:48926-48940).
+  //
+  // ⚠ Brak middleware przy pustym CORS_ORIGINS jest STANEM DOCELOWYM, nie przeoczeniem
+  // (potwierdzone finalnym audytem 12e): bez nagłówków `Access-Control-Allow-*` przeglądarka
+  // blokuje cross-origin sama, a staging i produkcja są same-origin (front i /api pod tą samą
+  // domeną przez proxy Apache — deploy/staging/htaccess:11). NIE „naprawiaj" tego, dokładając
+  // domyślnej allowlisty — byłaby konfiguracją na wyrost, a każdy origin na liście to origin,
+  // który dostaje `Allow-Credentials: true`. Stan CORS wypisuje przy starcie `server.ts`.
   if (env.CORS_ORIGINS.length > 0) app.use(corsZAllowlisty(env.CORS_ORIGINS));
 
   // ODSTĘPSTWO ŚWIADOME (ticket 3-FEATURE-katalog-odczyt, D2): oryginał nie kompresuje
