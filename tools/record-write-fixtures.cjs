@@ -314,7 +314,13 @@ function przytnij(cialoSurowe) {
   const cialo = zamaskuj(cialoSurowe);
 
   if (Array.isArray(cialo)) {
-    return { wartosc: cialo.slice(0, LIMIT_TABLICY), przycieteZ: cialo.length };
+    // Adnotacja TYLKO gdy realnie ucięto. Wcześniej wychodziła zawsze, więc tablica
+    // trzyelementowa dostawała `_body_przyciete_z: 3` — informację, że nagranie jest
+    // niepełne, choć było kompletne.
+    return {
+      wartosc: cialo.slice(0, LIMIT_TABLICY),
+      przycieteZ: cialo.length > LIMIT_TABLICY ? cialo.length : null,
+    };
   }
 
   if (cialo && typeof cialo === "object") {
@@ -375,7 +381,14 @@ async function nagraj({ plik, metoda, sciezka, cialo, token, opis, port }) {
     body: wartosc,
   };
   if (przycieteZ !== null) fixture._body_przyciete_z = przycieteZ;
-  if (cialo !== undefined) fixture.request = zamaskuj(cialo);
+  if (cialo !== undefined) {
+    // Ciało żądania przycinamy tą samą regułą co odpowiedź. Dziś wszystkie są małe, ale
+    // pierwszy scenariusz z dużą tablicą w żądaniu (np. bulk na kilka tysięcy pozycji)
+    // rozdąłby fixture bez ograniczenia.
+    const { wartosc, przycieteZ } = przytnij(cialo);
+    fixture.request = wartosc;
+    if (przycieteZ !== null) fixture._request_przyciete_z = przycieteZ;
+  }
   fixture._zrodlo = "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)";
   if (opis) fixture._opis = opis;
 

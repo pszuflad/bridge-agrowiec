@@ -77,9 +77,20 @@ describe("nagrywarka — przycinanie i adnotacje", () => {
     expect(przycieteZ).toBeNull();
   });
 
-  it("krótkiej tablicy nie tyka i nie dokłada adnotacji", () => {
+  it("krótkiej tablicy w obiekcie nie tyka i nie dokłada adnotacji", () => {
     const { wartosc } = przytnij({ rows: [{ id: 1 }] });
     expect(wartosc).toEqual({ rows: [{ id: 1 }] });
+  });
+
+  /**
+   * Regres: adnotacja `_body_przyciete_z` wychodziła dla KAŻDEJ gołej tablicy, także
+   * nieprzyciętej — trzyelementowa odpowiedź dostawała „przycięte z 3", czyli informację,
+   * że nagranie jest niepełne, choć było kompletne.
+   */
+  it("goła tablica mieszcząca się w limicie nie dostaje adnotacji przycięcia", () => {
+    const { wartosc, przycieteZ } = przytnij([{ id: 1 }, { id: 2 }]);
+    expect(wartosc).toHaveLength(2);
+    expect(przycieteZ).toBeNull();
   });
 
   it("maskuje TAKŻE wewnątrz przyciętych tablic", () => {
