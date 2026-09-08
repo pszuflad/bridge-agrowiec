@@ -61,9 +61,17 @@ else
   printf '%s\n' "$NS" | grep -qE 'mirror/frontend|deminified/frontend' && CAT="$CAT[FRONTEND]"
   [ -z "$CAT" ] && CAT="[INNE]"
 
-  # etykiety zmian z nazw kopii .bak (np. "sniegfix") — niezawodne, bo Ania zawsze robi .bak
-  BAKS="$(printf '%s\n' "$NS" | grep -oE '\.bak_pre_[A-Za-z0-9_-]+' \
-          | sed -E 's/\.bak_pre_//; s/[_-][0-9]{6,}.*$//' | sort -u | tr '\n' ' ' | sed 's/ *$//')"
+  # etykiety zmian z nazw kopii .bak (np. "sniegfix") — Ania zawsze robi .bak, ale nazewnictwo
+  # jest NIESTABILNE: .bak_pre_LABEL, .bak_LABEL_DDDDDDDD_HHMM, .bak-YYYY-MM-DD-LABEL itd.
+  # Dlatego wzorzec jest szeroki, a CAŁY pipeline kończy się `|| true` — brak trafień grepa
+  # NIE MOŻE ubić skryptu pod `set -euo pipefail` (etykieta jest kosmetyczna: temat maila
+  # i commit; realną treścią i tak jest diff). Historyczny bug: producent milczał 25.08–08.09,
+  # bo grep `\.bak_pre_` przestał trafiać po zmianie nazewnictwa Ani i przerywał przed push.
+  BAKS="$(printf '%s\n' "$NS" \
+          | grep -oE '\.bak[._-][A-Za-z0-9._-]+' \
+          | sed -E 's/^\.bak[._-]//; s/^pre[._-]//; s/[._-]20[0-9]{6}.*$//; s/[._-]20[0-9]{2}-[0-9]{2}-[0-9]{2}.*$//; s/^20[0-9]{2}[._-].*$//' \
+          | grep -vE '^([0-9._-]*)$' \
+          | sort -u | tr '\n' ' ' | sed 's/ *$//' || true)"
 
   # najnowszy wpis z changelogu Ani (pierwsza sekcja "## "), jeśli CHANGELOG się zmienił
   CH=""
@@ -90,9 +98,12 @@ $CH}"
   # diff CZYTELNYCH plików kodu do maila — SAM diff (git diff, nie git show, żeby
   # nie dublować komunikatu commita); bez .bak, bez zminifikowanego index.cjs oraz
   # bez CHANGELOG.md (wpis Ani jest już wyżej w sekcji "Changelog Ani"). Przycięty.
+  # `| head -250` zamyka potok wcześnie → `git diff` dostaje SIGPIPE (141); pod pipefail to
+  # ubiłoby skrypt PO push, a PRZED mailem. `|| true` osłania (diff jest tylko dla maila).
+  # Wykluczenie `*.bak*` (nie `*.bak_*`) — łapie też `.bak-YYYY-...` z nowego nazewnictwa.
   DIFF="$(git diff "$SHA^" "$SHA" -- mirror/backend deminified db/schema.sql \
-          ':(exclude)*.bak_*' ':(exclude)mirror/backend/index.cjs' \
-          ':(exclude)*/CHANGELOG.md' 2>/dev/null | head -250)"
+          ':(exclude)*.bak*' ':(exclude)mirror/backend/index.cjs' \
+          ':(exclude)*/CHANGELOG.md' 2>/dev/null | head -250 || true)"
 
   # powiadomienie e-mail — komponujemy wiadomość, potem wysyłamy z JAWNĄ obsługą błędu
   MAILMSG="$( {
