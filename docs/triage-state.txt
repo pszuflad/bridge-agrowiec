@@ -1,9 +1,21 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
 # Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
-08be0f326d6b6bc66782ecf0f9dafb01e4e9eb59
-# ^ 2026-08-25 16:00 „uwagacena" — ostatni sync producenta. Wszystko do tego commita striażowane
-#   (backlog #1–#6 + wpisy sesji odbudowy). PO 25.08 brak nowych sync(vps) — patrz nota niżej.
+d88ac15
+# ^ 2026-09-08. Bieżący HEAD main. Zawiera 6872aea („sync(vps): zaległości Ani 26.08–08.09")
+#   + tooling d88ac15 (fix vps-sync.sh). Zakres 08be0f3..6872aea STRIAŻOWANY 2026-09-08:
+#   lista zmian → backlog #53–#62 + domknięcia #3/#8/#9/#10; plan ticketów → roadmapa blok I13
+#   (13a–13e), tablica §4 wiersz 13. Ticket planistyczny: 40-CHORE-triaz-i13-plan.
+#   Następny triaż: git log d88ac15..origin/main | grep 'sync(vps)'.
 #
-# 2026-09-08: origin/main stoi na 72957d7 (25.08); od 14 dni ZERO nowych sync(vps).
-#   Do ustalenia, czy to feature-freeze pod cutover, czy zatrzymany cron producenta.
+# ZMIANA PRODUCENTA (2026-09-08): cron vps-sync.sh MILCZAŁ od 25.08 do 08.09 — grep BAKS
+#   `\.bak_pre_` zwracał 1 przy nowym nazewnictwie .bak Ani (.bak_katunify_/.bak-2026-…/.bak_b10_/
+#   .bak_bug2_) i pod set -euo pipefail ubijał skrypt przed git commit/push. NAPRAWIONE w d88ac15
+#   (wzorzec .bak rozszerzony + `|| true` na pipeline BAKS i DIFF). Producent wróci do automatu
+#   przy najbliższym cronie. DO ZROBIENIA RĘCZNIE: potwierdzić, że cron w panelu DirectAdmin nadal
+#   istnieje i że pierwszy przebieg po fixie przechodzi (mail + brak nowego commita = OK, bo
+#   6872aea ma już wszystko).
+#
+# --- poprzedni marker (do 25.08) ---
+# 08be0f326d6b6bc66782ecf0f9dafb01e4e9eb59  2026-08-25 16:00 „uwagacena"
+#   Wszystko do niego striażowane (backlog #1–#6 + wpisy sesji odbudowy).

@@ -472,7 +472,7 @@ produkcyjny.
 | **Pliki** | `parsers/mo8_trelleborg.cjs` |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
 | **Iteracja** | **→ 3b** (bezpiecznik, pierwsza wersja) **→ 3c** (bezpiecznik przeniesiony do `tk()`, zakrywa wszystkie trasy); poprawka parsera MO8 — patrz „Gdzie naprawiamy" na końcu pliku |
-| **Status** | 🔨 częściowo zrobione (bezpiecznik `PustyImportBlad` w `tk()`, I3/3c, 2026-08-26 — zakrywa wszystkie trasy silnika) — poprawka parsera MO8 nadal do portu (#6, Wariant A) |
+| **Status** | 🔨 częściowo zrobione (bezpiecznik `PustyImportBlad` w `tk()`, I3/3c, 2026-08-26 — zakrywa wszystkie trasy silnika) — poprawka parsera MO8 nadal do portu (#6, Wariant A). **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#4 — detekcja CSV vs XLSX przez `isZipBuffer` w `mo8_trelleborg.cjs`, dedykowany parser CSV; 704 rek. z 704 wierszy). Port w I13/13a.** |
 
 **Opis biznesowy:** jeśli Trelleborg przyśle cennik jako CSV zamiast XLSX, import kończy się
 **zerem zaimportowanych pozycji i bez żadnego komunikatu błędu**. Wygląda jak udany import
@@ -563,7 +563,7 @@ zamiast liczbą.
 | **Pliki** | `parsers/adapter.cjs` (`recordToSurowe` — `nro`, `cho`), normalizatory w `tyre_params.cjs` |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
 | **Iteracja** | **→ 3b**; gdzie naprawiamy — patrz koniec pliku |
-| **Status** | — |
+| **Status** | **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#2 — NRO/CHO → `'Tak'`/null; `tyre_params.cjs:423-424` + `adapter.cjs:596-597` `normalizeLabelFlag`; UPDATE bazy: 16×`Tak` NRO, 13×`Tak` CHO, reszta NULL). Port w I13/13a.** |
 
 **Opis biznesowy:** oznaczenia NRO i CHO zapisują się jako `0`/`1` zamiast „Tak"/pustego pola —
 czyli dokładnie ten sam objaw, który poprawki `sniegfix` (18.08) i `flagsfix` (25.08) usunęły
@@ -613,7 +613,7 @@ kolumny mogą już zawierać `0`/`1` z wcześniejszych importów.
 | **Pliki** | `parsers/adapter.cjs` (`shouldRejectRecord` → `accessoryRe`) |
 | **Do nowej wersji?** | ✅ **TAK** (decyzja Ani 2026-08-26) |
 | **Iteracja** | **→ 3c** (klasyfikator) lub wcześniej u źródła; patrz koniec pliku |
-| **Status** | — |
+| **Status** | **2026-09-01: Ania wdrożyła fix produkcyjny (Bug#1 — filtr dętki/akcesoria case-insensitive w `mo1_bohnenkamp.cjs` i `mo9_agrorami_api.cjs` + usunięcie 16 rek. WULSTBAND ze `staging_items`). ⚠ To była REGRESJA po katunify (#57): filtr porównywał małą literą z Wielką od 18.08. Port w I13/13a — RAZEM z katunify, patrz nota kolejności w bloku I13.** |
 
 **Opis biznesowy:** 16 pozycji `WULSTBAND` z cennika Bohnenkampa trafia do katalogu jako opony.
 To taśma ochronna obręczy, nie opona — wpada z pustym rozmiarem. Ania: *„dokładnie, trzeba to
@@ -2521,3 +2521,145 @@ które produkcja oddaje bez tokenu, w odbudowie zostają pod `requireAuth`. Nie 
 wariantu publicznego — to najgroźniejsza dziura oryginału (`GET /api/export/shoper` oddaje cały
 katalog bez logowania, `GET /api/audit-log` log działań z e-mailami i URL-ami dostawców).
 Finalny audyt 12e potwierdził kompletność i celowość tej listy.
+
+---
+
+## Delty produkcji Ani 26.08–08.09 → Iteracja 13
+
+> Zmiany wdrożone na produkcji między 25.08 a 08.09, wciągnięte ręcznie w `6872aea` (producent
+> milczał — patrz roadmapa blok I13). Źródło prawdy: `mirror/backend/CHANGELOG.md` (te daty),
+> `db/schema.sql`, `mirror/backend/parsers/*.cjs`, `mirror/backend/selly/*`. Audytowe #3/#8/#9/#10
+> to nasze findingi, na które Ania zareagowała (CHANGELOG „Bug #1/#2/#3/#4") — mają noty domykające
+> u siebie. Poniżej wpisy NOWE. Realizacja: I13 (13a–13f).
+
+**Mapowanie zmian → karty I13** (podział wg MECHANIZMU PORTU — parsery to kopia bajtowa `legacy/`,
+więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok I13):
+
+| Zmiana (wpis) | Karta | Warstwa |
+|---|---|---|
+| B4 #53, B10 #54, mo9expand #55, katunify(parser) #57, konstr(parser) #58, WULSTBAND #10, NRO/CHO #9, MO8-CSV #8, **p2_4 #63**, **odswinch #64** | **13a** | parsery — kopia `src/import/legacy/**` + charakteryzacja |
+| P3 #56, CAPS/Xq #59 (część silnikowa) | **13b** | silnik `tk()`/`acceptStaging` — reimpl TS |
+| katunify(migracja) #57, konstr(migracja) #58, CAPS(nazwa) #59 | **13c** | migracje danych + przenagranie fixtures |
+| Selly REST #60 | **13d** | nowy podsystem TS (blokada: Tor 2 u Ani) |
+| Bridge ONE + drobne #61 | **13e** | frontend |
+| backfille #62 | **13f** | DECYZJA (najpierw) |
+
+### #53 · 2026-08-31 · [BACKEND] · B4 — parser rozmiaru WxSxD (stara diagonalna rolnicza)
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser rozmiaru) |
+| **Pliki** | `parsers/tyre_params.cjs` (`parseSize`) |
+| **Zmiana Ani** | Nowy wzorzec `^(\d{3,4})x(\d{3})-(\d{1,3}(?:\.\d+)?)$` z warunkiem pierwsza≥400, druga≥100 (`690x180-15`): 1. liczba = średnica zewn. mm, 2. = szerokość mm, 3. = felga cale; konstrukcja=`D`, profil=NULL, `rozmiar` zachowuje etykietę. Ochrona `Number(sz)<400` przed nadpisaniem `szerokoscRaw`. Regresja: 10.5x80-18, 100/100-4, 30.5L-32, 380/105R50, 31x15.5-15 — bez zmian. |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13a** (PORT, Wariant A) |
+| **Status** | ⬜ do portu |
+
+### #54 · 2026-08-31 · [BACKEND] · B10 — sufiksy w polu `model` (Handlopex MO4/MO5)
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser, `extractHandlopexModel`) |
+| **Pliki** | `parsers/tyre_params.cjs` |
+| **Zmiana Ani** | `HANDLOPEX_STOPWORDS_RE` += KPL, NACZEPA (NIE `TR\d+` globalnie — regresja LASSA/MITAS/BKT); reguła `/\/\s*TR\d{1,3}\b/` usuwa `/TR87` tylko po ukośniku; reguła na NIESPARZONĄ klamrę `[148/145 M TL`. |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13a** (PORT, Wariant A) |
+| **Status** | ⬜ do portu |
+
+### #55 · 2026-09-04 · [BACKEND] · mo9expand — rozwijanie skróconego indeksu obciążenia po `/`
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser MO9 Agrorami) |
+| **Pliki** | `parsers/mo9_agrorami_api.cjs` (`expandLoadIndexSlash`, linia 56-64; wywołanie w `fetchAllItems` :590) |
+| **Zmiana Ani** | `(?<!\d)(\d{2,3})([KLASA]\d?)\/([KLASA]\d?)(?!\d)` → `144A8/B`→`144A8/144B`; `270/95R48` nietknięte. Klasa liter prędkości bez X/R/L/H. UPDATE 82 rek. w bazie (audit_log system). |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13a** (PORT, Wariant A) |
+| **Status** | ⬜ do portu |
+
+### #56 · 2026-08-31 · [BACKEND] · P3 — fallback marki `tk()` → `"UNKNOWN"` zamiast `nazwa.split`
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (silnik importu `tk()`) |
+| **Pliki** | `mirror/backend/index.cjs` ⚠ (cieniowanie — sprawdź żywą definicję `tk`, CLAUDE.md §5) |
+| **Zmiana Ani** | Usunięto degenerowany `n.nazwa.split(" ")[0]` (wpisywał rozmiar/losowe słowo jako markę, np. MO2 JMK); przy pustym `Producent` wpisuje `"UNKNOWN"` — widoczne od razu do ręcznej naprawy. |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13a** (PORT, Wariant A) |
+| **Status** | ⬜ do portu · powiązane z #26 (JMK marka=rozmiar, backfill w 13e) |
+
+### #57 · 2026-09-01 · [BACKEND] · katunify — kategorie do Wielkiej litery we wszystkich parserach
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (konwencja kategorii) + BAZA (migracja) |
+| **Pliki** | `common.cjs`, `parsers/{mo2_jmk,mo6_agrowiec,mo7_nokian,mo8_trelleborg}.cjs`, `tyre_params.cjs` |
+| **Zmiana Ani** | Unifikacja do Wielkiej litery: „Rolnicze", „Leśne", „Ciężarowe", „Przemysłowe", „Dętki", „Akcesoria" — zgodnie z `classifyByName` i `products.kategoria` (decyzja Anny 2026-09-01, Opcja B). |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13b** (migracja + fixtures). ⚠ SPOWODOWAŁO regresję #10/Bug#1 — port RAZEM z case-insensitive filtrem (kolejność w bloku I13). Rozszerza #2 kategoriafix. |
+| **Status** | ⬜ do portu |
+
+### #58 · 2026-09-01 · [BACKEND][BAZA][FRONTEND] · konstrukcja — kody `R/D/L/B` → pełne słowa
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (migracja) + FRONTEND (kolumna/eksport) |
+| **Pliki** | parsery + `generate_selly_export.cjs`; FE bundle `.bak_konstr` |
+| **Zmiana Ani** | `R`→`Radialna`, `D`/`L`/`B`→`Diagonalna` (L = część rozmiaru „Low Section Height"; B = bias-belted Trelleborg AMPT/Nokian Ground Kare). W bazie 2 wartości: Radialna 4390 + Diagonalna 3015. Prośba Anny — słowa zamiast kodów w kolumnie i eksporcie. |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13b** (BE+migracja) + **13d** (FE `konstr`) |
+| **Status** | ⬜ do portu |
+
+### #59 · 2026-09-01 · [BACKEND][BAZA] · CAPS — `products.nazwa` = WIELKIE LITERY + `Xq()` case-insensitive
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (helper equality `Xq`) + BAZA (migracja) |
+| **Pliki** | `mirror/backend/index.cjs` ⚠ (cieniowanie `Xq`, CLAUDE.md §5) |
+| **Zmiana Ani** | `Xq(t,e)` porównuje `A.toUpperCase()===B.toUpperCase()` (plik „Kleber GRIPKER" vs baza „KLEBER GRIPKER" NIE generuje `staging_items` zmiana_kluczowa). Migracja: `UPPER(nazwa)` 747 products + 38 `manual_overrides` (pole nazwa) + DELETE 769 staging CASE_ONLY. |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13b** (migracja + wpływ na klasyfikację stagingu) |
+| **Status** | ⬜ do portu |
+
+### #60 · 2026-09-07…08 · [BACKEND][BAZA] · Selly REST sync — NOWY podsystem (model wariantowy)
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (nowy podsystem) + BAZA (przeprojektowana `selly_products`) |
+| **Pliki** | `mirror/backend/selly/{discovery,sync_delta,sync_full,mapper_v2,rate_limiter,scheduler_selly,routes_sync}.cjs`; schemat `selly_products` (+ `selly_products_old`) |
+| **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
+| **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
+| **Iteracja** | **→ 13c** (nowa, BE-heavy). ⚠ **BLOKADA: Tor 2 `sync_full` niedomknięty u Ani 08.09** — czekać. Rozważyć podział 13c-1/13c-2/13c-3. |
+| **Status** | ⬜ do portu (po domknięciu Tor 2 u Ani) |
+
+### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (bundle zminifikowany) |
+| **Pliki** | `mirror/frontend/assets/index-BRIDGEONE….js`, `index-PRICEFMT….js` (+ kopie `.bak_{tr_fix,ackalerts,szer_marka,konstr}`) |
+| **Zmiana Ani** | Rebrand na „Bridge ONE" (title „Bridge ONE — konsolidacja cenników opon") + drobne: `tr_fix`, `ackalerts` (potwierdzanie alertów), `szer_marka` (kolumna szerokość/marka), `PRICEFMT` (formatowanie ceny). Bundle minified — najpierw rozłożyć diff, `.bak` daje tylko etykietę. |
+| **Do nowej wersji?** | ⬜ do decyzji (zakres rebrandu — czy odbudowa też nazywa się „Bridge ONE") |
+| **Iteracja** | **→ 13d** (FE; `konstr` łączy się z #58) |
+| **Status** | ⬜ do rozłożenia diffu + decyzji |
+
+### #62 · 2026-08-26…09-04 · [BAZA] · Backfille danych (tl_tt / szerokości ułamkowe / JMK) — DECYZJA
+| pole | wartość |
+|---|---|
+| **Kategoria** | BAZA (jednorazowe UPDATE) — częściowo LOGIKA |
+| **Pliki** | `data.db` (bez zmian kodu, poza regułami tl_tt) |
+| **Zmiana Ani** | **tl_tt** 628 rek. (A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT). **Szerokości ułamkowe** 10 rek. (parser już poprawny — #3). **JMK** 14 rek. marka/model + 27 `manual_overrides` (feed bez `Producent`). |
+| **Do nowej wersji?** | ⬜ **DECYZJA** — odbudowa buduje bazę importem od zera; backfille historyczne w większości nieistotne, ALE reguły tl_tt B/C to logika klasyfikacji (jeśli mają obowiązywać na przyszłych importach → do parsera, nie UPDATE) |
+| **Iteracja** | **→ 13f** (po rozstrzygnięciu z użytkownikiem) |
+| **Status** | ⬜ do decyzji |
+
+### #63 · 2026-08-25 · [BACKEND] · p2_4 — rozszerzenie `parseSize` o L-series z profilem i ułamki
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser rozmiaru) |
+| **Pliki** | `parsers/tyre_params.cjs` (`normalizeSizeText`, `parseSize`; bak `.bak_p2_4_20260825_1601`) |
+| **Zmiana Ani** | (A) `normalizeSizeText`: separator L-series rozszerzony z `[-R]` na `[-Rx]` — obsługa `28LX26`, `7,5Lx15`. (B) `parseSize`: wzorzec `W/PLxD`/`W/PL-D` dla L-series z profilem (`400/45Lx17` BKT TERRA TRAX, konstrukcja=L). (C) regex `W/P[RBD-]D` z `(\d{2,4})` na `(\d{1,4})` — łapie ułamkowe `6.5/75-14` (MITAS TS-02). Test node: 19/19 (12 anomalii + 7 regresja). UPDATE 12 rek. |
+| **Do nowej wersji?** | ✅ TAK |
+| **Iteracja** | **→ 13a** (kopia `tyre_params.cjs` wnosi to atomowo z b4/b10/odswinch) |
+| **Status** | ⬜ do portu |
+
+### #64 · 2026-09-04 · [BACKEND] · odswinch — zmiana w `tyre_params.cjs` NIEZALOGOWANA w CHANGELOG
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser) — do charakteryzacji |
+| **Pliki** | `parsers/tyre_params.cjs` (bak `.bak_odswinch_20260904_1403`) |
+| **Zmiana Ani** | ⚠ Brak wpisu w `CHANGELOG.md` — istnieje tylko kopia `.bak_odswinch_20260904_1403`. Etykieta sugeruje „odśwież/inch" (obsługa cali/felgi?). **DO ROZŁOŻENIA:** `git diff` między `tyre_params.cjs.bak_odswinch_20260904_1403` a wersją po niej w `mirror/`, żeby ustalić realny zakres. |
+| **Do nowej wersji?** | ✅ TAK (jest w produkcji 08.09) |
+| **Iteracja** | **→ 13a** (kopia `tyre_params.cjs` wnosi to atomowo; charakteryzacja wychwyci behawior) |
+| **Status** | ⬜ do portu + rozłożenia diffu |
