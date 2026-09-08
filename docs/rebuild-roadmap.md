@@ -1917,12 +1917,16 @@ z main@08.09 + port + przenagrywa swoje bramki → develop zielony po każdej. M
 
 **Podział na sesje (każda = osobny ticket `/feature`):**
 
-- **13f — Backfille: DECYZJA (najpierw, nie kod)** [decyzja] — rozstrzygnąć PRZED 13a/13c. **tl_tt**
-  628 rek. (reguły A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT),
-  **szerokości ułamkowe** 10 rek. (parser już poprawny), **JMK marka/model** 14 rek. + 27 overrides.
-  Pytanie: odbudowa buduje bazę importem od zera — backfille historyczne w większości nieistotne, ALE
-  reguły tl_tt B/C to **logika klasyfikacji** — jeśli mają działać na przyszłych importach, idą do
-  parsera/mapowania (wtedy część 13a/13c), nie jako jednorazowy UPDATE. Wynik decyzji wpina się w 13a/13c.
+- **13f — Backfille: ✅ ROZSTRZYGNIĘTE 2026-09-08 — BEZ KODU** [decyzja, `41-CHORE-i13f-decyzja-backfille`].
+  Dotyczyło: **tl_tt** 628 rek. (A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT),
+  **szerokości ułamkowe** 10 rek., **JMK marka/model** 14 rek. + 27 overrides. **Decyzja użytkownika: NIE
+  odtwarzamy backfilli jako kod/migracje.** Powód rozstrzygający: cutover jest big-bang na **TEJ SAMEJ
+  `data.db`** (`docs/cutover.md` — „nie migrujemy danych"), którą Ania już zbackfillowała — wartości już
+  są w bazie, na której odbudowa wystartuje. Reguły **tl_tt B/C NIE wchodzą** do parsera/mapowania (były
+  jednorazowym czyszczeniem historycznych NULL-i; dodanie = świadome odstępstwo od 1:1, którego nie robimy).
+  Na PRZYSZŁE importy wystarcza parserowy default TL dla Ciężarowych (wchodzi z 13a) + overrides JMK (już
+  w bazie). ⚠ Świadomy skutek uboczny: `products/clear` + reimport NIE odtworzy wartości B/C — tak samo
+  jak w produkcji (jej parser też ich nie derywuje), więc zgodność 1:1 zachowana. **Nic nie blokuje 13c.**
 - **13a — Parsery: re-sync warstwy `legacy` (kopia bajtowa)** [BE, FUNDAMENT] — skopiuj z mirror@08.09
   do `src/import/legacy/`: `common.cjs`, `parsers/{adapter,tyre_params,mo1_bohnenkamp,mo2_jmk,mo6_agrowiec,
   mo7_nokian,mo8_trelleborg,mo9_agrorami_api}.cjs`. Kopia wnosi ATOMOWO: **b4** (WxSxD), **b10** (Handlopex

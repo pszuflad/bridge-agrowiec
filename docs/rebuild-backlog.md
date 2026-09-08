@@ -2640,9 +2640,9 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Kategoria** | BAZA (jednorazowe UPDATE) — częściowo LOGIKA |
 | **Pliki** | `data.db` (bez zmian kodu, poza regułami tl_tt) |
 | **Zmiana Ani** | **tl_tt** 628 rek. (A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT). **Szerokości ułamkowe** 10 rek. (parser już poprawny — #3). **JMK** 14 rek. marka/model + 27 `manual_overrides` (feed bez `Producent`). |
-| **Do nowej wersji?** | ⬜ **DECYZJA** — odbudowa buduje bazę importem od zera; backfille historyczne w większości nieistotne, ALE reguły tl_tt B/C to logika klasyfikacji (jeśli mają obowiązywać na przyszłych importach → do parsera, nie UPDATE) |
-| **Iteracja** | **→ 13f** (po rozstrzygnięciu z użytkownikiem) |
-| **Status** | ⬜ do decyzji |
+| **Do nowej wersji?** | ❌ **NIE — świadomie pominięte (decyzja 2026-09-08, `41-CHORE-i13f`)**. Cutover big-bang idzie na TEJ SAMEJ `data.db` (`docs/cutover.md`), którą Ania już zbackfillowała → wartości już są w bazie startowej odbudowy; odtwarzanie jako kod/migracja jest zbędne. Reguły tl_tt B/C NIE wchodzą do parsera (jednorazowe czyszczenie NULL-i, nie logika parsera; dodanie = odstępstwo od 1:1). Na przyszłe importy: parserowy default TL dla Ciężarowych (z 13a) + overrides JMK (w bazie). |
+| **Iteracja** | **→ 13f ✅ ZAMKNIĘTE 2026-09-08** (bez kodu) |
+| **Status** | ✅ rozstrzygnięte — bez implementacji. ⚠ Skutek uboczny (jak w produkcji): `products/clear`+reimport nie odtworzy B/C. |
 
 ### #63 · 2026-08-25 · [BACKEND] · p2_4 — rozszerzenie `parseSize` o L-series z profilem i ułamki
 | pole | wartość |
