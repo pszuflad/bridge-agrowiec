@@ -29,7 +29,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Bell, CircleAlert, CircleCheck, Info, Inbox, Package, TriangleAlert } from "lucide-react";
 import { Link } from "wouter";
 
-import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -94,9 +93,10 @@ export function Pulpit() {
   const krytyczne = aktywne.filter((a) => a.poziom === "krytyczny").length;
 
   return (
-    // Rama aplikacji jest częścią tego widoku, nie routera — `N2` zwraca `mn(…)`, czyli
-    // shell z sidebarem, i tak samo robi `WidokWPrzygotowaniu`, który stał tu przed 10f.
-    <AppShell>
+    <>
+      {/* Rama z sidebarem (AppShell) wpinana jest przez ROUTER — patrz `App.tsx`,
+          `TRASY_Z_RAMA`. Do 12e każdy widok zawijał się w nią sam, tak jak `mn()`
+          w oryginale, ale robiło to tylko 5 z 12 widoków (backlog #36). */}
       <PageHeader title="Pulpit" subtitle="Codzienny obraz kanału dostawców i katalogu produktów" />
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
@@ -272,6 +272,6 @@ export function Pulpit() {
           </div>
         </CardContent>
       </Card>
-    </AppShell>
+    </>
   );
 }

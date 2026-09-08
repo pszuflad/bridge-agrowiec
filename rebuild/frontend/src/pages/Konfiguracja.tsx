@@ -6,7 +6,6 @@
  * „Shoper", „Katalog" i „AI Fallback" w Iteracji 11. Kolejność i etykiety zakładek
  * mieszkają w `konfiguracja/zakladki.ts` i są 1:1 z produkcją — Ania zna je z pamięci.
  */
-import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Admin } from "./konfiguracja/Admin";
@@ -21,7 +20,10 @@ import { ZAKLADKI_KONFIGURACJI } from "./konfiguracja/zakladki";
 
 export function Konfiguracja() {
   return (
-    <AppShell>
+    <>
+      {/* Rama z sidebarem (AppShell) wpinana jest przez ROUTER — patrz `App.tsx`,
+          `TRASY_Z_RAMA`. Do 12e każdy widok zawijał się w nią sam, tak jak `mn()`
+          w oryginale, ale robiło to tylko 5 z 12 widoków (backlog #36). */}
       <PageHeader
         title="Konfiguracja"
         subtitle="Dostawcy, wgrywanie ręczne, spedycja, Shoper i AI Fallback"
@@ -79,6 +81,6 @@ export function Konfiguracja() {
           <Ai />
         </TabsContent>
       </Tabs>
-    </AppShell>
+    </>
   );
 }

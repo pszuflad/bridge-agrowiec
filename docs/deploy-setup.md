@@ -17,6 +17,15 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
 - **Źródło = gałąź `develop`.** `main` to lustro starej produkcji — NIE wdrażamy z niego (patrz `rebuild-roadmap.md` §1a).
 - Prod (dla porównania): PM2 `bridge-backend` na `0.0.0.0:5000`, proxy w `public_html/panel/.htaccess`.
 
+> **Przełączenie PRODUKCJI na nowy stos opisuje osobny dokument `docs/cutover.md`** (12e,
+> `39-CHORE-audyt-bezpieczenstwa-domkniecie`) — plan big-bang na TEJ SAMEJ bazie `data.db`,
+> z obowiązkową weryfikacją schematu przed migracją i rollbackiem. Korzysta z ustaleń tego
+> pliku (ścieżki, PM2, proxy Apache). Sekcja „⚠ Schemat bazy staging NIE pochodzi z naszego
+> kanonu" niżej jest tam rozwinięta o realne ryzyko dla produkcji: `002_import.sql`
+> prawdopodobnie padnie na `duplicate column name: uwaga_cena` (kolumnę dokłada patch produkcji
+> przy każdym starcie), a `003_szerokosc_text.sql` przebudowuje `products` przez `SELECT *`,
+> więc jest wrażliwa na liczbę i kolejność kolumn.
+
 ## Fakty hosta (zwiad 2026-08-21)
 - Node **v20.20.2**, npm 10.8.2 → build na VPS OK. sqlite3 CLI **3.26** (stary → snapshot przez `.backup`, nie `VACUUM INTO`).
   Dotyczy to WYŁĄCZNIE CLI: `better-sqlite3` 11.7.0 niesie własne SQLite **3.47**, więc kod aplikacji

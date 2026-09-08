@@ -15,7 +15,6 @@
 import { KeyRound, User } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
-import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { useUzytkownik } from "@/components/AuthGate";
 import { Button } from "@/components/ui/button";
@@ -75,7 +74,10 @@ export function MojeKonto() {
   }
 
   return (
-    <AppShell>
+    <>
+      {/* Rama z sidebarem (AppShell) wpinana jest przez ROUTER — patrz `App.tsx`,
+          `TRASY_Z_RAMA`. Do 12e każdy widok zawijał się w nią sam, tak jak `mn()`
+          w oryginale, ale robiło to tylko 5 z 12 widoków (backlog #36). */}
       <PageHeader title="Moje konto" subtitle="Dane konta i zmiana hasła" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl">
@@ -176,6 +178,6 @@ export function MojeKonto() {
           </CardContent>
         </Card>
       </div>
-    </AppShell>
+    </>
   );
 }

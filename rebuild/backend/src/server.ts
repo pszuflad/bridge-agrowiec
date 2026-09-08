@@ -33,6 +33,16 @@ const server = app.listen(env.PORT, env.HOST, () => {
       `(NODE_ENV=${env.NODE_ENV}, DB_PATH=${env.DB_PATH})`,
   );
 
+  // Stan CORS wypisujemy JAWNIE (finalny audyt 12e, D2b), bo „brak nagłówków CORS" wygląda
+  // w logu identycznie jak przeoczona konfiguracja, a jest stanem docelowym dla same-origin.
+  // Bez tej linii jedynym sposobem odpowiedzenia na pytanie „czy CORS jest na pewno zamknięty?"
+  // jest czytanie kodu.
+  if (env.CORS_ORIGINS.length > 0) {
+    console.log(`[cors] allowlista (${env.CORS_ORIGINS.length}): ${env.CORS_ORIGINS.join(", ")}`);
+  } else {
+    console.log("[cors] wyłączony — brak nagłówków Access-Control-* (same-origin za proxy)");
+  }
+
   // ODSTĘPSTWO ŚWIADOME W UMIEJSCOWIENIU (decyzja użytkownika 2026-09-01, roadmapa 3f-3):
   // oryginał woła `D4()` w `M4()` (`:48167`), czyli w odpowiedniku `stworzApp`, przed
   // rejestracją tras. Zachowanie procesu produkcyjnego jest identyczne — `stworzApp` jest

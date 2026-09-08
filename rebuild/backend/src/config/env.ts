@@ -28,7 +28,7 @@ const flagaBoolDomyslnieWylaczona = z
   .default("false")
   .transform((v) => v === "true" || v === "1");
 
-const schemaEnv = z.object({
+const schemaEnvBazowe = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   HOST: z.string().min(1).default("127.0.0.1"),
   PORT: z.coerce.number().int().min(1).max(65535).default(5001),
@@ -118,6 +118,32 @@ const schemaEnv = z.object({
     .string()
     .min(1)
     .default("https://agritires.eu/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
+});
+
+/**
+ * Strażnik konfiguracji (finalny audyt 12e, D2b).
+ *
+ * Allowlista z gwiazdką znosi cały sens allowlisty: `middleware/cors.ts` odesłałby
+ * `Access-Control-Allow-Origin: *` razem z `Allow-Credentials: true`, czyli dokładnie tę
+ * dziurę oryginału (backend-index.cjs:48926-48930), którą odbudowa zamknęła.
+ *
+ * Uwaga na to, czego tu NIE MA: pusty `CORS_ORIGINS` jest stanem DOCELOWYM, a nie brakiem
+ * konfiguracji — staging i produkcja są same-origin (front i `/api` pod tą samą domeną przez
+ * proxy Apache), więc bez allowlisty middleware CORS w ogóle się nie montuje i przeglądarka
+ * blokuje cross-origin sama. Wymaganie allowlisty byłoby konfiguracją na wyrost. Pada
+ * wyłącznie jawna gwiazdka i wyłącznie w produkcji — lokalnie bywa wygodna i nie ma czego
+ * wykraść.
+ */
+const schemaEnv = schemaEnvBazowe.superRefine((env, ctx) => {
+  if (env.NODE_ENV === "production" && env.CORS_ORIGINS.includes("*")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["CORS_ORIGINS"],
+      message:
+        'nie może zawierać "*" w produkcji — wypisz konkretne originy albo zostaw pustą ' +
+        "(produkcja jest same-origin: front i /api pod tą samą domeną przez proxy Apache)",
+    });
+  }
 });
 
 export type Env = z.infer<typeof schemaEnv> & { cookieSecure: boolean };

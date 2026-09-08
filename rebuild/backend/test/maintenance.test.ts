@@ -7,8 +7,8 @@
  * Kopia bazy jest sprawdzana na pliku, nie na wywołaniu — bezpiecznik, którego nie widać
  * na dysku, nie jest bezpiecznikiem.
  */
-import { readdirSync, rmSync, statSync } from "node:fs";
-import { dirname } from "node:path";
+import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { auditLog, products } from "../src/db/schema.js";
@@ -265,5 +265,83 @@ describe("POST /api/products/clear", () => {
       .get("/api/audit-log")
       .set("Authorization", `Bearer ${token}`);
     expect((audyt.body as { szczegolyJson: unknown }[])[0]!.szczegolyJson).toBeNull();
+  });
+  /**
+   * Retencja kopii — ODSTĘPSTWO ŚWIADOME od oryginału (12e, D2d, backlog #49). Produkcja nie
+   * sprząta tych plików nigdy, więc katalog danych rośnie z każdym kliknięciem „Usuń wszystko
+   * z katalogu". Limit w kodzie to 5 NAJNOWSZYCH.
+   *
+   * Kopie z przeszłości podkładamy na dysk zamiast wywoływać trasę osiem razy: znacznik ma
+   * rozdzielczość milisekundy, więc dwa szybkie wywołania mogłyby trafić w tę samą nazwę
+   * i po cichu się nadpisać, a test mierzyłby wtedy co innego niż retencję.
+   */
+  it("po czyszczeniu zostaje 5 najnowszych kopii, starsze znikają", async () => {
+    const katalog = dirname(srodowisko.sciezka);
+    const nazwaBazy = basename(srodowisko.sciezka);
+    const stare = [
+      "2020-01-01T00-00-00-000Z",
+      "2021-01-01T00-00-00-000Z",
+      "2022-01-01T00-00-00-000Z",
+      "2023-01-01T00-00-00-000Z",
+      "2024-01-01T00-00-00-000Z",
+      "2025-01-01T00-00-00-000Z",
+      "2026-01-01T00-00-00-000Z",
+    ];
+    for (const znacznik of stare) {
+      writeFileSync(join(katalog, `${nazwaBazy}.bak_before_clear_${znacznik}`), "stara kopia");
+    }
+    expect(kopie()).toHaveLength(7);
+
+    const odp = await wyczysc({ potwierdzenie: "WYCZYSC" });
+    expect(odp.status).toBe(200);
+
+    const zostaly = kopie().sort();
+    expect(zostaly).toHaveLength(5);
+    // Cztery najnowsze podłożone + świeża z tego wywołania; najstarsze trzy skasowane.
+    expect(zostaly.slice(0, 4)).toEqual([
+      `${nazwaBazy}.bak_before_clear_2023-01-01T00-00-00-000Z`,
+      `${nazwaBazy}.bak_before_clear_2024-01-01T00-00-00-000Z`,
+      `${nazwaBazy}.bak_before_clear_2025-01-01T00-00-00-000Z`,
+      `${nazwaBazy}.bak_before_clear_2026-01-01T00-00-00-000Z`,
+    ]);
+    expect(statSync(join(katalog, zostaly[4]!)).size).toBeGreaterThan(0);
+  });
+
+  /**
+   * Sprzątanie jest BEST-EFFORT tak samo jak sama kopia: niemożność skasowania starego pliku
+   * nie może zablokować czyszczenia katalogu. Zamiast atrapy `fs` podkładamy realny warunek
+   * systemu plików — wpis o pasującej nazwie, który jest KATALOGIEM, więc `unlinkSync` na nim
+   * pada. Trasa ma mimo to oddać 200 i wyczyścić produkty.
+   */
+  it("błąd sprzątania nie przerywa ani czyszczenia, ani kasowania POZOSTAŁYCH kopii", async () => {
+    const katalog = dirname(srodowisko.sciezka);
+    const nazwaBazy = basename(srodowisko.sciezka);
+    const zepsuta = `${nazwaBazy}.bak_before_clear_2019-01-01T00-00-00-000Z`;
+    mkdirSync(join(katalog, zepsuta));
+    for (const rok of ["2020", "2021", "2022", "2023", "2024", "2025"]) {
+      writeFileSync(join(katalog, `${nazwaBazy}.bak_before_clear_${rok}-01-01T00-00-00-000Z`), "x");
+    }
+
+    const odp = await wyczysc({ potwierdzenie: "WYCZYSC" });
+
+    expect(odp.status).toBe(200);
+    expect(odp.body).toEqual({ ok: true });
+    expect(listaProduktow(srodowisko.db)).toHaveLength(0);
+
+    // 7 podłożonych + 1 świeża = 8; do skasowania 3 najstarsze. Najstarsza (`zepsuta`) jest
+    // katalogiem i skasować się nie da — ale POZOSTAŁE DWIE muszą zniknąć mimo to. Gdyby
+    // `try` obejmował całą pętlę, jeden zepsuty wpis blokowałby retencję trwale: zawsze
+    // sortuje się jako najstarszy, więc przy każdym kolejnym czyszczeniu wywracałby ją znowu.
+    const zostaly = kopie().sort();
+    expect(zostaly).toContain(zepsuta);
+    expect(zostaly).not.toContain(`${nazwaBazy}.bak_before_clear_2020-01-01T00-00-00-000Z`);
+    expect(zostaly).not.toContain(`${nazwaBazy}.bak_before_clear_2021-01-01T00-00-00-000Z`);
+    expect(zostaly).toHaveLength(6);
+
+    // Sprzątamy sami: `beforeEach` kasuje kopie zwykłym `rmSync`, który na katalogu padłby.
+    rmSync(join(katalog, `${nazwaBazy}.bak_before_clear_2019-01-01T00-00-00-000Z`), {
+      recursive: true,
+      force: true,
+    });
   });
 });

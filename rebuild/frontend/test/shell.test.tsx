@@ -166,3 +166,63 @@ describe("wylogowanie", () => {
     expect(window.location.pathname).toBe("/login");
   });
 });
+
+/**
+ * Rama na WSZYSTKICH trasach zalogowanego (finalny audyt 12e, D1, backlog #36).
+ *
+ * Do 12e `AppShell` wpinał się każdy widok z osobna i robiło to tylko pięć z dwunastu, więc
+ * sidebar znikał na `/katalog`, `/staging`, `/historia`, `/narzuty`, `/alerty`,
+ * `/waga-gabarytowa` i `/analityka`. Teraz wpina go router (`App.tsx`, `TRASY_Z_RAMA`),
+ * a ten blok pilnuje, żeby rozjazd nie wrócił przy kolejnym widoku.
+ *
+ * Zaślepka MSW oddaje pustą listę każdemu żądaniu do API: sprawdzamy RAMĘ, nie treść, a każdy
+ * z dwunastu widoków pobiera własny zestaw tras, których `onUnhandledRequest: "error"`
+ * nie wybacza.
+ */
+describe("rama aplikacji na każdej trasie", () => {
+  const TRASY_ZALOGOWANEGO = [
+    "/",
+    "/katalog",
+    "/staging",
+    "/konfiguracja",
+    "/historia",
+    "/narzuty",
+    "/alerty",
+    "/atrybuty",
+    "/waga-gabarytowa",
+    "/analityka",
+    "/selly",
+    "/moje-konto",
+  ];
+
+  beforeEach(() => {
+    server.use(http.get("*/api/*", () => HttpResponse.json([])));
+  });
+
+  it.each(TRASY_ZALOGOWANEGO)("%s renderuje sidebar", async (sciezka) => {
+    window.history.pushState({}, "", sciezka);
+    render(<App />);
+
+    // `/analityka` ładuje się leniwie, więc czekamy — na pozostałych trasach rama jest od razu.
+    expect(await screen.findByTestId("link-nav-katalog")).toBeInTheDocument();
+    expect(screen.getByTestId("text-current-user")).toBeInTheDocument();
+  });
+
+  it("`/login` NIE ma ramy — tak jak w oryginale", async () => {
+    sessionStorage.clear();
+    _zresetujStanSesji();
+    window.history.pushState({}, "", "/login");
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByTestId("input-email")).toBeInTheDocument());
+    expect(screen.queryByTestId("link-nav-katalog")).not.toBeInTheDocument();
+  });
+
+  it("404 NIE ma ramy — tak jak w oryginale", async () => {
+    window.history.pushState({}, "", "/nie-ma-takiej-strony");
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByText(/nie znaleziono strony/i)).toBeInTheDocument());
+    expect(screen.queryByTestId("link-nav-katalog")).not.toBeInTheDocument();
+  });
+});

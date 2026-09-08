@@ -43,6 +43,23 @@ beforeAll(() => {
     Element.prototype.scrollIntoView = () => {};
   }
 
+  // Ta sama kategoria luki jsdoma: `ResizeObserver` nie istnieje, a wirtualizacja katalogu
+  // obserwuje nim kontener tabeli (`pages/katalog/wirtualizacja.ts`, port
+  // `frontend-index.js:23246-23248`). Zaślepka jest bezczynna — wystarczy, bo testy nie
+  // zmieniają rozmiarów elementów; sam pomiar okna robi `zmierz()` przy montowaniu.
+  //
+  // ⚠ Dlaczego pojawia się dopiero w 12e: efekt wirtualizacji wychodzi z `useEffect`
+  // natychmiast, gdy nie znajdzie `#$vMainScroll` — a ten element mieszka w `AppShell`,
+  // którego `/katalog` do 12e w ogóle nie renderował (backlog #36). Konstruktor
+  // `ResizeObserver` nigdy więc nie był wołany, także w PRZEGLĄDARCE.
+  if (!globalThis.ResizeObserver) {
+    globalThis.ResizeObserver = class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    } as unknown as typeof ResizeObserver;
+  }
+
   server.listen({ onUnhandledRequest: "error" });
 
   // jsdom nie dostarcza `fetch`, więc w testach działa `fetch` z Node — a ten nie

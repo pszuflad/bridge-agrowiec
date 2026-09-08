@@ -16,8 +16,19 @@ export const CZAS_ZYCIA_TOKENA = "30d";
 /** 30 dni w sekundach — musi się zgadzać z CZAS_ZYCIA_TOKENA (fixture: exp - iat = 2592000). */
 export const CZAS_ZYCIA_TOKENA_SEK = 60 * 60 * 24 * 30;
 
+/**
+ * Algorytm podpisu — HS256, czyli domyślny dla `jwt.sign` z sekretem tekstowym (tak podpisuje
+ * oryginał, `backend-index.cjs:47856-47859`). Wypisany jawnie, żeby dało się go przekazać do
+ * `jwt.verify` (finalny audyt 12e, D2c): weryfikacja bez `algorithms` przyjmuje każdy algorytm,
+ * jaki biblioteka uzna za pasujący do klucza. Przy sekrecie symetrycznym są to wyłącznie
+ * warianty HMAC, więc realnego ryzyka nie było — ale przypięcie jednego algorytmu sprawia, że
+ * ewentualne przejście na klucz asymetryczny nie otworzy po cichu drogi na „algorithm
+ * confusion".
+ */
+const ALGORYTM = "HS256" as const;
+
 export function podpiszToken(payload: PayloadUzytkownika, sekret: string): string {
-  return jwt.sign(payload, sekret, { expiresIn: CZAS_ZYCIA_TOKENA });
+  return jwt.sign(payload, sekret, { expiresIn: CZAS_ZYCIA_TOKENA, algorithm: ALGORYTM });
 }
 
 /**
@@ -26,7 +37,7 @@ export function podpiszToken(payload: PayloadUzytkownika, sekret: string): strin
  */
 export function zweryfikujToken(token: string, sekret: string): PayloadTokena | null {
   try {
-    const payload = jwt.verify(token, sekret);
+    const payload = jwt.verify(token, sekret, { algorithms: [ALGORYTM] });
     if (!maKsztaltPayloadu(payload)) return null;
     return payload;
   } catch {
