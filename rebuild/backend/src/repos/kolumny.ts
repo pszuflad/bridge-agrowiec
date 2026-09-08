@@ -43,13 +43,32 @@ export function projekcjaKontraktowa<T extends SQLiteTable, K extends keyof T["_
 /**
  * Kolumny obecne w bazie, ale ŚWIADOMIE nieujawniane w API.
  *
- * Każdy wpis to zatwierdzone odstępstwo od kanonu produkcji — kolumna, której zamrożony
- * kontrakt nie zna, bo produkcja jej nie ma. Przenagranie fixtures należy do I12; do tego
- * czasu odpowiedzi muszą wyglądać dokładnie tak, jak przed dołożeniem kolumny.
+ * ⚠ TO NIE JEST STAN PRZEJŚCIOWY. Wcześniejsza wersja tego komentarza zapowiadała, że
+ * przenagranie fixtures w I12 ujawni te kolumny. Sesja 12d (ticket 38) przenagrała fixtures
+ * i ustaliła, że dla `uwagaCena` byłoby to ODSTĘPSTWEM od produkcji, nie domknięciem długu.
  */
 export const KOLUMNY_POZA_KONTRAKTEM = {
-  /** D5 / backlog #7 — wycofanie dostawcy z importu (migracja 002). */
+  /**
+   * D5 / backlog #7 — wycofanie dostawcy z importu (migracja 002).
+   * Kolumna WŁASNA odbudowy: produkcja jej w ogóle nie ma, więc nie ma czego ujawniać.
+   */
   suppliers: ["importWylaczony"],
-  /** D9 / backlog #4 — cena „na zapytanie"; pisarz i endpoint dochodzą w 3d (migracja 002). */
+  /**
+   * D9 / backlog #4 — cena „na zapytanie" (migracja 002).
+   *
+   * ⭐ PRODUKCJA TEŻ TEJ KOLUMNY NIE ODDAJE przez `GET /api/products` — ukrycie jej jest
+   * ODTWORZENIEM zachowania, nie długiem. Dowód (ticket 38, sesja 12d):
+   *  • oryginał czyta produkty przez `X.select().from(he)` (`deminified/backend-index.cjs:44699`),
+   *    czyli Drizzle bez jawnej listy kolumn — oddaje pola MODELU, nie kolumny tabeli;
+   *  • model `he` o `uwagaCena` nie wie: `grep -c "uwagaCena" mirror/backend/index.cjs` = 0,
+   *    mimo że `uwaga_cena_patch.cjs` dokłada kolumnę `ALTER TABLE` przy każdym starcie;
+   *  • patch monkey-patchuje `acceptStaging` i `addProductsBulk`, ale NIE `listProducts`;
+   *  • zmierzone: oryginał na kopii bazy, z kolumną już dodaną, oddaje 72 klucze bez `uwagaCena`
+   *    — zarówno w `GET /api/products`, jak i w odpowiedzi `PUT`/`PATCH /api/products/{id}`.
+   *
+   * Kolumnę czytają wyłącznie dwie trasy surowym SQL-em: `GET /api/products/uwagi-cena`
+   * i `/hold-reasons` (klucz `uwaga_cena` w snake_case). Strażnik: test „GET /api/products
+   * NIE oddaje uwagaCena" w `test/katalog.gate.test.ts`.
+   */
   products: ["uwagaCena"],
 } as const;

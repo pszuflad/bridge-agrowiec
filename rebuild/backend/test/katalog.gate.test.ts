@@ -6,16 +6,13 @@
  *
  * Rozbieżność z fixture'em/kontraktem = STOP (nie poprawiamy fixture'a).
  *
- * ⚠ ZNANE, ZATWIERDZONE ODSTĘPSTWO — `szerokosc` (backlog #3, ticket 7 / plan.md D3).
- * Do Iteracji 3d-1 kanon miał tu `REAL` i GATE rozjazdu NIE WIDZIAŁ — bo typy po obu
- * stronach się zgadzały, mimo że produkcja od migracji `szertxt` trzyma tam TEXT.
- * Migracja `003_szerokosc_text.sql` doprowadziła kanon do stanu produkcji, więc rozjazd
- * WYSZEDŁ NA WIERZCH: `GET_products.json` nagrano PRZED tamtą migracją i ma tam liczby.
- *
- * Nie „poprawiamy" fixture'a (Krok 9 tego zabrania) i nie wyłączamy GATE'u — deklarujemy
- * wyjątek (`WYJATKI_SZEROKOSC`), który mówi CO, DLACZEGO i KIEDY znika. Wyjątek jest
- * samoczyszczący: gdy I12 przenagra fixtures, przestanie cokolwiek pokrywać i test
- * zapali się, żądając usunięcia.
+ * `szerokosc` — rozjazd DOMKNIĘTY 2026-09-08 (ticket 38, sesja 12d).
+ * Do tej pory GATE przepuszczał tu zadeklarowany, samoczyszczący wyjątek `WYJATKI_SZEROKOSC`:
+ * `GET_products.json` nagrano PRZED produkcyjną migracją `szertxt`, więc trzymał `szerokosc`
+ * jako liczbę, podczas gdy produkcja i kanon (`003_szerokosc_text.sql`) mają tam TEXT.
+ * Fixture jest przenagrany z oryginału (`tools/record-write-fixtures.cjs`) i niesie napisy
+ * z zerami końcowymi („8.00"), więc wyjątek przestał cokolwiek pokrywać i — zgodnie z tym,
+ * po co był samoczyszczący — zapalił test, żądając usunięcia. Usunięty, nie obejrzany.
  */
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -24,28 +21,11 @@ import {
   sprawdzZgodnoscZKontraktem,
   stworzSrodowiskoTestowe,
   wczytajFixture,
-  type WyjatekGate,
   zasiejDostawcow,
   zasiejHistorieCen,
   zasiejProdukty,
   type SrodowiskoTestowe,
 } from "./gate/index.js";
-
-/**
- * Jedyny zadeklarowany wyjątek GATE I2. Lista ma zostać jednoelementowa — pilnuje tego
- * osobny test niżej, żeby nikt nie „rozszerzył" jej zamiast zgłosić nowy rozjazd.
- */
-const WYJATKI_SZEROKOSC: WyjatekGate[] = [
-  {
-    sciezka: /^\$\.items\[\d+\]\.szerokosc$/,
-    powod:
-      "Produkcja po migracji `szertxt` trzyma `products.szerokosc` jako TEXT i oddaje napis " +
-      "z zerami końcowymi („10.00\"). `GET_products.json` nagrano PRZED tą migracją, więc ma " +
-      "tam liczby. Racja jest po stronie produkcji — fixture jest starszy niż zachowanie, " +
-      "które opisuje.",
-    domyka: "I12 — przenagranie contract/fixtures/GET_products.json",
-  },
-];
 
 describe("GATE — kontrakt i fixtures dla katalogu", () => {
   let srodowisko: SrodowiskoTestowe;
@@ -71,19 +51,80 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
 
     expect(odp.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/products", odpowiedz: odp });
-    sprawdzZgodnoscZFixture("GET_products.json", odp.body, WYJATKI_SZEROKOSC);
+    sprawdzZgodnoscZFixture("GET_products.json", odp.body);
   });
 
   /**
-   * Strażnik samego wyjątku. Zadeklarowany wyjątek to furtka w GATE — musi zostać
-   * JEDNA i musi dotyczyć wyłącznie `szerokosc`. Gdyby ktoś chciał przepchnąć kolejny
-   * rozjazd dopisaniem do listy zamiast zgłoszeniem go (Krok 9: „rozbieżność = STOP"),
-   * zapali się tutaj.
+   * GŁÓWNA ścieżka katalogu, do 12d bez ani jednego fixture'a.
+   *
+   * `GET /api/products` BEZ parametrów to inna gałąź i INNY KSZTAŁT niż `?limit=`:
+   * oryginał oddaje wtedy gołą tablicę, nie kopertę `{items,total,limit,offset}`
+   * (`deminified/backend-index.cjs:48291-48295`). Do tego ticketu pokrywały ją wyłącznie
+   * testy jednostkowe w `produkty.test.ts` — czyli nasz opis zachowania, nie nagranie produkcji.
    */
-  it("GATE ma dokładnie JEDEN zadeklarowany wyjątek i dotyczy on `szerokosc`", () => {
-    expect(WYJATKI_SZEROKOSC).toHaveLength(1);
-    expect(WYJATKI_SZEROKOSC[0]!.sciezka.source).toContain("szerokosc");
-    expect(WYJATKI_SZEROKOSC[0]!.domyka).toContain("I12");
+  it("GET /api/products bez parametrów zwraca GOŁĄ TABLICĘ 1:1 z fixture'em", async () => {
+    const odp = await request(srodowisko.app)
+      .get("/api/products")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(odp.status).toBe(200);
+    expect(Array.isArray(odp.body), "bez parametrów musi być goła tablica").toBe(true);
+    sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/products", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("GET_products_bez-parametrow.json", odp.body);
+  });
+
+  /**
+   * Dwa warianty tej samej trasy MUSZĄ się różnić kształtem — inaczej któryś z nich
+   * przestał odtwarzać produkcję. Bez tego testu regres „zawsze koperta" albo
+   * „zawsze tablica" przeszedłby przez oba fixtures osobno, bo każdy z nich
+   * porównuje tylko swój wariant.
+   */
+  it("oba warianty GET /api/products mają RÓŻNE kształty, zgodnie z gałęzią oryginału", async () => {
+    const bez = await request(srodowisko.app)
+      .get("/api/products")
+      .set("Authorization", `Bearer ${token}`);
+    const zLimitem = await request(srodowisko.app)
+      .get("/api/products?limit=5")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(Array.isArray(bez.body)).toBe(true);
+    expect(Array.isArray(zLimitem.body)).toBe(false);
+    expect(Object.keys(zLimitem.body as object).sort()).toEqual([
+      "items",
+      "limit",
+      "offset",
+      "total",
+    ]);
+  });
+
+  /**
+   * STRAŻNIK DECYZJI D1 (ticket 38). `products.uwaga_cena` istnieje w bazie od migracji 002,
+   * ale API jej NIE oddaje — i to jest ODTWORZENIE produkcji, nie nasz dług.
+   * Oryginał czyta produkty przez `X.select().from(he)` (`deminified/backend-index.cjs:44699`),
+   * czyli Drizzle bez jawnej listy kolumn, więc oddaje pola MODELU; model `he` o `uwagaCena`
+   * nie wie (zero trafień w całym bundlu), a `uwaga_cena_patch.cjs` patchuje `acceptStaging`
+   * i `addProductsBulk`, ale NIE `listProducts`. Potwierdzone nagraniem: oba fixtures
+   * produktów i obie mutacje `{id}` mają 72 klucze, żaden nie ma `uwagaCena`.
+   *
+   * Roadmapa (12d pkt 1) i backlog #3 twierdziły, że przenagranie fixtures „przy okazji ujawni"
+   * tę kolumnę. To było błędne — ujawnienie byłoby ODSTĘPSTWEM od produkcji. Ten test pilnuje,
+   * żeby nikt nie zdjął jej z `KOLUMNY_POZA_KONTRAKTEM` w dobrej wierze.
+   */
+  it("GET /api/products NIE oddaje uwagaCena — tak jak produkcja (D1)", async () => {
+    for (const sciezka of ["/api/products", "/api/products?limit=5"]) {
+      const odp = await request(srodowisko.app)
+        .get(sciezka)
+        .set("Authorization", `Bearer ${token}`);
+      const pozycje = (Array.isArray(odp.body) ? odp.body : (odp.body as { items: unknown[] }).items) as Record<string, unknown>[];
+
+      expect(pozycje.length, sciezka).toBeGreaterThan(0);
+      for (const pozycja of pozycje) {
+        expect(Object.keys(pozycja), `${sciezka} — kolumna spoza kontraktu`).not.toContain(
+          "uwagaCena",
+        );
+        expect(Object.keys(pozycja), sciezka).toHaveLength(72);
+      }
+    }
   });
 
   /**

@@ -1,25 +1,23 @@
 /**
  * GATE ODBUDOWY — mutacje produktów i trasy `uwaga_cena` (Iteracja 12a, ticket 35).
  *
- * ⚠ TEN GATE STOI NA KONTRAKCIE, NIE NA FIXTURES — I TO JEST STAN ZASTANY, NIE OBEJŚCIE.
- * `contract/fixtures/` nie zawiera ANI JEDNEGO nagrania dla sześciu operacji tej sesji:
- * `POST /api/products`, `PUT`/`PATCH`/`DELETE /api/products/{id}`, `GET /api/products/uwagi-cena`,
- * `GET /api/products/hold-reasons`. Nagrania POST/PUT/PATCH/DELETE przeciw kopii bazy są
- * zaplanowane dopiero na sesję 12d (`contract/README.md`, roadmap §5 I12). Do tego czasu
- * wzorcem kształtu jest KOD ORYGINAŁU, mierzony w dwóch innych plikach:
+ * ⚠ DO 2026-09-08 TEN GATE STAŁ WYŁĄCZNIE NA KONTRAKCIE — bo `contract/fixtures/` nie miał
+ * ANI JEDNEGO nagrania dla sześciu operacji sesji 12a. Ticket 38 (sesja 12d) je nagrał:
+ * `tools/record-write-fixtures.cjs` stawia ORYGINAŁ (`mirror/backend/index.cjs`) na kopii
+ * `db/snapshot.db` i łapie żądanie razem z odpowiedzią. Od teraz gate stoi na OBU nogach —
+ * kontrakcie (ścieżka, metoda, kod, JSON) i fixtures (kształt ciała 1:1).
+ *
+ * Charakteryzacja kodu oryginału zostaje i dalej jest potrzebna — mierzy to, czego nagranie
+ * pojedynczego żądania nie pokaże (rozgałęzienia, skutki uboczne w bazie):
  *   • `produkty-bulk.charakteryzacja.test.ts` — `addProductsBulk` vs uruchomiony bundle;
  *   • `produkty.mutacje.test.ts` — warstwa trasy vs `:48306-48487` i `uwaga_cena_patch.cjs`.
- *
- * Tutaj pilnujemy tego, co kontrakt realnie niesie: że wszystkie sześć operacji istnieje
- * w `contract/openapi.yaml`, że zwracane statusy są tam zadeklarowane i że odpowiedzi są
- * JSON-em. Dwie ścieżki `uwaga_cena` i kod `404` dopisano do kontraktu w tej sesji (D3) —
- * bez tego ta asercja nie miałaby czego sprawdzić.
  */
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { products } from "../src/db/schema.js";
 import {
+  sprawdzZgodnoscZFixture,
   sprawdzZgodnoscZKontraktem,
   stworzSrodowiskoTestowe,
   type SrodowiskoTestowe,
@@ -77,6 +75,21 @@ describe("GATE — kontrakt dla mutacji produktów", () => {
     ]);
     expect(odp.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/products", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("POST_products.json", odp.body);
+  });
+
+  /**
+   * Oryginał przyjmuje DWA kształty ciała: `Array.isArray(body) ? body : body.items ?? []`
+   * (`deminified/backend-index.cjs:48306-48307`). Nagrane są oba, bo fixture jednego z nich
+   * zamroziłby połowę prawdy o tej trasie.
+   */
+  it("POST /api/products — ciało `{items:[…]}` daje ten sam kształt odpowiedzi", async () => {
+    const odp = await zAuth(request(srodowisko.app).post("/api/products")).send({
+      items: [{ kod: "GATE_BULK_ITEMS", nazwa: "Z gate'u", cenaZakupu: 100, stan: 1 }],
+    });
+    expect(odp.status).toBe(200);
+    sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/products", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("POST_products_items.json", odp.body);
   });
 
   it.each([
@@ -92,6 +105,7 @@ describe("GATE — kontrakt dla mutacji produktów", () => {
 
     expect(odp.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda, sciezka: "/api/products/{id}", odpowiedz: odp });
+    sprawdzZgodnoscZFixture(`${metoda}_products_id.json`, odp.body);
   });
 
   it("DELETE /api/products/{id} — 200 zadeklarowane w kontrakcie", async () => {
@@ -99,6 +113,7 @@ describe("GATE — kontrakt dla mutacji produktów", () => {
     const odp = await zAuth(request(srodowisko.app).delete(`/api/products/${id}`));
     expect(odp.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda: "DELETE", sciezka: "/api/products/{id}", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("DELETE_products_id.json", odp.body);
   });
 
   /**
@@ -119,6 +134,7 @@ describe("GATE — kontrakt dla mutacji produktów", () => {
 
     expect(odp.status).toBe(404);
     sprawdzZgodnoscZKontraktem({ metoda, sciezka: "/api/products/{id}", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("PATCH_products_id_404.json", odp.body);
   });
 
   it.each([
@@ -129,6 +145,28 @@ describe("GATE — kontrakt dla mutacji produktów", () => {
     const odp = await zAuth(request(srodowisko.app).get(sciezka));
     expect(odp.status).toBe(200);
     sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka, odpowiedz: odp });
+    sprawdzZgodnoscZFixture(`GET_products_${sciezka.split("/").pop()}.json`, odp.body);
+  });
+
+  /**
+   * ⚠ Klucz `uwaga_cena` jest w SNAKE_CASE i fixture jest jedynym dowodem, że tak zostanie.
+   * Produkcja czyta tę trasę surowym `better-sqlite3` (`uwaga_cena_patch.cjs:98-104`), więc
+   * oddaje nazwy KOLUMN; gołe `select()` Drizzle'a dałoby tu `uwagaCena`. Nagranie musiało
+   * mieć niepustą listę, żeby w ogóle zamrozić kształt pozycji — dlatego nagrywarka zasiewa
+   * jeden wiersz (`zasiejUwageCeny`). Ta asercja czyta klucz wprost, żeby regres do camelCase
+   * zapalił się z nazwą pola, a nie jako abstrakcyjna różnica kształtu.
+   */
+  it("GET /api/products/uwagi-cena — pozycja ma klucz `uwaga_cena` w snake_case", async () => {
+    const id = zasiejProdukt();
+    srodowisko.sqlite
+      .prepare("UPDATE products SET uwaga_cena = 'na zapytanie' WHERE id = ?")
+      .run(id);
+
+    const odp = await zAuth(request(srodowisko.app).get("/api/products/uwagi-cena"));
+    const pozycje = (odp.body as { items: Record<string, unknown>[] }).items;
+
+    expect(pozycje).toHaveLength(1);
+    expect(Object.keys(pozycje[0]!).sort()).toEqual(["ean", "id", "kod", "uwaga_cena"]);
   });
 
   it.each([

@@ -65,7 +65,12 @@ Ta sama nieufność dotyczy projekcji Drizzle: `select()` bez jawnej listy pól 
 modelu (camelCase), a fixture nagrany z oryginału (który robi `SELECT *` przez `better-sqlite3`)
 ma nazwy KOLUMN (`snake_case`) — trafiło to na `GET /api/selly/log` (siedem kluczy naraz) i
 wykrył to dopiero GATE, nie code review. Dla trasy, której fixture ma klucze `snake_case`,
-projekcję trzeba wypisać jawnie.
+projekcję trzeba wypisać jawnie. Działa to też w drugą stronę: kolumna dodana runtime'owym
+`ALTER TABLE` (nie migracją) jest dla Drizzle NIEWIDOCZNA, bo model jej nie zna —
+`products.uwaga_cena` (dokładana patchem `uwaga_cena_patch.cjs` przy każdym starcie) NIE
+wychodzi przez `GET /api/products`, mimo że fizycznie jest w tabeli (zmierzone na oryginale:
+72 klucze bez `uwagaCena`). Obecność kolumny w bazie produkcji nie znaczy, że API ją oddaje —
+sprawdzaj model, nie schemat tabeli.
 
 ---
 
@@ -82,3 +87,12 @@ projekcję trzeba wypisać jawnie.
   w `rebuild/backend/test/gate/selly-atrapa.ts`. Uwaga: `POST /api/selly/sync-supplier` z
   `dry_run=false` realnie modyfikuje cudzy sklep — nie odpalaj tego ręcznie bez sekretów
   testowych.
+- **Oryginał da się uruchomić lokalnie** — `tools/record-write-fixtures.cjs` stawia
+  `mirror/backend/index.cjs` na kopii `db/snapshot.db`; to standardowa metoda dowodzenia
+  wierności (nagrania fixtures), nie tylko czytanie zdeminifikowanego kodu. Trzy pułapki:
+  scheduler rusza po URL-e dostawców w ciągu 60 s od startu (`extensions.cjs:811-838`,
+  6/10 dostawców ma ustawioną częstotliwość) — trzeba ją wygasić w kopii przed startem;
+  proces musi startować z CWD = katalog backendu (baza otwierana relatywnie
+  `new Database("data.db")`, ale `POST /api/products/clear` robi kopię przez
+  `path.join(__dirname, "data.db")`); moduły `atrybuty` i `pending` mają zahardkodowane
+  ścieżki produkcyjne i lokalnie się nie podnoszą (`/api/atrybuty*` w piaskownicy martwe).

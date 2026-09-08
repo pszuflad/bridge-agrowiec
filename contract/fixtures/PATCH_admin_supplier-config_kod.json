@@ -1,0 +1,18 @@
+{
+  "endpoint": "/api/admin/supplier-config/MO2",
+  "method": "PATCH",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "kod": "MO2",
+    "url": "http://46.238.100.138:5844/Cennik_26002_v2_4f8a1740-11c5-4ee8-8e1d-e3145b10d335.csv",
+    "czestotliwoscMinuty": null,
+    "status": "aktywny"
+  },
+  "request": {
+    "status": "aktywny"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Metoda to PATCH, nie PUT (extensions.cjs:344) — roadmapa myliła się tu trzykrotnie."
+}

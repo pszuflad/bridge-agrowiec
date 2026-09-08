@@ -126,7 +126,7 @@ tego, co użytkownik realnie widzi w panelu, nie tylko statystyk importu.
 | **Pliki (stan końcowy)** | `parsers/tyre_params.cjs`, `bridge_ext.cjs`, `db/schema.sql` (kolumna `products.szerokosc`); skasowane `probe.cjs/2/3`; kopie `*.bak_pre_szerokoscfix_*`, `*.bak_pre_szerorig_*`, `*.bak_pre_szertxt_*` |
 | **Commity** | `97ccb9f` (szerokoscfix — cofnięty) · `5c060b0` (szerorig) · `d5a43c9` (szertxt) |
 | **Do nowej wersji?** | ✅ **TAK — NANIESIONE** (decyzja użytkownika 2026-08-27, ticket `7-FEATURE-silnik-zatwierdzanie-wycofania-overrides`, plan.md D3) |
-| **Status** | ✅ **ZREALIZOWANE 2026-08-27 (I3/3d-1)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`); potwierdzone w I12a (2026-09-05), że kanon nie ożywił starego wyjątku; 12c (2026-09-05) doniosła wadę ręcznej edycji do frontu (D3, 1:1). Zostaje JEDNO: przenagranie `GET_products.json` w **sesji 12d**. |
+| **Status** | ✅ **ZAMKNIĘTE 2026-09-08 (sesja 12d, ticket `38-CHORE-kontrakt-fixtures-odswiezenie`)** — migracja `rebuild/schema/003_szerokosc_text.sql` + `src/db/schema.ts` (`text()`) od 3d-1 (2026-08-27); potwierdzone w I12a (2026-09-05), że kanon nie ożywił starego wyjątku; 12c (2026-09-05) doniosła wadę ręcznej edycji do frontu (D3, 1:1); 12d przenagrał `GET_products.json` z ORYGINAŁU (`szerokosc` jako TEXT z zerami końcowymi) i usunął wyjątek `WYJATKI_SZEROKOSC` — GATE katalogu zielony bez ani jednego zadeklarowanego wyjątku. Nic nie zostaje otwarte. |
 
 **Opis biznesowy:**
 Kolumna „szerokość" opony była niespójna: ten sam rozmiar (np. „11.2-24") zapisywał się raz jako
@@ -152,19 +152,24 @@ liczbę z tekstu rozmiaru 1:1, z zerami końcowymi**, bez konwersji jednostek.
 - Skrypty jednorazowe Ani (`backfill_szerokosc_*`, `migrate_szer_to_text.cjs`, `patch_szertxt*`,
   `backup_szertxt.cjs`) — operacyjne, **nie są celem odbudowy** (nowy import od razu zapisuje poprawnie).
 
-**⚠ Rozjazdy — stan po 3d-1 (2026-08-27):**
+**⚠ Rozjazdy — domknięte w sesji 12d (2026-09-08):**
 - ✅ **Schemat ZROBIONY.** `001_schema.sql` zostaje NIETKNIĘTY (jest datowanym punktem zerowym =
   stan produkcji 2026-08-17, `rebuild/schema/README.md`); zmianę wnosi migracja przyrostowa
   `003_szerokosc_text.sql`, która przebudowuje tabelę (SQLite nie ma `ALTER COLUMN`). Strażnik
   przed dryfem duplikatu DDL: `test/db.migracje.test.ts` porównuje kolumny żywej tabeli z kanonem.
-- ⬜ **Fixture — ZOSTAJE do sesji 12d.** `GET_products.json` ma `szerokosc` liczbową (nagrany przed
-  migracją produkcji). GATE I2 przepuszcza to przez **zadeklarowany, samoczyszczący się wyjątek**
-  `WYJATKI_SZEROKOSC` (`test/katalog.gate.test.ts`): niesie powód i wskazanie na 12d, a gdy
-  przestanie cokolwiek pokrywać — zapali test i wymusi swoje usunięcie. Przenagranie
-  `GET_products.json` (`szerokosc` jako TEXT) i zdjęcie tego wyjątku nadal czeka na sesję 12d.
-- 🔎 **Warto wiedzieć przy przenagrywaniu:** `db/snapshot.db` (2026-08-13) jest STARSZY niż
-  migracja `szertxt` (2026-08-19) i ma jeszcze `szerokosc REAL`, więc sam nie nadaje się na
-  źródło wartości „z zerami końcowymi".
+- ✅ **Fixture PRZENAGRANY (sesja 12d).** `GET_products.json` ma teraz `szerokosc` jako TEXT
+  z zerami końcowymi (potwierdzone wartości: `"620"`, `"240"`, `"8.00"`, `"540"`, `"600"`),
+  nagrany z ORYGINAŁU (`mirror/backend/index.cjs`) na kopii bazy. Wyjątek `WYJATKI_SZEROKOSC`
+  (`test/katalog.gate.test.ts`) zapalił się sam po przenagraniu — dokładnie jak zaprojektowała
+  to sesja 3d-1 — i został usunięty razem z test-strażnikiem swojej jednoelementowości. GATE
+  katalogu jest zielony bez ani jednego zadeklarowanego wyjątku.
+- 🔎 **Skąd wzięły się wartości „z zerami końcowymi" mimo starego snapshotu.** `db/snapshot.db`
+  (2026-08-13) faktycznie jest STARSZY niż migracja `szertxt` (2026-08-19/20) i ma `szerokosc
+  REAL` — ale **nadaje się** jako źródło, bo produkcja ma własny skrypt migracyjny
+  `mirror/backend/migrate_szer_to_text.cjs`, który backfilluje `szerokosc` z kolumny `rozmiar`
+  (pierwsza liczba jako string 1:1, z zerami). Nagrywarka 12d (`tools/record-write-fixtures.cjs`)
+  uruchamia ten skrypt na KOPII bazy (podmieniona wyłącznie jedna linia z zahardkodowaną ścieżką
+  produkcyjną) i dostaje dokładnie te napisy z zerami — kod produkcji domyka wiek snapshotu sam.
 - ⚠ **Znalezione w I12a (2026-09-05), potwierdzone i ZANIESIONE w sesji 12c (2026-09-05,
   decyzja D3, `docs/tickets/37-FEATURE-katalog-edycja-produktu/plan.md`).** Produkcyjny dialog
   edycji `LT()` renderuje `szerokosc` jako `type="number"` z `parseFloat`
@@ -181,7 +186,7 @@ Port verbatim `tyre_params.cjs` wniósł stan końcowy `szertxt` do `rebuild/bac
 zwraca `szerokosc` jako **string** z zerami końcowymi (`"10.00"`, `"400"`), a `widthCm` dalej liczy
 `wysokoscBokuCm`/`wysokoscRzeczywistaCm` z floata. W 3a nie ma bazy, więc dotyczy to wyłącznie
 kształtu rekordu w pamięci. **Zmiana `products.szerokosc` REAL→TEXT została naniesiona
-w 3d-1 (2026-08-27); zostaje wyłącznie przenagranie `GET_products.json` w sesji 12d.**
+w 3d-1 (2026-08-27); `GET_products.json` przenagrany w sesji 12d (2026-09-08) — saga zamknięta.**
 
 ⭐ **Dlaczego to NIE była kosmetyka (ustalenie z 3d-1).** Port parsera od 3a produkuje napisy,
 ale SQLite stosuje TYPE AFFINITY: do kolumny `REAL` napis `"10.00"` wchodzi jako liczba `10.0`
@@ -280,7 +285,7 @@ podejmują (status zostaje 🕒 PÓŹNIEJ):**
 | **Commity** | `33455c8`, `c5d3d63`, `16bc37c` |
 | **Do nowej wersji?** | ✅ **TAK — DOMKNIĘTE** (parser i kolumna I3/3a-3b; propagacja `acceptStaging` 3d-2; oba endpointy + propagacja bulku I12a, 2026-09-05) |
 | **Iteracja** | **→ I3** (schemat: 3b ✔; propagacja importu: 3d-2 ✔) **→ I12a** (endpointy + propagacja bulku ✔) **+ injection-tooltip** (późniejsza iteracja; wzorzec jak pending/selly/freq-injection) |
-| **Status** | ✅ **ZREALIZOWANE w rebuild (I12a, 2026-09-05)** — kolumna, obaj pisarze (`acceptStaging`, `addProductsBulk`) i oba czytelniki (`uwagi-cena`, `hold-reasons`) gotowe; nadal otwarte: ujawnienie `uwagaCena` w `GET /api/products` → 12d |
+| **Status** | ✅ **ZAMKNIĘTE (I12a, 2026-09-05; potwierdzone dowodem z oryginału w sesji 12d, 2026-09-08)** — kolumna, obaj pisarze (`acceptStaging`, `addProductsBulk`) i oba czytelniki (`uwagi-cena`, `hold-reasons`) gotowe. `uwagaCena` **celowo zostaje ukryta** w `GET /api/products` — 12d ustaliła, że produkcja też jej tam nie oddaje (patrz niżej), więc ukrycie jest wiernym odtworzeniem, nie długiem. |
 
 **Opis biznesowy:** dostawcy czasem zwracają „cena na zapytanie" (np. „- zł" w Nokian dla wielkoformatowych VF Float King). Zamiast pokazywać 0/pustą cenę, produkt dostaje notatkę i jest „wstrzymany"; frontend pokazuje tooltip z powodem.
 
@@ -297,8 +302,8 @@ próbki, nie brak obsługi.)
 `rebuild/schema/002_import.sql` (ta sama migracja co #7). Wartość już dziś dociera do stagingu
 w `snapshot_json`, bo parsery z 3a propagują pole `uwagaCena`. Kolumna jest w bazie, ale
 świadomie NIE wychodzi w `GET /api/products` — pilnuje tego jawna projekcja kontraktowa
-(`rebuild/backend/src/repos/kolumny.ts`), dzięki czemu zamrożony `GET_products.json` (72 klucze)
-pozostaje nietknięty do czasu przenagrania fixtures w I12.
+(`rebuild/backend/src/repos/kolumny.ts`). **Trwałe, nie przejściowe** — 12d (2026-09-08)
+potwierdziła dowodem z oryginału, że produkcja też tej kolumny tam nie oddaje (patrz niżej, D1).
 
 **Podział doprecyzowany 2026-08-27 (I3/3d-1, decyzja użytkownika — plan.md D4):**
 - **propagacja** w `acceptStaging` (odczyt `uwagaCena` ze `snapshotJson` → `products.uwaga_cena`)
@@ -317,10 +322,27 @@ pozostaje nietknięty do czasu przenagrania fixtures w I12.
 wiersze surowym `better-sqlite3`; projekcja w odbudowie wypisana jawnie z aliasem) i
 `GET /api/products/hold-reasons` (`{ok, items:[{id, kod, ean, reason}]}`, powód liczony w locie,
 pięć przypadków, `uwaga_cena` bije wszystkie pozostałe warunki). Obie ścieżki dopisane do
-`contract/openapi.yaml` (bez schematów ciał — te powstają z nagrań produkcji w 12d). **Nadal
-otwarte:** kolumna `uwagaCena` jest wciąż ukryta przed `GET /api/products` projekcją
-kontraktową (`repos/kolumny.ts`, `KOLUMNY_POZA_KONTRAKTEM`) — ujawnienie wymaga przenagrania
-`contract/fixtures/GET_products.json` → sesja 12d.
+`contract/openapi.yaml`; schematy ciał (w tym `uwaga_cena` w snake_case) dopisane w 12d
+z nagrań `GET_products_uwagi-cena.json` / `GET_products_hold-reasons.json`.
+
+**⭐ Rozstrzygnięte w sesji 12d (2026-09-08), obala wcześniejsze założenie — patrz D1
+`docs/tickets/38-CHORE-kontrakt-fixtures-odswiezenie/plan.md`.** Roadmapa i ten wpis zakładały,
+że kolumna `uwagaCena` jest ukryta przed `GET /api/products` **tymczasowo**, do przenagrania
+fixtures w 12d. **To założenie było błędne.** Sesja 12d zmierzyła na uruchomionym oryginale
+(`mirror/backend/index.cjs` na kopii bazy): `U.listProducts()` to `X.select().from(he).all()`
+(`deminified/backend-index.cjs:44699-44701`) — Drizzle bez jawnej listy kolumn, więc oddaje
+pola MODELU, nie kolumny tabeli; model `he` nie deklaruje `uwagaCena`
+(`grep -c "uwagaCena" mirror/backend/index.cjs` = 0); `uwaga_cena_patch.cjs` monkey-patchuje
+`U.acceptStaging` i `U.addProductsBulk`, ale **nie** `listProducts`. Kolumna dodana runtime'owym
+`ALTER TABLE` jest dla Drizzle niewidoczna. **Zmierzone empirycznie:** `GET /api/products`
+z żywego oryginału oddaje **72 klucze bez `uwagaCena`**, tak samo `PUT`/`PATCH
+/api/products/{id}`. Produkcja więc tej kolumny NIE ujawnia — ukrycie w
+`KOLUMNY_POZA_KONTRAKTEM` (`repos/kolumny.ts`) jest **odtworzeniem produkcji 1:1**, nie długiem
+do spłacenia; „ujawnienie" byłoby odstępstwem. Kolumnę czytają wyłącznie dwie trasy surowym
+SQL-em (`GET /api/products/uwagi-cena`, `/hold-reasons`, klucz `uwaga_cena` w **snake_case**) —
+obie mają teraz nagrania, i pilnuje tego strażnik w `test/katalog.gate.test.ts` („`GET
+/api/products` ma dokładnie 72 klucze i nie zawiera `uwagaCena`"). `kolumny.ts` dostał
+zaktualizowany komentarz oparty na tym dowodzie; zero zmian logiki.
 
 **Potwierdzone przy 3c (2026-08-26).** Silnik dopasowania serializuje `snapshotJson` z rekordu
 PO `znormalizujPozycje()` (`Hq()`), która kopiuje wszystkie pola wejścia przez spread —
@@ -2407,3 +2429,43 @@ czy (b) zostawić natywny dialog, ale **dopisać uzasadnienie** tam, gdzie go ni
 ma je `konfiguracja/Katalog.tsx`. Wariant (b) jest tańszy i wystarcza, jeśli powodem jest
 nieodwracalność operacji (obie są masowe i nieodwracalne). Naturalny moment domknięcia:
 **12e** (finalny audyt + przegląd 12 widoków).
+
+---
+
+### #52 · 2026-09-08 · [BACKEND][BEZPIECZEŃSTWO] · `security: []` w kontrakcie vs `requireAuth` w odbudowie — teraz ZMIERZONE na oryginale, materiał dla 12e
+
+> **Informacyjny, nie decyzyjny.** Sesja 12d zmierzyła to empirycznie na uruchomionym
+> oryginale (przy okazji nagrywania fixtures zapisujących); wcześniej było to tylko
+> wywnioskowane z kodu. Rozstrzygnięcie (czy coś zmieniać) należy do finalnego audytu
+> bezpieczeństwa **12e**, nie do tej sesji.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (auth) + KONTRAKT |
+| **Pliki** | `contract/openapi.yaml` (`security: []` + nowa adnotacja `x-odbudowa-auth`), odbudowa: `requireAuth` na wymienionych trasach (odstępstwo D1 z I1) |
+| **Do nowej wersji?** | ✅ **TAK — już naniesione jako świadome odstępstwo** (D1 z I1, utrwalone I2/3b/3d-2/4a/I5); ten wpis dokumentuje pomiar, nie proponuje zmiany |
+| **Status** | ✔ zmierzone na oryginale (12d, 2026-09-08); kontrakt niesie to jawnie przez `x-odbudowa-auth` + zadeklarowany `401` (14 operacji) |
+
+**Co zmierzono.** Sesja 12d postawiła `mirror/backend/index.cjs` (oryginał) lokalnie na kopii
+bazy i wysłała żądania bez tokenu. **14 tras, które kontrakt opisuje jako `security: []`,
+produkcja realnie oddaje BEZ tokenu (200):** `GET /api/alerts`, `/api/audit-log`, `/api/config`,
+`/api/export-shoper`, `/api/export/shoper`, `/api/history`, `/api/history/meta`,
+`/api/history/paged`, `/api/markups`, `/api/overrides`, `/api/promotions`, `/api/spedycja`,
+`/api/staging`, `POST /api/waga-gabarytowa/oblicz`. Odbudowa je chroni `requireAuth` — to
+świadome, udokumentowane odstępstwo od produkcji (D1 z I1), nie regres.
+
+**Osobno — nie odstępstwo, tylko luka dawnego inwentarza.** `GET /api/me` i `POST /api/login`
+zwracają **401 także w produkcji** (bez tokenu / ze złym hasłem) — kontrakt wersji 2.3 tego nie
+deklarował; 12d dopisała realny `401` dla obu tras.
+
+**Efekt w kontrakcie (12d).** Wszystkie 14 tras z listy wyżej dostały adnotację
+`x-odbudowa-auth` z powodem i dopuszczony kod `401`, bez zmiany `security` — kontrakt zostaje
+lustrem produkcji, a odstępstwo odbudowy jest jawnie oznaczone osobnym kluczem. GATE testuje
+`401` na tych trasach jednolicie przez `sprawdzZgodnoscZKontraktem`, zamiast omijać kontrakt
+osobnym testem (jak dotąd `GET /api/audit-log`, nota 12b w roadmapie). Szczegóły i dowód:
+`docs/tickets/38-CHORE-kontrakt-fixtures-odswiezenie/plan.md` (D4), `raport.md` (sekcja „Kody
+błędów — zmierzone, nie założone").
+
+**Do decyzji (12e).** Czy wobec zmierzonego stanu produkcji odstępstwo `requireAuth` na tych
+14 trasach ma zostać na stałe (dzisiejszy wybór), czy część z nich powinna wrócić do zachowania
+1:1 z produkcją (publiczne). Ten wpis tylko niesie pomiar — nie rozstrzyga.

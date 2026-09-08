@@ -141,11 +141,11 @@ describe("GATE — kontrakt i fixtures dla konta, admina i utrzymania", () => {
   });
 
   /**
-   * Trasy zapisujące nie mają nagrań w `contract/fixtures/` (`contract/README.md`), więc
-   * GATE sprawdza dla nich to, co kontrakt realnie zamraża: ścieżkę, metodę i kod odpowiedzi.
-   * Przenagranie fixtures POST/PATCH należy do sesji 12d.
+   * Cztery mutacje tej sesji dostały nagrania w tickecie 38 (sesja 12d), z ORYGINAŁU
+   * postawionego na kopii bazy (`tools/record-write-fixtures.cjs`). Do tego czasu gate
+   * sprawdzał tu wyłącznie kontrakt (ścieżka, metoda, kod) — teraz także kształt ciała.
    */
-  describe("mutacje — zgodność z kontraktem (fixtures dojdą w 12d)", () => {
+  describe("mutacje — zgodność z kontraktem i fixtures", () => {
     it("PATCH /api/admin/supplier-config/{kod}", async () => {
       const odp = await request(srodowisko.app)
         .patch("/api/admin/supplier-config/MO1")
@@ -158,6 +158,7 @@ describe("GATE — kontrakt i fixtures dla konta, admina i utrzymania", () => {
         sciezka: "/api/admin/supplier-config/MO1",
         odpowiedz: odp,
       });
+      sprawdzZgodnoscZFixture("PATCH_admin_supplier-config_kod.json", odp.body);
     });
 
     it("POST /api/password/change (401 przy złym starym haśle)", async () => {
@@ -186,6 +187,7 @@ describe("GATE — kontrakt i fixtures dla konta, admina i utrzymania", () => {
         sciezka: "/api/maintenance/usun-nieopony",
         odpowiedz: odp,
       });
+      sprawdzZgodnoscZFixture("POST_maintenance_usun-nieopony.json", odp.body);
     });
 
     it("POST /api/products/clear — 400 bez potwierdzenia i 200 z nim", async () => {
@@ -196,6 +198,7 @@ describe("GATE — kontrakt i fixtures dla konta, admina i utrzymania", () => {
 
       expect(bez.status).toBe(400);
       sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/products/clear", odpowiedz: bez });
+      sprawdzZgodnoscZFixture("POST_products_clear_400.json", bez.body);
 
       const z = await request(srodowisko.app)
         .post("/api/products/clear")
@@ -204,6 +207,27 @@ describe("GATE — kontrakt i fixtures dla konta, admina i utrzymania", () => {
 
       expect(z.status).toBe(200);
       sprawdzZgodnoscZKontraktem({ metoda: "POST", sciezka: "/api/products/clear", odpowiedz: z });
+      sprawdzZgodnoscZFixture("POST_products_clear.json", z.body);
+    });
+
+    /**
+     * Nagranie POWODZENIA zmiany hasła — osobno od istniejącego testu 401, bo to dwa różne
+     * kształty ciała (`{ok:true}` vs `{error, code}`) i tylko oba razem opisują trasę.
+     * Idzie na końcu bloku, bo unieważnia hasło, którym loguje się `beforeAll`.
+     */
+    it("POST /api/password/change — kształt odpowiedzi 200 z fixture'a", async () => {
+      const odp = await request(srodowisko.app)
+        .post("/api/password/change")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ oldPassword: srodowisko.dane.haslo, newPassword: "NoweHasloGate1!" });
+
+      expect(odp.status).toBe(200);
+      sprawdzZgodnoscZKontraktem({
+        metoda: "POST",
+        sciezka: "/api/password/change",
+        odpowiedz: odp,
+      });
+      sprawdzZgodnoscZFixture("POST_password_change.json", odp.body);
     });
   });
 
