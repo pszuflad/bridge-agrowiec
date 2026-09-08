@@ -41,7 +41,7 @@ const columns = [
   ['Waga', 'waga'],
   ['TL/TT', 'tl_tt'],
   ['PR', 'pr'],
-  ['Konstrukcja', 'konstrukcja'],  // 2026-09-01: naglowek zmieniony z 'R/D' (kody) na 'Konstrukcja' — baza ma teraz pelne slowa 'Radialna'/'Diagonalna'
+  ['R/D', 'konstrukcja'],
   ['IF/VF', 'vf_if'],
   ['Oznaczenie-bieznika', 'oznaczenie_bieznika'],
   ['Link-do-zdjecia', 'link_zdjecia'],

@@ -171,7 +171,7 @@ CREATE TABLE atrybuty_wartosci_odrzucone (
   UNIQUE(rodzaj, wartosc)
 );
 CREATE INDEX idx_odrzucone_rodzaj ON atrybuty_wartosci_odrzucone(rodzaj);
-CREATE TABLE IF NOT EXISTS "selly_products_old" (
+CREATE TABLE selly_products (
   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
   bridge_kod         TEXT NOT NULL UNIQUE,          -- odpowiada products.kod
   selly_product_id   INTEGER NOT NULL,              -- product_id w Selly
@@ -185,7 +185,8 @@ CREATE TABLE IF NOT EXISTS "selly_products_old" (
   stan_wyslany           INTEGER,
   utworzono          TEXT NOT NULL DEFAULT (datetime('now'))
 );
-CREATE INDEX idx_selly_products_kod ON "selly_products_old"(bridge_kod);
+CREATE INDEX idx_selly_products_kod ON selly_products(bridge_kod);
+CREATE INDEX idx_selly_products_status ON selly_products(ostatni_status);
 CREATE TABLE selly_dict (
   slownik    TEXT NOT NULL,     -- 'producers' | 'categories' | 'vat_rates' | 'warehouses'
   klucz      TEXT NOT NULL,     -- np. nazwa marki po toLowerCase
@@ -296,36 +297,3 @@ CREATE TABLE IF NOT EXISTS "products" (
   label_snow TEXT
 , link_zdjecia TEXT, oznaczenie_bieznika TEXT, sezon TEXT, ms INTEGER, snow_3pmsf INTEGER, wentyl TEXT, cfo INTEGER, wysokosc_przesylki REAL, zastosowanie TEXT, kod_importu TEXT, nieobecnosc_pod_rzad INTEGER NOT NULL DEFAULT 0, uwaga_cena TEXT);
 CREATE INDEX idx_products_kod_importu ON products(kod_importu);
-CREATE TABLE atrybuty_wartosci_bak_20260904(
-  id INT,
-  rodzaj TEXT,
-  wartosc TEXT,
-  utworzony TEXT,
-  origin TEXT,
-  utworzono TEXT
-);
-CREATE TABLE selly_products (
-  id                     INTEGER PRIMARY KEY AUTOINCREMENT,
-  kod_importu            TEXT NOT NULL,                 -- klucz produktu (grupuje warianty)
-  dostawca               TEXT NOT NULL,                 -- MO1..MO10 - identyfikuje wariant
-  bridge_kod             TEXT NOT NULL,                 -- pelny kod Bridge (np. MO2_19539) dla latwosci JOIN
-  selly_product_id       INTEGER NOT NULL,              -- product_id w Selly (wspolny dla wszystkich wariantow tego kod_importu)
-  selly_variant_id       INTEGER,                       -- variant_id w Selly (unikatowy per dostawca+produkt)
-  selly_category_id      INTEGER,
-  selly_producer_id      INTEGER,
-  feature_id_magazyn     INTEGER,                       -- feature_id (Magazyny) dla tego dostawcy
-  ostatnia_sync          TEXT NOT NULL DEFAULT (datetime('now')),
-  ostatni_status         TEXT NOT NULL DEFAULT 'pending', -- pending | ok | error | not_found
-  ostatni_blad           TEXT,
-  cena_sprzedazy_wyslana REAL,
-  cena_zakupu_wyslana    REAL,
-  stan_wyslany           INTEGER,
-  utworzono              TEXT NOT NULL DEFAULT (datetime('now')),
-  UNIQUE (kod_importu, dostawca)
-);
-CREATE INDEX idx_selly_products_bridge  ON selly_products(bridge_kod);
-CREATE INDEX idx_selly_products_kod_imp ON selly_products(kod_importu);
-CREATE INDEX idx_selly_products_dostaw  ON selly_products(dostawca);
-CREATE INDEX idx_selly_products_prodid  ON selly_products(selly_product_id);
-CREATE INDEX idx_selly_products_varid   ON selly_products(selly_variant_id);
-CREATE INDEX idx_selly_products_status ON selly_products(ostatni_status);

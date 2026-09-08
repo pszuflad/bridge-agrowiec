@@ -575,10 +575,7 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     szerokosc: enriched.szerokosc ?? null,
     profil: enriched.profil ?? null,
     srednica: enriched.srednica ?? null,
-    // POPRAWKA 2026-09-01 (unifikacja konstrukcji): centralne mapowanie na pełne słowa
-    // ('Radialna'/'Diagonalna'). Wewnetrzne kody parsera (R/D/L/B/-) tu są rozwijane.
-    // Idempotentne — wartości już pełne przechodzą bez zmian.
-    konstrukcja: common.normalizeKonstrukcja(enriched.konstrukcja),
+    konstrukcja: enriched.konstrukcja ?? null,
     indeksNosnosci: enriched.indeksNosnosci ?? null,
     indeksPredkosci: enriched.indeksPredkosci ?? null,
     tlTt: enriched.tlTt ?? null,
@@ -596,11 +593,8 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     hf: (enriched.hf || marks.hf) ? 'HF' : null,
     ls: (enriched.ls || marks.ls) ? 'LS' : null,
     hs: (enriched.hs || marks.hs) ? 'HS' : null,
-    // POPRAWKA 2026-09-01 (Bug #2 od Claude'a): flagi Michelin NRO/CHO teraz Tak/null
-    // (dopisane do konwencji flagsfix 2026-08-25). normalizeLabelFlag radzi sobie zarówno
-    // z surową wart. 0/1 (starsi dostawcy) jak i 'Tak'/null (nowa ścieżka z tyre_params).
-    nro: tyre.normalizeLabelFlag(enriched.nro),
-    cho: tyre.normalizeLabelFlag(enriched.cho),
+    nro: enriched.nro ?? null,
+    cho: enriched.cho ?? null,
     // POPRAWKA 2026-08-25 (flagsfix): flagi UE (cfo, stubbleResistant, reinforced) sa
     // teraz Tak/NULL zgodnie z konwencja checkmark_tak z 21.07. Wczesniej byly INTEGER 0/1.
     cfo: tyre.normalizeLabelFlag(enriched.cfo),

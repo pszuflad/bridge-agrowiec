@@ -459,16 +459,6 @@ function register(app, ctx) {
     } catch (e) {
       console.error('[bridge_v6] BLAD ladowania selly/routes:', e.message);
     }
-    // === DODANE 2026-09-07: Selly REST API sync (Tor 1 delta + Tor 2 full) ===
-    try {
-      const { registerSyncRoutes } = require('./selly/routes_sync.cjs');
-      registerSyncRoutes(app, { db: _bridgeDb, requireAuth: we });
-      const { installScheduler } = require('./selly/scheduler_selly.cjs');
-      installScheduler(_bridgeDb);
-      console.log('[bridge_v6] Selly sync: endpointy /sync-* + scheduler zaladowane');
-    } catch (e) {
-      console.error('[bridge_v6] BLAD ladowania selly/sync:', e.message);
-    }
     // === DODANE 2026-08-24: uwaga_cena patch ===
     // Kolumna products.uwaga_cena + monkey-patch acceptStaging/addProductsBulk
     // + endpoint GET /api/products/uwagi-cena dla frontendowego tooltipu przy statusie.
