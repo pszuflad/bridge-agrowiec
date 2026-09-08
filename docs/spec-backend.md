@@ -238,6 +238,42 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `wal_checkpoint(TRUNCATE)` przed `DELETE FROM products` bez `WHERE`). Szczegóły:
 > `docs/tickets/36-FEATURE-konto-admin-maintenance/`.
 
+> **Domknięte finalnym audytem 12e (2026-09-08, `39-CHORE-audyt-bezpieczenstwa-domkniecie`).**
+> Przejrzano rejestr tras zbudowanej aplikacji: ~95 operacji w 21 plikach
+> `rebuild/backend/src/routes/*.ts`, **każda trasa danych ma `requireAuth` bezpośrednio przy
+> rejestracji**. Publiczne są dokładnie trzy: `POST /api/login` (`routes/auth.ts:31`),
+> `POST /api/logout` (`routes/auth.ts:62` — JWT bezstanowy, jak w oryginale
+> `backend-index.cjs:48175-48178`) i `GET /api/health` (`app.ts:135`, nie oddaje danych).
+>
+> Odstępstwo D1 z I1 (14 tras, które produkcja oddaje publicznie, w odbudowie pod
+> `requireAuth`) **zostaje na stałe** — decyzja D6, backlog #52.
+>
+> Od 12e pilnuje tego `rebuild/backend/test/auth.rejestr.test.ts`: skanuje **realny rejestr
+> Express** (`app._router.stack`), nie listę z kontraktu. Powód: dotychczasowe testy auth
+> chodziły po listach (`kontrakt.spojnosc.test.ts` po `openapi.yaml`, testy modułowe po
+> kuratorowanych tablicach), więc trasa dodana bez `requireAuth` **i** nieopisana w kontrakcie
+> przeszłaby CI.
+>
+> **CORS — sprostowanie do zapisania jako fakt:** przy pustym `CORS_ORIGINS` middleware CORS
+> w ogóle się nie montuje, więc nie ma nagłówków `Access-Control-Allow-*` i przeglądarka
+> blokuje cross-origin sama. Staging i produkcja są same-origin (Apache proxuje `/api/*` pod
+> tą samą domeną), więc allowlista jest tam ZBĘDNA — to jest stan docelowy, nie brak
+> konfiguracji. Gdy allowlista jednak jest, `middleware/cors.ts` odsyła konkretny origin
+> z listy razem z `Allow-Credentials: true`, nigdy `*` i nigdy echa dowolnego originu — to
+> naprawa wobec produkcji, która odbijała DOWOLNY origin z `credentials:true`
+> (`backend-index.cjs:48926-48930`). Od 12e `CORS_ORIGINS` zawierający `*` przy
+> `NODE_ENV=production` **zatrzymuje start procesu**, a `server.ts` wypisuje stan CORS
+> przy starcie.
+>
+> **JWT:** `JWT_SECRET` wymagany bez fallbacku (fail-fast, `config/env.ts:36`); od 12e
+> algorytm jest przypięty jawnie (`algorithms: ["HS256"]` w `jwt.verify`) — przy sekrecie
+> symetrycznym ryzyka nie było, to porządek, nie naprawa.
+>
+> **Mass-assignment (backlog #14) domknięty na WSZYSTKICH trasach mutacji** — żadna nie robi
+> `Object.keys(req.body)` do `UPDATE` ani spreadu ciała do `SET`. Jedyny wyjątek,
+> `POST /api/products` (bulk import), filtruje na poziomie kolumn tabeli, bo import musi
+> zapisać kolumny wyliczane — opisane komentarzem i zamierzone.
+
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).

@@ -10,7 +10,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { App } from "@/App";
 import { queryClient } from "@/lib/queryClient";
@@ -192,11 +192,16 @@ describe("Widok /staging", () => {
 
     it("„wszystkie” wysyła `allFiltered` z bieżącym filtrem, a nie listę id", async () => {
       const uzytkownik = userEvent.setup();
-      // `confirm` w jsdom domyślnie nie istnieje — akcja masowa pyta o potwierdzenie.
-      vi.spyOn(window, "confirm").mockReturnValue(true);
       await otworzStaging();
 
+      // Od 12e (D5) akcje masowe pytają przez `DialogPotwierdzenia`, nie przez natywny
+      // `window.confirm` — nie ma już czego podmieniać w globalu, klikamy przycisk w dialogu.
       await uzytkownik.click(screen.getByTestId("button-reject-all"));
+      await uzytkownik.click(
+        within(await screen.findByTestId("dialog-odrzuc-wszystkie")).getByTestId(
+          "button-potwierdz",
+        ),
+      );
 
       await waitFor(() => expect(mutacje).toHaveLength(1));
       expect(mutacje[0]!.url).toContain("/api/staging/reject");
@@ -205,13 +210,17 @@ describe("Widok /staging", () => {
 
     it("„akceptuj wszystkie” też wysyła `allFiltered`, z aktualnym filtrem typu", async () => {
       const uzytkownik = userEvent.setup();
-      vi.spyOn(window, "confirm").mockReturnValue(true);
       await otworzStaging();
 
       // Filtr ustawiony na coś innego niż domyślne — ma trafić do ciała żądania.
       await uzytkownik.click(screen.getByTestId("select-filter-type"));
       await uzytkownik.click(await screen.findByRole("option", { name: "Wycofane" }));
       await uzytkownik.click(screen.getByTestId("button-accept-all"));
+      await uzytkownik.click(
+        within(await screen.findByTestId("dialog-akceptuj-wszystkie")).getByTestId(
+          "button-potwierdz",
+        ),
+      );
 
       await waitFor(() => expect(mutacje).toHaveLength(1));
       expect(mutacje[0]!.url).toContain("/api/staging/accept");
@@ -220,11 +229,24 @@ describe("Widok /staging", () => {
 
     it("odmowa w oknie potwierdzenia NIE wysyła żądania", async () => {
       const uzytkownik = userEvent.setup();
-      vi.spyOn(window, "confirm").mockReturnValue(false);
       await otworzStaging();
 
       await uzytkownik.click(screen.getByTestId("button-accept-all"));
+      await uzytkownik.click(
+        within(await screen.findByTestId("dialog-akceptuj-wszystkie")).getByTestId("button-anuluj"),
+      );
 
+      expect(mutacje).toHaveLength(0);
+    });
+
+    it("bez potwierdzenia dialog tylko się otwiera — samo kliknięcie nic nie wysyła", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+
+      await uzytkownik.click(screen.getByTestId("button-reject-all"));
+
+      // Pytanie jest DOSŁOWNIE takie, jakie stało w `confirm()` do 12e — parytet treści.
+      expect(await screen.findByText(/Odrzucić wszystkie pasujące pozycje \(\d+\)\?/)).toBeInTheDocument();
       expect(mutacje).toHaveLength(0);
     });
 

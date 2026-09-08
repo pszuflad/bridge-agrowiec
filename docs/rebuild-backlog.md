@@ -19,6 +19,13 @@ bundla do ~2026-08-05, MD5 `b745bf95`). Wcześniejsze zmiany są już w specyfik
 **Legenda „Do nowej wersji?":** ⬜ do decyzji · ✅ TAK · ❌ NIE (świadomie pomijamy) · 🕒 PÓŹNIEJ
 **Legenda „Status":** — nie zaczęte · 🔨 w toku · ✔ zrobione w rebuild
 
+**Backlog rozliczony w sesji 12e (2026-09-08).** Wszystkie wpisy ✅ zostały naniesione,
+❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #39–#43) to
+**defekty PRODUKCJI odtworzone świadomie 1:1**, czekające na decyzję produktową Ani — żaden nie
+jest regresją odbudowy i żaden nie blokuje cutoveru. Szczegóły rozliczenia:
+`docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md` (sekcja „Rozliczenie
+backlogu").
+
 ---
 
 ## Backlog
@@ -1896,8 +1903,8 @@ pustego CSV) albo owinąć nazwę w cudzysłowy. ⚠ Powiązanie: to zmieniłoby
 |---|---|
 | **Kategoria** | FRONTEND (regresja wierności wobec oryginału, nie tylko architektura odbudowy) |
 | **Pliki** | renderują `AppShell`: `rebuild/frontend/src/pages/{Pulpit,Konfiguracja,Atrybuty,Selly,MojeKonto}.tsx` (`MojeKonto.tsx` od I12/12b); NIE renderują: `Katalog.tsx`, `Staging.tsx`, `Historia.tsx`, `Narzuty.tsx`, `Alerty.tsx`, `WagaGabarytowa.tsx`, `Analityka.tsx`; `App.tsx` (routing bez wspólnego layoutu wokół `<Switch>`); `WidokWPrzygotowaniu.tsx` USUNIĘTY w 12b (ostatni placeholder zniknął); oryginał: `deminified/frontend-index.js:16329` (`mn()`, sidebar+topbar) |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** |
-| **Status** | — nie zaczęte (zastane, ujawnione przy **10f**, powiększone przy **8b** o `/selly`) |
+| **Do nowej wersji?** | ✅ TAK — **NAPRAWIONE** (39-CHORE…, D1) |
+| **Status** | ✔ zrobione w rebuild (12e) |
 
 **Co znaleziono.** `App.tsx` rejestruje trasy bezpośrednio pod `<Switch>`, bez wspólnego
 layoutu — każdy widok sam decyduje, czy owinąć się w `AppShell` (komponent z sidebarem,
@@ -1934,6 +1941,17 @@ na większości.
 
 **Do decyzji.** Czy ujednolicić przez wspólny layout w `App.tsx` (jedno miejsce), czy dołożyć
 `AppShell` pojedynczo do ośmiu widoków.
+
+**Rozstrzygnięcie 12e (2026-09-08).** `AppShell` przeniesiony z widoków do routera
+(`App.tsx`, tabela `TRASY_Z_RAMA`) — sidebar renderuje się na wszystkich 12 trasach
+zalogowanego, `/login` i 404 zostają bez niego, jak w oryginale. Zdjęto `<AppShell>` z pięciu
+widoków, siedem dostało ramę z routera; `test/shell.test.tsx` sprawdza obecność sidebara na
+każdej z 12 tras i jego brak na `/login` i 404. **Nie była to wyłącznie regresja wizualna:**
+`useWirtualizacja` (`pages/katalog/wirtualizacja.ts`) wychodzi z `useEffect`, gdy nie znajdzie
+`#$vMainScroll` — element, który mieszka w `AppShell`. Brak ramy na `/katalog` oznaczał więc,
+że wirtualizacja katalogu była martwa także w przeglądarce (widoczne dopiero przy rozmiarze
+strony „Wszystkie", powyżej progu 150 wierszy — dlatego niezauważone wcześniej). Naprawa ramy
+to odblokowała. Szczegóły: `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md`.
 
 ---
 
@@ -2215,9 +2233,9 @@ odstępstwo od parytetu 1:1 (odbudowa jest tu LEPSZA od produkcji świadomie).
 |---|---|
 | **Kategoria** | FRONTEND (panel wartości, widok `/atrybuty`) |
 | **Pliki** | `mirror/frontend/assets/pending-injection.js:741-744,766-772` (filtr i kolumna po `w.origin`, domyślka `'user'`); backend nie zwraca pola: `mirror/backend/atrybuty_module.cjs:185-196` (`GET /api/atrybuty/wartosci` → `{id,rodzaj,wartosc}`), potwierdzone w `contract/fixtures/GET_atrybuty_wartosci.json`; pominięte w porcie: `rebuild/frontend/src/pages/atrybuty/PanelWartosci.tsx` |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — czy `origin` ma być w ogóle wystawiane przez backend |
+| **Do nowej wersji?** | ❌ NIE (decyzja użytkownika 2026-09-08, 39-CHORE…, D4) |
 | **Iteracja** | ujawnione przy **7b** (`docs/tickets/31-FEATURE-atrybuty-frontend/`, decyzja D4) |
-| **Status** | — nie zaczęte (zastane, ujawnione przy 7b) · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §5 |
+| **Status** | ✔ zamknięte w 12e (świadome pominięcie) · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §5 |
 
 **Co znaleziono.** `pending-injection.js` filtruje i pokazuje kolumnę „Źródło" po polu
 `w.origin` (`catalog`/`user`/`preset`, z domyślką `'user'`, gdy pole brakuje), ale ŻADNA trasa
@@ -2234,6 +2252,11 @@ Backend 7a też `origin` nie eksponuje (zgodnie z fixture).
 **Do decyzji.** Czy `origin` ma w ogóle trafiać do odpowiedzi API (wtedy filtr miałby sens do
 odtworzenia), czy pole zostaje wyłącznie wewnętrzne (baza), a filtr w produkcji zostaje
 uznany za martwy kod, którego nie warto portować.
+
+**Rozstrzygnięcie 12e (2026-09-08).** Utrzymana decyzja D4 z 7b: odtwarzanie martwego elementu
+UI byłoby parytetem usterki, nie zachowania. Ożywienie filtra wymagałoby wystawienia pola
+`origin` w odpowiedzi API, czego produkcja nie robi — to byłaby nowa funkcja, nie odbudowa.
+Wpis zamknięty; gdyby Ania chciała działający filtr, to osobny ticket.
 
 ---
 
@@ -2309,8 +2332,8 @@ prawdopodobnie nie ma. ⬜ Do sprawdzenia.
 |---|---|
 | **Kategoria** | BACKEND (schemat, autoryzacja) |
 | **Pliki** | `rebuild/schema/001_schema.sql` (`users`: `id, email, haslo_hash, imie_nazwisko, utworzono, ostatnie_logowanie` — bez roli); oryginał: strony `/admin/*` chronione samym `requireAuth`, `mirror/backend/extensions.cjs:296+` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — nie zaczęte (zastane, ujawnione przy 12b) |
+| **Do nowej wersji?** | ❌ NIE **w odbudowie** (decyzja użytkownika 2026-09-08, 39-CHORE…, D3) |
+| **Status** | ✔ rozstrzygnięte w 12e (zostaje 1:1 z produkcją) |
 
 **Co znaleziono.** Tabela `users` nie ma kolumny roli/uprawnień — każdy zalogowany użytkownik
 jest technicznie równy każdemu innemu. 12b dołożyła zakładki „Admin" i „Dziennik" w
@@ -2329,6 +2352,13 @@ strony admina chroni tam sam middleware autoryzacji, bez sprawdzania roli. 12b o
 dla zakładek admina — decyzja Ani, kandydat do rozstrzygnięcia przy 12e (finalny przegląd
 bezpieczeństwa).
 
+**Rozstrzygnięcie 12e (2026-09-08).** Stan zgodny z produkcją, nie regresja — oryginał chroni
+`/admin/*` samym `requireAuth`. Wprowadzenie ról to zmiana schematu (migracja 004), nowe
+middleware i decyzja, kto dostaje rolę na starcie — czyli nowa funkcja, a byliśmy dzień przed
+cutoverem. **Kandydat na osobny ticket po cutoverze** — odnotowane w `docs/cutover.md` §8
+z rekomendacją „raczej wcześniej niż później" i przedstawione Ani wprost w
+`docs/przeglad-12-widokow.md` (sekcja „Rzecz znana i nienaprawiona").
+
 ---
 
 ### #49 · 2026-09-05 · [BACKEND] · kopie bazy po `POST /api/products/clear` nigdy nie są sprzątane
@@ -2340,8 +2370,8 @@ bezpieczeństwa).
 |---|---|
 | **Kategoria** | BACKEND (utrzymanie, miejsce na dysku) |
 | **Pliki** | `deminified/backend-index.cjs:48319-48331` (`copyFileSync` best-effort przed czyszczeniem); port: `rebuild/backend/src/routes/maintenance.ts` (`POST /api/products/clear`, D5 ticketa 36) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — nie zaczęte (zastane, ujawnione przy 12b) |
+| **Do nowej wersji?** | ✅ TAK — **NAPRAWIONE** (39-CHORE…, D2d) |
+| **Status** | ✔ zrobione w rebuild (12e) |
 
 **Co znaleziono.** Przed czyszczeniem katalogu trasa robi best-effort kopię
 `<baza>.bak_before_clear_<ISO>` (w odbudowie z checkpointem WAL, D5) — i nic nigdy tych
@@ -2357,6 +2387,12 @@ ten sam brak retencji.
 **Do decyzji.** Czy wprowadzić rotację/retencję kopii (np. limit liczby plików albo TTL) —
 decyzja Ani, nie blokuje 12b.
 
+**Rozstrzygnięcie 12e (2026-09-08).** `rebuild/backend/src/routes/maintenance.ts`: po kopii
+zostaje 5 najnowszych plików `*.bak_before_clear_*`, starsze kasowane; best-effort, `try`
+wewnątrz pętli (jeden nieusuwalny plik kosztuje jeden pominięty plik, nie całą retencję —
+poprawka po review). **Świadome odstępstwo od 1:1**: produkcja nie sprząta wcale. Odstępstwo
+czysto operacyjne — nie dotyka bazy, kształtu ani kodu odpowiedzi HTTP.
+
 ---
 
 ### #50 · 2026-09-05 · [BACKEND][FRONTEND] · `parsujSzczegoly` istnieje w repo w dwóch kopiach (backend i frontend)
@@ -2368,8 +2404,8 @@ decyzja Ani, nie blokuje 12b.
 |---|---|
 | **Kategoria** | BACKEND + FRONTEND (architektura odbudowy — brak wspólnego pakietu) |
 | **Pliki** | `rebuild/backend/src/historia/mapowanie.ts:87` i `rebuild/frontend/src/pages/konfiguracja/dziennik.ts` (kotwice do siebie, testy na te same trzy wejścia: NULL, zepsuty JSON, wartość nie-obiektowa) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | ✔ obie kopie zrobione w rebuild (12b), zamierzony duplikat |
+| **Do nowej wersji?** | ❌ NIE (decyzja użytkownika 2026-09-08, 39-CHORE…, D4) |
+| **Status** | ✔ obie kopie zrobione w rebuild (12b), zamierzony duplikat — rozstrzygnięte w 12e |
 
 **Co znaleziono.** `rebuild/backend` i `rebuild/frontend` to dwa rozłączne projekty bez
 wspólnego pakietu (w całym froncie nie ma ani jednego importu kodu z backendu). `GET
@@ -2386,6 +2422,11 @@ typów frontu. Obie kopie mają komentarz-kotwicę wskazujący na drugą.
 współdzielonej BE/FE — nie blokuje 12b, kandydat do rozważenia przy większej liczbie takich
 duplikatów.
 
+**Rozstrzygnięcie 12e (2026-09-08).** Zamierzony duplikat, decyzja D4 z ticketu 36: wspólny
+pakiet `rebuild/shared/` przebudowałby buildy, tsconfigi, lint i deploy obu stron za 12 linii
+kodu. Status ⬜ wprowadzał w błąd, sugerując, że coś czeka na rozstrzygnięcie — decyzja
+zapadła już wtedy.
+
 ---
 
 ### #51 · 2026-09-05 · [FRONTEND] · wzorzec potwierdzeń rozjechał się — trzy miejsca z surowym `window.confirm`, dwa bez uzasadnienia
@@ -2397,8 +2438,8 @@ duplikatów.
 |---|---|
 | **Kategoria** | FRONTEND (spójność wzorca potwierdzeń) |
 | **Pliki** | `rebuild/frontend/src/pages/Staging.tsx:177,210` · `rebuild/frontend/src/pages/konfiguracja/Admin.tsx:233` (oba bez uzasadnienia) · `rebuild/frontend/src/pages/konfiguracja/Katalog.tsx:45` (świadomy, udokumentowany wyjątek) · wzorzec reszty: `rebuild/frontend/src/components/DialogPotwierdzenia.tsx` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — nie zaczęte, zidentyfikowane przy scalaniu 12b+12c |
+| **Do nowej wersji?** | ✅ TAK — **NAPRAWIONE** (39-CHORE…, D5) |
+| **Status** | ✔ zrobione w rebuild (12e) |
 
 **Co znaleziono.** Odbudowa ma dziś TRZY reguły potwierdzania naraz, choć 7b (D2) ustanowiła
 jedną: `window.confirm` zastępujemy `DialogPotwierdzenia` z **dosłownym** tekstem oryginału.
@@ -2430,6 +2471,11 @@ ma je `konfiguracja/Katalog.tsx`. Wariant (b) jest tańszy i wystarcza, jeśli p
 nieodwracalność operacji (obie są masowe i nieodwracalne). Naturalny moment domknięcia:
 **12e** (finalny audyt + przegląd 12 widoków).
 
+**Rozstrzygnięcie 12e (2026-09-08).** `Staging.tsx` (dwa wywołania) i `konfiguracja/Admin.tsx`
+przeszły na `DialogPotwierdzenia` z **dosłownym** tekstem pytania. `konfiguracja/Katalog.tsx`
+**zostaje** jako świadomy, udokumentowany wyjątek. Testy przestały podmieniać globalny
+`window.confirm`; doszły asercje na dosłowność tekstów.
+
 ---
 
 ### #52 · 2026-09-08 · [BACKEND][BEZPIECZEŃSTWO] · `security: []` w kontrakcie vs `requireAuth` w odbudowie — teraz ZMIERZONE na oryginale, materiał dla 12e
@@ -2444,7 +2490,7 @@ nieodwracalność operacji (obie są masowe i nieodwracalne). Naturalny moment d
 | **Kategoria** | BACKEND (auth) + KONTRAKT |
 | **Pliki** | `contract/openapi.yaml` (`security: []` + nowa adnotacja `x-odbudowa-auth`), odbudowa: `requireAuth` na wymienionych trasach (odstępstwo D1 z I1) |
 | **Do nowej wersji?** | ✅ **TAK — już naniesione jako świadome odstępstwo** (D1 z I1, utrwalone I2/3b/3d-2/4a/I5); ten wpis dokumentuje pomiar, nie proponuje zmiany |
-| **Status** | ✔ zmierzone na oryginale (12d, 2026-09-08); kontrakt niesie to jawnie przez `x-odbudowa-auth` + zadeklarowany `401` (14 operacji) |
+| **Status** | ✔ zmierzone na oryginale (12d, 2026-09-08); kontrakt niesie to jawnie przez `x-odbudowa-auth` + zadeklarowany `401` (14 operacji); rozstrzygnięte na stałe w 12e |
 
 **Co zmierzono.** Sesja 12d postawiła `mirror/backend/index.cjs` (oryginał) lokalnie na kopii
 bazy i wysłała żądania bez tokenu. **14 tras, które kontrakt opisuje jako `security: []`,
@@ -2469,6 +2515,12 @@ błędów — zmierzone, nie założone").
 **Do decyzji (12e).** Czy wobec zmierzonego stanu produkcji odstępstwo `requireAuth` na tych
 14 trasach ma zostać na stałe (dzisiejszy wybór), czy część z nich powinna wrócić do zachowania
 1:1 z produkcją (publiczne). Ten wpis tylko niesie pomiar — nie rozstrzyga.
+
+**ROZSTRZYGNIĘTE 2026-09-08 (39-CHORE…, D6).** Odstępstwo D1 z I1 **zostaje na stałe**. 14 tras,
+które produkcja oddaje bez tokenu, w odbudowie zostają pod `requireAuth`. Nie cofamy żadnej do
+wariantu publicznego — to najgroźniejsza dziura oryginału (`GET /api/export/shoper` oddaje cały
+katalog bez logowania, `GET /api/audit-log` log działań z e-mailami i URL-ami dostawców).
+Finalny audyt 12e potwierdził kompletność i celowość tej listy.
 
 ---
 

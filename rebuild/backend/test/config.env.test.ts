@@ -56,4 +56,28 @@ describe("wczytajEnv", () => {
         .CORS_ORIGINS,
     ).toEqual(["http://localhost:5173", "http://localhost:4173"]);
   });
+  it("CORS_ORIGINS z gwiazdką jest odrzucone w produkcji, dozwolone lokalnie (12e, D2b)", () => {
+    // Gwiazdka na allowliście znosi jej sens: `corsZAllowlisty` odesłałoby
+    // `Access-Control-Allow-Origin: *` razem z `Allow-Credentials: true` — dokładnie ta dziura
+    // oryginału, którą odbudowa zamknęła. Strażnik pilnuje tylko produkcji.
+    expect(() => wczytajEnv({ ...bazoweEnv, NODE_ENV: "production", CORS_ORIGINS: "*" })).toThrow(
+      /CORS_ORIGINS/,
+    );
+    expect(() =>
+      wczytajEnv({
+        ...bazoweEnv,
+        NODE_ENV: "production",
+        CORS_ORIGINS: "https://panel.example.com, *",
+      }),
+    ).toThrow(/CORS_ORIGINS/);
+    expect(
+      wczytajEnv({ ...bazoweEnv, NODE_ENV: "development", CORS_ORIGINS: "*" }).CORS_ORIGINS,
+    ).toEqual(["*"]);
+  });
+
+  it("pusty CORS_ORIGINS w produkcji przechodzi — same-origin to stan docelowy (12e, D2b)", () => {
+    // Strażnik NIE wymaga allowlisty. Produkcja stoi za proxy Apache pod jedną domeną, więc
+    // brak middleware CORS jest bezpieczny; wymuszanie listy byłoby konfiguracją na wyrost.
+    expect(wczytajEnv({ ...bazoweEnv, NODE_ENV: "production" }).CORS_ORIGINS).toEqual([]);
+  });
 });

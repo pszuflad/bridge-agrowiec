@@ -19,7 +19,6 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { AppShell } from "@/components/AppShell";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -124,21 +123,10 @@ export function Selly() {
   };
 
   return (
-    /*
-     * Rama z sidebarem jest częścią WIDOKU, nie routera — tak samo jak w oryginale,
-     * gdzie każdy zalogowany widok zwraca `mn(…)` (`deminified/frontend-index.js:16329`;
-     * dwanaście wywołań, m.in. katalog :23315, analityka :25392).
-     *
-     * ⚠ Odbudowa ma tu ZASTANY rozjazd: `AppShell` wpinają dziś tylko `Pulpit`,
-     * `Konfiguracja` i `WidokWPrzygotowaniu`, więc `/katalog`, `/staging`, `/narzuty`,
-     * `/alerty`, `/waga-gabarytowa`, `/analityka` i `/historia` renderują się BEZ sidebara,
-     * choć oryginał pokazuje go wszędzie poza `/login` i 404. To regres wierności spoza
-     * zakresu 8b — opisany w `docs/rebuild-backlog.md` #36. `/selly` idzie za ORYGINAŁEM,
-     * a nie za tym rozjazdem: panel Selly w produkcji był overlayem NAD `<main>`, czyli
-     * wewnątrz ramy, a wstrzykiwany skrypt podświetlał przy tym swoją pozycję w sidebarze
-     * (`selly-injection.js:255-280`).
-     */
-    <AppShell>
+    <>
+      {/* Rama z sidebarem (AppShell) wpinana jest przez ROUTER — patrz `App.tsx`,
+          `TRASY_Z_RAMA`. Do 12e każdy widok zawijał się w nią sam, tak jak `mn()`
+          w oryginale, ale robiło to tylko 5 z 12 widoków (backlog #36). */}
       <PageHeader
         title="Integracja Selly.pl"
         subtitle="Synchronizacja produktów z Bridge do sklepu w Selly przez API v3."
@@ -209,7 +197,7 @@ export function Selly() {
         onZamknij={() => ustawPotwierdzenie(null)}
         onPotwierdz={wykonajPotwierdzone}
       />
-    </AppShell>
+    </>
   );
 }
 

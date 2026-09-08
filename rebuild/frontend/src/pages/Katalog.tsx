@@ -356,7 +356,7 @@ export function Katalog() {
         : `Dostawca ${zakladka}`;
 
   return (
-    <div className="p-6 max-w-full">
+    <div className="max-w-full">
       <PageHeader
         title="Katalog produktów"
         subtitle={podtytul}

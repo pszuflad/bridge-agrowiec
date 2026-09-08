@@ -226,20 +226,42 @@ describe("Zakładka „Admin”", () => {
   });
 
   describe("utrzymanie katalogu", () => {
+    /**
+     * Od 12e (D5, backlog #51) przycisk pyta przez `DialogPotwierdzenia`, nie przez natywny
+     * `window.confirm` — w odróżnieniu od bliźniaczego „Usuń wszystko z katalogu" w zakładce
+     * „Katalog", gdzie natywny dialog jest ŚWIADOMYM, opisanym wyjątkiem i zostaje.
+     */
     it("nie wysyła żądania, gdy potwierdzenie odrzucono", async () => {
-      vi.spyOn(window, "confirm").mockReturnValue(false);
       await otworzZakladke("admin");
 
       await userEvent.click(await screen.findByTestId("button-usun-nieopony"));
+      await userEvent.click(
+        within(await screen.findByTestId("dialog-usun-nieopony")).getByTestId("button-anuluj"),
+      );
 
       expect(usunieciaNieOpon).toBe(0);
     });
 
-    it("po potwierdzeniu usuwa nie-opony i pokazuje podsumowanie", async () => {
-      vi.spyOn(window, "confirm").mockReturnValue(true);
+    it("pyta tekstem przeniesionym dosłownie z `confirm()`", async () => {
       await otworzZakladke("admin");
 
       await userEvent.click(await screen.findByTestId("button-usun-nieopony"));
+
+      expect(
+        await screen.findByText(
+          "Usunąć z katalogu wszystkie pozycje, które nie są oponami? Operacji nie da się cofnąć.",
+        ),
+      ).toBeInTheDocument();
+      expect(usunieciaNieOpon).toBe(0);
+    });
+
+    it("po potwierdzeniu usuwa nie-opony i pokazuje podsumowanie", async () => {
+      await otworzZakladke("admin");
+
+      await userEvent.click(await screen.findByTestId("button-usun-nieopony"));
+      await userEvent.click(
+        within(await screen.findByTestId("dialog-usun-nieopony")).getByTestId("button-potwierdz"),
+      );
 
       await waitFor(() => expect(usunieciaNieOpon).toBe(1));
       const wynik = await screen.findByTestId("wynik-usun-nieopony");
