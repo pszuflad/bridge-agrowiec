@@ -320,3 +320,54 @@ Rzeczy zauważone i **świadomie niezrobione** w tym tickecie:
    7 400 wierszy. Zweryfikuje to Ania na staging (punkt w checkliście).
 5. **Pozostałe ⬜ w backlogu** (#11, #12, #19, #21, #25, #26, #31–#35, #39–#43) — defekty
    produkcji odtworzone 1:1, czekające na decyzję Ani. Nie blokują cutoveru.
+
+---
+
+## Docs updates
+
+Trzej doc-checkerzy równolegle, każdy na własnym zestawie plików.
+
+### `docs/rebuild-roadmap.md`
+- §4, blok nad tablicą — przepisany ze „została JEDNA iteracja — I12" na **„WSZYSTKIE iteracje
+  0–12 zamknięte, odbudowa dowieziona"**.
+- §4, wiersz `| 12 |` — status `🔨` → **`✅`**, w kolumnie PR/data dopisane
+  `12e: 39-CHORE-audyt-bezpieczenstwa-domkniecie · 2026-09-08`; usunięte „Została 12e".
+- §5, blok „Iteracja 12" — status `🔨 w toku` → `✅ zrobione`.
+- §5, blok „Sesja 12e" — przepisany z zaślepki planistycznej `⬜` na opis STANU dowiezionego:
+  wynik audytu z liczbami, obalone założenie o CORS, luka procesu i jej zamknięcie, przypięcie
+  JWT, retencja kopii, sidebar w routerze + odkrycie martwej wirtualizacji, potwierdzenia,
+  rozliczenie backlogu, nowe dokumenty, bramki, DoD odhaczone.
+- **Usunięte jako nieaktualne** (nie dopisane obok): nota „WEJŚCIE Z SESJI 12d" w wersji
+  wymagającej allowlisty CORS, nota „WEJŚCIE ZE SCALENIA 12b+12c" o otwartych `window.confirm`,
+  nota „WEJŚCIE Z ITERACJI 8" o niespójnym sidebarze, otwarte noty „WEJŚCIE Z SESJI 12b"
+  o #48 i #49.
+- §6 „Po zakończeniu" — przepisane na stan końcowy: co dowiozła 12e + dwa zdarzenia POZA
+  odbudową (przegląd Ani → `przeglad-12-widokow.md`, cutover → `cutover.md`).
+
+### `docs/rebuild-backlog.md`
+- Legenda / „Jak to działa" — nota, że backlog został **rozliczony w 12e**, a pozostałe ⬜ to
+  defekty produkcji odtworzone świadomie 1:1.
+- **#36** ⬜ → ✅ TAK (naprawione) + dopisany fakt o martwej wirtualizacji katalogu, którego
+  wpis dotąd nie znał.
+- **#49** ⬜ → ✅ TAK (retencja 5 kopii, świadome odstępstwo od 1:1).
+- **#51** ⬜ → ✅ TAK (`DialogPotwierdzenia`, z `konfiguracja/Katalog.tsx` jako wyjątkiem).
+- **#45**, **#48**, **#50** ⬜ → ❌ NIE, każdy z sekcją „Rozstrzygnięcie 12e" i uzasadnieniem;
+  przy #48 odsyłacz do `cutover.md` §8 i do checklisty Ani.
+- **#52** — „Do decyzji (12e)" → **ROZSTRZYGNIĘTE**: odstępstwo D1 z I1 zostaje na stałe.
+
+### `docs/spec-backend.md` · `docs/deploy-setup.md` · `docs/spec-frontend.md`
+- `spec-backend.md` §2 — dopisana nota domykająca łańcuch „Potwierdzone w I2/3b/4a/I5/I6/I9/I11":
+  rejestr tras, trzy publiczne trasy, D6, nowy test rejestru, **sprostowanie o CORS**,
+  przypięcie algorytmu JWT, mass-assignment domknięty.
+- `deploy-setup.md` — po sekcji „Architektura" odsyłacz do `docs/cutover.md` plus dwa
+  ostrzeżenia dla produkcji (kolizja `002_import.sql` z `uwaga_cena`, wrażliwość
+  `003_szerokosc_text.sql` na liczbę i kolejność kolumn).
+- `spec-frontend.md` — **bez zmian**, sprawdzony. Nie opisuje mechanizmu montowania `AppShell`
+  (tylko zachowanie widoków), a wzmianka o `window.confirm` dotyczy `konfiguracja/Katalog.tsx`,
+  które świadomie zostaje — nic nieaktualnego.
+
+### Pre-existing issues
+Żaden z doc-checkerów nie znalazł sprzeczności wymagających decyzji. Odnotowana jedna
+obserwacja bez zmiany: `rebuild-roadmap.md` §3 i blok I1a opisują „CORS domyślnie zamknięty
+z allowlistą z env" — to nadal prawda (mechanizm allowlisty istnieje i działa, gdy lista jest
+niepusta) i nie twierdzi, że allowlista jest wymagana, więc nie kłóci się z ustaleniem 12e.

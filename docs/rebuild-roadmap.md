@@ -148,14 +148,16 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 
 ## 4. Tablica postępu
 
-> **Stan na 2026-09-08: została JEDNA iteracja — I12** (konto, admin, hardening), w toku.
-> Iteracje 0–11 są zamknięte, wszystkie trzy skrypty injection wchłonięte, martwe ścieżki FE
-> naprawione. I12 zebrała po drodze wejścia z I2, I5, I7 i I11 i jest podzielona na pięć sesji
-> (12a–12e); **zamknięte są 12a** (mutacje produktów, BE), **12b** (konto/admin/maintenance)
-> i **12c** (dialog edycji produktu) — wszystkie 2026-09-05, 12b i 12c równolegle — oraz
-> **12d** (przenagranie fixtures + schematy ciał, 2026-09-08). **Została wyłącznie 12e**
-> (finalny audyt bezpieczeństwa + przegląd 12 widoków z Anią). Czytaj blok I12 w całości,
-> bo urósł ponad pierwotny zakres (m.in. dialog edycji produktu z `/katalog`).
+> **Stan na 2026-09-08: WSZYSTKIE iteracje 0–12 są zamknięte — odbudowa Bridge jest
+> dowieziona.** I12 (konto, admin, hardening) zebrała po drodze wejścia z I2, I5, I7 i I11
+> i była podzielona na pięć sesji (12a–12e); **zamknięte są 12a** (mutacje produktów, BE),
+> **12b** (konto/admin/maintenance) i **12c** (dialog edycji produktu) — wszystkie 2026-09-05,
+> 12b i 12c równolegle — **12d** (przenagranie fixtures + schematy ciał, 2026-09-08) oraz
+> **12e** (finalny audyt bezpieczeństwa + rozliczenie backlogu + plan cutoveru + przegląd
+> 12 widoków, 2026-09-08). Audyt 12e **nie znalazł ani jednej otwartej dziury** w auth/CORS/
+> JWT/mass-assignment. Zostają dwa zdarzenia POZA odbudową: **przegląd 12 widoków przez Anię**
+> (`docs/przeglad-12-widokow.md`) i **cutover** (`docs/cutover.md`) — patrz §6. Czytaj blok
+> I12 w całości, bo urósł ponad pierwotny zakres (m.in. dialog edycji produktu z `/katalog`).
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
@@ -173,7 +175,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
-| 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | 🔨 | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08. **Została 12e.** |
+| 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 
 ---
 
@@ -1601,15 +1603,17 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 12 — Konto + admin + hardening bezpieczeństwa
-- **Status:** 🔨 **w toku** — sesje 12a, 12b, 12c i 12d zrobione (12a/12b/12c 2026-09-05,
-  12b i 12c szły równolegle; 12d 2026-09-08), **została jedna: 12e**.
+- **Status:** ✅ **zrobione** — sesje 12a, 12b, 12c, 12d i 12e zamknięte (12a/12b/12c
+  2026-09-05, 12b i 12c szły równolegle; 12d i 12e 2026-09-08). **Iteracja 12 jest ostatnią
+  iteracją odbudowy — I0–I12 zamknięte w całości.**
   **Sesje:** 12a BE ✅ (mutacje produktów) · 12b BE+FE ✅ (konto/admin/maintenance) ·
   12c FE ✅ (dialog edycji `LT()` + menu „Akcje") · 12d ✅ (przenagranie fixtures + schematy
-  ciał) · 12e ⬜ (finalny audyt + przegląd 12 widoków z Anią)  **Zależy od:** wszystkie (finalny przegląd)
+  ciał) · 12e ✅ (finalny audyt bezpieczeństwa + rozliczenie backlogu + plan cutoveru +
+  przegląd 12 widoków)  **Zależy od:** wszystkie (finalny przegląd)
 - **Cel (Ania klika):** zmienia hasło w `/moje-konto` ✅ (12b); admin zarządza użytkownikami/
   konfiguracją dostawców i utrzymaniem ✅ (12b); edytuje/wstrzymuje/usuwa produkty wprost
   z `/katalog` ✅ (backend 12a + UI 12c). **Cel iteracji dowieziony w całości — kontrakt
-  i fixtures odświeżone (12d), zostaje finalny audyt (12e).**
+  i fixtures odświeżone (12d), audyt bezpieczeństwa zamknięty bez znalezisk (12e).**
 
 #### Sesja 12a — Backend: mutacje produktów — ✅ zrobiona 2026-09-05 (`35-FEATURE-mutacje-produktow-backend`)
 Domyka katalog (I2) do parytetu ZAPISU z produkcją. Dowiezione:
@@ -1799,77 +1803,124 @@ Domyka zaległość #1 z I3 (3d-1, `WYJATKI_SZEROKOSC`) i braki nagrań z 12a/12
 - Bramki: **1209 testów / 77 plików** (było 1199), lint/typecheck/build czyste. Szczegóły:
   `docs/tickets/38-CHORE-kontrakt-fixtures-odswiezenie/`.
 
-#### Sesja 12e — Finalny audyt bezpieczeństwa + przegląd 12 widoków — ⬜
-- **Potwierdzić:** auth na WSZYSTKICH trasach danych, zamknięty CORS, brak zahardkodowanego
-  `JWT_SECRET` z fallbackiem; domknięcie przeglądu list pól edytowalnych zaczętego w 12b.
-- **⚠ WEJŚCIE Z SESJI 12d (2026-09-08) — materiał do audytu auth już zmierzony, nie do ustalenia
-  od nowa.** 14 tras opisanych w kontrakcie jako `security: []`, które oryginał REALNIE oddaje
-  **bez tokenu (200)**: `GET /api/alerts`, `/api/audit-log`, `/api/config`, `/api/export-shoper`,
-  `/api/export/shoper`, `/api/history`, `/api/history/meta`, `/api/history/paged`,
-  `/api/markups`, `/api/overrides`, `/api/promotions`, `/api/spedycja`, `/api/staging`,
-  `POST /api/waga-gabarytowa/oblicz` — odbudowa je chroni `requireAuth`em, świadome odstępstwo,
-  teraz oznaczone w `openapi.yaml` adnotacją `x-odbudowa-auth` + zadeklarowanym `401`; nie trzeba
-  tego już ustalać, tylko przejrzeć pod kątem czy lista odstępstw jest kompletna i celowa.
-  `GET /api/me` i `POST /api/login` zwracają `401` **też w produkcji** — to luka dawnego
-  inwentarza 2.3, nie odstępstwo odbudowy; kontrakt to teraz deklaruje. Spójność adnotacji
-  z realnym zachowaniem pilnuje `rebuild/backend/test/kontrakt.spojnosc.test.ts`.
-- **⚠ WEJŚCIE ZE SCALENIA 12b+12c (2026-09-07) — wzorzec potwierdzeń rozjechał się na TRZY
-  miejsca z surowym `window.confirm`, z czego dwa bez uzasadnienia.** `konfiguracja/Katalog.tsx:45`
-  („Usuń wszystko z katalogu", 12b) to wyjątek ŚWIADOMY i udokumentowany komentarzem przy kodzie
-  — operacja nieodwracalna, blokujący dialog jest tam zaletą; ten zostawiamy. Bez żadnego
-  uzasadnienia zostały `Staging.tsx:177,210` (zastane sprzed 7b) i `konfiguracja/Admin.tsx:233`
-  („Usuń pozycje, które nie są oponami", dołożone w 12b — bliźniaczy przycisk w tym samym
-  tickecie komentarz dostał, ten nie). Reszta odbudowy (D2 z 7b, D6 z narzutów, D1 z 12c) używa
-  `DialogPotwierdzenia` z dosłownym tekstem. Do decyzji w tym audycie: ujednolicić albo dopisać
-  uzasadnienie tam, gdzie go brak. Backlog **#51**.
-  **⚠ Lekcja metodologiczna:** raport 12c twierdził, że `Staging.tsx` jest „jedynym pozostałym
-  miejscem" — i przestało to być prawdą w chwili scalenia z równoległą sesją 12b, która dołożyła
-  dwa kolejne. **Twierdzenia „jedyne w całej odbudowie" nie da się bezpiecznie postawić
-  z wnętrza jednej z dwóch równoległych kart.**
-- **⚠ WEJŚCIE Z ITERACJI 8 (2026-09-04) — `AppShell` (sidebar) jest wpinany przez WIDOK, nie
-  przez router.** `/`, `/konfiguracja` i placeholdery renderują sidebar; `/katalog`, `/staging`,
-  `/narzuty`, `/alerty`, `/waga-gabarytowa`, `/analityka`, `/historia` i `/selly` — nie. Zastane
-  zachowanie sprzed I8, spoza jej zakresu, wygląda na niezamierzone — warte decyzji przy tym
-  przeglądzie.
-- **⚠ WEJŚCIE Z SESJI 12b (2026-09-05) — tabela `users` NIE MA KOLUMNY ROLI.**
-  `rebuild/schema/001_schema.sql`: `id, email, haslo_hash, imie_nazwisko, utworzono,
-  ostatnie_logowanie`. Skutek: „admin" nie jest technicznie odróżnialny od zwykłego
-  użytkownika — nowe zakładki „Admin" i „Dziennik" widzi KAŻDY zalogowany. To stan zgodny
-  z produkcją (strony `/admin/*` chroni tam sam `requireAuth`), więc nie jest to regresja
-  odbudowy; wprowadzenie ról to zmiana schematu i decyzja Ani. Backlog **#48**.
-- **⚠ WEJŚCIE Z SESJI 12b (2026-09-05) — kopie bazy po `products/clear` nie są sprzątane.**
-  Trasa zostawia `<baza>.bak_before_clear_<ISO>` przed każdym czyszczeniem (port `:48319-48331`)
-  i nikt tych plików nigdy nie usuwa — tak samo jak w produkcji. Przy częstym używaniu
-  przycisku katalog danych rośnie bez ograniczeń. Backlog **#49** (retencja/rotacja).
-- **Kompletny przegląd 12 widoków z Anią.**
+#### Sesja 12e — Finalny audyt bezpieczeństwa + rozliczenie backlogu + plan cutoveru + przegląd 12 widoków — ✅ zrobiona 2026-09-08 (`39-CHORE-audyt-bezpieczenstwa-domkniecie`)
+**OSTATNIA sesja całej odbudowy (I0–I12).** Audyt **nie znalazł ani jednej otwartej dziury**
+w auth/CORS/JWT/mass-assignment. Dowiezione:
+
+- **Auth (A1) — OK.** ~95 operacji w 21 plikach `rebuild/backend/src/routes/*.ts`, każda trasa
+  danych ma `requireAuth` bezpośrednio przy rejestracji (nie przez `router.use`, więc nie da się
+  tego zgubić przy refaktorze routera). Publiczne są dokładnie trzy: `POST /api/login`
+  (`auth.ts:31`), `POST /api/logout` (`auth.ts:62` — JWT bezstanowy), `GET /api/health`
+  (`app.ts:135` — healthcheck PM2, nie oddaje danych).
+- **Luka PROCESU zamknięta (A2).** Testy auth dotąd chodziły po listach (kontrakt +
+  kuratorowane tablice w ośmiu plikach) — nowa trasa bez `requireAuth` **i** bez wpisu
+  w `openapi.yaml` przeszłaby CI. Zamknięte nowym `rebuild/backend/test/auth.rejestr.test.ts`:
+  skanuje realny rejestr Express (`app._router.stack`) i porównuje z jawną listą trzech tras
+  publicznych.
+- **⚠ CORS — OBALONE ZAŁOŻENIE, usunięte z roadmapy.** Wcześniejsza obawa z promptu audytu, że
+  pusty `CORS_ORIGINS` zostawia CORS „de facto otwarty" i że staging/produkcja MUSZĄ mieć
+  allowlistę — **nie potwierdziła się**.
+  Zmierzone: przy pustym `CORS_ORIGINS` middleware CORS w ogóle się nie montuje (`app.ts:116`),
+  więc nie ma nagłówków `Access-Control-Allow-*` i przeglądarka blokuje cross-origin sama.
+  Architektura jest same-origin — Apache `mod_proxy [P]` proxuje `/api/*` pod tą samą subdomeną
+  co statyczny front (`deploy/staging/htaccess:11`) — więc allowlista jest **zbędna**, a jej
+  wymuszanie byłoby konfiguracją na wyrost. Odbudowa jest tu bezpieczniejsza niż oryginał, który
+  odbijał dowolny origin z `credentials:true` (`cors.ts:4-12`). Zamiast wymuszania allowlisty
+  doszedł strażnik: **`CORS_ORIGINS` zawierający `*` przy `NODE_ENV=production` zatrzymuje start
+  procesu** (D2b), plus jawny log stanu CORS przy starcie (`server.ts`).
+- **JWT — OK, wzmocnione.** `algorithms: ["HS256"]` przypięte w `jwt.verify` (`auth/jwt.ts:29`,
+  D2c) — token podpisany innym algorytmem jest teraz jawnie odrzucany, nie tylko przypadkiem
+  poprawny. `JWT_SECRET` bez fallbacku (fail-fast) potwierdzone bez zmian.
+- **Mass-assignment (backlog #14) — OK, domknięty na wszystkich ~13 grupach tras mutacji**
+  (produkty, dostawcy, narzuty, promocje, staging, spedycja, config, admin, konto, maintenance,
+  atrybuty, Selly) — każda ma jawny filtr pól, żadna nie robi `Object.keys(req.body)` do `UPDATE`.
+  Szczegóły i tabela `plik:linia`: `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md`.
+- **Sidebar (D1, backlog #36) — naprawiony, nota z I8 zamknięta.** `AppShell` przeniesiony
+  z pięciu widoków do routera (`App.tsx`, tabela `TRASY_Z_RAMA`) — sidebar renderuje się na
+  wszystkich 12 trasach zalogowanego, `/login` i 404 zostają bez niego, jak w oryginale
+  (`mn()`, 12 wywołań w `deminified/frontend-index.js`). Padding siedmiu widoków, które dostały
+  ramę, sprawdzony (`Katalog.tsx` miał zdublowany `p-6`, zdjęty).
+  **Ważny efekt uboczny — wirtualizacja katalogu była martwa w przeglądarce.**
+  `useWirtualizacja` (`pages/katalog/wirtualizacja.ts`) wychodzi z efektu, gdy nie znajdzie
+  `#$vMainScroll`, a ten element mieszka w `AppShell`. Skoro `/katalog` do 12e nie renderował
+  `AppShell`, okno wierszy nigdy się nie przesuwało — widoczne przy rozmiarze strony „Wszystkie"
+  (powyżej progu 150 wierszy). Naprawa D1 to odblokowała.
+- **Potwierdzenia (D5, backlog #51) — ujednolicone, nota ze scalenia 12b+12c zamknięta.**
+  `Staging.tsx:177,210` i `konfiguracja/Admin.tsx:233` przeszły z `window.confirm` na
+  `DialogPotwierdzenia`, z dosłownym tekstem pytania. `konfiguracja/Katalog.tsx:45` zostaje jako
+  świadomy, opisany komentarzem wyjątek (operacja nieodwracalna).
+- **Rozliczenie backlogu:** **#36 ✅** (sidebar naprawiony), **#49 ✅** (retencja 5 kopii bazy po
+  `POST /api/products/clear`, best-effort, świadome odstępstwo od produkcji, która nie sprząta
+  wcale), **#51 ✅** (potwierdzenia ujednolicone) — naprawione. **#45 ❌** (martwy filtr „Źródło",
+  decyzja D4 z 7b utrzymana), **#48 ❌** (brak kolumny roli w `users`, zostaje 1:1 z produkcją —
+  patrz niżej), **#50 ❌** (`parsujSzczegoly` w dwóch kopiach, zamierzony duplikat, decyzja D4
+  z ticketu 36) — świadomie pominięte. **#52 rozstrzygnięty na stałe:** odstępstwo D1 z I1
+  (14 tras pod `requireAuth`, choć produkcja oddaje je publicznie) zostaje — nie cofamy niczego
+  do wariantu publicznego, to najgroźniejsza dziura oryginału (`/api/export/shoper` oddaje cały
+  katalog, `/api/audit-log` log działań).
+  **#48 rozstrzygnięcie:** brak kolumny roli w `users` zostaje świadomie 1:1 z produkcją — nie
+  jest to regresja odbudowy (oryginał chroni `/admin/*` samym `requireAuth`), wprowadzenie ról
+  to nowa funkcja (migracja schematu + `requireAdmin` + decyzja, kto dostaje rolę) — kandydat na
+  osobny ticket PO cutoverze, odnotowany w `docs/cutover.md` i w checkliście Ani.
+- **`docs/cutover.md` (nowy)** — plan big-bang: przełączenie Apache/PM2 na nowy stos na TEJ
+  SAMEJ bazie `data.db`. Warunki wstępne · weryfikacja schematu `PRAGMA table_info(products)`
+  przed migracją · migracje 001→003 · różnice env staging vs produkcja (`SELLY_TRYB`,
+  `IMPORT_SCHEDULER`) · kroki przełączenia · rollback · smoke-testy. **Dokument, nie wykonanie.**
+- **`docs/przeglad-12-widokow.md` (nowy)** — checklista dla Ani, 12 sekcji (jedna na trasę) +
+  logowanie, „rzeczy, które celowo wyglądają inaczej" i „co jest znane i nienaprawione" (#48).
 - **Ścieżki (GATE) całej Iteracji 12:** password, users, admin×3, maintenance, products/clear,
   audit-log — **✅ gotowe od 12b**; **products×6 — ✅ gotowe od 12a** (`POST` + `PATCH`/`PUT`/`DELETE {id}` +
   `uwagi-cena` + `hold-reasons`).  **Fixtures:** `GET_users.json`, `GET_admin_supplier-config.json`,
   `GET_admin_suppliers-list.json`, `GET_audit-log.json` — **✅ zielone od 12b** + fixtures
   zapisujące dla czterech operacji produktów, czterech mutacji 12b i `login`/`logout`,
-  nagrane z oryginału w 12d (`contract/README.md`).
-- **DoD Iteracji 12:** konto/admin/maintenance działają **✅ (12b)**; **mutacje produktów ✅ (12a)
-  i akcje wierszowe w `/katalog` ✅ domknięte** (12c, odstępstwo D4 z I2 zniesione); **kontrakt
-  i fixtures odświeżone ✅ (12d)**; audyt bezpieczeństwa domknięty (12e); fixtures przez GATE;
-  **kompletny przegląd 12 widoków z Anią** (12e).
+  nagrane z oryginału w 12d (`contract/README.md`). **12e nie zmienia kształtu ani wartości
+  żadnej odpowiedzi API — `contract/` nietknięty.**
+- **Bramki:** backend **79 plików / 1223 testy** (było 1209, +14); frontend **48 plików /
+  747 testów** (było 731, +16) + 5 plików / 39 testów integracyjnych; lint/typecheck/build
+  czyste po obu stronach.
+- **DoD Iteracji 12 — spełnione w całości:** konto/admin/maintenance ✅ (12b); mutacje produktów
+  ✅ i akcje wierszowe w `/katalog` ✅ (12c, odstępstwo D4 z I2 zniesione); kontrakt i fixtures
+  odświeżone ✅ (12d); audyt bezpieczeństwa domknięty bez znalezisk ✅ (12e); fixtures przez
+  GATE ✅; `docs/cutover.md` i `docs/przeglad-12-widokow.md` gotowe ✅ (12e).
+  Szczegóły: `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/`.
 
 ---
 
 ## 6. Po zakończeniu wszystkich iteracji
 
-> **Stan 2026-09-08:** zostało do zrobienia wyłącznie **I12**, sesja **12e** (12a, 12b, 12c
-> zamknięte 2026-09-05, 12d zamknięta 2026-09-08). Po zamknięciu ostatniej z nich wykonaj punkty
-> niżej. Do rozliczenia
-> backlogu dochodzą wpisy dołożone przez I7: **#44** (przycisk „Nowy rodzaj" w produkcji nie
-> zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło" — ⬜ do decyzji
-> Ani); przez 12a: **#14** (produkty domknięte) i **#4** (endpointy `uwaga_cena` i propagacja
-> bulku domknięte); przez 12b: **#48** (brak kolumny roli w `users`), **#49** (niesprzątane kopie
-> bazy po `products/clear`) i **#50** (dwie kopie `parsujSzczegoly`) — wszystkie trzy ⬜ do decyzji.
+> **Stan 2026-09-08: odbudowa DOWIEZIONA — I0–I12 zamknięte, ostatnia sesja 12e domknęła
+> audyt bezpieczeństwa bez znalezisk.** Zostają dwa zdarzenia POZA odbudową, opisane niżej:
+> przegląd 12 widoków przez Anię i cutover. Żadna kolejna sesja programistyczna nie jest już
+> przewidziana w tym dokumencie — jeśli trafi tu kolejny ticket, to będzie follow-up po
+> cutoverze, nie kontynuacja roadmapy.
 
-- Pełny przegląd 12 widoków. Fixtures/kontrakt: 73 nagrania / 96 ścieżek — 12 operacji
-  zapisujących z D3 mają nagranie, reszta zapisujących tras lokalnych zostaje bez fixtures
-  (Follow-up 38, `contract/README.md`).
-- Plan cutoveru (big-bang): przełączenie Apache/PM2 na nowy stos, ta sama baza `data.db`.
-- Rozliczenie backlogu (`docs/rebuild-backlog.md`) — wszystkie wpisy TAK naniesione, NIE świadomie pominięte.
+**Zrobione w 12e (patrz blok Sesja 12e w §5 po szczegóły):**
+- Audyt bezpieczeństwa (auth, CORS, JWT, mass-assignment) — bez otwartych dziur; luka procesu
+  w testach auth zamknięta testem skanującym rejestr Express.
+- Sidebar ujednolicony przez router (`AppShell` w `App.tsx`) — nota z I8 zamknięta, przy okazji
+  naprawiona martwa wirtualizacja katalogu.
+- Potwierdzenia ujednolicone do `DialogPotwierdzenia` (poza świadomym wyjątkiem
+  `konfiguracja/Katalog.tsx`).
+- Backlog rozliczony w `docs/rebuild-backlog.md`: **#36 ✅, #49 ✅, #51 ✅** (naprawione);
+  **#45 ❌, #48 ❌, #50 ❌** (świadomie pominięte, z notą uzasadnienia przy każdym wpisie);
+  **#52** rozstrzygnięty na stałe (odstępstwo D1 z I1 zostaje). Pozostałe ⬜ w backlogu
+  (#11, #12, #19, #21, #25, #26, #31–#35, #39–#43) to **defekty PRODUKCJI odtworzone świadomie
+  1:1** — żaden nie jest regresją odbudowy i żaden nie blokuje cutoveru; czekają na decyzję Ani
+  po cutoverze.
 
-*Utworzono 2026-08-20 (Faza 3–4). Aktualizuj §4 i statusy w §5 po każdym zmergowanym tickecie.*
+**Zostaje jako zdarzenie poza odbudową:**
+- **Przegląd 12 widoków przez Anię** — checklista gotowa w `docs/przeglad-12-widokow.md`
+  (12 sekcji + logowanie, „wygląda inaczej i to OK", „znane i nienaprawione"). Sam przegląd
+  klika Ania na stagingu (test.agritires.eu).
+- **Cutover (big-bang)** — plan gotowy w `docs/cutover.md`: przełączenie Apache/PM2 na nowy
+  stos, ta sama baza `data.db`. Warunki wstępne (zielony przegląd Ani, zielone bramki, kopia
+  bazy), weryfikacja schematu przed migracją, migracje 001→003, różnice env staging vs
+  produkcja, kroki przełączenia, rollback, smoke-testy. **To dokument — wykonanie jest osobnym
+  zdarzeniem z Anią**, poza zakresem tej roadmapy.
+
+Fixtures/kontrakt: 73 nagrania / 96 ścieżek — 12 operacji zapisujących z D3 (12d) mają nagranie,
+reszta zapisujących tras lokalnych zostaje bez fixtures (Follow-up 38, `contract/README.md`).
+12e nie zmieniła kształtu ani wartości żadnej odpowiedzi API — `contract/` nietknięty.
+
+*Utworzono 2026-08-20 (Faza 3–4). Zamknięte 2026-09-08 (12e, `39-CHORE-audyt-bezpieczenstwa-domkniecie`)
+— dalsze zmiany tego pliku to już follow-up po cutoverze, nie kontynuacja planu odbudowy.*
