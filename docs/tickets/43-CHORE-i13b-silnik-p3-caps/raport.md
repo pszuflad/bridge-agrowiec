@@ -178,8 +178,14 @@ Trzej doc-checkerzy równolegle, każdy na rozłącznym zbiorze plików.
 `plan.md` i `raport.md` wymieniały `ean` wśród pól auto-patchowanych przez `Xq`. To nieprawda:
 `AP.ean` istnieje wyłącznie w MARTWEJ definicji `tk`. Żywy `tk` ma 6 wywołań `Xq` — jedno
 w pętli `powod` i pięć w auto-patchu (`cenaZakupu`, `cenaSprzedazy`, `marzaPct`, `stan`,
-`magazyn`). Zweryfikowane bezpośrednio na `mirror/backend/index.cjs`; oba pliki poprawione.
-Komentarze w kodzie były od początku poprawne (mówią „pola cenowo-magazynowe").
+`magazyn`). Zweryfikowane bezpośrednio na `mirror/backend/index.cjs`. Komentarze w kodzie były od początku
+poprawne (mówią „pola cenowo-magazynowe").
+
+Druga iteracja review wykryła, że korekta była NIEKOMPLETNA: doc-checkerzy zapisali moją pierwotną,
+błędną frazę także w `docs/rebuild-roadmap.md` (blok 13c) i `docs/rebuild-backlog.md` (#59) — czyli
+dokładnie tam, gdzie przeczyta ją sesja 13c. Poprawione w commicie „review fix (iteracja 2)".
+Ostatecznie sprostowane w czterech plikach: `plan.md`, `raport.md`, `docs/spec-backend.md`,
+`docs/rebuild-roadmap.md`, `docs/rebuild-backlog.md`.
 
 ## Pre-existing issues (do decyzji użytkownika, POZA zakresem tego ticketa)
 

@@ -114,3 +114,118 @@ Definition of done) i mimo że dwa poprzednie tickety tej samej iteracji zrobił
 to blokuje merge do czasu uzupełnienia, bo bez tego następna sesja (13c) odziedziczy nieaktualne
 fakty w backlogu. Drugorzędnie: liczba testów w kontroli mutacyjnej raportu jest zaniżona (6 vs
 realnie 11) — kosmetyczna nieścisłość, warto poprawić przy okazji.
+
+---
+
+## Iteracja 2
+
+> Reviewed: 2026-09-09
+> Branch: chore/43-i13b-silnik-p3-caps
+> Diff od iteracji 1: commity `912c0de` (sprostowanie liczby testów w kontroli mutacyjnej) i
+> `7911747` (sync docs) — zmiany wyłącznie w `docs/**`, kod i testy niezmienione od iteracji 1.
+
+### Weryfikacja BLOCKER z iteracji 1 (docs nieaktualne)
+
+**Zamknięty.** Zweryfikowałem niezależnie:
+- `docs/rebuild-roadmap.md` — tabela zbiorcza wiersz 13 ma teraz `13b: ✅ 43-CHORE-i13b-silnik-p3-caps
+  · 2026-09-09`. Blok 13b (linia ~1953) ma ✅ + datę + ID ticketa, sprostowany fakt „P3 w
+  `U.acceptStaging`, NIE w `tk()`" z konkretnymi offsetami — **policzyłem je sam** na
+  `mirror/backend/index.cjs`: `function tk(` @1432657, `tk=function(` @1438815, `function Xq(`
+  @1430238, `a.marka=a.marka??…` @1350905 — zgadzają się co do bitu z tekstem w roadmapie i backlogu.
+- Nota o rozjeździe CHANGELOG↔kod jest teraz **wyłącznie w bloku 13c** (nie w 13b) — zgodne z
+  obowiązkiem 2 z `CLAUDE.md`. Blok 13b odsyła do niej frazą „patrz nota niżej w bloku **13c**".
+- `docs/rebuild-backlog.md` #56 — tytuł/`Kategoria`/`Iteracja`(→13b)/`Status`(✅ zrobione w 13b)
+  poprawione i prawdziwe. #59 — `Iteracja` rozbita (silnik→13b zrobione / migracja→13c), `Status`
+  zawiera dowód (57 pól `powod`, zero innych) — zweryfikowany wcześniej w iteracji 1, nie
+  zmienił się.
+- `docs/spec-backend.md` — nowy blockquote w §5 opisuje P3 i CAPS zgodnie ze stanem faktycznym,
+  w tym poprawnie zaznacza „bez `ean`" dla auto-patchu.
+
+### Nowa weryfikacja: litery kart #58/#60/#61 (poza pierwotnym zakresem BLOCKER-a)
+
+Sprawdzone względem tabeli mapowania (`docs/rebuild-backlog.md` ~2540) i bloku I13 w roadmapie
+(„13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE"):
+- **#58** (konstr) — `Iteracja` teraz: parsery→13a (zrobione), migracja→13c, FE→13e. Zgodne z
+  tabelą mapowania i z blokiem 13e w roadmapie („`konstr` FE strona konstrukcji — sparowane z 13c").
+- **#60** (Selly) — `Iteracja` 13c→**13d**. Zgodne z blokiem 13d roadmapy (opisuje dokładnie ten
+  podsystem: `discovery/sync_delta/sync_full/mapper_v2/rate_limiter/scheduler_selly/routes_sync`).
+- **#61** (Bridge ONE) — `Iteracja` 13d→**13e**. Zgodne z blokiem 13e roadmapy.
+
+Wszystkie trzy poprawki są zgodne z tabelą mapowania i z opisami bloków 13c/13d/13e — **żadna nowa
+sprzeczność**.
+
+### Nowa weryfikacja: sprostowanie o `ean`
+
+`raport.md:178-181` twierdzi: żywy `tk` ma 6 wywołań `Xq` (1 w pętli `powod`, 5 w auto-patchu:
+`cenaZakupu`, `cenaSprzedazy`, `marzaPct`, `stan`, `magazyn`, **bez `ean`**), bo `AP.ean` istnieje
+wyłącznie w martwej definicji `tk`. Policzyłem to niezależnie na `mirror/backend/index.cjs`:
+
+```
+Xq( w żywym tk (offset 1438815, zakres +8000 znaków): 6 wystąpień
+  1× w pętli powod (v.push(...))
+  5× w auto-patchu: AP.cenaZakupu, AP.cenaSprzedazy, AP.marzaPct, AP.stan, AP.magazyn
+AP.ean w martwej function tk( (offset 1432657): true (obecny TYLKO tam)
+```
+
+**Sprostowanie jest prawdziwe** — potwierdzone bit-po-bicie. `docs/spec-backend.md` ma tę samą,
+poprawną wersję („bez `ean`, zgodnie z ustaleniem 3c wyżej").
+
+Jednak **korekta nie została naniesiona wszędzie**: `docs/rebuild-roadmap.md:1986` (blok 13c) i
+`docs/rebuild-backlog.md:2617` (#59, pole `Status`) wciąż zawierają starą, błędną listę:
+„`Xq` wpływa realnie tylko na narrację `powod` … i na auto-patch `ean`/`cenaZakupu`/
+`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn`" — z `ean` w auto-patchu, co jest tą samą
+nieprawdą, którą `raport.md:178` sam nazywa błędną i deklaruje naprawioną („oba pliki
+poprawione" — ale „oba" to tylko `plan.md`+`raport.md`, nie roadmapa/backlog). Zobacz BLOCKER
+niżej.
+
+### Bramki
+
+Uruchomione niezależnie z `BRIDGE_SNAPSHOT_DB` na Node 20.20.2: `lint` ✓, `typecheck` ✓, `build` ✓,
+`test` ✓ — 80 plików / 1234 testy, wszystkie zielone. Zgodne z deklaracją w `raport.md`. Brak
+`it.skip`/`describe.skip`/`.only` w `rebuild/backend/{src,test}`.
+
+### Zakres diffu
+
+Commity `912c0de` i `7911747` dotykają wyłącznie `docs/**` i artefaktów ticketa
+(`plan.md`/`raport.md`/`review.md`) — kod (`mirror/`, `rebuild/backend/src`, `rebuild/backend/test`)
+niezmieniony od iteracji 1. Brak scope creep.
+
+## BLOCKER (iteracja 2)
+
+- [ ] `docs/rebuild-roadmap.md:1986` (blok 13c), `docs/rebuild-backlog.md:2617` (#59, pole
+  `Status`) — obie linie wciąż twierdzą, że `Xq` wpływa na auto-patch pola `ean`, co jest
+  nieprawdą sprostowaną w tym samym PR w `plan.md`/`raport.md`/`docs/spec-backend.md`.
+  - Reason: `raport.md:178-181` wprost mówi „żywy `tk` ma 6 wywołań `Xq`… oba pliki poprawione"
+    (odnosząc się tylko do `plan.md`+`raport.md`), ale identyczna błędna fraza „auto-patch
+    `ean`/`cenaZakupu`/…" została skopiowana do bloku 13c roadmapy i do #59 w backlogu i NIE
+    naniesiono tam tej samej korekty — mimo że `docs/spec-backend.md`, dodany w tym samym
+    commicie `7911747`, ma poprawną wersję („bez `ean`, zgodnie z ustaleniem 3c wyżej"). To
+    dokładnie ta klasa błędu, przed którą ostrzega `CLAUDE.md` (fakt musi być PRAWDĄ w bloku,
+    który czyta następna sesja) — a blok 13c jest właśnie tym blokiem, który czyta sesja 13c.
+    Zweryfikowałem niezależnie na `mirror/backend/index.cjs`: `AP.ean` istnieje wyłącznie w
+    martwej `function tk(`, żywy `tk=function(` ma 6 wywołań `Xq` bez żadnego dotyczącego `ean`.
+  - Suggestion: usunąć `ean/` z listy auto-patchu w obu miejscach (`docs/rebuild-roadmap.md:1986`,
+    `docs/rebuild-backlog.md:2617`), analogicznie do już poprawnego tekstu w
+    `docs/spec-backend.md`.
+
+## SHOULD-FIX (iteracja 2)
+
+Brak nowych — poprzedni SHOULD-FIX (liczba testów w kontroli mutacyjnej, 6→11) zamknięty
+poprawnie, zweryfikowany zgodny z raportem (`silnik.rownosc.test.ts` 3, `akceptacja.charakteryzacja
+.test.ts` 3, `silnik.charakteryzacja.test.ts` MO1–MO5 5 = 11).
+
+## NICE-TO-HAVE (iteracja 2)
+
+Poprzedni NICE-TO-HAVE (`plan.md` status `Draft`→`Implemented`) zamknięty — zweryfikowany
+(`plan.md:3` ma teraz `Status: Implemented`).
+
+## Overall assessment (iteracja 2)
+
+Praca doc-checkerów jest w większości solidna i dokładna — offsety, liczby wywołań `Xq`, litery
+kart (#58/#60/#61) i przeniesienie noty CHANGELOG↔kod do bloku 13c wszystkie zweryfikowałem
+niezależnie i się zgadzają. Jest jednak jeden realny, łatwo weryfikowalny błąd: sprostowanie
+o `ean` (prawdziwe i potwierdzone w `plan.md`/`raport.md`/`spec-backend.md`) nie zostało
+naniesione w `docs/rebuild-roadmap.md` (blok 13c) i `docs/rebuild-backlog.md` (#59) — te dwa
+miejsca wciąż niosą tę samą nieprawdę, którą raport deklaruje jako naprawioną. To dokładnie ten
+rodzaj rozjazdu, przed którym ostrzega `CLAUDE.md`, i akurat w bloku, który przeczyta sesja 13c —
+do zamknięcia przed merge.

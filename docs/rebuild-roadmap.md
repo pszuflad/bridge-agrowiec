@@ -1983,8 +1983,9 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   robi** — w żywym `tk` klasyfikacja `_ck` liczy się BEZ `Xq`, jest case-SENSITIVE
   (`_KP=["rozmiar","indeksNosnosci","indeksPredkosci","model","marka","nazwa","kodDostawcy"]`,
   porównanie `String(vS??"")!==String(vN??"")`); diff 08.09 tego fragmentu nie tknął. `Xq` wpływa
-  realnie tylko na narrację `powod` (`POLA_ROZNIC`) i na auto-patch `ean`/`cenaZakupu`/
-  `cenaSprzedazy`/`marzaPct`/`stan`/`magazyn`. Dowód empiryczny z 13b: przenagranie wzorca zmieniło
+  realnie tylko na narrację `powod` (`POLA_ROZNIC`) i na auto-patch PIĘCIU pól: `cenaZakupu`/
+  `cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` — **bez `ean`**, bo `AP.ean` istnieje wyłącznie
+  w MARTWEJ definicji `tk`; żywy `tk` ma dokładnie 6 wywołań `Xq` (1 w pętli `powod` + 5 wyżej). Dowód empiryczny z 13b: przenagranie wzorca zmieniło
   57 pól `powod` i ZERO innych pól — wiersze zostały `typZmiany: "zmiana_kluczowa"`. **Dopiero
   migracja danych tej karty (`UPPER(nazwa)` + `DELETE` wierszy staging CASE_ONLY) usuwa szum
   case-only** — nie kod silnika, 13b tego nie mogła załatwić.
