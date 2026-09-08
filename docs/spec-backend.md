@@ -45,6 +45,16 @@ GET  /api/alerts             GET  /api/spedycja
 GET  /api/export/shoper      GET  /api/export-shoper     ← pełny katalog CSV bez auth!
 POST /api/waga-gabarytowa/oblicz
 ```
+**Potwierdzone w 12d** (`38-CHORE-kontrakt-fixtures-odswiezenie`, 2026-09-08): lista powyżej
+zmierzona na **uruchomionym oryginale**, nie tylko wywnioskowana z czytania kodu — wszystkie
+14 tras z `security: []` realnie oddają **200** bez tokenu (`GET /api/export-shoper` akurat
+zwrócił 500 na danych snapshotu, ale bez auth — trasa jest publiczna, błąd jest gdzie indziej).
+Ten sam bieg potwierdził, że **`GET /api/me` mimo `security: []` w kontrakcie NIE jest
+publiczne** — produkcja realnie oddaje **401**, chroni ją ręczny `if (!req.user)`
+(`deminified/backend-index.cjs:48179-48183`), nie wspólny middleware `we`; `POST /api/login`
+ze złym hasłem też oddaje 401. Oba kody są od tego ticketu zadeklarowane w
+`contract/openapi.yaml`.
+
 Najgroźniejsze: **`/api/export/shoper`** (każdy pobierze cały katalog),
 **`/api/audit-log`** i **`/api/history`** (log działań i zmian), **`/api/config`**.
 

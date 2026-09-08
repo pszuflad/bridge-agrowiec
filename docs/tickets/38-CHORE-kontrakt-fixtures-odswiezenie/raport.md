@@ -204,3 +204,49 @@ Brak zmian zachowania backendu. Zmiany dotyczą kontraktu, fixtures, testów i d
    (kształt jest już wierny). Wymaga decyzji, bo plik jest wspólny dla innych testów.
 5. **`GET /api/export-shoper` oddaje 500 na danych snapshotu** (`export/shoper` oddaje 200) —
    zaobserwowane przy probie auth, nie badane. Może być artefaktem starych danych.
+
+## Docs updates
+
+Cztery pliki `docs/` + `CLAUDE.md`, zaktualizowane przez trzech doc-checkerów równolegle.
+
+### `docs/rebuild-roadmap.md`
+- **Sesja 12d przepisana z planu na STAN** — ✅ zrobiona 2026-09-08, ticket 38, z zakresem
+  faktycznie dowiezionym (dwa narzędzia, 73 fixtures, 96 ścieżek / 113 operacji / 80 schematów,
+  `401` + `x-odbudowa-auth` przy 14 trasach, usunięcie `WYJATKI_SZEROKOSC`, 1209 testów).
+- **⭐ Usunięte fałszywe zdanie** „`uwaga_cena`… ujawnienie jej wymaga tego samego przenagrania"
+  — zastąpione sprostowaniem D1 z pełnym dowodem. To był BLOCKER z review.
+- Usunięta nieaktualna nota o `GET /api/audit-log` (401 sprawdzany osobno poza kontraktem).
+- **Materiał dla 12e wpisany DO BLOKU 12e**: lista 14 tras z `x-odbudowa-auth` jest już
+  zmierzona, więc audyt nie musi jej ustalać od nowa; `/me` i `/login` to luka inwentarza 2.3,
+  nie odstępstwo odbudowy.
+- Poprawione liczby w §2 (fixtures `55 GET` → `73`, openapi `94 ścieżki` → `96/113/80 schematów`)
+  i callout o rozjeździe kontrakt↔produkcja — z „do rozważenia w I12" na „domknięty w 12d".
+- Skorygowane wejścia w blokach I3, I9, 12a, 12b, §6.
+- Domknięte przeze mnie po agencie: nota stanu w §4 i wiersz iteracji 12 w tablicy postępu
+  (obie nadal mówiły, że 12d jest otwarte).
+
+### `docs/rebuild-backlog.md`
+- **Wpis #3 (saga szerokości) — ZAMKNIĘTY.** Ostatnia otwarta pozycja (przenagranie fixture'a)
+  rozliczona; wyjątek `WYJATKI_SZEROKOSC` usunięty, GATE katalogu zielony bez ani jednego wyjątku.
+- **Skorygowana obalona nota** „`db/snapshot.db` sam nie nadaje się na źródło wartości z zerami
+  końcowymi" — nadaje się, bo produkcja ma własny skrypt migracyjny, uruchamiany na kopii.
+- **Wpis #4 (`uwaga_cena`) — usunięte fałszywe zdanie** o ujawnieniu kolumny w 12d, zastąpione
+  dowodem D1 i wskazaniem strażnika w testach.
+- **Nowy wpis #52** — zmierzona lista 14 tras publicznych w produkcji, jako materiał
+  informacyjny dla 12e (nie decyzja do podjęcia).
+
+### `CLAUDE.md`
+- Pułapka projekcji Drizzle rozszerzona o kierunek odwrotny: **kolumna dodana runtime'owym
+  `ALTER TABLE` jest dla Drizzle NIEWIDOCZNA** — obecność kolumny w bazie produkcji nie znaczy,
+  że API ją oddaje; sprawdzaj model, nie schemat tabeli.
+- Nowy punkt w „Środowisku": **oryginał da się uruchomić lokalnie** i to jest teraz standardowa
+  metoda dowodzenia wierności, wraz z trzema pułapkami (scheduler po 60 s, wymóg CWD, martwe
+  moduły `atrybuty`/`pending`).
+
+### `docs/spec-backend.md`
+- §2 (auth): lista publicznych tras opatrzona adnotacją, że jest **zmierzona na uruchomionym
+  oryginale**, nie tylko wywnioskowana z kodu; dopisane, że `GET /api/me` mimo `security: []`
+  NIE jest publiczne (realnie 401), a oba kody są od tego ticketu w kontrakcie.
+
+### Pre-existing issues zgłoszone przez doc-checkerów
+Brak — żaden z trzech agentów nie znalazł sprzeczności spoza zakresu ticketa.
