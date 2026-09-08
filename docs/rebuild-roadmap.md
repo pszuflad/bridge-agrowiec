@@ -148,14 +148,17 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 
 ## 4. Tablica postępu
 
-> **Stan na 2026-09-08: została JEDNA iteracja — I12** (konto, admin, hardening), w toku.
-> Iteracje 0–11 są zamknięte, wszystkie trzy skrypty injection wchłonięte, martwe ścieżki FE
-> naprawione. I12 zebrała po drodze wejścia z I2, I5, I7 i I11 i jest podzielona na pięć sesji
-> (12a–12e); **zamknięte są 12a** (mutacje produktów, BE), **12b** (konto/admin/maintenance)
-> i **12c** (dialog edycji produktu) — wszystkie 2026-09-05, 12b i 12c równolegle — oraz
-> **12d** (przenagranie fixtures + schematy ciał, 2026-09-08). **Została wyłącznie 12e**
-> (finalny audyt bezpieczeństwa + przegląd 12 widoków z Anią). Czytaj blok I12 w całości,
-> bo urósł ponad pierwotny zakres (m.in. dialog edycji produktu z `/katalog`).
+> **Stan na 2026-09-08: została 12e oraz dołożona I13.** Iteracje 0–11 zamknięte, wszystkie trzy
+> skrypty injection wchłonięte, martwe ścieżki FE naprawione. I12 zebrała po drodze wejścia z I2,
+> I5, I7 i I11 i jest podzielona na pięć sesji (12a–12e); **zamknięte są 12a** (mutacje produktów,
+> BE), **12b** (konto/admin/maintenance) i **12c** (dialog edycji produktu) — wszystkie 2026-09-05,
+> 12b i 12c równolegle — oraz **12d** (przenagranie fixtures + schematy ciał, 2026-09-08).
+> **Została wyłącznie 12e** (finalny audyt bezpieczeństwa + przegląd 12 widoków z Anią). Czytaj
+> blok I12 w całości, bo urósł ponad pierwotny zakres (m.in. dialog edycji produktu z `/katalog`).
+>
+> **I13 to NOWA rodzina zmian** — nie część pierwotnej odbudowy, tylko delty, które Ania wdrożyła
+> na produkcji 26.08–08.09 (producent milczał przez ten czas, zaległości wciągnięte ręcznie w
+> `6872aea`, striażowane `40-CHORE-triaz-i13-plan`). Pięć sesji 13a–13e — czytaj blok I13.
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
@@ -174,6 +177,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | 🔨 | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08. **Została 12e.** |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13a BE · 13b BE+BAZA · 13c BE(nowy) · 13d FE · 13e decyzja | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Wykonanie: osobne tickety `/feature` per sesja |
 
 ---
 
@@ -1855,11 +1859,69 @@ Domyka zaległość #1 z I3 (3d-1, `WYJATKI_SZEROKOSC`) i braki nagrań z 12a/12
 
 ---
 
+### Iteracja 13 — Delty produkcji Ani 26.08–08.09 (post-odbudowa)
+
+- **Status:** ⬜ zaplanowana 2026-09-08 (`40-CHORE-triaz-i13-plan`). **Zależy od:** 3 (import), 8 (Selly).
+- **Skąd się wzięła.** Producent (`tools/vps-sync.sh`) **milczał 25.08–08.09** (grep `\.bak_pre_`
+  przestał trafiać po zmianie nazewnictwa kopii `.bak` Ani → skrypt ubijał się pod `set -euo pipefail`
+  przed `git push`; naprawione w `d88ac15` na main). Dwa tygodnie zmian produkcji wciągnięto RĘCZNIE
+  w commit **`6872aea`** (64 pliki). **Źródło prawdy tej iteracji:** `mirror/backend/CHANGELOG.md`
+  (wpisy 2026-08-25…09-08), `db/schema.sql`, `mirror/backend/parsers/*.cjs`, `mirror/backend/selly/*`.
+  Backlog: nowe wpisy **#53–#61** + domknięcie audytowych **#3/#8/#9/#10** (to były NASZE findingi
+  „audytu Claude'a", na które Ania wprost zareagowała — patrz CHANGELOG „Bug #1/#2/#3/#4").
+- **Cel:** odtworzyć w `rebuild/` te zmiany 1:1 (PORT parserów, migracje, nowy podsystem Selly),
+  żeby cutover big-bang szedł ze stanu produkcji z 08.09, nie z 25.08.
+
+**Podział na sesje (każda = osobny ticket `/feature`):**
+
+- **13a — Poprawki parserów (batch)** [BE] — grupa B. PORT przez Wariant A (mechanizm z #6,
+  `docs/rebuild-backlog.md` §„Gdzie naprawiamy…"). Zakres: **Bug#1** WULSTBAND (filtr dętki/akcesoria
+  case-insensitive, mo1/mo9 — regresja PO katunify, patrz zależność niżej), **Bug#2** NRO/CHO →
+  `Tak`/null (tyre_params:423-424 + adapter:596-597), **Bug#4** MO8 detekcja CSV vs XLSX (`isZipBuffer`),
+  **B10** Handlopex sufiksy w `model` (STOPWORDS KPL/NACZEPA, `/TR\d`, niesparzona klamra), **B4**
+  parser rozmiaru WxSxD (`690x180-15`), **mo9expand** `expandLoadIndexSlash` (`144A8/B`→`144A8/144B`),
+  **P3** fallback marki `tk()` → `"UNKNOWN"`. **GATE:** charakteryzacja (realne pliki dostawców →
+  identyczne rekordy) + fixtures. ⚠ **Cieniowanie (CLAUDE.md §5):** P3 dotyka `tk()` w `index.cjs` —
+  sprawdź, która definicja żywa, zanim uwierzysz numerowi linii z deminifikatu.
+- **13b — Unifikacje konwencji + migracje** [BE + BAZA] — grupa C. **katunify** (kategorie do Wielkiej
+  litery we wszystkich parserach + `common.cjs`), **konstrukcja** (kody `R/D/L/B` → `Radialna`/`Diagonalna`;
+  L i B → Diagonalna), **CAPS** (`products.nazwa` = WIELKIE LITERY + helper `Xq()` case-insensitive).
+  Każda z trzech ma **migrację danych** (wzór: #2 kategoriafix, #3 szertxt) i **przesuwa fixtures**
+  (kategoria/konstrukcja/nazwa się zmieniają — GATE trzeba przenagrać). ⚠ **Cieniowanie:** CAPS dotyka
+  `Xq()` w `index.cjs`. ⚠ **KOLEJNOŚĆ:** katunify (13b) SPOWODOWAŁO regresję Bug#1 (13a) — filtr
+  porównywał małą literą z Wielką. W odbudowie: albo 13b przed 13a, albo oba w jednym tickecie;
+  nie da się odtworzyć katunify bez jednoczesnego case-insensitive filtra.
+- **13c — Selly REST sync (model wariantowy)** [BE, NOWY PODSYSTEM] — grupa A. **To wykracza poza I8**
+  (I8 = eksport CSV + panel). Ania 07–08.09 dołożyła synchronizację Bridge→Selly przez REST API,
+  bo cena/stan w Selly są **per wariant** (19% produktów ma >1 wariant), a bulk-endpoint zwracał
+  HTTP 400. Nowe pliki: `selly/discovery.cjs` (lazy discovery po EAN, `ensureMapping`, `apiWithRetry`),
+  `sync_delta.cjs` (Tor 1: `PUT .../variants/{vid}` {quantity,price}), `rate_limiter.cjs` (token bucket
+  250/60s), `scheduler_selly.cjs` (HH:55 + fallback), `routes_sync.cjs` (7 endpointów `/api/selly/sync-*`),
+  `mapper_v2.cjs` (21 features, `provider_code=kod_importu` — bugfix), `sync_full.cjs` (Tor 2, nocny).
+  Tabela **`selly_products` przeprojektowana**: klucz `(kod_importu, dostawca)` → `(selly_product_id,
+  selly_variant_id)` + `feature_id_magazyn`; stara → `selly_products_old`. **⚠ BLOKADA:** Tor 2
+  (`sync_full`) był u Ani NIEDOMKNIĘTY 08.09 („refactor sync_full w następnej sesji") — **poczekaj,
+  aż Ania go domknie**, inaczej portujesz ruchomy cel. Rozważ podział: 13c-1 discovery+delta (Tor 1),
+  13c-2 sync_full (Tor 2, gdy gotowe u Ani), 13c-3 przyciski sync w panelu FE. Duży ticket.
+- **13d — Frontend: Bridge ONE + drobne** [FE] — grupa E. Rebrand na **„Bridge ONE"** (title
+  „Bridge ONE — konsolidacja cenników opon") + etykiety z kopii `.bak`: `tr_fix`, `ackalerts`,
+  `szer_marka`, `PRICEFMT` (formatowanie ceny), `konstr` (FE strona unifikacji konstrukcji — idzie
+  logicznie z 13b). Bundle są zminifikowane (`index-BRIDGEONE….js`, `index-PRICEFMT….js`) — **najpierw
+  rozłóż diff bundla**, nazwa `.bak` daje tylko etykietę, nie treść.
+- **13e — Backfille danych (DECYZJA użytkownika, nie kod)** [BAZA] — grupa D. **tl_tt** backfill 628 rek.
+  (reguły A: jawne TL; B: Ciężarowe+Radialna+śr≥17.5→TL; C: BKT MAGLIFT+Diagonalna+śr≤12→TT), **szerokości
+  ułamkowe** 10 rek. (parser już poprawny od 18.08), **JMK marka/model** 14 rek. + 27 `manual_overrides`.
+  **Pytanie otwarte:** odbudowa buduje bazę importem od zera — jednorazowe backfille historycznych
+  rekordów są w większości nieistotne. ALE reguły tl_tt B/C to **logika klasyfikacji**, nie sam import —
+  jeśli mają obowiązywać na przyszłych importach, trzeba je dodać do parsera/mapowania, nie tylko jako
+  UPDATE. Do rozstrzygnięcia z użytkownikiem PRZED 13e.
+
 ## 6. Po zakończeniu wszystkich iteracji
 
-> **Stan 2026-09-08:** zostało do zrobienia wyłącznie **I12**, sesja **12e** (12a, 12b, 12c
-> zamknięte 2026-09-05, 12d zamknięta 2026-09-08). Po zamknięciu ostatniej z nich wykonaj punkty
-> niżej. Do rozliczenia
+> **Stan 2026-09-08:** zostały **12e** (12a–12d zamknięte) oraz cała **I13** (delty produkcji
+> Ani 26.08–08.09 — patrz blok I13; wykonanie po domknięciu 12e i po tym, jak Ania domknie u siebie
+> Tor 2 Selly). Cutover big-bang idzie ze stanu produkcji z 08.09 (`6872aea`), więc **I13 musi być
+> rozliczona przed cutoverem** — inaczej wdrażamy stan sprzed dwóch tygodni. Do rozliczenia
 > backlogu dochodzą wpisy dołożone przez I7: **#44** (przycisk „Nowy rodzaj" w produkcji nie
 > zapisuje rodzaju — ✅ naprawione w odbudowie) i **#45** (martwy filtr „Źródło" — ⬜ do decyzji
 > Ani); przez 12a: **#14** (produkty domknięte) i **#4** (endpointy `uwaga_cena` i propagacja
