@@ -18,6 +18,7 @@ import { opakujKlientaTrybem } from "../src/selly/tryb.js";
 import {
   stworzAtrapeSelly,
   stworzSrodowiskoTestowe,
+  zasiejMapowanieWariantowe,
   zasiejMapySelly,
   zasiejProdukty,
   type AtrapaSelly,
@@ -145,9 +146,27 @@ describe("⭐ tryb `tylko-odczyt` — dry-run tak, wysyłka nie", () => {
 });
 
 describe("tryb `pelny` — zachowanie 1:1, nic nie blokuje", () => {
-  it("`sync-supplier` z `dry_run: false` tworzy produkty jak dotąd", async () => {
+  /**
+   * Sedno tego testu to „tryb `pelny` niczego nie blokuje", a nie „ile pozycji przeszło".
+   *
+   * ⚠ Mapowanie zasiewamy z góry (Iteracja 13d-1, ticket 45, decyzja D3): po migracji `007`
+   * gałąź CREATE starego `syncOneProduct` pada na `NOT NULL constraint failed` — u Ani też.
+   * Bez zasiewu ten test mierzyłby tamten defekt zamiast blokady trybu.
+   */
+  it("`sync-supplier` z `dry_run: false` synchronizuje produkty jak dotąd", async () => {
     const { srodowisko, token } = await srodowiskoZTrybem("pelny");
     try {
+      zasiejMapowanieWariantowe(srodowisko.db, [
+        {
+          kod: "MO9_336320",
+          kodImportu: "798368",
+          dostawca: "MO9",
+          sellyProductId: 5001,
+          sellyVariantId: 6001,
+          featureIdMagazyn: 1,
+        },
+      ]);
+
       const odp = await request(srodowisko.app)
         .post("/api/selly/sync-supplier")
         .set("Authorization", `Bearer ${token}`)

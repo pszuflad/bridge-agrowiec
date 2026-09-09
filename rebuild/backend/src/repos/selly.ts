@@ -227,13 +227,31 @@ export async function synchronizujJedenProdukt(
    * Zapis idzie surowym SQL-em, bo typowany `db.insert(...).values({...})` nie skompilowałby
    * się z pominiętymi kolumnami `notNull` — a my chcemy, żeby kod się budował i padał
    * W RUNTIME, tak jak produkcja. Awarię utrwala `test/selly.synchronizacja.test.ts`.
+   *
+   * ⚠ Przez `db.$client`, czyli sterownik `better-sqlite3` WPROST, a nie przez `db.run()`.
+   * Powód jest w treści błędu, nie w wygodzie: Drizzle opakowuje wyjątek w „Failed to run
+   * the query '<cały SQL>'" i chowa komunikat SQLite w `cause`. Ten komunikat nie zostaje
+   * w kodzie — leci do odpowiedzi `POST /api/selly/sync-supplier` (`errors[].error`) i do
+   * `selly_sync_log.szczegoly_json`, czyli na ekran Ani. Oryginał używa `better-sqlite3`
+   * bezpośrednio (`routes.cjs:417`) i pokazuje tam „NOT NULL constraint failed:
+   * selly_products.kod_importu"; przez Drizzle Ania zobaczyłaby zrzut całego INSERT-a
+   * zamiast przyczyny.
    */
-  db.run(
-    sql`INSERT INTO selly_products (bridge_kod, selly_product_id, selly_category_id, selly_producer_id,
-      cena_sprzedazy_wyslana, cena_zakupu_wyslana, stan_wyslany, ostatnia_sync, ostatni_status)
-      VALUES (${produkt.kod}, ${productId}, ${payload.category_id}, ${payload.producer_id ?? null},
-        ${payload.price}, ${payload.price_purchase}, ${produkt.stan}, datetime('now'), 'ok')`,
-  );
+  db.$client
+    .prepare(
+      `INSERT INTO selly_products (bridge_kod, selly_product_id, selly_category_id, selly_producer_id,
+        cena_sprzedazy_wyslana, cena_zakupu_wyslana, stan_wyslany, ostatnia_sync, ostatni_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), 'ok')`,
+    )
+    .run(
+      produkt.kod,
+      productId,
+      payload.category_id,
+      payload.producer_id ?? null,
+      payload.price,
+      payload.price_purchase,
+      produkt.stan,
+    );
 
   return { action: "created", kod: produkt.kod, selly_product_id: productId };
 }

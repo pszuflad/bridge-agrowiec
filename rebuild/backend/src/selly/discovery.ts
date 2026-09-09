@@ -326,7 +326,7 @@ export function stworzDiscovery({ klient, limiter = globalnyLimiter }: Zaleznosc
     wiersz: WierszBridge,
     slowniki: SlownikiSelly | null = null,
   ): Promise<WynikMapowania> {
-    const { kod, kod_importu, dostawca, ean } = wiersz;
+    const { kod_importu, dostawca, ean } = wiersz;
     if (!kod_importu || !dostawca) {
       return { error: "brak kod_importu lub dostawca" };
     }

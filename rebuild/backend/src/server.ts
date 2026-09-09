@@ -4,6 +4,11 @@ import { otworzBaze } from "./db/index.js";
 import { stworzApp } from "./app.js";
 import { stworzScheduler } from "./import/scheduler.js";
 import { synchronizujDostawce } from "./import/synchronizuj.js";
+import { stworzDiscovery } from "./selly/discovery.js";
+import { stworzKlientaSelly } from "./selly/klient.js";
+import { stworzSchedulerSelly } from "./selly/scheduler-sync.js";
+import { syncDelta } from "./selly/sync-delta.js";
+import { opakujKlientaTrybem } from "./selly/tryb.js";
 
 const env = wczytajEnv();
 const { sqlite, db } = otworzBaze(env.DB_PATH);
@@ -25,6 +30,28 @@ const app = stworzApp({
   sqlite,
   synchronizuj,
   przeplanujScheduler: () => scheduler.przeplanuj(),
+});
+
+/*
+ * Scheduler Toru 1 Selly. Klient budowany TU, a nie brany z `stworzApp` — bo `stworzApp`
+ * go nie wystawia, a automat i tak musi żyć poza cyklem żądań. Blokada `SELLY_TRYB`
+ * obowiązuje tak samo jak w trasach: to ten sam `opakujKlientaTrybem`.
+ *
+ * Sam obiekt niczego nie uruchamia — timer stawia dopiero `uruchom()` niżej.
+ */
+const klientSelly = opakujKlientaTrybem(
+  stworzKlientaSelly({
+    shopUrl: env.SELLY_SHOP_URL,
+    clientId: env.SELLY_CLIENT_ID,
+    clientSecret: env.SELLY_CLIENT_SECRET,
+    scope: env.SELLY_SCOPE,
+  }),
+  env.SELLY_TRYB,
+);
+const discoverySelly = stworzDiscovery({ klient: klientSelly });
+const schedulerSelly = stworzSchedulerSelly({
+  syncDelta: (dostawca, opcje) =>
+    syncDelta({ db, klient: klientSelly, discovery: discoverySelly }, dostawca, opcje),
 });
 
 const server = app.listen(env.PORT, env.HOST, () => {
@@ -53,11 +80,21 @@ const server = app.listen(env.PORT, env.HOST, () => {
   } else {
     console.log("[scheduler] wyłączony (IMPORT_SCHEDULER nie jest ustawione)");
   }
+
+  // Tor 1 Selly (Iteracja 13d-1, decyzja D4) — to samo umiejscowienie i ta sama zasada co
+  // wyżej. Oryginał instaluje ten automat bezwarunkowo (`extensions.cjs:466`); u nas musi
+  // być włączony jawnie, bo na stagingu robiłby REALNE `PUT`-y w żywym sklepie Ani.
+  if (env.SELLY_SCHEDULER) {
+    schedulerSelly.uruchom();
+  } else {
+    console.log("[selly-scheduler] wyłączony (SELLY_SCHEDULER nie jest ustawione)");
+  }
 });
 
 function zamknij(sygnal: string): void {
   console.log(`${sygnal} — zamykam serwer…`);
   scheduler.zatrzymaj();
+  schedulerSelly.zatrzymaj();
   server.close(() => {
     sqlite.close();
     process.exit(0);

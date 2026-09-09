@@ -99,6 +99,20 @@ const schemaEnvBazowe = z.object({
   SELLY_CLIENT_SECRET: z.string().default(""),
   SELLY_SCOPE: z.string().min(1).default("READWRITE"),
   /**
+   * Scheduler synchronizacji Bridge → Selly (Tor 1: HH:55 + HH:10/25/40) —
+   * DOMYŚLNIE WYŁĄCZONY. Iteracja 13d-1, ticket 45, decyzja D4.
+   *
+   * ODSTĘPSTWO ŚWIADOME: produkcja instaluje ten scheduler BEZWARUNKOWO przy starcie
+   * (`mirror/backend/extensions.cjs:466`). U nas musi być włączony jawnie, bo włączony na
+   * stagingu robiłby REALNE `PUT`-y na cenach i stanach w żywym sklepie Ani co 15 minut —
+   * staging stoi na tym samym VPS co produkcja i przy skopiowanym `.env` widzi ten sam
+   * sklep. Wzorzec i uzasadnienie 1:1 jak przy `IMPORT_SCHEDULER` wyżej.
+   *
+   * ⚠ To DRUGA warstwa, nie jedyna: pierwszą jest `SELLY_TRYB`. Obie są potrzebne —
+   * `SELLY_TRYB` broni przed wywołaniem, ta flaga przed samym uruchomieniem automatu.
+   */
+  SELLY_SCHEDULER: flagaBoolDomyslnieWylaczona,
+  /**
    * Codzienny eksport CSV dla Selly (pull po stronie marketplace'u): katalog, nazwa pliku
    * i publiczny URL. Oryginał ma je zahardkodowane w DWÓCH miejscach
    * (`mirror/backend/selly/routes.cjs:300-301` i `:361`) oraz w skrypcie generatora
