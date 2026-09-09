@@ -2629,8 +2629,8 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Pliki** | `mirror/backend/selly/{discovery,sync_delta,sync_full,mapper_v2,rate_limiter,scheduler_selly,routes_sync}.cjs`; schemat `selly_products` (+ `selly_products_old`) |
 | **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
 | **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
-| **Iteracja** | **→ 13d** (nowa, BE-heavy). ⚠ **BLOKADA: Tor 2 `sync_full` niedomknięty u Ani 08.09** — czekać. Rozważyć podział 13d-1/13d-2/13d-3. ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13c" — niezgodne z tabelą mapowania i roadmapą (Selly REST = 13d). |
-| **Status** | ⬜ do portu (po domknięciu Tor 2 u Ani) |
+| **Iteracja** | **→ 13d** (nowa, BE-heavy). Podział docelowy 13d-1/13d-2/13d-3. |
+| **Status** | ⛔ **ODŁOŻONE — start wstrzymany**. 13d-1 sportowane i zmergowane (`45-FEATURE-selly-rest-sync-tor1`, PR #57), potem **COFNIĘTE** (`46-CHORE-revert-13d1-selly`, 2026-09-09). Powód: Ania (09.09) potwierdziła, że podsystem NIE jest zamrożony — ~tydzień docierania dostawców + łatanie błędów w `selly/*`. Port był ruchomym celem. **Całe 13d przepisujemy świeżo** po ustabilizowaniu. Sygnał startu: brak nowych zmian w `mirror/backend/selly/` przez kilka dni (rewizja ~2026-09-16). ⚠ Rewrite na NOWEJ gałęzi — revert #57 sprawia, że `feature/45` liczy się jako „zmergowane". |
 
 ### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
 | pole | wartość |

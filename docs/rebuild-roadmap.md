@@ -2023,14 +2023,22 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   nasz port surowym `db/snapshot.db`, którego 13c nie dotyka — obie strony dostają identyczne
   wejście, więc migracja danych nie mogła przesunąć wzorca zbudowanego na innym źródle.
   **Zależy od:** 13a, 13b (spełnione).
-- **13d — Selly REST sync (NOWY podsystem)** [BE] — reimplementacja TS 7 plików `selly/*`
-  (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/`routes_sync`) +
-  przeprojektowana `selly_products` (klucz `(kod_importu,dostawca)`→`(selly_product_id,selly_variant_id)`
-  + `feature_id_magazyn`; stara → `selly_products_old`). Model wariantowy: cena/stan PER WARIANT
-  (`PUT .../variants/{vid}`), rate limiter 250/60s + `apiWithRetry`, `provider_code=kod_importu`.
-  **⚠ BLOKADA:** Tor 2 (`sync_full`) NIEDOMKNIĘTY u Ani 08.09 — poczekaj, aż domknie, inaczej portujesz
-  ruchomy cel. Podział: 13d-1 discovery+delta (Tor 1), 13d-2 sync_full (Tor 2, gdy gotowe), 13d-3 przyciski
-  sync w panelu FE. **Zależy od:** 8; **wykracza poza I8** (I8 = eksport CSV). Niezależne od 13a–13c.
+- **13d — Selly REST sync (NOWY podsystem)** [BE] — ⛔ **ODŁOŻONE, START WSTRZYMANY**. Reimplementacja TS
+  7 plików `selly/*` (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/
+  `routes_sync`) + przeprojektowana `selly_products` (klucz `(kod_importu,dostawca)`→`(selly_product_id,
+  selly_variant_id)` + `feature_id_magazyn`; stara → `selly_products_old`). Model wariantowy: cena/stan
+  PER WARIANT (`PUT .../variants/{vid}`), rate limiter 250/60s + `apiWithRetry`, `provider_code=kod_importu`.
+  **Zależy od:** 8; **wykracza poza I8** (I8 = eksport CSV). Niezależne od 13a–13c. Podział (docelowy):
+  13d-1 discovery+delta (Tor 1), 13d-2 sync_full (Tor 2), 13d-3 przyciski sync w panelu FE.
+  - **HISTORIA:** 13d-1 zostało sportowane i zmergowane (`45-FEATURE-selly-rest-sync-tor1`, PR #57), a
+    następnie **COFNIĘTE** (`46-CHORE-revert-13d1-selly`, `git revert -m 1`) 2026-09-09.
+  - **DLACZEGO cofnięte:** Ania (2026-09-09) potwierdziła, że podsystem Selly **NIE jest zamrożony** —
+    dostawcy aktualizują się przez ~tydzień i ona łata błędy w `selly/*` na bieżąco. Port z 08.09 był
+    ruchomym celem. **Całe 13d przepisujemy ŚWIEŻO po ustabilizowaniu**, nie odświeżamy prowizorki.
+  - **SYGNAŁ STARTU (zielone światło):** `git log --since="7 days ago" --oneline main -- mirror/backend/selly/`
+    przez kilka dni **nic nowego** (albo Ania mówi „stabilne"). Rewizja orientacyjnie **~2026-09-16**.
+  - **⚠ PUŁAPKA:** revert merge’a #57 sprawia, że git uzna `feature/45` za „już zmergowane". Rewrite MUSI
+    iść na **NOWEJ gałęzi** (świeży port z finalnego `mirror/selly/`), NIE przez re-merge `feature/45`.
 - **13e — Frontend: Bridge ONE + drobne** [FE] — rebrand „Bridge ONE" (title „Bridge ONE — konsolidacja
   cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`.
   ⚠ **`konstr` po stronie FE JEST JUŻ ZROBIONE — nie rób tego drugi raz.** Bundle zminifikowane —
@@ -2057,7 +2065,8 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   - ⚠ ASCII-only `UPPER` zostawia małe polskie diakrytyki w środku wyrazów (np. „PROWADZąCA").
     To jest stan produkcji, nie błąd odbudowy — FE nie powinien tego „poprawiać".
 
-**Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → { **13d** gdy Ania domknie Tor 2, **13e** }.
+**Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → **13e** ; **13d ODŁOŻONE** (przepisanie świeże
+po ustabilizowaniu `mirror/selly/` u Ani, ~2026-09-16 — patrz blok 13d; 13d-1 sportowane i cofnięte 09.09).
 13d jest niezależne od 13a–13c (inny podsystem), więc może startować równolegle po 13a. 13a jest twardym
 fundamentem — nie zaczynaj 13b/13c przed jego merge.
 
