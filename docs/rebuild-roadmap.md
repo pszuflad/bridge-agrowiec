@@ -2037,10 +2037,17 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     ruchomym celem. **Całe 13d przepisujemy ŚWIEŻO po ustabilizowaniu**, nie odświeżamy prowizorki.
   - **SYGNAŁ STARTU (zielone światło):** `git log --since="7 days ago" --oneline main -- mirror/backend/selly/`
     przez kilka dni **nic nowego** (albo Ania mówi „stabilne"). Rewizja orientacyjnie **~2026-09-16**.
+  - **STAN 2026-09-09 (triaż w 46-CHORE):** docieranie TRWA — 3 commity producenta (`d88ac15..94bdf11`):
+    `sync_full` przepisany (428 linii; usunięte PUT features po Selly 400 „Malformed JSON"), `mapper_v2 v2.1`
+    (bez `vat_rate` — VAT na kategorii w Selly), `discovery.buildProductCodeCache` (paginacja `/api/products`),
+    weryfikacja pierwszego nocnego Tor 2 (MO5: 1713 ok, 0 błędów). **Zegar startu ZRESETOWANY** — port dziś
+    byłby nieaktualny w 428 liniach. Potwierdza trafność revertu 13d-1. Nowej karty NIE zakładamy.
   - **⚠ PUŁAPKA:** revert merge’a #57 sprawia, że git uzna `feature/45` za „już zmergowane". Rewrite MUSI
     iść na **NOWEJ gałęzi** (świeży port z finalnego `mirror/selly/`), NIE przez re-merge `feature/45`.
 - **13e — Frontend: Bridge ONE + drobne** [FE] — rebrand „Bridge ONE" (title „Bridge ONE — konsolidacja
   cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`.
+  ✅ **DECYZJA UŻYTKOWNIKA (2026-09-09): odbudowa PRZYJMUJE nazwę „Bridge ONE"** — produkcja się
+  przemianowała, więc odbudowa robi to 1:1 (nazwa + title). Nie pytać już o to w sesji 13e.
   ⚠ **`konstr` po stronie FE JEST JUŻ ZROBIONE — nie rób tego drugi raz.** Bundle zminifikowane —
   **najpierw rozłóż diff bundla**, `.bak` daje tylko etykietę. **Zależy od:** 13c (✅ spełnione
   2026-09-09); rebrand+drobne mogą iść częściowo równolegle.

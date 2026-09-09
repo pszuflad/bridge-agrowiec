@@ -34,3 +34,16 @@ test 80 plików / 1241 testów ✓**. Zero wiszących referencji do usuniętego 
 - ⚠ **Rewrite na NOWEJ gałęzi.** Revert merge’a #57 sprawia, że git traktuje `feature/45` jako „już
   zmergowane" — przyszłe 13d nie może iść przez re-merge tamtej gałęzi; świeży port z finalnego `mirror/selly/`.
 - Tor bieżący bez zmian: 13a→13b→13c→13e (13d wypada z kolejki do czasu stabilizacji).
+
+## Dołożone w tym samym PR (2026-09-09): triaż 09.09 + decyzja o rebrandzie
+
+Producent znów działa (fix `d88ac15` zadziałał — 3 commity `sync(vps)` przyszły z automatu + mail).
+
+- **Triaż `d88ac15..94bdf11`** (3 commity, 08-09 17:00 / 09-09 06:00 / 09-09 09:00): WSZYSTKO to
+  docieranie Selly Tor 2 — `sync_full` przepisany (428 linii, usunięte PUT features po Selly 400
+  „Malformed JSON"), `mapper_v2 v2.1` (bez `vat_rate`), `discovery.buildProductCodeCache`, weryfikacja
+  pierwszego nocnego Tor 2 (MO5 1713 ok). **ZERO zmian FE/menu** — tag `[FRONTEND]` w mailu to tylko
+  przegenerowany `sellycsv-*.csv` (dane). Nie zakładamy nowej karty — to należy do odłożonego 13d;
+  **zegar startu 13d zresetowany**. Marker triażu → `94bdf11`. To dodatkowo potwierdza trafność revertu.
+- **Rebrand (decyzja użytkownika 2026-09-09):** odbudowa PRZYJMUJE nazwę **„Bridge ONE"** (produkcja się
+  przemianowała → 1:1). Zapisane w roadmapie 13e i backlogu #61 — sesja 13e nie pyta już o to.

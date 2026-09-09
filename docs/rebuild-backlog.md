@@ -2638,7 +2638,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Kategoria** | FRONTEND (bundle zminifikowany) |
 | **Pliki** | `mirror/frontend/assets/index-BRIDGEONE….js`, `index-PRICEFMT….js` (+ kopie `.bak_{tr_fix,ackalerts,szer_marka,konstr}`) |
 | **Zmiana Ani** | Rebrand na „Bridge ONE" (title „Bridge ONE — konsolidacja cenników opon") + drobne: `tr_fix`, `ackalerts` (potwierdzanie alertów), `szer_marka` (kolumna szerokość/marka), `PRICEFMT` (formatowanie ceny). Bundle minified — najpierw rozłożyć diff, `.bak` daje tylko etykietę. |
-| **Do nowej wersji?** | ⬜ do decyzji (zakres rebrandu — czy odbudowa też nazywa się „Bridge ONE") |
+| **Do nowej wersji?** | ✅ **TAK (decyzja 2026-09-09): odbudowa przyjmuje nazwę „Bridge ONE"** — produkcja się przemianowała, odbudowa 1:1 (nazwa + title). Rebrand + `tr_fix`/`ackalerts`/`szer_marka`/`PRICEFMT` → 13e. `konstr` FE już zrobione w 13c. |
 | **Iteracja** | **→ 13e** (FE; `konstr` łączy się z #58). ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13d" — niezgodne z tabelą mapowania i roadmapą (FE = 13e; 13d to Selly). |
 | **Status** | ⬜ do rozłożenia diffu + decyzji |
 
