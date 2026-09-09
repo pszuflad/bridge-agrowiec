@@ -1,14 +1,3 @@
-2026-09-09 15:47
-obszar: frontend
-
-pliki: /home/admin/domains/agritires.eu/public_html/panel/assets/index-PRICEFMT1783512500.js, /home/admin/domains/agritires.eu/public_html/panel/assets/index-PRICEFMT1783512500.js.bak_pre_konstrukcja_full_20260909154703, /home/admin/private_apps/bridge/CHANGELOG.md, /home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_konstrukcja_full_20260909154703
-
-zmiana: poprawiono wyswietlanie kolumny Konstrukcja opony dla kanonicznych wartosci Radialna/Diagonalna; renderer i eksport frontendu akceptuja pelne nazwy oraz stare skroty, a formularz edycji oferuje Radialna i Diagonalna zamiast R/D/B/-.
-
-powod: zgloszenie Anny, ze mimo poprawnych danych w bazie kolumna Konstrukcja opony nie pokazywala zadnej wartosci; frontend rozpoznawal tylko stare skroty.
-
----
-
 2026-09-09 08:15
 obszar: backend
 

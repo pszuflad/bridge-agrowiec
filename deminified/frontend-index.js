@@ -9684,7 +9684,7 @@ const PRODUCT_FIELD_CONFIG = [{
     key: "konstrukcja",
     label: "Konstrukcja",
     kind: "select-static",
-    options: ["R", "D", "B", "-"],
+    options: ["Radialna", "Diagonalna"],
     section: "tech"
   }, {
     key: "indeksNosnosci",
@@ -23078,7 +23078,7 @@ function OT(e, t, n = ";") {
       return Qy(e)
     }
     if ("konstrukcja" === t.key) {
-      const kv = "R" === n ? "Radialna" : "D" === n || "L" === n || "B" === n ? "Diagonalna" : "";
+      const kv = "Radialna" === n || "R" === n ? "Radialna" : "Diagonalna" === n || "D" === n || "L" === n || "B" === n ? "Diagonalna" : "";
       return Qy(kv)
     }
     if ("tlTt" === t.key) {
@@ -23140,7 +23140,7 @@ function DT(e, t) {
     }) : w
   }
   if ("konstrukcja" === t) {
-    const kv = "R" === n ? "Radialna" : "D" === n || "L" === n || "B" === n ? "Diagonalna" : null;
+    const kv = "Radialna" === n || "R" === n ? "Radialna" : "Diagonalna" === n || "D" === n || "L" === n || "B" === n ? "Diagonalna" : null;
     return kv == null ? s.jsx("span", {
       className: "text-muted-foreground",
       children: "—"
@@ -24083,7 +24083,7 @@ function LT({
           type: "number",
           step: "0.01",
           num: parseFloat
-        }), h("Konstrukcja", "konstrukcja", ["R", "D", "B", "-"]), p("indeks_nosnosci").length ? h("Indeks nosnosci (LI)", "indeksNosnosci", p("indeks_nosnosci")) : f("Indeks nosnosci (LI)", "indeksNosnosci"), p("indeks_predkosci").length ? h("Indeks predkosci (SI)", "indeksPredkosci", p("indeks_predkosci")) : f("Indeks predkosci (SI)", "indeksPredkosci"), h("VF/IF", "vfIf", ["VF", "IF", "CFO"]), f("PR / PLY", "pr"), h("TL/TT", "tlTt", ["TL", "TT"]), f("DOT", "dot"), f("Waga", "waga", {
+        }), h("Konstrukcja", "konstrukcja", ["Radialna", "Diagonalna"]), p("indeks_nosnosci").length ? h("Indeks nosnosci (LI)", "indeksNosnosci", p("indeks_nosnosci")) : f("Indeks nosnosci (LI)", "indeksNosnosci"), p("indeks_predkosci").length ? h("Indeks predkosci (SI)", "indeksPredkosci", p("indeks_predkosci")) : f("Indeks predkosci (SI)", "indeksPredkosci"), h("VF/IF", "vfIf", ["VF", "IF", "CFO"]), f("PR / PLY", "pr"), h("TL/TT", "tlTt", ["TL", "TT"]), f("DOT", "dot"), f("Waga", "waga", {
           type: "number",
           step: "0.01",
           num: parseFloat
