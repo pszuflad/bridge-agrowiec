@@ -105,8 +105,8 @@ if(!rs.includes("/")){
 ```
 
 Skutek: dla `rozmiar="14.9x28"`, `szerokosc=14.9` kolumna pokazywała `14.9x28`, teraz `14.9`.
-**Pomiar na `db/snapshot.db`: 587 z 7395 pozycji zmienia wyświetlanie** (`8.00x20`→`8.00`,
-`16x6-8`→`16`, `23x10.50-12`→`23`, `300x15`→`300`). Zera końcowe z `rozmiar` zostają zachowane
+**Pomiar na `db/snapshot.db`: 587 z 7395 pozycji zmienia wyświetlanie.**
+⚠ Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, a nie cały `rozmiar` — przykłady czytaj jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). Zera końcowe z `rozmiar` zostają zachowane
 (pętla po tokenach `rozmiar` działa dalej) — `8.00x20`/`szerokosc="8.00"` daje `8.00`, nie `8`.
 
 **(b) filtr „marka bez cyfr" rozszerzony na wartości ze SŁOWNIKA:**

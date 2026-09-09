@@ -214,6 +214,8 @@ describe("formatujKomorke (DT)", () => {
     expect(zNotacjaAxB.rozmiar).toBe("8.00x20");
     expect(tekstKomorki(zNotacjaAxB, "szerokosc")).toBe("8.00");
     expect(tekstKomorki(zNotacjaAxB, "cenaSprzedazy")).toBe("782,-");
+    // ⚠ „Diagonalna" to stan ODBUDOWY. Żywy bundle produkcji pokazuje tu „—", bo łatka
+    // pass-through z 01.09 trafiła do martwego pliku — świadome odstępstwo D4, nie rozjazd.
     expect(tekstKomorki(zNotacjaAxB, "konstrukcja")).toBe("Diagonalna");
   });
 });

@@ -97,7 +97,7 @@ describe("3. Przypadki specjalne kolumn (port `OT`)", () => {
       wartoscKomorki(produkt({ szerokosc: 14.9, rozmiar: "14.9x28" } as Partial<Produkt>), "szerokosc"),
     ).toBe("14.9");
     expect(
-      wartoscKomorki(produkt({ szerokosc: "8.00", rozmiar: "8.00x20" } as unknown as Partial<Produkt>), "szerokosc"),
+      wartoscKomorki(produkt({ szerokosc: "8.00", rozmiar: "8.00x20" } as Partial<Produkt>), "szerokosc"),
     ).toBe("8.00");
   });
 

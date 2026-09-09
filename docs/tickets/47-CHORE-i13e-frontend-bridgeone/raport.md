@@ -50,8 +50,8 @@ Bundle rozbite na kawałki po `;{}` i porównane `diff -u`.
 | ackalerts | (1) odcisk wartości w `id` alertu (`-marza-ujemna-{marża}`, `-nie-opona-{nazwa\|kategoria}`, `-brak-importu-{dni}`), (2) pulpit czyta `alerty-statusy` z IndexedDB, (3) `window.dispatchEvent("alerty-statusy-updated")` po zapisie, (4) ukrycie `rozwiazany` poza filtrem. | **N/D** — patrz decyzje D2/D3 |
 | szer_marka | (a) `Wfmt` bez gałęzi `AxB`; (b) filtr „bez cyfr" dołożony na gałęzi słownikowej `listaMarek`. | **zrobione w tym tickecie** |
 
-Pomiar wpływu (a) na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis —
-`8.00x20`→`8.00`, `16x6-8`→`16`, `23x10.50-12`→`23`, `300x15`→`300`, `14.9x28`→`14.9`.
+Pomiar wpływu (a) na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis.
+⚠ Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, a nie cały `rozmiar` — przykłady czytaj jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`).
 
 ## Odstępstwa od planu
 
@@ -80,6 +80,31 @@ Brak w sensie API. Zmiana **widoczna dla użytkownika**: kolumna „Szerokość 
 i w eksporcie CSV pokazuje dla 587 pozycji sam człon szerokości zamiast pełnej notacji `AxB`
 (`14.9x28` → `14.9`). To jest ODTWORZENIE stanu produkcji z 2026-09-04, nie regresja.
 Drugi widoczny skutek: z listy filtra „Producent" znikają wartości słownikowe zawierające cyfrę.
+
+## Poprawki po review
+
+Review (`review.md`): **0 BLOCKER**, 4 SHOULD-FIX, 3 NICE-TO-HAVE. Reviewer niezależnie odtworzył
+diff obu bundli (dwa hunki, oba w tickecie), graf wywołań `Wfmt`/`listaMarek` oraz pomiar 587/7395.
+
+Naniesione:
+
+- **SHOULD-FIX — mylące przykłady.** Zniesiona gałąź `AxB` oddawała DWA PIERWSZE CZŁONY, a nie
+  cały `rozmiar`, więc zapis „`16x6-8`→`16`" czytany jako „dawniej → dziś" był nieprawdziwy
+  (dawniej było `16x6`). Lista rozpisana na `rozmiar` → dziś (dawniej) w `formatowanie.tsx`,
+  `plan.md` i wyżej w tym raporcie.
+- **SHOULD-FIX — deminifikat starszy niż produkcja.** `deminified/frontend-active-bundle.txt`
+  jest NADPISYWANY przez `tools/deminify.sh:42`, więc nota w nim by zginęła; powstał
+  **`deminified/README.md`** z listą czterech łatek, których deminifikat nie zawiera
+  (`konstr`, `tr_fix`, `ackalerts`, `szer_marka`), i z instrukcją czytania żywego bundla z `main`.
+  Dodatkowo nota w nagłówku `formatowanie.tsx`, żeby nikt nie „przywrócił" zdjętej gałęzi.
+- **NICE-TO-HAVE** — nota przy asercji `konstrukcja` w teście (to stan odbudowy, nie produkcji —
+  odstępstwo D4) oraz usunięte zbędne `as unknown as` w teście eksportu (`Produkt.szerokosc`
+  to `number | string | null`, podwójne rzutowanie było niepotrzebne).
+
+Pozostałe dwa SHOULD-FIX (`docs/spec-frontend.md:173` oraz warstwa docs z DoD — roadmapa 13e,
+backlog #61/#58, wpis o regresji `konstrukcja`) idą Fazą 5, przez doc-checkery.
+
+Bramki po poprawkach: `lint` ✓ · `typecheck` ✓ · `build` ✓ · `test` ✓ 751/751.
 
 ## Follow-up
 

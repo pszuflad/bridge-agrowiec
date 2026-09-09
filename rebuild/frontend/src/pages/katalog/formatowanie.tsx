@@ -2,6 +2,11 @@
  * Formatowanie komórek tabeli katalogu — 1:1 z `Wfmt` i `DT`
  * (`deminified/frontend-index.js:23098-23190`).
  *
+ * ⚠ ODWOŁANIE DO DEMINIFIKATU JEST STARSZE NIŻ TEN PLIK. `deminified/frontend-index.js` to
+ * bundle `index-PRICEFMT…` w stanie z 2026-08-13, czyli SPRZED łatek z 2026-09-04.
+ * `formatujSzerokosc` jest tu świadomie PO łatce `szer_marka` i różni się od deminifikatu —
+ * nie „przywracać" gałęzi `AxB` jako rzekomo zgubionej w porcie.
+ *
  * To tutaj mieszkają wszystkie „drobiazgi", po których Ania pozna, czy odbudowa jest
  * wierna: dwie cyfry po przecinku w cenie zakupu, `1234,-` w cenie sprzedaży, `8PR`,
  * „Radialna"/„Diagonalna", czerwone zero w stanie i kreska `—` zamiast pustki.
@@ -36,8 +41,11 @@ function Kreska() {
  * `.bak_szer_marka_20260904_1500`). Ania usunęła z `Wfmt` całą gałąź
  * `if(!rs.includes("/")){ … /^(A)\s*[xX]\s*(B)/ … return `${A}x${B}` }`, więc dla
  * `rozmiar="14.9x28"` kolumna pokazuje dziś `14.9`, a nie `14.9x28`. Pomiar na
- * `db/snapshot.db`: **587 z 7395 pozycji** zmienia zapis (`8.00x20`→`8.00`, `16x6-8`→`16`,
- * `23x10.50-12`→`23`, `300x15`→`300`).
+ * `db/snapshot.db`: **587 z 7395 pozycji** zmienia zapis. ⚠ Zniesiona gałąź oddawała DWA
+ * PIERWSZE CZŁONY, a nie cały `rozmiar` — dlatego przykłady trzeba czytać jako
+ * `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300`
+ * (dawniej `300x15`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23`
+ * (dawniej `23x10.50`).
  *
  * ⚠ Zera końcowe PRZEŻYŁY usunięcie gałęzi — niesie je krok 3, który oddaje token
  * `rozmiar` w oryginalnym zapisie: `8.00x20` przy `szerokosc="8.00"` daje `"8.00"`, nie `"8"`.
