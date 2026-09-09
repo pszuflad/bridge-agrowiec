@@ -1,3 +1,28 @@
+2026-09-09 08:15
+obszar: backend
+
+pliki: brak zmian kodu - weryfikacja pierwszego uruchomienia Tor 2
+
+zmiana:
+- Weryfikacja Tor 2 z nocy 2026-09-09 04:30 CEST (sroda -> rotacja MO5/MO6):
+  - MO5: A=1713, B=34, C=0, err=0, time=503s
+    * 34 wczesniej niezmapowanych produktow polaczonych ze Selly przez
+      provider_code cache (34 wpisy "[discovery] Znaleziono w Selly przez
+      provider_code cache: ..." w logach)
+  - MO6: A=0, B=0, C=0, err=0 (celowo pusty - Uniglory nie importowany)
+  - Cache Selly zbudowany raz per batch (~75s, 6261 entries)
+  - Zero bledow
+- Stan pozostalych bez mappingu (do rotacji w kolejne dni):
+  MO2=1 (Pn), MO3=88 (Wt), MO4=6 (Wt), MO9=10 (Czw)
+
+powod:
+Potwierdzenie ze scheduler Tor 2 dziala poprawnie w cyklu produkcyjnym.
+Obserwacja: ostatnia_sync w selly_products nie jest aktualizowane dla sciezki A
+(tylko dla B/C przy discovery insert) - to spojne z sync_delta i nie jest bledem,
+tylko wyjasnia dlaczego zapytanie po ostatnia_sync>=04:30 zwraca 0 mimo A=1713.
+
+---
+
 2026-09-08 15:56
 obszar: backend
 
