@@ -178,6 +178,10 @@ export function stworzSchedulerSelly({
     uruchom() {
       if (timer) return;
       timer = setInterval(() => tik(), ODSTEP_SPRAWDZENIA_MS);
+      // ⚠ DROBNE ODSTĘPSTWO, ŚWIADOME: oryginał `unref()` nie woła (`scheduler_selly.cjs:99`).
+      // Ten sam wzorzec i to samo uzasadnienie co w `import/scheduler.ts:185` („KONIECZNE,
+      // nie kosmetyczne"): wiszący interwał trzyma proces przy życiu i wywraca sprzątanie.
+      // Dla produkcji bez znaczenia — proces i tak żyje, dopóki nasłuchuje HTTP.
       timer.unref?.();
       console.log(
         "[Selly Scheduler] Zainstalowany. Tor1: HH:55 + HH:10/25/40." +

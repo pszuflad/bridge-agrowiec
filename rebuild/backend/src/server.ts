@@ -24,20 +24,12 @@ const scheduler = stworzScheduler({
   pierwszyPrzebieg: env.IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG,
 });
 
-const app = stworzApp({
-  env,
-  db,
-  sqlite,
-  synchronizuj,
-  przeplanujScheduler: () => scheduler.przeplanuj(),
-});
-
 /*
- * Scheduler Toru 1 Selly. Klient budowany TU, a nie brany z `stworzApp` — bo `stworzApp`
- * go nie wystawia, a automat i tak musi żyć poza cyklem żądań. Blokada `SELLY_TRYB`
- * obowiązuje tak samo jak w trasach: to ten sam `opakujKlientaTrybem`.
- *
- * Sam obiekt niczego nie uruchamia — timer stawia dopiero `uruchom()` niżej.
+ * Selly: JEDEN klient i JEDNO discovery na proces — dzielą je trasy manualne (`stworzApp`)
+ * i scheduler Toru 1. Oryginał osiąga to stanem modułu (`discovery.cjs:46` trzyma cache
+ * `dostawca → feature_id`, a `require` daje obu ścieżkom ten sam moduł); u nas cache jest
+ * w domknięciu, więc instancję trzeba przekazać jawnie, inaczej obie ścieżki uczyłyby się
+ * osobno. Blokada `SELLY_TRYB` obejmuje ten klient tak samo jak w trasach.
  */
 const klientSelly = opakujKlientaTrybem(
   stworzKlientaSelly({
@@ -49,6 +41,20 @@ const klientSelly = opakujKlientaTrybem(
   env.SELLY_TRYB,
 );
 const discoverySelly = stworzDiscovery({ klient: klientSelly });
+
+const app = stworzApp({
+  env,
+  db,
+  sqlite,
+  synchronizuj,
+  przeplanujScheduler: () => scheduler.przeplanuj(),
+  // JEDNA instancja klienta i discovery na proces — trasy manualne i scheduler dzielą
+  // nauczone `feature_id` Magazynów, tak jak w oryginale dzieli je stan modułu.
+  klientSelly,
+  discoverySelly,
+});
+
+// Sam obiekt niczego nie uruchamia — timer stawia dopiero `uruchom()` niżej.
 const schedulerSelly = stworzSchedulerSelly({
   syncDelta: (dostawca, opcje) =>
     syncDelta({ db, klient: klientSelly, discovery: discoverySelly }, dostawca, opcje),

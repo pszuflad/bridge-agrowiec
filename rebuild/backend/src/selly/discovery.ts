@@ -79,9 +79,15 @@ export const FEATURE_ID_MAGAZYNOW: Readonly<Record<string, number | null>> = {
 /**
  * Cache `dostawca → feature_id`, uzupełniany w trakcie działania procesu.
  *
- * ⚠ Stan MODUŁU, jak w oryginale (`discovery.cjs:46`) — żyje tyle, co proces, i nie jest
- * zapisywany do bazy (do bazy trafia `feature_id_magazyn` per wiersz mapowania).
- * `stworzDiscovery` dostaje własną kopię, żeby testy się nie przeciekały nawzajem.
+ * Żyje tyle, co instancja discovery, i nie jest zapisywany do bazy (do bazy trafia
+ * `feature_id_magazyn` per wiersz mapowania).
+ *
+ * ⚠ RÓŻNICA WOBEC ORYGINAŁU, ISTOTNA PRZY MONTAŻU. Oryginał trzyma ten cache w STANIE
+ * MODUŁU (`discovery.cjs:46`), więc `require` daje trasom manualnym i schedulerowi ten sam
+ * obiekt i `feature_id` odkryte przez jedną ścieżkę zna od razu druga. U nas cache siedzi
+ * w domknięciu — dzięki temu testy się nie przeciekają, ale ZA TO proces musi mieć JEDNĄ
+ * instancję: `server.ts` buduje ją raz i podaje do `stworzApp` (`discoverySelly`) oraz do
+ * schedulera. Dwie instancje uczyłyby się osobno.
  */
 function stworzCacheFeatureId(): Record<string, number | null> {
   return { ...FEATURE_ID_MAGAZYNOW };

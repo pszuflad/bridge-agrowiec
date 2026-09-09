@@ -30,7 +30,7 @@ import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
-import { stworzDiscovery } from "./selly/discovery.js";
+import { stworzDiscovery, type Discovery } from "./selly/discovery.js";
 import { syncDelta, type OpcjeSyncDelta } from "./selly/sync-delta.js";
 import { opakujKlientaTrybem } from "./selly/tryb.js";
 
@@ -68,8 +68,23 @@ export type ZaleznosciApp = {
    * do realnego sklepu `agroopony.selly24.pl`, a `POST /api/selly/sync-supplier`
    * z `dry_run=false` tworzy i modyfikuje tam produkty. Żaden bieg `npm test` nie może tego
    * dotknąć nawet przez pomyłkę.
+   *
+   * ⚠ Od 13d-1 wstrzykuje też PRODUKCJA (`server.ts`) — po to, żeby scheduler Toru 1 i trasy
+   * dzieliły jedną instancję. Klient z `server.ts` jest JUŻ opakowany `SELLY_TRYB`, więc
+   * blokada obowiązuje; nietknięty zostaje tylko klient testowy, i to jest zamierzone.
    */
   klientSelly?: KlientSelly;
+  /**
+   * Discovery Selly (Iteracja 13d-1). Pominięte ⇒ `stworzApp` buduje własne.
+   *
+   * ⚠ WSTRZYKIWANE, ŻEBY PROCES MIAŁ JEDNĄ INSTANCJĘ. Oryginał trzyma cache
+   * `dostawca → feature_id` w STANIE MODUŁU (`discovery.cjs:46`), a `require` zwraca ten sam
+   * moduł trasom manualnym i schedulerowi — czyli `feature_id` odkryte przez jedną ścieżkę
+   * zna od razu druga. U nas cache siedzi w domknięciu `stworzDiscovery`, więc dwie instancje
+   * uczyłyby się osobno: scheduler odkryłby `feature_id` dla MO6, a trasa manualna nadal
+   * wysyłałaby wariant bez cechy „Magazyny". `server.ts` buduje discovery raz i podaje je tutaj.
+   */
+  discoverySelly?: Discovery;
 };
 
 /**
@@ -83,6 +98,7 @@ export function stworzApp({
   synchronizuj,
   przeplanujScheduler,
   klientSelly,
+  discoverySelly,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -210,7 +226,7 @@ export function stworzApp({
    * za flagą `SELLY_SCHEDULER` (decyzja D4) — dzięki temu cała suita testów buduje aplikację
    * przez `stworzApp` bez stawiania ani jednego timera.
    */
-  const discovery = stworzDiscovery({ klient: klientSellyDoUzycia });
+  const discovery = discoverySelly ?? stworzDiscovery({ klient: klientSellyDoUzycia });
   app.use(
     trasySellySync({
       db,
