@@ -50,33 +50,6 @@ export type StawkaVatSelly = { vat_id?: number; rate: number | string };
 export type MagazynSelly = { warehouse_id: number; name?: string };
 
 /**
- * Cecha wariantu w Selly. Interesuje nas wyłącznie `Magazyny` — to ona mówi, KTÓREGO
- * dostawcy (MO1..MO10) dotyczy dany wariant (`discovery.cjs:88-98`).
- */
-export type CechaWariantu = { feature_id?: number; name?: string; value?: string };
-
-/** Wariant produktu Selly — cena i stan siedzą TUTAJ, nie na produkcie (backlog #60). */
-export type WariantSelly = {
-  variant_id: number;
-  default?: number;
-  features?: CechaWariantu[];
-};
-
-/** Produkt Selly w odpowiedzi wyszukiwania po EAN. */
-export type ProduktSelly = { product_id: number };
-
-/** Ciało `POST`/`PUT` wariantu — pola wg `discovery.cjs:112-120` i `sync_delta.cjs:150-153`. */
-export type CialoWariantu = {
-  quantity?: number | null;
-  price?: number | null;
-  vat?: number;
-  ean?: string;
-  default?: number;
-  attributes?: unknown[];
-  features?: CechaWariantu[];
-};
-
-/**
  * Powierzchnia klienta, z której korzystają trasy i synchronizacja. Węższa niż moduł
  * oryginału — celowo: `listProducts`, `getProduct`, `deleteProduct`, `bulkPriceUpdate`,
  * `bulkWarehouseQuantity`, `listOrders`, `getOrder`, `listUnits`, `getProductMultiCat`
@@ -102,33 +75,6 @@ export type KlientSelly = {
     dane: { warehouse_id?: number; quantity?: number },
   ): Promise<unknown>;
   setProductMultiCat(productId: number, categoryIds: number[]): Promise<unknown>;
-
-  /*
-   * ── Model wariantowy (Iteracja 13d-1, ticket 45) ─────────────────────────────────
-   *
-   * ⚠ DLACZEGO NAZWANE METODY, A NIE GENERYCZNE `api(metoda, sciezka, opcje)` (decyzja D7).
-   * Oryginał woła `client.api(...)` wprost (`discovery.cjs:30`), ale u nas `tryb.ts` dzieli
-   * powierzchnię klienta na METODY_ZAPISUJACE i METODY_ODCZYTU i na tym podziale stoi blokada
-   * `SELLY_TRYB`. Generyczne `api()` jest nieklasyfikowalne — w trybie `tylko-odczyt`
-   * przepuściłoby PUT wariantu do żywego sklepu. Cztery nazwane metody klasyfikują się
-   * jednoznacznie, a test kompletności (`test/selly.tryb.test.ts`) tego pilnuje.
-   */
-
-  /** `GET /api/products?ean=…&limit=1` — lazy discovery po EAN (`discovery.cjs:64-74`). */
-  listProductsByEan(ean: string): Promise<OdpowiedzListy<ProduktSelly>>;
-  /** `GET /api/products/{pid}/variants` (`discovery.cjs:80-87`). */
-  listVariants(productId: number): Promise<OdpowiedzListy<WariantSelly>>;
-  /** `POST /api/products/{pid}/variants` (`discovery.cjs:122`). */
-  createVariant(
-    productId: number,
-    cialo: CialoWariantu,
-  ): Promise<{ data?: WariantSelly } | null>;
-  /** `PUT /api/products/{pid}/variants/{vid}` — Tor 1 (`sync_delta.cjs:150`). */
-  updateVariant(
-    productId: number,
-    variantId: number,
-    cialo: CialoWariantu,
-  ): Promise<unknown>;
 };
 
 /** Błąd HTTP z Selly — niesie status, żeby `api()` mogło ponowić na 401, a upsert na 400/409. */
@@ -382,32 +328,5 @@ export function stworzKlientaSelly(konfiguracja: KonfiguracjaSelly): KlientSelly
         body: { product_id: productId, categories },
       });
     },
-
-    // ── Model wariantowy (13d-1) ───────────────────────────────────────────────────
-    //
-    // ⚠ Te cztery metody rzucają `BladSelly` na każdy status spoza 2xx — tak samo jak
-    // reszta pliku i tak samo jak `request()` w oryginale (`client.cjs:56-60`). To NIE jest
-    // szczegół implementacyjny: właśnie dlatego deklarowany w `discovery.cjs` retry na HTTP
-    // 429 jest tam martwym kodem (`discovery.ts`, nota przy `wykonajZPonowieniem`).
-
-    /**
-     * `limit: 1` jest w oryginale (`discovery.cjs:67`) — discovery bierze PIERWSZY trafiony
-     * produkt i nie sprawdza, czy EAN nie jest w Selly zduplikowany.
-     */
-    listProductsByEan: async (ean) =>
-      (await dane("GET", "/api/products", {
-        query: { ean, limit: 1 },
-      })) as OdpowiedzListy<ProduktSelly>,
-
-    listVariants: async (productId) =>
-      (await dane("GET", `/api/products/${productId}/variants`)) as OdpowiedzListy<WariantSelly>,
-
-    createVariant: async (productId, cialo) =>
-      (await dane("POST", `/api/products/${productId}/variants`, { body: cialo })) as {
-        data?: WariantSelly;
-      } | null,
-
-    updateVariant: (productId, variantId, cialo) =>
-      dane("PUT", `/api/products/${productId}/variants/${variantId}`, { body: cialo }),
   };
 }

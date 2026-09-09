@@ -43,12 +43,6 @@ function atrapaKlienta(): { klient: KlientSelly; wywolania: string[] } {
     updateProduct: metoda("updateProduct"),
     upsertProductWarehouse: metoda("upsertProductWarehouse"),
     setProductMultiCat: metoda("setProductMultiCat"),
-    // Model wariantowy (Iteracja 13d-1, ticket 45). Ta lista jest ręczna z rozmysłem —
-    // to ona jest wzorcem, do którego test porównuje `METODY_*` z `tryb.ts`.
-    listProductsByEan: metoda("listProductsByEan"),
-    listVariants: metoda("listVariants"),
-    createVariant: metoda("createVariant"),
-    updateVariant: metoda("updateVariant"),
   } as unknown as KlientSelly;
 
   return { klient, wywolania };

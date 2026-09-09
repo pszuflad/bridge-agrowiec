@@ -2556,7 +2556,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | B4 #53, B10 #54, mo9expand #55, katunify(parser) #57, konstr(parser) #58, WULSTBAND #10, NRO/CHO #9, MO8-CSV #8, **p2_4 #63**, **odswinch #64** | **13a** | parsery — kopia `src/import/legacy/**` + charakteryzacja |
 | P3 #56, CAPS/Xq #59 (część silnikowa) | **13b** | silnik `tk()`/`acceptStaging` — reimpl TS |
 | katunify(migracja) #57, konstr(migracja) #58, CAPS(nazwa) #59 | **13c ✅ zrobione** (`44-CHORE-i13c-migracje-konwencji`, 2026-09-09) | migracje danych + przenagranie fixtures |
-| Selly REST #60 | **13d** | 🔨 Tor 1 zrobiony 13d-1 (2026-09-09); Tor 2 → 13d-2, przyciski FE → 13d-3 |
+| Selly REST #60 | **13d** | ⛔ ODŁOŻONE — 13d-1 sportowane i **COFNIĘTE** (revert #58); Tor 2 dociera u Ani (zegar zresetowany) |
 | Bridge ONE + drobne #61 | **13e ✅ zrobione** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09) | frontend — realny kod tylko `szer_marka` |
 | regresja `konstrukcja` w żywym bundlu #71 | **13e** (wykryte, bez kodu) | frontend PRODUKCJI — ❌ nie odtwarzamy (D4) |
 | backfille #62 | **13f** | DECYZJA (najpierw) |
@@ -2638,8 +2638,8 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Pliki** | `mirror/backend/selly/{discovery,sync_delta,sync_full,mapper_v2,rate_limiter,scheduler_selly,routes_sync}.cjs`; schemat `selly_products` (+ `selly_products_old`) |
 | **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
 | **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
-| **Iteracja** | **→ 13d** (nowa, BE-heavy), pod-karta **13d-1** (fundament + Tor 1) dowieziona. |
-| **Status** | 🔨 częściowo — **Tor 1 zrobiony w 13d-1** (2026-09-09, ticket `45-FEATURE-selly-rest-sync-tor1`): migracja `007_selly_products_warianty.sql` (model wariantowy, `selly_products_old` zachowana), `limiter.ts`, `discovery.ts`, `mapper-v2.ts`, `sync-delta.ts`, `scheduler-sync.ts`, trzy trasy Toru 1 (`GET sync-status`, `POST sync-delta-supplier`, `POST sync-delta-all`), 89 nowych testów za atrapą. Tor 2 (`sync_full`) **nadal otwarty → 13d-2** — ⚠ BLOKADA dotyczy WYŁĄCZNIE Toru 2 (Tor 1 był niezależny od domknięcia Tor 2 u Ani i został dowieziony bez niego). Przyciski sync w panelu FE → 13d-3. Sześć defektów produkcji wykrytych przy porcie: #66–#70 niżej + naprawa `sync-delta-supplier` (patrz `docs/tickets/45-FEATURE-selly-rest-sync-tor1/raport.md`, decyzja D1). |
+| **Iteracja** | **→ 13d** (nowa, BE-heavy). Podział docelowy 13d-1/13d-2/13d-3. |
+| **Status** | ⛔ **ODŁOŻONE — start wstrzymany**. 13d-1 sportowane i zmergowane (`45-FEATURE-selly-rest-sync-tor1`, PR #57), potem **COFNIĘTE** (`46-CHORE-revert-13d1-selly`, 2026-09-09). Powód: Ania (09.09) potwierdziła, że podsystem NIE jest zamrożony — ~tydzień docierania dostawców + łatanie błędów w `selly/*`. Port był ruchomym celem. **Całe 13d przepisujemy świeżo** po ustabilizowaniu. Sygnał startu: brak nowych zmian w `mirror/backend/selly/` przez kilka dni (rewizja ~2026-09-16). ⚠ Rewrite na NOWEJ gałęzi — revert #57 sprawia, że `feature/45` liczy się jako „zmergowane". |
 
 ### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
 | pole | wartość |
@@ -2690,6 +2690,14 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Do nowej wersji?** | ⬜ **do decyzji** — naprawa byłaby świadomym odstępstwem od 1:1 (13c odtworzyła zachowanie 1:1, plan D7; to luka PRODUKCJI, nie regresja odbudowy) |
 | **Iteracja** | — (follow-up, nieprzypisany) |
 | **Status** | ⬜ nierozstrzygnięte — znalezione w `44-CHORE-i13c-migracje-konwencji` |
+
+> ⚠ **AKTUALIZACJA 2026-09-09 (po revercie #58) — dotyczy #66–#70.** Te pięć wpisów to defekty Selly
+> znalezione podczas portu **13d-1**, który został **COFNIĘTY** (`git revert -m 1`, PR #58). Analiza
+> produkcji w każdym z nich jest AKTUALNA i cenna (to realne defekty u Ani — zachowujemy jako wiedzę na
+> przepisanie 13d). ALE odniesienia w polach „Iteracja"/„Status" typu „przeportowane 1:1 w 13d-1" są
+> **NIEAKTUALNE** — kod portu usunięty. Przy ŚWIEŻYM przepisaniu 13d (z finalnego `mirror/selly/`, na
+> NOWEJ gałęzi) trzeba te defekty odtworzyć/rozstrzygnąć na nowo. #71 (regresja `konstrukcja`) NIE jest
+> tym dotknięte — to defekt produkcji FE, ważny bez zmian.
 
 ### #66 · 2026-09-08 · [BACKEND] · Selly retry na HTTP 429 jest martwym kodem — gasi go throttle, nie retry
 | pole | wartość |
