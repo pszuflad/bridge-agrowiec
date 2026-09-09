@@ -24,11 +24,14 @@ import { trasyOverrides } from "./routes/overrides.js";
 import { trasyNarzutow } from "./routes/markups.js";
 import { trasyPromocji } from "./routes/promotions.js";
 import { trasySelly } from "./routes/selly.js";
+import { trasySellySync } from "./routes/selly-sync.js";
 import { trasyEksportuShoper } from "./routes/export-shoper.js";
 import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
+import { stworzDiscovery, type Discovery } from "./selly/discovery.js";
+import { syncDelta, type OpcjeSyncDelta } from "./selly/sync-delta.js";
 import { opakujKlientaTrybem } from "./selly/tryb.js";
 
 export type ZaleznosciApp = {
@@ -65,8 +68,23 @@ export type ZaleznosciApp = {
    * do realnego sklepu `agroopony.selly24.pl`, a `POST /api/selly/sync-supplier`
    * z `dry_run=false` tworzy i modyfikuje tam produkty. Żaden bieg `npm test` nie może tego
    * dotknąć nawet przez pomyłkę.
+   *
+   * ⚠ Od 13d-1 wstrzykuje też PRODUKCJA (`server.ts`) — po to, żeby scheduler Toru 1 i trasy
+   * dzieliły jedną instancję. Klient z `server.ts` jest JUŻ opakowany `SELLY_TRYB`, więc
+   * blokada obowiązuje; nietknięty zostaje tylko klient testowy, i to jest zamierzone.
    */
   klientSelly?: KlientSelly;
+  /**
+   * Discovery Selly (Iteracja 13d-1). Pominięte ⇒ `stworzApp` buduje własne.
+   *
+   * ⚠ WSTRZYKIWANE, ŻEBY PROCES MIAŁ JEDNĄ INSTANCJĘ. Oryginał trzyma cache
+   * `dostawca → feature_id` w STANIE MODUŁU (`discovery.cjs:46`), a `require` zwraca ten sam
+   * moduł trasom manualnym i schedulerowi — czyli `feature_id` odkryte przez jedną ścieżkę
+   * zna od razu druga. U nas cache siedzi w domknięciu `stworzDiscovery`, więc dwie instancje
+   * uczyłyby się osobno: scheduler odkryłby `feature_id` dla MO6, a trasa manualna nadal
+   * wysyłałaby wariant bez cechy „Magazyny". `server.ts` buduje discovery raz i podaje je tutaj.
+   */
+  discoverySelly?: Discovery;
 };
 
 /**
@@ -80,6 +98,7 @@ export function stworzApp({
   synchronizuj,
   przeplanujScheduler,
   klientSelly,
+  discoverySelly,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -167,31 +186,52 @@ export function stworzApp({
   app.use(trasyAdmina({ db, przeplanujScheduler }));
   app.use(trasyUtrzymania({ db, dbPath: env.DB_PATH, sqlite }));
   app.use(trasySpedycji({ db }));
+  /*
+   * JEDEN klient na aplikację — dzielą go trasy panelu (I8) i Tor 1 (13d-1).
+   *
+   * ⚠ Blokada trybu obejmuje TYLKO klienta budowanego z env (ticket 34, D3). Klient
+   * wstrzyknięty z zewnątrz (`klientSelly`) idzie nietknięty — to atrapa testowa
+   * (`test/gate/selly-atrapa.ts`), a test sam decyduje, co sprawdza; opakowanie jej
+   * domyślnym `wylaczony` wywróciłoby GATE 8a/8b, który z blokadą nie ma nic wspólnego.
+   */
+  const klientSellyDoUzycia =
+    klientSelly ??
+    opakujKlientaTrybem(
+      stworzKlientaSelly({
+        shopUrl: env.SELLY_SHOP_URL,
+        clientId: env.SELLY_CLIENT_ID,
+        clientSecret: env.SELLY_CLIENT_SECRET,
+        scope: env.SELLY_SCOPE,
+      }),
+      env.SELLY_TRYB,
+    );
+
   app.use(
     trasySelly({
       db,
-      /*
-       * ⚠ Blokada trybu obejmuje TYLKO klienta budowanego z env (ticket 34, D3).
-       * Klient wstrzyknięty z zewnątrz (`klientSelly`) idzie nietknięty — to atrapa testowa
-       * (`test/gate/selly-atrapa.ts`), a test sam decyduje, co sprawdza; opakowanie jej
-       * domyślnym `wylaczony` wywróciłoby GATE 8a/8b, który z blokadą nie ma nic wspólnego.
-       */
-      klient:
-        klientSelly ??
-        opakujKlientaTrybem(
-          stworzKlientaSelly({
-            shopUrl: env.SELLY_SHOP_URL,
-            clientId: env.SELLY_CLIENT_ID,
-            clientSecret: env.SELLY_CLIENT_SECRET,
-            scope: env.SELLY_SCOPE,
-          }),
-          env.SELLY_TRYB,
-        ),
+      klient: klientSellyDoUzycia,
       sciezkiCsv: {
         katalog: env.SELLY_CSV_DIR,
         plik: env.SELLY_CSV_PLIK,
         url: env.SELLY_CSV_URL,
       },
+    }),
+  );
+  /*
+   * Tor 1 synchronizacji wariantowej (Iteracja 13d-1). Klient jest TEN SAM co wyżej —
+   * łącznie z opakowaniem `SELLY_TRYB`, bo `PUT` wariantu jest metodą zapisującą i musi
+   * podlegać tej samej blokadzie co reszta zapisów.
+   *
+   * ⚠ Rejestracja tras NIE uruchamia schedulera. Automat startuje wyłącznie w `server.ts`
+   * za flagą `SELLY_SCHEDULER` (decyzja D4) — dzięki temu cała suita testów buduje aplikację
+   * przez `stworzApp` bez stawiania ani jednego timera.
+   */
+  const discovery = discoverySelly ?? stworzDiscovery({ klient: klientSellyDoUzycia });
+  app.use(
+    trasySellySync({
+      db,
+      syncDelta: (dostawca: string | null, opcje?: OpcjeSyncDelta) =>
+        syncDelta({ db, klient: klientSellyDoUzycia, discovery }, dostawca, opcje),
     }),
   );
   app.use(trasyEksportuShoper({ db }));

@@ -212,19 +212,46 @@ export async function synchronizujJedenProdukt(
       );
   }
 
-  db.insert(sellyProducts)
-    .values({
-      bridgeKod: produkt.kod,
-      sellyProductId: productId,
-      sellyCategoryId: payload.category_id,
-      sellyProducerId: payload.producer_id ?? null,
-      cenaSprzedazyWyslana: payload.price,
-      cenaZakupuWyslana: payload.price_purchase,
-      stanWyslany: produkt.stan,
-      ostatniaSync: sql`datetime('now')` as unknown as string,
-      ostatniStatus: "ok",
-    })
-    .run();
+  /*
+   * ⚠ TEN ZAPIS PADA — I TAK MA BYĆ (ticket 45, decyzja D3).
+   *
+   * Iteracja 13d-1 przebudowała `selly_products` na model wariantowy: `kod_importu`
+   * i `dostawca` są `NOT NULL` bez wartości domyślnej (migracja `007`). Oryginał wstawia tu
+   * DOKŁADNIE tę listę kolumn co poniżej (`mirror/backend/selly/routes.cjs:417-421`) — bez
+   * tych dwóch — więc na produkcji od 07.09 gałąź CREATE starego `POST /api/selly/sync-supplier`
+   * wywala się na `NOT NULL constraint failed: selly_products.kod_importu`. Refaktor Ani nie
+   * doszedł do kodu z I8; to jeden z czterech defektów opisanych w `plan.md`.
+   *
+   * Odtwarzamy to 1:1 zamiast po cichu naprawiać: gdybyśmy dopisali brakujące kolumny, nasz
+   * endpoint robiłby coś, czego u Ani nie robi, a rozjazd wyszedłby dopiero po cutoverze.
+   * Zapis idzie surowym SQL-em, bo typowany `db.insert(...).values({...})` nie skompilowałby
+   * się z pominiętymi kolumnami `notNull` — a my chcemy, żeby kod się budował i padał
+   * W RUNTIME, tak jak produkcja. Awarię utrwala `test/selly.synchronizacja.test.ts`.
+   *
+   * ⚠ Przez `db.$client`, czyli sterownik `better-sqlite3` WPROST, a nie przez `db.run()`.
+   * Powód jest w treści błędu, nie w wygodzie: Drizzle opakowuje wyjątek w „Failed to run
+   * the query '<cały SQL>'" i chowa komunikat SQLite w `cause`. Ten komunikat nie zostaje
+   * w kodzie — leci do odpowiedzi `POST /api/selly/sync-supplier` (`errors[].error`) i do
+   * `selly_sync_log.szczegoly_json`, czyli na ekran Ani. Oryginał używa `better-sqlite3`
+   * bezpośrednio (`routes.cjs:417`) i pokazuje tam „NOT NULL constraint failed:
+   * selly_products.kod_importu"; przez Drizzle Ania zobaczyłaby zrzut całego INSERT-a
+   * zamiast przyczyny.
+   */
+  db.$client
+    .prepare(
+      `INSERT INTO selly_products (bridge_kod, selly_product_id, selly_category_id, selly_producer_id,
+        cena_sprzedazy_wyslana, cena_zakupu_wyslana, stan_wyslany, ostatnia_sync, ostatni_status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), 'ok')`,
+    )
+    .run(
+      produkt.kod,
+      productId,
+      payload.category_id,
+      payload.producer_id ?? null,
+      payload.price,
+      payload.price_purchase,
+      produkt.stan,
+    );
 
   return { action: "created", kod: produkt.kod, selly_product_id: productId };
 }

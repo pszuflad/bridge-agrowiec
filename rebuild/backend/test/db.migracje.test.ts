@@ -44,14 +44,18 @@ describe("zastosujMigracje", () => {
     "004_kategoria_wielka_litera.sql",
     "005_konstrukcja_slowa.sql",
     "006_nazwa_caps.sql",
+    "007_selly_products_warianty.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 26 tabel i 13 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 27 tabel i 18 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
     // (SQLite nie ma ALTER COLUMN) i odtwarza jej indeks — bilans tabel i indeksów bez zmian.
-    expect(policzTabele(sqlite)).toBe(26);
+    //
+    // 007 (Iteracja 13d-1) dokłada JEDNĄ tabelę: `selly_products` przemianowana na
+    // `selly_products_old` i utworzona od nowa w kształcie wariantowym. Stąd 26 → 27.
+    expect(policzTabele(sqlite)).toBe(27);
 
     const indeksy = (
       sqlite
@@ -60,7 +64,13 @@ describe("zastosujMigracje", () => {
         )
         .get() as { c: number }
     ).c;
-    expect(indeksy).toBe(13);
+    // 13 (stan po 006) − 1 + 6 = 18. Minus jeden, bo `idx_selly_products_status` wędruje
+    // przy `RENAME` na starą tabelę i 007 go KASUJE, żeby zwolnić nazwę; plus sześć nowych
+    // na `selly_products`. Przy starej tabeli zostaje `idx_selly_products_kod` — dokładnie
+    // taki rozkład ma produkcja (`main:db/schema.sql:188,326-331`).
+    // `UNIQUE (kod_importu, dostawca)` nie liczy się tutaj: SQLite robi z niego
+    // `sqlite_autoindex_*`, odsiewany warunkiem `name NOT LIKE 'sqlite_%'`.
+    expect(indeksy).toBe(18);
   });
 
   it("baza działa w trybie WAL (jak produkcja)", () => {
@@ -81,7 +91,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(26);
+    expect(policzTabele(sqlite)).toBe(27);
   });
 
   /**
