@@ -90,6 +90,11 @@ Najważniejszy ekran. Poświęć mu najwięcej czasu.
 - [ ] ✅ / ❌ — ceny w kolumnach zgadzają się z tym, czego się spodziewasz po narzutach.
 - [ ] ✅ / ❌ — eksport do Shopera działa (przycisk pobiera plik).
 
+> ⚠ **Kolumna „Konstrukcja opony" wygląda inaczej niż u Ciebie — i tutaj rację mamy my.**
+> W starym Bridgu widzisz w niej dziś kreski („—") i pustą kolumnę w eksporcie CSV: poprawka
+> z 1 września trafiła do pliku panelu, którego produkcja nie ładuje. Tutaj zobaczysz „Radialna"
+> i „Diagonalna". Nie zgłaszaj tego jako błąd.
+
 ---
 
 ## 4. Narzuty i promocje — adres `/narzuty`
@@ -261,6 +266,9 @@ Zebrane w jednym miejscu, żebyś nie musiała ich zgłaszać:
 5. **Brak filtru „Źródło"** w atrybutach — w starym Bridgu i tak nic nie robił.
 6. **Wygasłe promocje nadal obniżają ceny** i **dwie karty „Dostępności" są puste** — oba
    odtworzone 1:1 ze starego Bridge'a. Jeśli chcesz je naprawić, powiedz — zrobimy osobno.
+7. **Kolumna „Konstrukcja opony" jest wypełniona** („Radialna"/„Diagonalna") tam, gdzie w starym
+   Bridgu są dziś kreski — w produkcji wrześniowa poprawka trafiła do nieużywanego pliku panelu.
+   To zmiana na lepsze, nie usterka.
 
 ## Rzecz znana i nienaprawiona
 

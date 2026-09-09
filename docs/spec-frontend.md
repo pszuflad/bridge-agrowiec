@@ -17,6 +17,14 @@ instrukcją z 17 zrzutami.
 `01_WARSTWA_WSPOLNA`, `02_WIDOKI`, `03_ROZBIEZNOSCI`, `04_DESIGN_TOKENS`,
 `_mapy_api/` (mapy wywołań FE vs BE). **Sprostowania do niej — §7.**
 
+> ⚠ **Deminifikat jest STARSZY NIŻ PRODUKCJA — ustalone w 13e
+> (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09).** `deminified/frontend-index.js` to ten sam
+> bundle `index-PRICEFMT1783512500.js`, ale w stanie z **2026-08-13**, czyli sprzed czterech
+> łatek: `konstr` (01.09) oraz `tr_fix`, `ackalerts`, `szer_marka` (wszystkie 04.09). Kto
+> weryfikuje tezy tego dokumentu `grep`em w deminifikacie, zobaczy stan SPRZED łatek i uzna
+> sportowaną zmianę za regresję. Lista łatek i sposób czytania żywego bundla:
+> `deminified/README.md`.
+
 ---
 
 ## 1. ⭐ Krzyżowa kontrola kontraktu — POTWIERDZONE niezależnie
@@ -114,6 +122,11 @@ ma endpoint:
   nie ma dławika (339 alertów „Błąd pobierania" w produkcji, do 23/dobę na jednego dostawcę).
   Pseudo-alerty katalogowe oryginału **świadomie pominięte** — `docs/rebuild-backlog.md` #26
   (⬜ do decyzji). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+  ⚠ **Doprecyzowanie (13e, 2026-09-09):** dwie łatki produkcji z 2026-09-04 — `tr_fix` (token
+  `"tr-"` znika z listy słów „to nie opona", bo `\btr-\b` łapał `TR-135` w nazwach opon BKT)
+  i `ackalerts` (odcisk wartości w `id` alertu, potwierdzenia respektowane na Pulpicie, ukrycie
+  „rozwiązanych") — żyją WYŁĄCZNIE w tym pseudo-alertowym silniku, więc odbudowa nie ma czego
+  portować (D2/D3, `docs/tickets/47-CHORE-i13e-frontend-bridgeone/`).
 - **Waga gabarytowa** — liczona w przeglądarce, choć `POST /api/waga-gabarytowa/oblicz` istnieje.
   Nie jest to przeoczenie: BE liczy inny wzór (paletowy/oponowy), a widok — wolumetryczny
   kurierski z wyborem przewoźnika, objętością m³ i wagą do wyceny; podpięcie pod endpoint
@@ -170,8 +183,11 @@ ma endpoint:
 > dialog edycji zastąpił podgląd, tak jak w oryginale. Eksport CSV (backend gotowy
 > od I8, `28-FEATURE-selly-eksport-backend`) dowieziony w 8b, a **słowniki marek/kategorii dla
 > filtrów tego widoku — w sesji 7c** (`32-FEATURE-katalog-slowniki-atrybutow`, 2026-09-04):
-> obie listy to SUMA słownika i danych katalogu, z filtrem „bez cyfr" wyłącznie na gałęzi
-> produktowej marek i zwykłym `sort()` dla kategorii (`:23285-23295`). ⚠ Nie mylić z dialogiem
+> obie listy to SUMA słownika i danych katalogu, z filtrem „bez cyfr" na markach i zwykłym
+> `sort()` dla kategorii (`:23285-23295`). ⚠ **Sprostowanie (13e, 2026-09-09):** filtr „bez cyfr"
+> wisiał wyłącznie na gałęzi produktowej tylko **do 2026-09-04** — łatka `szer_marka` dokleiła go
+> także na gałęzi słownikowej, więc dziś odsiewa OBA źródła marek. Asymetria marka↔kategoria
+> ZOSTAJE: `listaKategorii` nie ma tego filtra w żadnej z gałęzi. ⚠ Nie mylić z dialogiem
 > reguł w `/narzuty`, gdzie kategorie idą WYŁĄCZNIE ze słownika. Szczegóły:
 > `docs/tickets/3-FEATURE-katalog-odczyt/` i `docs/tickets/32-FEATURE-katalog-slowniki-atrybutow/`.
 
@@ -448,6 +464,26 @@ ma endpoint:
 > `Usunąć {kod}?`. **D3:** `szerokosc` portowana 1:1 z wadą oryginału — ręczna edycja gubi zera
 > końcowe („10.00" → „10"), mimo że kolumna jest TEXT. Szczegóły:
 > `docs/tickets/37-FEATURE-katalog-edycja-produktu/`.
+
+> **Odbudowa (13e, `47-CHORE-i13e-frontend-bridgeone`, 2026-09-09) — port łatek produkcji
+> z 2026-09-04.** Z pięciu etykiet z bundla (rebrand, `PRICEFMT`, `tr_fix`, `ackalerts`,
+> `szer_marka`) realnego kodu wymagała tylko `szer_marka` — i to nie „kolumna szerokość/marka",
+> lecz dwie poprawki. **(a) Zapis szerokości w katalogu i w eksporcie CSV:** `formatujSzerokosc`
+> (`Wfmt`) straciła gałąź „`rozmiar` bez ukośnika w notacji `AxB` → dwa pierwsze człony", więc
+> kolumna „Szerokość opony" pokazuje dziś sam człon szerokości — `14.9x28` → `14.9`, `16x6-8`
+> → `16` (dawniej `16x6`), `23x10.50-12` → `23` (dawniej `23x10.50`); zera końcowe z `rozmiar`
+> zostają (`8.00x20` przy `szerokosc="8.00"` daje `"8.00"`). **Pomiar na `db/snapshot.db`:
+> 587 z 7395 pozycji zmienia zapis.** Eksport CSV zmienia się RAZEM z tabelą, bo `OT` i `DT`
+> dzielą ten sam formater — tak jak w oryginale. **(b) Lista marek w filtrze `/katalog`** —
+> patrz sprostowanie w bloku I2 wyżej. `tr_fix` i `ackalerts` nie mają w odbudowie nośnika
+> (§4), a rebrand i `PRICEFMT` odbudowa miała już 1:1 od ticketa 2. **Nazwa aplikacji (D1):**
+> produkcja i odbudowa mają zgodnie `<title>Bridge ONE — konsolidacja cenników opon</title>`
+> oraz `BridgeOne` (BEZ spacji) w trzech miejscach UI — nagłówek mobilny, nagłówek sidebara,
+> `<h1>` logowania; rozjazd zapisu jest w bundlu produkcji i odtwarzamy go świadomie.
+> **Odstępstwo D4:** kolumna „Konstrukcja opony" i jej odpowiednik w CSV — odbudowa ma
+> pass-through pełnych słów z 13c, a ŻYWY bundle produkcji pokazuje tam „—" (łatka `konstr`
+> trafiła do martwego `index-BRIDGEONE21783342500.js`); regresji nie odtwarzamy. Szczegóły:
+> `docs/tickets/47-CHORE-i13e-frontend-bridgeone/`.
 
 **Design tokens** (`04_DESIGN_TOKENS.md`) — komplet do wiernego wyglądu:
 - Fonty: **Inter** (UI), **JetBrains Mono** (kod/EAN).

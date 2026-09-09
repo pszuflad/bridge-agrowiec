@@ -129,3 +129,80 @@ Bramki po poprawkach: `lint` ✓ · `typecheck` ✓ · `build` ✓ · `test` ✓
    niezminifikowany na końcu bundla) — mylące skojarzenie z etykietą `szer_marka`, ale to
    inna i wcześniejsza zmiana. Odbudowa ma staging z 11 sztywnymi kolumnami
    (`staging/TabelaStagingu.tsx:81-102`). Nie jest to w żadnym wpisie backlogu — do triażu.
+
+## Docs updates
+
+Cztery doc-checkery, równolegle. Podsumowania:
+
+### `docs/rebuild-roadmap.md`
+- §4 tablica postępu, wiersz 13: `⬜` → `🔨`; dopisane `13e: ✅ 47-CHORE-i13e-frontend-bridgeone ·
+  2026-09-09 (realny kod tylko szer_marka)`; „Zostają 13d-2/13d-3/13e" → „Zostaje 13d (Selly)".
+- §5 blok 13e **przepisany na opis STANU**: zakres faktyczny, GATE N/D + bramki FE, sekcja
+  **Fakty** (żywy vs martwy bundle, pomiar 587/7395 w zapisie „dziś (dawniej)", zasięg na CSV,
+  `/narzuty` bez filtra) oddzielona od sekcji **Decyzje użytkownika D1–D4**, plus Follow-up.
+- §2 tabela źródeł prawdy, wiersz `deminified/`: dopisany fakt, że `frontend-index.js` jest
+  z 2026-08-13, starszy od produkcji o cztery łatki → `deminified/README.md`.
+- §6: nota dla cutoveru i przeglądu 12 widoków o regresji `konstrukcja` w żywej produkcji.
+- §5 blok 7c: sprostowane zdanie „filtr «bez cyfr» wisi WYŁĄCZNIE na gałęzi produktowej".
+- **Usunięte jako obalone** (nie dopisane obok): „`szer_marka` — kolumna szerokość/marka";
+  rebrand i PRICEFMT jako robota do wykonania; „`tr_fix`/`ackalerts` — port do TS";
+  ostrzeżenie „CAPS `nazwa` zderzy się z formatowaniem we froncie" → zamienione na zmierzony
+  fakt „bezprzedmiotowe" (zero `capitalize`/`title-case` w `rebuild/frontend/src/`).
+
+### `docs/rebuild-backlog.md`
+- **#61 → ✅ zrobione w 13e**: `Zmiana Ani` przepisana z etykiet na realny rozkład diffu wszystkich
+  pięciu łatek; `Do nowej wersji?` `⬜ do decyzji` → `✅ TAK — i już było` (D1); Status z pomiarem
+  587/7395, notą o dwóch pierwszych członach i decyzjami D2/D3.
+- **#58 → sprostowanie faktu**: usunięte fałszywe „dokładnie jak bundle produkcji od 2026-09-01";
+  w to miejsce dowód, że łatka poszła w martwy bundle, i zapis, że pass-through jest od
+  2026-09-09 świadomym odstępstwem (D4).
+- **NOWY wpis #71** — regresja `konstrukcja` w żywej produkcji, `❌ NIE — świadomie nie
+  odtwarzamy`, z konkretną naprawą po stronie VPS i adnotacją „nie blokuje cutoveru".
+  ⚠ Numer zweryfikowany przez agenta: ostatni istniejący wpis to **#70**, nie #65 jak zakładałem.
+- Tabela mapowania I13: wiersz #61 zaktualizowany, dodany wiersz dla #71.
+- **#26** (pseudo-alerty): dopisane doprecyzowanie — gdyby kiedyś weszły, wchodzą OD RAZU
+  w wersji po łatkach z 04.09. Status wpisu pozostaje ⬜.
+
+### `docs/spec-frontend.md`
+- Sprostowana teza o filtrze „bez cyfr" (wskazana w code review) + nota, że asymetria
+  marka↔kategoria zostaje.
+- Nagłówek dokumentu: ⚠ nota „deminifikat jest starszy niż produkcja" — dotyczy weryfikacji
+  całego dokumentu, który sam deklaruje deminifikat jako źródło konfrontacji.
+- §4 („Alerty"): doprecyzowanie, że `tr_fix`/`ackalerts` żyją wyłącznie w pseudo-alertowym
+  silniku oryginału (D2/D3).
+- §5: nowy blok 13e z rozkładem pięciu etykiet, pomiarem i odstępstwami D1/D4.
+
+### `docs/cutover.md`, `docs/przeglad-12-widokow.md`, `CLAUDE.md`, `START.md`
+- `cutover.md`: oczekiwana różnica po przełączeniu — kolumna „Konstrukcja opony" zacznie działać
+  (rozdział 1) + kratka w smoke-testach (rozdział 6); liczba testów FE `747` → `751`.
+- `przeglad-12-widokow.md`: nota w sekcji „Katalog" i pozycja 7 na liście „wygląda inaczej i to
+  jest w porządku" — w starym Bridgu są kreski, u nas pełne słowa, nie zgłaszać jako błąd.
+  Kolumny „Szerokość opony" świadomie NIE opisano: produkcja ma łatkę `szer_marka` od 04.09,
+  więc staging wygląda tak samo jak to, co Ania widzi dziś.
+- `CLAUDE.md`: dwie nowe pułapki w sekcji ostrzeżeń — (1) „w `mirror/frontend/` bundli jest kilka,
+  ale ŻYWY jest tylko ten z `index.html`" (z poleceniem `grep` i przypadkiem `konstr`),
+  (2) „nazwa kopii `.bak` daje ETYKIETĘ, nie treść" (z morałem: najpierw rozłóż diff bundla).
+- `START.md`: akapit o stanie odbudowy był nieaktualny o dziesięć iteracji („iteracje 0–2
+  zamknięte, iteracja 3 w toku") — przepisany na I0–I12 zamknięte + I13 poza 13d; nota
+  o froncie i o starszym deminifikacie.
+
+### Pre-existing issues (zastane, NIENAPRAWIONE — do decyzji użytkownika)
+- **⚠ Kolizja z gałęzią `chore/46-revert-13d1-selly`.** Ten worktree odchodzi od `origin/develop`
+  (`c1ef210`), czyli SPRZED commita `cc868a3`, który cofa 13d-1 i oznacza całe 13d jako ⛔ ODŁOŻONE.
+  Wiersz 13 tablicy roadmapy, linia „Kolejność" i linia Status I13 są dotknięte po obu stronach —
+  **przy scalaniu trzeba je złączyć ręcznie** (gałąź 46 jest nadrzędna co do 13d, ta co do 13e).
+  Dotyczy też `docs/cutover.md:43` („backend: 87 plików / 1330 testów, po 13d-1") i wiersza
+  `SELLY_SCHEDULER` w rozdziale 4 — po rewercie 13d-1 wymagają sprostowania.
+- `docs/rebuild-roadmap.md` stopka: „Zamknięte 2026-09-08 (12e) — dalsze zmiany tego pliku to już
+  follow-up po cutoverze" jest sprzeczne z tym, że I13 trwa.
+- `docs/rebuild-backlog.md:20` — legenda `Status` zna tylko `— / 🔨 / ✔`, a cała sekcja I13
+  (#53–#71) używa `✅` i `⬜`. Legenda nieaktualna wobec ~20 wpisów.
+- `docs/rebuild-backlog.md:22-27` — lista pozostałych ⬜ z 12e jest datowaną migawką; od tego czasu
+  doszły #66–#71.
+- `docs/rebuild-backlog.md` #58, pole `Iteracja` — dwa nawarstwione sprostowania, treściowo
+  poprawne, ale trudne w czytaniu.
+- `docs/spec-frontend.md:498` literówka „zrzytów"; `:502` „sidebar 10 pozycji" (§6, oryginał) vs
+  „11 pozycji" (§2, odbudowa) bez adnotacji; §6 „12 tras = 12 widoków" vs §3 „13 tras".
+- `docs/cutover.md:3` — pole „Wersja dokumentu" nie było aktualizowane przez tickety 44/45.
+- `START.md:233` — „feed MO3 nie działa od 2026-07-06" jest z lipca, brak dowodu na dziś.
+  `START.md:201` — „26 tabel / 71 kolumn `products`" vs 72–73 kolumny w `cutover.md`.

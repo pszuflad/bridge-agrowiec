@@ -214,9 +214,11 @@ Masz wtedy: repo Git będące żywym lustrem produkcji, świeżą wiedzę, basel
 i działającą synchronizację. To domyka **Fazę 1** z [PLAN.md](PLAN.md). Dalej:
 zamrożenie kontraktu API (Faza 2) i odbudowa (Fazy 3–4).
 
-**Stan odbudowy: iteracje 0–2 zamknięte, iteracja 3 w toku (3a gotowe).** `rebuild/backend/`
-(API + logowanie + katalog do odczytu + portowany podsystem parserów), `rebuild/frontend/`
-(rama panelu, `/login`, `/katalog`, 12 tras routera) i `rebuild/schema/`.
+**Stan odbudowy: iteracje 0–12 zamknięte (2026-09-08), iteracja 13 — delty produkcji Ani
+z 26.08–08.09 — rozliczona poza blokiem 13d (Selly).** `rebuild/backend/` (pełne API, import,
+analityka), `rebuild/frontend/` (12 widoków + logowanie) i `rebuild/schema/` (migracje 001–007).
+Dalej poza odbudową: przegląd 12 widoków przez Anię (`docs/przeglad-12-widokow.md`) i cutover
+(`docs/cutover.md`).
 Podział na iteracje: `docs/rebuild-roadmap.md`; deploy stagingu: `docs/deploy-setup.md`.
 Uruchomienie lokalne (Node 20; dev frontendu proxuje `/api` na backend, więc backend musi
 działać osobno — szczegóły w README obu pakietów):
@@ -226,9 +228,13 @@ cd rebuild/backend  && npm ci && npm run dev    # terminal 1 → 127.0.0.1:5001 
 cd rebuild/frontend && npm ci && npm run dev    # terminal 2 → http://localhost:5173
 ```
 
-Iteracja 3a doszła: `rebuild/backend/src/import/legacy/` to port bajt-w-bajt parserów dostawców
-z produkcji — **nie edytuj tych plików ręcznie** (test integralności to wychwyci). Gate tej sesji:
+`rebuild/backend/src/import/legacy/` to port bajt-w-bajt parserów dostawców z produkcji
+(zresynchronizowany w 13a) — **nie edytuj tych plików ręcznie** (test integralności to wychwyci):
 `cd rebuild/backend && npm test -- test/charakteryzacja.test.ts`; szczegóły: `rebuild/backend/README.md`.
+
+Frontend odbudowy odpowiada żywemu bundlowi produkcji ze stanu 2026-09-04 (poza świadomie
+niesportowanym silnikiem pseudo-alertów katalogowych). ⚠ `deminified/frontend-index.js` jest
+starszy (2026-08-13) i nie zawiera czterech późniejszych łatek — patrz `deminified/README.md`.
 
 Niezależnie, natychmiast (produkcja cierpi): feed MO3 nie działa od 2026-07-06,
 alertów nikt nie czyta.

@@ -80,6 +80,23 @@ samą resztkę i jest to spójne (baza ma `PROWADZąCA`, plik dostawcy z `PROWAD
 niej różni). Morał: przy porównaniach case-insensitive w SQL sprawdź, czy dane mają polskie
 znaki, i nie „popraw" tego na wariant Unicode-aware bez sprawdzenia, co zrobił oryginał.
 
+**W `mirror/frontend/` bundli jest kilka, ale ŻYWY jest tylko ten z `index.html`.** Sprawdzaj to
+zawsze: `grep -o 'src="./assets/index[^"]*"' mirror/frontend/index.html` (dziś:
+`index-PRICEFMT1783512500.js`). Ania dwukrotnie łatała plik, którego produkcja nie ładuje —
+pass-through `konstrukcja` z 2026-09-01 poszedł do martwego `index-BRIDGEONE21783342500.js`
+(ścieżkę wpisała w `mirror/backend/CHANGELOG.md:101`), więc produkcja do dziś pokazuje „—"
+w kolumnie „Konstrukcja opony". Do tego `deminified/frontend-index.js` jest bundlem z 2026-08-13,
+czyli sprzed czterech łatek — zanim uznasz deminifikat za stan produkcji, przeczytaj
+`deminified/README.md`.
+
+**Nazwa kopii `.bak` daje ETYKIETĘ, nie treść.** `.bak_szer_marka_20260904_1500` brzmi jak
+„kolumna szerokość/marka" i tak opisały ją roadmapa i backlog, a realnie łatka zdejmuje z formatera
+szerokości gałąź „cała notacja `AxB`" (587 z 7395 pozycji zmienia zapis) i dokłada filtr „bez cyfr"
+na słownikowej gałęzi listy marek. Morał: przy łatkach FE najpierw rozłóż diff bundla
+(`git show main:mirror/frontend/assets/<plik>` — kopie `.bak` są tylko na `main`), dopiero potem
+uwierz etykiecie. Rozkład wszystkich pięciu etykiet z I13:
+`docs/tickets/47-CHORE-i13e-frontend-bridgeone/plan.md`.
+
 ---
 
 ## Środowisko
