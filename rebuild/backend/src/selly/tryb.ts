@@ -39,6 +39,10 @@ export const METODY_ZAPISUJACE = [
   "updateProduct",
   "upsertProductWarehouse",
   "setProductMultiCat",
+  // Model wariantowy (13d-1). `updateVariant` to Tor 1: PUT ceny i stanu na wariant —
+  // najczęściej wołany zapis w całej integracji, musi być za blokadą.
+  "createVariant",
+  "updateVariant",
 ] as const satisfies readonly (keyof KlientSelly)[];
 
 /** Metody wyłącznie odczytowe — przechodzą w trybie `tylko-odczyt`. */
@@ -48,6 +52,9 @@ export const METODY_ODCZYTU = [
   "listCategories",
   "listVatRates",
   "listWarehouses",
+  // Model wariantowy (13d-1) — samo discovery niczego w Selly nie zmienia.
+  "listProductsByEan",
+  "listVariants",
 ] as const satisfies readonly (keyof KlientSelly)[];
 
 /**
