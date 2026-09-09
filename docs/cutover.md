@@ -14,7 +14,7 @@ Przełączamy **jednym ruchem** (big-bang, bez okresu współbieżnego działani
 |---|---|---|
 | Backend | `mirror/backend/index.cjs` + kilkanaście łatek `patch_*.cjs`, PM2 `bridge-backend`, `0.0.0.0:5000` | `rebuild/backend` → `dist/server.js`, PM2, ten sam port |
 | Frontend | zbudowany bundle w `public_html/panel` + trzy skrypty wstrzykiwane (`selly-injection.js`, `pending-injection.js`, `freq-injection.js`) | build `rebuild/frontend`, **skrypty wstrzykiwane znikają** — wszystkie trzy wchłonięte (I7, I8, 3f-2) |
-| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie przenosimy plików do innej bazy, ale `npm run migrate` na niej stosuje migracje SCHEMATU (001–003, **007** — ⚠ ryzyko, patrz rozdział 3) i DANYCH (004–006, konwencje 13c) |
+| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie przenosimy plików do innej bazy, ale `npm run migrate` na niej stosuje migracje SCHEMATU (001–003) i DANYCH (004–006, konwencje 13c) |
 | Apache | `public_html/panel/.htaccess`, proxy `/api/*` | ten sam mechanizm, przekierowanie na nowy proces |
 
 **Baza jest wspólnym mianownikiem i to jest największe ryzyko całej operacji** — dlatego
@@ -32,8 +32,7 @@ przed oknem, żeby nie zgłosiła tego jako błąd.
 - [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na staging
       (`docs/przeglad-12-widokow.md`). To jest warunek nadrzędny — bez niego nie zaczynamy.
 - [ ] **Bramki zielone** na `develop`: `lint`, `typecheck`, `build`, `test` po obu stronach
-      (backend: 87 plików / 1330 testów, po 13d-1; frontend: 48 plików / 747 testów + 5 plików
-      integracyjnych).
+      (backend: 80 plików / 1241 testów; frontend: 48 plików / 747 testów + 5 plików integracyjnych).
 - [ ] **Sekrety produkcyjne przygotowane** w pliku `.env` poza repo (rozdział 4). Bez
       `JWT_SECRET` i `DB_PATH` backend **nie wstanie** — to celowy fail-fast, nie usterka.
 - [ ] **Schemat produkcji zweryfikowany** wg rozdziału 3, na KOPII, nie na żywej bazie.
@@ -57,7 +56,7 @@ Ten sam mechanizm już raz uderzył — na staging, gdzie `products.szerokosc` b
 kanon deklarował REAL, i przez wiele iteracji nikt tego nie widział
 (`docs/deploy-setup.md`, sekcja „Schemat bazy staging NIE pochodzi z naszego kanonu").
 
-**Trzy konkretne, przewidywalne zderzenia na produkcji:**
+**Dwa konkretne, przewidywalne zderzenia na produkcji:**
 
 **(a) `002_import.sql` prawdopodobnie PADNIE.** Zawiera
 `ALTER TABLE products ADD COLUMN uwaga_cena TEXT;`, a produkcja tę kolumnę już ma — dokłada ją
@@ -69,23 +68,6 @@ w transakcji, więc **cała 002 się wycofa i `npm run migrate` przerwie**.
 się nie zgadza), albo — co gorsze — **po cichu przestawi dane** (liczba się zgadza, kolejność
 nie). Produkcja przeszła własną wersję `szertxt`, więc kolejność kolumn NIE JEST u nas znana
 z góry.
-
-**(c) `007_selly_products_warianty.sql` PRAWDOPODOBNIE PADNIE — na tej konkretnej produkcji
-niemal na pewno.** Migracja robi `ALTER TABLE selly_products RENAME TO selly_products_old`.
-Ale Ania na TEJ SAMEJ bazie 2026-09-07 **już ręcznie** przeprojektowała `selly_products` na
-model wariantowy i zostawiła starą tabelę pod nazwą `selly_products_old` (2174 wpisy MO1/MO2,
-`mirror/backend/CHANGELOG.md`, wpis 20:03) — czyli tabela `selly_products_old` **już istnieje**
-na produkcji, zanim ta migracja w ogóle ruszy. `ALTER TABLE ... RENAME TO selly_products_old`
-odpowie wtedy `there is already another table or index with this name: selly_products_old` i
-**cała transakcja `007` się wycofa** (migracje idą w transakcji, jak 002/003 wyżej). To NIE jest
-teoretyczne ryzyko jak (a)/(b) — to niemal pewność, bo źródłem `007` jest właśnie ten sam ruch
-Ani, odtworzony 1:1 (`rebuild/schema/007_selly_products_warianty.sql`, nota na górze pliku).
-**Przed oknem trzeba sprawdzić na kopii**, czy `selly_products` ma już kształt wariantowy
-(`PRAGMA table_info(selly_products)` — obecność `kod_importu`, `dostawca`, `selly_variant_id`,
-`feature_id_magazyn`) i czy `selly_products_old` istnieje. Jeśli tak — **`007` nie ma czego
-robić i trzeba ją odnotować jako zastosowaną ręcznie** (wzorem obejścia 002 w kroku 5 wyżej,
-`INSERT OR IGNORE INTO _migracje`), **bez** puszczania samego `ALTER TABLE`. Szczegóły
-i pełny DDL: `docs/tickets/45-FEATURE-selly-rest-sync-tor1/plan.md`.
 
 **Stan zmierzony (2026-09-08, ticket 39):**
 
@@ -115,10 +97,6 @@ wc -l ~/cutover-proba/products.txt          # oczekiwane: 73 (72 + uwaga_cena)
 grep -c uwaga_cena ~/cutover-proba/products.txt
 grep -c import_wylaczony ~/cutover-proba/suppliers.txt
 sqlite3 ~/cutover-proba/data.db "SELECT name FROM sqlite_master WHERE name='_migracje';"
-
-# 2b. Czy 007 ma na czym padać — czy Ania już ręcznie przeprojektowała selly_products (patrz (c) wyżej)
-sqlite3 ~/cutover-proba/data.db "SELECT name FROM sqlite_master WHERE name='selly_products_old';"
-sqlite3 ~/cutover-proba/data.db "PRAGMA table_info(selly_products);" | grep -c kod_importu
 
 # 3. Ten sam pomiar na świeżej bazie z kanonu — punkt odniesienia
 cd ~/private_apps/bridge-staging/repo/rebuild/backend
@@ -169,29 +147,13 @@ napisać wariant 003 dopasowany do faktycznego kształtu produkcji, przetestowa�
 i wrócić do cutoveru w kolejnym oknie. To jest dokładnie ta sytuacja, dla której ta próba
 istnieje.
 
-**Jeśli padło na `007` z `there is already another table or index with this name:
-selly_products_old`** — to jest **oczekiwany** scenariusz na tej produkcji (patrz (c) wyżej), nie
-powód do STOP. `selly_products` ma już kształt wariantowy, `007` nie ma czego robić. Odnotuj ją
-jako zastosowaną, tak samo jak obejście 002 wyżej, i puść resztę:
-
-```bash
-sqlite3 ~/cutover-proba/data.db "
-  INSERT OR IGNORE INTO _migracje (nazwa, zastosowano)
-    VALUES ('007_selly_products_warianty.sql', datetime('now'));"
-DB_PATH=$HOME/cutover-proba/data.db npm run migrate      # 007 pominięta, reszta idzie dalej
-```
-⚠ **Sprawdź krok 2b PRZED uruchomieniem `007` na żywej bazie**, nie po. Jeśli `selly_products`
-NIE ma jeszcze kolumny `kod_importu` (kopia sprzed ręcznej zmiany Ani albo inna instalacja) —
-`007` powinna przejść normalnie i TEGO obejścia nie stosujemy.
-
 **Jeśli 001 zgłosi cokolwiek poza „już istnieje"** — też STOP. `001_schema.sql` jest
 idempotentny (`CREATE TABLE IF NOT EXISTS`) i na bazie produkcyjnej ma być no-opem.
 
-> ⚠ **Uwaga o pozornej zgodności.** Po `npm run migrate` tabela `_migracje` odnotuje każdy
-> zastosowany plik (001–003, 007, i pominięte tylko jeśli odnotowane ręcznie) — także wtedy, gdy
-> realny schemat różni się od kanonu. Od tego momentu obie strony *wyglądają* na zgodne. Dlatego
-> `diff` z kroku 4, krok 2b i podgląd danych z kroku 5 robimy **przed** uznaniem migracji za
-> udaną, a nie po.
+> ⚠ **Uwaga o pozornej zgodności.** Po `npm run migrate` tabela `_migracje` odnotuje wszystkie
+> trzy pliki jako zastosowane — także wtedy, gdy realny schemat różni się od kanonu. Od tego
+> momentu obie strony *wyglądają* na zgodne. Dlatego `diff` z kroku 4 i podgląd danych z kroku 5
+> robimy **przed** uznaniem migracji za udaną, a nie po.
 
 ---
 
@@ -219,7 +181,6 @@ proces wstanie i będzie wyglądał na zdrowy.
 | `IMPORT_SCHEDULER` | **wyłączone** | `true` | **import z URL-i przestaje chodzić** — cennikami nikt się nie zajmuje, a panel wygląda normalnie |
 | `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` | wyłączone | do decyzji | bez niego pierwszy przebieg dopiero po pełnym cyklu |
 | `SELLY_TRYB` | `wylaczony` | `pelny` | **integracja Selly milczy** — klient odmawia każdej operacji, także z poprawnymi sekretami |
-| `SELLY_SCHEDULER` | **wyłączone** | do decyzji (od 13d-1) | scheduler Toru 1 (discovery + delta, HH:55 + HH:10/25/40 dla 10 dostawców) nie rusza bez tej flagi; druga warstwa ochrony obok `SELLY_TRYB` |
 | `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`, `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` | brak / `READWRITE` | prawdziwe sekrety | sześć tras zewnętrznych oddaje 500 „Brak konfiguracji" |
 | `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` | **wartości produkcyjne** | zostawić domyślne | to jedyne trzy, których produkcja NIE nadpisuje — staging musi, produkcja nie |
 | `CORS_ORIGINS` | puste | **zostawić puste** | patrz niżej |
@@ -269,18 +230,12 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    ```
 
 5. **Migracje na ŻYWEJ bazie** — wariantem ustalonym w rozdziale 3 (albo zwykłe
-   `npm run migrate`, albo z ręcznym odnotowaniem 002 i/lub 007).
+   `npm run migrate`, albo z ręcznym odnotowaniem 002).
    ```bash
    cd <katalog wydania>/rebuild/backend
    DB_PATH=/home/admin/private_apps/bridge/data.db npm run migrate
    ```
    Wynik wypisuje, co zastosowano i co pominięto. **Każdy błąd = przerwij i wróć do rozdziału 7.**
-   ⚠ **`007_selly_products_warianty.sql` prawdopodobnie padnie tu na `already another table
-   ... selly_products_old`** — to samo ryzyko co rozdział 3 (c), tyle że na żywej bazie zamiast
-   kopii. Jeśli krok 2b na kopii już potwierdził, że `selly_products` ma kształt wariantowy,
-   `007` na żywej bazie **odnotuj ręcznie jako zastosowaną PRZED** tym krokiem (to samo
-   `INSERT OR IGNORE INTO _migracje`, na `DB_PATH` produkcyjnym) — inaczej cała migracja tego
-   przebiegu wycofa się w transakcji i przerwie krok 5 na samym starcie.
    Od 13c dochodzą trzy migracje DANYCH — `004_kategoria_wielka_litera.sql`,
    `005_konstrukcja_slowa.sql`, `006_nazwa_caps.sql` — które odtwarzają konwencje wprowadzone
    przez Anię na produkcji 18.08 i 09-01. **Na żywej bazie mają nie zmienić ani jednego wiersza** —

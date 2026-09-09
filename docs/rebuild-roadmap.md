@@ -182,7 +182,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
-| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`. 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13d-1: ✅ `45-FEATURE-selly-rest-sync-tor1` · 2026-09-09. Zostają 13d-2/13d-3/13e |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`. 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. Zostają 13d/13e |
 
 ---
 
@@ -2023,50 +2023,31 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   nasz port surowym `db/snapshot.db`, którego 13c nie dotyka — obie strony dostają identyczne
   wejście, więc migracja danych nie mogła przesunąć wzorca zbudowanego na innym źródle.
   **Zależy od:** 13a, 13b (spełnione).
-- **13d — Selly REST sync (NOWY podsystem)** [BE] — reimplementacja TS podsystemu `selly/*`
-  (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/`routes_sync`) +
-  przeprojektowana `selly_products` (klucz `(kod_importu,dostawca)`→`(selly_product_id,selly_variant_id)`
-  + `feature_id_magazyn`; stara → `selly_products_old`). Model wariantowy: cena/stan PER WARIANT
-  (`PUT .../variants/{vid}`), rate limiter 250/60s + `apiWithRetry`, `provider_code=kod_importu`.
-  Podział: 13d-1 fundament + Tor 1 (discovery+delta), 13d-2 Tor 2 (`sync_full`), 13d-3 przyciski sync
-  w panelu FE. **Zależy od:** 8; **wykracza poza I8** (I8 = eksport CSV). Niezależne od 13a–13c.
-  - **13d-1 — fundament + Tor 1 (discovery + delta) — ✅ zrobione 2026-09-09
-    (`45-FEATURE-selly-rest-sync-tor1`, backlog #60).** Tor 1 jest niezależny od Toru 2 —
-    „⚠ BLOKADA: Tor 2 niedomknięty" NIE dotyczyła tej pod-karty i nie blokowała jej; blokada
-    dotyczy wyłącznie **13d-2** (patrz niżej).
-    Dowiezione: migracja `007_selly_products_warianty.sql` (`ALTER TABLE ... RENAME` do
-    `selly_products_old` + nowa tabela wariantowa **PUSTA** — danych nie migrujemy, tak jak
-    Ania 07.09) + model Drizzle `sellyProducts`/`sellyProductsOld`; **5 z 7 plików** `selly/*`:
-    `limiter.ts`, `discovery.ts`, `mapper-v2.ts`, `sync-delta.ts`, `scheduler-sync.ts` (Tor 1
-    wyłącznie — Tor 2 w schedulerze nieobecny, jak u Ani); `routes/selly-sync.ts` — **3 z 6 tras**
-    `routes_sync.cjs` (Tor 1): `GET /api/selly/sync-status`, `POST /api/selly/sync-delta-supplier`,
-    `POST /api/selly/sync-delta-all`. `sync_full.cjs` i pozostałe 3 trasy (`sync-full-*`) zostają
-    dla **13d-2**. Cztery nazwane metody wariantowe w `KlientSelly` (D7 — nie generyczny `api()`,
-    bo otworzyłby dziurę w blokadzie `SELLY_TRYB`).
-    **Świadome odstępstwa (wiążące dla kolejnych kart):** `sync-delta-supplier` NAPRAWIONY (D1,
-    u Ani zawsze 500 — literówka `syncDeltaForDostawca` po refaktorze 07.09); scheduler za flagą
-    `SELLY_SCHEDULER`, domyślnie WYŁĄCZONY (D4, wzorzec `IMPORT_SCHEDULER` z I3); 3 nowe ścieżki
-    dopisane do `contract/openapi.yaml` BEZ fixtures (D6) — kształty odpowiedzi Selly dla
-    `GET /api/products?ean=` i `.../variants` nie są nigdzie w repo i nagrać się ich nie da (zakaz
-    odpytania żywego Selly) — testy dowodzą zgodności z kodem Ani, **nie** że Selly odpowiada tak,
-    jak oboje zakładamy. Odtworzone 1:1 mimo że są defektami: martwy retry na 429 (throttle
-    ubiega go w praktyce), stary `POST /api/selly/sync-supplier` (I8) ZEPSUTY przez nowy schemat
-    (pada na `NOT NULL constraint failed`, dokładnie jak u Ani od 07.09), `discovery.createProduct`
-    bez `mapper.buildProductPayload` (rozstrzygnięcie w 13d-2).
-  - **Dla 13d-2 (Tor 2) — do rozstrzygnięcia, zastane w 13d-1:** `routes_sync.cjs:14` importuje
-    `runFullTodays`, którego `scheduler_selly.cjs` NIE eksportuje (nazwa żyje tylko w
-    `.bak-preref-2026-09-07`) → u Ani `POST /api/selly/sync-full-today` i `/sync-full-force` są
-    ZEPSUTE (500); `sync-full-supplier` działa. Do tego `discovery.createProduct` woła
-    `mapper.buildProductPayload`, funkcji, której nie eksportuje ani `mapper_v2.cjs`, ani
-    `mapper.cjs` — ścieżka auto-create jest u Ani martwa i 13d-2 musi to rozstrzygnąć. `mapper-v2.ts`
-    i `discovery.ts` są JUŻ dowiezione (13d-1) i gotowe do użycia; `toDeltaPayload` jest portowany,
-    ale nigdzie niepodpięty (Tor 1 liczy deltę własnym SQL-em, nie woła go w ogóle).
-  - **Dla 13d-3 (przyciski FE) — do wykorzystania:** `POST /api/selly/sync-delta-supplier` został
-    w 13d-1 NAPRAWIONY (u Ani zawsze 500) — przycisk „synchronizuj dostawcę" ma z czego korzystać.
-    Dostępne trasy: `GET /api/selly/sync-status`, `POST /api/selly/sync-delta-supplier`,
-    `POST /api/selly/sync-delta-all`.
+- **13d — Selly REST sync (NOWY podsystem)** [BE] — ⛔ **ODŁOŻONE, START WSTRZYMANY**. Reimplementacja TS
+  7 plików `selly/*` (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/
+  `routes_sync`) + przeprojektowana `selly_products` (klucz `(kod_importu,dostawca)`→`(selly_product_id,
+  selly_variant_id)` + `feature_id_magazyn`; stara → `selly_products_old`). Model wariantowy: cena/stan
+  PER WARIANT (`PUT .../variants/{vid}`), rate limiter 250/60s + `apiWithRetry`, `provider_code=kod_importu`.
+  **Zależy od:** 8; **wykracza poza I8** (I8 = eksport CSV). Niezależne od 13a–13c. Podział (docelowy):
+  13d-1 discovery+delta (Tor 1), 13d-2 sync_full (Tor 2), 13d-3 przyciski sync w panelu FE.
+  - **HISTORIA:** 13d-1 zostało sportowane i zmergowane (`45-FEATURE-selly-rest-sync-tor1`, PR #57), a
+    następnie **COFNIĘTE** (`46-CHORE-revert-13d1-selly`, `git revert -m 1`) 2026-09-09.
+  - **DLACZEGO cofnięte:** Ania (2026-09-09) potwierdziła, że podsystem Selly **NIE jest zamrożony** —
+    dostawcy aktualizują się przez ~tydzień i ona łata błędy w `selly/*` na bieżąco. Port z 08.09 był
+    ruchomym celem. **Całe 13d przepisujemy ŚWIEŻO po ustabilizowaniu**, nie odświeżamy prowizorki.
+  - **SYGNAŁ STARTU (zielone światło):** `git log --since="7 days ago" --oneline main -- mirror/backend/selly/`
+    przez kilka dni **nic nowego** (albo Ania mówi „stabilne"). Rewizja orientacyjnie **~2026-09-16**.
+  - **STAN 2026-09-09 (triaż w 46-CHORE):** docieranie TRWA — 3 commity producenta (`d88ac15..94bdf11`):
+    `sync_full` przepisany (428 linii; usunięte PUT features po Selly 400 „Malformed JSON"), `mapper_v2 v2.1`
+    (bez `vat_rate` — VAT na kategorii w Selly), `discovery.buildProductCodeCache` (paginacja `/api/products`),
+    weryfikacja pierwszego nocnego Tor 2 (MO5: 1713 ok, 0 błędów). **Zegar startu ZRESETOWANY** — port dziś
+    byłby nieaktualny w 428 liniach. Potwierdza trafność revertu 13d-1. Nowej karty NIE zakładamy.
+  - **⚠ PUŁAPKA:** revert merge’a #57 sprawia, że git uzna `feature/45` za „już zmergowane". Rewrite MUSI
+    iść na **NOWEJ gałęzi** (świeży port z finalnego `mirror/selly/`), NIE przez re-merge `feature/45`.
 - **13e — Frontend: Bridge ONE + drobne** [FE] — rebrand „Bridge ONE" (title „Bridge ONE — konsolidacja
   cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`.
+  ✅ **DECYZJA UŻYTKOWNIKA (2026-09-09): odbudowa PRZYJMUJE nazwę „Bridge ONE"** — produkcja się
+  przemianowała, więc odbudowa robi to 1:1 (nazwa + title). Nie pytać już o to w sesji 13e.
   ⚠ **`konstr` po stronie FE JEST JUŻ ZROBIONE — nie rób tego drugi raz.** Bundle zminifikowane —
   **najpierw rozłóż diff bundla**, `.bak` daje tylko etykietę. **Zależy od:** 13c (✅ spełnione
   2026-09-09); rebrand+drobne mogą iść częściowo równolegle.
@@ -2091,10 +2072,10 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   - ⚠ ASCII-only `UPPER` zostawia małe polskie diakrytyki w środku wyrazów (np. „PROWADZąCA").
     To jest stan produkcji, nie błąd odbudowy — FE nie powinien tego „poprawiać".
 
-**Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → { **13d-1** ✅ zrobione, **13d-2** gdy Ania
-domknie Tor 2, **13d-3**, **13e** }. 13d jest niezależne od 13a–13c (inny podsystem), więc mogło startować
-równolegle po 13a — i tak wyszło z 13d-1. Blokada „poczekaj na Tor 2" dotyczy wyłącznie **13d-2**,
-niezależnie od 13d-1/13d-3. 13a jest twardym fundamentem — nie zaczynaj 13b/13c przed jego merge.
+**Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → **13e** ; **13d ODŁOŻONE** (przepisanie świeże
+po ustabilizowaniu `mirror/selly/` u Ani, ~2026-09-16 — patrz blok 13d; 13d-1 sportowane i cofnięte 09.09).
+13d jest niezależne od 13a–13c (inny podsystem), więc może startować równolegle po 13a. 13a jest twardym
+fundamentem — nie zaczynaj 13b/13c przed jego merge.
 
 ## 6. Po zakończeniu wszystkich iteracji
 

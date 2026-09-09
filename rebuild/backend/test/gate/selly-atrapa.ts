@@ -19,15 +19,12 @@
  */
 
 import type {
-  CialoWariantu,
   KategoriaSelly,
   KlientSelly,
   MagazynSelly,
   OdpowiedzListy,
   ProducentSelly,
-  ProduktSelly,
   StawkaVatSelly,
-  WariantSelly,
   WynikPing,
 } from "../../src/selly/klient.js";
 import { wczytajFixture } from "./fixtures.js";
@@ -68,32 +65,6 @@ export type OpcjeAtrapy = {
   nastepneProductId?: number;
   /** Metody, które mają rzucić podanym błędem zamiast odpowiedzieć. */
   bledy?: Partial<Record<keyof KlientSelly, Error>>;
-
-  /*
-   * ── Model wariantowy (Iteracja 13d-1, ticket 45) ────────────────────────────────
-   *
-   * ⚠ Tu atrapa przestaje odtwarzać nagranie, a zaczyna odgrywać scenariusz — i trzeba
-   * o tym wiedzieć czytając testy discovery. Powyższe słowniki pochodzą z
-   * `contract/fixtures/GET_selly_dictionaries.json`, czyli z tego, co Selly RZECZYWIŚCIE
-   * zwróciło. Dla wariantów takiego nagrania NIE MA i nie da się go zrobić: kształty
-   * odpowiedzi `/variants` nie są nigdzie w repo, a odpytanie żywego sklepu jest zakazane
-   * (CLAUDE.md). Poniższe pola odtwarzają kształt odczytany z KODU `discovery.cjs`.
-   * Testy dowodzą więc, że nasz kod robi to samo co kod Ani — nie, że Selly odpowiada tak,
-   * jak oboje zakładamy.
-   */
-
-  /** `ean → product_id`. Brak wpisu = Selly nie zna tego EAN-u. */
-  produktyPoEan?: Record<string, number>;
-  /** `product_id → warianty`. Brak wpisu = produkt bez wariantów. */
-  wariantyProduktu?: Record<number, WariantSelly[]>;
-  /** Wynik `createVariant` — domyślnie kolejne `variant_id` od 7001 w górę. */
-  nastepneVariantId?: number;
-  /**
-   * Czy `createVariant` ma oddać cechę `Magazyny` w odpowiedzi (z tym `feature_id`).
-   * Tak Selly ujawnia `feature_id` dla dostawców, których jeszcze nie znamy
-   * (MO1, MO6–MO8, MO10) — `discovery.cjs:130-133`.
-   */
-  featureIdPrzyTworzeniu?: number;
 };
 
 /**
@@ -104,7 +75,6 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
   const wywolania: WywolanieSelly[] = [];
   const slowniki = slownikiZFixture();
   let kolejneId = opcje.nastepneProductId ?? 9001;
-  let kolejneVariantId = opcje.nastepneVariantId ?? 7001;
 
   const zapisz = (metoda: keyof KlientSelly, ...argumenty: unknown[]): void => {
     wywolania.push({ metoda, argumenty });
@@ -172,52 +142,6 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
       zapisz("setProductMultiCat", productId, categoryIds);
       return Promise.resolve({ data: { product_id: productId, categories: categoryIds } });
     },
-
-    // ── Model wariantowy (13d-1) ─────────────────────────────────────────────────
-
-    listProductsByEan(ean) {
-      zapisz("listProductsByEan", ean);
-      const productId = opcje.produktyPoEan?.[ean];
-      return Promise.resolve({
-        data: productId === undefined ? [] : [{ product_id: productId }],
-      } as OdpowiedzListy<ProduktSelly>);
-    },
-
-    listVariants(productId) {
-      zapisz("listVariants", productId);
-      return Promise.resolve({
-        data: opcje.wariantyProduktu?.[productId] ?? [],
-      } as OdpowiedzListy<WariantSelly>);
-    },
-
-    createVariant(productId, cialo: CialoWariantu) {
-      zapisz("createVariant", productId, cialo);
-      const variantId = kolejneVariantId++;
-      const utworzony: WariantSelly = {
-        variant_id: variantId,
-        default: cialo.default ?? 0,
-        // Odpowiedź niesie cechy z żądania, a gdy test tego chce — także `feature_id`
-        // nadane przez Selly dla nieznanego wcześniej dostawcy.
-        features:
-          cialo.features ??
-          (opcje.featureIdPrzyTworzeniu !== undefined
-            ? [{ feature_id: opcje.featureIdPrzyTworzeniu, name: "Magazyny" }]
-            : []),
-      };
-      // Kolejne `listVariants` na tym produkcie ma widzieć nowy wariant.
-      if (opcje.wariantyProduktu) {
-        opcje.wariantyProduktu[productId] = [
-          ...(opcje.wariantyProduktu[productId] ?? []),
-          utworzony,
-        ];
-      }
-      return Promise.resolve({ data: utworzony });
-    },
-
-    updateVariant(productId, variantId, cialo) {
-      zapisz("updateVariant", productId, variantId, cialo);
-      return Promise.resolve({ data: { variant_id: variantId } });
-    },
   };
 
   return {
@@ -250,10 +174,6 @@ export function stworzAtrapeBezKonfiguracji(): KlientSelly {
     createProduct: rzuc,
     updateProduct: rzuc,
     upsertProductWarehouse: rzuc,
-    listProductsByEan: rzuc,
-    listVariants: rzuc,
-    createVariant: rzuc,
-    updateVariant: rzuc,
     setProductMultiCat: rzuc,
   };
 }
