@@ -10,17 +10,6 @@
  *
  * Baza jest prawdziwym SQLite w katalogu tymczasowym — mockujemy wyłącznie to, czego nie
  * wolno nam dotknąć.
- *
- * ⚠⚠ PRZECZYTAJ, ZANIM UZNASZ TE TESTY ZA DZIWNE (Iteracja 13d-1, ticket 45, decyzja D3).
- * Migracja `007` przebudowała `selly_products` na model wariantowy: `kod_importu`
- * i `dostawca` są `NOT NULL` bez wartości domyślnej. Stary `syncOneProduct` z I8 — port
- * `routes.cjs:394-425` — w gałęzi CREATE tych kolumn NIE PODAJE, więc od 07.09 wywala się
- * na `NOT NULL constraint failed: selly_products.kod_importu`. Tak jest u Ani NA PRODUKCJI
- * i tak zostaje u nas: refaktor pod warianty nie doszedł do kodu z I8.
- *
- * Dlatego testy poniżej DOKUMENTUJĄ AWARIĘ zamiast dowodzić sukcesu, a wszędzie, gdzie
- * potrzebne jest istniejące mapowanie, zasiewamy je `zasiejMapowanieWariantowe` — czyli tak,
- * jak w nowym świecie robi to lazy discovery (`src/selly/discovery.ts`).
  */
 import { eq } from "drizzle-orm";
 import request from "supertest";
@@ -31,7 +20,6 @@ import { logSelly, produktPoKodzie } from "../src/repos/selly.js";
 import {
   stworzAtrapeSelly,
   stworzSrodowiskoTestowe,
-  zasiejMapowanieWariantowe,
   zasiejMapySelly,
   zasiejProdukty,
   type AtrapaSelly,
@@ -63,66 +51,17 @@ describe("synchronizacja z Selly (blok 8a)", () => {
   const mapowanie = (kod: string) =>
     srodowisko.db.select().from(sellyProducts).where(eq(sellyProducts.bridgeKod, kod)).get();
 
-  /** Dwa produkty MO9 z `PRODUKTY_TESTOWE`, zmapowane tak, jakby zrobiło to discovery. */
-  const zasiejMapowanieMO9 = (ostatniaSync = "2020-01-01 00:00:00") =>
-    zasiejMapowanieWariantowe(srodowisko.db, [
-      {
-        kod: "MO9_336320",
-        kodImportu: "798368",
-        dostawca: "MO9",
-        sellyProductId: 5001,
-        sellyVariantId: 6001,
-        featureIdMagazyn: 1,
-        ostatniaSync,
-      },
-      {
-        kod: "MO9_336319",
-        kodImportu: "798369",
-        dostawca: "MO9",
-        sellyProductId: 5002,
-        sellyVariantId: 6002,
-        featureIdMagazyn: 1,
-        ostatniaSync,
-      },
-    ]);
-
   describe("pojedynczy produkt", () => {
-    /**
-     * ⭐ DEFEKT PRODUKCJI ODTWORZONY ŚWIADOMIE (ticket 45, D3) — patrz nagłówek pliku.
-     *
-     * I to jest najgorszy wariant awarii, jaki mógł tu wyjść: produkt POWSTAJE w cudzym
-     * sklepie (`createProduct` idzie po HTTP i się udaje), a mapowanie w naszej bazie NIE
-     * powstaje. Kolejny przebieg nie widzi wpisu, więc utworzy go w Selly PONOWNIE.
-     * Test pilnuje obu połówek tego stanu, żeby nikt nie „naprawił" go przypadkiem.
-     */
-    it("nieznany produkt: Selly dostaje produkt, ale zapis mapowania PADA (defekt D3)", async () => {
+    it("nieznany produkt jest TWORZONY i zapisywany w `selly_products`", async () => {
       const odp = await post("/api/selly/sync-product").send({ kod: "MO9_336320" });
 
-      const cialo = odp.body as { error?: string };
-      expect(cialo.error).toContain("NOT NULL constraint failed");
-      expect(cialo.error).toContain("selly_products.kod_importu");
-
-      // Wywołanie do Selly JUŻ POSZŁO — awaria jest po naszej stronie, po fakcie.
+      expect(odp.body).toMatchObject({ action: "created", kod: "MO9_336320" });
       expect(atrapa.liczba("createProduct")).toBe(1);
-      expect(mapowanie("MO9_336320")).toBeUndefined();
-    });
+      expect(atrapa.liczba("updateProduct")).toBe(0);
 
-    /**
-     * Gałąź UPDATE działa dalej — i to jest istotne rozróżnienie: migracja `007` zepsuła
-     * WYŁĄCZNIE tworzenie nowego mapowania, nie aktualizację istniejącego. Mapowanie
-     * zasiewamy tak, jak w nowym świecie zrobiłoby to discovery.
-     */
-    it("znany produkt jest AKTUALIZOWANY, bez drugiego wpisu w `selly_products`", async () => {
-      zasiejMapowanieMO9();
-      const pierwszeId = mapowanie("MO9_336320")?.id;
-
-      const odp = await post("/api/selly/sync-product").send({ kod: "MO9_336320" });
-
-      expect(odp.body).toMatchObject({ action: "updated" });
-      expect(atrapa.liczba("createProduct")).toBe(0);
-      expect(atrapa.liczba("updateProduct")).toBe(1);
-      expect(mapowanie("MO9_336320")?.id).toBe(pierwszeId);
-      expect(mapowanie("MO9_336320")).toMatchObject({
+      const zapis = mapowanie("MO9_336320");
+      expect(zapis).toMatchObject({
+        sellyProductId: (odp.body as { selly_product_id: number }).selly_product_id,
         ostatniStatus: "ok",
         ostatniBlad: null,
         sellyCategoryId: 11,
@@ -130,6 +69,18 @@ describe("synchronizacja z Selly (blok 8a)", () => {
         cenaZakupuWyslana: 5562.4,
         stanWyslany: 2,
       });
+    });
+
+    it("znany produkt jest AKTUALIZOWANY, bez drugiego wpisu w `selly_products`", async () => {
+      await post("/api/selly/sync-product").send({ kod: "MO9_336320" });
+      const pierwszeId = mapowanie("MO9_336320")?.id;
+
+      const odp = await post("/api/selly/sync-product").send({ kod: "MO9_336320" });
+
+      expect(odp.body).toMatchObject({ action: "updated" });
+      expect(atrapa.liczba("createProduct")).toBe(1);
+      expect(atrapa.liczba("updateProduct")).toBe(1);
+      expect(mapowanie("MO9_336320")?.id).toBe(pierwszeId);
     });
 
     it("stan magazynowy idzie osobnym wywołaniem, z magazynem z payloadu", async () => {
@@ -159,20 +110,14 @@ describe("synchronizacja z Selly (blok 8a)", () => {
   });
 
   describe("synchronizacja dostawcy", () => {
-    /**
-     * Ze zmapowanymi produktami przebieg liczy `updated` i domyka dziennik jak dotąd.
-     * Bez mapowania — patrz test „…wszystkie pozycje są `failed`" niżej.
-     */
-    it("liczy `updated`, a wpis w dzienniku domyka się statusem `zakonczono`", async () => {
-      zasiejMapowanieMO9();
-
+    it("liczy `created`, a wpis w dzienniku domyka się statusem `zakonczono`", async () => {
       const odp = await post("/api/selly/sync-supplier").send({ dostawca: "MO9" });
 
       expect(odp.body).toMatchObject({
         dostawca: "MO9",
         total: 2,
-        created: 0,
-        updated: 2,
+        created: 2,
+        updated: 0,
         failed: 0,
         skipped: 0,
         dry_run: false,
@@ -189,21 +134,6 @@ describe("synchronizacja z Selly (blok 8a)", () => {
         status: "zakonczono",
       });
       expect(wpis?.zakonczono).not.toBeNull();
-    });
-
-    /**
-     * ⭐ To samo żądanie BEZ zasianego mapowania — czyli stan, w jakim Ania jest dziś dla
-     * każdego produktu, którego nie ma jeszcze w `selly_products` (defekt D3, patrz nagłówek).
-     * Cały przebieg schodzi do `failed`, mimo że w Selly produkty POWSTAŁY.
-     */
-    it("bez mapowania: wszystkie pozycje są `failed`, choć Selly dostał produkty (D3)", async () => {
-      const odp = await post("/api/selly/sync-supplier").send({ dostawca: "MO9" });
-
-      expect(odp.body).toMatchObject({ total: 2, created: 0, updated: 0, failed: 2 });
-      const errors = (odp.body as { errors: { error?: string }[] }).errors;
-      expect(errors[0]?.error).toContain("NOT NULL constraint failed");
-      expect(atrapa.liczba("createProduct")).toBe(2);
-      expect(logSelly(srodowisko.db)[0]).toMatchObject({ liczba_blad: 2, status: "zakonczono" });
     });
 
     /**
@@ -247,12 +177,10 @@ describe("synchronizacja z Selly (blok 8a)", () => {
     });
 
     it("`limit` obcina liczbę przetwarzanych produktów", async () => {
-      zasiejMapowanieMO9();
-
       const odp = await post("/api/selly/sync-supplier").send({ dostawca: "MO9", limit: 1 });
 
-      expect(odp.body).toMatchObject({ total: 1, updated: 1 });
-      expect(atrapa.liczba("updateProduct")).toBe(1);
+      expect(odp.body).toMatchObject({ total: 1, created: 1 });
+      expect(atrapa.liczba("createProduct")).toBe(1);
     });
 
     /**
@@ -305,7 +233,6 @@ describe("synchronizacja z Selly (blok 8a)", () => {
      * do roboty.
      */
     it("`only_updated` pomija produkty zsynchronizowane i niezmienione", async () => {
-      zasiejMapowanieMO9();
       await post("/api/selly/sync-supplier").send({ dostawca: "MO9" });
 
       const odp = await post("/api/selly/sync-supplier").send({
@@ -317,7 +244,6 @@ describe("synchronizacja z Selly (blok 8a)", () => {
     });
 
     it("`only_updated` łapie produkt zmieniony po ostatniej synchronizacji", async () => {
-      zasiejMapowanieMO9();
       await post("/api/selly/sync-supplier").send({ dostawca: "MO9" });
 
       srodowisko.sqlite

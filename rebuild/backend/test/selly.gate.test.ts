@@ -35,7 +35,6 @@ import {
   stworzSrodowiskoTestowe,
   zasiejDostawcow,
   zasiejLogSellyZFixtures,
-  zasiejMapowanieWariantowe,
   zasiejMapySelly,
   zasiejProdukty,
   type AtrapaSelly,
@@ -150,27 +149,12 @@ describe("GATE — panel Selly (blok 8a)", () => {
 
   describe("kontrakt — trasy bez fixture'a", () => {
     /**
-     * `MO9_336320` ma zastosowanie „Ciągnik" → kategoria 11, więc payload jest kompletny
-     * i idzie do Selly. Sprawdzamy ścieżkę udaną — 200 i zgodność z kontraktem.
-     *
-     * ⚠ Mapowanie zasiewamy z góry (Iteracja 13d-1, ticket 45, decyzja D3): po migracji
-     * `007` gałąź CREATE starego `syncOneProduct` pada na `NOT NULL constraint failed`,
-     * bo nie podaje `kod_importu`/`dostawca` — tak samo jak u Ani na produkcji. Gałąź
-     * UPDATE, którą tu sprawdzamy, działa dalej. Sama awaria jest utrwalona w
-     * `test/selly.synchronizacja.test.ts`.
+     * Trzy produkty testowe są aktywne, ale żaden nie przechodzi walidacji payloadu:
+     * marka „BKT"/„ALLIANCE" jest w słowniku, natomiast `MO9_336320` ma zastosowanie
+     * „Ciągnik" → kategoria 11, więc payload jest kompletny i idzie do Selly. Sprawdzamy
+     * ścieżkę udaną — 200 i zgodność z kontraktem.
      */
     it("POST /api/selly/sync-product", async () => {
-      zasiejMapowanieWariantowe(srodowisko.db, [
-        {
-          kod: "MO9_336320",
-          kodImportu: "798368",
-          dostawca: "MO9",
-          sellyProductId: 5001,
-          sellyVariantId: 6001,
-          featureIdMagazyn: 1,
-        },
-      ]);
-
       const odp = await postZAuth("/api/selly/sync-product").send({ kod: "MO9_336320" });
 
       expect(odp.status).toBe(200);
@@ -179,7 +163,7 @@ describe("GATE — panel Selly (blok 8a)", () => {
         sciezka: "/api/selly/sync-product",
         odpowiedz: odp,
       });
-      expect(odp.body).toMatchObject({ action: "updated", kod: "MO9_336320" });
+      expect(odp.body).toMatchObject({ action: "created", kod: "MO9_336320" });
     });
 
     it("POST /api/selly/sync-supplier (dry_run — nie dotyka Selly)", async () => {

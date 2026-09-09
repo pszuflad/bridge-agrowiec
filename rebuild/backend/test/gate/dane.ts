@@ -13,8 +13,6 @@
  *  3. `NULL` w kolumnie boolean musi zostać `null`, a nie zamienić się w `false`
  *     (`reinforced` w fixture jest nullem).
  */
-import { sql } from "drizzle-orm";
-
 import type { Baza } from "../../src/db/index.js";
 import {
   KONFIGURACJA_POCZATKOWA,
@@ -739,43 +737,6 @@ export function zasiejMapySelly(db: Baza): void {
       },
     ])
     .run();
-}
-
-/**
- * Mapowanie Bridge → Selly w kształcie WARIANTOWYM (Iteracja 13d-1, ticket 45).
- *
- * ⚠ Po migracji `007` to jest JEDYNY sposób, żeby wiersz w `selly_products` w ogóle powstał
- * w teście: `kod_importu` i `dostawca` są `NOT NULL`, a stara ścieżka I8
- * (`syncOneProduct`, gałąź CREATE) ich nie podaje i pada — świadomie, 1:1 z produkcją
- * (decyzja D3). Testy, które potrzebują ISTNIEJĄCEGO mapowania, zasiewają je tędy.
- *
- * Wartości dobrane, nie nagrane — produkcja nie wystawia tej tabeli przez API.
- */
-export function zasiejMapowanieWariantowe(
-  db: Baza,
-  wiersze: {
-    kod: string;
-    kodImportu: string;
-    dostawca: string;
-    sellyProductId: number;
-    sellyVariantId?: number | null;
-    featureIdMagazyn?: number | null;
-    stanWyslany?: number | null;
-    cenaSprzedazyWyslana?: number | null;
-    ostatniaSync?: string;
-  }[],
-): void {
-  for (const w of wiersze) {
-    db.run(
-      sql`INSERT INTO selly_products (kod_importu, dostawca, bridge_kod, selly_product_id,
-            selly_variant_id, feature_id_magazyn, stan_wyslany, cena_sprzedazy_wyslana,
-            ostatni_status, ostatnia_sync)
-          VALUES (${w.kodImportu}, ${w.dostawca}, ${w.kod}, ${w.sellyProductId},
-            ${w.sellyVariantId ?? null}, ${w.featureIdMagazyn ?? null},
-            ${w.stanWyslany ?? null}, ${w.cenaSprzedazyWyslana ?? null},
-            'ok', ${w.ostatniaSync ?? "2020-01-01 00:00:00"})`,
-    );
-  }
 }
 
 /**

@@ -274,18 +274,6 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `POST /api/products` (bulk import), filtruje na poziomie kolumn tabeli, bo import musi
 > zapisać kolumny wyliczane — opisane komentarzem i zamierzone.
 
-> **Dołożone w 13d-1** (`45-FEATURE-selly-rest-sync-tor1`, 2026-09-09): obok panelu Selly z I8
-> (10 tras, `registerSellyRoutes`, `extensions.cjs:395-396`) działa od tej karty osobny
-> podsystem Tor 1 — discovery + delta stan/cena PER WARIANT — zarejestrowany oddzielnie
-> (`extensions.cjs:462-470`). Trzy nowe trasy, wszystkie pod `requireAuth`:
-> `GET /api/selly/sync-status`, `POST /api/selly/sync-delta-supplier`,
-> `POST /api/selly/sync-delta-all`. Tabela `selly_products` zmieniła klucz na
-> `UNIQUE(kod_importu, dostawca)` (migracja `007`, patrz `docs/cutover.md`), `bridge_kod`
-> przestał być unikatowy. Skutek dla starej trasy I8: `POST /api/selly/sync-supplier`
-> przestaje tworzyć nowe produkty (`NOT NULL constraint failed` przy INSERT bez
-> `kod_importu`/`dostawca`) — wierne odtworzenie stanu produkcji od 07.09, nie regres
-> odbudowy. Szczegóły: `docs/tickets/45-FEATURE-selly-rest-sync-tor1/`.
-
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).
