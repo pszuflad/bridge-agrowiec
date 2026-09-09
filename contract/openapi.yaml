@@ -19799,6 +19799,148 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETSellyStatusOdpowiedz200" } } } }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  /api/selly/sync-status:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/sync-status"
+      description: |
+        Stan limitera zapytań i 20 ostatnich wpisów `selly_sync_log`.
+        DOPISANE 2026-09-09 (Iteracja 13d-1, ticket 45) — trasa istnieje w produkcji
+        od 2026-09-07 (`mirror/backend/selly/routes_sync.cjs:23`), ale nie było jej
+        w tym kontrakcie. BEZ FIXTURE'A: nagranie wymagałoby żywego Selly.
+        `todayRotation`/`activeSuppliers` dotyczą Toru 2, mimo że wychodzą tą trasą.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, limiter, todayRotation, activeSuppliers, recentLogs]
+                properties:
+                  ok: { type: boolean }
+                  limiter:
+                    type: object
+                    required: [requestsInWindow, capacity, utilizationPct]
+                    properties:
+                      requestsInWindow: { type: integer }
+                      capacity: { type: integer }
+                      utilizationPct: { type: integer }
+                  todayRotation:
+                    type: array
+                    items: { type: string }
+                  activeSuppliers:
+                    type: array
+                    items: { type: string }
+                  recentLogs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        operacja: { type: string }
+                        dostawca_kod: { type: string, nullable: true }
+                        liczba_ok: { type: integer }
+                        liczba_blad: { type: integer }
+                        liczba_skip: { type: integer }
+                        rozpoczeto: { type: string }
+                        zakonczono: { type: string, nullable: true }
+                        status: { type: string }
+                        szczegoly_json: { type: string, nullable: true }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Błąd — `{ok: false, error}`" }
+  /api/selly/sync-delta-supplier:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-delta-supplier"
+      description: |
+        Tor 1 (delta stan/cena) dla JEDNEGO dostawcy: `PUT /api/products/{pid}/variants/{vid}`.
+        DOPISANE 2026-09-09 (Iteracja 13d-1, ticket 45). BEZ FIXTURE'A — wymaga żywego Selly.
+
+        ⚠ ODSTĘPSTWO ŚWIADOME (ticket 45, decyzja D1): w produkcji ta trasa ZAWSZE oddaje 500,
+        bo `routes_sync.cjs:15` importuje nieistniejące `syncDeltaForDostawca`
+        (`sync_delta.cjs` eksportuje `syncDelta`). U nas trasa działa.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dostawca]
+              properties:
+                dostawca:
+                  type: string
+                  enum: [MO1, MO2, MO3, MO4, MO5, MO6, MO7, MO8, MO9, MO10]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [stats, errors, logId]
+                properties:
+                  stats:
+                    type: object
+                    required: [total, ok, err, skip, discovered, created]
+                    properties:
+                      total: { type: integer }
+                      ok: { type: integer }
+                      err: { type: integer }
+                      skip: { type: integer }
+                      discovered: { type: integer }
+                      created: { type: integer }
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      required: [kod, error]
+                      properties:
+                        kod: { type: string }
+                        error: { type: string }
+                  logId: { type: integer }
+        "400": { description: "Zły dostawca — `{ok: false, error}`" }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Błąd — `{ok: false, error}`" }
+  /api/selly/sync-delta-all:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-delta-all"
+      description: |
+        Tor 1 dla wszystkich dziesięciu dostawców, sekwencyjnie.
+        DOPISANE 2026-09-09 (Iteracja 13d-1, ticket 45). BEZ FIXTURE'A — wymaga żywego Selly.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, results]
+                properties:
+                  ok: { type: boolean }
+                  results:
+                    type: array
+                    description: |
+                      Wpis udany niesie `dostawca` + statystyki; wpis po wyjątku niesie
+                      `{ok: false, dostawca, error}` — dwa różne kształty, jak w oryginale.
+                    items:
+                      type: object
+                      required: [dostawca]
+                      properties:
+                        dostawca: { type: string }
+                        total: { type: integer }
+                        ok: { type: boolean }
+                        err: { type: integer }
+                        skip: { type: integer }
+                        discovered: { type: integer }
+                        created: { type: integer }
+                        error: { type: string }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Błąd — `{ok: false, error}`" }
   /api/selly/sync-product:
     post:
       tags: [selly]
