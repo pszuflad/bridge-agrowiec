@@ -13,6 +13,7 @@ danych dla odbudowy backendu.
 | `004_kategoria_wielka_litera.sql` | **Iteracja 13c:** historyczne `products.kategoria` z małej litery → forma kanoniczna (backlog #2 `kategoriafix` + #57 `katunify`). |
 | `005_konstrukcja_slowa.sql` | **Iteracja 13c:** `products.konstrukcja` kody `R`/`D`/`L`/`B`/`-` → `Radialna`/`Diagonalna` (backlog #58). |
 | `006_nazwa_caps.sql` | **Iteracja 13c:** `products.nazwa` → `UPPER`, `manual_overrides` pole `nazwa` → `UPPER`, skasowanie wierszy `staging_items` CASE_ONLY (backlog #59). |
+| `007_selly_products_warianty.sql` | **Iteracja 13d-1** (ticket 45, backlog #60): `selly_products` na model wariantowy — `ALTER TABLE ... RENAME` na `selly_products_old` (zachowana z danymi), nowa tabela pusta z kluczem `(selly_product_id, selly_variant_id)` + `feature_id_magazyn`, `UNIQUE (kod_importu, dostawca)`, sześć indeksów, domyślny `ostatni_status='pending'` (stara miała `'ok'`). Danych nie migrujemy — Ania też nie migrowała. |
 
 ## Skąd pochodzi
 

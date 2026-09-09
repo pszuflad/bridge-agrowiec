@@ -141,6 +141,62 @@ nowe produkty (defekt 3, decyzja D3). To jest stan, w jakim jest dziś produkcja
 **Nowa zmienna środowiskowa:** `SELLY_SCHEDULER` (domyślnie wyłączona). Bez ustawienia zachowanie
 procesu jest jak dotąd — scheduler Toru 1 nie startuje.
 
+### ⚠ Migracja `007` NIE PRZEJDZIE na bazie produkcji — i to jest oczekiwane
+
+Cutover idzie big-bang na **tej samej** `data.db`, na której Ania **już** wykonała tę przebudowę
+ręcznie 2026-09-07 — łącznie z zostawieniem starej tabeli pod nazwą `selly_products_old`
+(2174 wpisy MO1/MO2, `mirror/backend/CHANGELOG.md`). Nasze
+`ALTER TABLE selly_products RENAME TO selly_products_old` trafi więc na istniejącą nazwę i odpowie
+`there is already another table or index with this name`, a transakcja migracji się wycofa.
+
+To nie jest ryzyko teoretyczne jak przy `002`/`003` — to niemal pewność, bo `007` odtwarza dokładnie
+ten sam ruch. **Obejście jest takie samo jak istniejące obejście `002`**: nie puszczać `ALTER TABLE`,
+tylko odnotować migrację jako zastosowaną
+(`INSERT OR IGNORE INTO _migracje VALUES ('007_selly_products_warianty.sql', datetime('now'))`),
+bo docelowy kształt tabeli już tam jest. Procedura sprawdzenia na kopii i gałąź decyzyjna opisane
+w `docs/cutover.md` §3 (punkt (c), krok 2b) i §5 (krok 5).
+
+Migracji **nie zmieniamy**, żeby „przechodziła wszędzie": na czystej bazie z kanonu ma zrobić
+dokładnie to, co zrobiła Ania, a rozjazd z żywą produkcją jest właściwością cutoveru, nie migracji,
+i cutover ma na to ustaloną procedurę.
+
+## Aktualizacja dokumentacji
+
+Cztery równoległe przeglądy. Zmienione dziewięć plików:
+
+**`docs/rebuild-roadmap.md`** — 13d-1 oznaczone ✅ (2026-09-09), tablica postępu zaktualizowana.
+Zakres sprostowany do stanu faktycznego: **5 z 7** plików `selly/*` + migracja `007`, **3 z 6** tras.
+Blokada „Tor 2 niedomknięty" **zdjęta z całego 13d** i zawężona do 13d-2 — 13d-1 i 13d-3 nigdy jej
+nie podlegały, a tak zapisana zatrzymałaby następną sesję bez powodu. Ustalenia wpisane
+**do bloków 13d-2 i 13d-3**, nie do zamkniętego 13d-1 (obowiązek nr 2 z `CLAUDE.md`).
+
+**`docs/rebuild-backlog.md`** — #60 z `⬜ do portu` na `🔨 częściowo — Tor 1 zrobiony w 13d-1`;
+sprostowane przypisanie (było „→ 13c", właściwe to 13d) i zawężona nota o blokadzie.
+Sześć defektów produkcji zapisane jako **#66–#70** (defekt naprawiony u nas — D1 — świadomie bez
+osobnego numeru, bo nie ma czego śledzić; opisany w #60).
+
+**`docs/cutover.md`** — ⚠ **znalezisko wdrożeniowe**, patrz „Breaking changes" wyżej. Dodatkowo
+lista migracji `001–007`, wiersz `SELLY_SCHEDULER` w tabeli env i aktualna liczba testów.
+
+**`docs/deploy-setup.md`** — `SELLY_SCHEDULER` z wyraźną notą, że na stagingu zostaje wyłączona.
+
+**`docs/spec-backend.md`** — nota o Torze 1: osobna rejestracja, trzy trasy pod `requireAuth`,
+nowy klucz `selly_products`, świadoma regresja starej trasy `sync-supplier`.
+
+**`contract/README.md`** — 96 → 99 ścieżek (113 → 116 operacji), liczba nagrań bez zmian (73).
+Dopisany wyjątek: to jedyne trasy w kontrakcie, których fixtures **nie da się nagrać nigdy**.
+
+**`rebuild/schema/README.md`** — wiersz migracji `007`.
+**`rebuild/backend/README.md`** i **`rebuild/backend/.env.example`** — `SELLY_SCHEDULER`
+(braku w `.env.example` nie było w planie — wychwycone w przeglądzie i uzupełnione).
+
+### Pre-existing issues (zastane, POZA zakresem tego ticketa)
+- `rebuild/backend/README.md` — sekcja „Struktura" opisuje stan do ~3b (auth/staging/import).
+  Selly (I8), analityka, admin/config i spedycja nie są tam udokumentowane w ogóle. Nie tknięte,
+  bo dopisanie samego Toru 1 pogłębiłoby niespójność.
+- `docs/cutover.md` §9 „Czego dokument NIE rozstrzyga" wymienia tylko ryzyko `003`. `007` nie
+  zostało tam dopisane, bo nowy punkt (c) daje jednoznaczną odpowiedź — to nie jest kwestia otwarta.
+
 ## Follow-up
 
 - **Tor 2 (`sync_full`) → karta 13d-2.** Przy okazji: `routes_sync.cjs:14` importuje

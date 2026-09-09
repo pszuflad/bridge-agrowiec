@@ -103,6 +103,13 @@ chmod 600 ~/private_apps/bridge-staging/.env
 > - `SELLY_TRYB` — **twarda blokada, domyślnie `wylaczony`**: klient odmawia każdej operacji,
 >   także z poprawnymi sekretami. `tylko-odczyt` przepuszcza odczyty i dry-run, blokując zapisy;
 >   `pelny` to zachowanie 1:1 z produkcją. **Produkcja musi ustawić `pelny` jawnie.**
+> - `SELLY_SCHEDULER` — **flaga bool, domyślnie WYŁĄCZONA** (od 13d-1, ticket
+>   `45-FEATURE-selly-rest-sync-tor1`). Włącza scheduler Toru 1 (discovery + delta stan/cena):
+>   HH:55 + HH:10/25/40 dla 10 dostawców. **Na stagingu MA ZOSTAĆ wyłączona** — staging stoi na
+>   tym samym VPS co produkcja, a przy skopiowanych sekretach `SELLY_*` włączony scheduler robiłby
+>   realne `PUT`-y w żywym sklepie Ani co 15 minut. Druga warstwa ochrony obok `SELLY_TRYB`, nie
+>   zamiennik — `tools/deploy-staging.sh` nie ustawia jej jawnie (domyślny off wystarcza), ale
+>   ktokolwiek dopisuje ją ręcznie do `.env` stagingu, robi to świadomie i błędnie.
 > - `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`, `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` (domyślnie
 >   `READWRITE`) — bez nich sześć tras zewnętrznych oddaje 500 „Brak konfiguracji" (zachowanie
 >   zamierzone, 1:1 z produkcją). Cztery trasy lokalne (`status`, `log`, `csv-status`,

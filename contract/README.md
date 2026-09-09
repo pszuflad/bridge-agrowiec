@@ -7,7 +7,7 @@ przepisywaniu.
 
 | Plik | Co | Stan |
 |---|---|---|
-| `openapi.yaml` | 96 ścieżek / 113 operacji: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d) |
+| `openapi.yaml` | 99 ścieżek / 116 operacji: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d; +3 ścieżki Selly Tor 1 w 13d-1, bez fixtures) |
 | `fixtures/` | 73 nagrania: **59 GET** + **14 tras zapisujących** | ✅ Krok 2.4 + sesja 12d |
 
 ## Co jest zamrożone
@@ -95,6 +95,15 @@ to zakresu 12d, ale rozszerzenie nagrań o atrybuty będzie wymagało obejścia 
 - `POST /api/selly/{producers,categories,sync-product,sync-supplier}` — wołają zewnętrzne API
   Selly, nagranie zmieniałoby cudzy sklep. Pokrycie: kontrakt + atrapa klienta
   (`rebuild/backend/test/gate/selly-atrapa.ts`).
+- `GET /api/selly/sync-status`, `POST /api/selly/sync-delta-supplier`, `POST /api/selly/sync-delta-all`
+  (Tor 1, ticket 45, decyzja D6) — dopisane do `openapi.yaml` **bez** nagrania, wyjątkowo bez
+  szans na domknięcie: kształty odpowiedzi Selly dla `GET /api/products?ean=`, `GET/POST
+  .../variants`, `PUT .../variants/{vid}` nie są nigdzie w repo udokumentowane, a odpytanie
+  żywego, cudzego Selly jest zakazane (`CLAUDE.md`). `tools/record-write-fixtures.cjs` nagrywa
+  zapisy do bazy Bridge, nie odpowiedzi zewnętrznego API — tu nie ma czego uruchomić lokalnie.
+  Świadomie NIE wstawiono syntetycznego fixture'a, żeby nie podważać wiarygodności tego
+  katalogu. Weryfikacja: testy za atrapą + walidacja metody/statusu/content-type wobec
+  `openapi.yaml`. Szczegóły: `docs/tickets/45-FEATURE-selly-rest-sync-tor1/plan.md` (D6).
 - `POST /api/import/from-url`, `POST /api/dostawcy/{kod}/synchronizuj-teraz` — realnie pobierają
   pliki z URL-i dostawców.
 - `POST /api/ai-fallback/parse` — zewnętrzne AI.

@@ -67,6 +67,7 @@ Wzór i opisy: [`.env.example`](.env.example).
 | `IMPORT_ARCHIVE_DIR` | nie | `<cwd>/import_archive` | Katalog archiwum plików importu (D11) — konfigurowalny, bo po `npm run build` `__dirname` wskazywałby `dist/`. |
 | `IMPORT_SCHEDULER` | nie | **`false`** | Automatyczny polling dostawców `url` (port `D4()`, blok 3f-3). **Świadome odstępstwo:** produkcja ma go włączonego na sztywno. Włączony odpytuje pięciu dostawców co 60 min ze **realnych** serwerów i przy każdej nieudanej próbie dopisuje alert (bez dławika — decyzja 3f-2). Startuje w `server.ts` po `listen()`, gaszony w `zamknij()`. |
 | `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` | nie | **`false`** | Przebieg zaraz po starcie, poza cyklem — działa tylko z `IMPORT_SCHEDULER`. Bez niego pierwsze pobranie jest dopiero po pełnym interwale, jak w oryginale; z nim dostawcy ruszają od razu, z rozrzutem 5 s. Osobna zmienna, żeby proces produkcyjny został 1:1. |
+| `SELLY_SCHEDULER` | nie | **`false`** | Scheduler sync Bridge→Selly Toru 1 (`selly/scheduler-sync.ts`, karta 13d-1): HH:55 event-driven + HH:10/25/40 fallback, wszystkich 10 dostawców. **Świadome odstępstwo:** produkcja go instaluje bezwarunkowo (`extensions.cjs:466`). Włączony robi realne `PUT`-y do żywego sklepu Ani co 15 min — druga warstwa ochrony obok `SELLY_TRYB`. Ten sam wzorzec co `IMPORT_SCHEDULER`. Startuje w `server.ts` po `listen()`. |
 
 Na stagingu `JWT_SECRET` wczytywany jest z pliku **poza repo**
 (`~/private_apps/bridge-staging/.env`) przez `tools/deploy-staging.sh` —
