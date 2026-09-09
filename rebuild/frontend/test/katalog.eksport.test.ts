@@ -87,6 +87,20 @@ describe("3. Przypadki specjalne kolumn (port `OT`)", () => {
     expect(wartoscKomorki(obcyPrefiks, "kodDostawcy")).toBe("ABC123");
   });
 
+  /*
+   * Eksport dzieli formater szerokości z tabelą (`OT` woła to samo `Wfmt` co `DT`), więc
+   * łatka `szer_marka` z 2026-09-04 zmienia CSV razem z widokiem: gałąź „cała notacja AxB"
+   * zniknęła, zostaje sam człon szerokości — z zerami końcowymi z pola `rozmiar`.
+   */
+  it("szerokosc z notacji AxB daje sam człon, z zerami końcowymi", () => {
+    expect(
+      wartoscKomorki(produkt({ szerokosc: 14.9, rozmiar: "14.9x28" } as Partial<Produkt>), "szerokosc"),
+    ).toBe("14.9");
+    expect(
+      wartoscKomorki(produkt({ szerokosc: "8.00", rozmiar: "8.00x20" } as unknown as Partial<Produkt>), "szerokosc"),
+    ).toBe("8.00");
+  });
+
   it("ean zostawia same cyfry", () => {
     expect(wartoscKomorki(produkt({ ean: "59-012 345/6789" } as Partial<Produkt>), "ean")).toBe(
       "590123456789",

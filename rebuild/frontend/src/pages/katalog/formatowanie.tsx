@@ -23,15 +23,25 @@ function Kreska() {
  *
  *  1. pusto/null            → `null` (komórka pokaże „—"),
  *  2. wartość nieliczbowa   → surowy tekst,
- *  3. `rozmiar` bez „/" i w notacji `AxB`, którego pierwszy człon równa się szerokości
- *     → cała notacja `AxB` (np. „14.9x28"),
- *  4. inaczej: pierwszy token liczbowy z `rozmiar` RÓWNY liczbowo szerokości → ten token
+ *  3. pierwszy token liczbowy z `rozmiar` RÓWNY liczbowo szerokości → ten token
  *     w oryginalnym zapisie (tak wraca „10.00" mimo REAL-a w bazie),
- *  5. fallback              → `String(Number(wartosc))`.
+ *  4. fallback              → `String(Number(wartosc))`.
  *
  * Praktyczny skutek: dopóki `rozmiar` zawiera pasujący token, kolumna wygląda TAK SAMO
  * niezależnie od tego, czy baza trzyma `10` (REAL, kanon) czy `"10.00"` (TEXT, staging).
  * Rozjazd z backlogu #3 jest więc w UI w dużej mierze niewidoczny.
+ *
+ * ⚠ KROK „CAŁA NOTACJA `AxB`" ZOSTAŁ ZDJĘTY — łatka `szer_marka` z 2026-09-04 15:00
+ * (żywy bundle `index-PRICEFMT1783512500.js`, stan sprzed łatki w kopii
+ * `.bak_szer_marka_20260904_1500`). Ania usunęła z `Wfmt` całą gałąź
+ * `if(!rs.includes("/")){ … /^(A)\s*[xX]\s*(B)/ … return `${A}x${B}` }`, więc dla
+ * `rozmiar="14.9x28"` kolumna pokazuje dziś `14.9`, a nie `14.9x28`. Pomiar na
+ * `db/snapshot.db`: **587 z 7395 pozycji** zmienia zapis (`8.00x20`→`8.00`, `16x6-8`→`16`,
+ * `23x10.50-12`→`23`, `300x15`→`300`).
+ *
+ * ⚠ Zera końcowe PRZEŻYŁY usunięcie gałęzi — niesie je krok 3, który oddaje token
+ * `rozmiar` w oryginalnym zapisie: `8.00x20` przy `szerokosc="8.00"` daje `"8.00"`, nie `"8"`.
+ * To dlatego kroku 3 nie wolno „uprościć" do `String(Number(…))`.
  */
 export function formatujSzerokosc(
   wartosc: number | string | null | undefined,
@@ -44,13 +54,6 @@ export function formatujSzerokosc(
 
   if (rozmiar) {
     const tekstRozmiaru = String(rozmiar);
-    if (!tekstRozmiaru.includes("/")) {
-      const notacjaAxB = tekstRozmiaru.match(/^([0-9]+(?:[.,][0-9]+)?)\s*[xX]\s*([0-9]+(?:[.,][0-9]+)?)/);
-      if (notacjaAxB) {
-        const pierwszy = (notacjaAxB[1] ?? "").replace(",", ".");
-        if (Number(pierwszy) === liczba) return `${pierwszy}x${(notacjaAxB[2] ?? "").replace(",", ".")}`;
-      }
-    }
     for (const token of tekstRozmiaru.match(/[0-9]+(?:[.,][0-9]+)?/g) ?? []) {
       const znormalizowany = token.replace(",", ".");
       if (Number(znormalizowany) === liczba) return znormalizowany;
