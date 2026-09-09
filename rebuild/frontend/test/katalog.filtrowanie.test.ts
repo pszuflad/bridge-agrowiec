@@ -178,7 +178,7 @@ describe("listy słownikowe filtrów", () => {
     const SLOWNIK = [
       { rodzaj: "marka", wartosc: "Michelin" },
       { rodzaj: "marka", wartosc: "BKT" },
-      // ⚠ Wartość słownikowa Z CYFRĄ — filtr „bez cyfr” jej NIE dotyczy (patrz test niżej).
+      // ⚠ Wartość słownikowa Z CYFRĄ — od łatki `szer_marka` (04.09) filtr „bez cyfr” JĄ TEŻ odsiewa.
       { rodzaj: "marka", wartosc: "Gruma 3" },
       { rodzaj: "kategoria", wartosc: "Quady" },
       { rodzaj: "bieznik", wartosc: "AGRO 10" },
@@ -194,14 +194,20 @@ describe("listy słownikowe filtrów", () => {
       expect(wynik.filter((m) => m === "BKT")).toHaveLength(1); // w obu źródłach
     });
 
-    it("marki: filtr „bez cyfr” dotyczy WYŁĄCZNIE marek z produktów", () => {
-      // W oryginale `filter(!/\d/)` wisi na gałęzi produktowej (`:23288`), nie na złączeniu.
+    /*
+     * ⚠ ODWRÓCONY W 13e. Do 2026-09-04 `filter(!/\d/)` wisiał wyłącznie na gałęzi
+     * produktowej (`:23288`), więc marka słownikowa z cyfrą przechodziła — i odbudowa
+     * odtwarzała tę asymetrię świadomie. Łatka `szer_marka` z 04.09 15:00 dokleiła ten sam
+     * filtr na gałęzi słownikowej, więc teraz odsiewane są OBA źródła.
+     */
+    it("marki: filtr „bez cyfr” dotyczy OBU źródeł — produktów i słownika", () => {
       const dane = [produkt({ id: 1, marka: "11.2-24" })];
 
       const wynik = listaMarek(dane, SLOWNIK);
 
       expect(wynik).not.toContain("11.2-24"); // śmieć z importu — odsiany
-      expect(wynik).toContain("Gruma 3"); // ze słownika — zostaje mimo cyfry
+      expect(wynik).not.toContain("Gruma 3"); // ze słownika — od 04.09 też odsiany
+      expect(wynik).toContain("Michelin"); // słownikowa bez cyfry — zostaje
     });
 
     it("marki: sortowanie po polsku obejmuje oba źródła", () => {

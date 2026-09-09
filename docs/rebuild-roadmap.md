@@ -95,7 +95,7 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | `docs/spec-frontend.md` | 12 widoków, blueprint auth, design tokens, mapa napraw |
 | `rebuild/schema/001_schema.sql` | kanoniczny schemat bazy (26 tabel, `products` 72 kol.) |
 | `docs/prompts/mapa-kodu-do-wiki.md` | mapa starego kodu (funkcje/pliki) |
-| `deminified/` + `mirror/backend`, `mirror/frontend` | zdeminifikowany oryginał — ostateczne źródło, gdy spec milczy |
+| `deminified/` + `mirror/backend`, `mirror/frontend` | zdeminifikowany oryginał — ostateczne źródło, gdy spec milczy. ⚠ `deminified/frontend-index.js` to bundle z **2026-08-13**, STARSZY niż produkcja o cztery łatki (`konstr`, `tr_fix`, `ackalerts`, `szer_marka`) — lista i sposób czytania żywego bundla z `main`: `deminified/README.md` |
 | `docs/incoming/*-perplexity/` | kanoniczne dokumentacje BE/FE (cytują plik:linia) |
 | `docs/reference/Instrukcja_obslugi_Bridge.docx` (17 zrzutów) | wygląd/UX (wersja 5, starsza niż bundle) |
 | `rebuild/backend/test/gate/` | harness GATE (od I1, rozbudowany w I2 o moduł seedujący `test/gate/dane.ts` — produkty/dostawcy/`historia_cen`): porównanie odpowiedzi z `contract/fixtures/` + walidacja wg `contract/openapi.yaml`, generyczny — kolejne iteracje dokładają tylko ścieżki/fixtures/seed |
@@ -182,7 +182,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
-| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy) · 13e FE | 3, 8 | ⬜ | zaplanowane `40-CHORE-triaz-i13-plan` · 2026-09-08. Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). Wykonanie: osobne tickety `/feature`. 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. Zostają 13d/13e |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
 
 ---
 
@@ -1126,6 +1126,9 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
       (`rodzaj === "marka"`); suma przez `Set`, sort `localeCompare(…, "pl")`.
       **Filtr „bez cyfr" wisi WYŁĄCZNIE na gałęzi produktowej** (`:23288`), więc wartość
       słownikowa z cyfrą zostaje na liście, a śmieć z importu w rodzaju „11.2-24" wypada.
+      ⚠ **Zdanie wyżej opisuje stan do 2026-09-04** — łatka `szer_marka` rozszerzyła filtr
+      „bez cyfr" także na gałąź SŁOWNIKOWĄ marek; sportowane w 13e
+      (`47-CHORE-i13e-frontend-bridgeone`). Asymetria marka↔kategoria (niżej) ZOSTAJE.
     - KATEGORIE: z produktów BEZ filtra cyfr + wartości słownika; suma przez `Set`,
       **zwykły `.sort()`**, nie `localeCompare`.
   - **⚠ To INNA reguła niż w dialogu reguł `/narzuty` (7b)**, gdzie kategorie idą WYŁĄCZNIE
@@ -1895,7 +1898,8 @@ w auth/CORS/JWT/mass-assignment. Dowiezione:
 
 ### Iteracja 13 — Delty produkcji Ani 26.08–08.09 (post-odbudowa)
 
-- **Status:** ⬜ zaplanowana 2026-09-08 (`40-CHORE-triaz-i13-plan`). **Zależy od:** 3 (import), 8 (Selly).
+- **Status:** 🔨 w toku — zaplanowana 2026-09-08 (`40-CHORE-triaz-i13-plan`); zrobione 13f, 13a, 13b,
+  13c i 13e, zostaje 13d (Selly). **Zależy od:** 3 (import), 8 (Selly).
 - **Skąd się wzięła.** Producent (`tools/vps-sync.sh`) **milczał 25.08–08.09** (grep `\.bak_pre_`
   przestał trafiać po zmianie nazewnictwa kopii `.bak` Ani → skrypt ubijał się pod `set -euo pipefail`
   przed `git push`; naprawione w `d88ac15` na main). Dwa tygodnie zmian produkcji wciągnięto RĘCZNIE
@@ -2044,33 +2048,64 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     byłby nieaktualny w 428 liniach. Potwierdza trafność revertu 13d-1. Nowej karty NIE zakładamy.
   - **⚠ PUŁAPKA:** revert merge’a #57 sprawia, że git uzna `feature/45` za „już zmergowane". Rewrite MUSI
     iść na **NOWEJ gałęzi** (świeży port z finalnego `mirror/selly/`), NIE przez re-merge `feature/45`.
-- **13e — Frontend: Bridge ONE + drobne** [FE] — rebrand „Bridge ONE" (title „Bridge ONE — konsolidacja
-  cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`.
-  ✅ **DECYZJA UŻYTKOWNIKA (2026-09-09): odbudowa PRZYJMUJE nazwę „Bridge ONE"** — produkcja się
-  przemianowała, więc odbudowa robi to 1:1 (nazwa + title). Nie pytać już o to w sesji 13e.
-  ⚠ **`konstr` po stronie FE JEST JUŻ ZROBIONE — nie rób tego drugi raz.** Bundle zminifikowane —
-  **najpierw rozłóż diff bundla**, `.bak` daje tylko etykietę. **Zależy od:** 13c (✅ spełnione
-  2026-09-09); rebrand+drobne mogą iść częściowo równolegle.
-  **Ustalenia z 13c (`44-CHORE-i13c-migracje-konwencji`) dla tej karty:**
-  - Migracja `konstrukcja` JUŻ WESZŁA — `products.konstrukcja` oddaje `Radialna`/`Diagonalna`,
-    nie kody jednoliterowe.
-  - ⚠ **`konstr` FE zrobione W 13c, nie w tej karcie — i to nie było „przy okazji".**
-    Roadmapa przypisywała tę zmianę tutaj, zakładając (błędnie), że FE odbudowy poradzi sobie
-    sam, bo bundle PRODUKCJI ma pass-through. Frontend ODBUDOWY go nie miał: mapował wyłącznie
-    kody `R`/`D`/`L`/`B`, więc po migracji 13c kolumna „konstrukcja" w katalogu pokazywałaby
-    `—` dla KAŻDEGO produktu, a eksport CSV oddawałby pustą kolumnę. Wykrył to dopiero CI
-    (`katalog.formatowanie.test.tsx` porównuje się z prawdziwą pozycją z `GET_products.json`).
-    Skoro 13c to zepsuła, 13c to naprawiła — reguła „develop zostaje zielony" jest nadrzędna.
-    Zrobione: `src/pages/katalog/formatowanie.tsx` i `src/pages/katalog/eksport.ts` mają
-    pass-through wartości surowej (`n||""`/`n||null`) obok zachowanego mapowania kodów, dokładnie
-    jak bundle produkcji od 2026-09-01 (CHANGELOG 11:35).
-  - ⚠ **Skutek uboczny pass-through, wpisany do testów:** wartość spoza mapy przechodzi surowa,
-    więc jedyny produkt z `konstrukcja='X'` w `db/snapshot.db` (migracja go nie rusza) pokaże się
-    jako „X", a nie „—". Tak samo zachowa się produkcja. Nie „poprawiać".
-  - `products.nazwa` jest teraz WIELKIMI literami — jeśli FE gdzieś formatuje nazwę
-    (capitalize/title-case), zderzy się to z konwencją katalogu.
-  - ⚠ ASCII-only `UPPER` zostawia małe polskie diakrytyki w środku wyrazów (np. „PROWADZąCA").
-    To jest stan produkcji, nie błąd odbudowy — FE nie powinien tego „poprawiać".
+- **13e — Frontend: `szer_marka` (rebrand i `PRICEFMT` odbudowa miała już 1:1)** [FE] — ✅ zrobione
+  2026-09-09 (`47-CHORE-i13e-frontend-bridgeone`, backlog #61). Z pięciu etykiet z bundla
+  produkcji realny kod dotyczy **wyłącznie `szer_marka`** — i to NIE „kolumny szerokość/marka",
+  lecz dwóch poprawek z 2026-09-04 15:00: **(a)** `Wfmt`/`formatujSzerokosc` traci gałąź „cała
+  notacja `AxB`", **(b)** filtr „marka bez cyfr" obejmuje też wartości ze SŁOWNIKA (`listaMarek`).
+  `listaKategorii` filtra dalej nie ma w żadnej gałęzi — asymetria marka↔kategoria ZOSTAJE i nie
+  wolno jej „domykać". **Zależy od:** 13c (✅ 2026-09-09). API nietknięte, więc **GATE N/D**
+  (`contract/`, `rebuild/backend/`, `mirror/` bez zmian w diffie gałęzi); bramki FE
+  `lint`/`typecheck`/`build`/`test` zielone (751/751, 48 plików).
+  **Fakty ustalone rozkładem diffu bundla** (kopie `.bak` istnieją tylko na `main`, czyta się je
+  `git show main:mirror/frontend/assets/<plik>`; pełny rozkład i materiał dowodowy:
+  `docs/tickets/47-CHORE-i13e-frontend-bridgeone/plan.md`):
+  - **Żywy bundle to `index-PRICEFMT1783512500.js`** (`mirror/frontend/index.html:16`).
+    `index-BRIDGEONE21783342500.js` jest MARTWY od łatki `pricefmt` z 31.07.
+  - **Rebrand „Bridge ONE" i `PRICEFMT`: odbudowa miała je JUŻ 1:1 — zero kodu w tej karcie.**
+    Rebrand jest z 2026-07-31 (data „09-01…04" w backlogu opisywała nazwę PLIKU bundla, nie
+    zmianę), a `deminified/frontend-index.js` to bundle PRICEFMT sprzed 04.09 — port z I0–I12
+    wciągnął oba automatycznie (`index.html:6`, `AppShell.tsx:47,73`, `Login.tsx:48`,
+    `katalog/formatowanie.tsx:167,169`).
+  - **`tr_fix` i `ackalerts` nie mają w odbudowie NOŚNIKA — nie ma czego portować.** Obie łatki
+    żyją w silniku PSEUDO-ALERTÓW katalogowych (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`),
+    którego odbudowa świadomie nie ma (D1 z I6, backlog #26); `/alerty` stoi na REALNYCH alertach
+    importu z `GET /api/alerts`.
+  - **Pomiar (a) na `db/snapshot.db`: 587 z 7395 pozycji zmienia zapis.** ⚠ Zniesiona gałąź
+    oddawała DWA PIERWSZE CZŁONY, a nie cały `rozmiar` — czytaj jako `rozmiar` → dziś (dawniej):
+    `8.00x20` → `8.00` (dawniej `8.00x20`), `14.9x28` → `14.9` (dawniej `14.9x28`),
+    `16x6-8` → `16` (dawniej `16x6`), `23x10.50-12` → `23` (dawniej `23x10.50`). Zera końcowe
+    niesie pętla po tokenach `rozmiar` — nie upraszczać jej.
+  - **Zasięg (a) obejmuje eksport CSV.** W oryginale `Wfmt` woła `DT` (tabela) i `OT` (CSV),
+    w odbudowie `eksport.ts:78` woła to samo `formatujSzerokosc`. Dialog reguł `/narzuty` ma
+    własną listę marek i filtra cyfr NIE dostaje — tak jak memo `h` w oryginale.
+  - **`products.nazwa` CAPS a formatowanie nazwy we froncie: zmierzone — BEZPRZEDMIOTOWE.** FE
+    nigdzie nie robi capitalize/title-case na `nazwa` (zero trafień w `rebuild/frontend/src/`;
+    jedyne `toLowerCase` to szukajka katalogu). Konwencja CAPS z 13c i ASCII-only `UPPER`
+    („PROWADZąCA") przechodzą przez warstwę prezentacji surowe — tak jak w produkcji.
+  - ⚠ **`konstr` po stronie FE zrobiony W 13c, nie tutaj** (pass-through `n||""`/`n||null` obok
+    mapowania kodów — szczegóły w bloku 13c). Skutek uboczny wpisany do testów: wartość spoza mapy
+    przechodzi surowa, więc jedyny produkt z `konstrukcja='X'` w `db/snapshot.db` pokaże się jako
+    „X", a nie „—". Nie „poprawiać". **Żywa produkcja tego pass-through nie ma** — patrz D4 niżej
+    i nota o cutoverze w §6.
+  **Decyzje użytkownika (2026-09-09):**
+  - **D1 — rebrand zostaje jak jest, bez kodu.** Odtwarzamy rozjazd zapisu z bundla Ani: „Bridge
+    ONE" w `<title>`, „BridgeOne" (bez spacji) w trzech miejscach UI. Ujednolicenie byłoby
+    odstępstwem. Backlog #61 rozstrzygnięty.
+  - **D2 — `tr_fix` i `ackalerts` pkt 1–3: nie portujemy** (kontynuacja D1 z I6, backlog #26).
+    Pkt 2 („pulpit respektuje potwierdzenia") odbudowa spełnia konstrukcyjnie — `aktywneAlerty()`
+    filtruje po `status === "nowy"` z realnej odpowiedzi API, bez IndexedDB.
+  - **D3 — `ackalerts` pkt 4 (ukrycie statusu `rozwiazany`): nie portujemy.** Oryginał ma trzy
+    statusy i domyślny filtr „wszystkie", odbudowa dwa i domyślny filtr `nowy` — ta sama reguła
+    zdegenerowałaby opcję „Wszystkie statusy" do duplikatu opcji „nowy".
+  - **D4 — pass-through `konstrukcja` ZOSTAJE mimo regresji żywej produkcji.** Od 2026-09-09 to
+    świadome odstępstwo: odbudowa jest POPRAWNIEJSZA niż produkcja. Odrzucone: zdjęcie
+    pass-through, żeby odtworzyć zepsute zachowanie (cofałoby 13c).
+  **Follow-up (nierozliczone):** silnik pseudo-alertów — backlog #26 ⬜; gdyby kiedyś wszedł,
+  wchodzi OD RAZU w wersji po łatkach z 04.09. Trzeci status alertu `przejrzany` istnieje
+  w oryginale, nie w odbudowie (brak wpisu w backlogu). Enhancer konfiguratora kolumn stagingu
+  (`ex_marka`/`ex_szerokosc`) — mylące skojarzenie z etykietą `szer_marka`, to inna i wcześniejsza
+  zmiana, do triażu.
 
 **Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → **13e** ; **13d ODŁOŻONE** (przepisanie świeże
 po ustabilizowaniu `mirror/selly/` u Ani, ~2026-09-16 — patrz blok 13d; 13d-1 sportowane i cofnięte 09.09).
@@ -2110,6 +2145,16 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
   bazy), weryfikacja schematu przed migracją, migracje 001→003, różnice env staging vs
   produkcja, kroki przełączenia, rollback, smoke-testy. **To dokument — wykonanie jest osobnym
   zdarzeniem z Anią**, poza zakresem tej roadmapy.
+
+> ⚠ **Fakt dla cutoveru i dla przeglądu 12 widoków (ustalony w 13e, 2026-09-09): kolumna
+> „Konstrukcja opony" jest dziś w ŻYWEJ produkcji PUSTA.** Łatka pass-through z 2026-09-01 11:22
+> trafiła do MARTWEGO bundla `index-BRIDGEONE21783342500.js`, a `mirror/frontend/index.html:16`
+> ładuje `index-PRICEFMT1783512500.js` — więc po migracji `konstrukcja` na pełne słowa produkcja
+> pokazuje „—" w tej kolumnie i pustą kolumnę w eksporcie CSV dla 7392 wierszy. **Odbudowa jest
+> POPRAWNA** (pass-through od 13c, decyzja D4 w bloku 13e), więc po cutoverze Ania zobaczy tam
+> pełne słowa zamiast kresek. To zmiana na lepsze, ale ma prawo ją zaskoczyć — uprzedzić przy
+> przeglądzie widoków. Naprawa po stronie produkcji (przeniesienie łatki do żywego bundla) to
+> robota na VPS, nie w odbudowie.
 
 Fixtures/kontrakt: 73 nagrania / 96 ścieżek — 12 operacji zapisujących z D3 (12d) mają nagranie,
 reszta zapisujących tras lokalnych zostaje bez fixtures (Follow-up 38, `contract/README.md`).

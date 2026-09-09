@@ -65,11 +65,25 @@ describe("formatujSzerokosc (Wfmt)", () => {
     expect(formatujSzerokosc(11.2, "11.2-24")).toBe(formatujSzerokosc("11.2", "11.2-24"));
   });
 
-  it("dla rozmiaru w notacji AxB oddaje całą notację", () => {
-    expect(formatujSzerokosc(14.9, "14.9x28")).toBe("14.9x28");
+  /*
+   * ⚠ ODWRÓCONY W 13e. Do 2026-09-04 `Wfmt` miał osobną gałąź dla rozmiarów bez „/"
+   * w notacji `AxB` i oddawał CAŁĄ notację („14.9x28"). Łatka `szer_marka` z 04.09 15:00
+   * tę gałąź usunęła, więc zostaje sam pierwszy człon. Pomiar na `db/snapshot.db`:
+   * 587 z 7395 pozycji zmienia zapis.
+   */
+  it("z notacji AxB bierze sam pierwszy człon, nie całą notację", () => {
+    expect(formatujSzerokosc(14.9, "14.9x28")).toBe("14.9");
+    expect(formatujSzerokosc(16, "16x6-8")).toBe("16");
+    expect(formatujSzerokosc(23, "23x10.50-12")).toBe("23");
   });
 
-  it("notacji AxB nie stosuje, gdy rozmiar zawiera ukośnik", () => {
+  it("z notacji AxB zachowuje zera końcowe z rozmiaru", () => {
+    // Usunięcie gałęzi `AxB` NIE może zabrać zer — niesie je pętla po tokenach `rozmiar`.
+    expect(formatujSzerokosc("8.00", "8.00x20")).toBe("8.00");
+    expect(formatujSzerokosc(8, "8.00x20")).toBe("8.00");
+  });
+
+  it("dla rozmiaru z ukośnikiem oddaje pasujący token", () => {
     expect(formatujSzerokosc(620, "620/70R42")).toBe("620");
   });
 
@@ -187,5 +201,21 @@ describe("formatujKomorke (DT)", () => {
     expect(tekstKomorki(pierwszy, "szerokosc")).toBe("620");
     expect(tekstKomorki(pierwszy, "konstrukcja")).toBe("Radialna");
     expect(tekstKomorki(pierwszy, "stubbleResistant")).toBe("");
+  });
+
+  /*
+   * Zakotwiczenie łatki `szer_marka` w NAGRANYCH danych produkcji: trzecia pozycja fixtura
+   * (`id 97796`, `rozmiar:"8.00x20"`, `szerokosc:"8.00"`) to dokładnie przypadek, który
+   * zniesiona gałąź `AxB` pokazywała jako „8.00x20". Fixture jest nietknięty — zmieniło się
+   * oczekiwanie, bo zmienił się formater.
+   */
+  it("pozycja AxB z contract/fixtures/GET_products.json daje sam człon szerokości", () => {
+    const zNotacjaAxB = produktyZFixtura()[2] as Produkt;
+    expect(zNotacjaAxB.rozmiar).toBe("8.00x20");
+    expect(tekstKomorki(zNotacjaAxB, "szerokosc")).toBe("8.00");
+    expect(tekstKomorki(zNotacjaAxB, "cenaSprzedazy")).toBe("782,-");
+    // ⚠ „Diagonalna" to stan ODBUDOWY. Żywy bundle produkcji pokazuje tu „—", bo łatka
+    // pass-through z 01.09 trafiła do martwego pliku — świadome odstępstwo D4, nie rozjazd.
+    expect(tekstKomorki(zNotacjaAxB, "konstrukcja")).toBe("Diagonalna");
   });
 });

@@ -20,6 +20,14 @@ Przełączamy **jednym ruchem** (big-bang, bez okresu współbieżnego działani
 **Baza jest wspólnym mianownikiem i to jest największe ryzyko całej operacji** — dlatego
 rozdział 3 (weryfikacja schematu) jest najdłuższy i nie wolno go pominąć.
 
+**⚠ Kolumna „Konstrukcja opony" zacznie po cutoverze działać — i to jest poprawne.** Łatka
+pass-through z 2026-09-01 trafiła do MARTWEGO bundla `index-BRIDGEONE21783342500.js`, a
+`mirror/frontend/index.html:16` ładuje `index-PRICEFMT1783512500.js` — więc po migracji
+`konstrukcja` na pełne słowa **żywa produkcja pokazuje dziś „—" w tej kolumnie i pustą kolumnę
+w eksporcie CSV** (7392 wiersze). Odbudowa ma pass-through od 13c, więc po przełączeniu w tym
+miejscu pojawią się „Radialna"/„Diagonalna". Zmiana na lepsze, ale nieoczekiwana — uprzedź Anię
+przed oknem. Ustalenie 13e, decyzja D4: `docs/tickets/47-CHORE-i13e-frontend-bridgeone/plan.md`.
+
 **Routing adresów.** Odbudowa porzuciła routing po hashu (odstępstwo O1 z I1): stary panel dawał
 adresy `/#/katalog`, nowy daje `/katalog`. Zakładki Ani zapisane na starych adresach trafią na
 `/` (hash jest ignorowany po stronie serwera) — to nie jest awaria, ale warto ją o tym uprzedzić
@@ -32,7 +40,8 @@ przed oknem, żeby nie zgłosiła tego jako błąd.
 - [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na staging
       (`docs/przeglad-12-widokow.md`). To jest warunek nadrzędny — bez niego nie zaczynamy.
 - [ ] **Bramki zielone** na `develop`: `lint`, `typecheck`, `build`, `test` po obu stronach
-      (backend: 80 plików / 1241 testów; frontend: 48 plików / 747 testów + 5 plików integracyjnych).
+      (backend: 80 plików / 1241 testów — 13d-1 cofnięte; frontend: 48 plików / 751 testów + 5 plików
+      integracyjnych).
 - [ ] **Sekrety produkcyjne przygotowane** w pliku `.env` poza repo (rozdział 4). Bez
       `JWT_SECRET` i `DB_PATH` backend **nie wstanie** — to celowy fail-fast, nie usterka.
 - [ ] **Schemat produkcji zweryfikowany** wg rozdziału 3, na KOPII, nie na żywej bazie.
@@ -293,6 +302,8 @@ Kolejność jest celowa: od najtańszego do najdroższego, żeby awaria wyszła 
 - [ ] Logowanie na konto Ani działa; po zalogowaniu widać jej imię w stopce sidebara.
 - [ ] `/katalog` pokazuje produkty, a licznik pozycji zgadza się z tym, co było przed oknem.
 - [ ] **Sidebar jest na każdym z 12 ekranów** (od 12e wpina go router).
+- [ ] `/katalog` → kolumna „Konstrukcja opony" pokazuje „Radialna"/„Diagonalna", a nie „—".
+      ⚠ To **świadoma różnica wobec starej produkcji** (rozdział 1), nie usterka do zgłoszenia.
 - [ ] `/historia` pokazuje wpisy sprzed cutoveru — dowód, że to ta sama baza.
 - [ ] `/konfiguracja` → zakładka „Dostawcy": lista i statusy wyglądają jak wcześniej.
 - [ ] `/analityka` rysuje wykresy (ładuje się leniwie — chwilę trwa, to normalne).

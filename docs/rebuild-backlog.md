@@ -1596,6 +1596,14 @@ dobór (poziom `krytyczny`/`ostrzezenie`, status `nowy`), sortowanie (poziom, po
 malejąco) i limit pięciu są portem 1:1, zmieniło się wyłącznie ŹRÓDŁO. Pseudo-alerty
 katalogowe są teraz porzucone na DWÓCH ekranach (`/alerty` i `/`), nie jednym.
 
+**Doprecyzowanie z 13e (2026-09-09, `47-CHORE-i13e-frontend-bridgeone`).** Gdyby pseudo-alerty
+kiedyś weszły, wchodzą OD RAZU w wersji **po łatkach Ani z 2026-09-04** (wpis #61), a nie
+w wersji z deminifikatu — ten jest sprzed 04.09. To znaczy: `h2` bez tokenu `"tr-"` (regex
+`\btr-\b` łapał `TR-135` w nazwach opon BKT), `id` alertu z odciskiem wartości (potwierdzenie
+przestaje kleić się do alertu na zawsze), pulpit czytający zapisane statusy z IndexedDB
+i podający je do `pv(produkty, statusy)` oraz ukrycie alertów `rozwiazany` poza filtrem
+wybranym wprost. Sam wpis zostaje ⬜ — decyzja o powrocie pseudo-alertów jest nadal otwarta.
+
 ---
 
 ### #27 · 2026-09-03 · [FRONTEND] · lista przewoźników i dzielników żyje wyłącznie w IndexedDB przeglądarki
@@ -2548,8 +2556,9 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | B4 #53, B10 #54, mo9expand #55, katunify(parser) #57, konstr(parser) #58, WULSTBAND #10, NRO/CHO #9, MO8-CSV #8, **p2_4 #63**, **odswinch #64** | **13a** | parsery — kopia `src/import/legacy/**` + charakteryzacja |
 | P3 #56, CAPS/Xq #59 (część silnikowa) | **13b** | silnik `tk()`/`acceptStaging` — reimpl TS |
 | katunify(migracja) #57, konstr(migracja) #58, CAPS(nazwa) #59 | **13c ✅ zrobione** (`44-CHORE-i13c-migracje-konwencji`, 2026-09-09) | migracje danych + przenagranie fixtures |
-| Selly REST #60 | **13d** | nowy podsystem TS (blokada: Tor 2 u Ani) |
-| Bridge ONE + drobne #61 | **13e** | frontend |
+| Selly REST #60 | **13d** | ⛔ ODŁOŻONE — 13d-1 sportowane i **COFNIĘTE** (revert #58); Tor 2 dociera u Ani (zegar zresetowany) |
+| Bridge ONE + drobne #61 | **13e ✅ zrobione** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09) | frontend — realny kod tylko `szer_marka` |
+| regresja `konstrukcja` w żywym bundlu #71 | **13e** (wykryte, bez kodu) | frontend PRODUKCJI — ❌ nie odtwarzamy (D4) |
 | backfille #62 | **13f** | DECYZJA (najpierw) |
 
 ### #53 · 2026-08-31 · [BACKEND] · B4 — parser rozmiaru WxSxD (stara diagonalna rolnicza)
@@ -2610,7 +2619,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | `R`→`Radialna`, `D`/`L`/`B`→`Diagonalna` (L = część rozmiaru „Low Section Height"; B = bias-belted Trelleborg AMPT/Nokian Ground Kare). W bazie 2 wartości: Radialna 4390 + Diagonalna 3015. Prośba Anny — słowa zamiast kodów w kolumnie i eksporcie. |
 | **Do nowej wersji?** | ✅ TAK |
 | **Iteracja** | część parserowa **→ 13a** (zrobione), migracja historycznych wartości **→ 13c (zrobione)**, FE (kolumna katalogu + eksport CSV) **→ ZROBIONE W 13c**, nie w 13e — patrz `Status`. ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13b (BE+migracja) + 13d (FE)" — niezgodne z tabelą mapowania (migracja katunify/konstr → 13c) i z roadmapą (FE = 13e; 13d to Selly). Do 13b nie należy żadna część. |
-| **Status** | ✅ część parserowa sportowana i POTWIERDZONA pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): `konstrukcja` `R`→`Radialna`, `D`→`Diagonalna`, wszystkich 10 dostawców (MO1 199, MO2 200, MO3 44, MO4 101, MO5 146, MO6 2, MO7 285, MO8 625, MO9 12, MO10 223 rek.). Mechanizm: `normalizeKonstrukcja()` + `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs`. ✅ **Migracja danych historycznych zrobiona w 13c** (`44-CHORE-i13c-migracje-konwencji`, 2026-09-09), plik `rebuild/schema/005_konstrukcja_slowa.sql` = `normalizeKonstrukcja()` przyłożone do istniejących wierszy (mapuje po `LOWER(TRIM(...))` wg `KONSTRUKCJA_CANONICAL_MAP`). Pomiar na `db/snapshot.db`: 7392 zmienione wiersze (R 4389, D 2957, L 35, B 11). ⚠ **Sprostowanie faktu w tym wpisie:** SQL produkcji (CHANGELOG 2026-09-01 11:35) objął WYŁĄCZNIE `R`/`D`/`L`/`B` — `'-'` NIE był częścią migracji danych produkcji. Klucz `'-'` istnieje tylko w `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs` jako mapowanie dla PRZYSZŁYCH importów; w danych produkcji ani w snapshocie nie występuje. Nasza migracja go obejmuje (bo mapuje wg mapy kanonicznej — i to jest no-op), ale twierdzenie „`-` → Diagonalna" jako opis tego, co zrobiła produkcja, było błędne (patrz opis Zmiany Ani wyżej). Migracja NIE rusza wartości spoza mapy — w snapshocie `X` (1 rek.) i `NULL` (12 rek.), dokładnie jak `MAP[key] || value` w oryginale; produkcja pozbyła się ich backfillem, którego decyzją 13f nie odtwarzamy. ⚠ **FE ZROBIONY RÓWNIEŻ W 13c, nie w 13e.** Roadmapa przypisywała `konstr` po stronie FE do 13e, zakładając (błędnie), że frontend odbudowy poradzi sobie sam, bo bundle PRODUKCJI ma pass-through. Frontend odbudowy go NIE miał — `src/pages/katalog/formatowanie.tsx` i `eksport.ts` mapowały wyłącznie kody `R`/`D`/`L`/`B`, więc po migracji kolumna „konstrukcja" pokazywałaby `—` dla każdego produktu, a eksport CSV oddawałby pustą kolumnę. Wykryło to CI, nie code review. Naprawione w 13c portem pass-through (`n||""`/`n||null`) obok zachowanego mapowania kodów, dokładnie jak bundle produkcji od 2026-09-01 (CHANGELOG 11:35). Skutek uboczny wpisany do testów: wartość spoza mapy przechodzi surowa, więc jedyny produkt z `konstrukcja='X'` pokaże się jako „X", nie „—" — tak samo jak w produkcji. |
+| **Status** | ✅ część parserowa sportowana i POTWIERDZONA pomiarem w `42-CHORE-i13a-resync-parserow` (2026-09-08): `konstrukcja` `R`→`Radialna`, `D`→`Diagonalna`, wszystkich 10 dostawców (MO1 199, MO2 200, MO3 44, MO4 101, MO5 146, MO6 2, MO7 285, MO8 625, MO9 12, MO10 223 rek.). Mechanizm: `normalizeKonstrukcja()` + `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs`. ✅ **Migracja danych historycznych zrobiona w 13c** (`44-CHORE-i13c-migracje-konwencji`, 2026-09-09), plik `rebuild/schema/005_konstrukcja_slowa.sql` = `normalizeKonstrukcja()` przyłożone do istniejących wierszy (mapuje po `LOWER(TRIM(...))` wg `KONSTRUKCJA_CANONICAL_MAP`). Pomiar na `db/snapshot.db`: 7392 zmienione wiersze (R 4389, D 2957, L 35, B 11). ⚠ **Sprostowanie faktu w tym wpisie:** SQL produkcji (CHANGELOG 2026-09-01 11:35) objął WYŁĄCZNIE `R`/`D`/`L`/`B` — `'-'` NIE był częścią migracji danych produkcji. Klucz `'-'` istnieje tylko w `KONSTRUKCJA_CANONICAL_MAP` w `common.cjs` jako mapowanie dla PRZYSZŁYCH importów; w danych produkcji ani w snapshocie nie występuje. Nasza migracja go obejmuje (bo mapuje wg mapy kanonicznej — i to jest no-op), ale twierdzenie „`-` → Diagonalna" jako opis tego, co zrobiła produkcja, było błędne (patrz opis Zmiany Ani wyżej). Migracja NIE rusza wartości spoza mapy — w snapshocie `X` (1 rek.) i `NULL` (12 rek.), dokładnie jak `MAP[key] || value` w oryginale; produkcja pozbyła się ich backfillem, którego decyzją 13f nie odtwarzamy. ⚠ **FE ZROBIONY RÓWNIEŻ W 13c, nie w 13e.** Roadmapa przypisywała `konstr` po stronie FE do 13e, zakładając (błędnie), że frontend odbudowy poradzi sobie sam, bo bundle PRODUKCJI ma pass-through. Frontend odbudowy go NIE miał — `src/pages/katalog/formatowanie.tsx` i `eksport.ts` mapowały wyłącznie kody `R`/`D`/`L`/`B`, więc po migracji kolumna „konstrukcja" pokazywałaby `—` dla każdego produktu, a eksport CSV oddawałby pustą kolumnę. Wykryło to CI, nie code review. Naprawione w 13c portem pass-through (`n||""`/`n||null`) obok zachowanego mapowania kodów. ⚠ **Sprostowanie faktu (13e, 2026-09-09): to NIE jest „dokładnie jak bundle produkcji od 2026-09-01".** Łatka `konstr` z 01.09 11:22 trafiła do `index-BRIDGEONE21783342500.js` — bundla **MARTWEGO** od łatki `pricefmt` z 31.07 (linia rodowa: `AUTOFILL` → `BRIDGEONE` 31.07 13:01 → `BRIDGEONE2` 31.07 13:55 → `PRICEFMT`; potwierdza to `index.html.bak_pre_pricefmt_20260731`, wskazujący jeszcze BRIDGEONE2). `mirror/frontend/index.html:16` ładuje `./assets/index-PRICEFMT1783512500.js`, a ten ma `…"Diagonalna":""` / `…"Diagonalna":null` — **BEZ `n||`**. Potwierdzenie wprost: `mirror/backend/CHANGELOG.md:101` (gałąź `main`), gdzie Ania wpisała ścieżkę `…/panel/assets/index-BRIDGEONE21783342500.js`. Skutek: pass-through w odbudowie (`formatowanie.tsx`, `eksport.ts`) jest od 2026-09-09 **świadomym ODSTĘPSTWEM od żywej produkcji** (decyzja **D4**, `47-CHORE-i13e-frontend-bridgeone`), a nie portem 1:1 — odbudowa jest w tym miejscu POPRAWNIEJSZA niż produkcja. Regresja żywej produkcji opisana osobno: **#71**. Skutek uboczny wpisany do testów: wartość spoza mapy przechodzi surowa, więc jedyny produkt z `konstrukcja='X'` pokaże się jako „X", nie „—" — tak samo jak w produkcji. |
 
 ### #59 · 2026-09-01 · [BACKEND][BAZA] · CAPS — `products.nazwa` = WIELKIE LITERY + `Xq()` case-insensitive
 | pole | wartość |
@@ -2637,10 +2646,10 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 |---|---|
 | **Kategoria** | FRONTEND (bundle zminifikowany) |
 | **Pliki** | `mirror/frontend/assets/index-BRIDGEONE….js`, `index-PRICEFMT….js` (+ kopie `.bak_{tr_fix,ackalerts,szer_marka,konstr}`) |
-| **Zmiana Ani** | Rebrand na „Bridge ONE" (title „Bridge ONE — konsolidacja cenników opon") + drobne: `tr_fix`, `ackalerts` (potwierdzanie alertów), `szer_marka` (kolumna szerokość/marka), `PRICEFMT` (formatowanie ceny). Bundle minified — najpierw rozłożyć diff, `.bak` daje tylko etykietę. |
-| **Do nowej wersji?** | ✅ **TAK (decyzja 2026-09-09): odbudowa przyjmuje nazwę „Bridge ONE"** — produkcja się przemianowała, odbudowa 1:1 (nazwa + title). Rebrand + `tr_fix`/`ackalerts`/`szer_marka`/`PRICEFMT` → 13e. `konstr` FE już zrobione w 13c. |
-| **Iteracja** | **→ 13e** (FE; `konstr` łączy się z #58). ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13d" — niezgodne z tabelą mapowania i roadmapą (FE = 13e; 13d to Selly). |
-| **Status** | ⬜ do rozłożenia diffu + decyzji |
+| **Zmiana Ani** | Pięć etykiet, **rozkład diffu bundli zrobiony w 13e** (nazwa `.bak` dawała tylko etykietę): **rebrand** — `<title>` → „Bridge ONE — konsolidacja cenników opon" + 3× `children:"Bridge"`→`"BridgeOne"` (**bez spacji**: nagłówek mobilny, sidebar, `<h1>` logowania) + usunięcie podtytułu „dla Agrowca" w sidebarze i na logowaniu; `aria-label="Bridge"` na SVG oraz teksty pomocnicze **bez zmian**. ⚠ Rebrand jest z **2026-07-31**, nie z 09-01…04 — data w nagłówku tego wpisu opisuje nazwę PLIKU bundla, nie samą zmianę. **PRICEFMT** — w `DT` `cenaSprzedazy` odchodzi od wspólnej gałęzi z `cenaZakupu`: `toFixed(2)` → `` `${Math.floor(n)},-` `` (`1234,-`); eksport `OT` nietknięty. **tr_fix** — usunięcie tokenu `"tr-"` z listy `h2` („to nie opona"); regex `\btr-\b` łapał `TR-135` w nazwach opon BKT → fałszywy alert „Nie-opona w katalogu — błąd parsera". **ackalerts** — CZTERY zmiany: (1) odcisk wartości w `id` alertu (`-marza-ujemna-{marża}`, `-marza-niska-{marża}`, `-nie-opona-{nazwa\|kategoria}`, `-brak-importu-{dni}` w obu gałęziach ≥7 i ≥30 dni), (2) pulpit czyta `alerty-statusy` z IndexedDB i podaje do `pv(produkty, statusy)`, (3) `window.dispatchEvent(new Event("alerty-statusy-updated"))` po zapisie statusów, (4) `.filter(e => e.status!=="rozwiazany" \|\| filtrStatusu==="rozwiazany")`. **szer_marka** — **NIE kolumna**, dwie poprawki: (a) `Wfmt` traci gałąź „cała notacja `AxB`", (b) filtr „marka bez cyfr" dołożony na gałęzi SŁOWNIKOWEJ listy marek. |
+| **Do nowej wersji?** | ✅ **TAK — i już było** (decyzja **D1**, 2026-09-09). Odbudowa ma rebrand 1:1 od ticketa 2 (`751a8e2`), bo deminifikat robiono z bundla PO rebrandzie. Rozjazd zapisu „Bridge ONE" (`<title>`) vs „BridgeOne" (UI) **jest w produkcji** i odtwarzamy go świadomie — nie ujednolicamy. `tr_fix` i `ackalerts` → ❌ nie portujemy (D2/D3, brak nośnika — patrz #26). |
+| **Iteracja** | **→ 13e ✅ zamknięte 2026-09-09** (FE; `konstr` łączy się z #58 — FE zrobiony w 13c, a łatka produkcji okazała się regresją, patrz #71). ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13d" — niezgodne z tabelą mapowania i roadmapą (FE = 13e; 13d to Selly). |
+| **Status** | ✅ **zrobione w 13e** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09). Sportowane: **tylko `szer_marka`** (oba punkty) — `formatujSzerokosc` bez gałęzi `AxB` + filtr „bez cyfr" także na gałęzi słownikowej `listaMarek`; `listaKategorii` bez zmian. **rebrand i PRICEFMT odbudowa miała już 1:1** — deminifikat to bundle `index-PRICEFMT…` w stanie SPRZED 04.09, więc port z I0–I12 wciągnął je automatycznie, a trzech łatek z 04.09 nie. Pomiar na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis szerokości; eksport CSV zmienia się razem z tabelą, bo `OT` i `DT` dzielą `Wfmt` (potwierdzone grafem wywołań w żywym bundlu; w odbudowie `eksport.ts` woła to samo `formatujSzerokosc`). ⚠ **Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, nie cały `rozmiar`** — czytać jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). **D2 — `tr_fix` i `ackalerts` (1–3) nie mają w odbudowie nośnika**: silnika pseudo-alertów (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`) świadomie nie ma (D1 z I6), więc obie łatki **pozostają zależne od decyzji przy #26**; punkt (2) jest spełniony konstrukcyjnie, bo pulpit odbudowy filtruje po `status==="nowy"` z REALNEJ odpowiedzi `GET /api/alerts`. **D3 — punktu (4) nie portujemy**: odbudowa ma DWA statusy (`nowy`/`rozwiazany`) i domyślny filtr ustawiony na `nowy`, więc reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu „nowy" — cel łatki realizuje już domyślny filtr. `konstr` po stronie FE → patrz #58 (zrobione w 13c) i #71 (regresja żywej produkcji). |
 
 ### #62 · 2026-08-26…09-04 · [BAZA] · Backfille danych (tl_tt / szerokości ułamkowe / JMK) — DECYZJA
 | pole | wartość |
@@ -2681,3 +2690,72 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Do nowej wersji?** | ⬜ **do decyzji** — naprawa byłaby świadomym odstępstwem od 1:1 (13c odtworzyła zachowanie 1:1, plan D7; to luka PRODUKCJI, nie regresja odbudowy) |
 | **Iteracja** | — (follow-up, nieprzypisany) |
 | **Status** | ⬜ nierozstrzygnięte — znalezione w `44-CHORE-i13c-migracje-konwencji` |
+
+> ⚠ **AKTUALIZACJA 2026-09-09 (po revercie #58) — dotyczy #66–#70.** Te pięć wpisów to defekty Selly
+> znalezione podczas portu **13d-1**, który został **COFNIĘTY** (`git revert -m 1`, PR #58). Analiza
+> produkcji w każdym z nich jest AKTUALNA i cenna (to realne defekty u Ani — zachowujemy jako wiedzę na
+> przepisanie 13d). ALE odniesienia w polach „Iteracja"/„Status" typu „przeportowane 1:1 w 13d-1" są
+> **NIEAKTUALNE** — kod portu usunięty. Przy ŚWIEŻYM przepisaniu 13d (z finalnego `mirror/selly/`, na
+> NOWEJ gałęzi) trzeba te defekty odtworzyć/rozstrzygnąć na nowo. #71 (regresja `konstrukcja`) NIE jest
+> tym dotknięte — to defekt produkcji FE, ważny bez zmian.
+
+### #66 · 2026-09-08 · [BACKEND] · Selly retry na HTTP 429 jest martwym kodem — gasi go throttle, nie retry
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (Selly, `discovery.cjs`/`client.cjs`) |
+| **Pliki** | `mirror/backend/selly/client.cjs:56-60` (`request()`), `discovery.cjs:27-36` (`apiWithRetry`); port: `rebuild/backend/src/selly/discovery.ts` (`wykonajZPonowieniem`) |
+| **Zmiana Ani** | Brak — to defekt zastanego kodu, znaleziony przy porcie `45-FEATURE-selly-rest-sync-tor1` (13d-1). `client.cjs:request()` odrzuca (rzuca) każdą odpowiedź spoza 2xx, więc `apiWithRetry` nigdy nie ogląda `r.status !== 429` — gałąź backoff z `Retry-After` jest nieosiągalna. Burzę 429 z cyklu 07.09 20:10 ugasił `globalLimiter.acquire()` (throttle przed każdym requestem), nie retry. |
+| **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** (decyzja D2, `45-FEATURE-selly-rest-sync-tor1`): naprawa zmieniłaby obserwowalne zachowanie (mniej wpisów `error`, inne czasy) względem produkcji. Gałąź zostaje w kodzie jako nieosiągalna, z komentarzem. |
+| **Iteracja** | zamknięte w **13d-1** (port odtwarza defekt 1:1) |
+| **Status** | ✅ udokumentowane i przeportowane 1:1; nie wymaga dalszej akcji, chyba że Ania naprawi u siebie — wtedy do rewizji przy 13d-2 |
+
+### #67 · 2026-09-08 · [BACKEND][BAZA] · stary `POST /api/selly/sync-supplier` (I8) zepsuty przez nowy schemat `selly_products`
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (Selly, panel I8) |
+| **Pliki** | `mirror/backend/selly/routes.cjs:417` (INSERT gałęzi CREATE); port: `rebuild/backend/src/repos/selly.ts:215` |
+| **Zmiana Ani** | Migracja modelu wariantowego (07.09, patrz #60) dodała `NOT NULL` na `kod_importu`/`dostawca` w `selly_products`, ale stary INSERT z I8 (`routes.cjs:417`) tych kolumn nie podaje. Gałąź CREATE pada na `NOT NULL constraint failed`. Produkt **POWSTAJE w Selly** (wywołanie HTTP poszło), ale mapowanie lokalne nie zapisuje się → kolejny przebieg tworzy go **ponownie**. |
+| **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** (decyzja D3, `45-FEATURE-selly-rest-sync-tor1`): u nas ten sam `NOT NULL constraint failed`, ten sam efekt (duplikaty w Selly). Naprawa dopisaniem kolumn wprowadziłaby rozjazd z produkcją, który wyszedłby dopiero po cutoverze. Test `selly.synchronizacja.test.ts` przepisany, żeby dokumentować awarię, nie sukces. |
+| **Iteracja** | zamknięte w **13d-1** (port odtwarza defekt 1:1); **świadoma regresja funkcjonalna** wnoszona do odbudowy — stan zgodny z dzisiejszą produkcją |
+| **Status** | ✅ udokumentowane i przeportowane 1:1 — u Ani ten sam defekt jest aktywny na produkcji, więc to nie jest coś do naprawy w odbudowie, tylko fakt o źródle prawdy |
+
+### #68 · 2026-09-08 · [BACKEND] · `discovery.createProduct` woła nieistniejące `mapper.buildProductPayload`
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (Selly, Tor 2) |
+| **Pliki** | `mirror/backend/selly/discovery.cjs:147` (`createProduct`); ani `mapper_v2.cjs`, ani `mapper.cjs` takiej funkcji nie eksportują; port: `rebuild/backend/src/selly/discovery.ts` |
+| **Zmiana Ani** | Brak — zastany defekt. `createProduct` liczy na `mapper.buildProductPayload`, którego nie ma w żadnej wersji mappera. Nieosiągalne z Toru 1 (`sync_delta` woła `ensureMapping` BEZ `dictMaps`), ale zawsze rzuciłoby `TypeError`, gdyby Tor 2 (`sync_full`) wywołał ścieżkę tworzenia nowego produktu (nie tylko wariantu). |
+| **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** (decyzja D5, `45-FEATURE-selly-rest-sync-tor1`): `createProduct` u nas zwraca `{error: ...}` zamiast wymyślać payload, którego Ania u siebie nie ma. **Do rozstrzygnięcia w 13d-2** razem z resztą Toru 2. |
+| **Iteracja** | port defektu zamknięty w **13d-1**; rozstrzygnięcie (czy dopisać `buildProductPayload`, czy zostawić 1:1) → **13d-2** |
+| **Status** | ⬜ do decyzji w 13d-2 — dziś przeportowane 1:1 jako zablokowana gałąź |
+
+### #69 · 2026-09-09 · [BACKEND][BAZA] · `pending_create` nie ma jak trafić do `selly_products` — błąd liczy się w statystykach, nie zostawia śladu w bazie
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (Selly, discovery + sync_delta) |
+| **Pliki** | `mirror/backend/selly/discovery.cjs:213-218` (krok „rodzeństwo"), `sync_delta.cjs:96-103` (`markError`); port: `rebuild/backend/src/selly/discovery.ts`, `sync-delta.ts` |
+| **Zmiana Ani** | Brak — zastany defekt, wyszedł przy pisaniu testów w `45-FEATURE-selly-rest-sync-tor1` (13d-1), niezależnie zweryfikowany w code review na oryginale. Krok „rodzeństwo" szuka `selly_product_id` po samym `kod_importu`, a ta kolumna jest `NOT NULL` — więc **jeśli wiersz istnieje, rodzeństwo zawsze poda `product_id`** (wiersz podaje go sam sobie) i sterowanie nigdy nie dochodzi do gałęzi „brak dictMaps"; **jeśli wiersza nie ma**, komunikat `'produkt nie istnieje w Selly ale brak dictMaps do createProduct'` owszem powstaje, ale `markError` robi `UPDATE ... WHERE kod_importu=? AND dostawca=?` bez `INSERT` i nie trafia w żaden wiersz. Błąd jest policzony w `stats.err`/`errors[]`, ale w bazie nie zostaje ślad — zgodne z komentarzem DDL, który zna tylko `pending \| ok \| error \| not_found` (nie `pending_create`). |
+| **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** w porcie. Kosmetyczny defekt operacyjny: Tor 1 i tak ustawia `ok` po udanym PUT-cie, więc synchronizacja się nie psuje, ale diagnostyka w panelu jest myląca (produkt nieznany w Selly nie zostawia śladu). |
+| **Iteracja** | port defektu zamknięty w **13d-1**; naprawa → **do decyzji Ani po cutoverze** |
+| **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę |
+
+### #70 · 2026-09-09 · [BACKEND][BAZA] · `ON CONFLICT DO UPDATE` w discovery nie odświeża `ostatni_status` — stary `pending_create` przeżywa udane odnalezienie wariantu
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (Selly, discovery) |
+| **Pliki** | `mirror/backend/selly/discovery.cjs:229-234` (`ON CONFLICT(kod_importu, dostawca) DO UPDATE`); port: `rebuild/backend/src/selly/discovery.ts` |
+| **Zmiana Ani** | Brak — zastany defekt, zweryfikowany w `45-FEATURE-selly-rest-sync-tor1` (13d-1). UPSERT po odnalezieniu/utworzeniu wariantu nie nadpisuje kolumny `ostatni_status`, więc wiersz, który wcześniej dostał `pending_create`, po udanym `found_variant`/`created_variant` nadal pokazuje `pending_create` w panelu, mimo że mapowanie jest już poprawne. |
+| **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** w porcie. Kosmetyczny defekt operacyjny, ten sam charakter co #69 (nie psuje synchronizacji, tylko diagnostykę). |
+| **Iteracja** | port defektu zamknięty w **13d-1**; naprawa → **do decyzji Ani po cutoverze** |
+| **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę |
+
+### #71 · 2026-09-09 · [FRONTEND] · regresja `konstrukcja` w ŻYWEJ produkcji — łatka pass-through poszła w martwy bundle
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (bundle produkcji) — defekt PRODUKCJI, nie odbudowy |
+| **Pliki** | `mirror/frontend/index.html:16` (ładuje `assets/index-PRICEFMT1783512500.js`), `mirror/frontend/assets/index-BRIDGEONE21783342500.js` (+ `.bak_konstr_20260901_1122`), `mirror/backend/CHANGELOG.md:101` — kopie `.bak` i ta linia CHANGELOG-a są na gałęzi `main` |
+| **Zmiana Ani** | Łatka `konstr` z 2026-09-01 11:22 (pass-through `"Diagonalna":n\|\|""` w `OT` / `:n\|\|null` w `DT`, obok mapowania kodów `R/D/L/B`) została przyłożona **wyłącznie do `index-BRIDGEONE21783342500.js`** — do bundla, którego `index.html` nie ładuje, martwego od łatki `pricefmt` z 31.07. Ania sama wpisała tę ścieżkę do CHANGELOG-a (`…/panel/assets/index-BRIDGEONE21783342500.js`). Żywy `index-PRICEFMT1783512500.js` ma `…"Diagonalna":""` / `…"Diagonalna":null`, bez `n\|\|`. Wykryte przy rozkładaniu diffu bundla w 13e. |
+| **Skutek w produkcji** | Po migracji `konstrukcja` na pełne słowa (SQL produkcji z 2026-09-01 11:35, **7392 wiersze** — patrz #58) frontend zna już tylko kody, a w bazie są słowa: **produkcja pokazuje dziś „—" w kolumnie „Konstrukcja opony" i pustą kolumnę w eksporcie CSV** dla wszystkich zmigrowanych wierszy. |
+| **Do nowej wersji?** | ❌ **NIE — świadomie NIE odtwarzamy** (decyzja **D4**, 2026-09-09, `47-CHORE-i13e-frontend-bridgeone`). Odbudowa ma pass-through od 13c i działa poprawnie; wdrożenie regresji oznaczałoby cofnięcie 13c. To świadome odstępstwo od żywej produkcji — odbudowa jest tu POPRAWNIEJSZA. Wpis #58 sprostowany. |
+| **Iteracja** | wykryte w **13e** (bez kodu w odbudowie); naprawa dotyczy **PRODUKCJI**, nie `rebuild/` |
+| **Status** | ⬜ **do zgłoszenia Ani.** Naprawa po stronie VPS: przenieść tę samą zmianę do `index-PRICEFMT1783512500.js`, dwa miejsca — `OT` → `:n\|\|""`, `DT` → `:n\|\|null`. **Nie blokuje cutoveru**: po cutoverze panel odbudowy zastępuje bundle produkcji i kolumna po prostu zacznie działać. |

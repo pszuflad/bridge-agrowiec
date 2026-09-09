@@ -2,6 +2,11 @@
  * Formatowanie komórek tabeli katalogu — 1:1 z `Wfmt` i `DT`
  * (`deminified/frontend-index.js:23098-23190`).
  *
+ * ⚠ ODWOŁANIE DO DEMINIFIKATU JEST STARSZE NIŻ TEN PLIK. `deminified/frontend-index.js` to
+ * bundle `index-PRICEFMT…` w stanie z 2026-08-13, czyli SPRZED łatek z 2026-09-04.
+ * `formatujSzerokosc` jest tu świadomie PO łatce `szer_marka` i różni się od deminifikatu —
+ * nie „przywracać" gałęzi `AxB` jako rzekomo zgubionej w porcie.
+ *
  * To tutaj mieszkają wszystkie „drobiazgi", po których Ania pozna, czy odbudowa jest
  * wierna: dwie cyfry po przecinku w cenie zakupu, `1234,-` w cenie sprzedaży, `8PR`,
  * „Radialna"/„Diagonalna", czerwone zero w stanie i kreska `—` zamiast pustki.
@@ -23,15 +28,28 @@ function Kreska() {
  *
  *  1. pusto/null            → `null` (komórka pokaże „—"),
  *  2. wartość nieliczbowa   → surowy tekst,
- *  3. `rozmiar` bez „/" i w notacji `AxB`, którego pierwszy człon równa się szerokości
- *     → cała notacja `AxB` (np. „14.9x28"),
- *  4. inaczej: pierwszy token liczbowy z `rozmiar` RÓWNY liczbowo szerokości → ten token
+ *  3. pierwszy token liczbowy z `rozmiar` RÓWNY liczbowo szerokości → ten token
  *     w oryginalnym zapisie (tak wraca „10.00" mimo REAL-a w bazie),
- *  5. fallback              → `String(Number(wartosc))`.
+ *  4. fallback              → `String(Number(wartosc))`.
  *
  * Praktyczny skutek: dopóki `rozmiar` zawiera pasujący token, kolumna wygląda TAK SAMO
  * niezależnie od tego, czy baza trzyma `10` (REAL, kanon) czy `"10.00"` (TEXT, staging).
  * Rozjazd z backlogu #3 jest więc w UI w dużej mierze niewidoczny.
+ *
+ * ⚠ KROK „CAŁA NOTACJA `AxB`" ZOSTAŁ ZDJĘTY — łatka `szer_marka` z 2026-09-04 15:00
+ * (żywy bundle `index-PRICEFMT1783512500.js`, stan sprzed łatki w kopii
+ * `.bak_szer_marka_20260904_1500`). Ania usunęła z `Wfmt` całą gałąź
+ * `if(!rs.includes("/")){ … /^(A)\s*[xX]\s*(B)/ … return `${A}x${B}` }`, więc dla
+ * `rozmiar="14.9x28"` kolumna pokazuje dziś `14.9`, a nie `14.9x28`. Pomiar na
+ * `db/snapshot.db`: **587 z 7395 pozycji** zmienia zapis. ⚠ Zniesiona gałąź oddawała DWA
+ * PIERWSZE CZŁONY, a nie cały `rozmiar` — dlatego przykłady trzeba czytać jako
+ * `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300`
+ * (dawniej `300x15`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23`
+ * (dawniej `23x10.50`).
+ *
+ * ⚠ Zera końcowe PRZEŻYŁY usunięcie gałęzi — niesie je krok 3, który oddaje token
+ * `rozmiar` w oryginalnym zapisie: `8.00x20` przy `szerokosc="8.00"` daje `"8.00"`, nie `"8"`.
+ * To dlatego kroku 3 nie wolno „uprościć" do `String(Number(…))`.
  */
 export function formatujSzerokosc(
   wartosc: number | string | null | undefined,
@@ -44,13 +62,6 @@ export function formatujSzerokosc(
 
   if (rozmiar) {
     const tekstRozmiaru = String(rozmiar);
-    if (!tekstRozmiaru.includes("/")) {
-      const notacjaAxB = tekstRozmiaru.match(/^([0-9]+(?:[.,][0-9]+)?)\s*[xX]\s*([0-9]+(?:[.,][0-9]+)?)/);
-      if (notacjaAxB) {
-        const pierwszy = (notacjaAxB[1] ?? "").replace(",", ".");
-        if (Number(pierwszy) === liczba) return `${pierwszy}x${(notacjaAxB[2] ?? "").replace(",", ".")}`;
-      }
-    }
     for (const token of tekstRozmiaru.match(/[0-9]+(?:[.,][0-9]+)?/g) ?? []) {
       const znormalizowany = token.replace(",", ".");
       if (Number(znormalizowany) === liczba) return znormalizowany;

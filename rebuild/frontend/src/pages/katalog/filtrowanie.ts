@@ -136,10 +136,16 @@ export type WartoscSlownika = { rodzaj: string; wartosc: string };
  *
  * SUMA dwóch źródeł: wartości słownikowych rodzaju `marka` ORAZ marek obecnych w danych.
  *
- * ⚠ FILTR „BEZ CYFR" DOTYCZY WYŁĄCZNIE MAREK Z PRODUKTÓW (`!/\d/.test(e)` — odsiewa śmieci
- * z importu w rodzaju „11.2-24"). Wartości ze słownika wchodzą BEZ tego filtra, bo w oryginale
- * `filter` wisi tylko na gałęzi produktowej (`:23288`), a nie na złączeniu. To nie przeoczenie
- * portu — sprawdzone w kodzie przy zamykaniu sesji 7c.
+ * ⚠ FILTR „BEZ CYFR" (`!/\d/.test(e)` — odsiewa śmieci z importu w rodzaju „11.2-24")
+ * OBEJMUJE OD 2026-09-04 OBIE GAŁĘZIE. Do tej daty `filter` wisiał wyłącznie na gałęzi
+ * produktowej (`:23288`), więc wartość słownikowa z cyfrą przechodziła — odbudowa
+ * odtwarzała tę asymetrię świadomie (sprawdzone przy zamykaniu sesji 7c). Łatka
+ * `szer_marka` z 2026-09-04 15:00 (żywy bundle `index-PRICEFMT1783512500.js`, stan sprzed
+ * łatki w kopii `.bak_szer_marka_20260904_1500`) dokleiła ten sam `filter` na gałęzi
+ * słownikowej i asymetria po stronie MAREK zniknęła.
+ *
+ * ⚠ ASYMETRIA MARKA↔KATEGORIA ZOSTAJE: `listaKategorii` nie ma filtra „bez cyfr" w ŻADNEJ
+ * z gałęzi i łatka jej nie ruszyła. Nie „domykać" tego przez analogię.
  *
  * Sort: `localeCompare(…, "pl")`.
  */
@@ -149,7 +155,8 @@ export function listaMarek(produkty: Produkt[], wartosciSlownika: WartoscSlownik
     .filter((marka): marka is string => Boolean(marka) && !/\d/.test(marka as string));
   const zeSlownika = wartosciSlownika
     .filter((wartosc) => wartosc.rodzaj === "marka")
-    .map((wartosc) => wartosc.wartosc);
+    .map((wartosc) => wartosc.wartosc)
+    .filter((marka) => Boolean(marka) && !/\d/.test(marka));
   return Array.from(new Set([...zeSlownika, ...zProduktow]))
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b, "pl"));
