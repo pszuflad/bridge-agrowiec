@@ -66,8 +66,19 @@ Co robi krok po kroku i dlaczego to jest wierne:
 3. uruchamia **własny skrypt migracyjny Ani** `migrate_szer_to_text.cjs` (podmieniona wyłącznie
    linia z zahardkodowaną ścieżką produkcyjną) — snapshot jest z 2026-08-13, starszy niż
    migracja `szertxt` z 19/20.08;
-4. startuje oryginał; ten sam dokłada kolumnę `uwaga_cena` (`uwaga_cena_patch.cjs:26-34`);
-5. loguje się i odgrywa scenariusze, operacje niszczące na końcu.
+4. **(od 13c) doprowadza kopię do stanu produkcji po 09-01** — `migrujKonwencje()`: `kategoria`
+   idzie WŁASNYM skryptem Ani `apply_kategoria.cjs` (podmieniona wyłącznie ścieżka do bazy,
+   dokładnie jak w kroku 3 dla `migrate_szer_to_text.cjs`); `konstrukcja` i CAPS (`nazwa`)
+   idą SQL-em przepisanym z `mirror/backend/CHANGELOG.md` (wpisy 2026-09-01 11:35 i 12:30),
+   bo literalnego skryptu Ania dla nich w repo nie zostawiła. **Zasada:** stan wejściowy
+   piaskownicy doprowadzamy do stanu produkcji artefaktami PRODUKCJI, nigdy plikami
+   `rebuild/schema/00X_*.sql` — inaczej nagranie byłoby dowodem na naszą własną migrację,
+   a nie na zachowanie oryginału. Wyjątek: `DELETE` wierszy `staging_items` CASE_ONLY (CHANGELOG
+   09-01 12:30) nagrywarka celowo NIE odtwarza — CHANGELOG podaje ten `DELETE` w skrócie
+   z placeholderami (`UPPER(A)=UPPER(B)`), więc przepisanie byłoby zgadywaniem wpływającym
+   na kształt `GET /api/staging`.
+5. startuje oryginał; ten sam dokłada kolumnę `uwaga_cena` (`uwaga_cena_patch.cjs:26-34`);
+6. loguje się i odgrywa scenariusze, operacje niszczące na końcu.
 
 **Odtwarzalne znaczy „ten sam KSZTAŁT", nie „bajt w bajt"** — `PUT`/`PATCH /api/products/{id}`
 oddają zapisany rekord z `dataAktualizacji` z zegara.

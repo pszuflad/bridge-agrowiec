@@ -154,9 +154,16 @@ function zainstalujZaleznosci(katalog) {
  *
  *    (Kolumny `uwaga_cena` NIE trzeba dokładać — `uwaga_cena_patch.cjs:26-34` robi
  *    idempotentny `ALTER TABLE` przy każdym starcie oryginału.)
+ *
+ * 3. Migracje KONWENCJI z 2026-08-18 i 2026-09-01 (ticket 44, iteracja 13c) — z tego samego
+ *    powodu co punkt 2 i dokładnie tą samą metodą. Snapshot (2026-08-13) jest starszy również
+ *    od nich, a oryginał NIE transformuje tych pól przy odczycie — `GET /api/products` to gołe
+ *    `SELECT`. Bez tego kroku nagranie oddałoby `konstrukcja: "R"`, `kategoria: "rolnicze"`
+ *    i nazwy mieszaną wielkością liter, czyli stan, którego produkcja od 09-01 nie ma.
+ *    Patrz `migrujKonwencje()` niżej.
  */
 function przygotujBaze(katalog) {
-  log("[3/6] Przygotowanie kopii bazy (scheduler + migracja szertxt)…");
+  log("[3/6] Przygotowanie kopii bazy (scheduler + migracje produkcji)…");
   const Database = require(path.join(katalog, "node_modules", "better-sqlite3"));
   const db = new Database(path.join(katalog, "data.db"));
   const wynik = db.prepare("UPDATE suppliers SET czestotliwosc_minuty = NULL").run();
@@ -181,6 +188,79 @@ function przygotujBaze(katalog) {
     stdio: ["ignore", "ignore", "inherit"],
   });
   log("      migracja szertxt zastosowana (products.szerokosc → TEXT)");
+
+  migrujKonwencje(katalog);
+}
+
+/**
+ * Migracje KONWENCJI produkcji: kategoria (2026-08-18), konstrukcja i CAPS (2026-09-01).
+ *
+ * ⭐ DLACZEGO TO NIE JEST NASZA MIGRACJA WKLEJONA DO NAGRYWARKI. Fixture ma być niezależnym
+ * dowodem na to, co robi produkcja — gdyby jej stan wejściowy budowały pliki
+ * `rebuild/schema/00*.sql`, nagranie dowodziłoby samego siebie. Dlatego:
+ *
+ *  • `kategoria` idzie WŁASNYM skryptem Ani `apply_kategoria.cjs` (jest w `mirror/backend/`,
+ *    commit `740b273`), z podmienioną WYŁĄCZNIE ścieżką do bazy — identycznie jak repo robi to
+ *    dla `migrate_szer_to_text.cjs` wyżej;
+ *  • `konstrukcja` i CAPS idą SQL-em przepisanym z `mirror/backend/CHANGELOG.md`
+ *    (wpisy 2026-09-01 11:35 i 12:30). Literalnego skryptu dla nich Ania w repo nie zostawiła —
+ *    do bundla weszły tylko kopie `.bak_konstr_*` i `.bak_caps_*` samych plików kodu.
+ *
+ * ⚠ `UPPER()` SQLite jest ASCII-only i tak właśnie zrobiła produkcja (CHANGELOG mówi dosłownie
+ * `UPDATE products SET nazwa=UPPER(nazwa)`). Nie „naprawiamy" tego locale'em — nagranie ma
+ * pokazać stan produkcji, wraz z małymi diakrytykami w środku wyrazów.
+ *
+ * DELETE wierszy `staging_items` CASE_ONLY celowo NIE jest tu odtwarzany. CHANGELOG podaje go
+ * w skrócie z placeholderami (`UPPER(A)=UPPER(B)`), a nie literalnym SQL-em, więc przepisanie
+ * go tutaj byłoby zgadywaniem — i to zgadywaniem wpływającym na `GET /api/staging`. Wiersze
+ * CASE_ONLY zostają w nagraniu; kasuje je migracja `006_nazwa_caps.sql` po stronie odbudowy,
+ * a gate tej trasy porównuje KSZTAŁT, nie liczbę wierszy.
+ */
+function migrujKonwencje(katalog) {
+  const zrodlo = fs.readFileSync(path.join(katalog, "apply_kategoria.cjs"), "utf8");
+  const SZUKANE = "const db = new Database('data.db');";
+  if (!zrodlo.includes(SZUKANE)) {
+    throw new Error(
+      "apply_kategoria.cjs zmienił kształt — nie znaleziono linii otwierającej bazę. " +
+        "Nie zgaduj: sprawdź skrypt, zanim podmienisz ścieżkę.",
+    );
+  }
+  const plik = path.join(katalog, "_migracja-kategoria-piaskownicy.cjs");
+  fs.writeFileSync(
+    plik,
+    zrodlo.replace(SZUKANE, "const db = new Database(process.env.BRIDGE_DB_PIASKOWNICA);"),
+  );
+  execFileSync(process.execPath, [plik], {
+    cwd: katalog,
+    env: { ...process.env, BRIDGE_DB_PIASKOWNICA: path.join(katalog, "data.db") },
+    stdio: ["ignore", "ignore", "inherit"],
+  });
+  log("      migracja kategorii zastosowana (apply_kategoria.cjs Ani)");
+
+  const Database = require(path.join(katalog, "node_modules", "better-sqlite3"));
+  const db = new Database(path.join(katalog, "data.db"));
+  try {
+    // CHANGELOG 2026-09-01 11:35 — kody jednoliterowe → pełne słowa.
+    const radialne = db
+      .prepare("UPDATE products SET konstrukcja = 'Radialna' WHERE konstrukcja = 'R'")
+      .run().changes;
+    const diagonalne = db
+      .prepare("UPDATE products SET konstrukcja = 'Diagonalna' WHERE konstrukcja IN ('D','L','B')")
+      .run().changes;
+    log(`      migracja konstrukcji: Radialna ${radialne}, Diagonalna ${diagonalne}`);
+
+    // CHANGELOG 2026-09-01 12:30 — nazwy katalogu wyłącznie DUŻYMI literami.
+    const nazwy = db.prepare("UPDATE products SET nazwa = UPPER(nazwa)").run().changes;
+    const overrides = db
+      .prepare(
+        "UPDATE manual_overrides SET override_value = UPPER(override_value) " +
+          "WHERE field_name = 'nazwa'",
+      )
+      .run().changes;
+    log(`      migracja CAPS: products ${nazwy}, manual_overrides ${overrides}`);
+  } finally {
+    db.close();
+  }
 }
 
 /**
@@ -471,7 +551,8 @@ async function odegrajScenariusze(port, db, katalog) {
     token,
     opis:
       "GOŁA TABLICA — gałąź `if (limit === undefined && !dostawca)` oryginału " +
-      "(deminified/backend-index.cjs:48291-48295). Inny kształt niż wariant `?limit=`.",
+      "(deminified/backend-index.cjs:48291-48295). Inny kształt niż wariant `?limit=`. " +
+      "PRZENAGRANE w tickecie 44 (13c) razem z wariantem `?limit=` — konwencje z 2026-09-01.",
     port,
   });
 
@@ -481,8 +562,9 @@ async function odegrajScenariusze(port, db, katalog) {
     sciezka: "/api/products?limit=5",
     token,
     opis:
-      "PRZENAGRANE w tickecie 38 (sesja 12d): `szerokosc` jest TEKSTEM z zerami końcowymi, " +
-      "zgodnie z produkcyjną migracją `szertxt`. Poprzednie nagranie było starsze niż migracja.",
+      "PRZENAGRANE w tickecie 44 (13c): `konstrukcja` to pełne słowa, `nazwa` jest CAPS, " +
+      "`kategoria` z Wielkiej litery — zgodnie z migracjami produkcji z 2026-08-18 i 2026-09-01. " +
+      "Wcześniej (ticket 38, 12d): `szerokosc` jako TEKST z zerami końcowymi, migracja `szertxt`.",
     port,
   });
 
