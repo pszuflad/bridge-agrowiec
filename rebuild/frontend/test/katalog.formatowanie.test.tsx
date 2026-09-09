@@ -117,9 +117,29 @@ describe("formatujKomorke (DT)", () => {
   it("konstrukcja i typ opony tłumaczą się na opisy", () => {
     expect(tekstKomorki(produkt({ konstrukcja: "R" }), "konstrukcja")).toBe("Radialna");
     expect(tekstKomorki(produkt({ konstrukcja: "D" }), "konstrukcja")).toBe("Diagonalna");
-    expect(tekstKomorki(produkt({ konstrukcja: "X" }), "konstrukcja")).toBe("—");
     expect(tekstKomorki(produkt({ tlTt: "TL" }), "tlTt")).toBe("TL (bezdętkowa)");
     expect(tekstKomorki(produkt({ tlTt: "TT" }), "tlTt")).toBe("TT (dętkowa)");
+  });
+
+  /**
+   * PASS-THROUGH — zmiana `konstr` produkcji z 2026-09-01 11:35, sparowana z migracją
+   * `rebuild/schema/005_konstrukcja_slowa.sql` (13c).
+   *
+   * ⚠ Ten test ZMIENIŁ oczekiwanie: do 13c `konstrukcja: "X"` dawała „—", bo mapa kodów
+   * była jedyną drogą. Po migracji kolumna niesie PEŁNE SŁOWA, więc bundle produkcji
+   * dostał pass-through (`n||null`) — a wraz z nim każda wartość spoza mapy przechodzi
+   * surowa, nie tylko pełne słowo. Odtwarzamy zachowanie, nie własne wyobrażenie o nim.
+   *
+   * To nie jest teoria: `db/snapshot.db` ma DOKŁADNIE jeden produkt z `konstrukcja='X'`,
+   * którego migracja świadomie nie rusza (nie ma go w `KONSTRUKCJA_CANONICAL_MAP`).
+   * W panelu pokaże się jako „X" — tak samo jak w produkcji.
+   */
+  it("konstrukcja: pełne słowo z bazy przechodzi surowe, pusto nadal daje kreskę", () => {
+    expect(tekstKomorki(produkt({ konstrukcja: "Radialna" }), "konstrukcja")).toBe("Radialna");
+    expect(tekstKomorki(produkt({ konstrukcja: "Diagonalna" }), "konstrukcja")).toBe("Diagonalna");
+    expect(tekstKomorki(produkt({ konstrukcja: "X" }), "konstrukcja")).toBe("X");
+    expect(tekstKomorki(produkt({ konstrukcja: null }), "konstrukcja")).toBe("—");
+    expect(tekstKomorki(produkt({ konstrukcja: "" }), "konstrukcja")).toBe("—");
   });
 
   it("liczba płócien dostaje sufiks PR", () => {

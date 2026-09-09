@@ -99,12 +99,17 @@ export function wartoscKomorki(produkt: Produkt, klucz: string): string {
   }
 
   if (klucz === "konstrukcja") {
+    // Pass-through jak w komórce tabeli (`formatowanie.tsx`) i jak w bundlu produkcji
+    // od 2026-09-01 (`n||""`). Po migracji `005_konstrukcja_slowa.sql` kolumna niesie pełne
+    // słowa — bez tego eksport CSV oddawałby pustą kolumnę dla KAŻDEGO produktu.
     const opis =
       surowa === "R"
         ? "Radialna"
         : surowa === "D" || surowa === "L" || surowa === "B"
           ? "Diagonalna"
-          : "";
+          : surowa == null || surowa === ""
+            ? ""
+            : String(surowa);
     return escapujCsv(opis);
   }
 

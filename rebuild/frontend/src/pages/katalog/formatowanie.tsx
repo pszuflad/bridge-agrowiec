@@ -92,12 +92,25 @@ export function formatujKomorke(produkt: Produkt, klucz: string): ReactNode {
   }
 
   if (klucz === "konstrukcja") {
+    // ⚠ MAPOWANIE KODÓW + PASS-THROUGH — jedno bez drugiego psuje kolumnę.
+    //
+    // Do 2026-09-01 baza trzymała kody jednoliterowe i sama mapa wystarczała. Od migracji
+    // `konstr` (produkcja) i jej odpowiednika w odbudowie (`rebuild/schema/005_konstrukcja_slowa.sql`,
+    // 13c) kolumna niesie już PEŁNE SŁOWA — na samej mapie każdy wiersz wpadałby w `null`
+    // i cała kolumna pokazywałaby „—".
+    //
+    // Produkcja rozwiązała to dokładnie tak samo: „mapowanie R/D/L/B → Radialna/Diagonalna
+    // zachowane jako defensywny bezpiecznik + rozszerzenie o pass-through wartości surowej
+    // (`n||""` / `n||null`)" — `mirror/backend/CHANGELOG.md`, wpis 2026-09-01 11:35.
+    // Mapy NIE usuwamy: baza po `products/clear` + reimporcie znów może oddać kod.
     const opis =
       wartosc === "R"
         ? "Radialna"
         : wartosc === "D" || wartosc === "L" || wartosc === "B"
           ? "Diagonalna"
-          : null;
+          : wartosc === null || wartosc === undefined || wartosc === ""
+            ? null
+            : String(wartosc);
     return opis === null ? <Kreska /> : opis;
   }
 

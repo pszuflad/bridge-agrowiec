@@ -102,8 +102,17 @@ describe("3. Przypadki specjalne kolumn (port `OT`)", () => {
         wartoscKomorki(produkt({ konstrukcja: kod } as Partial<Produkt>), "konstrukcja"),
       ).toBe("Diagonalna");
     }
-    // Nieznana wartość → pusto, nie surowy kod.
+    // PASS-THROUGH (produkcja 2026-09-01 11:35, `n||""`), sparowany z migracją
+    // `005_konstrukcja_slowa.sql`: pełne słowo z bazy idzie do CSV surowe. Bez tego eksport
+    // po migracji miałby PUSTĄ kolumnę `konstrukcja` dla każdego produktu.
+    // ⚠ Oczekiwanie zmienione w 13c: do tej pory wartość spoza mapy dawała pusto.
+    expect(
+      wartoscKomorki(produkt({ konstrukcja: "Radialna" } as Partial<Produkt>), "konstrukcja"),
+    ).toBe("Radialna");
     expect(wartoscKomorki(produkt({ konstrukcja: "Z" } as Partial<Produkt>), "konstrukcja")).toBe(
+      "Z",
+    );
+    expect(wartoscKomorki(produkt({ konstrukcja: null } as Partial<Produkt>), "konstrukcja")).toBe(
       "",
     );
 

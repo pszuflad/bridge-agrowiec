@@ -26,6 +26,11 @@ z żywego oryginału postawionego na bazie doprowadzonej do stanu produkcji po 0
   `describe("migracje danych — konwencje 13c")` z siedmioma testami.
 - `tools/record-write-fixtures.cjs` — `przygotujBaze()` dostaje krok `migrujKonwencje()`;
   zaktualizowane opisy dwóch nagrań `GET /api/products`.
+- `rebuild/frontend/src/pages/katalog/formatowanie.tsx` i `.../eksport.ts` — pass-through
+  wartości surowej dla `konstrukcja` (port zmiany `konstr` po stronie FE). Patrz sekcja
+  „Sprostowanie: FE odbudowy NIE miał pass-through".
+- `rebuild/frontend/test/katalog.formatowanie.test.tsx`, `test/katalog.eksport.test.ts` —
+  zaktualizowane oczekiwania + nowy test pass-through.
 - `contract/fixtures/GET_products.json`, `GET_products_bez-parametrow.json`,
   `PUT_products_id.json`, `PATCH_products_id.json` — przenagrane.
 
@@ -143,7 +148,10 @@ Fixtures, które pokazują `nazwa` mieszaną wielkością liter **i tak ma być*
   Stan po `004` to **dokładnie** rozkład, który Ania zweryfikowała na produkcji
   (CHANGELOG 09-01 10:35): Rolnicze 4533, Ciężarowe 1463, Przemysłowe 1195, Leśne 214.
   To niezależne potwierdzenie, że mapa jest kompletna.
-- **Lint / typecheck / build:** zielone.
+- **Lint / typecheck / build:** zielone po obu stronach.
+- **Frontend:** 48 plików / **748 testów zielonych** (`lint`/`typecheck`/`build` zielone).
+  ⚠ Frontend NIE był w mojej pierwszej rundzie bramek i to był błąd — patrz sekcja
+  „Sprostowanie: FE odbudowy NIE miał pass-through".
 
 ### Wzorzec charakteryzacji silnika
 
@@ -156,14 +164,49 @@ uzasadnienie w „Sprostowania faktów" pkt 3.
 Brak w API. Zmiana jest w DANYCH i jest zamierzona:
 
 - `products.konstrukcja` przestaje zwracać kody `R`/`D`/`L`/`B` — od teraz `Radialna`/`Diagonalna`.
-  **Konsument frontendu jest sparowany z tą kartą i wchodzi w 13e** (roadmapa: „konstr — FE strona
-  konstrukcji"). Do czasu 13e panel radzi sobie sam: bundle produkcji od 09-01 ma pass-through
-  wartości surowej (`n||""`), więc pełne słowo wyświetla bez zmian.
+  **Wymusiło to poprawkę FE W TEJ KARCIE** — szczegóły w „Sprostowanie: FE odbudowy NIE miał
+  pass-through" niżej.
 - `products.nazwa` i `manual_overrides.override_value` (pole `nazwa`) są WIELKIMI literami.
 - `staging_items` traci wiersze CASE_ONLY (na `db/snapshot.db`: 723 z 1457 `zmiana_kluczowa`).
 
 Migracja jest jednokierunkowa. `scripts/kopia-bazy.cjs` (kopia przed migracją, ticket 8) działa
 bez zmian, a runner stosuje każdy plik w transakcji.
+
+## Sprostowanie: FE odbudowy NIE miał pass-through (wykryte przez CI, nie przeze mnie)
+
+**Popełniłem błąd w pierwszej wersji tego raportu i w opisie PR-a.** Napisałem, że do czasu 13e
+panel radzi sobie sam, bo „bundle produkcji od 09-01 ma pass-through wartości surowej".
+To prawda o **bundlu produkcji** — i nieprawda o **frontendzie odbudowy**, który tego pass-through
+nie miał. Pomyliłem dwie różne rzeczy.
+
+Skutek był realny, nie kosmetyczny: `src/pages/katalog/formatowanie.tsx` i
+`src/pages/katalog/eksport.ts` mapowały WYŁĄCZNIE kody (`R`/`D`/`L`/`B`), a wszystko inne wpadało
+w `null` / `""`. Po migracji `005_konstrukcja_slowa.sql` kolumna niesie pełne słowa, więc:
+- kolumna „konstrukcja" w katalogu pokazywałaby **`—` dla każdego produktu**,
+- eksport CSV oddawałby **pustą kolumnę `konstrukcja`** dla każdego produktu.
+
+**Dlaczego nie złapałem tego lokalnie:** puszczałem wyłącznie bramki backendu (`CLAUDE.md`
+wymienia „Bramki backendu"), a `contract/fixtures/` są **wspólne** — frontend też je czyta.
+Test `katalog.formatowanie.test.tsx` porównuje się z prawdziwą pozycją z `GET_products.json`
+i zapalił się dopiero na CI. Wniosek na przyszłość: **ticket ruszający `contract/fixtures/`
+musi puścić bramki OBU stron.**
+
+**Poprawka** — port zmiany `konstr` po stronie FE, dokładnie jak zrobiła to produkcja
+(`mirror/backend/CHANGELOG.md`, 2026-09-01 11:35: „mapowanie R/D/L/B → Radialna/Diagonalna
+zachowane jako defensywny bezpiecznik + rozszerzenie o pass-through wartości surowej
+(`n||""` / `n||null`)"). Mapy NIE usuwamy — po `products/clear` + reimporcie baza znów może
+oddać kod.
+
+⚠ **Dwa istniejące testy zmieniły oczekiwanie i jest to zamierzone.** Do 13c
+`konstrukcja: "X"` dawała `—` (katalog) i `""` (eksport), bo mapa była jedyną drogą.
+Pass-through produkcji (`n||null`) przepuszcza surowo **każdą** wartość spoza mapy, nie tylko
+pełne słowo — więc `X` pokaże się jako `X`. To nie jest przeoczenie: `db/snapshot.db` ma
+dokładnie jeden produkt z `konstrukcja='X'`, którego migracja świadomie nie rusza, i w produkcji
+wyświetli się on tak samo. Odtwarzamy zachowanie, nie własne wyobrażenie o nim.
+
+**Zakres:** roadmapa przypisywała `konstr` po stronie FE do 13e. Skoro jednak to 13c psuje tę
+kolumnę, to 13c musi ją naprawić — reguła „develop zostaje zielony" jest nadrzędna. 13e ma
+o jedną rzecz mniej; odnotowane w roadmapie, żeby sesja 13e nie robiła tego drugi raz.
 
 ## Poprawki po review
 

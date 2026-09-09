@@ -1975,8 +1975,13 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   konstrukcja / nazwa+overrides), **drugi przebieg 0 / 0 / 0** — idempotencja TREŚCIOWA
   (przybita testem, nie tylko przez ewidencję `_migracje`). `staging_items` stracił **723**
   wiersze CASE_ONLY. Fixtures przenagrane: `GET_products.json`, `GET_products_bez-parametrow.json`,
-  `PUT_products_id.json`, `PATCH_products_id.json`. **Bramki:** 80 plików / 1241 testów zielone,
-  `lint`/`typecheck`/`build` zielone, `tools/generate-openapi-schemas.cjs --sprawdz` zielone.
+  `PUT_products_id.json`, `PATCH_products_id.json`. **Bramki:** backend 80 plików / 1241 testów,
+  **frontend 48 plików / 748 testów**, `lint`/`typecheck`/`build` po obu stronach,
+  `tools/generate-openapi-schemas.cjs --sprawdz` — wszystko zielone.
+  ⚠ **Nauka dla kolejnych kart: `contract/fixtures/` są WSPÓLNE dla backendu i frontendu.**
+  13c puściła najpierw same bramki backendu (bo `CLAUDE.md` wymienia „Bramki backendu") i CI
+  zapaliło się na `katalog.formatowanie.test.tsx`, który porównuje się z prawdziwą pozycją
+  z `GET_products.json`. **Ticket ruszający fixtures musi puścić bramki OBU stron.**
   **Znalezisko 13a rozstrzygnięte:** `katunify` NIE unifikował kategorii `'rolnicze małe'` w
   warstwie parserów (MO2, 3 rek.) — Wielką literę nadaje `mirror/backend/apply_kategoria.cjs:12`,
   spoza warstwy parserów. **katunify WYMAGAŁ migracji historycznych kategorii** — 537 rekordów
@@ -2027,15 +2032,26 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   ruchomy cel. Podział: 13d-1 discovery+delta (Tor 1), 13d-2 sync_full (Tor 2, gdy gotowe), 13d-3 przyciski
   sync w panelu FE. **Zależy od:** 8; **wykracza poza I8** (I8 = eksport CSV). Niezależne od 13a–13c.
 - **13e — Frontend: Bridge ONE + drobne** [FE] — rebrand „Bridge ONE" (title „Bridge ONE — konsolidacja
-  cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`, `konstr` (FE strona
-  konstrukcji — sparowane z 13c). Bundle zminifikowane — **najpierw rozłóż diff bundla**, `.bak` daje tylko
-  etykietę. **Zależy od:** 13c (konstr, ✅ spełnione 2026-09-09); rebrand+drobne mogą iść częściowo równolegle.
+  cenników opon") + etykiety z `.bak`: `tr_fix`, `ackalerts`, `szer_marka`, `PRICEFMT`.
+  ⚠ **`konstr` po stronie FE JEST JUŻ ZROBIONE — nie rób tego drugi raz.** Bundle zminifikowane —
+  **najpierw rozłóż diff bundla**, `.bak` daje tylko etykietę. **Zależy od:** 13c (✅ spełnione
+  2026-09-09); rebrand+drobne mogą iść częściowo równolegle.
   **Ustalenia z 13c (`44-CHORE-i13c-migracje-konwencji`) dla tej karty:**
   - Migracja `konstrukcja` JUŻ WESZŁA — `products.konstrukcja` oddaje `Radialna`/`Diagonalna`,
     nie kody jednoliterowe.
-  - **Bez pilności:** bundle produkcji od 2026-09-01 ma pass-through wartości surowej
-    (`n||""`/`n||null`), więc panel pokazuje pełne słowo bez zmiany kodu FE — mapowanie kodów
-    w panelu zostało tam jako defensywny bezpiecznik (CHANGELOG 2026-09-01 11:35).
+  - ⚠ **`konstr` FE zrobione W 13c, nie w tej karcie — i to nie było „przy okazji".**
+    Roadmapa przypisywała tę zmianę tutaj, zakładając (błędnie), że FE odbudowy poradzi sobie
+    sam, bo bundle PRODUKCJI ma pass-through. Frontend ODBUDOWY go nie miał: mapował wyłącznie
+    kody `R`/`D`/`L`/`B`, więc po migracji 13c kolumna „konstrukcja" w katalogu pokazywałaby
+    `—` dla KAŻDEGO produktu, a eksport CSV oddawałby pustą kolumnę. Wykrył to dopiero CI
+    (`katalog.formatowanie.test.tsx` porównuje się z prawdziwą pozycją z `GET_products.json`).
+    Skoro 13c to zepsuła, 13c to naprawiła — reguła „develop zostaje zielony" jest nadrzędna.
+    Zrobione: `src/pages/katalog/formatowanie.tsx` i `src/pages/katalog/eksport.ts` mają
+    pass-through wartości surowej (`n||""`/`n||null`) obok zachowanego mapowania kodów, dokładnie
+    jak bundle produkcji od 2026-09-01 (CHANGELOG 11:35).
+  - ⚠ **Skutek uboczny pass-through, wpisany do testów:** wartość spoza mapy przechodzi surowa,
+    więc jedyny produkt z `konstrukcja='X'` w `db/snapshot.db` (migracja go nie rusza) pokaże się
+    jako „X", a nie „—". Tak samo zachowa się produkcja. Nie „poprawiać".
   - `products.nazwa` jest teraz WIELKIMI literami — jeśli FE gdzieś formatuje nazwę
     (capitalize/title-case), zderzy się to z konwencją katalogu.
   - ⚠ ASCII-only `UPPER` zostawia małe polskie diakrytyki w środku wyrazów (np. „PROWADZąCA").
