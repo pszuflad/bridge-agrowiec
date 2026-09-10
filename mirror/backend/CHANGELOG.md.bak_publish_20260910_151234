@@ -1,12 +1,3 @@
-2026-09-10 15:12
-obszar: backend
-
-pliki: generate_selly_export.cjs (uruchomienie), /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_publish_20260910_151234, CHANGELOG.md, CHANGELOG.md.bak_publish_20260910_151234
-
-zmiana: Wygenerowano i opublikowano nowy 60-kolumnowy plik CSV dla Selly z kolumna Blokowane-formy-platnosci na koncu. Zweryfikowano komplet wartosci MO1-MO5 i MO7-MO10 oraz puste MO6.
-
-powod: Prosba Anny o umieszczenie nowego pliku CSV na serwerze dla Selly.
-
 2026-09-10 15:01
 obszar: frontend
 

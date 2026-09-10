@@ -52,12 +52,8 @@
     });
   }
 
-  function isCatalogRoute() {
-    return location.pathname === '/katalog' || /^#\/katalog(?:[/?]|$)/.test(location.hash);
-  }
-
   function refresh() {
-    if (!isCatalogRoute()) return;
+    if (location.pathname !== '/katalog') return;
     document.querySelectorAll('table').forEach(decorateTable);
   }
 
@@ -73,7 +69,6 @@
 
   observer.observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener('popstate', refresh);
-  window.addEventListener('hashchange', refresh);
   setInterval(refresh, 1500);
   refresh();
 })();
