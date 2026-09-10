@@ -3,7 +3,6 @@
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
-const paymentBlocks = require('./payment_blocks.cjs');
 
 const DB_PATH = '/home/admin/private_apps/bridge/data.db';
 const OUT_DIR = '/home/admin/domains/agritires.eu/public_html/panel/ex-port-files';
@@ -72,7 +71,6 @@ const columns = [
   ['status', 'status'],
   ['Zastosowanie', 'zastosowanie'],
   ['data_aktualizacji', 'data_aktualizacji'],
-  ['Blokowane-formy-platnosci', 'blokowane_formy_platnosci'],
 ];
 
 const boolCols = new Set(['reinforced','extra_load','cut_resistant','heat_resistant','stubble_resistant','nro','cho','ms','snow_3pmsf','cfo']);
@@ -104,9 +102,6 @@ for (const row of rows) {
     }
     if (header === 'cena_sprzedazy' && typeof v === 'number') {
       v = `${Math.floor(v)},-`; // 2026-07-31: format gola liczba + ",-" zamiast surowej liczby z kropka
-    }
-    if (header === 'Blokowane-formy-platnosci' && !v) {
-      v = paymentBlocks.getBlockedPaymentForms(row.dostawca);
     }
     return esc(v);
   }).join(';');

@@ -18,7 +18,6 @@ const adapter = require('./parsers/adapter.cjs');
 const atrybuty = require('./atrybuty_module.cjs');
 const pending = require('./pending_module.cjs');
 const archive = require('./archive_module.cjs');
-const paymentBlocks = require('./payment_blocks.cjs');
 
 const TMP = path.join(os.tmpdir(), 'bridge_v6_imports');
 if (!fs.existsSync(TMP)) fs.mkdirSync(TMP, { recursive: true });
@@ -108,15 +107,6 @@ function register(app, ctx) {
   if (!tk || !U || !we || !be) {
     console.error('[bridge_v6] BŁĄD: brakuje ctx (tk/U/we/be) — extensions nie zostały zarejestrowane');
     return;
-  }
-
-  // Idempotentnie dopina kolumnę, uzupełnia istniejące rekordy i zakłada triggery.
-  // Dzięki triggerom każdy kolejny import zachowuje regułę per magazyn.
-  try {
-    const result = paymentBlocks.ensurePaymentBlocks();
-    console.log(`[bridge_v6] Blokowane formy płatności: ${result.rows} produktów z przypisaną regułą`);
-  } catch (e) {
-    console.error('[bridge_v6] BŁĄD inicjalizacji blokowanych form płatności:', e.message);
   }
 
   // === MODUŁ ATRYBUTÓW ===
@@ -934,3 +924,4 @@ async function runAutoPull(ctx, onlyKod) {
 }
 
 module.exports = { register, runAutoPull };
+

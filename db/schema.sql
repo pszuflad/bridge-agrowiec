@@ -294,7 +294,7 @@ CREATE TABLE IF NOT EXISTS "products" (
   label_rolling TEXT,
   label_ice TEXT,
   label_snow TEXT
-, link_zdjecia TEXT, oznaczenie_bieznika TEXT, sezon TEXT, ms INTEGER, snow_3pmsf INTEGER, wentyl TEXT, cfo INTEGER, wysokosc_przesylki REAL, zastosowanie TEXT, kod_importu TEXT, nieobecnosc_pod_rzad INTEGER NOT NULL DEFAULT 0, uwaga_cena TEXT);
+, link_zdjecia TEXT, oznaczenie_bieznika TEXT, sezon TEXT, ms INTEGER, snow_3pmsf INTEGER, wentyl TEXT, cfo INTEGER, wysokosc_przesylki REAL, zastosowanie TEXT, kod_importu TEXT, nieobecnosc_pod_rzad INTEGER NOT NULL DEFAULT 0, uwaga_cena TEXT, blokowane_formy_platnosci TEXT);
 CREATE INDEX idx_products_kod_importu ON products(kod_importu);
 CREATE TABLE atrybuty_wartosci_bak_20260904(
   id INT,
@@ -329,3 +329,17 @@ CREATE INDEX idx_selly_products_dostaw  ON selly_products(dostawca);
 CREATE INDEX idx_selly_products_prodid  ON selly_products(selly_product_id);
 CREATE INDEX idx_selly_products_varid   ON selly_products(selly_variant_id);
 CREATE INDEX idx_selly_products_status ON selly_products(ostatni_status);
+CREATE TRIGGER products_blokowane_formy_ai
+        AFTER INSERT ON products
+        BEGIN
+          UPDATE products
+          SET blokowane_formy_platnosci = CASE UPPER(TRIM(NEW.dostawca)) WHEN 'MO1' THEN '203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO2' THEN '201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO3' THEN '201, 202, 203, 204, 205, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO4' THEN '201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO5' THEN '201, 202, 203, 204, 205, 206, 207, 208, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO7' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO8' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 215, 216, 217, 218, 219' WHEN 'MO9' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 217, 218, 219' WHEN 'MO10' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216' ELSE NULL END
+          WHERE id = NEW.id;
+        END;
+CREATE TRIGGER products_blokowane_formy_au
+        AFTER UPDATE OF dostawca ON products
+        BEGIN
+          UPDATE products
+          SET blokowane_formy_platnosci = CASE UPPER(TRIM(NEW.dostawca)) WHEN 'MO1' THEN '203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO2' THEN '201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO3' THEN '201, 202, 203, 204, 205, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO4' THEN '201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO5' THEN '201, 202, 203, 204, 205, 206, 207, 208, 211, 212, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO7' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 213, 214, 215, 216, 217, 218, 219' WHEN 'MO8' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 215, 216, 217, 218, 219' WHEN 'MO9' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 217, 218, 219' WHEN 'MO10' THEN '201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216' ELSE NULL END
+          WHERE id = NEW.id;
+        END;

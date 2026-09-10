@@ -7,7 +7,6 @@
 const crypto = require('crypto');
 const tyre = require('./tyre_params.cjs');
 const common = require('../common.cjs');
-const paymentBlocks = require('../payment_blocks.cjs');
 
 function firstValue(...values) {
   for (const value of values) {
@@ -658,10 +657,6 @@ function recordToSuroweDostawca(dostawcaKod, record) {
     s.kod = `${kod}_${s.kod}`;
   }
 
-  // Reguła logistyczna Selly zależna wyłącznie od magazynu/dostawcy.
-  // Warstwa bazy utrwala ją triggerem, a adapter przekazuje ją również w rekordzie importu.
-  s.blokowaneFormyPlatnosci = paymentBlocks.getBlockedPaymentForms(kod);
-
   return s;
 }
 
@@ -670,3 +665,4 @@ function recordsToSurowe(dostawcaKod, records) {
 }
 
 module.exports = { recordToSurowe, recordToSuroweDostawca, recordsToSurowe };
+
