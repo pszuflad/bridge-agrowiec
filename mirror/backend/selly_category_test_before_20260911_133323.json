@@ -1,0 +1,37 @@
+{
+  "created_at": "2026-09-11T11:33:24.139Z",
+  "tests": [
+    {
+      "product_id": 528,
+      "name": "10.0/75-15.3 BKT AW 909 10PR TL",
+      "provider_code": "699732",
+      "category_id": 7,
+      "visible": 1,
+      "product_rewrite": "10-0-75x15-3-bkt-aw-909-10pr-tl"
+    },
+    {
+      "product_id": 3430,
+      "name": "710/45-26.5 ALLIANCE 644 FORESTAR III ELIT 168A8/175A2 20PR TL",
+      "provider_code": "700070",
+      "category_id": 8,
+      "visible": 1,
+      "product_rewrite": "710-45-26-5-alliance-644-forestar-iii-elit-168a8-175a2-20pr-tl"
+    },
+    {
+      "product_id": 961,
+      "name": "10.00-20 TRELLEBORG C-800 EXCAVATOR KPL 166A8 16PR TT",
+      "provider_code": "509732",
+      "category_id": 9,
+      "visible": 1,
+      "product_rewrite": "10-00-20-trelleborg-c-800-excavator-kpl-166a8-16pr-tt"
+    },
+    {
+      "product_id": 1577,
+      "name": "385/55R22.5 MATADOR HR 5 160K 20PR TL M+S 3PMSF",
+      "provider_code": "862317",
+      "category_id": 10,
+      "visible": 1,
+      "product_rewrite": "385-55r22-5-matador-hr-5-160k-20pr-tl-m-s-3pmsf"
+    }
+  ]
+}
