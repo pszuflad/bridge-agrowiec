@@ -1,14 +1,3 @@
-2026-09-11 10:10
-obszar: backend | baza danych
-
-pliki: data.db, data.db.bak_pre_selly_mapping_categories_20260911_080630, kategoria_norm_map_pplx.sql, kategoria_norm_map_pplx.sql.bak_pre_category_fix_20260911_101000, zastosowanie_selly_map_v2_pplx.sql, zastosowanie_selly_map_v2_pplx.sql.bak_pre_category_fix_20260911_101000, zastosowanie_selly_map_pplx.sql, zastosowanie_selly_map_pplx.sql.bak_pre_category_fix_20260911_101000, selly/sync_full.cjs, selly/sync_full.cjs.bak_pre_category_fix_20260911_101000, CHANGELOG.md, CHANGELOG.md.bak_pre_category_fix_20260911_101000
-
-zmiana: odtworzono 95 brakujacych wpisow selly_products dla produktow i wariantow juz istniejacych w Selly (MO2=1, MO3=88, MO4=6), bez tworzenia nowych produktow. Poprawiono mapowanie kategorii glownej na zywe ID Selly: rolnicze=1, lesne=2, przemyslowe=3, ciezarowe=4. Wycofano martwe ID podkategorii zastosowan i ustawiono dziedziczenie kategorii glownej produktu. Zaktualizowano pliki inicjalizujace i komentarze sync_full, aby stare ID nie wrocily.
-
-powod: audyt synchronizacji wykazal braki lokalnego cache mapowan oraz przebudowe kategorii w Selly; stare ID kategorii i podkategorii sa niewidoczne albo zwracaja 404.
-
----
-
 2026-09-10 15:12
 obszar: backend
 

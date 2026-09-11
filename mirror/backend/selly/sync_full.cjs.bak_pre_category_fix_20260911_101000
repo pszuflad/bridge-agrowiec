@@ -60,15 +60,15 @@ function collectFullSyncItems(db, dostawca) {
 /**
  * Wczytaj slowniki dla POST /api/products (Tor 2 auto-create):
  *   - catMap: klucz=kategoria_raw (np. 'Rolnicze'/'Cieżarowe') -> category_id_glowna
- *     Zrodlo: selly_kategoria_norm_map (zywe kategorie glowne Selly: 1/2/3/4)
+ *     Zrodlo: selly_kategoria_norm_map (mapowanie kategorii Bridge na Selly hierarchie 1/137/259/377)
  *   - prodMap: klucz=marka.toLowerCase() -> producer_id
  *     Zrodlo: selly_dict.producers
  *   - whMap: klucz=magazyn_slug -> warehouse_id
  *     Zrodlo: selly_dict.warehouses
  *
  * UWAGA: uzywamy selly_kategoria_norm_map (nie selly_dict.categories), bo Selly ma glebsza
- * zywe kategorie glowne (1=rolnicze, 2=lesne, 3=przemyslowe, 4=ciezarowe).
- * Stare ID 137/259/377 zostaly usuniete w Selly i zwracaja 404.
+ * hierarchie kategorii (Opony rolnicze = id=1 podstawowe, ale Opony przemyslowe=137, ciezarowe=259,
+ * lesne=377 - to sa aktualnie uzywane id). selly_dict.categories to zaslepka z 4 rowmzu wpisow.
  */
 function loadDictMaps(db) {
   const maps = { catMap: new Map(), prodMap: new Map(), whMap: new Map() };

@@ -1,7 +1,5 @@
 -- Tabela normalizujaca WSZYSTKIE realne warianty pisowni products.kategoria
--- znalezione w bazie do (kategoria_glowna_norm, category_id_glowna).
--- ID zweryfikowane z API Selly 2026-09-11 po przebudowie kategorii:
--- 1=Opony rolnicze, 2=Opony leśne, 3=Opony przemysłowe, 4=Opony ciężarowe.
+-- znalezione w bazie na 2026-07-10 do (kategoria_glowna_norm, category_id_glowna).
 -- Uzywana przez mapper, zeby "rolnicze", "rolnicze małe" itd. trafialy na ten sam wpis
 -- w selly_zastosowanie_category_map (ktora jest keyed na kategoria_glowna_norm).
 
@@ -17,9 +15,9 @@ DELETE FROM selly_kategoria_norm_map;
 INSERT INTO selly_kategoria_norm_map (kategoria_raw, kategoria_glowna_norm, category_id_glowna) VALUES
   ('rolnicze', 'rolnicze', 1),
   ('rolnicze małe', 'rolnicze', 1),
-  ('przemyslowe', 'przemyslowe', 3),
-  ('przemysłowe', 'przemyslowe', 3),
-  ('Przemysłowe', 'przemyslowe', 3),
-  ('ciezarowe', 'ciezarowe', 4),
-  ('ciężarowe', 'ciezarowe', 4),
-  ('leśne', 'lesne', 2);
+  ('przemyslowe', 'przemyslowe', 137),
+  ('przemysłowe', 'przemyslowe', 137),
+  ('Przemysłowe', 'przemyslowe', 137),
+  ('ciezarowe', 'ciezarowe', 259),
+  ('ciężarowe', 'ciezarowe', 259),
+  ('leśne', 'lesne', 377);
