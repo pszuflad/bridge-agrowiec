@@ -1,0 +1,8000 @@
+[
+  {
+    "kod": "MO9_107116",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_102605",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_102383",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_101998",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_99888",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_99436",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_99398",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_98659",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_69596",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_69580",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_69044",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_66275",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_64286",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_63169",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_60037",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_59529",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_57772",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_57557",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_56911",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_56138",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_55619",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_52519",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_51978",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_50624",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_48931",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_48489",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_46526",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_46495",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_45914",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_45894",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_45281",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_45126",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_43031",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_42841",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_42728",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_42154",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_38580",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_38369",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_37974",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_35198",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_34771",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_33947",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_33267",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_30604",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_30599",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_30437",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_30276",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_27435",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_27416",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_27253",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_27196",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_25823",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_25651",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_24024",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_21856",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_21689",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_21020",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_20573",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_20480",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_20425",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_18261",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_18043",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_16483",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_15755",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_15511",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_14957",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_12525",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_11709",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_9746",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_6880",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_6823",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_6701",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_4578",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_3901",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO9_7",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR38052070DTX70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR38042085885T0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR34060070DTVX0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR34054065DTV60",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR34052070DTX70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR28048065DTV60",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR28042070DTV70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR28038085885T0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR28028085885T0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR24042085885T0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR24038070DTX70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR24034085885T0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR240320858TV80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR24028085885T0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR20036070DTX70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR20028085DTV80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR20028070DTX70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR20026070DTX70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR280440808TVE0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR240500708TVE1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR240460708TVE1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR240460708END0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR240400808TVE0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR240400808END0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR240400708TVE0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR240400708END0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR200400708END0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR200340808END0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRPR180400708END0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_TRRD150E70000TCT0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_TRRD090E600065220",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_TRRD080191000TDR0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_TRRD040E40000T992",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_TRRD040E30005T990",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_TRRD040114000T7S0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_SXPD200G60708SMN0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_SXCR22538565KLCW0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_SXCR22538555KLZ30",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_SXCR22531570LGH10",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PPCR22538565KR0N0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PPCR22538565KG020",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PPCR22538555KR0N0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PPCR22531580KG020",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PPCR17523575KR0N0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PICR225F3000KTGP1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PICR22538555KR0N0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PICR22531580LITD1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_PICR22531580KTG80",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRR22550060DAGG0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD380G84006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD380G84006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD380G69006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD380G69006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD380G36006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD380G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD360G36006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD360G36006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD360G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD340G84006KNK1",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD340G84006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD340G69006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD340G69006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD320G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD320D95006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD320D83006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD300G84006KNK1",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD300G69006KNK2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD300G69006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD280G69006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD280G49006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD280G49006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD280G36006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD280G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD280G12006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD260L31006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD260G84006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240G69008KNK2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240G69008KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240G49006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240G24006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240G12006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240G12006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240D95006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD240D83006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD225550608KN60",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD200G60702KK31",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD200E75006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD200E65006KN30",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD200D95006KNK2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD200D95006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD200A82006K5N0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD180G25808K430",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD180E75006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD180E75006KN30",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD170500508K471",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E90006KN80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E90006K7N1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E90006K6N1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E90006K6N0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E75006KN80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E75006KN41",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E75006KN40",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E65006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E65006KN42",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E60006KNX3",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E60006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E60006KN41",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E60006KN40",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD160E55006KN80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD155400608KN60",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD153G10758K520",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD153G10758K430",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD150E65806KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD150E50006KN00",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD120G10808K244",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD120E70006K520",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD260L31008K770",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD250G75002KN70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD250G55002KN70",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD240H30008KN20",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD200H100028KN1",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD200G60702IN7T",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD200G4580DIN70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD200G2500FK120",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD180G25808ND50",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD180340808IN70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZPD160E6500LKNW2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MNCR16025510KXZL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR30560060DAGU0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR26571050DALA0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR26565065DALA0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR26565055DALA0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR26560055DALA0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR22571045DAGT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR22556060DR020",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR22556060DALA0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR22544565FR010",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRR18035560JAGT0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD150E50008TS60",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD150180008TS70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD120E50000B1S2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD120E40000B1S2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD120D65808TS66",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD100E50000B1A1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD100E40000B1S3",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD100E40000B1S2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080F18000B633",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080F16000B195",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080E40000V551",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080E40000V550",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080E40000B1S2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080E35000V551",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080E35000B1A1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080E35000B151",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080E35000B111",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD060E40000V552",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD060E40000V551",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD060E35000B1A1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD06013A000B1S1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD06013A000B193",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPR200H10003CC00",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPR200F30803CC00",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD225480658ME60",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD200H1000BE220",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD200H10005CPS0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD200H10003CPT0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD200H0000BE230",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD200H0000BE220",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD180G2500GMP32",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD140D63005SN00",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD130E60006SN00",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIPD120E55006SN00",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR22538565KETT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR22538565JMA90",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR22538565JLL83",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR22538555JLL82",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR19544545JETT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR17524570JKL21",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR17523575JT2L0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR17523575JKL21",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR17521575JT2L0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR17521575JKL21",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR17520565JT2L0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_LLCR17520565JKL20",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCZ22538565LWA00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCZ22538555JWA00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCZ22531570LWA00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538565KLS00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538565KKTL1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538565KKTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538555KX310",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538555KMHO0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538555KLAK0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538555K23L0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22538555K23K0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531580LXS00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531580LKXD0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531580KD510",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531570LXS00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531570LX310",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531570LLDK0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531570LKXD1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531560LXS01",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22531560LXS00",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22529580LXS00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22529580LKXD0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22529560KKUL0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22529560KD500",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR22527570JCA00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR200H2000KKFD0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR19544545JKTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR19544545J23K0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR19543550JKTL1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR19543550JKTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR19528570JKHO1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR19528570JKHO0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR19526570JKHO0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR17523575MKUR0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR17523575JKHO0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR17522575MHRS0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR17522575LX310",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KUCR17521575MHRS0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KARD080F16004LWG0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KARD080F160040000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KARD080189004LWG2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KARD080189004LWG0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_KARD060156004LWG1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR225F3000G7680",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR225F3000G7021",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22538565K0221",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22531580LMG00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22531580L7680",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22531580L6380",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22531580L12M1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22531570L6380",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22531570L12M2",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22529580M6280",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_IMCR22529580L12M0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HLRD150H5500BM600",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HLRD120238006MG50",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HLRD080F16003MG50",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HLPD250G7500B4562",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HLPD250G75002MG80",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HLPD250G55008MG80",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HLPD250G230024562",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HACR22538565KT150",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HACR22538565K31T1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HACR19544545K20L0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HACR19543550J31T1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HACR19538555J31T0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_HACR17521575K31T0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GSCR22538565KCA50",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GSCR22538555KCR50",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GSCR19543550JCA41",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GSCR19526570JCA40",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GSCR19524570JCA40",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GSCR17523575JCA42",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR22538565K7HL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR22538555KS240",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR19543550JS240",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR19528570J2460",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR19526570J2460",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR19524570J2461",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR19524570J2460",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR17524570J2460",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR17523575J2460",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR17521575J2461",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GGCZ22535550KWTS0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GGCR22529580MCHL1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR22538565KVAR1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR22538565KRN30",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR22538555KRN30",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR19543550JRN30",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR19528570JETN1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR19528570JETN0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR19526570JECT1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR19524570JETL2",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR175D9500MECS1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR175D9500JETN1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR17524570JECT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR17523575JECT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GFCR17521575JETN0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_EGCR22538565KGHT1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_EGCR22538565K5GM0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_EGCR22538555KGHT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_EGCR19544545JGH20",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_DCPR250H4000ERM80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CUCR22538565KUT50",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR225F1000JWER0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22538565KWET0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22538565KWES0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22538555KWET0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22531580LWES0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22531580LWED0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22531570LWES0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22531570LWED0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22531560LWES1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22531560LWES0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22529580MWX30",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR22529560LWED0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR19524570JEAW0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR17524570JX3E0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR17523575KX3E0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CTCR17521575KX3E0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCPR200G2500JM802",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCZ22538565KT3C1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCZ19544545JHTW0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR22542565KHT22",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR22538565KEPT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR22538565KCTH1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR22538555KHTP0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR20036585JHC12",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR17524570LR2C0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR17523575KR2C0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR17521575KR2C0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CCCR17520565JR2C0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR225F3000KDMR1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22544565KT431",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22544565JS490",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22538565KU490",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22538555KF0R0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22531580LF0R1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22531580LD0R0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22531580KDMR1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22531570LF0R1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22531560LF0R2",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22531560LD0R0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22529580MD0R0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR22529560LD0R0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR19544545JORB0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR19526570MD0R0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR19524570MFRO2",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR19524570MDRO2",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR19524570MDRO1",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR17524570LORB0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR17523575KORB0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR17522575MFRO1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR17522575MDRO1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR17521575MFRO2",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR17521575MDRO0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR17521575KORB0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR22538565KURT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR22538565KEZ20",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR22538565KEIA0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR22538555KURT1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR22538555KEZ20",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR19543550J1663",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR19526570KRT80",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR17524570JRT80",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR17523575KRT80",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR17521575KRT81",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BRCR17520565JRT81",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BLCR225F3000KBD80",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BLCR225F3000KBA20",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR22542565KTSP1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR22538565KFT41",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR22538565KFT31",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR22538555KFT40",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR19528570JTSP1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR175D9500MFS41",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR175D9500JTSP1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR17524570JTSP2",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_BFCR17523575JTSP2",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR24050070D10R0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR24050070D1040",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR24046070D10R0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR24046070D1040",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR24040570B1040",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR20040570B1040",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR20040070D10R0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPR20034080D10R0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPD280G690084260",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_APPD200H0000B71A1",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_AOPR22544565FP230",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_TRRD040E40000T992",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_TRRD040E30005T990",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD380G69006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD340G84006KNK1",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD340G69006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD320G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD300G69006KNK2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD280G49006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD280G49006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD280G36006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD280G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD240G24006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD240G12006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD240G12006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD200G12006KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD160E75006KN80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD160E65006KN40",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD160E60006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD160E60006KN40",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD155400608KN60",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD150E65806KNK0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZRD150E50006KN00",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_OZPD160E6500LKNW2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD120E40000B1S2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD100E50000B1A1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD080F18000B633",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD080F16000B195",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD080E40000V551",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD080E40000B1S2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD080E35000V551",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD080E35000B151",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD060E40000V552",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD060E40000V551",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD060E40000B111",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD06013A000B1S1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIRD06013A000B193",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MIPD200H0000BE230",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_MACR22538565KTM12",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_LLCR22538565KETT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_LLCR22538565JLL83",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_LLCR17523575JT2L0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_LLCR17523575JKL21",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_LLCR17521575JT2L0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_LLCR17520565JT2L0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_LLCR17520565JKL20",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR22538565KLS00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR22538565KKTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR22531570LLDK0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR22531560LXS01",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR22531560LXS00",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR22529560KKUL0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR19544545JKTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR19543550JKTL1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KUCR19543550JKTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KARD080F16004LWG0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KARD080F160040000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KARD080189004LWG2",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KARD080189004LWG0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_KARD060156004LWG1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR225F3000G7021",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22538565K0221",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22531580LMG00",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22531580L7680",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22531580L6380",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22531580L12M1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22531570L6380",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22531570L12M2",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_IMCR22529580M6280",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_HLRD150H5500BM600",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_HLRD120238006MG50",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_HLRD080F16003MG50",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_HLRD080189003MGC0",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_HACR22538565K31T1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_GSCR22538565KCA50",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_GNCR22538565K7HL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_GFCR22538565KRN30",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_GFCR22538555KRN30",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_GFCR17521575JETN0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_EGCR22538565KGHT1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_EGCR22538565K5GM0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_EGCR22538555KGHT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_EGCR19544545JGH20",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_DCPR250H4000ERM80",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CTCR22538565KWET0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CTCR22531580LWES0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CTCR22531580LWED0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CTCR22531570LWES0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CTCR22531560LWES0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CTCR22529560LWED0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CTCR17521575KX3E0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CCPR20036580KM811",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_CCCR22542565KHT22",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_BRCR22538565KURT0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO4_BFCR22538565KFT41",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2385012J",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4408024Ndemo",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_1558024sat",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_1657018Fkf9716",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_29125015Jp332",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_156006J5086",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_31155015BR",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4007024vE152",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3807020vtr70132",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_27105015J3328",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_26120012Jou3326",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_31135015Jp332",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_114005J",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_23105012J328",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2485014Jp332",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3408548Asc",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_166508J3326",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_41140020J3324",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3607020vtr70129",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2385012Jh85018",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4756520BR",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3408528PET",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4008024AA-325162A8",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2006516G",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2485014BKTLG3064",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_20060145TR",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3607024G",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4808034Nok",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2607016PET",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_27105015BKTLG30612",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4408028No",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2007016G",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3408018N",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4008024Nok",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3007020G",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_23105012TR",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_38565225b",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2406012G",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_26120012BKTLG30614",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2385012TR",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3658020N",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4408028Gdemo",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4607024contiEM",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3808528Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4208530Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_5406530Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4806528Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4406528Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4208528Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2495014joup3326",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_6507538Ndemo",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3809538ASC",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_1885010JouH85018",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_90016PETnt3",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_60012jouh80398",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4608538Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_31560225dd",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_166508joup508a10",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3208528Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_188508jh85018",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_188508jp3284",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_114004kk5004",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3808524Maximo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4208534VTraxion85II1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_1657018fqh63818",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_22110010joup3286",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4607024vedemo",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_44570195M",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_7107038T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_6009TR991",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_6006528T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4406524T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2309548t",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2709542T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_9544T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_26120016J",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2709538TA",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_6007030T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_4255018St",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2309536t",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2709532t",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_3009546TA",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_2309532T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO3_75010TR",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0920",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0919",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0550",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0469",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0467",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0391",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL021",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0174",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0148",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0083",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0082",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0081",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0078",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL00498",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T675267",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T675266",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T675254",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T485430",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445729",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445725",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445626",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445622",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445496",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445415",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445385",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445372",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445338",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_T445337",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_KOIM81885062T",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_KOIM81885062L",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00342",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00341",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00325",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00261",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00254",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00223",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00176",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00136",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00135",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00134",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00133",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00093",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_IND00092",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_GOL0040",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_GOL0037",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_GOL0021",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_GOL0020",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_GOL0014",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0049",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0047",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0044",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0036",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0017",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0016",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0013",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_CET0011",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_999991602",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_999991152",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_894373",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_83900020AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_83900010AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_812967",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_70500004AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_70410001AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_70310001AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_66800018AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_66800016AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_66800012AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_66800011AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_66800008AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_66800006AL-IG",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64450052AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64450050AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400090AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400071AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400051AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400041AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400036AL",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400020AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400011AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_64400010AL-IG",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_6144700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_60800025AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_60800010AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_60100192AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_587148",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_582974",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_582641",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_572203",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_572202",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001516580000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001516050000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001506710000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001506500000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001506260000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001506160000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001506110000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001506080000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001504870000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001504570000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_5001501744000",
+    "kategoria": "Leśne",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4801894",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4007112210000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4007112200000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4007112160000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006204500000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006202150000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201460000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201440000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201420000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201400000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201380000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201280000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201200000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006201020000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_4006200320000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_380331-33",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_362698-36",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_362696-36",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_35601529AL",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_348418-36",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_33020017AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_33020017AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_33005662AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_33005610AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_33005205AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_33005202AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32905250AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32905250AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32538",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32422403AL-IN",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32421492AL-IN",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32411304AL-IN",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32402251AL-IN",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_32401708AL-IN",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_31714354AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_31701010AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30910280AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30800800AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30700050AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30700019AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30700018AL-IG",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_3068180442090400",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30612809AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30610407AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_304702-36",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30219708AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_30215508AL-IN",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_3003746",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_3003446",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_3003439",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_3003309",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_3002586",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_282195",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_282055",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_28204200",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_282038",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_280153",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_280025",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_28001500",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_27833",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_27830",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_27828",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_27028400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_270251",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_270239",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_260439",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_26041900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25970",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25947",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25597",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25031833",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25029862",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25029528",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25029382",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25028196",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25028054",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25028052",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_25027655",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_23832",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2373183",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_23728",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2371293",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2364603",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2364313",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2361073",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2327543",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2306153",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2303153",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2261563",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2243603",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2234563",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_21733",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2116463",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_203435-33",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2000044370101",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2000044250101",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_2000025280101",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1E112230260166BVC0",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_19351",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_18112230250200V990",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_17049",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_16926",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1472500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_13560",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_135433-33",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_13499",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_13496",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_13454",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_13219200",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1169800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1168500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_11606000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_11605900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_115223852C020KTH2U",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_115223852C020KJTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_115223832C020KJTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_115221102C016LTH10",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1147700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_11468000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_11467900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_110650",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_10862",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_10861",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_10852",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_10850",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_10386",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_10380",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1014202690000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1012307230000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1012305850000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1012305620000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1012305040000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1012201240000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1012102160000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011313680000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011313210000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011312750000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011312300000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011304930000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011304470000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011206320000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_1011204690000",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_06700030000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_05740150000",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_003-01-01-06-08-0001",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PCB1296",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PAB1267",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PAB1266",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PAB1265",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PAB1264",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PAB1112",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PAB1111",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO10_PAB1110",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6404800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_11146800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6140100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_10557200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6140200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6140600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6140300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_10576400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1219100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1217300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6141100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6140400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6405000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6140500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1473000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1253300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1228200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1239500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6404500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6158600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_11233600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1148800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1472100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_11221700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1472500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1444000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1150400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1150200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1443600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1443800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1149600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1194600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1443500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1442900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6467500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6467200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1476300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1169900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1298800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1148200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1467500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1444600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6156300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1155800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1159700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1147400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_12754500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1300000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1481700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1169800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1467800",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1443700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_11789000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_0214500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1482100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_11940000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6144700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1151000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6151100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1169500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1464900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1227900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1465600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6150600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6146100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1146200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1150000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_10871100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1150300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6153200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1152900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_11093700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_0579600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1470100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6150100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_6170400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1194700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_10576300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1170000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1160600",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1152700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1160400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1194200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1147700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1168500",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1152400",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1160300",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1160700",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1152200",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1152000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO8_1159900",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19981689",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19800433",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19800286",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19271099",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211335",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211334",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211329",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211309",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211277",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211276",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211233",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211226",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211215",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211205",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211201",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211190",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211111",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19211087",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19172460",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19111103",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19111100",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19110121",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19110117",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19110112",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19110097",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19110081",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_19110065",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_18366370",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_18345403",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_18345285",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_18345276",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_17422750",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15272572",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15272548",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15272542",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231230",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231210",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231182",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231161",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231153",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231071",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231067",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231047",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15231026",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15223350",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15223336",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15223333",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15223320",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15223305",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15223090",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15222730",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15222685",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15222580",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15222330",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15222268",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15211665",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15211659",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15172672",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15172581",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15172543",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_15122367",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kompaktor",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_12500701",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_11166115",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10485122",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10485106",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10436000",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004967",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004966",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004964",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004958",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004779",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004655",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004654",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004508",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004241",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004228",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004222",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004221",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004148",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10003948",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10003672",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10003623",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10003620",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10003463",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10003386",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10002767",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10001857",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10001615",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10001614",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10001613",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10001611",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445796",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445592",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445591",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445590",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445691",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445223",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445171",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445255",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445463",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445221",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445468",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445471",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445663",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445805",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445638",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445662",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445637",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445711",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445710",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T845482",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T845483",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Suwnica/dźwig",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445545",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445544",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445709",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445617",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445712",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445431",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445651",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445836",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445650",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445649",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445770",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445459",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445562",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445610",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445611",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445600",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445406",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445440",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445404",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445653",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445496",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445542",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445407",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445441",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445405",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445401",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445402",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445453",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445500",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445469",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445470",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445499",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445601",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445641",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445465",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445654",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445659",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445708",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445688",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445668",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445802",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445799",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445664",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445798",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445828",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445516",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445415",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445414",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445413",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445412",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445411",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445410",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445787",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445788",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445793",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445777",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445779",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445786",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445789",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445790",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445785",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445778",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445780",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445784",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445597",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445565",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445598",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445599",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445625",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445596",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445476",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445475",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445528",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445527",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445541",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445624",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445622",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445716",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445715",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445714",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445537",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445570",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445603",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445574",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445800",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445589",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445571",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445573",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445717",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445572",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445608",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445619",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445581",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445612",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445594",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445602",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445801",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445640",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445566",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445567",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445718",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445568",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445639",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445607",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445618",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445395",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445687",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445686",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445740",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445685",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445852",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445741",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445684",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445683",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445682",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445681",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445680",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445679",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445678",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445677",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445676",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445851",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445675",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445674",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445673",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445806",
+    "kategoria": "Leśne",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445820",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445818",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445819",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445821",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445739",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445822",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445826",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445823",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445825",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445824",
+    "kategoria": "Leśne",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445759",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445768",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445808",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445830",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445815",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445760",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445769",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445813",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445672",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445671",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445669",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445587",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445636",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445666",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445832",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445667",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445665",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445847",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445595",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445773",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445564",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445585",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445700",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445583",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445588",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445848",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445736",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445609",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445754",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445758",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445772",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445563",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445584",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445752",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445634",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445586",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445582",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445753",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445757",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445756",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T845541",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T845540",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445655",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445390",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445518",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445443",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445445",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445338",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445377",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445656",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445370",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445369",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445657",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445371",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445386",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445384",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445442",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445444",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445337",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445383",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445579",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445550",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445420",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445467",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445393",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445385",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445392",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445372",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445378",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445376",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445419",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445389",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445569",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445391",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T845495",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T845539",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445722",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445725",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445727",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445744",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445743",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445738",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445765",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445734",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445732",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445731",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445730",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445729",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445726",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445728",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445763",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445762",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445737",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445764",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445735",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445733",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_VRRR28048070DTX70",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_28003500",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_OZRD260G49006KNK1",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Uniwersalne/pozostałe",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD080F16000B196",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_MIRD060E40000B111",
+    "kategoria": "Rolnicze",
+    "zastosowanie": "Kosiarka/ogród",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_EGCR22538565KGTL0",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_CBCR19526570MF0R1",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO1_10004963",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_WL0084",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO5_GNCR22538555K4360",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "All position",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO2_570307",
+    "kategoria": "Ciężarowe",
+    "zastosowanie": "Naczepa/przyczepa",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445547",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445546",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445580",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445540",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Maszyny górnicze",
+    "reason": "brak_mapowania"
+  },
+  {
+    "kod": "MO7_T445522",
+    "kategoria": "Przemysłowe",
+    "zastosowanie": "Forwarder, harwester",
+    "reason": "brak_mapowania"
+  }
+]

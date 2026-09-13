@@ -3,7 +3,6 @@
 // POPRAWKA 2026-06-30: importujemy helpery z common.cjs do normalizacji bieżników typu
 // "Agriflex 372 +" oraz ekstrakcji PR z indeksów (np. "16P/159A8" -> PR=16, LI/SI=159A8).
 const commonHelpers = require('../common.cjs');
-const applicationRules = require('../application_rules.cjs');
 const { normalizeBieznikPlus, extractPrFromText } = commonHelpers;
 
 function cleanText(value) {
@@ -16,13 +15,6 @@ function cleanText(value) {
 function emptyToNull(value) {
   const text = cleanText(value);
   return text ? text : null;
-}
-
-// POPRAWKA 2026-09-13: jedna zamknięta mapa kategoria → zastosowanie dla wszystkich
-// parserów MO1-MO10. Adapter wywołuje ten helper na końcu wspólnego pipeline'u,
-// dzięki czemu wartości spoza listy danej kategorii nie wracają przy kolejnym imporcie.
-function normalizeCategoryApplication(kategoria, zastosowanie) {
-  return applicationRules.normalizeCategoryApplication(kategoria, zastosowanie);
 }
 
 function parseNumber(value) {
@@ -1816,7 +1808,6 @@ module.exports = {
   normalizeQty,
   normalizeLabelFlag,
   normalizeLabelNoise,
-  normalizeCategoryApplication,
   parseSize,
   parseLoadSpeed,
   parseTechnicalMarks,

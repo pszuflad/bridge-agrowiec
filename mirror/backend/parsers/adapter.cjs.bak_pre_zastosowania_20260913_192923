@@ -537,16 +537,6 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
   const marks = detectTechMarks(nazwa, modelRaw, ...(Array.isArray(oz) ? oz : []));
   // oczyszczenie modelu/bieżnika z oznaczeń technicznych (SB/SF/HF/LS/HS nie należą do nazwy modelu)
   const modelBieznikClean = stripTechMarks(modelRaw);
-  const categoryApplication = tyre.normalizeCategoryApplication(
-    common.capitalizeKategoria(firstValue(enriched.kategoria, record.kategoria)),
-    firstValue(
-      enriched.zastosowanie,
-      record.zastosowanie,
-      record.Zastosowanie,
-      record.surowe_pola?.Zastosowanie,
-      record.surowe_pola?.zastosowanie
-    )
-  );
 
   // POPRAWKA 2026-07-21 (standaryzacja WIELKICH liter, decyzja Anny): nazwa/marka/model/bieznik
   // oraz oznaczenieBieznika/rodzaj zapisujemy DRUKOWANYMI literami niezaleznie od pisowni feedu
@@ -568,11 +558,7 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     // ciezarowe/Ciezarowe, lesne/Lesne) psujacymi statystyki/filtry w panelu. To centralne
     // miejsce (koniec pipeline, przed zapisem do DB) gwarantuje konsekwentnosc dla wszystkich
     // obecnych i przyszlych dostawcow bez potrzeby edycji kazdego parsera osobno.
-    kategoria: categoryApplication.kategoria,
-    // POPRAWKA 2026-09-13: zastosowanie jest normalizowane względem kategorii
-    // w jednym wspólnym miejscu dla wszystkich dostawców. Nieprawidłowe połączenia
-    // (np. Rolnicze + Harwester) przechodzą na Uniwersalne/pozostałe.
-    zastosowanie: categoryApplication.zastosowanie,
+    kategoria: common.capitalizeKategoria(firstValue(enriched.kategoria, record.kategoria)),
 
     magazyn: null,
     magazynRaw: null,

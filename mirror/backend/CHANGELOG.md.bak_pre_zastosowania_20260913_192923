@@ -1,14 +1,3 @@
-2026-09-13 19:31
-obszar: backend | baza danych
-
-pliki: application_rules.cjs (nowy), parsers/tyre_params.cjs, parsers/tyre_params.cjs.bak_pre_zastosowania_20260913_192923, parsers/adapter.cjs, parsers/adapter.cjs.bak_pre_zastosowania_20260913_192923, extensions.cjs, extensions.cjs.bak_pre_zastosowania_20260913_192923, data.db, data.db.bak_full_zastosowania_20260913_192923, CHANGELOG.md, CHANGELOG.md.bak_pre_zastosowania_20260913_192923
-
-zmiana: dodano wspolne reguly zgodnosci kategorii i zastosowania, uzywane przez parser parametrow, adapter importu i triggery SQLite. Jednorazowy backfill poprawil 678 niezgodnych rekordow: Przemyslowe 373, Rolnicze 151, Lesne 106, Ciezarowe 48. Nieprawidlowe zastosowanie dla danej kategorii jest ustawiane na Uniwersalne/pozostale; wartosc Forwarder, harwester w kategorii Lesne jest normalizowana do Harwester ; Forwarder. Reguly i triggery sa odtwarzane przy starcie backendu.
-
-powod: audyt wykazal zastosowania z innych kategorii, m.in. Rolnicze z Harwester/Forwarder. Poprawka ma wyczyscic obecne dane i zapobiec ich ponownemu nadpisaniu przez import lub odtwarzanie zastosowan.
-
----
-
 2026-09-11 13:33
 obszar: baza danych
 

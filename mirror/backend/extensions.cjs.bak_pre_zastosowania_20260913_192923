@@ -19,7 +19,6 @@ const atrybuty = require('./atrybuty_module.cjs');
 const pending = require('./pending_module.cjs');
 const archive = require('./archive_module.cjs');
 const paymentBlocks = require('./payment_blocks.cjs');
-const applicationRules = require('./application_rules.cjs');
 
 const TMP = path.join(os.tmpdir(), 'bridge_v6_imports');
 if (!fs.existsSync(TMP)) fs.mkdirSync(TMP, { recursive: true });
@@ -118,15 +117,6 @@ function register(app, ctx) {
     console.log(`[bridge_v6] Blokowane formy płatności: ${result.rows} produktów z przypisaną regułą`);
   } catch (e) {
     console.error('[bridge_v6] BŁĄD inicjalizacji blokowanych form płatności:', e.message);
-  }
-
-  // Zamknięta lista zastosowań per kategoria + triggery zabezpieczające także zapisy
-  // spoza adaptera (np. odtworzenie zastosowań z zastosowania_master.csv).
-  try {
-    applicationRules.ensureApplicationRules();
-    console.log('[bridge_v6] Reguły kategorii i zastosowań: aktywne');
-  } catch (e) {
-    console.error('[bridge_v6] BŁĄD inicjalizacji reguł zastosowań:', e.message);
   }
 
   // === MODUŁ ATRYBUTÓW ===
