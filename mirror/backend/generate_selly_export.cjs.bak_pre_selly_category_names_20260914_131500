@@ -1,5 +1,5 @@
 // Generator pliku CSV dla Selly - pelny eksport wszystkich aktywnych produktow, wszyscy dostawcy
-// Odwzorowuje format pliku katalog_wszyscy_wybrane_2026-07-23.csv (60 kolumn, separator ';', BOM UTF-8)
+// Odwzorowuje format pliku katalog_wszyscy_wybrane_2026-07-23.csv (59 kolumn, separator ';', BOM UTF-8)
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
@@ -42,7 +42,7 @@ const columns = [
   ['Waga', 'waga'],
   ['TL/TT', 'tl_tt'],
   ['PR', 'pr'],
-  ['R/D', 'konstrukcja'], // naglowek zgodny z istniejacym mapowaniem importera Selly; wartosci pozostaja pelne: Radialna/Diagonalna
+  ['Konstrukcja', 'konstrukcja'],  // 2026-09-01: naglowek zmieniony z 'R/D' (kody) na 'Konstrukcja' — baza ma teraz pelne slowa 'Radialna'/'Diagonalna'
   ['IF/VF', 'vf_if'],
   ['Oznaczenie-bieznika', 'oznaczenie_bieznika'],
   ['Link-do-zdjecia', 'link_zdjecia'],
@@ -77,26 +77,6 @@ const columns = [
 
 const boolCols = new Set(['reinforced','extra_load','cut_resistant','heat_resistant','stubble_resistant','nro','cho','ms','snow_3pmsf','cfo']);
 
-const sellyCategoryNames = new Map([
-  ['rolnicze', 'Opony rolnicze'],
-  ['rolnicze male', 'Opony rolnicze'],
-  ['lesne', 'Opony leśne'],
-  ['przemyslowe', 'Opony przemysłowe'],
-  ['ciezarowe', 'Opony ciężarowe'],
-]);
-
-function toSellyCategoryName(value) {
-  if (value === null || value === undefined) return '';
-  const raw = String(value).trim();
-  const key = raw
-    .toLocaleLowerCase('pl-PL')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/ł/g, 'l')
-    .replace(/\s+/g, ' ');
-  return sellyCategoryNames.get(key) || raw;
-}
-
 function esc(val) {
   if (val === null || val === undefined) return '';
   let s = String(val);
@@ -124,9 +104,6 @@ for (const row of rows) {
     }
     if (header === 'cena_sprzedazy' && typeof v === 'number') {
       v = `${Math.floor(v)},-`; // 2026-07-31: format gola liczba + ",-" zamiast surowej liczby z kropka
-    }
-    if (header === 'Kategoria') {
-      v = toSellyCategoryName(v);
     }
     if (header === 'Blokowane-formy-platnosci' && !v) {
       v = paymentBlocks.getBlockedPaymentForms(row.dostawca);
