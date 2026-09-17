@@ -1,14 +1,3 @@
-2026-09-17 18:40
-obszar: baza danych
-
-pliki: data.db, data.db.bak_pre_selly_search_20260917_1840, CHANGELOG.md, CHANGELOG.md.bak_pre_selly_search_20260917_1840
-
-zmiana: usunięto jedno martwe mapowanie selly_products dla produktu Selly 639 (kod_importu 668772, MO9_23814), którego rekord źródłowy nie istniał już w katalogu products. Pełny rekord produktu Selly zapisano przed usunięciem w selly_backups/product_639_pre_delete_20260917T164000Z.json, a odpowiedź operacji w selly_backups/product_639_delete_result_20260917T164000Z.json.
-
-powód: zgłoszenie Anny — osierocony produkt zachowywał w wyszukiwarce Selly starą wartość zastosowania „harwester” w kategorii Opony rolnicze.
-
----
-
 2026-09-17 17:07
 obszar: backend | baza danych
 

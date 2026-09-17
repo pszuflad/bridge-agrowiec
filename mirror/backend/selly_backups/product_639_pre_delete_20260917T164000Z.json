@@ -1,0 +1,266 @@
+{
+  "statuscode": 200,
+  "__metadata": {
+    "links": {
+      "self": "https://agroopony.selly24.pl/api/products/639",
+      "warehouses": "https://agroopony.selly24.pl/api/products/639/warehouses",
+      "photos": "https://agroopony.selly24.pl/api/products/639/photos",
+      "variants": "https://agroopony.selly24.pl/api/products/639/variants",
+      "shops": "https://agroopony.selly24.pl/api/products/639/shops",
+      "multi_cats": "https://agroopony.selly24.pl/api/products/639/multi_cats"
+    },
+    "methods": [
+      "GET",
+      "DELETE",
+      "PUT"
+    ],
+    "fields_edit": [
+      "name",
+      "category_id",
+      "producer_id",
+      "product_name_additional",
+      "price",
+      "price_accounting",
+      "margin_minimal",
+      "visible",
+      "kit",
+      "provider_id",
+      "product_code",
+      "provider_code",
+      "previous_price",
+      "vat_rate",
+      "html_title",
+      "html_description",
+      "html_keywords",
+      "promotion_text",
+      "content_html",
+      "content_html_short",
+      "photo_nr",
+      "promotion",
+      "promotion_category",
+      "delivery",
+      "product_rewrite",
+      "warehouse_id",
+      "weight",
+      "overall_dimensions",
+      "length",
+      "width",
+      "height",
+      "note",
+      "video_description",
+      "product_symbol",
+      "discount_group_id",
+      "discount_price_level_1",
+      "discount_price_level_2",
+      "discount_price_level_3",
+      "fixed_standard_price",
+      "min_margin",
+      "price_purchase",
+      "order_in_category",
+      "promotion_icon",
+      "binding_code",
+      "quantity_precision",
+      "quantity_minimum",
+      "quantity_increase",
+      "ean",
+      "shop_main",
+      "availability",
+      "availability_id",
+      "auction_photo_id",
+      "auction_price",
+      "auction_description",
+      "ads_compare",
+      "warehouse_localisation",
+      "factor_illustrate_price_value",
+      "factor_illustrate_unit",
+      "unit_of_measure"
+    ]
+  },
+  "data": {
+    "product_id": 639,
+    "name": "500/85R30 BKT RM 500 STBT 176A8/164A8",
+    "category_id": 1,
+    "producer_id": 1,
+    "product_name_additional": "",
+    "price": 1268,
+    "price_accounting": null,
+    "margin_minimal": null,
+    "visible": 1,
+    "keywords": "500a 85R30 500_85R30 BKTa RMaa STBT 176A8 164A8 176A8_164A8 Bkta 85aa 500_85 R30a 176a 164a 176_164 A8aa 40aa kmaa km_h TLaa bezdętkowa OponyBkt 8903094065097 bezdetkowa",
+    "kit": 0,
+    "provider_id": 0,
+    "product_code": null,
+    "provider_code": "133329",
+    "previous_price": 0,
+    "vat_rate": 23,
+    "html_title": "Opony rolnicze wielosezonowe - Bkt 500/85 R30 176/164 A8 (40 km/h) TL (bezdętkowa)   - Agro Opony",
+    "html_description": null,
+    "html_keywords": "Bkt Bkt 500/85 R30 176/164 A8 (40 km/h) TL (bezdętkowa)   500/85 R30 R30 A8 (40 km/h) 176/164, OponyBkt Bkt 500/85 R30 176/164 A8 (40 km/h) TL (bezdętkowa)   500/85 R30 R30 A8 (40 km/h) 176/164",
+    "promotion_text": "",
+    "content_html": "<p><strong>BKT RM 500 STBT 500/85R30 – opona radialna rolnicza do ciągników i maszyn rolniczych</strong></p>\n<p>Opona <strong>BKT RM 500 STBT 500/85R30</strong> to sprawdzona opona rolnicza do ciągników i maszyn rolniczych. Model <strong>RM 500 STBT</strong> sprawdza się w polu oraz na drogach utwardzonych, zapewniając stabilność, trakcję i komfort pracy.</p>\n<h3>Specyfikacja techniczna:</h3>\n<ul><li><p><strong>Rozmiar:</strong> 500/85R30</p></li><li><p><strong>Model:</strong> RM 500 STBT</p></li><li><p><strong>Producent:</strong> BKT</p></li><li><p><strong>Indeks nośności/prędkości:</strong> 176A8/164A8</p></li><li><p><strong>Typ:</strong> opona radialna</p></li></ul>\n<p>Pełna specyfikacja: indeks <strong>176A8/164A8</strong>: do <strong>7100 kg</strong> przy prędkości do <strong>40 km/h</strong> lub <strong>5000 kg</strong> przy <strong>40 km/h</strong>.</p>\n<h3>Kluczowe cechy opony:</h3>\n<ul><li><p>Wysoka przyczepność na miękkim podłożu</p></li><li><p>Ochrona struktury gleby</p></li><li><p>Równomierne zużycie bieżnika</p></li></ul>\n<h3>Podsumowanie:</h3>\n<p>Opona BKT RM 500 STBT 500/85R30 znajdzie zastosowanie przede wszystkim w segmencie: rolnicza. Wzmocniony karkas zwiększa odporność na uszkodzenia mechaniczne typowe dla codziennej eksploatacji.</p>\n<h3>O marce BKT</h3>\n<p>W katalogu naszego Sklepu online znajdą Państwo nowe opony ciągnikowe, rolnicze i przemysłowe, których cena jest bardzo przystępna. Prezentujemy asortyment indyjskiej marki BKT, który przeznaczony jest do pracy w trudnych warunkach na drodze. Nasze ogumienie mogą Państwo wykorzystać w traktorach, harwesterach czy przyczepach, zapewniając efektywną pracę i bezpieczeństwo kierowcy.</p>",
+    "content_html_short": null,
+    "photo_nr": 1,
+    "photo_dir": "img/products/63/9/",
+    "import_blocks": "",
+    "promotion": null,
+    "promotion_category": 0,
+    "delivery": null,
+    "product_rewrite": "500-85r30-bkt-rm-500-stbt-176a8-164a8",
+    "warehouse_id": 1,
+    "quantity": 0,
+    "weight": 150,
+    "overall_dimensions": 0,
+    "length": null,
+    "width": null,
+    "height": null,
+    "note": "",
+    "video_description": null,
+    "product_symbol": "MO923814",
+    "discount_group_id": 0,
+    "discount_price_level_1": null,
+    "discount_price_level_2": null,
+    "discount_price_level_3": null,
+    "fixed_standard_price": null,
+    "min_margin": null,
+    "price_purchase": null,
+    "order_in_category": 1,
+    "promotion_icon": "",
+    "binding_code": "",
+    "quantity_precision": 0,
+    "quantity_minimum": 1,
+    "quantity_increase": 1,
+    "ean": "8903094065097",
+    "shop_main": 1,
+    "availability": "",
+    "availability_id": 0,
+    "auction_photo_id": "",
+    "auction_price": null,
+    "auction_description": null,
+    "ads_compare": "",
+    "warehouse_localisation": "0",
+    "factor_illustrate_price_value": null,
+    "factor_illustrate_unit": 1,
+    "unit_of_measure": 1,
+    "main_photo": null,
+    "variants": [
+      {
+        "variant_id": 639,
+        "product_id": 639,
+        "position": 0,
+        "default": 1,
+        "quantity": 0,
+        "price": 5006,
+        "price_discount_group_1": 0,
+        "price_discount_group_2": 0,
+        "price_discount_group_3": 0,
+        "photo_id": 0,
+        "vat": 23,
+        "code": "",
+        "main_attribute_id": 0,
+        "imports_block": "",
+        "delivery_time": "",
+        "price_auciton": 0,
+        "ean": "8903094065097",
+        "is_promotion": 0,
+        "warehouse_localisation": "",
+        "previous_price": 0,
+        "photo": null,
+        "features": [
+          {
+            "feature_id": 1,
+            "group_id": 40,
+            "name": "Magazyny",
+            "value": "MO9",
+            "position": "34"
+          }
+        ],
+        "uri": "https://agroopony.selly24.pl/api/products/639/variants/639"
+      }
+    ],
+    "meta": [],
+    "shops": [
+      {
+        "shop_id": 0,
+        "shop_name": "Sklep podstawowy"
+      }
+    ],
+    "multi_cat": [],
+    "unit_of_measure_name": "szt.",
+    "promotion_new": 1,
+    "ads_compare_export": false,
+    "features": [
+      {
+        "name": "Bieżnik / model",
+        "values": [
+          "RM 500 STBT"
+        ]
+      },
+      {
+        "name": "Rozmiar",
+        "values": [
+          "500/85R30"
+        ]
+      },
+      {
+        "name": "Szerokość opony",
+        "values": [
+          "500"
+        ]
+      },
+      {
+        "name": "Profil",
+        "values": [
+          "85"
+        ]
+      },
+      {
+        "name": "Średnica",
+        "values": [
+          "30"
+        ]
+      },
+      {
+        "name": "R/D",
+        "values": [
+          "R"
+        ]
+      },
+      {
+        "name": "Indeksy",
+        "values": [
+          "176A8/164A8"
+        ]
+      },
+      {
+        "name": "Indeks nośności",
+        "values": [
+          "176/164"
+        ]
+      },
+      {
+        "name": "Indeks prędkości",
+        "values": [
+          "A8/A8"
+        ]
+      },
+      {
+        "name": "DOT",
+        "values": [
+          "nie starsza niz 3 lata"
+        ]
+      },
+      {
+        "name": "Zastosowanie",
+        "values": [
+          "harwester"
+        ]
+      },
+      {
+        "name": "Marka",
+        "values": [
+          "BKT"
+        ]
+      }
+    ]
+  }
+}
