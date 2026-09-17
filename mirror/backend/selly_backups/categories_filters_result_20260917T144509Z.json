@@ -1,0 +1,2839 @@
+{
+  "finished_at": "2026-09-17T14:49:24.154Z",
+  "backup": "selly_backups/categories_filters_pre_20260917T144509Z.json",
+  "updated": 147,
+  "failed_verification": [
+    {
+      "product_id": 883,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "16.0/70X20 BKT AS 504 14PR TL",
+      "rozmiar": [
+        "16.0/70x20"
+      ],
+      "zastosowanie": [
+        "Ładowarka"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2614,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE FORESTAR 644 III 175A2/168A8 20PR SB TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2626,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 643 FORESTAR RIII 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2640,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 ALLIANCE 644 FORESTAR III 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2710,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "500/70R24 FIRESTONE DURA-UT 164A/164B TL",
+      "rozmiar": [
+        "500/70R24"
+      ],
+      "zastosowanie": [
+        "Koparka"
+      ],
+      "errors": [
+        "DOT: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3140,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "16.9-34 NOKIAN TR FS FOREST 146A8 14PR",
+      "rozmiar": [
+        "16.9-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3144,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN NORDMAN FOREST TRS L-2 SF 16PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3215,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4-34 SPEEDWAYS GRIPKING FORESTRY 16PR TT",
+      "rozmiar": [
+        "18.4-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3221,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4-38 SPEEDWAYS GRIPKING FORESTRY 162A2 16PR TT",
+      "rozmiar": [
+        "18.4-38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3222,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "16.9-28 SPEEDWAYS GRIPKING FORESTRY 16PR TT",
+      "rozmiar": [
+        "16.9-28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3423,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/60R38 ALLIANCE 668 FORESTAR III 171D TL",
+      "rozmiar": [
+        "710/60R38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3425,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/60R28 ALLIANCE 668 FORESTAR III 157D",
+      "rozmiar": [
+        "600/60R28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3426,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "540/65-28 ALLIANCE 668 FORESTAR III 154D TL",
+      "rozmiar": [
+        "540/65-28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3427,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "650/65R42 ALLIANCE 668 FORESTAR III 170D TL",
+      "rozmiar": [
+        "650/65R42"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3429,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 644 FORESTAR III 24PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3430,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 644 FORESTAR III ELIT 168A8/175A2 20PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3431,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 ALLIANCE 644 FORESTAR III 20PR",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "TL/TT: stale managed feature remains",
+        "Indeksy: stale managed feature remains",
+        "Indeks nośności: stale managed feature remains",
+        "Indeks prędkości: stale managed feature remains",
+        "Przyczepność: stale managed feature remains",
+        "Opór toczenia: stale managed feature remains",
+        "Hałas: stale managed feature remains",
+        "Błoto + śnieg: stale managed feature remains",
+        "Śnieg-3PMSF: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3432,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 ALLIANCE 644 FORESTAR III 24PR TL",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3433,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "780/50-28.5 ALLIANCE 644 FORESTAR III 182A8/190A2 TL",
+      "rozmiar": [
+        "780/50-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3434,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 ALLIANCE 644 FORESTAR III 20PR TL",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3435,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 ALLIANCE 644 FORESTAR III 20PR TL",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3436,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 ALLIANCE 644 FORESTAR III 159A8/167A2 20PR",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3816,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 344 FORESTRY 20PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3841,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "20.8-42 ALLIANCE 333 AGRO-FORESTRY 162A8/159B TL",
+      "rozmiar": [
+        "20.8-42"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3843,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL",
+      "rozmiar": [
+        "460/85-38"
+      ],
+      "zastosowanie": [
+        "Uniwersalne/pozostałe"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3850,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "420/85-28 ALLIANCE AGRO FORESTRY 333 144A8/141B 14PR SB TL",
+      "rozmiar": [
+        "420/85-28"
+      ],
+      "zastosowanie": [
+        "Forwarder"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "Zastosowanie: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3852,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL",
+      "rozmiar": [
+        "380/85-24"
+      ],
+      "zastosowanie": [
+        "Uniwersalne/pozostałe"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3873,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "500/45-22.5 ALLIANCE 328 VALUE PLUS 144A8 16PR TL",
+      "rozmiar": [
+        "500/45-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3874,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "400/60-15.5 ALLIANCE 328 VALUE PLUS 152A8 20PR",
+      "rozmiar": [
+        "400/60-15.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 4236,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "28L-26 ALLIANCE FORESTAR 345 177A2/165A6 20PR TL",
+      "rozmiar": [
+        "28L-26"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 6508,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT SKID POWER HD 26X12-12",
+      "rozmiar": [
+        "26x12-12"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Rozmiar: [\"26x12-12\"] != [\"26X12-12\"]"
+      ]
+    },
+    {
+      "product_id": 6509,
+      "reasons": [
+        "bad_size"
+      ],
+      "category_id": 3,
+      "name": "BKT CON STAR IND 12.5/80-18 (340/80-18)",
+      "rozmiar": [
+        "12.5/80-18"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Bieżnik / model: stale managed feature remains",
+        "PR: stale managed feature remains",
+        "TL/TT: stale managed feature remains",
+        "Indeksy: stale managed feature remains",
+        "Indeks nośności: stale managed feature remains",
+        "Indeks prędkości: stale managed feature remains",
+        "DOT: stale managed feature remains",
+        "Przyczepność: stale managed feature remains",
+        "Opór toczenia: stale managed feature remains",
+        "Hałas: stale managed feature remains",
+        "Błoto + śnieg: stale managed feature remains",
+        "Śnieg-3PMSF: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 6513,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT PT - HD 27X10-12",
+      "rozmiar": [
+        "27x10-12"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Rozmiar: [\"27x10-12\"] != [\"27X10-12\"]"
+      ]
+    },
+    {
+      "product_id": 6565,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT LG 408 24X13.00-12",
+      "rozmiar": [
+        "24x13.00-12"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Rozmiar: [\"24x13.00-12\"] != [\"24X13.00-12\"]"
+      ]
+    },
+    {
+      "product_id": 6741,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AS 504 400/80-24",
+      "rozmiar": [
+        "400/80-24"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Bieżnik / model: stale managed feature remains",
+        "Rozmiar alternatywny: stale managed feature remains",
+        "PR: stale managed feature remains",
+        "TL/TT: stale managed feature remains",
+        "Indeksy: stale managed feature remains",
+        "Indeks nośności: stale managed feature remains",
+        "Indeks prędkości: stale managed feature remains",
+        "DOT: stale managed feature remains",
+        "Przyczepność: stale managed feature remains",
+        "Opór toczenia: stale managed feature remains",
+        "Hałas: stale managed feature remains",
+        "Błoto + śnieg: stale managed feature remains",
+        "Śnieg-3PMSF: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    }
+  ],
+  "results": [
+    {
+      "product_id": 4,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "540/65R28 BKT FORESTMAX 149A8/146B TL",
+      "rozmiar": [
+        "540/65R28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/60R28 BKT FORESTMAX E 152A8/149B TL",
+      "rozmiar": [
+        "600/60R28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 7,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "650/65R38 BKT FORESTMAX 172A8/186A2 TL",
+      "rozmiar": [
+        "650/65R38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 16,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "14.9X28 BKT FORESTLAND E 14PR TT",
+      "rozmiar": [
+        "14.9x28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 17,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4X38 BKT FORESTLAND E 14PR TT",
+      "rozmiar": [
+        "18.4x38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 203,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40X22.5 BKT FORESTECH STBT 20PR TL",
+      "rozmiar": [
+        "710/40x22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 372,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55X26.5 BKT FORESTECH 172A2/165A8 20PR SB TL",
+      "rozmiar": [
+        "600/55x26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 456,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45X26.5 BKT FORESTECH 168A8/175A2 20PR SB TL",
+      "rozmiar": [
+        "710/45x26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 883,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "16.0/70X20 BKT AS 504 14PR TL",
+      "rozmiar": [
+        "16.0/70x20"
+      ],
+      "zastosowanie": [
+        "Ładowarka"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2614,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE FORESTAR 644 III 175A2/168A8 20PR SB TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2626,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 643 FORESTAR RIII 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2640,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 ALLIANCE 644 FORESTAR III 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 2710,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "500/70R24 FIRESTONE DURA-UT 164A/164B TL",
+      "rozmiar": [
+        "500/70R24"
+      ],
+      "zastosowanie": [
+        "Koparka"
+      ],
+      "errors": [
+        "DOT: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3140,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "16.9-34 NOKIAN TR FS FOREST 146A8 14PR",
+      "rozmiar": [
+        "16.9-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3144,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN NORDMAN FOREST TRS L-2 SF 16PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3215,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4-34 SPEEDWAYS GRIPKING FORESTRY 16PR TT",
+      "rozmiar": [
+        "18.4-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3221,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4-38 SPEEDWAYS GRIPKING FORESTRY 162A2 16PR TT",
+      "rozmiar": [
+        "18.4-38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3222,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "16.9-28 SPEEDWAYS GRIPKING FORESTRY 16PR TT",
+      "rozmiar": [
+        "16.9-28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3423,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/60R38 ALLIANCE 668 FORESTAR III 171D TL",
+      "rozmiar": [
+        "710/60R38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3425,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/60R28 ALLIANCE 668 FORESTAR III 157D",
+      "rozmiar": [
+        "600/60R28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3426,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "540/65-28 ALLIANCE 668 FORESTAR III 154D TL",
+      "rozmiar": [
+        "540/65-28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3427,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "650/65R42 ALLIANCE 668 FORESTAR III 170D TL",
+      "rozmiar": [
+        "650/65R42"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3429,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 644 FORESTAR III 24PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3430,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 644 FORESTAR III ELIT 168A8/175A2 20PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3431,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 ALLIANCE 644 FORESTAR III 20PR",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "TL/TT: stale managed feature remains",
+        "Indeksy: stale managed feature remains",
+        "Indeks nośności: stale managed feature remains",
+        "Indeks prędkości: stale managed feature remains",
+        "Przyczepność: stale managed feature remains",
+        "Opór toczenia: stale managed feature remains",
+        "Hałas: stale managed feature remains",
+        "Błoto + śnieg: stale managed feature remains",
+        "Śnieg-3PMSF: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3432,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 ALLIANCE 644 FORESTAR III 24PR TL",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3433,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "780/50-28.5 ALLIANCE 644 FORESTAR III 182A8/190A2 TL",
+      "rozmiar": [
+        "780/50-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3434,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 ALLIANCE 644 FORESTAR III 20PR TL",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3435,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 ALLIANCE 644 FORESTAR III 20PR TL",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3436,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 ALLIANCE 644 FORESTAR III 159A8/167A2 20PR",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3816,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 344 FORESTRY 20PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3841,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "20.8-42 ALLIANCE 333 AGRO-FORESTRY 162A8/159B TL",
+      "rozmiar": [
+        "20.8-42"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3843,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL",
+      "rozmiar": [
+        "460/85-38"
+      ],
+      "zastosowanie": [
+        "Uniwersalne/pozostałe"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3850,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "420/85-28 ALLIANCE AGRO FORESTRY 333 144A8/141B 14PR SB TL",
+      "rozmiar": [
+        "420/85-28"
+      ],
+      "zastosowanie": [
+        "Forwarder"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "Zastosowanie: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3852,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL",
+      "rozmiar": [
+        "380/85-24"
+      ],
+      "zastosowanie": [
+        "Uniwersalne/pozostałe"
+      ],
+      "errors": [
+        "Rozmiar alternatywny: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3873,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "500/45-22.5 ALLIANCE 328 VALUE PLUS 144A8 16PR TL",
+      "rozmiar": [
+        "500/45-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 3874,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "400/60-15.5 ALLIANCE 328 VALUE PLUS 152A8 20PR",
+      "rozmiar": [
+        "400/60-15.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 4236,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "28L-26 ALLIANCE FORESTAR 345 177A2/165A6 20PR TL",
+      "rozmiar": [
+        "28L-26"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": [
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 5145,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 ALLIANCE FORESTAR 344 184A2/177A8 20PR TL",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5146,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 ALLIANCE FORESTAR 644 III 189A2/182A8 24PR SB TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5149,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 ALLIANCE FORESTAR 644 III 186A2/161A8 20PR SB TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5352,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 ALLIANCE FORESTAR 644 III 177A2/170A8 24PR SB TL",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5358,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 ALLIANCE FORESTAR 644 III 183A2/176A8 24PR SB TL",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5373,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "23.1-26 ALLIANCE FORESTAR 345 160A6 16PR TL",
+      "rozmiar": [
+        "23.1-26"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5533,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL",
+      "rozmiar": [
+        "28L-26"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5551,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5552,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5553,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5554,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5555,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN NORDMAN FOREST F SF 16PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5556,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN NORDMAN FOREST ELS SF 16PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5557,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "700/70-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "700/70-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5558,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "700/55-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "700/55-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5559,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/65-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "600/65-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5560,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5561,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5562,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5563,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN NORDMAN FOREST TRS L-2 SF 16PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5564,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/70-34 NOKIAN FOREST KING TRS 2PLUS SF 24PR TT",
+      "rozmiar": [
+        "710/70-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5565,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-34 NOKIAN FOREST KING TRS 2PLUS SF 24PR TT",
+      "rozmiar": [
+        "710/55-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5566,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/65-34 NOKIAN FOREST KING TRS 2PLUS SF 24PR TT",
+      "rozmiar": [
+        "600/65-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5567,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "780/50-28.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "780/50-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5568,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-28.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5569,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5570,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5571,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-26.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5572,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5573,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5574,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5575,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-24.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5576,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5577,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5578,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5579,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "780/50-28.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "780/50-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5580,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-28.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5581,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5582,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5583,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-26.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5584,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5585,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5586,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5587,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-24.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5588,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5589,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-24.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "600/50-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5590,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5591,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5595,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "650/60-26.5 NOKIAN FOREST KING TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "650/60-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5616,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF800/50R34 NOKIAN FLOAT KING VF 183D SB TL",
+      "rozmiar": [
+        "VF800/50R34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5617,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF710/55R34 NOKIAN FLOAT KING VF 179D SB TL",
+      "rozmiar": [
+        "VF710/55R34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5619,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF850/50R30.5 NOKIAN FLOAT KING VF 184D SB TL",
+      "rozmiar": [
+        "VF850/50R30.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5620,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF750/60R30.5 NOKIAN FLOAT KING VF 183D SB TL",
+      "rozmiar": [
+        "VF750/60R30.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 6501,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT PL 801 7.00-12",
+      "rozmiar": [
+        "7.00-12"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6503,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT AT 621 12.5/70-16",
+      "rozmiar": [
+        "12.5/70-16"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6505,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT TR 128 6.00-12",
+      "rozmiar": [
+        "6.00-12"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6506,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT TF 9090 60A8 4.00-12",
+      "rozmiar": [
+        "4.00-12"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6507,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FARM 2000 127A8 250/80-18",
+      "rozmiar": [
+        "250/80-18"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6508,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT SKID POWER HD 26X12-12",
+      "rozmiar": [
+        "26x12-12"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Rozmiar: [\"26x12-12\"] != [\"26X12-12\"]"
+      ]
+    },
+    {
+      "product_id": 6509,
+      "reasons": [
+        "bad_size"
+      ],
+      "category_id": 3,
+      "name": "BKT CON STAR IND 12.5/80-18 (340/80-18)",
+      "rozmiar": [
+        "12.5/80-18"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Bieżnik / model: stale managed feature remains",
+        "PR: stale managed feature remains",
+        "TL/TT: stale managed feature remains",
+        "Indeksy: stale managed feature remains",
+        "Indeks nośności: stale managed feature remains",
+        "Indeks prędkości: stale managed feature remains",
+        "DOT: stale managed feature remains",
+        "Przyczepność: stale managed feature remains",
+        "Opór toczenia: stale managed feature remains",
+        "Hałas: stale managed feature remains",
+        "Błoto + śnieg: stale managed feature remains",
+        "Śnieg-3PMSF: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 6510,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT TR 171 12.4-26",
+      "rozmiar": [
+        "12.4-26"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6511,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FLOT648 500/55-20",
+      "rozmiar": [
+        "500/55-20"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6512,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MULTIMAX MP522 IND 400/80R24",
+      "rozmiar": [
+        "400/80R24"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6513,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT PT - HD 27X10-12",
+      "rozmiar": [
+        "27x10-12"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Rozmiar: [\"27x10-12\"] != [\"27X10-12\"]"
+      ]
+    },
+    {
+      "product_id": 6516,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FARM HIGHWAY SPL LR-F 12.5L-15",
+      "rozmiar": [
+        "12.5L-15"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6518,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT OPONA JUMBOTRAX HD 12-16.5",
+      "rozmiar": [
+        "12-16.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6519,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT OPONA SURETRAX HD 12-16.5",
+      "rozmiar": [
+        "12-16.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6532,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MAGLIFT STD 5.00-8",
+      "rozmiar": [
+        "5.00-8"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6533,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MULTIMAX MP 513 (136G) 16.0/70R20",
+      "rozmiar": [
+        "16.0/70R20"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6540,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FLOT 648 600/50-22.5",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6541,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FL 630 ULTRA 800/45R26.5",
+      "rozmiar": [
+        "800/45R26.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6543,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FLOT 648 550/60-22.5",
+      "rozmiar": [
+        "550/60-22.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6544,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT FS 216 STEL BLT 18.4-34",
+      "rozmiar": [
+        "18.4-34"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6565,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT LG 408 24X13.00-12",
+      "rozmiar": [
+        "24x13.00-12"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Rozmiar: [\"24x13.00-12\"] != [\"24X13.00-12\"]"
+      ]
+    },
+    {
+      "product_id": 6725,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT EM 936 (ZESTAW-SET) 8.25-20",
+      "rozmiar": [
+        "8.25-20"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6726,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT LIFTMAX LM81 (NOWOŚĆ) 250/70R15",
+      "rozmiar": [
+        "250/70R15"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6727,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT LG 306 25x8.50-14",
+      "rozmiar": [
+        "25x8.50-14"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6728,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT EARTHMAX SR 53 CR 20.5R25",
+      "rozmiar": [
+        "20.5R25"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6729,
+      "reasons": [
+        "category_mismatch",
+        "bad_size"
+      ],
+      "category_id": 3,
+      "name": "BKT BK-LOADER 53 155A2 16.0/70R20 (405/70R20)",
+      "rozmiar": [
+        "16.0/70R20"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6731,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT ROCK GRIP 16.00-25",
+      "rozmiar": [
+        "16.00-25"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6732,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MAGLIFT LIP (NIEBRUDZĄCA) (QUICK) 8.25-15",
+      "rozmiar": [
+        "8.25-15"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6734,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT TR 387 23.1-26",
+      "rozmiar": [
+        "23.1-26"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6736,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AGRIMAX FORCE 600/70R34",
+      "rozmiar": [
+        "600/70R34"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6737,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT PT - HD  (ZESTAW-SET) 10.00-20",
+      "rozmiar": [
+        "10.00-20"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6738,
+      "reasons": [
+        "category_mismatch",
+        "bad_size"
+      ],
+      "category_id": 1,
+      "name": "BKT AGRIMAX RT 945 380/90R50 (14.9R50)",
+      "rozmiar": [
+        "380/90R50"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6739,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AW 702 14.5/80-18",
+      "rozmiar": [
+        "14.5/80-18"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6740,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT PAC MASTER 205/60-15",
+      "rozmiar": [
+        "205/60-15"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6741,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AS 504 400/80-24",
+      "rozmiar": [
+        "400/80-24"
+      ],
+      "zastosowanie": null,
+      "errors": [
+        "Bieżnik / model: stale managed feature remains",
+        "Rozmiar alternatywny: stale managed feature remains",
+        "PR: stale managed feature remains",
+        "TL/TT: stale managed feature remains",
+        "Indeksy: stale managed feature remains",
+        "Indeks nośności: stale managed feature remains",
+        "Indeks prędkości: stale managed feature remains",
+        "DOT: stale managed feature remains",
+        "Przyczepność: stale managed feature remains",
+        "Opór toczenia: stale managed feature remains",
+        "Hałas: stale managed feature remains",
+        "Błoto + śnieg: stale managed feature remains",
+        "Śnieg-3PMSF: stale managed feature remains",
+        "Śnieg: stale managed feature remains"
+      ]
+    },
+    {
+      "product_id": 6742,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT Ridemax IT 696 IND E 480/80R34",
+      "rozmiar": [
+        "480/80R34"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6743,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT TR 678  DUAL BEAD 600/40-22.5",
+      "rozmiar": [
+        "600/40-22.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6744,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AW 909 E 11.5/80-15.3",
+      "rozmiar": [
+        "11.5/80-15.3"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6745,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MAGLIFT LIP (NIEBRUDZĄCA) (Quick) 15x4.5-8",
+      "rozmiar": [
+        "15x4.5-8"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6747,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AGRIMAX FORCE 900/60R38",
+      "rozmiar": [
+        "900/60R38"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6749,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MAGLIFT  LIP (QUICK)  300-15",
+      "rozmiar": [
+        "300-15"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6750,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MAGLIFT STD (NIEBRUDZĄCA) 5.00-8",
+      "rozmiar": [
+        "5.00-8"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6752,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AS 504 420/55-17",
+      "rozmiar": [
+        "420/55-17"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6755,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT MULTIMAX  MP 540 335/80R20",
+      "rozmiar": [
+        "335/80R20"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6756,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AS 504 9.0/70-16",
+      "rozmiar": [
+        "9.0/70-16"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6763,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT TR 387 18.4-26",
+      "rozmiar": [
+        "18.4-26"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6764,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT OPONA JUMBOTRAX HD 10-16.5",
+      "rozmiar": [
+        "10-16.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6767,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT GR 288 20.5-25",
+      "rozmiar": [
+        "20.5-25"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6769,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FLOT 648 385/65-22.5",
+      "rozmiar": [
+        "385/65-22.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6770,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 3,
+      "name": "BKT SKID POWER 14-17.5",
+      "rozmiar": [
+        "14-17.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6786,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FL 693 M 560/60R22.5",
+      "rozmiar": [
+        "560/60R22.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6798,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AGRIMAX RT 955  270/95R32",
+      "rozmiar": [
+        "270/95R32"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6830,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FLOT 648 400/60-22.5",
+      "rozmiar": [
+        "400/60-22.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6884,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT AGRIMAX RT 855 18.4R34",
+      "rozmiar": [
+        "18.4R34"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6900,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT TR 135 13.6-38",
+      "rozmiar": [
+        "13.6-38"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6904,
+      "reasons": [
+        "category_mismatch"
+      ],
+      "category_id": 1,
+      "name": "BKT FLOT 648 385/65-22.5",
+      "rozmiar": [
+        "385/65-22.5"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    }
+  ]
+}

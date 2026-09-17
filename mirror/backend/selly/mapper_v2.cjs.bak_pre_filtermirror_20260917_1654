@@ -94,15 +94,12 @@ function buildFeatures(row) {
 function buildFeaturesMirror(row, existingFeatures) {
   const bridgeFeatures = buildFeatures(row);
   const bridgeByName = new Map(bridgeFeatures.map(f => [f.name, f]));
-  const managedNames = new Set(FEATURE_MAP.map(([name]) => name));
   const result = [];
   for (const existing of (existingFeatures || [])) {
     if (bridgeByName.has(existing.name)) {
       result.push(bridgeByName.get(existing.name));
       bridgeByName.delete(existing.name);
-    } else if (!managedNames.has(existing.name)) {
-      // Cechy spoza mapy Bridge zachowujemy. Cecha zarzadzana przez Bridge, ktora
-      // jest teraz pusta, nie moze odziedziczyc starej wartosci z Selly.
+    } else {
       result.push({ name: existing.name, values: existing.values });
     }
   }

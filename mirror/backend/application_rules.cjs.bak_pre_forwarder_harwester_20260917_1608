@@ -114,17 +114,11 @@ function canonicalCategory(value) {
 
 function splitApplications(value) {
   return String(value || '')
-    .replace(/forwarder\s*[,;/]\s*harwester/gi, 'Forwarder/Harwester')
-    .replace(/harwester\s*[,;/]\s*forwarder/gi, 'Forwarder/Harwester')
+    .replace(/forwarder\s*,\s*harwester/gi, 'Forwarder ; Harwester')
     .split(/\s*(?:;|\+)\s*/)
     .map((item) => item.trim())
     .filter(Boolean);
 }
-
-// Forwarder i Harwester zawsze wystepuja razem jako jedna wartosc "Forwarder/Harwester",
-// niezaleznie od tego czy zrodlowy wpis mial jeden z nich czy oba (prosba Anny 2026-09-17).
-const FORWARDER_HARWESTER = 'Forwarder/Harwester';
-const FORWARDER_HARWESTER_MEMBERS = new Set(['Forwarder', 'Harwester']);
 
 function normalizeApplication(category, value) {
   const canonical = canonicalCategory(category);
@@ -133,17 +127,12 @@ function normalizeApplication(category, value) {
 
   const allowed = new Set(CATEGORY_VALUES[canonical]);
   const mapped = splitApplications(value)
-    .map((item) => APPLICATION_ALIASES[normalizeKey(item)] || (item === FORWARDER_HARWESTER ? FORWARDER_HARWESTER : null))
+    .map((item) => APPLICATION_ALIASES[normalizeKey(item)] || null)
     .filter(Boolean);
 
-  const specific = [...new Set(mapped.filter((item) => item !== UNIVERSAL && (allowed.has(item) || item === FORWARDER_HARWESTER)))];
+  const specific = [...new Set(mapped.filter((item) => item !== UNIVERSAL && allowed.has(item)))];
   if (specific.length > 0) {
-    const hasForwarderHarwester = specific.some((item) => item === FORWARDER_HARWESTER || FORWARDER_HARWESTER_MEMBERS.has(item));
-    const rest = specific.filter((item) => !FORWARDER_HARWESTER_MEMBERS.has(item) && item !== FORWARDER_HARWESTER);
-    const ordered = CATEGORY_VALUES[canonical].filter((item) => rest.includes(item));
-    const parts = hasForwarderHarwester && allowed.has('Forwarder') ? [...ordered, FORWARDER_HARWESTER] : ordered;
-    if (parts.length > 0) return parts.join(' ; ');
-    if (hasForwarderHarwester) return FORWARDER_HARWESTER;
+    return CATEGORY_VALUES[canonical].filter((item) => specific.includes(item)).join(' ; ');
   }
   return UNIVERSAL;
 }
@@ -171,14 +160,8 @@ function sqlNormalizeExpression(categoryExpression, applicationExpression) {
   const rawValues = new Set([
     ...Object.keys(APPLICATION_ALIASES),
     ...Object.values(APPLICATION_ALIASES),
-    'Forwarder',
-    'Harwester',
-    'Forwarder, Harwester',
-    'Harwester, Forwarder',
-    'Forwarder ; Harwester',
-    'Harwester ; Forwarder',
-    'Forwarder/Harwester',
-    'Harwester/Forwarder'
+    'Forwarder, harwester',
+    'Forwarder ; Harwester'
   ]);
   const categoryCases = [];
   for (const category of Object.keys(CATEGORY_VALUES)) {
@@ -203,6 +186,25 @@ function ensureApplicationRules(options = {}) {
   const byCategory = {};
 
   try {
+    if (backfill) {
+      const rows = db.prepare(`
+        SELECT id, kategoria, zastosowanie
+        FROM products
+        WHERE zastosowanie IS NOT NULL AND TRIM(zastosowanie) <> ''
+      `).all();
+      const update = db.prepare('UPDATE products SET kategoria = ?, zastosowanie = ? WHERE id = ?');
+      db.transaction(() => {
+        for (const row of rows) {
+          const next = normalizeCategoryApplication(row.kategoria, row.zastosowanie);
+          if (next.kategoria !== row.kategoria || next.zastosowanie !== row.zastosowanie) {
+            update.run(next.kategoria, next.zastosowanie, row.id);
+            updated += 1;
+            byCategory[next.kategoria] = (byCategory[next.kategoria] || 0) + 1;
+          }
+        }
+      })();
+    }
+
     const categoryForNew = sqlCanonicalCategoryExpression('NEW.kategoria');
     const overrideCategoryForNew = sqlCanonicalCategoryExpression('NEW.override_value');
     const valueForNew = sqlNormalizeExpression('NEW.kategoria', 'NEW.zastosowanie');
@@ -254,29 +256,6 @@ function ensureApplicationRules(options = {}) {
         WHERE id = NEW.id;
       END;
     `);
-
-    // Backfill DOPIERO po podmianie triggerow: kazdy UPDATE ponizej odpala
-    // products_zastosowanie_au, ktory musi juz byc nowa wersja - inaczej
-    // stary trigger nadpisuje wynik backfillu (np. Forwarder/Harwester wraca
-    // do Uniwersalne/pozostale). Zob. incydent 2026-09-17 16:xx.
-    if (backfill) {
-      const rows = db.prepare(`
-        SELECT id, kategoria, zastosowanie
-        FROM products
-        WHERE zastosowanie IS NOT NULL AND TRIM(zastosowanie) <> ''
-      `).all();
-      const update = db.prepare('UPDATE products SET kategoria = ?, zastosowanie = ? WHERE id = ?');
-      db.transaction(() => {
-        for (const row of rows) {
-          const next = normalizeCategoryApplication(row.kategoria, row.zastosowanie);
-          if (next.kategoria !== row.kategoria || next.zastosowanie !== row.zastosowanie) {
-            update.run(next.kategoria, next.zastosowanie, row.id);
-            updated += 1;
-            byCategory[next.kategoria] = (byCategory[next.kategoria] || 0) + 1;
-          }
-        }
-      })();
-    }
 
     return { ok: true, updated, byCategory };
   } finally {

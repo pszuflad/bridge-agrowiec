@@ -36,7 +36,6 @@ const { apiWithRetry } = disc;
 function collectFullSyncItems(db, dostawca) {
   const rows = db.prepare(`
     SELECT
-      p.id AS bridge_product_id,
       p.kod, p.kod_importu, p.dostawca, p.ean, p.nazwa,
       p.marka, p.kategoria, p.status, p.stan, p.waga,
       p.cena_sprzedazy, p.cena_zakupu, p.vat,
@@ -132,74 +131,40 @@ function markError(db, row, error) {
   `).run(status, errStr.slice(0, 500), row.kod_importu, row.dostawca);
 }
 
-function metadataScore(row) {
-  const fields = [
-    'bieznik', 'rozmiar', 'szerokosc', 'profil', 'srednica',
-    'rozmiar_alternatywny', 'konstrukcja', 'pr', 'tl_tt',
-    'indeksy', 'indeks_nosnosci', 'indeks_predkosci', 'dot',
-    'zastosowanie', 'label_wet', 'label_rolling', 'label_noise',
-    'ms', 'snow_3pmsf', 'label_snow', 'marka',
-  ];
-  return fields.reduce((sum, key) => (
-    sum + (row[key] !== null && row[key] !== '' ? 1 : 0)
-  ), 0);
-}
-
 /**
- * Jeden produkt Selly moze miec warianty od kilku dostawcow. Cechy i kategoria
- * sa jednak wspolne dla produktu, dlatego zapisuje je tylko jeden kanoniczny
- * rekord Bridge. Grupy, w ktorych aktywne rekordy maja rozne kategorie, sa
- * celowo pomijane, bo wymagaja rozdzielenia na osobne produkty Selly.
+ * Pobierz istniejace features wariantu (dla mirror).
  */
-function isMetadataOwner(db, row) {
-  if (!row.selly_product_id) return false;
-  const candidates = db.prepare(`
-    SELECT p.*
-    FROM selly_products sp
-    JOIN products p
-      ON p.kod_importu = sp.kod_importu
-     AND p.dostawca = sp.dostawca
-    WHERE sp.selly_product_id = ?
-  `).all(row.selly_product_id);
-  const active = candidates.filter(candidate => candidate.status === 'aktywny');
-  const preferred = active.length ? active : candidates;
-  const categories = new Set(preferred.map(candidate => candidate.kategoria).filter(Boolean));
-  if (categories.size !== 1) return false;
-  preferred.sort((a, b) => metadataScore(b) - metadataScore(a) || a.id - b.id);
-  return preferred.length > 0 && preferred[0].id === row.bridge_product_id;
+async function fetchVariantFeatures(productId, variantId) {
+  try {
+    const r = await apiWithRetry('GET', `/api/products/${productId}/variants/${variantId}`);
+    return r.data?.data?.features || [];
+  } catch (e) {
+    return [];
+  }
 }
 
 /**
- * Sciezka A: wariant istnieje w cache.
+ * Sciezka A: wariant istnieje w cache - PUT tylko pola produktu.
  *
- * Test produkcyjny 2026-09-17 potwierdzil, ze PUT /api/products/{pid} przyjmuje
- * pelna tablice `features` mimo braku tego pola w fields_edit. Kategorie i cechy
- * zapisujemy tylko z kanonicznego rekordu Bridge, zeby warianty roznych
- * dostawcow nie nadpisywaly sobie wzajemnie metadanych produktu.
+ * ODKRYCIE 2026-09-08: Selly PUT /api/products/{pid} NIE akceptuje pola `features`
+ * (HTTP 400 "Malformed JSON input"). Metadata endpoint zwraca `fields_edit` bez `features`.
+ * Features produktowe (Biez̈nik, Rozmiar, ...) sa zapisywane TYLKO przy POST /api/products.
+ * Features wariantowe (Magazyny) sa juz ustawione przez discovery.createVariant.
+ * Wiec sciezka A ogranicza sie do PUT pol produktu.
  */
-async function updateExistingVariant(db, row, dictMaps, opts) {
+async function updateExistingVariant(db, row, opts) {
   const { dryRun } = opts;
   const productId = row.selly_product_id;
   const variantId = row.selly_variant_id;
-  const metadataOwner = isMetadataOwner(db, row);
 
-  let productPayload = mapper.toSellyPayloadV2(row, { includeFeatures: false });
-  if (metadataOwner && !dryRun) {
-    const current = await apiWithRetry('GET', `/api/products/${productId}`);
-    const currentProduct = current.data?.data || current.data || {};
-    productPayload = mapper.toSellyPayloadV2(row, {
-      includeFeatures: true,
-      existingSellyFeatures: currentProduct.features || [],
-    });
-    const categoryId = dictMaps.catMap.get(String(row.kategoria || '').toLowerCase());
-    if (categoryId) productPayload.category_id = categoryId;
-  }
+  // Payload produktu (bez VAT, bez ceny, bez stanu, BEZ features)
+  const productPayload = mapper.toSellyPayloadV2(row, { includeFeatures: false });
 
   if (dryRun) {
-    return { action: 'dry_A', metadata_owner: metadataOwner, payload_product: productPayload };
+    return { action: 'dry_A', payload_product: productPayload };
   }
 
-  // PUT /api/products/{pid}; cechy/kategoria tylko dla metadataOwner.
+  // PUT /api/products/{pid} (pola produktu: name/weight/provider_code/price_purchase/visible/ean)
   const putProduct = await apiWithRetry('PUT', `/api/products/${productId}`, { body: productPayload });
   if (putProduct.status < 200 || putProduct.status >= 300) {
     throw new Error(`PUT product HTTP ${putProduct.status}: ${JSON.stringify(putProduct.data).slice(0, 300)}`);
@@ -289,7 +254,7 @@ async function syncFullForDostawca(db, dostawca, opts = {}) {
       let result;
       if (row.selly_variant_id) {
         // Sciezka A
-        result = await updateExistingVariant(db, row, dictMaps, { dryRun });
+        result = await updateExistingVariant(db, row, { dryRun });
       } else {
         // Sciezka B lub C - discovery zdecyduje
         if (!autoCreate) {

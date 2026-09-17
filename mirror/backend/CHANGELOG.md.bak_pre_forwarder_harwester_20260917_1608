@@ -1,14 +1,3 @@
-2026-09-17 16:10
-obszar: backend | baza danych
-
-pliki: application_rules.cjs, application_rules.cjs.bak_pre_forwarder_harwester_20260917_1608, data.db, data.db.bak_pre_forwarder_harwester_20260917_1608, CHANGELOG.md, CHANGELOG.md.bak_pre_forwarder_harwester_20260917_1608
-
-zmiana: ujednolicono zapis zastosowania w kategorii Leśne — Forwarder, Harwester oraz ich połączenia (w dowolnej kolejności/separatorze) są teraz zawsze zapisywane jako jedna wartość "Forwarder/Harwester". Poprawiono splitApplications/normalizeApplication oraz sqlNormalizeExpression w application_rules.cjs (separator " ; " -> "/", kolejność Forwarder przed Harwester), naprawiono kolejność backfill/triggery w ensureApplicationRules (najpierw podmiana triggerów, potem UPDATE danych — inaczej stary trigger nadpisywał wynik). Jednorazowo scalono 100 produktów: Forwarder 29, Harwester 2, Harwester ; Forwarder 69. Kategoria bez zmian, manual_overrides zastosowania (17 wpisów) nie miały wariantów Forwarder/Harwester. Test UPDATE z rollbackiem potwierdził automatyczne scalanie przy przyszłych zapisach.
-
-powód: zgłoszenie Anny — pole zastosowanie miało Forwarder i Harwester zapisywane osobno lub jako "Harwester ; Forwarder", a miało być jedno połączone "Forwarder/Harwester" z wielkiej litery po ukośniku.
-
----
-
 2026-09-17 15:45
 obszar: backend | baza danych
 
