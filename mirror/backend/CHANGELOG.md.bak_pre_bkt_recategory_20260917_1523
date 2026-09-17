@@ -1,25 +1,3 @@
-2026-09-17 15:45
-obszar: backend | baza danych
-
-pliki: common.cjs, common.cjs.bak_pre_category_case_20260917_1545, parsers/tyre_params.cjs, parsers/tyre_params.cjs.bak_pre_category_case_20260917_1545, application_rules.cjs, application_rules.cjs.bak_pre_category_case_20260917_1545, data.db, data.db.bak_pre_category_case_20260917_1545, CHANGELOG.md, CHANGELOG.md.bak_pre_category_case_20260917_1545
-
-zmiana: ujednolicono wielkość liter kategorii w 283 produktach oraz 14 ręcznych nadpisaniach: rolnicze→Rolnicze, przemysłowe→Przemysłowe, ciężarowe→Ciężarowe, leśne→Leśne. Dodano kanonizację na wyjściu parserów, poprawiono cztery miejsca w tyre_params.cjs zwracające małe litery oraz rozszerzono triggery bazy, aby normalizowały kategorię przy każdym INSERT/UPDATE produktów i ręcznych nadpisań.
-
-powód: zgłoszenie Anny — filtr katalogu pokazywał zdublowane kategorie zapisane małą i wielką literą, a kolejne importy mogły ponownie tworzyć warianty małymi literami.
-
----
-
-2026-09-17 15:23
-obszar: backend | baza danych
-
-pliki: parsers/mo9_agrorami_api.cjs, parsers/mo9_agrorami_api.cjs.bak_pre_bkt_recategory_20260917_1523, data.db, data.db.bak_pre_bkt_recategory_20260917_1523, CHANGELOG.md, CHANGELOG.md.bak_pre_bkt_recategory_20260917_1523
-
-zmiana: usunięto ogólną regułę MO9 „inne → Rolnicze” i dodano klasyfikację awaryjną według rodzin bieżników BKT na Rolnicze, Przemysłowe lub Leśne. Jednorazowo przeklasyfikowano 58 historycznych produktów MO9 z kategorii „inne”: 28 na Rolnicze i 30 na Przemysłowe. Przeoczoną pozycję BKT LG 306 20X10.00-10 należącą do wykluczonej kategorii Magento 163 usunięto z Selly i Bridge.
-
-powód: prośba Anny — kategoria „inne” nie ma występować w katalogu; opony mają trafiać do właściwych kategorii zależnie od rodzaju, a małe opony do quadów i kosiarek nadal nie mogą być importowane.
-
----
-
 2026-09-17 14:58
 obszar: backend | baza danych
 

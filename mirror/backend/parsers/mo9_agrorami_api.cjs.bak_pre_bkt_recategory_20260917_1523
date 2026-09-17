@@ -418,24 +418,9 @@ const KATEGORIA_MAP = {
   'przemysłowe': 'Przemysłowe', 'przemyslowe': 'Przemysłowe',
   'ciężarowe': 'Ciężarowe', 'ciezarowe': 'Ciężarowe',
   'dętki': 'Dętki', 'detki': 'Dętki',
-  'akcesoria': 'Akcesoria'
+  'akcesoria': 'Akcesoria',
+  'inne': 'Rolnicze' // DECYZJA ANNY: inne → rolnicze
 };
-
-// POPRAWKA 2026-09-17: Agrorami historycznie zwracało część produktów jako
-// „inne”. Nie wolno mapować całej tej grupy na Rolnicze, bo zawiera również
-// opony przemysłowe. Gdy drzewo kategorii nie daje rozstrzygnięcia, używamy
-// rodziny bieżnika; nieznane serie trafiają do centralnego klasyfikatora.
-function classifyBktFallback(fullName) {
-  const name = String(fullName || '');
-  if (/\bFRS\b/i.test(name)) return 'Leśne';
-  if (/\b(?:AT\s*621|BK-?LOADER|EARTHMAX|EM\s*936|FS\s*216|GR\s*288|LG\s*(?:306|408)|LIFTMAX|MAGLIFT|MULTIMAX|JUMBOTRAX|SURETRAX|PAC\s*MASTER|PACMASTER|PL\s*801|PT\s*-?\s*HD|ROCK\s*GRIP|SKID\s*POWER|TR\s*387)\b/i.test(name)) {
-    return 'Przemysłowe';
-  }
-  if (/\b(?:AGRIMAX|AS\s*504|AW\s*702|AW\s*909|FARM\s*2000|FARM\s*HIGHWAY|FL\s*630|FL\s*693|FLOT\s*648|TF\s*9090|TR\s*128|TR\s*135|TR\s*171|TR\s*678)\b/i.test(name)) {
-    return 'Rolnicze';
-  }
-  return c.classifyByName(name);
-}
 
 // DECYZJA ANNY 2026-09-17: nie importujemy opon do quadów, kosiarek,
 // gokartów ani podobnych małych pojazdów. Agrorami grupuje je w kategorii
@@ -664,7 +649,7 @@ function itemToRecord(it) {
   }
   let kategoria = KATEGORIA_MAP[kategoriaRaw] || null;
   if (!kategoria) {
-    kategoria = classifyBktFallback(fullName);
+    kategoria = c.classifyByName(fullName);
   }
   // Override FLOT/Flotation (zgodnie z CSV parserem)
   // POPRAWKA 2026-09-01: kategorie z Wielkiej litery (jak w reszcie systemu).

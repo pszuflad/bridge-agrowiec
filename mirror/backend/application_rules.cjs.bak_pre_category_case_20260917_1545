@@ -149,13 +149,6 @@ function sqlQuote(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
-function sqlCanonicalCategoryExpression(categoryExpression) {
-  const cases = Object.entries(CATEGORY_ALIASES)
-    .map(([raw, canonical]) => `WHEN LOWER(TRIM(${categoryExpression})) = LOWER(${sqlQuote(raw)}) THEN ${sqlQuote(canonical)}`)
-    .join(' ');
-  return `CASE ${cases} ELSE TRIM(${categoryExpression}) END`;
-}
-
 function sqlNormalizeExpression(categoryExpression, applicationExpression) {
   const rawValues = new Set([
     ...Object.keys(APPLICATION_ALIASES),
@@ -205,54 +198,26 @@ function ensureApplicationRules(options = {}) {
       })();
     }
 
-    const categoryForNew = sqlCanonicalCategoryExpression('NEW.kategoria');
-    const overrideCategoryForNew = sqlCanonicalCategoryExpression('NEW.override_value');
     const valueForNew = sqlNormalizeExpression('NEW.kategoria', 'NEW.zastosowanie');
     db.exec(`
       DROP TRIGGER IF EXISTS products_zastosowanie_ai;
       DROP TRIGGER IF EXISTS products_zastosowanie_au;
-      DROP TRIGGER IF EXISTS manual_overrides_kategoria_ai;
-      DROP TRIGGER IF EXISTS manual_overrides_kategoria_au;
 
       CREATE TRIGGER products_zastosowanie_ai
       AFTER INSERT ON products
+      WHEN NEW.zastosowanie IS NOT NULL AND TRIM(NEW.zastosowanie) <> ''
       BEGIN
         UPDATE products
-        SET kategoria = ${categoryForNew},
-            zastosowanie = CASE
-              WHEN NEW.zastosowanie IS NULL OR TRIM(NEW.zastosowanie) = '' THEN NEW.zastosowanie
-              ELSE ${valueForNew}
-            END
+        SET zastosowanie = ${valueForNew}
         WHERE id = NEW.id;
       END;
 
       CREATE TRIGGER products_zastosowanie_au
       AFTER UPDATE OF kategoria, zastosowanie ON products
+      WHEN NEW.zastosowanie IS NOT NULL AND TRIM(NEW.zastosowanie) <> ''
       BEGIN
         UPDATE products
-        SET kategoria = ${categoryForNew},
-            zastosowanie = CASE
-              WHEN NEW.zastosowanie IS NULL OR TRIM(NEW.zastosowanie) = '' THEN NEW.zastosowanie
-              ELSE ${valueForNew}
-            END
-        WHERE id = NEW.id;
-      END;
-
-      CREATE TRIGGER manual_overrides_kategoria_ai
-      AFTER INSERT ON manual_overrides
-      WHEN NEW.field_name = 'kategoria'
-      BEGIN
-        UPDATE manual_overrides
-        SET override_value = ${overrideCategoryForNew}
-        WHERE id = NEW.id;
-      END;
-
-      CREATE TRIGGER manual_overrides_kategoria_au
-      AFTER UPDATE OF field_name, override_value ON manual_overrides
-      WHEN NEW.field_name = 'kategoria'
-      BEGIN
-        UPDATE manual_overrides
-        SET override_value = ${overrideCategoryForNew}
+        SET zastosowanie = ${valueForNew}
         WHERE id = NEW.id;
       END;
     `);

@@ -567,7 +567,7 @@ function normalizeJmk(record) {
   // POPRAWKA 2026-07-21: doklejamy record.bieznik do wykrywania SB/SF/HS - dostawca (Alliance
   // przez JMK) czasem wpisuje "STEEL BELTED"/"HIGH SPEED" w kolumnie Bieżnik, a nie w Nazwie.
   const marks = parseTechnicalMarks(record.nazwa, record.system, record.bieznik);
-  const kategoria = applicationRules.canonicalCategory(record.rodzaj);
+  const kategoria = cleanText(record.rodzaj).toLowerCase() || null;
   const liSi = formatLiSi(loadSpeed.indeksNosnosci, loadSpeed.indeksPredkosci);
   const cenaZakupu = normalizePrice(record.cenaKlientNetto);
   const stan = normalizeQty(record.magazyn1);
@@ -1211,7 +1211,7 @@ function normalizeAgrowiec(record) {
   const loadSpeed = parseLoadSpeed(record.indeksy);
   const vfIf = emptyToNull(record.vfIf);
   const result = {
-    kategoria: applicationRules.canonicalCategory(record.kategoria),
+    kategoria: cleanText(record.kategoria).toLowerCase() || null,
     kodDostawcy: null,
     ean: emptyToNull(record.ean),
     marka: emptyToNull(record.producent),
@@ -1308,7 +1308,7 @@ function normalizeTrelleborg(record) {
   const vfIf = emptyToNull(record.vfIf);
   const cfo = emptyToNull(record.cfo) ? 1 : 0;
   const result = {
-    kategoria: applicationRules.canonicalCategory(record.rodzaj),
+    kategoria: cleanText(record.rodzaj).toLowerCase() || null,
     kodDostawcy: emptyToNull(record.kodProducenta),
     ean: normalizeScientificEan(record.ean),
     marka: emptyToNull(record.producent),
@@ -1384,7 +1384,7 @@ function normalizeAgrorami(record) {
     else if (reIndustrial.test(txt)) kategoria = 'Przemys\u0142owe';
     else kategoria = 'Rolnicze';
   } else {
-    kategoria = applicationRules.canonicalCategory(record.kategoria);
+    kategoria = katRaw;
   }
   // POPRAWKA 2026-09-01: porównanie z Wielkiej litery.
   let tlTt = normalizeTlTt(record.tlTt) || marks.tlTt;
