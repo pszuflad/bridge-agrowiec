@@ -1,14 +1,3 @@
-2026-09-17 14:58
-obszar: backend | baza danych
-
-pliki: parsers/mo9_agrorami_api.cjs, parsers/mo9_agrorami_api.cjs.bak_pre_bkt_category_163_20260917_145511, data.db, data.db.bak_full_bkt_category_163_20260917_145511, CHANGELOG.md, CHANGELOG.md.bak_pre_bkt_category_163_20260917_145511
-
-zmiana: filtr importu MO9 odrzuca po stabilnym ID kategorii Magento 163 wszystkie pozycje Agrorami z kategorii „Opony do quadów i kosiarek”, zachowując tekstowy filtr quad jako fallback. Aktualne API: 1114 pozycji, 991 dopuszczonych, 123 odrzucone, 0 błędów. Jednorazowo usunięto z katalogu Bridge 83 istniejące odpowiedniki tej grupy; 40 z 123 pozycji źródłowych nie było zapisanych w katalogu. Usunięto także 76 odpowiadających mapowań selly_products po poprawnym usunięciu produktów w Selly. Nie usuwano pozostałych rekordów historycznej kategorii inne.
-
-powód: prośba Anny — opony BKT do quadów, kosiarek, gokartów i podobnych małych pojazdów nie mają być importowane z API ani publikowane w Selly.
-
----
-
 2026-09-14 15:34
 obszar: backend | baza danych
 

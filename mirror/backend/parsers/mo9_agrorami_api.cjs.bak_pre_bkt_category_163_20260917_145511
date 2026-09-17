@@ -422,26 +422,6 @@ const KATEGORIA_MAP = {
   'inne': 'Rolnicze' // DECYZJA ANNY: inne → rolnicze
 };
 
-// DECYZJA ANNY 2026-09-17: nie importujemy opon do quadów, kosiarek,
-// gokartów ani podobnych małych pojazdów. Agrorami grupuje je w kategorii
-// Magento 163 „Opony do quadów i kosiarek”. ID jest stabilniejszym warunkiem
-// niż sama odmiana słowa „quad” w nazwie kategorii.
-const ODRZUCONE_CATEGORY_IDS = new Set(['163']);
-
-function powodOdrzucenia(it) {
-  const categories = Array.isArray(it && it.categories) ? it.categories : [];
-  if (categories.some(x => ODRZUCONE_CATEGORY_IDS.has(String(x && x.id)))) {
-    return 'kategoria_163_quady_kosiarki';
-  }
-
-  const nameL = String((it && it.name) || '').toLowerCase();
-  const catL = categories.map(x => (x && x.name) || '').join(' ').toLowerCase();
-  if (/\bquad\b/.test(nameL) || /\bquad\b/.test(catL)) {
-    return 'quad';
-  }
-  return null;
-}
-
 // Override rozmiaru dla pozycji, gdzie dostawca wpisuje indeks zamiast wymiaru (jak w CSV parserze)
 const ROZMIAR_OVERRIDE = {
   '106946': '540/65R38' // BKT AGRIMAX RT 657
@@ -741,9 +721,11 @@ async function fetchAll() {
 
   for (const it of items) {
     try {
-      const powod = powodOdrzucenia(it);
-      if (powod) {
-        odrzucone.push({ powod, id: it.id, name: it.name });
+      // Odrzucamy quady (jak w CSV parserze) — po nazwie/kategorii
+      const nameL = (it.name || '').toLowerCase();
+      const catL = (Array.isArray(it.categories) ? it.categories.map(x => (x && x.name) || '').join(' ') : '').toLowerCase();
+      if (/\bquad\b/.test(nameL) || /\bquad\b/.test(catL)) {
+        odrzucone.push({ powod: 'quad', id: it.id, name: it.name });
         continue;
       }
       records.push(itemToRecord(it));
