@@ -1,0 +1,1382 @@
+{
+  "finished_at": "2026-09-17T15:06:36.411Z",
+  "backup": "selly_backups/categories_filters_pre_20260917T150443Z.json",
+  "updated": 92,
+  "failed_verification": [],
+  "results": [
+    {
+      "product_id": 4,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "540/65R28 BKT FORESTMAX 149A8/146B TL",
+      "rozmiar": [
+        "540/65R28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/60R28 BKT FORESTMAX E 152A8/149B TL",
+      "rozmiar": [
+        "600/60R28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 7,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "650/65R38 BKT FORESTMAX 172A8/186A2 TL",
+      "rozmiar": [
+        "650/65R38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 16,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "14.9X28 BKT FORESTLAND E 14PR TT",
+      "rozmiar": [
+        "14.9x28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 17,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4X38 BKT FORESTLAND E 14PR TT",
+      "rozmiar": [
+        "18.4x38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 203,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40X22.5 BKT FORESTECH STBT 20PR TL",
+      "rozmiar": [
+        "710/40x22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 372,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55X26.5 BKT FORESTECH 172A2/165A8 20PR SB TL",
+      "rozmiar": [
+        "600/55x26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 456,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45X26.5 BKT FORESTECH 168A8/175A2 20PR SB TL",
+      "rozmiar": [
+        "710/45x26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 2614,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE FORESTAR 644 III 175A2/168A8 20PR SB TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 2626,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 643 FORESTAR RIII 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 2640,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 ALLIANCE 644 FORESTAR III 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3140,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "16.9-34 NOKIAN TR FS FOREST 146A8 14PR",
+      "rozmiar": [
+        "16.9-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3144,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN NORDMAN FOREST TRS SF 16PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3215,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4-34 SPEEDWAYS GRIPKING FORESTRY 16PR TT",
+      "rozmiar": [
+        "18.4-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3221,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "18.4-38 SPEEDWAYS GRIPKING FORESTRY 162A2 16PR TT",
+      "rozmiar": [
+        "18.4-38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3222,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "16.9-28 SPEEDWAYS GRIPKING FORESTRY 16PR TT",
+      "rozmiar": [
+        "16.9-28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3423,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/60R38 ALLIANCE 668 FORESTAR III 171D TL",
+      "rozmiar": [
+        "710/60R38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3425,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/60R28 ALLIANCE 668 FORESTAR III 157D",
+      "rozmiar": [
+        "600/60R28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3426,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "540/65-28 ALLIANCE 668 FORESTAR III 154D TL",
+      "rozmiar": [
+        "540/65-28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3427,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "650/65R42 ALLIANCE 668 FORESTAR III 170D TL",
+      "rozmiar": [
+        "650/65R42"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3429,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 644 FORESTAR III 24PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3430,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 644 FORESTAR III ELIT 168A8/175A2 20PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3431,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 ALLIANCE 644 FORESTAR III 20PR",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3432,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 ALLIANCE 644 FORESTAR III 24PR TL",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3433,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "780/50-28.5 ALLIANCE 644 FORESTAR III 182A8/190A2 TL",
+      "rozmiar": [
+        "780/50-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3434,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 ALLIANCE 644 FORESTAR III 20PR TL",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3435,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 ALLIANCE 644 FORESTAR III 20PR TL",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3436,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 ALLIANCE 644 FORESTAR III 159A8/167A2 20PR",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3816,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 ALLIANCE 344 FORESTRY 20PR TL",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3841,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "20.8-42 ALLIANCE 333 AGRO-FORESTRY 162A8/159B TL",
+      "rozmiar": [
+        "20.8-42"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3843,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL",
+      "rozmiar": [
+        "18.4-38"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3850,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "16.9-28 ALLIANCE 333 AGRO-FORESTRY 144A8/141B TL",
+      "rozmiar": [
+        "16.9-28"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3852,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL",
+      "rozmiar": [
+        "14.9-24"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3873,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "500/45-22.5 ALLIANCE 328 VALUE PLUS 144A8 16PR TL",
+      "rozmiar": [
+        "500/45-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 3874,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "400/60-15.5 ALLIANCE 328 VALUE PLUS 152A8 20PR",
+      "rozmiar": [
+        "400/60-15.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 4236,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "28L-26 ALLIANCE FORESTAR 345 177A2/165A6 20PR TL",
+      "rozmiar": [
+        "28L-26"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5145,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 ALLIANCE FORESTAR 344 184A2/177A8 20PR TL",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5146,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 ALLIANCE FORESTAR 644 III 189A2/182A8 24PR SB TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5149,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 ALLIANCE FORESTAR 644 III 186A2/161A8 20PR SB TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5352,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 ALLIANCE FORESTAR 644 III 177A2/170A8 24PR SB TL",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5358,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 ALLIANCE FORESTAR 644 III 183A2/176A8 24PR SB TL",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5373,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "23.1-26 ALLIANCE FORESTAR 345 160A6 16PR TL",
+      "rozmiar": [
+        "23.1-26"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5533,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL",
+      "rozmiar": [
+        "28L-26"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5551,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5552,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5553,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5554,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 NOKIAN NORDMAN FOREST F SF 20PR TT",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5555,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN NORDMAN FOREST F SF 16PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5556,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN NORDMAN FOREST ELS SF 16PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5557,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "700/70-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "700/70-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5558,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "700/55-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "700/55-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5559,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/65-34 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "600/65-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5560,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5561,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5562,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN NORDMAN FOREST TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5563,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN NORDMAN FOREST TRS L-2 SF 16PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5564,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/70-34 NOKIAN FOREST KING TRS 2PLUS SF 24PR TT",
+      "rozmiar": [
+        "710/70-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5565,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-34 NOKIAN FOREST KING TRS 2PLUS SF 24PR TT",
+      "rozmiar": [
+        "710/55-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5566,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/65-34 NOKIAN FOREST KING TRS 2PLUS SF 24PR TT",
+      "rozmiar": [
+        "600/65-34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5567,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "780/50-28.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "780/50-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5568,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-28.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5569,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5570,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5571,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-26.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5572,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING F 2 SF 24PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5573,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5574,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5575,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-24.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5576,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5577,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5578,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN FOREST KING F 2 SF 20PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5579,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "780/50-28.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "780/50-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5580,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-28.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-28.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5581,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-26.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5582,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "750/55-26.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "750/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5583,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/55-26.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "710/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5584,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING TRS 2 SF 24PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5585,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/45-26.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "710/45-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5586,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/55-26.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "600/55-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5587,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "800/40-24.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "800/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5588,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-24.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5589,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-24.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "600/50-24.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5590,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "710/40-22.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "710/40-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5591,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "600/50-22.5 NOKIAN FOREST KING TRS 2 SF 20PR TT",
+      "rozmiar": [
+        "600/50-22.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5595,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "650/60-26.5 NOKIAN FOREST KING TRS L-2 SF 20PR TT",
+      "rozmiar": [
+        "650/60-26.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5616,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF800/50R34 NOKIAN FLOAT KING VF 183D SB TL",
+      "rozmiar": [
+        "VF800/50R34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5617,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF710/55R34 NOKIAN FLOAT KING VF 179D SB TL",
+      "rozmiar": [
+        "VF710/55R34"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5619,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF850/50R30.5 NOKIAN FLOAT KING VF 184D SB TL",
+      "rozmiar": [
+        "VF850/50R30.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 5620,
+      "reasons": [
+        "forwarder_harwester"
+      ],
+      "category_id": 2,
+      "name": "VF750/60R30.5 NOKIAN FLOAT KING VF 183D SB TL",
+      "rozmiar": [
+        "VF750/60R30.5"
+      ],
+      "zastosowanie": [
+        "Forwarder/Harwester"
+      ],
+      "errors": []
+    },
+    {
+      "product_id": 6509,
+      "reasons": [
+        "bad_size"
+      ],
+      "category_id": 3,
+      "name": "BKT CON STAR IND 12.5/80-18 (340/80-18)",
+      "rozmiar": [
+        "12.5/80-18"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6729,
+      "reasons": [
+        "bad_size"
+      ],
+      "category_id": 3,
+      "name": "BKT BK-LOADER 53 155A2 16.0/70R20 (405/70R20)",
+      "rozmiar": [
+        "16.0/70R20"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    },
+    {
+      "product_id": 6738,
+      "reasons": [
+        "bad_size"
+      ],
+      "category_id": 1,
+      "name": "BKT AGRIMAX RT 945 380/90R50 (14.9R50)",
+      "rozmiar": [
+        "380/90R50"
+      ],
+      "zastosowanie": null,
+      "errors": []
+    }
+  ]
+}
