@@ -353,6 +353,11 @@ Trzy, wszystkie wykryte w trakcie pomiaru i wszystkie opisane wyżej:
 - **Bramki backendu:** `npm run lint` ✓, `npm run typecheck` ✓, `npm run build` ✓,
   `npm test` ✓ — **82 pliki, 1262 testy, wszystkie przechodzą** (przed kartą 1249; +13 to
   dokładnie nowy plik wyroczni).
+  **Po scaleniu `develop` (2026-09-18, merge #72 i #73): 83 pliki, 1271 testów, wszystkie
+  przechodzą** — różnica to `test/akceptacja.odstepstwa.test.ts` z karty
+  `58-FEATURE-i14i-ean-naukowy-pusty`, nie nasza. Konflikt scalania wystąpił wyłącznie
+  w `docs/rebuild-roadmap.md` (dwa wiersze tabel: 14i domknięte przez 58, 14j dołożone przez nas)
+  i został rozwiązany zachowaniem OBU informacji.
 
 ## Breaking changes
 
