@@ -176,3 +176,27 @@ Rzeczy zauważone i **świadomie** odłożone:
 5. **Rozjazd `pewnosc: "wymuszona"` vs „ręczna"** przy ręcznym wyborze dostawcy z selecta
    (zgłoszony przez 14a, istniejący od 3f-1). Instrukcja opisuje etykiety takimi, jakie Ania
    zobaczy dziś — jeśli rozjazd zostanie naprawiony, rozdz. 3.1 wymaga jednej poprawki.
+
+## Poprawki po review
+
+Review: **0 BLOCKER, 0 SHOULD-FIX, 2 NICE-TO-HAVE** (`review.md`). Rozliczenie:
+
+- **✓ Naprawione (znalezione NIEZALEŻNIE od review, poza jego listą) — etykieta „1 dzień"
+  nie istnieje w kodzie.** Review zadeklarowało sprawdzenie jedenastu presetów częstotliwości
+  i nie zgłosiło rozbieżności, ale `formatujCzestotliwosc()`
+  (`rebuild/frontend/src/pages/konfiguracja/dostawcy.ts:36-40`) dla 1440 minut zwraca
+  `` `${Math.round(1440/1440)} dni` `` = **„1 dni"**, a select renderuje właśnie tę funkcję
+  (`Dostawcy.tsx:425-429`). Instrukcja podawała „1 dzień" — czyli napis, którego Ania nie
+  znajdzie na ekranie. Zweryfikowane wykonaniem funkcji na całej liście presetów:
+  `5 min · 15 min · 30 min · 1 godz. · 2 godz. · 4 godz. · 6 godz. · 12 godz. · 1 dni · 2 dni · 7 dni`.
+  Poprawione i **opatrzone ostrzeżeniem**, że „1 dni" jest odtworzone 1:1 i nie należy go
+  zgłaszać jako literówki.
+- **✓ Naprawione (NICE-TO-HAVE) — brak instrukcji sprzątania po teście wymuszonego dostawcy.**
+  Test z rozdz. 3.2 celowo tworzy źle przypisane pozycje; bez instrukcji zostawałyby
+  w poczekalni i myliły przy kolejnych przebiegach. Dopisana ścieżka: filtr „Wszystkie" →
+  szukajka „MO3" → „Odrzuć zaznaczone".
+- **Zostawione świadomie (NICE-TO-HAVE) — stara sekcja §5 w `instrukcja-testow-I3.md` nie ma
+  przekreślonych pozycji „Historia"/„Atrybuty".** To bezpośrednia konsekwencja decyzji D3
+  (I3 nietknięta poza bannerem) i konwencji I13 („starsze instrukcje zostają bez zmian").
+  Banner na górze I3 wymienia §5 wprost jako nieaktualny i kieruje do I14 rozdz. 11, gdzie
+  lista jest poprawna. Reviewer sam ocenia to jako nieistotne.

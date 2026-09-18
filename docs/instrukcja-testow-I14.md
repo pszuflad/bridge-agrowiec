@@ -102,6 +102,11 @@ Pod spodem jest siatka **kafli wszystkich dostawców**: kod, nazwa, e-mail i prz
 **Test wart zrobienia:** weź plik, który nazwą wskazuje na MO1, i wgraj go przez kafel **MO3**.
 Pozycje mają wylądować pod **MO3** — wymuszenie ma wygrać z nazwą pliku.
 
+**Po sprawdzeniu posprzątaj:** to są celowo źle przypisane pozycje, więc **nie akceptuj ich**.
+Wejdź na `/staging`, ustaw „Typ sprawy" na **„Wszystkie"**, wpisz w szukajkę **MO3**, zaznacz
+te pozycje i kliknij **„Odrzuć zaznaczone"**. Inaczej zostaną w poczekalni i będą mylić przy
+kolejnych testach.
+
 ⚠ **Kafle pokazują WSZYSTKICH dostawców, także MO6.** MO6 jest wyłączony z importu, więc
 wgranie przez jego kafel skończy się odmową — **tak samo jak w starym Bridge**, który też
 nie filtrował kafli. To nie jest błąd.
@@ -236,8 +241,11 @@ rację.** Ten błąd nadal siedzi w produkcji i warto go u siebie poprawić.
 
 ### 5.3 Pole „liczba minut" jest teraz schowane
 
-Częstotliwość wybierasz z listy gotowych wartości (5 min, 15 min, 30 min, 1 godz., 2 godz.,
-4 godz., 6 godz., 12 godz., 1 dzień, 2 dni, 7 dni).
+Częstotliwość wybierasz z listy jedenastu gotowych wartości: *5 min · 15 min · 30 min ·
+1 godz. · 2 godz. · 4 godz. · 6 godz. · 12 godz. · **1 dni** · 2 dni · 7 dni*.
+
+⚠ **„1 dni" to nie literówka do zgłoszenia.** Stary Bridge skleja liczbę ze słowem „dni"
+bez odmiany, więc doba wyświetla się jako „1 dni". Odtworzone 1:1.
 
 **Pole na wpisanie własnej liczby minut pojawia się dopiero po wybraniu opcji
 „Inna wartość (minuty)…"** — wcześniej w odbudowie wisiało od razu obok listy.
