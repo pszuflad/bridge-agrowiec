@@ -2397,24 +2397,43 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   --all` nie zwraca ANI JEDNEGO commita od baseline'u 13.08 po 18.09. Wniosek: karta 14h to
   **nowa funkcja i świadome odstępstwo**, a nie przywrócenie czegoś, co się zepsuło — i tak
   trzeba ją wycenić i opisać Ani, żeby nie liczyła na „powrót do stanu sprzed backupu".
-- ⚠ **NIEROZSTRZYGNIĘTE — blokuje 14f i część 14e (backlog #19).** W instrukcji Ania napisała
-  „data końcowa powinna automatycznie wyłączać promocję (…) system powinien przeliczyć ceny bez
-  tej promocji", a w odpowiedzi z 18.09: „to nie było opisane jako błąd (…) ma zostać tak jak
-  jest, reguła znika po końcu obowiązywania". Te zdania są rozbieżne, a jej opis zachowania
-  **nie zgadza się z kodem**: `TabelaPromocji.tsx` NICZEGO nie filtruje po datach (wiersz
-  zostaje z odznaką „zakończona" i naszym pomarańczowym znacznikiem), a silnik cen dat nie czyta
-  w ogóle, więc **wygasła promocja dalej obniża ceny**. Pytanie kontrolne wysłane 2026-09-18;
-  do czasu odpowiedzi **nie ruszamy silnika cen**. Jej odpowiedzi na sąsiednie pytania (brak
-  przełącznika statusu, „promocje po prostu się usuwa") sugerują wariant NAJTAŃSZY — zostawiamy
-  1:1 — ale to domysł, nie decyzja.
+- ⭐ **ROZSTRZYGNIĘTE 2026-09-19 (backlog #19): DATA MA NAPRAWDĘ KOŃCZYĆ PROMOCJĘ.** Pierwsza
+  odpowiedź Ani była rozbieżna z jej wpisem w instrukcji, bo pytanie było zbyt otwarte; zadane
+  ponownie — z opisem stanu faktycznego („po dacie końca promocja nadal obniża ceny") — dało
+  jednoznaczne: *„data ma naprawdę kończyć promocje"*. **To NAJDROŻSZA pozycja I14 i jedyne
+  świadome odstępstwo, które rusza silnik cen.**
+- **Kierunek do wyceny w 14e, NIE przesądzony.** Są dwie drogi i różnią się kosztem o rząd
+  wielkości:
+  **(a) silnik czyta daty** — `promocjaPasuje` dostaje warunek na `start`/`koniec`. Proste w kodzie,
+  ale zmienia zachowanie funkcji porównywanej z oryginałem, więc **wymaga wyjątku w charakteryzacji**
+  (koszt opisany w `repos/ceny.ts:108-116`).
+  **(b) wygaszacz statusu** — osobny krok przestawia w bazie `status` na `zakonczona`, gdy minęła
+  data końca (na starcie i przy każdym przeliczeniu cen), a silnik zostaje NIETKNIĘTY i dalej
+  patrzy wyłącznie na `status`. Charakteryzacja zostaje nienaruszona, bo funkcja zachowuje się
+  identycznie jak w oryginale — zmieniają się DANE, które dostaje. Dodatkowo (b) naturalnie
+  spełnia to, co Ania opisała słowami „reguła znika po końcu obowiązywania": wiersz dostaje status
+  `zakonczona` i przestaje obniżać ceny.
+  **Rekomendacja: (b)**, o ile 14e nie wykaże przeciwwskazań. Decyzja należy do użytkownika.
+- **Skutek uboczny dla 14f:** pomarańczowy znacznik rozbieżności (`rozbieznoscStatusu`, dodany
+  w 4b jako D5) traci rację bytu w wariancie (b) — etykieta z dat i kolumna `status` przestaną
+  się rozjeżdżać. Znacznik należy usunąć ŚWIADOMIE i odnotować, a nie zostawić jako martwy kod.
+- **Zamknięte tą samą turą odpowiedzi (2026-09-19):**
+  - **§3.7 nie jest błędem cen** — Ania: *„tylko się nie wyświetlało, cena się oblicza
+    prawidłowo"*. Zadanie A karty 14e (polowanie na defekt w dopasowaniu promocji) jest
+    **bezprzedmiotowe**; zostaje wyłącznie wycena z punktu wyżej.
+  - **Kolumna „Promocja" — potwierdzona do zrobienia** (*„dodaj regułę wypełniania kolumny
+    promocja"*). Ania nie odniosła się do ustalenia, że kolumna nigdy nie działała — przyjmujemy,
+    że akceptuje to jako nową funkcję (karta 14h).
+  - **Potwierdzenie usuwania reguły ma podawać liczbę produktów** (*„pokazuj ilu produktów ma
+    dotyczyć zmiana"*) — zakres 14f przesądzony, bez wariantu minimalnego.
 
 **Karty drugiej fali.** Klaster `/narzuty` jest mały i gęsty, więc rozłączność wymusza inny
 podział niż w pierwszej fali; poniżej własność plików, która gwarantuje pracę równoległą.
 
 | Karta | Zakres | Pliki (wyłączna własność) | Testy |
 |---|---|---|---|
-| **14e** | Diagnoza: czy promocja z warunkiem obniża ceny (pomiar na odbudowie I oryginale) + wycena kosztu #19 | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
-| **14f** | Potwierdzenie przy usuwaniu reguły + liczba dotkniętych produktów | `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx` | `test/narzuty.test.tsx` |
+| **14e** | ⚠ ZAKRES ZAWĘŻONY 19.09: wycena #19 — wariant (a) czy (b), z liczbami. Zadania „czy promocja obniża ceny" i „komunikat po edycji" ZAMKNIĘTE odpowiedziami Ani | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
+| **14f** | Daty kończą promocję (#19, wariant z 14e) + usunięcie znacznika rozbieżności + potwierdzenie usuwania reguły z liczbą produktów | BE: `repos/ceny.ts` albo NOWY wygaszacz + `repos/promotions.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts` | `test/narzuty.test.tsx` + testy BE |
 | **14h** | Kolumna „Promocja" w katalogu — NOWA funkcja (BE wypełnia `_reguly.promocja`) | BE: trasa `/api/products` · FE: `katalog/formatowanie.tsx` | `test/katalog.formatowanie.test.tsx` |
 | **14i** | EAN w notacji naukowej → puste pole w katalogu | BE: silnik importu (normalizacja EAN) | bramki charakteryzacji |
 
