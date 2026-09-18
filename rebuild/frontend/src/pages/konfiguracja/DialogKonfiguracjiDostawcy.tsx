@@ -122,6 +122,18 @@ export function DialogKonfiguracjiDostawcy({
             )}
           </div>
 
+          {/*
+           * ŚWIADOMIE surowe pole liczbowe — BEZ selectu presetów, który ma karta dostawcy
+           * (`Dostawcy.tsx`). To nie jest przeoczenie ani niespójność do „posprzątania"
+           * (decyzja użytkownika w 14c, plan.md D3). Dwa powody:
+           *  1. To inna trasa o innej semantyce. Dialog wysyła TYLKO pola zmienione, bo backend
+           *     rozróżnia „pole nieobecne" od „pole `null`" (`extensions.cjs:355,363,371`).
+           *     Select zawsze ma jakąś wartość, więc samo otwarcie dialogu zaczęłoby wysyłać
+           *     częstotliwość i odebrałoby temu rozróżnieniu sens.
+           *  2. Dla `/api/admin/supplier-config` NIE MA w oryginale żadnego React UI — nie ma
+           *     więc czego odtwarzać ani z czym ujednolicać. Presety z `freq-injection.js`
+           *     dotyczyły wyłącznie karty dostawcy.
+           */}
           <div className="space-y-1.5">
             <Label htmlFor="admin-czestotliwosc">Częstotliwość (minuty)</Label>
             <Input

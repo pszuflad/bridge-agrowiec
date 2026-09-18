@@ -171,6 +171,26 @@ describe("Zakładka „Admin”", () => {
     });
 
     /**
+     * STRAŻNIK DECYZJI (I14/14c, plan.md D3). Karta dostawcy ma select presetów częstotliwości
+     * (wchłonięty `freq-injection.js`), a ten dialog ŚWIADOMIE ma samo surowe pole liczbowe.
+     * To nie jest niespójność do „posprzątania":
+     *  - dialog wysyła TYLKO pola zmienione, bo backend rozróżnia „nie ruszaj" od „wyczyść";
+     *    select zawsze ma wartość, więc samo otwarcie zaczęłoby wysyłać częstotliwość;
+     *  - dla `/api/admin/supplier-config` nie ma w oryginale ŻADNEGO React UI, więc nie ma
+     *    czego odtwarzać ani z czym ujednolicać.
+     * Ten test istnieje po to, żeby następna sesja nie dołożyła tu selectu z rozpędu.
+     */
+    it("ŚWIADOMIE nie ma selectu presetów — częstotliwość to surowe pole liczbowe", async () => {
+      await otworzDialog();
+
+      const pole = screen.getByTestId("input-admin-czestotliwosc");
+      expect(pole).toHaveAttribute("type", "number");
+      expect(screen.queryByTestId("select-admin-czestotliwosc")).not.toBeInTheDocument();
+      // Jedyny select w dialogu to status — gdyby doszedł drugi, to znak, że ktoś ujednolicił.
+      expect(screen.getByTestId("select-admin-status")).toBeInTheDocument();
+    });
+
+    /**
      * ⚠ NAJWAŻNIEJSZA ASERCJA DIALOGU: wysyłamy TYLKO pola zmienione. Backend rozróżnia
      * „pole nieobecne" (nie ruszaj) od „pole null" (wyczyść) przez `hasOwnProperty`, więc
      * wysłanie kompletu nadpisałoby wartości, których nikt nie dotknął.
