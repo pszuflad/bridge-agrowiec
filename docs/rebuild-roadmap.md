@@ -164,6 +164,11 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 > ręcznie w `6872aea`, striażowane `40-CHORE-triaz-i13-plan`). Sześć sesji 13a–13f (podział wg
 > mechanizmu portu) — czytaj blok I13. **Musi być rozliczona przed cutoverem** — cutover idzie ze
 > stanu produkcji 08.09, nie 25.08.
+>
+> **I14 to ODDZIELNA rodzina — uwagi Ani z testów I3, nie delta produkcji** (2026-09-18).
+> Trzy karty FE (14a/14b/14c) rozłączne plikowo, więc idą równolegle, plus 14d (docs) na końcu.
+> Nie blokuje cutoveru tak jak I13, ale dotyczy ekranów, z których Ania korzysta codziennie —
+> czytaj blok I14 w §5.
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
@@ -183,6 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
+| 14 | Uwagi Ani z testów I3 (warstwa UI importu i stagingu) | 14a FE · 14b FE · 14c FE · 14d DOCS | 3 | ⬜ | Źródło: wypełniona `docs/instrukcja-testow-I3.md` (uwagi Ani + zrzuty ekranu). Oś podziału = PLIK, nie temat — 14a/14b/14c mają rozłączne zestawy plików i idą RÓWNOLEGLE; 14d (docs) na końcu. Czytaj blok I14. |
 
 ---
 
@@ -2112,6 +2118,128 @@ po ustabilizowaniu `mirror/selly/` u Ani, ~2026-09-16 — patrz blok 13d; 13d-1 
 13d jest niezależne od 13a–13c (inny podsystem), więc może startować równolegle po 13a. 13a jest twardym
 fundamentem — nie zaczynaj 13b/13c przed jego merge.
 
+---
+
+### Iteracja 14 — Uwagi Ani z testów Iteracji 3 (warstwa UI importu i stagingu)
+
+- **Status:** ⬜ nie zaczęte — zaplanowana 2026-09-18. **Zależy od:** 3 (import), konkretnie widoków
+  z 3e i 3f. Niezależna od otwartego 13d (inny podsystem, inne pliki).
+- **Skąd się wzięła.** Ania przeszła `docs/instrukcja-testow-I3.md` i wypełniła pola UWAGI (komentarze
+  + zrzuty ekranu). **To NIE jest kolejna delta produkcji** jak I13 — produkcja się nie zmieniła.
+  I13 portowała KOD, którego odbudowa nie miała; I14 nadrabia to, czego odbudowa nie przeniosła
+  z **warstwy UI** oryginału, plus rozstrzyga decyzje, o które Ania poprosiła w rozdz. 12 i 13
+  instrukcji. Większość jej uwag o parserach i silniku wypadła — 13a/13b/13c je już dowiozły.
+- **Cel:** dociągnąć trzy ekrany do kształtu oryginału (1:1) i zaktualizować instrukcję testów I3,
+  która w rozdz. 12 i 13 opisuje stan sprzed I13.
+
+**Oś podziału = PLIK, nie temat.** Karty 14a/14b/14c mają ROZŁĄCZNE zestawy plików źródłowych
+i testowych, dzięki czemu idą RÓWNOLEGLE na trzech gałęziach. Pierwszy podział był tematyczny
+i stawiał przycisk „Wgraj plik" z karty dostawcy w jednej karcie z zakładką „Wgrywanie ręczne" —
+a to dwa różne pliki i dwie różne implementacje (w oryginale też: kafle w zakładce wołają wspólny
+dialog, przycisk na karcie dostawcy ma własny, samodzielny upload). Własność plików:
+
+| Karta | Pliki źródłowe (wyłączna własność) | Testy |
+|---|---|---|
+| 14a | `src/pages/konfiguracja/Wgrywanie.tsx`, `detekcja.ts`, `wgrywanie.ts` | `test/konfiguracja.test.tsx` |
+| 14b | `src/pages/Staging.tsx`, `src/pages/staging/**` | `test/staging.test.tsx` |
+| 14c | `src/pages/konfiguracja/Dostawcy.tsx`, `DialogKonfiguracjiDostawcy.tsx` | `test/konfiguracja.dostawcy.test.tsx`, `test/konfiguracja.admin.test.tsx` |
+
+Żadna z trzech kart nie rusza `contract/`, `rebuild/backend/` ani `contract/fixtures/` — **bramki
+backendu są dla nich N/D**. Gdyby któraś musiała ruszyć fixtures, ma się ZATRZYMAĆ i zapytać
+(fixtures są wspólne dla BE i FE — nauka z 13c).
+
+⚠ **`deminified/frontend-index.js` jest bundlem z 13.08**, czyli sprzed łatek FE Ani. Numery linii
+niżej są z niego i były weryfikowane pod kątem ISTNIENIA zachowania, nie jego najnowszej wersji.
+Zanim zmienisz etykietę albo tekst, potwierdź go w ŻYWYM bundlu
+(`mirror/frontend/assets/index-PRICEFMT1783512500.js`, ścieżka w `mirror/frontend/index.html`).
+
+**14a — zakładka „Wgrywanie ręczne"** [FE]. Cztery braki, wszystkie zweryfikowane w oryginale:
+- **Wgrywanie zbiorcze jest MODALEM, nie inline'em.** Przycisk „Wgraj pliki" (`button-multi-upload`)
+  otwiera dialog „Wgraj wiele plików — auto-detekcja dostawcy" z „Dodaj kolejny plik" / „Wyczyść" /
+  „Importuj do staging" — `frontend-index.js:26155-26166`, `:18957`, `:19171`. Etykieta akcji ma
+  wariant „Importuj do katalogu" (`:19171`) — ustalić, co go włącza, przed zahardkodowaniem.
+- **Brak całej sekcji „Wgrywanie pojedyncze (z wymuszonym dostawcą)"** — siatka kafli
+  `upload-tile-{kod}` (kod · nazwa · e-mail · „Wgraj plik"), `:26169-26200`. Ten sam dialog,
+  ale z wymuszonym dostawcą zamiast auto-detekcji.
+- **Brak toasta po imporcie** — `:19152-19153`: tytuł `${doStagingu} pozycji czeka na akceptację`
+  albo „Import zakończony", opis skleja tylko NIEZEROWE liczniki (Pozycji w plikach · Do akceptacji
+  w stagingu · Nowe · Zmienione · Wycofane · Bez zmian · Odrzucone (nie opony) · Pominięte pliki).
+  Błąd wczytania też idzie toastem (`:18876`). ⚠ Komentarz „nie mamy jeszcze Toastera"
+  w `Wgrywanie.tsx:80` jest NIEAKTUALNY — `ToastProvider` stoi w `App.tsx` od sesji 4b.
+- **Przycisk pokazuje „Wgraj (0)" po udanym wgraniu** (`Wgrywanie.tsx:192`) — licznik `doWyslania`
+  liczy pozycje JESZCZE niewysłane, więc po imporcie spada do zera i Ania czyta to jako „wgrało zero".
+- Bez zmian: podgląd 5 pozycji dalej pochodzi z odpowiedzi backendu (decyzja 3f-1), endpointy,
+  limit 50 MB, CSV+XLSX.
+
+**14b — Staging** [FE]. Cztery pozycje:
+- ⭐ **Zły filtr domyślny.** Oryginał startuje `useState("nowa")` = „Nowe produkty" (`:20617`),
+  odbudowa `useState("all")` (`Staging.tsx:47`). Lista opcji: `all`/`nowa`/`nowy`/`wycofana`/
+  `zmiana_kluczowa`/`blad` (`:20543-20560`). ⚠ Przesuwa domyślny zakres „Akceptuj/Odrzuć wszystkie (N)".
+- **Brak konfiguratora kolumn („Kolumny").** W oryginale to NIE komponent Reacta, tylko skrypt
+  doklejony do DOM-u (`:29317-29331`): wstrzykuje przycisk przed `button-accept-all`, popover
+  z checkboxami, ukrywanie kolumn CSS-em, zapamiętanie ustawienia. Wchłonąć jak `freq-injection.js`
+  w 3f-2. ⚠ NIE wyciągać wspólnego komponentu z `pages/katalog/KonfiguratorKolumn.tsx` — to plik
+  spoza własności 14b i złamałoby rozłączność kart. **To rozlicza wpis „do triażu" z bloku 13e.**
+- **Placeholder szukajki zaniża możliwości:** oryginał „Szukaj po kodzie, nazwie, dostawcy lub EAN...",
+  odbudowa „Szukaj po nazwie lub kodzie…" (`Staging.tsx:148`) — a backend szuka po czterech polach
+  (`rebuild/backend/src/repos/staging.ts:114-117`). Sam tekst.
+- **Układ paska akcji** (`:20702-20770`): jeden rząd — szukajka → „Typ sprawy" → licznik „N zmian" →
+  „Akceptuj/Odrzuć zaznaczone (N)" renderowane TYLKO przy zaznaczeniu → „Akceptuj/Odrzuć widoczne";
+  „Akceptuj/Odrzuć wszystkie (N)" w nagłówku karty.
+- ⚠ **NIE cofać:** zmiana rozmiaru strony wraca na stronę 1 (`Staging.tsx:65-67`). Oryginał resetuje
+  tylko przy zmianie filtra i frazy, ale to ŚWIADOME odstępstwo z 3e, opisane Ani w §9.3 instrukcji.
+
+**14c — karta dostawcy** [FE]. Trzy pozycje + jedno rozstrzygnięcie:
+- **Brak przycisku „Wgraj plik" na kartach dostawców** — `:25756-25802`: renderowany dla
+  `sposobDostarczania ∈ {upload, mail}`, ukryty `<input type="file" accept=".csv,.xml,.xlsx">`,
+  `FormData` z polem `plik` na `POST /api/dostawcy/{kod}/upload`, po sukcesie toast „Plik wczytany",
+  unieważnienie `["/api/suppliers"]` i `["/api/staging"]`. **Backend GOTOWY**
+  (`rebuild/backend/src/routes/suppliers.ts:134`) — brak jest wyłącznie po stronie FE. Treść toasta
+  dopasować do tego, co realnie zwraca kontrakt, nie do nazw pól z bundla.
+- **Pole „liczba minut" widoczne ZAWSZE** obok selectu presetów (`Dostawcy.tsx:259-298`); oryginał
+  (`freq-injection.js:124-146`) odsłaniał je dopiero po „Inna wartość (minuty)…". Stąd uwaga Ani
+  „w nowym jest wartość w minutach, w starym lista wyboru". Dzisiejsze uproszczenie jest w kodzie
+  udokumentowane komentarzem — zaktualizować razem ze zmianą.
+- **Dwa różne UI do tej samej rzeczy:** karta dostawcy (select + pole) kontra Konfiguracja → Admin
+  (`DialogKonfiguracjiDostawcy.tsx:126-134`, samo pole minut). Do decyzji użytkownika.
+- **Do sprawdzenia, nie do automatycznej zmiany:** etykieta przycisku synchronizacji — deminifikat
+  ma „Synchronizuj" (`:25754`), odbudowa „Synchronizuj teraz", instrukcja §6 mówi Ani „Synchronizuj
+  teraz". Zweryfikować na ŻYWYM bundlu przed ruszeniem.
+
+**14d — aktualizacja instrukcji testów + domknięcie backlogu** [DOCS] — **idzie PO 14a/14b/14c**,
+bo dokument ma opisywać STAN, nie zamiar. Dwie części:
+- *Można było zrobić wcześniej* (opisuje to, co JUŻ jest): rozdz. 12 pkt 12 (WULSTBAND) i pkt 13
+  (`nro`/`cho` 0/1) — Ania naprawiła je u siebie 01.09, odbudowa wciągnęła portem w 13a (`bug1`,
+  `bug2`); rozdz. 13 „Czego jeszcze NIE MA" jest nieaktualny poza „ceną na zapytanie" (historia,
+  alerty, atrybuty, analityka, narzuty i promocje są dowiezione). Backlog #9/#10 do rozliczenia.
+- *Musi czekać na 14a–14c:* opis nowego kształtu trzech ekranów + wiersz iteracji w tablicy §4.
+
+**Poza zakresem I14, wymaga osobnych decyzji i kart:**
+- **Status dostawcy w dwóch polach** (ustawienie ręczne + osobny wyliczony status techniczny) —
+  propozycja Ani z §12 pkt 10, backlog **#18**. Rusza BE + schemat + kontrakt, więc GATE i bramki
+  obu stron; dziś odbudowa odtwarza 1:1 zachowanie oryginału (wyliczony nadpisuje zapisany).
+  **To prośba o świadome odstępstwo, nie usterka** — czeka na decyzję użytkownika.
+- **EAN w notacji naukowej**, backlog **#11** (komunikat „zapis naukowy ma tylko null cyfr
+  znaczących"). Ania napisała: „EAN zapisany w notacji naukowej jest bezpiecznie pomijany jako NULL".
+  Zdanie jest dwuznaczne — albo akceptuje stan i zostaje poprawienie treści komunikatu, albo zgłasza
+  zmianę zachowania. **Wpis #11 czeka na jej decyzję; bez doprecyzowania nie zakładać karty.**
+- **Nowe priorytety Ani z §13 — do triażu, BRAK wpisów w backlogu:** kolizje `kod_importu`;
+  aktualizacja CECH istniejących produktów w Selly (wiąże się z odłożonym 13d — u Ani `PUT features`
+  usunięty po HTTP 400); rozróżnienie „nowy produkt" od „nowy magazyn dla istniejącego EAN";
+  uporządkowanie danych MO9.
+- **Zadania środowiskowe przed cutoverem:** Ania nie mogła przetestować §7 (scheduler — brak restartu
+  backendu) ani §14 „trzy drogi importu / konfiguracja", bo **dostawcy nie są podpięci produkcyjnie
+  na stagingu** („nie da się wstrzymać synchro"). ⚠ Osobno: **test rozstrzygający §8.1 (ta sama
+  liczba pozycji w starym i nowym Bridge) NADAL NIE ZOSTAŁ WYKONANY** — tabela jest wypełniona tylko
+  dla MO1 i to „na oko, bez liczb"; MO9 się nie da (API, brak pliku). To najcenniejszy test całej
+  instrukcji i wymaga osobnego podejścia z konkretnymi plikami.
+
+**Kolejność:** **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej kolejności) → **14d**.
+Każda z trzech kart dopisuje TYLKO swój podblok wyżej i NIE rusza tablicy postępu §4 — wiersz iteracji
+zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-18.
+
+---
+
 ## 6. Po zakończeniu wszystkich iteracji
 
 > **Stan 2026-09-08: pierwotna odbudowa DOWIEZIONA — I0–I12 zamknięte, ostatnia sesja 12e domknęła
@@ -2119,8 +2247,10 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
 > przegląd 12 widoków przez Anię i cutover. **Doszła jednak I13** — nowa rodzina zmian, które Ania
 > wdrożyła na produkcji 26.08–08.09 (patrz blok I13 w §5); **musi być rozliczona PRZED cutoverem**,
 > bo cutover idzie ze stanu produkcji z 08.09 (`6872aea`), nie 25.08 — inaczej wdrażamy stan sprzed
-> dwóch tygodni. Poza I13 i tymi dwoma zdarzeniami żadna kolejna sesja programistyczna nie jest
-> przewidziana w tym dokumencie.
+> dwóch tygodni. **Doszła też I14** — uwagi Ani z testów Iteracji 3 (warstwa UI importu
+> i stagingu, blok I14 w §5); w odróżnieniu od I13 **nie blokuje cutoveru**. Poza I13, I14
+> i tymi dwoma zdarzeniami żadna kolejna sesja programistyczna nie jest przewidziana w tym
+> dokumencie.
 
 **Zrobione w 12e (patrz blok Sesja 12e w §5 po szczegóły):**
 - Audyt bezpieczeństwa (auth, CORS, JWT, mass-assignment) — bez otwartych dziur; luka procesu
