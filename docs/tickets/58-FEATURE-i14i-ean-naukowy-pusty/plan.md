@@ -172,7 +172,7 @@ cyfr znaczących" (cieniowanie `Lq` — backlog #11, osobny defekt oryginału).
    - kontrola negatywna: status `no_valid_candidate` → bez zmian względem dotychczasowego
      zachowania (oryginał i tak daje tam `ean = null`, więc nie ruszamy tej gałęzi).
 3. **Weryfikacja braku regresji** — pełny `npm test` w `rebuild/backend/`, ze szczególnym
-   naciskiem na `akceptacja.charakteryzacja.test.ts` (38 scenariuszy porównywanych na żywo
+   naciskiem na `akceptacja.charakteryzacja.test.ts` (31 scenariuszy porównywanych na żywo
    z oryginałem — muszą przejść **bez wyjątków**, bo żaden nie ma statusu z notacji naukowej)
    oraz `silnik.charakteryzacja.test.ts` i `silnik.gate.test.ts` (muszą przejść **nietknięte**).
 4. **Docs** — `docs/rebuild-roadmap.md` (podblok 14i: stan + korekta D5 + nota o kolejności
@@ -186,7 +186,7 @@ cyfr znaczących" (cieniowanie `Lq` — backlog #11, osobny defekt oryginału).
   `katalog.gate.test.ts` (`GET /api/products` 1:1 z `GET_products.json`). Obie muszą być
   zielone bez zmian w kontrakcie — to jest dowód, że gate jest spełniony.
 - **Charakteryzacja (najmocniejsza siatka tutaj):** `akceptacja.charakteryzacja.test.ts`
-  porównuje końcowy stan bazy naszego portu z **uruchomionym oryginałem** na 38 scenariuszach.
+  porównuje końcowy stan bazy naszego portu z **uruchomionym oryginałem** na 31 scenariuszach.
   Zielony wynik dowodzi, że odstępstwo jest **wąskie** — dotyka wyłącznie gałęzi
   `scientific_notation_uncertain` i nie przecieka na żadną inną ścieżkę akceptacji.
 - **Test odstępstwa:** nowy `akceptacja.odstepstwa.test.ts` — 3 przypadki (pkt 2 wyżej),
@@ -214,7 +214,7 @@ cyfr znaczących" (cieniowanie `Lq` — backlog #11, osobny defekt oryginału).
       dalej widoczne.
 - [ ] Status `ok` i `no_valid_candidate` zachowują się jak dotąd (kontrola negatywna).
 - [ ] `test/charakteryzacja/silnik/*` i `silnik.gate.test.ts` — **nietknięte i zielone**.
-- [ ] `akceptacja.charakteryzacja.test.ts` — 38/38 zielonych, bez dodanego wyjątku.
+- [ ] `akceptacja.charakteryzacja.test.ts` — 31/31 scenariuszy zielonych, bez dodanego wyjątku.
 - [ ] `contract/` bez zmian; `kontrakt.spojnosc.test.ts` i `katalog.gate.test.ts` zielone.
 - [ ] Bramki BE: lint, typecheck, build, test — wszystkie zielone.
 - [ ] Odstępstwo opisane w kodzie (komentarz z decyzją, datą i odsyłaczem do backlogu #11).

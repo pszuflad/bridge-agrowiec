@@ -114,32 +114,6 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
     dataAktualizacji: teraz,
   };
 
-  // ——— ODSTĘPSTWO ŚWIADOME (karta 14i, ticket 58) ———
-  // Decyzja Ani z 2026-09-18 (`docs/rebuild-backlog.md` #11): „EAN który jest zepsuty notacją
-  // naukową ma być importowany jako PUSTE POLE W KATALOGU". PRODUKCJA ROBI INACZEJ — oryginał
-  // zapisuje w `:44872` rozwiniętą wartość (np. „6,41944E+12" → `6419440000000`) i tylko
-  // dokleja do ostrzeżenia komunikat „zapis naukowy ma tylko null cyfr znaczących — EAN
-  // niepewny". Rozwinięcie bywa zmyślone: Excel gubi cyfry znaczące, więc do katalogu trafiał
-  // EAN, który wygląda na prawdziwy, a nim nie jest. Puste pole widać i da się poprawić.
-  //
-  // Cięcie jest TUTAJ, a nie w `silnik/ean.ts`, i to jest istota tej karty. `normalizujEan()`
-  // musi dalej zwracać rozwiniętą wartość, bo `tk.ts:302-305` dopasowuje pozycję do produktu
-  // w katalogu WŁAŚNIE po `znormalizowana.ean` (dowód: `test/silnik.gate.test.ts`,
-  // „dopasowanie po EAN ZNORMALIZOWANYM"). Wyzerowanie EAN-u przy normalizacji zerwałoby to
-  // dopasowanie — pozycja stałaby się „nowa" zamiast „zmiana_kluczowa" i mogłaby założyć
-  // DUPLIKAT w katalogu. Ania rozstrzygnęła o zawartości pola, nie o regułach dopasowania.
-  //
-  // Zerujemy WYŁĄCZNIE `ean`. `eanRaw`, `eanIsValid`, `eanSourceStatus` i `eanCandidates`
-  // zostają, żeby z samego wiersza `products` było widać, DLACZEGO pole jest puste. Ostrzeżenie
-  // w stagingu też zostaje nietknięte — silnik nie jest tą kartą dotykany.
-  //
-  // Warunek stoi na statusie EFEKTYWNYM (`rekord.eanSourceStatus`, czyli po uwzględnieniu
-  // ręcznej poprawki z `PUT /api/staging/{id}`), a nie na samym snapshocie — dzięki temu `ean`
-  // i `eanSourceStatus` w jednym wierszu katalogu nie mogą się rozjechać.
-  if (rekord.eanSourceStatus === "scientific_notation_uncertain") {
-    rekord.ean = null;
-  }
-
   if (pozycja.cenaSprzedazyNowa != null) rekord.cenaSprzedazy = pozycja.cenaSprzedazyNowa;
 
   // ——— Wartości domyślne (:44880-44881) ———
@@ -214,6 +188,38 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
 
   // ——— Zapis produktu (:44906) ———
   const doZapisu = tylkoKolumnyProduktu(rekord);
+
+  // ——— ODSTĘPSTWO ŚWIADOME (karta 14i, ticket 58) ———
+  // Decyzja Ani z 2026-09-18 (`docs/rebuild-backlog.md` #11): „EAN który jest zepsuty notacją
+  // naukową ma być importowany jako PUSTE POLE W KATALOGU". PRODUKCJA ROBI INACZEJ — oryginał
+  // zapisuje w `:44872` rozwiniętą wartość (np. „6,41944E+12" → `6419440000000`) i tylko
+  // dokleja do ostrzeżenia komunikat „zapis naukowy ma tylko null cyfr znaczących — EAN
+  // niepewny". Rozwinięcie bywa zmyślone: Excel gubi cyfry znaczące, więc do katalogu trafiał
+  // EAN, który wygląda na prawdziwy, a nim nie jest. Puste pole widać i da się poprawić.
+  //
+  // ⚠ MIEJSCE CIĘCIA JEST TU CELOWO NAJPÓŹNIEJSZE, JAKIE SIĘ DA — na `doZapisu`, tuż przed
+  // zapisem, a NIE na `rekord` przy jego budowie. Powód jest konkretny: `assignKodImportu()`
+  // (`legacy/bridge_ext.cjs:164-167`) grupuje produkty do wspólnego `kod_importu`
+  // (wielomagazynowość Selly) po kluczu `EAN:<ean>`, ale tylko gdy `ean` jest niepusty
+  // ORAZ `eanIsValid === 1`. Zapis naukowy z poprawną sumą kontrolną spełnia oba warunki
+  // (np. „8,05997E+12" → `8059970000000`), więc wyzerowanie EAN-u WCZEŚNIEJ zrzuciłoby
+  // grupowanie na gałąź zapasową `marka|rozmiar|bieznik|nazwa` i produkt przestałby
+  // dziedziczyć numer po swoim odpowiedniku z innego magazynu. To byłoby DRUGIE, nieobjęte
+  // decyzją Ani odstępstwo. Cięcie na `doZapisu` sprawia, że `assignKodImportu()`,
+  // `applyLinkMemory()` i `rememberLink()` widzą DOKŁADNIE to samo, co w produkcji —
+  // jedyną różnicą jest wartość wpisana do kolumny `products.ean`.
+  //
+  // Zerujemy WYŁĄCZNIE `ean`. `eanRaw`, `eanIsValid`, `eanSourceStatus` i `eanCandidates`
+  // zostają, żeby z samego wiersza `products` było widać, DLACZEGO pole jest puste. Ostrzeżenie
+  // w stagingu też zostaje nietknięte — silnik nie jest tą kartą dotykany.
+  //
+  // Warunek stoi na statusie EFEKTYWNYM (`rekord.eanSourceStatus`, czyli po uwzględnieniu
+  // ręcznej poprawki z `PUT /api/staging/{id}`), a nie na samym snapshocie — dzięki temu `ean`
+  // i `eanSourceStatus` w jednym wierszu katalogu nie mogą się rozjechać.
+  if (rekord.eanSourceStatus === "scientific_notation_uncertain") {
+    doZapisu.ean = null;
+  }
+
   if (istniejacy) {
     db.update(products).set(doZapisu).where(eq(products.id, istniejacy.id)).run();
   } else {

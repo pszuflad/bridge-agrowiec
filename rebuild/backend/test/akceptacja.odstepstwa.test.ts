@@ -26,7 +26,7 @@ import { zatwierdzPozycjeStagingu } from "../src/import/akceptacja.js";
 import { products, stagingItems } from "../src/db/schema.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
 import { zaladujOryginal } from "./charakteryzacja/akceptacja/oryginal.mjs";
-import { pozycja } from "./charakteryzacja/akceptacja/scenariusze.mjs";
+import { pozycja, produkt } from "./charakteryzacja/akceptacja/scenariusze.mjs";
 
 type Wiersz = Record<string, unknown>;
 
@@ -43,15 +43,19 @@ const ZNACZNIK_LOSOWY = "<losowy numer sześciocyfrowy>";
  * `status` steruje wyłącznie polem `ean_source_status` — reszta zostaje identyczna, żeby
  * kontrole negatywne różniły się od przypadku badanego DOKŁADNIE jedną rzeczą.
  */
-function pozycjaZEanem(status: string | null, ean: string | null = EAN_ROZWINIETY) {
+function pozycjaZEanem(
+  status: string | null,
+  ean: string | null = EAN_ROZWINIETY,
+  eanIsValid = 0,
+) {
   return pozycja({
     eanRaw: EAN_SUROWY,
-    eanIsValid: 0,
+    eanIsValid,
     eanSourceStatus: status,
     eanCandidates: KANDYDACI,
     snapshot: {
       ean,
-      eanIsValid: 0,
+      eanIsValid,
       eanSourceStatus: status,
       eanCandidates: KANDYDACI,
       eanRaw: EAN_SUROWY,
@@ -59,14 +63,25 @@ function pozycjaZEanem(status: string | null, ean: string | null = EAN_ROZWINIET
   });
 }
 
-/** Sprowadza stan bazy do postaci porównywalnej między przebiegami (jak w charakteryzacji). */
-function stan(baza: TestowaBaza) {
+/**
+ * Sprowadza stan bazy do postaci porównywalnej między przebiegami (jak w charakteryzacji).
+ *
+ * `numeryZKatalogu` to numery `kod_importu` zasiane ręcznie — te MUSZĄ być porównywane
+ * dosłownie, bo są deterministyczne i to właśnie one są ciekawe przy grupowaniu po EAN-ie.
+ * Maskujemy wyłącznie numery świeżo wylosowane przez `_kiGenUnique()`, których obie strony
+ * z definicji mają różne.
+ */
+function stan(baza: TestowaBaza, numeryZKatalogu: Set<string> = new Set()) {
   const produkty = (baza.db.select().from(products).all() as unknown as Wiersz[]).map((w) => {
     const kopia = { ...w };
     if (typeof kopia.dataAktualizacji === "string") kopia.dataAktualizacji = ZNACZNIK_CZASU;
     // `_kiGenUnique()` w `bridge_ext` losuje numer dla produktu bez grupy EAN — katalog
     // wejściowy jest pusty, więc po obu stronach numer jest inny z definicji.
-    if (typeof kopia.kodImportu === "string" && /^\d{6}$/.test(kopia.kodImportu)) {
+    if (
+      typeof kopia.kodImportu === "string" &&
+      /^\d{6}$/.test(kopia.kodImportu) &&
+      !numeryZKatalogu.has(kopia.kodImportu)
+    ) {
       kopia.kodImportu = ZNACZNIK_LOSOWY;
     }
     return kopia;
@@ -81,17 +96,25 @@ function zasiej(baza: TestowaBaza, wiersz: Wiersz): number {
 }
 
 /** Uruchamia oryginał i port na dwóch identycznie zasianych bazach. */
-function obieStrony(wiersz: Wiersz) {
+function obieStrony(wiersz: Wiersz, katalog: Wiersz[] = []) {
+  const numery = new Set(
+    katalog.map((p) => p.kodImportu).filter((n): n is string => typeof n === "string"),
+  );
+  const zasiejObie = (baza: TestowaBaza) => {
+    if (katalog.length) baza.db.insert(products).values(katalog as never).run();
+    return zasiej(baza, wiersz);
+  };
+
   const bazaOryginalu = stworzTestowaBaze();
   const bazaPortu = stworzTestowaBaze();
   otwarte.push(bazaOryginalu, bazaPortu);
 
   const { U } = zaladujOryginal(bazaOryginalu);
-  U.acceptStaging(zasiej(bazaOryginalu, wiersz), 1);
+  U.acceptStaging(zasiejObie(bazaOryginalu), 1);
 
-  zatwierdzPozycjeStagingu(bazaPortu.db, zasiej(bazaPortu, wiersz), 1);
+  zatwierdzPozycjeStagingu(bazaPortu.db, zasiejObie(bazaPortu), 1);
 
-  return { oryginal: stan(bazaOryginalu), port: stan(bazaPortu) };
+  return { oryginal: stan(bazaOryginalu, numery), port: stan(bazaPortu, numery) };
 }
 
 const otwarte: TestowaBaza[] = [];
@@ -170,5 +193,72 @@ describe("14i — kontrole negatywne: warunek nie może być szerszy, niż decyz
 
     expect(port.produkty[0]!.ean).toBe(EAN_ROZWINIETY);
     expect(port.produkty).toEqual(oryginal.produkty);
+  });
+});
+
+describe("14i — grupowanie `kod_importu` po EAN-ie musi zostać NIETKNIĘTE", () => {
+  /**
+   * ⚠ REGRESJA WYKRYTA W CODE REVIEW TEGO TICKETA — najważniejszy test w tym pliku.
+   *
+   * `assignKodImportu()` (`legacy/bridge_ext.cjs:164-167`) nadaje produktom z różnych magazynów
+   * WSPÓLNY sześciocyfrowy `kod_importu` (wielomagazynowość Selly), grupując je po kluczu
+   * `EAN:<ean>` — ale tylko gdy `ean` jest niepusty ORAZ `eanIsValid === 1`. Zapis naukowy
+   * z POPRAWNĄ sumą kontrolną spełnia oba warunki, więc jest realnym przypadkiem, a nie
+   * teoretycznym: `8,05997E+12` rozwija się do `8059970000000`, którego suma kontrolna się
+   * zgadza (ta sama wartość stoi w `test/silnik.gate.test.ts`).
+   *
+   * Pierwsza wersja tej karty zerowała `ean` na `rekord` PRZED `assignKodImportu()` — przez co
+   * grupowanie spadało na gałąź zapasową `marka|rozmiar|bieznik|nazwa`, a produkt LOSOWAŁ nowy
+   * numer zamiast odziedziczyć numer swojego odpowiednika z innego magazynu. To byłoby DRUGIE,
+   * nieobjęte decyzją Ani odstępstwo. Dlatego cięcie przeniesiono na `doZapisu`, tuż przed
+   * zapisem. Ten test pilnuje, żeby nikt go nie przesunął z powrotem.
+   */
+  const EAN_Z_POPRAWNA_SUMA = "8059970000000";
+  const NUMER_GRUPY = "424242";
+
+  /** Ten sam produkt w innym magazynie — ma już numer grupy, nadany przy wcześniejszym imporcie. */
+  const innyMagazyn = [
+    produkt({
+      kod: "P0-INNY-MAGAZYN",
+      ean: EAN_Z_POPRAWNA_SUMA,
+      eanIsValid: 1,
+      kodImportu: NUMER_GRUPY,
+    }),
+  ] as unknown as Wiersz[];
+
+  const pozycjaNaukowa = pozycjaZEanem("scientific_notation_uncertain", EAN_Z_POPRAWNA_SUMA, 1);
+
+  it("produkt dziedziczy numer grupy po innym magazynie — dokładnie jak produkcja", () => {
+    const { oryginal, port } = obieStrony(pozycjaNaukowa, innyMagazyn);
+
+    const nowyOryginal = oryginal.produkty.find((p) => p.kod === "P1")!;
+    const nowyPort = port.produkty.find((p) => p.kod === "P1")!;
+
+    // Najpierw dowód, że produkcja NAPRAWDĘ dziedziczy tu numer — inaczej test nie mierzyłby nic.
+    expect(nowyOryginal.kodImportu, "oryginał dziedziczy numer grupy po EAN-ie").toBe(NUMER_GRUPY);
+
+    // I właściwa asercja: nasze odstępstwo NIE MOŻE tego zepsuć.
+    expect(nowyPort.kodImportu, "grupowanie po EAN-ie jest poza zakresem decyzji Ani").toBe(
+      NUMER_GRUPY,
+    );
+  });
+
+  it("…a jedyną różnicą wobec produkcji dalej jest samo pole `ean`", () => {
+    const { oryginal, port } = obieStrony(pozycjaNaukowa, innyMagazyn);
+
+    expect(port.produkty.map((p) => p.kod)).toEqual(oryginal.produkty.map((p) => p.kod));
+
+    // Produkt z innego magazynu nie może zostać tknięty — akceptacja dotyczy wyłącznie `P1`.
+    expect(port.produkty.find((p) => p.kod === "P0-INNY-MAGAZYN")).toEqual(
+      oryginal.produkty.find((p) => p.kod === "P0-INNY-MAGAZYN"),
+    );
+
+    const { ean: _o, ...resztaOryginalu } = oryginal.produkty.find((p) => p.kod === "P1")!;
+    const { ean: _p, ...resztaPortu } = port.produkty.find((p) => p.kod === "P1")!;
+    expect(resztaPortu).toEqual(resztaOryginalu);
+
+    // Samo odstępstwo dalej obowiązuje — mimo poprawnej sumy kontrolnej EAN ma być pusty.
+    expect(port.produkty.find((p) => p.kod === "P1")!.ean).toBeNull();
+    expect(oryginal.produkty.find((p) => p.kod === "P1")!.ean).toBe(EAN_Z_POPRAWNA_SUMA);
   });
 });

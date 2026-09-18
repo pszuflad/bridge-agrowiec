@@ -29,7 +29,7 @@ Zmierzony koszt obu wariantów (nie oszacowany — policzony grepem i lekturą h
 | | (A) `silnik/ean.ts` | (B) `akceptacja.ts` |
 |---|---|---|
 | scenariusze charakteryzacji silnika | **1** — `ean-notacja-naukowa` | **0** |
-| scenariusze charakteryzacji akceptacji | 0 | **0** (z 38) |
+| scenariusze charakteryzacji akceptacji | 0 | **0** (z 31) |
 | testy | **1** — `silnik.gate.test.ts`, „dopasowanie po EAN ZNORMALIZOWANYM" (3 asercje) | **0** |
 | pliki `contract/fixtures/` | 0 | **0** |
 
@@ -65,13 +65,57 @@ Zmierzony koszt obu wariantów (nie oszacowany — policzony grepem i lekturą h
 - **W teście:** nagłówek `akceptacja.odstepstwa.test.ts` tłumaczy, dlaczego odstępstwo mieszka
   w osobnym pliku, a nie jako scenariusz charakteryzacji.
 - **Czego NIE zrobiono:** nie wyłączono żadnego scenariusza, nie rozluźniono porównania
-  w `akceptacja.charakteryzacja.test.ts` (38/38 dalej żąda pełnej równości z oryginałem),
+  w `akceptacja.charakteryzacja.test.ts` (31/31 scenariuszy dalej żąda pełnej równości z oryginałem),
   nie poprawiono po cichu żadnego wzorca. Komunikat „zapis naukowy ma tylko null cyfr
   znaczących" (cieniowanie `Lq`, backlog #11) **pozostaje niezmieniony**, zgodnie z kartą.
 
 ## Deviations from plan
 
-Brak — wdrożono 1:1 wg planu.
+Brak odstępstw od planu w zakresie. **Zmieniło się natomiast MIEJSCE cięcia** wewnątrz
+`akceptacja.ts` — po code review (patrz „Review fixes applied"). Plan mówił „po zbudowaniu
+`rekord`, przed wartościami domyślnymi"; faktycznie cięcie stoi na `doZapisu`, tuż przed
+zapisem do bazy. Powód w sekcji niżej — pierwotne miejsce powodowało drugie, nieautoryzowane
+odstępstwo.
+
+## Review fixes applied
+
+**BLOCKER — zerowanie EAN-u psuło grupowanie `kod_importu` (naprawione).**
+Cięcie stało pierwotnie na `rekord` zaraz po jego zbudowaniu, czyli **przed**
+`assignKodImportu()` (`akceptacja.ts:200`). Ta funkcja (`legacy/bridge_ext.cjs:164-167`) nadaje
+produktom tego samego towaru w różnych magazynach **wspólny sześciocyfrowy `kod_importu`**
+(wielomagazynowość Selly), grupując je po kluczu `EAN:<ean>` — ale tylko gdy `ean` jest
+niepusty **oraz** `eanIsValid === 1`. Zapis naukowy z poprawną sumą kontrolną spełnia oba
+warunki (`8,05997E+12` → `8059970000000`, suma kontrolna zweryfikowana — poprawna), więc
+wyzerowanie EAN-u wcześniej zrzucało grupowanie na gałąź zapasową `marka|rozmiar|bieznik|nazwa`
+i produkt **losował nowy numer zamiast odziedziczyć** numer swojego odpowiednika z innego
+magazynu. To byłoby **drugie, nieobjęte decyzją Ani odstępstwo**.
+
+*Naprawa:* cięcie przeniesione na `doZapisu` (wynik `tylkoKolumnyProduktu(rekord)`), tuż przed
+`INSERT`/`UPDATE`. Dzięki temu `assignKodImportu()`, `applyLinkMemory()` i `rememberLink()`
+widzą **dokładnie to samo, co w produkcji**, a jedyną różnicą jest wartość wpisana do kolumny
+`products.ean`. Zweryfikowano, że `ean` czytają w `bridge_ext.cjs` wyłącznie funkcje grupujące
+`kod_importu` (linie 144, 145, 164, 167) — żadne inne rozszerzenie go nie używa.
+
+*Nowe testy (2, w osobnym `describe`):* produkt z EAN-em w notacji naukowej **i poprawną sumą
+kontrolną** dziedziczy numer grupy po produkcie z innego magazynu — asercja najpierw dowodzi, że
+oryginał też tak robi. Drugi test pilnuje, że poza samym `ean` produkt jest identyczny jak
+u produkcji, a produkt z innego magazynu nie został tknięty.
+**Kontrola mutacyjna:** po przesunięciu cięcia z powrotem w stare miejsce oba nowe testy
+**czerwienieją** (2 failed / 7 passed) — regresja jest realnie złapana.
+Przy okazji poprawiono `stan()` w teście, żeby **nie maskowało** numerów `kod_importu` zasianych
+ręcznie w katalogu (maskowanie ukrywało właśnie ten typ różnicy); maskowane są tylko numery
+świeżo losowane przez `_kiGenUnique()`.
+
+**SHOULD-FIX — błędna liczba scenariuszy w dokumentacji (naprawione).**
+Plan i raport pisały o „38 scenariuszach" charakteryzacji akceptacji. Faktycznie
+`SCENARIUSZE.length === 31` (zweryfikowane importem modułu) — liczba 38 wzięła się z naiwnego
+`grep -c "nazwa:"`, który łapał też pola `nazwa` wewnątrz helperów `produkt()`/`narzut()`/
+`promocja()`. Skorygowano w `plan.md` i `raport.md`.
+
+**NICE-TO-HAVE — brak przypadku `eanIsValid: 1` (naprawione).**
+Wszystkie pierwotne przypadki miały `eanIsValid: 0`, więc nigdy nie ćwiczyły kombinacji
+„zapis naukowy + poprawna suma kontrolna" — a to właśnie ona ujawniała BLOCKER-a. Helper
+`pozycjaZEanem()` przyjmuje teraz `eanIsValid`, a nowy `describe` używa `1`.
 
 ## Test results
 
@@ -84,18 +128,18 @@ Brak — wdrożono 1:1 wg planu.
   Zmierzone przed zmianą: te cztery fixtures mają odpowiednio 5/5/5/1 wystąpień `ean`, **zero
   `null` i zero wartości w notacji naukowej**, więc zmiana nie mogła przestawić żadnej wartości.
   W całym `contract/fixtures/`: **0 plików** ze statusem `scientific_notation_uncertain`.
-- **Charakteryzacja akceptacji (najmocniejszy dowód wąskości): ✓ 38/38**,
+- **Charakteryzacja akceptacji (najmocniejszy dowód wąskości): ✓ 31/31 scenariuszy**,
   `akceptacja.charakteryzacja.test.ts` — porównanie końcowego stanu bazy naszego portu
   z **uruchomionym oryginałem**, bez dodanego wyjątku i bez rozluźnienia porównania.
 - **Charakteryzacja silnika: ✓ nietknięta i zielona** (`silnik.charakteryzacja.test.ts`,
   `silnik.gate.test.ts` — w tym test „dopasowanie po EAN ZNORMALIZOWANYM").
-- **Unit/integracja (nowe): ✓ 7/7** — `akceptacja.odstepstwa.test.ts`. Bez mocków, na
+- **Unit/integracja (nowe): ✓ 9/9** — `akceptacja.odstepstwa.test.ts`. Bez mocków, na
   prawdziwym SQLite w katalogu tymczasowym.
   **Kontrola mutacyjna:** po usunięciu poprawki z `akceptacja.ts` test „produkcja zapisuje
   rozwinięty EAN, my zapisujemy NULL" **czerwienieje** (1 failed / 6 passed) — próba realnie
   gryzie, a nie przechodzi „z rozpędu". Poprawka przywrócona, diff czysty.
-- **Pełna bramka backendu:** `npm test` → **82 pliki, 1256 testów, 0 błędów**
-  (baseline `develop` to 1249 — przyrost +7 to dokładnie nowy plik).
+- **Pełna bramka backendu:** `npm test` → **82 pliki, 1258 testów, 0 błędów**
+  (baseline `develop` to 1249 — przyrost +9 to dokładnie nowy plik).
   `npm run lint` ✓ · `npm run typecheck` ✓ · `npm run build` ✓
 - **Bramki FE:** nie dotyczy — `rebuild/frontend/**` ani `contract/fixtures/` nie były ruszane.
 
