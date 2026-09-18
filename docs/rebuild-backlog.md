@@ -19,6 +19,17 @@ bundla do ~2026-08-05, MD5 `b745bf95`). Wcześniejsze zmiany są już w specyfik
 **Legenda „Do nowej wersji?":** ⬜ do decyzji · ✅ TAK · ❌ NIE (świadomie pomijamy) · 🕒 PÓŹNIEJ
 **Legenda „Status":** — nie zaczęte · 🔨 w toku · ✔ zrobione w rebuild
 
+**Partia #72–#83 (triaż 2026-09-18) — ROZSTRZYGNIĘTA przez użytkownika tego samego dnia.**
+Dziesięć wpisów ✅ TAK, jeden ❌ NIE (#72 — odbudowa ma lepsze rozwiązanie, zostawiamy nasze),
+jeden 🕒 PÓŹNIEJ (#81 → odłożony do **13d**, zapisany w roadmapie w bloku 13d).
+⏸ **Dwa zatwierdzone wpisy mają WSTRZYMANĄ implementację: #82 i #83** — ich commity przyszły bez
+wpisu w CHANGELOG Ani, więc uzasadnienie biznesowe jest NIEZNANE i czekamy na jej odpowiedź.
+Ania nadal pracuje nad tym obszarem, więc wyjaśnienie ma dojechać kolejnym `sync(vps)` (kod
++ CHANGELOG). **Następny `/triaz-zmian` ma to sprawdzić, ZANIM ktokolwiek ruszy `tyre_params.cjs`
+albo `application_rules.cjs` w odbudowie.**
+Sugerowane sklejenie w tickety: **CSV** = #73 + #76 + #77(część) · **application_rules** = #75 + #79
++ #80 + #82 · **MO9** = #78 + #79(drugi hunk) · **szerokość** = #83 · **13d** = #74 + #77(delta) + #81.
+
 **Backlog rozliczony w sesji 12e (2026-09-08).** Wszystkie wpisy ✅ zostały naniesione,
 ❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #39–#43) to
 **defekty PRODUKCJI odtworzone świadomie 1:1**, czekające na decyzję produktową Ani — żaden nie
@@ -642,9 +653,17 @@ przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 | **Data** | 2026-08-26 (znalezione przy I3/3c) |
 | **Kategoria** | BACKEND (silnik importu, normalizacja EAN) |
 | **Pliki** | `index.cjs` — `ZT()` (deminified `:46971`, wywołanie `:46984`), `Lq()` (`:46965` i `:47312`) |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI ANI** |
-| **Iteracja** | odtworzone 1:1 w **3c**; naprawa u Ani — do rozstrzygnięcia |
-| **Status** | zgłoszone |
+| **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-18 przez Anię** (świadome odstępstwo) |
+| **Iteracja** | odtworzone 1:1 w **3c**; naprawa → **I14, karta 14i** |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**DECYZJA ANI (2026-09-18), pytanie 8:** „EAN który jest zepsuty notacją naukową ma być
+importowany jako **puste pole w katalogu**". To ŚWIADOME ODSTĘPSTWO — produkcja zapisuje
+wartość i wypisuje komunikat „zapis naukowy ma tylko null cyfr znaczących". Zakres karty 14i:
+EAN rozpoznany jako notacja naukowa → puste pole w `products`. ⚠ Rusza silnik importu, więc
+wzorce charakteryzacji trzeba PRZENAGRAĆ, nie poprawiać ręcznie. Otwarte przy wdrożeniu (do
+rozstrzygnięcia w karcie, nie przez Anię): czy ostrzeżenie w stagingu ma zostać — rekomendacja
+TAK, żeby pominięty EAN nie był niewidzialny.
 
 **Opis biznesowy:** przy EAN-ie zapisanym w notacji naukowej (Excel zamienia „8059970000000"
 na „8,05997E+12") pozycja w stagingu dostaje ostrzeżenie o treści:
@@ -886,6 +905,26 @@ od zera):
   ujęty w #4/#6.
 - `archive_module.cjs` (nowy, obsługa `import_archive`) — archiwizacja zrzutów importu; my `import_archive`
   wykluczyliśmy z mirrora, więc **→ później (Ix)**, nie cel wczesnych iteracji.
+
+*Pominięte — triaż 2026-09-18 (zakres `94bdf11..9d1b09f`):*
+- **Dziewięć commitów `[FRONTEND]` z codziennego cyklu 06:00** — wyłącznie regeneracja pliku
+  eksportu `sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv` (dane, zero zmian UI/kodu):
+  `a65057a` (10.09), `43965ce` (11.09), `543a205` (12.09), `71e5b6e` (13.09), `7acfa4f` (14.09),
+  `a147c3c` (15.09), `8b46ddb` (16.09), `700ae74` (17.09), `8ad81eb` (18.09).
+  ⚠ Tag `[FRONTEND]` w mailu producenta **nie znaczy zmiany frontendu** — plik CSV leży pod
+  `mirror/frontend/ex-port-files/`. Ta sama pomyłka groziła przy triażu 09.09.
+- `9755e5f` (11.09 14:00, `category_test`) — kontrolowany test mapowania kategorii Selly na czterech
+  produktach (528, 3430, 961, 1577; PUT + weryfikacja przez API) i aktualizacja lokalnego cache
+  `selly_products`. Operacja na danych, zero kodu; dowód działania mapowania z **#74**.
+- `5cfb7ab` (17.09 19:00, `selly_search`) — usunięcie jednego martwego mapowania `selly_products`
+  (produkt Selly 639, `kod_importu` 668772, MO9_23814) bez rekordu źródłowego w `products`;
+  osierocony produkt trzymał w wyszukiwarce Selly stare zastosowanie „harwester" w kategorii
+  rolniczej. Operacja na danych. **Sygnał, nie zmiana:** brak sprzątania mapowań po usunięciu
+  produktu to kandydat na defekt do opisania przy przepisywaniu 13d.
+- Zrzuty `selly_backups/*.json` z `5dedefb`/`65dcbd0`/`5cfb7ab` (`categories_filters_*`,
+  `product_3430_pre_featurefix`, `product_639_*`) — kopie bezpieczeństwa sprzed operacji, nie kod.
+- `cleanup_selly_filters_20260917.cjs` — skrypt jednorazowy, dodany w `5dedefb` i **usunięty przez
+  Anię w `65dcbd0`** po wykonaniu. Nie portujemy; kontekst w **#81**.
 
 ---
 
@@ -1270,8 +1309,20 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **do decyzji** (odrzucona w tym tickecie, patrz niżej) |
+| **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **NADAL do decyzji**; odpowiedzi Ani z 2026-09-18 są ROZBIEŻNE, pytanie kontrolne wysłane (patrz nota niżej) |
 | **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony |
+
+**⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
+„Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
+przeliczyć ceny bez tej promocji". W odpowiedzi na pytanie kontrolne z 18.09 napisała coś innego:
+„to nie było opisane jako błąd — opisałam co się dzieje, bo takie było pytanie. Ma zostać tak jak
+jest, reguła znika po końcu obowiązywania". **Jej opis zachowania nie zgadza się z kodem:**
+`TabelaPromocji.tsx` nie filtruje niczego po datach (wiersz ZOSTAJE, z odznaką „zakończona"
+i naszym pomarańczowym znacznikiem), a silnik dat nie czyta, więc wygasła promocja **dalej obniża
+ceny**. Wysłano drugie pytanie kontrolne, tym razem z opisem stanu faktycznego zamiast pytania
+otwartego. **Do czasu odpowiedzi nie ruszamy silnika cen.** Poszlaka: sąsiednie odpowiedzi
+(„przełącznika statusu nie dokładamy", „promocje po prostu się usuwa", „nie dodajemy nowych
+reguł") wskazują na wariant najtańszy — zostawiamy 1:1 — ale to domysł, nie decyzja.
 
 **Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
 `koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
@@ -1406,8 +1457,20 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 |---|---|
 | **Kategoria** | FRONTEND (katalog) |
 | **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
-| **Do nowej wersji?** | ✅ **port 1:1** — ożywienie ⬜ **do decyzji** (kandydat na I12) |
-| **Status** | ✔ odtworzone w rebuild (4b), martwota potwierdzona |
+| **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
+| **Iteracja** | odtworzone 1:1 w **4b**; ożywienie → **I14, karta 14h** |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
+Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
+nie potwierdza w ŻADNEJ wersji, którą mamy.** Zmierzone na ŻYWYCH plikach produkcji, nie na
+deminifikacie: `mirror/frontend/assets/index-PRICEFMT1783512500.js` ma dokładnie JEDNO wystąpienie
+`._reguly` (miejsce odczytu), a `mirror/backend/index.cjs` nie ma go wcale — dwa trafienia
+`grep -o "_reguly"` to substring kolumny `dodatkowe_reguly` z tabeli `spedycja_limity`, co łatwo
+wziąć za trafienie (wzięliśmy, na jedną minutę). Rozstrzygające: `git log -S'_reguly:' --all` nie
+zwraca ANI JEDNEGO commita od baseline'u 13.08 do 18.09 — nikt nigdy nie dopisał zapisu tego pola.
+**Wniosek dla karty 14h: to nowa funkcja i świadome odstępstwo, nie przywrócenie regresji.** Trzeba
+to Ani powiedzieć wprost, żeby nie liczyła na „powrót do stanu sprzed backupu" i na jego wycenę.
 
 **Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
 **nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
@@ -1502,8 +1565,8 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 |---|---|
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
-| **Do nowej wersji?** | ⬜ **do decyzji** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
-| **Status** | odtworzone świadomie w 4b · w produkcji **nadal obecne** |
+| **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-18**: „nie, zostawiamy tak jak jest, nie dodajemy nowych reguł" |
+| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
@@ -2689,7 +2752,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Brak — to luka, nie zmiana. Zmierzone na `db/snapshot.db`: `field_name='konstrukcja'` → 3 rekordy z wartością `'D'`; `field_name='kategoria'` → 6944 rekordy ogółem, z tego 14 małą literą (9× `przemysłowe`, 5× `rolnicze`). Ania NIE migrowała ich ani 2026-08-18 (`apply_kategoria.cjs` dotyka wyłącznie `products`), ani 2026-09-01 (CHANGELOG 12:30 rusza `manual_overrides` tylko dla `field_name='nazwa'`). Skutek: przy kolejnym imporcie override wstrzykuje surową wartość z powrotem, więc te konkretne produkty wracają do kodu `D` / małej litery, mimo poprawnej kolumny w `products`. |
 | **Do nowej wersji?** | ⬜ **do decyzji** — naprawa byłaby świadomym odstępstwem od 1:1 (13c odtworzyła zachowanie 1:1, plan D7; to luka PRODUKCJI, nie regresja odbudowy) |
 | **Iteracja** | — (follow-up, nieprzypisany) |
-| **Status** | ⬜ nierozstrzygnięte — znalezione w `44-CHORE-i13c-migracje-konwencji` |
+| **Status** | ⬜ nierozstrzygnięte, ale **ZAWĘŻONE (triaż 2026-09-18)** — Ania rozwiązała u siebie połowę kategoryjną: `ca8a694` (17.09) przemigrował 14 wpisów `field_name='kategoria'` i dołożył triggery `manual_overrides_kategoria_ai/_au` normalizujące `override_value` przy każdym zapisie. **Zostają 3 wpisy `field_name='konstrukcja'` z wartością `'D'`** — ich Ania nie ruszyła, więc opisany tu mechanizm cofania konwencji dotyczy dziś już tylko `konstrukcja`. Kontekst: **#79**. Znalezione w `44-CHORE-i13c-migracje-konwencji`. |
 
 > ⚠ **AKTUALIZACJA 2026-09-09 (po revercie #58) — dotyczy #66–#70.** Te pięć wpisów to defekty Selly
 > znalezione podczas portu **13d-1**, który został **COFNIĘTY** (`git revert -m 1`, PR #58). Analiza
@@ -2758,4 +2821,445 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Skutek w produkcji** | Po migracji `konstrukcja` na pełne słowa (SQL produkcji z 2026-09-01 11:35, **7392 wiersze** — patrz #58) frontend zna już tylko kody, a w bazie są słowa: **produkcja pokazuje dziś „—" w kolumnie „Konstrukcja opony" i pustą kolumnę w eksporcie CSV** dla wszystkich zmigrowanych wierszy. |
 | **Do nowej wersji?** | ❌ **NIE — świadomie NIE odtwarzamy** (decyzja **D4**, 2026-09-09, `47-CHORE-i13e-frontend-bridgeone`). Odbudowa ma pass-through od 13c i działa poprawnie; wdrożenie regresji oznaczałoby cofnięcie 13c. To świadome odstępstwo od żywej produkcji — odbudowa jest tu POPRAWNIEJSZA. Wpis #58 sprostowany. |
 | **Iteracja** | wykryte w **13e** (bez kodu w odbudowie); naprawa dotyczy **PRODUKCJI**, nie `rebuild/` |
-| **Status** | ⬜ **do zgłoszenia Ani.** Naprawa po stronie VPS: przenieść tę samą zmianę do `index-PRICEFMT1783512500.js`, dwa miejsca — `OT` → `:n\|\|""`, `DT` → `:n\|\|null`. **Nie blokuje cutoveru**: po cutoverze panel odbudowy zastępuje bundle produkcji i kolumna po prostu zacznie działać. |
+| **Status** | ✅ **ZAMKNIĘTE — Ania naprawiła to u siebie 2026-09-09** (commit `28541ca`, etykieta `konstrukcja_full`), ustalone w triażu 2026-09-18. Łatka trafiła tym razem w ŻYWY `index-PRICEFMT1783512500.js`; zamiast pass-through Ania rozpoznaje pełne nazwy obok kodów i przestawiła listy wyboru na „Radialna"/„Diagonalna". Szczegóły i jedyna pozostała różnica wobec odbudowy (wartość spoza zbioru → u Ani „—", u nas dosłownie): **#72**. Zgłaszanie Ani nieaktualne. |
+
+### #72 · 2026-09-09 · [FRONTEND] · `konstrukcja` naprawiona w ŻYWYM bundlu — #71 zamknięty przez Anię
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (bundle produkcji) |
+| **Pliki** | `mirror/frontend/assets/index-PRICEFMT1783512500.js` (bak `.bak_pre_konstrukcja_full_20260909154703`), `deminified/frontend-index.js`, `mirror/backend/CHANGELOG.md` |
+| **Commit** | `28541ca` (2026-09-09 16:00) |
+| **Do nowej wersji?** | ❌ **NIE — świadomie pomijamy.** Decyzja użytkownika 2026-09-18: odbudowa ma pass-through od 13c i działa poprawnie, więc **zostawiamy nasze rozwiązanie jako lepsze**. Przenosimy tylko wniosek: wpis **#71** zamknięty. Jedyna pozostała różnica (wartość spoza zbioru → u Ani „—”, u nas dosłownie) jest świadomie przyjęta. |
+| **Status** | ✅ **zamknięte, bez pracy w `rebuild/`** — kodu nie przenosimy (decyzja ❌). Jedyny skutek: wpis **#71** przestawiony na rozwiązany. |
+
+**Opis biznesowy.** Zgłoszenie Ani: mimo poprawnych danych w bazie kolumna „Konstrukcja opony"
+w katalogu nie pokazywała żadnej wartości. Ania poprawiła renderer i eksport tak, żeby przyjmowały
+pełne nazwy `Radialna`/`Diagonalna` obok starych skrótów, a formularz edycji oferuje teraz dwie
+pełne nazwy zamiast listy `R`/`D`/`B`/`-`.
+
+**Szczegół techniczny (dla rebuildu).** Cztery miejsca w bundlu: `PRODUCT_FIELD_CONFIG` (opcje
+selecta `konstrukcja`: `["R","D","B","-"]` → `["Radialna","Diagonalna"]`), `OT()` (ścieżka eksportu)
+i `DT()` (renderer komórki) — oba dostały `"Radialna"===n||"R"===n ? "Radialna" : "Diagonalna"===n||"D"===n||"L"===n||"B"===n ? "Diagonalna" : ""`,
+oraz formularz `LT()` (`h("Konstrukcja","konstrukcja",["Radialna","Diagonalna"])`). **Tym razem
+łatka trafiła w ŻYWY bundle** — `mirror/frontend/index.html` ładuje `index-PRICEFMT1783512500.js`
+(zweryfikowane `grep`em), a to właśnie ten plik Ania zmieniła.
+
+**Rekomendacja (moja).** ❌ **nie przenosić kodu** — odbudowa ma pass-through od 13c i działa
+poprawnie. Wartość tego wpisu jest inna: **to zamyka wpis #71** („łatka pass-through poszła
+w martwy bundle"). Status #71 zmieniam na rozwiązany po stronie produkcji.
+⚠ **Jedna różnica do świadomego przyjęcia:** u Ani wartość SPOZA zbioru (`Radialna`/`Diagonalna`/
+`R`/`D`/`L`/`B`) renderuje się jako pusta („—"), a odbudowa (pass-through z 13c) pokaże ją
+dosłownie. Zbiór `konstrukcja` w bazie po migracji z 01.09 ma tylko dwie wartości, więc dziś to
+różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej pamiętać.
+
+### #73 · 2026-09-10 · [BAZA][BACKEND][FRONTEND] · `blokowane_formy_platnosci` — nowa kolumna, moduł, triggery i 60. kolumna CSV
+| pole | wartość |
+|---|---|
+| **Kategoria** | BAZA + BACKEND + FRONTEND (nowa funkcja) |
+| **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
+| **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
+| **Status** | — zatwierdzone do naniesienia; **jeden ticket CSV razem z #76 i #77** (wspólny plik `generator-csv.ts` + fixture). |
+
+**Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
+i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
+identyfikatorów form płatności do zablokowania; MO6 (Uniglory) zostaje pusty, bo „nie będzie na
+razie w sprzedaży", nieznani dostawcy również. Wartość widać w katalogu panelu jako kolumnę
+„Blokowane formy płatności" i na końcu pełnego eksportu CSV dla Selly (kolumna
+`Blokowane-formy-platnosci`, identyfikatory rozdzielone przecinkiem ze spacją). Drugi commit
+(`0c4d2f2`) to poprawka: kolumna nie pokazywała się w panelu, bo skrypt rozpoznawał widok
+katalogu po `location.pathname`, a żywy frontend używa routera haszowego — dołożono obsługę
+`#/katalog` i `hashchange` oraz wersję w parametrze skryptu, żeby ominąć cache przeglądarki.
+
+**Szczegół techniczny (dla rebuildu).** `payment_blocks.cjs` eksportuje zamrożoną mapę
+`BLOCKED_PAYMENT_FORMS` (kod dostawcy → string z listą ID 201–219), `getBlockedPaymentForms(kod)`,
+`sqlCase(kolumna)` (generator wyrażenia `CASE UPPER(TRIM(...)) WHEN 'MO1' THEN ... END`) oraz
+`ensurePaymentBlocks(dbPath)`, który idempotentnie robi `ALTER TABLE products ADD COLUMN
+blokowane_formy_platnosci TEXT`, uzupełnia istniejące wiersze i zakłada triggery
+`products_blokowane_formy_ai` (AFTER INSERT) i `products_blokowane_formy_au`
+(AFTER UPDATE OF dostawca). `extensions.cjs:register()` woła `ensurePaymentBlocks()` przy starcie,
+w `try/catch` z logiem. `adapter.recordToSuroweDostawca()` dokłada `s.blokowaneFormyPlatnosci`.
+`generate_selly_export.cjs` dostaje 60. kolumnę i fallback `getBlockedPaymentForms(row.dostawca)`,
+gdy pole w bazie puste.
+
+**Rekomendacja (moja).** ✅ **nanieść** — to nowa funkcja produktowa, nie defekt, i dotyka trzech
+warstw naraz. Trzy uwagi:
+1. **To dokładnie ten wzorzec, na który uczula CLAUDE.md**: kolumna dokładana runtime'owym
+   `ALTER TABLE` z modułu startowego, nie migracją — czyli dla Drizzle **niewidoczna**, tak samo
+   jak `products.uwaga_cena`. W odbudowie musi wejść jako **migracja + pole w modelu**, inaczej
+   nie wyjdzie przez `GET /api/products` mimo obecności w tabeli.
+2. Mapa MO→ID to **dane konfiguracyjne, nie logika** — w odbudowie warto ją trzymać tak,
+   żeby dało się ją zmienić bez deployu (Ania będzie ją ruszać przy każdym nowym magazynie).
+3. `rebuild/backend/src/selly/generator-csv.ts` ma dziś **59 kolumn** i nie zna
+   `Blokowane-formy-platnosci` — dopisanie 60. kolumny rusza fixture CSV, więc idzie razem z #76/#77.
+
+### #74 · 2026-09-11 · [BACKEND][BAZA] · kategorie Selly przebudowane — stare ID 137/259/377 dają 404, żywe to 1/2/3/4
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (Selly, mapowanie kategorii) |
+| **Pliki** | `mirror/backend/kategoria_norm_map_pplx.sql` (bak `.bak_pre_category_fix_20260911_101000`), `zastosowanie_selly_map_pplx.sql` (bak j.w.), `zastosowanie_selly_map_v2_pplx.sql` (bak j.w.), `selly/sync_full.cjs` (bak j.w.) |
+| **Commit** | `2a2a1da` (2026-09-11 11:00) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — **wykonanie razem z przepisywanym 13d**, nie osobno. |
+| **Status** | — zatwierdzone; **czeka na start 13d** (nie zakładać karty wcześniej). |
+
+**Opis biznesowy.** Audyt synchronizacji wykazał dwie rzeczy naraz. Po pierwsze, w lokalnym cache
+`selly_products` brakowało 95 wpisów dla produktów i wariantów, które w Selly już istniały
+(MO2 = 1, MO3 = 88, MO4 = 6) — Ania je odtworzyła bez tworzenia nowych produktów. Po drugie, Selly
+przebudowało u siebie drzewo kategorii: identyfikatory, na które Bridge kierował produkty, są dziś
+niewidoczne albo zwracają 404. Bridge mapuje teraz kategorię główną na żywe ID sklepu, a martwe ID
+podkategorii zastosowań wycofano — podkategoria dziedziczy kategorię główną produktu.
+
+**Szczegół techniczny (dla rebuildu).** `kategoria_norm_map_pplx.sql` (ładowany do
+`selly_kategoria_norm_map`): `przemysłowe` 137 → **3**, `ciężarowe` 259 → **4**, `leśne` 377 → **2**;
+`rolnicze` i `rolnicze małe` zostają na **1**. Komentarz w `sync_full.cjs:loadDictMaps()` opisujący
+starą hierarchię został przepisany („1=rolnicze, 2=lesne, 3=przemyslowe, 4=ciezarowe. Stare ID
+137/259/377 zostaly usuniete w Selly i zwracaja 404"). Zmiana `sync_full.cjs` jest **wyłącznie
+komentarzowa** — ID siedzą w danych, nie w kodzie. Pliki `zastosowanie_selly_map_pplx.sql`
+i `zastosowanie_selly_map_v2_pplx.sql` wycofują martwe ID podkategorii.
+
+**Rekomendacja (moja).** ✅ **nanieść**, ale **razem z przepisywanym 13d**, nie osobno — to zmiana
+w danych inicjalizujących podsystemu, którego port został cofnięty (revert #58). Ważny fakt
+przy okazji: **ID kategorii Selly są zmienne w czasie**, więc odbudowa nie powinna ich hardkodować
+w kodzie; miejscem prawdy zostaje tabela `selly_kategoria_norm_map` ładowana z pliku SQL. Wpis
+wiąże się z #76 (nazwy kategorii w CSV) — tam ten sam problem rozwiązany po stronie eksportu
+plikowego, a tu po stronie API.
+
+### #75 · 2026-09-13 · [BACKEND][BAZA] · `application_rules.cjs` — zamknięta lista zastosowań per kategoria, wspólna dla parsera, adaptera i triggerów
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (nowy moduł reguł) |
+| **Pliki** | `mirror/backend/application_rules.cjs` (**nowy**, 238 l.), `parsers/tyre_params.cjs` (bak `.bak_pre_zastosowania_20260913_192923`), `parsers/adapter.cjs` (bak j.w.), `extensions.cjs` (bak j.w.), `db/schema.sql` (2 triggery), `zastosowanie_niezmapowane.json` (raport) |
+| **Commit** | `74b7442` (2026-09-13 20:00) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #79/#80/#82. |
+| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #79/#80/#82** (stan końcowy modułu). |
+
+**Opis biznesowy.** Audyt wykazał produkty z zastosowaniem z zupełnie innej kategorii — np. opony
+Rolnicze z zastosowaniem „Harwester"/„Forwarder". Ania wprowadziła zamkniętą listę dopuszczalnych
+zastosowań dla każdej z czterech kategorii; wartość spoza listy przechodzi na
+`Uniwersalne/pozostałe`. Jednorazowy backfill poprawił **678 rekordów** (Przemysłowe 373,
+Rolnicze 151, Leśne 106, Ciężarowe 48). Reguły działają też jako triggery bazy, więc nie cofnie ich
+ani kolejny import, ani odtwarzanie zastosowań z pliku.
+
+**Szczegół techniczny (dla rebuildu).** Nowy moduł eksportuje `CATEGORY_VALUES` (Rolnicze: Ciągnik,
+Kombajn, Opryskiwacz, Przyczepa, Ładowarka, Kosiarka/ogród, Wózek widłowy, Uniwersalne/pozostałe;
+Przemysłowe: Ładowarka, Koparka, Kompaktor, Suwnica/dźwig, Maszyny górnicze, Wózek widłowy, Uniw.;
+Ciężarowe: All position, Oś kierowana, Oś napędowa, Naczepa/przyczepa, Uniw.; Leśne: Ciągnik leśny,
+Harwester, Forwarder, Skidder, Uniw.), `CATEGORY_ALIASES`, `canonicalCategory()`,
+`normalizeApplication()`, `normalizeCategoryApplication()` i `ensureApplicationRules()`.
+Pipeline: `adapter.recordToSurowe()` liczy `categoryApplication` **raz** i zapisuje z niego oba pola
+(`kategoria` i `zastosowanie`) — dotąd `kategoria` szła przez `common.capitalizeKategoria()`,
+a `zastosowanie` nie było normalizowane wcale. `tyre_params.normalizeCategoryApplication()` to cienki
+re-export modułu. `extensions.cjs:register()` woła `ensureApplicationRules()` przy starcie (obok
+`ensurePaymentBlocks()` z #73). Triggery `products_zastosowanie_ai`/`_au` mają w tej wersji jeszcze
+warunek `WHEN NEW.zastosowanie IS NOT NULL AND TRIM(...) <> ''` (zmieniony w #79).
+
+**Rekomendacja (moja).** ✅ **nanieść** — to zmiana w rdzeniu importu (wzorzec normalizacji
+w `adapter.recordToSurowe()`, ten sam punkt, który odbudowa portowała w 13a/13b), więc dotyczy
+`rebuild/backend/src/import/`, a nie Selly. **Uwaga na kolejność:** #75, #79, #80 i #82 to cztery
+kolejne warstwy na TYM SAMYM module — nanosić jako jeden spójny stan końcowy (`03fe892`), nie
+cztery osobne kroki, inaczej odtworzysz po drodze błąd kolejności trigger/backfill z #80.
+Wprost: **`ensureApplicationRules()` jest w odbudowie nowym bytem** (dziś `grep` nie znajduje ani
+`application_rules`, ani nic równoważnego).
+
+### #76 · 2026-09-14 · [BACKEND] · eksport Selly: nazwy kategorii sklepu, mapowanie `ł`→`l` i POWRÓT nagłówka `R/D`
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (generator CSV dla Selly) |
+| **Pliki** | `mirror/backend/generate_selly_export.cjs` (baki `.bak_pre_selly_category_names_20260914_130000`, `.bak_fix_polish_l_20260914_131800`, `.bak_pre_restore_rd_header_20260914_140000`) |
+| **Commit** | `b580628` (2026-09-14 14:00 — trzy wpisy CHANGELOG w jednym commicie) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — do naniesienia `toSellyCategoryName` (pkt 1–2); pkt 3 (nagłówek `R/D`) odbudowa już ma. |
+| **Status** | — zatwierdzone; **jeden ticket CSV razem z #73 i #77**. |
+
+**Opis biznesowy.** Trzy poprawki tego samego pliku w ciągu godziny, wszystkie wokół importera CSV
+Selly. (1) Automatyczny integrator o 12:00 wciąż przypisywał produkty do starych, ukrytych kategorii
+7–10, bo CSV niósł wewnętrzne nazwy Bridge — generator mapuje je teraz na nazwy żywych kategorii
+sklepu („Opony rolnicze", „Opony leśne", „Opony przemysłowe", „Opony ciężarowe"; „Rolnicze małe"
+idzie do „Opony rolnicze"). (2) Kontrola pierwszego eksportu wykazała, że jedna z czterech kategorii
+zachowała starą nazwę — standardowa normalizacja Unicode nie rozkłada litery `ł`, więc
+„Przemysłowe" nie trafiało w mapę; dołożono jawne mapowanie `ł`→`l`. (3) Selly przestało
+aktualizować cechę konstrukcji po zmianie nagłówka CSV z `R/D` na `Konstrukcja` (zmiana z 01.09) —
+nagłówek **wrócił na `R/D`**, a wartości w kolumnie zostają pełne („Radialna"/„Diagonalna").
+
+**Szczegół techniczny (dla rebuildu).** Nowa `toSellyCategoryName(value)`: `trim` →
+`toLocaleLowerCase('pl-PL')` → `normalize('NFD')` → usunięcie `\p{Diacritic}` → **`.replace(/ł/g,'l')`**
+→ zbicie spacji, potem `Map` (`rolnicze`, `rolnicze male`, `lesne`, `przemyslowe`, `ciezarowe`)
+z fallbackiem na wartość surową. Wołana dla nagłówka `Kategoria`. Nagłówek kolumny `konstrukcja`
+wrócił z `'Konstrukcja'` na `'R/D'`; komentarz o 59 kolumnach poprawiony na 60 (po #73).
+
+**Rekomendacja (moja).** ✅ **nanieść** — z jednym miłym skutkiem ubocznym: **odbudowa nigdy nie
+przejęła zmiany nagłówka z 01.09**, `rebuild/backend/src/selly/generator-csv.ts:79` ma do dziś
+`["R/D", "konstrukcja"]`. Punkt (3) to więc **powrót produkcji do stanu, który odbudowa już ma** —
+nie ma tu nic do przenoszenia, jest za to potwierdzenie, że nasz kształt jest poprawny.
+Do naniesienia zostają (1) i (2), czyli `toSellyCategoryName`.
+⚠ Punkt (2) to **dokładnie pułapka z CLAUDE.md o polskich znakach**, tylko w wersji JS: `NFD` +
+usunięcie diakrytyków **nie rozkłada `ł`**, bo to osobny znak, nie litera z diakrytykiem. Ten sam
+błąd co ASCII-only `UPPER()` w SQLite z 13c. Jeżeli w odbudowie jest gdziekolwiek slug kategorii
+budowany przez `normalize('NFD')`, ma ten sam defekt.
+
+### #77 · 2026-09-14 · [BACKEND][BAZA] · produkty `wstrzymany` trafiają do eksportu i do delty — zawsze ze stanem 0
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (eksport CSV + Tor 1 Selly) |
+| **Pliki** | `mirror/backend/generate_selly_export.cjs` (bak `.bak_pre_wstrzymane_zero_20260914_153400`), `selly/sync_delta.cjs` (bak j.w.) |
+| **Commit** | `94492d1` (2026-09-14 16:00) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — część CSV teraz (jeden ticket z #73/#76), część delta razem z 13d. |
+| **Status** | — zatwierdzone; część CSV → ticket CSV (#73/#76), część delta → **czeka na 13d**. |
+
+**Opis biznesowy.** Produkt wstrzymany w Bridge, ale z dodatnim stanem, mógł zostawić w Selly
+nieaktualny dodatni stan — nie trafiał ani do CSV (filtr `status='aktywny'`), ani do delty API.
+Sklep sprzedawał więc coś, czego Bridge już nie oferował. Teraz eksport obejmuje produkty aktywne
+**i wstrzymane**, a dla wstrzymanych zawsze zapisuje stan 0; delta API zeruje wstrzymane pozycje,
+które mają już wariant w Selly, ale **nie tworzy** nowych produktów wstrzymanych. Przy okazji Ania
+odtworzyła mapowania produktu 191462 (MO5 → Selly 1164/wariant 1164, MO4 → 1164/wariant 2632)
+i poprawiła główną cenę produktu Selly 1164 z 3305 zł na 368 zł — błędny mapping historyczny sklejał
+produkt OZKA z ceną CULTOR-a.
+
+**Szczegół techniczny (dla rebuildu).** `generate_selly_export.cjs`: `WHERE status = 'aktywny'`
+→ `WHERE status IN ('aktywny','wstrzymany')`, plus nadpisanie `v = 0` dla nagłówka
+`Stan-magazynowy`, gdy `row.status === 'wstrzymany'`; zmienił się też tekst na stdout
+(„Liczba produktow (aktywnych i wstrzymanych)"). `sync_delta.findDeltaProducts()`: warunek
+`p.status='aktywny'` → `(p.status='aktywny' OR (p.status='wstrzymany' AND sp.selly_variant_id IS NOT NULL))`,
+`p.stan` w SELECT i w porównaniu z `sp.stan_wyslany` owinięte w
+`CASE WHEN p.status='wstrzymany' THEN 0 ELSE p.stan END`.
+
+**Rekomendacja (moja).** ✅ **nanieść** — to naprawa realnego błędu biznesowego (sprzedaż
+niedostępnego towaru), nie kosmetyka. Rozkłada się na dwie części o różnym losie:
+- **eksport CSV** → `rebuild/backend/src/selly/generator-csv.ts:158` (`.where(eq(products.status,"aktywny"))`)
+  i linia stdout `Liczba produktow (aktywnych): …` w tym samym pliku, którą trasa oddaje 1:1 —
+  **zmiana tekstu rusza fixture**, więc razem z #73 i #76 jako jeden ticket CSV;
+- **delta Toru 1** → należy do przepisywanego **13d**, nie ruszać osobno.
+
+### #78 · 2026-09-17 · [BACKEND] · MO9: odrzucanie po stabilnym ID kategorii Magento 163 (quady/kosiarki)
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser MO9 Agrorami API) |
+| **Pliki** | `mirror/backend/parsers/mo9_agrorami_api.cjs` (bak `.bak_pre_bkt_category_163_20260917_145511`) |
+| **Commit** | `cba212d` (2026-09-17 15:00) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
+| **Status** | — zatwierdzone do naniesienia (jeden plik, `mo9_agrorami_api.cjs`; razem z drugim hunkiem z #79). |
+
+**Opis biznesowy.** Prośba Ani: opony BKT do quadów, kosiarek, gokartów i podobnych małych pojazdów
+nie mają być ani importowane z API, ani publikowane w Selly. Agrorami grupuje je w kategorii Magento
+o ID 163 „Opony do quadów i kosiarek". Filtr importu odrzuca je teraz po ID (stabilniejsze niż
+odmiana słowa „quad" w nazwie), zachowując stary filtr tekstowy jako zapasowy. Pomiar na żywym API:
+1114 pozycji, 991 dopuszczonych, 123 odrzucone, 0 błędów. Jednorazowo usunięto z katalogu Bridge
+83 istniejące odpowiedniki (40 ze 123 pozycji źródłowych w ogóle nie było zapisanych) oraz 76
+odpowiadających mapowań `selly_products` po poprawnym usunięciu produktów w Selly.
+
+**Szczegół techniczny (dla rebuildu).** Nowe `ODRZUCONE_CATEGORY_IDS = new Set(['163'])`
+i `powodOdrzucenia(it)`, które zwraca `'kategoria_163_quady_kosiarki'` (gdy któraś z `it.categories`
+ma to ID) albo `'quad'` (stary regex `/\bquad\b/` po `it.name` i po sklejonych nazwach kategorii)
+albo `null`. W `fetchAll()` inline'owy warunek zastąpiony wywołaniem — **powód odrzucenia trafia
+do tablicy `odrzucone`**, więc raport importu rozróżnia teraz dwa powody zamiast jednego.
+
+**Rekomendacja (moja).** ✅ **nanieść** — reguła biznesowa („czego nie sprzedajemy"), nie defekt.
+Tanie: jeden plik, jedna funkcja, żadnych zmian kontraktu. Odbudowa ma ten parser jako
+`rebuild/backend/src/import/legacy/parsers/mo9_agrorami_api.cjs`. ⚠ Nowa etykieta powodu odrzucenia
+może wychodzić w podsumowaniu importu — sprawdź fixture raportu MO9 przed zmianą.
+Idzie w parze z #79 (drugi hunk tego samego pliku).
+
+### #79 · 2026-09-17 · [BACKEND][BAZA] · kanonizacja wielkości liter kategorii (283 produkty + 14 nadpisań) i koniec reguły „inne → Rolnicze" w MO9
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (parsery, `common.cjs`, triggery) |
+| **Pliki** | `mirror/backend/common.cjs` (bak `.bak_pre_category_case_20260917_1545`), `parsers/tyre_params.cjs` (bak j.w.), `application_rules.cjs` (bak j.w.), `parsers/mo9_agrorami_api.cjs` (bak `.bak_pre_bkt_recategory_20260917_1523`), `db/schema.sql` (4 triggery) |
+| **Commit** | `ca8a694` (2026-09-17 16:00 — dwa wpisy CHANGELOG) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#80/#82. |
+| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #75/#80/#82**. |
+
+**Opis biznesowy.** Dwie prośby Ani w jednym commicie. (1) Filtr katalogu pokazywał zdublowane
+kategorie — tę samą raz małą, raz wielką literą; ujednolicono 283 produkty i 14 ręcznych nadpisań
+(`rolnicze`→`Rolnicze` itd.) i zabezpieczono przed nawrotem przy kolejnych importach. (2) Kategoria
+„inne" ma zniknąć z katalogu: usunięto ogólną regułę MO9 „inne → Rolnicze" (bo grupa zawiera również
+opony przemysłowe) i zastąpiono ją klasyfikacją po rodzinach bieżników BKT. Przeklasyfikowano 58
+historycznych produktów MO9 z „inne": 28 na Rolnicze, 30 na Przemysłowe. Jedną przeoczoną pozycję
+z wykluczonej kategorii 163 (BKT LG 306 20X10.00-10) usunięto z Selly i z Bridge.
+
+**Szczegół techniczny (dla rebuildu).** `common.normalizeRecord()`:
+`kategoria: rec.kategoria || 'Rolnicze'` → `capitalizeKategoria(rec.kategoria || 'Rolnicze')` —
+kanonizacja **na wyjściu każdego parsera**, także dla ścieżek omijających adapter.
+`tyre_params.cjs`: cztery miejsca zwracające małe litery przeszły na
+`applicationRules.canonicalCategory(...)` — `normalizeJmk` (`record.rodzaj`), `normalizeAgrowiec`
+(`record.kategoria`), `normalizeTrelleborg` (`record.rodzaj`), `normalizeAgrorami` (gałąź `else`).
+`application_rules.cjs`: nowe `sqlCanonicalCategoryExpression()`, triggery `products_zastosowanie_ai/_au`
+**straciły warunek `WHEN`** (odpalają się zawsze) i normalizują teraz również `NEW.kategoria`,
+a doszły dwa nowe triggery `manual_overrides_kategoria_ai/_au` normalizujące `override_value`
+dla `field_name='kategoria'`. `mo9_agrorami_api.cjs`: z `KATEGORIA_MAP` wypadł wpis
+`'inne': 'Rolnicze'`, doszła `classifyBktFallback(fullName)` — regexy rodzin bieżników
+(`FRS` → Leśne; `AT 621|BK-LOADER|EARTHMAX|EM 936|FS 216|GR 288|LG 306/408|LIFTMAX|MAGLIFT|MULTIMAX|
+JUMBOTRAX|SURETRAX|PAC MASTER|PL 801|PT-HD|ROCK GRIP|SKID POWER|TR 387` → Przemysłowe;
+`AGRIMAX|AS 504|AW 702|AW 909|FARM 2000|FARM HIGHWAY|FL 630|FL 693|FLOT 648|TF 9090|TR 128|TR 135|
+TR 171|TR 678` → Rolnicze), z `c.classifyByName()` jako ostatecznym fallbackiem.
+
+**Rekomendacja (moja).** ✅ **nanieść** — i to jest **najważniejszy wpis tej partii dla odbudowy**,
+bo trafia w kod, który odbudowa ma 1:1 i który dziś rozjeżdża się z produkcją:
+`rebuild/backend/src/import/legacy/parsers/tyre_params.cjs:562,1206,1303,1367` mają wciąż
+`cleanText(...).toLowerCase()`, a `mo9_agrorami_api.cjs:422` wciąż `'inne': 'Rolnicze'`.
+⭐ **Trigger na `manual_overrides` częściowo domyka wpis #65** („`manual_overrides` nieprzemigrowane
+— override cofa konwencję przy imporcie"): Ania rozwiązała **połowę kategorii** (14 wpisów
+`field_name='kategoria'` przemigrowane + trigger na przyszłość). **Nie ruszyła** drugiej połowy —
+3 wpisów `field_name='konstrukcja'` z wartością `'D'`. #65 zostaje otwarty, ale w węższym zakresie.
+
+### #80 · 2026-09-17 · [BACKEND][BAZA] · `Forwarder/Harwester` jako JEDNA wartość + naprawa kolejności trigger→backfill
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (reguły zastosowań) |
+| **Pliki** | `mirror/backend/application_rules.cjs` (bak `.bak_pre_forwarder_harwester_20260917_1608`), `db/schema.sql`, `application_rules_v2_test.cjs` (**nowy**, 294 l. — test) |
+| **Commit** | `5dedefb` (2026-09-17 17:00, pierwszy z dwóch tematów commita) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#79/#82. |
+| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #75/#79/#82**. |
+
+**Opis biznesowy.** Zgłoszenie Ani: w kategorii Leśne pole „zastosowanie" miało „Forwarder"
+i „Harwester" zapisywane osobno albo jako „Harwester ; Forwarder", a miała być jedna wartość
+„Forwarder/Harwester", z wielkiej litery po ukośniku. Po zmianie dowolna kombinacja (jeden z nich,
+oba, w dowolnej kolejności, z dowolnym separatorem) zapisuje się jako jedna wartość. Jednorazowo
+scalono 100 produktów: 29 × „Forwarder", 2 × „Harwester", 69 × „Harwester ; Forwarder". Kategoria
+bez zmian, 17 ręcznych nadpisań zastosowania nie miało tych wariantów. Test z rollbackiem
+potwierdził scalanie przy przyszłych zapisach.
+
+**Szczegół techniczny (dla rebuildu).** `splitApplications()`: zamiast jednego
+`replace(/forwarder\s*,\s*harwester/gi,'Forwarder ; Harwester')` są dwa `replace` łapiące oba
+porządki i separatory `[,;/]`, oba dające `'Forwarder/Harwester'`. Stałe `FORWARDER_HARWESTER`
+i `FORWARDER_HARWESTER_MEMBERS`. `normalizeApplication()` przepuszcza `Forwarder/Harwester` obok
+listy dozwolonych i dokleja go **na końcu** listy (`[...ordered, FORWARDER_HARWESTER]`), z osobną
+gałęzią, gdy to jedyna wartość. `sqlNormalizeExpression()` dostał komplet ośmiu wariantów wejściowych.
+⭐ **Drugi, ważniejszy hunk:** blok `if (backfill) {...}` **przeniesiony sprzed podmiany triggerów
+na PO niej**. Komentarz Ani nazywa incydent wprost: każdy `UPDATE` w backfillu odpala
+`products_zastosowanie_au`, więc przy starej kolejności **stary trigger nadpisywał wynik backfillu**
+(`Forwarder/Harwester` wracało na `Uniwersalne/pozostałe`).
+
+**Rekomendacja (moja).** ✅ **nanieść razem z #75/#79/#82** jako jeden stan końcowy modułu.
+⚠ **Kolejność trigger→backfill to nie kosmetyka, to warunek poprawności** — jeśli odbudowa
+odtworzy `ensureApplicationRules()` ze starą kolejnością, dostanie dokładnie ten sam cichy błąd
+(dane wyglądają na zbackfillowane, a nie są). To ten sam gatunek pułapki co `safeAll()` z CLAUDE.md:
+operacja „się udaje", tylko wynik jest inny niż sądzisz.
+`application_rules_v2_test.cjs` (294 l.) to gotowy zestaw przypadków — **warto go przeczytać przed
+pisaniem własnych testów**, bo niesie oczekiwania Ani co do wartości granicznych.
+
+### #81 · 2026-09-17 · [BACKEND] · Selly: właściciel metadanych produktu + `PUT features` JEDNAK DZIAŁA (obala ustalenie z 08.09)
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (Selly, Tor 2 / `sync_full`) |
+| **Pliki** | `mirror/backend/selly/sync_full.cjs` (bak `.bak_pre_filtermirror_20260917_1654`), `selly/mapper_v2.cjs` (bak j.w.), `cleanup_selly_filters_20260917.cjs` (jednorazowy, dodany w `5dedefb`, **usunięty** w `65dcbd0`), zrzuty `selly_backups/categories_filters_*.json` |
+| **Commit** | `5dedefb` (2026-09-17 17:00, drugi temat) + `65dcbd0` (18:00, scopefix + publikacja CSV) |
+| **Do nowej wersji?** | 🕒 **PÓŹNIEJ — odłożone do 13d.** Decyzja użytkownika 2026-09-18. Kod czeka na świeże przepisanie podsystemu Selly (port 13d-1 cofnięty revertem #58, docieranie u Ani trwa). **Zapisane w roadmapie, blok 13d** — razem z obalonym ustaleniem o `PUT features`, żeby nie zginęło do czasu startu 13d. |
+| **Status** | 🕒 **odłożone do 13d** — zapisane w `docs/rebuild-roadmap.md`, blok **13d** (razem z obalonym ustaleniem o `PUT features`). Nowej karty NIE zakładać. |
+
+**Opis biznesowy.** Zgłoszenie Ani: dane synchronizowane z Bridge nie mają tworzyć sklejonych
+wartości filtra „Rozmiar" w sklepie ani pozwalać, żeby warianty różnych dostawców nadpisywały sobie
+wzajemnie kategorię i cechy tego samego produktu. Poprawiono trzy historyczne rekordy MO9 ze
+sklejonym rozmiarem głównym i alternatywnym (po poprawce 0 wartości z nawiasem w `products.rozmiar`)
+i przegenerowano CSV (8088 produktów, 60 kolumn). Jeden produkt Selly może mieć warianty od kilku
+dostawców, ale cechy i kategoria są wspólne dla produktu — zapisuje je więc tylko jeden wybrany
+rekord Bridge. Grupy, w których aktywne rekordy mają **różne** kategorie, są celowo pomijane:
+wymagają rozdzielenia na osobne produkty w sklepie.
+
+**Szczegół techniczny (dla rebuildu).** `collectFullSyncItems()` dokłada do SELECT-a
+`p.id AS bridge_product_id`. Nowe `metadataScore(row)` (liczy niepuste pola z 21-elementowej listy)
+i `isMetadataOwner(db,row)`: bierze wszystkie rekordy Bridge zmapowane na ten sam
+`selly_product_id`, preferuje aktywne, **odrzuca grupę, gdy ma więcej niż jedną kategorię**
+(`categories.size !== 1` → `false`), sortuje po `metadataScore` malejąco z `id` rosnąco jako
+rozstrzygnięciem i zwraca `true` tylko dla zwycięzcy. `updateExistingVariant()` dostał
+`dictMaps` jako argument; dla właściciela metadanych (i poza `dryRun`) robi `GET /api/products/{pid}`,
+buduje payload z `includeFeatures:true` + `existingSellyFeatures` i dokłada `category_id` z
+`dictMaps.catMap`. **Usunięto martwą `fetchVariantFeatures()`.** `mapper_v2.buildFeaturesMirror()`:
+nowy `managedNames` (nazwy z `FEATURE_MAP`) — cecha zarządzana przez Bridge, dziś pusta, **nie
+dziedziczy już starej wartości z Selly**; cechy spoza mapy zostają nietknięte. Odpowiedź `dry_A`
+niesie teraz dodatkowe pole `metadata_owner`.
+
+**Rekomendacja (moja).** 🕒 **później — ale z jednym faktem do natychmiastowego zapisania.**
+⭐ **Komentarz w `sync_full.cjs` odwraca ustalenie z 08.09.** Poprzednia wersja głosiła: „ODKRYCIE
+2026-09-08: Selly PUT /api/products/{pid} NIE akceptuje pola `features` (HTTP 400 Malformed JSON
+input)" — i to właśnie na jego podstawie 13d-1 wyciął `PUT features`. Nowy komentarz: „Test
+produkcyjny 2026-09-17 potwierdzil, ze PUT /api/products/{pid} przyjmuje pelna tablice `features`
+mimo braku tego pola w fields_edit". **Roadmapa I14 wymienia „aktualizacja CECH istniejących
+produktów w Selly (u Ani PUT features usunięty po HTTP 400)" wśród priorytetów Ani do triażu —
+ta przesłanka jest już nieaktualna.** Przenoszę to ustalenie do bloku 13d w roadmapie.
+Sam kod czeka na przepisanie 13d (port cofnięty revertem #58); `isMetadataOwner` to **nowa
+logika biznesowa**, nie defekt do odtworzenia 1:1, więc wchodzi świadomie, nie automatem.
+`cleanup_selly_filters_20260917.cjs` był narzędziem jednorazowym i Ania go po użyciu usunęła —
+**nie portować**.
+
+### #82 · 2026-09-18 · [BACKEND][BAZA] · `Ładowarka` wypada z zastosowań Rolniczych → remapowana na `Ciągnik`
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND + BAZA (reguły zastosowań) |
+| **Pliki** | `mirror/backend/application_rules.cjs`, `db/schema.sql` (regeneracja 2 triggerów) |
+| **Commit** | `03fe892` (2026-09-18 14:00) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ⏸ **implementacja WSTRZYMANA do odpowiedzi Ani** (commit bez wpisu w CHANGELOG, uzasadnienie biznesowe NIEZNANE: dlaczego akurat „Ciągnik”?). Pytanie wysłane 2026-09-18. |
+| **Status** | ⏸ **WSTRZYMANE — czekamy na odpowiedź Ani** (pytanie wysłane 2026-09-18). Ania nadal pracuje nad tym obszarem, więc uzasadnienie powinno dojechać w kolejnym `sync(vps)` — w CHANGELOG-u i w kodzie. **Sprawdzić przy następnym `/triaz-zmian`.** |
+
+**Opis biznesowy.** ⚠ **NIEZNANE — commit nie niesie wpisu CHANGELOG ani etykiety `.bak`**; opis
+poniżej pochodzi wyłącznie z diffu. „Ładowarka" przestaje być dopuszczalnym zastosowaniem
+w kategorii Rolnicze (zostaje w Przemysłowych) i jest tam automatycznie zamieniana na „Ciągnik" —
+czyli produkty rolnicze opisane jako ładowarki trafiają pod ciągniki zamiast, jak dotąd
+(reguła z #75), lądować w „Uniwersalne/pozostałe".
+
+**Szczegół techniczny (dla rebuildu).** Z `CATEGORY_VALUES.Rolnicze` usunięty element `'Ładowarka'`
+(lista schodzi do 7 pozycji; w `Przemysłowe` zostaje). Nowa zamrożona mapa
+`CATEGORY_APPLICATION_REMAP = { Rolnicze: { 'Ładowarka': 'Ciągnik' } }` i dodatkowy `.map()`
+w `normalizeApplication()`, wstawiony **między** rozwinięcie aliasów a `filter(Boolean)` — czyli
+remap działa po normalizacji aliasu, przed testem dozwolonych wartości. Bez tego remapu „Ładowarka"
+w Rolniczych wpadłaby teraz na `Uniwersalne/pozostałe`. `db/schema.sql` to wyłącznie regeneracja
+wyrażenia w dwóch triggerach.
+
+**Rekomendacja (moja).** ✅ **nanieść razem z #75/#79/#80** (czwarta i ostatnia warstwa tego samego
+modułu — to jest stan końcowy `application_rules.cjs` na dziś).
+⚠ **Brak wpisu CHANGELOG to sam w sobie sygnał** — ten sam gatunek co #64 (`odswinch`), gdzie
+zmiana parsera istniała tylko jako kopia `.bak`. Tu nie ma nawet `.bak`, więc jedynym źródłem
+prawdy jest diff. Uzasadnienie biznesowe („dlaczego akurat Ciągnik?") jest **NIEZNANE** —
+warto dopytać Anię, zanim reguła wejdzie do odbudowy, bo to decyzja produktowa, nie techniczna.
+
+### #83 · 2026-09-18 · [BACKEND] · normalizacja `products.szerokosc` — ODWRÓCENIE decyzji „zachowaj zera końcowe" z 19.08
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (parser rozmiaru — rdzeń importu) |
+| **Pliki** | `mirror/backend/parsers/tyre_params.cjs`, `parsers/adapter.cjs`, `parsers/mo9_agrorami_api.cjs`, `normalize_widths_selly_20260918.cjs` (**nowy**, 146 l., jednorazowy) |
+| **Commit** | `9d1b09f` (2026-09-18 15:00, etykieta `20260918_1500_width_norm`) |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ⏸ **implementacja WSTRZYMANA do odpowiedzi Ani** (commit bez wpisu w CHANGELOG; zmiana odwraca wymaganie Anny z 19.08 o zachowaniu zer końcowych). Pytanie wysłane 2026-09-18. |
+| **Status** | ⏸ **WSTRZYMANE — czekamy na odpowiedź Ani** (pytanie wysłane 2026-09-18). Jw. — kolejny `sync(vps)` powinien przynieść wpis w CHANGELOG-u. **Sprawdzić przy następnym `/triaz-zmian`**, zanim ruszysz `tyre_params.cjs` w odbudowie. |
+
+**Opis biznesowy.** ⚠ **Powód NIEZNANY — commit nie niesie wpisu CHANGELOG**; opis z diffu
+i komentarzy w kodzie. Kolumna szerokości dostaje jeden kanoniczny zapis liczbowy: bez nieznaczących
+zer końcowych (`5.00`→`5`, `12.50`→`12.5`, `340.0`→`340`). Zmiana dotyczy **wyłącznie kolumny
+szerokości i odpowiadającej jej cechy w Selly** — pełna nazwa produktu i pole rozmiaru zachowują
+zapis źródłowy. Osobno: znak `$` stojący bezpośrednio przed wymiarem w danych MO9 przestaje być
+traktowany jako część rozmiaru. Dołożony skrypt jednorazowy przepisuje już wysłane wartości
+szerokości w Selly.
+
+**Szczegół techniczny (dla rebuildu).** Nowa `tyre_params.normalizeWidthValue(value)` (trim,
+`,`→`.`, wartości niepasujące do `^\d+(?:\.\d+)?$` przechodzą bez zmian, reszta przez `Number()`
+→ `String()`), wyeksportowana z modułu. `adapter.recordToSurowe()`: `szerokosc: enriched.szerokosc ?? null`
+→ `szerokosc: tyre.normalizeWidthValue(enriched.szerokosc)`. `mo9_agrorami_api.itemToRecord()`:
+`rozmiar = parsedName.rozmiar || ''` → `.replace(/^\$\s*/,'')`.
+⭐ **Najcięższy hunk: w `parseSize()` skasowany CAŁY blok `szerokoscRaw` (−37 linii)** i zastąpiony
+trzema liniami: `result.szerokoscRaw = normalizeWidthValue(result.szerokosc); result.szerokosc = result.szerokoscRaw;`.
+Padły obie gałęzie tego bloku naraz: nadpisanie `result.szerokosc` **surowym stringiem pierwszej
+liczby z `size`** (to ono trzymało zera końcowe) i strażnik `isWxSxD`/`isWxSxDcale`, który przed tym
+nadpisaniem chronił notacje, gdzie pierwsza liczba to średnica zewnętrzna, nie szerokość.
+**Usunięcie obu jest spójne** — skoro nie ma naiwnego nadpisania, nie ma przed czym chronić:
+`result.szerokosc` zostaje wartością policzoną przez parser, a więc dla `WxSxD` dalej SW.
+⚠ **Zweryfikowane osobno: własne parsowanie notacji `OD×SW−Rim` ŻYJE** (`:283`, `:299` w wersji po
+zmianie) — z pary hunków wpisu #64 („odswinch") zniknął tylko strażnik, a nie rozpoznanie notacji.
+Jednostki też nie ruszono: przeliczanie na mm było już cofnięte 2026-08-19 i ten komentarz stoi
+nietknięty, więc **`szerokosc` zostaje w jednostce oryginalnej z rozmiaru**.
+`normalize_widths_selly_20260918.cjs` to skrypt operacyjny (własna kopia `normalizeWidth`,
+`better-sqlite3` + klient Selly, `retry` z narastającym backoffem).
+
+**Rekomendacja (moja).** ✅ **nanieść — i to pilnie, bo dziś odbudowa rozjeżdża się z produkcją
+w rdzeniu importu.** `rebuild/backend/src/import/legacy/parsers/tyre_params.cjs:336-366` zawiera
+**dokładnie ten blok, który Ania właśnie usunęła** (`isWxSxDcale`, `isWxSxD`, `rawMatch`), wniesiony
+tam świadomie w 13a. Skutek rozjazdu jest **formatowy, nie jednostkowy**: produkcja zapisuje dziś
+`10`, odbudowa `10.0`; dla notacji `WxSxD` obie strony dają tę samą liczbę (SW), tylko inaczej
+zapisaną. Trzy rzeczy przed implementacją:
+1. To **jawne odwrócenie decyzji Anny z 2026-08-19** („Anna wymaga zachowania oryginalnego zapisu
+   pierwszej liczby z rozmiaru — z zerami końcowymi"), zapisanej w kodzie jako POPRAWKA v2/v3.
+   Bez wpisu CHANGELOG nie wiadomo, czy to nowa decyzja produktowa, czy skutek uboczny porządków
+   w cechach Selly. **Do dopytania Ani** — a dla 14d to materiał do instrukcji testów, bo zmienia
+   to, co Ania zobaczy w kolumnie.
+2. **Etykieta jest węższa niż zmiana** — `width_norm` brzmi jak samo obcięcie zer, a razem z nim
+   wypadł strażnik `isWxSxD` z #64. Tu akurat usunięcie jest spójne (patrz wyżej), ale morał
+   z CLAUDE.md zostaje: **etykieta daje nazwę, nie treść** — rozkładaj diff, nie ufaj `.bak`.
+3. Przed naniesieniem **zmierzyć na `db/snapshot.db`, ile rekordów zmienia zapis** (ile wartości
+   `products.szerokosc` ma dziś zera końcowe) — to jest liczba, którą trzeba pokazać Ani przy
+   pytaniu z pkt. 1, i jednocześnie oczekiwanie dla testu charakteryzacyjnego.

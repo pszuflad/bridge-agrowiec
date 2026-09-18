@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 (warstwa UI importu i stagingu) | 14a FE · 14b FE · 14c FE · 14d DOCS | 3 | ⬜ | Źródło: wypełniona `docs/instrukcja-testow-I3.md` (uwagi Ani + zrzuty ekranu). Oś podziału = PLIK, nie temat — 14a/14b/14c mają rozłączne zestawy plików i idą RÓWNOLEGLE; 14d (docs) na końcu. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | ⬜ | Źródło: wypełniona `docs/instrukcja-testow-I3.md` (uwagi Ani + zrzuty ekranu). Oś podziału = PLIK, nie temat — 14a/14b/14c mają rozłączne zestawy plików i idą RÓWNOLEGLE; 14d (docs) na końcu. Czytaj blok I14. |
 
 ---
 
@@ -2052,6 +2052,33 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     (bez `vat_rate` — VAT na kategorii w Selly), `discovery.buildProductCodeCache` (paginacja `/api/products`),
     weryfikacja pierwszego nocnego Tor 2 (MO5: 1713 ok, 0 błędów). **Zegar startu ZRESETOWANY** — port dziś
     byłby nieaktualny w 428 liniach. Potwierdza trafność revertu 13d-1. Nowej karty NIE zakładamy.
+  - **STAN 2026-09-18 (triaż `94bdf11..9d1b09f`, `52-CHORE-triaz-produkcja-i14`): DOCIERANIE NADAL TRWA,
+    zegar startu ZNOWU ZRESETOWANY.** W oknie 09–18.09 padło kolejnych 5 commitów w `selly/*` — ostatni
+    **17.09 wieczorem**, czyli PO orientacyjnej dacie rewizji ~16.09. Sygnał startu **nie zapalił się**.
+    Nowej karty NIE zakładamy; następna rewizja po kolejnym cichym tygodniu.
+  - **⭐ USTALENIE Z 08.09 OBALONE — czytaj to, ZANIM zaczniesz przepisywać 13d.** Komentarz
+    „PUT /api/products/{pid} NIE akceptuje `features` (HTTP 400 Malformed JSON)", na podstawie którego
+    13d-1 wyciął `PUT features`, **przestał obowiązywać**: `mirror/backend/selly/sync_full.cjs` mówi dziś
+    „Test produkcyjny 2026-09-17 potwierdzil, ze PUT /api/products/{pid} przyjmuje pelna tablice `features`
+    mimo braku tego pola w fields_edit" (commit `5dedefb`). Ścieżka A robi teraz `GET /api/products/{pid}`
+    → payload z `includeFeatures:true` → `PUT` z cechami i `category_id`. Backlog **#81**.
+  - **DECYZJA UŻYTKOWNIKA 2026-09-18:** backlog **#81** (właściciel metadanych produktu +
+    przywrócone `PUT features`) jest **formalnie ODŁOŻONY DO 13d** — nie zakładamy osobnej karty,
+    nie nanosimy tego poza 13d. Wpis ma w backlogu „Do nowej wersji?" = 🕒 PÓŹNIEJ. Ta linia jest
+    po to, żeby przy starcie 13d nikt nie szukał tematu w backlogu — **#81 jest częścią zakresu 13d**.
+    Tą samą decyzją #74 i część delta z #77 również czekają na 13d (patrz niżej).
+  - **Co jeszcze doszło w `selly/*` i wchodzi do zakresu przepisania** (szczegóły w backlogu):
+    **#74** — kategorie Selly przebudowane, stare ID 137/259/377 zwracają 404, żywe to 1/2/3/4;
+    ID siedzą w `selly_kategoria_norm_map` (dane), nie w kodzie — **nie hardkodować**.
+    **#77** — `sync_delta.findDeltaProducts()` obejmuje `wstrzymany` z istniejącym wariantem i wysyła
+    dla nich stan 0 (bez tworzenia nowych produktów).
+    **#81** — `sync_full`: `metadataScore()`/`isMetadataOwner()` (jeden kanoniczny rekord Bridge pisze
+    cechy i kategorię wspólnego produktu; grupa o różnych kategoriach jest pomijana), usunięta martwa
+    `fetchVariantFeatures()`, `mapper_v2.buildFeaturesMirror()` nie dziedziczy już starej wartości cechy
+    zarządzanej przez Bridge, gdy bieżąca jest pusta. To **nowa logika biznesowa**, nie defekt do
+    odtworzenia 1:1 — wchodzi świadomie, jako decyzja.
+    **Do opisania jako defekt:** usunięcie produktu nie sprząta mapowań `selly_products` (osierocony
+    rekord trzymał stare zastosowanie w wyszukiwarce sklepu — `5cfb7ab`, 17.09).
   - **⚠ PUŁAPKA:** revert merge’a #57 sprawia, że git uzna `feature/45` za „już zmergowane". Rewrite MUSI
     iść na **NOWEJ gałęzi** (świeży port z finalnego `mirror/selly/`), NIE przez re-merge `feature/45`.
 - **13e — Frontend: `szer_marka` (rebrand i `PRICEFMT` odbudowa miała już 1:1)** [FE] — ✅ zrobione
@@ -2156,23 +2183,52 @@ niżej są z niego i były weryfikowane pod kątem ISTNIENIA zachowania, nie jeg
 Zanim zmienisz etykietę albo tekst, potwierdź go w ŻYWYM bundlu
 (`mirror/frontend/assets/index-PRICEFMT1783512500.js`, ścieżka w `mirror/frontend/index.html`).
 
-**14a — zakładka „Wgrywanie ręczne"** [FE]. Cztery braki, wszystkie zweryfikowane w oryginale:
-- **Wgrywanie zbiorcze jest MODALEM, nie inline'em.** Przycisk „Wgraj pliki" (`button-multi-upload`)
-  otwiera dialog „Wgraj wiele plików — auto-detekcja dostawcy" z „Dodaj kolejny plik" / „Wyczyść" /
-  „Importuj do staging" — `frontend-index.js:26155-26166`, `:18957`, `:19171`. Etykieta akcji ma
-  wariant „Importuj do katalogu" (`:19171`) — ustalić, co go włącza, przed zahardkodowaniem.
-- **Brak całej sekcji „Wgrywanie pojedyncze (z wymuszonym dostawcą)"** — siatka kafli
-  `upload-tile-{kod}` (kod · nazwa · e-mail · „Wgraj plik"), `:26169-26200`. Ten sam dialog,
-  ale z wymuszonym dostawcą zamiast auto-detekcji.
-- **Brak toasta po imporcie** — `:19152-19153`: tytuł `${doStagingu} pozycji czeka na akceptację`
-  albo „Import zakończony", opis skleja tylko NIEZEROWE liczniki (Pozycji w plikach · Do akceptacji
-  w stagingu · Nowe · Zmienione · Wycofane · Bez zmian · Odrzucone (nie opony) · Pominięte pliki).
-  Błąd wczytania też idzie toastem (`:18876`). ⚠ Komentarz „nie mamy jeszcze Toastera"
-  w `Wgrywanie.tsx:80` jest NIEAKTUALNY — `ToastProvider` stoi w `App.tsx` od sesji 4b.
-- **Przycisk pokazuje „Wgraj (0)" po udanym wgraniu** (`Wgrywanie.tsx:192`) — licznik `doWyslania`
-  liczy pozycje JESZCZE niewysłane, więc po imporcie spada do zera i Ania czyta to jako „wgrało zero".
-- Bez zmian: podgląd 5 pozycji dalej pochodzi z odpowiedzi backendu (decyzja 3f-1), endpointy,
-  limit 50 MB, CSV+XLSX.
+**14a — zakładka „Wgrywanie ręczne"** [FE] — ✅ **ZROBIONE 2026-09-18**, ticket
+`49-CHORE-i14a-wgrywanie-reczne`. Wszystkie cztery braki dowiezione:
+- **Wgrywanie zbiorcze jest MODALEM** za „Wgraj pliki" (`button-multi-upload`), dialog
+  „Wgraj wiele plików — auto-detekcja dostawcy" z „Dodaj kolejny plik" / „Wyczyść" /
+  „Importuj do staging" (`:26155-26166`, `:18957`, `:19171`).
+- **Sekcja „Wgrywanie pojedyncze (z wymuszonym dostawcą)"** — siatka kafli `upload-tile-{kod}`
+  (kod · nazwa · e-mail · „Wgraj plik"), otwierających TEN SAM dialog z wymuszonym dostawcą
+  (`:26169-26200`). Kafle renderują WSZYSTKICH dostawców, bez filtrowania i sortowania, jak
+  oryginał — dostawcę wyłączonego z importu odrzuca backend, front nie dubluje reguły.
+- **Toast po imporcie** odtworzony co do znaku z `:19142-19153`, razem z osobliwością oryginału:
+  `odrzuconeBrakDanych` jest sumowane, ale **nigdy nie wyświetlane** — nie „naprawiać" tego
+  dopisaniem członu. Błąd wczytania pliku i błąd importu idą toastem `destructive`.
+- **Licznik „Wgraj (0)" usunięty.** Oryginał NIE MA licznika w etykiecie; przycisk wyłącza
+  wyłącznie warunek „żaden plik nie ma rozpoznanego dostawcy" (`:19161`, `:19171`). Naprawa
+  polegała na usunięciu licznika, nie na przeliczeniu go inaczej.
+- Bez zmian, zgodnie z założeniem: podgląd 5 pozycji dalej z odpowiedzi backendu (decyzja 3f-1),
+  endpointy, limit 50 MB, CSV+XLSX.
+
+⭐ **ROZSTRZYGNIĘTE: wariant „Importuj do katalogu" (`:19171`) to MARTWA GAŁĄŹ — nie portowany.**
+Propsy `prostoDoKatalogu` i `buttonLabel` istnieją w deklaracji dialogu `Cd` (`:18853-18855`), ale
+`Cd` jest w CAŁYM bundlu wołane dokładnie dwa razy (`:26157`, `:26190`) i żadne z wywołań ich nie
+przekazuje; `prostoDoKatalogu` domyślnie `false`, a trzeci argument `sP(e,t,n)` nie jest w ciele
+funkcji nawet czytany (`:18821`). Etykieta w produkcji zawsze brzmi „Importuj do staging".
+
+**Zweryfikowane przy okazji:** żywy bundel `index-PRICEFMT1783512500.js` jest dla bloków `JT` i `Cd`
+**znak w znak zgodny z deminifikatem z 13.08** (porównane bloki + liczniki wszystkich
+charakterystycznych stringów). Żadna z czterech łatek FE tej zakładki nie ruszała, więc ostrzeżenie
+o nieaktualnym deminifikacie (wyżej) dla TEJ zakładki nie obowiązuje.
+
+**Nowy plik:** `src/pages/konfiguracja/DialogWgrywania.tsx` (port `Cd()`) — jeden dialog obsługuje
+oba wejścia. `detekcja.ts` i `wgrywanie.ts` nie wymagały zmian; `wymusDostawce` już ustawiało
+dokładnie to, co `:18868`.
+
+**Świadome odstępstwa (zatwierdzone przez użytkownika w Q&A karty):** wynik importu z podglądem
+5 pozycji renderuje się w sekcji „Ostatni import" POD kaflami, a nie w dialogu — oryginał pokazuje
+podgląd PRZED wysłaniem z parsowania w przeglądarce, którego odbudowa nie robi (3f-1), więc podgląd
+powstaje dopiero z odpowiedzi backendu; sam dialog zachowuje się 1:1 (po sukcesie zamyka się
+i czyści listę). Teksty o formatach mówią „CSV i XLSX … do 50 MB" zamiast oryginalnego
+„CSV … do 10 MB", bo odbudowa realnie przyjmuje XLSX i 50 MB.
+
+⚠ **Luka w siatce bezpieczeństwa, wykryta przy tej karcie, NIE naprawiona:**
+`POST /api/dostawcy/{kod}/upload` **nie ma fixture** — `contract/openapi.yaml:19314-19328` deklaruje
+`200` bez schematu, a w `contract/fixtures/` nie ma żadnego pliku uploadu (multipartu nie dało się
+nagrać `tools/record-write-fixtures.cjs`). Kształt odpowiedzi — od którego zależy cały toast — jest
+wiążąco znany tylko z kodu (oryginał `backend-index.cjs:48277-48281` ≡ port `suppliers.ts:213-221`).
+14a nie mogła tego ruszyć (`contract/` jest wspólne dla BE i FE, nauka z 13c). **Do osobnej karty.**
 
 **14b — Staging** [FE] — ✅ zrobione 2026-09-18 (`51-FEATURE-staging-filtr-pasek-kolumny`).
 Cztery pozycje pierwotnego zakresu dowiezione:
@@ -2249,6 +2305,11 @@ z 3e, opisane Ani w **§3.3, linia 95** instrukcji (sprostowanie referencji: dok
 - **Do sprawdzenia, nie do automatycznej zmiany:** etykieta przycisku synchronizacji — deminifikat
   ma „Synchronizuj" (`:25754`), odbudowa „Synchronizuj teraz", instrukcja §6 mówi Ani „Synchronizuj
   teraz". Zweryfikować na ŻYWYM bundlu przed ruszeniem.
+- ⚠ **NIE reużywaj `DialogWgrywania.tsx` z 14a.** Od 2026-09-18 w `pages/konfiguracja/` stoi
+  gotowy dialog uploadu, ale oryginał ma na karcie dostawcy WŁASNY, samodzielny upload
+  (`:25756-25802`: ukryty `<input>`, `FormData`, toast „Plik wczytany") — nie ten dialog. Sięgnięcie
+  po plik 14a złamałoby też rozłączność kart. Wzorzec toasta jest już ustawiony:
+  `useToast()` z `@/components/ui/toast`, wywołanie `toast({ title, description, variant })`.
 
 **14d — aktualizacja instrukcji testów + domknięcie backlogu** [DOCS] — **idzie PO 14a/14b/14c**,
 bo dokument ma opisywać STAN, nie zamiar. Dwie części:
@@ -2257,25 +2318,127 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   `bug2`); rozdz. 13 „Czego jeszcze NIE MA" jest nieaktualny poza „ceną na zapytanie" (historia,
   alerty, atrybuty, analityka, narzuty i promocje są dowiezione). Backlog #9/#10 do rozliczenia.
 - *Musi czekać na 14a–14c:* opis nowego kształtu trzech ekranów + wiersz iteracji w tablicy §4.
+- ⚠ **Co konkretnie zmieniło 14a w instrukcji** (zrobione 2026-09-18): rozdz. §2 opisuje STARY,
+  inline'owy przepływ („wybierz pliki na zakładce → Wgraj (N)") i jest do przepisania w całości.
+  Nowy przepływ: „Wgraj pliki" otwiera modal → wybór plików → „Importuj do staging" → toast
+  z podsumowaniem → wynik z podglądem pod kaflami. Doszła druga ścieżka, której instrukcja
+  w ogóle nie zna: kafel dostawcy → „Wgraj plik" (wymuszony dostawca, bez auto-detekcji).
+  Zniknęły `data-testid`, na które instrukcja mogła się powoływać: `button-wyslij`,
+  `bledy-wczytania`, `blad-uploadu`; `input-pliki` i `powod-detekcji` żyją teraz TYLKO w modalu.
 - *Z 14b (ustalone 2026-09-18, `51-FEATURE-staging-filtr-pasek-kolumny`), musi rozliczyć 14d:*
   **(1)** §3.2 każe Ani „wrócić na *Wszystkie*" po sprawdzeniu filtra „Błędy importu" — przy nowym
   domyślnym filtrze `nowa` ten krok wraca teraz do INNEGO stanu niż startowy, trzeba przepisać;
   **(2)** §3.1/§6 mówią o „liście pozycji z kompletem kolumn" — po 14b kolumny „Stan", „Cena
   zakupu" i „Cena sprzedaży" są domyślnie ukryte, trzeba opisać przycisk „Kolumny".
 
+---
+
+#### Druga fala I14 — uwagi Ani z testów Iteracji 4 (karty 14e–14i)
+
+- **Skąd.** Ania wypełniła `docs/instrukcja-testow-I4.md` (silnik cen: narzuty i promocje).
+  **Osiem z jedenastu scenariuszy wyszło „działa prawidłowo"**, w tym oba oznaczone gwiazdką
+  (symulator zgadza się z katalogiem, reguła szczegółowa bije globalną, reguła nadpisuje cenę
+  wpisaną ręcznie w stagingu). Zostały dwie decyzje, jedno zgłoszenie i jedna prośba o funkcję.
+- **Decyzje Ani z 2026-09-18** (odpowiedzi na pytania wysłane po testach) — zapisane też
+  w `docs/rebuild-backlog.md` przy wpisach #11/#19/#22/#25:
+  - **Usuwanie reguły MA pytać o potwierdzenie** (§3.6). Jej pierwotny wpis precyzuje: razem
+    z informacją, ilu produktów dotyczy zmiana. Liczbę da się policzyć po stronie klienta —
+    ten sam materiał, z którego liczy się ostrzeżenie „poniżej kosztu". To ŚWIADOME ODSTĘPSTWO:
+    oryginał kasuje bez pytania.
+  - **Przełącznika statusu przy promocjach NIE dokładamy** (§3.9, pytanie o wyłączanie ręczne):
+    „zostawiamy tak jak obecnie działa, promocje po prostu się usuwa".
+  - **Globalnej promocji NIE naprawiamy i nie blokujemy** (backlog #25): „nie, zostawiamy tak
+    jak jest, nie dodajemy nowych reguł". Pułapka zostaje odtworzona 1:1, bez blokady w UI.
+  - **Komunikat „Reguła dodana" po edycji — bez zmian** (§3.11): „dodana czy zaktualizowana to
+    nie ma różnicy, zostaw to tak jak jest". Wątek zamknięty bez kodu.
+  - **EAN w notacji naukowej ma trafiać do katalogu jako PUSTE pole** (backlog #11). To
+    rozstrzyga wpis, który od 26.08 czekał na jej decyzję, i jest ŚWIADOMYM ODSTĘPSTWEM —
+    produkcja zapisuje wartość i wypisuje komunikat „zapis naukowy ma tylko null cyfr znaczących".
+  - **Kolumna „Promocja" w katalogu jest POTRZEBNA** (backlog #22): „mają się wyświetlać
+    aktualne promocje dla danych produktów".
+- ⚠ **Sprostowanie do #22, zmierzone 2026-09-18.** Ania pamięta, że kolumna „działała w starym
+  Bridge" i przypuszcza, że nadpisał ją któryś backup. **Kod tego nie potwierdza w żadnej
+  wersji, którą mamy:** pole `_reguly.promocja` ma DOKŁADNIE JEDNO wystąpienie w żywym bundlu
+  produkcji (`mirror/frontend/assets/index-PRICEFMT1783512500.js`) — miejsce ODCZYTU — i ani
+  jednego w żywym backendzie (`mirror/backend/index.cjs`; dwa trafienia `grep -o "_reguly"` to
+  substring kolumny `dodatkowe_reguly` ze `spedycja_limity`, nie to pole). `git log -S'_reguly:'
+  --all` nie zwraca ANI JEDNEGO commita od baseline'u 13.08 po 18.09. Wniosek: karta 14h to
+  **nowa funkcja i świadome odstępstwo**, a nie przywrócenie czegoś, co się zepsuło — i tak
+  trzeba ją wycenić i opisać Ani, żeby nie liczyła na „powrót do stanu sprzed backupu".
+- ⚠ **NIEROZSTRZYGNIĘTE — blokuje 14f i część 14e (backlog #19).** W instrukcji Ania napisała
+  „data końcowa powinna automatycznie wyłączać promocję (…) system powinien przeliczyć ceny bez
+  tej promocji", a w odpowiedzi z 18.09: „to nie było opisane jako błąd (…) ma zostać tak jak
+  jest, reguła znika po końcu obowiązywania". Te zdania są rozbieżne, a jej opis zachowania
+  **nie zgadza się z kodem**: `TabelaPromocji.tsx` NICZEGO nie filtruje po datach (wiersz
+  zostaje z odznaką „zakończona" i naszym pomarańczowym znacznikiem), a silnik cen dat nie czyta
+  w ogóle, więc **wygasła promocja dalej obniża ceny**. Pytanie kontrolne wysłane 2026-09-18;
+  do czasu odpowiedzi **nie ruszamy silnika cen**. Jej odpowiedzi na sąsiednie pytania (brak
+  przełącznika statusu, „promocje po prostu się usuwa") sugerują wariant NAJTAŃSZY — zostawiamy
+  1:1 — ale to domysł, nie decyzja.
+
+**Karty drugiej fali.** Klaster `/narzuty` jest mały i gęsty, więc rozłączność wymusza inny
+podział niż w pierwszej fali; poniżej własność plików, która gwarantuje pracę równoległą.
+
+| Karta | Zakres | Pliki (wyłączna własność) | Testy |
+|---|---|---|---|
+| **14e** | Diagnoza: czy promocja z warunkiem obniża ceny (pomiar na odbudowie I oryginale) + wycena kosztu #19 | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
+| **14f** | Potwierdzenie przy usuwaniu reguły + liczba dotkniętych produktów | `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx` | `test/narzuty.test.tsx` |
+| **14h** | Kolumna „Promocja" w katalogu — NOWA funkcja (BE wypełnia `_reguly.promocja`) | BE: trasa `/api/products` · FE: `katalog/formatowanie.tsx` | `test/katalog.formatowanie.test.tsx` |
+| **14i** | EAN w notacji naukowej → puste pole w katalogu | BE: silnik importu (normalizacja EAN) | bramki charakteryzacji |
+
+- **14g SKASOWANA** — obie jej pozycje (globalna promocja, komunikat po edycji) Ania zamknęła
+  decyzją „zostaw jak jest". Litery nie przenumerowujemy, żeby nie rozjechać się z promptami,
+  które już poszły do sesji.
+- **Równoległość:** 14e ∥ 14f ∥ 14h ∥ 14i — zero wspólnych plików; wszystkie cztery są też
+  rozłączne z 14a/14b/14c z pierwszej fali. ⚠ **Jedyna realna kolizja: `contract/openapi.yaml`
+  i fixtures** — ruszają je 14h (nowe pole w odpowiedzi `/api/products`) i 14i (zmiana wartości
+  EAN w fixtures importu). Ustal, która wchodzi do kontraktu pierwsza, albo puść je sekwencyjnie.
+- ⚠ **14i rusza silnik importu**, więc dotyka charakteryzacji — wzorce trzeba przenagrać, a nie
+  „poprawić ręcznie". Wejście: `docs/rebuild-backlog.md` #11 (opis mechanizmu `ZT()`/`Lq()`).
+- **14f zależy** od rozstrzygnięcia #19 tylko w jednym punkcie: jeśli daty MIAŁYBY wyłączać
+  promocje, `TabelaPromocji.tsx` zmienia się w tej samej karcie. Dlatego 14f startuje po
+  odpowiedzi Ani, nie przed.
+
 **Poza zakresem I14, wymaga osobnych decyzji i kart:**
 - **Status dostawcy w dwóch polach** (ustawienie ręczne + osobny wyliczony status techniczny) —
   propozycja Ani z §12 pkt 10, backlog **#18**. Rusza BE + schemat + kontrakt, więc GATE i bramki
   obu stron; dziś odbudowa odtwarza 1:1 zachowanie oryginału (wyliczony nadpisuje zapisany).
   **To prośba o świadome odstępstwo, nie usterka** — czeka na decyzję użytkownika.
-- **EAN w notacji naukowej**, backlog **#11** (komunikat „zapis naukowy ma tylko null cyfr
-  znaczących"). Ania napisała: „EAN zapisany w notacji naukowej jest bezpiecznie pomijany jako NULL".
-  Zdanie jest dwuznaczne — albo akceptuje stan i zostaje poprawienie treści komunikatu, albo zgłasza
-  zmianę zachowania. **Wpis #11 czeka na jej decyzję; bez doprecyzowania nie zakładać karty.**
-- **Nowe priorytety Ani z §13 — do triażu, BRAK wpisów w backlogu:** kolizje `kod_importu`;
-  aktualizacja CECH istniejących produktów w Selly (wiąże się z odłożonym 13d — u Ani `PUT features`
-  usunięty po HTTP 400); rozróżnienie „nowy produkt" od „nowy magazyn dla istniejącego EAN";
-  uporządkowanie danych MO9.
+- ~~**EAN w notacji naukowej** (backlog #11)~~ — **ROZSTRZYGNIĘTE 2026-09-18**: Ania chce puste
+  pole w katalogu. Karta **14i**, opis w sekcji drugiej fali wyżej.
+- **Nowe priorytety Ani z §13 — częściowo już ruszone przez samą Anię** (stan po triażu 2026-09-18,
+  `52-CHORE-triaz-produkcja-i14`):
+  - kolizje `kod_importu` — **bez zmian, nadal brak wpisu w backlogu**;
+  - rozróżnienie „nowy produkt" od „nowy magazyn dla istniejącego EAN" — **bez zmian, brak wpisu**;
+  - aktualizacja CECH istniejących produktów w Selly — ⚠ **przesłanka NIEAKTUALNA**: `PUT features`
+    nie jest już „usunięty po HTTP 400", Ania przywróciła go 17.09 po teście produkcyjnym. Temat
+    ma wpis **#81** i należy do przepisywanego **13d** — szczegóły w bloku 13d wyżej;
+  - uporządkowanie danych MO9 — **ruszone przez Anię 17.09**, ma dwa wpisy: **#78** (odrzucanie po ID
+    kategorii Magento 163 — quady/kosiarki) i **#79** (koniec reguły „inne → Rolnicze", klasyfikacja
+    po rodzinach bieżników BKT). Oba ⬜ do decyzji.
+- **⭐ ŚWIEŻA PARTIA DELT PRODUKCJI (triaż 2026-09-18) — backlog #72–#83, JUŻ ROZSTRZYGNIĘTA.**
+  Decyzja użytkownika z 2026-09-18: **10 × ✅ TAK**, **1 × ❌ NIE** (#72 — odbudowa ma lepsze
+  rozwiązanie), **1 × 🕒 PÓŹNIEJ** (#81 → do 13d). ⏸ Dwa zatwierdzone wpisy (**#82**, **#83**) mają
+  **wstrzymaną implementację do odpowiedzi Ani** — ich commity przyszły bez wpisu w CHANGELOG,
+  a Ania nadal nad tym pracuje, więc uzasadnienie ma dojechać kolejnym `sync(vps)`.
+  **Przed ruszeniem `tyre_params.cjs`/`application_rules.cjs` odpal `/triaz-zmian`.**
+  Okno `94bdf11..9d1b09f`, 24 commity producenta. **To NIE jest zakres I14** (I14 jest FE-only i nic
+  z tego nie dotyka `rebuild/frontend/`), ale **nie może umknąć**, bo część trafia w kod, który
+  odbudowa ma już 1:1 i który od 18.09 rozjeżdża się z produkcją:
+  - **rdzeń importu (I3/13a):** #75, #79, #80, #82 (nowy moduł `application_rules.cjs` — cztery
+    kolejne warstwy, nanosić jako JEDEN stan końcowy) oraz **#83** (`products.szerokosc` — odwrócenie
+    decyzji Anny z 19.08 „zachowaj zera końcowe"; `rebuild/.../tyre_params.cjs:336-366` ma dziś
+    dokładnie ten blok, który Ania usunęła). Dodatkowo #78/#79 w parserze MO9;
+  - **eksport CSV (I8):** #73 (60. kolumna `Blokowane-formy-platnosci`), #76 (nazwy kategorii sklepu
+    + `ł`→`l`), #77 (`wstrzymany` ze stanem 0) — trzy wpisy na tym samym pliku
+    `rebuild/backend/src/selly/generator-csv.ts`, **do jednego ticketu**, bo ruszają fixture CSV
+    i asercję `stdout` w `test/selly.generator-csv.test.ts:155`;
+  - **Selly REST (13d):** #74, #77 (część delta), #81 — opisane w bloku 13d wyżej;
+  - **zamknięte tym triażem:** #71 (Ania naprawiła `konstrukcja` w żywym bundlu — patrz #72),
+    #65 zawężone do 3 wpisów `field_name='konstrukcja'`.
+  - **Dwa wpisy bez uzasadnienia biznesowego** (commity bez wpisu w CHANGELOG Ani): #82 i #83.
+    Pytania do Ani wysłane 2026-09-18; **implementacja wstrzymana do odpowiedzi** (obie zmiany są
+    zatwierdzone co do kierunku, brakuje tylko „dlaczego”).
 - **Zadania środowiskowe przed cutoverem:** Ania nie mogła przetestować §7 (scheduler — brak restartu
   backendu) ani §14 „trzy drogi importu / konfiguracja", bo **dostawcy nie są podpięci produkcyjnie
   na stagingu** („nie da się wstrzymać synchro"). ⚠ Osobno: **test rozstrzygający §8.1 (ta sama
@@ -2283,7 +2446,10 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   dla MO1 i to „na oko, bez liczb"; MO9 się nie da (API, brak pliku). To najcenniejszy test całej
   instrukcji i wymaga osobnego podejścia z konkretnymi plikami.
 
-**Kolejność:** **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej kolejności) → **14d**.
+**Kolejność:** FALA 1 — **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej
+kolejności) → **14d** (docs, na końcu). FALA 2 — **14e ∥ 14f ∥ 14h ∥ 14i**, rozłączne z falą 1,
+więc mogą iść razem z nią; 14f czeka na rozstrzygnięcie #19, a 14h i 14i uzgadniają między sobą
+kolejność wejścia do `contract/`. **14g skasowana** (decyzje Ani z 18.09).
 Każda z trzech kart dopisuje TYLKO swój podblok wyżej i NIE rusza tablicy postępu §4 — wiersz iteracji
 zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-18.
 
