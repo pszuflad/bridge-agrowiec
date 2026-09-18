@@ -320,3 +320,32 @@ Oba pliki linkują do siebie nawzajem.
 w instrukcji. Dodatkowo potwierdzone dla S3.4: `formatujCzestotliwosc(90)` = `Math.round(90/60)`
 = **„2 godz."**, a 90 minut nie jest presetem, więc po ponownym wejściu w edycję select stoi
 na „Inna wartość (minuty)…" z wypełnionym polem (`dostawcy.ts:36-40`, `Dostawcy.tsx:141`).
+
+## Czwarta runda — scalenie do JEDNEGO pliku i zmiana nazwy (2026-09-18)
+
+Dwie korekty kierunku od użytkownika, obie unieważniające poprzednią rundę:
+
+**1. Jeden plik zamiast dwóch.** Podział na `instrukcja-testow-I14.md` (dlaczego) +
+`scenariusze-testow-I14.md` (co kliknąć) **odrzucony**: *„Nie chcę mieć dwóch dokumentów.
+Chcę mieć jeden plik"*. Oba scalone; `scenariusze-testow-I14.md` **usunięty z repo**.
+Scalenie nie polegało na sklejeniu — każda pozycja ma teraz **pięć części w jednym miejscu**:
+„Zgłosiłaś" → **„Jak to naprawiliśmy"** (wyjaśnienie, czego wcześniej nie było w scenariuszach)
+→ „Sprawdź" (kroki) → „Ma się stać" → **„Twoja ocena"** (☐ OK ☐ ŹLE + uwagi). Osiemnaście
+pozycji, zebranych w tabeli podsumowania w §7.
+
+**2. Nazwa `I3-v2`, nie `I14`.** Plik nazywa się `docs/instrukcja-testow-I3-v2.md`, tytuł:
+„Iteracja 3 — wersja 2: poprawki po Twoich uwagach". Uzasadnienie użytkownika jest z punktu
+widzenia odbiorczyni: **dla Ani to druga wersja dokumentu, który wypełniała**, a nie nowa
+iteracja — numer iteracji jest naszą kategorią wewnętrzną, nie jej.
+
+⚠ **Konsekwencja dla nazewnictwa w projekcie:** to ZERWANIE z konwencją `instrukcja-testow-I<n>`
+powiązaną z numerem iteracji. Wcześniejsze instrukcje (I3, I4, I6–I10, I13) nazwę biorą
+od iteracji; ta bierze ją od **dokumentu, który poprawia**. Odnotowane w roadmapie, żeby kolejna
+karta nie „naprawiła" tego z powrotem na `I14`.
+
+**Zaktualizowane odwołania:** banner w `instrukcja-testow-I3.md` (trzy miejsca) oraz cztery
+miejsca w `docs/rebuild-roadmap.md`. Sprawdzone `grep`em, że nigdzie nie został link
+do nieistniejących już `instrukcja-testow-I14.md` i `scenariusze-testow-I14.md`.
+
+**Wierność wobec kodu bez zmian** — treść merytoryczna, zweryfikowane stringi i liczby
+przeniesione bez modyfikacji; zmienił się układ, zakres i nazwa pliku, nie fakty.
