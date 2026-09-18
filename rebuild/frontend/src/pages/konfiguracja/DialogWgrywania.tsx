@@ -19,7 +19,7 @@
  * pod kaflami (decyzja 14a/D4). Dialog zachowuje się przy tym 1:1: po sukcesie zamyka się
  * i czyści listę (`i(!1)`, `w()`, `:19154-19155`).
  */
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Upload, X } from "lucide-react";
 import { useRef, useState, type ReactNode } from "react";
 
@@ -41,6 +41,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 import { przeanalizujPlik, wymusDostawce, type AnalizaPliku } from "./detekcja";
 import { wgrajPlik, type WynikUploadu } from "./wgrywanie";
 
@@ -81,11 +82,14 @@ function formatujRozmiar(bajty: number): string {
 
 export function DialogWgrywania({
   trigger,
+  dostawcy,
   dostawcaKod,
   multi = false,
   onZaimportowano,
 }: {
   trigger: ReactNode;
+  /** Lista do selecta — przychodzi propsem, żeby N+1 instancji dialogu nie zakładało N+1 subskrypcji. */
+  dostawcy: Dostawca[];
   /** Wymusza dostawcę na każdym wczytanym pliku — kafel „Wgrywanie pojedyncze" (`:26190`). */
   dostawcaKod?: string;
   /** Wgrywanie zbiorcze z auto-detekcją (`:26157`). */
@@ -94,12 +98,14 @@ export function DialogWgrywania({
 }) {
   const klient = useQueryClient();
   const { toast } = useToast();
-  const { data: dostawcy = [] } = useQuery<Dostawca[]>({ queryKey: ["/api/dostawcy"] });
   const [otwarty, ustawOtwarty] = useState(false);
   const [pliki, ustawPliki] = useState<PozycjaPliku[]>([]);
   const [parsowanie, ustawParsowanie] = useState(false);
   const [wysylanie, ustawWysylanie] = useState(false);
+  const [przeciaganie, ustawPrzeciaganie] = useState(false);
   const wejscie = useRef<HTMLInputElement>(null);
+  /** Licznik zamiast `Date.now()` — dwa pliki o tej samej nazwie i rozmiarze muszą mieć różne id. */
+  const licznikId = useRef(0);
 
   /** `w()` z oryginału (`:18859`) — czyści listę i zdejmuje flagi, bez zamykania dialogu. */
   const wyczysc = () => {
@@ -121,7 +127,7 @@ export function DialogWgrywania({
       try {
         const analiza = await przeanalizujPlik(plik);
         nowe.push({
-          id: `${plik.name}-${plik.size}-${Date.now()}-${nowe.length}`,
+          id: `${plik.name}-${plik.size}-${++licznikId.current}`,
           // Wymuszenie nadpisuje wynik auto-detekcji, dokładnie jak `:18868`
           // (`pewnosc: "wymuszona"`, `powod: "Wymuszone z UI (KOD)"`).
           analiza: dostawcaKod ? wymusDostawce(analiza, dostawcaKod) : analiza,
@@ -149,9 +155,21 @@ export function DialogWgrywania({
     ustawPliki((poprzednie) => poprzednie.filter((p) => p.id !== id));
   };
 
+  /** Te same unieważnienia co `sP()` (`:18838-18842`) — po KAŻDYM udanym pliku, nie na końcu. */
+  const uniewaznijCache = () => {
+    void klient.invalidateQueries({ queryKey: ["/api/staging"] });
+    void klient.invalidateQueries({ queryKey: ["/api/products"] });
+    // `/api/dostawcy` to nazwa tej samej listy, którą oryginał zna jako `/api/suppliers`.
+    void klient.invalidateQueries({ queryKey: ["/api/dostawcy"] });
+    void klient.invalidateQueries({ queryKey: ["/api/suppliers"] });
+  };
+
   /** Pętla importu — `:19130-19160`, odtworzona co do kolejności i warunków. */
   const importuj = async () => {
     ustawWysylanie(true);
+    // Poza `try`, bo przy błędzie (D7) oddajemy rodzicowi to, co zdążyło się udać — inaczej
+    // pod kaflami zostałby wynik POPRZEDNIEGO importu i czytał się jako wynik tej próby.
+    const wyniki: WynikPliku[] = [];
     try {
       let pozycjeWPlikach = 0;
       let pominietePliki = 0;
@@ -166,7 +184,6 @@ export function DialogWgrywania({
         odrzuconeBrakDanych: 0,
         doStagingu: 0,
       };
-      const wyniki: WynikPliku[] = [];
 
       // Sekwencyjnie, jak oryginał: `sP` rzuca przy pierwszym błędzie, więc pętla się urywa
       // i pliki po nim nie idą (decyzja 14a/D7 — zachowanie 1:1).
@@ -186,6 +203,9 @@ export function DialogWgrywania({
         sumy.odrzuconeBrakDanych += wynik.odrzuconeBrakDanych;
         sumy.doStagingu += wynik.doStagingu;
         wyniki.push({ nazwaPliku: pozycja.analiza.nazwaPliku, wynik });
+        // Po każdym pliku, jak `sP()` — pozycje już zapisane mają być widoczne w stagingu
+        // i katalogu nawet wtedy, gdy następny plik wywali import (D7).
+        uniewaznijCache();
       }
 
       // Opis skleja TYLKO niezerowe człony, w tej kolejności, separatorem „ • " (`:19142-19151`).
@@ -208,13 +228,6 @@ export function DialogWgrywania({
         description: czlony.join(" • "),
       });
 
-      // Te same unieważnienia co `sP()` (`:18838-18842`); `/api/dostawcy` to nazwa tej samej
-      // listy w odbudowie, którą oryginał zna jako `/api/suppliers`.
-      void klient.invalidateQueries({ queryKey: ["/api/staging"] });
-      void klient.invalidateQueries({ queryKey: ["/api/products"] });
-      void klient.invalidateQueries({ queryKey: ["/api/dostawcy"] });
-      void klient.invalidateQueries({ queryKey: ["/api/suppliers"] });
-
       onZaimportowano(wyniki);
       ustawOtwarty(false);
       wyczysc();
@@ -225,6 +238,9 @@ export function DialogWgrywania({
         description: e instanceof Error ? e.message : String(e),
         variant: "destructive",
       });
+      // Wyniki plików sprzed błędu (albo pusta lista, jeśli padł pierwszy) — sekcja pod kaflami
+      // ma pokazywać TĘ próbę, nie poprzednią.
+      onZaimportowano(wyniki);
     } finally {
       ustawWysylanie(false);
     }
@@ -248,10 +264,15 @@ export function DialogWgrywania({
               ? "Wgraj wiele plików — auto-detekcja dostawcy"
               : `Wczytaj plik cennika${dostawcaKod ? ` — ${dostawcaKod}` : ""}`}
           </DialogTitle>
+          {/* ⚠ ODSTĘPSTWO ŚWIADOME w obu opisach. Oryginał (`:18959-18960`) mówi „plików CSV"
+              i „Bridge sparsuje CSV, rozpozna dostawcę i pokaże podgląd przed importem do
+              staging.". Słowo „CSV" wypada, bo odbudowa przyjmuje też XLSX (D6), a obietnica
+              podglądu PRZED importem — bo odbudowa nie parsuje w przeglądarce (D2) i podgląd
+              powstaje z odpowiedzi backendu już po imporcie (D4). */}
           <DialogDescription>
             {multi
               ? "Wybierz dowolną liczbę plików. Bridge sam rozpozna dostawcę i sparsuje rozmiary opon."
-              : "Bridge sparsuje plik i zaimportuje pozycje do stagingu."}
+              : "Bridge sparsuje plik, zaimportuje pozycje do stagingu i pokaże podgląd po imporcie."}
           </DialogDescription>
         </DialogHeader>
 
@@ -266,15 +287,32 @@ export function DialogWgrywania({
           data-testid="input-pliki"
           aria-label="Pliki cennika"
           className="sr-only"
-          onChange={(e) => void dodajPliki(e.target.files)}
+          onChange={(e) => {
+            // Kopia PRZED zerowaniem: `input.files` to żywa referencja, którą reset opróżnia.
+            const wybrane = Array.from(e.target.files ?? []);
+            // Reset `value` po odczytaniu: to JEDEN trwały węzeł (oryginał renderuje dwa osobne
+            // inputy, `:18921` i `:18959`), więc bez tego ponowny wybór TEGO SAMEGO pliku —
+            // np. po poprawieniu go na dysku i „Dodaj kolejny plik" — nie dałby zdarzenia.
+            e.target.value = "";
+            void dodajPliki(wybrane);
+          }}
         />
 
         {pliki.length === 0 ? (
           <div
-            className="border border-dashed border-border rounded-md p-8 text-center space-y-2"
-            onDragOver={(e) => e.preventDefault()}
+            className={cn(
+              "border border-dashed rounded-md p-8 text-center space-y-2",
+              // Podświetlenie w trakcie przeciągania — `:18900-18907`.
+              przeciaganie ? "border-primary bg-accent" : "border-border",
+            )}
+            onDragOver={(e) => {
+              e.preventDefault();
+              ustawPrzeciaganie(true);
+            }}
+            onDragLeave={() => ustawPrzeciaganie(false)}
             onDrop={(e) => {
               e.preventDefault();
+              ustawPrzeciaganie(false);
               void dodajPliki(e.dataTransfer.files);
             }}
           >

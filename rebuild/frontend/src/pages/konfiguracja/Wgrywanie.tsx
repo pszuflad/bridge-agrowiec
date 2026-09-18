@@ -49,6 +49,7 @@ export function Wgrywanie() {
           <div className="flex gap-2">
             <DialogWgrywania
               multi
+              dostawcy={dostawcy}
               onZaimportowano={ustawWyniki}
               trigger={
                 <Button data-testid="button-multi-upload">
@@ -87,6 +88,7 @@ export function Wgrywanie() {
                 <div className="text-xs text-muted-foreground font-mono truncate">{d.email}</div>
                 <DialogWgrywania
                   dostawcaKod={d.kod}
+                  dostawcy={dostawcy}
                   onZaimportowano={ustawWyniki}
                   trigger={
                     <Button variant="outline" size="sm" className="flex-1">
@@ -106,8 +108,8 @@ export function Wgrywanie() {
           <CardContent className="pt-6 space-y-3">
             <h2 className="text-sm font-medium">Ostatni import</h2>
             <div className="space-y-3">
-              {wyniki.map((w) => (
-                <WynikPlikuKarta key={w.nazwaPliku} pozycja={w} />
+              {wyniki.map((w, i) => (
+                <WynikPlikuKarta key={`${w.nazwaPliku}-${i}`} pozycja={w} />
               ))}
             </div>
           </CardContent>

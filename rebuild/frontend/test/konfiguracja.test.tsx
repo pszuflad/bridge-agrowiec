@@ -397,6 +397,72 @@ describe("Widok /konfiguracja", () => {
       await waitFor(() => expect(uploady).toHaveLength(1));
       expect(uploady[0]!.url).toContain("/api/dostawcy/MO3/upload");
     });
+
+    /**
+     * „Pominięte pliki" to JEDYNY licznik liczony po stronie klienta i jedyna gałąź `continue`
+     * w pętli (`:19136-19138`, `:19150`) — plik bez rozpoznanego dostawcy nie jest wysyłany,
+     * ale musi być policzony.
+     */
+    it("liczy pliki bez rozpoznanego dostawcy jako „Pominięte pliki”", async () => {
+      await otworzDialogZbiorczy();
+      await userEvent.upload(screen.getByTestId("input-pliki"), [
+        plikMO1(),
+        new File(["alfa;beta;gamma\n"], "cokolwiek.csv", { type: "text/csv" }),
+      ]);
+      await waitFor(() => expect(screen.getByTestId("pozycja-cokolwiek.csv")).toBeInTheDocument());
+
+      await userEvent.click(screen.getByTestId("button-importuj"));
+
+      const toast = await screen.findByTestId("toast-default");
+      expect(toast).toHaveTextContent("Pominięte pliki: 1");
+      // Pominięty plik NIE jest wysyłany — leci tylko rozpoznany.
+      expect(uploady).toHaveLength(1);
+      expect(uploady[0]!.url).toContain("/api/dostawcy/MO1/upload");
+    });
+  });
+
+  /**
+   * Import częściowo udany: pierwszy plik przechodzi, drugi wywala pętlę (D7). Sprawdzamy to,
+   * czego nie widać w scenariuszu jednoplikowym — że wynik udanego pliku NIE ginie i że
+   * sekcja pod kaflami pokazuje TĘ próbę, a nie poprzednią.
+   */
+  describe("import częściowo udany", () => {
+    beforeEach(() => {
+      let wywolanie = 0;
+      zamockujApi(() => {
+        wywolanie += 1;
+        return wywolanie === 1
+          ? HttpResponse.json(ODPOWIEDZ_OK)
+          : HttpResponse.json({ error: "Parser padł na wierszu 7" }, { status: 500 });
+      });
+    });
+
+    it("pokazuje wynik udanego pliku i zostawia dialog otwarty na błędzie", async () => {
+      await otworzDialogZbiorczy();
+      await userEvent.upload(screen.getByTestId("input-pliki"), [
+        plikMO1("bohnenkamp_2026.csv"),
+        plikMO1("bohnenkamp_2027.csv"),
+      ]);
+      await waitFor(() =>
+        expect(screen.getByTestId("pozycja-bohnenkamp_2027.csv")).toBeInTheDocument(),
+      );
+
+      await userEvent.click(screen.getByTestId("button-importuj"));
+
+      const toast = await screen.findByTestId("toast-destructive");
+      expect(toast).toHaveTextContent("Błąd importu");
+      expect(toast).toHaveTextContent("Parser padł na wierszu 7");
+
+      // Oba pliki poszły — błąd był na drugim, nie na pierwszym.
+      await waitFor(() => expect(uploady).toHaveLength(2));
+      // Wynik pierwszego pliku NIE ginie.
+      const wynik = await screen.findByTestId("wynik-uploadu");
+      expect(wynik).toHaveTextContent("bohnenkamp_2026.csv");
+      expect(wynik).toHaveTextContent("Wczytano 120 pozycji");
+      // Dialog zostaje otwarty z niewyczyszczoną listą (D7).
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(screen.getByTestId("pozycja-bohnenkamp_2026.csv")).toBeInTheDocument();
+    });
   });
 
   describe("toast przy imporcie bez pozycji do akceptacji", () => {
@@ -459,6 +525,23 @@ describe("Widok /konfiguracja", () => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
       expect(screen.getByTestId("pozycja-bohnenkamp_2026.csv")).toBeInTheDocument();
       expect(screen.queryByTestId("wynik-uploadu")).not.toBeInTheDocument();
+    });
+
+    it("urywa pętlę na pierwszym błędzie — kolejne pliki nie są wysyłane", async () => {
+      await otworzDialogZbiorczy();
+      await userEvent.upload(screen.getByTestId("input-pliki"), [
+        plikMO1("bohnenkamp_2026.csv"),
+        plikMO1("bohnenkamp_2027.csv"),
+      ]);
+      await waitFor(() =>
+        expect(screen.getByTestId("pozycja-bohnenkamp_2027.csv")).toBeInTheDocument(),
+      );
+
+      await userEvent.click(screen.getByTestId("button-importuj"));
+      await screen.findByTestId("toast-destructive");
+
+      // 1:1 z oryginałem (`:19140`): `sP` rzuca, więc drugi plik w ogóle nie leci.
+      expect(uploady).toHaveLength(1);
     });
   });
 });
