@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 (warstwa UI importu i stagingu) | 14a FE · 14b FE · 14c FE · 14d DOCS | 3 | ⬜ | Źródło: wypełniona `docs/instrukcja-testow-I3.md` (uwagi Ani + zrzuty ekranu). Oś podziału = PLIK, nie temat — 14a/14b/14c mają rozłączne zestawy plików i idą RÓWNOLEGLE; 14d (docs) na końcu. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | ⬜ | Źródło: wypełniona `docs/instrukcja-testow-I3.md` (uwagi Ani + zrzuty ekranu). Oś podziału = PLIK, nie temat — 14a/14b/14c mają rozłączne zestawy plików i idą RÓWNOLEGLE; 14d (docs) na końcu. Czytaj blok I14. |
 
 ---
 
@@ -2282,15 +2282,81 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   Zniknęły `data-testid`, na które instrukcja mogła się powoływać: `button-wyslij`,
   `bledy-wczytania`, `blad-uploadu`; `input-pliki` i `powod-detekcji` żyją teraz TYLKO w modalu.
 
+---
+
+#### Druga fala I14 — uwagi Ani z testów Iteracji 4 (karty 14e–14i)
+
+- **Skąd.** Ania wypełniła `docs/instrukcja-testow-I4.md` (silnik cen: narzuty i promocje).
+  **Osiem z jedenastu scenariuszy wyszło „działa prawidłowo"**, w tym oba oznaczone gwiazdką
+  (symulator zgadza się z katalogiem, reguła szczegółowa bije globalną, reguła nadpisuje cenę
+  wpisaną ręcznie w stagingu). Zostały dwie decyzje, jedno zgłoszenie i jedna prośba o funkcję.
+- **Decyzje Ani z 2026-09-18** (odpowiedzi na pytania wysłane po testach) — zapisane też
+  w `docs/rebuild-backlog.md` przy wpisach #11/#19/#22/#25:
+  - **Usuwanie reguły MA pytać o potwierdzenie** (§3.6). Jej pierwotny wpis precyzuje: razem
+    z informacją, ilu produktów dotyczy zmiana. Liczbę da się policzyć po stronie klienta —
+    ten sam materiał, z którego liczy się ostrzeżenie „poniżej kosztu". To ŚWIADOME ODSTĘPSTWO:
+    oryginał kasuje bez pytania.
+  - **Przełącznika statusu przy promocjach NIE dokładamy** (§3.9, pytanie o wyłączanie ręczne):
+    „zostawiamy tak jak obecnie działa, promocje po prostu się usuwa".
+  - **Globalnej promocji NIE naprawiamy i nie blokujemy** (backlog #25): „nie, zostawiamy tak
+    jak jest, nie dodajemy nowych reguł". Pułapka zostaje odtworzona 1:1, bez blokady w UI.
+  - **Komunikat „Reguła dodana" po edycji — bez zmian** (§3.11): „dodana czy zaktualizowana to
+    nie ma różnicy, zostaw to tak jak jest". Wątek zamknięty bez kodu.
+  - **EAN w notacji naukowej ma trafiać do katalogu jako PUSTE pole** (backlog #11). To
+    rozstrzyga wpis, który od 26.08 czekał na jej decyzję, i jest ŚWIADOMYM ODSTĘPSTWEM —
+    produkcja zapisuje wartość i wypisuje komunikat „zapis naukowy ma tylko null cyfr znaczących".
+  - **Kolumna „Promocja" w katalogu jest POTRZEBNA** (backlog #22): „mają się wyświetlać
+    aktualne promocje dla danych produktów".
+- ⚠ **Sprostowanie do #22, zmierzone 2026-09-18.** Ania pamięta, że kolumna „działała w starym
+  Bridge" i przypuszcza, że nadpisał ją któryś backup. **Kod tego nie potwierdza w żadnej
+  wersji, którą mamy:** pole `_reguly.promocja` ma DOKŁADNIE JEDNO wystąpienie w żywym bundlu
+  produkcji (`mirror/frontend/assets/index-PRICEFMT1783512500.js`) — miejsce ODCZYTU — i ani
+  jednego w żywym backendzie (`mirror/backend/index.cjs`; dwa trafienia `grep -o "_reguly"` to
+  substring kolumny `dodatkowe_reguly` ze `spedycja_limity`, nie to pole). `git log -S'_reguly:'
+  --all` nie zwraca ANI JEDNEGO commita od baseline'u 13.08 po 18.09. Wniosek: karta 14h to
+  **nowa funkcja i świadome odstępstwo**, a nie przywrócenie czegoś, co się zepsuło — i tak
+  trzeba ją wycenić i opisać Ani, żeby nie liczyła na „powrót do stanu sprzed backupu".
+- ⚠ **NIEROZSTRZYGNIĘTE — blokuje 14f i część 14e (backlog #19).** W instrukcji Ania napisała
+  „data końcowa powinna automatycznie wyłączać promocję (…) system powinien przeliczyć ceny bez
+  tej promocji", a w odpowiedzi z 18.09: „to nie było opisane jako błąd (…) ma zostać tak jak
+  jest, reguła znika po końcu obowiązywania". Te zdania są rozbieżne, a jej opis zachowania
+  **nie zgadza się z kodem**: `TabelaPromocji.tsx` NICZEGO nie filtruje po datach (wiersz
+  zostaje z odznaką „zakończona" i naszym pomarańczowym znacznikiem), a silnik cen dat nie czyta
+  w ogóle, więc **wygasła promocja dalej obniża ceny**. Pytanie kontrolne wysłane 2026-09-18;
+  do czasu odpowiedzi **nie ruszamy silnika cen**. Jej odpowiedzi na sąsiednie pytania (brak
+  przełącznika statusu, „promocje po prostu się usuwa") sugerują wariant NAJTAŃSZY — zostawiamy
+  1:1 — ale to domysł, nie decyzja.
+
+**Karty drugiej fali.** Klaster `/narzuty` jest mały i gęsty, więc rozłączność wymusza inny
+podział niż w pierwszej fali; poniżej własność plików, która gwarantuje pracę równoległą.
+
+| Karta | Zakres | Pliki (wyłączna własność) | Testy |
+|---|---|---|---|
+| **14e** | Diagnoza: czy promocja z warunkiem obniża ceny (pomiar na odbudowie I oryginale) + wycena kosztu #19 | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
+| **14f** | Potwierdzenie przy usuwaniu reguły + liczba dotkniętych produktów | `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx` | `test/narzuty.test.tsx` |
+| **14h** | Kolumna „Promocja" w katalogu — NOWA funkcja (BE wypełnia `_reguly.promocja`) | BE: trasa `/api/products` · FE: `katalog/formatowanie.tsx` | `test/katalog.formatowanie.test.tsx` |
+| **14i** | EAN w notacji naukowej → puste pole w katalogu | BE: silnik importu (normalizacja EAN) | bramki charakteryzacji |
+
+- **14g SKASOWANA** — obie jej pozycje (globalna promocja, komunikat po edycji) Ania zamknęła
+  decyzją „zostaw jak jest". Litery nie przenumerowujemy, żeby nie rozjechać się z promptami,
+  które już poszły do sesji.
+- **Równoległość:** 14e ∥ 14f ∥ 14h ∥ 14i — zero wspólnych plików; wszystkie cztery są też
+  rozłączne z 14a/14b/14c z pierwszej fali. ⚠ **Jedyna realna kolizja: `contract/openapi.yaml`
+  i fixtures** — ruszają je 14h (nowe pole w odpowiedzi `/api/products`) i 14i (zmiana wartości
+  EAN w fixtures importu). Ustal, która wchodzi do kontraktu pierwsza, albo puść je sekwencyjnie.
+- ⚠ **14i rusza silnik importu**, więc dotyka charakteryzacji — wzorce trzeba przenagrać, a nie
+  „poprawić ręcznie". Wejście: `docs/rebuild-backlog.md` #11 (opis mechanizmu `ZT()`/`Lq()`).
+- **14f zależy** od rozstrzygnięcia #19 tylko w jednym punkcie: jeśli daty MIAŁYBY wyłączać
+  promocje, `TabelaPromocji.tsx` zmienia się w tej samej karcie. Dlatego 14f startuje po
+  odpowiedzi Ani, nie przed.
+
 **Poza zakresem I14, wymaga osobnych decyzji i kart:**
 - **Status dostawcy w dwóch polach** (ustawienie ręczne + osobny wyliczony status techniczny) —
   propozycja Ani z §12 pkt 10, backlog **#18**. Rusza BE + schemat + kontrakt, więc GATE i bramki
   obu stron; dziś odbudowa odtwarza 1:1 zachowanie oryginału (wyliczony nadpisuje zapisany).
   **To prośba o świadome odstępstwo, nie usterka** — czeka na decyzję użytkownika.
-- **EAN w notacji naukowej**, backlog **#11** (komunikat „zapis naukowy ma tylko null cyfr
-  znaczących"). Ania napisała: „EAN zapisany w notacji naukowej jest bezpiecznie pomijany jako NULL".
-  Zdanie jest dwuznaczne — albo akceptuje stan i zostaje poprawienie treści komunikatu, albo zgłasza
-  zmianę zachowania. **Wpis #11 czeka na jej decyzję; bez doprecyzowania nie zakładać karty.**
+- ~~**EAN w notacji naukowej** (backlog #11)~~ — **ROZSTRZYGNIĘTE 2026-09-18**: Ania chce puste
+  pole w katalogu. Karta **14i**, opis w sekcji drugiej fali wyżej.
 - **Nowe priorytety Ani z §13 — częściowo już ruszone przez samą Anię** (stan po triażu 2026-09-18,
   `52-CHORE-triaz-produkcja-i14`):
   - kolizje `kod_importu` — **bez zmian, nadal brak wpisu w backlogu**;
@@ -2331,7 +2397,10 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   dla MO1 i to „na oko, bez liczb"; MO9 się nie da (API, brak pliku). To najcenniejszy test całej
   instrukcji i wymaga osobnego podejścia z konkretnymi plikami.
 
-**Kolejność:** **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej kolejności) → **14d**.
+**Kolejność:** FALA 1 — **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej
+kolejności) → **14d** (docs, na końcu). FALA 2 — **14e ∥ 14f ∥ 14h ∥ 14i**, rozłączne z falą 1,
+więc mogą iść razem z nią; 14f czeka na rozstrzygnięcie #19, a 14h i 14i uzgadniają między sobą
+kolejność wejścia do `contract/`. **14g skasowana** (decyzje Ani z 18.09).
 Każda z trzech kart dopisuje TYLKO swój podblok wyżej i NIE rusza tablicy postępu §4 — wiersz iteracji
 zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-18.
 
