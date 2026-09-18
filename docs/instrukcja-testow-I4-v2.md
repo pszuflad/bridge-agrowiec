@@ -124,8 +124,8 @@ pokazać czegoś innego, niż naprawdę zadziałało.
 >   to pole, ale nikt go nigdy nie **zapisywał**;
 > - **kopia sprzed czterech Twoich łatek** (13 sierpnia) — identycznie, żadna łatka tego nie
 >   dodała ani nie usunęła;
-> - **cały backend produkcji wraz ze wszystkimi kilkunastu łatkami** — **zero** miejsc, w których
->   to pole jest wypełniane;
+> - **cała część Bridge'a działająca na serwerze**, razem z kilkunastoma późniejszymi
+>   poprawkami — **zero** miejsc, w których to pole jest wypełniane;
 > - **pełna historia zmian w repozytorium** — jedyny ślad tego pola to nasz własny wpis
 >   dokumentacyjny.
 >
@@ -317,8 +317,8 @@ się nie pokaże. **Usunęliśmy go.**
 Razem z nim **zmieniła się nota w okienku dodawania i edycji promocji.** Stara mówiła, że upływ
 daty sam promocji nie wyłącza — czyli **dokładnie odwrotnie niż jest teraz**. Nowa brzmi tak:
 
-> *„Daty rządzą promocją: przed datą początku jest «zaplanowana» i nie obniża cen, po dacie
-> końca sama się wyłącza. Zmiana bywa widoczna z kilkuminutowym opóźnieniem."*
+> *Daty rządzą promocją: przed datą początku jest „zaplanowana" i nie obniża cen, po dacie
+> końca sama się wyłącza. Zmiana bywa widoczna z kilkuminutowym opóźnieniem.*
 
 **Sprawdź:**
 1. Powtórz krok 3 z punktu 3.1 (przestaw promocję na daty z 2020) i popatrz **pod odznakę
@@ -360,8 +360,8 @@ pytania (tak opisywał to §3.6 pierwszej wersji). **Tutaj odbudowa robi celowo 
 produkcja.**
 
 **Co dokładnie zobaczysz.** Okienko narzutu: tytuł **„Usunąć regułę narzutu?"** i treść
-*„Reguła «nazwa» zostanie usunięta, a ceny całego katalogu przeliczone od nowa. Tej operacji
-nie można cofnąć."*, przycisk **„Usuń regułę"**. Okienko promocji jest bliźniacze: **„Usunąć
+*„Reguła „nazwa opony" zostanie usunięta, a ceny całego katalogu przeliczone od nowa. Tej
+operacji nie można cofnąć."* — w miejsce „nazwa opony" wchodzi nazwa Twojej reguły, przycisk **„Usuń regułę"**. Okienko promocji jest bliźniacze: **„Usunąć
 promocję?"** i przycisk **„Usuń promocję"**.
 
 Pod tym jest **zdanie o liczbie produktów**, w jednym z trzech brzmień:
@@ -374,8 +374,8 @@ Pod tym jest **zdanie o liczbie produktów**, w jednym z trzech brzmień:
 
 **Sprawdź** — dalej na promocji *Wyprzedaż BKT*; zobaczysz przy okazji **dwa z trzech** brzmień
 z tabelki wyżej:
-1. Zakładka **Promocje** — jeśli po punkcie 3.4 promocja ma **daty z 2020**, kliknij od razu
-   **kosz** i przeczytaj zdanie o liczbie produktów. Kliknij **Anuluj**.
+1. Zakładka **Promocje** — po punkcie 3.4 promocja ma **daty z 2020**, czyli jest *zakończona*.
+   Kliknij od razu **kosz** i przeczytaj zdanie o liczbie produktów. Kliknij **Anuluj**.
 2. Wejdź w **edycję** promocji i przywróć daty na **domyślne** (start dziś, koniec za 30 dni),
    żeby znów była **aktywna**. **Zapisz.**
 3. Kliknij **kosz** jeszcze raz. Przeczytaj tytuł, treść i zdanie o liczbie produktów.

@@ -68,3 +68,143 @@ Nie dotyczy — karta nie dodaje ani nie zmienia żadnych testów automatycznych
 ## Overall assessment
 
 Warstwa redakcyjna i zgodność ze wzorcem `I3-v2` są bardzo solidne: liczby, cytaty (poza jednym) i większość brzmień UI zweryfikowano w kodzie, a nie w raportach, dokładnie tak, jak wymagała karta — to widać w jakości pracy. Niestety dokument ma dwa realne błędy merytoryczne, które podważają jego główny cel: §5.2 mówi Ani coś odwrotnego niż pokazuje kod i własny cytowany raport, a scenariusze 3.1/3.2 (obie ⭐, rekomendowane jako „zrób to jeśli masz mało czasu") mogą dać wynik niezgodny z opisanym „Ma się stać" z powodu nieusuwanej promocji testowej z 2.1. Oba są do naprawienia bez przepisywania całości — pierwszy to zmiana kilku zdań w §5.2, drugi to dopisanie jednego kroku porządkującego przed/między scenariuszami.
+
+---
+
+# Przegląd nr 2
+
+> Reviewed: 2026-09-19
+> Branch: docs/65-instrukcja-testow-i4-v2
+> Diff od przeglądu nr 1: commit `1e45f7a` (84 zmienione linie w `docs/instrukcja-testow-I4-v2.md`, nowe `raport.md` i `review.md`)
+
+## Weryfikacja BLOCKER 1 (§5.2, teraz linie ~435-453)
+
+**Naprawione poprawnie.** Sprawdzone niezależnie w trzech miejscach:
+
+- `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx:270-282` — gałąź `dodawanie = !edycja`
+  daje przy edycji narzutu **„Reguła zaktualizowana"**, przy edycji promocji **„Promocja
+  zaktualizowana"**. Dokument teraz cytuje oba brzmienia poprawnie (linia 445-446 tekst,
+  domyślnie narzut; promocja wspomniana wprost).
+- `rebuild/frontend/test/narzuty.edycja-toast.test.tsx` — policzone `it(` bloki: **11**,
+  dokładnie tyle, ile deklaruje dokument („zmierzyliśmy jedenaście przypadków"). Same testy
+  faktycznie sprawdzają brzmienie toastu (`:204-205`, `:223-224`) i brak drugiej reguły
+  (`:154-190`, `PATCH` bez `POST`) — obie treści z §5.2 mają pokrycie.
+- `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md:160-173` — dosłownie „11 przypadków,
+  wszystkie przechodzą", tabela z wierszami „Toast po edycji narzutu: Reguła zaktualizowana" /
+  „Toast po edycji promocji: Promocja zaktualizowana", i zdanie „nie, edycja nie tworzy drugiej
+  reguły" — zgodne z nowym tekstem dokumentu słowo w słowo pod względem faktów.
+
+Nowa ramka ⚠ („gdybyś zobaczyła «Reguła dodana» — to błąd") jest logicznie poprawna: odwraca
+polaryzację zgodnie z odwróconym stanem faktycznym.
+
+**Grep po śladach starego, fałszywego twierdzenia — czysto:**
+- „Reguła dodana" występuje wyłącznie w kontekście DODAWANIA reguły (§5.2 nowa ramka ⚠ — jako
+  przykład błędu do zgłoszenia — oraz `docs/instrukcja-testow-I4.md:83`, gdzie dotyczy scenariusza
+  3.1 pierwszej wersji, czyli faktycznego dodania reguły, nie edycji). Brak fałszywego twierdzenia
+  „po edycji dalej Reguła dodana".
+- „dalej brzmi" — brak w całym pliku.
+- „§3.11" — trzy wystąpienia w I4-v2.md (wszystkie w kontekście naprawionym) i jedno w bannerze
+  I4.md (`:26`, na liście „Dalej obowiązują" — poprawnie, bo §3.11 rzeczywiście mówi prawdę).
+- Rozdziały 6, 7, 8 (linie 468-591) — bez śladu starej tezy; wiersz „5" w tabeli podsumowania
+  (rozdz. 7) mówi „Trzy Twoje decyzje zapamiętane poprawnie" — to zdanie jest o zapamiętaniu
+  DECYZJI Ani (którą podjęła niezależnie od tego, czy defekt istniał), więc zostaje prawdziwe
+  także po przepisaniu §5.2; nie wymagało zmiany.
+
+## Weryfikacja BLOCKER 2 (rozdział 3 + 4.1, jedna promocja)
+
+Przejście łańcucha 2.1 → 3.1 → 3.2 → 3.4 → 4.1 krok po kroku (stan promocji *Wyprzedaż BKT*
+po każdym punkcie):
+
+| Po punkcie | Daty | Status wynikowy |
+|---|---|---|
+| 2.1 | dziś → +30 dni | aktywna |
+| 3.1 krok 3 | 2020-01-01 → 2020-03-31 | zakończona |
+| 3.2 krok 1 | jutro → za miesiąc | zaplanowana |
+| 3.2 krok 3 | wczoraj → za miesiąc (bez zmian) | aktywna |
+| 3.4 krok 1 (powtórka kroku 3 z 3.1) | 2020-01-01 → 2020-03-31 | zakończona |
+| 4.1 krok 2 | dziś → +30 dni | aktywna |
+
+Każdy krok zastaje promocję w stanie, którego oczekuje poprzedni punkt, i zostawia ją w stanie,
+którego oczekuje następny. Ramka ⚠ na wejściu do rozdziału 3 (linie 158-162) poprawnie tłumaczy
+DLACZEGO nie wolno zakładać drugiej promocji (remis priorytetu 50, brak pola priorytetu w
+formularzu — zgodne z `DialogReguly.tsx:141-152`), bez nadmiernego twierdzenia o determinizmie
+kolejności (poprzednia wersja nie miała tego problytmu akurat tu, ale ramka jest ostrożniej
+sformułowana: „nie masz wpływu na to, która" zamiast zakładać z góry, że zawsze wygra pierwsza).
+
+**Sekwencja 4.1 (dwa brzmienia komunikatu) jest wykonalna i prawdziwa:**
+- krok 1 zastaje promocję *zakończoną* (po 3.4) → komunikat „nie obejmuje żadnego produktu" —
+  zgodne z tabelą brzmień wyżej w tym samym punkcie (linia 372) i z logiką „dziś nie obejmuje".
+- krok 2 „przywróć daty na domyślne (start dziś, koniec za 30 dni)" — **nie jest to nawiązanie
+  do automatycznego resetu formularza** (który rzeczywiście działa tylko przy DODAWANIU nowej
+  reguły, `DialogReguly.tsx:129-133`, `naDate(edytowanaPromocja?.start ?? "") || dzisiaj()`),
+  tylko instrukcja RĘCZNEGO wpisania tych samych wartości w pola dat przy edycji — pola dat to
+  zwykłe `<input type="date">`, więc dowolna wartość jest wpisywalna niezależnie od tego, co
+  pokazuje się przy otwarciu dialogu. Wykonalne.
+- krok 3 zastaje promocję aktywną → komunikat z liczbą 954, zgodnie z pomiarem z 2.1 (niezmienionym
+  tą naprawą, już zweryfikowanym w przeglądzie nr 1).
+
+**Wniosek: oba BLOCKERy naprawione poprawnie, bez wprowadzenia nowych błędów w rozumowanym łańcuchu stanów.**
+
+## Sprawdzenie skutków ubocznych naprawy
+
+- Numeracja punktów (2.1, 3.1–3.4, 4.1, 5.1–5.3, 6.1–6.3, 7, 8) — spójna, bez dziur i duplikatów.
+- Tabela w rozdziale 7 — 11 wierszy, zgadza się z „Sprawdzonych ____ / 11" pod tabelą i z liczbą
+  punktów w dokumencie. Wiersz „5" nadal opisuje prawdę (patrz wyżej).
+- Lista fałszywych alarmów (rozdział 8) — 6 pozycji, wszystkie zweryfikowane w przeglądzie nr 1
+  i nietknięte przez `1e45f7a`; nowa treść §5.2/rozdziału 3 nie dodała nowego kandydata na tę
+  listę, choć mogłaby (np. „krok 1 w 4.1 pokazuje „0 produktów", to nie błąd" — dokument tłumaczy
+  to w miejscu, nie zbiorczo w rozdziale 8; brak tego w rozdziale 8 to niedopatrzenie, patrz
+  NICE-TO-HAVE niżej, bo scenariusz jest nowy w tej naprawie i akurat pasowałby do wzorca innych
+  sześciu pozycji).
+- Pola „Twoja ocena" / pytania z kratkami — przelot po całym pliku (`grep` powyżej) potwierdza:
+  zero pól bez pytania lub bez ☐.
+- Własność plików — diff `1e45f7a` dotyka wyłącznie `docs/instrukcja-testow-I4-v2.md` i
+  `docs/tickets/65-.../{raport.md,review.md}` — w granicach dozwolonych.
+
+## SHOULD-FIX z przeglądu nr 1 — ocena uzasadnienia „bez zmian"
+
+Reviewer (ja, poprzednio) zgłosił, że cytat Ani w §2.1 nie ma weryfikowalnego pierwotnego źródła
+(żyje tylko w `plan.md`/`raport.md` kart 53/61, nie w zapisie oryginalnej wiadomości), i zasugerował
+oznaczenie go jako parafrazy (D2), tak jak zrobiono to dla cytatu w §4.1.
+
+Autor karty **świadomie nie zmienił** tego, z uzasadnieniem: karty 53/61 zapisują te zdania
+**jako cytaty** ze zwrotem „Ania zgłosiła: «…»" — sprawdzone: `docs/tickets/53-.../plan.md:16-18`
+faktycznie ma „Ania zgłosiła: «Rabaty nie działają…»" w tej samej konwencji, w jakiej backlog
+i roadmapa zapisują cytaty (a)/(b)/(c) z rozdziału 5, których przegląd nr 1 NIE kwestionował.
+Rozróżnienie, które przegląd nr 1 próbował przeprowadzić („to dokument planistyczny pisany przez
+sesję, nie zapis oryginału"), dotyczy w równym stopniu backlogu i roadmapy — a te źródła traktuje
+się w całym dokumencie jako wiarygodne.
+
+**Uzasadnienie się broni.** To defensywny, spójny wybór: albo oznacza się jako parafrazę WSZYSTKIE
+cytaty w dokumencie (co rozmywa siłę adnotacji D2 tam, gdzie jest naprawdę potrzebna — przy §4.1,
+gdzie samo źródło jawnie mówi „doprecyzowuje"), albo nie oznacza się żadnego z tej kategorii.
+Ryzyko zostało uczciwie odnotowane w raporcie („repo nie przechowuje oryginalnych wiadomości Ani,
+tylko ich zapis w kartach") zamiast przemilczane. Nie eskaluję tego z powrotem do SHOULD-FIX.
+
+## NICE-TO-HAVE z przeglądu nr 1 — nadal aktualne
+
+- `docs/instrukcja-testow-I4-v2.md:320` (przesunięte z :310-311) — cudzysłów francuski «zaplanowana»
+  w cytacie noty, kod ma polski cudzysłów „zaplanowana" (`DialogReguly.tsx:559`). Nadal aktualne,
+  nietknięte przez `1e45f7a`.
+- `docs/instrukcja-testow-I4-v2.md:127` (przesunięte z :127, treść ta sama) — „cały backend
+  produkcji" jako pojedynczy techniczny termin w dokumencie dla nietechnicznej odbiorczyni.
+  Nadal aktualne, nietknięte.
+
+## Nowe NICE-TO-HAVE (z tej naprawy)
+
+- [ ] `docs/instrukcja-testow-I4-v2.md:377` (§4.1 krok 1) — słowo „jeśli" („jeśli po punkcie 3.4
+  promocja ma daty z 2020") sugeruje niepewność, choć przy wykonaniu kroków po kolei stan jest
+  deterministyczny (zawsze będzie miała daty z 2020). Nieszkodliwe (działa jako zabezpieczenie
+  na wypadek pominięcia kroku), ale „ponieważ" byłoby precyzyjniejsze.
+- [ ] `docs/tickets/65-DOCS-instrukcja-testow-i4-v2/raport.md:6` — raport podaje „561 linii" dla
+  `docs/instrukcja-testow-I4-v2.md`, ale po naprawie plik ma **592 linie** (`wc -l`). Metryka w
+  Summary nie została odświeżona po dopisaniu naprawy w tym samym commicie, który dodał raport.
+
+## Ocena końcowa (przegląd nr 2)
+
+**0 BLOCKER / 0 SHOULD-FIX (nowych) / 2 NICE-TO-HAVE przeniesione + 2 nowe NICE-TO-HAVE.**
+Oba BLOCKERy z przeglądu nr 1 są naprawione rzetelnie — nie tylko zmieniono treść, ale nowa treść
+jest zweryfikowana w kodzie i testach, a łańcuch scenariuszy 2.1→3.1→3.2→3.4→4.1 faktycznie
+działa na jednej promocji bez kolizji stanu. SHOULD-FIX pozostawiony bez zmian ma solidne
+uzasadnienie. Dokument jest gotowy do merge'a z punktu widzenia code review; pozostałe uwagi są
+kosmetyczne.

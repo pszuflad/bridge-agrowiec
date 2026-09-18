@@ -2,7 +2,7 @@
 
 ## Summary
 
-Powstał `docs/instrukcja-testow-I4-v2.md` (561 linii) — delta dla Ani po kartach 14f (`64-…`)
+Powstał `docs/instrukcja-testow-I4-v2.md` (592 linie) — delta dla Ani po kartach 14f (`64-…`)
 i 14h (`61-…`), w konwencji `docs/instrukcja-testow-I3-v2.md`. Opisuje sześć zmian, trzy
 świadomie niezmienione rzeczy (jej decyzje z 2026-09-18) i rozlicza wszystkie punkty starej
 instrukcji, które przestały być prawdą — w tym §4 pkt 6, który **nieprawdziwy był już przed
@@ -199,3 +199,20 @@ w kartach. Gdyby kiedyś zaczęło, cytaty warto przewiązać do tamtego źród�
 | 4.1 obiecuje liczbę tylko w stanie, w którym promocja jest aktywna | ✓ |
 | Brzmienia UI nadal zgodne z kodem (pozostałe punkty) | ✓ bez zmian |
 | Pola oceny, struktura, banner, własność plików | ✓ bez zmian |
+
+### Przegląd nr 2 — 0 BLOCKER, 0 SHOULD-FIX; cztery NICE-TO-HAVE naprawione
+
+Reviewer zweryfikował obie naprawy niezależnie (łańcuch stanów promocji 2.1→3.1→3.2→3.4→4.1
+przejrzany krok po kroku: aktywna → zakończona → zaplanowana → aktywna → zakończona → aktywna),
+potwierdził, że uzasadnienie odrzucenia SHOULD-FIX się broni, i zostawił cztery drobiazgi.
+Wszystkie naprawione, bo były tanie:
+
+- **cudzysłowy w cytacie noty o datach** — było `«zaplanowana»` (zagnieżdżenie), jest `„zaplanowana"`,
+  czyli znak w znak jak na ekranie; zewnętrzne cudzysłowy zdjęte, bo cytat i tak stoi w bloku kursywą;
+- **`«nazwa»` w treści dialogu usuwania** — zamienione na czytelny przykład z dopiskiem, co wchodzi
+  w to miejsce;
+- **„cały backend produkcji wraz ze wszystkimi kilkunastu łatkami"** — żargon i błąd odmiany;
+  jest „cała część Bridge'a działająca na serwerze, razem z kilkunastoma późniejszymi poprawkami";
+- **„jeśli po punkcie 3.4…"** w kroku 1 punktu 4.1 — stan jest deterministyczny, więc zdanie
+  twierdzące zamiast warunkowego;
+- **metryka w Summary** — 561 → 592 linie (nieodświeżona po naprawach BLOCKERów).
