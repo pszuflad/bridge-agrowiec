@@ -1,6 +1,6 @@
 # 64-FEATURE-i14f-daty-koncza-promocje — daty kończą promocję (wygaszacz statusu) + potwierdzenie usuwania
 
-> Status: Draft
+> Status: Implemented
 > Branch: `feature/64-i14f-daty-koncza-promocje`
 > Worktree: `.worktrees/64-FEATURE-i14f-daty-koncza-promocje`
 

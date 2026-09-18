@@ -162,6 +162,34 @@ pozostaje poprawny.
 - Nowa zmienna środowiskowa `PROMO_WYGASZACZ_MINUTY` — **opcjonalna**, domyślnie 5, więc
   wdrożenie nie wymaga zmian w konfiguracji.
 
+## Review fixes applied
+
+Review: **0 BLOCKER**, 4 SHOULD-FIX, 2 NICE-TO-HAVE. Wszystkie sześć rozliczone.
+
+- **Brak testu odróżniającego dla D6 (SHOULD-FIX) — naprawione, słusznie zgłoszone.**
+  Plan zapowiadał test z warunkiem, którego matcher ostrzeżenia nie łapie, a dostarczony test
+  używał reguły GLOBALNEJ — dla takiej oba dopasowania dają ten sam wynik, więc przeszedłby nawet
+  przy podpiętym złym matcherze. Dołożone dwie warstwy siatki na warunku `srednica`:
+  jednostkowa w `test/narzuty.ceny.test.ts` (nowa sekcja 5, 7 przypadków — w tym kontrola
+  negatywna pokazująca, że ostrzeżenie widzi na tych danych ZERO, oraz test, że liczymy produkty
+  WYBIERANE, nie tylko pasujące) i komponentowa w `test/narzuty.test.tsx` (reguła po `srednica: 28`
+  ⇒ dialog pokazuje 2 z 5 produktów fixture'a; zły matcher pokazałby 0).
+  Obie nowe funkcje z `ceny.ts` mają teraz testy bezpośrednie, nie tylko przez UI.
+- **`PROMO_WYGASZACZ_MINUTY` nieudokumentowane (SHOULD-FIX) — naprawione.** Wiersz w tabeli
+  zmiennych `rebuild/backend/README.md` i sekcja w `rebuild/backend/.env.example`, obie
+  z uzasadnieniem, dlaczego ta zmienna jest domyślnie WŁĄCZONA w odróżnieniu od `IMPORT_SCHEDULER`.
+- **Nierozliczona roadmapa i backlog (2 × SHOULD-FIX) — rozliczone w fazie docs** (Krok 13–15),
+  która następuje po review; patrz sekcja „Docs updates" niżej. Uwaga słuszna: `CLAUDE.md` wymaga,
+  by statusy aktualizowała sesja realizująca, i tak się stało.
+- **`plan.md` miał `Status: Draft` (NICE-TO-HAVE) — poprawione na `Implemented`.**
+- **Brzmienie komunikatu dla zera (NICE-TO-HAVE) — poprawione.** Było „Żaden produkt nie jest dziś
+  objęty tą regułą", co dawało się czytać jako trwałe „nigdy"; jest „Dziś ta reguła nie obejmuje
+  żadnego produktu — usunięcie nie zmieni cen", czyli zdanie o skutku usunięcia TERAZ. Ma
+  znaczenie właśnie dla promocji zaplanowanej i zakończonej, gdzie zero jest stanem przejściowym.
+
+Bramki po poprawkach: BE 85 plików / 1317 testów, FE 49 / **809** (było 801, +8 nowych testów);
+lint, typecheck, build zielone po obu stronach.
+
 ## Follow-up
 
 - **`docs/instrukcja-testow-I4.md` — sprostowanie należy do 14m, NIE do tej karty** (plik poza

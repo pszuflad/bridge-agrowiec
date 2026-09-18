@@ -198,6 +198,32 @@ describe("2. Tabela narzutów", () => {
     );
   });
 
+  /**
+   * ⚠ TEST ROZSTRZYGAJĄCY DLA D6, na poziomie widoku. Poprzedni test używa reguły GLOBALNEJ,
+   * a dla takiej wierny silnik i uproszczony matcher ostrzeżenia dają ten sam wynik — więc
+   * przeszedłby nawet wtedy, gdyby ktoś podpiął w tabeli niewłaściwe dopasowanie. Tutaj reguła
+   * stoi na warunku `srednica`, którego `dopasujDoOstrzezenia` NIE ZNA (zwraca zawsze false):
+   * poprawna implementacja pokazuje 2 produkty z fixture'a, błędna pokazałaby zero.
+   */
+  it("⭐ liczba produktów idzie z silnika, nie z matchera ostrzeżenia (warunek `srednica`)", async () => {
+    const poSrednicy: Narzut = {
+      ...NARZUT,
+      id: 77,
+      typ: "srednica",
+      warunki: JSON.stringify([{ typ: "srednica", wartosc: "28" }]),
+    };
+    zamockujApi([], [poSrednicy]);
+    window.history.pushState({}, "", "/narzuty");
+    render(<App />);
+    await screen.findByTestId("row-markup-77");
+
+    await userEvent.click(screen.getByTestId("button-delete-markup-77"));
+
+    // `GET_products.json` ma pięć pozycji, z czego DWIE mają `srednica: 28`.
+    const opis = await screen.findByTestId("liczba-produktow-narzutu");
+    await waitFor(() => expect(opis).toHaveTextContent("Zmiana dotyczy 2 produktów"));
+  });
+
   it("⭐ „Anuluj\" w potwierdzeniu NIE kasuje reguły", async () => {
     zamockujApi();
     await otworzNarzuty();

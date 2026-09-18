@@ -170,7 +170,12 @@ export function liczbaProduktowZPromocja(
  */
 export function opisLiczbyProduktow(liczba: number | null, ogon: string): string {
   if (liczba === null) return "Liczba dotkniętych produktów: ładowanie katalogu…";
-  if (liczba === 0) return "Żaden produkt nie jest dziś objęty tą regułą — ceny się nie zmienią.";
+  // „Dziś" jest tu istotne, a nie stylistyczne: zero znaczy też „promocja jeszcze nie
+  // obowiązuje" (zaplanowana) albo „już nie obowiązuje" (zakończona) — a nie „nigdy nikogo
+  // nie obejmie". Komunikat mówi o skutku USUNIĘCIA w tej chwili i tylko o nim.
+  if (liczba === 0) {
+    return "Dziś ta reguła nie obejmuje żadnego produktu — usunięcie nie zmieni cen.";
+  }
   // Po „dotyczy" idzie dopełniacz: 1 produktu, 2 produktów, 5 produktów.
   const rzeczownik = liczba === 1 ? "produktu" : "produktów";
   return `Zmiana dotyczy ${liczba} ${rzeczownik} — tyle pozycji katalogu ${ogon}.`;
