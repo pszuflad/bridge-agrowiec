@@ -474,7 +474,10 @@ Do naniesienia w pozostałych dokumentach przy okazji:
   **narzuty i promocje naprawione w Iteracji 4a** (`POLA_EDYTOWALNE_NARZUTU`/
   `POLA_EDYTOWALNE_PROMOCJI`, filtr na PATCH i POST — `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`),
   z jednym świadomym odstępstwem: audyt loguje SUROWE `req.body`, więc dziennik może wskazać pole,
-  które faktycznie nie zostało zapisane; **produkty naprawione w 12a** —
+  które faktycznie nie zostało zapisane. **Od karty 14f (`64-FEATURE-i14f-daty-koncza-promocje`,
+  2026-09-19) `status` wypadł z `POLA_EDYTOWALNE_PROMOCJI`** — stał się polem wyliczanym z dat
+  przez nowy wygaszacz (`promocje/wygaszacz.ts`), więc `POST`/`PATCH /api/promotions` po cichu
+  odsiewają `status` z ciała zamiast go zapisywać; **produkty naprawione w 12a** —
   `POLA_EDYTOWALNE_PRODUKTU` (42 pola, wyprowadzone z dialogu edycji `LT()`), zamiast zapisu
   całych 70 kolumn. Pełny rozbiór: `rebuild-backlog.md` #14.
 

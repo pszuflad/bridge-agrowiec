@@ -108,9 +108,11 @@ Najważniejszy ekran. Poświęć mu najwięcej czasu.
 - [ ] ✅ / ❌ — to samo dla promocji.
 - [ ] ✅ / ❌ — po zmianie narzutu ceny w Katalogu faktycznie się przeliczają.
 
-> ⚠ **Rzecz, którą odtworzyliśmy celowo, mimo że wygląda na błąd:** promocja z datą, która
-> już minęła, **dalej obniża ceny**. Tak działa stary Bridge i tak zostało przeniesione
-> (wpis #19 w naszej liście). Jeśli chcesz to naprawić — to osobna decyzja, nie zgłaszaj jako błąd.
+> ⚠ **Rzecz, którą naprawiliśmy celowo, inaczej niż stary Bridge:** promocja z datą, która
+> już minęła, **przestaje obniżać ceny** — tutaj data naprawdę kończy promocję (świadome
+> odstępstwo od oryginału, Twoje ustalenie z 2026-09-18, wpis #19). W starym Bridgu taka
+> promocja dalej by obniżała ceny. Tak samo promocja zaplanowana na przyszłość **włącza się
+> sama**, gdy nadejdzie jej data startu — w starym Bridgu zostawałaby zaplanowana na zawsze.
 
 ---
 

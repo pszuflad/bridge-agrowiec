@@ -44,6 +44,10 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
   Od Iteracji 3a `npm run build` dokłada krok kopiujący portowane parsery importu (`.cjs` +
   słownik) do `dist/import/legacy/` — bez niego import nie miałby czym parsować plików
   dostawców, bo deploy kopiuje wyłącznie `dist/` (szczegóły: `rebuild/backend/README.md`).
+  Od karty 14f: opcjonalna `PROMO_WYGASZACZ_MINUTY` (domyślnie `5`) steruje wygaszaczem statusu
+  promocji — inaczej niż `IMPORT_SCHEDULER` (domyślnie wyłączony) jest **domyślnie włączona**,
+  bo rusza wyłącznie naszą bazę, a nie serwery dostawców. Wartość domyślna jest docelowa, więc
+  **wdrożenie nie wymaga żadnej zmiany konfiguracji**; tabela zmiennych: `rebuild/backend/README.md`.
 - **rebuild/frontend**: `npm ci --include=dev` && `npm run build` → `dist/` (base `/`, API pod `/api`).
   Spełnione od Iteracji 1b (`rebuild/frontend/`, szczegóły: `rebuild/frontend/README.md`).
 

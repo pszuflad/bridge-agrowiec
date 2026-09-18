@@ -33,6 +33,17 @@ adresy `/#/katalog`, nowy daje `/katalog`. Zakładki Ani zapisane na starych adr
 `/` (hash jest ignorowany po stronie serwera) — to nie jest awaria, ale warto ją o tym uprzedzić
 przed oknem, żeby nie zgłosiła tego jako błąd.
 
+**⚠ Pierwszy start procesu i pierwszy zapis dowolnej reguły cenowej mogą wyglądać jak masowa,
+niezamówiona zmiana cen — uprzedź Anię przed oknem.** Znalezisko 14e: samo `przeliczCenyZRegul`,
+bez żadnej promocji, prostuje pozycje rozjechane z aktualnym narzutem — **2050 z 7405 cen** się
+zmieni przy pierwszym zapisie dowolnej reguły narzutu po cutoverze. To zachowanie oryginału, nie
+defekt odbudowy. Od karty 14f dochodzi drugi efekt tego samego przeliczenia: nowy wygaszacz
+(`docs/tickets/64-FEATURE-i14f-daty-koncza-promocje/`) przy PIERWSZYM STARCIE PROCESU przestawia
+`promotions.status` na wartość wyliczoną z dat, w obie strony — świadome odstępstwo od produkcji,
+która statusu nigdy nie przelicza. Na dziś tabela `promotions` na produkcji jest **pusta**
+(0 wierszy), więc realnie zamiecie 0 wierszy, ale gdy promocje się pojawią, pierwszy start po
+przestoju je uporządkuje.
+
 ---
 
 ## 2. Warunki wstępne (wszystkie muszą być spełnione PRZED oknem)

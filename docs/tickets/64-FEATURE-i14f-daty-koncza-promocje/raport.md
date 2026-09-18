@@ -213,3 +213,80 @@ lint, typecheck, build zielone po obu stronach.
   a `PROMO_WYGASZACZ_MINUTY` domyślnie włączony. Uzasadnienie (scheduler odpytuje CUDZE serwery,
   wygaszacz tylko naszą bazę) jest zapisane przy obu zmiennych — jeśli kiedyś powstanie wspólna
   konwencja przełączników automatów, to jest miejsce do przejrzenia.
+
+## Docs updates
+
+Pięć doc-checkerów równolegle, osiem plików zmienionych, wszystko w `docs/`.
+`docs/instrukcja-testow-I4.md` **nietknięta** — należy do karty 14m (zweryfikowane `git status`).
+
+### `docs/rebuild-roadmap.md` (10 edycji + nowa podsekcja)
+
+- **14f oznaczone ✅** `64-FEATURE-i14f-daty-koncza-promocje` · 2026-09-19 w tabeli iteracji
+  (~191), w opisie bloku I14 (~2158) i w tabeli kart fali 2 (wiersz przepisany na faktycznie
+  dowieziony zakres, z listą plików i testów). Fala 2 opisana jako **dowieziona poza 14m**;
+  przy okazji dopisane brakujące w tym wierszu 14j.
+- **ZAŁOŻONA NOWA PODSEKCJA `14m`** (⬜ nie zrobione) — zgodnie z obowiązkiem „ustalenie
+  dotyczące PRZYSZŁEGO bloku wpisz DO TEGO BLOKU". Zawiera, co 14f dla niej zostawia:
+  unieważnione §4 pkt 6 i §3.9 instrukcji I4, radę „zmień status" do usunięcia, oraz notę
+  cutoverową.
+- **Rozdzielony opis PRODUKCJI od ODBUDOWY** w bloku 4b (~914-923) — to był największy
+  realny ryzyk tej aktualizacji: dotąd dało się czytać, że odbudowa nadal ma defekt #19.
+- **⚠ Skorygowany błędny fakt:** roadmapa twierdziła, że defekt z backlogu #88
+  (`promocjaPasuje` przy pustej marce i kategorii) naprawi 14f. **Nie naprawiła** — silnik
+  został świadomie nietknięty w wariancie (b). Założenie pochodziło sprzed wyboru wariantu.
+- `POLA_EDYTOWALNE_PROMOCJI` poprawione z 8 na 7 pól; „14f czeka na rozstrzygnięcie #19"
+  i „zostaje otwarte tylko 14f" zamienione na stan faktyczny.
+
+### `docs/rebuild-backlog.md` (3 wpisy zmienione, 2 sprawdzone bez zmian)
+
+- **Wpis #19 ZAMKNIĘTY** ✅ 2026-09-19, z pełną drogą (4a/4b → wycena 14e → naprawa 14f).
+  **Historia diagnozy i wycena obu wariantów zachowane bez wycinania** — dopisane rozliczenie.
+  Nagłówek jawnie zastrzega, że sekcja „Co robi produkcja" pozostaje prawdziwa WYŁĄCZNIE
+  dla produkcji; „Uzupełnienie 4b" oznaczone jako historyczne (opisuje znacznik, którego nie ma).
+- **Poprawiona nazwa w kodzie:** docs mówiły `rozbieznoscStatusu`, a pole nazywało się
+  `rozbieznosc` — rozróżnienie nazwy pojęciowej od nazwy w kodzie jest teraz zapisane.
+- **Sprostowana liczba:** `zakonczona` nie występuje w `mirror/backend/index.cjs` ANI RAZU,
+  a `zaplanowana` dokładnie raz (dotąd: „oba padają w danych seeda").
+- **#14** — `status` usunięty z wyliczonej listy pól edytowalnych promocji.
+- **#24** — dopisane, że 14f dodała tylko nowego KONSUMENTA wiernego silnika; trzy sposoby
+  liczenia ceny zostają trzema, czwartego nie ma.
+- **#23 i #25** sprawdzone, bez zmian (dotyczą innych funkcji).
+
+### `docs/spec-backend.md` i `docs/spec-frontend.md`
+
+- `spec-frontend.md`: poprawiona fraza, która sugerowała, że **odbudowa** ignoruje daty —
+  teraz jasno mówi, że robi to produkcja. Usunięte zdanie o „widocznym znaczniku rozbieżności".
+  Dodany blok „Odbudowa (14f…)" z sześcioma zdaniami o faktycznym stanie.
+- `spec-backend.md`: uzupełniony opis `POLA_EDYTOWALNE_PROMOCJI` (`status` wypadł, jest polem
+  wyliczanym, `POST`/`PATCH` odsiewają je po cichu). Doc-checker świadomie NIE dopisał tam
+  `PROMO_WYGASZACZ_MINUTY`, bo ten plik nie prowadzi tabeli zmiennych env — zmienna jest
+  udokumentowana w `rebuild/backend/README.md` i `.env.example`.
+
+### `docs/cutover.md`, `docs/deploy-setup.md`, `docs/przeglad-12-widokow.md`, `docs/plan.md`
+
+- `cutover.md`: nowy akapit łączący DWA ryzyka — znalezisko 14e (pierwszy zapis reguły zmienia
+  2050 z 7405 cen, nadal aktualne) oraz nowy skutek 14f (pierwszy start procesu zamiata statusy
+  promocji; dziś realnie 0 wierszy, bo `promotions` na produkcji jest pusta).
+- `deploy-setup.md`: `PROMO_WYGASZACZ_MINUTY` z uzasadnieniem domyślnego włączenia i wprost
+  napisane, że **wdrożenie nie wymaga zmiany konfiguracji**.
+- `przeglad-12-widokow.md`: przepisana nota, która mówiła, że wygasła promocja „dalej obniża
+  ceny" — teraz opisuje to jako świadome odstępstwo po 14f. Potwierdzenie usuwania było tam
+  już opisane poprawnie.
+- `plan.md`: **bez zmian** — jawnie oznaczony jako dokument historyczny, operuje na fazach
+  sprzed odbudowy. Nie przepisujemy historii.
+
+### `docs/instrukcja-testow-I3-v2.md`, `-I7.md`, `docs/pytania-do-ani-2026-09-18.md`
+
+- `instrukcja-testow-I3-v2.md`: sekcja 5.3 „Daty promocji — zmierzone, naprawa zaplanowana"
+  przepisana na „✅ WDROŻONE kartą 14f", z **wzmianką o opóźnieniu do ~5 minut** przy samym
+  upływie daty (po zapisie reguły albo restarcie — od razu). To jest jedyna rzecz, która przy
+  testach może Anię zmylić, więc jest napisana wprost.
+- `instrukcja-testow-I7.md` i `pytania-do-ani-2026-09-18.md`: **bez zmian**, sprawdzone grepem —
+  nie zawierają twierdzeń unieważnionych tą kartą (I7 dotyczy widoku Atrybuty, wzmianki
+  o „Narzuty i promocje" to tylko nazwa menu).
+
+### Pre-existing issues
+
+Żaden doc-checker nie zgłosił problemów sprzed tej karty. Jedyne znalezione nieprawdy wiązały
+się bezpośrednio z zakresem 14f i zostały poprawione — z wyjątkiem `docs/instrukcja-testow-I4.md`,
+która jest świadomie zostawiona karcie 14m (wykaz nieprawd zebrany w sekcji Follow-up).
