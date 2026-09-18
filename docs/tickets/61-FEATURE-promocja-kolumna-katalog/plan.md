@@ -1,6 +1,6 @@
 # 61-FEATURE-promocja-kolumna-katalog — kolumna „Promocja" w Katalogu zaczyna pokazywać promocję
 
-> Status: Draft
+> Status: Implemented
 > Branch: `feature/61-promocja-kolumna-katalog`
 > Worktree: `.worktrees/61-FEATURE-promocja-kolumna-katalog`
 > Blok roadmapy: I14, karta **14h** (FALA 2)
