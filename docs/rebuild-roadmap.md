@@ -2331,6 +2331,57 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   dla MO1 i to „na oko, bez liczb"; MO9 się nie da (API, brak pliku). To najcenniejszy test całej
   instrukcji i wymaga osobnego podejścia z konkretnymi plikami.
 
+**14e — diagnoza promocji i wycena kosztu „daty wyłączają promocję"** [ROZPOZNANIE] —
+**ZROBIONE 2026-09-18, ticket `53-CHORE-i14e-diagnoza-promocji`.** Karta rozpoznawcza, zamknięta
+**bez ani jednej zmiany w kodzie produkcyjnym** — dowiozła werdykty i liczby, nie naprawy.
+
+⚠ **Ta karta różni się charakterem od 14a–14d.** Tamte są czysto frontowe i mają bramki backendu
+jako N/D; 14e dotknęła `rebuild/backend/test/` i `rebuild/frontend/test/` (po jednym NOWYM pliku),
+więc bramki obu stron obowiązywały i są zielone. Źródłem nie były też uwagi z testów I3, tylko
+z **I4** (`docs/instrukcja-testow-I4.md` §3.7, §3.9, §3.11). Nie koliduje z 14a/14b/14c ani nie
+blokuje 14d — zbiory plików są rozłączne.
+
+**Metoda: pomiar na dwóch żywych backendach**, nie lektura. Odbudowa i ORYGINAŁ
+(`mirror/backend/index.cjs` w piaskownicy: kopia bazy, scheduler wygaszony SQL-em przed startem,
+CWD = katalog piaskownicy, porty efemeryczne) postawione na kopiach tej samej `db/snapshot.db`.
+
+- **A — promocja z warunkiem DZIAŁA, werdykt (a). Regresji NIE MA.** Promocja `marka→BKT`,
+  rabat 10% obniżyła ceny **954 produktów BKT** wg `floor(zakup × 1,06 × 0,90 × 1,23)`.
+  Porównanie **pełnego katalogu, produkt po produkcie: 7405 wspólnych, 0 różnic** między
+  oryginałem a odbudową — w obu wariantach promocji. Zgłoszenie Ani „rabaty nie działają"
+  to trafienie w **backlog #25**: promocja z zaznaczoną „Regułą globalną" zmieniła cenę
+  **1 produktu na 7405** (`MO4_LLCR17523575MLLS0`, pusta marka), identycznie po obu stronach.
+- **B — defektu „Reguła dodana" po edycji NIE potwierdzono.** Zapis z dialogu edycji leci
+  `PATCH` na id edytowanej reguły, zero `POST`-ów, toast mówi „zaktualizowana" — **druga reguła
+  nie powstaje**. Zastrzeżenie: pomiar dotyczy odbudowy; żywego bundla FE oryginału nie
+  porównywano (poza zakresem karty).
+- **C — wycena #19 policzona:** **1 scenariusz charakteryzacji z 31** (`promocja-wygasla-nadal-obniza-cene`;
+  3 pola: `cena_sprzedazy`, `marza_pct`, `status`, w 1 wierszu), **2 testy jednostkowe**
+  (`test/ceny.silnik.test.ts:246-252`, `test/narzuty.patch.test.ts:319-331`), **0 scenariuszy
+  `bulk` z 17** i **0 fixtures** do przenagrania. Naprawa jest więc TAŃSZA, niż mówił komentarz
+  w `repos/ceny.ts:108-116`; jej realną ceną jest wypisanie jednego scenariusza spod wyroczni,
+  która uruchamia ŻYWY kod produkcji wycięty z bundla.
+
+**Sprostowanie do backlogu #25 (fakt, zmierzony):** dopasowanie promocji „globalnej" to
+**ALTERNATYWA** — wystarczy pusta marka *albo* pusta kategoria, nie obie naraz. Jedyny trafiony
+produkt w katalogu produkcji ma pustą markę przy WYPEŁNIONEJ kategorii („Ciężarowe").
+
+**Znalezisko uboczne, ważne przed cutoverem:** samo `przeliczCenyZRegul`, **bez żadnej promocji**,
+zmienia **2050 z 7405 cen** (2049 spoza BKT + 1 BKT) — prostuje pozycje rozjechane z aktualnym
+narzutem. Zachowanie oryginału, nie defekt, ale pierwszy zapis dowolnej reguły na produkcji
+będzie wyglądał jak masowa, niezamówiona zmiana cen. Uprzedzić Anię.
+
+⚠ **Gdzie szukać reszty — nota dla kart, które tego dotkną.** Własność plików karty 14e
+obejmowała wyłącznie ten podblok oraz pola Status/fakty w backlogu #19/#22/#25, więc ustaleń
+dotyczących przyszłych kart NIE dało się wpisać do ich bloków. Kto bierze temat promocji, dat
+albo dialogu reguł — **czyta `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`**, tam są:
+trzy warianty rozwiązania ryzyka duplikatu reguły (pamiętający formularz „Dodaj"), dwa warianty
+naprawy #19 z porównaniem kosztów, oraz lista artefaktów FE, które po naprawie #19 stałyby się
+martwe (znacznik `rozbieznosc-statusu-{id}`, nota `nota-daty-promocji` i cztery testy).
+
+**Decyzje, które ta karta ZOSTAWIA użytkownikowi** (żadnej nie podjęła): czy prostować #25
+w produkcji; czy naprawiać #19 i którym wariantem; co zrobić z ryzykiem duplikatu reguły z §3.11.
+
 **Kolejność:** **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej kolejności) → **14d**.
 Każda z trzech kart dopisuje TYLKO swój podblok wyżej i NIE rusza tablicy postępu §4 — wiersz iteracji
 zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-18.

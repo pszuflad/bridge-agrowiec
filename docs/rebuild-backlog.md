@@ -1302,7 +1302,7 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
 | **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **do decyzji** (odrzucona w tym tickecie, patrz niżej) |
-| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **koszt naprawy WYCENIONY w 14e (2026-09-18)** — patrz niżej |
 
 **Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
 `koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
@@ -1335,6 +1335,34 @@ czyta start ani koniec") i scenariuszem charakteryzacji
 **Do rozważenia dla produkcji.** Naprawa jest jednoliniowa (dodać warunek na `start`/`koniec`
 w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
+
+**⭐ KOSZT POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-18).** Zdanie „naprawa
+wymagałaby wyjątku w charakteryzacji importu” zamienione na liczby:
+
+| Pozycja | Ile |
+|---|---|
+| Scenariusze charakteryzacji akceptacji | **1 z 31** (`promocja-wygasla-nadal-obniza-cene`) — 3 pola (`cena_sprzedazy`, `marza_pct`, `status`) w 1 wierszu `products` |
+| Scenariusze charakteryzacji `bulk` | **0 z 17** |
+| Testy jednostkowe backendu | **2** — `test/ceny.silnik.test.ts:246-252` (2 asercje), `test/narzuty.patch.test.ts:319-331` (1 asercja) |
+| Fixtures w `contract/` do przenagrania | **0** — żaden fixture nie zawiera `rabatPct`, a `GET_promotions.json` to `[]` |
+| Realne ceny zmienione dziś w produkcji | **0** — w `db/snapshot.db` nie ma ani jednej promocji |
+
+**Naprawa jest więc TAŃSZA, niż sugerował ten wpis.** Jej realną ceną nie są fixtures, tylko
+wypisanie jednego scenariusza spod wyroczni, która uruchamia ŻYWY kod produkcji wycięty
+z `mirror/backend/index.cjs` (pilnowany sha256 w `integralnosc.json`) — czyli świadome
+stwierdzenie „tutaj różnimy się od Bridge’a stojącego u Agrowca”.
+
+**Wariant bez wyjątku istnieje, ale nie jest polecany:** filtrowanie dat wyłącznie
+w `przeliczCenyZRegul`, przy nietkniętym `promocjaPasuje`, zostawia charakteryzację w spokoju
+(0 scenariuszy), ale daje systemowi TRZECIĄ odpowiedź na to samo pytanie — masowe przeliczenie
+mówiłoby „nie”, a gałąź importu nadal „tak”, więc wygasła promocja wracałaby na produkt przy
+najbliższej akceptacji ze stagingu. Niestabilne w czasie, gorsze od dzisiejszego defektu.
+
+**Dotyczy też daty startu w przyszłości** (§4 pkt 6 instrukcji I4) — ta sama linia kodu,
+naprawa musi objąć oba końce zakresu. **Po naprawie stają się martwe** dołożone w 4b ostrzeżenia:
+znacznik `rozbieznosc-statusu-{id}` (`TabelaPromocji.tsx:165`) nigdy się nie pokaże, a nota
+`nota-daty-promocji` (`DialogReguly.tsx:555-557`) stanie się nieprawdziwa — plus 4 testy FE
+do przepisania. Pełne rozbicie: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`, sekcja C.
 
 **Uzupełnienie 4b (frontend, 2026-09-02).** Widok `/narzuty` portuje `_b()`/`Qd()` 1:1
 (`rebuild/frontend/src/pages/narzuty/status.ts`) — etykieta statusu promocji liczona z dat
@@ -1438,7 +1466,7 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 | **Kategoria** | FRONTEND (katalog) |
 | **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
 | **Do nowej wersji?** | ✅ **port 1:1** — ożywienie ⬜ **do decyzji** (kandydat na I12) |
-| **Status** | ✔ odtworzone w rebuild (4b), martwota potwierdzona |
+| **Status** | ✔ odtworzone w rebuild (4b), martwota potwierdzona · **14e (2026-09-18): potwierdzone pomiarem, że to NIE jest przyczyna zgłoszenia o niedziałających rabatach** — ceny spadają poprawnie mimo pustej kolumny |
 
 **Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
 **nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
@@ -1534,7 +1562,7 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
 | **Do nowej wersji?** | ⬜ **do decyzji** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
-| **Status** | odtworzone świadomie w 4b · w produkcji **nadal obecne** |
+| **Status** | odtworzone świadomie w 4b · w produkcji **nadal obecne** · **14e (2026-09-18): ZMIERZONE na pełnym katalogu — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
@@ -1549,6 +1577,20 @@ return !!r && (r.includes((t.marka ?? "").toLowerCase()) || r.includes((t.katego
 Napis `"globalny"` nie zawiera ani `"bkt"`, ani `"rolnicze"` — więc **promocja globalna nie
 pasuje do żadnego normalnego produktu**. Pasuje wyłącznie do pozycji z PUSTĄ marką albo pustą
 kategorią, bo `"globalny".includes("")` jest prawdą.
+
+**⭐ SPROSTOWANIE MECHANIZMU (14e, 2026-09-18, pomiar).** Dopasowanie jest **ALTERNATYWĄ**, nie
+koniunkcją: wystarczy pusta marka **albo** pusta kategoria. Jedyny produkt w katalogu produkcji,
+który „globalna” realnie złapała, ma pustą markę przy **WYPEŁNIONEJ** kategorii —
+`MO4_LLCR17523575MLLS0`, kategoria „Ciężarowe”, zakup 475,30; cena 619 → 557.
+
+**⭐ ZASIĘG ZMIERZONY NA ŻYWYM KATALOGU (14e).** Promocja „globalna” z rabatem 10%, założona przez
+API na kopii `db/snapshot.db`, zmieniła — ponad efekt samego przeliczenia katalogu — cenę
+**dokładnie 1 produktu z 7405**. Ten sam pomiar powtórzony na ORYGINALE
+(`mirror/backend/index.cjs` w piaskownicy) dał **0 różnic wobec odbudowy na wszystkich 7405
+produktach**. Dla kontrastu ta sama promocja założona Z WARUNKIEM `marka→BKT` objęła
+**954 produkty**. Hipoteza „praktycznie zero” z tego wpisu ma więc teraz liczbę: **1/7405**.
+Zamrożone testem `rebuild/backend/test/promocja-warunek-obniza-cene.test.ts`, który pilnuje OBU
+kierunków — żeby promocja warunkowa nie przestała działać po cichu i żeby „globalna” nie zaczęła.
 
 **Zmierzone** (`promocjaPasuje` z `rebuild/frontend/src/pages/narzuty/ceny.ts`, port `Tb` 1:1):
 
