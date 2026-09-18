@@ -172,7 +172,7 @@ przez `POLA_EDYTOWALNE_PRODUKTU`, gdzie `_reguly` nie występuje.
 ## Docs updates
 
 Trzej doc-checkerzy, rozłączne pliki, równolegle. Ich ustalenia niżej; pomiar skali defektu
-(zero produktów) dopisałem do `#87` i do bloku 14f już po ich zakończeniu.
+(zero produktów) dopisałem do `#88` i do bloku 14f już po ich zakończeniu.
 
 ### `docs/rebuild-roadmap.md` — 9 miejsc
 
@@ -198,7 +198,7 @@ Trzej doc-checkerzy, rozłączne pliki, równolegle. Ich ustalenia niżej; pomia
   na czas przeszły z potwierdzeniem, że dokładnie tak zrobiono; usunięte obalone „kandydat na I12".
 - **#19** — kolumna zacznie respektować daty sama, gdy 14f dowiezie naprawę (status bez zmian).
 - **#23, #24** — odnotowane, że 14h świadomie **nie dołożyła czwartego** sposobu liczenia.
-- **#87 (nowy)** — defekt pustych `marka`/`kategoria`, ⬜ do decyzji, naprawa = 14f,
+- **#88 (nowy)** — defekt pustych `marka`/`kategoria`, ⬜ do decyzji, naprawa = 14f,
   **ze zmierzoną skalą: zero produktów w produkcji**.
 
 ### `docs/spec-frontend.md` — 1 edycja

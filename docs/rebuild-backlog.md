@@ -1360,8 +1360,8 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA 2026-09-19 przez Anię** — daty mają kończyć promocję (świadome odstępstwo, karta **14f**) |
-| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-19)** — liczby niżej |
+| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA** — daty mają kończyć promocję (Ania, 2026-09-18). **WARIANT WDROŻENIA WYBRANY 2026-09-18: (b) wygaszacz statusu, cykliczny, `status` odcięty od pól edytowalnych.** Karta **14f** |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-18)** — liczby niżej |
 
 **⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
 „Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
@@ -1371,7 +1371,7 @@ jest, reguła znika po końcu obowiązywania". **Jej opis zachowania nie zgadza 
 `TabelaPromocji.tsx` nie filtruje niczego po datach (wiersz ZOSTAJE, z odznaką „zakończona"
 i naszym pomarańczowym znacznikiem), a silnik dat nie czyta, więc wygasła promocja **dalej obniża
 ceny**. Wysłano drugie pytanie kontrolne, tym razem z opisem stanu faktycznego zamiast pytania
-otwartego — i **2026-09-19 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
+otwartego — i **2026-09-18 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
 promocje"**. Wpis przechodzi z „do decyzji" na ZATWIERDZONY. Morał na przyszłość: pytanie
 „co ma się dziać?" dostało odpowiedź opisującą to, co Ania MYŚLAŁA, że się dzieje; dopiero
 pytanie „dziś jest TAK — zostawiamy czy zmieniamy?" dało decyzję.
@@ -1384,6 +1384,18 @@ użytkownik):
   końca; silnik NIETKNIĘTY, dalej patrzy tylko na `status`, charakteryzacja bez wyjątku, bo
   zmieniają się DANE, a nie zachowanie funkcji. Dodatkowo odtwarza dosłownie to, co Ania
   opisała słowami „reguła znika po końcu obowiązywania".
+**DECYZJA UŻYTKOWNIKA 2026-09-18 — wariant (b), w wersji rozszerzonej o cykliczność.**
+Trzy rozstrzygnięcia podjęte naraz, po przedstawieniu wyceny z 14e:
+1. **(b) wygaszacz przestawia `status`** — silnik nietknięty, zero wyjątków w wyroczni.
+2. **Wygaszacz chodzi także CYKLICZNIE**, nie tylko przy starcie i przy mutacji reguł. Bez tego
+   zostaje okno, w którym wygasła promocja **nadal obniża cenę przy każdym imporcie** (importy
+   co godzinę u pięciu dostawców → okno sięga dni). ⚠ 14f ma najpierw ZMIERZYĆ, że wariant
+   cykliczny nie wchodzi w ścieżkę charakteryzacji — nie zakładać.
+3. **`status` odcięty od `POLA_EDYTOWALNE_PROMOCJI`** — po (b) jest polem wyliczanym, więc
+   edytowalność oznaczałaby ciche nadpisywanie ustawień użytkownika.
+⚠ Zakres 14f obejmuje OBIE strony zakresu dat — samo wygaszanie zostawiłoby niedziałające
+planowanie (defekt odwrotny, opisany wyżej w tym wpisie).
+
 **Rekomendacja: (b).** ⚠ Skutek uboczny w obu wariantach: znacznik `rozbieznoscStatusu` (D5
 z 4b) przestaje mieć rację bytu i trzeba go usunąć świadomie, nie zostawić jako martwy kod.
 
@@ -1419,7 +1431,7 @@ czyta start ani koniec") i scenariuszem charakteryzacji
 w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
 
-**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-19).**
+**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-18).**
 
 **Najpierw ustalenie, które przesądza o koszcie: status promocji jest zapisywany RAZ.**
 POST liczy go z dat (`status: statusZDat(start, koniec)`), **PATCH go NIE wysyła** (siedem pól,
@@ -1587,7 +1599,7 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 | **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138`; ożywienie: `rebuild/backend/src/repos/products.ts` (`dolaczReguly`), `rebuild/backend/src/routes/products.ts` |
 | **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
 | **Iteracja** | odtworzone 1:1 w **4b**; ożywione w **I14, karta 14h** (2026-09-18) |
-| **Status** | ✔ **zrobione 2026-09-18, `61-FEATURE-promocja-kolumna-katalog`** · 14e (2026-09-19): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływała na ceny — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
+| **Status** | ✔ **zrobione 2026-09-18, `61-FEATURE-promocja-kolumna-katalog`** · **14e (2026-09-18): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływała na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
 
 **⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
 Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
@@ -1713,7 +1725,7 @@ czwartego sposobu — patrz notatka przy #23.
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
 | **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-18**: „nie, zostawiamy tak jak jest, nie dodajemy nowych reguł" |
-| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-19): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
+| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-18): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
@@ -3488,9 +3500,56 @@ oryginał w ogóle nie miał (puste pole custom wpadało w `if (!val || val < 1)
 na zepsuty. Odbudowa czyści pole (`e.target.value = ""`) — powód praktyczny: Ania poprawia plik
 u dostawcy i wgrywa go ponownie pod tą samą nazwą.
 
+### #87 · 2026-09-18 · [BACKEND] · widok „Historia" czyta tylko 5000 najświeższych zdarzeń — najstarsze stają się nieosiągalne, a licznik przestaje być liczbą wszystkich zdarzeń
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (historia / mapowanie audytu) — dziwactwo PRODUKCJI odtworzone świadomie |
+| **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts:54` (`LIMIT_AUDYTU = 5000`), użycie w `rebuild/backend/src/routes/history.ts` |
+| **Do nowej wersji?** | ⬜ **DO DECYZJI** |
+| **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · zmiana limitu — nie zaczęte |
+
+**Co robi produkcja.** `GET /api/history/meta` i `GET /api/history/paged` wołają
+`listAudit(5000)`, czyli `SELECT … FROM audit_log ORDER BY kiedy DESC LIMIT 5000`. Limit stoi
+**PRZED** mapowaniem, odsiewem akcji spoza słownika, filtrowaniem i paginacją — do widoku
+wchodzi więc 5000 najświeższych wierszy `audit_log`, a dopiero z nich powstaje to, co widać.
+Obie trasy mają ten limit zahardkodowany, bez parametru i bez możliwości sięgnięcia głębiej.
+
+**Jaki jest skutek.** Dwa, oba narastające z czasem:
+1. **Najstarsze wpisy stają się nieosiągalne.** Nie da się do nich dojść ani stronicowaniem, ani
+   filtrem, ani wyszukiwarką — wypadły, zanim filtr zdążył zadziałać. Ekran nie sygnalizuje tego
+   w żaden sposób: wygląda identycznie jak historia, która po prostu tyle ma.
+2. **Licznik `N wpisów` przestaje być liczbą wszystkich zdarzeń.** `total` liczy się na już
+   przyciętym zbiorze, więc po przekroczeniu progu pokazuje „ile z ostatnich 5000 pasuje do
+   filtra", a nie „ile było". Tak samo zawęża się lista dostawców w filtrze (`/meta` liczy się
+   na tym samym materiale).
+
+**Kiedy to wypłynie — zmierzone 2026-09-18** (`59-CHORE-i14j`, na `db/snapshot.db`):
+`audit_log` ma dziś **3873 wiersze**, czyli **77% progu**. Limit jest więc **dziś niewidoczny**
+i dlatego nie wyszedł w żadnym teście — ale przy obecnym tempie zapisu do `audit_log` (import
+z URL, staging, overrides, narzuty — w sumie kilkanaście akcji, z czego sam `auto_pull` to już
+2869 wierszy) próg zostanie przekroczony i wtedy ekran zacznie po cichu gubić najstarsze
+zdarzenia. Odsiew akcji jest tu bez znaczenia: limit tnie **surowy** `audit_log`, więc zjadają
+go także akcje, których widok i tak nie pokazuje (backlog **#21**).
+
+**Dlaczego to jest jak w produkcji, a nie usterka.** Zachowanie odtworzone 1:1, opisane Ani
+w `docs/instrukcja-testow-I5.md` §11 pkt 9 jako dziwactwo do NIEzgłaszania.
+
+**Powiązanie z #21.** Oba wpisy dotyczą tego samego widoku i idą w przeciwnych kierunkach:
+#21 pyta, czy **rozszerzyć** słownik akcji (więcej zdarzeń w widoku), a ten wpis — czy podnieść
+albo zdjąć limit. Rozstrzygnięcie #21 na „tak" **przyspiesza** problem opisany tutaj, bo przez
+odsiew przechodziłoby wielokrotnie więcej wierszy. Warto je rozstrzygać razem.
+
+**Możliwe kierunki — do decyzji użytkownika, NIE rozstrzygam:**
+- **(a) zostawić 1:1** — zero kosztu, problem wraca sam przy ~5000 zdarzeń;
+- **(b) podnieść limit** — najtańsze, odsuwa próg, ale go nie usuwa i obciąża odpowiedź
+  (mapowanie całości w pamięci przy każdym żądaniu);
+- **(c) filtrować i paginować w SQL** zamiast w pamięci — usuwa problem u źródła i naprawia
+  licznik, ale jest **świadomym odstępstwem** od oryginału w trasie, którą dziś porównujemy
+  z produkcją 1:1, i wymaga przenagrania fixtures historii.
 ---
 
-### #87 · 2026-09-18 · [BACKEND] · `promocjaPasuje` — pusty `marka`/`kategoria` łapie KAŻDĄ promocję o niepustym zasięgu
+### #88 · 2026-09-18 · [BACKEND] · `promocjaPasuje` — pusty `marka`/`kategoria` łapie KAŻDĄ promocję o niepustym zasięgu
 
 > **Znalezione przy karcie 14h (`61-FEATURE-promocja-kolumna-katalog`), 2026-09-18** —
 > uwidocznione dopiero teraz, bo dotąd kolumna „Promocja" w `/katalog` była martwa (#22) i nie
