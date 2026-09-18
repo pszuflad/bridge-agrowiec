@@ -155,6 +155,12 @@ błędu; jeśli sortowanie po promocji byłoby Ci przydatne, napisz — to osobn
 wyłącznie na *status* promocji, a daty były tylko napisem na ekranie. Teraz **status jest
 wyliczany z dat** — i to zmienia cztery rzeczy naraz.
 
+> **⚠ Przez cały ten rozdział pracujesz na JEDNEJ promocji — tej założonej w punkcie 2.1
+> („Wyprzedaż BKT").** Nie zakładaj drugiej promocji na tę samą markę. Gdy dwie promocje pasują
+> do tego samego produktu, obniżkę robi **tylko jedna z nich** — i przy równym priorytecie (a
+> priorytetu nie da się ustawić z formularza) nie masz wpływu na to, która. Druga promocja
+> na BKT **przykryłaby efekt** tego, co właśnie testujesz, i wyniki przestałyby być czytelne.
+
 ---
 
 ## 3.1 ⭐ Data końca naprawdę wyłącza promocję
@@ -178,13 +184,16 @@ przy testowaniu:
 2. za każdym razem, gdy **zapisujesz dowolną regułę** (narzut albo promocję),
 3. **sam, co 5 minut.**
 
-**Sprawdź:**
-1. Założ promocję z warunkiem (np. **Marka** → *BKT*), rabat **10**, daty domyślne. **Zapisz.**
-2. Sprawdź w **Katalogu**, że produkty BKT **potaniały** (kolumna **Promocja** pokazuje `-10%`).
+**Sprawdź** — pracujesz na promocji *Wyprzedaż BKT* z punktu 2.1, **nie zakładaj nowej**:
+1. Zakładka **Promocje** — upewnij się, że *Wyprzedaż BKT* jest w tabeli ze statusem **aktywna**
+   i że to **jedyna** promocja pasująca do marki BKT. Jeśli z wcześniejszych prób wisi tam
+   druga — **usuń ją**.
+2. Sprawdź w **Katalogu**, że produkty BKT są **potaniałe** (kolumna **Promocja** pokazuje
+   `-10%`). Zanotuj cenę jednego z nich.
 3. Wejdź w **edycję** tej promocji (ikona ołówka), ustaw **Datę startu** na `2020-01-01`,
    a **Datę końca** na `2020-03-31`. **Zapisz.**
 4. Popatrz na status w tabeli promocji.
-5. Wejdź w **Katalog** i popatrz na cenę produktu BKT oraz na kolumnę **Promocja**.
+5. Wejdź w **Katalog** i popatrz na cenę produktu z kroku 2 oraz na kolumnę **Promocja**.
 
 **Ma się stać:**
 - krok 4: status **zakończona**;
@@ -230,13 +239,14 @@ sam defekt jest do dziś** i nie jest to naprawione po tamtej stronie.
 *zakończona*. Promocja zaplanowana na przyszły tydzień **naprawdę się w przyszłym tygodniu
 włączy**.
 
-**Sprawdź** (test dwustronny — najpierw że NIE działa przed czasem, potem że działa po czasie):
-1. Założ promocję z warunkiem **Marka** → *BKT*, rabat **10**, **Datę startu** ustaw na
-   **jutro**, datę końca na za miesiąc. **Zapisz.**
+**Sprawdź** — **dalej ta sama promocja co w punkcie 3.1**, którą zostawiłaś na datach z 2020.
+Test jest dwustronny: najpierw że NIE działa przed czasem, potem że działa po czasie:
+1. Wejdź w **edycję** promocji *Wyprzedaż BKT*, ustaw **Datę startu** na **jutro**, a **Datę
+   końca** na **za miesiąc**. **Zapisz.**
 2. Popatrz na status w tabeli, a potem wejdź w **Katalog** — na cenę produktu BKT i na kolumnę
    **Promocja**.
-3. Wróć do **edycji** tej promocji i przestaw **Datę startu** na **wczoraj** (datę końca
-   zostaw). **Zapisz.**
+3. Wróć do **edycji** tej samej promocji i przestaw **Datę startu** na **wczoraj** (datę końca
+   zostaw na za miesiąc). **Zapisz.**
 4. Popatrz jeszcze raz na status, cenę w Katalogu i kolumnę **Promocja**.
 
 **Ma się stać:**
@@ -362,23 +372,30 @@ Pod tym jest **zdanie o liczbie produktów**, w jednym z trzech brzmień:
 | reguła dziś nikogo nie obejmuje | *„Dziś ta reguła nie obejmuje żadnego produktu — usunięcie nie zmieni cen."* |
 | reguła kogoś obejmuje | *„Zmiana dotyczy 954 produktów — tyle pozycji katalogu obniża dziś ta promocja."* (przy narzucie końcówka brzmi *„wycenia dziś ta reguła"*) |
 
-**Sprawdź:**
-1. Zakładka **Promocje** — kliknij **kosz** przy promocji „marka → BKT" z punktu 2.1.
-2. Przeczytaj tytuł, treść i zdanie o liczbie produktów. Kliknij **Anuluj**.
-3. Sprawdź, że promocja **nadal jest w tabeli**.
-4. Zakładka **Narzuty** — kliknij **kosz** przy dowolnej regule i przeczytaj okienko.
+**Sprawdź** — dalej na promocji *Wyprzedaż BKT*; zobaczysz przy okazji **dwa z trzech** brzmień
+z tabelki wyżej:
+1. Zakładka **Promocje** — jeśli po punkcie 3.4 promocja ma **daty z 2020**, kliknij od razu
+   **kosz** i przeczytaj zdanie o liczbie produktów. Kliknij **Anuluj**.
+2. Wejdź w **edycję** promocji i przywróć daty na **domyślne** (start dziś, koniec za 30 dni),
+   żeby znów była **aktywna**. **Zapisz.**
+3. Kliknij **kosz** jeszcze raz. Przeczytaj tytuł, treść i zdanie o liczbie produktów.
    Kliknij **Anuluj**.
-5. Wróć do promocji, kliknij kosz i tym razem **potwierdź** przyciskiem **„Usuń promocję"**.
-6. Zajrzyj do **Katalogu** — na cenę produktu BKT i na kolumnę **Promocja**.
+4. Sprawdź, że promocja **nadal jest w tabeli**.
+5. Zakładka **Narzuty** — kliknij **kosz** przy dowolnej regule narzutu i przeczytaj okienko.
+   Kliknij **Anuluj**.
+6. Wróć do promocji, kliknij kosz i tym razem **potwierdź** przyciskiem **„Usuń promocję"**.
+7. Zajrzyj do **Katalogu** — na cenę produktu BKT i na kolumnę **Promocja**.
 
 **Ma się stać:**
-- kroki 1–2: okienko z **nazwą usuwanej reguły** w treści i z **konkretną liczbą** produktów
-  (dla promocji BKT rzędu kilkuset — w naszym pomiarze było **954**);
-- krok 3: **Anuluj nic nie usuwa**;
-- krok 4: okienko narzutu mówi **„Usunąć regułę narzutu?"** i końcówkę *„wycenia dziś ta
-  reguła"*;
-- krok 5: promocja znika z tabeli, pojawia się komunikat o usunięciu;
-- krok 6: cena bez rabatu, w kolumnie **Promocja** jest **„—"**.
+- krok 1 (promocja *zakończona*): *„Dziś ta reguła nie obejmuje żadnego produktu — usunięcie nie
+  zmieni cen."* — **i to jest poprawne**, bo wygasła promocja faktycznie nikogo dziś nie obejmuje;
+- krok 3 (promocja *aktywna*): okienko **„Usunąć promocję?"** z **nazwą** w treści i
+  z **konkretną liczbą** produktów (dla BKT rzędu kilkuset — w naszym pomiarze **954**);
+- krok 4: **Anuluj nic nie usuwa**;
+- krok 5: okienko narzutu mówi **„Usunąć regułę narzutu?"** i ma końcówkę *„wycenia dziś ta
+  reguła"* zamiast *„obniża dziś ta promocja"*;
+- krok 6: promocja znika z tabeli, pojawia się komunikat o usunięciu;
+- krok 7: cena bez rabatu, w kolumnie **Promocja** jest **„—"**.
 
 **⚠ Liczba w okienku to nie to samo, co liczba z czerwonego paska „poniżej kosztu".** Czerwony
 pasek z §3.8 pierwszej wersji liczy dopasowanie **trzecim, osobnym sposobem** i jest ślepy na
@@ -415,15 +432,26 @@ po czym zapis nie zmienia ani jednej ceny.
 w starym Bridge i w odbudowie. **Praktyczny wniosek bez zmian: promocjom zawsze ustawiaj
 warunek.**
 
-## 5.2 Komunikat po edycji reguły dalej brzmi „Reguła dodana"
+## 5.2 Komunikat po edycji reguły — zamknięte bez zmian, ale wynik nas zaskoczył
 
-Dotyczy §3.11 pierwszej wersji, która obiecywała komunikat *„Reguła zaktualizowana"*.
+Dotyczy §3.11 pierwszej wersji. Zgłosiłaś, że po edycji reguły pojawia się komunikat *„Reguła
+dodana"* zamiast obiecanego *„Reguła zaktualizowana"*.
 
 **Twoja decyzja:** *„dodana czy zaktualizowana to nie ma różnicy, zostaw to tak jak jest"*.
 
-Sprawdziliśmy przy okazji, czy pod tym komunikatem nie kryje się prawdziwy defekt — czyli czy
-edycja przypadkiem nie tworzy drugiej reguły obok pierwszej. **Nie tworzy.** Zapis z edycji
-naprawdę aktualizuje istniejącą regułę, myli tylko napis.
+**Sprawdziliśmy to jeszcze przed Twoją odpowiedzią i wyszło coś innego, niż oboje myśleliśmy:
+w odbudowie komunikat po edycji brzmi „Reguła zaktualizowana".** Przy promocji — *„Promocja
+zaktualizowana"*. Zmierzyliśmy jedenaście przypadków i wszystkie wypadły poprawnie. Czyli
+**§3.11 pierwszej wersji mówi prawdę i nie ma tu czego naprawiać** — a Twoja decyzja zamknęła
+wątek, który okazał się pusty.
+
+Przy okazji sprawdziliśmy rzecz poważniejszą, która mogłaby się za tym komunikatem kryć: czy
+edycja przypadkiem nie tworzy **drugiej reguły** obok pierwszej. **Nie tworzy** — zapis z edycji
+naprawdę aktualizuje tę regułę, którą edytujesz.
+
+**⚠ Gdybyś jednak zobaczyła po edycji „Reguła dodana" — to jest błąd i chcemy o nim wiedzieć.**
+Zapisz wtedy, którą regułę edytowałaś i przez którą ikonę (ołówek przy wierszu, nie przycisk
+„Dodaj regułę").
 
 ## 5.3 Przełącznika statusu przy promocjach nie dokładamy
 
