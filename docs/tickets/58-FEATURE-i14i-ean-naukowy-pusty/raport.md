@@ -182,3 +182,63 @@ Gałąź staje się osiągalna, gdy MO8 przyjdzie jako CSV albo gdy pozycje wejd
 3. **Komunikat „zapis naukowy ma tylko null cyfr znaczących"** (cieniowanie `Lq`, backlog #11)
    dalej zawiera dosłowne „null". Karta wprost zabraniała naprawy przy okazji — wpis w backlogu
    pozostaje otwarty w tej części.
+
+## Docs updates
+
+### `docs/rebuild-roadmap.md` (9 edycji)
+
+- Blok **14i** oznaczony jako zrobiony w czterech miejscach (tabela §4 linia ~191, nagłówek
+  bloku I14 ~2158, tabela kart drugiej fali ~2499, sekcja „ROZSTRZYGNIĘTE 2026-09-18") —
+  data 2026-09-18 + ID ticketa; 14i zdjęta z listy „otwarte 14f/14h/14i".
+- **Skorygowane błędne przypisanie zakresu (D5):** wiersz 14i miał „BE: silnik importu
+  (normalizacja EAN)" → jest „BE: zapis do katalogu (akceptacja), `src/import/akceptacja.ts`".
+  Dowód zapisany jako fakt: `tk.ts:302-305` dopasowuje po `znormalizowana.ean`, test
+  `silnik.gate.test.ts`.
+- **Usunięta niewykonalna nota** „14i rusza silnik importu — wzorce trzeba przenagrać":
+  zastąpiona stanem faktycznym (0 scenariuszy/testów/fixtures ruszonych) i wyjaśnieniem, że
+  przenagranie odtworzyłoby starą wartość, bo skrypt uruchamia żywy oryginał.
+- **Zdjęta fałszywa blokada kolejnościowa z 14h** — 14i nie ruszyła `contract/`, więc 14h
+  wchodzi bez uzgodnień (poprawione w dwóch miejscach: nota o kolizji ~2504 i „Kolejność" ~2681).
+- Nota „Do rozliczenia przez kartę zamykającą DRUGĄ FALĘ I14" — zależność aktualizacji
+  `docs/instrukcja-testow-I4.md` zawężona z „14f/14i" do samego **14f**.
+- Dopisane dwa follow-upy z tego raportu (zwężenie `ean` w kontrakcie, bulk bez
+  `normalizujEan()`) — z odsyłaczem do ticketa zamiast kopiowania treści.
+
+### `docs/rebuild-backlog.md` (wpis #11)
+
+- **Rozdzielone dwa zagadnienia, które wpis mieszał:** (a) decyzja Ani „puste pole w katalogu" —
+  **zrealizowana** kartą 58; (b) defekt cieniowania `Lq()` i komunikat „null cyfr znaczących" —
+  **nadal otwarty**, karta 58 celowo go nie ruszała. Pola `Do nowej wersji?`, `Iteracja`
+  i `Status` opisują teraz STAN, nie zamiar.
+- Skorygowana obalona teza „rusza silnik importu, trzeba przenagrać wzorce".
+- Rozstrzygnięte otwarte pytanie „czy ostrzeżenie w stagingu zostaje" → **ZOSTAJE** (D2).
+- Dopisana wiedza z code review: `assignKodImportu()` (`bridge_ext.cjs:164-167`) grupuje po
+  `EAN:<ean>` tylko gdy `eanIsValid === 1` — pułapka dla każdej przyszłej zmiany `products.ean`.
+- Dopisana zmierzona statystyka zasięgu: **0 z 7405** produktów w `db/snapshot.db` ma dziś
+  status `scientific_notation_uncertain`.
+
+### `docs/instrukcja-testow-I3-v2.md` (dokument dla Ani)
+
+Punkt **5.2** („⏳ EAN w zapisie naukowym — decyzja podjęta, wdrożenie czeka") przeniesiony do
+rozdziału z dowiezionymi poprawkami jako **4.3**, z krokami sprawdzenia i miejscem na ocenę.
+Uczciwe zastrzeżenie: gałąź trafia się rzadko (0/7405 w produkcji), więc punkt jest **warunkowy**
+(„tylko jeśli natrafisz"), a nie do wymuszenia. Podbite odwołania: arytmetyka we wstępie
+(9 poprawionych zamiast 8), tabela podsumowania (19 punktów), rozdział 8. W dokumencie
+powiedziane wprost, że **ostrzeżenie na Stagingu zostaje** i nie należy go zgłaszać ponownie.
+
+⚠ **Ten plik trafił na gałąź przez scalenie osieroconych commitów ticketa 56** — patrz
+„Pre-existing issues" niżej.
+
+## Pre-existing issues
+
+1. **Trzy commity ticketa 56 nigdy nie trafiły na `develop`.** PR #71 zmergowano 2026-09-18
+   o 17:18, a commity `c3343ba` (17:24), `e90dfab` (18:17) i `7ea0beb` (18:32) powstały PO
+   merge'u i nie miały żadnego otwartego PR-a. Wśród nich: zawężenie instrukcji do uwag Ani
+   (13 → 8 rozdziałów), 26 scenariuszy testowych i scalenie wszystkiego w jeden plik
+   `docs/instrukcja-testow-I3-v2.md` (kasujące `instrukcja-testow-I14.md`
+   i `scenariusze-testow-I14.md`). Skutek: `develop` i roadmapa opisywały plik, który gałąź 56
+   już zastąpiła. **Naprawione w tym PR** przez scalenie gałęzi 56 (decyzja użytkownika) —
+   historia i autorstwo trzech commitów zachowane.
+2. **`docs/rebuild-backlog.md:35`** — narracja z podsumowania sesji 12e (2026-09-08) nadal
+   wymienia #11 jako ⬜. Zostawione: to datowany zapis historyczny sprzed decyzji Ani, nie żywy
+   wskaźnik statusu. Do rozważenia przy porządkowaniu preambuły.
