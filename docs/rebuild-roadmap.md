@@ -2175,23 +2175,52 @@ niżej są z niego i były weryfikowane pod kątem ISTNIENIA zachowania, nie jeg
 Zanim zmienisz etykietę albo tekst, potwierdź go w ŻYWYM bundlu
 (`mirror/frontend/assets/index-PRICEFMT1783512500.js`, ścieżka w `mirror/frontend/index.html`).
 
-**14a — zakładka „Wgrywanie ręczne"** [FE]. Cztery braki, wszystkie zweryfikowane w oryginale:
-- **Wgrywanie zbiorcze jest MODALEM, nie inline'em.** Przycisk „Wgraj pliki" (`button-multi-upload`)
-  otwiera dialog „Wgraj wiele plików — auto-detekcja dostawcy" z „Dodaj kolejny plik" / „Wyczyść" /
-  „Importuj do staging" — `frontend-index.js:26155-26166`, `:18957`, `:19171`. Etykieta akcji ma
-  wariant „Importuj do katalogu" (`:19171`) — ustalić, co go włącza, przed zahardkodowaniem.
-- **Brak całej sekcji „Wgrywanie pojedyncze (z wymuszonym dostawcą)"** — siatka kafli
-  `upload-tile-{kod}` (kod · nazwa · e-mail · „Wgraj plik"), `:26169-26200`. Ten sam dialog,
-  ale z wymuszonym dostawcą zamiast auto-detekcji.
-- **Brak toasta po imporcie** — `:19152-19153`: tytuł `${doStagingu} pozycji czeka na akceptację`
-  albo „Import zakończony", opis skleja tylko NIEZEROWE liczniki (Pozycji w plikach · Do akceptacji
-  w stagingu · Nowe · Zmienione · Wycofane · Bez zmian · Odrzucone (nie opony) · Pominięte pliki).
-  Błąd wczytania też idzie toastem (`:18876`). ⚠ Komentarz „nie mamy jeszcze Toastera"
-  w `Wgrywanie.tsx:80` jest NIEAKTUALNY — `ToastProvider` stoi w `App.tsx` od sesji 4b.
-- **Przycisk pokazuje „Wgraj (0)" po udanym wgraniu** (`Wgrywanie.tsx:192`) — licznik `doWyslania`
-  liczy pozycje JESZCZE niewysłane, więc po imporcie spada do zera i Ania czyta to jako „wgrało zero".
-- Bez zmian: podgląd 5 pozycji dalej pochodzi z odpowiedzi backendu (decyzja 3f-1), endpointy,
-  limit 50 MB, CSV+XLSX.
+**14a — zakładka „Wgrywanie ręczne"** [FE] — ✅ **ZROBIONE 2026-09-18**, ticket
+`49-CHORE-i14a-wgrywanie-reczne`. Wszystkie cztery braki dowiezione:
+- **Wgrywanie zbiorcze jest MODALEM** za „Wgraj pliki" (`button-multi-upload`), dialog
+  „Wgraj wiele plików — auto-detekcja dostawcy" z „Dodaj kolejny plik" / „Wyczyść" /
+  „Importuj do staging" (`:26155-26166`, `:18957`, `:19171`).
+- **Sekcja „Wgrywanie pojedyncze (z wymuszonym dostawcą)"** — siatka kafli `upload-tile-{kod}`
+  (kod · nazwa · e-mail · „Wgraj plik"), otwierających TEN SAM dialog z wymuszonym dostawcą
+  (`:26169-26200`). Kafle renderują WSZYSTKICH dostawców, bez filtrowania i sortowania, jak
+  oryginał — dostawcę wyłączonego z importu odrzuca backend, front nie dubluje reguły.
+- **Toast po imporcie** odtworzony co do znaku z `:19142-19153`, razem z osobliwością oryginału:
+  `odrzuconeBrakDanych` jest sumowane, ale **nigdy nie wyświetlane** — nie „naprawiać" tego
+  dopisaniem członu. Błąd wczytania pliku i błąd importu idą toastem `destructive`.
+- **Licznik „Wgraj (0)" usunięty.** Oryginał NIE MA licznika w etykiecie; przycisk wyłącza
+  wyłącznie warunek „żaden plik nie ma rozpoznanego dostawcy" (`:19161`, `:19171`). Naprawa
+  polegała na usunięciu licznika, nie na przeliczeniu go inaczej.
+- Bez zmian, zgodnie z założeniem: podgląd 5 pozycji dalej z odpowiedzi backendu (decyzja 3f-1),
+  endpointy, limit 50 MB, CSV+XLSX.
+
+⭐ **ROZSTRZYGNIĘTE: wariant „Importuj do katalogu" (`:19171`) to MARTWA GAŁĄŹ — nie portowany.**
+Propsy `prostoDoKatalogu` i `buttonLabel` istnieją w deklaracji dialogu `Cd` (`:18853-18855`), ale
+`Cd` jest w CAŁYM bundlu wołane dokładnie dwa razy (`:26157`, `:26190`) i żadne z wywołań ich nie
+przekazuje; `prostoDoKatalogu` domyślnie `false`, a trzeci argument `sP(e,t,n)` nie jest w ciele
+funkcji nawet czytany (`:18821`). Etykieta w produkcji zawsze brzmi „Importuj do staging".
+
+**Zweryfikowane przy okazji:** żywy bundel `index-PRICEFMT1783512500.js` jest dla bloków `JT` i `Cd`
+**znak w znak zgodny z deminifikatem z 13.08** (porównane bloki + liczniki wszystkich
+charakterystycznych stringów). Żadna z czterech łatek FE tej zakładki nie ruszała, więc ostrzeżenie
+o nieaktualnym deminifikacie (wyżej) dla TEJ zakładki nie obowiązuje.
+
+**Nowy plik:** `src/pages/konfiguracja/DialogWgrywania.tsx` (port `Cd()`) — jeden dialog obsługuje
+oba wejścia. `detekcja.ts` i `wgrywanie.ts` nie wymagały zmian; `wymusDostawce` już ustawiało
+dokładnie to, co `:18868`.
+
+**Świadome odstępstwa (zatwierdzone przez użytkownika w Q&A karty):** wynik importu z podglądem
+5 pozycji renderuje się w sekcji „Ostatni import" POD kaflami, a nie w dialogu — oryginał pokazuje
+podgląd PRZED wysłaniem z parsowania w przeglądarce, którego odbudowa nie robi (3f-1), więc podgląd
+powstaje dopiero z odpowiedzi backendu; sam dialog zachowuje się 1:1 (po sukcesie zamyka się
+i czyści listę). Teksty o formatach mówią „CSV i XLSX … do 50 MB" zamiast oryginalnego
+„CSV … do 10 MB", bo odbudowa realnie przyjmuje XLSX i 50 MB.
+
+⚠ **Luka w siatce bezpieczeństwa, wykryta przy tej karcie, NIE naprawiona:**
+`POST /api/dostawcy/{kod}/upload` **nie ma fixture** — `contract/openapi.yaml:19314-19328` deklaruje
+`200` bez schematu, a w `contract/fixtures/` nie ma żadnego pliku uploadu (multipartu nie dało się
+nagrać `tools/record-write-fixtures.cjs`). Kształt odpowiedzi — od którego zależy cały toast — jest
+wiążąco znany tylko z kodu (oryginał `backend-index.cjs:48277-48281` ≡ port `suppliers.ts:213-221`).
+14a nie mogła tego ruszyć (`contract/` jest wspólne dla BE i FE, nauka z 13c). **Do osobnej karty.**
 
 **14b — Staging** [FE]. Cztery pozycje:
 - ⭐ **Zły filtr domyślny.** Oryginał startuje `useState("nowa")` = „Nowe produkty" (`:20617`),
@@ -2227,6 +2256,11 @@ Zanim zmienisz etykietę albo tekst, potwierdź go w ŻYWYM bundlu
 - **Do sprawdzenia, nie do automatycznej zmiany:** etykieta przycisku synchronizacji — deminifikat
   ma „Synchronizuj" (`:25754`), odbudowa „Synchronizuj teraz", instrukcja §6 mówi Ani „Synchronizuj
   teraz". Zweryfikować na ŻYWYM bundlu przed ruszeniem.
+- ⚠ **NIE reużywaj `DialogWgrywania.tsx` z 14a.** Od 2026-09-18 w `pages/konfiguracja/` stoi
+  gotowy dialog uploadu, ale oryginał ma na karcie dostawcy WŁASNY, samodzielny upload
+  (`:25756-25802`: ukryty `<input>`, `FormData`, toast „Plik wczytany") — nie ten dialog. Sięgnięcie
+  po plik 14a złamałoby też rozłączność kart. Wzorzec toasta jest już ustawiony:
+  `useToast()` z `@/components/ui/toast`, wywołanie `toast({ title, description, variant })`.
 
 **14d — aktualizacja instrukcji testów + domknięcie backlogu** [DOCS] — **idzie PO 14a/14b/14c**,
 bo dokument ma opisywać STAN, nie zamiar. Dwie części:
@@ -2235,6 +2269,13 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   `bug2`); rozdz. 13 „Czego jeszcze NIE MA" jest nieaktualny poza „ceną na zapytanie" (historia,
   alerty, atrybuty, analityka, narzuty i promocje są dowiezione). Backlog #9/#10 do rozliczenia.
 - *Musi czekać na 14a–14c:* opis nowego kształtu trzech ekranów + wiersz iteracji w tablicy §4.
+- ⚠ **Co konkretnie zmieniło 14a w instrukcji** (zrobione 2026-09-18): rozdz. §2 opisuje STARY,
+  inline'owy przepływ („wybierz pliki na zakładce → Wgraj (N)") i jest do przepisania w całości.
+  Nowy przepływ: „Wgraj pliki" otwiera modal → wybór plików → „Importuj do staging" → toast
+  z podsumowaniem → wynik z podglądem pod kaflami. Doszła druga ścieżka, której instrukcja
+  w ogóle nie zna: kafel dostawcy → „Wgraj plik" (wymuszony dostawca, bez auto-detekcji).
+  Zniknęły `data-testid`, na które instrukcja mogła się powoływać: `button-wyslij`,
+  `bledy-wczytania`, `blad-uploadu`; `input-pliki` i `powod-detekcji` żyją teraz TYLKO w modalu.
 
 **Poza zakresem I14, wymaga osobnych decyzji i kart:**
 - **Status dostawcy w dwóch polach** (ustawienie ręczne + osobny wyliczony status techniczny) —
