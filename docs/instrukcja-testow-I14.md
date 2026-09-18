@@ -394,7 +394,7 @@ gabarytowa, Analityka, Selly, Moje konto, Pulpit). Braki są **wewnątrz** ekran
 
 | Czego brakuje | Kiedy |
 |---|---|
-| **Daty promocji** — silnik cen nalicza promocję **niezależnie od dat obowiązywania** | druga fala Iteracji 14 (karta 14f) — decyzja podjęta, jeszcze nie zrobione |
+| **Daty promocji nie działają w obie strony** — promocja z datą końca w **przeszłości** dalej obniża ceny, a promocja z datą startu w **przyszłości** nigdy się sama nie włącza | druga fala Iteracji 14 (karta 14f) — zmierzone i wycenione w rozpoznaniu 14e, naprawa jeszcze nie zrobiona |
 | **EAN w notacji naukowej → puste pole** | druga fala Iteracji 14 (karta 14i) — patrz rozdział 8 |
 | **Status dostawcy w dwóch polach** (ręczny + wyliczony) | czeka na decyzję, patrz rozdział 7 |
 | **Nowa synchronizacja z Selly przez REST** (`sync_full`, warianty magazynów) | świadomie odłożone, aż ustabilizuje się u Ciebie — panel Selly działa jak dotąd |

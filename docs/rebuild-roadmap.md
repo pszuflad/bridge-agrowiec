@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I14.md` + banner w I3). **FALA 2 OTWARTA:** 14e/14f/14h/14i — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I14.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); **otwarte 14f/14h/14i** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
 
 ---
 
@@ -2155,7 +2155,8 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
 - **Status:** 🔨 w toku — zaplanowana 2026-09-18. **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a ✅
   (`49-CHORE-i14a-wgrywanie-reczne`), 14b ✅ (`51-FEATURE-staging-filtr-pasek-kolumny`),
   14c ✅ (`50-FEATURE-i14c-karta-dostawcy-upload`), 14d ✅ (`56-DOCS-instrukcja-testow-i14`).
-  **FALA 2 otwarta:** 14e/14f/14h/14i. **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f.
+  **FALA 2 w toku:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`), otwarte 14f/14h/14i.
+  **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f.
   Niezależna od otwartego 13d (inny podsystem, inne pliki).
 - **Skąd się wzięła.** Ania przeszła `docs/instrukcja-testow-I3.md` i wypełniła pola UWAGI (komentarze
   + zrzuty ekranu). **To NIE jest kolejna delta produkcji** jak I13 — produkcja się nie zmieniła.
@@ -2570,7 +2571,13 @@ Z tego wynika rzecz najważniejsza dla 14f: **wpisanie właściwego `status` do 
 bez tknięcia silnika.** Słownik statusów już istnieje, silnik już go respektuje.
 
 **⚠ DWA SPROSTOWANIA DO `docs/instrukcja-testow-I4.md` — dokument wprowadza Anię w błąd.**
-Nie naprawione tutaj (plik poza własnością 14e), do zrobienia przez **14d**:
+Nie naprawione tutaj (plik poza własnością 14e). ⚠ **PRZYPISANIE SPROSTOWANE 2026-09-18
+w `56-DOCS-instrukcja-testow-i14`: NIE robi tego 14d, tylko karta domykająca FALĘ 2** (najpewniej
+po 14f/14h/14i). Decyzja użytkownika przy zakładaniu 14d, wprost: „NIE ruszaj
+`docs/instrukcja-testow-I4.md` — to zależy od kart 14f/14h/14i, których jeszcze nie ma".
+Powód merytoryczny: oba sprostowania niżej opisują stan, który **14f ma zmienić** — opisanie go
+Ani teraz znaczyłoby opisanie stanu, który za chwilę przestanie obowiązywać. 14d dotyczyła
+wyłącznie `instrukcja-testow-I3.md` (fala 1). Treść sprostowań zostaje tu bez zmian:
 - **§4 pkt 6 jest NIEPRAWDZIWY.** Mówi, że „promocja z datą startu w przyszłości od razu obniża
   ceny", a założona przez dialog dostaje `status: "zaplanowana"` i **nie obniża niczego**;
   nie pokaże też znacznika rozbieżności, bo etykieta z dat i kolumna `status` się zgadzają.
