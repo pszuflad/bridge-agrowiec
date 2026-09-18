@@ -2137,8 +2137,11 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   **Follow-up (nierozliczone):** silnik pseudo-alertów — backlog #26 ⬜; gdyby kiedyś wszedł,
   wchodzi OD RAZU w wersji po łatkach z 04.09. Trzeci status alertu `przejrzany` istnieje
   w oryginale, nie w odbudowie (brak wpisu w backlogu). Enhancer konfiguratora kolumn stagingu
-  (`ex_marka`/`ex_szerokosc`) — mylące skojarzenie z etykietą `szer_marka`, to inna i wcześniejsza
-  zmiana, do triażu.
+  (`ex_marka`/`ex_szerokosc`) — **rozliczone w 14b** (`51-FEATURE-staging-filtr-pasek-kolumny`,
+  2026-09-18): wchłonięty jako komponent React; `ex_marka`/`ex_szerokosc` to dwie z 49 pozycji
+  sekcji „Dodatkowe (z katalogu)", która w oryginale nic nie robi (`applyCss()` zaczyna od
+  `if (c.extra) return`, `fe.js:29134`) i odtworzona 1:1 razem z tą martwotą (D3 w bloku 14b).
+  Skojarzenie z etykietą `szer_marka` było mylące — to inna zmiana.
 
 **Kolejność:** 13f (decyzja) → **13a** → **13b** → **13c** → **13e** ; **13d ODŁOŻONE** (przepisanie świeże
 po ustabilizowaniu `mirror/selly/` u Ani, ~2026-09-16 — patrz blok 13d; 13d-1 sportowane i cofnięte 09.09).
@@ -2227,23 +2230,64 @@ nagrać `tools/record-write-fixtures.cjs`). Kształt odpowiedzi — od którego 
 wiążąco znany tylko z kodu (oryginał `backend-index.cjs:48277-48281` ≡ port `suppliers.ts:213-221`).
 14a nie mogła tego ruszyć (`contract/` jest wspólne dla BE i FE, nauka z 13c). **Do osobnej karty.**
 
-**14b — Staging** [FE]. Cztery pozycje:
-- ⭐ **Zły filtr domyślny.** Oryginał startuje `useState("nowa")` = „Nowe produkty" (`:20617`),
-  odbudowa `useState("all")` (`Staging.tsx:47`). Lista opcji: `all`/`nowa`/`nowy`/`wycofana`/
-  `zmiana_kluczowa`/`blad` (`:20543-20560`). ⚠ Przesuwa domyślny zakres „Akceptuj/Odrzuć wszystkie (N)".
-- **Brak konfiguratora kolumn („Kolumny").** W oryginale to NIE komponent Reacta, tylko skrypt
-  doklejony do DOM-u (`:29317-29331`): wstrzykuje przycisk przed `button-accept-all`, popover
-  z checkboxami, ukrywanie kolumn CSS-em, zapamiętanie ustawienia. Wchłonąć jak `freq-injection.js`
-  w 3f-2. ⚠ NIE wyciągać wspólnego komponentu z `pages/katalog/KonfiguratorKolumn.tsx` — to plik
-  spoza własności 14b i złamałoby rozłączność kart. **To rozlicza wpis „do triażu" z bloku 13e.**
-- **Placeholder szukajki zaniża możliwości:** oryginał „Szukaj po kodzie, nazwie, dostawcy lub EAN...",
-  odbudowa „Szukaj po nazwie lub kodzie…" (`Staging.tsx:148`) — a backend szuka po czterech polach
-  (`rebuild/backend/src/repos/staging.ts:114-117`). Sam tekst.
-- **Układ paska akcji** (`:20702-20770`): jeden rząd — szukajka → „Typ sprawy" → licznik „N zmian" →
-  „Akceptuj/Odrzuć zaznaczone (N)" renderowane TYLKO przy zaznaczeniu → „Akceptuj/Odrzuć widoczne";
-  „Akceptuj/Odrzuć wszystkie (N)" w nagłówku karty.
-- ⚠ **NIE cofać:** zmiana rozmiaru strony wraca na stronę 1 (`Staging.tsx:65-67`). Oryginał resetuje
-  tylko przy zmianie filtra i frazy, ale to ŚWIADOME odstępstwo z 3e, opisane Ani w §9.3 instrukcji.
+**14b — Staging** [FE] — ✅ zrobione 2026-09-18 (`51-FEATURE-staging-filtr-pasek-kolumny`).
+Cztery pozycje pierwotnego zakresu dowiezione:
+- **Filtr domyślny wrócił na `useState("nowa")`** = „Nowe produkty" (D1). Skutek: „Akceptuj/Odrzuć
+  wszystkie (N)" domyślnie liczy i wysyła tylko pozycje typu `nowa`; żeby ruszyć cały staging, trzeba
+  świadomie przestawić „Typ sprawy" na „Wszystkie" — to zachowanie produkcji, chroni przed masowym
+  zatwierdzeniem błędów i wycofań jednym kliknięciem.
+- **Konfigurator kolumn („Kolumny") wchłonięty jako komponent React** w `pages/staging/`
+  (`KonfiguratorKolumn.tsx`, `kolumny.ts`) — wzorzec z `freq-injection.js` → `Dostawcy.tsx` (3f-2):
+  układ, teksty i semantyka trzech skrótów („Wszystkie"/„Domyślne"/„Żadna") 1:1, warstwa manipulacji
+  DOM-em znika (D8, D9). Ustawienia w `localStorage`, klucz `bridge_staging_cols_v2` (D5, tak jak
+  oryginał — nie IndexedDB jak konfigurator katalogu).
+- **Placeholder szukajki** poprawiony na „Szukaj po kodzie, nazwie, dostawcy lub EAN..." (dosłownie,
+  z trzema kropkami ASCII).
+- **Pasek akcji złożony w jeden rząd** wg `fe.js:20707-20770`: szukajka → „Typ sprawy" → licznik
+  „N zmian" → „Akceptuj/Odrzuć zaznaczone (N)" (tylko przy zaznaczeniu) → „Kolumny" → „Akceptuj/Odrzuć
+  widoczne"; „Akceptuj/Odrzuć wszystkie (N)" w nagłówku karty.
+
+**Dwa rozjazdy, których pierwotny opis tego bloku NIE MIAŁ, a karta naprawiła (wykryte rozpoznaniem,
+nie z tego opisu):**
+- **Kolejność kolumn tabeli** — `Magazyn` wrócił z 9. na 6. pozycję, zaraz za `Dostawca`, bo
+  konfigurator mapuje kolumny POZYCYJNIE przez `POS_KEYS` (`fe.js:29156`) — rozjazd kolejności
+  nie był wyłącznie kosmetyką, tylko psuł mapowanie widoczności (D2).
+- **Nagłówek kolumny** wrócił z „Powód / co sprawdzić" na „Powód" (D2).
+
+Do tego, też poza pierwotnym opisem: nagłówek widoku wyrównany do oryginału — tytuł
+„Staging — zmiany do akceptacji", podtytuł „Do decyzji Marty trafiają tylko nowe, wycofane, błędne
+i kluczowo zmienione pozycje..." (D6); warianty przycisków masowych 1:1 — „Akceptuj wszystkie (N)"
+`variant="default"` + ikona `Check`, „Odrzuć wszystkie (N)" `variant="outline"` + ikona `X`, czerwony
+`destructive` znika (D7). Bezpiecznikiem zostaje `DialogPotwierdzenia`, którego oryginał w ogóle nie
+ma — zastane odstępstwo z 12e (backlog #51), poza zakresem tej karty.
+
+⚠ **Pułapka `data-testid`, wpływa na to GDZIE realnie ląduje przycisk „Kolumny":** w oryginale
+`data-testid` przycisków masowych są semantycznie ZAMIENIONE względem odbudowy — „Akceptuj wszystkie
+(N)" w nagłówku ma tam `button-accept-selected`, a „Akceptuj widoczne" w pasku ma `button-accept-all`.
+Enhancer wstrzykuje przycisk „Kolumny" przed `button[data-testid="button-accept-all"]`
+(`:29317-29334`), co w oryginale znaczy PASEK, przed „Akceptuj widoczne" — nie nagłówek, jak
+sugerowałaby nazwa czytana wprost. **Decyzja D4: `data-testid` w odbudowie ZOSTAJĄ w konwencji
+odbudowy** (niezamienione) — świadome odstępstwo, bo atrybut jest niewidoczny dla użytkownika,
+a wierność utrwaliłaby mylącą nazwę w naszym kodzie.
+
+**Deminifikat tu WIARYGODNY**, mimo ostrzeżenia o bundlu z 13.08 wyżej w bloku: `STAGING_COLS`
+i `POS_KEYS` w ŻYWYM bundlu (`main:mirror/frontend/assets/index-PRICEFMT1783512500.js`) są bajt
+w bajt identyczne z `deminified/frontend-index.js` — żadna z czterech łatek FE Ani tego enhancera
+nie tknęła.
+
+**GATE odbudowy: N/D** — `contract/`, `contract/fixtures/` i `rebuild/backend/` poza diffem gałęzi;
+jedyna zmiana w wywołaniach API to WARTOŚĆ `typZmiany` w pierwszym żądaniu (`all` → `nowa`), legalna
+w enumie od zawsze. Bramki FE zielone: `lint`/`typecheck`/`build`/`test` **762/762 w 48 plikach**
+(przed kartą 751).
+
+⚠ **Dwie zmiany widoczne dla Ani, do uprzedzenia przy przeglądzie 12 widoków** (obie odtwarzają
+produkcję, nie regresja): **(1)** ekran startuje z filtrem „Nowe produkty" — patrz D1 wyżej;
+**(2)** kolumny „Stan", „Cena zakupu" i „Cena sprzedaży" są DOMYŚLNIE UKRYTE, bo jako jedyne kolumny
+tabeli nie mają `def:true` w `STAGING_COLS` — włącza się je przyciskiem „Kolumny".
+
+Reset strony przy zmianie rozmiaru strony ZOSTAJE (bez zmian w tej karcie) — świadome odstępstwo
+z 3e, opisane Ani w **§3.3, linia 95** instrukcji (sprostowanie referencji: dokument kończy się na
+§8, „§9.3" nie istnieje; sama decyzja niezmieniona).
 
 **14c — karta dostawcy** [FE]. Trzy pozycje + jedno rozstrzygnięcie:
 - **Brak przycisku „Wgraj plik" na kartach dostawców** — `:25756-25802`: renderowany dla
@@ -2281,6 +2325,11 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   w ogóle nie zna: kafel dostawcy → „Wgraj plik" (wymuszony dostawca, bez auto-detekcji).
   Zniknęły `data-testid`, na które instrukcja mogła się powoływać: `button-wyslij`,
   `bledy-wczytania`, `blad-uploadu`; `input-pliki` i `powod-detekcji` żyją teraz TYLKO w modalu.
+- *Z 14b (ustalone 2026-09-18, `51-FEATURE-staging-filtr-pasek-kolumny`), musi rozliczyć 14d:*
+  **(1)** §3.2 każe Ani „wrócić na *Wszystkie*" po sprawdzeniu filtra „Błędy importu" — przy nowym
+  domyślnym filtrze `nowa` ten krok wraca teraz do INNEGO stanu niż startowy, trzeba przepisać;
+  **(2)** §3.1/§6 mówią o „liście pozycji z kompletem kolumn" — po 14b kolumny „Stan", „Cena
+  zakupu" i „Cena sprzedaży" są domyślnie ukryte, trzeba opisać przycisk „Kolumny".
 
 ---
 

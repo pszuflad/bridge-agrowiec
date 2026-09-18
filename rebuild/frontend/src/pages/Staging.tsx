@@ -14,7 +14,7 @@
  * Ten ostatni jest logiem zdarzeń z `audit_log` i pojedynczych auto-zatwierdzeń nie pokazuje.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import { Check, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
@@ -29,8 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { KonfiguratorKolumn } from "./staging/KonfiguratorKolumn";
 import { SzczegolyPozycji } from "./staging/SzczegolyPozycji";
 import { TabelaStagingu } from "./staging/TabelaStagingu";
+import { wczytajKolumny, zapiszKolumny, type WidocznoscKolumn } from "./staging/kolumny";
 import {
   OPCJE_FILTRA_TYPU,
   ROZMIARY_STRONY,
@@ -44,7 +46,14 @@ import {
 
 export function Staging() {
   const klient = useQueryClient();
-  const [typZmiany, ustawTyp] = useState("all");
+  /*
+    ⭐ „nowa", nie „all" — 1:1 z oryginałem (`fe.js:20617`).
+    To nie jest kosmetyka: filtr steruje zakresem przycisków „Akceptuj/Odrzuć wszystkie (N)",
+    bo `allFiltered` leci z bieżącą wartością `typZmiany`. Domyślnie akcja masowa dotyczy
+    więc TYLKO nowych produktów, a nie całego stagingu razem z błędami i wycofaniami —
+    i właśnie to chroni przed zatwierdzeniem wszystkiego jednym kliknięciem.
+  */
+  const [typZmiany, ustawTyp] = useState("nowa");
   const [szukaj, ustawSzukaj] = useState("");
   const [strona, ustawStrone] = useState(1);
   const [naStronie, ustawNaStronie] = useState<number>(ROZMIARY_STRONY[0]);
@@ -59,6 +68,18 @@ export function Staging() {
    * zmienia się wyłącznie nośnik — ten sam wzorzec co D2 z 7b, D6 z narzutów i D1 z 12c.
    */
   const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<"akceptuj" | "odrzuc" | null>(null);
+
+  /*
+    Wybór kolumn z konfiguratora. Czytamy go RAZ przy montowaniu (leniwy inicjalizator),
+    tak jak oryginał czytał `loadPrefs()` przy starcie skryptu (`fe.js:29122`).
+    Zapis idzie do `localStorage` pod kluczem oryginału — patrz `staging/kolumny.ts`.
+  */
+  const [widoczneKolumny, ustawWidoczneKolumny] = useState<WidocznoscKolumn>(wczytajKolumny);
+
+  const zmienKolumny = (nowe: WidocznoscKolumn) => {
+    ustawWidoczneKolumny(nowe);
+    zapiszKolumny(nowe);
+  };
 
   // Zmiana filtra, szukanej frazy albo rozmiaru strony cofa na stronę 1 — inaczej łatwo
   // wylądować poza zakresem wyników i zobaczyć pustą tabelę, która wygląda jak brak danych.
@@ -120,111 +141,138 @@ export function Staging() {
 
   return (
     <div className="space-y-4">
+      {/*
+        Nagłówek 1:1 z oryginałem (`fe.js:20679-20706`), razem z akcjami masowymi w `actions`.
+        Oryginał trzyma „Akceptuj/Odrzuć wszystkie (N)" WŁAŚNIE TUTAJ, a nie w pasku — pasek
+        dostaje tylko warianty „zaznaczone" i „widoczne".
+
+        ⚠ Nazwy `data-testid` zostają w konwencji odbudowy (`button-accept-all` = „wszystkie").
+        W oryginale są semantycznie zamienione — tam „Akceptuj wszystkie" ma
+        `button-accept-selected`, a „Akceptuj widoczne" ma `button-accept-all`. To ŚWIADOME
+        odstępstwo (D4 przy 14b): atrybut nie jest widoczny dla użytkownika, a wierność
+        utrwaliłaby mylącą nazwę w naszym kodzie. Jedyne miejsce, gdzie ta zamiana ma skutek,
+        to pozycja przycisku „Kolumny" — i ona jest odtworzona, patrz `KonfiguratorKolumn`.
+      */}
       <PageHeader
-        title="Staging"
-        subtitle="Pozycje z importu czekające na decyzję. Zmiany cen i stanów import zatwierdza sam — tutaj trafia to, co wymaga oka człowieka."
-      />
-
-      <Card>
-        <CardContent className="space-y-3 p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Select value={typZmiany} onValueChange={ustawTyp}>
-              <SelectTrigger className="w-56" data-testid="select-filter-type" aria-label="Typ sprawy">
-                <SelectValue placeholder="Typ sprawy" />
-              </SelectTrigger>
-              <SelectContent>
-                {OPCJE_FILTRA_TYPU.map(({ wartosc, etykieta }) => (
-                  <SelectItem key={wartosc} value={wartosc}>
-                    {etykieta}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <div className="relative flex-1 min-w-48">
-              <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pl-8"
-                placeholder="Szukaj po nazwie lub kodzie…"
-                aria-label="Szukaj w stagingu"
-                data-testid="input-search-staging"
-                value={szukaj}
-                onChange={(e) => ustawSzukaj(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/*
-            Trzy warianty każdej akcji, jak w oryginale: ZAZNACZONE (`ids`), WIDOCZNE (`ids`
-            z bieżącej strony) i WSZYSTKIE PRZEFILTROWANE (`allFiltered` + filtr typu).
-            Ten trzeci nie ogląda się na paginację — dlatego pyta o potwierdzenie.
-          */}
-          <div className="flex flex-wrap items-center gap-2">
+        title="Staging — zmiany do akceptacji"
+        subtitle="Do decyzji Marty trafiają tylko nowe, wycofane, błędne i kluczowo zmienione pozycje. Cena i stan aktualizują katalog automatycznie."
+        actions={
+          <>
             <Button
-              size="sm"
-              data-testid="button-accept-checked"
-              disabled={idZaznaczone.length === 0 || akcja.isPending}
-              onClick={() => akcja.mutate(() => zatwierdzPozycje(idZaznaczone))}
-            >
-              Akceptuj zaznaczone ({idZaznaczone.length})
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              data-testid="button-accept-selected"
-              disabled={idWidoczne.length === 0 || akcja.isPending}
-              onClick={() => akcja.mutate(() => zatwierdzPozycje(idWidoczne))}
-            >
-              Akceptuj widoczne
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
               data-testid="button-accept-all"
               disabled={razem === 0 || akcja.isPending}
               onClick={() => ustawDoPotwierdzenia("akceptuj")}
             >
-              Akceptuj wszystkie ({razem})
+              <Check className="mr-2 h-4 w-4" /> Akceptuj wszystkie ({razem})
             </Button>
-
-            <span className="mx-1 h-5 w-px bg-border" />
-
             <Button
-              size="sm"
               variant="outline"
-              data-testid="button-reject-checked"
-              disabled={idZaznaczone.length === 0 || akcja.isPending}
-              onClick={() => akcja.mutate(() => odrzucPozycje(idZaznaczone))}
-            >
-              Odrzuć zaznaczone ({idZaznaczone.length})
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              data-testid="button-reject-selected"
-              disabled={idWidoczne.length === 0 || akcja.isPending}
-              onClick={() => akcja.mutate(() => odrzucPozycje(idWidoczne))}
-            >
-              Odrzuć widoczne
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
               data-testid="button-reject-all"
               disabled={razem === 0 || akcja.isPending}
               onClick={() => ustawDoPotwierdzenia("odrzuc")}
             >
-              Odrzuć wszystkie ({razem})
+              <X className="mr-2 h-4 w-4" /> Odrzuć wszystkie ({razem})
             </Button>
-          </div>
+          </>
+        }
+      />
 
-          {komunikat ? (
-            <p className="text-sm text-muted-foreground" role="status" data-testid="komunikat-akcji">
-              {komunikat}
-            </p>
+      {/*
+        Pasek narzędzi — jeden rząd, POZA kartą, dokładnie jak w oryginale
+        (`fe.js:20707-20770`, `div.flex.items-center.gap-3.mb-4`). Kolejność:
+        szukajka → „Typ sprawy" → select → licznik zmian → (do prawej) akcje na zaznaczonych
+        i widocznych. Odbudowa trzymała to wcześniej w karcie i w dwóch rzędach.
+      */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative min-w-[220px]">
+          <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="pl-8 font-mono text-sm"
+            /* Trzy kropki ASCII, nie wielokropek — tak ma oryginał (`fe.js:20714`). */
+            placeholder="Szukaj po kodzie, nazwie, dostawcy lub EAN..."
+            aria-label="Szukaj w stagingu"
+            data-testid="input-search-staging"
+            value={szukaj}
+            onChange={(e) => ustawSzukaj(e.target.value)}
+          />
+        </div>
+
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">Typ sprawy</span>
+
+        <Select value={typZmiany} onValueChange={ustawTyp}>
+          <SelectTrigger className="w-64" data-testid="select-filter-type" aria-label="Typ sprawy">
+            <SelectValue placeholder="Typ sprawy" />
+          </SelectTrigger>
+          <SelectContent>
+            {OPCJE_FILTRA_TYPU.map(({ wartosc, etykieta }) => (
+              <SelectItem key={wartosc} value={wartosc}>
+                {etykieta}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        {/* Liczebnik jak w oryginale: „1 zmiana", poza tym „N zmian" (`fe.js:20738`). */}
+        <div className="font-mono text-xs text-muted-foreground" data-testid="licznik-zmian">
+          {razem} {razem === 1 ? "zmiana" : "zmian"}
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          {/*
+            Oryginał RENDERUJE te dwa przyciski tylko przy niepustym zaznaczeniu
+            (`n.size > 0 && …`), zamiast pokazywać je wyszarzone. Odbudowa trzymała je
+            zawsze — stąd uwaga Ani, że pasek wygląda inaczej.
+          */}
+          {idZaznaczone.length > 0 ? (
+            <>
+              <Button
+                size="sm"
+                data-testid="button-accept-checked"
+                disabled={akcja.isPending}
+                onClick={() => akcja.mutate(() => zatwierdzPozycje(idZaznaczone))}
+              >
+                Akceptuj zaznaczone ({idZaznaczone.length})
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                data-testid="button-reject-checked"
+                disabled={akcja.isPending}
+                onClick={() => akcja.mutate(() => odrzucPozycje(idZaznaczone))}
+              >
+                Odrzuć zaznaczone ({idZaznaczone.length})
+              </Button>
+            </>
           ) : null}
-        </CardContent>
-      </Card>
+
+          <KonfiguratorKolumn widoczne={widoczneKolumny} onZmiana={zmienKolumny} />
+
+          <Button
+            size="sm"
+            variant="ghost"
+            data-testid="button-accept-selected"
+            disabled={idWidoczne.length === 0 || akcja.isPending}
+            onClick={() => akcja.mutate(() => zatwierdzPozycje(idWidoczne))}
+          >
+            Akceptuj widoczne
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            data-testid="button-reject-selected"
+            disabled={idWidoczne.length === 0 || akcja.isPending}
+            onClick={() => akcja.mutate(() => odrzucPozycje(idWidoczne))}
+          >
+            Odrzuć widoczne
+          </Button>
+        </div>
+      </div>
+
+      {komunikat ? (
+        <p className="mb-2 text-sm text-muted-foreground" role="status" data-testid="komunikat-akcji">
+          {komunikat}
+        </p>
+      ) : null}
 
       <Card>
         <CardContent className="p-0">
@@ -240,6 +288,7 @@ export function Staging() {
               przelaczWszystkie={przelaczWszystkie}
               otworzSzczegoly={ustawSzczegolyId}
               ladowanie={isLoading}
+              widoczneKolumny={widoczneKolumny}
             />
           )}
         </CardContent>
