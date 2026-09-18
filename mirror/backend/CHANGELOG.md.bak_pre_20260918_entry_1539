@@ -1,14 +1,3 @@
-2026-09-18 15:39
-obszar: backend | baza danych
-
-pliki: application_rules.cjs, parsers/tyre_params.cjs, parsers/tyre_params.cjs.bak_20260918_1500_width_norm, parsers/adapter.cjs, parsers/adapter.cjs.bak_20260918_1500_width_norm, parsers/mo9_agrorami_api.cjs, parsers/mo9_agrorami_api.cjs.bak_20260918_1500_width_norm, normalize_widths_selly_20260918.cjs, data.db, data.db.bak_20260918_1500_width_norm, CHANGELOG.md, CHANGELOG.md.bak_20260918_1500_width_norm, CHANGELOG.md.bak_pre_20260918_entry_1539
-
-zmiana: w application_rules.cjs dodano zależne od kategorii mapowanie zastosowania: w Rolniczych wartości Ładowarka, ładowarka kołowa i ładowarka rolnicza są zapisywane jako Ciągnik, natomiast w Przemysłowych Ładowarka pozostaje bez zmian. Backfill zaktualizował 265 rekordów Rolniczych; po korekcie pozostało 0 Rolniczych z zastosowaniem Ładowarka. W parserze wspólnym i adapterze dodano kanoniczny zapis wyłącznie kolumny szerokosc: nieznaczące zera końcowe są usuwane (5.00→5, 12.50→12.5, 340.0→340), bez zmiany pełnych nazw i pola rozmiar. Jednorazowo ujednolicono 1297 istniejących wartości szerokości; kontrola końcowa wykazała 0 niekanonicznych szerokości i integrity_check=ok. W parserze MO9 usunięto znak $ stojący bezpośrednio przed wymiarem i poprawiono products.id=105986 z $7-14 na 7-14, pozostawiając nazwę „BKT TR 144 $7-14” bez zmian.
-
-powód: zgłoszenie Anny — filtr Rolniczych nie powinien pokazywać zastosowania Ładowarka, a filtr Szerokość opony nie powinien rozdzielać tej samej liczby na warianty 5, 5.0 i 5.00. Błędny rozmiar $7-14 z MO9 miał zostać poprawiony u źródła, aby nie wracał po imporcie.
-
----
-
 2026-09-17 18:40
 obszar: baza danych
 
