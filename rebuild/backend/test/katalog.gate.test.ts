@@ -355,12 +355,15 @@ describe("GATE — odstępstwo 14h: `_reguly.promocja` w GET /api/products", () 
   );
 
   /**
-   * Kontrakt musi dalej akceptować odpowiedź — `additionalProperties` nie jest w nim ustawione
-   * nigdzie, więc dodatkowy klucz niczego nie łamie. Ten test utrwala to jako sprawdzony fakt,
-   * a nie założenie: gdyby ktoś kiedyś dokręcił schemat, odstępstwo zapali się tutaj.
+   * Trasa z odstępstwem ma dalej przechodzić kontrolę kontraktu.
+   *
+   * ⚠ ZAKRES TEJ ASERCJI, ŻEBY NIKT NIE LICZYŁ NA WIĘCEJ: `sprawdzZgodnoscZKontraktem`
+   * sprawdza ścieżkę, metodę, kod odpowiedzi i `content-type` — NIE waliduje ciała względem
+   * schematu. Że dodatkowy klucz nie łamie schematu, wiemy stąd, że `additionalProperties`
+   * nie jest w `contract/openapi.yaml` ustawione nigdzie. Kształt ciała pilnują testy wyżej.
    */
   it.each(["/api/products", "/api/products?limit=5"])(
-    "%s — odpowiedź z `_reguly` nadal waliduje się względem contract/openapi.yaml",
+    "%s — odpowiedź z `_reguly` przechodzi kontrolę kontraktu (ścieżka/kod/content-type)",
     async (sciezka) => {
       const odp = await request(srodowisko.app)
         .get(sciezka)
