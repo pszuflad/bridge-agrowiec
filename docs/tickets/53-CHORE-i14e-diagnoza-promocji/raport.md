@@ -2,30 +2,40 @@
 
 ## Podsumowanie
 
-Karta rozpoznawcza, zgodnie z założeniem **bez ani jednej zmiany w kodzie produkcyjnym**.
+Karta rozpoznawcza, zamknięta **bez ani jednej zmiany w kodzie produkcyjnym**.
 
-Trzy werdykty:
+**⚠ ZAKRES ZAWĘŻONY W TRAKCIE REALIZACJI** — odpowiedzi Ani z 19.09 zamknęły dwa z trzech zadań,
+zanim doszło do wniosków. **Jedynym celem karty stało się zadanie C**, a jego waga wzrosła, bo
+Ania zatwierdziła zmianę: *„data ma naprawdę kończyć promocje"* (backlog #19).
 
-- **A — werdykt (a): promocja z warunkiem DZIAŁA, i to identycznie w oryginale i w odbudowie.**
-  Pomiar na kopii `db/snapshot.db`, na dwóch żywych backendach: po założeniu promocji
-  `marka→BKT` z rabatem 10% ceny 954 produktów BKT spadły dokładnie wg
-  `floor(zakup × 1,06 × 0,90 × 1,23)`, a porównanie **wszystkich 7405 produktów** między
-  oryginałem a odbudową dało **zero rozjazdów**. Zgłoszenie Ani („rabaty nie działają")
-  to trafienie w pułapkę backlogu **#25**: promocja z zaznaczoną „Regułą globalną" obejmuje
-  **1 produkt na 7405**. Nie ma regresji i nie ma czego naprawiać po naszej stronie.
-- **B — nie potwierdzono defektu.** Nie istnieje ścieżka, którą kliknięcie ołówka wchodzi
-  w tryb dodawania. Zapis z dialogu edycji leci `PATCH` na id edytowanej reguły, nie pada
-  żaden `POST`, toast mówi „zaktualizowana". **Druga reguła nie powstaje.** Ryzyko, na które
-  Ania mogła trafić, jest realne, ale leży gdzie indziej — opisane niżej.
-- **C — wycena gotowa, decyzja NIE zapadła.** Naprawa #19 kosztuje **1 scenariusz
-  charakteryzacji z 31** (3 pola w 1 wierszu), **2 testy jednostkowe** i **0 fixtures**.
-  Istnieje wariant omijający charakteryzację, ale ma własny koszt. Poniżej są dwa warianty
-  z liczbami i moją rekomendacją; **wybór między nimi — albo pozostawienie stanu jak jest —
-  należy do użytkownika.** Ta karta niczego tu nie przesądza.
+- **C (jedyny cel) — wycena obu wariantów gotowa.** **(a)** silnik czyta daty: **1 scenariusz
+  charakteryzacji z 31**, 2 testy, 0 fixtures, **wymaga wyjątku w wyroczni**. **(b)** wygaszacz
+  przestawia `status`: **0 scenariuszy**, 1 test, 0 fixtures, **bez wyjątku** — ale tylko dopóki
+  nie wchodzi do ścieżki importu. **Rekomendacja: (b)**, z trzema nazwanymi słabościami.
+  Decyzja należy do użytkownika.
+- **A — BEZPRZEDMIOTOWE** (Ania: „tylko się nie wyświetlało, cena się oblicza prawidłowo").
+  Pomiar zdążył to potwierdzić niezależnie, zanim przyszła odpowiedź: promocja `marka→BKT` 10%
+  obniżyła ceny **954 produktów** wg wzoru, a porównanie pełnego katalogu **oryginał ↔ odbudowa
+  dało 0 różnic na 7405 produktach**. Zostawiam jako dowód braku regresji, nie jako znalezisko.
+- **B — ZAMKNIĘTE bez zmian** (Ania: „dodana czy zaktualizowana to nie ma różnicy, zostaw to tak
+  jak jest"). Pomiar i tak wykazał, że defektu nie ma: zapis z edycji leci `PATCH`, **druga reguła
+  nie powstaje**.
+
+**Najważniejsze ustalenie karty** — i to, które przesądza o koszcie #19: **status promocji jest
+zapisywany RAZ, przy tworzeniu.** POST liczy go z dat, PATCH go nie wysyła, a nic po stronie
+serwera nigdy go nie przelicza. Silnik **już** honoruje `status`, więc wpisanie właściwej wartości
+do bazy wyłącza rabat **bez tknięcia silnika**. Z tego samego faktu wynika defekt odwrotny,
+nigdzie dotąd nieopisany: **promocja „zaplanowana" nigdy się nie włącza**.
 
 ---
 
-## A. ⭐ Czy promocja z warunkiem realnie obniża ceny?
+## A. Czy promocja z warunkiem realnie obniża ceny?
+
+> **ZADANIE ZAMKNIĘTE JAKO BEZPRZEDMIOTOWE** (odpowiedź Ani z 19.09: *„tylko się nie
+> wyświetlało, cena się oblicza prawidłowo"* — zgłoszenie dotyczyło pustej kolumny „Promocja",
+> nie cen). Pomiary poniżej wykonano, **zanim** odpowiedź dotarła; zostawiam je, bo niezależnie
+> potwierdzają brak regresji i dostarczają liczby do backlogu #25. Dalszych poszukiwań defektu
+> w dopasowaniu promocji nie prowadzono.
 
 ### Jak mierzyłem
 
@@ -127,6 +137,12 @@ z zakresem karty nie badałem jej.
 
 ## B. Komunikat „Reguła dodana" po edycji (§3.11)
 
+> **ZADANIE ZAMKNIĘTE BEZ ZMIAN W KODZIE** (odpowiedź Ani z 19.09: *„dodana czy zaktualizowana
+> to nie ma różnicy, zostaw to tak jak jest"*). Pomiar poniżej wykonano przed odpowiedzią;
+> zostawiam go razem z testem, bo zamyka realną lukę pokrycia i niczego nie wymusza.
+> Opisane niżej ryzyko duplikatu reguły **nie jest już przedmiotem decyzji** — Ania rozstrzygnęła
+> wątek na „zostaw jak jest".
+
 ### Co mówi architektura
 
 Każdy zasób ma **dwie niezależne instancje** `DialogReguly`:
@@ -187,111 +203,139 @@ a `deminified/frontend-index.js` jest bundlem sprzed czterech łatek i nie jest 
 
 ---
 
-## C. Wycena kosztu: „data końca ma wyłączać promocję" (backlog #19)
+## C. ⭐ Wycena: „data ma naprawdę kończyć promocję" (backlog #19)
 
-### Które bramki i wzorce faktycznie by się przesunęły
+**To jest jedyny cel karty po zawężeniu zakresu 19.09**, i jednocześnie pozycja o najwyższej
+stawce w I14 — jedyne świadome odstępstwo ruszające silnik cen.
 
-**Wariant 1 — wymuszenie dat w `promocjaPasuje`** (obie ścieżki silnika: masowe przeliczenie
-i gałąź importu). To jest ta naprawa, o której mówi komentarz w `repos/ceny.ts:108-116`.
+### Najpierw ustalenie, które przesądza o koszcie: status jest zapisywany RAZ
 
-| Miejsce | Co się zapala | Rozmiar |
+Defekt #19 bywa opisywany jako „silnik ignoruje daty". To prawda, ale niepełna i przez to myląca
+przy wycenie. Pełny obraz — trzy fakty, każdy sprawdzony w kodzie:
+
+| Fakt | Gdzie |
+|---|---|
+| **POST** wysyła `status: statusZDat(start, koniec)` — status jest liczony z dat **przy tworzeniu** | `DialogReguly.tsx:226-236` (port `Cb()`, `:9324`) |
+| **PATCH** wysyła SIEDEM pól i **`status` NIE jest wśród nich** — edycja dat nigdy nie zmienia statusu | `DialogReguly.tsx:209-224` (port `Eb()`, `:9369-9390`) |
+| **Nic po stronie serwera nigdy statusu nie przelicza** | `grep` po `statusZDat`/`zakonczona`/`zaplanowana` w `rebuild/backend/src/` nie zwraca **nic**; w `mirror/backend/index.cjs` te napisy padają wyłącznie w danych seeda |
+
+Czyli defekt to **brak przeliczania statusu w czasie**, a nie samo „nieczytanie dat".
+
+### Silnik JUŻ honoruje status — zmierzone
+
+Pomiar na prawdziwej bazie (`floor(1000 × 1,06 × 1,23) = 1303` bez rabatu, `1173` z rabatem 10%):
+
+| Stan promocji w bazie | Cena po przeliczeniu | Wynik |
 |---|---|---|
-| `test/ceny.silnik.test.ts:246-252` | test „⚠ promocja WYGASŁA nadal działa" | 1 test, **2 asercje** (wygasła + z datą startu w przyszłości) |
-| `test/narzuty.patch.test.ts:319-331` | „POST promocji obniża ceny natychmiast" — promocja `2026-06-01…2026-08-31`, czyli dziś już wygasła | 1 test, **1 asercja** |
-| **Charakteryzacja akceptacji** | scenariusz `promocja-wygasla-nadal-obniza-cene` | **1 z 31 scenariuszy** |
-| Charakteryzacja `bulk` | — | **0 z 17 scenariuszy** |
-| `test/gate/dane.ts:451` (`PROMOCJA_TESTOWA`, daty w przeszłości) | używana tylko do porównania KSZTAŁTU odpowiedzi (`narzuty.gate.test.ts:129-130`), nie do liczenia cen | **0** |
+| `aktywna`, daty bieżące | 1173 | rabat działa |
+| `aktywna`, **koniec w PRZESZŁOŚCI** | 1173 | **to jest defekt #19** |
+| `aktywna`, **start w PRZYSZŁOŚCI** | 1173 | rabat działa |
+| `zakonczona`, koniec w przeszłości | **1303** | **rabat nie działa** |
+| `zaplanowana`, start w przyszłości | **1303** | **rabat nie działa** |
 
-**Ile pól w charakteryzacji.** Gałąź cenowa zapisuje dokładnie trzy pola, i tyle właśnie by się
-rozjechało: **`cena_sprzedazy`, `marza_pct`, `status`** — w **1 wierszu `products`**, w tym
-jednym scenariuszu. Harness porównuje jednak całe tabele przez `toEqual` (9 tabel na scenariusz:
-`products`, `staging_items`, `manual_overrides`, `link_pamiec_kod`, `link_pamiec_mr`,
-`nazwa_pamiec`, `waga_pamiec`, `markups`, `promotions`), więc formalnie padłaby cała asercja
-`products` tego scenariusza.
+> **Wniosek nośny dla całej wyceny: wpisanie właściwego `status` do bazy wyłącza rabat
+> BEZ TKNIĘCIA SILNIKA.** Słownik statusów (`aktywna`/`zakonczona`/`zaplanowana`) już istnieje
+> i silnik już go respektuje. Wariant (b) nie wprowadza nowego pojęcia — stosuje w czasie tę samą
+> regułę, którą system stosuje raz, przy tworzeniu promocji.
 
-**Dlaczego to boli bardziej, niż sugeruje liczba „1 z 31".** Harness nie porównuje się
-z zapisanym oczekiwaniem — on **wycina żywy fragment `mirror/backend/index.cjs`**
-(`__bridgeCondMatch` → `recalcPricesFromRules`, pilnowany sha256 w `integralnosc.json`)
-i uruchamia **prawdziwy kod produkcji** jako wyrocznię obok naszego portu. Rozjazd na tym
-scenariuszu nie jest więc „nieaktualnym oczekiwaniem do poprawienia" — to jest stwierdzenie,
-że nasz port przestał liczyć tak jak produkcja. Wyciszenie go = świadome wypisanie jednego
-scenariusza spod wyroczni, czyli dokładnie „wyjątek w charakteryzacji", o którym mówi #19.
+### Wycena obu wariantów
 
-### Czy da się BEZ wyjątku — tak, ale za cenę niespójności
-
-**Wariant 2 — filtrowanie po datach wyłącznie w `przeliczCenyZRegul`**, przy nietkniętych
-`promocjaPasuje` i `zastosujRegulyCenowe`:
-
-| Miejsce | Wariant 1 | Wariant 2 |
+| Pozycja | **(a)** silnik czyta daty w `promocjaPasuje` | **(b)** wygaszacz przestawia `status` |
 |---|---|---|
-| Charakteryzacja akceptacji | 1 scenariusz pada | **0** — idzie przez `acceptStaging`, czyli przez `zastosujRegulyCenowe` |
-| Charakteryzacja `bulk` | 0 | **0** |
-| `ceny.silnik.test.ts:246-252` | pada | **przechodzi** — testuje `promocjaPasuje` wprost |
-| `narzuty.patch.test.ts:319-331` | pada | **pada** — idzie przez masowe przeliczenie |
-| Fixtures do przenagrania | 0 | 0 |
+| Scenariusze charakteryzacji akceptacji | **1 z 31** (`promocja-wygasla-nadal-obniza-cene`) — 3 pola (`cena_sprzedazy`, `marza_pct`, `status`) w 1 wierszu `products` | **0 z 31** — warunkowo, patrz niżej |
+| Scenariusze charakteryzacji `bulk` | **0 z 17** | **0 z 17** |
+| Testy jednostkowe BE do przepisania | **2** — `ceny.silnik.test.ts:246-252` (2 asercje), `narzuty.patch.test.ts:319-331` (1 asercja) | **1** — `narzuty.patch.test.ts:319-331` |
+| Fixtures w `contract/` do przenagrania | **0** | **0** |
+| Realne ceny zmienione dziś w produkcji | **0** | **0** |
+| **Wyjątek w wyroczni charakteryzacji** | **TAK** | **NIE** |
 
-**Koszt wariantu 2 nie jest testowy, tylko koncepcyjny:** system dostaje **trzecią** odpowiedź
-na pytanie „czy wygasła promocja obniża cenę". Dziś są dwie (silnik mówi „tak", etykieta na
-liście mówi „zakończona"); po tej zmianie byłoby: masowe przeliczenie mówi „nie", a **import
-nadal mówi „tak"** — więc wygasła promocja wróciłaby na produkt przy najbliższej akceptacji
-pozycji ze stagingu i cena zmieniałaby się w tę i z powrotem. To gorsze niż dzisiejszy defekt,
-bo niestabilne w czasie. **Nie rekomenduję.**
+**Dlaczego fixtures to zero w obu wariantach.** `contract/fixtures/GET_promotions.json` to `[]` —
+produkcja nie ma ani jednej promocji. Żaden fixture w całym katalogu nie zawiera `rabatPct`
+(sprawdzone). Siedem fixtures niesie `cenaSprzedazy`/`marzaPct`, ale skoro w bazie źródłowej nie
+było promocji, **żadna z tych wartości nie zależy od dat**. To samo dotyczy danych: w
+`db/snapshot.db` nie ma promocji, więc naprawa nie zmieni dziś ani jednej realnej ceny.
 
-### Ile fixtures trzeba by przenagrać
+### ⚠ Warunek, pod którym (b) jest darmowe
 
-> **Zero.**
+Harness charakteryzacji porównuje `acceptStaging`, a ta ścieżka woła `zastosujRegulyCenowe`,
+**nie** `przeliczCenyZRegul`. Zweryfikowane grafem wywołań, nie nazwą: `przeliczCenyZRegul` jest
+wołane wyłącznie z `repos/markups.ts:113` i `repos/promotions.ts:97` (mutacje reguł).
 
-- `contract/fixtures/GET_promotions.json` to `[]` — produkcja nie ma żadnej promocji.
-- **Żaden** z fixtures nie zawiera `rabatPct` (sprawdzone na całym katalogu `contract/fixtures/`).
-- 7 fixtures niesie `cenaSprzedazy`/`marzaPct` (`GET_products.json`,
-  `GET_products_bez-parametrow.json`, `POST_products.json`, `POST_products_items.json`,
-  `PATCH_products_id.json`, `PUT_products_id.json`,
-  `GET_analytics_prices_product-history.json`), ale skoro w bazie źródłowej nie było promocji,
-  żadna z tych wartości nie zależy od dat. **Zmiana nie ruszy ani jednego pola w `contract/`.**
+Wygaszacz odpalany **przy starcie** i **na wejściu `przeliczCenyZRegul`** jest więc dla harnessu
+niewidoczny → **0 scenariuszy**. Ale:
 
-To samo dotyczy danych: w `db/snapshot.db` **nie ma ani jednej promocji**, więc naprawa
-na dziś nie zmieniłaby żadnej realnej ceny w produkcji. Koszt jest w całości „na przyszłość".
+> **Gdyby wygaszacz wszedł także do ścieżki importu, koszt zrównuje się z (a) — i jest nawet
+> wyższy:** rozjechałyby się DWIE tabele naraz (`products` **i** `promotions`), bo nasz port
+> zmieniłby dane, których oryginał nie rusza.
 
-### Czy dotyczy też promocji z datą startu w przyszłości (§4 pkt 6)
+**Cena tego kompromisu, nazwana wprost:** zostaje okno, w którym promocja wygasa przy działającym
+procesie, bez żadnej mutacji reguły — i **nadal obniża cenę przy imporcie**, aż do najbliższego
+zamiatania. To jest realny wybór do podjęcia w 14f, nie szczegół implementacyjny.
 
-**Tak — to ta sama przyczyna i ta sama linia kodu.** `promocjaPasuje` nie czyta ani `start`,
-ani `koniec`; decyduje wyłącznie `status === "aktywna"`. Naprawa musi objąć oba końce zakresu,
-inaczej promocja „zaplanowana" nadal obniżałaby ceny przed startem. Test
-`ceny.silnik.test.ts:250` sprawdza dziś wprost przypadek `start: "2099-01-01"`, więc
-obie gałęzie są pod tą samą asercją i przy naprawie zapalą się razem.
+### Gdzie odpalać wygaszacz
 
-### Co jeszcze stanie się martwe po naprawie
+**Rekomendacja: przy starcie procesu I na wejściu `przeliczCenyZRegul`.** Start łapie wygaśnięcia
+z czasu postoju, przeliczenie — wygaśnięcia między mutacjami reguł. Oba miejsca są poza ścieżką
+importu, więc charakteryzacja zostaje nietknięta. Koszt wykonania jest pomijalny: `promotions`
+w produkcji ma dziś 0 wierszy, a i docelowo będą to jednostki.
 
-Nie testy, ale warto policzyć — **naprawa unieważnia własną obudowę ostrzegawczą**, dołożoną
-świadomie w 4b:
+### ⚠ Promocje „zaplanowane" — tu jest defekt ODWROTNY, nigdzie nieopisany
 
-- znacznik `rozbieznosc-statusu-{id}` (`TabelaPromocji.tsx:165`) — po naprawie etykieta z dat
-  i zachowanie silnika przestaną się rozjeżdżać, więc **nigdy się nie pokaże**;
-  testy `narzuty.test.tsx:241` i `:256` trzeba by przepisać albo usunąć;
-- nota w dialogu (`nota-daty-promocji`, `DialogReguly.tsx:555-557`, treść: „Daty są
-  informacyjne… upływ daty sam jej nie wyłącza") — stanie się **nieprawdziwa**;
-  testy `narzuty.dialog.test.tsx:393` i `:400` do przepisania.
+Skoro status zapisuje się raz przy tworzeniu, to promocja założona z datą startu w przyszłości
+dostaje `status: "zaplanowana"` i — jak pokazuje tabela pomiarów — **nie obniża cen**.
+Ale nic nie przelicza jej statusu po nadejściu daty startu, więc:
 
-### Wycena zbiorczo
+> **Promocja „zaplanowana" NIGDY SIĘ NIE WŁĄCZA.** Zostaje `zaplanowana` na zawsze.
 
-| Pozycja | Wariant 1 (rekomendowany, jeśli w ogóle) | Wariant 2 |
-|---|---|---|
-| Testy jednostkowe BE | 2 testy (3 asercje) | 1 test (1 asercja) |
-| Scenariusze charakteryzacji | 1 z 31 (3 pola, 1 wiersz) | 0 |
-| Fixtures `contract/` | 0 | 0 |
-| Realne ceny w produkcji dziś | 0 | 0 |
-| Artefakty FE do przepisania | 2 miejsca + 4 testy | 2 miejsca + 4 testy |
-| Osłabienie wyroczni | **tak** — 1 scenariusz spod żywego kodu produkcji | nie |
-| Spójność systemu | zachowana | **złamana** (import kontra przeliczenie) |
+Z tego wynikają dwie rzeczy:
+1. **Wygaszacz musi działać w OBIE strony** (`zakonczona` po końcu, `aktywna` po nadejściu startu),
+   inaczej 14f naprawi wygaszanie i zostawi niedziałające planowanie. W wariancie (a) to samo:
+   warunek musi objąć oba końce zakresu, inaczej „zaplanowana" nadal nie ruszy.
+2. **`docs/instrukcja-testow-I4.md` §4 pkt 6 jest NIEPRAWDZIWY.** Mówi Ani, że „promocja z datą
+   startu w przyszłości od razu obniża ceny", a założona przez dialog nie obniża niczego i nie
+   pokaże znacznika rozbieżności (etykieta z dat i kolumna `status` się zgadzają). §3.9 pozostaje
+   **poprawny** i teraz wiadomo dlaczego: PATCH nie rusza statusu, więc promocja utworzona jako
+   „aktywna" i przestawiona na daty z 2020 dalej ma w bazie „aktywna".
+   Plik jest poza własnością 14e — sprostowanie należy do **14d**.
 
-**Wniosek do decyzji użytkownika:** naprawa jest **tańsza, niż sugerował komentarz
-w `repos/ceny.ts`** — nie „przenagrywanie fixtures", tylko trzy asercje i jeden scenariusz.
-Prawdziwą ceną jest wypisanie jednego scenariusza spod wyroczni, która uruchamia realny kod
-produkcji. Dopóki produkcja nie zostanie naprawiona tym samym warunkiem, ten wyjątek będzie
-oznaczał: „tutaj świadomie różnimy się od Bridge'a, który stoi u Agrowca".
+### Znacznik `rozbieznoscStatusu` (D5 z 4b) — zachowuje się różnie, i to ma znaczenie
 
----
+- **(b):** nigdy się nie zapali, bo `status` w bazie zrówna się z etykietą liczoną z dat →
+  **martwy kod**, usunąć świadomie.
+- **(a):** **nadal będzie się zapalał i będzie KŁAMAŁ** — powie „wg dat zakończona, ale nadal
+  obniża ceny" o promocji, która już ich nie obniża, bo kolumna `status` zostanie nieprzeliczona.
+  Tu usunięcie jest **warunkiem poprawności**, nie kosmetyką.
 
+W obu wariantach nota `nota-daty-promocji` (`DialogReguly.tsx:555-557`, „upływ daty sam jej nie
+wyłącza") staje się nieprawdziwa. Testy FE do przepisania: `narzuty.test.tsx:241` i `:256`
+(znacznik), `narzuty.dialog.test.tsx:393` i `:400` (nota) — **4 przypadki**.
+
+### Rekomendacja
+
+**(b), i pomiar ją potwierdza — ale nie dlatego, że była wskazana z góry.** Powody, każdy
+z liczbą albo z faktem za sobą:
+
+1. **Nie wymaga wyjątku w wyroczni** (0 scenariuszy kontra 1), a wyrocznia uruchamia żywy kod
+   produkcji — to najmocniejsza siatka, jaką mamy.
+2. **O jeden test mniej** do przepisania (1 kontra 2).
+3. **Nie zostawia kłamiącego znacznika** — w (a) trzeba go usunąć, żeby nie wprowadzał w błąd.
+4. **Nie wprowadza nowego pojęcia** — stosuje w czasie regułę `status = statusZDat(...)`, którą
+   system już stosuje przy tworzeniu promocji.
+5. **Odtwarza dosłownie to, co Ania opisała słowami** „reguła znika po końcu obowiązywania":
+   wiersz dostaje status `zakonczona` i przestaje obniżać ceny.
+
+**Uczciwie o słabości (b), żeby wybór był świadomy:**
+- **Charakteryzacja zostaje zielona, ale ŚLEPA na zmianę.** To nie jest obejście — funkcja
+  naprawdę się nie zmienia, więc test naprawdę ma prawo przejść. Ale znaczy to, że nowe
+  zachowanie **nie jest objęte wyrocznią** i 14f musi dowieźć własne testy wygaszacza.
+- **Okno przy imporcie** (opisane wyżej) — (a) tej dziury nie ma, bo działa na każdym odczycie.
+- **`status` jest polem edytowalnym przez API** (`POLA_EDYTOWALNE_PROMOCJI` w
+  `repos/promotions.ts:29-38`), więc wygaszacz będzie **nadpisywał ręczne ustawienia**.
+  Dziś instrukcja mówi Ani wprost: „żeby naprawdę wyłączyć promocję, musisz zmienić jej status".
+  Po (b) status staje się polem **wyliczanym** i ta rada przestaje mieć sens.
+  **Do rozstrzygnięcia w 14f: czy odciąć `status` od listy pól edytowalnych.**
+
+**Decyzja należy do użytkownika.** Ta karta dostarcza liczby i nazywa kompromisy; nie przesądza.
 ## Zmiany
 
 - **Nowy:** `rebuild/backend/test/promocja-warunek-obniza-cene.test.ts` — 8 przypadków,
@@ -330,17 +374,25 @@ Brak.
    bez żadnej promocji, zmienia 2050 z 7405 cen — prostuje pozycje rozjechane z aktualnym
    narzutem. Zachowanie oryginału (zmierzone), nie defekt. Warto uprzedzić Anię **przed**
    cutoverem, bo pierwszy zapis dowolnej reguły wygląda jak masowa, niezamówiona zmiana cen.
-2. **Ryzyko duplikatu reguły przez pamiętający formularz dodawania** — opis i trzy warianty
-   w sekcji B. Wymaga decyzji użytkownika, nie cichej poprawki.
-3. **Doprecyzowanie backlogu #25:** dopasowanie „globalnej" to **alternatywa** (pusta marka
+2. **⚠ DLA KARTY 14f — dwa sprostowania do `docs/instrukcja-testow-I4.md`** (plik poza
+   własnością 14e, sprostowanie należy do 14d): **§4 pkt 6 jest NIEPRAWDZIWY** — promocja
+   z datą startu w przyszłości założona przez dialog dostaje `status: "zaplanowana"` i NIE
+   obniża cen, nie pokaże też znacznika rozbieżności. **Jest za to defekt odwrotny, nigdzie
+   nieopisany: promocja „zaplanowana" NIGDY SIĘ NIE WŁĄCZA**, bo nic nie przelicza statusu po
+   nadejściu daty startu. 14f musi objąć oba kierunki, inaczej naprawi wygaszanie i zostawi
+   niedziałające planowanie.
+3. **Ryzyko duplikatu reguły przez pamiętający formularz dodawania** — opisane w sekcji B.
+   **Nie wymaga już decyzji:** Ania rozstrzygnęła wątek 19.09 na „zostaw jak jest". Zapisane
+   wyłącznie jako obserwacja, gdyby kiedyś wróciło.
+4. **Doprecyzowanie backlogu #25:** dopasowanie „globalnej" to **alternatywa** (pusta marka
    *albo* pusta kategoria), a nie koniunkcja; zmierzony przypadek ma pustą markę przy
    wypełnionej kategorii. Poprawione we wpisie.
-4. **Zaległość środowiskowa, nie moja zmiana:** `rebuild/frontend/node_modules` w głównym repo
+5. **Zaległość środowiskowa, nie moja zmiana:** `rebuild/frontend/node_modules` w głównym repo
    nie ma `recharts`, choć pakiet jest w `package.json` i `package-lock.json` od ticketa 19.
    Skutek: bramki FE odpalone na nieodświeżonych zależnościach dają **82 fałszywe porażki**
    w 8 plikach (`analityka.*`, `shell`). Po `npm ci` wszystko przechodzi. Ktokolwiek będzie
    uruchamiał bramki FE w głównym repo — najpierw `npm ci`.
-5. **⚠ Bezpieczeństwo, poza zakresem karty.** Hasło seeda zapisane jawnie w
+6. **⚠ Bezpieczeństwo, poza zakresem karty.** Hasło seeda zapisane jawnie w
    `tools/record-write-fixtures.cjs` jest **tym samym hasłem**, którym otwierają się realne,
    imienne konta produkcyjne w `db/snapshot.db` (zweryfikowane logowaniem w obu piaskownicach).
    Nie cytuję go w artefaktach ticketa. Zgodnie z decyzją użytkownika **nie zakładam wpisu
@@ -349,7 +401,15 @@ Brak.
 
 ## Czego świadomie NIE zrobiłem
 
-- Nie naprawiłem #19, #22 ani #25 — to karta rozpoznawcza.
-- Nie podjąłem decyzji „Do nowej wersji?" w backlogu; zaktualizowałem wyłącznie Status i fakty.
-- Nie badałem martwej kolumny „Promocja" w katalogu (#22) — wyłączone z zakresu karty.
+- **Nie zaimplementowałem #19** — karta miała go WYCENIĆ. Wdrożenie należy do **14f**,
+  po wyborze wariantu przez użytkownika.
+- Nie naprawiłem #22 ani #25 — obie decyzje zapadły poza tą kartą (odpowiednio: karta 14h
+  i „❌ NIE" z 18.09).
+- **Nie ruszałem pól „Do nowej wersji?" w backlogu** — przy scalaniu z `develop` wszystkie trzy
+  konflikty rozstrzygnąłem na korzyść `develop`, bo to tam siedzą decyzje Ani i użytkownika.
+  Swoje wniosłem wyłącznie jako zmierzone fakty do pola Status.
+- **Nie poprawiłem `docs/instrukcja-testow-I4.md`**, mimo że znalazłem w niej nieprawdziwy
+  punkt (§4 pkt 6) — plik jest poza własnością tej karty, należy do 14d.
+- Po zawężeniu zakresu **przerwałem pomiary zadania A** i nie szukałem dalej defektu
+  w dopasowaniu promocji.
 - Nie porównywałem zadania B z żywym bundlem FE produkcji (zastrzeżenie w sekcji B).

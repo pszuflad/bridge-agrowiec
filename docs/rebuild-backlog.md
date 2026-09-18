@@ -653,9 +653,17 @@ przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 | **Data** | 2026-08-26 (znalezione przy I3/3c) |
 | **Kategoria** | BACKEND (silnik importu, normalizacja EAN) |
 | **Pliki** | `index.cjs` — `ZT()` (deminified `:46971`, wywołanie `:46984`), `Lq()` (`:46965` i `:47312`) |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI ANI** |
-| **Iteracja** | odtworzone 1:1 w **3c**; naprawa u Ani — do rozstrzygnięcia |
-| **Status** | zgłoszone |
+| **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-18 przez Anię** (świadome odstępstwo) |
+| **Iteracja** | odtworzone 1:1 w **3c**; naprawa → **I14, karta 14i** |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**DECYZJA ANI (2026-09-18), pytanie 8:** „EAN który jest zepsuty notacją naukową ma być
+importowany jako **puste pole w katalogu**". To ŚWIADOME ODSTĘPSTWO — produkcja zapisuje
+wartość i wypisuje komunikat „zapis naukowy ma tylko null cyfr znaczących". Zakres karty 14i:
+EAN rozpoznany jako notacja naukowa → puste pole w `products`. ⚠ Rusza silnik importu, więc
+wzorce charakteryzacji trzeba PRZENAGRAĆ, nie poprawiać ręcznie. Otwarte przy wdrożeniu (do
+rozstrzygnięcia w karcie, nie przez Anię): czy ostrzeżenie w stagingu ma zostać — rekomendacja
+TAK, żeby pominięty EAN nie był niewidzialny.
 
 **Opis biznesowy:** przy EAN-ie zapisanym w notacji naukowej (Excel zamienia „8059970000000"
 na „8,05997E+12") pozycja w stagingu dostaje ostrzeżenie o treści:
@@ -1301,8 +1309,32 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **do decyzji** (odrzucona w tym tickecie, patrz niżej) |
-| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **koszt naprawy WYCENIONY w 14e (2026-09-18)** — patrz niżej |
+| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA 2026-09-19 przez Anię** — daty mają kończyć promocję (świadome odstępstwo, karta **14f**) |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-19)** — liczby niżej |
+
+**⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
+„Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
+przeliczyć ceny bez tej promocji". W odpowiedzi na pytanie kontrolne z 18.09 napisała coś innego:
+„to nie było opisane jako błąd — opisałam co się dzieje, bo takie było pytanie. Ma zostać tak jak
+jest, reguła znika po końcu obowiązywania". **Jej opis zachowania nie zgadza się z kodem:**
+`TabelaPromocji.tsx` nie filtruje niczego po datach (wiersz ZOSTAJE, z odznaką „zakończona"
+i naszym pomarańczowym znacznikiem), a silnik dat nie czyta, więc wygasła promocja **dalej obniża
+ceny**. Wysłano drugie pytanie kontrolne, tym razem z opisem stanu faktycznego zamiast pytania
+otwartego — i **2026-09-19 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
+promocje"**. Wpis przechodzi z „do decyzji" na ZATWIERDZONY. Morał na przyszłość: pytanie
+„co ma się dziać?" dostało odpowiedź opisującą to, co Ania MYŚLAŁA, że się dzieje; dopiero
+pytanie „dziś jest TAK — zostawiamy czy zmieniamy?" dało decyzję.
+
+**Dwa warianty wdrożenia, różnica kosztu jest zasadnicza** (wycena: karta 14e, decyzja:
+użytkownik):
+- **(a) silnik czyta daty** — warunek na `start`/`koniec` w `promocjaPasuje`. Kilka linii, ale
+  funkcja przestaje zachowywać się jak oryginał, więc **charakteryzacja wymaga wyjątku**.
+- **(b) wygaszacz statusu** — osobny krok przestawia `status` na `zakonczona`, gdy minęła data
+  końca; silnik NIETKNIĘTY, dalej patrzy tylko na `status`, charakteryzacja bez wyjątku, bo
+  zmieniają się DANE, a nie zachowanie funkcji. Dodatkowo odtwarza dosłownie to, co Ania
+  opisała słowami „reguła znika po końcu obowiązywania".
+**Rekomendacja: (b).** ⚠ Skutek uboczny w obu wariantach: znacznik `rozbieznoscStatusu` (D5
+z 4b) przestaje mieć rację bytu i trzeba go usunąć świadomie, nie zostawić jako martwy kod.
 
 **Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
 `koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
@@ -1336,33 +1368,65 @@ czyta start ani koniec") i scenariuszem charakteryzacji
 w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
 
-**⭐ KOSZT POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-18).** Zdanie „naprawa
-wymagałaby wyjątku w charakteryzacji importu” zamienione na liczby:
+**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-19).**
 
-| Pozycja | Ile |
-|---|---|
-| Scenariusze charakteryzacji akceptacji | **1 z 31** (`promocja-wygasla-nadal-obniza-cene`) — 3 pola (`cena_sprzedazy`, `marza_pct`, `status`) w 1 wierszu `products` |
-| Scenariusze charakteryzacji `bulk` | **0 z 17** |
-| Testy jednostkowe backendu | **2** — `test/ceny.silnik.test.ts:246-252` (2 asercje), `test/narzuty.patch.test.ts:319-331` (1 asercja) |
-| Fixtures w `contract/` do przenagrania | **0** — żaden fixture nie zawiera `rabatPct`, a `GET_promotions.json` to `[]` |
-| Realne ceny zmienione dziś w produkcji | **0** — w `db/snapshot.db` nie ma ani jednej promocji |
+**Najpierw ustalenie, które przesądza o koszcie: status promocji jest zapisywany RAZ.**
+POST liczy go z dat (`status: statusZDat(start, koniec)`), **PATCH go NIE wysyła** (siedem pól,
+1:1 z `Eb()` oryginału — `DialogReguly.tsx:209-224`), a **nic po stronie serwera nigdy go nie
+przelicza** — ani w odbudowie, ani w produkcji (w `mirror/backend/index.cjs` napisy `zakonczona`
+/`zaplanowana` padają wyłącznie w danych seeda). Defekt #19 to więc nie „silnik ignoruje daty"
+w oderwaniu od reszty, tylko **brak przeliczania statusu w czasie**.
 
-**Naprawa jest więc TAŃSZA, niż sugerował ten wpis.** Jej realną ceną nie są fixtures, tylko
-wypisanie jednego scenariusza spod wyroczni, która uruchamia ŻYWY kod produkcji wycięty
-z `mirror/backend/index.cjs` (pilnowany sha256 w `integralnosc.json`) — czyli świadome
-stwierdzenie „tutaj różnimy się od Bridge’a stojącego u Agrowca”.
+**Silnik JUŻ honoruje status — zmierzone** (bez rabatu 1303, z rabatem 10% 1173):
 
-**Wariant bez wyjątku istnieje, ale nie jest polecany:** filtrowanie dat wyłącznie
-w `przeliczCenyZRegul`, przy nietkniętym `promocjaPasuje`, zostawia charakteryzację w spokoju
-(0 scenariuszy), ale daje systemowi TRZECIĄ odpowiedź na to samo pytanie — masowe przeliczenie
-mówiłoby „nie”, a gałąź importu nadal „tak”, więc wygasła promocja wracałaby na produkt przy
-najbliższej akceptacji ze stagingu. Niestabilne w czasie, gorsze od dzisiejszego defektu.
+| Stan promocji | Cena | |
+|---|---|---|
+| `aktywna`, daty bieżące | 1173 | rabat działa |
+| `aktywna`, koniec w PRZESZŁOŚCI | 1173 | **to jest defekt #19** |
+| `aktywna`, start w PRZYSZŁOŚCI | 1173 | rabat działa |
+| `zakonczona` | 1303 | **rabat nie działa** |
+| `zaplanowana` | 1303 | **rabat nie działa** |
 
-**Dotyczy też daty startu w przyszłości** (§4 pkt 6 instrukcji I4) — ta sama linia kodu,
-naprawa musi objąć oba końce zakresu. **Po naprawie stają się martwe** dołożone w 4b ostrzeżenia:
-znacznik `rozbieznosc-statusu-{id}` (`TabelaPromocji.tsx:165`) nigdy się nie pokaże, a nota
-`nota-daty-promocji` (`DialogReguly.tsx:555-557`) stanie się nieprawdziwa — plus 4 testy FE
-do przepisania. Pełne rozbicie: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`, sekcja C.
+Czyli: **wpisanie właściwego `status` do bazy wyłącza rabat bez tknięcia silnika.**
+
+| Pozycja | (a) silnik czyta daty | (b) wygaszacz przestawia `status` |
+|---|---|---|
+| Scenariusze charakteryzacji akceptacji | **1 z 31** — 3 pola (`cena_sprzedazy`, `marza_pct`, `status`) w 1 wierszu | **0 z 31** (warunkowo, patrz niżej) |
+| Scenariusze charakteryzacji `bulk` | **0 z 17** | **0 z 17** |
+| Testy jednostkowe BE | **2** (`ceny.silnik.test.ts:246-252`, `narzuty.patch.test.ts:319-331`) | **1** (`narzuty.patch.test.ts:319-331`) |
+| Fixtures w `contract/` | **0** | **0** |
+| Realne ceny w produkcji dziś | **0** (`promotions` pusta) | **0** |
+| Wyjątek w wyroczni charakteryzacji | **TAK** | **NIE** |
+
+**⚠ (b) jest darmowe tylko dopóki wygaszacz nie wchodzi do ścieżki importu.** Harness porównuje
+`acceptStaging`, a ta woła `zastosujRegulyCenowe`, nie `przeliczCenyZRegul` (to drugie jest wołane
+wyłącznie z `repos/markups.ts:113` i `repos/promotions.ts:97`). Wygaszacz przy starcie i w
+`przeliczCenyZRegul` jest dla harnessu niewidoczny; dołożony do importu **kosztuje tyle co (a)**,
+a nawet więcej — rozjechałyby się dwie tabele (`products` i `promotions`). Zostaje wtedy okno:
+promocja wygasająca przy działającym procesie, bez mutacji reguł, obniża ceny przy imporcie aż do
+najbliższego zamiatania. **To jest wybór do podjęcia w 14f, nie szczegół implementacyjny.**
+
+**Znacznik `rozbieznoscStatusu` (D5 z 4b) zachowuje się RÓŻNIE:** w (b) nigdy się nie zapali
+(status zrówna się z etykietą) → martwy kod do świadomego usunięcia; w (a) **nadal będzie się
+zapalał i będzie KŁAMAŁ** („nadal obniża ceny" o promocji, która już nie obniża) → usunięcie jest
+warunkiem poprawności, nie kosmetyką. Nota `nota-daty-promocji` (`DialogReguly.tsx:555-557`)
+staje się nieprawdziwa w obu wariantach.
+
+**⚠ DWA SPROSTOWANIA DO `docs/instrukcja-testow-I4.md`** (plik poza własnością 14e — do zrobienia
+przez 14d): **§4 pkt 6 jest NIEPRAWDZIWY** (promocja z datą startu w przyszłości założona przez
+dialog dostaje `status: "zaplanowana"` i NIE obniża cen, nie pokaże też znacznika rozbieżności),
+a **istnieje defekt odwrotny, nigdzie nieopisany: promocja „zaplanowana" NIGDY SIĘ NIE WŁĄCZA**,
+bo nic nie przelicza statusu po nadejściu daty startu. §3.9 pozostaje poprawny — i teraz wiadomo
+dlaczego: PATCH nie rusza statusu.
+
+**Dwa zastrzeżenia do 14f, oba realne:** (1) wygaszacz musi działać w OBIE strony (`zakonczona`
+po końcu, `aktywna` po nadejściu startu), inaczej naprawi wygaszanie i zostawi niedziałające
+planowanie; (2) `status` jest na liście `POLA_EDYTOWALNE_PROMOCJI`, więc wygaszacz będzie
+nadpisywał ręczne ustawienia — a instrukcja mówi dziś Ani wprost, że „żeby wyłączyć promocję,
+trzeba zmienić status". Po (b) status staje się polem WYLICZANYM; do rozstrzygnięcia, czy odciąć
+go od listy edytowalnych.
+
+Pełne liczby i metoda: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`, sekcja C.
 
 **Uzupełnienie 4b (frontend, 2026-09-02).** Widok `/narzuty` portuje `_b()`/`Qd()` 1:1
 (`rebuild/frontend/src/pages/narzuty/status.ts`) — etykieta statusu promocji liczona z dat
@@ -1465,8 +1529,20 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 |---|---|
 | **Kategoria** | FRONTEND (katalog) |
 | **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
-| **Do nowej wersji?** | ✅ **port 1:1** — ożywienie ⬜ **do decyzji** (kandydat na I12) |
-| **Status** | ✔ odtworzone w rebuild (4b), martwota potwierdzona · **14e (2026-09-18): potwierdzone pomiarem, że to NIE jest przyczyna zgłoszenia o niedziałających rabatach** — ceny spadają poprawnie mimo pustej kolumny |
+| **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
+| **Iteracja** | odtworzone 1:1 w **4b**; ożywienie → **I14, karta 14h** |
+| **Status** | decyzja podjęta, karta niezałożona · **14e (2026-09-19): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływa na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
+
+**⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
+Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
+nie potwierdza w ŻADNEJ wersji, którą mamy.** Zmierzone na ŻYWYCH plikach produkcji, nie na
+deminifikacie: `mirror/frontend/assets/index-PRICEFMT1783512500.js` ma dokładnie JEDNO wystąpienie
+`._reguly` (miejsce odczytu), a `mirror/backend/index.cjs` nie ma go wcale — dwa trafienia
+`grep -o "_reguly"` to substring kolumny `dodatkowe_reguly` z tabeli `spedycja_limity`, co łatwo
+wziąć za trafienie (wzięliśmy, na jedną minutę). Rozstrzygające: `git log -S'_reguly:' --all` nie
+zwraca ANI JEDNEGO commita od baseline'u 13.08 do 18.09 — nikt nigdy nie dopisał zapisu tego pola.
+**Wniosek dla karty 14h: to nowa funkcja i świadome odstępstwo, nie przywrócenie regresji.** Trzeba
+to Ani powiedzieć wprost, żeby nie liczyła na „powrót do stanu sprzed backupu" i na jego wycenę.
 
 **Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
 **nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
@@ -1561,8 +1637,8 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 |---|---|
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
-| **Do nowej wersji?** | ⬜ **do decyzji** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
-| **Status** | odtworzone świadomie w 4b · w produkcji **nadal obecne** · **14e (2026-09-18): ZMIERZONE na pełnym katalogu — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
+| **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-18**: „nie, zostawiamy tak jak jest, nie dodajemy nowych reguł" |
+| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-19): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
@@ -3273,3 +3349,47 @@ zapisaną. Trzy rzeczy przed implementacją:
 3. Przed naniesieniem **zmierzyć na `db/snapshot.db`, ile rekordów zmienia zapis** (ile wartości
    `products.szerokosc` ma dziś zera końcowe) — to jest liczba, którą trzeba pokazać Ani przy
    pytaniu z pkt. 1, i jednocześnie oczekiwanie dla testu charakteryzacyjnego.
+
+### #84 · 2026-09-18 · [FRONTEND] · toast po uploadzie z karty dostawcy w produkcji czyta pola, których backend nigdy nie zwracał — „undefined nowych, undefined zmian”
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (karta dostawcy, toast po `POST /api/dostawcy/{kod}/upload`) — defekt PRODUKCJI |
+| **Pliki** | `deminified/frontend-index.js:25778-25781` (potwierdzone bajt w bajt w żywym `mirror/frontend/assets/index-PRICEFMT1783512500.js`); `mirror/backend/index.cjs`, trasa `POST /api/dostawcy/:kod/upload`, wynik `tk()` |
+| **Zmiana w oryginale** | Toast składa opis z pól `o.nowych` i `o.zmian`, których odpowiedź trasy **nigdy nie miała** — realnie zwraca `nowe`, `zmienione`, `wycofane`, `bezZmian`, `doStagingu`, `autoZatwierdzone` (`grep -o 'nowych:'` i `grep -o 'zmian:'` po całym `mirror/backend/index.cjs` → zero trafień obu). `tk()` ma w żywym bundlu jedną definicję — to zwykła literówka w nazwach pól, nie cieniowanie duplikatem (`CLAUDE.md` §5). |
+| **Skutek w produkcji** | Od zawsze wyświetla „N produktów, **undefined** nowych, **undefined** zmian” po każdym ręcznym uploadzie z karty dostawcy. |
+| **Do nowej wersji?** | ✅ **TAK — naprawiamy, nie odtwarzamy buga** (decyzja **D1**, 2026-09-18, `50-FEATURE-i14c-karta-dostawcy-upload`). Wierne przepisanie dałoby ten sam „undefined” w odbudowie, co i tak zostałoby zgłoszone jako usterka. |
+| **Status** | ✔ zrobione w rebuild (14c) — toast czyta realne `nowe`/`zmienione` (`rebuild/backend/src/routes/suppliers.ts:215-222`), test asertuje `not.toHaveTextContent("undefined")`. W żywej produkcji **nadal obecne** — do ewentualnego zgłoszenia Ani, nie blokuje cutoveru. |
+
+### #85 · 2026-09-18 · [FRONTEND] · pole „liczba minut” na karcie dostawcy — wartość startowa dla dostawcy bez harmonogramu
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (karta dostawcy, edycja częstotliwości) |
+| **Pliki** | `mirror/frontend/assets/freq-injection.js:124-147` (oryginał — osobny popover, patchuje wyłącznie `czestotliwoscMinuty`); `rebuild/frontend/src/pages/konfiguracja/Dostawcy.tsx` (odbudowa — jeden formularz zapisujący cztery pola naraz: url, częstotliwość, sposób dostarczania, status) |
+| **Do nowej wersji?** | ✅ **TAK — świadome odstępstwo** (decyzja **D5**, 2026-09-18, `50-FEATURE-i14c-karta-dostawcy-upload`) |
+| **Status** | ✔ zrobione w rebuild (14c) |
+
+**Opis.** Reguła WIDOCZNOŚCI pola minut jest 1:1 z oryginałem — widoczne dokładnie wtedy, gdy
+select stoi na „Inna wartość (minuty)…” (`freq-injection.js:138-147`). Odstępstwem jest tylko
+wartość STARTOWA dla `czestotliwoscMinuty` null/0: w oryginale żadna gałąź nie ustawia
+`select.value` w tym przypadku (`:129`, `:141`), więc select zostaje na pierwszej opcji presetów,
+czyli „5 min”. Odbudowa scaliła edycję częstotliwości z zapisem pozostałych pól karty w jeden
+formularz — odtworzenie „5 min” 1:1 znaczyłoby, że zapis samego statusu **po cichu włącza
+dostawcy odpytywanie co 5 minut**. Dlatego dostawca bez harmonogramu startuje na „Inna wartość
+(minuty)…” z pustym polem; zachowuje to też możliwość wyczyszczenia harmonogramu (`null`), której
+oryginał w ogóle nie miał (puste pole custom wpadało w `if (!val || val < 1) return`, `:167-171`).
+
+### #86 · 2026-09-18 · [FRONTEND] · `<input type="file">` na karcie dostawcy czyszczony po wysyłce — oryginał tego nie robi
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (karta dostawcy, przycisk „Wgraj plik”) |
+| **Pliki** | `mirror/frontend/assets/index-PRICEFMT1783512500.js:25690-25802` (oryginał — brak `.value = ""` po wysyłce uploadu); `rebuild/frontend/src/pages/konfiguracja/Dostawcy.tsx` |
+| **Do nowej wersji?** | ✅ **TAK — świadome odstępstwo** (decyzja **D6**, 2026-09-18, `50-FEATURE-i14c-karta-dostawcy-upload`) |
+| **Status** | ✔ zrobione w rebuild (14c) |
+
+**Opis.** Oryginał nie czyści `<input type="file">` po wysyłce, więc wgranie tego samego pliku
+(ta sama nazwa/ścieżka) drugi raz z rzędu nie wywołuje `onChange` przeglądarki i przycisk wygląda
+na zepsuty. Odbudowa czyści pole (`e.target.value = ""`) — powód praktyczny: Ania poprawia plik
+u dostawcy i wgrywa go ponownie pod tą samą nazwą.
