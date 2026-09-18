@@ -232,11 +232,17 @@ ma endpoint:
 > każdym odczycie (jak oryginał), bez zapisu na serwer, plus widoczny znacznik rozbieżności,
 > gdy etykieta nie zgadza się z kolumną `status` z bazy. Ostrzeżenie „poniżej kosztu" przed
 > zapisem promocji — pasek na żywo w formularzu + dialog potwierdzenia (oryginał używał
-> `window.confirm`). **Kolumna „Promocja" w `/katalog` zostaje MARTWA** — w produkcji
-> `_reguly` nie jest ustawiane nigdzie i `GET /api/products` nie niesie danych o promocji;
-> to port 1:1, nie brakujące dane do dociągnięcia. Dołożony `Toaster` do drzewa aplikacji
+> `window.confirm`). Renderer kolumny „Promocja" w `/katalog` gotowy już tutaj (czyta
+> `produkt._reguly?.promocja`), ale w produkcji `_reguly` nigdy nie jest ustawiane i
+> `GET /api/products` nie niesie danych o promocji — tam kolumna zostaje martwa na trwałe,
+> port 1:1. W odbudowie ożywiona od karty **14h** (`61-FEATURE-promocja-kolumna-katalog`,
+> 2026-09-18, świadome odstępstwo od produkcji, nie port): `GET /api/products` dokłada
+> opcjonalny `_reguly.promocja = {wartosc, nazwa}` przy dopasowanej aktywnej promocji, ten sam
+> renderer rysuje pomarańczową odznakę `-N%` + nazwę, „—" zostaje tylko bez dopasowania.
+> Dołożony `Toaster` do drzewa aplikacji
 > (`App.tsx`) — pierwszy widok używający toastów; `TooltipProvider` dalej czeka. Szczegóły:
-> `docs/tickets/16-FEATURE-widok-narzuty-promocje/`, backend: `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`.
+> `docs/tickets/16-FEATURE-widok-narzuty-promocje/`, backend: `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`;
+> ożywienie kolumny: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/`.
 >
 > **Odbudowa (I5, `15-FEATURE-historia-zmian`, 2026-09-02):** `/historia` odbudowany — router
 > ma **12 tras, 7 placeholderów**. Tabela + filtry (szukaj / typ / dostawca) + paginacja 25/50/100.

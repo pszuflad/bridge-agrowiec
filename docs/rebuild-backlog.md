@@ -1360,8 +1360,8 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA 2026-09-19 przez Anię** — daty mają kończyć promocję (świadome odstępstwo, karta **14f**) |
-| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-19)** — liczby niżej |
+| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA** — daty mają kończyć promocję (Ania, 2026-09-18). **WARIANT WDROŻENIA WYBRANY 2026-09-18: (b) wygaszacz statusu, cykliczny, `status` odcięty od pól edytowalnych.** Karta **14f** |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-18)** — liczby niżej |
 
 **⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
 „Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
@@ -1371,7 +1371,7 @@ jest, reguła znika po końcu obowiązywania". **Jej opis zachowania nie zgadza 
 `TabelaPromocji.tsx` nie filtruje niczego po datach (wiersz ZOSTAJE, z odznaką „zakończona"
 i naszym pomarańczowym znacznikiem), a silnik dat nie czyta, więc wygasła promocja **dalej obniża
 ceny**. Wysłano drugie pytanie kontrolne, tym razem z opisem stanu faktycznego zamiast pytania
-otwartego — i **2026-09-19 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
+otwartego — i **2026-09-18 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
 promocje"**. Wpis przechodzi z „do decyzji" na ZATWIERDZONY. Morał na przyszłość: pytanie
 „co ma się dziać?" dostało odpowiedź opisującą to, co Ania MYŚLAŁA, że się dzieje; dopiero
 pytanie „dziś jest TAK — zostawiamy czy zmieniamy?" dało decyzję.
@@ -1384,6 +1384,18 @@ użytkownik):
   końca; silnik NIETKNIĘTY, dalej patrzy tylko na `status`, charakteryzacja bez wyjątku, bo
   zmieniają się DANE, a nie zachowanie funkcji. Dodatkowo odtwarza dosłownie to, co Ania
   opisała słowami „reguła znika po końcu obowiązywania".
+**DECYZJA UŻYTKOWNIKA 2026-09-18 — wariant (b), w wersji rozszerzonej o cykliczność.**
+Trzy rozstrzygnięcia podjęte naraz, po przedstawieniu wyceny z 14e:
+1. **(b) wygaszacz przestawia `status`** — silnik nietknięty, zero wyjątków w wyroczni.
+2. **Wygaszacz chodzi także CYKLICZNIE**, nie tylko przy starcie i przy mutacji reguł. Bez tego
+   zostaje okno, w którym wygasła promocja **nadal obniża cenę przy każdym imporcie** (importy
+   co godzinę u pięciu dostawców → okno sięga dni). ⚠ 14f ma najpierw ZMIERZYĆ, że wariant
+   cykliczny nie wchodzi w ścieżkę charakteryzacji — nie zakładać.
+3. **`status` odcięty od `POLA_EDYTOWALNE_PROMOCJI`** — po (b) jest polem wyliczanym, więc
+   edytowalność oznaczałaby ciche nadpisywanie ustawień użytkownika.
+⚠ Zakres 14f obejmuje OBIE strony zakresu dat — samo wygaszanie zostawiłoby niedziałające
+planowanie (defekt odwrotny, opisany wyżej w tym wpisie).
+
 **Rekomendacja: (b).** ⚠ Skutek uboczny w obu wariantach: znacznik `rozbieznoscStatusu` (D5
 z 4b) przestaje mieć rację bytu i trzeba go usunąć świadomie, nie zostawić jako martwy kod.
 
@@ -1419,7 +1431,7 @@ czyta start ani koniec") i scenariuszem charakteryzacji
 w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
 
-**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-19).**
+**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-18).**
 
 **Najpierw ustalenie, które przesądza o koszcie: status promocji jest zapisywany RAZ.**
 POST liczy go z dat (`status: statusZDat(start, koniec)`), **PATCH go NIE wysyła** (siedem pól,
@@ -1476,6 +1488,10 @@ planowanie; (2) `status` jest na liście `POLA_EDYTOWALNE_PROMOCJI`, więc wygas
 nadpisywał ręczne ustawienia — a instrukcja mówi dziś Ani wprost, że „żeby wyłączyć promocję,
 trzeba zmienić status". Po (b) status staje się polem WYLICZANYM; do rozstrzygnięcia, czy odciąć
 go od listy edytowalnych.
+
+**Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) korzysta o tego samego
+`wybierzPromocje` z `repos/ceny.ts` co silnik cen — więc zacznie respektować daty **sama**, bez
+żadnej zmiany w karcie 14h, gdy karta 14f dowiezie wygaszacz/naprawę dat.
 
 Pełne liczby i metoda: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`, sekcja C.
 
@@ -1574,15 +1590,16 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 ### #22 · 2026-09-02 · [FRONTEND] · kolumna „Promocja" w `/katalog` jest MARTWA
 
 > **Znalezione przy bloku I4/4b (2026-09-02). Port 1:1** — decyzja użytkownika D1
-> (`docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md`).
+> (`docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md`). **Ożywione 2026-09-18,
+> karta 14h** (`docs/tickets/61-FEATURE-promocja-kolumna-katalog/`).
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (katalog) |
-| **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
+| **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138`; ożywienie: `rebuild/backend/src/repos/products.ts` (`dolaczReguly`), `rebuild/backend/src/routes/products.ts` |
 | **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
-| **Iteracja** | odtworzone 1:1 w **4b**; ożywienie → **I14, karta 14h** |
-| **Status** | decyzja podjęta, karta niezałożona · **14e (2026-09-19): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływa na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
+| **Iteracja** | odtworzone 1:1 w **4b**; ożywione w **I14, karta 14h** (2026-09-18) |
+| **Status** | ✔ **zrobione 2026-09-18, `61-FEATURE-promocja-kolumna-katalog`** · **14e (2026-09-18): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływała na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
 
 **⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
 Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
@@ -1594,6 +1611,10 @@ wziąć za trafienie (wzięliśmy, na jedną minutę). Rozstrzygające: `git log
 zwraca ANI JEDNEGO commita od baseline'u 13.08 do 18.09 — nikt nigdy nie dopisał zapisu tego pola.
 **Wniosek dla karty 14h: to nowa funkcja i świadome odstępstwo, nie przywrócenie regresji.** Trzeba
 to Ani powiedzieć wprost, żeby nie liczyła na „powrót do stanu sprzed backupu" i na jego wycenę.
+**Dwa fakty zweryfikowane niezależnie w 14h:** odczyt `_reguly` istniał już w baseline'ie
+z 2026-08-13 (`deminified/frontend-index.js`, 1 wystąpienie), więc żadna łatka Ani go nie dodała
+ani nie usunęła — nie ma czego „przywracać"; `git log -S'_reguly:' --all` zwraca dokładnie **jeden**
+commit i jest to nasz własny wpis dokumentacyjny, zero kodu produkcji.
 
 **Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
 **nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
@@ -1605,14 +1626,22 @@ i od zawsze renderuje `—`.
 promocję, a nigdy nic nie pokaże — bo dane, które by ją zasiliły, nie istnieją nigdzie
 w systemie produkcyjnym.
 
-**Decyzja użytkownika (2026-09-02): port 1:1** — odbudowa ma to samo zachowanie
-w `rebuild/frontend/src/pages/katalog/formatowanie.tsx`. Ożywienie wymagałoby danych
-z backendu (pole dopasowanej promocji przy produkcie); liczenie po stronie klienta
-duplikowałoby silnik dopasowania reguł (`rebuild/backend/src/repos/ceny.ts`) — drugie
-miejsce, które musiałoby zgadzać się z pierwszym.
+**Decyzja użytkownika (2026-09-02): port 1:1 w 4b** — odbudowa miała wtedy to samo zachowanie
+w `rebuild/frontend/src/pages/katalog/formatowanie.tsx`. Ożywienie wymagało danych z backendu
+(pole dopasowanej promocji przy produkcie); liczenie po stronie klienta duplikowałoby silnik
+dopasowania reguł (`rebuild/backend/src/repos/ceny.ts`) — drugie miejsce, które musiałoby zgadzać
+się z pierwszym. **Dokładnie tak to zrobiono w 14h:** backend liczy wspólnym silnikiem, front
+zostaje bez zmian w kodzie.
 
-**Do rozważenia dla produkcji/odbudowy.** Ożywienie kolumny (backend dokłada pole przy
-produkcie, wyliczone tym samym silnikiem co ceny) — kandydat na I12, poza zakresem 4b.
+**Co dowiozła karta 14h (2026-09-18).** `GET /api/products` dokłada opcjonalny klucz
+`_reguly.promocja` = `{ wartosc, nazwa }` (`wartosc` = kolumna `promotions.rabat_pct`),
+wyliczony **istniejącym** `wybierzPromocje` z `rebuild/backend/src/repos/ceny.ts` (silnik
+NIETKNIĘTY). Pole trafia do OBU kształtów odpowiedzi `GET /api/products` (goła tablica i
+koperta). **Brak dopasowania = BRAK klucza**, więc produkt bez promocji ma nadal dokładnie
+72 klucze co nagranie produkcji — odstępstwo jest warunkowe i wąskie. **Dziś w bazie jest
+0 promocji** (`db/snapshot.db`: `products` = 7405, `promotions` = 0; produkcyjny fixture
+`GET_promotions.json` to pusta tablica) — kolumna zaświeci dopiero po założeniu promocji
+w `/narzuty`. Szczegóły: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/plan.md` (D1–D9).
 
 ---
 
@@ -1647,6 +1676,10 @@ testy po obu stronach (`narzuty.ceny.test.ts` / `ceny.silnik.test.ts`). Uzasadni
 błędne wyjaśnienie ceny jest gorsze niż jego brak, a od tej samej logiki zależy ostrzeżenie
 o sprzedaży poniżej kosztu. W produkcji defekt **nadal obecny**.
 
+**Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) świadomie NIE dokłada
+czwartego sposobu dopasowania promocji — reużywa `wybierzPromocje`/`promocjaPasuje` z
+`repos/ceny.ts`, ten sam silnik co ceny w katalogu.
+
 ---
 
 ### #24 · 2026-09-02 · [FRONTEND] · ostrzeżenie „poniżej kosztu" to TRZECI, osobny sposób liczenia
@@ -1677,6 +1710,9 @@ bez zmian, wygląd dialogu inny (Radix zamiast `window.confirm`, bo ten blokuje 
 da się go stylować/testować). Odtworzone świadomie, ⬜ do rozważenia w przyszłości, czy
 ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 
+**Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) świadomie NIE dołożyła
+czwartego sposobu — patrz notatka przy #23.
+
 ---
 
 ### #25 · 2026-09-02 · [FRONTEND] · promocja „globalna" nie obniża żadnych cen, ale ostrzega o całym katalogu
@@ -1689,7 +1725,7 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
 | **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-18**: „nie, zostawiamy tak jak jest, nie dodajemy nowych reguł" |
-| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-19): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
+| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-18): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
@@ -3511,3 +3547,46 @@ odsiew przechodziłoby wielokrotnie więcej wierszy. Warto je rozstrzygać razem
 - **(c) filtrować i paginować w SQL** zamiast w pamięci — usuwa problem u źródła i naprawia
   licznik, ale jest **świadomym odstępstwem** od oryginału w trasie, którą dziś porównujemy
   z produkcją 1:1, i wymaga przenagrania fixtures historii.
+---
+
+### #88 · 2026-09-18 · [BACKEND] · `promocjaPasuje` — pusty `marka`/`kategoria` łapie KAŻDĄ promocję o niepustym zasięgu
+
+> **Znalezione przy karcie 14h (`61-FEATURE-promocja-kolumna-katalog`), 2026-09-18** —
+> uwidocznione dopiero teraz, bo dotąd kolumna „Promocja" w `/katalog` była martwa (#22) i nie
+> było jak zobaczyć skutku, choć na cenę wpływał tak samo, po cichu.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (silnik cen) |
+| **Pliki** | `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`); test utrwalający: `rebuild/backend/test/katalog.promocja.test.ts` |
+| **Do nowej wersji?** | ⬜ **do decyzji** — naprawa byłaby odstępstwem od oryginału |
+| **Status** | — nie zaczęte (świadomie odłożone do 14f) |
+
+**Opis.** `promocjaPasuje` dopasowuje przez `zasieg.includes(tekst(produkt.marka))` (analogicznie
+dla `kategoria`), a **każdy napis zawiera pusty napis** — więc produkt z pustą `marka` ORAZ pustą
+`kategoria` łapie **KAŻDĄ** promocję o niepustym zasięgu. `marka` i `kategoria` są `NOT NULL`
+w schemacie (`rebuild/backend/src/db/schema.ts:24-25`), więc osiągalny jest wariant z pustym
+napisem, nie z NULL-em.
+
+**Skutek.** Defekt jest **odziedziczony po oryginale**, nie wprowadzony w odbudowie. Karta 14h
+go wyłącznie **UWIDACZNIA** przez ożywienie kolumny „Promocja" (#22) — dotąd nie było go jak
+zobaczyć, bo kolumna renderowała „—" bez względu na wynik dopasowania, choć na `cenaSprzedazy`
+wpływał identycznie, po cichu.
+
+**Skala — ZMIERZONA, nie oszacowana (14h, 2026-09-18): ZERO.** Na snapshocie produkcji
+(`db/snapshot.db`, 7405 produktów) **ani jeden** produkt nie ma jednocześnie pustej `marka`
+i pustej `kategoria`:
+
+```sql
+SELECT COUNT(*) FROM products
+WHERE TRIM(COALESCE(marka,'')) = '' AND TRIM(COALESCE(kategoria,'')) = '';  -- 0
+```
+
+Defekt jest więc **realny, ale dziś nikogo nie dotyczy** — to pułapka czekająca na dane (np. na
+import od dostawcy bez marki), a nie usterka do gaszenia. Zapisany, żeby nie trzeba go było
+odkrywać drugi raz od zera; **priorytetu nie podnosimy**.
+
+**Decyzja.** Naprawa to zakres silnika cen — karta **14f**, nie 14h (14h reużywa silnika,
+nie modyfikuje go). Wymaga decyzji Ani, bo zmiana dopasowania jest odstępstwem od oryginału.
+Przy zerowym zasięgu rozsądne jest odłożenie tego do czasu, aż dane się zmienią — pod warunkiem,
+że wpis zostaje.

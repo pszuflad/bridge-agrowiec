@@ -80,12 +80,14 @@ export const KOLUMNY: DefinicjaKolumny[] = [
 /**
  * Kolumny widoczne domyślnie (`Nn`, frontend-index.js:23021).
  *
- * ⚠ `promocja` jest tu celowo i renderuje „—" ZAWSZE, nie „do czasu Iteracji 4".
- * Sprostowanie z sesji 4b: kolumna czyta `produkt._reguly?.promocja`, a `_reguly` nie jest
- * ustawiane NIGDZIE w produkcyjnym bundlu (jedno wystąpienie, wyłącznie odczyt) ani nie
- * przychodzi z `GET /api/products` (żadne z 66 pól w `contract/fixtures/GET_products.json`).
- * Kolumna jest w produkcji MARTWA i taka zostaje — port 1:1, decyzja użytkownika.
- * Pełny opis: `docs/rebuild-backlog.md` #22.
+ * ⚠ `promocja` jest w produkcji MARTWA — czyta `produkt._reguly?.promocja`, a `_reguly` nie
+ * jest ustawiane NIGDZIE w produkcyjnym bundlu (jedno wystąpienie, wyłącznie odczyt) ani nie
+ * przychodzi z `GET /api/products` (72 klucze nagrania, żaden nie niesie promocji).
+ *
+ * ⭐ W ODBUDOWIE OŻYWIONA w karcie 14h (ticket 61) — ŚWIADOME ODSTĘPSTWO, nie przywrócenie:
+ * backend dokłada `_reguly.promocja` do odpowiedzi `GET /api/products`. Decyzja Ani
+ * z 2026-09-18. Kolumna pokazuje „—" tylko wtedy, gdy produktowi nie odpowiada żadna aktywna
+ * promocja. Pełny opis: `docs/rebuild-backlog.md` #22.
  */
 export const KOLUMNY_DOMYSLNE: string[] = [
   "nazwa",
