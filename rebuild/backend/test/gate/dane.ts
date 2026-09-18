@@ -448,6 +448,22 @@ export function zasiejNarzutyZFixtures(db: Baza): void {
  * test, który go używa. Sam fixture pilnuje wyłącznie tego, że pusty katalog promocji
  * zwraca `[]` z kodem 200.
  */
+/**
+ * Data `YYYY-MM-DD` przesunięta o `przesuniecieDni` od dziś — ten sam pomocnik, co
+ * w `promocja-warunek-obniza-cene.test.ts`.
+ */
+export const dzienISO = (przesuniecieDni: number): string =>
+  new Date(Date.now() + przesuniecieDni * 86_400_000).toISOString().slice(0, 10);
+
+/**
+ * ⚠ DATY LICZONE OD DZIŚ, NIE WPISANE NA SZTYWNO (karta 14f). Wcześniej było tu
+ * `start: "2026-01-01"`, `koniec: "2026-03-31"` przy `status: "aktywna"` — czyli ten seed
+ * KODOWAŁ defekt #19: promocję wygasłą, która mimo to obniża ceny. Do 14f przechodziło to
+ * niezauważone, bo silnik dat nie czytał; od 14f wygaszacz przestawia taki wiersz na
+ * `zakonczona` i rabat znika, więc testy oczekujące obniżki przestałyby przechodzić
+ * z upływem czasu — i to nie z powodu błędu, tylko dlatego, że seed sam sobie przeczył.
+ * Teraz `status: "aktywna"` jest ZGODNY z datami i taki zostanie w każdym kolejnym roku.
+ */
 export const PROMOCJA_TESTOWA = {
   id: 1,
   nazwa: "Wyprzedaż zimowa",
@@ -455,8 +471,8 @@ export const PROMOCJA_TESTOWA = {
   zasieg: "BKT,MICHELIN",
   warunki: null,
   priorytet: 50,
-  start: "2026-01-01",
-  koniec: "2026-03-31",
+  start: dzienISO(-30),
+  koniec: dzienISO(30),
   status: "aktywna",
   zmienilUzytkownikId: 1,
   zmienionoData: "2026-07-31T13:07:21.578Z",

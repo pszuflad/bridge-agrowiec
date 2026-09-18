@@ -19,6 +19,7 @@ import { eq } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { markups, products, promotions } from "../db/schema.js";
 import { uchwytSqlite } from "../import/silnik/bridge-ext.js";
+import { zamiecStatusyPromocji } from "../promocje/wygaszacz.js";
 
 export type Narzut = typeof markups.$inferSelect;
 export type Promocja = typeof promotions.$inferSelect;
@@ -109,10 +110,15 @@ export function narzutPasuje(regula: Narzut, produkt: RekordCenowy): boolean {
  * Czy promocja pasuje do produktu — port `__bridgePromoMatches` (`:44615`).
  *
  * ⚠ DATY `start` I `koniec` NIE SĄ CZYTANE — ani tutaj, ani nigdzie indziej w silniku.
- * O zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie, więc
- * WYGASŁA PROMOCJA NADAL OBNIŻA CENY. To defekt produkcji, odtworzony 1:1 decyzją
- * użytkownika (plan.md D4, `rebuild-backlog.md`) — naprawa wymagałaby wyjątku
- * w charakteryzacji importu, czyli osłabienia najmocniejszej siatki, jaką mamy.
+ * O zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie. Ta funkcja
+ * zostaje portem 1:1 `__bridgePromoMatches` (`:44615`) i taka ma zostać.
+ *
+ * ⚠ ALE SKUTEK ZMIENIŁ SIĘ W 14f — i to nie tutaj, tylko w DANYCH. Do 14f wygasła promocja
+ * obniżała ceny w nieskończoność (defekt #19). Dziś `status` przelicza z dat wygaszacz
+ * (`promocje/wygaszacz.ts`, odstępstwo zatwierdzone przez Anię 2026-09-18), więc wygasła
+ * promocja ma w bazie `zakonczona` i ten warunek ją odrzuca. Naprawiono DANE, nie tę funkcję —
+ * właśnie dlatego, żeby nie osłabiać charakteryzacji importu wyjątkiem w wyroczni.
+ * Nie dokładać tu warunku na daty: to odrzucony wariant (a) z wyceny 14e.
  *
  * ⚠ Druga osobliwość: dopasowanie po `zasieg` jest ODWRÓCONE — to `zasieg` musi ZAWIERAĆ
  * markę lub kategorię produktu, a nie odwrotnie. Dzięki temu `zasieg: "BKT,MICHELIN"` działa
@@ -231,6 +237,16 @@ export type WynikPrzeliczenia = { checked: number; updated: number };
  * dającą dokładnie 0 NIE dostanie UPDATE-u, a wynik zgłosi `updated: 0`.
  */
 export function przeliczCenyZRegul(db: Baza, idProduktow?: number[]): WynikPrzeliczenia {
+  // ⚠ ODSTĘPSTWO ŚWIADOME (karta 14f, backlog #19, zatwierdzone przez Anię 2026-09-18):
+  // przed przeliczeniem zamiatamy statusy promocji wg dat, więc wygasła promocja NIE wchodzi
+  // już do wyceny, a zaplanowana wchodzi, gdy nadszedł jej start. Musi to być PRZED
+  // odczytem `promocje` niżej — inaczej przeliczenie użyłoby statusów sprzed zamiecenia.
+  //
+  // ⚠ TEGO WYWOŁANIA NIE WOLNO SKOPIOWAĆ DO `zastosujRegulyCenowe`. Tamta funkcja leży na
+  // ścieżce importu (`acceptStaging`, `addProductsBulk`), którą porównuje charakteryzacja;
+  // zamiatanie tam rozjechałoby DWIE tabele naraz. Szczegóły: `promocje/wygaszacz.ts`.
+  zamiecStatusyPromocji(db);
+
   const narzuty = db.select().from(markups).all();
   const promocje = db.select().from(promotions).all();
 

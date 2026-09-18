@@ -63,6 +63,22 @@ const schemaEnvBazowe = z.object({
    */
   IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG: flagaBoolDomyslnieWylaczona,
   /**
+   * Odstęp między przebiegami wygaszacza statusu promocji w MINUTACH (karta 14f).
+   * `0` wyłącza sam cykl — przebieg startowy zostaje.
+   *
+   * ⚠ DOMYŚLNIE WŁĄCZONY, inaczej niż `IMPORT_SCHEDULER` — i to jest świadome rozróżnienie,
+   * nie niekonsekwencja (decyzja użytkownika 2026-09-18). Scheduler jest domyślnie wyłączony,
+   * bo odpytywałby REALNE serwery dostawców i podmieniał dane pod Anią. Wygaszacz rusza
+   * WYŁĄCZNIE naszą bazę i JEST tą naprawą, o którą Ania poprosiła („data ma naprawdę kończyć
+   * promocje"); domyślnie wyłączony wróciłby jako zgłoszenie „daty nadal nie kończą promocji".
+   *
+   * Domyślne 5 minut wobec 60-minutowego odstępu importów daje 12-krotny margines na kryterium
+   * karty: okno, w którym wygasła promocja jeszcze obniża cenę przy imporcie, ma być krótsze
+   * niż odstęp między importami. Koszt przebiegu to jeden `SELECT` i `UPDATE` tylko dla
+   * wierszy, które faktycznie zmieniają status.
+   */
+  PROMO_WYGASZACZ_MINUTY: z.coerce.number().int().min(0).default(5),
+  /**
    * ── Integracja Selly.pl (Iteracja 8a) ─────────────────────────────────────
    *
    * Sekrety klienta REST Selly — 1:1 z oryginałem (`mirror/backend/selly/client.cjs:21-24`),

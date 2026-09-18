@@ -4,6 +4,7 @@ import { otworzBaze } from "./db/index.js";
 import { stworzApp } from "./app.js";
 import { stworzScheduler } from "./import/scheduler.js";
 import { synchronizujDostawce } from "./import/synchronizuj.js";
+import { stworzWygaszacz } from "./promocje/wygaszacz.js";
 
 const env = wczytajEnv();
 const { sqlite, db } = otworzBaze(env.DB_PATH);
@@ -17,6 +18,15 @@ const scheduler = stworzScheduler({
   db,
   synchronizuj,
   pierwszyPrzebieg: env.IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG,
+});
+
+// Wygaszacz statusu promocji (karta 14f). Jak scheduler wyżej — sam obiekt niczego nie
+// uruchamia, timer stawia dopiero `uruchom()` poniżej. To jest WARUNEK darmowej
+// charakteryzacji: cała suita buduje aplikację przez `stworzApp`, więc timer stojący tutaj
+// jest dla niej niewidoczny (`promocje/wygaszacz.ts`, nagłówek).
+const wygaszacz = stworzWygaszacz({
+  db,
+  interwalMs: env.PROMO_WYGASZACZ_MINUTY * 60 * 1000,
 });
 
 const app = stworzApp({
@@ -53,11 +63,19 @@ const server = app.listen(env.PORT, env.HOST, () => {
   } else {
     console.log("[scheduler] wyłączony (IMPORT_SCHEDULER nie jest ustawione)");
   }
+
+  // ⚠ ODSTĘPSTWO ŚWIADOME (karta 14f, zatwierdzone przez Anię 2026-09-18: „data ma naprawdę
+  // kończyć promocje"). Bezwarunkowo, w odróżnieniu od schedulera wyżej — wygaszacz rusza
+  // wyłącznie naszą bazę i JEST tą naprawą, więc za flagą domyślnie wyłączoną byłby martwy
+  // (uzasadnienie przy `PROMO_WYGASZACZ_MINUTY` w `config/env.ts`). Przebieg startowy łapie
+  // wygaśnięcia z czasu POSTOJU procesu; `PROMO_WYGASZACZ_MINUTY=0` zostawia sam ten przebieg.
+  wygaszacz.uruchom();
 });
 
 function zamknij(sygnal: string): void {
   console.log(`${sygnal} — zamykam serwer…`);
   scheduler.zatrzymaj();
+  wygaszacz.zatrzymaj();
   server.close(() => {
     sqlite.close();
     process.exit(0);
