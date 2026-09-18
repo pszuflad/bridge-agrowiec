@@ -17,6 +17,10 @@
 > Jeśli staging jest pusty — najpierw wgraj jakiś cennik (rozdział 1), inaczej nie będzie
 > czego oglądać.
 
+> **Do klikania jest osobna kartka:** [scenariusze testowe](scenariusze-testow-I14.md) —
+> 26 ponumerowanych scenariuszy z krokami, oczekiwanym wynikiem i arkuszem na wyniki.
+> Ta kartka mówi **dlaczego**, tamta **co kliknąć po kolei**.
+
 **Zgłosiłaś dziesięć rzeczy. Osiem poprawiliśmy, jedna czeka na Twoją decyzję, jednej
 świadomie nie ruszamy.** Rozdziały 1–4 to poprawki do sprawdzenia, rozdział 5 to lista
 „tego nie zgłaszaj ponownie", rozdział 6 to jedyne zadanie, które zostaje po Twojej stronie.
