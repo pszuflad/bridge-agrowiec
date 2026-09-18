@@ -2152,8 +2152,10 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
 
 ### Iteracja 14 — Uwagi Ani z testów Iteracji 3 (warstwa UI importu i stagingu)
 
-- **Status:** ⬜ nie zaczęte — zaplanowana 2026-09-18. **Zależy od:** 3 (import), konkretnie widoków
-  z 3e i 3f. Niezależna od otwartego 13d (inny podsystem, inne pliki).
+- **Status:** 🔨 w toku — zaplanowana 2026-09-18; **14c ✅ 2026-09-18**
+  (`50-FEATURE-i14c-karta-dostawcy-upload`), 14a i 14b idą równolegle na własnych gałęziach,
+  14d czeka na ich domknięcie. **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f. Niezależna
+  od otwartego 13d (inny podsystem, inne pliki).
 - **Skąd się wzięła.** Ania przeszła `docs/instrukcja-testow-I3.md` i wypełniła pola UWAGI (komentarze
   + zrzuty ekranu). **To NIE jest kolejna delta produkcji** jak I13 — produkcja się nie zmieniła.
   I13 portowała KOD, którego odbudowa nie miała; I14 nadrabia to, czego odbudowa nie przeniosła
@@ -2172,7 +2174,13 @@ dialog, przycisk na karcie dostawcy ma własny, samodzielny upload). Własność
 |---|---|---|
 | 14a | `src/pages/konfiguracja/Wgrywanie.tsx`, `detekcja.ts`, `wgrywanie.ts` | `test/konfiguracja.test.tsx` |
 | 14b | `src/pages/Staging.tsx`, `src/pages/staging/**` | `test/staging.test.tsx` |
-| 14c | `src/pages/konfiguracja/Dostawcy.tsx`, `DialogKonfiguracjiDostawcy.tsx` | `test/konfiguracja.dostawcy.test.tsx`, `test/konfiguracja.admin.test.tsx` |
+| 14c | `src/pages/konfiguracja/Dostawcy.tsx`, `DialogKonfiguracjiDostawcy.tsx`, `dostawcy.ts` | `test/konfiguracja.dostawcy.test.tsx`, `test/konfiguracja.admin.test.tsx` |
+
+⚠ Ta tabela w wersji przed 50-FEATURE-i14c-karta-dostawcy-upload pomijała `dostawcy.ts`, mimo że
+to moduł wspierający `Dostawcy.tsx` (typy, `PRESETY_CZESTOTLIWOSCI`, `formatujCzestotliwosc`,
+`synchronizujTeraz`, `zapiszDostawce` — `grep -n "from \"./dostawcy\"" Dostawcy.tsx`). Skutek w
+50-FEATURE-i14c-karta-dostawcy-upload: klient uploadu musiał wylądować wewnątrz `Dostawcy.tsx`,
+bo lista była whitelistą. Poprawione tutaj.
 
 Żadna z trzech kart nie rusza `contract/`, `rebuild/backend/` ani `contract/fixtures/` — **bramki
 backendu są dla nich N/D**. Gdyby któraś musiała ruszyć fixtures, ma się ZATRZYMAĆ i zapytać
@@ -2289,27 +2297,45 @@ Reset strony przy zmianie rozmiaru strony ZOSTAJE (bez zmian w tej karcie) — �
 z 3e, opisane Ani w **§3.3, linia 95** instrukcji (sprostowanie referencji: dokument kończy się na
 §8, „§9.3" nie istnieje; sama decyzja niezmieniona).
 
-**14c — karta dostawcy** [FE]. Trzy pozycje + jedno rozstrzygnięcie:
-- **Brak przycisku „Wgraj plik" na kartach dostawców** — `:25756-25802`: renderowany dla
-  `sposobDostarczania ∈ {upload, mail}`, ukryty `<input type="file" accept=".csv,.xml,.xlsx">`,
-  `FormData` z polem `plik` na `POST /api/dostawcy/{kod}/upload`, po sukcesie toast „Plik wczytany",
-  unieważnienie `["/api/suppliers"]` i `["/api/staging"]`. **Backend GOTOWY**
-  (`rebuild/backend/src/routes/suppliers.ts:134`) — brak jest wyłącznie po stronie FE. Treść toasta
-  dopasować do tego, co realnie zwraca kontrakt, nie do nazw pól z bundla.
-- **Pole „liczba minut" widoczne ZAWSZE** obok selectu presetów (`Dostawcy.tsx:259-298`); oryginał
-  (`freq-injection.js:124-146`) odsłaniał je dopiero po „Inna wartość (minuty)…". Stąd uwaga Ani
-  „w nowym jest wartość w minutach, w starym lista wyboru". Dzisiejsze uproszczenie jest w kodzie
-  udokumentowane komentarzem — zaktualizować razem ze zmianą.
-- **Dwa różne UI do tej samej rzeczy:** karta dostawcy (select + pole) kontra Konfiguracja → Admin
-  (`DialogKonfiguracjiDostawcy.tsx:126-134`, samo pole minut). Do decyzji użytkownika.
-- **Do sprawdzenia, nie do automatycznej zmiany:** etykieta przycisku synchronizacji — deminifikat
-  ma „Synchronizuj" (`:25754`), odbudowa „Synchronizuj teraz", instrukcja §6 mówi Ani „Synchronizuj
-  teraz". Zweryfikować na ŻYWYM bundlu przed ruszeniem.
-- ⚠ **NIE reużywaj `DialogWgrywania.tsx` z 14a.** Od 2026-09-18 w `pages/konfiguracja/` stoi
-  gotowy dialog uploadu, ale oryginał ma na karcie dostawcy WŁASNY, samodzielny upload
-  (`:25756-25802`: ukryty `<input>`, `FormData`, toast „Plik wczytany") — nie ten dialog. Sięgnięcie
-  po plik 14a złamałoby też rozłączność kart. Wzorzec toasta jest już ustawiony:
-  `useToast()` z `@/components/ui/toast`, wywołanie `toast({ title, description, variant })`.
+**14c — karta dostawcy** [FE]. **Zrobione 2026-09-18, `50-FEATURE-i14c-karta-dostawcy-upload`.**
+Zakres faktycznie dowieziony:
+- **Przycisk „Wgraj plik" na kartach dostawców** — dodany w `Dostawcy.tsx` dla
+  `sposobDostarczania ∈ {upload, mail}`: ukryty `<input type="file" accept=".csv,.xml,.xlsx">`,
+  `FormData` z polem `plik`, `POST /api/dostawcy/{kod}/upload`, po sukcesie toast „Plik wczytany",
+  unieważnienie `["/api/dostawcy"]` + `["/api/staging"]` (nie `["/api/suppliers"]` jak w oryginale —
+  odbudowa pobiera ten ekran innym kluczem, komentarz w kodzie). Zweryfikowane bajt w bajt z żywym
+  bundlem `mirror/frontend/assets/index-PRICEFMT1783512500.js:25690-25802`.
+- **NIE reużyto `DialogWgrywania.tsx` z 14a** — oryginał ma na karcie dostawcy WŁASNY,
+  samodzielny upload (`:25756-25802`), a nie wspólny dialog zakładki „Wgrywanie ręczne".
+  Klient multipart siedzi więc wprost w `Dostawcy.tsx`. Druga przyczyna: `dostawcy.ts` nie był
+  w tabeli własności 14c (patrz wyżej), a `wgrywanie.ts` należy do 14a — duplikat jest
+  wymuszony rozłącznością kart i czeka na scalenie po zmergowaniu obu.
+- **Pole „liczba minut" schowane za „Inna wartość (minuty)…"** — reguła widoczności 1:1 z
+  `freq-injection.js:138-147`. Dostawca bez harmonogramu startuje na „Inna wartość" z pustym
+  polem, NIE na „5 min" jak dałoby dosłowne 1:1 (**D5**, patrz niżej).
+- **Etykieta przycisku synchronizacji zmieniona na „Synchronizuj"** — FAKT, nie „do sprawdzenia":
+  żywy bundle (`grep -o 'Synchronizuj[a-zęą ]\{0,10\}'` na
+  `mirror/frontend/assets/index-PRICEFMT1783512500.js`) ma jedno trafienie, `Synchronizuj`, zgodnie
+  z deminifikatem. „Synchronizuj teraz" było tylko w odbudowie.
+- **Dialog admina (`DialogKonfiguracjiDostawcy.tsx`) BEZ ZMIAN funkcjonalnych** — decyzja **D3**:
+  zostaje surowe pole „Częstotliwość (minuty)", bez selectu presetów, bo to osobna trasa
+  (`PATCH /api/admin/supplier-config/{kod}`) o innej semantyce (rozróżnia „nie ruszaj" od „wyczyść"
+  przez `hasOwnProperty`, select by to popsuł) i w oryginale nie ma dla niej żadnego React UI.
+  Utrwalone komentarzem w kodzie + testem-strażnikiem (`konfiguracja.admin.test.tsx`).
+
+Trzy zatwierdzone odstępstwa od oryginału (pełne uzasadnienia:
+`docs/tickets/50-FEATURE-i14c-karta-dostawcy-upload/plan.md`, sekcja Decisions):
+- **D1** — toast uploadu czyta realne pola `nowe`/`zmienione`, nie `nowych`/`zmian` jak oryginał.
+  Oryginalny bundle woła pola, których trasa `POST /api/dostawcy/:kod/upload` nigdy nie zwracała
+  (`tk()` daje `nowe`/`zmienione`/`wycofane`/…), więc produkcja od zawsze wyświetla „undefined
+  nowych, undefined zmian" — naprawa zamiast odtworzenia buga.
+- **D5** — dostawca bez `czestotliwoscMinuty` startuje na „Inna wartość" z pustym polem, nie na
+  „5 min" (co dałoby dosłowne 1:1 z `freq-injection.js:138-147`, bo żadna gałąź reguły nie ustawia
+  `select.value`, gdy `currentMin` jest null/0). Powód: formularz odbudowy zapisuje cztery pola
+  karty naraz, więc „5 min" jako wartość startowa po cichu włączyłoby polling przy zapisie
+  DOWOLNEGO innego pola karty.
+- **D6** — `<input type="file">` jest czyszczony po wysyłce (oryginał tego nie robi) — inaczej
+  wgranie tego samego pliku drugi raz z rzędu nie wywołuje `onChange` i UI wygląda zawieszone.
 
 **14d — aktualizacja instrukcji testów + domknięcie backlogu** [DOCS] — **idzie PO 14a/14b/14c**,
 bo dokument ma opisywać STAN, nie zamiar. Dwie części:
@@ -2330,6 +2356,12 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   domyślnym filtrze `nowa` ten krok wraca teraz do INNEGO stanu niż startowy, trzeba przepisać;
   **(2)** §3.1/§6 mówią o „liście pozycji z kompletem kolumn" — po 14b kolumny „Stan", „Cena
   zakupu" i „Cena sprzedaży" są domyślnie ukryte, trzeba opisać przycisk „Kolumny".
+- ⚠ **Co konkretnie zmieniło 14c w instrukcji** (zrobione 2026-09-18): etykieta przycisku
+  synchronizacji to teraz **„Synchronizuj"**, a instrukcja mówi „Synchronizuj teraz" w ~10
+  miejscach (`:190,198,205,215,249,296,297,387,430`) — do poprawienia. Doszedł przycisk
+  **„Wgraj plik"** przy dostawcach `upload`/`mail`, którego instrukcja w ogóle nie zna.
+  Pole „liczba minut" jest teraz schowane za „Inna wartość (minuty)…", a §3.12 (`:236-238`)
+  opisuje je jako widoczne od razu obok listy presetów — to już nieprawda.
 
 ---
 

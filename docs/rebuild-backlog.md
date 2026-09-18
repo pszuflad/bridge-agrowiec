@@ -3275,3 +3275,47 @@ zapisaną. Trzy rzeczy przed implementacją:
 3. Przed naniesieniem **zmierzyć na `db/snapshot.db`, ile rekordów zmienia zapis** (ile wartości
    `products.szerokosc` ma dziś zera końcowe) — to jest liczba, którą trzeba pokazać Ani przy
    pytaniu z pkt. 1, i jednocześnie oczekiwanie dla testu charakteryzacyjnego.
+
+### #84 · 2026-09-18 · [FRONTEND] · toast po uploadzie z karty dostawcy w produkcji czyta pola, których backend nigdy nie zwracał — „undefined nowych, undefined zmian”
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (karta dostawcy, toast po `POST /api/dostawcy/{kod}/upload`) — defekt PRODUKCJI |
+| **Pliki** | `deminified/frontend-index.js:25778-25781` (potwierdzone bajt w bajt w żywym `mirror/frontend/assets/index-PRICEFMT1783512500.js`); `mirror/backend/index.cjs`, trasa `POST /api/dostawcy/:kod/upload`, wynik `tk()` |
+| **Zmiana w oryginale** | Toast składa opis z pól `o.nowych` i `o.zmian`, których odpowiedź trasy **nigdy nie miała** — realnie zwraca `nowe`, `zmienione`, `wycofane`, `bezZmian`, `doStagingu`, `autoZatwierdzone` (`grep -o 'nowych:'` i `grep -o 'zmian:'` po całym `mirror/backend/index.cjs` → zero trafień obu). `tk()` ma w żywym bundlu jedną definicję — to zwykła literówka w nazwach pól, nie cieniowanie duplikatem (`CLAUDE.md` §5). |
+| **Skutek w produkcji** | Od zawsze wyświetla „N produktów, **undefined** nowych, **undefined** zmian” po każdym ręcznym uploadzie z karty dostawcy. |
+| **Do nowej wersji?** | ✅ **TAK — naprawiamy, nie odtwarzamy buga** (decyzja **D1**, 2026-09-18, `50-FEATURE-i14c-karta-dostawcy-upload`). Wierne przepisanie dałoby ten sam „undefined” w odbudowie, co i tak zostałoby zgłoszone jako usterka. |
+| **Status** | ✔ zrobione w rebuild (14c) — toast czyta realne `nowe`/`zmienione` (`rebuild/backend/src/routes/suppliers.ts:215-222`), test asertuje `not.toHaveTextContent("undefined")`. W żywej produkcji **nadal obecne** — do ewentualnego zgłoszenia Ani, nie blokuje cutoveru. |
+
+### #85 · 2026-09-18 · [FRONTEND] · pole „liczba minut” na karcie dostawcy — wartość startowa dla dostawcy bez harmonogramu
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (karta dostawcy, edycja częstotliwości) |
+| **Pliki** | `mirror/frontend/assets/freq-injection.js:124-147` (oryginał — osobny popover, patchuje wyłącznie `czestotliwoscMinuty`); `rebuild/frontend/src/pages/konfiguracja/Dostawcy.tsx` (odbudowa — jeden formularz zapisujący cztery pola naraz: url, częstotliwość, sposób dostarczania, status) |
+| **Do nowej wersji?** | ✅ **TAK — świadome odstępstwo** (decyzja **D5**, 2026-09-18, `50-FEATURE-i14c-karta-dostawcy-upload`) |
+| **Status** | ✔ zrobione w rebuild (14c) |
+
+**Opis.** Reguła WIDOCZNOŚCI pola minut jest 1:1 z oryginałem — widoczne dokładnie wtedy, gdy
+select stoi na „Inna wartość (minuty)…” (`freq-injection.js:138-147`). Odstępstwem jest tylko
+wartość STARTOWA dla `czestotliwoscMinuty` null/0: w oryginale żadna gałąź nie ustawia
+`select.value` w tym przypadku (`:129`, `:141`), więc select zostaje na pierwszej opcji presetów,
+czyli „5 min”. Odbudowa scaliła edycję częstotliwości z zapisem pozostałych pól karty w jeden
+formularz — odtworzenie „5 min” 1:1 znaczyłoby, że zapis samego statusu **po cichu włącza
+dostawcy odpytywanie co 5 minut**. Dlatego dostawca bez harmonogramu startuje na „Inna wartość
+(minuty)…” z pustym polem; zachowuje to też możliwość wyczyszczenia harmonogramu (`null`), której
+oryginał w ogóle nie miał (puste pole custom wpadało w `if (!val || val < 1) return`, `:167-171`).
+
+### #86 · 2026-09-18 · [FRONTEND] · `<input type="file">` na karcie dostawcy czyszczony po wysyłce — oryginał tego nie robi
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | FRONTEND (karta dostawcy, przycisk „Wgraj plik”) |
+| **Pliki** | `mirror/frontend/assets/index-PRICEFMT1783512500.js:25690-25802` (oryginał — brak `.value = ""` po wysyłce uploadu); `rebuild/frontend/src/pages/konfiguracja/Dostawcy.tsx` |
+| **Do nowej wersji?** | ✅ **TAK — świadome odstępstwo** (decyzja **D6**, 2026-09-18, `50-FEATURE-i14c-karta-dostawcy-upload`) |
+| **Status** | ✔ zrobione w rebuild (14c) |
+
+**Opis.** Oryginał nie czyści `<input type="file">` po wysyłce, więc wgranie tego samego pliku
+(ta sama nazwa/ścieżka) drugi raz z rzędu nie wywołuje `onChange` przeglądarki i przycisk wygląda
+na zepsuty. Odbudowa czyści pole (`e.target.value = ""`) — powód praktyczny: Ania poprawia plik
+u dostawcy i wgrywa go ponownie pod tą samą nazwą.
