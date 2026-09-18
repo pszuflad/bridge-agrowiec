@@ -17,6 +17,7 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
+  PROMOCJA_TESTOWA,
   sprawdzZgodnoscZFixture,
   sprawdzZgodnoscZKontraktem,
   stworzSrodowiskoTestowe,
@@ -24,6 +25,7 @@ import {
   zasiejDostawcow,
   zasiejHistorieCen,
   zasiejProdukty,
+  zasiejPromocjeTestowa,
   type SrodowiskoTestowe,
 } from "./gate/index.js";
 
@@ -236,4 +238,137 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
       .set("Authorization", `Bearer ${token}`);
     expect(odp.status).toBe(404);
   });
+});
+
+/**
+ * STRAŻNIK ŚWIADOMEGO ODSTĘPSTWA — karta 14h (ticket 61).
+ *
+ * CO: `GET /api/products` dokłada opcjonalny 73. klucz `_reguly` z dopasowaną promocją.
+ * DLACZEGO TO ODSTĘPSTWO: nagrana produkcja oddaje 72 klucze i `_reguly` wśród nich NIE MA.
+ *     Kolumna „Promocja" w `/katalog` czytała `_reguly.promocja` od baseline'u 13.08, ale
+ *     ZAPISU tego pola nie dopisał nigdy nikt — ani w żywym bundlu, ani w backendzie.
+ *     To NOWA FUNKCJA, nie naprawa regresji.
+ * CZYJA DECYZJA I KIEDY: Ania, 2026-09-18 — „dodaj regułę wypełniania kolumny promocja".
+ *     Zapis: `docs/rebuild-backlog.md` #22, `docs/rebuild-roadmap.md` §I14 karta 14h.
+ *
+ * ⚠ DLACZEGO OSOBNE ŚRODOWISKO, A NIE `beforeAll` WYŻEJ. Bramka powyżej celowo NIE zasiewa
+ * żadnej promocji, więc żaden produkt nie dostaje tam `_reguly` i wszystkie trzy asercje
+ * „dokładnie 72 klucze" przechodzą BEZ ROZLUŹNIENIA czegokolwiek — i tak ma zostać, bo to
+ * one dowodzą, że produkt bez promocji jest nadal 1:1 z produkcją. Zasianie promocji w tamtym
+ * środowisku skaziłoby je (testy w pliku lecą po kolei, wiersz zostałby w bazie).
+ *
+ * ⚠ Ten blok świadomie NIE używa `sprawdzZgodnoscZFixture` — nie istnieje żadne nagranie
+ * produkcji z wypełnioną promocją, bo produkcja nigdy jej nie wypełniała. Nie ma z czym
+ * porównywać, więc porównywanie z fixture'em byłoby tu udawaniem dowodu.
+ */
+describe("GATE — odstępstwo 14h: `_reguly.promocja` w GET /api/products", () => {
+  let srodowisko: SrodowiskoTestowe;
+  let token: string;
+
+  /** Zasięg `BKT,MICHELIN` trafia dwa produkty BKT z seeda, a mija MITAS i ALLIANCE. */
+  const MARKI_TRAFIONE = ["BKT"];
+
+  beforeAll(async () => {
+    srodowisko = await stworzSrodowiskoTestowe();
+    zasiejDostawcow(srodowisko.db);
+    zasiejProdukty(srodowisko.db);
+    zasiejPromocjeTestowa(srodowisko.db);
+    const odp = await request(srodowisko.app)
+      .post("/api/login")
+      .send({ email: srodowisko.dane.email, password: srodowisko.dane.haslo });
+    token = (odp.body as { token: string }).token;
+  });
+
+  afterAll(() => srodowisko.posprzataj());
+
+  async function pozycje(sciezka: string): Promise<Record<string, unknown>[]> {
+    const odp = await request(srodowisko.app)
+      .get(sciezka)
+      .set("Authorization", `Bearer ${token}`);
+    expect(odp.status, sciezka).toBe(200);
+    return (
+      Array.isArray(odp.body) ? odp.body : (odp.body as { items: unknown[] }).items
+    ) as Record<string, unknown>[];
+  }
+
+  /**
+   * Sedno odstępstwa: klucz pojawia się WYŁĄCZNIE przy dopasowaniu i niesie dokładnie
+   * `{ wartosc, nazwa }` — tyle, ile czyta renderer (`katalog/formatowanie.tsx`) i tyle,
+   * ile czytał żywy bundle produkcji (`p.wartosc`, `p.nazwa || "Promocja"`).
+   */
+  it.each(["/api/products", "/api/products?limit=5"])(
+    "%s — produkt z pasującą promocją dostaje `_reguly.promocja` o kształcie {wartosc, nazwa}",
+    async (sciezka) => {
+      const trafione = (await pozycje(sciezka)).filter((p) =>
+        MARKI_TRAFIONE.includes(String(p.marka)),
+      );
+
+      expect(trafione.length, "seed musi mieć produkt marki BKT").toBeGreaterThan(0);
+      for (const produkt of trafione) {
+        expect(produkt._reguly, `${sciezka} / ${String(produkt.kod)}`).toEqual({
+          promocja: { wartosc: PROMOCJA_TESTOWA.rabatPct, nazwa: PROMOCJA_TESTOWA.nazwa },
+        });
+      }
+    },
+  );
+
+  /**
+   * Druga połowa strażnika i powód, dla którego odstępstwo jest WĄSKIE: produkt, któremu
+   * promocja nie odpowiada, zostaje przy 72 kluczach nagrania. Gdyby ktoś kiedyś zmienił
+   * `dolaczReguly` na `_reguly: {}` „dla czystości API", ten test zapali się natychmiast.
+   */
+  it.each(["/api/products", "/api/products?limit=5"])(
+    "%s — produkt BEZ pasującej promocji nie ma `_reguly` i ma nadal dokładnie 72 klucze",
+    async (sciezka) => {
+      const nietrafione = (await pozycje(sciezka)).filter(
+        (p) => !MARKI_TRAFIONE.includes(String(p.marka)),
+      );
+
+      expect(nietrafione.length, "seed musi mieć produkt spoza zasięgu promocji").toBeGreaterThan(
+        0,
+      );
+      for (const produkt of nietrafione) {
+        expect(Object.keys(produkt), `${sciezka} / ${String(produkt.kod)}`).not.toContain(
+          "_reguly",
+        );
+        expect(Object.keys(produkt), `${sciezka} / ${String(produkt.kod)}`).toHaveLength(72);
+      }
+    },
+  );
+
+  /** Odstępstwo ma być dokładnie JEDNYM kluczem — nie okazją do przemycenia kolejnych. */
+  it.each(["/api/products", "/api/products?limit=5"])(
+    "%s — `_reguly` dokłada dokładnie jeden klucz (73), reszta kształtu nietknięta",
+    async (sciezka) => {
+      const fixture = wczytajFixture("GET_products.json");
+      const oczekiwane = Object.keys(
+        (fixture.body as { items: Record<string, unknown>[] }).items[0] ?? {},
+      ).sort();
+
+      for (const produkt of await pozycje(sciezka)) {
+        const klucze = Object.keys(produkt);
+        const bezOdstepstwa = klucze.filter((k) => k !== "_reguly").sort();
+        expect(bezOdstepstwa, `${sciezka} / ${String(produkt.kod)}`).toEqual(oczekiwane);
+        expect(klucze.length, `${sciezka} / ${String(produkt.kod)}`).toBeLessThanOrEqual(73);
+      }
+    },
+  );
+
+  /**
+   * Trasa z odstępstwem ma dalej przechodzić kontrolę kontraktu.
+   *
+   * ⚠ ZAKRES TEJ ASERCJI, ŻEBY NIKT NIE LICZYŁ NA WIĘCEJ: `sprawdzZgodnoscZKontraktem`
+   * sprawdza ścieżkę, metodę, kod odpowiedzi i `content-type` — NIE waliduje ciała względem
+   * schematu. Że dodatkowy klucz nie łamie schematu, wiemy stąd, że `additionalProperties`
+   * nie jest w `contract/openapi.yaml` ustawione nigdzie. Kształt ciała pilnują testy wyżej.
+   */
+  it.each(["/api/products", "/api/products?limit=5"])(
+    "%s — odpowiedź z `_reguly` przechodzi kontrolę kontraktu (ścieżka/kod/content-type)",
+    async (sciezka) => {
+      const odp = await request(srodowisko.app)
+        .get(sciezka)
+        .set("Authorization", `Bearer ${token}`);
+      sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/products", odpowiedz: odp });
+    },
+  );
 });

@@ -8,6 +8,7 @@ import { zapiszWpisDziennika } from "../repos/dziennik-zmian.js";
 import { zapiszPoprawke } from "../repos/overrides.js";
 import {
   aktualizujProdukt,
+  dolaczReguly,
   listaProduktow,
   listaProduktowStronicowana,
   odsiejPolaEdytowalneProduktu,
@@ -15,6 +16,7 @@ import {
   usunProdukt,
   wKontrakcie,
 } from "../repos/products.js";
+import { listaPromocji } from "../repos/promotions.js";
 import { dodajProduktyBulk, type PozycjaBulku } from "../import/bulk.js";
 
 export type ZaleznosciProduktow = {
@@ -42,6 +44,12 @@ export const DOMYSLNY_LIMIT = 200;
  * Endpoint NIE zna `search` ani `sort` — produkcja ich nie obsługuje.
  * `GET /api/products/{id}` nie istnieje ani w produkcji, ani w kontrakcie
  * (openapi.yaml:834-870 ma tam wyłącznie delete/patch/put) — dlatego go tu nie ma.
+ *
+ * ⚠ ODSTĘPSTWO 14h: OBA warianty dokładają opcjonalny klucz `_reguly` z dopasowaną promocją,
+ * którego produkcja nie zwraca. Świadoma decyzja Ani z 2026-09-18 (`rebuild-backlog.md` #22);
+ * pełne uzasadnienie i kształt — przy `dolaczReguly()` w `repos/products.ts`.
+ * Pole trafia do OBU kształtów celowo: trasa, która raz oddaje klucz, a raz nie, byłaby
+ * rozjazdem czekającym na odkrycie. Produkt bez pasującej promocji zostaje przy 72 kluczach.
  */
 export function trasyProduktow({ db }: ZaleznosciProduktow): Router {
   const router = Router();
@@ -57,8 +65,12 @@ export function trasyProduktow({ db }: ZaleznosciProduktow): Router {
     const offset = parseInt(String(req.query.offset ?? "0"), 10) || 0;
     const dostawca = req.query.dostawca ? String(req.query.dostawca) : undefined;
 
+    // ⚠ RAZ na żądanie, PRZED rozgałęzieniem — nigdy per produkt (katalog to ~7400 pozycji).
+    // Wzorzec 1:1 z `przeliczCenyZRegul` (`repos/ceny.ts:234-235`).
+    const promocje = listaPromocji(db);
+
     if (limit === undefined && dostawca === undefined) {
-      res.json(listaProduktow(db));
+      res.json(dolaczReguly(listaProduktow(db), promocje));
       return;
     }
 
@@ -68,7 +80,7 @@ export function trasyProduktow({ db }: ZaleznosciProduktow): Router {
       offset,
       dostawca,
     );
-    res.json({ items, total, limit: limit ?? DOMYSLNY_LIMIT, offset });
+    res.json({ items: dolaczReguly(items, promocje), total, limit: limit ?? DOMYSLNY_LIMIT, offset });
   });
 
   // ————————————————————————————————————————————————————————————————————————————————————

@@ -1489,6 +1489,10 @@ nadpisywał ręczne ustawienia — a instrukcja mówi dziś Ani wprost, że „�
 trzeba zmienić status". Po (b) status staje się polem WYLICZANYM; do rozstrzygnięcia, czy odciąć
 go od listy edytowalnych.
 
+**Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) korzysta o tego samego
+`wybierzPromocje` z `repos/ceny.ts` co silnik cen — więc zacznie respektować daty **sama**, bez
+żadnej zmiany w karcie 14h, gdy karta 14f dowiezie wygaszacz/naprawę dat.
+
 Pełne liczby i metoda: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`, sekcja C.
 
 **Uzupełnienie 4b (frontend, 2026-09-02).** Widok `/narzuty` portuje `_b()`/`Qd()` 1:1
@@ -1586,15 +1590,16 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 ### #22 · 2026-09-02 · [FRONTEND] · kolumna „Promocja" w `/katalog` jest MARTWA
 
 > **Znalezione przy bloku I4/4b (2026-09-02). Port 1:1** — decyzja użytkownika D1
-> (`docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md`).
+> (`docs/tickets/16-FEATURE-widok-narzuty-promocje/plan.md`). **Ożywione 2026-09-18,
+> karta 14h** (`docs/tickets/61-FEATURE-promocja-kolumna-katalog/`).
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (katalog) |
-| **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
+| **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138`; ożywienie: `rebuild/backend/src/repos/products.ts` (`dolaczReguly`), `rebuild/backend/src/routes/products.ts` |
 | **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
-| **Iteracja** | odtworzone 1:1 w **4b**; ożywienie → **I14, karta 14h** |
-| **Status** | decyzja podjęta, karta niezałożona · **14e (2026-09-18): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływa na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
+| **Iteracja** | odtworzone 1:1 w **4b**; ożywione w **I14, karta 14h** (2026-09-18) |
+| **Status** | ✔ **zrobione 2026-09-18, `61-FEATURE-promocja-kolumna-katalog`** · **14e (2026-09-18): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływała na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
 
 **⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
 Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
@@ -1606,6 +1611,10 @@ wziąć za trafienie (wzięliśmy, na jedną minutę). Rozstrzygające: `git log
 zwraca ANI JEDNEGO commita od baseline'u 13.08 do 18.09 — nikt nigdy nie dopisał zapisu tego pola.
 **Wniosek dla karty 14h: to nowa funkcja i świadome odstępstwo, nie przywrócenie regresji.** Trzeba
 to Ani powiedzieć wprost, żeby nie liczyła na „powrót do stanu sprzed backupu" i na jego wycenę.
+**Dwa fakty zweryfikowane niezależnie w 14h:** odczyt `_reguly` istniał już w baseline'ie
+z 2026-08-13 (`deminified/frontend-index.js`, 1 wystąpienie), więc żadna łatka Ani go nie dodała
+ani nie usunęła — nie ma czego „przywracać"; `git log -S'_reguly:' --all` zwraca dokładnie **jeden**
+commit i jest to nasz własny wpis dokumentacyjny, zero kodu produkcji.
 
 **Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
 **nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
@@ -1617,14 +1626,22 @@ i od zawsze renderuje `—`.
 promocję, a nigdy nic nie pokaże — bo dane, które by ją zasiliły, nie istnieją nigdzie
 w systemie produkcyjnym.
 
-**Decyzja użytkownika (2026-09-02): port 1:1** — odbudowa ma to samo zachowanie
-w `rebuild/frontend/src/pages/katalog/formatowanie.tsx`. Ożywienie wymagałoby danych
-z backendu (pole dopasowanej promocji przy produkcie); liczenie po stronie klienta
-duplikowałoby silnik dopasowania reguł (`rebuild/backend/src/repos/ceny.ts`) — drugie
-miejsce, które musiałoby zgadzać się z pierwszym.
+**Decyzja użytkownika (2026-09-02): port 1:1 w 4b** — odbudowa miała wtedy to samo zachowanie
+w `rebuild/frontend/src/pages/katalog/formatowanie.tsx`. Ożywienie wymagało danych z backendu
+(pole dopasowanej promocji przy produkcie); liczenie po stronie klienta duplikowałoby silnik
+dopasowania reguł (`rebuild/backend/src/repos/ceny.ts`) — drugie miejsce, które musiałoby zgadzać
+się z pierwszym. **Dokładnie tak to zrobiono w 14h:** backend liczy wspólnym silnikiem, front
+zostaje bez zmian w kodzie.
 
-**Do rozważenia dla produkcji/odbudowy.** Ożywienie kolumny (backend dokłada pole przy
-produkcie, wyliczone tym samym silnikiem co ceny) — kandydat na I12, poza zakresem 4b.
+**Co dowiozła karta 14h (2026-09-18).** `GET /api/products` dokłada opcjonalny klucz
+`_reguly.promocja` = `{ wartosc, nazwa }` (`wartosc` = kolumna `promotions.rabat_pct`),
+wyliczony **istniejącym** `wybierzPromocje` z `rebuild/backend/src/repos/ceny.ts` (silnik
+NIETKNIĘTY). Pole trafia do OBU kształtów odpowiedzi `GET /api/products` (goła tablica i
+koperta). **Brak dopasowania = BRAK klucza**, więc produkt bez promocji ma nadal dokładnie
+72 klucze co nagranie produkcji — odstępstwo jest warunkowe i wąskie. **Dziś w bazie jest
+0 promocji** (`db/snapshot.db`: `products` = 7405, `promotions` = 0; produkcyjny fixture
+`GET_promotions.json` to pusta tablica) — kolumna zaświeci dopiero po założeniu promocji
+w `/narzuty`. Szczegóły: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/plan.md` (D1–D9).
 
 ---
 
@@ -1659,6 +1676,10 @@ testy po obu stronach (`narzuty.ceny.test.ts` / `ceny.silnik.test.ts`). Uzasadni
 błędne wyjaśnienie ceny jest gorsze niż jego brak, a od tej samej logiki zależy ostrzeżenie
 o sprzedaży poniżej kosztu. W produkcji defekt **nadal obecny**.
 
+**Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) świadomie NIE dokłada
+czwartego sposobu dopasowania promocji — reużywa `wybierzPromocje`/`promocjaPasuje` z
+`repos/ceny.ts`, ten sam silnik co ceny w katalogu.
+
 ---
 
 ### #24 · 2026-09-02 · [FRONTEND] · ostrzeżenie „poniżej kosztu" to TRZECI, osobny sposób liczenia
@@ -1688,6 +1709,9 @@ tych, które 4b dołożyła do buildera warunków (D4 tego ticketa) ponad 6 typ�
 bez zmian, wygląd dialogu inny (Radix zamiast `window.confirm`, bo ten blokuje wątek i nie
 da się go stylować/testować). Odtworzone świadomie, ⬜ do rozważenia w przyszłości, czy
 ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
+
+**Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) świadomie NIE dołożyła
+czwartego sposobu — patrz notatka przy #23.
 
 ---
 
@@ -3523,3 +3547,46 @@ odsiew przechodziłoby wielokrotnie więcej wierszy. Warto je rozstrzygać razem
 - **(c) filtrować i paginować w SQL** zamiast w pamięci — usuwa problem u źródła i naprawia
   licznik, ale jest **świadomym odstępstwem** od oryginału w trasie, którą dziś porównujemy
   z produkcją 1:1, i wymaga przenagrania fixtures historii.
+---
+
+### #88 · 2026-09-18 · [BACKEND] · `promocjaPasuje` — pusty `marka`/`kategoria` łapie KAŻDĄ promocję o niepustym zasięgu
+
+> **Znalezione przy karcie 14h (`61-FEATURE-promocja-kolumna-katalog`), 2026-09-18** —
+> uwidocznione dopiero teraz, bo dotąd kolumna „Promocja" w `/katalog` była martwa (#22) i nie
+> było jak zobaczyć skutku, choć na cenę wpływał tak samo, po cichu.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | BACKEND (silnik cen) |
+| **Pliki** | `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`); test utrwalający: `rebuild/backend/test/katalog.promocja.test.ts` |
+| **Do nowej wersji?** | ⬜ **do decyzji** — naprawa byłaby odstępstwem od oryginału |
+| **Status** | — nie zaczęte (świadomie odłożone do 14f) |
+
+**Opis.** `promocjaPasuje` dopasowuje przez `zasieg.includes(tekst(produkt.marka))` (analogicznie
+dla `kategoria`), a **każdy napis zawiera pusty napis** — więc produkt z pustą `marka` ORAZ pustą
+`kategoria` łapie **KAŻDĄ** promocję o niepustym zasięgu. `marka` i `kategoria` są `NOT NULL`
+w schemacie (`rebuild/backend/src/db/schema.ts:24-25`), więc osiągalny jest wariant z pustym
+napisem, nie z NULL-em.
+
+**Skutek.** Defekt jest **odziedziczony po oryginale**, nie wprowadzony w odbudowie. Karta 14h
+go wyłącznie **UWIDACZNIA** przez ożywienie kolumny „Promocja" (#22) — dotąd nie było go jak
+zobaczyć, bo kolumna renderowała „—" bez względu na wynik dopasowania, choć na `cenaSprzedazy`
+wpływał identycznie, po cichu.
+
+**Skala — ZMIERZONA, nie oszacowana (14h, 2026-09-18): ZERO.** Na snapshocie produkcji
+(`db/snapshot.db`, 7405 produktów) **ani jeden** produkt nie ma jednocześnie pustej `marka`
+i pustej `kategoria`:
+
+```sql
+SELECT COUNT(*) FROM products
+WHERE TRIM(COALESCE(marka,'')) = '' AND TRIM(COALESCE(kategoria,'')) = '';  -- 0
+```
+
+Defekt jest więc **realny, ale dziś nikogo nie dotyczy** — to pułapka czekająca na dane (np. na
+import od dostawcy bez marki), a nie usterka do gaszenia. Zapisany, żeby nie trzeba go było
+odkrywać drugi raz od zera; **priorytetu nie podnosimy**.
+
+**Decyzja.** Naprawa to zakres silnika cen — karta **14f**, nie 14h (14h reużywa silnika,
+nie modyfikuje go). Wymaga decyzji Ani, bo zmiana dopasowania jest odstępstwem od oryginału.
+Przy zerowym zasięgu rozsądne jest odłożenie tego do czasu, aż dane się zmienią — pod warunkiem,
+że wpis zostaje.

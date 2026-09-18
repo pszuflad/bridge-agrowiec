@@ -19560,6 +19560,25 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/DELETEProductsIdOdpowiedz200" } } } }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  # ─── ODSTĘPSTWO OD PRODUKCJI — karta 14h ────────────────────────────────────────────────
+  # `GET /api/products` dokłada do każdej pozycji OPCJONALNY klucz `_reguly`:
+  #     _reguly: { promocja: { wartosc: number, nazwa: string } }
+  # gdzie `wartosc` to procent rabatu (kolumna `promotions.rabat_pct`), a klucz pojawia się
+  # WYŁĄCZNIE wtedy, gdy produktowi odpowiada aktywna promocja. Bez dopasowania pozycja ma
+  # dokładnie te 72 klucze co nagranie produkcji.
+  #
+  # Nagrana produkcja tego klucza NIE ZWRACA — kolumna „Promocja" w `/katalog` czytała
+  # `_reguly.promocja` od baseline'u 13.08, ale zapisu tego pola nie dopisał nigdy nikt.
+  # To NOWA FUNKCJA, nie naprawa regresji. Decyzja: Ania, 2026-09-18
+  # („dodaj regułę wypełniania kolumny promocja") — `docs/rebuild-backlog.md` #22.
+  #
+  # DLACZEGO OPISUJE TO KOMENTARZ, A NIE SCHEMAT NIŻEJ: cały blok `components.schemas` jest
+  # GENEROWANY z `contract/fixtures/` (`tools/generate-openapi-schemas.cjs`), a generator
+  # z definicji pomija klucze zaczynające się od `_` — traktuje je jako techniczne klucze
+  # nagrywarki. Ręczny wpis w tym bloku zostałby skasowany przy pierwszym biegu, a pola nie
+  # da się „nagrać" z oryginału, bo produkcja nigdy go nie wypełnia. Klucz niczego nie łamie:
+  # `additionalProperties` nie jest w tym kontrakcie ustawione nigdzie.
+  # ─────────────────────────────────────────────────────────────────────────────────────────
   /api/products:
     get:
       tags: [products]

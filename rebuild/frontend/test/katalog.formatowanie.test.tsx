@@ -184,8 +184,32 @@ describe("formatujKomorke (DT)", () => {
     expect(data).toMatch(/2026/);
   });
 
-  it("promocja bez reguł cenowych (Iteracja 4) pokazuje kreskę", () => {
+  it("promocja pokazuje kreskę, gdy produktowi nie odpowiada żadna promocja", () => {
     expect(tekstKomorki(produkt({}), "promocja")).toBe("—");
+  });
+
+  /**
+   * ŚCIEŻKA POZYTYWNA — to ona jest sednem karty 14h (ticket 61): od tego ticketu
+   * `GET /api/products` realnie wypełnia `_reguly.promocja`, więc kolumna wreszcie coś
+   * pokazuje. Wcześniej pokryta była wyłącznie gałąź „brak promocji → kreska", czyli
+   * jedyna, jaką produkcja kiedykolwiek umiała pokazać.
+   *
+   * Kształt `{ wartosc, nazwa }` jest podyktowany przez oryginał, nie przez nas — żywy
+   * bundle czyta `p.wartosc` i `p.nazwa || "Promocja"`.
+   */
+  it("promocja z `_reguly` pokazuje rabat i nazwę", () => {
+    const zPromocja = produkt({
+      _reguly: { promocja: { wartosc: 10, nazwa: "Wyprzedaż zimowa" } },
+    } as Partial<Produkt>);
+
+    expect(tekstKomorki(zPromocja, "promocja")).toBe("-10%Wyprzedaż zimowa");
+  });
+
+  /** Fallback nazwy jest w oryginale (`p.nazwa || "Promocja"`) — odtworzony, więc pilnowany. */
+  it("promocja bez nazwy używa fallbacku Promocja", () => {
+    const bezNazwy = produkt({ _reguly: { promocja: { wartosc: 5 } } } as Partial<Produkt>);
+
+    expect(tekstKomorki(bezNazwy, "promocja")).toBe("-5%Promocja");
   });
 
   it("puste wartości zawsze dają kreskę, nie pusty string", () => {
