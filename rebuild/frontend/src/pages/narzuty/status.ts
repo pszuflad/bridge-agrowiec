@@ -1,22 +1,26 @@
 /**
  * Statusy reguł cenowych.
  *
- * ⚠ TU MIESZKA NAJBARDZIEJ MYLĄCA RZECZ W CAŁYM TYM WIDOKU — i dlatego jest opisana długo.
- *
  * Produkcja liczy status promocji Z DAT przy KAŻDYM odczycie `/api/promotions`
  * (`_b()`, `frontend-index.js:9508-9514`, wołane z `queryFn` `:9568`; sama formuła to `Qd()`,
- * `:9309-9314`). Wynik idzie do wyświetlenia i do IndexedDB (`Gr()` → `un()`), ale **NIGDY
- * na serwer**. Kolumna `status` w bazie zostaje nietknięta — a to JEJ używa silnik cen
- * (`rebuild/backend/src/repos/ceny.ts`, `promocjaPasuje`), który dat nie czyta w ogóle
- * (`rebuild-backlog.md` #19).
+ * `:9309-9314`). Wynik idzie do wyświetlenia i do IndexedDB (`Gr()` → `un()`), ale NIGDY
+ * na serwer. Odtwarzamy to 1:1 — etykieta na liście liczy się z dat, bez zapisu.
  *
- * Skutek w produkcji: lista pokazuje „zakończona" przy promocji, którą backend NADAL stosuje
- * i która NADAL obniża ceny. Etykieta i zachowanie cen mówią co innego.
+ * ⚠ CO ZMIENIŁA KARTA 14f (i dlaczego nie ma tu już znacznika rozbieżności).
+ * Do 14f kolumna `status` w bazie nie miała nic wspólnego z datami: zapisywała się RAZ, przy
+ * tworzeniu, i nic jej nigdy nie przeliczało — a to JEJ używa silnik cen. Lista pokazywała więc
+ * „zakończona" przy promocji, którą backend NADAL stosował (backlog #19), i dlatego wiersz
+ * dostawał pomarańczowy znacznik `rozbieznosc` (decyzja D5 z sesji 4b), żeby defekt przestał
+ * być niewidzialny.
  *
- * Odtwarzamy to 1:1 (etykieta z dat, bez zapisu na serwer), ale dokładamy JEDNO: gdy etykieta
- * rozjeżdża się z kolumną `status`, wiersz dostaje widoczny znacznik (`rozbieznoscStatusu`).
- * To ten sam rodzaj poprawki co literówka niżej — dane i mechanika bez zmian, znika wyłącznie
- * niewidzialność defektu (plan.md D5, decyzja użytkownika).
+ * Od 14f statusy przelicza backendowy wygaszacz (`promocje/wygaszacz.ts`, port TEJ SAMEJ
+ * reguły `statusZDat` niżej), więc kolumna `status` i etykieta z dat ZGADZAJĄ SIĘ ZE SOBĄ.
+ * Znacznik nie miałby się już jak zapalić — został usunięty ŚWIADOMIE, jako martwy kod,
+ * a nie przypadkiem przy okazji. Gdyby kiedyś wrócił rozjazd, wróci razem z nim.
+ *
+ * ⚠ `statusZDat` MUSI zostać zgodne z portem backendowym znak w znak. Rozjazd którejkolwiek
+ * strony przywróciłby dokładnie ten defekt, który 14f likwiduje. Pilnuje tego
+ * `rebuild/backend/test/wygaszacz.test.ts`.
  */
 import type { Promocja } from "./api";
 
@@ -72,32 +76,19 @@ export const ETYKIETY_STANU: Record<StanPromocji, string> = {
 export type PromocjaZeStanem = Promocja & {
   /** Stan wyliczony Z DAT — to jest etykieta na badge'u, jak w produkcji. */
   stanZDat: StanPromocji;
-  /** Stan wynikający z kolumny `status` — to jest to, czym kieruje się silnik cen. */
-  stanZBazy: StanPromocji;
-  /**
-   * Opis rozbieżności albo `null`. Niepusty znaczy, że etykieta i ceny mówią co innego —
-   * i tylko wtedy widok pokazuje znacznik.
-   */
-  rozbieznosc: string | null;
 };
 
 /**
- * Nakłada na promocję stan z dat (port `_b()`) i wykrywa rozjazd z kolumną `status`.
+ * Nakłada na promocję stan wyliczony z dat — port `_b()` (`:9508-9514`).
  *
- * ⚠ NIE ZAPISUJEMY wyniku na serwer — produkcja też tego nie robi, a zapis byłby zmianą
- * danych, której nikt nie autoryzował, i wchodziłby w kompetencje backendu (backlog #19).
+ * ⚠ NIE ZAPISUJEMY wyniku na serwer — produkcja też tego nie robi, a od 14f nie ma po co:
+ * `status` w bazie liczy z tych samych dat backendowy wygaszacz, więc etykieta i kolumna
+ * zgadzają się bez udziału klienta.
+ *
+ * Liczymy etykietę z DAT, a nie z kolumny `status`, i to jest świadome z dwóch powodów:
+ * tak robi produkcja (1:1), a do tego między przebiegami wygaszacza (domyślnie 5 min) kolumna
+ * może o kilka minut zostawać w tyle — data jest wtedy bliższa prawdy niż zapisany status.
  */
 export function zeStanem(promocja: Promocja, teraz = Date.now()): PromocjaZeStanem {
-  const stanZDat = stanPromocji(statusZDat(promocja.start, promocja.koniec, teraz));
-  const stanZBazy = stanPromocji(promocja.status);
-
-  let rozbieznosc: string | null = null;
-  if (stanZDat !== stanZBazy) {
-    rozbieznosc =
-      stanZBazy === "aktywna"
-        ? `Wg dat ${ETYKIETY_STANU[stanZDat]}, ale w bazie ma status „aktywna" — NADAL obniża ceny.`
-        : `Wg dat ${ETYKIETY_STANU[stanZDat]}, ale w bazie ma status „${promocja.status}" — NIE obniża cen.`;
-  }
-
-  return { ...promocja, stanZDat, stanZBazy, rozbieznosc };
+  return { ...promocja, stanZDat: stanPromocji(statusZDat(promocja.start, promocja.koniec, teraz)) };
 }

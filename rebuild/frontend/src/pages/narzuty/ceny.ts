@@ -121,6 +121,66 @@ export function wybierzPromocje(promocje: Promocja[], produkt: ProduktDoWyceny):
   );
 }
 
+/**
+ * Ile produktów katalogu reguła FAKTYCZNIE dziś obsługuje — materiał dla potwierdzenia
+ * usunięcia (karta 14f, zadanie 5; decyzja Ani §3.6 instrukcji I4: „usuwanie ma pytać
+ * o potwierdzenie, z informacją, ilu produktów dotyczy zmiana").
+ *
+ * ⚠ LICZYMY SILNIKIEM Z GÓRY TEGO PLIKU (`wybierzNarzut`/`wybierzPromocje`), a NIE matcherem
+ * ostrzeżenia `dopasujDoOstrzezenia`. To była jawna decyzja użytkownika (2026-09-18) i ma
+ * konkretny powód: matcher ostrzeżenia jest ŚWIADOMIE uproszczony (port dziwactwa oryginału,
+ * D6) i dla warunków `konstrukcja`, `srednica` oraz `vfIf` zwraca zawsze `false` — reguła
+ * oparta na nich pokazałaby w okienku „0 produktów", co jest komunikatem wprost nieprawdziwym
+ * w miejscu, gdzie użytkownik podejmuje nieodwracalną decyzję.
+ *
+ * ⚠ To NIE jest czwarty sposób liczenia (ostrzeżenie backlogu #23/#24): oba dopasowania już
+ * w tym pliku istnieją, a my wybieramy istniejące, wierne — nie dokładamy nowego.
+ *
+ * Liczymy produkty, dla których ta reguła jest OBECNIE WYBIERANA, a nie takie, które do niej
+ * tylko pasują. Produkt pasujący, ale obsługiwany przez regułę specyficzną o wyższym
+ * priorytecie, po usunięciu tej reguły nie zmieni ceny — więc nie należy go zgłaszać.
+ * Stąd też liczba `0` dla promocji już wygaszonej: ona naprawdę niczego dziś nie obniża.
+ */
+export function liczbaProduktowZNarzutem(
+  produkty: ProduktDoWyceny[],
+  narzuty: Narzut[],
+  regula: Narzut,
+): number {
+  return produkty.filter((p) => wybierzNarzut(narzuty, p)?.id === regula.id).length;
+}
+
+/** Bliźniak `liczbaProduktowZNarzutem` dla promocji — patrz tam po uzasadnienie metody. */
+export function liczbaProduktowZPromocja(
+  produkty: ProduktDoWyceny[],
+  promocje: Promocja[],
+  promocja: Promocja,
+): number {
+  return produkty.filter((p) => wybierzPromocje(promocje, p)?.id === promocja.id).length;
+}
+
+/**
+ * Zdanie o liczbie dotkniętych produktów, pokazywane w potwierdzeniu usunięcia (14f).
+ * Wspólne dla narzutów i promocji, żeby obie tabele mówiły dokładnie tym samym językiem.
+ *
+ * `null` to „katalog się jeszcze nie wczytał" i jest ROZRÓŻNIANE od zera: „0 produktów" jest
+ * twierdzeniem o regule, a brak danych to brak wiedzy — pokazanie zera zamiast „ładowanie"
+ * zachęcałoby do usunięcia reguły, która realnie wycenia pół katalogu.
+ *
+ * @param ogon dopełnienie zdania, np. „wycenia dziś ta reguła"
+ */
+export function opisLiczbyProduktow(liczba: number | null, ogon: string): string {
+  if (liczba === null) return "Liczba dotkniętych produktów: ładowanie katalogu…";
+  // „Dziś" jest tu istotne, a nie stylistyczne: zero znaczy też „promocja jeszcze nie
+  // obowiązuje" (zaplanowana) albo „już nie obowiązuje" (zakończona) — a nie „nigdy nikogo
+  // nie obejmie". Komunikat mówi o skutku USUNIĘCIA w tej chwili i tylko o nim.
+  if (liczba === 0) {
+    return "Dziś ta reguła nie obejmuje żadnego produktu — usunięcie nie zmieni cen.";
+  }
+  // Po „dotyczy" idzie dopełniacz: 1 produktu, 2 produktów, 5 produktów.
+  const rzeczownik = liczba === 1 ? "produktu" : "produktów";
+  return `Zmiana dotyczy ${liczba} ${rzeczownik} — tyle pozycji katalogu ${ogon}.`;
+}
+
 /** Rozbicie ceny krok po kroku — to, co pokazuje symulator. */
 export type RozbicieCeny = {
   zakup: number;

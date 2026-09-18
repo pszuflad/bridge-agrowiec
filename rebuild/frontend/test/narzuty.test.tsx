@@ -6,10 +6,10 @@
  * nazwane w `test/msw/kontrakt.ts` i w plan.md.
  *
  * Zakres: że obie tabele renderują to, co przychodzi z API; że sort idzie po `id` malejąco;
- * że klik w status wysyła PATCH z odwróconą wartością; że usuwanie NIE pyta o potwierdzenie
- * (1:1 z produkcją); oraz dwie rzeczy, które są w tej sesji odstępstwem i muszą być
- * przypilnowane: **badge „zaplanowana" nie udaje „zakończonej"** i **rozjazd etykiety
- * z kolumną `status` jest widoczny**.
+ * że klik w status wysyła PATCH z odwróconą wartością; że **badge „zaplanowana" nie udaje
+ * „zakończonej"** (odstępstwo — literówka oryginału naprawiona); oraz dwa odstępstwa dołożone
+ * w 14f: **usuwanie PYTA o potwierdzenie i podaje liczbę dotkniętych produktów**, a **znacznik
+ * rozbieżności statusu ZNIKNĄŁ** (statusy zamiata backend, więc rozjazd nie ma jak powstać).
  */
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -170,12 +170,78 @@ describe("2. Tabela narzutów", () => {
     expect(patche[0]!.cialo).toEqual({ status: "nieaktywny" });
   });
 
-  /** ⚠ Brak potwierdzenia jest w oryginale (`:24784`) — kasuje od razu. Port 1:1. */
-  it("usuwanie NIE pyta o potwierdzenie — leci od razu", async () => {
+  /**
+   * ⚠ ODSTĘPSTWO ŚWIADOME (14f, zadanie 5; decyzja Ani §3.6 instrukcji I4). Oryginał kasuje
+   * od razu — do 14f ten test pilnował dokładnie tego („usuwanie NIE pyta"). Od 14f pyta,
+   * bo usunięcie reguły przelicza ceny całego katalogu i nie da się tego cofnąć.
+   */
+  it("⭐ usuwanie PYTA o potwierdzenie — sam klik jeszcze nie kasuje", async () => {
     zamockujApi();
     await otworzNarzuty();
 
     await userEvent.click(screen.getByTestId(`button-delete-markup-${NARZUT.id}`));
+
+    expect(await screen.findByTestId("dialog-usun-narzut")).toBeInTheDocument();
+    expect(skasowane).toEqual([]);
+  });
+
+  it("⭐ potwierdzenie podaje, ilu produktów dotyczy zmiana", async () => {
+    zamockujApi();
+    await otworzNarzuty();
+
+    await userEvent.click(screen.getByTestId(`button-delete-markup-${NARZUT.id}`));
+
+    // Reguła z fixture'a jest globalna (+6%) i jako jedyna wycenia cały katalog z fixture'a.
+    const opis = await screen.findByTestId("liczba-produktow-narzutu");
+    await waitFor(() =>
+      expect(opis).toHaveTextContent(`Zmiana dotyczy ${PRODUKTY.length} produktów`),
+    );
+  });
+
+  /**
+   * ⚠ TEST ROZSTRZYGAJĄCY DLA D6, na poziomie widoku. Poprzedni test używa reguły GLOBALNEJ,
+   * a dla takiej wierny silnik i uproszczony matcher ostrzeżenia dają ten sam wynik — więc
+   * przeszedłby nawet wtedy, gdyby ktoś podpiął w tabeli niewłaściwe dopasowanie. Tutaj reguła
+   * stoi na warunku `srednica`, którego `dopasujDoOstrzezenia` NIE ZNA (zwraca zawsze false):
+   * poprawna implementacja pokazuje 2 produkty z fixture'a, błędna pokazałaby zero.
+   */
+  it("⭐ liczba produktów idzie z silnika, nie z matchera ostrzeżenia (warunek `srednica`)", async () => {
+    const poSrednicy: Narzut = {
+      ...NARZUT,
+      id: 77,
+      typ: "srednica",
+      warunki: JSON.stringify([{ typ: "srednica", wartosc: "28" }]),
+    };
+    zamockujApi([], [poSrednicy]);
+    window.history.pushState({}, "", "/narzuty");
+    render(<App />);
+    await screen.findByTestId("row-markup-77");
+
+    await userEvent.click(screen.getByTestId("button-delete-markup-77"));
+
+    // `GET_products.json` ma pięć pozycji, z czego DWIE mają `srednica: 28`.
+    const opis = await screen.findByTestId("liczba-produktow-narzutu");
+    await waitFor(() => expect(opis).toHaveTextContent("Zmiana dotyczy 2 produktów"));
+  });
+
+  it("⭐ „Anuluj\" w potwierdzeniu NIE kasuje reguły", async () => {
+    zamockujApi();
+    await otworzNarzuty();
+
+    await userEvent.click(screen.getByTestId(`button-delete-markup-${NARZUT.id}`));
+    await screen.findByTestId("dialog-usun-narzut");
+    await userEvent.click(screen.getByTestId("button-anuluj"));
+
+    expect(skasowane).toEqual([]);
+  });
+
+  it("⭐ „Potwierdź\" kasuje regułę", async () => {
+    zamockujApi();
+    await otworzNarzuty();
+
+    await userEvent.click(screen.getByTestId(`button-delete-markup-${NARZUT.id}`));
+    await screen.findByTestId("dialog-usun-narzut");
+    await userEvent.click(screen.getByTestId("button-potwierdz"));
 
     await waitFor(() => expect(skasowane).toEqual([`markups/${NARZUT.id}`]));
   });
@@ -225,24 +291,32 @@ describe("3. Tabela promocji", () => {
   });
 
   /**
-   * ⭐ ZNACZNIK ROZBIEŻNOŚCI (plan.md D5) — jedyne odstępstwo w tej tabeli. Etykieta idzie
-   * z DAT (port `_b()`), a ceny z kolumny `status`. Gdy się rozjeżdżają, produkcja milczy;
-   * u nas wiersz mówi to wprost.
+   * ⭐ ZNACZNIK ROZBIEŻNOŚCI ZNIKNĄŁ W 14f — i ten test pilnuje, że NIE WRÓCIŁ przypadkiem.
+   *
+   * Do 14f wiersz wygasłej promocji ze statusem „aktywna" dostawał pomarańczowe ostrzeżenie
+   * „NADAL obniża ceny" (D5 z 4b), bo etykieta szła z dat, a ceny z kolumny `status`, której
+   * nic nie przeliczało. Od 14f statusy zamiata backendowy wygaszacz tą samą regułą, z której
+   * liczy się etykieta, więc taki rozjazd nie ma jak powstać — znacznik został usunięty
+   * świadomie, jako martwy kod. Wiersz nadal się pokazuje, z odznaką „zakończona" z dat.
    */
-  it("⭐ wygasła promocja ze statusem „aktywna\" pokazuje ostrzeżenie, że NADAL obniża ceny", async () => {
+  it("⭐ wygasła promocja NIE pokazuje już znacznika rozbieżności (usunięty w 14f)", async () => {
     const wygasla: Promocja = {
       ...PROMOCJA_TESTOWA,
       start: "2020-01-01T00:00:00.000Z",
       koniec: "2020-03-31T00:00:00.000Z",
+      // Stan „sprzed wygaszacza" — celowo niespójny z datami. Widok ma go NIE komentować.
       status: "aktywna",
     };
     await otworzPromocje([wygasla]);
+    const wiersz = await screen.findByTestId(`row-promotion-${wygasla.id}`);
 
-    const znacznik = await screen.findByTestId(`rozbieznosc-statusu-${wygasla.id}`);
-    expect(znacznik).toHaveTextContent(/NADAL obniża ceny/);
+    expect(screen.queryByTestId(`rozbieznosc-statusu-${wygasla.id}`)).not.toBeInTheDocument();
+    expect(wiersz).not.toHaveTextContent(/NADAL obniża ceny/);
+    // Etykieta dalej liczy się z dat (port `_b()`), więc odznaka mówi „zakończona".
+    expect(within(wiersz).getByText("zakończona")).toBeInTheDocument();
   });
 
-  it("gdy etykieta zgadza się ze statusem, znacznika NIE MA", async () => {
+  it("promocja trwająca też nie ma żadnego znacznika", async () => {
     const teraz = Date.now();
     const trwajaca: Promocja = {
       ...PROMOCJA_TESTOWA,
@@ -256,7 +330,28 @@ describe("3. Tabela promocji", () => {
     expect(screen.queryByTestId(`rozbieznosc-statusu-${trwajaca.id}`)).not.toBeInTheDocument();
   });
 
-  /** ⚠ Nagłówek nie może obiecywać, że upływ daty wyłącza promocję — bo nie wyłącza. */
+  it("⭐ usuwanie promocji PYTA o potwierdzenie, z liczbą produktów", async () => {
+    await otworzPromocje([PROMOCJA_TESTOWA]);
+    await screen.findByTestId(`row-promotion-${PROMOCJA_TESTOWA.id}`);
+
+    await userEvent.click(
+      screen.getByTestId(`button-delete-promotion-${PROMOCJA_TESTOWA.id}`),
+    );
+
+    expect(await screen.findByTestId("dialog-usun-promocje")).toBeInTheDocument();
+    expect(screen.getByTestId("liczba-produktow-promocji")).toBeInTheDocument();
+    expect(skasowane).toEqual([]);
+
+    await userEvent.click(screen.getByTestId("button-potwierdz"));
+    await waitFor(() =>
+      expect(skasowane).toEqual([`promotions/${PROMOCJA_TESTOWA.id}`]),
+    );
+  });
+
+  /**
+   * Nagłówek tabeli nie ma zdania o automatycznym statusie — oryginał go nie ma, a po 14f
+   * informacja o rządzących datach siedzi w dialogu reguły, nie nad tabelą.
+   */
   it("nagłówek nie twierdzi, że status zmienia się automatycznie", async () => {
     await otworzPromocje([]);
     expect(screen.queryByText(/Status zmienia się automatycznie wg dat/)).not.toBeInTheDocument();

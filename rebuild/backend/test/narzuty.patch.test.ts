@@ -15,6 +15,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { auditLog, markups, products, promotions } from "../src/db/schema.js";
 import {
+  dzienISO,
   PROMOCJA_TESTOWA,
   stworzSrodowiskoTestowe,
   zasiejNarzutyZFixtures,
@@ -166,7 +167,7 @@ describe("Narzuty i promocje — lista pól edytowalnych i audyt", () => {
   });
 
   describe("2. PATCH promocji", () => {
-    it("zapisuje pola z listy, w tym daty (choć silnik ich nie czyta)", async () => {
+    it("zapisuje pola z listy, w tym daty (od 14f sterują statusem)", async () => {
       const odp = await patch(`/api/promotions/${ID_PROMOCJI}`, {
         rabatPct: 25,
         koniec: "2026-12-31",
@@ -176,6 +177,20 @@ describe("Narzuty i promocje — lista pól edytowalnych i audyt", () => {
       const po = srodowisko.db.select().from(promotions).all()[0]!;
       expect(po.rabatPct).toBe(25);
       expect(po.koniec).toBe("2026-12-31");
+    });
+
+    /**
+     * ⚠ `status` ODCIĘTY OD LISTY (karta 14f). Od tej karty jest polem WYLICZANYM z dat, więc
+     * trasa nie ma prawa przyjąć go z ciała żądania. Gdyby przyjęła, ręczne ustawienie
+     * i tak zostałoby nadpisane przy najbliższym przebiegu wygaszacza — czyli API obiecywałoby
+     * coś, czego nie dowozi. Promocja testowa ma daty obejmujące dziś, więc po odsianiu pola
+     * i przeliczeniu status zostaje `aktywna`, a nie przysłana `zakonczona`.
+     */
+    it("⚠ `status` NIE jest zapisywalny — liczy go wygaszacz z dat", async () => {
+      const odp = await patch(`/api/promotions/${ID_PROMOCJI}`, { status: "zakonczona" });
+
+      expect(odp.status).toBe(200);
+      expect(srodowisko.db.select().from(promotions).all()[0]!.status).toBe("aktywna");
     });
 
     it("podpis zmiany ustawia SERWER, nie użytkownik", async () => {
@@ -316,17 +331,78 @@ describe("Narzuty i promocje — lista pól edytowalnych i audyt", () => {
       expect(cena()).toBe(1230);
     });
 
+    /**
+     * ⚠ DATY LICZONE OD DZIŚ (karta 14f). Wcześniej stało tu `start: "2026-06-01"`,
+     * `koniec: "2026-08-31"` — daty, które w chwili pisania testu były przyszłe, a dziś są
+     * przeszłe. Do 14f nie miało to znaczenia (silnik dat nie czytał), od 14f wygaszacz
+     * przestawiłby taką promocję na `zakonczona` i rabat by nie wszedł. Test mierzy
+     * „POST promocji przelicza katalog OD RAZU", a nie „jak działają daty" — więc promocja
+     * musi być bezspornie trwająca. `status` w ciele NIE JEST wysyłany: pole zostało odcięte
+     * od `POLA_EDYTOWALNE_PROMOCJI`, a serwer liczy je z dat (`dodajPromocje`).
+     */
     it("POST promocji obniża ceny natychmiast, bez czekania na import", async () => {
       zasiejProdukt();
       await post("/api/promotions", {
         nazwa: "Lato",
         rabatPct: 50,
         zasieg: "BKT",
-        start: "2026-06-01",
-        koniec: "2026-08-31",
-        status: "aktywna",
+        start: dzienISO(-1),
+        koniec: dzienISO(1),
       });
       // 1000 × 1,06 × 0,5 × 1,23 = 651,9 → 651
+      expect(cena()).toBe(651);
+    });
+
+    /**
+     * ⚠ PUŁAPKA ODCIĘCIA `status` (karta 14f, zadanie 3) — to jest test, który pilnuje, żeby
+     * naprawa defektu #19 nie wprowadziła defektu GORSZEGO. Po odcięciu `status` od pól
+     * edytowalnych ciało żądania go nie niesie, a kolumna ma `DEFAULT 'aktywna'`. Gdyby
+     * `dodajPromocje` nie liczyło statusu z dat, promocja z datą startu w PRZYSZŁOŚCI
+     * dostałaby `aktywna` i natychmiast obniżyła ceny — dokładnie odwrotnie do zamówienia.
+     * Ciało wysyła `status: "aktywna"` NA ZŁOŚĆ: ma zostać zignorowane.
+     */
+    it("POST promocji z datą startu w PRZYSZŁOŚCI: `zaplanowana`, ceny bez zmian", async () => {
+      zasiejProdukt();
+      await post("/api/promotions", {
+        nazwa: "Przyszła",
+        rabatPct: 50,
+        zasieg: "BKT",
+        start: dzienISO(7),
+        koniec: dzienISO(14),
+        status: "aktywna",
+      });
+
+      expect(srodowisko.db.select().from(promotions).all()[0]!.status).toBe("zaplanowana");
+      // Sam narzut globalny 6% + VAT: 1000 × 1,06 × 1,23 = 1303,8 → 1303. Bez rabatu.
+      expect(cena()).toBe(1303);
+    });
+
+    /**
+     * Drugi kierunek wygaszacza, wołany z trasy: promocja zaplanowana, której start już
+     * nadszedł, WŁĄCZA SIĘ przy najbliższym przeliczeniu. Bez tego zostałby defekt odwrotny
+     * z 14e — „zaplanowana nigdy się nie włącza".
+     */
+    it("promocja `zaplanowana` z nadeszłym startem włącza się przy mutacji reguły", async () => {
+      zasiejProdukt();
+      srodowisko.db
+        .insert(promotions)
+        .values({
+          nazwa: "Już trwa",
+          rabatPct: 50,
+          zasieg: "BKT",
+          warunki: null,
+          priorytet: 50,
+          start: dzienISO(-1),
+          koniec: dzienISO(14),
+          // Stan „sprzed wygaszacza": status nie dogonił dat.
+          status: "zaplanowana",
+        })
+        .run();
+
+      // Dowolna mutacja reguły uruchamia `przeliczCenyZRegul`, a ta zamiata statusy.
+      await patch(`/api/markups/${ID_NARZUTU}`, { wartosc: 6 });
+
+      expect(srodowisko.db.select().from(promotions).all()[0]!.status).toBe("aktywna");
       expect(cena()).toBe(651);
     });
   });

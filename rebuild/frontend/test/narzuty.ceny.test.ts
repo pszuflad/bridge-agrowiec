@@ -15,7 +15,10 @@ import { describe, expect, it } from "vitest";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import {
   dopasujWarunek,
+  liczbaProduktowZNarzutem,
+  liczbaProduktowZPromocja,
   narzutPasuje,
+  opisLiczbyProduktow,
   policzCene,
   produktyPonizejKosztu,
   promocjaPasuje,
@@ -252,5 +255,83 @@ describe("5. Ostrzeżenie „poniżej kosztu\" — port 1:1, NIE silnik cen", ()
 
   it("nie zgłasza produktu, który zostaje powyżej kosztu", () => {
     expect(produktyPonizejKosztu([wKatalogu], [], true, 5)).toHaveLength(0);
+  });
+});
+
+describe("5. Liczba produktów objętych regułą — materiał dla potwierdzenia usunięcia (14f)", () => {
+  /**
+   * ⚠ TO JEST TEST ROZSTRZYGAJĄCY DLA DECYZJI D6 — i dlatego używa warunku `srednica`.
+   *
+   * Potwierdzenie usunięcia reguły ma liczyć produkty WIERNYM silnikiem
+   * (`wybierzNarzut`/`wybierzPromocje`), a nie uproszczonym matcherem ostrzeżenia
+   * `dopasujDoOstrzezenia`. Różnicę widać wyłącznie na warunkach, których ostrzeżenie nie zna:
+   * `srednica`, `konstrukcja`, `vfIf` (patrz sekcja 4 wyżej — tam ta ślepota jest
+   * udokumentowana jako zachowanie oryginału). Na regule globalnej albo na `marka` OBA
+   * dopasowania dają ten sam wynik, więc test na nich NIE odróżniłby poprawnej implementacji
+   * od błędnej — stąd ten zestaw.
+   */
+  const KATALOG = [
+    { ...PRODUKT, kod: "A", srednica: 28 },
+    { ...PRODUKT, kod: "B", srednica: 28 },
+    { ...PRODUKT, kod: "C", srednica: 42 },
+  ];
+  const PO_SREDNICY = JSON.stringify([{ typ: "srednica", wartosc: "28" }]);
+
+  it("⭐ liczy warunkiem `srednica`, którego matcher ostrzeżenia NIE zna", () => {
+    const regula = narzut({ id: 7, typ: "srednica", warunki: PO_SREDNICY });
+
+    expect(liczbaProduktowZNarzutem(KATALOG, [regula], regula)).toBe(2);
+    // Kontrola negatywna: ostrzeżenie na tych samych danych widzi ZERO. Gdyby potwierdzenie
+    // liczyło jego matcherem, pokazałoby „0 produktów" przy nieodwracalnej decyzji.
+    expect(produktyPonizejKosztu(
+      KATALOG.map((p) => ({ ...p, cenaSprzedazy: 2000 })),
+      [{ typ: "srednica", wartosc: "28" }],
+      false,
+      90,
+    )).toHaveLength(0);
+  });
+
+  it("⭐ liczy produkty, dla których reguła jest WYBIERANA, a nie tylko pasuje", () => {
+    // Reguła specyficzna po średnicy przegrywa dwa produkty z regułą o tej samej
+    // specyficzności, ale wyższym priorytecie — i wtedy usunięcie tej pierwszej nic nie zmieni.
+    const nasza = narzut({ id: 7, typ: "srednica", warunki: PO_SREDNICY, priorytet: 10 });
+    const mocniejsza = narzut({ id: 8, typ: "srednica", warunki: PO_SREDNICY, priorytet: 90 });
+
+    expect(liczbaProduktowZNarzutem(KATALOG, [nasza, mocniejsza], nasza)).toBe(0);
+    expect(liczbaProduktowZNarzutem(KATALOG, [nasza, mocniejsza], mocniejsza)).toBe(2);
+  });
+
+  it("reguła globalna obejmuje cały katalog", () => {
+    const globalna = narzut({ id: 1, typ: "globalny", warunki: "[]" });
+    expect(liczbaProduktowZNarzutem(KATALOG, [globalna], globalna)).toBe(KATALOG.length);
+  });
+
+  it("promocja liczy się tym samym sposobem, przez `wybierzPromocje`", () => {
+    const p = promocja({ id: 3, zasieg: "BKT" });
+    expect(liczbaProduktowZPromocja(KATALOG, [p], p)).toBe(KATALOG.length);
+  });
+
+  /**
+   * ⚠ ZERO DLA PROMOCJI WYGASZONEJ TO PRAWDA, NIE BŁĄD. `wybierzPromocje` honoruje `status`,
+   * a po 14f wygaszacz ustawia `zakonczona` po dacie końca — taka promocja naprawdę nie obniża
+   * dziś żadnej ceny, więc jej usunięcie niczego nie ruszy.
+   */
+  it("⭐ promocja `zakonczona` obejmuje 0 produktów", () => {
+    const wygaszona = promocja({ id: 3, zasieg: "BKT", status: "zakonczona" });
+    expect(liczbaProduktowZPromocja(KATALOG, [wygaszona], wygaszona)).toBe(0);
+  });
+
+  describe("brzmienie komunikatu", () => {
+    it("rozróżnia „jeszcze nie wiem\" od „zero\"", () => {
+      expect(opisLiczbyProduktow(null, "wycenia dziś ta reguła")).toMatch(/ładowanie katalogu/);
+      expect(opisLiczbyProduktow(0, "wycenia dziś ta reguła")).toMatch(/usunięcie nie zmieni cen/);
+      // Zero mówi o DZIŚ, nie o „nigdy" — dotyczy też promocji zaplanowanej i zakończonej.
+      expect(opisLiczbyProduktow(0, "wycenia dziś ta reguła")).toContain("Dziś");
+    });
+
+    it("odmienia rzeczownik: 1 produktu, 2 produktów", () => {
+      expect(opisLiczbyProduktow(1, "wycenia dziś ta reguła")).toContain("1 produktu");
+      expect(opisLiczbyProduktow(2, "wycenia dziś ta reguła")).toContain("2 produktów");
+    });
   });
 });

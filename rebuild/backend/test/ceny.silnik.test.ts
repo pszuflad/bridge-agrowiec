@@ -238,12 +238,20 @@ describe("4. Dopasowanie i wybór promocji", () => {
   });
 
   /**
-   * ⚠ DEFEKT PRODUKCJI ODTWARZANY 1:1 (plan.md D4, `rebuild-backlog.md`). Ten test istnieje
-   * PO TO, żeby naprawa dat nie przeszła kiedyś przypadkiem, jako „oczywista poprawka".
-   * Jeśli ktoś świadomie zdecyduje inaczej — zapali się tutaj i będzie musiał tę decyzję
-   * zapisać, zamiast po cichu rozjechać port z produkcją.
+   * ⚠ TEN TEST ZOSTAJE PRAWDZIWY PO 14f — i to jest jego sedno, nie przeoczenie.
+   *
+   * Do 14f dowodził defektu #19 w całości: wygasła promocja obniżała ceny. Od 14f daty
+   * KOŃCZĄ promocję, ale robi to wygaszacz danych (`promocje/wygaszacz.ts`), który przestawia
+   * kolumnę `status` — a NIE ta funkcja. `promocjaPasuje` jest portem `__bridgePromoMatches`
+   * (`:44615`) i dalej nie czyta ani `start`, ani `koniec`; dostaje promocję już oznaczoną
+   * jako `zakonczona` i odrzuca ją po statusie.
+   *
+   * Dlatego asercje niżej pilnują teraz czegoś innego niż na początku: że nikt nie „poprawił"
+   * silnika, dokładając warunek na daty. Byłby to odrzucony wariant (a) z wyceny 14e, a jego
+   * ceną jest wyjątek w wyroczni charakteryzacji importu — czyli osłabienie najmocniejszej
+   * siatki, jaką mamy. Kto zdecyduje inaczej, zapali się tutaj i będzie musiał to zapisać.
    */
-  it("⚠ promocja WYGASŁA nadal działa — silnik nie czyta start ani koniec", () => {
+  it("⚠ silnik nie czyta start ani koniec — daty wygasza osobny wygaszacz (14f)", () => {
     const wygasla = promocja({ start: "2020-01-01", koniec: "2020-03-31" });
     expect(promocjaPasuje(wygasla, PRODUKT)).toBe(true);
 

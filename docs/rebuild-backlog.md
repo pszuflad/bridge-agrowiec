@@ -1118,8 +1118,10 @@ Skrypt jest już wchłonięty (3f-2), więc rzecz ma znaczenie wyłącznie archi
 - **Iteracja 4a (narzuty i promocje) — NAPRAWIONE (2026-09-02).** `POLA_EDYTOWALNE_NARZUTU`
   (`rebuild/backend/src/repos/markups.ts`: `typ, zakres, warunki, nazwa, wartosc, jednostka,
   priorytet, status`) i `POLA_EDYTOWALNE_PROMOCJI` (`rebuild/backend/src/repos/promotions.ts`:
-  `nazwa, rabatPct, zasieg, warunki, priorytet, start, koniec, status`) odcinają `id`,
-  `zmienilUzytkownikId`, `zmienionoData` (ustawia je SERWER). Testy:
+  `nazwa, rabatPct, zasieg, warunki, priorytet, start, koniec`) odcinają `id`,
+  `zmienilUzytkownikId`, `zmienionoData` (ustawia je SERWER). **`status` wypadł z listy promocji
+  w 14f (2026-09-19, `64-FEATURE-i14f-daty-koncza-promocje`, backlog #19)** — po wygaszaczu
+  statusu jest polem WYLICZANYM z dat, nie edytowalnym; `dodajPromocje` liczy go sam. Testy:
   `rebuild/backend/test/narzuty.patch.test.ts`. **Różnica wobec dostawców:** filtr działa
   także na **POST**, nie tylko na PATCH (plan.md D3) — u dostawców trasy POST nie ma, więc
   ta powierzchnia ataku tam nie istniała. **Nowa niespójność, wprowadzona świadomie (D2):**
@@ -1351,19 +1353,21 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 
 ### #19 · 2026-09-02 · [BACKEND] · silnik cen IGNORUJE daty promocji — wygasła promocja nadal obniża cenę
 
-> **Znalezione przy bloku I4/4a (2026-09-02). ODTWORZONE 1:1** — naprawa świadomie
-> odłożona, bo wymagałaby wyjątku w charakteryzacji importu. **Właściciel do ustalenia.**
-> **Uzupełnione w 4b (frontend):** widok `/narzuty` odtwarza dokładnie ten sam defekt
-> po stronie klienta i teraz go pokazuje — patrz „Co robi produkcja" niżej.
+> **Znalezione przy bloku I4/4a (2026-09-02).** Zdiagnozowane i oba warianty naprawy WYCENIONE
+> w 14e (2026-09-18). **NAPRAWIONE W ODBUDOWIE kartą `64-FEATURE-i14f-daty-koncza-promocje`
+> (2026-09-19)** — wariant (b), wygaszacz statusu. **⚠ Produkcja jest NIEZMIENIONA** — nadal nie
+> przelicza `status` z dat, wygasła promocja tam nadal obniża ceny w nieskończoność (opis „Co
+> robi produkcja" niżej pozostaje w 100% prawdziwy dla produkcji, nie dla odbudowy).
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
-| **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA** — daty mają kończyć promocję (Ania, 2026-09-18). **WARIANT WDROŻENIA WYBRANY 2026-09-18: (b) wygaszacz statusu, cykliczny, `status` odcięty od pól edytowalnych.** Karta **14f** |
-| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-18)** — liczby niżej |
+| **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`, NIETKNIĘTE naprawą — dalej nie czyta dat). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts`. Naprawa (14f): **nowy** `rebuild/backend/src/promocje/wygaszacz.ts` |
+| **Do nowej wersji?** | ✅ **NAPRAWIONE w odbudowie.** Wariant (b) — wygaszacz przestawia `promotions.status` z dat, w OBIE strony (`aktywna→zakonczona` i `zaplanowana→aktywna`), silnik cen nietknięty. Odpala się przy starcie procesu, na wejściu `przeliczCenyZRegul` oraz cyklicznie co `PROMO_WYGASZACZ_MINUTY` (domyślnie 5 min, `0` wyłącza cykl). `status` odcięty od `POLA_EDYTOWALNE_PROMOCJI`. Wdrożone kartą **`64-FEATURE-i14f-daty-koncza-promocje`**. |
+| **Status** | ✅ **ZAMKNIĘTE 2026-09-19, karta `64-FEATURE-i14f-daty-koncza-promocje`.** Droga: odtworzone 1:1 w rebuild (4a backend, 4b frontend) → oba warianty naprawy wycenione w 14e (2026-09-18) → naprawione wariantem (b) w 14f (2026-09-19). Charakteryzacja importu przeszła BEZ WYJĄTKU (31 + 17 scenariuszy) — zmieniły się dane, nie zachowanie `promocjaPasuje`. **Produkcja pozostaje niezmieniona**, poza zakresem odbudowy. |
 
-**⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
+**⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, naprawa ZATWIERDZONA (zrealizowana w 14f).**
+W instrukcji I4 (§3.9) napisała:
 „Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
 przeliczyć ceny bez tej promocji". W odpowiedzi na pytanie kontrolne z 18.09 napisała coś innego:
 „to nie było opisane jako błąd — opisałam co się dzieje, bo takie było pytanie. Ma zostać tak jak
@@ -1396,8 +1400,11 @@ Trzy rozstrzygnięcia podjęte naraz, po przedstawieniu wyceny z 14e:
 ⚠ Zakres 14f obejmuje OBIE strony zakresu dat — samo wygaszanie zostawiłoby niedziałające
 planowanie (defekt odwrotny, opisany wyżej w tym wpisie).
 
-**Rekomendacja: (b).** ⚠ Skutek uboczny w obu wariantach: znacznik `rozbieznoscStatusu` (D5
-z 4b) przestaje mieć rację bytu i trzeba go usunąć świadomie, nie zostawić jako martwy kod.
+**Rekomendacja: (b).** ⚠ Skutek uboczny w obu wariantach: znacznik `rozbieznosc` (D5 z 4b; nazwa
+pojęciowa w tym wpisie brzmiała „rozbieżność statusu", w kodzie pole nazywało się `rozbieznosc`)
+przestaje mieć rację bytu i trzeba go usunąć świadomie, nie zostawić jako martwy kod.
+**Zrealizowane w 14f** — pole `rozbieznosc` (typ `PromocjaZeStanem`) i jego wyliczanie w
+`status.ts`/`TabelaPromocji.tsx` usunięte.
 
 **Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
 `koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
@@ -1436,8 +1443,9 @@ decyzja użytkownika, czy i kiedy.
 **Najpierw ustalenie, które przesądza o koszcie: status promocji jest zapisywany RAZ.**
 POST liczy go z dat (`status: statusZDat(start, koniec)`), **PATCH go NIE wysyła** (siedem pól,
 1:1 z `Eb()` oryginału — `DialogReguly.tsx:209-224`), a **nic po stronie serwera nigdy go nie
-przelicza** — ani w odbudowie, ani w produkcji (w `mirror/backend/index.cjs` napisy `zakonczona`
-/`zaplanowana` padają wyłącznie w danych seeda). Defekt #19 to więc nie „silnik ignoruje daty"
+przelicza** — ani w odbudowie (przed 14f), ani w produkcji (w `mirror/backend/index.cjs` napis
+`zakonczona` nie występuje ani razu, `zaplanowana` dokładnie raz — oba wyłącznie w literale
+danych seeda, sprostowanie liczbowe z 14f). Defekt #19 to więc nie „silnik ignoruje daty"
 w oderwaniu od reszty, tylko **brak przeliczania statusu w czasie**.
 
 **Silnik JUŻ honoruje status — zmierzone** (bez rabatu 1303, z rabatem 10% 1173):
@@ -1469,11 +1477,12 @@ a nawet więcej — rozjechałyby się dwie tabele (`products` i `promotions`). 
 promocja wygasająca przy działającym procesie, bez mutacji reguł, obniża ceny przy imporcie aż do
 najbliższego zamiatania. **To jest wybór do podjęcia w 14f, nie szczegół implementacyjny.**
 
-**Znacznik `rozbieznoscStatusu` (D5 z 4b) zachowuje się RÓŻNIE:** w (b) nigdy się nie zapali
+**Znacznik `rozbieznosc` (D5 z 4b) zachowuje się RÓŻNIE:** w (b) nigdy się nie zapali
 (status zrówna się z etykietą) → martwy kod do świadomego usunięcia; w (a) **nadal będzie się
 zapalał i będzie KŁAMAŁ** („nadal obniża ceny" o promocji, która już nie obniża) → usunięcie jest
 warunkiem poprawności, nie kosmetyką. Nota `nota-daty-promocji` (`DialogReguly.tsx:555-557`)
-staje się nieprawdziwa w obu wariantach.
+staje się nieprawdziwa w obu wariantach. **Zrealizowane w 14f (wariant (b) wybrany):** znacznik
+usunięty, nota w `DialogReguly.tsx` przepisana na prawdziwą.
 
 **⚠ DWA SPROSTOWANIA DO `docs/instrukcja-testow-I4.md`** (plik poza własnością 14e — do zrobienia
 przez 14d): **§4 pkt 6 jest NIEPRAWDZIWY** (promocja z datą startu w przyszłości założona przez
@@ -1482,28 +1491,44 @@ a **istnieje defekt odwrotny, nigdzie nieopisany: promocja „zaplanowana" NIGDY
 bo nic nie przelicza statusu po nadejściu daty startu. §3.9 pozostaje poprawny — i teraz wiadomo
 dlaczego: PATCH nie rusza statusu.
 
-**Dwa zastrzeżenia do 14f, oba realne:** (1) wygaszacz musi działać w OBIE strony (`zakonczona`
-po końcu, `aktywna` po nadejściu startu), inaczej naprawi wygaszanie i zostawi niedziałające
-planowanie; (2) `status` jest na liście `POLA_EDYTOWALNE_PROMOCJI`, więc wygaszacz będzie
-nadpisywał ręczne ustawienia — a instrukcja mówi dziś Ani wprost, że „żeby wyłączyć promocję,
-trzeba zmienić status". Po (b) status staje się polem WYLICZANYM; do rozstrzygnięcia, czy odciąć
-go od listy edytowalnych.
+**Dwa zastrzeżenia do 14f, OBA ROZLICZONE:** (1) wygaszacz musiał działać w OBIE strony
+(`zakonczona` po końcu, `aktywna` po nadejściu startu) — **zrealizowane**, inaczej naprawiałby
+tylko wygaszanie i zostawiał niedziałające planowanie; (2) `status` był na liście
+`POLA_EDYTOWALNE_PROMOCJI`, więc wygaszacz nadpisywałby ręczne ustawienia — **rozstrzygnięte
+przez odcięcie `status` od tej listy** (D3), pole jest teraz WYLICZANYM.
 
 **Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) korzysta o tego samego
-`wybierzPromocje` z `repos/ceny.ts` co silnik cen — więc zacznie respektować daty **sama**, bez
-żadnej zmiany w karcie 14h, gdy karta 14f dowiezie wygaszacz/naprawę dat.
+`wybierzPromocje` z `repos/ceny.ts` co silnik cen — więc zaczęła respektować daty **sama**, bez
+żadnej zmiany w karcie 14h, gdy karta 14f dowiozła wygaszacz. Emergentny skutek uboczny (opisany
+w raporcie 14f): wygasła promocja po zamieceniu statusu przestaje się też pokazywać jako odznaka
+w kolumnie katalogu, nie tylko przestaje obniżać ceny — zachowanie spójne (brak rabatu ⇒ brak
+odznaki), nie regresja.
 
 Pełne liczby i metoda: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`, sekcja C.
 
-**Uzupełnienie 4b (frontend, 2026-09-02).** Widok `/narzuty` portuje `_b()`/`Qd()` 1:1
-(`rebuild/frontend/src/pages/narzuty/status.ts`) — etykieta statusu promocji liczona z dat
-przy każdym odczycie, bez zapisu na serwer, dokładnie jak produkcja. Ponad port dołożony
-**widoczny znacznik rozbieżności** (`rozbieznosc-statusu-{id}`, `data-testid` w
-`TabelaPromocji.tsx`): gdy etykieta wyliczona z dat nie zgadza się z kolumną `status` z
-serwera, wiersz pokazuje ostrzeżenie w stylu „wg dat zakończona, ale nadal obniża ceny".
-To **nie jest naprawa** — dane i mechanika bez zmian, znika wyłącznie niewidzialność defektu
-na liście (plan.md D5, decyzja użytkownika 2026-09-02). Naprawa (czytanie dat w silniku)
-zostaje po stronie backendu i jest nadal ⬜ do decyzji.
+**⭐ ROZLICZENIE — naprawione w 14f (2026-09-19).** Wdrożony wariant (b): nowy
+`rebuild/backend/src/promocje/wygaszacz.ts` (`statusZDat`, `zamiecStatusyPromocji`,
+`stworzWygaszacz`) przestawia `promotions.status` z dat, w OBIE strony, idempotentnie. Odpala się
+w trzech miejscach: start procesu, wejście `przeliczCenyZRegul`, cyklicznie co
+`PROMO_WYGASZACZ_MINUTY` (domyślnie 5 min, `0` wyłącza cykl) — **NIE** na ścieżce importu
+(`zastosujRegulyCenowe` nietknięte). Zmierzone: cykliczność jest darmowa dla charakteryzacji
+(0 z 31 scenariuszy akceptacji, 0 z 17 bulk), bo harness nie przechodzi przez `server.ts`, gdzie
+mieszkają timery. `promocjaPasuje` w `repos/ceny.ts` pozostaje **nietknięte** — zmieniły się
+dane, nie zachowanie porównywanej funkcji, dlatego charakteryzacja przeszła **bez ani jednego
+wyjątku w wyroczni**. `dodajPromocje` liczy `status` z dat po stronie serwera, domykając pułapkę
+`DEFAULT 'aktywna'` dla promocji z datą startu w przyszłości. Szczegóły:
+`docs/tickets/64-FEATURE-i14f-daty-koncza-promocje/`.
+
+**Uzupełnienie 4b (frontend, 2026-09-02, HISTORYCZNE — znacznik usunięty w 14f).** Widok
+`/narzuty` portuje `_b()`/`Qd()` 1:1 (`rebuild/frontend/src/pages/narzuty/status.ts`) — etykieta
+statusu promocji liczona z dat przy każdym odczycie, bez zapisu na serwer, dokładnie jak
+produkcja (to zostaje bez zmian). Ponad port ówcześnie dołożony **widoczny znacznik rozbieżności**
+(`rozbieznosc-statusu-{id}`, `data-testid` w `TabelaPromocji.tsx`): gdy etykieta wyliczona z dat
+nie zgadzała się z kolumną `status` z serwera, wiersz pokazywał ostrzeżenie w stylu „wg dat
+zakończona, ale nadal obniża ceny". To **nie była naprawa** — dane i mechanika bez zmian, znikała
+wyłącznie niewidzialność defektu na liście (plan.md D5, decyzja użytkownika 2026-09-02).
+**Naprawa (przeliczanie statusu z dat po stronie serwera) dowieziona w 14f — znacznik stał się
+martwym kodem i został usunięty świadomie** (patrz „ROZLICZENIE" wyżej).
 
 ---
 
@@ -1712,6 +1737,13 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 
 **Uzupełnienie 14h (2026-09-18).** Kolumna „Promocja" w `/katalog` (#22) świadomie NIE dołożyła
 czwartego sposobu — patrz notatka przy #23.
+
+**Uzupełnienie 14f (2026-09-19, D6).** Potwierdzenie usuwania reguły narzutu/promocji (liczba
+dotkniętych produktów w dialogu) liczy **wiernym silnikiem cen** (`wybierzNarzut`/`wybierzPromocje`
+z `repos/ceny.ts`), świadomie NIE tym matcherem (`dopasujDoOstrzezenia`) — inaczej dialog
+pokazałby „0 produktów" dla reguł z warunkami `konstrukcja`/`srednica`/`vfIf`, których ten
+matcher nie łapie. Trzy niezależne sposoby liczenia ceny w `/narzuty` zostają trzema — karta nie
+dołożyła czwartego, tylko dodała nowego konsumenta jednego z istniejących dwóch.
 
 ---
 

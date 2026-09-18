@@ -222,15 +222,15 @@ ma endpoint:
 > IndexedDB oryginału — świadome odstępstwo), wspólny dialog z builderem warunków.
 > `GET /api/markups` i `GET /api/promotions` zwracają **gołe tablice**, nie koperty; pole
 > `warunki` w obu tabelach to **string ze zserializowanym JSON-em**, nie tablica; aktywny
-> status to `"aktywny"` przy narzucie i `"aktywna"` (żeński) przy promocji; silnik cen
-> **ignoruje** daty `start`/`koniec` promocji — wyłączenie promocji to zmiana `status`, nie
-> upływ daty (formularz o tym ostrzega — nota przy polach dat); `PATCH /api/promotions/{id}`
+> status to `"aktywny"` przy narzucie i `"aktywna"` (żeński) przy promocji; w PRODUKCJI silnik cen
+> **ignoruje** daty `start`/`koniec` promocji na zawsze — wyłączenie promocji to zmiana `status`,
+> nie upływ daty; `PATCH /api/promotions/{id}`
 > na nieistniejące id oddaje **200 z pustym ciałem** (bliźniacza trasa narzutu ma 404),
 > klient to znosi; każda mutacja narzutu/promocji przelicza ceny CAŁEGO katalogu synchronicznie
 > w handlerze. Builder warunków wystawia **9 typów** (oryginał 6; dołożone `konstrukcja`,
 > `srednica`, `vfIf`, które silnik rozumie). Etykieta statusu promocji liczona z dat przy
-> każdym odczycie (jak oryginał), bez zapisu na serwer, plus widoczny znacznik rozbieżności,
-> gdy etykieta nie zgadza się z kolumną `status` z bazy. Ostrzeżenie „poniżej kosztu" przed
+> każdym odczycie (jak oryginał), bez zapisu na serwer (`statusZDat`/`stanPromocji` w
+> `pages/narzuty/status.ts`). Ostrzeżenie „poniżej kosztu" przed
 > zapisem promocji — pasek na żywo w formularzu + dialog potwierdzenia (oryginał używał
 > `window.confirm`). Renderer kolumny „Promocja" w `/katalog` gotowy już tutaj (czyta
 > `produkt._reguly?.promocja`), ale w produkcji `_reguly` nigdy nie jest ustawiane i
@@ -243,6 +243,20 @@ ma endpoint:
 > (`App.tsx`) — pierwszy widok używający toastów; `TooltipProvider` dalej czeka. Szczegóły:
 > `docs/tickets/16-FEATURE-widok-narzuty-promocje/`, backend: `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`;
 > ożywienie kolumny: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/`.
+>
+> **Odbudowa (14f, `64-FEATURE-i14f-daty-koncza-promocje`, 2026-09-19) — świadome odstępstwo od
+> produkcji: w odbudowie data KOŃCZY promocję naprawdę.** Backendowy wygaszacz (`promocje/wygaszacz.ts`)
+> przestawia kolumnę `status` na wartość policzoną z dat — w obie strony, więc promocja
+> „zaplanowana" też się sama włącza po nadejściu startu. Silnik cen nietknięty: dalej patrzy
+> wyłącznie na `status`, tylko dane, które dostaje, są teraz aktualne. `status` przestał być
+> polem edytowalnym w `POST`/`PATCH /api/promotions` — serwer liczy go sam z dat, ciało z
+> `status` jest po cichu ignorowane. Znacznik rozbieżności (pole `rozbieznosc` w
+> `PromocjaZeStanem`, `status.ts`) **usunięty jako martwy kod** — po wygaszaczu etykieta z dat
+> i kolumna `status` się nie rozjeżdżają. Nota przy polach dat w `DialogReguly.tsx` przepisana:
+> już nie mówi, że upływ daty promocji jej nie wyłącza. Usuwanie reguły narzutu I promocji
+> zaczęło pytać o potwierdzenie z liczbą dotkniętych produktów (istniejący
+> `components/DialogPotwierdzenia.tsx`; decyzja Ani §3.6 instrukcji I4) — oryginał kasuje bez
+> pytania. Szczegóły: `docs/tickets/64-FEATURE-i14f-daty-koncza-promocje/`.
 >
 > **Odbudowa (I5, `15-FEATURE-historia-zmian`, 2026-09-02):** `/historia` odbudowany — router
 > ma **12 tras, 7 placeholderów**. Tabela + filtry (szukaj / typ / dostawca) + paginacja 25/50/100.

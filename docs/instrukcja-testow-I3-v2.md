@@ -567,12 +567,14 @@ null cyfr znaczących" nadal pojawia się na Stagingu** i tak ma być. Samo dziw
 słowo **„null"** w tym komunikacie to usterka starego Bridge'a, którą **odtworzyliśmy celowo**,
 żeby nie mieszać dwóch zmian naraz — jest zapisana osobno. **Nie zgłaszaj jej ponownie.**
 
-## 5.3 Daty promocji — zmierzone, naprawa zaplanowana
+## 5.3 ✅ Daty promocji — WDROŻONE kartą 14f (2026-09-19)
 
-Silnik cen **nie pilnuje dat obowiązywania promocji w obie strony**: promocja z datą końca
-w **przeszłości** dalej obniża ceny, a promocja z datą startu w **przyszłości** nigdy się sama
-nie włącza. Zmierzyliśmy oba przypadki i wyceniliśmy naprawę; jest zaplanowana, ale jeszcze
-nie zrobiona.
+Silnik cen teraz honoruje daty w obie strony: promocja z minioną datą końca sama przestaje
+obniżać ceny, a promocja z datą startu w przyszłości sama się włącza, gdy ta data nadejdzie.
+Zmiana statusu jest widoczna od razu po zapisie dowolnej reguły i po restarcie procesu; jeśli
+nikt niczego nie zapisuje, a mija sama data, pilnuje tego automat co 5 minut — więc bywa
+widoczna z kilkuminutowym opóźnieniem. Szczegóły:
+`docs/tickets/64-FEATURE-i14f-daty-koncza-promocje/`.
 
 ---
 

@@ -3,21 +3,33 @@
  *
  * Sześć kolumn, sort po `id` malejąco, brak paginacji — jak przy narzutach.
  *
- * ⚠ ETYKIETA STATUSU IDZIE Z DAT, NIE Z BAZY — i to jest zachowanie produkcji, nie nasz
- * pomysł: `_b()` (`:9508`) przelicza status przy każdym odczycie `/api/promotions`, ale
- * NIGDY nie zapisuje wyniku na serwer. Silnik cen czyta niezmienioną kolumnę `status`,
- * więc etykieta i ceny potrafią mówić co innego. Dokładamy jedyne odstępstwo: gdy się
- * rozjeżdżają, wiersz pokazuje to wprost (plan.md D5, `repos` po stronie widoku: `status.ts`).
+ * ⚠ ETYKIETA STATUSU IDZIE Z DAT, NIE Z BAZY — zachowanie produkcji, nie nasz pomysł:
+ * `_b()` (`:9508`) przelicza status przy każdym odczycie `/api/promotions`, ale NIGDY nie
+ * zapisuje wyniku na serwer.
+ *
+ * ⚠ ZNACZNIK ROZBIEŻNOŚCI USUNIĘTY W 14f — ŚWIADOMIE, nie przy okazji. Do 14f kolumna
+ * `status` żyła własnym życiem (nic jej nie przeliczało), więc etykieta z dat i ceny potrafiły
+ * mówić co innego; wiersz dostawał wtedy pomarańczowe ostrzeżenie (D5 z 4b). Od 14f statusy
+ * zamiata backendowy wygaszacz tą samą regułą, z której liczy się etykieta, więc znacznik
+ * nie miałby się już jak zapalić — został wycięty jako martwy kod (`narzuty/status.ts`).
+ *
+ * ⚠ ODSTĘPSTWO ŚWIADOME — USUWANIE PYTA O POTWIERDZENIE (14f, zadanie 5; decyzja Ani §3.6).
+ * Oryginał kasuje od razu. Symetrycznie do `TabelaNarzutow` — obie tabele stoją w tym samym
+ * widoku, więc „narzut pyta, promocja nie" wyglądałoby jak błąd (decyzja użytkownika).
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
+
+import type { Produkt } from "@/pages/katalog/filtrowanie";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
 import { useToast } from "@/components/ui/toast";
 import { DialogReguly } from "./DialogReguly";
+import { liczbaProduktowZPromocja, opisLiczbyProduktow } from "./ceny";
 import { pobierzPromocje, usunPromocje, type Promocja } from "./api";
 import { ETYKIETY_STANU, zeStanem, type StanPromocji } from "./status";
 import { odczytajWarunki } from "./warunki";
@@ -56,11 +68,15 @@ export function TabelaPromocji() {
   const klient = useQueryClient();
   const { toast } = useToast();
   const [edytowana, ustawEdytowana] = useState<Promocja | null>(null);
+  const [doUsuniecia, ustawDoUsuniecia] = useState<Promocja | null>(null);
 
   const { data: promocje = [] } = useQuery<Promocja[]>({
     queryKey: ["/api/promotions"],
     queryFn: pobierzPromocje,
   });
+
+  /** Ten sam klucz katalogu, co w symulatorze i ostrzeżeniu „poniżej kosztu". */
+  const { data: produkty } = useQuery<Produkt[]>({ queryKey: ["/api/products"] });
 
   const odswiez = () => {
     void klient.invalidateQueries({ queryKey: ["/api/promotions"] });
@@ -79,6 +95,14 @@ export function TabelaPromocji() {
 
   const posortowane = [...promocje].sort((a, b) => b.id - a.id).map((p) => zeStanem(p));
 
+  /**
+   * ⚠ Liczba bywa ZEREM dla promocji już wygaszonej — i to jest prawda, nie błąd: promocja
+   * o statusie `zakonczona` nie obniża dziś żadnej ceny, więc jej usunięcie niczego nie ruszy.
+   * Liczymy silnikiem (`wybierzPromocje`), który honoruje status — patrz `ceny.ts`.
+   */
+  const liczbaObjetych =
+    doUsuniecia && produkty ? liczbaProduktowZPromocja(produkty, promocje, doUsuniecia) : null;
+
   return (
     <>
       <div className="flex justify-between items-center mb-4 gap-4">
@@ -95,6 +119,27 @@ export function TabelaPromocji() {
           edytowanaPromocja={edytowana}
           onClose={() => ustawEdytowana(null)}
         />
+      ) : null}
+
+      {doUsuniecia ? (
+        <DialogPotwierdzenia
+          otwarty
+          tytul="Usunąć promocję?"
+          tresc={`Promocja „${doUsuniecia.nazwa}" zostanie usunięta, a ceny całego katalogu przeliczone od nowa. Tej operacji nie można cofnąć.`}
+          etykietaPotwierdzenia="Usuń promocję"
+          wariantPotwierdzenia="destructive"
+          zajety={kasowanie.isPending}
+          onPotwierdz={() => {
+            kasowanie.mutate(doUsuniecia.id);
+            ustawDoUsuniecia(null);
+          }}
+          onZamknij={() => ustawDoUsuniecia(null)}
+          testId="dialog-usun-promocje"
+        >
+          <p className="text-sm" data-testid="liczba-produktow-promocji">
+            {opisLiczbyProduktow(liczbaObjetych, "obniża dziś ta promocja")}
+          </p>
+        </DialogPotwierdzenia>
       ) : null}
 
       <Card className="border-card-border">
@@ -159,15 +204,6 @@ export function TabelaPromocji() {
                       <td className="px-4 py-2.5">
                         <div className="flex flex-col items-start gap-1">
                           <OdznakaStanu stan={promocja.stanZDat} />
-                          {promocja.rozbieznosc ? (
-                            <span
-                              className="flex items-start gap-1 text-[10px] text-amber-600 dark:text-amber-500"
-                              data-testid={`rozbieznosc-statusu-${promocja.id}`}
-                            >
-                              <AlertTriangle className="w-3 h-3 shrink-0 mt-px" />
-                              {promocja.rozbieznosc}
-                            </span>
-                          ) : null}
                         </div>
                       </td>
                       <td className="px-4 py-2.5 text-right">
@@ -186,7 +222,7 @@ export function TabelaPromocji() {
                             size="sm"
                             variant="ghost"
                             className="h-7 w-7 p-0"
-                            onClick={() => kasowanie.mutate(promocja.id)}
+                            onClick={() => ustawDoUsuniecia(promocja)}
                             disabled={kasowanie.isPending}
                             data-testid={`button-delete-promotion-${promocja.id}`}
                             title="Usuń"

@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE · 14i BE · 14j pomiar (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); 14h ✅ `61-FEATURE-promocja-kolumna-katalog` · 2026-09-18 (czysto backendowa); 14i ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18; 14j ✅ `59-CHORE-i14j-oracle-diff-historii` · 2026-09-18 (pomiar, zero kodu produkcyjnego); **otwarte 14f** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f wygaszacz · 14h BE · 14i BE · 14j pomiar · 14m docs (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 DOWIEZIONA POZA 14m 2026-09-19:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); 14f ✅ `64-FEATURE-i14f-daty-koncza-promocje` · 2026-09-19 (wygaszacz statusu promocji w obie strony + potwierdzenie usuwania z liczbą produktów); 14h ✅ `61-FEATURE-promocja-kolumna-katalog` · 2026-09-18 (czysto backendowa); 14i ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18; 14j ✅ `59-CHORE-i14j-oracle-diff-historii` · 2026-09-18 (pomiar, zero kodu produkcyjnego); **otwarte 14m** (sprostowanie `docs/instrukcja-testow-I4.md`, domyka falę 2) — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
 
 ---
 
@@ -876,7 +876,8 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
     **`addProductsBulk` NIE wchodzi w zakres 4a — czeka na I12 (patrz tamten blok).**
   - **Lista pól edytowalnych zamyka backlog #14 dla narzutów i promocji.**
     `POLA_EDYTOWALNE_NARZUTU` (`rebuild/backend/src/repos/markups.ts`, 8 pól) i
-    `POLA_EDYTOWALNE_PROMOCJI` (`promotions.ts`, 8 pól); filtr działa na PATCH **i** POST.
+    `POLA_EDYTOWALNE_PROMOCJI` (`promotions.ts`, 8 pól — **7 od 14f**, `status` odcięty jako pole
+    WYLICZANE, patrz blok I14 14f); filtr działa na PATCH **i** POST.
   - **Audyt loguje SUROWE `c.body` w całości** (`:48699-48737`, wszystkie sześć wywołań
     `be(...)`) — potwierdzone lekturą, port 1:1. Niespójności znanej od dostawców (audyt
     tylko wybranych pól, zapis przez filtr) tu NIE MA.
@@ -911,16 +912,22 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **`PATCH /api/promotions/{id}` NIE MA 404** — dla nieistniejącego id oddaje **200 z pustym
     ciałem** (`res.json(undefined)` → puste `text`, nie `{}`). Bliźniacza trasa narzutu 404 MA.
     Klient promocji 4b czyta `text()` i parsuje warunkowo — pusta odpowiedź to „nie znaleziono".
-  - **Silnik cen backendu IGNORUJE daty `start`/`koniec` promocji** — wygasła promocja nadal
-    obniża ceny (port 1:1, `__bridgePromoMatches`). Frontend produkcji mimo to **przelicza
-    etykietę statusu z dat przy każdym odczycie** `/api/promotions` (`_b()`,
-    `frontend-index.js:9508`, wołane z `queryFn` `:9568`) i zapisuje wynik do IndexedDB —
+  - **Silnik cen backendu IGNORUJE daty `start`/`koniec` promocji** — to opis PRODUKCJI, wciąż
+    prawdziwy: wygasła promocja nadal obniża ceny (port 1:1, `__bridgePromoMatches`). Frontend
+    produkcji mimo to **przelicza etykietę statusu z dat przy każdym odczycie** `/api/promotions`
+    (`_b()`, `frontend-index.js:9508`, wołane z `queryFn` `:9568`) i zapisuje wynik do IndexedDB —
     **nigdy na serwer**; kolumna `status`, której używa silnik cen, zostaje nietknięta. Skutek
     w produkcji: lista pokazuje „zakończona" przy promocji, którą backend nadal stosuje. 4b
     odtworzyło to 1:1 i dołożyło widoczny **znacznik rozbieżności** na wierszu, gdy przeliczona
     etykieta nie zgadza się z kolumną `status` z serwera, plus naprawiony badge `"zaplanowana"`
-    (oryginał ma tu literówkę i wyświetla ją jako „zakończona"). Wyłączenie promocji „na
-    sztywno" to nadal zmiana `status`, a nie upływ daty — silnika to nie rusza (backlog #19).
+    (oryginał ma tu literówkę i wyświetla ją jako „zakończona").
+    ⚠ **Stan ODBUDOWY po 14f (`64-FEATURE-i14f-daty-koncza-promocje`, 2026-09-19): naprawione.**
+    Nowy wygaszacz (`src/promocje/wygaszacz.ts`) przestawia `status` z dat automatycznie (start
+    procesu + wejście `przeliczCenyZRegul` + cyklicznie), więc wygasła promocja w odbudowie
+    przestaje obniżać ceny — silnik (`promocjaPasuje`) sam pozostaje NIETKNIĘTY, zmieniają się
+    dane, które dostaje. Znacznik rozbieżności stał się martwym kodem i został usunięty; `status`
+    przestał być polem edytowalnym, więc „wyłączenie promocji na sztywno zmianą `status`" już nie
+    działa — promocję wyłącza teraz wyłącznie data albo usunięcie. Backlog #19 zamknięty.
   - **Listy marek i kategorii w `DialogReguly.tsx` powstawały z danych produktów** (ta sama
     degradacja co D3 w I2), bo 4b nie miało endpointu słowników — **domknięte w 7b
     (2026-09-04, ticket `31-FEATURE-atrybuty-frontend`):** dialog czyta `["/api/atrybuty"]`,
@@ -2155,7 +2162,11 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
 - **Status:** 🔨 w toku — zaplanowana 2026-09-18. **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a ✅
   (`49-CHORE-i14a-wgrywanie-reczne`), 14b ✅ (`51-FEATURE-staging-filtr-pasek-kolumny`),
   14c ✅ (`50-FEATURE-i14c-karta-dostawcy-upload`), 14d ✅ (`56-DOCS-instrukcja-testow-i14`).
-  **FALA 2 w toku:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`), 14h ✅ (`61-FEATURE-promocja-kolumna-katalog`, 2026-09-18), 14i ✅ (`58-FEATURE-i14i-ean-naukowy-pusty`, 2026-09-18), otwarte 14f.
+  **FALA 2 DOWIEZIONA POZA 14m 2026-09-19:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`),
+  14f ✅ (`64-FEATURE-i14f-daty-koncza-promocje`, 2026-09-19), 14h ✅
+  (`61-FEATURE-promocja-kolumna-katalog`, 2026-09-18), 14i ✅ (`58-FEATURE-i14i-ean-naukowy-pusty`,
+  2026-09-18), 14j ✅ (`59-CHORE-i14j-oracle-diff-historii`, 2026-09-18), 14g skasowana. Otwarte
+  wyłącznie **14m** (sprostowanie `docs/instrukcja-testow-I4.md`, domyka falę 2).
   **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f.
   Niezależna od otwartego 13d (inny podsystem, inne pliki).
 - **Skąd się wzięła.** Ania przeszła `docs/instrukcja-testow-I3.md` i wypełniła pola UWAGI (komentarze
@@ -2490,10 +2501,12 @@ Karta domykająca falę 2 powinna zrobić dla I4 to, co 14d zrobiła dla I3: del
      Powód: po (b) `status` jest polem WYLICZANYM, więc zostawienie go edytowalnym znaczyłoby,
      że wygaszacz nadpisuje ręczne ustawienia użytkownika bez ostrzeżenia.
   ⚠ **Skutek dla instrukcji:** rada „żeby naprawdę wyłączyć promocję, zmień jej status" przestaje
-  obowiązywać — po 14f promocję wyłącza data albo usunięcie. Sprostowanie należy do **14m**.
+  obowiązywać — po 14f promocję wyłącza data albo usunięcie. **14f ✅ dowiozła to 2026-09-19.**
+  Sprostowanie instrukcji należy do **14m** (⬜ otwarta, domyka falę 2).
 - **Skutek uboczny dla 14f:** pomarańczowy znacznik rozbieżności (`rozbieznoscStatusu`, dodany
   w 4b jako D5) traci rację bytu w wariancie (b) — etykieta z dat i kolumna `status` przestaną
   się rozjeżdżać. Znacznik należy usunąć ŚWIADOMIE i odnotować, a nie zostawić jako martwy kod.
+  **✅ Usunięty w 14f** — znacznik NIE ISTNIEJE już w `status.ts`/`TabelaPromocji.tsx`.
 - **Zamknięte tą samą turą odpowiedzi (2026-09-18):**
   - **§3.7 nie jest błędem cen** — Ania: *„tylko się nie wyświetlało, cena się oblicza
     prawidłowo"*. Zadanie A karty 14e (polowanie na defekt w dopasowaniu promocji) jest
@@ -2510,7 +2523,8 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
 | Karta | Zakres | Pliki (wyłączna własność) | Testy |
 |---|---|---|---|
 | **14e** | ⚠ ZAKRES ZAWĘŻONY 19.09: wycena #19 — wariant (a) czy (b), z liczbami. Zadania „czy promocja obniża ceny" i „komunikat po edycji" ZAMKNIĘTE odpowiedziami Ani | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
-| **14f** | **Wariant (b) — decyzja 2026-09-18:** wygaszacz `status` (start + mutacja reguł + CYKLICZNIE) działający w OBIE strony · odcięcie `status` od pól edytowalnych · usunięcie znacznika rozbieżności i noty w dialogu · potwierdzenie usuwania reguły z liczbą produktów | BE: `repos/ceny.ts` albo NOWY wygaszacz + `repos/promotions.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts` | `test/narzuty.test.tsx` + testy BE |
+| **14f** | ✅ **ZROBIONE 2026-09-19**, `64-FEATURE-i14f-daty-koncza-promocje`. Wariant (b) dowieziony: NOWY `src/promocje/wygaszacz.ts` przestawia `status` z dat w OBIE strony (start procesu + wejście `przeliczCenyZRegul` + cyklicznie co `PROMO_WYGASZACZ_MINUTY`, domyślnie 5 min, `0` wyłącza) — silnik (`promocjaPasuje`) NIETKNIĘTY, charakteryzacja zielona bez wyjątku (0 z 31 + 0 z 17). `status` odcięty od `POLA_EDYTOWALNE_PROMOCJI` (7 pól), `dodajPromocje` liczy go z dat. Znacznik rozbieżności i stara nota w dialogu usunięte/przepisane. Usuwanie narzutu I promocji pyta o potwierdzenie z liczbą dotkniętych produktów, liczoną silnikiem `wybierzNarzut`/`wybierzPromocje` (nie matcherem ostrzeżenia) | BE: NOWY `src/promocje/wygaszacz.ts`, `repos/ceny.ts`, `repos/promotions.ts`, `config/env.ts`, `server.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts`, `narzuty/ceny.ts`, `narzuty/DialogReguly.tsx` | BE: `test/wygaszacz.test.ts` (27) + `test/narzuty.patch.test.ts` · FE: `test/narzuty.test.tsx`, `test/narzuty.ceny.test.ts`, `test/narzuty.dialog.test.tsx` |
+| **14m** | ⬜ Sprostowanie `docs/instrukcja-testow-I4.md` (rozdz. 4 i 5, unieważnione przez 14f) — domyka FALĘ 2 I14 | `docs/instrukcja-testow-I4.md` | — |
 | **14h** | ✅ **ZROBIONE 2026-09-18**, `61-FEATURE-promocja-kolumna-katalog`. Kolumna „Promocja" w katalogu — NOWA funkcja: `GET /api/products` dokłada opcjonalny `_reguly.promocja` (`{wartosc, nazwa}`) przez istniejące `wybierzPromocje`/`promocjaPasuje` z `repos/ceny.ts` (silnik NIETKNIĘTY, zakres 14f). Karta okazała się czysto backendowa — renderer, piker i typ `Produkt` na FE już były gotowe od 4b | BE: `repos/products.ts` (`dolaczReguly`), `routes/products.ts`, `contract/openapi.yaml` (komentarz nad ścieżką, bez węzła schematu) | BE: `test/katalog.promocja.test.ts` + nowy strażnik w `test/katalog.gate.test.ts` · FE: 2 nowe przypadki w `test/katalog.formatowanie.test.tsx` |
 | **14i** | ✅ **ZROBIONE 2026-09-18**, `58-FEATURE-i14i-ean-naukowy-pusty`. EAN w notacji naukowej → puste pole w katalogu | BE: zapis do katalogu (akceptacja), `src/import/akceptacja.ts` | `test/akceptacja.odstepstwa.test.ts` + bramki charakteryzacji (nietknięte) |
 | **14j** ✅ | Automatyczne porównanie Historii z oryginałem — zastępuje niewykonany test §9 z I5. Karta POMIAROWA, zero kodu produkcyjnego | `docs/tickets/59-*/**` · NOWY `rebuild/backend/test/historia.wyrocznia.*` · backlog (tylko #87) | `test/historia.wyrocznia.test.ts` (13 przypadków) |
@@ -2616,6 +2630,30 @@ produkcja, bo różnica siedzi w wersji zależności. Skutek dla Historii: w pro
 ani jeden wpis `eksport_csv` z tej gałęzi. **Wymaga osobnej karty i decyzji użytkownika**
 (odtworzyć defekt czy zostać przy działającej wersji) — opis i propozycja w
 `docs/tickets/59-CHORE-i14j-oracle-diff-historii/raport.md`.
+
+##### 14m — sprostowanie `docs/instrukcja-testow-I4.md` · ⬜ NIE ZROBIONE (domyka FALĘ 2 I14)
+
+Zostawione przez **14f** (`64-FEATURE-i14f-daty-koncza-promocje`, ✅ 2026-09-19 — jawne
+ograniczenie własności plików w tamtej karcie: `docs/instrukcja-testow-I4.md` poza jej
+zakresem). Robi dla I4 to, co 14d zrobiła dla I3 — deltę + banner, metodą 14d (delta jako format
+docelowy, „starszych instrukcji się nie przepisuje").
+
+Co 14f unieważniła w rozdziałach 4 i 5, do sprostowania:
+- **§4 pkt 6 — nieprawdziwy.** Twierdzi, że promocja z datą startu w przyszłości od razu obniża
+  ceny; po 14f dostaje `status: "zaplanowana"` po stronie serwera i nie obniża niczego.
+- **§3.9 przestaje obowiązywać.** Promocja przestawiona na daty z 2020 (koniec w przeszłości) już
+  NIE zostaje „aktywna" — wygaszacz (start procesu / wejście `przeliczCenyZRegul` / cyklicznie co
+  `PROMO_WYGASZACZ_MINUTY`) przestawia ją na `zakonczona`.
+- **Rada „żeby naprawdę wyłączyć promocję, zmień jej status" — do usunięcia.** `status` przestał
+  być polem edytowalnym (`POLA_EDYTOWALNE_PROMOCJI`, 7 pól po 14f); promocję wyłącza teraz
+  wyłącznie data albo usunięcie.
+
+**Dla cutoveru — uprzedzić Anię, nie tylko przepisać instrukcję:** pierwszy start procesu po
+wdrożeniu 14f zamiecie statusy WSZYSTKICH promocji rozjechanych z datami. Na dziś (`promotions`
+w `db/snapshot.db` PUSTA) realnie 0 zmian, ale to drugi powód uprzedzenia obok już znanego
+znaleziska 14e: samo `przeliczCenyZRegul`, bez żadnej promocji, zmienia 2050 z 7405 cen (prostuje
+pozycje rozjechane z aktualnym narzutem — zachowanie oryginału, nie defekt, ale wygląda jak
+masowa, niezamówiona zmiana cen).
 
 **⚠ DLA KARTY 14k (backlog #21) — PRZECZYTAJ, ZANIM ZACZNIESZ.** Bloku „14k" w tej roadmapie
 jeszcze NIE MA; 14j nie miała prawa go założyć (własność plików), więc pierwsza rzecz do zrobienia
@@ -2736,8 +2774,11 @@ wyłącznie `instrukcja-testow-I3.md` (fala 1). Treść sprostowań zostaje tu b
 - **Jest za to defekt ODWROTNY, nigdzie nieopisany: promocja „zaplanowana" NIGDY SIĘ NIE
   WŁĄCZA.** Status zostaje `zaplanowana` na zawsze, bo nic go nie przelicza po nadejściu daty
   startu. Karta 14f musi to objąć, inaczej naprawi wygaszanie i zostawi niedziałające planowanie.
-- §3.9 pozostaje **poprawny** i teraz wiadomo dlaczego: PATCH nie rusza statusu, więc promocja
-  utworzona jako „aktywna" i przestawiona na daty z 2020 dalej ma w bazie „aktywna".
+- §3.9 był **poprawny w chwili pisania** i wiadomo dlaczego: PATCH nie ruszał statusu, więc
+  promocja utworzona jako „aktywna" i przestawiona na daty z 2020 zostawała w bazie „aktywna".
+  **Po 14f ✅ (2026-09-19) §3.9 PRZESTAJE OBOWIĄZYWAĆ** — wygaszacz przestawi taką promocję na
+  `zakonczona` (na starcie procesu, na wejściu `przeliczCenyZRegul`, albo cyklicznie w ciągu
+  `PROMO_WYGASZACZ_MINUTY`). Sprostowanie instrukcji: **14m** (⬜, domyka falę 2).
 
 **WYCENA DWÓCH WARIANTÓW — liczby**
 
@@ -2799,6 +2840,10 @@ kłamiącego znacznika i **odtwarza regułę, którą system już stosuje przy t
    nie usterka do gaszenia. **Nie podnoś mu priorytetu w 14f** — wystarczy, że wpis zostaje.
    Źródło: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/raport.md`, Follow-up #1;
    wpis backlogu **#88**.
+   ⚠ **FAKT po 14f (2026-09-19): NIE naprawione.** `promocjaPasuje` zostało w wariancie (b)
+   świadomie NIETKNIĘTE (D1 — wygaszacz przestawia tylko `status`, silnik dostaje inne dane, nie
+   inny kod), więc backlog #88 zostaje otwarty; „naprawa należy do 14f" wyżej okazała się błędnym
+   założeniem sprzed decyzji o wariancie.
 
 **Siatki zostawione przez 14e** (nie wymuszają żadnej zmiany, pilnują stanu):
 `rebuild/backend/test/promocja-warunek-obniza-cene.test.ts` (8 przypadków) i
@@ -2813,10 +2858,12 @@ Pełne liczby i metoda: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`
 
 **Kolejność:** FALA 1 — **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej
 kolejności) → **14d** (docs, na końcu). FALA 2 — **14e ∥ 14f ∥ 14h ∥ 14i**, rozłączne z falą 1,
-więc mogą iść razem z nią; 14f czeka na rozstrzygnięcie #19. **14i ✅ zrobiona i nie ruszyła
-`contract/`** (decyzja użytkownika), a **14h ✅ zrobiona** dotknęła kontraktu tylko komentarzem
-(D4, `61-FEATURE-promocja-kolumna-katalog`) — obie weszły bez blokady kolejnościowej i bez
-wspólnych fixtures. Zostaje otwarte tylko **14f**.
+więc mogą iść razem z nią; 14f czekała na rozstrzygnięcie #19, dostała je 2026-09-18 i
+**✅ zrobiona 2026-09-19** (`64-FEATURE-i14f-daty-koncza-promocje`). **14i ✅ zrobiona i nie
+ruszyła `contract/`** (decyzja użytkownika), a **14h ✅ zrobiona** dotknęła kontraktu tylko
+komentarzem (D4, `61-FEATURE-promocja-kolumna-katalog`) — obie weszły bez blokady kolejnościowej
+i bez wspólnych fixtures. Zostaje otwarte tylko **14m** (sprostowanie
+`docs/instrukcja-testow-I4.md`, domyka falę 2 — zależy od 14f, gotowa do startu).
 **14g skasowana** (decyzje Ani z 18.09).
 Każda z trzech kart dopisuje TYLKO swój podblok wyżej i NIE rusza tablicy postępu §4 — wiersz iteracji
 zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-18.
