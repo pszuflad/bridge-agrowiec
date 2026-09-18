@@ -142,7 +142,7 @@ export function Staging() {
   return (
     <div className="space-y-4">
       {/*
-        Nagłówek 1:1 z oryginałem (`fe.js:20679-20682`), razem z akcjami masowymi w `actions`.
+        Nagłówek 1:1 z oryginałem (`fe.js:20679-20706`), razem z akcjami masowymi w `actions`.
         Oryginał trzyma „Akceptuj/Odrzuć wszystkie (N)" WŁAŚNIE TUTAJ, a nie w pasku — pasek
         dostaje tylko warianty „zaznaczone" i „widoczne".
 
@@ -179,7 +179,7 @@ export function Staging() {
 
       {/*
         Pasek narzędzi — jeden rząd, POZA kartą, dokładnie jak w oryginale
-        (`fe.js:20702-20770`, `div.flex.items-center.gap-3.mb-4`). Kolejność:
+        (`fe.js:20707-20770`, `div.flex.items-center.gap-3.mb-4`). Kolejność:
         szukajka → „Typ sprawy" → select → licznik zmian → (do prawej) akcje na zaznaczonych
         i widocznych. Odbudowa trzymała to wcześniej w karcie i w dwóch rzędach.
       */}
@@ -188,7 +188,7 @@ export function Staging() {
           <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             className="pl-8 font-mono text-sm"
-            /* Trzy kropki ASCII, nie wielokropek — tak ma oryginał (`fe.js:20710`). */
+            /* Trzy kropki ASCII, nie wielokropek — tak ma oryginał (`fe.js:20714`). */
             placeholder="Szukaj po kodzie, nazwie, dostawcy lub EAN..."
             aria-label="Szukaj w stagingu"
             data-testid="input-search-staging"
@@ -212,7 +212,7 @@ export function Staging() {
           </SelectContent>
         </Select>
 
-        {/* Liczebnik jak w oryginale: „1 zmiana", poza tym „N zmian" (`fe.js:20744`). */}
+        {/* Liczebnik jak w oryginale: „1 zmiana", poza tym „N zmian" (`fe.js:20738`). */}
         <div className="font-mono text-xs text-muted-foreground" data-testid="licznik-zmian">
           {razem} {razem === 1 ? "zmiana" : "zmian"}
         </div>

@@ -6,7 +6,7 @@
  * serwera (`/paged`, domyślnie 25 wierszy), więc nie ma czego wirtualizować.
  *
  * ⚠ KOLEJNOŚĆ KOLUMN JEST ZNACZĄCA, nie kosmetyczna. Enhancer kolumn w oryginale mapował
- * je POZYCYJNIE — brał `i`-ty `<th>` i przypisywał mu `POS_KEYS[i]` (`fe.js:29157-29173`).
+ * je POZYCYJNIE — brał `i`-ty `<th>` i przypisywał mu `POS_KEYS[i]` (`fe.js:29158-29173`).
  * Dlatego przy 14b `Magazyn` wrócił na szóstą pozycję, zaraz za `Dostawca`; odbudowa trzymała
  * go wcześniej za `Cena sprzedaży`. Źródłem prawdy jest `KOLEJNOSC_KOLUMN` w `kolumny.ts` —
  * przy każdej zmianie tej tabeli trzeba je przestawiać razem.

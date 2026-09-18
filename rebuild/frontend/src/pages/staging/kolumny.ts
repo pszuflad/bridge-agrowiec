@@ -27,7 +27,7 @@ export type KolumnaStagingu = {
    * `extra` — pozycja sekcji „Dodatkowe (z katalogu)".
    *
    * ⭐ TE PRZEŁĄCZNIKI NIC NIE ROBIĄ i tak ma zostać. `applyCss()` w oryginale zaczyna od
-   * `if (c.extra) return` (`fe.js:29133`), więc 49 pozycji tej sekcji zapisuje się do pamięci
+   * `if (c.extra) return` (`fe.js:29134`), więc 49 pozycji tej sekcji zapisuje się do pamięci
    * i na tym się kończy — sam popover mówi to wprost użytkownikowi („Te kolumny nie są jeszcze
    * wyświetlane w tabeli stagingu."). To niedokończona funkcja, która pojechała na produkcję;
    * odtwarzamy ją 1:1 (decyzja D3 przy 14b), nie oceniamy.
@@ -36,7 +36,7 @@ export type KolumnaStagingu = {
 };
 
 /**
- * Lista kolumn 1:1 z `STAGING_COLS` (`fe.js:28808-29105`) — 61 pozycji w tej samej kolejności.
+ * Lista kolumn 1:1 z `STAGING_COLS` (`fe.js:28808-29100`) — 61 pozycji w tej samej kolejności.
  *
  * Etykiety przepisane DOSŁOWNIE, łącznie z niekonsekwencjami oryginału: `marza_pct`, `vat`,
  * `status` i `data_aktualizacji` małą literą, `Srednica` i `Dlugosc` bez ogonków,
@@ -107,7 +107,7 @@ export const KOLUMNY_STAGINGU: readonly KolumnaStagingu[] = [
   { klucz: "ex_dataAktualizacji", etykieta: "data_aktualizacji", dodatkowa: true },];
 
 /**
- * Kolejność kolumn RZECZYWIŚCIE renderowanych w tabeli — `POS_KEYS` (`fe.js:29155`).
+ * Kolejność kolumn RZECZYWIŚCIE renderowanych w tabeli — `POS_KEYS` (`fe.js:29156`).
  *
  * Oryginał mapował kolumny POZYCYJNIE: brał `i`-ty `<th>` i przypisywał mu `POS_KEYS[i]`.
  * Dlatego kolejność w `TabelaStagingu.tsx` musi się zgadzać co do jednej pozycji — przy 14b
@@ -128,13 +128,13 @@ export const KOLEJNOSC_KOLUMN = [
   "akcje",
 ] as const;
 
-/** Klucz w `localStorage` — 1:1 z oryginałem (`fe.js:29107`), żeby wybór przeżył cutover. */
+/** Klucz w `localStorage` — 1:1 z oryginałem (`fe.js:29101`), żeby wybór przeżył cutover. */
 export const KLUCZ_KOLUMN_STAGINGU = "bridge_staging_cols_v2";
 
 /** Mapa `klucz → widoczna`, w tym kształcie leży w pamięci przeglądarki. */
 export type WidocznoscKolumn = Record<string, boolean>;
 
-/** Stan po pierwszym wejściu — `loadPrefs()` bez wpisu w pamięci (`fe.js:29115-29119`). */
+/** Stan po pierwszym wejściu — `loadPrefs()` bez wpisu w pamięci (`fe.js:29110-29114`). */
 export function domyslneKolumny(): WidocznoscKolumn {
   const stan: WidocznoscKolumn = {};
   for (const kolumna of KOLUMNY_STAGINGU) {
@@ -144,7 +144,7 @@ export function domyslneKolumny(): WidocznoscKolumn {
 }
 
 /**
- * Odczyt wyboru z pamięci — port `loadPrefs()` (`fe.js:29109-29121`).
+ * Odczyt wyboru z pamięci — port `loadPrefs()` (`fe.js:29103-29115`).
  *
  * ⚠ ZAPISANY WPIS BIERZEMY W CAŁOŚCI, bez scalania z domyślnymi — dokładnie jak oryginał
  * (`if (raw) return JSON.parse(raw)`). Skutek: klucz dodany do listy w przyszłości będzie
@@ -153,18 +153,33 @@ export function domyslneKolumny(): WidocznoscKolumn {
  *
  * Błędy są POŁYKANE (brak `localStorage`, prywatne okno, uszkodzony JSON) — wtedy wracamy
  * do domyślnych zamiast wywracać widok.
+ *
+ * ⚠ SPRAWDZAMY KSZTAŁT, choć oryginał tego nie robi — i to jest wierność, nie ulepszenie.
+ * `JSON.parse("null")` albo `JSON.parse("[]")` przechodzi bez wyjątku, więc `loadPrefs()`
+ * w oryginale oddaje `null`, a `visible[c.key]` w `applyCss()` rzuca `TypeError`. Tam
+ * przechwytuje go ZEWNĘTRZNY `try/catch` całego enhancera (`fe.js:28803` + `:29350-29352`,
+ * `console.warn('bridge staging cols v2 enhancer error:', e)`) i skutek dla użytkownika jest taki, że
+ * konfigurator po cichu nie działa, a strona stoi. U nas ten sam wyjątek poleciałby
+ * z renderu komponentu — bez `ErrorBoundary` wywróciłby CAŁĄ aplikację na białą stronę.
+ * Cofnięcie się do domyślnych odtwarza obserwowalne zachowanie oryginału; przepisanie
+ * wyjątku 1:1 by go NIE odtworzyło.
  */
 export function wczytajKolumny(): WidocznoscKolumn {
   try {
     const surowe = localStorage.getItem(KLUCZ_KOLUMN_STAGINGU);
-    if (surowe) return JSON.parse(surowe) as WidocznoscKolumn;
+    if (surowe) {
+      const wczytane: unknown = JSON.parse(surowe);
+      if (wczytane && typeof wczytane === "object" && !Array.isArray(wczytane)) {
+        return wczytane as WidocznoscKolumn;
+      }
+    }
   } catch {
     // Oryginał: `catch (e) {}` — cisza i domyślne.
   }
   return domyslneKolumny();
 }
 
-/** Zapis wyboru — port `savePrefs()` (`fe.js:29123-29129`), też połyka błędy. */
+/** Zapis wyboru — port `savePrefs()` (`fe.js:29117-29121`), też połyka błędy. */
 export function zapiszKolumny(stan: WidocznoscKolumn): void {
   try {
     localStorage.setItem(KLUCZ_KOLUMN_STAGINGU, JSON.stringify(stan));

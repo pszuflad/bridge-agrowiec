@@ -8,13 +8,13 @@
  * z ZEWNĄTRZ Reacta i nie miał do czego się podpiąć.
  *
  * ⚠ GDZIE TEN PRZYCISK STOI — czytaj z kodu, nie z nazwy. Oryginał wstrzykuje go przed
- * `button[data-testid="button-accept-all"]` (`fe.js:29317-29331`), ale w oryginale ten
+ * `button[data-testid="button-accept-all"]` (`fe.js:29317-29334`), ale w oryginale ten
  * `data-testid` wisi na „Akceptuj widoczne" w PASKU, a nie na „Akceptuj wszystkie"
  * w nagłówku — testidy są tam semantycznie zamienione względem odbudowy. Przycisk ląduje
  * więc w pasku, przed „Akceptuj widoczne", i tak go tu stawiamy (ustalenie F1 przy 14b).
  *
  * Wariant `ghost`/`sm` też nie jest wyborem estetycznym: oryginał robi dosłownie
- * `btn.className = acceptBtn.className` (`fe.js:29325`), czyli dziedziczy wygląd
+ * `btn.className = acceptBtn.className` (`fe.js:29326`), czyli dziedziczy wygląd
  * sąsiedniego „Akceptuj widoczne".
  */
 import { Columns3 } from "lucide-react";
@@ -41,7 +41,7 @@ export function KonfiguratorKolumn({
     onZmiana({ ...widoczne, [klucz]: !widoczne[klucz] });
 
   /*
-    Trzy skróty mają w oryginale RÓŻNY zasięg i to nie jest niedoróbka (`fe.js:29196-29212`):
+    Trzy skróty mają w oryginale RÓŻNY zasięg i to nie jest niedoróbka (`fe.js:29197-29213`):
       • „Wszystkie" i „Żadna" ruszają WYŁĄCZNIE kolumny tabeli (`if (!c.extra)`),
       • „Domyślne" resetuje WSZYSTKO, z sekcją „Dodatkowe" włącznie.
     Odtwarzamy dokładnie ten podział.
@@ -65,16 +65,16 @@ export function KonfiguratorKolumn({
   };
 
   // Kolumny `locked` (`checkbox`, `akcje`) nie mają w oryginale przełącznika — popover po
-  // prostu je pomija (`if (c.locked || c.extra) return`, `fe.js:29218`).
+  // prostu je pomija (`if (c.locked || c.extra) return`, `fe.js:29222`).
   const wTabeli = KOLUMNY_STAGINGU.filter((k) => !k.zablokowana && !k.dodatkowa);
   const dodatkowe = KOLUMNY_STAGINGU.filter((k) => k.dodatkowa);
 
   return (
     /*
       `modal={false}` nie jest ustępstwem na rzecz testów — to wierność. Popover oryginału
-      był zwykłym `<div>` doklejonym do `body` (`fe.js:29176`); nie blokował strony, nie
+      był zwykłym `<div>` doklejonym do `body` (`fe.js:29178`); nie blokował strony, nie
       chował jej przed czytnikiem ekranu i zamykał się kliknięciem na zewnątrz
-      (`fe.js:29294-29301`). Domyślny, modalny tryb Radiksa oznaczałby `aria-hidden` na całej
+      (`fe.js:29294-29300`). Domyślny, modalny tryb Radiksa oznaczałby `aria-hidden` na całej
       reszcie widoku i zablokowany scroll tabeli — czyli zachowanie, którego enhancer nie miał.
     */
     <DropdownMenu modal={false}>
@@ -126,7 +126,7 @@ export function KonfiguratorKolumn({
           Dodatkowe (z katalogu)
         </DropdownMenuLabel>
         {/*
-          Zdanie oryginału, przepisane dosłownie (`fe.js:29249`). Mówi użytkownikowi wprost,
+          Zdanie oryginału, przepisane dosłownie (`fe.js:29251`). Mówi użytkownikowi wprost,
           że te przełączniki niczego nie pokazują — i tak ma zostać (decyzja D3 przy 14b).
         */}
         <div className="px-2 py-1.5 text-[10px] leading-snug text-muted-foreground">

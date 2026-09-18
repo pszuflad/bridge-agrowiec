@@ -85,7 +85,7 @@ Poprawiam tylko wskaźnik, w bloku 14b roadmapy (CLAUDE.md pkt 4: roadmapa koryg
 
 ### Enhancer kolumn — co dokładnie robi
 
-- `STAGING_COLS` (`:28808-29105`) — **61 pozycji**: 12 „prawdziwych" (`checkbox` i `akcje`
+- `STAGING_COLS` (`:28808-29100`) — **61 pozycji**: 12 „prawdziwych" (`checkbox` i `akcje`
   z `locked:true`; `def:true` na wszystkich poza `stan`/`cenaZ`/`cenaS`) + **49 z `extra:true`**
   (`ex_marka`, `ex_marzaPct`, `ex_ean`, …, `ex_dataAktualizacji`).
 - `applyCss()` (`:29131-29140`) — **jawnie pomija `extra`** (`if (c.extra) return`), czyli
@@ -191,7 +191,7 @@ Pięć kroków, każdy = jeden commit.
 
 **Krok 1 — `pages/staging/kolumny.ts` (NOWY): dane konfiguratora.**
 - `type KolumnaStagingu = { klucz, etykieta, zablokowana?, domyslna?, dodatkowa? }`.
-- `KOLUMNY_STAGINGU` — 61 pozycji 1:1 z `STAGING_COLS` (`:28808-29105`), w tej samej
+- `KOLUMNY_STAGINGU` — 61 pozycji 1:1 z `STAGING_COLS` (`:28808-29100`), w tej samej
   kolejności, z tymi samymi etykietami (łącznie z niekonsekwentnymi: `marza_pct`, `vat`,
   `status`, `data_aktualizacji` małą literą, `Bloto+snieg`, `Srednica` bez ogonka).
 - `KLUCZ_PAMIECI = "bridge_staging_cols_v2"`.

@@ -19,6 +19,11 @@ import { _zresetujStanSesji } from "@/lib/auth";
 import { server } from "./msw/server";
 import { WYGLAD_TYPU } from "@/pages/staging/dane";
 import {
+  domyslneKolumny,
+  KOLEJNOSC_KOLUMN,
+  KOLUMNY_STAGINGU,
+} from "@/pages/staging/kolumny";
+import {
   pozycjaStaginguZFixtura,
   stronaStaginguZFixtura,
   TOKEN_TESTOWY,
@@ -106,7 +111,7 @@ describe("Widok /staging", () => {
 
     /*
       Nagłówki 1:1 z oryginałem — sprawdzamy CAŁĄ LISTĘ W KOLEJNOŚCI, nie pojedyncze
-      wystąpienia. Enhancer kolumn mapował je pozycyjnie (`POS_KEYS`, `fe.js:29155`), więc
+      wystąpienia. Enhancer kolumn mapował je pozycyjnie (`POS_KEYS`, `fe.js:29156`), więc
       przestawienie dwóch kolumn miejscami jest realnym błędem, a nie kosmetyką — i taki
       właśnie błąd (`Magazyn` za `Cena sprzedaży`) siedział w odbudowie do 14b.
 
@@ -126,6 +131,21 @@ describe("Widok /staging", () => {
       "Powód",
       "Akcje",
     ]);
+
+    /*
+      Druga kotwica, w drugą stronę. Powyższa lista trzyma tabelę przy ORYGINALE (jest
+      przepisana z `fe.js:20790-20826`), a ta trzyma ją przy stałej `KOLEJNOSC_KOLUMN`,
+      którą `kolumny.ts` reklamuje jako źródło prawdy dla kolejności. Bez tej asercji stała
+      byłaby martwym komentarzem, a JSX i `POS_KEYS` mogłyby się rozjechać niezauważone.
+    */
+    const domyslne = domyslneKolumny();
+    const etykieta = (klucz: string) =>
+      klucz === "checkbox"
+        ? ""
+        : KOLUMNY_STAGINGU.find((k) => k.klucz === klucz)!.etykieta;
+    expect(naglowki).toEqual(
+      KOLEJNOSC_KOLUMN.filter((klucz) => domyslne[klucz]).map(etykieta),
+    );
 
     // Etykieta bierze się z mapy z oryginału, nie z surowej wartości pola. Oczekiwanie
     // wyprowadzamy z FIXTURE'A, żeby test nie zakładał, co produkcja akurat nagrała.
@@ -273,7 +293,7 @@ describe("Widok /staging", () => {
 
       /*
         Po odznaczeniu przycisk ZNIKA, a nie pokazuje „(0)" — oryginał renderuje warianty
-        „zaznaczone" warunkowo (`n.size > 0 && …`, `fe.js:20750`). Odbudowa trzymała je
+        „zaznaczone" warunkowo (`n.size > 0 && …`, `fe.js:20741`). Odbudowa trzymała je
         zawsze, tylko wyszarzone; wyrównane w 14b.
       */
       await uzytkownik.click(zaznaczWszystkie);
@@ -392,7 +412,7 @@ describe("Widok /staging", () => {
       await otworzStaging();
 
       /*
-        Dosłowny tekst oryginału (`fe.js:20710`), z trzema kropkami ASCII. Backend naprawdę
+        Dosłowny tekst oryginału (`fe.js:20714`), z trzema kropkami ASCII. Backend naprawdę
         przeszukuje cztery pola (`rebuild/backend/src/repos/staging.ts:114-117`), a odbudowa
         obiecywała dwa — stąd uwaga Ani, że szukajka „nie znajduje po dostawcy".
       */
@@ -454,7 +474,7 @@ describe("Widok /staging", () => {
 
       /*
         W `STAGING_COLS` te trzy kolumny jako jedyne kolumny tabeli nie mają `def:true`
-        (`fe.js:28836-28847`), a `loadPrefs()` liczy domyślną widoczność jako
+        (`fe.js:28834-28841`), a `loadPrefs()` liczy domyślną widoczność jako
         `!!(c.locked || c.def)`. Produkcja startuje więc bez nich — to nie jest zgubiona
         kolumna, tylko odtworzone zachowanie enhancera.
       */
@@ -503,6 +523,25 @@ describe("Widok /staging", () => {
       */
       expect(screen.getByRole("columnheader", { name: "Stan" })).toBeInTheDocument();
       expect(screen.queryByRole("columnheader", { name: "Nazwa" })).not.toBeInTheDocument();
+    });
+
+    it("uszkodzony wpis w pamięci cofa do domyślnych, zamiast wywracać widok", async () => {
+      /*
+        `null` i `[]` to POPRAWNY JSON, więc nie wpadają w `catch` — w oryginale `loadPrefs()`
+        oddaje je dalej, a `visible[c.key]` rzuca `TypeError`, który łapie zewnętrzny
+        `try/catch` enhancera (`fe.js:29350-29352`): konfigurator milczy, strona stoi.
+        U nas ten sam wyjątek poleciałby z renderu i bez `ErrorBoundary` zabrałby całą
+        aplikację — dlatego `wczytajKolumny()` sprawdza kształt. Ten test pilnuje, że
+        obserwowalny skutek jest taki jak w produkcji: widok działa.
+      */
+      for (const smiec of ["null", "[]", "{niepoprawny json"]) {
+        localStorage.setItem("bridge_staging_cols_v2", smiec);
+        queryClient.clear();
+        window.history.pushState({}, "", "/staging");
+        const widok = render(<App />);
+        expect(await screen.findByRole("columnheader", { name: "Nazwa" })).toBeInTheDocument();
+        widok.unmount();
+      }
     });
 
     it("kolumny zablokowane nie mają przełącznika i przeżywają skrót „Żadna”", async () => {
@@ -559,7 +598,7 @@ describe("Widok /staging", () => {
 
       /*
         ⭐ TO JEST DOWÓD WIERNOŚCI, nie przeoczenie. `applyCss()` w oryginale zaczyna od
-        `if (c.extra) return` (`fe.js:29133`), więc 49 przełączników tej sekcji zapisuje się
+        `if (c.extra) return` (`fe.js:29134`), więc 49 przełączników tej sekcji zapisuje się
         do pamięci i nie robi nic więcej. Gdyby kiedyś ktoś je „naprawił", ten test upadnie
         i zmusi do świadomej decyzji.
       */
