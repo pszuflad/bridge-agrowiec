@@ -2062,6 +2062,11 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     „Test produkcyjny 2026-09-17 potwierdzil, ze PUT /api/products/{pid} przyjmuje pelna tablice `features`
     mimo braku tego pola w fields_edit" (commit `5dedefb`). Ścieżka A robi teraz `GET /api/products/{pid}`
     → payload z `includeFeatures:true` → `PUT` z cechami i `category_id`. Backlog **#81**.
+  - **DECYZJA UŻYTKOWNIKA 2026-09-18:** backlog **#81** (właściciel metadanych produktu +
+    przywrócone `PUT features`) jest **formalnie ODŁOŻONY DO 13d** — nie zakładamy osobnej karty,
+    nie nanosimy tego poza 13d. Wpis ma w backlogu „Do nowej wersji?" = 🕒 PÓŹNIEJ. Ta linia jest
+    po to, żeby przy starcie 13d nikt nie szukał tematu w backlogu — **#81 jest częścią zakresu 13d**.
+    Tą samą decyzją #74 i część delta z #77 również czekają na 13d (patrz niżej).
   - **Co jeszcze doszło w `selly/*` i wchodzi do zakresu przepisania** (szczegóły w backlogu):
     **#74** — kategorie Selly przebudowane, stare ID 137/259/377 zwracają 404, żywe to 1/2/3/4;
     ID siedzą w `selly_kategoria_norm_map` (dane), nie w kodzie — **nie hardkodować**.
@@ -2296,7 +2301,12 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   - uporządkowanie danych MO9 — **ruszone przez Anię 17.09**, ma dwa wpisy: **#78** (odrzucanie po ID
     kategorii Magento 163 — quady/kosiarki) i **#79** (koniec reguły „inne → Rolnicze", klasyfikacja
     po rodzinach bieżników BKT). Oba ⬜ do decyzji.
-- **⭐ ŚWIEŻA PARTIA DELT PRODUKCJI (triaż 2026-09-18) — 12 wpisów ⬜ do decyzji, backlog #72–#83.**
+- **⭐ ŚWIEŻA PARTIA DELT PRODUKCJI (triaż 2026-09-18) — backlog #72–#83, JUŻ ROZSTRZYGNIĘTA.**
+  Decyzja użytkownika z 2026-09-18: **10 × ✅ TAK**, **1 × ❌ NIE** (#72 — odbudowa ma lepsze
+  rozwiązanie), **1 × 🕒 PÓŹNIEJ** (#81 → do 13d). ⏸ Dwa zatwierdzone wpisy (**#82**, **#83**) mają
+  **wstrzymaną implementację do odpowiedzi Ani** — ich commity przyszły bez wpisu w CHANGELOG,
+  a Ania nadal nad tym pracuje, więc uzasadnienie ma dojechać kolejnym `sync(vps)`.
+  **Przed ruszeniem `tyre_params.cjs`/`application_rules.cjs` odpal `/triaz-zmian`.**
   Okno `94bdf11..9d1b09f`, 24 commity producenta. **To NIE jest zakres I14** (I14 jest FE-only i nic
   z tego nie dotyka `rebuild/frontend/`), ale **nie może umknąć**, bo część trafia w kod, który
   odbudowa ma już 1:1 i który od 18.09 rozjeżdża się z produkcją:
@@ -2312,7 +2322,8 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   - **zamknięte tym triażem:** #71 (Ania naprawiła `konstrukcja` w żywym bundlu — patrz #72),
     #65 zawężone do 3 wpisów `field_name='konstrukcja'`.
   - **Dwa wpisy bez uzasadnienia biznesowego** (commity bez wpisu w CHANGELOG Ani): #82 i #83.
-    **Do dopytania Ani przed implementacją** — to decyzje produktowe, nie techniczne.
+    Pytania do Ani wysłane 2026-09-18; **implementacja wstrzymana do odpowiedzi** (obie zmiany są
+    zatwierdzone co do kierunku, brakuje tylko „dlaczego”).
 - **Zadania środowiskowe przed cutoverem:** Ania nie mogła przetestować §7 (scheduler — brak restartu
   backendu) ani §14 „trzy drogi importu / konfiguracja", bo **dostawcy nie są podpięci produkcyjnie
   na stagingu** („nie da się wstrzymać synchro"). ⚠ Osobno: **test rozstrzygający §8.1 (ta sama
