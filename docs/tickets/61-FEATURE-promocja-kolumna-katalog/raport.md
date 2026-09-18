@@ -32,8 +32,9 @@ Powiązane, zmierzone niezależnie w 14e: pusta kolumna **nie wpływała na ceny
 
 ## ⚠ DZIŚ W BAZIE NIE MA ŻADNEJ PROMOCJI — kolumna zaświeci dopiero po jej założeniu
 
-`db/snapshot.db`: `products` = 7405 wierszy, `promotions` = **0**. Produkcyjny fixture
-`GET_promotions.json` to również pusta tablica. Kolumna będzie więc nadal pokazywać „—"
+Zmierzone bezpośrednio na snapshocie produkcji `db/snapshot.db`: `products` = 7405 wierszy,
+`promotions` = **0**, `markups` = 1. Produkcyjny fixture `GET_promotions.json` to również
+pusta tablica. Kolumna będzie więc nadal pokazywać „—"
 **dopóki Ania nie założy promocji** w `/narzuty`. To nie jest usterka tej karty — bez tego
 zdania zgłosi „dalej nie działa" i z własnego punktu widzenia będzie miała rację.
 
@@ -98,9 +99,40 @@ nieaktualnych komentarzy na FE, i **D9** — obowiązek napisania wprost, że w 
   kontraktu. Świadomie **bez** `sprawdzZgodnoscZFixture` — nie istnieje nagranie produkcji
   z wypełnioną promocją, więc nie ma z czym porównywać.
 - **Unit: ✓ 8/8** (`katalog.promocja.test.ts`).
+- **Renderer FE: ✓ 26/26** (`katalog.formatowanie.test.tsx`) — w tym dwa nowe przypadki
+  na ścieżkę pozytywną, dodane po review.
+- **Weryfikacja mutacyjna (wykonana przez reviewera):** zepsucie `dolaczReguly` na dwa sposoby
+  zapala 8 testów bramki i 5 jednostkowych. Strażnik realnie łapie regres.
 - **Backend pełny: ✓ 83 pliki, 1274 testy** — lint, typecheck, build, test wszystkie zielone.
 - **Frontend pełny: ✓ 49 plików, 795 testów** — lint, typecheck, build, test zielone. Puszczony
   mimo braku zmian w fixtures, bo `contract/` jest wspólne (nauka z 13c).
+
+## Review fixes applied
+
+Review: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/review.md`.
+
+Reviewer wykonał **eksperyment mutacyjny** na `dolaczReguly` (dwa warianty: „zawsze dokładaj
+`_reguly`" i „`wartosc` z błędnego pola") i potwierdził, że nowy strażnik oraz istniejące
+asercje 72 kluczy realnie się zapalają — czyli testy coś dowodzą, a nie tylko wyglądają na testy.
+Potwierdził też niezależnie nietykalność `repos/ceny.ts`, `contract/fixtures/`, `test/gate/*`
+oraz przeżywalność komentarza w kontrakcie pod pełną regeneracją.
+
+- **SHOULD-FIX — brak testu ścieżki POZYTYWNEJ renderera. Naprawione.** Plan twierdził, że
+  renderer jest pokryty od 4b; to było **nieprecyzyjne** — pokryta była wyłącznie gałąź
+  „brak promocji → kreska", czyli jedyna, jaką produkcja umiała pokazać. Doszły dwa przypadki
+  w `rebuild/frontend/test/katalog.formatowanie.test.tsx`: odznaka `-10%` z nazwą oraz fallback
+  nazwy `Promocja` z oryginału. To dokładnie ta ścieżka, którą Ania zobaczy jako pierwszą.
+- **NICE-TO-HAVE — komentarz obiecywał więcej, niż asercja robi. Naprawione.**
+  `sprawdzZgodnoscZKontraktem` sprawdza ścieżkę, metodę, kod i `content-type`, a nie ciało
+  względem schematu. Komentarz w `katalog.gate.test.ts` mówi teraz wprost, jaki ma zakres
+  i skąd wiemy, że dodatkowy klucz nie łamie schematu.
+- **Dwa BLOCKER-y (synchronizacja `rebuild-roadmap.md`, `rebuild-backlog.md`,
+  `spec-frontend.md`) — to faza docs tego samego ticketa, wykonana poniżej.** Reviewer miał
+  rację, że musi się to zdarzyć w tej gałęzi, przed mergem; w momencie review ta faza
+  jeszcze nie ruszyła.
+- **Uwaga reviewera, której nie mógł zweryfikować:** liczby z `db/snapshot.db`. Sprawdziłem
+  je bezpośrednio — `products` = 7405, `promotions` = 0, i **zero** produktów z pustą `marka`
+  ORAZ pustą `kategoria`. Ostatnia liczba obniża pilność follow-upu #1 i jest w nim zapisana.
 
 ## Breaking changes
 
@@ -119,8 +151,12 @@ przez `POLA_EDYTOWALNE_PRODUKTU`, gdzie `_reguly` nie występuje.
    robi `zasieg.includes(tekst(produkt.marka))`, a każdy napis zawiera pusty napis. Zachowanie
    odziedziczone po oryginale, utrwalone testem — karta 14h go wyłącznie **uwidacznia** (dotąd
    nie było go jak zobaczyć, bo kolumna była martwa, choć na cenę wpływał tak samo, po cichu).
-   **Naprawa należy do silnika cen (`repos/ceny.ts`), czyli do 14f.** Warto sprawdzić, ile
-   produktów w produkcji ma puste `marka`/`kategoria` — to skala ewentualnego problemu.
+   **Naprawa należy do silnika cen (`repos/ceny.ts`), czyli do 14f.**
+
+   **Zasięg zmierzony na snapshocie produkcji: ZERO.** `db/snapshot.db` nie ma ani jednego
+   produktu z pustą `marka` ORAZ pustą `kategoria` (0 z 7405). Defekt jest więc **realny, ale
+   dziś nikogo nie dotyka** — to pułapka czekająca na dane, nie usterka do gaszenia. Zapisujemy
+   go, żeby nie został odkryty ponownie od zera, i nie podnosimy mu priorytetu.
 2. **Kontrakt opisuje `_reguly` komentarzem, nie schematem.** Pełne, walidujące opisanie wymaga
    rozszerzenia `tools/generate-openapi-schemas.cjs` o tabelę świadomych odstępstw. Ten sam
    mechanizm rozwiązałby **nierozliczony follow-up #1 z ticketu 58** (`ean` nullable) — warto
@@ -132,3 +168,53 @@ przez `POLA_EDYTOWALNE_PRODUKTU`, gdzie `_reguly` nie występuje.
    przyznawała FE tylko warunkowo. Zmiana dotyczy **wyłącznie treści komentarzy** — zero zmian
    w JSX, typach i zachowaniu. Uzgodnione z użytkownikiem przed implementacją (D8). Ryzyko
    konfliktu żadne: 14f siedzi w `/narzuty`, 14j w `/historia`.
+
+## Docs updates
+
+Trzej doc-checkerzy, rozłączne pliki, równolegle. Ich ustalenia niżej; pomiar skali defektu
+(zero produktów) dopisałem do `#87` i do bloku 14f już po ich zakończeniu.
+
+### `docs/rebuild-roadmap.md` — 9 miejsc
+
+- Wiersz tabeli §5 (I14) i status bloku (:2158): **14h ✅ `61-FEATURE-promocja-kolumna-katalog`
+  · 2026-09-18 (czysto backendowa)**; „otwarte 14f/14h" → **„otwarte 14f"**. Kolumna kart
+  poprawiona z „14h BE+FE" na **„14h BE"** — bo FE nie wymagał zmian w kodzie.
+- Wiersz **14h** w tabeli kart drugiej fali: opis planowany zastąpiony **stanem faktycznym**
+  (pliki realnie zmienione zamiast zakładanych, testy realnie dodane zamiast jednego
+  planowanego testu FE).
+- Usunięte założenia sprzed implementacji o kolizji z kontraktem — zastąpione faktem.
+- **Do bloku 14f (nie do 14h!) dopisane dwa punkty:** (1) kolumna korzysta ze wspólnego
+  `wybierzPromocje`, więc po 14f zacznie respektować daty **sama**, bez zmian w
+  `repos/products.ts`; (2) defekt pustych `marka`/`kategoria` — z pomiarem „skala: zero".
+- **Do sekcji o kontrakcie dopisane:** ten sam mechanizm (tabela odstępstw w generatorze)
+  rozwiąże odstępstwo 14h **i** nierozliczony follow-up `ean nullable` z ticketu 58 —
+  **kandydat na jedną wspólną kartę zamiast dwóch**. Plus fakty o kontrakcie zweryfikowane
+  empirycznie, przydatne każdej następnej karcie ruszającej `openapi.yaml`.
+
+### `docs/rebuild-backlog.md` — 4 wpisy zmienione + 1 nowy
+
+- **#22** — Status z „decyzja podjęta, karta niezałożona" na **zrobione 2026-09-18**; sprostowanie
+  archeologiczne wzmocnione o dwa fakty z tej karty; hipoteza „ożywienie wymagałoby…" przepisana
+  na czas przeszły z potwierdzeniem, że dokładnie tak zrobiono; usunięte obalone „kandydat na I12".
+- **#19** — kolumna zacznie respektować daty sama, gdy 14f dowiezie naprawę (status bez zmian).
+- **#23, #24** — odnotowane, że 14h świadomie **nie dołożyła czwartego** sposobu liczenia.
+- **#87 (nowy)** — defekt pustych `marka`/`kategoria`, ⬜ do decyzji, naprawa = 14f,
+  **ze zmierzoną skalą: zero produktów w produkcji**.
+
+### `docs/spec-frontend.md` — 1 edycja
+
+Usunięte nieprawdziwe już „Kolumna «Promocja» w `/katalog` zostaje MARTWA (…) to port 1:1".
+Zastąpione rozdzieleniem: **w produkcji** kolumna martwa na trwałe (fakt zostaje);
+**w odbudowie** ożywiona od 14h jako świadome odstępstwo.
+
+### `docs/spec-backend.md` — bez zmian (uzasadnione)
+
+Plik jest raportem z audytu auth i rejestracji tras, nie opisem kształtu payloadu. Jedyna
+wzmianka o `GET /api/products` dotyczy `requireAuth` i pozostaje prawdziwa. Występujące tam
+„72" to liczba **kolumn tabeli SQL**, nie kluczy odpowiedzi — ticket nie rusza schematu bazy.
+Dopisywanie noty o `_reguly` byłoby wprowadzaniem tematu spoza zakresu pliku.
+
+### Pre-existing issues
+
+Żaden z trzech doc-checkerów nie znalazł w swoich plikach nieścisłości niezwiązanych z tym
+ticketem.

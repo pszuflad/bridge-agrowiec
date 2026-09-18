@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); 14i ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18; **otwarte 14f/14h** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); 14h ✅ `61-FEATURE-promocja-kolumna-katalog` · 2026-09-18 (czysto backendowa); 14i ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18; **otwarte 14f** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
 
 ---
 
@@ -2155,7 +2155,7 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
 - **Status:** 🔨 w toku — zaplanowana 2026-09-18. **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a ✅
   (`49-CHORE-i14a-wgrywanie-reczne`), 14b ✅ (`51-FEATURE-staging-filtr-pasek-kolumny`),
   14c ✅ (`50-FEATURE-i14c-karta-dostawcy-upload`), 14d ✅ (`56-DOCS-instrukcja-testow-i14`).
-  **FALA 2 w toku:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`), 14i ✅ (`58-FEATURE-i14i-ean-naukowy-pusty`, 2026-09-18), otwarte 14f/14h.
+  **FALA 2 w toku:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`), 14h ✅ (`61-FEATURE-promocja-kolumna-katalog`, 2026-09-18), 14i ✅ (`58-FEATURE-i14i-ean-naukowy-pusty`, 2026-09-18), otwarte 14f.
   **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f.
   Niezależna od otwartego 13d (inny podsystem, inne pliki).
 - **Skąd się wzięła.** Ania przeszła `docs/instrukcja-testow-I3.md` i wypełniła pola UWAGI (komentarze
@@ -2495,7 +2495,7 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
 |---|---|---|---|
 | **14e** | ⚠ ZAKRES ZAWĘŻONY 19.09: wycena #19 — wariant (a) czy (b), z liczbami. Zadania „czy promocja obniża ceny" i „komunikat po edycji" ZAMKNIĘTE odpowiedziami Ani | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
 | **14f** | Daty kończą promocję (#19, wariant z 14e) + usunięcie znacznika rozbieżności + potwierdzenie usuwania reguły z liczbą produktów | BE: `repos/ceny.ts` albo NOWY wygaszacz + `repos/promotions.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts` | `test/narzuty.test.tsx` + testy BE |
-| **14h** | Kolumna „Promocja" w katalogu — NOWA funkcja (BE wypełnia `_reguly.promocja`) | BE: trasa `/api/products` · FE: `katalog/formatowanie.tsx` | `test/katalog.formatowanie.test.tsx` |
+| **14h** | ✅ **ZROBIONE 2026-09-18**, `61-FEATURE-promocja-kolumna-katalog`. Kolumna „Promocja" w katalogu — NOWA funkcja: `GET /api/products` dokłada opcjonalny `_reguly.promocja` (`{wartosc, nazwa}`) przez istniejące `wybierzPromocje`/`promocjaPasuje` z `repos/ceny.ts` (silnik NIETKNIĘTY, zakres 14f). Karta okazała się czysto backendowa — renderer, piker i typ `Produkt` na FE już były gotowe od 4b | BE: `repos/products.ts` (`dolaczReguly`), `routes/products.ts`, `contract/openapi.yaml` (komentarz nad ścieżką, bez węzła schematu) | BE: `test/katalog.promocja.test.ts` + nowy strażnik w `test/katalog.gate.test.ts` · FE: 2 nowe przypadki w `test/katalog.formatowanie.test.tsx` |
 | **14i** | ✅ **ZROBIONE 2026-09-18**, `58-FEATURE-i14i-ean-naukowy-pusty`. EAN w notacji naukowej → puste pole w katalogu | BE: zapis do katalogu (akceptacja), `src/import/akceptacja.ts` | `test/akceptacja.odstepstwa.test.ts` + bramki charakteryzacji (nietknięte) |
 
 - **14g SKASOWANA** — obie jej pozycje (globalna promocja, komunikat po edycji) Ania zamknęła
@@ -2503,9 +2503,10 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
   które już poszły do sesji.
 - **Równoległość:** 14e ∥ 14f ∥ 14h ∥ 14i — zero wspólnych plików; wszystkie cztery są też
   rozłączne z 14a/14b/14c z pierwszej fali. **14i NIE ruszyła `contract/` w ogóle** (decyzja
-  użytkownika, `58-FEATURE-i14i-ean-naukowy-pusty` D4) — kolizja z 14h w `contract/openapi.yaml`
-  i fixtures, którą zakładano tutaj, jest więc bezprzedmiotowa: **14h wchodzi do kontraktu bez
-  blokady kolejnościowej.**
+  użytkownika, `58-FEATURE-i14i-ean-naukowy-pusty` D4), więc zakładana kolizja z 14h w
+  `contract/openapi.yaml` była bezprzedmiotowa. **14h ✅ potwierdziła to w praktyce** — dotknęła
+  kontraktu wyłącznie komentarzem nad `/api/products` (D4, `61-FEATURE-promocja-kolumna-katalog`),
+  zero `contract/fixtures/`.
 - **14i skorygowała własne przypisanie zakresu (D5, zmierzone grafem wywołań).** Cięcie stoi
   w `akceptacja.ts` (zapis do katalogu), nie w silniku normalizacji EAN — `tk.ts:302-305`
   dopasowuje pozycję do produktu w katalogu po `znormalizowana.ean`, więc zerowanie EAN-u przy
@@ -2522,6 +2523,21 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
   --sprawdz`), legalne drogi opisane w `docs/tickets/58-FEATURE-i14i-ean-naukowy-pusty/raport.md`.
   Osobno: `POST /api/products` (bulk, `bulk.ts:71-87`) nie woła `normalizujEan()`, więc decyzja
   Ani (14i) tej trasy nie obejmuje.
+- **Ten sam mechanizm rozwiąże też odstępstwo z 14h (`_reguly.promocja`).** 14h opisała
+  `_reguly` w `contract/openapi.yaml` KOMENTARZEM nad `/api/products`, nie schematem, bo blok
+  `components.schemas` (`:18`–`:18716`) jest generowany wyłącznie z `contract/fixtures/` i
+  generator z definicji pomija klucze `_*` (`tools/generate-openapi-schemas.cjs:53,65`) — nie da
+  się też „nagrać" pola z oryginału, bo produkcja nigdy go nie wypełnia. Pełne, walidujące
+  opisanie (i `ean nullable` wyżej) wymaga rozszerzenia generatora o tabelę świadomych
+  odstępstw — **kandydat na jedną, wspólną kartę zamiast dwóch osobnych**. Szczegóły:
+  `docs/tickets/61-FEATURE-promocja-kolumna-katalog/plan.md` (D4).
+- **Fakty o kontrakcie zweryfikowane empirycznie w 14h, przydatne każdej następnej karcie
+  ruszającej `contract/openapi.yaml`:** klucz `schemas:` leży WEWNĄTRZ bloku generowanego, więc
+  nie ma w `components.schemas` miejsca na ręczny schemat — dopisanie własnego `schemas:` przed
+  znacznikiem KONIEC dałoby zduplikowany klucz YAML; `--sprawdz` porównuje CAŁY plik tekstowo i
+  jest realną bramką `npm test` (`rebuild/backend/test/kontrakt.spojnosc.test.ts:112`); komentarz
+  nad ścieżką w sekcji `paths` PRZEŻYWA zarówno `--sprawdz`, jak i pełny bieg generatora
+  (sprawdzone: kopia pliku → regeneracja → `diff` → bez różnic).
 - **14f zależy** od rozstrzygnięcia #19 tylko w jednym punkcie: jeśli daty MIAŁYBY wyłączać
   promocje, `TabelaPromocji.tsx` zmienia się w tej samej karcie. Dlatego 14f startuje po
   odpowiedzi Ani, nie przed.
@@ -2616,8 +2632,8 @@ bez tknięcia silnika.** Słownik statusów już istnieje, silnik już go respek
 
 **⚠ DWA SPROSTOWANIA DO `docs/instrukcja-testow-I4.md` — dokument wprowadza Anię w błąd.**
 Nie naprawione tutaj (plik poza własnością 14e). ⚠ **PRZYPISANIE SPROSTOWANE 2026-09-18
-w `56-DOCS-instrukcja-testow-i14`: NIE robi tego 14d, tylko karta domykająca FALĘ 2** (najpewniej
-po 14f/14h/14i). Decyzja użytkownika przy zakładaniu 14d, wprost: „NIE ruszaj
+w `56-DOCS-instrukcja-testow-i14`: NIE robi tego 14d, tylko karta domykająca FALĘ 2** (stan
+2026-09-18: 14h i 14i już zrobione, zostaje 14f). Decyzja użytkownika przy zakładaniu 14d, wprost: „NIE ruszaj
 `docs/instrukcja-testow-I4.md` — to zależy od kart 14f/14h/14i, których jeszcze nie ma".
 Powód merytoryczny: oba sprostowania niżej opisują stan, który **14f ma zmienić** — opisanie go
 Ani teraz znaczyłoby opisanie stanu, który za chwilę przestanie obowiązywać. 14d dotyczyła
@@ -2666,13 +2682,31 @@ w 14f**, nie szczegół implementacyjny.
 **Rekomendacja: (b), i pomiar ją potwierdza** — ale nie dlatego, że była wskazana z góry, tylko
 dlatego, że (b) nie wymaga wyjątku w wyroczni, ma o jeden test mniej do przepisania, nie zostawia
 kłamiącego znacznika i **odtwarza regułę, którą system już stosuje przy tworzeniu promocji**
-(`status = statusZDat(...)`), zamiast wprowadzać nową. ⚠ Dwa zastrzeżenia do 14f, oba realne:
+(`status = statusZDat(...)`), zamiast wprowadzać nową. ⚠ Cztery zastrzeżenia/fakty do 14f, dwa pierwsze zapisane wcześniej, dwa kolejne z 14h:
 1. **Wygaszacz musi działać w OBIE strony** (`zakonczona` po końcu, `aktywna` po nadejściu startu),
    inaczej zostanie defekt „zaplanowana nigdy się nie włącza".
 2. **`status` jest polem edytowalnym przez API** (`POLA_EDYTOWALNE_PROMOCJI`), więc wygaszacz
    będzie nadpisywał ręczne ustawienia. Dziś instrukcja mówi Ani wprost, że „żeby wyłączyć
    promocję, trzeba zmienić status" — po (b) status staje się polem WYLICZANYM i ta rada
    przestaje mieć sens. Do rozstrzygnięcia w 14f: czy odciąć `status` od listy edytowalnych.
+3. **Kolumna „Promocja" w katalogu (14h ✅) korzysta z tej samej `wybierzPromocje`/`promocjaPasuje`**
+   (`repos/products.ts` → `dolaczReguly`, wołane z `routes/products.ts`), więc gdy 14f wejdzie
+   w życie, kolumna zacznie respektować daty **sama, bez żadnej zmiany w `repos/products.ts`** —
+   dotyczy to zwłaszcza wariantu (b) (wygaszacz zmienia tylko dane, nie silnik), ale zadziała
+   też przy (a), bo to ta sama funkcja.
+4. **⚠ DEFEKT DO ROZWAŻENIA, ujawniony przez 14h:** `promocjaPasuje` robi
+   `zasieg.includes(tekst(produkt.marka))`, a każdy napis zawiera pusty napis — produkt z pustą
+   `marka` ORAZ pustą `kategoria` (obie `NOT NULL` w schemacie, więc osiągalny jest pusty napis,
+   nie `NULL`) łapie KAŻDĄ promocję o niepustym zasięgu. Defekt odziedziczony po oryginale,
+   utrwalony testem w `rebuild/backend/test/katalog.promocja.test.ts`; dotąd był niewidoczny, bo
+   kolumna była martwa, choć na cenę wpływał tak samo, po cichu. **Naprawa należy do silnika cen,
+   czyli do 14f.**
+   **Skala ZMIERZONA w 14h, nie oszacowana: ZERO** — na `db/snapshot.db` (7405 produktów) ani
+   jeden nie ma jednocześnie pustej `marka` i pustej `kategoria`. Defekt jest więc realny, ale
+   dziś nikogo nie dotyczy: to pułapka czekająca na dane (np. import od dostawcy bez marki),
+   nie usterka do gaszenia. **Nie podnoś mu priorytetu w 14f** — wystarczy, że wpis zostaje.
+   Źródło: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/raport.md`, Follow-up #1;
+   wpis backlogu **#87**.
 
 **Siatki zostawione przez 14e** (nie wymuszają żadnej zmiany, pilnują stanu):
 `rebuild/backend/test/promocja-warunek-obniza-cene.test.ts` (8 przypadków) i
@@ -2688,7 +2722,9 @@ Pełne liczby i metoda: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`
 **Kolejność:** FALA 1 — **14a ∥ 14b ∥ 14c** (równolegle, rozłączne pliki, merge w dowolnej
 kolejności) → **14d** (docs, na końcu). FALA 2 — **14e ∥ 14f ∥ 14h ∥ 14i**, rozłączne z falą 1,
 więc mogą iść razem z nią; 14f czeka na rozstrzygnięcie #19. **14i ✅ zrobiona i nie ruszyła
-`contract/`** (decyzja użytkownika), więc **14h wchodzi do kontraktu bez blokady kolejnościowej**.
+`contract/`** (decyzja użytkownika), a **14h ✅ zrobiona** dotknęła kontraktu tylko komentarzem
+(D4, `61-FEATURE-promocja-kolumna-katalog`) — obie weszły bez blokady kolejnościowej i bez
+wspólnych fixtures. Zostaje otwarte tylko **14f**.
 **14g skasowana** (decyzje Ani z 18.09).
 Każda z trzech kart dopisuje TYLKO swój podblok wyżej i NIE rusza tablicy postępu §4 — wiersz iteracji
 zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-18.
