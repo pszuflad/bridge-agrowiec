@@ -14,7 +14,7 @@ charakteryzacji, zero ruszonych fixtures, kontrakt nietknięty.
   wartościami domyślnymi: `if (rekord.eanSourceStatus === "scientific_notation_uncertain")
   rekord.ean = null`. Komentarz opisuje odstępstwo (decyzja, data, backlog #11) oraz
   **dlaczego cięcie jest tutaj, a nie przy normalizacji**.
-- **Nowy:** `rebuild/backend/test/akceptacja.odstepstwa.test.ts` — 7 przypadków, porównanie
+- **Nowy:** `rebuild/backend/test/akceptacja.odstepstwa.test.ts` — 9 przypadków, porównanie
   z uruchomionym oryginałem.
 - `docs/tickets/58-FEATURE-i14i-ean-naukowy-pusty/plan.md`, `raport.md` — dokumentacja ticketa.
 

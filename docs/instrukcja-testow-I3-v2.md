@@ -20,8 +20,9 @@ z pierwszej wersji dotyczące silnika importu, dopasowania pozycji i wycofań **
 **Pierwsza wersja zostaje w repozytorium bez zmian** i miejscami opisuje stan sprzed tych
 poprawek. **Gdy coś się różni, prawdą jest ta kartka.**
 
-**Zgłosiłaś dziesięć rzeczy.** Osiem poprawiliśmy (rozdziały 1–4), jedna czeka na Twoją decyzję,
-jednej świadomie nie ruszamy (rozdział 5). Rozdział 6 to jedyne zadanie, które zostaje
+**Zgłosiłaś dziesięć rzeczy.** Dziewięć poprawiliśmy (rozdziały 1–4) — ostatnią, EAN w zapisie
+naukowym (4.3), domknęliśmy po Twojej decyzji z 18 września. Jedna czeka na Twoją decyzję
+(rozdział 5). Rozdział 6 to jedyne zadanie, które zostaje
 po Twojej stronie.
 
 ### Jak wypełniać
@@ -456,11 +457,12 @@ wybraniu „Inna wartość (minuty)…"**.
 
 ---
 
-# 4. Dwa dziwactwa, które zniknęły
+# 4. Trzy dziwactwa, które zniknęły
 
-Na Twojej liście „dziwactw odtworzonych celowo" były dwie pozycje, które **już nie obowiązują**.
-Naprawiłaś je u siebie **1 września**; my wciągnęliśmy Twoją poprawkę i **potwierdziliśmy ją
-pomiarem** 8 września.
+Na Twojej liście „dziwactw odtworzonych celowo" były pozycje, które **już nie obowiązują**.
+Dwie pierwsze naprawiłaś u siebie **1 września**; my wciągnęliśmy Twoją poprawkę i
+**potwierdziliśmy ją pomiarem** 8 września. **Trzecia (4.3) to Twoja decyzja z 18 września** —
+tę wdrożyliśmy my i jest gotowa do sprawdzenia.
 
 ---
 
@@ -492,14 +494,48 @@ samych **199 kodach** — rekord jest odrzucany już w parserze, a nie dopiero d
 
 ---
 
-> **Obie pozycje wykreśl ze swojej listy dziwactw.**
+## 4.3 EAN zepsuty zapisem naukowym nie trafia już do Katalogu
+
+**Co zgłaszałaś.** Przy niektórych pozycjach na Stagingu pojawia się ostrzeżenie
+**„zapis naukowy ma tylko null cyfr znaczących — EAN niepewny"**. Bierze się stąd, że Excel
+zamienia długi numer EAN na skrót w rodzaju **`6,41944E+12`** i po drodze **gubi cyfry**.
+Stary Bridge mimo to zapisywał do Katalogu „odtworzoną" wartość — numer, który wygląda
+na prawdziwy EAN, a nim nie jest.
+
+**Twoja decyzja z 18 września:** taki EAN ma trafiać do Katalogu jako **PUSTE pole**.
+
+**Jak to zrobiliśmy.** Pozycja przechodzi przez import normalnie, a pole **EAN w Katalogu
+zostaje puste**. Celowo zostawiliśmy przy tym dwie rzeczy:
+
+- **ostrzeżenie na Stagingu nadal się pojawia** — żeby pominięty EAN nie zniknął po cichu;
+- w Katalogu **zostaje surowa wartość z cennika** (`6,41944E+12`) w kolumnach pomocniczych,
+  więc zawsze widać, **dlaczego** pole EAN jest puste i da się je potem uzupełnić ręcznie.
+
+> ⚠ **To jedyne miejsce w tej iteracji, gdzie ŚWIADOMIE robimy inaczej niż stary Bridge.**
+> Produkcja dalej zapisuje tam zmyśloną wartość. Różnica jest zamierzona i jest nią Twoja decyzja.
+
+**Sprawdź — tylko jeśli natrafisz.** Ta sytuacja zdarza się **rzadko**: prawie wszystkie cenniki
+są czyszczone wcześniej i EAN dociera do importu już jako same cyfry. Nie ma sensu, żebyś jej
+szukała na siłę. Jeśli natomiast **zobaczysz na Stagingu ostrzeżenie o zapisie naukowym**:
+
+1. zaakceptuj tę pozycję,
+2. odszukaj ją w **Katalogu** (po kodzie albo nazwie),
+3. spójrz na kolumnę **EAN**.
+
+**Ma się stać:** kolumna **EAN pusta**. Ostrzeżenie na Stagingu **ma tam zostać** — to nie błąd.
+
+> **Twoja ocena:** ☐ OK ☐ ŹLE ☐ nie natrafiłam — uwagi: _______________
+
+---
+
+> **Wszystkie trzy pozycje wykreśl ze swojej listy dziwactw.**
 
 ---
 
 # 5. Czego NIE zgłaszaj ponownie
 
-Trzy rzeczy z Twojej listy, które **zostają takie, jakie są**. Tu nie ma czego klikać —
-to jest wyjaśnienie, żebyś nie traciła czasu na ponowne zgłaszanie.
+Rzeczy, które **zostają takie, jakie są**. Tu nie ma czego klikać — to jest wyjaśnienie,
+żebyś nie traciła czasu na ponowne zgłaszanie.
 
 ## 5.1 ⏳ Status dostawcy — czeka na Twoją decyzję
 
@@ -523,14 +559,13 @@ status techniczny. **Prośba jest zapisana i czeka na Twoją decyzję.** Nie wes
 iteracji, bo zmieniłaby zachowanie, które dziś jest odtworzone 1:1 — a to wymaga osobnego
 ustalenia, nie decyzji programisty.
 
-## 5.2 ⏳ EAN w zapisie naukowym — decyzja podjęta, wdrożenie czeka
+## 5.2 ✅ EAN w zapisie naukowym — WDROŻONE, przeniesione do punktu 4.3
 
-Komunikat **„zapis naukowy ma tylko null cyfr znaczących"** bierze się z błędu w starym Bridge
-(funkcja licząca cyfry została przesłonięta inną o tej samej nazwie). **18 września
-zdecydowałaś, że taki EAN ma trafiać do katalogu jako PUSTE pole.**
-
-⚠ **Ta zmiana NIE JEST jeszcze wdrożona.** Komunikat **nadal się pojawia** i wygląda
-identycznie jak w produkcji. **To nie jest regres — to stan przed wdrożeniem Twojej decyzji.**
+Twoja decyzja z 18 września **jest już wdrożona** — opis i sprawdzenie przeniosły się do
+**punktu 4.3**. Zostaje jedna rzecz warta zapamiętania: **ostrzeżenie „zapis naukowy ma tylko
+null cyfr znaczących" nadal pojawia się na Stagingu** i tak ma być. Samo dziwnie brzmiące
+słowo **„null"** w tym komunikacie to usterka starego Bridge'a, którą **odtworzyliśmy celowo**,
+żeby nie mieszać dwóch zmian naraz — jest zapisana osobno. **Nie zgłaszaj jej ponownie.**
 
 ## 5.3 Daty promocji — zmierzone, naprawa zaplanowana
 
@@ -601,9 +636,12 @@ i dlatego nie liczy się jako wykonane.
 | 3.3 | Pole minut za „Inna wartość" | ☐ | ☐ | |
 | 4.1 | Brak WULSTBAND-u | ☐ | ☐ | |
 | 4.2 | NRO/CHO jako „Tak"/puste | ☐ | ☐ | |
+| 4.3 | EAN z zapisu naukowego → puste pole w Katalogu *(tylko jeśli natrafisz)* | ☐ | ☐ | |
 | **6** ⭐ | **Test rozstrzygający — tabela z liczbami** | ☐ | ☐ | |
 
-**Sprawdzonych ____ / 18 · błędów ____ · pominiętych ____**
+**Sprawdzonych ____ / 19 · błędów ____ · pominiętych ____**
+
+*(punkt 4.3 zdarza się rzadko — jeśli nie natrafisz, policz go jako pominięty)*
 
 ---
 
@@ -612,7 +650,7 @@ i dlatego nie liczy się jako wykonane.
 **Najpierw sprawdź ramki ⚠ przy danym punkcie i rozdział 5.** Sześć rzeczy wygląda na błąd,
 a jest poprawnych: podgląd pozycji po imporcie zamiast przed (1.1), brak licznika na przycisku
 (1.2), MO6 na kaflach (1.7), martwa sekcja „Dodatkowe" i trzy ukryte kolumny (2.4, 2.5),
-napis **„1 dni"** i puste pole minut (3.3), komunikat o zapisie naukowym (5.2).
+napis **„1 dni"** i puste pole minut (3.3), ostrzeżenie o zapisie naukowym na Stagingu (4.3, 5.2).
 
 **W zgłoszeniu podaj:**
 

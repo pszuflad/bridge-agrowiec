@@ -11,7 +11,7 @@
  * pełnej równości (`expect(nasz.produkty).toEqual(oczekiwany.produkty)`) dla każdego wpisu
  * z `charakteryzacja/akceptacja/scenariusze.mjs`. Scenariusz ze świadomym odstępstwem
  * MUSIAŁBY tam paść, a w typie scenariusza nie ma pola wyjątku. Dokładanie takiego pola
- * rozluźniłoby porównanie dla wszystkich 38 scenariuszy — czyli osłabiło jedyną siatkę, która
+ * rozluźniłoby porównanie dla wszystkich 31 scenariuszy — czyli osłabiło jedyną siatkę, która
  * pilnuje wierności akceptacji. Dlatego odstępstwo mieszka tutaj, w jednym miejscu, jawnie.
  *
  * METODA JEST TA SAMA CO W CHARAKTERYZACJI I TO JEST SENS TEGO PLIKU: nie wpisujemy ręcznie,
