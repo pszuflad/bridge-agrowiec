@@ -13,7 +13,7 @@
 > **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego,
 > co widzisz na ekranie, prawdą jest instrukcja Iteracji 14.**
 >
-> Co konkretnie przestało być prawdą (pełna lista: **I14 rozdział 10**):
+> Co konkretnie przestało być prawdą:
 > - **§2** — cały przepływ wgrywania; dziś „Wgraj pliki" otwiera okienko, doszły kafle dostawców;
 > - **§3.1, §3.2, §6** — staging startuje na filtrze **„Nowe produkty"**, a kolumny *Stan*,
 >   *Cena zakupu* i *Cena sprzedaży* są **domyślnie ukryte** (przycisk „Kolumny");
@@ -24,7 +24,7 @@
 >   Konfiguracji **są już dowiezione**.
 >
 > **Dalej obowiązują** m.in. §4 pkt 4 (komunikat o zapisie naukowym) i §4 pkt 11 (status
-> dostawcy) — patrz I14 rozdziały 8 i 7.
+> dostawcy) — patrz I14 rozdział 5.
 
 ---
 

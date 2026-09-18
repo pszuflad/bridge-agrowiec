@@ -241,3 +241,34 @@ ten przycisk **od 14c realnie istnieje**, więc ta akurat wzmianka stała się p
 
 **Zapisane też w roadmapie** (podblok 14d), żeby wynik audytu doszedł do następnej sesji,
 a nie został tylko w raporcie tej karty.
+
+## Druga runda decyzji użytkownika (2026-09-18, po przeglądzie pierwszej wersji)
+
+**⭐ DELTA UZNANA ZA FORMAT DOCELOWY instrukcji testów** — dla każdej kolejnej iteracji, nie
+tylko I14. **Follow-up nr 1 z tego raportu (rozjazd z 17-rozdziałowym dokumentem Ani) jest tym
+samym ZAMKNIĘTY** — przestaje być długiem, bo pełny przewodnik przestał być formatem docelowym.
+Zapisane w roadmapie w podbloku 14d, żeby obowiązywało następne sesje.
+
+**Dokument zawężony wyłącznie do uwag Ani.** Polecenie: *„żeby w tym dokumencie było zawarte
+tylko to, co Ania ma przetestować — nie wszystko od początku, tylko to, co zgłosiła do
+poprawy"*. Wykonane:
+
+- **13 rozdziałów → 8.** Usunięte jako materiał meta, nie zadanie testowe: „Co jest NIEAKTUALNE
+  w instrukcji Iteracji 3" (jego rolę przejął banner w samym I3, gdzie i tak trafia czytelnik)
+  oraz „Czego jeszcze NIE MA" (spis stanu całej odbudowy — nie jej zgłoszenia). Zwinięte także
+  rozdziały 1–2 (skrót + tabela „co zobaczysz inaczej"), bo powtarzały treść rozdziałów
+  szczegółowych.
+- **Każda poprawka przepisana w układzie „Zgłosiłaś → Jest teraz → Sprawdź"** — czytelniczka
+  widzi wprost, która jej uwaga jest domknięta i czym to zweryfikować.
+- **Rozdzielone jej zgłoszenia od naszych znalezisk.** Pozycje, których Ania NIE zgłaszała
+  (przestawiona kolumna „Magazyn", skrócony nagłówek „Powód", placeholder szukajki), zeszły do
+  bloku „Przy okazji — dwie rzeczy, których nie zgłaszałaś", żeby nie przypisywać jej cudzych
+  uwag.
+- **Nowy rozdział 5 „Czego NIE zgłaszaj ponownie"** — status dostawcy (czeka na jej decyzję),
+  EAN naukowy (decyzja podjęta, wdrożenie czeka), daty promocji (zmierzone, naprawa zaplanowana).
+  Wcześniej te trzy rzeczy były rozsypane po trzech różnych rozdziałach.
+- **Banner w `instrukcja-testow-I3.md` zsynchronizowany** — odsyłał do rozdziałów 10 i 11,
+  które przestały istnieć; teraz sam niesie listę i kieruje do rozdziału 5.
+
+Wierność wobec kodu bez zmian — treść merytoryczna i wszystkie zweryfikowane stringi oraz
+liczby zostały przeniesione, zmienił się układ i zakres, nie fakty.

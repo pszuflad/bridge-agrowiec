@@ -2344,20 +2344,32 @@ Trzy zatwierdzone odstępstwa od oryginału (pełne uzasadnienia:
 `origin/develop` 4cd5cd9 przed startem).
 
 **Co faktycznie dowiezione** (różni się od pierwotnego zamiaru — patrz decyzja D1 niżej):
-- **Nowy plik `docs/instrukcja-testow-I14.md`** — 13 rozdziałów w konwencji
-  `instrukcja-testow-I13.md` (krótka delta „co się zmieniło", nie pełny przewodnik): trzy ekrany
-  po 14a/14b/14c, dziwactwa naprawione i pozostałe, test rozstrzygający, „Czego jeszcze NIE MA",
-  lista kontrolna.
+- **Nowy plik `docs/instrukcja-testow-I14.md`** — **8 rozdziałów, zawężonych wyłącznie do uwag
+  Ani**: 1–3 trzy ekrany po 14a/14b/14c (każda pozycja w układzie „Zgłosiłaś → Jest teraz →
+  Sprawdź"), 4 dwa dziwactwa naprawione, 5 „czego NIE zgłaszaj ponownie" (status dostawcy,
+  EAN naukowy, daty promocji), 6 test rozstrzygający, 7 lista kontrolna, 8 jak zgłaszać.
+  **Świadomie NIE ma** rozdziałów „Co jest nieaktualne w I3" i „Czego jeszcze NIE MA" —
+  to materiał meta, nie zadanie testowe; pierwszy zastąpiony bannerem w samym I3.
 - **`docs/instrukcja-testow-I3.md` — TYLKO banner** na górze, kierujący do I14 i wymieniający
   zdezaktualizowane sekcje. **Treść I3 nietknięta**, w szczególności 9 wystąpień „Synchronizuj
   teraz" ZOSTAJE w I3 (konwencja I13: „starsze instrukcje zostają bez zmian, wierz tej kartce").
 - `docs/rebuild-backlog.md` — **bez zmian**, patrz sprostowanie niżej.
 
-**Decyzja użytkownika D1 (2026-09-18) — forma dokumentu.** Rozważane: (A) aktualizacja
-8-rozdziałowej wersji w repo, (B) odtworzenie w repo 17-rozdziałowej wersji Ani.
-**Wybrane: ani A, ani B — osobna, krótka delta I14.** Uzasadnienie: Ania testuje deltę, a nie
-czyta 17 rozdziałów od nowa. ⚠ **Świadomy koszt: rozjazd z 17-rozdziałowym dokumentem Ani NIE
-znika** i wróci przy kolejnej iteracji. Odtworzenie pełnej wersji zostaje jako otwarty temat.
+**⭐ DECYZJA UŻYTKOWNIKA (2026-09-18) — DELTA JEST FORMATEM DOCELOWYM instrukcji testów.**
+Obowiązuje od teraz dla KAŻDEJ kolejnej iteracji, nie tylko dla I14. Z tego wynika:
+- instrukcja iteracji zawiera **wyłącznie to, co Ania zgłosiła i ma zweryfikować** — nie
+  powtarza scenariuszy, które już przeszły i których nie reklamowała;
+- **starszych instrukcji się nie przepisuje** — dostają banner „częściowo nieaktualne, patrz
+  I<n>" i zostają jako zapis stanu z danej daty;
+- **temat odtworzenia 17-rozdziałowej wersji Ani jest ZAMKNIĘTY** — nie robimy tego; rozjazd
+  przestaje być długiem, bo pełny przewodnik przestał być formatem docelowym.
+
+**Decyzja D1 (2026-09-18) — droga do powyższego.** Rozważane: (A) aktualizacja 8-rozdziałowej
+wersji w repo, (B) odtworzenie w repo 17-rozdziałowej wersji Ani. **Wybrane: ani A, ani B —
+osobna delta I14**, a następnie (po przeglądzie pierwszej wersji) **zawężona wyłącznie do uwag
+Ani**: z dokumentu wypadły rozdziały „Co jest nieaktualne w I3" i „Czego jeszcze NIE MA"
+jako materiał meta, a każda pozycja dostała układ **„Zgłosiłaś → Jest teraz → Sprawdź"**.
+Osiem rozdziałów zamiast trzynastu.
 
 ⚠ **FAKT sprostowany — numeracja w tym opisie pochodziła z wersji, której w repo NIE MA.**
 `docs/instrukcja-testow-I3.md` w gicie ma **8 rozdziałów** (494 linie, 2026-09-01). Wersja, którą

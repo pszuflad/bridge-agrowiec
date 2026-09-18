@@ -1,295 +1,244 @@
-# Iteracja 14 (Twoje uwagi z testów Importu) — instrukcja testów dla Ani
+# Iteracja 14 — co poprawiliśmy po Twoich uwagach
 
 **Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-18
 
 > **To jest STAGING, nie produkcja.** Cokolwiek tu zaakceptujesz, odrzucisz albo zepsujesz —
 > produkcji nie dotyka. Testuj bez skrupułów.
 
-> **⚠ PRZECZYTAJ TO NAJPIERW.**
+> **⚠ Ta kartka jest krótka i celowo niekompletna.**
 >
-> Ta iteracja **nie dodaje żadnego nowego ekranu.** Powstała **z Twoich uwag** wpisanych do
-> instrukcji Iteracji 3 — poprawiliśmy trzy ekrany, które codziennie klikasz, żeby wyglądały
-> tak jak w starym Bridge: **Wgrywanie ręczne**, **Staging** i **kartę dostawcy**.
+> Jest w niej **wyłącznie to, co zgłosiłaś**, przechodząc instrukcję Iteracji 3 — plus
+> odpowiedź, co z tym zrobiliśmy i co masz sprawdzić. **Nie ma tu nic, co już działało**
+> i czego nie reklamowałaś. Nie musisz przechodzić testów od początku.
 >
-> Produkcja się nie zmieniła. Zmieniła się odbudowa — **dogoniła** produkcję.
+> Instrukcja Iteracji 3 **zostaje bez zmian** — miejscami opisuje stan sprzed tych poprawek.
+> Gdy coś się różni, **prawdą jest ta kartka**.
 >
-> Dlatego **instrukcja Iteracji 3 jest miejscami nieaktualna** — pisano ją przed tymi
-> poprawkami. **Nie trzeba jej czytać na nowo ani niczego w niej naprawiać.** Zasada jest
-> prosta: **gdy coś różni się od tamtej kartki, prawdą jest to, co piszę TUTAJ.** Rozdział 10
-> wymienia konkretnie, co w Iteracji 3 przestało być prawdą.
->
-> Jeśli staging jest pusty — najpierw zaimportuj jakiś cennik (rozdział 3), inaczej nie będzie
+> Jeśli staging jest pusty — najpierw wgraj jakiś cennik (rozdział 1), inaczej nie będzie
 > czego oglądać.
 
----
-
-## 1. Co zmienia Iteracja 14 — w skrócie
-
-Trzy ekrany dociągnięte do kształtu starego Bridge:
-
-- **Wgrywanie ręczne** — wgrywanie przeniosło się z zakładki **do okienka**, a pod spodem
-  doszła brakująca sekcja z **kaflami dostawców** (wgrywanie z wymuszonym dostawcą).
-- **Staging** — otwiera się teraz na filtrze **„Nowe produkty"**, a nie „Wszystkie"; pasek
-  narzędzi jest poukładany jak w oryginale i doszedł przycisk **„Kolumny"**.
-- **Karta dostawcy** — doszedł przycisk **„Wgraj plik"**, przycisk synchronizacji nazywa się
-  **„Synchronizuj"** (bez „teraz"), a pole liczby minut schowało się za osobną opcją.
-
-Przy okazji: **dwa dziwactwa z Twojej listy już nie istnieją** — WULSTBAND i `0`/`1` w NRO/CHO
-zostały naprawione (rozdział 6).
-
-**To jest pierwsza fala Iteracji 14.** Druga fala (silnik cen: daty promocji, EAN w notacji
-naukowej) jest zaplanowana, ale jeszcze nie zrobiona — rozdziały 8 i 11.
+**Zgłosiłaś dziesięć rzeczy. Osiem poprawiliśmy, jedna czeka na Twoją decyzję, jednej
+świadomie nie ruszamy.** Rozdziały 1–4 to poprawki do sprawdzenia, rozdział 5 to lista
+„tego nie zgłaszaj ponownie", rozdział 6 to jedyne zadanie, które zostaje po Twojej stronie.
 
 ---
 
-## 2. Co zobaczysz INACZEJ niż wcześniej
-
-| Gdzie | Jak było | Jak jest teraz (Iteracja 14) |
-|---|---|---|
-| Konfiguracja → Wgrywanie ręczne | pliki wybierało się wprost na zakładce, przycisk **„Wgraj (N)"** z licznikiem | przycisk **„Wgraj pliki"** otwiera **okienko**; w okienku **„Importuj do staging"**, **bez licznika** |
-| Konfiguracja → Wgrywanie ręczne | brak | nowa sekcja **„Wgrywanie pojedyncze (z wymuszonym dostawcą)"** — kafle wszystkich dostawców |
-| Konfiguracja → Wgrywanie ręczne | komunikaty pod formularzem | **toast** (dymek w rogu) z podsumowaniem importu |
-| Staging → filtr „Typ sprawy" | startowo **„Wszystkie"** | startowo **„Nowe produkty"** |
-| Staging → tabela | wszystkie kolumny widoczne | **„Stan", „Cena zakupu", „Cena sprzedaży" są domyślnie UKRYTE** — włączasz je przyciskiem **„Kolumny"** |
-| Staging → pasek narzędzi | akcje masowe w pasku | „Akceptuj/Odrzuć **wszystkie** (N)" przeniosły się **do nagłówka**; „…**zaznaczone**" pokazują się dopiero, gdy coś zaznaczysz |
-| Staging → szukajka | ogólny opis | placeholder mówi prawdę: **„Szukaj po kodzie, nazwie, dostawcy lub EAN..."** |
-| Karta dostawcy → przycisk synchronizacji | **„Synchronizuj teraz"** | **„Synchronizuj"** |
-| Karta dostawcy | brak | nowy przycisk **„Wgraj plik"** (przy dostawcach `upload` i `mail`) |
-| Karta dostawcy → częstotliwość | pole „liczba minut" widoczne od razu obok listy | pole ukryte; odsłania je opcja **„Inna wartość (minuty)…"** |
-
----
-
-## 3. Wgrywanie ręczne — nowy przepływ
+## 1. Wgrywanie ręczne — trzy poprawki
 
 **Gdzie:** Konfiguracja → zakładka **Wgrywanie ręczne**.
 
-Zakładka ma teraz **dwie karty** i **dwie różne ścieżki wgrywania**. To nie jest to samo — druga
-ścieżka pomija rozpoznawanie dostawcy.
+### 1.1 Wgrywanie wróciło do okienka
 
-### 3.1 Ścieżka A — wiele plików, Bridge sam rozpoznaje dostawcę
+> **Zgłosiłaś:** w starym Bridge wgrywanie otwierało się w okienku, a u nas wszystko było
+> wprost na zakładce.
 
-Karta **„Wgraj wiele plików — auto-detekcja"**.
+**Jest teraz:** przycisk **„Wgraj pliki"** otwiera **okienko**. W nim: przeciągasz pliki albo
+klikasz **„Wybierz pliki z dysku"**, każdy plik dostaje rozpoznanie dostawcy (np.
+*MO1 · wysoka pewność · Nazwa pliku pasuje do wzorca*), obok jest lista do ręcznej poprawki
+i przycisk **„Usuń"**. **„Dodaj kolejny plik"** dokłada następne bez zamykania okienka,
+**„Wyczyść"** czyści listę (okienka nie zamyka). Na koniec **„Importuj do staging"**.
 
-1. Kliknij **„Wgraj pliki"**. Otwiera się **okienko** — wcześniej wszystko działo się wprost
-   na zakładce.
-2. W okienku przeciągnij pliki na pole **„Przeciągnij pliki tutaj"** albo kliknij
-   **„Wybierz pliki z dysku"**. Przyjmowane są **CSV i XLSX, do 50 MB każdy**.
-3. Każdy dodany plik pojawia się na liście **„Wczytane pliki (N)"**. Przy nim zobaczysz:
-   nazwę, rozmiar, liczbę wierszy i **wynik rozpoznania** — np. *„MO1 · wysoka pewność ·
-   Nazwa pliku pasuje do wzorca"* albo *„Nie rozpoznano"*.
-4. **Jeśli Bridge się pomylił — popraw ręcznie.** Obok każdej pozycji jest lista dostawców;
-   wybierz właściwego. Przycisk **„Usuń"** wyrzuca pozycję z listy.
-5. **„Dodaj kolejny plik"** dokłada następne pliki bez zamykania okienka.
-6. Kliknij **„Importuj do staging"**.
+**Sprawdź:** kliknij „Wgraj pliki" → ma się otworzyć okienko, nie formularz na zakładce.
 
-⚠ **Przycisk NIE ma licznika.** Wcześniej pisało na nim „Wgraj (N)" i po udanym imporcie
-pokazywał „Wgraj (0)" — to był błąd odbudowy, stary Bridge nigdy licznika tu nie miał.
-**Brak liczby na przycisku jest poprawny, nie zgłaszaj tego.**
+### 1.2 Zniknął licznik „Wgraj (0)"
 
-Przycisk **„Wyczyść"** czyści listę plików, ale **nie zamyka okienka**.
+> **Zgłosiłaś:** po udanym imporcie przycisk pokazywał „Wgraj (0)".
 
-### 3.2 Ścieżka B — jeden plik, dostawca wymuszony
+**Jest teraz:** przycisk nazywa się **„Importuj do staging"** i **nie ma żadnej liczby**.
+Stary Bridge nigdy licznika w tym miejscu nie miał.
 
-Karta **„Wgrywanie pojedyncze (z wymuszonym dostawcą)"** — **tej sekcji wcześniej w ogóle
-nie było, instrukcja Iteracji 3 jej nie zna.**
+**Sprawdź:** po imporcie na przycisku nie ma nawiasu z liczbą. ⚠ **Brak liczby jest poprawny.**
 
-Pod spodem jest siatka **kafli wszystkich dostawców**: kod, nazwa, e-mail i przycisk
-**„Wgraj plik"**. Klikasz kafel wybranego dostawcy → otwiera się to samo okienko, ale
-**z góry ustawionym dostawcą**, bez zgadywania po nazwie pliku.
+### 1.3 Wróciła sekcja „Wgrywanie pojedyncze"
 
-**Do czego to służy:** gdy auto-detekcja się myli albo plik ma nietypową nazwę.
+> **Zgłosiłaś:** brakuje kafli dostawców, przez które wgrywa się plik z góry ustawionemu
+> dostawcy, bez zgadywania po nazwie.
 
-**Test wart zrobienia:** weź plik, który nazwą wskazuje na MO1, i wgraj go przez kafel **MO3**.
-Pozycje mają wylądować pod **MO3** — wymuszenie ma wygrać z nazwą pliku.
+**Jest teraz:** pod pierwszą kartą jest sekcja **„Wgrywanie pojedyncze (z wymuszonym
+dostawcą)"** — siatka kafli wszystkich dostawców (kod, nazwa, e-mail) z przyciskiem
+**„Wgraj plik"**. Klikasz kafel → to samo okienko, ale dostawca ustawiony na sztywno.
 
-**Po sprawdzeniu posprzątaj:** to są celowo źle przypisane pozycje, więc **nie akceptuj ich**.
+**Sprawdź (najważniejszy test tego rozdziału):** weź plik, który **nazwą** wskazuje na MO1,
+i wgraj go przez kafel **MO3**. Pozycje mają wylądować pod **MO3** — wymuszenie ma wygrać
+z nazwą pliku.
+
+**Po sprawdzeniu posprzątaj:** to są celowo źle przypisane pozycje, **nie akceptuj ich**.
 Wejdź na `/staging`, ustaw „Typ sprawy" na **„Wszystkie"**, wpisz w szukajkę **MO3**, zaznacz
-te pozycje i kliknij **„Odrzuć zaznaczone"**. Inaczej zostaną w poczekalni i będą mylić przy
-kolejnych testach.
+je i kliknij **„Odrzuć zaznaczone"**.
 
-⚠ **Kafle pokazują WSZYSTKICH dostawców, także MO6.** MO6 jest wyłączony z importu, więc
-wgranie przez jego kafel skończy się odmową — **tak samo jak w starym Bridge**, który też
-nie filtrował kafli. To nie jest błąd.
+⚠ **Kafle pokazują też MO6**, który jest wyłączony z importu — wgranie przez jego kafel
+skończy się odmową. Stary Bridge też nie filtrował kafli, więc **to nie jest błąd**.
 
-### 3.3 Co zobaczysz po imporcie
+### Przy okazji zmieniło się jeszcze to
 
-**Dymek (toast) w rogu ekranu.** Tytuł to albo *„N pozycji czeka na akceptację"*, albo
-*„Import zakończony"* (gdy nic nie poszło do stagingu). Pod spodem podsumowanie — sklejone
-kropkami, **pokazywane są tylko niezerowe pozycje**:
-
-> Pozycji w plikach: N • Do akceptacji w stagingu: N • Nowe: N • Zmienione: N •
-> Wycofane: N • Bez zmian: N • Odrzucone (nie opony): N • Pominięte pliki: N
-
-**Sekcja „Ostatni import"** pod kaflami — pojawia się dopiero po pierwszym imporcie i pokazuje
-wynik dla każdego pliku: *„Wczytano N pozycji · do stagingu: N · nowe: N · zmienione: N ·
-wycofane: N · auto-zatwierdzone: N"*, a pod tym podgląd pierwszych pięciu pozycji.
-
-⚠ **Podgląd jest PO imporcie, nie przed.** Stary Bridge pokazywał tabelkę podglądu **zanim**
-zaimportował, bo parsował plik w przeglądarce. Odbudowa parsuje po stronie serwera, więc
-podgląd mogła pokazać dopiero po. **To świadome odstępstwo, uzgodnione — nie zgłaszaj go.**
-
-### 3.4 Co się dzieje, gdy coś pójdzie nie tak
-
-| Sytuacja | Co zobaczysz | Co jest poprawne |
-|---|---|---|
-| Jeden z plików jest wadliwy (nie da się odczytać) | czerwony dymek **„Błąd pliku {nazwa}"** | **pozostałe pliki idą dalej**; pominięty plik liczy się w członie „Pominięte pliki: N" |
-| Import pada na którymś pliku | czerwony dymek **„Błąd importu"** | **okienko ZOSTAJE otwarte, lista plików nie znika** — żebyś mogła spróbować ponownie. Pliki wgrane **przed** błędem **są już w stagingu** i mają być tam widoczne |
-| Lista dostawców jest pusta | pusta siatka kafli, bez komunikatu | tak samo zachowuje się stary Bridge |
+- **Komunikaty zastąpił dymek (toast)** w rogu ekranu. Tytuł: *„N pozycji czeka na
+  akceptację"* albo *„Import zakończony"*. Pod spodem, sklejone kropkami, **tylko niezerowe**
+  człony: *Pozycji w plikach · Do akceptacji w stagingu · Nowe · Zmienione · Wycofane ·
+  Bez zmian · Odrzucone (nie opony) · Pominięte pliki*.
+- **Sekcja „Ostatni import"** pod kaflami — wynik dla każdego pliku plus podgląd pięciu pozycji.
+  ⚠ **Podgląd jest PO imporcie, nie przed.** Stary Bridge pokazywał tabelkę zanim zaimportował,
+  bo czytał plik w przeglądarce; my czytamy go na serwerze. **To uzgodnione odstępstwo.**
+- **Gdy jeden plik jest wadliwy** — czerwony dymek *„Błąd pliku {nazwa}"*, **pozostałe pliki
+  idą dalej**.
+- **Gdy padnie sam import** — dymek *„Błąd importu"*, a **okienko zostaje otwarte z listą
+  plików**, żebyś mogła spróbować ponownie. Pliki wgrane **przed** błędem **są już w stagingu**.
 
 ---
 
-## 4. Staging — nowy domyślny filtr i przycisk „Kolumny"
+## 2. Staging — cztery poprawki
 
 **Gdzie:** `/staging`.
 
-### 4.1 ⭐ Ekran startuje z filtrem „Nowe produkty"
+### 2.1 ⭐ Ekran startuje na filtrze „Nowe produkty"
 
-To **najważniejsza zmiana** tego ekranu i najłatwiejsza do przeoczenia.
+> **Zgłosiłaś:** stary Bridge otwiera staging na „Nowych produktach", u nas było „Wszystkie".
 
-Filtr **„Typ sprawy"** ma teraz startowo wartość **„Nowe produkty"**, a nie „Wszystkie".
-Pełna lista opcji: *Wszystkie · Nowe produkty · Nowe produkty (stare) · Wycofane ·
-Zmiany kluczowe · Błędy importu*.
+**Jest teraz:** filtr **„Typ sprawy"** startuje na **„Nowe produkty"**.
 
-**Dlaczego to ma znaczenie:** przyciski **„Akceptuj wszystkie (N)"** i **„Odrzuć wszystkie (N)"**
-działają **na tym, co przepuszcza filtr** — nie na całym stagingu. Przy domyślnym filtrze
-licznik `N` pokazuje liczbę **nowych** pozycji i przycisk zatwierdza **tylko je**.
+⚠ **To zmienia działanie przycisków, nie tylko widok.** „Akceptuj wszystkie (N)" i „Odrzuć
+wszystkie (N)" działają **na tym, co przepuszcza filtr**. Przy starcie licznik pokazuje liczbę
+**nowych** pozycji i przycisk rusza **tylko je**. **Żeby objąć cały staging, musisz świadomie
+przestawić filtr na „Wszystkie".** Tak działa stary Bridge — i to właśnie chroni przed
+zatwierdzeniem błędów importu i wycofań jednym kliknięciem.
 
-**Żeby ruszyć cały staging, musisz świadomie przestawić „Typ sprawy" na „Wszystkie".**
+**Sprawdź:** wejdź na `/staging` → filtr stoi na „Nowe produkty"; przestaw na „Wszystkie"
+i zobacz, że licznik przy „Akceptuj wszystkie" się zmienia.
 
-Tak działa stary Bridge — i to właśnie chroni przed zatwierdzeniem błędów importu i wycofań
-jednym kliknięciem.
+### 2.2 Pasek narzędzi ułożony jak w oryginale
 
-### 4.2 ⚠ Trzy kolumny są domyślnie UKRYTE
+> **Zgłosiłaś:** przyciski akcji masowych są w innych miejscach niż w starym Bridge.
 
-**„Stan", „Cena zakupu" i „Cena sprzedaży" nie są widoczne w tabeli.** Włączasz je przyciskiem
-**„Kolumny"** w pasku narzędzi.
+**Jest teraz:**
 
-To **nie są zgubione kolumny** — w starym Bridge zachowują się dokładnie tak samo (jako jedyne
-kolumny tabeli nie mają ustawionej domyślnej widoczności). Ale jeśli znasz tylko odbudowę,
-zobaczysz różnicę i pomyślisz, że coś zniknęło.
-
-**Domyślna kolejność nagłówków:** ☑ · Typ · Kod · Nazwa · Dostawca · Magazyn · Zmiana ·
-Powód · Akcje.
-
-### 4.3 Przycisk „Kolumny"
-
-Klikasz **„Kolumny"** → otwiera się panel **„Widoczne kolumny (staging)"**:
-
-- **trzy skróty:** **„Wszystkie"** (włącza wszystko z pierwszej sekcji), **„Domyślne"**
-  (przywraca stan startowy — **razem z sekcją „Dodatkowe"**), **„Żadna"** (chowa wszystko,
-  co da się schować),
-- sekcja **„W tabeli stagingu"** — **10 przełączników** (7 włączonych, 3 wyłączone: Stan,
-  Cena zakupu, Cena sprzedaży),
-- sekcja **„Dodatkowe (z katalogu)"** — **49 przełączników**.
-
-⚠ **Sekcja „Dodatkowe" nic nie robi i tak ma być.** Panel sam to pisze: *„Te kolumny nie są
-jeszcze wyświetlane w tabeli stagingu."* Przełączniki zapisują się, ale tabela ich nie pokazuje —
-**dokładnie tak jak w starym Bridge**, gdzie ta sekcja też była martwa. Nie zgłaszaj tego.
-
-Ustawienia kolumn **zapamiętują się w przeglądarce**. ⚠ Jeśli kiedyś dojdzie nowa kolumna,
-w Twojej zapisanej konfiguracji będzie ukryta, dopóki nie klikniesz **„Domyślne"** — tak samo
-działał stary Bridge.
-
-### 4.4 Pasek narzędzi — co gdzie jest
-
-- **W nagłówku** (nad paskiem): **„Akceptuj wszystkie (N)"** i **„Odrzuć wszystkie (N)"**.
-  Są widoczne zawsze, a `N` odpowiada **aktualnemu filtrowi**. **Pytają o potwierdzenie** —
-  np. *„Zaakceptować wszystkie pasujące pozycje (N)?"*.
-- **W pasku, od lewej:** szukajka → napis „Typ sprawy" i lista → licznik *„N zmian"*.
-- **Po prawej:** **„Akceptuj zaznaczone (N)"** i **„Odrzuć zaznaczone (N)"** — **pokazują się
-  dopiero, gdy zaznaczysz przynajmniej jedną pozycję** (wcześniej wisiały tam zawsze);
-  dalej **„Kolumny"**, **„Akceptuj widoczne"** i **„Odrzuć widoczne"** (bez licznika).
-- **Placeholder szukajki:** *„Szukaj po kodzie, nazwie, dostawcy lub EAN..."* — cztery pola,
-  po których backend naprawdę szuka.
+- **w nagłówku** (nad paskiem): **„Akceptuj wszystkie (N)"** i **„Odrzuć wszystkie (N)"** —
+  widoczne zawsze, **pytają o potwierdzenie**;
+- **w pasku od lewej:** szukajka → „Typ sprawy" z listą → licznik *„N zmian"*;
+- **po prawej:** **„Akceptuj zaznaczone (N)"** i **„Odrzuć zaznaczone (N)"** — **pokazują się
+  dopiero, gdy coś zaznaczysz** (wcześniej wisiały zawsze); dalej **„Kolumny"**,
+  **„Akceptuj widoczne"** i **„Odrzuć widoczne"**.
 
 ⚠ **„Zaznaczone" i „widoczne" NIE pytają o potwierdzenie** — działają od razu. Pytają tylko
 warianty „wszystkie". Tak jest w oryginale.
 
+**Sprawdź:** przy niczym niezaznaczonym po prawej nie ma przycisków „…zaznaczone"; po
+zaznaczeniu jednej pozycji pojawiają się z liczbą „(1)".
+
+### 2.3 Wrócił przycisk „Kolumny"
+
+> **Zgłosiłaś:** w starym Bridge da się włączać i wyłączać kolumny stagingu, u nas nie było
+> takiego przycisku.
+
+**Jest teraz:** przycisk **„Kolumny"** otwiera panel **„Widoczne kolumny (staging)"**:
+trzy skróty — **„Wszystkie"**, **„Domyślne"** (przywraca stan startowy), **„Żadna"** — oraz
+dwie sekcje: **„W tabeli stagingu"** (10 przełączników) i **„Dodatkowe (z katalogu)"**
+(49 przełączników). Ustawienia zapamiętują się w przeglądarce.
+
+⚠ **Sekcja „Dodatkowe" nic nie robi i tak ma być.** Panel sam to pisze: *„Te kolumny nie są
+jeszcze wyświetlane w tabeli stagingu."* W starym Bridge ta sekcja też była martwa.
+
+### 2.4 ⚠ Trzy kolumny są domyślnie UKRYTE
+
+To **konsekwencja poprawki 2.3**, o której warto wiedzieć, zanim uznasz, że coś zniknęło.
+
+**„Stan", „Cena zakupu" i „Cena sprzedaży" nie są widoczne w tabeli.** Włączasz je przyciskiem
+**„Kolumny"**. W starym Bridge zachowują się dokładnie tak samo — jako jedyne kolumny tabeli
+nie mają ustawionej domyślnej widoczności.
+
+**Domyślna kolejność nagłówków:** ☑ · Typ · Kod · Nazwa · Dostawca · Magazyn · Zmiana ·
+Powód · Akcje.
+
+**Sprawdź:** w tabeli nie ma tych trzech kolumn → kliknij „Kolumny" → włącz je → pojawiają się
+na właściwych miejscach (Stan, Cena zakupu i Cena sprzedaży wchodzą między „Magazyn"
+a „Zmiana").
+
+### Przy okazji — dwie rzeczy, których nie zgłaszałaś
+
+Znaleźliśmy je sami przy okazji i naprawiliśmy:
+
+- **kolumna „Magazyn"** stała w złym miejscu (teraz jest szósta, jak w oryginale),
+- **nagłówek kolumny „Powód"** był skrócony,
+- **szukajka mówi teraz prawdę** o tym, po czym szuka: *„Szukaj po kodzie, nazwie, dostawcy
+  lub EAN..."*.
+
 ---
 
-## 5. Karta dostawcy — „Synchronizuj", „Wgraj plik", częstotliwość
+## 3. Karta dostawcy — trzy poprawki
 
 **Gdzie:** Konfiguracja → zakładka **Dostawcy**.
 
-### 5.1 Przycisk nazywa się „Synchronizuj"
+### 3.1 Przycisk nazywa się „Synchronizuj"
 
-Nie **„Synchronizuj teraz"**. Etykieta została sprawdzona w żywym bundlu produkcji — stary
-Bridge mówi „Synchronizuj". Podczas pobierania przycisk pokazuje *„Synchronizuję…"*.
+> **Zgłosiłaś:** przycisk ma złą nazwę.
 
-⚠ **Instrukcja Iteracji 3 używa starej nazwy w dziewięciu miejscach.** To ta sama akcja —
-patrz rozdział 10.
+**Jest teraz:** **„Synchronizuj"**, bez „teraz" — sprawdzone w żywym bundlu produkcji.
+W trakcie pobierania pokazuje *„Synchronizuję…"*.
+
+⚠ **Instrukcja Iteracji 3 używa starej nazwy w dziewięciu miejscach.** To ta sama akcja.
 
 Bez zmian zostaje: **przycisk jest tylko przy dostawcach `url`.** Przy MO1, MO7, MO8 i MO10
 (`mail`) go nie ma i tak ma być.
 
-### 5.2 Nowy przycisk „Wgraj plik"
+### 3.2 Wrócił przycisk „Wgraj plik"
 
-Pojawia się przy dostawcach o sposobie dostarczania **`upload`** i **`mail`** — czyli tam,
-gdzie nie ma URL-a do pobrania. **Instrukcja Iteracji 3 tego przycisku nie zna.**
+> **Zgłosiłaś:** w starym Bridge da się wgrać plik wprost z karty dostawcy, u nas nie było
+> takiego przycisku.
 
-- Przyjmuje pliki **`.csv`, `.xml`, `.xlsx`**.
-- Po udanym wgraniu pokazuje dymek **„Plik wczytany"** z treścią
-  *„N produktów, N nowych, N zmienionych"*.
-- Przy błędzie: dymek **„Błąd"** z treścią komunikatu.
-- W trakcie wgrywania przycisk **„Synchronizuj"** też jest zablokowany — to jeden wspólny
-  stan zajętości, jak w oryginale.
+**Jest teraz:** przycisk **„Wgraj plik"** przy dostawcach o sposobie dostarczania **`upload`**
+i **`mail`** (czyli tam, gdzie nie ma URL-a do pobrania). Przyjmuje **`.csv`, `.xml`, `.xlsx`**.
+Po udanym wgraniu dymek **„Plik wczytany"** z treścią *„N produktów, N nowych, N zmienionych"*.
+Przy błędzie: dymek **„Błąd"**. W trakcie wgrywania przycisk „Synchronizuj" też jest
+zablokowany — jeden wspólny stan zajętości, jak w oryginale.
+
+**Sprawdź:** wgraj plik z karty MO1 → dymek pokazuje **liczby**.
 
 ⚠ **Tu odbudowa jest LEPSZA od produkcji — celowo.** Żywy Bridge pokazuje w tym dymku
 *„undefined nowych, undefined zmian"*, bo czyta pola, których serwer nigdy nie odsyłał.
-Naprawiliśmy to w odbudowie. **Jeśli porównujesz z produkcją i widzisz różnicę — odbudowa ma
-rację.** Ten błąd nadal siedzi w produkcji i warto go u siebie poprawić.
+Naprawiliśmy to. **Jeśli porównujesz z produkcją i widzisz różnicę — odbudowa ma rację.**
+Ten błąd nadal siedzi w produkcji i warto go u siebie poprawić.
 
-### 5.3 Pole „liczba minut" jest teraz schowane
+### 3.3 Pole „liczba minut" schowane za osobną opcją
 
-Częstotliwość wybierasz z listy jedenastu gotowych wartości: *5 min · 15 min · 30 min ·
-1 godz. · 2 godz. · 4 godz. · 6 godz. · 12 godz. · **1 dni** · 2 dni · 7 dni*.
+> **Zgłosiłaś:** w starym Bridge pole na własną liczbę minut nie wisi od razu obok listy.
 
-⚠ **„1 dni" to nie literówka do zgłoszenia.** Stary Bridge skleja liczbę ze słowem „dni"
-bez odmiany, więc doba wyświetla się jako „1 dni". Odtworzone 1:1.
+**Jest teraz:** częstotliwość wybierasz z listy jedenastu gotowych wartości: *5 min · 15 min ·
+30 min · 1 godz. · 2 godz. · 4 godz. · 6 godz. · 12 godz. · **1 dni** · 2 dni · 7 dni*.
+Pole na własną liczbę pojawia się **dopiero po wybraniu „Inna wartość (minuty)…"**.
 
-**Pole na wpisanie własnej liczby minut pojawia się dopiero po wybraniu opcji
-„Inna wartość (minuty)…"** — wcześniej w odbudowie wisiało od razu obok listy.
-**Instrukcja Iteracji 3 (§3.12) opisuje stary układ i jest w tym miejscu nieaktualna.**
+⚠ **Dwie rzeczy, które wyglądają na błąd, a nie są:**
+- **„1 dni"** — stary Bridge skleja liczbę ze słowem „dni" bez odmiany. Odtworzone 1:1.
+- **Po przełączeniu z gotowej wartości na „Inna wartość" pole jest PUSTE** — nie przepisuje
+  tam poprzedniej liczby. Też odtworzone 1:1; dzięki temu da się jawnie wyczyścić harmonogram.
 
-⚠ **Po przełączeniu z gotowej wartości na „Inna wartość" pole jest PUSTE** — nie przepisuje
-tam poprzedniej liczby. To odtworzone ze starego Bridge 1:1. Dzięki temu da się jawnie
-wyczyścić harmonogram. **Nie zgłaszaj pustego pola jako błędu.**
+**Sprawdź:** wybierz „4 godz.", potem przełącz na „Inna wartość (minuty)…" → pole się pojawia
+i jest puste.
 
 ---
 
-## 6. Co PRZESTAŁO być dziwactwem — dwie rzeczy naprawione
+## 4. Dwa dziwactwa, które zniknęły
 
 Na Twojej liście „dziwactw odtworzonych celowo" były dwie pozycje, które **już nie obowiązują**.
-Naprawiłaś je u siebie **1 września**, a odbudowa wciągnęła Twoją poprawkę i **potwierdziła ją
-pomiarem** (2026-09-08).
+Naprawiłaś je u siebie **1 września**, my wciągnęliśmy Twoją poprawkę i **potwierdziliśmy ją
+pomiarem** (8 września).
 
-### 6.1 ✅ WULSTBAND już nie trafia do stagingu jako opona
+**4.1 ✅ WULSTBAND już nie trafia do stagingu jako opona.** Taśma obręczy z Bohnenkampa
+i Agrorami była importowana jako opona.
+*Pomiar:* dla MO1 licznik odrzuceń spadł **z 1 na 0** przy tych samych **199 kodach** —
+rekord jest odrzucany już w parserze, a nie dopiero dalej.
+**Sprawdź:** wgraj cennik MO1 i przejrzyj staging — **żadnego WULSTBAND-a**.
 
-Taśma obręczy (WULSTBAND) z Bohnenkampa i Agrorami była importowana jako opona. Twoja poprawka
-z 1 września (filtr akcesoriów przestał rozróżniać wielkość liter) jest w odbudowie.
+**4.2 ✅ NRO i CHO to „Tak" albo puste pole, nie 0/1.**
+*Pomiar:* `1` → **„Tak"**, `0` → **puste pole**; dotknęło **MO1 199, MO3 44 i MO9 12 rekordów**.
+**Sprawdź:** w Katalogu kolumny NRO i CHO — „Tak" albo pusto, **nigdzie zera ani jedynki**.
 
-**Pomiar:** dla MO1 licznik `odrzuconePrzezAdapter` spadł **z 1 na 0** przy tych samych
-**199 kodach** — rekord jest teraz odrzucany już w parserze, a nie dopiero w adapterze.
-
-**Co sprawdzić:** wgraj cennik Bohnenkampa (MO1) i przejrzyj staging — **żadnego WULSTBAND-a**.
-
-### 6.2 ✅ NRO i CHO to „Tak" albo puste pole, nie 0/1
-
-Oznaczenia NRO i CHO zapisywały się jako `0`/`1`, podczas gdy wszystkie pozostałe flagi miały
-już „Tak"/pusto. Twoja poprawka z 1 września jest w odbudowie.
-
-**Pomiar:** `1` → **„Tak"**, `0` → **puste pole**; dotknęło **MO1 199, MO3 44 i MO9 12 rekordów**.
-
-**Co sprawdzić:** w Katalogu spójrz na kolumny NRO i CHO — mają być „Tak" albo pusto,
-**nigdzie zera ani jedynki**.
-
-> Obie te pozycje **wykreśl ze swojej listy dziwactw** — są zamknięte.
+> **Wykreśl obie pozycje ze swojej listy dziwactw.**
 
 ---
 
-## 7. Co ZOSTAJE dziwactwem — status dostawcy
+## 5. Czego NIE zgłaszaj ponownie
 
-**To dalej działa tak, jak opisywała instrukcja Iteracji 3 (§4 pkt 11) — nic się nie zmieniło.**
+Trzy rzeczy z Twojej listy, które **zostają takie, jakie są** — i dlaczego.
+
+### 5.1 ⏳ Status dostawcy — czeka na Twoją decyzję
 
 Ustawiasz status **wstrzymany**, zapisujesz — a karta dalej pokazuje *aktywny* albo *błąd*.
 Bridge (stary i nowy tak samo) **wylicza status wyświetlany na bieżąco** i nadpisuje nim to,
@@ -306,166 +255,105 @@ co zapisałaś:
 **Twoje wstrzymanie mimo to DZIAŁA** — jest zapisane i to ono, a nie napis na karcie, blokuje
 automatyczne pobieranie. Ręczne **„Synchronizuj"** przechodzi mimo wstrzymania i tak ma być.
 
-### ⏳ Twoja prośba czeka na decyzję
+**Poprosiłaś, żeby karta pokazywała dwa pola osobno** — Twoje ustawienie ręczne i wyliczony
+status techniczny. **Prośba jest zapisana i czeka na decyzję.** Nie mieści się w tej iteracji,
+bo zmienia zachowanie, które dziś jest odtworzone 1:1.
 
-Poprosiłaś, żeby karta pokazywała **dwa pola osobno**: Twoje ustawienie ręczne i wyliczony
-status techniczny — zamiast jednego, w którym jedno nadpisuje drugie.
+### 5.2 ⏳ EAN w zapisie naukowym — decyzja podjęta, wdrożenie czeka
 
-**To jest zapisane i czeka na decyzję** (pozycja #18 w naszym rejestrze zmian). **Nie mieści
-się w Iteracji 14** — zmienia zachowanie, które dziś jest odtworzone 1:1, więc wymaga
-osobnego ustalenia. **Nie zgłaszaj tego ponownie jako błędu** — wiemy o tym.
+Komunikat **„zapis naukowy ma tylko null cyfr znaczących"** bierze się z błędu w starym Bridge.
+**18 września zdecydowałaś, że taki EAN ma trafiać do katalogu jako PUSTE pole.**
 
----
+⚠ **Ta zmiana NIE JEST jeszcze wdrożona.** Komunikat **nadal się pojawia** i wygląda identycznie
+jak w produkcji. **To nie jest regres — to stan przed wdrożeniem Twojej decyzji.**
 
-## 8. Zmiana zatwierdzona, ale jeszcze NIE wdrożona
+### 5.3 Daty promocji — zmierzone, naprawa zaplanowana
 
-### EAN zapisany w notacji naukowej
-
-Na liście dziwactw był komunikat **„zapis naukowy ma tylko null cyfr znaczących"** — dziwaczna
-wiadomość biorąca się z błędu w starym Bridge (funkcja licząca cyfry została przesłonięta inną
-o tej samej nazwie).
-
-**18 września zdecydowałaś, że taki EAN ma trafiać do katalogu jako PUSTE pole** — zamiast
-komunikatu i zamiast zepsutej wartości.
-
-⚠ **Ta zmiana NIE JEST jeszcze wdrożona.** Karta, która ma ją zrobić (14i), jest zaplanowana,
-ale nie zrealizowana.
-
-**Czego się spodziewać podczas testów:** komunikat *„zapis naukowy ma tylko null cyfr
-znaczących"* **nadal się pojawia** i nadal wygląda identycznie jak w produkcji.
-**To nie jest regres — to stan przed wdrożeniem Twojej decyzji.** Nie zgłaszaj go.
+Silnik cen **nie pilnuje dat obowiązywania promocji w obie strony**: promocja z datą końca
+w **przeszłości** dalej obniża ceny, a promocja z datą startu w **przyszłości** nigdy się sama
+nie włącza. Zmierzyliśmy to i wyceniliśmy; naprawa jest zaplanowana, ale jeszcze nie zrobiona.
 
 ---
 
-## 9. ⭐ Test rozstrzygający — NIEWYKONANY
+## 6. ⭐ Test rozstrzygający — jedyne zadanie po Twojej stronie
 
-**To najcenniejszy test całej instrukcji i wciąż nie został zrobiony.**
+**To najcenniejszy test i wciąż nie został zrobiony.** Nikt poza Tobą go nie wykona, bo wymaga
+dostępu do starego Bridge i tych samych plików cennika.
 
-**Na czym polega:** wgrać **ten sam plik cennika** do starego Bridge i do odbudowy, a potem
-porównać **liczbę pozycji**, które z niego weszły. Jeśli liczby się zgadzają dla wszystkich
-dostawców — parsery i klasyfikator odtworzyliśmy wiernie. Jeśli się nie zgadzają, to najszybszy
-sposób, żeby to wykryć, zanim przejdziemy na nową wersję.
+**Na czym polega:** wgrać **ten sam plik** do starego Bridge i do odbudowy, a potem porównać
+**liczbę pozycji**, które z niego weszły. Zgadzają się — parsery odtworzyliśmy wiernie.
+Nie zgadzają się — to najszybszy sposób, żeby to wykryć przed przejściem na nową wersję.
 
-**Stan na dziś:**
-
-| Dostawca | Stary Bridge | Odbudowa | Zgodność | Uwaga |
-|---|---|---|---|---|
-| MO1 Bohnenkamp | — | — | ⚠ **„na oko, bez liczb"** | jedyny sprawdzany; **wymaga powtórzenia z liczbami** |
-| MO2 | — | — | ❌ **nieporównane** | |
-| MO3 | — | — | ❌ **nieporównane** | |
-| MO4 | — | — | ❌ **nieporównane** | |
-| MO5 | — | — | ❌ **nieporównane** | |
-| MO6 Uniglory | — | — | **nie dotyczy** | wyłączony z importu |
-| MO7 | — | — | ❌ **nieporównane** | |
-| MO8 Trelleborg | — | — | ❌ **nieporównane** | plik XLSX **i** CSV |
-| MO9 Agrorami | — | — | ⛔ **niewykonalne** | dane z API, **nie ma pliku** do wgrania do obu wersji |
-| MO10 GRI | — | — | ❌ **nieporównane** | plik XLSX |
+| Dostawca | Stary Bridge | Odbudowa | Stan |
+|---|---|---|---|
+| MO1 Bohnenkamp | | | ⚠ sprawdzone **„na oko, bez liczb"** — do powtórzenia |
+| MO2 | | | ❌ nieporównane |
+| MO3 | | | ❌ nieporównane |
+| MO4 | | | ❌ nieporównane |
+| MO5 | | | ❌ nieporównane |
+| MO6 Uniglory | — | — | nie dotyczy (wyłączony z importu) |
+| MO7 | | | ❌ nieporównane |
+| MO8 Trelleborg | | | ❌ nieporównane (plik XLSX **i** CSV) |
+| MO9 Agrorami | — | — | ⛔ niewykonalne — dane z API, **nie ma pliku** |
+| MO10 GRI | | | ❌ nieporównane (plik XLSX) |
 
 **Jak go zrobić:** dla każdego dostawcy weź **jeden i ten sam plik**, wgraj go do starego
-Bridge i do https://test.agritires.eu, a potem wpisz do tabeli **dwie liczby** — ile pozycji
-wykazał każdy. Liczbę bierz z podsumowania importu (człon *„Pozycji w plikach"* i
-*„Do akceptacji w stagingu"*), nie „na oko".
-
-⚠ **Ten rozdział ma zostać w instrukcji, dopóki tabela nie będzie wypełniona liczbami.**
+Bridge i na https://test.agritires.eu, a potem wpisz do tabeli **dwie liczby**. Liczbę bierz
+z podsumowania importu (człony *„Pozycji w plikach"* i *„Do akceptacji w stagingu"*),
+**nie „na oko"**.
 
 ---
 
-## 10. Co jest NIEAKTUALNE w instrukcji Iteracji 3
-
-Instrukcja `instrukcja-testow-I3.md` **zostaje bez zmian** — nie trzeba jej poprawiać ani
-czytać na nowo. Poniżej lista miejsc, w których **wierz tej kartce, nie tamtej**.
-
-| Gdzie w Iteracji 3 | Co przestało być prawdą |
-|---|---|
-| **§2 Przygotowanie**, kroki 2–5 | opisują **stary przepływ**: „kliknij pole wyboru pliku" wprost na zakładce i przycisk **„Wgraj"**. Dziś: „Wgraj pliki" → okienko → „Importuj do staging". Aktualny opis: **rozdział 3 tutaj** |
-| **§2**, „Oczekiwane" | obiecuje podgląd 5 pozycji **przy pliku** — dziś jest w sekcji **„Ostatni import"** pod kaflami, patrz **3.3** |
-| **§2** | nie zna sekcji **„Wgrywanie pojedyncze"** (kafle dostawców) — patrz **3.2** |
-| **§2**, ramka „Czego tu jeszcze nie ma" | mówi, że zakładki *Spedycja*, *Shoper*, *Katalog* i *AI Fallback* są **puste** — **już nie są**, patrz **rozdział 11** |
-| **§3.1 Lista pozycji** i **§6 Lista kontrolna** | mówią o liście „z kompletem kolumn" — dziś **Stan, Cena zakupu i Cena sprzedaży są ukryte**, patrz **4.2** |
-| **§3.2 Filtr i wyszukiwarka** | każe „wrócić na **Wszystkie**" po sprawdzeniu filtra „Błędy importu" — to **już nie jest powrót do stanu startowego**, bo ekran startuje na „Nowe produkty", patrz **4.1** |
-| **§3.10, §3.11, §3.12, §3.13, §4 pkt 11, §6** | nazywają przycisk **„Synchronizuj teraz"** (9 miejsc) — dziś **„Synchronizuj"**, patrz **5.1** |
-| **§3.12 Zmiana częstotliwości** | opisuje pole „liczba minut" jako widoczne od razu obok listy — dziś schowane za **„Inna wartość (minuty)…"**, patrz **5.3** |
-| **§4 Rzeczy, które WYGLĄDAJĄ na błąd** | nie zna przycisku **„Wgraj plik"** na karcie dostawcy, patrz **5.2** |
-| **§5 Czego jeszcze NIE MA** | w większości **nieaktualny** — historia, alerty, atrybuty, analityka, narzuty i promocje oraz zakładki Konfiguracji **są dowiezione**. Aktualna lista: **rozdział 11 tutaj** |
-| **całość** | nie zna testu rozstrzygającego z **rozdziału 9** |
-
-Pozycje **§4 pkt 4** („zapis naukowy") i **§4 pkt 11** (status dostawcy) **dalej obowiązują** —
-patrz rozdziały 8 i 7.
-
----
-
-## 11. Czego jeszcze NIE MA
-
-Zweryfikowane wobec tablicy postępu — **wszystkie ekrany produkcji mają już swój odpowiednik**
-w odbudowie (Katalog, Staging, Konfiguracja, Historia, Narzuty, Alerty, Atrybuty, Waga
-gabarytowa, Analityka, Selly, Moje konto, Pulpit). Braki są **wewnątrz** ekranów:
-
-| Czego brakuje | Kiedy |
-|---|---|
-| **Daty promocji nie działają w obie strony** — promocja z datą końca w **przeszłości** dalej obniża ceny, a promocja z datą startu w **przyszłości** nigdy się sama nie włącza | druga fala Iteracji 14 (karta 14f) — zmierzone i wycenione w rozpoznaniu 14e, naprawa jeszcze nie zrobiona |
-| **EAN w notacji naukowej → puste pole** | druga fala Iteracji 14 (karta 14i) — patrz rozdział 8 |
-| **Status dostawcy w dwóch polach** (ręczny + wyliczony) | czeka na decyzję, patrz rozdział 7 |
-| **Nowa synchronizacja z Selly przez REST** (`sync_full`, warianty magazynów) | świadomie odłożone, aż ustabilizuje się u Ciebie — panel Selly działa jak dotąd |
-| Lista „cena na zapytanie" i powody wstrzymania | nie planowane w tej fali |
-
-**Już NIE są brakami** (a instrukcja Iteracji 3 tak je wymienia): automatyczne pobieranie
-cenników, narzuty i promocje, Historia, Alerty, Atrybuty, Analityka i pulpit, zakładki
-Konfiguracji (Spedycja, Shoper, Katalog, AI Fallback).
-
----
-
-## 12. Szybka lista kontrolna
+## 7. Lista kontrolna
 
 **Wgrywanie ręczne**
 
-- [ ] „Wgraj pliki" otwiera **okienko**, nie formularz na zakładce
-- [ ] Na przycisku importu **nie ma licznika** („Importuj do staging", nie „Wgraj (0)")
-- [ ] Pod spodem jest sekcja **„Wgrywanie pojedyncze"** z kaflami dostawców
-- [ ] ⭐ Plik o nazwie wskazującej MO1, wgrany przez **kafel MO3**, ląduje pod **MO3**
-- [ ] Po imporcie pokazuje się **dymek** z podsumowaniem, a pod kaflami **„Ostatni import"**
-- [ ] Plik XLSX (MO8 / MO10) też się wgrywa
-- [ ] Po błędzie importu **okienko zostaje otwarte**, a pliki wgrane wcześniej są w stagingu
+- [ ] „Wgraj pliki" otwiera **okienko**, nie formularz na zakładce (1.1)
+- [ ] Na przycisku importu **nie ma licznika** (1.2)
+- [ ] Jest sekcja **„Wgrywanie pojedyncze"** z kaflami dostawców (1.3)
+- [ ] ⭐ Plik o nazwie MO1, wgrany przez **kafel MO3**, ląduje pod **MO3** (1.3)
+- [ ] Po sprawdzeniu **odrzuciłam** te testowe pozycje ze stagingu (1.3)
+- [ ] Po błędzie importu **okienko zostaje otwarte**, a wcześniejsze pliki są w stagingu
 
 **Staging**
 
-- [ ] ⭐ Ekran startuje na filtrze **„Nowe produkty"**
-- [ ] Licznik przy „Akceptuj wszystkie (N)" zmienia się razem z filtrem
-- [ ] „Akceptuj/Odrzuć **zaznaczone**" pokazują się dopiero **po zaznaczeniu** pozycji
-- [ ] „Akceptuj/Odrzuć **wszystkie**" **pytają o potwierdzenie**
-- [ ] Przycisk **„Kolumny"** włącza ukryte „Stan", „Cena zakupu", „Cena sprzedaży"
-- [ ] Skrót **„Domyślne"** przywraca stan startowy
+- [ ] ⭐ Ekran startuje na filtrze **„Nowe produkty"** (2.1)
+- [ ] Licznik przy „Akceptuj wszystkie (N)" zmienia się razem z filtrem (2.1)
+- [ ] „…**zaznaczone**" pokazują się dopiero **po zaznaczeniu** pozycji (2.2)
+- [ ] „…**wszystkie**" **pytają o potwierdzenie**, „…zaznaczone" i „…widoczne" nie (2.2)
+- [ ] Przycisk **„Kolumny"** działa, a skrót **„Domyślne"** przywraca stan startowy (2.3)
+- [ ] „Stan", „Cena zakupu", „Cena sprzedaży" są ukryte i **dają się włączyć** (2.4)
 
 **Karta dostawcy**
 
-- [ ] Przycisk nazywa się **„Synchronizuj"**
-- [ ] Przy dostawcach `upload`/`mail` jest przycisk **„Wgraj plik"**
-- [ ] Dymek po wgraniu pokazuje **liczby**, nie „undefined"
-- [ ] Pole minut odsłania się dopiero po **„Inna wartość (minuty)…"** i jest wtedy **puste**
+- [ ] Przycisk nazywa się **„Synchronizuj"** (3.1)
+- [ ] Przy dostawcach `upload`/`mail` jest przycisk **„Wgraj plik"** (3.2)
+- [ ] Dymek po wgraniu pokazuje **liczby**, nie „undefined" (3.2)
+- [ ] Pole minut odsłania się po **„Inna wartość (minuty)…"** i jest wtedy **puste** (3.3)
 
 **Naprawione dziwactwa**
 
-- [ ] W stagingu po imporcie MO1 **nie ma WULSTBAND-a**
-- [ ] W Katalogu kolumny **NRO/CHO** pokazują „Tak" albo pusto, **nigdzie 0/1**
+- [ ] W stagingu po imporcie MO1 **nie ma WULSTBAND-a** (4.1)
+- [ ] W Katalogu **NRO/CHO** to „Tak" albo pusto, **nigdzie 0/1** (4.2)
 
-**Test rozstrzygający**
+**Zadanie**
 
-- [ ] ⭐ Tabela z rozdziału 9 wypełniona **liczbami** dla MO1–MO5, MO7, MO8, MO10
+- [ ] ⭐ Tabela z rozdziału 6 wypełniona **liczbami** dla MO1–MO5, MO7, MO8, MO10
 
 ---
 
-## 13. Jak zgłaszać problemy
+## 8. Jak zgłaszać
 
-**Zanim zgłosisz — sprawdź rozdziały 6, 7 i 8.** Trzy najczęstsze fałszywe alarmy tej iteracji:
-
-1. brak licznika na przycisku importu (**tak ma być**, rozdział 3.1),
-2. brak kolumn „Stan"/„Cena zakupu"/„Cena sprzedaży" w stagingu (**są ukryte**, rozdział 4.2),
-3. komunikat o „zapisie naukowym" (**decyzja podjęta, wdrożenie czeka**, rozdział 8).
+**Zanim zgłosisz — sprawdź rozdział 5 i ramki ⚠.** Pięć rzeczy, które wyglądają na błąd,
+a są poprawne: brak licznika na przycisku importu (1.2), MO6 na liście kafli (1.3), brak
+trzech kolumn w stagingu (2.4), napis **„1 dni"** i puste pole minut po przełączeniu (3.3),
+komunikat o zapisie naukowym (5.2).
 
 **Co dopisać do zgłoszenia:**
 
 - **gdzie** — ekran i sekcja (np. „Konfiguracja → Wgrywanie ręczne, okienko"),
 - **co kliknęłaś** i **co się stało** zamiast tego, czego się spodziewałaś,
-- **zrzut ekranu** — przy dymkach (toastach) szczególnie, bo znikają,
+- **zrzut ekranu** — przy dymkach szczególnie, bo znikają,
 - **który plik** wgrywałaś (nazwa i dostawca), jeśli rzecz dotyczy importu,
-- czy to samo dzieje się **w starym Bridge** — jeśli tak, to prawdopodobnie odtworzyliśmy
+- czy to samo dzieje się **w starym Bridge** — jeśli tak, prawdopodobnie odtworzyliśmy
   zachowanie celowo i wystarczy, że dasz znać, czy chcesz to zmienić.
