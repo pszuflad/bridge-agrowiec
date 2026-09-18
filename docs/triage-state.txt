@@ -1,7 +1,31 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
 # Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
-9d1b09f1421e93d0a140c5c0fd7186ab7f783cf9
+86d909028cda141786f73321f38e87dfd377a514
+# ^ 2026-09-18 16:00 „20260918_entry_1539". STRIAŻOWANE 2026-09-18
+#   (ticket 57-CHORE-triaz-uzasadnienia-ani, gałąź chore/57-triaz-uzasadnienia-ani).
+#   Zakres 9d1b09f..86d9090 = 1 commit sync(vps), zmienia WYŁĄCZNIE CHANGELOG.md (+11 linii).
+#   ZERO kodu → nowego wpisu backlogu NIE MA. Treść poszła do #82 i #83 jako brakujące „dlaczego".
+#   ✅ POLECENIE Z POPRZEDNIEGO TRIAŻU WYKONANE: uzasadnienie obu zmian PRZYSZŁO.
+#     #82 (Ładowarka→Ciągnik): filtr Rolniczych nie ma pokazywać „Ładowarka"; w Rolniczych
+#       Ładowarka/ładowarka kołowa/ładowarka rolnicza → Ciągnik, w Przemysłowych bez zmian;
+#       backfill 265 rekordów, po korekcie 0 Rolniczych z „Ładowarka".
+#     #83 (szerokość): filtr „Szerokość opony" nie ma rozdzielać 5 / 5.0 / 5.00 — czyli ŚWIADOME
+#       odwrócenie decyzji Anny z 19.08, nie skutek uboczny porządków w Selly; 1297 wartości
+#       ujednoliconych, 0 niekanonicznych, integrity_check=ok. MO9 „$": products.id=105986
+#       ($7-14 → 7-14), nazwa „BKT TR 144 $7-14" bez zmian.
+#   Blokada implementacji #82/#83 ZDJĘTA — cała partia #72–#83 gotowa do wykonania.
+#
+#   ⚠ NAUKA NA PRZYSZŁOŚĆ (kosztowała jeden cykl czekania): producent potrafi przysłać KOD, a
+#   UZASADNIENIE dopiero osobnym commitem kilka godzin później. Brak wpisu w CHANGELOG znaczy
+#   „jeszcze nie opisane", nie „nie ma powodu" — przy commicie bez opisu poczekaj na kolejny
+#   sync(vps), zanim uznasz powód za NIEZNANY na stałe.
+#   ⚠ Pole „Changelog Ani (najnowszy wpis)" w TREŚCI commita bywa MYLĄCE — w 86d9090 producent
+#   wkleił tam wpis z 2026-08-18. Prawdziwą treść daje tylko `git diff <sha>^ <sha> -- CHANGELOG.md`.
+#   Następny triaż: git fetch origin main && git log 86d9090..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 18.09 15:00) ---
+# 9d1b09f1421e93d0a140c5c0fd7186ab7f783cf9
 # ^ 2026-09-18 15:00 „20260918_1500_width_norm". STRIAŻOWANE 2026-09-18
 #   (ticket 52-CHORE-triaz-produkcja-i14, gałąź chore/52-triaz-produkcja-i14).
 #   Zakres 94bdf11..9d1b09f = 24 commity sync(vps): 15 kod/schemat → backlog #72–#83 (12 wpisów),
@@ -24,6 +48,7 @@
 #   ⏸ #82 i #83 zatwierdzone, ale IMPLEMENTACJA WSTRZYMANA — brak uzasadnienia biznesowego
 #   (oba commity bez wpisu w CHANGELOG Ani). Ania nadal pracuje nad tym obszarem i zapowiedziała,
 #   że wyjaśnienie pojawi się w kodzie i w CHANGELOG-u.
+#   >>> [WYKONANE 2026-09-18, commit 86d9090 — patrz marker wyżej]
 #   >>> NASTĘPNY TRIAŻ MA TO SPRAWDZIĆ NAJPIERW: czy w nowych commitach jest wpis CHANGELOG
 #   >>> tłumaczący (a) usunięcie „Ładowarki" z zastosowań Rolniczych i remap na „Ciągnik"
 #   >>> (03fe892, #82), (b) normalizację products.szerokosc bez zer końcowych (9d1b09f, #83).

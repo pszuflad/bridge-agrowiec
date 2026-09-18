@@ -2469,10 +2469,11 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
     po rodzinach bieżników BKT). Oba ⬜ do decyzji.
 - **⭐ ŚWIEŻA PARTIA DELT PRODUKCJI (triaż 2026-09-18) — backlog #72–#83, JUŻ ROZSTRZYGNIĘTA.**
   Decyzja użytkownika z 2026-09-18: **10 × ✅ TAK**, **1 × ❌ NIE** (#72 — odbudowa ma lepsze
-  rozwiązanie), **1 × 🕒 PÓŹNIEJ** (#81 → do 13d). ⏸ Dwa zatwierdzone wpisy (**#82**, **#83**) mają
-  **wstrzymaną implementację do odpowiedzi Ani** — ich commity przyszły bez wpisu w CHANGELOG,
-  a Ania nadal nad tym pracuje, więc uzasadnienie ma dojechać kolejnym `sync(vps)`.
-  **Przed ruszeniem `tyre_params.cjs`/`application_rules.cjs` odpal `/triaz-zmian`.**
+  rozwiązanie), **1 × 🕒 PÓŹNIEJ** (#81 → do 13d). ✅ **Blokada #82/#83 zdjęta 2026-09-18** (triaż `9d1b09f..86d9090`,
+  `57-CHORE-triaz-uzasadnienia-ani`): Ania dosłała brakujący wpis CHANGELOG. Powód obu zmian jest
+  **produktowy — porządki w wartościach filtrów katalogu**: „Ładowarka" ma zniknąć z filtra
+  Rolniczych (#82), a `5`/`5.0`/`5.00` przestać rozbijać filtr „Szerokość opony" (#83; **świadome**
+  odwrócenie decyzji Anny z 19.08). **Cała partia #72–#83 jest gotowa do implementacji.**
   Okno `94bdf11..9d1b09f`, 24 commity producenta. **To NIE jest zakres I14** (I14 jest FE-only i nic
   z tego nie dotyka `rebuild/frontend/`), ale **nie może umknąć**, bo część trafia w kod, który
   odbudowa ma już 1:1 i który od 18.09 rozjeżdża się z produkcją:
@@ -2487,9 +2488,10 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
   - **Selly REST (13d):** #74, #77 (część delta), #81 — opisane w bloku 13d wyżej;
   - **zamknięte tym triażem:** #71 (Ania naprawiła `konstrukcja` w żywym bundlu — patrz #72),
     #65 zawężone do 3 wpisów `field_name='konstrukcja'`.
-  - **Dwa wpisy bez uzasadnienia biznesowego** (commity bez wpisu w CHANGELOG Ani): #82 i #83.
-    Pytania do Ani wysłane 2026-09-18; **implementacja wstrzymana do odpowiedzi** (obie zmiany są
-    zatwierdzone co do kierunku, brakuje tylko „dlaczego”).
+  - ~~Dwa wpisy bez uzasadnienia biznesowego: #82 i #83.~~ ✅ **Domknięte 2026-09-18** — Ania
+    dopisała wpis CHANGELOG (`86d9090`), oba mają już „dlaczego" i są gotowe do implementacji.
+    Oczekiwania do testów są w backlogu: #82 → 265 rekordów backfillu; #83 → 1297 ujednoliconych
+    szerokości + rekord kontrolny `products.id=105986` dla `$` w MO9.
 - **Zadania środowiskowe przed cutoverem:** Ania nie mogła przetestować §7 (scheduler — brak restartu
   backendu) ani §14 „trzy drogi importu / konfiguracja", bo **dostawcy nie są podpięci produkcyjnie
   na stagingu** („nie da się wstrzymać synchro"). ⚠ Osobno: **test rozstrzygający §8.1 (ta sama

@@ -22,11 +22,12 @@ bundla do ~2026-08-05, MD5 `b745bf95`). Wcześniejsze zmiany są już w specyfik
 **Partia #72–#83 (triaż 2026-09-18) — ROZSTRZYGNIĘTA przez użytkownika tego samego dnia.**
 Dziesięć wpisów ✅ TAK, jeden ❌ NIE (#72 — odbudowa ma lepsze rozwiązanie, zostawiamy nasze),
 jeden 🕒 PÓŹNIEJ (#81 → odłożony do **13d**, zapisany w roadmapie w bloku 13d).
-⏸ **Dwa zatwierdzone wpisy mają WSTRZYMANĄ implementację: #82 i #83** — ich commity przyszły bez
-wpisu w CHANGELOG Ani, więc uzasadnienie biznesowe jest NIEZNANE i czekamy na jej odpowiedź.
-Ania nadal pracuje nad tym obszarem, więc wyjaśnienie ma dojechać kolejnym `sync(vps)` (kod
-+ CHANGELOG). **Następny `/triaz-zmian` ma to sprawdzić, ZANIM ktokolwiek ruszy `tyre_params.cjs`
-albo `application_rules.cjs` w odbudowie.**
+✅ **Blokada #82/#83 ZDJĘTA 2026-09-18** (`57-CHORE-triaz-uzasadnienia-ani`). Oba wpisy szły przez
+dobę bez uzasadnienia biznesowego; Ania dopisała brakujący wpis CHANGELOG o 15:39 i przyszedł on
+commitem `86d9090`. Powód w obu przypadkach okazał się ten sam i jest **produktowy, nie techniczny:
+porządki w wartościach filtrów katalogu** — „Ładowarka" miała zniknąć z filtra Rolniczych (#82),
+a `5`/`5.0`/`5.00` przestać rozbijać filtr „Szerokość opony" (#83). To ta sama motywacja co #79
+(zdublowane kategorie). **Cała partia #72–#83 jest teraz gotowa do implementacji.**
 Sugerowane sklejenie w tickety: **CSV** = #73 + #76 + #77(część) · **application_rules** = #75 + #79
 + #80 + #82 · **MO9** = #78 + #79(drugi hunk) · **szerokość** = #83 · **13d** = #74 + #77(delta) + #81.
 
@@ -925,6 +926,17 @@ od zera):
   `product_3430_pre_featurefix`, `product_639_*`) — kopie bezpieczeństwa sprzed operacji, nie kod.
 - `cleanup_selly_filters_20260917.cjs` — skrypt jednorazowy, dodany w `5dedefb` i **usunięty przez
   Anię w `65dcbd0`** po wykonaniu. Nie portujemy; kontekst w **#81**.
+
+*Pominięte — triaż 2026-09-18 (zakres `9d1b09f..86d9090`):*
+- `86d9090` (18.09 16:00, `20260918_entry_1539`) — **commit zmienia WYŁĄCZNIE `CHANGELOG.md`** (+11 linii,
+  plus własna kopia `.bak`). Zero kodu, zero schematu. Ania uzupełniła brakujący wpis z 15:39, który
+  opisuje zmiany przysłane wcześniej commitami `03fe892` i `9d1b09f`. **Nie zakładamy wpisu #87** —
+  treść poszła do **#82** i **#83** jako brakujące „dlaczego", i zdjęła z nich blokadę implementacji.
+  ⚠ **Wzorzec do zapamiętania:** producent potrafi przysłać najpierw kod, a uzasadnienie dopiero
+  osobnym commitem kilka godzin później. Brak wpisu w CHANGELOG znaczy „jeszcze nie opisane",
+  nie „nie ma powodu".
+  ⚠ Uwaga na pole „Changelog Ani (najnowszy wpis)" w treści tego commita — producent wkleił tam
+  wpis z **2026-08-18**, nie nowy. Prawdziwą treść daje dopiero `git diff` na `CHANGELOG.md`.
 
 ---
 
@@ -3272,11 +3284,17 @@ logika biznesowa**, nie defekt do odtworzenia 1:1, więc wchodzi świadomie, nie
 | **Kategoria** | BACKEND + BAZA (reguły zastosowań) |
 | **Pliki** | `mirror/backend/application_rules.cjs`, `db/schema.sql` (regeneracja 2 triggerów) |
 | **Commit** | `03fe892` (2026-09-18 14:00) |
-| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ⏸ **implementacja WSTRZYMANA do odpowiedzi Ani** (commit bez wpisu w CHANGELOG, uzasadnienie biznesowe NIEZNANE: dlaczego akurat „Ciągnik”?). Pytanie wysłane 2026-09-18. |
-| **Status** | ⏸ **WSTRZYMANE — czekamy na odpowiedź Ani** (pytanie wysłane 2026-09-18). Ania nadal pracuje nad tym obszarem, więc uzasadnienie powinno dojechać w kolejnym `sync(vps)` — w CHANGELOG-u i w kodzie. **Sprawdzić przy następnym `/triaz-zmian`.** |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ✅ **blokada ZDJĘTA 2026-09-18**: Ania dosłała uzasadnienie (`86d9090`), gotowe do implementacji. |
+| **Status** | — **odblokowane 2026-09-18** (`57-CHORE-triaz-uzasadnienia-ani`), zatwierdzone do naniesienia; **jeden ticket „application_rules” razem z #75/#79/#80**. Oczekiwanie do testu: backfill Rolniczych = **265 rekordów**, po korekcie 0 Rolniczych z „Ładowarka”. |
 
-**Opis biznesowy.** ⚠ **NIEZNANE — commit nie niesie wpisu CHANGELOG ani etykiety `.bak`**; opis
-poniżej pochodzi wyłącznie z diffu. „Ładowarka" przestaje być dopuszczalnym zastosowaniem
+**Opis biznesowy.** ✅ **UZUPEŁNIONE 2026-09-18 z wpisu CHANGELOG Ani** (dopisany przez nią
+o 15:39, przyszedł commitem `86d9090`; wcześniej ten commit nie miał uzasadnienia).
+**Powód:** zgłoszenie Anny — *filtr Rolniczych nie powinien pokazywać zastosowania „Ładowarka"*.
+W kategorii Rolnicze wartości `Ładowarka`, `ładowarka kołowa` i `ładowarka rolnicza` zapisują się
+teraz jako `Ciągnik`; **w Przemysłowych `Ładowarka` zostaje bez zmian**. Backfill zaktualizował
+**265 rekordów** Rolniczych, po korekcie zostało 0 Rolniczych z zastosowaniem „Ładowarka".
+To ten sam gatunek porządków co #79 (zdublowane kategorie w filtrze) — **czyszczenie listy
+wartości w filtrach katalogu**, nie zmiana semantyki opony. „Ładowarka" przestaje być dopuszczalnym zastosowaniem
 w kategorii Rolnicze (zostaje w Przemysłowych) i jest tam automatycznie zamieniana na „Ciągnik" —
 czyli produkty rolnicze opisane jako ładowarki trafiają pod ciągniki zamiast, jak dotąd
 (reguła z #75), lądować w „Uniwersalne/pozostałe".
@@ -3285,16 +3303,23 @@ czyli produkty rolnicze opisane jako ładowarki trafiają pod ciągniki zamiast,
 (lista schodzi do 7 pozycji; w `Przemysłowe` zostaje). Nowa zamrożona mapa
 `CATEGORY_APPLICATION_REMAP = { Rolnicze: { 'Ładowarka': 'Ciągnik' } }` i dodatkowy `.map()`
 w `normalizeApplication()`, wstawiony **między** rozwinięcie aliasów a `filter(Boolean)` — czyli
-remap działa po normalizacji aliasu, przed testem dozwolonych wartości. Bez tego remapu „Ładowarka"
+remap działa po normalizacji aliasu, przed testem dozwolonych wartości. **Zweryfikowane w kodzie:**
+mapa ma tylko wpis `'Ładowarka': 'Ciągnik'`, a trzy warianty z opisu Ani zbiegają się do niego
+wcześniej, przez istniejące `APPLICATION_ALIASES` (`ładowarka`, `ładowarka kołowa`,
+`ładowarka rolnicza` → `Ładowarka`, `application_rules.cjs:69-71`) — kolejność `.map()`-ów jest
+więc istotna dla poprawności, nie kosmetyczna. Bez tego remapu „Ładowarka"
 w Rolniczych wpadłaby teraz na `Uniwersalne/pozostałe`. `db/schema.sql` to wyłącznie regeneracja
 wyrażenia w dwóch triggerach.
 
 **Rekomendacja (moja).** ✅ **nanieść razem z #75/#79/#80** (czwarta i ostatnia warstwa tego samego
 modułu — to jest stan końcowy `application_rules.cjs` na dziś).
-⚠ **Brak wpisu CHANGELOG to sam w sobie sygnał** — ten sam gatunek co #64 (`odswinch`), gdzie
-zmiana parsera istniała tylko jako kopia `.bak`. Tu nie ma nawet `.bak`, więc jedynym źródłem
-prawdy jest diff. Uzasadnienie biznesowe („dlaczego akurat Ciągnik?") jest **NIEZNANE** —
-warto dopytać Anię, zanim reguła wejdzie do odbudowy, bo to decyzja produktowa, nie techniczna.
+✅ **Blokada zdjęta 2026-09-18** — Ania dosłała uzasadnienie (`86d9090`), pytanie „dlaczego akurat
+Ciągnik?" jest odpowiedziane: chodzi o **zawartość filtra w katalogu**, nie o klasyfikację opony.
+Nic nie stoi na przeszkodzie implementacji.
+⚠ Zostaje morał proceduralny: przez dobę ta zmiana istniała w produkcji **bez wpisu w CHANGELOG
+i bez kopii `.bak`** — ten sam gatunek co #64 (`odswinch`). Wniosek na przyszłość: brak wpisu
+znaczy „jeszcze nie opisane", nie „nie ma powodu" — **poczekać na kolejny `sync(vps)`, zanim
+uzna się powód za NIEZNANY na stałe**.
 
 ### #83 · 2026-09-18 · [BACKEND] · normalizacja `products.szerokosc` — ODWRÓCENIE decyzji „zachowaj zera końcowe" z 19.08
 | pole | wartość |
@@ -3302,11 +3327,15 @@ warto dopytać Anię, zanim reguła wejdzie do odbudowy, bo to decyzja produktow
 | **Kategoria** | BACKEND (parser rozmiaru — rdzeń importu) |
 | **Pliki** | `mirror/backend/parsers/tyre_params.cjs`, `parsers/adapter.cjs`, `parsers/mo9_agrorami_api.cjs`, `normalize_widths_selly_20260918.cjs` (**nowy**, 146 l., jednorazowy) |
 | **Commit** | `9d1b09f` (2026-09-18 15:00, etykieta `20260918_1500_width_norm`) |
-| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ⏸ **implementacja WSTRZYMANA do odpowiedzi Ani** (commit bez wpisu w CHANGELOG; zmiana odwraca wymaganie Anny z 19.08 o zachowaniu zer końcowych). Pytanie wysłane 2026-09-18. |
-| **Status** | ⏸ **WSTRZYMANE — czekamy na odpowiedź Ani** (pytanie wysłane 2026-09-18). Jw. — kolejny `sync(vps)` powinien przynieść wpis w CHANGELOG-u. **Sprawdzić przy następnym `/triaz-zmian`**, zanim ruszysz `tyre_params.cjs` w odbudowie. |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ✅ **blokada ZDJĘTA 2026-09-18**: Ania dosłała uzasadnienie (`86d9090`) — świadome odwrócenie decyzji z 19.08, powód to filtr „Szerokość opony”. |
+| **Status** | — **odblokowane 2026-09-18** (`57-CHORE-triaz-uzasadnienia-ani`), zatwierdzone do naniesienia. Oczekiwania do testu: **1297 ujednoliconych wartości** szerokości, 0 niekanonicznych po zmianie; rekord kontrolny dla `$` w MO9: `products.id=105986` (`$7-14` → `7-14`, nazwa bez zmian). |
 
-**Opis biznesowy.** ⚠ **Powód NIEZNANY — commit nie niesie wpisu CHANGELOG**; opis z diffu
-i komentarzy w kodzie. Kolumna szerokości dostaje jeden kanoniczny zapis liczbowy: bez nieznaczących
+**Opis biznesowy.** ✅ **UZUPEŁNIONE 2026-09-18 z wpisu CHANGELOG Ani** (`86d9090`).
+**Powód:** zgłoszenie Anny — *filtr „Szerokość opony" nie powinien rozdzielać tej samej liczby
+na warianty `5`, `5.0` i `5.00"*. Czyli **to NIE jest cofnięcie decyzji z 19.08 „dla samej zasady",
+tylko rozwiązanie konkretnego problemu w filtrach katalogu** — dokładnie ta sama motywacja co
+w #79 (zdublowane kategorie) i #82 (Ładowarka). Jednorazowo ujednolicono **1297 wartości**;
+kontrola końcowa: 0 niekanonicznych szerokości, `integrity_check=ok`. Kolumna szerokości dostaje jeden kanoniczny zapis liczbowy: bez nieznaczących
 zer końcowych (`5.00`→`5`, `12.50`→`12.5`, `340.0`→`340`). Zmiana dotyczy **wyłącznie kolumny
 szerokości i odpowiadającej jej cechy w Selly** — pełna nazwa produktu i pole rozmiaru zachowują
 zapis źródłowy. Osobno: znak `$` stojący bezpośrednio przed wymiarem w danych MO9 przestaje być
@@ -3317,7 +3346,9 @@ szerokości w Selly.
 `,`→`.`, wartości niepasujące do `^\d+(?:\.\d+)?$` przechodzą bez zmian, reszta przez `Number()`
 → `String()`), wyeksportowana z modułu. `adapter.recordToSurowe()`: `szerokosc: enriched.szerokosc ?? null`
 → `szerokosc: tyre.normalizeWidthValue(enriched.szerokosc)`. `mo9_agrorami_api.itemToRecord()`:
-`rozmiar = parsedName.rozmiar || ''` → `.replace(/^\$\s*/,'')`.
+`rozmiar = parsedName.rozmiar || ''` → `.replace(/^\$\s*/,'')`. Ania podaje też **konkretny rekord,
+na którym to widać: `products.id=105986`, rozmiar poprawiony z `$7-14` na `7-14`, przy czym
+nazwa „BKT TR 144 $7-14" **zostaje bez zmian** — `$` znika wyłącznie z pola `rozmiar`.
 ⭐ **Najcięższy hunk: w `parseSize()` skasowany CAŁY blok `szerokoscRaw` (−37 linii)** i zastąpiony
 trzema liniami: `result.szerokoscRaw = normalizeWidthValue(result.szerokosc); result.szerokosc = result.szerokoscRaw;`.
 Padły obie gałęzie tego bloku naraz: nadpisanie `result.szerokosc` **surowym stringiem pierwszej
@@ -3338,17 +3369,17 @@ w rdzeniu importu.** `rebuild/backend/src/import/legacy/parsers/tyre_params.cjs:
 tam świadomie w 13a. Skutek rozjazdu jest **formatowy, nie jednostkowy**: produkcja zapisuje dziś
 `10`, odbudowa `10.0`; dla notacji `WxSxD` obie strony dają tę samą liczbę (SW), tylko inaczej
 zapisaną. Trzy rzeczy przed implementacją:
-1. To **jawne odwrócenie decyzji Anny z 2026-08-19** („Anna wymaga zachowania oryginalnego zapisu
-   pierwszej liczby z rozmiaru — z zerami końcowymi"), zapisanej w kodzie jako POPRAWKA v2/v3.
-   Bez wpisu CHANGELOG nie wiadomo, czy to nowa decyzja produktowa, czy skutek uboczny porządków
-   w cechach Selly. **Do dopytania Ani** — a dla 14d to materiał do instrukcji testów, bo zmienia
-   to, co Ania zobaczy w kolumnie.
+1. ✅ **Rozstrzygnięte 2026-09-18.** To **świadome odwrócenie decyzji Anny z 2026-08-19**
+   („zachować oryginalny zapis z zerami końcowymi", POPRAWKA v2/v3 w kodzie) — **nie** skutek
+   uboczny porządków w Selly, jak podejrzewałem. Nowe wymaganie jest silniejsze od starego:
+   zera końcowe rozbijały filtr „Szerokość opony" na `5`/`5.0`/`5.00`. Dla **14d** to materiał
+   do instrukcji testów — zmienia to, co Ania zobaczy w kolumnie i w filtrze.
 2. **Etykieta jest węższa niż zmiana** — `width_norm` brzmi jak samo obcięcie zer, a razem z nim
    wypadł strażnik `isWxSxD` z #64. Tu akurat usunięcie jest spójne (patrz wyżej), ale morał
    z CLAUDE.md zostaje: **etykieta daje nazwę, nie treść** — rozkładaj diff, nie ufaj `.bak`.
-3. Przed naniesieniem **zmierzyć na `db/snapshot.db`, ile rekordów zmienia zapis** (ile wartości
-   `products.szerokosc` ma dziś zera końcowe) — to jest liczba, którą trzeba pokazać Ani przy
-   pytaniu z pkt. 1, i jednocześnie oczekiwanie dla testu charakteryzacyjnego.
+3. **Liczba oczekiwana jest już znana: 1297 wartości** (pomiar Ani na produkcji, `86d9090`).
+   Pomiar na `db/snapshot.db` zrobić mimo to — jako kontrolę, czy nasza baza startowa zgadza się
+   z jej stanem; rozjazd byłby sygnałem, nie powodem do zmiany liczby.
 
 ### #84 · 2026-09-18 · [FRONTEND] · toast po uploadzie z karty dostawcy w produkcji czyta pola, których backend nigdy nie zwracał — „undefined nowych, undefined zmian”
 
