@@ -11,7 +11,6 @@ const CATEGORY_VALUES = Object.freeze({
     'Kombajn',
     'Opryskiwacz',
     'Przyczepa',
-    'Ładowarka',
     'Kosiarka/ogród',
     'Wózek widłowy',
     UNIVERSAL
@@ -125,6 +124,11 @@ function splitApplications(value) {
 // niezaleznie od tego czy zrodlowy wpis mial jeden z nich czy oba (prosba Anny 2026-09-17).
 const FORWARDER_HARWESTER = 'Forwarder/Harwester';
 const FORWARDER_HARWESTER_MEMBERS = new Set(['Forwarder', 'Harwester']);
+const CATEGORY_APPLICATION_REMAP = Object.freeze({
+  Rolnicze: Object.freeze({
+    'Ładowarka': 'Ciągnik'
+  })
+});
 
 function normalizeApplication(category, value) {
   const canonical = canonicalCategory(category);
@@ -134,6 +138,7 @@ function normalizeApplication(category, value) {
   const allowed = new Set(CATEGORY_VALUES[canonical]);
   const mapped = splitApplications(value)
     .map((item) => APPLICATION_ALIASES[normalizeKey(item)] || (item === FORWARDER_HARWESTER ? FORWARDER_HARWESTER : null))
+    .map((item) => CATEGORY_APPLICATION_REMAP[canonical]?.[item] || item)
     .filter(Boolean);
 
   const specific = [...new Set(mapped.filter((item) => item !== UNIVERSAL && (allowed.has(item) || item === FORWARDER_HARWESTER)))];
