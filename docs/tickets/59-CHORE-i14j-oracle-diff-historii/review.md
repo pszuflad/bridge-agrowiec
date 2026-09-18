@@ -125,3 +125,123 @@ procesu, nie domysłem. Jedyny poważny problem to rozjazd między tym, co `rapo
 („tylko podblok »14j«" w roadmapie) a stanem faktycznym (roadmapa nietknięta) — to dokładnie
 rodzaj nieuczciwości artefaktu, przed którym ostrzega `CLAUDE.md`, i musi zostać poprawione
 przed scaleniem.
+
+---
+
+# DRUGA ITERACJA — review po poprawkach (commit `85cc628`)
+
+> Reviewed: 2026-09-18
+> Branch: chore/59-i14j-oracle-diff-historii
+> Diff względem pierwszej iteracji: `91d118b..HEAD` (1 commit, 7 plików)
+
+## Weryfikacja czterech zgłoszonych poprawek
+
+**1. BLOCKER (brak podbloku 14j w roadmapie) — NAPRAWIONE.**
+`docs/rebuild-roadmap.md` ma teraz podblok `##### 14j — automatyczne porównanie Historii z
+oryginałem · ✅ ZROBIONE 2026-09-18 (59-CHORE-i14j-oracle-diff-historii)` (linie ~2495-2567),
+wpis w tabeli kart drugiej fali (linia 191) i w komórce statusu I14. Opisuje STAN: data,
+numer ticketa, gate rozliczony („Gate rozliczony: karta nie rusza kontraktu ani kodu… przechodzi
+bez zmian"), tabela faktycznie dowiezionego zakresu z liczbami zgodnymi z `raport.md`
+(59/59, 0 rozjazdów, 49 813/49 846 wpisów, 270+20 wierszy wyroczni). Zweryfikowane liczby
+zgadzają się 1:1 z `raport.md` i `historia.wyrocznia.json`.
+
+**2. SHOULD-FIX (piaskownice nie sprzątane przy wywrotce przed serwerami) — NAPRAWIONE.**
+`PIASKOWNICE` rejestruje oba katalogi w momencie `mkdtempSync` (linie 138-139, 205-206 w kodzie
+po zmianie — `zbudujPiaskowniceOryginalu`, `zbudujBazeOdbudowy`), obie funkcje wołane PRZED
+blokiem `try` z serwerami. `posprzatajPiaskownice()` wisi na `.finally()` doczepionym do
+`main().catch(...)` na samym końcu pliku — uruchamia się niezależnie od tego, gdzie main() padnie.
+Dokładnie adresuje zgłoszony scenariusz (błąd `npm ci`/migracji/asercji startowej przed startem
+serwerów).
+
+**3. SHOULD-FIX (niespójny separator w `roznice()`) — NAPRAWIONE.**
+`kluczeA.join(",") !== kluczeB.join(",")` (było `"|"` przy porównaniu, `","` przy wyświetlaniu) —
+teraz oba miejsca używają `","`. Zgodne też z `kluczeWpisu` gdzie indziej w pliku.
+
+**4. NICE-TO-HAVE (remisy czasowe w wyroczni) — potwierdzone jako REALNY problem i naprawione
+u źródła.** Nagrywarka (`zapiszWyrocznie()`) filtruje teraz `dziennik.cialo` po unikalnej `data`
+zamiast brać pierwsze 20 wierszy „na ślepo", dokłada flagę `dziennikBezRemisow` do wyroczni i
+osobną asercję w teście (`historia.wyrocznia.test.ts` — nowy `it` „wyrocznia jest ważna: wiersze
+dziennika mają parami różne `data`"). Zweryfikowane uruchomieniem:
+`historia.wyrocznia.json.dziennikBezRemisow === true`, `dziennikPierwszeWiersze.length === 20`,
+`new Set(daty).size === 20` — zero remisów w nowym nagraniu. Sprawdzona też kolejność: 20 wierszy
+jest ściśle malejąco po `data` (ręczna weryfikacja skryptem), więc odsianie remisów nie zaburzyło
+względnej kolejności pozostałych wierszy — po prostu pominięto pary, które i tak miały
+niezdefiniowaną kolejność. `zasiewAudytu` nadal ma 270 wierszy (bez zmian, zgodnie z oczekiwaniem
+— filtr dotyczy wyłącznie gałęzi `history`, nie `audit_log`).
+
+## B. Podblok 14j vs obowiązki 1–5 CLAUDE.md
+
+- **Obowiązek 1 (STAN, nie zamiar):** spełniony — data, ID ticketa, status ✅, gate rozliczony,
+  tabela z faktycznie zmierzonymi liczbami (nie planowanymi).
+- **Obowiązek 3 (fakty weryfikowane, nie z nazwy):** zweryfikowałem samodzielnie dwa z pięciu
+  faktów: (a) `archiver@5.3.2` w `mirror/backend/package-lock.json:67` — zgodne; `archiver@^8.0.0`
+  w `rebuild/backend/package.json:24` — zgodne; (b) `routes/export-shoper.ts:108-171` faktycznie
+  zapisuje `zapiszAudyt(..., akcja: "eksport_csv"/"eksport_shoper", ...)` w obu gałęziach (ZIP i
+  pojedynczy dostawca) — zgodne z twierdzeniem „odbudowa ZAPISUJE audyt eksportu". Nie znalazłem
+  nieprawdziwych faktów.
+- **Obowiązek 2 (nota dla przyszłego bloku trafia do WŁAŚCIWEGO miejsca) — kluczowa ocena.**
+  Bloku „14k" w roadmapie nie ma, a karta 14j miała zakaz ruszania czegokolwiek poza własnym
+  podblokiem (decyzja użytkownika, nadrzędna wobec domyślnej reguły CLAUDE.md). Autor zostawił
+  notę dla 14k WEWNĄTRZ podbloku 14j, jawnie oznaczoną nagłówkiem „⚠ DLA KARTY 14k (backlog #21)
+  — PRZECZYTAJ, ZANIM ZACZNIESZ" i pierwszym zdaniem wprost przyznającym, że blok 14k jeszcze nie
+  istnieje i że **pierwszym krokiem sesji 14k ma być przeniesienie tej treści do nowo założonego
+  bloku**. To jest rozwiązanie akceptowalne, a nie obejście: różni się od przypadków opisanych
+  w CLAUDE.md (`bridge_ext.cjs`, `PUT /api/config`), gdzie fakt WYLĄDOWAŁ w złym miejscu po cichu
+  i trzeba było go tam znaleźć. Tu nota jest głośno oznaczona jako tymczasowa i wskazuje
+  dokładnie, co zrobić. **Rekomendacja: zostawić jak jest, nie zakładać bloku 14k na siłę** —
+  założenie pustego bloku 14k tylko po to, by przenieść trzy punkty, byłoby naruszeniem tej samej
+  zasady własności plików, którą karta świadomie uszanowała, i nie doda żadnej wartości poza
+  kosmetyką. Jedyne ryzyko: gdyby sesja realizująca backlog #21 nie nazwała się „14k" (np. dostała
+  inny numer/nazwę), nota by ją ominęła — ale to ryzyko dotyczy każdej noty „do przyszłego bloku”
+  pisanej zanim ten blok istnieje, nie jest specyficzne dla tej karty.
+
+## C. Poprawność nowej wyroczni
+
+Potwierdzone bezpośrednim odczytem `historia.wyrocznia.json`:
+- `dziennikPierwszeWiersze.length === 20`, `dziennikBezRemisow === true`, 20 unikalnych `data`.
+- `zasiewAudytu.length === 270` (bez zmian względem pierwszego nagrania).
+- Kolejność 20 wierszy jest ściśle malejąca po `data` (sprawdzone programowo) — spójne z
+  `ORDER BY data DESC` bez tiebreakera, teraz jednoznaczne, bo bez remisów.
+- Diff pliku pokazuje, że dwa wiersze z remisem (`id 46916`, `id 46914`) zostały usunięte z
+  pierwszych 20, a w ich miejsce doszły dwa starsze wiersze (`id 37820`, `id 37822`) z jeszcze
+  wcześniejszej daty — spójne z logiką „pomiń duplikat `data`, idź dalej, aż będzie 20 unikalnych".
+  Nie psuje to porównania z odbudową: `zasiewDziennika` (surowe wiersze wstawiane do testowej bazy)
+  i `dziennikPierwszeWiersze` (oczekiwana odpowiedź) pochodzą z tego samego, spójnie przefiltrowanego
+  zbioru.
+
+## D. Nowe problemy w plikach zmienionych tą iteracją
+
+Nie znalazłem. `oracle-diff-historii.cjs`, `historia.wyrocznia.test.ts`, `historia.wyrocznia.json`,
+`raport.md`, `docs/rebuild-roadmap.md` — zmiany są spójne wewnętrznie i ze sobą nawzajem, bez
+regresji względem pierwszej iteracji.
+
+## E. Własność plików
+
+`git diff origin/develop...HEAD --name-only` pokazuje wyłącznie: `docs/rebuild-backlog.md`,
+`docs/rebuild-roadmap.md`, `docs/tickets/59-CHORE-i14j-oracle-diff-historii/**`,
+`rebuild/backend/test/historia.wyrocznia.json`, `rebuild/backend/test/historia.wyrocznia.test.ts`.
+`rebuild/backend/src/` i `contract/` nietknięte — zgodne z deklaracją.
+
+## F. Bramki (uruchomione samodzielnie w tej iteracji)
+
+- `npm run lint` ✓
+- `npm run typecheck` ✓
+- `npm run build` ✓
+- `npm test` ✓ — **82 pliki, 1262 testy, wszystkie zielone** (dokładnie liczba deklarowana
+  w `raport.md`).
+
+## G. Uczciwość raportu po poprawkach
+
+Sekcja „Review fixes applied" w `raport.md` opisuje wszystkie cztery poprawki zgodnie ze stanem
+faktycznym w diffie (zweryfikowane wyżej punkt po punkcie) — liczby testów (12→13, 1261→1262),
+liczba unikalnych dat (18→20) i status bramek są prawdziwe. Nie znalazłem żadnego twierdzenia
+w `raport.md` niepokrytego diffem.
+
+## Podsumowanie drugiej iteracji
+
+**0 BLOCKER / 0 SHOULD-FIX / 0 NICE-TO-HAVE.** Wszystkie cztery poprzednio zgłoszone problemy
+zostały naprawione trafnie i sprawdzalnie, w tym remisy czasowe — które okazały się realnym,
+a nie tylko teoretycznym problemem (18/20 unikalnych dat w pierwszym nagraniu). Rozwiązanie noty
+dla bloku 14k (żywa w środku 14j, jawnie oznaczona) jest wystarczające i nie wymaga zakładania
+pustego bloku 14k na siłę. Bramki zielone, liczby w `raport.md` zgodne ze stanem faktycznym.
+Karta gotowa do merge.
