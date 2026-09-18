@@ -3424,3 +3424,51 @@ oryginał w ogóle nie miał (puste pole custom wpadało w `if (!val || val < 1)
 (ta sama nazwa/ścieżka) drugi raz z rzędu nie wywołuje `onChange` przeglądarki i przycisk wygląda
 na zepsuty. Odbudowa czyści pole (`e.target.value = ""`) — powód praktyczny: Ania poprawia plik
 u dostawcy i wgrywa go ponownie pod tą samą nazwą.
+
+### #87 · 2026-09-18 · [BACKEND] · widok „Historia" czyta tylko 5000 najświeższych zdarzeń — najstarsze stają się nieosiągalne, a licznik przestaje być liczbą wszystkich zdarzeń
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (historia / mapowanie audytu) — dziwactwo PRODUKCJI odtworzone świadomie |
+| **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts:54` (`LIMIT_AUDYTU = 5000`), użycie w `rebuild/backend/src/routes/history.ts` |
+| **Do nowej wersji?** | ⬜ **DO DECYZJI** |
+| **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · zmiana limitu — nie zaczęte |
+
+**Co robi produkcja.** `GET /api/history/meta` i `GET /api/history/paged` wołają
+`listAudit(5000)`, czyli `SELECT … FROM audit_log ORDER BY kiedy DESC LIMIT 5000`. Limit stoi
+**PRZED** mapowaniem, odsiewem akcji spoza słownika, filtrowaniem i paginacją — do widoku
+wchodzi więc 5000 najświeższych wierszy `audit_log`, a dopiero z nich powstaje to, co widać.
+Obie trasy mają ten limit zahardkodowany, bez parametru i bez możliwości sięgnięcia głębiej.
+
+**Jaki jest skutek.** Dwa, oba narastające z czasem:
+1. **Najstarsze wpisy stają się nieosiągalne.** Nie da się do nich dojść ani stronicowaniem, ani
+   filtrem, ani wyszukiwarką — wypadły, zanim filtr zdążył zadziałać. Ekran nie sygnalizuje tego
+   w żaden sposób: wygląda identycznie jak historia, która po prostu tyle ma.
+2. **Licznik `N wpisów` przestaje być liczbą wszystkich zdarzeń.** `total` liczy się na już
+   przyciętym zbiorze, więc po przekroczeniu progu pokazuje „ile z ostatnich 5000 pasuje do
+   filtra", a nie „ile było". Tak samo zawęża się lista dostawców w filtrze (`/meta` liczy się
+   na tym samym materiale).
+
+**Kiedy to wypłynie — zmierzone 2026-09-18** (`59-CHORE-i14j`, na `db/snapshot.db`):
+`audit_log` ma dziś **3873 wiersze**, czyli **77% progu**. Limit jest więc **dziś niewidoczny**
+i dlatego nie wyszedł w żadnym teście — ale przy obecnym tempie zapisu do `audit_log` (import
+z URL, staging, overrides, narzuty — w sumie kilkanaście akcji, z czego sam `auto_pull` to już
+2869 wierszy) próg zostanie przekroczony i wtedy ekran zacznie po cichu gubić najstarsze
+zdarzenia. Odsiew akcji jest tu bez znaczenia: limit tnie **surowy** `audit_log`, więc zjadają
+go także akcje, których widok i tak nie pokazuje (backlog **#21**).
+
+**Dlaczego to jest jak w produkcji, a nie usterka.** Zachowanie odtworzone 1:1, opisane Ani
+w `docs/instrukcja-testow-I5.md` §11 pkt 9 jako dziwactwo do NIEzgłaszania.
+
+**Powiązanie z #21.** Oba wpisy dotyczą tego samego widoku i idą w przeciwnych kierunkach:
+#21 pyta, czy **rozszerzyć** słownik akcji (więcej zdarzeń w widoku), a ten wpis — czy podnieść
+albo zdjąć limit. Rozstrzygnięcie #21 na „tak" **przyspiesza** problem opisany tutaj, bo przez
+odsiew przechodziłoby wielokrotnie więcej wierszy. Warto je rozstrzygać razem.
+
+**Możliwe kierunki — do decyzji użytkownika, NIE rozstrzygam:**
+- **(a) zostawić 1:1** — zero kosztu, problem wraca sam przy ~5000 zdarzeń;
+- **(b) podnieść limit** — najtańsze, odsuwa próg, ale go nie usuwa i obciąża odpowiedź
+  (mapowanie całości w pamięci przy każdym żądaniu);
+- **(c) filtrować i paginować w SQL** zamiast w pamięci — usuwa problem u źródła i naprawia
+  licznik, ale jest **świadomym odstępstwem** od oryginału w trasie, którą dziś porównujemy
+  z produkcją 1:1, i wymaga przenagrania fixtures historii.
