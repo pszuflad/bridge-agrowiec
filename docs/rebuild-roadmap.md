@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I14.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); **otwarte 14f/14h/14i** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); **otwarte 14f/14h/14i** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
 
 ---
 
@@ -2344,20 +2344,40 @@ Trzy zatwierdzone odstępstwa od oryginału (pełne uzasadnienia:
 `origin/develop` 4cd5cd9 przed startem).
 
 **Co faktycznie dowiezione** (różni się od pierwotnego zamiaru — patrz decyzja D1 niżej):
-- **Nowy plik `docs/instrukcja-testow-I14.md`** — 13 rozdziałów w konwencji
-  `instrukcja-testow-I13.md` (krótka delta „co się zmieniło", nie pełny przewodnik): trzy ekrany
-  po 14a/14b/14c, dziwactwa naprawione i pozostałe, test rozstrzygający, „Czego jeszcze NIE MA",
-  lista kontrolna.
-- **`docs/instrukcja-testow-I3.md` — TYLKO banner** na górze, kierujący do I14 i wymieniający
+- **Nowy plik `docs/instrukcja-testow-I3-v2.md`** — **JEDEN dokument** (nie „I14"; nazwa to
+  decyzja użytkownika: dla Ani to druga wersja instrukcji, którą wypełniała, a nie nowa
+  iteracja). Zawężony wyłącznie do jej uwag; **wyjaśnienie i kroki są w tej samej pozycji**,
+  bo rozdzielenie ich na dwa pliki (instrukcja + scenariusze) zostało odrzucone przez
+  użytkownika jako niewygodne w przekazaniu.
+  Układ: 0 przygotowanie i pliki testowe · **1–3 trzy ekrany po 14a/14b/14c** · 4 dwa dziwactwa
+  naprawione · 5 „czego NIE zgłaszaj ponownie" · 6 test rozstrzygający · 7 podsumowanie
+  · 8 jak zgłosić. **Każda pozycja ma pięć części:** „Zgłosiłaś" → „Jak to naprawiliśmy"
+  (wyjaśnienie) → „Sprawdź" (ponumerowane kroki) → „Ma się stać" → **„Twoja ocena"**
+  (☐ OK ☐ ŹLE + miejsce na uwagi). Osiemnaście pozycji do odhaczenia, zebranych w tabeli w §7.
+  **Świadomie NIE ma** rozdziałów „Co jest nieaktualne w I3" i „Czego jeszcze NIE MA" —
+  to materiał meta, nie zadanie testowe; pierwszy zastąpiony bannerem w samym I3.
+  **Plik `docs/instrukcja-testow-I14.md` ani `scenariusze-testow-I14.md` NIE ISTNIEJĄ** —
+  były wersjami pośrednimi w trakcie tej karty, scalonymi do jednego pliku.
+- **`docs/instrukcja-testow-I3.md` — TYLKO banner** na górze, kierujący do v2 i wymieniający
   zdezaktualizowane sekcje. **Treść I3 nietknięta**, w szczególności 9 wystąpień „Synchronizuj
   teraz" ZOSTAJE w I3 (konwencja I13: „starsze instrukcje zostają bez zmian, wierz tej kartce").
 - `docs/rebuild-backlog.md` — **bez zmian**, patrz sprostowanie niżej.
 
-**Decyzja użytkownika D1 (2026-09-18) — forma dokumentu.** Rozważane: (A) aktualizacja
-8-rozdziałowej wersji w repo, (B) odtworzenie w repo 17-rozdziałowej wersji Ani.
-**Wybrane: ani A, ani B — osobna, krótka delta I14.** Uzasadnienie: Ania testuje deltę, a nie
-czyta 17 rozdziałów od nowa. ⚠ **Świadomy koszt: rozjazd z 17-rozdziałowym dokumentem Ani NIE
-znika** i wróci przy kolejnej iteracji. Odtworzenie pełnej wersji zostaje jako otwarty temat.
+**⭐ DECYZJA UŻYTKOWNIKA (2026-09-18) — DELTA JEST FORMATEM DOCELOWYM instrukcji testów.**
+Obowiązuje od teraz dla KAŻDEJ kolejnej iteracji, nie tylko dla I14. Z tego wynika:
+- instrukcja iteracji zawiera **wyłącznie to, co Ania zgłosiła i ma zweryfikować** — nie
+  powtarza scenariuszy, które już przeszły i których nie reklamowała;
+- **starszych instrukcji się nie przepisuje** — dostają banner „częściowo nieaktualne, patrz
+  I<n>" i zostają jako zapis stanu z danej daty;
+- **temat odtworzenia 17-rozdziałowej wersji Ani jest ZAMKNIĘTY** — nie robimy tego; rozjazd
+  przestaje być długiem, bo pełny przewodnik przestał być formatem docelowym.
+
+**Decyzja D1 (2026-09-18) — droga do powyższego.** Rozważane: (A) aktualizacja 8-rozdziałowej
+wersji w repo, (B) odtworzenie w repo 17-rozdziałowej wersji Ani. **Wybrane: ani A, ani B —
+osobna delta I14**, a następnie (po przeglądzie pierwszej wersji) **zawężona wyłącznie do uwag
+Ani**: z dokumentu wypadły rozdziały „Co jest nieaktualne w I3" i „Czego jeszcze NIE MA"
+jako materiał meta, a każda pozycja dostała układ **„Zgłosiłaś → Jest teraz → Sprawdź"**.
+Osiem rozdziałów zamiast trzynastu.
 
 ⚠ **FAKT sprostowany — numeracja w tym opisie pochodziła z wersji, której w repo NIE MA.**
 `docs/instrukcja-testow-I3.md` w gicie ma **8 rozdziałów** (494 linie, 2026-09-01). Wersja, którą
@@ -2375,9 +2395,9 @@ tego opisu mówiła „Backlog #9/#10 do rozliczenia"; to było **błędne zało
 zamknięte od **2026-09-08**: fix Ani z 01.09 sportowany i **POTWIERDZONY POMIAREM** w
 `42-CHORE-i13a-resync-parserow` (`nro` `1`→`'Tak'`, `0`→`null` — MO1 199, MO3 44, MO9 12 rek.;
 MO1 `odrzuconePrzezAdapter` 1→0 przy tych samych 199 kodach). 14d **niczego w backlogu nie
-zmieniała** — tylko opisała naprawę Ani w instrukcji (I14 rozdz. 6).
+zmieniała** — tylko opisała naprawę Ani w instrukcji (v2 rozdz. 4).
 
-**Rozliczenie uwag przekazanych przez 14a/14b/14c** (wszystkie trafiły do I14, rozdz. 3–5 i 10):
+**Rozliczenie uwag przekazanych przez 14a/14b/14c** (wszystkie trafiły do v2, rozdz. 1–3):
 - **14a:** nowy przepływ „Wgraj pliki" → modal → „Importuj do staging" → toast; druga ścieżka
   przez kafel dostawcy; brak licznika na przycisku importu; podgląd PO imporcie, nie przed.
   `data-testid` **świadomie pominięte w instrukcji** — Ania klika po etykietach, nie po testidach.

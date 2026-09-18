@@ -241,3 +241,111 @@ ten przycisk **od 14c realnie istnieje**, więc ta akurat wzmianka stała się p
 
 **Zapisane też w roadmapie** (podblok 14d), żeby wynik audytu doszedł do następnej sesji,
 a nie został tylko w raporcie tej karty.
+
+## Druga runda decyzji użytkownika (2026-09-18, po przeglądzie pierwszej wersji)
+
+**⭐ DELTA UZNANA ZA FORMAT DOCELOWY instrukcji testów** — dla każdej kolejnej iteracji, nie
+tylko I14. **Follow-up nr 1 z tego raportu (rozjazd z 17-rozdziałowym dokumentem Ani) jest tym
+samym ZAMKNIĘTY** — przestaje być długiem, bo pełny przewodnik przestał być formatem docelowym.
+Zapisane w roadmapie w podbloku 14d, żeby obowiązywało następne sesje.
+
+**Dokument zawężony wyłącznie do uwag Ani.** Polecenie: *„żeby w tym dokumencie było zawarte
+tylko to, co Ania ma przetestować — nie wszystko od początku, tylko to, co zgłosiła do
+poprawy"*. Wykonane:
+
+- **13 rozdziałów → 8.** Usunięte jako materiał meta, nie zadanie testowe: „Co jest NIEAKTUALNE
+  w instrukcji Iteracji 3" (jego rolę przejął banner w samym I3, gdzie i tak trafia czytelnik)
+  oraz „Czego jeszcze NIE MA" (spis stanu całej odbudowy — nie jej zgłoszenia). Zwinięte także
+  rozdziały 1–2 (skrót + tabela „co zobaczysz inaczej"), bo powtarzały treść rozdziałów
+  szczegółowych.
+- **Każda poprawka przepisana w układzie „Zgłosiłaś → Jest teraz → Sprawdź"** — czytelniczka
+  widzi wprost, która jej uwaga jest domknięta i czym to zweryfikować.
+- **Rozdzielone jej zgłoszenia od naszych znalezisk.** Pozycje, których Ania NIE zgłaszała
+  (przestawiona kolumna „Magazyn", skrócony nagłówek „Powód", placeholder szukajki), zeszły do
+  bloku „Przy okazji — dwie rzeczy, których nie zgłaszałaś", żeby nie przypisywać jej cudzych
+  uwag.
+- **Nowy rozdział 5 „Czego NIE zgłaszaj ponownie"** — status dostawcy (czeka na jej decyzję),
+  EAN naukowy (decyzja podjęta, wdrożenie czeka), daty promocji (zmierzone, naprawa zaplanowana).
+  Wcześniej te trzy rzeczy były rozsypane po trzech różnych rozdziałach.
+- **Banner w `instrukcja-testow-I3.md` zsynchronizowany** — odsyłał do rozdziałów 10 i 11,
+  które przestały istnieć; teraz sam niesie listę i kieruje do rozdziału 5.
+
+Wierność wobec kodu bez zmian — treść merytoryczna i wszystkie zweryfikowane stringi oraz
+liczby zostały przeniesione, zmienił się układ i zakres, nie fakty.
+
+## Trzecia runda — scenariusze testowe (2026-09-18)
+
+Polecenie: *„Napisz teraz dokumentację, scenariusze testowe do wykonania przez Anię i zapisz
+to wszystko do markdown do pliku MD"*.
+
+**Nowy plik: `docs/scenariusze-testow-I14.md`** — **26 ponumerowanych scenariuszy** do wykonania
+przez Anię. Świadomie jako **osobny plik obok instrukcji**, nie jako jej rozdział: instrukcja
+odpowiada na pytanie „dlaczego to wygląda inaczej", scenariusze na „co kliknąć po kolei".
+Sklejenie ich dałoby dokument, w którym uzasadnienia rozpychają kroki i gubi się rytm klikania.
+Oba pliki linkują do siebie nawzajem.
+
+**Układ każdego scenariusza:** Cel · Warunki wstępne · Kroki (ponumerowane) · Oczekiwany wynik
+(kryterium zaliczenia) · ⚠ Uwaga (pułapka wyglądająca na błąd).
+
+**Podział:**
+- **0. Przygotowanie** (P1–P2) — logowanie, punkt wyjścia, **tabela plików testowych**
+  z przypisaniem „który plik do którego scenariusza" plus przepis na plik celowo wadliwy;
+- **1. Wgrywanie ręczne** (S1.1–S1.9) — import zbiorczy, brak licznika, korekta dostawcy,
+  ⭐ wymuszenie z kafla, sprzątanie po nim, wadliwy plik, błąd importu, MO6, XLSX;
+- **2. Staging** (S2.1–S2.8) — ⭐ domyślny filtr, ⭐ zakres „Akceptuj wszystkie", warunkowe
+  przyciski, potwierdzenia, konfigurator, ukryte kolumny, trwałość ustawień, szukajka;
+- **3. Karta dostawcy** (S3.1–S3.4) — etykieta, ⭐ „Wgraj plik" z liczbami, pole minut,
+  regresja zapisu częstotliwości;
+- **4. Naprawione dziwactwa** (S4.1–S4.2) — WULSTBAND, NRO/CHO, z liczbami z pomiaru 13a;
+- **5. Test rozstrzygający** (S5.1) — ⭐ tabela MO1–MO10 z czterema kolumnami liczb;
+- **6. Czego ten zestaw NIE sprawdza** — żeby Ania nie szukała rzeczy czekających na decyzję;
+- **7. Arkusz wyników** — 26 wierszy OK/BŁĄD/POMINIĘTY + podsumowanie;
+- **8. Jak zgłaszać znalezisko** — ze wskazaniem ID scenariusza i numeru kroku.
+
+**Decyzje projektowe warte odnotowania:**
+- **Pięć scenariuszy oznaczonych ⭐ jako minimum** (S1.4, S2.1, S2.2, S3.2, S5.1) — na wypadek,
+  gdyby Ania miała mało czasu.
+- **S1.7 (błąd importu) oznaczony jako WARUNKOWY**, bo nie da się go wywołać na życzenie;
+  instrukcja mówi wprost, żeby wtedy zanotować „POMINIĘTY", zamiast udawać, że da się to
+  wymusić.
+- **S1.5 (sprzątanie) jest osobnym scenariuszem**, nie przypisem do S1.4 — S1.4 celowo tworzy
+  błędne dane i bez własnego kroku z numerem sprzątanie bywa pomijane.
+- **S3.2 ma odwróconą polaryzację ostrzeżenia:** „undefined" jest tu BŁĘDEM do zgłoszenia,
+  bo naprawiliśmy zachowanie produkcji. Napisane wprost, żeby Ania nie uznała tego za
+  „zgodne z oryginałem".
+- **S5.1 ma cztery kolumny liczb, nie dwie** (w plikach / w poczekalni × stary / nowy) —
+  oraz osobne wiersze dla MO8 CSV i MO8 XLSX, bo to dwie różne ścieżki parsera.
+
+**Weryfikacja wobec kodu:** wszystkie nowe liczby i etykiety sprawdzone tak samo jak
+w instrukcji. Dodatkowo potwierdzone dla S3.4: `formatujCzestotliwosc(90)` = `Math.round(90/60)`
+= **„2 godz."**, a 90 minut nie jest presetem, więc po ponownym wejściu w edycję select stoi
+na „Inna wartość (minuty)…" z wypełnionym polem (`dostawcy.ts:36-40`, `Dostawcy.tsx:141`).
+
+## Czwarta runda — scalenie do JEDNEGO pliku i zmiana nazwy (2026-09-18)
+
+Dwie korekty kierunku od użytkownika, obie unieważniające poprzednią rundę:
+
+**1. Jeden plik zamiast dwóch.** Podział na `instrukcja-testow-I14.md` (dlaczego) +
+`scenariusze-testow-I14.md` (co kliknąć) **odrzucony**: *„Nie chcę mieć dwóch dokumentów.
+Chcę mieć jeden plik"*. Oba scalone; `scenariusze-testow-I14.md` **usunięty z repo**.
+Scalenie nie polegało na sklejeniu — każda pozycja ma teraz **pięć części w jednym miejscu**:
+„Zgłosiłaś" → **„Jak to naprawiliśmy"** (wyjaśnienie, czego wcześniej nie było w scenariuszach)
+→ „Sprawdź" (kroki) → „Ma się stać" → **„Twoja ocena"** (☐ OK ☐ ŹLE + uwagi). Osiemnaście
+pozycji, zebranych w tabeli podsumowania w §7.
+
+**2. Nazwa `I3-v2`, nie `I14`.** Plik nazywa się `docs/instrukcja-testow-I3-v2.md`, tytuł:
+„Iteracja 3 — wersja 2: poprawki po Twoich uwagach". Uzasadnienie użytkownika jest z punktu
+widzenia odbiorczyni: **dla Ani to druga wersja dokumentu, który wypełniała**, a nie nowa
+iteracja — numer iteracji jest naszą kategorią wewnętrzną, nie jej.
+
+⚠ **Konsekwencja dla nazewnictwa w projekcie:** to ZERWANIE z konwencją `instrukcja-testow-I<n>`
+powiązaną z numerem iteracji. Wcześniejsze instrukcje (I3, I4, I6–I10, I13) nazwę biorą
+od iteracji; ta bierze ją od **dokumentu, który poprawia**. Odnotowane w roadmapie, żeby kolejna
+karta nie „naprawiła" tego z powrotem na `I14`.
+
+**Zaktualizowane odwołania:** banner w `instrukcja-testow-I3.md` (trzy miejsca) oraz cztery
+miejsca w `docs/rebuild-roadmap.md`. Sprawdzone `grep`em, że nigdzie nie został link
+do nieistniejących już `instrukcja-testow-I14.md` i `scenariusze-testow-I14.md`.
+
+**Wierność wobec kodu bez zmian** — treść merytoryczna, zweryfikowane stringi i liczby
+przeniesione bez modyfikacji; zmienił się układ, zakres i nazwa pliku, nie fakty.
