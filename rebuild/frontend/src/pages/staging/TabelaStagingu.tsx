@@ -1,14 +1,21 @@
 /**
- * Tabela pozycji stagingu — jedenaście kolumn z oryginału
- * (`deminified/frontend-index.js:20610-21100`).
+ * Tabela pozycji stagingu — dwanaście kolumn z oryginału
+ * (`deminified/frontend-index.js:20790-20830`).
  *
  * Bez wirtualizacji, w odróżnieniu od katalogu: staging jest STRONICOWANY po stronie
  * serwera (`/paged`, domyślnie 25 wierszy), więc nie ma czego wirtualizować.
+ *
+ * ⚠ KOLEJNOŚĆ KOLUMN JEST ZNACZĄCA, nie kosmetyczna. Enhancer kolumn w oryginale mapował
+ * je POZYCYJNIE — brał `i`-ty `<th>` i przypisywał mu `POS_KEYS[i]` (`fe.js:29157-29173`).
+ * Dlatego przy 14b `Magazyn` wrócił na szóstą pozycję, zaraz za `Dostawca`; odbudowa trzymała
+ * go wcześniej za `Cena sprzedaży`. Źródłem prawdy jest `KOLEJNOSC_KOLUMN` w `kolumny.ts` —
+ * przy każdej zmianie tej tabeli trzeba je przestawiać razem.
  */
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WYGLAD_TYPU, type PozycjaStagingu } from "./dane";
+import type { WidocznoscKolumn } from "./kolumny";
 
 /** Odznaka typu zmiany — etykiety i kolory 1:1 z `XP` (`fe.js:597593`). */
 export function OdznakaTypu({ typ }: { typ: string }) {
@@ -47,6 +54,8 @@ export type WlasciwosciTabeli = {
   przelaczWszystkie: () => void;
   otworzSzczegoly: (id: number) => void;
   ladowanie: boolean;
+  /** Mapa z konfiguratora kolumn; `checkbox` i `akcje` są w niej zawsze prawdziwe. */
+  widoczneKolumny: WidocznoscKolumn;
 };
 
 export function TabelaStagingu({
@@ -56,8 +65,17 @@ export function TabelaStagingu({
   przelaczWszystkie,
   otworzSzczegoly,
   ladowanie,
+  widoczneKolumny,
 }: WlasciwosciTabeli) {
   const wszystkieZaznaczone = pozycje.length > 0 && pozycje.every((p) => zaznaczone.has(p.id));
+
+  /*
+    Oryginał ukrywał kolumny wstrzykniętym `<style>` z regułami `display:none` na selektorach
+    `th[data-scol="…"]` (`fe.js:29131-29140`), bo z zewnątrz Reacta nie miał innego sposobu.
+    Tutaj po prostu nie renderujemy komórki — skutek dla użytkownika jest identyczny, a znika
+    cała warstwa taggowania DOM-u.
+  */
+  const pokaz = (klucz: string): boolean => !!widoczneKolumny[klucz];
 
   if (ladowanie) {
     return (
@@ -89,16 +107,16 @@ export function TabelaStagingu({
                 onChange={przelaczWszystkie}
               />
             </th>
-            <th className="p-2 font-medium">Typ</th>
-            <th className="p-2 font-medium">Kod</th>
-            <th className="p-2 font-medium">Nazwa</th>
-            <th className="p-2 font-medium">Dostawca</th>
-            <th className="p-2 font-medium text-right">Stan</th>
-            <th className="p-2 font-medium text-right">Cena zakupu</th>
-            <th className="p-2 font-medium text-right">Cena sprzedaży</th>
-            <th className="p-2 font-medium">Magazyn</th>
-            <th className="p-2 font-medium text-right">Zmiana</th>
-            <th className="p-2 font-medium">Powód / co sprawdzić</th>
+            {pokaz("typ") && <th className="p-2 font-medium">Typ</th>}
+            {pokaz("kod") && <th className="p-2 font-medium">Kod</th>}
+            {pokaz("nazwa") && <th className="p-2 font-medium">Nazwa</th>}
+            {pokaz("dostawca") && <th className="p-2 font-medium">Dostawca</th>}
+            {pokaz("magazyn") && <th className="p-2 font-medium">Magazyn</th>}
+            {pokaz("stan") && <th className="p-2 font-medium text-right">Stan</th>}
+            {pokaz("cenaZ") && <th className="p-2 font-medium text-right">Cena zakupu</th>}
+            {pokaz("cenaS") && <th className="p-2 font-medium text-right">Cena sprzedaży</th>}
+            {pokaz("zmiana") && <th className="p-2 font-medium text-right">Zmiana</th>}
+            {pokaz("powod") && <th className="p-2 font-medium">Powód</th>}
             <th className="p-2 font-medium">Akcje</th>
           </tr>
         </thead>
@@ -114,60 +132,74 @@ export function TabelaStagingu({
                   onChange={() => przelaczZaznaczenie(pozycja.id)}
                 />
               </td>
-              <td className="p-2">
-                <OdznakaTypu typ={pozycja.typZmiany} />
-              </td>
-              <td className="p-2 font-mono text-xs">{pozycja.kod}</td>
-              <td className="p-2 max-w-xs truncate" title={pozycja.nazwa}>
-                {pozycja.nazwa}
-              </td>
-              <td className="p-2">{pozycja.dostawca}</td>
-              <td className="p-2 text-right tabular-nums">
-                {/* Stary → nowy, bo to właśnie różnica jest tu informacją. */}
-                {pozycja.stanStary != null && pozycja.stanStary !== pozycja.stanNowy ? (
-                  <>
-                    <span className="text-muted-foreground">{pozycja.stanStary}</span>
-                    {" → "}
-                  </>
-                ) : null}
-                {pozycja.stanNowy ?? "—"}
-              </td>
-              <td className="p-2 text-right tabular-nums">
-                {pozycja.cenaZakupuStara != null &&
-                pozycja.cenaZakupuStara !== pozycja.cenaZakupuNowa ? (
-                  <>
-                    <span className="text-muted-foreground">
-                      {liczba(pozycja.cenaZakupuStara)}
-                    </span>
-                    {" → "}
-                  </>
-                ) : null}
-                {liczba(pozycja.cenaZakupuNowa)}
-              </td>
-              <td className="p-2 text-right tabular-nums">{liczba(pozycja.cenaSprzedazyNowa)}</td>
-              <td className="p-2">{pozycja.magazyn ?? "—"}</td>
-              <td className="p-2 text-right">
-                <ZmianaProcentowa wartosc={pozycja.zmianaPct} />
-              </td>
-              <td className="p-2 max-w-md">
-                {/*
-                  `powod` i `ostrzezenie` to komunikaty PISANE DLA CZŁOWIEKA — łącznie
-                  z odtworzonym błędem produkcji „zapis naukowy ma tylko null cyfr
-                  znaczących" (backlog #11). Ustalenie z 3b: UI ma je POKAZYWAĆ, nie filtrować.
-                */}
-                <div className="text-xs text-muted-foreground line-clamp-2" title={pozycja.powod ?? ""}>
-                  {pozycja.powod ?? "—"}
-                </div>
-                {pozycja.ostrzezenie ? (
-                  <div
-                    className="mt-0.5 text-xs text-amber-700 line-clamp-2"
-                    title={pozycja.ostrzezenie}
-                    data-testid={`ostrzezenie-${pozycja.id}`}
-                  >
-                    {pozycja.ostrzezenie}
+              {pokaz("typ") && (
+                <td className="p-2">
+                  <OdznakaTypu typ={pozycja.typZmiany} />
+                </td>
+              )}
+              {pokaz("kod") && <td className="p-2 font-mono text-xs">{pozycja.kod}</td>}
+              {pokaz("nazwa") && (
+                <td className="p-2 max-w-xs truncate" title={pozycja.nazwa}>
+                  {pozycja.nazwa}
+                </td>
+              )}
+              {pokaz("dostawca") && <td className="p-2">{pozycja.dostawca}</td>}
+              {pokaz("magazyn") && <td className="p-2">{pozycja.magazyn ?? "—"}</td>}
+              {pokaz("stan") && (
+                <td className="p-2 text-right tabular-nums">
+                  {/* Stary → nowy, bo to właśnie różnica jest tu informacją. */}
+                  {pozycja.stanStary != null && pozycja.stanStary !== pozycja.stanNowy ? (
+                    <>
+                      <span className="text-muted-foreground">{pozycja.stanStary}</span>
+                      {" → "}
+                    </>
+                  ) : null}
+                  {pozycja.stanNowy ?? "—"}
+                </td>
+              )}
+              {pokaz("cenaZ") && (
+                <td className="p-2 text-right tabular-nums">
+                  {pozycja.cenaZakupuStara != null &&
+                  pozycja.cenaZakupuStara !== pozycja.cenaZakupuNowa ? (
+                    <>
+                      <span className="text-muted-foreground">
+                        {liczba(pozycja.cenaZakupuStara)}
+                      </span>
+                      {" → "}
+                    </>
+                  ) : null}
+                  {liczba(pozycja.cenaZakupuNowa)}
+                </td>
+              )}
+              {pokaz("cenaS") && (
+                <td className="p-2 text-right tabular-nums">{liczba(pozycja.cenaSprzedazyNowa)}</td>
+              )}
+              {pokaz("zmiana") && (
+                <td className="p-2 text-right">
+                  <ZmianaProcentowa wartosc={pozycja.zmianaPct} />
+                </td>
+              )}
+              {pokaz("powod") && (
+                <td className="p-2 max-w-md">
+                  {/*
+                    `powod` i `ostrzezenie` to komunikaty PISANE DLA CZŁOWIEKA — łącznie
+                    z odtworzonym błędem produkcji „zapis naukowy ma tylko null cyfr
+                    znaczących" (backlog #11). Ustalenie z 3b: UI ma je POKAZYWAĆ, nie filtrować.
+                  */}
+                  <div className="text-xs text-muted-foreground line-clamp-2" title={pozycja.powod ?? ""}>
+                    {pozycja.powod ?? "—"}
                   </div>
-                ) : null}
-              </td>
+                  {pozycja.ostrzezenie ? (
+                    <div
+                      className="mt-0.5 text-xs text-amber-700 line-clamp-2"
+                      title={pozycja.ostrzezenie}
+                      data-testid={`ostrzezenie-${pozycja.id}`}
+                    >
+                      {pozycja.ostrzezenie}
+                    </div>
+                  ) : null}
+                </td>
+              )}
               <td className="p-2">
                 <Button
                   variant="outline"
