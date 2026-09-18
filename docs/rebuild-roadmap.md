@@ -2052,6 +2052,28 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     (bez `vat_rate` — VAT na kategorii w Selly), `discovery.buildProductCodeCache` (paginacja `/api/products`),
     weryfikacja pierwszego nocnego Tor 2 (MO5: 1713 ok, 0 błędów). **Zegar startu ZRESETOWANY** — port dziś
     byłby nieaktualny w 428 liniach. Potwierdza trafność revertu 13d-1. Nowej karty NIE zakładamy.
+  - **STAN 2026-09-18 (triaż `94bdf11..9d1b09f`, `52-CHORE-triaz-produkcja-i14`): DOCIERANIE NADAL TRWA,
+    zegar startu ZNOWU ZRESETOWANY.** W oknie 09–18.09 padło kolejnych 5 commitów w `selly/*` — ostatni
+    **17.09 wieczorem**, czyli PO orientacyjnej dacie rewizji ~16.09. Sygnał startu **nie zapalił się**.
+    Nowej karty NIE zakładamy; następna rewizja po kolejnym cichym tygodniu.
+  - **⭐ USTALENIE Z 08.09 OBALONE — czytaj to, ZANIM zaczniesz przepisywać 13d.** Komentarz
+    „PUT /api/products/{pid} NIE akceptuje `features` (HTTP 400 Malformed JSON)", na podstawie którego
+    13d-1 wyciął `PUT features`, **przestał obowiązywać**: `mirror/backend/selly/sync_full.cjs` mówi dziś
+    „Test produkcyjny 2026-09-17 potwierdzil, ze PUT /api/products/{pid} przyjmuje pelna tablice `features`
+    mimo braku tego pola w fields_edit" (commit `5dedefb`). Ścieżka A robi teraz `GET /api/products/{pid}`
+    → payload z `includeFeatures:true` → `PUT` z cechami i `category_id`. Backlog **#81**.
+  - **Co jeszcze doszło w `selly/*` i wchodzi do zakresu przepisania** (szczegóły w backlogu):
+    **#74** — kategorie Selly przebudowane, stare ID 137/259/377 zwracają 404, żywe to 1/2/3/4;
+    ID siedzą w `selly_kategoria_norm_map` (dane), nie w kodzie — **nie hardkodować**.
+    **#77** — `sync_delta.findDeltaProducts()` obejmuje `wstrzymany` z istniejącym wariantem i wysyła
+    dla nich stan 0 (bez tworzenia nowych produktów).
+    **#81** — `sync_full`: `metadataScore()`/`isMetadataOwner()` (jeden kanoniczny rekord Bridge pisze
+    cechy i kategorię wspólnego produktu; grupa o różnych kategoriach jest pomijana), usunięta martwa
+    `fetchVariantFeatures()`, `mapper_v2.buildFeaturesMirror()` nie dziedziczy już starej wartości cechy
+    zarządzanej przez Bridge, gdy bieżąca jest pusta. To **nowa logika biznesowa**, nie defekt do
+    odtworzenia 1:1 — wchodzi świadomie, jako decyzja.
+    **Do opisania jako defekt:** usunięcie produktu nie sprząta mapowań `selly_products` (osierocony
+    rekord trzymał stare zastosowanie w wyszukiwarce sklepu — `5cfb7ab`, 17.09).
   - **⚠ PUŁAPKA:** revert merge’a #57 sprawia, że git uzna `feature/45` za „już zmergowane". Rewrite MUSI
     iść na **NOWEJ gałęzi** (świeży port z finalnego `mirror/selly/`), NIE przez re-merge `feature/45`.
 - **13e — Frontend: `szer_marka` (rebrand i `PRICEFMT` odbudowa miała już 1:1)** [FE] — ✅ zrobione
@@ -2223,10 +2245,33 @@ bo dokument ma opisywać STAN, nie zamiar. Dwie części:
   znaczących"). Ania napisała: „EAN zapisany w notacji naukowej jest bezpiecznie pomijany jako NULL".
   Zdanie jest dwuznaczne — albo akceptuje stan i zostaje poprawienie treści komunikatu, albo zgłasza
   zmianę zachowania. **Wpis #11 czeka na jej decyzję; bez doprecyzowania nie zakładać karty.**
-- **Nowe priorytety Ani z §13 — do triażu, BRAK wpisów w backlogu:** kolizje `kod_importu`;
-  aktualizacja CECH istniejących produktów w Selly (wiąże się z odłożonym 13d — u Ani `PUT features`
-  usunięty po HTTP 400); rozróżnienie „nowy produkt" od „nowy magazyn dla istniejącego EAN";
-  uporządkowanie danych MO9.
+- **Nowe priorytety Ani z §13 — częściowo już ruszone przez samą Anię** (stan po triażu 2026-09-18,
+  `52-CHORE-triaz-produkcja-i14`):
+  - kolizje `kod_importu` — **bez zmian, nadal brak wpisu w backlogu**;
+  - rozróżnienie „nowy produkt" od „nowy magazyn dla istniejącego EAN" — **bez zmian, brak wpisu**;
+  - aktualizacja CECH istniejących produktów w Selly — ⚠ **przesłanka NIEAKTUALNA**: `PUT features`
+    nie jest już „usunięty po HTTP 400", Ania przywróciła go 17.09 po teście produkcyjnym. Temat
+    ma wpis **#81** i należy do przepisywanego **13d** — szczegóły w bloku 13d wyżej;
+  - uporządkowanie danych MO9 — **ruszone przez Anię 17.09**, ma dwa wpisy: **#78** (odrzucanie po ID
+    kategorii Magento 163 — quady/kosiarki) i **#79** (koniec reguły „inne → Rolnicze", klasyfikacja
+    po rodzinach bieżników BKT). Oba ⬜ do decyzji.
+- **⭐ ŚWIEŻA PARTIA DELT PRODUKCJI (triaż 2026-09-18) — 12 wpisów ⬜ do decyzji, backlog #72–#83.**
+  Okno `94bdf11..9d1b09f`, 24 commity producenta. **To NIE jest zakres I14** (I14 jest FE-only i nic
+  z tego nie dotyka `rebuild/frontend/`), ale **nie może umknąć**, bo część trafia w kod, który
+  odbudowa ma już 1:1 i który od 18.09 rozjeżdża się z produkcją:
+  - **rdzeń importu (I3/13a):** #75, #79, #80, #82 (nowy moduł `application_rules.cjs` — cztery
+    kolejne warstwy, nanosić jako JEDEN stan końcowy) oraz **#83** (`products.szerokosc` — odwrócenie
+    decyzji Anny z 19.08 „zachowaj zera końcowe"; `rebuild/.../tyre_params.cjs:336-366` ma dziś
+    dokładnie ten blok, który Ania usunęła). Dodatkowo #78/#79 w parserze MO9;
+  - **eksport CSV (I8):** #73 (60. kolumna `Blokowane-formy-platnosci`), #76 (nazwy kategorii sklepu
+    + `ł`→`l`), #77 (`wstrzymany` ze stanem 0) — trzy wpisy na tym samym pliku
+    `rebuild/backend/src/selly/generator-csv.ts`, **do jednego ticketu**, bo ruszają fixture CSV
+    i asercję `stdout` w `test/selly.generator-csv.test.ts:155`;
+  - **Selly REST (13d):** #74, #77 (część delta), #81 — opisane w bloku 13d wyżej;
+  - **zamknięte tym triażem:** #71 (Ania naprawiła `konstrukcja` w żywym bundlu — patrz #72),
+    #65 zawężone do 3 wpisów `field_name='konstrukcja'`.
+  - **Dwa wpisy bez uzasadnienia biznesowego** (commity bez wpisu w CHANGELOG Ani): #82 i #83.
+    **Do dopytania Ani przed implementacją** — to decyzje produktowe, nie techniczne.
 - **Zadania środowiskowe przed cutoverem:** Ania nie mogła przetestować §7 (scheduler — brak restartu
   backendu) ani §14 „trzy drogi importu / konfiguracja", bo **dostawcy nie są podpięci produkcyjnie
   na stagingu** („nie da się wstrzymać synchro"). ⚠ Osobno: **test rozstrzygający §8.1 (ta sama
