@@ -574,7 +574,7 @@ ani zamknąć. Nie chcemy jej rozstrzygać za Ciebie, więc pytamy wprost:
 podaj numer punktu i kroku, co zobaczyłaś zamiast oczekiwanego, kod produktu, treść reguły,
 godzinę i zrzut ekranu. Najcenniejsze jest **rozbicie z Symulatora** obok ceny z Katalogu.
 
-**Najpierw jednak sprawdź ramki ⚠ przy danym punkcie.** Sześć rzeczy w tej kartce wygląda na
+**Najpierw jednak sprawdź ramki ⚠ przy danym punkcie.** Siedem rzeczy w tej kartce wygląda na
 błąd, a jest poprawnych:
 
 1. **~2050 cen zmienia się przy pierwszym zapisie**, mimo że Twoja reguła ich nie dotyczy
@@ -583,10 +583,16 @@ błąd, a jest poprawnych:
 3. **kliknięcie nagłówka „Promocja" nie sortuje** tabeli (2.1);
 4. **do 5 minut opóźnienia**, gdy data mija sama i nikt nic nie zapisuje (3.1);
 5. **wygasła promocja zostaje w tabeli** z odznaką *zakończona*, nie znika (3.1);
-6. **brak pomarańczowego znacznika** pod statusem (3.4) — tu odwrotnie niż zwykle: **gdybyś go
-   zobaczyła, TO jest błąd.**
+6. **„Dziś ta reguła nie obejmuje żadnego produktu"** w okienku usuwania — poprawne dla promocji
+   *zakończonej* albo *zaplanowanej*, bo dziś faktycznie nikogo nie obejmuje (4.1);
+7. **brak pomarańczowego znacznika** pod statusem (3.4).
 
-**Dwie rzeczy warte zgłoszenia natychmiast**, bo znaczyłyby, że naprawa nie zadziałała:
+**Trzy rzeczy, przy których polaryzacja jest ODWROTNA** — tutaj to ich *pojawienie się* albo
+*brak działania* jest błędem i chcemy o tym wiedzieć od razu:
 
-- promocja **zaplanowana nie włącza się** po przestawieniu daty startu na przeszłość (3.2);
-- promocja z **datą końca w przeszłości dalej obniża ceny** po odczekaniu 5 minut (3.1).
+- **zobaczysz pomarańczowy znacznik** rozbieżności pod statusem promocji (3.4) — miał zniknąć;
+- **zobaczysz „Reguła dodana" po edycji** istniejącej reguły (5.2) — ma być „Reguła
+  zaktualizowana";
+- **promocja zaplanowana nie włącza się** po przestawieniu daty startu na przeszłość (3.2)
+  albo **promocja z datą końca w przeszłości dalej obniża ceny** po odczekaniu 5 minut (3.1) —
+  to znaczyłoby, że naprawa z rozdziału 3 nie zadziałała.
