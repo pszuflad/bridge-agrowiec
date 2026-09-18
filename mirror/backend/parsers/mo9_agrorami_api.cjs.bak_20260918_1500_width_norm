@@ -644,9 +644,7 @@ function itemToRecord(it) {
   if (ROZMIAR_OVERRIDE[idDostawcy]) {
     rozmiar = ROZMIAR_OVERRIDE[idDostawcy];
   } else {
-    // Znak "$" bezpośrednio przed wymiarem nie jest częścią rozmiaru.
-    // Czyścimy wyłącznie pole rozmiar; pełna nazwa produktu pozostaje bez zmian.
-    rozmiar = (parsedName.rozmiar || '').replace(/^\$\s*/, '');
+    rozmiar = parsedName.rozmiar || '';
   }
 
   // bieznik: TERAZ czysty model (bez rozmiaru/LI-SI/PR/TL) — to jest pole, które
