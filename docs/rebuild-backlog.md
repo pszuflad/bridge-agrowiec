@@ -1309,7 +1309,7 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **NADAL do decyzji**; odpowiedzi Ani z 2026-09-18 są ROZBIEŻNE, pytanie kontrolne wysłane (patrz nota niżej) |
+| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA 2026-09-19 przez Anię** — daty mają kończyć promocję (świadome odstępstwo, karta **14f**) |
 | **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony |
 
 **⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
@@ -1320,9 +1320,21 @@ jest, reguła znika po końcu obowiązywania". **Jej opis zachowania nie zgadza 
 `TabelaPromocji.tsx` nie filtruje niczego po datach (wiersz ZOSTAJE, z odznaką „zakończona"
 i naszym pomarańczowym znacznikiem), a silnik dat nie czyta, więc wygasła promocja **dalej obniża
 ceny**. Wysłano drugie pytanie kontrolne, tym razem z opisem stanu faktycznego zamiast pytania
-otwartego. **Do czasu odpowiedzi nie ruszamy silnika cen.** Poszlaka: sąsiednie odpowiedzi
-(„przełącznika statusu nie dokładamy", „promocje po prostu się usuwa", „nie dodajemy nowych
-reguł") wskazują na wariant najtańszy — zostawiamy 1:1 — ale to domysł, nie decyzja.
+otwartego — i **2026-09-19 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
+promocje"**. Wpis przechodzi z „do decyzji" na ZATWIERDZONY. Morał na przyszłość: pytanie
+„co ma się dziać?" dostało odpowiedź opisującą to, co Ania MYŚLAŁA, że się dzieje; dopiero
+pytanie „dziś jest TAK — zostawiamy czy zmieniamy?" dało decyzję.
+
+**Dwa warianty wdrożenia, różnica kosztu jest zasadnicza** (wycena: karta 14e, decyzja:
+użytkownik):
+- **(a) silnik czyta daty** — warunek na `start`/`koniec` w `promocjaPasuje`. Kilka linii, ale
+  funkcja przestaje zachowywać się jak oryginał, więc **charakteryzacja wymaga wyjątku**.
+- **(b) wygaszacz statusu** — osobny krok przestawia `status` na `zakonczona`, gdy minęła data
+  końca; silnik NIETKNIĘTY, dalej patrzy tylko na `status`, charakteryzacja bez wyjątku, bo
+  zmieniają się DANE, a nie zachowanie funkcji. Dodatkowo odtwarza dosłownie to, co Ania
+  opisała słowami „reguła znika po końcu obowiązywania".
+**Rekomendacja: (b).** ⚠ Skutek uboczny w obu wariantach: znacznik `rozbieznoscStatusu` (D5
+z 4b) przestaje mieć rację bytu i trzeba go usunąć świadomie, nie zostawić jako martwy kod.
 
 **Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
 `koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
