@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | ⬜ | Źródło: wypełniona `docs/instrukcja-testow-I3.md` (uwagi Ani + zrzuty ekranu). Oś podziału = PLIK, nie temat — 14a/14b/14c mają rozłączne zestawy plików i idą RÓWNOLEGLE; 14d (docs) na końcu. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I14.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); **otwarte 14f/14h/14i** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
 
 ---
 
@@ -2152,10 +2152,12 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
 
 ### Iteracja 14 — Uwagi Ani z testów Iteracji 3 (warstwa UI importu i stagingu)
 
-- **Status:** 🔨 w toku — zaplanowana 2026-09-18; **14c ✅ 2026-09-18**
-  (`50-FEATURE-i14c-karta-dostawcy-upload`), 14a i 14b idą równolegle na własnych gałęziach,
-  14d czeka na ich domknięcie. **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f. Niezależna
-  od otwartego 13d (inny podsystem, inne pliki).
+- **Status:** 🔨 w toku — zaplanowana 2026-09-18. **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a ✅
+  (`49-CHORE-i14a-wgrywanie-reczne`), 14b ✅ (`51-FEATURE-staging-filtr-pasek-kolumny`),
+  14c ✅ (`50-FEATURE-i14c-karta-dostawcy-upload`), 14d ✅ (`56-DOCS-instrukcja-testow-i14`).
+  **FALA 2 w toku:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`), otwarte 14f/14h/14i.
+  **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f.
+  Niezależna od otwartego 13d (inny podsystem, inne pliki).
 - **Skąd się wzięła.** Ania przeszła `docs/instrukcja-testow-I3.md` i wypełniła pola UWAGI (komentarze
   + zrzuty ekranu). **To NIE jest kolejna delta produkcji** jak I13 — produkcja się nie zmieniła.
   I13 portowała KOD, którego odbudowa nie miała; I14 nadrabia to, czego odbudowa nie przeniosła
@@ -2337,31 +2339,70 @@ Trzy zatwierdzone odstępstwa od oryginału (pełne uzasadnienia:
 - **D6** — `<input type="file">` jest czyszczony po wysyłce (oryginał tego nie robi) — inaczej
   wgranie tego samego pliku drugi raz z rzędu nie wywołuje `onChange` i UI wygląda zawieszone.
 
-**14d — aktualizacja instrukcji testów + domknięcie backlogu** [DOCS] — **idzie PO 14a/14b/14c**,
-bo dokument ma opisywać STAN, nie zamiar. Dwie części:
-- *Można było zrobić wcześniej* (opisuje to, co JUŻ jest): rozdz. 12 pkt 12 (WULSTBAND) i pkt 13
-  (`nro`/`cho` 0/1) — Ania naprawiła je u siebie 01.09, odbudowa wciągnęła portem w 13a (`bug1`,
-  `bug2`); rozdz. 13 „Czego jeszcze NIE MA" jest nieaktualny poza „ceną na zapytanie" (historia,
-  alerty, atrybuty, analityka, narzuty i promocje są dowiezione). Backlog #9/#10 do rozliczenia.
-- *Musi czekać na 14a–14c:* opis nowego kształtu trzech ekranów + wiersz iteracji w tablicy §4.
-- ⚠ **Co konkretnie zmieniło 14a w instrukcji** (zrobione 2026-09-18): rozdz. §2 opisuje STARY,
-  inline'owy przepływ („wybierz pliki na zakładce → Wgraj (N)") i jest do przepisania w całości.
-  Nowy przepływ: „Wgraj pliki" otwiera modal → wybór plików → „Importuj do staging" → toast
-  z podsumowaniem → wynik z podglądem pod kaflami. Doszła druga ścieżka, której instrukcja
-  w ogóle nie zna: kafel dostawcy → „Wgraj plik" (wymuszony dostawca, bez auto-detekcji).
-  Zniknęły `data-testid`, na które instrukcja mogła się powoływać: `button-wyslij`,
-  `bledy-wczytania`, `blad-uploadu`; `input-pliki` i `powod-detekcji` żyją teraz TYLKO w modalu.
-- *Z 14b (ustalone 2026-09-18, `51-FEATURE-staging-filtr-pasek-kolumny`), musi rozliczyć 14d:*
-  **(1)** §3.2 każe Ani „wrócić na *Wszystkie*" po sprawdzeniu filtra „Błędy importu" — przy nowym
-  domyślnym filtrze `nowa` ten krok wraca teraz do INNEGO stanu niż startowy, trzeba przepisać;
-  **(2)** §3.1/§6 mówią o „liście pozycji z kompletem kolumn" — po 14b kolumny „Stan", „Cena
-  zakupu" i „Cena sprzedaży" są domyślnie ukryte, trzeba opisać przycisk „Kolumny".
-- ⚠ **Co konkretnie zmieniło 14c w instrukcji** (zrobione 2026-09-18): etykieta przycisku
-  synchronizacji to teraz **„Synchronizuj"**, a instrukcja mówi „Synchronizuj teraz" w ~10
-  miejscach (`:190,198,205,215,249,296,297,387,430`) — do poprawienia. Doszedł przycisk
-  **„Wgraj plik"** przy dostawcach `upload`/`mail`, którego instrukcja w ogóle nie zna.
-  Pole „liczba minut" jest teraz schowane za „Inna wartość (minuty)…", a §3.12 (`:236-238`)
-  opisuje je jako widoczne od razu obok listy presetów — to już nieprawda.
+**14d — aktualizacja instrukcji testów** [DOCS] — ✅ **ZROBIONE 2026-09-18**, ticket
+`56-DOCS-instrukcja-testow-i14`. Weszło PO zmergowaniu 14a/14b/14c (zweryfikowane na
+`origin/develop` 4cd5cd9 przed startem).
+
+**Co faktycznie dowiezione** (różni się od pierwotnego zamiaru — patrz decyzja D1 niżej):
+- **Nowy plik `docs/instrukcja-testow-I14.md`** — 13 rozdziałów w konwencji
+  `instrukcja-testow-I13.md` (krótka delta „co się zmieniło", nie pełny przewodnik): trzy ekrany
+  po 14a/14b/14c, dziwactwa naprawione i pozostałe, test rozstrzygający, „Czego jeszcze NIE MA",
+  lista kontrolna.
+- **`docs/instrukcja-testow-I3.md` — TYLKO banner** na górze, kierujący do I14 i wymieniający
+  zdezaktualizowane sekcje. **Treść I3 nietknięta**, w szczególności 9 wystąpień „Synchronizuj
+  teraz" ZOSTAJE w I3 (konwencja I13: „starsze instrukcje zostają bez zmian, wierz tej kartce").
+- `docs/rebuild-backlog.md` — **bez zmian**, patrz sprostowanie niżej.
+
+**Decyzja użytkownika D1 (2026-09-18) — forma dokumentu.** Rozważane: (A) aktualizacja
+8-rozdziałowej wersji w repo, (B) odtworzenie w repo 17-rozdziałowej wersji Ani.
+**Wybrane: ani A, ani B — osobna, krótka delta I14.** Uzasadnienie: Ania testuje deltę, a nie
+czyta 17 rozdziałów od nowa. ⚠ **Świadomy koszt: rozjazd z 17-rozdziałowym dokumentem Ani NIE
+znika** i wróci przy kolejnej iteracji. Odtworzenie pełnej wersji zostaje jako otwarty temat.
+
+⚠ **FAKT sprostowany — numeracja w tym opisie pochodziła z wersji, której w repo NIE MA.**
+`docs/instrukcja-testow-I3.md` w gicie ma **8 rozdziałów** (494 linie, 2026-09-01). Wersja, którą
+Ania wypełniała (2026-09-02, 17 rozdziałów, ze ściągą dostawców i rozdziałami „Świadome
+ODSTĘPSTWA" / „Dziwactwa ODTWORZONE CELOWO") **nigdy nie trafiła do repozytorium**. Dlatego
+odwołania „rozdz. 12 pkt 12/13" i „rozdz. 13" z poprzedniej wersji tego opisu **nie mają
+odpowiednika w repo**. Zweryfikowane grepem:
+- WULSTBAND, `nro`/`cho`, test rozstrzygający, rozdz. „Świadome ODSTĘPSTWA", ściąga dziesięciu
+  dostawców — **zero trafień w wersji repo**;
+- „zapis naukowy" jest rozdz. **4 poz. 4**, status dostawcy rozdz. **4 poz. 11** (nie 10);
+- rozdz. 4 ma **11 pozycji, nie 13**; „Czego jeszcze NIE MA" to rozdz. **5**.
+
+⚠ **SPROSTOWANIE — backlog #9 i #10 NIE wymagały rozliczenia przez 14d.** Poprzednia wersja
+tego opisu mówiła „Backlog #9/#10 do rozliczenia"; to było **błędne założenie**. Oba wpisy są
+zamknięte od **2026-09-08**: fix Ani z 01.09 sportowany i **POTWIERDZONY POMIAREM** w
+`42-CHORE-i13a-resync-parserow` (`nro` `1`→`'Tak'`, `0`→`null` — MO1 199, MO3 44, MO9 12 rek.;
+MO1 `odrzuconePrzezAdapter` 1→0 przy tych samych 199 kodach). 14d **niczego w backlogu nie
+zmieniała** — tylko opisała naprawę Ani w instrukcji (I14 rozdz. 6).
+
+**Rozliczenie uwag przekazanych przez 14a/14b/14c** (wszystkie trafiły do I14, rozdz. 3–5 i 10):
+- **14a:** nowy przepływ „Wgraj pliki" → modal → „Importuj do staging" → toast; druga ścieżka
+  przez kafel dostawcy; brak licznika na przycisku importu; podgląd PO imporcie, nie przed.
+  `data-testid` **świadomie pominięte w instrukcji** — Ania klika po etykietach, nie po testidach.
+- **14b:** domyślny filtr `nowa` i konsekwencja dla „Akceptuj/Odrzuć wszystkie (N)"; trzy kolumny
+  domyślnie ukryte + przycisk „Kolumny"; martwa sekcja „Dodatkowe (z katalogu)".
+  Sprostowanie liczbowe: sekcja „W tabeli stagingu" ma **10 przełączników** (7 widocznych
+  + 3 ukryte), nie 9 — policzone w `pages/staging/kolumny.ts` (12 kolumn tabeli minus
+  `checkbox` i `akcje`, które są `zablokowana`).
+- **14c:** „Synchronizuj" zamiast „Synchronizuj teraz"; przycisk „Wgraj plik" przy
+  `upload`/`mail`; pole minut za „Inna wartość (minuty)…", puste po przełączeniu z presetu.
+
+**⚠ AUDYT 14d — etykieta „Synchronizuj teraz" żyje jeszcze w TRZECH dokumentach poza własnością
+tej karty.** `grep -rn "Synchronizuj teraz" docs/` (bez `docs/tickets/`) daje sześć wystąpień:
+`instrukcja-testow-I6.md:49,50,58,125` · `instrukcja-testow-I10.md:56` ·
+`przeglad-12-widokow.md:198`. **Najpilniejszy jest I6** — to instrukcja scenariuszowa, której
+krok „kliknij Synchronizuj teraz jeszcze cztery razy" jest nie do wykonania pod nazwą, której
+nie ma na ekranie. 14d nie mogła ich ruszyć (zamknięta lista własności plików + równoległe karty).
+Czyste, sprawdzone: `spec-frontend.md`, `spec-backend.md`, `cutover.md`.
+
+**⚠ Do rozliczenia przez kartę zamykającą DRUGĄ FALĘ I14 (nie przez 14d):**
+`docs/instrukcja-testow-I4.md` jest **nietknięta i częściowo nieaktualna** — decyzje Ani
+unieważniły jej rozdziały 4 i 5, ale zależy to od kart **14f** (daty promocji) i **14i** (EAN
+w notacji naukowej), których w chwili zamykania 14d jeszcze nie ma. 14d celowo jej nie ruszała
+(ograniczenie własności plików). Karta domykająca falę 2 powinna zrobić dla I4 to, co 14d
+zrobiła dla I3: deltę + banner.
 
 ---
 
@@ -2538,7 +2579,13 @@ Z tego wynika rzecz najważniejsza dla 14f: **wpisanie właściwego `status` do 
 bez tknięcia silnika.** Słownik statusów już istnieje, silnik już go respektuje.
 
 **⚠ DWA SPROSTOWANIA DO `docs/instrukcja-testow-I4.md` — dokument wprowadza Anię w błąd.**
-Nie naprawione tutaj (plik poza własnością 14e), do zrobienia przez **14d**:
+Nie naprawione tutaj (plik poza własnością 14e). ⚠ **PRZYPISANIE SPROSTOWANE 2026-09-18
+w `56-DOCS-instrukcja-testow-i14`: NIE robi tego 14d, tylko karta domykająca FALĘ 2** (najpewniej
+po 14f/14h/14i). Decyzja użytkownika przy zakładaniu 14d, wprost: „NIE ruszaj
+`docs/instrukcja-testow-I4.md` — to zależy od kart 14f/14h/14i, których jeszcze nie ma".
+Powód merytoryczny: oba sprostowania niżej opisują stan, który **14f ma zmienić** — opisanie go
+Ani teraz znaczyłoby opisanie stanu, który za chwilę przestanie obowiązywać. 14d dotyczyła
+wyłącznie `instrukcja-testow-I3.md` (fala 1). Treść sprostowań zostaje tu bez zmian:
 - **§4 pkt 6 jest NIEPRAWDZIWY.** Mówi, że „promocja z datą startu w przyszłości od razu obniża
   ceny", a założona przez dialog dostaje `status: "zaplanowana"` i **nie obniża niczego**;
   nie pokaże też znacznika rozbieżności, bo etykieta z dat i kolumna `status` się zgadzają.

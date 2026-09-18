@@ -5,6 +5,27 @@
 > **To jest STAGING, nie produkcja.** Baza to kopia produkcji z 2026-08-13. Cokolwiek tu
 > zaakceptujesz, odrzucisz albo zepsujesz — produkcji nie dotyka. Testuj bez skrupułów.
 
+> **⚠ CZĘŚCIOWO NIEAKTUALNE od 2026-09-18 — najpierw przeczytaj
+> [instrukcję Iteracji 14](instrukcja-testow-I14.md).**
+>
+> Na podstawie Twoich uwag do tej kartki poprawiliśmy trzy ekrany: **Wgrywanie ręczne**,
+> **Staging** i **kartę dostawcy**. Ta instrukcja opisuje ich stan **sprzed** poprawek.
+> **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego,
+> co widzisz na ekranie, prawdą jest instrukcja Iteracji 14.**
+>
+> Co konkretnie przestało być prawdą (pełna lista: **I14 rozdział 10**):
+> - **§2** — cały przepływ wgrywania; dziś „Wgraj pliki" otwiera okienko, doszły kafle dostawców;
+> - **§3.1, §3.2, §6** — staging startuje na filtrze **„Nowe produkty"**, a kolumny *Stan*,
+>   *Cena zakupu* i *Cena sprzedaży* są **domyślnie ukryte** (przycisk „Kolumny");
+> - **§3.10–§3.13, §4 pkt 11, §6** — przycisk nazywa się **„Synchronizuj"**, nie
+>   „Synchronizuj teraz";
+> - **§3.12** — pole „liczba minut" jest schowane za opcją „Inna wartość (minuty)…";
+> - **§5** — historia, alerty, atrybuty, analityka, narzuty i promocje oraz zakładki
+>   Konfiguracji **są już dowiezione**.
+>
+> **Dalej obowiązują** m.in. §4 pkt 4 (komunikat o zapisie naukowym) i §4 pkt 11 (status
+> dostawcy) — patrz I14 rozdziały 8 i 7.
+
 ---
 
 ## 1. Co dowozi Iteracja 3
