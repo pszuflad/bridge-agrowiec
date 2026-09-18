@@ -316,7 +316,7 @@ wyłącznie w `rebuild/backend/test/`, a powstał też nowy plik w `rebuild/fron
   w obu piaskownicach zgodny z `contract/fixtures/GET_markups.json` i `GET_promotions.json`
   **co do bajtu**. `contract/**` nietknięty.
 - **Backend:** `lint` ✓ · `typecheck` ✓ · `build` ✓ · `test` ✓ **81 plików / 1249 testów**.
-- **Frontend:** `lint` ✓ · `typecheck` ✓ · `test` ✓ **49 plików / 762 testy**.
+- **Frontend:** `lint` ✓ · `typecheck` ✓ · `test` ✓ **49 plików / 772 testy** (liczba po wciągnięciu `develop` z zmergowaną kartą 14a).
 - **Dowód wierności ponad bramki:** pełne porównanie katalogu oryginał ↔ odbudowa,
   **7405 produktów, 0 różnic**, w obu wariantach promocji.
 
