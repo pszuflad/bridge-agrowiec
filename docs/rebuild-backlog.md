@@ -19,6 +19,17 @@ bundla do ~2026-08-05, MD5 `b745bf95`). Wcześniejsze zmiany są już w specyfik
 **Legenda „Do nowej wersji?":** ⬜ do decyzji · ✅ TAK · ❌ NIE (świadomie pomijamy) · 🕒 PÓŹNIEJ
 **Legenda „Status":** — nie zaczęte · 🔨 w toku · ✔ zrobione w rebuild
 
+**Partia #72–#83 (triaż 2026-09-18) — ROZSTRZYGNIĘTA przez użytkownika tego samego dnia.**
+Dziesięć wpisów ✅ TAK, jeden ❌ NIE (#72 — odbudowa ma lepsze rozwiązanie, zostawiamy nasze),
+jeden 🕒 PÓŹNIEJ (#81 → odłożony do **13d**, zapisany w roadmapie w bloku 13d).
+⏸ **Dwa zatwierdzone wpisy mają WSTRZYMANĄ implementację: #82 i #83** — ich commity przyszły bez
+wpisu w CHANGELOG Ani, więc uzasadnienie biznesowe jest NIEZNANE i czekamy na jej odpowiedź.
+Ania nadal pracuje nad tym obszarem, więc wyjaśnienie ma dojechać kolejnym `sync(vps)` (kod
++ CHANGELOG). **Następny `/triaz-zmian` ma to sprawdzić, ZANIM ktokolwiek ruszy `tyre_params.cjs`
+albo `application_rules.cjs` w odbudowie.**
+Sugerowane sklejenie w tickety: **CSV** = #73 + #76 + #77(część) · **application_rules** = #75 + #79
++ #80 + #82 · **MO9** = #78 + #79(drugi hunk) · **szerokość** = #83 · **13d** = #74 + #77(delta) + #81.
+
 **Backlog rozliczony w sesji 12e (2026-09-08).** Wszystkie wpisy ✅ zostały naniesione,
 ❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #39–#43) to
 **defekty PRODUKCJI odtworzone świadomie 1:1**, czekające na decyzję produktową Ani — żaden nie
@@ -2818,8 +2829,8 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Kategoria** | FRONTEND (bundle produkcji) |
 | **Pliki** | `mirror/frontend/assets/index-PRICEFMT1783512500.js` (bak `.bak_pre_konstrukcja_full_20260909154703`), `deminified/frontend-index.js`, `mirror/backend/CHANGELOG.md` |
 | **Commit** | `28541ca` (2026-09-09 16:00) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ❌ **NIE — świadomie pomijamy.** Decyzja użytkownika 2026-09-18: odbudowa ma pass-through od 13c i działa poprawnie, więc **zostawiamy nasze rozwiązanie jako lepsze**. Przenosimy tylko wniosek: wpis **#71** zamknięty. Jedyna pozostała różnica (wartość spoza zbioru → u Ani „—”, u nas dosłownie) jest świadomie przyjęta. |
+| **Status** | ✅ **zamknięte, bez pracy w `rebuild/`** — kodu nie przenosimy (decyzja ❌). Jedyny skutek: wpis **#71** przestawiony na rozwiązany. |
 
 **Opis biznesowy.** Zgłoszenie Ani: mimo poprawnych danych w bazie kolumna „Konstrukcja opony"
 w katalogu nie pokazywała żadnej wartości. Ania poprawiła renderer i eksport tak, żeby przyjmowały
@@ -2847,8 +2858,8 @@ różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej 
 | **Kategoria** | BAZA + BACKEND + FRONTEND (nowa funkcja) |
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
 | **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
+| **Status** | — zatwierdzone do naniesienia; **jeden ticket CSV razem z #76 i #77** (wspólny plik `generator-csv.ts` + fixture). |
 
 **Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
 i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
@@ -2888,8 +2899,8 @@ warstw naraz. Trzy uwagi:
 | **Kategoria** | BACKEND + BAZA (Selly, mapowanie kategorii) |
 | **Pliki** | `mirror/backend/kategoria_norm_map_pplx.sql` (bak `.bak_pre_category_fix_20260911_101000`), `zastosowanie_selly_map_pplx.sql` (bak j.w.), `zastosowanie_selly_map_v2_pplx.sql` (bak j.w.), `selly/sync_full.cjs` (bak j.w.) |
 | **Commit** | `2a2a1da` (2026-09-11 11:00) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — **wykonanie razem z przepisywanym 13d**, nie osobno. |
+| **Status** | — zatwierdzone; **czeka na start 13d** (nie zakładać karty wcześniej). |
 
 **Opis biznesowy.** Audyt synchronizacji wykazał dwie rzeczy naraz. Po pierwsze, w lokalnym cache
 `selly_products` brakowało 95 wpisów dla produktów i wariantów, które w Selly już istniały
@@ -2919,8 +2930,8 @@ plikowego, a tu po stronie API.
 | **Kategoria** | BACKEND + BAZA (nowy moduł reguł) |
 | **Pliki** | `mirror/backend/application_rules.cjs` (**nowy**, 238 l.), `parsers/tyre_params.cjs` (bak `.bak_pre_zastosowania_20260913_192923`), `parsers/adapter.cjs` (bak j.w.), `extensions.cjs` (bak j.w.), `db/schema.sql` (2 triggery), `zastosowanie_niezmapowane.json` (raport) |
 | **Commit** | `74b7442` (2026-09-13 20:00) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #79/#80/#82. |
+| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #79/#80/#82** (stan końcowy modułu). |
 
 **Opis biznesowy.** Audyt wykazał produkty z zastosowaniem z zupełnie innej kategorii — np. opony
 Rolnicze z zastosowaniem „Harwester"/„Forwarder". Ania wprowadziła zamkniętą listę dopuszczalnych
@@ -2956,8 +2967,8 @@ Wprost: **`ensureApplicationRules()` jest w odbudowie nowym bytem** (dziś `grep
 | **Kategoria** | BACKEND (generator CSV dla Selly) |
 | **Pliki** | `mirror/backend/generate_selly_export.cjs` (baki `.bak_pre_selly_category_names_20260914_130000`, `.bak_fix_polish_l_20260914_131800`, `.bak_pre_restore_rd_header_20260914_140000`) |
 | **Commit** | `b580628` (2026-09-14 14:00 — trzy wpisy CHANGELOG w jednym commicie) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — do naniesienia `toSellyCategoryName` (pkt 1–2); pkt 3 (nagłówek `R/D`) odbudowa już ma. |
+| **Status** | — zatwierdzone; **jeden ticket CSV razem z #73 i #77**. |
 
 **Opis biznesowy.** Trzy poprawki tego samego pliku w ciągu godziny, wszystkie wokół importera CSV
 Selly. (1) Automatyczny integrator o 12:00 wciąż przypisywał produkty do starych, ukrytych kategorii
@@ -2991,8 +3002,8 @@ budowany przez `normalize('NFD')`, ma ten sam defekt.
 | **Kategoria** | BACKEND + BAZA (eksport CSV + Tor 1 Selly) |
 | **Pliki** | `mirror/backend/generate_selly_export.cjs` (bak `.bak_pre_wstrzymane_zero_20260914_153400`), `selly/sync_delta.cjs` (bak j.w.) |
 | **Commit** | `94492d1` (2026-09-14 16:00) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — część CSV teraz (jeden ticket z #73/#76), część delta razem z 13d. |
+| **Status** | — zatwierdzone; część CSV → ticket CSV (#73/#76), część delta → **czeka na 13d**. |
 
 **Opis biznesowy.** Produkt wstrzymany w Bridge, ale z dodatnim stanem, mógł zostawić w Selly
 nieaktualny dodatni stan — nie trafiał ani do CSV (filtr `status='aktywny'`), ani do delty API.
@@ -3024,8 +3035,8 @@ niedostępnego towaru), nie kosmetyka. Rozkłada się na dwie części o różny
 | **Kategoria** | BACKEND (parser MO9 Agrorami API) |
 | **Pliki** | `mirror/backend/parsers/mo9_agrorami_api.cjs` (bak `.bak_pre_bkt_category_163_20260917_145511`) |
 | **Commit** | `cba212d` (2026-09-17 15:00) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
+| **Status** | — zatwierdzone do naniesienia (jeden plik, `mo9_agrorami_api.cjs`; razem z drugim hunkiem z #79). |
 
 **Opis biznesowy.** Prośba Ani: opony BKT do quadów, kosiarek, gokartów i podobnych małych pojazdów
 nie mają być ani importowane z API, ani publikowane w Selly. Agrorami grupuje je w kategorii Magento
@@ -3053,8 +3064,8 @@ Idzie w parze z #79 (drugi hunk tego samego pliku).
 | **Kategoria** | BACKEND + BAZA (parsery, `common.cjs`, triggery) |
 | **Pliki** | `mirror/backend/common.cjs` (bak `.bak_pre_category_case_20260917_1545`), `parsers/tyre_params.cjs` (bak j.w.), `application_rules.cjs` (bak j.w.), `parsers/mo9_agrorami_api.cjs` (bak `.bak_pre_bkt_recategory_20260917_1523`), `db/schema.sql` (4 triggery) |
 | **Commit** | `ca8a694` (2026-09-17 16:00 — dwa wpisy CHANGELOG) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#80/#82. |
+| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #75/#80/#82**. |
 
 **Opis biznesowy.** Dwie prośby Ani w jednym commicie. (1) Filtr katalogu pokazywał zdublowane
 kategorie — tę samą raz małą, raz wielką literą; ujednolicono 283 produkty i 14 ręcznych nadpisań
@@ -3095,8 +3106,8 @@ bo trafia w kod, który odbudowa ma 1:1 i który dziś rozjeżdża się z produk
 | **Kategoria** | BACKEND + BAZA (reguły zastosowań) |
 | **Pliki** | `mirror/backend/application_rules.cjs` (bak `.bak_pre_forwarder_harwester_20260917_1608`), `db/schema.sql`, `application_rules_v2_test.cjs` (**nowy**, 294 l. — test) |
 | **Commit** | `5dedefb` (2026-09-17 17:00, pierwszy z dwóch tematów commita) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#79/#82. |
+| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #75/#79/#82**. |
 
 **Opis biznesowy.** Zgłoszenie Ani: w kategorii Leśne pole „zastosowanie" miało „Forwarder"
 i „Harwester" zapisywane osobno albo jako „Harwester ; Forwarder", a miała być jedna wartość
@@ -3131,8 +3142,8 @@ pisaniem własnych testów**, bo niesie oczekiwania Ani co do wartości graniczn
 | **Kategoria** | BACKEND (Selly, Tor 2 / `sync_full`) |
 | **Pliki** | `mirror/backend/selly/sync_full.cjs` (bak `.bak_pre_filtermirror_20260917_1654`), `selly/mapper_v2.cjs` (bak j.w.), `cleanup_selly_filters_20260917.cjs` (jednorazowy, dodany w `5dedefb`, **usunięty** w `65dcbd0`), zrzuty `selly_backups/categories_filters_*.json` |
 | **Commit** | `5dedefb` (2026-09-17 17:00, drugi temat) + `65dcbd0` (18:00, scopefix + publikacja CSV) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | 🕒 **PÓŹNIEJ — odłożone do 13d.** Decyzja użytkownika 2026-09-18. Kod czeka na świeże przepisanie podsystemu Selly (port 13d-1 cofnięty revertem #58, docieranie u Ani trwa). **Zapisane w roadmapie, blok 13d** — razem z obalonym ustaleniem o `PUT features`, żeby nie zginęło do czasu startu 13d. |
+| **Status** | 🕒 **odłożone do 13d** — zapisane w `docs/rebuild-roadmap.md`, blok **13d** (razem z obalonym ustaleniem o `PUT features`). Nowej karty NIE zakładać. |
 
 **Opis biznesowy.** Zgłoszenie Ani: dane synchronizowane z Bridge nie mają tworzyć sklejonych
 wartości filtra „Rozmiar" w sklepie ani pozwalać, żeby warianty różnych dostawców nadpisywały sobie
@@ -3175,8 +3186,8 @@ logika biznesowa**, nie defekt do odtworzenia 1:1, więc wchodzi świadomie, nie
 | **Kategoria** | BACKEND + BAZA (reguły zastosowań) |
 | **Pliki** | `mirror/backend/application_rules.cjs`, `db/schema.sql` (regeneracja 2 triggerów) |
 | **Commit** | `03fe892` (2026-09-18 14:00) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ⏸ **implementacja WSTRZYMANA do odpowiedzi Ani** (commit bez wpisu w CHANGELOG, uzasadnienie biznesowe NIEZNANE: dlaczego akurat „Ciągnik”?). Pytanie wysłane 2026-09-18. |
+| **Status** | ⏸ **WSTRZYMANE — czekamy na odpowiedź Ani** (pytanie wysłane 2026-09-18). Ania nadal pracuje nad tym obszarem, więc uzasadnienie powinno dojechać w kolejnym `sync(vps)` — w CHANGELOG-u i w kodzie. **Sprawdzić przy następnym `/triaz-zmian`.** |
 
 **Opis biznesowy.** ⚠ **NIEZNANE — commit nie niesie wpisu CHANGELOG ani etykiety `.bak`**; opis
 poniżej pochodzi wyłącznie z diffu. „Ładowarka" przestaje być dopuszczalnym zastosowaniem
@@ -3205,8 +3216,8 @@ warto dopytać Anię, zanim reguła wejdzie do odbudowy, bo to decyzja produktow
 | **Kategoria** | BACKEND (parser rozmiaru — rdzeń importu) |
 | **Pliki** | `mirror/backend/parsers/tyre_params.cjs`, `parsers/adapter.cjs`, `parsers/mo9_agrorami_api.cjs`, `normalize_widths_selly_20260918.cjs` (**nowy**, 146 l., jednorazowy) |
 | **Commit** | `9d1b09f` (2026-09-18 15:00, etykieta `20260918_1500_width_norm`) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ⏸ **implementacja WSTRZYMANA do odpowiedzi Ani** (commit bez wpisu w CHANGELOG; zmiana odwraca wymaganie Anny z 19.08 o zachowaniu zer końcowych). Pytanie wysłane 2026-09-18. |
+| **Status** | ⏸ **WSTRZYMANE — czekamy na odpowiedź Ani** (pytanie wysłane 2026-09-18). Jw. — kolejny `sync(vps)` powinien przynieść wpis w CHANGELOG-u. **Sprawdzić przy następnym `/triaz-zmian`**, zanim ruszysz `tyre_params.cjs` w odbudowie. |
 
 **Opis biznesowy.** ⚠ **Powód NIEZNANY — commit nie niesie wpisu CHANGELOG**; opis z diffu
 i komentarzy w kodzie. Kolumna szerokości dostaje jeden kanoniczny zapis liczbowy: bez nieznaczących

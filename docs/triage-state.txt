@@ -17,6 +17,17 @@
 #   (e) 13d: docieranie Selly TRWA (5 commitów w selly/*, ostatni 17.09 wieczorem) — sygnał startu
 #   NIE zapalił się, zegar zresetowany.
 #   Dwa commity BEZ wpisu w CHANGELOG Ani (03fe892, 9d1b09f) → opis wyłącznie z diffu, powód NIEZNANY.
+#
+#   DECYZJE UŻYTKOWNIKA 2026-09-18 (ta sama sesja, gałąź chore/52-decyzje-backlog):
+#   10 × ✅ TAK (#73–#80, #82, #83), 1 × ❌ NIE (#72 — zostawiamy rozwiązanie odbudowy),
+#   1 × 🕒 PÓŹNIEJ (#81 → odłożone do 13d, zapisane w roadmapie w bloku 13d).
+#   ⏸ #82 i #83 zatwierdzone, ale IMPLEMENTACJA WSTRZYMANA — brak uzasadnienia biznesowego
+#   (oba commity bez wpisu w CHANGELOG Ani). Ania nadal pracuje nad tym obszarem i zapowiedziała,
+#   że wyjaśnienie pojawi się w kodzie i w CHANGELOG-u.
+#   >>> NASTĘPNY TRIAŻ MA TO SPRAWDZIĆ NAJPIERW: czy w nowych commitach jest wpis CHANGELOG
+#   >>> tłumaczący (a) usunięcie „Ładowarki" z zastosowań Rolniczych i remap na „Ciągnik"
+#   >>> (03fe892, #82), (b) normalizację products.szerokosc bez zer końcowych (9d1b09f, #83).
+#   >>> Dopiero po tym wolno ruszać tyre_params.cjs / application_rules.cjs w odbudowie.
 #   Następny triaż: git fetch origin main && git log 9d1b09f..origin/main | grep 'sync(vps)'.
 #
 # --- poprzedni marker (do 09.09) ---
