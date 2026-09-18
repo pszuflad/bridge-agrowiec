@@ -2458,7 +2458,7 @@ Karta domykająca falę 2 powinna zrobić dla I4 to, co 14d zrobiła dla I3: del
   --all` nie zwraca ANI JEDNEGO commita od baseline'u 13.08 po 18.09. Wniosek: karta 14h to
   **nowa funkcja i świadome odstępstwo**, a nie przywrócenie czegoś, co się zepsuło — i tak
   trzeba ją wycenić i opisać Ani, żeby nie liczyła na „powrót do stanu sprzed backupu".
-- ⭐ **ROZSTRZYGNIĘTE 2026-09-19 (backlog #19): DATA MA NAPRAWDĘ KOŃCZYĆ PROMOCJĘ.** Pierwsza
+- ⭐ **ROZSTRZYGNIĘTE 2026-09-18 (backlog #19): DATA MA NAPRAWDĘ KOŃCZYĆ PROMOCJĘ.** Pierwsza
   odpowiedź Ani była rozbieżna z jej wpisem w instrukcji, bo pytanie było zbyt otwarte; zadane
   ponownie — z opisem stanu faktycznego („po dacie końca promocja nadal obniża ceny") — dało
   jednoznaczne: *„data ma naprawdę kończyć promocje"*. **To NAJDROŻSZA pozycja I14 i jedyne
@@ -2474,11 +2474,27 @@ Karta domykająca falę 2 powinna zrobić dla I4 to, co 14d zrobiła dla I3: del
   identycznie jak w oryginale — zmieniają się DANE, które dostaje. Dodatkowo (b) naturalnie
   spełnia to, co Ania opisała słowami „reguła znika po końcu obowiązywania": wiersz dostaje status
   `zakonczona` i przestaje obniżać ceny.
-  **Rekomendacja: (b)**, o ile 14e nie wykaże przeciwwskazań. Decyzja należy do użytkownika.
+  **Rekomendacja: (b)**, o ile 14e nie wykaże przeciwwskazań.
+- ⭐ **DECYZJA UŻYTKOWNIKA 2026-09-18 — WARIANT (b), TRZY ROZSTRZYGNIĘCIA NARAZ.** Podjęta po
+  przedstawieniu wyceny z 14e; wszystkie trzy zgodne z rekomendacją:
+  1. **Wariant (b) — wygaszacz przestawia `status`.** Silnik NIETKNIĘTY, dalej patrzy wyłącznie
+     na `status`; zmieniają się DANE, nie zachowanie porównywanej funkcji. Zero wyjątków
+     w wyroczni (0 scenariuszy z 31 kontra 1 przy wariancie (a)).
+  2. **Wygaszacz chodzi RÓWNIEŻ CYKLICZNIE**, nie tylko przy starcie i przy mutacji reguł.
+     Powód: bez tego zostaje okno, w którym wygasła promocja **nadal obniża cenę przy każdym
+     imporcie** — a importy chodzą co godzinę u pięciu dostawców, więc okno realnie sięga dni.
+     ⚠ **14f ma to NAJPIERW ZMIERZYĆ, nie założyć:** potwierdzić, że wariant cykliczny faktycznie
+     nie wchodzi w ścieżkę charakteryzacji. Gdyby wchodził — wrócić do użytkownika, a nie
+     „po cichu" rezygnować z cykliczności albo z wierności.
+  3. **`status` zostaje ODCIĘTY od `POLA_EDYTOWALNE_PROMOCJI`** (`repos/promotions.ts:29-38`).
+     Powód: po (b) `status` jest polem WYLICZANYM, więc zostawienie go edytowalnym znaczyłoby,
+     że wygaszacz nadpisuje ręczne ustawienia użytkownika bez ostrzeżenia.
+  ⚠ **Skutek dla instrukcji:** rada „żeby naprawdę wyłączyć promocję, zmień jej status" przestaje
+  obowiązywać — po 14f promocję wyłącza data albo usunięcie. Sprostowanie należy do **14m**.
 - **Skutek uboczny dla 14f:** pomarańczowy znacznik rozbieżności (`rozbieznoscStatusu`, dodany
   w 4b jako D5) traci rację bytu w wariancie (b) — etykieta z dat i kolumna `status` przestaną
   się rozjeżdżać. Znacznik należy usunąć ŚWIADOMIE i odnotować, a nie zostawić jako martwy kod.
-- **Zamknięte tą samą turą odpowiedzi (2026-09-19):**
+- **Zamknięte tą samą turą odpowiedzi (2026-09-18):**
   - **§3.7 nie jest błędem cen** — Ania: *„tylko się nie wyświetlało, cena się oblicza
     prawidłowo"*. Zadanie A karty 14e (polowanie na defekt w dopasowaniu promocji) jest
     **bezprzedmiotowe**; zostaje wyłącznie wycena z punktu wyżej.
@@ -2494,7 +2510,7 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
 | Karta | Zakres | Pliki (wyłączna własność) | Testy |
 |---|---|---|---|
 | **14e** | ⚠ ZAKRES ZAWĘŻONY 19.09: wycena #19 — wariant (a) czy (b), z liczbami. Zadania „czy promocja obniża ceny" i „komunikat po edycji" ZAMKNIĘTE odpowiedziami Ani | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
-| **14f** | Daty kończą promocję (#19, wariant z 14e) + usunięcie znacznika rozbieżności + potwierdzenie usuwania reguły z liczbą produktów | BE: `repos/ceny.ts` albo NOWY wygaszacz + `repos/promotions.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts` | `test/narzuty.test.tsx` + testy BE |
+| **14f** | **Wariant (b) — decyzja 2026-09-18:** wygaszacz `status` (start + mutacja reguł + CYKLICZNIE) działający w OBIE strony · odcięcie `status` od pól edytowalnych · usunięcie znacznika rozbieżności i noty w dialogu · potwierdzenie usuwania reguły z liczbą produktów | BE: `repos/ceny.ts` albo NOWY wygaszacz + `repos/promotions.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts` | `test/narzuty.test.tsx` + testy BE |
 | **14h** | Kolumna „Promocja" w katalogu — NOWA funkcja (BE wypełnia `_reguly.promocja`) | BE: trasa `/api/products` · FE: `katalog/formatowanie.tsx` | `test/katalog.formatowanie.test.tsx` |
 | **14i** | ✅ **ZROBIONE 2026-09-18**, `58-FEATURE-i14i-ean-naukowy-pusty`. EAN w notacji naukowej → puste pole w katalogu | BE: zapis do katalogu (akceptacja), `src/import/akceptacja.ts` | `test/akceptacja.odstepstwa.test.ts` + bramki charakteryzacji (nietknięte) |
 | **14j** ✅ | Automatyczne porównanie Historii z oryginałem — zastępuje niewykonany test §9 z I5. Karta POMIAROWA, zero kodu produkcyjnego | `docs/tickets/59-*/**` · NOWY `rebuild/backend/test/historia.wyrocznia.*` · backlog (tylko #87) | `test/historia.wyrocznia.test.ts` (13 przypadków) |
@@ -2652,7 +2668,7 @@ Do rozstrzygnięcia osobno: domknąć tę gałąź czy przenieść treść do ak
   dla MO1 i to „na oko, bez liczb"; MO9 się nie da (API, brak pliku). To najcenniejszy test całej
   instrukcji i wymaga osobnego podejścia z konkretnymi plikami.
 
-**14e — wycena kosztu „daty kończą promocję" (#19)** [ROZPOZNANIE] — **ZROBIONE 2026-09-19,
+**14e — wycena kosztu „daty kończą promocję" (#19)** [ROZPOZNANIE] — **ZROBIONE 2026-09-18,
 ticket `53-CHORE-i14e-diagnoza-promocji`.** Karta zamknięta **bez zmian w kodzie produkcyjnym**.
 
 **⚠ ZAKRES ZAWĘŻONY W TRAKCIE** odpowiedziami Ani z 19.09. Pierwotnie karta miała trzy zadania;

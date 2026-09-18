@@ -1360,8 +1360,8 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA 2026-09-19 przez Anię** — daty mają kończyć promocję (świadome odstępstwo, karta **14f**) |
-| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-19)** — liczby niżej |
+| **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA** — daty mają kończyć promocję (Ania, 2026-09-18). **WARIANT WDROŻENIA WYBRANY 2026-09-18: (b) wygaszacz statusu, cykliczny, `status` odcięty od pól edytowalnych.** Karta **14f** |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-18)** — liczby niżej |
 
 **⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
 „Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
@@ -1371,7 +1371,7 @@ jest, reguła znika po końcu obowiązywania". **Jej opis zachowania nie zgadza 
 `TabelaPromocji.tsx` nie filtruje niczego po datach (wiersz ZOSTAJE, z odznaką „zakończona"
 i naszym pomarańczowym znacznikiem), a silnik dat nie czyta, więc wygasła promocja **dalej obniża
 ceny**. Wysłano drugie pytanie kontrolne, tym razem z opisem stanu faktycznego zamiast pytania
-otwartego — i **2026-09-19 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
+otwartego — i **2026-09-18 Ania odpowiedziała jednoznacznie: „data ma naprawdę kończyć
 promocje"**. Wpis przechodzi z „do decyzji" na ZATWIERDZONY. Morał na przyszłość: pytanie
 „co ma się dziać?" dostało odpowiedź opisującą to, co Ania MYŚLAŁA, że się dzieje; dopiero
 pytanie „dziś jest TAK — zostawiamy czy zmieniamy?" dało decyzję.
@@ -1384,6 +1384,18 @@ użytkownik):
   końca; silnik NIETKNIĘTY, dalej patrzy tylko na `status`, charakteryzacja bez wyjątku, bo
   zmieniają się DANE, a nie zachowanie funkcji. Dodatkowo odtwarza dosłownie to, co Ania
   opisała słowami „reguła znika po końcu obowiązywania".
+**DECYZJA UŻYTKOWNIKA 2026-09-18 — wariant (b), w wersji rozszerzonej o cykliczność.**
+Trzy rozstrzygnięcia podjęte naraz, po przedstawieniu wyceny z 14e:
+1. **(b) wygaszacz przestawia `status`** — silnik nietknięty, zero wyjątków w wyroczni.
+2. **Wygaszacz chodzi także CYKLICZNIE**, nie tylko przy starcie i przy mutacji reguł. Bez tego
+   zostaje okno, w którym wygasła promocja **nadal obniża cenę przy każdym imporcie** (importy
+   co godzinę u pięciu dostawców → okno sięga dni). ⚠ 14f ma najpierw ZMIERZYĆ, że wariant
+   cykliczny nie wchodzi w ścieżkę charakteryzacji — nie zakładać.
+3. **`status` odcięty od `POLA_EDYTOWALNE_PROMOCJI`** — po (b) jest polem wyliczanym, więc
+   edytowalność oznaczałaby ciche nadpisywanie ustawień użytkownika.
+⚠ Zakres 14f obejmuje OBIE strony zakresu dat — samo wygaszanie zostawiłoby niedziałające
+planowanie (defekt odwrotny, opisany wyżej w tym wpisie).
+
 **Rekomendacja: (b).** ⚠ Skutek uboczny w obu wariantach: znacznik `rozbieznoscStatusu` (D5
 z 4b) przestaje mieć rację bytu i trzeba go usunąć świadomie, nie zostawić jako martwy kod.
 
@@ -1419,7 +1431,7 @@ czyta start ani koniec") i scenariuszem charakteryzacji
 w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
 
-**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-19).**
+**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-18).**
 
 **Najpierw ustalenie, które przesądza o koszcie: status promocji jest zapisywany RAZ.**
 POST liczy go z dat (`status: statusZDat(start, koniec)`), **PATCH go NIE wysyła** (siedem pól,
@@ -1582,7 +1594,7 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 | **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
 | **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
 | **Iteracja** | odtworzone 1:1 w **4b**; ożywienie → **I14, karta 14h** |
-| **Status** | decyzja podjęta, karta niezałożona · **14e (2026-09-19): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływa na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
+| **Status** | decyzja podjęta, karta niezałożona · **14e (2026-09-18): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływa na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
 
 **⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
 Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
@@ -1689,7 +1701,7 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
 | **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-18**: „nie, zostawiamy tak jak jest, nie dodajemy nowych reguł" |
-| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-19): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
+| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-18): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
