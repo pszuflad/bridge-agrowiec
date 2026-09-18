@@ -2581,9 +2581,12 @@ isRegisteredFormat`) — log procesu: `zip pipeline failed TypeError: oh is not 
 przy potwierdzonym `archiver w piaskownicy: JEST`. Odbudowa ma `archiver@^8.0.0`, gdzie
 `ZipArchive` istnieje, więc **działa** — czyli wierne przepisanie kodu dało zachowanie INNE niż
 produkcja, bo różnica siedzi w wersji zależności. Skutek dla Historii: w produkcji nie powstaje
-ani jeden wpis `eksport_csv` z tej gałęzi. **Wymaga osobnej karty i decyzji użytkownika**
-(odtworzyć defekt czy zostać przy działającej wersji) — opis i propozycja w
-`docs/tickets/59-CHORE-i14j-oracle-diff-historii/raport.md`.
+ani jeden wpis `eksport_csv` z tej gałęzi.
+**⭐ ROZSTRZYGNIĘTE 2026-09-18: ✅ zostajemy przy działającej wersji, defektu NIE odtwarzamy**
+(decyzja użytkownika; ten sam wzorzec co #84). Zapisane jako **backlog #88** wraz z pomiarem
+i uzasadnieniem; osobna karta implementacyjna **nie jest potrzebna** — odbudowa już działa,
+bo deklaruje `archiver: ^8.0.0`. Opisane Ani w `docs/instrukcja-testow-I5.md` §8.2 jako różnica
+na jej korzyść. Pozostaje jedynie ewentualne zgłoszenie defektu Ani; nie blokuje cutoveru.
 
 **⚠ DLA KARTY 14k (backlog #21) — PRZECZYTAJ, ZANIM ZACZNIESZ.** Bloku „14k" w tej roadmapie
 jeszcze NIE MA; 14j nie miała prawa go założyć (własność plików), więc pierwsza rzecz do zrobienia
@@ -2591,16 +2594,22 @@ przy planowaniu 14k to spisanie jej zakresu tutaj. Wejście, które 14j zostawia
 - rozszerzenie słownika `akcja → typ` **zmieni wynik oracle-diffu** — po zmianie trzeba PONOWNIE
   uruchomić `oracle-diff-historii.cjs` i PONOWNIE nagrać `historia.wyrocznia.json`; stara wyrocznia
   zacznie świecić i **to będzie poprawne zachowanie**, a nie regresja;
-- rozstrzygnięcie #21 na „tak" **przyspiesza problem z backlogu #87** (limit 5000), bo przez odsiew
-  przechodziłoby wielokrotnie więcej wierszy. Oba wpisy warto rozstrzygać RAZEM;
+- **#87 (limit 5000) jest już rozstrzygnięty: ❌ zostaje 5000** (decyzja użytkownika 2026-09-18,
+  zmierzone 3873 z 5000, czyli 77% progu). ⚠ **Ale rozstrzygnięcie #21 na „tak" ten temat OTWIERA
+  PONOWNIE** — przez odsiew przechodziłoby wielokrotnie więcej wierszy, więc próg zostałby
+  przekroczony znacznie szybciej. Planując 14k, policz to, zanim zaproponujesz rozszerzenie
+  słownika, i wróć do #87 razem z tą propozycją;
 - podzbiór 270 wierszy w wyroczni jest ważny **tylko dopóki** odsiew działa przed filtrowaniem
   i paginacją; zmiana tej kolejności unieważnia skrót i test to wykryje asercją `limitNieGryzie`.
 
-**⚠ `docs/instrukcja-testow-I5.md` jest w dwóch miejscach NIEAKTUALNA** — §3.3 obiecuje Ani, że
-wpisów typu *edycja* nie przybędzie (nieprawda od 12a/12c — zmierzone), a §8.2 że „nowych eksportów
-nie wygenerujesz" (odbudowa eksporty ma i audytuje). **Uwaga: pliku nie ma na `develop`** — leży
-wyłącznie na niezmergowanej gałęzi `origin/docs/instrukcja-testow-i5` (commity `322a176`, `4ea3b92`).
-Do rozstrzygnięcia osobno: domknąć tę gałąź czy przenieść treść do aktualnej instrukcji.
+**✅ `docs/instrukcja-testow-I5.md` — ODZYSKANA I POPRAWIONA 2026-09-18** (`62-DOCS-decyzje-po-i14j`,
+decyzja użytkownika: „przenieśmy treść do aktualnej instrukcji"). Plik **nie istniał na `develop`**,
+a gałąź `docs/instrukcja-testow-i5` **zdążyła zniknąć z `origin`** — treść odzyskano z wiszącego
+lokalnie commita `322a176` (identycznego z `4ea3b92`) i wniesiono do `docs/`. Poprawione: §3.3
+(wpisów typu *edycja* JUŻ przybywa — od 12a/12c), §8.2 (eksporty działają, plus różnica na korzyść
+z #88), §9 (ręczne porównanie zastąpione wynikiem pomiaru + trzy wpisy do kontroli wzrokowej),
+§11 pkt 9 (limit 5000 z liczbą i decyzją), §12 i §13. **Morał na przyszłość: instrukcja dla Ani
+na niezmergowanej gałęzi jest o jeden `git gc` od zniknięcia — po wysłaniu jej Ani domykaj PR.**
 
 **Poza zakresem I14, wymaga osobnych decyzji i kart:**
 - **Status dostawcy w dwóch polach** (ustawienie ręczne + osobny wyliczony status techniczny) —

@@ -3470,8 +3470,8 @@ u dostawcy i wgrywa go ponownie pod tą samą nazwą.
 |---|---|
 | **Kategoria** | BACKEND (historia / mapowanie audytu) — dziwactwo PRODUKCJI odtworzone świadomie |
 | **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts:54` (`LIMIT_AUDYTU = 5000`), użycie w `rebuild/backend/src/routes/history.ts` |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI** |
-| **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · zmiana limitu — nie zaczęte |
+| **Do nowej wersji?** | ❌ **NIE — zostawiamy 5000** (decyzja użytkownika, 2026-09-18) |
+| **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · limit zostaje bez zmian, temat wraca przy progu |
 
 **Co robi produkcja.** `GET /api/history/meta` i `GET /api/history/paged` wołają
 `listAudit(5000)`, czyli `SELECT … FROM audit_log ORDER BY kiedy DESC LIMIT 5000`. Limit stoi
@@ -3504,10 +3504,79 @@ w `docs/instrukcja-testow-I5.md` §11 pkt 9 jako dziwactwo do NIEzgłaszania.
 albo zdjąć limit. Rozstrzygnięcie #21 na „tak" **przyspiesza** problem opisany tutaj, bo przez
 odsiew przechodziłoby wielokrotnie więcej wierszy. Warto je rozstrzygać razem.
 
-**Możliwe kierunki — do decyzji użytkownika, NIE rozstrzygam:**
-- **(a) zostawić 1:1** — zero kosztu, problem wraca sam przy ~5000 zdarzeń;
+**⭐ DECYZJA 2026-09-18: wariant (a) — zostawiamy 1:1.** *„Na razie zróbmy tak jak jest, że jest
+5 tysięcy i tyle."* Uzasadnienie zgodne z domyślną regułą odbudowy: produkcja ma ten sam limit,
+więc jego zmiana byłaby świadomym odstępstwem, a dziś nie ma powodu go ponosić (3873 z 5000,
+77% progu). **Temat NIE jest zamknięty na zawsze** — wraca, gdy próg zacznie doskwierać, albo
+razem z rozstrzygnięciem #21, które go przyspiesza. Instrukcja I5 §11 pkt 9 opisuje Ani stan
+faktyczny wraz z liczbą i mówi, po czym pozna, że próg został przekroczony.
+
+**Rozważone kierunki:**
+- **(a) zostawić 1:1** ⬅ **WYBRANE** — zero kosztu, problem wraca sam przy ~5000 zdarzeń;
 - **(b) podnieść limit** — najtańsze, odsuwa próg, ale go nie usuwa i obciąża odpowiedź
   (mapowanie całości w pamięci przy każdym żądaniu);
 - **(c) filtrować i paginować w SQL** zamiast w pamięci — usuwa problem u źródła i naprawia
   licznik, ale jest **świadomym odstępstwem** od oryginału w trasie, którą dziś porównujemy
   z produkcją 1:1, i wymaga przenagrania fixtures historii.
+
+### #88 · 2026-09-18 · [BACKEND] · eksport wszystkich dostawców do ZIP-a jest w produkcji trwale zepsuty (HTTP 500) — odbudowa działa i tak zostaje
+
+| pole | wartość |
+|---|---|
+| **Kategoria** | BACKEND (eksport Shoper, gałąź „wszyscy") — defekt PRODUKCJI |
+| **Pliki** | `deminified/backend-index.cjs:48139` (`rV()` — konstruktor archiwum), `:48783-48818` (trasa); `mirror/backend/package.json` + `package-lock.json`; odbudowa: `rebuild/backend/src/routes/export-shoper.ts:60-63,81-127`, `rebuild/backend/package.json` (`archiver: ^8.0.0`) |
+| **Do nowej wersji?** | ✅ **TAK — NIE odtwarzamy defektu** (decyzja użytkownika, 2026-09-18) |
+| **Status** | ✔ zrobione w rebuild — działa „samo z siebie", bez ani jednej linii kodu napisanej pod ten wpis. W żywej produkcji **nadal zepsute** |
+
+**Co robi produkcja.** `GET /api/export-shoper` **bez** parametru `?dostawca=` wchodzi w gałąź
+„wszyscy", która składa ZIP z osobnym CSV na dostawcę. `rV()` robi
+`let t = await import("archiver"); oh = t.ZipArchive ?? t.default?.ZipArchive` — to jest API
+**archivera 8.x**, gdzie `ZipArchive` jest eksportem nazwanym. Tymczasem
+`mirror/backend/package-lock.json` przypina **`archiver@5.3.2`**, którego eksporty to
+`create, registerFormat, isRegisteredFormat` — **`ZipArchive` tam nie istnieje**. `oh` wychodzi
+`undefined`, `new oh(...)` rzuca, a `.catch` zamienia to na HTTP 500.
+
+Do tego `archiver` **w ogóle nie jest zadeklarowany** w `mirror/backend/package.json` (są tam
+tylko cztery inne zależności plus `better-sqlite3` i `xlsx`) — siedzi wyłącznie w lockfile'u.
+Każde `npm install` na produkcji zamiast `npm ci` usunęłoby go całkowicie i trasa padałaby na
+`ERR_MODULE_NOT_FOUND` zamiast na `oh is not a constructor`.
+
+**Jak to zmierzono** (`59-CHORE-i14j`, piaskownica z zależnościami odtworzonymi z lockfile'a
+produkcji przez `npm ci`, kontrola w logu: `archiver w piaskownicy: JEST` — czyli **nie** jest to
+artefakt brakującego modułu):
+
+```
+zip pipeline failed TypeError: oh is not a constructor
+    at rV (…/index.cjs:313:6525)
+GET /api/export-shoper 500 in 49ms :: {"error":"oh is not a constructor"}
+```
+
+| Ścieżka | Oryginał | Odbudowa |
+|---|---|---|
+| `GET /api/export-shoper` (ZIP wszystkich) | **500**, brak audytu | **200**, audyt `eksport_csv` |
+| `GET /api/export-shoper?dostawca=MO1` (CSV) | 200, audyt `eksport_csv` | 200, audyt `eksport_csv` |
+| `GET /api/export/shoper` (CSV z konfiguracji) | 200, audyt `eksport_shoper` | 200, audyt `eksport_shoper` |
+
+**Skutek w produkcji.** Pobranie wszystkich dostawców jednym plikiem nie działa i **nie zostawia
+żadnego wpisu w widoku „Historia"** — audyt zapisywany jest dopiero po udanym złożeniu archiwum.
+Historia produkcji jest o te wpisy uboższa, a Ania mogła uznać przycisk za zepsuty i przestać
+go używać.
+
+**⚠ Czym ten wpis różni się od pozostałych defektów produkcji.** Tu **nie napisaliśmy żadnego
+własnego kodu** — port jest przepisany z oryginału dosłownie, łącznie z odczytem `ZipArchive`.
+Różnica siedzi wyłącznie w **wersji zależności**: odbudowa deklaruje `archiver: ^8.0.0`, gdzie
+`ZipArchive` istnieje. To pierwszy przypadek w tej odbudowie, w którym **wierne przepisanie kodu
+dało zachowanie INNE niż produkcja**. Morał na przyszłość: przy porcie sprawdzaj nie tylko kod,
+ale i wersję biblioteki, z którą ten kod realnie chodzi u Ani.
+
+**Decyzja i uzasadnienie.** ✅ **Zostajemy przy działającej wersji, defektu nie odtwarzamy**
+(*„oczywiście zostajemy przy działającej wersji"*, 2026-09-18). Ten sam wzorzec co przy **#84**
+(„undefined nowych, undefined zmian"): wierne przepisanie dałoby w odbudowie błąd, który i tak
+zostałby zgłoszony jako usterka, a odtwarzanie zepsutego pobierania nie ma wartości dla
+użytkownika. Opisane Ani w `docs/instrukcja-testow-I5.md` §8.2 jako różnica **na jej korzyść**,
+żeby nie zgłosiła tego jako rozjazdu.
+
+**Do ewentualnego zgłoszenia Ani przy okazji** (nie blokuje cutoveru): w żywej produkcji ten
+przycisk nadal nie działa. Naprawa po stronie produkcji to podbicie `archiver` do 8.x **i**
+dopisanie go do `package.json` — ale skoro cutover i tak zastąpi tamten backend, nie ma powodu
+ruszać produkcji tylko po to.

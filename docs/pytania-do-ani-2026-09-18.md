@@ -95,18 +95,22 @@ oraz „Historia ceny wybranej opony".
 >
 >
 
-### 5.3 Porównanie Historii ze starym Bridge — zrobimy automatem
+### 5.3 Porównanie Historii ze starym Bridge — ✅ ZROBIONE, to już nie jest pytanie
 
-To pole zostało puste, a był to najważniejszy test tamtej iteracji. Nie prosimy Cię o przejście
-całej listy — przygotowujemy automatyczne porównanie obu Bridge'ów wpis po wpisie. Poprosimy Cię
-tylko o sprawdzenie **dwóch–trzech wpisów** i potwierdzenie, że się zgadzają.
+To pole zostało puste, a był to najważniejszy test tamtej iteracji. **Zrobiliśmy je za Ciebie
+automatem** — nie musisz nic odpowiadać.
 
-- **(a)** OK, dajcie znać kiedy
-- **(b)** wolę przejść to sama w całości
+Postawiliśmy stary i nowy Bridge obok siebie na tej samej kopii bazy i zestawiliśmy ich
+odpowiedzi co do znaku: całą tabelę, wszystkie filtry, wszystkie strony i liczniki.
 
-> **ODPOWIEDŹ:**
->
->
+> **Wynik: 49 813 porównanych wpisów · 0 różnic.**
+
+Zostają **trzy wpisy do obejrzenia na oczy**, jakieś pięć minut — są rozpisane w poprawionej
+`docs/instrukcja-testow-I5.md`, rozdział 9 (najnowszy wpis na górze, import MO1 z nazwą pliku,
+lista ośmiu dostawców w filtrze).
+
+⚠ **Przy okazji poprawiliśmy dwie rzeczy, które tamta instrukcja obiecywała nieprawdziwie:**
+wpisów typu *edycja* **już przybywa** (§3.3) i eksporty **już działają** (§8.2).
 
 ---
 
