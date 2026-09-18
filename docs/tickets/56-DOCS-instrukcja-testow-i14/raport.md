@@ -200,3 +200,44 @@ Review: **0 BLOCKER, 0 SHOULD-FIX, 2 NICE-TO-HAVE** (`review.md`). Rozliczenie:
   (I3 nietknięta poza bannerem) i konwencji I13 („starsze instrukcje zostają bez zmian").
   Banner na górze I3 wymienia §5 wprost jako nieaktualny i kieruje do I14 rozdz. 11, gdzie
   lista jest poprawna. Reviewer sam ocenia to jako nieistotne.
+
+## Aktualizacja dokumentacji
+
+`docs/rebuild-roadmap.md` — rozliczona w ramach karty (podblok 14d na STAN, wiersz 14 w §4
+⬜ → 🔨, linia „Status" bloku I14, sprostowanie przypisania w podbloku 14e). Szczegóły w
+„Zmiany" i „Rozbieżności".
+
+`docs/rebuild-backlog.md` — sprawdzone wpisy #9, #10, #11, #18; **żaden nie wymagał zmiany**.
+#9 i #10 zamknięte 2026-09-08, #11 ma zapisaną decyzję Ani z 2026-09-18 z adnotacją „karta
+niezałożona" (14i), #18 ma status „odtworzone, opisane Ani w instrukcji" — ta karta ten opis
+przeniosła do I14 rozdz. 7 wraz z notą o oczekującej decyzji.
+
+**⚠ Doc-checkerów świadomie NIE uruchomiono.** Opis karty podaje zamkniętą listę własności
+plików (`instrukcja-testow-I3.md` / nowy plik, `docs/tickets/<ID>/**`, podblok 14d i wiersz §4
+roadmapy, ewentualnie backlog). Delegowanie aktualizacji pozostałych dokumentów oznaczałoby
+edycję plików spoza tej listy — przy równolegle idących kartach 14f/14h/14i to jest dokładnie
+to ryzyko, przed którym karta ostrzega. Zamiast tego przeprowadzono **audyt tylko do odczytu**
+i jego wynik idzie do Follow-up.
+
+### Wynik audytu — co jeszcze jest nieaktualne poza własnością tej karty
+
+`grep -rn "Synchronizuj teraz" docs/` (z pominięciem `docs/tickets/`) daje **sześć wystąpień
+w trzech dokumentach**, wszystkie nieaktualne po 14c:
+
+| Plik | Linie | Kontekst |
+|---|---|---|
+| `docs/instrukcja-testow-I6.md` | `:49, :50, :58, :125` | scenariusz alertów — instrukcja każe Ani klikać przycisk pięć razy pod starą nazwą |
+| `docs/instrukcja-testow-I10.md` | `:56` | przygotowanie danych do analityki |
+| `docs/przeglad-12-widokow.md` | `:198` | pozycja listy kontrolnej przeglądu widoków |
+
+⚠ **`docs/instrukcja-testow-I6.md` jest najpilniejszy** — to instrukcja scenariuszowa, a nie
+wzmianka: krok „kliknij Synchronizuj teraz jeszcze cztery razy" jest nie do wykonania pod
+nazwą, której nie ma na ekranie.
+
+Sprawdzone i **czyste**: `docs/spec-frontend.md` (zero wystąpień, nie opisuje domyślnego filtra
+stagingu ani starego przepływu wgrywania), `docs/spec-backend.md`, `docs/cutover.md`.
+`docs/instrukcja-testow-I10.md:56` wspomina „Konfiguracja → Dostawcy → **Wgraj plik**" —
+ten przycisk **od 14c realnie istnieje**, więc ta akurat wzmianka stała się prawdziwa.
+
+**Zapisane też w roadmapie** (podblok 14d), żeby wynik audytu doszedł do następnej sesji,
+a nie został tylko w raporcie tej karty.

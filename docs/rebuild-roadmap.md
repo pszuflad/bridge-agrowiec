@@ -2389,6 +2389,14 @@ zmieniała** — tylko opisała naprawę Ani w instrukcji (I14 rozdz. 6).
 - **14c:** „Synchronizuj" zamiast „Synchronizuj teraz"; przycisk „Wgraj plik" przy
   `upload`/`mail`; pole minut za „Inna wartość (minuty)…", puste po przełączeniu z presetu.
 
+**⚠ AUDYT 14d — etykieta „Synchronizuj teraz" żyje jeszcze w TRZECH dokumentach poza własnością
+tej karty.** `grep -rn "Synchronizuj teraz" docs/` (bez `docs/tickets/`) daje sześć wystąpień:
+`instrukcja-testow-I6.md:49,50,58,125` · `instrukcja-testow-I10.md:56` ·
+`przeglad-12-widokow.md:198`. **Najpilniejszy jest I6** — to instrukcja scenariuszowa, której
+krok „kliknij Synchronizuj teraz jeszcze cztery razy" jest nie do wykonania pod nazwą, której
+nie ma na ekranie. 14d nie mogła ich ruszyć (zamknięta lista własności plików + równoległe karty).
+Czyste, sprawdzone: `spec-frontend.md`, `spec-backend.md`, `cutover.md`.
+
 **⚠ Do rozliczenia przez kartę zamykającą DRUGĄ FALĘ I14 (nie przez 14d):**
 `docs/instrukcja-testow-I4.md` jest **nietknięta i częściowo nieaktualna** — decyzje Ani
 unieważniły jej rozdziały 4 i 5, ale zależy to od kart **14f** (daty promocji) i **14i** (EAN
