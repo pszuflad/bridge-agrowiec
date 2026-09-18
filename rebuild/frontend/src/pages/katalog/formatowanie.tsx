@@ -140,9 +140,14 @@ export function formatujKomorke(produkt: Produkt, klucz: string): ReactNode {
   }
 
   /**
-   * `promocja` nie jest kolumną produktu — oryginał czyta ją z `_reguly.promocja`,
-   * które dokłada warstwa cenowa (Iteracja 4). Do tego czasu zawsze „—", identycznie
-   * jak w produkcji dla produktu bez promocji.
+   * `promocja` nie jest kolumną produktu — czytamy ją z `_reguly.promocja`, dokładnie jak
+   * oryginał (`const p = e?._reguly?.promocja; … p.wartosc; p.nazwa || "Promocja"`).
+   *
+   * ⭐ Od karty 14h (ticket 61) pole REALNIE PRZYCHODZI z `GET /api/products` — backend
+   * dopasowuje promocję silnikiem cen (`repos/products.ts`, `dolaczReguly`). W produkcji
+   * `_reguly` nie było ustawiane nigdy, więc to ŚWIADOME ODSTĘPSTWO, decyzja Ani
+   * z 2026-09-18 (`docs/rebuild-backlog.md` #22), a nie przywrócenie regresji.
+   * „—" zostaje dla produktu, któremu żadna aktywna promocja nie odpowiada.
    */
   if (klucz === "promocja") {
     const reguly = produkt._reguly as { promocja?: { wartosc?: number; nazwa?: string } } | undefined;

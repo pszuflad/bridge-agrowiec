@@ -1,6 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { products } from "../db/schema.js";
+import { wybierzPromocje, type Promocja, type RekordCenowy } from "./ceny.js";
 import { KOLUMNY_POZA_KONTRAKTEM, projekcjaKontraktowa } from "./kolumny.js";
 import { odsiejPola } from "./pola-edytowalne.js";
 
@@ -59,6 +60,69 @@ export function listaProduktowStronicowana(
   const items = db.select(KOLUMNY_API).from(products).limit(limit).offset(offset).all();
   const licznik = db.select({ c: sql<number>`count(*)` }).from(products).get();
   return { items, total: licznik?.c ?? 0 };
+}
+
+// ————————————————————————————————————————————————————————————————————————————————————————
+//  `_reguly.promocja` — ŚWIADOME ODSTĘPSTWO OD PRODUKCJI (karta 14h)
+//
+//  CO: `GET /api/products` dokłada do produktu opcjonalny 73. klucz `_reguly` z wygrywającą,
+//      aktywną promocją. Produkcja tego klucza NIE ZWRACA — jej odpowiedź ma 72 klucze.
+//  DLACZEGO: kolumna „Promocja" w `/katalog` renderuje `produkt._reguly?.promocja` od
+//      baseline'u 13.08, ale ZAPISU tego pola nie dopisał nigdy nikt — ani w żywym bundlu
+//      (`index-PRICEFMT1783512500.js`: jedno wystąpienie, wyłącznie odczyt), ani w backendzie
+//      (`mirror/backend/index.cjs`: zero). Kolumna od zawsze pokazuje „—".
+//  CZYJA DECYZJA: Ania, 2026-09-18 — „w kolumnie promocje mają się wyświetlać aktualne
+//      promocje dla danych produktów", po dopytaniu: „dodaj regułę wypełniania kolumny
+//      promocja". Zapis: `docs/rebuild-backlog.md` #22.
+//  ⚠ To NOWA FUNKCJA, nie naprawa regresji. Ania pamięta, że kolumna „działała i zepsuł ją
+//      backup" — kod tego nie potwierdza w ŻADNEJ wersji, którą mamy.
+//
+//  Dopasowanie idzie przez `wybierzPromocje` z `repos/ceny.ts` i to jest WARUNEK KONIECZNY,
+//  nie kwestia stylu:
+//   • w systemie są już trzy różne sposoby liczenia ceny (backlog #23, #24) — czwarty sposób
+//     dopasowania promocji byłby fabryką rozjazdów;
+//   • karta 14f sprawi, że daty zaczną kończyć promocje (backlog #19). Dzięki wspólnej funkcji
+//     kolumna zacznie to respektować SAMA, bez ruszania tego pliku. Zduplikowana logika nie.
+//  ⚠ Dat tu NIE czytamy — `promocjaPasuje` ich nie zna (`ceny.ts:110-116`) i tak ma zostać
+//  do 14f. `repos/ceny.ts` jest tu READ-ONLY.
+// ————————————————————————————————————————————————————————————————————————————————————————
+
+/** Promocja tak, jak czyta ją kolumna katalogu — `wartosc` to PROCENT rabatu (`rabat_pct`). */
+export type PromocjaProduktu = { wartosc: number; nazwa: string };
+
+/** Produkt katalogu z opcjonalnym 73. kluczem. Brak promocji = BRAK `_reguly` (nie `{}`). */
+export type ProduktZRegulami = Produkt & { _reguly?: { promocja: PromocjaProduktu } };
+
+/**
+ * Dokłada `_reguly.promocja` do produktów, którym jakaś aktywna promocja pasuje.
+ *
+ * ⚠ KSZTAŁT JEST PODYKTOWANY PRZEZ ORYGINAŁ, nie przez nas: żywy bundle produkcji czyta
+ * `const p = e?._reguly?.promocja; … const rabat = p.wartosc; const nazwa = p.nazwa || "Promocja"`.
+ * Stąd `wartosc`, a nie `rabatPct` — mapujemy nazwę kolumny bazy na nazwę, której oczekuje
+ * renderer. Port w `rebuild/` (`katalog/formatowanie.tsx`) jest z tym zgodny bajt w bajt.
+ *
+ * ⚠ BRAK DOPASOWANIA = BRAK KLUCZA, a nie `_reguly: {}`. To nie kosmetyka: dzięki temu produkt
+ * bez promocji ma dokładnie te 72 klucze co nagranie produkcji, więc odstępstwo jest warunkowe
+ * i nie dotyka istniejących bramek wierności (`test/katalog.gate.test.ts`). Renderer i tak
+ * sprawdza `if (!promocja) return <Kreska />`.
+ *
+ * ⚠ WYDAJNOŚĆ: `promocje` przychodzą z ZEWNĄTRZ, wczytane raz na żądanie. Katalog ma ~7400
+ * pozycji — zapytanie per produkt byłoby tu zabójcze. Wzorzec 1:1 z `przeliczCenyZRegul`.
+ */
+export function dolaczReguly(produkty: Produkt[], promocje: Promocja[]): ProduktZRegulami[] {
+  // Dziś to stan produkcji: `promotions` jest puste, a `GET_promotions.json` to `[]`.
+  // Bez tej ścieżki kopiowalibyśmy 7400 obiektów, żeby nie dołożyć do nich niczego.
+  if (promocje.length === 0) return produkty;
+
+  return produkty.map((produkt) => {
+    const promocja = wybierzPromocje(promocje, produkt as unknown as RekordCenowy);
+    if (!promocja) return produkt;
+
+    return {
+      ...produkt,
+      _reguly: { promocja: { wartosc: promocja.rabatPct, nazwa: promocja.nazwa } },
+    };
+  });
 }
 
 /**
