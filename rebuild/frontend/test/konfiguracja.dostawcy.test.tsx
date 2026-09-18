@@ -12,7 +12,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
@@ -281,11 +281,35 @@ describe("Zakładka „Dostawcy”", () => {
       expect(screen.queryByTestId(`input-freq-${Z_URL.kod}`)).not.toBeInTheDocument();
 
       await userEvent.selectOptions(screen.getByTestId(`select-freq-${Z_URL.kod}`), "inna");
-      expect(screen.getByTestId(`input-freq-${Z_URL.kod}`)).toBeInTheDocument();
+      const pole = screen.getByTestId(`input-freq-${Z_URL.kod}`);
+      expect(pole).toBeInTheDocument();
+      /*
+       * Pole startuje PUSTE, nie z porzuconym presetem. W oryginale listener `change` tylko
+       * przełącza widoczność (`freq-injection.js:144-146`), a wartość jest wpisywana wyłącznie
+       * przy budowie popovera i tylko dla wartości spoza presetów (`:141`).
+       */
+      expect(pole).toHaveValue(null);
 
       // Powrót na preset chowa pole z powrotem.
       await userEvent.selectOptions(screen.getByTestId(`select-freq-${Z_URL.kod}`), "240");
       expect(screen.queryByTestId(`input-freq-${Z_URL.kod}`)).not.toBeInTheDocument();
+    });
+
+    /**
+     * Druga połowa reguły z `freq-injection.js:141`: wartość SPOZA presetów ma się pokazać
+     * w polu od razu (`if (select.value === 'custom' && currentMin) customInput.value = …`).
+     * Fixture nie ma takiego dostawcy, więc podstawiamy go ręcznie.
+     */
+    it("wartość spoza presetów startuje na „Inna wartość” z WYPEŁNIONYM polem", async () => {
+      zamockujApi(undefined, undefined, [{ ...Z_URL, czestotliwoscMinuty: 45 }]);
+      window.history.pushState({}, "", "/konfiguracja");
+      render(<App />);
+      await screen.findByTestId(`supplier-config-${Z_URL.kod}`);
+
+      await userEvent.click(screen.getByTestId(`button-edit-${Z_URL.kod}`));
+
+      expect(screen.getByTestId(`select-freq-${Z_URL.kod}`)).toHaveValue("inna");
+      expect(screen.getByTestId(`input-freq-${Z_URL.kod}`)).toHaveValue(45);
     });
 
     /**
@@ -365,6 +389,20 @@ describe("Zakładka „Dostawcy”", () => {
         "accept",
         ".csv,.xml,.xlsx",
       );
+    });
+
+    /**
+     * Pozostałe testy wgrywają plik prosto na ukryty input, więc regresja w samym `onClick`
+     * przycisku przeszłaby niezauważona — a to jedyna rzecz, którą użytkownik realnie klika.
+     */
+    it("kliknięcie przycisku otwiera ukryte pole wyboru pliku", async () => {
+      await otworzDostawcow();
+      const pole = screen.getByTestId(`input-file-${Z_MAILA.kod}`);
+      const otwarcia = vi.spyOn(pole, "click");
+
+      await userEvent.click(screen.getByTestId(`button-upload-${Z_MAILA.kod}`));
+
+      expect(otwarcia).toHaveBeenCalledTimes(1);
     });
 
     it("GATE: wysyła multipart z polem `plik` na trasę WŁAŚCIWEGO dostawcy", async () => {

@@ -28,7 +28,13 @@ Wolno zmieniać **wyłącznie**:
 `rebuild/frontend/src/pages/konfiguracja/DialogKonfiguracjiDostawcy.tsx`,
 `rebuild/frontend/test/konfiguracja.dostawcy.test.tsx`,
 `rebuild/frontend/test/konfiguracja.admin.test.tsx`,
-`docs/tickets/50-FEATURE-i14c-karta-dostawcy-upload/**`, plus podblok 14c w `docs/rebuild-roadmap.md`.
+`docs/tickets/50-FEATURE-i14c-karta-dostawcy-upload/**`, plus podblok 14c w `docs/rebuild-roadmap.md`
+i wpisy odstępstw w `docs/rebuild-backlog.md`.
+
+⚠ Karta wymieniła tylko roadmapę, ale `CLAUDE.md` wymaga, żeby **świadome odstępstwa trafiły do
+backlogu**, a procedura `/feature` (Krok 13) stawia backlog zawsze w zakresie bloku iteracji.
+Dopisujemy więc WYŁĄCZNIE nowe wpisy dla D1/D5/D6, bez ruszania cudzych — trzy karty idą
+równolegle, więc każda modyfikacja istniejących wierszy groziłaby konfliktem.
 
 ⚠ **`rebuild/frontend/src/pages/konfiguracja/dostawcy.ts` NIE JEST na liście własności**, mimo że
 jest modułem wspierającym `Dostawcy.tsx` i naturalnym miejscem na klienta uploadu. Lista jest

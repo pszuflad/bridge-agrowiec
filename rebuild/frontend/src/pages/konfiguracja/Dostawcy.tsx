@@ -152,7 +152,9 @@ function jestPresetem(minuty: number | null): boolean {
 function stanZDostawcy(d: DostawcaKonfiguracji): StanEdycji {
   return {
     url: d.url ?? "",
-    czestotliwosc: d.czestotliwoscMinuty == null ? "" : String(d.czestotliwoscMinuty),
+    // `0` traktujemy jak brak, tak jak oryginał: jego warunki są na PRAWDZIWOŚCI `currentMin`
+    // (`:129`, `:141`), więc zero nigdy nie trafiało do pola. Zero i tak nie przechodzi walidacji.
+    czestotliwosc: d.czestotliwoscMinuty ? String(d.czestotliwoscMinuty) : "",
     sposobDostarczania: d.sposobDostarczania,
     status: d.status,
     // Preset → select pokazuje ten preset, pole minut schowane. Wartość spoza presetów ORAZ brak
@@ -408,8 +410,12 @@ function KartaDostawcy({ dostawca }: { dostawca: DostawcaKonfiguracji }) {
               value={edycja.inna ? "inna" : edycja.czestotliwosc}
               onChange={(e) => {
                 if (e.target.value === "inna") {
-                  // Wartość zostaje — użytkownik ją teraz doprecyzuje w odsłoniętym polu.
-                  ustawEdycje({ ...edycja, inna: true });
+                  // Pole startuje PUSTE, jak w oryginale: listener `change` skryptu tylko
+                  // przełącza widoczność (`:144-146`), a `customInput.value` jest ustawiane
+                  // WYŁĄCZNIE przy budowie popovera i tylko wtedy, gdy bieżąca wartość nie była
+                  // presetem (`:141`). Ręczne przełączenie z presetu odsłania więc puste pole,
+                  // a nie preset, który użytkownik właśnie porzucił.
+                  ustawEdycje({ ...edycja, inna: true, czestotliwosc: "" });
                   return;
                 }
                 ustawEdycje({ ...edycja, inna: false, czestotliwosc: e.target.value });
