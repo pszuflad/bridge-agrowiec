@@ -1,0 +1,902 @@
+{
+  "kiedy": "2026-09-18T17:03:29.341Z",
+  "tryb": "dane-produkcji",
+  "snapshot": "/home/szuflada/apinfo/projects/bridge/db/snapshot.db",
+  "stanBaz": {
+    "history": {
+      "wierszy": 46916,
+      "kolumny": "id:INTEGER,data:TEXT,kod_produktu:TEXT,nazwa:TEXT,pole:TEXT,stara_wartosc:TEXT,nowa_wartosc:TEXT,zrodlo:TEXT,kto:TEXT,wykonal_uzytkownik_id:INTEGER",
+      "sumaKontrolna": {
+        "c": 46916,
+        "s": 1100578986,
+        "mn": 1,
+        "mx": 46916
+      }
+    },
+    "audit_log": {
+      "wierszy": 3873,
+      "kolumny": "id:INTEGER,uzytkownik_id:INTEGER,uzytkownik_imie:TEXT,akcja:TEXT,encja_typ:TEXT,encja_id:TEXT,szczegoly_json:TEXT,kiedy:TEXT",
+      "sumaKontrolna": {
+        "c": 3873,
+        "s": 7502001,
+        "mn": 1,
+        "mx": 3873
+      }
+    }
+  },
+  "przypadki": [
+    {
+      "grupa": "/api/history",
+      "opis": "bez parametrów (cała tabela)",
+      "sciezka": "/api/history",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 46916,
+      "total": null,
+      "kluczeWpisu": "data,id,kodProduktu,kto,nazwa,nowaWartosc,pole,staraWartosc,wykonalUzytkownikId,zrodlo",
+      "roznice": []
+    },
+    {
+      "grupa": "/api/history/meta",
+      "opis": "bez parametrów",
+      "sciezka": "/api/history/meta",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 8,
+      "total": null,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged bez filtrów",
+      "opis": "domyślne",
+      "sciezka": "/api/history/paged",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr typ",
+      "opis": "typ=all",
+      "sciezka": "/api/history/paged?typ=all&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 200,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr typ",
+      "opis": "typ=import",
+      "sciezka": "/api/history/paged?typ=import&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 92,
+      "total": 92,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr typ",
+      "opis": "typ=eksport",
+      "sciezka": "/api/history/paged?typ=eksport&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 0,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr typ",
+      "opis": "typ=edycja",
+      "sciezka": "/api/history/paged?typ=edycja&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 178,
+      "total": 178,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=all",
+      "sciezka": "/api/history/paged?dostawca=all&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 200,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO1",
+      "sciezka": "/api/history/paged?dostawca=MO1&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 40,
+      "total": 40,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO10",
+      "sciezka": "/api/history/paged?dostawca=MO10&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 14,
+      "total": 14,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO2",
+      "sciezka": "/api/history/paged?dostawca=MO2&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 1,
+      "total": 1,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO3",
+      "sciezka": "/api/history/paged?dostawca=MO3&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 2,
+      "total": 2,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO6",
+      "sciezka": "/api/history/paged?dostawca=MO6&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 3,
+      "total": 3,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO7",
+      "sciezka": "/api/history/paged?dostawca=MO7&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 16,
+      "total": 16,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO8",
+      "sciezka": "/api/history/paged?dostawca=MO8&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 13,
+      "total": 13,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr dostawca",
+      "opis": "dostawca=MO9",
+      "sciezka": "/api/history/paged?dostawca=MO9&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 3,
+      "total": 3,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"MO3\"",
+      "sciezka": "/api/history/paged?search=MO3&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 79,
+      "total": 79,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"kategoria\"",
+      "sciezka": "/api/history/paged?search=kategoria&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 14,
+      "total": 14,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"Plik:\"",
+      "sciezka": "/api/history/paged?search=Plik%3A&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 92,
+      "total": 92,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"import\"",
+      "sciezka": "/api/history/paged?search=import&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 92,
+      "total": 92,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"edycja\"",
+      "sciezka": "/api/history/paged?search=edycja&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 178,
+      "total": 178,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"eksport\"",
+      "sciezka": "/api/history/paged?search=eksport&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 0,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"Format:\"",
+      "sciezka": "/api/history/paged?search=Format%3A&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 0,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"csv\"",
+      "sciezka": "/api/history/paged?search=csv&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 76,
+      "total": 76,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"Marta\"",
+      "sciezka": "/api/history/paged?search=Marta&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 200,
+      "total": 268,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\".csv\"",
+      "sciezka": "/api/history/paged?search=.csv&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 76,
+      "total": 76,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"ZZZ-nie-istnieje\"",
+      "sciezka": "/api/history/paged?search=ZZZ-nie-istnieje&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 0,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged filtr search",
+      "opis": "search=\"\"",
+      "sciezka": "/api/history/paged?search=&limit=200",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 200,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=25&page=1",
+      "sciezka": "/api/history/paged?limit=25&page=1",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 25,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=25&page=2",
+      "sciezka": "/api/history/paged?limit=25&page=2",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 25,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=25&page=3",
+      "sciezka": "/api/history/paged?limit=25&page=3",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 25,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=25&page=4",
+      "sciezka": "/api/history/paged?limit=25&page=4",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 25,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=25&page=11",
+      "sciezka": "/api/history/paged?limit=25&page=11",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 20,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=25&page=12",
+      "sciezka": "/api/history/paged?limit=25&page=12",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 270,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=50&page=1",
+      "sciezka": "/api/history/paged?limit=50&page=1",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=50&page=2",
+      "sciezka": "/api/history/paged?limit=50&page=2",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=50&page=3",
+      "sciezka": "/api/history/paged?limit=50&page=3",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=50&page=4",
+      "sciezka": "/api/history/paged?limit=50&page=4",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=50&page=11",
+      "sciezka": "/api/history/paged?limit=50&page=11",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 270,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=50&page=12",
+      "sciezka": "/api/history/paged?limit=50&page=12",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 270,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=100&page=1",
+      "sciezka": "/api/history/paged?limit=100&page=1",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 100,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=100&page=2",
+      "sciezka": "/api/history/paged?limit=100&page=2",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 100,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=100&page=3",
+      "sciezka": "/api/history/paged?limit=100&page=3",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 70,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=100&page=4",
+      "sciezka": "/api/history/paged?limit=100&page=4",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 270,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=100&page=11",
+      "sciezka": "/api/history/paged?limit=100&page=11",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 270,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged paginacja",
+      "opis": "limit=100&page=12",
+      "sciezka": "/api/history/paged?limit=100&page=12",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 270,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "limit=0",
+      "sciezka": "/api/history/paged?limit=0",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "limit=1",
+      "sciezka": "/api/history/paged?limit=1",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 1,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "limit=201",
+      "sciezka": "/api/history/paged?limit=201",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 200,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "limit=abc",
+      "sciezka": "/api/history/paged?limit=abc",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "page=0",
+      "sciezka": "/api/history/paged?page=0",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "page=abc",
+      "sciezka": "/api/history/paged?page=abc",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "page=-3",
+      "sciezka": "/api/history/paged?page=-3",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 50,
+      "total": 270,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "page=99999",
+      "sciezka": "/api/history/paged?page=99999",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 270,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "limit=25&page=2&typ=edycja",
+      "sciezka": "/api/history/paged?limit=25&page=2&typ=edycja",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 25,
+      "total": 178,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "limit=25&page=2&dostawca=MO3",
+      "sciezka": "/api/history/paged?limit=25&page=2&dostawca=MO3",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 2,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "typ=edycja&search=kategoria&limit=10&page=2",
+      "sciezka": "/api/history/paged?typ=edycja&search=kategoria&limit=10&page=2",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 4,
+      "total": 14,
+      "kluczeWpisu": "dostawca,format,id,kiedy,kodProduktu,liczbaPozycji,nazwaPliku,typ,uwagi,uzytkownik,zmienionePola",
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "typ=nieznany",
+      "sciezka": "/api/history/paged?typ=nieznany",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 0,
+      "kluczeWpisu": null,
+      "roznice": []
+    },
+    {
+      "grupa": "/paged skrajne",
+      "opis": "dostawca=NIE-MA-TAKIEGO",
+      "sciezka": "/api/history/paged?dostawca=NIE-MA-TAKIEGO",
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisow": 0,
+      "total": 0,
+      "kluczeWpisu": null,
+      "roznice": []
+    }
+  ],
+  "zadanieB": {
+    "doborProduktu": {
+      "id": 97794,
+      "kod": "MO9_336320",
+      "nazwa": "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+      "polaPorownane": [
+        "kod",
+        "nazwa",
+        "dot",
+        "label_snow"
+      ],
+      "poleA": "dot",
+      "poleB": "labelSnow",
+      "nowaA": "14J-DOT",
+      "nowaB": "TAK",
+      "staraA": "nie starsza niz 3 lata",
+      "staraB": null
+    },
+    "edycjaWspolnymiPolami": {
+      "cialoZadania": {
+        "dot": "14J-DOT",
+        "labelSnow": "TAK",
+        "_reason": "14j pomiar parzystości"
+      },
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisowHistory": {
+        "oryginal": 2,
+        "odbudowa": 2
+      },
+      "noweWpisyHistory": {
+        "oryginal": [
+          {
+            "kodProduktu": "MO9_336320",
+            "nazwa": "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+            "pole": "dot",
+            "staraWartosc": "nie starsza niz 3 lata",
+            "nowaWartosc": "14J-DOT",
+            "zrodlo": "recznie",
+            "kto": "Marta Bieguniak",
+            "wykonalUzytkownikId": 1
+          },
+          {
+            "kodProduktu": "MO9_336320",
+            "nazwa": "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+            "pole": "labelSnow",
+            "staraWartosc": "null",
+            "nowaWartosc": "TAK",
+            "zrodlo": "recznie",
+            "kto": "Marta Bieguniak",
+            "wykonalUzytkownikId": 1
+          }
+        ],
+        "odbudowa": [
+          {
+            "kodProduktu": "MO9_336320",
+            "nazwa": "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+            "pole": "dot",
+            "staraWartosc": "nie starsza niz 3 lata",
+            "nowaWartosc": "14J-DOT",
+            "zrodlo": "recznie",
+            "kto": "Marta Bieguniak",
+            "wykonalUzytkownikId": 1
+          },
+          {
+            "kodProduktu": "MO9_336320",
+            "nazwa": "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+            "pole": "labelSnow",
+            "staraWartosc": "null",
+            "nowaWartosc": "TAK",
+            "zrodlo": "recznie",
+            "kto": "Marta Bieguniak",
+            "wykonalUzytkownikId": 1
+          }
+        ]
+      },
+      "rozniceHistory": [],
+      "totalPaged": {
+        "oryginal": 1,
+        "odbudowa": 1
+      },
+      "roznicePaged": []
+    },
+    "sondaAllowlisty": {
+      "cialoZadania": {
+        "hf": "14J-SONDA",
+        "_reason": "14j sonda allowlisty"
+      },
+      "statusOryginalu": 200,
+      "statusOdbudowy": 200,
+      "wpisowHistory": {
+        "oryginal": 1,
+        "odbudowa": 0
+      },
+      "noweWpisyHistory": {
+        "oryginal": [
+          {
+            "kodProduktu": "MO9_336320",
+            "nazwa": "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+            "pole": "hf",
+            "staraWartosc": "null",
+            "nowaWartosc": "14J-SONDA",
+            "zrodlo": "recznie",
+            "kto": "Marta Bieguniak",
+            "wykonalUzytkownikId": 1
+          }
+        ],
+        "odbudowa": []
+      },
+      "rozniceHistory": [
+        {
+          "sciezka": ".length",
+          "oryginal": 1,
+          "odbudowa": 0
+        }
+      ],
+      "totalPaged": {
+        "oryginal": 2,
+        "odbudowa": 2
+      },
+      "roznicePaged": [
+        {
+          "sciezka": "items[0].zmienionePola.length",
+          "oryginal": 1,
+          "odbudowa": 0
+        }
+      ],
+      "polesondowane": "hf"
+    },
+    "eksport": {
+      "statusy": {
+        "/api/export-shoper": {
+          "oryginal": 500,
+          "odbudowa": 200
+        },
+        "/api/export-shoper?dostawca=MO1": {
+          "oryginal": 200,
+          "odbudowa": 200
+        },
+        "/api/export/shoper": {
+          "oryginal": 200,
+          "odbudowa": 200
+        }
+      },
+      "logOryginaluPodczasEksportu": [
+        "zip pipeline failed TypeError: oh is not a constructor",
+        "    at rV (/tmp/bridge-14j-oryginal-u378c1/index.cjs:313:6525)",
+        "    at async /tmp/bridge-14j-oryginal-u378c1/index.cjs:329:284",
+        "7:03:46 PM [express] GET /api/export-shoper 500 in 53ms :: {\"error\":\"oh is not a constructor\"}",
+        "7:03:46 PM [express] GET /api/export-shoper 200 in 161ms",
+        "7:03:47 PM [express] GET /api/export/shoper 200 in 177ms",
+        "7:03:47 PM [express] GET /api/history/paged 200 in 60ms :: {\"items\":[{\"id\":3877,\"typ\":\"eksport\",\"kiedy\":\"2026-09-18T17:03:47.085Z\",\"dostawca\":\"wszyscy\",\"uzytkownik\":\"Marta Bieguniak\",\"liczbaPozycji\":7405,\"nazwaPliku\":null,\"format\":\"shoper\",\"kodProduktu\":null,\"zmienionePola\":[],\"uwagi\":\"Format: shoper\"},{\"id\":3876,\"typ\":\"eksport\",\"kiedy\":\"2026-09-18T17:03:46.662Z\",\"dostawca\":\"MO1\",\"uzytkownik\":\"Marta Bieguniak\",\"liczbaPozycji\":657,\"nazwaPliku\":null,\"format\":\"csv\",\"kodProduktu\":null,\"zmienionePola\":[],\"uwagi\":\"Format: csv\"}],\"total\":2,\"pages\":1,\"page\":1,\"limit\":50}"
+      ],
+      "audytPrzed": {
+        "oryginal": [],
+        "odbudowa": []
+      },
+      "audytPo": {
+        "oryginal": [
+          {
+            "akcja": "eksport_csv",
+            "c": 1
+          },
+          {
+            "akcja": "eksport_shoper",
+            "c": 1
+          }
+        ],
+        "odbudowa": [
+          {
+            "akcja": "eksport_csv",
+            "c": 2
+          },
+          {
+            "akcja": "eksport_shoper",
+            "c": 1
+          }
+        ]
+      },
+      "pagedTypEksport": {
+        "oryginal": 2,
+        "odbudowa": 3
+      },
+      "roznicePaged": [
+        {
+          "sciezka": "items.length",
+          "oryginal": 2,
+          "odbudowa": 3
+        },
+        {
+          "sciezka": "items[0].id",
+          "oryginal": "3877",
+          "odbudowa": "3878"
+        },
+        {
+          "sciezka": "items[0].kiedy",
+          "oryginal": "2026-09-18T17:03:47.085Z",
+          "odbudowa": "2026-09-18T17:03:47.267Z"
+        },
+        {
+          "sciezka": "items[1].id",
+          "oryginal": "3876",
+          "odbudowa": "3877"
+        },
+        {
+          "sciezka": "items[1].kiedy",
+          "oryginal": "2026-09-18T17:03:46.662Z",
+          "odbudowa": "2026-09-18T17:03:46.905Z"
+        },
+        {
+          "sciezka": "total",
+          "oryginal": "2",
+          "odbudowa": "3"
+        }
+      ]
+    }
+  },
+  "podsumowanie": {
+    "przypadkow": 59,
+    "zgodnych": 59,
+    "rozjazdow": 0,
+    "wpisowPorownanych": 49813
+  },
+  "schedulerOryginalu": "[scheduler] zaplanowano 0 dostawców z URL polling"
+}
