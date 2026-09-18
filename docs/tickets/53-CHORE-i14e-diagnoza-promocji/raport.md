@@ -17,9 +17,11 @@ Trzy werdykty:
   w tryb dodawania. Zapis z dialogu edycji leci `PATCH` na id edytowanej reguły, nie pada
   żaden `POST`, toast mówi „zaktualizowana". **Druga reguła nie powstaje.** Ryzyko, na które
   Ania mogła trafić, jest realne, ale leży gdzie indziej — opisane niżej.
-- **C — wycena gotowa.** Naprawa #19 kosztuje **1 scenariusz charakteryzacji z 31**
-  (3 pola w 1 wierszu), **2 testy jednostkowe** i **0 fixtures**. Da się ją zrobić
-  bez dotykania charakteryzacji, ale za cenę niespójności systemu — szczegóły i liczby niżej.
+- **C — wycena gotowa, decyzja NIE zapadła.** Naprawa #19 kosztuje **1 scenariusz
+  charakteryzacji z 31** (3 pola w 1 wierszu), **2 testy jednostkowe** i **0 fixtures**.
+  Istnieje wariant omijający charakteryzację, ale ma własny koszt. Poniżej są dwa warianty
+  z liczbami i moją rekomendacją; **wybór między nimi — albo pozostawienie stanu jak jest —
+  należy do użytkownika.** Ta karta niczego tu nie przesądza.
 
 ---
 
@@ -86,6 +88,11 @@ zapisana cena rozjechała się z aktualnym narzutem.
 | Kontrola: samo przeliczenie, bez promocji | 2050 |
 | Promocja `marka→BKT` 10% (łącznie z przeliczeniem) | 3003, w tym **954 BKT** i 2049 innych |
 | **Efekt samej promocji** | **954 produkty BKT** |
+
+Rozbicie 3003 = 954 + 2049 domyka się z kontrolą 2050 bez luki, i jest to **zmierzone,
+nie wyliczone**: w przebiegu kontrolnym 2050 zmian dzieli się na **2049 produktów spoza BKT
+i dokładnie 1 produkt BKT**. Ten jeden BKT miałby zmienioną cenę także bez promocji, ale
+w przebiegu z promocją nie da się go od jej efektu odróżnić, więc liczy się do 954.
 
 ⚠ **To jest osobne, uboczne znalezisko:** pierwsza mutacja dowolnej reguły na produkcyjnych
 danych po cichu przepisze ~2050 cen, które dziś są nieaktualne. Nie jest to defekt — tak działa

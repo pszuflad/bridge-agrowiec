@@ -99,7 +99,16 @@ function zasiej(b: TestowaBaza) {
     .run();
 }
 
-/** Ciało 1:1 z tym, co wysyła `DialogReguly` przy ODZNACZONEJ „regule globalnej". */
+const dzienISO = (przesuniecieDni: number) =>
+  new Date(Date.now() + przesuniecieDni * 86_400_000).toISOString().slice(0, 10);
+
+/**
+ * Ciało 1:1 z tym, co wysyła `DialogReguly` przy ODZNACZONEJ „regule globalnej".
+ *
+ * Daty liczone są OD DZIŚ, tak jak robi to dialog (`dzisiaj()` / `zaMiesiac()`), a nie
+ * wpisane na sztywno — inaczej „daty domyślne" z §3.7 instrukcji z czasem przestałyby
+ * nimi być i komentarz kłamałby, mimo że test dalej by przechodził (silnik dat nie czyta).
+ */
 function promocjaZWarunkiem(wartosc: string) {
   return {
     nazwa: "Wyprzedaż testowa",
@@ -107,11 +116,11 @@ function promocjaZWarunkiem(wartosc: string) {
     zasieg: "",
     warunki: JSON.stringify([{ typ: "marka", wartosc }]),
     priorytet: 50,
-    start: "2026-09-18",
-    koniec: "2026-10-18",
+    start: dzienISO(0),
+    koniec: dzienISO(30),
     status: "aktywna",
     zmienilUzytkownikId: 1,
-    zmienionoData: "2026-09-18T00:00:00.000Z",
+    zmienionoData: new Date().toISOString(),
   };
 }
 
