@@ -104,22 +104,28 @@ describe("Widok /staging", () => {
     const pierwsza = STRONA.items[0] as Record<string, unknown>;
     expect(await screen.findByText(String(pierwsza.kod))).toBeInTheDocument();
 
-    // Nagłówki kolumn 1:1 z oryginałem.
-    for (const naglowek of [
+    /*
+      Nagłówki 1:1 z oryginałem — sprawdzamy CAŁĄ LISTĘ W KOLEJNOŚCI, nie pojedyncze
+      wystąpienia. Enhancer kolumn mapował je pozycyjnie (`POS_KEYS`, `fe.js:29155`), więc
+      przestawienie dwóch kolumn miejscami jest realnym błędem, a nie kosmetyką — i taki
+      właśnie błąd (`Magazyn` za `Cena sprzedaży`) siedział w odbudowie do 14b.
+
+      ⚠ „Stan", „Cena zakupu" i „Cena sprzedaży" NIE SĄ tu wymienione, bo domyślnie są
+      UKRYTE: w `STAGING_COLS` jako jedyne kolumny tabeli nie mają `def:true`. To zachowanie
+      produkcji, osobny test niżej pilnuje, że nie zniknęło.
+    */
+    const naglowki = screen.getAllByRole("columnheader").map((th) => th.textContent?.trim());
+    expect(naglowki).toEqual([
+      "",
       "Typ",
       "Kod",
       "Nazwa",
       "Dostawca",
-      "Stan",
-      "Cena zakupu",
-      "Cena sprzedaży",
       "Magazyn",
       "Zmiana",
-      "Powód / co sprawdzić",
+      "Powód",
       "Akcje",
-    ]) {
-      expect(screen.getByRole("columnheader", { name: naglowek })).toBeInTheDocument();
-    }
+    ]);
 
     // Etykieta bierze się z mapy z oryginału, nie z surowej wartości pola. Oczekiwanie
     // wyprowadzamy z FIXTURE'A, żeby test nie zakładał, co produkcja akurat nagrała.
@@ -128,15 +134,18 @@ describe("Widok /staging", () => {
     expect(screen.getAllByText(WYGLAD_TYPU[typWFixture]!.etykieta).length).toBeGreaterThan(0);
   });
 
-  it("pierwsze żądanie idzie z domyślnymi parametrami (strona 1, 25, wszystkie)", async () => {
+  it("pierwsze żądanie idzie z domyślnymi parametrami (strona 1, 25, NOWE produkty)", async () => {
     await otworzStaging();
 
     await waitFor(() => expect(zapytania.length).toBeGreaterThan(0));
     const url = ostatnieZapytanie();
     expect(url.searchParams.get("page")).toBe("1");
     expect(url.searchParams.get("limit")).toBe("25");
-    expect(url.searchParams.get("typZmiany")).toBe("all");
+    // ⭐ „nowa", nie „all" — oryginał startuje `useState("nowa")` (`fe.js:20617`).
+    expect(url.searchParams.get("typZmiany")).toBe("nowa");
     expect(url.searchParams.get("search")).toBe("");
+
+    expect(screen.getByTestId("select-filter-type").textContent).toContain("Nowe produkty");
   });
 
   it("szukajka trafia do parametru `search`", async () => {
@@ -205,7 +214,9 @@ describe("Widok /staging", () => {
 
       await waitFor(() => expect(mutacje).toHaveLength(1));
       expect(mutacje[0]!.url).toContain("/api/staging/reject");
-      expect(mutacje[0]!.body).toEqual({ allFiltered: true, typZmiany: "all" });
+      // Zakres przycisku idzie za FILTREM, a filtr startuje na „nowa" — czyli domyślnie
+      // akcja masowa dotyczy nowych produktów, nie całego stagingu.
+      expect(mutacje[0]!.body).toEqual({ allFiltered: true, typZmiany: "nowa" });
     });
 
     it("„akceptuj wszystkie” też wysyła `allFiltered`, z aktualnym filtrem typu", async () => {
@@ -260,8 +271,14 @@ describe("Widok /staging", () => {
         screen.getByTestId("button-accept-checked").textContent,
       ).toContain(String(STRONA.items.length));
 
+      /*
+        Po odznaczeniu przycisk ZNIKA, a nie pokazuje „(0)" — oryginał renderuje warianty
+        „zaznaczone" warunkowo (`n.size > 0 && …`, `fe.js:20750`). Odbudowa trzymała je
+        zawsze, tylko wyszarzone; wyrównane w 14b.
+      */
       await uzytkownik.click(zaznaczWszystkie);
-      expect(screen.getByTestId("button-accept-checked").textContent).toContain("(0)");
+      expect(screen.queryByTestId("button-accept-checked")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("button-reject-checked")).not.toBeInTheDocument();
     });
   });
 
@@ -367,6 +384,191 @@ describe("Widok /staging", () => {
       expect(
         await screen.findByText("Nie udało się pobrać pozycji stagingu."),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe("Pasek narzędzi", () => {
+    it("placeholder szukajki wymienia wszystkie cztery pola, po których szuka backend", async () => {
+      await otworzStaging();
+
+      /*
+        Dosłowny tekst oryginału (`fe.js:20710`), z trzema kropkami ASCII. Backend naprawdę
+        przeszukuje cztery pola (`rebuild/backend/src/repos/staging.ts:114-117`), a odbudowa
+        obiecywała dwa — stąd uwaga Ani, że szukajka „nie znajduje po dostawcy".
+      */
+      expect(screen.getByTestId("input-search-staging")).toHaveAttribute(
+        "placeholder",
+        "Szukaj po kodzie, nazwie, dostawcy lub EAN...",
+      );
+    });
+
+    it("licznik zmian odmienia rzeczownik tak jak oryginał", async () => {
+      zamockujApi({ ...STRONA, total: 1 });
+      await otworzStaging();
+
+      expect((await screen.findByTestId("licznik-zmian")).textContent).toBe("1 zmiana");
+    });
+
+    it("„zaznaczone” pojawia się dopiero po zaznaczeniu wiersza", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+
+      expect(screen.queryByTestId("button-accept-checked")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("button-reject-checked")).not.toBeInTheDocument();
+
+      const pierwsza = STRONA.items[0] as { id: number };
+      await uzytkownik.click(await screen.findByTestId(`checkbox-staging-${pierwsza.id}`));
+
+      expect(screen.getByTestId("button-accept-checked")).toBeInTheDocument();
+      expect(screen.getByTestId("button-reject-checked")).toBeInTheDocument();
+    });
+
+    it("przestawienie filtra na „Wszystkie” rozszerza zakres akcji masowej", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+
+      await uzytkownik.click(screen.getByTestId("select-filter-type"));
+      await uzytkownik.click(await screen.findByRole("option", { name: "Wszystkie" }));
+      await uzytkownik.click(screen.getByTestId("button-accept-all"));
+      await uzytkownik.click(
+        within(await screen.findByTestId("dialog-akceptuj-wszystkie")).getByTestId(
+          "button-potwierdz",
+        ),
+      );
+
+      await waitFor(() => expect(mutacje).toHaveLength(1));
+      expect(mutacje[0]!.body).toEqual({ allFiltered: true, typZmiany: "all" });
+    });
+  });
+
+  describe("Konfigurator kolumn", () => {
+    /** Otwiera popover „Kolumny" i oddaje go do dalszych asercji. */
+    async function otworzKolumny(uzytkownik: ReturnType<typeof userEvent.setup>) {
+      await uzytkownik.click(screen.getByTestId("button-staging-columns"));
+      return screen.findByTestId("popover-staging-columns");
+    }
+
+    it("domyślnie ukrywa „Stan”, „Cena zakupu” i „Cena sprzedaży”", async () => {
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      /*
+        W `STAGING_COLS` te trzy kolumny jako jedyne kolumny tabeli nie mają `def:true`
+        (`fe.js:28836-28847`), a `loadPrefs()` liczy domyślną widoczność jako
+        `!!(c.locked || c.def)`. Produkcja startuje więc bez nich — to nie jest zgubiona
+        kolumna, tylko odtworzone zachowanie enhancera.
+      */
+      for (const ukryta of ["Stan", "Cena zakupu", "Cena sprzedaży"]) {
+        expect(
+          screen.queryByRole("columnheader", { name: ukryta }),
+          `${ukryta} ma być domyślnie ukryta`,
+        ).not.toBeInTheDocument();
+      }
+    });
+
+    it("odznaczenie kolumny usuwa ją z tabeli i zapisuje wybór w pamięci", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      expect(screen.getByRole("columnheader", { name: "Dostawca" })).toBeInTheDocument();
+
+      const popover = await otworzKolumny(uzytkownik);
+      await uzytkownik.click(within(popover).getByTestId("kolumna-staging-dostawca"));
+
+      await waitFor(() =>
+        expect(screen.queryByRole("columnheader", { name: "Dostawca" })).not.toBeInTheDocument(),
+      );
+
+      const zapisane = JSON.parse(localStorage.getItem("bridge_staging_cols_v2")!) as Record<
+        string,
+        boolean
+      >;
+      expect(zapisane.dostawca).toBe(false);
+      expect(zapisane.nazwa).toBe(true);
+    });
+
+    it("wybór zapisany wcześniej w pamięci obowiązuje od pierwszego renderu", async () => {
+      localStorage.setItem(
+        "bridge_staging_cols_v2",
+        JSON.stringify({ checkbox: true, typ: true, kod: true, akcje: true, stan: true }),
+      );
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      /*
+        Klucz zapisany wcześniej bierzemy W CAŁOŚCI, bez scalania z domyślnymi — tak jak
+        `loadPrefs()` w oryginale (`if (raw) return JSON.parse(raw)`). Dlatego „Nazwa",
+        której w zapisie nie ma, jest ukryta, a „Stan", którego domyślnie NIE MA, jest widoczny.
+      */
+      expect(screen.getByRole("columnheader", { name: "Stan" })).toBeInTheDocument();
+      expect(screen.queryByRole("columnheader", { name: "Nazwa" })).not.toBeInTheDocument();
+    });
+
+    it("kolumny zablokowane nie mają przełącznika i przeżywają skrót „Żadna”", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      const popover = await otworzKolumny(uzytkownik);
+      expect(within(popover).queryByTestId("kolumna-staging-checkbox")).not.toBeInTheDocument();
+      expect(within(popover).queryByTestId("kolumna-staging-akcje")).not.toBeInTheDocument();
+
+      await uzytkownik.click(within(popover).getByRole("button", { name: "Żadna" }));
+
+      await waitFor(() =>
+        expect(screen.queryByRole("columnheader", { name: "Typ" })).not.toBeInTheDocument(),
+      );
+      expect(screen.getByRole("columnheader", { name: "Akcje" })).toBeInTheDocument();
+      expect(screen.getByTestId("checkbox-select-all")).toBeInTheDocument();
+    });
+
+    it("skrót „Domyślne” przywraca stan sprzed zmian, z ukrytymi cenami włącznie", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      const popover = await otworzKolumny(uzytkownik);
+      await uzytkownik.click(within(popover).getByRole("button", { name: "Wszystkie" }));
+      await waitFor(() =>
+        expect(screen.getByRole("columnheader", { name: "Cena zakupu" })).toBeInTheDocument(),
+      );
+
+      await uzytkownik.click(within(popover).getByRole("button", { name: "Domyślne" }));
+
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("columnheader", { name: "Cena zakupu" }),
+        ).not.toBeInTheDocument(),
+      );
+      expect(screen.getByRole("columnheader", { name: "Magazyn" })).toBeInTheDocument();
+    });
+
+    it("przełącznik z sekcji „Dodatkowe” zapisuje się, ale NIE zmienia tabeli", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      const ileKolumn = screen.getAllByRole("columnheader").length;
+
+      const popover = await otworzKolumny(uzytkownik);
+      expect(
+        within(popover).getByText("Te kolumny nie są jeszcze wyświetlane w tabeli stagingu."),
+      ).toBeInTheDocument();
+      await uzytkownik.click(within(popover).getByTestId("kolumna-staging-ex_ean"));
+
+      /*
+        ⭐ TO JEST DOWÓD WIERNOŚCI, nie przeoczenie. `applyCss()` w oryginale zaczyna od
+        `if (c.extra) return` (`fe.js:29133`), więc 49 przełączników tej sekcji zapisuje się
+        do pamięci i nie robi nic więcej. Gdyby kiedyś ktoś je „naprawił", ten test upadnie
+        i zmusi do świadomej decyzji.
+      */
+      await waitFor(() =>
+        expect(
+          JSON.parse(localStorage.getItem("bridge_staging_cols_v2")!).ex_ean,
+        ).toBe(true),
+      );
+      expect(screen.getAllByRole("columnheader")).toHaveLength(ileKolumn);
     });
   });
 });
