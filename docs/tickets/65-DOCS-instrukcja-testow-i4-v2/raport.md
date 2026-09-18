@@ -2,7 +2,7 @@
 
 ## Summary
 
-Powstał `docs/instrukcja-testow-I4-v2.md` (592 linie) — delta dla Ani po kartach 14f (`64-…`)
+Powstał `docs/instrukcja-testow-I4-v2.md` (598 linii) — delta dla Ani po kartach 14f (`64-…`)
 i 14h (`61-…`), w konwencji `docs/instrukcja-testow-I3-v2.md`. Opisuje sześć zmian, trzy
 świadomie niezmienione rzeczy (jej decyzje z 2026-09-18) i rozlicza wszystkie punkty starej
 instrukcji, które przestały być prawdą — w tym §4 pkt 6, który **nieprawdziwy był już przed
@@ -216,3 +216,56 @@ Wszystkie naprawione, bo były tanie:
 - **„jeśli po punkcie 3.4…"** w kroku 1 punktu 4.1 — stan jest deterministyczny, więc zdanie
   twierdzące zamiast warunkowego;
 - **metryka w Summary** — 561 → 592 linie (nieodświeżona po naprawach BLOCKERów).
+
+---
+
+## Docs updates
+
+Dwa doc-checkery, równolegle, w tym samym worktree.
+
+### `docs/rebuild-roadmap.md` (65 wstawek, 27 usunięć)
+
+- **Podblok `##### 14m` (:2641)** → `✅ ZROBIONE 2026-09-19 (65-DOCS-instrukcja-testow-i4-v2,
+  domyka FALĘ 2 I14 i całą Iterację 4)`. Opis przerobiony z „co do zrobienia" na **stan**:
+  co zgadzało się z pierwotnym blokiem (§4 pkt 6, §3.9, rada „zmień status" — wszystkie trzy)
+  i **co dołożono ponad blok** (§3.6, §4 pkt 1, §4 pkt 5, §4 pkt 8, pozycja checklisty §6).
+  Dopisane rozliczenie wszystkich 4 pozycji §5. Nota cutoverowa przeformułowana z „uprzedzić
+  Anię" na „przekazana Ani" — fakt dokonany.
+- **Sprostowanie nieprawdy o komunikacie po edycji** — dwa miejsca: `:2456` (wpis decyzji Ani
+  o §3.11 w „Druga fala I14") i `:2775` (opis zadania B w 14e). Oba mówiły albo sugerowały, że
+  komunikat brzmi „Reguła dodana". Teraz mówią stan faktyczny z dowodem
+  (`DialogReguly.tsx:270-282`, `narzuty.edycja-toast.test.tsx` 11/11,
+  `docs/tickets/53-…/raport.md:160-173`) i odnotowują, że ustaliła to dopiero ta karta.
+- **Tablica postępu §4** — wiersz **Iteracja 14**: `🔨` → `✅`, „FALA 2 DOWIEZIONA POZA 14m" →
+  „FALA 2 ZAMKNIĘTA W CAŁOŚCI", dopisane `14m: ✅ 65-… · 2026-09-19`, **usunięte** zdanie
+  „otwarte 14m … stąd 🔨, nie ✅". Wiersz **Iteracja 4**: dopisane, że domykają ją karty z I14
+  (14e, 14f, 14h, 14m); status ✅ bez zmian.
+- **Pięć rozrzuconych wzmianek** opisujących 14m jako otwarte (`:2162`, `:2512`, `:2534`,
+  `:2819`, `:2903`) — zaktualizowane, nie dopisane obok.
+- **Ustalenia dla PRZYSZŁYCH bloków** zapisane w sekcji „Poza zakresem I14, wymaga osobnych
+  decyzji i kart", **nie** w zamkniętym bloku 14m (`CLAUDE.md`, obowiązek 2): edycja priorytetu
+  reguły, sortowanie kolumny „Promocja", ukrywanie wygasłych promocji — wszystkie trzy jako
+  oczekujące na odpowiedź Ani z datą pytania 2026-09-19.
+
+### `docs/rebuild-backlog.md` (8 edycji + 1 nowy wpis)
+
+- **#19** — sprostowanie przekazane Ani (I4-v2 §3.1, §3.2), unieważnia §3.9 i §4 pkt 5–6 starej
+  instrukcji; osobno odnotowane pytanie otwarte o ukrywanie wygasłych promocji.
+- **#22** — opisane Ani w §2.1 wraz z jawnym sprostowaniem jej założenia o backupie (cztery
+  niezależne dowody); dopisany domiar 14m o niedziałającym sortowaniu kolumny + pytanie otwarte.
+- **#24** — odnotowane, że I4-v2 §4.1 uprzedza o rozbieżności między liczbą w okienku usuwania
+  a liczbą z czerwonego paska „poniżej kosztu" (#23 nietknięte — dotyczy symulatora).
+- **#25** — opisane Ani w rozdziale 5.1 ze zmierzonym zasięgiem 1/7405; pułapka zostaje.
+- **#88** — odnotowane, że **świadomie NIE opisano tego Ani** (skala 0/7405, nie ma jak dziś
+  zobaczyć) — żeby następna sesja nie uznała tego za przeoczenie.
+- **Nowy wpis #89** — „edycja priorytetu reguły z formularza", ⬜ do decyzji, czeka na odpowiedź
+  Ani (pytanie zadane 2026-09-19). Kontekst zweryfikowany w kodzie: `DialogReguly.tsx:141-143`,
+  `rebuild/backend/src/repos/ceny.ts:161-165`.
+
+**Sprostowanie o „Reguła dodana" nie dotyczyło backlogu** — sprawdzone `grep`em, plik nigdy nie
+zawierał tego twierdzenia. Nieprawda żyła w roadmapie (2 miejsca, poprawione) i w treści karty.
+
+### Pre-existing issues
+
+Oba doc-checkery zgłosiły **brak** — nie znalazły w swoich plikach nieprawd spoza zakresu tej
+karty.

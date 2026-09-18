@@ -178,7 +178,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
-| 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 |
+| 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 · **domknięta kartami z I14:** 14e diagnoza (`53-…`), 14f daty kończą promocję + potwierdzenie usuwania (`64-…`), 14h kolumna „Promocja" (`61-…`), 14m instrukcja I4-v2 (`65-…`) |
 | 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f wygaszacz · 14h BE · 14i BE · 14j pomiar · 14m docs (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 DOWIEZIONA POZA 14m 2026-09-19:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); 14f ✅ `64-FEATURE-i14f-daty-koncza-promocje` · 2026-09-19 (wygaszacz statusu promocji w obie strony + potwierdzenie usuwania z liczbą produktów); 14h ✅ `61-FEATURE-promocja-kolumna-katalog` · 2026-09-18 (czysto backendowa); 14i ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18; 14j ✅ `59-CHORE-i14j-oracle-diff-historii` · 2026-09-18 (pomiar, zero kodu produkcyjnego); **otwarte 14m** (sprostowanie `docs/instrukcja-testow-I4.md`, domyka falę 2) — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f wygaszacz · 14h BE · 14i BE · 14j pomiar · 14m docs (14g skasowana) | 3, 4 | ✅ | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 ZAMKNIĘTA W CAŁOŚCI:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); 14f ✅ `64-FEATURE-i14f-daty-koncza-promocje` · 2026-09-19 (wygaszacz statusu promocji w obie strony + potwierdzenie usuwania z liczbą produktów); 14h ✅ `61-FEATURE-promocja-kolumna-katalog` · 2026-09-18 (czysto backendowa); 14i ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18; 14j ✅ `59-CHORE-i14j-oracle-diff-historii` · 2026-09-18 (pomiar, zero kodu produkcyjnego); 14m: ✅ `65-DOCS-instrukcja-testow-i4-v2` · 2026-09-19 (nowy `docs/instrukcja-testow-I4-v2.md` + banner w I4). Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
 
 ---
 
@@ -2159,14 +2159,14 @@ fundamentem — nie zaczynaj 13b/13c przed jego merge.
 
 ### Iteracja 14 — Uwagi Ani z testów Iteracji 3 (warstwa UI importu i stagingu)
 
-- **Status:** 🔨 w toku — zaplanowana 2026-09-18. **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a ✅
+- **Status:** ✅ ZAMKNIĘTA 2026-09-19 (zaplanowana 2026-09-18). **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a ✅
   (`49-CHORE-i14a-wgrywanie-reczne`), 14b ✅ (`51-FEATURE-staging-filtr-pasek-kolumny`),
   14c ✅ (`50-FEATURE-i14c-karta-dostawcy-upload`), 14d ✅ (`56-DOCS-instrukcja-testow-i14`).
-  **FALA 2 DOWIEZIONA POZA 14m 2026-09-19:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`),
+  **FALA 2 ZAMKNIĘTA W CAŁOŚCI 2026-09-19:** 14e ✅ (`53-CHORE-i14e-diagnoza-promocji`),
   14f ✅ (`64-FEATURE-i14f-daty-koncza-promocje`, 2026-09-19), 14h ✅
   (`61-FEATURE-promocja-kolumna-katalog`, 2026-09-18), 14i ✅ (`58-FEATURE-i14i-ean-naukowy-pusty`,
-  2026-09-18), 14j ✅ (`59-CHORE-i14j-oracle-diff-historii`, 2026-09-18), 14g skasowana. Otwarte
-  wyłącznie **14m** (sprostowanie `docs/instrukcja-testow-I4.md`, domyka falę 2).
+  2026-09-18), 14j ✅ (`59-CHORE-i14j-oracle-diff-historii`, 2026-09-18), 14m ✅
+  (`65-DOCS-instrukcja-testow-i4-v2`, 2026-09-19), 14g skasowana.
   **Zależy od:** 3 (import), konkretnie widoków z 3e i 3f.
   Niezależna od otwartego 13d (inny podsystem, inne pliki).
 - **Skąd się wzięła.** Ania przeszła `docs/instrukcja-testow-I3.md` i wypełniła pola UWAGI (komentarze
@@ -2453,8 +2453,15 @@ Karta domykająca falę 2 powinna zrobić dla I4 to, co 14d zrobiła dla I3: del
     „zostawiamy tak jak obecnie działa, promocje po prostu się usuwa".
   - **Globalnej promocji NIE naprawiamy i nie blokujemy** (backlog #25): „nie, zostawiamy tak
     jak jest, nie dodajemy nowych reguł". Pułapka zostaje odtworzona 1:1, bez blokady w UI.
-  - **Komunikat „Reguła dodana" po edycji — bez zmian** (§3.11): „dodana czy zaktualizowana to
-    nie ma różnicy, zostaw to tak jak jest". Wątek zamknięty bez kodu.
+  - **Komunikat po edycji reguły — Ania zdecydowała, że różnica jej nie interesuje** (§3.11):
+    „dodana czy zaktualizowana to nie ma różnicy, zostaw to tak jak jest". Wątek zamknięty bez
+    kodu — i słusznie: pomiar 14e potwierdził, że §3.11 starej instrukcji mówi PRAWDĘ, defektu
+    nigdy nie było. Komunikat po edycji brzmi „Reguła zaktualizowana" (przy promocji „Promocja
+    zaktualizowana"), zgodnie z `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx:270-282`;
+    potwierdzone testem `rebuild/frontend/test/narzuty.edycja-toast.test.tsx` (11/11 zielone,
+    `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md:160-173`). Ustalone dopiero przy
+    karcie **65-DOCS-instrukcja-testow-i4-v2** (2026-09-19) — do tego czasu roadmapa błędnie
+    sugerowała, że komunikat po edycji nadal brzmi „Reguła dodana".
   - **EAN w notacji naukowej ma trafiać do katalogu jako PUSTE pole** (backlog #11). To
     rozstrzyga wpis, który od 26.08 czekał na jej decyzję, i jest ŚWIADOMYM ODSTĘPSTWEM —
     produkcja zapisuje wartość i wypisuje komunikat „zapis naukowy ma tylko null cyfr znaczących".
@@ -2502,7 +2509,7 @@ Karta domykająca falę 2 powinna zrobić dla I4 to, co 14d zrobiła dla I3: del
      że wygaszacz nadpisuje ręczne ustawienia użytkownika bez ostrzeżenia.
   ⚠ **Skutek dla instrukcji:** rada „żeby naprawdę wyłączyć promocję, zmień jej status" przestaje
   obowiązywać — po 14f promocję wyłącza data albo usunięcie. **14f ✅ dowiozła to 2026-09-19.**
-  Sprostowanie instrukcji należy do **14m** (⬜ otwarta, domyka falę 2).
+  Sprostowanie instrukcji: **14m** ✅ `65-DOCS-instrukcja-testow-i4-v2` · 2026-09-19.
 - **Skutek uboczny dla 14f:** pomarańczowy znacznik rozbieżności (`rozbieznoscStatusu`, dodany
   w 4b jako D5) traci rację bytu w wariancie (b) — etykieta z dat i kolumna `status` przestaną
   się rozjeżdżać. Znacznik należy usunąć ŚWIADOMIE i odnotować, a nie zostawić jako martwy kod.
@@ -2524,7 +2531,7 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
 |---|---|---|---|
 | **14e** | ⚠ ZAKRES ZAWĘŻONY 19.09: wycena #19 — wariant (a) czy (b), z liczbami. Zadania „czy promocja obniża ceny" i „komunikat po edycji" ZAMKNIĘTE odpowiedziami Ani | `docs/tickets/<N>/**`, ewentualny NOWY test w `rebuild/backend/test/` | — |
 | **14f** | ✅ **ZROBIONE 2026-09-19**, `64-FEATURE-i14f-daty-koncza-promocje`. Wariant (b) dowieziony: NOWY `src/promocje/wygaszacz.ts` przestawia `status` z dat w OBIE strony (start procesu + wejście `przeliczCenyZRegul` + cyklicznie co `PROMO_WYGASZACZ_MINUTY`, domyślnie 5 min, `0` wyłącza) — silnik (`promocjaPasuje`) NIETKNIĘTY, charakteryzacja zielona bez wyjątku (0 z 31 + 0 z 17). `status` odcięty od `POLA_EDYTOWALNE_PROMOCJI` (7 pól), `dodajPromocje` liczy go z dat. Znacznik rozbieżności i stara nota w dialogu usunięte/przepisane. Usuwanie narzutu I promocji pyta o potwierdzenie z liczbą dotkniętych produktów, liczoną silnikiem `wybierzNarzut`/`wybierzPromocje` (nie matcherem ostrzeżenia) | BE: NOWY `src/promocje/wygaszacz.ts`, `repos/ceny.ts`, `repos/promotions.ts`, `config/env.ts`, `server.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts`, `narzuty/ceny.ts`, `narzuty/DialogReguly.tsx` | BE: `test/wygaszacz.test.ts` (27) + `test/narzuty.patch.test.ts` · FE: `test/narzuty.test.tsx`, `test/narzuty.ceny.test.ts`, `test/narzuty.dialog.test.tsx` |
-| **14m** | ⬜ Sprostowanie `docs/instrukcja-testow-I4.md` (rozdz. 4 i 5, unieważnione przez 14f) — domyka FALĘ 2 I14 | `docs/instrukcja-testow-I4.md` | — |
+| **14m** | ✅ **ZROBIONE 2026-09-19**, `65-DOCS-instrukcja-testow-i4-v2`. Delta dla Ani: nowy `docs/instrukcja-testow-I4-v2.md` (§4 pkt 6/1/5/8, §3.6, §3.9, rada „zmień status" sprostowane, plus §5 rozliczone i sygnał o nadal otwartej „edycji priorytetu reguły z formularza") + wyłącznie banner w `docs/instrukcja-testow-I4.md` — domyka FALĘ 2 I14 i całą Iterację 4 | `docs/instrukcja-testow-I4.md`, NOWY `docs/instrukcja-testow-I4-v2.md` | — |
 | **14h** | ✅ **ZROBIONE 2026-09-18**, `61-FEATURE-promocja-kolumna-katalog`. Kolumna „Promocja" w katalogu — NOWA funkcja: `GET /api/products` dokłada opcjonalny `_reguly.promocja` (`{wartosc, nazwa}`) przez istniejące `wybierzPromocje`/`promocjaPasuje` z `repos/ceny.ts` (silnik NIETKNIĘTY, zakres 14f). Karta okazała się czysto backendowa — renderer, piker i typ `Produkt` na FE już były gotowe od 4b | BE: `repos/products.ts` (`dolaczReguly`), `routes/products.ts`, `contract/openapi.yaml` (komentarz nad ścieżką, bez węzła schematu) | BE: `test/katalog.promocja.test.ts` + nowy strażnik w `test/katalog.gate.test.ts` · FE: 2 nowe przypadki w `test/katalog.formatowanie.test.tsx` |
 | **14i** | ✅ **ZROBIONE 2026-09-18**, `58-FEATURE-i14i-ean-naukowy-pusty`. EAN w notacji naukowej → puste pole w katalogu | BE: zapis do katalogu (akceptacja), `src/import/akceptacja.ts` | `test/akceptacja.odstepstwa.test.ts` + bramki charakteryzacji (nietknięte) |
 | **14j** ✅ | Automatyczne porównanie Historii z oryginałem — zastępuje niewykonany test §9 z I5. Karta POMIAROWA, zero kodu produkcyjnego | `docs/tickets/59-*/**` · NOWY `rebuild/backend/test/historia.wyrocznia.*` · backlog (tylko #87) | `test/historia.wyrocznia.test.ts` (13 przypadków) |
@@ -2631,29 +2638,44 @@ ani jeden wpis `eksport_csv` z tej gałęzi. **Wymaga osobnej karty i decyzji u�
 (odtworzyć defekt czy zostać przy działającej wersji) — opis i propozycja w
 `docs/tickets/59-CHORE-i14j-oracle-diff-historii/raport.md`.
 
-##### 14m — sprostowanie `docs/instrukcja-testow-I4.md` · ⬜ NIE ZROBIONE (domyka FALĘ 2 I14)
+##### 14m — sprostowanie `docs/instrukcja-testow-I4.md` · ✅ ZROBIONE 2026-09-19 (`65-DOCS-instrukcja-testow-i4-v2`, domyka FALĘ 2 I14 i całą Iterację 4)
 
 Zostawione przez **14f** (`64-FEATURE-i14f-daty-koncza-promocje`, ✅ 2026-09-19 — jawne
 ograniczenie własności plików w tamtej karcie: `docs/instrukcja-testow-I4.md` poza jej
-zakresem). Robi dla I4 to, co 14d zrobiła dla I3 — deltę + banner, metodą 14d (delta jako format
-docelowy, „starszych instrukcji się nie przepisuje").
+zakresem). Zrobiła dla I4 to, co 14d zrobiła dla I3 — deltę + banner, metodą 14d (delta jako
+format docelowy, „starszych instrukcji się nie przepisuje"): nowy `docs/instrukcja-testow-I4-v2.md`
+(598 linii, 8 rozdziałów, 11 punktów z polem oceny) + wyłącznie banner w `docs/instrukcja-testow-I4.md`
+(14 wstawek, 0 usunięć, treść starej instrukcji nietknięta).
 
-Co 14f unieważniła w rozdziałach 4 i 5, do sprostowania:
+**Sprostowane wszystkie trzy punkty przewidziane blokiem** — §4 pkt 6, §3.9 i rada „zmień status,
+żeby wyłączyć promocję". **Dołożone ponad pierwotny zakres bloku:** §3.6, §4 pkt 1, §4 pkt 5,
+**§4 pkt 8** (mówi to samo co §3.6 i też jest nieprawdą — blok go nie wymieniał) i pozycja
+checklisty §6 starej instrukcji („Wygasła promocja dalej obniża ceny, a znacznik mówi o tym
+wprost").
+
+Co 14f unieważniła w rozdziałach 4 i 5, sprostowane w v2 i w bannerze:
 - **§4 pkt 6 — nieprawdziwy.** Twierdzi, że promocja z datą startu w przyszłości od razu obniża
   ceny; po 14f dostaje `status: "zaplanowana"` po stronie serwera i nie obniża niczego.
 - **§3.9 przestaje obowiązywać.** Promocja przestawiona na daty z 2020 (koniec w przeszłości) już
   NIE zostaje „aktywna" — wygaszacz (start procesu / wejście `przeliczCenyZRegul` / cyklicznie co
   `PROMO_WYGASZACZ_MINUTY`) przestawia ją na `zakonczona`.
-- **Rada „żeby naprawdę wyłączyć promocję, zmień jej status" — do usunięcia.** `status` przestał
+- **Rada „żeby naprawdę wyłączyć promocję, zmień jej status" — usunięta.** `status` przestał
   być polem edytowalnym (`POLA_EDYTOWALNE_PROMOCJI`, 7 pól po 14f); promocję wyłącza teraz
   wyłącznie data albo usunięcie.
 
-**Dla cutoveru — uprzedzić Anię, nie tylko przepisać instrukcję:** pierwszy start procesu po
-wdrożeniu 14f zamiecie statusy WSZYSTKICH promocji rozjechanych z datami. Na dziś (`promotions`
-w `db/snapshot.db` PUSTA) realnie 0 zmian, ale to drugi powód uprzedzenia obok już znanego
-znaleziska 14e: samo `przeliczCenyZRegul`, bez żadnej promocji, zmienia 2050 z 7405 cen (prostuje
-pozycje rozjechane z aktualnym narzutem — zachowanie oryginału, nie defekt, ale wygląda jak
-masowa, niezamówiona zmiana cen).
+**§5 starej instrukcji rozliczone w całości** (tabela w `docs/instrukcja-testow-I4-v2.md` §6.3)
+wobec czterech pozycji: 1. kolumna „Promocja" ✅ dowieziona (14h), 2. wyłączanie promocji datą
+✅ dowiezione (14f), 3. przełącznik statusu przy promocjach ❌ świadomie nie — decyzja Ani
+2026-09-18, 4. **edycja priorytetu reguły z formularza — nadal otwarta**, bez wpisu w backlogu
+i bez czyjejkolwiek decyzji; dokument zadaje o nią Ani pytanie z kratką (patrz „Poza zakresem
+I14" niżej — czeka na odpowiedź, pytanie zadane 2026-09-19).
+
+**Dla cutoveru — nota przekazana Ani** (rozdział 1 `docs/instrukcja-testow-I4-v2.md`, przed
+scenariuszami): pierwszy start procesu po wdrożeniu 14f zamiótł statusy WSZYSTKICH promocji
+rozjechanych z datami — na dziś (`promotions` w `db/snapshot.db` PUSTA) realnie 0 zmian; drugi
+powód uprzedzenia obok znaleziska 14e: samo `przeliczCenyZRegul`, bez żadnej promocji, zmienia
+2050 z 7405 cen (prostuje pozycje rozjechane z aktualnym narzutem — zachowanie oryginału, nie
+defekt, ale wygląda jak masowa, niezamówiona zmiana cen).
 
 **⚠ DLA KARTY 14k (backlog #21) — PRZECZYTAJ, ZANIM ZACZNIESZ.** Bloku „14k" w tej roadmapie
 jeszcze NIE MA; 14j nie miała prawa go założyć (własność plików), więc pierwsza rzecz do zrobienia
@@ -2677,6 +2699,20 @@ Do rozstrzygnięcia osobno: domknąć tę gałąź czy przenieść treść do ak
   propozycja Ani z §12 pkt 10, backlog **#18**. Rusza BE + schemat + kontrakt, więc GATE i bramki
   obu stron; dziś odbudowa odtwarza 1:1 zachowanie oryginału (wyliczony nadpisuje zapisany).
   **To prośba o świadome odstępstwo, nie usterka** — czeka na decyzję użytkownika.
+- **Edycja priorytetu reguły z formularza** (§5 poz. 4 starej instrukcji I4) — jedyna pozycja §5
+  bez czyjejkolwiek decyzji, wisi od 2026-09-02 bez wpisu w backlogu. `docs/instrukcja-testow-I4-v2.md`
+  (karta **65-DOCS-instrukcja-testow-i4-v2**) zadaje o nią Ani pytanie z kratką 2026-09-19 — jej
+  odpowiedź będzie wymagała wpisu w backlogu i być może osobnej karty.
+- **Sortowanie kolumny „Promocja" w katalogu nie działa.** Zmierzone kartą 65:
+  `rebuild/frontend/src/pages/katalog/filtrowanie.ts:107-123` — `sortuj()` czyta
+  `produkt["promocja"]`, a wartość siedzi w `_reguly.promocja`, więc obie strony porównania to
+  `""`. **Identycznie w oryginale** (`frontend-index.js:23307-23311`) — wierne odtworzenie, nie
+  regresja. `docs/instrukcja-testow-I4-v2.md` uprzedza o tym Anię i pyta, czy sortowanie byłoby
+  przydatne; „tak" wymaga osobnej karty (materializacja pola albo wyjątek w `sortuj()`).
+- **Wygasłe promocje zostają w tabeli, nie znikają.** Ania spodziewała się, że „reguła znika po
+  końcu obowiązywania" (`docs/rebuild-backlog.md:1368`); wiersz zostaje z odznaką „zakończona"
+  (zachowanie oryginału). `docs/instrukcja-testow-I4-v2.md` pyta Ani, czy chce je ukrywać —
+  ewentualne „tak" to świadome odstępstwo i osobna decyzja/karta.
 - ~~**EAN w notacji naukowej** (backlog #11)~~ — **ROZSTRZYGNIĘTE 2026-09-18**: Ania chce puste
   pole w katalogu. Karta **14i** ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18, opis
   w sekcji drugiej fali wyżej.
@@ -2733,9 +2769,11 @@ dwa zamknęły się jej odpowiedziami, zanim doszło do wniosków:
   a porównanie pełnego katalogu **oryginał ↔ odbudowa dało 0 różnic na 7405 produktach**.
   Regresji nie ma i nie było. Przy okazji zmierzony zasięg pułapki #25: promocja „globalna"
   obejmuje **1 produkt na 7405**.
-- **B (komunikat „Reguła dodana" po edycji) — ZAMKNIĘTE bez zmian.** Ania: „dodana czy
+- **B (komunikat po edycji reguły) — ZAMKNIĘTE bez zmian.** Ania: „dodana czy
   zaktualizowana to nie ma różnicy, zostaw to tak jak jest". Pomiar i tak wykazał, że defektu
-  nie ma: zapis z dialogu edycji leci `PATCH` na id, zero `POST`-ów, **druga reguła nie powstaje**.
+  nie ma: zapis z dialogu edycji leci `PATCH` na id, zero `POST`-ów, **druga reguła nie powstaje**,
+  a sam komunikat brzmi „Reguła zaktualizowana", nie „Reguła dodana" (potwierdzone dopiero kartą
+  **65-DOCS-instrukcja-testow-i4-v2** — zobacz sprostowanie wyżej w „Druga fala I14").
 
 **⭐ USTALENIE, KTÓRE PRZESĄDZA O KOSZCIE #19 — status promocji jest zapisywany RAZ.**
 To nie jest „silnik ignoruje daty" w oderwaniu od reszty, tylko **brak przeliczania statusu**:
@@ -2778,7 +2816,7 @@ wyłącznie `instrukcja-testow-I3.md` (fala 1). Treść sprostowań zostaje tu b
   promocja utworzona jako „aktywna" i przestawiona na daty z 2020 zostawała w bazie „aktywna".
   **Po 14f ✅ (2026-09-19) §3.9 PRZESTAJE OBOWIĄZYWAĆ** — wygaszacz przestawi taką promocję na
   `zakonczona` (na starcie procesu, na wejściu `przeliczCenyZRegul`, albo cyklicznie w ciągu
-  `PROMO_WYGASZACZ_MINUTY`). Sprostowanie instrukcji: **14m** (⬜, domyka falę 2).
+  `PROMO_WYGASZACZ_MINUTY`). Sprostowanie instrukcji: **14m** ✅ `65-DOCS-instrukcja-testow-i4-v2` · 2026-09-19.
 
 **WYCENA DWÓCH WARIANTÓW — liczby**
 
@@ -2862,8 +2900,8 @@ więc mogą iść razem z nią; 14f czekała na rozstrzygnięcie #19, dostała j
 **✅ zrobiona 2026-09-19** (`64-FEATURE-i14f-daty-koncza-promocje`). **14i ✅ zrobiona i nie
 ruszyła `contract/`** (decyzja użytkownika), a **14h ✅ zrobiona** dotknęła kontraktu tylko
 komentarzem (D4, `61-FEATURE-promocja-kolumna-katalog`) — obie weszły bez blokady kolejnościowej
-i bez wspólnych fixtures. Zostaje otwarte tylko **14m** (sprostowanie
-`docs/instrukcja-testow-I4.md`, domyka falę 2 — zależy od 14f, gotowa do startu).
+i bez wspólnych fixtures. **14m ✅ zrobiona 2026-09-19** (`65-DOCS-instrukcja-testow-i4-v2`,
+sprostowanie `docs/instrukcja-testow-I4.md`, domykała falę 2 — startowała po 14f).
 **14g skasowana** (decyzje Ani z 18.09).
 Każda z trzech kart dopisuje TYLKO swój podblok wyżej i NIE rusza tablicy postępu §4 — wiersz iteracji
 zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-18.
