@@ -20,7 +20,7 @@ ma już licznika „Wgraj (N)", który po udanym imporcie pokazywał „Wgraj (0
   `PozycjaListy` przeniesiony do dialogu; doszła sekcja „Ostatni import" z wynikiem per plik
   i podglądem 5 pozycji.
 - `rebuild/frontend/test/konfiguracja.test.tsx` — przepisana część o wgrywaniu (szkielet zakładek
-  bez zmian): 7 testów zastąpionych 14 nowymi.
+  bez zmian): 7 testów zastąpionych 17 nowymi.
 - `docs/tickets/49-CHORE-i14a-wgrywanie-reczne/plan.md` — plan ticketa.
 
 `detekcja.ts` i `wgrywanie.ts` **nie wymagały zmian** — `przeanalizujPlik`, `wymusDostawce`
@@ -46,7 +46,18 @@ i `wgrajPlik` pokryły potrzeby dialogu bez modyfikacji.
 
 ## Odstępstwa od planu
 
-Brak — zakres i wszystkie decyzje D1–D7 zrealizowane zgodnie z `plan.md`.
+Zakres i wszystkie decyzje D1–D7 zrealizowane zgodnie z `plan.md`. Dwa uzupełnienia wykonane
+po review, poza literą planu:
+
+1. **Unieważnienia cache idą po KAŻDYM udanym pliku, nie raz na końcu.** Krok 2 planu mówił
+   „unieważnienia jak dziś", a „dziś" znaczyło: raz, po pętli. Oryginał robi je wewnątrz `sP()`,
+   czyli po każdym pliku (`:18838-18842`) — i to ma znaczenie przy decyzji D7, bo po imporcie
+   przerwanym błędem pozycje zapisane wcześniej muszą być widoczne w stagingu i katalogu.
+   Poprawka przybliża kod do oryginału, nie oddala.
+2. **Sekcja „Ostatni import" jest zerowana/odświeżana także po błędzie.** Plan opisywał tylko
+   ścieżkę sukcesu; bez tego po nieudanym imporcie pod kaflami wisiałby wynik POPRZEDNIEJ próby
+   obok toasta „Błąd importu". Sekcja jest naszym dodatkiem (D4), więc nie ma tu ograniczenia
+   wierności — jest powód, żeby nie mylić.
 
 ## Świadome odstępstwa od oryginału (zatwierdzone w planie)
 
@@ -73,8 +84,8 @@ z pozostawieniem otwartego dialogu (D7), brak komunikatu przy pustej liście dos
   Kształt odpowiedzi jest wiążąco znany tylko z kodu (oryginał `backend-index.cjs:48277-48281`
   ≡ port `rebuild/backend/src/routes/suppliers.ts:213-221` ≡ typ `WynikUploadu`). To luka
   w siatce bezpieczeństwa, nie regres tej karty — do follow-upu.
-- **Unit/komponentowe:** ✓ 758 testów w 48 plikach, wszystkie zielone (cały pakiet frontendu).
-  W `test/konfiguracja.test.tsx`: 21 testów (było 14), z czego 14 dotyczy wgrywania.
+- **Unit/komponentowe:** ✓ 761 testów w 48 plikach, wszystkie zielone (cały pakiet frontendu).
+  W `test/konfiguracja.test.tsx`: 24 testy (było 14), z czego 17 dotyczy wgrywania.
 - **Bramki FE:** ✓ `npm run lint`, ✓ `npm run typecheck`, ✓ `npm run build`, ✓ `npm test`.
 - **Bramki backendu:** N/D (karta czysto FE).
 
@@ -92,6 +103,50 @@ Brak zmian kontraktu. Zmiana jest widoczna dla użytkownika (inny układ zakład
 żyją teraz wyłącznie wewnątrz modala, a `button-wyslij`, `bledy-wczytania` i `blad-uploadu`
 zniknęły (zastąpione przez `button-importuj` i toasty). W repo nikt poza przepisanym plikiem
 testowym ich nie używa.
+
+## Poprawki po review
+
+Review nie zgłosiło ani jednego BLOCKER-a. Naprawione wszystkie SHOULD-FIX:
+
+- **Unieważnienia cache w pętli** (patrz „Odstępstwa od planu" pkt 1) — rozjazd z `:18838-18842`.
+- **Wyniki częściowe oddawane rodzicowi także przy błędzie** (pkt 2) — sekcja pod kaflami
+  pokazuje TĘ próbę, nie poprzednią.
+- **`<input type="file">` zeruje `value` po odczytaniu.** To jeden trwały węzeł DOM (oryginał
+  renderuje dwa osobne inputy, `:18921` i `:18959`), więc bez resetu ponowny wybór TEGO SAMEGO
+  pliku nie generował zdarzenia `change` i kończył się ciszą. Lista plików jest kopiowana przed
+  resetem, bo `input.files` to żywa referencja.
+- **Lista dostawców idzie propsem** zamiast `useQuery` w każdej z N+1 instancji dialogu.
+- **`id` pozycji z licznika `useRef`** zamiast `Date.now()` — dwa pliki o tej samej nazwie
+  i rozmiarze dodane w tej samej milisekundzie dostawały identyczny klucz, a wtedy usunięcie
+  i zmiana dostawcy trafiały w obie pozycje naraz.
+- **Podświetlenie strefy zrzutu przy przeciąganiu** (`:18900-18907`) — brakujący fragment 1:1.
+- **Opisy dialogu opatrzone komentarzem** o odstępstwie (D2/D4/D6), żeby następna sesja nie brała
+  rozjazdu stringu za literówkę. Wariant pojedynczy mówi teraz wprost „pokaże podgląd po imporcie".
+- **Trzy nowe testy:** człon „Pominięte pliki: N" (jedyny licznik kliencki i jedyna gałąź
+  `continue`), urwanie pętli na pierwszym błędzie (dwa pliki → jeden upload) oraz import częściowo
+  udany (wynik udanego pliku nie ginie, dialog zostaje otwarty).
+
+Świadomie NIE zmienione z listy NICE-TO-HAVE: `pewnosc: "wymuszona"` przy ręcznym wyborze
+z selecta, podczas gdy oryginał rozróżnia wybór ręczny (`pewnosc: "ręczna"`, „Wybór użytkownika",
+`:19009-19013`) od wymuszenia z kafla. To rozjazd ISTNIEJĄCY od 3f-1, którego ta karta nie
+wprowadziła — zmiana dotknęłaby `detekcja.ts` i testu detekcji spoza zakresu uwag Ani. Do triażu.
+
+## Aktualizacja dokumentacji
+
+`docs/rebuild-roadmap.md` — podblok **14a** przepisany na STAN (✅ zrobione 2026-09-18 + ID ticketa):
+faktycznie dowieziony zakres, rozstrzygnięcie martwej gałęzi „Importuj do katalogu" (zastąpiło
+otwarte pytanie, nie dopisane obok), dowód zgodności żywego bundla z deminifikatem dla tej
+zakładki, lista świadomych odstępstw i luka „brak fixture dla uploadu".
+Zgodnie z zasadą nr 2 z `CLAUDE.md` ustalenia dotyczące przyszłych bloków wpisane DO NICH:
+- **14c** — ostrzeżenie, żeby NIE reużywać `DialogWgrywania.tsx` (oryginał ma na karcie dostawcy
+  własny, samodzielny upload, `:25756-25802`; reużycie złamałoby też rozłączność kart) oraz
+  gotowy wzorzec wywołania toasta;
+- **14d** — co dokładnie zmieniło się w przepływie opisanym w §2 instrukcji testów i które
+  `data-testid` zniknęły albo przeniosły się do modala.
+
+Tablica postępu §4 i podblok 14b **nietknięte** (wiersz iteracji zamyka 14d).
+`docs/rebuild-backlog.md` — bez zmian: żaden wpis nie dotyczy tej zakładki (sprawdzone `grep`em
+po „wgrywan/upload/toast"; trafienia dotyczą parserów i silnika importu, nie warstwy UI).
 
 ## Follow-up
 
