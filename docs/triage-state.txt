@@ -1,7 +1,26 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
 # Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
-94bdf11
+9d1b09f1421e93d0a140c5c0fd7186ab7f783cf9
+# ^ 2026-09-18 15:00 „20260918_1500_width_norm". STRIAŻOWANE 2026-09-18
+#   (ticket 52-CHORE-triaz-produkcja-i14, gałąź chore/52-triaz-produkcja-i14).
+#   Zakres 94bdf11..9d1b09f = 24 commity sync(vps): 15 kod/schemat → backlog #72–#83 (12 wpisów),
+#   9 to sama regeneracja sellycsv-*.csv (dane, cykl 06:00) + 2 operacje na danych (9755e5f, 5cfb7ab)
+#   → sekcja „Pominięte".
+#   NAJWAŻNIEJSZE: (a) #83 — Ania odwróciła decyzję z 19.08 o zerach końcowych w products.szerokosc
+#   i skasowała blok szerokoscRaw w parseSize(); rebuild/.../tyre_params.cjs:336-366 ma go NADAL,
+#   więc odbudowa rozjeżdża się z produkcją w rdzeniu importu (różnica formatowa, nie jednostkowa).
+#   (b) #81 — ustalenie z 08.09 „Selly PUT nie przyjmuje features (HTTP 400)" OBALONE testem
+#   produkcyjnym 17.09; przesłanka, na której 13d-1 wyciął PUT features, już nie obowiązuje.
+#   (c) #79 — trigger na manual_overrides zawęża otwarty wpis #65 do 3 wpisów 'konstrukcja'.
+#   (d) #71 ZAMKNIĘTE — Ania naprawiła konstrukcję w ŻYWYM bundlu (28541ca), patrz #72.
+#   (e) 13d: docieranie Selly TRWA (5 commitów w selly/*, ostatni 17.09 wieczorem) — sygnał startu
+#   NIE zapalił się, zegar zresetowany.
+#   Dwa commity BEZ wpisu w CHANGELOG Ani (03fe892, 9d1b09f) → opis wyłącznie z diffu, powód NIEZNANY.
+#   Następny triaż: git fetch origin main && git log 9d1b09f..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 09.09) ---
+# 94bdf11
 # ^ 2026-09-09. Bieżący HEAD main. STRIAŻOWANE 2026-09-09 (w ramach 46-CHORE-revert-13d1-selly).
 #   Zakres d88ac15..94bdf11 = 3 commity sync(vps) (08-09 17:00, 09-09 06:00, 09-09 09:00).
 #   WSZYSTKO to docieranie podsystemu Selly (Tor 2): sync_full przepisany (428 linii, usunięte PUT
