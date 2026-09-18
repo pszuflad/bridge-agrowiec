@@ -642,9 +642,17 @@ przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 | **Data** | 2026-08-26 (znalezione przy I3/3c) |
 | **Kategoria** | BACKEND (silnik importu, normalizacja EAN) |
 | **Pliki** | `index.cjs` — `ZT()` (deminified `:46971`, wywołanie `:46984`), `Lq()` (`:46965` i `:47312`) |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI ANI** |
-| **Iteracja** | odtworzone 1:1 w **3c**; naprawa u Ani — do rozstrzygnięcia |
-| **Status** | zgłoszone |
+| **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-18 przez Anię** (świadome odstępstwo) |
+| **Iteracja** | odtworzone 1:1 w **3c**; naprawa → **I14, karta 14i** |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**DECYZJA ANI (2026-09-18), pytanie 8:** „EAN który jest zepsuty notacją naukową ma być
+importowany jako **puste pole w katalogu**". To ŚWIADOME ODSTĘPSTWO — produkcja zapisuje
+wartość i wypisuje komunikat „zapis naukowy ma tylko null cyfr znaczących". Zakres karty 14i:
+EAN rozpoznany jako notacja naukowa → puste pole w `products`. ⚠ Rusza silnik importu, więc
+wzorce charakteryzacji trzeba PRZENAGRAĆ, nie poprawiać ręcznie. Otwarte przy wdrożeniu (do
+rozstrzygnięcia w karcie, nie przez Anię): czy ostrzeżenie w stagingu ma zostać — rekomendacja
+TAK, żeby pominięty EAN nie był niewidzialny.
 
 **Opis biznesowy:** przy EAN-ie zapisanym w notacji naukowej (Excel zamienia „8059970000000"
 na „8,05997E+12") pozycja w stagingu dostaje ostrzeżenie o treści:
@@ -1290,8 +1298,20 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **do decyzji** (odrzucona w tym tickecie, patrz niżej) |
+| **Do nowej wersji?** | ✅ **port 1:1** — naprawa ⬜ **NADAL do decyzji**; odpowiedzi Ani z 2026-09-18 są ROZBIEŻNE, pytanie kontrolne wysłane (patrz nota niżej) |
 | **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony |
+
+**⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
+„Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
+przeliczyć ceny bez tej promocji". W odpowiedzi na pytanie kontrolne z 18.09 napisała coś innego:
+„to nie było opisane jako błąd — opisałam co się dzieje, bo takie było pytanie. Ma zostać tak jak
+jest, reguła znika po końcu obowiązywania". **Jej opis zachowania nie zgadza się z kodem:**
+`TabelaPromocji.tsx` nie filtruje niczego po datach (wiersz ZOSTAJE, z odznaką „zakończona"
+i naszym pomarańczowym znacznikiem), a silnik dat nie czyta, więc wygasła promocja **dalej obniża
+ceny**. Wysłano drugie pytanie kontrolne, tym razem z opisem stanu faktycznego zamiast pytania
+otwartego. **Do czasu odpowiedzi nie ruszamy silnika cen.** Poszlaka: sąsiednie odpowiedzi
+(„przełącznika statusu nie dokładamy", „promocje po prostu się usuwa", „nie dodajemy nowych
+reguł") wskazują na wariant najtańszy — zostawiamy 1:1 — ale to domysł, nie decyzja.
 
 **Co robi produkcja.** `__bridgePromoMatches` (`:44615-44628`) nie czyta ani `start`, ani
 `koniec` — o zastosowaniu promocji decyduje wyłącznie `status === "aktywna"` i dopasowanie
@@ -1426,8 +1446,20 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 |---|---|
 | **Kategoria** | FRONTEND (katalog) |
 | **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
-| **Do nowej wersji?** | ✅ **port 1:1** — ożywienie ⬜ **do decyzji** (kandydat na I12) |
-| **Status** | ✔ odtworzone w rebuild (4b), martwota potwierdzona |
+| **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
+| **Iteracja** | odtworzone 1:1 w **4b**; ożywienie → **I14, karta 14h** |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
+Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
+nie potwierdza w ŻADNEJ wersji, którą mamy.** Zmierzone na ŻYWYCH plikach produkcji, nie na
+deminifikacie: `mirror/frontend/assets/index-PRICEFMT1783512500.js` ma dokładnie JEDNO wystąpienie
+`._reguly` (miejsce odczytu), a `mirror/backend/index.cjs` nie ma go wcale — dwa trafienia
+`grep -o "_reguly"` to substring kolumny `dodatkowe_reguly` z tabeli `spedycja_limity`, co łatwo
+wziąć za trafienie (wzięliśmy, na jedną minutę). Rozstrzygające: `git log -S'_reguly:' --all` nie
+zwraca ANI JEDNEGO commita od baseline'u 13.08 do 18.09 — nikt nigdy nie dopisał zapisu tego pola.
+**Wniosek dla karty 14h: to nowa funkcja i świadome odstępstwo, nie przywrócenie regresji.** Trzeba
+to Ani powiedzieć wprost, żeby nie liczyła na „powrót do stanu sprzed backupu" i na jego wycenę.
 
 **Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
 **nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
@@ -1522,8 +1554,8 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 |---|---|
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
-| **Do nowej wersji?** | ⬜ **do decyzji** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
-| **Status** | odtworzone świadomie w 4b · w produkcji **nadal obecne** |
+| **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-18**: „nie, zostawiamy tak jak jest, nie dodajemy nowych reguł" |
+| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
