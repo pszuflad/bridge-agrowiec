@@ -188,7 +188,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I14.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); **otwarte 14f/14h/14i** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f FE · 14h BE+FE · 14i BE · 14j pomiar ✅ (14g skasowana) | 3, 4 | 🔨 | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I14.md` + banner w I3). **FALA 2 W TOKU:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); **otwarte 14f/14h/14i** — stąd 🔨, nie ✅. Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
 
 ---
 
@@ -2477,6 +2477,7 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
 | **14f** | Daty kończą promocję (#19, wariant z 14e) + usunięcie znacznika rozbieżności + potwierdzenie usuwania reguły z liczbą produktów | BE: `repos/ceny.ts` albo NOWY wygaszacz + `repos/promotions.ts` · FE: `narzuty/TabelaNarzutow.tsx`, `narzuty/TabelaPromocji.tsx`, `narzuty/status.ts` | `test/narzuty.test.tsx` + testy BE |
 | **14h** | Kolumna „Promocja" w katalogu — NOWA funkcja (BE wypełnia `_reguly.promocja`) | BE: trasa `/api/products` · FE: `katalog/formatowanie.tsx` | `test/katalog.formatowanie.test.tsx` |
 | **14i** | EAN w notacji naukowej → puste pole w katalogu | BE: silnik importu (normalizacja EAN) | bramki charakteryzacji |
+| **14j** ✅ | Automatyczne porównanie Historii z oryginałem — zastępuje niewykonany test §9 z I5. Karta POMIAROWA, zero kodu produkcyjnego | `docs/tickets/59-*/**` · NOWY `rebuild/backend/test/historia.wyrocznia.*` · backlog (tylko #87) | `test/historia.wyrocznia.test.ts` (13 przypadków) |
 
 - **14g SKASOWANA** — obie jej pozycje (globalna promocja, komunikat po edycji) Ania zamknęła
   decyzją „zostaw jak jest". Litery nie przenumerowujemy, żeby nie rozjechać się z promptami,
@@ -2490,6 +2491,81 @@ podział niż w pierwszej fali; poniżej własność plików, która gwarantuje 
 - **14f zależy** od rozstrzygnięcia #19 tylko w jednym punkcie: jeśli daty MIAŁYBY wyłączać
   promocje, `TabelaPromocji.tsx` zmienia się w tej samej karcie. Dlatego 14f startuje po
   odpowiedzi Ani, nie przed.
+
+##### 14j — automatyczne porównanie Historii z oryginałem · ✅ ZROBIONE 2026-09-18 (`59-CHORE-i14j-oracle-diff-historii`)
+
+**Po co była.** Ania przeszła `docs/instrukcja-testow-I5.md` bez ani jednej usterki, ale
+zostawiła PUSTE pole przy rozdziale 9 („Porównanie ze starym Bridge" — najcenniejszym teście
+iteracji) i przy rozdziale 8 („Szczegóły"). Karta zastąpiła ten test POMIAREM, metodą 14e
+(dwa żywe backendy na kopiach tej samej bazy). **Zero kodu produkcyjnego** — `rebuild/backend/src/`
+nietknięty.
+
+**Co faktycznie dowieziono** (zakres zgodny z planem, trzy odstępstwa wykonawcze w raporcie):
+
+| Zadanie | Wynik |
+|---|---|
+| **A — oracle diff** `GET /api/history`, `/meta`, `/paged` | **59/59 przypadków zgodnych · 0 rozjazdów · 49 813 wpisów porównanych**; drugi przebieg z zasianą gałęzią eksportu: 59/59, 0 rozjazdów, 49 846 wpisów |
+| **B — ślad po mutacjach** | edycja produktu: **2/2 wiersze `history`**, 0 różnic w treści i w `/paged`; sonda allowlisty (#14/D1): oryginał 1 wiersz, odbudowa 0 |
+| **C — backlog** | nowy wpis **#87** (limit `LIMIT_AUDYTU = 5000`), ⬜ do decyzji |
+
+**Gate rozliczony:** karta nie rusza kontraktu ani kodu, więc gate w wersji regresyjnej —
+`test/historia.gate.test.ts` przechodzi bez zmian. Bramki backendu zielone: **82 pliki,
+1262 testy** (przed kartą 1249; +13 to nowy `test/historia.wyrocznia.test.ts`).
+
+**Co ta karta ZOSTAWIA do ponownego użycia:**
+- `docs/tickets/59-CHORE-i14j-oracle-diff-historii/oracle-diff-historii.cjs` — gotowy oracle-diff,
+  uruchamiany jednym poleceniem; `--zasiew-eksportu` dokłada gałąź eksportu, `--zostaw-piaskownice`
+  zostawia katalogi do obejrzenia;
+- `rebuild/backend/test/historia.wyrocznia.test.ts` + `historia.wyrocznia.json` — odpowiedzi
+  ŻYWEGO oryginału zamrożone w bramkach (270 wierszy `audit_log` + 20 wierszy `history` + 8 pełnych
+  odpowiedzi). Chodzi bez oryginału.
+
+**⚠ FAKTY USTALONE POMIAREM — poprawiają to, co wcześniej zakładaliśmy:**
+1. **Pułapka „projekcja Drizzle" NIE dotyczy historii.** `listHistory()` oryginału to Drizzle
+   (`X.select().from(Wa).orderBy(desc(Wa.data)).all()`, `:44962-44964`), więc oryginał sam oddaje
+   camelCase — inaczej niż `GET /api/selly/log`, który jest raw-SQL. Zestaw kluczy porównany
+   osobno i identyczny.
+2. **Migracje 001–006 nie dotykają `history` ani `audit_log`** — ani DDL, ani DML. Zweryfikowane
+   asercją startową (liczba wierszy + `PRAGMA table_info` + min/max/suma `id`), nie założeniem.
+3. **Przepis na piaskownicę oryginału wymaga `npm ci`, NIE `npm install`.** `mirror/backend/package.json`
+   deklaruje sześć zależności, a lockfile ma ich więcej (m.in. `archiver`). Przy `npm install`
+   część tras oddaje 500 z powodu piaskownicy, nie produkcji — kosztowało to jeden fałszywy
+   wynik. **Dotyczy każdej przyszłej karty stawiającej oryginał.**
+4. **`db/snapshot.db` nie zawiera ANI JEDNEGO wiersza `eksport_csv`, `eksport_shoper`
+   ani `import_cennika`** (`audit_log` = 3873 wiersze, z czego 270 rozpoznawanych: 178 `edycja_produktu`
+   + 92 `upload_pliku`). Gałąź „eksport" mapowania jest na żywych danych nieosiągalna i wymaga zasiewu.
+5. **Odbudowa ZAPISUJE audyt eksportu** (`routes/export-shoper.ts:108,133,171`) — wcześniejsze
+   założenie, że tego nie robi, było nieprawdziwe.
+
+**⚠ ZNALEZISKO UBOCZNE — DEFEKT PRODUKCJI, NIE NAPRAWIONY (poza zakresem karty).**
+`GET /api/export-shoper` bez `?dostawca=` (eksport wszystkich dostawców do ZIP-a) oddaje
+w produkcji **zawsze HTTP 500**. Przyczyna zmierzona, nie wydedukowana: `rV()`
+(`deminified/backend-index.cjs:48139`) czyta `ZipArchive` z archivera, a lockfile produkcji
+przypina **`archiver@5.3.2`**, który takiego eksportu nie ma (`create, registerFormat,
+isRegisteredFormat`) — log procesu: `zip pipeline failed TypeError: oh is not a constructor`,
+przy potwierdzonym `archiver w piaskownicy: JEST`. Odbudowa ma `archiver@^8.0.0`, gdzie
+`ZipArchive` istnieje, więc **działa** — czyli wierne przepisanie kodu dało zachowanie INNE niż
+produkcja, bo różnica siedzi w wersji zależności. Skutek dla Historii: w produkcji nie powstaje
+ani jeden wpis `eksport_csv` z tej gałęzi. **Wymaga osobnej karty i decyzji użytkownika**
+(odtworzyć defekt czy zostać przy działającej wersji) — opis i propozycja w
+`docs/tickets/59-CHORE-i14j-oracle-diff-historii/raport.md`.
+
+**⚠ DLA KARTY 14k (backlog #21) — PRZECZYTAJ, ZANIM ZACZNIESZ.** Bloku „14k" w tej roadmapie
+jeszcze NIE MA; 14j nie miała prawa go założyć (własność plików), więc pierwsza rzecz do zrobienia
+przy planowaniu 14k to spisanie jej zakresu tutaj. Wejście, które 14j zostawia:
+- rozszerzenie słownika `akcja → typ` **zmieni wynik oracle-diffu** — po zmianie trzeba PONOWNIE
+  uruchomić `oracle-diff-historii.cjs` i PONOWNIE nagrać `historia.wyrocznia.json`; stara wyrocznia
+  zacznie świecić i **to będzie poprawne zachowanie**, a nie regresja;
+- rozstrzygnięcie #21 na „tak" **przyspiesza problem z backlogu #87** (limit 5000), bo przez odsiew
+  przechodziłoby wielokrotnie więcej wierszy. Oba wpisy warto rozstrzygać RAZEM;
+- podzbiór 270 wierszy w wyroczni jest ważny **tylko dopóki** odsiew działa przed filtrowaniem
+  i paginacją; zmiana tej kolejności unieważnia skrót i test to wykryje asercją `limitNieGryzie`.
+
+**⚠ `docs/instrukcja-testow-I5.md` jest w dwóch miejscach NIEAKTUALNA** — §3.3 obiecuje Ani, że
+wpisów typu *edycja* nie przybędzie (nieprawda od 12a/12c — zmierzone), a §8.2 że „nowych eksportów
+nie wygenerujesz" (odbudowa eksporty ma i audytuje). **Uwaga: pliku nie ma na `develop`** — leży
+wyłącznie na niezmergowanej gałęzi `origin/docs/instrukcja-testow-i5` (commity `322a176`, `4ea3b92`).
+Do rozstrzygnięcia osobno: domknąć tę gałąź czy przenieść treść do aktualnej instrukcji.
 
 **Poza zakresem I14, wymaga osobnych decyzji i kart:**
 - **Status dostawcy w dwóch polach** (ustawienie ręczne + osobny wyliczony status techniczny) —

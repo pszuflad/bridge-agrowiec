@@ -1,5 +1,5 @@
 {
-  "kiedy": "2026-09-18T17:03:29.341Z",
+  "kiedy": "2026-09-18T17:18:22.656Z",
   "tryb": "dane-produkcji",
   "snapshot": "/home/szuflada/apinfo/projects/bridge/db/snapshot.db",
   "stanBaz": {
@@ -821,12 +821,12 @@
       },
       "logOryginaluPodczasEksportu": [
         "zip pipeline failed TypeError: oh is not a constructor",
-        "    at rV (/tmp/bridge-14j-oryginal-u378c1/index.cjs:313:6525)",
-        "    at async /tmp/bridge-14j-oryginal-u378c1/index.cjs:329:284",
-        "7:03:46 PM [express] GET /api/export-shoper 500 in 53ms :: {\"error\":\"oh is not a constructor\"}",
-        "7:03:46 PM [express] GET /api/export-shoper 200 in 161ms",
-        "7:03:47 PM [express] GET /api/export/shoper 200 in 177ms",
-        "7:03:47 PM [express] GET /api/history/paged 200 in 60ms :: {\"items\":[{\"id\":3877,\"typ\":\"eksport\",\"kiedy\":\"2026-09-18T17:03:47.085Z\",\"dostawca\":\"wszyscy\",\"uzytkownik\":\"Marta Bieguniak\",\"liczbaPozycji\":7405,\"nazwaPliku\":null,\"format\":\"shoper\",\"kodProduktu\":null,\"zmienionePola\":[],\"uwagi\":\"Format: shoper\"},{\"id\":3876,\"typ\":\"eksport\",\"kiedy\":\"2026-09-18T17:03:46.662Z\",\"dostawca\":\"MO1\",\"uzytkownik\":\"Marta Bieguniak\",\"liczbaPozycji\":657,\"nazwaPliku\":null,\"format\":\"csv\",\"kodProduktu\":null,\"zmienionePola\":[],\"uwagi\":\"Format: csv\"}],\"total\":2,\"pages\":1,\"page\":1,\"limit\":50}"
+        "    at rV (/tmp/bridge-14j-oryginal-k6P9C6/index.cjs:313:6525)",
+        "    at async /tmp/bridge-14j-oryginal-k6P9C6/index.cjs:329:284",
+        "7:18:42 PM [express] GET /api/export-shoper 500 in 62ms :: {\"error\":\"oh is not a constructor\"}",
+        "7:18:42 PM [express] GET /api/export-shoper 200 in 170ms",
+        "7:18:43 PM [express] GET /api/export/shoper 200 in 174ms",
+        "7:18:43 PM [express] GET /api/history/paged 200 in 59ms :: {\"items\":[{\"id\":3877,\"typ\":\"eksport\",\"kiedy\":\"2026-09-18T17:18:43.291Z\",\"dostawca\":\"wszyscy\",\"uzytkownik\":\"Marta Bieguniak\",\"liczbaPozycji\":7405,\"nazwaPliku\":null,\"format\":\"shoper\",\"kodProduktu\":null,\"zmienionePola\":[],\"uwagi\":\"Format: shoper\"},{\"id\":3876,\"typ\":\"eksport\",\"kiedy\":\"2026-09-18T17:18:42.940Z\",\"dostawca\":\"MO1\",\"uzytkownik\":\"Marta Bieguniak\",\"liczbaPozycji\":657,\"nazwaPliku\":null,\"format\":\"csv\",\"kodProduktu\":null,\"zmienionePola\":[],\"uwagi\":\"Format: csv\"}],\"total\":2,\"pages\":1,\"page\":1,\"limit\":50}"
       ],
       "audytPrzed": {
         "oryginal": [],
@@ -871,8 +871,8 @@
         },
         {
           "sciezka": "items[0].kiedy",
-          "oryginal": "2026-09-18T17:03:47.085Z",
-          "odbudowa": "2026-09-18T17:03:47.267Z"
+          "oryginal": "2026-09-18T17:18:43.291Z",
+          "odbudowa": "2026-09-18T17:18:43.482Z"
         },
         {
           "sciezka": "items[1].id",
@@ -881,8 +881,8 @@
         },
         {
           "sciezka": "items[1].kiedy",
-          "oryginal": "2026-09-18T17:03:46.662Z",
-          "odbudowa": "2026-09-18T17:03:46.905Z"
+          "oryginal": "2026-09-18T17:18:42.940Z",
+          "odbudowa": "2026-09-18T17:18:43.113Z"
         },
         {
           "sciezka": "total",

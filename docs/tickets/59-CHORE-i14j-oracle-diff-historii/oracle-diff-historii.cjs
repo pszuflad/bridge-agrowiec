@@ -10,7 +10,7 @@
  * Zastępuje ręczny test §9 instrukcji I5 („Porównanie ze starym Bridge"), którego
  * Ania nie wykonała. Metoda jest ta sama, którą 14e zastosowała do cen.
  *
- * ⚠ TO NIE JEST TEST CI. Wymaga żywego oryginału (kopia `mirror/backend` + `npm install`),
+ * ⚠ TO NIE JEST TEST CI. Wymaga żywego oryginału (kopia `mirror/backend` + `npm ci`),
  * więc mieszka w folderze ticketa, a nie w `rebuild/backend/test/`. Trwały ślad pomiaru
  * to `rebuild/backend/test/historia.wyrocznia.test.ts`, który zamraża odpowiedzi
  * ZAPISANE STĄD i chodzi w zwykłych bramkach, bez oryginału.
@@ -58,8 +58,26 @@ const PLIK_WYNIKU = path.join(
   ZASIEW_EKSPORTU ? "wynik-oracle-diff-zasiew.json" : "wynik-oracle-diff.json",
 );
 
+/**
+ * Katalogi tymczasowe do posprzątania — rejestrowane W MOMENCIE UTWORZENIA, nie na końcu.
+ *
+ * Sprzątanie wisi na `finally` wokół CAŁEGO `main()`, a nie tylko wokół bloku z serwerami:
+ * wywrotka przed startem serwerów (np. `npm ci`, migracje, asercja startowa) zostawiała
+ * inaczej w `/tmp` kopię całego `mirror/backend` razem z `node_modules` i kopię bazy.
+ */
+const PIASKOWNICE = [];
+
 function log(tekst) {
   console.log(tekst);
+}
+
+function posprzatajPiaskownice() {
+  if (PIASKOWNICE.length === 0) return;
+  if (ZOSTAW_PIASKOWNICE) {
+    log(`\nPiaskownice zostawione (--zostaw-piaskownice):\n  ${PIASKOWNICE.join("\n  ")}`);
+    return;
+  }
+  for (const katalog of PIASKOWNICE) fs.rmSync(katalog, { recursive: true, force: true });
 }
 
 function czekaj(ms) {
@@ -120,6 +138,7 @@ function znajdzSnapshot() {
  */
 function zbudujPiaskowniceOryginalu(snapshot) {
   const katalog = fs.mkdtempSync(path.join(os.tmpdir(), "bridge-14j-oryginal-"));
+  PIASKOWNICE.push(katalog);
   log(`[1/7] Piaskownica oryginału: ${katalog}`);
   fs.cpSync(ZRODLO_BACKENDU, katalog, { recursive: true });
   fs.copyFileSync(snapshot, path.join(katalog, "data.db"));
@@ -186,6 +205,7 @@ function wygasScheduler(katalogOryginalu) {
  */
 function zbudujBazeOdbudowy(snapshot) {
   const katalog = fs.mkdtempSync(path.join(os.tmpdir(), "bridge-14j-odbudowa-"));
+  PIASKOWNICE.push(katalog);
   const sciezka = path.join(katalog, "data.db");
   log(`[3/7] Kopia bazy dla odbudowy: ${sciezka}`);
   fs.copyFileSync(snapshot, sciezka);
@@ -420,7 +440,7 @@ function roznice(a, b, sciezka = "", zebrane = [], limit = 25) {
   if (typA === "object") {
     const kluczeA = Object.keys(a).sort();
     const kluczeB = Object.keys(b).sort();
-    if (kluczeA.join("|") !== kluczeB.join("|")) {
+    if (kluczeA.join(",") !== kluczeB.join(",")) {
       zebrane.push({
         sciezka: `${sciezka} (ZESTAW KLUCZY)`,
         oryginal: kluczeA.join(","),
@@ -748,16 +768,12 @@ async function main() {
       }
     }
   } finally {
+    // Tylko procesy — katalogi sprząta `posprzatajPiaskownice()` wokół całego `main()`,
+    // żeby wywrotka PRZED tym blokiem też ich nie zostawiała.
     for (const strona of [oryginal, odbudowa]) {
       if (strona && strona.proces.exitCode === null) strona.proces.kill("SIGKILL");
     }
     await czekaj(300);
-    if (ZOSTAW_PIASKOWNICE) {
-      log(`\nPiaskownice zostawione:\n  oryginał: ${katalogOryginalu}\n  odbudowa: ${katalogOdbudowy}`);
-    } else {
-      fs.rmSync(katalogOryginalu, { recursive: true, force: true });
-      fs.rmSync(katalogOdbudowy, { recursive: true, force: true });
-    }
   }
 
   fs.writeFileSync(PLIK_WYNIKU, `${JSON.stringify(raport, null, 2)}\n`);
@@ -825,7 +841,28 @@ async function zapiszWyrocznie(ctx) {
   }
 
   const dziennik = await pobierz(ctx.portOryginalu, "/api/history", ctx.tokenOryginalu);
-  const wierszeDziennika = (dziennik.cialo || []).slice(0, WIERSZY_DZIENNIKA_DO_WYROCZNI);
+
+  /**
+   * ⚠ BIERZEMY TYLKO WIERSZE O UNIKALNEJ `data` — i to nie jest kosmetyka.
+   *
+   * `GET /api/history` sortuje wyłącznie `ORDER BY data DESC`, bez tiebreakera. Przy remisie
+   * czasowym kolejność zależy od planu zapytania SQLite, a ten może być inny na tabeli
+   * z 46 916 wierszami (oryginał) niż na 20-wierszowej tabeli testowej. Wyrocznia z remisami
+   * dawałaby więc asercję, która dziś przechodzi, a jutro potrafi zaświecić bez żadnej zmiany
+   * w kodzie. Pierwsze nagranie miało 18 unikalnych dat na 20 wierszy, czyli dwa remisy.
+   *
+   * Odsiewając remisy dostajemy podzbiór, w którym `data` wyznacza kolejność JEDNOZNACZNIE,
+   * więc test porównuje to, co naprawdę jest zdefiniowane. Nie tracimy przy tym niczego:
+   * kolejność przy remisie i tak nie jest kontraktem, ani u nas, ani w produkcji.
+   */
+  const wierszeDziennika = [];
+  const widzianeDaty = new Set();
+  for (const wiersz of dziennik.cialo || []) {
+    if (wierszeDziennika.length >= WIERSZY_DZIENNIKA_DO_WYROCZNI) break;
+    if (widzianeDaty.has(wiersz.data)) continue;
+    widzianeDaty.add(wiersz.data);
+    wierszeDziennika.push(wiersz);
+  }
 
   const dbDziennik = new ctx.Database(ctx.bazaOryginalu, { readonly: true });
   let zasiewDziennika;
@@ -856,6 +893,13 @@ async function zapiszWyrocznie(ctx) {
       limitAudytu: 5000,
       limitNieGryzie: wszystkichAudytu < 5000,
     },
+    /**
+     * Warunek ważności wyroczni `GET /api/history`: wiersze mają PARAMI RÓŻNE `data`,
+     * więc `ORDER BY data DESC` wyznacza ich kolejność jednoznacznie i asercja na kolejność
+     * nie zależy od planu zapytania SQLite.
+     */
+    dziennikBezRemisow:
+      new Set(wierszeDziennika.map((w) => w.data)).size === wierszeDziennika.length,
     zasiewAudytu,
     zasiewDziennika,
     dziennikPierwszeWiersze: wierszeDziennika,
@@ -1128,7 +1172,9 @@ async function porownajEksport(ctx) {
   return wynik;
 }
 
-main().catch((blad) => {
-  console.error(`\nBŁĄD: ${blad.message}`);
-  process.exitCode = 1;
-});
+main()
+  .catch((blad) => {
+    console.error(`\nBŁĄD: ${blad.message}`);
+    process.exitCode = 1;
+  })
+  .finally(posprzatajPiaskownice);

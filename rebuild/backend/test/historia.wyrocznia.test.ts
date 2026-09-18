@@ -61,6 +61,7 @@ type Wyrocznia = {
   _nagrane: string;
   _ticket: string;
   kontrolaLimitu: { wierszyAuditLog: number; limitAudytu: number; limitNieGryzie: boolean };
+  dziennikBezRemisow: boolean;
   zasiewAudytu: WierszAudytuSurowy[];
   zasiewDziennika: WierszDziennikaSurowy[];
   dziennikPierwszeWiersze: Record<string, unknown>[];
@@ -121,6 +122,21 @@ describe("WYROCZNIA — historia zgodna z żywym oryginałem", () => {
     expect(wyrocznia.kontrolaLimitu.wierszyAuditLog).toBeLessThan(
       wyrocznia.kontrolaLimitu.limitAudytu,
     );
+  });
+
+  /**
+   * Drugi warunek ważności, tym razem dla `GET /api/history`.
+   *
+   * Ta trasa sortuje wyłącznie `ORDER BY data DESC`, bez tiebreakera, więc przy remisie
+   * czasowym kolejność zależy od planu zapytania SQLite — a ten może być inny na tabeli
+   * oryginału (46 916 wierszy) niż na 20-wierszowej tabeli testowej. Wyrocznia bierze więc
+   * wyłącznie wiersze o PARAMI RÓŻNYCH `data`; gdyby ktoś nagrał ją inaczej, asercja na
+   * kolejność stałaby się krucha i test zaświeciłby kiedyś bez żadnej zmiany w kodzie.
+   */
+  it("wyrocznia jest ważna: wiersze dziennika mają parami różne `data`", () => {
+    expect(wyrocznia.dziennikBezRemisow).toBe(true);
+    const daty = wyrocznia.dziennikPierwszeWiersze.map((w) => w["data"]);
+    expect(new Set(daty).size).toBe(daty.length);
   });
 
   /**

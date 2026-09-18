@@ -1,12 +1,13 @@
 {
   "_opis": "Wyrocznia nagrana z ŻYWEGO oryginału (mirror/backend/index.cjs) na kopii db/snapshot.db przez docs/tickets/59-CHORE-i14j-oracle-diff-historii/oracle-diff-historii.cjs. NIE EDYTOWAĆ RĘCZNIE — to zapis tego, co robi produkcja, a nie nasz oczekiwany wynik.",
-  "_nagrane": "2026-09-18T17:03:41.869Z",
+  "_nagrane": "2026-09-18T17:18:37.237Z",
   "_ticket": "59-CHORE-i14j",
   "kontrolaLimitu": {
     "wierszyAuditLog": 3873,
     "limitAudytu": 5000,
     "limitNieGryzie": true
   },
+  "dziennikBezRemisow": true,
   "zasiewAudytu": [
     {
       "id": 1,
@@ -2711,6 +2712,30 @@
   ],
   "zasiewDziennika": [
     {
+      "id": 37820,
+      "data": "2026-07-22T07:15:53.344Z",
+      "kod_produktu": "MO8_4007102020000",
+      "nazwa": "VF800/60R32 TRELLEBORG HF1000 191D TL",
+      "pole": "model",
+      "stara_wartosc": "1000",
+      "nowa_wartosc": "HF1000",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonal_uzytkownik_id": 1
+    },
+    {
+      "id": 37822,
+      "data": "2026-07-22T07:16:18.278Z",
+      "kod_produktu": "MO8_4007102010000",
+      "nazwa": "VF750/60R30.5 TRELLEBORG HF1000 187D TL",
+      "pole": "model",
+      "stara_wartosc": "1000",
+      "nowa_wartosc": "HF1000",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonal_uzytkownik_id": 1
+    },
+    {
       "id": 37824,
       "data": "2026-07-22T07:30:44.799Z",
       "kod_produktu": "MO5_IMCR22531580L12M1",
@@ -2915,18 +2940,6 @@
       "wykonal_uzytkownik_id": 1
     },
     {
-      "id": 46914,
-      "data": "2026-07-28T06:22:16.803Z",
-      "kod_produktu": "MO2_1169800",
-      "nazwa": "4.10-4 TRELLEBORG T539 6PR TT",
-      "pole": "labelSnow",
-      "stara_wartosc": "0.0",
-      "nowa_wartosc": "",
-      "zrodlo": "recznie",
-      "kto": "Marta Bieguniak",
-      "wykonal_uzytkownik_id": 1
-    },
-    {
       "id": 46915,
       "data": "2026-07-28T06:22:26.735Z",
       "kod_produktu": "MO2_1147700",
@@ -2934,18 +2947,6 @@
       "pole": "kategoria",
       "stara_wartosc": "Rolnicze małe",
       "nowa_wartosc": "Rolnicze",
-      "zrodlo": "recznie",
-      "kto": "Marta Bieguniak",
-      "wykonal_uzytkownik_id": 1
-    },
-    {
-      "id": 46916,
-      "data": "2026-07-28T06:22:26.735Z",
-      "kod_produktu": "MO2_1147700",
-      "nazwa": "15x6.00-6 TRELLEBORG T510 6PR TT",
-      "pole": "labelSnow",
-      "stara_wartosc": "0.0",
-      "nowa_wartosc": "",
       "zrodlo": "recznie",
       "kto": "Marta Bieguniak",
       "wykonal_uzytkownik_id": 1
@@ -2965,18 +2966,6 @@
       "wykonalUzytkownikId": 1
     },
     {
-      "id": 46916,
-      "data": "2026-07-28T06:22:26.735Z",
-      "kodProduktu": "MO2_1147700",
-      "nazwa": "15x6.00-6 TRELLEBORG T510 6PR TT",
-      "pole": "labelSnow",
-      "staraWartosc": "0.0",
-      "nowaWartosc": "",
-      "zrodlo": "recznie",
-      "kto": "Marta Bieguniak",
-      "wykonalUzytkownikId": 1
-    },
-    {
       "id": 46913,
       "data": "2026-07-28T06:22:16.803Z",
       "kodProduktu": "MO2_1169800",
@@ -2984,18 +2973,6 @@
       "pole": "kategoria",
       "staraWartosc": "Rolnicze małe",
       "nowaWartosc": "Rolnicze",
-      "zrodlo": "recznie",
-      "kto": "Marta Bieguniak",
-      "wykonalUzytkownikId": 1
-    },
-    {
-      "id": 46914,
-      "data": "2026-07-28T06:22:16.803Z",
-      "kodProduktu": "MO2_1169800",
-      "nazwa": "4.10-4 TRELLEBORG T539 6PR TT",
-      "pole": "labelSnow",
-      "staraWartosc": "0.0",
-      "nowaWartosc": "",
       "zrodlo": "recznie",
       "kto": "Marta Bieguniak",
       "wykonalUzytkownikId": 1
@@ -3188,6 +3165,30 @@
       "pole": "model",
       "staraWartosc": "MG121 158/150L PROWADZĄCA",
       "nowaWartosc": "MG121 PROWADZĄCA",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonalUzytkownikId": 1
+    },
+    {
+      "id": 37822,
+      "data": "2026-07-22T07:16:18.278Z",
+      "kodProduktu": "MO8_4007102010000",
+      "nazwa": "VF750/60R30.5 TRELLEBORG HF1000 187D TL",
+      "pole": "model",
+      "staraWartosc": "1000",
+      "nowaWartosc": "HF1000",
+      "zrodlo": "recznie",
+      "kto": "Marta Bieguniak",
+      "wykonalUzytkownikId": 1
+    },
+    {
+      "id": 37820,
+      "data": "2026-07-22T07:15:53.344Z",
+      "kodProduktu": "MO8_4007102020000",
+      "nazwa": "VF800/60R32 TRELLEBORG HF1000 191D TL",
+      "pole": "model",
+      "staraWartosc": "1000",
+      "nowaWartosc": "HF1000",
       "zrodlo": "recznie",
       "kto": "Marta Bieguniak",
       "wykonalUzytkownikId": 1

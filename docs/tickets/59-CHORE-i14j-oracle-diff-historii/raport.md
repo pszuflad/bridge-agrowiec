@@ -10,7 +10,7 @@ zgodnych.** Trzy trasy historii oddają w odbudowie dokładnie to, co w oryginal
 pól, na kolejności wierszy, na licznikach i na wszystkich filtrach. Drugi przebieg, z zasianą
 gałęzią eksportu, dał **0 rozjazdów na 49 846 wpisach**. Ręczny test §9 instrukcji I5, którego
 Ania nie wykonała, jest tym samym zastąpiony pomiarem i **zamrożony w bramkach** jako
-`rebuild/backend/test/historia.wyrocznia.test.ts` (12 przypadków).
+`rebuild/backend/test/historia.wyrocznia.test.ts` (13 przypadków).
 
 **Zadanie B — instrukcja I5 §3.3 jest nieaktualna i trzeba ją poprawić.** Edycja produktu
 zostawia ślad po OBU stronach identycznie (2 wiersze `history` na 2 zmienione pola, ten sam
@@ -317,7 +317,7 @@ najwyższej wagi i trzeba napisać od razu.
   w bramkach.
 - **Nowy:** `docs/tickets/59-CHORE-i14j-oracle-diff-historii/wynik-oracle-diff.json`,
   `…-zasiew.json` — pełne wyniki obu przebiegów.
-- **Nowy:** `rebuild/backend/test/historia.wyrocznia.test.ts` — 12 przypadków, trwały ślad
+- **Nowy:** `rebuild/backend/test/historia.wyrocznia.test.ts` — 13 przypadków, trwały ślad
   pomiaru, chodzi w zwykłych bramkach bez oryginału.
 - **Nowy:** `rebuild/backend/test/historia.wyrocznia.json` — wyrocznia nagrana z żywego
   oryginału: 270 wierszy `audit_log` + 20 wierszy `history` (wejście) + 8 pełnych odpowiedzi
@@ -347,16 +347,52 @@ Trzy, wszystkie wykryte w trakcie pomiaru i wszystkie opisane wyżej:
   `/api/history/paged`; fixtures `GET_history.json`, `GET_history_meta.json`,
   `GET_history_paged.json`) przechodzi tak jak przed kartą. Gate w wersji regresyjnej, zgodnie
   z planem.
-- **Nowy test wyroczni:** ✓ `test/historia.wyrocznia.test.ts` — **12/12**.
+- **Nowy test wyroczni:** ✓ `test/historia.wyrocznia.test.ts` — **13/13**.
 - **Pomiar oracle-diff:** ✓ przebieg 1 — 59/59, 0 rozjazdów, 49 813 wpisów; przebieg 2 (zasiew)
   — 59/59, 0 rozjazdów, 49 846 wpisów.
 - **Bramki backendu:** `npm run lint` ✓, `npm run typecheck` ✓, `npm run build` ✓,
-  `npm test` ✓ — **82 pliki, 1261 testów, wszystkie przechodzą** (przed kartą 1249; +12 to
+  `npm test` ✓ — **82 pliki, 1262 testy, wszystkie przechodzą** (przed kartą 1249; +13 to
   dokładnie nowy plik wyroczni).
 
 ## Breaking changes
 
 Brak. Zero zmian w kodzie produkcyjnym.
+
+## Review fixes applied
+
+Review (`review.md`) zgłosiło 1 BLOCKER, 2 SHOULD-FIX i 1 NICE-TO-HAVE. **Naprawione wszystkie
+cztery.**
+
+**BLOCKER — raport deklarował zmianę w roadmapie, której nie było.** Sekcja „Changes" wymieniała
+podblok „14j" w `docs/rebuild-roadmap.md`, a `git diff` tego pliku był pusty: podbloku po prostu
+jeszcze nie napisałem. Zarzut trafiony i to dokładnie scenariusz, przed którym ostrzega `CLAUDE.md`
+(obowiązek 1 — roadmapa nie wiedziałaby, że karta się wydarzyła). **Podblok 14j jest teraz
+napisany**: opisuje STAN, nie zamiar, z datą i ID ticketa, rozliczonym gate'em, faktycznie
+dowiezionym zakresem, pięcioma faktami ustalonymi pomiarem i znaleziskiem o eksporcie ZIP.
+Dodany też wiersz 14j do tabeli kart drugiej fali i do wiersza przeglądowego I14 w §5.
+
+**SHOULD-FIX — skrypt zostawiał piaskownice przy wywrotce przed startem serwerów.** Sprzątanie
+wisiało na `finally` wokół bloku z serwerami, więc błąd w `npm ci`, migracjach albo asercji
+startowej zostawiał w `/tmp` kopię całego `mirror/backend` razem z `node_modules`. Katalogi są
+teraz rejestrowane **w momencie utworzenia** (`PIASKOWNICE`), a `posprzatajPiaskownice()` wisi na
+`finally` wokół całego `main()`. Zweryfikowane: po pełnym przebiegu `/tmp/bridge-14j-*` jest puste.
+
+**SHOULD-FIX — niespójny separator w komunikacie diagnostycznym `roznice()`.** Zestawy kluczy
+sklejane były `join("|")` do porównania, a raportowane `join(",")`. Kosmetyka, ale myląca przy
+czytaniu różnicy. Ujednolicone na `,`.
+
+**NICE-TO-HAVE, okazało się realne — remisy czasowe w wyroczni `GET /api/history`.** Pierwsze
+nagranie miało **18 unikalnych `data` na 20 wierszy**, czyli dwa remisy. Trasa sortuje wyłącznie
+`ORDER BY data DESC`, bez tiebreakera, więc przy remisie kolejność zależy od planu zapytania
+SQLite — a ten może być inny na tabeli oryginału (46 916 wierszy) niż na 20-wierszowej tabeli
+testowej. Test przechodził, ale był **uśpioną kruchością**: mógł kiedyś zaświecić bez żadnej
+zmiany w kodzie. Naprawione **u źródła, nie tolerancją asercji**: nagrywarka bierze teraz
+wyłącznie wiersze o parami różnych `data`, zapisuje flagę `dziennikBezRemisow`, a test ma osobną
+asercję warunku ważności. Wyrocznia przenagrana — **20 wierszy, 20 unikalnych dat**. Nic nie
+tracimy: kolejność przy remisie i tak nie jest kontraktem po żadnej ze stron.
+
+Po poprawkach ponownie: pomiar 59/59 i 0 rozjazdów (bez zmian), test wyroczni **13/13**,
+wszystkie bramki zielone.
 
 ## Follow-up
 
