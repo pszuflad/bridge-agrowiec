@@ -385,13 +385,23 @@ describe("5. Odstępstwa świadome", () => {
     expect(wartosci).toContain("vfIf");
   });
 
-  /** plan.md D4 — silnik nie czyta dat, więc formularz mówi o tym wprost. */
-  it("⭐ pola dat promocji mają notę, że o działaniu decyduje status", async () => {
+  /**
+   * ⚠ NOTA ZMIENIŁA TREŚĆ W 14f — i ten test pilnuje, że stara NIE WRÓCIŁA.
+   *
+   * Do 14f nota mówiła „o tym, czy promocja obniża ceny, decyduje status — upływ daty sam jej
+   * nie wyłącza", bo taka była prawda (backlog #19). Od 14f daty naprawdę kończą promocję,
+   * więc dawna treść wprowadzałaby w błąd dokładnie w miejscu, gdzie użytkownik ustawia daty.
+   */
+  it("⭐ nota przy datach promocji mówi, że daty rządzą promocją", async () => {
     zamockujApi();
     await otworzDialogPromocji();
 
     const nota = await screen.findByTestId("nota-daty-promocji");
-    expect(nota).toHaveTextContent(/decyduje status/);
+    expect(nota).toHaveTextContent(/Daty rządzą promocją/);
+    expect(nota).toHaveTextContent(/sama się wyłącza/);
+    // Stara, już nieprawdziwa obietnica nie może wrócić.
+    expect(nota).not.toHaveTextContent(/decyduje status/);
+    expect(nota).not.toHaveTextContent(/nie wyłącza/);
   });
 
   it("nota o datach NIE pojawia się w trybie narzutu", async () => {

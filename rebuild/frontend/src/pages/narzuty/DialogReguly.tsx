@@ -548,13 +548,17 @@ export function DialogReguly({
                   </div>
                 </div>
                 {/*
-                  ODSTĘPSTWO ŚWIADOME (plan.md D4): oryginał nie ostrzega. Silnik cen NIE CZYTA
-                  tych dat (backlog #19) — decyduje wyłącznie `status`. Bez tej noty łatwo
-                  wyłączyć promocję datą i nie zauważyć, że dalej obniża ceny.
+                  ⚠ NOTA PRZEPISANA W 14f, bo poprzednia stała się NIEPRAWDZIWA. Mówiła, że
+                  „upływ daty sam jej nie wyłącza" — i do 14f to była prawda (silnik czytał
+                  wyłącznie `status`, którego nic nie przeliczało, backlog #19). Od 14f daty
+                  faktycznie rządzą: backendowy wygaszacz przestawia `status` wg dat w obie
+                  strony, cyklicznie i przy każdej mutacji reguły. Zostawienie starej treści
+                  wprowadzałoby Anię w błąd dokładnie w miejscu, w którym ustawia daty.
                 */}
                 <p className="text-[11px] text-muted-foreground" data-testid="nota-daty-promocji">
-                  Daty są informacyjne i sterują wyłącznie etykietą na liście. O tym, czy
-                  promocja obniża ceny, decyduje status „aktywna" — upływ daty sam jej nie wyłącza.
+                  Daty rządzą promocją: przed datą początku jest „zaplanowana" i nie obniża cen,
+                  po dacie końca sama się wyłącza. Zmiana bywa widoczna z kilkuminutowym
+                  opóźnieniem.
                 </p>
               </div>
             ) : null}
