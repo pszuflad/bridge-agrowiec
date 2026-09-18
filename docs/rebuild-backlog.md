@@ -654,17 +654,56 @@ przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 | **Data** | 2026-08-26 (znalezione przy I3/3c) |
 | **Kategoria** | BACKEND (silnik importu, normalizacja EAN) |
 | **Pliki** | `index.cjs` — `ZT()` (deminified `:46971`, wywołanie `:46984`), `Lq()` (`:46965` i `:47312`) |
-| **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-18 przez Anię** (świadome odstępstwo) |
-| **Iteracja** | odtworzone 1:1 w **3c**; naprawa → **I14, karta 14i** |
-| **Status** | decyzja podjęta, karta niezałożona |
+| **Do nowej wersji?** | ✅ **TAK — puste pole w katalogu, ROZSTRZYGNIĘTE 2026-09-18 przez Anię i WDROŻONE** (świadome odstępstwo). Komunikat „null cyfr znaczących" (część (b) niżej) NIE jest tym objęty. |
+| **Iteracja** | odtworzone 1:1 w **3c**; puste pole w katalogu → **I14, karta 14i** (`58-FEATURE-i14i-ean-naukowy-pusty`, 2026-09-18) |
+| **Status** | (a) puste pole w katalogu: **✔ zrobione** (58, 2026-09-18). (b) cieniowanie `Lq()` / komunikat „null cyfr znaczących": **nadal otwarte** — karta 58 celowo go NIE naprawiała (zakaz wprost w treści karty, żeby nie mieszać dwóch zmian naraz) |
 
-**DECYZJA ANI (2026-09-18), pytanie 8:** „EAN który jest zepsuty notacją naukową ma być
-importowany jako **puste pole w katalogu**". To ŚWIADOME ODSTĘPSTWO — produkcja zapisuje
-wartość i wypisuje komunikat „zapis naukowy ma tylko null cyfr znaczących". Zakres karty 14i:
-EAN rozpoznany jako notacja naukowa → puste pole w `products`. ⚠ Rusza silnik importu, więc
-wzorce charakteryzacji trzeba PRZENAGRAĆ, nie poprawiać ręcznie. Otwarte przy wdrożeniu (do
-rozstrzygnięcia w karcie, nie przez Anię): czy ostrzeżenie w stagingu ma zostać — rekomendacja
-TAK, żeby pominięty EAN nie był niewidzialny.
+**Ten wpis miesza dwie osobne rzeczy — rozdzielone tu, żeby nie sprawiały wrażenia jednego
+zagadnienia:**
+
+**(a) Puste pole w katalogu — ZREALIZOWANE.** DECYZJA ANI (2026-09-18), pytanie 8: „EAN który
+jest zepsuty notacją naukową ma być importowany jako **puste pole w katalogu**". Wdrożone kartą
+`58-FEATURE-i14i-ean-naukowy-pusty`: `products.ean` jest `NULL` dla pozycji ze statusem
+`scientific_notation_uncertain`, cięcie stoi w `src/import/akceptacja.ts` (na `doZapisu`, tuż
+przed zapisem), **nie** w silniku. Szczegóły: `docs/tickets/58-FEATURE-i14i-ean-naukowy-pusty/plan.md`,
+`raport.md`.
+
+⚠ **Wpis pierwotnie zakładał** „Rusza silnik importu, więc wzorce charakteryzacji trzeba
+PRZENAGRAĆ, nie poprawiać ręcznie" — **to okazało się błędne i niewykonalne**, ustalone przy
+wdrożeniu 58:
+- Cięcie **nie jest** w silniku (`silnik/ean.ts`) ani w `tk.ts` — oba nietknięte (0 scenariuszy
+  charakteryzacji, 0 testów, 0 fixtures ruszonych). Cięcie jest wyłącznie w `akceptacja.ts`,
+  na obiekcie do zapisu, po tym jak silnik i staging już zrobiły swoje.
+- Przenagranie by i tak nie zadziałało: `scripts/charakteryzacja-silnik-nagraj.mjs` uruchamia
+  **ŻYWY oryginał** z `mirror/backend/index.cjs`, który nie zna decyzji Ani i odtworzyłby STARĄ
+  wartość (`"ean":"6419440000000"`).
+- Powód, dla którego cięcie NIE mogło być w `ean.ts`: `tk.ts:302-305` dopasowuje pozycję do
+  produktu w katalogu po `znormalizowana.ean` — wyzerowanie EAN-u przy normalizacji zrywa to
+  dopasowanie (klasyfikacja „nowa" zamiast „zmiana_kluczowa", ryzyko duplikatu w katalogu).
+  Dowód: `test/silnik.gate.test.ts` — „dopasowanie po EAN ZNORMALIZOWANYM — surowy EAN nie
+  trafia, rozwinięty już tak".
+- Pułapka wykryta dopiero w code review 58 (BLOCKER rundy 1): `assignKodImportu()`
+  (`src/import/legacy/bridge_ext.cjs:164-167`) grupuje produkty tego samego towaru w różnych
+  magazynach po kluczu `EAN:<ean>`, ale **tylko gdy `ean` niepusty ORAZ `eanIsValid === 1`**.
+  Zapis naukowy z poprawną sumą kontrolną spełnia oba warunki (`8,05997E+12` →
+  `8059970000000`, suma kontrolna poprawna). Zerowanie EAN-u **za wcześnie** (na `rekord`,
+  przed `assignKodImportu`) zrywało dziedziczenie numeru grupy między magazynami — dlatego
+  finalne cięcie stoi na `doZapisu`, tuż przed `INSERT`/`UPDATE`, żeby `assignKodImportu()`
+  widziała prawdziwy EAN. Realna pułapka dla każdej przyszłej zmiany dotykającej `products.ean`.
+
+„Otwarte przy wdrożeniu — czy ostrzeżenie w stagingu ma zostać" — **rozstrzygnięte: ZOSTAJE**.
+`staging_items.ostrzezenie`/`powod`, `eanRaw`/`eanIsValid`/`eanSourceStatus`/`eanCandidates`
+i `snapshotJson.ean` są nietknięte — pominięty EAN nie jest niewidzialny.
+
+Zmierzone na `db/snapshot.db` przy wdrożeniu: **0 z 7405** produkcyjnych produktów ma dziś
+status `scientific_notation_uncertain` (rozkład `ean_source_status`: `ok` 7246, `NULL` 157,
+`no_valid_candidate` 1, `memory` 1) — realny zasięg zmiany jest dziś zerowy, staje się
+niezerowy w warunkach z sekcji „Jak duży to problem" niżej (MO8 jako CSV, albo
+`POST /api/staging/import` z pominięciem parserów).
+
+**(b) Komunikat „null cyfr znaczących" (cieniowanie `Lq()`) — NADAL OTWARTE.** Karta 58 wprost
+zabraniała naprawy przy okazji, żeby nie mieszać dwóch zmian naraz. Opis defektu i propozycja
+naprawy — niżej, bez zmian.
 
 **Opis biznesowy:** przy EAN-ie zapisanym w notacji naukowej (Excel zamienia „8059970000000"
 na „8,05997E+12") pozycja w stagingu dostaje ostrzeżenie o treści:
