@@ -1310,7 +1310,7 @@ i `GET_suppliers.json` — stąd osobna decyzja, nie doklejka do 3f-3.
 | **Kategoria** | BACKEND (silnik cen) [+FRONTEND — prezentacja, 4b] |
 | **Pliki** | `deminified/backend-index.cjs:44615-44628` (`__bridgePromoMatches`); port: `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`). Frontend: `frontend-index.js:9309-9314` (`Qd`), `:9508-9514` (`_b`), `:9568` (`queryFn`), `:9183-9193` (`Gr`/`un`, IndexedDB); port: `rebuild/frontend/src/pages/narzuty/status.ts` |
 | **Do nowej wersji?** | ✅ **port 1:1 + NAPRAWA ZATWIERDZONA 2026-09-19 przez Anię** — daty mają kończyć promocję (świadome odstępstwo, karta **14f**) |
-| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony |
+| **Status** | ✔ odtworzone w rebuild (4a backend, 4b frontend), defekt zgłoszony · **oba warianty wdrożenia WYCENIONE w 14e (2026-09-19)** — liczby niżej |
 
 **⚠ DECYZJA ANI 2026-09-18 — ROZBIEŻNA, wpis NADAL otwarty.** W instrukcji I4 (§3.9) napisała:
 „Tak, data końcowa powinna automatycznie wyłączać promocję. (…) Po wygaśnięciu system powinien
@@ -1367,6 +1367,66 @@ czyta start ani koniec") i scenariuszem charakteryzacji
 **Do rozważenia dla produkcji.** Naprawa jest jednoliniowa (dodać warunek na `start`/`koniec`
 w `__bridgePromoMatches`), ale zmienia ceny na żywym katalogu. Poza zakresem odbudowy —
 decyzja użytkownika, czy i kiedy.
+
+**⭐ KOSZT OBU WARIANTÓW POLICZONY — karta `53-CHORE-i14e-diagnoza-promocji` (2026-09-19).**
+
+**Najpierw ustalenie, które przesądza o koszcie: status promocji jest zapisywany RAZ.**
+POST liczy go z dat (`status: statusZDat(start, koniec)`), **PATCH go NIE wysyła** (siedem pól,
+1:1 z `Eb()` oryginału — `DialogReguly.tsx:209-224`), a **nic po stronie serwera nigdy go nie
+przelicza** — ani w odbudowie, ani w produkcji (w `mirror/backend/index.cjs` napisy `zakonczona`
+/`zaplanowana` padają wyłącznie w danych seeda). Defekt #19 to więc nie „silnik ignoruje daty"
+w oderwaniu od reszty, tylko **brak przeliczania statusu w czasie**.
+
+**Silnik JUŻ honoruje status — zmierzone** (bez rabatu 1303, z rabatem 10% 1173):
+
+| Stan promocji | Cena | |
+|---|---|---|
+| `aktywna`, daty bieżące | 1173 | rabat działa |
+| `aktywna`, koniec w PRZESZŁOŚCI | 1173 | **to jest defekt #19** |
+| `aktywna`, start w PRZYSZŁOŚCI | 1173 | rabat działa |
+| `zakonczona` | 1303 | **rabat nie działa** |
+| `zaplanowana` | 1303 | **rabat nie działa** |
+
+Czyli: **wpisanie właściwego `status` do bazy wyłącza rabat bez tknięcia silnika.**
+
+| Pozycja | (a) silnik czyta daty | (b) wygaszacz przestawia `status` |
+|---|---|---|
+| Scenariusze charakteryzacji akceptacji | **1 z 31** — 3 pola (`cena_sprzedazy`, `marza_pct`, `status`) w 1 wierszu | **0 z 31** (warunkowo, patrz niżej) |
+| Scenariusze charakteryzacji `bulk` | **0 z 17** | **0 z 17** |
+| Testy jednostkowe BE | **2** (`ceny.silnik.test.ts:246-252`, `narzuty.patch.test.ts:319-331`) | **1** (`narzuty.patch.test.ts:319-331`) |
+| Fixtures w `contract/` | **0** | **0** |
+| Realne ceny w produkcji dziś | **0** (`promotions` pusta) | **0** |
+| Wyjątek w wyroczni charakteryzacji | **TAK** | **NIE** |
+
+**⚠ (b) jest darmowe tylko dopóki wygaszacz nie wchodzi do ścieżki importu.** Harness porównuje
+`acceptStaging`, a ta woła `zastosujRegulyCenowe`, nie `przeliczCenyZRegul` (to drugie jest wołane
+wyłącznie z `repos/markups.ts:113` i `repos/promotions.ts:97`). Wygaszacz przy starcie i w
+`przeliczCenyZRegul` jest dla harnessu niewidoczny; dołożony do importu **kosztuje tyle co (a)**,
+a nawet więcej — rozjechałyby się dwie tabele (`products` i `promotions`). Zostaje wtedy okno:
+promocja wygasająca przy działającym procesie, bez mutacji reguł, obniża ceny przy imporcie aż do
+najbliższego zamiatania. **To jest wybór do podjęcia w 14f, nie szczegół implementacyjny.**
+
+**Znacznik `rozbieznoscStatusu` (D5 z 4b) zachowuje się RÓŻNIE:** w (b) nigdy się nie zapali
+(status zrówna się z etykietą) → martwy kod do świadomego usunięcia; w (a) **nadal będzie się
+zapalał i będzie KŁAMAŁ** („nadal obniża ceny" o promocji, która już nie obniża) → usunięcie jest
+warunkiem poprawności, nie kosmetyką. Nota `nota-daty-promocji` (`DialogReguly.tsx:555-557`)
+staje się nieprawdziwa w obu wariantach.
+
+**⚠ DWA SPROSTOWANIA DO `docs/instrukcja-testow-I4.md`** (plik poza własnością 14e — do zrobienia
+przez 14d): **§4 pkt 6 jest NIEPRAWDZIWY** (promocja z datą startu w przyszłości założona przez
+dialog dostaje `status: "zaplanowana"` i NIE obniża cen, nie pokaże też znacznika rozbieżności),
+a **istnieje defekt odwrotny, nigdzie nieopisany: promocja „zaplanowana" NIGDY SIĘ NIE WŁĄCZA**,
+bo nic nie przelicza statusu po nadejściu daty startu. §3.9 pozostaje poprawny — i teraz wiadomo
+dlaczego: PATCH nie rusza statusu.
+
+**Dwa zastrzeżenia do 14f, oba realne:** (1) wygaszacz musi działać w OBIE strony (`zakonczona`
+po końcu, `aktywna` po nadejściu startu), inaczej naprawi wygaszanie i zostawi niedziałające
+planowanie; (2) `status` jest na liście `POLA_EDYTOWALNE_PROMOCJI`, więc wygaszacz będzie
+nadpisywał ręczne ustawienia — a instrukcja mówi dziś Ani wprost, że „żeby wyłączyć promocję,
+trzeba zmienić status". Po (b) status staje się polem WYLICZANYM; do rozstrzygnięcia, czy odciąć
+go od listy edytowalnych.
+
+Pełne liczby i metoda: `docs/tickets/53-CHORE-i14e-diagnoza-promocji/raport.md`, sekcja C.
 
 **Uzupełnienie 4b (frontend, 2026-09-02).** Widok `/narzuty` portuje `_b()`/`Qd()` 1:1
 (`rebuild/frontend/src/pages/narzuty/status.ts`) — etykieta statusu promocji liczona z dat
@@ -1471,7 +1531,7 @@ i rozważone alternatywy: `docs/tickets/15-FEATURE-historia-zmian/plan.md` (D2),
 | **Pliki** | `deminified/frontend-index.js:23162-23182` (render kolumny); port: `rebuild/frontend/src/pages/katalog/kolumny.ts`, `katalog/formatowanie.tsx:118-138` |
 | **Do nowej wersji?** | ✅ **TAK, OŻYWIENIE — decyzja Ani 2026-09-18** (świadome odstępstwo: to NOWA funkcja, nie przywrócenie) |
 | **Iteracja** | odtworzone 1:1 w **4b**; ożywienie → **I14, karta 14h** |
-| **Status** | decyzja podjęta, karta niezałożona |
+| **Status** | decyzja podjęta, karta niezałożona · **14e (2026-09-19): niezależnie potwierdzone pomiarem, że pusta kolumna NIE wpływa na ceny** — przy promocji `marka→BKT` ceny 954 produktów spadły poprawnie mimo pustej kolumny, zgodnie z tym, co Ania napisała 19.09 („tylko się nie wyświetlało, cena się oblicza prawidłowo") |
 
 **⚠ SPROSTOWANIE ARCHEOLOGICZNE (2026-09-18).** Ania, prosząc o ożywienie kolumny, dodała: „w starym
 Bridge działała, było to sprawdzane, być może któryś backup to zastąpił i już nie działa". **Kod tego
@@ -1578,7 +1638,7 @@ ujednolicić trzy niezależne sposoby liczenia ceny w widoku `/narzuty`.
 | **Kategoria** | FRONTEND (widok `/narzuty`, dialog reguły) |
 | **Pliki** | `deminified/frontend-index.js:24613` (`zasieg: R ? "globalny" : …`), `:9473-9479` (`Tb`), `:24473-24513` i `:24563-24597` (ostrzeżenie); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx`, `ceny.ts` |
 | **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-18**: „nie, zostawiamy tak jak jest, nie dodajemy nowych reguł" |
-| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI |
+| **Status** | zamknięte bez zmian · odtworzone świadomie w 4b · w produkcji **nadal obecne** · pułapka ZOSTAJE, bez blokady w UI · **14e (2026-09-19): zasięg ZMIERZONY — 1 produkt na 7405, identycznie w oryginale i w odbudowie** |
 
 **Co robi produkcja.** Zaznaczenie w dialogu checkboxa „Reguła globalna (wszystkie produkty,
 bez warunków)" wysyła przy promocji `zasieg: "globalny"` i `warunki: "[]"` (`:24613`).
@@ -1593,6 +1653,20 @@ return !!r && (r.includes((t.marka ?? "").toLowerCase()) || r.includes((t.katego
 Napis `"globalny"` nie zawiera ani `"bkt"`, ani `"rolnicze"` — więc **promocja globalna nie
 pasuje do żadnego normalnego produktu**. Pasuje wyłącznie do pozycji z PUSTĄ marką albo pustą
 kategorią, bo `"globalny".includes("")` jest prawdą.
+
+**⭐ SPROSTOWANIE MECHANIZMU (14e, 2026-09-18, pomiar).** Dopasowanie jest **ALTERNATYWĄ**, nie
+koniunkcją: wystarczy pusta marka **albo** pusta kategoria. Jedyny produkt w katalogu produkcji,
+który „globalna” realnie złapała, ma pustą markę przy **WYPEŁNIONEJ** kategorii —
+`MO4_LLCR17523575MLLS0`, kategoria „Ciężarowe”, zakup 475,30; cena 619 → 557.
+
+**⭐ ZASIĘG ZMIERZONY NA ŻYWYM KATALOGU (14e).** Promocja „globalna” z rabatem 10%, założona przez
+API na kopii `db/snapshot.db`, zmieniła — ponad efekt samego przeliczenia katalogu — cenę
+**dokładnie 1 produktu z 7405**. Ten sam pomiar powtórzony na ORYGINALE
+(`mirror/backend/index.cjs` w piaskownicy) dał **0 różnic wobec odbudowy na wszystkich 7405
+produktach**. Dla kontrastu ta sama promocja założona Z WARUNKIEM `marka→BKT` objęła
+**954 produkty**. Hipoteza „praktycznie zero” z tego wpisu ma więc teraz liczbę: **1/7405**.
+Zamrożone testem `rebuild/backend/test/promocja-warunek-obniza-cene.test.ts`, który pilnuje OBU
+kierunków — żeby promocja warunkowa nie przestała działać po cichu i żeby „globalna” nie zaczęła.
 
 **Zmierzone** (`promocjaPasuje` z `rebuild/frontend/src/pages/narzuty/ceny.ts`, port `Tb` 1:1):
 
