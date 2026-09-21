@@ -65,7 +65,7 @@ Kontrakt nie jest ruszany. **Wariant ZIP jest świadomym odstępstwem od produkc
    z `gate/index.ts`, żeby nie dotykać wspólnego indeksu): `czytajZip(bufor) → {nazwa, tresc}[]`.
    Waliduje: rekord EOCD, zgodność liczby wpisów EOCD↔katalog centralny, sygnatury nagłówków
    lokalnych, metodę 0/8, długość po rozpakowaniu i CRC-32 każdego wpisu. Rzuca przy
-   uszkodzeniu. Plus `pobierzBinarnie` (parser supertest do bufora).
+   uszkodzeniu. Plus `doBufora` (parser supertest do bufora).
 2. **Bramka (zadania 1+2)** — `test/eksport-shoper.gate.test.ts`: komentarz odstępstwa przy obu
    przypadkach ZIP (produkcja 500, `archiver@5.3.2`, D1 2026-09-18, backlog #93); sprostowanie
    komentarza cytującego `:48786-48800`; asercje zawartości: poprawny ZIP, dokładnie jeden plik na
