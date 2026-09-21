@@ -131,7 +131,10 @@ ma endpoint:
   Nie jest to przeoczenie: BE liczy inny wzór (paletowy/oponowy), a widok — wolumetryczny
   kurierski z wyborem przewoźnika, objętością m³ i wagą do wyceny; podpięcie pod endpoint
   odebrałoby te funkcje. Odbudowa (I9) zachowała ten stan świadomie (D1),
-  `docs/tickets/18-FEATURE-waga-gabarytowa/`.
+  `docs/tickets/18-FEATURE-waga-gabarytowa/`. Odbudowa (76, 2026-09-21) dodała pod tabelą
+  przewoźników drugą kartę „Waga paletowa (opony)", pierwszy realny konsument `/oblicz` w
+  całym projekcie — świadome odstępstwo, backlog #27/#28, `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
+  Główny kalkulator wolumetryczny zostaje lokalny.
 - **Staging** — instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu.
 - Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa
   (potwierdza deltę: te moduły dojrzały po czerwcu). Doprecyzowanie z I5: widok Historii woła
@@ -283,13 +286,30 @@ ma endpoint:
 > nie ten sam w dwóch miejscach (BE: formuła paletowa/oponowa, patrz `spec-backend.md`; FE:
 > waga wolumetryczna kurierska `dł×szer×wys / dzielnik`, dzielnik per przewoźnik — GEIS 10000,
 > DPD 6000, GLS 4000, InPost/UPS/DHL 5000 — plus objętość m³ i waga do wyceny
-> `max(gabarytowa, rzeczywista)`). Widok liczy **wyłącznie lokalnie, zero wywołań API** (D1).
+> `max(gabarytowa, rzeczywista)`). Widok liczy **wyłącznie lokalnie, zero wywołań API** (D1) —
+> ⚠ stan I9; ticket 76 (niżej) przenosi listę przewoźników na serwer, formuła sama zostaje lokalna.
 > Formularz: Długość/Szerokość/Wysokość w cm (domyślnie 60/50/50), opcjonalna Waga rzeczywista,
 > select Przewoźnik; pełny edytor przewoźników i dzielników (dodawanie, usuwanie z blokadą
 > „min. 1", zmiana nazwy/dzielnika, „Przywróć domyślne"). Stan trwały w IndexedDB przez
-> `magazynKV` (cztery klucze `waga-gabarytowa-*`). Mechanizm „waga pamięć" (`waga_pamiec`) to
-> osobna, import-side logika bez związku z tym widokiem. Szczegóły:
-> `docs/tickets/18-FEATURE-waga-gabarytowa/`.
+> `magazynKV` (cztery klucze `waga-gabarytowa-*`) — ⚠ stan I9, zniesione częściowo w 76.
+> Mechanizm „waga pamięć" (`waga_pamiec`) to osobna, import-side logika bez związku z tym widokiem.
+> Szczegóły: `docs/tickets/18-FEATURE-waga-gabarytowa/`.
+>
+> **Odbudowa (76, `76-FEATURE-przewoznicy-serwer-paletowy`, 2026-09-21) — trzy świadome
+> odstępstwa od produkcji, zatwierdzone przez Anię (backlog #27, #28).** Produkcja nadal trzyma
+> listę przewoźników/dzielników w IndexedDB przeglądarki, patrz §4 i blok I9 wyżej — to opis
+> **produkcji**, nie odbudowy od tej sesji. Odbudowa: **(1)** lista przewoźników i dzielników
+> przeniesiona na serwer — `GET`/`PUT /api/waga-gabarytowa/przewoznicy` (trasy, których produkcja
+> nie ma, `x-odbudowa-nowa-trasa`), wspólna dla wszystkich zalogowanych, seed sześciu przewoźników
+> w migracji `007` (GEIS 10000 domyślny, DPD 6000, GLS 4000, InPost/UPS/DHL 5000 — bez zmian
+> wobec I9); w IndexedDB (`magazynKV`) zostają tylko trzy z czterech kluczy
+> `waga-gabarytowa-*` — wybrany przewoźnik, ostatnie wymiary, ostatni wynik; klucz z samą listą
+> przewoźników nie jest już ani czytany, ani pisany. **(2)** usunięcie przewoźnika i „Przywróć
+> domyślne" pytają o potwierdzenie (dialog, ostrzeżenie że lista jest wspólna dla firmy);
+> zmiana nazwy/dzielnika zapisuje się na serwer dopiero po opuszczeniu pola. **(3)** druga karta
+> „Waga paletowa (opony)" woła `POST /api/waga-gabarytowa/oblicz` (formuła BE z bloku I9 wyżej,
+> bez pamięci wyniku) — pierwszy konsument tej trasy. Szczegóły:
+> `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
 
 > **Odbudowa (I11, `18-FEATURE-konfiguracja-config-spedycja`, 2026-09-03):** `/konfiguracja`
 > domknięte — ostatnie cztery zakładki (spedycja / shoper / katalog / ai) wypełnione, zaślepki

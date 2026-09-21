@@ -161,3 +161,31 @@ Runda 3: 0 BLOCKER, 0 nowych SHOULD-FIX. Pozostałe NICE-TO-HAVE przeszły do �
   - pola edycji nazwy i dzielnika nie są wyłączane w trakcie zapisu (kolejka zapisów i tak chroni dane);
   - brak górnego limitu długości listy w walidacji PUT;
   - `overflow-hidden` tabeli przewoźników — linia sprzed ticketa.
+
+## Docs updates
+
+- **`docs/rebuild-roadmap.md`:**
+  - P9.1 oznaczona ✅ 2026-09-21 z dowiezionym zakresem i odstępstwem od planu (kształt odpowiedzi
+    w tekście `x-odbudowa-nowa-trasa`);
+  - P9.2 dostała pełną listę materiału do delty instrukcji I9, stan „gotowe do startu";
+  - stary blok Iteracji 9, §3 („Lokalne vs API") i tabela iteracji mają datowane noty o zmianie z P9.1;
+  - noty o zajętym numerze migracji 007 wpisane do bloków PR.3 i P6.2.
+- **`docs/rebuild-backlog.md`:**
+  - #27 i #28 — „Do nowej wersji?" ✅ TAK (odstępstwo, pytania 9.1/9.2), Status ✔ zrobione (P9.1, ticket 76);
+  - nowe pliki w polu „Pliki", akapity „Co zrobiono w odbudowie", stare decyzje „port 1:1" oznaczone
+    jako zastąpione.
+- **`docs/spec-frontend.md`:**
+  - §4 — kalkulator paletowy to pierwszy konsument `/oblicz`;
+  - §5 — ostrzeżenia przy twierdzeniach z I9 i nowy blok „Odbudowa (76)"; fakty o produkcji bez zmian.
+- **`docs/spec-backend.md`:** wpis „Potwierdzone w 76" (tabela 007 + seed, nowe trasy, audyt,
+  konsument `/oblicz`, marker `x-odbudowa-nowa-trasa`).
+- **`contract/README.md`:** licznik ścieżek i operacji 97/115, nowa sekcja „Trasy, których produkcja
+  nie ma" z opisem konwencji `x-odbudowa-nowa-trasa`.
+- **`docs/cutover.md`:**
+  - §1 i §5 krok 5 — 007 realnie wstawia 6 wierszy, w odróżnieniu od no-opów 004–006;
+  - §6 — smoke-test `SELECT count(*) FROM waga_gab_przewoznicy` → 6.
+- **Bez zmian:**
+  - `docs/deploy-setup.md` — nie dotyczy;
+  - `docs/plan.md` — dokument historyczny;
+  - `docs/instrukcja-testow-I9.md` — należy do P9.2.
+- **Pre-existing issues:** brak.

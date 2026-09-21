@@ -14,7 +14,7 @@ Przełączamy **jednym ruchem** (big-bang, bez okresu współbieżnego działani
 |---|---|---|
 | Backend | `mirror/backend/index.cjs` + kilkanaście łatek `patch_*.cjs`, PM2 `bridge-backend`, `0.0.0.0:5000` | `rebuild/backend` → `dist/server.js`, PM2, ten sam port |
 | Frontend | zbudowany bundle w `public_html/panel` + trzy skrypty wstrzykiwane (`selly-injection.js`, `pending-injection.js`, `freq-injection.js`) | build `rebuild/frontend`, **skrypty wstrzykiwane znikają** — wszystkie trzy wchłonięte (I7, I8, 3f-2) |
-| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie przenosimy plików do innej bazy, ale `npm run migrate` na niej stosuje migracje SCHEMATU (001–003) i DANYCH (004–006, konwencje 13c) |
+| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie przenosimy plików do innej bazy, ale `npm run migrate` na niej stosuje migracje SCHEMATU (001–003), DANYCH (004–006, konwencje 13c) i **nowej tabeli z seedem** (007, sześciu przewoźników wagi gabarytowej — 76-FEATURE) |
 | Apache | `public_html/panel/.htaccess`, proxy `/api/*` | ten sam mechanizm, przekierowanie na nowy proces |
 
 **Baza jest wspólnym mianownikiem i to jest największe ryzyko całej operacji** — dlatego
@@ -261,6 +261,12 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    przez Anię na produkcji 18.08 i 09-01. **Na żywej bazie mają nie zmienić ani jednego wiersza** —
    produkcja te dane już zmigrowała, więc to jest oczekiwany no-op, dowód wierności, nie usterka.
 
+   Od 76-FEATURE dochodzi `007_waga_gab_przewoznicy.sql` — inny przypadek: tworzy nową tabelę
+   `waga_gab_przewoznicy` i **wstawia** sześciu przewoźników (GEIS Polska 10000 domyślny, DPD 6000,
+   GLS 4000, InPost Kurier 5000, UPS 5000, DHL Parcel 5000). To NIE jest no-op — produkcja tej
+   tabeli nie ma (lista dziś żyje w IndexedDB przeglądarki), więc migracja realnie dokłada sześć
+   wierszy. `INSERT OR IGNORE`, więc powtórne uruchomienie nic nie zmieni.
+
    ⚠ **`npm run migrate` tego NIE pokaże** — wypisuje wyłącznie, które PLIKI zastosował, a które
    pominął (`migrate-cli.ts`), bez liczby zmienionych wierszy. Sprawdź to osobno, na KOPII bazy
    z kroku 1, PRZED uruchomieniem migracji na żywej:
@@ -317,6 +323,10 @@ Kolejność jest celowa: od najtańszego do najdroższego, żeby awaria wyszła 
       ⚠ To **świadoma różnica wobec starej produkcji** (rozdział 1), nie usterka do zgłoszenia.
 - [ ] `/historia` pokazuje wpisy sprzed cutoveru — dowód, że to ta sama baza.
 - [ ] `/konfiguracja` → zakładka „Dostawcy": lista i statusy wyglądają jak wcześniej.
+- [ ] `waga_gab_przewoznicy` zasiedlona przez 007: `sqlite3 data.db "SELECT count(*) FROM
+      waga_gab_przewoznicy;"` → **6**. Lokalne listy z IndexedDB przeglądarki (jeśli ktoś je sobie
+      edytował przed cutoverem) **nie są importowane** — po przełączeniu wszyscy widzą wspólny seed
+      Ani (76-FEATURE, świadome odstępstwo).
 - [ ] `/analityka` rysuje wykresy (ładuje się leniwie — chwilę trwa, to normalne).
 - [ ] `/selly` → „Status": pokazuje realny stan, nie „Brak konfiguracji" (jeśli ma być `pelny`).
 - [ ] Jeden **odczytowy** eksport CSV — sprawdza, że ścieżki plików są produkcyjne.

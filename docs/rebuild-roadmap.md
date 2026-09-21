@@ -139,7 +139,7 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 | **Auth flow** | `POST /api/login {email:trim,password}` → `{ok,user,token}`; `Bearer` gdy token + `credentials:include` równolegle; `bridge_user` w `localStorage` albo `sessionStorage` wg `bridge_remember`; Query `on401:returnNull,staleTime:Infinity,retry:false` | **odtworzone 1:1 w I1 (1b)** (`rebuild/frontend/src/lib/`) | ✅ ustalone |
 | **Martwe ścieżki FE** | FE woła `/api/attributes` (8×) i `/api/attribute-kinds` (6×) — backend ma `/api/atrybuty(/rodzaje)` | **naprawione w 7b (2026-09-04, ticket `31-FEATURE-atrybuty-frontend`)** — front woła wyłącznie `/api/atrybuty(/rodzaje)` | ✅ zrobione |
 | **Skrypty injection** | `pending-injection.js`, `selly-injection.js`, `freq-injection.js` łatają UI spoza Reacta | wchłonięte natywnie WSZYSTKIE TRZY: **`freq-injection.js` ✅ 3f-2 (2026-09-01)**, **`pending-injection.js` ✅ 7b (2026-09-04, `31-FEATURE-atrybuty-frontend`)**, **`selly-injection.js` ✅ 8b (2026-09-04, `30-FEATURE-selly-panel-frontend`)** | ✅ zrobione |
-| **Lokalne vs API** | **Oba tematy rozstrzygnięte 2026-09-03, każdy INNYM rozstrzygnięciem — bo to były dwa różne problemy, nie jeden.** **I6 (alerty, D3): przez API.** `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie, zero IndexedDB/localStorage. Wcześniejszy zapis w tym wierszu mylił — oryginalny widok `/alerty` (`HT()`, `frontend-index.js:25177-25340`) w ogóle nie czytał `/api/alerts`: liczył pseudo-alerty katalogowe z `GET /api/products` i trzymał ich status w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`); to inny zestaw danych, nie kwestia miejsca przechowywania statusu. **I9 (waga gabarytowa, D1): lokalnie, FAKTEM.** To DWA różne kalkulatory pod jedną nazwą (paletowy w BE vs wolumetryczny w FE), nie jeden wzór w dwóch miejscach — nie było czego deduplikować. Dowieziono oba 1:1, FE liczy lokalnie i endpointu nie woła, jak produkcja. **Wniosek na przyszłość: pytanie „lokalnie czy przez API” rozstrzyga się dopiero po sprawdzeniu, czy obie strony liczą TO SAMO** — dwa razy z rzędu okazało się, że nie. | — | ✅ I6 · ✅ I9 |
+| **Lokalne vs API** | **Oba tematy rozstrzygnięte 2026-09-03, każdy INNYM rozstrzygnięciem — bo to były dwa różne problemy, nie jeden.** **I6 (alerty, D3): przez API.** `PATCH /api/alerts/{id}` jest jedynym źródłem prawdy o statusie, zero IndexedDB/localStorage. Wcześniejszy zapis w tym wierszu mylił — oryginalny widok `/alerty` (`HT()`, `frontend-index.js:25177-25340`) w ogóle nie czytał `/api/alerts`: liczył pseudo-alerty katalogowe z `GET /api/products` i trzymał ich status w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`); to inny zestaw danych, nie kwestia miejsca przechowywania statusu. **I9 (waga gabarytowa, D1): lokalnie, FAKTEM — stan do 2026-09-03.** To DWA różne kalkulatory pod jedną nazwą (paletowy w BE vs wolumetryczny w FE), nie jeden wzór w dwóch miejscach — nie było czego deduplikować. Dowieziono oba 1:1, FE liczył lokalnie i endpointu nie wołał, jak produkcja. **Wniosek na przyszłość: pytanie „lokalnie czy przez API” rozstrzyga się dopiero po sprawdzeniu, czy obie strony liczą TO SAMO** — dwa razy z rzędu okazało się, że nie. ⚠ **Od 2026-09-21 (P9.1, ticket `76`) wolumetryczny FE dalej liczy lokalnie, ale kalkulator paletowy dostał świadomie konsumenta w UI** (odstępstwo O3, zatwierdzone przez Anię) — endpoint już nie jest bez konsumenta. | — | ✅ I6 · ✅ I9 |
 | **Staging auto-accept — LOKALNIE czy przez API** | **rozstrzygnięte 2026-08-27 (3d-1) FAKTEM, nie preferencją: auto-zatwierdzanie jest BACKENDOWE.** Siedzi w gałęzi `else if` żywego `tk()` (`backend-index.cjs:47791-47806`) i od 3d-1 jest odtworzone razem ze skutkami (`updateProduct` + `historia_cen` + `applyDims`). Frontend NIE liczy go lokalnie: bundle woła `POST /api/staging/accept` (czyli API) i nie zawiera ani `autoZatwierdzone`, ani żadnej lokalnej logiki auto-akceptacji (grep po `mirror/frontend/assets/*.js`: 0 trafień). Zdanie ze `spec-frontend` §4 („instrukcja v5 zakłada ręczną obsługę, kod auto-przyjmuje zmiany ceny/stanu") mówi o rozjeździe INSTRUKCJI z KODEM, a nie o liczeniu czegokolwiek w przeglądarce. **Skutek dla 3e:** UI ma tylko pokazywać to, co przyszło ze stagingu — pozycje auto-zatwierdzone w ogóle się w nim nie pojawiają. Przestarzała jest instrukcja v5, nie kod. | — | ✅ ustalone |
 | **Utrzymanie roadmapy** | roadmapa jest wejściem dla NASTĘPNEJ sesji, a prompt jest jednorazowy — wiedza z bloku musi lądować tutaj, nie w prompcie | **zaklepane 2026-08-26:** po każdym zamkniętym bloku roadmapa opisuje STAN, nie zamiar; ustalenie dotyczące PRZYSZŁEGO bloku wpisuje się DO TEGO BLOKU (sesja 3c czyta blok 3c); **przypisanie funkcji do sesji weryfikuje się GRAFEM WYWOŁAŃ, nie nazwą** (`bridge_ext` trafił do złej sesji dwa razy — 3a i 3c); prompt nie koryguje roadmapy, tylko roadmapa siebie. Pełna reguła: `CLAUDE.md`, krok operacyjny: `.claude/commands/feature.md` Krok 13 | ✅ ustalone |
 | **Stack / decyzje szkieletu** | TypeScript vs JS; framework testów; drizzle introspect vs ręczny; layout `rebuild/` | **zaklepane w I1:** TypeScript (strict, ESM) + Vitest po obu stronach; BE: Express 4 + better-sqlite3 + `drizzle-kit introspect`; FE: Vite + Tailwind 3 + shadcn/ui, testy z Testing Library + MSW; layout `rebuild/backend/` + `rebuild/frontend/` (ewentualnie `rebuild/shared/`) | ✅ ustalone |
@@ -183,7 +183,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
-| 9 | Waga gabarytowa | 1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 |
+| 9 | Waga gabarytowa | 1 + P9.1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 · P9.1: `76-FEATURE-przewoznicy-serwer-paletowy` · 2026-09-21 (lista przewoźników na serwerze, potwierdzenia, kalkulator paletowy w UI) |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
@@ -1348,12 +1348,19 @@ jeden realny defekt znaleziony przy okazji:
   InPost/UPS/DHL 5000) + objętość m³ + „waga do wyceny", lokalnie, stan w IndexedDB, **zero
   wywołań API**. **Decyzja D1 (dowieziona):** oba 1:1, każdy jak w oryginale; FE nie woła
   endpointu. Szczegóły: `docs/tickets/18-FEATURE-waga-gabarytowa/plan.md`.
+  **⚠ Nieaktualne od 2026-09-21 (P9.1, ticket `76-FEATURE-przewoznicy-serwer-paletowy`):** to
+  świadome odstępstwo od produkcji, zatwierdzone przez Anię — kalkulator paletowy dostał
+  konsumenta w UI (druga sekcja obok wolumetrycznego), patrz karta P9.1 niżej.
 - **Backend:** `POST /api/waga-gabarytowa/oblicz` dowieziony, formuła 1:1, za `requireAuth`
   (⚠ odstępstwo świadome D2 — produkcja i kontrakt mają trasę publiczną `security: []`,
   kontynuacja D1 z I1; kontrakt od 12d ma na tej trasie `401` + adnotację `x-odbudowa-auth`).
   Endpoint **bez konsumenta** — FE go nie woła.
+  **⚠ Nieaktualne od 2026-09-21 (P9.1):** FE dostał konsumenta (`KalkulatorPaletowy.tsx`).
 - **Frontend:** widok `/waga-gabarytowa` dowieziony — formularz + wynik + pełny edytor
   przewoźników/dzielników (D3), trwałość w IndexedDB przez `magazynKV`.
+  **⚠ Nieaktualne od 2026-09-21 (P9.1):** lista przewoźników/dzielników przeniosła się na
+  serwer (`waga_gab_przewoznicy`, wspólna dla wszystkich zalogowanych); w IndexedDB zostały
+  tylko wybór, ostatni wynik i ostatnie wymiary (założenie A karty P9.1).
 - **Ścieżki (GATE):** `POST /api/waga-gabarytowa/oblicz` — **fixtures faktycznie brak**
   (potwierdzone), siatka oparta na `sprawdzZgodnoscZKontraktem` + teście jednostkowym formuły
   jako głównym dowodzie zgodności; 401 bez tokenu asertowany wprost poza checkerem (kontrakt
@@ -3063,6 +3070,11 @@ przełączeniem produkcji.
 **Zależność:** P6.2 startuje PO merge'u P6.1, bo korzysta z wydzielonego tam wspólnego modułu statusów
 i przycisków.
 
+⚠ **Numeracja migracji — jeśli status pseudo-alertów na serwerze (decyzja 2) potrzebuje nowej tabeli
+(migracja SQL), następny wolny numer to `008`** — `007` zajął `waga_gab_przewoznicy` (karta P9.1,
+ticket `76`, 2026-09-21). Sprawdź `ls rebuild/schema/` przed pisaniem pliku, PR.3 może w
+międzyczasie zająć `008`.
+
 ⚠ **Pułapka źródła, zademonstrowana 2026-09-21:** silnik pseudo-alertów czytać WYŁĄCZNIE z `origin/main`
 (`git show origin/main:mirror/frontend/assets/index-PRICEFMT1783512500.js`). Na `develop` `mirror/` jest
 cofnięty do 25.08, a `deminified/` jest z 13.08 — oba są SPRZED łatek z 4.09 (`tr_fix`, `ackalerts`).
@@ -3085,12 +3097,51 @@ plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czym
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P9.1** | wspólna lista przewoźników na serwerze + potwierdzenie usuwania + kalkulator paletowy | #27, #28 | ⬜ gotowe |
-| **P9.2** | delta instrukcji I9 dla Ani | — | ⬜ po P9.1 |
+| **P9.1** | wspólna lista przewoźników na serwerze + potwierdzenie usuwania + kalkulator paletowy | #27, #28 | ✅ **2026-09-21**, ticket `76-FEATURE-przewoznicy-serwer-paletowy` |
+| **P9.2** | delta instrukcji I9 dla Ani | — | ⬜ gotowe do startu (P9.1 zamknięta) |
 
 Trzy rzeczy w jednej karcie świadomie — wszystkie w `waga-gabarytowa/**`. Seed potwierdzony przez Anię
 21.09 bez poprawek: GEIS 10 000 · DPD 6 000 · GLS 4 000 · InPost / UPS / DHL 5 000. Edytuje każdy
 zalogowany.
+
+**P9.1 — dowieziony zakres (2026-09-21).** Trzy świadome odstępstwa od produkcji (O1–O3,
+zatwierdzone przez Anię): lista przewoźników/dzielników przeniesiona z IndexedDB (`magazynKV`) na
+serwer, tabela `waga_gab_przewoznicy` (migracja `007`, seed sześciu przewoźników jak wyżej, GEIS
+domyślny — `INSERT OR IGNORE`, trafia do produkcji przy cutoverze przez `npm run migrate`);
+`GET`/`PUT /api/waga-gabarytowa/przewoznicy` za `requireAuth`, walidacja 400 (niepusta lista,
+unikalne `id`, `nazwa` niepusta po trim, `dzielnik` liczbą dodatnią, najwyżej jeden `domyslny`) i
+audyt (`edycja_przewoznikow`, `{przed, po}`, try/catch jak `atrybuty.ts`); usunięcie przewoźnika i
+„Przywróć domyślne" pytają o potwierdzenie (`DialogPotwierdzenia`, z ostrzeżeniem, że lista jest
+wspólna); kalkulator **paletowy** (`POST /api/waga-gabarytowa/oblicz`, wcześniej bez konsumenta)
+dostał ekran obok wolumetrycznego, bez pamięci wyniku. W IndexedDB zostają tylko wybór, ostatni
+wynik i ostatnie wymiary (założenie A) — stare lokalne listy przewoźników **nie są importowane**
+(świadome, Ania potwierdziła seed). Szczegóły, w tym mechanizm serializacji zapisów (kolejka
+`scope` w React Query, dowieziona dopiero w rundzie 3 code review) i pełna lista decyzji Q&A:
+`docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/{plan.md,raport.md,review.md}`.
+
+**Odstępstwo od planu:** kontrakt dla nowych tras opisuje kształt odpowiedzi 200/400 w TEKŚCIE
+markera `x-odbudowa-nowa-trasa`, nie inline w linii statusu — generator schematów
+(`tools/generate-openapi-schemas.cjs`) przepisuje i czyści linie statusów bez fixture'a, a dla tras
+spoza produkcji fixture nie istnieje i nie może istnieć. Inline zostaje tylko schemat `requestBody`
+PUT.
+
+**Numeracja migracji (fakt):** `007` zajęty przez `waga_gab_przewoznicy` (ta karta, 2026-09-21).
+Konsekwencja dla kart PR.3 i P6.2 (obie mogą chcieć migracji SQL) zapisana w ICH blokach niżej.
+
+**P9.2 — delta instrukcji I9 dla Ani (do napisania).** `docs/instrukcja-testow-I9.md` po P9.1 ma
+nieaktualne fragmenty: §3.11, §4 pkt 4 i pkt 6 oraz wszystkie opisy „lista żyje w Twojej
+przeglądarce" przestały być prawdziwe (lista jest teraz na serwerze). Do instrukcji dochodzi:
+- potwierdzenie usunięcia przewoźnika (z ostrzeżeniem, że lista jest wspólna);
+- potwierdzenie „Przywróć domyślne" (zmienia listę całej firmie, nie tylko przeglądarce);
+- wspólna lista — edytuje ją każdy zalogowany, zmiany widzą wszyscy;
+- zapis nazwy/dzielnika dopiero po opuszczeniu pola (pusta nazwa albo zły dzielnik → komunikat i
+  powrót do poprzedniej wartości, bez zapisu);
+- nowa sekcja „kalkulator paletowy" pod tabelą przewoźników: pola szerokość/długość/wysokość (cm),
+  wynik `wagaGabarytowa`/`szerokoscEfektywna`/`wysokoscZPaleta`/`wspolczynnik`/`opis`; progi z
+  `db/snapshot.db` (`szer_polpaleta = 55`, `szer_paleta = 80`, `wys_palety = 10`,
+  `wspolczynnik = 0.000167`);
+- stare listy przewoźników z lokalnego IndexedDB przeglądarki **nie są importowane** — po P9.1
+  startuje się z seeda serwera, nie z tego, co ktoś miał lokalnie.
 
 #### Iteracja 10 — Analityka i Pulpit
 
@@ -3118,6 +3169,10 @@ PR.1 to jedyny w całym projekcie **czysty brak funkcji obecnej w produkcji** (`
 + `archive_module.cjs`, trzy trasy). Zakres doprecyzowany odpowiedzią Ani 12.1: używa archiwum do
 porównywania, czy plik zgadza się z katalogiem, i do weryfikacji brakujących pozycji — więc widok MUSI
 pozwalać pobrać plik, nie tylko pokazać listę.
+
+⚠ **PR.3 — jeśli poprawka `B??d`→`Błąd` idzie migracją SQL (jak `006_nazwa_caps.sql`), następny wolny
+numer to `008`** — `007` zajął `waga_gab_przewoznicy` (karta P9.1, ticket `76`, 2026-09-21); sprawdź
+`ls rebuild/schema/` przed pisaniem pliku, nie ufaj temu numerowi bez świeżego sprawdzenia.
 
 #### ⭐ Pomiar parserów na prawdziwych cennikach (2026-09-21) — zastępuje test §8.1 instrukcji I3
 
