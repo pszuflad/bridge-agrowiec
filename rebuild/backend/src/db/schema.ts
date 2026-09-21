@@ -280,6 +280,17 @@ export const config = sqliteTable("config", {
 	wartosc: text().notNull(),
 });
 
+// dopieszczenie (migracja 007, ticket 76, backlog #27): tabela spoza kanonu produkcji —
+// wspólna lista przewoźników wagi wolumetrycznej, w produkcji żyje w IndexedDB przeglądarki.
+// `domyslny` w trybie boolean, jak flagi opon wyżej (D5 z ticketu 3).
+export const wagaGabPrzewoznicy = sqliteTable("waga_gab_przewoznicy", {
+	id: text().primaryKey(),
+	nazwa: text().notNull(),
+	dzielnik: real().notNull(),
+	kolejnosc: integer().notNull(),
+	domyslny: integer({ mode: "boolean" }).default(false).notNull(),
+});
+
 export const atrybutyRodzaje = sqliteTable("atrybuty_rodzaje", {
 	value: text().primaryKey(),
 	label: text().notNull(),

@@ -292,6 +292,18 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `POST /api/products` (bulk import), filtruje na poziomie kolumn tabeli, bo import musi
 > zapisać kolumny wyliczane — opisane komentarzem i zamierzone.
 
+> **Potwierdzone w 76** (`76-FEATURE-przewoznicy-serwer-paletowy`, 2026-09-21, karta P9.1):
+> `POST /api/waga-gabarytowa/oblicz` (patrz I9 wyżej) dostał od teraz **konsumenta w UI** —
+> kalkulator paletowy obok wolumetrycznego na `/waga-gabarytowa`; trasa, kontrakt i handler
+> zostają bez zmian. Świadome odstępstwo od produkcji: lista przewoźników i dzielników
+> wagi wolumetrycznej, dotąd trzymana w IndexedDB przeglądarki, przeniosła się na serwer —
+> nowa tabela `waga_gab_przewoznicy` (migracja `007`, pierwsza migracja z seedem danych: sześciu
+> przewoźników, GEIS domyślny) i dwie trasy bez odpowiednika w produkcji, `GET`/`PUT
+> /api/waga-gabarytowa/przewoznicy` (`requireAuth`, walidacja `400 {error}`, audyt
+> `edycja_przewoznikow` z `{przed, po}`, poza whitelistą widoku Historii). Opisane w
+> `contract/openapi.yaml` nowym markerem `x-odbudowa-nowa-trasa`. Szczegóły:
+> `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
+
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).

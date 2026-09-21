@@ -2033,26 +2033,35 @@ jako **bajtowo identyczny** z oryginałem na całym `db/snapshot.db` (7405 produ
 
 | Pole | Wartość |
 |---|---|
-| **Kategoria** | FRONTEND (widok `/waga-gabarytowa`, edytor przewoźników) |
-| **Pliki** | `deminified/frontend-index.js:9165-9193` (store IndexedDB); port: `rebuild/frontend/src/lib/magazynKV.ts`, `pages/waga-gabarytowa/przewoznicy.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1** — przeniesienie na backend ⬜ **do decyzji** |
-| **Status** | ✔ odtworzone w rebuild (I9) |
+| **Kategoria** | FRONTEND+BACKEND (widok `/waga-gabarytowa`, edytor przewoźników) |
+| **Pliki** | `deminified/frontend-index.js:9165-9193` (store IndexedDB, historyczny stan); **P9.1**: `rebuild/schema/007_waga_gab_przewoznicy.sql`, `rebuild/backend/src/repos/przewoznicy.ts`, `rebuild/backend/src/waga-gabarytowa/przewoznicy.ts`, `rebuild/backend/src/routes/waga-gabarytowa.ts`, `rebuild/frontend/src/pages/waga-gabarytowa/api.ts`, `pages/waga-gabarytowa/przewoznicy.ts` (bez `KLUCZ_PRZEWOZNICY`), `pages/waga-gabarytowa/TabelaPrzewoznikow.tsx`; nieczytany dalej: `rebuild/frontend/src/lib/magazynKV.ts` |
+| **Do nowej wersji?** | ✅ **TAK — odstępstwo** (decyzja Ani 2026-09-18/21, pytanie 9.1 w `docs/pytania-do-ani-2026-09-18.md`, runda 2 — „każdy zalogowany") |
+| **Status** | ✔ zrobione w rebuild, **P9.1**, ticket `76-FEATURE-przewoznicy-serwer-paletowy`, 2026-09-21 |
 
 **POTWIERDZENIE ANI 2026-09-21 (runda 2, pytanie 3): wszystkie sześć dzielników bez poprawek.**
 GEIS Polska 10 000 · DPD 6 000 · GLS 4 000 · InPost Kurier 5 000 · UPS 5 000 · DHL Parcel 5 000 —
 przy każdym wpisała „zgadza się". Oba wiersze na dodatkowych przewoźników zostawiła puste, czyli
-lista jest kompletna. Karta **P9.1** startuje z tymi wartościami jako seedem serwerowym; nie ma
-już potrzeby pytać jej o cokolwiek przed wdrożeniem.
+lista jest kompletna. Karta **P9.1** startuje z tymi wartościami jako seedem serwerowym.
 
 **Co robi produkcja.** Edytor przewoźników i dzielników (dodawanie własnego, zmiana nazwy/
 dzielnika per wiersz, usuwanie z blokadą „min. 1 przewoźnik", „Przywróć domyślne") trzyma
 cały stan wyłącznie w IndexedDB przeglądarki (baza `bridge-store-v2`). Zmiany Ani nie
 przenoszą się między urządzeniami i giną przy czyszczeniu danych witryny.
 
-**Decyzja użytkownika (2026-09-03): port 1:1** — odbudowa ma to samo zachowanie
-(`magazynKV`, ten sam mechanizm co inne dane lokalne widoku). Przeniesienie listy
-przewoźników na backend (persystencja niezależna od urządzenia) byłoby nową funkcją,
-nie odbudową — do rozważenia osobno.
+**Decyzja użytkownika (2026-09-03): port 1:1** — *zastąpiona* decyzją poniżej. Pierwotnie
+odbudowa miała mieć to samo zachowanie (`magazynKV`, lokalny stan widoku); przeniesienie na
+backend czekało jako „do rozważenia osobno".
+
+**Decyzja Ani (2026-09-18/21, pytanie 9.1) — lista idzie na serwer, edytuje każdy zalogowany.**
+**Co zrobiono w odbudowie (P9.1, ticket 76, 2026-09-21).** Tabela `waga_gab_przewoznicy`
+(migracja `007`, seed sześciu przewoźników Ani, GEIS domyślny) + `GET`/`PUT
+/api/waga-gabarytowa/przewoznicy` za `requireAuth`, z walidacją (`400`, m.in. niepusta lista,
+unikalne `id`, dodatni `dzielnik`, najwyżej jeden `domyslny`) i audytem `edycja_przewoznikow`
+(`przed`/`po` w `audit_log`). Widok czyta listę z API; usunięcie i „Przywróć domyślne" pytają
+o potwierdzenie (`DialogPotwierdzenia`); zmiana nazwy/dzielnika zapisuje się po opuszczeniu
+pola. Stary klucz `waga-gabarytowa-przewoznicy` w IndexedDB zostaje **nieczytany i niepisany** —
+lokalne zmiany Ani z przeglądarki nie są importowane ani usuwane, po prostu przestają mieć
+znaczenie. Szczegóły: `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
 
 ---
 
@@ -2063,10 +2072,10 @@ nie odbudową — do rozważenia osobno.
 
 | Pole | Wartość |
 |---|---|
-| **Kategoria** | BACKEND (endpoint kalkulatora paletowego) |
-| **Pliki** | `deminified/backend-index.cjs:48749-48769`; port: `rebuild/backend/src/waga-gabarytowa/formula.ts`, `routes/waga-gabarytowa.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1 + PODŁĄCZENIE POD UI ZATWIERDZONE — decyzja Ani 2026-09-21** |
-| **Status** | ✔ zrobione w rebuild (I9), przetestowane jednostkowo i przez GATE, bez wywołań z frontendu |
+| **Kategoria** | BACKEND+FRONTEND (endpoint kalkulatora paletowego + ekran) |
+| **Pliki** | `deminified/backend-index.cjs:48749-48769`; port I9: `rebuild/backend/src/waga-gabarytowa/formula.ts`, `routes/waga-gabarytowa.ts` (bez zmian w P9.1); **P9.1**: `rebuild/frontend/src/pages/waga-gabarytowa/api.ts` (`obliczPaletowo`), `rebuild/frontend/src/pages/waga-gabarytowa/KalkulatorPaletowy.tsx` |
+| **Do nowej wersji?** | ✅ **TAK — odstępstwo** (decyzja Ani 2026-09-21, pytanie 9.2 w `docs/pytania-do-ani-2026-09-18.md`, runda 2 — „Tak, przyda się") |
+| **Status** | ✔ zrobione w rebuild, **P9.1**, ticket `76-FEATURE-przewoznicy-serwer-paletowy`, 2026-09-21 |
 
 **DECYZJA ANI 2026-09-21 (pytanie 9.2): TAK.** Cytat: „Tak, przyda się". Kalkulator paletowy dostaje
 ekran w panelu — świadome odstępstwo, bo w produkcji formuła istnieje, ale nie jest podpięta
@@ -2077,9 +2086,15 @@ nie woła — widok `/waga-gabarytowa` liczy **innym, wolumetrycznym** wzorem, l
 z dzielnikiem per przewoźnik (patrz #27). Dwa merytorycznie różne kalkulatory pod tą samą
 nazwą, oba odtworzone 1:1 w I9 (D1).
 
-**Decyzja użytkownika (2026-09-03): dowieźć oba, bez podłączania FE do endpointu.** Gdyby
-formuła paletowa miała się kiedyś pojawić w UI, to osobna decyzja produktowa (nowy widok
-albo zakładka), nie podmiana istniejącego kalkulatora wolumetrycznego.
+**Decyzja użytkownika (2026-09-03): dowieźć oba, bez podłączania FE do endpointu.** *Zastąpiona*
+decyzją Ani poniżej — endpoint dostał konsumenta.
+
+**Co zrobiono w odbudowie (P9.1, ticket 76, 2026-09-21).** Kalkulator paletowy doszedł jako
+**druga sekcja** na `/waga-gabarytowa`, obok — nie zamiast — kalkulatora wolumetrycznego
+(patrz #27). Formularz (szerokość/długość/wysokość w cm) woła `POST
+/api/waga-gabarytowa/oblicz` bez zmian w handlerze i pokazuje pełny wynik (waga gabarytowa,
+efektywna szerokość, wysokość z paletą, współczynnik, opis); nic z tego nie trafia do
+IndexedDB. Trasa `/oblicz` i jej kontrakt zostały bez zmian.
 
 ---
 

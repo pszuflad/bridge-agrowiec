@@ -7,7 +7,7 @@ przepisywaniu.
 
 | Plik | Co | Stan |
 |---|---|---|
-| `openapi.yaml` | 97 ścieżek / 115 operacji: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d) |
+| `openapi.yaml` | 98 ścieżek / 117 operacji: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d), + 2 nowe trasy spoza produkcji (76-FEATURE, 77-FEATURE) |
 | `fixtures/` | 73 nagrania: **59 GET** + **14 tras zapisujących** | ✅ Krok 2.4 + sesja 12d |
 
 ## Co jest zamrożone
@@ -154,6 +154,20 @@ Spójność tych adnotacji z rzeczywistym zachowaniem backendu pilnuje test — 
 ręcznym `if (!req.user)` zamiast wspólnym middlewarem, więc inwentarz 2.3 uznał ją za
 publiczną) i `POST /api/login` przy złym haśle. Kontrakt 2.3 nie deklarował żadnego z nich;
 oba dopisane w 12d na podstawie pomiaru i nagrania.
+
+## Trasy, których produkcja nie ma
+
+Adnotacja **`x-odbudowa-nowa-trasa`** oznacza operację spoza produkcji — nie ma jej w
+`mirror/backend/`, więc nie ma czego nagrać i fixture nie może powstać. Pierwszy przypadek:
+`GET`/`PUT /api/waga-gabarytowa/przewoznicy` (ticket 76-FEATURE-przewoznicy-serwer-paletowy,
+karta P9.1) — lista przewoźników i dzielników przeniosła się z IndexedDB przeglądarki na
+serwer, produkcja trzyma ją wyłącznie lokalnie. Uzasadnienie odstępstwa i kształt odpowiedzi
+są opisane w tekście adnotacji przy operacji, nie w linii statusu — linie statusów należą do
+`tools/generate-openapi-schemas.cjs` i dla trasy bez fixture'a zostałyby wyczyszczone; inline
+schemat zostaje tylko tam, gdzie generator go nie rusza (`requestBody`). GATE dla takich tras
+sprawdza `sprawdzZgodnoscZKontraktem` (istnienie ścieżki/metody, zadeklarowane kody 200/400/401)
+i testy trasy na prawdziwej bazie tymczasowej — nie `sprawdzZgodnoscZFixture`, bo nie ma z czym
+porównać.
 
 ## Jak używać przy odbudowie
 

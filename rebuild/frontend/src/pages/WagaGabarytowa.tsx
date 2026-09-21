@@ -1,16 +1,20 @@
 /**
  * Widok `/waga-gabarytowa` — port `nM()` (`deminified/frontend-index.js:26514-26953`).
  *
- * ⚠ LICZY LOKALNIE I NIE WOŁA BACKENDU — świadomie (plan.md D1). `POST /api/waga-gabarytowa/oblicz`
- * istnieje w odbudowie (`rebuild/backend/src/routes/waga-gabarytowa.ts`), ale liczy INNY wzór:
- * wagę paletową z progami i configiem, a nie wolumetryczną z dzielnikiem przewoźnika.
- * Podpięcie widoku pod endpoint odebrałoby Ani wybór przewoźnika, objętość i wagę do wyceny —
- * to nie byłaby deduplikacja, tylko zmiana funkcji. Szczegóły w `waga-gabarytowa/obliczenia.ts`.
+ * ⚠ KALKULATOR WOLUMETRYCZNY LICZY LOKALNIE — świadomie (plan.md D1 ticketu 18). Wzór
+ * `dł × szer × wys / dzielnik` zostaje we froncie (`waga-gabarytowa/obliczenia.ts`) bez zmian.
  *
- * Cały stan trwały siedzi w IndexedDB przez `magazynKV` — tak jak w oryginale, bez API.
+ * ⚠ ODSTĘPSTWA ŚWIADOME (karta P9.1, ticket 76, zatwierdzone przez Anię 2026-09-18/21):
+ *  - lista przewoźników przychodzi z SERWERA i jest wspólna dla firmy (backlog #27) — w oryginale
+ *    żyje w IndexedDB; szczegóły w `waga-gabarytowa/przewoznicy.ts`;
+ *  - pod tabelą przewoźników dochodzi kalkulator PALETOWY na `POST /api/waga-gabarytowa/oblicz`
+ *    (backlog #28) — to INNY wzór, nie zamiennik tego wyżej (`waga-gabarytowa/KalkulatorPaletowy.tsx`).
+ *
+ * W IndexedDB przez `magazynKV` zostaje stan osobisty: wybrany przewoźnik, wymiary i ostatni wynik.
  */
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calculator, Info } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -19,11 +23,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 import { odczytajKV, zapiszKV } from "@/lib/magazynKV";
+import { KLUCZ_PRZEWOZNIKOW, zapiszPrzewoznikow } from "./waga-gabarytowa/api";
+import { KalkulatorPaletowy } from "./waga-gabarytowa/KalkulatorPaletowy";
 import { policzWage, type WymiaryTekstem, type WynikWagi } from "./waga-gabarytowa/obliczenia";
 import {
   KLUCZ_OSTATNIE_WYMIARY,
   KLUCZ_OSTATNI_WYNIK,
-  KLUCZ_PRZEWOZNICY,
   KLUCZ_WYBRANY,
   PRZEWOZNICY_DOMYSLNI,
   WYBRANY_DOMYSLNY,
@@ -44,22 +49,77 @@ type ZapisWymiarow = { dlug: string; szer: string; wys: string; wagaRzecz: strin
 
 export function WagaGabarytowa() {
   const [wymiary, ustawWymiary] = useState<WymiaryTekstem>(WYMIARY_STARTOWE);
-  const [przewoznicy, ustawPrzewoznikow] = useState<Przewoznik[]>(PRZEWOZNICY_DOMYSLNI);
   const [wybrany, ustawWybranego] = useState(WYBRANY_DOMYSLNY);
   const [wynik, ustawWynik] = useState<WynikWagi | null>(null);
   const [wczytano, ustawWczytano] = useState(false);
   const { toast } = useToast();
+  const klient = useQueryClient();
 
   /**
-   * Hydratacja z IndexedDB (`:26547-26560`). Flaga `wczytano` NIE jest kosmetyką: bez niej
-   * autozapis niżej wystrzeliłby przy pierwszym renderze i nadpisał zapamiętaną listę
-   * przewoźników domyślną, zanim odczyt zdążyłby wrócić.
+   * Lista z serwera. `null` = sesja wygasła (`on401: "returnNull"`, `lib/queryClient.ts`) —
+   * traktujemy jak błąd odczytu, bo bez listy kalkulator nie ma czym dzielić.
+   */
+  const odczyt = useQuery<Przewoznik[] | null>({ queryKey: KLUCZ_PRZEWOZNIKOW });
+  const przewoznicy = useMemo(() => odczyt.data ?? [], [odczyt.data]);
+  const listaGotowa = przewoznicy.length > 0;
+
+  /**
+   * Numer ostatnio zleconego zapisu. Odpowiedź (albo błąd) starszego zapisu nie może nadpisać
+   * na ekranie zmiany, która poszła po nim — liczy się tylko najnowszy.
+   */
+  const ostatniZapis = useRef(0);
+
+  /**
+   * Zapis całej listy. Zapisy idą PO KOLEI (`scope`): serwer podmienia całą listę i wygrywa
+   * ostatni zapis, więc dwa równoległe PUT-y z odpowiedziami w odwrotnej kolejności
+   * utrwaliłyby na serwerze STARSZĄ listę (review, runda 2). Odpowiedź trafia do cache tylko
+   * dla najnowszego zapisu; przy błędzie najnowszego — komunikat i ponowny odczyt, żeby ekran
+   * wrócił do stanu z serwera.
+   */
+  const zapis = useMutation<Przewoznik[], Error, { lista: Przewoznik[]; nr: number }>({
+    scope: { id: "waga-gabarytowa-przewoznicy" },
+    mutationFn: ({ lista }) => zapiszPrzewoznikow(lista),
+    onSuccess: (lista, { nr }) => {
+      if (nr === ostatniZapis.current) klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
+    },
+    onError: (e, { nr }) => {
+      toast({
+        title: "Nie zapisano listy przewoźników",
+        description: e.message,
+        variant: "destructive",
+      });
+      if (nr === ostatniZapis.current) {
+        void klient.invalidateQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
+      }
+    },
+  });
+
+  /**
+   * Nowa lista liczona jest z BIEŻĄCEGO cache w chwili zapisu, nie z propsa, który mógł jeszcze
+   * nie dostać poprzedniej zmiany — dwie szybkie edycje z rzędu (dzielnik DPD, zaraz potem GLS)
+   * nie mogą po cichu cofnąć pierwszej. Cache jest aktualizowany synchronicznie, więc kolejna
+   * zmiana widzi już poprzednią.
+   */
+  const zapiszListe = async (zmiana: (aktualna: Przewoznik[]) => Przewoznik[]) => {
+    const lista = zmiana(klient.getQueryData<Przewoznik[]>(KLUCZ_PRZEWOZNIKOW) ?? []);
+    void klient.cancelQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
+    klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
+    ostatniZapis.current += 1;
+    try {
+      await zapis.mutateAsync({ lista, nr: ostatniZapis.current });
+      return true;
+    } catch {
+      return false; // komunikat pokazał już `onError`
+    }
+  };
+
+  /**
+   * Hydratacja stanu osobistego z IndexedDB (`:26547-26560`). Flaga `wczytano` NIE jest
+   * kosmetyką: bez niej autozapis niżej wystrzeliłby przy pierwszym renderze i nadpisał
+   * zapamiętany wybór domyślnym, zanim odczyt zdążyłby wrócić.
    */
   useEffect(() => {
     void (async () => {
-      const zapisani = await odczytajKV<Przewoznik[]>(KLUCZ_PRZEWOZNICY);
-      if (Array.isArray(zapisani) && zapisani.length > 0) ustawPrzewoznikow(zapisani);
-
       const zapisanyWybor = await odczytajKV<string>(KLUCZ_WYBRANY);
       if (zapisanyWybor) ustawWybranego(zapisanyWybor);
 
@@ -81,10 +141,6 @@ export function WagaGabarytowa() {
   }, []);
 
   useEffect(() => {
-    if (wczytano) void zapiszKV(KLUCZ_PRZEWOZNICY, przewoznicy);
-  }, [przewoznicy, wczytano]);
-
-  useEffect(() => {
     if (wczytano) void zapiszKV(KLUCZ_WYBRANY, wybrany);
   }, [wybrany, wczytano]);
 
@@ -96,6 +152,16 @@ export function WagaGabarytowa() {
     () => przewoznicy.find((p) => p.id === wybrany) ?? przewoznicy[0],
     [przewoznicy, wybrany],
   );
+
+  /**
+   * Lista jest wspólna, więc zapamiętanego tu przewoźnika mógł usunąć ktoś inny (plan.md D3).
+   * Liczenie i tak bierze pierwszego (wyżej); tu wyrównujemy do niego pole wyboru i zapis
+   * w IndexedDB — po cichu, jak oryginał. Czekamy na `wczytano`, żeby nie poprawiać wyboru,
+   * którego jeszcze nie odczytaliśmy.
+   */
+  useEffect(() => {
+    if (wczytano && przewoznik && przewoznik.id !== wybrany) ustawWybranego(przewoznik.id);
+  }, [wczytano, przewoznik, wybrany]);
 
   const pole = (klucz: keyof WymiaryTekstem) => (zdarzenie: { target: { value: string } }) =>
     ustawWymiary((poprzednie) => ({ ...poprzednie, [klucz]: zdarzenie.target.value }));
@@ -211,7 +277,12 @@ export function WagaGabarytowa() {
               </select>
             </div>
 
-            <Button onClick={() => void oblicz()} className="w-full" data-testid="button-oblicz">
+            <Button
+              onClick={() => void oblicz()}
+              disabled={!przewoznik}
+              className="w-full"
+              data-testid="button-oblicz"
+            >
               <Calculator className="w-4 h-4 mr-2" />
               Oblicz wagę gabarytową
             </Button>
@@ -287,16 +358,31 @@ export function WagaGabarytowa() {
         </Card>
       </div>
 
-      <TabelaPrzewoznikow
-        przewoznicy={przewoznicy}
-        ustawPrzewoznikow={ustawPrzewoznikow}
-        wybrany={wybrany}
-        ustawWybranego={ustawWybranego}
-        przywrocDomyslne={() => {
-          ustawPrzewoznikow(PRZEWOZNICY_DOMYSLNI);
-          ustawWybranego(WYBRANY_DOMYSLNY);
-        }}
-      />
+      {listaGotowa ? (
+        <TabelaPrzewoznikow
+          przewoznicy={przewoznicy}
+          zapiszListe={zapiszListe}
+          zapisuje={zapis.isPending}
+          wybrany={wybrany}
+          ustawWybranego={ustawWybranego}
+          przywrocDomyslne={async () => {
+            const zapisano = await zapiszListe(() => PRZEWOZNICY_DOMYSLNI);
+            if (zapisano) ustawWybranego(WYBRANY_DOMYSLNY);
+            return zapisano;
+          }}
+        />
+      ) : (
+        <Card className="p-6 mt-6">
+          <h3 className="font-semibold">Przewoźnicy i dzielniki</h3>
+          <p className="text-sm text-muted-foreground mt-1" data-testid="text-stan-przewoznikow">
+            {odczyt.isPending
+              ? "Wczytywanie listy przewoźników…"
+              : "Nie udało się wczytać listy przewoźników. Odśwież stronę albo zaloguj się ponownie."}
+          </p>
+        </Card>
+      )}
+
+      <KalkulatorPaletowy />
     </div>
   );
 }
