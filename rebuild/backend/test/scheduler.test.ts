@@ -61,6 +61,14 @@ describe("scheduler importu (3f-3)", () => {
   let token: string;
   const serwery: Serwer[] = [];
   const schedulery: Scheduler[] = [];
+  /**
+   * Przebiegi synchronizacji, które scheduler już odpalił, a które jeszcze trwają.
+   * `zatrzymaj()` gasi TIMERY, ale nie przerywa pobrania w locie — a baza jest wspólna dla całego
+   * pliku. Bez czekania na nie udane pobranie z testu N (pełny import prawdziwego cennika) potrafi
+   * skończyć się PO `beforeEach` testu N+1 i wpisać mu alert „Synchronizacja" do świeżo wyczyszczonej
+   * tabeli. Na wolnym runnerze CI to realnie wywracało test „awaria dostawcy nie wywraca pętli".
+   */
+  const wLocie = new Set<Promise<unknown>>();
 
   beforeAll(async () => {
     srodowisko = await stworzSrodowiskoTestowe();
@@ -84,8 +92,9 @@ describe("scheduler importu (3f-3)", () => {
   });
 
   // Każdy scheduler postawiony w teście jest gaszony — inaczej wiszący timer trzymałby proces.
-  afterEach(() => {
+  afterEach(async () => {
     for (const s of schedulery.splice(0)) s.zatrzymaj();
+    await Promise.allSettled([...wLocie]);
     vi.restoreAllMocks();
   });
 
@@ -143,12 +152,19 @@ describe("scheduler importu (3f-3)", () => {
    * dotyczy WYŁĄCZNIE rozrzutu przebiegów startowych, nie interwałów.
    */
   const stworz = (opcje: { pierwszyPrzebieg?: boolean } = {}) => {
+    const prawdziwa = synchronizujDostawce({
+      db: srodowisko.db,
+      katalogArchiwum: srodowisko.katalogArchiwum,
+    });
     const scheduler = stworzScheduler({
       db: srodowisko.db,
-      synchronizuj: synchronizujDostawce({
-        db: srodowisko.db,
-        katalogArchiwum: srodowisko.katalogArchiwum,
-      }),
+      // Prawdziwa synchronizacja, tylko śledzona — patrz `wLocie`.
+      synchronizuj: (kod, opcjeSynchronizacji) => {
+        const przebieg = prawdziwa(kod, opcjeSynchronizacji);
+        wLocie.add(przebieg);
+        void przebieg.finally(() => wLocie.delete(przebieg)).catch(() => {});
+        return przebieg;
+      },
       odstepPierwszegoPrzebieguMs: 0,
       ...opcje,
     });

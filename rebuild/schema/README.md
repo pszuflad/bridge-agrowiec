@@ -14,6 +14,7 @@ danych dla odbudowy backendu.
 | `005_konstrukcja_slowa.sql` | **Iteracja 13c:** `products.konstrukcja` kody `R`/`D`/`L`/`B`/`-` → `Radialna`/`Diagonalna` (backlog #58). |
 | `006_nazwa_caps.sql` | **Iteracja 13c:** `products.nazwa` → `UPPER`, `manual_overrides` pole `nazwa` → `UPPER`, skasowanie wierszy `staging_items` CASE_ONLY (backlog #59). |
 | `007_waga_gab_przewoznicy.sql` | **Karta P9.1 (ticket 76):** nowa tabela `waga_gab_przewoznicy` — wspólna lista przewoźników wagi wolumetrycznej, spoza produkcji (backlog #27) — i **seed danych** (sześciu przewoźników Ani). Pierwsza migracja wstawiająca dane do nowej tabeli; trafiają do produkcji przez `npm run migrate` przy cutoverze. |
+| `008_alerty_katalogu_statusy.sql` | **Karta P6.2** (`77-FEATURE-pseudo-alerty-katalogowe`): tabela `alerty_katalogu_statusy` (+ indeks na `klucz`) dla statusu pseudo-alertów katalogowych. ⚠ **Ta migracja NIE odtwarza stan produkcji** — produkcja tej tabeli nie ma (status żył w IndexedDB przeglądarki), to nowa funkcja odbudowy. Na cutoverze tworzy pustą tabelę = wszystkie pseudo-alerty katalogowe startują jako „nowy". |
 
 ## Skąd pochodzi
 
@@ -74,7 +75,11 @@ Produkcja dokłada kolumny idempotentną funkcją `bw()` (w bundlu) — np. sier
 (`002_import.sql`, dalsze `003_*.sql`…). Od Iteracji 13c pliki `004`–`006` niosą także
 **migracje DANYCH**, nie tylko struktury — odtwarzają jednorazowe skrypty i SQL, którymi
 Ania ujednoliciła konwencje na produkcji (`mirror/backend/apply_kategoria.cjs`, wpisy
-`CHANGELOG.md` z 2026-09-01 11:35 i 12:30). Numer pliku = kolejność chronologiczna produkcji.
+`CHANGELOG.md` z 2026-09-01 11:35 i 12:30). Numer pliku = kolejność chronologiczna produkcji —
+**wyjątki: `007`** (karta P9.1, lista przewoźników) **i `008`** (karta P6.2, status
+pseudo-alertów katalogowych) nie odtwarzają nic z produkcji, tylko dokładają tabele dla nowych
+funkcji odbudowy (dane przeniesione z IndexedDB przeglądarki na serwer); ich numer mówi jedynie
+o kolejności migracji w NASZYM repo.
 
 ⚠ Migracja danych MUSI być idempotentna także TREŚCIOWO, nie tylko przez ewidencję
 `_migracje`: cutover idzie na tej samej `data.db`, którą produkcja już zmigrowała, więc

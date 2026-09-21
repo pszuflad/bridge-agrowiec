@@ -267,6 +267,12 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    tabeli nie ma (lista dziś żyje w IndexedDB przeglądarki), więc migracja realnie dokłada sześć
    wierszy. `INSERT OR IGNORE`, więc powtórne uruchomienie nic nie zmieni.
 
+   ⚠ **`008_alerty_katalogu_statusy.sql` (karta P6.2) MUSI zostać zastosowana** — w odróżnieniu
+   od `004`–`006` to NIE jest no-op: produkcja tabeli `alerty_katalogu_statusy` nie ma (status
+   pseudo-alertów katalogowych tam żył w IndexedDB przeglądarki), więc migracja ją dopiero
+   tworzy, pustą. Bez niej zakładka „Katalog" na `/alerty` pokazuje błąd zapytania SQL po
+   przełączeniu.
+
    ⚠ **`npm run migrate` tego NIE pokaże** — wypisuje wyłącznie, które PLIKI zastosował, a które
    pominął (`migrate-cli.ts`), bez liczby zmienionych wierszy. Sprawdź to osobno, na KOPII bazy
    z kroku 1, PRZED uruchomieniem migracji na żywej:
