@@ -101,3 +101,31 @@ widoku nikt ich nie używał.
 - **P6.2** importuje `statusy.ts` i `PrzyciskiStatusu.tsx`. Mutacja i toast zostały w
   `TabelaAlertow.tsx`, bo sposób zapisu statusu pseudo-alertów czeka jeszcze na decyzję („serwer”
   w tabeli decyzji roadmapy).
+- **UX: grupa po zmianie statusu wraca zwinięta** (NICE-TO-HAVE z review). Klucz grupy zawiera
+  `status`, więc po „Oznacz jako przejrzany” grupa dostaje nowy klucz i stan rozwinięcia się gubi.
+  Tak samo było przed tym ticketem przy „Rozwiąż”/„Otwórz ponownie”, więc to nie jest regresja.
+
+## Poprawki po review
+- Review nr 1: 1 BLOCKER, 0 SHOULD-FIX, 1 NICE-TO-HAVE. BLOCKER (roadmapa P6.1 i backlog #26/#90
+  bez aktualizacji) zamyka etap dokumentacji tego ticketa (commit „sync docs”). W kodzie nie było
+  czego poprawiać. NICE-TO-HAVE trafił do follow-upu wyżej.
+
+## Aktualizacje dokumentacji
+- **`docs/rebuild-roadmap.md`:**
+  - wiersz P6.1 w bloku „Poprawki po testach Ani” oznaczony ✅ 2026-09-21 (72) wraz z faktycznym
+    zakresem;
+  - w wierszach P6.2 i P6.3 noty dla tych kart (import `statusy.ts`/`PrzyciskiStatusu.tsx`,
+    odsyłacz do listy punktów instrukcji I6);
+  - akapit „Dlaczego #26 jest rozdzielone…” ma zaktualizowaną listę plików; dopisana nota „Dla P6.2”
+    (mutacja i toast zostały w `TabelaAlertow.tsx`);
+  - zapisy historyczne (I6 DoD, D3 z 13e) dostały notę „nieaktualne od P6.1”;
+  - zdanie z 13e, że „trzeciego statusu nie ma w odbudowie”, poprawione.
+- **`docs/rebuild-backlog.md`:**
+  - #90 ✅ zrobione (P6.1, ticket 72) z opisem dowiezionego zakresu i notą o odwróceniu D8 z I6;
+  - #26 🔨 częściowo: trzeci status dowieziony dla alertów importu, pseudo-alerty nadal w P6.2;
+    dopisana nota o wspólnym module;
+  - nota przy D3 (`ackalerts`, #61) i przy zbiorczym zdaniu z 12e.
+- **`docs/spec-frontend.md`:** poprawione zdanie o domyślnym filtrze w bloku I6 i dopisany akapit
+  o P6.1.
+- **`docs/spec-backend.md`:** bez zmian. Zdanie „PATCH bez walidacji `status`” nadal jest prawdziwe.
+- **Problemy zastane:** doc-checkery nie zgłosiły żadnych.
