@@ -51,6 +51,11 @@ przestały być prawdą. Pierwsza wersja dostała banner.
 - Gate odbudowy: N/D (DOCS, zero zmian w `rebuild/` i `contract/`).
 - Język dla Ani: `grep` po `migracj|/api|ticket|commit|P6.|.ts` w I6-v2 — zero trafień.
 
+## Poprawki po review
+Review nr 1 (`review.md`): 0 BLOCKER / 0 SHOULD-FIX / 3 NICE-TO-HAVE. Poprawione dwa: przykład
+„39 dni" w 1.1 zastąpiony „N dni" (liczby stagingu rosną z czasem), plan D2 uzupełniony o rozdział 6.
+Trzeci (nota o raporcie 72 w karcie) — bez zmian, review uznało za poprawny.
+
 ## Follow-up
 - Koordynator: zamknąć Iterację 6 w roadmapie (P6.1 72, P6.2 77, P6.3 85 — wszystkie ✅).
 - P10.4: `docs/karty/P10.4/wejscie-85.md`.

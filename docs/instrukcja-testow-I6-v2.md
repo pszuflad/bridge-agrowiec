@@ -102,7 +102,7 @@ i ostrzeżenia liczone na żywo z katalogu"*.
    - lista kart. Każda ma kolorową plakietkę poziomu (**krytyczny** na czerwono, **ostrzeżenie**
      na pomarańczowo), nazwę ostrzeżenia, opis, datę, a przy większości także **„· dostawca MOx"**.
      Na przykład „Bardzo niska marża" ma opis w rodzaju *„KOD · nazwa produktu (marża 0.0%)"*,
-     a „Brak importu cennika" opis w rodzaju *„Dostawca MO3: ostatni import 39 dni temu (próg
+     a „Brak importu cennika" opis w rodzaju *„Dostawca MO3: ostatni import N dni temu (próg
      krytyczny: 30 dni)"*;
    - przy nowych ostrzeżeniach kolorowy pasek z lewej strony karty.
 5. Otwórz **stary Bridge** i jego ekran Alerty, ten ze swojego zrzutu.

@@ -16,7 +16,8 @@
   dostaje tylko banner.
 - D2: rozdział 1 = trzy odpowiedzi Ani (runda 2: 1a, 1b; pytanie 6.4), „Zgłosiłaś → Jest teraz →
   Sprawdź → Twoja ocena"; rozdział 2 = pięć zmian „przy okazji"; rozdział 3 = „czego nie
-  zgłaszaj"; rozdział 4 = zdania I6 z numerami paragrafów; rozdział 5 = podsumowanie.
+  zgłaszaj"; rozdział 4 = zdania I6 z numerami paragrafów; rozdział 5 = podsumowanie; rozdział 6 =
+  jak zgłosić (jak w I5-v2).
 - D3: każdą etykietę cytować z kodu `develop` (`5a7f7db`), zachowanie starego Bridge — z żywego
   bundla `origin/main:mirror/frontend/assets/index-PRICEFMT1783512500.js`.
 - D4: Pulpit w I10 też obalony — nie ruszamy `instrukcja-testow-I10.md` (własność P10.4);
