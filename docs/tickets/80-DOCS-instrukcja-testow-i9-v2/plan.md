@@ -1,6 +1,6 @@
 # 80-DOCS-instrukcja-testow-i9-v2 — delta instrukcji testów I9 dla Ani (karta P9.2)
 
-> Status: Approved (zakres i format narzucone promptem karty; decyzje otwarte niżej)
+> Status: Shipped
 > Branch: `docs/80-instrukcja-testow-i9-v2`
 > Worktree: `.worktrees/80-DOCS-instrukcja-testow-i9-v2`
 

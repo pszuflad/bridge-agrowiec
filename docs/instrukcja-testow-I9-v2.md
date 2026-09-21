@@ -129,10 +129,14 @@ wersji). Wiemy o tym i poprawimy treść ramki. **Nie zgłaszaj tego.**
 jednym komputerze jest widoczna na każdym innym po odświeżeniu strony.
 
 **„Przywróć domyślne" pyta teraz o potwierdzenie.** Okno ma tytuł **„Przywrócić domyślną listę
-przewoźników?"** i treść:
-*„Lista wróci do sześciu domyślnych przewoźników: GEIS Polska, DPD, GLS, InPost Kurier, UPS
-i DHL Parcel. To zmienia listę dla całej firmy — dodani przewoźnicy i poprawione dzielniki
-znikną u wszystkich."* Przycisk: **„Przywróć domyślne"**.
+przewoźników?"** i treść w dwóch linijkach:
+
+> *„Lista wróci do sześciu domyślnych przewoźników: GEIS Polska, DPD, GLS, InPost Kurier, UPS
+> i DHL Parcel.*
+> *To zmienia listę dla całej firmy — dodani przewoźnicy i poprawione dzielniki znikną
+> u wszystkich."*
+
+Przycisk: **„Przywróć domyślne"**.
 
 **Sprawdź:**
 1. **Przeglądarka A** (ta, w której robiłaś 2.1): **Edytuj listę**, zmień dzielnik **GLS**
@@ -278,7 +282,7 @@ Notka pod tabelą (Alerty, Pulpit i Analityka już są) zostaje prawdziwa.
 | **2.1** ⭐ | **Dwa okna usuwania; przy wybranym żółta ramka z nazwą następcy** | ☐ | ☐ | |
 | **2.2** ⭐ | **Zmiana z przeglądarki A widoczna w B; „Przywróć domyślne" pyta** | ☐ | ☐ | |
 | **3.2** ⭐ | **Paletowy: 21.042 kg i 28.056 kg** | ☐ | ☐ | |
-| 3.2 | Progi palety: tak / do zmiany / nie wiem | | | |
+| 3.2, pytanie | Progi palety: tak / do zmiany / nie wiem (zaznacz w punkcie 3.2) | | | |
 | 4 | Żaden z nieaktualnych punktów nie działa po staremu | ☐ | ☐ | |
 
 **Sprawdzonych ____ / 5 · błędów ____ · pominiętych ____**
