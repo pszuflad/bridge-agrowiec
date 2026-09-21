@@ -67,9 +67,12 @@ beforeEach(() => {
   );
 });
 
+let klient = utworzQueryClient();
+
 function pokaz() {
+  klient = utworzQueryClient();
   return render(
-    <QueryClientProvider client={utworzQueryClient()}>
+    <QueryClientProvider client={klient}>
       <ToastProvider>
         <WagaGabarytowa />
       </ToastProvider>
@@ -268,19 +271,29 @@ describe("widok wagi gabarytowej — wspólna lista przewoźników", () => {
   });
 
   /**
-   * Dwie szybkie edycje z rzędu, zanim pierwszy zapis wróci z serwera (review). Druga lista musi
-   * już zawierać pierwszą zmianę, a odpowiedź PIERWSZEGO zapisu nie może na ekranie cofnąć
-   * drugiej zmiany, dopóki drugi zapis jeszcze leci. Każdy PUT jest wstrzymany osobno, żeby
-   * odpowiedzi wróciły dokładnie w tej kolejności.
+   * Dwie szybkie edycje z rzędu, zanim pierwszy zapis wróci z serwera (review, rundy 1 i 2).
+   * Serwer podmienia całą listę i wygrywa ostatni zapis, więc:
+   *  - drugi PUT rusza dopiero PO odpowiedzi na pierwszy — inaczej odpowiedzi w odwrotnej
+   *    kolejności utrwaliłyby na serwerze starszą listę;
+   *  - druga lista zawiera już pierwszą zmianę;
+   *  - odpowiedź pierwszego zapisu (bez zmiany GLS) nie cofa na ekranie drugiej zmiany.
+   * Każdy PUT jest wstrzymany osobno, a moment „drugi PUT ruszył" jest sygnałem, że odpowiedź
+   * pierwszego została już w pełni obsłużona — bez czekania na zegar.
    */
-  it("odpowiedź pierwszego zapisu nie cofa drugiej, jeszcze lecącej zmiany", async () => {
+  it("szybkie edycje z rzędu zapisują się po kolei i nie cofają się nawzajem", async () => {
     const zwolnienia: Array<() => void> = [];
+    let wLocie = 0;
+    let najwiecejNaRaz = 0;
     server.use(
       http.put(SCIEZKA, async ({ request }) => {
+        wLocie += 1;
+        najwiecejNaRaz = Math.max(najwiecejNaRaz, wLocie);
         const lista = (await request.json()) as Przewoznik[];
         zapisy.push(lista);
         await new Promise<void>((resolve) => zwolnienia.push(resolve));
-        return HttpResponse.json(lista.map((p) => ({ domyslny: false, ...p })));
+        listaNaSerwerze = lista.map((p) => ({ domyslny: false, ...p }));
+        wLocie -= 1;
+        return HttpResponse.json(listaNaSerwerze);
       }),
     );
     const uzytkownik = userEvent.setup();
@@ -289,21 +302,30 @@ describe("widok wagi gabarytowej — wspólna lista przewoźników", () => {
     await uzytkownik.click(screen.getByTestId("button-edycja-przewoznikow"));
     await wpisz(uzytkownik, "input-dzielnik-dpd", "5500");
     await wpisz(uzytkownik, "input-dzielnik-gls", "4500"); // klik w GLS = blur DPD → pierwszy PUT
-    await uzytkownik.tab(); // blur GLS → drugi PUT, pierwszy wciąż wisi
+    await uzytkownik.tab(); // blur GLS → drugi zapis czeka w kolejce
+
+    // Oba zapisy zlecone; puszczony jest tylko pierwszy.
+    await waitFor(() => expect(klient.isMutating()).toBe(2));
+    await waitFor(() => expect(zwolnienia).toHaveLength(1));
+    expect(zapisy).toHaveLength(1);
+    expect(screen.getByTestId("input-dzielnik-gls")).toHaveValue(4500);
+
+    // Wraca pierwsza odpowiedź (bez zmiany GLS) — dopiero teraz rusza drugi PUT.
+    zwolnienia[0]?.();
     await waitFor(() => expect(zwolnienia).toHaveLength(2));
+    expect(screen.getByTestId("input-dzielnik-gls")).toHaveValue(4500);
+    expect(screen.getByTestId("input-dzielnik-dpd")).toHaveValue(5500);
 
     const drugi = zapisy[1] ?? [];
     expect(drugi.find((p) => p.id === "dpd")?.dzielnik).toBe(5500);
     expect(drugi.find((p) => p.id === "gls")?.dzielnik).toBe(4500);
 
-    // Wraca odpowiedź pierwszego zapisu (bez zmiany GLS) — ekran ma dalej pokazywać 4500.
-    zwolnienia[0]?.();
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(screen.getByTestId("input-dzielnik-gls")).toHaveValue(4500);
-
     zwolnienia[1]?.();
-    await waitFor(() => expect(screen.getByTestId("input-dzielnik-gls")).toHaveValue(4500));
-    expect(screen.getByTestId("input-dzielnik-dpd")).toHaveValue(5500);
+    await waitFor(() => expect(klient.isMutating()).toBe(0));
+    expect(najwiecejNaRaz).toBe(1);
+    expect(listaNaSerwerze.find((p) => p.id === "gls")?.dzielnik).toBe(4500);
+    expect(listaNaSerwerze.find((p) => p.id === "dpd")?.dzielnik).toBe(5500);
+    expect(screen.getByTestId("input-dzielnik-gls")).toHaveValue(4500);
   });
 
   it("zmiana nazwy zapisuje się po opuszczeniu pola", async () => {

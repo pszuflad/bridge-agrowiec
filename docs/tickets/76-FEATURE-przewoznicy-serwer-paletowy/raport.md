@@ -33,7 +33,7 @@ istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór pale
 - `rebuild/frontend/src/pages/waga-gabarytowa/TabelaPrzewoznikow.tsx` — szkice pól z zapisem na blur,
   dwa `DialogPotwierdzenia`, blokada przycisków w trakcie zapisu, dopisek „Lista jest wspólna".
 - `rebuild/frontend/src/pages/WagaGabarytowa.tsx` — `useQuery` listy, `useMutation` PUT
-  (optymistycznie, przy błędzie toast i ponowny odczyt), wyrównanie wyboru usuniętego przez kogoś
+  (optymistycznie, zapisy po kolei przez `scope`, cache i ponowny odczyt tylko dla najnowszego zapisu), wyrównanie wyboru usuniętego przez kogoś
   innego, stan „wczytywanie / błąd", kalkulator paletowy.
 - `rebuild/frontend/test/waga-gabarytowa.test.tsx` — przepisany na MSW z listą w pamięci (28 testów).
 
@@ -116,6 +116,28 @@ Runda 1 (`review.md`: 1 BLOCKER, 2 SHOULD-FIX, 2 NICE-TO-HAVE):
   aktualizacji dokumentacji (faza docs tego ticketa).
 - **Znalezione przy okazji:** test seeda migracji 007 był tautologią, bo `beforeEach` robił wcześniej
   PUT tą samą listą. Przeniesiony do osobnego `describe` ze świeżą bazą.
+
+Runda 2 (`review.md`, sekcja „Runda 2": 1 BLOCKER, 2 SHOULD-FIX, 2 NICE-TO-HAVE):
+
+- **BLOCKER — odpowiedzi PUT w odwrotnej kolejności.** Warunek `isMutating <= 1` z rundy 1 chronił
+  tylko przypadek, gdy odpowiedzi wracają w kolejności wysłania. Gdy nowszy zapis kończył się pierwszy,
+  spóźniona starsza odpowiedź cofała zmianę w cache. Gorzej: serwer podmienia całą listę i wygrywa
+  ostatni zapis, więc na serwerze mogła zostać STARSZA lista. Naprawa u źródła:
+  - zapisy listy idą po kolei, bo mutacja ma `scope: { id: "waga-gabarytowa-przewoznicy" }`
+    i następny PUT rusza dopiero po odpowiedzi na poprzedni;
+  - każdy zapis ma numer (`useRef`), a odpowiedź i błąd dotykają cache tylko dla najnowszego.
+- **SHOULD-FIX — `onError` bez tego samego warunku.** Naprawione tym samym numerem zapisu:
+  ponowny odczyt tylko po błędzie najnowszego.
+- **SHOULD-FIX — `setTimeout(50)` w teście.** Usunięty. Test „szybkie edycje z rzędu zapisują się po
+  kolei i nie cofają się nawzajem" czeka na `isMutating() === 2` (oba zapisy zlecone), liczy PUT-y
+  lecące naraz w atrapie serwera (musi być 1) i sprawdza cache po każdej odpowiedzi. Na kodzie z rundy 2
+  **pada deterministycznie** (dwa PUT-y naraz), na obecnym przechodzi; 5 kolejnych przebiegów zielonych.
+- **NICE-TO-HAVE — `disabled` na polach edycji w trakcie zapisu.** Niepotrzebne: zapisy są w kolejce,
+  a każdy liczy listę z bieżącego cache.
+- **Znany, zaakceptowany skrajny przypadek:** jeśli starszy zapis padnie, a nowszy (już w kolejce)
+  przejdzie, nowszy niesie w sobie także zmianę starszego. Użytkownik zobaczy toast „Nie zapisano",
+  choć zmiana finalnie trafi na serwer. Walidację i tak robi UI przed wysłaniem, więc zostaje błąd
+  sieci — przypadek rzadki, stan końcowy jest spójny z ekranem.
 
 ## Breaking changes
 

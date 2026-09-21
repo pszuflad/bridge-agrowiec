@@ -14,7 +14,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calculator, Info } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -64,26 +64,33 @@ export function WagaGabarytowa() {
   const listaGotowa = przewoznicy.length > 0;
 
   /**
-   * Zapis całej listy. Odpowiedź serwera zastępuje zmianę pokazaną optymistycznie
-   * (`zapiszListe` niżej) — ale tylko wtedy, gdy nie leci już następny zapis, bo inaczej
-   * odpowiedź starszego zapisu na chwilę cofnęłaby na ekranie nowszą zmianę. Przy błędzie
-   * komunikat i ponowny odczyt, żeby ekran wrócił do stanu z serwera.
+   * Numer ostatnio zleconego zapisu. Odpowiedź (albo błąd) starszego zapisu nie może nadpisać
+   * na ekranie zmiany, która poszła po nim — liczy się tylko najnowszy.
    */
-  const zapis = useMutation<Przewoznik[], Error, Przewoznik[]>({
-    mutationKey: KLUCZ_PRZEWOZNIKOW,
-    mutationFn: zapiszPrzewoznikow,
-    onSuccess: (lista) => {
-      if (klient.isMutating({ mutationKey: KLUCZ_PRZEWOZNIKOW }) <= 1) {
-        klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
-      }
+  const ostatniZapis = useRef(0);
+
+  /**
+   * Zapis całej listy. Zapisy idą PO KOLEI (`scope`): serwer podmienia całą listę i wygrywa
+   * ostatni zapis, więc dwa równoległe PUT-y z odpowiedziami w odwrotnej kolejności
+   * utrwaliłyby na serwerze STARSZĄ listę (review, runda 2). Odpowiedź trafia do cache tylko
+   * dla najnowszego zapisu; przy błędzie najnowszego — komunikat i ponowny odczyt, żeby ekran
+   * wrócił do stanu z serwera.
+   */
+  const zapis = useMutation<Przewoznik[], Error, { lista: Przewoznik[]; nr: number }>({
+    scope: { id: "waga-gabarytowa-przewoznicy" },
+    mutationFn: ({ lista }) => zapiszPrzewoznikow(lista),
+    onSuccess: (lista, { nr }) => {
+      if (nr === ostatniZapis.current) klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
     },
-    onError: (e) => {
+    onError: (e, { nr }) => {
       toast({
         title: "Nie zapisano listy przewoźników",
         description: e.message,
         variant: "destructive",
       });
-      void klient.invalidateQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
+      if (nr === ostatniZapis.current) {
+        void klient.invalidateQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
+      }
     },
   });
 
@@ -94,11 +101,12 @@ export function WagaGabarytowa() {
    * zmiana widzi już poprzednią.
    */
   const zapiszListe = async (zmiana: (aktualna: Przewoznik[]) => Przewoznik[]) => {
-    const nastepna = zmiana(klient.getQueryData<Przewoznik[]>(KLUCZ_PRZEWOZNIKOW) ?? []);
+    const lista = zmiana(klient.getQueryData<Przewoznik[]>(KLUCZ_PRZEWOZNIKOW) ?? []);
     void klient.cancelQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
-    klient.setQueryData(KLUCZ_PRZEWOZNIKOW, nastepna);
+    klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
+    ostatniZapis.current += 1;
     try {
-      await zapis.mutateAsync(nastepna);
+      await zapis.mutateAsync({ lista, nr: ostatniZapis.current });
       return true;
     } catch {
       return false; // komunikat pokazał już `onError`
