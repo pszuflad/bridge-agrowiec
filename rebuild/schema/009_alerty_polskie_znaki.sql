@@ -43,8 +43,6 @@ UPDATE alerts SET typ = 'Błąd pobierania' WHERE typ = 'B??d pobierania';
 UPDATE alerts SET typ = 'Ręczny upload'   WHERE typ = 'R?czny upload';
 UPDATE alerts SET typ = 'Błąd HTTP'       WHERE typ = 'B??d HTTP';
 
--- `typ` jest już naprawiony powyżej, ale warunek zna obie formy — żeby plik nie zależał od
--- kolejności instrukcji.
 UPDATE alerts
    SET opis = replace(replace(opis,
                 ' produkt?w (nowe: ', ' produktów (nowe: '),
@@ -52,6 +50,8 @@ UPDATE alerts
  WHERE typ = 'Synchronizacja'
    AND (instr(opis, ' produkt?w (nowe: ') > 0 OR instr(opis, ', kluczowe/b??dy: ') > 0);
 
+-- `typ` jest już naprawiony powyżej, ale warunek zna obie formy — żeby plik nie zależał od
+-- kolejności instrukcji.
 UPDATE alerts
    SET opis = replace(opis, ' produkt?w, nowe: ', ' produktów, nowe: ')
  WHERE typ IN ('Ręczny upload', 'R?czny upload')

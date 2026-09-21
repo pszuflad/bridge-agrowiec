@@ -1,6 +1,6 @@
 # 92-CHORE-migracja-typow-alertow — naprawa zepsutych polskich znaków w alertach (karta PR.3)
 
-> Status: Approved
+> Status: Implemented
 > Branch: `chore/92-migracja-typow-alertow`
 > Worktree: `.worktrees/92-CHORE-migracja-typow-alertow`
 
@@ -73,6 +73,6 @@ z `SNAPSHOT_DB=<ścieżka>/db/snapshot.db`, wynik zapisany w raporcie.
 Kod alertów (P6.1/P6.2), `docs/cutover.md`, roadmapa, fixtures.
 
 ## Definition of done
-- [ ] Na kopii snapshotu: 435 `typ` i 2219 `opis` naprawione, 0 pozostałych „?” w słowach.
-- [ ] Drugie wykonanie SQL daje 0 zmian.
-- [ ] Wszystkie bramki zielone.
+- [x] Na kopii snapshotu: 435 `typ` i 2219 `opis` naprawione, 0 pozostałych „?” w słowach.
+- [x] Drugie wykonanie SQL daje 0 zmian.
+- [x] Wszystkie bramki zielone.
