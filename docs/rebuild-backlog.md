@@ -32,11 +32,12 @@ Sugerowane sklejenie w tickety: **CSV** = #73 + #76 + #77(część) · **applica
 + #80 + #82 · **MO9** = #78 + #79(drugi hunk) · **szerokość** = #83 · **13d** = #74 + #77(delta) + #81.
 
 **Backlog rozliczony w sesji 12e (2026-09-08).** Wszystkie wpisy ✅ zostały naniesione,
-❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #39–#43) to
+❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #40, #42, #43) to
 **defekty PRODUKCJI odtworzone świadomie 1:1**, czekające na decyzję produktową Ani — żaden nie
 jest regresją odbudowy i żaden nie blokuje cutoveru. Szczegóły rozliczenia:
 `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md` (sekcja „Rozliczenie
-backlogu").
+backlogu"). **#39 i #41 rozstrzygnięte przez Anię i wdrożone 2026-09-21**
+(`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`).
 
 ---
 
@@ -2422,8 +2423,8 @@ pojawi się kolizja) i czy warto zmieniać klucz na case-sensitive po stronie ba
 | **Kategoria** | BACKEND (trasy kolejki atrybutów, audyt) |
 | **Pliki** | `mirror/backend/pending_module.cjs:199` (`const { we } = ctx` — bez `be`), `:287-289` i `:331` (masowy `UPDATE products`); dla kontrastu `mirror/backend/atrybuty_module.cjs:142,161,177,208,226,243` (sześć zapisów `be(...)`); port: `rebuild/backend/src/routes/atrybuty.ts` (`audytuj()` wołane tylko przy CRUD słownika) |
 | **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
-| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D4) |
-| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 7 |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D4); naprawione w **74** (`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`) |
+| **Status** | ✔ **zrealizowane w rebuild (ticket 74, 2026-09-21)** · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 7 (sprostowanie zaplanowane, karta P7.4) |
 
 **DECYZJA ANI 2026-09-21 (pytanie 7.1): TAK.** Cytat: „tak, ma zostawiać ślad w historii". Akcje kolejki
 atrybutów („Edytuj" i alias), które przepisują pole w setkach produktów naraz, mają zostawiać wpis
@@ -2442,13 +2443,28 @@ markę albo bieżnik w CAŁYM katalogu. Po fakcie nie da się ustalić, kto to z
 jaka była wartość poprzednia: dziennik `history` (zmiany pól produktu) też nie dostaje wpisu,
 bo UPDATE idzie surowym SQL-em z pominięciem pisarza.
 
-**Co zrobiła odbudowa.** Port 1:1 (D4): `routes/atrybuty.ts` woła `audytuj()` wyłącznie przy
-sześciu trasach CRUD słownika, kolejka pending nie loguje nic. Luka opisana komentarzem w kodzie.
+**Co zrobiła odbudowa (7a, stan sprzed ticketu 74).** Port 1:1 (D4): `routes/atrybuty.ts` wołał
+`audytuj()` wyłącznie przy sześciu trasach CRUD słownika, kolejka pending nie logowała nic.
 
-**Do decyzji.** Czy dołożyć audyt akcjom kolejki (osobne akcje `atrybut_pending_*`, z liczbą
-przepisanych produktów w szczegółach). Naprawa jest tania i nie zmienia kształtu żadnej
-odpowiedzi — koszt to rozjazd z produkcją w zawartości `audit_log`, widocznej przez
-`GET /api/history/paged`.
+**Co zrobiła odbudowa (ticket 74, 2026-09-21).** Sześć tras kolejki (`akceptuj`,
+`akceptuj-z-edycja`, `akceptuj-jako-alias`, `odrzuc`, `DELETE /api/atrybuty/pending`,
+`POST /api/atrybuty/scan-pending`) woła `audytuj()` po udanej operacji, poza transakcją repo —
+akcje `atrybut_pending_zaakceptowano`, `_zaakceptowano_z_edycja`, `_zaakceptowano_jako_alias`,
+`_odrzucono`, `_wyczyszczono`, `_skanowano`. W widoku Historii (`GET /api/history/paged`) są
+widoczne TYLKO dwie z nich — akceptacja z edycją i alias, czyli te, które przepisują produkty —
+zmapowane na istniejący typ `edycja`: `liczbaPozycji` = realna liczba przepisanych produktów
+(`produktow_zaktualizowano`), `kodProduktu` = `kolumna: „stara" → „nowa"`, `zmienionePola` =
+`["kolumna (alias|edycja z kolejki)"]`, a `uwagi` (nierysowane we froncie, ale łapane przez
+wyszukiwarkę) opisuje operację pełnym zdaniem. Pozostałe cztery akcje są tylko w `audit_log`
+(`GET /api/audit-log`). Dopisanie tych dwóch akcji do `SLOWNIK_AKCJI` jest wprost odstępstwem
+z decyzji Ani (7.1) — przy porcie widoku Historii (ticket 15, D2) świadomie tego nie robiono;
+**#21** dotyczy innych akcji (importów z URL, ręcznej synchronizacji), nie kolejki atrybutów.
+Druga decyzja użytkownika (2026-09-21, „mapowanie dla 2 akcji"): zmiana `naWpisHistorii()` jest
+konieczna właśnie dla tych dwóch akcji — bez niej wiersz Historii pokazywałby „Pozycji: 1"
+zamiast realnej liczby przepisanych produktów. Szczegóły: `docs/tickets/74-FEATURE-slad-kolejki-atrybutow/plan.md` (D1, D2).
+
+**Rozstrzygnięte (decyzja Ani 2026-09-21, wdrożone w tickecie 74).** Audyt akcji kolejki
+(`atrybut_pending_*`, z liczbą przepisanych produktów w szczegółach) dołożony, jak opisano wyżej.
 
 **Uzupełnienie 7b.** Sesja frontendowa nie naprawiła luki (poza zakresem), ale UI ostrzega
 przed masowym `UPDATE products`: dialogi „Akceptuj z edycją" i „jako alias" pokazują liczbę
@@ -2507,8 +2523,8 @@ bo wartość zasiana z `model` trafia do słownika `bieznik`.
 | **Kategoria** | BACKEND (mapowanie atrybut → kolumna `products`) |
 | **Pliki** | `mirror/backend/atrybuty_module.cjs:251-267` (`RODZAJ_KOLUMNA`, 15 pozycji — `liczniki` i `uzycie`), `mirror/backend/pending_module.cjs:22-36` (`RODZAJE_KOLUMNY`, 13 pozycji — skan i akceptacje), `:283-284` i `:326-327` (400 „Nieznany rodzaj"); port: `rebuild/backend/src/repos/atrybuty.ts:49` i `rebuild/backend/src/repos/atrybuty-pending.ts:25` |
 | **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
-| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D6) |
-| **Status** | ✔ odtworzone w rebuild (7a) · **nieosiągalne dzisiejszą ścieżką UI** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 4 |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D6); naprawione w **74** (`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`) |
+| **Status** | ✔ **zrealizowane w rebuild (ticket 74, 2026-09-21)** — jedna mapa `RODZAJ_KOLUMNA` (15) dla liczników, użycia i obu akceptacji; zakres skanu (13, bez zmian) wydzielony do jawnej listy `ZAKRES_SKANU` |
 
 **DECYZJA ANI 2026-09-21 (pytanie 7.4): TAK.** Cytat: „trzeba naprawić". Ania UŻYWA rodzajów `model`
 i `zastosowanie` w kolejce, a „Edytuj" i alias zwracają przy nich „Nieznany rodzaj". Dwie rozjeżdżone
@@ -2525,18 +2541,36 @@ iteruje po tej samej 13-pozycyjnej mapie i takich pozycji nie tworzy — ale wys
 rodzaj do mapy skanu (albo wstawić wiersz do `atrybuty_wartosci_pending` ręcznie), żeby mina
 odpaliła.
 
-**Co zrobiła odbudowa.** Obie mapy odtworzone osobno (D6), każda przy swoim repozytorium,
-z komentarzem opisującym rozjazd i jego konsekwencję.
+**Co zrobiła odbudowa (7a, stan sprzed ticketu 74).** Obie mapy odtworzone osobno (D6), każda
+przy swoim repozytorium, z komentarzem opisującym rozjazd i jego konsekwencję.
 
-**Do decyzji.** Czy zunifikować mapy. ⚠ Uwaga na kierunek: dołożenie `model` i `zastosowanie`
-do mapy SKANU sprawi, że `scan-pending` zacznie zgłaszać nowe wartości także tych rodzajów
-(dla `model` to praktycznie cały katalog — patrz **#40**) i zaleje kolejkę. Bezpieczniejszy
-wariant to zostawić zakres skanu bez zmian, a pełną mapę dać tylko akceptacjom.
+**Pomiar rozbieżności (fakt, ticket 74).** Przesłanka z pytania 7.4 („Ania UŻYWA rodzajów `model`
+i `zastosowanie` w kolejce") się nie potwierdziła. `origin/main:mirror/backend/pending_module.cjs`
+ma jeden commit (baseline `e03e2aa`, 2026-08-13), a jego mapa skanu `:22-36` jest identyczna
+z develop — **produkcja we wrześniu nie zmieniła zakresu skanu**. `db/snapshot.db`,
+`atrybuty_wartosci_pending`: `bieznik` 296, `rozmiar` 99, `marka` 68, `indeks_nosnosci` 27,
+`kategoria` 7, `konstrukcja` 1 — **0 wierszy `model`/`zastosowanie`**; jedynym pisarzem tabeli
+jest skan, w oryginale i w rebuild. Źródłem rozjazdu jest nieprawdziwe zdanie w
+`docs/instrukcja-testow-I7.md` §4 pkt 4 („Te dwa rodzaje trafiają do kolejki") — Ania odpowiadała
+na jego podstawie, nie na podstawie błędu zaobserwowanego w danych. Opis „nieosiągalne dzisiejszą
+ścieżką UI", który miał ten wpis backlogu, był trafny. Sprostowanie instrukcji: karta P7.4
+(follow-up).
 
-**Uzupełnienie 7b.** Konsekwencja widoczna teraz w UI: dla pozycji kolejki rodzaju
-`model`/`zastosowanie` akcje „Akceptuj z edycją" i „jako alias" zwrócą 400 „Nieznany rodzaj",
-a widok `/atrybuty` pokaże ten komunikat użytkowniczce (`komunikatBledu()` w
-`rebuild/frontend/src/pages/atrybuty/api.ts`).
+**Rozstrzygnięte (decyzja Ani 2026-09-21, wdrożone w tickecie 74, D3, „wariant bezpieczny").**
+Jedna mapa `RODZAJ_KOLUMNA` (15, `repos/atrybuty.ts`) dla liczników, użycia i OBU akceptacji;
+`RODZAJE_KOLUMNY` usunięta. Zakres skanu zostaje bez zmian (13 rodzajów, kolejność jak w
+oryginale) — dopisanie `model`/`zastosowanie` do skanu zalałoby kolejkę (patrz **#40**) — ale
+jest teraz jawną, osobną listą `ZAKRES_SKANU` w `repos/atrybuty-pending.ts`. Nieznany rodzaj
+(spoza 15) nadal daje 400 „Nieznany rodzaj: <rodzaj>". Fakt poboczny: `atrybuty_wartosci.rodzaj`
+ma FK do `atrybuty_rodzaje`; produkcja ma 15 rodzajów, seed rebuildu tylko 5 rdzeniowych — na
+świeżej bazie akceptacja rodzaju spoza piątki (w tym `model`/`zastosowanie`) kończy się 500
+(rollback); stan zastany, nieobecny na bazie z produkcji.
+
+**Uzupełnienie 7b (stan sprzed ticketu 74).** Konsekwencja była wtedy widoczna w UI: dla pozycji
+kolejki rodzaju `model`/`zastosowanie` akcje „Akceptuj z edycją" i „jako alias" zwracały 400
+„Nieznany rodzaj". Od ticketu 74 obie akceptacje przyjmują wszystkich 15 rodzajów (zakres skanu
+się nie zmienił, więc pozycje `model`/`zastosowanie` w kolejce dziś i tak nie powstają — patrz
+pomiar wyżej).
 
 ---
 
@@ -2572,7 +2606,7 @@ oryginału.
 **Do decyzji.** Czy porównywać wartości po normalizacji (`trim().toLowerCase()`, zwinięte
 spacje), zostawiając w słowniku i w `products` formę oryginalną. Ryzyko: sugestii będzie
 WIĘCEJ i będą inne niż dziś, a przycisk „akceptuj jako alias" przepisuje produkty w całym
-katalogu — rośnie więc koszt pomyłki (tym bardziej, że nie ma z tego audytu, **#39**). Zmiana
+katalogu — rośnie więc koszt pomyłki (od ticketu 74 akcja zostawia ślad w audycie, **#39**). Zmiana
 rozjeżdża pole `sugerowane_aliasy` z zamrożonym `GET_atrybuty_pending.json`.
 
 **Uzupełnienie 7b.** Skutek widoczny w kolejce: „BKT" i „bkt" nie dostają sugestii aliasu,

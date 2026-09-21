@@ -93,3 +93,26 @@ pojawiają się nowe akcje, a Historia pokazuje dwa nowe rodzaje wpisów `edycja
 - **Klucz obcy rodzaju:** na świeżej bazie akceptacja rodzaju spoza pięciu rdzeniowych kończy się
   500 (rollback). Stan zastany, nieobecny na bazie z produkcji. Ewentualne dosianie rodzajów
   `atrybuty_rodzaje` to osobna decyzja.
+
+## Review fixes applied
+
+Review (1 iteracja): 2 BLOCKER-y dotyczyły wyłącznie dokumentacji. Wiersz P7.1 w roadmapie i
+statusy #39/#41 w backlogu miały opisywać stan po tickecie; zamknięto je w fazie docs poniżej.
+W kodzie nie było uwag do poprawy. Dwa NICE-TO-HAVE przeszły do follow-upu: martwy fallback
+`rodzaj` w `przepisanieZKolejki()`, istotny tylko dla uszkodzonych `szczegoly_json`, oraz
+wzorzec sortowania w testach Historii przy remisie `kiedy`.
+
+## Docs updates
+
+- `docs/rebuild-roadmap.md`: P7.1 ✅ (2026-09-21, ticket 74) z faktycznym zakresem. Notatki
+  przypisano do bloków kart P7.2 (czysty punkt startu, gdzie leżą `ZAKRES_SKANU` i
+  `RODZAJ_KOLUMNA`, FK rodzaju) i P7.4 (§4 pkt 4 i 7 instrukcji I7 do sprostowania). W opisach
+  7a i 7b zdania o dwóch mapach i o braku audytu są teraz opisane jako stan sprzed P7.1.
+- `docs/rebuild-backlog.md`: #39 i #41 zrealizowane (ticket 74). W #39 zapisano wprost dopisanie
+  akcji do słownika Historii jako skutek decyzji Ani, z odróżnieniem od #21. W #41 poprawiono
+  opis faktów (pomiar: przesłanka z nieprawdziwej instrukcji, produkcja bez zmian) i dopisano fakt
+  o FK. W #42 zaktualizowano wzmiankę o audycie, a w zestawieniu statusów #39/#41 są już zamknięte.
+- `docs/spec-backend.md`: przy opisie audytu modułów atrybutów doszła nota o świadomym
+  odstępstwie rebuildu. Opis zachowania produkcji jest bez zmian.
+- Pre-existing: nieaktualne komentarze we froncie (`pages/atrybuty/api.ts`, `pages/historia/dane.ts`),
+  opisane wyżej w Follow-up.
