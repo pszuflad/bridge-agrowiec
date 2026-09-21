@@ -3951,8 +3951,8 @@ dostawców przychodzą różnie**. Rozstrzygać łącznie z #42, nie osobno.
 | **Kategoria** | BACKEND (eksport Shoper) |
 | **Pliki** | oryginał: `deminified/backend-index.cjs:48139` (`rV()`); port: `rebuild/backend/src/routes/export-shoper.ts` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-18: NIE odtwarzamy defektu produkcji** |
-| **Iteracja** | poprawki po testach — karta `P5.2` |
-| **Status** | decyzja podjęta, karta niezałożona |
+| **Iteracja** | karta `70-CHORE-eksport-zip-odstepstwo` (P5.2) |
+| **Status** | ✅ zrealizowane 2026-09-21, karta `70-CHORE-eksport-zip-odstepstwo` (P5.2) |
 
 **Na czym polega — przyczyna ZMIERZONA, nie wydedukowana.** `GET /api/export-shoper` bez
 parametru `?dostawca=` (eksport wszystkich dostawców do ZIP-a) oddaje w produkcji **zawsze
@@ -3972,8 +3972,21 @@ w `db/snapshot.db` nie ma ani jednego wiersza `eksport_csv`/`eksport_shoper`/`im
 
 **Decyzja (użytkownik, 2026-09-18): zostajemy przy wersji działającej.** Nie odtwarzamy defektu
 produkcji przez cofnięcie `archiver` — to jedno z nielicznych miejsc, gdzie odbudowa jest
-POPRAWNIEJSZA od oryginału i ma taka zostać. Zakres karty `P5.2`: potwierdzić, że trasa działa
-end-to-end po naszej stronie, dopisać test i odnotować odstępstwo jako świadome.
+POPRAWNIEJSZA od oryginału i ma taka zostać.
+
+**Realizacja (P5.2).** Bramka (`test/eksport-shoper.gate.test.ts`) ma jawny komentarz
+odstępstwa przy obu przypadkach ZIP, cytujący ten wpis. Bramka i test formatu
+(`test/eksport-shoper.format.test.ts`) sprawdzają teraz ZAWARTOŚĆ archiwum, nie tylko nagłówki —
+własny czytnik ZIP `test/gate/czytnik-zip.ts` (EOCD, katalog centralny, CRC-32), każdy wpis
+sprawdzony bajt w bajt jako równy odpowiedzi pojedynczego eksportu tego dostawcy. Nowy strażnik
+zależności `test/zaleznosci.archiver.test.ts` pada, gdy zainstalowany `archiver` nie eksportuje
+`ZipArchive`. Zakres w `package.json` zostaje `^8.0.0` bez przypinania (decyzja użytkownika
+2026-09-21, D3) — lockfile i tak trzyma `npm ci` na 8.0.0, strażnik łapie regresję przy
+regeneracji locka. Przy okazji znalezisko: błąd rzucony PO wysłaniu nagłówków ZIP-a wieszał
+klienta bez końca (`on("error")`/`pipe()` po `headersSent` nic nie kończyły); teraz trasa zrywa
+połączenie (`abort()` + `res.destroy()`, decyzja użytkownika 2026-09-21, D2) — ścieżka
+nieosiągalna w produkcji, bo tam trasa pada wcześniej, na `new ZipArchive`. Szczegóły:
+`docs/tickets/70-CHORE-eksport-zip-odstepstwo/`.
 
 **⚠ Morał do procesu, bo to już drugi raz.** Numer wpisu backlogu rezerwuj tak samo jak numer
 ticketa — sprawdzając `develop`, nie własną gałąź. Stacked PR, którego bazą jest gałąź mergowana

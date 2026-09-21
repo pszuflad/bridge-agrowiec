@@ -20,7 +20,10 @@ import {
   NAGLOWEK_EXPORT_SHOPER,
 } from "../src/selly/csv-shoper.js";
 import type { Produkt } from "../src/repos/products.js";
+import { listaDostawcow } from "../src/repos/suppliers.js";
+import { czytajZip, doBufora } from "./gate/czytnik-zip.js";
 import {
+  DOSTAWCY_TESTOWI,
   stworzSrodowiskoTestowe,
   zasiejDostawcow,
   zasiejProdukty,
@@ -29,6 +32,9 @@ import {
 
 /** BOM — pierwszy znak każdego pliku obu formatów. */
 const BOM = "﻿";
+
+/** Dostawca bez ani jednego produktu w `PRODUKTY_TESTOWE` — do wariantu ZIP. */
+const DOSTAWCA_BEZ_PRODUKTOW = { ...DOSTAWCY_TESTOWI[0]!, kod: "MO7", nazwa: "Bez produktów" };
 
 /** Minimalny produkt do testów jednostkowych formatu — pola spoza formatu są nieistotne. */
 function produkt(nadpisania: Partial<Produkt> = {}): Produkt {
@@ -185,6 +191,9 @@ describe("trasy eksportu — treść odpowiedzi end-to-end", () => {
     srodowisko = await stworzSrodowiskoTestowe();
     zasiejProdukty(srodowisko.db);
     zasiejDostawcow(srodowisko.db);
+    // Dostawca bez produktów — dla testu ZIP-a; pozostałe testy tego bloku filtrują po MO9
+    // albo czytają nagłówek, więc dodatkowy dostawca ich nie dotyczy.
+    zasiejDostawcow(srodowisko.db, [{ ...DOSTAWCA_BEZ_PRODUKTOW }]);
 
     const odp = await request(srodowisko.app)
       .post("/api/login")
@@ -210,25 +219,32 @@ describe("trasy eksportu — treść odpowiedzi end-to-end", () => {
   });
 
   /**
-   * ZIP jest strumieniowany, więc supertest dostaje go jako bufor binarny. Sprawdzamy
-   * sygnaturę `PK` i to, że w środku są nazwy plików per dostawca — bez rozpakowywania,
-   * bo nazwy wpisów w archiwum ZIP leżą jawnie w nagłówkach lokalnych.
+   * ⚠ ODSTĘPSTWO OD PRODUKCJI (backlog #93, karta P5.2): w produkcji ten ZIP nigdy nie
+   * powstaje — trasa oddaje 500, bo `archiver@5.3.2` nie ma `ZipArchive`. Treść poniżej to
+   * zachowanie KODU oryginału (`:48786-48800`), które u nas działa dzięki `archiver@8`.
+   *
+   * Każdy wpis archiwum musi być BAJT W BAJT tym samym plikiem, który daje pojedynczy eksport
+   * `?dostawca={kod}` — ZIP to tylko opakowanie, nie drugi format. Dostawca bez produktów
+   * (tu dosiany `MO7`) dostaje plik z samym BOM-em i nagłówkiem, nie zostaje pominięty.
    */
-  it("`/api/export-shoper` bez parametru oddaje ZIP z plikiem per dostawca", async () => {
-    const odp = await zAuth("/api/export-shoper").buffer(true).parse((res, cb) => {
-      const kawalki: Buffer[] = [];
-      res.on("data", (c: Buffer) => kawalki.push(c));
-      res.on("end", () => cb(null, Buffer.concat(kawalki)));
-    });
-
-    const bufor = odp.body as Buffer;
-    expect(bufor.subarray(0, 2).toString("latin1")).toBe("PK");
+  it("`/api/export-shoper` bez parametru: każdy wpis ZIP-a == pojedynczy eksport dostawcy", async () => {
+    const odp = await zAuth("/api/export-shoper").buffer(true).parse(doBufora);
+    const wpisy = czytajZip(odp.body as Buffer);
 
     const data = new Date().toISOString().slice(0, 10);
-    const tekst = bufor.toString("latin1");
-    for (const kod of ["MO1", "MO2", "MO9"]) {
-      expect(tekst, `brak wpisu dla ${kod}`).toContain(`shoper_${kod}_${data}.csv`);
+    const kody = listaDostawcow(srodowisko.db).map((d) => d.kod);
+    expect(kody).toContain("MO7");
+    expect(wpisy.map((w) => w.nazwa)).toEqual(kody.map((kod) => `shoper_${kod}_${data}.csv`));
+
+    for (const [i, kod] of kody.entries()) {
+      const pojedynczy = await zAuth(`/api/export-shoper?dostawca=${kod}`)
+        .buffer(true)
+        .parse(doBufora);
+      expect(wpisy[i]?.tresc.equals(pojedynczy.body as Buffer), kod).toBe(true);
     }
+
+    const pusty = wpisy[kody.indexOf("MO7")]?.tresc.toString("utf8");
+    expect(pusty).toBe(BOM + NAGLOWEK_EXPORT_SHOPER);
   });
 
   it("`/api/export/shoper` czyta `shoper.format_eksportu` z konfiguracji", async () => {
