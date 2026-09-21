@@ -365,9 +365,15 @@ describe("widok wagi gabarytowej — wspólna lista przewoźników", () => {
     await uzytkownik.click(screen.getByTestId("button-edycja-przewoznikow"));
     await uzytkownik.click(screen.getByTestId("button-usun-dhl"));
 
+    // DHL nie jest wybrany (wybrany jest GEIS) → zwykłe okno, treść znak w znak jak w karcie 76.
     const dialog = await screen.findByTestId("dialog-usun-przewoznika");
-    expect(dialog).toHaveTextContent("„DHL Parcel\"");
-    expect(dialog).toHaveTextContent("Lista jest wspólna");
+    expect(within(dialog).getByRole("heading")).toHaveTextContent(/^Usunąć przewoźnika\?$/);
+    expect(within(dialog).getByText(/^Przewoźnik/)).toHaveTextContent(
+      /^Przewoźnik „DHL Parcel" zniknie z listy\. Lista jest wspólna — zmiana obowiązuje wszystkich użytkowników\.$/,
+    );
+    expect(within(dialog).getByTestId("button-potwierdz")).toHaveTextContent("Usuń przewoźnika");
+    expect(within(dialog).queryByTestId("text-ostrzezenie-wybrany")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("dialog-usun-wybranego-przewoznika")).not.toBeInTheDocument();
     expect(zapisy).toHaveLength(0);
     expect(screen.getByTestId("button-usun-dhl")).toBeInTheDocument();
 
@@ -401,22 +407,75 @@ describe("widok wagi gabarytowej — wspólna lista przewoźników", () => {
 
   /**
    * Usunięcie AKTUALNIE WYBRANEGO przewoźnika przenosi wybór na pierwszego z pozostałych —
-   * bez tego kalkulator zostałby bez dzielnika (`:26881-26885`).
+   * bez tego kalkulator zostałby bez dzielnika (`:26881-26885`). Okno mówi o tym wprost i podaje
+   * następcę (karta P9.1b, ticket 84 — §3.11 Ani).
    */
-  it("usunięcie wybranego przewoźnika przenosi wybór na kolejnego", async () => {
+  it("usunięcie wybranego przewoźnika pyta mocniej, podaje następcę i przenosi na niego wybór", async () => {
+    const uzytkownik = userEvent.setup();
+    await pokazZLista();
+
+    await uzytkownik.click(screen.getByTestId("button-edycja-przewoznikow"));
+    await uzytkownik.click(screen.getByTestId("button-usun-geis"));
+
+    const dialog = await screen.findByTestId("dialog-usun-wybranego-przewoznika");
+    expect(screen.queryByTestId("dialog-usun-przewoznika")).not.toBeInTheDocument();
+    expect(within(dialog).getByRole("heading")).toHaveTextContent(
+      /^Usunąć wybranego przewoźnika\?$/,
+    );
+    expect(within(dialog).getByText(/^Przewoźnik/)).toHaveTextContent(
+      /^Przewoźnik „GEIS Polska" jest teraz wybrany w Twoim kalkulatorze\. Lista jest wspólna — zmiana obowiązuje wszystkich użytkowników\.$/,
+    );
+    expect(within(dialog).getByTestId("text-ostrzezenie-wybrany")).toHaveTextContent(
+      /^Po usunięciu kalkulator przełączy się na „DPD" i przeliczy wynik jego dzielnikiem\.$/,
+    );
+    expect(within(dialog).getByTestId("button-potwierdz")).toHaveTextContent("Usuń przewoźnika");
+    expect(zapisy).toHaveLength(0);
+
+    await uzytkownik.click(within(dialog).getByTestId("button-potwierdz"));
+
+    await waitFor(() => expect(screen.getByTestId("select-przewoznik")).toHaveValue("dpd"));
+    expect(zapisy).toHaveLength(1);
+    expect(zapisy[0]?.map((p) => p.id)).toEqual(["dpd", "gls", "inpost", "ups", "dhl"]);
+    await waitFor(() => expect(magazyn.get("waga-gabarytowa-wybrany")).toBe("dpd"));
+
+    await uzytkownik.click(screen.getByTestId("button-oblicz"));
+    expect(await screen.findByTestId("text-wynik-waga")).toHaveTextContent("25.00 kg");
+  });
+
+  it("następcą jest pierwszy z pozostałych także wtedy, gdy wybrany nie stoi na początku listy", async () => {
+    const uzytkownik = userEvent.setup();
+    await pokazZLista();
+    await uzytkownik.selectOptions(screen.getByTestId("select-przewoznik"), "gls");
+
+    await uzytkownik.click(screen.getByTestId("button-edycja-przewoznikow"));
+    await uzytkownik.click(screen.getByTestId("button-usun-gls"));
+    const dialog = await screen.findByTestId("dialog-usun-wybranego-przewoznika");
+    expect(within(dialog).getByTestId("text-ostrzezenie-wybrany")).toHaveTextContent(
+      "przełączy się na „GEIS Polska\"",
+    );
+
+    await uzytkownik.click(within(dialog).getByTestId("button-potwierdz"));
+    await waitFor(() => expect(screen.getByTestId("select-przewoznik")).toHaveValue("geis"));
+  });
+
+  it("anulowanie mocniejszego okna nie zmienia ani listy, ani wyboru", async () => {
     const uzytkownik = userEvent.setup();
     await pokazZLista();
 
     await uzytkownik.click(screen.getByTestId("button-edycja-przewoznikow"));
     await uzytkownik.click(screen.getByTestId("button-usun-geis"));
     await uzytkownik.click(
-      within(await screen.findByTestId("dialog-usun-przewoznika")).getByTestId("button-potwierdz"),
+      within(await screen.findByTestId("dialog-usun-wybranego-przewoznika")).getByTestId(
+        "button-anuluj",
+      ),
     );
 
-    await waitFor(() => expect(screen.getByTestId("select-przewoznik")).toHaveValue("dpd"));
-
-    await uzytkownik.click(screen.getByTestId("button-oblicz"));
-    expect(await screen.findByTestId("text-wynik-waga")).toHaveTextContent("25.00 kg");
+    await waitFor(() =>
+      expect(screen.queryByTestId("dialog-usun-wybranego-przewoznika")).not.toBeInTheDocument(),
+    );
+    expect(screen.getByTestId("button-usun-geis")).toBeInTheDocument();
+    expect(screen.getByTestId("select-przewoznik")).toHaveValue("geis");
+    expect(zapisy).toHaveLength(0);
   });
 
   /** Ostatni przewoźnik musi zostać — inaczej nie ma czym dzielić. Blokada PRZED pytaniem. */
@@ -430,6 +489,7 @@ describe("widok wagi gabarytowej — wspólna lista przewoźników", () => {
 
     expect(await screen.findByText("Nie można usunąć")).toBeInTheDocument();
     expect(screen.queryByTestId("dialog-usun-przewoznika")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("dialog-usun-wybranego-przewoznika")).not.toBeInTheDocument();
     expect(screen.getByDisplayValue("GEIS Polska")).toBeInTheDocument();
     expect(screen.getByTestId("select-przewoznik")).toHaveValue("geis");
     expect(zapisy).toHaveLength(0);

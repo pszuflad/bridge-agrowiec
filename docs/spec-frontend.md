@@ -315,6 +315,9 @@ ma endpoint:
 > `waga-gabarytowa-*` — wybrany przewoźnik, ostatnie wymiary, ostatni wynik; klucz z samą listą
 > przewoźników nie jest już ani czytany, ani pisany. **(2)** usunięcie przewoźnika i „Przywróć
 > domyślne" pytają o potwierdzenie (dialog, ostrzeżenie że lista jest wspólna dla firmy);
+> usunięcie przewoźnika wybranego w tej przeglądarce pokazuje drugi wariant okna — „Usunąć
+> wybranego przewoźnika?” z ramką ostrzeżenia, że kalkulator przełączy się na następcę (pierwszego
+> z pozostałych), wymienionego z nazwy (P9.1b, ticket `84`);
 > zmiana nazwy/dzielnika zapisuje się na serwer dopiero po opuszczeniu pola. **(3)** druga karta
 > „Waga paletowa (opony)" woła `POST /api/waga-gabarytowa/oblicz` (formuła BE z bloku I9 wyżej,
 > bez pamięci wyniku) — pierwszy konsument tej trasy. Szczegóły:

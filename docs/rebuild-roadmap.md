@@ -192,7 +192,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
-| 9 | Waga gabarytowa | 1 + P9.1 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 · P9.1: `76-FEATURE-przewoznicy-serwer-paletowy` · 2026-09-21 (lista przewoźników na serwerze, potwierdzenia, kalkulator paletowy w UI) |
+| 9 | Waga gabarytowa | 1 + P9.1 + P9.1b | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 · P9.1: `76-FEATURE-przewoznicy-serwer-paletowy` · 2026-09-21 (lista przewoźników na serwerze, potwierdzenia, kalkulator paletowy w UI) · P9.1b: `84-FEATURE-usun-wybranego-przewoznika` · 2026-09-21 (mocniejsze okno usunięcia wybranego przewoźnika) |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
@@ -3203,7 +3203,8 @@ sugestie 91% mogą łączyć różne produkty („MG628"→„MG638"); wyjątek 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
 | **P9.1** | wspólna lista przewoźników na serwerze + potwierdzenie usuwania + kalkulator paletowy | #27, #28 | ✅ **2026-09-21**, ticket `76-FEATURE-przewoznicy-serwer-paletowy` |
-| **P9.2** | delta instrukcji I9 dla Ani | — | ⬜ gotowe do startu (P9.1 zamknięta) |
+| **P9.1b** | mocniejsze potwierdzenie usunięcia AKTUALNIE WYBRANEGO przewoźnika (domknięcie §3.11 Ani) — tylko frontend | #27 | ✅ **2026-09-21**, ticket `84-FEATURE-usun-wybranego-przewoznika` |
+| **P9.2** | delta instrukcji I9 dla Ani | — | ⬜ gotowe do startu (P9.1 i P9.1b zamknięte) |
 
 Trzy rzeczy w jednej karcie świadomie — wszystkie w `waga-gabarytowa/**`. Seed potwierdzony przez Anię
 21.09 bez poprawek: GEIS 10 000 · DPD 6 000 · GLS 4 000 · InPost / UPS / DHL 5 000. Edytuje każdy
@@ -3224,6 +3225,16 @@ wynik i ostatnie wymiary (założenie A) — stare lokalne listy przewoźników 
 `scope` w React Query, dowieziona dopiero w rundzie 3 code review) i pełna lista decyzji Q&A:
 `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/{plan.md,raport.md,review.md}`.
 
+**P9.1b — dowieziony zakres (2026-09-21).** Luka w P9.1: jedno okno usunięcia dla każdego
+przewoźnika, a usunięcie wybranego po cichu przenosiło wybór na pierwszego z pozostałych i
+kalkulator zmieniał dzielnik bez słowa. Teraz, gdy usuwany jest przewoźnik wybrany w tej
+przeglądarce, pokazuje się drugi wariant okna z nazwą następcy i bursztynową ramką ostrzeżenia.
+Usunięcie każdego innego przewoźnika pokazuje dotychczasowe okno, znak w znak. Następca bez zmian:
+pierwszy z pozostałych (spójnie z D3 karty 76). Rozjazd z „Przywróć domyślne” (→ GEIS) zostaje
+świadomie, bo tam lista i tak zaczyna się od GEIS. Okno nie mówi nic o wyborze u innych
+użytkowników (nie znamy go). Blokada ostatniego przewoźnika bez zmian. Backend i `contract/` bez
+zmian. Szczegóły: `docs/tickets/84-FEATURE-usun-wybranego-przewoznika/`.
+
 **Odstępstwo od planu:** kontrakt dla nowych tras opisuje kształt odpowiedzi 200/400 w TEKŚCIE
 markera `x-odbudowa-nowa-trasa`, nie inline w linii statusu — generator schematów
 (`tools/generate-openapi-schemas.cjs`) przepisuje i czyści linie statusów bez fixture'a, a dla tras
@@ -3236,7 +3247,21 @@ Konsekwencja dla kart PR.3 i P6.2 (obie mogą chcieć migracji SQL) zapisana w I
 **P9.2 — delta instrukcji I9 dla Ani (do napisania).** `docs/instrukcja-testow-I9.md` po P9.1 ma
 nieaktualne fragmenty: §3.11, §4 pkt 4 i pkt 6 oraz wszystkie opisy „lista żyje w Twojej
 przeglądarce" przestały być prawdziwe (lista jest teraz na serwerze). Do instrukcji dochodzi:
-- potwierdzenie usunięcia przewoźnika (z ostrzeżeniem, że lista jest wspólna);
+- potwierdzenie usunięcia przewoźnika — **dwa warianty okna** (P9.1b, ticket `84`), opisać
+  dokładną treść obu:
+  - zwykłe (przewoźnik NIE jest wybrany w kalkulatorze tej osoby): tytuł „Usunąć przewoźnika?”,
+    treść „Przewoźnik „X” zniknie z listy. Lista jest wspólna — zmiana obowiązuje wszystkich
+    użytkowników.”, przycisk „Usuń przewoźnika”;
+  - mocniejsze (przewoźnik JEST wybrany): tytuł „Usunąć wybranego przewoźnika?”, treść
+    „Przewoźnik „X” jest teraz wybrany w Twoim kalkulatorze. Lista jest wspólna — zmiana
+    obowiązuje wszystkich użytkowników.”, pod nią bursztynowa ramka z ikoną ostrzeżenia „Po
+    usunięciu kalkulator przełączy się na „Y” i przeliczy wynik jego dzielnikiem.” (Y = pierwszy
+    z pozostałych na liście), przycisk „Usuń przewoźnika”;
+  - **wybór przewoźnika jest osobisty dla przeglądarki** (IndexedDB), nie dla firmy — dlatego
+    mocniejsze okno widzi tylko osoba, która sama ma tego przewoźnika wybranego; u innych
+    użytkowników, którzy go mieli wybranego, kalkulator po cichu przejdzie na pierwszego z listy;
+  - ostatniego przewoźnika nadal nie da się usunąć (komunikat „Nie można usunąć”, bez okna) —
+    to §3.11 Ani, bez zmian;
 - potwierdzenie „Przywróć domyślne" (zmienia listę całej firmie, nie tylko przeglądarce);
 - wspólna lista — edytuje ją każdy zalogowany, zmiany widzą wszyscy;
 - zapis nazwy/dzielnika dopiero po opuszczeniu pola (pusta nazwa albo zły dzielnik → komunikat i

@@ -7,13 +7,15 @@
  * ⚠ ODSTĘPSTWA ŚWIADOME (karta P9.1, ticket 76, backlog #27), wszystkie przez to, że lista jest
  * teraz WSPÓLNA dla firmy i żyje na serwerze, a nie w IndexedDB jednej przeglądarki:
  *  - usunięcie i „Przywróć domyślne" pytają o potwierdzenie (w oryginale działają od razu);
+ *    usunięcie przewoźnika WYBRANEGO w tej przeglądarce pyta mocniej — z ramką ostrzeżenia
+ *    i nazwą następcy, bo kalkulator po cichu przełącza dzielnik (karta P9.1b, ticket 84);
  *  - nazwa i dzielnik zapisują się po opuszczeniu pola, nie co znak (plan.md D2) — co znak
  *    oznaczałoby żądanie na każdy klawisz, a chwilowo pusta nazwa dostałaby 400. Pusta nazwa
  *    albo zły dzielnik wracają do poprzedniej wartości z komunikatem;
  *  - przyciski zapisujące są zablokowane, dopóki poprzedni zapis nie wróci z serwera.
  * Stan listy trzyma widok nadrzędny (razem z zapisem), tutaj jest prezentacja i szkice pól.
  */
-import { Info, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { Info, Plus, RotateCcw, Trash2, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 
 import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
@@ -46,6 +48,14 @@ type Szkic = { nazwa?: string; dzielnik?: string };
 function naDzielnik(tekst: string): number | null {
   const dzielnik = Number.parseFloat(tekst.replace(",", "."));
   return Number.isFinite(dzielnik) && dzielnik > 0 ? dzielnik : null;
+}
+
+/**
+ * Następca usuwanego przewoźnika w wyborze — pierwszy z pozostałych (`:26881-26885`). Jedno źródło
+ * dla okna potwierdzenia (nazwa następcy) i dla samego usunięcia, żeby mówiły to samo.
+ */
+function nastepcaPo(przewoznicy: Przewoznik[], id: string): Przewoznik | undefined {
+  return przewoznicy.find((p) => p.id !== id);
 }
 
 export function TabelaPrzewoznikow({
@@ -133,8 +143,8 @@ export function TabelaPrzewoznikow({
    */
   const usun = (id: string) => {
     ustawDoUsuniecia(null);
-    const pozostali = przewoznicy.filter((p) => p.id !== id);
-    if (wybrany === id && pozostali[0]) ustawWybranego(pozostali[0].id);
+    const nastepca = nastepcaPo(przewoznicy, id);
+    if (wybrany === id && nastepca) ustawWybranego(nastepca.id);
     void zapiszListe((aktualna) => aktualna.filter((p) => p.id !== id));
   };
 
@@ -169,9 +179,35 @@ export function TabelaPrzewoznikow({
     }
   };
 
+  /** Następca pokazywany w oknie — tylko gdy usuwany jest przewoźnik wybrany w tej przeglądarce. */
+  const nastepcaWybranego =
+    doUsuniecia && doUsuniecia.id === wybrany ? nastepcaPo(przewoznicy, doUsuniecia.id) : undefined;
+
   return (
     <Card className="p-6 mt-6">
-      {doUsuniecia ? (
+      {doUsuniecia && nastepcaWybranego ? (
+        <DialogPotwierdzenia
+          otwarty
+          tytul="Usunąć wybranego przewoźnika?"
+          tresc={`Przewoźnik „${doUsuniecia.nazwa}" jest teraz wybrany w Twoim kalkulatorze. Lista jest wspólna — zmiana obowiązuje wszystkich użytkowników.`}
+          etykietaPotwierdzenia="Usuń przewoźnika"
+          wariantPotwierdzenia="destructive"
+          onPotwierdz={() => usun(doUsuniecia.id)}
+          onZamknij={() => ustawDoUsuniecia(null)}
+          testId="dialog-usun-wybranego-przewoznika"
+        >
+          <div
+            className="flex items-start gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-sm"
+            data-testid="text-ostrzezenie-wybrany"
+          >
+            <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <span>
+              Po usunięciu kalkulator przełączy się na „{nastepcaWybranego.nazwa}" i przeliczy
+              wynik jego dzielnikiem.
+            </span>
+          </div>
+        </DialogPotwierdzenia>
+      ) : doUsuniecia ? (
         <DialogPotwierdzenia
           otwarty
           tytul="Usunąć przewoźnika?"
