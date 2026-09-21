@@ -81,3 +81,16 @@ jak w przypadku 004–006.
 Review: 0 BLOCKER, 0 SHOULD-FIX, 2 NICE-TO-HAVE. Obie uwagi poprawione: komentarz o „obu formach
 `typ`” w 009 przeniesiony nad właściwy `UPDATE` (Ręczny upload), a checkboxy DoD w `plan.md`
 odhaczone.
+
+## Aktualizacje dokumentacji
+- `docs/karty/PR.3/karta.md`: stan ✅ 2026-09-22, uzupełnione „Dowiezione” (pomiar,
+  przyczyna, skutki) i „Do koordynatora” (`cutover.md` ma dostać 009, choć brakuje w nim
+  już 008; liczba 339 w notatce dla Ani).
+- **Nowy:** `docs/karty/PR.6/wejscie-92.md` — co zmienia się w sekcji Alerty przeglądu.
+- `docs/rebuild-backlog.md`: bez zmian. Karta nie ma wpisów backlogu, a wzmianki o „339 alertach
+  Błąd pobierania” (#1223, #1263, #1979) pozostają prawdziwe, bo typ po naprawie ma tę samą nazwę.
+- Roadmapy i `docs/cutover.md` nie zmieniano (reguła 0 i zakres karty).
+
+## Kontrola numeru migracji przed pushem (2026-09-22)
+`origin/develop`: najwyższa migracja to 008. Otwarte PR-y: brak. Żywe worktree (90, 91, 93, 94)
+nie mają pliku `009_*` ani wyższego.
