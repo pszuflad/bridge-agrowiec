@@ -152,3 +152,27 @@ Review (`review.md`): 1 BLOCKER, 0 SHOULD-FIX, 2 NICE-TO-HAVE.
 
 Follow-up (dopisek): 3. **`test/scheduler.test.ts` bywa niestabilny** (obserwacja reviewera,
 reprodukcja 2/3 przy pełnym pliku). Do osobnego zgłoszenia, bo nie dotyczy tej karty.
+
+## Aktualizacje dokumentacji
+
+**`docs/rebuild-roadmap.md`:**
+- nagłówek bloku Iteracji 5 i wiersz Iteracji 5 w tabeli postępu §4: dopisane „P5.1 ✅ 2026-09-21”;
+- sprostowane dwa twierdzenia bloku I5 („`listAudit(5000)`… port 1:1”): teraz opisują ORYGINAŁ,
+  z notą, że P5.1 zdjęła limit;
+- nowy podblok `##### P5.1 — Historia bez limitu 5000` (stan, hybryda D2, gate, pomiar);
+- „Wejście dla P5.3” (P5.3 w roadmapie jeszcze nie istnieje): §11 pkt 9 instrukcji I5
+  nieaktualny; licznik i najstarsze wpisy mogą się różnić na korzyść odbudowy; wyrocznię 14j
+  przenagrywać tylko z bazy poniżej 5000 wierszy `audit_log`;
+- tabela 14j (wiersz „C — backlog”) i nota dla 14k: #87 z „⬜ do decyzji” na
+  „✅ zdecydowany i zrealizowany w P5.1”.
+
+**`docs/rebuild-backlog.md` (#87):** pola Pliki, „Do nowej wersji?” i Status zaktualizowane
+(✔ wdrożone 2026-09-21, P5.1); akapit „Dlaczego jak w produkcji” przeredagowany na
+„Tak robi ORYGINAŁ, odbudowa od P5.1 już nie”; obalone zdanie o konieczności przenagrania
+fixtures; nowa sekcja „⭐ Realizacja”. Wpis #21 sprawdzony, bez zmian.
+
+**`docs/spec-backend.md`:** sprawdzony, bez zmian (brak twierdzeń o limicie historii
+w odbudowie; „LIMIT 5000” w :173 dotyczy analityki).
+
+Istniejące wcześniej problemy: brak (zgłoszenia doc-checkerów o roadmapie i DoD rozliczone
+w tym samym commicie).
