@@ -287,17 +287,19 @@ describe("atrybuty — CRUD słownika", () => {
     });
 
     /**
-     * Mapa liczników ma 15 rodzajów, w tym `model` i `zastosowanie`, których NIE MA mapa
-     * kolejki pending (13 rodzajów, `repos/atrybuty-pending.ts`). Rozbieżność jest
-     * w oryginale i ten test ją utrwala, żeby nikt jej „nie posprzątał”.
+     * Mapa rodzaj→kolumna ma 15 rodzajów, w tym `model` i `zastosowanie` — liczniki je liczą.
+     * Skan kolejki przegląda tylko 13 (`ZAKRES_SKANU`, bez tych dwóch) i ten węższy zakres
+     * jest celowy (backlog #41): test pilnuje, żeby nikt go „nie wyrównał” przy okazji.
      */
-    it("liczniki obejmują rodzaj `model`, którego kolejka pending nie zna", async () => {
+    it("liczniki obejmują rodzaj `model`, którego skan kolejki nie przegląda", async () => {
       const odp = await get("/api/atrybuty/liczniki");
       const mapa = odp.body as Record<string, number>;
       expect(mapa["model::AGRIMAX FACTOR"]).toBe(1);
 
-      const { RODZAJE_KOLUMNY } = await import("../src/repos/atrybuty-pending.js");
-      expect(Object.hasOwn(RODZAJE_KOLUMNY, "model")).toBe(false);
+      const { ZAKRES_SKANU } = await import("../src/repos/atrybuty-pending.js");
+      expect(ZAKRES_SKANU).not.toContain("model");
+      expect(ZAKRES_SKANU).not.toContain("zastosowanie");
+      expect(ZAKRES_SKANU).toHaveLength(13);
     });
 
     it("użycie: brak `wartosc` → 400, nieznany rodzaj → 400 z jego nazwą", async () => {
