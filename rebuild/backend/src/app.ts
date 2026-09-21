@@ -6,6 +6,7 @@ import { optionalAuth } from "./middleware/auth.js";
 import { corsZAllowlisty } from "./middleware/cors.js";
 import { bladHandler, nieZnalezionoHandler } from "./middleware/errors.js";
 import { trasyAlertow } from "./routes/alerts.js";
+import { trasyAlertowKatalogu } from "./routes/alerty-katalogu.js";
 import { trasyAtrybutow } from "./routes/atrybuty.js";
 import { trasyAnalityki } from "./routes/analytics.js";
 import { zasiejSlownikAtrybutow } from "./repos/atrybuty.js";
@@ -170,6 +171,7 @@ export function stworzApp({
   app.use(trasyHistorii({ db }));
   app.use(trasyAnalityki({ db }));
   app.use(trasyAlertow({ db }));
+  app.use(trasyAlertowKatalogu({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
   app.use(trasyKonfiguracji({ db }));
   app.use(trasyKonta({ db }));

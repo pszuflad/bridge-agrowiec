@@ -22,6 +22,7 @@ import { KLUCZE_STORAGE } from "@/lib/api";
 import { _zresetujStanSesji } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
 import type { Alert } from "@/pages/alerty/api";
+import { policzAlertyKatalogu } from "@/pages/alerty/silnik-katalogu";
 import {
   TOKEN_TESTOWY,
   alertyZFixtura,
@@ -39,18 +40,40 @@ const DOSTAWCY = dostawcyZFixtura();
 /** `GET /api/staging` bez parametrów oddaje GOŁĄ TABLICĘ — bierzemy same `items` nagrania. */
 const STAGING = stronaStaginguZFixtura().items;
 
+/**
+ * Produkty z fixture'a (MO9, `dataAktualizacji` 2026-08-04) dają pseudo-alert katalogowy
+ * „Brak importu cennika" (P6.2), a jego `id` zależy od DZISIEJSZEJ daty (liczba dni jest
+ * odciskiem). Testy sekcji o alertach importu dostają go więc domyślnie jako ROZWIĄZANY —
+ * identyfikatory liczy sam silnik, więc nie zależą od dnia uruchomienia. Testy sekcji
+ * „Katalog" (blok 6) podają statusy wprost.
+ */
+function katalogowePrzykryte(): Record<string, unknown>[] {
+  return policzAlertyKatalogu(PRODUKTY, new Map()).map((a) => ({
+    id: a.id,
+    status: "rozwiazany",
+    kto: null,
+    kiedy: "2026-09-21T00:00:00.000Z",
+  }));
+}
+
 type Opcje = {
   alerty?: Alert[];
   dziennik?: Record<string, unknown>[];
+  statusyKatalogu?: Record<string, unknown>[];
 };
 
-function zamockujApi({ alerty = alertyZFixtura(), dziennik = dziennikZmianZFixtura() }: Opcje = {}) {
+function zamockujApi({
+  alerty = alertyZFixtura(),
+  dziennik = dziennikZmianZFixtura(),
+  statusyKatalogu = katalogowePrzykryte(),
+}: Opcje = {}) {
   server.use(
     http.get("*/api/products", () => HttpResponse.json(PRODUKTY)),
     http.get("*/api/staging", () => HttpResponse.json(STAGING)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
     http.get("*/api/history", () => HttpResponse.json(dziennik)),
     http.get("*/api/alerts", () => HttpResponse.json(alerty)),
+    http.get("*/api/alerty-katalogu/statusy", () => HttpResponse.json(statusyKatalogu)),
   );
 }
 
@@ -261,5 +284,103 @@ describe("5. Tabela „Ostatnia aktywność dostawców”", () => {
       .map((w) => w.getAttribute("data-testid")!.replace("row-supplier-", ""));
     const numery = kody.map((k) => parseInt(k.replace(/\D/g, ""), 10) || 0);
     expect(numery).toEqual([...numery].sort((a, b) => a - b));
+  });
+});
+
+/**
+ * Karta P6.2 (decyzja 3 z 2026-09-21): Pulpit pokazuje OBA źródła alertów — import
+ * i pseudo-alerty katalogowe liczone z `/api/products` — z podziałem na dwie sekcje.
+ * Produkty z fixture'a dają dokładnie jeden pseudo-alert: „Brak importu cennika" dla MO9
+ * (krytyczny, bo 2026-08-04 jest dawniej niż 30 dni przed dzisiejszą datą uruchomienia).
+ */
+describe("6. Pulpit a pseudo-alerty katalogowe (P6.2)", () => {
+  const ALERT_IMPORTU: Alert = {
+    id: 11,
+    poziom: "ostrzezenie",
+    typ: "Błąd pobierania",
+    opis: "timeout",
+    dostawca: "MO2",
+    status: "nowy",
+    data: "2026-09-02T10:00:00.000Z",
+  };
+  const idKatalogowego = () => policzAlertyKatalogu(PRODUKTY, new Map())[0]!.id;
+
+  it("wyliczony pseudo-alert jest dokładnie jeden i dotyczy MO9 (założenie tego bloku)", () => {
+    const alerty = policzAlertyKatalogu(PRODUKTY, new Map());
+    expect(alerty.map((a) => [a.typ, a.poziom, a.dostawca])).toEqual([
+      ["Brak importu cennika", "krytyczny", "MO9"],
+    ]);
+  });
+
+  it("kafel sumuje `nowy` z obu źródeł; „krytycznych” liczone łącznie", async () => {
+    zamockujApi({ alerty: [ALERT_IMPORTU], statusyKatalogu: [] });
+    await otworzPulpit();
+
+    await waitFor(() => expect(screen.getByTestId("kpi-alerts-value").textContent).toBe("2"));
+    expect(screen.getByText("1 krytycznych")).toBeTruthy();
+  });
+
+  it("karta ma dwie sekcje; wiersze linkują do właściwej zakładki /alerty", async () => {
+    zamockujApi({ alerty: [ALERT_IMPORTU], statusyKatalogu: [] });
+    await otworzPulpit();
+
+    const karta = await screen.findByTestId("card-recent-alerts");
+    const importu = within(karta).getByTestId("section-recent-alerts-import");
+    const katalogu = within(karta).getByTestId("section-recent-alerts-katalog");
+    expect(within(importu).getByText("Import")).toBeTruthy();
+    expect(within(katalogu).getByText("Katalog")).toBeTruthy();
+
+    const wierszImportu = within(importu).getByTestId(`row-dashboard-alert-${ALERT_IMPORTU.id}`);
+    const wierszKatalogu = within(katalogu).getByTestId(`row-dashboard-catalog-alert-${idKatalogowego()}`);
+    expect(wierszImportu.closest("a")!.getAttribute("href")).toBe("/alerty");
+    expect(wierszKatalogu.closest("a")!.getAttribute("href")).toBe("/alerty?zakladka=katalog");
+    expect(within(wierszKatalogu).getByText("Brak importu cennika")).toBeTruthy();
+    expect(screen.getByText("2 aktywnych alertów łącznie")).toBeTruthy();
+  });
+
+  it("gdy są TYLKO pseudo-alerty, karta jest, a sekcji importu nie ma", async () => {
+    zamockujApi({ alerty: [], statusyKatalogu: [] });
+    await otworzPulpit();
+
+    const karta = await screen.findByTestId("card-recent-alerts");
+    expect(within(karta).queryByTestId("section-recent-alerts-import")).toBeNull();
+    expect(within(karta).getByTestId("section-recent-alerts-katalog")).toBeTruthy();
+  });
+
+  it("przejrzany pseudo-alert znika z Pulpitu (łatka ackalerts pkt 2)", async () => {
+    zamockujApi({
+      alerty: [],
+      statusyKatalogu: [{ id: idKatalogowego(), status: "przejrzany", kto: null, kiedy: "2026-09-21T10:00:00.000Z" }],
+    });
+    await otworzPulpit();
+
+    await waitFor(() => expect(screen.getByTestId("kpi-alerts-value").textContent).toBe("0"));
+    expect(screen.queryByTestId("card-recent-alerts")).toBeNull();
+  });
+
+  it("gdy statusy padną, sekcja „Katalog” mówi to wprost zamiast udawać zero alertów", async () => {
+    zamockujApi({ alerty: [] });
+    server.use(
+      http.get("*/api/alerty-katalogu/statusy", () => new HttpResponse("Baza zablokowana", { status: 500 })),
+    );
+    await otworzPulpit();
+
+    const katalogu = await screen.findByTestId("section-recent-alerts-katalog");
+    expect(within(katalogu).getByRole("alert")).toHaveTextContent("Nie udało się policzyć alertów katalogu.");
+  });
+
+  it("zmiana statusu odświeża Pulpit przez unieważnienie zapytania (łatka ackalerts pkt 3)", async () => {
+    zamockujApi({ alerty: [], statusyKatalogu: [] });
+    await otworzPulpit();
+    await waitFor(() => expect(screen.getByTestId("kpi-alerts-value").textContent).toBe("1"));
+
+    server.use(
+      http.get("*/api/alerty-katalogu/statusy", () =>
+        HttpResponse.json([{ id: idKatalogowego(), status: "rozwiazany", kto: "Ania", kiedy: "2026-09-21T10:00:00.000Z" }]),
+      ),
+    );
+    await queryClient.invalidateQueries({ queryKey: ["/api/alerty-katalogu/statusy"] });
+
+    await waitFor(() => expect(screen.getByTestId("kpi-alerts-value").textContent).toBe("0"));
   });
 });

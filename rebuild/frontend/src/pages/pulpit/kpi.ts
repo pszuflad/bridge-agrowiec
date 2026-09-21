@@ -5,7 +5,6 @@
  * Wydzielone z komponentu, żeby dało się je sprawdzić bez DOM-u: to tutaj siedzą wszystkie
  * progi, sortowania i jedna udokumentowana usterka produkcji (`ostatniEksport` niżej).
  */
-import type { Alert } from "@/pages/alerty/api";
 import { STATUS_NOWY } from "@/pages/alerty/api";
 import type { WpisDziennikaZmian, DostawcaPulpitu } from "./api";
 
@@ -47,18 +46,22 @@ export function czyWTymTygodniu(
 }
 
 /**
+ * Minimalny kształt alertu, na którym działa dobór — wspólny dla alertów importu (`Alert`
+ * z `GET /api/alerts`) i pseudo-alertów katalogowych (`AlertKatalogu` z silnika P6.2).
+ */
+export type AlertDoPulpitu = { poziom: string; status: string; data: string };
+
+/**
  * Alerty do karty „Najnowsze powiadomienia" (`:16853-16856`): tylko `krytyczny`/`ostrzezenie`,
  * posortowane najpierw po wadze poziomu, potem po dacie MALEJĄCO, ucięte do pięciu.
  *
- * ⚠ ŹRÓDŁO ALERTÓW TO ŚWIADOME ODSTĘPSTWO (O-10f-1, decyzja D1 użytkownika z 2026-09-04).
- * Oryginał liczył tu pseudo-alerty katalogowe klientem (`pv()`, `:16631-16745` — marża
- * ujemna/niska, „nie-opona", brak importu ≥7/≥30 dni). Odbudowa karmi ten sam układ REALNYMI
- * alertami importu z `GET /api/alerts`, kontynuując decyzję D1 z Iteracji 6
- * (`docs/rebuild-backlog.md` #26). Powód: „Zobacz wszystkie" prowadzi do `/alerty`, a tamten
- * widok stoi na alertach importu — dwa różne zbiory pod jednym linkiem myliłyby bardziej
- * niż inne liczby. Sam DOBÓR i SORTOWANIE zostają portem 1:1.
+ * ŹRÓDŁA (decyzja 3 użytkownika z 2026-09-21, karta P6.2 — `docs/rebuild-backlog.md` #26).
+ * Oryginał karmił kartę WYŁĄCZNIE pseudo-alertami katalogowymi (`pv()`); odbudowa do P6.2 —
+ * wyłącznie alertami importu (O-10f-1, D1 z 2026-09-04). Od P6.2 Pulpit pokazuje OBA źródła
+ * z podziałem na dwie sekcje i ta funkcja jest wołana osobno dla każdej z nich. Sam DOBÓR
+ * i SORTOWANIE zostają portem 1:1.
  */
-export function najswiezszeAlerty(alerty: Alert[]): Alert[] {
+export function najswiezszeAlerty<A extends AlertDoPulpitu>(alerty: readonly A[]): A[] {
   return alerty
     .filter((a) => a.poziom === "krytyczny" || a.poziom === "ostrzezenie")
     .sort((a, b) =>
@@ -70,7 +73,7 @@ export function najswiezszeAlerty(alerty: Alert[]): Alert[] {
 }
 
 /** Alerty „aktywne" — status `nowy`, tak jak `pv(...).filter(e => "nowy" === e.status)` (`:16852`). */
-export function aktywneAlerty(alerty: Alert[] | null | undefined): Alert[] {
+export function aktywneAlerty<A extends AlertDoPulpitu>(alerty: readonly A[] | null | undefined): A[] {
   return (alerty ?? []).filter((a) => a.status === STATUS_NOWY);
 }
 
