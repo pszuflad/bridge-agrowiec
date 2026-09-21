@@ -1863,8 +1863,28 @@ reguł"), dokument opisuje ją razem ze zmierzonym zasięgiem **1/7405**.
 |---|---|
 | **Kategoria** | FRONTEND (widok `/alerty`) |
 | **Pliki** | `deminified/frontend-index.js:25177-25340` (`HT()`), `:16631-16705` (`pv()`), `:9165-9193` (IndexedDB `cn`/`un`) |
-| **Do nowej wersji?** | ⬜ **NADAL do decyzji** — Ania 2026-09-21 nie zrozumiała pytania, ale przysłała ZRZUT produkcji (patrz nota) |
+| **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-21 przez Anię** (pytanie 1a rundy 2): pseudo-alerty katalogowe WRACAJĄ, razem z trzecim statusem `przejrzany` |
 | **Status** | — nie zaczęte (Iteracja 6 dowiozła INNY widok pod tym adresem) |
+
+**⭐ DECYZJA ANI 2026-09-21 (runda 2, pytania 1a i 1b) — WPIS ZAMKNIĘTY NA TAK.**
+Po pokazaniu jej WŁASNEGO zrzutu zamiast opisu mechanizmu pytanie trafiło od razu:
+- **1a: „tak, potrzebuję jej w nowym Bridge"** — wariant (a). Lista ostrzeżeń liczonych na żywo
+  z katalogu (ujemna marża, bardzo niska marża, „to nie jest opona") ma wrócić. Nie zamiast
+  błędów importu — OBOK nich.
+- **1b: „używam obu"** — czyli TRZECI STATUS `przejrzany` JEST POTRZEBNY. Oryginał ma trzy stany
+  (`nowy` / `przejrzany` / `rozwiazany`) i dwa osobne przyciski („Oznacz jako przejrzany",
+  „Rozwiąż"); odbudowa ma dziś dwa stany. To domyka lukę odnotowaną w bloku I13e roadmapy
+  („trzeci status `przejrzany` istnieje w oryginale, nie w odbudowie — brak wpisu w backlogu").
+
+**Zakres karty P6.2, wynikający wprost z tych dwóch odpowiedzi:** silnik pseudo-alertów liczony
+z katalogu + trzeci status + dwa przyciski akcji. ⚠ To jedna z dwóch rzeczy, które Ania sama
+nazwała mogącymi wstrzymać cutover („najpoważniejsza różnica z całego przeglądu"), więc karta
+ma wejść PRZED przełączeniem produkcji.
+
+⚠ **Historia decyzji, warta zapamiętania jako metoda:** pierwsze pytanie („czy stare ostrzeżenia
+marżowe są Ci potrzebne?") dostało odpowiedź „nie rozumiem, co to znaczy". Drugie, z jej własnym
+zrzutem ekranu zamiast opisu mechanizmu, dostało jednoznaczne „tak". **Pytaj o to, co widzi,
+nie o to, jak to działa.**
 
 **STAN PO PYTANIU 12.2 (2026-09-21) — wpis otwarty, ale materiał dowodowy się poprawił.**
 Na pytanie „czy stare ostrzeżenia marżowe są Ci potrzebne?" Ania odpowiedziała: „nie rozumiem,
@@ -1942,6 +1962,12 @@ wybranym wprost. Sam wpis zostaje ⬜ — decyzja o powrocie pseudo-alertów jes
 | **Pliki** | `deminified/frontend-index.js:9165-9193` (store IndexedDB); port: `rebuild/frontend/src/lib/magazynKV.ts`, `pages/waga-gabarytowa/przewoznicy.ts` |
 | **Do nowej wersji?** | ✅ **port 1:1** — przeniesienie na backend ⬜ **do decyzji** |
 | **Status** | ✔ odtworzone w rebuild (I9) |
+
+**POTWIERDZENIE ANI 2026-09-21 (runda 2, pytanie 3): wszystkie sześć dzielników bez poprawek.**
+GEIS Polska 10 000 · DPD 6 000 · GLS 4 000 · InPost Kurier 5 000 · UPS 5 000 · DHL Parcel 5 000 —
+przy każdym wpisała „zgadza się". Oba wiersze na dodatkowych przewoźników zostawiła puste, czyli
+lista jest kompletna. Karta **P9.1** startuje z tymi wartościami jako seedem serwerowym; nie ma
+już potrzeby pytać jej o cokolwiek przed wdrożeniem.
 
 **Co robi produkcja.** Edytor przewoźników i dzielników (dodawanie własnego, zmiana nazwy/
 dzielnika per wiersz, usuwanie z blokadą „min. 1 przewoźnik", „Przywróć domyślne") trzyma
