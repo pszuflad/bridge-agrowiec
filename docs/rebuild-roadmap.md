@@ -157,27 +157,17 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 
 ## 4. Tablica postępu
 
-> **Stan na 2026-09-08: WSZYSTKIE iteracje 0–12 są zamknięte — pierwotna odbudowa Bridge jest
-> dowieziona.** I12 (konto, admin, hardening) zebrała po drodze wejścia z I2, I5, I7 i I11
-> i była podzielona na pięć sesji (12a–12e); **zamknięte są 12a** (mutacje produktów, BE),
-> **12b** (konto/admin/maintenance) i **12c** (dialog edycji produktu) — wszystkie 2026-09-05,
-> 12b i 12c równolegle — **12d** (przenagranie fixtures + schematy ciał, 2026-09-08) oraz
-> **12e** (finalny audyt bezpieczeństwa + rozliczenie backlogu + plan cutoveru + przegląd
-> 12 widoków, 2026-09-08). Audyt 12e **nie znalazł ani jednej otwartej dziury** w auth/CORS/
-> JWT/mass-assignment. Zostają dwa zdarzenia POZA odbudową: **przegląd 12 widoków przez Anię**
-> (`docs/przeglad-12-widokow.md`) i **cutover** (`docs/cutover.md`) — patrz §6. Czytaj blok
-> I12 w całości, bo urósł ponad pierwotny zakres (m.in. dialog edycji produktu z `/katalog`).
+> **Stan na 2026-09-21.** Pierwotna odbudowa (iteracje 0–12) jest **zamknięta od 2026-09-08**
+> (audyt 12e bez otwartych dziur). Po niej doszły trzy rodziny zmian:
+> - **I13** — delty produkcji Ani 26.08–08.09; wszystko rozliczone poza **13d (Selly) — odłożone**.
+>   Cutover idzie ze stanu produkcji 08.09, więc I13 musi być rozliczona przed nim.
+> - **I14** — uwagi Ani z testów I3 i I4; obie fale zamknięte (2026-09-19).
+> - **Plan P** — poprawki po testach I5, I6, I7, I9, I10 i przeglądzie 12 widoków; **w toku**.
+>   Otwarte karty mają katalogi `docs/karty/<ID>/`, stan: `tools/stan-kart.sh`.
 >
-> **I13 to NOWA rodzina zmian dołożona PO odbudowie** — nie część pierwotnego zakresu 0–12, tylko
-> delty, które Ania wdrożyła na produkcji 26.08–08.09 (producent milczał, zaległości wciągnięte
-> ręcznie w `6872aea`, striażowane `40-CHORE-triaz-i13-plan`). Sześć sesji 13a–13f (podział wg
-> mechanizmu portu) — czytaj blok I13. **Musi być rozliczona przed cutoverem** — cutover idzie ze
-> stanu produkcji 08.09, nie 25.08.
->
-> **I14 to ODDZIELNA rodzina — uwagi Ani z testów I3, nie delta produkcji** (2026-09-18).
-> Trzy karty FE (14a/14b/14c) rozłączne plikowo, więc idą równolegle, plus 14d (docs) na końcu.
-> Nie blokuje cutoveru tak jak I13, ale dotyczy ekranów, z których Ania korzysta codziennie —
-> czytaj blok I14 w §5.
+> Poza odbudową zostają: **przegląd 12 widoków przez Anię** (`docs/przeglad-12-widokow.md`)
+> i **cutover** (`docs/cutover.md`) — patrz §6. Tę tablicę odświeża **koordynator**, nie karty
+> (zob. §0 „Praca równoległa”).
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
@@ -186,18 +176,19 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 0 | CI/CD + środowisko staging | 1 (DevOps) | — | ✅ | pipeline HTTPS + CI + branch protection; test.agritires.eu · 2026-08-24 |
 | 1 | Fundament + logowanie | 1a BE · 1b FE | 0 | ✅ | 1a: PR #2 · 1b: PR #3 · 2026-08-25 |
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
-| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
-| 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 · **domknięta kartami z I14:** 14e diagnoza (`53-…`), 14f daty kończą promocję + potwierdzenie usuwania (`64-…`), 14h kolumna „Promocja" (`61-…`), 14m instrukcja I4-v2 (`65-…`) |
-| 5 | Historia | 1 + P5.1–P5.3 | 3 | ✅ | PR #24 · 2026-09-02 · **domknięta kartami planu P (2026-09-21):** P5.1 `69-FEATURE-historia-bez-limitu` (limit 5000 wierszy audytu zdjęty, backlog #87), P5.2 `70-CHORE-eksport-zip-odstepstwo` (#93), P5.3 `73-DOCS-instrukcja-testow-i5-v2` (delta instrukcji I5-v2) |
-| 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
-| 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
+| 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · 3f-1·3f-2·3f-3 | 2 | ✅ | PR #6, #7, #11, #12, #15, #16, #19 · 3f dołożone 2026-09-01 — szczegóły: blok I3 |
+| 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE · + karty 14e/14f/14h/14m | 2, 3 | ✅ | 4a/4b 2026-09-02 · domknięta kartami I14 2026-09-18…19 — szczegóły: bloki I4 i I14 |
+| 5 | Historia | 1 + P5.1–P5.3 | 3 | ✅ | PR #24 · 2026-09-02 · poprawki planu P zamknięte 2026-09-21 — szczegóły: blok „Poprawki po testach Ani” |
+| 6 | Alerty | 1 + P6.1–P6.3 | 3 | ✅ | `18-FEATURE-widok-alerty` · 2026-09-03 · poprawki planu P zamknięte 2026-09-21 — szczegóły: blok „Poprawki po testach Ani” |
+| 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE + P7.1–P7.5 | 2 | ✅ / 🔨 | 7a/7b/7c 2026-09-04 · poprawki planu P: blok „Poprawki po testach Ani” |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
-| 9 | Waga gabarytowa | 1 + P9.1 + P9.1b + P9.2 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 · P9.1: `76-FEATURE-przewoznicy-serwer-paletowy` · 2026-09-21 (lista przewoźników na serwerze, potwierdzenia, kalkulator paletowy w UI) · P9.1b: `84-FEATURE-usun-wybranego-przewoznika` · 2026-09-21 (mocniejsze okno usunięcia wybranego przewoźnika) · P9.2: `80-DOCS-instrukcja-testow-i9-v2` · 2026-09-21 (delta instrukcji dla Ani) — **iteracja zamknięta**; otwarte po stronie Ani: progi palety |
-| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
+| 9 | Waga gabarytowa | 1 + P9.1 · P9.1b · P9.2 | 2 | ✅ | `18-FEATURE-waga-gabarytowa` · 2026-09-03 · poprawki planu P zamknięte 2026-09-21 (otwarte po stronie Ani: progi palety) — szczegóły: blok „Poprawki po testach Ani” |
+| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f + P10.1–P10.4 | 2, 3, 4 | ✅ / 🔨 | 10a–10f 2026-09-03…04 (blok I10) · poprawki P10.x otwarte: `tools/stan-kart.sh P10` |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
-| 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
-| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f decyzja · 13a BE(parsery) · 13b BE(silnik) · 13c BE+BAZA(migracje) · 13d BE(Selly, nowy, 13d-1/2/3) · 13e FE | 3, 8 | 🔨 | Podział wg mechanizmu portu (parsery-kopia/silnik-TS/migracje/Selly/FE/decyzja). 13f: ✅ decyzja `41-CHORE-i13f-decyzja-backfille` · 2026-09-08. 13a: ✅ `42-CHORE-i13a-resync-parserow` · 2026-09-08. 13b: ✅ `43-CHORE-i13b-silnik-p3-caps` · 2026-09-09. 13c: ✅ `44-CHORE-i13c-migracje-konwencji` · 2026-09-09. 13e: ✅ `47-CHORE-i13e-frontend-bridgeone` · 2026-09-09 (realny kod tylko `szer_marka` — reszta etykiet bez kodu, patrz blok). **13d: ⛔ ODŁOŻONE** — 13d-1 sportowane (`45-FEATURE-selly-rest-sync-tor1`) i **COFNIĘTE** (revert #58, 2026-09-09), Selly dociera u Ani. Zostaje 13d. |
-| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | FALA 1: 14a FE · 14b FE · 14c FE · 14d DOCS — FALA 2: 14e diagnoza · 14f wygaszacz · 14h BE · 14i BE · 14j pomiar · 14m docs (14g skasowana) | 3, 4 | ✅ | **FALA 1 ZAMKNIĘTA 2026-09-18:** 14a: ✅ `49-CHORE-i14a-wgrywanie-reczne` · 14b: ✅ `51-FEATURE-staging-filtr-pasek-kolumny` · 14c: ✅ `50-FEATURE-i14c-karta-dostawcy-upload` · 14d: ✅ `56-DOCS-instrukcja-testow-i14` (nowy `docs/instrukcja-testow-I3-v2.md` + banner w I3). **FALA 2 ZAMKNIĘTA W CAŁOŚCI:** 14e ✅ `53-CHORE-i14e-diagnoza-promocji` (rozpoznanie, bez kodu); 14f ✅ `64-FEATURE-i14f-daty-koncza-promocje` · 2026-09-19 (wygaszacz statusu promocji w obie strony + potwierdzenie usuwania z liczbą produktów); 14h ✅ `61-FEATURE-promocja-kolumna-katalog` · 2026-09-18 (czysto backendowa); 14i ✅ `58-FEATURE-i14i-ean-naukowy-pusty` · 2026-09-18; 14j ✅ `59-CHORE-i14j-oracle-diff-historii` · 2026-09-18 (pomiar, zero kodu produkcyjnego); 14m: ✅ `65-DOCS-instrukcja-testow-i4-v2` · 2026-09-19 (nowy `docs/instrukcja-testow-I4-v2.md` + banner w I4). Źródło: wypełnione `instrukcja-testow-I3.md` i `-I4.md` (uwagi Ani + zrzuty). Oś podziału = PLIK, nie temat. Czytaj blok I14. |
+| 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a–12c 2026-09-05 · 12d, 12e 2026-09-08 — szczegóły: nagłówki sesji w bloku I12 |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f · 13a · 13b · 13c · 13d · 13e | 3, 8 | 🔨 | 13a/13b/13c/13e/13f ✅ 2026-09-08…09 · **13d ⛔ ODŁOŻONE** (13d-1 cofnięte, revert #58 — Selly dociera u Ani) — szczegóły: blok I13 |
+| 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | fala 1: 14a–14d · fala 2: 14e–14m (14g skasowana) | 3, 4 | ✅ | fala 1 zamknięta 2026-09-18 · fala 2 zamknięta 2026-09-19 — szczegóły: blok I14 |
+| P | Poprawki po testach Ani (I5, I6, I7, I9, I10, przegląd 12 widoków) | karty `P{iteracja}.{n}` i `PR.{n}` | 5–10 | 🔨 | stan każdej karty: `tools/stan-kart.sh` · karty otwarte mają katalogi `docs/karty/<ID>/` · plan: blok „Poprawki po testach Ani” |
 
 ---
 
@@ -3030,7 +3021,7 @@ zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-1
   patrz tabela „Po stronie użytkownika” niżej.
 - ⚠ **Od ticketu 82 karty tego planu NIE edytują roadmapy** — stan i ustalenia piszą w
   `docs/karty/<ID>/` (zasady: `docs/karty/README.md`). Kolumna „Stan” w tabelach niżej jest
-  zamrożona do etapu 2 migracji; aktualny stan: `tools/stan-kart.sh` + ta tabela.
+  historyczna (karty zamknięte); otwarte karty mają katalogi — etap 2 migracji, ticket 86.
 
 **Nazewnictwo — trzy różne rzeczy, trzy systemy, nie mieszać:**
 
@@ -3081,7 +3072,7 @@ przydadzą się dalej:
 |---|---|---|---|
 | **P6.1** | ✅ 2026-09-21 (72) — trzeci status `przejrzany` (przyciski słownictwem oryginału + nasza „Otwórz ponownie", domyślny filtr „Nierozwiązane") i wyszukiwarka po `opis` filtrująca wpisy PRZED grupowaniem; wspólny moduł `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx` pod P6.2 — decyzje w `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/plan.md` | #90, #26 (część) | ✅ zrobione |
 | **P6.2** ⭐ | ✅ 2026-09-21 (77) — pseudo-alerty katalogowe jako zakładka „Katalog" na `/alerty`, obok „Import" (`?zakladka=katalog`); silnik 1:1 z `origin/main` (bajtowo zgodny na `db/snapshot.db`, 25 ms mediana na 7405 produktach); status na serwerze (migracja `008`, `alerty_katalogu_statusy`, wypieranie odcisków + sierotki); filtr statusu jak P6.1, „Otwórz ponownie"; Pulpit sumuje `nowy` z obu źródeł na kaflu i pokazuje dwie sekcje na karcie — decyzje w `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/plan.md` | #26 | ✅ zrobione |
-| **P6.3** | delta instrukcji I6 dla Ani — co P6.1 I P6.2 obaliły w `docs/instrukcja-testow-I6.md`; lista w `raport.md` ticketu 72 (Follow-up) i ticketu 77 (sekcja „Do zrobienia później") | — | ⬜ P6.1 i P6.2 zrobione, może startować |
+| **P6.3** | delta instrukcji I6 dla Ani — co P6.1 I P6.2 obaliły w `docs/instrukcja-testow-I6.md`; lista w `raport.md` ticketu 72 (Follow-up) i ticketu 77 (sekcja „Do zrobienia później") | — | ✅ 2026-09-21, ticket `85-DOCS-instrukcja-testow-i6-v2` — szczegóły: [`docs/karty/P6.3/`](karty/P6.3/) |
 
 **Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
 `PATCH /api/alerts/:id` nie waliduje statusu (oryginał też nie, `routes/alerts.ts:45`), wystarczy
@@ -3304,55 +3295,29 @@ założona.
 
 #### Iteracja 10 — Analityka i Pulpit
 
-| Karta | Zakres | Wpisy | Stan |
+Otwarte karty tej iteracji żyją w **`docs/karty/<ID>/`** (zakres, decyzje, pliki, wejścia od innych
+kart) — przeniesione tam ticketem `86-DOCS-migracja-kart-etap2`. Stan: `tools/stan-kart.sh P10`.
+Poniżej tylko spis i kolejność (tabelę zmienia koordynator, nie karty).
+
+| Karta | Zakres | Wpisy | Zależy od |
 |---|---|---|---|
-| **P10.1** | klaster backendu analityki: ożywienie kart „Dostępności" + trzy poprawki towarzyszące | #31, #32, #33, #35 | ⬜ gotowe — decyzje 2026-09-21 |
-| **P10.2** | kafel „Ostatni eksport CSV" pokazuje datę | #34 | ⬜ gotowe |
-| **P10.3** | eksport CSV respektuje filtry | #91 | ⏸ zakres do decyzji |
-| **P10.4** | delta instrukcji I10 dla Ani | — | ⬜ po P10.1–P10.3 |
-
-P10.3 rusza ten sam plik tras co P10.1 — po niej, nie równolegle.
-
-**Decyzje dla P10.1 — PODJĘTE 2026-09-21 przez użytkownika, wszystkie zgodnie z rekomendacją** (pełna treść
-w backlogu). Do 21.09 wiersz stał na „gotowe", choć #31, #33 i #35 miały w backlogu „do decyzji" —
-rozjazd zamknięty. Przy #32 Ania zatwierdziła NAPRAWĘ, a wybór WARIANTU był decyzją techniczną użytkownika.
-
-| Wpis | Decyzja |
-|---|---|
-| **#32** | wariant (a): nazwa z katalogu, `LEFT JOIN products` po **`dostawca` + `kod`**; usunięty produkt → kreska |
-| **#33** | naprawić razem z #32; z duplikatów klucza brać **ostatni wpisany** (`MAX(id)`) — karta najpierw MIERZY, co import zostawia w katalogu |
-| **#31** | naprawić: nie dokładać migawki, jeśli produkt ma już dzisiejszą; **bez** indeksu unikalnego |
-| **#35** | lista znanych widoków eksportu, reszta **404** (zamiast `200` z samym BOM) → zmiana kontraktu |
-
-⚠ **Skutek dla PR.2** (kafle KPI analityki) i **P10.2** (kafel na Pulpicie): P10.1 ożywia dane, które te karty
-mogą pokazywać — obie po P10.1. P10.2 dodatkowo po P6.2 (obie ruszają Pulpit).
+| [P10.1](karty/P10.1/) | klaster backendu analityki: ożywienie kart „Dostępności” + trzy poprawki towarzyszące | #31, #32, #33, #35 | — |
+| [P10.2](karty/P10.2/) | kafel „Ostatni eksport CSV” pokazuje datę | #34 | P10.1, P6.2 |
+| [P10.3](karty/P10.3/) | eksport CSV respektuje filtry | #91 | P10.1, decyzja #91 |
+| [P10.4](karty/P10.4/) | delta instrukcji I10 dla Ani | — | P10.1–P10.3 |
 
 #### Przegląd 12 widoków
 
-| Karta | Zakres | Wpisy | Stan |
+Jak wyżej: karty w `docs/karty/<ID>/`, stan `tools/stan-kart.sh PR`.
+
+| Karta | Zakres | Wpisy | Zależy od |
 |---|---|---|---|
-| **PR.1** ⭐ | Archiwum importów — trzy trasy + widok z POBIERANIEM pliku | — | ⬜ gotowe |
-| **PR.2** | kafle KPI analityki jak na produkcji | — | ⬜ gotowe |
-| **PR.3** | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) — ⚠ migracje `007` (karta 76, PR #92 — przewoźnicy) i `008` (P6.2, ticket 77) są zajęte — PR.3 bierze `009_*.sql`; przed nadaniem numeru sprawdź develop ORAZ pliki `rebuild/schema/` na gałęziach otwartych PR-ów (rezerwacja numeru ticketa nie rezerwuje numeru migracji — kolizja 007 wyszła dopiero przed pushem P6.2) | — | ⬜ gotowe |
-| **PR.4** | diagnoza Selly „Wygeneruj CSV" na stagingu | — | ⬜ gotowe |
-| **PR.5** | duplikat marki `ALLIANCE` / `Alliance` | #92 | ⏸ decyzja |
-| **PR.6** | aktualizacja przeglądu 12 widoków | — | ⬜ na końcu |
-
-PR.1 to jedyny w całym projekcie **czysty brak funkcji obecnej w produkcji** (`archive-injection.js`
-+ `archive_module.cjs`, trzy trasy). Zakres doprecyzowany odpowiedzią Ani 12.1: używa archiwum do
-porównywania, czy plik zgadza się z katalogiem, i do weryfikacji brakujących pozycji — więc widok MUSI
-pozwalać pobrać plik, nie tylko pokazać listę.
-
-⚠ **PR.3 — jeśli poprawka `B??d`→`Błąd` idzie migracją SQL (jak `006_nazwa_caps.sql`), następny wolny
-numer to `009`** — `007` zajął `waga_gab_przewoznicy` (karta P9.1, ticket `76`), `008`
-`alerty_katalogu_statusy` (P6.2, ticket `77`), oba 2026-09-21; sprawdź `ls rebuild/schema/` na develop
-ORAZ pliki `rebuild/schema/` w otwartych PR-ach przed pisaniem pliku, nie ufaj temu numerowi bez
-świeżego sprawdzenia.
-
-**Dla PR.5 (fakt z P7.2, ticket 78, 2026-09-21):** po sprzątaniu kolejki (D1) kolejka nie
-zaproponuje już aliasu `ALLIANCE → Alliance` — pozycja `ALLIANCE` jest dosłownie w słowniku
-`marka` i znika przy sprzątaniu, zanim reguła sugestii ją zobaczy. Słownik `marka` ma dziś obie
-formy naraz. Duplikat trzeba rozwiązać po stronie danych, decyzja #92 dalej otwarta.
+| [PR.1](karty/PR.1/) ⭐ | Archiwum importów — trzy trasy + widok z POBIERANIEM pliku | — | — |
+| [PR.2](karty/PR.2/) | kafle KPI analityki jak na produkcji | — | P10.1 |
+| [PR.3](karty/PR.3/) | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) — migracja `009` | — | — |
+| [PR.4](karty/PR.4/) | diagnoza Selly „Wygeneruj CSV” na stagingu | — | — |
+| [PR.5](karty/PR.5/) | duplikat marki `ALLIANCE` / `Alliance` | #92 | decyzja #92 |
+| [PR.6](karty/PR.6/) | aktualizacja przeglądu 12 widoków | — | PR.1–PR.5 |
 
 #### ⭐ Pomiar parserów na prawdziwych cennikach (2026-09-21) — zastępuje test §8.1 instrukcji I3
 
