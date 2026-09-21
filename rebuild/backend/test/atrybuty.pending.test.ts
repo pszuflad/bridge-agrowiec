@@ -156,7 +156,7 @@ describe("atrybuty — kolejka pending", () => {
       expect(po.ostatniImport).not.toBe("2020-01-01 00:00:00");
     });
 
-    it("nie czyści kolejki — pozycja dopisana ręcznie zostaje po skanie", async () => {
+    it("pozycja spoza słownika zostaje po skanie, nawet dopisana ręcznie", async () => {
       srodowisko.db
         .insert(atrybutyWartosciPending)
         .values({ rodzaj: "marka", wartosc: "WIDMO", ileWystapien: 1, dostawcy: "" })
@@ -164,6 +164,98 @@ describe("atrybuty — kolejka pending", () => {
 
       await skanuj();
       expect(await pozycja("WIDMO")).toBeDefined();
+    });
+  });
+
+  /**
+   * Świadome odstępstwo, backlog #40, decyzja Ani 2026-09-21 (ticket 78): kolejka jest sprzątana
+   * z pozycji, których wartość jest już dosłownie w słowniku tego rodzaju — na końcu każdego skanu
+   * i przy starcie procesu, zaraz po seedzie. Oryginał tego nie robi, stąd w nagraniu produkcji
+   * pozycje podpowiadające same siebie ze 100%.
+   */
+  describe("sprzątanie kolejki z wartości obecnych w słowniku (#40)", () => {
+    const dodajDoKolejki = (rodzaj: string, wartosc: string) =>
+      srodowisko.db
+        .insert(atrybutyWartosciPending)
+        .values({ rodzaj, wartosc, ileWystapien: 1, dostawcy: "" })
+        .run();
+    const dodajDoSlownika = (rodzaj: string, wartosc: string) =>
+      srodowisko.db.insert(atrybutyWartosci).values({ rodzaj, wartosc }).run();
+    // Rodzaje rdzenia (klucz obcy `atrybuty_wartosci.rodzaj`) zakłada seed przy tworzeniu
+    // aplikacji testowej — na pustym jeszcze `products`, więc słownik marek startuje pusty.
+    const wKolejce = (rodzaj: string, wartosc: string) =>
+      srodowisko.db
+        .select()
+        .from(atrybutyWartosciPending)
+        .all()
+        .some((p) => p.rodzaj === rodzaj && p.wartosc === wartosc);
+
+    it("skan usuwa pozycje obecne w słowniku — różnych rodzajów — i nie rusza produktów", async () => {
+      await skanuj();
+      expect(await pozycja("NOKIAN HAKKA")).toBeDefined();
+
+      // wartości trafiają do słownika inną drogą (seed po restarcie, ręczne dodanie)
+      dodajDoSlownika("marka", "NOKIAN HAKKA");
+      dodajDoKolejki("kategoria", "Rolnicze"); // `CORE_WARTOSCI`, więc w słowniku od seedu
+      const przed = markiProduktow();
+
+      const odp = await skanuj();
+      expect(odp.status).toBe(200);
+      // kształt odpowiedzi bez zmian — liczba usuniętych idzie tylko do logu
+      expect(Object.keys(odp.body as object).sort()).toEqual(
+        ["nowych_wartosci", "ok", "skanowano_rodzajow", "zaktualizowano"].sort(),
+      );
+      expect(wKolejce("marka", "NOKIAN HAKKA")).toBe(false);
+      expect(wKolejce("kategoria", "Rolnicze")).toBe(false);
+      expect(markiProduktow()).toEqual(przed);
+    });
+
+    it("porównanie jest dokładne: „bkt” przy „BKT” w słowniku trafia do kolejki i zostaje", async () => {
+      dodajDoSlownika("marka", "BKT");
+      srodowisko.db
+        .insert(products)
+        .values({ ...PRODUKT_Z_NOWA_MARKA, kod: "MO1_BKT_MALE", marka: "bkt" })
+        .run();
+
+      await skanuj();
+      await skanuj(); // drugi skan też jej nie sprząta
+
+      const odp = await get("/api/atrybuty/pending?rodzaj=marka");
+      const bkt = (
+        odp.body as { items: { wartosc: string; sugerowane_aliasy: unknown[] }[] }
+      ).items.find((i) => i.wartosc === "bkt");
+      // #42: jedyną różnicą jest wielkość liter, więc alias „BKT” ze 100
+      expect(bkt?.sugerowane_aliasy).toEqual([{ wartosc: "BKT", podobienstwo: 100 }]);
+    });
+
+    it("lista nie podpowiada samej siebie, zanim skan zdąży posprzątać", async () => {
+      dodajDoKolejki("marka", "AGRI STAR II");
+      dodajDoSlownika("marka", "AGRI STAR II"); // np. dodane ręcznie w słowniku, bez skanu
+
+      const p = (
+        (await get("/api/atrybuty/pending?rodzaj=marka")).body as {
+          items: { wartosc: string; sugerowane_aliasy: { wartosc: string }[] }[];
+        }
+      ).items.find((i) => i.wartosc === "AGRI STAR II");
+      expect(p).toBeDefined();
+      expect(p!.sugerowane_aliasy.map((s) => s.wartosc)).not.toContain("AGRI STAR II");
+    });
+
+    it("start procesu sprząta kolejkę po seedzie (marka i bieżnik z `products`)", async () => {
+      const { stworzApp } = await import("../src/app.js");
+      // stan jak przed restartem: pozycje dodane skanem, zanim seed wsypał je do słownika
+      await skanuj();
+      expect(wKolejce("marka", "NOKIAN HAKKA")).toBe(true);
+      const bieznik = PRODUKT_Z_NOWA_MARKA.bieznik!;
+      expect(wKolejce("bieznik", bieznik)).toBe(true); // słownik `bieznik` był pusty przy skanie
+      dodajDoKolejki("marka", "WIDMO"); // spoza słownika i spoza produktów — zostaje
+
+      stworzApp({ env: srodowisko.env, db: srodowisko.db, sqlite: srodowisko.sqlite });
+
+      expect(wKolejce("marka", "NOKIAN HAKKA")).toBe(false);
+      expect(wKolejce("bieznik", bieznik)).toBe(false);
+      expect(wKolejce("marka", "WIDMO")).toBe(true);
+      expect(wSlowniku("marka", "NOKIAN HAKKA")).toBe(true);
     });
   });
 
@@ -506,7 +598,9 @@ describe("atrybuty — kolejka pending", () => {
         "ROZMIAR TESTOWY XD",
         "ROZMIAR TESTOWY XE",
         "ROZMIAR TESTOWY XF",
-        // Ten jest identyczny — podobieństwo 100, więc musi wylądować NA SZCZYCIE listy.
+        // Różni się tylko wielkością liter — po #42 podobieństwo 100, więc NA SZCZYCIE listy.
+        "rozmiar testowy xx",
+        // Identyczny z pozycją — po #40 NIE jest sugestią (dawniej był na szczycie ze 100).
         "ROZMIAR TESTOWY XX",
       ];
       for (const wartosc of kanoniczne) {
@@ -518,12 +612,16 @@ describe("atrybuty — kolejka pending", () => {
         .run();
 
       const items = ((await get("/api/atrybuty/pending?rodzaj=bieznik")).body as {
-        items: { wartosc: string; sugerowane_aliasy: { podobienstwo: number }[] }[];
+        items: {
+          wartosc: string;
+          sugerowane_aliasy: { wartosc: string; podobienstwo: number }[];
+        }[];
       }).items;
       const sugestie = items.find((i) => i.wartosc === "ROZMIAR TESTOWY XX")!.sugerowane_aliasy;
 
       expect(sugestie).toHaveLength(5);
-      expect(sugestie[0]!.podobienstwo).toBe(100);
+      expect(sugestie[0]).toEqual({ wartosc: "rozmiar testowy xx", podobienstwo: 100 });
+      expect(sugestie.map((s) => s.wartosc)).not.toContain("ROZMIAR TESTOWY XX");
       expect(sugestie.map((s) => s.podobienstwo)).toEqual(
         [...sugestie.map((s) => s.podobienstwo)].sort((a, b) => b - a),
       );
