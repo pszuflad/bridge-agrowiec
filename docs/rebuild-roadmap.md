@@ -179,7 +179,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 · **domknięta kartami z I14:** 14e diagnoza (`53-…`), 14f daty kończą promocję + potwierdzenie usuwania (`64-…`), 14h kolumna „Promocja" (`61-…`), 14m instrukcja I4-v2 (`65-…`) |
-| 5 | Historia | 1 + P5.1 | 3 | ✅ | PR #24 · 2026-09-02 · P5.1: `69-FEATURE-historia-bez-limitu` · 2026-09-21 (limit 5000 wierszy audytu zdjęty, backlog #87) |
+| 5 | Historia | 1 + P5.1–P5.3 | 3 | ✅ | PR #24 · 2026-09-02 · **domknięta kartami planu P (2026-09-21):** P5.1 `69-FEATURE-historia-bez-limitu` (limit 5000 wierszy audytu zdjęty, backlog #87), P5.2 `70-CHORE-eksport-zip-odstepstwo` (#93), P5.3 `73-DOCS-instrukcja-testow-i5-v2` (delta instrukcji I5-v2) |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
@@ -948,9 +948,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 5 — Historia
-- **Status:** ✅ **2026-09-02** (`15-FEATURE-historia-zmian`, PR #24)  **Sesje:** 1 + P5.1
-  **Zależy od:** 3. **P5.1 ✅ 2026-09-21** (`69-FEATURE-historia-bez-limitu`) — limit
-  5000 wierszy audytu zdjęty, patrz podblok P5.1 niżej.
+- **Status:** ✅ **2026-09-02** (`15-FEATURE-historia-zmian`, PR #24)  **Sesje:** 1 + P5.1–P5.3
+  **Zależy od:** 3. **Iteracja ZAMKNIĘTA 2026-09-21** kartami planu P: P5.1
+  (`69-FEATURE-historia-bez-limitu`, limit 5000 wierszy audytu zdjęty), P5.2
+  (`70-CHORE-eksport-zip-odstepstwo`, #93) i P5.3 (`73-DOCS-instrukcja-testow-i5-v2`, delta
+  `docs/instrukcja-testow-I5-v2.md`) — patrz podbloki niżej i blok „Poprawki po testach Ani”.
 - **Cel (Ania klika):** otwiera `/historia`, widzi log importów/eksportów/edycji z audytu — ✅ dowiezione.
 - **Backend — sprostowanie faktu, na którym stał ten blok: `Wa` to tabela `history`, NIE `historia_cen`**
   (`deminified/backend-index.cjs:43833`, jedno wystąpienie `Wa =`, brak cieniowania).
@@ -1032,8 +1034,8 @@ zmienia kolejności. Tempo zapisu (ok. 2400 wierszy/miesiąc w lipcu, 1476 w sie
 
 Szczegóły: `docs/tickets/69-FEATURE-historia-bez-limitu/`.
 
-Wejście dla P5.3 (sprostowanie instrukcji I5 §11 pkt 9) leży w bloku „Poprawki po testach
-Ani”, sekcja Iteracja 5, pod tabelą kart.
+Sprostowanie instrukcji I5 §11 pkt 9 dowiezione w P5.3 (`73-DOCS-instrukcja-testow-i5-v2`,
+2026-09-21) — `docs/instrukcja-testow-I5-v2.md`, punkty 2.1 i 3.1.
 
 ##### P5.2 — eksport ZIP jako świadome odstępstwo · ✅ ZROBIONE 2026-09-21 (`70-CHORE-eksport-zip-odstepstwo`)
 
@@ -3011,31 +3013,30 @@ pod starymi nazwami: przemianowanie zerwałoby **719 odwołań w 38 plikach**.
 |---|---|---|---|
 | **P5.1** | Historia przestaje gubić najstarsze zdarzenia — hybryda: odsiew akcji w SQL bez limitu, reszta w pamięci (decyzja D2) | #87 | ✅ `69-FEATURE-historia-bez-limitu` · 2026-09-21 |
 | **P5.2** | eksport ZIP działa u nas, w produkcji nie — utrwalić jako świadome odstępstwo | #93 | ✅ 2026-09-21, ticket 70 — szczegóły: podblok „P5.2” w bloku „Iteracja 5 — Historia” |
-| **P5.3** | delta instrukcji I5 dla Ani | — | ⬜ po P5.1 i P5.2 |
+| **P5.3** | delta instrukcji I5 dla Ani | — | ✅ `73-DOCS-instrukcja-testow-i5-v2` · 2026-09-21 |
 
 Karta `14j` (oracle diff historii, 0 różnic na 49 813 wpisach) i skasowana `14k` (#21 — NIE) też
 należą do tej iteracji. Baza dla P5.3: `docs/instrukcja-testow-I5.md`, odtworzony 21.09 z PDF-a Ani
 (ticket 67) — wcześniej nie istniał w repo.
 
-**Wejście dla P5.3 (od P5.1, 2026-09-21):**
-po P5.1 `docs/instrukcja-testow-I5.md` §11 pkt 9 („ekran czyta 5000 najświeższych zdarzeń…
-z czasem wypłynie") przestaje być prawdziwy dla odbudowy — sprostowanie należy do karty P5.3.
-Przy porównaniu obok starego Bridge licznik `N wpisów` i najstarsze wpisy mogą się różnić
-na korzyść odbudowy — to oczekiwane, nie zgłoszenie. Dodatkowo dla ewentualnego
-przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`): działa tylko na bazie PONIŻEJ
-5000 wierszy `audit_log` — powyżej progu skrypt pokaże rozjazdy z założenia (odbudowa oddaje
-więcej), co wykryje pierwszy warunek ważności w `historia.wyrocznia.test.ts`
-(`limitNieGryzie: false`).
-
-**Wejście dla P5.3 (od P5.2, 2026-09-21):** `docs/instrukcja-testow-I5.md` §8.2 („nowych
-eksportów nie wygenerujesz”) **z perspektywy Ani zostaje prawdziwy**. Obie trasy eksportu Shopera
-nie mają w UI konsumenta (`docs/spec-frontend.md`, I8 D2; w `rebuild/frontend/src` jedyne
-trafienie `export-shoper` to komentarz w `pages/katalog/eksport.ts`, który mówi, że trasy nie są
-wołane), więc z interfejsu ich nie wywoła. Backend już je ma i przy wejściu wprost na URL zapisuje
-w audycie `eksport_csv`, który Historia pokazuje jako `eksport`. Wariant ZIP robi to wyłącznie
-w odbudowie, bo w produkcji kończy się 500 bez wpisu (backlog #93, świadome odstępstwo).
-Delta nie powinna więc obiecywać Ani generowania eksportów; najwyżej wspomnieć, że wpis `eksport`
-w nowym Bridge może się pojawić tylko po ręcznym wywołaniu trasy.
+**Iteracja 5 ZAMKNIĘTA 2026-09-21 — wszystkie trzy karty zrobione.** Delta dla Ani:
+`docs/instrukcja-testow-I5-v2.md` (P5.3); pierwsza wersja dostała banner „częściowo nieaktualne”
+i zostaje jako zapis stanu z 2026-09-02 (numery paragrafów wiążące). Ustalenia P5.3, które
+przydadzą się dalej:
+- **Eksport ZIP nie ma przycisku w UI (ani oryginał, ani odbudowa)** — delta daje Ani gotowy link
+  `https://test.agritires.eu/api/export-shoper` (decyzja użytkownika 2026-09-21, świadome wyjście
+  poza regułę „zero tras API” w instrukcjach). Wpis w Historii: typ `eksport`, Dostawca „—”
+  (`encja_typ = 'dostawcy'`, liczba mnoga, nie łapie się na `encja_typ === 'dostawca'`), Pozycji =
+  liczba dostawców, Szczegóły „Format: csv Format: csv” (dublowanie `format` + `uwagi` wierne
+  oryginałowi, `fe.js:25537-25545`).
+- **Różnica po P5.1 jest dziś niewidoczna na stagingu** (snapshot 3873 wierszy `audit_log` < 5000,
+  scheduler stagingu wyłączony). Jedyny widoczny objaw: stary Bridge może zaczynać Historię później
+  niż nowy — delta każe tego nie zgłaszać.
+- **§3.3 i §12 („ręczna edycja”) pierwszej wersji były nieaktualne od 12a**, nie od P5.x — edycja
+  produktu z Katalogu („Akcje” → „Edytuj”) pisze `edycja_produktu`; delta prostuje to w osobnej
+  podsekcji. Dla przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`) nadal obowiązuje: działa
+  tylko na bazie PONIŻEJ 5000 wierszy `audit_log` (warunek `limitNieGryzie` w
+  `historia.wyrocznia.test.ts`).
 
 #### Iteracja 6 — Alerty
 
