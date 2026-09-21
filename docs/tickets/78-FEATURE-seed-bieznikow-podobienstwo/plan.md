@@ -1,6 +1,6 @@
 # 78-FEATURE-seed-bieznikow-podobienstwo — seed bieżników z `products.bieznik`, kolejka bez self-matchy, podobieństwo bez względu na wielkość liter (P7.2)
 
-> Status: Implemented
+> Status: Shipped
 > Branch: `feature/78-seed-bieznikow-podobienstwo`
 > Worktree: `.worktrees/78-FEATURE-seed-bieznikow-podobienstwo`
 

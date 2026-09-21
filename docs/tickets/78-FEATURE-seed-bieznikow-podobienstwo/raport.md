@@ -187,3 +187,26 @@ Review (1 iteracja): 0 BLOCKER, 1 SHOULD-FIX, 1 NICE-TO-HAVE.
 - NICE-TO-HAVE, do follow-upu: `listaPending` robi jedno zapytanie o kandydatów na każdą pozycję
   kolejki (N+1, zastane, 1:1 z oryginałem). Po sprzątaniu kolejka jest 8× krótsza, więc presja
   spadła.
+
+## Docs updates
+
+- `docs/rebuild-roadmap.md`:
+  - P7.2 ✅ (2026-09-21, ticket 78), z faktycznym zakresem w akapicie „P7.2 dowieziona”.
+  - Nota P7.3 „Dla P7.2” oznaczona jako zrealizowana, liczba skorygowana z 500 na 498.
+    Blok „Dla P7.2 (punkt startu czysty)” wchłonięty.
+  - Do bloku „Dla P7.4” doszła delta: §4 pkt 1 i 2 instrukcji I7 nieaktualne, kolejka ≈61,
+    marki i bieżniki znikają po restarcie, formy kanoniczne małymi literami, sugestie 91%.
+  - Wyjątek „alias na tę samą wartość (100%)” z noty o §3.11 oznaczony jako nieaktualny.
+  - Blok 7a: seed `bieznik` z `products.bieznik` od ticketu 78.
+  - Przy karcie PR.5: fakt o ALLIANCE/Alliance.
+- `docs/rebuild-backlog.md`:
+  - #40 i #42 zrealizowane (ticket 78), z sekcjami „Rozstrzygnięte” (D1–D6, pomiar
+    zanieczyszczenia, skutek i ryzyko). Stare „Do decyzji” oznaczone jako stan sprzed ticketu 78.
+  - Sprostowanie w #40: `origin='user'` to domyślna wartość kolumny, a nie ręczne dodanie.
+    Liczba 500 skorygowana na 498.
+  - #92: fakt z P7.2, status bez zmian (⬜).
+  - Podsumowanie na górze pliku zaktualizowane.
+- `docs/spec-backend.md`: nota o świadomym odstępstwie rebuildu (ticket 78, #40/#42) przy opisie
+  modułów atrybutów. Opis produkcji bez zmian.
+- `docs/spec-frontend.md`: bez zmian. Opis kolumny „Sugerowane aliasy” pozostał prawdziwy.
+- Pre-existing issues: brak nowych.
