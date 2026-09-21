@@ -32,10 +32,10 @@ Sugerowane sklejenie w tickety: **CSV** = #73 + #76 + #77(część) · **applica
 + #80 + #82 · **MO9** = #78 + #79(drugi hunk) · **szerokość** = #83 · **13d** = #74 + #77(delta) + #81.
 
 **Backlog rozliczony w sesji 12e (2026-09-08).** Wszystkie wpisy ✅ zostały naniesione,
-❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #43) to
+❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #31–#35, #43) to
 **defekty PRODUKCJI odtworzone świadomie 1:1**, czekające na decyzję produktową Ani — żaden nie
-jest regresją odbudowy i żaden nie blokuje cutoveru. (#26 od 2026-09-21 częściowo zrobiony —
-patrz wpis #26.) Szczegóły rozliczenia:
+jest regresją odbudowy i żaden nie blokuje cutoveru. (#26 ✅ zrobione 2026-09-21, ticket
+`77-FEATURE-pseudo-alerty-katalogowe` — patrz wpis #26.) Szczegóły rozliczenia:
 `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md` (sekcja „Rozliczenie
 backlogu"). **#39 i #41 rozstrzygnięte przez Anię i wdrożone 2026-09-21**
 (`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`). **#40 i #42 rozstrzygnięte przez Anię
@@ -1861,15 +1861,16 @@ reguł"), dokument opisuje ją razem ze zmierzonym zasięgiem **1/7405**.
 ### #26 · 2026-09-03 · [FRONTEND] · widok `/alerty` w oryginale NIE czyta `/api/alerts` — pseudo-alerty katalogowe pominięte
 
 > **Znalezione przy Iteracji 6 (2026-09-03), ticket `18-FEATURE-widok-alerty`.**
-> **POMINIĘTE ŚWIADOMIE, decyzja użytkownika** — nowy `/alerty` stoi na realnych alertach
-> importu. Ten wpis pilnuje, żeby wiedza o porzuconej funkcji nie zginęła.
+> **✅ ZROBIONE 2026-09-21, ticket `77-FEATURE-pseudo-alerty-katalogowe` (P6.2)** — pseudo-alerty
+> katalogowe wróciły jako zakładka „Katalog" na `/alerty`, obok „Import". Poniżej zostaje
+> historia decyzji; stan dowozu opisuje blok „CO DOWIOZŁA KARTA P6.2" niżej.
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (widok `/alerty`) |
 | **Pliki** | `deminified/frontend-index.js:25177-25340` (`HT()`), `:16631-16705` (`pv()`), `:9165-9193` (IndexedDB `cn`/`un`) |
 | **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-21 przez Anię** (pytanie 1a rundy 2): pseudo-alerty katalogowe WRACAJĄ, razem z trzecim statusem `przejrzany` |
-| **Status** | 🔨 **częściowo** — trzeci status `przejrzany` + przyciski „Oznacz jako przejrzany”/„Rozwiąż” (i nasze „Otwórz ponownie”) dowiezione dla alertów importu w **P6.1** (2026-09-21, `72-FEATURE-alerty-przejrzany-szukajka`). Pseudo-alerty katalogowe (silnik liczony z katalogu) — nadal **P6.2, nie zaczęte**. |
+| **Status** | ✅ **zrobione 2026-09-21** — trzeci status `przejrzany` + przyciski „Oznacz jako przejrzany”/„Rozwiąż” (i nasze „Otwórz ponownie”) dowiezione dla alertów importu w **P6.1** (`72-FEATURE-alerty-przejrzany-szukajka`). Pseudo-alerty katalogowe (silnik liczony z katalogu) dowiezione w **P6.2** (`77-FEATURE-pseudo-alerty-katalogowe`) jako zakładka „Katalog" na `/alerty`, obok „Import" — szczegóły w bloku niżej „CO DOWIOZŁA KARTA P6.2". |
 
 **DECYZJE WDROŻENIOWE UŻYTKOWNIKA 2026-09-21 (karta P6.2) — wszystkie zgodnie z rekomendacją.**
 
@@ -1892,8 +1893,12 @@ alertu na zawsze: gdy wartość się zmieni, alert wraca jako `nowy`.
 2. **Status: na SERWERZE.** Świadome odstępstwo — oryginał trzyma go w IndexedDB. Powód identyczny jak przy
    decyzji D1 z I6: status w przeglądarce ginie po wyczyszczeniu historii i nie przenosi się między
    komputerami; dwie listy obok siebie, z których jedna pamięta decyzje, a druga nie, byłyby gorsze niż
-   każda z opcji z osobna. Koszt: nowa tabela i trasa. ⚠ Odciski wartości w identyfikatorach sprawiają,
-   że stare wpisy statusu będą się gromadzić — karta ma zaproponować sprzątanie.
+   każda z opcji z osobna. Koszt: nowa tabela i trasa. Odciski wartości w identyfikatorach sprawiają,
+   że stare wpisy statusu by się gromadziły — P6.2 rozwiązała to sprzątaniem przy zapisie
+   („wypieranie + sierotki", Q2 niżej): zapis statusu kasuje wpisy tej samej pary
+   (produkt/dostawca + reguła) z innym odciskiem, a każdy zapis dodatkowo kasuje wpisy produktów,
+   których już nie ma w katalogu. Świadoma różnica z IndexedDB oryginału: powrót marży do
+   DOKŁADNIE starej wartości daje status „nowy", nie stary zapamiętany status.
 3. **Pulpit: OBA źródła, z podziałem.** Przy statusie na serwerze dwie łatki z 4.09 — „Pulpit respektuje
    potwierdzenia" (`ackalerts` pkt 2) i zdarzenie synchronizujące (pkt 3) — przychodzą bez dodatkowego
    mechanizmu, przez unieważnienie zapytań.
@@ -1902,6 +1907,9 @@ alertu na zawsze: gdy wartość się zmieni, alert wraca jako `nowy`.
    zachowują się tak samo.
 5. **Liczenie: w przeglądarce, jak w oryginale** — z warunkiem, że karta NAJPIERW zmierzy koszt na Pulpicie
    (jeśli dziś nie ładuje całego katalogu, przejście na (b) — trasa serwerowa — wraca do użytkownika).
+   Zmierzone na `db/snapshot.db` (7405 produktów, Node 20, 30 biegów): port **25,3 ms** mediana
+   (35,8 ms max) wobec **284,7 ms** oryginału wyciętego z bundla (oryginał buduje `new RegExp`
+   dla 35 słów przy każdym produkcie, port raz) — nieodczuwalne, licznie w przeglądarce zostaje.
 
 **⭐ DECYZJA ANI 2026-09-21 (runda 2, pytania 1a i 1b) — WPIS ZAMKNIĘTY NA TAK.**
 Po pokazaniu jej WŁASNEGO zrzutu zamiast opisu mechanizmu pytanie trafiło od razu:
@@ -1982,7 +1990,8 @@ Odbudowa karmi ten sam układ realnymi alertami importu z `GET /api/alerts` (dec
 z 2026-09-04, `docs/tickets/26-FEATURE-analityka-export-pulpit/plan.md`, odstępstwo O-10f-1) —
 dobór (poziom `krytyczny`/`ostrzezenie`, status `nowy`), sortowanie (poziom, potem data
 malejąco) i limit pięciu są portem 1:1, zmieniło się wyłącznie ŹRÓDŁO. Pseudo-alerty
-katalogowe są teraz porzucone na DWÓCH ekranach (`/alerty` i `/`), nie jednym.
+katalogowe były wtedy porzucone na DWÓCH ekranach (`/alerty` i `/`) — P6.2 (niżej) wróciła
+na oba.
 
 **Doprecyzowanie z 13e (2026-09-09, `47-CHORE-i13e-frontend-bridgeone`).** Gdyby pseudo-alerty
 kiedyś weszły, wchodzą OD RAZU w wersji **po łatkach Ani z 2026-09-04** (wpis #61), a nie
@@ -1990,7 +1999,32 @@ w wersji z deminifikatu — ten jest sprzed 04.09. To znaczy: `h2` bez tokenu `"
 `\btr-\b` łapał `TR-135` w nazwach opon BKT), `id` alertu z odciskiem wartości (potwierdzenie
 przestaje kleić się do alertu na zawsze), pulpit czytający zapisane statusy z IndexedDB
 i podający je do `pv(produkty, statusy)` oraz ukrycie alertów `rozwiazany` poza filtrem
-wybranym wprost. Sam wpis zostaje ⬜ — decyzja o powrocie pseudo-alertów jest nadal otwarta.
+wybranym wprost. Dokładnie tę wersję (po łatkach `tr_fix`/`ackalerts`) sportowała P6.2.
+
+**✅ CO DOWIOZŁA KARTA P6.2 (2026-09-21, `77-FEATURE-pseudo-alerty-katalogowe`).** Pseudo-alerty
+katalogowe wróciły jako zakładka „Katalog" na `/alerty`, obok „Import" (P6.1); silnik to port
+1:1 `v2()`/`pv()` z żywego bundla `origin/main` po łatkach `tr_fix`/`ackalerts`, zweryfikowany
+jako **bajtowo identyczny** z oryginałem na całym `db/snapshot.db` (7405 produktów).
+- **Status na serwerze** (odstępstwo od IndexedDB, decyzja 2): nowa tabela
+  `alerty_katalogu_statusy` (migracja `008`; `007` zajęła równoległa karta 76/PR #92 — **PR.3 bierze `009`**) + trasa
+  `GET/PUT /api/alerty-katalogu/statusy`.
+- **Sprzątanie tabeli (Q2):** „wypieranie + sierotki" przy każdym zapisie — nowy zapis statusu
+  kasuje wpisy tej samej pary (produkt/dostawca + reguła) z innym odciskiem wartości, a każdy
+  zapis dodatkowo kasuje wpisy produktów, których już nie ma w `products`. Świadoma różnica:
+  powrót marży do DOKŁADNIE starej wartości daje status „nowy", nie stary zapamiętany status.
+- **Filtr statusu jak P6.1 (Q3):** „Nierozwiązane" domyślnie, „Wszystkie statusy" pokazuje też
+  rozwiązane — zgodne z domyślnym widokiem oryginału (rozwiązane ukryte).
+  **Odwrócenie D3 z 13e** (ukrywanie rozwiązanych, `ackalerts` pkt 4) — teraz WCHODZI.
+- **„Otwórz ponownie" (Q4):** ten sam komponent co w zakładce Import; „nowy" = skasowanie wpisu
+  statusu.
+- **Pulpit (decyzja 3):** kafel „Aktywne alerty" sumuje `nowy` z OBU źródeł (import + katalog),
+  „N krytycznych" liczone łącznie; karta „Najnowsze powiadomienia" ma dwie sekcje, „Import" i
+  „Katalog"; synchronizacja przez `invalidateQueries`, bez `window.dispatchEvent`.
+- **Pomiar kosztu liczenia w przeglądarce (decyzja 5):** na `db/snapshot.db` port liczy mediana
+  **25,3 ms** (max 35,8 ms) wobec **284,7 ms** oryginału wyciętego z bundla — 11× szybciej
+  (oryginał buduje `new RegExp` dla 35 słów przy każdym produkcie, port raz). Nieodczuwalne,
+  licznie w przeglądarce zostaje bez przejścia na trasę serwerową.
+- Szczegóły i dowody: `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/`.
 
 ---
 
@@ -2030,6 +2064,12 @@ o potwierdzenie (`DialogPotwierdzenia`); zmiana nazwy/dzielnika zapisuje się po
 pola. Stary klucz `waga-gabarytowa-przewoznicy` w IndexedDB zostaje **nieczytany i niepisany** —
 lokalne zmiany Ani z przeglądarki nie są importowane ani usuwane, po prostu przestają mieć
 znaczenie. Szczegóły: `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
+**Uzupełnienie (P9.1b, ticket 84, 2026-09-21) — domknięcie §3.11 Ani** („szczególnie gdy jest
+aktualnie wybrany”). Usunięcie przewoźnika wybranego w tej przeglądarce pokazuje drugi, mocniejszy
+wariant okna: tytuł „Usunąć wybranego przewoźnika?”, informację, że jest wybrany w kalkulatorze,
+i bursztynową ramkę z nazwą następcy (pierwszy z pozostałych, jak dotąd). Zwykłe okno dla
+niewybranych bez zmian. Pliki: `TabelaPrzewoznikow.tsx` (już na liście). Szczegóły:
+`docs/tickets/84-FEATURE-usun-wybranego-przewoznika/`.
 
 ---
 
@@ -3198,9 +3238,9 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Kategoria** | FRONTEND (bundle zminifikowany) |
 | **Pliki** | `mirror/frontend/assets/index-BRIDGEONE….js`, `index-PRICEFMT….js` (+ kopie `.bak_{tr_fix,ackalerts,szer_marka,konstr}`) |
 | **Zmiana Ani** | Pięć etykiet, **rozkład diffu bundli zrobiony w 13e** (nazwa `.bak` dawała tylko etykietę): **rebrand** — `<title>` → „Bridge ONE — konsolidacja cenników opon" + 3× `children:"Bridge"`→`"BridgeOne"` (**bez spacji**: nagłówek mobilny, sidebar, `<h1>` logowania) + usunięcie podtytułu „dla Agrowca" w sidebarze i na logowaniu; `aria-label="Bridge"` na SVG oraz teksty pomocnicze **bez zmian**. ⚠ Rebrand jest z **2026-07-31**, nie z 09-01…04 — data w nagłówku tego wpisu opisuje nazwę PLIKU bundla, nie samą zmianę. **PRICEFMT** — w `DT` `cenaSprzedazy` odchodzi od wspólnej gałęzi z `cenaZakupu`: `toFixed(2)` → `` `${Math.floor(n)},-` `` (`1234,-`); eksport `OT` nietknięty. **tr_fix** — usunięcie tokenu `"tr-"` z listy `h2` („to nie opona"); regex `\btr-\b` łapał `TR-135` w nazwach opon BKT → fałszywy alert „Nie-opona w katalogu — błąd parsera". **ackalerts** — CZTERY zmiany: (1) odcisk wartości w `id` alertu (`-marza-ujemna-{marża}`, `-marza-niska-{marża}`, `-nie-opona-{nazwa\|kategoria}`, `-brak-importu-{dni}` w obu gałęziach ≥7 i ≥30 dni), (2) pulpit czyta `alerty-statusy` z IndexedDB i podaje do `pv(produkty, statusy)`, (3) `window.dispatchEvent(new Event("alerty-statusy-updated"))` po zapisie statusów, (4) `.filter(e => e.status!=="rozwiazany" \|\| filtrStatusu==="rozwiazany")`. **szer_marka** — **NIE kolumna**, dwie poprawki: (a) `Wfmt` traci gałąź „cała notacja `AxB`", (b) filtr „marka bez cyfr" dołożony na gałęzi SŁOWNIKOWEJ listy marek. |
-| **Do nowej wersji?** | ✅ **TAK — i już było** (decyzja **D1**, 2026-09-09). Odbudowa ma rebrand 1:1 od ticketa 2 (`751a8e2`), bo deminifikat robiono z bundla PO rebrandzie. Rozjazd zapisu „Bridge ONE" (`<title>`) vs „BridgeOne" (UI) **jest w produkcji** i odtwarzamy go świadomie — nie ujednolicamy. `tr_fix` i `ackalerts` → ❌ nie portujemy (D2/D3, brak nośnika — patrz #26). |
+| **Do nowej wersji?** | ✅ **TAK — i już było** (decyzja **D1**, 2026-09-09). Odbudowa ma rebrand 1:1 od ticketa 2 (`751a8e2`), bo deminifikat robiono z bundla PO rebrandzie. Rozjazd zapisu „Bridge ONE" (`<title>`) vs „BridgeOne" (UI) **jest w produkcji** i odtwarzamy go świadomie — nie ujednolicamy. `tr_fix` i `ackalerts` (1–3) → ✅ **sportowane w P6.2** (2026-09-21, `77-FEATURE-pseudo-alerty-katalogowe`, patrz #26) razem z silnikiem pseudo-alertów, który wcześniej był ich brakującym nośnikiem (D2 niżej — historyczne). |
 | **Iteracja** | **→ 13e ✅ zamknięte 2026-09-09** (FE; `konstr` łączy się z #58 — FE zrobiony w 13c, a łatka produkcji okazała się regresją, patrz #71). ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13d" — niezgodne z tabelą mapowania i roadmapą (FE = 13e; 13d to Selly). |
-| **Status** | ✅ **zrobione w 13e** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09). Sportowane: **tylko `szer_marka`** (oba punkty) — `formatujSzerokosc` bez gałęzi `AxB` + filtr „bez cyfr" także na gałęzi słownikowej `listaMarek`; `listaKategorii` bez zmian. **rebrand i PRICEFMT odbudowa miała już 1:1** — deminifikat to bundle `index-PRICEFMT…` w stanie SPRZED 04.09, więc port z I0–I12 wciągnął je automatycznie, a trzech łatek z 04.09 nie. Pomiar na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis szerokości; eksport CSV zmienia się razem z tabelą, bo `OT` i `DT` dzielą `Wfmt` (potwierdzone grafem wywołań w żywym bundlu; w odbudowie `eksport.ts` woła to samo `formatujSzerokosc`). ⚠ **Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, nie cały `rozmiar`** — czytać jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). **D2 — `tr_fix` i `ackalerts` (1–3) nie mają w odbudowie nośnika**: silnika pseudo-alertów (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`) świadomie nie ma (D1 z I6), więc obie łatki **pozostają zależne od decyzji przy #26**; punkt (2) jest spełniony konstrukcyjnie, bo pulpit odbudowy filtruje po `status==="nowy"` z REALNEJ odpowiedzi `GET /api/alerts`. **D3 — punktu (4) nie portujemy**: odbudowa ma DWA statusy (`nowy`/`rozwiazany`) i domyślny filtr ustawiony na `nowy`, więc reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu „nowy" — cel łatki realizuje już domyślny filtr. *(Aktualizacja P6.1, 2026-09-21, ticket 72: od tej karty odbudowa ma TRZY statusy, a domyślny filtr to „Nierozwiązane" (`status ≠ rozwiazany`), nie sam `nowy` — to realizuje cel punktu (4) łatki `ackalerts` [ukrycie `rozwiazany`] wprost, jeszcze dokładniej niż opisany tu degenerat. Samą D3 odwróciła decyzja 4 dla P6.2 [2026-09-21, patrz #26]: ukrywanie rozwiązanych wchodzi w pseudo-alertach, zbieżnie z tym filtrem.)* `konstr` po stronie FE → patrz #58 (zrobione w 13c) i #71 (regresja żywej produkcji). |
+| **Status** | ✅ **zrobione w 13e** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09). Sportowane: **tylko `szer_marka`** (oba punkty) — `formatujSzerokosc` bez gałęzi `AxB` + filtr „bez cyfr" także na gałęzi słownikowej `listaMarek`; `listaKategorii` bez zmian. **rebrand i PRICEFMT odbudowa miała już 1:1** — deminifikat to bundle `index-PRICEFMT…` w stanie SPRZED 04.09, więc port z I0–I12 wciągnął je automatycznie, a trzech łatek z 04.09 nie. Pomiar na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis szerokości; eksport CSV zmienia się razem z tabelą, bo `OT` i `DT` dzielą `Wfmt` (potwierdzone grafem wywołań w żywym bundlu; w odbudowie `eksport.ts` woła to samo `formatujSzerokosc`). ⚠ **Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, nie cały `rozmiar`** — czytać jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). **D2 — `tr_fix` i `ackalerts` (1–3), historyczne (do 2026-09-21):** silnika pseudo-alertów (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`) świadomie nie było (D1 z I6), więc obie łatki pozostawały zależne od decyzji przy #26; punkt (2) był wtedy spełniony konstrukcyjnie, bo pulpit odbudowy filtrował po `status==="nowy"` z REALNEJ odpowiedzi `GET /api/alerts`. **D3 — punktu (4), historyczne:** odbudowa miała wtedy DWA statusy (`nowy`/`rozwiazany`) i domyślny filtr ustawiony na `nowy`, więc reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu „nowy" — cel łatki realizował już domyślny filtr. *(Aktualizacja P6.1, 2026-09-21, ticket 72: od tej karty odbudowa ma TRZY statusy, a domyślny filtr to „Nierozwiązane" (`status ≠ rozwiazany`), nie sam `nowy` — to realizuje cel punktu (4) łatki `ackalerts` [ukrycie `rozwiazany`] wprost, jeszcze dokładniej niż opisany tu degenerat. Samą D3 odwróciła decyzja 4 dla P6.2 [2026-09-21, patrz #26]: ukrywanie rozwiązanych wchodzi w pseudo-alertach, zbieżnie z tym filtrem.)* **P6.2 (2026-09-21, ticket 77) domyka D2 do końca:** silnik pseudo-alertów dostał nośnika (zakładka „Katalog" na `/alerty`), więc `tr_fix` i `ackalerts` pkt 1–3 są sportowane wprost, a nie tylko konstrukcyjnie — status na serwerze zamiast IndexedDB (świadome odstępstwo, patrz #26). `konstr` po stronie FE → patrz #58 (zrobione w 13c) i #71 (regresja żywej produkcji). |
 
 ### #62 · 2026-08-26…09-04 · [BAZA] · Backfille danych (tl_tt / szerokości ułamkowe / JMK) — DECYZJA
 | pole | wartość |

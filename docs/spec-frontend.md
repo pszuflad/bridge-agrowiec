@@ -120,13 +120,15 @@ ma endpoint:
   `/alerty` na REALNYCH alertach importu z `/api/alerts`, ze statusem przez `PATCH
   /api/alerts/{id}` (świadome odejście od oryginału), z grupowaniem powtórek w widoku, bo zapis
   nie ma dławika (339 alertów „Błąd pobierania" w produkcji, do 23/dobę na jednego dostawcę).
-  Pseudo-alerty katalogowe oryginału **świadomie pominięte** — `docs/rebuild-backlog.md` #26
-  (⬜ do decyzji). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+  Pseudo-alerty katalogowe oryginału (P6.2, `77-FEATURE-pseudo-alerty-katalogowe`, 2026-09-21)
+  **wróciły jako druga zakładka** „Katalog" obok „Import" — patrz P6.2 niżej. Szczegóły I6:
+  `docs/tickets/18-FEATURE-widok-alerty/`.
   ⚠ **Doprecyzowanie (13e, 2026-09-09):** dwie łatki produkcji z 2026-09-04 — `tr_fix` (token
   `"tr-"` znika z listy słów „to nie opona", bo `\btr-\b` łapał `TR-135` w nazwach opon BKT)
   i `ackalerts` (odcisk wartości w `id` alertu, potwierdzenia respektowane na Pulpicie, ukrycie
-  „rozwiązanych") — żyją WYŁĄCZNIE w tym pseudo-alertowym silniku, więc odbudowa nie ma czego
-  portować (D2/D3, `docs/tickets/47-CHORE-i13e-frontend-bridgeone/`).
+  „rozwiązanych") — żyły WYŁĄCZNIE w tym pseudo-alertowym silniku; P6.2 przeniosła obie 1:1
+  do `silnik-katalogu.ts` (`docs/tickets/47-CHORE-i13e-frontend-bridgeone/` — analiza łatek,
+  `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/` — port).
 - **Waga gabarytowa** — liczona w przeglądarce, choć `POST /api/waga-gabarytowa/oblicz` istnieje.
   Nie jest to przeoczenie: BE liczy inny wzór (paletowy/oponowy), a widok — wolumetryczny
   kurierski z wyborem przewoźnika, objętością m³ i wagą do wyceny; podpięcie pod endpoint
@@ -290,6 +292,23 @@ ma endpoint:
 > z filtrami; trafienie liczy się PRZED grupowaniem, więc licznik grupy i akcja grupowa obejmują
 > tylko pasujące wpisy. Szczegóły: `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/`.
 
+> **Odbudowa (P6.2, `77-FEATURE-pseudo-alerty-katalogowe`, 2026-09-21):** `/alerty` ma teraz
+> dwie zakładki — „Import" (P6.1, wyżej, domyślna) i „Katalog" (`?zakladka=katalog`, żeby Pulpit
+> mógł linkować wprost). Zakładka „Katalog" to port 1:1 silnika `v2()`/`pv()` z żywego bundla
+> `origin/main` PO łatkach 04.09 (`tr_fix`, `ackalerts`) — cztery reguły (marża ujemna, bardzo
+> niska marża, „nie-opona" wg klasyfikatora `klasyfikujOpone`, brak importu cennika u dostawcy;
+> `MO7`/`MO8` wykluczeni z ostatniej), liczone **w przeglądarce** z `GET /api/products`
+> (`silnik-katalogu.ts`, ~25 ms na 7405 produktach, ok. 11x szybciej niż oryginał, bo regexy
+> budowane raz zamiast w pętli — dowiedzione bit-identycznym wynikiem na `db/snapshot.db`).
+> Filtry poziomu i statusu (domyślnie „Nierozwiązane", jak P6.1), „Zaakceptuj wszystko",
+> wspólne przyciski statusu z P6.1. **Odstępstwo od oryginału:** status pseudo-alertu trzymany
+> **na serwerze** (nowa trasa `GET`/`PUT /api/alerty-katalogu/statusy`, tabela
+> `alerty_katalogu_statusy` z wypieraniem starych odcisków tej samej pary i sprzątaniem sierot),
+> nie w IndexedDB `alerty-statusy` — zapis natychmiastowy, bez debounce 300 ms oryginału. Trasa
+> jest ręcznym dopiskiem do `contract/openapi.yaml` bez fixture'a (w produkcji status żyje w
+> przeglądarce, nagrania nie ma i być nie może). Szczegóły:
+> `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/`.
+
 > **Odbudowa (I9, `18-FEATURE-waga-gabarytowa`, 2026-09-03):** `/waga-gabarytowa` odbudowany —
 > router ma **12 tras, 4 placeholdery**. Ustalenie ticketa: BE i FE liczą **dwa różne wzory**,
 > nie ten sam w dwóch miejscach (BE: formuła paletowa/oponowa, patrz `spec-backend.md`; FE:
@@ -315,6 +334,9 @@ ma endpoint:
 > `waga-gabarytowa-*` — wybrany przewoźnik, ostatnie wymiary, ostatni wynik; klucz z samą listą
 > przewoźników nie jest już ani czytany, ani pisany. **(2)** usunięcie przewoźnika i „Przywróć
 > domyślne" pytają o potwierdzenie (dialog, ostrzeżenie że lista jest wspólna dla firmy);
+> usunięcie przewoźnika wybranego w tej przeglądarce pokazuje drugi wariant okna — „Usunąć
+> wybranego przewoźnika?” z ramką ostrzeżenia, że kalkulator przełączy się na następcę (pierwszego
+> z pozostałych), wymienionego z nazwy (P9.1b, ticket `84`);
 > zmiana nazwy/dzielnika zapisuje się na serwer dopiero po opuszczeniu pola. **(3)** druga karta
 > „Waga paletowa (opony)" woła `POST /api/waga-gabarytowa/oblicz` (formuła BE z bloku I9 wyżej,
 > bez pamięci wyniku) — pierwszy konsument tej trasy. Szczegóły:
@@ -445,11 +467,21 @@ ma endpoint:
 > sort poziom→data malejąco, karta nieobecna gdy brak alertów) i tabela „Ostatnia aktywność
 > dostawców" (9 kolumn) z `GET /api/suppliers`. **Odstępstwo O-10f-1 (D1):** oryginalny Pulpit
 > (`N2`, `frontend-index.js:16836-17090`) nie woła ani `/api/analytics/*`, ani `/api/alerts` —
-> alerty wyprowadza klientem z `/api/products` przez `pv()`; odbudowa karmi ten sam layout
-> realnymi alertami z `GET /api/alerts` (kontynuacja D1 z I6, `docs/rebuild-backlog.md` #26).
-> Kafel „Ostatni eksport CSV" jest **trwale martwy** (D3) — szuka `typ==="eksport"` w
-> `GET /api/history`, a ten wiersz nie ma pola `typ`. Szczegóły:
+> alerty wyprowadza klientem wyłącznie z `/api/products` przez `pv()`; odbudowa (I6) karmiła ten
+> layout realnymi alertami z `GET /api/alerts`. Kafel „Ostatni eksport CSV" jest **trwale martwy**
+> (D3) — szuka `typ==="eksport"` w `GET /api/history`, a ten wiersz nie ma pola `typ`. Szczegóły:
 > `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
+>
+> **Odbudowa (P6.2, `77-FEATURE-pseudo-alerty-katalogowe`, 2026-09-21) — decyzja 3:** Pulpit
+> znów liczy też pseudo-alerty katalogowe (jak oryginalny `N2()`), OBOK realnych alertów importu
+> z I6 — świadome scalenie dwóch źródeł, nie powrót do 1:1. Kafel „Aktywne alerty" sumuje status
+> `nowy` z obu źródeł (podpis „N krytycznych" też łącznie — w praktyce krytyczne wychodzą tylko
+> z katalogu, bo alerty importu nie mają tego poziomu); karta „Najnowsze powiadomienia" ma dwie
+> sekcje „Import"/„Katalog" (≤5 każda, ten sam dobór/sortowanie co dotąd), znikające niezależnie,
+> z linkiem do właściwej zakładki `/alerty`. Odświeżenie po zmianie statusu idzie przez
+> `invalidateQueries` (odpowiednik łatek `ackalerts` pkt 2/3), nie `window.dispatchEvent`. Gdy
+> statusy katalogu nie dają się wczytać, sekcja „Katalog" pokazuje komunikat błędu zamiast cichego
+> zera. Szczegóły: `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/`.
 
 > **Odbudowa (7b, `31-FEATURE-atrybuty-frontend`, 2026-09-04):** `/atrybuty` odbudowany natywnie —
 > router ma **12 tras, 1 placeholder** (`/moje-konto`). Produkcyjny ekran ma **trzy warstwy**, nie

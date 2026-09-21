@@ -50,6 +50,10 @@ stanu dostawców i katalogu.
 - [ ] ✅ / ❌ — przełącznik jasny/ciemny (ikona słońca/księżyca w menu) działa, a wybór
       zostaje po odświeżeniu strony.
 
+> ⚠ **Od P6.2 (77, 2026-09-21):** kafel „Aktywne alerty" i karta „Najnowsze powiadomienia"
+> liczą łącznie alerty importu i pseudo-alerty katalogowe (marża, nie-opona, brak importu
+> cennika) — druga sekcja karty i wiersze prowadzą do zakładki „Katalog" na `/alerty`.
+
 ---
 
 ## 2. Staging — adres `/staging`
@@ -135,12 +139,15 @@ Najważniejszy ekran. Poświęć mu najwięcej czasu.
 
 ## 6. Alerty — adres `/alerty`
 
-**Ma się pokazać:** lista alertów o dostawcach i imporcie, z poziomami ważności.
+**Ma się pokazać:** dwie zakładki, „Import" (domyślna) i „Katalog". „Import" — lista alertów
+o dostawcach i imporcie, z poziomami ważności. „Katalog" — pseudo-alerty liczone na żywo z
+katalogu (marża ujemna, bardzo niska marża, produkt sklasyfikowany jako nie-opona, brak
+importu cennika u dostawcy).
 
 **Do kliknięcia:**
 - [ ] ✅ / ❌ — alerty są pogrupowane i da się je odczytać.
 - [ ] ✅ / ❌ — oznaczasz alert jako obsłużony i zmienia stan.
-- [ ] ✅ / ❌ — filtr po poziomie (krytyczny / ostrzeżenie) działa.
+- [ ] ✅ / ❌ — na zakładce „Katalog" filtr po poziomie (krytyczny / ostrzeżenie / info) działa.
 
 ---
 
