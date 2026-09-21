@@ -80,16 +80,31 @@ export function levenshtein(a: string, b: string): number {
 }
 
 /**
- * Podobieństwo 0..1 (port `similarity`, `:57-62`).
+ * Postać napisu TYLKO do liczenia podobieństwa: `trim`, małe litery, wielokrotne białe znaki
+ * zwinięte do jednej spacji.
  *
- * ⚠ BEZ normalizacji wielkości liter i białych znaków — „BKT" i „bkt" mają podobieństwo 0,
- * bo każda litera się różni. Oryginał porównuje surowe napisy i tak zostaje.
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #42, decyzja Ani 2026-09-21): oryginał porównuje surowe napisy,
+ * więc „BKT" i „bkt" miały podobieństwo 0. Katalog ma konwencję WIELKICH liter, a pliki
+ * dostawców przychodzą różnie — rozjazd wielkości liter jest w tym procesie regułą.
+ *
+ * `toLowerCase()` w JS obsługuje polskie znaki („Ą" → „ą"), w przeciwieństwie do `LOWER()`
+ * w SQLite (ASCII-only) — dlatego normalizacja jest tutaj, a nie w SQL. W słowniku, w kolejce
+ * i w `products` zostaje forma oryginalna; tej postaci nigdzie się nie zapisuje.
+ */
+export function normalizujDoPorownania(napis: string): string {
+  return napis.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/**
+ * Podobieństwo 0..1 (port `similarity`, `:57-62`), liczone na postaci `normalizujDoPorownania`
+ * (świadome odstępstwo, #42). Wzór bez zmian: `1 - levenshtein / dłuższa długość`, pusty
+ * napis → 0.
  */
 export function podobienstwo(a: string, b: string): number {
-  if (!a || !b) return 0;
-  const maxDlugosc = Math.max(a.length, b.length);
-  if (!maxDlugosc) return 1;
-  return 1 - levenshtein(a, b) / maxDlugosc;
+  const na = normalizujDoPorownania(a);
+  const nb = normalizujDoPorownania(b);
+  if (!na || !nb) return 0;
+  return 1 - levenshtein(na, nb) / Math.max(na.length, nb.length);
 }
 
 /**
@@ -97,16 +112,20 @@ export function podobienstwo(a: string, b: string): number {
  * ORAZ różnica NIE polega wyłącznie na plusach.
  *
  * Wyjątek na `+` jest merytoryczny: w oponach „150A8+" to inny produkt niż „150A8", więc
- * podpowiadanie tu aliasu prowadziłoby do sklejenia dwóch różnych rzeczy. Napis identyczny
- * z kanoniczną przechodzi (warunek `nowa !== kanoniczna` w `:70`) — stąd w nagraniu produkcji
- * sugestie o `podobienstwo: 100` dla wartości, która jest już w katalogu.
+ * podpowiadanie tu aliasu prowadziłoby do sklejenia dwóch różnych rzeczy. Po #42 reguła `+`
+ * patrzy na postać znormalizowaną („bkt+" wobec „BKT" nadal odpada).
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #40, decyzja Ani 2026-09-21): napis IDENTYCZNY z kanoniczną
+ * nie jest aliasem. Oryginał go przepuszczał (`nowa !== kanoniczna` w `:70`), stąd w nagraniu
+ * produkcji sugestie „X → X" ze 100%. Różnica wyłącznie wielkością liter albo spacjami
+ * („bkt" → „BKT") JEST aliasem, i to ze 100% — dokładnie o to prosiła Ania (#42).
  */
 export function czySugerowacAlias(nowa: string, kanoniczna: string): boolean {
-  const sim = podobienstwo(nowa, kanoniczna);
-  if (sim < 0.9) return false;
-  const bezPlusowNowa = nowa.replace(/\+/g, "");
-  const bezPlusowKanoniczna = kanoniczna.replace(/\+/g, "");
-  if (bezPlusowNowa === bezPlusowKanoniczna && nowa !== kanoniczna) return false;
+  if (nowa === kanoniczna) return false;
+  if (podobienstwo(nowa, kanoniczna) < 0.9) return false;
+  const n = normalizujDoPorownania(nowa);
+  const k = normalizujDoPorownania(kanoniczna);
+  if (n.replace(/\+/g, "") === k.replace(/\+/g, "") && n !== k) return false;
   return true;
 }
 
@@ -204,9 +223,11 @@ export type StatystykiSkanu = {
  * Warunek `dostawca IS NULL OR …` przepuszcza wiersze bez dostawcy, choć kolumna jest NOT NULL;
  * to defensywa oryginału, zostaje.
  *
- * ⚠ Skan NIE CZYŚCI kolejki i nie usuwa pozycji, które zdążyły trafić do słownika inną drogą
- * (np. przez seed). Stąd w nagraniu produkcji pozycje pending sugerujące same siebie ze
- * `podobienstwo: 100` — patrz `zasiejSlownikAtrybutow` w `repos/atrybuty.ts`.
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #40): na końcu skan usuwa z kolejki pozycje, które zdążyły
+ * trafić do słownika inną drogą (`usunZKolejkiObecneWSlowniku`). Oryginał tego nie robi — stąd
+ * w nagraniu produkcji pozycje sugerujące same siebie ze `podobienstwo: 100`. Statystyki skanu
+ * (a więc ciało `POST /api/atrybuty/scan-pending`) się nie zmieniają; liczba usuniętych idzie
+ * tylko do logu.
  *
  * ⚠ `pierwszy_import` przy aktualizacji ZOSTAJE nietknięty (`:122-124`) — to znacznik pierwszego
  * zauważenia wartości, nie ostatniego.
@@ -291,7 +312,40 @@ export function skanujNoweWartosci(db: Baza): StatystykiSkanu {
     }
   }
 
+  const usunieto = usunZKolejkiObecneWSlowniku(db);
+  if (usunieto) {
+    console.log(`[pending] skan: usunięto z kolejki ${usunieto} pozycji obecnych w słowniku`);
+  }
+
   return staty;
+}
+
+/**
+ * Usuwa z kolejki pozycje, których wartość JEST JUŻ w słowniku tego samego rodzaju. Zwraca
+ * liczbę usuniętych.
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #40, decyzja Ani 2026-09-21: „tak, przeszkadza mi to").
+ * Oryginał kolejki nie sprząta, a seed przy każdym starcie dosypuje do słownika marki
+ * i bieżniki z `products` — pozycja dodana skanem przed restartem wisiała potem w kolejce
+ * i podpowiadała samą siebie ze 100%. Na snapshocie dotyczyło to 437 z 500 pozycji.
+ *
+ * Skutek jest ten sam co „Akceptuj" (`akceptujPending`): wartość w słowniku, pozycja poza
+ * kolejką, `products` nietknięte. Bez audytu (decyzja użytkownika, ticket 78, D4).
+ *
+ * Porównanie DOKŁADNE (`=` w SQLite to BINARY): „bkt" przy „BKT" w słowniku zostaje w kolejce,
+ * bo tylko tam dostanie sugestię aliasu (#42).
+ *
+ * Wołane na końcu `skanujNoweWartosci` i przy starcie procesu, zaraz po seedzie (`app.ts`).
+ */
+export function usunZKolejkiObecneWSlowniku(db: Baza): number {
+  return db.run(sql`
+    DELETE FROM atrybuty_wartosci_pending
+    WHERE EXISTS (
+      SELECT 1 FROM atrybuty_wartosci w
+      WHERE w.rodzaj = atrybuty_wartosci_pending.rodzaj
+        AND w.wartosc = atrybuty_wartosci_pending.wartosc
+    )
+  `).changes;
 }
 
 /**
