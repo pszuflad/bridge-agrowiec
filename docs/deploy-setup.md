@@ -272,7 +272,11 @@ Cel: żaden PR ticketa nie wejdzie do `develop` bez zielonego CI — a właścic
   `iconv-lite`, `xlsx` są czysto JS-owe (bez kompilacji natywnej) — `npm ci --omit=dev` w
   release'ie instaluje je bez dodatkowych kroków, inaczej niż `better-sqlite3` niżej.
 - **`archiver` (Iteracja 8a, ZIP eksportu Shopera) też nie wymaga obejścia** — czysto JS-owy,
-  bez kompilacji natywnej, ten sam tryb instalacji co wyżej.
+  bez kompilacji natywnej, ten sam tryb instalacji co wyżej. **Wersja ma jednak znaczenie**
+  (70, backlog #93): produkcja ma `archiver@5.3.2`, który nie eksportuje `ZipArchive` — `GET
+  /api/export-shoper` bez `?dostawca=` tam zawsze pada 500; u nas `archiver@^8.0.0` (lockfile
+  na 8.0.0) i strażnik `test/zaleznosci.archiver.test.ts` pada, jeśli instalowana wersja
+  przestanie eksportować `ZipArchive`.
 - **better-sqlite3 vs glibc 2.28.** VPS ma glibc 2.28; prebuilt better-sqlite3 (11.7+/11.10) wymaga
   `GLIBC_2.29` i nie ładuje się, a node-gyp 10 nie zbuduje ze źródła na dostępnym Pythonie 3.6.
   **Obejście (w `deploy-staging.sh`):** `npm ci --ignore-scripts` + podłożenie działającej binarki

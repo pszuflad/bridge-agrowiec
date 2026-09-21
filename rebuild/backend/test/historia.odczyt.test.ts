@@ -150,6 +150,21 @@ describe("Historia — odczyt", () => {
       expect(poPolu.total).toBeGreaterThan(0);
     });
 
+    /**
+     * `typ` spoza trzech rozpoznawanych daje w SQL pustą listę akcji (`akcjeHistorii()`),
+     * czyli pusty wynik — dokładnie to, co dał filtr w pamięci przed ticketem 69.
+     * `typ=0` przechodzi do filtra dosłownie (`String(x ?? "all")`, `:48355-48357`).
+     */
+    it("nieznany `typ` daje pustą stronę z `pages: 1`", async () => {
+      for (const typ of ["0", "Import", "constructor"]) {
+        expect(await paged(`?typ=${typ}&limit=200`)).toMatchObject({
+          items: [],
+          total: 0,
+          pages: 1,
+        });
+      }
+    });
+
     it("filtry sumują się i domyślnie (`all`) nic nie odcinają", async () => {
       const razem = await paged("?typ=import&dostawca=MO1&limit=200");
       expect(razem.items.every((w) => w.typ === "import" && w.dostawca === "MO1")).toBe(true);
@@ -163,7 +178,12 @@ describe("Historia — odczyt", () => {
     it("tnie wynik na strony i liczy `pages` z `total`", async () => {
       const stron = Math.ceil(WIDOCZNYCH / 4);
       const pierwsza = await paged("?limit=4&page=1");
-      expect(pierwsza).toMatchObject({ total: WIDOCZNYCH, pages: stron, page: 1, limit: 4 });
+      expect(pierwsza).toMatchObject({
+        total: WIDOCZNYCH,
+        pages: stron,
+        page: 1,
+        limit: 4,
+      });
       expect(pierwsza.items).toHaveLength(4);
 
       const ostatnia = await paged(`?limit=4&page=${stron}`);

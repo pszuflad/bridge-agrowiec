@@ -49,6 +49,10 @@ POST /api/waga-gabarytowa/oblicz
 zmierzona na **uruchomionym oryginale**, nie tylko wywnioskowana z czytania kodu — wszystkie
 14 tras z `security: []` realnie oddają **200** bez tokenu (`GET /api/export-shoper` akurat
 zwrócił 500 na danych snapshotu, ale bez auth — trasa jest publiczna, błąd jest gdzie indziej).
+**Przyczyna 500 ustalona w 70** (`70-CHORE-eksport-zip-odstepstwo`): bez `?dostawca=` trasa
+generuje ZIP, a lockfile produkcji trzyma `archiver@5.3.2`, który nie eksportuje `ZipArchive` —
+pada zawsze, niezależnie od danych. Świadome odstępstwo D1 (backlog #93): odbudowa ma
+`archiver@^8.0.0` i ZIP u nas działa.
 Ten sam bieg potwierdził, że **`GET /api/me` mimo `security: []` w kontrakcie NIE jest
 publiczne** — produkcja realnie oddaje **401**, chroni ją ręczny `if (!req.user)`
 (`deminified/backend-index.cjs:48179-48183`), nie wspólny middleware `we`; `POST /api/login`
@@ -203,9 +207,11 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > tras eksportu** — `GET /api/export-shoper` i `GET /api/export/shoper` — publicznych w
 > `contract/openapi.yaml:611,619` (`security: []`), a u nas pod `requireAuth`. Trasy to DWA różne
 > formaty, nie alias: `export-shoper` ma stały 7-kolumnowy nagłówek, filtr `?dostawca=` i bez
-> parametru oddaje `application/zip` (plik per dostawca); `export/shoper` bierze kolumny z
-> `shoper.format_eksportu`, filtruje `?supplier=` i zawsze oddaje jeden `text/csv`. Szczegóły:
-> `docs/tickets/28-FEATURE-selly-eksport-backend/`.
+> parametru oddaje `application/zip` (plik per dostawca) **— w produkcji ta gałąź zawsze 500**
+> (`archiver@5.3.2` bez `ZipArchive`; ustalone w 70, backlog #93; u nas świadomie działa, D1);
+> `export/shoper` bierze kolumny z `shoper.format_eksportu`, filtruje `?supplier=` i zawsze
+> oddaje jeden `text/csv`. Szczegóły: `docs/tickets/28-FEATURE-selly-eksport-backend/`,
+> `docs/tickets/70-CHORE-eksport-zip-odstepstwo/`.
 
 > **Potwierdzone w 12a** (`35-FEATURE-mutacje-produktow-backend`, 2026-09-05): katalog domknięty
 > do parytetu ZAPISU — `POST /api/products` (bulk), `PUT`/`PATCH`/`DELETE /api/products/{id}`,

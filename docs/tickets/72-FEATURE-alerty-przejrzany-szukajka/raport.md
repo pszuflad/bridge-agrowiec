@@ -99,8 +99,8 @@ widoku nikt ich nie używał.
   - opcje filtra statusu mają teraz etykiety „Nowy” / „Przejrzany” / „Rozwiązany”;
   - brak opisu wyszukiwarki.
 - **P6.2** importuje `statusy.ts` i `PrzyciskiStatusu.tsx`. Mutacja i toast zostały w
-  `TabelaAlertow.tsx`, bo sposób zapisu statusu pseudo-alertów czeka jeszcze na decyzję („serwer”
-  w tabeli decyzji roadmapy).
+  `TabelaAlertow.tsx`, bo są przywiązane do `PATCH /api/alerts/:id`. Status pseudo-alertów ma iść
+  na serwer (decyzja 2 dla P6.2 w roadmapie), ale własną drogą zapisu, którą dołoży P6.2.
 - **UX: grupa po zmianie statusu wraca zwinięta** (NICE-TO-HAVE z review). Klucz grupy zawiera
   `status`, więc po „Oznacz jako przejrzany” grupa dostaje nowy klucz i stan rozwinięcia się gubi.
   Tak samo było przed tym ticketem przy „Rozwiąż”/„Otwórz ponownie”, więc to nie jest regresja.

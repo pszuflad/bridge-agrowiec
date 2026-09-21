@@ -1867,6 +1867,38 @@ reguł"), dokument opisuje ją razem ze zmierzonym zasięgiem **1/7405**.
 | **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-21 przez Anię** (pytanie 1a rundy 2): pseudo-alerty katalogowe WRACAJĄ, razem z trzecim statusem `przejrzany` |
 | **Status** | 🔨 **częściowo** — trzeci status `przejrzany` + przyciski „Oznacz jako przejrzany”/„Rozwiąż” (i nasze „Otwórz ponownie”) dowiezione dla alertów importu w **P6.1** (2026-09-21, `72-FEATURE-alerty-przejrzany-szukajka`). Pseudo-alerty katalogowe (silnik liczony z katalogu) — nadal **P6.2, nie zaczęte**. |
 
+**DECYZJE WDROŻENIOWE UŻYTKOWNIKA 2026-09-21 (karta P6.2) — wszystkie zgodnie z rekomendacją.**
+
+**Ustalone i NIE będące decyzją — port 1:1, w wersji po łatkach z 4.09** (zmierzone na `origin/main`):
+| Reguła | Warunek | Poziom | Identyfikator (po `ackalerts` pkt 1) |
+|---|---|---|---|
+| Marża ujemna — sprzedaż pod kosztem | `marzaPct < 0` | krytyczny | `${id}-marza-ujemna-${Math.round(marzaPct*10)/10}` |
+| Bardzo niska marża | `marzaPct < 5` | ostrzeżenie | `${id}-marza-niska-…` (odcisk marży) |
+| Nie-opona w katalogu — błąd parsera | `v2()`: `!isTire && confidence==="wysoka"` | krytyczny | `${id}-nie-opona-${nazwa+'|'+kategoria}` |
+| Brak importu cennika | ≥ 30 dni / ≥ 7 dni | krytyczny / ostrzeżenie | `dostawca-${kod}-brak-importu-${dni}` |
+
+Dwie reguły są w oryginale WYŁĄCZONE (`if (false)`: „Brak stanu magazynowego", „Znaki w rozmiarze sklejone
+z nazwą") i takie zostają. `tr_fix` (usunięcie `"tr-"` z listy `h2`) wchodzi — bez niego opony BKT z `TR-135`
+lądowały jako „nie-opona". Odcisk wartości w identyfikatorze sprawia, że potwierdzenie nie przykleja się do
+alertu na zawsze: gdy wartość się zmieni, alert wraca jako `nowy`.
+
+**Pięć decyzji:**
+1. **Gdzie:** zakładki na `/alerty` — „Import" (dzisiejsza lista) i „Katalog" (pseudo-alerty). Odrzucone:
+   osobna pozycja menu, jedna wspólna lista (mieszałaby błędy dostawców z problemami produktów).
+2. **Status: na SERWERZE.** Świadome odstępstwo — oryginał trzyma go w IndexedDB. Powód identyczny jak przy
+   decyzji D1 z I6: status w przeglądarce ginie po wyczyszczeniu historii i nie przenosi się między
+   komputerami; dwie listy obok siebie, z których jedna pamięta decyzje, a druga nie, byłyby gorsze niż
+   każda z opcji z osobna. Koszt: nowa tabela i trasa. ⚠ Odciski wartości w identyfikatorach sprawiają,
+   że stare wpisy statusu będą się gromadzić — karta ma zaproponować sprzątanie.
+3. **Pulpit: OBA źródła, z podziałem.** Przy statusie na serwerze dwie łatki z 4.09 — „Pulpit respektuje
+   potwierdzenia" (`ackalerts` pkt 2) i zdarzenie synchronizujące (pkt 3) — przychodzą bez dodatkowego
+   mechanizmu, przez unieważnienie zapytań.
+4. **Odwrócenie decyzji D3 z karty 13e:** ukrywanie rozwiązanych (`ackalerts` pkt 4) WCHODZI. D3 zapadła,
+   gdy silnika w odbudowie nie było. Zbieżne z domyślnym filtrem „nierozwiązane" z P6.1 — obie listy
+   zachowują się tak samo.
+5. **Liczenie: w przeglądarce, jak w oryginale** — z warunkiem, że karta NAJPIERW zmierzy koszt na Pulpicie
+   (jeśli dziś nie ładuje całego katalogu, przejście na (b) — trasa serwerowa — wraca do użytkownika).
+
 **⭐ DECYZJA ANI 2026-09-21 (runda 2, pytania 1a i 1b) — WPIS ZAMKNIĘTY NA TAK.**
 Po pokazaniu jej WŁASNEGO zrzutu zamiast opisu mechanizmu pytanie trafiło od razu:
 - **1a: „tak, potrzebuję jej w nowym Bridge"** — wariant (a). Lista ostrzeżeń liczonych na żywo
@@ -3028,7 +3060,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Pięć etykiet, **rozkład diffu bundli zrobiony w 13e** (nazwa `.bak` dawała tylko etykietę): **rebrand** — `<title>` → „Bridge ONE — konsolidacja cenników opon" + 3× `children:"Bridge"`→`"BridgeOne"` (**bez spacji**: nagłówek mobilny, sidebar, `<h1>` logowania) + usunięcie podtytułu „dla Agrowca" w sidebarze i na logowaniu; `aria-label="Bridge"` na SVG oraz teksty pomocnicze **bez zmian**. ⚠ Rebrand jest z **2026-07-31**, nie z 09-01…04 — data w nagłówku tego wpisu opisuje nazwę PLIKU bundla, nie samą zmianę. **PRICEFMT** — w `DT` `cenaSprzedazy` odchodzi od wspólnej gałęzi z `cenaZakupu`: `toFixed(2)` → `` `${Math.floor(n)},-` `` (`1234,-`); eksport `OT` nietknięty. **tr_fix** — usunięcie tokenu `"tr-"` z listy `h2` („to nie opona"); regex `\btr-\b` łapał `TR-135` w nazwach opon BKT → fałszywy alert „Nie-opona w katalogu — błąd parsera". **ackalerts** — CZTERY zmiany: (1) odcisk wartości w `id` alertu (`-marza-ujemna-{marża}`, `-marza-niska-{marża}`, `-nie-opona-{nazwa\|kategoria}`, `-brak-importu-{dni}` w obu gałęziach ≥7 i ≥30 dni), (2) pulpit czyta `alerty-statusy` z IndexedDB i podaje do `pv(produkty, statusy)`, (3) `window.dispatchEvent(new Event("alerty-statusy-updated"))` po zapisie statusów, (4) `.filter(e => e.status!=="rozwiazany" \|\| filtrStatusu==="rozwiazany")`. **szer_marka** — **NIE kolumna**, dwie poprawki: (a) `Wfmt` traci gałąź „cała notacja `AxB`", (b) filtr „marka bez cyfr" dołożony na gałęzi SŁOWNIKOWEJ listy marek. |
 | **Do nowej wersji?** | ✅ **TAK — i już było** (decyzja **D1**, 2026-09-09). Odbudowa ma rebrand 1:1 od ticketa 2 (`751a8e2`), bo deminifikat robiono z bundla PO rebrandzie. Rozjazd zapisu „Bridge ONE" (`<title>`) vs „BridgeOne" (UI) **jest w produkcji** i odtwarzamy go świadomie — nie ujednolicamy. `tr_fix` i `ackalerts` → ❌ nie portujemy (D2/D3, brak nośnika — patrz #26). |
 | **Iteracja** | **→ 13e ✅ zamknięte 2026-09-09** (FE; `konstr` łączy się z #58 — FE zrobiony w 13c, a łatka produkcji okazała się regresją, patrz #71). ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13d" — niezgodne z tabelą mapowania i roadmapą (FE = 13e; 13d to Selly). |
-| **Status** | ✅ **zrobione w 13e** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09). Sportowane: **tylko `szer_marka`** (oba punkty) — `formatujSzerokosc` bez gałęzi `AxB` + filtr „bez cyfr" także na gałęzi słownikowej `listaMarek`; `listaKategorii` bez zmian. **rebrand i PRICEFMT odbudowa miała już 1:1** — deminifikat to bundle `index-PRICEFMT…` w stanie SPRZED 04.09, więc port z I0–I12 wciągnął je automatycznie, a trzech łatek z 04.09 nie. Pomiar na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis szerokości; eksport CSV zmienia się razem z tabelą, bo `OT` i `DT` dzielą `Wfmt` (potwierdzone grafem wywołań w żywym bundlu; w odbudowie `eksport.ts` woła to samo `formatujSzerokosc`). ⚠ **Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, nie cały `rozmiar`** — czytać jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). **D2 — `tr_fix` i `ackalerts` (1–3) nie mają w odbudowie nośnika**: silnika pseudo-alertów (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`) świadomie nie ma (D1 z I6), więc obie łatki **pozostają zależne od decyzji przy #26**; punkt (2) jest spełniony konstrukcyjnie, bo pulpit odbudowy filtruje po `status==="nowy"` z REALNEJ odpowiedzi `GET /api/alerts`. **D3 — punktu (4) nie portujemy**: odbudowa ma DWA statusy (`nowy`/`rozwiazany`) i domyślny filtr ustawiony na `nowy`, więc reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu „nowy" — cel łatki realizuje już domyślny filtr. *(Aktualizacja P6.1, 2026-09-21, ticket 72: od tej karty odbudowa ma TRZY statusy, a domyślny filtr to „Nierozwiązane" (`status ≠ rozwiazany`), nie sam `nowy` — to realizuje cel punktu (4) łatki `ackalerts` [ukrycie `rozwiazany`] wprost, jeszcze dokładniej niż opisany tu degenerat. Sama decyzja D3 [nie portujemy reguły (4) 1:1] nie zmienia się.)* `konstr` po stronie FE → patrz #58 (zrobione w 13c) i #71 (regresja żywej produkcji). |
+| **Status** | ✅ **zrobione w 13e** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09). Sportowane: **tylko `szer_marka`** (oba punkty) — `formatujSzerokosc` bez gałęzi `AxB` + filtr „bez cyfr" także na gałęzi słownikowej `listaMarek`; `listaKategorii` bez zmian. **rebrand i PRICEFMT odbudowa miała już 1:1** — deminifikat to bundle `index-PRICEFMT…` w stanie SPRZED 04.09, więc port z I0–I12 wciągnął je automatycznie, a trzech łatek z 04.09 nie. Pomiar na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis szerokości; eksport CSV zmienia się razem z tabelą, bo `OT` i `DT` dzielą `Wfmt` (potwierdzone grafem wywołań w żywym bundlu; w odbudowie `eksport.ts` woła to samo `formatujSzerokosc`). ⚠ **Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, nie cały `rozmiar`** — czytać jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). **D2 — `tr_fix` i `ackalerts` (1–3) nie mają w odbudowie nośnika**: silnika pseudo-alertów (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`) świadomie nie ma (D1 z I6), więc obie łatki **pozostają zależne od decyzji przy #26**; punkt (2) jest spełniony konstrukcyjnie, bo pulpit odbudowy filtruje po `status==="nowy"` z REALNEJ odpowiedzi `GET /api/alerts`. **D3 — punktu (4) nie portujemy**: odbudowa ma DWA statusy (`nowy`/`rozwiazany`) i domyślny filtr ustawiony na `nowy`, więc reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu „nowy" — cel łatki realizuje już domyślny filtr. *(Aktualizacja P6.1, 2026-09-21, ticket 72: od tej karty odbudowa ma TRZY statusy, a domyślny filtr to „Nierozwiązane" (`status ≠ rozwiazany`), nie sam `nowy` — to realizuje cel punktu (4) łatki `ackalerts` [ukrycie `rozwiazany`] wprost, jeszcze dokładniej niż opisany tu degenerat. Samą D3 odwróciła decyzja 4 dla P6.2 [2026-09-21, patrz #26]: ukrywanie rozwiązanych wchodzi w pseudo-alertach, zbieżnie z tym filtrem.)* `konstr` po stronie FE → patrz #58 (zrobione w 13c) i #71 (regresja żywej produkcji). |
 
 ### #62 · 2026-08-26…09-04 · [BAZA] · Backfille danych (tl_tt / szerokości ułamkowe / JMK) — DECYZJA
 | pole | wartość |
@@ -3648,9 +3680,9 @@ u dostawcy i wgrywa go ponownie pod tą samą nazwą.
 | pole | wartość |
 |---|---|
 | **Kategoria** | BACKEND (historia / mapowanie audytu) — dziwactwo PRODUKCJI odtworzone świadomie |
-| **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts:54` (`LIMIT_AUDYTU = 5000`), użycie w `rebuild/backend/src/routes/history.ts` |
-| **Do nowej wersji?** | ✅ **TAK — WARIANT (c) wybrany przez użytkownika 2026-09-21**: filtrowanie i paginacja w SQL (świadome odstępstwo) |
-| **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · zmiana limitu — nie zaczęte |
+| **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts` (`SLOWNIK_AKCJI`, `akcjeHistorii()` — `LIMIT_AUDYTU` USUNIĘTY), `rebuild/backend/src/repos/audit-historia.ts` (`audytDlaHistorii()`, nowy), `rebuild/backend/src/routes/history.ts` |
+| **Do nowej wersji?** | ✅ **TAK — WARIANT (c), hybryda, wybrany przez użytkownika 2026-09-21**: odsiew akcji i sortowanie w SQL bez limitu; mapowanie, `dostawca`, fraza, `total`, paginacja zostają w pamięci |
+| **Status** | ✔ wdrożone 2026-09-21 w `69-FEATURE-historia-bez-limitu` (P5.1) — hybryda: SQL odsiewa akcje ze słownika (i `typ`) bez limitu, reszta (mapowanie, `dostawca`, fraza, `total`, paginacja) w pamięci. Szczegóły niżej, sekcja „Realizacja" |
 
 **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: WARIANT (c).** Uzasadnienie wprost: „żeby problem nie
 wracał". Odrzucone: (a) zostawić 1:1 — problem wraca sam; (b) podnieść limit — odsuwa próg,
@@ -3705,8 +3737,10 @@ z URL, staging, overrides, narzuty — w sumie kilkanaście akcji, z czego sam `
 zdarzenia. Odsiew akcji jest tu bez znaczenia: limit tnie **surowy** `audit_log`, więc zjadają
 go także akcje, których widok i tak nie pokazuje (backlog **#21**).
 
-**Dlaczego to jest jak w produkcji, a nie usterka.** Zachowanie odtworzone 1:1, opisane Ani
-w `docs/instrukcja-testow-I5.md` §11 pkt 9 jako dziwactwo do NIEzgłaszania.
+**Tak robi ORYGINAŁ — odbudowa od P5.1 już nie.** Do karty `69-FEATURE-historia-bez-limitu`
+(P5.1) zachowanie było odtworzone 1:1 i opisane Ani w `docs/instrukcja-testow-I5.md` §11 pkt 9
+jako dziwactwo do NIEzgłaszania. Od P5.1 limit w odbudowie zniknął (patrz „Realizacja" niżej);
+sprostowanie samej instrukcji I5 należy do karty P5.3 (follow-up, nieukończony).
 
 **Powiązanie z #21.** Oba wpisy dotyczą tego samego widoku i idą w przeciwnych kierunkach:
 #21 pyta, czy **rozszerzyć** słownik akcji (więcej zdarzeń w widoku), a ten wpis — czy podnieść
@@ -3719,7 +3753,35 @@ odsiew przechodziłoby wielokrotnie więcej wierszy. Warto je rozstrzygać razem
   (mapowanie całości w pamięci przy każdym żądaniu);
 - **(c) filtrować i paginować w SQL** zamiast w pamięci — usuwa problem u źródła i naprawia
   licznik, ale jest **świadomym odstępstwem** od oryginału w trasie, którą dziś porównujemy
-  z produkcją 1:1, i wymaga przenagrania fixtures historii.
+  z produkcją 1:1. Zakładano tu, że wymaga przenagrania fixtures historii — **pomiar w
+  69-FEATURE-historia-bez-limitu to obala**: kształt odpowiedzi się nie zmienił, fixtures
+  zostały nietknięte.
+
+**⭐ Realizacja (69-FEATURE-historia-bez-limitu, P5.1, 2026-09-21).** Wybrana wersja to
+**hybryda**, nie litera (c): w SQL tylko odsiew do akcji ze słownika (przy konkretnym `typ` —
+tylko akcje tego typu) plus `ORDER BY kiedy DESC, id DESC`, bez limitu; mapowanie, `dostawca`,
+fraza, `total` i paginacja zostają w pamięci jak dotąd.
+- **Wynik warunku wdrożenia** (hipoteza z sekcji wyżej, zweryfikowana PRZED kodem): potwierdzona.
+  `historia.wyrocznia.test.ts` przeszła 13/13 bez wyjątku. Zastrzeżenie: wyrocznia zasiewa
+  wyłącznie 270 wierszy ze słownika, więc z konstrukcji nie widzi, czy odsiew dzieje się w SQL
+  czy w pamięci — mocnym dowodem jest pomiar danych (`db/snapshot.db`): jeden format `kiedy`
+  (3873/3873, ISO z `Z`), 0 remisów, 0 inwersji między porządkiem tekstowym SQL a porządkiem
+  `Date` z JS.
+- **Decyzja o frazie (i o `dostawca`)** — użytkownik, 2026-09-21: obie zostają w pamięci, bo
+  trafiają w pola WYLICZANE na zmapowanym wpisie (`typ`, `format`, „Plik: …", `zmienionePola`
+  dla frazy; `encja_id`/`szczegoly.dostawca` po parsowaniu JSON dla `dostawca`). Wersja SQL
+  dla `dostawca` (`json_extract`) byłaby drugą kopią mapowania akcja→typ, czyli mechanizmem
+  z backlogu **#41**. Koszt: każde żądanie mapuje w pamięci wszystkie WIDOCZNE zdarzenia (dziś
+  ok. 270, przybywa ok. 130/miesiąc), nie całość `audit_log` — dlatego paginacja też została
+  w pamięci, co jest odejściem od litery wariantu (c) przy zachowaniu jego skutku (oba objawy
+  usunięte).
+- **Jedno źródło prawdy słownika**: `SLOWNIK_AKCJI` (`ReadonlyMap`) w `historia/mapowanie.ts`;
+  z niego wyliczają się i `typWpisu()`, i lista akcji do klauzuli SQL `IN` (`akcjeHistorii()`).
+- **Remisy `kiedy`**: rozstrzygane `id DESC` (deterministycznie); w danych produkcji remisów
+  jest 0, więc bez wpływu na dziś widoczny wynik.
+- **Fixtures**: NIE wymagały przenagrania — kształt odpowiedzi (`GET_history_meta.json`,
+  `GET_history_paged.json`) bez zmian, kontrakt bez zmian.
+- Szczegóły: `docs/tickets/69-FEATURE-historia-bez-limitu/plan.md`, `raport.md`.
 ---
 
 ### #88 · 2026-09-18 · [BACKEND] · `promocjaPasuje` — pusty `marka`/`kategoria` łapie KAŻDĄ promocję o niepustym zasięgu
@@ -3903,8 +3965,8 @@ dostawców przychodzą różnie**. Rozstrzygać łącznie z #42, nie osobno.
 | **Kategoria** | BACKEND (eksport Shoper) |
 | **Pliki** | oryginał: `deminified/backend-index.cjs:48139` (`rV()`); port: `rebuild/backend/src/routes/export-shoper.ts` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-18: NIE odtwarzamy defektu produkcji** |
-| **Iteracja** | poprawki po testach — karta `P5.2` |
-| **Status** | decyzja podjęta, karta niezałożona |
+| **Iteracja** | karta `70-CHORE-eksport-zip-odstepstwo` (P5.2) |
+| **Status** | ✅ zrealizowane 2026-09-21, karta `70-CHORE-eksport-zip-odstepstwo` (P5.2) |
 
 **Na czym polega — przyczyna ZMIERZONA, nie wydedukowana.** `GET /api/export-shoper` bez
 parametru `?dostawca=` (eksport wszystkich dostawców do ZIP-a) oddaje w produkcji **zawsze
@@ -3924,8 +3986,21 @@ w `db/snapshot.db` nie ma ani jednego wiersza `eksport_csv`/`eksport_shoper`/`im
 
 **Decyzja (użytkownik, 2026-09-18): zostajemy przy wersji działającej.** Nie odtwarzamy defektu
 produkcji przez cofnięcie `archiver` — to jedno z nielicznych miejsc, gdzie odbudowa jest
-POPRAWNIEJSZA od oryginału i ma taka zostać. Zakres karty `P5.2`: potwierdzić, że trasa działa
-end-to-end po naszej stronie, dopisać test i odnotować odstępstwo jako świadome.
+POPRAWNIEJSZA od oryginału i ma taka zostać.
+
+**Realizacja (P5.2).** Bramka (`test/eksport-shoper.gate.test.ts`) ma jawny komentarz
+odstępstwa przy obu przypadkach ZIP, cytujący ten wpis. Bramka i test formatu
+(`test/eksport-shoper.format.test.ts`) sprawdzają teraz ZAWARTOŚĆ archiwum, nie tylko nagłówki —
+własny czytnik ZIP `test/gate/czytnik-zip.ts` (EOCD, katalog centralny, CRC-32), każdy wpis
+sprawdzony bajt w bajt jako równy odpowiedzi pojedynczego eksportu tego dostawcy. Nowy strażnik
+zależności `test/zaleznosci.archiver.test.ts` pada, gdy zainstalowany `archiver` nie eksportuje
+`ZipArchive`. Zakres w `package.json` zostaje `^8.0.0` bez przypinania (decyzja użytkownika
+2026-09-21, D3) — lockfile i tak trzyma `npm ci` na 8.0.0, strażnik łapie regresję przy
+regeneracji locka. Przy okazji znalezisko: błąd rzucony PO wysłaniu nagłówków ZIP-a wieszał
+klienta bez końca (`on("error")`/`pipe()` po `headersSent` nic nie kończyły); teraz trasa zrywa
+połączenie (`abort()` + `res.destroy()`, decyzja użytkownika 2026-09-21, D2) — ścieżka
+nieosiągalna w produkcji, bo tam trasa pada wcześniej, na `new ZipArchive`. Szczegóły:
+`docs/tickets/70-CHORE-eksport-zip-odstepstwo/`.
 
 **⚠ Morał do procesu, bo to już drugi raz.** Numer wpisu backlogu rezerwuj tak samo jak numer
 ticketa — sprawdzając `develop`, nie własną gałąź. Stacked PR, którego bazą jest gałąź mergowana
