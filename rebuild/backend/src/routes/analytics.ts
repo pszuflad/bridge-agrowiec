@@ -42,7 +42,7 @@ import { Router, type Request, type Response } from "express";
 import { naCsv } from "../analityka/csv.js";
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
-import { WIDOKI_EKSPORTU } from "../repos/analityka-eksport.js";
+import { widokEksportu } from "../repos/analityka-eksport.js";
 import {
   cenyGrupRynku,
   cyklZyciaDostawcow,
@@ -317,23 +317,29 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
    * (`?ean`, `?kod`, `?group`, `?days`) czytają `req.query`; tu wartość siedzi w ścieżce
    * i jest jednocześnie nazwą pliku.
    *
-   * ⚠ NIEZNANY `{view}` DAJE 200 I PUSTY PLIK, NIE 404. W oryginale ostatnią instrukcją
-   * łańcucha `if`-ów jest `return sendRows([])` (`:321`), więc `/export/cokolwiek` odpowiada
-   * poprawnym CSV-em złożonym z samego BOM-u. Odtwarzamy to: `?? []` niżej.
+   * ⚠ ŚWIADOME ODSTĘPSTWO: NIEZNANY `{view}` DAJE 404 (backlog #35, decyzja użytkownika
+   * 2026-09-21, ticket 90). W oryginale ostatnią instrukcją łańcucha `if`-ów jest
+   * `return sendRows([])` (`:321`), więc `/export/cokolwiek` odpowiada 200 i CSV-em z samego
+   * BOM-u — ta sama pułapka „pusty plik wygląda jak brak danych", przez którą #32 leżało
+   * niezauważone. Front nie woła widoków spoza listy (zamknięta unia `WidokEksportu`).
    *
-   * ⚠ `filename` W `Content-Disposition` IDZIE Z `req.params.view` BEZ SANITYZACJI — port 1:1
-   * (`:308`). Node odrzuci wartość nagłówka ze znakiem sterującym, więc `{view}` z `\n`
-   * kończy w `catch` jako 500; wartości „dziwne, ale legalne" trafiają do nazwy pliku tak,
-   * jak w produkcji. Nie domykamy tego tutaj — obserwacja jest w `docs/rebuild-backlog.md`.
+   * `filename` w `Content-Disposition` powstaje WYŁĄCZNIE z nazwy, która przeszła
+   * `widokEksportu()` — czyli z klucza mapy widoków. Oryginał wstawiał tam surowe
+   * `req.params.view` (`:308`); przy liście znanych widoków ta ścieżka przestała istnieć.
    *
    * Zapytania i ich pułapki: `repos/analityka-eksport.ts`. Format CSV: `analityka/csv.ts`.
    */
   router.get("/api/analytics/export/:view", requireAuth, (req: Request, res: Response) => {
     const widok = req.params.view ?? "";
+    const zapytanie = widokEksportu(widok);
+    if (!zapytanie) {
+      res.status(404).json({ error: "Nieznany widok eksportu" });
+      return;
+    }
     try {
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader("Content-Disposition", `attachment; filename=${widok}.csv`);
-      res.send(naCsv(WIDOKI_EKSPORTU[widok]?.(db) ?? []));
+      res.send(naCsv(zapytanie(db)));
     } catch (e) {
       // Port `catch (e) { res.status(500).json({ error: e.message }) }` (`:322`).
       res.status(500).json({ error: e instanceof Error ? e.message : String(e) });
