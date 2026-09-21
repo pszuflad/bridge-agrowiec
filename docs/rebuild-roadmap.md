@@ -3017,8 +3017,9 @@ zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-1
 - **Skąd.** Ania przeszła instrukcje I5, I6, I7, I9, I10 i przegląd 12 widoków, a potem odpowiedziała
   na dwie rundy pytań zbiorczych (`docs/pytania-do-ani-2026-09-18.md` i runda 2 z 21.09).
   **Po jej stronie nie ma już ani jednej otwartej sprawy.** Wszystkie decyzje są w backlogu.
-  ⚠ Stan z chwili planowania — od 2026-09-21 (P9.2) jest jedna nowa: progi kalkulatora paletowego,
-  patrz tabela „Po stronie użytkownika” niżej.
+  ⚠ Stan z chwili planowania — od 2026-09-21 doszły trzy nowe: progi kalkulatora paletowego (P9.2,
+  tabela „Po stronie użytkownika” niżej) i dwa pytania z delty I7-v2 (P7.4, tabela pod „Iteracja 7
+  ZAMKNIĘTA”).
 - ⚠ **Od ticketu 82 karty tego planu NIE edytują roadmapy** — stan i ustalenia piszą w
   `docs/karty/<ID>/` (zasady: `docs/karty/README.md`). Kolumna „Stan” w tabelach niżej jest
   historyczna (karty zamknięte); otwarte karty mają katalogi — etap 2 migracji, ticket 86.
@@ -3139,7 +3140,7 @@ z oryginałem (22 alerty, z i bez statusów).
 | **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ✅ 2026-09-21, ticket `74-FEATURE-slad-kolejki-atrybutow` |
 | **P7.2** | seed bieżników z `products.bieznik` + sprzątanie kolejki z self-matchy + podobieństwo case-insensitive | #40, #42 | ✅ 2026-09-21, ticket `78-FEATURE-seed-bieznikow-podobienstwo` — kolejka 498→61 pozycji, 0 self-matchy, 13 nowych sugestii aliasów |
 | **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ✅ `75-CHORE-niezmiennik-atrybutow` · 2026-09-21 — niezmiennik trzyma się: liczba w ostrzeżeniu = liczba przepisanych wierszy, 0 rozjazdów na 4148 pomiarach na snapshocie; test `atrybuty.niezmiennik.test.ts` w bramce |
-| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 i P7.5 · wejście od P7.3 niżej |
+| **P7.4** | delta instrukcji I7 dla Ani | — | ✅ 2026-09-21, ticket `79-DOCS-instrukcja-testow-i7-v2` — `docs/instrukcja-testow-I7-v2.md` + banner w I7; dwa pytania do Ani otwarte (niżej) |
 | **P7.5** | tekst ostrzeżenia w kolejce atrybutów zgodny ze śladem w Historii (tylko frontend) | #39 | ✅ 2026-09-21, ticket `81-FEATURE-ostrzezenie-kolejki-historia` — oba okienka (edycja, alias) mówią o wpisie w Historii zamiast o braku audytu; test obejmuje oba |
 
 ⚠ P7.1 i P7.2 dzielą klaster backendu atrybutów — przed puszczeniem obu naraz sprawdzić rozłączność
@@ -3221,6 +3222,31 @@ małymi literami („Farmax R75", „MG638  napęd") — sprawdzić formę kanon
 sugestie 91% mogą łączyć różne produkty („MG628"→„MG638"); wyjątek opisany wyżej (§3.11,
 „kliknięcie sugestii tą samą wartością") jest już nieaktualny, bo self-matchy nie ma. Pełna lista:
 `docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/raport.md`, sekcja Follow-up.
+
+**Iteracja 7 ZAMKNIĘTA 2026-09-21 — wszystkie pięć kart zrobione** (P7.1–P7.5). Delta dla Ani:
+`docs/instrukcja-testow-I7-v2.md` (P7.4, ticket 79). Pierwsza wersja dostała banner „częściowo
+nieaktualne” i zostaje jako zapis stanu z 2026-09-04 (numery paragrafów wiążące). Wszystkie noty
+„Dla P7.4” wyżej są rozliczone w delcie. Ustalenia P7.4, które przydadzą się dalej:
+- **Na stagingu każda pozycja kolejki ma dziś 0 produktów na żywo.** Pomiar na `db/snapshot.db`:
+  61 pozycji po sprzątaniu z P7.2. 57 nie ma na żadnym produkcie, a 4 kategorie małą literą
+  (`rolnicze` 334 itd.) migracja 004 przepisała na Wielką literę. Kolumna „Wystąpień” to migawka
+  ze skanu, a ostrzeżenie liczy na żywo, więc każda pozycja pokazuje np. 334 → 0. Skutek: po
+  „Wyczyść pending” żaden import tych pozycji nie odbuduje. Scenariusz śladu w Historii (I7-v2
+  pkt 1.1) każe Ani przygotować własną pozycję: usunąć ze słownika bieżnik `307` (3 produkty MO2
+  ALLIANCE), zatwierdzić jedną pozycję w Stagingu (skan) i zrobić „Edytuj”. Bez restartu po drodze,
+  bo seed dosypałby `307` z powrotem.
+- **Przyczyna self-matchy w pytaniu 7.2 była opisana za wąsko** („słownik zasiany z nazw modeli”).
+  Delta to prostuje: z tego źródła było najwyżej 72 z 437 (P7.3), a resztę stanowiły wartości już
+  obecne w słowniku.
+- **Akcje kolejki spoza Historii** (Akceptuj, Odrzuć, Wyczyść) delta wskazuje w
+  „Konfiguracja → Dziennik” (widok z 12b). Skan po akceptacji stagingu nie zapisuje się nigdzie.
+
+**Otwarte po stronie Ani (z delty I7-v2, 2026-09-21):**
+
+| Pytanie | Gdzie | Warianty | Co oznacza odpowiedź |
+|---|---|---|---|
+| Gdzie używa rodzajów `model` i `zastosowanie`? | I7-v2 pkt 1.4, backlog #41 | (a) słownik · (b) filtry Katalogu / reguły cen · (c) nowe wartości z importów mają trafiać do kolejki · (d) nie używa | (a)/(b)/(d): nic do zrobienia. (c): nowa funkcja, zmiana `ZAKRES_SKANU` (na snapshocie +199 pozycji `model`), nowy wpis backlogu i osobna rozmowa |
+| Czy nowe marki i bieżniki mogą znikać z kolejki przy uruchomieniu serwera (seed je „akceptuje”)? | I7-v2 pkt 2.3; źródło: raport ticketu 78, Follow-up | tak / nie, mają czekać na jej decyzję | „nie”: zmiana seedu marek i bieżników przy starcie, odstępstwo od produkcji, nowy wpis backlogu |
 
 #### Iteracja 9 — Waga gabarytowa
 

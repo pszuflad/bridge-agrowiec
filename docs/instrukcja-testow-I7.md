@@ -2,6 +2,20 @@
 
 **Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-04
 
+> **⚠ CZĘŚCIOWO NIEAKTUALNE od 2026-09-21 — najpierw przeczytaj [wersję 2 tej instrukcji](instrukcja-testow-I7-v2.md).**
+>
+> Po Twoich odpowiedziach na pytania 7.1–7.3 zmieniliśmy trzy rzeczy: **Edytuj i alias w kolejce zostawiają wpis w Historii**, **kolejka nie podpowiada już samej siebie** (jest w niej około 60 pozycji zamiast około 500) i **podpowiedzi nie rozróżniają wielkich i małych liter**. Przy pytaniu 7.4 prostujemy nasz błąd. Ta instrukcja opisuje stan **sprzed** tych zmian. **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego, co widzisz na ekranie, prawdą jest wersja 2.**
+>
+> Co konkretnie przestało być prawdą w TEJ wersji:
+> - **ramka „Jedna rzecz do przeczytania”**, **§4 pkt 7** i **§5** (wiersz „Ślad akcji kolejki w Historii”) — Edytuj i alias zostawiają już wpis w Historii;
+> - **§1**, **§2** i **§3.9** — w kolejce jest około 60 pozycji, a nie około 500; wyczyszczonej kolejki import nie odbuduje;
+> - **§3.9** i **§3.12** — przykład *AGRI STAR II → AGRISTAR II* zniknął z kolejki;
+> - **§3.11** — ostrzeżenie ma nowe brzmienie, a jego liczba nie musi się zgadzać z kolumną *Wystąpień*;
+> - **§4 pkt 1** i **§4 pkt 2** — nieaktualne: nic nie podpowiada samego siebie, a *bkt* dostaje podpowiedź *BKT*;
+> - **§4 pkt 4** — **nieprawdziwy od początku**: „model” i „zastosowanie” nigdy nie trafiały do kolejki;
+> - **§4 pkt 8** — kolejka jest około ośmiokrotnie krótsza;
+> - **§7** — zgodność liczby w ostrzeżeniu jest już sprawdzana automatycznie.
+
 > **To jest STAGING, nie produkcja.** Cokolwiek tu ustawisz albo zepsujesz — produkcji nie
 > dotyka. Testuj bez skrupułów.
 
