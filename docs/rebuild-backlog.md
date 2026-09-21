@@ -1586,9 +1586,13 @@ asymetrii tras, nie jej naprawa.
 |---|---|
 | **Kategoria** | BACKEND (historia / mapowanie audytu) |
 | **Pliki** | `deminified/backend-index.cjs:48341,48363` (słownik `akcja → typ`); port: `rebuild/backend/src/historia/mapowanie.ts` |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI** |
+| **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-21** |
 | **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · rozszerzenie słownika — nie zaczęte |
 
+**DECYZJA ANI 2026-09-21 (pytanie 5.1): NIE.** Cytat: „Nie chcę tego widzieć w historii, bo importy
+są co 60 minut i cała historia będzie zawalona importami. Wystarczy działający przycisk
+aktywny/nieaktywny w zakładce dostawcy, który obecnie już tam jest". Wpis ZAMKNIĘTY bez zmian
+w kodzie; planowana karta 14k SKASOWANA.
 **Co robi produkcja.** `/api/history/meta` i `/paged` mapują `akcja` z `audit_log` na `typ`
 sztywnym słownikiem pięciu wartości (`upload_pliku`, `import_cennika` → import;
 `eksport_csv`, `eksport_shoper` → eksport; `edycja_produktu` → edycja) i **odrzucają**
@@ -1825,8 +1829,27 @@ zwraca dla tego typu `true` bezwarunkowo. Niespójność dotyczy wyłącznie pro
 |---|---|
 | **Kategoria** | FRONTEND (widok `/alerty`) |
 | **Pliki** | `deminified/frontend-index.js:25177-25340` (`HT()`), `:16631-16705` (`pv()`), `:9165-9193` (IndexedDB `cn`/`un`) |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Do nowej wersji?** | ⬜ **NADAL do decyzji** — Ania 2026-09-21 nie zrozumiała pytania, ale przysłała ZRZUT produkcji (patrz nota) |
 | **Status** | — nie zaczęte (Iteracja 6 dowiozła INNY widok pod tym adresem) |
+
+**STAN PO PYTANIU 12.2 (2026-09-21) — wpis otwarty, ale materiał dowodowy się poprawił.**
+Na pytanie „czy stare ostrzeżenia marżowe są Ci potrzebne?" Ania odpowiedziała: „nie rozumiem,
+co to znaczy stare ostrzeżenia marżowe i co tu chcesz zmieniać?". Pytanie było zadane jej
+językiem opisu mechanizmu, a nie tym, co widzi na ekranie — i dlatego nie trafiło.
+
+**Ale w odpowiedzi na inne pytanie (6.2) przysłała ZRZUT EKRANU produkcyjnych Alertów**, który
+rozstrzyga, o co chodzi, lepiej niż nasz opis. Widać na nim:
+- nagłówek: „Alerty · 0 krytycznych · 15 ostrzeżeń · **alerty wyliczane na żywo z katalogu**";
+- filtry „Wszystkie poziomy" i „Wszystkie statusy" oraz akcję „Zaakceptuj wszystko";
+- pozycje typu **„Bardzo niska marża"** z kodem produktu, dostawcą i `(marża 0.0%)`, odznaką
+  `nowy` i akcjami **„Oznacz jako przejrzany"** i **„Rozwiąż"**.
+
+Dwa wnioski: (1) na produkcji jest tych ostrzeżeń **15 i mają status `nowy`**, więc nie są
+martwym ekranem; (2) potwierdza się trzeci status `przejrzany`, którego odbudowa nie ma
+(odnotowany w bloku I13e roadmapy jako „brak wpisu w backlogu" — teraz ma go tutaj).
+
+**Jak zapytać ponownie:** pokazać jej TEN zrzut i zapytać wprost, czy z tej listy korzysta
+w codziennej pracy. Nie pytać o „mechanizm" ani o „pseudo-alerty".
 
 **Co robi produkcja.** Ekran `/alerty` w oryginale **nie woła `GET /api/alerts` ani razu**,
 mimo że backend obsługuje tę trasę od zawsze (`backend-index.cjs:48688-48691`). Zamiast tego
@@ -1907,9 +1930,12 @@ nie odbudową — do rozważenia osobno.
 |---|---|
 | **Kategoria** | BACKEND (endpoint kalkulatora paletowego) |
 | **Pliki** | `deminified/backend-index.cjs:48749-48769`; port: `rebuild/backend/src/waga-gabarytowa/formula.ts`, `routes/waga-gabarytowa.ts` |
-| **Do nowej wersji?** | ✅ **port 1:1** — podłączenie pod UI ⬜ **do decyzji** |
+| **Do nowej wersji?** | ✅ **port 1:1 + PODŁĄCZENIE POD UI ZATWIERDZONE — decyzja Ani 2026-09-21** |
 | **Status** | ✔ zrobione w rebuild (I9), przetestowane jednostkowo i przez GATE, bez wywołań z frontendu |
 
+**DECYZJA ANI 2026-09-21 (pytanie 9.2): TAK.** Cytat: „Tak, przyda się". Kalkulator paletowy dostaje
+ekran w panelu — świadome odstępstwo, bo w produkcji formuła istnieje, ale nie jest podpięta
+pod żaden widok.
 **Co robi produkcja.** Endpoint liczy wagę gabarytową wg formuły **paletowej/oponowej**
 (progi półpalety/palety, sterowana configiem `waga_gab.*`), ale żaden fragment frontendu go
 nie woła — widok `/waga-gabarytowa` liczy **innym, wolumetrycznym** wzorem, lokalnie,
@@ -2043,10 +2069,13 @@ usterek — nie scalać.
 |---|---|
 | **Kategoria** | BACKEND (dwie trasy analityki, tabela `historia_cen`) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:161` (`availability/products`), `:176` (`availability/sell-through`), `:316-317` (te same dwa widoki eksportu); schemat: `db/schema.sql`, `rebuild/schema/001_schema.sql`, `analytics_module.cjs:24-49` (`ensureSchema`); port: `rebuild/backend/src/repos/analityka.ts` (dashboard), `rebuild/backend/src/repos/analityka-eksport.ts` (eksport CSV) |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
 | **Iteracja** | odtworzone 1:1 w **10e** (dashboard, `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) i **10f** (eksport CSV, `docs/tickets/26-FEATURE-analityka-export-pulpit/`) |
 | **Status** | ✔ odtworzone w rebuild (10e + 10f) · w produkcji **nadal obecne** |
 
+**DECYZJA ANI 2026-09-21 (pytanie 10.1): TAK.** Cytat: „tak chcę, żeby zaczęły działać". Naprawa ożywia
+naraz dwie karty zakładki „Dostępność", dwa eksporty CSV (dziś sam BOM) i ODSŁANIA #33, dziś
+zamaskowane. Kolejność: #32 przed #33.
 **Co robi produkcja.** `GET /api/analytics/availability/products` w gałęzi z historią robi
 `SELECT kod, ean, dostawca, MAX(nazwa) AS nazwa, … FROM historia_cen`, a
 `GET /api/analytics/availability/sell-through` bierze `MAX(nazwa)` w CTE `seq` z tej samej
@@ -2129,10 +2158,12 @@ odbudowy — decyzja użytkownika, razem z #32.
 |---|---|
 | **Kategoria** | FRONTEND (widok `/`, Pulpit) |
 | **Pliki** | `deminified/frontend-index.js:16852` (`N2`); `contract/fixtures/GET_history.json`; nagłówek `rebuild/backend/src/routes/history.ts`; port: `rebuild/frontend/src/pages/pulpit/kpi.ts` (`ostatniEksport`/`ostatniImport`) |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
 | **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`, decyzja D3) |
 | **Status** | ✔ odtworzone w rebuild (10f) · w produkcji **nadal obecne** |
 
+**DECYZJA ANI 2026-09-21 (pytanie 10.2): wariant (a).** Cytat: „niech zacznie pokazywać datę".
+Odrzucone: usunięcie kafla z Pulpitu i zostawienie go martwym.
 **Co robi produkcja.** Pulpit oryginału (`N2`) robi `r.find(e => "eksport" === e.typ)` na
 odpowiedzi `GET /api/history`, a druga zmienna analogicznie szuka `"import"`. `GET /api/history`
 oddaje wiersze tabeli `history` — dziennik zmian PÓL PRODUKTU, kształt
@@ -2298,10 +2329,13 @@ pojawi się kolizja) i czy warto zmieniać klucz na case-sensitive po stronie ba
 |---|---|
 | **Kategoria** | BACKEND (trasy kolejki atrybutów, audyt) |
 | **Pliki** | `mirror/backend/pending_module.cjs:199` (`const { we } = ctx` — bez `be`), `:287-289` i `:331` (masowy `UPDATE products`); dla kontrastu `mirror/backend/atrybuty_module.cjs:142,161,177,208,226,243` (sześć zapisów `be(...)`); port: `rebuild/backend/src/routes/atrybuty.ts` (`audytuj()` wołane tylko przy CRUD słownika) |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D4) |
 | **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 7 |
 
+**DECYZJA ANI 2026-09-21 (pytanie 7.1): TAK.** Cytat: „tak, ma zostawiać ślad w historii". Akcje kolejki
+atrybutów („Edytuj" i alias), które przepisują pole w setkach produktów naraz, mają zostawiać wpis
+w Historii. Zgodne z rekomendacją: operacja jest nieodwracalna i szeroka.
 **Co robi produkcja.** `registerPending` (`:199`) destrukturyzuje z ctx wyłącznie `we`
 (middleware auth) — funkcja audytu `be` **nie trafia do modułu w ogóle** (w całym
 `pending_module.cjs` nie ma ani jednego wystąpienia `be`). Żadna z siedmiu tras kolejki
@@ -2337,10 +2371,13 @@ podaje `produktow_zaktualizowano`. To nie zastępuje wpisu w dzienniku.
 |---|---|
 | **Kategoria** | BACKEND (seed słownika atrybutów, uruchamiany przy każdym starcie procesu) |
 | **Pliki** | `mirror/backend/atrybuty_module.cjs:79-83` (`SELECT DISTINCT model` → `insWartosc('bieznik', …)`), `:75-78` (analogiczny, poprawny seed marki), `:99` (`seed(db)` przy rejestracji modułu); `rebuild/schema/001_schema.sql:53` (`products.bieznik TEXT` istnieje); dowód skutku: `contract/fixtures/GET_atrybuty_pending.json`; port: `rebuild/backend/src/repos/atrybuty.ts:355` (`zasiejSlownikAtrybutow`) |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D1) |
 | **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 1 |
 
+**DECYZJA ANI 2026-09-21 (pytanie 7.2): TAK.** Cytat: „tak, przeszkadza mi to". Pozycje kolejki
+podpowiadające same siebie ze 100% mają zniknąć — seed słownika `bieznik` idzie dziś z
+`products.model` zamiast z `products.bieznik`.
 **Co robi produkcja.** `seed()` zasila słownik `marka` z `SELECT DISTINCT marka FROM products`,
 a zaraz potem słownik `bieznik` z `SELECT DISTINCT model FROM products` — **z kolumny `model`**,
 mimo że `products`
@@ -2377,10 +2414,13 @@ bo wartość zasiana z `model` trafia do słownika `bieznik`.
 |---|---|
 | **Kategoria** | BACKEND (mapowanie atrybut → kolumna `products`) |
 | **Pliki** | `mirror/backend/atrybuty_module.cjs:251-267` (`RODZAJ_KOLUMNA`, 15 pozycji — `liczniki` i `uzycie`), `mirror/backend/pending_module.cjs:22-36` (`RODZAJE_KOLUMNY`, 13 pozycji — skan i akceptacje), `:283-284` i `:326-327` (400 „Nieznany rodzaj"); port: `rebuild/backend/src/repos/atrybuty.ts:49` i `rebuild/backend/src/repos/atrybuty-pending.ts:25` |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D6) |
 | **Status** | ✔ odtworzone w rebuild (7a) · **nieosiągalne dzisiejszą ścieżką UI** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 4 |
 
+**DECYZJA ANI 2026-09-21 (pytanie 7.4): TAK.** Cytat: „trzeba naprawić". Ania UŻYWA rodzajów `model`
+i `zastosowanie` w kolejce, a „Edytuj" i alias zwracają przy nich „Nieznany rodzaj". Dwie rozjeżdżone
+mapy rodzaj→kolumna (15 vs 13) do uzgodnienia.
 **Co robi produkcja.** Dwa moduły trzymają własne, niezależne mapy „rodzaj atrybutu → kolumna
 `products`". `liczniki` i `uzycie` używają mapy 15-pozycyjnej; skan kolejki i obie akceptacje
 przepisujące produkty — 13-pozycyjnej, która jest jej **podzbiorem** bez `model`
@@ -2414,10 +2454,14 @@ a widok `/atrybuty` pokaże ten komunikat użytkowniczce (`komunikatBledu()` w
 |---|---|
 | **Kategoria** | BACKEND (algorytm sugerowania aliasów w kolejce atrybutów) |
 | **Pliki** | `mirror/backend/pending_module.cjs:41-55` (`levenshtein`), `:57-62` (`similarity`), `:65-72` (`shouldSuggestAlias`); port: `rebuild/backend/src/repos/atrybuty-pending.ts:57,80,96`, testy `rebuild/backend/test/atrybuty.podobienstwo.test.ts` |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
 | **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`) |
 | **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 2 |
 
+**DECYZJA ANI 2026-09-21 (pytanie 7.3): TAK, z uzasadnieniem biznesowym.** Cytat: „tak, bo mamy logikę,
+że katalog ma się zmieniać na drukowane litery, a w plikach przychodzi różnie". Czyli rozjazd
+wielkości liter jest w tym procesie REGUŁĄ, nie wyjątkiem — porównanie podobieństwa musi być
+case-insensitive. Powiązane: #12.4 z przeglądu (duplikat marki ALLIANCE/Alliance w danych).
 **Co robi produkcja.** `similarity` liczy odległość Levenshteina na SUROWYCH napisach — bez
 `toLowerCase()`, bez `trim()`, bez zwijania wielokrotnych spacji. Jedyna normalizacja w całym
 module to reguła „nie sugeruj, gdy różnica to wyłącznie `+`" (`:65-72`). Próg sugestii:
@@ -3622,3 +3666,84 @@ odkrywać drugi raz od zera; **priorytetu nie podnosimy**.
 nie modyfikuje go). Wymaga decyzji Ani, bo zmiana dopasowania jest odstępstwem od oryginału.
 Przy zerowym zasięgu rozsądne jest odłożenie tego do czasu, aż dane się zmienią — pod warunkiem,
 że wpis zostaje.
+
+---
+
+### #89 · 2026-09-21 · [FRONTEND] · wyszukiwarka po treści alertu — ŻYCZENIE ANI
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-21 (odpowiedź na pytanie 6.4 z `docs/pytania-do-ani-2026-09-18.md`) |
+| **Kategoria** | FRONTEND (widok `/alerty`) |
+| **Pliki** | `rebuild/frontend/src/pages/alerty/TabelaAlertow.tsx`, `pages/alerty/grupowanie.ts` |
+| **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-21** (nowa funkcja, oryginał jej nie ma) |
+| **Iteracja** | do zaplanowania |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**Po co.** Typ „Błąd pobierania" obejmuje JEDNYM workiem awarię sieci i błąd parsera (backlog #16),
+więc żeby je rozróżnić, trzeba dziś rozwinąć grupę i przeczytać wpisy. Wyszukiwarka po treści
+pozwoli znaleźć je od razu. Ania: „ta przydałaby się".
+
+**Uwaga do wdrożenia.** Filtry w tym widoku są wyliczane z danych, nie zaszyte — nowa wyszukiwarka
+ma działać na tej samej zasadzie i łączyć się z istniejącymi filtrami operatorem AND, tak jak
+robią to filtry dostawcy i typu (`test/alerty.grupowanie.test.ts`, „filtry łączą się operatorem AND").
+
+---
+
+### #90 · 2026-09-21 · [FRONTEND][BACKEND] · eksport CSV analityki ma respektować filtry — ŻYCZENIE ANI
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-21 (odpowiedź na pytanie 10.3) |
+| **Kategoria** | FRONTEND + BACKEND (analityka, eksport CSV) |
+| **Pliki** | `rebuild/backend/src/routes/analytics.ts` (trasa `export/:view`), `rebuild/frontend/src/pages/analityka/eksport.tsx` |
+| **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-21** (ŚWIADOME ODSTĘPSTWO) |
+| **Iteracja** | do zaplanowania |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**Co robi produkcja.** Każdy przycisk CSV pobiera dane WŁASNYM zapytaniem, innym niż karta nad nim,
+i **nie zna zaznaczonych filtrów** — zaznaczasz jednego dostawcę, a w pliku są wszyscy. Do tego
+CSV z karty „Marża" ma inne kolumny niż tabela, a CSV z „Rotacji" ignoruje pole „Bez ruchu dni".
+Opisane Ani w `instrukcja-testow-I10.md` §6.4 jako zachowanie zamierzone.
+
+**Decyzja Ani:** „można dorobić filtry". Czyli eksport ma oddawać to, co użytkownik widzi.
+
+⚠ **Zakres do rozstrzygnięcia przy zakładaniu karty:** czy „zapisz to, co widzę" obejmuje TYLKO
+filtry globalne, czy także rozjazd kolumn (Marża) i pole „Bez ruchu dni" (Rotacja). To trzy różne
+rozjazdy pod jednym hasłem i mają różny koszt.
+
+---
+
+### #91 · 2026-09-21 · [BAZA][FRONTEND] · duplikaty marek różniące się wielkością liter — `ALLIANCE` vs `Alliance`
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-21 (zgłoszenie Ani, pytanie 12.4 — doprecyzowanie uwagi z przeglądu 12 widoków) |
+| **Kategoria** | BAZA (dane) + FRONTEND (filtr marek w katalogu) |
+| **Pliki** | dane `products.marka`; filtr: `rebuild/frontend/src/pages/katalog/**` |
+| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** — dane vs prezentacja, patrz niżej |
+| **Iteracja** | do zaplanowania |
+| **Status** | zgłoszone, ZMIERZONE |
+
+**Zgłoszenie.** Ania: „to jest wynik kopii bazy ze starego Bridge'a — np. w filtrach marki
+w katalogu jest ALLIANCE i alliance, duplikaty małą i dużą literą".
+
+**Pomiar (2026-09-21, `db/snapshot.db`, 7405 produktów).** Duplikatów różniących się WYŁĄCZNIE
+wielkością liter jest **dokładnie jedna para: `ALLIANCE` i `Alliance`**. Żadna inna marka nie ma
+wariantów. Zapytanie kontrolne:
+
+```sql
+SELECT LOWER(marka), COUNT(DISTINCT marka), GROUP_CONCAT(DISTINCT marka)
+FROM products WHERE marka IS NOT NULL AND marka <> ''
+GROUP BY LOWER(marka) HAVING COUNT(DISTINCT marka) > 1;
+```
+
+**Dwie drogi, różne konsekwencje:**
+- **dane** — migracja normalizująca `marka` (jak 004–006 dla kategorii, konstrukcji i nazwy).
+  Rozwiązuje problem u źródła, ale zmienia dane produkcji; przy jednej parze koszt jest minimalny.
+- **prezentacja** — filtr marek w katalogu scala warianty case-insensitive. Nie rusza danych,
+  ale duplikat zostaje wszędzie indziej (eksporty, reguły cenowe, kolejka atrybutów).
+
+**Powiązania.** To ten sam problem, co #42 („BKT" i „bkt" nie podpowiadają się nawzajem) i ta sama
+przyczyna, którą Ania nazwała w pytaniu 7.3: **katalog ma konwencję WIELKICH liter, a pliki
+dostawców przychodzą różnie**. Rozstrzygać łącznie z #42, nie osobno.
