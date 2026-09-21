@@ -92,7 +92,7 @@ i `contract/`. Poza zakresem jest też niewielka nieścisłość §8.1 pierwszej
 
 ## Definition of done
 - [x] warunek startu sprawdzony (oba PR w develop, deploy stagingu `success`)
-- [ ] `instrukcja-testow-I5-v2.md` napisana, każde twierdzenie zweryfikowane z kodem
-- [ ] banner w `instrukcja-testow-I5.md`
-- [ ] roadmapa: P5.3 ✅, Iteracja 5 zamknięta
-- [ ] review bez BLOCKER-ów, PR do develop
+- [x] `instrukcja-testow-I5-v2.md` napisana, każde twierdzenie zweryfikowane z kodem
+- [x] banner w `instrukcja-testow-I5.md`
+- [x] roadmapa: P5.3 ✅, Iteracja 5 zamknięta
+- [x] review bez BLOCKER-ów, PR do develop
