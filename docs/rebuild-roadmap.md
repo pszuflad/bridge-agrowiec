@@ -1032,15 +1032,8 @@ zmienia kolejności. Tempo zapisu (ok. 2400 wierszy/miesiąc w lipcu, 1476 w sie
 
 Szczegóły: `docs/tickets/69-FEATURE-historia-bez-limitu/`.
 
-**Wejście dla P5.3 (delta instrukcji I5-v2, jeszcze nie założona w tej roadmapie):**
-po P5.1 `docs/instrukcja-testow-I5.md` §11 pkt 9 („ekran czyta 5000 najświeższych zdarzeń…
-z czasem wypłynie") przestaje być prawdziwy dla odbudowy — sprostowanie należy do karty P5.3.
-Przy porównaniu obok starego Bridge licznik `N wpisów` i najstarsze wpisy mogą się różnić
-na korzyść odbudowy — to oczekiwane, nie zgłoszenie. Dodatkowo dla ewentualnego
-przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`): działa tylko na bazie PONIŻEJ
-5000 wierszy `audit_log` — powyżej progu skrypt pokaże rozjazdy z założenia (odbudowa oddaje
-więcej), co wykryje pierwszy warunek ważności w `historia.wyrocznia.test.ts`
-(`limitNieGryzie: false`).
+Wejście dla P5.3 (sprostowanie instrukcji I5 §11 pkt 9) leży w bloku „Poprawki po testach
+Ani”, sekcja Iteracja 5, pod tabelą kart.
 
 ---
 
@@ -2983,13 +2976,23 @@ pod starymi nazwami: przemianowanie zerwałoby **719 odwołań w 38 plikach**.
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P5.1** | Historia przestaje gubić najstarsze zdarzenia — filtrowanie i paginacja w SQL | #87 | 🔨 ticket 69 |
+| **P5.1** | Historia przestaje gubić najstarsze zdarzenia — hybryda: odsiew akcji w SQL bez limitu, reszta w pamięci (decyzja D2) | #87 | ✅ `69-FEATURE-historia-bez-limitu` · 2026-09-21 |
 | **P5.2** | eksport ZIP działa u nas, w produkcji nie — utrwalić jako świadome odstępstwo | #93 | 🔨 ticket 70 |
 | **P5.3** | delta instrukcji I5 dla Ani | — | ⬜ po P5.1 i P5.2 |
 
 Karta `14j` (oracle diff historii, 0 różnic na 49 813 wpisach) i skasowana `14k` (#21 — NIE) też
 należą do tej iteracji. Baza dla P5.3: `docs/instrukcja-testow-I5.md`, odtworzony 21.09 z PDF-a Ani
 (ticket 67) — wcześniej nie istniał w repo.
+
+**Wejście dla P5.3 (od P5.1, 2026-09-21):**
+po P5.1 `docs/instrukcja-testow-I5.md` §11 pkt 9 („ekran czyta 5000 najświeższych zdarzeń…
+z czasem wypłynie") przestaje być prawdziwy dla odbudowy — sprostowanie należy do karty P5.3.
+Przy porównaniu obok starego Bridge licznik `N wpisów` i najstarsze wpisy mogą się różnić
+na korzyść odbudowy — to oczekiwane, nie zgłoszenie. Dodatkowo dla ewentualnego
+przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`): działa tylko na bazie PONIŻEJ
+5000 wierszy `audit_log` — powyżej progu skrypt pokaże rozjazdy z założenia (odbudowa oddaje
+więcej), co wykryje pierwszy warunek ważności w `historia.wyrocznia.test.ts`
+(`limitNieGryzie: false`).
 
 #### Iteracja 6 — Alerty
 
