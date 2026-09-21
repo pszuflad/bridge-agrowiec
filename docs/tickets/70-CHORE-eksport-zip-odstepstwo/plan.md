@@ -1,6 +1,6 @@
 # 70-CHORE-eksport-zip-odstepstwo — P5.2: eksport ZIP jako świadome odstępstwo od produkcji
 
-> Status: Draft → **Approved** → Implemented → Shipped
+> Status: Draft → Approved → **Implemented** → Shipped
 > Branch: `chore/70-eksport-zip-odstepstwo`
 > Worktree: `.worktrees/70-CHORE-eksport-zip-odstepstwo`
 
