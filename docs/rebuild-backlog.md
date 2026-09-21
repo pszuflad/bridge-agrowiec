@@ -2493,6 +2493,9 @@ zamiast realnej liczby przepisanych produktów. Szczegóły: `docs/tickets/74-FE
 przed masowym `UPDATE products`: dialogi „Akceptuj z edycją" i „jako alias" pokazują liczbę
 produktów, których dotknie zmiana (`GET /api/atrybuty/uzycie` → `count`), a toast po sukcesie
 podaje `produktow_zaktualizowano`. To nie zastępuje wpisu w dzienniku.
+**Tekst ostrzeżenia w UI zgadza się już ze śladem w Historii (ticket 81, 2026-09-21):** zamiast
+„…akcje kolejki nie trafiają do audytu” oba okienka mówią „Operacji nie da się cofnąć. Zostanie po
+niej wpis w Historii (typ „edycja”).”
 
 ---
 

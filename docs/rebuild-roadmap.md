@@ -3103,7 +3103,8 @@ odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest popraw
 | **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ✅ 2026-09-21, ticket `74-FEATURE-slad-kolejki-atrybutow` |
 | **P7.2** | seed bieżników z `products.bieznik` + sprzątanie kolejki z self-matchy + podobieństwo case-insensitive | #40, #42 | ✅ 2026-09-21, ticket `78-FEATURE-seed-bieznikow-podobienstwo` — kolejka 498→61 pozycji, 0 self-matchy, 13 nowych sugestii aliasów |
 | **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ✅ `75-CHORE-niezmiennik-atrybutow` · 2026-09-21 — niezmiennik trzyma się: liczba w ostrzeżeniu = liczba przepisanych wierszy, 0 rozjazdów na 4148 pomiarach na snapshocie; test `atrybuty.niezmiennik.test.ts` w bramce |
-| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 · wejście od P7.3 niżej |
+| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 i P7.5 · wejście od P7.3 niżej |
+| **P7.5** | tekst ostrzeżenia w kolejce atrybutów zgodny ze śladem w Historii (tylko frontend) | #39 | ✅ 2026-09-21, ticket `81-FEATURE-ostrzezenie-kolejki-historia` — oba okienka (edycja, alias) mówią o wpisie w Historii zamiast o braku audytu; test obejmuje oba |
 
 ⚠ P7.1 i P7.2 dzielą klaster backendu atrybutów — przed puszczeniem obu naraz sprawdzić rozłączność
 plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czymkolwiek.
@@ -3161,6 +3162,14 @@ pliku nietknięta. `atrybuty_wartosci.rodzaj` ma FK do `atrybuty_rodzaje`, a see
 tylko 5 rodzajów rdzenia (produkcja ma 15) — na świeżej bazie akceptacja rodzaju spoza piątki
 nadal kończy się 500 (rollback, stan zastany, nie zmieniony w 78). Szczegóły:
 `docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`.
+
+**Dla P7.4 — ostateczne brzmienie ostrzeżenia (P7.5, ticket 81, do cytowania znak w znak).**
+Oba okienka, „Akceptuj z edycją” i „Akceptuj jako alias”, pokazują ten sam komponent:
+„Zmiana przepisze pole <rodzaj> w <N> produktach katalogu. Operacji nie da się cofnąć. Zostanie
+po niej wpis w Historii (typ „edycja”).” Pod nim okienko aliasu ma dodatkowe, niezmienione zdanie:
+„Do słownika nie trafi nic — mapowanie nie jest nigdzie zapisywane, zmieniają się wyłącznie
+produkty.” Stare zdanie „…ani odtworzyć z dziennika — akcje kolejki nie trafiają do audytu”
+już nie występuje. Produkcja nie ma ani ostrzeżenia (dodatek D7 rebuildu), ani audytu kolejki.
 
 **Dla P7.4 (delta instrukcji I7):** `docs/instrukcja-testow-I7.md` §4 pkt 4 jest po 74
 nieprawdziwy dwukrotnie — `model`/`zastosowanie` NIE trafiają do kolejki (skan ich nie tworzy,
