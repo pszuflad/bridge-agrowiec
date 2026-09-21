@@ -4076,6 +4076,21 @@ wyszukiwarkę odrzuciła jako follow-up. Wraca, bo Ania wprost jej chciała — 
 
 ### #91 · 2026-09-21 · [FRONTEND][BACKEND] · eksport CSV analityki ma respektować filtry — ŻYCZENIE ANI
 
+> **⭐ ZAKRES — decyzje użytkownika 2026-09-21, wszystkie zgodnie z rekomendacją. Karta P10.3.**
+> 1. **Sposób: plik CSV powstaje w PRZEGLĄDARCE** z dokładnie tych wierszy, które tabela karty ma po
+>    zastosowaniu filtrów (globalnych i lokalnych, np. „Bez ruchu dni" w Rotacji). Odrzucone: filtry
+>    doklejane do `export/:view` i filtrowane w SQL — 10 zapytań × 6 wymiarów do przerobienia, a kolumny
+>    i tak zostałyby inne niż w tabeli. Trasa `GET /api/analytics/export/:view` ZOSTAJE bez zmian (kontrakt,
+>    naprawiona w P10.1) — przestaje być wołana przez przyciski CSV.
+> 2. **Marża: plik ma przekrój tabeli** (grupy dostawca/kategoria/marka), nie dzisiejszą listę per produkt.
+>    Bez drugiego przycisku „wszystkie produkty" — Ania prosiła o „to, co widzę"; jeśli potrzebuje danych
+>    per produkt, zapyta o to delta I10 (P10.4).
+> 3. **Limit 300 wierszy tabeli NIE dotyczy pliku** — CSV ma WSZYSTKIE wiersze po filtrach. Limit to
+>    ograniczenie rysowania (`TabelaAnalityki.tsx`, `slice(0, 300)` z oryginału), nie zamiar.
+> Kontekst, który przesądził: **pasek filtrów analityki to NASZE odstępstwo** (O-10a-2, 10a) — produkcja
+> go nie ma. Brak filtrów w eksporcie to luka, którą stworzyła odbudowa, nie defekt produkcji.
+> Trzy rozjazdy z pierwotnego opisu (filtry, kolumny Marży, „Bez ruchu dni") zamyka punkt 1.
+
 | Pole | Wartość |
 |---|---|
 | **Data** | 2026-09-21 (odpowiedź na pytanie 10.3) |
@@ -4083,7 +4098,7 @@ wyszukiwarkę odrzuciła jako follow-up. Wraca, bo Ania wprost jej chciała — 
 | **Pliki** | `rebuild/backend/src/routes/analytics.ts` (trasa `export/:view`), `rebuild/frontend/src/pages/analityka/eksport.tsx` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-21** (ŚWIADOME ODSTĘPSTWO) |
 | **Iteracja** | do zaplanowania |
-| **Status** | decyzja podjęta, karta niezałożona |
+| **Status** | decyzja i zakres podjęte (2026-09-21) — karta **P10.3** gotowa do startu po P10.1 |
 
 **Co robi produkcja.** Każdy przycisk CSV pobiera dane WŁASNYM zapytaniem, innym niż karta nad nim,
 i **nie zna zaznaczonych filtrów** — zaznaczasz jednego dostawcę, a w pliku są wszyscy. Do tego
