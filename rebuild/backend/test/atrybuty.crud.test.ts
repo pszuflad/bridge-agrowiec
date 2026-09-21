@@ -340,12 +340,12 @@ describe("atrybuty — CRUD słownika", () => {
 
   describe("seed słownika", () => {
     /**
-     * ⚠ „BIEŻNIK Z MODELU" JEST W ORYGINALE (`atrybuty_module.cjs:80-83`) — słownik `bieznik`
-     * zasilany jest z `products.model`, choć `products` ma osobną kolumnę `bieznik`.
-     * W danych testowych obie kolumny mają tę samą treść, więc sprawdzamy to wprost na
-     * produkcie, w którym się różnią.
+     * Świadome odstępstwo, backlog #40, decyzja Ani 2026-09-21 (ticket 78): słownik `bieznik`
+     * zasilany jest z `products.bieznik`. Oryginał (`atrybuty_module.cjs:80-83`) brał
+     * `products.model`. W danych testowych obie kolumny mają tę samą treść, więc sprawdzamy
+     * to wprost na produkcie, w którym się różnią.
      */
-    it("seed bierze wartości `bieznik` z kolumny `model`, nie `bieznik`", () => {
+    it("seed bierze wartości `bieznik` z kolumny `bieznik`, nie `model`", () => {
       // Rozjeżdżamy obie kolumny dla jednego produktu i powtarzamy seed (jak restart procesu).
       srodowisko.db.run(
         sql`UPDATE products SET model = 'MODEL_X', bieznik = 'BIEZNIK_Y' WHERE kod = 'MO1_100001'`,
@@ -359,8 +359,8 @@ describe("atrybuty — CRUD słownika", () => {
         .filter((w) => w.rodzaj === "bieznik")
         .map((w) => w.wartosc);
 
-      expect(wartosci).toContain("MODEL_X");
-      expect(wartosci).not.toContain("BIEZNIK_Y");
+      expect(wartosci).toContain("BIEZNIK_Y");
+      expect(wartosci).not.toContain("MODEL_X");
     });
 
     it("seed jest idempotentny — powtórzenie nie mnoży wierszy", () => {

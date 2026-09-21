@@ -535,20 +535,24 @@ describe("atrybuty — niezmiennik „ostrzeżenie = liczba realnie przepisanych
     });
 
     /**
-     * …ale pozycji, która trafiła już do słownika, skan NIE odświeża (pomija wartości ze
-     * słownika, zanim sięgnie do kolejki) — jej A zostaje na zawsze z pierwszego skanu. To źródło
-     * wszystkich 126 rozjazdów A ≠ C w kolejce ze snapshotu.
+     * …a pozycji, która trafiła już do słownika, skan nie odświeża, tylko ją USUWA z kolejki.
+     *
+     * ⚠ Świadome odstępstwo, backlog #40, ticket 78 (decyzja Ani 2026-09-21, odwrócenie testu:
+     * decyzja użytkownika). W oryginale i przed ticketem 78 taka pozycja zostawała z A z pierwszego
+     * skanu na zawsze (tu A = 2 przy B = 5) — źródło większości ze 126 rozjazdów A ≠ C w kolejce
+     * ze snapshotu. Teraz skan ją sprząta, więc nieświeżego A dla niej już nie ma. Produkty
+     * nietknięte — sprzątanie działa jak „Akceptuj", nie jak alias.
      */
-    it("pozycji obecnej w słowniku skan nie odświeża — A zostaje nieświeże", async () => {
+    it("pozycję obecną w słowniku skan usuwa z kolejki — nieświeże A znika", async () => {
       dodajProdukty(MARKA, "P73 ZAMROZONA", 2);
       await skanuj();
       await doSlownika(MARKA, "P73 ZAMROZONA");
       dodajProdukty(MARKA, "P73 ZAMROZONA", 3);
       await skanuj();
 
-      const p = (await pozycja(MARKA, "P73 ZAMROZONA"))!;
-      const B = await uzycie(MARKA, "P73 ZAMROZONA");
-      expect({ A: p.ile_wystapien, B }).toEqual({ A: 2, B: 5 });
+      expect(await pozycja(MARKA, "P73 ZAMROZONA")).toBeUndefined();
+      expect(await uzycie(MARKA, "P73 ZAMROZONA")).toBe(5);
+      expect(ileZWartoscia(MARKA, "P73 ZAMROZONA")).toBe(5);
     });
   });
 });

@@ -10,6 +10,7 @@ import { trasyAlertowKatalogu } from "./routes/alerty-katalogu.js";
 import { trasyAtrybutow } from "./routes/atrybuty.js";
 import { trasyAnalityki } from "./routes/analytics.js";
 import { zasiejSlownikAtrybutow } from "./repos/atrybuty.js";
+import { usunZKolejkiObecneWSlowniku } from "./repos/atrybuty-pending.js";
 import { trasyAuth } from "./routes/auth.js";
 import { trasyKonfiguracji } from "./routes/config.js";
 import { trasyAdmina } from "./routes/admin.js";
@@ -91,8 +92,12 @@ export function stworzApp({
   // ⚠ To NIE jest migracja i nie należy jej za taką brać: seed dosypuje 6 wbudowanych rodzajów
   // ORAZ wartości `marka`/`bieznik` odczytane z aktualnej zawartości `products`, więc jego wynik
   // zmienia się z każdym importem. Steruje tym, co Ania zobaczy w kolejce pending — wartość
-  // obecna w słowniku jest przy skanie pomijana. Szczegóły i quirk „bieżnik z modelu”:
-  // `repos/atrybuty.ts`.
+  // obecna w słowniku jest przy skanie pomijana. Szczegóły: `repos/atrybuty.ts`.
+  //
+  // Zaraz po seedzie sprzątamy kolejkę z pozycji, które seed właśnie „zaakceptował” (świadome
+  // odstępstwo, backlog #40, ticket 78) — inaczej podpowiadałyby same siebie ze 100%.
+  // Sprzątanie jest tu, a nie w seedzie, bo `repos/atrybuty-pending.ts` importuje
+  // `repos/atrybuty.ts` (wywołanie w drugą stronę dałoby import cykliczny).
   //
   // W `try/catch`, bo seed NIE JEST krytyczny dla startu: na bazie bez tabel atrybutów (stary
   // `DB_PATH`, na którym nie puszczono `npm run migrate`) niezabezpieczone wywołanie wywracałoby
@@ -103,6 +108,10 @@ export function stworzApp({
   // w oryginale wokół SELECT-ów z `products` („products może nie istnieć", `:78`).
   try {
     zasiejSlownikAtrybutow(db);
+    const usunieto = usunZKolejkiObecneWSlowniku(db);
+    if (usunieto) {
+      console.log(`[atrybuty] start: usunięto z kolejki ${usunieto} pozycji obecnych w słowniku`);
+    }
   } catch (e) {
     console.error("[atrybuty] seed pominięty:", e instanceof Error ? e.message : e);
   }
