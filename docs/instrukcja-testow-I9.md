@@ -1,5 +1,18 @@
 # Iteracja 9 (Waga gabarytowa) — instrukcja testów dla Ani
 
+> **⚠ CZĘŚCIOWO NIEAKTUALNE od 2026-09-21 — najpierw przeczytaj [wersję 2 tej instrukcji](instrukcja-testow-I9-v2.md).**
+>
+> Po Twoich uwagach **lista przewoźników jest wspólna dla całej firmy i zapisana w Bridge**, **usunięcie przewoźnika i „Przywróć domyślne" pytają o potwierdzenie**, a **kalkulator paletowy jest w panelu**. Ta instrukcja opisuje stan **sprzed** tych zmian. **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego, co widzisz na ekranie, prawdą jest wersja 2.**
+>
+> Co konkretnie przestało być prawdą w TEJ wersji:
+> - **ramka na górze**, **§3.13** i **§4 pkt 1** — lista przewoźników nie siedzi już w przeglądarce, w innej przeglądarce jest taka sama;
+> - **§3.11**, **§3.12** i **§4 pkt 4** — usunięcie i „Przywróć domyślne" pytają o potwierdzenie, a „Przywróć domyślne" cofa listę całej firmie;
+> - **§4 pkt 2** — bez połączenia z Bridge kalkulator nie policzy, bo listę przewoźników bierze z Bridge;
+> - **§1**, **§2**, **§4 pkt 3** i **§4 pkt 8** — kalkulator paletowy jest na ekranie (progów palety nadal nie da się ustawić);
+> - **§3.9** (ramka) — błędny dzielnik daje komunikat zamiast cichego zignorowania;
+> - **§5** — wspólna lista, kalkulator paletowy i Atrybuty już są;
+> - **§6** (pozycja „W innej przeglądarce lista jest domyślna") i **§7** (zgłoszenie „ustawienia zniknęły same").
+
 **Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-03 · **Zaktualizowano:** 2026-09-04 (sekcje 4.8 i 5 — statusy iteracji)
 
 > **To jest STAGING, nie produkcja.** Cokolwiek tu ustawisz albo zepsujesz — produkcji nie
