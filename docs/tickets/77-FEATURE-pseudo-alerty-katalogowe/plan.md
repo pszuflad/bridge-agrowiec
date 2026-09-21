@@ -1,6 +1,6 @@
 # 77-FEATURE-pseudo-alerty-katalogowe — P6.2: pseudo-alerty katalogowe jako zakładka „Katalog" na /alerty
 
-> Status: Implemented
+> Status: Shipped
 > Branch: `feature/77-pseudo-alerty-katalogowe`
 > Worktree: `.worktrees/77-FEATURE-pseudo-alerty-katalogowe`
 
