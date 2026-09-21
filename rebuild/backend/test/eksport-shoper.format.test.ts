@@ -191,6 +191,9 @@ describe("trasy eksportu — treść odpowiedzi end-to-end", () => {
     srodowisko = await stworzSrodowiskoTestowe();
     zasiejProdukty(srodowisko.db);
     zasiejDostawcow(srodowisko.db);
+    // Dostawca bez produktów — dla testu ZIP-a; pozostałe testy tego bloku filtrują po MO9
+    // albo czytają nagłówek, więc dodatkowy dostawca ich nie dotyczy.
+    zasiejDostawcow(srodowisko.db, [{ ...DOSTAWCA_BEZ_PRODUKTOW }]);
 
     const odp = await request(srodowisko.app)
       .post("/api/login")
@@ -225,8 +228,6 @@ describe("trasy eksportu — treść odpowiedzi end-to-end", () => {
    * (tu dosiany `MO7`) dostaje plik z samym BOM-em i nagłówkiem, nie zostaje pominięty.
    */
   it("`/api/export-shoper` bez parametru: każdy wpis ZIP-a == pojedynczy eksport dostawcy", async () => {
-    zasiejDostawcow(srodowisko.db, [{ ...DOSTAWCA_BEZ_PRODUKTOW }]);
-
     const odp = await zAuth("/api/export-shoper").buffer(true).parse(doBufora);
     const wpisy = czytajZip(odp.body as Buffer);
 

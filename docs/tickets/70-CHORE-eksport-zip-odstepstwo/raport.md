@@ -102,3 +102,15 @@ zachowanie po awarii w trakcie strumienia: zamiast wiszenia jest zerwane połąc
 - **Zapis audytu przed `finalize()` może zerwać eksport, który sam w sobie się udał.**
   Kolejność jest 1:1 z oryginałem. Zmiana (np. audyt po `finalize` albo w `try/catch`) to
   decyzja o zachowaniu, nie część tej karty.
+
+## Poprawki po review
+
+- **BLOCKER (DoD p.6: roadmapa i backlog)** — to zakres fazy dokumentacji (krok 13–14), która
+  szła PO review. Rozliczone w sekcji „Aktualizacje dokumentacji” niżej.
+- **SHOULD-FIX (dosiew `MO7` w środku `it()`)** — przeniesiony do `beforeAll` bloku end-to-end
+  w `eksport-shoper.format.test.ts`, z komentarzem, dlaczego pozostałym testom bloku nie
+  przeszkadza. Testy nie zależą już od kolejności wykonania.
+- NICE-TO-HAVE: checkboxy DoD w `plan.md` odhaczone po dokumentacji. Brak automatycznego testu
+  gałęzi „błąd archivera po nagłówkach” i to, że test ścieżki błędu trafia w praktyce w jedną
+  gałąź, są opisane wyżej („Zadanie 4”). Zostają tak świadomie: testowy parametr trasy tylko po
+  to, żeby wstrzyknąć archiwum, byłby kosztem większym niż zysk.
