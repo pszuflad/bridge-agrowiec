@@ -1,4 +1,4 @@
--- 007_alerty_katalogu_statusy.sql — Iteracja 6, karta P6.2 (ticket 77-FEATURE-pseudo-alerty-katalogowe)
+-- 008_alerty_katalogu_statusy.sql — Iteracja 6, karta P6.2 (ticket 77-FEATURE-pseudo-alerty-katalogowe)
 --
 -- Status obsługi PSEUDO-ALERTÓW KATALOGOWYCH (marża ujemna / bardzo niska marża / nie-opona /
 -- brak importu cennika). Same alerty NIE są tu zapisywane — przeglądarka liczy je na żywo

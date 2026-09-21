@@ -456,7 +456,7 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 > w formie, której silnik frontu nie produkuje. Zapis w jednej transakcji wypiera stare wpisy
 > tej samej pary (produkt/dostawca + reguła, inny odcisk wartości) i kasuje sieroty
 > (`produkt_id` spoza `products`) — bez procesu w tle. Obie metody za `requireAuth`, bez
-> `audit_log` (spójnie z `PATCH /api/alerts/:id`, D4 z I6). Migracja `007` (tabela nie istnieje
+> `audit_log` (spójnie z `PATCH /api/alerts/:id`, D4 z I6). Migracja `008` (tabela nie istnieje
 > w produkcji — `rebuild/schema/README.md`); schemat trasy jest ręczny w `contract/openapi.yaml`
 > (nagrania z produkcji być nie może — `contract/README.md`). Szczegóły:
 > `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/`.

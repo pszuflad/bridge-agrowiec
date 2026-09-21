@@ -44,7 +44,7 @@ describe("zastosujMigracje", () => {
     "004_kategoria_wielka_litera.sql",
     "005_konstrukcja_slowa.sql",
     "006_nazwa_caps.sql",
-    "007_alerty_katalogu_statusy.sql",
+    "008_alerty_katalogu_statusy.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 27 tabel i 14 indeksów", () => {
@@ -52,7 +52,7 @@ describe("zastosujMigracje", () => {
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
     // (SQLite nie ma ALTER COLUMN) i odtwarza jej indeks — bilans tabel i indeksów bez zmian.
-    // 007 (P6.2) dokłada jedną tabelę z jednym indeksem — statusy pseudo-alertów katalogowych.
+    // 008 (P6.2) dokłada jedną tabelę z jednym indeksem — statusy pseudo-alertów katalogowych.
     expect(policzTabele(sqlite)).toBe(27);
 
     const indeksy = (

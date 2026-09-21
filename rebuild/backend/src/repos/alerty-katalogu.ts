@@ -5,7 +5,7 @@ import { alertyKataloguStatusy, products } from "../db/schema.js";
 
 /**
  * Statusy obsługi PSEUDO-ALERTÓW KATALOGOWYCH — karta P6.2 (ticket
- * `77-FEATURE-pseudo-alerty-katalogowe`), tabela z migracji `007_alerty_katalogu_statusy.sql`.
+ * `77-FEATURE-pseudo-alerty-katalogowe`), tabela z migracji `008_alerty_katalogu_statusy.sql`.
  *
  * Same alerty liczy przeglądarka z `GET /api/products` (`pages/alerty/silnik-katalogu.ts`,
  * port `pv()` z żywego bundla na `origin/main`). Serwer zna wyłącznie ich IDENTYFIKATORY

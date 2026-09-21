@@ -88,6 +88,8 @@ Pięć decyzji użytkownika z 2026-09-21 (backlog #26) — wykonujemy:
 
 Decyzje z Q&A tej karty (2026-09-21, wszystkie zgodnie z rekomendacją):
 - **Q1 migracja:** P6.2 bierze `007`; PR.3 dostaje `008` — nota wpisana do bloku PR.3 w roadmapie.
+  **Korekta przed pushem (decyzja użytkownika 2026-09-21):** równoległa karta 76 (PR #92, po review)
+  dołożyła `007_waga_gab_przewoznicy.sql` — P6.2 przenumerowana na **`008`**, PR.3 bierze **`009`**.
 - **Q2 sprzątanie:** „wypieranie + sierotki" — zapis statusu kasuje wpisy tej samej pary
   (produkt/dostawca, reguła) z innym odciskiem, a przy każdym zapisie kasowane są wpisy
   produktów, których nie ma już w `products`. Tabela ≤ ~1 wiersz na parę. Bez procesu w tle.
@@ -115,7 +117,7 @@ Decyzje Mastera (zlecone przez decyzję 3, opisane w raporcie):
 
 ## Plan implementacji
 
-### Krok 1 — BE: migracja `007_alerty_katalogu_statusy.sql`
+### Krok 1 — BE: migracja `008_alerty_katalogu_statusy.sql` (pierwotnie 007 — patrz Q1)
 ```sql
 CREATE TABLE IF NOT EXISTS alerty_katalogu_statusy (
   id TEXT PRIMARY KEY,               -- id alertu z odciskiem, dokładnie jak liczy front
@@ -209,7 +211,7 @@ dwie sekcje. Komentarz O-10f-1 zaktualizowany (Pulpit znów liczy też pseudo-al
 - „Zaakceptuj wszystko" na zakładce Import (oryginał miał je tylko w widoku pseudo-alertów).
 
 ## Definition of done
-- [ ] Migracja 007 + tabela + model; trasa GET/PUT z walidacją, wypieraniem i sierotkami.
+- [ ] Migracja 008 + tabela + model; trasa GET/PUT z walidacją, wypieraniem i sierotkami.
 - [ ] `openapi.yaml` opisuje trasę; `--sprawdz` i `kontrakt.spojnosc` zielone.
 - [ ] Silnik 1:1 z `origin/main` (4 reguły, h2 bez `tr-`, MO7/MO8, odciski).
 - [ ] Zakładki „Import"/„Katalog", filtry jak P6.1, „Zaakceptuj wszystko", wspólne przyciski.
@@ -217,4 +219,4 @@ dwie sekcje. Komentarz O-10f-1 zaktualizowany (Pulpit znów liczy też pseudo-al
 - [ ] Testy reguł z progami, MO7/MO8, odciskiem, BKT TR-135.
 - [ ] Pomiar czasu liczenia na snapshocie w raporcie.
 - [ ] Bramki BE i FE zielone.
-- [ ] Roadmapa (podblok P6.2, nota o 008 w PR.3), backlog #26 (Status) zaktualizowane.
+- [ ] Roadmapa (podblok P6.2, nota o 009 w PR.3), backlog #26 (Status) zaktualizowane.

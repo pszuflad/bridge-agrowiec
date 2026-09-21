@@ -5,14 +5,14 @@
 Pseudo-alerty katalogowe wróciły jako zakładka „Katalog" na `/alerty`, obok „Import". Silnik to
 port 1:1 `v2()`/`pv()` z żywego bundla na `origin/main` (po łatkach `tr_fix` i `ackalerts`
 z 04.09). Na całym `db/snapshot.db` daje wynik **identyczny co do bajtu** z oryginałem wyciętym
-z bundla. Status alertu trzymamy na serwerze w nowej tabeli (migracja `007`), zapisuje go nowa
+z bundla. Status alertu trzymamy na serwerze w nowej tabeli (migracja `008`), zapisuje go nowa
 trasa `GET/PUT /api/alerty-katalogu/statusy`, a tabela sprząta się sama przy zapisie. Pulpit
 pokazuje oba źródła: kafel sumuje, karta ma dwie sekcje.
 
 ## Zmiany
 
 **Backend**
-- **Nowy:** `rebuild/schema/007_alerty_katalogu_statusy.sql` — tabela
+- **Nowy:** `rebuild/schema/008_alerty_katalogu_statusy.sql` — tabela
   `alerty_katalogu_statusy (id PK, klucz, produkt_id, status CHECK przejrzany|rozwiazany,
   uzytkownik_id, uzytkownik_imie, kiedy)` + indeks na `klucz`. Idempotentna (`IF NOT EXISTS`).
 - `rebuild/backend/src/db/schema.ts` — model `alertyKataloguStatusy`, dopisany ręcznie.
@@ -29,7 +29,7 @@ pokazuje oba źródła: kafel sumuje, karta ma dwie sekcje.
     (także reguły wyłączone `if(false)`);
   - obie metody za `requireAuth`, bez `audit_log` (spójnie z D4 z I6).
 - `src/app.ts` — rejestracja trasy.
-- `test/db.migracje.test.ts` — lista migracji +007, tabel 27, indeksów 14.
+- `test/db.migracje.test.ts` — lista migracji +008, tabel 27, indeksów 14.
 - **Nowy:** `test/alerty-katalogu.gate.test.ts` (37 testów, z limitem paczki 20 000 / 20 001) — kontrakt GET/PUT (ciało sprawdzane
   wobec schematu czytanego z `openapi.yaml`), „kto i kiedy", `nowy` kasuje, paczka z duplikatami,
   wypieranie (marża i dni dostawcy), brak wypierania między regułami i produktami, sieroty,
@@ -146,6 +146,21 @@ Review nr 1 (`review.md`): 1 BLOCKER / 1 SHOULD-FIX / 2 NICE-TO-HAVE.
   20 000 → 200 (paczka jednej pary wypiera się do jednego wiersza).
 - **NICE-TO-HAVE (`rebuild/schema/README.md` do 006)**: przekazane doc-checkerowi.
 
+## Przenumerowanie migracji przed pushem (007 → 008)
+
+Kontrola tuż przed pushem wykazała, że otwarty PR #92 (karta 76, P9.1 przewoźnicy, po review)
+dokłada `rebuild/schema/007_waga_gab_przewoznicy.sql`. Przy starcie karty ta gałąź nie miała
+jeszcze pliku migracji. Decyzja użytkownika (2026-09-21): **P6.2 bierze `008`**, PR.3 bierze
+`009`. Zmienione: nazwa pliku, lista w `test/db.migracje.test.ts`, komentarze w `schema.ts`
+i repo, `rebuild/schema/README.md`, `docs/cutover.md`, `docs/spec-backend.md`, roadmapa
+(P6.2 i PR.3), backlog #26, plan.
+
+⚠ **Kto zmerguje drugi (#92 albo ten PR), dopisuje w `test/db.migracje.test.ts` obie migracje
+(`007_waga_gab_przewoznicy.sql`, `008_alerty_katalogu_statusy.sql`) i podbija licznik tabel do 28**
+(indeksów: 14; migracja 76 nie ma indeksu). Test ma jawną listę plików, więc konflikt wyjdzie
+tekstowo. Runner stosuje pliki alfabetycznie i ewidencjonuje je po nazwie, więc kolejność
+007 → 008 jest poprawna niezależnie od kolejności merge'ów.
+
 ## Wyniki testów
 
 - **Gate odbudowy (kontrakt):** ✓ zgodne.
@@ -175,7 +190,7 @@ Review nr 1 (`review.md`): 1 BLOCKER / 1 SHOULD-FIX / 2 NICE-TO-HAVE.
 
 ## Zmiany łamiące zgodność
 
-Brak dla API i danych. Wdrożenie wymaga `npm run migrate` (nowa migracja 007), tak jak każda
+Brak dla API i danych. Wdrożenie wymaga `npm run migrate` (nowa migracja 008), tak jak każda
 migracja. Bez niej `GET/PUT /api/alerty-katalogu/statusy` rzuci błąd SQL, a zakładka „Katalog"
 pokaże „Nie udało się policzyć alertów katalogu" (zakładka „Import" działa dalej).
 
@@ -186,14 +201,14 @@ pokaże „Nie udało się policzyć alertów katalogu" (zakładka „Import" dz
   i suma na kaflu). Warto też uprzedzić Anię, że alert „Brak importu cennika" oznaczony jako
   przejrzany wraca następnego dnia jako „nowy" (dni są w `id`). Tak działa oryginał od łatki
   `ackalerts`. Pliku nie ruszałem.
-- **PR.3 musi wziąć migrację `008`** (007 zajęła ta karta). Nota trafia do bloku PR.3
+- **PR.3 musi wziąć migrację `009`** (007 — karta 76 / PR #92, 008 — ta karta). Nota trafia do bloku PR.3
   w roadmapie przy synchronizacji dokumentacji (sekcja „Aktualizacje dokumentacji" niżej).
 - **Nieaktualne komentarze w plikach P6.1**, których ta karta nie mogła ruszyć:
   - nagłówek `pages/alerty/TabelaAlertow.tsx` mówi „pseudo-alerty katalogowe czekają na decyzję
     w backlogu";
   - `pages/alerty/api.ts` pisze o „przyszłej liście P6.2".
   Do poprawki przy następnym dotknięciu tych plików.
-- `rebuild/schema/README.md` wymienia migracje do `006`; dopisanie `007` należy do synchronizacji
+- `rebuild/schema/README.md` wymienia migracje do `006`; dopisanie `008` należy do synchronizacji
   dokumentacji.
 
 ## Aktualizacje dokumentacji
@@ -201,7 +216,7 @@ pokaże „Nie udało się policzyć alertów katalogu" (zakładka „Import" dz
 - **docs/rebuild-roadmap.md:**
   - P6.2 → ✅ zrobione, opisany faktyczny zakres;
   - P6.3 → może startować, dostała podsekcję „Delta dla P6.3" (5 punktów względem instrukcji I6);
-  - PR.3 → nota „007 zajęta, PR.3 bierze 008; sprawdź otwarte PR-y";
+  - PR.3 → nota „007 i 008 zajęte, PR.3 bierze 009; sprawdź pliki migracji w otwartych PR-ach";
   - blok decyzji P6.2 oznaczony jako dowieziony, z pomiarem;
   - adnotacje przy obalonych fragmentach historycznych (I3f D1, I10f O-10f-1, I13e D2/D3
     i follow-up), z zachowaniem zapisu pierwotnych decyzji.
@@ -215,12 +230,12 @@ pokaże „Nie udało się policzyć alertów katalogu" (zakładka „Import" dz
   - nowy blok P6.2 (zakładki, silnik, status na serwerze jako odstępstwo);
   - blok Pulpitu z decyzją 3 (oba źródła, suma, dwie sekcje, invalidacja, sygnał błędu).
 - **docs/spec-backend.md:** blok „Nowa trasa, której produkcja nie ma — P6.2" (kształt, walidacja,
-  sprzątanie, auth, migracja 007).
-- **rebuild/schema/README.md:** wiersz `007` (nowa funkcja odbudowy, nie chronologia produkcji;
+  sprzątanie, auth, migracja 008).
+- **rebuild/schema/README.md:** wiersz `008` (nowa funkcja odbudowy, nie chronologia produkcji;
   na cutoverze pusta tabela) + wyjątek przy zasadzie „numer = chronologia produkcji".
 - **contract/README.md:** liczniki 97 ścieżek / 115 operacji; akapit o ręcznym schemacie inline
   dla `/api/alerty-katalogu/statusy`.
-- **docs/cutover.md:** krok 5 — `007` musi zostać zastosowana (w odróżnieniu od 004–006 nie jest
+- **docs/cutover.md:** krok 5 — `008` musi zostać zastosowana (w odróżnieniu od 004–006 nie jest
   no-opem), bez niej zakładka „Katalog" pokazuje błąd.
 - **CLAUDE.md:** nauka o MSW + React Query. Przy `onUnhandledRequest: "error"` brakujący handler
   daje stan błędu zapytania, a nie czerwony test (zmierzone w P6.2 na Pulpicie).

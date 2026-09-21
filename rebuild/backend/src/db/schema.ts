@@ -160,7 +160,7 @@ export const alerts = sqliteTable("alerts", {
 });
 
 /**
- * Status obsługi pseudo-alertów katalogowych — migracja `007_alerty_katalogu_statusy.sql`
+ * Status obsługi pseudo-alertów katalogowych — migracja `008_alerty_katalogu_statusy.sql`
  * (P6.2, ticket `77-FEATURE-pseudo-alerty-katalogowe`). Dopisane ręcznie, nie z `drizzle-kit
  * pull` — tabela jest nowa w odbudowie, produkcja jej nie ma (status żyje tam w IndexedDB).
  * Repo: `repos/alerty-katalogu.ts`.

@@ -261,7 +261,7 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    przez Anię na produkcji 18.08 i 09-01. **Na żywej bazie mają nie zmienić ani jednego wiersza** —
    produkcja te dane już zmigrowała, więc to jest oczekiwany no-op, dowód wierności, nie usterka.
 
-   ⚠ **`007_alerty_katalogu_statusy.sql` (karta P6.2) MUSI zostać zastosowana** — w odróżnieniu
+   ⚠ **`008_alerty_katalogu_statusy.sql` (karta P6.2) MUSI zostać zastosowana** — w odróżnieniu
    od `004`–`006` to NIE jest no-op: produkcja tabeli `alerty_katalogu_statusy` nie ma (status
    pseudo-alertów katalogowych tam żył w IndexedDB przeglądarki), więc migracja ją dopiero
    tworzy, pustą. Bez niej zakładka „Katalog" na `/alerty` pokazuje błąd zapytania SQL po

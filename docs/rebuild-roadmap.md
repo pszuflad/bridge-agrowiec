@@ -3057,7 +3057,7 @@ przydadzą się dalej:
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
 | **P6.1** | ✅ 2026-09-21 (72) — trzeci status `przejrzany` (przyciski słownictwem oryginału + nasza „Otwórz ponownie", domyślny filtr „Nierozwiązane") i wyszukiwarka po `opis` filtrująca wpisy PRZED grupowaniem; wspólny moduł `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx` pod P6.2 — decyzje w `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/plan.md` | #90, #26 (część) | ✅ zrobione |
-| **P6.2** ⭐ | ✅ 2026-09-21 (77) — pseudo-alerty katalogowe jako zakładka „Katalog" na `/alerty`, obok „Import" (`?zakladka=katalog`); silnik 1:1 z `origin/main` (bajtowo zgodny na `db/snapshot.db`, 25 ms mediana na 7405 produktach); status na serwerze (migracja `007`, `alerty_katalogu_statusy`, wypieranie odcisków + sierotki); filtr statusu jak P6.1, „Otwórz ponownie"; Pulpit sumuje `nowy` z obu źródeł na kaflu i pokazuje dwie sekcje na karcie — decyzje w `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/plan.md` | #26 | ✅ zrobione |
+| **P6.2** ⭐ | ✅ 2026-09-21 (77) — pseudo-alerty katalogowe jako zakładka „Katalog" na `/alerty`, obok „Import" (`?zakladka=katalog`); silnik 1:1 z `origin/main` (bajtowo zgodny na `db/snapshot.db`, 25 ms mediana na 7405 produktach); status na serwerze (migracja `008`, `alerty_katalogu_statusy`, wypieranie odcisków + sierotki); filtr statusu jak P6.1, „Otwórz ponownie"; Pulpit sumuje `nowy` z obu źródeł na kaflu i pokazuje dwie sekcje na karcie — decyzje w `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/plan.md` | #26 | ✅ zrobione |
 | **P6.3** | delta instrukcji I6 dla Ani — co P6.1 I P6.2 obaliły w `docs/instrukcja-testow-I6.md`; lista w `raport.md` ticketu 72 (Follow-up) i ticketu 77 (sekcja „Do zrobienia później") | — | ⬜ P6.1 i P6.2 zrobione, może startować |
 
 **Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
@@ -3082,7 +3082,7 @@ backlog #26, `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/plan.md`):
 1. **Gdzie:** zakładki na `/alerty` — „Import" i „Katalog", domyślnie „Import", zakładka w adresie
    (`?zakladka=katalog`).
 2. **Status:** na SERWERZE, spójnie z decyzją D1 z I6 dla alertów importu (świadome odstępstwo: oryginał
-   trzyma go w IndexedDB przeglądarki) — migracja `007`, tabela `alerty_katalogu_statusy`,
+   trzyma go w IndexedDB przeglądarki) — migracja `008`, tabela `alerty_katalogu_statusy`,
    wypieranie odcisków tej samej pary (produkt/dostawca, reguła) + kasowanie sierot przy każdym zapisie.
 3. **Pulpit:** karta powiadomień pokazuje OBA źródła, z podziałem; kafel „Aktywne alerty" sumuje `nowy`
    z obu źródeł.
@@ -3210,7 +3210,7 @@ P10.3 rusza ten sam plik tras co P10.1 — po niej, nie równolegle.
 |---|---|---|---|
 | **PR.1** ⭐ | Archiwum importów — trzy trasy + widok z POBIERANIEM pliku | — | ⬜ gotowe |
 | **PR.2** | kafle KPI analityki jak na produkcji | — | ⬜ gotowe |
-| **PR.3** | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) — ⚠ migracja `007` zajęta przez P6.2 (77, 2026-09-21), PR.3 bierze `008_*.sql`; sprawdź też otwarte PR-y przed nadaniem numeru | — | ⬜ gotowe |
+| **PR.3** | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) — ⚠ migracje `007` (karta 76, PR #92 — przewoźnicy) i `008` (P6.2, ticket 77) są zajęte — PR.3 bierze `009_*.sql`; przed nadaniem numeru sprawdź develop ORAZ pliki `rebuild/schema/` na gałęziach otwartych PR-ów (rezerwacja numeru ticketa nie rezerwuje numeru migracji — kolizja 007 wyszła dopiero przed pushem P6.2) | — | ⬜ gotowe |
 | **PR.4** | diagnoza Selly „Wygeneruj CSV" na stagingu | — | ⬜ gotowe |
 | **PR.5** | duplikat marki `ALLIANCE` / `Alliance` | #92 | ⏸ decyzja |
 | **PR.6** | aktualizacja przeglądu 12 widoków | — | ⬜ na końcu |

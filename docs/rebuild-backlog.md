@@ -2003,7 +2003,7 @@ katalogowe wróciły jako zakładka „Katalog" na `/alerty`, obok „Import" (P
 1:1 `v2()`/`pv()` z żywego bundla `origin/main` po łatkach `tr_fix`/`ackalerts`, zweryfikowany
 jako **bajtowo identyczny** z oryginałem na całym `db/snapshot.db` (7405 produktów).
 - **Status na serwerze** (odstępstwo od IndexedDB, decyzja 2): nowa tabela
-  `alerty_katalogu_statusy` (migracja `007`; **PR.3 bierze `008`**, 007 jest zajęta) + trasa
+  `alerty_katalogu_statusy` (migracja `008`; `007` zajęła równoległa karta 76/PR #92 — **PR.3 bierze `009`**) + trasa
   `GET/PUT /api/alerty-katalogu/statusy`.
 - **Sprzątanie tabeli (Q2):** „wypieranie + sierotki" przy każdym zapisie — nowy zapis statusu
   kasuje wpisy tej samej pary (produkt/dostawca + reguła) z innym odciskiem wartości, a każdy
