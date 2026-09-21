@@ -97,6 +97,16 @@ na słownikowej gałęzi listy marek. Morał: przy łatkach FE najpierw rozłó�
 uwierz etykiecie. Rozkład wszystkich pięciu etykiet z I13:
 `docs/tickets/47-CHORE-i13e-frontend-bridgeone/plan.md`.
 
+**MSW z `onUnhandledRequest: "error"` (`rebuild/frontend/test/setup.ts`) nie wywala testu przy
+brakującym handlerze — zamienia go w błąd zapytania.** MSW rzuca wewnątrz przechwycenia
+żądania (`InternalError`), więc `fetch()` po prostu odrzuca obietnicę; React Query łapie to
+i query wchodzi w stan `error` zamiast rzucić wyjątkiem z testu. Skutek: nowe zapytanie
+(własny `queryFn`) dodane do widoku, który MA już testy (np. Pulpit), bez dopisania handlera do
+współdzielonych mocków (`test/msw/pulpit.ts`) **nie wywala** tych testów — po cichu sprawdzają
+stan błędu zamiast danych, dopóki nikt nie doda asercji na treść. Zmierzone w P6.2
+(`77-FEATURE-pseudo-alerty-katalogowe`): zapytanie o statusy w `useAlertyKatalogu()` wymagało dopisania
+`GET /api/alerty-katalogu/statusy` do `handleryPulpitu()`.
+
 ---
 
 ## Środowisko

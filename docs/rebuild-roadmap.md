@@ -1082,8 +1082,10 @@ jeden realny defekt znaleziony przy okazji:
   niska marża, „nie-opona"), a status trzymał w IndexedDB (`alerty-statusy`, `fe.js:9165-9193`),
   operując poziomem `krytyczny` i statusem `przejrzany`, których backend NIGDY nie produkuje.
   To nie był wybór miejsca przechowywania statusu tych samych alertów — to dwa różne zestawy
-  danych. Widok tej iteracji stoi WYŁĄCZNIE na `/api/alerts` (alerty importu); pseudo-alerty
-  katalogowe pominięte świadomie, wpis **`docs/rebuild-backlog.md` #26** (⬜ do decyzji).
+  danych. Widok tej iteracji stał WYŁĄCZNIE na `/api/alerts` (alerty importu); pseudo-alerty
+  katalogowe pominięte świadomie, wpis **`docs/rebuild-backlog.md` #26**. **Od P6.2 (77,
+  2026-09-21) już nieaktualne** — pseudo-alerty katalogowe wróciły jako zakładka „Katalog" na
+  `/alerty`, patrz Iteracja 6 w §5.
 - **Widok zwija powtórki — wymóg z 3f-2 rozliczony.** Grupowanie po (`dostawca`, `typ`, `status`)
   w `pages/alerty/grupowanie.ts` (`pogrupujAlerty`/`filtrujAlerty`/`wartosciFiltrow`): grupa
   domyślnie zwinięta, licznik + czas ostatniego wystąpienia („MO3 — Błąd pobierania · 23× ·
@@ -1598,7 +1600,9 @@ jeden realny defekt znaleziony przy okazji:
     pseudo-alertach katalogowych `pv()` z oryginału** (odstępstwo O-10f-1). Reużyty gotowy
     klient `pobierzAlerty()` (`pages/alerty/api.ts`, Iteracja 6) i logika filtrowania — bez
     drugiego klienta. Karta „Najnowsze powiadomienia" renderuje się tylko gdy `o.length > 0`,
-    limit 5, sort poziom→data malejąco.
+    limit 5, sort poziom→data malejąco. **Od P6.2 (77, 2026-09-21) już nieaktualne jako stan
+    bieżący** — decyzja 3 tej karty odwróciła O-10f-1: Pulpit dziś pokazuje OBA źródła (import +
+    katalog), kafel sumuje `nowy` z obu, karta ma dwie sekcje. Patrz Iteracja 6 w §5.
   - **D3 — kafel „Ostatni eksport CSV" odtworzony 1:1 jako TRWALE MARTWY.** Szuka
     `typ === "eksport"` w `GET /api/history` (I5), a ta trasa oddaje tabelę `history`, której
     wiersz nie ma pola `typ` (niesie je `GET /api/history/paged` z `audit_log`). Pokazuje zawsze
@@ -1619,8 +1623,9 @@ jeden realny defekt znaleziony przy okazji:
     - O-10a-1 (nagłówek KPI `/analityka` czyta `/api/analytics/kpi` zamiast danych z
       `filters`/`ean/*`/`status`) — dane potrzebne do przepięcia są od 10c dostępne, ale
       przepięcie to osobna decyzja użytkownika, nikt jej nie podjął;
-    - backlog #26 (pseudo-alerty katalogowe `pv()` zamiast `/api/alerts`) — D1 utrzymuje
-      decyzję z I6 po raz drugi, teraz też na Pulpicie;
+    - backlog #26 (pseudo-alerty katalogowe `pv()` zamiast `/api/alerts`) — D1 utrzymywała
+      decyzję z I6 po raz drugi, teraz też na Pulpicie; **rozstrzygnięte przez P6.2 (77,
+      2026-09-21), patrz wyżej i Iteracja 6 w §5**;
     - backlog #32/#33 (`historia_cen` bez kolumny `nazwa`, okno po niepełnym `GROUP BY`) —
       dotyczą teraz TAKŻE dwóch widoków eksportu (`export/availability-products`,
       `export/sell-through`), nie tylko dashboardu 10e.
@@ -2179,10 +2184,13 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     zmianę), a `deminified/frontend-index.js` to bundle PRICEFMT sprzed 04.09 — port z I0–I12
     wciągnął oba automatycznie (`index.html:6`, `AppShell.tsx:47,73`, `Login.tsx:48`,
     `katalog/formatowanie.tsx:167,169`).
-  - **`tr_fix` i `ackalerts` nie mają w odbudowie NOŚNIKA — nie ma czego portować.** Obie łatki
-    żyją w silniku PSEUDO-ALERTÓW katalogowych (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`),
-    którego odbudowa świadomie nie ma (D1 z I6, backlog #26); `/alerty` stoi na REALNYCH alertach
-    importu z `GET /api/alerts`.
+  - **`tr_fix` i `ackalerts` nie miały w odbudowie NOŚNIKA — nie było czego portować (stan
+    2026-09-09).** Obie łatki żyją w silniku PSEUDO-ALERTÓW katalogowych (`pv`/`v2`/`h2` +
+    IndexedDB `alerty-statusy`), którego odbudowa wtedy świadomie nie miała (D1 z I6, backlog
+    #26); `/alerty` stał na REALNYCH alertach importu z `GET /api/alerts`. **Od P6.2 (77,
+    2026-09-21) nieaktualne** — silnik pseudo-alertów katalogowych wszedł (nośnik jest), portując
+    `tr_fix`/`ackalerts` 1:1 z bundla po łatkach z 04.09; status na serwerze, nie w IndexedDB.
+    Patrz Iteracja 6 w §5.
   - **Pomiar (a) na `db/snapshot.db`: 587 z 7395 pozycji zmienia zapis.** ⚠ Zniesiona gałąź
     oddawała DWA PIERWSZE CZŁONY, a nie cały `rozmiar` — czytaj jako `rozmiar` → dziś (dawniej):
     `8.00x20` → `8.00` (dawniej `8.00x20`), `14.9x28` → `14.9` (dawniej `14.9x28`),
@@ -2204,21 +2212,26 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   - **D1 — rebrand zostaje jak jest, bez kodu.** Odtwarzamy rozjazd zapisu z bundla Ani: „Bridge
     ONE" w `<title>`, „BridgeOne" (bez spacji) w trzech miejscach UI. Ujednolicenie byłoby
     odstępstwem. Backlog #61 rozstrzygnięty.
-  - **D2 — `tr_fix` i `ackalerts` pkt 1–3: nie portujemy** (kontynuacja D1 z I6, backlog #26).
-    Pkt 2 („pulpit respektuje potwierdzenia") odbudowa spełnia konstrukcyjnie — `aktywneAlerty()`
-    filtruje po `status === "nowy"` z realnej odpowiedzi API, bez IndexedDB.
+  - **D2 — `tr_fix` i `ackalerts` pkt 1–3: nie portujemy (stan 2026-09-09)** (kontynuacja D1 z I6,
+    backlog #26). Pkt 2 („pulpit respektuje potwierdzenia") odbudowa spełniała konstrukcyjnie —
+    `aktywneAlerty()` filtruje po `status === "nowy"` z realnej odpowiedzi API, bez IndexedDB.
+    *(Nieaktualne od P6.2 — 77, 2026-09-21: `tr_fix` i `ackalerts` pkt 1–3 są sportowane w
+    silniku pseudo-alertów katalogowych, status idzie na serwer zamiast IndexedDB — odstępstwo
+    O-P62-1.)*
   - **D3 — `ackalerts` pkt 4 (ukrycie statusu `rozwiazany`): nie portujemy.** Oryginał ma trzy
     statusy i domyślny filtr „wszystkie", odbudowa (w tym momencie, 2026-09-09) dwa i domyślny
     filtr `nowy` — ta sama reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu opcji
     „nowy". *(Nieaktualne od P6.1 — 72, 2026-09-21: odbudowa ma już trzy statusy i domyślny filtr
-    „Nierozwiązane", degeneracja nie zachodzi.)*
+    „Nierozwiązane", degeneracja nie zachodzi. P6.2 — 77, 2026-09-21 — odwraca D3 wprost
+    (decyzja 4 tej karty): zakładka „Katalog" ukrywa rozwiązane domyślnie, tak jak Import.)*
   - **D4 — pass-through `konstrukcja` ZOSTAJE mimo regresji żywej produkcji.** Od 2026-09-09 to
     świadome odstępstwo: odbudowa jest POPRAWNIEJSZA niż produkcja. Odrzucone: zdjęcie
     pass-through, żeby odtworzyć zepsute zachowanie (cofałoby 13c).
-  **Follow-up (nierozliczone):** silnik pseudo-alertów — backlog #26 ⬜; gdyby kiedyś wszedł,
-  wchodzi OD RAZU w wersji po łatkach z 04.09. Trzeci status alertu `przejrzany` istnieje od
-  P6.1 (72, 2026-09-21) też w odbudowie — ale wyłącznie dla alertów IMPORTU; pseudo-alerty
-  katalogowe (#26/P6.2) go nadal nie mają. Enhancer konfiguratora kolumn stagingu
+  **Follow-up — rozliczone przez P6.2 (77, 2026-09-21):** silnik pseudo-alertów wszedł w wersji
+  po łatkach z 04.09 (`tr_fix`, `ackalerts`), zgodnie z zapowiedzią wyżej. Trzeci status alertu
+  `przejrzany` istnieje od P6.1 (72, 2026-09-21) dla alertów IMPORTU, a od P6.2 — **importując ten
+  sam moduł** — także dla pseudo-alertów katalogowych. Szczegóły: Iteracja 6 w §5. Enhancer
+  konfiguratora kolumn stagingu
   (`ex_marka`/`ex_szerokosc`) — **rozliczone w 14b** (`51-FEATURE-staging-filtr-pasek-kolumny`,
   2026-09-18): wchłonięty jako komponent React; `ex_marka`/`ex_szerokosc` to dwie z 49 pozycji
   sekcji „Dodatkowe (z katalogu)", która w oryginale nic nie robi (`applyCss()` zaczyna od
@@ -3044,8 +3057,8 @@ przydadzą się dalej:
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
 | **P6.1** | ✅ 2026-09-21 (72) — trzeci status `przejrzany` (przyciski słownictwem oryginału + nasza „Otwórz ponownie", domyślny filtr „Nierozwiązane") i wyszukiwarka po `opis` filtrująca wpisy PRZED grupowaniem; wspólny moduł `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx` pod P6.2 — decyzje w `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/plan.md` | #90, #26 (część) | ✅ zrobione |
-| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu; **importuje** `statusy.ts`/`PrzyciskiStatusu.tsx` z P6.1, nie duplikuje | #26 | ⬜ gotowe — **P6.1 zmergowana, można startować** |
-| **P6.3** | delta instrukcji I6 dla Ani — lista tego, co P6.1 obaliła w `docs/instrukcja-testow-I6.md`, jest w `raport.md` ticketu 72 (sekcja Follow-up) | — | ⬜ po P6.1 i P6.2 |
+| **P6.2** ⭐ | ✅ 2026-09-21 (77) — pseudo-alerty katalogowe jako zakładka „Katalog" na `/alerty`, obok „Import" (`?zakladka=katalog`); silnik 1:1 z `origin/main` (bajtowo zgodny na `db/snapshot.db`, 25 ms mediana na 7405 produktach); status na serwerze (migracja `007`, `alerty_katalogu_statusy`, wypieranie odcisków + sierotki); filtr statusu jak P6.1, „Otwórz ponownie"; Pulpit sumuje `nowy` z obu źródeł na kaflu i pokazuje dwie sekcje na karcie — decyzje w `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/plan.md` | #26 | ✅ zrobione |
+| **P6.3** | delta instrukcji I6 dla Ani — co P6.1 I P6.2 obaliły w `docs/instrukcja-testow-I6.md`; lista w `raport.md` ticketu 72 (Follow-up) i ticketu 77 (sekcja „Do zrobienia później") | — | ⬜ P6.1 i P6.2 zrobione, może startować |
 
 **Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
 `PATCH /api/alerts/:id` nie waliduje statusu (oryginał też nie, `routes/alerts.ts:45`), wystarczy
@@ -3061,26 +3074,45 @@ z P6.2) `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx`; P6.2 ma NOWE pliki i
 IMPORTU. Status pseudo-alertów ma iść na serwer (decyzja 2 niżej), ale inną drogą niż `alerts` —
 P6.2 dokłada własny zapis; wspólne są tylko statusy, etykiety i przyciski.
 
-⚠ **P6.2 jest jedną z dwóch rzeczy, które Ania nazwała mogącymi wstrzymać cutover** — musi wejść przed
+⚠ **P6.2 była jedną z dwóch rzeczy, które Ania nazwała mogącymi wstrzymać cutover** — weszła przed
 przełączeniem produkcji.
 
-**Decyzje dla P6.2 — PODJĘTE 2026-09-21, wszystkie zgodnie z rekomendacją** (pełna treść: backlog #26):
-1. **Gdzie:** zakładki na `/alerty` — „Import" i „Katalog".
+**Decyzje dla P6.2 — PODJĘTE 2026-09-21, wszystkie zgodnie z rekomendacją, DOWIEZIONE** (pełna treść:
+backlog #26, `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/plan.md`):
+1. **Gdzie:** zakładki na `/alerty` — „Import" i „Katalog", domyślnie „Import", zakładka w adresie
+   (`?zakladka=katalog`).
 2. **Status:** na SERWERZE, spójnie z decyzją D1 z I6 dla alertów importu (świadome odstępstwo: oryginał
-   trzyma go w IndexedDB przeglądarki).
-3. **Pulpit:** karta powiadomień pokazuje OBA źródła, z podziałem.
+   trzyma go w IndexedDB przeglądarki) — migracja `007`, tabela `alerty_katalogu_statusy`,
+   wypieranie odcisków tej samej pary (produkt/dostawca, reguła) + kasowanie sierot przy każdym zapisie.
+3. **Pulpit:** karta powiadomień pokazuje OBA źródła, z podziałem; kafel „Aktywne alerty" sumuje `nowy`
+   z obu źródeł.
 4. **Odwrócenie D3 z karty 13e:** ukrywanie rozwiązanych (`ackalerts` pkt 4) WCHODZI — zbieżne z domyślnym
    filtrem „nierozwiązane" z P6.1, więc obie listy zachowują się tak samo.
-5. **Liczenie:** w przeglądarce, jak w oryginale — ALE karta ma najpierw zmierzyć koszt na Pulpicie.
-
-**Zależność:** P6.2 startuje PO merge'u P6.1, bo korzysta z wydzielonego tam wspólnego modułu statusów
-i przycisków.
+5. **Liczenie:** w przeglądarce, jak w oryginale — zmierzone na `db/snapshot.db` (7405 produktów):
+   port **25 ms** mediana vs **285 ms** oryginał wycięty z bundla (port buduje regexy słów raz, nie
+   przy każdym produkcie). Nieodczuwalne — bez STOP.
 
 ⚠ **Pułapka źródła, zademonstrowana 2026-09-21:** silnik pseudo-alertów czytać WYŁĄCZNIE z `origin/main`
 (`git show origin/main:mirror/frontend/assets/index-PRICEFMT1783512500.js`). Na `develop` `mirror/` jest
 cofnięty do 25.08, a `deminified/` jest z 13.08 — oba są SPRZED łatek z 4.09 (`tr_fix`, `ackalerts`).
 Przy planowaniu tej karty odczyt z `develop` dał fałszywą „rozbieżność" z opisem karty 13e; na `main`
-odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest poprawny.
+odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest poprawny. Silnik P6.2 zweryfikowano
+token w token wobec tego bundla i porównano na całym `db/snapshot.db`: wynik identyczny co do bajtu
+z oryginałem (22 alerty, z i bez statusów).
+
+**Delta dla P6.3 (co P6.2 zmieniła względem `docs/instrukcja-testow-I6.md`, poza deltą P6.1 z ticketu
+72):**
+- §5 („alerty o jakości danych … decyzja") i §4 pkt 9 nieaktualne — pseudo-alerty katalogowe znów
+  istnieją, jako zakładka „Katalog".
+- `/alerty` ma dwie zakładki, „Import" i „Katalog" (`?zakladka=katalog`).
+- Pulpit: kafel „Aktywne alerty" sumuje `nowy` z importu i katalogu; karta „Najnowsze powiadomienia" ma
+  dwie sekcje, „Import" i „Katalog".
+- Alert „Brak importu cennika" oznaczony jako przejrzany wraca następnego dnia jako „nowy" (dni od
+  ostatniego importu są częścią `id` alertu) — zachowanie oryginału od łatki `ackalerts`, nie błąd portu.
+- Status pseudo-alertów katalogowych jest wspólny dla wszystkich komputerów (na serwerze), nie per
+  przeglądarka jak w oryginale.
+- Pełna lista: `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/raport.md`, sekcja „Do zrobienia
+  później".
 
 #### Iteracja 7 — Atrybuty
 
@@ -3178,7 +3210,7 @@ P10.3 rusza ten sam plik tras co P10.1 — po niej, nie równolegle.
 |---|---|---|---|
 | **PR.1** ⭐ | Archiwum importów — trzy trasy + widok z POBIERANIEM pliku | — | ⬜ gotowe |
 | **PR.2** | kafle KPI analityki jak na produkcji | — | ⬜ gotowe |
-| **PR.3** | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) | — | ⬜ gotowe |
+| **PR.3** | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) — ⚠ migracja `007` zajęta przez P6.2 (77, 2026-09-21), PR.3 bierze `008_*.sql`; sprawdź też otwarte PR-y przed nadaniem numeru | — | ⬜ gotowe |
 | **PR.4** | diagnoza Selly „Wygeneruj CSV" na stagingu | — | ⬜ gotowe |
 | **PR.5** | duplikat marki `ALLIANCE` / `Alliance` | #92 | ⏸ decyzja |
 | **PR.6** | aktualizacja przeglądu 12 widoków | — | ⬜ na końcu |

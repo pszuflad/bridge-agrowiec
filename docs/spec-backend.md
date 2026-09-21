@@ -444,6 +444,23 @@ Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 > `UPPER()` jest ASCII-only, więc 16 wierszy z polskim diakrytykiem zostaje, tak jak w
 > produkcji). Szczegóły i pomiary: `docs/tickets/44-CHORE-i13c-migracje-konwencji/`.
 
+> **Nowa trasa, której PRODUKCJA W OGÓLE NIE MA — P6.2** (`77-FEATURE-pseudo-alerty-katalogowe`,
+> 2026-09-21): `GET`/`PUT /api/alerty-katalogu/statusy`. Oryginał liczy pseudo-alerty katalogowe
+> (marża ujemna, bardzo niska marża, nie-opona, brak importu cennika) w przeglądarce i trzyma
+> ich status w IndexedDB (`HT()`: klucz `alerty-statusy`) — do backendu w ogóle nie woła;
+> odbudowa świadomie przenosi wyłącznie STATUS na serwer (decyzja 2, backlog #26), żeby nie
+> ginął po wyczyszczeniu historii przeglądarki. `GET` oddaje gołą tablicę
+> `{id, status, kto, kiedy}` (brak wiersza = `nowy`, nie zapisuje się). `PUT` przyjmuje
+> `{ids: string[], status}` (`nowy`/`przejrzany`/`rozwiazany`); 400 dla nieznanego statusu,
+> pustej lub zbyt długiej (>20 000 pozycji) listy, `id` pustego/dłuższego niż 2000 znaków lub
+> w formie, której silnik frontu nie produkuje. Zapis w jednej transakcji wypiera stare wpisy
+> tej samej pary (produkt/dostawca + reguła, inny odcisk wartości) i kasuje sieroty
+> (`produkt_id` spoza `products`) — bez procesu w tle. Obie metody za `requireAuth`, bez
+> `audit_log` (spójnie z `PATCH /api/alerts/:id`, D4 z I6). Migracja `007` (tabela nie istnieje
+> w produkcji — `rebuild/schema/README.md`); schemat trasy jest ręczny w `contract/openapi.yaml`
+> (nagrania z produkcji być nie może — `contract/README.md`). Szczegóły:
+> `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/`.
+
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,

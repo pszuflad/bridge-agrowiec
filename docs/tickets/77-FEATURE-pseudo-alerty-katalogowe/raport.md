@@ -195,3 +195,39 @@ pokaże „Nie udało się policzyć alertów katalogu" (zakładka „Import" dz
   Do poprawki przy następnym dotknięciu tych plików.
 - `rebuild/schema/README.md` wymienia migracje do `006`; dopisanie `007` należy do synchronizacji
   dokumentacji.
+
+## Aktualizacje dokumentacji
+
+- **docs/rebuild-roadmap.md:**
+  - P6.2 → ✅ zrobione, opisany faktyczny zakres;
+  - P6.3 → może startować, dostała podsekcję „Delta dla P6.3" (5 punktów względem instrukcji I6);
+  - PR.3 → nota „007 zajęta, PR.3 bierze 008; sprawdź otwarte PR-y";
+  - blok decyzji P6.2 oznaczony jako dowieziony, z pomiarem;
+  - adnotacje przy obalonych fragmentach historycznych (I3f D1, I10f O-10f-1, I13e D2/D3
+    i follow-up), z zachowaniem zapisu pierwotnych decyzji.
+- **docs/rebuild-backlog.md:**
+  - #26 → ✅ zrobione 2026-09-21: status, blockquote i rollup na górze pliku;
+  - decyzja 2 dostała opis sprzątania, decyzja 5 wynik pomiaru;
+  - nowy blok „CO DOWIOZŁA KARTA P6.2";
+  - #61 (tr_fix/ackalerts) → „sportowane w P6.2".
+- **docs/spec-frontend.md:**
+  - §4 bez fałszywego „pseudo-alerty pominięte";
+  - nowy blok P6.2 (zakładki, silnik, status na serwerze jako odstępstwo);
+  - blok Pulpitu z decyzją 3 (oba źródła, suma, dwie sekcje, invalidacja, sygnał błędu).
+- **docs/spec-backend.md:** blok „Nowa trasa, której produkcja nie ma — P6.2" (kształt, walidacja,
+  sprzątanie, auth, migracja 007).
+- **rebuild/schema/README.md:** wiersz `007` (nowa funkcja odbudowy, nie chronologia produkcji;
+  na cutoverze pusta tabela) + wyjątek przy zasadzie „numer = chronologia produkcji".
+- **contract/README.md:** liczniki 97 ścieżek / 115 operacji; akapit o ręcznym schemacie inline
+  dla `/api/alerty-katalogu/statusy`.
+- **docs/cutover.md:** krok 5 — `007` musi zostać zastosowana (w odróżnieniu od 004–006 nie jest
+  no-opem), bez niej zakładka „Katalog" pokazuje błąd.
+- **CLAUDE.md:** nauka o MSW + React Query. Przy `onUnhandledRequest: "error"` brakujący handler
+  daje stan błędu zapytania, a nie czerwony test (zmierzone w P6.2 na Pulpicie).
+- **docs/przeglad-12-widokow.md:** nota P6.2 przy Pulpicie; sekcja „Alerty" opisuje dwie zakładki
+  (pełna aktualizacja czeka na PR.6).
+- **docs/plan.md:** bez zmian (dokument historyczny).
+
+**Wcześniejsze problemy** zgłoszone przez doc-checkery i nienaprawione, bo spoza zakresu:
+nieaktualne komentarze w plikach P6.1 `pages/alerty/TabelaAlertow.tsx` (nagłówek)
+i `pages/alerty/api.ts`. Są już w „Do zrobienia później".

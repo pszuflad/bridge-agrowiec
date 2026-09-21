@@ -7,7 +7,7 @@ przepisywaniu.
 
 | Plik | Co | Stan |
 |---|---|---|
-| `openapi.yaml` | 96 ścieżek / 113 operacji: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d) |
+| `openapi.yaml` | 97 ścieżek / 115 operacji: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d) |
 | `fixtures/` | 73 nagrania: **59 GET** + **14 tras zapisujących** | ✅ Krok 2.4 + sesja 12d |
 
 ## Co jest zamrożone
@@ -125,6 +125,14 @@ node tools/generate-openapi-schemas.cjs --sprawdz  # tylko kontrola aktualności
 - Operacja z kilkoma legalnymi kształtami dostaje `oneOf` — tak jest z `GET /api/products`
   (koperta `{items,total,limit,offset}` z parametrem, **goła tablica** bez) oraz
   z `POST /api/products` (ciało jako tablica albo jako `{items: […]}`).
+
+**Wyjątek: `GET`/`PUT /api/alerty-katalogu/statusy` (karta P6.2, ticket
+`77-FEATURE-pseudo-alerty-katalogowe`).** Trasa nie istnieje w produkcji — status pseudo-alertów
+katalogowych tam żyje w IndexedDB przeglądarki, więc nagrania z produkcji nie ma i być nie może.
+Schematy tej ścieżki są wpisane RĘCZNIE, wielowierszowo i POZA generowanym blokiem
+`components.schemas` (blok „ODSTĘPSTWO OD PRODUKCJI — P6.2" w `openapi.yaml`) — generator by je
+przy pierwszym biegu skasował. Kształt pilnuje `rebuild/backend/test/alerty-katalogu.gate.test.ts`,
+czytając schemat wprost z `openapi.yaml`. `contract/fixtures/` tej trasy nie zawiera.
 
 ## ⚠ Uwaga bezpieczeństwa wbudowana w kontrakt
 
