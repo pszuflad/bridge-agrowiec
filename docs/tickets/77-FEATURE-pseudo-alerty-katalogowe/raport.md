@@ -246,3 +246,15 @@ pokaże „Nie udało się policzyć alertów katalogu" (zakładka „Import" dz
 **Wcześniejsze problemy** zgłoszone przez doc-checkery i nienaprawione, bo spoza zakresu:
 nieaktualne komentarze w plikach P6.1 `pages/alerty/TabelaAlertow.tsx` (nagłówek)
 i `pages/alerty/api.ts`. Są już w „Do zrobienia później".
+
+## Niestabilny test w CI (poza zakresem karty, naprawiony na tej gałęzi)
+
+CI PR #93 wywróciło `rebuild/backend/test/scheduler.test.ts` › „awaria dostawcy nie wywraca pętli"
+(`expected ['Synchronizacja', 'Błąd pobierania']`). To nie jest regresja P6.2: test pochodzi z ticketu
+14 i ma przeciek między testami. Baza jest wspólna dla pliku, `afterEach` gasi timery schedulera, ale
+nie czeka na synchronizację już w locie. Udane pobranie z poprzedniego testu kończyło się na wolnym
+runnerze po `beforeEach` następnego i wpisywało mu alert „Synchronizacja".
+
+Poprawka dotyczy tylko testu: prawdziwe `synchronizujDostawce` jest opakowane licznikiem przebiegów
+w locie, a `afterEach` czeka na nie `Promise.allSettled`. Dowód: z odpowiedzią serwera cennika
+opóźnioną o 1,5 s stara wersja pada dokładnie tą asercją co w CI, nowa przechodzi. Backend 1469/1469.
