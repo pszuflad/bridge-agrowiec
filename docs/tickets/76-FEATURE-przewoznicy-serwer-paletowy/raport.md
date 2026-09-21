@@ -73,7 +73,7 @@ istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór pale
   - GET w kolejności;
   - PUT → GET;
   - odcięcie obcych pól;
-  - 11 przypadków walidacji 400 (lista się nie zmienia);
+  - 12 przypadków walidacji 400 (lista się nie zmienia);
   - numer pozycji w komunikacie;
   - wpis w `audit_log` z `przed`/`po` i brak wpisu przy 400;
   - 401 dla GET i PUT.
