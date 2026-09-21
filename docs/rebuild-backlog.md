@@ -1866,6 +1866,38 @@ reguł"), dokument opisuje ją razem ze zmierzonym zasięgiem **1/7405**.
 | **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-21 przez Anię** (pytanie 1a rundy 2): pseudo-alerty katalogowe WRACAJĄ, razem z trzecim statusem `przejrzany` |
 | **Status** | — nie zaczęte (Iteracja 6 dowiozła INNY widok pod tym adresem) |
 
+**DECYZJE WDROŻENIOWE UŻYTKOWNIKA 2026-09-21 (karta P6.2) — wszystkie zgodnie z rekomendacją.**
+
+**Ustalone i NIE będące decyzją — port 1:1, w wersji po łatkach z 4.09** (zmierzone na `origin/main`):
+| Reguła | Warunek | Poziom | Identyfikator (po `ackalerts` pkt 1) |
+|---|---|---|---|
+| Marża ujemna — sprzedaż pod kosztem | `marzaPct < 0` | krytyczny | `${id}-marza-ujemna-${Math.round(marzaPct*10)/10}` |
+| Bardzo niska marża | `marzaPct < 5` | ostrzeżenie | `${id}-marza-niska-…` (odcisk marży) |
+| Nie-opona w katalogu — błąd parsera | `v2()`: `!isTire && confidence==="wysoka"` | krytyczny | `${id}-nie-opona-${nazwa+'|'+kategoria}` |
+| Brak importu cennika | ≥ 30 dni / ≥ 7 dni | krytyczny / ostrzeżenie | `dostawca-${kod}-brak-importu-${dni}` |
+
+Dwie reguły są w oryginale WYŁĄCZONE (`if (false)`: „Brak stanu magazynowego", „Znaki w rozmiarze sklejone
+z nazwą") i takie zostają. `tr_fix` (usunięcie `"tr-"` z listy `h2`) wchodzi — bez niego opony BKT z `TR-135`
+lądowały jako „nie-opona". Odcisk wartości w identyfikatorze sprawia, że potwierdzenie nie przykleja się do
+alertu na zawsze: gdy wartość się zmieni, alert wraca jako `nowy`.
+
+**Pięć decyzji:**
+1. **Gdzie:** zakładki na `/alerty` — „Import" (dzisiejsza lista) i „Katalog" (pseudo-alerty). Odrzucone:
+   osobna pozycja menu, jedna wspólna lista (mieszałaby błędy dostawców z problemami produktów).
+2. **Status: na SERWERZE.** Świadome odstępstwo — oryginał trzyma go w IndexedDB. Powód identyczny jak przy
+   decyzji D1 z I6: status w przeglądarce ginie po wyczyszczeniu historii i nie przenosi się między
+   komputerami; dwie listy obok siebie, z których jedna pamięta decyzje, a druga nie, byłyby gorsze niż
+   każda z opcji z osobna. Koszt: nowa tabela i trasa. ⚠ Odciski wartości w identyfikatorach sprawiają,
+   że stare wpisy statusu będą się gromadzić — karta ma zaproponować sprzątanie.
+3. **Pulpit: OBA źródła, z podziałem.** Przy statusie na serwerze dwie łatki z 4.09 — „Pulpit respektuje
+   potwierdzenia" (`ackalerts` pkt 2) i zdarzenie synchronizujące (pkt 3) — przychodzą bez dodatkowego
+   mechanizmu, przez unieważnienie zapytań.
+4. **Odwrócenie decyzji D3 z karty 13e:** ukrywanie rozwiązanych (`ackalerts` pkt 4) WCHODZI. D3 zapadła,
+   gdy silnika w odbudowie nie było. Zbieżne z domyślnym filtrem „nierozwiązane" z P6.1 — obie listy
+   zachowują się tak samo.
+5. **Liczenie: w przeglądarce, jak w oryginale** — z warunkiem, że karta NAJPIERW zmierzy koszt na Pulpicie
+   (jeśli dziś nie ładuje całego katalogu, przejście na (b) — trasa serwerowa — wraca do użytkownika).
+
 **⭐ DECYZJA ANI 2026-09-21 (runda 2, pytania 1a i 1b) — WPIS ZAMKNIĘTY NA TAK.**
 Po pokazaniu jej WŁASNEGO zrzutu zamiast opisu mechanizmu pytanie trafiło od razu:
 - **1a: „tak, potrzebuję jej w nowym Bridge"** — wariant (a). Lista ostrzeżeń liczonych na żywo

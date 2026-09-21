@@ -2999,7 +2999,7 @@ więcej), co wykryje pierwszy warunek ważności w `historia.wyrocznia.test.ts`
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
 | **P6.1** | lista alertów importu: wyszukiwarka po treści + trzeci status `przejrzany` | #90, #26 (część) | ⬜ gotowe |
-| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu | #26 | ⏸ 3 decyzje użytkownika |
+| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu | #26 | ⬜ gotowe — **po merge'u P6.1** |
 | **P6.3** | delta instrukcji I6 dla Ani | — | ⬜ po P6.1 i P6.2 |
 
 **Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
@@ -3011,7 +3011,25 @@ mechanizm: w oryginale liczone w PRZEGLĄDARCE z katalogu (`frontend-index.js:25
 i powłokę strony `/alerty`. Dzięki temu idą równolegle.
 
 ⚠ **P6.2 jest jedną z dwóch rzeczy, które Ania nazwała mogącymi wstrzymać cutover** — musi wejść przed
-przełączeniem produkcji. Przed startem potrzebne trzy decyzje (niżej, „po stronie użytkownika").
+przełączeniem produkcji.
+
+**Decyzje dla P6.2 — PODJĘTE 2026-09-21, wszystkie zgodnie z rekomendacją** (pełna treść: backlog #26):
+1. **Gdzie:** zakładki na `/alerty` — „Import" i „Katalog".
+2. **Status:** na SERWERZE, spójnie z decyzją D1 z I6 dla alertów importu (świadome odstępstwo: oryginał
+   trzyma go w IndexedDB przeglądarki).
+3. **Pulpit:** karta powiadomień pokazuje OBA źródła, z podziałem.
+4. **Odwrócenie D3 z karty 13e:** ukrywanie rozwiązanych (`ackalerts` pkt 4) WCHODZI — zbieżne z domyślnym
+   filtrem „nierozwiązane" z P6.1, więc obie listy zachowują się tak samo.
+5. **Liczenie:** w przeglądarce, jak w oryginale — ALE karta ma najpierw zmierzyć koszt na Pulpicie.
+
+**Zależność:** P6.2 startuje PO merge'u P6.1, bo korzysta z wydzielonego tam wspólnego modułu statusów
+i przycisków.
+
+⚠ **Pułapka źródła, zademonstrowana 2026-09-21:** silnik pseudo-alertów czytać WYŁĄCZNIE z `origin/main`
+(`git show origin/main:mirror/frontend/assets/index-PRICEFMT1783512500.js`). Na `develop` `mirror/` jest
+cofnięty do 25.08, a `deminified/` jest z 13.08 — oba są SPRZED łatek z 4.09 (`tr_fix`, `ackalerts`).
+Przy planowaniu tej karty odczyt z `develop` dał fałszywą „rozbieżność" z opisem karty 13e; na `main`
+odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest poprawny.
 
 #### Iteracja 7 — Atrybuty
 
@@ -3117,9 +3135,6 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 
 | Decyzja | Odblokowuje | Rekomendacja |
 |---|---|---|
-| Gdzie pokazać pseudo-alerty | P6.2 | zakładki na `/alerty`: „Import" i „Katalog" |
-| Gdzie trzymać ich status | P6.2 | serwer — spójnie z decyzją D1 z I6 dla alertów importu |
-| Co pokazuje karta powiadomień na Pulpicie | P6.2 | oba źródła, z podziałem |
 | **#91** — zakres „zapisz to, co widzę" | P10.3 | do rozstrzygnięcia |
 | **#92** — duplikat marek: dane czy prezentacja | PR.5 | łącznie z #42 |
 
