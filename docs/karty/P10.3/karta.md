@@ -1,6 +1,6 @@
 # P10.3 — eksport CSV respektuje filtry
 
-> **Stan:** ⏸ zakres do decyzji (#91)
+> **Stan:** ⬜ gotowe (po P10.1) — zakres rozstrzygnięty 2026-09-21, patrz `wejscie-87.md`
 > **Iteracja:** 10 — Analityka i Pulpit · **Wpisy backlogu:** #91 · **Zależy od:** P10.1, decyzja #91
 > **Ticket:** —
 

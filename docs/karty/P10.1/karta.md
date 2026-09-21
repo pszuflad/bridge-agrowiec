@@ -11,7 +11,11 @@ Klaster backendu analityki (`repos/analityka-*.ts`, trasy analityki). Pełna tre
 w `docs/rebuild-backlog.md` (#31, #32, #33, #35).
 
 ## Pliki (wyłączna własność)
-Backend analityki. ⚠ **P10.3 rusza ten sam plik tras** — idzie PO P10.1, nie równolegle.
+Backend analityki: `rebuild/backend/src/repos/analityka.ts`, `repos/analityka-eksport.ts`,
+`routes/analytics.ts` + testy analityki BE; `contract/openapi.yaml` (404 dla `export/:view`).
+Frontend tylko w obrębie zakładki „Dostępność”, jeśli wymusi to pusta nazwa (#32).
+P10.3 po decyzji z 2026-09-21 (eksport z przeglądarki, `docs/karty/P10.3/wejscie-87.md`) NIE rusza
+plików backendu — idzie po P10.1 z powodu danych, nie kolizji plików.
 
 ## Decyzje
 **PODJĘTE 2026-09-21 przez użytkownika, wszystkie zgodnie z rekomendacją** (pełna treść w backlogu).
