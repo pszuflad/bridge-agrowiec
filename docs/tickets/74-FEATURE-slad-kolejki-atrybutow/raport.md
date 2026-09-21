@@ -116,3 +116,12 @@ wzorzec sortowania w testach Historii przy remisie `kiedy`.
   odstępstwie rebuildu. Opis zachowania produkcji jest bez zmian.
 - Pre-existing: nieaktualne komentarze we froncie (`pages/atrybuty/api.ts`, `pages/historia/dane.ts`),
   opisane wyżej w Follow-up.
+
+## Scalenie z develop (P7.3, ticket 75)
+
+W międzyczasie weszła P7.3 z testem `atrybuty.niezmiennik.test.ts` i notą „dla P7.1: dopisać
+`model`/`zastosowanie` do `RODZAJE`". Samo dopisanie nie wystarcza, bo główne przypadki testu
+biorą pozycję ze skanu, a skan tych rodzajów celowo nie przegląda. Doszła więc osobna lista
+`RODZAJE_POZA_SKANEM` z pozycją wstawianą ręcznie. Niezmiennik B == C == realna zmiana jest
+sprawdzany dla obu akceptacji (4 nowe przypadki). Konflikt w roadmapie (tabela P7.x i noty)
+rozwiązano przez złożenie obu stron, a nota P7.3 „dla P7.1” jest oznaczona jako zrobiona.

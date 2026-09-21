@@ -34,7 +34,8 @@ Sugerowane sklejenie w tickety: **CSV** = #73 + #76 + #77(część) · **applica
 **Backlog rozliczony w sesji 12e (2026-09-08).** Wszystkie wpisy ✅ zostały naniesione,
 ❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #40, #42, #43) to
 **defekty PRODUKCJI odtworzone świadomie 1:1**, czekające na decyzję produktową Ani — żaden nie
-jest regresją odbudowy i żaden nie blokuje cutoveru. Szczegóły rozliczenia:
+jest regresją odbudowy i żaden nie blokuje cutoveru. (#26 od 2026-09-21 częściowo zrobiony —
+patrz wpis #26.) Szczegóły rozliczenia:
 `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md` (sekcja „Rozliczenie
 backlogu"). **#39 i #41 rozstrzygnięte przez Anię i wdrożone 2026-09-21**
 (`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`).
@@ -1865,7 +1866,7 @@ reguł"), dokument opisuje ją razem ze zmierzonym zasięgiem **1/7405**.
 | **Kategoria** | FRONTEND (widok `/alerty`) |
 | **Pliki** | `deminified/frontend-index.js:25177-25340` (`HT()`), `:16631-16705` (`pv()`), `:9165-9193` (IndexedDB `cn`/`un`) |
 | **Do nowej wersji?** | ✅ **TAK — ROZSTRZYGNIĘTE 2026-09-21 przez Anię** (pytanie 1a rundy 2): pseudo-alerty katalogowe WRACAJĄ, razem z trzecim statusem `przejrzany` |
-| **Status** | — nie zaczęte (Iteracja 6 dowiozła INNY widok pod tym adresem) |
+| **Status** | 🔨 **częściowo** — trzeci status `przejrzany` + przyciski „Oznacz jako przejrzany”/„Rozwiąż” (i nasze „Otwórz ponownie”) dowiezione dla alertów importu w **P6.1** (2026-09-21, `72-FEATURE-alerty-przejrzany-szukajka`). Pseudo-alerty katalogowe (silnik liczony z katalogu) — nadal **P6.2, nie zaczęte**. |
 
 **DECYZJE WDROŻENIOWE UŻYTKOWNIKA 2026-09-21 (karta P6.2) — wszystkie zgodnie z rekomendacją.**
 
@@ -1913,6 +1914,12 @@ Po pokazaniu jej WŁASNEGO zrzutu zamiast opisu mechanizmu pytanie trafiło od r
 z katalogu + trzeci status + dwa przyciski akcji. ⚠ To jedna z dwóch rzeczy, które Ania sama
 nazwała mogącymi wstrzymać cutover („najpoważniejsza różnica z całego przeglądu"), więc karta
 ma wejść PRZED przełączeniem produkcji.
+
+**Trzeci status i przyciski już dowiezione dla alertów importu (P6.1).** Definicja statusów,
+etykiety i reguła „jakie akcje przy jakim statusie” leżą we wspólnym module
+`rebuild/frontend/src/pages/alerty/statusy.ts`, a komponent przycisków w
+`pages/alerty/PrzyciskiStatusu.tsx` — P6.2 ma je zaimportować dla pseudo-alertów katalogowych
+zamiast pisać drugą kopię reguły.
 
 ⚠ **Historia decyzji, warta zapamiętania jako metoda:** pierwsze pytanie („czy stare ostrzeżenia
 marżowe są Ci potrzebne?") dostało odpowiedź „nie rozumiem, co to znaczy". Drugie, z jej własnym
@@ -2514,6 +2521,15 @@ pending pozycja „AGRI STAR II" dostaje self-match z `podobienstwo: 100` (wida�
 `contract/fixtures/GET_atrybuty_pending.json` i w widoku `/atrybuty` → panel „Do akceptacji"),
 bo wartość zasiana z `model` trafia do słownika `bieznik`.
 
+**Uzupełnienie P7.3 (ticket 75, 2026-09-21) — zasięg objawu zmierzony.** Na kopii snapshotu
+437 z 500 pozycji kolejki podpowiada samą siebie jako pierwszą sugestię: `bieznik` 242, `rozmiar` 99,
+`marka` 68, `indeks_nosnosci` 27, `konstrukcja` 1. Przestawienie seedu na `products.bieznik`
+obejmuje co najwyżej 72 z nich (`bieznik` z `origin = 'catalog'`). Reszta to wartości ręczne
+(`origin = 'user'`, 236) albo rodzaje spoza seedu z `model`. Objaw zniknie dopiero po „sprzątaniu
+samego objawu” z akapitu „Do decyzji”. Skutek uboczny: alias na samą siebie pokazuje
+w ostrzeżeniu i w toaście N produktów, choć nic się nie zmienia. Szczegóły:
+`docs/tickets/75-CHORE-niezmiennik-atrybutow/raport.md`.
+
 ---
 
 ### #41 · 2026-09-04 · [BACKEND] · dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13) — pozycji pending rodzaju `model`/`zastosowanie` nie dałoby się zaakceptować
@@ -3087,7 +3103,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Pięć etykiet, **rozkład diffu bundli zrobiony w 13e** (nazwa `.bak` dawała tylko etykietę): **rebrand** — `<title>` → „Bridge ONE — konsolidacja cenników opon" + 3× `children:"Bridge"`→`"BridgeOne"` (**bez spacji**: nagłówek mobilny, sidebar, `<h1>` logowania) + usunięcie podtytułu „dla Agrowca" w sidebarze i na logowaniu; `aria-label="Bridge"` na SVG oraz teksty pomocnicze **bez zmian**. ⚠ Rebrand jest z **2026-07-31**, nie z 09-01…04 — data w nagłówku tego wpisu opisuje nazwę PLIKU bundla, nie samą zmianę. **PRICEFMT** — w `DT` `cenaSprzedazy` odchodzi od wspólnej gałęzi z `cenaZakupu`: `toFixed(2)` → `` `${Math.floor(n)},-` `` (`1234,-`); eksport `OT` nietknięty. **tr_fix** — usunięcie tokenu `"tr-"` z listy `h2` („to nie opona"); regex `\btr-\b` łapał `TR-135` w nazwach opon BKT → fałszywy alert „Nie-opona w katalogu — błąd parsera". **ackalerts** — CZTERY zmiany: (1) odcisk wartości w `id` alertu (`-marza-ujemna-{marża}`, `-marza-niska-{marża}`, `-nie-opona-{nazwa\|kategoria}`, `-brak-importu-{dni}` w obu gałęziach ≥7 i ≥30 dni), (2) pulpit czyta `alerty-statusy` z IndexedDB i podaje do `pv(produkty, statusy)`, (3) `window.dispatchEvent(new Event("alerty-statusy-updated"))` po zapisie statusów, (4) `.filter(e => e.status!=="rozwiazany" \|\| filtrStatusu==="rozwiazany")`. **szer_marka** — **NIE kolumna**, dwie poprawki: (a) `Wfmt` traci gałąź „cała notacja `AxB`", (b) filtr „marka bez cyfr" dołożony na gałęzi SŁOWNIKOWEJ listy marek. |
 | **Do nowej wersji?** | ✅ **TAK — i już było** (decyzja **D1**, 2026-09-09). Odbudowa ma rebrand 1:1 od ticketa 2 (`751a8e2`), bo deminifikat robiono z bundla PO rebrandzie. Rozjazd zapisu „Bridge ONE" (`<title>`) vs „BridgeOne" (UI) **jest w produkcji** i odtwarzamy go świadomie — nie ujednolicamy. `tr_fix` i `ackalerts` → ❌ nie portujemy (D2/D3, brak nośnika — patrz #26). |
 | **Iteracja** | **→ 13e ✅ zamknięte 2026-09-09** (FE; `konstr` łączy się z #58 — FE zrobiony w 13c, a łatka produkcji okazała się regresją, patrz #71). ⚠ Sprostowanie 43-CHORE-i13b: pole mówiło „→ 13d" — niezgodne z tabelą mapowania i roadmapą (FE = 13e; 13d to Selly). |
-| **Status** | ✅ **zrobione w 13e** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09). Sportowane: **tylko `szer_marka`** (oba punkty) — `formatujSzerokosc` bez gałęzi `AxB` + filtr „bez cyfr" także na gałęzi słownikowej `listaMarek`; `listaKategorii` bez zmian. **rebrand i PRICEFMT odbudowa miała już 1:1** — deminifikat to bundle `index-PRICEFMT…` w stanie SPRZED 04.09, więc port z I0–I12 wciągnął je automatycznie, a trzech łatek z 04.09 nie. Pomiar na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis szerokości; eksport CSV zmienia się razem z tabelą, bo `OT` i `DT` dzielą `Wfmt` (potwierdzone grafem wywołań w żywym bundlu; w odbudowie `eksport.ts` woła to samo `formatujSzerokosc`). ⚠ **Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, nie cały `rozmiar`** — czytać jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). **D2 — `tr_fix` i `ackalerts` (1–3) nie mają w odbudowie nośnika**: silnika pseudo-alertów (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`) świadomie nie ma (D1 z I6), więc obie łatki **pozostają zależne od decyzji przy #26**; punkt (2) jest spełniony konstrukcyjnie, bo pulpit odbudowy filtruje po `status==="nowy"` z REALNEJ odpowiedzi `GET /api/alerts`. **D3 — punktu (4) nie portujemy**: odbudowa ma DWA statusy (`nowy`/`rozwiazany`) i domyślny filtr ustawiony na `nowy`, więc reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu „nowy" — cel łatki realizuje już domyślny filtr. `konstr` po stronie FE → patrz #58 (zrobione w 13c) i #71 (regresja żywej produkcji). |
+| **Status** | ✅ **zrobione w 13e** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09). Sportowane: **tylko `szer_marka`** (oba punkty) — `formatujSzerokosc` bez gałęzi `AxB` + filtr „bez cyfr" także na gałęzi słownikowej `listaMarek`; `listaKategorii` bez zmian. **rebrand i PRICEFMT odbudowa miała już 1:1** — deminifikat to bundle `index-PRICEFMT…` w stanie SPRZED 04.09, więc port z I0–I12 wciągnął je automatycznie, a trzech łatek z 04.09 nie. Pomiar na `db/snapshot.db`: **587 z 7395** pozycji zmienia zapis szerokości; eksport CSV zmienia się razem z tabelą, bo `OT` i `DT` dzielą `Wfmt` (potwierdzone grafem wywołań w żywym bundlu; w odbudowie `eksport.ts` woła to samo `formatujSzerokosc`). ⚠ **Zniesiona gałąź oddawała DWA PIERWSZE CZŁONY, nie cały `rozmiar`** — czytać jako `rozmiar` → dziś (dawniej): `8.00x20` → `8.00` (dawniej `8.00x20`), `300x15` → `300` (dawniej `300x15`), `14.9x28` → `14.9` (dawniej `14.9x28`), ale `16x6-8` → `16` (dawniej `16x6`) i `23x10.50-12` → `23` (dawniej `23x10.50`). **D2 — `tr_fix` i `ackalerts` (1–3) nie mają w odbudowie nośnika**: silnika pseudo-alertów (`pv`/`v2`/`h2` + IndexedDB `alerty-statusy`) świadomie nie ma (D1 z I6), więc obie łatki **pozostają zależne od decyzji przy #26**; punkt (2) jest spełniony konstrukcyjnie, bo pulpit odbudowy filtruje po `status==="nowy"` z REALNEJ odpowiedzi `GET /api/alerts`. **D3 — punktu (4) nie portujemy**: odbudowa ma DWA statusy (`nowy`/`rozwiazany`) i domyślny filtr ustawiony na `nowy`, więc reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu „nowy" — cel łatki realizuje już domyślny filtr. *(Aktualizacja P6.1, 2026-09-21, ticket 72: od tej karty odbudowa ma TRZY statusy, a domyślny filtr to „Nierozwiązane" (`status ≠ rozwiazany`), nie sam `nowy` — to realizuje cel punktu (4) łatki `ackalerts` [ukrycie `rozwiazany`] wprost, jeszcze dokładniej niż opisany tu degenerat. Samą D3 odwróciła decyzja 4 dla P6.2 [2026-09-21, patrz #26]: ukrywanie rozwiązanych wchodzi w pseudo-alertach, zbieżnie z tym filtrem.)* `konstr` po stronie FE → patrz #58 (zrobione w 13c) i #71 (regresja żywej produkcji). |
 
 ### #62 · 2026-08-26…09-04 · [BAZA] · Backfille danych (tl_tt / szerokości ułamkowe / JMK) — DECYZJA
 | pole | wartość |
@@ -3898,8 +3914,8 @@ tylko promocji, czy też narzutów).
 | **Kategoria** | FRONTEND (widok `/alerty`) |
 | **Pliki** | `rebuild/frontend/src/pages/alerty/TabelaAlertow.tsx`, `pages/alerty/grupowanie.ts` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-21** (nowa funkcja, oryginał jej nie ma) |
-| **Iteracja** | do zaplanowania |
-| **Status** | decyzja podjęta, karta niezałożona |
+| **Iteracja** | P6.1 |
+| **Status** | ✅ **zrobione 2026-09-21** (`72-FEATURE-alerty-przejrzany-szukajka`) |
 
 **Po co.** Typ „Błąd pobierania" obejmuje JEDNYM workiem awarię sieci i błąd parsera (backlog #16),
 więc żeby je rozróżnić, trzeba dziś rozwinąć grupę i przeczytać wpisy. Wyszukiwarka po treści
@@ -3908,6 +3924,13 @@ pozwoli znaleźć je od razu. Ania: „ta przydałaby się".
 **Uwaga do wdrożenia.** Filtry w tym widoku są wyliczane z danych, nie zaszyte — nowa wyszukiwarka
 ma działać na tej samej zasadzie i łączyć się z istniejącymi filtrami operatorem AND, tak jak
 robią to filtry dostawcy i typu (`test/alerty.grupowanie.test.ts`, „filtry łączą się operatorem AND").
+
+**Dowiezione w P6.1.** Wyszukiwanie obejmuje sam `opis` (nie dostawcę ani typ — mają własne
+filtry), frazę dzieli na słowa łączone AND, porównanie bez rozróżniania wielkości liter. Filtr
+działa PRZED grupowaniem: grupa zostaje, gdy pasuje choć jeden jej wpis, licznik „N×” i akcja
+grupy obejmują wyłącznie trafienia. Szczegóły: `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/plan.md`
+(D3, D4). ⚠ To świadome odwrócenie decyzji D8 z `18-FEATURE-widok-alerty` (I6), która tę samą
+wyszukiwarkę odrzuciła jako follow-up. Wraca, bo Ania wprost jej chciała — nie jest to przeoczenie D8.
 
 ---
 
