@@ -20,10 +20,19 @@ Claude Code otwiera go, bierze następny niezrobiony ticket i po skończeniu odz
 3. Przeczytaj **§3 Zasady przekrojowe** — obowiązują w KAŻDEJ iteracji.
 4. Uruchom **`/feature`** z opisem tego ticketa (komenda sama pociągnie research po źródłach
    prawdy, plan, worktree, implementację, review, GATE fixtures/kontrakt, docs i PR).
-5. Po zmergowaniu PR: **zmień status** ticketa w §4 i §5 na ✅, wpisz numer PR i datę.
+5. Po zmergowaniu PR: status karty jest w **`docs/karty/<ID>/karta.md`** (zapisała go sama
+   karta). §4 i tabele kart w §5 odświeża **koordynator**, nie karta — patrz niżej.
 6. Jeśli iteracja jest podzielona na sesję **BE** i **FE** — najpierw kończy się i merge'uje
    BE (endpointy muszą istnieć, żeby FE miało co wołać i żeby GATE był odtwarzalny), potem
    FE branchuje się z `develop` (już z BE) i robi widok.
+
+**Praca równoległa — kto pisze gdzie (od ticketu 82, 2026-09-21).** Ten plik zmienia
+**wyłącznie koordynator** (sesja, która planuje falę i pisze prompty do kart). Karta pisze tylko
+w swoim katalogu `docs/karty/<ID>/` (`karta.md`) i zakłada nowe pliki `wejscie-<N>.md` w
+katalogach przyszłych kart — nigdy nie edytuje roadmapy, bo każda wspólna linia (wiersz §4,
+sąsiednie wiersze tabeli kart, dopisek na końcu sekcji) kończyła się konfliktem przy merge'u.
+Stan kart: `tools/stan-kart.sh`. Pełne zasady, szablony i etap 2 migracji (przeniesienie treści
+otwartych kart planu P z §5 do `docs/karty/`): **`docs/karty/README.md`**.
 
 **Zasada gałęzi:** producent (zmiany Ani) pisze do `main`; my pracujemy na `develop`. Każdy
 ticket = własny worktree + branch z `origin/develop`, PR z powrotem do `develop`. Okresowo
@@ -3004,6 +3013,9 @@ zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-1
 - **Skąd.** Ania przeszła instrukcje I5, I6, I7, I9, I10 i przegląd 12 widoków, a potem odpowiedziała
   na dwie rundy pytań zbiorczych (`docs/pytania-do-ani-2026-09-18.md` i runda 2 z 21.09).
   **Po jej stronie nie ma już ani jednej otwartej sprawy.** Wszystkie decyzje są w backlogu.
+- ⚠ **Od ticketu 82 karty tego planu NIE edytują roadmapy** — stan i ustalenia piszą w
+  `docs/karty/<ID>/` (zasady: `docs/karty/README.md`). Kolumna „Stan” w tabelach niżej jest
+  zamrożona do etapu 2 migracji; aktualny stan: `tools/stan-kart.sh` + ta tabela.
 
 **Nazewnictwo — trzy różne rzeczy, trzy systemy, nie mieszać:**
 
@@ -3103,7 +3115,8 @@ odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest popraw
 | **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ✅ 2026-09-21, ticket `74-FEATURE-slad-kolejki-atrybutow` |
 | **P7.2** | seed bieżników z `products.bieznik` + sprzątanie kolejki z self-matchy + podobieństwo case-insensitive | #40, #42 | ✅ 2026-09-21, ticket `78-FEATURE-seed-bieznikow-podobienstwo` — kolejka 498→61 pozycji, 0 self-matchy, 13 nowych sugestii aliasów |
 | **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ✅ `75-CHORE-niezmiennik-atrybutow` · 2026-09-21 — niezmiennik trzyma się: liczba w ostrzeżeniu = liczba przepisanych wierszy, 0 rozjazdów na 4148 pomiarach na snapshocie; test `atrybuty.niezmiennik.test.ts` w bramce |
-| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 · wejście od P7.3 niżej |
+| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 i P7.5 · wejście od P7.3 niżej |
+| **P7.5** | tekst ostrzeżenia w kolejce atrybutów zgodny ze śladem w Historii (tylko frontend) | #39 | ✅ 2026-09-21, ticket `81-FEATURE-ostrzezenie-kolejki-historia` — oba okienka (edycja, alias) mówią o wpisie w Historii zamiast o braku audytu; test obejmuje oba |
 
 ⚠ P7.1 i P7.2 dzielą klaster backendu atrybutów — przed puszczeniem obu naraz sprawdzić rozłączność
 plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czymkolwiek.
@@ -3161,6 +3174,14 @@ pliku nietknięta. `atrybuty_wartosci.rodzaj` ma FK do `atrybuty_rodzaje`, a see
 tylko 5 rodzajów rdzenia (produkcja ma 15) — na świeżej bazie akceptacja rodzaju spoza piątki
 nadal kończy się 500 (rollback, stan zastany, nie zmieniony w 78). Szczegóły:
 `docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`.
+
+**Dla P7.4 — ostateczne brzmienie ostrzeżenia (P7.5, ticket 81, do cytowania znak w znak).**
+Oba okienka, „Akceptuj z edycją” i „Akceptuj jako alias”, pokazują ten sam komponent:
+„Zmiana przepisze pole <rodzaj> w <N> produktach katalogu. Operacji nie da się cofnąć. Zostanie
+po niej wpis w Historii (typ „edycja”).” Pod nim okienko aliasu ma dodatkowe, niezmienione zdanie:
+„Do słownika nie trafi nic — mapowanie nie jest nigdzie zapisywane, zmieniają się wyłącznie
+produkty.” Stare zdanie „…ani odtworzyć z dziennika — akcje kolejki nie trafiają do audytu”
+już nie występuje. Produkcja nie ma ani ostrzeżenia (dodatek D7 rebuildu), ani audytu kolejki.
 
 **Dla P7.4 (delta instrukcji I7):** `docs/instrukcja-testow-I7.md` §4 pkt 4 jest po 74
 nieprawdziwy dwukrotnie — `model`/`zastosowanie` NIE trafiają do kolejki (skan ich nie tworzy,

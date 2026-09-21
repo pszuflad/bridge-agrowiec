@@ -209,7 +209,7 @@ export function akceptuj(id: number): Promise<WynikAkcjiPending> {
   return akcjaPending(id, "akceptuj");
 }
 
-/** `UPDATE products` + wartość do słownika. Masowa zmiana — backend jej NIE audytuje (backlog #39). */
+/** `UPDATE products` + wartość do słownika. Masowa zmiana — zostawia wpis `edycja` w Historii (backlog #39). */
 export function akceptujZEdycja(id: number, nowa_wartosc: string): Promise<WynikAkcjiPending> {
   return akcjaPending(id, "akceptuj-z-edycja", { nowa_wartosc });
 }
@@ -218,7 +218,7 @@ export function akceptujZEdycja(id: number, nowa_wartosc: string): Promise<Wynik
  * `UPDATE products` na wartość kanoniczną; do słownika NIE wchodzi NIC.
  *
  * ⚠ Nie ma tabeli aliasów — mapowanie nigdzie nie zostaje, a kanoniczna MUSI już być
- * w słowniku tego rodzaju (inaczej 400). Też bez audytu (backlog #39).
+ * w słowniku tego rodzaju (inaczej 400). Też zostawia wpis `edycja` w Historii (backlog #39).
  */
 export function akceptujJakoAlias(
   id: number,
