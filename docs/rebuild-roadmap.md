@@ -3252,12 +3252,26 @@ przeglądarce" przestały być prawdziwe (lista jest teraz na serwerze). Do inst
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P10.1** | klaster backendu analityki | #31, #32, #33, #35 | ⬜ gotowe |
+| **P10.1** | klaster backendu analityki: ożywienie kart „Dostępności" + trzy poprawki towarzyszące | #31, #32, #33, #35 | ⬜ gotowe — decyzje 2026-09-21 |
 | **P10.2** | kafel „Ostatni eksport CSV" pokazuje datę | #34 | ⬜ gotowe |
 | **P10.3** | eksport CSV respektuje filtry | #91 | ⏸ zakres do decyzji |
 | **P10.4** | delta instrukcji I10 dla Ani | — | ⬜ po P10.1–P10.3 |
 
 P10.3 rusza ten sam plik tras co P10.1 — po niej, nie równolegle.
+
+**Decyzje dla P10.1 — PODJĘTE 2026-09-21 przez użytkownika, wszystkie zgodnie z rekomendacją** (pełna treść
+w backlogu). Do 21.09 wiersz stał na „gotowe", choć #31, #33 i #35 miały w backlogu „do decyzji" —
+rozjazd zamknięty. Przy #32 Ania zatwierdziła NAPRAWĘ, a wybór WARIANTU był decyzją techniczną użytkownika.
+
+| Wpis | Decyzja |
+|---|---|
+| **#32** | wariant (a): nazwa z katalogu, `LEFT JOIN products` po **`dostawca` + `kod`**; usunięty produkt → kreska |
+| **#33** | naprawić razem z #32; z duplikatów klucza brać **ostatni wpisany** (`MAX(id)`) — karta najpierw MIERZY, co import zostawia w katalogu |
+| **#31** | naprawić: nie dokładać migawki, jeśli produkt ma już dzisiejszą; **bez** indeksu unikalnego |
+| **#35** | lista znanych widoków eksportu, reszta **404** (zamiast `200` z samym BOM) → zmiana kontraktu |
+
+⚠ **Skutek dla PR.2** (kafle KPI analityki) i **P10.2** (kafel na Pulpicie): P10.1 ożywia dane, które te karty
+mogą pokazywać — obie po P10.1. P10.2 dodatkowo po P6.2 (obie ruszają Pulpit).
 
 #### Przegląd 12 widoków
 
