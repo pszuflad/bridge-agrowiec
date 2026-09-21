@@ -1164,7 +1164,8 @@ jeden realny defekt znaleziony przy okazji:
     dosłowne nie miałoby sensu). 71 testów w domenie atrybutów, suita **917 testów / 58 plików**,
     lint/typecheck/build czyste. Pełny wywód (D1–D6, quirki produkcji — m.in. seed `bieznik`
     z `products.model` i dwie rozjeżdżone mapy rodzaj→kolumna, 15 dla liczników i 13 dla
-    kolejki): `docs/tickets/29-FEATURE-atrybuty-backend/`.
+    kolejki): `docs/tickets/29-FEATURE-atrybuty-backend/`. Mapy uzgodniono w P7.1 (ticket 74,
+    2026-09-21): jest jedna `RODZAJ_KOLUMNA` (15), a zakres skanu to jawna lista `ZAKRES_SKANU` (13).
 
 - **7b · Widok `/atrybuty`** (FE) — ✅ **zrobione** (ticket `31-FEATURE-atrybuty-frontend`,
   2026-09-04). Widok natywny: kafle rodzajów → panel wartości (CRUD) → kolejka „Do akceptacji"
@@ -1177,8 +1178,8 @@ jeden realny defekt znaleziony przy okazji:
   - **Zatwierdzone odstępstwa (D2, D4, D7):** `window.prompt`/`confirm` zastąpione dialogami
     Radix z zachowaniem dosłownych tekstów; pominięty martwy filtr „Źródło" (żadna trasa nie
     zwraca `origin`); dialogi akcji masowych pokazują liczbę produktów, których dotknie
-    `UPDATE` (`GET /atrybuty/uzycie` → `count`), a toast — `produktow_zaktualizowano` (bo
-    backend tych akcji NIE audytuje, backlog #39).
+    `UPDATE` (`GET /atrybuty/uzycie` → `count`), a toast — `produktow_zaktualizowano` (w 7b backend
+    tych akcji nie audytował, backlog #39; od P7.1, ticket 74, audytuje i pokazuje je w Historii).
   - **NIE odtworzono kafla „Wszystkie atrybuty" (D3)** — istnieje tylko w bazowym Reakcie,
     injection go chowa, Ania go nie widzi.
   - **Trzy operacje backendu 7a nie mają konsumenta w UI i to jest zgodne z produkcją (D5):**
@@ -3085,7 +3086,7 @@ odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest popraw
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ⬜ gotowe · wejście od P7.3 niżej |
+| **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ✅ 2026-09-21, ticket `74-FEATURE-slad-kolejki-atrybutow` |
 | **P7.2** | seed bieżników z `products.bieznik` + podobieństwo case-insensitive | #40, #42 | ⬜ gotowe · wejście od P7.3 niżej |
 | **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ✅ `75-CHORE-niezmiennik-atrybutow` · 2026-09-21 — niezmiennik trzyma się: liczba w ostrzeżeniu = liczba przepisanych wierszy, 0 rozjazdów na 4148 pomiarach na snapshocie; test `atrybuty.niezmiennik.test.ts` w bramce |
 | **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 · wejście od P7.3 niżej |
@@ -3098,7 +3099,9 @@ plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czym
 - **Dla P7.1:** po wprowadzeniu `model` / `zastosowanie` do akceptacji dopisać je do listy `RODZAJE`
   w `rebuild/backend/test/atrybuty.niezmiennik.test.ts`. P7.3 je pominęła, bo dziś dają 400
   „Nieznany rodzaj". Test nie importuje map rodzaj→kolumna i nie sprawdza `audit_log`, więc audyt
-  akcji i przebudowa map go nie ruszają.
+  akcji i przebudowa map go nie ruszają. **Zrobione w P7.1 (ticket 74):** zamiast dopisania do
+  `RODZAJE` doszła osobna lista `RODZAJE_POZA_SKANEM` — skan tych rodzajów nie przegląda, więc
+  pozycję kolejki test wstawia ręcznie i sprawdza B == C == realna zmiana.
 - **Dla P7.2:** pozycje kolejki, które podpowiadają same siebie ze 100%, dają dziś fałszywą liczbę
   przy aliasie. Ostrzeżenie mówi „w N produktach", toast „Zaktualizowano produktów: N", a realnie
   zmienia się 0 wierszy (SQLite liczy wiersze dopasowane, nie zmienione). W snapshocie takich
@@ -3121,6 +3124,31 @@ plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czym
   (`:424`) jest więc rozjazd ostrzeżenie ↔ toast ↔ katalog, a nie ostrzeżenie ↔ kolumna. Wyjątek,
   o którym Ania powinna wiedzieć: kliknięcie sugestii, która jest tą samą wartością (100%),
   pokaże N w ostrzeżeniu i w toaście, choć w katalogu nic się nie zmieni (patrz wyżej, P7.2).
+
+**P7.1 dowieziona (2026-09-21, ticket 74):** sześć tras kolejki (`akceptuj`, `akceptuj-z-edycja`,
+`akceptuj-jako-alias`, `odrzuc`, `DELETE /api/atrybuty/pending`, `POST /api/atrybuty/scan-pending`)
+pisze do `audit_log` (`atrybut_pending_*`); dwie z nich (edycja, alias) są widoczne w
+`GET /api/history/paged` jako `edycja`, z realną liczbą przepisanych produktów i opisem
+przed → po (wymagało gałęzi w `naWpisHistorii()`, nie tylko wpisu w słowniku). `RODZAJE_KOLUMNY`
+zniknęła — jedna mapa `RODZAJ_KOLUMNA` (15) obsługuje liczniki, użycie i obie akceptacje; zakres
+skanu został osobną, jawną listą `ZAKRES_SKANU` (13, bez zmiany zawartości). Szczegóły:
+`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`.
+
+**Dla P7.2 (punkt startu czysty):** P7.1 nie ruszyła seedu `bieznik`, kandydatów ani podobieństwa
+(`repos/atrybuty.ts` zmieniony tylko w komentarzu). Skan iteruje dziś po `ZAKRES_SKANU`
+(`repos/atrybuty-pending.ts`), a kolumny bierze z `RODZAJ_KOLUMNA` (`repos/atrybuty.ts`) — `RODZAJE_KOLUMNY` w
+`repos/atrybuty-pending.ts` już nie istnieje. Fakt do uwzględnienia, jeśli P7.2 wstawia w
+testach wartości spoza pięciu rdzeniowych rodzajów: `atrybuty_wartosci.rodzaj` ma FK do
+`atrybuty_rodzaje`, a seed rebuildu zakłada tylko 5 rodzajów rdzenia (produkcja ma 15) — na
+świeżej bazie akceptacja rodzaju spoza piątki kończy się 500 (rollback); stan zastany, nie
+powstał w 74.
+
+**Dla P7.4 (delta instrukcji I7):** `docs/instrukcja-testow-I7.md` §4 pkt 4 jest po 74
+nieprawdziwy dwukrotnie — `model`/`zastosowanie` NIE trafiają do kolejki (skan ich nie tworzy,
+0 wierszy na snapshocie), a błąd „Nieznany rodzaj" dla nich już nie występuje (jedna mapa,
+akceptacja je przyjmuje). §4 pkt 7 też nieaktualny — ślad w Historii już jest (patrz wyżej).
+Jeśli Ania chce, żeby `model`/`zastosowanie` trafiały do kolejki, to zmiana zakresu skanu (I15),
+która zalałaby kolejkę (#40) — do wyjaśnienia z nią, nie do cichej zmiany.
 
 #### Iteracja 9 — Waga gabarytowa
 

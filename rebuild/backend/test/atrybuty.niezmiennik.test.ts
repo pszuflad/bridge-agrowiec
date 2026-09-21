@@ -23,11 +23,14 @@
  * Pomiar na snapshocie: A == C na wszystkich 3648 świeżych pozycjach, bo w danych produkcji nie ma
  * ani wierszy MO6, ani wartości ze spacją na brzegu — wyjątki są dziś uśpione, nie nieistniejące.
  *
- * ⚠ Równoległa karta P7.1 (ticket 74) przebudowuje mapy rodzaj→kolumna i dokłada audyt akcji
- * kolejki. Dlatego: (1) rodzaje i kolumny są wypisane tu JAWNIE, bez importu map z repozytoriów;
- * (2) wszystko idzie przez trasy HTTP; (3) nic nie zakłada, że akcje NIE piszą do `audit_log`.
- * Rodzaje `model` i `zastosowanie` są POMINIĘTE — dziś akceptacja odbija je 400 „Nieznany rodzaj"
- * (backlog #41). Po merge'u P7.1 dopisać je do `RODZAJE` (follow-up w raporcie ticketa 75).
+ * Rodzaje i kolumny są wypisane tu JAWNIE, bez importu map z repozytoriów, a wszystko idzie przez
+ * trasy HTTP — test sprawdza zachowanie, nie powtarza implementacji. Nic nie zakłada, że akcje
+ * NIE piszą do `audit_log` (od P7.1, ticket 74, piszą).
+ *
+ * `model` i `zastosowanie` akceptacje obsługują od P7.1 (backlog #41), ale skan ich NIE
+ * przegląda (`ZAKRES_SKANU`, celowo) — stąd osobna lista `RODZAJE_POZA_SKANEM`: pozycję kolejki
+ * wstawiamy ręcznie, a sprawdzamy niezmiennik główny B == C == realna zmiana (A nie ma sensu,
+ * bo nie pochodzi ze skanu).
  */
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -76,7 +79,20 @@ const RODZAJE = [
   kolumna: string;
 }[];
 
-type Rodzaj = (typeof RODZAJE)[number];
+/**
+ * Rodzaje, które akceptacje obsługują, a skan pomija (backlog #41, ticket 74). Pozycja kolejki
+ * takiego rodzaju nie powstaje ze skanu, więc testy wstawiają ją do tabeli ręcznie.
+ */
+const RODZAJE_POZA_SKANEM = [
+  { rodzaj: "model", pole: "model", kolumna: "model" },
+  { rodzaj: "zastosowanie", pole: "zastosowanie", kolumna: "zastosowanie" },
+] as const satisfies readonly {
+  rodzaj: string;
+  pole: keyof NowyProdukt;
+  kolumna: string;
+}[];
+
+type Rodzaj = (typeof RODZAJE)[number] | (typeof RODZAJE_POZA_SKANEM)[number];
 const BIEZNIK = RODZAJE.find((r) => r.rodzaj === "bieznik")!;
 const MARKA = RODZAJE.find((r) => r.rodzaj === "marka")!;
 
@@ -101,9 +117,9 @@ describe("atrybuty — niezmiennik „ostrzeżenie = liczba realnie przepisanych
     token = (odp.body as { token: string }).token;
 
     // Stan PRODUKCJI: w snapshocie `atrybuty_rodzaje` zna wszystkie 15 rodzajów, a świeża baza
-    // tylko 6 wbudowanych z seedu. Bez tego „Akceptuj z edycją" dla pozostałych 7 kończy się 500
+    // tylko wbudowane z seedu. Bez tego „Akceptuj z edycją" dla pozostałych kończy się 500
     // (FK `atrybuty_wartosci.rodzaj` → `atrybuty_rodzaje`; follow-up w raporcie ticketa 75).
-    for (const r of RODZAJE) {
+    for (const r of [...RODZAJE, ...RODZAJE_POZA_SKANEM]) {
       const rodzaj = await post("/api/atrybuty/rodzaje", {
         value: r.rodzaj,
         label: r.rodzaj,
@@ -240,6 +256,51 @@ describe("atrybuty — niezmiennik „ostrzeżenie = liczba realnie przepisanych
 
       expect({ A: p.ile_wystapien, B, C }).toEqual({ A: 4, B: 4, C: 4 });
       // Realna zmiana: kanoniczną ma teraz 1 + C wierszy, starej nie ma nikt.
+      expect(ileZWartoscia(r, kanoniczna)).toBe(1 + C);
+      expect(ileZWartoscia(r, stara)).toBe(0);
+    });
+  });
+
+  describe("rodzaje poza zakresem skanu (#41): B == C == realna zmiana", () => {
+    /** Pozycja kolejki wstawiona ręcznie — skan tych rodzajów nie przegląda (`ZAKRES_SKANU`). */
+    const pozycjaRecznie = (r: Rodzaj, wartosc: string) =>
+      Number(
+        srodowisko.sqlite
+          .prepare(
+            `INSERT INTO atrybuty_wartosci_pending (rodzaj, wartosc, ile_wystapien, dostawcy)
+             VALUES (?, ?, 1, '')`,
+          )
+          .run(r.rodzaj, wartosc).lastInsertRowid,
+      );
+
+    it.each(RODZAJE_POZA_SKANEM)("akceptuj-z-edycja: $rodzaj", async (r) => {
+      const stara = `P71_STARA_${r.rodzaj}`;
+      const nowa = `P71_NOWA_${r.rodzaj}`;
+      dodajProdukty(r, stara, 3);
+      dodajProdukty(r, `P71_INNA_${r.rodzaj}`, 2);
+      const id = pozycjaRecznie(r, stara);
+
+      const B = await uzycie(r, stara);
+      const C = await zEdycja(id, nowa);
+
+      expect({ B, C }).toEqual({ B: 3, C: 3 });
+      expect(ileZWartoscia(r, nowa)).toBe(C);
+      expect(ileZWartoscia(r, stara)).toBe(0);
+      expect(ileZWartoscia(r, `P71_INNA_${r.rodzaj}`)).toBe(2);
+    });
+
+    it.each(RODZAJE_POZA_SKANEM)("akceptuj-jako-alias: $rodzaj", async (r) => {
+      const stara = `P71_STARA_${r.rodzaj}`;
+      const kanoniczna = `P71_KANON_${r.rodzaj}`;
+      dodajProdukty(r, stara, 4);
+      dodajProdukty(r, kanoniczna, 1);
+      await doSlownika(r, kanoniczna);
+      const id = pozycjaRecznie(r, stara);
+
+      const B = await uzycie(r, stara);
+      const C = await jakoAlias(id, kanoniczna);
+
+      expect({ B, C }).toEqual({ B: 4, C: 4 });
       expect(ileZWartoscia(r, kanoniczna)).toBe(1 + C);
       expect(ileZWartoscia(r, stara)).toBe(0);
     });

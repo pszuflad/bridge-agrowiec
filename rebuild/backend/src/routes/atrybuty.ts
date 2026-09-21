@@ -61,6 +61,7 @@ function blad(res: Response, status: number, komunikat: string): Response {
  * Audyt nie może wywrócić udanej operacji — oryginał opakowuje każde `be(…)` w
  * `try { … } catch (_) {}` (`atrybuty_module.cjs:142`, `:161`, `:177`, `:208`, `:226`, `:243`).
  * Bez tego awaria zapisu do `audit_log` zamieniłaby wykonany już CRUD w odpowiedź 500.
+ * Tego samego helpera używają trasy kolejki pending (backlog #39, ticket 74).
  */
 function audytuj(db: Baza, wpis: Parameters<typeof zapiszAudyt>[1]): void {
   try {
@@ -298,9 +299,13 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
 
   // ————————————————————————————— kolejka pending —————————————————————————————
   //
-  // ⚠ ŻADNA trasa poniżej nie pisze do audytu — oryginalny moduł nie dostaje funkcji `be`
-  // (`pending_module.cjs:199`). Dotyczy to też akceptacji przepisujących `products`.
-  // Decyzja użytkownika: odtwarzamy 1:1 (plan.md D4).
+  // ⚠ ŚWIADOME ODSTĘPSTWO (backlog #39, decyzja Ani 2026-09-21, ticket 74): każda trasa
+  // poniżej, która coś zmienia, pisze do `audit_log` akcję `atrybut_pending_*`. Oryginalny
+  // moduł nie dostaje funkcji `be` (`pending_module.cjs:199`) i nie loguje NIC — także przy
+  // akceptacjach robiących masowy `UPDATE products`. Audyt idzie przez `audytuj()`, PO udanej
+  // operacji i poza jej transakcją, jak w CRUD słownika: błąd zapisu nie cofa zmiany i nie
+  // zamienia odpowiedzi w 500. W widoku Historii widać tylko dwie akcje przepisujące produkty
+  // (`historia/mapowanie.ts`, `PRZEPISANIA_Z_KOLEJKI`); reszta jest w `GET /api/audit-log`.
 
   /** Kolejka z podpowiedziami aliasów (`pending_module.cjs:218-250`). */
   router.get("/api/atrybuty/pending", requireAuth, (req: Request, res: Response) => {
@@ -317,7 +322,18 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
    */
   router.delete("/api/atrybuty/pending", requireAuth, (req: Request, res: Response) => {
     const rodzaj = parametr(req.query.rodzaj);
-    res.json({ ok: true, usunieto: wyczyscPending(db, rodzaj), rodzaj: rodzaj ?? null });
+    const usunieto = wyczyscPending(db, rodzaj);
+
+    audytuj(db, {
+      uzytkownikId: req.user?.id ?? null,
+      uzytkownikImie: req.user?.imieNazwisko ?? null,
+      akcja: "atrybut_pending_wyczyszczono",
+      encjaTyp: "atrybut_pending",
+      encjaId: null,
+      szczegoly: { rodzaj: rodzaj ?? null, usunieto },
+    });
+
+    res.json({ ok: true, usunieto, rodzaj: rodzaj ?? null });
   });
 
   /** Akceptacja zwykła (`:253-270`) — wartość do słownika, `products` bez zmian. */
@@ -327,6 +343,16 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
     if (!pozycja) return blad(res, 404, "Pozycja pending nie istnieje");
 
     akceptujPending(db, id, pozycja.rodzaj, pozycja.wartosc);
+
+    audytuj(db, {
+      uzytkownikId: req.user?.id ?? null,
+      uzytkownikImie: req.user?.imieNazwisko ?? null,
+      akcja: "atrybut_pending_zaakceptowano",
+      encjaTyp: "atrybut_pending",
+      encjaId: id,
+      szczegoly: { rodzaj: pozycja.rodzaj, wartosc: pozycja.wartosc },
+    });
+
     return res.json({
       ok: true,
       akcja: "akceptowana",
@@ -357,6 +383,21 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
         kolumna,
         stara: pozycja.wartosc,
         nowa,
+      });
+
+      audytuj(db, {
+        uzytkownikId: req.user?.id ?? null,
+        uzytkownikImie: req.user?.imieNazwisko ?? null,
+        akcja: "atrybut_pending_zaakceptowano_z_edycja",
+        encjaTyp: "atrybut_pending",
+        encjaId: id,
+        szczegoly: {
+          rodzaj: pozycja.rodzaj,
+          kolumna,
+          z: pozycja.wartosc,
+          na: nowa,
+          produktow_zaktualizowano: zmienione,
+        },
       });
 
       return res.json({
@@ -401,6 +442,21 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
         kanoniczna,
       });
 
+      audytuj(db, {
+        uzytkownikId: req.user?.id ?? null,
+        uzytkownikImie: req.user?.imieNazwisko ?? null,
+        akcja: "atrybut_pending_zaakceptowano_jako_alias",
+        encjaTyp: "atrybut_pending",
+        encjaId: id,
+        szczegoly: {
+          rodzaj: pozycja.rodzaj,
+          kolumna,
+          z: pozycja.wartosc,
+          na: kanoniczna,
+          produktow_zaktualizowano: zmienione,
+        },
+      });
+
       return res.json({
         ok: true,
         akcja: "akceptowana_jako_alias",
@@ -418,6 +474,16 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
     if (!pozycja) return blad(res, 404, "Pozycja pending nie istnieje");
 
     odrzucPending(db, id, pozycja.rodzaj, pozycja.wartosc);
+
+    audytuj(db, {
+      uzytkownikId: req.user?.id ?? null,
+      uzytkownikImie: req.user?.imieNazwisko ?? null,
+      akcja: "atrybut_pending_odrzucono",
+      encjaTyp: "atrybut_pending",
+      encjaId: id,
+      szczegoly: { rodzaj: pozycja.rodzaj, wartosc: pozycja.wartosc },
+    });
+
     return res.json({
       ok: true,
       akcja: "odrzucona",
@@ -426,9 +492,25 @@ export function trasyAtrybutow({ db }: ZaleznosciAtrybutow): Router {
     });
   });
 
-  /** Ręczne uruchomienie skanu (`:365-372`). Statystyki wracają rozpakowane do ciała. */
-  router.post("/api/atrybuty/scan-pending", requireAuth, (_req: Request, res: Response) => {
-    res.json({ ok: true, ...skanujNoweWartosci(db) });
+  /**
+   * Ręczne uruchomienie skanu (`:365-372`). Statystyki wracają rozpakowane do ciała.
+   *
+   * Audytujemy tylko tę trasę. Skan wołany hookiem `POST /api/staging/accept`
+   * (`routes/staging-mutacje.ts`) nie jest akcją kolejki i wpisu nie dostaje.
+   */
+  router.post("/api/atrybuty/scan-pending", requireAuth, (req: Request, res: Response) => {
+    const staty = skanujNoweWartosci(db);
+
+    audytuj(db, {
+      uzytkownikId: req.user?.id ?? null,
+      uzytkownikImie: req.user?.imieNazwisko ?? null,
+      akcja: "atrybut_pending_skanowano",
+      encjaTyp: "atrybut_pending",
+      encjaId: null,
+      szczegoly: staty,
+    });
+
+    res.json({ ok: true, ...staty });
   });
 
   /**
