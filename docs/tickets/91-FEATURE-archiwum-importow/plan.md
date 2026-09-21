@@ -66,7 +66,7 @@ Ticket je tworzy z nagrań oryginału (`tools/record-write-fixtures.cjs`):
 - ⚠ Nowe fixtures → bramki OBU stron (sprawdzę, co w BE/FE iteruje po fixtures/ścieżkach).
 
 ## Decisions
-Rekomendacje (do potwierdzenia przy approve):
+Zatwierdzone przez użytkownika 2026-09-22 („go”):
 - **D1 — trasa i menu:** `/archiwum`, pozycja „Archiwum importów" w `POZYCJE_NAWIGACJI` zaraz po
   „Historia" (przed „Konfiguracja"), ikona `Archive` z lucide (oryginał klonował ikonę Historii).
 - **D2 — backend 1:1** z filtrem `status`, tymi samymi kodami/komunikatami, `res.sendFile`
