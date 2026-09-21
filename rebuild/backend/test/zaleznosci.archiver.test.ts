@@ -73,5 +73,16 @@ describe("strażnik zależności — `archiver` eksportuje `ZipArchive` (backlog
       ["a.csv", "kod;cena\r\nMO9_1;1,00"],
       ["pusty.csv", ""],
     ]);
+
+    /**
+     * Kontrola samego czytnika: bramki ZIP stoją na tym, że `czytajZip` ODRZUCA zepsute
+     * archiwum. Urwany plik (tak wygląda przerwany transfer) i przekłamany bajt danych muszą
+     * rzucić, inaczej asercje zawartości w bramkach byłyby puste.
+     */
+    const zip = Buffer.concat(kawalki);
+    expect(() => czytajZip(zip.subarray(0, zip.length - 10))).toThrow();
+    const przeklamany = Buffer.from(zip);
+    przeklamany[40] = (przeklamany[40] ?? 0) ^ 0xff;
+    expect(() => czytajZip(przeklamany)).toThrow();
   });
 });

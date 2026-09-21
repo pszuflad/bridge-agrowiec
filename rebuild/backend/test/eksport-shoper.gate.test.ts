@@ -19,6 +19,11 @@
  * Test „401 bez tokenu" sprawdza więc NASZE odstępstwo, nie zgodność z kontraktem — i to jest
  * jedyne miejsce w tym pliku, gdzie celowo rozjeżdżamy się z `openapi.yaml`.
  *
+ * ⚠ DRUGIE ODSTĘPSTWO, TYM RAZEM OD PRODUKCJI, NIE OD KONTRAKTU (backlog #93, karta P5.2).
+ * Wariant ZIP (`/api/export-shoper` bez `?dostawca=` i z `dostawca=wszyscy`) w produkcji zawsze
+ * oddaje 500 przez wersję `archiver`, nie przez kod. My zostajemy przy działającym ZIP-ie —
+ * szczegóły przy `sprawdzArchiwum` niżej.
+ *
  * ⚠ DRUGA POŁOWA TEGO PLIKU TO DOWÓD AUTORYZACJI PRZEZ COOKIE. Eksport jest NAWIGACJĄ
  * przeglądarki (`window.location.href`), nie `fetch`-em — nie niesie nagłówka `Authorization`
  * i działa wyłącznie na cookie sesji. To jest ta rzecz, która „działa u mnie" i pada u Ani.
@@ -26,6 +31,9 @@
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { listaDostawcow } from "../src/repos/suppliers.js";
+import { NAGLOWEK_EXPORT_SHOPER } from "../src/selly/csv-shoper.js";
+import { czytajZip, doBufora } from "./gate/czytnik-zip.js";
 import {
   sprawdzZgodnoscZKontraktemNieJson,
   stworzSrodowiskoTestowe,
@@ -33,6 +41,9 @@ import {
   zasiejProdukty,
   type SrodowiskoTestowe,
 } from "./gate/index.js";
+
+/** BOM — pierwszy znak każdego pliku CSV eksportu. */
+const BOM = "\uFEFF";
 
 describe("GATE — eksport do Shopera, dwie trasy (blok 8a)", () => {
   let srodowisko: SrodowiskoTestowe;
@@ -81,11 +92,25 @@ describe("GATE — eksport do Shopera, dwie trasy (blok 8a)", () => {
     });
 
     /**
-     * Bez parametru trasa zwija się do ZIP-a z osobnym plikiem per dostawca (`:48786-48800`).
-     * To jedyna odpowiedź całego backendu, która nie jest ani JSON-em, ani CSV-em.
+     * ⚠⚠ ŚWIADOMY ROZJAZD Z PRODUKCJĄ — TE DWA TESTY NIE SĄ WIERNYM ODTWORZENIEM.
+     *
+     * W PRODUKCJI ta gałąź ZAWSZE oddaje HTTP 500. Kod oryginału (`:48786-48800`) jest ten sam
+     * co nasz, ale `rV()` (`deminified/backend-index.cjs:48139`) czyta `ZipArchive` z pakietu
+     * `archiver`, a lockfile produkcji przypina `archiver@5.3.2`, który tego eksportu NIE MA.
+     * Log produkcji: „zip pipeline failed TypeError: oh is not a constructor". My mamy
+     * `archiver@^8.0.0`, więc u nas ZIP wychodzi — i ma wychodzić: decyzja użytkownika
+     * 2026-09-18 (karta `62-DOCS-decyzje-po-i14j`, D1), backlog #93, karta P5.2
+     * (`70-CHORE-eksport-zip-odstepstwo`). Wersji zależności pilnuje
+     * `test/zaleznosci.archiver.test.ts`.
+     *
+     * Nie „naprawiaj" tych testów na 500 w imię wierności — odstępstwo jest zatwierdzone.
+     *
+     * Sprawdzamy ZAWARTOŚĆ, nie tylko nagłówki: nagłówki idą przed pierwszym bajtem archiwum,
+     * więc uszkodzony albo pusty ZIP miałby te same 200 i ten sam `content-type`.
+     * Bajtową równość każdego wpisu z pojedynczym eksportem niesie `eksport-shoper.format.test.ts`.
      */
-    it("bez parametru oddaje ZIP nazwany `shoper_wszyscy_{data}.zip`", async () => {
-      const odp = await zAuth("/api/export-shoper");
+    async function sprawdzArchiwum(sciezka: string): Promise<void> {
+      const odp = await zAuth(sciezka).buffer(true).parse(doBufora);
 
       expect(odp.status).toBe(200);
       expect(odp.headers["content-type"]).toContain("application/zip");
@@ -93,13 +118,32 @@ describe("GATE — eksport do Shopera, dwie trasy (blok 8a)", () => {
       expect(odp.headers["content-disposition"]).toBe(
         `attachment; filename="shoper_wszyscy_${data}.zip"`,
       );
+
+      // `czytajZip` rzuca przy każdym uszkodzeniu (EOCD, sygnatury, rozmiary, CRC-32).
+      const wpisy = czytajZip(odp.body as Buffer);
+
+      // DOKŁADNIE jeden plik na dostawcę z `listaDostawcow` — ani brakującego, ani nadmiarowego,
+      // w kolejności listy. Dostawcy, nie `DISTINCT products.dostawca` (komentarz przy trasie).
+      const oczekiwane = listaDostawcow(srodowisko.db).map((d) => `shoper_${d.kod}_${data}.csv`);
+      expect(oczekiwane.length).toBeGreaterThan(0);
+      expect(wpisy.map((w) => w.nazwa)).toEqual(oczekiwane);
+
+      for (const { nazwa, tresc } of wpisy) {
+        const tekst = tresc.toString("utf8");
+        expect(tekst.startsWith(BOM), `${nazwa}: brak BOM`).toBe(true);
+        const naglowek = tekst.slice(BOM.length).split("\r\n")[0];
+        expect(naglowek, nazwa).toBe(NAGLOWEK_EXPORT_SHOPER);
+        expect(naglowek?.split(";"), nazwa).toHaveLength(7);
+      }
+    }
+
+    it("bez parametru oddaje ZIP `shoper_wszyscy_{data}.zip` z plikiem per dostawca (ODSTĘPSTWO #93)", async () => {
+      await sprawdzArchiwum("/api/export-shoper");
     });
 
-    it("`dostawca=wszyscy` zachowuje się jak brak parametru", async () => {
-      const odp = await zAuth("/api/export-shoper?dostawca=wszyscy");
-
-      expect(odp.status).toBe(200);
-      expect(odp.headers["content-type"]).toContain("application/zip");
+    /** ⚠ To samo odstępstwo co wyżej: w produkcji również 500 (backlog #93). */
+    it("`dostawca=wszyscy` zachowuje się jak brak parametru (ODSTĘPSTWO #93)", async () => {
+      await sprawdzArchiwum("/api/export-shoper?dostawca=wszyscy");
     });
   });
 
