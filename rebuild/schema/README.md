@@ -13,6 +13,7 @@ danych dla odbudowy backendu.
 | `004_kategoria_wielka_litera.sql` | **Iteracja 13c:** historyczne `products.kategoria` z małej litery → forma kanoniczna (backlog #2 `kategoriafix` + #57 `katunify`). |
 | `005_konstrukcja_slowa.sql` | **Iteracja 13c:** `products.konstrukcja` kody `R`/`D`/`L`/`B`/`-` → `Radialna`/`Diagonalna` (backlog #58). |
 | `006_nazwa_caps.sql` | **Iteracja 13c:** `products.nazwa` → `UPPER`, `manual_overrides` pole `nazwa` → `UPPER`, skasowanie wierszy `staging_items` CASE_ONLY (backlog #59). |
+| `007_waga_gab_przewoznicy.sql` | **Karta P9.1 (ticket 76):** nowa tabela `waga_gab_przewoznicy` — wspólna lista przewoźników wagi wolumetrycznej, spoza produkcji (backlog #27) — i **seed danych** (sześciu przewoźników Ani). Pierwsza migracja wstawiająca dane do nowej tabeli; trafiają do produkcji przez `npm run migrate` przy cutoverze. |
 
 ## Skąd pochodzi
 
