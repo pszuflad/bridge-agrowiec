@@ -34,6 +34,31 @@ const SEED = [
   { id: "dhl", nazwa: "DHL Parcel", dzielnik: 5000, domyslny: false },
 ];
 
+/**
+ * Stan PROSTO PO MIGRACJACH — osobne środowisko bez `PUT`-a z `beforeEach` niżej, bo ten zapisuje
+ * tę samą listę i test seeda byłby tautologią. To jest stan, który cutover da produkcji.
+ */
+describe("migracja 007", () => {
+  let srodowisko: SrodowiskoTestowe;
+
+  beforeAll(async () => {
+    srodowisko = await stworzSrodowiskoTestowe();
+  });
+
+  afterAll(() => srodowisko.posprzataj());
+
+  it("zasiewa sześciu przewoźników Ani w kolejności, GEIS domyślny", () => {
+    const wiersze = srodowisko.sqlite
+      .prepare(
+        `SELECT id, nazwa, dzielnik, kolejnosc, domyslny FROM waga_gab_przewoznicy ORDER BY kolejnosc`,
+      )
+      .all();
+    expect(wiersze).toEqual(
+      SEED.map((p, kolejnosc) => ({ ...p, kolejnosc, domyslny: p.domyslny ? 1 : 0 })),
+    );
+  });
+});
+
 describe("wspólna lista przewoźników", () => {
   let srodowisko: SrodowiskoTestowe;
   let token: string;
@@ -64,18 +89,6 @@ describe("wspólna lista przewoźników", () => {
   it("obie operacje są opisane w contract/openapi.yaml", () => {
     expect(wczytajKontrakt().znajdzOperacje("GET", SCIEZKA)).toBeDefined();
     expect(wczytajKontrakt().znajdzOperacje("PUT", SCIEZKA)).toBeDefined();
-  });
-
-  it("migracja 007 zasiewa sześciu przewoźników Ani w kolejności, GEIS domyślny", () => {
-    // Prosto z tabeli, bez `PUT` z `beforeEach` po drodze — to jest stan, który cutover da produkcji.
-    const wiersze = srodowisko.sqlite
-      .prepare(
-        `SELECT id, nazwa, dzielnik, kolejnosc, domyslny FROM waga_gab_przewoznicy ORDER BY kolejnosc`,
-      )
-      .all();
-    expect(wiersze).toEqual(
-      SEED.map((p, kolejnosc) => ({ ...p, kolejnosc, domyslny: p.domyslny ? 1 : 0 })),
-    );
   });
 
   it("GET zwraca seed w kolejności, zgodnie z kontraktem", async () => {
@@ -129,6 +142,14 @@ describe("wspólna lista przewoźników", () => {
       ],
       ["domyslny nie-boolean", [{ id: "a", nazwa: "A", dzielnik: 5000, domyslny: "tak" }], "Przewoźnik nr 1: pole domyslny musi być wartością logiczną"],
       ["element nie-obiekt", ["geis"], "Przewoźnik nr 1: oczekiwano obiektu"],
+      [
+        "dwóch domyślnych",
+        [
+          { id: "a", nazwa: "A", dzielnik: 5000, domyslny: true },
+          { id: "b", nazwa: "B", dzielnik: 4000, domyslny: true },
+        ],
+        "Przewoźnik nr 2: tylko jeden przewoźnik może być domyślny",
+      ],
     ];
 
     it.each(przypadki)("%s", async (_opis, cialo, komunikat) => {

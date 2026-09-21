@@ -64,16 +64,19 @@ export function WagaGabarytowa() {
   const listaGotowa = przewoznicy.length > 0;
 
   /**
-   * Zapis całej listy. Tabela pokazuje zmianę od razu (`onMutate`), a odpowiedź serwera ją
-   * zastępuje; przy błędzie komunikat i ponowny odczyt, żeby ekran wrócił do stanu z serwera.
+   * Zapis całej listy. Odpowiedź serwera zastępuje zmianę pokazaną optymistycznie
+   * (`zapiszListe` niżej) — ale tylko wtedy, gdy nie leci już następny zapis, bo inaczej
+   * odpowiedź starszego zapisu na chwilę cofnęłaby na ekranie nowszą zmianę. Przy błędzie
+   * komunikat i ponowny odczyt, żeby ekran wrócił do stanu z serwera.
    */
   const zapis = useMutation<Przewoznik[], Error, Przewoznik[]>({
+    mutationKey: KLUCZ_PRZEWOZNIKOW,
     mutationFn: zapiszPrzewoznikow,
-    onMutate: async (lista) => {
-      await klient.cancelQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
-      klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
+    onSuccess: (lista) => {
+      if (klient.isMutating({ mutationKey: KLUCZ_PRZEWOZNIKOW }) <= 1) {
+        klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
+      }
     },
-    onSuccess: (lista) => klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista),
     onError: (e) => {
       toast({
         title: "Nie zapisano listy przewoźników",
@@ -84,9 +87,18 @@ export function WagaGabarytowa() {
     },
   });
 
-  const zapiszListe = async (lista: Przewoznik[]) => {
+  /**
+   * Nowa lista liczona jest z BIEŻĄCEGO cache w chwili zapisu, nie z propsa, który mógł jeszcze
+   * nie dostać poprzedniej zmiany — dwie szybkie edycje z rzędu (dzielnik DPD, zaraz potem GLS)
+   * nie mogą po cichu cofnąć pierwszej. Cache jest aktualizowany synchronicznie, więc kolejna
+   * zmiana widzi już poprzednią.
+   */
+  const zapiszListe = async (zmiana: (aktualna: Przewoznik[]) => Przewoznik[]) => {
+    const nastepna = zmiana(klient.getQueryData<Przewoznik[]>(KLUCZ_PRZEWOZNIKOW) ?? []);
+    void klient.cancelQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
+    klient.setQueryData(KLUCZ_PRZEWOZNIKOW, nastepna);
     try {
-      await zapis.mutateAsync(lista);
+      await zapis.mutateAsync(nastepna);
       return true;
     } catch {
       return false; // komunikat pokazał już `onError`
@@ -346,7 +358,7 @@ export function WagaGabarytowa() {
           wybrany={wybrany}
           ustawWybranego={ustawWybranego}
           przywrocDomyslne={async () => {
-            const zapisano = await zapiszListe(PRZEWOZNICY_DOMYSLNI);
+            const zapisano = await zapiszListe(() => PRZEWOZNICY_DOMYSLNI);
             if (zapisano) ustawWybranego(WYBRANY_DOMYSLNY);
             return zapisano;
           }}

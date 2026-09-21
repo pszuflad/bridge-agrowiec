@@ -3,7 +3,8 @@
 // ⚠ ODSTĘPSTWO ŚWIADOME (backlog #27, ticket 76, karta P9.1): w produkcji ta lista żyje
 // wyłącznie w IndexedDB przeglądarki i serwer jej nie zna, więc walidacja jest NOWA, nie
 // portowana. Reguły odtwarzają to, czego pilnuje dziś UI (`TabelaPrzewoznikow.tsx`):
-// co najmniej jeden przewoźnik, nazwa niepusta, dzielnik liczbą dodatnią.
+// co najmniej jeden przewoźnik, nazwa niepusta, dzielnik liczbą dodatnią. Do tego dwie reguły
+// spójności, których w IndexedDB nikt nie pilnował: id bez powtórzeń i najwyżej jeden domyślny.
 //
 // To NIE jest wejście kalkulatora paletowego (`formula.ts`) — tamten bierze progi z `config`.
 
@@ -40,6 +41,7 @@ export function zwalidujListePrzewoznikow(cialo: unknown): WynikWalidacji {
 
   const lista: Przewoznik[] = [];
   const widziane = new Set<string>();
+  let domyslnych = 0;
   for (const [indeks, pozycja] of cialo.entries()) {
     const nr = `Przewoźnik nr ${indeks + 1}`;
     if (!czyObiekt(pozycja)) return { ok: false, blad: `${nr}: oczekiwano obiektu` };
@@ -59,6 +61,10 @@ export function zwalidujListePrzewoznikow(cialo: unknown): WynikWalidacji {
     }
     if (domyslny !== undefined && typeof domyslny !== "boolean") {
       return { ok: false, blad: `${nr}: pole domyslny musi być wartością logiczną` };
+    }
+
+    if (domyslny === true && ++domyslnych > 1) {
+      return { ok: false, blad: `${nr}: tylko jeden przewoźnik może być domyślny` };
     }
 
     lista.push({ id, nazwa, dzielnik, domyslny: domyslny ?? false });

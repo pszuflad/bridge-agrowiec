@@ -23,7 +23,7 @@ istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór pale
   PUT jest inline; kształt odpowiedzi opisuje tekst markera, bo linie statusów należą do
   `tools/generate-openapi-schemas.cjs`.
 - `rebuild/backend/test/db.migracje.test.ts` — 007 na liście, 27 tabel.
-- **New:** `rebuild/backend/test/waga-gabarytowa.przewoznicy.test.ts` — 23 testy.
+- **New:** `rebuild/backend/test/waga-gabarytowa.przewoznicy.test.ts` — 24 testy.
 - **New:** `rebuild/frontend/src/pages/waga-gabarytowa/api.ts` — `KLUCZ_PRZEWOZNIKOW`,
   `zapiszPrzewoznikow`, `obliczPaletowo`, typ `WynikPaletowy`.
 - **New:** `rebuild/frontend/src/pages/waga-gabarytowa/KalkulatorPaletowy.tsx` — Card „Waga paletowa
@@ -35,7 +35,7 @@ istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór pale
 - `rebuild/frontend/src/pages/WagaGabarytowa.tsx` — `useQuery` listy, `useMutation` PUT
   (optymistycznie, przy błędzie toast i ponowny odczyt), wyrównanie wyboru usuniętego przez kogoś
   innego, stan „wczytywanie / błąd", kalkulator paletowy.
-- `rebuild/frontend/test/waga-gabarytowa.test.tsx` — przepisany na MSW z listą w pamięci (27 testów).
+- `rebuild/frontend/test/waga-gabarytowa.test.tsx` — przepisany na MSW z listą w pamięci (28 testów).
 
 ## Deviations from plan
 
@@ -67,7 +67,7 @@ istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór pale
   `waga-gabarytowa.gate.test.ts` bez zmian, zielony. `GET`/`PUT /api/waga-gabarytowa/przewoznicy` —
   trasy spoza produkcji, fixture'a nie ma i nie może być. `sprawdzZgodnoscZKontraktem` sprawdza je dla
   200, 400 i 401, `kontrakt.spojnosc.test.ts` jest zielony. `contract/fixtures/` nieruszane.
-- **Backend:** lint ✓, typecheck ✓, build ✓ (kopiuje 7 plików `.sql`), test ✓: 88 plików, 1360 testów.
+- **Backend:** lint ✓, typecheck ✓, build ✓ (kopiuje 7 plików `.sql`), test ✓: 88 plików, 1361 testów (po poprawkach z review).
   Nowe testy sprawdzają:
   - seed migracji wprost z tabeli i jego zgodność z listą Ani / `PRZEWOZNICY_DOMYSLNI`;
   - GET w kolejności;
@@ -77,7 +77,7 @@ istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór pale
   - numer pozycji w komunikacie;
   - wpis w `audit_log` z `przed`/`po` i brak wpisu przy 400;
   - 401 dla GET i PUT.
-- **Frontend:** lint ✓, typecheck ✓, build ✓, test ✓: 49 plików, 822 testy. Scenariusze z karty:
+- **Frontend:** lint ✓, typecheck ✓, build ✓, test ✓: 49 plików, 823 testy (po poprawkach z review). Scenariusze z karty:
   - lista z API, a stara lista z IndexedDB nieczytana;
   - usunięcie pyta i dopiero po potwierdzeniu robi PUT;
   - anulowanie usunięcia i resetu niczego nie zmienia;
@@ -96,6 +96,26 @@ istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór pale
   `obliczenia.ts`, `formula.ts`, `magazynKV.ts`).
 - **E2E:** pominięte. Plan tego nie przewidywał, a przepływ jest pokryty RTL + MSW i testami tras na
   prawdziwej bazie.
+
+## Review fixes applied
+
+Runda 1 (`review.md`: 1 BLOCKER, 2 SHOULD-FIX, 2 NICE-TO-HAVE):
+
+- **BLOCKER — szybkie edycje z rzędu mogły cofnąć wcześniejszą zmianę.** `zapiszListe` dostaje teraz
+  ZMIANĘ (`(aktualna) => nowa`), a nie gotową listę. Liczy ją z bieżącego cache React Query
+  i aktualizuje cache synchronicznie, więc kolejna zmiana zawsze widzi poprzednią. Do tego
+  `onSuccess` wkłada odpowiedź do cache tylko wtedy, gdy nie leci następny zapis (`isMutating`).
+  Bez tego odpowiedź starszego zapisu cofała na ekranie nowszą zmianę.
+  - Test regresyjny „odpowiedź pierwszego zapisu nie cofa drugiej, jeszcze lecącej zmiany"
+    wstrzymuje każdy PUT osobno. Na starym kodzie **pada**, na nowym przechodzi (sprawdzone).
+  - Sama nieświeżość propsa w starym kodzie trwała kilka mikrozadań i przez UI nie da się w nią
+    trafić. Pierwsza wersja testu przechodziła na starym kodzie, więc została zastąpiona.
+- **SHOULD-FIX — najwyżej jeden `domyslny`.** Nowa reguła walidacji
+  („Przewoźnik nr N: tylko jeden przewoźnik może być domyślny") + przypadek testowy.
+- **SHOULD-FIX — `contract/README.md` bez konwencji `x-odbudowa-nowa-trasa`.** Przekazane do
+  aktualizacji dokumentacji (faza docs tego ticketa).
+- **Znalezione przy okazji:** test seeda migracji 007 był tautologią, bo `beforeEach` robił wcześniej
+  PUT tą samą listą. Przeniesiony do osobnego `describe` ze świeżą bazą.
 
 ## Breaking changes
 

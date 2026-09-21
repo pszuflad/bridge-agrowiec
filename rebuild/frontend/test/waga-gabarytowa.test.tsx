@@ -267,6 +267,45 @@ describe("widok wagi gabarytowej — wspólna lista przewoźników", () => {
     expect(listaNaSerwerze.find((p) => p.id === "dpd")?.dzielnik).toBe(5500);
   });
 
+  /**
+   * Dwie szybkie edycje z rzędu, zanim pierwszy zapis wróci z serwera (review). Druga lista musi
+   * już zawierać pierwszą zmianę, a odpowiedź PIERWSZEGO zapisu nie może na ekranie cofnąć
+   * drugiej zmiany, dopóki drugi zapis jeszcze leci. Każdy PUT jest wstrzymany osobno, żeby
+   * odpowiedzi wróciły dokładnie w tej kolejności.
+   */
+  it("odpowiedź pierwszego zapisu nie cofa drugiej, jeszcze lecącej zmiany", async () => {
+    const zwolnienia: Array<() => void> = [];
+    server.use(
+      http.put(SCIEZKA, async ({ request }) => {
+        const lista = (await request.json()) as Przewoznik[];
+        zapisy.push(lista);
+        await new Promise<void>((resolve) => zwolnienia.push(resolve));
+        return HttpResponse.json(lista.map((p) => ({ domyslny: false, ...p })));
+      }),
+    );
+    const uzytkownik = userEvent.setup();
+    await pokazZLista();
+
+    await uzytkownik.click(screen.getByTestId("button-edycja-przewoznikow"));
+    await wpisz(uzytkownik, "input-dzielnik-dpd", "5500");
+    await wpisz(uzytkownik, "input-dzielnik-gls", "4500"); // klik w GLS = blur DPD → pierwszy PUT
+    await uzytkownik.tab(); // blur GLS → drugi PUT, pierwszy wciąż wisi
+    await waitFor(() => expect(zwolnienia).toHaveLength(2));
+
+    const drugi = zapisy[1] ?? [];
+    expect(drugi.find((p) => p.id === "dpd")?.dzielnik).toBe(5500);
+    expect(drugi.find((p) => p.id === "gls")?.dzielnik).toBe(4500);
+
+    // Wraca odpowiedź pierwszego zapisu (bez zmiany GLS) — ekran ma dalej pokazywać 4500.
+    zwolnienia[0]?.();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(screen.getByTestId("input-dzielnik-gls")).toHaveValue(4500);
+
+    zwolnienia[1]?.();
+    await waitFor(() => expect(screen.getByTestId("input-dzielnik-gls")).toHaveValue(4500));
+    expect(screen.getByTestId("input-dzielnik-dpd")).toHaveValue(5500);
+  });
+
   it("zmiana nazwy zapisuje się po opuszczeniu pola", async () => {
     const uzytkownik = userEvent.setup();
     await pokazZLista();

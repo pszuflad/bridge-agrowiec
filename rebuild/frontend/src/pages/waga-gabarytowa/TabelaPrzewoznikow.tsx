@@ -26,8 +26,12 @@ import { OBJETOSC_PRZYKLADU, type Przewoznik } from "./przewoznicy";
 
 export type WlasciwosciTabeli = {
   przewoznicy: Przewoznik[];
-  /** Zapisuje całą listę na serwerze; `true`, gdy się udało (błąd pokazuje widok nadrzędny). */
-  zapiszListe: (nastepni: Przewoznik[]) => Promise<boolean>;
+  /**
+   * Zapisuje całą listę na serwerze; `true`, gdy się udało (błąd pokazuje widok nadrzędny).
+   * Dostaje ZMIANĘ, nie gotową listę — widok nadrzędny stosuje ją do najświeższego stanu,
+   * żeby szybkie edycje z rzędu nie nadpisały się nawzajem.
+   */
+  zapiszListe: (zmiana: (aktualna: Przewoznik[]) => Przewoznik[]) => Promise<boolean>;
   /** Trwa zapis — przyciski zmieniające listę czekają. */
   zapisuje: boolean;
   wybrany: string;
@@ -89,8 +93,8 @@ export function TabelaPrzewoznikow({
         return;
       }
       if (tekst === przewoznik.nazwa) return;
-      void zapiszListe(
-        przewoznicy.map((p) => (p.id === przewoznik.id ? { ...p, nazwa: tekst } : p)),
+      void zapiszListe((aktualna) =>
+        aktualna.map((p) => (p.id === przewoznik.id ? { ...p, nazwa: tekst } : p)),
       );
       return;
     }
@@ -105,7 +109,9 @@ export function TabelaPrzewoznikow({
       return;
     }
     if (dzielnik === przewoznik.dzielnik) return;
-    void zapiszListe(przewoznicy.map((p) => (p.id === przewoznik.id ? { ...p, dzielnik } : p)));
+    void zapiszListe((aktualna) =>
+      aktualna.map((p) => (p.id === przewoznik.id ? { ...p, dzielnik } : p)),
+    );
   };
 
   /** Blokada ostatniego przewoźnika z oryginału (`:26876-26880`) — sprawdzana PRZED pytaniem. */
@@ -129,7 +135,7 @@ export function TabelaPrzewoznikow({
     ustawDoUsuniecia(null);
     const pozostali = przewoznicy.filter((p) => p.id !== id);
     if (wybrany === id && pozostali[0]) ustawWybranego(pozostali[0].id);
-    void zapiszListe(pozostali);
+    void zapiszListe((aktualna) => aktualna.filter((p) => p.id !== id));
   };
 
   const dodaj = async () => {
@@ -144,8 +150,8 @@ export function TabelaPrzewoznikow({
       return;
     }
     // Id z sygnatury czasowej — 1:1 z oryginałem (`:26922`).
-    const zapisano = await zapiszListe([
-      ...przewoznicy,
+    const zapisano = await zapiszListe((aktualna) => [
+      ...aktualna,
       { id: `custom_${Date.now()}`, nazwa, dzielnik },
     ]);
     if (!zapisano) return;
