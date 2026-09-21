@@ -87,3 +87,9 @@ Review (1 iteracja): 0 BLOCKER, 1 SHOULD-FIX, 1 NICE-TO-HAVE. Oba poprawione.
   obie obietnice są nieprawdziwe (pkt 2.2).
 - NICE-TO-HAVE: urwane cytaty w wierszach §4 pkt 2 i §4 pkt 7 dostały znacznik „(…)”, tak jak
   sąsiednie wiersze.
+
+## Docs updates
+
+Zrobione w samym tickecie, w zakresie plików narzuconym przez prompt: roadmapa (blok Iteracji 7
+i jedno zdanie w nagłówku planu P), backlog #41, banner w I7. Doc-checkerów nie uruchamiano, bo
+prompt zabraniał zmian poza tą listą. Pre-existing: nieaktualny odsyłacz w backlogu #42 (Follow-up).
