@@ -180,7 +180,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE · + karty 14e/14f/14h/14m | 2, 3 | ✅ | 4a/4b 2026-09-02 · domknięta kartami I14 2026-09-18…19 — szczegóły: bloki I4 i I14 |
 | 5 | Historia | 1 + P5.1–P5.3 | 3 | ✅ | PR #24 · 2026-09-02 · poprawki planu P zamknięte 2026-09-21 — szczegóły: blok „Poprawki po testach Ani” |
 | 6 | Alerty | 1 + P6.1–P6.3 | 3 | ✅ | `18-FEATURE-widok-alerty` · 2026-09-03 · poprawki planu P zamknięte 2026-09-21 — szczegóły: blok „Poprawki po testach Ani” |
-| 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE + P7.1–P7.5 | 2 | ✅ / 🔨 | 7a/7b/7c 2026-09-04 · poprawki planu P: blok „Poprawki po testach Ani” |
+| 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE + P7.1–P7.5 | 2 | ✅ | 7a/7b/7c 2026-09-04 · poprawki planu P zamknięte 2026-09-21 (otwarte po stronie Ani: dwa pytania z I7-v2) — szczegóły: blok „Poprawki po testach Ani” |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
 | 9 | Waga gabarytowa | 1 + P9.1 · P9.1b · P9.2 | 2 | ✅ | `18-FEATURE-waga-gabarytowa` · 2026-09-03 · poprawki planu P zamknięte 2026-09-21 (otwarte po stronie Ani: progi palety) — szczegóły: blok „Poprawki po testach Ani” |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f + P10.1–P10.4 | 2, 3, 4 | ✅ / 🔨 | 10a–10f 2026-09-03…04 (blok I10) · poprawki P10.x otwarte: `tools/stan-kart.sh P10` |
@@ -3402,6 +3402,8 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 | **#91** — zakres „zapisz to, co widzę" | P10.3 | do rozstrzygnięcia |
 | **#92** — duplikat marek: dane czy prezentacja | PR.5 | łącznie z #42 |
 | **Progi kalkulatora paletowego** (półpaleta ≤ 55 cm → 60 cm, paleta ≤ 80 cm, +10 cm paleta, współczynnik 0.000167) — właściwe czy do zmiany | ewentualną zmianę ustawień `waga_gab.*` (stała 60 cm to kod, nie ustawienie) | **⬜ po stronie Ani** — pytanie z wariantami w `docs/instrukcja-testow-I9-v2.md` §3.2 (2026-09-21) |
+| **Rodzaje `model` i `zastosowanie`** — gdzie Ania ich używa (słownik · filtry/reguły cen · mają trafiać do kolejki · nie używa) | tylko przy „mają trafiać do kolejki”: nowa funkcja (zmiana `ZAKRES_SKANU`, +199 pozycji `model` na snapshocie), nowy wpis backlogu | **⬜ po stronie Ani** — I7-v2 pkt 1.4, backlog #41 (2026-09-21) |
+| **Seed marek i bieżników przy starcie** — czy nowe wartości mogą znikać z kolejki (seed je „akceptuje”) | przy „nie”: zmiana seedu, odstępstwo od produkcji, nowy wpis backlogu | **⬜ po stronie Ani** — I7-v2 pkt 2.3, raport ticketu 78 (2026-09-21) |
 
 #### Kolejność
 
