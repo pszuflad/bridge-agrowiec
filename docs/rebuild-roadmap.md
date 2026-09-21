@@ -192,7 +192,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
-| 9 | Waga gabarytowa | 1 + P9.1 + P9.1b | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 · P9.1: `76-FEATURE-przewoznicy-serwer-paletowy` · 2026-09-21 (lista przewoźników na serwerze, potwierdzenia, kalkulator paletowy w UI) · P9.1b: `84-FEATURE-usun-wybranego-przewoznika` · 2026-09-21 (mocniejsze okno usunięcia wybranego przewoźnika) |
+| 9 | Waga gabarytowa | 1 + P9.1 + P9.1b + P9.2 | 2 | ✅ | ticket `18-FEATURE-waga-gabarytowa` · 2026-09-03 · P9.1: `76-FEATURE-przewoznicy-serwer-paletowy` · 2026-09-21 (lista przewoźników na serwerze, potwierdzenia, kalkulator paletowy w UI) · P9.1b: `84-FEATURE-usun-wybranego-przewoznika` · 2026-09-21 (mocniejsze okno usunięcia wybranego przewoźnika) · P9.2: `80-DOCS-instrukcja-testow-i9-v2` · 2026-09-21 (delta instrukcji dla Ani) — **iteracja zamknięta**; otwarte po stronie Ani: progi palety |
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f | 2, 3, 4 | ✅ | 10a: `19-FEATURE-analityka-fundament` · 10c: `22-FEATURE-analityka-ean` · 10d: `23-FEATURE-analityka-dostawcy` — wszystkie 2026-09-03 · 10b: `24-FEATURE-analityka-ceny` · 10e: `25-FEATURE-analityka-dostepnosc-rotacja` — obydwa 2026-09-04 · 10f: `26-FEATURE-analityka-export-pulpit` · 2026-09-04. |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a: `35-FEATURE-mutacje-produktow-backend` · 12b: `36-FEATURE-konto-admin-maintenance` · 12c: `37-FEATURE-katalog-edycja-produktu` — wszystkie 2026-09-05 · 12d: `38-CHORE-kontrakt-fixtures-odswiezenie` · 2026-09-08 · 12e: `39-CHORE-audyt-bezpieczenstwa-domkniecie` · 2026-09-08 |
@@ -3025,8 +3025,10 @@ zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-1
   (karty `14a`–`14m`). Ten blok przejmuje dalszy ciąg z **nową numeracją**.
 - **Skąd.** Ania przeszła instrukcje I5, I6, I7, I9, I10 i przegląd 12 widoków, a potem odpowiedziała
   na dwie rundy pytań zbiorczych (`docs/pytania-do-ani-2026-09-18.md` i runda 2 z 21.09).
-  **Po jej stronie nie ma już ani jednej otwartej sprawy** poza dwoma pytaniami z delty I7-v2
-  (2026-09-21, tabela pod „Iteracja 7 ZAMKNIĘTA”). Wszystkie decyzje są w backlogu.
+  **Po jej stronie nie ma już ani jednej otwartej sprawy.** Wszystkie decyzje są w backlogu.
+  ⚠ Stan z chwili planowania — od 2026-09-21 doszły trzy nowe: progi kalkulatora paletowego (P9.2,
+  tabela „Po stronie użytkownika” niżej) i dwa pytania z delty I7-v2 (P7.4, tabela pod „Iteracja 7
+  ZAMKNIĘTA”).
 - ⚠ **Od ticketu 82 karty tego planu NIE edytują roadmapy** — stan i ustalenia piszą w
   `docs/karty/<ID>/` (zasady: `docs/karty/README.md`). Kolumna „Stan” w tabelach niżej jest
   zamrożona do etapu 2 migracji; aktualny stan: `tools/stan-kart.sh` + ta tabela.
@@ -3261,7 +3263,7 @@ nieaktualne” i zostaje jako zapis stanu z 2026-09-04 (numery paragrafów wią�
 |---|---|---|---|
 | **P9.1** | wspólna lista przewoźników na serwerze + potwierdzenie usuwania + kalkulator paletowy | #27, #28 | ✅ **2026-09-21**, ticket `76-FEATURE-przewoznicy-serwer-paletowy` |
 | **P9.1b** | mocniejsze potwierdzenie usunięcia AKTUALNIE WYBRANEGO przewoźnika (domknięcie §3.11 Ani) — tylko frontend | #27 | ✅ **2026-09-21**, ticket `84-FEATURE-usun-wybranego-przewoznika` |
-| **P9.2** | delta instrukcji I9 dla Ani | — | ⬜ gotowe do startu (P9.1 i P9.1b zamknięte) |
+| **P9.2** | delta instrukcji I9 dla Ani | — | ✅ **2026-09-21**, ticket `80-DOCS-instrukcja-testow-i9-v2` — **Iteracja 9 zamknięta** |
 
 Trzy rzeczy w jednej karcie świadomie — wszystkie w `waga-gabarytowa/**`. Seed potwierdzony przez Anię
 21.09 bez poprawek: GEIS 10 000 · DPD 6 000 · GLS 4 000 · InPost / UPS / DHL 5 000. Edytuje każdy
@@ -3301,34 +3303,30 @@ PUT.
 **Numeracja migracji (fakt):** `007` zajęty przez `waga_gab_przewoznicy` (ta karta, 2026-09-21),
 `008` przez `alerty_katalogu_statusy` (P6.2, ticket 77). Konsekwencja dla PR.3 zapisana w jej bloku niżej.
 
-**P9.2 — delta instrukcji I9 dla Ani (do napisania).** `docs/instrukcja-testow-I9.md` po P9.1 ma
-nieaktualne fragmenty: §3.11, §4 pkt 4 i pkt 6 oraz wszystkie opisy „lista żyje w Twojej
-przeglądarce" przestały być prawdziwe (lista jest teraz na serwerze). Do instrukcji dochodzi:
-- potwierdzenie usunięcia przewoźnika — **dwa warianty okna** (P9.1b, ticket `84`), opisać
-  dokładną treść obu:
-  - zwykłe (przewoźnik NIE jest wybrany w kalkulatorze tej osoby): tytuł „Usunąć przewoźnika?”,
-    treść „Przewoźnik „X” zniknie z listy. Lista jest wspólna — zmiana obowiązuje wszystkich
-    użytkowników.”, przycisk „Usuń przewoźnika”;
-  - mocniejsze (przewoźnik JEST wybrany): tytuł „Usunąć wybranego przewoźnika?”, treść
-    „Przewoźnik „X” jest teraz wybrany w Twoim kalkulatorze. Lista jest wspólna — zmiana
-    obowiązuje wszystkich użytkowników.”, pod nią bursztynowa ramka z ikoną ostrzeżenia „Po
-    usunięciu kalkulator przełączy się na „Y” i przeliczy wynik jego dzielnikiem.” (Y = pierwszy
-    z pozostałych na liście), przycisk „Usuń przewoźnika”;
-  - **wybór przewoźnika jest osobisty dla przeglądarki** (IndexedDB), nie dla firmy — dlatego
-    mocniejsze okno widzi tylko osoba, która sama ma tego przewoźnika wybranego; u innych
-    użytkowników, którzy go mieli wybranego, kalkulator po cichu przejdzie na pierwszego z listy;
-  - ostatniego przewoźnika nadal nie da się usunąć (komunikat „Nie można usunąć”, bez okna) —
-    to §3.11 Ani, bez zmian;
-- potwierdzenie „Przywróć domyślne" (zmienia listę całej firmie, nie tylko przeglądarce);
-- wspólna lista — edytuje ją każdy zalogowany, zmiany widzą wszyscy;
-- zapis nazwy/dzielnika dopiero po opuszczeniu pola (pusta nazwa albo zły dzielnik → komunikat i
-  powrót do poprzedniej wartości, bez zapisu);
-- nowa sekcja „kalkulator paletowy" pod tabelą przewoźników: pola szerokość/długość/wysokość (cm),
-  wynik `wagaGabarytowa`/`szerokoscEfektywna`/`wysokoscZPaleta`/`wspolczynnik`/`opis`; progi z
-  `db/snapshot.db` (`szer_polpaleta = 55`, `szer_paleta = 80`, `wys_palety = 10`,
-  `wspolczynnik = 0.000167`);
-- stare listy przewoźników z lokalnego IndexedDB przeglądarki **nie są importowane** — po P9.1
-  startuje się z seeda serwera, nie z tego, co ktoś miał lokalnie.
+**P9.2 — dowieziony zakres (2026-09-21, ticket `80-DOCS-instrukcja-testow-i9-v2`).** Nowy
+`docs/instrukcja-testow-I9-v2.md` (delta „Zgłosiłaś → Jest teraz → Sprawdź”), a w
+`docs/instrukcja-testow-I9.md` tylko banner „częściowo nieaktualne” z listą unieważnionych paragrafów.
+Treść delty:
+- „Zanim klikniesz”: lista wspólna, stare lokalne listy nie przeniesione, zmiana dotyczy wszystkich,
+  „Przywróć domyślne” resetuje listę firmie; w przeglądarce zostają wybór, wymiary i wynik;
+- §3.11 → oba okna usunięcia znak w znak + scenariusz na DPD (następca GEIS Polska), blokada
+  ostatniego przewoźnika zachowana;
+- §3.13 → scenariusz dwóch przeglądarek (GLS 4000→3000, widoczny w drugiej po F5; potem „Przywróć
+  domyślne” z treścią okna); `refetchOnWindowFocus: false`, więc bez F5 druga przeglądarka nie widzi
+  zmiany — opisane jako poprawne;
+- decyzje 9.1 / 9.2 / 9.3; kalkulator paletowy ze scenariuszem policzonym prawdziwą
+  `obliczWageGabarytowa` na ustawieniach z `db/snapshot.db` (55 / 80 / 10 / 0.000167):
+  50×60×25 → **21.042 kg** (60 cm, 35 cm), 70×60×25 → **28.056 kg** (80 cm);
+- tabela 15 unieważnionych zdań pierwszej wersji + rozliczenie pięciu pozycji §5 (wspólna lista
+  ✅, kalkulator paletowy ✅, Atrybuty ✅, etykiety czytnika ekranu ⬜ bez zmian, ekran progów
+  palety ⬜ — pytanie do Ani).
+
+**Znalezione przy pisaniu (fakt, do koordynatora):** ramka mocniejszego okna z P9.1b mówi „…i przeliczy
+wynik jego dzielnikiem”, a kod przełącza tylko wybór — wynik na ekranie zostaje stary (z nazwą
+usuniętego przewoźnika) do kliknięcia „Oblicz” (`WagaGabarytowa.tsx`: `ustawWynik` tylko w
+`oblicz()`; test ticketu 84 też klika „Oblicz”). Decyzja użytkownika 2026-09-21: instrukcja uprzedza
+Anię (ramka ⚠ w §2.1 delty), poprawka tekstu ramki jako osobna, przyszła karta — jeszcze nie
+założona.
 
 #### Iteracja 10 — Analityka i Pulpit
 
@@ -3438,6 +3436,7 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 |---|---|---|
 | **#91** — zakres „zapisz to, co widzę" | P10.3 | do rozstrzygnięcia |
 | **#92** — duplikat marek: dane czy prezentacja | PR.5 | łącznie z #42 |
+| **Progi kalkulatora paletowego** (półpaleta ≤ 55 cm → 60 cm, paleta ≤ 80 cm, +10 cm paleta, współczynnik 0.000167) — właściwe czy do zmiany | ewentualną zmianę ustawień `waga_gab.*` (stała 60 cm to kod, nie ustawienie) | **⬜ po stronie Ani** — pytanie z wariantami w `docs/instrukcja-testow-I9-v2.md` §3.2 (2026-09-21) |
 
 #### Kolejność
 

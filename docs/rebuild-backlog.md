@@ -1864,6 +1864,9 @@ reguł"), dokument opisuje ją razem ze zmierzonym zasięgiem **1/7405**.
 > **✅ ZROBIONE 2026-09-21, ticket `77-FEATURE-pseudo-alerty-katalogowe` (P6.2)** — pseudo-alerty
 > katalogowe wróciły jako zakładka „Katalog" na `/alerty`, obok „Import". Poniżej zostaje
 > historia decyzji; stan dowozu opisuje blok „CO DOWIOZŁA KARTA P6.2" niżej.
+>
+> **Instrukcja dla Ani:** `docs/instrukcja-testow-I6-v2.md` (P6.3, ticket `85-DOCS-instrukcja-testow-i6-v2`,
+> 2026-09-21) — rozdział 1.1 (zakładka „Katalog") i 1.2 (dwa przyciski), plus „przy okazji" 2.1–2.5.
 
 | Pole | Wartość |
 |---|---|
@@ -4052,7 +4055,7 @@ tylko promocji, czy też narzutów).
 | **Pliki** | `rebuild/frontend/src/pages/alerty/TabelaAlertow.tsx`, `pages/alerty/grupowanie.ts` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-21** (nowa funkcja, oryginał jej nie ma) |
 | **Iteracja** | P6.1 |
-| **Status** | ✅ **zrobione 2026-09-21** (`72-FEATURE-alerty-przejrzany-szukajka`) |
+| **Status** | ✅ **zrobione 2026-09-21** (`72-FEATURE-alerty-przejrzany-szukajka`) · instrukcja dla Ani: `docs/instrukcja-testow-I6-v2.md` §1.3 (P6.3, ticket `85`) |
 
 **Po co.** Typ „Błąd pobierania" obejmuje JEDNYM workiem awarię sieci i błąd parsera (backlog #16),
 więc żeby je rozróżnić, trzeba dziś rozwinąć grupę i przeczytać wpisy. Wyszukiwarka po treści
