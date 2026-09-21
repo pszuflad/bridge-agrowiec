@@ -179,7 +179,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · 3f-1·3f-2·3f-3 | 2 | ✅ | PR #6, #7, #11, #12, #15, #16, #19 · 3f dołożone 2026-09-01 — szczegóły: blok I3 |
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE · + karty 14e/14f/14h/14m | 2, 3 | ✅ | 4a/4b 2026-09-02 · domknięta kartami I14 2026-09-18…19 — szczegóły: bloki I4 i I14 |
 | 5 | Historia | 1 + P5.1–P5.3 | 3 | ✅ | PR #24 · 2026-09-02 · poprawki planu P zamknięte 2026-09-21 — szczegóły: blok „Poprawki po testach Ani” |
-| 6 | Alerty | 1 + P6.1–P6.3 | 3 | ✅ / 🔨 | `18-FEATURE-widok-alerty` · 2026-09-03 · poprawki planu P: blok „Poprawki po testach Ani” |
+| 6 | Alerty | 1 + P6.1–P6.3 | 3 | ✅ | `18-FEATURE-widok-alerty` · 2026-09-03 · poprawki planu P zamknięte 2026-09-21 — szczegóły: blok „Poprawki po testach Ani” |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE + P7.1–P7.5 | 2 | ✅ / 🔨 | 7a/7b/7c 2026-09-04 · poprawki planu P: blok „Poprawki po testach Ani” |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
 | 9 | Waga gabarytowa | 1 + P9.1 · P9.1b · P9.2 | 2 | ✅ | `18-FEATURE-waga-gabarytowa` · 2026-09-03 · poprawki planu P zamknięte 2026-09-21 (otwarte po stronie Ani: progi palety) — szczegóły: blok „Poprawki po testach Ani” |
@@ -3072,7 +3072,7 @@ przydadzą się dalej:
 |---|---|---|---|
 | **P6.1** | ✅ 2026-09-21 (72) — trzeci status `przejrzany` (przyciski słownictwem oryginału + nasza „Otwórz ponownie", domyślny filtr „Nierozwiązane") i wyszukiwarka po `opis` filtrująca wpisy PRZED grupowaniem; wspólny moduł `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx` pod P6.2 — decyzje w `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/plan.md` | #90, #26 (część) | ✅ zrobione |
 | **P6.2** ⭐ | ✅ 2026-09-21 (77) — pseudo-alerty katalogowe jako zakładka „Katalog" na `/alerty`, obok „Import" (`?zakladka=katalog`); silnik 1:1 z `origin/main` (bajtowo zgodny na `db/snapshot.db`, 25 ms mediana na 7405 produktach); status na serwerze (migracja `008`, `alerty_katalogu_statusy`, wypieranie odcisków + sierotki); filtr statusu jak P6.1, „Otwórz ponownie"; Pulpit sumuje `nowy` z obu źródeł na kaflu i pokazuje dwie sekcje na karcie — decyzje w `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/plan.md` | #26 | ✅ zrobione |
-| **P6.3** | delta instrukcji I6 dla Ani — co P6.1 I P6.2 obaliły w `docs/instrukcja-testow-I6.md`; lista w `raport.md` ticketu 72 (Follow-up) i ticketu 77 (sekcja „Do zrobienia później") | — | ⬜ P6.1 i P6.2 zrobione, może startować |
+| **P6.3** | delta instrukcji I6 dla Ani — co P6.1 I P6.2 obaliły w `docs/instrukcja-testow-I6.md`; lista w `raport.md` ticketu 72 (Follow-up) i ticketu 77 (sekcja „Do zrobienia później") | — | ✅ 2026-09-21, ticket `85-DOCS-instrukcja-testow-i6-v2` — szczegóły: [`docs/karty/P6.3/`](karty/P6.3/) |
 
 **Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
 `PATCH /api/alerts/:id` nie waliduje statusu (oryginał też nie, `routes/alerts.ts:45`), wystarczy
