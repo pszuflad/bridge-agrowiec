@@ -1,6 +1,6 @@
 # 69-FEATURE-historia-bez-limitu: Historia przestaje gubić najstarsze zdarzenia (P5.1, backlog #87)
 
-> Status: Approved → Implemented
+> Status: Implemented
 > Branch: `feature/69-historia-bez-limitu`
 > Worktree: `.worktrees/69-FEATURE-historia-bez-limitu`
 
@@ -123,9 +123,9 @@ z założenia, więc nie ma czego z nim porównywać. To test świadomego odstę
 
 ## Definicja ukończenia
 
-- [ ] `LIMIT_AUDYTU` usunięty; `/meta` i `/paged` nie tną `audit_log`
-- [ ] słownik akcji ma jedno źródło; klauzula `IN` z niego wyliczana
-- [ ] test powyżej progu zielony (pada na starym kodzie, wykazane)
-- [ ] wyrocznia 13/13 bez wyjątku, GATE zielony
-- [ ] lint, typecheck, build, test zielone
-- [ ] roadmapa (P5.1) i backlog #87 zaktualizowane; follow-up P5.3 w raporcie
+- [x] `LIMIT_AUDYTU` usunięty; `/meta` i `/paged` nie tną `audit_log`
+- [x] słownik akcji ma jedno źródło; klauzula `IN` z niego wyliczana
+- [x] test powyżej progu zielony (pada na starym kodzie, wykazane)
+- [x] wyrocznia 13/13 bez wyjątku, GATE zielony
+- [x] lint, typecheck, build, test zielone
+- [x] roadmapa (P5.1) i backlog #87 zaktualizowane; follow-up P5.3 w raporcie

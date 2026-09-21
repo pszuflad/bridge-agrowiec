@@ -132,3 +132,23 @@ kolejność jest teraz deterministyczna (`id DESC`); w oryginale była nieokreś
    wyrocznia: zapisze `limitNieGryzie: false` (`oracle-diff-historii.cjs:894`), a pierwszy
    warunek ważności w `historia.wyrocznia.test.ts` zaświeci. Przenagrywając, trzeba więc brać
    bazę poniżej progu. Nie ruszam skryptu, bo jest artefaktem zamkniętej karty.
+
+## Poprawki po review
+
+Review (`review.md`): 1 BLOCKER, 0 SHOULD-FIX, 2 NICE-TO-HAVE.
+
+- **BLOCKER: roadmapa i backlog #87 niezaktualizowane.** W chwili review było to prawdą, bo
+  aktualizacja dokumentacji to kolejna faza karty. Załatwione w commicie „sync docs”
+  (podblok P5.1 w roadmapie, status #87 w backlogu, sekcja „Aktualizacje dokumentacji” niżej).
+  W kodzie review nie znalazło nic do poprawy: równoważność hybrydy ze starym filtrem
+  potwierdzona, jedno źródło słownika potwierdzone grepem, dyskryminacja testów
+  zweryfikowana niezależnie (cofnięcie `src/` do `origin/develop` → nowe testy padają).
+- **NICE-TO-HAVE: niezaznaczone checkboxy DoD w `plan.md`.** Zaznaczone.
+- **NICE-TO-HAVE: 4 miejsca w `historia.mapowanie.test.ts` niezgodne z prettier-100.** To
+  zaszłość poza liniami tej karty, zostawiona celowo (bez szumu w diffie).
+- **Uwaga reviewera spoza zakresu:** `test/scheduler.test.ts` bywa niestabilny przy pełnym
+  przebiegu pliku (2/3), a w izolacji i na czystym `origin/develop` jest zielony. Kod spoza
+  diffu, dopisane do follow-upu.
+
+Follow-up (dopisek): 3. **`test/scheduler.test.ts` bywa niestabilny** (obserwacja reviewera,
+reprodukcja 2/3 przy pełnym pliku). Do osobnego zgłoszenia, bo nie dotyczy tej karty.
