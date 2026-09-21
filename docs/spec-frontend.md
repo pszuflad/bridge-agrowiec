@@ -273,10 +273,19 @@ ma endpoint:
 > **12 tras, 5 placeholderów**. Widok stoi na `GET /api/alerts` (bez limitu) i **zwija powtórki**
 > w grupy `(dostawca, typ, status)` z licznikiem i czasem ostatniego wystąpienia, bo import
 > pisze alert przy każdej nieudanej próbie bez dławika (do 23×/dobę dla jednego dostawcy);
-> rozwinięcie grupy pokazuje pojedyncze wpisy. Domyślny filtr `status=nowy`; zmiana statusu
-> (pojedyncza i grupowa, w obie strony) idzie przez `PATCH /api/alerts/{id}`, bez IndexedDB/
-> localStorage — świadome odejście od oryginału, który dla `/alerty` liczył zupełnie inne dane
-> (patrz §4, sprostowanie). Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+> rozwinięcie grupy pokazuje pojedyncze wpisy. Domyślny filtr „Nierozwiązane" (`status≠rozwiazany`,
+> od P6.1 — pierwotnie `status=nowy`); zmiana statusu (pojedyncza i grupowa, w obie strony) idzie
+> przez `PATCH /api/alerts/{id}`, bez IndexedDB/localStorage — świadome odejście od oryginału,
+> który dla `/alerty` liczył zupełnie inne dane (patrz §4, sprostowanie). Szczegóły:
+> `docs/tickets/18-FEATURE-widok-alerty/`.
+>
+> **Odbudowa (P6.1, `72-FEATURE-alerty-przejrzany-szukajka`, 2026-09-21):** trzeci status
+> `przejrzany` obok `nowy`/`rozwiazany` (bez `CHECK` w bazie). Przyciski zależą od statusu:
+> „Oznacz jako przejrzany" (przy `nowy`), „Rozwiąż" (przy ≠ `rozwiazany`), „Otwórz ponownie"
+> (przy ≠ `nowy`, odstępstwo — oryginał nie ma drogi powrotnej). Doszła wyszukiwarka po treści
+> `opis` (słowa łączone AND, bez rozróżniania wielkości liter, jak w Katalogu), łączona AND
+> z filtrami; trafienie liczy się PRZED grupowaniem, więc licznik grupy i akcja grupowa obejmują
+> tylko pasujące wpisy. Szczegóły: `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/`.
 
 > **Odbudowa (I9, `18-FEATURE-waga-gabarytowa`, 2026-09-03):** `/waga-gabarytowa` odbudowany —
 > router ma **12 tras, 4 placeholdery**. Ustalenie ticketa: BE i FE liczą **dwa różne wzory**,

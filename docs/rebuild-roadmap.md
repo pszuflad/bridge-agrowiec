@@ -1089,7 +1089,9 @@ jeden realny defekt znaleziony przy okazji:
   domyślnie zwinięta, licznik + czas ostatniego wystąpienia („MO3 — Błąd pobierania · 23× ·
   ostatnio 14:45"), rozwinięcie do pojedynczych wpisów; dowiedzione testem na danych z
   powtórkami (24 alerty → 2 grupy w DOM, pojedyncze `opis`y nieobecne przed rozwinięciem).
-  Domyślny filtr `status = nowy` (D7), filtry status/dostawca/typ z wartości w danych (D8).
+  Domyślny filtr `status = nowy` (D7), filtry status/dostawca/typ z wartości w danych (D8) —
+  **od P6.1 (72-FEATURE-alerty-przejrzany-szukajka, 2026-09-21): trzeci status `przejrzany`
+  i domyślny filtr „Nierozwiązane"**, patrz Iteracja 6 w §5.
   Zmiana statusu — na grupie i na pojedynczym wpisie, w obie strony, WYŁĄCZNIE przez API (D3):
   `PATCH /api/alerts/{id}` jedyne źródło prawdy, zero IndexedDB/localStorage; akcja grupowa to
   N `PATCH`-y z limitem równoległości 8 (`pages/alerty/api.ts`, największa grupa w produkcji —
@@ -2205,14 +2207,17 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     Pkt 2 („pulpit respektuje potwierdzenia") odbudowa spełnia konstrukcyjnie — `aktywneAlerty()`
     filtruje po `status === "nowy"` z realnej odpowiedzi API, bez IndexedDB.
   - **D3 — `ackalerts` pkt 4 (ukrycie statusu `rozwiazany`): nie portujemy.** Oryginał ma trzy
-    statusy i domyślny filtr „wszystkie", odbudowa dwa i domyślny filtr `nowy` — ta sama reguła
-    zdegenerowałaby opcję „Wszystkie statusy" do duplikatu opcji „nowy".
+    statusy i domyślny filtr „wszystkie", odbudowa (w tym momencie, 2026-09-09) dwa i domyślny
+    filtr `nowy` — ta sama reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu opcji
+    „nowy". *(Nieaktualne od P6.1 — 72, 2026-09-21: odbudowa ma już trzy statusy i domyślny filtr
+    „Nierozwiązane", degeneracja nie zachodzi.)*
   - **D4 — pass-through `konstrukcja` ZOSTAJE mimo regresji żywej produkcji.** Od 2026-09-09 to
     świadome odstępstwo: odbudowa jest POPRAWNIEJSZA niż produkcja. Odrzucone: zdjęcie
     pass-through, żeby odtworzyć zepsute zachowanie (cofałoby 13c).
   **Follow-up (nierozliczone):** silnik pseudo-alertów — backlog #26 ⬜; gdyby kiedyś wszedł,
-  wchodzi OD RAZU w wersji po łatkach z 04.09. Trzeci status alertu `przejrzany` istnieje
-  w oryginale, nie w odbudowie (brak wpisu w backlogu). Enhancer konfiguratora kolumn stagingu
+  wchodzi OD RAZU w wersji po łatkach z 04.09. Trzeci status alertu `przejrzany` istnieje od
+  P6.1 (72, 2026-09-21) też w odbudowie — ale wyłącznie dla alertów IMPORTU; pseudo-alerty
+  katalogowe (#26/P6.2) go nadal nie mają. Enhancer konfiguratora kolumn stagingu
   (`ex_marka`/`ex_szerokosc`) — **rozliczone w 14b** (`51-FEATURE-staging-filtr-pasek-kolumny`,
   2026-09-18): wchłonięty jako komponent React; `ex_marka`/`ex_szerokosc` to dwie z 49 pozycji
   sekcji „Dodatkowe (z katalogu)", która w oryginale nic nie robi (`applyCss()` zaczyna od
@@ -3037,17 +3042,23 @@ przydadzą się dalej:
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P6.1** | lista alertów importu: wyszukiwarka po treści + trzeci status `przejrzany` | #90, #26 (część) | ⬜ gotowe |
-| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu | #26 | ⬜ gotowe — **po merge'u P6.1** |
-| **P6.3** | delta instrukcji I6 dla Ani | — | ⬜ po P6.1 i P6.2 |
+| **P6.1** | ✅ 2026-09-21 (72) — trzeci status `przejrzany` (przyciski słownictwem oryginału + nasza „Otwórz ponownie", domyślny filtr „Nierozwiązane") i wyszukiwarka po `opis` filtrująca wpisy PRZED grupowaniem; wspólny moduł `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx` pod P6.2 — decyzje w `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/plan.md` | #90, #26 (część) | ✅ zrobione |
+| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu; **importuje** `statusy.ts`/`PrzyciskiStatusu.tsx` z P6.1, nie duplikuje | #26 | ⬜ gotowe — **P6.1 zmergowana, można startować** |
+| **P6.3** | delta instrukcji I6 dla Ani — lista tego, co P6.1 obaliła w `docs/instrukcja-testow-I6.md`, jest w `raport.md` ticketu 72 (sekcja Follow-up) | — | ⬜ po P6.1 i P6.2 |
 
 **Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
 `PATCH /api/alerts/:id` nie waliduje statusu (oryginał też nie, `routes/alerts.ts:45`), wystarczy
 poszerzyć typ `StatusAlertu` (`repos/alerts.ts:16`) i dołożyć przycisk. Pseudo-alerty to osobny, duży
 mechanizm: w oryginale liczone w PRZEGLĄDARCE z katalogu (`frontend-index.js:25177-25340` `HT()`,
 `:16631-16705` `pv()`), status w IndexedDB (`:9165-9193`). Rozłączność plików: P6.1 ma
-`TabelaAlertow.tsx`, `grupowanie.ts`, `repos/alerts.ts` i `test/alerty.*`; P6.2 ma NOWE pliki
-i powłokę strony `/alerty`. Dzięki temu idą równolegle.
+`TabelaAlertow.tsx`, `grupowanie.ts`, `repos/alerts.ts`, `test/alerty.*` i (nowe, współdzielone
+z P6.2) `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx`; P6.2 ma NOWE pliki i powłokę strony
+`/alerty` (`pages/Alerty.tsx`, nietknięty przez P6.1). Dzięki temu idą równolegle.
+
+**Dla P6.2:** mutacja zapisu statusu i toast „Zmieniono X z N alertów" zostały w
+`TabelaAlertow.tsx` (P6.1 ich nie wydzieliła), bo są przywiązane do `PATCH /api/alerts/:id` alertów
+IMPORTU. Status pseudo-alertów ma iść na serwer (decyzja 2 niżej), ale inną drogą niż `alerts` —
+P6.2 dokłada własny zapis; wspólne są tylko statusy, etykiety i przyciski.
 
 ⚠ **P6.2 jest jedną z dwóch rzeczy, które Ania nazwała mogącymi wstrzymać cutover** — musi wejść przed
 przełączeniem produkcji.

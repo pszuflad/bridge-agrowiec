@@ -43,7 +43,8 @@ export function trasyAlertow({ db }: ZaleznosciAlertow): Router {
    *     istnieje; UPDATE bez trafienia jest cichym no-opem. Bliźniacze trasy
    *     `DELETE /api/overrides/:id` i `PATCH /api/markups/:id` 404 mają, ta nie.
    *  2. **Brak walidacji `status`** — kolumna nie ma `CHECK`, oryginał zapisuje dowolny
-   *     napis. Widok wysyła wyłącznie `nowy`/`rozwiazany` (typ `StatusAlertu`).
+   *     napis. Widok wysyła wyłącznie `nowy`/`przejrzany`/`rozwiazany`
+   *     (typ `StatusAlertu`).
    *  3. **Brak wpisu do `audit_log`** — w odróżnieniu od PATCH-ów overrides i markups,
    *     które audytują każdą zmianę. Ta trasa jest jedynym PATCH-em w rebuildzie bez
    *     audytu i tak ma zostać.
