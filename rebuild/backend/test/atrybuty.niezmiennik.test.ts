@@ -277,6 +277,12 @@ describe("atrybuty — niezmiennik „ostrzeżenie = liczba realnie przepisanych
      * `zaktualizowano: 1` w pierwszym skanie na pustej kolejce. UPDATE szuka dokładnie „X", więc
      * wiersze „X " zostają nietknięte, a wartość przy kolejnym skanie wraca do kolejki.
      * Na snapshocie uśpione: żadna z 13 kolumn nie ma wartości ze spacją na brzegu.
+     *
+     * ⚠ „Która grupa wygrywa" zależy od kolejności wierszy `GROUP BY` bez `ORDER BY` — w SQLite
+     * to w praktyce porządek sortowania grupowania (binarny, „X" < „X "), ale nie gwarancja
+     * języka. Gdyby ten test kiedyś padł na `A: 1`, pierwsze pytanie brzmi: czy zmieniła się
+     * wersja SQLite albo plan zapytania (np. indeks na kolumnie), a nie „zepsuł się skan".
+     * Samo zjawisko — A to licznik JEDNEJ z grup, nie ich suma, a UPDATE nie rusza „X " — zostaje.
      */
     it("spacja na końcu obok wersji czystej: A = licznik wersji ze spacją, B == C = wersja czysta", async () => {
       dodajProdukty(BIEZNIK, "P73 BIEZNIK", 2);

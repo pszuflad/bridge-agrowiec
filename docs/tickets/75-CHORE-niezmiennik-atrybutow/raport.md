@@ -120,6 +120,12 @@ import MO6 albo pierwsza wartość ze spacją na brzegu.
   do czasu odpowiedzi `uzycie` (albo gdy `uzycie` padnie). Rekomendacja: bez naprawy w odbudowie.
   To zachowanie oryginału, a właściwe lekarstwo to samo sprzątanie kolejki co wyżej.
 
+- **Instrukcja I7 §3.11 obiecuje nieprawdę** (`docs/instrukcja-testow-I7.md:206-208`): „liczba
+  [w ostrzeżeniu] ma odpowiadać temu, co pokazuje kolumna *Wystąpień*". Dla 126 z 500 pozycji
+  w snapshocie tak nie jest, także dla przykładu z samej instrukcji („AGRI STAR II": 186 w kolumnie,
+  188 w ostrzeżeniu). Instrukcji nie ruszamy, to zadanie P7.4. Nota z liczbami jest w roadmapie,
+  w bloku „Iteracja 7", pod „Wejście od P7.3".
+
 ## Changes
 
 - **New:** `rebuild/backend/test/atrybuty.niezmiennik.test.ts` — 37 przypadków:
@@ -171,3 +177,12 @@ Brak.
 3. **Uśpione rozjazdy A vs C (MO6, spacje na brzegu)** zostają zapisane w teście jako zachowanie.
    Jeśli kiedyś MO6 wróci do katalogu albo import przyniesie wartości ze spacją, kolumna listy
    kolejki zacznie kłamać. Ostrzeżenie w dialogu nie.
+
+## Review fixes applied
+
+- **BLOCKER (roadmapa niezaktualizowana):** wiersz P7.3 → ✅ z datą i ID. Pod tabelą „Iteracja 7"
+  dopisane „Wejście od P7.3" z notami dla P7.1 (dopisać `model`/`zastosowanie`), P7.2 (seed usunie
+  co najwyżej 72 z 437 pozycji „alias na samą siebie") i P7.4 (sprostowanie §3.11 instrukcji I7).
+- **SHOULD-FIX (kolejność `GROUP BY`):** w teście „spacja na końcu" dopisany komentarz, że wynik
+  `A: 1` zależy od kolejności grup bez `ORDER BY`, i co sprawdzać, gdyby test padł.
+

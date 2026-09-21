@@ -3073,13 +3073,42 @@ odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest popraw
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ⬜ gotowe |
-| **P7.2** | seed bieżników z `products.bieznik` + podobieństwo case-insensitive | #40, #42 | ⬜ gotowe |
-| **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ⬜ gotowe |
-| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 |
+| **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ⬜ gotowe · wejście od P7.3 niżej |
+| **P7.2** | seed bieżników z `products.bieznik` + podobieństwo case-insensitive | #40, #42 | ⬜ gotowe · wejście od P7.3 niżej |
+| **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ✅ `75-CHORE-niezmiennik-atrybutow` · 2026-09-21 — niezmiennik trzyma się: liczba w ostrzeżeniu = liczba przepisanych wierszy, 0 rozjazdów na 4148 pomiarach na snapshocie; test `atrybuty.niezmiennik.test.ts` w bramce |
+| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 · wejście od P7.3 niżej |
 
 ⚠ P7.1 i P7.2 dzielą klaster backendu atrybutów — przed puszczeniem obu naraz sprawdzić rozłączność
 plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czymkolwiek.
+
+**Wejście od P7.3 (ticket 75, 2026-09-21)** — pomiar i tabela: `docs/tickets/75-CHORE-niezmiennik-atrybutow/raport.md`.
+
+- **Dla P7.1:** po wprowadzeniu `model` / `zastosowanie` do akceptacji dopisać je do listy `RODZAJE`
+  w `rebuild/backend/test/atrybuty.niezmiennik.test.ts`. P7.3 je pominęła, bo dziś dają 400
+  „Nieznany rodzaj". Test nie importuje map rodzaj→kolumna i nie sprawdza `audit_log`, więc audyt
+  akcji i przebudowa map go nie ruszają.
+- **Dla P7.2:** pozycje kolejki, które podpowiadają same siebie ze 100%, dają dziś fałszywą liczbę
+  przy aliasie. Ostrzeżenie mówi „w N produktach", toast „Zaktualizowano produktów: N", a realnie
+  zmienia się 0 wierszy (SQLite liczy wiersze dopasowane, nie zmienione). W snapshocie takich
+  pozycji jest **437 z 500**: `bieznik` 242, `rozmiar` 99, `marka` 68, `indeks_nosnosci` 27,
+  `konstrukcja` 1. **Sama zmiana seedu `bieznik` na `products.bieznik` usunie co najwyżej 72
+  z nich** (`bieznik` z `origin = 'catalog'`). Pozostałe 365 to wartości dodane ręcznie
+  (`origin = 'user'`) albo rodzaje, których seed z `model` nie dotyczy. Żeby objaw z decyzji Ani
+  („przeszkadza mi to") zniknął, potrzebne jest też sprzątanie kolejki z pozycji obecnych już
+  w słowniku. #40 opisuje je jako osobną, mniejszą zmianę. Test „alias na samą siebie"
+  w `atrybuty.niezmiennik.test.ts` trzeba wtedy odwrócić (komentarz w teście to mówi).
+- **Dla P7.4 — ⚠ instrukcja I7 §3.11 obiecuje coś, co nie jest prawdą.**
+  `docs/instrukcja-testow-I7.md:206-208` mówi, że liczba w ostrzeżeniu „ma odpowiadać temu, co
+  pokazuje kolumna *Wystąpień*". Tak nie jest i być nie musi. Ostrzeżenie liczy na żywo
+  (`GET /api/atrybuty/uzycie`), a kolumna to migawka ze skanu. Pozycji już obecnych w słowniku
+  skan nie odświeża nigdy, więc w snapshocie **126 z 500** pozycji ma w kolumnie inną liczbę niż
+  w ostrzeżeniu. Dotyczy to także przykładu z samej instrukcji: „AGRI STAR II" ma 186 w kolumnie
+  i 188 w ostrzeżeniu. Inny przykład: ALLIANCE, 780 w kolumnie i 848 w ostrzeżeniu. Delta ma to
+  sprostować. Wiarygodna jest liczba z OSTRZEŻENIA i ona ma się równać liczbie z toastu
+  „Zaktualizowano produktów" (P7.3 to potwierdziła: 0 rozjazdów). Właściwym zgłoszeniem z §5
+  (`:424`) jest więc rozjazd ostrzeżenie ↔ toast ↔ katalog, a nie ostrzeżenie ↔ kolumna. Wyjątek,
+  o którym Ania powinna wiedzieć: kliknięcie sugestii, która jest tą samą wartością (100%),
+  pokaże N w ostrzeżeniu i w toaście, choć w katalogu nic się nie zmieni (patrz wyżej, P7.2).
 
 #### Iteracja 9 — Waga gabarytowa
 
