@@ -8,11 +8,13 @@
  * (robi to Pulpit, Iteracja 10). Zmiany cen z auto-zatwierdzenia importu są w `historia_cen`
  * i należą do Iteracji 10 — nie do tego ekranu (plan.md 15-FEATURE-historia-zmian, D2).
  *
- * ⚠ CZĘŚĆ ZDARZEŃ TU NIE DOTRZE. Backend rozpoznaje pięć akcji audytu (`upload_pliku`,
- * `import_cennika`, `eksport_csv`, `eksport_shoper`, `edycja_produktu`) i odrzuca resztę —
- * `import_z_url`, `import_pliku` i `synchronizacja_reczna` są dla tego widoku niewidoczne.
- * To port 1:1 zachowania produkcji, nie usterka UI. Szczegóły:
- * `rebuild/backend/src/historia/mapowanie.ts`.
+ * ⚠ CZĘŚĆ ZDARZEŃ TU NIE DOTRZE. Backend rozpoznaje siedem akcji audytu i odrzuca resztę.
+ * Pięć to port 1:1 produkcji (`upload_pliku`, `import_cennika`, `eksport_csv`, `eksport_shoper`,
+ * `edycja_produktu`). Dwie to świadome odstępstwo rebuildu (backlog #39, ticket 74): akcje kolejki
+ * atrybutów przepisujące produkty (`atrybut_pending_zaakceptowano_z_edycja`,
+ * `atrybut_pending_zaakceptowano_jako_alias`), pokazywane jako `edycja`. `import_z_url`,
+ * `import_pliku` i `synchronizacja_reczna` są dla tego widoku niewidoczne — jak w produkcji,
+ * nie usterka UI (backlog #21). Szczegóły: `rebuild/backend/src/historia/mapowanie.ts`.
  */
 
 /** Wpis z `/api/history/paged` — 11 pól, kształt z `contract/fixtures/GET_history_paged.json`. */

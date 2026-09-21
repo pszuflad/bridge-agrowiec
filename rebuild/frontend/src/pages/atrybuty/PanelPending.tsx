@@ -16,10 +16,12 @@
  *  - `Odrzuć` — wpis do `atrybuty_wartosci_odrzucone`, kolejne skany pomijają wartość.
  *
  * ⚠ OSTRZEŻENIE O SKALI ZMIANY (odstępstwo D7, dodanie informacji): dwie akcje przepisują pole
- * w CAŁYM katalogu, a backend NIE loguje ich do audytu — `registerPending` nie dostaje funkcji
- * audytu w ogóle (`pending_module.cjs:199`, `docs/rebuild-backlog.md` #39, ⬜ do decyzji).
- * Po fakcie nie da się ustalić, kto i co przepisał, więc dialog pokazuje liczbę produktów
- * PRZED zatwierdzeniem, a toast — `produktow_zaktualizowano` z odpowiedzi.
+ * w CAŁYM katalogu i nie da się ich cofnąć, więc dialog pokazuje liczbę produktów PRZED
+ * zatwierdzeniem, a toast — `produktow_zaktualizowano` z odpowiedzi. Produkcja nie ma ani tego
+ * ostrzeżenia, ani audytu kolejki (`pending_module.cjs:199`). Rebuild od ticketu 74 audytuje obie
+ * akcje i pokazuje je w Historii jako wpis `edycja` z liczbą przepisanych produktów i opisem
+ * „przed → po" (`docs/rebuild-backlog.md` #39, ✅ TAK) — tekst ostrzeżenia mówi o tym wpisie
+ * (ticket 81).
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -63,8 +65,8 @@ function OstrzezenieOSkali({ pozycja }: { pozycja: PozycjaPending }) {
       data-testid="ostrzezenie-skala-zmiany"
     >
       Zmiana przepisze pole <b className="text-foreground">{pozycja.rodzaj}</b> w{" "}
-      <b className="text-foreground">{ile}</b> produktach katalogu. Operacji nie da się cofnąć
-      ani odtworzyć z dziennika — akcje kolejki nie trafiają do audytu.
+      <b className="text-foreground">{ile}</b> produktach katalogu. Operacji nie da się cofnąć.
+      Zostanie po niej wpis w Historii (typ „edycja”).
     </div>
   );
 }
