@@ -3642,8 +3642,38 @@ u dostawcy i wgrywa go ponownie pod tą samą nazwą.
 |---|---|
 | **Kategoria** | BACKEND (historia / mapowanie audytu) — dziwactwo PRODUKCJI odtworzone świadomie |
 | **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts:54` (`LIMIT_AUDYTU = 5000`), użycie w `rebuild/backend/src/routes/history.ts` |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI** |
+| **Do nowej wersji?** | ✅ **TAK — WARIANT (c) wybrany przez użytkownika 2026-09-21**: filtrowanie i paginacja w SQL (świadome odstępstwo) |
 | **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · zmiana limitu — nie zaczęte |
+
+**⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: WARIANT (c).** Uzasadnienie wprost: „żeby problem nie
+wracał". Odrzucone: (a) zostawić 1:1 — problem wraca sam; (b) podnieść limit — odsuwa próg,
+nie usuwa go, i każe mapować całość w pamięci przy każdym żądaniu.
+
+**Liczba, która przesądziła.** `audit_log` ma 3873 wiersze, ale widok pokazuje z nich **270**
+(178 `edycja_produktu` + 92 `upload_pliku`). Pozostałe 3603 to akcje spoza słownika pięciu
+typów, z czego sam `auto_pull` to 2869. Limit tnie **surowy** `audit_log` PRZED odsiewem, więc
+93% budżetu zjadają wiersze, których użytkownik nigdy nie zobaczy — i to one wypchną te, które
+widzi. Rozstrzygnięcie **#21 na NIE** (2026-09-21) to pogłębia: `auto_pull` nigdy nie stanie się
+widoczny, a mimo to będzie wypierał użyteczne wpisy z okna 5000.
+
+**⚠ WARUNEK WDROŻENIA — POMIAR PRZED KODEM, nie po.** Bramka `historia.wyrocznia.test.ts`
+(karta `59-CHORE-i14j`, 0 różnic na 49 813 wpisach) porównuje te trasy z żywym oryginałem.
+Hipoteza: rozjazd między filtrowaniem w SQL a w pamięci ujawnia się **dopiero powyżej 5000
+wierszy**, a wyrocznia chodzi na snapshocie z 3873 — więc (c) powinno przejść **bez wyjątku
+w wyroczni**. To hipoteza, nie ustalenie: karta ma ją zweryfikować PRZED implementacją i wrócić
+z pytaniem, jeśli bramka się zapali. Fallback: wariant (b).
+
+**⚠ PUŁAPKA ZAKRESU, ZMIERZONA 2026-09-21 — `search` NIE DA SIĘ PRZENIEŚĆ DO SQL bez zmiany
+semantyki.** `stronaHistorii()` (`historia/mapowanie.ts:237-246`) filtruje frazę przez
+`JSON.stringify(wpis).toLowerCase().includes(fraza)` na **zmapowanym** wpisie — więc trafia też
+w pola WYLICZANE: `typ` (`import`/`eksport`/`edycja`), `format`, napis `„Plik: …"` i nazwy
+zmienionych pól. Wpisanie `import` znajduje wpisy **po nazwie typu**, a nie po żadnej kolumnie
+`audit_log` (opisane Ani w §11 pkt 4 instrukcji I5 jako zamierzone).
+
+Z tego wynika, że `typ`, `dostawca` i paginacja przenoszą się do SQL bez przeszkód, ale `search`
+wymaga osobnego rozstrzygnięcia — np. hybrydy (filtr i limit w SQL, fraza nadal w pamięci, ale
+na znacznie szerszym zbiorze kandydatów) albo przetłumaczenia frazy na listę wartości `akcja`.
+**Wybór ma być opisany w raporcie karty jako decyzja, a nie przemilczany.**
 
 **Co robi produkcja.** `GET /api/history/meta` i `GET /api/history/paged` wołają
 `listAudit(5000)`, czyli `SELECT … FROM audit_log ORDER BY kiedy DESC LIMIT 5000`. Limit stoi
