@@ -186,3 +186,12 @@ Brak.
 - **SHOULD-FIX (kolejność `GROUP BY`):** w teście „spacja na końcu" dopisany komentarz, że wynik
   `A: 1` zależy od kolejności grup bez `ORDER BY`, i co sprawdzać, gdyby test padł.
 
+
+## Docs updates
+
+- `docs/rebuild-roadmap.md` — wiersz P7.3 → ✅ (2026-09-21, ticket 75). Pod tabelą „Iteracja 7"
+  dopisane „Wejście od P7.3" z notami dla P7.1, P7.2 i P7.4.
+- `docs/rebuild-backlog.md` #40 — „Uzupełnienie P7.3": zasięg objawu „podpowiada samą siebie"
+  zmierzony (437 z 500, seed obejmuje co najwyżej 72). Status wpisu bez zmian (✅ zatwierdzone,
+  realizuje P7.2).
+- `docs/instrukcja-testow-I7.md` — celowo bez zmian, to zadanie P7.4.

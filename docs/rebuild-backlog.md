@@ -2498,6 +2498,15 @@ pending pozycja „AGRI STAR II" dostaje self-match z `podobienstwo: 100` (wida�
 `contract/fixtures/GET_atrybuty_pending.json` i w widoku `/atrybuty` → panel „Do akceptacji"),
 bo wartość zasiana z `model` trafia do słownika `bieznik`.
 
+**Uzupełnienie P7.3 (ticket 75, 2026-09-21) — zasięg objawu zmierzony.** Na kopii snapshotu
+437 z 500 pozycji kolejki podpowiada samą siebie jako pierwszą sugestię: `bieznik` 242, `rozmiar` 99,
+`marka` 68, `indeks_nosnosci` 27, `konstrukcja` 1. Przestawienie seedu na `products.bieznik`
+obejmuje co najwyżej 72 z nich (`bieznik` z `origin = 'catalog'`). Reszta to wartości ręczne
+(`origin = 'user'`, 236) albo rodzaje spoza seedu z `model`. Objaw zniknie dopiero po „sprzątaniu
+samego objawu” z akapitu „Do decyzji”. Skutek uboczny: alias na samą siebie pokazuje
+w ostrzeżeniu i w toaście N produktów, choć nic się nie zmienia. Szczegóły:
+`docs/tickets/75-CHORE-niezmiennik-atrybutow/raport.md`.
+
 ---
 
 ### #41 · 2026-09-04 · [BACKEND] · dwie rozjeżdżone mapy rodzaj→kolumna (15 vs 13) — pozycji pending rodzaju `model`/`zastosowanie` nie dałoby się zaakceptować

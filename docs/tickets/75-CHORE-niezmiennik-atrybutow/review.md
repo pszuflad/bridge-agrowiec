@@ -98,3 +98,70 @@ są spójne ze sobą i z oryginałem (zweryfikowane linia w linię). Jedyny real
 niedotrzymana część planu/DoD — brak aktualizacji `docs/rebuild-roadmap.md` — co jest wprost
 wymagane przez `CLAUDE.md` i przez własny plan karty; to trywialne do naprawienia, ale musi zostać
 zrobione przed uznaniem karty za zamkniętą.
+
+## Re-review (2026-09-21, commit `82529ac`)
+
+Weryfikacja obu poprawek zgłoszonych przez koordynatora.
+
+### BLOCKER — roadmapa → naprawione ✓
+
+`docs/rebuild-roadmap.md`, tabela „Iteracja 7": wiersz P7.3 ma teraz
+`✅ \`75-CHORE-niezmiennik-atrybutow\` · 2026-09-21` z krótkim podsumowaniem wyniku (niezmiennik
+się trzyma, 0 rozjazdów na 4148 pomiarach). Format zgodny z konwencją innych zamkniętych kart w
+tego typu tabelach (por. wiersz `P5.1`, linia 3007: `✅ \`69-FEATURE-historia-bez-limitu\` ·
+2026-09-21`).
+
+Pod tabelą doszła sekcja „Wejście od P7.3 (ticket 75, 2026-09-21)" z trzema notami:
+
+- **P7.1** — przypomnienie o dopisaniu `model`/`zastosowanie` do `RODZAJE` w teście po merge'u.
+  Zgodne z Follow-up 1 z `raport.md` i z tym, co było w review jako „Done ✓" (test i tak
+  zostanie zielony, bo nie importuje map).
+- **P7.2** — liczby zweryfikowane wobec `pomiar-wynik.json` i `raport.md`: **437 z 500** pozycji
+  to alias na samą siebie (bieznik 242 + rozmiar 99 + marka 68 + indeks_nosnosci 27 +
+  konstrukcja 1 = 437 ✓), z czego **72** ma `origin = 'catalog'` w `bieznik` (zgodne z
+  `raport.md` linia 80-81: „origin = 'catalog' 201 (bieznik 72, …)"), więc `437 − 72 = 365`
+  zostaje po samej zmianie seedu — liczba w roadmapie się zgadza.
+- **P7.4** — nowe, wcześniej niezgłoszone znalezisko: `docs/instrukcja-testow-I7.md:206-208`
+  rzeczywiście obiecuje „liczba ma odpowiadać temu, co pokazuje kolumna *Wystąpień*" (zweryfikowane
+  odczytem pliku), co jest nieprawdą dla **126 z 500** pozycji (liczba z `pomiar-wynik.json`,
+  `sumaRozjazdow["A≠C"]` wariantu „stan" = 126, potwierdzone wcześniej w oryginalnym review).
+  Przykład z samej instrukcji — „186 produktów" przy `bieznik` — zgadza się z przykładem
+  „AGRI STAR II": A = 186 w `raport.md` (linia 74); roadmapa poprawnie dodaje, że ostrzeżenie
+  (B = C) dla tej samej pozycji to 188, a nie 186. Drugi przykład w roadmapie, „ALLIANCE" 780/848,
+  też zgadza się z `raport.md` linia 74. To trafne i dobrze udokumentowane znalezisko — instrukcja
+  faktycznie obiecuje coś, czego kod (świadomie, 1:1 z oryginałem) nie dotrzymuje.
+
+`raport.md` dostał równoległy wpis w sekcji „Werdykt i rekomendacja" (nota o §3.11) oraz nową
+sekcję „Review fixes applied" podsumowującą obie poprawki — spójne z tym, co faktycznie zmieniono.
+
+**Werdykt: BLOCKER zamknięty.** Roadmapa opisuje STAN (data + ID ticketa + wynik), nie zamiar, noty
+trafiły do właściwego bloku (Iteracja 7, nie do bloku już zamkniętego), liczby zweryfikowane wobec
+`pomiar-wynik.json` i się zgadzają.
+
+### SHOULD-FIX — komentarz o kolejności GROUP BY → naprawione ✓
+
+`rebuild/backend/test/atrybuty.niezmiennik.test.ts:280-285` (nowe linie w bloku komentarza testu
+„spacja na końcu obok wersji czystej") dostał dopisek: kolejność grup bez `ORDER BY` to w
+praktyce SQLite porządek sortowania, nie gwarancja języka; jeśli test kiedyś padnie na `A: 1`,
+pierwsze podejrzenie to zmiana wersji SQLite / planu zapytania, nie regresja w `skanujNoweWartosci`.
+Dokładnie to, o co proszono w SHOULD-FIX — nazwane ryzyko i wskazówka diagnostyczna zamiast
+milczącego założenia. Nie wymagało zmiany logiki testu (i nie powinno było — sam test dalej
+zielony).
+
+### Regresja
+
+- `npx vitest run test/atrybuty.niezmiennik.test.ts` → 37/37 zielone (ponowne uruchomienie po
+  commicie `82529ac`).
+- `npm run lint` → czysto.
+
+### Nowe uwagi z tej poprawki
+
+Brak. Obie zmiany są punktowe, nie dotykają `src/**`/`contract/**`, nie wprowadzają nowych
+problemów.
+
+## Werdykt końcowy
+
+**Brak BLOCKERów.** Jedyny BLOCKER z pierwszego przebiegu (brak aktualizacji roadmapy) jest
+usunięty i zweryfikowany liczbowo wobec `pomiar-wynik.json`/`raport.md`. Zostaje 1 NICE-TO-HAVE
+z pierwszego przebiegu (mylące pole `"C≠D poza aliasem na samą siebie"` w skrypcie pomiarowym) —
+kosmetyczne, nie blokuje merge'a. Karta gotowa do połączenia.
