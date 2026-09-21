@@ -108,7 +108,8 @@ describe("podobieństwo wartości atrybutów", () => {
     /** Świadome odstępstwo, #42: reguła „+" patrzy na postać znormalizowaną. */
     it("reguła plusów działa też przy różnej wielkości liter", () => {
       expect(czySugerowacAlias("abcdefghij+", "ABCDEFGHIJ")).toBe(false);
-      expect(czySugerowacAlias("bkt+", "BKT")).toBe(false);
+      // 12 na 13 znaków = 0,923, więc próg przechodzi — odrzuca dopiero reguła „+"
+      expect(czySugerowacAlias("150A8 RADIAL+", "150a8 radial")).toBe(false);
     });
 
     /**

@@ -177,3 +177,13 @@ Brak zmian kontraktu. Zmienia się zachowanie (świadome odstępstwa #40, #42):
   jest nieaktualny.
 - **Słownik z wartościami niezgodnymi z konwencją WIELKICH liter** („Farmax R75”, „MG638  napęd”,
   „Alliance”) to ten sam wątek co #92 (strona danych), do karty PR.5.
+
+## Review fixes applied
+
+Review (1 iteracja): 0 BLOCKER, 1 SHOULD-FIX, 1 NICE-TO-HAVE.
+- SHOULD-FIX, poprawione: przypadek `czySugerowacAlias("bkt+", "BKT")` odpadał już na progu
+  podobieństwa (0,75), więc nie dowodził reguły `+` po normalizacji. Zastąpiony parą
+  `"150A8 RADIAL+"` / `"150a8 radial"` (0,923 ≥ 0,9), którą odrzuca dopiero reguła `+`.
+- NICE-TO-HAVE, do follow-upu: `listaPending` robi jedno zapytanie o kandydatów na każdą pozycję
+  kolejki (N+1, zastane, 1:1 z oryginałem). Po sprzątaniu kolejka jest 8× krótsza, więc presja
+  spadła.
