@@ -34,13 +34,16 @@ function wiersz(nadpisania: Partial<WierszAudytu> = {}): WierszAudytu {
   };
 }
 
-describe("typWpisu — słownik pięciu rozpoznawanych akcji", () => {
+describe("typWpisu — słownik rozpoznawanych akcji", () => {
   it.each([
     ["upload_pliku", "import"],
     ["import_cennika", "import"],
     ["eksport_csv", "eksport"],
     ["eksport_shoper", "eksport"],
     ["edycja_produktu", "edycja"],
+    // Backlog #39 (ticket 74) — świadome odstępstwo: przepisania z kolejki atrybutów.
+    ["atrybut_pending_zaakceptowano_z_edycja", "edycja"],
+    ["atrybut_pending_zaakceptowano_jako_alias", "edycja"],
   ])("%s → %s", (akcja, oczekiwany) => {
     expect(typWpisu(akcja)).toBe(oczekiwany);
   });
@@ -61,14 +64,21 @@ describe("typWpisu — słownik pięciu rozpoznawanych akcji", () => {
     "override",
     "usuniecie_override",
     "czyszczenie_stagingu",
+    // Akcje kolejki, które NIE przepisują produktów, zostają poza widokiem (ticket 74, D2).
+    "atrybut_pending_zaakceptowano",
+    "atrybut_pending_odrzucono",
+    "atrybut_pending_wyczyszczono",
+    "atrybut_pending_skanowano",
   ])("%s → null (akcja spoza słownika, wypada z widoku)", (akcja) => {
     expect(typWpisu(akcja)).toBeNull();
   });
 });
 
 describe("akcjeHistorii — klauzula `IN` wyliczana z tego samego słownika (backlog #87)", () => {
-  it("`all` to dokładnie pięć akcji słownika", () => {
+  it("`all` to dokładnie siedem akcji: pięć z oryginału + dwie z kolejki (#39)", () => {
     expect(akcjeHistorii("all").sort()).toEqual([
+      "atrybut_pending_zaakceptowano_jako_alias",
+      "atrybut_pending_zaakceptowano_z_edycja",
       "edycja_produktu",
       "eksport_csv",
       "eksport_shoper",
@@ -80,7 +90,14 @@ describe("akcjeHistorii — klauzula `IN` wyliczana z tego samego słownika (bac
   it.each([
     ["import", ["upload_pliku", "import_cennika"]],
     ["eksport", ["eksport_csv", "eksport_shoper"]],
-    ["edycja", ["edycja_produktu"]],
+    [
+      "edycja",
+      [
+        "edycja_produktu",
+        "atrybut_pending_zaakceptowano_z_edycja",
+        "atrybut_pending_zaakceptowano_jako_alias",
+      ],
+    ],
   ])("typ %s → jego akcje", (typ, akcje) => {
     expect(akcjeHistorii(typ).sort()).toEqual([...akcje].sort());
   });
@@ -223,6 +240,57 @@ describe("naWpisHistorii — mapowanie wiersza audytu", () => {
       dostawca: null,
       uwagi: null,
     });
+  });
+
+  /**
+   * Backlog #39 (ticket 74): przepisanie z kolejki atrybutów. Front przy `edycja` pokazuje
+   * `liczbaPozycji`, `kodProduktu` i `zmienionePola` — tam musi być cała informacja.
+   */
+  it.each([
+    ["atrybut_pending_zaakceptowano_z_edycja", "edycja"],
+    ["atrybut_pending_zaakceptowano_jako_alias", "alias"],
+  ])("%s: realna liczba produktów i opis przed → po", (akcja, wariant) => {
+    const wpis = naWpisHistorii(
+      wiersz({
+        id: 7,
+        akcja,
+        encjaTyp: "atrybut_pending",
+        encjaId: "42",
+        szczegolyJson: JSON.stringify({
+          rodzaj: "vfIf",
+          kolumna: "vf_if",
+          z: "VF ",
+          na: "VF",
+          produktow_zaktualizowano: 312,
+        }),
+      }),
+    );
+    expect(wpis).toEqual({
+      id: 7,
+      typ: "edycja",
+      kiedy: "2026-07-28T06:00:00.000Z",
+      dostawca: null,
+      uzytkownik: "Marta Bieguniak",
+      liczbaPozycji: 312,
+      nazwaPliku: null,
+      format: null,
+      kodProduktu: "vf_if: „VF ” → „VF”",
+      zmienionePola: [`vf_if (${wariant} z kolejki)`],
+      uwagi: `Kolejka atrybutów — ${wariant}: vf_if: „VF ” → „VF”, produktów: 312`,
+    });
+  });
+
+  it("przepisanie z kolejki z uszkodzonymi szczegółami nie łamie kształtu wpisu", () => {
+    const wpis = naWpisHistorii(
+      wiersz({
+        akcja: "atrybut_pending_zaakceptowano_z_edycja",
+        encjaTyp: "atrybut_pending",
+        szczegolyJson: "nie-json",
+      }),
+    )!;
+    expect(wpis.liczbaPozycji).toBeNull();
+    expect(wpis.kodProduktu).toBe("?: „?” → „?”");
+    expect(wpis.zmienionePola).toEqual(["? (edycja z kolejki)"]);
   });
 
   it("edycja bez `zmiany` albo z `zmiany` niebędącym tablicą daje pustą listę", () => {
