@@ -71,9 +71,17 @@ export function trasyEksportuShoper({ db }: ZaleznosciEksportuShoper): Router {
    * Bez `?dostawca` albo z `dostawca=wszyscy` oddaje ZIP `shoper_wszyscy_{data}.zip`
    * z osobnym CSV per dostawca; z konkretnym kodem — pojedynczy plik.
    *
-   * ⚠ ZIP jest STRUMIENIOWANY: nagłówki idą przed pierwszym bajtem archiwum, więc gdy
-   * `archiver` padnie w trakcie, nie da się już odpowiedzieć 500 — stąd warunek
-   * `headersSent` w obu obsługach błędu, przeniesiony 1:1 z oryginału (`:48792`, `:48804`).
+   * ⚠ ZIP jest STRUMIENIOWANY: nagłówki idą przed pierwszym bajtem archiwum, więc gdy coś
+   * padnie w trakcie, nie da się już odpowiedzieć 500. Oryginał (`:48792`, `:48804`) miał wtedy
+   * tylko `if (!res.headersSent)` i NIE ROBIŁ NIC — klient wisiał bez końca. U nas (karta P5.2,
+   * decyzja D2 karty 70) oba handlery idą przez `przerwij()`: przed nagłówkami 500 jak
+   * w oryginale, po nagłówkach zerwanie połączenia — przeglądarka pokazuje nieudane pobieranie.
+   * Produkcja tej ścieżki nie zna, bo pada wcześniej (niżej).
+   *
+   * ⚠ ODSTĘPSTWO OD PRODUKCJI (backlog #93, decyzja użytkownika 2026-09-18): w produkcji ta
+   * gałąź ZAWSZE oddaje 500 — `archiver@5.3.2` z jej lockfile'a nie eksportuje `ZipArchive`
+   * („zip pipeline failed TypeError: oh is not a constructor"). My mamy `archiver@8` i ZIP
+   * działa; tak ma zostać. Wersji pilnuje `test/zaleznosci.archiver.test.ts`.
    *
    * ⚠ Lista dostawców do ZIP-a idzie z `listaDostawcow`, nie z `DISTINCT products.dostawca`.
    * Dostawca bez produktów dostaje więc plik z samym nagłówkiem — tak jak w produkcji.
@@ -87,13 +95,35 @@ export function trasyEksportuShoper({ db }: ZaleznosciEksportuShoper): Router {
       res.setHeader("Content-Type", "application/zip");
       res.setHeader("Content-Disposition", `attachment; filename="shoper_wszyscy_${data}.zip"`);
 
+      let archiwum: InstanceType<typeof import("archiver").ZipArchive> | undefined;
+
+      /**
+       * Wspólne wyjście awaryjne obu handlerów (`on("error")` i `.catch`). Pierwszy błąd
+       * kończy odpowiedź, kolejne tylko lądują w logu.
+       */
+      const przerwij = (etykieta: string, blad: unknown, odpowiedz500: () => void) => {
+        console.error(etykieta, blad);
+        if (res.writableEnded || res.destroyed) return;
+
+        if (res.headersSent) {
+          // Za późno na status — zrywamy połączenie, zamiast zostawić klienta w zawieszeniu.
+          res.destroy(blad instanceof Error ? blad : undefined);
+          archiwum?.abort();
+          return;
+        }
+        // Odpinamy archiwum, zanim odpowiemy 500 — inaczej archiver pisałby dalej
+        // do zakończonej już odpowiedzi.
+        archiwum?.unpipe(res);
+        archiwum?.abort();
+        odpowiedz500();
+      };
+
       void (async () => {
         const ZipArchive = await konstruktorZip();
-        const archiwum = new ZipArchive({ zlib: { level: 9 } });
+        archiwum = new ZipArchive({ zlib: { level: 9 } });
 
         archiwum.on("error", (blad: Error) => {
-          console.error("zip error", blad);
-          if (!res.headersSent) res.status(500).end();
+          przerwij("zip error", blad, () => res.status(500).end());
         });
         archiwum.pipe(res);
 
@@ -117,10 +147,9 @@ export function trasyEksportuShoper({ db }: ZaleznosciEksportuShoper): Router {
 
         await archiwum.finalize();
       })().catch((blad: unknown) => {
-        console.error("zip pipeline failed", blad);
-        if (!res.headersSent) {
-          res.status(500).json({ error: blad instanceof Error ? blad.message : "zip" });
-        }
+        przerwij("zip pipeline failed", blad, () =>
+          res.status(500).json({ error: blad instanceof Error ? blad.message : "zip" }),
+        );
       });
       return;
     }

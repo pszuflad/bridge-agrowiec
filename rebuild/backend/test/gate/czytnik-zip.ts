@@ -17,6 +17,8 @@
  */
 import { inflateRawSync } from "node:zlib";
 
+import type { Response } from "supertest";
+
 export type WpisZip = { nazwa: string; tresc: Buffer };
 
 const SYGNATURA_EOCD = 0x06054b50;
@@ -87,7 +89,10 @@ export function czytajZip(zip: Buffer): WpisZip[] {
       throw new Error(`${nazwa}: zła sygnatura nagłówka lokalnego (offset ${offsetLokalny})`);
     }
     const start =
-      offsetLokalny + 30 + zip.readUInt16LE(offsetLokalny + 26) + zip.readUInt16LE(offsetLokalny + 28);
+      offsetLokalny +
+      30 +
+      zip.readUInt16LE(offsetLokalny + 26) +
+      zip.readUInt16LE(offsetLokalny + 28);
     const dane = zip.subarray(start, start + rozmiarSkompresowany);
     if (dane.length !== rozmiarSkompresowany) throw new Error(`${nazwa}: dane urwane`);
 
@@ -104,7 +109,8 @@ export function czytajZip(zip: Buffer): WpisZip[] {
     wpisy.push({ nazwa, tresc });
   }
 
-  if (p !== eocd) throw new Error(`katalog centralny: ${eocd - p} B nadmiarowych po ${liczbaWpisow} wpisach`);
+  if (p !== eocd)
+    throw new Error(`katalog centralny: ${eocd - p} B nadmiarowych po ${liczbaWpisow} wpisach`);
   return wpisy;
 }
 
@@ -112,7 +118,7 @@ export function czytajZip(zip: Buffer): WpisZip[] {
  * Parser supertest zbierający odpowiedź do jednego bufora. Bez niego supertest zostawia
  * `application/zip` jako pusty `body`. Użycie: `request(app).get(...).buffer(true).parse(doBufora)`.
  */
-export function doBufora(res: NodeJS.ReadableStream, cb: (blad: Error | null, body: Buffer) => void): void {
+export function doBufora(res: Response, cb: (blad: Error | null, body: Buffer) => void): void {
   const kawalki: Buffer[] = [];
   res.on("data", (c: Buffer) => kawalki.push(c));
   res.on("end", () => cb(null, Buffer.concat(kawalki)));

@@ -219,3 +219,65 @@ describe("GATE — eksport do Shopera, dwie trasy (blok 8a)", () => {
     });
   });
 });
+
+/**
+ * ŚCIEŻKA BŁĘDU ZIP-a (karta P5.2, zadanie 4; decyzja D2 karty 70).
+ *
+ * ZIP jest strumieniowany: `archiwum.pipe(res)` stoi PRZED dopisaniem wpisów i zapisem audytu,
+ * a nagłówki 200 wychodzą z pierwszym bajtem archiwum. Jeśli potem cokolwiek padnie, odpowiedzi
+ * nie da się już zamienić na 500. Przed poprawką trasa wtedy NIE ROBIŁA NIC — klient dostawał
+ * nagłówki i czekał bez końca (w przeglądarce: pobieranie „w toku" na zawsze).
+ *
+ * Usterkę wywołujemy BEZ ATRAP: usuwamy z bazy tabelę `audit_log`, więc `zapiszAudyt` rzuca
+ * dokładnie tak, jak rzuciłby przy zablokowanej albo pełnej bazie. Test wymaga, żeby klient
+ * dostał ZAKOŃCZENIE odpowiedzi — 500 albo zerwane połączenie (przeglądarka pokaże nieudane
+ * pobieranie) — a nie wiszenie. Sprawdzone: na kodzie sprzed poprawki ten test pada na limicie.
+ *
+ * Produkcja tej ścieżki nie zna: pada wcześniej, na `new ZipArchive` (backlog #93).
+ */
+describe("GATE — eksport ZIP: błąd w trakcie strumienia kończy odpowiedź (P5.2)", () => {
+  let srodowisko: SrodowiskoTestowe;
+  let token: string;
+
+  beforeAll(async () => {
+    srodowisko = await stworzSrodowiskoTestowe();
+    zasiejProdukty(srodowisko.db);
+    zasiejDostawcow(srodowisko.db);
+
+    const odp = await request(srodowisko.app)
+      .post("/api/login")
+      .send({ email: srodowisko.dane.email, password: srodowisko.dane.haslo });
+    token = (odp.body as { token: string }).token;
+  });
+
+  afterAll(() => srodowisko.posprzataj());
+
+  it("padnięty zapis audytu: klient dostaje 500 albo zerwane połączenie, nie wiszenie", async () => {
+    srodowisko.sqlite.exec("DROP TABLE audit_log");
+
+    const wynik = await request(srodowisko.app)
+      .get("/api/export-shoper")
+      .set("Authorization", `Bearer ${token}`)
+      .timeout(5000)
+      .buffer(true)
+      .parse(doBufora)
+      .then(
+        (odp) => ({ status: odp.status, blad: undefined }),
+        (blad: Error & { code?: string; timeout?: number; status?: number }) => ({
+          status: blad.status,
+          blad,
+        }),
+      );
+
+    expect(
+      wynik.blad?.timeout,
+      "klient zawisł — odpowiedź nigdy się nie zakończyła",
+    ).toBeUndefined();
+    if (wynik.blad && wynik.status === undefined) {
+      // Zerwane połączenie: przeglądarka oznaczy pobieranie jako nieudane.
+      expect(["ECONNRESET", "ECONNABORTED"]).toContain(wynik.blad.code);
+    } else {
+      expect(wynik.status).toBe(500);
+    }
+  }, 15000);
+});
