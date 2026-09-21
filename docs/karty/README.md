@@ -132,17 +132,23 @@ były cztery karty planu P (tickety 77, 79, 80, 81), które swoje „sync docs�
 w roadmapie — przeniesienie tekstu spod nich dałoby każdej z nich dokładnie ten konflikt,
 któremu ta zmiana ma zapobiec.
 
-**Okres przejściowy:** karty, które wystartowały PRZED ticketem 82, kończą po staremu (piszą
+**Okres przejściowy (zakończony etapem 2):** karty, które wystartowały PRZED ticketem 82, kończą po staremu (piszą
 w roadmapie). Karty startujące PO nim piszą już tylko w `docs/karty/`. Jeśli karta nie ma
 jeszcze `karta.md`, zakłada go sama przy „sync docs” (nowy plik = zero konfliktu), przepisując
 zakres z tabeli planu P; wiersza w tabeli roadmapy NIE rusza — stan widać w `tools/stan-kart.sh`.
 
-**Etap 2 — ⬜ do zrobienia, gdy żadna karta nie będzie w toku** (sprawdź: `git worktree list`
-i `gh pr list --state open` — zero kart planu P): koordynator jednym ticketem `DOCS`
-- przenosi treść każdej otwartej karty planu P (P6.3, P7.4, P9.2, P10.x, PR.x i ewentualne
-  nowe) z bloku „Poprawki po testach Ani” do `docs/karty/<ID>/karta.md`, a noty „Dla X…”
-  do `docs/karty/<X>/wejscie-<N>.md`;
-- z tabel kart planu P usuwa kolumnę „Stan” i dokłada kolumnę „Karta” z linkiem do katalogu;
-- skraca wiersze §4 roadmapy (4, 5, 9, 13, 14) do jednego zdania + odsyłacza — szczegóły są
-  w blokach §5;
-- karty zamknięte (✅) zostają w roadmapie tak, jak są — to historia, nikt jej już nie edytuje.
+**Etap 2 (ticket 86, 2026-09-21) — zrobiony:**
+- karty otwarte planu P przeniesione z roadmapy do katalogów: **P10.1–P10.4, PR.1–PR.6**; noty „Dla X…”
+  rozpisane na pliki wejść (`PR.3/wejscie-76.md`, `PR.3/wejscie-77.md`, `PR.5/wejscie-78.md`, oraz
+  nowe `PR.6/wejscie-77.md` — nota z raportu ticketu 77, której w roadmapie nie było);
+- w roadmapie tabele Iteracji 10 i przeglądu 12 widoków to już tylko spis (bez kolumny „Stan”,
+  z linkiem do katalogu), a tablica §4 ma krótkie wiersze + wiersz „P” dla planu poprawek;
+- **nie przeniesione, celowo:** **P6.3** — ticket 85 (PR #99) sam zakłada `P6.3/karta.md` według
+  nowych reguł, więc założenie go tutaj dałoby konflikt dwóch nowych plików; **P7.4** — ticket 79
+  (PR #100) wystartował przed ticketem 82 i zamyka kartę po staremu, w sekcji Iteracji 7 roadmapy,
+  której ten ticket nie ruszał;
+- tabele kart zamkniętych (Iteracje 5, 6, 7, 9) zostają w roadmapie jako historia; wiersze P6.3 i
+  P7.4 odświeża koordynator po merge'u #99 i #100.
+
+Od tego ticketu **każda nowa karta dostaje katalog od razu przy planowaniu** (koordynator, patrz
+„Przepływ fali”) — okres przejściowy się skończył.
