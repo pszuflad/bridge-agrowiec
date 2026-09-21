@@ -122,8 +122,9 @@ pm2 save >/dev/null 2>&1 || true
 # --- frontend: build -> publikacja do docroota ---
 log "frontend: build -> $DOCROOT"
 ( cd rebuild/frontend && npm ci --include=dev && npm run build )   # jw. — build wymaga devDependencies
-mkdir -p "$DOCROOT"
-rsync -a --delete --exclude '.htaccess' rebuild/frontend/dist/ "$DOCROOT"/
+# `--delete` z wyłączeniem .htaccess i katalogu CSV Selly (SELLY_CSV_DIR leży POD docrootem,
+# żeby plik był pobieralny) — bez tego każdy deploy kasował wygenerowany CSV (ticket 93).
+bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR"
 cp -f deploy/staging/htaccess "$DOCROOT/.htaccess"       # proxy utrzymywany z repo
 
 # --- sprzątanie: zostaw 5 ostatnich release ---
