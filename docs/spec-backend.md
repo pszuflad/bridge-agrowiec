@@ -200,6 +200,14 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > pisze do `audit_log`, a akceptacja z edycją/alias jest dodatkowo widoczna w Historii jako
 > `edycja`; oryginał tego nadal nie robi. Mapy rodzaj→kolumna są u nas jedne (15 rodzajów) —
 > `pending_module.cjs` w oryginale ma osobną, węższą mapę (13, bez `model`/`zastosowanie`).
+> **Kolejne świadome odstępstwo rebuildu** (2026-09-21, `78-FEATURE-seed-bieznikow-podobienstwo`,
+> backlog #40/#42): seed słownika `bieznik` u nas bierze `SELECT DISTINCT bieznik FROM products`
+> (oryginał: `model`); po każdym skanie i przy starcie po seedzie usuwamy z kolejki pending
+> pozycje, których wartość jest już dosłownie w słowniku, a reguła sugestii nigdy nie proponuje
+> napisu identycznego z pozycją (oryginał kolejki nigdy nie czyści i podpowiada samemu sobie ze
+> 100%); podobieństwo aliasów liczymy po normalizacji trim/lowercase/zwinięciu spacji, więc pary
+> różniące się tylko wielkością liter dostają teraz sugestię (oryginał porównuje surowe napisy).
+> Szczegóły: `docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`.
 
 > **Potwierdzone w 8a** (`28-FEATURE-selly-eksport-backend`, 2026-09-04): panel Selly to **5 GET
 > + 5 POST**, nie 7+3 jak zakładała robocza notatka — `categories` i `producers` są POST-ami

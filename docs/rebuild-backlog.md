@@ -32,13 +32,14 @@ Sugerowane sklejenie w tickety: **CSV** = #73 + #76 + #77(część) · **applica
 + #80 + #82 · **MO9** = #78 + #79(drugi hunk) · **szerokość** = #83 · **13d** = #74 + #77(delta) + #81.
 
 **Backlog rozliczony w sesji 12e (2026-09-08).** Wszystkie wpisy ✅ zostały naniesione,
-❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #40, #42, #43) to
+❌ świadomie pominięte. Pozostałe ⬜ (#11, #12, #19, #21, #25, #26, #31–#35, #43) to
 **defekty PRODUKCJI odtworzone świadomie 1:1**, czekające na decyzję produktową Ani — żaden nie
 jest regresją odbudowy i żaden nie blokuje cutoveru. (#26 od 2026-09-21 częściowo zrobiony —
 patrz wpis #26.) Szczegóły rozliczenia:
 `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md` (sekcja „Rozliczenie
 backlogu"). **#39 i #41 rozstrzygnięte przez Anię i wdrożone 2026-09-21**
-(`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`).
+(`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`). **#40 i #42 rozstrzygnięte przez Anię
+i wdrożone 2026-09-21** (`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`).
 
 ---
 
@@ -2502,8 +2503,8 @@ podaje `produktow_zaktualizowano`. To nie zastępuje wpisu w dzienniku.
 | **Kategoria** | BACKEND (seed słownika atrybutów, uruchamiany przy każdym starcie procesu) |
 | **Pliki** | `mirror/backend/atrybuty_module.cjs:79-83` (`SELECT DISTINCT model` → `insWartosc('bieznik', …)`), `:75-78` (analogiczny, poprawny seed marki), `:99` (`seed(db)` przy rejestracji modułu); `rebuild/schema/001_schema.sql:53` (`products.bieznik TEXT` istnieje); dowód skutku: `contract/fixtures/GET_atrybuty_pending.json`; port: `rebuild/backend/src/repos/atrybuty.ts:355` (`zasiejSlownikAtrybutow`) |
 | **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
-| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D1) |
-| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 1 |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`, decyzja D1); naprawione w **78** (`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`) |
+| **Status** | ✔ **zrealizowane w rebuild (ticket 78, 2026-09-21)** — sprzątanie kolejki (D1) + seed `bieznik` z `products.bieznik` (D5) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 1 (sprostowanie instrukcji: P7.4, follow-up) |
 
 **DECYZJA ANI 2026-09-21 (pytanie 7.2): TAK.** Cytat: „tak, przeszkadza mi to". Pozycje kolejki
 podpowiadające same siebie ze 100% mają zniknąć — seed słownika `bieznik` idzie dziś z
@@ -2522,10 +2523,10 @@ w słowniku; kolejny start procesu wsypał ją do słownika z `products.model`; 
 z kolejki pozycji, które trafiły już do katalogu, więc wpis wisi dalej i jako „sugerowany alias"
 dostaje swój własny odpowiednik. Ania widzi w kolejce propozycję „zamień X na X".
 
-**Co zrobiła odbudowa.** Port 1:1 (D1), z komentarzem w `repos/atrybuty.ts` opisującym quirk
-i jego ślad w fixture.
+**Co zrobiła odbudowa (7a, stan sprzed ticketu 78).** Port 1:1, z komentarzem w `repos/atrybuty.ts`
+opisującym quirk i jego ślad w fixture.
 
-**Do decyzji.** Czy przestawić seed na `products.bieznik`. Ryzyko: zawartość słownika `bieznik`
+**Do decyzji (stan sprzed ticketu 78).** Czy przestawić seed na `products.bieznik`. Ryzyko: zawartość słownika `bieznik`
 rozjedzie się z produkcją (wypadną z niego nazwy modeli, dojdą realne bieżniki), a to zmienia
 wyniki `scan-pending`, listę sugerowanych aliasów i zamrożony `GET_atrybuty_pending.json` —
 czyli wymaga przenagrania fixture'a. Sprzątanie samego objawu (usuwanie z kolejki pozycji
@@ -2539,11 +2540,33 @@ bo wartość zasiana z `model` trafia do słownika `bieznik`.
 **Uzupełnienie P7.3 (ticket 75, 2026-09-21) — zasięg objawu zmierzony.** Na kopii snapshotu
 437 z 500 pozycji kolejki podpowiada samą siebie jako pierwszą sugestię: `bieznik` 242, `rozmiar` 99,
 `marka` 68, `indeks_nosnosci` 27, `konstrukcja` 1. Przestawienie seedu na `products.bieznik`
-obejmuje co najwyżej 72 z nich (`bieznik` z `origin = 'catalog'`). Reszta to wartości ręczne
-(`origin = 'user'`, 236) albo rodzaje spoza seedu z `model`. Objaw zniknie dopiero po „sprzątaniu
-samego objawu” z akapitu „Do decyzji”. Skutek uboczny: alias na samą siebie pokazuje
-w ostrzeżeniu i w toaście N produktów, choć nic się nie zmienia. Szczegóły:
-`docs/tickets/75-CHORE-niezmiennik-atrybutow/raport.md`.
+obejmuje co najwyżej 72 z nich (`bieznik` z `origin = 'catalog'`). Reszta to `origin = 'user'`
+(236 — wartość domyślna kolumny, nie dowód ręcznego dodania) albo rodzaje spoza seedu z `model`.
+Objaw zniknie dopiero po „sprzątaniu samego objawu” z akapitu „Do decyzji”. Skutek uboczny: alias
+na samą siebie pokazuje w ostrzeżeniu i w toaście N produktów, choć nic się nie zmienia. Szczegóły:
+`docs/tickets/75-CHORE-niezmiennik-atrybutow/raport.md`. **Korekta (ticket 78):** „437 z 500” to
+snapshot po skanie; kopia `db/snapshot.db` ma 498 pozycji przed skanem, 500 dopiero po nim
+(skan dokłada 2 pozycje `konstrukcja`).
+
+**Rozstrzygnięte (decyzja Ani 2026-09-21, wdrożone w tickecie 78).** Sprzątanie kolejki (D1):
+pozycja obecna dosłownie w słowniku tego samego rodzaju jest usuwana na końcu każdego skanu
+i przy starcie procesu zaraz po seedzie; reguła sugestii nigdy nie proponuje napisu identycznego
+z pozycją. Seed `bieznik` (D5) bierze `SELECT DISTINCT bieznik FROM products` zamiast `model`.
+Pomiar zanieczyszczenia słownika `bieznik` (D3, `docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/raport.md`):
+1665 wartości, 1660 w obu kolumnach (`model` i `bieznik`), 3 tylko w `bieznik`, 0 tylko w `model`,
+2 w żadnej, 13 wartości obecnych tylko w `model` nieobecnych w słowniku, 17 z 7405 produktów mają
+`model ≠ bieznik`, 0 wpisów `atrybut_wartosc_dodano` w `audit_log` — decyzja: istniejących
+wartości słownika nie usuwać, bez migracji (zmiana seedu działa tylko na przyszłość). Fixture
+`GET_atrybuty_pending.json` (D2) zostaje bez zmian — nagranie produkcji, nienagrywalne lokalnie
+(moduły `atrybuty`/`pending` mają zahardkodowane ścieżki produkcyjne), gate go sprawdza tylko
+kształtem.
+**Skutek na snapshocie:** kolejka 498 → 61 po starcie procesu (bieznik 296→54, rozmiar 99→0,
+marka 68→0, indeks_nosnosci 27→0, kategoria 7→7, konstrukcja 1→0); po pierwszym skanie 63
+(skan dokłada 2 nowe pozycje `konstrukcja`, niezwiązane ze sprzątaniem).
+**Świadoma konsekwencja:** marki i bieżniki z katalogu wychodzą z kolejki po najbliższym
+restarcie procesu (seed „akceptuje” wszystko, co już jest w `products`) — to semantyka seedu
+z produkcji, dotąd ukryta pod self-matchem. Szczegóły:
+`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`.
 
 ---
 
@@ -2612,8 +2635,8 @@ pomiar wyżej).
 | **Kategoria** | BACKEND (algorytm sugerowania aliasów w kolejce atrybutów) |
 | **Pliki** | `mirror/backend/pending_module.cjs:41-55` (`levenshtein`), `:57-62` (`similarity`), `:65-72` (`shouldSuggestAlias`); port: `rebuild/backend/src/repos/atrybuty-pending.ts:57,80,96`, testy `rebuild/backend/test/atrybuty.podobienstwo.test.ts` |
 | **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
-| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`) |
-| **Status** | ✔ odtworzone w rebuild (7a) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 2 |
+| **Iteracja** | odtworzone 1:1 w **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`); naprawione w **78** (`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`) |
+| **Status** | ✔ **zrealizowane w rebuild (ticket 78, 2026-09-21)** — podobieństwo liczone po normalizacji (trim/toLowerCase/zwinięcie spacji) · w produkcji **nadal obecne** · skutek widoczny dla Ani opisany w `docs/instrukcja-testow-I7.md` §4 pkt 2 (sprostowanie instrukcji: P7.4, follow-up) |
 
 **DECYZJA ANI 2026-09-21 (pytanie 7.3): TAK, z uzasadnieniem biznesowym.** Cytat: „tak, bo mamy logikę,
 że katalog ma się zmieniać na drukowane litery, a w plikach przychodzi różnie". Czyli rozjazd
@@ -2630,11 +2653,11 @@ człowieka to ta sama marka. Im krótsza wartość, tym gorzej: różnica w jedn
 się w progu 0,9 dopiero od 10 znaków. To ten sam rodzaj rozjazdu, który w katalogu prostował
 `kategoriafix` (**#2** — duplikaty różniące się wyłącznie wielkością liter).
 
-**Co zrobiła odbudowa.** Port 1:1, jawnie odnotowany w `plan.md` („bez normalizacji wielkości
-liter i spacji — oryginał jej nie ma"); testy jednostkowe zamrażają wyniki policzone ze wzoru
-oryginału.
+**Co zrobiła odbudowa (7a, stan sprzed ticketu 78).** Port 1:1, jawnie odnotowany w `plan.md`
+(„bez normalizacji wielkości liter i spacji — oryginał jej nie ma"); testy jednostkowe zamrażają
+wyniki policzone ze wzoru oryginału.
 
-**Do decyzji.** Czy porównywać wartości po normalizacji (`trim().toLowerCase()`, zwinięte
+**Do decyzji (stan sprzed ticketu 78).** Czy porównywać wartości po normalizacji (`trim().toLowerCase()`, zwinięte
 spacje), zostawiając w słowniku i w `products` formę oryginalną. Ryzyko: sugestii będzie
 WIĘCEJ i będą inne niż dziś, a przycisk „akceptuj jako alias" przepisuje produkty w całym
 katalogu — rośnie więc koszt pomyłki (od ticketu 74 akcja zostawia ślad w audycie, **#39**). Zmiana
@@ -2642,6 +2665,21 @@ rozjeżdża pole `sugerowane_aliasy` z zamrożonym `GET_atrybuty_pending.json`.
 
 **Uzupełnienie 7b.** Skutek widoczny w kolejce: „BKT" i „bkt" nie dostają sugestii aliasu,
 kolumna „Sugerowane aliasy" w widoku `/atrybuty` pokazuje dla nich „brak podobnych".
+
+**Rozstrzygnięte (decyzja Ani 2026-09-21, wdrożone w tickecie 78).** Normalizacja
+(`trim()`, `toLowerCase()` w JS — obsługuje polskie znaki, w przeciwieństwie do `LOWER()`
+w SQLite, zwinięcie `\s+` do jednej spacji) działa TYLKO do liczenia podobieństwa; w słowniku,
+kolejce i `products` zostaje forma oryginalna. Próg 0,9 i reguła „różnica tylko w `+`" bez zmian,
+stosowana teraz na postaci znormalizowanej. „Nowość" w skanie i sprzątanie (**#40**, D1) zostają
+porównaniem DOKŁADNYM (BINARY) — `bkt` przy `BKT` w słowniku dalej trafia do kolejki, ale dostaje
+sugestię `BKT` 100%.
+**Skutek na snapshocie:** 13 nowych par sugestii, np. `kategoria "rolnicze" → "Rolnicze"` (334
+produkty), `"ciężarowe" → "Ciężarowe"` (106), `bieznik "FARMAX R75" → "Farmax R75"`,
+`"Conti CrossTrac 3" → "CONTI CROSSTRAC 3"`. **Ryzyko:** część sugerowanych form kanonicznych
+jest MAŁYMI literami („Farmax R75", „MG638  napęd"), niezgodnie z konwencją WIELKICH liter w
+słowniku, a sugestie 91% czasem łączą różne produkty (`"MG628 NAPĘD" → "MG638  napęd"`).
+Cofnięcia „akceptuj jako alias" nadal nie ma. Szczegóły:
+`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/raport.md`.
 
 ---
 
@@ -4006,6 +4044,12 @@ GROUP BY LOWER(marka) HAVING COUNT(DISTINCT marka) > 1;
 **Powiązania.** To ten sam problem, co #42 („BKT" i „bkt" nie podpowiadają się nawzajem) i ta sama
 przyczyna, którą Ania nazwała w pytaniu 7.3: **katalog ma konwencję WIELKICH liter, a pliki
 dostawców przychodzą różnie**. Rozstrzygać łącznie z #42, nie osobno.
+
+**Fakt z P7.2 (ticket 78, 2026-09-21).** Słownik `marka` ma obie formy, `ALLIANCE` i `Alliance`.
+Po ticketcie 78 kolejka atrybutów **nie zaproponuje** tej pary jako sugestii aliasu: pozycja
+`ALLIANCE` jest dosłownie obecna w słowniku i znika przy sprzątaniu kolejki (**#40**, D1) zamiast
+dostać sugestię. Duplikat w `products.marka` i w słowniku zostaje nietknięty — to nadal wymaga
+osobnej decyzji (dane vs prezentacja, wyżej).
 
 ---
 
