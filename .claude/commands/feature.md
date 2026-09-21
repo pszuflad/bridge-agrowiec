@@ -63,6 +63,8 @@ użytkownikowi** zamiast po cichu wybierać.
 Twoją mapą są **źródła prawdy odbudowy** wymienione w sekcji „Kontekst odbudowy" wyżej. Zacznij od nich — nie ma tu `README.md` ani `docs/INDEX.md`. Dla danego ticketa wybierz **właściwe sekcje** (nie ładuj całych specyfikacji ani `openapi.yaml` w całości):
 - ustal, których **endpointów/ekranów** dotyczy zadanie → odczytaj odpowiednie ścieżki w `contract/openapi.yaml` i pasujące pliki w `contract/fixtures/`;
 - odczytaj odpowiednie sekcje `docs/spec-backend.md` / `docs/spec-frontend.md`;
+- jeśli ticket realizuje kartę (`P7.4`, `PR.1`…) → `cat docs/karty/<ID>/*.md` (karta + wejścia
+  od innych kart; zob. `docs/karty/README.md`), a z roadmapy tylko blok jej iteracji;
 - sprawdź `docs/rebuild-backlog.md`, czy zadania nie dotyka któraś zdecydowana zmiana (✅/⬜/❌);
 - jeśli zadanie rusza schemat/dane → `rebuild/schema/001_schema.sql`.
 
@@ -350,23 +352,40 @@ Limit: **3 full fix-loop iterations**. If after the 3rd iteration BLOCKERs remai
 
 Based on plan.md + raport.md + review.md + branch diff — decide which files in `docs/` may need an update. **Better too many than too few.** Generally include high-level/index docs (e.g. `INDEX.md`, `README.md`, `CLAUDE.md`, `ROADMAP.md`, a PRD if present) plus selectively any other files in `/docs/` (but not tickets, plans, reports, reviews — only `/docs/`, not deeper).
 
-> **OBOWIĄZKOWO, jeśli ticket realizował blok iteracji odbudowy** (`docs/rebuild-roadmap.md` §5):
-> `docs/rebuild-roadmap.md` i `docs/rebuild-backlog.md` są **zawsze** w zakresie. Roadmapa jest
-> wejściem dla następnej sesji — prompt do niej jest jednorazowy, roadmapa zostaje (patrz
-> `CLAUDE.md`). Doc-checker dostaje wprost polecenie, żeby:
+> **OBOWIĄZKOWO, jeśli ticket realizował kartę odbudowy** (`docs/karty/<ID>/`, dawniej blok
+> w `docs/rebuild-roadmap.md` §5): `docs/karty/` i `docs/rebuild-backlog.md` są **zawsze**
+> w zakresie. Karta jest wejściem dla następnej sesji — prompt do niej jest jednorazowy, karta
+> zostaje (patrz `CLAUDE.md`).
 >
-> 1. **oznaczyć zamknięty blok jako zrobiony** (data + ID ticketa) i opisać zakres FAKTYCZNIE
->    dowieziony, nie planowany — łącznie z tym, gdzie odbiegł od pierwotnego założenia;
-> 2. **każde ustalenie dotyczące PRZYSZŁEGO bloku wpisać DO TEGO BLOKU**, a nie do właśnie
->    zamkniętego. Sesja 3c czyta blok 3c; nota w bloku 3b do niej nie dojdzie. To jest
->    najczęstszy sposób, w jaki wiedza z iteracji ginie;
+> ⛔ **Karta NIE edytuje `docs/rebuild-roadmap.md`** — ani §4, ani tabeli kart, ani wspólnych
+> akapitów iteracji. Karty pracują równolegle, a każda wspólna linia w roadmapie kończyła się
+> konfliktem przy merge'u (7 przypadków w 2026-09-18…21). Roadmapę zmienia wyłącznie
+> koordynator. Pełna tabela własności i szablony: `docs/karty/README.md`.
+>
+> Doc-checker dostaje wprost polecenie, żeby:
+>
+> 1. **oznaczyć kartę jako zrobioną w JEJ pliku** — `docs/karty/<ID>/karta.md`: linia
+>    `> **Stan:** ✅ <data> · <TICKET-ID>` i sekcja „Dowiezione” z zakresem FAKTYCZNIE
+>    dowiezionym, nie planowanym — łącznie z tym, gdzie odbiegł od pierwotnego założenia.
+>    Jeśli karta nie ma jeszcze `karta.md` (okres przejściowy, patrz README), założyć go
+>    z szablonu;
+> 2. **każde ustalenie dotyczące PRZYSZŁEJ karty zapisać jako NOWY plik
+>    `docs/karty/<jej ID>/wejscie-<N>.md`** (N = numer tego ticketa) — nigdy jako dopisek
+>    w cudzym `karta.md` ani w roadmapie. Sesja 3c czyta katalog 3c; nota schowana gdzie
+>    indziej do niej nie dojdzie. To jest najczęstszy sposób, w jaki wiedza z iteracji ginie;
 > 3. **zaktualizować statusy wpisów w backlogu**, których ticket dotknął (✅/🔨/⬜/❌);
-> 4. **usunąć z roadmapy to, co ticket obalił** — nieaktualne założenia o zakresie, błędne
->    przypisania funkcji do sesji, sprostowane fakty o oryginale. Nie dopisywać obok.
+> 4. **usunąć z WŁASNEGO `karta.md` to, co ticket obalił** — nieaktualne założenia o zakresie,
+>    sprostowane fakty o oryginale. Nie dopisywać obok. Jeśli fałsz siedzi w roadmapie albo
+>    w cudzej karcie — zapisać to w sekcji „Do koordynatora” własnego `karta.md`, nie
+>    poprawiać samemu.
+>
+> **Okres przejściowy:** ticket, którego worktree powstał PRZED wprowadzeniem `docs/karty/`
+> (ticket 82), kończy po staremu — w roadmapie. Sprawdzenie: `ls docs/karty/README.md`
+> w worktree ticketa.
 >
 > Jeśli w trakcie ticketa wyszło, że roadmapa przypisała jakąś funkcję do złej sesji
-> (zdarzyło się to już dwukrotnie z `bridge_ext.cjs`), popraw przypisanie i zapisz dowód
-> — numery linii wywołań. **Fakt** zapisz jako fakt; **zmianę przypisania zakresu** potraktuj
+> (zdarzyło się to już dwukrotnie z `bridge_ext.cjs`), zapisz dowód — numery linii
+> wywołań — w „Do koordynatora” własnego `karta.md`. **Fakt** zapisz jako fakt; **zmianę przypisania zakresu** potraktuj
 > jako decyzję użytkownika i zapytaj o nią w Kroku 3, jeśli ticket jeszcze trwa.
 
 ### Step 14: Delegate all docs to doc-checker subagents

@@ -3,11 +3,20 @@
  *
  * To NIE jest ozdobnik do kalkulatora: Ania dodaje tu własnych przewoźników i poprawia
  * dzielniki, a lista jest jedynym miejscem, z którego kalkulator bierze dzielnik.
- * Stan trzyma widok nadrzędny (razem z zapisem do IndexedDB), tutaj jest sama prezentacja.
+ *
+ * ⚠ ODSTĘPSTWA ŚWIADOME (karta P9.1, ticket 76, backlog #27), wszystkie przez to, że lista jest
+ * teraz WSPÓLNA dla firmy i żyje na serwerze, a nie w IndexedDB jednej przeglądarki:
+ *  - usunięcie i „Przywróć domyślne" pytają o potwierdzenie (w oryginale działają od razu);
+ *  - nazwa i dzielnik zapisują się po opuszczeniu pola, nie co znak (plan.md D2) — co znak
+ *    oznaczałoby żądanie na każdy klawisz, a chwilowo pusta nazwa dostałaby 400. Pusta nazwa
+ *    albo zły dzielnik wracają do poprzedniej wartości z komunikatem;
+ *  - przyciski zapisujące są zablokowane, dopóki poprzedni zapis nie wróci z serwera.
+ * Stan listy trzyma widok nadrzędny (razem z zapisem), tutaj jest prezentacja i szkice pól.
  */
 import { Info, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,15 +26,32 @@ import { OBJETOSC_PRZYKLADU, type Przewoznik } from "./przewoznicy";
 
 export type WlasciwosciTabeli = {
   przewoznicy: Przewoznik[];
-  ustawPrzewoznikow: (nastepni: Przewoznik[]) => void;
+  /**
+   * Zapisuje całą listę na serwerze; `true`, gdy się udało (błąd pokazuje widok nadrzędny).
+   * Dostaje ZMIANĘ, nie gotową listę — widok nadrzędny stosuje ją do najświeższego stanu,
+   * żeby szybkie edycje z rzędu nie nadpisały się nawzajem.
+   */
+  zapiszListe: (zmiana: (aktualna: Przewoznik[]) => Przewoznik[]) => Promise<boolean>;
+  /** Trwa zapis — przyciski zmieniające listę czekają. */
+  zapisuje: boolean;
   wybrany: string;
   ustawWybranego: (id: string) => void;
-  przywrocDomyslne: () => void;
+  przywrocDomyslne: () => Promise<boolean>;
 };
+
+/** Niezatwierdzona treść pól wiersza w trybie edycji — znika po opuszczeniu pola. */
+type Szkic = { nazwa?: string; dzielnik?: string };
+
+/** `parseFloat` z przecinkiem jak w oryginale (`:26858`); `null`, gdy nie jest liczbą dodatnią. */
+function naDzielnik(tekst: string): number | null {
+  const dzielnik = Number.parseFloat(tekst.replace(",", "."));
+  return Number.isFinite(dzielnik) && dzielnik > 0 ? dzielnik : null;
+}
 
 export function TabelaPrzewoznikow({
   przewoznicy,
-  ustawPrzewoznikow,
+  zapiszListe,
+  zapisuje,
   wybrany,
   ustawWybranego,
   przywrocDomyslne,
@@ -33,25 +59,63 @@ export function TabelaPrzewoznikow({
   const [edycja, ustawEdycje] = useState(false);
   const [nowaNazwa, ustawNowaNazwe] = useState("");
   const [nowyDzielnik, ustawNowyDzielnik] = useState("");
+  const [szkice, ustawSzkice] = useState<Record<string, Szkic>>({});
+  const [doUsuniecia, ustawDoUsuniecia] = useState<Przewoznik | null>(null);
+  const [pytanieOReset, ustawPytanieOReset] = useState(false);
   const { toast } = useToast();
 
-  const zmienNazwe = (id: string, nazwa: string) =>
-    ustawPrzewoznikow(przewoznicy.map((p) => (p.id === id ? { ...p, nazwa } : p)));
+  const zmienSzkic = (id: string, pole: keyof Szkic, wartosc: string) =>
+    ustawSzkice((poprzednie) => ({ ...poprzednie, [id]: { ...poprzednie[id], [pole]: wartosc } }));
 
-  /** Nieliczbowy albo niedodatni dzielnik jest po cichu IGNOROWANY (`:26858`) — */
-  /** pole zostaje przy poprzedniej wartości, zamiast wpuścić do wzoru NaN. */
-  const zmienDzielnik = (id: string, tekst: string) => {
-    const dzielnik = Number.parseFloat(tekst.replace(",", "."));
-    if (!Number.isFinite(dzielnik) || dzielnik <= 0) return;
-    ustawPrzewoznikow(przewoznicy.map((p) => (p.id === id ? { ...p, dzielnik } : p)));
-  };
+  const porzucSzkic = (id: string, pole: keyof Szkic) =>
+    ustawSzkice((poprzednie) => {
+      const { [pole]: _porzucone, ...reszta } = poprzednie[id] ?? {};
+      return { ...poprzednie, [id]: reszta };
+    });
 
   /**
-   * Usunięcie z dwoma zabezpieczeniami z oryginału (`:26876-26886`): ostatni przewoźnik
-   * zostaje (bez niego kalkulator nie ma czym dzielić), a skasowanie AKTUALNIE WYBRANEGO
-   * przenosi wybór na pierwszego z pozostałych.
+   * Zatwierdzenie pola po opuszczeniu go (plan.md D2). Niezmieniona wartość nie wysyła niczego;
+   * błędna wraca do tej z serwera z komunikatem — oryginał błędny dzielnik po cichu ignorował
+   * (`:26858`), ale tam nie było zapisu, który mógłby się „nie udać" bez śladu.
    */
-  const usun = (id: string) => {
+  const zatwierdzPole = (przewoznik: Przewoznik, pole: keyof Szkic) => {
+    const tekst = szkice[przewoznik.id]?.[pole];
+    porzucSzkic(przewoznik.id, pole);
+    if (tekst === undefined) return;
+
+    if (pole === "nazwa") {
+      if (!tekst.trim()) {
+        toast({
+          title: "Brak nazwy",
+          description: "Nazwa przewoźnika nie może być pusta.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (tekst === przewoznik.nazwa) return;
+      void zapiszListe((aktualna) =>
+        aktualna.map((p) => (p.id === przewoznik.id ? { ...p, nazwa: tekst } : p)),
+      );
+      return;
+    }
+
+    const dzielnik = naDzielnik(tekst);
+    if (dzielnik === null) {
+      toast({
+        title: "Niepoprawny dzielnik",
+        description: "Dzielnik musi być liczbą dodatnią.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (dzielnik === przewoznik.dzielnik) return;
+    void zapiszListe((aktualna) =>
+      aktualna.map((p) => (p.id === przewoznik.id ? { ...p, dzielnik } : p)),
+    );
+  };
+
+  /** Blokada ostatniego przewoźnika z oryginału (`:26876-26880`) — sprawdzana PRZED pytaniem. */
+  const zapytajOUsuniecie = (przewoznik: Przewoznik) => {
     if (przewoznicy.length <= 1) {
       toast({
         title: "Nie można usunąć",
@@ -60,17 +124,24 @@ export function TabelaPrzewoznikow({
       });
       return;
     }
-    ustawPrzewoznikow(przewoznicy.filter((p) => p.id !== id));
-    if (wybrany === id) {
-      const zastepca = przewoznicy.find((p) => p.id !== id);
-      if (zastepca) ustawWybranego(zastepca.id);
-    }
+    ustawDoUsuniecia(przewoznik);
   };
 
-  const dodaj = () => {
+  /**
+   * Usunięcie po potwierdzeniu. Skasowanie AKTUALNIE WYBRANEGO przenosi wybór na pierwszego
+   * z pozostałych (`:26881-26885`).
+   */
+  const usun = (id: string) => {
+    ustawDoUsuniecia(null);
+    const pozostali = przewoznicy.filter((p) => p.id !== id);
+    if (wybrany === id && pozostali[0]) ustawWybranego(pozostali[0].id);
+    void zapiszListe((aktualna) => aktualna.filter((p) => p.id !== id));
+  };
+
+  const dodaj = async () => {
     const nazwa = nowaNazwa.trim();
-    const dzielnik = Number.parseFloat(nowyDzielnik.replace(",", "."));
-    if (!nazwa || !Number.isFinite(dzielnik) || dzielnik <= 0) {
+    const dzielnik = naDzielnik(nowyDzielnik);
+    if (!nazwa || dzielnik === null) {
       toast({
         title: "Brak danych",
         description: "Podaj nazwę i dodatni dzielnik.",
@@ -79,19 +150,61 @@ export function TabelaPrzewoznikow({
       return;
     }
     // Id z sygnatury czasowej — 1:1 z oryginałem (`:26922`).
-    ustawPrzewoznikow([...przewoznicy, { id: `custom_${Date.now()}`, nazwa, dzielnik }]);
+    const zapisano = await zapiszListe((aktualna) => [
+      ...aktualna,
+      { id: `custom_${Date.now()}`, nazwa, dzielnik },
+    ]);
+    if (!zapisano) return;
     ustawNowaNazwe("");
     ustawNowyDzielnik("");
   };
 
+  const przywroc = async () => {
+    ustawPytanieOReset(false);
+    if (await przywrocDomyslne()) {
+      toast({
+        title: "Przywrócono",
+        description: "Domyślna lista przewoźników i dzielników.",
+      });
+    }
+  };
+
   return (
     <Card className="p-6 mt-6">
+      {doUsuniecia ? (
+        <DialogPotwierdzenia
+          otwarty
+          tytul="Usunąć przewoźnika?"
+          tresc={`Przewoźnik „${doUsuniecia.nazwa}" zniknie z listy. Lista jest wspólna — zmiana obowiązuje wszystkich użytkowników.`}
+          etykietaPotwierdzenia="Usuń przewoźnika"
+          wariantPotwierdzenia="destructive"
+          onPotwierdz={() => usun(doUsuniecia.id)}
+          onZamknij={() => ustawDoUsuniecia(null)}
+          testId="dialog-usun-przewoznika"
+        />
+      ) : null}
+
+      <DialogPotwierdzenia
+        otwarty={pytanieOReset}
+        tytul="Przywrócić domyślną listę przewoźników?"
+        tresc={
+          "Lista wróci do sześciu domyślnych przewoźników: GEIS Polska, DPD, GLS, InPost Kurier, UPS i DHL Parcel.\n" +
+          "To zmienia listę dla całej firmy — dodani przewoźnicy i poprawione dzielniki znikną u wszystkich."
+        }
+        etykietaPotwierdzenia="Przywróć domyślne"
+        wariantPotwierdzenia="destructive"
+        onPotwierdz={() => void przywroc()}
+        onZamknij={() => ustawPytanieOReset(false)}
+        testId="dialog-przywroc-domyslne"
+      />
+
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-semibold">Przewoźnicy i dzielniki</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Dzielnik dla GEIS Polska = 10 000 (paczki). DPD = 6 000. GLS = 4 000. Zmiany
-            zapisują się automatycznie.
+            zapisują się automatycznie. Lista jest wspólna — zmiana obowiązuje wszystkich
+            użytkowników.
           </p>
         </div>
         <div className="flex gap-2">
@@ -106,13 +219,8 @@ export function TabelaPrzewoznikow({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => {
-              przywrocDomyslne();
-              toast({
-                title: "Przywrócono",
-                description: "Domyślna lista przewoźników i dzielników.",
-              });
-            }}
+            onClick={() => ustawPytanieOReset(true)}
+            disabled={zapisuje}
             data-testid="button-przywroc-domyslne"
           >
             <RotateCcw className="w-3.5 h-3.5 mr-2" />
@@ -137,8 +245,11 @@ export function TabelaPrzewoznikow({
                 <td className="px-3 py-2">
                   {edycja ? (
                     <Input
-                      value={przewoznik.nazwa}
-                      onChange={(zdarzenie) => zmienNazwe(przewoznik.id, zdarzenie.target.value)}
+                      value={szkice[przewoznik.id]?.nazwa ?? przewoznik.nazwa}
+                      onChange={(zdarzenie) =>
+                        zmienSzkic(przewoznik.id, "nazwa", zdarzenie.target.value)
+                      }
+                      onBlur={() => zatwierdzPole(przewoznik, "nazwa")}
                       className="h-8"
                       data-testid={`input-nazwa-${przewoznik.id}`}
                     />
@@ -150,10 +261,11 @@ export function TabelaPrzewoznikow({
                   {edycja ? (
                     <Input
                       type="number"
-                      value={przewoznik.dzielnik}
+                      value={szkice[przewoznik.id]?.dzielnik ?? przewoznik.dzielnik}
                       onChange={(zdarzenie) =>
-                        zmienDzielnik(przewoznik.id, zdarzenie.target.value)
+                        zmienSzkic(przewoznik.id, "dzielnik", zdarzenie.target.value)
                       }
+                      onBlur={() => zatwierdzPole(przewoznik, "dzielnik")}
                       className="h-8 w-24 ml-auto text-right"
                       data-testid={`input-dzielnik-${przewoznik.id}`}
                     />
@@ -169,7 +281,8 @@ export function TabelaPrzewoznikow({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => usun(przewoznik.id)}
+                      onClick={() => zapytajOUsuniecie(przewoznik)}
+                      disabled={zapisuje}
                       data-testid={`button-usun-${przewoznik.id}`}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -200,7 +313,11 @@ export function TabelaPrzewoznikow({
               className="w-40"
               data-testid="input-nowy-dzielnik"
             />
-            <Button onClick={dodaj} data-testid="button-dodaj-przewoznika">
+            <Button
+              onClick={() => void dodaj()}
+              disabled={zapisuje}
+              data-testid="button-dodaj-przewoznika"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Dodaj
             </Button>

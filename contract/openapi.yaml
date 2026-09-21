@@ -20007,3 +20007,44 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "400": { description: "Błędne żądanie" }
         "401": { description: "Nieautoryzowany — WYŁĄCZNIE w odbudowie; patrz x-odbudowa-auth" }
+  /api/waga-gabarytowa/przewoznicy:
+    get:
+      tags: [waga-gabarytowa]
+      summary: "GET /api/waga-gabarytowa/przewoznicy — wspólna lista przewoźników (kolejność z edytora)"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      x-odbudowa-nowa-trasa: >-
+        Trasy NIE MA w produkcji — nie ma czego nagrać, więc brak fixture'a i schemat jest pisany ręcznie.
+        Produkcja trzyma listę przewoźników i dzielników wagi wolumetrycznej wyłącznie w IndexedDB
+        przeglądarki (deminified/frontend-index.js:9165-9193). Odstępstwo świadome, zatwierdzone przez
+        Anię 2026-09-18/21: backlog #27, karta P9.1, ticket 76-FEATURE-przewoznicy-serwer-paletowy.
+        Lista wspólna dla firmy, edytuje każdy zalogowany, zapis podmienia całą listę (wygrywa ostatni).
+        Kształt odpowiedzi 200 (GET i PUT) opisany tu, a nie w linii statusu, bo linie statusów należą
+        do tools/generate-openapi-schemas.cjs (schematy tylko z fixtures): tablica
+        [{ id: string, nazwa: string, dzielnik: number > 0, domyslny: boolean }] w kolejności z edytora,
+        co najmniej jeden element, domyslny zawsze obecny. 400 z PUT: { error: string } po polsku,
+        z numerem pozycji, np. "Przewoźnik nr 2: dzielnik musi być liczbą dodatnią".
+      responses:
+        "200": { description: "OK — lista w kolejności z edytora" }
+        "401": { description: "Nieautoryzowany" }
+    put:
+      tags: [waga-gabarytowa]
+      summary: "PUT /api/waga-gabarytowa/przewoznicy — podmiana całej listy"
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      x-odbudowa-nowa-trasa: >-
+        Trasy NIE MA w produkcji — nie ma czego nagrać, więc brak fixture'a i schemat jest pisany ręcznie.
+        Produkcja trzyma listę przewoźników i dzielników wagi wolumetrycznej wyłącznie w IndexedDB
+        przeglądarki (deminified/frontend-index.js:9165-9193). Odstępstwo świadome, zatwierdzone przez
+        Anię 2026-09-18/21: backlog #27, karta P9.1, ticket 76-FEATURE-przewoznicy-serwer-paletowy.
+        Lista wspólna dla firmy, edytuje każdy zalogowany, zapis podmienia całą listę (wygrywa ostatni).
+        Kształt odpowiedzi 200 (GET i PUT) opisany tu, a nie w linii statusu, bo linie statusów należą
+        do tools/generate-openapi-schemas.cjs (schematy tylko z fixtures): tablica
+        [{ id: string, nazwa: string, dzielnik: number > 0, domyslny: boolean }] w kolejności z edytora,
+        co najmniej jeden element, domyslny zawsze obecny. 400 z PUT: { error: string } po polsku,
+        z numerem pozycji, np. "Przewoźnik nr 2: dzielnik musi być liczbą dodatnią".
+      requestBody:
+        description: "Cała lista. Dzielnik musi być liczbą JSON (tekst → 400); id bez powtórzeń; domyslny opcjonalny (brak = false); inne pola odcinane."
+        content: { application/json: { schema: { type: array, minItems: 1, items: { type: object, required: [id, nazwa, dzielnik], properties: { id: { type: string, minLength: 1 }, nazwa: { type: string, minLength: 1 }, dzielnik: { type: number, exclusiveMinimum: 0 }, domyslny: { type: boolean } } } } } }
+      responses:
+        "200": { description: "OK — lista po zapisie (jak GET); zmiana trafia do audit_log jako edycja_przewoznikow" }
+        "400": { description: "Błędna lista — pusta, nie tablica, pusta nazwa, dzielnik niedodatni lub nieliczbowy, powtórzone id" }
+        "401": { description: "Nieautoryzowany" }

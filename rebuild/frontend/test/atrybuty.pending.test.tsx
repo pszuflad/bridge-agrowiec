@@ -123,8 +123,10 @@ describe("1. Lista kolejki", () => {
     for (const sugestia of PIERWSZA.sugerowane_aliasy) {
       expect(wiersz).toHaveTextContent(`${sugestia.wartosc} (${sugestia.podobienstwo}%)`);
     }
-    // ⚠ Fixture ma self-match „AGRI STAR II” z podobieństwem 100 — skutek seedu słownika
-    // `bieznik` z `products.model` (backlog #40, ⬜ do decyzji). Pokazujemy jak jest.
+    // ⚠ Fixture (nagrany z produkcji) ma self-match „AGRI STAR II” z podobieństwem 100 — skutek
+    // seedu słownika `bieznik` z `products.model`. W rebuildzie od P7.2 (ticket 78, backlog #40)
+    // sprzątanie kolejki usuwa takie pozycje, a reguła sugestii ich nie proponuje. Test czyta
+    // fixture, a widok pokazuje to, co przyszło, więc 100% zostaje.
     expect(PIERWSZA.sugerowane_aliasy[0]?.podobienstwo).toBe(100);
   });
 
@@ -228,7 +230,18 @@ describe("2. Trzy warianty akceptacji — adres i ciało", () => {
 });
 
 describe("3. Ostrzeżenie przed masowym UPDATE (plan.md D7)", () => {
-  it("dialog edycji mówi, ilu produktów dotknie zmiana i że nie ma jej w audycie", async () => {
+  /**
+   * Od ticketu 74 obie akcje zostawiają wpis `edycja` w Historii (backlog #39), więc ostrzeżenie
+   * mówi o tym wpisie, a stare zdanie o braku audytu nie może wrócić (ticket 81).
+   */
+  function sprawdzTrescOstrzezenia(ostrzezenie: HTMLElement) {
+    expect(ostrzezenie).toHaveTextContent("Operacji nie da się cofnąć.");
+    expect(ostrzezenie).toHaveTextContent("Zostanie po niej wpis w Historii (typ „edycja”).");
+    expect(ostrzezenie).not.toHaveTextContent("nie trafiają do audytu");
+    expect(ostrzezenie).not.toHaveTextContent("odtworzyć z dziennika");
+  }
+
+  it("dialog edycji mówi, ilu produktów dotknie zmiana i że zostanie wpis w Historii", async () => {
     zamockujApi();
     await otworzKolejke();
 
@@ -236,10 +249,10 @@ describe("3. Ostrzeżenie przed masowym UPDATE (plan.md D7)", () => {
 
     const ostrzezenie = await screen.findByTestId("ostrzezenie-skala-zmiany");
     await waitFor(() => expect(ostrzezenie).toHaveTextContent("186"));
-    expect(ostrzezenie).toHaveTextContent("nie trafiają do audytu");
+    sprawdzTrescOstrzezenia(ostrzezenie);
   });
 
-  it("dialog aliasu ostrzega dodatkowo, że do słownika nie wchodzi nic", async () => {
+  it("dialog aliasu ma to samo ostrzeżenie i dodatkowo mówi, że do słownika nie wchodzi nic", async () => {
     zamockujApi();
     await otworzKolejke();
 
@@ -247,6 +260,9 @@ describe("3. Ostrzeżenie przed masowym UPDATE (plan.md D7)", () => {
     await userEvent.click(screen.getByTestId(`chip-alias-${PIERWSZA.id}-${sugestia.wartosc}`));
 
     const dialog = await screen.findByTestId("dialog-akceptuj-alias");
+    const ostrzezenie = within(dialog).getByTestId("ostrzezenie-skala-zmiany");
+    await waitFor(() => expect(ostrzezenie).toHaveTextContent("186"));
+    sprawdzTrescOstrzezenia(ostrzezenie);
     expect(dialog).toHaveTextContent("mapowanie nie jest nigdzie zapisywane");
   });
 
