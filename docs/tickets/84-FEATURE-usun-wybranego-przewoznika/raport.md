@@ -38,3 +38,21 @@ Brak.
   Jeśli `PUT` usunięcia wybranego przewoźnika się nie uda, lista wraca z serwera razem z tym
   przewoźnikiem, ale wybór zostaje już na następcy. „Przywróć domyślne” przestawia wybór dopiero po
   udanym zapisie, więc te dwa zachowania są niespójne. Do decyzji, czy wyrównać.
+
+## Review
+0 BLOCKER, 0 SHOULD-FIX, 2 NICE-TO-HAVE (kosmetyczne, pozostawione): `usun()` liczy następcę
+jeszcze raz zamiast wziąć go z renderu (ten sam cykl, bez ryzyka rozjazdu) oraz uwaga o klasach
+ramki, już opisana wyżej. Pełny tekst: `review.md`.
+
+## Docs updates
+Mały ticket z dokładnie wskazanym zakresem dokumentacji, więc edycje zrobił Master bez
+doc-checkerów:
+- `docs/rebuild-roadmap.md`:
+  - wiersz P9.1b ✅ w bloku „Iteracja 9”, P9.2 → „gotowe do startu (P9.1 i P9.1b zamknięte)”;
+  - akapit „P9.1b — dowieziony zakres”;
+  - wiersz zbiorczy iteracji 9 uzupełniony o ticket 84;
+  - w bloku P9.2 dokładna treść obu okien, informacja, że wybór jest osobisty dla przeglądarki,
+    i blokada ostatniego przewoźnika.
+- `docs/rebuild-backlog.md` #27: akapit „Uzupełnienie (P9.1b)”. Pole „Pliki” bez zmian
+  (`TabelaPrzewoznikow.tsx` już jest na liście).
+- `docs/spec-frontend.md` §5, blok „Odbudowa (76)”: zdanie o drugim wariancie okna.
