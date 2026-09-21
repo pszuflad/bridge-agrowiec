@@ -18787,6 +18787,89 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  # ─── ODSTĘPSTWO OD PRODUKCJI — karta P6.2 (ticket 77-FEATURE-pseudo-alerty-katalogowe) ────
+  # Trasa, której produkcja NIE MA. Oryginał liczy pseudo-alerty katalogowe w przeglądarce
+  # (`pv()` na `GET /api/products`) i ich status trzyma w IndexedDB (klucz `alerty-statusy`).
+  # Odbudowa liczy je tak samo, ale status przenosi na serwer — decyzja 2 użytkownika
+  # z 2026-09-21 (`docs/rebuild-backlog.md` #26): status w przeglądarce ginie po wyczyszczeniu
+  # historii i nie przechodzi między komputerami.
+  #
+  # DLACZEGO SCHEMATY SĄ INLINE I WIELOWIERSZOWE: `components.schemas` w całości generuje
+  # `tools/generate-openapi-schemas.cjs` z `contract/fixtures/`, a nagrania tej trasy nie ma
+  # i być nie może. Wpis w generowanym bloku zniknąłby przy pierwszym biegu, a jednowierszowe
+  # `content: { … }` w liniach odpowiedzi generator zdejmuje. Kształt pilnuje
+  # `rebuild/backend/test/alerty-katalogu.gate.test.ts` — czyta schematy stąd.
+  # ─────────────────────────────────────────────────────────────────────────────────────────
+  /api/alerty-katalogu/statusy:
+    get:
+      tags: [alerts]
+      summary: "GET /api/alerty-katalogu/statusy"
+      description: >-
+        Zapisane statusy pseudo-alertów katalogowych — goła tablica. Alert, którego tu nie ma,
+        ma status `nowy` (statusu `nowy` się nie zapisuje).
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, status, kto, kiedy]
+                  properties:
+                    id: { type: string, description: "Identyfikator alertu z odciskiem wartości, np. `12-marza-niska-3.2`" }
+                    status: { type: string, enum: [przejrzany, rozwiazany] }
+                    kto: { type: string, nullable: true, description: "Imię i nazwisko zalogowanego, który zmienił status" }
+                    kiedy: { type: string, description: "ISO 8601" }
+        "401": { description: "Nieautoryzowany" }
+    put:
+      tags: [alerts]
+      summary: "PUT /api/alerty-katalogu/statusy"
+      description: >-
+        Jeden status dla wielu alertów naraz (przycisk przy alercie i „Zaakceptuj wszystko").
+        `nowy` kasuje wpis. Zapis wypiera wpisy tej samej pary (produkt/dostawca, reguła)
+        z innym odciskiem wartości i kasuje wpisy produktów spoza katalogu.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ids, status]
+              properties:
+                ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 20000
+                  items: { type: string, minLength: 1, maxLength: 2000 }
+                  description: >-
+                    Formy: `{produkt}-marza-ujemna-{marża}`, `{produkt}-marza-niska-{marża}`,
+                    `{produkt}-nie-opona-{nazwa}|{kategoria}`, `dostawca-{kod}-brak-importu-{dni}`.
+                status: { type: string, enum: [nowy, przejrzany, rozwiazany] }
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok, zmienione]
+                properties:
+                  ok: { type: boolean }
+                  zmienione: { type: integer, description: "Liczba przetworzonych (unikalnych) identyfikatorów" }
+        "400":
+          description: "Nieznany status, pusta/za długa lista albo identyfikator w formie, której silnik nie produkuje"
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error: { type: string }
+        "401": { description: "Nieautoryzowany" }
   /api/analytics/availability/products:
     get:
       tags: [analytics]
