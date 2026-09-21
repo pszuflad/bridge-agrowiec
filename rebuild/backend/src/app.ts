@@ -19,6 +19,7 @@ import { trasyKonta } from "./routes/konto.js";
 import { trasyHistorii } from "./routes/history.js";
 import { trasyDostawcow } from "./routes/suppliers.js";
 import { trasyImportu } from "./routes/import.js";
+import { trasyArchiwumImportu } from "./routes/import-archive.js";
 import { trasyProduktow } from "./routes/products.js";
 import { trasyStagingu } from "./routes/staging.js";
 import { trasyMutacjiStagingu } from "./routes/staging-mutacje.js";
@@ -173,6 +174,7 @@ export function stworzApp({
   app.use(trasyAlertow({ db }));
   app.use(trasyAlertowKatalogu({ db }));
   app.use(trasyImportu({ db, katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
+  app.use(trasyArchiwumImportu({ katalogArchiwum: env.IMPORT_ARCHIVE_DIR }));
   app.use(trasyKonfiguracji({ db }));
   app.use(trasyKonta({ db }));
   app.use(trasyAdmina({ db, przeplanujScheduler }));
