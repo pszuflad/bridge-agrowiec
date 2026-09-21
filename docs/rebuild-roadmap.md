@@ -2908,6 +2908,176 @@ zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-1
 
 ---
 
+---
+
+### Poprawki po testach Ani — iteracje 5, 6, 7, 9, 10 i przegląd 12 widoków (plan P)
+
+- **Status:** 🔨 w toku — zaplanowane 2026-09-21. Iteracje 3 i 4 zamknięte w bloku I14 wyżej
+  (karty `14a`–`14m`). Ten blok przejmuje dalszy ciąg z **nową numeracją**.
+- **Skąd.** Ania przeszła instrukcje I5, I6, I7, I9, I10 i przegląd 12 widoków, a potem odpowiedziała
+  na dwie rundy pytań zbiorczych (`docs/pytania-do-ani-2026-09-18.md` i runda 2 z 21.09).
+  **Po jej stronie nie ma już ani jednej otwartej sprawy.** Wszystkie decyzje są w backlogu.
+
+**Nazewnictwo — trzy różne rzeczy, trzy systemy, nie mieszać:**
+
+| Co to jest | Oznaczenie | Przykład |
+|---|---|---|
+| znalezisko / zmiana produkcji — rejestr WIEDZY | `#N`, globalnie rosnąco | `#39`, `#93` |
+| karta do wykonania — jednostka PRACY | **`P{iteracja}.{kolejność}`** | `P7.1` |
+| ticket — folder i gałąź | `{numer}-{TYP}-{slug}` | `69-FEATURE-historia-bez-limitu` |
+
+`P` jak poprawki; numer iteracji = **skąd pochodzi uwaga Ani**, nie kiedy to robimy. `PR` = przegląd
+12 widoków (nie `P12`, żeby nie mylić z Iteracją 12 — konto i admin). Karty `14a`–`14m` zostają
+pod starymi nazwami: przemianowanie zerwałoby **719 odwołań w 38 plikach**.
+
+#### Iteracja 5 — Historia
+
+| Karta | Zakres | Wpisy | Stan |
+|---|---|---|---|
+| **P5.1** | Historia przestaje gubić najstarsze zdarzenia — filtrowanie i paginacja w SQL | #87 | 🔨 ticket 69 |
+| **P5.2** | eksport ZIP działa u nas, w produkcji nie — utrwalić jako świadome odstępstwo | #93 | 🔨 ticket 70 |
+| **P5.3** | delta instrukcji I5 dla Ani | — | ⬜ po P5.1 i P5.2 |
+
+Karta `14j` (oracle diff historii, 0 różnic na 49 813 wpisach) i skasowana `14k` (#21 — NIE) też
+należą do tej iteracji. Baza dla P5.3: `docs/instrukcja-testow-I5.md`, odtworzony 21.09 z PDF-a Ani
+(ticket 67) — wcześniej nie istniał w repo.
+
+#### Iteracja 6 — Alerty
+
+| Karta | Zakres | Wpisy | Stan |
+|---|---|---|---|
+| **P6.1** | lista alertów importu: wyszukiwarka po treści + trzeci status `przejrzany` | #90, #26 (część) | ⬜ gotowe |
+| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu | #26 | ⏸ 3 decyzje użytkownika |
+| **P6.3** | delta instrukcji I6 dla Ani | — | ⬜ po P6.1 i P6.2 |
+
+**Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
+`PATCH /api/alerts/:id` nie waliduje statusu (oryginał też nie, `routes/alerts.ts:45`), wystarczy
+poszerzyć typ `StatusAlertu` (`repos/alerts.ts:16`) i dołożyć przycisk. Pseudo-alerty to osobny, duży
+mechanizm: w oryginale liczone w PRZEGLĄDARCE z katalogu (`frontend-index.js:25177-25340` `HT()`,
+`:16631-16705` `pv()`), status w IndexedDB (`:9165-9193`). Rozłączność plików: P6.1 ma
+`TabelaAlertow.tsx`, `grupowanie.ts`, `repos/alerts.ts` i `test/alerty.*`; P6.2 ma NOWE pliki
+i powłokę strony `/alerty`. Dzięki temu idą równolegle.
+
+⚠ **P6.2 jest jedną z dwóch rzeczy, które Ania nazwała mogącymi wstrzymać cutover** — musi wejść przed
+przełączeniem produkcji. Przed startem potrzebne trzy decyzje (niżej, „po stronie użytkownika").
+
+#### Iteracja 7 — Atrybuty
+
+| Karta | Zakres | Wpisy | Stan |
+|---|---|---|---|
+| **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ⬜ gotowe |
+| **P7.2** | seed bieżników z `products.bieznik` + podobieństwo case-insensitive | #40, #42 | ⬜ gotowe |
+| **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ⬜ gotowe |
+| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 |
+
+⚠ P7.1 i P7.2 dzielą klaster backendu atrybutów — przed puszczeniem obu naraz sprawdzić rozłączność
+plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czymkolwiek.
+
+#### Iteracja 9 — Waga gabarytowa
+
+| Karta | Zakres | Wpisy | Stan |
+|---|---|---|---|
+| **P9.1** | wspólna lista przewoźników na serwerze + potwierdzenie usuwania + kalkulator paletowy | #27, #28 | ⬜ gotowe |
+| **P9.2** | delta instrukcji I9 dla Ani | — | ⬜ po P9.1 |
+
+Trzy rzeczy w jednej karcie świadomie — wszystkie w `waga-gabarytowa/**`. Seed potwierdzony przez Anię
+21.09 bez poprawek: GEIS 10 000 · DPD 6 000 · GLS 4 000 · InPost / UPS / DHL 5 000. Edytuje każdy
+zalogowany.
+
+#### Iteracja 10 — Analityka i Pulpit
+
+| Karta | Zakres | Wpisy | Stan |
+|---|---|---|---|
+| **P10.1** | klaster backendu analityki | #31, #32, #33, #35 | ⬜ gotowe |
+| **P10.2** | kafel „Ostatni eksport CSV" pokazuje datę | #34 | ⬜ gotowe |
+| **P10.3** | eksport CSV respektuje filtry | #91 | ⏸ zakres do decyzji |
+| **P10.4** | delta instrukcji I10 dla Ani | — | ⬜ po P10.1–P10.3 |
+
+P10.3 rusza ten sam plik tras co P10.1 — po niej, nie równolegle.
+
+#### Przegląd 12 widoków
+
+| Karta | Zakres | Wpisy | Stan |
+|---|---|---|---|
+| **PR.1** ⭐ | Archiwum importów — trzy trasy + widok z POBIERANIEM pliku | — | ⬜ gotowe |
+| **PR.2** | kafle KPI analityki jak na produkcji | — | ⬜ gotowe |
+| **PR.3** | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) | — | ⬜ gotowe |
+| **PR.4** | diagnoza Selly „Wygeneruj CSV" na stagingu | — | ⬜ gotowe |
+| **PR.5** | duplikat marki `ALLIANCE` / `Alliance` | #92 | ⏸ decyzja |
+| **PR.6** | aktualizacja przeglądu 12 widoków | — | ⬜ na końcu |
+
+PR.1 to jedyny w całym projekcie **czysty brak funkcji obecnej w produkcji** (`archive-injection.js`
++ `archive_module.cjs`, trzy trasy). Zakres doprecyzowany odpowiedzią Ani 12.1: używa archiwum do
+porównywania, czy plik zgadza się z katalogiem, i do weryfikacji brakujących pozycji — więc widok MUSI
+pozwalać pobrać plik, nie tylko pokazać listę.
+
+#### ⭐ Pomiar parserów na prawdziwych cennikach (2026-09-21) — zastępuje test §8.1 instrukcji I3
+
+Ania odmówiła ręcznego testu §8.1 z uzasadnionych powodów (wgrywanie do żywego Bridge'a = dzień
+akceptowania stagingu dla Marty; ręczne wgranie nie sprawdza synchronizacji po URL). Zamiast tego
+przysłała **osiem aktualnych plików** — dokładnie te, które produkcyjny automat ściąga spod adresów
+z `dispatcher.cjs` — i porównaliśmy dwa potoki `dispatcher.parseByKod()` → `adapter.recordsToSurowe()`
+na tych samych plikach: **produkcja dziś (`origin/main`) kontra nasz port (`src/import/legacy`)**.
+
+⚠ Porównanie z `mirror/` na `develop` byłoby BEZWARTOŚCIOWE: tam parsery są co do bajta identyczne
+z naszym portem (oba zsynchronizowane na 08.09 w 13a), więc wyszłoby zawsze zero różnic.
+
+**Liczba pozycji zgadza się co do sztuki w 7 z 7 testowalnych plików, zero rekordów po jednej stronie:**
+MO1 715 · MO3 582 · MO4 309 · MO5 1572 · MO7 285 · MO8 704 · MO10 219.
+
+**Różnice w polach — KAŻDA wyjaśniona wrześniową zmianą produkcji, żadna niewyjaśniona:**
+
+| Pole | Co produkcja robi inaczej | Wpis |
+|---|---|---|
+| `blokowaneFormyPlatnosci` | dokłada pole, stałe per dostawca | #73 |
+| `zastosowanie` | dokłada pole z zamkniętej listy per kategoria | #75 |
+| `szerokosc` | obcina zera końcowe (`"10"` vs nasze `"10.0"`) | #83 |
+| `kategoria` (tylko MO8, 50 rek.) | Wielka litera już w parserze (`"Leśne"` vs `"leśne"`) | #79 |
+
+**Wniosek: port jest wierny; cała różnica to nieprzeniesione zmiany września (materiał I15).**
+Produkcja wciągnęła te zmiany WPROST do potoku parsowania — parsery ciągną dziś dwa moduły, których
+odbudowa nie ma: `application_rules.cjs` i `payment_blocks.cjs`. Port #73 i #75 będzie więc zmianą
+w warstwie parserów, nie kosmetyką. ⚠ `payment_blocks.cjs` ma zahardkodowaną ścieżkę produkcyjną
+`/home/admin/private_apps/bridge/data.db` — ale funkcja używana przez adapter
+(`getBlockedPaymentForms`) jest czysta i bazy nie dotyka.
+
+**Znaleziska po drodze:**
+- **MO8 Trelleborg w CSV działa** — 704 pozycje po obu stronach. W starym Bridge ten sam przypadek
+  dawał zero pozycji po cichu (backlog #8, zrzut Ani z I3). Poprawka `bug4` z 13a potwierdzona na
+  prawdziwym pliku.
+- **Trelleborg ma EAN w notacji naukowej** (`8,05997E+12`) — realny przypadek dla 14i.
+- **MO7 Nokian: 14 zdublowanych kodów**, ale to IDENTYCZNE wiersze w pliku dostawcy — nic nie ginie.
+  To NIE jest kolizja `kod_importu` w sensie, o którym mówiła Ania (różne produkty pod jednym kodem).
+- **Szerokość: produkcja złamała obietnicę z instrukcji I3 §11 pkt 10** („10.00 zostaje takie, jakie
+  jest w pliku") — od 18.09 obcina zera (#83, odwrócenie decyzji z 19.08). Przy porcie #83 sprostować.
+- **MO9 nie da się przetestować plikiem** — parser „plikowy" ignoruje plik i idzie do API. Nie wyszło
+  żadne żądanie (padło na braku haseł).
+- **MO2 (JMK) nieprzetestowany** — brak pliku.
+
+**Narzędzie i reprodukcja.** Skrypt: `docs/tickets/71-DOCS-plan-poprawek/porownaj-parsery.cjs`.
+Uruchomienie: drzewo parserów z `origin/main` (+ `application_rules.cjs`, `payment_blocks.cjs`) do
+katalogu tymczasowego, potem `NODE_PATH=rebuild/backend/node_modules node porownaj-parsery.cjs
+<prod> rebuild/backend/src/import/legacy '<JSON par [kod, plik]>'`, Node ≥ 20.
+**To gotowy test akceptacyjny portu I15:** po przeniesieniu #73/#75/#79/#83 ma wyjść zero różnic
+w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawców, leżą poza repo.
+
+#### Po stronie użytkownika — decyzje, które zostały
+
+| Decyzja | Odblokowuje | Rekomendacja |
+|---|---|---|
+| Gdzie pokazać pseudo-alerty | P6.2 | zakładki na `/alerty`: „Import" i „Katalog" |
+| Gdzie trzymać ich status | P6.2 | serwer — spójnie z decyzją D1 z I6 dla alertów importu |
+| Co pokazuje karta powiadomień na Pulpicie | P6.2 | oba źródła, z podziałem |
+| **#91** — zakres „zapisz to, co widzę" | P10.3 | do rozstrzygnięcia |
+| **#92** — duplikat marek: dane czy prezentacja | PR.5 | łącznie z #42 |
+
+#### Kolejność
+
+Iteracjami: 5 → 6 → 7 → 9 → 10 → przegląd. Wewnątrz iteracji karty rozłączne plikowo idą równolegle.
+**Dwa świadome wyjątki od kolejności:** PR.1 (jedyny brak funkcji) i P6.2 (bloker cutoveru) — oba
+warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
+
+
 ## 6. Po zakończeniu wszystkich iteracji
 
 > **Stan 2026-09-08: pierwotna odbudowa DOWIEZIONA — I0–I12 zamknięte, ostatnia sesja 12e domknęła
