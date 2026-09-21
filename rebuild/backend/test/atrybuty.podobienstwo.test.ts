@@ -6,12 +6,17 @@
  * `GET_atrybuty_pending.json` pokazuje wyniki (`podobienstwo: 92`), ale nie dowodzi, jak
  * powstały. Wartości poniżej są policzone ręcznie ze wzoru oryginału
  * (`1 - dystans / max(dł. a, dł. b)`, potem `Math.round(× 100)`).
+ *
+ * ⚠ Dwa świadome odstępstwa od oryginału (decyzja Ani 2026-09-21, ticket 78): porównanie po
+ * normalizacji wielkości liter i spacji (#42) oraz brak sugestii identycznej z pozycją (#40).
+ * Przypadki bez różnic wielkości liter i spacji zostały zamrożone jak były — wzór się nie zmienił.
  */
 import { describe, expect, it } from "vitest";
 
 import {
   czySugerowacAlias,
   levenshtein,
+  normalizujDoPorownania,
   podobienstwo,
 } from "../src/repos/atrybuty-pending.js";
 
@@ -48,14 +53,37 @@ describe("podobieństwo wartości atrybutów", () => {
       expect(podobienstwo("BKT", "")).toBe(0);
     });
 
+    it("pusty po normalizacji (same spacje) też daje zero", () => {
+      expect(podobienstwo("   ", "BKT")).toBe(0);
+    });
+
     /**
-     * ⚠ BRAK NORMALIZACJI WIELKOŚCI LITER I SPACJI jest w oryginale. „BKT" i „bkt" mają
-     * podobieństwo 0, bo każdy znak się różni — więc taka para nigdy nie dostanie sugestii
-     * aliasu, choć dla człowieka to ta sama marka. Zastane zachowanie, nie nasz błąd.
+     * Świadome odstępstwo, #42, decyzja Ani 2026-09-21. W oryginale „BKT" i „bkt" miały
+     * podobieństwo 0 (każdy znak się różni), więc taka para nigdy nie dostawała sugestii
+     * aliasu. Teraz wielkość liter się nie liczy.
      */
-    it("nie normalizuje wielkości liter", () => {
-      expect(podobienstwo("BKT", "bkt")).toBe(0);
-      expect(czySugerowacAlias("BKT", "bkt")).toBe(false);
+    it("nie zależy od wielkości liter", () => {
+      expect(podobienstwo("BKT", "bkt")).toBe(1);
+      expect(podobienstwo("Farmax R75", "FARMAX R75")).toBe(1);
+      // różnica wielkości liter nie dokłada się do dystansu: 1 podmiana na 14 znaków jak wyżej
+      expect(Math.round(podobienstwo("agrimax factor", "AGRIMAX FAKTOR") * 100)).toBe(93);
+    });
+
+    /**
+     * Świadome odstępstwo, #42. `toLowerCase()` w JS zrównuje polskie znaki, czego `LOWER()`
+     * w SQLite (ASCII-only) by nie zrobił — dlatego normalizacja jest w JS.
+     */
+    it("zrównuje polskie znaki różniące się wielkością liter", () => {
+      expect(normalizujDoPorownania("ĄĆĘŁŃÓŚŹŻ")).toBe("ąćęłńóśźż");
+      expect(podobienstwo("CIĘŻAROWE", "ciężarowe")).toBe(1);
+      expect(podobienstwo("Ą", "ą")).toBe(1);
+    });
+
+    /** Świadome odstępstwo, #42: skrajne spacje i wielokrotne spacje w środku się nie liczą. */
+    it("ignoruje skrajne i wielokrotne spacje", () => {
+      expect(normalizujDoPorownania("  MG638   napęd ")).toBe("mg638 napęd");
+      expect(podobienstwo("MG638 NAPĘD", "MG638  napęd")).toBe(1);
+      expect(podobienstwo(" BKT", "BKT ")).toBe(1);
     });
   });
 
@@ -77,15 +105,35 @@ describe("podobieństwo wartości atrybutów", () => {
       expect(czySugerowacAlias("ABCDEFGHIJKLMNOPQRSU+", "ABCDEFGHIJKLMNOPQRST")).toBe(true);
     });
 
+    /** Świadome odstępstwo, #42: reguła „+" patrzy na postać znormalizowaną. */
+    it("reguła plusów działa też przy różnej wielkości liter", () => {
+      expect(czySugerowacAlias("abcdefghij+", "ABCDEFGHIJ")).toBe(false);
+      // 12 na 13 znaków = 0,923, więc próg przechodzi — odrzuca dopiero reguła „+"
+      expect(czySugerowacAlias("150A8 RADIAL+", "150a8 radial")).toBe(false);
+    });
+
     /**
-     * ⚠ Napis IDENTYCZNY z kanoniczną przechodzi regułę (warunek `nowa !== kanoniczna`
-     * w `:70` wyklucza tylko przypadek „różnica to same plusy"). Stąd w nagraniu produkcji
-     * pozycje kolejki sugerujące SAME SIEBIE ze `podobienstwo: 100` — wartość zdążyła
-     * trafić do słownika seedem, a skan nie usuwa nieaktualnych pozycji.
+     * Świadome odstępstwo, #40, decyzja Ani 2026-09-21. W oryginale napis IDENTYCZNY
+     * z kanoniczną przechodził regułę (warunek `nowa !== kanoniczna` w `:70` wyklucza tylko
+     * „różnica to same plusy"), stąd w nagraniu produkcji pozycje kolejki sugerujące SAME
+     * SIEBIE ze `podobienstwo: 100`. Teraz identyczny napis nie jest aliasem.
      */
-    it("dla wartości identycznej z katalogową sugeruje ją z wynikiem 100", () => {
-      expect(czySugerowacAlias("AGRI STAR II", "AGRI STAR II")).toBe(true);
+    it("nie sugeruje wartości identycznej z pozycją (self-match)", () => {
+      expect(czySugerowacAlias("AGRI STAR II", "AGRI STAR II")).toBe(false);
+      // samo podobieństwo nadal wynosi 100 — odpada dopiero reguła
       expect(Math.round(podobienstwo("AGRI STAR II", "AGRI STAR II") * 100)).toBe(100);
+    });
+
+    /**
+     * Świadome odstępstwo, #42 — i granica z #40: napis różny SUROWO, ale równy po normalizacji,
+     * JEST aliasem ze 100%. To dokładnie przypadek, o który prosiła Ania („w plikach przychodzi
+     * różnie").
+     */
+    it("sugeruje alias różniący się tylko wielkością liter albo spacjami, z wynikiem 100", () => {
+      expect(czySugerowacAlias("bkt", "BKT")).toBe(true);
+      expect(czySugerowacAlias("rolnicze", "Rolnicze")).toBe(true);
+      expect(czySugerowacAlias("MG638 NAPĘD", "MG638  napęd")).toBe(true);
+      expect(Math.round(podobienstwo("bkt", "BKT") * 100)).toBe(100);
     });
 
     /** Wynik z nagrania produkcji: „AGRI STAR II" ↔ „AGRISTAR II" to 92 (`_pending`). */

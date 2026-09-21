@@ -1163,9 +1163,11 @@ jeden realny defekt znaleziony przy okazji:
     a `GET_atrybuty_liczniki.json` przez nową asercję `sprawdzZgodnoscZFixtureSlownika` (5348 kluczy dynamicznych — porównanie
     dosłowne nie miałoby sensu). 71 testów w domenie atrybutów, suita **917 testów / 58 plików**,
     lint/typecheck/build czyste. Pełny wywód (D1–D6, quirki produkcji — m.in. seed `bieznik`
-    z `products.model` i dwie rozjeżdżone mapy rodzaj→kolumna, 15 dla liczników i 13 dla
+    wtedy z `products.model` i dwie rozjeżdżone mapy rodzaj→kolumna, 15 dla liczników i 13 dla
     kolejki): `docs/tickets/29-FEATURE-atrybuty-backend/`. Mapy uzgodniono w P7.1 (ticket 74,
     2026-09-21): jest jedna `RODZAJ_KOLUMNA` (15), a zakres skanu to jawna lista `ZAKRES_SKANU` (13).
+    Seed `bieznik` przełączony na `products.bieznik` w P7.2 (ticket 78, 2026-09-21, świadome
+    odstępstwo D5).
 
 - **7b · Widok `/atrybuty`** (FE) — ✅ **zrobione** (ticket `31-FEATURE-atrybuty-frontend`,
   2026-09-04). Widok natywny: kafle rodzajów → panel wartości (CRUD) → kolejka „Do akceptacji"
@@ -3087,7 +3089,7 @@ odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest popraw
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
 | **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ✅ 2026-09-21, ticket `74-FEATURE-slad-kolejki-atrybutow` |
-| **P7.2** | seed bieżników z `products.bieznik` + podobieństwo case-insensitive | #40, #42 | ⬜ gotowe · wejście od P7.3 niżej |
+| **P7.2** | seed bieżników z `products.bieznik` + sprzątanie kolejki z self-matchy + podobieństwo case-insensitive | #40, #42 | ✅ 2026-09-21, ticket `78-FEATURE-seed-bieznikow-podobienstwo` — kolejka 498→61 pozycji, 0 self-matchy, 13 nowych sugestii aliasów |
 | **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ✅ `75-CHORE-niezmiennik-atrybutow` · 2026-09-21 — niezmiennik trzyma się: liczba w ostrzeżeniu = liczba przepisanych wierszy, 0 rozjazdów na 4148 pomiarach na snapshocie; test `atrybuty.niezmiennik.test.ts` w bramce |
 | **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 · wejście od P7.3 niżej |
 
@@ -3102,16 +3104,12 @@ plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czym
   akcji i przebudowa map go nie ruszają. **Zrobione w P7.1 (ticket 74):** zamiast dopisania do
   `RODZAJE` doszła osobna lista `RODZAJE_POZA_SKANEM` — skan tych rodzajów nie przegląda, więc
   pozycję kolejki test wstawia ręcznie i sprawdza B == C == realna zmiana.
-- **Dla P7.2:** pozycje kolejki, które podpowiadają same siebie ze 100%, dają dziś fałszywą liczbę
-  przy aliasie. Ostrzeżenie mówi „w N produktach", toast „Zaktualizowano produktów: N", a realnie
-  zmienia się 0 wierszy (SQLite liczy wiersze dopasowane, nie zmienione). W snapshocie takich
-  pozycji jest **437 z 500**: `bieznik` 242, `rozmiar` 99, `marka` 68, `indeks_nosnosci` 27,
-  `konstrukcja` 1. **Sama zmiana seedu `bieznik` na `products.bieznik` usunie co najwyżej 72
-  z nich** (`bieznik` z `origin = 'catalog'`). Pozostałe 365 to wartości dodane ręcznie
-  (`origin = 'user'`) albo rodzaje, których seed z `model` nie dotyczy. Żeby objaw z decyzji Ani
-  („przeszkadza mi to") zniknął, potrzebne jest też sprzątanie kolejki z pozycji obecnych już
-  w słowniku. #40 opisuje je jako osobną, mniejszą zmianę. Test „alias na samą siebie"
-  w `atrybuty.niezmiennik.test.ts` trzeba wtedy odwrócić (komentarz w teście to mówi).
+- **Dla P7.2 (zrealizowane, ticket 78):** pozycje kolejki, które podpowiadały same siebie ze
+  100%, dawały fałszywą liczbę przy aliasie — ostrzeżenie/toast liczyły wiersze dopasowane, nie
+  zmienione. W snapshocie takich pozycji było 437 z 498 (nie z 500 — ta liczba to stan PO
+  skanie, który dokłada 2 pozycje `konstrukcja`). Sama zmiana seedu `bieznik` na
+  `products.bieznik` usuwała co najwyżej 72 z nich; resztę zdjęło dopiero sprzątanie kolejki
+  (D1, #40) — pełny zakres w „P7.2 dowieziona" niżej.
 - **Dla P7.4 — ⚠ instrukcja I7 §3.11 obiecuje coś, co nie jest prawdą.**
   `docs/instrukcja-testow-I7.md:206-208` mówi, że liczba w ostrzeżeniu „ma odpowiadać temu, co
   pokazuje kolumna *Wystąpień*". Tak nie jest i być nie musi. Ostrzeżenie liczy na żywo
@@ -3121,9 +3119,10 @@ plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czym
   i 188 w ostrzeżeniu. Inny przykład: ALLIANCE, 780 w kolumnie i 848 w ostrzeżeniu. Delta ma to
   sprostować. Wiarygodna jest liczba z OSTRZEŻENIA i ona ma się równać liczbie z toastu
   „Zaktualizowano produktów" (P7.3 to potwierdziła: 0 rozjazdów). Właściwym zgłoszeniem z §5
-  (`:424`) jest więc rozjazd ostrzeżenie ↔ toast ↔ katalog, a nie ostrzeżenie ↔ kolumna. Wyjątek,
-  o którym Ania powinna wiedzieć: kliknięcie sugestii, która jest tą samą wartością (100%),
-  pokaże N w ostrzeżeniu i w toaście, choć w katalogu nic się nie zmieni (patrz wyżej, P7.2).
+  (`:424`) jest więc rozjazd ostrzeżenie ↔ toast ↔ katalog, a nie ostrzeżenie ↔ kolumna.
+  **Nieaktualne po P7.2 (ticket 78):** wcześniej ten akapit opisywał wyjątek „kliknięcie sugestii
+  tą samą wartością (100%) pokazuje N, choć w katalogu nic się nie zmienia" — sugestii
+  identycznych z pozycją już nie ma (D1), więc wyjątku nie ma.
 
 **P7.1 dowieziona (2026-09-21, ticket 74):** sześć tras kolejki (`akceptuj`, `akceptuj-z-edycja`,
 `akceptuj-jako-alias`, `odrzuc`, `DELETE /api/atrybuty/pending`, `POST /api/atrybuty/scan-pending`)
@@ -3134,21 +3133,37 @@ zniknęła — jedna mapa `RODZAJ_KOLUMNA` (15) obsługuje liczniki, użycie i o
 skanu został osobną, jawną listą `ZAKRES_SKANU` (13, bez zmiany zawartości). Szczegóły:
 `docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`.
 
-**Dla P7.2 (punkt startu czysty):** P7.1 nie ruszyła seedu `bieznik`, kandydatów ani podobieństwa
-(`repos/atrybuty.ts` zmieniony tylko w komentarzu). Skan iteruje dziś po `ZAKRES_SKANU`
-(`repos/atrybuty-pending.ts`), a kolumny bierze z `RODZAJ_KOLUMNA` (`repos/atrybuty.ts`) — `RODZAJE_KOLUMNY` w
-`repos/atrybuty-pending.ts` już nie istnieje. Fakt do uwzględnienia, jeśli P7.2 wstawia w
-testach wartości spoza pięciu rdzeniowych rodzajów: `atrybuty_wartosci.rodzaj` ma FK do
-`atrybuty_rodzaje`, a seed rebuildu zakłada tylko 5 rodzajów rdzenia (produkcja ma 15) — na
-świeżej bazie akceptacja rodzaju spoza piątki kończy się 500 (rollback); stan zastany, nie
-powstał w 74.
+**P7.2 dowieziona (2026-09-21, ticket 78):** trzy świadome odstępstwa zatwierdzone przez Anię
+(#40, #42): **D1** — pozycja kolejki obecna dosłownie (porównanie BINARY) w słowniku tego samego
+rodzaju znika po każdym skanie (`POST /api/staging/accept`, `POST /api/atrybuty/scan-pending`) i
+przy starcie procesu zaraz po seedzie, a reguła sugestii nigdy nie proponuje napisu identycznego
+z pozycją; **D5** — seed `bieznik` bierze `SELECT DISTINCT bieznik FROM products` zamiast
+`model`; **D6** — podobieństwo liczone po normalizacji (`trim`, `toLowerCase`, zwinięcie spacji),
+próg 0,9 i reguła `+` bez zmian. Bez migracji (D3) — pomiar na snapshocie: 0 wartości słownika
+pochodzi wyłącznie z `products.model`, więc nie było czego sprzątać. Fixture
+`GET_atrybuty_pending.json` zostaje bez zmian (D2), gate porównuje kształtem, nie wartościami. Na
+snapshocie kolejka spada z 498 do 61 po starcie (63 po pierwszym skanie), self-matchy z 437 do 0,
+dochodzi 13 nowych par sugestii różniących się wielkością liter. Po pytaniu zwrotnym do
+użytkownika odwrócony jeden przypadek niezmiennika P7.3 w `atrybuty.niezmiennik.test.ts`, reszta
+pliku nietknięta. `atrybuty_wartosci.rodzaj` ma FK do `atrybuty_rodzaje`, a seed rebuildu zakłada
+tylko 5 rodzajów rdzenia (produkcja ma 15) — na świeżej bazie akceptacja rodzaju spoza piątki
+nadal kończy się 500 (rollback, stan zastany, nie zmieniony w 78). Szczegóły:
+`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`.
 
 **Dla P7.4 (delta instrukcji I7):** `docs/instrukcja-testow-I7.md` §4 pkt 4 jest po 74
 nieprawdziwy dwukrotnie — `model`/`zastosowanie` NIE trafiają do kolejki (skan ich nie tworzy,
 0 wierszy na snapshocie), a błąd „Nieznany rodzaj" dla nich już nie występuje (jedna mapa,
 akceptacja je przyjmuje). §4 pkt 7 też nieaktualny — ślad w Historii już jest (patrz wyżej).
 Jeśli Ania chce, żeby `model`/`zastosowanie` trafiały do kolejki, to zmiana zakresu skanu (I15),
-która zalałaby kolejkę (#40) — do wyjaśnienia z nią, nie do cichej zmiany.
+która zalałaby kolejkę (#40) — do wyjaśnienia z nią, nie do cichej zmiany. **Po ticketcie 78 §4
+pkt 1 i pkt 2 też przestają być prawdziwe** (self-match „AGRI STAR II" i „BKT"/„bkt" bez
+sugestii) — do dopisania w delcie: kolejka po wdrożeniu jest krótsza (≈61 zamiast 498); marki i
+bieżniki z katalogu znikają z kolejki po restarcie (semantyka seedu — akceptuje przy starcie
+wszystko, co jest w `products`); nowe sugestie różniące się wielkością liter bywają w formie z
+małymi literami („Farmax R75", „MG638  napęd") — sprawdzić formę kanoniczną przed „jako alias";
+sugestie 91% mogą łączyć różne produkty („MG628"→„MG638"); wyjątek opisany wyżej (§3.11,
+„kliknięcie sugestii tą samą wartością") jest już nieaktualny, bo self-matchy nie ma. Pełna lista:
+`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/raport.md`, sekcja Follow-up.
 
 #### Iteracja 9 — Waga gabarytowa
 
@@ -3187,6 +3202,11 @@ PR.1 to jedyny w całym projekcie **czysty brak funkcji obecnej w produkcji** (`
 + `archive_module.cjs`, trzy trasy). Zakres doprecyzowany odpowiedzią Ani 12.1: używa archiwum do
 porównywania, czy plik zgadza się z katalogiem, i do weryfikacji brakujących pozycji — więc widok MUSI
 pozwalać pobrać plik, nie tylko pokazać listę.
+
+**Dla PR.5 (fakt z P7.2, ticket 78, 2026-09-21):** po sprzątaniu kolejki (D1) kolejka nie
+zaproponuje już aliasu `ALLIANCE → Alliance` — pozycja `ALLIANCE` jest dosłownie w słowniku
+`marka` i znika przy sprzątaniu, zanim reguła sugestii ją zobaczy. Słownik `marka` ma dziś obie
+formy naraz. Duplikat trzeba rozwiązać po stronie danych, decyzja #92 dalej otwarta.
 
 #### ⭐ Pomiar parserów na prawdziwych cennikach (2026-09-21) — zastępuje test §8.1 instrukcji I3
 

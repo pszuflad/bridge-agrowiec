@@ -339,17 +339,18 @@ const CORE_WARTOSCI: Record<string, string[]> = {
  * Seed słownika — port `seed()` (`:61-84`), wołany w `registerAtrybuty:99`, czyli przy KAŻDYM
  * starcie procesu. Decyzja użytkownika (plan.md D1): odtwarzamy 1:1, razem z konsekwencjami.
  *
- * ⚠ „BIEŻNIK Z MODELU" JEST W ORYGINALE (`:80-83`) i nie jest literówką w naszym porcie:
- * słownik `bieznik` zasilany jest z `products.model`, choć `products` ma osobną kolumnę
- * `bieznik`. Skutek uboczny widać wprost w `contract/fixtures/GET_atrybuty_pending.json`:
- * pozycja pending „AGRI STAR II" ma sugerowany alias o `podobienstwo: 100` — samą siebie,
- * bo seed wsypał tę wartość do katalogu z `products.model` już PO utworzeniu wpisu pending,
- * a skan nigdy nie usuwa nieaktualnych pozycji. Zmiana źródła kolumny naprawiłaby ten quirk,
- * ale rozjechałaby zawartość słownika z produkcją.
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #40, decyzja Ani 2026-09-21): słownik `bieznik` zasilamy
+ * z `products.bieznik`. Oryginał (`:80-83`) brał `products.model`. Na snapshocie obie kolumny
+ * różnią się w 17 z 7405 produktów, a żadna wartość słownika nie pochodzi wyłącznie z `model`
+ * (pomiar: `docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/raport.md`). Istniejących
+ * wartości nie usuwamy — seed tylko dosypuje (`INSERT OR IGNORE`).
  *
- * ⚠ Seed rośnie z każdym importem: nowa marka w `products` po restarcie wchodzi do katalogu
- * automatycznie, a wartość obecna w katalogu jest przy skanie POMIJANA — seed realnie steruje
- * tym, co Ania zobaczy w kolejce pending.
+ * ⚠ Seed rośnie z każdym importem: nowa marka czy bieżnik w `products` po restarcie wchodzi do
+ * katalogu automatycznie, a wartość obecna w katalogu jest przy skanie POMIJANA — seed realnie
+ * steruje tym, co Ania zobaczy w kolejce pending. Pozycje kolejki, które seed w ten sposób
+ * „zaakceptował", sprząta `usunZKolejkiObecneWSlowniku` (`repos/atrybuty-pending.ts`), wołane
+ * przy starcie zaraz po seedzie — bez tego podpowiadały same siebie ze 100% (nagranie produkcji
+ * `contract/fixtures/GET_atrybuty_pending.json`).
  *
  * Oba SELECT-y z `products` są w `try/catch` jak w oryginale („products może nie istnieć
  * w testach", `:78`).
@@ -382,10 +383,11 @@ export function zasiejSlownikAtrybutow(db: Baza): void {
   }
 
   try {
-    const biezniki = db.all<{ model: string }>(sql`
-      SELECT DISTINCT model FROM products WHERE model IS NOT NULL AND model != '' ORDER BY model
+    const biezniki = db.all<{ bieznik: string }>(sql`
+      SELECT DISTINCT bieznik FROM products
+      WHERE bieznik IS NOT NULL AND bieznik != '' ORDER BY bieznik
     `);
-    for (const b of biezniki) wstawWartosc("bieznik", b.model);
+    for (const b of biezniki) wstawWartosc("bieznik", b.bieznik);
   } catch {
     /* jw. (`:83`) */
   }
