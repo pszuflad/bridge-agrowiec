@@ -20,10 +20,19 @@ Claude Code otwiera go, bierze następny niezrobiony ticket i po skończeniu odz
 3. Przeczytaj **§3 Zasady przekrojowe** — obowiązują w KAŻDEJ iteracji.
 4. Uruchom **`/feature`** z opisem tego ticketa (komenda sama pociągnie research po źródłach
    prawdy, plan, worktree, implementację, review, GATE fixtures/kontrakt, docs i PR).
-5. Po zmergowaniu PR: **zmień status** ticketa w §4 i §5 na ✅, wpisz numer PR i datę.
+5. Po zmergowaniu PR: status karty jest w **`docs/karty/<ID>/karta.md`** (zapisała go sama
+   karta). §4 i tabele kart w §5 odświeża **koordynator**, nie karta — patrz niżej.
 6. Jeśli iteracja jest podzielona na sesję **BE** i **FE** — najpierw kończy się i merge'uje
    BE (endpointy muszą istnieć, żeby FE miało co wołać i żeby GATE był odtwarzalny), potem
    FE branchuje się z `develop` (już z BE) i robi widok.
+
+**Praca równoległa — kto pisze gdzie (od ticketu 82, 2026-09-21).** Ten plik zmienia
+**wyłącznie koordynator** (sesja, która planuje falę i pisze prompty do kart). Karta pisze tylko
+w swoim katalogu `docs/karty/<ID>/` (`karta.md`) i zakłada nowe pliki `wejscie-<N>.md` w
+katalogach przyszłych kart — nigdy nie edytuje roadmapy, bo każda wspólna linia (wiersz §4,
+sąsiednie wiersze tabeli kart, dopisek na końcu sekcji) kończyła się konfliktem przy merge'u.
+Stan kart: `tools/stan-kart.sh`. Pełne zasady, szablony i etap 2 migracji (przeniesienie treści
+otwartych kart planu P z §5 do `docs/karty/`): **`docs/karty/README.md`**.
 
 **Zasada gałęzi:** producent (zmiany Ani) pisze do `main`; my pracujemy na `develop`. Każdy
 ticket = własny worktree + branch z `origin/develop`, PR z powrotem do `develop`. Okresowo
@@ -3004,6 +3013,9 @@ zamyka 14d. Prompty startowe trzech kart powstały w sesji planującej 2026-09-1
 - **Skąd.** Ania przeszła instrukcje I5, I6, I7, I9, I10 i przegląd 12 widoków, a potem odpowiedziała
   na dwie rundy pytań zbiorczych (`docs/pytania-do-ani-2026-09-18.md` i runda 2 z 21.09).
   **Po jej stronie nie ma już ani jednej otwartej sprawy.** Wszystkie decyzje są w backlogu.
+- ⚠ **Od ticketu 82 karty tego planu NIE edytują roadmapy** — stan i ustalenia piszą w
+  `docs/karty/<ID>/` (zasady: `docs/karty/README.md`). Kolumna „Stan” w tabelach niżej jest
+  zamrożona do etapu 2 migracji; aktualny stan: `tools/stan-kart.sh` + ta tabela.
 
 **Nazewnictwo — trzy różne rzeczy, trzy systemy, nie mieszać:**
 
