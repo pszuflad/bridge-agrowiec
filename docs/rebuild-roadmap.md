@@ -3022,14 +3022,15 @@ przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`): działa tylko na bazie
 więcej), co wykryje pierwszy warunek ważności w `historia.wyrocznia.test.ts`
 (`limitNieGryzie: false`).
 
-**Wejście dla P5.3 (od P5.2, 2026-09-21):** `docs/instrukcja-testow-I5.md` §8.2 mówi, że nowych
-eksportów „nie wygenerujesz” (eksport miał przyjść w późniejszej iteracji). W odbudowie to już
-nieprawda: `GET /api/export-shoper` (CSV z `?dostawca=` i ZIP bez parametru) działa od I8 i
-zapisuje w audycie `eksport_csv`, który Historia pokazuje jako typ `eksport`. **Porównanie ze starym
-Bridge się tu rozjedzie:** eksport ZIP w produkcji zawsze kończy się 500 i nie zapisuje wpisu
-(backlog #93, świadome odstępstwo). Wpis `eksport` z ZIP-a zobaczy więc tylko nowy Bridge, a
-`db/snapshot.db` nie ma ani jednego wiersza `eksport_csv`/`eksport_shoper`. Delta musi to powiedzieć
-wprost, żeby Ania nie zgłosiła tego jako błędu.
+**Wejście dla P5.3 (od P5.2, 2026-09-21):** `docs/instrukcja-testow-I5.md` §8.2 („nowych
+eksportów nie wygenerujesz”) **z perspektywy Ani zostaje prawdziwy**. Obie trasy eksportu Shopera
+nie mają w UI konsumenta (`docs/spec-frontend.md`, I8 D2; w `rebuild/frontend/src` jedyne
+trafienie `export-shoper` to komentarz w `pages/katalog/eksport.ts`, który mówi, że trasy nie są
+wołane), więc z interfejsu ich nie wywoła. Backend już je ma i przy wejściu wprost na URL zapisuje
+w audycie `eksport_csv`, który Historia pokazuje jako `eksport`. Wariant ZIP robi to wyłącznie
+w odbudowie, bo w produkcji kończy się 500 bez wpisu (backlog #93, świadome odstępstwo).
+Delta nie powinna więc obiecywać Ani generowania eksportów; najwyżej wspomnieć, że wpis `eksport`
+w nowym Bridge może się pojawić tylko po ręcznym wywołaniu trasy.
 
 #### Iteracja 6 — Alerty
 
