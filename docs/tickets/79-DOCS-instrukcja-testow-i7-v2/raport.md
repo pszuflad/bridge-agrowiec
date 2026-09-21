@@ -78,3 +78,12 @@ Brak.
   jeśli mają podobne odsyłacze.
 - **Pytanie 2.3 (seed przy starcie)**: po odpowiedzi Ani „nie” trzeba założyć nowy wpis backlogu.
 - **Pytanie 1.4 (c)**: po odpowiedzi Ani trzeba założyć nowy wpis backlogu (zmiana `ZAKRES_SKANU`).
+
+## Review fixes applied
+
+Review (1 iteracja): 0 BLOCKER, 1 SHOULD-FIX, 1 NICE-TO-HAVE. Oba poprawione.
+- SHOULD-FIX: w tabeli 3.1 doszedł wiersz „§1 Sedno do sprawdzenia, pkt 3” („wartości wrócą przy
+  następnym imporcie”). To samo zdanie z §2 było już unieważnione, a dla dzisiejszych 61 pozycji
+  obie obietnice są nieprawdziwe (pkt 2.2).
+- NICE-TO-HAVE: urwane cytaty w wierszach §4 pkt 2 i §4 pkt 7 dostały znacznik „(…)”, tak jak
+  sąsiednie wiersze.
