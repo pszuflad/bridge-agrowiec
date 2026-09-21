@@ -13,12 +13,12 @@
  * czekają na decyzję w `docs/rebuild-backlog.md`.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ChevronDown, ChevronRight, CircleAlert, Info } from "lucide-react";
+import { AlertTriangle, ChevronDown, ChevronRight, CircleAlert, Info, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -27,15 +27,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
+import { pobierzAlerty, zmienStatusAlertow, type Alert, type WynikZmianyGrupowej } from "./api";
 import {
-  pobierzAlerty,
-  zmienStatusAlertow,
-  STATUS_NOWY,
-  STATUS_ROZWIAZANY,
-  type Alert,
-  type WynikZmianyGrupowej,
-} from "./api";
-import {
+  FILTR_NIEROZWIAZANE,
   FILTRY_POCZATKOWE,
   filtrujAlerty,
   pogrupujAlerty,
@@ -44,6 +38,8 @@ import {
   type FiltryAlertow,
   type GrupaAlertow,
 } from "./grupowanie";
+import { PrzyciskiStatusu } from "./PrzyciskiStatusu";
+import { STATUS_NOWY, etykietaStatusu, type StatusAlertu } from "./statusy";
 
 /** Wartość „bez zawężenia" w `Select` — Radix nie przyjmuje pustego stringa jako `value`. */
 const WSZYSTKIE = "all";
@@ -67,16 +63,6 @@ function odmien(ile: number, jedna: string, dwie: string, wiele: string): string
   if (ostatnia >= 2 && ostatnia <= 4 && (dwieOstatnie < 12 || dwieOstatnie > 14))
     return `${ile} ${dwie}`;
   return `${ile} ${wiele}`;
-}
-
-/** Docelowy status akcji: to przełącznik w obie strony, nie jednokierunkowe „zamknij". */
-function przeciwnyStatus(status: string): string {
-  return status === STATUS_ROZWIAZANY ? STATUS_NOWY : STATUS_ROZWIAZANY;
-}
-
-function etykietaAkcji(status: string, liczba: number): string {
-  const kierunek = status === STATUS_ROZWIAZANY ? "Otwórz ponownie" : "Oznacz jako rozwiązane";
-  return liczba > 1 ? `${kierunek} (${liczba})` : kierunek;
 }
 
 export function TabelaAlertow() {
@@ -121,7 +107,7 @@ export function TabelaAlertow() {
       toast({ title: "Nie udało się zmienić statusu", description: e.message, variant: "destructive" }),
   });
 
-  const przelacz = (idki: number[], status: string) => zmiana.mutate({ idki, status });
+  const zmienStatus = (idki: number[], status: StatusAlertu) => zmiana.mutate({ idki, status });
 
   const przelaczRozwiniecie = (klucz: string) =>
     ustawRozwiniete((poprzednie) => {
@@ -140,7 +126,7 @@ export function TabelaAlertow() {
   const widoczne = useMemo(() => filtrujAlerty(alerty, filtry), [alerty, filtry]);
   const grupy = useMemo(() => pogrupujAlerty(widoczne), [widoczne]);
 
-  const ustawFiltr = (pole: keyof FiltryAlertow) => (wartosc: string) =>
+  const ustawFiltr = (pole: "status" | "dostawca" | "typ") => (wartosc: string) =>
     ustawFiltry((poprzednie) => ({
       ...poprzednie,
       [pole]: wartosc === WSZYSTKIE ? null : wartosc,
@@ -150,15 +136,32 @@ export function TabelaAlertow() {
     <div className="space-y-4">
       <Card>
         <CardContent className="flex flex-wrap items-center gap-2.5 p-4">
+          {/* Po treści (`opis`) — tylko tam widać prawdziwą przyczynę: „Błąd pobierania" to
+              jednym workiem awaria sieci i błąd parsera (backlog #16, #90). */}
+          <div className="relative min-w-[200px] flex-1">
+            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Szukaj w treści"
+              aria-label="Szukaj w treści alertu"
+              value={filtry.fraza}
+              onChange={(zdarzenie) =>
+                ustawFiltry((poprzednie) => ({ ...poprzednie, fraza: zdarzenie.target.value }))
+              }
+              className="pl-8 text-sm"
+              data-testid="input-alert-search"
+            />
+          </div>
+
           <Select value={filtry.status ?? WSZYSTKIE} onValueChange={ustawFiltr("status")}>
             <SelectTrigger className="w-44" data-testid="select-alert-status" aria-label="Status">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value={FILTR_NIEROZWIAZANE}>Nierozwiązane</SelectItem>
               <SelectItem value={WSZYSTKIE}>Wszystkie statusy</SelectItem>
               {dostepne.statusy.map((status) => (
                 <SelectItem key={status} value={status}>
-                  {status}
+                  {etykietaStatusu(status)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -226,7 +229,7 @@ export function TabelaAlertow() {
                   grupa={grupa}
                   rozwinieta={rozwiniete.has(grupa.klucz)}
                   onRozwin={() => przelaczRozwiniecie(grupa.klucz)}
-                  onPrzelacz={przelacz}
+                  onZmien={zmienStatus}
                   zablokowane={zmiana.isPending}
                 />
               ))}
@@ -242,18 +245,17 @@ function WierszGrupy({
   grupa,
   rozwinieta,
   onRozwin,
-  onPrzelacz,
+  onZmien,
   zablokowane,
 }: {
   grupa: GrupaAlertow;
   rozwinieta: boolean;
   onRozwin: () => void;
-  onPrzelacz: (idki: number[], status: string) => void;
+  onZmien: (idki: number[], status: StatusAlertu) => void;
   zablokowane: boolean;
 }) {
   // Grupa jednoelementowa nie ma czego rozwijać — pokazujemy `opis` od razu, bez strzałki.
   const powtorki = grupa.liczba > 1;
-  const docelowy = przeciwnyStatus(grupa.status);
 
   return (
     <li data-testid={`group-alert-${grupa.klucz}`}>
@@ -304,20 +306,20 @@ function WierszGrupy({
           ostatnio {sformatujOstatnia(grupa.ostatnia)}
         </span>
 
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={zablokowane}
-          data-testid={`button-toggle-${grupa.klucz}`}
-          onClick={() =>
-            onPrzelacz(
+        {/* Akcja obejmuje wpisy GRUPY PO FILTRACH — przy aktywnej wyszukiwarce tylko trafienia
+            (patrz `filtrujAlerty`), i tyle też mówi liczba w etykiecie. */}
+        <PrzyciskiStatusu
+          status={grupa.status}
+          liczba={grupa.liczba}
+          zablokowane={zablokowane}
+          testId={grupa.klucz}
+          onZmien={(cel) =>
+            onZmien(
               grupa.wpisy.map((wpis) => wpis.id),
-              docelowy,
+              cel,
             )
           }
-        >
-          {etykietaAkcji(grupa.status, grupa.liczba)}
-        </Button>
+        />
       </div>
 
       {powtorki && rozwinieta ? (
@@ -332,15 +334,14 @@ function WierszGrupy({
                 {sformatujOstatnia(wpis.data)}
               </span>
               <span className="min-w-0 flex-1 text-xs">{wpis.opis}</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                disabled={zablokowane}
-                data-testid={`button-toggle-alert-${wpis.id}`}
-                onClick={() => onPrzelacz([wpis.id], przeciwnyStatus(wpis.status))}
-              >
-                {etykietaAkcji(wpis.status, 1)}
-              </Button>
+              <PrzyciskiStatusu
+                status={wpis.status}
+                liczba={1}
+                zablokowane={zablokowane}
+                wariant="ghost"
+                testId={`alert-${wpis.id}`}
+                onZmien={(cel) => onZmien([wpis.id], cel)}
+              />
             </li>
           ))}
         </ul>
