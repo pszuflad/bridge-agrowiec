@@ -159,6 +159,26 @@ export const alerts = sqliteTable("alerts", {
 	data: text().notNull(),
 });
 
+/**
+ * Status obsługi pseudo-alertów katalogowych — migracja `007_alerty_katalogu_statusy.sql`
+ * (P6.2, ticket `77-FEATURE-pseudo-alerty-katalogowe`). Dopisane ręcznie, nie z `drizzle-kit
+ * pull` — tabela jest nowa w odbudowie, produkcja jej nie ma (status żyje tam w IndexedDB).
+ * Repo: `repos/alerty-katalogu.ts`.
+ */
+export const alertyKataloguStatusy = sqliteTable(
+	"alerty_katalogu_statusy",
+	{
+		id: text().primaryKey().notNull(),
+		klucz: text().notNull(),
+		produktId: integer("produkt_id"),
+		status: text().notNull(),
+		uzytkownikId: integer("uzytkownik_id"),
+		uzytkownikImie: text("uzytkownik_imie"),
+		kiedy: text().notNull(),
+	},
+	(table) => [index("idx_alerty_katalogu_statusy_klucz").on(table.klucz)],
+);
+
 export const history = sqliteTable("history", {
 	id: integer().primaryKey({ autoIncrement: true }),
 	data: text().notNull(),
