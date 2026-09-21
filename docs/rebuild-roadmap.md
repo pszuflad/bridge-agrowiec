@@ -179,7 +179,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 · **domknięta kartami z I14:** 14e diagnoza (`53-…`), 14f daty kończą promocję + potwierdzenie usuwania (`64-…`), 14h kolumna „Promocja" (`61-…`), 14m instrukcja I4-v2 (`65-…`) |
-| 5 | Historia | 1 + P5.1 | 3 | ✅ | PR #24 · 2026-09-02 · P5.1: `69-FEATURE-historia-bez-limitu` · 2026-09-21 (limit 5000 wierszy audytu zdjęty, backlog #87) |
+| 5 | Historia | 1 + P5.1–P5.3 | 3 | ✅ | PR #24 · 2026-09-02 · **domknięta kartami planu P (2026-09-21):** P5.1 `69-FEATURE-historia-bez-limitu` (limit 5000 wierszy audytu zdjęty, backlog #87), P5.2 `70-CHORE-eksport-zip-odstepstwo` (#93), P5.3 `73-DOCS-instrukcja-testow-i5-v2` (delta instrukcji I5-v2) |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
@@ -948,9 +948,11 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 5 — Historia
-- **Status:** ✅ **2026-09-02** (`15-FEATURE-historia-zmian`, PR #24)  **Sesje:** 1 + P5.1
-  **Zależy od:** 3. **P5.1 ✅ 2026-09-21** (`69-FEATURE-historia-bez-limitu`) — limit
-  5000 wierszy audytu zdjęty, patrz podblok P5.1 niżej.
+- **Status:** ✅ **2026-09-02** (`15-FEATURE-historia-zmian`, PR #24)  **Sesje:** 1 + P5.1–P5.3
+  **Zależy od:** 3. **Iteracja ZAMKNIĘTA 2026-09-21** kartami planu P: P5.1
+  (`69-FEATURE-historia-bez-limitu`, limit 5000 wierszy audytu zdjęty), P5.2
+  (`70-CHORE-eksport-zip-odstepstwo`, #93) i P5.3 (`73-DOCS-instrukcja-testow-i5-v2`, delta
+  `docs/instrukcja-testow-I5-v2.md`) — patrz podbloki niżej i blok „Poprawki po testach Ani”.
 - **Cel (Ania klika):** otwiera `/historia`, widzi log importów/eksportów/edycji z audytu — ✅ dowiezione.
 - **Backend — sprostowanie faktu, na którym stał ten blok: `Wa` to tabela `history`, NIE `historia_cen`**
   (`deminified/backend-index.cjs:43833`, jedno wystąpienie `Wa =`, brak cieniowania).
@@ -1032,8 +1034,8 @@ zmienia kolejności. Tempo zapisu (ok. 2400 wierszy/miesiąc w lipcu, 1476 w sie
 
 Szczegóły: `docs/tickets/69-FEATURE-historia-bez-limitu/`.
 
-Wejście dla P5.3 (sprostowanie instrukcji I5 §11 pkt 9) leży w bloku „Poprawki po testach
-Ani”, sekcja Iteracja 5, pod tabelą kart.
+Sprostowanie instrukcji I5 §11 pkt 9 dowiezione w P5.3 (`73-DOCS-instrukcja-testow-i5-v2`,
+2026-09-21) — `docs/instrukcja-testow-I5-v2.md`, punkty 2.1 i 3.1.
 
 ##### P5.2 — eksport ZIP jako świadome odstępstwo · ✅ ZROBIONE 2026-09-21 (`70-CHORE-eksport-zip-odstepstwo`)
 
@@ -1087,7 +1089,9 @@ jeden realny defekt znaleziony przy okazji:
   domyślnie zwinięta, licznik + czas ostatniego wystąpienia („MO3 — Błąd pobierania · 23× ·
   ostatnio 14:45"), rozwinięcie do pojedynczych wpisów; dowiedzione testem na danych z
   powtórkami (24 alerty → 2 grupy w DOM, pojedyncze `opis`y nieobecne przed rozwinięciem).
-  Domyślny filtr `status = nowy` (D7), filtry status/dostawca/typ z wartości w danych (D8).
+  Domyślny filtr `status = nowy` (D7), filtry status/dostawca/typ z wartości w danych (D8) —
+  **od P6.1 (72-FEATURE-alerty-przejrzany-szukajka, 2026-09-21): trzeci status `przejrzany`
+  i domyślny filtr „Nierozwiązane"**, patrz Iteracja 6 w §5.
   Zmiana statusu — na grupie i na pojedynczym wpisie, w obie strony, WYŁĄCZNIE przez API (D3):
   `PATCH /api/alerts/{id}` jedyne źródło prawdy, zero IndexedDB/localStorage; akcja grupowa to
   N `PATCH`-y z limitem równoległości 8 (`pages/alerty/api.ts`, największa grupa w produkcji —
@@ -1160,7 +1164,8 @@ jeden realny defekt znaleziony przy okazji:
     dosłowne nie miałoby sensu). 71 testów w domenie atrybutów, suita **917 testów / 58 plików**,
     lint/typecheck/build czyste. Pełny wywód (D1–D6, quirki produkcji — m.in. seed `bieznik`
     z `products.model` i dwie rozjeżdżone mapy rodzaj→kolumna, 15 dla liczników i 13 dla
-    kolejki): `docs/tickets/29-FEATURE-atrybuty-backend/`.
+    kolejki): `docs/tickets/29-FEATURE-atrybuty-backend/`. Mapy uzgodniono w P7.1 (ticket 74,
+    2026-09-21): jest jedna `RODZAJ_KOLUMNA` (15), a zakres skanu to jawna lista `ZAKRES_SKANU` (13).
 
 - **7b · Widok `/atrybuty`** (FE) — ✅ **zrobione** (ticket `31-FEATURE-atrybuty-frontend`,
   2026-09-04). Widok natywny: kafle rodzajów → panel wartości (CRUD) → kolejka „Do akceptacji"
@@ -1173,8 +1178,8 @@ jeden realny defekt znaleziony przy okazji:
   - **Zatwierdzone odstępstwa (D2, D4, D7):** `window.prompt`/`confirm` zastąpione dialogami
     Radix z zachowaniem dosłownych tekstów; pominięty martwy filtr „Źródło" (żadna trasa nie
     zwraca `origin`); dialogi akcji masowych pokazują liczbę produktów, których dotknie
-    `UPDATE` (`GET /atrybuty/uzycie` → `count`), a toast — `produktow_zaktualizowano` (bo
-    backend tych akcji NIE audytuje, backlog #39).
+    `UPDATE` (`GET /atrybuty/uzycie` → `count`), a toast — `produktow_zaktualizowano` (w 7b backend
+    tych akcji nie audytował, backlog #39; od P7.1, ticket 74, audytuje i pokazuje je w Historii).
   - **NIE odtworzono kafla „Wszystkie atrybuty" (D3)** — istnieje tylko w bazowym Reakcie,
     injection go chowa, Ania go nie widzi.
   - **Trzy operacje backendu 7a nie mają konsumenta w UI i to jest zgodne z produkcją (D5):**
@@ -2210,14 +2215,17 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
     Pkt 2 („pulpit respektuje potwierdzenia") odbudowa spełnia konstrukcyjnie — `aktywneAlerty()`
     filtruje po `status === "nowy"` z realnej odpowiedzi API, bez IndexedDB.
   - **D3 — `ackalerts` pkt 4 (ukrycie statusu `rozwiazany`): nie portujemy.** Oryginał ma trzy
-    statusy i domyślny filtr „wszystkie", odbudowa dwa i domyślny filtr `nowy` — ta sama reguła
-    zdegenerowałaby opcję „Wszystkie statusy" do duplikatu opcji „nowy".
+    statusy i domyślny filtr „wszystkie", odbudowa (w tym momencie, 2026-09-09) dwa i domyślny
+    filtr `nowy` — ta sama reguła zdegenerowałaby opcję „Wszystkie statusy" do duplikatu opcji
+    „nowy". *(Nieaktualne od P6.1 — 72, 2026-09-21: odbudowa ma już trzy statusy i domyślny filtr
+    „Nierozwiązane", degeneracja nie zachodzi.)*
   - **D4 — pass-through `konstrukcja` ZOSTAJE mimo regresji żywej produkcji.** Od 2026-09-09 to
     świadome odstępstwo: odbudowa jest POPRAWNIEJSZA niż produkcja. Odrzucone: zdjęcie
     pass-through, żeby odtworzyć zepsute zachowanie (cofałoby 13c).
   **Follow-up (nierozliczone):** silnik pseudo-alertów — backlog #26 ⬜; gdyby kiedyś wszedł,
-  wchodzi OD RAZU w wersji po łatkach z 04.09. Trzeci status alertu `przejrzany` istnieje
-  w oryginale, nie w odbudowie (brak wpisu w backlogu). Enhancer konfiguratora kolumn stagingu
+  wchodzi OD RAZU w wersji po łatkach z 04.09. Trzeci status alertu `przejrzany` istnieje od
+  P6.1 (72, 2026-09-21) też w odbudowie — ale wyłącznie dla alertów IMPORTU; pseudo-alerty
+  katalogowe (#26/P6.2) go nadal nie mają. Enhancer konfiguratora kolumn stagingu
   (`ex_marka`/`ex_szerokosc`) — **rozliczone w 14b** (`51-FEATURE-staging-filtr-pasek-kolumny`,
   2026-09-18): wchłonięty jako komponent React; `ex_marka`/`ex_szerokosc` to dwie z 49 pozycji
   sekcji „Dodatkowe (z katalogu)", która w oryginale nic nie robi (`applyCss()` zaczyna od
@@ -3013,47 +3021,52 @@ pod starymi nazwami: przemianowanie zerwałoby **719 odwołań w 38 plikach**.
 |---|---|---|---|
 | **P5.1** | Historia przestaje gubić najstarsze zdarzenia — hybryda: odsiew akcji w SQL bez limitu, reszta w pamięci (decyzja D2) | #87 | ✅ `69-FEATURE-historia-bez-limitu` · 2026-09-21 |
 | **P5.2** | eksport ZIP działa u nas, w produkcji nie — utrwalić jako świadome odstępstwo | #93 | ✅ 2026-09-21, ticket 70 — szczegóły: podblok „P5.2” w bloku „Iteracja 5 — Historia” |
-| **P5.3** | delta instrukcji I5 dla Ani | — | ⬜ po P5.1 i P5.2 |
+| **P5.3** | delta instrukcji I5 dla Ani | — | ✅ `73-DOCS-instrukcja-testow-i5-v2` · 2026-09-21 |
 
 Karta `14j` (oracle diff historii, 0 różnic na 49 813 wpisach) i skasowana `14k` (#21 — NIE) też
 należą do tej iteracji. Baza dla P5.3: `docs/instrukcja-testow-I5.md`, odtworzony 21.09 z PDF-a Ani
 (ticket 67) — wcześniej nie istniał w repo.
 
-**Wejście dla P5.3 (od P5.1, 2026-09-21):**
-po P5.1 `docs/instrukcja-testow-I5.md` §11 pkt 9 („ekran czyta 5000 najświeższych zdarzeń…
-z czasem wypłynie") przestaje być prawdziwy dla odbudowy — sprostowanie należy do karty P5.3.
-Przy porównaniu obok starego Bridge licznik `N wpisów` i najstarsze wpisy mogą się różnić
-na korzyść odbudowy — to oczekiwane, nie zgłoszenie. Dodatkowo dla ewentualnego
-przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`): działa tylko na bazie PONIŻEJ
-5000 wierszy `audit_log` — powyżej progu skrypt pokaże rozjazdy z założenia (odbudowa oddaje
-więcej), co wykryje pierwszy warunek ważności w `historia.wyrocznia.test.ts`
-(`limitNieGryzie: false`).
-
-**Wejście dla P5.3 (od P5.2, 2026-09-21):** `docs/instrukcja-testow-I5.md` §8.2 („nowych
-eksportów nie wygenerujesz”) **z perspektywy Ani zostaje prawdziwy**. Obie trasy eksportu Shopera
-nie mają w UI konsumenta (`docs/spec-frontend.md`, I8 D2; w `rebuild/frontend/src` jedyne
-trafienie `export-shoper` to komentarz w `pages/katalog/eksport.ts`, który mówi, że trasy nie są
-wołane), więc z interfejsu ich nie wywoła. Backend już je ma i przy wejściu wprost na URL zapisuje
-w audycie `eksport_csv`, który Historia pokazuje jako `eksport`. Wariant ZIP robi to wyłącznie
-w odbudowie, bo w produkcji kończy się 500 bez wpisu (backlog #93, świadome odstępstwo).
-Delta nie powinna więc obiecywać Ani generowania eksportów; najwyżej wspomnieć, że wpis `eksport`
-w nowym Bridge może się pojawić tylko po ręcznym wywołaniu trasy.
+**Iteracja 5 ZAMKNIĘTA 2026-09-21 — wszystkie trzy karty zrobione.** Delta dla Ani:
+`docs/instrukcja-testow-I5-v2.md` (P5.3); pierwsza wersja dostała banner „częściowo nieaktualne”
+i zostaje jako zapis stanu z 2026-09-02 (numery paragrafów wiążące). Ustalenia P5.3, które
+przydadzą się dalej:
+- **Eksport ZIP nie ma przycisku w UI (ani oryginał, ani odbudowa)** — delta daje Ani gotowy link
+  `https://test.agritires.eu/api/export-shoper` (decyzja użytkownika 2026-09-21, świadome wyjście
+  poza regułę „zero tras API” w instrukcjach). Wpis w Historii: typ `eksport`, Dostawca „—”
+  (`encja_typ = 'dostawcy'`, liczba mnoga, nie łapie się na `encja_typ === 'dostawca'`), Pozycji =
+  liczba dostawców, Szczegóły „Format: csv Format: csv” (dublowanie `format` + `uwagi` wierne
+  oryginałowi, `fe.js:25537-25545`).
+- **Różnica po P5.1 jest dziś niewidoczna na stagingu** (snapshot 3873 wierszy `audit_log` < 5000,
+  scheduler stagingu wyłączony). Jedyny widoczny objaw: stary Bridge może zaczynać Historię później
+  niż nowy — delta każe tego nie zgłaszać.
+- **§3.3 i §12 („ręczna edycja”) pierwszej wersji były nieaktualne od 12a**, nie od P5.x — edycja
+  produktu z Katalogu („Akcje” → „Edytuj”) pisze `edycja_produktu`; delta prostuje to w osobnej
+  podsekcji. Dla przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`) nadal obowiązuje: działa
+  tylko na bazie PONIŻEJ 5000 wierszy `audit_log` (warunek `limitNieGryzie` w
+  `historia.wyrocznia.test.ts`).
 
 #### Iteracja 6 — Alerty
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P6.1** | lista alertów importu: wyszukiwarka po treści + trzeci status `przejrzany` | #90, #26 (część) | ⬜ gotowe |
-| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu | #26 | ⬜ gotowe — **po merge'u P6.1** |
-| **P6.3** | delta instrukcji I6 dla Ani | — | ⬜ po P6.1 i P6.2 |
+| **P6.1** | ✅ 2026-09-21 (72) — trzeci status `przejrzany` (przyciski słownictwem oryginału + nasza „Otwórz ponownie", domyślny filtr „Nierozwiązane") i wyszukiwarka po `opis` filtrująca wpisy PRZED grupowaniem; wspólny moduł `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx` pod P6.2 — decyzje w `docs/tickets/72-FEATURE-alerty-przejrzany-szukajka/plan.md` | #90, #26 (część) | ✅ zrobione |
+| **P6.2** ⭐ | pseudo-alerty katalogowe — nowy mechanizm liczony z katalogu; **importuje** `statusy.ts`/`PrzyciskiStatusu.tsx` z P6.1, nie duplikuje | #26 | ⬜ gotowe — **P6.1 zmergowana, można startować** |
+| **P6.3** | delta instrukcji I6 dla Ani — lista tego, co P6.1 obaliła w `docs/instrukcja-testow-I6.md`, jest w `raport.md` ticketu 72 (sekcja Follow-up) | — | ⬜ po P6.1 i P6.2 |
 
 **Dlaczego #26 jest rozdzielone na dwie karty.** Trzeci status dla ISTNIEJĄCYCH alertów jest tani —
 `PATCH /api/alerts/:id` nie waliduje statusu (oryginał też nie, `routes/alerts.ts:45`), wystarczy
 poszerzyć typ `StatusAlertu` (`repos/alerts.ts:16`) i dołożyć przycisk. Pseudo-alerty to osobny, duży
 mechanizm: w oryginale liczone w PRZEGLĄDARCE z katalogu (`frontend-index.js:25177-25340` `HT()`,
 `:16631-16705` `pv()`), status w IndexedDB (`:9165-9193`). Rozłączność plików: P6.1 ma
-`TabelaAlertow.tsx`, `grupowanie.ts`, `repos/alerts.ts` i `test/alerty.*`; P6.2 ma NOWE pliki
-i powłokę strony `/alerty`. Dzięki temu idą równolegle.
+`TabelaAlertow.tsx`, `grupowanie.ts`, `repos/alerts.ts`, `test/alerty.*` i (nowe, współdzielone
+z P6.2) `pages/alerty/statusy.ts` + `PrzyciskiStatusu.tsx`; P6.2 ma NOWE pliki i powłokę strony
+`/alerty` (`pages/Alerty.tsx`, nietknięty przez P6.1). Dzięki temu idą równolegle.
+
+**Dla P6.2:** mutacja zapisu statusu i toast „Zmieniono X z N alertów" zostały w
+`TabelaAlertow.tsx` (P6.1 ich nie wydzieliła), bo są przywiązane do `PATCH /api/alerts/:id` alertów
+IMPORTU. Status pseudo-alertów ma iść na serwer (decyzja 2 niżej), ale inną drogą niż `alerts` —
+P6.2 dokłada własny zapis; wspólne są tylko statusy, etykiety i przyciski.
 
 ⚠ **P6.2 jest jedną z dwóch rzeczy, które Ania nazwała mogącymi wstrzymać cutover** — musi wejść przed
 przełączeniem produkcji.
@@ -3085,13 +3098,69 @@ odciski wartości w identyfikatorach alertów są obecne, a opis 13e jest popraw
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ⬜ gotowe |
-| **P7.2** | seed bieżników z `products.bieznik` + podobieństwo case-insensitive | #40, #42 | ⬜ gotowe |
-| **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ⬜ gotowe |
-| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 |
+| **P7.1** | ślad akcji kolejki w Historii + uzgodnienie map rodzaj→kolumna | #39, #41 | ✅ 2026-09-21, ticket `74-FEATURE-slad-kolejki-atrybutow` |
+| **P7.2** | seed bieżników z `products.bieznik` + podobieństwo case-insensitive | #40, #42 | ⬜ gotowe · wejście od P7.3 niżej |
+| **P7.3** | test niezmiennika „ostrzeżenie = liczba realnie przepisanych" | — | ✅ `75-CHORE-niezmiennik-atrybutow` · 2026-09-21 — niezmiennik trzyma się: liczba w ostrzeżeniu = liczba przepisanych wierszy, 0 rozjazdów na 4148 pomiarach na snapshocie; test `atrybuty.niezmiennik.test.ts` w bramce |
+| **P7.4** | delta instrukcji I7 dla Ani | — | ⬜ po P7.1–P7.3 · wejście od P7.3 niżej |
 
 ⚠ P7.1 i P7.2 dzielą klaster backendu atrybutów — przed puszczeniem obu naraz sprawdzić rozłączność
 plików, inaczej połączyć. P7.3 jest czysto testowa, idzie równolegle z czymkolwiek.
+
+**Wejście od P7.3 (ticket 75, 2026-09-21)** — pomiar i tabela: `docs/tickets/75-CHORE-niezmiennik-atrybutow/raport.md`.
+
+- **Dla P7.1:** po wprowadzeniu `model` / `zastosowanie` do akceptacji dopisać je do listy `RODZAJE`
+  w `rebuild/backend/test/atrybuty.niezmiennik.test.ts`. P7.3 je pominęła, bo dziś dają 400
+  „Nieznany rodzaj". Test nie importuje map rodzaj→kolumna i nie sprawdza `audit_log`, więc audyt
+  akcji i przebudowa map go nie ruszają. **Zrobione w P7.1 (ticket 74):** zamiast dopisania do
+  `RODZAJE` doszła osobna lista `RODZAJE_POZA_SKANEM` — skan tych rodzajów nie przegląda, więc
+  pozycję kolejki test wstawia ręcznie i sprawdza B == C == realna zmiana.
+- **Dla P7.2:** pozycje kolejki, które podpowiadają same siebie ze 100%, dają dziś fałszywą liczbę
+  przy aliasie. Ostrzeżenie mówi „w N produktach", toast „Zaktualizowano produktów: N", a realnie
+  zmienia się 0 wierszy (SQLite liczy wiersze dopasowane, nie zmienione). W snapshocie takich
+  pozycji jest **437 z 500**: `bieznik` 242, `rozmiar` 99, `marka` 68, `indeks_nosnosci` 27,
+  `konstrukcja` 1. **Sama zmiana seedu `bieznik` na `products.bieznik` usunie co najwyżej 72
+  z nich** (`bieznik` z `origin = 'catalog'`). Pozostałe 365 to wartości dodane ręcznie
+  (`origin = 'user'`) albo rodzaje, których seed z `model` nie dotyczy. Żeby objaw z decyzji Ani
+  („przeszkadza mi to") zniknął, potrzebne jest też sprzątanie kolejki z pozycji obecnych już
+  w słowniku. #40 opisuje je jako osobną, mniejszą zmianę. Test „alias na samą siebie"
+  w `atrybuty.niezmiennik.test.ts` trzeba wtedy odwrócić (komentarz w teście to mówi).
+- **Dla P7.4 — ⚠ instrukcja I7 §3.11 obiecuje coś, co nie jest prawdą.**
+  `docs/instrukcja-testow-I7.md:206-208` mówi, że liczba w ostrzeżeniu „ma odpowiadać temu, co
+  pokazuje kolumna *Wystąpień*". Tak nie jest i być nie musi. Ostrzeżenie liczy na żywo
+  (`GET /api/atrybuty/uzycie`), a kolumna to migawka ze skanu. Pozycji już obecnych w słowniku
+  skan nie odświeża nigdy, więc w snapshocie **126 z 500** pozycji ma w kolumnie inną liczbę niż
+  w ostrzeżeniu. Dotyczy to także przykładu z samej instrukcji: „AGRI STAR II" ma 186 w kolumnie
+  i 188 w ostrzeżeniu. Inny przykład: ALLIANCE, 780 w kolumnie i 848 w ostrzeżeniu. Delta ma to
+  sprostować. Wiarygodna jest liczba z OSTRZEŻENIA i ona ma się równać liczbie z toastu
+  „Zaktualizowano produktów" (P7.3 to potwierdziła: 0 rozjazdów). Właściwym zgłoszeniem z §5
+  (`:424`) jest więc rozjazd ostrzeżenie ↔ toast ↔ katalog, a nie ostrzeżenie ↔ kolumna. Wyjątek,
+  o którym Ania powinna wiedzieć: kliknięcie sugestii, która jest tą samą wartością (100%),
+  pokaże N w ostrzeżeniu i w toaście, choć w katalogu nic się nie zmieni (patrz wyżej, P7.2).
+
+**P7.1 dowieziona (2026-09-21, ticket 74):** sześć tras kolejki (`akceptuj`, `akceptuj-z-edycja`,
+`akceptuj-jako-alias`, `odrzuc`, `DELETE /api/atrybuty/pending`, `POST /api/atrybuty/scan-pending`)
+pisze do `audit_log` (`atrybut_pending_*`); dwie z nich (edycja, alias) są widoczne w
+`GET /api/history/paged` jako `edycja`, z realną liczbą przepisanych produktów i opisem
+przed → po (wymagało gałęzi w `naWpisHistorii()`, nie tylko wpisu w słowniku). `RODZAJE_KOLUMNY`
+zniknęła — jedna mapa `RODZAJ_KOLUMNA` (15) obsługuje liczniki, użycie i obie akceptacje; zakres
+skanu został osobną, jawną listą `ZAKRES_SKANU` (13, bez zmiany zawartości). Szczegóły:
+`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`.
+
+**Dla P7.2 (punkt startu czysty):** P7.1 nie ruszyła seedu `bieznik`, kandydatów ani podobieństwa
+(`repos/atrybuty.ts` zmieniony tylko w komentarzu). Skan iteruje dziś po `ZAKRES_SKANU`
+(`repos/atrybuty-pending.ts`), a kolumny bierze z `RODZAJ_KOLUMNA` (`repos/atrybuty.ts`) — `RODZAJE_KOLUMNY` w
+`repos/atrybuty-pending.ts` już nie istnieje. Fakt do uwzględnienia, jeśli P7.2 wstawia w
+testach wartości spoza pięciu rdzeniowych rodzajów: `atrybuty_wartosci.rodzaj` ma FK do
+`atrybuty_rodzaje`, a seed rebuildu zakłada tylko 5 rodzajów rdzenia (produkcja ma 15) — na
+świeżej bazie akceptacja rodzaju spoza piątki kończy się 500 (rollback); stan zastany, nie
+powstał w 74.
+
+**Dla P7.4 (delta instrukcji I7):** `docs/instrukcja-testow-I7.md` §4 pkt 4 jest po 74
+nieprawdziwy dwukrotnie — `model`/`zastosowanie` NIE trafiają do kolejki (skan ich nie tworzy,
+0 wierszy na snapshocie), a błąd „Nieznany rodzaj" dla nich już nie występuje (jedna mapa,
+akceptacja je przyjmuje). §4 pkt 7 też nieaktualny — ślad w Historii już jest (patrz wyżej).
+Jeśli Ania chce, żeby `model`/`zastosowanie` trafiały do kolejki, to zmiana zakresu skanu (I15),
+która zalałaby kolejkę (#40) — do wyjaśnienia z nią, nie do cichej zmiany.
 
 #### Iteracja 9 — Waga gabarytowa
 

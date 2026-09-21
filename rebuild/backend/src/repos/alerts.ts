@@ -12,8 +12,12 @@ import { alerts } from "../db/schema.js";
  */
 export type PoziomAlertu = "info" | "ostrzezenie" | "blad";
 
-/** Stan alertu. Import pisze `rozwiazany` dla zdarzeń informacyjnych, `nowy` dla awarii. */
-export type StatusAlertu = "nowy" | "rozwiazany";
+/**
+ * Stan alertu. Import pisze `rozwiazany` dla zdarzeń informacyjnych, `nowy` dla awarii.
+ * `przejrzany` („widziałam, ale jeszcze nie załatwione") ustawia wyłącznie widok `/alerty`
+ * (P6.1, ticket `72-FEATURE-alerty-przejrzany-szukajka`) — słownictwo oryginału `HT()`.
+ */
+export type StatusAlertu = "nowy" | "przejrzany" | "rozwiazany";
 
 export type NowyAlert = {
   poziom: PoziomAlertu;

@@ -195,7 +195,11 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > oddaje **gołą mapę** `"<rodzaj>::<wartosc>": liczba`, bez koperty `ok`. Audyt piszą tylko
 > 3 trasy CRUD rodzajów i 3 wartości — kolejka pending nie loguje nic, mimo że
 > `akceptuj-z-edycja`/`akceptuj-jako-alias` robią masowy `UPDATE products`. Szczegóły:
-> `docs/tickets/29-FEATURE-atrybuty-backend/`.
+> `docs/tickets/29-FEATURE-atrybuty-backend/`. **Świadome odstępstwo rebuildu** (2026-09-21,
+> `74-FEATURE-slad-kolejki-atrybutow`, backlog #39/#41): u nas wszystkie sześć tras kolejki
+> pisze do `audit_log`, a akceptacja z edycją/alias jest dodatkowo widoczna w Historii jako
+> `edycja`; oryginał tego nadal nie robi. Mapy rodzaj→kolumna są u nas jedne (15 rodzajów) —
+> `pending_module.cjs` w oryginale ma osobną, węższą mapę (13, bez `model`/`zastosowanie`).
 
 > **Potwierdzone w 8a** (`28-FEATURE-selly-eksport-backend`, 2026-09-04): panel Selly to **5 GET
 > + 5 POST**, nie 7+3 jak zakładała robocza notatka — `categories` i `producers` są POST-ami

@@ -1,0 +1,526 @@
+{
+  "snapshot": "<repo>/db/snapshot.db",
+  "warianty": [
+    {
+      "tryb": "stan",
+      "pendingPrzedSkanem": 498,
+      "staty": {
+        "skanowano_rodzajow": 13,
+        "nowych_wartosci": 2,
+        "zaktualizowano": 0
+      },
+      "pozycjiPoSkanie": 500,
+      "pominiete": {},
+      "tabela": {
+        "bieznik": {
+          "pozycji": 296,
+          "swiezych": 0,
+          "A≠C": 85,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 296,
+          "B≠C alias": 0,
+          "C≠D alias": 242,
+          "alias na samą siebie": 242
+        },
+        "indeks_nosnosci": {
+          "pozycji": 27,
+          "swiezych": 0,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 27,
+          "B≠C alias": 0,
+          "C≠D alias": 27,
+          "alias na samą siebie": 27
+        },
+        "kategoria": {
+          "pozycji": 7,
+          "swiezych": 0,
+          "A≠C": 7,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 7,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "konstrukcja": {
+          "pozycji": 3,
+          "swiezych": 2,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 3,
+          "B≠C alias": 0,
+          "C≠D alias": 1,
+          "alias na samą siebie": 1
+        },
+        "marka": {
+          "pozycji": 68,
+          "swiezych": 0,
+          "A≠C": 33,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 68,
+          "B≠C alias": 0,
+          "C≠D alias": 68,
+          "alias na samą siebie": 68
+        },
+        "rozmiar": {
+          "pozycji": 99,
+          "swiezych": 0,
+          "A≠C": 1,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 99,
+          "B≠C alias": 0,
+          "C≠D alias": 99,
+          "alias na samą siebie": 99
+        }
+      },
+      "sumaRozjazdow": {
+        "A≠C": 126,
+        "A≠C wśród świeżych": 0,
+        "B≠C": 0,
+        "C≠D": 437,
+        "C≠D poza aliasem na samą siebie": 0,
+        "reszta po TRIM": 0
+      },
+      "przyczynyAC": {
+        "migawka nieświeża (inne zmiany katalogu po skanie)": {
+          "liczba": 65,
+          "przyklady": [
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "AGRI STAR II",
+              "A": 186,
+              "B": 188,
+              "C": 188,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "TORQUEMAX",
+              "A": 25,
+              "B": 30,
+              "C": 30,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "FARMAX R85",
+              "A": 24,
+              "B": 33,
+              "C": 33,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "AGRIFLEX 372 +",
+              "A": 21,
+              "B": 23,
+              "C": 23,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "AGRISTAR II ROW CROP",
+              "A": 10,
+              "B": 12,
+              "C": 12,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "K500 SUPER TURF",
+              "A": 10,
+              "B": 11,
+              "C": 11,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "LWG-02 IMPLEMENT KLOCKOWA",
+              "A": 10,
+              "B": 11,
+              "C": 11,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "FLOATMAX FT",
+              "A": 9,
+              "B": 14,
+              "C": 14,
+              "mo6": 0
+            }
+          ]
+        },
+        "wartość zniknęła z products po skanie": {
+          "liczba": 61,
+          "przyklady": [
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "CONTI ECO 5",
+              "A": 9,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "NORDMAN FOREST TRS",
+              "A": 8,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "REGIOFORCE NAPĘD",
+              "A": 8,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "LOGGER KING TRS-2 TL",
+              "A": 4,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "TRACTORMASTER",
+              "A": 4,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "FARMPRO",
+              "A": 3,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "WINTERFORCE NAPĘD",
+              "A": 3,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            },
+            {
+              "rodzaj": "bieznik",
+              "wartosc": "Conti CrossTrac 3",
+              "A": 2,
+              "B": 0,
+              "C": 0,
+              "mo6": 0
+            }
+          ]
+        }
+      },
+      "przykladyBC": [],
+      "przykladyAliasNaSiebie": [
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "AGRI STAR II",
+          "A": 186,
+          "edycja": {
+            "B": 188,
+            "C": 188,
+            "D": 188,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 188,
+            "C": 188,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "AGRI STAR II"
+          }
+        },
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "HAKKAPELIITTA TRI",
+          "A": 36,
+          "edycja": {
+            "B": 36,
+            "C": 36,
+            "D": 36,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 36,
+            "C": 36,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "HAKKAPELIITTA TRI"
+          }
+        },
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "TORQUEMAX",
+          "A": 25,
+          "edycja": {
+            "B": 30,
+            "C": 30,
+            "D": 30,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 30,
+            "C": 30,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "TORQUEMAX"
+          }
+        },
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "FARMAX R85",
+          "A": 24,
+          "edycja": {
+            "B": 33,
+            "C": 33,
+            "D": 33,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 33,
+            "C": 33,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "FARMAX R85"
+          }
+        },
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "AGRIFLEX 372 +",
+          "A": 21,
+          "edycja": {
+            "B": 23,
+            "C": 23,
+            "D": 23,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 23,
+            "C": 23,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "AGRIFLEX 372 +"
+          }
+        },
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "TRACTOR KING",
+          "A": 21,
+          "edycja": {
+            "B": 21,
+            "C": 21,
+            "D": 21,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 21,
+            "C": 21,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "TRACTOR KING"
+          }
+        },
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "FARMAX",
+          "A": 19,
+          "edycja": {
+            "B": 19,
+            "C": 19,
+            "D": 19,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 19,
+            "C": 19,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "FARMAX"
+          }
+        },
+        {
+          "rodzaj": "bieznik",
+          "wartosc": "IMP-06 IMPLEMENT LINIOWA",
+          "A": 15,
+          "edycja": {
+            "B": 15,
+            "C": 15,
+            "D": 15,
+            "resztaTrim": 0
+          },
+          "alias": {
+            "B": 15,
+            "C": 15,
+            "D": 0,
+            "resztaTrim": 0,
+            "kanoniczna": "IMP-06 IMPLEMENT LINIOWA"
+          }
+        }
+      ],
+      "przykladyResztaTrim": []
+    },
+    {
+      "tryb": "czysty",
+      "pendingPrzedSkanem": 0,
+      "staty": {
+        "skanowano_rodzajow": 13,
+        "nowych_wartosci": 3648,
+        "zaktualizowano": 0
+      },
+      "pozycjiPoSkanie": 3648,
+      "pominiete": {},
+      "tabela": {
+        "bieznik": {
+          "pozycji": 1663,
+          "swiezych": 1663,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "indeks_nosnosci": {
+          "pozycji": 665,
+          "swiezych": 665,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "indeks_predkosci": {
+          "pozycji": 71,
+          "swiezych": 71,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "kategoria": {
+          "pozycji": 4,
+          "swiezych": 4,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "konstrukcja": {
+          "pozycji": 3,
+          "swiezych": 3,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "marka": {
+          "pozycji": 93,
+          "swiezych": 93,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "oznaczenie_bieznika": {
+          "pozycji": 13,
+          "swiezych": 13,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "rodzaj": {
+          "pozycji": 13,
+          "swiezych": 13,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "rozmiar": {
+          "pozycji": 1119,
+          "swiezych": 1119,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "tl_tt": {
+          "pozycji": 2,
+          "swiezych": 2,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        },
+        "vfIf": {
+          "pozycji": 2,
+          "swiezych": 2,
+          "A≠C": 0,
+          "B≠C edycja": 0,
+          "C≠D edycja": 0,
+          "z aliasem": 0,
+          "B≠C alias": 0,
+          "C≠D alias": 0,
+          "alias na samą siebie": 0
+        }
+      },
+      "sumaRozjazdow": {
+        "A≠C": 0,
+        "A≠C wśród świeżych": 0,
+        "B≠C": 0,
+        "C≠D": 0,
+        "C≠D poza aliasem na samą siebie": 0,
+        "reszta po TRIM": 0
+      },
+      "przyczynyAC": {},
+      "przykladyBC": [],
+      "przykladyAliasNaSiebie": [],
+      "przykladyResztaTrim": []
+    }
+  ]
+}

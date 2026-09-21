@@ -14,12 +14,14 @@ import { describe, expect, it } from "vitest";
 
 import type { Alert } from "@/pages/alerty/api";
 import {
+  FILTR_NIEROZWIAZANE,
   FILTRY_POCZATKOWE,
   filtrujAlerty,
   pogrupujAlerty,
   sformatujOstatnia,
   wartosciFiltrow,
 } from "@/pages/alerty/grupowanie";
+import { akcjeStatusu, etykietaStatusu } from "@/pages/alerty/statusy";
 import { alertyZFixtura } from "./msw/kontrakt";
 
 const WZORCOWY = alertyZFixtura()[0]!;
@@ -107,14 +109,17 @@ describe("1. Zwijanie powtórek", () => {
    * `status` jest CZĘŚCIĄ klucza: zamknięcie połowy powtórek musi być widać jako osobny
    * wiersz, inaczej praca Ani znika z ekranu bez śladu.
    */
-  it("ten sam (dostawca, typ) w dwóch statusach to DWIE grupy", () => {
+  it("ten sam (dostawca, typ) w każdym z trzech statusów to osobna grupa", () => {
     const grupy = pogrupujAlerty([
       alert({ id: 1, dostawca: "MO3", typ: "Błąd pobierania", status: "nowy" }),
-      alert({ id: 2, dostawca: "MO3", typ: "Błąd pobierania", status: "rozwiazany" }),
+      alert({ id: 2, dostawca: "MO3", typ: "Błąd pobierania", status: "przejrzany" }),
+      alert({ id: 3, dostawca: "MO3", typ: "Błąd pobierania", status: "rozwiazany" }),
+      alert({ id: 4, dostawca: "MO3", typ: "Błąd pobierania", status: "przejrzany" }),
     ]);
 
-    expect(grupy).toHaveLength(2);
-    expect(grupy.map((g) => g.status).sort()).toEqual(["nowy", "rozwiazany"]);
+    expect(grupy).toHaveLength(3);
+    expect(grupy.map((g) => g.status).sort()).toEqual(["nowy", "przejrzany", "rozwiazany"]);
+    expect(grupy.find((g) => g.status === "przejrzany")!.liczba).toBe(2);
   });
 
   it("różni dostawcy przy tym samym typie nie wpadają do jednej grupy", () => {
@@ -167,13 +172,27 @@ describe("1. Zwijanie powtórek", () => {
 });
 
 describe("2. Filtry", () => {
-  it("domyślny filtr pokazuje wyłącznie status `nowy`", () => {
-    expect(FILTRY_POCZATKOWE.status).toBe("nowy");
+  /**
+   * Decyzja D1 (`72-FEATURE-alerty-przejrzany-szukajka`): domyślnie NIEROZWIĄZANE. Gdyby
+   * `przejrzany` był schowany, „Oznacz jako przejrzany" działałoby jak „Rozwiąż".
+   */
+  it("domyślny filtr pokazuje nierozwiązane — `nowy` i `przejrzany`, bez `rozwiazany`", () => {
+    expect(FILTRY_POCZATKOWE.status).toBe(FILTR_NIEROZWIAZANE);
 
-    const widoczne = filtrujAlerty(zPowtorkami(), FILTRY_POCZATKOWE);
+    const alerty = [
+      ...zPowtorkami(),
+      alert({ id: 4000, status: "przejrzany", dostawca: "MO3", typ: "Błąd pobierania" }),
+    ];
+    const widoczne = filtrujAlerty(alerty, FILTRY_POCZATKOWE);
 
-    expect(widoczne).toHaveLength(27);
-    expect(widoczne.every((a) => a.status === "nowy")).toBe(true);
+    expect(widoczne).toHaveLength(28);
+    expect(new Set(widoczne.map((a) => a.status))).toEqual(new Set(["nowy", "przejrzany"]));
+  });
+
+  /** Kolumna bez `CHECK` — nieznany status nie może zniknąć z listy roboczej. */
+  it("status spoza znanych trzech liczy się jako nierozwiązany", () => {
+    const widoczne = filtrujAlerty([alert({ id: 1, status: "dziwny" })], FILTRY_POCZATKOWE);
+    expect(widoczne).toHaveLength(1);
   });
 
   it("filtry łączą się operatorem AND", () => {
@@ -181,15 +200,16 @@ describe("2. Filtry", () => {
       status: "nowy",
       dostawca: "MO5",
       typ: "Błąd pobierania",
+      fraza: "",
     });
     expect(widoczne).toHaveLength(4);
   });
 
-  it("`null` w filtrze nie zawęża niczego", () => {
+  it("`null` w filtrze i pusta fraza nie zawężają niczego", () => {
     const alerty = zPowtorkami();
-    expect(filtrujAlerty(alerty, { status: null, dostawca: null, typ: null })).toHaveLength(
-      alerty.length,
-    );
+    expect(
+      filtrujAlerty(alerty, { status: null, dostawca: null, typ: null, fraza: "  " }),
+    ).toHaveLength(alerty.length);
   });
 
   it("wartości filtrów są wyliczane z danych, a nie zaszyte na sztywno", () => {
@@ -211,6 +231,104 @@ describe("2. Filtry", () => {
   it("nowy typ alertu z importu pojawia się w filtrze sam, bez zmiany kodu", () => {
     const wartosci = wartosciFiltrow([alert({ id: 1, typ: "Zupełnie nowy typ" })]);
     expect(wartosci.typy).toContain("Zupełnie nowy typ");
+  });
+});
+
+describe("2a. Wyszukiwarka po treści (backlog #90)", () => {
+  const BEZ_FILTROW = { status: null, dostawca: null, typ: null, fraza: "" };
+
+  /** Dwie przyczyny w jednym typie „Błąd pobierania" (backlog #16) — po to jest wyszukiwarka. */
+  function dwiePrzyczyny(): Alert[] {
+    return [
+      alert({ id: 1, dostawca: "MO3", typ: "Błąd pobierania", status: "nowy", opis: "MO3: fetch failed" }),
+      alert({ id: 2, dostawca: "MO3", typ: "Błąd pobierania", status: "nowy", opis: "MO3: fetch failed" }),
+      alert({
+        id: 3,
+        dostawca: "MO3",
+        typ: "Błąd pobierania",
+        status: "nowy",
+        opis: "MO3: Parser XLSX — brak kolumny 'cena'",
+      }),
+      alert({ id: 4, dostawca: "MO5", typ: "Błąd HTTP", status: "nowy", opis: "MO5: HTTP 503" }),
+    ];
+  }
+
+  it("zawęża po `opis` bez rozróżniania wielkości liter", () => {
+    const widoczne = filtrujAlerty(dwiePrzyczyny(), { ...BEZ_FILTROW, fraza: "parser" });
+    expect(widoczne.map((a) => a.id)).toEqual([3]);
+  });
+
+  it("każde słowo frazy musi wystąpić w treści (AND po słowach, nie po całej frazie)", () => {
+    const alerty = dwiePrzyczyny();
+    expect(filtrujAlerty(alerty, { ...BEZ_FILTROW, fraza: "xlsx cena" })).toHaveLength(1);
+    expect(filtrujAlerty(alerty, { ...BEZ_FILTROW, fraza: "xlsx 503" })).toHaveLength(0);
+  });
+
+  it("polskie znaki porównują się poprawnie także przy wielkich literach", () => {
+    const alerty = [alert({ id: 1, opis: "MO4: BŁĄD połączenia" })];
+    expect(filtrujAlerty(alerty, { ...BEZ_FILTROW, fraza: "błąd" })).toHaveLength(1);
+  });
+
+  /** Decyzja D4: dostawca i typ mają własne filtry — fraza ich nie przeszukuje. */
+  it("przeszukuje wyłącznie treść — nie dostawcę i nie typ", () => {
+    const alerty = [alert({ id: 1, dostawca: "MO3", typ: "Błąd pobierania", opis: "fetch failed" })];
+    expect(filtrujAlerty(alerty, { ...BEZ_FILTROW, fraza: "MO3" })).toHaveLength(0);
+    expect(filtrujAlerty(alerty, { ...BEZ_FILTROW, fraza: "pobierania" })).toHaveLength(0);
+  });
+
+  it("łączy się z pozostałymi filtrami operatorem AND", () => {
+    const widoczne = filtrujAlerty(dwiePrzyczyny(), {
+      status: "nowy",
+      dostawca: "MO5",
+      typ: null,
+      fraza: "fetch",
+    });
+    expect(widoczne).toHaveLength(0);
+  });
+
+  /**
+   * Decyzja D3: trafienie filtruje WPISY, grupa składa się z samych trafień. Licznik „N×"
+   * mówi, ile wpisów pasuje, a akcja na grupie obejmuje tylko je — błędy parsera da się
+   * zamknąć, nie ruszając awarii sieci z tej samej grupy.
+   */
+  it("grupa zostaje przy jednym trafieniu, a jej licznik liczy tylko trafienia", () => {
+    const grupy = pogrupujAlerty(
+      filtrujAlerty(dwiePrzyczyny(), { ...BEZ_FILTROW, fraza: "parser" }),
+    );
+
+    expect(grupy).toHaveLength(1);
+    expect(grupy[0]!.klucz).toBe("MO3|Błąd pobierania|nowy");
+    expect(grupy[0]!.liczba).toBe(1);
+    expect(grupy[0]!.wpisy.map((w) => w.id)).toEqual([3]);
+  });
+});
+
+describe("2b. Statusy i akcje (wspólne z P6.2)", () => {
+  const cele = (status: string) => akcjeStatusu(status).map((a) => `${a.cel}:${a.etykieta}`);
+
+  it("`nowy` → „Oznacz jako przejrzany” i „Rozwiąż”", () => {
+    expect(cele("nowy")).toEqual(["przejrzany:Oznacz jako przejrzany", "rozwiazany:Rozwiąż"]);
+  });
+
+  it("`przejrzany` → „Rozwiąż” i „Otwórz ponownie”", () => {
+    expect(cele("przejrzany")).toEqual(["rozwiazany:Rozwiąż", "nowy:Otwórz ponownie"]);
+  });
+
+  it("`rozwiazany` → tylko „Otwórz ponownie”", () => {
+    expect(cele("rozwiazany")).toEqual(["nowy:Otwórz ponownie"]);
+  });
+
+  it("status nieznany da się i rozwiązać, i otworzyć ponownie", () => {
+    expect(cele("dziwny")).toEqual(["rozwiazany:Rozwiąż", "nowy:Otwórz ponownie"]);
+  });
+
+  it("etykiety filtra jak w oryginale; nieznany status pod surową nazwą", () => {
+    expect(["nowy", "przejrzany", "rozwiazany", "dziwny"].map(etykietaStatusu)).toEqual([
+      "Nowy",
+      "Przejrzany",
+      "Rozwiązany",
+      "dziwny",
+    ]);
   });
 });
 
