@@ -1,5 +1,21 @@
 # Iteracja 6 (Alerty) — instrukcja testów dla Ani
 
+> **⚠ CZĘŚCIOWO NIEAKTUALNE od 2026-09-21 — najpierw przeczytaj [wersję 2 tej instrukcji](instrukcja-testow-I6-v2.md).**
+>
+> Po Twoich odpowiedziach ekran **Alerty** ma **dwie zakładki**, **Import** (ta lista) i **Katalog** (ostrzeżenia liczone z katalogu, jak w starym Bridge), **trzy stany** alertu z przyciskami **Oznacz jako przejrzany** i **Rozwiąż** oraz **wyszukiwarkę po treści**. Ta instrukcja opisuje stan **sprzed** tych zmian. **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego, co widzisz na ekranie, prawdą jest wersja 2.**
+>
+> Co konkretnie przestało być prawdą w TEJ wersji:
+> - **ramka na początku**, **§1** i **§4 pkt 7** — „alerty pisze wyłącznie import" dotyczy już tylko zakładki **Import**;
+> - **§1 pkt 2**, **§3.5**, **§4 pkt 4** i **§6** — domyślny filtr to **Nierozwiązane** (nowe i przejrzane), nie „nowy";
+> - **§3.1** — inny podpis pod tytułem, zakładki nad listą i pole **Szukaj w treści** przed filtrami;
+> - **§3.3**, **§3.5**, **§3.6** — przycisku **Oznacz jako rozwiązane** już nie ma: jest **Oznacz jako przejrzany** i **Rozwiąż**;
+> - **§3.7** — **Otwórz ponownie** jest też przy przejrzanych; filtr statusu ma nowe opcje;
+> - **§4 pkt 9** — poziom jako sama ikona tylko w zakładce **Import**;
+> - **§5** — wyszukiwarka i ostrzeżenia z katalogu już są, a Pulpit pokazuje obie zakładki;
+> - **§7** — „zamknięty alert wraca jako nowy" ma w zakładce **Katalog** dwa celowe wyjątki.
+>
+> Szczegóły i tabela zdań: [wersja 2, rozdział 4](instrukcja-testow-I6-v2.md#4-co-w-pierwszej-wersji-przestało-być-prawdą).
+
 **Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-03
 
 > **To jest STAGING, nie produkcja.** Cokolwiek tu ustawisz albo zepsujesz — produkcji nie
