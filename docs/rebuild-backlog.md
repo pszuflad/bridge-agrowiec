@@ -2064,6 +2064,12 @@ o potwierdzenie (`DialogPotwierdzenia`); zmiana nazwy/dzielnika zapisuje się po
 pola. Stary klucz `waga-gabarytowa-przewoznicy` w IndexedDB zostaje **nieczytany i niepisany** —
 lokalne zmiany Ani z przeglądarki nie są importowane ani usuwane, po prostu przestają mieć
 znaczenie. Szczegóły: `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
+**Uzupełnienie (P9.1b, ticket 84, 2026-09-21) — domknięcie §3.11 Ani** („szczególnie gdy jest
+aktualnie wybrany”). Usunięcie przewoźnika wybranego w tej przeglądarce pokazuje drugi, mocniejszy
+wariant okna: tytuł „Usunąć wybranego przewoźnika?”, informację, że jest wybrany w kalkulatorze,
+i bursztynową ramkę z nazwą następcy (pierwszy z pozostałych, jak dotąd). Zwykłe okno dla
+niewybranych bez zmian. Pliki: `TabelaPrzewoznikow.tsx` (już na liście). Szczegóły:
+`docs/tickets/84-FEATURE-usun-wybranego-przewoznika/`.
 
 ---
 
