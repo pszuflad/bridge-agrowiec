@@ -144,3 +144,21 @@ Nowe do sprawdzenia przez Anię: karty mają wiersze, pozycje usunięte z katalo
   poza decyzjami P10.1 — kandydat na wpis backlogu (wskazane przez review).
 - `sell-through` sortuje tylko po `zeszloSztuk DESC` z `LIMIT 500` (jak oryginał); przy wielu
   zerowych wynikach wybór wierszy na granicy limitu nie jest określony. Port 1:1, bez zmiany.
+
+## Docs updates
+- `docs/rebuild-backlog.md` — #31, #32, #33, #35: „✅ WDROŻONE 2026-09-22" w boksach decyzji, Status/Iteracja
+  na stan po naprawie, „Co zrobiła odbudowa" oznaczone jako stan historyczny (10a/10e/10f), „Naprawa
+  (propozycja)"/„Do decyzji" → „Naprawa wdrożona w P10.1" z pomiarami; zdanie w indeksie na początku pliku.
+- `docs/spec-backend.md` — bloki „Potwierdzone w 10e/10f" i ⚠ w §5 uzupełnione o stan odbudowy po P10.1
+  (produkcja opisana jako produkcja); nowy blok „Potwierdzone w P10.1".
+- `docs/spec-frontend.md` — nieaktualne zdanie o kartach z „Brak danych" zastąpione akapitem P10.1.
+- `docs/karty/P10.1/karta.md` — Stan ✅ 2026-09-22 · ticket, „Dowiezione", „Do koordynatora" (roadmapa
+  nieruszona wg reguły 0 mimo promptu; kandydaci do backlogu: goły `h.ean`, `COUNT(*)` z duplikatami;
+  niuans importu).
+- Nowe wejścia: `docs/karty/P10.4/wejscie-90.md` (nieaktualne paragrafy instrukcji I10),
+  `docs/karty/PR.2/wejscie-90.md`, `docs/karty/P10.2/wejscie-90.md` (zależność od P10.1 spełniona).
+- `CLAUDE.md` — akapit o `safeAll`/BOM: fakt przypisany produkcji, odbudowa naprawiona w P10.1.
+- `contract/README.md` — akapit o wyjątku 404 dla `export/{view}` i o nietkniętych nagraniach `availability/*`.
+
+**Pre-existing / do koordynatora:** goły `h.ean` w karcie 4.1 (klasa #33) i `COUNT(*)` z duplikatami —
+kandydaci na nowe wpisy backlogu, nie dodane (decyzja koordynatora).
