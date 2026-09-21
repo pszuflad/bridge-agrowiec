@@ -137,3 +137,12 @@ trzeba raz kliknąć „Wygeneruj CSV teraz”, a od tej chwili plik przeżywa k
 - **NICE-TO-HAVE** (chroniony katalog zagnieżdżony głębiej niż 1 poziom → rsync wypisuje
   nieszkodliwe „cannot delete non-empty directory”): bez zmian, bo `ex-port-files` jest płytki.
   Zostaje jako follow-up.
+
+## Docs updates
+- `docs/rebuild-backlog.md` #46 — nota o skutku ubocznym naprawy z ticketu 34 (rsync `--delete`
+  kasował katalog CSV stagingu) i jego naprawie w tickecie 93. Status wpisu (✅, ticket 34) bez zmian.
+- `docs/deploy-setup.md` — publikację frontendu robi `tools/publikuj-frontend.sh`, który wyłącza
+  `SELLY_CSV_DIR` z `--delete`. W bloku „Selly.pl i eksport CSV” dopisany opis skutku ubocznego
+  i wskazówka: po pierwszym deployu z poprawką trzeba raz kliknąć „Wygeneruj CSV teraz”.
+- `docs/karty/PR.4/karta.md` — stan ✅, dowiezione, do koordynatora (12.6 do zamknięcia).
+- `docs/karty/PR.6/wejscie-93.md` — nowy: warunek i instrukcja ponownego sprawdzenia §11.
