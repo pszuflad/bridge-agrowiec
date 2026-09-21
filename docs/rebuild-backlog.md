@@ -983,6 +983,16 @@ od zera):
   ⚠ Uwaga na pole „Changelog Ani (najnowszy wpis)" w treści tego commita — producent wkleił tam
   wpis z **2026-08-18**, nie nowy. Prawdziwą treść daje dopiero `git diff` na `CHANGELOG.md`.
 
+*Pominięte — triaż 2026-09-22 (zakres `86d9090..71323ec`, ticket 94):*
+- `0c3c9e4` (19.09 06:00), `68d55cf` (20.09 06:00), `71323ec` (21.09 06:00) — trzy commity z etykietą
+  `[FRONTEND]`, każdy zmienia **wyłącznie** `mirror/frontend/ex-port-files/sellycsv-*.csv` — codzienna
+  regeneracja eksportu Selly o 6:00 (dane, nie kod). Nagłówek pliku identyczny jak w `86d9090`
+  (ta sama suma kontrolna pierwszej linii), więc **zestaw kolumn CSV się nie zmienił**. Liczba wierszy
+  8089 → 8087. **Zero kodu, zero schematu → brak nowych wpisów backlogu.**
+  ⚠ Sygnał dla **13d** (Selly REST): ostatnia zmiana w `mirror/backend/selly/` to `5dedefb` z 17.09 17:00,
+  a ostatnia zmiana kodu backendu w ogóle to `86d9090` z 18.09 — **cztery dni ciszy** po serii docierania.
+  To pierwszy dłuższy spokój od 08.09; nie przesądza o stabilności (pytanie do Ani nadal otwarte).
+
 ---
 
 ### #13 · 2026-09-01 · [FRONTEND] · `LE()` — pusta kolumna daje komplet trafień każdej sygnaturze

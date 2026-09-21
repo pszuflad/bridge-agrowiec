@@ -1,7 +1,17 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
 # Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
-86d909028cda141786f73321f38e87dfd377a514
+71323ece87ddd427a25d7fa55bb6fc0e80ef6d5c
+# ^ 2026-09-21 06:00 (regeneracja sellycsv). STRIAŻOWANE 2026-09-22
+#   (ticket 94-CHORE-triaz-po-86d9090, gałąź chore/94-triaz-po-86d9090).
+#   Zakres 86d9090..71323ec = 3 commity sync(vps) (19.09, 20.09, 21.09, wszystkie 06:00),
+#   KAŻDY zmienia wyłącznie mirror/frontend/ex-port-files/sellycsv-*.csv — dane, nagłówek CSV bez zmian.
+#   ZERO kodu → nowych wpisów backlogu NIE MA; do planowanej I15 (#73–#83) nic nie dochodzi.
+#   Sygnał dla 13d: ostatnia zmiana w selly/ 17.09 17:00, ostatnia zmiana kodu 18.09 16:00 (4 dni ciszy).
+#   Następny triaż: git fetch origin main && git log 71323ec..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 18.09 16:00) ---
+# 86d909028cda141786f73321f38e87dfd377a514
 # ^ 2026-09-18 16:00 „20260918_entry_1539". STRIAŻOWANE 2026-09-18
 #   (ticket 57-CHORE-triaz-uzasadnienia-ani, gałąź chore/57-triaz-uzasadnienia-ani).
 #   Zakres 9d1b09f..86d9090 = 1 commit sync(vps), zmienia WYŁĄCZNIE CHANGELOG.md (+11 linii).
