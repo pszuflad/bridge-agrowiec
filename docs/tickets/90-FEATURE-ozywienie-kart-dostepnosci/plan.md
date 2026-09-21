@@ -1,6 +1,6 @@
 # 90-FEATURE-ozywienie-kart-dostepnosci — P10.1: ożywienie kart „Dostępności" i ich eksportów + #33, #31, #35
 
-> Status: Approved (decyzje 2026-09-21, prompt karty: „WYKONAJ, nie rozstrzygaj") → Implemented
+> Status: Implemented
 > Branch: `feature/90-ozywienie-kart-dostepnosci`
 > Worktree: `.worktrees/90-FEATURE-ozywienie-kart-dostepnosci`
 > Karta: `docs/karty/P10.1/karta.md` · Backlog: #31, #32, #33, #35
