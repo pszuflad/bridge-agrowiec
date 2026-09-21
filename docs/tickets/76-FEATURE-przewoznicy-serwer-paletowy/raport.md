@@ -139,6 +139,8 @@ Runda 2 (`review.md`, sekcja „Runda 2": 1 BLOCKER, 2 SHOULD-FIX, 2 NICE-TO-HAV
   choć zmiana finalnie trafi na serwer. Walidację i tak robi UI przed wysłaniem, więc zostaje błąd
   sieci — przypadek rzadki, stan końcowy jest spójny z ekranem.
 
+Runda 3: 0 BLOCKER, 0 nowych SHOULD-FIX. Pozostałe NICE-TO-HAVE przeszły do „Follow-up".
+
 ## Breaking changes
 
 - Nowa migracja `007` — przy wdrożeniu wymaga `npm run migrate` (standardowy krok deployu i cutoveru).
@@ -155,3 +157,7 @@ Runda 2 (`review.md`, sekcja „Runda 2": 1 BLOCKER, 2 SHOULD-FIX, 2 NICE-TO-HAV
   - kalkulator paletowy.
 - Konwencja `x-odbudowa-nowa-trasa` jest nowa. Jeśli kolejne trasy spoza produkcji dojdą, warto
   dopisać ją do `contract/README.md` i sprawdzać w `kontrakt.spojnosc.test.ts`, jak `x-odbudowa-auth`.
+- NICE-TO-HAVE z review (runda 3), bez wpływu na dane:
+  - pola edycji nazwy i dzielnika nie są wyłączane w trakcie zapisu (kolejka zapisów i tak chroni dane);
+  - brak górnego limitu długości listy w walidacji PUT;
+  - `overflow-hidden` tabeli przewoźników — linia sprzed ticketa.
