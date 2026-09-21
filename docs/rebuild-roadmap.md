@@ -179,7 +179,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 2 | Katalog (odczyt) | 1 (BE+FE) | 1 | ✅ | PR #4 · 2026-08-25 |
 | 3 | Import — rdzeń | 3a·3b·3c·3d-1·3d-2 BE · 3e FE · **3f-1·3f-2·3f-3** | 2 | ✅ | 3a: #6 · 3b: #7 · 3c: #11 · 3d-1: #12 · 3d-2: #15 · 3e: #16 · **3f dołożone 2026-09-01, 3f-1: #19, 3f-2 i 3f-3: 2026-09-01** |
 | 4 | Narzuty + promocje (ceny) | 4a BE · 4b FE | 2, 3 | ✅ | 4a: ticket `15-FEATURE-narzuty-promocje-ceny` · 2026-09-02 · 4b: ticket `16-FEATURE-widok-narzuty-promocje` · 2026-09-02 · **domknięta kartami z I14:** 14e diagnoza (`53-…`), 14f daty kończą promocję + potwierdzenie usuwania (`64-…`), 14h kolumna „Promocja" (`61-…`), 14m instrukcja I4-v2 (`65-…`) |
-| 5 | Historia | 1 | 3 | ✅ | PR #24 · 2026-09-02 |
+| 5 | Historia | 1 + P5.1 | 3 | ✅ | PR #24 · 2026-09-02 · P5.1: `69-FEATURE-historia-bez-limitu` · 2026-09-21 (limit 5000 wierszy audytu zdjęty, backlog #87) |
 | 6 | Alerty | 1 | 3 | ✅ | ticket `18-FEATURE-widok-alerty` · 2026-09-03 |
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE | 2 | ✅ | 7a: `29-FEATURE-atrybuty-backend` · 7b: `31-FEATURE-atrybuty-frontend` · 7c: `32-FEATURE-katalog-slowniki-atrybutow` — wszystkie 2026-09-04 |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
@@ -948,13 +948,16 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
 ---
 
 ### Iteracja 5 — Historia
-- **Status:** ✅ **2026-09-02** (`15-FEATURE-historia-zmian`, PR #24)  **Sesje:** 1  **Zależy od:** 3
+- **Status:** ✅ **2026-09-02** (`15-FEATURE-historia-zmian`, PR #24)  **Sesje:** 1 + P5.1
+  **Zależy od:** 3. **P5.1 ✅ 2026-09-21** (`69-FEATURE-historia-bez-limitu`) — limit
+  5000 wierszy audytu zdjęty, patrz podblok P5.1 niżej.
 - **Cel (Ania klika):** otwiera `/historia`, widzi log importów/eksportów/edycji z audytu — ✅ dowiezione.
 - **Backend — sprostowanie faktu, na którym stał ten blok: `Wa` to tabela `history`, NIE `historia_cen`**
   (`deminified/backend-index.cjs:43833`, jedno wystąpienie `Wa =`, brak cieniowania).
   `GET /api/history` czyta `history` (`listHistory()`, `:44962`); `GET /api/history/meta` i
   `/paged` **nie** czytają `history` ani `historia_cen` — czytają **`audit_log`**
-  (`listAudit(5000)`, `:45068`) i mapują `akcja → typ` sztywnym słownikiem pięciu wartości
+  (ORYGINAŁ: `listAudit(5000)`, `:45068`; ODBUDOWA od **P5.1**: bez limitu, patrz podblok P5.1
+  niżej) i mapują `akcja → typ` sztywnym słownikiem pięciu wartości
   (`:48341`/`:48363`), reszta akcji odpada (`filter(Boolean)`). `historia_cen` (RAW SQL,
   `analytics_module.cjs`) do tego widoku nie należy w ogóle — jej pisarz i czytelnik są opisane
   w bloku **Iteracja 10**. Wszystkie trzy trasy za `requireAuth` (odstępstwo D1, §3) — w
@@ -986,14 +989,51 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   - **Clamp paginacji różni się od `/api/staging/paged`:** tu fallback `|| 1`/`|| 50` stoi PO
     `parseInt`, więc `NaN` nie wycieka; w `pagination_module` używanym przez staging `||` działa
     na stringu i `NaN` dochodzi do SQLite. Zastane, nie do ujednolicenia.
-  - **`/paged` czyta tylko 5000 najświeższych wierszy audytu PRZED filtrowaniem** —
+  - **ORYGINAŁ czyta tylko 5000 najświeższych wierszy audytu PRZED filtrowaniem** —
     przy większym `audit_log` starsze wpisy stają się niedostępne niezależnie od strony, a
-    `total` przestaje być liczbą wszystkich wpisów. Port 1:1.
+    `total` przestaje być liczbą wszystkich wpisów. To był port 1:1 do **P5.1** — od P5.1
+    (`69-FEATURE-historia-bez-limitu`, ✅ 2026-09-21) odbudowa tego limitu już nie ma,
+    patrz podblok P5.1 niżej.
 - **Ścieżki (GATE):** history×3.  **Fixtures:** `GET_history.json`, `GET_history_meta.json`, `GET_history_paged.json`.
 - **DoD:** ✅ trzy trasy za auth przechodzą GATE (kształt 1:1 + komplet kluczy); mapowanie
   akcja→typ i clamp odtworzone 1:1; NULL/zepsuty JSON i `encja_id` niezłączalny nie wywracają
   odczytu (testy); widok wpięty, filtry i paginacja działają; `lint`/`typecheck`/`test`/`build`
   czyste po obu stronach. Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
+
+##### P5.1 — Historia bez limitu 5000 · ✅ ZROBIONE 2026-09-21 (`69-FEATURE-historia-bez-limitu`, backlog #87 wariant c)
+
+Zamyka backlog #87 (limit `LIMIT_AUDYTU = 5000` z 14j). **Świadome odstępstwo od oryginału**
+(decyzja D1 użytkownika 2026-09-21): `/meta` i `/paged` przestają ciąć `audit_log` do 5000
+najświeższych wierszy PRZED filtrowaniem.
+
+**Zakres dowieziony — hybryda (D2), nie litera wariantu (c):** w SQL tylko odsiew do akcji
+ze słownika (przy konkretnym `typ` — akcje tego typu) plus `ORDER BY kiedy DESC, id DESC`,
+bez limitu (`repos/audit-historia.ts::audytDlaHistorii`). Mapowanie, `dostawca`, fraza, `total`
+i paginacja zostają w pamięci jak dotąd, bo to pola WYLICZANE po zmapowanym wpisie —
+paginacja więc nie trafiła do SQL (odejście od litery (c) przy zachowanym skutku: obie usterki
+#87 znikają). Słownik akcja→typ (`SLOWNIK_AKCJI`, `Map`) zostaje jednym źródłem prawdy dla
+`typWpisu()` i nowego `akcjeHistorii(typ)`. Remis `kiedy` rozstrzyga `id DESC` (D4) —
+w danych produkcji remisów jest 0.
+
+**Gate rozliczony bez przenagrania.** Kontrakt i fixtures (`GET_history_meta.json`,
+`GET_history_paged.json`) NIETKNIĘTE — kształt odpowiedzi się nie zmienił. Wyrocznia
+14j (`historia.wyrocznia.json`, 270 wierszy) też nietknięta i zielona **13/13 bez wyjątku**,
+ale z zastrzeżeniem: zasiewa wyłącznie akcje ze słownika, więc strukturalnie nie widzi, czy
+odsiew dzieje się w SQL czy w pamięci — dowód siły daje pomiar danych, nie sam zielony test
+(patrz niżej). Nowy `test/historia.powyzej-progu.test.ts` (5200 wierszy `auto_pull` nad
+widocznymi) świadomie NIE wchodzi do wyroczni (oryginał w tym reżimie gubi wpisy z założenia,
+nie ma z czym porównywać) — wykazano, że 5/6 przypadków pada na kodzie sprzed P5.1.
+
+**Pomiar, który uzasadnia bezpieczeństwo zmiany porządku:** w `db/snapshot.db` wszystkie
+3873 wiersze `kiedy` mają jeden format (ISO, `Z`), remisów 0, inwersji między porządkiem
+tekstowym SQL i porządkiem `Date` z JS też 0 — więc przeniesienie sortowania do SQL nie
+zmienia kolejności. Tempo zapisu (ok. 2400 wierszy/miesiąc w lipcu, 1476 w sierpniu) sugeruje,
+że próg 5000 w produkcji **już jest przekroczony**, czyli defekt #87 tam dziś realnie występuje.
+
+Szczegóły: `docs/tickets/69-FEATURE-historia-bez-limitu/`.
+
+Wejście dla P5.3 (sprostowanie instrukcji I5 §11 pkt 9) leży w bloku „Poprawki po testach
+Ani”, sekcja Iteracja 5, pod tabelą kart.
 
 ##### P5.2 — eksport ZIP jako świadome odstępstwo · ✅ ZROBIONE 2026-09-21 (`70-CHORE-eksport-zip-odstepstwo`)
 
@@ -2621,7 +2661,7 @@ nietknięty.
 |---|---|
 | **A — oracle diff** `GET /api/history`, `/meta`, `/paged` | **59/59 przypadków zgodnych · 0 rozjazdów · 49 813 wpisów porównanych**; drugi przebieg z zasianą gałęzią eksportu: 59/59, 0 rozjazdów, 49 846 wpisów |
 | **B — ślad po mutacjach** | edycja produktu: **2/2 wiersze `history`**, 0 różnic w treści i w `/paged`; sonda allowlisty (#14/D1): oryginał 1 wiersz, odbudowa 0 |
-| **C — backlog** | nowy wpis **#87** (limit `LIMIT_AUDYTU = 5000`), ⬜ do decyzji |
+| **C — backlog** | nowy wpis **#87** (limit `LIMIT_AUDYTU = 5000`) — **✅ zdecydowany (wariant c) i zrealizowany w P5.1** (`69-FEATURE-historia-bez-limitu`, 2026-09-21, blok Iteracja 5) |
 
 **Gate rozliczony:** karta nie rusza kontraktu ani kodu, więc gate w wersji regresyjnej —
 `test/historia.gate.test.ts` przechodzi bez zmian. Bramki backendu zielone: **82 pliki,
@@ -2711,8 +2751,10 @@ przy planowaniu 14k to spisanie jej zakresu tutaj. Wejście, które 14j zostawia
 - rozszerzenie słownika `akcja → typ` **zmieni wynik oracle-diffu** — po zmianie trzeba PONOWNIE
   uruchomić `oracle-diff-historii.cjs` i PONOWNIE nagrać `historia.wyrocznia.json`; stara wyrocznia
   zacznie świecić i **to będzie poprawne zachowanie**, a nie regresja;
-- rozstrzygnięcie #21 na „tak" **przyspiesza problem z backlogu #87** (limit 5000), bo przez odsiew
-  przechodziłoby wielokrotnie więcej wierszy. Oba wpisy warto rozstrzygać RAZEM;
+- **#87 już zdecydowany i zrealizowany (P5.1, `69-FEATURE-historia-bez-limitu`, 2026-09-21,
+  blok Iteracja 5) — limit 5000 zdjęty**, więc ten punkt nie obowiązuje: rozstrzygnięcie #21
+  na „tak" powiększy zbiór mapowany w pamięci, ale nie ma już progu, przy którym cokolwiek
+  się gubi;
 - podzbiór 270 wierszy w wyroczni jest ważny **tylko dopóki** odsiew działa przed filtrowaniem
   i paginacją; zmiana tej kolejności unieważnia skrót i test to wykryje asercją `limitNieGryzie`.
 
@@ -2962,13 +3004,32 @@ pod starymi nazwami: przemianowanie zerwałoby **719 odwołań w 38 plikach**.
 
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
-| **P5.1** | Historia przestaje gubić najstarsze zdarzenia — filtrowanie i paginacja w SQL | #87 | 🔨 ticket 69 |
+| **P5.1** | Historia przestaje gubić najstarsze zdarzenia — hybryda: odsiew akcji w SQL bez limitu, reszta w pamięci (decyzja D2) | #87 | ✅ `69-FEATURE-historia-bez-limitu` · 2026-09-21 |
 | **P5.2** | eksport ZIP działa u nas, w produkcji nie — utrwalić jako świadome odstępstwo | #93 | ✅ 2026-09-21, ticket 70 — szczegóły: podblok „P5.2” w bloku „Iteracja 5 — Historia” |
 | **P5.3** | delta instrukcji I5 dla Ani | — | ⬜ po P5.1 i P5.2 |
 
 Karta `14j` (oracle diff historii, 0 różnic na 49 813 wpisach) i skasowana `14k` (#21 — NIE) też
 należą do tej iteracji. Baza dla P5.3: `docs/instrukcja-testow-I5.md`, odtworzony 21.09 z PDF-a Ani
 (ticket 67) — wcześniej nie istniał w repo.
+
+**Wejście dla P5.3 (od P5.1, 2026-09-21):**
+po P5.1 `docs/instrukcja-testow-I5.md` §11 pkt 9 („ekran czyta 5000 najświeższych zdarzeń…
+z czasem wypłynie") przestaje być prawdziwy dla odbudowy — sprostowanie należy do karty P5.3.
+Przy porównaniu obok starego Bridge licznik `N wpisów` i najstarsze wpisy mogą się różnić
+na korzyść odbudowy — to oczekiwane, nie zgłoszenie. Dodatkowo dla ewentualnego
+przenagrywania wyroczni 14j (`oracle-diff-historii.cjs`): działa tylko na bazie PONIŻEJ
+5000 wierszy `audit_log` — powyżej progu skrypt pokaże rozjazdy z założenia (odbudowa oddaje
+więcej), co wykryje pierwszy warunek ważności w `historia.wyrocznia.test.ts`
+(`limitNieGryzie: false`).
+
+**Wejście dla P5.3 (od P5.2, 2026-09-21):** `docs/instrukcja-testow-I5.md` §8.2 mówi, że nowych
+eksportów „nie wygenerujesz” (eksport miał przyjść w późniejszej iteracji). W odbudowie to już
+nieprawda: `GET /api/export-shoper` (CSV z `?dostawca=` i ZIP bez parametru) działa od I8 i
+zapisuje w audycie `eksport_csv`, który Historia pokazuje jako typ `eksport`. **Porównanie ze starym
+Bridge się tu rozjedzie:** eksport ZIP w produkcji zawsze kończy się 500 i nie zapisuje wpisu
+(backlog #93, świadome odstępstwo). Wpis `eksport` z ZIP-a zobaczy więc tylko nowy Bridge, a
+`db/snapshot.db` nie ma ani jednego wiersza `eksport_csv`/`eksport_shoper`. Delta musi to powiedzieć
+wprost, żeby Ania nie zgłosiła tego jako błędu.
 
 #### Iteracja 6 — Alerty
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import type { Baza } from "../db/index.js";
 import {
-  LIMIT_AUDYTU,
+  akcjeHistorii,
   dostawcyHistorii,
   limitZQuery,
   stronaHistorii,
@@ -9,7 +9,7 @@ import {
   wpisyHistorii,
 } from "../historia/mapowanie.js";
 import { requireAuth } from "../middleware/auth.js";
-import { listaAudytu } from "../repos/audit.js";
+import { audytDlaHistorii } from "../repos/audit-historia.js";
 import { listaDziennikaZmian } from "../repos/dziennik-zmian.js";
 
 export type ZaleznosciHistorii = {
@@ -20,8 +20,13 @@ export type ZaleznosciHistorii = {
  * Historia — odczyt (Iteracja 5). Trzy trasy czytające DWIE RÓŻNE tabele:
  *
  *   • `GET /api/history`       → tabela `history`   (`:48692`, `listHistory()`)
- *   • `GET /api/history/meta`  → tabela `audit_log` (`:48335`, `listAudit(5e3)`)
- *   • `GET /api/history/paged` → tabela `audit_log` (`:48352`, `listAudit(5e3)`)
+ *   • `GET /api/history/meta`  → tabela `audit_log` (`:48335`, w oryginale `listAudit(5e3)`)
+ *   • `GET /api/history/paged` → tabela `audit_log` (`:48352`, w oryginale `listAudit(5e3)`)
+ *
+ * ⚠ ODSTĘPSTWO ŚWIADOME (backlog #87, wariant c; ticket 69): `/meta` i `/paged` nie tną
+ * `audit_log` do 5000 wierszy. SQL zawęża do akcji ze słownika, bez limitu; mapowanie,
+ * filtry, fraza i paginacja zostają w pamięci jak w oryginale. Szczegóły:
+ * `repos/audit-historia.ts` i nagłówek `historia/mapowanie.ts`.
  *
  * Ani jedna z nich nie czyta `historia_cen` — roadmapa podawała „`Wa` = `historia_cen`"
  * błędnie, sprostowane w bloku I5. Rozróżnienie: nagłówek `repos/dziennik-zmian.ts`.
@@ -61,22 +66,26 @@ export function trasyHistorii({ db }: ZaleznosciHistorii): Router {
    * `synchronizacja_reczna`), do tej listy nie wejdzie — i tak jest w produkcji.
    */
   router.get("/api/history/meta", requireAuth, (_req, res) => {
-    const wpisy = wpisyHistorii(listaAudytu(db, LIMIT_AUDYTU));
+    const wpisy = wpisyHistorii(audytDlaHistorii(db, akcjeHistorii("all")));
     res.json({ dostawcy: dostawcyHistorii(wpisy) });
   });
 
   /** Strona wpisów z filtrami — port `:48352-48391`. */
   router.get("/api/history/paged", requireAuth, (req, res) => {
-    const wpisy = wpisyHistorii(listaAudytu(db, LIMIT_AUDYTU));
+    // `String(x ?? "")` — nie `x ? String(x) : ""`, bo oryginał tak właśnie robi
+    // (`:48355-48357`) i `typ=0` czy `dostawca=false` trafiają do filtra dosłownie.
+    const typ = String(req.query.typ ?? "all");
+
+    // `typ` zawęża już w SQL (lista akcji tego typu); `dostawca` i fraza — dopiero w pamięci,
+    // bo trafiają w pola wyliczane przy mapowaniu (plan.md D2 ticketu 69).
+    const wpisy = wpisyHistorii(audytDlaHistorii(db, akcjeHistorii(typ)));
 
     res.json(
       stronaHistorii(wpisy, {
         page: stronaZQuery(req.query.page),
         limit: limitZQuery(req.query.limit),
-        // `String(x ?? "")` — nie `x ? String(x) : ""`, bo oryginał tak właśnie robi
-        // (`:48355-48357`) i `typ=0` czy `dostawca=false` trafiają do filtra dosłownie.
         search: String(req.query.search ?? ""),
-        typ: String(req.query.typ ?? "all"),
+        typ,
         dostawca: String(req.query.dostawca ?? "all"),
       }),
     );

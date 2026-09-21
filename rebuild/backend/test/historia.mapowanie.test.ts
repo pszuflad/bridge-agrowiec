@@ -8,6 +8,7 @@
 import { describe, expect, it } from "vitest";
 import type { WierszAudytu } from "../src/repos/audit.js";
 import {
+  akcjeHistorii,
   dostawcyHistorii,
   limitZQuery,
   naWpisHistorii,
@@ -62,6 +63,53 @@ describe("typWpisu — słownik pięciu rozpoznawanych akcji", () => {
     "czyszczenie_stagingu",
   ])("%s → null (akcja spoza słownika, wypada z widoku)", (akcja) => {
     expect(typWpisu(akcja)).toBeNull();
+  });
+});
+
+describe("akcjeHistorii — klauzula `IN` wyliczana z tego samego słownika (backlog #87)", () => {
+  it("`all` to dokładnie pięć akcji słownika", () => {
+    expect(akcjeHistorii("all").sort()).toEqual([
+      "edycja_produktu",
+      "eksport_csv",
+      "eksport_shoper",
+      "import_cennika",
+      "upload_pliku",
+    ]);
+  });
+
+  it.each([
+    ["import", ["upload_pliku", "import_cennika"]],
+    ["eksport", ["eksport_csv", "eksport_shoper"]],
+    ["edycja", ["edycja_produktu"]],
+  ])("typ %s → jego akcje", (typ, akcje) => {
+    expect(akcjeHistorii(typ).sort()).toEqual([...akcje].sort());
+  });
+
+  /**
+   * Nieznany `typ` daje pustą listę, czyli pusty wynik z SQL — tak samo jak filtr w pamięci
+   * (`wpis.typ === typ` nie trafia w nic). `constructor` i `__proto__` sprawdzają, że słownik
+   * nie jest zwykłym obiektem, który odziedziczyłby klucze z prototypu.
+   */
+  it.each(["0", "", "Import", "constructor", "__proto__", "toString"])(
+    "nieznany typ %j → []",
+    (typ) => {
+      expect(akcjeHistorii(typ)).toEqual([]);
+    },
+  );
+
+  /**
+   * Jedno źródło prawdy: każda akcja z listy SQL mapuje się `typWpisu()` na typ, o który
+   * pytano. Gdyby ktoś dopisał akcję tylko w jednym miejscu, ten test by to złapał.
+   */
+  it("każda akcja z `akcjeHistorii(typ)` ma w `typWpisu()` ten sam typ", () => {
+    for (const typ of ["import", "eksport", "edycja"] as const) {
+      for (const akcja of akcjeHistorii(typ)) expect(typWpisu(akcja)).toBe(typ);
+    }
+  });
+
+  it("`typWpisu` nie trafia w prototyp", () => {
+    expect(typWpisu("constructor")).toBeNull();
+    expect(typWpisu("__proto__")).toBeNull();
   });
 });
 
