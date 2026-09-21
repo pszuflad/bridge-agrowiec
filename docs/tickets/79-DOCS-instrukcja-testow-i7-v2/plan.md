@@ -1,6 +1,6 @@
 # 79-DOCS-instrukcja-testow-i7-v2 — delta instrukcji testów Atrybutów dla Ani (P7.4)
 
-> Status: Draft — **WSTRZYMANY** do merge'a karty FE z tekstem ostrzeżenia (decyzja 1 niżej)
+> Status: Approved (2026-09-21, po merge'u P7.5 — decyzja 1 zrealizowana)
 > Branch: `docs/79-instrukcja-testow-i7-v2`
 > Worktree: `.worktrees/79-DOCS-instrukcja-testow-i7-v2`
 
@@ -19,7 +19,9 @@ użytkownika z 2026-09-21 (format delta, układ „Zdecydowałaś → Jest teraz
 
 ## Ustalenia z kodu i danych (develop @ 37c1b86), których raporty kart nie opisują
 
-1. **Tekst ostrzeżenia we froncie kłamie po P7.1.**
+1. **[ROZWIĄZANE przez P7.5, ticket 81, PR #96 — NIE CYTOWAĆ zdania niżej; ostateczne brzmienie:
+   roadmapa, nota „Dla P7.4 — ostateczne brzmienie ostrzeżenia”.]** Tekst ostrzeżenia we froncie
+   kłamał po P7.1.
    `rebuild/frontend/src/pages/atrybuty/PanelPending.tsx:65-67` (`OstrzezenieOSkali`, wspólny dla
    „Akceptuj z edycją” i aliasu): *„Operacji nie da się cofnąć ani odtworzyć z dziennika — akcje
    kolejki nie trafiają do audytu.”* Od P7.1 obie akcje trafiają do dziennika i do Historii.
@@ -51,13 +53,19 @@ użytkownika z 2026-09-21 (format delta, układ „Zdecydowałaś → Jest teraz
 
 1. **Tekst ostrzeżenia: najpierw mała karta FE, potem P7.4.** P7.4 czeka, aż zdanie
    z ustalenia 1 zostanie poprawione we froncie i zmergowane. Instrukcja ma opisać ostateczny
-   tekst, a nie uprzedzać o nieaktualnym.
+   tekst, a nie uprzedzać o nieaktualnym. **Zrealizowane:** karta P7.5 (ticket 81, PR #96),
+   zmergowana 2026-09-21; nowe brzmienie potwierdzone w `PanelPending.tsx:66-68` na develop.
 2. **Scenariusz 7.1: Ania przygotowuje wartość z realną liczbą produktów.** Usuwa ze słownika
    rzadko używany bieżnik (kandydaci na snapshocie: „307” ×3; „2 ECO”, „202”, „221” ×2),
    zatwierdza dowolny import w Stagingu (skan), wartość wraca do kolejki z liczbą N, potem
    „Edytuj” → wpis w Historii z „Pozycji: N” = ostrzeżenie = toast. Uprzedzić: między krokami
    nie może być restartu (seed dosypałby bieżnik z powrotem do słownika i sprzątanie zdjęłoby
-   pozycję z kolejki). Kandydata sprawdzić na stagingu przed wysyłką.
+   pozycję z kolejki). Kandydat potwierdzony na snapshocie: „307” jest w słowniku `bieznik`,
+   3 produkty (MO2, ALLIANCE), nie ma go wśród odrzuconych; w Stagingu jest 3362 pozycji do
+   zatwierdzenia, więc krok „zatwierdź jedną pozycję” jest wykonalny.
+3. **Stan karty zapisywany po staremu, w roadmapie** (okres przejściowy z `docs/karty/README.md`;
+   worktree 79 powstał przed ticketem 82; P7.4 zamyka Iterację 7 i idzie sama). Bez
+   `docs/karty/P7.4/karta.md`. Ustalenia dla przyszłych kart — jako `docs/karty/<ID>/wejscie-79.md`.
 
 ## Implementation plan (po odblokowaniu)
 
