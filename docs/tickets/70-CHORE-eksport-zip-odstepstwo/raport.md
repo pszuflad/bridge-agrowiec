@@ -114,3 +114,20 @@ zachowanie po awarii w trakcie strumienia: zamiast wiszenia jest zerwane połąc
   gałęzi „błąd archivera po nagłówkach” i to, że test ścieżki błędu trafia w praktyce w jedną
   gałąź, są opisane wyżej („Zadanie 4”). Zostają tak świadomie: testowy parametr trasy tylko po
   to, żeby wstrzyknąć archiwum, byłby kosztem większym niż zysk.
+
+## Aktualizacje dokumentacji
+
+- `docs/rebuild-roadmap.md` — nowy podblok **P5.2** na końcu bloku Iteracja 5 (stan dowieziony +
+  fakty do zapamiętania); w bloku 14j usunięte nieaktualne „wymaga osobnej karty i decyzji”,
+  zamiast tego odesłanie do P5.2 i #93. Pozostałe wzmianki o ZIP (blok I8) są faktograficzne,
+  bez zmian.
+- `docs/rebuild-backlog.md` — #93: Status → ✅ zrealizowane 2026-09-21 (ta karta), Iteracja
+  wskazuje kartę; akapit „Realizacja (P5.2)” zastępuje opis zamiaru.
+- `docs/spec-backend.md` — §2: przyczyna 500 na `/api/export-shoper` w produkcji
+  (`archiver@5.3.2`); blok „Potwierdzone w 8a”: zastrzeżenie, że gałąź ZIP w produkcji zawsze
+  oddaje 500.
+- `docs/deploy-setup.md` — przy `archiver`: wersja ma znaczenie funkcjonalne, strażnik
+  `test/zaleznosci.archiver.test.ts`.
+- `docs/spec-frontend.md` — bez zmian (nie opisuje zachowania ZIP-a).
+
+Pre-existing issues: brak.

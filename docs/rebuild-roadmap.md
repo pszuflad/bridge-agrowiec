@@ -995,6 +995,33 @@ Każdy blok: cel (co Ania klika), zakres BE, zakres FE, ścieżki+fixtures (GATE
   odczytu (testy); widok wpięty, filtry i paginacja działają; `lint`/`typecheck`/`test`/`build`
   czyste po obu stronach. Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
 
+##### P5.2 — eksport ZIP jako świadome odstępstwo · ✅ ZROBIONE 2026-09-21 (`70-CHORE-eksport-zip-odstepstwo`)
+
+Karta backlogu #93. `GET /api/export-shoper` bez `?dostawca=` (eksport wszystkich dostawców do
+ZIP-a) w produkcji zawsze oddaje HTTP 500 — `archiver@5.3.2` produkcji nie eksportuje
+`ZipArchive`. Decyzja D1 (`62-DOCS-decyzje-po-i14j`, 2026-09-18): **nie odtwarzamy defektu**,
+odbudowa z `archiver@^8.0.0` dalej zwraca działający ZIP. Ta karta domknęła stronę dowodową i
+jeden realny defekt znaleziony przy okazji:
+- Bramka (`test/eksport-shoper.gate.test.ts`, `test/eksport-shoper.format.test.ts`) sprawdzała
+  wcześniej tylko nagłówki/sygnaturę `PK`; teraz otwiera ZIP własnym czytnikiem
+  `test/gate/czytnik-zip.ts` (EOCD, katalog centralny, CRC-32, bez nowej zależności — w
+  `node_modules` są tylko pakiety piszące ZIP) i sprawdza, że każdy wpis archiwum jest bajt w
+  bajt równy pojedynczemu eksportowi tego dostawcy.
+- Nowy strażnik dryfu wersji `test/zaleznosci.archiver.test.ts` pada, jeśli zainstalowany
+  `archiver` przestanie eksportować `ZipArchive`. `package.json` zostaje na zakresie `^8.0.0`
+  bez pinu (D3) — lockfile i tak trzyma `npm ci` na 8.0.0, strażnik łapie regresję przy
+  regeneracji locka.
+- **Defekt znaleziony i naprawiony (D2):** błąd zgłoszony PO wysłaniu nagłówków odpowiedzi ZIP
+  (np. zapis audytu po `pipe(res)`) zostawiał klienta wiszącego bez końca — `on("error")` przy
+  `headersSent === true` nic nie robił. Teraz `archiwum.abort()` + `res.destroy()` kończą
+  połączenie (`ECONNRESET`) zamiast wiszenia; błąd PRZED nagłówkami dalej daje 500 jak w
+  oryginale. Produkcja do tej ścieżki nie dochodzi (pada wcześniej, na konstruktorze), więc
+  zmiana nie rusza obserwowalnego zachowania produkcji.
+- **Fakty do zapamiętania:** wierne przepisanie kodu nie chroni przed różnicą wersji zależności
+  między lockfile'ami — trasa jest identyczna, wynik inny; błąd w trakcie strumieniowania ZIP-a
+  (po `pipe`) kończy się zerwanym połączeniem klienta, nie odpowiedzią z kodem błędu. Szczegóły:
+  `docs/tickets/70-CHORE-eksport-zip-odstepstwo/`.
+
 ---
 
 ### Iteracja 6 — Alerty
@@ -2634,9 +2661,10 @@ isRegisteredFormat`) — log procesu: `zip pipeline failed TypeError: oh is not 
 przy potwierdzonym `archiver w piaskownicy: JEST`. Odbudowa ma `archiver@^8.0.0`, gdzie
 `ZipArchive` istnieje, więc **działa** — czyli wierne przepisanie kodu dało zachowanie INNE niż
 produkcja, bo różnica siedzi w wersji zależności. Skutek dla Historii: w produkcji nie powstaje
-ani jeden wpis `eksport_csv` z tej gałęzi. **Wymaga osobnej karty i decyzji użytkownika**
-(odtworzyć defekt czy zostać przy działającej wersji) — opis i propozycja w
-`docs/tickets/59-CHORE-i14j-oracle-diff-historii/raport.md`.
+ani jeden wpis `eksport_csv` z tej gałęzi. **Decyzja zapadła 2026-09-18** (D1, karta
+`62-DOCS-decyzje-po-i14j`): nie odtwarzamy defektu, zostajemy przy działającej wersji. Karta
+domykająca (bramka na zawartość ZIP-a + naprawa wiszącego połączenia przy błędzie w trakcie
+strumienia): podblok **P5.2** wyżej w tym pliku (Iteracja 5), `docs/rebuild-backlog.md` #93.
 
 ##### 14m — sprostowanie `docs/instrukcja-testow-I4.md` · ✅ ZROBIONE 2026-09-19 (`65-DOCS-instrukcja-testow-i4-v2`, domyka FALĘ 2 I14 i całą Iterację 4)
 

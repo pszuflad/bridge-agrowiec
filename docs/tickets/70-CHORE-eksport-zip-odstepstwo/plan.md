@@ -1,6 +1,6 @@
 # 70-CHORE-eksport-zip-odstepstwo — P5.2: eksport ZIP jako świadome odstępstwo od produkcji
 
-> Status: Draft → Approved → **Implemented** → Shipped
+> Status: Draft → Approved → Implemented → **Shipped**
 > Branch: `chore/70-eksport-zip-odstepstwo`
 > Worktree: `.worktrees/70-CHORE-eksport-zip-odstepstwo`
 
@@ -98,9 +98,9 @@ przed nagłówkami (1:1 z oryginałem); druga trasa `GET /api/export/shoper` (za
 
 ## Definition of done
 
-- [ ] Bramka ZIP ma jawny komentarz odstępstwa (oba przypadki) i sprawdza zawartość archiwum.
-- [ ] Każdy wpis ZIP-a == pojedynczy eksport tego dostawcy (bajty).
-- [ ] Strażnik `archiver` pada na wersji bez `ZipArchive`.
-- [ ] Błąd w trakcie strumienia nie wiesza klienta; test pada na starym kodzie.
-- [ ] `lint`/`typecheck`/`build`/`test` zielone; `package.json`/lock bez zmian.
-- [ ] Roadmapa: podblok P5.2 ✅; 14j bez „wymaga decyzji"; backlog #93 Status zaktualizowany.
+- [x] Bramka ZIP ma jawny komentarz odstępstwa (oba przypadki) i sprawdza zawartość archiwum.
+- [x] Każdy wpis ZIP-a == pojedynczy eksport tego dostawcy (bajty).
+- [x] Strażnik `archiver` pada na wersji bez `ZipArchive`.
+- [x] Błąd w trakcie strumienia nie wiesza klienta; test pada na starym kodzie.
+- [x] `lint`/`typecheck`/`build`/`test` zielone; `package.json`/lock bez zmian.
+- [x] Roadmapa: podblok P5.2 ✅; 14j bez „wymaga decyzji"; backlog #93 Status zaktualizowany.
