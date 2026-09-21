@@ -119,9 +119,9 @@ waga gabarytowa, import (tylko czytany), `docs/instrukcja-testow-I10.md` (P10.4 
 nieaktualne paragrafy), roadmapa (koordynator), `bezpiecznieWiersze` globalnie.
 
 ## Definition of done
-- [ ] Obie karty i oba eksporty zwracają wiersze na danych `historia_cen` (test + pomiar na snapshocie)
-- [ ] Nazwa z katalogu po dostawca+kod, usunięty → pusto / „—”
-- [ ] Duplikat klucza → `MAX(id)`, stabilnie
-- [ ] Bootstrap idempotentny w obrębie dnia UTC, `inserted` bez zmiany kształtu
-- [ ] Nieznany widok → 404, opisane w `openapi.yaml`
-- [ ] Fixtures nietknięte, gate zielony; bramki BE i FE zielone
+- [x] Obie karty i oba eksporty zwracają wiersze na danych `historia_cen` (test + pomiar na snapshocie)
+- [x] Nazwa z katalogu po dostawca+kod, usunięty → pusto / „—”
+- [x] Duplikat klucza → `MAX(id)`, stabilnie
+- [x] Bootstrap idempotentny w obrębie dnia UTC, `inserted` bez zmiany kształtu
+- [x] Nieznany widok → 404, opisane w `openapi.yaml`
+- [x] Fixtures nietknięte, gate zielony; bramki BE i FE zielone

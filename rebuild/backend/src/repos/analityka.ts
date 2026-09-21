@@ -1374,6 +1374,10 @@ export type Dostepnosc = { hasHistory: boolean; rows: WierszDostepnosci[] };
  * pozycję innego dostawcy). Dla pozycji usuniętej z katalogu `nazwa` jest `null` — widok
  * rysuje wtedy kreskę. Pozostałe kolumny i sortowanie bez zmian wobec SQL-a oryginału.
  * Kolumny historii są kwalifikowane `h.`, bo `products` też ma `kod`, `ean` i `stan`.
+ * `MAX(p.nazwa)` to tylko formalność: `products.kod` jest UNIQUE, więc para ma co najwyżej jeden
+ * wiersz katalogu. `h.ean` zostaje GOŁE obok `GROUP BY h.dostawca, h.kod`, jak w oryginale —
+ * przy parze z dwoma EAN-ami w historii SQLite weźmie EAN z arbitralnego wiersza (snapshot:
+ * 9 takich par). Port 1:1, poza decyzjami P10.1 — zapisane w follow-upie ticketu 90.
  */
 export function dostepnoscProduktow(db: Baza): Dostepnosc {
   const jestHistoria = czyJestHistoria(db);

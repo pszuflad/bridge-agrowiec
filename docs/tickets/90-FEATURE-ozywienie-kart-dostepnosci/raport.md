@@ -111,6 +111,11 @@ bez zmian; trasa nadal bez przycisku w UI (D4).
   importu), eksport (kolumny, para, duplikat, `widokEksportu` odrzuca `toString`/`constructor`/
   `__proto__`), HTTP 404 z walidacją kontraktu, FE kreska dla `nazwa: null` w obu kartach.
 
+## Review fixes applied
+- SHOULD-FIX: goły `h.ean` w karcie 4.1 — komentarz w kodzie + Follow-up (bez zmiany SQL, port 1:1).
+- SHOULD-FIX: Definition of done w `plan.md` odhaczona.
+- NICE-TO-HAVE: komentarz o `MAX(p.nazwa)` przy `dostepnoscProduktow` (symetria z eksportem).
+
 ## Breaking changes
 - `GET /api/analytics/export/<nieznany>`: 200 + BOM → **404 JSON**. Front nie woła widoków spoza
   listy (zamknięta unia `WidokEksportu` w `pages/analityka/eksport.tsx`) — grep potwierdza.
@@ -133,5 +138,9 @@ Nowe do sprawdzenia przez Anię: karty mają wiersze, pozycje usunięte z katalo
 - Karta 4.1 i `export/availability-products` liczą `COUNT(*)`/procent po surowej historii, więc
   duplikat klucza liczy się podwójnie. Decyzja #33 obejmowała tylko `sell-through` — do ewentualnej
   osobnej decyzji.
+- Karta 4.1 wybiera `h.ean` GOŁE obok `GROUP BY h.dostawca, h.kod` (port 1:1 oryginału) — przy
+  parze z dwoma różnymi EAN-ami w historii EAN pochodzi z arbitralnego wiersza grupy (ta sama
+  klasa co #33; snapshot: 9 par, stąd 5 193 vs 5 184 wiersze eksportu). Naprawa #32 to odsłoniła;
+  poza decyzjami P10.1 — kandydat na wpis backlogu (wskazane przez review).
 - `sell-through` sortuje tylko po `zeszloSztuk DESC` z `LIMIT 500` (jak oryginał); przy wielu
   zerowych wynikach wybór wierszy na granicy limitu nie jest określony. Port 1:1, bez zmiany.
