@@ -1,6 +1,6 @@
 # 91-FEATURE-archiwum-importow — Archiwum importów: trzy trasy odczytu + widok z pobieraniem
 
-> Status: Implemented
+> Status: Shipped
 > Branch: `feature/91-archiwum-importow`
 > Worktree: `.worktrees/91-FEATURE-archiwum-importow`
 > Karta: `docs/karty/PR.1/`

@@ -64,7 +64,7 @@ Wzór i opisy: [`.env.example`](.env.example).
 | `CORS_ORIGINS` | nie | *(puste)* | Lista po przecinku. Puste = CORS wyłączony. Staging jest same-origin, więc zostaje puste. Dla lokalnego dev frontendu: `http://localhost:5173`. |
 | `COOKIE_SECURE` | nie | wg `NODE_ENV` | Ręczne nadpisanie flagi `Secure`. |
 | `MIGRATIONS_DIR` | nie | auto | Nadpisuje wykrywanie katalogu z `*.sql`. |
-| `IMPORT_ARCHIVE_DIR` | nie | `<cwd>/import_archive` | Katalog archiwum plików importu (D11) — konfigurowalny, bo po `npm run build` `__dirname` wskazywałby `dist/`. |
+| `IMPORT_ARCHIVE_DIR` | nie | `<cwd>/import_archive` | Katalog archiwum plików importu (D11) — konfigurowalny, bo po `npm run build` `__dirname` wskazywałby `dist/`. Czytają go też trasy odczytu `routes/import-archive.ts` (`GET /api/import-archive*`, ticket 91) — na produkcji ma wskazywać katalog starego backendu, żeby widok pokazał pliki sprzed przełączenia. |
 | `IMPORT_SCHEDULER` | nie | **`false`** | Automatyczny polling dostawców `url` (port `D4()`, blok 3f-3). **Świadome odstępstwo:** produkcja ma go włączonego na sztywno. Włączony odpytuje pięciu dostawców co 60 min ze **realnych** serwerów i przy każdej nieudanej próbie dopisuje alert (bez dławika — decyzja 3f-2). Startuje w `server.ts` po `listen()`, gaszony w `zamknij()`. |
 | `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` | nie | **`false`** | Przebieg zaraz po starcie, poza cyklem — działa tylko z `IMPORT_SCHEDULER`. Bez niego pierwsze pobranie jest dopiero po pełnym interwale, jak w oryginale; z nim dostawcy ruszają od razu, z rozrzutem 5 s. Osobna zmienna, żeby proces produkcyjny został 1:1. |
 | `PROMO_WYGASZACZ_MINUTY` | nie | **`5`** | Odstęp przebiegów wygaszacza statusu promocji w minutach; `0` wyłącza sam cykl (przebieg startowy zostaje). Wygaszacz ustawia `promotions.status` wg dat w OBIE strony — to naprawa defektu #19 („daty mają kończyć promocje", Ania 2026-09-18, karta 14f). **Domyślnie WŁĄCZONY, inaczej niż `IMPORT_SCHEDULER`** — ten odpytuje CUDZE serwery, a wygaszacz rusza wyłącznie naszą bazę i jest właśnie tą zamówioną naprawą. 5 min wobec 60-minutowego odstępu importów daje 12-krotny margines. Startuje w `server.ts` po `listen()`, gaszony w `zamknij()`. |
@@ -164,11 +164,12 @@ src/
   routes/suppliers.ts  GET /api/suppliers, GET /api/dostawcy (jeden handler)
   routes/staging.ts    GET /api/staging, /paged, /{id}
   routes/import.ts     POST /api/import/parse-file, /api/import/from-url, /api/ai-fallback/parse
+  routes/import-archive.ts  GET /api/import-archive, /stats, /file/{month}/{name} (ticket 91)
   import/parsuj.ts     brzeg wejścia importu: (plik|bufor + dostawca) → rekordy
   import/typy.ts       KodDostawcy · RekordSurowy · WynikParsowania
   import/legacy/       PORT VERBATIM parserów z produkcji — NIE EDYTOWAĆ (patrz niżej)
   import/tk.ts         szew SilnikStagingu — implementacja 3b jawnie oznaczona jako niewierna
-  import/archiwum.ts   port archive_module.cjs — archiwizacja buforów importu, retencja
+  import/archiwum.ts   port archive_module.cjs — archiwizacja buforów importu + odczyt (lista/stats/plik), retencja
   import/pobierz.ts    pobierzZUrl() — transport http/https dla POST /api/import/from-url
 test/
   gate/                harness GATE — współdzielony przez wszystkie iteracje
@@ -245,6 +246,13 @@ przychodzi w 3c. Szczegóły i lista świadomych odstępstw (D1–D13):
 
 **Endpoint `POST /api/dostawcy/:kod/upload`** (rdzeń, multer, fallback do starych parserów
 `Wc()`) to inny mechanizm, spoza tej sesji — należy do Iteracji 11.
+
+**Odczyt archiwum (ticket 91, karta PR.1):** `routes/import-archive.ts` dokłada trzy trasy 1:1
+z `mirror/backend/archive_module.cjs` — `GET /api/import-archive` (filtry `dostawca`/`miesiac`/
+`status`), `GET /api/import-archive/stats` i `GET /api/import-archive/file/{month}/{name}`
+(`res.sendFile` + `Content-Disposition` z nazwą pliku w archiwum; broni się przed path
+traversal regexem dwóch segmentów + zakazem `..`, jak oryginał). Funkcje odczytu są w
+`import/archiwum.ts` obok zapisu. Szczegóły: `docs/tickets/91-FEATURE-archiwum-importow/plan.md`.
 
 ## Auth — co dokładnie odtwarzamy
 

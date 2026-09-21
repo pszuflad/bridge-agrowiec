@@ -105,8 +105,9 @@ src/
    `bridge_user`, `bridge_remember`).
 4. **401 w zapytaniu odczytowym zwraca `null`**, nie rzuca — i nie ma globalnego
    auto-wylogowania. To wierne oryginałowi; wygasła sesja objawia się pustym widokiem.
-5. **Sidebar ma 10 pozycji, router 12 tras.** `/moje-konto` jest linkiem w stopce
-   sidebara, `/login` nie występuje w żadnym menu.
+5. **Sidebar ma 12 pozycji** (`components/nawigacja.ts`, `POZYCJE_NAWIGACJI` — od ticketu 91
+   z „Archiwum importów" zaraz za „Historią"), **router 14 tras** (`App.tsx`, `TRASY_Z_RAMA` +
+   `/login`). `/moje-konto` jest linkiem w stopce sidebara, `/login` nie występuje w żadnym menu.
 
 ## Świadome odstępstwa od oryginału
 

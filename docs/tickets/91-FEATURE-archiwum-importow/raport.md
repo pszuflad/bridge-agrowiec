@@ -86,3 +86,27 @@ Brak. Nowe trasy i nowa pozycja menu; zapis archiwum bez zmian.
   (np. `a..csv`), jest nie do pobrania (400), choć zapis takie nazwy przepuszcza.
 - Oryginał bez `.meta.json`: plik nie przechodzi filtrów `dostawca`/`status`, choć na liście
   wygląda jak `ok` — zachowane 1:1, przetestowane.
+
+## Review
+Reviewer: 0 uwag do kodu. BLOCKER dotyczył niezaktualizowanej karty i braku `PR.6/wejscie-91.md`,
+czyli kroku „sync docs”, który z założenia idzie po review — domknięte niżej. NICE-TO-HAVE
+(nazwa schematu `GETImportArchiveOdpowiedz401` nadana przez generator) → Follow-up.
+
+## Docs updates
+- `docs/karty/PR.1/karta.md` — Stan ✅ 2026-09-22 · 91-FEATURE-archiwum-importow; faktyczna lista
+  plików, decyzje D1–D8, „Dowiezione”, „Do koordynatora” (cutover `IMPORT_ARCHIVE_DIR`, 12 pozycji
+  sidebara, nazwa schematu).
+- **New:** `docs/karty/PR.6/wejscie-91.md` — `przeglad-12-widokow.md` nie wspomina archiwum; miejsce
+  wstawienia (po „## 9. Historia”), decyzja o numeracji i „12 → 13 widoków” zostawiona PR.6.
+- `docs/rebuild-backlog.md` (~:951) — nota triażowa o `archive_module.cjs` oznaczona jako
+  zrealizowana w tickecie 91.
+- `docs/spec-backend.md` §2 — wpis „ticket 91”: trzy trasy, `file/{month}/{name}`, ochrona, retencja 7 dni.
+- `docs/spec-frontend.md` — §3: 14 tras / 12 pozycji; §5: akapit o widoku archiwum.
+- `rebuild/backend/README.md` — `IMPORT_ARCHIVE_DIR`, struktura (`routes/import-archive.ts`), akapit o trasach odczytu.
+- `rebuild/frontend/README.md` — reguła 5: 12 pozycji / 14 tras.
+
+**Pre-existing issues (poza zakresem):**
+- `rebuild/frontend/README.md` jest przestarzały szerzej (mówi o `pages/placeholdery.ts`, usuniętym
+  w I12b; struktura katalogów sprzed wielu iteracji) — kandydat na osobny ticket DOCS.
+- `docs/prompts/mapa-kodu-do-wiki.md` §3/§7 nie wymienia `archive_module.cjs` ani `archive-injection.js`
+  w tabelach modułów/skryptów oryginału.

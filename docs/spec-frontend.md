@@ -102,8 +102,10 @@ Weryfikacja frontendu koryguje dwie rzeczy z `audit-delta.md`:
   `/atrybuty`, `/moje-konto`. Router **Wouter v3**, `Switch`, `fe.js:28644-28677`.
   Odbudowane: wszystkich 12 (`/analityka` ładowana leniwie — `lazy`+`Suspense`; ostatni,
   `/moje-konto`, w sesji 12b, 2026-09-05) — zero placeholderów, `src/pages/placeholdery.ts`
-  i `WidokWPrzygotowaniu.tsx` usunięte. Router odbudowy ma dziś **13 tras** (12 oryginału +
-  `/selly` z 8b) — nota o liczbie przeniesiona do nagłówka `src/App.tsx`.
+  i `WidokWPrzygotowaniu.tsx` usunięte. Router odbudowy ma dziś **14 tras** (12 oryginału +
+  `/selly` z 8b + `/archiwum` z ticketu 91 — oryginał tu też nie miał trasy Reacta, tylko
+  wstrzykiwany `archive-injection.js`) — nota o liczbie przeniesiona do nagłówka `src/App.tsx`
+  i `src/components/nawigacja.ts` (sidebar ma dziś 12 pozycji, nie 10).
 
 ## 4. Zachowania „lokalne vs API" — do świadomej decyzji przy odbudowie
 
@@ -273,6 +275,24 @@ ma endpoint:
 > którego ten ekran nie woła). **Odstępstwo D5:** nasz widok ma stany `isLoading`/`isError`,
 > jak `Staging.tsx`; oryginał ich nie ma (`data = {}` domyślnie, więc podczas ładowania i przy
 > błędzie renderuje „Brak wpisów w historii."). Szczegóły: `docs/tickets/15-FEATURE-historia-zmian/`.
+>
+> **Odbudowa (karta PR.1, `91-FEATURE-archiwum-importow`, 2026-09-22):** `/archiwum` (widok
+> „Archiwum importów") dowieziony — jedyny widok z przeglądu 12 ekranów, którego w odbudowie
+> jeszcze nie było; w produkcji nie był trasą Reacta, tylko wstrzykiwanym
+> `mirror/frontend/assets/archive-injection.js`, dołożonym do sidebara tuż za „Historią" (dziś
+> router ma **14 tras, sidebar 12 pozycji** — patrz §3). Trzy trasy odczytu 1:1 z
+> `archive_module.cjs` (`GET /api/import-archive` z filtrami dostawca/miesiąc/status,
+> `/stats`, `/file/{month}/{name}` z ochroną przed path traversal). Widok: 3 selecty filtrów
+> (opcje liczone **z aktualnie przefiltrowanej listy**, jak w oryginale), pasek zajętości
+> (`bajtow/limitBajtow · N plików · retencja D dni`), tabela 8 kolumn (Data, Dostawca, Źródło,
+> Plik, Rozmiar, Rekordy, Status, „Pobierz"), odświeżenie danych przy każdym wejściu na widok.
+> „Pobierz": `fetch` z Bearer → blob → `a.download` = **oryginalna nazwa pliku u dostawcy**
+> (nie nazwa z `Content-Disposition`, która ma postać archiwalną `KOD__stempel__nazwa`) — 1:1
+> z oryginałem. Odstępstwa, wszystkie kosmetyczne: błąd pobrania jako toast zamiast `alert`;
+> wybrana wartość selecta zostaje na liście opcji nawet po zniknięciu z danych (oryginał wracał
+> wtedy do „Wszyscy dostawcy"); błąd listy nie „przykleja się" po udanym odświeżeniu (React
+> Query go czyści, oryginał trzymał `state.error` bez końca). Szczegóły:
+> `docs/tickets/91-FEATURE-archiwum-importow/`.
 >
 > **Odbudowa (I6, `18-FEATURE-widok-alerty`, 2026-09-03):** `/alerty` odbudowany — router ma
 > **12 tras, 5 placeholderów**. Widok stoi na `GET /api/alerts` (bez limitu) i **zwija powtórki**
