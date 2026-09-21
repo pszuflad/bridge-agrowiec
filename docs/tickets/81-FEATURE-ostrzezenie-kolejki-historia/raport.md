@@ -50,3 +50,17 @@ Brak. Zmienia się tylko tekst widoczny dla Ani, co jest celem karty.
 
 - **P7.4 (ticket 79):** delta instrukcji I7-v2 może już cytować brzmienie z noty „Dla P7.4” w roadmapie.
   Karta była wstrzymana do merge'a tej karty.
+
+## Review
+
+Jedna iteracja: 0 BLOCKER, 0 SHOULD-FIX, 2 NICE-TO-HAVE. Oba NICE-TO-HAVE świadomie nie wdrożone,
+bo to kosmetyka komentarzy: wzmianka o tickecie 81 w nazwie bloku `describe` (jest już w komentarzu
+funkcji pomocniczej) i skrócenie noty D7 w nagłówku `PanelPending.tsx`. Szczegóły: `review.md`.
+
+## Aktualizacje dokumentacji
+
+- `docs/rebuild-roadmap.md`: dodany wiersz P7.5 ✅ (2026-09-21, ticket 81). P7.4 czeka teraz
+  „po P7.1–P7.3 i P7.5”. Przed notą „Dla P7.4 (delta instrukcji I7)” doszło ostateczne brzmienie
+  ostrzeżenia do cytowania znak w znak.
+- `docs/rebuild-backlog.md` #39: dodane zdanie, że tekst ostrzeżenia w UI zgadza się ze śladem w Historii.
+- `docs/spec-frontend.md`: bez zmian, bo nie opisuje ostrzeżenia D7.
