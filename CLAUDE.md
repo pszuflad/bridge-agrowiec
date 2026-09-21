@@ -12,21 +12,34 @@ Praca idzie iteracjami i blokami (I3 → 3a, 3b, 3c…), opisanymi w `docs/rebui
 ## Roadmapa jest wejściem dla następnej sesji — utrzymuj ją na bieżąco
 
 `docs/rebuild-roadmap.md` czyta następna sesja. Prompt, którym ją uruchamiasz, jest
-jednorazowy — **roadmapa zostaje**. Z tego wynika pięć obowiązków:
+jednorazowy — **roadmapa i karty (`docs/karty/`) zostają**. Z tego wynikają obowiązki:
 
-**1. Po każdym zamkniętym bloku roadmapa opisuje STAN, nie zamiar.**
-Blok oznaczony jako zrobiony (data + ID ticketa), gate rozliczony, zakres faktycznie dowieziony
+**0. Karty równoległe piszą WYŁĄCZNIE we własnych plikach — nigdy w roadmapie.**
+Od ticketu 82 (2026-09-21) stan i ustalenia karty żyją w `docs/karty/<ID>/`: `karta.md` (pisze
+tylko ta karta) i `wejscie-<N>.md` (nowy plik od ticketu N dla przyszłej karty). Roadmapę
+zmienia wyłącznie **koordynator** — sesja, która planuje falę i pisze prompty do kart. Powód:
+każda wspólna linia roadmapy (wiersz §4, sąsiednie wiersze tabeli kart, dopisek na końcu
+sekcji) kończyła się konfliktem przy merge'u — 7 razy w 2026-09-18…21. Tabela własności,
+szablony, okres przejściowy: `docs/karty/README.md`; stan kart: `tools/stan-kart.sh`.
+**Jako koordynator:** zanim wydasz prompty na falę, załóż `docs/karty/<ID>/karta.md` dla
+KAŻDEJ karty fali i zmerguj to do `develop` (ticket `DOCS`, PR) — dopiero potem prompty. Karty
+branchują wtedy z `develop`, który już ma ich pliki. Prompt do karty wskazuje jej katalog,
+nie powtarza jego treści.
+
+**1. Po każdej zamkniętej karcie jej `karta.md` opisuje STAN, nie zamiar.**
+Karta oznaczona jako zrobiona (data + ID ticketa), gate rozliczony, zakres faktycznie dowieziony
 zamiast planowanego. Dotyczy też `docs/rebuild-backlog.md` — statusy wpisów aktualizuje ta
-sesja, która je realizuje, nie następna.
+sesja, która je realizuje, nie następna. Stan iteracji w roadmapie odświeża koordynator.
 
-**2. Ustalenie dotyczące PRZYSZŁEGO bloku wpisz DO TEGO BLOKU.**
-Nie do bloku właśnie zamkniętego. Sesja 3c czyta blok 3c; nota schowana w bloku 3b do niej nie
-dojdzie. To realnie się stało w 3b: konsekwencje dla 3c/3d/3e wylądowały w opisie 3b i trzeba
-było je potem przenosić.
+**2. Ustalenie dotyczące PRZYSZŁEJ karty zapisz DLA TEJ KARTY — jako `docs/karty/<jej ID>/wejscie-<N>.md`.**
+Nie w karcie właśnie zamkniętej i nie w roadmapie. Sesja 3c czyta katalog 3c; nota schowana
+w bloku 3b do niej nie dojdzie. To realnie się stało w 3b: konsekwencje dla 3c/3d/3e wylądowały
+w opisie 3b i trzeba było je potem przenosić.
 
 **3. Przypisanie funkcji do sesji weryfikuj GRAFEM WYWOŁAŃ, nie nazwą.**
 Zanim zaczniesz blok, sprawdź `grep`em, kto naprawdę woła funkcje z jego zakresu, i popraw
-roadmapę, jeśli się rozjeżdża. Dwa razy przypisała `bridge_ext.cjs` do złej sesji — raz do 3a
+roadmapę, jeśli się rozjeżdża (jako karta: zapisz dowód w „Do koordynatora” własnego
+`karta.md`, poprawkę wniesie koordynator). Dwa razy przypisała `bridge_ext.cjs` do złej sesji — raz do 3a
 (wykryte w 3a), raz do 3c (wykryte przy planowaniu 3c) — bo zakres pisano z nazw funkcji,
 a nie z tego, gdzie są wywoływane. Ta sama nieufność dotyczy kształtu API: w I11 roadmapa
 dwukrotnie opisała endpoint niezgodnie ze stanem faktycznym (`PUT /api/config` zamiast
