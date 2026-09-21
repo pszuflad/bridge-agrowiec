@@ -39,7 +39,9 @@ jest regresją odbudowy i żaden nie blokuje cutoveru. (#26 ✅ zrobione 2026-09
 `docs/tickets/39-CHORE-audyt-bezpieczenstwa-domkniecie/raport.md` (sekcja „Rozliczenie
 backlogu"). **#39 i #41 rozstrzygnięte przez Anię i wdrożone 2026-09-21**
 (`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`). **#40 i #42 rozstrzygnięte przez Anię
-i wdrożone 2026-09-21** (`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`).
+i wdrożone 2026-09-21** (`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`). **#31–#35 rozstrzygnięte 2026-09-21** —
+#32 i #34 przez Anię (naprawa), #31, #33, #35 i wariant #32 przez użytkownika (naprawa, karta P10.1 —
+wdrożenie #34 w P10.2).
 
 ---
 
@@ -2179,11 +2181,18 @@ dodać walidację klucza albo zawęzić maskowanie w starym Bridge.
 
 ### #31 · 2026-09-03 · [BACKEND] · `POST /api/analytics/bootstrap-current` nie jest idempotentne — każde wywołanie dubluje migawkę
 
+> **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: NAPRAWIĆ, bez indeksu unikalnego.** `bootstrap-current` nie dokłada
+> migawki produktowi, który ma już migawkę z bieżącego dnia (`WHERE NOT EXISTS` per produkt/dzień).
+> **Bez** unikalnego indeksu na `historia_cen` — zablokowałby on legalne zdublowane kody z jednego importu
+> (źródło duplikatów z #33). Uzasadnienie: dopóki karty „Dostępności" były martwe (#32), dublowanie
+> nie miało skutku; po ich ożywieniu jedno przypadkowe podwójne wywołanie zafałszuje historię, a naprawa
+> jest tania. Test charakteryzacyjny „rośnie przy drugim wywołaniu" zmienia się świadomie.
+
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (trasa analityki, tabela `historia_cen`) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:81-91` (handler, `INSERT … SELECT` bez `ON CONFLICT`); port: `rebuild/backend/src/repos/analityka.ts` (`zbudujSnapshotBiezacy`), `rebuild/backend/src/routes/analytics.ts` |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA — decyzja użytkownika 2026-09-21** (świadome odstępstwo, karta **P10.1**) |
 | **Iteracja** | odtworzone 1:1 w **10a**; trasa świadomie bez przycisku w UI (decyzja D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`) |
 | **Status** | ✔ odtworzone w rebuild (10a) · w produkcji **nadal obecne** |
 
@@ -2214,6 +2223,13 @@ usterek — nie scalać.
 ---
 
 ### #32 · 2026-09-04 · [BACKEND] · `historia_cen` NIE MA kolumny `nazwa` — obie karty „Dostępności" są trwale puste
+
+> **⭐ WARIANT NAPRAWY — decyzja użytkownika 2026-09-21: (a), z doprecyzowaniem.** Nazwa dociągana
+> z katalogu (`LEFT JOIN products`), łączenie po parze **`dostawca` + `kod`**, nie po samym kodzie — ten sam
+> kod może występować u dwóch dostawców. Dla pozycji usuniętej z katalogu nazwa pusta (w widoku kreska).
+> Odrzucone: (b) — kolumna „Nazwa" pusta dla wszystkich; (c) — migracja, a 15 597 historycznych migawek
+> i tak zostałoby bez nazwy. Dotyczy dashboardu (`repos/analityka.ts`) ORAZ dwóch widoków eksportu
+> (`repos/analityka-eksport.ts`). Karta **P10.1**, razem z #33 (naprawa #32 go odsłania).
 
 | Pole | Wartość |
 |---|---|
@@ -2267,11 +2283,19 @@ użytkownika, czy i kiedy naprawiać.
 
 ### #33 · 2026-09-04 · [BACKEND] · `sell-through`: funkcja okna liczona PO niepełnym `GROUP BY` — wynik niedeterministyczny przy duplikacie
 
+> **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: NAPRAWIĆ razem z #32.** Najpierw CTE zwijające duplikaty klucza
+> `(dostawca, kod, zarejestrowano_at)`, dopiero na nim `LAG`. **Z duplikatów bierzemy wiersz OSTATNI
+> WPISANY** (`MAX(id)`) — ten, który po imporcie zostaje w katalogu, więc karta mówi to samo co katalog.
+> ⚠ Warunek: karta P10.1 MIERZY przed kodem, co import zostawia w `products` przy zdublowanym kodzie
+> w jednym cenniku; jeśli wygrywa pierwszy wiersz, a nie ostatni — wraca z pytaniem. Uzasadnienie:
+> Ania prosiła, żeby karty działały; bez tej poprawki ożywiona karta pokazywałaby czasem przypadkowe liczby.
+> Dotyczy dashboardu i widoku eksportu `sell-through`.
+
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (trasa analityki, poprawność SQL) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:175-179` (dashboard), `:317` (widok eksportu `sell-through`); port: `rebuild/backend/src/repos/analityka.ts` (`tempoSchodzenia`), `rebuild/backend/src/repos/analityka-eksport.ts` (eksport); źródło duplikatu: `rebuild/backend/src/import/tk.ts:171,548-564` |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — dziś zamaskowane przez #32 |
+| **Do nowej wersji?** | ✅ **NAPRAWA — decyzja użytkownika 2026-09-21** (świadome odstępstwo, karta **P10.1**, razem z #32) |
 | **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) |
 | **Status** | ✔ odtworzone w rebuild (10e) · **nieosiągalne, dopóki żyje #32** |
 
@@ -2335,11 +2359,17 @@ zostawić martwy.
 
 ### #35 · 2026-09-04 · [BACKEND] · `Content-Disposition` w eksporcie CSV bierze `{view}` bez sanityzacji
 
+> **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: lista znanych widoków, reszta 404.** `{view}` spoza listy widoków
+> eksportu dostaje 404 zamiast dzisiejszego `200` z samym BOM. Świadomie zmienia port `return sendRows([])`
+> (`:321`). Uzasadnienie: frontend nigdy nie woła nieznanych widoków, więc nikt tego nie odczuje, a „200 i pusty
+> plik" to dokładnie ta pułapka, przez którą #32 przeleżało niezauważone. Zmiana kodu odpowiedzi →
+> aktualizacja `contract/openapi.yaml`. Karta **P10.1**.
+
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | BACKEND (trasa `GET /api/analytics/export/:view`) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:308` (nagłówek), `:321` (nieznany widok → `sendRows([])`); port: `rebuild/backend/src/routes/analytics.ts:324-335` |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — port 1:1 wykonany, naprawa czeka na rozstrzygnięcie |
+| **Do nowej wersji?** | ✅ **NAPRAWA — decyzja użytkownika 2026-09-21** (świadome odstępstwo, karta **P10.1**) |
 | **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`) |
 | **Status** | ✔ odtworzone w rebuild (10f) · w produkcji **nadal obecne** |
 
@@ -2527,6 +2557,9 @@ zamiast realnej liczby przepisanych produktów. Szczegóły: `docs/tickets/74-FE
 przed masowym `UPDATE products`: dialogi „Akceptuj z edycją" i „jako alias" pokazują liczbę
 produktów, których dotknie zmiana (`GET /api/atrybuty/uzycie` → `count`), a toast po sukcesie
 podaje `produktow_zaktualizowano`. To nie zastępuje wpisu w dzienniku.
+**Tekst ostrzeżenia w UI zgadza się już ze śladem w Historii (ticket 81, 2026-09-21):** zamiast
+„…akcje kolejki nie trafiają do audytu” oba okienka mówią „Operacji nie da się cofnąć. Zostanie po
+niej wpis w Historii (typ „edycja”).”
 
 ---
 
