@@ -17,6 +17,11 @@
  * (plan.md D2: fraza i `dostawca` trafiają w pola WYLICZANE, więc w SQL zmieniłyby semantykę
  * albo zdublowały mapowanie). Poniżej progu wynik jest identyczny z oryginałem
  * (`test/historia.wyrocznia.test.ts`), powyżej — pełny (`test/historia.powyzej-progu.test.ts`).
+ *
+ * ⚠ DRUGIE ŚWIADOME ODSTĘPSTWO (backlog #39, decyzja Ani 2026-09-21; ticket 74): widok pokazuje
+ * też dwie akcje kolejki atrybutów przepisujące produkty (`PRZEPISANIA_Z_KOLEJKI`). Oryginał ich
+ * nie ma, bo moduł kolejki w ogóle nie pisze do audytu. Na danych produkcji do dziś (snapshot)
+ * wynik się nie różni — takich wierszy tam nie ma. Różnica pojawi się przy nowych zdarzeniach.
  */
 
 import type { WierszAudytu } from "../repos/audit.js";
@@ -60,14 +65,30 @@ export const DOMYSLNY_LIMIT = 50;
 export const MAX_LIMIT = 200;
 
 /**
- * Słownik pięciu rozpoznawanych akcji (`:48341`, `:48363`).
+ * Akcje kolejki atrybutów, które przepisują pole w `products` (masowy `UPDATE … WHERE <kol> =
+ * stara`) → etykieta wariantu w widoku. Pisze je `routes/atrybuty.ts`.
  *
- * ⚠ WSZYSTKO SPOZA TEJ PIĄTKI DAJE `null` I WYPADA Z WYNIKU (`filter(Boolean)`). To NIE jest
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #39, decyzja Ani 2026-09-21, ticket 74): Ania chce śladu tych
+ * operacji „w historii", więc trafiają do słownika poniżej jako typ `edycja` — bez nowego typu,
+ * bez zmian w UI i w kontrakcie. Pozostałe akcje kolejki (`atrybut_pending_zaakceptowano`,
+ * `_odrzucono`, `_wyczyszczono`, `_skanowano`) NIE zmieniają katalogu i zostają tylko w
+ * `audit_log` — w widoku zaśmiecałyby listę.
+ */
+const PRZEPISANIA_Z_KOLEJKI: ReadonlyMap<string, string> = new Map([
+  ["atrybut_pending_zaakceptowano_z_edycja", "edycja"],
+  ["atrybut_pending_zaakceptowano_jako_alias", "alias"],
+]);
+
+/**
+ * Słownik rozpoznawanych akcji: pięć z oryginału (`:48341`, `:48363`) + dwie z kolejki atrybutów.
+ *
+ * ⚠ WSZYSTKO SPOZA SŁOWNIKA DAJE `null` I WYPADA Z WYNIKU (`filter(Boolean)`). To NIE jest
  * usterka do naprawienia — tak działa produkcja. Akcji zapisywanych do `audit_log` jest
  * znacznie więcej (m.in. `import_z_url`, `synchronizacja_reczna`, `akceptacja_stagingu`,
  * `override`; w snapshocie produkcji 22 różne, z czego sam `auto_pull` to 74% wierszy) i dla
- * tego widoku są niewidoczne — w produkcji również. Rozszerzenie słownika byłoby odstępstwem;
- * odrzucone świadomie (backlog #21 — ❌ NIE, 2026-09-21).
+ * tego widoku są niewidoczne — w produkcji również. Rozszerzenie słownika o te akcje byłoby
+ * odstępstwem; odrzucone świadomie (backlog #21 — ❌ NIE, 2026-09-21). Dwie akcje kolejki to
+ * INNA decyzja (backlog #39 — ✅ TAK) i dochodzą z `PRZEPISANIA_Z_KOLEJKI`, nie z ręcznego wpisu.
  *
  * JEDYNE źródło prawdy słownika. Czyta go i `typWpisu()` (mapowanie w pamięci), i
  * `akcjeHistorii()` (klauzula `IN` w SQL) — dwie osobne listy mogłyby się rozjechać, a to
@@ -80,6 +101,7 @@ const SLOWNIK_AKCJI: ReadonlyMap<string, TypWpisu> = new Map<string, TypWpisu>([
   ["eksport_csv", "eksport"],
   ["eksport_shoper", "eksport"],
   ["edycja_produktu", "edycja"],
+  ...Array.from(PRZEPISANIA_Z_KOLEJKI.keys(), (akcja): [string, TypWpisu] => [akcja, "edycja"]),
 ]);
 
 /** Akcja → typ wpisu, albo `null` dla akcji spoza słownika. */
@@ -167,6 +189,34 @@ function pierwszaLiczba(szczegoly: Record<string, unknown>, klucze: string[]): n
 }
 
 /**
+ * Wpis Historii dla przepisania z kolejki atrybutów (backlog #39) — tylko dla akcji
+ * z `PRZEPISANIA_Z_KOLEJKI`, więc `edycja_produktu` mapuje się dalej 1:1 z oryginałem.
+ *
+ * Front przy typie `edycja` pokazuje `liczbaPozycji`, `kodProduktu` (pogrubiony) i listę
+ * `zmienionePola`, a `uwagi` pomija (`TabelaHistorii.tsx`) — dlatego opis zmiany idzie do
+ * `kodProduktu`. `uwagi` niesie pełne zdanie dla wyszukiwarki (przeszukuje cały wpis).
+ *   Pozycji: 312 · Szczegóły: marka: „NOKIAN HAKKA” → „NOKIAN” / marka (alias z kolejki)
+ */
+function przepisanieZKolejki(
+  wpis: WpisHistorii,
+  wariant: string,
+  szczegoly: Record<string, unknown>,
+): WpisHistorii {
+  const kolumna = tekstAlboNull(szczegoly["kolumna"]) ?? tekstAlboNull(szczegoly["rodzaj"]) ?? "?";
+  const z = tekstAlboNull(szczegoly["z"]) ?? "?";
+  const na = tekstAlboNull(szczegoly["na"]) ?? "?";
+  const opis = `${kolumna}: „${z}” → „${na}”`;
+  const liczba = liczbaAlboNull(szczegoly["produktow_zaktualizowano"]);
+  return {
+    ...wpis,
+    liczbaPozycji: liczba,
+    kodProduktu: opis,
+    zmienionePola: [`${kolumna} (${wariant} z kolejki)`],
+    uwagi: `Kolejka atrybutów — ${wariant}: ${opis}, produktów: ${liczba ?? "?"}`,
+  };
+}
+
+/**
  * Jeden wiersz `audit_log` → wpis widoku, albo `null`, gdy akcja jest spoza słownika.
  * Port `:48360-48381` — kolejność fallbacków jest wierna i istotna.
  *
@@ -195,6 +245,7 @@ export function naWpisHistorii(wiersz: WierszAudytu): WpisHistorii | null {
 
   // Oryginał składa tu string i dopiero potem robi `z ?? null`, więc dla `typ === "edycja"`
   // `uwagi` zawsze wychodzi `null` — a przy imporcie bez nazwy pliku wychodzi „Plik: ?".
+  // Wyjątek: przepisania z kolejki atrybutów, `przepisanieZKolejki()` niżej.
   const uwagi =
     typ === "import"
       ? `Plik: ${nazwaPliku ?? "?"}`
@@ -204,7 +255,7 @@ export function naWpisHistorii(wiersz: WierszAudytu): WpisHistorii | null {
 
   const zmiany = szczegoly["zmiany"];
 
-  return {
+  const wpis: WpisHistorii = {
     id: wiersz.id,
     typ,
     kiedy: wiersz.kiedy,
@@ -217,6 +268,9 @@ export function naWpisHistorii(wiersz: WierszAudytu): WpisHistorii | null {
     zmienionePola: typ === "edycja" && Array.isArray(zmiany) ? (zmiany as string[]) : [],
     uwagi,
   };
+
+  const wariant = PRZEPISANIA_Z_KOLEJKI.get(wiersz.akcja);
+  return wariant ? przepisanieZKolejki(wpis, wariant, szczegoly) : wpis;
 }
 
 /**

@@ -4,48 +4,55 @@
 // pojawiające się w `products` po akceptacji stagingu trafiają do kolejki, a Ania je akceptuje,
 // edytuje, aliasuje albo odrzuca.
 //
-// ⚠ ŻADNA z tych operacji NIE PISZE DO AUDYTU — moduł oryginału dostaje z ctx wyłącznie `we`
-// (middleware auth), nigdy `be` (`pending_module.cjs:199`). Dotyczy to także akceptacji z edycją
-// i aliasu, które robią masowy `UPDATE products`. Odtwarzamy 1:1 (plan.md D4); luka jest opisana
-// w raporcie ticketa jako follow-up, nie zasypana po cichu.
+// Audytu tu nie ma — pisze go warstwa tras (`routes/atrybuty.ts`), po udanej operacji. Oryginał
+// nie audytuje kolejki wcale (`pending_module.cjs:199` bierze z ctx tylko `we`, bez `be`);
+// audyt to świadome odstępstwo z backlogu #39 (decyzja Ani 2026-09-21, ticket 74).
 
 import { and, eq, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { atrybutyWartosciPending } from "../db/schema.js";
+import { RODZAJ_KOLUMNA, znanyRodzaj, type RodzajSlownika } from "./atrybuty.js";
 
 /**
- * Mapa rodzaj → kolumna `products` dla kolejki (port `:22-36`, **13 pozycji**).
+ * Rodzaje, które skan kolejki w ogóle przegląda (port `RODZAJE_KOLUMNY`, `:22-36`, **13 z 15**).
  *
- * ⚠ RÓŻNI SIĘ od 15-pozycyjnej `RODZAJ_KOLUMNA` w `repos/atrybuty.ts`: ta mapa jest jej
- * dokładnym PODZBIOREM — brakuje dokładnie dwóch pozycji, `model` i `zastosowanie`
- * (`wentyl` i wszystkie pozostałe są w obu). Rozbieżność jest w oryginale
- * — dwa moduły pisano osobno — i decyduje o dwóch rzeczach naraz: co skan w ogóle wykrywa
- * i dla jakich rodzajów zadziała akceptacja przepisująca produkty. Nie unifikujemy (plan.md D6).
+ * ⚠ WĘŻSZY ZAKRES JEST CELOWY, NIE JEST ROZJAZDEM. Kolumnę każdego rodzaju bierzemy z jednej
+ * mapy `RODZAJ_KOLUMNA` (`repos/atrybuty.ts`) — tej samej, której używają liczniki, użycie
+ * i obie akceptacje. Ta lista mówi tylko, CZEGO SKAN SZUKA: brakuje `model` i `zastosowanie`,
+ * tak jak w oryginale. Dołożenie `model` zalałoby kolejkę prawie całym katalogiem (backlog
+ * #40, #41); zmiana zakresu skanu to osobna decyzja, nie porządki.
+ *
+ * Kolejność jest z oryginału i jest obserwowalna: skan wstawia pozycje w tej kolejności,
+ * więc od niej zależą `id` nowych wierszy kolejki.
+ *
+ * Historia: w oryginale i w porcie 7a była to OSOBNA, 13-pozycyjna mapa rodzaj→kolumna,
+ * której używały także akceptacje — dla pozycji `model`/`zastosowanie` kończyły się one 400
+ * „Nieznany rodzaj". Mapy uzgodniono w tickecie 74 (backlog #41, decyzja Ani 2026-09-21).
  */
-export const RODZAJE_KOLUMNY = {
-  marka: "marka",
-  kategoria: "kategoria",
-  konstrukcja: "konstrukcja",
-  vfIf: "vf_if",
-  rodzaj: "rodzaj",
-  sezon: "sezon",
-  tl_tt: "tl_tt",
-  oznaczenie_bieznika: "oznaczenie_bieznika",
-  bieznik: "bieznik",
-  wentyl: "wentyl",
-  rozmiar: "rozmiar",
-  indeks_nosnosci: "indeks_nosnosci",
-  indeks_predkosci: "indeks_predkosci",
-} as const satisfies Record<string, string>;
+export const ZAKRES_SKANU: readonly RodzajSlownika[] = [
+  "marka",
+  "kategoria",
+  "konstrukcja",
+  "vfIf",
+  "rodzaj",
+  "sezon",
+  "tl_tt",
+  "oznaczenie_bieznika",
+  "bieznik",
+  "wentyl",
+  "rozmiar",
+  "indeks_nosnosci",
+  "indeks_predkosci",
+];
 
-export type RodzajPending = keyof typeof RODZAJE_KOLUMNY;
-
-/** Czy rodzaj pozycji pending ma odpowiednik w `products` (`:283-284`, `:326-327`). */
+/**
+ * Kolumna `products` dla rodzaju pozycji pending (`:283-284`, `:326-327`) — z JEDNEJ mapy
+ * `RODZAJ_KOLUMNA` (15 rodzajów), więc akceptacje obsługują też `model` i `zastosowanie`,
+ * których skan sam nie zgłasza, ale które mogą przyjść inną drogą. `undefined` → 400.
+ */
 export function kolumnaRodzaju(rodzaj: string): string | undefined {
-  return Object.hasOwn(RODZAJE_KOLUMNY, rodzaj)
-    ? RODZAJE_KOLUMNY[rodzaj as RodzajPending]
-    : undefined;
+  return znanyRodzaj(rodzaj) ? RODZAJ_KOLUMNA[rodzaj] : undefined;
 }
 
 /**
@@ -189,8 +196,9 @@ export type StatystykiSkanu = {
  * Skan `products` w poszukiwaniu wartości spoza słownika (port `scanForNewValues`, `:77-138`).
  *
  * Źródłem jest tabela `products`, NIE staging — skan patrzy na stan po akceptacji, nie na to,
- * co dopiero czeka. Dla każdego z 13 rodzajów: grupowanie po kolumnie, pominięcie wartości
- * obecnych w słowniku i w odrzuconych, wstawienie nowej pozycji albo aktualizacja istniejącej.
+ * co dopiero czeka. Dla każdego z 13 rodzajów `ZAKRES_SKANU`: grupowanie po kolumnie,
+ * pominięcie wartości obecnych w słowniku i w odrzuconych, wstawienie nowej pozycji albo
+ * aktualizacja istniejącej.
  *
  * ⚠ Filtr `dostawca != 'MO6'` jest w oryginale (`:91`) — MO6 jest w Bridge celowo pomijany.
  * Warunek `dostawca IS NULL OR …` przepuszcza wiersze bez dostawcy, choć kolumna jest NOT NULL;
@@ -213,7 +221,8 @@ export function skanujNoweWartosci(db: Baza): StatystykiSkanu {
     zaktualizowano: 0,
   };
 
-  for (const [rodzaj, kolumna] of Object.entries(RODZAJE_KOLUMNY)) {
+  for (const rodzaj of ZAKRES_SKANU) {
+    const kolumna = RODZAJ_KOLUMNA[rodzaj];
     staty.skanowano_rodzajow++;
     const kol = sql.raw(kolumna);
     let wiersze: { wartosc: string; ile: number; dostawcy: string | null }[];

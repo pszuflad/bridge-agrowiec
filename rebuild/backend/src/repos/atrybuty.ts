@@ -37,14 +37,16 @@ export type Wartosc = {
 };
 
 /**
- * Mapa rodzaj atrybutu → kolumna `products` (port `:251-267`, **15 pozycji**).
+ * Mapa rodzaj atrybutu → kolumna `products` (port `:251-267`, **15 pozycji**) — JEDYNA w rebuild.
  *
- * ⚠ TO NIE JEST TA SAMA MAPA, CO W KOLEJCE PENDING. `repos/atrybuty-pending.ts` ma własną,
- * 13-pozycyjną: dokładny PODZBIÓR tej mapy, bez `model` i `zastosowanie` (`wentyl` i cała
- * reszta są w obu). Rozbieżność jest w oryginale — dwa moduły pisano osobno — i ma widoczny skutek: dla pozycji pending rodzaju `model` albo
- * `zastosowanie` akceptacja z edycją zwróciłaby 400 „Nieznany rodzaj". W praktyce takie
- * pozycje nie powstają, bo skan ich nie tworzy. Nie unifikujemy map — unifikacja zmieniłaby
- * zachowanie obu tras naraz.
+ * Czytają ją liczniki i użycie (tu) oraz obie akceptacje kolejki przepisujące produkty
+ * (`kolumnaRodzaju()` w `repos/atrybuty-pending.ts`). Skan kolejki bierze z niej kolumny, ale
+ * przegląda tylko 13 rodzajów z jawnej listy `ZAKRES_SKANU` (bez `model` i `zastosowanie`).
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #41, decyzja Ani 2026-09-21, ticket 74): oryginał ma w module
+ * kolejki DRUGĄ, 13-pozycyjną mapę, której używają też akceptacje — dla pozycji `model`
+ * i `zastosowanie` kończą się one tam 400 „Nieznany rodzaj". Tu akceptacje obsługują wszystkie
+ * 15 rodzajów, a zakres skanu zostaje bez zmian.
  */
 export const RODZAJ_KOLUMNA = {
   marka: "marka",

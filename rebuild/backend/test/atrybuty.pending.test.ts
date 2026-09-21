@@ -17,6 +17,7 @@ import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
+  atrybutyRodzaje,
   atrybutyWartosci,
   atrybutyWartosciOdrzucone,
   atrybutyWartosciPending,
@@ -103,7 +104,7 @@ describe("atrybuty — kolejka pending", () => {
         zaktualizowano: number;
       };
       expect(staty.ok).toBe(true);
-      // 13 rodzajów z mapy kolejki (`RODZAJE_KOLUMNY`), nie 15 z mapy liczników.
+      // 13 rodzajów z `ZAKRES_SKANU`, nie wszystkie 15 z mapy rodzaj→kolumna.
       expect(staty.skanowano_rodzajow).toBe(13);
       expect(staty.nowych_wartosci).toBeGreaterThan(0);
       expect(staty.zaktualizowano).toBe(0);
@@ -231,15 +232,10 @@ describe("atrybuty — kolejka pending", () => {
       expect(brakPozycji.body).toEqual({ ok: false, error: "Pozycja pending nie istnieje" });
     });
 
-    /**
-     * ⚠ Mapa kolejki nie zna rodzaju `model` ani `zastosowanie` (13 pozycji wobec 15 w mapie
-     * liczników). Skan takich pozycji nie tworzy, ale gdyby jakaś powstała inną drogą,
-     * akceptacja przepisująca produkty kończy się 400. Rozbieżność jest w oryginale.
-     */
-    it("dla rodzaju spoza mapy kolejki → 400 „Nieznany rodzaj”", async () => {
+    it("dla rodzaju spoza 15 znanych → 400 „Nieznany rodzaj”, pozycja zostaje", async () => {
       srodowisko.db
         .insert(atrybutyWartosciPending)
-        .values({ rodzaj: "model", wartosc: "COKOLWIEK", ileWystapien: 1, dostawcy: "" })
+        .values({ rodzaj: "bieznik_zly", wartosc: "COKOLWIEK", ileWystapien: 1, dostawcy: "" })
         .run();
       const wpis = (await pozycja("COKOLWIEK"))!;
 
@@ -247,7 +243,115 @@ describe("atrybuty — kolejka pending", () => {
         nowa_wartosc: "X",
       });
       expect(odp.status).toBe(400);
-      expect(odp.body).toEqual({ ok: false, error: "Nieznany rodzaj: model" });
+      expect(odp.body).toEqual({ ok: false, error: "Nieznany rodzaj: bieznik_zly" });
+      expect(await pozycja("COKOLWIEK")).toBeDefined();
+    });
+  });
+
+  /**
+   * Backlog #41 (decyzja Ani 2026-09-21, ticket 74): akceptacje korzystają z JEDNEJ,
+   * 15-pozycyjnej mapy rodzaj→kolumna. W oryginale mapa kolejki nie znała `model`
+   * i `zastosowanie`, więc obie akceptacje przepisujące produkty kończyły się tam 400.
+   * Skan takich pozycji nadal nie tworzy (zakres skanu bez zmian) — wstawiamy je ręcznie.
+   */
+  describe("rodzaje `model` i `zastosowanie` (#41)", () => {
+    /**
+     * `atrybuty_wartosci.rodzaj` ma klucz obcy do `atrybuty_rodzaje`, a seed rebuildu zakłada
+     * tylko pięć rodzajów rdzenia. W produkcji oba są w tabeli (`db/snapshot.db`: `model`
+     * core=1, `zastosowanie` core=0, dodany ręcznie) — odtwarzamy ten stan dosłownie.
+     */
+    beforeEach(() => {
+      srodowisko.db
+        .insert(atrybutyRodzaje)
+        .values([
+          { value: "model", label: "Model", opis: "Model opony", core: 1 },
+          {
+            value: "zastosowanie",
+            label: "Zastosowanie",
+            opis: "Typ maszyny / zastosowanie opony (ciągnik, kombajn, ładowarka, koparka, przyczepa itd.)",
+            core: 0,
+          },
+        ])
+        .run();
+    });
+
+    const dodajPozycje = async (rodzaj: string, wartosc: string) => {
+      srodowisko.db
+        .insert(atrybutyWartosciPending)
+        .values({ rodzaj, wartosc, ileWystapien: 1, dostawcy: "" })
+        .run();
+      return (await pozycja(wartosc))!;
+    };
+
+    const ileProduktow = (kolumna: "model" | "zastosowanie", wartosc: string) =>
+      srodowisko.db
+        .select({ model: products.model, zastosowanie: products.zastosowanie })
+        .from(products)
+        .all()
+        .filter((p) => p[kolumna] === wartosc).length;
+
+    it.each([
+      ["model", "AGRIMAX FACTOR", "AGRIMAX FACTOR II"],
+      ["zastosowanie", "Ciągnik", "Ciągnik rolniczy"],
+    ] as const)("akceptacja z edycją dla `%s` przepisuje właściwą kolumnę", async (rodzaj, stara, nowa) => {
+      const przed = ileProduktow(rodzaj, stara);
+      expect(przed).toBeGreaterThan(0);
+      const wpis = await dodajPozycje(rodzaj, stara);
+
+      const odp = await post(`/api/atrybuty/pending/${wpis.id}/akceptuj-z-edycja`, {
+        nowa_wartosc: nowa,
+      });
+      expect(odp.status).toBe(200);
+      expect(odp.body).toEqual({
+        ok: true,
+        akcja: "akceptowana_z_edycja",
+        z: stara,
+        na: nowa,
+        produktow_zaktualizowano: przed,
+      });
+      expect(ileProduktow(rodzaj, stara)).toBe(0);
+      expect(ileProduktow(rodzaj, nowa)).toBe(przed);
+      expect(wSlowniku(rodzaj, nowa)).toBe(true);
+    });
+
+    it.each([
+      ["model", "AGRIMAX FACTOR", "AGRIMAX KANON"],
+      ["zastosowanie", "Ciągnik", "Rolnicze"],
+    ] as const)("akceptacja jako alias dla `%s` przepisuje właściwą kolumnę", async (rodzaj, stara, kanoniczna) => {
+      srodowisko.db.insert(atrybutyWartosci).values({ rodzaj, wartosc: kanoniczna }).run();
+      const przed = ileProduktow(rodzaj, stara);
+      expect(przed).toBeGreaterThan(0);
+      const wpis = await dodajPozycje(rodzaj, stara);
+
+      const odp = await post(`/api/atrybuty/pending/${wpis.id}/akceptuj-jako-alias`, {
+        kanoniczna_wartosc: kanoniczna,
+      });
+      expect(odp.status).toBe(200);
+      expect(odp.body).toEqual({
+        ok: true,
+        akcja: "akceptowana_jako_alias",
+        z: stara,
+        na: kanoniczna,
+        produktow_zaktualizowano: przed,
+      });
+      expect(ileProduktow(rodzaj, stara)).toBe(0);
+      expect(ileProduktow(rodzaj, kanoniczna)).toBe(przed);
+    });
+
+    it("skan nadal NIE tworzy pozycji rodzaju `model` ani `zastosowanie`", async () => {
+      // Produkty testowe mają oba pola wypełnione wartościami spoza słownika.
+      expect(ileProduktow("model", "AGRIMAX FACTOR")).toBeGreaterThan(0);
+      expect(ileProduktow("zastosowanie", "Ciągnik")).toBeGreaterThan(0);
+
+      await skanuj();
+      const rodzaje = srodowisko.db
+        .select({ rodzaj: atrybutyWartosciPending.rodzaj })
+        .from(atrybutyWartosciPending)
+        .all()
+        .map((w) => w.rodzaj);
+      expect(rodzaje.length).toBeGreaterThan(0);
+      expect(rodzaje).not.toContain("model");
+      expect(rodzaje).not.toContain("zastosowanie");
     });
   });
 
@@ -453,23 +557,171 @@ describe("atrybuty — kolejka pending", () => {
     });
   });
 
-  describe("audyt", () => {
-    /**
-     * ⚠ ŻADNA akcja kolejki nie pisze do `audit_log` — moduł oryginału nie dostaje funkcji
-     * audytu (`pending_module.cjs:199` destrukturyzuje tylko `we`). Dotyczy to także akcji
-     * przepisujących `products`. Odtworzone 1:1 na wyraźną decyzję użytkownika (plan.md D4);
-     * ten test pilnuje, żeby audyt nie wkradł się tu przypadkiem.
-     */
-    it("akcje pending nie zostawiają wpisów w audit_log", async () => {
+  /**
+   * Backlog #39 (decyzja Ani 2026-09-21, ticket 74) — ŚWIADOME ODSTĘPSTWO: oryginał nie audytuje
+   * kolejki wcale (`pending_module.cjs:199` nie dostaje funkcji `be`). Odbudowa zapisuje
+   * `atrybut_pending_*` dla każdej trasy, która coś zmienia; `GET` nie loguje.
+   */
+  describe("audyt (#39)", () => {
+    type Wpis = typeof auditLog.$inferSelect;
+    const wpisy = (): Wpis[] => srodowisko.db.select().from(auditLog).all();
+    const ostatni = (): Wpis => wpisy().at(-1)!;
+    const szczegoly = (w: Wpis): unknown => JSON.parse(w.szczegolyJson ?? "null");
+
+    it("akceptacja z edycją: akcja, encja, użytkownik i szczegóły odtwarzają zmianę", async () => {
       await skanuj();
       const wpis = (await pozycja("NOKIAN HAKKA"))!;
-      const przed = srodowisko.db.select().from(auditLog).all().length;
+      await post(`/api/atrybuty/pending/${wpis.id}/akceptuj-z-edycja`, { nowa_wartosc: "NOKIAN" });
 
-      await post(`/api/atrybuty/pending/${wpis.id}/akceptuj`);
+      const w = ostatni();
+      expect(w.akcja).toBe("atrybut_pending_zaakceptowano_z_edycja");
+      expect(w.encjaTyp).toBe("atrybut_pending");
+      expect(w.encjaId).toBe(String(wpis.id));
+      expect(w.uzytkownikImie).toBeTruthy();
+      expect(szczegoly(w)).toEqual({
+        rodzaj: "marka",
+        kolumna: "marka",
+        z: "NOKIAN HAKKA",
+        na: "NOKIAN",
+        produktow_zaktualizowano: 1,
+      });
+    });
+
+    it("akceptacja jako alias: liczba przepisanych produktów z `UPDATE`", async () => {
+      srodowisko.db.insert(atrybutyWartosci).values({ rodzaj: "marka", wartosc: "BKT" }).run();
+      srodowisko.db
+        .insert(atrybutyWartosciPending)
+        .values({ rodzaj: "marka", wartosc: "MITAS", ileWystapien: 1, dostawcy: "" })
+        .run();
+      const wpis = (await pozycja("MITAS"))!;
+      const przed = markiProduktow().filter((p) => p.marka === "MITAS").length;
+      expect(przed).toBeGreaterThan(0);
+
+      const odp = await post(`/api/atrybuty/pending/${wpis.id}/akceptuj-jako-alias`, {
+        kanoniczna_wartosc: "BKT",
+      });
+      expect(odp.body).toMatchObject({ produktow_zaktualizowano: przed });
+
+      const w = ostatni();
+      expect(w.akcja).toBe("atrybut_pending_zaakceptowano_jako_alias");
+      expect(w.encjaId).toBe(String(wpis.id));
+      expect(szczegoly(w)).toEqual({
+        rodzaj: "marka",
+        kolumna: "marka",
+        z: "MITAS",
+        na: "BKT",
+        produktow_zaktualizowano: przed,
+      });
+    });
+
+    it("akceptacja, odrzucenie, czyszczenie i skan zostawiają własne wpisy; lista nie", async () => {
+      const staty = (await skanuj()).body as Record<string, unknown>;
+      expect(ostatni().akcja).toBe("atrybut_pending_skanowano");
+      expect(ostatni().encjaId).toBeNull();
+      expect(szczegoly(ostatni())).toEqual({
+        skanowano_rodzajow: staty.skanowano_rodzajow,
+        nowych_wartosci: staty.nowych_wartosci,
+        zaktualizowano: staty.zaktualizowano,
+      });
+
+      const akceptowana = (await pozycja("NOKIAN HAKKA"))!;
+      await post(`/api/atrybuty/pending/${akceptowana.id}/akceptuj`);
+      expect(ostatni().akcja).toBe("atrybut_pending_zaakceptowano");
+      expect(ostatni().encjaId).toBe(String(akceptowana.id));
+      expect(szczegoly(ostatni())).toEqual({ rodzaj: "marka", wartosc: "NOKIAN HAKKA" });
+
+      const odrzucana = (await get("/api/atrybuty/pending")).body.items[0] as {
+        id: number;
+        rodzaj: string;
+        wartosc: string;
+      };
+      await post(`/api/atrybuty/pending/${odrzucana.id}/odrzuc`);
+      expect(ostatni().akcja).toBe("atrybut_pending_odrzucono");
+      expect(szczegoly(ostatni())).toEqual({ rodzaj: odrzucana.rodzaj, wartosc: odrzucana.wartosc });
+
+      const zostalo = ((await get("/api/atrybuty/pending")).body as { count: number }).count;
+      const ileWpisow = wpisy().length;
+      await get("/api/atrybuty/pending");
+      expect(wpisy()).toHaveLength(ileWpisow);
+
+      await del("/api/atrybuty/pending");
+      expect(ostatni().akcja).toBe("atrybut_pending_wyczyszczono");
+      expect(ostatni().encjaId).toBeNull();
+      expect(szczegoly(ostatni())).toEqual({ rodzaj: null, usunieto: zostalo });
+    });
+
+    /**
+     * Ania chciała śladu „w historii", więc wpis w `audit_log` nie wystarcza: musi go oddać
+     * `GET /api/history/paged`. Widoczne są wyłącznie dwie akcje przepisujące produkty.
+     */
+    it("widok Historii pokazuje edycję i alias z kolejki, a pozostałe akcje pomija", async () => {
+      srodowisko.db.insert(atrybutyWartosci).values({ rodzaj: "marka", wartosc: "BKT" }).run();
       await skanuj();
+      const edytowana = (await pozycja("NOKIAN HAKKA"))!;
+      await post(`/api/atrybuty/pending/${edytowana.id}/akceptuj-z-edycja`, {
+        nowa_wartosc: "NOKIAN",
+      });
+      const aliasowana = (await pozycja("MITAS"))!;
+      await post(`/api/atrybuty/pending/${aliasowana.id}/akceptuj-jako-alias`, {
+        kanoniczna_wartosc: "BKT",
+      });
+      const odrzucana = (await get("/api/atrybuty/pending")).body.items[0] as { id: number };
+      await post(`/api/atrybuty/pending/${odrzucana.id}/odrzuc`);
       await del("/api/atrybuty/pending");
 
-      expect(srodowisko.db.select().from(auditLog).all()).toHaveLength(przed);
+      type Strona = {
+        total: number;
+        items: {
+          typ: string;
+          uzytkownik: string | null;
+          liczbaPozycji: number | null;
+          kodProduktu: string | null;
+          zmienionePola: string[];
+        }[];
+      };
+      const strona = (await get("/api/history/paged?typ=all")).body as Strona;
+      expect(strona.total).toBe(2);
+      // Kolejność po `kiedy` — dwie akcje w tej samej milisekundzie dałyby remis, stąd sort.
+      expect(
+        strona.items
+          .map((w) => [w.typ, w.liczbaPozycji, w.kodProduktu, w.zmienionePola])
+          .sort((a, b) => String(a[2]).localeCompare(String(b[2]))),
+      ).toEqual([
+        ["edycja", 1, "marka: „MITAS” → „BKT”", ["marka (alias z kolejki)"]],
+        ["edycja", 1, "marka: „NOKIAN HAKKA” → „NOKIAN”", ["marka (edycja z kolejki)"]],
+      ]);
+      expect(strona.items.every((w) => w.uzytkownik)).toBe(true);
+
+      // Filtr „Edycje" i wyszukiwarka (po `uwagi`, których front przy edycji nie rysuje).
+      expect(((await get("/api/history/paged?typ=edycja")).body as Strona).total).toBe(2);
+      const szukane = (await get("/api/history/paged?search=alias")).body as Strona;
+      expect(szukane.items.map((w) => w.kodProduktu)).toEqual(["marka: „MITAS” → „BKT”"]);
+    });
+
+    it("odrzucone żądania (404, 400) nie zostawiają wpisu", async () => {
+      const ileWpisow = wpisy().length;
+      await post("/api/atrybuty/pending/999999/akceptuj");
+      await post("/api/atrybuty/pending/999999/akceptuj-z-edycja", { nowa_wartosc: "X" });
+      await post("/api/atrybuty/pending/999999/odrzuc");
+      expect(wpisy()).toHaveLength(ileWpisow);
+    });
+
+    it("skan z hooka akceptacji stagingu NIE jest audytowany jako akcja kolejki", async () => {
+      await post("/api/staging/accept", { ids: [] });
+      expect(wpisy().some((w) => w.akcja === "atrybut_pending_skanowano")).toBe(false);
+    });
+
+    it("awaria zapisu audytu nie zamienia udanej akceptacji w 500", async () => {
+      await skanuj();
+      const wpis = (await pozycja("NOKIAN HAKKA"))!;
+      srodowisko.db.run(sql`DROP TABLE audit_log`);
+
+      const odp = await post(`/api/atrybuty/pending/${wpis.id}/akceptuj-z-edycja`, {
+        nowa_wartosc: "NOKIAN",
+      });
+      expect(odp.status).toBe(200);
+      expect(odp.body).toMatchObject({ ok: true, produktow_zaktualizowano: 1 });
+      expect(markiProduktow().find((p) => p.kod === "MO1_NOWA")?.marka).toBe("NOKIAN");
     });
   });
 });
