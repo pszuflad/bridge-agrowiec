@@ -5,6 +5,9 @@
  * że domyślny filtr chowa szum „Synchronizacja", i że zmiana statusu idzie PRZEZ API
  * (decyzja D3) — na grupie jako N PATCH-y, na wpisie jako jeden.
  *
+ * P6.1 (`72-FEATURE-alerty-przejrzany-szukajka`): trzeci status `przejrzany` z przyciskami
+ * w słownictwie oryginału i wyszukiwarka po treści (sekcje 5 i 6).
+ *
  * Kształt wiersza bierzemy z `contract/fixtures/GET_alerts.json`; rozkład powtórek
  * budujemy sami, bo nagranie ma pięć wierszy bez ani jednej powtórki (nota przy
  * `alertyZFixtura` w `test/msw/kontrakt.ts`).
@@ -74,12 +77,22 @@ function alertyZPowtorkami(): Alert[] {
 
 let patche: { id: string; cialo: Record<string, unknown> }[] = [];
 
-function zamockujApi(alerty: Alert[] = alertyZPowtorkami()) {
+/**
+ * Atrapa Z PAMIĘCIĄ: PATCH zmienia status w liście, którą oddaje następny GET — inaczej nie
+ * da się sprawdzić, co widok pokazuje PO akcji (np. że grupa „przejrzany" nie znika).
+ * `nieudane` — id, dla których PATCH kończy się 500 (częściowe niepowodzenie akcji na grupie).
+ */
+function zamockujApi(alerty: Alert[] = alertyZPowtorkami(), nieudane: ReadonlySet<number> = new Set()) {
+  const baza = alerty.map((a) => ({ ...a }));
   server.use(
-    http.get("*/api/alerts", () => HttpResponse.json(alerty)),
+    http.get("*/api/alerts", () => HttpResponse.json(baza)),
     http.patch("*/api/alerts/:id", async ({ request, params }) => {
+      const id = Number(params.id);
+      if (nieudane.has(id)) return new HttpResponse("Baza zablokowana", { status: 500 });
       const cialo = (await request.json()) as Record<string, unknown>;
       patche.push({ id: String(params.id), cialo });
+      const wiersz = baza.find((a) => a.id === id);
+      if (wiersz) wiersz.status = String(cialo.status);
       return HttpResponse.json({ ok: true });
     }),
   );
@@ -169,12 +182,13 @@ describe("2. Zwijanie powtórek — sedno iteracji", () => {
 
 describe("3. Filtry", () => {
   /** 2127 wpisów „Synchronizacja"/rozwiazany w produkcji — bez tego ekran jest szumem. */
-  it("po wejściu widać tylko status `nowy` — „Synchronizacja\" jest schowana", async () => {
+  it("po wejściu widać nierozwiązane — „Synchronizacja\" jest schowana", async () => {
     zamockujApi();
     await otworzAlerty();
 
     expect(screen.queryByTestId("group-alert-MO9|Synchronizacja|rozwiazany")).not.toBeInTheDocument();
     expect(screen.getByTestId("text-alert-summary")).toHaveTextContent("24 alerty");
+    expect(screen.getByTestId("select-alert-status")).toHaveTextContent("Nierozwiązane");
   });
 
   it("zdjęcie filtra statusu odsłania alerty rozwiązane", async () => {
@@ -207,7 +221,7 @@ describe("4. Zmiana statusu idzie przez API (decyzja D3)", () => {
     zamockujApi();
     await otworzAlerty();
 
-    await userEvent.click(screen.getByTestId(`button-toggle-${KLUCZ_MO3}`));
+    await userEvent.click(screen.getByTestId(`button-status-rozwiazany-${KLUCZ_MO3}`));
 
     await waitFor(() => expect(patche).toHaveLength(23));
     expect(patche.every((p) => p.cialo.status === "rozwiazany")).toBe(true);
@@ -219,13 +233,13 @@ describe("4. Zmiana statusu idzie przez API (decyzja D3)", () => {
     await otworzAlerty();
 
     await userEvent.click(screen.getByTestId(`button-expand-${KLUCZ_MO3}`));
-    await userEvent.click(await screen.findByTestId("button-toggle-alert-100"));
+    await userEvent.click(await screen.findByTestId("button-status-rozwiazany-alert-100"));
 
     await waitFor(() => expect(patche).toHaveLength(1));
     expect(patche[0]).toEqual({ id: "100", cialo: { status: "rozwiazany" } });
   });
 
-  /** Przełącznik działa w OBIE strony — alert zamknięty przez pomyłkę da się otworzyć. */
+  /** Akcja działa w OBIE strony — alert zamknięty przez pomyłkę da się otworzyć. */
   it("alert rozwiązany wraca do statusu `nowy`", async () => {
     zamockujApi();
     await otworzAlerty();
@@ -250,5 +264,149 @@ describe("4. Zmiana statusu idzie przez API (decyzja D3)", () => {
     await userEvent.click(screen.getByTestId("group-alert-MO5|Błąd HTTP|nowy").querySelector("button")!);
 
     expect(await screen.findByText(/Nie udało się zmienić statusu/)).toBeInTheDocument();
+  });
+});
+
+describe("5. Trzeci status `przejrzany` (P6.1, backlog #26)", () => {
+  it("grupa `nowy` ma przyciski w słownictwie oryginału, z licznikiem", async () => {
+    zamockujApi();
+    const grupa = await otworzAlerty();
+
+    const przyciski = within(grupa)
+      .getAllByRole("button")
+      .map((b) => b.textContent)
+      .filter((t) => t !== "");
+    expect(przyciski).toEqual(["Oznacz jako przejrzany (23)", "Rozwiąż (23)"]);
+    expect(within(grupa).queryByText(/Oznacz jako rozwiązane/)).not.toBeInTheDocument();
+  });
+
+  /**
+   * SEDNO decyzji D1: oznaczenie jako przejrzane NIE chowa alertu — grupa wraca jako
+   * `…|przejrzany`, z przyciskami „Rozwiąż" i „Otwórz ponownie". Inaczej działałoby jak „Rozwiąż".
+   */
+  it("„Oznacz jako przejrzany” na grupie zmienia KAŻDY wpis, a grupa zostaje na liście", async () => {
+    zamockujApi();
+    await otworzAlerty();
+
+    await userEvent.click(screen.getByTestId(`button-status-przejrzany-${KLUCZ_MO3}`));
+
+    await waitFor(() => expect(patche).toHaveLength(23));
+    expect(patche.every((p) => p.cialo.status === "przejrzany")).toBe(true);
+
+    const przejrzana = await screen.findByTestId("group-alert-MO3|Błąd pobierania|przejrzany");
+    expect(within(przejrzana).getByText("przejrzany")).toBeInTheDocument();
+    expect(
+      within(przejrzana).getByTestId("button-status-rozwiazany-MO3|Błąd pobierania|przejrzany"),
+    ).toHaveTextContent("Rozwiąż (23)");
+    expect(
+      within(przejrzana).getByTestId("button-status-nowy-MO3|Błąd pobierania|przejrzany"),
+    ).toHaveTextContent("Otwórz ponownie (23)");
+    expect(within(przejrzana).queryByText(/Oznacz jako przejrzany/)).not.toBeInTheDocument();
+  });
+
+  it("pojedynczy wpis przejrzany wydziela się w osobną grupę obok reszty `nowy`", async () => {
+    zamockujApi();
+    await otworzAlerty();
+
+    await userEvent.click(screen.getByTestId(`button-expand-${KLUCZ_MO3}`));
+    await userEvent.click(await screen.findByTestId("button-status-przejrzany-alert-100"));
+
+    await waitFor(() => expect(patche).toEqual([{ id: "100", cialo: { status: "przejrzany" } }]));
+    expect(
+      await screen.findByTestId("group-alert-MO3|Błąd pobierania|przejrzany"),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByTestId(`badge-count-${KLUCZ_MO3}`)).toHaveTextContent("22×"),
+    );
+  });
+
+  it("alert rozwiązany znika z domyślnego widoku", async () => {
+    zamockujApi();
+    await otworzAlerty();
+
+    await userEvent.click(screen.getByTestId("button-status-rozwiazany-MO5|Błąd HTTP|nowy"));
+
+    await waitFor(() =>
+      expect(screen.queryByTestId(/^group-alert-MO5/)).not.toBeInTheDocument(),
+    );
+  });
+
+  it("filtr statusu ma polskie etykiety oryginału i opcję „Nierozwiązane”", async () => {
+    zamockujApi([...alertyZPowtorkami(), alert({ id: 400, status: "przejrzany", dostawca: "MO4" })]);
+    await otworzAlerty();
+
+    await userEvent.click(screen.getByTestId("select-alert-status"));
+    const opcje = (await screen.findAllByRole("option")).map((o) => o.textContent);
+    expect(opcje).toEqual([
+      "Nierozwiązane",
+      "Wszystkie statusy",
+      "Nowy",
+      "Przejrzany",
+      "Rozwiązany",
+    ]);
+  });
+
+  it("częściowe niepowodzenie akcji na grupie mówi uczciwie, ile się zmieniło", async () => {
+    zamockujApi(alertyZPowtorkami(), new Set([100, 101, 102, 103, 104]));
+    await otworzAlerty();
+
+    await userEvent.click(screen.getByTestId(`button-status-przejrzany-${KLUCZ_MO3}`));
+
+    expect(await screen.findByText("Zmieniono 18 z 23 alertów")).toBeInTheDocument();
+    expect(patche).toHaveLength(18);
+  });
+});
+
+describe("6. Wyszukiwarka po treści (P6.1, backlog #90)", () => {
+  /**
+   * Decyzja D3: filtruje WPISY przed grupowaniem. Tokeny „numer" i „7" trafiają w próby
+   * 7 i 17 (substring, jak w szukajce katalogu), czyli 2 z 23 — licznik grupy i przycisk
+   * mówią 2, a akcja zmienia tylko te dwa wpisy.
+   */
+  it("zawęża grupę do trafień — licznik i akcja obejmują tylko pasujące wpisy", async () => {
+    zamockujApi();
+    await otworzAlerty();
+
+    await userEvent.type(screen.getByTestId("input-alert-search"), "NUMER 7");
+
+    await waitFor(() =>
+      expect(screen.getByTestId(`badge-count-${KLUCZ_MO3}`)).toHaveTextContent("2×"),
+    );
+    expect(screen.queryByTestId("group-alert-MO5|Błąd HTTP|nowy")).not.toBeInTheDocument();
+    expect(screen.getByTestId("text-alert-summary")).toHaveTextContent("1 grupa / 2 alerty");
+    expect(screen.getByTestId(`button-status-rozwiazany-${KLUCZ_MO3}`)).toHaveTextContent(
+      "Rozwiąż (2)",
+    );
+
+    await userEvent.click(screen.getByTestId(`button-status-rozwiazany-${KLUCZ_MO3}`));
+
+    await waitFor(() => expect(patche).toHaveLength(2));
+    expect(patche.map((p) => p.id).sort()).toEqual(["106", "116"]);
+  });
+
+  it("brak trafień daje komunikat, a nie pustą stronę", async () => {
+    zamockujApi();
+    await otworzAlerty();
+
+    await userEvent.type(screen.getByTestId("input-alert-search"), "parser");
+
+    expect(await screen.findByText("Brak alertów spełniających filtry.")).toBeInTheDocument();
+  });
+
+  it("łączy się z filtrem statusu operatorem AND", async () => {
+    zamockujApi();
+    await otworzAlerty();
+
+    // „pobrano 925" jest w treści rozwiązanej synchronizacji MO9 — domyślny filtr ją chowa.
+    await userEvent.type(screen.getByTestId("input-alert-search"), "pobrano");
+    expect(await screen.findByText("Brak alertów spełniających filtry.")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId("select-alert-status"));
+    await userEvent.click(await screen.findByRole("option", { name: "Wszystkie statusy" }));
+
+    expect(
+      await screen.findByTestId("group-alert-MO9|Synchronizacja|rozwiazany"),
+    ).toBeInTheDocument();
+    expect(screen.getAllByTestId(/^group-alert-/)).toHaveLength(1);
   });
 });

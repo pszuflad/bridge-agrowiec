@@ -142,6 +142,38 @@ describe("GATE — kontrakt i fixtures dla alertów", () => {
   });
 
   /**
+   * P6.1 (`72-FEATURE-alerty-przejrzany-szukajka`): trzeci status `przejrzany`. Kontrakt się
+   * nie zmienia — `status` jest w nim zwykłym `string` bez enuma, a trasa nie waliduje
+   * wartości (D4) — ale widok na nim polega, więc przypinamy, że przechodzi w obie strony:
+   * zapis przez PATCH i odczyt przez GET w kształcie z kontraktu.
+   */
+  it("PATCH na `przejrzany` zapisuje się i wraca przez GET zgodnie z kontraktem", async () => {
+    const fixture = wczytajFixture("GET_alerts.json");
+    const cel = (fixture.body as WierszAlertu[])[2]!;
+
+    try {
+      const odp = await request(srodowisko.app)
+        .patch(`/api/alerts/${String(cel.id)}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: "przejrzany" });
+
+      expect(odp.status).toBe(200);
+      expect(odp.body).toEqual({ ok: true });
+
+      const lista = await zAuth("/api/alerts");
+      sprawdzZgodnoscZKontraktem({ metoda: "GET", sciezka: "/api/alerts", odpowiedz: lista });
+      expect((lista.body as WierszAlertu[]).find((a) => a.id === cel.id)?.status).toBe(
+        "przejrzany",
+      );
+    } finally {
+      await request(srodowisko.app)
+        .patch(`/api/alerts/${String(cel.id)}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: String(cel.status) });
+    }
+  });
+
+  /**
    * ODTWORZONE 1:1 (decyzja D4): oryginał NIE sprawdza istnienia wiersza — UPDATE bez
    * trafienia jest cichym no-opem, a trasa i tak oddaje `{ok:true}`. Bliźniacze
    * `DELETE /api/overrides/:id` i `PATCH /api/markups/:id` 404 mają; ta trasa nie.

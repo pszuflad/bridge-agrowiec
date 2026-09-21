@@ -26,9 +26,11 @@ export type Alert = {
   data: string;
 };
 
-/** Statusy, którymi operuje widok — 1:1 z `StatusAlertu` w `backend/src/repos/alerts.ts`. */
-export const STATUS_NOWY = "nowy";
-export const STATUS_ROZWIAZANY = "rozwiazany";
+/**
+ * Statusy mieszkają w `statusy.ts` (wspólne z przyszłą listą P6.2). Re-eksport zostaje, bo
+ * `STATUS_NOWY` stąd importuje Pulpit (`pages/pulpit/kpi.ts`).
+ */
+export { STATUS_NOWY, STATUS_ROZWIAZANY } from "./statusy";
 
 /**
  * Cała tabela alertów jedną gołą tablicą — bez limitu i bez paginacji, jak w oryginale
@@ -62,7 +64,7 @@ export async function zmienStatusAlertu(id: number, status: string): Promise<voi
 /**
  * Limit równoległych PATCH-ów przy akcji na całej grupie.
  *
- * Kontrakt NIE MA trasy masowej, więc „oznacz wszystkie jako rozwiązane" to N osobnych
+ * Kontrakt NIE MA trasy masowej, więc „Rozwiąż (N)" na grupie to N osobnych
  * żądań. Największa grupa w produkcji to 150 alertów `MO3 — Błąd pobierania`; puszczenie
  * ich naraz zapchałoby pulę połączeń przeglądarki (6 na host) i ustawiło resztę aplikacji
  * w kolejce. Ósemka mieści się w tej puli z zapasem.

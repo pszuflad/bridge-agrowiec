@@ -16,6 +16,7 @@
  * NIE naprawia zmianą typu przy zapisie — to port 1:1, widok ma się dostosować.
  */
 import type { Alert } from "./api";
+import { STATUS_ROZWIAZANY } from "./statusy";
 
 export type GrupaAlertow = {
   /** Klucz techniczny `(dostawca, typ, status)` — stabilny identyfikator wiersza w UI. */
@@ -33,16 +34,32 @@ export type GrupaAlertow = {
 };
 
 export type FiltryAlertow = {
+  /** Konkretny status, `FILTR_NIEROZWIAZANE` albo `null` (wszystkie statusy). */
   status: string | null;
   dostawca: string | null;
   typ: string | null;
+  /** Fraza wyszukiwarki po `opis`. Pusta = brak zawężenia. */
+  fraza: string;
 };
+
+/**
+ * Filtr statusu „Nierozwiązane" = wszystko, co NIE jest `rozwiazany` (decyzja D1, ticket
+ * `72-FEATURE-alerty-przejrzany-szukajka`). Obejmuje `nowy` i `przejrzany` — gdyby
+ * `przejrzany` był schowany, oznaczenie alertu jako przejrzanego usuwałoby go z widoku,
+ * czyli działałoby jak „Rozwiąż", a Ania używa obu przycisków właśnie dlatego, że znaczą
+ * co innego. Status spoza znanych też tu wpada: niezrozumiały alert ma być widoczny.
+ *
+ * Wartość nie koliduje z żadnym statusem z bazy — import pisze `nowy`/`rozwiazany`,
+ * widok dokłada `przejrzany`.
+ */
+export const FILTR_NIEROZWIAZANE = "nierozwiazane";
 
 /** Domyślny stan filtrów: sama robota do zrobienia, bez 2127 wpisów „Synchronizacja". */
 export const FILTRY_POCZATKOWE: FiltryAlertow = {
-  status: "nowy",
+  status: FILTR_NIEROZWIAZANE,
   dostawca: null,
   typ: null,
+  fraza: "",
 };
 
 /**
@@ -113,14 +130,39 @@ function porownajMalejaco(a: string, b: string): number {
   return 0;
 }
 
-/** `null` w filtrze = brak zawężenia. Filtry łączą się operatorem AND. */
+function pasujeStatus(status: string, filtr: string | null): boolean {
+  if (filtr === null) return true;
+  if (filtr === FILTR_NIEROZWIAZANE) return status !== STATUS_ROZWIAZANY;
+  return status === filtr;
+}
+
+/**
+ * `null` w filtrze (i pusta fraza) = brak zawężenia. Wszystkie filtry, łącznie
+ * z wyszukiwarką, łączą się operatorem AND.
+ *
+ * ⚠ FILTROWANIE IDZIE PRZED GRUPOWANIEM — także dla wyszukiwarki (decyzja D3). Grupa zostaje
+ * na liście, gdy pasuje choć jeden jej wpis, ale składa się WYŁĄCZNIE z trafień: licznik
+ * „N×" liczy pasujące wpisy, a „Rozwiąż (N)" na grupie zmienia tylko je. Dzięki temu da się
+ * wpisać „parse" i zamknąć same błędy parsera, zostawiając otwarte awarie sieci z tej samej
+ * grupy „Błąd pobierania" (backlog #16, #90) — licznik i przycisk mówią prawdę o tym,
+ * co widać, a nie o tym, co jest schowane.
+ *
+ * Wyszukiwarka przeszukuje SAM `opis` (decyzja D4): dostawca i typ mają własne filtry,
+ * a „MO3" w frazie łapałoby wtedy każdy alert tego dostawcy. Mechanika jak szukajka
+ * katalogu (`katalog/filtrowanie.ts`, `filtrujSzukajka`): fraza dzielona po białych
+ * znakach, KAŻDY token musi wystąpić (AND), bez rozróżniania wielkości liter.
+ */
 export function filtrujAlerty(alerty: Alert[], filtry: FiltryAlertow): Alert[] {
-  return alerty.filter(
-    (alert) =>
-      (filtry.status === null || alert.status === filtry.status) &&
-      (filtry.dostawca === null || alert.dostawca === filtry.dostawca) &&
-      (filtry.typ === null || alert.typ === filtry.typ),
-  );
+  const tokeny = filtry.fraza.toLowerCase().split(/\s+/).filter(Boolean);
+
+  return alerty.filter((alert) => {
+    if (!pasujeStatus(alert.status, filtry.status)) return false;
+    if (filtry.dostawca !== null && alert.dostawca !== filtry.dostawca) return false;
+    if (filtry.typ !== null && alert.typ !== filtry.typ) return false;
+    if (tokeny.length === 0) return true;
+    const opis = alert.opis.toLowerCase();
+    return tokeny.every((token) => opis.includes(token));
+  });
 }
 
 export type WartosciFiltrow = {
