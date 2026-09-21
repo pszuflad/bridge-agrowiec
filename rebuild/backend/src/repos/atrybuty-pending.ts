@@ -327,7 +327,7 @@ export function skanujNoweWartosci(db: Baza): StatystykiSkanu {
  * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #40, decyzja Ani 2026-09-21: „tak, przeszkadza mi to").
  * Oryginał kolejki nie sprząta, a seed przy każdym starcie dosypuje do słownika marki
  * i bieżniki z `products` — pozycja dodana skanem przed restartem wisiała potem w kolejce
- * i podpowiadała samą siebie ze 100%. Na snapshocie dotyczyło to 437 z 500 pozycji.
+ * i podpowiadała samą siebie ze 100%. Na snapshocie dotyczyło to 437 z 498 pozycji.
  *
  * Skutek jest ten sam co „Akceptuj" (`akceptujPending`): wartość w słowniku, pozycja poza
  * kolejką, `products` nietknięte. Bez audytu (decyzja użytkownika, ticket 78, D4).

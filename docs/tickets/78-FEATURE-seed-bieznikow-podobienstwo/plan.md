@@ -1,6 +1,6 @@
 # 78-FEATURE-seed-bieznikow-podobienstwo — seed bieżników z `products.bieznik`, kolejka bez self-matchy, podobieństwo bez względu na wielkość liter (P7.2)
 
-> Status: Approved
+> Status: Implemented
 > Branch: `feature/78-seed-bieznikow-podobienstwo`
 > Worktree: `.worktrees/78-FEATURE-seed-bieznikow-podobienstwo`
 
@@ -44,8 +44,9 @@ z 7405 produktów (MO3 4, MO4 2, MO5 1, MO9 10). `origin` nie odróżnia ręczny
 domyślna wartość kolumny, a seed i akceptacja jej nie nadpisują. `audit_log` nie ma ani jednego
 `atrybut_wartosc_dodano`.
 
-**Kolejka (pkt 1b):** 500 pozycji, z czego 437 ma wartość obecną dosłownie w słowniku tego
-rodzaju. Po sprzątaniu zostaje 63.
+**Kolejka (pkt 1b):** 498 pozycji, z czego 437 ma wartość obecną dosłownie w słowniku tego
+rodzaju. Po sprzątaniu zostaje 61, a po pierwszym skanie 63 (skan dokłada 2 pozycje `konstrukcja`).
+(P7.3 podawała „z 500”, bo liczyła po skanie.)
 
 | rodzaj | pozycji | w słowniku (znika) | zostaje |
 |---|---:|---:|---:|
@@ -57,7 +58,7 @@ rodzaju. Po sprzątaniu zostaje 63.
 | konstrukcja | 1 | 1 | 0 |
 
 **Sugestie (#42):** dziś 443 pozycje mają co najmniej jedną sugestię, w większości same siebie.
-Po zmianie 17 z 63 zostających pozycji ma sugestię. 13 par jest nowych, np.
+Po zmianie 17 z 61 zostających pozycji ma sugestię. 13 par jest nowych, np.
 `kategoria "rolnicze" → "Rolnicze"` (334 produkty), `"ciężarowe" → "Ciężarowe"` (106),
 `"leśne" → "Leśne"`, `"przemyslowe" → "Przemysłowe"` (91%),
 `bieznik "FARMAX R75" → "Farmax R75"`, `"Conti CrossTrac 3" → "CONTI CROSSTRAC 3"`,
