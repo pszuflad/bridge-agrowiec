@@ -1,11 +1,14 @@
 /**
- * Przewoźnicy i dzielniki wagi wolumetrycznej — port `ng` i czterech kluczy IndexedDB
+ * Przewoźnicy i dzielniki wagi wolumetrycznej — port `ng` i kluczy IndexedDB
  * (`deminified/frontend-index.js:9165-9192`).
  *
- * ⚠ TO NIE JEST CONFIG BACKENDU. Lista żyje wyłącznie w przeglądarce Ani (IndexedDB,
- * store `kv` bazy `bridge-store-v2`) — nie ma dla niej ani tabeli, ani endpointu.
- * Skutek, który trzeba znać: zmiany są PER PRZEGLĄDARKA i giną przy czyszczeniu danych
- * witryny. Tak działa produkcja i tego nie zmieniamy (plan.md D1, D3).
+ * ⚠ ODSTĘPSTWO ŚWIADOME (backlog #27, karta P9.1, ticket 76): w produkcji lista żyje wyłącznie
+ * w IndexedDB przeglądarki (klucz `waga-gabarytowa-przewoznicy`). Tu jest na SERWERZE
+ * (`GET`/`PUT /api/waga-gabarytowa/przewoznicy`, tabela `waga_gab_przewoznicy`) i jest wspólna
+ * dla całej firmy. Stary klucz IndexedDB nie jest już ani czytany, ani pisany — lokalne listy
+ * nie są importowane (Ania potwierdziła seed), a wpis zostaje w przeglądarce nieruszony.
+ *
+ * W IndexedDB zostaje stan OSOBISTY: wybrany przewoźnik, ostatnie wymiary i ostatni wynik.
  */
 
 export type Przewoznik = {
@@ -13,17 +16,20 @@ export type Przewoznik = {
   nazwa: string;
   /** Dzielnik wzoru `dł × szer × wys / dzielnik` — im mniejszy, tym cięższa paczka. */
   dzielnik: number;
-  /** Znacznik z oryginału, niesiony przy GEIS-ie; sam wybór trzyma osobny klucz. */
+  /** Znacznik z oryginału, niesiony przy GEIS-ie; sam wybór trzyma osobny klucz. Serwer oddaje go zawsze. */
   domyslny?: boolean;
 };
 
-/** Cztery klucze magazynu KV, nazwy 1:1 z oryginałem (`:9165-9168`). */
-export const KLUCZ_PRZEWOZNICY = "waga-gabarytowa-przewoznicy";
+/** Klucze magazynu KV stanu osobistego, nazwy 1:1 z oryginałem (`:9166-9168`). */
 export const KLUCZ_WYBRANY = "waga-gabarytowa-wybrany";
 export const KLUCZ_OSTATNI_WYNIK = "waga-gabarytowa-ostatni-wynik";
 export const KLUCZ_OSTATNIE_WYMIARY = "waga-gabarytowa-ostatnie-wymiary";
 
-/** Sześć przewoźników z oryginału (`:9169-9192`), w tej samej kolejności. */
+/**
+ * Sześć przewoźników z oryginału (`:9169-9192`), w tej samej kolejności — lista, którą wysyła
+ * „Przywróć domyślne". Ta sama lista jest seedem migracji `rebuild/schema/007_waga_gab_przewoznicy.sql`;
+ * test backendu `waga-gabarytowa.przewoznicy.test.ts` pilnuje, że się nie rozjadą.
+ */
 export const PRZEWOZNICY_DOMYSLNI: Przewoznik[] = [
   { id: "geis", nazwa: "GEIS Polska", dzielnik: 10000, domyslny: true },
   { id: "dpd", nazwa: "DPD", dzielnik: 6000 },
