@@ -112,10 +112,17 @@ describe("WYROCZNIA — historia zgodna z żywym oryginałem", () => {
    * Warunek ważności całej wyroczni.
    *
    * Zasiewamy WYŁĄCZNIE wiersze `audit_log` z pięciu rozpoznawanych akcji, bo reszta i tak
-   * odpada w mapowaniu przed filtrowaniem i paginacją — więc na wynik nie wpływa. Jedyne,
-   * co mogłoby ten skrót unieważnić, to `LIMIT 5000` (`LIMIT_AUDYTU`): gdyby w bazie, z której
-   * nagrano wyrocznię, było ≥ 5000 wierszy, limit odciąłby część JESZCZE PRZED odsiewem
-   * i podzbiór przestałby dawać ten sam wynik co całość. Backlog #87.
+   * odpada przed filtrowaniem i paginacją — więc na wynik nie wpływa. Jedyne, co mogłoby ten
+   * skrót unieważnić, to `listAudit(5e3)` ORYGINAŁU: gdyby w bazie, z której nagrano wyrocznię,
+   * było ≥ 5000 wierszy, oryginał odciąłby część JESZCZE PRZED odsiewem i jego odpowiedź
+   * przestałaby być odpowiedzią „na całość". Odbudowa od ticketu 69 limitu nie ma (backlog
+   * #87, wariant c), więc wyrocznia jest wzorcem tylko PONIŻEJ progu — reżim powyżej, gdzie
+   * obie strony świadomie się różnią, pilnuje `historia.powyzej-progu.test.ts`.
+   *
+   * ⚠ Z tego samego powodu ta wyrocznia NIE WIDZI, czy odsiew akcji dzieje się w SQL, czy
+   * w pamięci — zasiew nie ma akcji spoza słownika. Zgodność kolejności SQL (`kiedy DESC`)
+   * z sortowaniem JS (`new Date(kiedy)`) wynika z pomiaru danych (jeden format ISO, 0 remisów,
+   * `docs/tickets/69-FEATURE-historia-bez-limitu/raport.md`), nie z tego testu.
    */
   it("wyrocznia jest ważna: w bazie nagrania limit 5000 nie obcinał audytu", () => {
     expect(wyrocznia.kontrolaLimitu.limitNieGryzie).toBe(true);

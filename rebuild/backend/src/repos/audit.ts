@@ -46,10 +46,10 @@ export type WierszAudytu = typeof auditLog.$inferSelect;
  * Port `listAudit(t = 500)` (`backend-index.cjs:45068-45073`):
  * `X.select().from(Za).orderBy(Ii(Za.kiedy)).limit(t).all()`.
  *
- * ⚠ Limit działa PRZED jakimkolwiek filtrowaniem — `/api/history/paged` woła `listAudit(5000)`
- * i dopiero na tych 5 000 najświeższych wierszach robi mapowanie, odsiew akcji i paginację.
- * Starsze wpisy są dla tego widoku niewidoczne niezależnie od numeru strony. To zastane
- * zachowanie produkcji, nie nasze uproszczenie.
+ * Czyta ją `GET /api/audit-log` (`listAudit(500)`, `:48735`). Widok „Historia zmian" jej NIE
+ * używa: w oryginale woła `listAudit(5000)` i tnie surowy `audit_log` przed odsiewem akcji,
+ * co gubi najstarsze wpisy — odbudowa czyta tam `audytDlaHistorii()` z
+ * `repos/audit-historia.ts`, bez limitu (backlog #87, wariant c; ticket 69).
  */
 export function listaAudytu(db: Baza, limit = 500): WierszAudytu[] {
   return db.select().from(auditLog).orderBy(desc(auditLog.kiedy)).limit(limit).all();

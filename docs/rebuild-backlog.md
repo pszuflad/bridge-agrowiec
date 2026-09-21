@@ -3673,9 +3673,9 @@ u dostawcy i wgrywa go ponownie pod tą samą nazwą.
 | pole | wartość |
 |---|---|
 | **Kategoria** | BACKEND (historia / mapowanie audytu) — dziwactwo PRODUKCJI odtworzone świadomie |
-| **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts:54` (`LIMIT_AUDYTU = 5000`), użycie w `rebuild/backend/src/routes/history.ts` |
-| **Do nowej wersji?** | ✅ **TAK — WARIANT (c) wybrany przez użytkownika 2026-09-21**: filtrowanie i paginacja w SQL (świadome odstępstwo) |
-| **Status** | ✔ port 1:1 zrobiony w rebuild (I5) · zmiana limitu — nie zaczęte |
+| **Pliki** | `deminified/backend-index.cjs:48336` i `:48358` (`U.listAudit(5e3)` w obu handlerach); `listAudit()` — `:45068-45070`; port: `rebuild/backend/src/historia/mapowanie.ts` (`SLOWNIK_AKCJI`, `akcjeHistorii()` — `LIMIT_AUDYTU` USUNIĘTY), `rebuild/backend/src/repos/audit-historia.ts` (`audytDlaHistorii()`, nowy), `rebuild/backend/src/routes/history.ts` |
+| **Do nowej wersji?** | ✅ **TAK — WARIANT (c), hybryda, wybrany przez użytkownika 2026-09-21**: odsiew akcji i sortowanie w SQL bez limitu; mapowanie, `dostawca`, fraza, `total`, paginacja zostają w pamięci |
+| **Status** | ✔ wdrożone 2026-09-21 w `69-FEATURE-historia-bez-limitu` (P5.1) — hybryda: SQL odsiewa akcje ze słownika (i `typ`) bez limitu, reszta (mapowanie, `dostawca`, fraza, `total`, paginacja) w pamięci. Szczegóły niżej, sekcja „Realizacja" |
 
 **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: WARIANT (c).** Uzasadnienie wprost: „żeby problem nie
 wracał". Odrzucone: (a) zostawić 1:1 — problem wraca sam; (b) podnieść limit — odsuwa próg,
@@ -3730,8 +3730,10 @@ z URL, staging, overrides, narzuty — w sumie kilkanaście akcji, z czego sam `
 zdarzenia. Odsiew akcji jest tu bez znaczenia: limit tnie **surowy** `audit_log`, więc zjadają
 go także akcje, których widok i tak nie pokazuje (backlog **#21**).
 
-**Dlaczego to jest jak w produkcji, a nie usterka.** Zachowanie odtworzone 1:1, opisane Ani
-w `docs/instrukcja-testow-I5.md` §11 pkt 9 jako dziwactwo do NIEzgłaszania.
+**Tak robi ORYGINAŁ — odbudowa od P5.1 już nie.** Do karty `69-FEATURE-historia-bez-limitu`
+(P5.1) zachowanie było odtworzone 1:1 i opisane Ani w `docs/instrukcja-testow-I5.md` §11 pkt 9
+jako dziwactwo do NIEzgłaszania. Od P5.1 limit w odbudowie zniknął (patrz „Realizacja" niżej);
+sprostowanie samej instrukcji I5 należy do karty P5.3 (follow-up, nieukończony).
 
 **Powiązanie z #21.** Oba wpisy dotyczą tego samego widoku i idą w przeciwnych kierunkach:
 #21 pyta, czy **rozszerzyć** słownik akcji (więcej zdarzeń w widoku), a ten wpis — czy podnieść
@@ -3744,7 +3746,35 @@ odsiew przechodziłoby wielokrotnie więcej wierszy. Warto je rozstrzygać razem
   (mapowanie całości w pamięci przy każdym żądaniu);
 - **(c) filtrować i paginować w SQL** zamiast w pamięci — usuwa problem u źródła i naprawia
   licznik, ale jest **świadomym odstępstwem** od oryginału w trasie, którą dziś porównujemy
-  z produkcją 1:1, i wymaga przenagrania fixtures historii.
+  z produkcją 1:1. Zakładano tu, że wymaga przenagrania fixtures historii — **pomiar w
+  69-FEATURE-historia-bez-limitu to obala**: kształt odpowiedzi się nie zmienił, fixtures
+  zostały nietknięte.
+
+**⭐ Realizacja (69-FEATURE-historia-bez-limitu, P5.1, 2026-09-21).** Wybrana wersja to
+**hybryda**, nie litera (c): w SQL tylko odsiew do akcji ze słownika (przy konkretnym `typ` —
+tylko akcje tego typu) plus `ORDER BY kiedy DESC, id DESC`, bez limitu; mapowanie, `dostawca`,
+fraza, `total` i paginacja zostają w pamięci jak dotąd.
+- **Wynik warunku wdrożenia** (hipoteza z sekcji wyżej, zweryfikowana PRZED kodem): potwierdzona.
+  `historia.wyrocznia.test.ts` przeszła 13/13 bez wyjątku. Zastrzeżenie: wyrocznia zasiewa
+  wyłącznie 270 wierszy ze słownika, więc z konstrukcji nie widzi, czy odsiew dzieje się w SQL
+  czy w pamięci — mocnym dowodem jest pomiar danych (`db/snapshot.db`): jeden format `kiedy`
+  (3873/3873, ISO z `Z`), 0 remisów, 0 inwersji między porządkiem tekstowym SQL a porządkiem
+  `Date` z JS.
+- **Decyzja o frazie (i o `dostawca`)** — użytkownik, 2026-09-21: obie zostają w pamięci, bo
+  trafiają w pola WYLICZANE na zmapowanym wpisie (`typ`, `format`, „Plik: …", `zmienionePola`
+  dla frazy; `encja_id`/`szczegoly.dostawca` po parsowaniu JSON dla `dostawca`). Wersja SQL
+  dla `dostawca` (`json_extract`) byłaby drugą kopią mapowania akcja→typ, czyli mechanizmem
+  z backlogu **#41**. Koszt: każde żądanie mapuje w pamięci wszystkie WIDOCZNE zdarzenia (dziś
+  ok. 270, przybywa ok. 130/miesiąc), nie całość `audit_log` — dlatego paginacja też została
+  w pamięci, co jest odejściem od litery wariantu (c) przy zachowaniu jego skutku (oba objawy
+  usunięte).
+- **Jedno źródło prawdy słownika**: `SLOWNIK_AKCJI` (`ReadonlyMap`) w `historia/mapowanie.ts`;
+  z niego wyliczają się i `typWpisu()`, i lista akcji do klauzuli SQL `IN` (`akcjeHistorii()`).
+- **Remisy `kiedy`**: rozstrzygane `id DESC` (deterministycznie); w danych produkcji remisów
+  jest 0, więc bez wpływu na dziś widoczny wynik.
+- **Fixtures**: NIE wymagały przenagrania — kształt odpowiedzi (`GET_history_meta.json`,
+  `GET_history_paged.json`) bez zmian, kontrakt bez zmian.
+- Szczegóły: `docs/tickets/69-FEATURE-historia-bez-limitu/plan.md`, `raport.md`.
 ---
 
 ### #88 · 2026-09-18 · [BACKEND] · `promocjaPasuje` — pusty `marka`/`kategoria` łapie KAŻDĄ promocję o niepustym zasięgu

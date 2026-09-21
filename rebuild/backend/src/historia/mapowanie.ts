@@ -5,9 +5,18 @@
  * (`deminified/backend-index.cjs:48335-48391`). Oba handlery mają w oryginale ten sam,
  * skopiowany kod mapujący; tutaj jest raz i obsługuje obie trasy.
  *
- * ⚠ ŹRÓDŁEM JEST `audit_log`, NIE `history` I NIE `historia_cen`. Obie trasy wołają
- * `U.listAudit(5e3)` (`:48336`, `:48358`). Tabelę `history` czyta wyłącznie goła
- * `GET /api/history` (`repos/dziennik-zmian.ts`).
+ * ⚠ ŹRÓDŁEM JEST `audit_log`, NIE `history` I NIE `historia_cen`. Tabelę `history` czyta
+ * wyłącznie goła `GET /api/history` (`repos/dziennik-zmian.ts`).
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #87, wariant c; ticket 69): oryginał woła `U.listAudit(5e3)`
+ * (`:48336`, `:48358`) i tnie SUROWY `audit_log` do 5000 najświeższych wierszy, ZANIM odsieje
+ * akcje spoza słownika — po przekroczeniu progu najstarsze wpisy znikają, a `total` i lista
+ * dostawców liczą się na przyciętym materiale. Odbudowa nie tnie: odsiew do akcji ze słownika
+ * robi SQL (`repos/audit-historia.ts`, lista z `akcjeHistorii()`), bez limitu. Reszta —
+ * mapowanie, `dostawca`, fraza, `total`, paginacja — zostaje w pamięci, 1:1 z oryginałem
+ * (plan.md D2: fraza i `dostawca` trafiają w pola WYLICZANE, więc w SQL zmieniłyby semantykę
+ * albo zdublowały mapowanie). Poniżej progu wynik jest identyczny z oryginałem
+ * (`test/historia.wyrocznia.test.ts`), powyżej — pełny (`test/historia.powyzej-progu.test.ts`).
  */
 
 import type { WierszAudytu } from "../repos/audit.js";
@@ -50,26 +59,48 @@ export const DOMYSLNA_STRONA = 1;
 export const DOMYSLNY_LIMIT = 50;
 export const MAX_LIMIT = 200;
 
-/** Ile wierszy audytu w ogóle wchodzi do mapowania — `U.listAudit(5e3)` (`:48336`, `:48358`). */
-export const LIMIT_AUDYTU = 5000;
-
 /**
  * Słownik pięciu rozpoznawanych akcji (`:48341`, `:48363`).
  *
  * ⚠ WSZYSTKO SPOZA TEJ PIĄTKI DAJE `null` I WYPADA Z WYNIKU (`filter(Boolean)`). To NIE jest
- * usterka do naprawienia — tak działa produkcja. Skutek dla nas: z dwunastu akcji, które
- * rebuild zapisuje dziś do `audit_log`, przez ten odsiew przechodzą dwie — `upload_pliku`
- * (`routes/suppliers.ts`) i `import_cennika` (`routes/staging-mutacje.ts`). Pozostałe
- * (`import_z_url`, `import_pliku`, `synchronizacja_reczna`, `edycja_dostawcy`,
- * `edycja_stagingu`, `akceptacja_stagingu`, `odrzucenie_stagingu`, `override`,
- * `usuniecie_override`, `czyszczenie_stagingu`) są dla tego widoku niewidoczne — w produkcji
- * również. Rozszerzenie słownika byłoby odstępstwem; odrzucone świadomie (plan.md D2).
+ * usterka do naprawienia — tak działa produkcja. Akcji zapisywanych do `audit_log` jest
+ * znacznie więcej (m.in. `import_z_url`, `synchronizacja_reczna`, `akceptacja_stagingu`,
+ * `override`; w snapshocie produkcji 22 różne, z czego sam `auto_pull` to 74% wierszy) i dla
+ * tego widoku są niewidoczne — w produkcji również. Rozszerzenie słownika byłoby odstępstwem;
+ * odrzucone świadomie (backlog #21 — ❌ NIE, 2026-09-21).
+ *
+ * JEDYNE źródło prawdy słownika. Czyta go i `typWpisu()` (mapowanie w pamięci), i
+ * `akcjeHistorii()` (klauzula `IN` w SQL) — dwie osobne listy mogłyby się rozjechać, a to
+ * dokładnie mechanizm backlogu #41. `Map`, nie literał obiektu: `typWpisu("constructor")`
+ * nie może trafić w prototyp.
  */
+const SLOWNIK_AKCJI: ReadonlyMap<string, TypWpisu> = new Map<string, TypWpisu>([
+  ["upload_pliku", "import"],
+  ["import_cennika", "import"],
+  ["eksport_csv", "eksport"],
+  ["eksport_shoper", "eksport"],
+  ["edycja_produktu", "edycja"],
+]);
+
+/** Akcja → typ wpisu, albo `null` dla akcji spoza słownika. */
 export function typWpisu(akcja: string): TypWpisu | null {
-  if (akcja === "upload_pliku" || akcja === "import_cennika") return "import";
-  if (akcja === "eksport_csv" || akcja === "eksport_shoper") return "eksport";
-  if (akcja === "edycja_produktu") return "edycja";
-  return null;
+  return SLOWNIK_AKCJI.get(akcja) ?? null;
+}
+
+/**
+ * Wartości `audit_log.akcja`, które SQL ma w ogóle przepuścić do mapowania — dla `typ === "all"`
+ * cały słownik, dla znanego typu jego akcje, dla każdej innej wartości `[]`.
+ *
+ * Pusta lista daje pusty wynik, a to jest dokładnie to, co dałby filtr w pamięci
+ * (`wpis.typ === typ` nie trafi w żaden z trzech typów) — więc zawężenie po `typ` w SQL nie
+ * zmienia wyniku, tylko go przyspiesza. `stronaHistorii()` i tak filtruje `typ` ponownie.
+ */
+export function akcjeHistorii(typ: string): string[] {
+  const akcje: string[] = [];
+  for (const [akcja, typAkcji] of SLOWNIK_AKCJI) {
+    if (typ === "all" || typAkcji === typ) akcje.push(akcja);
+  }
+  return akcje;
 }
 
 /**
@@ -80,8 +111,9 @@ export function typWpisu(akcja: string): TypWpisu | null {
  *     bez czwartego argumentu (`:48240`);
  *  2. tekst, który nie jest poprawnym JSON-em — `JSON.parse` rzuca, oryginał to łyka.
  *
- * Odsiew akcji następuje DOPIERO PO parsowaniu, więc ten kod dotyka także wierszy, które
- * nigdy nie trafią do widoku (np. `synchronizacja_reczna`).
+ * W oryginale odsiew akcji następuje DOPIERO PO parsowaniu, więc ten kod dotyka tam także
+ * wierszy, które nigdy nie trafią do widoku (np. `synchronizacja_reczna`). W odbudowie takie
+ * wiersze odsiewa już SQL (`repos/audit-historia.ts`) — kolejność bez wpływu na wynik.
  *
  * ⚠ `GET /api/audit-log` (I12b) NIE UŻYWA tej funkcji i nie ma jej używać. Ta trasa oddaje
  * `szczegoly_json` SUROWO, jako string (`u.json(U.listAudit(500))`, `:48735`), a
@@ -187,7 +219,12 @@ export function naWpisHistorii(wiersz: WierszAudytu): WpisHistorii | null {
   };
 }
 
-/** Wiersze audytu → wpisy widoku, z odsianiem akcji spoza słownika (`:48382`). */
+/**
+ * Wiersze audytu → wpisy widoku, z odsianiem akcji spoza słownika (`:48382`).
+ *
+ * Trasy podają tu wiersze już zawężone w SQL do akcji ze słownika, więc odsiew jest tu
+ * zabezpieczeniem, nie filtrem — zostaje, żeby funkcja była poprawna dla dowolnego wejścia.
+ */
 export function wpisyHistorii(wiersze: WierszAudytu[]): WpisHistorii[] {
   const wpisy: WpisHistorii[] = [];
   for (const wiersz of wiersze) {
