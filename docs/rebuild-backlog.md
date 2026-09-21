@@ -2659,6 +2659,17 @@ kolejki rodzaju `model`/`zastosowanie` akcje „Akceptuj z edycją" i „jako al
 się nie zmienił, więc pozycje `model`/`zastosowanie` w kolejce dziś i tak nie powstają — patrz
 pomiar wyżej).
 
+**Sprostowanie i pytanie doprecyzowujące do Ani (2026-09-21, ticket 79, karta P7.4).**
+`docs/instrukcja-testow-I7-v2.md` pkt 1.4 mówi Ani wprost, że zdanie „Te dwa rodzaje trafiają do
+kolejki” (I7 §4 pkt 4 i pytanie 7.4) było nieprawdziwe i że jej odpowiedź opierała się na tym
+opisie. Pkt 3.2 oznacza §4 pkt 4 jako nieprawdziwy od początku. Ania dostała pytanie, gdzie używa
+tych rodzajów: (a) słownik atrybutów, (b) filtry Katalogu i reguły cen, (c) oczekuje, że nowe
+wartości z importów będą trafiać do kolejki, (d) nie używa. Przy (c) jest uprzedzenie, że to nowa
+funkcja do osobnej rozmowy: na snapshocie 1670 różnych modeli, z czego 199 spoza słownika, więc
+pierwszy skan dołożyłby około 200 pozycji. **Status pytania: ⬜ czeka na odpowiedź Ani.**
+Odpowiedź (c) oznacza zmianę zakresu skanu (`ZAKRES_SKANU`), a więc nowy wpis backlogu, nie
+reaktywację tego.
+
 ---
 
 ### #42 · 2026-09-04 · [BACKEND] · porównanie wartości bez normalizacji — „BKT" i „bkt" mają podobieństwo 0
