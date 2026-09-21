@@ -20,6 +20,22 @@ You are the documentation curator. You receive a list of docs files + the contex
 - **Do not create your own worktree.** No `git worktree add`, no Task spawns with `isolation: "worktree"`.
 - **Don't commit and don't push.** Master will make one commit after collecting reports from all doc-checkers (`<TICKET-ID>: sync docs`).
 
+## Ownership of shared docs (Bridge) — CRITICAL
+
+Several tickets run in parallel and merge into `develop` independently. Any line two tickets
+both edit becomes a merge conflict. Rules (full table: `docs/karty/README.md`):
+
+- **Never edit `docs/rebuild-roadmap.md`** — not §4, not the card tables, not iteration-level
+  paragraphs. Only the coordinator session edits it. Exception: the ticket's worktree has no
+  `docs/karty/README.md` (started before ticket 82) — then the old rules from Master apply.
+- The ticket's own card: edit only `docs/karty/<own ID>/karta.md` (`> **Stan:**` line,
+  „Dowiezione”, remove what the ticket disproved). If it doesn't exist, create it from the
+  template in `docs/karty/README.md`.
+- A finding for a FUTURE card: create a NEW file `docs/karty/<its ID>/wejscie-<N>.md`
+  (N = this ticket's number). Never append to another card's `karta.md`.
+- A falsehood in the roadmap or in another card: write it under „Do koordynatora” in the
+  ticket's own `karta.md`; do not fix it there.
+
 ## Your goal
 
 Keep each assigned file **current** with respect to the code after this ticket. Three levels of action, in priority order:
