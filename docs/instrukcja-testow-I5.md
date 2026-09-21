@@ -1,5 +1,17 @@
 # Iteracja 5 (Historia) — instrukcja testów dla Ani
 
+> **⚠ CZĘŚCIOWO NIEAKTUALNE od 2026-09-21 — najpierw przeczytaj [wersję 2 tej instrukcji](instrukcja-testow-I5-v2.md).**
+>
+> Po Twoich odpowiedziach doszły dwie zmiany, o które nie prosiłaś: **Historia nie gubi już najstarszych wpisów** (zniknął limit 5000 zdarzeń) i **eksport wszystkich dostawców do ZIP-a działa** i zostawia wpis w Historii (w starym Bridge ten eksport kończy się błędem). Ta instrukcja opisuje stan **sprzed** tych zmian. **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego, co widzisz na ekranie, prawdą jest wersja 2.**
+>
+> Co konkretnie przestało być prawdą w TEJ wersji:
+> - **§8.2** i **§12** (wiersz „Eksporty") — eksport ZIP już działa i zostawia wpis `eksport`, choć przycisku nadal nie ma;
+> - **§9**, **§13** i **§14** — „te same wpisy i ta sama ich liczba" mają dwa wyjątki: wpis eksportu ZIP i najstarsze wpisy są tylko w nowym Bridge;
+> - **§10** — świadomych odstępstw jest pięć, nie trzy;
+> - **§11 pkt 9** — limitu 5000 zdarzeń w nowym Bridge już nie ma;
+> - **§1**, **§3.2** (ramka „W praktyce") i **§5** — wgranie cennika nie jest już jedyną drogą do nowego wpisu: dochodzą edycja produktu w Katalogu i eksport ZIP;
+> - **§3.3** i **§12** (wiersz „Ręczna edycja") — produkt da się już edytować w Katalogu, więc nowe wpisy `edycja` powstają także w nowym Bridge.
+
 > ⚠ **Dokument ODTWORZONY 2026-09-21 z pliku PDF, który Ania dostała i wypełniła.**
 > Oryginał powstał 2026-09-02 poza repozytorium i nigdy nie został zacommitowany — brak wykryty
 > przy planowaniu karty P5.3, gdy okazało się, że delta nie ma się od czego odbić. Treść
