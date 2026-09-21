@@ -2461,7 +2461,7 @@ a widok `/atrybuty` pokaże ten komunikat użytkowniczce (`komunikatBledu()` w
 **DECYZJA ANI 2026-09-21 (pytanie 7.3): TAK, z uzasadnieniem biznesowym.** Cytat: „tak, bo mamy logikę,
 że katalog ma się zmieniać na drukowane litery, a w plikach przychodzi różnie". Czyli rozjazd
 wielkości liter jest w tym procesie REGUŁĄ, nie wyjątkiem — porównanie podobieństwa musi być
-case-insensitive. Powiązane: #12.4 z przeglądu (duplikat marki ALLIANCE/Alliance w danych).
+case-insensitive. Powiązane: **#92** (duplikat marki ALLIANCE/Alliance w danych, zgłoszony przez Anię w przeglądzie).
 **Co robi produkcja.** `similarity` liczy odległość Levenshteina na SUROWYCH napisach — bez
 `toLowerCase()`, bez `trim()`, bez zwijania wielokrotnych spacji. Jedyna normalizacja w całym
 module to reguła „nie sugeruj, gdy różnica to wyłącznie `+`" (`:65-72`). Próg sugestii:
@@ -3669,7 +3669,7 @@ Przy zerowym zasięgu rozsądne jest odłożenie tego do czasu, aż dane się zm
 
 ---
 
-### #89 · 2026-09-21 · [FRONTEND] · wyszukiwarka po treści alertu — ŻYCZENIE ANI
+### #90 · 2026-09-21 · [FRONTEND] · wyszukiwarka po treści alertu — ŻYCZENIE ANI
 
 | Pole | Wartość |
 |---|---|
@@ -3690,7 +3690,7 @@ robią to filtry dostawcy i typu (`test/alerty.grupowanie.test.ts`, „filtry ł
 
 ---
 
-### #90 · 2026-09-21 · [FRONTEND][BACKEND] · eksport CSV analityki ma respektować filtry — ŻYCZENIE ANI
+### #91 · 2026-09-21 · [FRONTEND][BACKEND] · eksport CSV analityki ma respektować filtry — ŻYCZENIE ANI
 
 | Pole | Wartość |
 |---|---|
@@ -3714,7 +3714,7 @@ rozjazdy pod jednym hasłem i mają różny koszt.
 
 ---
 
-### #91 · 2026-09-21 · [BAZA][FRONTEND] · duplikaty marek różniące się wielkością liter — `ALLIANCE` vs `Alliance`
+### #92 · 2026-09-21 · [BAZA][FRONTEND] · duplikaty marek różniące się wielkością liter — `ALLIANCE` vs `Alliance`
 
 | Pole | Wartość |
 |---|---|
