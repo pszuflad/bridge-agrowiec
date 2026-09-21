@@ -2963,7 +2963,7 @@ pod starymi nazwami: przemianowanie zerwałoby **719 odwołań w 38 plikach**.
 | Karta | Zakres | Wpisy | Stan |
 |---|---|---|---|
 | **P5.1** | Historia przestaje gubić najstarsze zdarzenia — filtrowanie i paginacja w SQL | #87 | 🔨 ticket 69 |
-| **P5.2** | eksport ZIP działa u nas, w produkcji nie — utrwalić jako świadome odstępstwo | #93 | 🔨 ticket 70 |
+| **P5.2** | eksport ZIP działa u nas, w produkcji nie — utrwalić jako świadome odstępstwo | #93 | ✅ 2026-09-21, ticket 70 — szczegóły: podblok „P5.2” w bloku „Iteracja 5 — Historia” |
 | **P5.3** | delta instrukcji I5 dla Ani | — | ⬜ po P5.1 i P5.2 |
 
 Karta `14j` (oracle diff historii, 0 różnic na 49 813 wpisach) i skasowana `14k` (#21 — NIE) też
