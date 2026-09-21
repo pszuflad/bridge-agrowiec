@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Uzytkownik } from "@/lib/api";
+import type { ListaArchiwum, StatystykiArchiwum } from "@/pages/archiwum-importow/dane";
 import type { Produkt } from "@/pages/katalog/filtrowanie";
 import type { Narzut, Promocja } from "@/pages/narzuty/api";
 import type { Alert } from "@/pages/alerty/api";
@@ -618,4 +619,30 @@ export function audytZFixtura(): unknown[] {
   const sciezka = resolve(korzenRepo, "contract/fixtures/GET_audit-log.json");
   const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as { body: unknown[] };
   return fixture.body;
+}
+
+/**
+ * Archiwum importów (ticket 91) — nagrania ORYGINAŁU z archiwum zapełnionego uploadem przez
+ * `parse-file` (`tools/record-write-fixtures.cjs`, `odegrajArchiwum`): MO6 i MO1 `ok`, MO7 `blad`.
+ */
+export function listaArchiwumZFixtura(
+  wariant: "" | "_dostawca" | "_miesiac" | "_status" = "",
+): ListaArchiwum {
+  const sciezka = resolve(korzenRepo, `contract/fixtures/GET_import-archive${wariant}.json`);
+  return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: ListaArchiwum }).body;
+}
+
+export function statystykiArchiwumZFixtura(): StatystykiArchiwum {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_import-archive_stats.json");
+  return (JSON.parse(readFileSync(sciezka, "utf8")) as { body: StatystykiArchiwum }).body;
+}
+
+/** Treść pliku z nagrania pobrania — to, co oryginał oddał dla `file/{month}/{name}`. */
+export function plikArchiwumZFixtura(): { tresc: string; naglowki: Record<string, string> } {
+  const sciezka = resolve(korzenRepo, "contract/fixtures/GET_import-archive_file.json");
+  const fixture = JSON.parse(readFileSync(sciezka, "utf8")) as {
+    body: string;
+    _naglowki: Record<string, string>;
+  };
+  return { tresc: fixture.body, naglowki: fixture._naglowki };
 }
