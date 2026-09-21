@@ -11,6 +11,20 @@
 > zostało odtworzone. Dwa wnioski praktyczne: zapis potrafi chwilę potrwać, a ceny w `/katalog`
 > po każdej zabawie regułami będą inne niż przed nią.
 
+> **⚠ CZĘŚCIOWO NIEAKTUALNE od 2026-09-19 — najpierw przeczytaj [wersję 2 tej instrukcji](instrukcja-testow-I4-v2.md).**
+>
+> Na podstawie Twoich uwag do tej kartki zmieniliśmy sześć rzeczy: **kolumnę „Promocja" w Katalogu**, **cztery rzeczy w promocjach** (daty naprawdę je włączają i wyłączają) i **usuwanie reguł** (pyta o potwierdzenie). Ta instrukcja opisuje stan **sprzed** tych poprawek. **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego, co widzisz na ekranie, prawdą jest wersja 2.**
+>
+> Co konkretnie przestało być prawdą w TEJ wersji:
+> - **§3.6** i **§4 pkt 8** — usunięcie reguły **pyta teraz o potwierdzenie** i podaje, ilu produktów dotyczy zmiana;
+> - **§3.9** i **§4 pkt 5** — **cały punkt nieaktualny**: wygasła promocja już NIE obniża cen, a pomarańczowego znacznika rozbieżności nie ma (stał się martwy). Nieaktualna jest też rada „żeby wyłączyć promocję, zmień jej **status**" — statusu nie da się już ustawić, promocję wyłącza **data albo usunięcie**;
+> - **§4 pkt 1** — kolumna **„Promocja" w Katalogu pokazuje rabat i nazwę promocji**, nie jest już zawsze pusta;
+> - **⚠ §4 pkt 6 — był NIEPRAWDZIWY, jeszcze zanim cokolwiek zmieniliśmy.** Twierdził, że promocja z datą startu w przyszłości od razu obniża ceny. W rzeczywistości nie obniżała ich **nigdy** i nigdy się nie włączała. Sprostowanie i wyjaśnienie: wersja 2, punkt 6.2;
+> - **§5** — dwie z czterech pozycji są **dowiezione** (kolumna „Promocja"; wyłączanie promocji datą), trzecia zamknięta Twoją decyzją, czwarta (edycja priorytetu) **nadal otwarta**;
+> - **§6** — wykreśl pozycję checklisty „Wygasła promocja dalej obniża ceny, a znacznik mówi o tym wprost".
+>
+> **Dalej obowiązują** §3.1–§3.5, §3.7, §3.8, §3.10, §3.11 oraz §4 pkt 2, 3, 4, 7, 9 i 10 — w tym pułapka „Reguła globalna" przy promocji (§3.7, §4 pkt 4), która **zostaje** na Twoją decyzję z 18 września; patrz wersja 2, rozdział 5.
+
 ---
 
 ## 1. Co dowozi Iteracja 4

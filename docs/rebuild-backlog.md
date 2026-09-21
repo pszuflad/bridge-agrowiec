@@ -1380,6 +1380,12 @@ promocje"**. Wpis przechodzi z „do decyzji" na ZATWIERDZONY. Morał na przysz�
 „co ma się dziać?" dostało odpowiedź opisującą to, co Ania MYŚLAŁA, że się dzieje; dopiero
 pytanie „dziś jest TAK — zostawiamy czy zmieniamy?" dało decyzję.
 
+**⚠ Pytanie otwarte zadane Ani ponownie — karta 14m (2026-09-19).** Jej sformułowanie „reguła
+znika po końcu obowiązywania" (cytat wyżej) opisuje inne zachowanie niż to, co dowiozła 14f:
+wiersz **zostaje** w tabeli `/narzuty`, tylko z odznaką „zakończona" (zachowanie oryginału,
+świadomie niezmienione). `docs/instrukcja-testow-I4-v2.md` §3.1 uprzedza ją o tym wprost i pyta,
+czy chce, żeby wygasłe promocje były ukrywane z tabeli. Odpowiedź czeka — brak decyzji dziś.
+
 **Dwa warianty wdrożenia, różnica kosztu jest zasadnicza** (wycena: karta 14e, decyzja:
 użytkownik):
 - **(a) silnik czyta daty** — warunek na `start`/`koniec` w `promocjaPasuje`. Kilka linii, ale
@@ -1490,6 +1496,12 @@ dialog dostaje `status: "zaplanowana"` i NIE obniża cen, nie pokaże też znacz
 a **istnieje defekt odwrotny, nigdzie nieopisany: promocja „zaplanowana" NIGDY SIĘ NIE WŁĄCZA**,
 bo nic nie przelicza statusu po nadejściu daty startu. §3.9 pozostaje poprawny — i teraz wiadomo
 dlaczego: PATCH nie rusza statusu.
+
+**Ania poinformowana — karta 14m (2026-09-19), `docs/instrukcja-testow-I4-v2.md` §3.1 i §3.2.**
+§3.1 opisuje jej naprawioną datę końca (zaprzeczenie §3.9 starej instrukcji, wprost); §3.2
+opisuje naprawę promocji „zaplanowanej" jako „Tego nie zgłaszałaś" (od 4a, 2026-09-02 nigdy nie
+działała). Oba sprostowania z akapitu wyżej (§3.9 i §4 pkt 5–6 starej instrukcji) trafiły do
+rozdziału 6 v2 jako unieważnione punkty — banner w `docs/instrukcja-testow-I4.md` kieruje do v2.
 
 **Dwa zastrzeżenia do 14f, OBA ROZLICZONE:** (1) wygaszacz musiał działać w OBIE strony
 (`zakonczona` po końcu, `aktywna` po nadejściu startu) — **zrealizowane**, inaczej naprawiałby
@@ -1645,6 +1657,12 @@ z 2026-08-13 (`deminified/frontend-index.js`, 1 wystąpienie), więc żadna łat
 ani nie usunęła — nie ma czego „przywracać"; `git log -S'_reguly:' --all` zwraca dokładnie **jeden**
 commit i jest to nasz własny wpis dokumentacyjny, zero kodu produkcji.
 
+**Ania poinformowana — karta 14m (2026-09-19), `docs/instrukcja-testow-I4-v2.md` §2.1, Ramka A.**
+Dokument prostuje jej założenie wprost, cytując jego treść („w starym Bridge działała, było to
+sprawdzane, być może któryś backup to zastąpił i już nie działa") i odpowiadając na nie dowodem
+z czterech niezależnych źródeł (żywy bundle, deminifikat, backend + wszystkie łatki, `git log -S`):
+kolumna **nie działała w żadnej wersji, którą mamy** — to nowa funkcja, nie naprawa regresji.
+
 **Co robi produkcja.** Render czyta `produkt._reguly?.promocja` (`:23162-23182`), a `_reguly`
 **nie jest ustawiane nigdzie w bundlu** — jedno wystąpienie w całym pliku, wyłącznie odczyt
 (potwierdzone `grep`em). Żadne z 66 pól produktu w `contract/fixtures/GET_products.json`
@@ -1671,6 +1689,13 @@ koperta). **Brak dopasowania = BRAK klucza**, więc produkt bez promocji ma nada
 0 promocji** (`db/snapshot.db`: `products` = 7405, `promotions` = 0; produkcyjny fixture
 `GET_promotions.json` to pusta tablica) — kolumna zaświeci dopiero po założeniu promocji
 w `/narzuty`. Szczegóły: `docs/tickets/61-FEATURE-promocja-kolumna-katalog/plan.md` (D1–D9).
+
+**⚠ Domiar 14m (2026-09-19): kliknięcie nagłówka „Promocja" NIC nie sortuje.**
+`rebuild/frontend/src/pages/katalog/filtrowanie.ts:107-123` (`sortuj()`) czyta
+`produkt["promocja"]`, a wartość siedzi w `_reguly.promocja` — obie strony porównania to `""`.
+Identycznie w oryginale (`frontend-index.js:23307-23311`) — wierne odtworzenie, nie regresja.
+**Pytanie otwarte zadane Ani** w `docs/instrukcja-testow-I4-v2.md` §2.1: czy sortowanie po tej
+kolumnie byłoby przydatne? Odpowiedź czeka — brak decyzji dziś.
 
 ---
 
@@ -1749,6 +1774,11 @@ pokazałby „0 produktów" dla reguł z warunkami `konstrukcja`/`srednica`/`vfI
 matcher nie łapie. Trzy niezależne sposoby liczenia ceny w `/narzuty` zostają trzema — karta nie
 dołożyła czwartego, tylko dodała nowego konsumenta jednego z istniejących dwóch.
 
+**Ania poinformowana — karta 14m (2026-09-19), `docs/instrukcja-testow-I4-v2.md` §4.1.** Dokument
+uprzedza ją wprost, że liczba w okienku usuwania (silnik cen) i liczba z czerwonego paska „poniżej
+kosztu" (`dopasujDoOstrzezenia`, ten wpis) mogą się różnić dla warunków `konstrukcja`/`srednica`/
+`vfIf` — i że to NIE jest błąd, tylko dwa różne, świadomie nieujednolicone mechanizmy.
+
 ---
 
 ### #25 · 2026-09-02 · [FRONTEND] · promocja „globalna" nie obniża żadnych cen, ale ostrzega o całym katalogu
@@ -1816,6 +1846,10 @@ zwraca dla tego typu `true` bezwarunkowo. Niespójność dotyczy wyłącznie pro
   katalogu. Wymaga świadomej decyzji użytkownika i sprawdzenia, czy w produkcyjnej bazie nie
   leżą uśpione promocje globalne.
 - Alternatywa: usunąć checkbox „globalna" z formularza promocji, skoro w tej roli nie działa.
+
+**Ania poinformowana — karta 14m (2026-09-19), `docs/instrukcja-testow-I4-v2.md` rozdział 5.1.**
+Pułapka ZOSTAJE (jej decyzja 2026-09-18: „nie, zostawiamy tak jak jest, nie dodajemy nowych
+reguł"), dokument opisuje ją razem ze zmierzonym zasięgiem **1/7405**.
 
 ---
 
@@ -3667,6 +3701,41 @@ nie modyfikuje go). Wymaga decyzji Ani, bo zmiana dopasowania jest odstępstwem 
 Przy zerowym zasięgu rozsądne jest odłożenie tego do czasu, aż dane się zmienią — pod warunkiem,
 że wpis zostaje.
 
+**Świadomie NIE opisane Ani — karta 14m (2026-09-19).** `docs/instrukcja-testow-I4-v2.md` tego
+wpisu nie porusza: skala jest zmierzona na 0 produktów z 7405 i dziś nie ma jak tego zobaczyć na
+ekranie. To decyzja karty 14m, nie przeoczenie — kolejna sesja niech tego nie dopisuje do v2 bez
+nowego powodu (np. zmiany danych podnoszącej skalę powyżej zera).
+
+---
+
+### #89 · 2026-09-02 (wisi bez decyzji do 2026-09-19) · [FRONTEND] · edycja priorytetu reguły z formularza — pole niedostępne dla użytkownika
+
+> **Pozycja §5 starej instrukcji testów I4 (2026-09-02), jedyna z czterech bez czyjejkolwiek
+> decyzji.** Pytanie zadane Ani wprost dopiero kartą **14m** (`65-DOCS-instrukcja-testow-i4-v2`,
+> 2026-09-19), `docs/instrukcja-testow-I4-v2.md` §6.3.
+
+| Pole | Wartość |
+|---|---|
+| **Kategoria** | FRONTEND (formularz reguły narzutu/promocji) |
+| **Pliki** | oryginał: pole „priorytet" pod `display:none` (`:24468-24472`); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx:141-143` (stan trzymany WYŁĄCZNIE po to, żeby przy edycji odesłać istniejącą wartość, domyślnie 50, i nie zbić jej po cichu); backend: `rebuild/backend/src/repos/ceny.ts:161-165` (`wybierzPromocje` sortuje po `priorytet` malejąco i bierze pierwszą pasującą) |
+| **Do nowej wersji?** | ⬜ **do decyzji — czeka na odpowiedź Ani (pytanie zadane 2026-09-19)** |
+| **Status** | ⬜ do decyzji — czeka na odpowiedź Ani (pytanie zadane 2026-09-19) |
+
+**Opis.** Priorytet reguły ma znaczenie **tylko przy remisie szczegółowości** (dwie reguły
+pasujące jednocześnie do tego samego produktu) — o wygranej decyduje wtedy wyłącznie kolejność
+po `priorytet` malejąco. Formularz go nie pokazuje ani w oryginale, ani w porcie — port 1:1
+odtwarza ukryte pole, więc użytkownik nie ma jak dziś ustawić priorytetu inaczej niż wartością
+domyślną (50) odziedziczoną przy tworzeniu reguły.
+
+**Skutek.** Przy dwóch pasujących regułach/promocjach na ten sam produkt wygrywa ta, która ma
+wyższy `priorytet` w bazie — a nie da się tego zmienić z UI. Zaobserwowane przy okazji reviewu
+14m: dwie promocje na tę samą markę w scenariuszu testowym maskowały nawzajem swój efekt.
+
+**Decyzja.** Brak. Karta 14m zadała Ani pytanie wprost (kratka „Czy brak pola «priorytet»
+w formularzu reguły Ci przeszkadza?") w `docs/instrukcja-testow-I4-v2.md` §6.3. Do czasu
+odpowiedzi: **port 1:1 zostaje bez zmian** (pole niedostępne z formularza, jak w oryginale).
+Gdyby odpowiedziała „tak" — osobna karta na dodanie pola do formularza (i decyzja, czy dotyczy
+tylko promocji, czy też narzutów).
 ---
 
 ### #90 · 2026-09-21 · [FRONTEND] · wyszukiwarka po treści alertu — ŻYCZENIE ANI
@@ -3747,3 +3816,49 @@ GROUP BY LOWER(marka) HAVING COUNT(DISTINCT marka) > 1;
 **Powiązania.** To ten sam problem, co #42 („BKT" i „bkt" nie podpowiadają się nawzajem) i ta sama
 przyczyna, którą Ania nazwała w pytaniu 7.3: **katalog ma konwencję WIELKICH liter, a pliki
 dostawców przychodzą różnie**. Rozstrzygać łącznie z #42, nie osobno.
+
+---
+
+### #93 · 2026-09-18 · [BACKEND] · eksport ZIP `GET /api/export-shoper` bez `?dostawca=` — w produkcji trwale HTTP 500
+
+> **Wpis zakładany 2026-09-21 jako NAPRAWA LUKI W EWIDENCJI.** Decyzja użytkownika zapadła już
+> 2026-09-18 (karta `62-DOCS-decyzje-po-i14j`, D1), ale wpis backlogu, który miał ją nieść,
+> **przepadł w kolizji numerów** — numer `#88` zajęła równolegle inna karta, a PR #75 zmergował
+> się do gałęzi już wmergowanej do `develop`. Decyzja żyła więc wyłącznie w opisie pull requesta,
+> czyli poza bazą wiedzy. To drugi taki przypadek w tym tygodniu; morał na końcu wpisu.
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-18 (znalezisko uboczne karty `59-CHORE-i14j-oracle-diff-historii`) |
+| **Kategoria** | BACKEND (eksport Shoper) |
+| **Pliki** | oryginał: `deminified/backend-index.cjs:48139` (`rV()`); port: `rebuild/backend/src/routes/export-shoper.ts` |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-18: NIE odtwarzamy defektu produkcji** |
+| **Iteracja** | poprawki po testach — karta `P5.2` |
+| **Status** | decyzja podjęta, karta niezałożona |
+
+**Na czym polega — przyczyna ZMIERZONA, nie wydedukowana.** `GET /api/export-shoper` bez
+parametru `?dostawca=` (eksport wszystkich dostawców do ZIP-a) oddaje w produkcji **zawsze
+HTTP 500**. Powód: `rV()` czyta `ZipArchive` z pakietu `archiver`, a lockfile produkcji przypina
+**`archiver@5.3.2`**, który tego eksportu nie ma (udostępnia `create`, `registerFormat`,
+`isRegisteredFormat`). Log procesu produkcyjnego: `zip pipeline failed TypeError: oh is not
+a constructor`, przy potwierdzonym „archiver w piaskownicy: JEST".
+
+**⚠ To rzadki przypadek: wierne przepisanie kodu dało zachowanie INNE niż produkcja.** Odbudowa
+ma `archiver@^8.0.0`, gdzie `ZipArchive` istnieje — więc u nas ta trasa **działa**. Różnica nie
+siedzi w kodzie, tylko w wersji zależności, i żadna bramka wierności nie mogła jej złapać,
+bo porównujemy kod, nie `package-lock.json`.
+
+**Skutek uboczny dla Historii:** w produkcji nie powstaje ani jeden wpis `eksport_csv` z tej
+gałęzi, więc ta ścieżka mapowania jest na żywych danych nieosiągalna (potwierdzone: `audit_log`
+w `db/snapshot.db` nie ma ani jednego wiersza `eksport_csv`/`eksport_shoper`/`import_cennika`).
+
+**Decyzja (użytkownik, 2026-09-18): zostajemy przy wersji działającej.** Nie odtwarzamy defektu
+produkcji przez cofnięcie `archiver` — to jedno z nielicznych miejsc, gdzie odbudowa jest
+POPRAWNIEJSZA od oryginału i ma taka zostać. Zakres karty `P5.2`: potwierdzić, że trasa działa
+end-to-end po naszej stronie, dopisać test i odnotować odstępstwo jako świadome.
+
+**⚠ Morał do procesu, bo to już drugi raz.** Numer wpisu backlogu rezerwuj tak samo jak numer
+ticketa — sprawdzając `develop`, nie własną gałąź. Stacked PR, którego bazą jest gałąź mergowana
+równolegle, potrafi zmergować się 25 sekund po swojej bazie i wylądować poza `develop`
+(tu: PR #75 o 18:04:39 wobec PR #74 o 18:04:14). **Decyzja zapisana wyłącznie w opisie pull
+requesta nie istnieje** — baza wiedzy to `docs/`, nie GitHub.
