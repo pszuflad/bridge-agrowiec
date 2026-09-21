@@ -248,6 +248,10 @@ describe("GATE — statusy pseudo-alertów katalogowych", () => {
       ["ids nie tablica", { ids: "1-marza-niska-3", status: "przejrzany" }],
       ["id nie tekst", { ids: [12], status: "przejrzany" }],
       ["id pusty", { ids: [""], status: "przejrzany" }],
+      [
+        "paczka ponad limit 20 000 id",
+        { ids: Array.from({ length: 20_001 }, (_, i) => `1-marza-niska-${i}`), status: "przejrzany" },
+      ],
       ["id za długi", { ids: [`1-nie-opona-${"x".repeat(2001)}`], status: "przejrzany" }],
       ["forma nieznana silnikowi", { ids: ["1-brak-stanu"], status: "przejrzany" }],
       ["reguła wyłączona w oryginale", { ids: ["1-rozmiar-sklejony"], status: "przejrzany" }],
@@ -258,6 +262,15 @@ describe("GATE — statusy pseudo-alertów katalogowych", () => {
       expect(odp.status).toBe(400);
       sprawdzCialo("put", odp);
       expect(wiersze()).toEqual([]);
+    });
+
+    it("paczka równa limitowi 20 000 id przechodzi (i wypiera do jednego wiersza)", async () => {
+      const ids = Array.from({ length: 20_000 }, (_, i) => `${idProduktu}-marza-niska-${i}`);
+      const odp = await ustaw({ ids, status: "przejrzany" });
+      expect(odp.status).toBe(200);
+      expect(odp.body).toEqual({ ok: true, zmienione: 20_000 });
+      // Wszystkie to ta sama para (produkt, reguła) — zostaje ostatni odcisk.
+      expect(wiersze().map((w) => w.id)).toEqual([`${idProduktu}-marza-niska-19999`]);
     });
 
     it("jeden zły id w paczce odrzuca całą paczkę", async () => {

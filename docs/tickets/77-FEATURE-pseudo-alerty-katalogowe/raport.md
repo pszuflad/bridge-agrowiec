@@ -30,7 +30,7 @@ pokazuje oba źródła: kafel sumuje, karta ma dwie sekcje.
   - obie metody za `requireAuth`, bez `audit_log` (spójnie z D4 z I6).
 - `src/app.ts` — rejestracja trasy.
 - `test/db.migracje.test.ts` — lista migracji +007, tabel 27, indeksów 14.
-- **Nowy:** `test/alerty-katalogu.gate.test.ts` (35 testów) — kontrakt GET/PUT (ciało sprawdzane
+- **Nowy:** `test/alerty-katalogu.gate.test.ts` (37 testów, z limitem paczki 20 000 / 20 001) — kontrakt GET/PUT (ciało sprawdzane
   wobec schematu czytanego z `openapi.yaml`), „kto i kiedy", `nowy` kasuje, paczka z duplikatami,
   wypieranie (marża i dni dostawcy), brak wypierania między regułami i produktami, sieroty,
   9 przypadków 400, 401, rozbiór `id` (z `|`, polskimi znakami, nową linią, myślnikami w kodzie).
@@ -60,7 +60,7 @@ pokazuje oba źródła: kafel sumuje, karta ma dwie sekcje.
   wiersze linkują do właściwej zakładki.
 - `test/msw/pulpit.ts`, `test/pulpit.test.tsx` — handler statusów. Stare testy dostają
   pseudo-alerty z fixture'a jako rozwiązane (id liczy silnik, więc test nie zależy od daty);
-  doszedł blok 6 (6 testów Pulpitu z P6.2).
+  doszedł blok 6 (7 testów Pulpitu z P6.2, w tym błąd statusów).
 - **Nowe:** `test/alerty.silnik-katalogu.test.ts` (27), `test/alerty.katalog.test.tsx` (11).
 
 ## Odstępstwa od planu
@@ -132,6 +132,20 @@ wszystko" na tysiącach alertów. Nie ma procesu w tle ani crona.
   `["/api/alerty-katalogu/statusy"]`, a Pulpit czyta ten sam klucz. Bez `window.dispatchEvent`.
   Pilnuje tego test 6.6 w `pulpit.test.tsx`.
 
+## Poprawki po review
+
+Review nr 1 (`review.md`): 1 BLOCKER / 1 SHOULD-FIX / 2 NICE-TO-HAVE.
+- **BLOCKER (roadmapa i backlog niezaktualizowane)** to krok fazy synchronizacji dokumentacji,
+  który w chwili review jeszcze nie nastąpił. Poprawiłem nieprawdziwe zdanie w raporcie
+  („nota wpisana" → „trafia przy synchronizacji"); treść dowożą doc-checkery w commicie
+  „sync docs". Bez zmian w kodzie.
+- **SHOULD-FIX (Pulpit milczy przy błędzie statusów)**: poprawione. Gdy `useAlertyKatalogu()`
+  zgłasza błąd, karta „Najnowsze powiadomienia" się renderuje, a sekcja „Katalog" pokazuje
+  „Nie udało się policzyć alertów katalogu." zamiast udawać zero. Test 6.6 w `pulpit.test.tsx`.
+- **NICE-TO-HAVE (brak testu limitu 20 000)**: dodane dwa testy, 20 001 → 400 i dokładnie
+  20 000 → 200 (paczka jednej pary wypiera się do jednego wiersza).
+- **NICE-TO-HAVE (`rebuild/schema/README.md` do 006)**: przekazane doc-checkerowi.
+
 ## Wyniki testów
 
 - **Gate odbudowy (kontrakt):** ✓ zgodne.
@@ -144,10 +158,10 @@ wszystko" na tysiącach alertów. Nie ma procesu w tle ani crona.
     (`alerty.gate.test.ts` i inne) zielone.
   - `contract/fixtures/` nietknięte. `kontrakt.spojnosc.test.ts` i
     `generate-openapi-schemas.cjs --sprawdz` zielone.
-- **Backend:** lint ✓, typecheck ✓, build ✓ (copy-schema: 7 plików .sql), test ✓ **1437/1437**
-  (89 plików; po scaleniu develop z P7.1/P7.3).
+- **Backend:** lint ✓, typecheck ✓, build ✓ (copy-schema: 7 plików .sql), test ✓ **1439/1439**
+  (89 plików; po scaleniu develop z P7.1/P7.3 i poprawkach z review).
 - **Frontend:** lint ✓, typecheck ✓, build ✓ (ostrzeżenie o rozmiarze chunka było już
-  wcześniej), test ✓ **874/874** (51 plików).
+  wcześniej), test ✓ **875/875** (51 plików, po poprawkach z review).
 - **Testy reguł** (`alerty.silnik-katalogu.test.ts`, 27):
   - każda z czterech reguł osobno;
   - marża −0,01 / 0 / 4,99 / 5;
@@ -172,8 +186,8 @@ pokaże „Nie udało się policzyć alertów katalogu" (zakładka „Import" dz
   i suma na kaflu). Warto też uprzedzić Anię, że alert „Brak importu cennika" oznaczony jako
   przejrzany wraca następnego dnia jako „nowy" (dni są w `id`). Tak działa oryginał od łatki
   `ackalerts`. Pliku nie ruszałem.
-- **PR.3 musi wziąć migrację `008`** (007 zajęła ta karta). Nota wpisana do bloku PR.3
-  w roadmapie.
+- **PR.3 musi wziąć migrację `008`** (007 zajęła ta karta). Nota trafia do bloku PR.3
+  w roadmapie przy synchronizacji dokumentacji (sekcja „Aktualizacje dokumentacji" niżej).
 - **Nieaktualne komentarze w plikach P6.1**, których ta karta nie mogła ruszyć:
   - nagłówek `pages/alerty/TabelaAlertow.tsx` mówi „pseudo-alerty katalogowe czekają na decyzję
     w backlogu";

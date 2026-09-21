@@ -81,19 +81,27 @@ function SekcjaPowiadomien<A extends Alert | AlertKatalogu>({
   alerty,
   href,
   testIdWiersza,
+  blad = null,
 }: {
   tytul: string;
   testId: string;
   alerty: A[];
   href: string;
   testIdWiersza: (alert: A) => string;
+  /** Komunikat zamiast listy, gdy źródła nie dało się wczytać. */
+  blad?: string | null;
 }) {
-  if (alerty.length === 0) return null;
+  if (alerty.length === 0 && !blad) return null;
   return (
     <section className="border-b border-border last:border-b-0" data-testid={testId}>
       <h4 className="bg-muted/40 px-5 py-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
         {tytul}
       </h4>
+      {blad ? (
+        <p className="px-5 py-3 text-xs text-destructive" role="alert">
+          {blad}
+        </p>
+      ) : null}
       <div className="divide-y divide-border">
         {alerty.map((alert) => (
           <Link key={alert.id} href={href}>
@@ -135,7 +143,9 @@ export function Pulpit() {
 
   // Pseudo-alerty katalogowe (P6.2) — liczone z tego samego `["/api/products"]`, które Pulpit
   // i tak pobiera, więc nie dokładają żądania katalogu (tylko ~25 ms liczenia na 7405 produktach).
-  const { alerty: alertyKatalogu } = useAlertyKatalogu();
+  // Gdy katalog albo statusy padną, sekcja „Katalog" mówi to wprost — cichy fallback do zera
+  // wyglądałby na Pulpicie jak „katalog jest czysty".
+  const { alerty: alertyKatalogu, blad: bladKatalogu } = useAlertyKatalogu();
 
   const aktywneImport = useMemo(() => aktywneAlerty(alerty), [alerty]);
   const aktywneKatalog = useMemo(() => aktywneAlerty(alertyKatalogu), [alertyKatalogu]);
@@ -226,7 +236,7 @@ export function Pulpit() {
 
       {/* Karty nie ma wcale, gdy nie ma alertów — `o.length > 0 && …` (`:16918`); sekcja
           źródła bez alertów też znika. */}
-      {(najswiezszeImport.length > 0 || najswiezszeKatalog.length > 0) && (
+      {(najswiezszeImport.length > 0 || najswiezszeKatalog.length > 0 || bladKatalogu) && (
         <Card className="mb-6 border-card-border" data-testid="card-recent-alerts">
           <CardContent className="p-0">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -259,6 +269,7 @@ export function Pulpit() {
               alerty={najswiezszeKatalog}
               href={adresZakladki(ZAKLADKA_KATALOG)}
               testIdWiersza={(a: AlertKatalogu) => `row-dashboard-catalog-alert-${a.id}`}
+              blad={bladKatalogu ? "Nie udało się policzyć alertów katalogu." : null}
             />
           </CardContent>
         </Card>

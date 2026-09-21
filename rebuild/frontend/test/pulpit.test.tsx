@@ -358,6 +358,17 @@ describe("6. Pulpit a pseudo-alerty katalogowe (P6.2)", () => {
     expect(screen.queryByTestId("card-recent-alerts")).toBeNull();
   });
 
+  it("gdy statusy padną, sekcja „Katalog” mówi to wprost zamiast udawać zero alertów", async () => {
+    zamockujApi({ alerty: [] });
+    server.use(
+      http.get("*/api/alerty-katalogu/statusy", () => new HttpResponse("Baza zablokowana", { status: 500 })),
+    );
+    await otworzPulpit();
+
+    const katalogu = await screen.findByTestId("section-recent-alerts-katalog");
+    expect(within(katalogu).getByRole("alert")).toHaveTextContent("Nie udało się policzyć alertów katalogu.");
+  });
+
   it("zmiana statusu odświeża Pulpit przez unieważnienie zapytania (łatka ackalerts pkt 3)", async () => {
     zamockujApi({ alerty: [], statusyKatalogu: [] });
     await otworzPulpit();
