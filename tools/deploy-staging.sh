@@ -73,6 +73,13 @@ if [ -z "${JWT_SECRET:-}" ]; then
   exit 1
 fi
 
+# --- guard: pusty SELLY_CSV_DIR (np. `SELLY_CSV_DIR=` w .env) przepuszcza `set -u`, a wyłączyłby
+# po cichu ochronę katalogu CSV przy publikacji frontendu (backend i tak by nie wstał — env.ts: min(1)) ---
+if [ -z "${SELLY_CSV_DIR:-}" ]; then
+  log "BŁĄD: pusty SELLY_CSV_DIR (sprawdź $STAGING_ROOT/.env). Przerywam."
+  exit 1
+fi
+
 # --- backend: build -> release -> migracje -> pm2 ---
 RELEASE="$STAGING_ROOT/releases/$SHA"
 log "backend: build -> $RELEASE"
