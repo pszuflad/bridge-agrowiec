@@ -4485,8 +4485,8 @@ u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu un
 | **Data** | 2026-09-22 (odpowiedź Ani na pytanie 1.4 rundy 3) |
 | **Kategoria** | BACKEND (Selly REST) — nowa funkcja, produkcja jej nie ma |
 | **Pliki** | produkcja: brak ścieżki; ślad ręcznego usunięcia przez API 17.09: `mirror/backend/…/product_639_pre_delete_20260917T164000Z.json`, `product_639_delete_result_20260917T164000Z.json` (`origin/main`); powiązane: osierocone mapowania `selly_products` (blok 13d w roadmapie, `5cfb7ab`) |
-| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
-| **Status** | — |
+| **Do nowej wersji?** | 🕒 **PÓŹNIEJ — decyzja użytkownika 2026-09-22 (D7): po cutoverze**, pierwsza nowa funkcja w nowym stosie |
+| **Status** | odłożone — w I15 port 1:1 |
 
 **Odpowiedź Ani:** „Nawet nie wiem czy jest możliwe żeby usuwać stary rekord z selly jeśli jest to trzeba taką ścieżke
 zrobić bo obecnie tego nie ma”. **Technicznie jest możliwe** — 17.09 produkt 639 został usunięty z Selly przez API
@@ -4505,7 +4505,7 @@ potwierdzenie), a celem nr 1 jest domknięcie odbudowy 1:1. W I15 port 1:1 (osie
 | **Data** | 2026-09-22 (odpowiedź Ani na pytanie 2.2 rundy 3) |
 | **Kategoria** | BAZA + BACKEND — zgłoszony defekt produkcji |
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (lista per dostawca MO1–MO10 bez MO6, `sqlCase()`), triggery `products_blokowane_formy_ai/_au` (`origin/main:db/schema.sql`), `extensions.cjs` (`ensurePaymentBlocks()` przy starcie); powiązane #73 |
-| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** (rekomendacja niżej) |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D6):** naprawić w I15 po pomiarze na kopii produkcji (23.09); karta wg przyczyny (I15.1 albo I15.6/I15.7) |
 | **Status** | — przyczyna NIEZNANA, do zmierzenia |
 
 **Odpowiedź Ani:** „trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie
@@ -4530,7 +4530,7 @@ pomiaru: w Bridge → karta I15.1; w Selly → karty I15.6/I15.7.
 | **Data** | 2026-09-22 (koordynator, po odpowiedzi Ani na pytanie 1.2) |
 | **Kategoria** | DEPLOY / BACKEND (eksport CSV Selly) — luka cutoveru |
 | **Pliki** | produkcja: cron serwera uruchamia `mirror/backend/generate_selly_export.cjs` (`selly/routes.cjs:297` „Plik generowany cronem ~6:00”); odbudowa: `rebuild/backend/src/selly/generator-csv.ts` (tylko trasa ręczna `POST /api/selly/generate-csv`) |
-| **Do nowej wersji?** | ✅ **TAK — wymagane do cutoveru** (Ania używa: „o 6 rano katalog wypycha nowy CSV na serwer”, Selly zaciąga go o 12:00) |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D8)**, wymagane do cutoveru (Ania używa: „o 6 rano katalog wypycha nowy CSV na serwer”, Selly zaciąga go o 12:00) |
 | **Status** | — przypisane do karty I15.3 (polecenie CLI) + `docs/cutover.md` (przepięcie crona) |
 
 **Na czym polega.** Odbudowa ma generator (8a), ale nie ma nic, co uruchamia go codziennie — w produkcji robi to cron

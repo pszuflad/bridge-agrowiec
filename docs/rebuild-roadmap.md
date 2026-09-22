@@ -3486,9 +3486,9 @@ Selly skończone (tor I15.6–I15.8 gotowy; Ania przygotuje podsumowanie logiki 
 torów Selly, CSV o 6:00 pobierany przez Selly o **12:00**; zgoda na kopię bazy produkcji na staging **od 23.09**; MO9 bez
 szczegółowego testu; okno cutoveru **w weekend**; jedna zmiana produkcji jeszcze w toku → **I15.10**.
 
-**Decyzje, które zostały (użytkownik):**
+**Decyzje D6–D9 — PODJĘTE 2026-09-22 przez użytkownika, wszystkie zgodnie z rekomendacją:**
 
-| # | Decyzja | Rekomendacja |
+| # | Decyzja | Rozstrzygnięcie |
 |---|---|---|
 | D6 | #101 — puste blokady płatności u nowych produktów: naprawić w I15? | ✅ tak, po pomiarze na kopii produkcji (23.09) — zakres I15.1 albo I15.6/I15.7 zależnie od przyczyny |
 | D7 | #100 — ścieżka usuwania produktu z Selly (nowa funkcja) | 🕒 po cutoverze |

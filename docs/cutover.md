@@ -51,8 +51,9 @@ przestoju je uporządkuje.
 > **Ustalenia z Anią (runda 3, 2026-09-22):** okno przełączenia **w weekend** (nie w dni robocze pn–pt), konkretny
 > dzień i porę ustala Paweł z Anią. **Cron CSV Selly o 6:00** (dziś uruchamia stary `generate_selly_export.cjs`) trzeba
 > przepiąć na polecenie generatora nowego stosu (backlog #102, karta I15.3). **Stary Bridge po przełączeniu NIE może
-> działać równolegle** na tej samej `data.db` (dwa schedulery importu i dwie synchronizacje Selly) — decyzja D9 w bloku
-> I15 roadmapy.
+> działać równolegle** na tej samej `data.db` (dwa schedulery importu i dwie synchronizacje Selly) — **decyzja D9 (użytkownik, 2026-09-22):
+> stary Bridge wyłączony od razu po przełączeniu**; kod i kopia bazy zostają ~2 tygodnie na rollback; zmiany po
+> cutoverze wyłącznie w nowym stosie (`develop` → staging → test → produkcja).
 
 - [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na staging
       (`docs/przeglad-12-widokow.md`). To jest warunek nadrzędny — bez niego nie zaczynamy.
