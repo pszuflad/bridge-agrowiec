@@ -15,7 +15,9 @@ szablonem, którego trzymały się wszystkie kolejne bloki Iteracji 10. Iteracja
   (patrz §1 i §2.3);
 - **10f** (`26-FEATURE-analityka-export-pulpit`) — ostatni blok: dołożył przycisk „CSV"
   do wszystkich dziesięciu kart, które mają go w oryginale, i odtworzył Pulpit `/`
-  (osobny widok, poza tym katalogiem) — patrz §7.
+  (osobny widok, poza tym katalogiem) — patrz §7;
+- **P10.3** (`98-FEATURE-eksport-csv-z-tabeli`) — przycisk „CSV" zapisuje w przeglądarce
+  wiersze i kolumny tabeli karty po filtrach, zamiast nawigować pod `export/{view}` — patrz §7a.
 
 Bloki **dokładają zakładki, nie przemeblowują widoku** — zakładki, ich kolejność
 i etykiety już są i pochodzą z oryginału.
@@ -356,7 +358,7 @@ Odstępstwa bloku 10c (decyzje D1–D6, `docs/tickets/22-FEATURE-analityka-ean/p
 
 Dołożył ostatnią, 27. trasę modułu (`GET /api/analytics/export/{view}`) i przycisk „CSV"
 w dziesięciu kartach, które mają go w oryginale — logika w `pages/analityka/eksport.tsx`
-(`PrzyciskCsv`, `adresEksportu()`), nie w tym katalogu wprost, bo przycisk jest współdzielony
+(`PrzyciskCsv`; od P10.3 z generatorem `csv.ts`, §7a), nie w tym katalogu wprost, bo przycisk jest współdzielony
 przez sekcje z kilku bloków.
 
 **Wpięcie w karty — trzy warianty tego samego układu „tytuł po lewej, akcje po prawej":**
@@ -369,19 +371,9 @@ inline bez wspólnego propa — przycisk jest tam wstawiony wprost w tym samym u
 (`flex items-center justify-between gap-2`), bo te trzy karty i tak nie przechodzą przez
 `NaglowekSekcji` (nie liczą notek o filtrach).
 
-**Dlaczego to musi być `window.location.href`, a nie `fetch`:** oryginał eksportuje przez
-zwykłą nawigację przeglądarki, więc żądanie **nie niesie nagłówka `Authorization`** i
-uwierzytelnia się wyłącznie cookie'em `bridge_session`. `fetch` + `blob` zmieniłby model
-autoryzacji i **zerwał zgodność z produkcją** — działa tylko dzięki temu, że cookie ma
-`SameSite=Lax` (wysyłane przy nawigacji GET najwyższego poziomu) i staging jest same-origin;
-dowiedzione testem integracyjnym na prawdziwym serwerze
-(`rebuild/backend/test/analityka.eksport.gate.test.ts`).
-
-⚠ **Eksport NIE zwraca tego, co widać w tabeli.** Każdy `{view}` ma własny SQL po stronie
-backendu, inny niż trasa dashboardu o tej samej nazwie, i nie niesie żadnych filtrów ani
-parametrów — `adresEksportu()` nie dokleja query stringu. Dwa widoki
-(`availability-products`, `sell-through`) oddają **pusty plik** (sam BOM) z powodu backlogu
-#32 (`historia_cen` bez kolumny `nazwa`) — odtworzone 1:1, nie naprawiane.
+**Mechanizm 10f (nawigacja `window.location.href` pod `export/{view}`, uwierzytelniona
+cookie'em `bridge_session`) jest od P10.3 ZASTĄPIONY** — patrz §7a. Trasa i jej test cookie'owy
+(`rebuild/backend/test/analityka.eksport.gate.test.ts`) zostają w backendzie bez zmian.
 
 | # | Co | Dlaczego |
 |---|---|---|
@@ -389,3 +381,40 @@ parametrów — `adresEksportu()` nie dokleja query stringu. Dwa widoki
 
 Pulpit `/` (`src/pages/Pulpit.tsx`, `src/pages/pulpit/`) jest osobnym widokiem poza tym
 katalogiem — szczegóły w `docs/analityka-bloki-10b-10f.md` §8.2.
+
+## 7a. Eksport CSV = to, co widać w tabeli (karta P10.3, `98-FEATURE-eksport-csv-z-tabeli`, 2026-09-22)
+
+Świadome odstępstwo (backlog **#91** ✅, decyzje użytkownika 2026-09-21/22). W oryginale plik
+nie znał filtrów, bo każdy `{view}` ma na serwerze własny SQL, inny niż karta. W produkcji to
+nie bolało, bo produkcja nie ma paska filtrów — pasek to nasze O-10a-2, więc lukę stworzyła odbudowa.
+
+**Jak działa teraz.** `PrzyciskCsv({ widok, wiersze, kolumny, wczytywanie })` (`eksport.tsx`)
+buduje plik w przeglądarce (`zbudujCsvTabeli` z `csv.ts`) i zapisuje go przez `pobierzPlik()`
+z `pages/katalog/eksport.ts` (BOM + `text/csv;charset=utf-8` + kotwica `download`). Karta podaje
+**tę samą tablicę** `wiersze`, którą daje `TabelaAnalityki` (po `zastosujFiltry*`, przed
+`slice(0, 300)`), i **te same stałe** `KOLUMNY*`. Filtrów nie liczy się drugi raz. W Rotacji
+„Bez ruchu dni" siedzi w `queryKey`, więc plik ma wiersze po `?days`. Żaden przycisk nie woła
+już `GET /api/analytics/export/{view}`.
+
+**Nowa karta z przyciskiem:** podaj `wiersze` i `kolumny` dokładnie te z `TabelaAnalityki`,
+a `wczytywanie` = flaga, od której tabela pisze „Wczytywanie…”.
+
+| Element pliku | Zapis | Skąd |
+|---|---|---|
+| separator, łamanie wierszy | `;`, samo `\n` | jak serwer (`toCsv`) |
+| BOM | na początku | jak serwer; dokłada `pobierzPlik` |
+| nagłówek | **etykiety kolumn tabeli** (`Śr. marża`) | decyzja 2026-09-22 (serwer: klucze pól) |
+| liczba | `12,5`, `1234,56` — **przecinek**, bez separatora tysięcy, pełna precyzja pola | decyzja 2026-09-22 (serwer: kropka) |
+| procent (`dostepnoscPct`) | surowa liczba `87,5`, bez `%` | reguła wartości |
+| data / znacznik | napis z API bez zmian (`2026-08-17T14:44:40.244Z`) | jak w tabeli |
+| brak wartości (`null`, `undefined`, `""`, np. pusta nazwa po P10.1) | **pusta komórka**, nie „—" | reguła wartości; `NaN`/∞ też puste |
+| EAN, kod | zwykły tekst (Excel może pokazać `5,9E+12`) | decyzja 2026-09-22 — jak serwer |
+| cudzysłowy | pole z `;`, `"`, `\n`, `\r` w `"…"`, wewnętrzny `"` podwojony | jak serwer (`csvEscape`) |
+| nazwa pliku | `<view>.csv` (dziesięć nazw z `WidokEksportu`) | jak `Content-Disposition` serwera |
+
+**Reguła wartości:** do komórki idzie pole wiersza spod `kolumna.key`, nigdy tekst z ekranu,
+także dla kolumn z `render()`. Dlatego `key` kolumny musi wskazywać pole z wartością.
+
+**Zakres pliku:** wszystkie wiersze po filtrach (limit 300 to tylko rysowanie). Marża ma przekrój
+tabeli (grupy dostawca/kategoria/marka), nie listę per produkt serwera. Pusta tabela po filtrach
+daje plik z samym nagłówkiem, a przycisk jest nieaktywny tylko podczas wczytywania.
