@@ -122,7 +122,9 @@ export const PODPIS_BLEDU_HISTORII = "Nie udało się pobrać historii";
  *
  * Nowe względem oryginału jest tylko zachowanie przy BŁĘDZIE (D3): „—" i podpis
  * {@link PODPIS_BLEDU_HISTORII}, zamiast udawać, że eksportów nie było. Błąd zapytania
- * o import liczy się dopiero wtedy, gdy import byłby pokazany (brak eksportu).
+ * o EKSPORT wygrywa z poprawnym importem — pokazanie „Ostatni import” sugerowałoby, że eksportu
+ * nie było, a tego nie wiemy. Błąd zapytania o import liczy się dopiero wtedy, gdy import byłby
+ * pokazany (brak eksportu).
  * Ładowanie rysuje pusty stan — jak oryginał, który ma `data: r = []`.
  */
 export function opisKafelkaEksportu(

@@ -55,7 +55,13 @@ Brak. (Dodany ponad plan test odświeżenia po powrocie na Pulpit — weryfikuje
 ## Breaking changes
 Brak w API. Zmiana widoczna dla użytkownika: kafel przestaje być martwy (zatwierdzone odstępstwo #34).
 
+## Review fixes applied
+- NICE-TO-HAVE: komentarz `opisKafelkaEksportu` wprost nazywa, że błąd zapytania o eksport wygrywa z poprawnym importem.
+- SHOULD-FIX #1 (karta/backlog/wejście P10.4) — realizowany w fazie docs (commit „sync docs”).
+- SHOULD-FIX #2 (komentarz `rebuild/backend/src/routes/history.ts:47-48` „Wołają ją Pulpit (I10)…” nieaktualny) — backend poza własnością karty; przeniesione do Follow-up i „Do koordynatora”.
+
 ## Follow-up
+- Komentarz nad `GET /api/history` w `rebuild/backend/src/routes/history.ts:47-48` wymienia Pulpit jako odbiorcę — od ticketu 96 nieprawda (zostaje invalidacja klucza w katalogu). Backend poza własnością tej karty.
 - Widok `/historia` ma ten sam problem ze `staleTime: Infinity` — po eksporcie lista Historii
   odwiedzona wcześniej w tej sesji pokazuje stan sprzed eksportu do przeładowania. Poza zakresem
   (pliki Historii).
