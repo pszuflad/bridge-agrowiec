@@ -414,8 +414,9 @@ ma endpoint:
 >
 > Odbudowa robi 10a jako **świadomie inny ekran niż oryginał**, decyzją użytkownika 2026-09-03
 > (D1–D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`): zakładki i etykiety zostają 1:1,
-> ale nagłówek KPI (O-10a-1) czyta z `GET /api/analytics/kpi` zamiast czterech aliasów oryginału,
-> dochodzi globalny pasek sześciu wyszukiwalnych filtrów działający **po stronie klienta**
+> a nagłówek KPI czytał tymczasowo z `GET /api/analytics/kpi` zamiast czterech aliasów oryginału
+> (odstępstwo O-10a-1, zamknięte ticketem 97 2026-09-22 — patrz niżej), dochodzi globalny pasek
+> sześciu wyszukiwalnych filtrów działający **po stronie klienta**
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
 > (O-10a-3). Wypełniona jest karta „Marża per dostawca/kategoria/marka" (O-10a-4); pozostałe
@@ -436,10 +437,10 @@ ma endpoint:
 > (`comparison`, `unique`, `coverage`, `supplier-rank`); `ean/details` i `ean-porownanie`
 > dowiezione jako trasy **bez UI** — oryginał ich też nie woła (D6). Karta „Pokrycie i ranking"
 > dostaje dwa wykresy (histogram pokrycia, ranking dostawców po `najtanszyPct`) nad tabelami —
-> drugie zastosowanie wzorca z 10a (O-10c-1). Nagłówek KPI **zostaje** na `GET /api/analytics/kpi`
-> (D1, odstępstwo O-10a-1 utrzymane) — dane do przepięcia na kafle oryginału
-> (`ean/comparison.rows.length`, `ean/unique.rows.length`) są od teraz gotowe, przepięcie czeka
-> na decyzję użytkownika. Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
+> drugie zastosowanie wzorca z 10a (O-10c-1). Nagłówek KPI zostawał wtedy na `GET /api/analytics/kpi`
+> (D1, odstępstwo O-10a-1) — dane do przepięcia na kafle oryginału (`ean/comparison.rows.length`,
+> `ean/unique.rows.length`) były od tego bloku gotowe; przepięcie zamknięte ticketem 97
+> (2026-09-22, `PR.2`, patrz wyżej). Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
 >
 > **Odbudowa (10d, `23-FEATURE-analityka-dostawcy`, 2026-09-03):** zakładka `dostawcy` — domyślna
 > zakładka `/analityka` — wypełniona trzema kartami 1:1: „1.1 Stabilność cennika dostawcy" (7

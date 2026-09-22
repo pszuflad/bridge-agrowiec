@@ -266,7 +266,8 @@ pokryć **testem jednostkowym backendu**, nie gatem. To samo dotyczy każdej pus
 w Twoich fixtures.
 
 **3. Sprawdź, czy oryginalny frontend w ogóle woła Twoją trasę.** `GET /api/analytics/kpi`
-istnieje, ma fixture i wygląda na źródło nagłówka — a produkcyjny bundle nie woła go ani razu
+istnieje, ma fixture i wygląda na źródło nagłówka (10a tak go użył — O-10a-1, cofnięte ticketem 97)
+— a produkcyjny bundle nie woła go ani razu
 (`analytics_module.cjs:324`: *„Backward-compatible aliases used by previous frontend build"*).
 Zanim uznasz, że coś odtwarzasz, zgrepuj ścieżkę w `deminified/frontend-index.js`. Jeśli
 trafień nie ma, budujesz coś nowego — a to wymaga decyzji użytkownika, nie domysłu.
@@ -290,7 +291,7 @@ układ karty „2.6" jako jednej karty z dwiema tabelami.
 
 | # | Co | Dlaczego |
 |---|---|---|
-| O-10a-1 | Kafle KPI z `/api/analytics/kpi` zamiast z `filters`/`ean/*`/`status` | oryginalne kafle wymagają tras z bloku 10c; te dają sensowne liczby od razu |
+| ~~O-10a-1~~ | ~~Kafle KPI z `/api/analytics/kpi` zamiast z `filters`/`ean/*`/`status`~~ — **zamknięte** ticketem 97 (karta PR.2, 2026-09-22): kafle są jak w oryginale, `/kpi` bez konsumenta w UI | oryginalne kafle wymagały tras z bloku 10c |
 | O-10a-2 | Globalny pasek sześciu wyszukiwalnych filtrów | oryginał pobiera `filters`, ale renderuje z nich tylko `dostawcy.length` |
 | O-10a-3 | Wykres w sekcji marż | oryginał nie ma żadnych wykresów; infrastruktura potrzebna blokom 10b–10e |
 | O-10a-4 | Cztery zakładki puste do czasu 10b–10e | zakres bloku, nie zmiana zachowania |
