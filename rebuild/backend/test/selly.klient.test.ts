@@ -322,7 +322,7 @@ describe("klient Selly — OAuth2 i warstwa HTTP", () => {
   /**
    * Metody modelu wariantowego (karta I15.6). Każda odpowiada JEDNEMU wywołaniu `apiWithRetry`
    * z oryginału — ścieżka, query i ciało muszą się zgadzać znak w znak (`discovery.cjs:76,91,
-   * 138,152,192,266`, `sync_delta.cjs:158`).
+   * 138,152,192,266`, `sync_delta.cjs:158`) + `getProduct` Toru 2 (`sync_full.cjs:189`).
    */
   it("metody wariantowe wołają ścieżki i ciała z oryginału", async () => {
     const udawany = udawanySelly((zad, res) => {
@@ -340,6 +340,7 @@ describe("klient Selly — OAuth2 i warstwa HTTP", () => {
     await klient.listProductsPage();
     await klient.listProductsPage(2);
     await klient.listVariants(812);
+    await klient.getProduct(812);
     await klient.createVariant(812, { quantity: 2, price: 7252, attributes: [] });
     await klient.updateVariant(812, 5001, { quantity: 0, price: 10 });
 
@@ -349,11 +350,12 @@ describe("klient Selly — OAuth2 i warstwa HTTP", () => {
       "GET /api/products?sort_by=product_id&sort=ASC",
       "GET /api/products?sort_by=product_id&sort=ASC&page=2",
       "GET /api/products/812/variants",
+      "GET /api/products/812",
       "POST /api/products/812/variants",
       "PUT /api/products/812/variants/5001",
     ]);
-    expect(JSON.parse(bezTokenu[4]?.cialo ?? "")).toEqual({ quantity: 2, price: 7252, attributes: [] });
-    expect(JSON.parse(bezTokenu[5]?.cialo ?? "")).toEqual({ quantity: 0, price: 10 });
+    expect(JSON.parse(bezTokenu[5]?.cialo ?? "")).toEqual({ quantity: 2, price: 7252, attributes: [] });
+    expect(JSON.parse(bezTokenu[6]?.cialo ?? "")).toEqual({ quantity: 0, price: 10 });
   });
 
   it("`setProductMultiCat` bez kategorii nie wykonuje żadnego żądania", async () => {

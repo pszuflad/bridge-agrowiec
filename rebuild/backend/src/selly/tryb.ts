@@ -50,6 +50,7 @@ export const METODY_ODCZYTU = [
   "listCategories",
   "listVatRates",
   "listWarehouses",
+  "getProduct",
   "listProductsByEan",
   "listProductsPage",
   "listVariants",

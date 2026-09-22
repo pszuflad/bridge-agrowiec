@@ -43,6 +43,7 @@ function atrapaKlienta(): { klient: KlientSelly; wywolania: string[] } {
     updateProduct: metoda("updateProduct"),
     upsertProductWarehouse: metoda("upsertProductWarehouse"),
     setProductMultiCat: metoda("setProductMultiCat"),
+    getProduct: metoda("getProduct"),
     listProductsByEan: metoda("listProductsByEan"),
     listProductsPage: metoda("listProductsPage"),
     listVariants: metoda("listVariants"),
