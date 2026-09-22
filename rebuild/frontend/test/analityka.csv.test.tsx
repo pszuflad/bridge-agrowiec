@@ -41,6 +41,14 @@ describe("wartoscKomorkiCsv — reguła wartości", () => {
     expect(wartoscKomorkiCsv(1234567.891)).toBe("1234567,891");
   });
 
+  it("notacja wykładnicza: przecinek w mantysie, jeśli ją ma — jak każda inna liczba", () => {
+    // `String()` przechodzi na wykładnik poniżej 1e-6; dane analityki tych rzędów nie osiągają,
+    // ale zapis ma zostać spójny: kropka dziesiętna → przecinek, reszta bez zmian.
+    expect(wartoscKomorkiCsv(1.5e-7)).toBe("1,5e-7");
+    expect(wartoscKomorkiCsv(1e-7)).toBe("1e-7");
+    expect(wartoscKomorkiCsv(-0)).toBe("0");
+  });
+
   it("NaN i nieskończoność → pusta komórka", () => {
     expect(wartoscKomorkiCsv(Number.NaN)).toBe("");
     expect(wartoscKomorkiCsv(Number.POSITIVE_INFINITY)).toBe("");

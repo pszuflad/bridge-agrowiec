@@ -1,6 +1,6 @@
 # 98-FEATURE-eksport-csv-z-tabeli — P10.3: eksport CSV analityki = to, co widać w tabeli
 
-> Status: Draft
+> Status: Implemented
 > Branch: `feature/98-eksport-csv-z-tabeli`
 > Worktree: `.worktrees/98-FEATURE-eksport-csv-z-tabeli`
 > Karta: `docs/karty/P10.3/` · Backlog: #91

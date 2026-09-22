@@ -61,3 +61,8 @@ Brak. Jedna rzecz doprecyzowana w trakcie: `NaN` i ±∞ też dają pustą komó
 ## Do zrobienia później
 - `docs/instrukcja-testow-I10.md` §6.4 opisuje stary eksport („plik nie zna filtrów”). Delta dla Ani należy do P10.4, wejście w `docs/karty/P10.4/wejscie-98.md`.
 - Serwerowy `export/{view}` bez konsumenta: zostawić jako API czy kiedyś wygasić? To decyzja koordynatora/użytkownika, nie tej karty.
+
+## Poprawki po review
+- **BLOCKER (dokumentacja karty/backlogu/`wejscie-98.md`)** — zrobione w fazie docs (commit „sync docs”); w chwili review ta faza jeszcze nie ruszyła.
+- **SHOULD-FIX (notacja wykładnicza w `wartoscKomorkiCsv`)** — zachowanie było poprawne (`1.5e-7` → `1,5e-7`; `1e-7` nie ma części dziesiętnej), brakowało testu. Dopisany test (także `-0` → `0`); jednostkowe 14/14.
+- **NICE-TO-HAVE** — `plan.md` ma status `Implemented`. Import `pobierzPlik` z katalogu zostaje: reviewer potwierdził buildem, że nie duplikuje modułu.
