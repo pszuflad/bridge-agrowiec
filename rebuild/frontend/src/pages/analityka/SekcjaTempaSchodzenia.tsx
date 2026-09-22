@@ -4,6 +4,7 @@
  *
  * Cztery kolumny 1:1 z oryginałem; przycisk „CSV" (`M("sell-through")`, `:28468`) dołożył
  * blok 10f.
+ * Od P10.3 plik powstaje w przeglądarce z wierszy i kolumn tej tabeli po filtrach (`eksport.tsx`).
  *
  * ⚠ W PRODUKCJI TA TABELA I JEJ EKSPORT SĄ PUSTE ZAWSZE — W ODBUDOWIE OD P10.1 TYLKO BEZ
  * HISTORII CEN. Bez historii oryginał nie ma gałęzi zapasowej (`analytics_module.cjs:174`)
@@ -62,7 +63,12 @@ export function SekcjaTempaSchodzenia({
           wyjasnieniePominietych="Ta sekcja grupuje po dostawcy i kodzie, więc nie stosuje filtrów:"
           rzeczownik="pozycji"
           prefiksTestu="tempo-schodzenia"
-          obok={<PrzyciskCsv widok="sell-through" />}
+          obok={<PrzyciskCsv
+              widok="sell-through"
+              wiersze={wiersze}
+              kolumny={KOLUMNY}
+              wczytywanie={ladowanie}
+            />}
         />
         <TabelaAnalityki
           dane={wiersze}

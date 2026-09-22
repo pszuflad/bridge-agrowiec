@@ -10,6 +10,8 @@
  *
  * Przyciski „CSV" przy kartach „2.1-2.4" (`M("ean-comparison")`, `:28190`) i „2.5"
  * (`M("unique")`, `:28234`) dołożył blok 10f. Karta „2.6" nie ma go ani w oryginale, ani tu.
+ * Od P10.3 plik powstaje w przeglądarce z wierszy i kolumn tabeli karty (`eksport.tsx`) —
+ * dla „2.5" po filtrze dostawcy, dla „2.1-2.4" pełna lista, bo ta karta nie ma czego filtrować.
  *
  * ─── ŚWIADOME ODSTĘPSTWA (decyzje użytkownika D2 i D4, 2026-09-03) ────────────────────
  *  • O-10c-1 — dwa wykresy w karcie „2.6" plus liczba nagłówkowa „% EAN-ów u ≥2 dostawców".
@@ -250,7 +252,17 @@ export function SekcjaEan({
       {/* ── Karta „2.1-2.4" (`:28180-28220`) ─────────────────────────────────────────── */}
       <Card className="border-card-border">
         <CardContent className="p-0">
-          <NaglowekKarty tytul="2.1-2.4 Porównanie cen po EAN" obok={<PrzyciskCsv widok="ean-comparison" />}>
+          <NaglowekKarty
+            tytul="2.1-2.4 Porównanie cen po EAN"
+            obok={
+              <PrzyciskCsv
+                widok="ean-comparison"
+                wiersze={wierszePorownania}
+                kolumny={KOLUMNY_PORWNANIA}
+                wczytywanie={porownanie.ladowanie}
+              />
+            }
+          >
             <NotkaPominietych
               wybor={wybor}
               obslugiwane={WYMIARY_EAN_PORWNANIE}
@@ -270,7 +282,17 @@ export function SekcjaEan({
       {/* ── Karta „2.5" (`:28221-28255`) ─────────────────────────────────────────────── */}
       <Card className="border-card-border">
         <CardContent className="p-0">
-          <NaglowekKarty tytul="2.5 Pozycje unikalne" obok={<PrzyciskCsv widok="unique" />}>
+          <NaglowekKarty
+            tytul="2.5 Pozycje unikalne"
+            obok={
+              <PrzyciskCsv
+                widok="unique"
+                wiersze={wierszeUnikalne}
+                kolumny={KOLUMNY_UNIKALNYCH}
+                wczytywanie={unikalne.ladowanie}
+              />
+            }
+          >
             {unikalneOdfiltrowane > 0 && (
               <div className="mt-1 text-xs text-muted-foreground" data-testid="ean-unikalne-licznik-filtra">
                 Filtry ukryły {formatuj(unikalneOdfiltrowane)} z {formatuj(unikalneWszystkie)} pozycji.

@@ -21,6 +21,7 @@
  *    jak `margins.low`/`high` w 10a (decyzja D4).
  *
  * Przycisk „CSV" przy karcie „3.1" (`M("prices-last")`, `:28310`) dołożył blok 10f.
+ * Od P10.3 plik powstaje w przeglądarce z wierszy i kolumn tej tabeli po filtrach (`eksport.tsx`).
  *
  * ─── ŚWIADOME ODSTĘPSTWA ──────────────────────────────────────────────────────────────
  *
@@ -260,7 +261,14 @@ export function SekcjaCeny({ wybor }: { wybor: WyborFiltrow }) {
     <div className="space-y-4">
       <KartaCen
         tytul="3.1 Zmiany cen z ostatnich importów"
-        obok={<PrzyciskCsv widok="prices-last" />}
+        obok={
+          <PrzyciskCsv
+            widok="prices-last"
+            wiersze={wierszeImportu}
+            kolumny={KOLUMNY_OSTATNI_IMPORT}
+            wczytywanie={ostatniImportWczytywany}
+          />
+        }
         notka={
           <NotkaFiltrow
             odfiltrowane={(ostatniImport?.rows.length ?? 0) - wierszeImportu.length}

@@ -15,11 +15,15 @@ import type { ReactNode } from "react";
 
 import { formatuj } from "./formatowanie";
 
-/** Ile wierszy trafia do DOM-u — `:27953`. */
+/** Ile wierszy trafia do DOM-u — `:27953`. Plik CSV karty tego limitu NIE ma (P10.3, #91.3). */
 export const LIMIT_WIERSZY = 300;
 
 export type KolumnaTabeli<T> = {
-  /** Klucz pola w wierszu; służy też jako `key` Reacta. */
+  /**
+   * Klucz pola w wierszu; służy też jako `key` Reacta.
+   * ⚠ Z tego pola czyta eksport CSV karty (`csv.ts`) — także wtedy, gdy kolumna ma `render`.
+   * `key` musi więc wskazywać pole z WARTOŚCIĄ, którą komórka pokazuje.
+   */
   key: string;
   label: string;
   /** Wyrównanie do prawej — kolumny liczbowe (`right: 1` w oryginale). */

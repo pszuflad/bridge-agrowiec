@@ -5,6 +5,7 @@
  * Sześć kolumn 1:1 z oryginałem, z paskiem postępu w kolumnie „Dostępność" (`O(e.dostepnoscPct)`,
  * `:28451`) i przyciskiem „CSV" w nagłówku (`M("availability-products")`, `:28430`), który
  * dołożył blok 10f razem z trasą `GET /api/analytics/export/{view}`.
+ * Od P10.3 plik powstaje w przeglądarce z wierszy i kolumn tej tabeli po filtrach (`eksport.tsx`).
  *
  * ⚠ W PRODUKCJI TA TABELA I JEJ EKSPORT SĄ PUSTE, GDY ISTNIEJE HISTORIA CEN — W ODBUDOWIE
  * OD P10.1 JUŻ NIE. Oryginał pyta `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma,
@@ -74,7 +75,12 @@ export function SekcjaDostepnosciProduktow({
           wyjasnieniePominietych="Ta sekcja grupuje po dostawcy i kodzie, więc nie stosuje filtrów:"
           rzeczownik="pozycji"
           prefiksTestu="dostepnosc-produktow"
-          obok={<PrzyciskCsv widok="availability-products" />}
+          obok={<PrzyciskCsv
+              widok="availability-products"
+              wiersze={wiersze}
+              kolumny={KOLUMNY}
+              wczytywanie={ladowanie}
+            />}
         />
         <TabelaAnalityki
           dane={wiersze}

@@ -21,9 +21,11 @@
  * przechodzi do backendu i wraca jako `days: null` z pustą listą; zaciskanie do [1, 730]
  * należy do backendu i tylko do niego.
  *
- * Przycisk „CSV" (`M("rotation-inactive")`, `:28572`) dołożył blok 10f. ⚠ Eksport NIE niesie
- * parametru `?days` — oddaje cały aktywny katalog, nie ten podzbiór, który widać w tabeli
- * (`backend/src/repos/analityka-eksport.ts`).
+ * Przycisk „CSV" (`M("rotation-inactive")`, `:28572`) dołożył blok 10f. Od P10.3 plik powstaje
+ * w przeglądarce z wierszy tej tabeli — czyli PO „Bez ruchu dni" (to pole siedzi w `queryKey`,
+ * więc `data` to już odpowiedź dla `?days`) i po filtrach globalnych. Serwerowy
+ * `export/rotation-inactive` parametru `?days` nie znał i oddawał cały aktywny katalog;
+ * front go już nie woła (`eksport.tsx`).
  */
 import { useMemo } from "react";
 
@@ -91,7 +93,12 @@ export function SekcjaRotacji({
           wyjasnieniePominietych="Odpowiedź tej sekcji nie niesie indeksów, więc nie stosuje filtrów:"
           rzeczownik="produktów"
           prefiksTestu="rotacja"
-          obok={<PrzyciskCsv widok="rotation-inactive" />}
+          obok={<PrzyciskCsv
+              widok="rotation-inactive"
+              wiersze={wiersze}
+              kolumny={KOLUMNY}
+              wczytywanie={isPending}
+            />}
         />
 
         <div className="flex items-center gap-2">

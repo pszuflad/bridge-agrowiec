@@ -1,32 +1,36 @@
 /**
- * Przycisk „CSV" w nagłówku karty analityki — port `M()` (`frontend-index.js:27938-27940`).
+ * Przycisk „CSV" w nagłówku karty analityki — plik = to, co widać w tabeli karty
+ * (karta P10.3, backlog #91 ✅, decyzje użytkownika 2026-09-21).
  *
- * Bloki 10a–10e świadomie ten przycisk pomijały, bo trasa `GET /api/analytics/export/{view}`
- * jeszcze nie istniała (decyzje D3/D5 tamtych bloków — przycisk wiodący donikąd jest gorszy
- * niż jego brak). Blok 10f dowozi trasę i dokłada przycisk do wszystkich dziesięciu kart,
- * które mają go w oryginale.
+ * ⚠ ŚWIADOME ODSTĘPSTWO OD ORYGINAŁU. Oryginalne `M()` (`frontend-index.js:27938-27940`) robi
+ * nawigację `window.location.href = /api/analytics/export/<view>` bez query stringu, a serwer
+ * ma dla każdego widoku WŁASNY SQL, inny niż karta nad przyciskiem. Plik nie znał więc
+ * filtrów, w Marży miał wiersze per produkt zamiast grup, a w Rotacji ignorował „Bez ruchu dni".
+ * W produkcji to nie bolało, bo produkcja nie ma paska filtrów — pasek to NASZE odstępstwo
+ * O-10a-2 i to odbudowa stworzyła lukę „zaznaczam dostawcę, a w pliku są wszyscy".
  *
- * ⚠ TO NAWIGACJA PRZEGLĄDARKI, NIE `fetch` — i to jest istotne, a nie stylistyczne.
- * Oryginał robi `window.location.href = …`, więc żądanie NIE niesie nagłówka
- * `Authorization` i uwierzytelnia się **wyłącznie cookie'em sesji** `bridge_session`
- * (`HttpOnly; Path=/; SameSite=Lax` — a `Lax` wysyła cookie właśnie przy nawigacji GET
- * najwyższego poziomu). Przepisanie tego na `fetch` + `blob` zmieniłoby model autoryzacji
- * i zerwałoby zgodność z produkcją; dowód, że wariant cookie'owy działa, siedzi
- * w `backend/test/analityka.eksport.gate.test.ts`.
+ * DLATEGO PLIK POWSTAJE W PRZEGLĄDARCE, z dokładnie tej tablicy wierszy i tych kolumn, które
+ * karta podaje `TabelaAnalityki`:
+ *  • filtry globalne i lokalne są już zastosowane — przycisk NIE liczy ich drugi raz;
+ *  • plik ma WSZYSTKIE wiersze po filtrach — limit 300 dotyczy tylko rysowania tabeli;
+ *  • format i reguła wartości: `csv.ts`.
  *
- * ⚠ EKSPORT NIE NIESIE FILTRÓW. Oryginał nie dokleja do adresu żadnego query stringu, a każdy
- * `{view}` ma po stronie backendu WŁASNY SQL, inny niż trasa dashboardu o tej samej nazwie
- * (`backend/src/repos/analityka-eksport.ts`). Plik CSV nie jest więc „tym, co widać w tabeli"
- * — i tak ma zostać.
+ * Trasa `GET /api/analytics/export/{view}` zostaje w backendzie i kontrakcie bez zmian
+ * (P10.1: lista widoków + 404), ale front jej już nie woła.
+ *
+ * Pusta tabela po filtrach → plik z samym nagłówkiem (przycisk aktywny). Nieaktywny jest
+ * tylko podczas wczytywania: plik z tej chwili byłby pusty bez powodu.
  */
 import { Button } from "@/components/ui/button";
-import { BAZA_API } from "@/lib/api";
+import { pobierzPlik } from "@/pages/katalog/eksport";
+
+import { zbudujCsvTabeli, type KolumnaCsv } from "./csv";
 
 /**
- * Dziesięć nazw `{view}`, które woła oryginalny front (`frontend-index.js:28065`, `:28109`,
+ * Dziesięć kart z przyciskiem — nazwy `{view}` oryginału (`frontend-index.js:28065`, `:28109`,
  * `:28147`, `:28190`, `:28233`, `:28310`, `:28432`, `:28470`, `:28531`, `:28573`).
- * Backend zna dokładnie te same (`repos/analityka-eksport.ts`); nazwa spoza listy dostałaby
- * z niego pusty plik ze statusem 200, więc typ pilnuje, żeby literówka nie przeszła cicho.
+ * Dziś służą jako nazwa pliku (`<view>.csv`, jak w `Content-Disposition` serwera) i jako
+ * `data-testid`; zamknięta unia pilnuje, żeby karta nie dostała nazwy spoza listy.
  */
 export type WidokEksportu =
   | "suppliers-stability"
@@ -40,24 +44,33 @@ export type WidokEksportu =
   | "margins"
   | "rotation-inactive";
 
-/** Port `M()` — goły adres, bez query stringu. Wydzielony, żeby dało się go sprawdzić testem. */
-export function adresEksportu(widok: WidokEksportu): string {
-  return `${BAZA_API}/api/analytics/export/${widok}`;
-}
+export type PrzyciskCsvProps<T> = {
+  widok: WidokEksportu;
+  /** Wiersze tabeli karty PO filtrach, PRZED `slice(0, 300)` — ta sama tablica co `dane` tabeli. */
+  wiersze: readonly T[];
+  /** Te same kolumny, którymi karta rysuje tabelę. */
+  kolumny: readonly KolumnaCsv<T>[];
+  /** Dane karty jeszcze się wczytują — przycisk nieaktywny. */
+  wczytywanie?: boolean;
+};
 
 /**
  * Markup 1:1 z oryginałem: `<Button variant="outline" size="sm">CSV</Button>` w nagłówku
  * karty, po prawej stronie tytułu.
  */
-export function PrzyciskCsv({ widok }: { widok: WidokEksportu }) {
+export function PrzyciskCsv<T extends Record<string, unknown>>({
+  widok,
+  wiersze,
+  kolumny,
+  wczytywanie = false,
+}: PrzyciskCsvProps<T>) {
   return (
     <Button
       variant="outline"
       size="sm"
       data-testid={`csv-${widok}`}
-      onClick={() => {
-        window.location.href = adresEksportu(widok);
-      }}
+      disabled={wczytywanie}
+      onClick={() => pobierzPlik(`${widok}.csv`, zbudujCsvTabeli(wiersze, kolumny))}
     >
       CSV
     </Button>

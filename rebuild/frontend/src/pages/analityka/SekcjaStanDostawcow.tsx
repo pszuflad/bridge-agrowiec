@@ -7,6 +7,7 @@
  * ani jednego wykresu; kontynuujemy tu wzorzec z sekcji marż bloku 10a.
  *
  * Przycisk „CSV" (`M("suppliers-stock")`, `:28144`) dołożył blok 10f.
+ * Od P10.3 plik powstaje w przeglądarce z wierszy i kolumn tej tabeli po filtrach (`eksport.tsx`).
  */
 import { useMemo } from "react";
 import {
@@ -119,7 +120,12 @@ export function SekcjaStanDostawcow({
               (`frontend-index.js:28147`). */}
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold">1.4 / 1.5 Stan i dostępność dostawcy</div>
-            <PrzyciskCsv widok="suppliers-stock" />
+            <PrzyciskCsv
+              widok="suppliers-stock"
+              wiersze={wiersze}
+              kolumny={KOLUMNY}
+              wczytywanie={ladowanie}
+            />
           </div>
           {odfiltrowane > 0 && (
             <div className="mt-1 text-xs text-muted-foreground" data-testid="stan-licznik-filtra">
