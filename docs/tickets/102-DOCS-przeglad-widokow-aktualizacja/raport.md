@@ -32,3 +32,14 @@ na początku dokumentu).
   `docs/pytania-do-ani-2026-09-18.md` nieaktualne.
 - Backlog #19: decyzja o ukrywaniu wygasłych promocji nadal otwarta.
 - Filtr marek pokazuje „marki” wyglądające jak rozmiar (dane dostawców) — poza zakresem.
+
+## Review fixes applied
+- BLOCKER: §11 Konfiguracja — przycisk nazywa się „Synchronizuj”, nie „Synchronizuj teraz”
+  (`konfiguracja/Dostawcy.tsx:314`, etykieta 1:1 z żywym bundlem produkcji). Zdanie pochodziło
+  z pierwszej wersji dokumentu; poprawione.
+- NICE-TO-HAVE: odznaczone „Definition of done” w `plan.md`.
+
+## Docs updates
+- `docs/karty/PR.6/karta.md` — zaktualizowana w tym tickecie (stan ✅, dowiezione, „Do koordynatora”).
+- Roadmapa, backlog, spec — bez zmian: ticket nie zmienia zachowania aplikacji ani wpisów backlogu;
+  roadmapę aktualizuje koordynator (CLAUDE.md, reguła 0).

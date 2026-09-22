@@ -297,7 +297,7 @@ Katalog, AI Fallback, Admin, Dziennik.
 
 **Zakładka „Dostawcy":**
 - [ ] ✅ / ❌ — lista dostawców z ich statusami.
-- [ ] ✅ / ❌ — „Synchronizuj teraz" przy dostawcy z adresem URL uruchamia pobranie.
+- [ ] ✅ / ❌ — „Synchronizuj" przy dostawcy z adresem URL uruchamia pobranie.
 
 **Zakładka „Wgrywanie ręczne":**
 - [ ] ✅ / ❌ — wgrywasz plik cennika ręcznie i pozycje trafiają do Staging.

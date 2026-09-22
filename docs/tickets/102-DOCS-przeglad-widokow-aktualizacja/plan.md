@@ -47,7 +47,7 @@ Każde twierdzenie o zachowaniu sprawdzone z kodem develop (raporty researcheró
 Zmiany w `rebuild/`, `contract/`, roadmapie, `docs/pytania-do-ani-2026-09-18.md`.
 
 ## Definition of done
-- [ ] Dokument opisuje stan develop, z sekcją Archiwum i numeracją 0–13.
-- [ ] Wszystkie wejścia PR.6 uwzględnione.
-- [ ] Sekcje zbiorcze bez rzeczy naprawionych.
-- [ ] Karta PR.6 oznaczona jako zrobiona.
+- [x] Dokument opisuje stan develop, z sekcją Archiwum i numeracją 0–13.
+- [x] Wszystkie wejścia PR.6 uwzględnione.
+- [x] Sekcje zbiorcze bez rzeczy naprawionych.
+- [x] Karta PR.6 oznaczona jako zrobiona.
