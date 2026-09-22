@@ -2389,15 +2389,18 @@ polu `stan`. Poza zakresem P10.1 (import tylko czytany) — follow-up dla karty 
 
 ---
 
-### #34 · 2026-09-04 · [FRONTEND] · kafel „Ostatni eksport CSV" na Pulpicie jest TRWALE MARTWY
+### #34 · 2026-09-04 · [FRONTEND] · kafel „Ostatni eksport CSV" na Pulpicie jest TRWALE MARTWY — naprawiony w P10.2
+
+> **✅ WDROŻONE 2026-09-22, ticket `96-FEATURE-kafel-ostatni-eksport` (karta P10.2).** Poniżej
+> zostaje historia decyzji; stan po wdrożeniu — patrz „Status" i „Naprawa wdrożona w P10.2" niżej.
 
 | Pole | Wartość |
 |---|---|
 | **Kategoria** | FRONTEND (widok `/`, Pulpit) |
-| **Pliki** | `deminified/frontend-index.js:16852` (`N2`); `contract/fixtures/GET_history.json`; nagłówek `rebuild/backend/src/routes/history.ts`; port: `rebuild/frontend/src/pages/pulpit/kpi.ts` (`ostatniEksport`/`ostatniImport`) |
-| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
-| **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`, decyzja D3) |
-| **Status** | ✔ odtworzone w rebuild (10f) · w produkcji **nadal obecne** |
+| **Pliki** | `deminified/frontend-index.js:16852` (`N2`); `contract/fixtures/GET_history.json`; nagłówek `rebuild/backend/src/routes/history.ts`; port: `rebuild/frontend/src/pages/pulpit/kpi.ts` (`opisKafelkaEksportu`, dawniej `ostatniEksport`/`ostatniImport`) |
+| **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo, karta **P10.2**) |
+| **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`, decyzja D3); naprawione w **P10.2** (`96-FEATURE-kafel-ostatni-eksport`) |
+| **Status** | ✔ **naprawione w rebuild 2026-09-22**, ticket `96-FEATURE-kafel-ostatni-eksport` (karta P10.2) · w produkcji **nadal obecne** |
 
 **DECYZJA ANI 2026-09-21 (pytanie 10.2): wariant (a).** Cytat: „niech zacznie pokazywać datę".
 Odrzucone: usunięcie kafla z Pulpitu i zostawienie go martwym.
@@ -2415,8 +2418,16 @@ Rozróżnienie dwóch tabel opisuje nagłówek `routes/history.ts`. Pole `typ` n
 `pages/pulpit/kpi.ts` (funkcja `ostatniEksport`/`ostatniImport` — sygnatura celowo nie pozwala
 odczytać `typ`) i dwoma testami zamrażającymi (`test/pulpit.kpi.test.ts`, `test/pulpit.test.tsx`).
 
-**Do decyzji.** Czy podpiąć kafel pod `audit_log` (`/api/history/paged` albo `/meta`), czy
-zostawić martwy.
+**Naprawa wdrożona w P10.2 (2026-09-22).** Kafel czyta dwa zapytania
+`GET /api/history/paged?typ=eksport|import&page=1&limit=1` (`useOstatniWpisHistorii(typ)` w
+`pages/pulpit/api.ts`, adres przez `adresStrony()` — DRY z widokiem Historii), z
+`refetchOnMount: "always"` (obchodzi `staleTime: Infinity`). Pulpit przestał wołać
+`GET /api/history`. Kafel pokazuje datę względną i „<dostawca|wszyscy> — N produktów"; bez
+eksportu — „—" + „Ostatni import: <data>"; bez obu — „Brak eksportów ani importów"; błąd
+zapytania — „Nie udało się pobrać historii". Liczy się to, co Historia (`SLOWNIK_AKCJI`,
+nie poszerzany) — CSV dla Selly nie liczy się, `import_pliku`/`import_z_url` też nie (#21 ❌).
+Backend i `contract/` nietknięte. Szczegóły:
+`docs/tickets/96-FEATURE-kafel-ostatni-eksport/raport.md`.
 
 ---
 
