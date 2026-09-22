@@ -154,3 +154,10 @@ zakres z tabeli planu P; wiersza w tabeli roadmapy NIE rusza — stan widać w `
 
 Od tego ticketu **każda nowa karta dostaje katalog od razu przy planowaniu** (koordynator, patrz
 „Przepływ fali”) — okres przejściowy się skończył.
+
+## Dokumenty testowe dla Ani — forma (polecenie Ani, 2026-09-22)
+
+Każda karta, która pisze instrukcję testów dla Ani (delty `docs/instrukcja-testow-*`, instrukcja pełnego testu,
+przegląd widoków): **krótko**. Na punkt: **co zmieniliśmy** (1 zdanie) → **polecenie** (kroki) → **rezultat**.
+Bez ściany tekstu — Ania jej nie czyta. Rozbieżność z logiką biznesową → sekcja **„Do Twojej decyzji”** z propozycją
+zmiany i wariantami. Materiał meta zostaje w karcie i backlogu. Pełny cytat: `docs/karty/I15.9/wejscie-104b.md`.
