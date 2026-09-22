@@ -986,6 +986,10 @@ od zera):
   ⚠ Uwaga na pole „Changelog Ani (najnowszy wpis)" w treści tego commita — producent wkleił tam
   wpis z **2026-08-18**, nie nowy. Prawdziwą treść daje dopiero `git diff` na `CHANGELOG.md`.
 
+*Pominięte — triaż 2026-09-22 po południu (zakres `71323ec..7d6cfc9`, ticket 104):*
+- `a6dffb1` (22.09 06:00) — wyłącznie regeneracja `sellycsv-*.csv` (dane). Kod z tego zakresu
+  (`7d6cfc9`, Staging v2) → wpis **#99**.
+
 *Pominięte — triaż 2026-09-22 (zakres `86d9090..71323ec`, ticket 94):*
 - `0c3c9e4` (19.09 06:00), `68d55cf` (20.09 06:00), `71323ec` (21.09 06:00) — trzy commity z etykietą
   `[FRONTEND]`, każdy zmienia **wyłącznie** `mirror/frontend/ex-port-files/sellycsv-*.csv` — codzienna
@@ -4426,3 +4430,49 @@ z Katalogu — to nowe, świadome odstępstwo (mała zmiana: jeden zapis audytu)
 
 **Rekomendacja koordynatora:** 🕒 po cutoverze. Żadna z tych rzeczy nie jest widoczna w filtrach katalogu
 ani nie blokuje testu. Śmieci w polu marki Ania może poprawić ręcznie (edycja produktu).
+
+---
+
+### #99 · 2026-09-22 · [BAZA][BACKEND][FRONTEND] · Staging v2 — nowy importer, akceptacja z kontrolą aktualności, ścisły EAN, „Rozstrzygnij”
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 13:03 (wdrożenie), commit `7d6cfc9` (sync 14:00) |
+| **Kategoria** | BAZA + BACKEND + FRONTEND — przebudowa rdzenia importu i stagingu |
+| **Pliki** | `mirror/backend/staging_policy.cjs` (**nowy**, 298 l.), `mirror/backend/index.cjs` (dwa wywołania: `staging_policy.install({U,db,normalize,classify,badName,ext})` i `registerRoutes`), `mirror/backend/common.cjs` (`ean_raw`), `mirror/backend/parsers/adapter.cjs` (EAN przez `validateEan`, `eanRaw`, kod zastępczy bez samego EAN), `mirror/frontend/assets/staging-policy-injection.js` (**nowy**), `mirror/frontend/index.html`, `db/schema.sql` (tabela `staging_matches`, indeks unikalny `staging_one_current_product ON staging_items(dostawca,kod)`), `mirror/backend/staging_reconcile_20260922.cjs` (skrypt jednorazowy); kopie `.bak_20260922T110248Z_staging_v2` |
+| **Commit** | `7d6cfc9` |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22** (D3 planu I15) |
+| **Status** | zatwierdzone; karty **I15.2** (część parserowa), **I15.4** (backend), **I15.5** (frontend) — `docs/karty/I15.*` |
+
+**Opis biznesowy (CHANGELOG Ani, 2026-09-22 13:03).** „Staging v2: jedno najnowsze zgłoszenie na produkt/dostawcę;
+świeże ceny i stany; ścisła kontrola surowego EAN w parserze/adapterze; dopasowanie po EAN wyłącznie do jednej
+zgodnej opony, z ochroną DOT; niejednoznaczności do ręcznej decyzji; poprawki ręczne chronione bez osobnego błędu;
+kontrola aktualności i atomowa akceptacja; przycisk Rozstrzygnij; przebudowa stagingu z archiwów bez zmiany katalogu;
+indeks unikalny i tabela świadomych dopasowań.” Powód: „Prośba Anny z 2026-09-22; nieaktualne zgłoszenia, błędne EAN
+i łączenie różnych partii opon.”
+
+**Szczegół techniczny (dla rebuildu).**
+- `install()` podmienia w `U` dodawanie (`addStaging` — najpierw kasuje stare zgłoszenie tej samej pary
+  dostawca+kod), edycję (`updateStaging` — przelicza status EAN przy zmianie numeru) i akceptację
+  (`checkAcceptance`: zgłoszenie zastąpione → 409; zgłoszenie ze starego importu bez `_policyVersion` → 409
+  „Odśwież cennik”; nierozstrzygnięte dopasowanie → 409; błędny EAN → 409), oraz dostarcza nowy `importer()`
+  (odpowiednik naszego `import/tk.ts`). Nadpisuje też `ext.assignKodImportu` (grupa produktów tylko przy
+  zgodności marka/model/rozmiar + indeksy/DOT).
+- `validateEan()`: puste → `empty`; zapis naukowy lub utracone cyfry → błąd; znaki nie-cyfry, zła długość
+  (8/12/13/14), same zera, zła cyfra kontrolna → błąd. **Nigdy nie obcina, nie zaokrągla, nie „naprawia”.**
+- `syntheticCode()`: kod zastępczy `<dostawca>_AUTO_<sha>` z tożsamości opony, **nigdy z samego EAN**.
+- Trasy: `GET /api/staging/:id/review`, `POST /api/staging/:id/resolve` (`action`, `targetCode`).
+- Frontend: wstrzykiwany skrypt z przyciskiem i oknem „Rozstrzygnij”.
+
+**⚠ Kolizja ze świadomym odstępstwem 14i** (ticket 58, EAN w zapisie naukowym → puste pole): produkcja od
+22.09 traktuje taki EAN jako BŁĄD blokujący akceptację do ręcznej poprawki. **Decyzja użytkownika
+2026-09-22 (D4): przyjmujemy wersję Ani** — zastępuje 14i. Dotyczy też wpisu #11.
+
+**Skrypt `staging_reconcile_20260922.cjs`** — jednorazowa przebudowa stagingu z archiwów importu (dedup
+`MAX(id)` per dostawca+kod, potem ponowny import najnowszego pliku każdego dostawcy w `SAVEPOINT`, z kontrolą, że
+`products` się nie zmienił). **Decyzja użytkownika 2026-09-22 (D5): nie przenosimy** — na produkcji wykonany;
+u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu unikalnego (karta I15.4).
+
+**Zamrożenie.** To ostatnia zmiana produkcji przed cutoverem — od 2026-09-22 stary Bridge jest zamrożony
+(uzgodnienie Pawła z Anią). Staging v2 jest więc w wersji ostatecznej.
+
