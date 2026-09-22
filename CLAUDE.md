@@ -25,6 +25,11 @@ szablony, okres przejściowy: `docs/karty/README.md`; stan kart: `tools/stan-kar
 KAŻDEJ karty fali i zmerguj to do `develop` (ticket `DOCS`, PR) — dopiero potem prompty. Karty
 branchują wtedy z `develop`, który już ma ich pliki. Prompt do karty wskazuje jej katalog,
 nie powtarza jego treści.
+**Ta sama zasada dotyczy `docs/spec-backend.md`:** nowego akapitu („Potwierdzone w N”,
+„Odbudowa (…)”) nie dopisuje się na koniec żadnej sekcji — ticket tworzy NOWY plik
+`docs/spec-backend/wpis-<N>.md`. Wolno tylko poprawić w miejscu zdanie, które ticket obalił.
+Powód: karty P10.1 i PR.1 (tickety 90, 91, 2026-09-22) dopisały się w to samo miejsce §2
+i zderzyły przy merge'u. Reguła i szablon: `docs/spec-backend/README.md`.
 
 **1. Po każdej zamkniętej karcie jej `karta.md` opisuje STAN, nie zamiar.**
 Karta oznaczona jako zrobiona (data + ID ticketa), gate rozliczony, zakres faktycznie dowieziony
@@ -70,9 +75,11 @@ Ta sama nieufność dotyczy pustych odpowiedzi: `safeAll()` w module analityki z
 (np. odwołanie do nieistniejącej kolumny) w pustą listę, więc zepsuta trasa wygląda identycznie
 jak trasa bez danych — nie ufaj `rows: []`, sprawdź, czy dane w bazie faktycznie są. Przykład:
 `docs/rebuild-backlog.md` #32 (`historia_cen` bez kolumny `nazwa`). Ta sama pułapka ma też
-postać pliku: `GET /api/analytics/export/{view}` dla `availability-products` i `sell-through`
-oddaje sam BOM (pusty CSV) zamiast `rows: []`, mimo danych w bazie — nie ufaj też pustemu
-plikowi eksportu.
+postać pliku: w PRODUKCJI `GET /api/analytics/export/{view}` dla `availability-products` i
+`sell-through` oddaje sam BOM (pusty CSV) zamiast `rows: []`, mimo danych w bazie — nie ufaj też
+pustemu plikowi eksportu. W odbudowie od karty P10.1 (ticket 90) to naprawione: oba widoki
+zwracają wiersze; morał o niedowierzaniu `rows: []`/pustemu plikowi zostaje aktualny dla innych
+tras i dla samej produkcji.
 
 Ta sama nieufność dotyczy projekcji Drizzle: `select()` bez jawnej listy pól oddaje nazwy PÓL
 modelu (camelCase), a fixture nagrany z oryginału (który robi `SELECT *` przez `better-sqlite3`)

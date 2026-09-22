@@ -19158,6 +19158,13 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+        # ODSTĘPSTWO OD PRODUKCJI — karta P10.1 (ticket 90-FEATURE-ozywienie-kart-dostepnosci),
+        # backlog #35, decyzja użytkownika 2026-09-21. Produkcja odpowiada na nieznany {view}
+        # 200 i CSV-em z samego BOM-u (`analytics_module.cjs:321`); odbudowa — 404 z ciałem
+        # `{ error: "Nieznany widok eksportu" }`. Znane widoki: `WIDOKI_EKSPORTU`
+        # w `rebuild/backend/src/repos/analityka-eksport.ts`. Bez `content`, bo generator
+        # schematów zdejmuje jednowierszowe `content` tras bez fixture'a.
+        "404": { description: "Nieznany widok eksportu" }
   /api/analytics/filters:
     get:
       tags: [analytics]

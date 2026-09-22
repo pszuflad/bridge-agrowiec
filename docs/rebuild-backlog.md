@@ -41,7 +41,8 @@ backlogu"). **#39 i #41 rozstrzygnięte przez Anię i wdrożone 2026-09-21**
 (`docs/tickets/74-FEATURE-slad-kolejki-atrybutow/`). **#40 i #42 rozstrzygnięte przez Anię
 i wdrożone 2026-09-21** (`docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`). **#31–#35 rozstrzygnięte 2026-09-21** —
 #32 i #34 przez Anię (naprawa), #31, #33, #35 i wariant #32 przez użytkownika (naprawa, karta P10.1 —
-wdrożenie #34 w P10.2).
+wdrożenie #34 w P10.2). **#31, #32, #33, #35 WDROŻONE 2026-09-22**, ticket
+`90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1) — w produkcji te cztery usterki nadal obecne.
 
 ---
 
@@ -2193,6 +2194,9 @@ dodać walidację klucza albo zawęzić maskowanie w starym Bridge.
 
 ### #31 · 2026-09-03 · [BACKEND] · `POST /api/analytics/bootstrap-current` nie jest idempotentne — każde wywołanie dubluje migawkę
 
+> **✅ WDROŻONE 2026-09-22, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1).** Poniżej
+> zostaje historia decyzji; stan po wdrożeniu — patrz „Status" i „Co zrobiła odbudowa" niżej.
+>
 > **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: NAPRAWIĆ, bez indeksu unikalnego.** `bootstrap-current` nie dokłada
 > migawki produktowi, który ma już migawkę z bieżącego dnia (`WHERE NOT EXISTS` per produkt/dzień).
 > **Bez** unikalnego indeksu na `historia_cen` — zablokowałby on legalne zdublowane kody z jednego importu
@@ -2205,8 +2209,8 @@ dodać walidację klucza albo zawęzić maskowanie w starym Bridge.
 | **Kategoria** | BACKEND (trasa analityki, tabela `historia_cen`) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:81-91` (handler, `INSERT … SELECT` bez `ON CONFLICT`); port: `rebuild/backend/src/repos/analityka.ts` (`zbudujSnapshotBiezacy`), `rebuild/backend/src/routes/analytics.ts` |
 | **Do nowej wersji?** | ✅ **NAPRAWA — decyzja użytkownika 2026-09-21** (świadome odstępstwo, karta **P10.1**) |
-| **Iteracja** | odtworzone 1:1 w **10a**; trasa świadomie bez przycisku w UI (decyzja D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`) |
-| **Status** | ✔ odtworzone w rebuild (10a) · w produkcji **nadal obecne** |
+| **Iteracja** | odtworzone 1:1 w **10a**; naprawione w **P10.1** (`90-FEATURE-ozywienie-kart-dostepnosci`); trasa świadomie bez przycisku w UI (decyzja D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`) |
+| **Status** | ✔ **naprawione w rebuild 2026-09-22**, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1) · w produkcji **nadal obecne** |
 
 **Co robi produkcja.** Handler robi `INSERT INTO historia_cen (…) SELECT … FROM products
 WHERE status='aktywny'` bez żadnego `ON CONFLICT`/`WHERE NOT EXISTS`. Każde wywołanie dokłada
@@ -2218,14 +2222,21 @@ wywołań, nie z liczbą realnych zdarzeń cenowych. Oryginalny frontend nigdy n
 (grep `bootstrap` po `frontend-index.js` — zero trafień), więc w produkcji ryzyko jest dziś
 teoretyczne — uruchamia się ją tylko ręcznie/skryptem.
 
-**Co zrobiła odbudowa.** Port 1:1, nieidempotentność udokumentowana w nagłówku funkcji
+**Co zrobiła odbudowa (do 10a).** Port 1:1, nieidempotentność udokumentowana w nagłówku funkcji
 i pokryta testem charakteryzacyjnym (`bootstrap-current` zwraca `inserted` równe liczbie
 aktywnych produktów i rośnie przy drugim wywołaniu). Trasa przechodzi GATE (openapi + 401 +
 test jednostkowy), ale świadomie nie dostała przycisku w UI, żeby nikt nie kliknął jej dwa razy.
 
-**Naprawa (propozycja).** `INSERT … SELECT` z `WHERE NOT EXISTS (SELECT 1 FROM historia_cen
-WHERE …)` per produkt/dzień, albo unikalny indeks na `(produkt, data)` + `ON CONFLICT DO NOTHING`.
-Poza zakresem odbudowy — decyzja użytkownika, czy i kiedy naprawiać zachowanie produkcji.
+**Naprawa wdrożona w P10.1 (2026-09-22).** `zbudujSnapshotBiezacy`: `INSERT … SELECT … WHERE
+status='aktywny' AND id NOT IN (SELECT produkt_id FROM historia_cen WHERE produkt_id IS NOT NULL
+AND substr(zarejestrowano_at, 1, 10) = <dzień UTC>)`. „Ten sam dzień" = dzień kalendarzowy **UTC**
+z prefiksu `YYYY-MM-DD` znacznika (100% danych snapshotu to ISO-UTC; ten sam `substr` tnie daty
+gdzie indziej w analityce). Konsekwencja: dzień kończy się o 01:00 (zima) / 02:00 (lato) czasu
+polskiego. Obejmuje migawki obu pisarzy (bootstrap i auto-zatwierdzanie importu). `NOT IN` +
+`IS NOT NULL`, bo `NOT IN` z `NULL` w liście daje pusty wynik. Bez indeksu unikalnego, bez
+migracji, kształt `{ok, inserted, at}` bez zmian. Pomiar na `db/snapshot.db`: pierwsze wywołanie
+`inserted = 6898`, drugie tego samego dnia `inserted = 0`. Szczegóły:
+`docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/raport.md`.
 
 **Powiązanie z #32/#33.** Inny błąd tej samej tabeli `historia_cen`, niezależny od tego wpisu:
 `INSERT` powyżej nie odwołuje się do kolumny `nazwa` (jej też nie ma w `historia_cen`), więc
@@ -2236,6 +2247,9 @@ usterek — nie scalać.
 
 ### #32 · 2026-09-04 · [BACKEND] · `historia_cen` NIE MA kolumny `nazwa` — obie karty „Dostępności" są trwale puste
 
+> **✅ WDROŻONE 2026-09-22, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1).** Poniżej
+> zostaje historia decyzji; stan po wdrożeniu — patrz „Status" i „Co zrobiła odbudowa" niżej.
+>
 > **⭐ WARIANT NAPRAWY — decyzja użytkownika 2026-09-21: (a), z doprecyzowaniem.** Nazwa dociągana
 > z katalogu (`LEFT JOIN products`), łączenie po parze **`dostawca` + `kod`**, nie po samym kodzie — ten sam
 > kod może występować u dwóch dostawców. Dla pozycji usuniętej z katalogu nazwa pusta (w widoku kreska).
@@ -2248,8 +2262,8 @@ usterek — nie scalać.
 | **Kategoria** | BACKEND (dwie trasy analityki, tabela `historia_cen`) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:161` (`availability/products`), `:176` (`availability/sell-through`), `:316-317` (te same dwa widoki eksportu); schemat: `db/schema.sql`, `rebuild/schema/001_schema.sql`, `analytics_module.cjs:24-49` (`ensureSchema`); port: `rebuild/backend/src/repos/analityka.ts` (dashboard), `rebuild/backend/src/repos/analityka-eksport.ts` (eksport CSV) |
 | **Do nowej wersji?** | ✅ **NAPRAWA ZATWIERDZONA — decyzja Ani 2026-09-21** (świadome odstępstwo) |
-| **Iteracja** | odtworzone 1:1 w **10e** (dashboard, `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) i **10f** (eksport CSV, `docs/tickets/26-FEATURE-analityka-export-pulpit/`) |
-| **Status** | ✔ odtworzone w rebuild (10e + 10f) · w produkcji **nadal obecne** |
+| **Iteracja** | odtworzone 1:1 w **10e** (dashboard, `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) i **10f** (eksport CSV, `docs/tickets/26-FEATURE-analityka-export-pulpit/`); naprawione w **P10.1** (`90-FEATURE-ozywienie-kart-dostepnosci`) |
+| **Status** | ✔ **naprawione w rebuild 2026-09-22**, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1) · w produkcji **nadal obecne** |
 
 **DECYZJA ANI 2026-09-21 (pytanie 10.1): TAK.** Cytat: „tak chcę, żeby zaczęły działać". Naprawa ożywia
 naraz dwie karty zakładki „Dostępność", dwa eksporty CSV (dziś sam BOM) i ODSŁANIA #33, dziś
@@ -2274,7 +2288,7 @@ użytkownikowi „Brak danych" **od zawsze**, niezależnie od danych. Ta sama wa
 widoków eksportu CSV (`export/availability-products`, `export/sell-through`, `:316-317`),
 które w tej sytuacji oddają sam znacznik BOM — to jest wejście dla bloku **10f**.
 
-**Co zrobiła odbudowa.** Port 1:1, łącznie z portem `safeAll` (`bezpiecznieWiersze`
+**Co zrobiła odbudowa (do 10e/10f).** Port 1:1, łącznie z portem `safeAll` (`bezpiecznieWiersze`
 w `repos/analityka.ts`), żeby zachowanie było identyczne z produkcją zamiast dawać 500.
 Zamrożone dwoma testami charakteryzacyjnymi backendu i jednym testem widoku — gdyby te trasy
 kiedyś zaczęły zwracać wiersze, testy o tym powiedzą. **Blok 10f odtworzył tę samą wadę**
@@ -2283,18 +2297,27 @@ w `repos/analityka-eksport.ts`) — oba oddają sam znacznik BOM mimo danych w `
 zamrożone `test/analityka.eksport.agregaty.test.ts` (poziom repo) i
 `test/analityka.eksport.gate.test.ts` (przez HTTP).
 
-**Naprawa (propozycja).** Trzy warianty, każdy to zmiana zachowania produkcji:
-(a) `LEFT JOIN products p ON p.kod = h.kod` i `MAX(p.nazwa)` — pełne kolumny oryginału, ale
-nazwa znika dla pozycji usuniętych z katalogu; (b) usunięcie `nazwa` z obu zapytań — karty
-zaczynają działać, pozycję rozpoznaje się po kodzie i EAN-ie; (c) dołożenie kolumny `nazwa`
-do `historia_cen` i wypełnianie jej przy zapisie — najbliżej pierwotnego zamiaru autora,
-ale wymaga migracji i nie wypełni danych historycznych. Poza zakresem odbudowy — decyzja
-użytkownika, czy i kiedy naprawiać.
+**Naprawa wdrożona w P10.1 (2026-09-22).** Wariant (a): `LEFT JOIN products p ON p.dostawca =
+h.dostawca AND p.kod = h.kod` (łączenie po PARZE, nie po samym kodzie — ten sam kod może
+występować u dwóch dostawców), `MAX(p.nazwa)` w dashboardzie i eksporcie `sell-through`,
+`p.nazwa` w `GROUP BY` eksportu `availability-products` (zachowuje grupowanie oryginału po
+`ean`). Pozycja usunięta z katalogu → `nazwa: null` (JSON) / pusta komórka (CSV), w widoku „—"
+(istniejące `formatuj()`). Pomiar na `db/snapshot.db` (kopia produkcji 2026-08-13; `historia_cen`
+14 513 wierszy w chwili pomiaru): karta 4.1 500/500 wierszy (bez limitu 5 184, 254 z `nazwa: null`,
+22,7 ms), karta 4.2 500/500 (bez limitu 5 184, 119 z `nazwa: null`, 54,7 ms), eksport
+`availability-products` 5000/5000 (bez limitu 5 193, 36,1 ms), eksport `sell-through` 5000/5000
+(bez limitu 5 184, 56,6 ms). 1 897 par `(dostawca, kod)` z historii nie ma już w katalogu → pusta
+nazwa. Fixtures (`GET_analytics_availability_*`, nagrania z `rows: []`) świadomie NIETKNIĘTE —
+rozjazd w treści to zatwierdzone odstępstwo, `gate/ksztalt.ts` nie zagląda do elementów tablicy
+pustej we wzorcu. Szczegóły: `docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/raport.md`.
 
 ---
 
 ### #33 · 2026-09-04 · [BACKEND] · `sell-through`: funkcja okna liczona PO niepełnym `GROUP BY` — wynik niedeterministyczny przy duplikacie
 
+> **✅ WDROŻONE 2026-09-22, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1).** Poniżej
+> zostaje historia decyzji; stan po wdrożeniu — patrz „Status" i „Co zrobiła odbudowa" niżej.
+>
 > **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: NAPRAWIĆ razem z #32.** Najpierw CTE zwijające duplikaty klucza
 > `(dostawca, kod, zarejestrowano_at)`, dopiero na nim `LAG`. **Z duplikatów bierzemy wiersz OSTATNI
 > WPISANY** (`MAX(id)`) — ten, który po imporcie zostaje w katalogu, więc karta mówi to samo co katalog.
@@ -2308,8 +2331,8 @@ użytkownika, czy i kiedy naprawiać.
 | **Kategoria** | BACKEND (trasa analityki, poprawność SQL) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:175-179` (dashboard), `:317` (widok eksportu `sell-through`); port: `rebuild/backend/src/repos/analityka.ts` (`tempoSchodzenia`), `rebuild/backend/src/repos/analityka-eksport.ts` (eksport); źródło duplikatu: `rebuild/backend/src/import/tk.ts:171,548-564` |
 | **Do nowej wersji?** | ✅ **NAPRAWA — decyzja użytkownika 2026-09-21** (świadome odstępstwo, karta **P10.1**, razem z #32) |
-| **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`) |
-| **Status** | ✔ odtworzone w rebuild (10e) · **nieosiągalne, dopóki żyje #32** |
+| **Iteracja** | odtworzone 1:1 w **10e** (`docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`); naprawione w **P10.1** (`90-FEATURE-ozywienie-kart-dostepnosci`) |
+| **Status** | ✔ **naprawione w rebuild 2026-09-22**, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1) · w produkcji **nadal obecne** |
 
 **Co robi produkcja.** CTE `seq` wybiera `stan` **gołe, bez agregatu**, obok
 `GROUP BY dostawca, kod, zarejestrowano_at`, i liczy na tym
@@ -2323,18 +2346,36 @@ poprawny; gdy przypada ich ≥ 2, SQLite bierze `stan` z **arbitralnego** wiersz
 **raz na cały import**, więc dwie linie tego samego `kod` w jednym cenniku dostawcy dają dwa
 wiersze `historia_cen` o identycznym kluczu grupowania. Ta sama konstrukcja jest w legacy.
 
-**Dlaczego to dziś nie boli.** Zapytanie i tak nigdy nie dobiega do końca — wywraca się
-wcześniej na `MAX(nazwa)` (wpis **#32**). Naprawa #32 **odsłoni** ten problem, więc obie
-sprawy trzeba rozstrzygać razem.
+**Dlaczego to do 10e/10f nie bolało.** Zapytanie i tak nigdy nie dobiegało do końca — wywracało się
+wcześniej na `MAX(nazwa)` (wpis **#32**). Naprawa #32 w P10.1 to **odsłoniła** — obie sprawy były
+rozstrzygane i wdrożone razem, w tej kolejności (#32 przed #33).
 
-**Co zrobiła odbudowa.** Port 1:1 z komentarzem opisującym pułapkę i testem
+**Co zrobiła odbudowa (do 10e/10f).** Port 1:1 z komentarzem opisującym pułapkę i testem
 charakteryzacyjnym, który zamraża realny efekt (pusta lista mimo danych do policzenia).
 To samo dotyczy widoku eksportu `export/sell-through` (port w `repos/analityka-eksport.ts`,
 blok **10f**) — tam też dziś zamaskowane przez #32.
 
-**Naprawa (propozycja).** Rozdzielić agregację od funkcji okna: najpierw CTE zwijające
-duplikaty (`MAX(stan)` albo `MIN(id)` per klucz), dopiero na nim `LAG`. Poza zakresem
-odbudowy — decyzja użytkownika, razem z #32.
+**Naprawa wdrożona w P10.1 (2026-09-22).** Wspólne CTE `zwiniete`
+(`HISTORIA_BEZ_DUPLIKATOW_KLUCZA` w `repos/analityka.ts`): z każdej grupy `(dostawca, kod,
+zarejestrowano_at)` bierze wiersz o `MAX(id)`, dopiero na nim liczy się `LAG`. Jeden fragment
+SQL, używany przez dashboard (`tempoSchodzenia`) i eksport `sell-through` — karta 4.1 i eksport
+`availability-products` liczą dalej `COUNT(*)` po surowej historii (decyzja #33 ich nie obejmuje,
+odnotowane jako follow-up w raporcie karty).
+Na snapshocie `db/snapshot.db` (kopia produkcji 2026-08-13): **30 grup duplikatów klucza,
+67 wierszy** (na 14 513 wierszy `historia_cen`); zwinięcie nie zmienia żadnej z 5 184 sum
+`sell-through` na tym snapshocie (duplikaty mają tam równe stany), ale bez niego wynik zależałby
+od implementacji SQLite.
+**Który wiersz zostaje w `products` przy duplikacie z prawdziwego importu (pomiar przed kodem,
+warunek z decyzji 2026-09-21):** silnik importu (`import/tk.ts`) wczytuje katalog raz i nie
+mutuje go — każda linia cennika liczy `autoPatch` względem stanu SPRZED importu. Test na
+prawdziwym silniku (dwie linie tego samego kodu w jednym cenniku, obie różne od katalogu):
+w `products` zostaje linia **OSTATNIA**, `historia_cen` dostaje dwa wiersze o tym samym kluczu,
+`MAX(id)` daje stan linii ostatniej — zgodne z decyzją, warunek stopu nie zaszedł. Niuans
+przypadku mieszanego (ostatnia linia ma `stan` równy stanowi sprzed importu, ale inną cenę):
+`stan` nie wchodzi do jej `autoPatch`, więc katalog zachowuje `stan` linii WCZEŚNIEJSZEJ, a
+`MAX(id)` daje stan linii ostatniej — w tym jednym przypadku karta i katalog się rozjeżdżają na
+polu `stan`. Poza zakresem P10.1 (import tylko czytany) — follow-up dla karty importu. Szczegóły:
+`docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/raport.md`.
 
 ---
 
@@ -2371,6 +2412,9 @@ zostawić martwy.
 
 ### #35 · 2026-09-04 · [BACKEND] · `Content-Disposition` w eksporcie CSV bierze `{view}` bez sanityzacji
 
+> **✅ WDROŻONE 2026-09-22, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1).** Poniżej
+> zostaje historia decyzji; stan po wdrożeniu — patrz „Status" i „Co zrobiła odbudowa" niżej.
+>
 > **⭐ DECYZJA UŻYTKOWNIKA 2026-09-21: lista znanych widoków, reszta 404.** `{view}` spoza listy widoków
 > eksportu dostaje 404 zamiast dzisiejszego `200` z samym BOM. Świadomie zmienia port `return sendRows([])`
 > (`:321`). Uzasadnienie: frontend nigdy nie woła nieznanych widoków, więc nikt tego nie odczuje, a „200 i pusty
@@ -2382,8 +2426,8 @@ zostawić martwy.
 | **Kategoria** | BACKEND (trasa `GET /api/analytics/export/:view`) |
 | **Pliki** | `mirror/backend/analytics_module.cjs:308` (nagłówek), `:321` (nieznany widok → `sendRows([])`); port: `rebuild/backend/src/routes/analytics.ts:324-335` |
 | **Do nowej wersji?** | ✅ **NAPRAWA — decyzja użytkownika 2026-09-21** (świadome odstępstwo, karta **P10.1**) |
-| **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`) |
-| **Status** | ✔ odtworzone w rebuild (10f) · w produkcji **nadal obecne** |
+| **Iteracja** | odtworzone 1:1 w **10f** (`docs/tickets/26-FEATURE-analityka-export-pulpit/`); naprawione w **P10.1** (`90-FEATURE-ozywienie-kart-dostepnosci`) |
+| **Status** | ✔ **naprawione w rebuild 2026-09-22**, ticket `90-FEATURE-ozywienie-kart-dostepnosci` (karta P10.1) · w produkcji **nadal obecne** |
 
 **Co robi produkcja.** `analytics_module.cjs:308`:
 ``res.setHeader('Content-Disposition', `attachment; filename=${view}.csv`)`` — `view` pochodzi
@@ -2393,12 +2437,18 @@ wprost z `req.params`, bez cudzysłowów i bez `filename*`.
 w `catch` jako 500 (nie jako wstrzyknięcie nagłówka) — ale nazwa pliku nadal przyjmuje dowolny
 „legalny" napis.
 
-**Co zrobiła odbudowa.** Port 1:1 w `routes/analytics.ts`, bez sanityzacji, z komentarzem
+**Co zrobiła odbudowa (do 10f).** Port 1:1 w `routes/analytics.ts`, bez sanityzacji, z komentarzem
 w kodzie.
 
-**Do decyzji.** Czy ograniczyć `{view}` do listy znanych widoków (odpowiedź 404/400 zamiast
-pustego CSV) albo owinąć nazwę w cudzysłowy. ⚠ Powiązanie: to zmieniłoby też zachowanie
-„nieznany `{view}` → 200 i sam BOM", które jest portem `return sendRows([])` (`:321`).
+**Naprawa wdrożona w P10.1 (2026-09-22).** `widokEksportu(nazwa)` w `repos/analityka-eksport.ts`
+(`Object.hasOwn` na `WIDOKI_EKSPORTU` — jedno źródło prawdy, zamiast osobnej listy dozwolonych
+nazw); nieznany widok → `404 {error}` zamiast `200` z samym BOM; `filename` składany wyłącznie
+z nazwy już zwalidowanej jako klucz mapy (bez sanityzacji nagłówka — poza zakresem, `{view}` nie
+trafia tam już nieznany). `openapi.yaml` ma `404` dla `/api/analytics/export/{view}`, oznaczony
+jako odstępstwo P10.1; generator `--sprawdz` czysty. Uboczny efekt: jako klucz zwykłego literału
+obiektu, `WIDOKI_EKSPORTU` przyjmowałoby też `toString`/`constructor` z prototypu —
+`Object.hasOwn` odcina i ten przypadek. Szczegóły:
+`docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/raport.md`.
 
 ---
 

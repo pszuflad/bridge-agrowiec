@@ -100,7 +100,23 @@ czyli kroku „sync docs”, który z założenia idzie po review — domknięte
   wstawienia (po „## 9. Historia”), decyzja o numeracji i „12 → 13 widoków” zostawiona PR.6.
 - `docs/rebuild-backlog.md` (~:951) — nota triażowa o `archive_module.cjs` oznaczona jako
   zrealizowana w tickecie 91.
-- `docs/spec-backend.md` §2 — wpis „ticket 91”: trzy trasy, `file/{month}/{name}`, ochrona, retencja 7 dni.
+- **New:** `docs/spec-backend/wpis-91.md` — wpis „ticket 91”: trzy trasy, `file/{month}/{name}`, ochrona,
+  retencja 7 dni (pierwotnie akapit na końcu §2 `docs/spec-backend.md`, przeniesiony — niżej).
+
+## Konflikt w `docs/spec-backend.md` i nowa reguła (2026-09-22, po otwarciu PR #108)
+Merge z `develop` dał konflikt: ticket 90 (karta P10.1, PR #107) i ten ticket dopisały akapit
+„Potwierdzone w N” na koniec §2, w to samo miejsce — wzorzec „dopisek w tym samym punkcie”,
+który w roadmapie dał 7 konfliktów. Na prośbę użytkownika rozwiązane tak samo jak roadmapa
+(ticket 82 → `docs/karty/`): **jeden plik na ticket**.
+- **New:** `docs/spec-backend/README.md` (reguła, szablon, okres przejściowy), `wpis-90.md`
+  (akapit P10.1 przeniesiony bez zmian treści), `wpis-91.md`.
+- `docs/spec-backend.md` — oba akapity zastąpione stałym wskaźnikiem na końcu §2; taki sam
+  wskaźnik na końcu §5 i zdanie we wstępie; odnośnik „Patrz §2 wyżej” w §5 → `wpis-90.md`.
+- Reguła dopisana tam, gdzie żyje reguła kart: `CLAUDE.md` (reguła 0), `.claude/commands/feature.md`
+  (Krok 13, pkt 5), `.claude/agents/doc-checker.md`, `docs/karty/README.md` (tabela własności).
+- Wpisy sprzed ticketu 91 zostały w `docs/spec-backend.md` — przeniesienie spod kart w toku dałoby
+  im konflikt. Karta w toku, która już dopisała akapit na koniec §2/§5, przy merge'u przenosi go
+  do `wpis-<swój N>.md` (instrukcja w README katalogu).
 - `docs/spec-frontend.md` — §3: 14 tras / 12 pozycji; §5: akapit o widoku archiwum.
 - `rebuild/backend/README.md` — `IMPORT_ARCHIVE_DIR`, struktura (`routes/import-archive.ts`), akapit o trasach odczytu.
 - `rebuild/frontend/README.md` — reguła 5: 12 pozycji / 14 tras.

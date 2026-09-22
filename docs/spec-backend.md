@@ -17,6 +17,10 @@ z naszym kodem (`deminified/backend-index.cjs`, `mirror/backend/*.cjs`,
 `02_SCHEMAT_BAZY`, `03_IMPORT_tk`, `04_WARSTWA_DANYCH`, `05_PARSERY_MODULY`,
 `06_KONFIGURACJA`, `schema.sql`.
 
+**Ustalenia odbudowy od ticketu 91** leżą w `docs/spec-backend/wpis-<N>.md` — jeden plik na
+ticket, żeby równoległe karty nie dopisywały się w to samo miejsce tego dokumentu
+(`docs/spec-backend/README.md`). Pełna specyfikacja = ten plik + tamten katalog.
+
 ---
 
 ## 1. Rozbieżności z moim audytem — 3 KOREKTY
@@ -161,9 +165,13 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `importy-timeline` nie ma konsumenta w UI (świadoma decyzja, jak `bootstrap-current` w 10a).
 > **Odkrycie o produkcji:** `historia_cen` nie ma kolumny `nazwa`, o którą pytają
 > `availability/products` i `availability/sell-through` — oba zapytania wywracają się na
-> `no such column`, `safeAll()` połyka błąd, więc obie trasy oddają `rows: []` mimo 15 597
-> migawek w historii; odtworzone 1:1, do decyzji w `docs/rebuild-backlog.md` #32. Szczegóły:
-> `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
+> `no such column`, `safeAll()` połyka błąd, więc w PRODUKCJI obie trasy zawsze oddają `rows: []`
+> mimo migawek w historii. **Odbudowa od P10.1** (`90-FEATURE-ozywienie-kart-dostepnosci`,
+> 2026-09-22, świadome odstępstwo, `docs/rebuild-backlog.md` #32) już nie portuje tej usterki
+> 1:1 — obie trasy łączą `historia_cen` z `products` po `(dostawca, kod)` i oddają wiersze
+> (`nazwa: null` dla pozycji usuniętej z katalogu). Szczegóły:
+> `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`,
+> `docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/`.
 >
 > **Potwierdzone w 10f** (`26-FEATURE-analityka-export-pulpit`, 2026-09-04): `GET
 > /api/analytics/export/{view}` — 27. i **ostatnia** trasa modułu analityki (moduł kompletny
@@ -176,11 +184,15 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `rotation-inactive`), **każdy z własnym SQL-em**, innym niż trasa dashboardu o tej samej
 > nazwie (np. `export/margins` liczy per produkt, dashboard `/margins` grupuje). LIMIT 5000 mają
 > tylko 6 z 10 (bez limitu: `suppliers-stability`, `suppliers-stock`, `ean-comparison`,
-> `unique`). Nieznany `{view}` → **200 i sam BOM, nie 404**. `availability-products` i
-> `sell-through` dziedziczą usterkę #32 (`historia_cen.nazwa`) i zawsze oddają sam BOM mimo
-> danych. Format CSV: separator średnik, BOM zawsze na początku (także przy pustym wyniku),
+> `unique`). W PRODUKCJI nieznany `{view}` → **200 i sam BOM, nie 404**, a `availability-products`
+> i `sell-through` dziedziczą usterkę #32 (`historia_cen.nazwa`) i zawsze oddają sam BOM mimo
+> danych; **odbudowa od P10.1** (2026-09-22, świadome odstępstwo, backlog #32/#35) łamie oba
+> punkty — nieznany widok dostaje `404 {error}`, a te dwa widoki eksportu oddają wiersze (JOIN
+> po `(dostawca, kod)` jak w dashboardzie, patrz blok 10e wyżej). Format CSV pozostałych ośmiu
+> widoków bez zmian: separator średnik, BOM zawsze na początku (także przy pustym wyniku),
 > cudzysłowy podwajane, nagłówek z kluczy pierwszego wiersza. Szczegóły:
-> `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
+> `docs/tickets/26-FEATURE-analityka-export-pulpit/`,
+> `docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/`.
 >
 > **Potwierdzone w 7a** (`29-FEATURE-atrybuty-backend`, 2026-09-04): atrybuty to **13 ścieżek /
 > 18 operacji** (`atrybuty_module.cjs` 11 + `pending_module.cjs` 7; operacji jest więcej niż
@@ -304,18 +316,9 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `contract/openapi.yaml` nowym markerem `x-odbudowa-nowa-trasa`. Szczegóły:
 > `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
 
-> **Potwierdzone w 91** (`91-FEATURE-archiwum-importow`, 2026-09-22, karta PR.1): trzy trasy
-> odczytu archiwum importów, port `archive_module.cjs:160-241` — `GET /api/import-archive`
-> (filtry `dostawca` upper-case, `miesiac` = nazwa katalogu, `status` dosłownie; najnowsze
-> pierwsze po `mtime`; wartości zastępcze, gdy brak `.meta.json`), `GET
-> /api/import-archive/stats` (`{ok, plikow, bajtow, limitBajtow: 5 GB, retencjaDni: 7,
-> perMiesiac}`) i `GET /api/import-archive/file/{month}/{name}` — **dwa segmenty, nie
-> `file/:id`**, bo Apache `AllowEncodedSlashes=Off` odrzuca `%2F`; regex `^\d{4}-\d{2}/[^/]+$`
-> + zakaz `..` → 400, brak pliku → 404, `Content-Disposition` z nazwą archiwalną. Wszystkie
-> trzy już w oryginale za `we` (Bearer lub cookie) — **NIE jest to odstępstwo D1**. Zapis
-> archiwum bez zmian (od 3b), retencja `RETENCJA_DNI = 7` zgodna z produkcją (nie 90 dni —
-> komentarz nagłówka oryginału jest nieaktualny, kod wygrywa). Szczegóły:
-> `docs/tickets/91-FEATURE-archiwum-importow/`.
+> **Kolejne wpisy do tej sekcji (od ticketu 91): `docs/spec-backend/wpis-<N>.md`** — jeden plik
+> na ticket, tu już nic nie dopisujemy (reguła i powód: `docs/spec-backend/README.md`).
+> Spis: `ls docs/spec-backend/wpis-*.md` — tej linii nie aktualizuje się ręcznie.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -515,9 +518,14 @@ z tego samego bloku liczy z niej inflację miesięczną, też oknem `LAG()`.
 `docs/tickets/23-FEATURE-analityka-dostawcy/` (10d).
 
 ⚠ **`historia_cen` NIE MA kolumny `nazwa`** — a `availability/products`
-i `availability/sell-through` (blok 10e) o nią pytają (`MAX(nazwa)`), więc oba zapytania
-wywracają się na `no such column`, `safeAll()` połyka błąd i obie trasy zawsze oddają pustą
-listę. Patrz §2 wyżej i `docs/rebuild-backlog.md` #32.
+i `availability/sell-through` (blok 10e) o nią pytają (`MAX(nazwa)`), więc w PRODUKCJI oba
+zapytania wywracają się na `no such column`, `safeAll()` połyka błąd i obie trasy zawsze oddają
+pustą listę. **Odbudowa od P10.1** świadomie odstępuje: łączy `historia_cen` z `products` po
+`(dostawca, kod)` i oddaje wiersze z `nazwa` (lub `null`, gdy pozycja zniknęła z katalogu).
+Patrz `docs/spec-backend/wpis-90.md` i `docs/rebuild-backlog.md` #32.
+
+> **Kolejne wpisy do tej sekcji (od ticketu 91): `docs/spec-backend/wpis-<N>.md`** — jeden plik
+> na ticket, tu już nic nie dopisujemy (reguła i powód: `docs/spec-backend/README.md`).
 
 ## 6. Korekty do propagacji
 
