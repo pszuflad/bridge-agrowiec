@@ -25,7 +25,7 @@ nie uruchamia — montaż harmonogramu i tras to I15.8.
 - **New:** `rebuild/backend/src/selly/rest/sync-delta.ts` — port `sync_delta.cjs` (`findDeltaProducts`, `syncDelta`).
 - Testy: **new** `test/migracje.selly-warianty.test.ts`, `test/selly.discovery.test.ts`, `test/selly.sync-delta.test.ts`,
   `test/selly.limiter.test.ts`, `test/gate/selly-rest.ts`; zmienione `test/gate/selly-atrapa.ts` (sklep wariantowy
-  w pamięci, `bledyRaz`, `featureIdNowegoMagazynu`), `test/gate/index.ts`, `test/db.migracje.test.ts` (013, bilans
+  w pamięci, `bledyRaz`, `magazynNowegoWariantu`), `test/gate/index.ts`, `test/db.migracje.test.ts` (013, bilans
   29 tabel / 19 indeksów), `test/selly.synchronizacja.test.ts` (#67), `test/selly.klient.test.ts` (ścieżki metod
   wariantowych), `test/selly.tryb.test.ts` (atrapa z `satisfies Record<keyof KlientSelly,…>`).
 
@@ -59,3 +59,8 @@ co zmieniało, czy `bridge_kod` jest nadpisywany); discovery wystawia `klient`, 
   (tam powstaje kolejny produkt), ale do rozważenia z Anią po cutoverze.
 - `dryRun` Toru 1 nie chroni przed `createVariant` w discovery — zastane 1:1; twardą blokadą jest `SELLY_TRYB`.
 - Defekty zostawione 1:1 do decyzji Ani po cutoverze: #66, #69, #70, osierocone mapowania (#100).
+
+## Review fixes applied
+- BLOCKER (dokumentacja handoffu: karta, backlog, wpis spec, wejścia I15.7/I15.8) — realizowany w fazie „sync docs” tego ticketu.
+- NICE-TO-HAVE: atrapa `createVariant` — opcja `featureIdNowegoMagazynu` (wybór dostawcy przez `Object.keys()[0]`)
+  zastąpiona jawną parą `magazynNowegoWariantu: { dostawca, featureId }`.

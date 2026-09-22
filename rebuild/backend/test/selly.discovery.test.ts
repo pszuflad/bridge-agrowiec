@@ -276,7 +276,7 @@ describe("discovery Selly — ensureMapping", () => {
 
   it("uczy się `feature_id` nieznanego magazynu z odpowiedzi na POST wariantu", async () => {
     zasiejMapowanie(baza.sqlite, { kodImportu: "100001", dostawca: "MO2", bridgeKod: "MO2_100001", productId: 812 });
-    const { atrapa, discovery } = przygotuj({ sklep: [produkt812()], featureIdNowegoMagazynu: { MO1: 9 } });
+    const { atrapa, discovery } = przygotuj({ sklep: [produkt812()], magazynNowegoWariantu: { dostawca: "MO1", featureId: 9 } });
     expect(discovery.getFeatureIdForWarehouse("MO1")).toBeNull();
 
     const wynik = await discovery.ensureMapping(baza.db, {

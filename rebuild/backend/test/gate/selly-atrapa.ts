@@ -89,10 +89,11 @@ export type OpcjeAtrapy = {
   /** Rozmiar strony `listProductsPage` — Selly oddaje 20 (`discovery.cjs:59`). */
   rozmiarStrony?: number;
   /**
-   * `feature_id`, które sklep nada cesze „Magazyny” nowego wariantu, gdy wołający nie podał
-   * jej w ciele — symulacja uczenia `feature_id` dla MO1/MO6/MO7/MO8/MO10.
+   * Cecha „Magazyny”, którą sklep dołoży do nowego wariantu utworzonego BEZ cech — symulacja
+   * uczenia `feature_id` dla MO1/MO6/MO7/MO8/MO10. Jawnie jedna para: ciało POST-a nie niesie
+   * dostawcy, więc atrapa nie ma z czego go wywnioskować.
    */
-  featureIdNowegoMagazynu?: Record<string, number>;
+  magazynNowegoWariantu?: { dostawca: string; featureId: number };
 };
 
 /**
@@ -236,10 +237,9 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
       zapisz("createVariant", productId, cialo);
       const produkt = produktAlbo404(productId, "POST", `/api/products/${productId}/variants`);
       let features: CechaWariantu[] = cialo.features ?? [];
-      if (features.length === 0) {
-        const dostawca = Object.keys(opcje.featureIdNowegoMagazynu ?? {})[0];
-        const featureId = dostawca ? opcje.featureIdNowegoMagazynu?.[dostawca] : undefined;
-        if (dostawca && featureId) features = [{ feature_id: featureId, name: "Magazyny", value: dostawca }];
+      const nowy = opcje.magazynNowegoWariantu;
+      if (features.length === 0 && nowy) {
+        features = [{ feature_id: nowy.featureId, name: "Magazyny", value: nowy.dostawca }];
       }
       const wariant = {
         variant_id: kolejnyWariant++,
