@@ -134,6 +134,16 @@ Schematy tej ścieżki są wpisane RĘCZNIE, wielowierszowo i POZA generowanym b
 przy pierwszym biegu skasował. Kształt pilnuje `rebuild/backend/test/alerty-katalogu.gate.test.ts`,
 czytając schemat wprost z `openapi.yaml`. `contract/fixtures/` tej trasy nie zawiera.
 
+**Wyjątek: `404` dla `GET /api/analytics/export/{view}` (karta P10.1, ticket
+`90-FEATURE-ozywienie-kart-dostepnosci`, backlog #35).** Produkcja odpowiada na nieznany `view`
+`200` + CSV z samego BOM-u; odbudowa — `404 {error}`. Kod wpisany RĘCZNIE w `openapi.yaml`, bez
+`content` (generator zdejmuje jednowierszowy `content` tras bez fixture'a). Nagrania
+`GET_analytics_availability_products.json` i `GET_analytics_availability_sell-through.json`
+zostają **puste** (`rows: []`) jako dowód stanu produkcji — nie przenagrywamy ich pod naprawiony
+kod (#32, ta sama karta): `WyjatekGate` jest zbędny, bo `gate/ksztalt.ts` nie zagląda do
+elementów, gdy fixture ma pustą tablicę, więc rozjazd treści (dziś wiersze zamiast `rows: []`)
+nie zapala testu.
+
 ## ⚠ Uwaga bezpieczeństwa wbudowana w kontrakt
 
 Operacje z `security: []` są **publiczne bez logowania** — to **stan faktyczny produkcji**,

@@ -70,9 +70,11 @@ Ta sama nieufność dotyczy pustych odpowiedzi: `safeAll()` w module analityki z
 (np. odwołanie do nieistniejącej kolumny) w pustą listę, więc zepsuta trasa wygląda identycznie
 jak trasa bez danych — nie ufaj `rows: []`, sprawdź, czy dane w bazie faktycznie są. Przykład:
 `docs/rebuild-backlog.md` #32 (`historia_cen` bez kolumny `nazwa`). Ta sama pułapka ma też
-postać pliku: `GET /api/analytics/export/{view}` dla `availability-products` i `sell-through`
-oddaje sam BOM (pusty CSV) zamiast `rows: []`, mimo danych w bazie — nie ufaj też pustemu
-plikowi eksportu.
+postać pliku: w PRODUKCJI `GET /api/analytics/export/{view}` dla `availability-products` i
+`sell-through` oddaje sam BOM (pusty CSV) zamiast `rows: []`, mimo danych w bazie — nie ufaj też
+pustemu plikowi eksportu. W odbudowie od karty P10.1 (ticket 90) to naprawione: oba widoki
+zwracają wiersze; morał o niedowierzaniu `rows: []`/pustemu plikowi zostaje aktualny dla innych
+tras i dla samej produkcji.
 
 Ta sama nieufność dotyczy projekcji Drizzle: `select()` bez jawnej listy pól oddaje nazwy PÓL
 modelu (camelCase), a fixture nagrany z oryginału (który robi `SELECT *` przez `better-sqlite3`)

@@ -11,7 +11,7 @@
  *    dogrywać — kształt wierszy niesie `analityka.eksport.agregaty.test.ts`, format pliku
  *    `analityka.csv.test.ts`.
  * 2. KONTRAKT NIE DEKLARUJE DLA NIEJ ŻADNEGO `content` — tylko `parameters`, `security`
- *    i `responses: {200, 400, 401}`. Dlatego używamy `sprawdzZgodnoscZKontraktemNieJson`
+ *    i `responses: {200, 400, 401, 404}` (404 od P10.1, #35). Dlatego używamy `sprawdzZgodnoscZKontraktemNieJson`
  *    (ścieżka + status) i sprawdzamy `content-type` osobno, wprost. Wspólna
  *    `sprawdzZgodnoscZKontraktem` wymaga `application/json` dla KAŻDEJ odpowiedzi
  *    (`gate/kontrakt.ts:81`) i dla CSV-a zapalałaby się zawsze, choć kontrakt tego nie chce.
@@ -27,6 +27,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { NAZWY_WIDOKOW_EKSPORTU } from "../src/repos/analityka-eksport.js";
 import {
+  sprawdzZgodnoscZKontraktem,
   sprawdzZgodnoscZKontraktemNieJson,
   stworzSrodowiskoTestowe,
   zasiejHistorieCen,
@@ -111,28 +112,39 @@ describe("GATE — kontrakt i format dla eksportu CSV (blok 10f)", () => {
   });
 
   /**
-   * Port `return sendRows([])` z końca łańcucha `if`-ów (`:321`). To NIE jest 404 —
-   * oryginał odpowiada poprawnym, pustym plikiem CSV, i tak samo nazywa go po widoku.
+   * Świadome odstępstwo, #35, 2026-09-21 (ticket 90). Do P10.1 tu stał port
+   * `return sendRows([])` z końca łańcucha `if`-ów oryginału (`:321`): nieznany widok → 200
+   * i sam BOM. Teraz 404 z JSON-em — zadeklarowane w `openapi.yaml` dla tej ścieżki.
    */
-  it("nieznany {view} → 200 i SAM BOM, nie 404", async () => {
-    const odp = await zAuth("/api/analytics/export/nie-ma-takiego-widoku");
+  it("nieznany {view} → 404 z błędem JSON, bez załącznika", async () => {
+    for (const widok of ["nie-ma-takiego-widoku", "toString", "constructor"]) {
+      const odp = await zAuth(`/api/analytics/export/${widok}`);
 
-    expect(odp.status).toBe(200);
-    expect(odp.headers["content-type"]).toContain("text/csv");
-    expect(odp.text).toBe(BOM);
+      expect(odp.status, widok).toBe(404);
+      expect(odp.body, widok).toEqual({ error: "Nieznany widok eksportu" });
+      expect(odp.headers["content-disposition"], widok).toBeUndefined();
+      sprawdzZgodnoscZKontraktem({
+        metoda: "GET",
+        sciezka: `/api/analytics/export/${widok}`,
+        odpowiedz: odp,
+      });
+    }
   });
 
   /**
-   * Charakteryzacja usterki produkcji — `docs/rebuild-backlog.md` #32. Historia cen jest
-   * zasiana, a mimo to oba pliki są puste, bo ich SQL pyta `historia_cen` o kolumnę `nazwa`,
-   * której ta tabela nie ma. Gdyby #32 naprawiono, ten test zapali i wymusi decyzję.
+   * Świadome odstępstwo, #32, 2026-09-21 (ticket 90). Do P10.1 oba pliki były samym BOM-em
+   * mimo zasianej historii (SQL pytał `historia_cen` o nieistniejącą kolumnę `nazwa`).
    */
-  it("availability-products i sell-through oddają SAM BOM mimo danych w historii (#32)", async () => {
-    const zHistoria = await zAuth("/api/analytics/export/suppliers-stability");
-    expect(zHistoria.text.length, "historia_cen jest zasiana").toBeGreaterThan(BOM.length);
+  it("availability-products i sell-through oddają wiersze z historii, nie sam BOM (#32)", async () => {
+    const dostepnosc = await zAuth("/api/analytics/export/availability-products");
+    const [naglowekD, ...wierszeD] = dostepnosc.text.slice(BOM.length).split("\n");
+    expect(naglowekD).toBe("dostawca;kod;ean;nazwa;dostepnoscPct");
+    expect(wierszeD.some((w) => w.includes("MO9_336320"))).toBe(true);
 
-    expect((await zAuth("/api/analytics/export/availability-products")).text).toBe(BOM);
-    expect((await zAuth("/api/analytics/export/sell-through")).text).toBe(BOM);
+    const tempo = await zAuth("/api/analytics/export/sell-through");
+    const [naglowekT, ...wierszeT] = tempo.text.slice(BOM.length).split("\n");
+    expect(naglowekT).toBe("dostawca;kod;nazwa;zeszloSztuk");
+    expect(wierszeT.some((w) => w.includes("MO9_336320"))).toBe(true);
   });
 
   describe("autoryzacja przez samo cookie sesji — tak, jak robi to nawigacja przeglądarki", () => {
