@@ -48,7 +48,12 @@ export type StatusHistorii = {
   do: string | null;
 };
 
-/** `GET /api/analytics/kpi` — cztery liczby nagłówka. `avgMarza` jest nullem na pustym katalogu. */
+/**
+ * `GET /api/analytics/kpi` — cztery liczby. `avgMarza` jest nullem na pustym katalogu.
+ *
+ * Trasa nie ma konsumenta w UI (jak w produkcji): do ticketu 97 czytał ją nagłówek KPI
+ * (odstępstwo O-10a-1, zamknięte). Typ zostaje dla loadera fixture w `test/msw/kontrakt.ts`.
+ */
 export type Kpi = {
   produkty: number;
   dostawcy: number;
@@ -94,10 +99,6 @@ export function useFiltry(): UseQueryResult<Filtry | null> {
 
 export function useStatusHistorii(): UseQueryResult<StatusHistorii | null> {
   return useQuery<StatusHistorii | null>({ queryKey: ["/api/analytics/status"] });
-}
-
-export function useKpi(): UseQueryResult<Kpi | null> {
-  return useQuery<Kpi | null>({ queryKey: ["/api/analytics/kpi"] });
 }
 
 export function useMarze(): UseQueryResult<Marze | null> {

@@ -4,15 +4,16 @@
  *
  * ─── CO JEST 1:1 Z ORYGINAŁEM ─────────────────────────────────────────────────────────
  *  • tytuł i podtytuł nagłówka strony (`:27973-27976`),
- *  • banner o zasięgu historii cen (`:27922`) — patrz `NaglowekKpi.tsx`,
+ *  • banner o zasięgu historii cen (`:27922`) i cztery kafle KPI liczone klientem
+ *    z `filters`/`ean/*`/`status` (`:27980-28030`) — patrz `NaglowekKpi.tsx`,
  *  • PIĘĆ zakładek, ich `value`, kolejność i etykiety PL (`:28034-28046`),
  *    z domyślną `dostawcy` — nie „marże" (`:27805`, `useState("dostawcy")`),
  *  • karta „Marża per dostawca/kategoria/marka" z siedmioma kolumnami (`:28516-28560`),
  *  • limit 300 renderowanych wierszy (`:27953`).
  *
  * ─── CO JEST ŚWIADOMYM ODSTĘPSTWEM (decyzje D1–D3 użytkownika, 2026-09-03) ─────────────
- *  • O-10a-1 — kafle KPI liczone z `GET /api/analytics/kpi` zamiast z `filters`/`ean/*`/`status`
- *              (uzasadnienie w `NaglowekKpi.tsx`),
+ *  • O-10a-1 — ZAMKNIĘTE (ticket 97, karta PR.2, 2026-09-22): kafle KPI brały się
+ *              z `GET /api/analytics/kpi`; dziś są jak w oryginale (`NaglowekKpi.tsx`),
  *  • O-10a-2 — globalny pasek sześciu filtrów, którego oryginał nie ma
  *              (uzasadnienie w `FiltryGlobalne.tsx`),
  *  • O-10a-3 — wykres w sekcji marż; oryginał nie ma ani jednego wykresu
@@ -26,10 +27,9 @@
  *              z 2026-09-03) — kontynuacja O-10a-3, uzasadnienie w `SekcjaStanDostawcow.tsx`.
  *
  * ─── CO DOŁOŻYŁ BLOK 10c (2026-09-03, `22-FEATURE-analityka-ean`) ──────────────────────
- * Zakładka „EAN i ceny" niesie trzy karty oryginału (`SekcjaEan.tsx`). Nagłówek KPI ZOSTAJE
- * na `GET /api/analytics/kpi` — oryginał liczy dwa z czterech kafli z `ean/comparison`
- * i `ean/unique` (`:28002-28017`) i te dane są już dostępne, ale przepięcie to osobna
- * decyzja użytkownika (D1 bloku 10c), nie skutek uboczny wypełniania zakładki.
+ * Zakładka „EAN i ceny" niesie trzy karty oryginału (`SekcjaEan.tsx`). Nagłówek KPI przepięto
+ * na `ean/comparison` i `ean/unique` dopiero ticketem 97 (osobna decyzja, jak chciało D1 bloku
+ * 10c) — oba zapytania są wspólne z zakładką (ten sam `queryKey`), więc nie ma dubli.
  *
  * ─── CO DOŁOŻYŁ BLOK 10e (2026-09-04, `25-FEATURE-analityka-dostepnosc-rotacja`) ───────
  * Zakładka „Dostępność" niesie trzy karty oryginału (4.1, 4.2, 4.4), a pod kartą marż
@@ -57,7 +57,6 @@ import {
   useCyklZyciaModeli,
   useDostepnoscProduktow,
   useFiltry,
-  useKpi,
   useMarze,
   usePokrycieEan,
   usePorownanieEan,
@@ -96,7 +95,6 @@ export function Analityka() {
 
   const { data: filtry } = useFiltry();
   const { data: status } = useStatusHistorii();
-  const { data: kpi } = useKpi();
   const { data: marze, isPending: marzeWczytywane } = useMarze();
   const { data: stabilnosc, isPending: stabilnoscWczytywana } = useStabilnoscDostawcow();
   const { data: cyklZycia, isPending: cyklZyciaWczytywany } = useCyklZyciaDostawcow();
@@ -128,7 +126,12 @@ export function Analityka() {
         subtitle="Dostawcy, porównanie EAN, ceny w czasie, dostępność, marża i rotacja"
       />
 
-      <NaglowekKpi kpi={kpi} status={status} />
+      <NaglowekKpi
+        filtry={filtry}
+        status={status}
+        porownanieEan={porownanieEan.data}
+        unikalneEan={unikalneEan.data}
+      />
       <FiltryGlobalne filtry={filtry} wybor={wybor} onZmiana={ustawWybor} />
 
       <Tabs defaultValue="dostawcy">
