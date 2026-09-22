@@ -9,7 +9,7 @@
 > Co konkretnie przestało być prawdą w TEJ wersji:
 > - **ramka na górze**, **§5.4**, **§6.1**, **§6.3**, **§7.5** i lista kontrolna — karty 4.1 i 4.2 nie są już puste, ich pliki też nie;
 > - **§3.1**, **§6.2** i lista kontrolna — kafel „Ostatni eksport CSV" nie jest martwy;
-> - **§1 pkt 4**, **§6.4**, **§6.9**, **§7.4** i **§8** — plik CSV zna filtry i ma kolumny tabeli;
+> - **§1 pkt 4**, **§6.4**, **§6.9** i **§8** — plik CSV zna filtry i ma kolumny tabeli; **§7.4** — plik powstaje w przeglądarce, więc uwaga o sesji odpadła;
 > - **§4.1** i lista kontrolna — kafle nagłówka Analityki to Dostawcy · EAN wspólne · Pozycje unikalne · Snapshoty;
 > - **§2.3**, **§3.1**, **§3.3**, **§3.4**, **§3.5**, **§6.8** i lista kontrolna — Pulpit pokazuje powiadomienia z obu zakładek Alertów;
 > - **§2.2** i **§8** — migawka cen już się nie dubluje (przycisku nadal nie ma).

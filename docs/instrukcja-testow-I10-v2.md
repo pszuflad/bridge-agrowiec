@@ -211,7 +211,8 @@ formatu kolumny na *Tekst*.
 > **Twoja ocena:** ☐ OK ☐ ŹLE — uwagi: _______________
 
 **Pytanie A: czy potrzebujesz pełnych plików z kart, które mają sufit?** Najbardziej chodzi o
-**2.5** (1000 zamiast około 5100) i **4.1 / 4.2** (500 zamiast około 5200).
+**2.5** (1000 zamiast około 5100) i **4.1 / 4.2** (500 zamiast około 5200). Ten sam sufit
+mają karty 2.1-2.4, Marża, Rotacja, 1.2 i 3.1 — napisz w komentarzu, jeśli któraś z nich też.
 
 - **(a)** tak. Plik ma mieć komplet, nawet jeśli tabela pokazuje mniej
 - **(b)** nie, tyle mi wystarczy

@@ -1,6 +1,6 @@
 # 100-DOCS-instrukcja-testow-i10-v2 — delta instrukcji testów I10 dla Ani (karta P10.4)
 
-> Status: Approved
+> Status: Implemented
 > Branch: `docs/100-instrukcja-testow-i10-v2`
 > Worktree: `.worktrees/100-DOCS-instrukcja-testow-i10-v2`
 
