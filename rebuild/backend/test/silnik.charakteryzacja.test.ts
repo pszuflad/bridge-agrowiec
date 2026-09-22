@@ -123,6 +123,28 @@ interface WynikPortu {
  * a nie z instrumentacji kodu — dzięki temu test mierzy skutek, a nie to, że wywołaliśmy
  * odpowiednią funkcję.
  */
+/**
+ * Migracja 011 (karta I15.1, backlog #73/#75/#79) zakłada triggery, które przy każdym INSERT/UPDATE
+ * `products` i `manual_overrides` normalizują kategorię, zastosowanie i blokady płatności.
+ * Wzorzec nagrano, uruchamiając oryginalne `tk()` na ATRAPACH w JS (`atrapy.mjs`) — bez SQLite, więc
+ * bez triggerów. Charakteryzacja porównuje SILNIK, a triggery to warstwa bazy, identyczna w obu
+ * stosach i testowana osobno (`test/db.migracje.test.ts`). Bez ich zdjęcia katalog wzorca zmieniałby
+ * się już przy wsadzeniu do bazy (np. `rolnicze` → `Rolnicze`) i porównanie przestałoby mierzyć silnik.
+ */
+function bezTriggerowBazy(baza: TestowaBaza): TestowaBaza {
+  for (const t of [
+    "products_blokowane_formy_ai",
+    "products_blokowane_formy_au",
+    "products_zastosowanie_ai",
+    "products_zastosowanie_au",
+    "manual_overrides_kategoria_ai",
+    "manual_overrides_kategoria_au",
+  ]) {
+    baza.sqlite.exec(`DROP TRIGGER ${t}`);
+  }
+  return baza;
+}
+
 function uruchomPort(
   db: Baza,
   dostawca: string,
@@ -278,7 +300,7 @@ describe("2. Charakteryzacja na realnych cennikach MO1–MO10", () => {
       expect(katalog.length, `${kod}: katalog wzorca`).toBe(wzorzec.katalog.produktow);
       expect(overridy.length, `${kod}: poprawki Marty we wzorcu`).toBe(wzorzec.overridy.wierszy);
 
-      baza = stworzTestowaBaze();
+      baza = bezTriggerowBazy(stworzTestowaBaze());
       porownajZWzorcem(uruchomPort(baza.db, kod, katalog, rekordy, overridy), wzorzec, kod);
     });
   }
@@ -301,7 +323,7 @@ describe("3. Scenariusze celowane w gałęzie, których cenniki nie ruszają", (
       const wzorzec = wzorce.find((w) => w.nazwa === scenariusz.nazwa);
       expect(wzorzec, `brak nagranego wzorca dla scenariusza ${scenariusz.nazwa}`).toBeDefined();
 
-      baza = stworzTestowaBaze();
+      baza = bezTriggerowBazy(stworzTestowaBaze());
       porownajZWzorcem(
         uruchomPort(
           baza.db,
