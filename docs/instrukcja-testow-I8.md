@@ -414,6 +414,8 @@ osobna usterka do naprawy (`docs/rebuild-backlog.md` #36).
 ### 10.4 Kafel „Ostatni eksport CSV" na Pulpicie nadal pokazuje „—"
 Nie zmieniło się i nie miało. To osobna, świadomie martwa rzecz z Iteracji 10.
 
+> **⚠ Nieaktualne od 2026-09-22:** kafel nie jest już martwy — patrz [instrukcja I10, wersja 2, punkt 1.2](instrukcja-testow-I10-v2.md#12-kafel-ostatni-eksport-csv-na-pulpicie-ożył-ale-o-eksporcie-z-katalogu-nie-wie).
+
 ### 10.5 W panelu nie ma słowników, producentów ani kategorii
 Backend ma cztery dodatkowe operacje (słowniki, producenci, kategorie, wysyłka pojedynczego
 produktu), ale **stary panel nigdy ich nie pokazywał** — używano ich z konsoli programisty.
@@ -494,5 +496,5 @@ Skrót całej instrukcji. Kolumna „Tryb" mówi, w którym trybie da się to sp
 | ☐ | „W Selly" wszędzie `0` | licznik rośnie po prawdziwym syncu |
 | ☐ | Status `zakonczono` na **szarej** odznace | tak samo jak stary Bridge |
 | ☐ | Menu boczne jest na Selly, ale nie na Katalogu | znana usterka, backlog #36 |
-| ☐ | Kafel „Ostatni eksport CSV" na Pulpicie: `—` | świadomie martwy od I10 |
+| ☐ | Kafel „Ostatni eksport CSV" na Pulpicie: `—` | świadomie martwy od I10 · **⚠ nieaktualne od 2026-09-22** — kafel czyta Historię, patrz [I10 wersja 2, punkt 1.2](instrukcja-testow-I10-v2.md#12-kafel-ostatni-eksport-csv-na-pulpicie-ożył-ale-o-eksporcie-z-katalogu-nie-wie) |
 | ☐ | Brak słowników/producentów/kategorii w panelu | stary panel ich nie pokazywał (D1) |
