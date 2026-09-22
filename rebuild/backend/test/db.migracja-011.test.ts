@@ -177,6 +177,51 @@ describe("dyrektywa runnera `@dodaj-kolumne-jesli-brak`", () => {
     expect(kolumny("t")).toEqual(["id"]);
   });
 
+  describe("dyrektywy pominięcia (002/003/013 na schemacie produkcji — `db.migracje-produkcja.test.ts`)", () => {
+    const tabele = () =>
+      (sqlite.prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name").all() as {
+        name: string;
+      }[]).map((t) => t.name);
+
+    it.each([
+      ["TEXT", "TEXT", true],
+      ["TEXT", "text", true],
+      ["REAL", "TEXT", false],
+    ])("`@pomin-jesli-typ-kolumny`: kolumna %s, warunek %s → pominięta: %s", (typ, warunek, pominieta) => {
+      const k = migracje({
+        "001_a.sql": `CREATE TABLE t (id INTEGER PRIMARY KEY, s ${typ});`,
+        "002_b.sql": `-- @pomin-jesli-typ-kolumny t s ${warunek}\n-- @dodaj-kolumne-jesli-brak t c TEXT\nCREATE TABLE tresc (id INTEGER);`,
+      });
+      const wynik = zastosujMigracje(sqlite, k);
+      expect(wynik.zastosowane).toEqual(["001_a.sql", "002_b.sql"]);
+      expect(wynik.bezTresci).toEqual(pominieta ? ["002_b.sql"] : []);
+      // Pominięcie obejmuje treść ORAZ pozostałe dyrektywy pliku.
+      expect(tabele().includes("tresc")).toBe(!pominieta);
+      expect(kolumny("t").includes("c")).toBe(!pominieta);
+    });
+
+    it("`@pomin-jesli-typ-kolumny` na nieistniejącej kolumnie → błąd i rollback", () => {
+      const k = migracje({
+        "001_a.sql": "CREATE TABLE t (id INTEGER PRIMARY KEY);",
+        "002_b.sql": "-- @pomin-jesli-typ-kolumny t s TEXT\nCREATE TABLE tresc (id INTEGER);",
+      });
+      expect(() => zastosujMigracje(sqlite, k)).toThrow(/kolumna "t.s" nie istnieje/);
+      expect(tabele()).not.toContain("tresc");
+    });
+
+    it.each([
+      [true, true],
+      [false, false],
+    ])("`@pomin-jesli-tabela-istnieje`: tabela jest = %s → pominięta: %s", (jest, pominieta) => {
+      const k = migracje({
+        "001_a.sql": jest ? "CREATE TABLE stara (id INTEGER);" : "CREATE TABLE inna (id INTEGER);",
+        "002_b.sql": "-- @pomin-jesli-tabela-istnieje stara\nCREATE TABLE tresc (id INTEGER);",
+      });
+      expect(zastosujMigracje(sqlite, k).bezTresci).toEqual(pominieta ? ["002_b.sql"] : []);
+      expect(tabele().includes("tresc")).toBe(!pominieta);
+    });
+  });
+
   it("zwykły komentarz bez `@` nie jest dyrektywą", () => {
     sqlite.exec("CREATE TABLE t (id INTEGER PRIMARY KEY);");
     expect(() => zastosujDyrektywy(sqlite, "-- dodaj-kolumne-jesli-brak t c TEXT\n", "x.sql")).not.toThrow();

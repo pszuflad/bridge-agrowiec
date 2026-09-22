@@ -21,10 +21,13 @@
 -- Danych NIE przenosimy — Ania też nie (nowa tabela startowała pusta, zapełniło ją lazy
 -- discovery). Stare wiersze zostają w `selly_products_old`; nic ich nie czyta.
 --
--- ⚠ CUTOVER. Baza produkcji ma już oba obiekty, więc na niej ta migracja PADA
--- („there is already another table named selly_products_old”) i transakcja runnera się
--- wycofuje — nic nie zostaje w pół drogi. Przy przełączeniu trzeba sprawdzić kształt i odnotować
--- 013 w `_migracje` ręcznie (jak 002, `docs/cutover.md` §5). Opis: `docs/karty/I15.6/karta.md`.
+-- ⚠ CUTOVER. Baza produkcji ma już oba obiekty (przebudowę zrobiła Ania 2026-09-07), więc bez warunku
+-- ta migracja padała tam („there is already another table named selly_products_old”). Od ticketu 107
+-- (karta I15.1, decyzja użytkownika 2026-09-22) runner (`db/migrate.ts`) sprawdza, czy `selly_products_old`
+-- już istnieje, i wtedy odnotowuje 013 jako zastosowaną BEZ wykonywania treści — DDL niżej jest verbatim
+-- z produkcji, więc jej kształt JEST celem tej migracji. Ręczny krok cutoveru dla 013 znika.
+-- Bazy z 013 w `_migracje` runner pomija po nazwie. Opis: `docs/karty/I15.6/karta.md`.
+-- @pomin-jesli-tabela-istnieje selly_products_old
 
 ALTER TABLE selly_products RENAME TO selly_products_old;
 

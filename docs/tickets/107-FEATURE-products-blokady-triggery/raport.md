@@ -79,3 +79,27 @@ normalizacja triggerem nie generuje pozycji stagingu przy każdym imporcie.
 - **Nowy:** `docs/spec-backend/wpis-107.md` — triggery 011 (kaskada ai→au), dyrektywa runnera, RETURNING przed triggerem AFTER.
 - `docs/rebuild-backlog.md` — #73, #75, #79, #80, #82 → 🔨 (część schematowa: 107 / migracja 011); #101 — ustalenie MO6.
 - Pre-existing issues: brak.
+
+## Rozszerzenie zakresu (decyzja koordynatora 2026-09-22) — uodpornienie łańcucha migracji
+- `src/db/migrate.ts` — dwie nowe dyrektywy pominięcia: `@pomin-jesli-typ-kolumny <tabela> <kolumna> <typ>` i
+  `@pomin-jesli-tabela-istnieje <tabela>`; składnia wszystkich dyrektyw walidowana przed wykonaniem czegokolwiek;
+  `WynikMigracji.bezTresci` (podzbiór `zastosowane`) + osobna linia w `npm run migrate` (`migrate-cli.ts`).
+- `rebuild/schema/002_import.sql` — `uwaga_cena` przez `@dodaj-kolumne-jesli-brak` (reszta bez zmian;
+  `suppliers.import_wylaczony` zostaje gołym `ALTER`, bo produkcja tej kolumny nie ma).
+- `rebuild/schema/003_szerokosc_text.sql` — `@pomin-jesli-typ-kolumny products szerokosc TEXT` (uzasadnienie wyboru
+  mechanizmu: `plan.md`, sekcja „Rozszerzenie zakresu”).
+- `rebuild/schema/013_selly_products_warianty.sql` (plik karty I15.6, za zgodą użytkownika) —
+  `@pomin-jesli-tabela-istnieje selly_products_old`; zaktualizowany test I15.6
+  `test/migracje.selly-warianty.test.ts` („odnotowuje się bez wykonania treści” zamiast „pada”).
+- **Nowe:** `test/db.migracje-produkcja.test.ts` + fixture `test/schemat-produkcji/7d6cfc9-schema.sql`
+  (= `git show 7d6cfc9:db/schema.sql` bajt w bajt): pełny łańcuch 001→013 na schemacie produkcji (74 kolumny, bez
+  `_migracje`) przechodzi; `bezTresci` = [003, 013]; `products`/`selly_products`/`selly_products_old`/triggery
+  nietknięte; dochodzą tylko obiekty spoza produkcji; baza z 002/003 w `_migracje` nie dostaje ich nowej treści.
+- `test/db.migracja-011.test.ts` — testy jednostkowe obu dyrektyw pominięcia (w tym: pominięcie obejmuje pozostałe
+  dyrektywy pliku, brak kolumny = błąd i rollback).
+- `rebuild/schema/README.md` — tabela trzech dyrektyw, uzasadnienie i nota, że zmiana treści zastosowanej migracji
+  jest bezpieczna (runner pomija po nazwie).
+- Bramki po rozszerzeniu: lint ✓, typecheck ✓, build ✓, `npm test` ✓ 98 plików, 1606 passed, 3 skipped;
+  migracje z `SNAPSHOT_DB` ✓ (65 testów).
+- Skutek dla cutoveru (co znika z ręcznej procedury `docs/cutover.md` §3) — opisany w „Do koordynatora”
+  w `docs/karty/I15.1/karta.md`; aktualizację samego `cutover.md` wnosi koordynator.

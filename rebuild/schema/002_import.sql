@@ -17,7 +17,11 @@ ALTER TABLE suppliers ADD COLUMN import_wylaczony INTEGER NOT NULL DEFAULT 0;
 -- `snapshot_json`) i `GET /api/products/uwagi-cena` należą do 3d — endpoint bez pisarza
 -- zwracałby zawsze pustą listę. Wartość już dziś dociera do stagingu w `snapshot_json`,
 -- bo parsery z 3a propagują pole `uwagaCena`.
-ALTER TABLE products ADD COLUMN uwaga_cena TEXT;
+-- ⚠ Na produkcyjnej `data.db` kolumna `uwaga_cena` JUŻ JEST — dokłada ją `uwaga_cena_patch.cjs` przy każdym
+-- starcie starego backendu. Gołe `ALTER` wywracało tam całą 002 (`duplicate column name`), stąd dyrektywa
+-- runnera (`db/migrate.ts`, ticket 107, decyzja koordynatora 2026-09-22): `ALTER` tylko przy braku kolumny.
+-- Zmiana treści jest bezpieczna — bazy, które mają 002 w `_migracje`, runner pomija po nazwie.
+-- @dodaj-kolumne-jesli-brak products uwaga_cena TEXT
 
 -- MO6 Agrowiec / Uniglory — decyzja produkcji z 2026-08-26 (backlog #7 ✅ TAK).
 -- W katalogu nie ma ani jednego produktu MO6, więc nie ma czego migrować ani kasować.

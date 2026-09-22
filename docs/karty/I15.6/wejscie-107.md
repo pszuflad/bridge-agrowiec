@@ -18,3 +18,13 @@ Test „w kategorii kanonicznej brak `multi_cat`” już istnieje: `rebuild/back
 kanonicznej trigger zamienia łańcuch `a + b` na jedną wartość — bez `multi_cat`”) — dodany przy okazji 107, bo
 zmieniał się stan bazy pod testami tego modułu. Przy dalszej pracy nad blokiem 8a w tej karcie to zachowanie jest
 już pokryte, nic dodatkowego nie trzeba robić poza świadomością, że to efekt uboczny 011, nie osobnej logiki I15.6.
+
+## Uzupełnienie (ta sama sesja, po decyzji koordynatora 2026-09-22): migracja 013 dostała warunek
+`013_selly_products_warianty.sql` padała na bazie produkcji (`selly_products_old` istnieje tam od 07.09), co karta
+I15.6 opisała jako ręczny krok cutoveru. Ticket 107 uodpornił łańcuch migracji na kształt produkcji, więc 013 ma
+teraz w nagłówku dyrektywę runnera `-- @pomin-jesli-tabela-istnieje selly_products_old`: gdy tabela już jest,
+migracja zostaje odnotowana w `_migracje` BEZ wykonania treści (DDL w 013 jest verbatim z produkcji, więc jej
+kształt jest celem migracji). Treść SQL 013 poza nagłówkiem — bez zmian.
+Skutek dla I15.6: ręczne odnotowanie 013 przy cutoverze **odpada**; test `test/migracje.selly-warianty.test.ts`
+(„na bazie, która już ma nowy kształt…”) sprawdza teraz `bezTresci` i niezmieniony `sqlite_master` zamiast wyjątku.
+Pełny łańcuch na schemacie produkcji: `test/db.migracje-produkcja.test.ts`.

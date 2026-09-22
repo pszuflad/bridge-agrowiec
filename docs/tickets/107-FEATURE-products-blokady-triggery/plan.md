@@ -118,6 +118,39 @@ tej sesji** i robimy kroki 6–7 (niżej) na tej kopii:
    pomiar #101 (nowe produkty po 10.09: dostawca, puste blokady). Wynik do karty.
 7. Karta (`docs/karty/I15.1/karta.md`), wejścia dla I15.2/I15.3 jeśli wyjdą, „Do koordynatora” (cutover).
 
+## Rozszerzenie zakresu — decyzja koordynatora 2026-09-22 (uodpornienie łańcucha migracji)
+Powód: bez tego ani odświeżenie stagingu kopią produkcji (D2), ani cutover nie przejdą `npm run migrate`.
+Zmiana treści 002/003/013 jest bezpieczna, bo runner pomija zastosowane migracje po NAZWIE — dotknie wyłącznie baz,
+które danej migracji jeszcze nie mają (czyli produkcji).
+
+- **002** — `ALTER TABLE products ADD COLUMN uwaga_cena` → `-- @dodaj-kolumne-jesli-brak products uwaga_cena TEXT`.
+  Reszta pliku bez zmian; `suppliers.import_wylaczony` zostaje gołym `ALTER`, bo produkcja tej kolumny NIE ma
+  (sprawdzone w `7d6cfc9:db/schema.sql`) — dyrektywa ukryłaby tam realny błąd.
+- **003** — nowa dyrektywa `-- @pomin-jesli-typ-kolumny products szerokosc TEXT`: gdy kolumna ma już typ docelowy,
+  runner odnotowuje migrację jako zastosowaną BEZ wykonania treści.
+  **Dlaczego tak, a nie inaczej:**
+  - *warunek na żywym schemacie w pliku migracji* (wybrane) — cel 003 to `szerokosc TEXT`; na produkcji jest on już
+    osiągnięty własną migracją Ani (`szertxt`, 19.08), więc przebudowa jest zbędna, a wręcz szkodliwa:
+    `INSERT … SELECT *` do tabeli 73-kolumnowej padłby na 74 kolumnach, a gdyby liczby się zgadzały — przestawiłby
+    dane. Warunek stoi w pliku, jest czytelny przy cutoverze i sprawdzany w tej samej transakcji;
+  - *przepisanie 003 na jawną listę kolumn* (odrzucone) — przebudowa tabeli na produkcji ZGUBIŁABY kolumny spoza
+    kanonu (`blokowane_formy_platnosci`) razem z triggerami, a danych w nich nie da się odtworzyć z migracji;
+  - *`PRAGMA` w SQL-u* (niemożliwe) — SQLite nie ma warunkowego DDL;
+  - *ręczny krok operatora* (odrzucone) — to jest dokładnie to, co ta decyzja likwiduje.
+- **013 (karta I15.6)** — ten sam problem: produkcja ma `selly_products_old` od 07.09, więc migracja tam padała
+  (opisane w samym pliku jako ręczny krok cutoveru). **Decyzja użytkownika z 2026-09-22 (pytanie w trakcie
+  ticketu):** uodpornić też ją — trzecia dyrektywa `-- @pomin-jesli-tabela-istnieje selly_products_old`. DDL w 013
+  jest verbatim z produkcji, więc jej kształt JEST celem migracji. Zaktualizowany test I15.6
+  (`test/migracje.selly-warianty.test.ts`) zamiast „pada i niczego nie zmienia” sprawdza „odnotowuje się bez
+  wykonania treści i niczego nie zmienia”.
+- **Runner** — `WynikMigracji.bezTresci` (podzbiór `zastosowane`) i osobna linia w `npm run migrate`, żeby przy
+  cutoverze było widać, która migracja przeszła warunkiem, a nie treścią.
+- **Test** — `test/db.migracje-produkcja.test.ts`: baza stawiana z fixture'u `test/schemat-produkcji/7d6cfc9-schema.sql`
+  (= `git show 7d6cfc9:db/schema.sql` bajt w bajt, bez `sqlite_sequence`), dane w stanie produkcji; pełny łańcuch
+  001→013 przechodzi, `bezTresci` = [003, 013], `products`/`selly_products`/`selly_products_old`/triggery bez zmian,
+  dochodzą tylko obiekty spoza produkcji (`suppliers.import_wylaczony`, `waga_gab_przewoznicy`,
+  `alerty_katalogu_statusy`); osobno: baza z 002/003 w `_migracje` nie dostaje ich nowej treści.
+
 ## Testing strategy
 - GATE: `GET_products.json` kształt 72 klucze — istniejący gate + nowy strażnik pola.
 - Migracja: trzy bazy jak wyżej; (c) na prawdziwej kopii produkcji ręcznie w kroku 6 (wynik w raporcie).

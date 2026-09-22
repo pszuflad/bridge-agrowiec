@@ -143,3 +143,20 @@ zostawić czy naprawić (świadome odstępstwo).” Źródło: `docs/tickets/107
 **⏸ Prośba użytkownika (2026-09-22): plan kopiowania bazy produkcyjnej na staging ma zawierać krok „wróć do I15.1”.**
 PR #122 (ticket 107) jest otwarty, ale czeka na próbę `npm run migrate` na tej kopii + pomiary z sekcji „Zostało przed
 PR”. Koordynator: przy planowaniu kopii dopisz ten krok (po rozstrzygnięciu 002/003, przed mergem #122).
+
+### Co znika z ręcznej procedury `docs/cutover.md` §3 (po rozszerzeniu zakresu, decyzja koordynatora 2026-09-22)
+Ticket 107 uodpornił łańcuch migracji na kształt produkcji, więc z §3 i z kroku 5 rozdziału 5 **można usunąć całą
+ręczną obsługę kolizji**:
+- „Jeśli padło na `duplicate column name: uwaga_cena`” + `INSERT OR IGNORE INTO _migracje ('002_import.sql')`
+  + ręczny `ALTER TABLE suppliers ADD COLUMN import_wylaczony` + `UPDATE suppliers … MO6` — **niepotrzebne**:
+  002 dokłada `uwaga_cena` dyrektywą tylko przy braku, a `import_wylaczony` (której produkcja nie ma) zakłada sama.
+- „Jeśli padło na 003 (niezgodna liczba kolumn) — STOP, nie przełączamy” — **nie wystąpi**: 003 wykrywa, że
+  `szerokosc` jest już TEXT, i odnotowuje się bez wykonania treści.
+- Ręczne odnotowanie 013 w `_migracje` (opisane w `docs/karty/I15.6/karta.md`) — **niepotrzebne**: 013 wykrywa
+  istniejącą `selly_products_old`.
+**Zostaje** (i zostać powinno): kopia bazy przed migracją, `diff` kształtu `products` vs kanon, podgląd danych po
+migracji (przestawione kolumny nie rzucają błędu) oraz punkty kontrolne. **Dochodzi** jedna rzecz do sprawdzenia:
+`npm run migrate` wypisuje teraz linię „w tym bez treści (warunek dyrektywy…)” — na produkcji mają tam być
+**dokładnie `003` i `013`**; cokolwiek innego (albo pusta lista) znaczy, że baza nie jest tym, czym myślimy — STOP.
+Dowód działania: `rebuild/backend/test/db.migracje-produkcja.test.ts` (pełny łańcuch na `7d6cfc9:db/schema.sql`).
+Aktualizację samego `docs/cutover.md` zostawiam koordynatorowi — to plik spoza własności tej karty.

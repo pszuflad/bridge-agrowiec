@@ -20,7 +20,7 @@ danych dla odbudowy backendu.
 | `011_blokowane_formy_i_triggery.sql` | **Karta I15.1** (`107-FEATURE-products-blokady-triggery`, backlog #73/#75/#79/#80/#82): kolumna `products.blokowane_formy_platnosci`, uzupełnienie jej dla istniejących wierszy (mapa MO1–MO10, MO6 celowo `NULL`) i sześć triggerów produkcji — blokady płatności po `dostawca`, kanoniczna kategoria i zamknięta lista zastosowań (`products`), kanoniczna kategoria w poprawkach ręcznych (`manual_overrides`). Treść triggerów to kopia bajt w bajt `git show 7d6cfc9:db/schema.sql:334-385`. Produkcja zakłada to samo przy każdym starcie (`payment_blocks.cjs`, `application_rules.cjs`), więc migracja jest **odporna na istniejące obiekty**: kolumna przez dyrektywę runnera (niżej), triggery `DROP IF EXISTS` + `CREATE`, uzupełnienie `WHERE … IS NOT`. Kategorii/zastosowań istniejących wierszy NIE normalizuje (produkcja przy starcie też nie; D2). Kolumna nie wychodzi w API do czasu I15.3. |
 | `013_selly_products_warianty.sql` | **Karta I15.6** (`108-FEATURE-selly-rest-discovery-delta`, backlog #60): `selly_products` → model wariantowy. Stara tabela przemianowana na `selly_products_old` (zachowuje dane i indeks `idx_selly_products_kod`), nowa z kluczem `(kod_importu, dostawca)`, `selly_variant_id`, `feature_id_magazyn` i sześcioma indeksami — DDL verbatim z `origin/main:db/schema.sql`. Danych nie przenosi (Ania też nie). ⚠ **Na bazie produkcji pada** (oba obiekty już istnieją od 07.09) i wycofuje się w całości — przy cutoverze weryfikacja kształtu + ręczny wpis do `_migracje`, jak dla 002. (`011`, `012` zarezerwowane dla I15.1 i I15.4.) |
 
-### Dyrektywy runnera (od 011)
+### Dyrektywy runnera (od ticketu 107)
 
 SQLite nie ma `ALTER TABLE … ADD COLUMN IF NOT EXISTS`, a runner wykonuje plik w jednej transakcji — gołe
 `ALTER` na kolumnie, którą produkcja już ma, wycofałoby całą migrację. Dlatego plik może zawierać linię-komentarz
@@ -29,10 +29,28 @@ SQLite nie ma `ALTER TABLE … ADD COLUMN IF NOT EXISTS`, a runner wykonuje plik
 -- @dodaj-kolumne-jesli-brak <tabela> <kolumna> <definicja>
 ```
 
-którą runner (`rebuild/backend/src/db/migrate.ts`, `zastosujDyrektywy`) wykonuje PRZED treścią pliku, w tej samej
-transakcji: `PRAGMA table_info` → `ALTER` tylko przy braku kolumny. Dla SQLite to zwykły komentarz. Nieznana
-dyrektywa, zła składnia albo brak tabeli = błąd i wycofanie migracji. ⚠ Linia zaczynająca się od `-- @` jest ZAWSZE
-traktowana jako dyrektywa — nie zaczynaj tak komentarzy opisowych.
+Runner (`rebuild/backend/src/db/migrate.ts`, `zastosujDyrektywy`) wykonuje dyrektywy PRZED treścią pliku, w tej samej
+transakcji. Dla SQLite to zwykły komentarz, więc plik zostaje poprawnym SQL-em.
+
+| Dyrektywa | Co robi | Gdzie użyta |
+|---|---|---|
+| `-- @dodaj-kolumne-jesli-brak <tabela> <kolumna> <definicja>` | `PRAGMA table_info` → `ALTER TABLE … ADD COLUMN` tylko przy braku kolumny | 002 (`uwaga_cena`), 011 (`blokowane_formy_platnosci`) |
+| `-- @pomin-jesli-typ-kolumny <tabela> <kolumna> <typ>` | kolumna ma już ten typ → treść pliku i pozostałe dyrektywy NIE są wykonywane, migracja zostaje odnotowana jako zastosowana | 003 (`szerokosc` już `TEXT` na produkcji) |
+| `-- @pomin-jesli-tabela-istnieje <tabela>` | jak wyżej, gdy tabela (albo widok) już istnieje | 013 (`selly_products_old` na produkcji) |
+
+**Po co pominięcia (ticket 107, decyzja koordynatora 2026-09-22).** Produkcyjna `data.db` nie pochodzi z kanonu:
+`products` ma tam 74 kolumny, `szerokosc` jest już `TEXT` (własna migracja `szertxt` Ani), a Selly przebudowane
+ręcznie 07.09. Migracje 002, 003 i 013 padały na niej po kolei, więc `npm run migrate` na kopii produkcji wymagał
+ręcznych kroków z `docs/cutover.md` §3. Z dyrektywami pełny łańcuch przechodzi sam — dowód:
+`rebuild/backend/test/db.migracje-produkcja.test.ts` (baza stawiana z `git show 7d6cfc9:db/schema.sql`).
+
+**Zmiana treści już zastosowanej migracji jest bezpieczna** — runner pomija pliki po NAZWIE (`_migracje`), więc bazy
+dev/staging, które mają 002/003/013 odnotowane, nie zobaczą nowej treści. Dotyczy to wyłącznie baz, gdzie danej
+migracji jeszcze nie ma — czyli produkcji.
+
+Nieznana dyrektywa, zła składnia, brak tabeli albo (przy pominięciu po typie) brak kolumny = błąd i wycofanie całej
+migracji. ⚠ Linia zaczynająca się od `-- @` jest ZAWSZE traktowana jako dyrektywa — nie zaczynaj tak komentarzy
+opisowych. `npm run migrate` wypisuje osobno, które migracje odnotował bez wykonania treści.
 
 ## Skąd pochodzi
 
