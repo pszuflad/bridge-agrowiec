@@ -563,10 +563,11 @@ wcześniejszy zapis tej sekcji, który zakładał reużycie `useKpi()`/`useStatu
   `/staging`, `/alerty`, `/historia`. `NaglowekKpi` (10a) zostaje wyłącznie nagłówkiem
   `/analityka`, Pulpit go nie używa.
 
-Dodatkowo (D3, ta sama runda decyzji): kafel „Ostatni eksport CSV" jest **trwale martwy** —
+Dodatkowo (D3, ta sama runda decyzji): kafel „Ostatni eksport CSV" był **trwale martwy** —
 oryginał szuka `r.find(e => e.typ === "eksport")` w odpowiedzi `GET /api/history`, a ta trasa
-oddaje tabelę `history`, której wiersz **nie ma pola `typ`**. Odtworzone 1:1 (zawsze pokazuje
-„—"), zamrożone testem, usterka w `docs/rebuild-backlog.md`.
+oddaje tabelę `history`, której wiersz **nie ma pola `typ`**. Odtworzone 1:1 (zawsze pokazywał
+„—"), zamrożone testem, usterka w `docs/rebuild-backlog.md`. Od ticketu 96 (P10.2, #34) kafel
+czyta `/api/history/paged` i pokazuje daty.
 
 - Czyta `GET /api/history` (I5) — na stagingu dziś `[]`, bo tabela `history` nie ma jeszcze
   pisarza; pusta odpowiedź renderuje widok normalnie (kafel „—"), nie jest traktowana jak błąd.
