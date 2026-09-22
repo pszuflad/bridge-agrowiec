@@ -1,6 +1,6 @@
 # 108-FEATURE-selly-rest-discovery-delta — Selly REST 1: nowy schemat `selly_products`, discovery, Tor 1
 
-> Status: Approved
+> Status: Implemented
 > Branch: `feature/108-selly-rest-discovery-delta`
 > Worktree: `.worktrees/108-FEATURE-selly-rest-discovery-delta`
 > Karta: `docs/karty/I15.6/` (Iteracja 15, fala 1, równolegle z I15.1)
