@@ -16,6 +16,7 @@ danych dla odbudowy backendu.
 | `007_waga_gab_przewoznicy.sql` | **Karta P9.1 (ticket 76):** nowa tabela `waga_gab_przewoznicy` — wspólna lista przewoźników wagi wolumetrycznej, spoza produkcji (backlog #27) — i **seed danych** (sześciu przewoźników Ani). Pierwsza migracja wstawiająca dane do nowej tabeli; trafiają do produkcji przez `npm run migrate` przy cutoverze. |
 | `008_alerty_katalogu_statusy.sql` | **Karta P6.2** (`77-FEATURE-pseudo-alerty-katalogowe`): tabela `alerty_katalogu_statusy` (+ indeks na `klucz`) dla statusu pseudo-alertów katalogowych. ⚠ **Ta migracja NIE odtwarza stan produkcji** — produkcja tej tabeli nie ma (status żył w IndexedDB przeglądarki), to nowa funkcja odbudowy. Na cutoverze tworzy pustą tabelę = wszystkie pseudo-alerty katalogowe startują jako „nowy". |
 | `009_alerty_polskie_znaki.sql` | **Karta PR.3** (`92-CHORE-migracja-typow-alertow`): migracja DANYCH `alerts` — polskie litery zamienione na „?" wracają (`B??d pobierania`→`Błąd pobierania`, `R?czny upload`→`Ręczny upload`, `B??d HTTP`→`Błąd HTTP`; w `opis` fragmenty szablonu `produkt?w`→`produktów`, `kluczowe/b??dy`→`kluczowe/błędy`). Na `db/snapshot.db`: 435 `typ` + 2219 `opis`. ⚠ **Świadome odstępstwo od produkcji** — tam „?" są wpisane w literały bundla i produkcja psuje każdy nowy alert aż do cutoveru; odbudowa pisze poprawnie. Test na kopii snapshotu: `SNAPSHOT_DB=… npx vitest run test/db.migracje.test.ts`. |
+| `010_marka_caps.sql` | **Karta PR.5** (`101-CHORE-migracja-marka-caps`, backlog #92): migracja DANYCH `products.marka` — marka, która w katalogu ma drugą formę różniącą się WYŁĄCZNIE wielkością liter, przechodzi na formę WIELKIMI; ze słownika `marka` znika forma niekanoniczna, gdy kanoniczna już w nim jest. Klucz porównania sprowadza `ąćęłńóśźż` przed `UPPER()` (ASCII-only), inne litery spoza ASCII nie są sprowadzane (ograniczenie opisane w pliku). Na `db/snapshot.db`: 1 produkt (`MO1_71970103` `Alliance`→`ALLIANCE`, razem 849) + 1 wpis słownika. ⚠ **Świadome odstępstwo od produkcji** (decyzja użytkownika 2026-09-22). `historia_cen.marka` celowo nietknięta. |
 
 ## Skąd pochodzi
 
@@ -81,11 +82,12 @@ Ania ujednoliciła konwencje na produkcji (`mirror/backend/apply_kategoria.cjs`,
 pseudo-alertów katalogowych) nie odtwarzają nic z produkcji, tylko dokładają tabele dla nowych
 funkcji odbudowy (dane przeniesione z IndexedDB przeglądarki na serwer); ich numer mówi jedynie
 o kolejności migracji w NASZYM repo. **`009`** (karta PR.3) też nie odtwarza produkcji — naprawia
-dane, które produkcja psuje (polskie litery w alertach).
+dane, które produkcja psuje (polskie litery w alertach); **`010`** (karta PR.5) — duplikat marki
+różniący się wielkością liter.
 
 ⚠ Migracja danych MUSI być idempotentna także TREŚCIOWO, nie tylko przez ewidencję
 `_migracje`: cutover idzie na tej samej `data.db`, którą produkcja już zmigrowała, więc
-pierwszy przebieg u nas trafia na dane już zmienione. Każda z `004`–`006` i `009` mapuje po kluczu
+pierwszy przebieg u nas trafia na dane już zmienione. Każda z `004`–`006`, `009` i `010` mapuje po kluczu
 znormalizowanym i ma warunek „pomiń wiersz, który już ma formę docelową"; dowodzi tego
 `rebuild/backend/test/db.migracje.test.ts`, wykonując ten sam SQL drugi raz z pominięciem
 ewidencji i żądając zera zmienionych wierszy. Mechanizm już istnieje i jest w użyciu:
