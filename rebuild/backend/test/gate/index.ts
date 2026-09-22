@@ -16,4 +16,5 @@ export * from "./kontrakt.js";
 export * from "./ksztalt.js";
 export * from "./repo.js";
 export * from "./selly-atrapa.js";
+export * from "./selly-rest.js";
 export * from "./asercje.js";

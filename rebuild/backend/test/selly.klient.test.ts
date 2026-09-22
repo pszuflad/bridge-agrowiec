@@ -319,6 +319,43 @@ describe("klient Selly — OAuth2 i warstwa HTTP", () => {
     expect(JSON.parse(put?.cialo ?? "{}")).toEqual({ quantity: 5 });
   });
 
+  /**
+   * Metody modelu wariantowego (karta I15.6). Każda odpowiada JEDNEMU wywołaniu `apiWithRetry`
+   * z oryginału — ścieżka, query i ciało muszą się zgadzać znak w znak (`discovery.cjs:76,91,
+   * 138,152,192,266`, `sync_delta.cjs:158`).
+   */
+  it("metody wariantowe wołają ścieżki i ciała z oryginału", async () => {
+    const udawany = udawanySelly((zad, res) => {
+      if (zad.sciezka === "/api/auth/access_token") {
+        odpowiedz(res, 200, { access_token: "TOKEN", expires_in: 3600 });
+        return;
+      }
+      odpowiedz(res, 200, { data: [] });
+    });
+    serwer = udawany.server;
+    const shopUrl = await udawany.url;
+    const klient = stworzKlientaSelly({ shopUrl, clientId: "id", clientSecret: "s", scope: "RW" });
+
+    await klient.listProductsByEan("8903094073627");
+    await klient.listProductsPage();
+    await klient.listProductsPage(2);
+    await klient.listVariants(812);
+    await klient.createVariant(812, { quantity: 2, price: 7252, attributes: [] });
+    await klient.updateVariant(812, 5001, { quantity: 0, price: 10 });
+
+    const bezTokenu = udawany.zadania.filter((z) => z.sciezka !== "/api/auth/access_token");
+    expect(bezTokenu.map((z) => `${z.metoda} ${z.sciezka}`)).toEqual([
+      "GET /api/products?ean=8903094073627&limit=1",
+      "GET /api/products?sort_by=product_id&sort=ASC",
+      "GET /api/products?sort_by=product_id&sort=ASC&page=2",
+      "GET /api/products/812/variants",
+      "POST /api/products/812/variants",
+      "PUT /api/products/812/variants/5001",
+    ]);
+    expect(JSON.parse(bezTokenu[4]?.cialo ?? "")).toEqual({ quantity: 2, price: 7252, attributes: [] });
+    expect(JSON.parse(bezTokenu[5]?.cialo ?? "")).toEqual({ quantity: 0, price: 10 });
+  });
+
   it("`setProductMultiCat` bez kategorii nie wykonuje żadnego żądania", async () => {
     const udawany = udawanySelly((_zad, res) => odpowiedz(res, 200, {}));
     serwer = udawany.server;

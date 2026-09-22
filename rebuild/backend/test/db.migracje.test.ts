@@ -48,9 +48,10 @@ describe("zastosujMigracje", () => {
     "008_alerty_katalogu_statusy.sql",
     "009_alerty_polskie_znaki.sql",
     "010_marka_caps.sql",
+    "013_selly_products_warianty.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 28 tabel i 14 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 29 tabel i 19 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -59,7 +60,9 @@ describe("zastosujMigracje", () => {
     // 008 (P6.2) dokłada jedną tabelę z jednym indeksem — statusy pseudo-alertów katalogowych.
     // 009 (PR.3) to wyłącznie migracja danych `alerts` — bilans bez zmian.
     // 010 (PR.5) to migracja danych `products.marka` + słownika marek — bilans bez zmian.
-    expect(policzTabele(sqlite)).toBe(28);
+    // 013 (I15.6) zostawia starą `selly_products` jako `selly_products_old` (z jej indeksem
+    // `_kod`), zabiera jej `_status` i zakłada nową tabelę z sześcioma indeksami: +1 tabela, +5.
+    expect(policzTabele(sqlite)).toBe(29);
 
     const indeksy = (
       sqlite
@@ -68,7 +71,7 @@ describe("zastosujMigracje", () => {
         )
         .get() as { c: number }
     ).c;
-    expect(indeksy).toBe(14);
+    expect(indeksy).toBe(19);
   });
 
   it("baza działa w trybie WAL (jak produkcja)", () => {
@@ -89,7 +92,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(28);
+    expect(policzTabele(sqlite)).toBe(29);
   });
 
   /**
