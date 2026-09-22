@@ -143,7 +143,8 @@ ma endpoint:
 - Instrukcja v5 opisuje **Narzuty i Historię jako „w przygotowaniu"**, a kod ich API używa
   (potwierdza deltę: te moduły dojrzały po czerwcu). Doprecyzowanie z I5: widok Historii woła
   **wyłącznie** `GET /api/history/paged` i `GET /api/history/meta` — gołej `GET /api/history`
-  (log 10-polowy z tabeli `history`) nie woła w ogóle; tę trasę wołają Pulpit (I10) i cache
+  (log 10-polowy z tabeli `history`) nie woła w ogóle; od ticketu 96 (P10.2) tej trasy nie woła
+  już też Pulpit (patrz niżej, kafel „Ostatni eksport CSV") — jedynym wywołującym zostaje cache
   edycji katalogu.
 
 ## 5. Blueprint odbudowy (potwierdzony w kodzie)
@@ -413,8 +414,9 @@ ma endpoint:
 >
 > Odbudowa robi 10a jako **świadomie inny ekran niż oryginał**, decyzją użytkownika 2026-09-03
 > (D1–D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`): zakładki i etykiety zostają 1:1,
-> ale nagłówek KPI (O-10a-1) czyta z `GET /api/analytics/kpi` zamiast czterech aliasów oryginału,
-> dochodzi globalny pasek sześciu wyszukiwalnych filtrów działający **po stronie klienta**
+> a nagłówek KPI czytał tymczasowo z `GET /api/analytics/kpi` zamiast czterech aliasów oryginału
+> (odstępstwo O-10a-1, zamknięte ticketem 97 2026-09-22 — patrz niżej), dochodzi globalny pasek
+> sześciu wyszukiwalnych filtrów działający **po stronie klienta**
 > (O-10a-2, `currentWhere()` backendu zostaje martwym kodem — nie jest ożywiana), a zakładka
 > „Marża i rotacja" dostaje poziomy wykres słupkowy nad tabelą jako wzorzec dla bloków 10b–10e
 > (O-10a-3). Wypełniona jest karta „Marża per dostawca/kategoria/marka" (O-10a-4); pozostałe
@@ -435,10 +437,10 @@ ma endpoint:
 > (`comparison`, `unique`, `coverage`, `supplier-rank`); `ean/details` i `ean-porownanie`
 > dowiezione jako trasy **bez UI** — oryginał ich też nie woła (D6). Karta „Pokrycie i ranking"
 > dostaje dwa wykresy (histogram pokrycia, ranking dostawców po `najtanszyPct`) nad tabelami —
-> drugie zastosowanie wzorca z 10a (O-10c-1). Nagłówek KPI **zostaje** na `GET /api/analytics/kpi`
-> (D1, odstępstwo O-10a-1 utrzymane) — dane do przepięcia na kafle oryginału
-> (`ean/comparison.rows.length`, `ean/unique.rows.length`) są od teraz gotowe, przepięcie czeka
-> na decyzję użytkownika. Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
+> drugie zastosowanie wzorca z 10a (O-10c-1). Nagłówek KPI zostawał wtedy na `GET /api/analytics/kpi`
+> (D1, odstępstwo O-10a-1) — dane do przepięcia na kafle oryginału (`ean/comparison.rows.length`,
+> `ean/unique.rows.length`) były od tego bloku gotowe; przepięcie zamknięte ticketem 97
+> (2026-09-22, `PR.2`, patrz wyżej). Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
 >
 > **Odbudowa (10d, `23-FEATURE-analityka-dostawcy`, 2026-09-03):** zakładka `dostawcy` — domyślna
 > zakładka `/analityka` — wypełniona trzema kartami 1:1: „1.1 Stabilność cennika dostawcy" (7
@@ -494,9 +496,10 @@ ma endpoint:
 > dostawców" (9 kolumn) z `GET /api/suppliers`. **Odstępstwo O-10f-1 (D1):** oryginalny Pulpit
 > (`N2`, `frontend-index.js:16836-17090`) nie woła ani `/api/analytics/*`, ani `/api/alerts` —
 > alerty wyprowadza klientem wyłącznie z `/api/products` przez `pv()`; odbudowa (I6) karmiła ten
-> layout realnymi alertami z `GET /api/alerts`. Kafel „Ostatni eksport CSV" jest **trwale martwy**
-> (D3) — szuka `typ==="eksport"` w `GET /api/history`, a ten wiersz nie ma pola `typ`. Szczegóły:
-> `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
+> layout realnymi alertami z `GET /api/alerts`. Kafel „Ostatni eksport CSV" w oryginale jest
+> **trwale martwy** (D3) — szuka `typ==="eksport"` w `GET /api/history`, a ten wiersz nie ma
+> pola `typ`; odbudowa (10f) odtworzyła to 1:1, ale od P10.2 (ticket 96, niżej) to już
+> nieaktualne. Szczegóły: `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
 >
 > **Odbudowa (P10.3, `98-FEATURE-eksport-csv-z-tabeli`, 2026-09-22) — świadome odstępstwo od
 > oryginału (#91), zastępuje mechanizm CSV z 10f.** Przyciski „CSV" wszystkich dziesięciu kart
@@ -521,6 +524,16 @@ ma endpoint:
 > `invalidateQueries` (odpowiednik łatek `ackalerts` pkt 2/3), nie `window.dispatchEvent`. Gdy
 > statusy katalogu nie dają się wczytać, sekcja „Katalog" pokazuje komunikat błędu zamiast cichego
 > zera. Szczegóły: `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/`.
+>
+> **Odbudowa (karta P10.2, `96-FEATURE-kafel-ostatni-eksport`, 2026-09-22) — świadome
+> odstępstwo #34:** kafel „Ostatni eksport CSV" przestaje być trwale martwy. Zamiast gołej
+> `GET /api/history` Pulpit woła dwa razy `GET /api/history/paged?page=1&limit=1&typ=eksport|import`
+> (`refetchOnMount: "always"`, słownik akcji `SLOWNIK_AKCJI` bez zmian — Selly CSV i
+> `import_pliku`/`import_z_url` nadal się nie liczą). Podpis 1:1 z oryginałem: jest eksport →
+> data względna + „<dostawca ?? wszyscy> — <liczbaPozycji ?? 0> produktów"; brak eksportu, jest
+> import → „—" + „Ostatni import: <data>"; nic → „Brak eksportów ani importów". Nowy tekst
+> (odstępstwo): błąd zapytania → „Nie udało się pobrać historii". Szczegóły:
+> `docs/tickets/96-FEATURE-kafel-ostatni-eksport/`.
 
 > **Odbudowa (7b, `31-FEATURE-atrybuty-frontend`, 2026-09-04):** `/atrybuty` odbudowany natywnie —
 > router ma **12 tras, 1 placeholder** (`/moje-konto`). Produkcyjny ekran ma **trzy warstwy**, nie

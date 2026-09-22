@@ -7,7 +7,8 @@
  * który realnie oddaje backend, a nie przeciwko wyobrażeniu o nim.
  *
  * Zakres: że szkielet jest 1:1 z oryginałem (pięć zakładek, ich kolejność i etykiety,
- * domyślna „Dostawcy"); że nagłówek pokazuje banner historii i cztery kafle KPI; że sekcja
+ * domyślna „Dostawcy"); że nagłówek pokazuje banner historii i cztery kafle KPI oryginału
+ * (liczone klientem z tras, które widok i tak pobiera — bez `/api/analytics/kpi`); że sekcja
  * marż renderuje kolumny oryginału; że globalne filtry zawężają tabelę i mówią wprost,
  * których wymiarów ta sekcja nie stosuje.
  */
@@ -27,7 +28,6 @@ import {
   cyklZyciaModeliZFixtura,
   dostepnoscProduktowZFixtura,
   filtryZFixtura,
-  kpiZFixtura,
   marzeZFixtura,
   pokrycieEanZFixtura,
   porownanieEanZFixtura,
@@ -57,7 +57,6 @@ vi.setConfig({ testTimeout: 20_000 });
 const UZYTKOWNIK = uzytkownikZFixtura();
 const FILTRY = filtryZFixtura();
 const STATUS = statusAnalitykiZFixtura();
-const KPI = kpiZFixtura();
 const MARZE = marzeZFixtura();
 const STABILNOSC = stabilnoscDostawcowZFixtura();
 const CYKL_ZYCIA = cyklZyciaDostawcowZFixtura();
@@ -75,7 +74,6 @@ function zamockujApi(marze: Marze = MARZE) {
   server.use(
     http.get("*/api/analytics/filters", () => HttpResponse.json(FILTRY)),
     http.get("*/api/analytics/status", () => HttpResponse.json(STATUS)),
-    http.get("*/api/analytics/kpi", () => HttpResponse.json(KPI)),
     http.get("*/api/analytics/margins", () => HttpResponse.json(marze)),
     // Widok pobiera KOMPLET tras przy każdym wejściu, niezależnie od aktywnej zakładki,
     // więc bez tych handlerów `onUnhandledRequest: "error"` wywala test.
@@ -197,30 +195,92 @@ describe("2. Nagłówek — banner historii i cztery kafle KPI", () => {
     );
   });
 
-  it("liczy cztery kafle z `GET /api/analytics/kpi` — odstępstwo O-10a-1", async () => {
+  it("pokazuje cztery kafle oryginału w jego kolejności i z jego etykietami", async () => {
     zamockujApi();
     await otworzAnalityke();
 
-    expect(await screen.findByTestId("kpi-produkty")).toHaveTextContent(
-      KPI.produkty.toLocaleString("pl-PL"),
+    // `:27980-28030` — kolejność i etykiety są częścią odbudowy (ticket 97, O-10a-1 zamknięte).
+    const siatka = (await screen.findByTestId("kpi-dostawcy")).closest(".grid");
+    expect(siatka).not.toBeNull();
+    const etykiety = Array.from(siatka!.children).map((kafel) => kafel.firstChild?.textContent);
+    expect(etykiety).toEqual(["Dostawcy", "EAN wspólne", "Pozycje unikalne", "Snapshoty"]);
+  });
+
+  it("liczy kafle klientem z `filters`, `ean/comparison`, `ean/unique` i `status`", async () => {
+    zamockujApi();
+    // Każdy kafel dostaje INNĄ liczbę (5 / 3 / 4 / 15597) — przy samych fixtures trzy kafle
+    // miałyby po 5 i zamiana dwóch z nich przeszłaby niezauważona.
+    const porownanie = { rows: porownanieEanZFixtura().rows.slice(0, 3) };
+    const unikalne = { rows: unikalneEanZFixtura().rows.slice(0, 4) };
+    server.use(
+      http.get("*/api/analytics/ean/comparison", () => HttpResponse.json(porownanie)),
+      http.get("*/api/analytics/ean/unique", () => HttpResponse.json(unikalne)),
     );
-    expect(screen.getByTestId("kpi-dostawcy")).toHaveTextContent(String(KPI.dostawcy));
-    expect(screen.getByTestId("kpi-marza")).toHaveTextContent(`${String(KPI.avgMarza)}%`);
-    expect(screen.getByTestId("kpi-staging")).toHaveTextContent(
-      KPI.stagingPending.toLocaleString("pl-PL"),
+    await otworzAnalityke();
+
+    // Liczby SUROWE, bez separatora tysięcy — oryginał wstawia `.length`/`snapshots` wprost.
+    await waitFor(() => expect(screen.getByTestId("kpi-ean-wspolne")).toHaveTextContent(/^3$/));
+    await waitFor(() => expect(screen.getByTestId("kpi-pozycje-unikalne")).toHaveTextContent(/^4$/));
+    await waitFor(() =>
+      expect(screen.getByTestId("kpi-dostawcy")).toHaveTextContent(
+        new RegExp(`^${FILTRY.dostawcy.length}$`),
+      ),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("kpi-snapshoty")).toHaveTextContent(
+        new RegExp(`^${STATUS.snapshots}$`),
+      ),
     );
   });
 
-  it("pokazuje „—\" zamiast procentu, gdy średnia marża jest nullem (pusty katalog)", async () => {
+  // Oryginał: `rows: []` → „0", `snapshots: 0` → „0", brak `dostawcy` → „—".
+  it("puste odpowiedzi — „0\" przy pustych tabelach i snapshotach, „—\" bez dostawców", async () => {
     zamockujApi();
     server.use(
-      http.get("*/api/analytics/kpi", () =>
-        HttpResponse.json({ produkty: 0, dostawcy: 0, avgMarza: null, stagingPending: 0 }),
+      http.get("*/api/analytics/filters", () => HttpResponse.json({})),
+      http.get("*/api/analytics/status", () =>
+        HttpResponse.json({ hasHistory: false, snapshots: 0, od: null, do: null }),
       ),
+      http.get("*/api/analytics/ean/comparison", () => HttpResponse.json({ rows: [] })),
+      http.get("*/api/analytics/ean/unique", () => HttpResponse.json({ rows: [] })),
     );
     await otworzAnalityke();
 
-    expect(await screen.findByTestId("kpi-marza")).toHaveTextContent("—");
+    await screen.findByText("Historia cen dopiero zacznie się zbierać", { exact: false });
+    expect(screen.getByTestId("kpi-dostawcy")).toHaveTextContent(/^—$/);
+    expect(screen.getByTestId("kpi-ean-wspolne")).toHaveTextContent(/^0$/);
+    expect(screen.getByTestId("kpi-pozycje-unikalne")).toHaveTextContent(/^0$/);
+    expect(screen.getByTestId("kpi-snapshoty")).toHaveTextContent(/^0$/);
+  });
+
+  it("nie woła `/api/analytics/kpi` i nie dubluje zapytań, z których liczy kafle", async () => {
+    zamockujApi();
+    const wywolania: Record<string, number> = {};
+    const policz = (trasa: string, cialo: object) =>
+      http.get(`*/api/analytics/${trasa}`, () => {
+        wywolania[trasa] = (wywolania[trasa] ?? 0) + 1;
+        return HttpResponse.json(cialo);
+      });
+    server.use(
+      policz("filters", FILTRY),
+      policz("status", STATUS),
+      policz("ean/comparison", porownanieEanZFixtura()),
+      policz("ean/unique", unikalneEanZFixtura()),
+      policz("kpi", { produkty: 0, dostawcy: 0, avgMarza: null, stagingPending: 0 }),
+    );
+    const uzytkownik = userEvent.setup();
+    await otworzAnalityke();
+    await waitFor(() =>
+      expect(screen.getByTestId("kpi-pozycje-unikalne")).toHaveTextContent(
+        String(unikalneEanZFixtura().rows.length),
+      ),
+    );
+    // Zakładka EAN renderuje tabele z tych samych zapytań — wspólny `queryKey`, bez drugiego
+    // GET. `findAllByText` rzuca, gdy tabela zakładki się nie wyrenderowała.
+    await uzytkownik.click(screen.getByTestId("tab-ean"));
+    await screen.findAllByText(porownanieEanZFixtura().rows[0]!.nazwa);
+
+    expect(wywolania).toEqual({ filters: 1, status: 1, "ean/comparison": 1, "ean/unique": 1 });
   });
 });
 

@@ -19,7 +19,11 @@ export function handleryPulpitu() {
     http.get("*/api/products", () => HttpResponse.json([])),
     http.get("*/api/staging", () => HttpResponse.json([])),
     http.get("*/api/suppliers", () => HttpResponse.json([])),
-    http.get("*/api/history", () => HttpResponse.json([])),
+    // Kafel „Ostatni eksport CSV" (P10.2, #34) — dwa zapytania `typ=eksport|import&limit=1`.
+    // Goła `/api/history` wypadła z Pulpitu razem z martwym kaflem.
+    http.get("*/api/history/paged", () =>
+      HttpResponse.json({ items: [], total: 0, pages: 1, page: 1, limit: 1 }),
+    ),
     http.get("*/api/alerts", () => HttpResponse.json([])),
     // Statusy pseudo-alertów katalogowych (P6.2) — Pulpit liczy je z `/api/products`.
     http.get("*/api/alerty-katalogu/statusy", () => HttpResponse.json([])),

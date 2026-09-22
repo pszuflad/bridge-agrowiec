@@ -2,18 +2,18 @@
  * Widok Pulpitu `/` — blok 10f (ostatni placeholder Iteracji 10).
  *
  * Dane idą z `contract/fixtures/` przez loadery w `test/msw/kontrakt.ts`, więc test pracuje
- * na kształtach, które produkcja realnie zwraca — łącznie z tym, że wiersz `/api/history`
- * nie ma pola `typ`.
+ * na kształtach, które produkcja realnie zwraca.
  *
- * ⚠ TRZY RZECZY, KTÓRE TEN PLIK ZAMRAŻA, BO WYGLĄDAJĄ JAK USTERKA, A SĄ ODBUDOWĄ:
- *  1. kafel „Ostatni eksport CSV" pokazuje „—" i „Brak eksportów ani importów" ZAWSZE
- *     (decyzja D3 — `/api/history` nie niesie pola, którego szuka oryginał);
- *  2. pusta odpowiedź `/api/history` (`[]`, dzisiejszy staging) NIE jest błędem — widok
- *     renderuje się w całości;
+ * ⚠ CO TEN PLIK PILNUJE:
+ *  1. kafel „Ostatni eksport CSV" pokazuje PRAWDZIWĄ datę z `GET /api/history/paged` —
+ *     świadome odstępstwo, #34, decyzja Ani 2026-09-21 (w produkcji kafel jest martwy; do
+ *     ticketu 96 ten plik to zamrażał jako decyzję D3);
+ *  2. brak wpisów w Historii (dzisiejszy staging bez eksportów) i błąd zapytania NIE wywracają
+ *     Pulpitu — widok renderuje się w całości;
  *  3. karty „Najnowsze powiadomienia" NIE MA WCALE, gdy nie ma alertów do pokazania
  *     (`o.length > 0 && …` w oryginale), zamiast pustej karty z komunikatem.
  */
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -27,8 +27,8 @@ import {
   TOKEN_TESTOWY,
   alertyZFixtura,
   dostawcyZFixtura,
-  dziennikZmianZFixtura,
   produktyZFixtura,
+  stronaHistoriiZFixtura,
   stronaStaginguZFixtura,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
@@ -56,22 +56,69 @@ function katalogowePrzykryte(): Record<string, unknown>[] {
   }));
 }
 
+/**
+ * Wpis Historii danego typu — kształt wzięty z nagrania `GET_history_paged.json` (tam same
+ * edycje), nadpisany polami eksportu/importu. `kiedy` jest starsze niż tydzień, więc
+ * `sformatujWzglednie` daje samą datę — test nie zależy od godziny uruchomienia.
+ */
+function wpisHistorii(pola: Record<string, unknown>): Record<string, unknown> {
+  return { ...stronaHistoriiZFixtura().items[0]!, kodProduktu: null, zmienionePola: [], ...pola };
+}
+
+const EKSPORT = wpisHistorii({
+  id: 901,
+  typ: "eksport",
+  kiedy: "2026-07-27T10:27:14.329Z",
+  dostawca: "MO3",
+  liczbaPozycji: 42,
+  format: "csv",
+  uwagi: "Format: csv",
+});
+
+const IMPORT = wpisHistorii({
+  id: 902,
+  typ: "import",
+  kiedy: "2026-07-20T10:00:00.000Z",
+  dostawca: "MO1",
+  liczbaPozycji: 1500,
+  format: null,
+  uwagi: "Plik: cennik.xlsx",
+});
+
+/** Data, jaką kafel narysuje dla wpisu starszego niż tydzień (`toLocaleDateString("pl-PL")`). */
+function dataKafla(kiedy: unknown): string {
+  return new Date(String(kiedy)).toLocaleDateString("pl-PL");
+}
+
+type Historia = { eksport: Record<string, unknown>[]; import: Record<string, unknown>[] } | "blad";
+
 type Opcje = {
   alerty?: Alert[];
-  dziennik?: Record<string, unknown>[];
+  historia?: Historia;
   statusyKatalogu?: Record<string, unknown>[];
 };
 
 function zamockujApi({
   alerty = alertyZFixtura(),
-  dziennik = dziennikZmianZFixtura(),
+  historia = { eksport: [EKSPORT], import: [IMPORT] },
   statusyKatalogu = katalogowePrzykryte(),
 }: Opcje = {}) {
   server.use(
     http.get("*/api/products", () => HttpResponse.json(PRODUKTY)),
     http.get("*/api/staging", () => HttpResponse.json(STAGING)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
-    http.get("*/api/history", () => HttpResponse.json(dziennik)),
+    // Handler pilnuje adresu: kafel ma pytać o JEDEN najnowszy wpis danego typu. Inny adres
+    // dostaje 400, więc pomyłka w parametrach wywali asercję na treść, a nie przejdzie cicho.
+    http.get("*/api/history/paged", ({ request }) => {
+      const q = new URL(request.url).searchParams;
+      const typ = q.get("typ");
+      if ((typ !== "eksport" && typ !== "import") || q.get("limit") !== "1" || q.get("page") !== "1") {
+        return HttpResponse.json({ error: "nieoczekiwany adres" }, { status: 400 });
+      }
+      if (historia === "blad") return HttpResponse.json({ error: "boom" }, { status: 500 });
+      const items = historia[typ];
+      return HttpResponse.json({ items, total: items.length, pages: 1, page: 1, limit: 1 });
+    }),
     http.get("*/api/alerts", () => HttpResponse.json(alerty)),
     http.get("*/api/alerty-katalogu/statusy", () => HttpResponse.json(statusyKatalogu)),
   );
@@ -165,33 +212,86 @@ describe("2. Cztery kafle KPI — etykiety, liczby i linki oryginału", () => {
   });
 
   /**
-   * Decyzja D3 — kafel odtworzony jako trwale martwy. Wiersze `/api/history` nie mają pola
-   * `typ`, więc `find(e => e.typ === "eksport")` nie trafia nigdy.
+   * Świadome odstępstwo, #34, decyzja Ani 2026-09-21 — do ticketu 96 ten test zamrażał kafel
+   * jako trwale martwy („—" mimo danych, decyzja D3). Teraz ma pokazywać datę eksportu.
    */
-  it("kafel „Ostatni eksport CSV” pokazuje „—”, mimo że /api/history ma wiersze (D3)", async () => {
+  it("kafel „Ostatni eksport CSV” pokazuje datę i podpis ostatniego eksportu (#34)", async () => {
     zamockujApi();
     await otworzPulpit();
 
-    const dziennik = dziennikZmianZFixtura();
-    expect(dziennik.length, "nagranie /api/history nie jest puste").toBeGreaterThan(0);
-    expect(dziennik[0]!.typ, "wiersz nie ma pola `typ`").toBeUndefined();
+    await waitFor(() =>
+      expect(screen.getByTestId("kpi-export-value").textContent).toBe(dataKafla(EKSPORT.kiedy)),
+    );
+    expect(screen.getByText("MO3 — 42 produktów")).toBeTruthy();
+    // Import jest, ale przy istniejącym eksporcie do podpisu nie wchodzi — kolejność z `N2`.
+    expect(screen.queryByText(/Ostatni import/)).toBeNull();
+  });
 
-    await waitFor(() => expect(screen.getByTestId("kpi-export-value").textContent).toBe("—"));
-    expect(screen.getByText("Brak eksportów ani importów")).toBeTruthy();
+  /**
+   * `staleTime: Infinity` klienta trzymałby odpowiedź z pierwszego wejścia — eksport zrobiony
+   * w katalogu nie pojawiłby się po powrocie na Pulpit. `refetchOnMount: "always"` (D5).
+   */
+  it("powrót na Pulpit pobiera świeży stan — eksport zrobiony w międzyczasie jest widoczny", async () => {
+    zamockujApi({ historia: { eksport: [], import: [] } });
+    await otworzPulpit();
+    await waitFor(() => expect(screen.getByText("Brak eksportów ani importów")).toBeTruthy());
+    cleanup();
+
+    zamockujApi();
+    await otworzPulpit();
+    await waitFor(() => expect(screen.getByText("MO3 — 42 produktów")).toBeTruthy());
+  });
+
+  it("tylko import → „—” i „Ostatni import: <data>”", async () => {
+    zamockujApi({ historia: { eksport: [], import: [IMPORT] } });
+    await otworzPulpit();
+
+    await waitFor(() =>
+      expect(screen.getByText(`Ostatni import: ${dataKafla(IMPORT.kiedy)}`)).toBeTruthy(),
+    );
+    expect(screen.getByTestId("kpi-export-value").textContent).toBe("—");
   });
 });
 
-describe("3. Pusty `GET /api/history` nie jest błędem", () => {
-  it("widok renderuje się w całości przy odpowiedzi `[]` (dzisiejszy staging)", async () => {
-    zamockujApi({ dziennik: [] });
+describe("3. Historia bez eksportów i importów albo z błędem nie wywraca Pulpitu", () => {
+  it("brak wpisów obu typów → dotychczasowy pusty stan, widok w całości", async () => {
+    zamockujApi({ historia: { eksport: [], import: [] } });
     await otworzPulpit();
 
-    await waitFor(() => expect(screen.getByTestId("kpi-export-value").textContent).toBe("—"));
-    expect(screen.getByText("Brak eksportów ani importów")).toBeTruthy();
-    // Reszta strony stoi — pusta historia nie wywraca ani kafli, ani tabeli dostawców.
+    await waitFor(() => expect(screen.getByText("Brak eksportów ani importów")).toBeTruthy());
+    expect(screen.getByTestId("kpi-export-value").textContent).toBe("—");
     expect(screen.getByTestId("kpi-products")).toBeTruthy();
     expect(screen.getByTestId("tabela-dostawcow-pulpit")).toBeTruthy();
     expect(screen.queryByText(/błąd/i)).toBeNull();
+  });
+
+  it("500 z `/api/history/paged` → podpis o błędzie, reszta Pulpitu stoi", async () => {
+    zamockujApi({ historia: "blad" });
+    await otworzPulpit();
+
+    await waitFor(() =>
+      expect(screen.getByText("Nie udało się pobrać historii")).toBeTruthy(),
+    );
+    expect(screen.getByTestId("kpi-export-value").textContent).toBe("—");
+    expect(screen.queryByText("Brak eksportów ani importów")).toBeNull();
+    await waitFor(() =>
+      expect(screen.getByTestId("kpi-products-value").textContent).toBe(String(PRODUKTY.length)),
+    );
+    expect(screen.getByTestId("tabela-dostawcow-pulpit")).toBeTruthy();
+  });
+
+  it("Pulpit nie woła już gołego `GET /api/history`", async () => {
+    const adresy: string[] = [];
+    server.events.on("request:start", ({ request }) => {
+      adresy.push(new URL(request.url).pathname);
+    });
+    zamockujApi();
+    await otworzPulpit();
+    await waitFor(() => expect(screen.getByText("MO3 — 42 produktów")).toBeTruthy());
+    server.events.removeAllListeners("request:start");
+
+    expect(adresy).toContain("/api/history/paged");
+    expect(adresy).not.toContain("/api/history");
   });
 });
 

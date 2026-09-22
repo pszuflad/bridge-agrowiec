@@ -7,14 +7,19 @@
  *
  *   ["/api/products"]   ["/api/staging"]   ["/api/suppliers"]   ["/api/history"]
  *
- * ⚠ DWIE Z NICH MAJĄ PO DWA KSZTAŁTY ODPOWIEDZI. `GET /api/products` i `GET /api/staging`
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #34, decyzja Ani 2026-09-21; karta P10.2, ticket 96): czwartej
+ * trasy odbudowa NIE woła. Oryginał brał z niej wyłącznie kafel „Ostatni eksport CSV", który
+ * szukał tam pola `typ` — a wiersze tabeli `history` go nie mają, więc kafel był trwale martwy.
+ * Kafel czyta teraz `GET /api/history/paged` (`useOstatniWpisHistorii` niżej).
+ *
+ * ⚠ DWIE Z TRAS ORYGINAŁU MAJĄ PO DWA KSZTAŁTY ODPOWIEDZI. `GET /api/products` i `GET /api/staging`
  * bez parametrów oddają **gołą tablicę**, a z `?limit`/`?dostawca` — kopertę
  * `{items,total,limit,offset}` (fixtures zamrażają wariant drugi; `backend/src/routes/
  * products.ts` i `staging.ts`). Pulpit woła je BEZ parametrów, więc `dane?.length` liczy to,
  * co trzeba. Doklejenie tu `?limit` po cichu zmieniłoby kształt i wyzerowało oba kafle.
  *
  * Klucz zapytania jest ścieżką — `lib/queryClient.ts` skleja `queryKey.join("/")` i dokłada
- * nagłówki; własny `queryFn` nie jest tu potrzebny, bo żadna z tych tras nie ma parametrów.
+ * nagłówki; własny `queryFn` nie jest tu potrzebny — parametry `/paged` są już w samym adresie.
  * Typ ma `| null`, bo `on401: "returnNull"` oznacza `null` na wygasłej sesji, nie błąd.
  *
  * Alertów TU NIE MA celowo — Pulpit reużywa `pobierzAlerty()` z `pages/alerty/api.ts`
@@ -23,29 +28,8 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
 import type { Produkt } from "@/pages/katalog/filtrowanie";
+import { adresStrony, type StronaHistorii } from "@/pages/historia/dane";
 import type { PozycjaStagingu } from "@/pages/staging/dane";
-
-/**
- * Wiersz `GET /api/history` — tabela `history`, kształt z `contract/fixtures/GET_history.json`.
- *
- * ⚠ TO NIE JEST `WpisHistorii` z `pages/historia/dane.ts`. Tamten opisuje `/api/history/paged`,
- * które czyta `audit_log` i ma pola `typ`, `kiedy`, `liczbaPozycji`. Ta trasa czyta INNĄ
- * TABELĘ — dziennik zmian pól produktu — i żadnego z tych pól nie ma. Rozróżnienie jest
- * opisane w nagłówku `backend/src/routes/history.ts`; pomylenie ich to prosta droga
- * do kafla, który zawsze pokazuje „—" (patrz `ostatniEksport` w `kpi.ts`).
- */
-export type WpisDziennikaZmian = {
-  id: number;
-  data: string;
-  kodProduktu: string;
-  nazwa: string;
-  pole: string;
-  staraWartosc: string | null;
-  nowaWartosc: string | null;
-  zrodlo: string;
-  kto: string | null;
-  wykonalUzytkownikId: number | null;
-};
 
 /**
  * Dostawca z `GET /api/suppliers` — kształt z `contract/fixtures/GET_suppliers.json`.
@@ -83,12 +67,23 @@ export function useDostawcy(): UseQueryResult<DostawcaPulpitu[] | null> {
 }
 
 /**
- * Dziennik zmian pól produktu.
+ * Najnowszy wpis Historii danego typu — źródło kafla „Ostatni eksport CSV" (backlog #34).
  *
- * ⚠ NA STAGINGU TA TRASA ZWRACA `[]` I TO NIE JEST BŁĄD. Jedynym pisarzem tabeli `history`
- * jest ręczna edycja produktu w katalogu, a ta nie została jeszcze sportowana — więc dopóki
- * jej nie ma, lista jest pusta. Widok musi to przeżyć bez komunikatu o błędzie.
+ * `GET /api/history/paged` z `typ`, `page=1&limit=1`: backend zawęża po typie w SQL, bez limitu
+ * 5000 (backlog #87), i sortuje malejąco po `kiedy`, więc jedyny wpis strony to najświeższy.
+ * Adres składa ten sam `adresStrony()`, co widok `/historia` — klucz cache ma jedną postać.
+ *
+ * Co jest „eksportem", a co „importem", rozstrzyga słownik akcji backendu
+ * (`backend/src/historia/mapowanie.ts`) — kafel pokazuje dokładnie to, co pokazuje Historia.
+ *
+ * `refetchOnMount: "always"` wbrew `staleTime: Infinity` klienta: bez tego eksport zrobiony
+ * w katalogu nie pojawiłby się na Pulpicie aż do przeładowania strony (plan.md D5 ticketu 96).
  */
-export function useDziennikZmian(): UseQueryResult<WpisDziennikaZmian[] | null> {
-  return useQuery({ queryKey: ["/api/history"] });
+export function useOstatniWpisHistorii(
+  typ: "eksport" | "import",
+): UseQueryResult<StronaHistorii | null> {
+  return useQuery({
+    queryKey: [adresStrony({ page: 1, limit: 1, search: "", typ, dostawca: "all" })],
+    refetchOnMount: "always",
+  });
 }

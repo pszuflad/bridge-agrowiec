@@ -8,15 +8,17 @@
 import { describe, expect, it } from "vitest";
 
 import type { Alert } from "@/pages/alerty/api";
-import type { DostawcaPulpitu, WpisDziennikaZmian } from "@/pages/pulpit/api";
+import type { StronaHistorii, WpisHistorii } from "@/pages/historia/dane";
+import type { DostawcaPulpitu } from "@/pages/pulpit/api";
 import { sformatujWzglednie } from "@/pages/pulpit/czas";
 import {
   aktywneAlerty,
   czyDzisiaj,
   czyWTymTygodniu,
   najswiezszeAlerty,
+  opisKafelkaEksportu,
+  PODPIS_BLEDU_HISTORII,
   sortujDostawcowPoKodzie,
-  znajdzPoTypie,
 } from "@/pages/pulpit/kpi";
 
 /**
@@ -162,41 +164,93 @@ describe("sortujDostawcowPoKodzie — port :17038", () => {
 });
 
 /**
- * Zamrożenie decyzji D3 — kafel „Ostatni eksport CSV" jest trwale martwy.
+ * Kafel „Ostatni eksport CSV" — świadome odstępstwo, #34, decyzja Ani 2026-09-21.
  *
- * Wiersze bierzemy tak, jak wyglądają w nagraniu `GET_history.json`: bez pola `typ`.
- * Gdyby `/api/history` kiedyś zaczęło je zwracać, ten test zapali i wymusi decyzję,
- * zamiast po cichu ożywić kafel.
+ * Do ticketu 96 ten blok ZAMRAŻAŁ martwy kafel (decyzja D3 z 10f): wiersze `GET /api/history`
+ * nie mają pola `typ`, więc `find(e => e.typ === "eksport")` z oryginału nie trafiał nigdy.
+ * Teraz wpisy przychodzą z `GET /api/history/paged` i kafel ma pokazywać datę — teksty i
+ * kolejność gałęzi zostają te same co w `N2` (`:16902-16917`).
  */
-describe("znajdzPoTypie — kafel „Ostatni eksport CSV” (decyzja D3)", () => {
-  const WPISY: WpisDziennikaZmian[] = [
-    {
-      id: 46915,
-      data: "2026-07-28T06:22:26.735Z",
-      kodProduktu: "MO2_1147700",
-      nazwa: "15x6.00-6 TRELLEBORG T510 6PR TT",
-      pole: "kategoria",
-      staraWartosc: "Rolnicze małe",
-      nowaWartosc: "Rolnicze",
-      zrodlo: "recznie",
-      kto: "Anna",
-      wykonalUzytkownikId: 1,
-    },
-  ];
+describe("opisKafelkaEksportu — kafel „Ostatni eksport CSV” (#34, decyzja Ani 2026-09-21)", () => {
+  /** Wpis w kształcie `contract/fixtures/GET_history_paged.json` (12 pól). */
+  function wpis(pola: Partial<WpisHistorii>): WpisHistorii {
+    return {
+      id: 1,
+      typ: "eksport",
+      kiedy: oGodzinie(4, 9, 5),
+      dostawca: "MO3",
+      uzytkownik: "Anna",
+      liczbaPozycji: 42,
+      nazwaPliku: null,
+      format: "csv",
+      kodProduktu: null,
+      zmienionePola: [],
+      uwagi: "Format: csv",
+      ...pola,
+    };
+  }
 
-  it("wiersz `/api/history` NIE MA pola `typ` — to źródło usterki", () => {
-    expect(Object.keys(WPISY[0]!)).not.toContain("typ");
+  function strona(...items: WpisHistorii[]): StronaHistorii {
+    return { items, total: items.length, pages: 1, page: 1, limit: 1 };
+  }
+
+  const PUSTO = { strona: strona(), blad: false };
+  const BLAD = { strona: undefined, blad: true };
+
+  it("jest eksport → data względna i „<dostawca> — N produktów”; import nie wchodzi do podpisu", () => {
+    const eksport = { strona: strona(wpis({})), blad: false };
+    const imp = { strona: strona(wpis({ typ: "import", kiedy: chwila(0, 0, 3) })), blad: false };
+
+    expect(opisKafelkaEksportu(eksport, imp, TERAZ)).toEqual({
+      wartosc: "dzisiaj, 09:05",
+      zmiana: { kierunek: "none", text: "MO3 — 42 produktów" },
+    });
   });
 
-  it("nie znajduje ani eksportu, ani importu — kafel zostaje pusty", () => {
-    expect(znajdzPoTypie(WPISY, "eksport")).toBeNull();
-    expect(znajdzPoTypie(WPISY, "import")).toBeNull();
+  it("ZIP „wszyscy” (dostawca null) — podpis z oryginału, liczba to `liczbaPozycji` bez przeliczania", () => {
+    const eksport = { strona: strona(wpis({ dostawca: null, liczbaPozycji: 10 })), blad: false };
+    expect(opisKafelkaEksportu(eksport, PUSTO, TERAZ).zmiana.text).toBe("wszyscy — 10 produktów");
   });
 
-  it("pusta odpowiedź stagingu (`[]`) też daje null, a nie błąd", () => {
-    expect(znajdzPoTypie([], "eksport")).toBeNull();
-    expect(znajdzPoTypie(null, "eksport")).toBeNull();
-    expect(znajdzPoTypie(undefined, "eksport")).toBeNull();
+  it("`liczbaPozycji: null` → „0 produktów”, jak `?? 0` w oryginale", () => {
+    const eksport = { strona: strona(wpis({ liczbaPozycji: null })), blad: false };
+    expect(opisKafelkaEksportu(eksport, PUSTO, TERAZ).zmiana.text).toBe("MO3 — 0 produktów");
+  });
+
+  it("tylko import → „—” i „Ostatni import: <data>”", () => {
+    const imp = { strona: strona(wpis({ typ: "import", kiedy: oGodzinie(3, 14, 30) })), blad: false };
+    expect(opisKafelkaEksportu(PUSTO, imp, TERAZ)).toEqual({
+      wartosc: "—",
+      zmiana: { kierunek: "none", text: "Ostatni import: wczoraj, 14:30" },
+    });
+  });
+
+  it("brak obu → dotychczasowy pusty stan", () => {
+    expect(opisKafelkaEksportu(PUSTO, PUSTO, TERAZ)).toEqual({
+      wartosc: "—",
+      zmiana: { kierunek: "none", text: "Brak eksportów ani importów" },
+    });
+  });
+
+  it("w trakcie ładowania i przy wygasłej sesji (`null` z 401) → pusty stan, nie błąd", () => {
+    const laduje = { strona: undefined, blad: false };
+    const sesja = { strona: null, blad: false };
+    expect(opisKafelkaEksportu(laduje, laduje, TERAZ).zmiana.text).toBe("Brak eksportów ani importów");
+    expect(opisKafelkaEksportu(sesja, sesja, TERAZ).zmiana.text).toBe("Brak eksportów ani importów");
+  });
+
+  it("błąd zapytania o eksport → podpis o błędzie, nie udawany brak eksportów", () => {
+    const imp = { strona: strona(wpis({ typ: "import" })), blad: false };
+    expect(opisKafelkaEksportu(BLAD, imp, TERAZ)).toEqual({
+      wartosc: "—",
+      zmiana: { kierunek: "none", text: PODPIS_BLEDU_HISTORII },
+    });
+  });
+
+  it("błąd zapytania o import liczy się tylko wtedy, gdy import byłby pokazany", () => {
+    const eksport = { strona: strona(wpis({})), blad: false };
+    expect(opisKafelkaEksportu(eksport, BLAD, TERAZ).zmiana.text).toBe("MO3 — 42 produktów");
+    expect(opisKafelkaEksportu(PUSTO, BLAD, TERAZ).zmiana.text).toBe(PODPIS_BLEDU_HISTORII);
   });
 });
 
