@@ -1,6 +1,6 @@
 # 101-CHORE-migracja-marka-caps — duplikat marki `ALLIANCE` / `Alliance` (karta PR.5, backlog #92)
 
-> Status: Approved (decyzja #92 = A, 2026-09-22; użytkownik: „continue")
+> Status: Implemented (decyzja #92 = A, 2026-09-22; użytkownik: „continue")
 > Branch: `chore/101-migracja-marka-caps`
 > Worktree: `.worktrees/101-CHORE-migracja-marka-caps`
 
@@ -59,6 +59,6 @@ Testy na bazie z migracji + opcjonalny na kopii snapshotu (`SNAPSHOT_DB=…`). B
 `docs/cutover.md` (do koordynatora), frontend.
 
 ## Definition of done
-- [ ] 010 na snapshocie: 849 × `ALLIANCE`, 0 × `Alliance`, słownik bez `Alliance`, nic innego
-- [ ] drugi przebieg = 0 zmian
-- [ ] lint/typecheck/build/test zielone
+- [x] 010 na snapshocie: 849 × `ALLIANCE`, 0 × `Alliance`, słownik bez `Alliance`, nic innego
+- [x] drugi przebieg = 0 zmian
+- [x] lint/typecheck/build/test zielone

@@ -38,6 +38,13 @@
 
 -- Klucz liczony w CTE każdej instrukcji (bez tabeli pomocniczej) — wyrażenie jest w obu
 -- instrukcjach IDENTYCZNE; zmieniając jedno, zmień drugie.
+--
+-- ⚠ Instrukcje czytają tabelę, którą same zmieniają. Bezpieczne, bo `WHERE … IN (SELECT …)`
+-- jest podzapytaniem NIESKORELOWANYM — SQLite liczy je raz, przed pierwszym zapisem — a wiersz
+-- dostaje wartość z `klucz` wyliczonego z jego WŁASNEJ (starej) marki, niezależnie od kolejności.
+-- Test „grupa bez formy WIELKIEJ" (`Bkt` + `bkt` → oba `BKT`) pilnuje, że żaden wiersz grupy
+-- nie wypada po zmianie poprzedniego. Kopiując ten wzorzec, nie zamieniaj `IN` na podzapytanie
+-- skorelowane (np. `EXISTS` po `products`) — to byłoby liczone per wiersz na zmienianej tabeli.
 
 WITH klucz AS (
        SELECT wartosc,
