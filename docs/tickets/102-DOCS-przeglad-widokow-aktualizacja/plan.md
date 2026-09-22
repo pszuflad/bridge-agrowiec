@@ -1,6 +1,6 @@
 # 102-DOCS-przeglad-widokow-aktualizacja — przegląd widoków do stanu develop (karta PR.6)
 
-> Status: Approved
+> Status: Implemented
 > Branch: `docs/102-przeglad-widokow-aktualizacja`
 > Worktree: `.worktrees/102-DOCS-przeglad-widokow-aktualizacja`
 
