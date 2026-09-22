@@ -1,7 +1,18 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
 # Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
-7d6cfc91290e9c67e6d6b5f739e1cac9a0f2448c
+abe5f14e96fd7a72bb66f13f3fb1bea5110a6705
+# ^ 2026-09-22 19:00 („availability” + „old_agrorami_delete”). STRIAŻOWANE 2026-09-22 (ticket 110).
+#   Zakres 7d6cfc9..abe5f14 = 2 commity sync(vps) z KODEM: 3f00533 (17:30 „withdrawals”) → backlog #103,
+#   abe5f14 (18:09 „availability” + 18:13 usunięcie 179 kart MO9) → backlog #104.
+#   To są te zmiany, o których Paweł uprzedzał 22.09 („jedna/dwie w toku”) — realizują karty I15.10/I15.11.
+#   ⚠ ZAMROŻENIE PRODUKCJI obowiązuje OD TEGO COMMITA — kolejny sync(vps) z kodem zgłoś Pawłowi.
+#   Nowe tabele produkcji: supplier_feed_state, supplier_feed_versions, product_absence_checks,
+#   product_auto_suspensions. ŻYWY bundel FE też zmieniony (panel „Braki w cenniku”).
+#   Następny triaż: git fetch origin main && git log abe5f14..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 22.09 14:00) ---
+# 7d6cfc91290e9c67e6d6b5f739e1cac9a0f2448c
 # ^ 2026-09-22 14:00 „20260922T110248Z_staging_v2”. STRIAŻOWANE 2026-09-22 (ticket 104-DOCS-plan-i15).
 #   Zakres 71323ec..7d6cfc9 = 2 commity: a6dffb1 (06:00, sama regeneracja sellycsv → „Pominięte”)
 #   i 7d6cfc9 (Staging v2 — nowy importer/akceptacja, ścisły EAN, „Rozstrzygnij”, staging_matches,

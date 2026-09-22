@@ -4561,3 +4561,80 @@ niezależnie od stanu danych czy Selly. `syncFullForDostawca` (`sync_full.cjs`, 
 `src/selly/rest/sync-full.ts`) samo w sobie działa poprawnie; awaria jest wyłącznie w montażu trasy.
 **Rekomendacja:** rozstrzygnąć w I15.8 (harmonogram + trasy `sync-*`) — naprawić import (odstępstwo świadome)
 albo odtworzyć 500 1:1, zgodnie z regułą projektu o defektach zastanych.
+
+---
+
+### #103 · 2026-09-22 17:30 · [BACKEND][BAZA][FRONTEND] · „Braki w cenniku” — bezpieczeństwo źródła, koniec fałszywych wycofań, staging v3
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 17:30 (etykieta `20260922T153004Z_withdrawals`) |
+| **Kategoria** | BACKEND + BAZA + FRONTEND — rdzeń importu, staging, panel |
+| **Pliki** | `mirror/backend/feed_safety.cjs` (**nowy**), `staging_policy.cjs` (+131 l. → 407), `extensions.cjs` (jeden scheduler — drugi wyłączony), `index.cjs`, `parsers/dispatcher.cjs` (usunięty cichy fallback do starych parserów), `parsers/mo2_jmk.cjs`, `parsers/mo9_agrorami.cjs`, `parsers/mo9_agrorami_api.cjs`, `parsers/_agrorami_fetch_helper.cjs`, `parsers/adapter.cjs`; FE: `assets/index-PRICEFMT1783512500.js` (ŻYWY bundel), `assets/staging-policy-injection.js`, `index.html`; `db/schema.sql`: `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks`; jednorazowe: `withdrawals_reconcile_20260922.cjs` + raport JSON |
+| **Commit** | `3f00533` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — |
+
+**Opis biznesowy (CHANGELOG Ani).** „Naprawa nieobecności w stagingu. Usunięto cichy fallback do starych parserów
+w imporcie URL i ręcznym. Agrorami: pełny zapis JSON przed zamknięciem procesu, kontrola liczby/unikalności produktów
+i postępu pobierania, import rdzenia bez pobierania nieużywanego starego CSV. Jeden scheduler (rdzeń), wyłączony drugi
+w extensions. Przenoszenie informacji o kompletności i wierszach odfiltrowanych dispatcher→adapter→silnik. Blokada
+pustego, błędnego, mniejszego o ponad 20% lub masowo nierozpoznanego źródła. Trzy różne kompletne oferty, minimum 24h
+pomiędzy potwierdzeniami; trwałe dowody i ochrona przed ponownym liczeniem tego samego pliku. Wstrzymane/0 nie wracają.
+Stare karty bez stabilnego oznaczenia i możliwe zmiany kodów mają osobne zablokowane zgłoszenia do sprawdzenia.
+Bezpieczne dopasowanie wielkości liter oraz jednoznacznego kodu dostawcy, ochrona DEMO i wariantów; podobne cechy
+z innym EAN do decyzji. JMK: nie łączy i nie sumuje wierszy po samym EAN. Panel: Braki w cenniku, podgląd starej karty.
+Przebudowano kolejkę z sześciu świeżo sprawdzonych źródeł… bez zmian cen/stanów/statusów/nazw katalogu. Testy 39
+przypadków, dwa pełne importy sześciu dostawców oraz trzy pełne odczyty Agrorami na izolowanej kopii.”
+Powód: „Anna 22.09.2026 poleciła zweryfikować rzeczywiste braki i naprawić wszystkie wykazane przyczyny fałszywych wycofań.”
+
+**Szczegół techniczny.** `feed_safety.attach(supplier, result)` rzuca wyjątek przy pustym cenniku i przy błędach parsera
+(koniec cichego przełączania na stary format), dokleja do tablicy rekordów niewyliczalne `_bridgeFeedMeta`
+(`complete`, `parserErrors`, `source`, `rawCount`, `excludedCodes`) i niesie je przez `converted()` do adaptera i silnika.
+Wycofanie pozycji wymaga **trzech różnych kompletnych ofert** (odcisk pliku w `supplier_feed_versions`, stan dostawcy
+w `supplier_feed_state`, dowody per produkt w `product_absence_checks`) i minimum 24 h między potwierdzeniami.
+`staging_policy.cjs` rośnie o reguły wycofań, zablokowane zgłoszenia „do sprawdzenia”, bezpieczne dopasowanie po
+kodzie dostawcy i wielkości liter, ochronę DEMO i wariantów. FE: **zmiana w ŻYWYM bundlu** (nie w łatce wstrzykiwanej) —
+nowy widok/filtr „Braki w cenniku” i podgląd starej karty.
+
+**Rekomendacja (moja):** ✅ **nanieść — to rdzeń importu i wprost naprawa problemu, który Ania nazwała „fałszywymi
+wycofaniami”.** Zakres wchodzi do istniejących kart I15 (parsery → I15.2, staging BE → I15.4, panel → I15.5), bo rusza
+te same pliki; osobnej karty nie zakładać. Skrypt `withdrawals_reconcile_20260922.cjs` to operacja jednorazowa —
+nie przenosić (jak D5 dla reconcile Staging v2).
+
+---
+
+### #104 · 2026-09-22 18:09 i 18:13 · [BACKEND][BAZA] · dostępność: brak w ofercie = wstrzymany/0, CSV tylko aktywne, delta reaguje natychmiast + usunięcie 179 starych kart MO9
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 18:09 (`20260922T160912Z_availability`) i 18:13 (`20260922T161344Z_old_agrorami_delete`) |
+| **Kategoria** | BACKEND + BAZA (staging, eksport CSV, Selly delta/full) + operacja na danych |
+| **Pliki** | `mirror/backend/availability_sync.cjs` (**nowy**), `staging_policy.cjs` (+87 l. → 488), `generate_selly_export.cjs` (+19), `selly/sync_delta.cjs` (+18), `selly/sync_full.cjs` (+3); `db/schema.sql`: `product_auto_suspensions`; jednorazowe: `apply_availability_20260922.cjs`, `zero_and_delete_agrorami_20260922.cjs` + archiwa JSON |
+| **Commit** | `abe5f14` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — |
+
+**Opis biznesowy (CHANGELOG Ani).** „Brak produktu w poprawnej pełnej ofercie natychmiast ustawia wstrzymany/0. Tabela
+`product_auto_suspensions` odróżnia automatyczny brak od ręcznego wstrzymania. Pewny powrót przywraca aktywność i bieżący
+stan; błędy/zmiany wymagają decyzji, ręczne wstrzymania chronione. Eksport CSV zawiera tylko aktywne produkty, zapis
+atomowy. Zmiana dostępności uruchamia odświeżenie CSV i Selly delta; delta zeruje również mapowane produkty bez EAN,
+sprawdza aktualny status tuż przed wysyłką i nie zeruje współdzielonego wariantu mającego inną aktywną ofertę. Tor pełny
+pomija produkty wstrzymane po rozpoczęciu cyklu. Migracja: 395 brakujących i 2 niepewne karty wstrzymane/0; 179 starych
+MO9 tymczasowo wstrzymanych do wyzerowania sklepu i zatwierdzonego usunięcia w kolejnym kroku.” Drugi wpis (18:13):
+„usunięto dokładnie 179 dawnych kart MO9 Agrorami z katalogu oraz ich stare zgłoszenia i ręczne powiązania
+`staging_matches`. Zachowano historię i wyzerowane mapowania Selly… Powrót opony nie odtwarza usuniętej karty.”
+
+**Szczegół techniczny.** `availability_sync.request(db, dostawca)` kolejkuje odświeżenie: uruchamia generator CSV
+w osobnym procesie i po nim `syncDelta` dla dotkniętych dostawców (okresowa synchronizacja zostaje mechanizmem
+ponawiania). `sync_delta`: warunek `WHERE` obejmuje teraz wstrzymane z wariantem, ale **wyklucza** te, które mają inną
+aktywną ofertę w tej samej grupie; mapowany wariant bez EAN też się zeruje; tuż przed wysyłką czytany jest **żywy**
+status/stan/cena produktu (`SELECT … FROM products WHERE id=?`), żeby nie wysłać stanu sprzed wstrzymania.
+`sync_full` pomija produkty wstrzymane po rozpoczęciu cyklu. Eksport CSV: tylko `aktywny`, zapis atomowy.
+
+**Rekomendacja (moja):** ✅ **nanieść** — bez tego nowy Bridge wysyłałby do sklepu stany produktów, których dostawca już
+nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4**, CSV tylko aktywne + zapis atomowy →
+**I15.3**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
+⚠ Operacje na danych (395 wstrzymań, 179 usuniętych kart MO9) — **nie odtwarzamy** (decyzja D2: świeża kopia produkcji
+na staging), ale **trzeba je uwzględnić przy pomiarach**: liczba produktów w katalogu spadła o 179.
+
