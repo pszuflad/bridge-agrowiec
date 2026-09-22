@@ -20,6 +20,7 @@
 
 import {
   BladSelly,
+  type CechaProduktu,
   type CechaWariantu,
   type KategoriaSelly,
   type KlientSelly,
@@ -65,6 +66,9 @@ export type ProduktSklepu = {
   product_code?: string | null;
   provider_code?: string | null;
   ean?: string | null;
+  /** Cechy PRODUKTU (Tor 2, `GET`/`PUT /api/products/{pid}`, karta I15.7). */
+  features?: CechaProduktu[];
+  category_id?: number | null;
   warianty: (WariantSelly & { quantity?: number | null; price?: number | null })[];
 };
 
@@ -190,6 +194,11 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
 
     updateProduct(id, payload) {
       zapisz("updateProduct", id, payload);
+      // Efekt PUT w sklepie (Tor 2): cechy i kategoria nadpisują się tylko, gdy payload je niesie.
+      const produkt = sklep.get(id);
+      const p = (payload ?? {}) as { features?: CechaProduktu[]; category_id?: number };
+      if (produkt && p.features) produkt.features = structuredClone(p.features);
+      if (produkt && p.category_id !== undefined) produkt.category_id = p.category_id;
       return Promise.resolve({ data: { product_id: id } });
     },
 
@@ -201,6 +210,18 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
     setProductMultiCat(productId, categoryIds) {
       zapisz("setProductMultiCat", productId, categoryIds);
       return Promise.resolve({ data: { product_id: productId, categories: categoryIds } });
+    },
+
+    async getProduct(productId) {
+      zapisz("getProduct", productId);
+      const produkt = produktAlbo404(productId, "GET", `/api/products/${productId}`);
+      // Selly oddaje produkt w kopercie `data` (`sync_full.cjs:190` czyta `current.data?.data`).
+      return {
+        data: {
+          product_id: produkt.product_id,
+          features: structuredClone(produkt.features ?? []),
+        },
+      };
     },
 
     listProductsByEan(ean) {
@@ -296,6 +317,7 @@ export function stworzAtrapeBezKonfiguracji(): KlientSelly {
     updateProduct: rzuc,
     upsertProductWarehouse: rzuc,
     setProductMultiCat: rzuc,
+    getProduct: rzuc,
     listProductsByEan: rzuc,
     listProductsPage: rzuc,
     listVariants: rzuc,
