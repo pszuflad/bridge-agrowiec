@@ -71,8 +71,8 @@ Zmiany w `rebuild/`, `contract/`, roadmapie, backlogu (statusy #32/#34/#91 już 
 `docs/pytania-do-ani-2026-09-18.md`. Naprawa sufitów CSV i śladu eksportu z Katalogu.
 
 ## Definition of done
-- [ ] I10-v2 w formacie delty, wszystkie unieważnienia z wejść 85/90/96/97/98 + znalezione przy
+- [x] I10-v2 w formacie delty, wszystkie unieważnienia z wejść 85/90/96/97/98 + znalezione przy
       weryfikacji, cytaty znak w znak.
-- [ ] Banner w I10, notki w I8.
-- [ ] Karta P10.4 = stan; „Do koordynatora” z zamknięciem Iteracji 10.
-- [ ] review.md bez otwartych BLOCKER-ów; PR do `develop`.
+- [x] Banner w I10, notki w I8.
+- [x] Karta P10.4 = stan; „Do koordynatora” z zamknięciem Iteracji 10.
+- [x] review.md bez otwartych BLOCKER-ów; PR do `develop`.
