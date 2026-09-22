@@ -286,9 +286,6 @@ async function syncFullForDostawca(db, dostawca, opts = {}) {
 
   for (const row of limited) {
     try {
-      const live=db.prepare('SELECT status,stan FROM products WHERE id=?').get(row.bridge_product_id);
-      if(!live || live.status!=='aktywny'){stats.skip++;continue;}
-      row.stan=live.stan;
       let result;
       if (row.selly_variant_id) {
         // Sciezka A

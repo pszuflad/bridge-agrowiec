@@ -1,14 +1,3 @@
-2026-09-22 18:13
-obszar: baza danych
-
-pliki: data.db + /home/admin/private_apps/bridge/data.db.bak_20260922T161344Z_old_agrorami_delete; CHANGELOG.md + /home/admin/private_apps/bridge/CHANGELOG.md.bak_20260922T161344Z_old_agrorami_delete; availability_migration_archive_20260922.json; availability_shop_result_20260922.json
-
-zmiana: Po zabezpieczeniu dostępności w sklepie usunięto dokładnie 179 dawnych kart MO9 Agrorami z katalogu oraz ich stare zgłoszenia i ręczne powiązania staging_matches. Zachowano historię i wyzerowane mapowania Selly, pozostałych dostawców nie usuwano. Powrót opony nie odtwarza usuniętej karty: przechodzi zwykłe dopasowanie i staging do akceptacji Marty.
-
-powód: Decyzja Anny 22.09.2026 o usunięciu nieobecnych starych kart Agrorami po przejściu z CSV na API.
-
----
-
 2026-09-22 18:09
 obszar: backend | baza danych
 

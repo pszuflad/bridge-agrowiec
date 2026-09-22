@@ -23,8 +23,8 @@ function findDeltaProducts(db, dostawca = null, limit = 10000) {
   // Aktywne pozycje sa odkrywane/tworzone standardowo. Wstrzymane obslugujemy
   // tylko, gdy maja juz mapping Selly: zerujemy istniejacy wariant, ale nie
   // tworzymy w sklepie produktu, ktory nigdy nie byl opublikowany.
-  const where = ["(p.status = 'aktywny' OR (p.status = 'wstrzymany' AND sp.selly_variant_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM products active WHERE active.dostawca=p.dostawca AND active.kod_importu=p.kod_importu AND active.status='aktywny')))",
-                 "(sp.selly_variant_id IS NOT NULL OR (p.ean IS NOT NULL AND p.ean != ''))",
+  const where = ["(p.status = 'aktywny' OR (p.status = 'wstrzymany' AND sp.selly_variant_id IS NOT NULL))",
+                 "p.ean IS NOT NULL", "p.ean != ''",
                  "p.kod_importu IS NOT NULL", "p.kod_importu != ''"];
   const params = [];
   if (dostawca) {
@@ -32,7 +32,7 @@ function findDeltaProducts(db, dostawca = null, limit = 10000) {
     params.push(dostawca);
   }
   const sql = `
-    SELECT p.id, p.status, p.kod, p.kod_importu, p.dostawca, p.ean, p.nazwa,
+    SELECT p.kod, p.kod_importu, p.dostawca, p.ean, p.nazwa,
            p.marka, p.kategoria,
            CASE WHEN p.status = 'wstrzymany' THEN 0 ELSE p.stan END AS stan,
            p.cena_sprzedazy, p.cena_zakupu, p.vat AS vat_rate,
@@ -148,18 +148,6 @@ async function syncDelta(db, dostawca = null, opts = {}) {
       }
 
       // 2. Aktualizuj wariant (quantity + price)
-      // The import may have suspended the item while this async batch was
-      // discovering variants. Never send a stock captured before suspension.
-      const live=db.prepare('SELECT status,stan,cena_sprzedazy FROM products WHERE id=?').get(row.id);
-      if(!live){stats.skip++;continue;}
-      if(live.status==='wstrzymany'){
-        if(db.prepare("SELECT 1 FROM products WHERE dostawca=? AND kod_importu=? AND status='aktywny' LIMIT 1").get(row.dostawca,row.kod_importu)){
-          stats.skip++;continue;
-        }
-        row.stan=0;
-      }else{
-        row.stan=live.stan;row.cena_sprzedazy=live.cena_sprzedazy;
-      }
       if (dryRun) {
         stats.skip++;
         console.log(`  [DRY] ${row.kod} -> pid=${mapping.product_id} vid=${mapping.variant_id} qty=${row.stan} price=${row.cena_sprzedazy}`);

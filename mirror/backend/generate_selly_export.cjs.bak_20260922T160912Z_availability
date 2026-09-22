@@ -1,4 +1,4 @@
-// Generator pliku CSV dla Selly - tylko aktywne produkty wszystkich dostawcow
+// Generator pliku CSV dla Selly - aktywne produkty oraz wstrzymane ze stanem 0, wszyscy dostawcy
 // Odwzorowuje format pliku katalog_wszyscy_wybrane_2026-07-23.csv (60 kolumn, separator ';', BOM UTF-8)
 const path = require('path');
 const fs = require('fs');
@@ -107,13 +107,13 @@ function esc(val) {
 }
 
 const sqlCols = columns.map(c => c[1]).filter(Boolean);
-// Wstrzymane produkty sa zerowane bezposrednio przez Selly API, a nastepnie
-// nie trafiaja do CSV. Ponowne pojawienie sie w pewnym dopasowaniu przywraca
-// status aktywny i wtedy produkt ponownie pojawia sie w eksporcie.
+// Wstrzymanych nie wolno pomijac: Selly musi dostac stan 0, gdy produkt
+// po ostatnim eksporcie przestal byc dostepny. Pozostale dane zachowujemy,
+// aby importer mogl znalezc i zaktualizowac istniejacy produkt/wariant.
 const rows = db.prepare(`
   SELECT *
   FROM products
-  WHERE status = 'aktywny'
+  WHERE status IN ('aktywny', 'wstrzymany')
   ORDER BY id
 `).all();
 
@@ -129,6 +129,9 @@ for (const row of rows) {
     }
     if (header === 'Kod-dostawcy' && typeof v === 'string') {
       v = v.replace(/_/g, ''); // MO9_336320 -> MO9336320, zgodnie ze wzorcowym plikiem wyslanym do Selly
+    }
+    if (header === 'Stan-magazynowy' && row.status === 'wstrzymany') {
+      v = 0;
     }
     if (header === 'cena_sprzedazy' && typeof v === 'number') {
       v = `${Math.floor(v)},-`; // 2026-07-31: format gola liczba + ",-" zamiast surowej liczby z kropka
@@ -152,11 +155,9 @@ if (!fs.existsSync(OUT_DIR)) {
 }
 
 const outPath = path.join(OUT_DIR, OUT_FILE);
-const tempPath=outPath+'.tmp-'+process.pid;
-fs.writeFileSync(tempPath, BOM + csvBody, 'utf8');
-fs.renameSync(tempPath,outPath);
+fs.writeFileSync(outPath, BOM + csvBody, 'utf8');
 
 console.log('Zapisano:', outPath);
-console.log('Liczba produktow aktywnych:', rows.length);
+console.log('Liczba produktow (aktywnych i wstrzymanych):', rows.length);
 console.log('Liczba kolumn:', columns.length);
 console.log('Rozmiar pliku (bajty):', fs.statSync(outPath).size);

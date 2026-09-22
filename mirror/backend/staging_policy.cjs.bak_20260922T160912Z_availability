@@ -73,43 +73,8 @@ function install({U,db,normalize,classify,badName,ext}) {
   db.exec('CREATE TABLE IF NOT EXISTS staging_matches(supplier TEXT NOT NULL,source_key TEXT NOT NULL,product_code TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(supplier,source_key))');
   db.exec(`CREATE TABLE IF NOT EXISTS supplier_feed_state(supplier TEXT PRIMARY KEY,last_identity_hash TEXT,last_item_count INTEGER NOT NULL DEFAULT 0,max_item_count INTEGER NOT NULL DEFAULT 0,updated_at TEXT NOT NULL,last_counted_at TEXT);
     CREATE TABLE IF NOT EXISTS supplier_feed_versions(supplier TEXT NOT NULL,fingerprint TEXT NOT NULL,counted_at TEXT NOT NULL,PRIMARY KEY(supplier,fingerprint));
-    CREATE TABLE IF NOT EXISTS product_absence_checks(supplier TEXT NOT NULL,product_code TEXT NOT NULL,checks_json TEXT NOT NULL,PRIMARY KEY(supplier,product_code));
-    CREATE TABLE IF NOT EXISTS product_auto_suspensions(
-      supplier TEXT NOT NULL,
-      product_code TEXT NOT NULL,
-      suspended_at TEXT NOT NULL,
-      source_fingerprint TEXT,
-      reason TEXT NOT NULL,
-      PRIMARY KEY(supplier,product_code)
-    );`);
+    CREATE TABLE IF NOT EXISTS product_absence_checks(supplier TEXT NOT NULL,product_code TEXT NOT NULL,checks_json TEXT NOT NULL,PRIMARY KEY(supplier,product_code));`);
   const original={add:U.addStaging.bind(U),accept:U.acceptStaging.bind(U),edit:U.updateStaging.bind(U)};
-  const originalUpdate=U.updateProduct.bind(U);
-  let availabilityChanged=false;
-  const autoMarker=db.prepare('SELECT 1 FROM product_auto_suspensions WHERE supplier=? AND product_code=?');
-  U.updateProduct=(id,patch)=>{
-    // An explicit manual status choice takes ownership away from automation.
-    if(Object.hasOwn(patch,'status')){
-      const p=U.getProduct(id);
-      if(p)db.prepare('DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?').run(p.dostawca,p.kod);
-    }
-    return originalUpdate(id,patch);
-  };
-  function suspend(p,time,fingerprint,reason){
-    if(p.status==='aktywny' || autoMarker.get(p.dostawca,p.kod)){
-      db.prepare(`INSERT INTO product_auto_suspensions VALUES(?,?,?,?,?)
-        ON CONFLICT(supplier,product_code) DO UPDATE SET source_fingerprint=excluded.source_fingerprint,reason=excluded.reason`)
-        .run(p.dostawca,p.kod,time,fingerprint,reason);
-    }
-    if(p.status!=='wstrzymany'||Number(p.stan)!==0){
-      originalUpdate(p.id,{status:'wstrzymany',stan:0,nieobecnoscPodRzad:0,dataAktualizacji:time});
-      availabilityChanged=true;
-    }
-  }
-  function refreshAvailability(supplier){
-    // Test copies must never call shop APIs or publish the production CSV.
-    if(require('path').resolve(db.name)!=='/home/admin/private_apps/bridge/data.db')return;
-    require('./availability_sync.cjs').request(db,supplier);
-  }
   const clear=db.prepare('DELETE FROM staging_items WHERE dostawca=? AND kod=?');
   const aliases=db.prepare('SELECT product_code FROM staging_matches WHERE supplier=? AND source_key=?');
   const find = code => U.getProductByKod(code);
@@ -184,13 +149,6 @@ function install({U,db,normalize,classify,badName,ext}) {
       cenaZakupuNowa:safe.cenaZakupu??row.cenaZakupuNowa,stanNowy:safe.stan??row.stanNowy,magazyn:safe.magazyn??row.magazyn,
       eanRaw:sv.raw,eanIsValid:safe.eanIsValid,eanSourceStatus:sv.status});
     original.accept(id,user);
-    if(current?.status==='wstrzymany'){
-      if(autoMarker.get(row.dostawca,row.kod)){
-        db.prepare('DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?').run(row.dostawca,row.kod);
-      }else{
-        originalUpdate(current.id,{status:'wstrzymany',stan:0});
-      }
-    }
     clear.run(row.dostawca,row.kod);
     if(snap._resolution && snap._sourceKey) db.prepare('INSERT INTO staging_matches(supplier,source_key,product_code,created_at) VALUES(?,?,?,?) ON CONFLICT(supplier,source_key) DO UPDATE SET product_code=excluded.product_code,created_at=excluded.created_at')
       .run(row.dostawca,snap._sourceKey,row.kod,new Date().toISOString());
@@ -220,7 +178,6 @@ function install({U,db,normalize,classify,badName,ext}) {
     return result;
   };
   function importer(supplier,incoming,options={}) {
-    availabilityChanged=false;
     if(!Array.isArray(incoming)) throw new Error('Nieprawidłowy cennik');
     const meta=incoming._bridgeFeedMeta;
     if(meta?.parserErrors>0) throw Error('Cennik zawiera błędy odczytu. Zachowano katalog i staging bez zmian.');
@@ -309,7 +266,6 @@ function install({U,db,normalize,classify,badName,ext}) {
       prepared.set(code,item);
     }
     function stage({code,current,d,errors,changes},type){
-      d._completeSource=meta?.complete===true && options.feedComplete!==false;
       d._catalogVersion=version(current ? find(current.kod) : null);
       const p=current;
       U.addStaging({typZmiany:type,kod:code,nazwa:d.nazwa||p?.nazwa||'',dostawca:supplier,magazyn:d.magazyn||p?.magazyn||supplier,magazynRaw:d.magazynRaw??null,
@@ -332,28 +288,17 @@ function install({U,db,normalize,classify,badName,ext}) {
     const elapsed=!feedState?.last_counted_at || Date.now()-Date.parse(feedState.last_counted_at)>=24*3600*1000;
     const distinctCompleteFeed=complete&&!knownVersion&&elapsed&&(!options.reconcileOnly||options.verifyAbsence);
     const clearAbsence=db.prepare('DELETE FROM product_absence_checks WHERE supplier=? AND product_code=?');
-    const autoSuspension=db.prepare('SELECT 1 FROM product_auto_suspensions WHERE supplier=? AND product_code=?');
-    const clearSuspension=db.prepare('DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?');
     // Presence of a source row rejected by category is not evidence of absence.
     for(const id of meta?.excludedCodes||[]){
       const p=byCode.get(id)||products.find(p=>norm(p.kod)===norm(id));
       if(p)observed.add(p.id);
     }
-    const result=db.transaction(()=>{
+    return db.transaction(()=>{
       for(const old of oldQueue.values()){
         if(complete && !prepared.has(old.kod) && old.typZmiany!=='wycofana' && !JSON.parse(old.snapshotJson||'{}')._absenceReview)clear.run(supplier,old.kod);
       }
       for(const item of prepared.values()){
         const {code,current,d,errors,changes}=item;
-        if(complete&&!options.reconcileOnly && d._matchIssue){
-          for(const c of d._candidates||[]){
-            const p=byCode.get(c.kod);
-            if(p)suspend(p,time,fingerprint,'Niejednoznaczne dopasowanie w aktualnym cenniku');
-          }
-        }
-        if(current && autoSuspension.get(supplier,current.kod) && !compatibility(d,current).ok && !changes.length && !errors.length){
-          errors.push('Powrót opony wymaga sprawdzenia: cechy nie potwierdzają zgodności ze wstrzymaną kartą.');
-        }
         if(current && current.nieobecnoscPodRzad>0 && !options.reconcileOnly) U.updateProduct(current.id,{nieobecnoscPodRzad:0});
         if(!current || errors.length || changes.length){stage(item,errors.length?'blad':current?'zmiana_kluczowa':'nowa');continue;}
         // Resolved/absent differences clear ALL obsolete cases, including withdrawal.
@@ -363,24 +308,10 @@ function install({U,db,normalize,classify,badName,ext}) {
           if(d[k]!=null && norm(d[k])!==norm(current[k]))patch[k]=d[k];
         }
         if(validateEan(d.ean).valid && d.ean!==current.ean)Object.assign(patch,{ean:d.ean,eanRaw:d.eanRaw,eanIsValid:1,eanSourceStatus:'ok'});
-        // Only a product suspended automatically because it disappeared from a
-        // complete supplier feed is restored automatically on a certain match.
-        // Manual suspensions remain untouched.
-        const auto=autoSuspension.get(supplier,current.kod);
-        if(current.status==='wstrzymany'){
-          if(auto && complete && !options.reconcileOnly && Number(d.cenaZakupu)>0 && Number(d.cenaSprzedazy??current.cenaSprzedazy)>0){
-            patch.status='aktywny';
-            clearSuspension.run(supplier,current.kod);
-            clearAbsence.run(supplier,current.kod);
-            availabilityChanged=true;
-          }else{
-            patch.stan=0;
-          }
-        }
         if(Object.keys(patch).length && !options.reconcileOnly){
           patch.dataAktualizacji=time;
           ext.applyDims(patch,current.rozmiar);ext.applyLinkMemory(db,patch,current);
-          originalUpdate(current.id,patch);stats.autoZatwierdzone++;
+          U.updateProduct(current.id,patch);stats.autoZatwierdzone++;
           db.prepare('INSERT INTO historia_cen(produkt_id,kod,ean,dostawca,marka,model,rozmiar,indeks_nosnosci,indeks_predkosci,kategoria,cena_zakupu,cena_sprzedazy,stan,zarejestrowano_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
             .run(current.id,current.kod,d.ean,supplier,current.marka,current.model,current.rozmiar,current.indeksNosnosci,current.indeksPredkosci,current.kategoria,patch.cenaZakupu??current.cenaZakupu,patch.cenaSprzedazy??current.cenaSprzedazy,patch.stan??current.stan,time);
         }else stats.bezZmian++;
@@ -410,15 +341,6 @@ function install({U,db,normalize,classify,badName,ext}) {
           if(!options.reconcileOnly && p.nieobecnoscPodRzad)U.updateProduct(p.id,{nieobecnoscPodRzad:0});
           continue;
         }
-        // A valid complete feed is the source of truth for sale availability.
-        // Missing products are suspended immediately; no customer may buy an
-        // item based on an old stock. A separate marker permits safe automatic
-        // restoration only when this exact product returns.
-        if(complete && !options.reconcileOnly){
-          suspend(p,time,fingerprint,'Brak w aktualnym, kompletnym cenniku dostawcy');
-          clearAbsence.run(supplier,p.kod);
-          if(oldQueue.get(p.kod)?.typZmiany==='wycofana')clear.run(supplier,p.kod);
-        }
         const alternatives=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod));
         if(alternatives.length){
           const snap={...p,_policyVersion:2,_catalogVersion:version(find(p.kod)),_absenceReview:true,
@@ -442,7 +364,6 @@ function install({U,db,normalize,classify,badName,ext}) {
             snapshotJson:JSON.stringify(snap),utworzono:time});
           clearAbsence.run(supplier,p.kod);stats.doStagingu++;stats.zmienione++;continue;
         }
-        if(complete && !options.reconcileOnly) continue;
         if(!distinctCompleteFeed) continue;
         const saved=db.prepare('SELECT checks_json FROM product_absence_checks WHERE supplier=? AND product_code=?').get(supplier,p.kod);
         const evidence=JSON.parse(saved?.checks_json||'[]');
@@ -460,8 +381,6 @@ function install({U,db,normalize,classify,badName,ext}) {
       }
       return stats;
     })();
-    if(availabilityChanged&&!options.reconcileOnly)refreshAvailability(supplier);
-    return result;
   }
   importer.policyVersion=2;
   return importer;

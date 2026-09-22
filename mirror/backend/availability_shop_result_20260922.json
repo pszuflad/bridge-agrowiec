@@ -1,0 +1,13 @@
+{
+  "zeroed": 539,
+  "verified": 539,
+  "notPresentInShop": 0,
+  "deletedOldAgrorami": 179,
+  "backup": "/home/admin/private_apps/bridge/data.db.bak_20260922T161344Z_old_agrorami_delete",
+  "remainingOldAgrorami": 0,
+  "integrity": [
+    {
+      "quick_check": "ok"
+    }
+  ]
+}
