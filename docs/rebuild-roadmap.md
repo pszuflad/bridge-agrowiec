@@ -3464,8 +3464,8 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 | [I15.6](karty/I15.6/) | Selly REST 1: nowy schemat `selly_products`, odnajdywanie, aktualizacje w ciągu dnia | #60, #74, #77 (delta), #68–#70 | — | `013` |
 | [I15.7](karty/I15.7/) | Selly REST 2: nocna pełna synchronizacja | #60, #81 | I15.6 | — |
 | [I15.8](karty/I15.8/) | Selly REST 3: harmonogram i przyciski w panelu | #60 | I15.7 | — |
-| [I15.10](karty/I15.10/) | zmiana w toku na starym Bridge nr 1 — zakres nieznany | — | triaż zmiany | przydzieli koordynator |
-| [I15.11](karty/I15.11/) | zmiana w toku na starym Bridge nr 2 — rezerwa, zakres nieznany | — | triaż zmiany | przydzieli koordynator |
+| [I15.10](karty/I15.10/) | dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1) | #104 | I15.3, I15.4, I15.6 | — |
+| [I15.11](karty/I15.11/) | panel „Braki w cenniku” i podgląd starej karty (FE) | #103 | I15.4, I15.5 | — |
 | [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) — **OSTATNIA** | — | I15.1–I15.8, I15.10, I15.11 | — |
 
 **Numery migracji przydzielone z góry przez koordynatora** (`011`, `012`, `013`). Runner (`db/migrate.ts`) stosuje
@@ -3481,10 +3481,20 @@ potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać 
 | 2 | **I15.2** ‖ **I15.3** ‖ **I15.7** | I15.1 (dla 2 i 3), I15.6 (dla 7) |
 | 3 | **I15.4** ‖ **I15.8** | I15.2 (dla 4), I15.7 (dla 8) |
 | 4 | **I15.5** | I15.4 |
-| 5 | **I15.10**, **I15.11** (zmiany Ani w toku) | triaż zmiany; zależności ustali koordynator (jeśli dotyczą stagingu — po I15.4/I15.5) |
+| 4b | **I15.10** (dostępność w Selly) | I15.3, I15.4 |
+| 5 | **I15.11** (panel „Braki w cenniku”) | I15.4, I15.5 |
 | 6 | **I15.9** — delta dla Ani, OSTATNIA karta; potem instrukcja pełnego testu i cutover | wszystkie |
 
 Karty z fazy 5 mogą wejść wcześniej, jeśli zmiana Ani wpłynie szybciej i nie koliduje plikowo z bieżącą fazą.
+
+⭐ **ZAKRES POSZERZONY 22.09 WIECZOREM (triaż, ticket 110).** Produkcja dołożyła dwie duże zmiany — backlog **#103**
+(„braki w cenniku”: `feed_safety.cjs`, wycofanie dopiero po trzech kompletnych ofertach i 24 h, blokada źródła
+mniejszego o >20%, koniec cichego fallbacku parserów, panel „Braki w cenniku”) i **#104** („dostępność”: brak
+w ofercie = `wstrzymany`/0, tabela `product_auto_suspensions`, CSV tylko aktywne, natychmiastowe odświeżenie CSV
+i delty Selly). **Źródłem prawdy dla całego I15 jest teraz `origin/main` na `abe5f14`**, nie `7d6cfc9`.
+Zakres rozdzielony na istniejące karty (wejścia `wejscie-110.md` w I15.2, I15.3, I15.4, I15.5, I15.7, I15.8, I15.9);
+karty-rezerwy I15.10 i I15.11 dostały konkretną treść. Nowe tabele produkcji (`supplier_feed_state`,
+`supplier_feed_versions`, `product_absence_checks`, `product_auto_suspensions`) wchodzą do migracji `012` (I15.4).
 
 **Odpowiedzi Ani, runda 3 (22.09)** — `docs/pytania-do-ani-2026-09-22.md`, sekcja „Co Ania odpowiedziała”. Skutki dla I15:
 Selly skończone (tor I15.6–I15.8 gotowy; Ania przygotuje podsumowanie logiki — odebrać przed I15.6); Ania używa wszystkich
