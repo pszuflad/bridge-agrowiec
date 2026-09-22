@@ -40,7 +40,6 @@ export type WynikMigracji = {
 const DYREKTYWA = /^--\s*@(\S+)(.*)$/;
 const DODAJ_KOLUMNE = /^\s+(\w+)\s+(\w+)\s+(\S.*?)\s*$/;
 const TYP_KOLUMNY = /^\s+(\w+)\s+(\w+)\s+(\w+)\s*$/;
-const TABELA = /^\s+(\w+)\s*$/;
 
 type Dyrektywa = { nazwa: string; argumenty: string[] };
 
@@ -56,9 +55,7 @@ function czytajDyrektywy(sql: string, plik: string): Dyrektywa[] {
         ? { re: DODAJ_KOLUMNE, oczekiwano: "<tabela> <kolumna> <definicja>" }
         : nazwa === "pomin-jesli-typ-kolumny"
           ? { re: TYP_KOLUMNY, oczekiwano: "<tabela> <kolumna> <typ>" }
-          : nazwa === "pomin-jesli-tabela-istnieje"
-            ? { re: TABELA, oczekiwano: "<tabela>" }
-            : null;
+          : null;
     if (!wzorzec) throw new Error(`${plik}: nieznana dyrektywa migracji "@${nazwa}".`);
     const a = wzorzec.re.exec(reszta);
     if (!a) {
@@ -98,9 +95,8 @@ function kolumnyTabeli(
  *    tylko wtedy, gdy kolumny brak (002 `uwaga_cena`, 011 `blokowane_formy_platnosci`);
  *  - `-- @pomin-jesli-typ-kolumny <tabela> <kolumna> <typ>` — gdy kolumna ma JUŻ zadeklarowany typ
  *    `<typ>` (porównanie bez wielkości liter), treść pliku i pozostałe dyrektywy NIE są wykonywane,
- *    a migracja zostaje odnotowana jako zastosowana (003: `szerokosc` już TEXT = cel osiągnięty);
- *  - `-- @pomin-jesli-tabela-istnieje <tabela>` — jak wyżej, gdy tabela (albo widok) o tej nazwie JUŻ
- *    istnieje (013: `selly_products_old` na produkcji = przebudowa Selly już zrobiona).
+ *    a migracja zostaje odnotowana jako zastosowana (003: `szerokosc` już TEXT, 013: `selly_products`
+ *    ma już kolumnę wariantową — w obu wypadkach cel migracji jest na tej bazie osiągnięty).
  *
  * Najpierw walidowana jest składnia WSZYSTKICH dyrektyw, potem sprawdzane warunki pominięcia, na końcu
  * dokładane kolumny. Nieznana dyrektywa, zła składnia, brak tabeli albo (dla pominięcia po typie) brak kolumny
@@ -112,18 +108,12 @@ export function zastosujDyrektywy(sqlite: BazaSqlite, sql: string, plik: string)
   const dyrektywy = czytajDyrektywy(sql, plik);
 
   for (const { nazwa, argumenty } of dyrektywy) {
-    if (nazwa === "pomin-jesli-typ-kolumny") {
-      const [tabela, kolumna, typ] = argumenty as [string, string, string];
-      const k = kolumnyTabeli(sqlite, tabela, plik, nazwa).find((c) => c.name === kolumna);
-      if (!k) throw new Error(`${plik}: "@${nazwa}" — kolumna "${tabela}.${kolumna}" nie istnieje.`);
-      if (k.type.trim().toUpperCase() === typ.toUpperCase()) return false;
-    } else if (nazwa === "pomin-jesli-tabela-istnieje") {
-      const [tabela] = argumenty as [string];
-      const jest = sqlite
-        .prepare(`SELECT 1 FROM sqlite_master WHERE type IN ('table', 'view') AND name = ?`)
-        .get(tabela);
-      if (jest) return false;
-    }
+    if (nazwa !== "pomin-jesli-typ-kolumny") continue;
+    const [tabela, kolumna, typ] = argumenty as [string, string, string];
+    // Brak kolumny = warunek niespełniony (migracja ma się wykonać), a nie błąd: dla 013 rozstrzygamy
+    // właśnie to, czy `selly_products` ma już kolumnę wariantową, czy jeszcze nie.
+    const k = kolumnyTabeli(sqlite, tabela, plik, nazwa).find((c) => c.name === kolumna);
+    if (k && k.type.trim().toUpperCase() === typ.toUpperCase()) return false;
   }
 
   for (const { nazwa, argumenty } of dyrektywy) {

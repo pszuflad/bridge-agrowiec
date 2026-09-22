@@ -103,3 +103,19 @@ normalizacja triggerem nie generuje pozycji stagingu przy każdym imporcie.
   migracje z `SNAPSHOT_DB` ✓ (65 testów).
 - Skutek dla cutoveru (co znika z ręcznej procedury `docs/cutover.md` §3) — opisany w „Do koordynatora”
   w `docs/karty/I15.1/karta.md`; aktualizację samego `cutover.md` wnosi koordynator.
+
+## Review fixes applied II
+Review II: 0 BLOCKER / 2 SHOULD-FIX / 2 NICE-TO-HAVE.
+- **SHOULD-FIX (013 ufał nazwie tabeli) — naprawione.** Warunek 013 to teraz
+  `@pomin-jesli-typ-kolumny selly_products selly_variant_id INTEGER` (kształt celu zamiast poszlaki). Dyrektywa
+  `@pomin-jesli-tabela-istnieje` usunięta z runnera jako zbędna — zostają dwie. Brak KOLUMNY nie jest już błędem
+  (znaczy „cel nieosiągnięty, wykonaj treść”); brak TABELI nadal jest. Dołożony test przypadku negatywnego
+  w `test/migracje.selly-warianty.test.ts` (nazwa `selly_products_old` + stara `selly_products` → migracja rusza
+  i zatrzymuje deploy) oraz test „brak kolumny → treść się wykonuje” w `test/db.migracja-011.test.ts`.
+- **SHOULD-FIX (003 zależy od kolejności 002→003) — świadomie bez zmian.** Zależność istnieje tylko na ścieżce,
+  na której 003 SIĘ WYKONUJE (przebudowa kopiuje `uwaga_cena` z 002); kolejność wymusza sortowanie plików po
+  nazwie w runnerze, a pełen łańcuch pilnuje jawna lista `MIGRACJE` w `test/db.migracje.test.ts`. Dodatkowy
+  mechanizm dublowałby tę gwarancję.
+- NICE-TO-HAVE (test CRLF dla linii dyrektywy; „znana nazwa dyrektywy w komentarzu opisowym”) — follow-up;
+  parser rozbija plik po `\r?\n`, a grep po `rebuild/schema/*.sql` pokazuje tylko 4 zamierzone wystąpienia `-- @`.
+- Bramki po poprawkach: lint ✓, typecheck ✓, `npm test` ✓ 98 plików, 1606 passed, 3 skipped.

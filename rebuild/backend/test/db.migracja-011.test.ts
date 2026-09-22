@@ -200,25 +200,22 @@ describe("dyrektywa runnera `@dodaj-kolumne-jesli-brak`", () => {
       expect(kolumny("t").includes("c")).toBe(!pominieta);
     });
 
-    it("`@pomin-jesli-typ-kolumny` na nieistniejącej kolumnie → błąd i rollback", () => {
+    it("`@pomin-jesli-typ-kolumny`: BRAK kolumny = cel nieosiągnięty, treść się wykonuje", () => {
       const k = migracje({
         "001_a.sql": "CREATE TABLE t (id INTEGER PRIMARY KEY);",
         "002_b.sql": "-- @pomin-jesli-typ-kolumny t s TEXT\nCREATE TABLE tresc (id INTEGER);",
       });
-      expect(() => zastosujMigracje(sqlite, k)).toThrow(/kolumna "t.s" nie istnieje/);
-      expect(tabele()).not.toContain("tresc");
+      expect(zastosujMigracje(sqlite, k).bezTresci).toEqual([]);
+      expect(tabele()).toContain("tresc");
     });
 
-    it.each([
-      [true, true],
-      [false, false],
-    ])("`@pomin-jesli-tabela-istnieje`: tabela jest = %s → pominięta: %s", (jest, pominieta) => {
+    it("`@pomin-jesli-typ-kolumny` na nieistniejącej TABELI → błąd i rollback", () => {
       const k = migracje({
-        "001_a.sql": jest ? "CREATE TABLE stara (id INTEGER);" : "CREATE TABLE inna (id INTEGER);",
-        "002_b.sql": "-- @pomin-jesli-tabela-istnieje stara\nCREATE TABLE tresc (id INTEGER);",
+        "001_a.sql": "CREATE TABLE t (id INTEGER PRIMARY KEY);",
+        "002_b.sql": "-- @pomin-jesli-typ-kolumny nie_ma s TEXT\nCREATE TABLE tresc (id INTEGER);",
       });
-      expect(zastosujMigracje(sqlite, k).bezTresci).toEqual(pominieta ? ["002_b.sql"] : []);
-      expect(tabele().includes("tresc")).toBe(!pominieta);
+      expect(() => zastosujMigracje(sqlite, k)).toThrow(/tabela "nie_ma" nie istnieje/);
+      expect(tabele()).not.toContain("tresc");
     });
   });
 

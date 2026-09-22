@@ -35,8 +35,7 @@ transakcji. Dla SQLite to zwykły komentarz, więc plik zostaje poprawnym SQL-em
 | Dyrektywa | Co robi | Gdzie użyta |
 |---|---|---|
 | `-- @dodaj-kolumne-jesli-brak <tabela> <kolumna> <definicja>` | `PRAGMA table_info` → `ALTER TABLE … ADD COLUMN` tylko przy braku kolumny | 002 (`uwaga_cena`), 011 (`blokowane_formy_platnosci`) |
-| `-- @pomin-jesli-typ-kolumny <tabela> <kolumna> <typ>` | kolumna ma już ten typ → treść pliku i pozostałe dyrektywy NIE są wykonywane, migracja zostaje odnotowana jako zastosowana | 003 (`szerokosc` już `TEXT` na produkcji) |
-| `-- @pomin-jesli-tabela-istnieje <tabela>` | jak wyżej, gdy tabela (albo widok) już istnieje | 013 (`selly_products_old` na produkcji) |
+| `-- @pomin-jesli-typ-kolumny <tabela> <kolumna> <typ>` | kolumna ma już ten typ → treść pliku i pozostałe dyrektywy NIE są wykonywane, migracja zostaje odnotowana jako zastosowana; brak kolumny = cel nieosiągnięty, treść się wykonuje | 003 (`szerokosc` już `TEXT`), 013 (`selly_products.selly_variant_id` = kształt wariantowy już jest) |
 
 **Po co pominięcia (ticket 107, decyzja koordynatora 2026-09-22).** Produkcyjna `data.db` nie pochodzi z kanonu:
 `products` ma tam 74 kolumny, `szerokosc` jest już `TEXT` (własna migracja `szertxt` Ani), a Selly przebudowane
@@ -48,8 +47,9 @@ ręcznych kroków z `docs/cutover.md` §3. Z dyrektywami pełny łańcuch przech
 dev/staging, które mają 002/003/013 odnotowane, nie zobaczą nowej treści. Dotyczy to wyłącznie baz, gdzie danej
 migracji jeszcze nie ma — czyli produkcji.
 
-Nieznana dyrektywa, zła składnia, brak tabeli albo (przy pominięciu po typie) brak kolumny = błąd i wycofanie całej
-migracji. ⚠ Linia zaczynająca się od `-- @` jest ZAWSZE traktowana jako dyrektywa — nie zaczynaj tak komentarzy
+Warunek pominięcia ma wskazywać KSZTAŁT CELU migracji (kolumnę, którą ona wprowadza), a nie poszlakę w rodzaju
+nazwy tabeli — inaczej baza w nieznanym stanie zostałaby po cichu przepuszczona zamiast zatrzymać deploy.
+Nieznana dyrektywa, zła składnia albo brak tabeli = błąd i wycofanie całej migracji. ⚠ Linia zaczynająca się od `-- @` jest ZAWSZE traktowana jako dyrektywa — nie zaczynaj tak komentarzy
 opisowych. `npm run migrate` wypisuje osobno, które migracje odnotował bez wykonania treści.
 
 ## Skąd pochodzi

@@ -22,9 +22,13 @@ już pokryte, nic dodatkowego nie trzeba robić poza świadomością, że to efe
 ## Uzupełnienie (ta sama sesja, po decyzji koordynatora 2026-09-22): migracja 013 dostała warunek
 `013_selly_products_warianty.sql` padała na bazie produkcji (`selly_products_old` istnieje tam od 07.09), co karta
 I15.6 opisała jako ręczny krok cutoveru. Ticket 107 uodpornił łańcuch migracji na kształt produkcji, więc 013 ma
-teraz w nagłówku dyrektywę runnera `-- @pomin-jesli-tabela-istnieje selly_products_old`: gdy tabela już jest,
-migracja zostaje odnotowana w `_migracje` BEZ wykonania treści (DDL w 013 jest verbatim z produkcji, więc jej
+teraz w nagłówku dyrektywę runnera `-- @pomin-jesli-typ-kolumny selly_products selly_variant_id INTEGER`: gdy
+`selly_products` ma już kształt wariantowy, migracja zostaje odnotowana w `_migracje` BEZ wykonania treści (DDL w 013 jest verbatim z produkcji, więc jej
 kształt jest celem migracji). Treść SQL 013 poza nagłówkiem — bez zmian.
 Skutek dla I15.6: ręczne odnotowanie 013 przy cutoverze **odpada**; test `test/migracje.selly-warianty.test.ts`
 („na bazie, która już ma nowy kształt…”) sprawdza teraz `bezTresci` i niezmieniony `sqlite_master` zamiast wyjątku.
 Pełny łańcuch na schemacie produkcji: `test/db.migracje-produkcja.test.ts`.
+⚠ Warunek celowo patrzy na KOLUMNĘ `selly_variant_id`, a nie na obecność `selly_products_old`: stara tabela tej
+kolumny nie ma (`7d6cfc9:db/schema.sql:174-188`), więc baza z samą nazwą `selly_products_old`, ale nieprzebudowaną
+`selly_products`, nadal zatrzyma deploy (013 rusza i pada na `RENAME`) zamiast zostać po cichu przepuszczona.
+Pilnuje tego test „sama nazwa `selly_products_old` NIE pomija migracji…” w `test/migracje.selly-warianty.test.ts`.

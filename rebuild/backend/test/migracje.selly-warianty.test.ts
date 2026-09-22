@@ -221,5 +221,27 @@ describe("migracja 013 — dane i baza w kształcie produkcji", () => {
     expect(sqlite.prepare(`SELECT count(*) AS c FROM selly_products`).get()).toEqual({ c: 1 });
     expect(sqlite.prepare(`SELECT name, sql FROM sqlite_master ORDER BY name`).all()).toEqual(schematPrzed);
   });
+
+  /**
+   * PRZYPADEK NEGATYWNY warunku pominięcia (review II ticketu 107). Sama nazwa `selly_products_old`
+   * nie dowodzi, że przebudowa się odbyła — stara tabela nie ma `selly_variant_id`
+   * (`7d6cfc9:db/schema.sql:174-188`). Baza z tą nazwą, ale ze STARĄ `selly_products`, ma zatrzymać
+   * deploy (013 rusza i pada na `RENAME`), a nie zostać po cichu przepuszczona.
+   */
+  it("sama nazwa `selly_products_old` NIE pomija migracji, gdy `selly_products` ma stary kształt", () => {
+    sqlite.exec(`ALTER TABLE selly_products RENAME TO selly_products_old;
+      CREATE TABLE selly_products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bridge_kod TEXT NOT NULL UNIQUE,
+        selly_product_id INTEGER NOT NULL,
+        ostatni_status TEXT NOT NULL DEFAULT 'ok'
+      );`);
+    dolozMigracje();
+
+    expect(() => zastosujMigracje(sqlite, katalogSchematu)).toThrow(
+      /there is already another table or index with this name: selly_products_old/,
+    );
+    expect(sqlite.prepare(`SELECT nazwa FROM _migracje WHERE nazwa = ?`).get(MIGRACJA)).toBeUndefined();
+  });
 });
 

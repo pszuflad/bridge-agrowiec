@@ -139,11 +139,14 @@ które danej migracji jeszcze nie mają (czyli produkcji).
   - *ręczny krok operatora* (odrzucone) — to jest dokładnie to, co ta decyzja likwiduje.
 - **013 (karta I15.6)** — ten sam problem: produkcja ma `selly_products_old` od 07.09, więc migracja tam padała
   (opisane w samym pliku jako ręczny krok cutoveru). **Decyzja użytkownika z 2026-09-22 (pytanie w trakcie
-  ticketu):** uodpornić też ją — trzecia dyrektywa `-- @pomin-jesli-tabela-istnieje selly_products_old`. DDL w 013
-  jest verbatim z produkcji, więc jej kształt JEST celem migracji. Zaktualizowany test I15.6
+  ticketu):** uodpornić też ją — warunkiem `-- @pomin-jesli-typ-kolumny selly_products selly_variant_id INTEGER`.
+  DDL w 013 jest verbatim z produkcji, więc jej kształt JEST celem migracji. Warunek patrzy na KSZTAŁT CELU
+  (kolumna wariantowa), a nie na obecność nazwy `selly_products_old` — pierwsza wersja sprawdzała nazwę i review II
+  słusznie wytknął, że nazwa nie dowodzi przebudowy (stara tabela `selly_variant_id` nie ma). Baza z samą nazwą,
+  ale starą `selly_products`, zatrzymuje teraz deploy zamiast zostać przepuszczona (test przypadku negatywnego). Zaktualizowany test I15.6
   (`test/migracje.selly-warianty.test.ts`) zamiast „pada i niczego nie zmienia” sprawdza „odnotowuje się bez
   wykonania treści i niczego nie zmienia”.
-- **Runner** — `WynikMigracji.bezTresci` (podzbiór `zastosowane`) i osobna linia w `npm run migrate`, żeby przy
+- **Runner** — dwie dyrektywy (`@dodaj-kolumne-jesli-brak`, `@pomin-jesli-typ-kolumny`); `WynikMigracji.bezTresci` (podzbiór `zastosowane`) i osobna linia w `npm run migrate`, żeby przy
   cutoverze było widać, która migracja przeszła warunkiem, a nie treścią.
 - **Test** — `test/db.migracje-produkcja.test.ts`: baza stawiana z fixture'u `test/schemat-produkcji/7d6cfc9-schema.sql`
   (= `git show 7d6cfc9:db/schema.sql` bajt w bajt, bez `sqlite_sequence`), dane w stanie produkcji; pełny łańcuch

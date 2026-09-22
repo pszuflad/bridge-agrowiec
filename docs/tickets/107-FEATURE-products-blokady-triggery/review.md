@@ -120,3 +120,135 @@ wzmacniają pokrycie zamiast je osłabiać. Największe pozostałe ryzyko nie le
 na styku z I15.2 (adapter parserów bez normalizacji JS-owej) — zgłoszone, nie zablokowane. Przed
 mergem do `develop`/PR warto dopilnować kroku 6 (kopia produkcji, 23.09), zgodnie z własną decyzją
 zespołu zapisaną w planie.
+
+---
+
+# Review II — uodpornienie łańcucha migracji
+
+> Reviewed: 2026-09-22
+> Branch: `feature/107-products-blokady-triggery`
+> Zakres: `git diff dfed7d5..HEAD` (commit `26450f2` + merge `dfed7d5`) — 14 plików, 1 commit własny
+> (`26450f2`) na wierzchu merge'a `develop`; cały `rebuild/backend/src/db/migrate.ts`.
+
+## BLOCKER
+
+Brak. Bramki BE (lint/typecheck/build/`npm test` — 98 plików, 1606 testów, 3 pominięte) przechodzą;
+dodatkowy przebieg `SNAPSHOT_DB=db/snapshot.db npx vitest run test/db.migracja-011.test.ts
+test/db.migracje.test.ts test/db.migracje-produkcja.test.ts` (65 testów) też zielony — wykonane w tym
+review. Fixture `test/schemat-produkcji/7d6cfc9-schema.sql` zweryfikowana `diff`em jako bajt w bajt
+identyczna z `git show 7d6cfc9:db/schema.sql` (exit 0, zero różnic). Grep po `-- @` w całym
+`rebuild/schema/*.sql` nie znalazł żadnego fałszywego trafienia — dokładnie cztery wystąpienia, wszystkie
+zamierzone (002, 003, 011, 013); w treści sześciu triggerów 011 i w pozostałych plikach nie ma linii
+zaczynającej się od `-- @` poza samymi dyrektywami. `readdirSync(...).sort()` daje poprawną kolejność
+(002→003→011→013 alfabetycznie = numerycznie), więc 002 (dokłada `uwaga_cena` dyrektywą) zawsze wykonuje
+się PRZED 003 (sprawdza typ `szerokosc`) — na produkcji `uwaga_cena` jest więc gwarantowana zanim 003
+oceni swój warunek, co domyka wątpliwość z briefu (pkt 2, pierwsza część). `WynikMigracji.bezTresci` jest
+polem addytywnym (destrukturyzacja `{ zastosowane, pominiete }` bez `bezTresci` w innym miejscu by
+zadziałała tak samo) — jedyny konsument poza testami to `migrate-cli.ts`, zaktualizowany w tym samym
+commicie; `tools/deploy-staging.sh` woła `npm run migrate` i nie parsuje jego stdout.
+
+## SHOULD-FIX
+
+- [ ] `rebuild/schema/013_selly_products_warianty.sql:30` (`@pomin-jesli-tabela-istnieje selly_products_old`) —
+  warunek pomija treść pliku na podstawie SAMEGO istnienia `selly_products_old`, bez weryfikacji, że
+  `selly_products` ma już docelowy kształt wariantowy (`selly_variant_id`, `feature_id_magazyn`,
+  `UNIQUE(kod_importu, dostawca)`). Dziś to bezpieczne, bo jedyny znany sposób, w jaki `selly_products_old`
+  może powstać, to albo ręczna przebudowa Ani na produkcji (kształt poprawny z definicji), albo sama ta
+  migracja (`ALTER TABLE ... RENAME TO`, kształt poprawny bo wykonała go treść pliku) — potwierdzone grepem
+  po całym repo, nic innego tej nazwy nie tworzy. Jest to jednak cichy warunek: gdyby kiedyś jakikolwiek inny
+  proces (ręczny eksperyment na staging, przerwany/częściowo cofnięty cutover, migracja z innej karty)
+  zostawił tabelę o tej samej nazwie przy `selly_products` w STARYM kształcie, runner odnotowałby 013 jako
+  zastosowaną i ZOSTAWIŁ złą strukturę na stałe (kolejne uruchomienie pomija plik po nazwie — patrz BLOCKER).
+  Żaden test nie sprawdza tego przypadku (`db.migracje-produkcja.test.ts` i `migracje.selly-warianty.test.ts`
+  budują tylko dwa warianty: „obiektu brak” i „obiekt jest, w kształcie zgodnym z 013”).
+  - Sugestia: w gałęzi `pomin-jesli-tabela-istnieje` dla 013 (albo ogólnie w dyrektywie) dodać twardą
+    asercję na obecność charakterystycznej kolumny nowej `selly_products` (np. `selly_variant_id`) przed
+    zaufaniem warunkowi — błąd zamiast cichego zaakceptowania złego kształtu. Alternatywnie: udokumentować
+    świadomie w README/karcie I15.6, że założenie „`selly_products_old` istnieje ⟹ `selly_products` ma nowy
+    kształt” jest przyjęte na wiarę i czym jest uzasadnione (brak innego twórcy tej nazwy w repo).
+- [ ] `rebuild/schema/003_szerokosc_text.sql:33` (`@pomin-jesli-typ-kolumny products szerokosc TEXT`) —
+  poprawność pominięcia opiera się WYŁĄCZNIE na poprawnej kolejności plików w katalogu (002 przed 003,
+  żeby `uwaga_cena` była już dołożona) i na tym, że nikt nie wyjmie dyrektywy z 002 bez wyjęcia jej z 003.
+  Ta zależność nie jest w żaden sposób wymuszona w kodzie (`zastosujMigracje` po prostu sortuje pliki po
+  nazwie) — dziś jest bezpieczna i przetestowana (`db.migracje-produkcja.test.ts`), ale to założenie
+  międzyplikowe warto zapisać jawnie przy samej dyrektywie w 003 (dziś jest tylko w komentarzu wyżej w pliku
+  i w `plan.md`), żeby ktoś kasujący/przenoszący 002 zauważył zależność, zanim ją złamie.
+
+## NICE-TO-HAVE
+
+- [ ] `rebuild/backend/src/db/migrate.ts:50` (`czytajDyrektywy`) — parser dyrektyw jest czysto liniowy:
+  każda linia zaczynająca się (po `trim()`) od `-- @` jest dyrektywą, niezależnie od tego, czy fizycznie
+  jest częścią komentarza opisowego, czy (teoretycznie) częścią wielowierszowego literału SQL. Nieznana
+  nazwa rzuca błędem (fail-loud, bezpieczne), ale użycie akurat jednej ze trzech znanych nazw jako
+  fragmentu opisowego komentarza zostałoby cicho wykonane jako dyrektywa. Dziś nie ma takiego przypadku
+  (zweryfikowane grepem po `rebuild/schema/*.sql`) i README już ostrzega („Linia zaczynająca się od `-- @`
+  jest ZAWSZE traktowana jako dyrektywa”) — zostawiam jako świadomość dla kolejnej migracji z dyrektywą.
+- [ ] Brak dedykowanego testu na CRLF w linii dyrektywy pozostaje nierozliczony z Review I (patrz tam,
+  NICE-TO-HAVE) — ten commit nie dodał ani nie musiał dodawać takiego testu, bo nowe dyrektywy nie
+  zmieniają parsowania linii; nadal łatwe do dopisania przy okazji.
+
+## Plan compliance
+
+### Done ✓
+- Dwie nowe dyrektywy pominięcia (`@pomin-jesli-typ-kolumny`, `@pomin-jesli-tabela-istnieje`) z walidacją
+  składni PRZED wykonaniem czegokolwiek, w tej samej transakcji co treść pliku — `src/db/migrate.ts`,
+  potwierdzone testami błędów (nieznana dyrektywa, zła składnia, brak tabeli/kolumny → rollback i brak
+  wpisu w `_migracje`).
+- 002 (`uwaga_cena`), 003 (`szerokosc` TEXT), 013 (`selly_products_old`) uodpornione zgodnie z decyzją
+  koordynatora z 2026-09-22 opisaną w `plan.md`, sekcja „Rozszerzenie zakresu”; zmiana treści 013 (plik
+  spoza własności tej karty) udokumentowana jako zrobiona „za zgodą użytkownika”.
+- `WynikMigracji.bezTresci` + linia w `npm run migrate` (`migrate-cli.ts`) — widoczność przy cutoverze,
+  bez zmiany zachowania istniejących konsumentów.
+- Nowy test `test/db.migracje-produkcja.test.ts` na fixture `7d6cfc9-schema.sql` (bajt w bajt zweryfikowane
+  w tym review) — pełny łańcuch 001→013 na dokładnym schemacie produkcji (74 kolumny, bez `_migracje`)
+  przechodzi, `bezTresci` = [003, 013], `products`/`selly_products`/`selly_products_old`/triggery nietknięte,
+  dochodzą tylko obiekty spoza produkcji; osobno pokryty przypadek „002/003 już w `_migracje`” (stara
+  procedura ręczna z `docs/cutover.md` §3).
+- `test/migracje.selly-warianty.test.ts` zaktualizowany zgodnie z nowym zachowaniem — sprawdza `bezTresci`
+  i niezmieniony `sqlite_master`/liczbę wierszy zamiast oczekiwanego wcześniej wyjątku; nie jest to
+  osłabienie (dalej dowodzi braku zmian w bazie, tylko innym mechanizmem niż `expect().toThrow()`).
+- Ustalenie dla przyszłej karty (I15.6) zapisane zgodnie z CLAUDE.md w `docs/karty/I15.6/wejscie-107.md`,
+  NIE w cudzym `karta.md` — `docs/karty/I15.6/karta.md` sam nie został tknięty przez ten ticket, mimo że
+  jego „Do koordynatora” opisuje teraz nieaktualną (ręczną) procedurę dla 013; to świadomie zostawione
+  koordynatorowi zgodnie z zasadą własności kart.
+- `rebuild/schema/README.md` — nowa sekcja „Dyrektywy runnera” z tabelą i uzasadnieniem, w tym jawne
+  ostrzeżenie o traktowaniu `-- @` i o bezpieczeństwie zmiany treści już zastosowanych migracji.
+
+### Missing or deviating ✗
+- Brak asercji/twardej weryfikacji kształtu `selly_products` w gałęzi pomijającej 013 (patrz SHOULD-FIX) —
+  nie było w planie jako wymagany krok, ale test na tę konkretną lukę też nie powstał.
+- `docs/karty/I15.6/karta.md` sekcja „Do koordynatora” pozostaje z opisem starej (ręcznej) procedury dla
+  013 — zgodnie z zasadą własności kart to nie jest zadaniem tego ticketu, ale koordynator będzie musiał
+  ją zaktualizować przed użyciem `docs/cutover.md` (już zasygnalizowane w `wejscie-107.md`, nic do zrobienia
+  tutaj).
+
+### Definition of done
+(Definition of done tej karty dotyczy głównie 011 — patrz Review I; „Rozszerzenie zakresu” nie ma
+własnej odrębnej listy DoD w `plan.md`, tylko sekcję z uzasadnieniem decyzji.)
+- [x] Zmiana treści 002/003/013 jest bezpieczna dla baz, które mają je już w `_migracje` — zweryfikowane
+  w kodzie (`juzZastosowane.has(plik)` po samej nazwie pliku, bez porównania treści) i testem
+  `db.migracje-produkcja.test.ts` („baza, która ma już 002/003 w `_migracje`”).
+- [x] Pełny łańcuch 001→013 przechodzi na dokładnym schemacie produkcji bez ręcznych kroków —
+  zweryfikowane testem i uruchomieniem w tym review.
+- [x] `bezTresci` widoczne w `npm run migrate` bez łamania istniejących konsumentów — zweryfikowane
+  grepem (`tools/deploy-staging.sh` nie parsuje stdout).
+- [ ] Twarda ochrona przed fałszywym trafieniem warunku 013 na innej niż zakładana bazie — NIE zrobione,
+  patrz SHOULD-FIX (dziś ryzyko czysto teoretyczne, brak dowodu, że jest osiągalne w praktyce tego repo).
+
+## Parallel-test concerns
+
+None — nowe testy (`db.migracje-produkcja.test.ts`) stawiają bazę w `mkdtempSync`, bez portów ani
+współdzielonych zasobów; zmieniony test w `migracje.selly-warianty.test.ts` korzysta z tej samej
+infrastruktury co reszta pliku (już oceniona w Review I jako parallelizable).
+
+## Overall assessment
+
+Solidne domknięcie realnego problemu operacyjnego (kopia produkcji i cutover nie przechodziły
+`npm run migrate`), z dobrze udokumentowanym uzasadnieniem wyboru mechanizmu i dowodem na dokładnym,
+zweryfikowanym bajt-w-bajt schemacie produkcji zamiast tylko na założeniach. Runner pozostaje prosty
+i przewidywalny — nieznana dyrektywa czy zła składnia zawsze wywraca całą migrację, a nie tylko cichnie.
+Jedyna realna luka koncepcyjna to zaufanie samej NAZWIE tabeli (`selly_products_old`) jako dowodowi na
+kształt SĄSIEDNIEJ tabeli w warunku 013 — dziś nieszkodliwe (nic innego w repo tej nazwy nie tworzy), ale
+warto to świadomie zapisać albo zabezpieczyć twardszą asercją, zanim ktoś przy przyszłej karcie (I15.7/I15.8
+albo kolejny cutover) stworzy tabelę o tej nazwie z innego powodu. Zarządzanie granicami kart (wpis do
+`docs/karty/I15.6/wejscie-107.md` zamiast do cudzego `karta.md`) jest zgodne z zasadami projektu.
