@@ -14,6 +14,7 @@
  * Zachowujemy to, bo taki widok Ania zna z produkcji.
  *
  * Przycisk „CSV" (`M("suppliers-lifecycle")`, `:28106`) dołożył blok 10f.
+ * Od P10.3 plik powstaje w przeglądarce z wierszy i kolumn tej tabeli po filtrach (`eksport.tsx`).
  */
 import { useMemo } from "react";
 
@@ -68,7 +69,12 @@ export function SekcjaCyklZyciaDostawcow({
               (`frontend-index.js:28109`). */}
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold">1.2 Nowości i wycofania</div>
-            <PrzyciskCsv widok="suppliers-lifecycle" />
+            <PrzyciskCsv
+              widok="suppliers-lifecycle"
+              wiersze={wiersze}
+              kolumny={KOLUMNY}
+              wczytywanie={ladowanie}
+            />
           </div>
           {odfiltrowane > 0 && (
             <div

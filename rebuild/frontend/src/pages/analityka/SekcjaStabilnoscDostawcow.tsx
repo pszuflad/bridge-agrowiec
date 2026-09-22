@@ -24,9 +24,9 @@
  * do naprawienia — jeśli kiedyś ma się zmienić, wymaga osobnej, nazwanej decyzji.
  *
  * Przycisk „CSV" (`onClick: () => M("suppliers-stability")`, `:28063`) dołożył blok 10f.
- * ⚠ Eksport liczy ZAWSZE z `historia_cen` i oddaje inne kolumny niż ta tabela
- * (`produkty, punkty, sredniaCena, sredniStan`) — nie da się go zbudować z danych, które
- * sekcja ma już w pamięci.
+ * Od P10.3 plik powstaje w przeglądarce z wierszy i siedmiu kolumn tej tabeli po filtrach
+ * (`eksport.tsx`). Serwerowy `export/suppliers-stability` liczył z `historia_cen` inny zestaw
+ * (`produkty, punkty, sredniaCena, sredniStan`); front go już nie woła.
  */
 import { useMemo } from "react";
 
@@ -82,7 +82,12 @@ export function SekcjaStabilnoscDostawcow({
               (`frontend-index.js:28065`). */}
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold">1.1 Stabilność cennika dostawcy</div>
-            <PrzyciskCsv widok="suppliers-stability" />
+            <PrzyciskCsv
+              widok="suppliers-stability"
+              wiersze={wiersze}
+              kolumny={KOLUMNY}
+              wczytywanie={ladowanie}
+            />
           </div>
           {odfiltrowane > 0 && (
             <div

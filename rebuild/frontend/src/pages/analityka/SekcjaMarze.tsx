@@ -5,10 +5,10 @@
  * nagłówek karty i siedem kolumn tabeli są 1:1 z oryginałem. Wykres nad tabelą jest
  * odstępstwem (O-10a-3) — oryginał nie ma żadnych wykresów.
  *
- * Przycisk „CSV" (`onClick: () => M("margins")`, `:28524`) dołożył blok 10f razem z trasą
- * `GET /api/analytics/export/{view}`. ⚠ Eksport zwraca INNE wiersze niż ta tabela: dashboard
- * grupuje po dostawcy/kategorii/marce, a `export/margins` oddaje pozycje PER PRODUKT
- * (`backend/src/repos/analityka-eksport.ts`). To nie jest ta sama odpowiedź w innym formacie.
+ * Przycisk „CSV" (`onClick: () => M("margins")`, `:28524`) dołożył blok 10f. Od P10.3 plik ma
+ * PRZEKRÓJ TEJ TABELI — grupy dostawca/kategoria/marka po filtrach, siedem kolumn jak wyżej —
+ * i powstaje w przeglądarce (`eksport.tsx`, decyzja #91.2). Serwerowy `export/margins` oddaje
+ * pozycje PER PRODUKT; front go już nie woła, a drugiego przycisku „per produkt" nie ma.
  *
  * ⚠ CZEGO NIE RENDERUJEMY, CHOĆ PRZYCHODZI: `low` i `high` z odpowiedzi. Produkcyjny frontend
  * też ich nie pokazuje — pobiera i ignoruje. Odtwarzamy to zachowanie.
@@ -124,7 +124,7 @@ export function SekcjaMarze({
           wyjasnieniePominietych="Ta sekcja grupuje po dostawcy, kategorii i marce, więc nie stosuje filtrów:"
           rzeczownik="grup"
           prefiksTestu="marze"
-          obok={<PrzyciskCsv widok="margins" />}
+          obok={<PrzyciskCsv widok="margins" wiersze={wiersze} kolumny={KOLUMNY} wczytywanie={ladowanie} />}
         />
 
         {/*
