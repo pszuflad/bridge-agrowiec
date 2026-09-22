@@ -233,7 +233,8 @@ describe("2. Nagłówek — banner historii i cztery kafle KPI", () => {
     );
   });
 
-  it("puste odpowiedzi: „0\" przy pustych tabelach i zerze snapshotów, „—\" bez listy dostawców", async () => {
+  // Oryginał: `rows: []` → „0", `snapshots: 0` → „0", brak `dostawcy` → „—".
+  it("puste odpowiedzi — „0\" przy pustych tabelach i snapshotach, „—\" bez dostawców", async () => {
     zamockujApi();
     server.use(
       http.get("*/api/analytics/filters", () => HttpResponse.json({})),

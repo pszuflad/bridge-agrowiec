@@ -75,8 +75,8 @@ Vitest + MSW na fixtures produkcji. Bramki: lint, typecheck, build, test w `rebu
 - `docs/instrukcja-testow-I10.md:171,472` opisuje stare kafle, więc idzie wejście dla P10.4.
 
 ## Definition of done
-- [ ] Cztery kafle z etykietami i kolejnością oryginału, liczby z fixtures.
-- [ ] Puste stany wg D3/D4.
-- [ ] `/api/analytics/kpi` nie jest wołane z `/analityka`, każda z czterech tras dokładnie raz.
-- [ ] Bramki FE zielone, backend i contract bez zmian.
-- [ ] `karta.md` PR.2 z opisem stanu, wejścia dla PR.6 i P10.4, PR do `develop`.
+- [x] Cztery kafle z etykietami i kolejnością oryginału, liczby z fixtures.
+- [x] Puste stany wg D3/D4.
+- [x] `/api/analytics/kpi` nie jest wołane z `/analityka`, każda z czterech tras dokładnie raz.
+- [x] Bramki FE zielone, backend i contract bez zmian.
+- [x] `karta.md` PR.2 z opisem stanu, wejścia dla PR.6 i P10.4, PR do `develop`.
