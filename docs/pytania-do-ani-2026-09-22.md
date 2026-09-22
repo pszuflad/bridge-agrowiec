@@ -237,3 +237,24 @@ Miejsce na wszystko, o co nie zapytaliśmy.
 *Pytania z instrukcji testów w wersji 2 (Historia, Alerty, Atrybuty, Waga gabarytowa) zostają
 w tamtych dokumentach: m.in. gdzie używasz rodzajów „model" i „zastosowanie", progi kalkulatora
 paletowego i pole „priorytet" w regułach cen. Odpowiedz tam, kiedy będziesz je testować.*
+
+---
+
+## Co Ania odpowiedziała (uzupełnione 2026-09-22)
+
+| Pytanie | Odpowiedź (cytat) | Skutek |
+|---|---|---|
+| 1.1 Selly skończone? | „Synchronizacja z Selly jest skończona i działa. zanotuj sobie że mam wyciągnąć podsumowanie działań i logiki i przypomnij Pawłowi żeby to ode mnie wziął gdy będzie mu to potrzebne” | I15.6–I15.8 gotowe do startu; **przypomnienie: odebrać od Ani podsumowanie logiki Selly przed startem I15.6** |
+| 1.2 Z których części? | „pełna aktualizacja cech i całego katalogu codziennie o 12 w południe (to zaciąga Selly z serwera w formie pliku CSV) · aktualizacja cen tylko dla tych produktów gdzie to się zmieniło — Bridge wykrywa zmianę w stanie magazynowym lub cenie i automatycznie wrzuca do selly po API · aktualizacja całego dostawcy w nocy między 3–4 rano, codziennie inna partia dostawców, po API · o 6 rano katalog wypycha nowy CSV na serwer” | używa WSZYSTKICH torów (CSV 6:00 + pobranie przez Selly 12:00, Tor 1 delta, Tor 2 z rotacją); przycisków ręcznych nie wymieniła (zgodne z kodem — ich nie ma) |
+| 1.3 Nowe produkty w Selly | „nie wiem na czym to stanęło musze dopytać perplexity bo w teorii jest to zrobione ale nie wiem czy to działa” | stan ścieżki auto-create ustala karta z kodu `origin/main` (#68) |
+| 1.4 Dwie usterki | „Nawet nie wiem czy jest możliwe żeby usuwać stary rekord z selly jeśli jest to trzeba taką ścieżke zrobić bo obecnie tego nie ma” | mylące statusy (#69/#70) — brak odpowiedzi → 1:1; usuwanie z Selly → nowa funkcja, backlog **#100** (decyzja użytkownika) |
+| 2.1 Zmiany na produkcji | „Są jescze zmiany cały czas naprawiamy coś co było i zniknęło albo poprawiamy logikę tak jak np. w stagingu bo za dużo śmieci tam wpada” | **zastąpione ustaleniem Pawła z Anią z 22.09: produkcja zamrożona**; jedna zmiana jest jeszcze w toku → karta **I15.10** (zakres nieznany) |
+| 2.2 Listy ostateczne? | „tak zastosowania i blokady płatności są ostateczne ale trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie tego nie ma - każdy nowy produkt ma to pole puste a to ono wyznacza opcje metody dostawy i cenę dla danego dostawcy” | backlog **#101** — do zmierzenia na kopii produkcji |
+| 2.3 Kopia bazy na staging | „zgoda w terminie 23.09 bo aktualnie zmieniam tam reguły” | odświeżenie bazy stagingu **od 23.09** (D2) |
+| 2.4 Szerokość | „trzeba przyjąć nową instrukcje” | #83 potwierdzone; sprostowanie I3 §11 pkt 10 w I15.9 |
+| 2.5 MO9 | „Agrorami było juz sprawdzane wyrywkowo i zgadzało sie ale nie jesteśmy w stanie sprawdzić wszytskich pozycji więc trzeba ufac że robi to dobrze” | bez szczegółowego testu MO9; w pełnym teście tylko kontrola, że import MO9 przechodzi |
+| 3.1 Kafle Analityki | „Trzeba przenieść analitykę 1:1 bo ona nie była jescze rozbudowywana i dopracowana … chyba że ty masz jakieś sensowne rozwiązanie to możesz wprowadzić to co uważasz żeby było zasadne” | zgodne z PR.2 (wariant a = 1:1) — **zamknięte** |
+| 3.2 Admin / użytkownik | „Zostawiamy jak jest, nie ma być podziału na administratora i użytkownika. wszyscy użytkownicy to zwykli użytkownicy i mają mieć takie same prawa” | **zamknięte** — bez ról |
+| 4.1 Test | kto: „Ja”; ile dni: „nie wiem, nie miałam w grafiku … muszę jakoś to gdzieś wepchać”; od kiedy: „Jak będzie trzeba to zacznę” | instrukcja pełnego testu ma być zwarta; termin do ustalenia z Anią |
+| 4.2 Przełączenie | dzień i pora: „ustalimy z Pawłem”; na pewno nie: „dni pracujące poniedziałek - piątek” | **okno cutoveru w weekend** |
+| 4.3 Stary Bridge | „nie mam pojęcia co z nim zrobić - czy poprawki tam będą wprowadzane zanim pójdą na produkcje czy pisane z Claudem i wtedy wrzucane.. nie wiem tego jaki jest zamysł” | decyzja Pawła + wyjaśnienie Ani (model pracy po cutoverze) |

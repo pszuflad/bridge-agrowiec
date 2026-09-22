@@ -48,6 +48,12 @@ przestoju je uporządkuje.
 
 ## 2. Warunki wstępne (wszystkie muszą być spełnione PRZED oknem)
 
+> **Ustalenia z Anią (runda 3, 2026-09-22):** okno przełączenia **w weekend** (nie w dni robocze pn–pt), konkretny
+> dzień i porę ustala Paweł z Anią. **Cron CSV Selly o 6:00** (dziś uruchamia stary `generate_selly_export.cjs`) trzeba
+> przepiąć na polecenie generatora nowego stosu (backlog #102, karta I15.3). **Stary Bridge po przełączeniu NIE może
+> działać równolegle** na tej samej `data.db` (dwa schedulery importu i dwie synchronizacje Selly) — decyzja D9 w bloku
+> I15 roadmapy.
+
 - [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na staging
       (`docs/przeglad-12-widokow.md`). To jest warunek nadrzędny — bez niego nie zaczynamy.
 - [ ] **Bramki zielone** na `develop`: `lint`, `typecheck`, `build`, `test` po obu stronach
@@ -414,7 +420,8 @@ rm -f data.db-wal data.db-shm            # resztki WAL po nowej bazie
 
 - [ ] Obserwacja przez pierwszy pełny cykl importu — czy scheduler ruszył i czy `/historia`
       notuje przebiegi.
-- [ ] Sprawdzenie następnego dnia po 6:00, czy Selly zaciągnął CSV (jeśli `SELLY_TRYB=pelny`).
+- [ ] Następnego dnia: po 6:00 — czy plik CSV dla Selly powstał (generuje go cron → polecenie z karty I15.3, backlog #102);
+      po **12:00** — czy Selly go zaciągnął (Ania, runda 3: Selly pobiera plik o 12:00).
 - [ ] Kopia `data.db.przed-cutover-*` zostaje **co najmniej tydzień** — dopiero potem kasujemy.
 - [ ] `docs/rebuild-roadmap.md` §6 — odnotować datę cutoveru.
 - [ ] Backlog: wpisy odłożone świadomie (**#45** martwy filtr „Źródło", **#48** brak roli

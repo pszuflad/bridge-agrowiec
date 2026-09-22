@@ -3476,7 +3476,7 @@ różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej 
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
 | **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
-| **Status** | — zatwierdzone do naniesienia; **jeden ticket CSV razem z #76 i #77** (wspólny plik `generator-csv.ts` + fixture). |
+| **Status** | — zatwierdzone; realizacja w I15 (karty I15.1 — kolumna i triggery, I15.3 — katalog i CSV). ⚠ Ania 22.09: nowe produkty mają to pole puste → **#101**. |
 
 **Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
 i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
@@ -4476,3 +4476,64 @@ u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu un
 **Zamrożenie.** To ostatnia zmiana produkcji przed cutoverem — od 2026-09-22 stary Bridge jest zamrożony
 (uzgodnienie Pawła z Anią). Staging v2 jest więc w wersji ostatecznej.
 
+---
+
+### #100 · 2026-09-22 · [BACKEND] · usunięcie produktu z katalogu nie usuwa go z Selly — ŻYCZENIE ANI (nowa funkcja)
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (odpowiedź Ani na pytanie 1.4 rundy 3) |
+| **Kategoria** | BACKEND (Selly REST) — nowa funkcja, produkcja jej nie ma |
+| **Pliki** | produkcja: brak ścieżki; ślad ręcznego usunięcia przez API 17.09: `mirror/backend/…/product_639_pre_delete_20260917T164000Z.json`, `product_639_delete_result_20260917T164000Z.json` (`origin/main`); powiązane: osierocone mapowania `selly_products` (blok 13d w roadmapie, `5cfb7ab`) |
+| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
+| **Status** | — |
+
+**Odpowiedź Ani:** „Nawet nie wiem czy jest możliwe żeby usuwać stary rekord z selly jeśli jest to trzeba taką ścieżke
+zrobić bo obecnie tego nie ma”. **Technicznie jest możliwe** — 17.09 produkt 639 został usunięty z Selly przez API
+(zachowane pliki `pre_delete`/`delete_result`).
+
+**Rekomendacja koordynatora:** 🕒 **po cutoverze**, jako pierwsza nowa funkcja w nowym stosie. Kasowanie w sklepie jest
+nieodwracalne i wymaga decyzji produktowych (usuwać produkt czy wariant, co przy produkcie wspólnym dla kilku dostawców,
+potwierdzenie), a celem nr 1 jest domknięcie odbudowy 1:1. W I15 port 1:1 (osierocone mapowania zostają jak w produkcji).
+
+---
+
+### #101 · 2026-09-22 · [BAZA][BACKEND] · nowe produkty mają puste „blokowane formy płatności” — ŻYCZENIE ANI
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (odpowiedź Ani na pytanie 2.2 rundy 3) |
+| **Kategoria** | BAZA + BACKEND — zgłoszony defekt produkcji |
+| **Pliki** | `mirror/backend/payment_blocks.cjs` (lista per dostawca MO1–MO10 bez MO6, `sqlCase()`), triggery `products_blokowane_formy_ai/_au` (`origin/main:db/schema.sql`), `extensions.cjs` (`ensurePaymentBlocks()` przy starcie); powiązane #73 |
+| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** (rekomendacja niżej) |
+| **Status** | — przyczyna NIEZNANA, do zmierzenia |
+
+**Odpowiedź Ani:** „trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie
+tego nie ma - każdy nowy produkt ma to pole puste a to ono wyznacza opcje metody dostawy i cenę dla danego dostawcy”.
+
+**Co wiemy z kodu (koordynator, 2026-09-22):** trigger `AFTER INSERT ON products` ustawia pole z `dostawca` (`CASE
+UPPER(TRIM(dostawca)) WHEN 'MO1' …`), a `products.dostawca` w snapshocie ma dokładnie te kody (MO1…MO10) — w teorii nowe
+produkty powinny dostawać wartość. Hipotezy do sprawdzenia: (a) dostawca spoza listy (MO6 nie ma w `BLOCKED_PAYMENT_FORMS`);
+(b) pole puste nie w Bridge, tylko w **Selly** (nowe produkty zakładane w sklepie bez tej cechy — ścieżka auto-create,
+#68); (c) produkty wstawiane ścieżką, która omija trigger. **Nie wiadomo, gdzie Ania widzi puste pole** — pytanie do niej.
+Pomiar: kopia bazy produkcji z 23.09 — produkty utworzone po 10.09 z pustym polem.
+
+**Rekomendacja koordynatora:** ✅ naprawić w I15 (to warunek poprawnych metod dostawy i cen w sklepie). Zakres zależy od
+pomiaru: w Bridge → karta I15.1; w Selly → karty I15.6/I15.7.
+
+---
+
+### #102 · 2026-09-22 · [DEPLOY][BACKEND] · plik CSV dla Selly o 6:00 generuje systemowy cron starego stosu — nowy stos nie ma odpowiednika
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (koordynator, po odpowiedzi Ani na pytanie 1.2) |
+| **Kategoria** | DEPLOY / BACKEND (eksport CSV Selly) — luka cutoveru |
+| **Pliki** | produkcja: cron serwera uruchamia `mirror/backend/generate_selly_export.cjs` (`selly/routes.cjs:297` „Plik generowany cronem ~6:00”); odbudowa: `rebuild/backend/src/selly/generator-csv.ts` (tylko trasa ręczna `POST /api/selly/generate-csv`) |
+| **Do nowej wersji?** | ✅ **TAK — wymagane do cutoveru** (Ania używa: „o 6 rano katalog wypycha nowy CSV na serwer”, Selly zaciąga go o 12:00) |
+| **Status** | — przypisane do karty I15.3 (polecenie CLI) + `docs/cutover.md` (przepięcie crona) |
+
+**Na czym polega.** Odbudowa ma generator (8a), ale nie ma nic, co uruchamia go codziennie — w produkcji robi to cron
+systemowy spoza aplikacji. Po cutoverze stary cron dalej uruchamiałby STARY skrypt na tej samej bazie (dałby plik, ale
+z logiką starego stosu), a bez niego plik przestałby się odświeżać i Selly o 12:00 zaciągałby wczorajszy katalog.
+**Rekomendacja:** I15.3 dokłada polecenie CLI generatora (np. `npm run selly:csv`), cutover przepina cron na nie.

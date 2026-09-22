@@ -3412,7 +3412,8 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 |---|---|---|
 | ~~**#91** — zakres „zapisz to, co widzę"~~ | P10.3 | ✅ rozstrzygnięte 2026-09-21 (ticket 87), dowiezione w P10.3 (98) |
 | ~~**#92** — duplikat marek: dane czy prezentacja~~ | PR.5 | ✅ 2026-09-22, wariant A — migracja `010` (ticket 101) |
-| **Pytanie 12.3 — kafle KPI Analityki** | — | PR.2 wdrożyła wariant (a) „jak na produkcji” na podstawie decyzji użytkownika 2026-09-22; odpowiedź Ani nadal pusta — pytanie ponowione w `docs/pytania-do-ani-2026-09-22.md` §3.1 |
+| ~~**Pytanie 12.3 — kafle KPI Analityki**~~ | — | ✅ Ania 22.09 (runda 3, 3.1): „przenieść analitykę 1:1” — zgodne z PR.2 |
+| ~~**Pytanie 12.5 — podział admin / użytkownik**~~ | — | ✅ Ania 22.09 (runda 3, 3.2): bez ról, wszyscy mają te same prawa |
 | **#96** — sufit 1000/500 wierszy w plikach CSV analityki | ewentualne zdjęcie sufitu dla pliku | **⬜ po stronie Ani** — I10-v2 §1.3 |
 | **#97** — kafel „Ostatni eksport CSV” bez źródła w UI | ewentualny audyt eksportu z Katalogu (nowe odstępstwo) | **⬜ po stronie Ani** — I10-v2 §1.2 |
 | **#94** — karta 4.1: przypadkowy EAN i podwójne migawki | mała karta analityki | ⬜ użytkownik — rekomendacja: naprawić wzorem #33 |
@@ -3464,6 +3465,7 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 | [I15.7](karty/I15.7/) | Selly REST 2: nocna pełna synchronizacja | #60, #81 | I15.6 | — |
 | [I15.8](karty/I15.8/) | Selly REST 3: harmonogram i przyciski w panelu | #60 | I15.7 | — |
 | [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) | — | I15.1–I15.8 | — |
+| [I15.10](karty/I15.10/) | zmiana w toku na starym Bridge — zakres nieznany | — | triaż zmiany | ? |
 
 **Numery migracji przydzielone z góry przez koordynatora** (`011`, `012`, `013`). Runner (`db/migrate.ts`) stosuje
 każdy brakujący plik niezależnie od kolejności merge'y, więc równoległe karty nie kolidują. Karta, która
@@ -3478,6 +3480,20 @@ potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać 
 | 3 | **I15.4** ‖ **I15.8** | I15.2 (dla 4), I15.7 (dla 8) |
 | 4 | **I15.5** | I15.4 |
 | 5 | **I15.9**, potem instrukcja pełnego testu i cutover | wszystkie |
+
+**Odpowiedzi Ani, runda 3 (22.09)** — `docs/pytania-do-ani-2026-09-22.md`, sekcja „Co Ania odpowiedziała”. Skutki dla I15:
+Selly skończone (tor I15.6–I15.8 gotowy; Ania przygotuje podsumowanie logiki — odebrać przed I15.6); Ania używa wszystkich
+torów Selly, CSV o 6:00 pobierany przez Selly o **12:00**; zgoda na kopię bazy produkcji na staging **od 23.09**; MO9 bez
+szczegółowego testu; okno cutoveru **w weekend**; jedna zmiana produkcji jeszcze w toku → **I15.10**.
+
+**Decyzje, które zostały (użytkownik):**
+
+| # | Decyzja | Rekomendacja |
+|---|---|---|
+| D6 | #101 — puste blokady płatności u nowych produktów: naprawić w I15? | ✅ tak, po pomiarze na kopii produkcji (23.09) — zakres I15.1 albo I15.6/I15.7 zależnie od przyczyny |
+| D7 | #100 — ścieżka usuwania produktu z Selly (nowa funkcja) | 🕒 po cutoverze |
+| D8 | #102 — CSV 6:00 w nowym stosie: polecenie CLI + przepięcie crona | ✅ tak — I15.3 + `docs/cutover.md` |
+| D9 | stary Bridge po cutoverze (pytanie 4.3) | wyłączony od razu (nie może chodzić równolegle na tej samej bazie — podwójne importy i synchronizacje Selly), kod i kopia bazy zostają ~2 tygodnie na rollback; zmiany po cutoverze wyłącznie w nowym stosie: `develop` → staging → test → produkcja |
 
 Wspólne pliki, na które uważać przy merge'u: `rebuild/backend/src/db/schema.ts` (I15.1, I15.4, I15.6 — różne
 tabele), `contract/openapi.yaml` (I15.3, I15.4, I15.8). Oba dają najwyżej trywialne konflikty.
