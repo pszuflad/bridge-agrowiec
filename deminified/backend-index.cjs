@@ -47585,274 +47585,14 @@ function tk(t, e) {
     for (let u of o) U.addStaging(u)
   })(), i.doStagingu = o.length, i
 }
-tk = function(t, e) {
-  let n = new Date().toISOString(),
-    i = {
-      doStagingu: 0,
-      odrzuconeNieOpony: 0,
-      odrzuconeBrakDanych: 0,
-      odrzuconeSmieciMO2: 0,
-      nowe: 0,
-      zmienione: 0,
-      wycofane: 0,
-      bezZmian: 0,
-      autoZatwierdzone: 0,
-      szczegolyOdrzuconych: []
-    },
-    r = U.listProducts().filter(u => u.dostawca === t),
-    a = new Map,
-    s = new Map,
-    conflictEans = new Map;
-  for (let u of r) {
-    u.kod && a.set(String(u.kod), u);
-    if (u.ean) {
-      let _ek = String(u.ean).trim();
-      if (_ek)
-        if (!s.has(_ek)) s.set(_ek, u);
-        else {
-          let _prev = s.get(_ek);
-          s.set(_ek, null);
-          if (!conflictEans.has(_ek)) conflictEans.set(_ek, _prev ? [_prev] : []);
-          conflictEans.get(_ek).push(u)
-        }
-    }
-  }
-  let o = new Set,
-    c = [];
-  for (let u of e) {
-    /*MO2_JUNK_FILTER*/
-    {
-      let _jt = String(t || "").toUpperCase();
-      let _jk = String(u && u.kod != null ? u.kod : "").trim().replace(/^MO2_/i, "");
-      let _je = String((u && (u.ean != null ? u.ean : u.ean_raw)) || "").replace(/\s+/g, "");
-      let _jm = String((u && (u.marka != null ? u.marka : (u.producent != null ? u.producent : "")))).trim();
-      let _jmSize = _jm !== "" && /[0-9]/.test(_jm) && !/[A-Za-z]{3,}/.test(_jm);
-      let _jmEmpty = _jm === "";
-      if (_jt === "MO2" && /^999991$/.test(_jk) && (_je === "" || _jmEmpty || _jmSize)) {
-        i.odrzuconeSmieciMO2 = (i.odrzuconeSmieciMO2 || 0) + 1;
-        i.szczegolyOdrzuconych.push({
-          nazwa: String((u && u.nazwa) || "(bez nazwy)"),
-          powod: "smieciowa pozycja MO2 (kod 999991 + brak EAN lub marka=rozmiar) - odrzucona przy imporcie"
-        });
-        continue;
-      }
-    }
-    let _sourceCode = u.kod == null ? "" : String(u.kod).trim(),
-      _sourceEan = u.ean == null ? "" : String(u.ean).trim(),
-      _matchedByCode = _sourceCode ? a.get(_sourceCode) : null,
-      _matchedByEan = !_matchedByCode && _sourceEan ? s.get(_sourceEan) : null,
-      T = _matchedByCode || _matchedByEan || null,
-      _usedEanId = !1,
-      _usedTechId = !1;
-    if (!_sourceCode) {
-      let _tmp = {
-        ...u
-      };
-      if (T?.kod) _tmp.kod = String(T.kod);
-      else if (_sourceEan) _tmp.kod = _sourceEan, _usedEanId = !0;
-      else {
-        let _f = Zc(u.nazwa || "", u.kategoria);
-        if (_f.isTire) {
-          _tmp.kod = Lq(t, {
-            ...u,
-            nazwa: u.nazwa || u.rozmiar || u.model || u.marka || "opona"
-          }), _usedTechId = !!_tmp.kod;
-          if (!_tmp.kod) {
-            i.odrzuconeBrakDanych++, i.szczegolyOdrzuconych.push({
-              nazwa: String(u.nazwa || "(bez nazwy)"),
-              powod: "brak identyfikatora i za malo danych produktu"
-            });
-            continue
-          }
-        } else {
-          i.odrzuconeBrakDanych++, i.szczegolyOdrzuconych.push({
-            nazwa: String(u.nazwa || "(bez nazwy)"),
-            powod: "brak identyfikatora i za malo danych produktu"
-          });
-          continue
-        }
-      }
-      u = _tmp
-    }
-    let _overrideKey = T?.kod ? String(T.kod) : String(u.kod || ""),
-      {
-        pozycja: l,
-        naruszono: p,
-        srcVals: _pSrc
-      } = Gq(t, {
-        ...u,
-        kod: _overrideKey
-      }),
-      f = Zc(l.nazwa || "", l.kategoria);
-    if (!f.isTire) {
-      i.odrzuconeNieOpony++, i.szczegolyOdrzuconych.push({
-        nazwa: `${l.kod} — ${l.nazwa||""}`,
-        powod: `nie opona (${f.reason})`
-      });
-      let g = T || a.get(String(u.kod));
-      g && (U.deleteProduct(g.id), a.delete(String(g.kod)), g.ean && s.delete(String(g.ean)));
-      continue
-    }
-    let {
-      poz: d,
-      eanInfo: m,
-      rozmiarWykryty: h
-    } = Hq(l);
-    if (!T && d.ean) {
-      let _byNormEan = s.get(String(d.ean));
-      _byNormEan && (T = _byNormEan)
-    }
-    T?.id != null && (o.add(T.id), T.nieobecnoscPodRzad > 0 && U.updateProduct(T.id, {
-      nieobecnoscPodRzad: 0
-    }));
-    let _ = [],
-      _bn = Kq(l.nazwa || d.nazwa || "");
-    _usedTechId && _.push("brak kodu dostawcy i EAN - uzyto identyfikatora technicznego"), !_usedTechId && _usedEanId && _.push("brak kodu dostawcy - uzyto EAN jako identyfikatora"), m && m.ean_source_status !== "ok" && _.push(`EAN: ${m.ean_source_status}${m.ean_validation_error?` (${m.ean_validation_error})`:""}`), h || _.push("nie wykryto rozmiaru opony (sprawdz recznie)"), _bn && _.push(`bledny zapis nazwy: ${_bn}`), p.length > 0 && _.push(`plik nadpisuje poprawke Marty: ${p.join(", ")}`);
-    let _eanConflict = !T && _sourceEan && conflictEans.has(_sourceEan) ? conflictEans.get(_sourceEan) : null;
-    _eanConflict && _.push(`Konflikt EAN — ten EAN (${_sourceEan}) istnieje juz w bazie pod innymi pozycjami: ${_eanConflict.map(cx=>`${cx.kod} "${cx.nazwa||""}"`).join(", ")}. Sprawdz recznie czy to duplikat tej samej opony.`);
-    let k = _.length ? _.join(" • ") : null;
-    if (!T) {
-      i.nowe++;
-      let _newBad = d.eanIsValid === !1 || !!_bn || !h || !!_usedTechId || !!_eanConflict,
-        _newType = _newBad ? "blad" : "nowa",
-        _newReason = _newBad ? "Nowa pozycja wymaga sprawdzenia" : "Nowa pozycja w cenniku";
-      c.push({
-        typZmiany: _newType,
-        kod: String(u.kod),
-        nazwa: d.nazwa || "",
-        dostawca: t,
-        magazyn: d.magazyn || "—",
-        magazynRaw: d.magazynRaw ?? null,
-        stanStary: null,
-        stanNowy: d.stan ?? 0,
-        cenaZakupuStara: null,
-        cenaZakupuNowa: d.cenaZakupu ?? 0,
-        cenaSprzedazyNowa: d.cenaSprzedazy ?? null,
-        zmianaPct: null,
-        ostrzezenie: k,
-        powod: _newReason + (k ? ` • ${k}` : ""),
-        snapshotJson: JSON.stringify(d),
-        eanRaw: d.eanRaw ?? null,
-        eanIsValid: d.eanIsValid ?? null,
-        eanSourceStatus: d.eanSourceStatus ?? null,
-        eanCandidates: d.eanCandidates ?? null,
-        edytowanePola: null,
-        utworzono: n
-      });
-      continue
-    }
-    let v = [];
-    p.length > 0 && (v.push(`konflikt z poprawka Marty — ZOSTANIE ZACHOWANA wartosc Marty, plik NIE nadpisuje (pole(a): ${p.map(_pf=>`${_pf}: baza/Marta="${l[_pf]??"—"}" vs plik dostawcy="${(_pSrc&&_pSrc[_pf])??"—"}"`).join("; ")}). Po akceptacji: wartosc z pliku zostanie zapamietana jako potwierdzona, wiec ten sam konflikt nie pojawi sie ponownie przy nastepnym imporcie — ale sama wartosc produktu NIE zmieni sie.`), d._srcConflict = _pSrc || {});
-    for (let {
-        key: g,
-        label: x
-      }
-      of Vq) {
-      let w = T[g],
-        O = d[g];
-      (w == null || w === "") && O !== null && O !== void 0 && O !== "" || (O == null || O === "") && w !== null && w !== void 0 && w !== "" || Xq(w, O) || v.push(`${x}: ${w||"—"} → ${O||"—"}`)
-    }
-    let _KP = ["rozmiar", "indeksNosnosci", "indeksPredkosci", "model", "marka", "nazwa", "kodDostawcy"],
-      _ck = _KP.some(pk => {
-        let vS = T[pk],
-          vN = d[pk];
-        if ((vS == null || vS === "" || vS === void 0) && (vN == null || vN === "" || vN === void 0)) return !1;
-        return String(vS ?? "") !== String(vN ?? "")
-      }),
-      _cb = (d.eanIsValid === !1 && T.eanIsValid !== !1) || !!_bn || !h || !!_usedTechId || p.length > 0,
-      AP = {};
-    if (d.cenaZakupu != null && !Xq(T.cenaZakupu, d.cenaZakupu)) AP.cenaZakupu = d.cenaZakupu;
-    if (d.cenaSprzedazy != null && !Xq(T.cenaSprzedazy, d.cenaSprzedazy)) AP.cenaSprzedazy = d.cenaSprzedazy;
-    if (d.marzaPct != null && !Xq(T.marzaPct, d.marzaPct)) AP.marzaPct = d.marzaPct;
-    if (d.stan != null && !Xq(T.stan, d.stan)) AP.stan = d.stan;
-    if (d.magazyn != null && !Xq(T.magazyn, d.magazyn)) AP.magazyn = d.magazyn;
-    if (_ck || _cb) {
-      i.zmienione++;
-      let g = d.cenaZakupu !== void 0 && d.cenaZakupu !== null && T.cenaZakupu > 0 ? (d.cenaZakupu - T.cenaZakupu) / T.cenaZakupu * 100 : null;
-      c.push({
-        typZmiany: _cb ? "blad" : "zmiana_kluczowa",
-        kod: String(T.kod || u.kod),
-        nazwa: d.nazwa || T.nazwa,
-        dostawca: t,
-        magazyn: d.magazyn || T.magazyn,
-        magazynRaw: d.magazynRaw ?? T.magazynRaw ?? null,
-        stanStary: T.stan,
-        stanNowy: d.stan ?? T.stan,
-        cenaZakupuStara: T.cenaZakupu,
-        cenaZakupuNowa: d.cenaZakupu ?? T.cenaZakupu,
-        cenaSprzedazyNowa: d.cenaSprzedazy ?? null,
-        zmianaPct: g,
-        ostrzezenie: k,
-        powod: (v.length ? v.join(" • ") : "Wymaga sprawdzenia") + (k ? ` • ${k}` : ""),
-        snapshotJson: JSON.stringify(d),
-        eanRaw: d.eanRaw ?? null,
-        eanIsValid: d.eanIsValid ?? null,
-        eanSourceStatus: d.eanSourceStatus ?? null,
-        eanCandidates: d.eanCandidates ?? null,
-        edytowanePola: null,
-        utworzono: n
-      })
-    } else if (Object.keys(AP).length > 0) {
-      i.autoZatwierdzone++, AP.dataAktualizacji = n;
-      try {
-        __BRIDGE_EXT.applyDims(AP, T.rozmiar);
-        __BRIDGE_EXT.applyLinkMemory(Qi, AP, T)
-      } catch (_be) {}
-      try {
-        U.updateProduct(T.id, AP);
-        try {
-          ww.prepare("INSERT INTO historia_cen (produkt_id,kod,ean,dostawca,marka,model,rozmiar,indeks_nosnosci,indeks_predkosci,kategoria,cena_zakupu,cena_sprzedazy,stan,zarejestrowano_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)").run(T.id, T.kod, T.ean, t, T.marka, T.model, T.rozmiar, T.indeksNosnosci, T.indeksPredkosci, T.kategoria, AP.cenaZakupu ?? T.cenaZakupu, AP.cenaSprzedazy ?? T.cenaSprzedazy, AP.stan ?? T.stan, n)
-        } catch (_h) {}
-      } catch (_e) {
-        console.warn("[tk:auto]", _e.message)
-      }
-    } else i.bezZmian++
-  }
-  const WYCOFANIE_PROG_IMPORTOW = 3;
-  for (let u of r)
-    if (!o.has(u.id)) {
-      let _npr = (u.nieobecnoscPodRzad || 0) + 1;
-      if (_npr >= WYCOFANIE_PROG_IMPORTOW) {
-        i.wycofane++;
-        c.push({
-          typZmiany: "wycofana",
-          kod: u.kod,
-          nazwa: u.nazwa,
-          dostawca: t,
-          magazyn: u.magazyn,
-          magazynRaw: u.magazynRaw ?? null,
-          stanStary: u.stan,
-          stanNowy: 0,
-          cenaZakupuStara: u.cenaZakupu,
-          cenaZakupuNowa: null,
-          cenaSprzedazyNowa: null,
-          zmianaPct: null,
-          ostrzezenie: (u.ean && conflictEans.has(String(u.ean).trim()) ? `Mozliwy duplikat EAN (${String(u.ean).trim()}) z inna pozycja w bazie: ${conflictEans.get(String(u.ean).trim()).filter(cx=>cx.kod!==u.kod).map(cx=>`${cx.kod} "${cx.nazwa||""}"`).join(", ")}. Sprawdz przed odrzuceniem.` : null),
-          powod: "Brak w cenniku — pozycja wycofana",
-          snapshotJson: null,
-          eanRaw: null,
-          eanIsValid: null,
-          eanSourceStatus: null,
-          eanCandidates: null,
-          edytowanePola: null,
-          utworzono: n
-        });
-        try {
-          U.updateProduct(u.id, {
-            nieobecnoscPodRzad: 0
-          })
-        } catch (_wr) {}
-      } else {
-        try {
-          U.updateProduct(u.id, {
-            nieobecnoscPodRzad: _npr
-          })
-        } catch (_wr) {}
-      }
-    } return ww.transaction(() => {
-    for (let u of c) U.addStaging(u)
-  })(), i.doStagingu = c.length, i
-};
+tk = require("./staging_policy.cjs").install({
+  U,
+  db: Qi,
+  normalize: Hq,
+  classify: Zc,
+  badName: Kq,
+  ext: __BRIDGE_EXT
+});
 var ih = pt(I4(), 1);
 var A4 = process.env.JWT_SECRET || "bridge-agrowiec-secret-2026",
   rh = "bridge_session";
@@ -48545,7 +48285,10 @@ async function M4(t, e) {
       let d = p.length ? ` WHERE ${p.join(" AND ")}` : "";
       l = Qi.prepare(`SELECT id FROM staging_items${d} ORDER BY id DESC`).all(...f).map(m => m.id)
     }
-    for (let p of l) U.acceptStaging(p, c.user.id);
+    Qi.transaction(() => {
+      for (let p of l) U.checkStagingAcceptance(p);
+      for (let p of l) U.acceptStaging(p, c.user.id)
+    })();
     try {
       var __rz = __restoreZastosowanie();
       console.log("[zastosowanie] auto-odtworzenie po akceptacji:", JSON.stringify(__rz))
@@ -48988,6 +48731,11 @@ fi.use((t, e, n) => {
   try {
     require("./extensions.cjs").register(fi, {
       tk,
+      U,
+      we,
+      be
+    });
+    require("./staging_policy.cjs").registerRoutes(fi, {
       U,
       we,
       be

@@ -390,9 +390,6 @@ function normalizeRecord(rec) {
   }
 
   return {
-    // Retain the supplier's exact input before normalization can strip invalid
-    // suffixes, truncate a long number or discard an invalid value.
-    ean_raw: require('./staging_policy.cjs').rawEan(rec) ?? null,
     ean: eanValue,
     ean_lossy: eanLossy,
     kod_dostawcy: rec.kod_dostawcy ? String(rec.kod_dostawcy).trim() : null,

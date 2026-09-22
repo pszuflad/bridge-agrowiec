@@ -329,6 +329,8 @@ CREATE INDEX idx_selly_products_dostaw  ON selly_products(dostawca);
 CREATE INDEX idx_selly_products_prodid  ON selly_products(selly_product_id);
 CREATE INDEX idx_selly_products_varid   ON selly_products(selly_variant_id);
 CREATE INDEX idx_selly_products_status ON selly_products(ostatni_status);
+CREATE TABLE staging_matches(supplier TEXT NOT NULL,source_key TEXT NOT NULL,product_code TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(supplier,source_key));
+CREATE UNIQUE INDEX staging_one_current_product ON staging_items(dostawca,kod);
 CREATE TRIGGER products_blokowane_formy_ai
         AFTER INSERT ON products
         BEGIN

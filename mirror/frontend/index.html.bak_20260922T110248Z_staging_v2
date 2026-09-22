@@ -125,7 +125,6 @@
         background-color: #1e293b !important;
       }
     </style>
-  <script src="./assets/staging-policy-injection.js?v=20260922v2" defer></script>
   </head>
   <body>
     <div id="root"></div>

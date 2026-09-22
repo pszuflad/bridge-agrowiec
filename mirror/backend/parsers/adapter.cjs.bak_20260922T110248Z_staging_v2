@@ -8,7 +8,6 @@ const crypto = require('crypto');
 const tyre = require('./tyre_params.cjs');
 const common = require('../common.cjs');
 const paymentBlocks = require('../payment_blocks.cjs');
-const stagingPolicy = require('../staging_policy.cjs');
 
 function firstValue(...values) {
   for (const value of values) {
@@ -556,9 +555,7 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
   return {
     kod: kod ? String(kod) : null,
     kodDostawcy: kodDisplay ? String(kodDisplay) : null,
-    ean: stagingPolicy.validateEan(stagingPolicy.rawEan(record),record.ean_lossy).value,
-    eanRaw: stagingPolicy.rawEan(record) ?? null,
-    _eanLossy: !!record.ean_lossy,
+    ean: firstValue(enriched.ean, record.ean),
 
     nazwa: toUpperPLName(nazwa),
     marka: toUpperPL(firstValue(enriched.marka, record.producent, record.marka)),
@@ -663,12 +660,7 @@ function recordToSuroweDostawca(dostawcaKod, record) {
     s.magazynRaw = record.surowe_pola.Lagerbestand;
   }
 
-  if (!s.kod) {
-    s._kodSynthetic = true;
-    // An EAN may identify different models or batches. Never use EAN alone
-    // as a generated product code.
-    s.kod = stagingPolicy.syntheticCode(kod,s);
-  }
+  if (!s.kod) s.kod = syntheticKod(kod, record, enriched);
 
   // POPRAWKA 2026-07-09: kolumna products.kod jest unikalna GLOBALNIE (dla wszystkich
   // dostawcow razem), a nie per-dostawca. Kod producenta opony (np. z Handlopex WR/RZ)
