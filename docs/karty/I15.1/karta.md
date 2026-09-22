@@ -49,4 +49,19 @@ Numer migracji `011` zarezerwowany. Druga migracja → „Do koordynatora”, ni
 —
 
 ## Do koordynatora
-—
+**⚠ PILNE przed odświeżeniem stagingu kopią produkcji (D2, od 23.09) — kopia NIE przejdzie samym `npm run migrate`.**
+Ustalone w tickecie 107 (2026-09-22) z `git show 7d6cfc9:db/schema.sql:297`: produkcyjne `products` ma **74 kolumny**
+(72 z kanonu + `uwaga_cena` + `blokowane_formy_platnosci`), `szerokosc` już `TEXT`, brak `_migracje`. Skutek dla
+łańcucha migracji na kopii produkcji:
+- `002_import.sql` — `ALTER TABLE products ADD COLUMN uwaga_cena` → `duplicate column name`, cała 002 się wycofuje
+  (znane: `docs/cutover.md` §3 (a));
+- `003_szerokosc_text.sql` — `INSERT INTO products_szertxt SELECT * FROM products` do tabeli 73-kolumnowej →
+  **pada deterministycznie** („73 columns but 74 values”). `docs/cutover.md` §3 (b) traktuje to jako możliwość
+  („Jeśli padło na 003 — STOP”) — dziś to pewnik, bo doszła `blokowane_formy_platnosci`. Cel 003 (TEXT) produkcja
+  ma już osiągnięty.
+- `011` (ta karta) — odporna na istniejącą kolumnę i triggery, więc po przejściu 002/003 przechodzi.
+Prośba użytkownika (2026-09-22): **zanim zrobimy kopię produkcji na staging, plan ma zawierać sposób, żeby ta kopia
+dała się zmigrować na nową wersję** — albo przez uodpornienie 002/003 (np. dyrektywą runnera wprowadzoną w 011,
+patrz niżej), albo przez sprawdzoną procedurę ręczną z `docs/cutover.md`. To ta sama ścieżka, którą pójdzie cutover —
+odświeżenie stagingu jest jego próbą generalną. Pliki 002/003 są poza własnością tej karty — decyzja i przydział do
+koordynatora.
