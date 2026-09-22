@@ -69,3 +69,14 @@ Brak w API. Zmiana widoczna dla użytkownika: kafel przestaje być martwy (zatwi
   z równoległymi kartami (P10.3, PR.2), więc nie ruszany; do usunięcia przy okazji.
 - Timeout testu 20 000 id (`alerty-katalogu.gate.test.ts`) przy pełnym biegu BE — flaky pod
   obciążeniem, warto podnieść limit czasu tego testu.
+
+## Docs updates
+- `docs/karty/P10.2/karta.md` — Stan ✅ 2026-09-22 · 96; Pliki, Decyzje (D1–D5), Dowiezione (faktyczny zakres, słownik akcji, quirk ZIP, snapshot, bramki); Do koordynatora: roadmapa ~:1615 (D3 nieaktualne), komentarz `routes/history.ts:47-48`, osierocona `dziennikZmianZFixtura()`.
+- `docs/karty/P10.4/wejscie-96.md` (nowy) — nieaktualne miejsca `docs/instrukcja-testow-I10.md` (`:104`, `:106`, `:317`, `:319-322`, `:466`) i gotowa delta „Zgłosiłaś → Jest teraz → Sprawdź"; wzmianka o `instrukcja-testow-I8.md` (`:414`, `:497`).
+- `docs/rebuild-backlog.md` #34 — baner WDROŻONE, Status/Iteracja, „Naprawa wdrożona w P10.2" zamiast „Do decyzji".
+- `docs/spec-frontend.md` — §4 (Pulpit nie woła już `GET /api/history`), §5 (D3 jako opis oryginału + nowy akapit „Odbudowa (karta P10.2…)").
+- `docs/analityka-bloki-10b-10f.md` ~:562 — D3 w czasie przeszłym + zdanie o stanie od ticketu 96.
+
+### Pre-existing issues
+- `rebuild/backend/src/routes/history.ts:47-48` — nieaktualny komentarz (poza własnością karty).
+- `docs/rebuild-roadmap.md` ~:1615 — do poprawy przez koordynatora.
