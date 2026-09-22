@@ -1,13 +1,18 @@
-# Przegląd 12 widoków — finalna akceptacja nowego Bridge'a
+# Przegląd widoków — finalna akceptacja nowego Bridge'a
 
-**Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-08
+**Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-08 · **Aktualizacja:** 2026-09-22
 **Dla kogo:** Ania · **Po co:** to ostatnie sprawdzenie przed przełączeniem produkcji.
 
 > **To jest STAGING, nie produkcja.** Cokolwiek tu ustawisz, zmienisz albo zepsujesz —
 > produkcji nie dotyka. Klikaj bez skrupułów, próbuj popsuć.
 
-> **Czym to się różni od poprzednich instrukcji.** Wcześniejsze (`instrukcja-testow-I3`,
-> `I4`, `I6`…) sprawdzały po jednej nowej funkcji. **Ta sprawdza CAŁOŚĆ** — czy wszystko, co
+> **Co nowego od pierwszej wersji (2026-09-08).** Doszedł ekran „Archiwum importów" (punkt 10 —
+> dlatego kolejne ekrany mają numer o jeden wyższy niż w Twoim pierwszym przejściu), a na kilku
+> ekranach poprawiliśmy to, co zgłosiłaś. Takie miejsca mają dopisek **„Zgłosiłaś → Jest teraz →
+> Sprawdź"**. Punkty bez zmian zostały tak, jak były.
+
+> **Czym to się różni od poprzednich instrukcji.** Wcześniejsze instrukcje testów
+> (I3, I4, I6…) sprawdzały po jednej nowej funkcji. **Ta sprawdza CAŁOŚĆ** — czy wszystko, co
 > robisz w starym Bridgu, da się zrobić tutaj. Nie musisz jej przechodzić za jednym razem;
 > możesz brać po jednym ekranie dziennie i odhaczać.
 
@@ -24,7 +29,7 @@ Każdy ekran ma trzy rzeczy:
    opisywać technicznie — „kliknęłam zapisz i nic się nie stało" w zupełności wystarczy.
 
 **Zanim zaczniesz — jedna rzecz, którą warto sprawdzić na każdym ekranie:**
-**menu po lewej (sidebar) ma być widoczne ZAWSZE**, na każdym z 12 ekranów. Do niedawna
+**menu po lewej (sidebar) ma być widoczne ZAWSZE**, na każdym z 13 ekranów. Do niedawna
 znikało na siedmiu z nich — to była usterka odbudowy i została naprawiona. Jeśli gdziekolwiek
 menu zniknie, to jest błąd i zaznacz go od razu.
 
@@ -50,9 +55,16 @@ stanu dostawców i katalogu.
 - [ ] ✅ / ❌ — przełącznik jasny/ciemny (ikona słońca/księżyca w menu) działa, a wybór
       zostaje po odświeżeniu strony.
 
-> ⚠ **Od P6.2 (77, 2026-09-21):** kafel „Aktywne alerty" i karta „Najnowsze powiadomienia"
-> liczą łącznie alerty importu i pseudo-alerty katalogowe (marża, nie-opona, brak importu
-> cennika) — druga sekcja karty i wiersze prowadzą do zakładki „Katalog" na `/alerty`.
+- [ ] ✅ / ❌ — kafel „Ostatni eksport CSV" pokazuje prawdziwą informację: kiedy był ostatni
+      eksport i ile produktów (albo — gdy eksportu jeszcze nie było — „Ostatni import: …").
+
+> ⚠ **Kafel „Aktywne alerty" i karta „Najnowsze powiadomienia" liczą dwa rodzaje alertów
+> razem:** alerty z importu i alerty katalogowe (ujemna lub bardzo niska marża, pozycja uznana
+> za nie-oponę, dostawca bez importu cennika). Alerty katalogowe w karcie prowadzą do zakładki
+> „Katalog" na ekranie Alerty.
+
+> ⚠ **Kafel „Ostatni eksport CSV" w starym Bridgu jest zepsuty i zawsze pusty** („—"). Tutaj
+> działa — to poprawka, nie błąd.
 
 ---
 
@@ -84,11 +96,19 @@ Najważniejszy ekran. Poświęć mu najwięcej czasu.
 - [ ] ✅ / ❌ — liczba pozycji zgadza się z tym, co pamiętasz ze starego Bridge'a.
 - [ ] ✅ / ❌ — przełączanie zakładek dostawców zmienia listę.
 - [ ] ✅ / ❌ — filtry (marka, kategoria, dostępność) zawężają wyniki.
+- [ ] ✅ / ❌ — **marka ALLIANCE jest w filtrze raz.**
+      Zgłosiłaś: w filtrze marek są „ALLIANCE" i „Alliance". → Jest teraz: jedna marka
+      „ALLIANCE" (na kopii danych — 849 pozycji). → Sprawdź: rozwiń filtr marki, wpisz „alli" —
+      ma być jedna pozycja; wybierz ją i zobacz, że na liście są opony Alliance od wszystkich
+      dostawców.
+      (W filtrze marek mogą się trafić „marki" wyglądające jak rozmiar, np. „21x7.00-15" — to
+      zapisy z plików dostawców, osobny temat; nie zgłaszaj tego tutaj.)
 - [ ] ✅ / ❌ — szukajka po kodzie, nazwie i rozmiarze.
 - [ ] ✅ / ❌ — **przycisk „Wszystkie" przy rozmiarze strony** (pokazuje cały katalog naraz):
       lista przewija się płynnie do samego końca. ⚠ To miejsce było zepsute i zostało
       naprawione — jeśli przewijanie się zatnie albo lista skończy się za wcześnie, zaznacz ❌.
 - [ ] ✅ / ❌ — menu „Akcje" przy wierszu otwiera się i ma pozycje: edytuj, wstrzymaj, usuń.
+      (Jest tam też wyszarzona „Historia" — tak samo nieaktywna jak w starym Bridgu, nie zgłaszaj.)
 - [ ] ✅ / ❌ — **edycja produktu**: zmieniasz coś, zapisujesz, zmiana widać w tabeli.
 - [ ] ✅ / ❌ — **usunięcie produktu** pyta o potwierdzenie i po nim produkt znika.
 - [ ] ✅ / ❌ — ceny w kolumnach zgadzają się z tym, czego się spodziewasz po narzutach.
@@ -114,9 +134,11 @@ Najważniejszy ekran. Poświęć mu najwięcej czasu.
 
 > ⚠ **Rzecz, którą naprawiliśmy celowo, inaczej niż stary Bridge:** promocja z datą, która
 > już minęła, **przestaje obniżać ceny** — tutaj data naprawdę kończy promocję (świadome
-> odstępstwo od oryginału, Twoje ustalenie z 2026-09-18, wpis #19). W starym Bridgu taka
+> odstępstwo od oryginału, Twoje ustalenie z 2026-09-18). W starym Bridgu taka
 > promocja dalej by obniżała ceny. Tak samo promocja zaplanowana na przyszłość **włącza się
 > sama**, gdy nadejdzie jej data startu — w starym Bridgu zostawałaby zaplanowana na zawsze.
+> Promocja po terminie **zostaje na liście** (oznaczona jako zakończona) — znika tylko jej wpływ
+> na ceny.
 
 ---
 
@@ -130,6 +152,16 @@ Najważniejszy ekran. Poświęć mu najwięcej czasu.
 - [ ] ✅ / ❌ — dodajesz i usuwasz wartość w wybranym rodzaju.
 - [ ] ✅ / ❌ — kolejka propozycji: akceptujesz jedną, znika z kolejki.
 - [ ] ✅ / ❌ — odrzucasz inną, też znika.
+- [ ] ✅ / ❌ — kolejka **nie podpowiada już „zamień X na X"** (tej samej wartości na samą
+      siebie). Podobieństwo liczy się bez względu na wielkość liter, więc np. „rolnicze" dostaje
+      podpowiedź „Rolnicze". Jeśli zobaczysz podpowiedź zamiany wartości na identyczną — ❌.
+- [ ] ✅ / ❌ — akceptacja **z poprawką** albo **jako alias** zostawia ślad: okno przed
+      akceptacją mówi, że wpis pojawi się w Historii, a na ekranie Historia (filtr „Edycje")
+      widać go z liczbą zmienionych produktów.
+
+> ⚠ **Czytaj podpowiedzi, zanim klikniesz.** Podpowiedź czasem proponuje jako „właściwy" zapis
+> z małymi literami (np. „Farmax R75" zamiast „FARMAX R75"). Akceptacja przepisze wszystkie
+> pasujące produkty w katalogu na tę formę.
 
 > ⚠ **Czego tu nie ma, a było:** filtr „Źródło" nad listą wartości. W starym Bridgu ten filtr
 > **nic nie robił** — zawsze pokazywał „user" i niczego nie zawężał. Świadomie go nie
@@ -146,40 +178,74 @@ importu cennika u dostawcy).
 
 **Do kliknięcia:**
 - [ ] ✅ / ❌ — alerty są pogrupowane i da się je odczytać.
-- [ ] ✅ / ❌ — oznaczasz alert jako obsłużony i zmienia stan.
+- [ ] ✅ / ❌ — alert ma trzy stany: nowy → przejrzany → rozwiązany. Przyciski „Oznacz jako
+      przejrzany" i „Rozwiąż" zmieniają stan, „Otwórz ponownie" cofa pomyłkę.
+- [ ] ✅ / ❌ — filtr stanu domyślnie pokazuje „Nierozwiązane" (nowe i przejrzane razem).
+- [ ] ✅ / ❌ — na zakładce „Import" pole „Szukaj w treści" zawęża listę po treści alertu
+      (wielkość liter nie ma znaczenia; kilka słów = alert musi mieć wszystkie).
+- [ ] ✅ / ❌ — **polskie litery w alertach.**
+      Zgłosiłaś: „B??d HTTP" i podobne znaki zapytania. → Jest teraz: „Błąd pobierania",
+      „Błąd HTTP", „Ręczny upload", a w treściach „produktów" — bez znaków zapytania, także
+      w starych alertach. → Sprawdź: rozwiń filtr typu i przejrzyj nazwy; wpisz w szukajkę
+      „Błąd" albo „Ręczny" — alerty mają się znaleźć. Liczba grup się nie zmienia, zmieniają
+      się tylko nazwy.
 - [ ] ✅ / ❌ — na zakładce „Katalog" filtr po poziomie (krytyczny / ostrzeżenie / info) działa.
+- [ ] ✅ / ❌ — na zakładce „Katalog" „Zaakceptuj wszystko" od razu rozwiązuje wszystkie
+      widoczne alerty — **bez pytania o potwierdzenie**, tak jak w starym Bridgu. Pomyłkę cofasz
+      pojedynczo przyciskiem „Otwórz ponownie".
+
+> ⚠ **Stary Bridge nadal będzie zapisywał „B??d…"** w nowych alertach aż do dnia
+> przełączenia — to jego wada. Nowy panel poprawia takie zapisy przy przełączeniu.
 
 ---
 
 ## 7. Waga gabarytowa — adres `/waga-gabarytowa`
 
-**Ma się pokazać:** kalkulator wymiarów + lista przewoźników z dzielnikami.
+**Ma się pokazać:** kalkulator wymiarów + lista przewoźników z dzielnikami, a pod listą
+osobny kalkulator „Waga paletowa (opony) — inny wzór".
 
 **Do kliknięcia:**
 - [ ] ✅ / ❌ — paczka 60 × 50 × 50 u GEIS-a (dzielnik 10 000) daje **15 kg**.
 - [ ] ✅ / ❌ — zmiana przewoźnika zmienia wynik (DPD 25 kg, GLS 37,50 kg dla tej samej paczki).
 - [ ] ✅ / ❌ — po podaniu wagi rzeczywistej pojawia się „waga do wyceny" (większa z dwóch).
-- [ ] ✅ / ❌ — dodajesz własnego przewoźnika i po odświeżeniu strony nadal tam jest.
+- [ ] ✅ / ❌ — dodajesz własnego przewoźnika i po odświeżeniu strony nadal tam jest —
+      także na innym komputerze albo w innej przeglądarce.
+- [ ] ✅ / ❌ — usuwasz przewoźnika — pyta o potwierdzenie. Jeśli to przewoźnik akurat
+      wybrany w kalkulatorze, okno dodatkowo ostrzega i mówi, na którego kalkulator się przełączy.
+- [ ] ✅ / ❌ — „Przywróć domyślne" pyta o potwierdzenie i przywraca domyślną listę przewoźników.
+- [ ] ✅ / ❌ — kalkulator paletowy: wpisujesz wymiary, klikasz „Oblicz wagę paletową" i
+      dostajesz wynik (liczony innym wzorem niż kalkulator na górze strony).
 
-> ⚠ **Tak jak w starym Bridgu:** lista przewoźników zapisuje się **tylko na tym komputerze
-> i w tej przeglądarce**. Nikt inny jej nie zobaczy. To nie usterka — tak działa oryginał.
+> ⚠ **Świadoma zmiana, uzgodniona z Tobą:** lista przewoźników zapisuje się teraz **na
+> serwerze i jest wspólna dla wszystkich**, którzy się logują. W starym Bridgu każdy komputer
+> miał własną listę. Zmiana u Ciebie = zmiana u wszystkich.
 
 ---
 
 ## 8. Analityka — adres `/analityka`
 
-**Ma się pokazać:** zestaw wykresów i tabel. ⚠ Ten ekran ładuje się chwilę dłużej niż inne —
-to normalne, wykresy są ciężkie.
+**Ma się pokazać:** cztery kafle na górze, pasek filtrów, zakładki (Dostawcy, EAN i ceny,
+Ceny w czasie, Dostępność, Marża i rotacja), a w nich wykresy i tabele. ⚠ Ten ekran ładuje się
+chwilę dłużej niż inne — to normalne, wykresy są ciężkie.
 
 **Do kliknięcia:**
 - [ ] ✅ / ❌ — wykresy się rysują (nie same puste ramki).
 - [ ] ✅ / ❌ — przełączanie zakładek analityki działa.
-- [ ] ✅ / ❌ — zmiana zakresu dat przelicza dane.
-- [ ] ✅ / ❌ — eksport CSV pobiera plik z danymi.
+- [ ] ✅ / ❌ — filtry nad zakładkami (dostawcy, marki, modele, rozmiary, indeksy nośności,
+      indeksy prędkości) zawężają dane w tabelach.
+- [ ] ✅ / ❌ — **kafle na górze jak w starym Bridgu.**
+      Zgłosiłaś: kafle są inne niż na produkcji. → Jest teraz: te same cztery co w starym Bridgu, w tej
+      samej kolejności — Dostawcy, EAN wspólne, Pozycje unikalne, Snapshoty. → Sprawdź: porównaj
+      nazwy i liczby ze starym Bridgiem.
+- [ ] ✅ / ❌ — **karty na zakładce „Dostępność" mają dane** — także dwie, które w starym
+      Bridgu są zawsze puste. Pusto może być tylko wtedy, gdy dla danych opon nie ma jeszcze
+      historii cen.
+- [ ] ✅ / ❌ — przycisk „CSV" przy karcie pobiera plik z **dokładnie tym, co widać w tabeli**
+      (po filtrach) — ta sama liczba wierszy i te same kolumny.
 
-> ⚠ **Dwie karty „Dostępności" mogą być puste** — to znany, odtworzony 1:1 błąd starego
-> Bridge'a (baza nie ma potrzebnej kolumny; wpis #32). Pusto = zgodnie z oryginałem, nie
-> zgłaszaj. Jeśli chcesz, żeby działały — to osobne zadanie.
+> ⚠ **Kafle na górze liczą CAŁOŚĆ i nie reagują na filtry** — tak samo jak w starym Bridgu.
+> „EAN wspólne" i „Pozycje unikalne" pokażą najwyżej 1000, nawet gdy pozycji jest więcej —
+> też tak jak w oryginale.
 
 ---
 
@@ -190,30 +256,60 @@ to normalne, wykresy są ciężkie.
 **Do kliknięcia:**
 - [ ] ✅ / ❌ — widać wpisy z ostatnich importów.
 - [ ] ✅ / ❌ — filtr po dostawcy zawęża listę.
-- [ ] ✅ / ❌ — stronicowanie przechodzi na kolejne strony.
+- [ ] ✅ / ❌ — stronicowanie przechodzi na kolejne strony — **aż do najstarszych wpisów**
+      (wcześniej lista urywała się na 5000 zdarzeniach; teraz nie ma limitu).
+- [ ] ✅ / ❌ — filtr typu ma cztery opcje: wszystkie, Importy, Eksporty, **Edycje**. W „Edycjach"
+      widać akceptacje z kolejki atrybutów (z poprawką albo jako alias), z liczbą zmienionych
+      produktów.
 
 > ⚠ **Tak jak w starym Bridgu:** historia **nie pokazuje** importów z adresów URL ani ręcznych
-> synchronizacji — tylko zmiany katalogu (wpis #21).
+> synchronizacji — tylko zmiany katalogu (Twoja decyzja z 2026-09-21).
 
 ---
 
-## 10. Konfiguracja — adres `/konfiguracja`
+## 10. Archiwum importów — adres `/archiwum`
 
-Najbardziej rozbudowany ekran — kilka zakładek.
+**Nowy ekran** — w menu zaraz za „Historią". Tu leżą pliki, które przyszły od dostawców
+(pobrane automatycznie, ręcznie z adresu albo wgrane z panelu). Służy do tego, o czym pisałaś:
+pobierasz plik dostawcy i porównujesz go z katalogiem.
+
+**Ma się pokazać:** przycisk „Odśwież", trzy filtry (Dostawca, Miesiąc, Status), pasek zajętości
+archiwum (ile miejsca zajęte z limitu, ile plików, ile dni pliki są trzymane) i tabela z
+kolumnami: Data, Dostawca, Źródło, Plik, Rozmiar, Rekordy, Status (OK / BŁĄD), Pobierz.
+
+**Do kliknięcia:**
+- [ ] ✅ / ❌ — filtry dostawca / miesiąc / status zawężają listę.
+- [ ] ✅ / ❌ — **„Pobierz" zapisuje plik pod tą samą nazwą, jaką miał u dostawcy** — da się go
+      otworzyć i porównać z katalogiem.
+- [ ] ✅ / ❌ — przy pliku ze statusem BŁĄD widać pod nazwą, co poszło nie tak.
+- [ ] ✅ / ❌ — „Odśwież" wczytuje listę na nowo (np. po imporcie z zakładki Konfiguracja).
+
+> ⚠ **Tak jak w starym Bridgu:** listy w filtrach Dostawca i Miesiąc pokazują tylko to, co jest
+> na aktualnie przefiltrowanej liście. Np. po wybraniu statusu BŁĄD w filtrze dostawców zostaną
+> tylko ci, którzy mają pliki z błędem. To nie usterka.
+
+---
+
+## 11. Konfiguracja — adres `/konfiguracja`
+
+Najbardziej rozbudowany ekran — osiem zakładek: Dostawcy, Wgrywanie ręczne, Spedycja, Shoper,
+Katalog, AI Fallback, Admin, Dziennik.
 
 **Zakładka „Dostawcy":**
 - [ ] ✅ / ❌ — lista dostawców z ich statusami.
+- [ ] ✅ / ❌ — „Synchronizuj" przy dostawcy z adresem URL uruchamia pobranie.
+
+**Zakładka „Wgrywanie ręczne":**
 - [ ] ✅ / ❌ — wgrywasz plik cennika ręcznie i pozycje trafiają do Staging.
-- [ ] ✅ / ❌ — „Synchronizuj teraz" przy dostawcy z adresem URL uruchamia pobranie.
 
 **Zakładka „Spedycja":**
 - [ ] ✅ / ❌ — ustawienia zapisują się i są widoczne po odświeżeniu.
 
 > ⚠ **Świadoma zmiana na lepsze:** w starym Bridgu ustawienia spedycji żyły **tylko w Twojej
-> przeglądarce**. Tutaj zapisują się na serwerze, więc przetrwają zmianę komputera (wpis #29).
+> przeglądarce**. Tutaj zapisują się na serwerze, więc przetrwają zmianę komputera.
 > Tak było uzgodnione — to jedna z niewielu rzeczy, które celowo robimy inaczej.
 
-**Zakładka „Shoper" i „AI":**
+**Zakładki „Shoper" i „AI Fallback":**
 - [ ] ✅ / ❌ — pola zapisują się i utrzymują po odświeżeniu.
 
 **Zakładka „Admin":**
@@ -235,14 +331,24 @@ Najbardziej rozbudowany ekran — kilka zakładek.
 
 ---
 
-## 11. Selly — adres `/selly`
+## 12. Selly — adres `/selly`
 
-**Ma się pokazać:** panel integracji ze sklepem Selly.pl.
+**Ma się pokazać:** panel integracji ze sklepem Selly.pl — bez zakładek, pięć kart jedna pod
+drugą: „Status połączenia", „Codzienna synchronizacja CSV", „Mapowanie dostawców",
+„Sync dostawcy", „Historia operacji".
 
 **Do kliknięcia:**
-- [ ] ✅ / ❌ — zakładka „Status" pokazuje stan integracji.
-- [ ] ✅ / ❌ — zakładka „Dziennik" pokazuje historię synchronizacji.
-- [ ] ✅ / ❌ — „Wygeneruj CSV teraz" tworzy plik i pokazuje jego datę.
+- [ ] ✅ / ❌ — karta „Status połączenia" pokazuje stan integracji.
+- [ ] ✅ / ❌ — karta „Historia operacji" pokazuje historię synchronizacji.
+- [ ] ✅ / ❌ — **„Wygeneruj CSV teraz" — plik zostaje.**
+      Zgłosiłaś: po kliknięciu nadal „Brak pliku CSV". → Jest teraz: plik powstawał, ale
+      kasowało go każde nasze wgranie nowej wersji na staging — to było naprawione po naszej
+      stronie, przycisk był w porządku. → Sprawdź w dwóch krokach:
+      1. Kliknij „Wygeneruj CSV teraz" i potwierdź. Pod przyciskiem pojawi się „✓ Wygenerowano…",
+         a w tabeli data w wierszu „Ostatnia synchronizacja".
+      2. **Wróć tu następnego dnia** (albo po kilku dniach): data ma zostać ta sama, a **nie**
+         „Brak pliku CSV". Czerwony napis „Plik nie zostal wygenerowany dzisiaj" jest wtedy
+         poprawny — staging nie generuje pliku sam o 6:00 rano, tylko po Twoim kliknięciu.
 
 > ⚠ **Na staging Selly jest CELOWO WYŁĄCZONY.** Operacje wysyłające cokolwiek do sklepu
 > odmówią działania, nawet gdyby ktoś wpisał prawdziwe hasła. Tak ma być — staging nie ma
@@ -251,7 +357,7 @@ Najbardziej rozbudowany ekran — kilka zakładek.
 
 ---
 
-## 12. Moje konto — adres `/moje-konto`
+## 13. Moje konto — adres `/moje-konto`
 
 **Do kliknięcia:**
 - [ ] ✅ / ❌ — widać Twoje dane (imię, e-mail).
@@ -270,14 +376,29 @@ Zebrane w jednym miejscu, żebyś nie musiała ich zgłaszać:
    w przeglądarce trzeba będzie zapisać na nowo.
 2. **Okna potwierdzeń** w stylu panelu zamiast szarych okienek przeglądarki — z jednym
    wyjątkiem („Usuń wszystko z katalogu"), gdzie zostało twarde okno. Treść pytań bez zmian.
-3. **Ustawienia spedycji zapisują się na serwerze**, a nie tylko w przeglądarce (uzgodnione).
+3. **Ustawienia spedycji i lista przewoźników w Wadze gabarytowej zapisują się na serwerze**
+   i są wspólne dla wszystkich — w starym Bridgu żyły tylko w przeglądarce (uzgodnione).
 4. **Selly na staging nie wysyła nic do sklepu** (zabezpieczenie środowiska).
 5. **Brak filtru „Źródło"** w atrybutach — w starym Bridgu i tak nic nie robił.
-6. **Wygasłe promocje nadal obniżają ceny** i **dwie karty „Dostępności" są puste** — oba
-   odtworzone 1:1 ze starego Bridge'a. Jeśli chcesz je naprawić, powiedz — zrobimy osobno.
+6. **Promocja po terminie przestaje obniżać ceny**, a zaplanowana włącza się sama w dniu startu
+   — w starym Bridgu daty nic nie zmieniały (uzgodnione).
 7. **Kolumna „Konstrukcja opony" jest wypełniona** („Radialna"/„Diagonalna") tam, gdzie w starym
    Bridgu są dziś kreski — w produkcji wrześniowa poprawka trafiła do nieużywanego pliku panelu.
    To zmiana na lepsze, nie usterka.
+8. **Rzeczy, które w starym Bridgu są zepsute, a tu działają:** kafel „Ostatni eksport CSV" na
+   Pulpicie, dwie karty „Dostępności" w Analityce, polskie litery w nazwach alertów, jedna
+   marka ALLIANCE w filtrze Katalogu, Historia bez limitu 5000 zdarzeń.
+9. **Eksport CSV w Analityce to dokładnie tabela z ekranu** (po Twoich filtrach), a nie osobny
+   zestaw danych.
+10. **Archiwum importów:** przy błędzie pobierania pliku pojawia się komunikat w rogu ekranu
+    zamiast szarego okienka; wybrany w filtrze dostawca albo miesiąc zostaje widoczny, nawet
+    gdy zniknie z listy (w starym Bridgu filtr wracał wtedy do „Wszyscy dostawcy"); komunikat
+    o błędzie wczytywania znika po udanym „Odśwież" (w starym Bridgu wisiał do przeładowania
+    strony).
+11. **Alerty mają przycisk „Otwórz ponownie"** — w starym Bridgu rozwiązanego alertu nie
+    dało się cofnąć. Filtr stanu ma dodatkową opcję „Nierozwiązane" i od niej startuje.
+12. **Waga gabarytowa pyta o potwierdzenie** przy usuwaniu przewoźnika i przy „Przywróć
+    domyślne" — w starym Bridgu oba działały od razu.
 
 ## Rzecz znana i nienaprawiona
 
@@ -294,7 +415,7 @@ tylko Ty miała dostęp do tych zakładek, powiedz — zrobimy to osobnym zadani
 ## Co po przeglądzie
 
 Odeślij tę listę z zaznaczonymi kratkami. Jeśli wszystko na ✅ — przechodzimy do ustalenia
-terminu przełączenia produkcji (`docs/cutover.md`). Jeśli są ❌ — najpierw je zamykamy.
+terminu przełączenia produkcji. Jeśli są ❌ — najpierw je zamykamy.
 
 **Przełączenie jest jednorazowe i obejmuje wszystko naraz** (nie da się „częściowo"), a nowy
 panel będzie pracował na **tej samej bazie** co obecny — nic z Twoich danych nie przepada.
