@@ -15,7 +15,8 @@ Kafel „Ostatni eksport CSV” na Pulpicie pokazuje datę — pełna treść: `
 `test/pulpit.kpi.test.ts`, `test/pulpit.test.tsx` (wg backlogu #34). Rusza Pulpit tak jak P6.2 — dlatego po P6.2 (✅ 2026-09-21, ticket 77).
 
 ## Decyzje
-Idzie **po P10.1**, bo P10.1 ożywia dane analityki, które kafel może pokazywać.
+Idzie **po P10.1** (✅ 2026-09-22, `wejscie-90.md`) — w fali B równolegle z P10.3 i PR.2; pliki rozłączne
+(Pulpit vs analityka).
 
 ## Dowiezione
 —
