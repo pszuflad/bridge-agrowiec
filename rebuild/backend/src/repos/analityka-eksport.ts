@@ -22,18 +22,19 @@
  * Opis bloku w roadmapie uogólniał to niedokładnie; wzorcem jest SQL, nie opis. Dokładanie
  * limitu, którego oryginał nie ma, ucięłoby eksport dostawców i EAN-ów bez uprzedzenia.
  *
- * ⚠ DWA WIDOKI SĄ W PRODUKCJI TRWALE PUSTE. `availability-products` (`:316`) i `sell-through`
- * (`:317`) pytają `historia_cen` o kolumnę `nazwa`, której ta tabela NIE MA (schemat:
- * `rebuild/schema/001_schema.sql`, `db/schema.sql`, `analytics_module.cjs:24-49`). SQLite
- * odpowiada `no such column: nazwa`, `bezpiecznieWiersze` połyka wyjątek i oba widoki oddają
- * pustą listę — czyli plik CSV złożony z samego BOM-u. To jest POPRAWNY, odtwarzany wynik,
- * ta sama usterka co w kartach „4.1"/„4.2" dashboardu: `docs/rebuild-backlog.md` #32.
- * Zamrożone testem charakteryzacyjnym w `analityka.eksport.agregaty.test.ts`.
+ * ⚠ DWA WIDOKI SĄ W PRODUKCJI TRWALE PUSTE, A TU — OD P10.1 — JUŻ NIE. `availability-products`
+ * (`:316`) i `sell-through` (`:317`) pytają w oryginale `historia_cen` o kolumnę `nazwa`,
+ * której ta tabela NIE MA (schemat: `rebuild/schema/001_schema.sql`, `db/schema.sql`,
+ * `analytics_module.cjs:24-49`). SQLite odpowiada `no such column: nazwa`, `safeAll` połyka
+ * wyjątek i produkcja oddaje plik CSV złożony z samego BOM-u — ta sama usterka co w kartach
+ * „4.1"/„4.2" dashboardu (`docs/rebuild-backlog.md` #32). Odbudowa oba widoki NAPRAWIA
+ * (decyzja Ani 2026-09-21, ticket 90): nazwa z katalogu po `dostawca` + `kod`, a `sell-through`
+ * dodatkowo liczy spadki na historii ze zwiniętymi duplikatami klucza (#33).
  */
 import { sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
-import { bezpiecznieWiersze } from "./analityka.js";
+import { bezpiecznieWiersze, HISTORIA_BEZ_DUPLIKATOW_KLUCZA } from "./analityka.js";
 
 /** Limit sześciu z dziesięciu zapytań (`:312`, `:316-320`). Pozostałe cztery nie mają żadnego. */
 const LIMIT_EKSPORTU = 5000;
@@ -97,20 +98,22 @@ export type WierszEksportuOstatnichCen = {
   zmianaPct: number | null;
 };
 
-/** Wiersz `export/availability-products` (`:316`) — w produkcji NIGDY nie powstaje (#32). */
+/** Wiersz `export/availability-products` (`:316`) — w produkcji nigdy nie powstaje (#32). */
 export type WierszEksportuDostepnosci = {
   dostawca: string;
   kod: string;
   ean: string | null;
-  nazwa: string;
+  /** Z katalogu po `dostawca` + `kod`; `null` (pusta komórka CSV), gdy pozycji już nie ma. */
+  nazwa: string | null;
   dostepnoscPct: number | null;
 };
 
-/** Wiersz `export/sell-through` (`:317`) — w produkcji NIGDY nie powstaje (#32). */
+/** Wiersz `export/sell-through` (`:317`) — w produkcji nigdy nie powstaje (#32). */
 export type WierszEksportuTempaSchodzenia = {
   dostawca: string;
   kod: string;
-  nazwa: string;
+  /** Z katalogu po `dostawca` + `kod`; `null` (pusta komórka CSV), gdy pozycji już nie ma. */
+  nazwa: string | null;
   zeszloSztuk: number | null;
 };
 
@@ -256,20 +259,24 @@ export function eksportOstatnichCen(db: Baza): WierszEksportuOstatnichCen[] {
 }
 
 /**
- * `export/availability-products` (`:316`) — ZAWSZE PUSTE w produkcji.
+ * `export/availability-products` (`:316`) — w produkcji ZAWSZE PUSTE, tu naprawione.
  *
- * `nazwa` nie istnieje w `historia_cen`, więc zapytanie się wywraca i `bezpiecznieWiersze`
- * oddaje `[]` → plik CSV to sam BOM. Nie „naprawiamy" tego dołożeniem `JOIN products`:
- * to byłaby zmiana zachowania produkcji, czekająca na decyzję Ani (`rebuild-backlog.md` #32).
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #32, decyzja Ani 2026-09-21, ticket 90). W oryginale `nazwa`
+ * nie istnieje w `historia_cen`, zapytanie się wywraca i plik CSV to sam BOM. Tu nazwa idzie
+ * z `LEFT JOIN products` po `dostawca` + `kod`. Grupowanie oryginału zostaje — łącznie z `ean`
+ * (para `dostawca` + `kod` z dwoma różnymi EAN-ami w historii daje dwa wiersze; na snapshocie
+ * produkcji: 5193 wiersze na 5184 pary); `p.nazwa` w `GROUP BY` jest funkcją pary, więc
+ * niczego nie rozbija.
  */
 export function eksportDostepnosciProduktow(db: Baza): WierszEksportuDostepnosci[] {
   return bezpiecznieWiersze<WierszEksportuDostepnosci>(
     db,
     sql`
-      SELECT dostawca, kod, ean, nazwa,
-             ROUND(100.0 * SUM(CASE WHEN stan > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS dostepnoscPct
-      FROM historia_cen
-      GROUP BY dostawca, kod, ean, nazwa
+      SELECT h.dostawca, h.kod, h.ean, p.nazwa,
+             ROUND(100.0 * SUM(CASE WHEN h.stan > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS dostepnoscPct
+      FROM historia_cen h
+      LEFT JOIN products p ON p.dostawca = h.dostawca AND p.kod = h.kod
+      GROUP BY h.dostawca, h.kod, h.ean, p.nazwa
       ORDER BY dostepnoscPct ASC
       LIMIT ${LIMIT_EKSPORTU}
     `,
@@ -277,29 +284,31 @@ export function eksportDostepnosciProduktow(db: Baza): WierszEksportuDostepnosci
 }
 
 /**
- * `export/sell-through` (`:317`) — ZAWSZE PUSTE w produkcji, z DWÓCH niezależnych powodów.
+ * `export/sell-through` (`:317`) — w produkcji ZAWSZE PUSTE, tu naprawione w dwóch miejscach.
  *
- * 1. `MAX(nazwa)` w zapytaniu zewnętrznym odwołuje się do kolumny, której `historia_cen`
- *    nie ma — i to on wywraca zapytanie już dziś (`rebuild-backlog.md` #32).
- * 2. Gdyby #32 naprawić, odsłoni się druga usterka: `LAG(stan) OVER (…)` liczy się na
- *    podzapytaniu `SELECT h.*`, w którym duplikat klucza `(dostawca, kod, zarejestrowano_at)`
- *    daje wynik zależny od implementacji (`rebuild-backlog.md` #33). Obie sprawy trzeba
- *    rozstrzygać razem — dlatego port jest dosłowny, razem z pułapką.
+ * ⚠ DWA ŚWIADOME ODSTĘPSTWA (decyzje 2026-09-21, ticket 90), te same co w karcie „4.2":
+ * 1. `MAX(nazwa)` oryginału odwołuje się do kolumny, której `historia_cen` nie ma, i wywraca
+ *    zapytanie (#32) — tu nazwa idzie z `LEFT JOIN products` po `dostawca` + `kod`.
+ * 2. `LAG(stan) OVER (…)` liczy się w oryginale na surowym `SELECT h.*`, gdzie duplikat klucza
+ *    `(dostawca, kod, zarejestrowano_at)` daje kolejność zależną od implementacji (#33) —
+ *    tu na `HISTORIA_BEZ_DUPLIKATOW_KLUCZA` (z duplikatów wiersz o `MAX(id)`).
  *
  * `MAX(0, …)` to dwuargumentowy `max` skalarny SQLite, nie agregat — zeruje wzrosty stanu,
- * żeby liczyć wyłącznie spadki.
+ * żeby liczyć wyłącznie spadki. Ta formuła i reszta zapytania — bez zmian wobec oryginału.
  */
 export function eksportTempaSchodzenia(db: Baza): WierszEksportuTempaSchodzenia[] {
   return bezpiecznieWiersze<WierszEksportuTempaSchodzenia>(
     db,
     sql`
-      SELECT dostawca, kod, MAX(nazwa) AS nazwa, SUM(spadek) AS zeszloSztuk
+      WITH zwiniete AS (${HISTORIA_BEZ_DUPLIKATOW_KLUCZA})
+      SELECT t.dostawca, t.kod, MAX(p.nazwa) AS nazwa, SUM(t.spadek) AS zeszloSztuk
       FROM (
-        SELECT h.*,
-               MAX(0, LAG(stan) OVER (PARTITION BY dostawca, kod ORDER BY zarejestrowano_at) - stan) AS spadek
-        FROM historia_cen h
-      )
-      GROUP BY dostawca, kod
+        SELECT z.dostawca, z.kod,
+               MAX(0, LAG(z.stan) OVER (PARTITION BY z.dostawca, z.kod ORDER BY z.zarejestrowano_at) - z.stan) AS spadek
+        FROM zwiniete z
+      ) t
+      LEFT JOIN products p ON p.dostawca = t.dostawca AND p.kod = t.kod
+      GROUP BY t.dostawca, t.kod
       ORDER BY zeszloSztuk DESC
       LIMIT ${LIMIT_EKSPORTU}
     `,
@@ -351,9 +360,8 @@ export function eksportRotacji(db: Baza): WierszEksportuRotacji[] {
  * Nazwy `{view}`, które obsługuje oryginał (`:311-320`) — dokładnie te dziesięć, które woła
  * `M()` z frontu (`frontend-index.js:28065`…`:28573`).
  *
- * Mapa jest jednocześnie listą dozwolonych wartości: `{view}` spoza niej trafia na `?? []`
- * w trasie i dostaje pusty CSV ze statusem 200 — tak jak `return sendRows([])` w oryginale
- * (`:321`). Celowo NIE jest to 404.
+ * Mapa jest JEDYNĄ listą dozwolonych wartości — czyta ją `widokEksportu()` niżej, a przez nią
+ * trasa. Nie dopisuj drugiej listy w trasie ani w testach.
  */
 export const WIDOKI_EKSPORTU: Record<string, (db: Baza) => Record<string, unknown>[]> = {
   "suppliers-stability": eksportStabilnosciDostawcow,
@@ -370,3 +378,19 @@ export const WIDOKI_EKSPORTU: Record<string, (db: Baza) => Record<string, unknow
 
 /** Nazwy widoków w kolejności z oryginału — używane przez testy i front. */
 export const NAZWY_WIDOKOW_EKSPORTU = Object.keys(WIDOKI_EKSPORTU);
+
+/**
+ * Zapytanie widoku o danej nazwie albo `undefined`, gdy takiego widoku nie ma.
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #35, decyzja użytkownika 2026-09-21, ticket 90): nieznany
+ * widok to w trasie 404, nie `return sendRows([])` oryginału (`:321`, 200 z samym BOM-em).
+ *
+ * `Object.hasOwn`, nie `WIDOKI_EKSPORTU[nazwa]`: mapa jest zwykłym literałem obiektu, więc
+ * odczyt przez nawias „znalazłby" też `toString` czy `constructor` z prototypu i trasa
+ * wywołałaby je jak zapytanie.
+ */
+export function widokEksportu(
+  nazwa: string,
+): ((db: Baza) => Record<string, unknown>[]) | undefined {
+  return Object.hasOwn(WIDOKI_EKSPORTU, nazwa) ? WIDOKI_EKSPORTU[nazwa] : undefined;
+}

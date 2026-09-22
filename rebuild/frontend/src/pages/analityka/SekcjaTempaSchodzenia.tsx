@@ -3,14 +3,14 @@
  * (port `deminified/frontend-index.js:28459-28487`).
  *
  * Cztery kolumny 1:1 z oryginałem; przycisk „CSV" (`M("sell-through")`, `:28468`) dołożył
- * blok 10f. ⚠ Ten eksport oddaje PUSTY plik (sam BOM) z tej samej przyczyny, dla której pusta
- * jest tabela poniżej — `MAX(nazwa)` z `historia_cen`, `docs/rebuild-backlog.md` #32.
+ * blok 10f.
  *
- * ⚠ TA TABELA JEST PUSTA ZAWSZE, I TAK JEST TEŻ W PRODUKCJI. Bez historii cen backend
- * oryginału nie ma gałęzi zapasowej i zwraca pustą listę (`analytics_module.cjs:174`),
- * a z historią zapytanie wywraca się na `MAX(nazwa)` z `historia_cen` — kolumny, której ta
- * tabela nie ma — i `safeAll` połyka błąd. Uzasadnienie z dowodem: nagłówek
- * `bezpiecznieWiersze` w `rebuild/backend/src/repos/analityka.ts`.
+ * ⚠ W PRODUKCJI TA TABELA I JEJ EKSPORT SĄ PUSTE ZAWSZE — W ODBUDOWIE OD P10.1 TYLKO BEZ
+ * HISTORII CEN. Bez historii oryginał nie ma gałęzi zapasowej (`analytics_module.cjs:174`)
+ * i tak zostaje. Z historią oryginał wywraca się na `MAX(nazwa)` z `historia_cen` i `safeAll`
+ * połyka błąd; backend odbudowy to naprawia (świadome odstępstwo, `docs/rebuild-backlog.md`
+ * #32 i #33, 2026-09-21, ticket 90): nazwa z katalogu albo `null` (kreska z `formatuj()`),
+ * a duplikaty migawek zwinięte przed liczeniem spadków.
  */
 import { useMemo } from "react";
 

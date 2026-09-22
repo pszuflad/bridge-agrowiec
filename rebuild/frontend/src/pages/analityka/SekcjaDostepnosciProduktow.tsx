@@ -6,16 +6,12 @@
  * `:28451`) i przyciskiem „CSV" w nagłówku (`M("availability-products")`, `:28430`), który
  * dołożył blok 10f razem z trasą `GET /api/analytics/export/{view}`.
  *
- * ⚠ TEN EKSPORT ODDAJE PUSTY PLIK — i tak jest też w produkcji. `export/availability-products`
- * pyta `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma, więc CSV to sam znacznik BOM.
- * Ta sama przyczyna, dla której pusta jest tabela poniżej: `docs/rebuild-backlog.md` #32.
- *
- * ⚠ TA TABELA JEST PUSTA, GDY ISTNIEJE HISTORIA CEN — I TAK JEST TEŻ W PRODUKCJI.
- * Zapytanie gałęzi historycznej pyta `historia_cen` o kolumnę `nazwa`, której ta tabela nie
- * ma, a `safeAll` oryginału połyka błąd i oddaje pustą listę. Dowód z nagrań i pełne
- * uzasadnienie: `rebuild/backend/src/repos/analityka.ts`, nagłówek `bezpiecznieWiersze`.
- * Nie „naprawiamy" tego w UI: pusta tabela z komunikatem „Brak danych" to dokładnie to,
- * co widzi dziś użytkownik produkcji.
+ * ⚠ W PRODUKCJI TA TABELA I JEJ EKSPORT SĄ PUSTE, GDY ISTNIEJE HISTORIA CEN — W ODBUDOWIE
+ * OD P10.1 JUŻ NIE. Oryginał pyta `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma,
+ * a `safeAll` połyka błąd („Brak danych", CSV = sam BOM). Backend odbudowy to naprawia
+ * (świadome odstępstwo, `docs/rebuild-backlog.md` #32, 2026-09-21, ticket 90): nazwa idzie
+ * z katalogu, a dla pozycji usuniętej z katalogu przychodzi `null` — `formatuj()` rysuje
+ * wtedy kreskę, więc widok nie wymagał zmiany.
  */
 import { useMemo } from "react";
 

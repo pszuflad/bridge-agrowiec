@@ -9,12 +9,13 @@
  * są 1:1 z produkcją; że pole „Bez ruchu dni” trafia do zapytania jako `?days` — bo to
  * jedyny filtr serwerowy całej analityki.
  *
- * ⚠ DWIE KARTY ZAKŁADKI „DOSTĘPNOŚĆ” POKAZUJĄ „BRAK DANYCH” I TAK MA BYĆ. Nagrania
- * `availability/products` i `availability/sell-through` mają `hasHistory: true` i `rows: []`,
- * bo zapytania obu tras pytają `historia_cen` o nieistniejącą kolumnę `nazwa`. Test to
- * ZAMRAŻA — gdyby kiedyś zaczęły zwracać wiersze, znaczyłoby to, że ktoś zmienił zachowanie
- * produkcji i musi to być świadoma decyzja. Uzasadnienie: `repos/analityka.ts`,
- * nagłówek `bezpiecznieWiersze`.
+ * ⚠ NAGRANIA DWÓCH KART ZAKŁADKI „DOSTĘPNOŚĆ” SĄ PUSTE — I OD P10.1 NIE OPISUJĄ JUŻ ODBUDOWY.
+ * `availability/products` i `availability/sell-through` nagrano z produkcji, w której oba
+ * zapytania pytają `historia_cen` o nieistniejącą kolumnę `nazwa` (`hasHistory: true`,
+ * `rows: []`). Backend odbudowy je naprawia (świadome odstępstwo, #32, 2026-09-21, ticket 90)
+ * i oddaje wiersze z nazwą z katalogu albo `null` dla pozycji usuniętej. Test pustych nagrań
+ * sprawdza więc już tylko stan „Brak danych", a wiersze — w tym kreskę zamiast pustej nazwy —
+ * budujemy z kształtu udowodnionego testami backendu.
  */
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -25,7 +26,7 @@ import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
 import { _zresetujStanSesji } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
-import type { Dostepnosc } from "@/pages/analityka/api";
+import type { Dostepnosc, TempoSchodzenia } from "@/pages/analityka/api";
 import {
   TOKEN_TESTOWY,
   cyklZyciaDostawcowZFixtura,
@@ -62,7 +63,10 @@ const CYKL_ZYCIA = cyklZyciaModeliZFixtura();
 /** Adresy `?days=…`, pod które widok realnie poszedł — dowód, że filtr jest serwerowy. */
 let zapytaniaRotacji: string[] = [];
 
-function zamockujApi(dostepnosc: Dostepnosc = dostepnoscProduktowZFixtura()) {
+function zamockujApi(
+  dostepnosc: Dostepnosc = dostepnoscProduktowZFixtura(),
+  tempo: TempoSchodzenia = tempoSchodzeniaZFixtura(),
+) {
   server.use(
     http.get("*/api/analytics/filters", () => HttpResponse.json(filtryZFixtura())),
     http.get("*/api/analytics/status", () => HttpResponse.json(statusAnalitykiZFixtura())),
@@ -82,9 +86,7 @@ function zamockujApi(dostepnosc: Dostepnosc = dostepnoscProduktowZFixtura()) {
     http.get("*/api/analytics/ean/coverage", () => HttpResponse.json(pokrycieEanZFixtura())),
     http.get("*/api/analytics/ean/supplier-rank", () => HttpResponse.json(rankingEanZFixtura())),
     http.get("*/api/analytics/availability/products", () => HttpResponse.json(dostepnosc)),
-    http.get("*/api/analytics/availability/sell-through", () =>
-      HttpResponse.json(tempoSchodzeniaZFixtura()),
-    ),
+    http.get("*/api/analytics/availability/sell-through", () => HttpResponse.json(tempo)),
     http.get("*/api/analytics/seasonality/monthly", () => HttpResponse.json(SEZONOWOSC)),
     http.get("*/api/analytics/lifecycle/models", () => HttpResponse.json(CYKL_ZYCIA)),
     http.get("*/api/analytics/rotation/inactive", ({ request }) => {
@@ -160,7 +162,12 @@ describe("1. Zakładka „Dostępność” — trzy karty w kolejności orygina�
     ]);
   });
 
-  it("CHARAKTERYZACJA: obie karty dostępności są puste, dokładnie jak w produkcji", async () => {
+  /**
+   * Świadome odstępstwo, #32, 2026-09-21. Do P10.1 ten test był charakteryzacją „obie karty
+   * są puste, dokładnie jak w produkcji". Backend odbudowy oddaje już wiersze, więc na pustym
+   * nagraniu produkcji sprawdzamy wyłącznie stan pustej odpowiedzi.
+   */
+  it("pusta odpowiedź (nagranie produkcji) → obie karty pokazują „Brak danych”", async () => {
     zamockujApi();
     await otworzZakladke("tab-dostepnosc");
 
@@ -168,6 +175,37 @@ describe("1. Zakładka „Dostępność” — trzy karty w kolejności orygina�
     const tempo = await screen.findByTestId("tabela-tempo-schodzenia");
     expect(within(produkty).getByText("Brak danych")).toBeInTheDocument();
     expect(within(tempo).getByText("Brak danych")).toBeInTheDocument();
+  });
+
+  it("pozycja usunięta z katalogu (`nazwa: null`) → kreska w kolumnie „Nazwa” obu kart (#32)", async () => {
+    zamockujApi(
+      {
+        hasHistory: true,
+        rows: [
+          {
+            kod: "MO1_USUNIETY",
+            ean: null,
+            dostawca: "MO1",
+            nazwa: null,
+            snapshoty: 2,
+            dostepnoscPct: 50,
+            miesiaceBrakow: "2026-07",
+          },
+        ],
+      },
+      { hasHistory: true, rows: [{ dostawca: "MO1", kod: "MO1_USUNIETY", nazwa: null, zeszloSztuk: 3 }] },
+    );
+    await otworzZakladke("tab-dostepnosc");
+
+    for (const testId of ["tabela-dostepnosc-produktow", "tabela-tempo-schodzenia"]) {
+      const tabela = await screen.findByTestId(testId);
+      const naglowki = within(tabela).getAllByRole("columnheader").map((k) => k.textContent);
+      const komorki = within(within(tabela).getAllByRole("row")[1]!).getAllByRole("cell");
+      const nazwa = komorki[naglowki.indexOf("Nazwa")]!;
+      expect(nazwa.textContent, testId).toBe("—");
+      expect(tabela.textContent, testId).not.toContain("undefined");
+      expect(tabela.textContent, testId).not.toContain("null");
+    }
   });
 
   it("kolumna „Dostępność” rysuje pasek postępu, gdy wiersze są", async () => {

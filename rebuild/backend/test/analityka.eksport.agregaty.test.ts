@@ -27,12 +27,16 @@ import {
   eksportUnikalnychEan,
   NAZWY_WIDOKOW_EKSPORTU,
   WIDOKI_EKSPORTU,
+  widokEksportu,
 } from "../src/repos/analityka-eksport.js";
 import {
+  PRODUKTY_TESTOWE,
   stworzSrodowiskoTestowe,
+  stworzTestowaBaze,
   zasiejHistorieCen,
   zasiejProdukty,
   zasiejStagingZFixtures,
+  type NowyProdukt,
   type SrodowiskoTestowe,
 } from "./gate/index.js";
 
@@ -279,30 +283,106 @@ describe("eksport analityki — kształt wierszy (blok 10f)", () => {
   });
 
   /**
-   * Charakteryzacja usterki produkcji, nie życzenie — `docs/rebuild-backlog.md` #32.
-   *
-   * Oba zapytania pytają `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma. Historia
-   * jest ZASIANA i ma cztery migawki, a mimo to wynik jest pusty — czyli CSV to sam BOM.
-   * Gdyby #32 kiedyś naprawiono, te dwie asercje zapalą się i powiedzą, że zachowanie
-   * odbudowy rozjechało się z produkcją.
+   * Świadome odstępstwo, #32 i #33, 2026-09-21 (ticket 90). Do P10.1 ten blok charakteryzował
+   * produkcję: oba widoki pytały `historia_cen` o nieistniejącą kolumnę `nazwa` i oddawały
+   * pustą listę (CSV = sam BOM) mimo zasianej historii. Teraz dowodzi naprawy.
    */
-  describe("dwa widoki trwale puste mimo danych w historii (backlog #32)", () => {
-    it("historia_cen jest zasiana — pusty wynik nie bierze się z braku danych", () => {
-      expect(eksportStabilnosciDostawcow(srodowisko.db).length).toBeGreaterThan(0);
+  describe("dwa widoki z historii — naprawione (backlog #32, #33)", () => {
+    it("availability-products — pięć kolumn, nazwa z katalogu po dostawca + kod", () => {
+      const wiersze = eksportDostepnosciProduktow(srodowisko.db);
+
+      expect(wiersze.length).toBeGreaterThan(0);
+      expect(Object.keys(wiersze[0] ?? {})).toEqual(["dostawca", "kod", "ean", "nazwa", "dostepnoscPct"]);
+      // Zasiew: cztery migawki MO9_336320 (stany 2, 2, 9, 7) — wszystkie > 0.
+      expect(wiersze.find((w) => w.kod === "MO9_336320")).toEqual({
+        dostawca: "MO9",
+        kod: "MO9_336320",
+        ean: null,
+        nazwa: "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+        dostepnoscPct: 100,
+      });
     });
 
-    it("availability-products oddaje pustą listę → CSV to sam BOM", () => {
-      expect(eksportDostepnosciProduktow(srodowisko.db)).toEqual([]);
-    });
+    it("sell-through — cztery kolumny, suma spadków, nazwa z katalogu", () => {
+      const wiersze = eksportTempaSchodzenia(srodowisko.db);
 
-    it("sell-through oddaje pustą listę → CSV to sam BOM", () => {
-      expect(eksportTempaSchodzenia(srodowisko.db)).toEqual([]);
+      expect(Object.keys(wiersze[0] ?? {})).toEqual(["dostawca", "kod", "nazwa", "zeszloSztuk"]);
+      // Stany po dacie: 2 → 2 → 9 → 7 (08-04) — jedyny spadek to 9 → 7.
+      expect(wiersze.find((w) => w.kod === "MO9_336320")).toEqual({
+        dostawca: "MO9",
+        kod: "MO9_336320",
+        nazwa: "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+        zeszloSztuk: 2,
+      });
     });
   });
 
   it("każdy widok z mapy da się wywołać i zwraca tablicę", () => {
     for (const nazwa of NAZWY_WIDOKOW_EKSPORTU) {
       expect(Array.isArray(WIDOKI_EKSPORTU[nazwa]!(srodowisko.db)), nazwa).toBe(true);
+    }
+  });
+});
+
+/**
+ * Świadome odstępstwa #32, #33 i #35 (decyzje 2026-09-21, ticket 90) na czystej bazie —
+ * przypadki, których wspólny zasiew nie ma: kod u dwóch dostawców, pozycja usunięta
+ * z katalogu, duplikat klucza historii i nazwy spoza mapy widoków.
+ */
+describe("eksport analityki — odstępstwa P10.1", () => {
+  const produkt = (nadpisania: Partial<NowyProdukt>): NowyProdukt => ({
+    ...PRODUKTY_TESTOWE[0]!,
+    ...nadpisania,
+    id: undefined,
+  });
+
+  it("nazwa po parze dostawca + kod; pozycja spoza katalogu → null (pusta komórka CSV)", () => {
+    const baza = stworzTestowaBaze();
+    try {
+      baza.db.insert(products).values([produkt({ kod: "K1", dostawca: "MO1", nazwa: "K1 u MO1" })]).run();
+      baza.db
+        .insert(historiaCen)
+        .values([
+          { kod: "K1", dostawca: "MO1", stan: 1, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+          { kod: "K1", dostawca: "MO2", stan: 1, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        ])
+        .run();
+
+      for (const wiersze of [eksportDostepnosciProduktow(baza.db), eksportTempaSchodzenia(baza.db)]) {
+        const nazwy = Object.fromEntries(wiersze.map((w) => [`${w.dostawca}/${w.kod}`, w.nazwa]));
+        expect(nazwy).toEqual({ "MO1/K1": "K1 u MO1", "MO2/K1": null });
+      }
+    } finally {
+      baza.posprzataj();
+    }
+  });
+
+  it("sell-through: z duplikatu klucza bierze wiersz wpisany ostatnio, stabilnie", () => {
+    const baza = stworzTestowaBaze();
+    try {
+      baza.db
+        .insert(historiaCen)
+        .values([
+          { kod: "A1", dostawca: "MO1", stan: 10, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" },
+          { kod: "A1", dostawca: "MO1", stan: 3, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+          { kod: "A1", dostawca: "MO1", stan: 8, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        ])
+        .run();
+
+      const pierwszy = eksportTempaSchodzenia(baza.db);
+      expect(pierwszy).toEqual([{ dostawca: "MO1", kod: "A1", nazwa: null, zeszloSztuk: 2 }]);
+      expect(eksportTempaSchodzenia(baza.db)).toEqual(pierwszy);
+    } finally {
+      baza.posprzataj();
+    }
+  });
+
+  it("widokEksportu zna tylko dziesięć nazw z mapy — nie klucze prototypu (#35)", () => {
+    for (const nazwa of NAZWY_WIDOKOW_EKSPORTU) {
+      expect(widokEksportu(nazwa), nazwa).toBe(WIDOKI_EKSPORTU[nazwa]);
+    }
+    for (const nazwa of ["nie-ma-takiego-widoku", "", "toString", "constructor", "__proto__", "hasOwnProperty"]) {
+      expect(widokEksportu(nazwa), nazwa).toBeUndefined();
     }
   });
 });

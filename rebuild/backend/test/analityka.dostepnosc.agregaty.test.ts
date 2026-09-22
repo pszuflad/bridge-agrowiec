@@ -10,14 +10,19 @@
  * Źródło prawdy dla każdej asercji: `mirror/backend/analytics_module.cjs:156-184`,
  * `:279-289`, `:299-303`, `:334`.
  *
- * ⚠ DWIE TRASY TEGO BLOKU SĄ W PRODUKCJI TRWALE PUSTE i ten plik to CHARAKTERYZUJE,
- * a nie naprawia — `historia_cen` nie ma kolumny `nazwa`, o którą pytają. Pełne uzasadnienie
- * z dowodem z nagrań: nagłówek `bezpiecznieWiersze` w `repos/analityka.ts`.
+ * ⚠ DWIE TRASY TEGO BLOKU SĄ W PRODUKCJI TRWALE PUSTE (`historia_cen` nie ma kolumny `nazwa`,
+ * o którą pytają — nagłówek `bezpiecznieWiersze` w `repos/analityka.ts`). Do P10.1 ten plik to
+ * charakteryzował; od P10.1 odbudowa je NAPRAWIA — świadome odstępstwo, #32 i #33, 2026-09-21
+ * (ticket 90) — i ten plik dowodzi naprawy: wiersze na danych z historii, nazwa z katalogu po
+ * parze `dostawca` + `kod`, duplikat klucza zwinięty do wiersza o `MAX(id)`.
  */
+import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { Baza } from "../src/db/index.js";
 import { auditLog, historiaCen, products } from "../src/db/schema.js";
+import { silnikStagingu } from "../src/import/tk.js";
+import type { RekordSurowy } from "../src/import/typy.js";
 import {
   cyklZyciaModeli,
   dostepnoscProduktow,
@@ -36,7 +41,7 @@ function produkt(nadpisania: Partial<NowyProdukt>): NowyProdukt {
   return { ...bazowy, ...nadpisania, id: undefined };
 }
 
-/** Migawka `historia_cen`. Kolumny `nazwa` NIE MA — i to jest sedno dwóch testów niżej. */
+/** Migawka `historia_cen`. Kolumny `nazwa` NIE MA — nazwa kart idzie z katalogu (#32). */
 type NowaMigawka = {
   kod: string;
   dostawca: string;
@@ -98,19 +103,63 @@ describe("agregaty analityki (blok 10e)", () => {
       ]);
     });
 
-    it("CHARAKTERYZACJA: z historią zwraca pustą listę, bo `historia_cen` nie ma kolumny `nazwa`", () => {
+    /**
+     * Świadome odstępstwo, #32, 2026-09-21. Do P10.1 w tym miejscu stała charakteryzacja
+     * `{ hasHistory: true, rows: [] }` — zapytanie oryginału (`:161`) pyta o `MAX(nazwa)`,
+     * której `historia_cen` nie ma, a `safeAll` połykał błąd (tak samo jak w nagraniu produkcji).
+     */
+    it("z historią zwraca wiersze z procentem, miesiącami braków i nazwą z katalogu", () => {
+      db.insert(products).values([produkt({ kod: "A1", dostawca: "MO1", nazwa: "Opona A1" })]).run();
       zasiejMigawki([
-        { kod: "A1", dostawca: "MO1", stan: 0, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" },
-        { kod: "A1", dostawca: "MO1", stan: 5, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", ean: "5901234123457", stan: 0, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", ean: "5901234123457", stan: 5, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", ean: "5901234123457", stan: 3, zarejestrowanoAt: "2026-08-02T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", ean: "5901234123457", stan: 0, zarejestrowanoAt: "2026-09-01T10:00:00.000Z" },
       ]);
 
-      const wynik = dostepnoscProduktow(db);
+      expect(dostepnoscProduktow(db)).toEqual({
+        hasHistory: true,
+        rows: [
+          {
+            kod: "A1",
+            ean: "5901234123457",
+            dostawca: "MO1",
+            nazwa: "Opona A1",
+            snapshoty: 4,
+            dostepnoscPct: 50,
+            miesiaceBrakow: "2026-07,2026-09",
+          },
+        ],
+      });
+    });
 
-      // Historia JEST — a wierszy nie ma. Zapytanie gałęzi historycznej (`:161`) pyta
-      // o `MAX(nazwa)`, SQLite odpowiada `no such column: nazwa`, port `safeAll` połyka błąd.
-      // Dokładnie to samo widać w nagraniu produkcji: `GET_analytics_status.json` ma 15 597
-      // migawek, a `GET_analytics_availability_products.json` — `hasHistory: true, rows: []`.
-      expect(wynik).toEqual({ hasHistory: true, rows: [] });
+    it("nazwa po parze dostawca + kod: ten sam kod u innego dostawcy NIE dostaje cudzej nazwy", () => {
+      // `products.kod` jest globalnie UNIQUE (`001_schema.sql:24`), więc w katalogu kod K może
+      // być tylko u jednego dostawcy — w historii może być u dwóch (np. po przeniesieniu).
+      db.insert(products)
+        .values([
+          produkt({ kod: "K1", dostawca: "MO1", nazwa: "K1 u MO1" }),
+          produkt({ kod: "K2", dostawca: "MO2", nazwa: "K2 u MO2" }),
+        ])
+        .run();
+      zasiejMigawki([
+        { kod: "K1", dostawca: "MO1", stan: 1, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "K1", dostawca: "MO2", stan: 1, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "K2", dostawca: "MO2", stan: 1, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+      ]);
+
+      const nazwy = Object.fromEntries(
+        dostepnoscProduktow(db).rows.map((w) => [`${w.dostawca}/${w.kod}`, w.nazwa]),
+      );
+      expect(nazwy).toEqual({ "MO1/K1": "K1 u MO1", "MO2/K1": null, "MO2/K2": "K2 u MO2" });
+    });
+
+    it("pozycja usunięta z katalogu zostaje w wyniku, z `nazwa: null`", () => {
+      zasiejMigawki([{ kod: "USUNIETY", dostawca: "MO1", stan: 2, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" }]);
+
+      expect(dostepnoscProduktow(db).rows).toEqual([
+        expect.objectContaining({ kod: "USUNIETY", nazwa: null, snapshoty: 1, dostepnoscPct: 100 }),
+      ]);
     });
   });
 
@@ -121,17 +170,104 @@ describe("agregaty analityki (blok 10e)", () => {
       expect(tempoSchodzenia(db)).toEqual({ hasHistory: false, rows: [] });
     });
 
-    it("CHARAKTERYZACJA: z historią też pusto — ten sam brak kolumny `nazwa` w CTE `seq`", () => {
+    /**
+     * Świadome odstępstwo, #32, 2026-09-21. Do P10.1 tu stała charakteryzacja
+     * `{ hasHistory: true, rows: [] }` — CTE `seq` oryginału (`:176`) pyta o `MAX(nazwa)`.
+     */
+    it("z historią sumuje spadki stanu (wzrosty jako zero), sortuje malejąco, nazwa z katalogu", () => {
+      db.insert(products).values([produkt({ kod: "A1", dostawca: "MO1", nazwa: "Opona A1" })]).run();
       zasiejMigawki([
         { kod: "A1", dostawca: "MO1", stan: 10, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" },
         { kod: "A1", dostawca: "MO1", stan: 4, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", stan: 9, zarejestrowanoAt: "2026-08-15T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", stan: 8, zarejestrowanoAt: "2026-09-01T10:00:00.000Z" },
+        { kod: "B1", dostawca: "MO2", stan: 3, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" },
+        { kod: "B1", dostawca: "MO2", stan: 3, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
       ]);
 
-      // ⚠ SKUTEK UBOCZNY, KTÓRY WARTO ZNAĆ: pułapka `GROUP BY dostawca, kod, zarejestrowano_at`
-      // obok gołego `stan` i `LAG(...) OVER (...)` (decyzja D1 planu) jest w produkcji
-      // NIEOSIĄGALNA — zapytanie wywraca się wcześniej, na `MAX(nazwa)`. Charakteryzujemy więc
-      // realny efekt: sześć spadków stanu do policzenia, zero zwróconych wierszy.
-      expect(tempoSchodzenia(db)).toEqual({ hasHistory: true, rows: [] });
+      expect(tempoSchodzenia(db)).toEqual({
+        hasHistory: true,
+        rows: [
+          // 10→4 (6) + 4→9 (wzrost, 0) + 9→8 (1) = 7
+          { dostawca: "MO1", kod: "A1", nazwa: "Opona A1", zeszloSztuk: 7 },
+          // B1 nie ma w katalogu → nazwa pusta; stan bez zmian → 0
+          { dostawca: "MO2", kod: "B1", nazwa: null, zeszloSztuk: 0 },
+        ],
+      });
+    });
+  });
+
+  /**
+   * Backlog #33 — świadome odstępstwo, decyzja 2026-09-21 (ticket 90). Duplikat klucza
+   * `(dostawca, kod, zarejestrowano_at)` jest zwijany do wiersza o `MAX(id)` PRZED `LAG`.
+   */
+  describe("tempoSchodzenia — duplikat klucza (#33)", () => {
+    it("z duplikatów bierze stan wiersza wpisanego OSTATNIO, niezależnie od wartości", () => {
+      // Kolejność wstawiania jest tu sednem: ostatni wpisany ma stan 8 (większy), więc ani
+      // `MIN(id)`, ani `MIN(stan)` nie dałyby tego wyniku.
+      zasiejMigawki([
+        { kod: "A1", dostawca: "MO1", stan: 10, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", stan: 3, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", stan: 8, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+      ]);
+
+      expect(tempoSchodzenia(db).rows).toEqual([
+        { dostawca: "MO1", kod: "A1", nazwa: null, zeszloSztuk: 2 },
+      ]);
+    });
+
+    it("wynik jest stabilny między wywołaniami", () => {
+      zasiejMigawki([
+        { kod: "A1", dostawca: "MO1", stan: 10, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", stan: 8, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", stan: 3, zarejestrowanoAt: "2026-08-01T10:00:00.000Z" },
+        { kod: "A1", dostawca: "MO1", stan: 1, zarejestrowanoAt: "2026-09-01T10:00:00.000Z" },
+      ]);
+
+      const pierwszy = tempoSchodzenia(db);
+      expect(tempoSchodzenia(db)).toEqual(pierwszy);
+      // 10→3 (ostatni wpisany z sierpnia) = 7, 3→1 = 2
+      expect(pierwszy.rows[0]?.zeszloSztuk).toBe(9);
+    });
+
+    /**
+     * Duplikat z PRAWDZIWEGO importu, nie wstawiony ręcznie: dwie linie tego samego kodu
+     * w jednym cenniku. Pomiar z ticketu 90 — w katalogu zostaje linia OSTATNIA, i karta ma
+     * powiedzieć to samo co katalog.
+     */
+    it("duplikat z importu (dwie linie tego samego kodu) — karta zgodna z katalogiem", () => {
+      const EAN = "5901234123457";
+      // Wiersz katalogu jak w `silnik.decyzje.test.ts` — bez pól spoza tego zestawu, żeby
+      // linie cennika różniły się od katalogu WYŁĄCZNIE ceną i stanem (auto-zatwierdzenie).
+      db.insert(products)
+        .values({
+          kod: "P1", nazwa: "Opona 480/70R28 BKT AGRIMAX RT 765", marka: "BKT", model: "AGRIMAX RT 765",
+          kategoria: "Opony rolnicze", dostawca: "MO5", magazyn: "PL", stan: 10, cenaZakupu: 1000,
+          cenaSprzedazy: 1300, marzaPct: 30, vat: 23, status: "aktywny", rozmiar: "480/70R28", ean: EAN,
+          eanIsValid: 1, nieobecnoscPodRzad: 0, dataAktualizacji: "2026-01-01T00:00:00.000Z",
+        })
+        .run();
+      const idProduktu = db.select().from(products).where(eq(products.kod, "P1")).get()!.id;
+      zasiejMigawki([{ kod: "P1", dostawca: "MO5", stan: 10, zarejestrowanoAt: "2026-07-01T10:00:00.000Z" }]);
+
+      const linia = (pola: Record<string, unknown>) =>
+        ({
+          kod: "P1", nazwa: "Opona 480/70R28 BKT AGRIMAX RT 765", rozmiar: "480/70R28", marka: "BKT",
+          model: "AGRIMAX RT 765", kategoria: "Opony rolnicze", ean: EAN, magazyn: "PL", ...pola,
+        }) as unknown as RekordSurowy;
+      silnikStagingu(db)("MO5", [linia({ stan: 7, cenaZakupu: 1100 }), linia({ stan: 2, cenaZakupu: 1200 })]);
+
+      // Import dał dwa wiersze historii o identycznym kluczu…
+      const migawkiImportu = db.select().from(historiaCen).all().filter((w) => w.produktId === idProduktu);
+      expect(migawkiImportu).toHaveLength(2);
+      expect(new Set(migawkiImportu.map((w) => w.zarejestrowanoAt)).size).toBe(1);
+      // …katalog ma stan linii ostatniej…
+      const stanKatalogu = db.select().from(products).where(eq(products.id, idProduktu)).get()!.stan;
+      expect(stanKatalogu).toBe(2);
+      // …i karta liczy spadek 10 → 2, nie 10 → 7.
+      expect(tempoSchodzenia(db).rows).toEqual([
+        { dostawca: "MO5", kod: "P1", nazwa: "Opona 480/70R28 BKT AGRIMAX RT 765", zeszloSztuk: 10 - stanKatalogu },
+      ]);
     });
   });
 
