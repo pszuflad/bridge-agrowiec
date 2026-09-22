@@ -47,6 +47,7 @@ describe("zastosujMigracje", () => {
     "007_waga_gab_przewoznicy.sql",
     "008_alerty_katalogu_statusy.sql",
     "009_alerty_polskie_znaki.sql",
+    "010_marka_caps.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 28 tabel i 14 indeksów", () => {
@@ -57,6 +58,7 @@ describe("zastosujMigracje", () => {
     // 007 dokłada tabelę `waga_gab_przewoznicy` (ticket 76) — spoza kanonu produkcji, bez indeksu.
     // 008 (P6.2) dokłada jedną tabelę z jednym indeksem — statusy pseudo-alertów katalogowych.
     // 009 (PR.3) to wyłącznie migracja danych `alerts` — bilans bez zmian.
+    // 010 (PR.5) to migracja danych `products.marka` + słownika marek — bilans bez zmian.
     expect(policzTabele(sqlite)).toBe(28);
 
     const indeksy = (
@@ -580,6 +582,173 @@ describe("migracja danych 009 — polskie znaki w alertach", () => {
         expect(snap.prepare("SELECT * FROM alerts ORDER BY id").all()).toEqual(oczekiwane);
 
         expect(wykonaj009(snap), "drugie wykonanie na snapshocie musi być no-opem").toBe(0);
+      } finally {
+        snap.close();
+      }
+    },
+  );
+});
+
+/**
+ * MIGRACJA DANYCH `010` (karta PR.5, ticket 101) — duplikaty marki różniące się wyłącznie
+ * wielkością liter (`ALLIANCE`/`Alliance`, backlog #92). Układ jak blok 009 wyżej.
+ */
+describe("migracja danych 010 — marka WIELKIMI przy duplikacie case-only", () => {
+  const PLIK = "010_marka_caps.sql";
+  let katalog: string;
+  let sqlite: BazaSqlite;
+
+  /** Wykonuje 010 poza ewidencją `_migracje` i zwraca liczbę zmienionych wierszy (wszystkie tabele). */
+  const wykonaj010 = (db: BazaSqlite): number => {
+    const przed = (db.prepare("SELECT total_changes() AS c").get() as { c: number }).c;
+    db.exec(readFileSync(join(KATALOG_SCHEMATU(), PLIK), "utf8"));
+    return (db.prepare("SELECT total_changes() AS c").get() as { c: number }).c - przed;
+  };
+
+  let licznik = 0;
+  const dodajProdukt = (marka: string) =>
+    sqlite
+      .prepare(
+        `INSERT INTO products
+           (kod, nazwa, marka, kategoria, dostawca, magazyn, stan, cena_zakupu, cena_sprzedazy,
+            marza_pct, data_aktualizacji)
+         VALUES (?, 'N', ?, 'Rolnicze', 'MO1', 'GL', 1, 100.0, 130.0, 30.0, '2026-09-22')`,
+      )
+      .run(`K${++licznik}`, marka);
+
+  const dodajDoSlownika = (wartosc: string, rodzaj = "marka") => {
+    sqlite.prepare("INSERT OR IGNORE INTO atrybuty_rodzaje (value, label) VALUES (?, ?)").run(rodzaj, rodzaj);
+    sqlite.prepare("INSERT INTO atrybuty_wartosci (rodzaj, wartosc) VALUES (?, ?)").run(rodzaj, wartosc);
+  };
+
+  const marki = () =>
+    (sqlite.prepare("SELECT marka FROM products ORDER BY id").all() as { marka: string }[]).map((w) => w.marka);
+  const slownik = (rodzaj = "marka") =>
+    (
+      sqlite
+        .prepare("SELECT wartosc FROM atrybuty_wartosci WHERE rodzaj = ? ORDER BY wartosc")
+        .all(rodzaj) as { wartosc: string }[]
+    ).map((w) => w.wartosc);
+
+  beforeEach(() => {
+    katalog = mkdtempSync(join(tmpdir(), "bridge-migracje-010-"));
+    ({ sqlite } = otworzBaze(join(katalog, "test.db")));
+    zastosujMigracje(sqlite, KATALOG_SCHEMATU());
+    licznik = 0;
+  });
+  afterEach(() => {
+    sqlite.close();
+    rmSync(katalog, { recursive: true, force: true });
+  });
+
+  it("forma różniąca się tylko wielkością liter przechodzi na WIELKIE; marki bez pary zostają", () => {
+    dodajProdukt("ALLIANCE");
+    dodajProdukt("Alliance");
+    dodajProdukt("ALLIANCE");
+    // Grupa bez formy WIELKIEJ też kończy jako WIELKIE.
+    dodajProdukt("Bkt");
+    dodajProdukt("bkt");
+    // Bez pary — nietknięte, nawet pisane małymi (reguła celuje w duplikat, nie w konwencję).
+    dodajProdukt("Mitas");
+    dodajProdukt("21x7.00-15");
+
+    expect(wykonaj010(sqlite)).toBe(3);
+    expect(marki()).toEqual(["ALLIANCE", "ALLIANCE", "ALLIANCE", "BKT", "BKT", "Mitas", "21x7.00-15"]);
+  });
+
+  it("polskie litery: klucz zna `ąćęłńóśźż`, choć `UPPER()` SQLite jest ASCII-only", () => {
+    dodajProdukt("STOMIL POZNAŃ");
+    dodajProdukt("Stomil Poznań");
+    // ASCII-owo WIELKIE, ale z małym `ń` — `UPPER()` sam by go nie ruszył.
+    dodajProdukt("STOMIL POZNAń");
+    // Bez pary — polska litera zostaje mała, wiersz nietknięty.
+    dodajProdukt("Dębica");
+
+    expect(wykonaj010(sqlite)).toBe(2);
+    expect(marki()).toEqual(["STOMIL POZNAŃ", "STOMIL POZNAŃ", "STOMIL POZNAŃ", "Dębica"]);
+  });
+
+  it("ograniczenie: litera spoza ASCII i spoza polskiego alfabetu nie jest sprowadzana — para zostaje", () => {
+    dodajProdukt("KLÉBER");
+    dodajProdukt("Kléber");
+
+    expect(wykonaj010(sqlite)).toBe(0);
+    expect(marki()).toEqual(["KLÉBER", "Kléber"]);
+  });
+
+  it("słownik: forma niekanoniczna znika tylko obok kanonicznej, inne rodzaje nietknięte", () => {
+    dodajProdukt("ALLIANCE");
+    dodajProdukt("Alliance");
+    dodajDoSlownika("ALLIANCE");
+    dodajDoSlownika("Alliance");
+    // Brak formy kanonicznej w słowniku — nie kasujemy (reguła nie dopisuje wartości).
+    dodajDoSlownika("Trelleborg");
+    // Inny rodzaj z parą case-only — poza zakresem 010.
+    dodajDoSlownika("FLOTATION T422", "bieznik");
+    dodajDoSlownika("Flotation T422", "bieznik");
+
+    expect(wykonaj010(sqlite)).toBe(1 /* products */ + 1 /* słownik */);
+    expect(slownik()).toEqual(["ALLIANCE", "Trelleborg"]);
+    expect(slownik("bieznik")).toEqual(["FLOTATION T422", "Flotation T422"]);
+  });
+
+  /** Scenariusz cutoveru: produkcja do ostatniego dnia może mieć stan zmigrowany częściowo. */
+  it("jest idempotentna treściowo — drugie wykonanie nie rusza ani jednego wiersza", () => {
+    dodajProdukt("ALLIANCE");
+    dodajProdukt("Alliance");
+    dodajProdukt("Stomil Poznań");
+    dodajProdukt("STOMIL POZNAŃ");
+    dodajDoSlownika("ALLIANCE");
+    dodajDoSlownika("Alliance");
+
+    expect(wykonaj010(sqlite), "pierwszy przebieg musi cokolwiek zmienić").toBeGreaterThan(0);
+    const stanPo = [marki(), slownik()];
+    expect(wykonaj010(sqlite), "drugie wykonanie tego samego SQL-a musi być no-opem").toBe(0);
+    expect([marki(), slownik()]).toEqual(stanPo);
+  });
+
+  /**
+   * ⭐ POMIAR NA KOPII `db/snapshot.db` — liczby z karty PR.5:
+   *
+   *   SNAPSHOT_DB=/ścieżka/do/db/snapshot.db npx vitest run test/db.migracje.test.ts
+   *
+   * Na kopii puszczamy sam plik 010 (snapshot to baza produkcji bez `_migracje`).
+   */
+  it.skipIf(!process.env.SNAPSHOT_DB)(
+    "na kopii snapshotu: 848 + 1 → 849 × `ALLIANCE`, słownik bez `Alliance`, nic poza tym",
+    () => {
+      const kopia = join(katalog, "snapshot.db");
+      copyFileSync(process.env.SNAPSHOT_DB!, kopia);
+      const { sqlite: snap } = otworzBaze(kopia);
+      try {
+        const liczba = (sql: string, ...p: unknown[]) =>
+          (snap.prepare(sql).get(...(p as never[])) as { c: number }).c;
+        const ileMarki = (m: string) => liczba("SELECT count(*) AS c FROM products WHERE marka = ?", m);
+        const wSlowniku = (m: string) =>
+          liczba("SELECT count(*) AS c FROM atrybuty_wartosci WHERE rodzaj = 'marka' AND wartosc = ?", m);
+
+        expect([ileMarki("ALLIANCE"), ileMarki("Alliance")]).toEqual([848, 1]);
+        expect([wSlowniku("ALLIANCE"), wSlowniku("Alliance")]).toEqual([1, 1]);
+        const przed = snap.prepare("SELECT * FROM products ORDER BY id").all() as { kod: string; marka: string }[];
+
+        // `total_changes()` liczy zmiany we WSZYSTKICH tabelach: 1 produkt + 1 wpis słownika.
+        expect(wykonaj010(snap)).toBe(2);
+        expect([ileMarki("ALLIANCE"), ileMarki("Alliance")]).toEqual([849, 0]);
+        expect([wSlowniku("ALLIANCE"), wSlowniku("Alliance")]).toEqual([1, 0]);
+
+        // Wiersz po wierszu: zmieniła się wyłącznie marka MO1_71970103.
+        const oczekiwane = przed.map((w) => (w.kod === "MO1_71970103" ? { ...w, marka: "ALLIANCE" } : w));
+        expect(snap.prepare("SELECT * FROM products ORDER BY id").all()).toEqual(oczekiwane);
+
+        // Kontrola narzędziem znającym Unicode: po migracji nie ma już żadnej pary case-only.
+        const grupy = new Map<string, Set<string>>();
+        for (const { marka } of snap.prepare("SELECT DISTINCT marka FROM products").all() as { marka: string }[]) {
+          const k = marka.toLocaleUpperCase("pl-PL");
+          grupy.set(k, (grupy.get(k) ?? new Set()).add(marka));
+        }
+        expect([...grupy.values()].filter((g) => g.size > 1)).toEqual([]);
+
+        expect(wykonaj010(snap), "drugie wykonanie na snapshocie musi być no-opem").toBe(0);
       } finally {
         snap.close();
       }
