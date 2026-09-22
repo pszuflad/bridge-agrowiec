@@ -1,7 +1,18 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
 # Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
-71323ece87ddd427a25d7fa55bb6fc0e80ef6d5c
+7d6cfc91290e9c67e6d6b5f739e1cac9a0f2448c
+# ^ 2026-09-22 14:00 „20260922T110248Z_staging_v2”. STRIAŻOWANE 2026-09-22 (ticket 104-DOCS-plan-i15).
+#   Zakres 71323ec..7d6cfc9 = 2 commity: a6dffb1 (06:00, sama regeneracja sellycsv → „Pominięte”)
+#   i 7d6cfc9 (Staging v2 — nowy importer/akceptacja, ścisły EAN, „Rozstrzygnij”, staging_matches,
+#   indeks unikalny staging_items(dostawca,kod)) → backlog #99, ✅ decyzja użytkownika 2026-09-22, karty I15.2/I15.4/I15.5.
+#   ⚠ OD 2026-09-22 PRODUKCJA ZAMROŻONA (Paweł + Ania): żadnych zmian w starym Bridge do cutoveru.
+#   Kolejny commit sync(vps) z KODEM = naruszenie ustaleń → zgłosić Pawłowi, nie dopisywać po cichu do I15.
+#   Regeneracja sellycsv o 6:00 to dane (dalej będzie przychodzić).
+#   Następny triaż: git fetch origin main && git log 7d6cfc9..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 21.09 06:00) ---
+# 71323ece87ddd427a25d7fa55bb6fc0e80ef6d5c
 # ^ 2026-09-21 06:00 (regeneracja sellycsv). STRIAŻOWANE 2026-09-22
 #   (ticket 94-CHORE-triaz-po-86d9090, gałąź chore/94-triaz-po-86d9090).
 #   Zakres 86d9090..71323ec = 3 commity sync(vps) (19.09, 20.09, 21.09, wszystkie 06:00),

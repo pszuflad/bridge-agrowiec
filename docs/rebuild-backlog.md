@@ -986,6 +986,10 @@ od zera):
   ⚠ Uwaga na pole „Changelog Ani (najnowszy wpis)" w treści tego commita — producent wkleił tam
   wpis z **2026-08-18**, nie nowy. Prawdziwą treść daje dopiero `git diff` na `CHANGELOG.md`.
 
+*Pominięte — triaż 2026-09-22 po południu (zakres `71323ec..7d6cfc9`, ticket 104):*
+- `a6dffb1` (22.09 06:00) — wyłącznie regeneracja `sellycsv-*.csv` (dane). Kod z tego zakresu
+  (`7d6cfc9`, Staging v2) → wpis **#99**.
+
 *Pominięte — triaż 2026-09-22 (zakres `86d9090..71323ec`, ticket 94):*
 - `0c3c9e4` (19.09 06:00), `68d55cf` (20.09 06:00), `71323ec` (21.09 06:00) — trzy commity z etykietą
   `[FRONTEND]`, każdy zmienia **wyłącznie** `mirror/frontend/ex-port-files/sellycsv-*.csv` — codzienna
@@ -3472,7 +3476,7 @@ różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej 
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
 | **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
-| **Status** | — zatwierdzone do naniesienia; **jeden ticket CSV razem z #76 i #77** (wspólny plik `generator-csv.ts` + fixture). |
+| **Status** | — zatwierdzone; realizacja w I15 (karty I15.1 — kolumna i triggery, I15.3 — katalog i CSV). ⚠ Ania 22.09: nowe produkty mają to pole puste → **#101**. |
 
 **Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
 i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
@@ -4426,3 +4430,110 @@ z Katalogu — to nowe, świadome odstępstwo (mała zmiana: jeden zapis audytu)
 
 **Rekomendacja koordynatora:** 🕒 po cutoverze. Żadna z tych rzeczy nie jest widoczna w filtrach katalogu
 ani nie blokuje testu. Śmieci w polu marki Ania może poprawić ręcznie (edycja produktu).
+
+---
+
+### #99 · 2026-09-22 · [BAZA][BACKEND][FRONTEND] · Staging v2 — nowy importer, akceptacja z kontrolą aktualności, ścisły EAN, „Rozstrzygnij”
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 13:03 (wdrożenie), commit `7d6cfc9` (sync 14:00) |
+| **Kategoria** | BAZA + BACKEND + FRONTEND — przebudowa rdzenia importu i stagingu |
+| **Pliki** | `mirror/backend/staging_policy.cjs` (**nowy**, 298 l.), `mirror/backend/index.cjs` (dwa wywołania: `staging_policy.install({U,db,normalize,classify,badName,ext})` i `registerRoutes`), `mirror/backend/common.cjs` (`ean_raw`), `mirror/backend/parsers/adapter.cjs` (EAN przez `validateEan`, `eanRaw`, kod zastępczy bez samego EAN), `mirror/frontend/assets/staging-policy-injection.js` (**nowy**), `mirror/frontend/index.html`, `db/schema.sql` (tabela `staging_matches`, indeks unikalny `staging_one_current_product ON staging_items(dostawca,kod)`), `mirror/backend/staging_reconcile_20260922.cjs` (skrypt jednorazowy); kopie `.bak_20260922T110248Z_staging_v2` |
+| **Commit** | `7d6cfc9` |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22** (D3 planu I15) |
+| **Status** | zatwierdzone; karty **I15.2** (część parserowa), **I15.4** (backend), **I15.5** (frontend) — `docs/karty/I15.*` |
+
+**Opis biznesowy (CHANGELOG Ani, 2026-09-22 13:03).** „Staging v2: jedno najnowsze zgłoszenie na produkt/dostawcę;
+świeże ceny i stany; ścisła kontrola surowego EAN w parserze/adapterze; dopasowanie po EAN wyłącznie do jednej
+zgodnej opony, z ochroną DOT; niejednoznaczności do ręcznej decyzji; poprawki ręczne chronione bez osobnego błędu;
+kontrola aktualności i atomowa akceptacja; przycisk Rozstrzygnij; przebudowa stagingu z archiwów bez zmiany katalogu;
+indeks unikalny i tabela świadomych dopasowań.” Powód: „Prośba Anny z 2026-09-22; nieaktualne zgłoszenia, błędne EAN
+i łączenie różnych partii opon.”
+
+**Szczegół techniczny (dla rebuildu).**
+- `install()` podmienia w `U` dodawanie (`addStaging` — najpierw kasuje stare zgłoszenie tej samej pary
+  dostawca+kod), edycję (`updateStaging` — przelicza status EAN przy zmianie numeru) i akceptację
+  (`checkAcceptance`: zgłoszenie zastąpione → 409; zgłoszenie ze starego importu bez `_policyVersion` → 409
+  „Odśwież cennik”; nierozstrzygnięte dopasowanie → 409; błędny EAN → 409), oraz dostarcza nowy `importer()`
+  (odpowiednik naszego `import/tk.ts`). Nadpisuje też `ext.assignKodImportu` (grupa produktów tylko przy
+  zgodności marka/model/rozmiar + indeksy/DOT).
+- `validateEan()`: puste → `empty`; zapis naukowy lub utracone cyfry → błąd; znaki nie-cyfry, zła długość
+  (8/12/13/14), same zera, zła cyfra kontrolna → błąd. **Nigdy nie obcina, nie zaokrągla, nie „naprawia”.**
+- `syntheticCode()`: kod zastępczy `<dostawca>_AUTO_<sha>` z tożsamości opony, **nigdy z samego EAN**.
+- Trasy: `GET /api/staging/:id/review`, `POST /api/staging/:id/resolve` (`action`, `targetCode`).
+- Frontend: wstrzykiwany skrypt z przyciskiem i oknem „Rozstrzygnij”.
+
+**⚠ Kolizja ze świadomym odstępstwem 14i** (ticket 58, EAN w zapisie naukowym → puste pole): produkcja od
+22.09 traktuje taki EAN jako BŁĄD blokujący akceptację do ręcznej poprawki. **Decyzja użytkownika
+2026-09-22 (D4): przyjmujemy wersję Ani** — zastępuje 14i. Dotyczy też wpisu #11.
+
+**Skrypt `staging_reconcile_20260922.cjs`** — jednorazowa przebudowa stagingu z archiwów importu (dedup
+`MAX(id)` per dostawca+kod, potem ponowny import najnowszego pliku każdego dostawcy w `SAVEPOINT`, z kontrolą, że
+`products` się nie zmienił). **Decyzja użytkownika 2026-09-22 (D5): nie przenosimy** — na produkcji wykonany;
+u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu unikalnego (karta I15.4).
+
+**Zamrożenie.** To ostatnia zmiana produkcji przed cutoverem — od 2026-09-22 stary Bridge jest zamrożony
+(uzgodnienie Pawła z Anią). Staging v2 jest więc w wersji ostatecznej.
+
+---
+
+### #100 · 2026-09-22 · [BACKEND] · usunięcie produktu z katalogu nie usuwa go z Selly — ŻYCZENIE ANI (nowa funkcja)
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (odpowiedź Ani na pytanie 1.4 rundy 3) |
+| **Kategoria** | BACKEND (Selly REST) — nowa funkcja, produkcja jej nie ma |
+| **Pliki** | produkcja: brak ścieżki; ślad ręcznego usunięcia przez API 17.09: `mirror/backend/…/product_639_pre_delete_20260917T164000Z.json`, `product_639_delete_result_20260917T164000Z.json` (`origin/main`); powiązane: osierocone mapowania `selly_products` (blok 13d w roadmapie, `5cfb7ab`) |
+| **Do nowej wersji?** | 🕒 **PÓŹNIEJ — decyzja użytkownika 2026-09-22 (D7): po cutoverze**, pierwsza nowa funkcja w nowym stosie |
+| **Status** | odłożone — w I15 port 1:1 |
+
+**Odpowiedź Ani:** „Nawet nie wiem czy jest możliwe żeby usuwać stary rekord z selly jeśli jest to trzeba taką ścieżke
+zrobić bo obecnie tego nie ma”. **Technicznie jest możliwe** — 17.09 produkt 639 został usunięty z Selly przez API
+(zachowane pliki `pre_delete`/`delete_result`).
+
+**Rekomendacja koordynatora:** 🕒 **po cutoverze**, jako pierwsza nowa funkcja w nowym stosie. Kasowanie w sklepie jest
+nieodwracalne i wymaga decyzji produktowych (usuwać produkt czy wariant, co przy produkcie wspólnym dla kilku dostawców,
+potwierdzenie), a celem nr 1 jest domknięcie odbudowy 1:1. W I15 port 1:1 (osierocone mapowania zostają jak w produkcji).
+
+---
+
+### #101 · 2026-09-22 · [BAZA][BACKEND] · nowe produkty mają puste „blokowane formy płatności” — ŻYCZENIE ANI
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (odpowiedź Ani na pytanie 2.2 rundy 3) |
+| **Kategoria** | BAZA + BACKEND — zgłoszony defekt produkcji |
+| **Pliki** | `mirror/backend/payment_blocks.cjs` (lista per dostawca MO1–MO10 bez MO6, `sqlCase()`), triggery `products_blokowane_formy_ai/_au` (`origin/main:db/schema.sql`), `extensions.cjs` (`ensurePaymentBlocks()` przy starcie); powiązane #73 |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D6):** naprawić w I15 po pomiarze na kopii produkcji (23.09); karta wg przyczyny (I15.1 albo I15.6/I15.7) |
+| **Status** | — przyczyna NIEZNANA, do zmierzenia |
+
+**Odpowiedź Ani:** „trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie
+tego nie ma - każdy nowy produkt ma to pole puste a to ono wyznacza opcje metody dostawy i cenę dla danego dostawcy”.
+
+**Co wiemy z kodu (koordynator, 2026-09-22):** trigger `AFTER INSERT ON products` ustawia pole z `dostawca` (`CASE
+UPPER(TRIM(dostawca)) WHEN 'MO1' …`), a `products.dostawca` w snapshocie ma dokładnie te kody (MO1…MO10) — w teorii nowe
+produkty powinny dostawać wartość. Hipotezy do sprawdzenia: (a) dostawca spoza listy (MO6 nie ma w `BLOCKED_PAYMENT_FORMS`);
+(b) pole puste nie w Bridge, tylko w **Selly** (nowe produkty zakładane w sklepie bez tej cechy — ścieżka auto-create,
+#68); (c) produkty wstawiane ścieżką, która omija trigger. **Nie wiadomo, gdzie Ania widzi puste pole** — pytanie do niej.
+Pomiar: kopia bazy produkcji z 23.09 — produkty utworzone po 10.09 z pustym polem.
+
+**Rekomendacja koordynatora:** ✅ naprawić w I15 (to warunek poprawnych metod dostawy i cen w sklepie). Zakres zależy od
+pomiaru: w Bridge → karta I15.1; w Selly → karty I15.6/I15.7.
+
+---
+
+### #102 · 2026-09-22 · [DEPLOY][BACKEND] · plik CSV dla Selly o 6:00 generuje systemowy cron starego stosu — nowy stos nie ma odpowiednika
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (koordynator, po odpowiedzi Ani na pytanie 1.2) |
+| **Kategoria** | DEPLOY / BACKEND (eksport CSV Selly) — luka cutoveru |
+| **Pliki** | produkcja: cron serwera uruchamia `mirror/backend/generate_selly_export.cjs` (`selly/routes.cjs:297` „Plik generowany cronem ~6:00”); odbudowa: `rebuild/backend/src/selly/generator-csv.ts` (tylko trasa ręczna `POST /api/selly/generate-csv`) |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D8)**, wymagane do cutoveru (Ania używa: „o 6 rano katalog wypycha nowy CSV na serwer”, Selly zaciąga go o 12:00) |
+| **Status** | — przypisane do karty I15.3 (polecenie CLI) + `docs/cutover.md` (przepięcie crona) |
+
+**Na czym polega.** Odbudowa ma generator (8a), ale nie ma nic, co uruchamia go codziennie — w produkcji robi to cron
+systemowy spoza aplikacji. Po cutoverze stary cron dalej uruchamiałby STARY skrypt na tej samej bazie (dałby plik, ale
+z logiką starego stosu), a bez niego plik przestałby się odświeżać i Selly o 12:00 zaciągałby wczorajszy katalog.
+**Rekomendacja:** I15.3 dokłada polecenie CLI generatora (np. `npm run selly:csv`), cutover przepina cron na nie.

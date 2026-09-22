@@ -186,7 +186,8 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f + P10.1–P10.4 | 2, 3, 4 | ✅ | 10a–10f 2026-09-03…04 (blok I10) · **poprawki P10.1–P10.4 zamknięte 2026-09-22** (tickety 90, 96, 98, 100) — `tools/stan-kart.sh P10` |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a–12c 2026-09-05 · 12d, 12e 2026-09-08 — szczegóły: nagłówki sesji w bloku I12 |
-| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f · 13a · 13b · 13c · 13d · 13e | 3, 8 | 🔨 | 13a/13b/13c/13e/13f ✅ 2026-09-08…09 · **13d ⛔ ODŁOŻONE** (13d-1 cofnięte, revert #58 — Selly dociera u Ani) — szczegóły: blok I13 |
+| 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f · 13a · 13b · 13c · 13d · 13e | 3, 8 | ✅ | 13a/13b/13c/13e/13f ✅ 2026-09-08…09 · **13d wchłonięte do I15** (karty I15.6–I15.8, 2026-09-22) — szczegóły: blok I13 |
+| 15 | Domknięcie zakresu produkcji: wrzesień (#73–#83) + Staging v2 (#99) + Selly REST (dawne 13d) | I15.1–I15.9 | 3, 8, 13 | 🔨 | zaplanowane 2026-09-22 (ticket 104) — **produkcja zamrożona od 22.09**, zakres zamknięty; stan: `tools/stan-kart.sh I15` |
 | 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | fala 1: 14a–14d · fala 2: 14e–14m (14g skasowana) | 3, 4 | ✅ | fala 1 zamknięta 2026-09-18 · fala 2 zamknięta 2026-09-19 — szczegóły: blok I14 |
 | P | Poprawki po testach Ani (I5, I6, I7, I9, I10, przegląd 12 widoków) | karty `P{iteracja}.{n}` i `PR.{n}` | 5–10 | 🔨 | stan każdej karty: `tools/stan-kart.sh` · karty otwarte mają katalogi `docs/karty/<ID>/` · plan: blok „Poprawki po testach Ani” |
 
@@ -2127,7 +2128,10 @@ co oracle, żeby obie kopie pochodziły z jednego źródła.
   nasz port surowym `db/snapshot.db`, którego 13c nie dotyka — obie strony dostają identyczne
   wejście, więc migracja danych nie mogła przesunąć wzorca zbudowanego na innym źródle.
   **Zależy od:** 13a, 13b (spełnione).
-- **13d — Selly REST sync (NOWY podsystem)** [BE] — ⛔ **ODŁOŻONE, START WSTRZYMANY**. Reimplementacja TS
+- **13d — Selly REST sync (NOWY podsystem)** [BE] — ➡️ **WCHŁONIĘTE DO I15 (2026-09-22): karty I15.6–I15.8,
+  `docs/karty/I15.6`–`I15.8`.** Produkcja zamrożona od 22.09, więc Selly REST jest w wersji ostatecznej —
+  sygnał startu nie jest już potrzebny. Poniżej historia odkładania (do 22.09) — ważna dla kart Selly:
+  pułapka revertu i obalone ustalenie o `PUT features`. Pierwotny status: ⛔ **ODŁOŻONE, START WSTRZYMANY**. Reimplementacja TS
   7 plików `selly/*` (`discovery`/`sync_delta`/`sync_full`/`mapper_v2`/`rate_limiter`/`scheduler_selly`/
   `routes_sync`) + przeprojektowana `selly_products` (klucz `(kod_importu,dostawca)`→`(selly_product_id,
   selly_variant_id)` + `feature_id_magazyn`; stara → `selly_products_old`). Model wariantowy: cena/stan
@@ -3408,7 +3412,8 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 |---|---|---|
 | ~~**#91** — zakres „zapisz to, co widzę"~~ | P10.3 | ✅ rozstrzygnięte 2026-09-21 (ticket 87), dowiezione w P10.3 (98) |
 | ~~**#92** — duplikat marek: dane czy prezentacja~~ | PR.5 | ✅ 2026-09-22, wariant A — migracja `010` (ticket 101) |
-| **Pytanie 12.3 — kafle KPI Analityki** | — | PR.2 wdrożyła wariant (a) „jak na produkcji” na podstawie decyzji użytkownika 2026-09-22; odpowiedź Ani nadal pusta — pytanie ponowione w `docs/pytania-do-ani-2026-09-22.md` §3.1 |
+| ~~**Pytanie 12.3 — kafle KPI Analityki**~~ | — | ✅ Ania 22.09 (runda 3, 3.1): „przenieść analitykę 1:1” — zgodne z PR.2 |
+| ~~**Pytanie 12.5 — podział admin / użytkownik**~~ | — | ✅ Ania 22.09 (runda 3, 3.2): bez ról, wszyscy mają te same prawa |
 | **#96** — sufit 1000/500 wierszy w plikach CSV analityki | ewentualne zdjęcie sufitu dla pliku | **⬜ po stronie Ani** — I10-v2 §1.3 |
 | **#97** — kafel „Ostatni eksport CSV” bez źródła w UI | ewentualny audyt eksportu z Katalogu (nowe odstępstwo) | **⬜ po stronie Ani** — I10-v2 §1.2 |
 | **#94** — karta 4.1: przypadkowy EAN i podwójne migawki | mała karta analityki | ⬜ użytkownik — rekomendacja: naprawić wzorem #33 |
@@ -3423,6 +3428,75 @@ Iteracjami: 5 → 6 → 7 → 9 → 10 → przegląd. Wewnątrz iteracji karty r
 **Dwa świadome wyjątki od kolejności:** PR.1 (jedyny brak funkcji) i P6.2 (bloker cutoveru) — oba
 warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 
+
+### Iteracja 15 — Domknięcie zakresu produkcji: wrzesień + Staging v2 + Selly REST
+
+- **Status:** 🔨 zaplanowana 2026-09-22 (ticket `104-DOCS-plan-i15`). Karty: `docs/karty/I15.1`–`I15.9`,
+  stan: `tools/stan-kart.sh I15`. Tabelę i kolejność zmienia koordynator, nie karty.
+- **⭐ Zamrożenie produkcji (2026-09-22, Paweł + Ania):** na starym Bridge **nie będzie już żadnych zmian**
+  do cutoveru. Cel nr 1 — dokończyć odbudowę i wdrożyć ją na produkcję; nowe zmiany dopiero w nowym stosie.
+  Ostatnia zmiana produkcji: `7d6cfc9` (Staging v2, 22.09 14:00). **Zakres I15 jest więc zamknięty**, a Staging v2
+  i Selly REST są w wersji ostatecznej — bez „dni ciszy” i sygnałów startu.
+- **Zakres:** (1) wrześniowe zmiany produkcji zatwierdzone w triażu 18.09 — #73, #75, #76, #77 (CSV + delta),
+  #78, #79, #80, #82, #83; (2) **Staging v2** — #99 (triaż 22.09); (3) **Selly REST** — dawne 13d: #60, #74, #77
+  (delta), #81, #68–#70, osierocone mapowania. Pomiar parserów na 8 prawdziwych cennikach (21.09, blok „Poprawki
+  po testach Ani” niżej) — gotowy test akceptacyjny.
+
+**Decyzje — PODJĘTE 2026-09-22 przez użytkownika, wszystkie zgodnie z rekomendacją:**
+
+| # | Decyzja |
+|---|---|
+| D1 | triggery z #73, #75, #79 (produkcyjne `db/schema.sql`) przenosimy jako **migrację odporną na to, że na produkcji już istnieją** |
+| D2 | poprawki danych z września (#79 283 produkty, #82 265 rekordów, #83 1297 wartości) — **bez migracji**; zamiast tego **odświeżenie bazy stagingu kopią produkcji** (czeka na zgodę Ani, pytanie 2.3 rundy 3) — ta sama logika co #62 w I13 |
+| D3 | **Staging v2 (#99) przenosimy** |
+| D4 | EAN w zapisie naukowym / błędny: **wersja Ani** (błąd blokujący akceptację do ręcznej poprawki) **zastępuje odstępstwo 14i** (puste pole) |
+| D5 | skrypt `staging_reconcile_20260922.cjs` — **nie przenosimy**; wystarczy sprzątanie duplikatów stagingu w migracji przed indeksem unikalnym |
+
+**Karty:**
+
+| Karta | Zakres | Wpisy | Zależy od | Migracja |
+|---|---|---|---|---|
+| [I15.1](karty/I15.1/) | schemat `products`: kolumna blokowanych form płatności + 6 triggerów | #73, #75, #79, #80, #82 | — | `011` |
+| [I15.2](karty/I15.2/) | resync parserów + `application_rules`, `payment_blocks`, część parserowa Staging v2 | #73, #75, #78, #79, #80, #82, #83, #99 | I15.1 | — |
+| [I15.3](karty/I15.3/) | blokowane formy płatności w katalogu + eksport CSV Selly | #73, #76, #77 (CSV) | I15.1 | — |
+| [I15.4](karty/I15.4/) | Staging v2 — backend (importer, akceptacja, trasy review/resolve) | #99 | I15.2 | `012` |
+| [I15.5](karty/I15.5/) | Staging v2 — frontend („Rozstrzygnij”) | #99 | I15.4 | — |
+| [I15.6](karty/I15.6/) | Selly REST 1: nowy schemat `selly_products`, odnajdywanie, aktualizacje w ciągu dnia | #60, #74, #77 (delta), #68–#70 | — | `013` |
+| [I15.7](karty/I15.7/) | Selly REST 2: nocna pełna synchronizacja | #60, #81 | I15.6 | — |
+| [I15.8](karty/I15.8/) | Selly REST 3: harmonogram i przyciski w panelu | #60 | I15.7 | — |
+| [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) | — | I15.1–I15.8 | — |
+| [I15.10](karty/I15.10/) | zmiana w toku na starym Bridge — zakres nieznany | — | triaż zmiany | ? |
+
+**Numery migracji przydzielone z góry przez koordynatora** (`011`, `012`, `013`). Runner (`db/migrate.ts`) stosuje
+każdy brakujący plik niezależnie od kolejności merge'y, więc równoległe karty nie kolidują. Karta, która
+potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać kolejny numer sama.
+
+**Fale (co równolegle, co na co czeka):**
+
+| Fala | Karty | Warunek startu |
+|---|---|---|
+| 1 | **I15.1** ‖ **I15.6** | — (rozłączne: `products` + triggery vs Selly) |
+| 2 | **I15.2** ‖ **I15.3** ‖ **I15.7** | I15.1 (dla 2 i 3), I15.6 (dla 7) |
+| 3 | **I15.4** ‖ **I15.8** | I15.2 (dla 4), I15.7 (dla 8) |
+| 4 | **I15.5** | I15.4 |
+| 5 | **I15.9**, potem instrukcja pełnego testu i cutover | wszystkie |
+
+**Odpowiedzi Ani, runda 3 (22.09)** — `docs/pytania-do-ani-2026-09-22.md`, sekcja „Co Ania odpowiedziała”. Skutki dla I15:
+Selly skończone (tor I15.6–I15.8 gotowy; Ania przygotuje podsumowanie logiki — odebrać przed I15.6); Ania używa wszystkich
+torów Selly, CSV o 6:00 pobierany przez Selly o **12:00**; zgoda na kopię bazy produkcji na staging **od 23.09**; MO9 bez
+szczegółowego testu; okno cutoveru **w weekend**; jedna zmiana produkcji jeszcze w toku → **I15.10**.
+
+**Decyzje D6–D9 — PODJĘTE 2026-09-22 przez użytkownika, wszystkie zgodnie z rekomendacją:**
+
+| # | Decyzja | Rozstrzygnięcie |
+|---|---|---|
+| D6 | #101 — puste blokady płatności u nowych produktów: naprawić w I15? | ✅ tak, po pomiarze na kopii produkcji (23.09) — zakres I15.1 albo I15.6/I15.7 zależnie od przyczyny |
+| D7 | #100 — ścieżka usuwania produktu z Selly (nowa funkcja) | 🕒 po cutoverze |
+| D8 | #102 — CSV 6:00 w nowym stosie: polecenie CLI + przepięcie crona | ✅ tak — I15.3 + `docs/cutover.md` |
+| D9 | stary Bridge po cutoverze (pytanie 4.3) | wyłączony od razu (nie może chodzić równolegle na tej samej bazie — podwójne importy i synchronizacje Selly), kod i kopia bazy zostają ~2 tygodnie na rollback; zmiany po cutoverze wyłącznie w nowym stosie: `develop` → staging → test → produkcja |
+
+Wspólne pliki, na które uważać przy merge'u: `rebuild/backend/src/db/schema.ts` (I15.1, I15.4, I15.6 — różne
+tabele), `contract/openapi.yaml` (I15.3, I15.4, I15.8). Oba dają najwyżej trywialne konflikty.
 
 ## 6. Po zakończeniu wszystkich iteracji
 
