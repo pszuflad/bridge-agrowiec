@@ -1,5 +1,5 @@
 /** Migracje — `npm run migrate` musi być idempotentne (kontrakt deployu). */
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -46,6 +46,7 @@ describe("zastosujMigracje", () => {
     "006_nazwa_caps.sql",
     "007_waga_gab_przewoznicy.sql",
     "008_alerty_katalogu_statusy.sql",
+    "009_alerty_polskie_znaki.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 28 tabel i 14 indeksów", () => {
@@ -55,6 +56,7 @@ describe("zastosujMigracje", () => {
     // (SQLite nie ma ALTER COLUMN) i odtwarza jej indeks — bilans tabel i indeksów bez zmian.
     // 007 dokłada tabelę `waga_gab_przewoznicy` (ticket 76) — spoza kanonu produkcji, bez indeksu.
     // 008 (P6.2) dokłada jedną tabelę z jednym indeksem — statusy pseudo-alertów katalogowych.
+    // 009 (PR.3) to wyłącznie migracja danych `alerts` — bilans bez zmian.
     expect(policzTabele(sqlite)).toBe(28);
 
     const indeksy = (
@@ -415,4 +417,172 @@ describe("migracje danych — konwencje 13c", () => {
     expect(sqlite.prepare("SELECT kod, nazwa, kategoria, konstrukcja FROM products ORDER BY kod").all()).toEqual(stanPo);
     expect(sqlite.prepare("SELECT id, powod FROM staging_items ORDER BY id").all()).toEqual(stagingPo);
   });
+});
+
+/**
+ * MIGRACJA DANYCH `009` (karta PR.3, ticket 92) — polskie litery zamienione na „?" w alertach.
+ *
+ * Ten sam układ co blok 13c wyżej: baza z migracji → wiersze „przed" → SQL pliku wykonany ręcznie
+ * poza ewidencją → stan „po" → ten sam SQL drugi raz musi dać 0 zmian (cutover trafia na
+ * `data.db`, którą produkcja do ostatniego dnia zasila zepsutymi literałami).
+ */
+describe("migracja danych 009 — polskie znaki w alertach", () => {
+  const PLIK = "009_alerty_polskie_znaki.sql";
+  let katalog: string;
+  let sqlite: BazaSqlite;
+
+  /** Wykonuje 009 poza ewidencją `_migracje` i zwraca liczbę zmienionych wierszy (wszystkie tabele). */
+  const wykonaj009 = (db: BazaSqlite): number => {
+    const przed = (db.prepare("SELECT total_changes() AS c").get() as { c: number }).c;
+    db.exec(readFileSync(join(KATALOG_SCHEMATU(), PLIK), "utf8"));
+    return (db.prepare("SELECT total_changes() AS c").get() as { c: number }).c - przed;
+  };
+
+  const dodajAlert = (typ: string, opis: string, poziom = "info", status = "rozwiazany") =>
+    Number(
+      sqlite
+        .prepare(
+          `INSERT INTO alerts (poziom, typ, opis, dostawca, status, data)
+           VALUES (?, ?, ?, 'MO4', ?, '2026-08-13T10:00:00.000Z')`,
+        )
+        .run(poziom, typ, opis, status).lastInsertRowid,
+    );
+
+  const alert = (id: number) =>
+    sqlite.prepare("SELECT poziom, typ, opis, dostawca, status, data FROM alerts WHERE id = ?").get(id) as
+      Record<string, string>;
+
+  beforeEach(() => {
+    katalog = mkdtempSync(join(tmpdir(), "bridge-migracje-009-"));
+    ({ sqlite } = otworzBaze(join(katalog, "test.db")));
+    zastosujMigracje(sqlite, KATALOG_SCHEMATU());
+  });
+  afterEach(() => {
+    sqlite.close();
+    rmSync(katalog, { recursive: true, force: true });
+  });
+
+  it("naprawia typ i fragmenty szablonu w opisie; nazwa dostawcy i pliku zostają", () => {
+    // Treści 1:1 z kształtów w `db/snapshot.db` (literały oryginału `:48060, :48091, :48103, :48270`).
+    const pobieranie = dodajAlert("B??d pobierania", "MO3 (Grasdorf (kolarolnicze.pl)): fetch failed", "ostrzezenie", "nowy");
+    const http = dodajAlert("B??d HTTP", "MO4 (Handlopex Wrocław): HTTP 404", "ostrzezenie", "nowy");
+    const sync = dodajAlert(
+      "Synchronizacja",
+      "MO4 (Handlopex Wrocław): pobrano 344 produkt?w (nowe: 5, kluczowe/b??dy: 201, wycofane: 59, auto: 0)",
+    );
+    const upload = dodajAlert(
+      "R?czny upload",
+      "MO6: wgrano BOH_PL_NPL (2).csv (1520 produkt?w, nowe: 3, kluczowe/bledy: 40, wycofane: 0, auto: 1)",
+    );
+
+    expect(wykonaj009(sqlite)).toBe(
+      3 /* typ */ + 2 /* opis: sync + upload */,
+    );
+
+    expect(alert(pobieranie)).toMatchObject({
+      typ: "Błąd pobierania",
+      opis: "MO3 (Grasdorf (kolarolnicze.pl)): fetch failed",
+      poziom: "ostrzezenie",
+      status: "nowy",
+    });
+    expect(alert(http)).toMatchObject({ typ: "Błąd HTTP", opis: "MO4 (Handlopex Wrocław): HTTP 404" });
+    expect(alert(sync).opis).toBe(
+      "MO4 (Handlopex Wrocław): pobrano 344 produktów (nowe: 5, kluczowe/błędy: 201, wycofane: 59, auto: 0)",
+    );
+    // `kluczowe/bledy` bez ogonków to oryginał (`:48270`) i odbudowa (`routes/suppliers.ts`) — zostaje.
+    expect(alert(upload)).toMatchObject({
+      typ: "Ręczny upload",
+      opis: "MO6: wgrano BOH_PL_NPL (2).csv (1520 produktów, nowe: 3, kluczowe/bledy: 40, wycofane: 0, auto: 1)",
+    });
+  });
+
+  it("nie rusza wartości spoza słownika, legalnych „?” ani alertów już poprawnych", () => {
+    const poprawne = dodajAlert(
+      "Synchronizacja",
+      "MO2 (JMK): pobrano 1605 produktów (nowe: 20, kluczowe/błędy: 315, wycofane: 30, auto: 3)",
+    );
+    const poprawnyTyp = dodajAlert("Błąd pobierania", "MO5 (Handlopex Rzeszów): terminated", "ostrzezenie", "nowy");
+    // Legalny „?" w treści (query string) przy typie, który 009 zna.
+    const zapytanie = dodajAlert("B??d HTTP", "MO1 (X): HTTP 500 dla https://x.pl/cennik.csv?token=1", "ostrzezenie", "nowy");
+    // Typ spoza słownika — bez dopasowania, więc nietknięty.
+    const obcy = dodajAlert("Inny b??d", "produkt?w (nowe: 1)");
+    // Fragment szablonu Synchronizacji w wierszu INNEGO typu — nietknięty (warunek po typie).
+    const obcyTyp = dodajAlert("Eksport", "X: pobrano 1 produkt?w (nowe: 0, kluczowe/b??dy: 0, wycofane: 0, auto: 0)");
+    const przed = [poprawne, poprawnyTyp, obcy, obcyTyp].map(alert);
+
+    expect(wykonaj009(sqlite)).toBe(1); // wyłącznie typ „B??d HTTP"
+    expect([poprawne, poprawnyTyp, obcy, obcyTyp].map(alert)).toEqual(przed);
+    expect(alert(zapytanie)).toMatchObject({
+      typ: "Błąd HTTP",
+      opis: "MO1 (X): HTTP 500 dla https://x.pl/cennik.csv?token=1",
+    });
+  });
+
+  /** Scenariusz cutoveru: produkcja już ma część danych naprawionych albo zmigrowanych. */
+  it("jest idempotentna treściowo — drugie wykonanie nie rusza ani jednego wiersza", () => {
+    dodajAlert("B??d pobierania", "MO3 (G): fetch failed", "ostrzezenie", "nowy");
+    dodajAlert("R?czny upload", "MO6: wgrano a.csv (1 produkt?w, nowe: 0, kluczowe/bledy: 0, wycofane: 0, auto: 0)");
+    dodajAlert("Synchronizacja", "MO2 (JMK): pobrano 1 produkt?w (nowe: 0, kluczowe/b??dy: 0, wycofane: 0, auto: 0)");
+
+    expect(wykonaj009(sqlite), "pierwszy przebieg musi cokolwiek zmienić").toBeGreaterThan(0);
+    const stanPo = sqlite.prepare("SELECT * FROM alerts ORDER BY id").all();
+
+    expect(wykonaj009(sqlite), "drugie wykonanie tego samego SQL-a musi być no-opem").toBe(0);
+    expect(sqlite.prepare("SELECT * FROM alerts ORDER BY id").all()).toEqual(stanPo);
+  });
+
+  /**
+   * ⭐ POMIAR NA KOPII `db/snapshot.db` — liczby z karty PR.3. Snapshot nie jest w repo (`.gitignore`),
+   * więc test rusza tylko z jawną ścieżką:
+   *
+   *   SNAPSHOT_DB=/ścieżka/do/db/snapshot.db npx vitest run test/db.migracje.test.ts
+   *
+   * Pracuje na KOPII w katalogu tymczasowym — oryginału nie otwiera. Na snapshocie nie puszczamy
+   * runnera (to baza produkcji bez `_migracje`), tylko sam plik 009.
+   */
+  it.skipIf(!process.env.SNAPSHOT_DB)(
+    "na kopii snapshotu: 435 typów i 2219 opisów naprawione, nic poza tym",
+    () => {
+      const kopia = join(katalog, "snapshot.db");
+      copyFileSync(process.env.SNAPSHOT_DB!, kopia);
+      const { sqlite: snap } = otworzBaze(kopia);
+      try {
+        const liczba = (sql: string) => (snap.prepare(sql).get() as { c: number }).c;
+        const zepsuteTyp = "SELECT count(*) AS c FROM alerts WHERE instr(typ, '?') > 0";
+        const zepsuteOpis =
+          "SELECT count(*) AS c FROM alerts WHERE instr(opis, 'produkt?w') > 0 OR instr(opis, 'b??dy') > 0";
+        expect(liczba(zepsuteTyp)).toBe(435);
+        expect(liczba(zepsuteOpis)).toBe(2219);
+
+        type Wiersz = { id: number; poziom: string; typ: string; opis: string; dostawca: string | null; status: string; data: string };
+        const przed = snap.prepare("SELECT * FROM alerts ORDER BY id").all() as Wiersz[];
+
+        // 435 typów + 2127 opisów Synchronizacji + 92 opisy Ręcznego uploadu. `total_changes()`
+        // liczy zmiany we WSZYSTKICH tabelach — równość dowodzi, że poza `alerts` nic nie ruszono.
+        expect(wykonaj009(snap)).toBe(435 + 2127 + 92);
+        expect(liczba(zepsuteTyp)).toBe(0);
+        expect(liczba(zepsuteOpis)).toBe(0);
+
+        // Wiersz po wierszu: zmieniły się tylko `typ` (wg słownika) i fragmenty szablonu w `opis`.
+        const slownikTypu: Record<string, string> = {
+          "B??d pobierania": "Błąd pobierania",
+          "R?czny upload": "Ręczny upload",
+          "B??d HTTP": "Błąd HTTP",
+        };
+        const oczekiwane = przed.map((w) => ({
+          ...w,
+          typ: slownikTypu[w.typ] ?? w.typ,
+          opis: w.opis
+            .replace(" produkt?w (nowe: ", " produktów (nowe: ")
+            .replace(", kluczowe/b??dy: ", ", kluczowe/błędy: ")
+            .replace(" produkt?w, nowe: ", " produktów, nowe: "),
+        }));
+        expect(snap.prepare("SELECT * FROM alerts ORDER BY id").all()).toEqual(oczekiwane);
+
+        expect(wykonaj009(snap), "drugie wykonanie na snapshocie musi być no-opem").toBe(0);
+      } finally {
+        snap.close();
+      }
+    },
+  );
 });
