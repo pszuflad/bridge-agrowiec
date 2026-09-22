@@ -12,7 +12,10 @@ import { odsiejPola } from "./pola-edytowalne.js";
  */
 const KOLUMNY_API = projekcjaKontraktowa(products, KOLUMNY_POZA_KONTRAKTEM.products);
 
-export type Produkt = Omit<typeof products.$inferSelect, "uwagaCena">;
+export type Produkt = Omit<
+  typeof products.$inferSelect,
+  (typeof KOLUMNY_POZA_KONTRAKTEM.products)[number]
+>;
 
 /**
  * Odpowiednik `U.listProducts` (backend-index.cjs:44699-44701) — CAŁA tabela, bez
