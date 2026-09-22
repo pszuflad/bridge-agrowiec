@@ -20,14 +20,13 @@
  *    react-query) — odpowiednik łatek `ackalerts` pkt 2 i 3 bez `window.dispatchEvent`.
  *    Uzasadnienie: `docs/rebuild-backlog.md` #26.
  *
- * ─── 1:1 Z ORYGINAŁEM, CHOĆ WYGLĄDA NA DEFEKT ────────────────────────────────────────
- *  • Kafel „Ostatni eksport CSV" jest TRWALE MARTWY (decyzja D3). Szuka `typ === "eksport"`
- *    w odpowiedzi `GET /api/history`, a ta trasa oddaje tabelę `history` — wiersze bez pola
- *    `typ`. Zawsze pokazuje „—" i „Brak eksportów ani importów". Szczegóły i droga naprawy:
- *    `pages/pulpit/kpi.ts`, nagłówek `znajdzPoTypie`.
- *  • `GET /api/history` zwraca dziś na stagingu `[]`, bo tabela `history` nie ma jeszcze
- *    pisarza (jedynym jest ręczna edycja produktu, jeszcze niesportowana). To NIE jest błąd
- *    i widok nie może go tak potraktować.
+ * ─── ŚWIADOME ODSTĘPSTWO (backlog #34, decyzja Ani 2026-09-21; karta P10.2, ticket 96) ───
+ *  • Kafel „Ostatni eksport CSV" pokazuje prawdziwe dane. W produkcji jest TRWALE MARTWY —
+ *    szuka `typ === "eksport"` w `GET /api/history`, której wiersze (tabela `history`) pola
+ *    `typ` nie mają. Tutaj czyta najnowszy eksport i import z `GET /api/history/paged`
+ *    (`audit_log`), a `GET /api/history` Pulpit przestał wołać — kafel był jedynym
+ *    odbiorcą tej odpowiedzi. Teksty i format daty 1:1; nowy jest tylko podpis przy błędzie zapytania.
+ *    Szczegóły: `pages/pulpit/kpi.ts`, nagłówek `opisKafelkaEksportu`.
  */
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -42,7 +41,12 @@ import { pobierzAlerty, type Alert } from "@/pages/alerty/api";
 import { useAlertyKatalogu } from "@/pages/alerty/katalog-api";
 import type { AlertKatalogu } from "@/pages/alerty/silnik-katalogu";
 import { adresZakladki, ZAKLADKA_IMPORT, ZAKLADKA_KATALOG } from "@/pages/alerty/zakladki";
-import { useDostawcy, useDziennikZmian, useProdukty, useStaging } from "@/pages/pulpit/api";
+import {
+  useDostawcy,
+  useOstatniWpisHistorii,
+  useProdukty,
+  useStaging,
+} from "@/pages/pulpit/api";
 import { formatujDate, formatujDateZGodzina, sformatujWzglednie } from "@/pages/pulpit/czas";
 import { KafelKpi } from "@/pages/pulpit/KafelKpi";
 import {
@@ -50,8 +54,8 @@ import {
   czyDzisiaj,
   czyWTymTygodniu,
   najswiezszeAlerty,
+  opisKafelkaEksportu,
   sortujDostawcowPoKodzie,
-  znajdzPoTypie,
 } from "@/pages/pulpit/kpi";
 
 /** Ikona wiersza alertu — trzy poziomy, 1:1 z `:16960-16970`. */
@@ -132,7 +136,9 @@ export function Pulpit() {
   const { data: produkty } = useProdukty();
   const { data: staging } = useStaging();
   const { data: dostawcy } = useDostawcy();
-  const { data: dziennik } = useDziennikZmian();
+  // Dwa zapytania, nie jedno `typ=all`: najnowszy wpis Historii bywa edycją produktu.
+  const eksporty = useOstatniWpisHistorii("eksport");
+  const importy = useOstatniWpisHistorii("import");
 
   // Reużycie klienta z Iteracji 6 — ten sam `queryKey`, więc widok `/alerty` i Pulpit
   // dzielą jeden wpis w cache'u zamiast pobierać listę dwa razy.
@@ -160,9 +166,10 @@ export function Pulpit() {
   const liczbaStagingu = staging?.length ?? 0;
   const noweStaging = (staging ?? []).filter((p) => czyDzisiaj(p.utworzono)).length;
 
-  // Oba wychodzą `null` zawsze — patrz nagłówek pliku i `znajdzPoTypie`.
-  const ostatniEksport = znajdzPoTypie(dziennik, "eksport");
-  const ostatniImport = znajdzPoTypie(dziennik, "import");
+  const kafelEksportu = opisKafelkaEksportu(
+    { strona: eksporty.data, blad: eksporty.isError },
+    { strona: importy.data, blad: importy.isError },
+  );
 
   const krytyczne = [...aktywneImport, ...aktywneKatalog].filter(
     (a) => a.poziom === "krytyczny",
@@ -218,17 +225,8 @@ export function Pulpit() {
         <KafelKpi
           ikona={CircleCheck}
           label="Ostatni eksport CSV"
-          wartosc={ostatniEksport?.kiedy ? sformatujWzglednie(ostatniEksport.kiedy) : "—"}
-          zmiana={
-            ostatniEksport
-              ? {
-                  kierunek: "none",
-                  text: `${ostatniEksport.dostawca ?? "wszyscy"} — ${ostatniEksport.liczbaPozycji ?? 0} produktów`,
-                }
-              : ostatniImport?.kiedy
-                ? { kierunek: "none", text: `Ostatni import: ${sformatujWzglednie(ostatniImport.kiedy)}` }
-                : { kierunek: "none", text: "Brak eksportów ani importów" }
-          }
+          wartosc={kafelEksportu.wartosc}
+          zmiana={kafelEksportu.zmiana}
           testId="kpi-export"
           href="/historia"
         />

@@ -3,10 +3,14 @@
  * (`deminified/frontend-index.js:16852-16880`) i pomocników `j2`/`b2` (`:16762-16775`).
  *
  * Wydzielone z komponentu, żeby dało się je sprawdzić bez DOM-u: to tutaj siedzą wszystkie
- * progi, sortowania i jedna udokumentowana usterka produkcji (`ostatniEksport` niżej).
+ * progi, sortowania i rysunek kafla „Ostatni eksport CSV" (`opisKafelkaEksportu` niżej —
+ * świadome odstępstwo: w produkcji ten kafel jest martwy, backlog #34).
  */
 import { STATUS_NOWY } from "@/pages/alerty/api";
-import type { WpisDziennikaZmian, DostawcaPulpitu } from "./api";
+import type { StronaHistorii } from "@/pages/historia/dane";
+import type { DostawcaPulpitu } from "./api";
+import { sformatujWzglednie } from "./czas";
+import type { Zmiana } from "./KafelKpi";
 
 /** Ile alertów mieści karta „Najnowsze powiadomienia" (`slice(0, 5)`, `:16856`). */
 export const LIMIT_ALERTOW_PULPITU = 5;
@@ -87,29 +91,68 @@ export function sortujDostawcowPoKodzie(dostawcy: DostawcaPulpitu[]): DostawcaPu
   return [...dostawcy].sort((a, b) => numer(a.kod) - numer(b.kod));
 }
 
+/** Stan jednego z dwóch zapytań kafla „Ostatni eksport CSV" — tyle, ile potrzeba do rysunku. */
+export type ZrodloKafelkaEksportu = {
+  /** Odpowiedź `GET /api/history/paged?…&limit=1`; `null` przy wygasłej sesji, `undefined` w trakcie ładowania. */
+  strona: StronaHistorii | null | undefined;
+  blad: boolean;
+};
+
+/** Tekst podpisu przy błędzie zapytania — spoza oryginału (plan.md D3 ticketu 96). */
+export const PODPIS_BLEDU_HISTORII = "Nie udało się pobrać historii";
+
 /**
- * Wpis szukany przez kafel „Ostatni eksport CSV" — port `r.find(e => "eksport" === e.typ)`
- * (`:16852`).
+ * Wartość i podpis kafla „Ostatni eksport CSV" — port rysunku z `N2` (`:16852`, `:16902-16917`).
  *
- * ⚠ TEN KAFEL JEST W PRODUKCJI TRWALE MARTWY I ODTWARZAMY GO MARTWYM (decyzja D3 użytkownika
- * z 2026-09-04). `GET /api/history` oddaje wiersze tabeli `history` — dziennik zmian pól
- * produktu — a te NIE MAJĄ pola `typ` (fixture `GET_history.json`: `{id, data, kodProduktu,
- * nazwa, pole, staraWartosc, nowaWartosc, zrodlo, kto, wykonalUzytkownikId}`). `find` nie
- * trafi więc nigdy i kafel zawsze pokazuje „—" / „Brak eksportów ani importów".
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #34, decyzja Ani 2026-09-21 „niech zacznie pokazywać datę";
+ * karta P10.2, ticket 96). W produkcji kafel jest TRWALE MARTWY: szuka `find(e => e.typ ===
+ * "eksport")` w `GET /api/history` (tabela `history`, dziennik zmian pól produktu), której
+ * wiersze pola `typ` nie mają — zawsze „—" / „Brak eksportów ani importów". Tutaj wpisy
+ * przychodzą z `GET /api/history/paged` (tabela `audit_log`), najnowszy wpis każdego typu.
  *
- * Pole `typ` niesie INNA trasa — `GET /api/history/paged` (tabela `audit_log`, wartości
- * `eksport_csv`, `import_cennika`); podpięcie jej byłoby zmianą zachowania produkcji, więc
- * czeka na decyzję Ani jako wpis w `docs/rebuild-backlog.md`. Sygnatura celowo przyjmuje
- * `WpisDziennikaZmian[]`, żeby `typ` nie dało się tu odczytać przez przypadek — zwracamy
- * `null`, dopóki źródło się nie zmieni.
+ * 1:1 z oryginałem zostają: teksty, format daty (`Bu` = `sformatujWzglednie`) i KOLEJNOŚĆ
+ * gałęzi — import trafia do podpisu tylko wtedy, gdy nie ma żadnego eksportu. Także quirk
+ * eksportu ZIP „wszyscy": backend liczy mu `liczbaPozycji` z `liczbaDostawcow`, więc podpis
+ * brzmi „wszyscy — 10 produktów", gdzie 10 to liczba DOSTAWCÓW (Historia pokazuje to samo).
+ *
+ * „Eksport" i „import" znaczą tyle, co w Historii — słownik akcji backendu
+ * (`historia/mapowanie.ts`): eksport = `eksport_csv` (pojedynczy dostawca i ZIP) oraz
+ * `eksport_shoper`; import = `upload_pliku` i `import_cennika`. Generowanie CSV dla Selly
+ * audytu nie pisze, więc się nie liczy — i nie poszerzamy słownika (backlog #21).
+ *
+ * Nowe względem oryginału jest tylko zachowanie przy BŁĘDZIE (D3): „—" i podpis
+ * {@link PODPIS_BLEDU_HISTORII}, zamiast udawać, że eksportów nie było. Błąd zapytania
+ * o import liczy się dopiero wtedy, gdy import byłby pokazany (brak eksportu).
+ * Ładowanie rysuje pusty stan — jak oryginał, który ma `data: r = []`.
  */
-export function znajdzPoTypie(
-  wpisy: WpisDziennikaZmian[] | null | undefined,
-  typ: "eksport" | "import",
-): (WpisDziennikaZmian & { kiedy?: string; dostawca?: string; liczbaPozycji?: number }) | null {
-  return (
-    (wpisy ?? []).find(
-      (w) => (w as unknown as Record<string, unknown>).typ === typ,
-    ) ?? null
-  );
+export function opisKafelkaEksportu(
+  eksport: ZrodloKafelkaEksportu,
+  imp: ZrodloKafelkaEksportu,
+  teraz: Date = new Date(),
+): { wartosc: string; zmiana: Zmiana } {
+  const ostatniEksport = eksport.strona?.items[0];
+  if (ostatniEksport) {
+    return {
+      wartosc: sformatujWzglednie(ostatniEksport.kiedy, teraz),
+      zmiana: {
+        kierunek: "none",
+        text: `${ostatniEksport.dostawca ?? "wszyscy"} — ${ostatniEksport.liczbaPozycji ?? 0} produktów`,
+      },
+    };
+  }
+  if (eksport.blad) return { wartosc: "—", zmiana: { kierunek: "none", text: PODPIS_BLEDU_HISTORII } };
+
+  const ostatniImport = imp.strona?.items[0];
+  if (ostatniImport) {
+    return {
+      wartosc: "—",
+      zmiana: {
+        kierunek: "none",
+        text: `Ostatni import: ${sformatujWzglednie(ostatniImport.kiedy, teraz)}`,
+      },
+    };
+  }
+  if (imp.blad) return { wartosc: "—", zmiana: { kierunek: "none", text: PODPIS_BLEDU_HISTORII } };
+
+  return { wartosc: "—", zmiana: { kierunek: "none", text: "Brak eksportów ani importów" } };
 }
