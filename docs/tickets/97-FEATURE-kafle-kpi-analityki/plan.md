@@ -52,7 +52,7 @@ i kontrakcie, ale traci konsumenta w UI (jak #28). Gate backendowy: N/D (brak zm
 ## Plan implementacji
 1. `NaglowekKpi.tsx`: props `filtry`, `status`, `porownanieEan`, `unikalneEan` oraz czysta funkcja
    `wartosciKafli()` (eksport, do testów jednostkowych), cztery kafle z testId `kpi-dostawcy`,
-   `kpi-ean-wspolne`, `kpi-unikalne`, `kpi-snapshoty`. Komentarz nagłówkowy przepisany: O-10a-1
+   `kpi-ean-wspolne`, `kpi-pozycje-unikalne`, `kpi-snapshoty`. Komentarz nagłówkowy przepisany: O-10a-1
    zamknięte (ticket 97), pułapka `LIMIT 1000`.
 2. `Analityka.tsx`: podpięcie nagłówka (`porownanieEan.data`, `unikalneEan.data`, `filtry`, `status`),
    usunięcie `useKpi`, aktualizacja komentarza modułu (lista odstępstw, akapit 10c).
