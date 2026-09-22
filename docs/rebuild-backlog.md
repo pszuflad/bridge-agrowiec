@@ -4164,12 +4164,12 @@ wyszukiwarkę odrzuciła jako follow-up. Wraca, bo Ania wprost jej chciała — 
 
 | Pole | Wartość |
 |---|---|
-| **Data** | 2026-09-21 (odpowiedź na pytanie 10.3) |
-| **Kategoria** | FRONTEND + BACKEND (analityka, eksport CSV) |
-| **Pliki** | `rebuild/backend/src/routes/analytics.ts` (trasa `export/:view`), `rebuild/frontend/src/pages/analityka/eksport.tsx` |
+| **Data** | 2026-09-21 (odpowiedź na pytanie 10.3), ✅ zrobione 2026-09-22 |
+| **Kategoria** | FRONTEND (analityka, eksport CSV) |
+| **Pliki** | `rebuild/frontend/src/pages/analityka/csv.ts` (nowy generator), `eksport.tsx`, dziesięć `Sekcja*.tsx`; backend nieruszony — `routes/analytics.ts` i trasa `export/:view` zostają bez zmian, tylko przestają mieć konsumenta we froncie |
 | **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-21** (ŚWIADOME ODSTĘPSTWO) |
-| **Iteracja** | do zaplanowania |
-| **Status** | decyzja i zakres podjęte (2026-09-21) — karta **P10.3** gotowa do startu po P10.1 |
+| **Iteracja** | 10 / **P10.3** |
+| **Status** | ✅ **zrobione 2026-09-22** — ticket `98-FEATURE-eksport-csv-z-tabeli`, karta `docs/karty/P10.3/` |
 
 **Co robi produkcja.** Każdy przycisk CSV pobiera dane WŁASNYM zapytaniem, innym niż karta nad nim,
 i **nie zna zaznaczonych filtrów** — zaznaczasz jednego dostawcę, a w pliku są wszyscy. Do tego
@@ -4178,9 +4178,14 @@ Opisane Ani w `instrukcja-testow-I10.md` §6.4 jako zachowanie zamierzone.
 
 **Decyzja Ani:** „można dorobić filtry". Czyli eksport ma oddawać to, co użytkownik widzi.
 
-⚠ **Zakres do rozstrzygnięcia przy zakładaniu karty:** czy „zapisz to, co widzę" obejmuje TYLKO
-filtry globalne, czy także rozjazd kolumn (Marża) i pole „Bez ruchu dni" (Rotacja). To trzy różne
-rozjazdy pod jednym hasłem i mają różny koszt.
+**Zakres rozstrzygnięty (2026-09-22, karta P10.3):** „zapisz to, co widzę" obejmuje wszystkie trzy
+rozjazdy — plik powstaje w przeglądarce z wierszy tabeli karty po filtrach globalnych i lokalnych
+(np. „Bez ruchu dni" w Rotacji), Marża idzie w przekroju grup jak tabela (bez drugiego przycisku),
+a limit 300 wierszy dotyczy tylko rysowania — plik ma wszystkie wiersze. Format: nagłówek z etykiet
+kolumn tabeli (nie kluczy pól), liczby z przecinkiem dziesiętnym, do komórki idzie surowa wartość
+pola `key` (nie tekst z ekranu — dostępność `87,5` bez `%`), brak wartości = pusta komórka; EAN-y
+i kody zostają zwykłym tekstem jak na serwerze. Backend i `GET /api/analytics/export/{view}`
+zostają nietknięte i martwe dla frontu. Szczegóły: `docs/tickets/98-FEATURE-eksport-csv-z-tabeli/`.
 
 ---
 

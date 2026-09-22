@@ -66,3 +66,16 @@ Brak. Jedna rzecz doprecyzowana w trakcie: `NaN` i ±∞ też dają pustą komó
 - **BLOCKER (dokumentacja karty/backlogu/`wejscie-98.md`)** — zrobione w fazie docs (commit „sync docs”); w chwili review ta faza jeszcze nie ruszyła.
 - **SHOULD-FIX (notacja wykładnicza w `wartoscKomorkiCsv`)** — zachowanie było poprawne (`1.5e-7` → `1,5e-7`; `1e-7` nie ma części dziesiętnej), brakowało testu. Dopisany test (także `-0` → `0`); jednostkowe 14/14.
 - **NICE-TO-HAVE** — `plan.md` ma status `Implemented`. Import `pobierzPlik` z katalogu zostaje: reviewer potwierdził buildem, że nie duplikuje modułu.
+
+## Aktualizacje dokumentacji
+- `docs/karty/P10.3/karta.md` — Stan ✅ 2026-09-22 · 98, decyzje formatu z 2026-09-22, „Dowiezione” (faktyczny zakres + testy), „Do koordynatora”:
+  - (a) backend i `routes/analytics.ts` nietknięte;
+  - (b) `export/{view}` nie ma konsumenta we froncie — zostawić czy wygasić?;
+  - (c) `docs/rebuild-roadmap.md:3402` ma #91 „do rozstrzygnięcia” (nieaktualne).
+- **Nowy:** `docs/karty/P10.4/wejscie-98.md` — delta dla Ani (Zgłosiłaś → Jest teraz → Sprawdź) i miejsca do zastąpienia w `docs/instrukcja-testow-I10.md` (`:42`, `:335-350` §6.4, `:383`, `:454`).
+- `docs/rebuild-backlog.md` #91 — Status ✅ zrobione 2026-09-22 (ticket 98), Kategoria FRONTEND, Pliki i Iteracja poprawione, akapit „zakres do rozstrzygnięcia” zastąpiony rozstrzygnięciem. Sprawdzone #32/#33/#35: bez zmian (opisują backend/produkcję).
+- `docs/spec-frontend.md` — blok 10f oznaczony jako stan sprzed P10.3; nowy blok „Odbudowa (P10.3)” w miejscu, którego dotyczy.
+- `docs/analityka-bloki-10b-10f.md` — §8.1 doprecyzowane jako opis trasy serwera + adnotacja o P10.3; wiersz inwentarza §9 opisuje bieżący mechanizm.
+- `docs/spec-backend.md`, `docs/spec-backend/wpis-90.md`, `CLAUDE.md` — sprawdzone, bez zmian (opisują tylko backend, który ticket zostawił bez zmian).
+
+**Istniejące wcześniej problemy:** `docs/rebuild-roadmap.md:3402` — wiersz #91 „do rozstrzygnięcia” nieaktualny. Tylko zgłoszone koordynatorowi, pliku nie edytowano.

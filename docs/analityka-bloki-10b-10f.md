@@ -505,10 +505,17 @@ przykłady, oba zweryfikowane:
   `export/suppliers-stability` liczy **zawsze** z `historia_cen` i oddaje inne kolumny
   (`produkty, punkty, sredniaCena, sredniStan`).
 
-Nie zakładaj więc, że da się zbudować CSV z danych, które sekcja już ma w pamięci — każdy
-widok eksportu jest portowany osobno, z własnego zapytania (`repos/analityka-eksport.ts`).
-Eksport nie niesie też żadnych parametrów: `adresEksportu()` (port `M()`) nie dokleja query
-stringu — plik CSV nie odzwierciedla filtrów ani parametrów widocznych w tabeli.
+Nie zakładaj więc, że trasa serwera `GET /api/analytics/export/{view}` da się zbudować z
+danych, które sekcja już ma w pamięci — każdy jej widok jest portowany osobno, z własnego
+zapytania (`repos/analityka-eksport.ts`), bez zmian tym ticketem. Trasa nie niesie też żadnych
+parametrów: nie dokleja query stringu — jej CSV nie odzwierciedla filtrów ani parametrów
+widocznych w tabeli.
+
+**Od P10.3 (ticket 98) to opisuje już tylko samą trasę serwera, nie przycisk „CSV" we
+froncie** — zastąpione, patrz `rebuild/frontend/src/pages/analityka/README.md` §7a: plik
+powstaje dziś w przeglądarce z wierszy i kolumn tabeli karty PO filtrach (dokładnie to, czego
+ten akapit wcześniej odradzał), `adresEksportu()` zostało usunięte, a trasa serwera nie ma już
+konsumenta we froncie (zostaje w backendzie i kontrakcie bez zmian).
 
 **Autoryzacja: sama nawigacja przeglądarki, bez `Authorization`, dowiedzione testem
 integracyjnym.** Eksport w oryginale to `window.location.href = …`
@@ -595,7 +602,7 @@ oddaje tabelę `history`, której wiersz **nie ma pola `typ`**. Odtworzone 1:1 (
 | Własny `queryFn` z jawnym query stringiem, klucz jako lista wartości a nie ścieżka (10b) — patrz §1.4 | `pages/analityka/api.ts` (`useHistoriaCenyProduktu`) |
 | Sekcja z filtrem SERWEROWYM w najprostszym wariancie (cały adres w jednym segmencie klucza, stan kontrolki w `Analityka.tsx`) | `pages/analityka/SekcjaRotacji.tsx` (10e) |
 | Kolejne przykłady wzorca sekcji (kopiuj obok `SekcjaMarze.tsx`) | trzy sekcje 10d: `SekcjaStabilnoscDostawcow.tsx` (pierwszy przykład sekcji **bez wykresu**), `SekcjaCyklZyciaDostawcow.tsx`, `SekcjaStanDostawcow.tsx`; `SekcjaCeny.tsx` z 10b i `SekcjaSezonowosci.tsx` z 10e — wzorzec wykresu **liniowego** (szereg czasowy) obok słupkowego z marż |
-| Przycisk „CSV" (port `M()`) — nawigacja `window.location.href`, bez query stringu | `pages/analityka/eksport.tsx` (`PrzyciskCsv`, `adresEksportu()`) |
+| Przycisk „CSV" — od P10.3 (ticket 98) plik w przeglądarce z wierszy/kolumn tabeli karty po filtrach, zastąpił nawigację `window.location.href` bez query stringu (port `M()`); patrz README.md §7a | `pages/analityka/eksport.tsx` (`PrzyciskCsv`), `pages/analityka/csv.ts` (`zbudujCsvTabeli`) |
 | Format CSV (port `toCsv`/`csvEscape`) | `backend/src/analityka/csv.ts` (`naCsv`, `escapujKomorke`) |
 | Kafel KPI Pulpitu (port `Si()`: ikona, wartość, trend, `href`) | `pages/pulpit/KafelKpi.tsx` |
 | Względne formatowanie czasu (port `Bu()`) — NIE to samo, co `sformatujOstatnia()` z alertów | `pages/pulpit/czas.ts` (`sformatujWzglednie`) |

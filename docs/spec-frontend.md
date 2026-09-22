@@ -482,11 +482,11 @@ ma endpoint:
 > `margins.low`/`high` w 10a). Szczegóły: `docs/tickets/24-FEATURE-analityka-ceny/`.
 
 > **Odbudowa (10f, `26-FEATURE-analityka-export-pulpit`, 2026-09-04) — zamyka Iterację 10.**
-> Dwie części. **Export CSV:** przycisk „CSV" doszedł do wszystkich dziesięciu kart
-> `/analityka` (pominięty świadomie przez 10a–10e), jako **nawigacja przeglądarki**
-> (`window.location.href`, nie `fetch`) na `GET /api/analytics/export/{view}` — cookie sesji
-> starcza, bo `SameSite=Lax` przechodzi przy nawigacji GET najwyższego poziomu; adres nie niesie
-> żadnych parametrów/filtrów. **Pulpit `/`:** ostatni placeholder Iteracji 10 odtworzony — cztery
+> Dwie części. **Export CSV (stan do P10.3, patrz niżej):** przycisk „CSV" doszedł do wszystkich
+> dziesięciu kart `/analityka` (pominięty świadomie przez 10a–10e), jako **nawigacja
+> przeglądarki** (`window.location.href`, nie `fetch`) na `GET /api/analytics/export/{view}` —
+> cookie sesji starcza, bo `SameSite=Lax` przechodzi przy nawigacji GET najwyższego poziomu;
+> adres nie niesie żadnych parametrów/filtrów. **Pulpit `/`:** ostatni placeholder Iteracji 10 odtworzony — cztery
 > klikalne kafle KPI (ikona, trend, `href`) liczone **lokalnie** z `GET /api/products` i
 > `GET /api/staging` (port `Si()`, nie `NaglowekKpi` z 10a — inny layout, inne liczby, D2),
 > karta „Najnowsze powiadomienia" (≤5, `poziom ∈ {krytyczny,ostrzezenie}` ∧ `status==="nowy"`,
@@ -497,6 +497,19 @@ ma endpoint:
 > layout realnymi alertami z `GET /api/alerts`. Kafel „Ostatni eksport CSV" jest **trwale martwy**
 > (D3) — szuka `typ==="eksport"` w `GET /api/history`, a ten wiersz nie ma pola `typ`. Szczegóły:
 > `docs/tickets/26-FEATURE-analityka-export-pulpit/`.
+>
+> **Odbudowa (P10.3, `98-FEATURE-eksport-csv-z-tabeli`, 2026-09-22) — świadome odstępstwo od
+> oryginału (#91), zastępuje mechanizm CSV z 10f.** Przyciski „CSV" wszystkich dziesięciu kart
+> `/analityka` już nie nawigują na `GET /api/analytics/export/{view}` (trasa zostaje w backendzie
+> i kontrakcie, bez konsumenta we froncie) — plik powstaje w przeglądarce (`pobierzPlik()` z
+> `pages/katalog/eksport.ts`) z wierszy i kolumn tabeli karty PO filtrach globalnych i lokalnych,
+> bez limitu 300 (limit dotyczy tylko rysowania tabeli), Marża w przekroju grup jak w tabeli.
+> Format: BOM, `;`, `\n`, cudzysłowy wg reguły serwera, nazwa `<view>.csv` — jak dotąd, ale
+> nagłówek to etykiety kolumn tabeli (nie klucze pól) i liczby idą z przecinkiem dziesiętnym
+> (odstępstwo od formatu serwera, który używa kropki); wartość komórki to surowe pole `key`
+> (np. Dostępność `87,5`, bez „%"), brak wartości → pusta komórka; pusta tabela po filtrach daje
+> plik z samym nagłówkiem, przycisk jest nieaktywny tylko podczas wczytywania karty. Szczegóły:
+> `rebuild/frontend/src/pages/analityka/README.md` §7a, `docs/tickets/98-FEATURE-eksport-csv-z-tabeli/`.
 >
 > **Odbudowa (P6.2, `77-FEATURE-pseudo-alerty-katalogowe`, 2026-09-21) — decyzja 3:** Pulpit
 > znów liczy też pseudo-alerty katalogowe (jak oryginalny `N2()`), OBOK realnych alertów importu
