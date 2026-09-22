@@ -12,12 +12,12 @@
  *    (`contract/README.md:38`), a jest jedyną trasą 10a, która PISZE do bazy.
  *
  * Ten plik jest więc świadectwem semantyki: progów, sortowań, limitów, tego które produkty
- * wchodzą do których liczników — i nieidempotentności bootstrapu, którą CHARAKTERYZUJEMY,
- * a nie naprawiamy (odbudowa odtwarza zastane zachowanie).
+ * wchodzą do których liczników — i idempotentności bootstrapu w obrębie dnia, która od P10.1
+ * jest ŚWIADOMYM ODSTĘPSTWEM od produkcji (backlog #31, decyzja 2026-09-21, ticket 90).
  *
  * Źródło prawdy dla każdej asercji: `mirror/backend/analytics_module.cjs`.
  */
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Baza } from "../src/db/index.js";
 import { historiaCen, products, stagingItems } from "../src/db/schema.js";
@@ -332,16 +332,82 @@ describe("agregaty analityki (blok 10a)", () => {
       expect(new Set(znaczniki)).toEqual(new Set([wynik.at]));
     });
 
-    it("CHARAKTERYZACJA: nie jest idempotentna — drugie wywołanie dokłada drugi komplet", () => {
-      zbudujSnapshotBiezacy(db);
+    /**
+     * ŚWIADOME ODSTĘPSTWO — backlog #31, decyzja użytkownika 2026-09-21 (ticket 90).
+     * Do P10.1 ten test CHARAKTERYZOWAŁ produkcję: drugie wywołanie dokładało drugi komplet
+     * (`INSERT … SELECT` bez warunku, `:83-88`) i `inserted` znów wynosiło 2.
+     */
+    it("drugie wywołanie tego samego dnia nie dokłada niczego — `inserted: 0`", () => {
+      const pierwszy = zbudujSnapshotBiezacy(db);
       const drugi = zbudujSnapshotBiezacy(db);
 
-      expect(drugi.inserted).toBe(2);
-      expect(statusHistorii(db).snapshots).toBe(4);
+      expect(pierwszy.inserted).toBe(2);
+      expect(drugi).toMatchObject({ ok: true, inserted: 0 });
+      expect(statusHistorii(db).snapshots).toBe(2);
+    });
 
-      // To NIE jest bug do naprawienia w tym tickecie, tylko udokumentowane zachowanie
-      // produkcji: `INSERT … SELECT` bez `ON CONFLICT` (`:83-88`). Powód, dla którego trasa
-      // świadomie nie dostaje przycisku w UI (decyzja D4, plan.md).
+    describe("„ten sam dzień” = dzień kalendarzowy UTC (#31)", () => {
+      afterEach(() => vi.useRealTimers());
+
+      const oGodzinie = (iso: string) => {
+        vi.useFakeTimers({ toFake: ["Date"] });
+        vi.setSystemTime(new Date(iso));
+      };
+
+      it("23:59 i 00:01 UTC to dwa różne dni — druga migawka wchodzi", () => {
+        oGodzinie("2026-09-21T23:59:00.000Z");
+        expect(zbudujSnapshotBiezacy(db).inserted).toBe(2);
+
+        oGodzinie("2026-09-22T00:01:00.000Z");
+        expect(zbudujSnapshotBiezacy(db).inserted).toBe(2);
+        expect(statusHistorii(db).snapshots).toBe(4);
+      });
+
+      it("00:01 i 23:59 UTC tego samego dnia — druga migawka NIE wchodzi", () => {
+        oGodzinie("2026-09-21T00:01:00.000Z");
+        zbudujSnapshotBiezacy(db);
+
+        oGodzinie("2026-09-21T23:59:00.000Z");
+        expect(zbudujSnapshotBiezacy(db).inserted).toBe(0);
+      });
+
+      it("liczy się per produkt: dzisiejsza migawka JEDNEGO produktu blokuje tylko jego", () => {
+        oGodzinie("2026-09-21T12:00:00.000Z");
+        const a1 = db.select().from(products).all().find((p) => p.kod === "A1")!;
+        // Migawka z importu (drugi pisarz, `repos/historia.ts`) — ten sam dzień, inna godzina.
+        db.insert(historiaCen)
+          .values({ produktId: a1.id, kod: "A1", dostawca: "MO1", stan: 1, zarejestrowanoAt: "2026-09-21T06:00:00.000Z" })
+          .run();
+
+        expect(zbudujSnapshotBiezacy(db).inserted).toBe(1);
+        const kody = db.select({ kod: historiaCen.kod, at: historiaCen.zarejestrowanoAt }).from(historiaCen).all();
+        expect(kody.filter((w) => w.kod === "A1")).toHaveLength(1);
+        expect(kody.filter((w) => w.kod === "A2")).toHaveLength(1);
+      });
+
+      it("migawka z wczoraj nie blokuje, a wiersz historii bez `produkt_id` nie wyłącza trasy", () => {
+        oGodzinie("2026-09-21T12:00:00.000Z");
+        const a1 = db.select().from(products).all().find((p) => p.kod === "A1")!;
+        db.insert(historiaCen)
+          .values([
+            { produktId: a1.id, kod: "A1", dostawca: "MO1", stan: 1, zarejestrowanoAt: "2026-09-20T23:59:59.999Z" },
+            // `NOT IN` z `NULL` na liście byłby zawsze fałszywy — filtr `IS NOT NULL` tego pilnuje.
+            { produktId: null, kod: "X9", dostawca: "MO1", stan: 1, zarejestrowanoAt: "2026-09-21T08:00:00.000Z" },
+          ])
+          .run();
+
+        expect(zbudujSnapshotBiezacy(db).inserted).toBe(2);
+      });
+
+      it("rozpoznaje też format domyślki schematu `YYYY-MM-DD HH:MM:SS`", () => {
+        oGodzinie("2026-09-21T12:00:00.000Z");
+        const a1 = db.select().from(products).all().find((p) => p.kod === "A1")!;
+        db.insert(historiaCen)
+          .values({ produktId: a1.id, kod: "A1", dostawca: "MO1", stan: 1, zarejestrowanoAt: "2026-09-21 03:00:00" })
+          .run();
+
+        expect(zbudujSnapshotBiezacy(db).inserted).toBe(1);
+      });
     });
   });
 });

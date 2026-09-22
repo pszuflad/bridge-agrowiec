@@ -22,6 +22,10 @@
  *    ten plik dowodzi TYLKO koperty (`{hasHistory, rows}` / `{days, rows}` / goła tablica)
  *    i braku klucza nadmiarowego. Kształt WIERSZA niosą testy jednostkowe
  *    w `analityka.dostepnosc.agregaty.test.ts` — bez nich blok nie miałby żadnego dowodu.
+ *    Od P10.1 (#32, ticket 90) `availability/*` oddają wiersze, a ich nagrania — z produkcji,
+ *    w której te zapytania się wywracały — celowo nie: fixtures zostają nietknięte, a pusta
+ *    tablica wzorca sprawia, że GATE nie widzi tu różnicy, więc `WyjatekGate` jest zbędny
+ *    (i jako niepokrywający niczego zapaliłby test).
  *
  * ⚠ DLATEGO ZASIEWAMY WIĘCEJ NIŻ 10a. `zasiejHistorieCen` daje trzy migawki JEDNEGO kodu
  * bez marki i modelu — przy takim zasiewie `lifecycle/models` zwróciłoby pustą listę, a jego
@@ -123,11 +127,16 @@ describe("GATE — kontrakt i fixtures dla analityki (blok 10e)", () => {
     const odp = await zAuth("/api/analytics/availability/products");
 
     expect(odp.status).toBe(200);
-    // ⚠ `rows` jest PUSTE mimo zasianej historii — i tak samo jest w produkcji: zapytanie
-    // gałęzi historycznej pyta `historia_cen` o nieistniejącą kolumnę `nazwa`, a port
-    // `safeAll` połyka błąd. Uzasadnienie i dowód z nagrań: `repos/analityka.ts`,
-    // nagłówek `bezpiecznieWiersze`.
-    expect(odp.body).toEqual({ hasHistory: true, rows: [] });
+    // Świadome odstępstwo, #32, 2026-09-21. Do P10.1 tu stało `toEqual({ hasHistory: true,
+    // rows: [] })` — tak jak w produkcji, gdzie zapytanie pyta o nieistniejącą `nazwa`,
+    // a `safeAll` połyka błąd. Wiersze na zasianej historii dowodzą, że trasa NIE wpada już
+    // w gałąź połykania błędu (pusta lista z `bezpiecznieWiersze` wyglądałaby jak brak danych).
+    const cialo = odp.body as { hasHistory: boolean; rows: { kod: string; dostawca: string; nazwa: string | null }[] };
+    expect(cialo.hasHistory).toBe(true);
+    expect(cialo.rows.length).toBeGreaterThan(0);
+    expect(cialo.rows.find((w) => w.kod === "MO9_336320" && w.dostawca === "MO9")?.nazwa).toBe(
+      "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL",
+    );
     sprawdzZgodnoscZKontraktem({
       metoda: "GET",
       sciezka: "/api/analytics/availability/products",
@@ -140,8 +149,11 @@ describe("GATE — kontrakt i fixtures dla analityki (blok 10e)", () => {
     const odp = await zAuth("/api/analytics/availability/sell-through");
 
     expect(odp.status).toBe(200);
-    // Ta sama przyczyna co wyżej — `MAX(nazwa)` w CTE `seq`.
-    expect(odp.body).toEqual({ hasHistory: true, rows: [] });
+    // Świadome odstępstwo, #32, 2026-09-21 — do P10.1 `rows: []` (`MAX(nazwa)` w CTE `seq`).
+    const cialo = odp.body as { hasHistory: boolean; rows: { kod: string; nazwa: string | null; zeszloSztuk: number }[] };
+    expect(cialo.hasHistory).toBe(true);
+    expect(cialo.rows.length).toBeGreaterThan(0);
+    expect(cialo.rows.every((w) => typeof w.zeszloSztuk === "number")).toBe(true);
     sprawdzZgodnoscZKontraktem({
       metoda: "GET",
       sciezka: "/api/analytics/availability/sell-through",

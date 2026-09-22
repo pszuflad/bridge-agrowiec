@@ -268,12 +268,26 @@ export type WynikBootstrapu = {
  * `POST /api/analytics/bootstrap-current` — migawka całego aktywnego katalogu do
  * `historia_cen` (`:81-91`).
  *
- * ⚠ TO NIE JEST OPERACJA IDEMPOTENTNA, i tak jest w produkcji. `INSERT … SELECT` nie ma
- * `ON CONFLICT` ani sprawdzenia, czy migawka z tym znacznikiem już istnieje — drugie
- * wywołanie dokłada DRUGI komplet wierszy, po jednym na każdy aktywny produkt. Nie
- * „naprawiamy" tego: zmiana zachowania trasy wymagałaby osobnej decyzji, a odbudowa
- * odtwarza zastane działanie. Skutek dla UI: trasa świadomie NIE dostaje przycisku
- * (decyzja D4, 2026-09-03) — oryginalny frontend też jej nigdy nie woła.
+ * ⚠ ŚWIADOME ODSTĘPSTWO OD PRODUKCJI: IDEMPOTENTNA W OBRĘBIE DNIA (backlog #31, decyzja
+ * użytkownika 2026-09-21, ticket 90). W produkcji `INSERT … SELECT` nie ma żadnego warunku
+ * i każde wywołanie dokłada komplet wierszy. Tu produkt, który ma już migawkę z bieżącego
+ * dnia, nie dostaje drugiej — drugie wywołanie tego samego dnia zwraca `inserted: 0`.
+ * Powód: od P10.1 karty „Dostępności" liczą z `historia_cen`, więc podwójne wywołanie
+ * zafałszowałoby procent dostępności i tempo schodzenia.
+ *
+ * „TEN SAM DZIEŃ" = DZIEŃ KALENDARZOWY UTC, czyli prefiks `YYYY-MM-DD` znacznika. Zmierzone
+ * na snapshocie produkcji: 100% `zarejestrowano_at` to `toISOString()` (UTC, `…Z`); reszta
+ * analityki tnie daty tym samym `substr` (miesiące: `substr(…, 1, 7)`); prefiks działa też
+ * dla formatu domyślki schematu `YYYY-MM-DD HH:MM:SS` (w SQLite również UTC). Skutek: dzień
+ * kończy się o 01:00/02:00 czasu polskiego. Liczą się migawki OBU pisarzy — produkt, któremu
+ * import dziś auto-zatwierdził zmianę, też nie dostaje drugiej migawki.
+ *
+ * ⛔ BEZ indeksu unikalnego na `historia_cen`: zablokowałby legalne zdublowane kody z jednego
+ * importu (patrz `HISTORIA_BEZ_DUPLIKATOW_KLUCZA`). `NOT IN` ma filtr `produkt_id IS NOT NULL`,
+ * bo jeden `NULL` na liście zamienia `NOT IN` w „nigdy" i trasa przestałaby cokolwiek wstawiać.
+ *
+ * Trasa nadal świadomie NIE ma przycisku w UI (decyzja D4, 2026-09-03) — oryginalny frontend
+ * też jej nigdy nie woła.
  *
  * ⚠ TO DRUGI PISARZ `historia_cen`, nie pierwszy. Pierwszym jest gałąź auto-zatwierdzania
  * importu (`repos/historia.ts`, blok 3d-1). Ten pisze partiami po całym katalogu, tamten —
@@ -286,6 +300,7 @@ export type WynikBootstrapu = {
  */
 export function zbudujSnapshotBiezacy(db: Baza): WynikBootstrapu {
   const teraz = new Date().toISOString();
+  const dzienUtc = teraz.slice(0, 10);
 
   const wynik = db.run(sql`
     INSERT INTO historia_cen (
@@ -298,6 +313,10 @@ export function zbudujSnapshotBiezacy(db: Baza): WynikBootstrapu {
            cena_zakupu, cena_sprzedazy, stan, ${teraz}
     FROM products
     WHERE status = 'aktywny'
+      AND id NOT IN (
+        SELECT produkt_id FROM historia_cen
+        WHERE produkt_id IS NOT NULL AND substr(zarejestrowano_at, 1, 10) = ${dzienUtc}
+      )
   `);
 
   return { ok: true, inserted: wynik.changes, at: teraz };
@@ -1228,14 +1247,19 @@ export function statystykiDostawcow(db: Baza): WierszStatystykDostawcy[] {
 // wyłącznie koperty; kształt WIERSZA niesie `test/analityka.dostepnosc.agregaty.test.ts`,
 // przepisany z SQL-a oryginału. Zmieniając cokolwiek niżej, zmieniasz kontrakt, którego
 // nie pilnuje żadne nagranie produkcji.
+//
+// ⚠ DWA Z TYCH PUSTYCH NAGRAŃ SĄ OD P10.1 CELOWO NIEAKTUALNE. `availability/products`
+// i `availability/sell-through` nagrano z produkcji, w której oba zapytania się wywracają
+// (backlog #32). Odbudowa je naprawia (decyzje 2026-09-21, ticket 90) i oddaje wiersze —
+// nagrania zostają nietknięte jako dowód stanu produkcji, a GATE nadal sprawdza ich kopertę.
 // ─────────────────────────────────────────────────────────────────────────────────────────
 
 /**
  * Port `safeAll(db, sql, params)` (`:51`) — zapytanie, które RZUCA, oddaje pustą listę.
  *
  * ⚠⚠ TO NIE JEST DEFENSYWA „NA WSZELKI WYPADEK". W oryginale każde z 27 zapytań analityki
- * idzie przez `safeAll`/`safeGet`, a w dwóch trasach TEGO BLOKU ten `catch` jest jedyną
- * rzeczą, która stoi między produkcją a błędem 500 — i widać to w nagraniach:
+ * idzie przez `safeAll`/`safeGet`, a w dwóch trasach TEGO BLOKU ten `catch` był jedyną
+ * rzeczą, która stała między produkcją a błędem 500 — i widać to w nagraniach:
  *
  *   `historia_cen` NIE MA KOLUMNY `nazwa`. Nie ma jej ani `rebuild/schema/001_schema.sql`,
  *   ani zrzut produkcji `db/schema.sql`, ani `ensureSchema()` samego modułu analityki
@@ -1248,9 +1272,11 @@ export function statystykiDostawcow(db: Baza): WierszStatystykDostawcy[] {
  * i `GET_analytics_availability_sell-through.json` mają mimo to `hasHistory: true`
  * i `rows: []`. Obie karty zakładki „Dostępność" są w produkcji trwale puste.
  *
- * Odtwarzamy to bez zmian — odbudowa odtwarza zastane zachowanie, a naprawa (dołożenie
- * `JOIN products` albo usunięcie kolumny z zapytania) byłaby świadomym odstępstwem, którego
- * nie pokrywa żaden fixture. Sprawa czeka na decyzję w `docs/rebuild-backlog.md`.
+ * Od P10.1 (backlog #32, decyzja Ani 2026-09-21, ticket 90) odbudowa te dwa zapytania
+ * NAPRAWIA — nazwa idzie z katalogu przez `LEFT JOIN products` — więc już tu nie wpadają.
+ * Sam helper zostaje portem 1:1: nadal osłania pozostałe zapytania analityki tak jak
+ * w oryginale, i nadal zamieni w pustą listę każdy PRZYSZŁY błąd SQL. Pusta lista z tej
+ * funkcji nie dowodzi więc braku danych (CLAUDE.md, „nie ufaj `rows: []`").
  *
  * ⚠ ASYMETRIA WOBEC 10a, ŻEBY NIE ZASKOCZYŁA: pięć funkcji bloku 10a (`filters`, `status`,
  * `kpi`, `margins`, bootstrap) NIE przechodzi przez ten helper — ich zapytania nie mogą się
@@ -1276,11 +1302,35 @@ const LIMIT_CYKLU_ZYCIA_MODELI = 1000;
 const LIMIT_ROTACJI = 1000;
 const LIMIT_OSI_IMPORTOW = 200;
 
+/**
+ * `historia_cen` z ZWINIĘTYMI duplikatami klucza `(dostawca, kod, zarejestrowano_at)` —
+ * z każdej grupy zostaje wiersz o największym `id`. Backlog #33, decyzja 2026-09-21 (ticket 90).
+ *
+ * Skąd duplikat: silnik importu liczy `zarejestrowanoAt` RAZ na cały przebieg
+ * (`import/tk.ts:171`), więc dwie linie tego samego kodu w jednym cenniku, obie
+ * auto-zatwierdzone, dają dwa wiersze historii o identycznym kluczu. W snapshocie produkcji
+ * z 2026-08-13: 30 takich grup, 67 wierszy.
+ *
+ * Dlaczego `MAX(id)`: każda linia robi osobny `UPDATE` produktu, więc w katalogu zostaje
+ * linia ostatnia — tak samo jak tu. (Wyjątek pól, zmierzony w ticket 90: gdy ostatnia linia
+ * ma `stan` równy stanowi sprzed importu, `stan` nie wchodzi do jej patcha i katalog zachowuje
+ * `stan` linii wcześniejszej. `MAX(id)` niesie wtedy `stan` ostatniej linii pliku.)
+ *
+ * Bez tego zwinięcia `GROUP BY` obok gołego `stan` brał stan z ARBITRALNEGO wiersza grupy,
+ * a funkcja okna liczyła się na tym przypadkowym wyniku. Fragment jest wspólny dla karty „4.2"
+ * i widoku eksportu `sell-through` (`repos/analityka-eksport.ts`).
+ */
+export const HISTORIA_BEZ_DUPLIKATOW_KLUCZA = sql`
+  SELECT * FROM historia_cen
+  WHERE id IN (SELECT MAX(id) FROM historia_cen GROUP BY dostawca, kod, zarejestrowano_at)
+`;
+
 /** Wiersz „4.1 Historia dostępności" liczony z `historia_cen` (`:160-166`). */
 export type WierszDostepnosciZHistorii = {
   kod: string;
   ean: string | null;
   dostawca: string;
+  /** Z katalogu po `dostawca` + `kod` (#32); `null`, gdy pozycji w katalogu już nie ma. */
   nazwa: string | null;
   /** Ile migawek złożyło się na procent — kolumna istnieje TYLKO w tej gałęzi. */
   snapshoty: number;
@@ -1316,6 +1366,18 @@ export type Dostepnosc = { hasHistory: boolean; rows: WierszDostepnosci[] };
  *
  * Sortowanie `dostepnoscPct ASC` w gałęzi z historią i `stan ASC` w zapasowej — obie stawiają
  * na górze pozycje najgorzej dostępne, ale liczą to z innych danych.
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO OD PRODUKCJI (backlog #32, decyzja Ani 2026-09-21, ticket 90).
+ * Oryginał pyta `historia_cen` o `MAX(nazwa)` — kolumny, której ta tabela nie ma — więc
+ * gałąź z historią zawsze się wywracała i karta pokazywała „Brak danych". Tu nazwa idzie
+ * z katalogu: `LEFT JOIN products` po parze `dostawca` + `kod` (sam kod mógłby wskazać
+ * pozycję innego dostawcy). Dla pozycji usuniętej z katalogu `nazwa` jest `null` — widok
+ * rysuje wtedy kreskę. Pozostałe kolumny i sortowanie bez zmian wobec SQL-a oryginału.
+ * Kolumny historii są kwalifikowane `h.`, bo `products` też ma `kod`, `ean` i `stan`.
+ * `MAX(p.nazwa)` to tylko formalność: `products.kod` jest UNIQUE, więc para ma co najwyżej jeden
+ * wiersz katalogu. `h.ean` zostaje GOŁE obok `GROUP BY h.dostawca, h.kod`, jak w oryginale —
+ * przy parze z dwoma EAN-ami w historii SQLite weźmie EAN z arbitralnego wiersza (snapshot:
+ * 9 takich par). Port 1:1, poza decyzjami P10.1 — zapisane w follow-upie ticketu 90.
  */
 export function dostepnoscProduktow(db: Baza): Dostepnosc {
   const jestHistoria = czyJestHistoria(db);
@@ -1326,12 +1388,13 @@ export function dostepnoscProduktow(db: Baza): Dostepnosc {
       rows: bezpiecznieWiersze<WierszDostepnosciZHistorii>(
         db,
         sql`
-        SELECT kod, ean, dostawca, MAX(nazwa) AS nazwa,
+        SELECT h.kod, h.ean, h.dostawca, MAX(p.nazwa) AS nazwa,
                COUNT(*) AS snapshoty,
-               ROUND(100.0 * SUM(CASE WHEN stan > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS dostepnoscPct,
-               GROUP_CONCAT(CASE WHEN stan <= 0 THEN substr(zarejestrowano_at, 1, 7) END) AS miesiaceBrakow
-        FROM historia_cen
-        GROUP BY dostawca, kod
+               ROUND(100.0 * SUM(CASE WHEN h.stan > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) AS dostepnoscPct,
+               GROUP_CONCAT(CASE WHEN h.stan <= 0 THEN substr(h.zarejestrowano_at, 1, 7) END) AS miesiaceBrakow
+        FROM historia_cen h
+        LEFT JOIN products p ON p.dostawca = h.dostawca AND p.kod = h.kod
+        GROUP BY h.dostawca, h.kod
         ORDER BY dostepnoscPct ASC
         LIMIT ${LIMIT_DOSTEPNOSCI}
       `),
@@ -1358,6 +1421,7 @@ export function dostepnoscProduktow(db: Baza): Dostepnosc {
 export type WierszTempaSchodzenia = {
   dostawca: string;
   kod: string;
+  /** Z katalogu po `dostawca` + `kod` (#32); `null`, gdy pozycji w katalogu już nie ma. */
   nazwa: string | null;
   /** Suma spadków stanu między kolejnymi migawkami; wzrosty liczą się jako zero. */
   zeszloSztuk: number | null;
@@ -1368,26 +1432,20 @@ export type TempoSchodzenia = { hasHistory: boolean; rows: WierszTempaSchodzenia
 /**
  * `GET /api/analytics/availability/sell-through` — „4.2 Tempo schodzenia z magazynu" (`:173-184`).
  *
- * ⚠⚠ TO ZAPYTANIE JEST W ORYGINALE NIEPOPRAWNE I ODTWARZAMY JE DOSŁOWNIE (decyzja D1
- * użytkownika, 2026-09-03; ticket `25-FEATURE-analityka-dostepnosc-rotacja`).
+ * ⚠⚠ DWA ŚWIADOME ODSTĘPSTWA OD PRODUKCJI (decyzje 2026-09-21, ticket 90, karta P10.1).
  *
- * CTE `seq` bierze `stan` GOŁY — bez agregatu — obok `GROUP BY dostawca, kod, zarejestrowano_at`,
- * a funkcja okna `LAG(stan) OVER (…)` liczy się PO tej agregacji. SQLite na to pozwala
- * (SQL92 nie), więc:
+ * 1. NAZWA Z KATALOGU (backlog #32). Oryginał bierze `MAX(nazwa)` z `historia_cen`, która tej
+ *    kolumny nie ma — zapytanie zawsze się wywracało, karta pokazywała „Brak danych". Tu:
+ *    `LEFT JOIN products` po `dostawca` + `kod`; usunięta pozycja → `nazwa: null`.
+ * 2. DUPLIKATY KLUCZA ZWINIĘTE PRZED `LAG` (backlog #33). CTE `seq` oryginału bierze `stan`
+ *    GOŁY obok `GROUP BY dostawca, kod, zarejestrowano_at` i liczy `LAG` PO tej agregacji —
+ *    przy ≥ 2 wierszach na klucz SQLite bierze `stan` z arbitralnego wiersza grupy. Póki
+ *    zapytanie wywracało się na `nazwa`, było to nieosiągalne; naprawa #32 by to odsłoniła.
+ *    Tu `LAG` liczy się na `HISTORIA_BEZ_DUPLIKATOW_KLUCZA` (wiersz o `MAX(id)`), więc wynik
+ *    jest określony i stabilny między wywołaniami.
  *
- *  • gdy na `(dostawca, kod, zarejestrowano_at)` przypada DOKŁADNIE JEDEN wiersz — a tak jest
- *    w zdecydowanej większości przypadków — `GROUP BY` jest bezczynne i wynik wychodzi
- *    poprawny: `LAG` porównuje kolejne migawki po dacie;
- *  • gdy wierszy jest ≥ 2, SQLite bierze `stan` z ARBITRALNEGO wiersza grupy
- *    (implementation-defined; empirycznie: z wstawionego jako pierwszy), a `MAX(nazwa)`
- *    z całej grupy. Wynik przestaje być określony przez standard.
- *
- * Drugi przypadek JEST osiągalny w tej odbudowie: `import/tk.ts:171,548-564` liczy
- * `zarejestrowanoAt` RAZ na cały import, więc dwie linie tego samego `kod` w jednym cenniku
- * dają dwa wiersze `historia_cen` o identycznym kluczu grupowania. Fixture
- * `GET_analytics_availability_sell-through.json` ma `rows: []`, więc GATE tego nie wykryje —
- * zachowanie charakteryzuje test w `test/analityka.dostepnosc.agregaty.test.ts`, a sprawa
- * czeka na decyzję w `docs/rebuild-backlog.md` (wpis o pułapce `GROUP BY` + `LAG`).
+ * Reszta (suma spadków, wzrosty jako zero, sortowanie, limit) — bez zmian wobec oryginału.
+ * Kolumny `seq` są kwalifikowane `s.`, bo `products` też ma `kod` i `stan`.
  *
  * Bez historii oryginał NIE MA gałęzi zapasowej — zwraca pustą listę (`:174`).
  */
@@ -1400,16 +1458,17 @@ export function tempoSchodzenia(db: Baza): TempoSchodzenia {
     rows: bezpiecznieWiersze<WierszTempaSchodzenia>(
       db,
       sql`
-      WITH seq AS (
-        SELECT dostawca, kod, MAX(nazwa) AS nazwa, stan,
+      WITH zwiniete AS (${HISTORIA_BEZ_DUPLIKATOW_KLUCZA}),
+      seq AS (
+        SELECT dostawca, kod, stan,
                LAG(stan) OVER (PARTITION BY dostawca, kod ORDER BY zarejestrowano_at) AS prev_stan
-        FROM historia_cen
-        GROUP BY dostawca, kod, zarejestrowano_at
+        FROM zwiniete
       )
-      SELECT dostawca, kod, nazwa,
-             SUM(CASE WHEN prev_stan > stan THEN prev_stan - stan ELSE 0 END) AS zeszloSztuk
-      FROM seq
-      GROUP BY dostawca, kod
+      SELECT s.dostawca, s.kod, MAX(p.nazwa) AS nazwa,
+             SUM(CASE WHEN s.prev_stan > s.stan THEN s.prev_stan - s.stan ELSE 0 END) AS zeszloSztuk
+      FROM seq s
+      LEFT JOIN products p ON p.dostawca = s.dostawca AND p.kod = s.kod
+      GROUP BY s.dostawca, s.kod
       ORDER BY zeszloSztuk DESC
       LIMIT ${LIMIT_TEMPA_SCHODZENIA}
     `),

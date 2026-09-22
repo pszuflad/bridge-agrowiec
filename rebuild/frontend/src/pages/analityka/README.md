@@ -313,12 +313,16 @@ użytkownika z 2026-09-04; szczegóły w §7):
 | O-10f-1 | Karta powiadomień i kafel alertów Pulpitu na realnych `/api/alerts`, zamiast pseudo-alertów katalogowych `pv()` | D1 — kontynuacja odstępstwa D1 z Iteracji 6 (backlog #26) |
 | — | Przycisk „CSV" w dziesięciu kartach `/analityka` | D4 — trasa `export/{view}` wreszcie istnieje; 10a i 10d świadomie ją pomijały do tego momentu |
 
-**1:1 z oryginałem, choć wygląda na defekt:** karty „4.1 Historia dostępności pozycji"
-i „4.2 Tempo schodzenia z magazynu" są **puste zawsze**. Ich zapytania pytają `historia_cen`
-o kolumnę `nazwa`, której ta tabela nie ma — produkcja połyka błąd i zwraca `rows: []` mimo
-15 597 migawek w historii (dowód w fixtures). Odtwarzamy to zachowanie; sprawa czeka na
-decyzję jako wpis **#32** w `docs/rebuild-backlog.md`. Nie „naprawiaj" tego przy okazji
-innego bloku — to jest zmiana zachowania produkcji i wymaga decyzji użytkownika.
+**Do P10.1 odtwarzane 1:1, od P10.1 naprawione (świadome odstępstwo):** karty „4.1 Historia
+dostępności pozycji" i „4.2 Tempo schodzenia z magazynu" oraz ich eksporty CSV są w produkcji
+**puste zawsze** — zapytania pytają `historia_cen` o kolumnę `nazwa`, której ta tabela nie ma,
+a produkcja połyka błąd i zwraca `rows: []` mimo 15 597 migawek (dowód w fixtures). Backend
+odbudowy to naprawia (decyzja Ani 2026-09-21, wpisy **#32** i **#33** w `docs/rebuild-backlog.md`,
+ticket `90-FEATURE-ozywienie-kart-dostepnosci`): nazwa idzie z katalogu po `dostawca` + `kod`,
+a pozycja usunięta z katalogu przychodzi z `nazwa: null`, którą `formatuj()` rysuje jako „—”.
+Widok nie wymagał zmiany kodu. Nagrania `availability/*` w `contract/fixtures/` zostają puste
+jako dowód stanu produkcji — w testach widoku wiersze buduje się ręcznie z kształtu
+udowodnionego testami backendu.
 
 ## 5. Co ustalił blok 10b (`24-FEATURE-analityka-ceny`, 2026-09-04)
 

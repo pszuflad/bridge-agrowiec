@@ -439,11 +439,17 @@ ma endpoint:
 > 10a („Rotacja / produkty bez aktualizacji", „Cykl życia modelu") — `ZakladkaWPrzygotowaniu`
 > zostaje już tylko w zakładce `ceny` (blok 10b). Jedyny filtr serwerowy całej analityki: pole
 > „Bez ruchu dni" (`?days` w `rotation/inactive`). Kolejny wykres (O-10e-1, kontynuacja O-10a-3):
-> linia „średnia cena zakupu wg miesiąca" nad kartą sezonowości, jedna seria. **Dwie z pięciu
-> kart („Historia dostępności pozycji", „Tempo schodzenia z magazynu") pokazują „Brak danych"
-> niezależnie od stanu bazy** — port 1:1 zapytania, które w produkcji zawsze zawodzi (brak
-> kolumny `nazwa` w `historia_cen`, patrz `spec-backend.md` §2 i `rebuild-backlog.md` #32).
-> Szczegóły: `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
+> linia „średnia cena zakupu wg miesiąca" nad kartą sezonowości, jedna seria. Szczegóły:
+> `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`.
+>
+> **Odbudowa (P10.1, `90-FEATURE-ozywienie-kart-dostepnosci`, 2026-09-22) — świadome odstępstwo:**
+> karty „Historia dostępności pozycji" i „Tempo schodzenia z magazynu", pierwotnie „Brak danych"
+> niezależnie od stanu bazy (port 1:1 zapytania, które w produkcji zawsze zawodzi na brakującej
+> kolumnie `historia_cen.nazwa`, `safeAll()` połyka błąd), pokazują teraz wiersze: backend łączy
+> historię z katalogiem po `(dostawca, kod)`; pozycja usunięta z katalogu ma „—" w kolumnie
+> „Nazwa" (istniejący `formatuj()`). To samo dotyczy obu eksportów CSV tych kart. Kod komponentów
+> FE bez zmian — sam backend przestał oddawać pustkę. Szczegóły: `spec-backend.md` §2,
+> `docs/rebuild-backlog.md` #31/#32/#33/#35, `docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/`.
 
 > **Odbudowa (10b, `24-FEATURE-analityka-ceny`, 2026-09-04):** zakładka `ceny`
 > („Ceny w czasie") wypełniona — trzy karty oryginału 1:1: „3.1 Zmiany cen z ostatnich
