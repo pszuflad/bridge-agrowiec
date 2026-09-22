@@ -2947,6 +2947,14 @@ w repo i działa przy każdym deployu, zamiast zależeć od tego, czy ktoś pami
 na serwerze. Wartości domyślnych w `env.ts` **nie zmieniono** — dla produkcji są poprawne
 i wierne oryginałowi. Przy okazji dołożono `SELLY_TRYB` (patrz niżej).
 
+**Skutek uboczny tej naprawy (znaleziony i naprawiony w `93-CHORE-diagnoza-selly-csv-staging`,
+2026-09-22).** Nowy `SELLY_CSV_DIR` stagingu leży **pod docrootem** (żeby link „Pobierz CSV"
+działał), a krok publikacji frontendu w `deploy-staging.sh` robił `rsync -a --delete` na cały
+docroot — każdy deploy kasował właśnie ten katalog razem z wygenerowanym plikiem CSV. Objaw:
+„Brak pliku CSV" wracał po każdym merge'u do `develop`, mimo że przycisk „Wygeneruj CSV teraz"
+działał poprawnie. Naprawione nowym `tools/publikuj-frontend.sh`, który wyklucza `SELLY_CSV_DIR`
+z `--delete`; produkcja bez zmian (nie ma `rsync --delete` na `panel/`).
+
 ---
 
 ### #47 · 2026-09-04 · [DEPLOY] · brak sekretów Selly to zabezpieczenie przez NIEOBECNOŚĆ
