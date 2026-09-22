@@ -3319,7 +3319,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
 | **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
 | **Iteracja** | **→ I15** (dawne 13d), podzielone na **I15.6** (schemat + discovery + Tor 1), **I15.7** (Tor 2), **I15.8** (harmonogram + trasy `sync-*`). |
-| **Status** | 🔨 **częściowo — I15.6 zrobione** (ticket 108, 2026-09-22, `feature/108-selly-rest-discovery-delta`): migracja 013 (`selly_products` wariantowa, stara → `selly_products_old`), discovery (odnajdywanie/zakładanie mapowań, cache kodów, limiter) i Tor 1 (`sync_delta`) przeportowane 1:1 z `origin/main:7d6cfc9`. Tor 2 (`sync_full`/`mapper_v2`/`loadDictMaps`) → **I15.7**; harmonogram i trasy `sync-*` → **I15.8** — nic z tego jeszcze nie jest uruchamiane w procesie. (Wcześniejszy port `13d-1`, PR #57, został **COFNIĘTY** `46-CHORE-revert-13d1-selly`, 2026-09-09 — I15.6 to świeży, niezależny port z finalnego stanu produkcji, nie wznowienie tamtej gałęzi.) |
+| **Status** | 🔨 **częściowo — I15.6 i I15.7 zrobione.** I15.6 (ticket 108, 2026-09-22, `feature/108-selly-rest-discovery-delta`): migracja 013 (`selly_products` wariantowa, stara → `selly_products_old`), discovery (odnajdywanie/zakładanie mapowań, cache kodów, limiter) i Tor 1 (`sync_delta`) przeportowane 1:1 z `origin/main:7d6cfc9`. I15.7 (ticket 109, 2026-09-22, `feature/109-selly-rest-sync-full`): Tor 2 (`sync_full`→`src/selly/rest/sync-full.ts`, `mapper_v2`→`src/selly/rest/mapper-v2.ts`, `loadDictMaps`) przeportowany 1:1, w tym #81. Zostaje **I15.8**: harmonogram i trasy `sync-*` — nic z tego jeszcze nie jest uruchamiane w procesie. (Wcześniejszy port `13d-1`, PR #57, został **COFNIĘTY** `46-CHORE-revert-13d1-selly`, 2026-09-09 — I15.6/I15.7 to świeży, niezależny port z finalnego stanu produkcji, nie wznowienie tamtej gałęzi.) |
 
 ### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
 | pole | wartość |
@@ -3391,7 +3391,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Brak — to defekt zastanego kodu, znaleziony przy porcie `45-FEATURE-selly-rest-sync-tor1` (13d-1). `client.cjs:request()` odrzuca (rzuca) każdą odpowiedź spoza 2xx, więc `apiWithRetry` nigdy nie ogląda `r.status !== 429` — gałąź backoff z `Retry-After` jest nieosiągalna. Burzę 429 z cyklu 07.09 20:10 ugasił `globalLimiter.acquire()` (throttle przed każdym requestem), nie retry. |
 | **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** (decyzja D2, `45-FEATURE-selly-rest-sync-tor1`): naprawa zmieniłaby obserwowalne zachowanie (mniej wpisów `error`, inne czasy) względem produkcji. Gałąź zostaje w kodzie jako nieosiągalna, z komentarzem. |
 | **Iteracja** | zamknięte w **13d-1** (port odtwarza defekt 1:1) |
-| **Status** | ✅ udokumentowane i przeportowane 1:1; nie wymaga dalszej akcji, chyba że Ania naprawi u siebie — wtedy do rewizji przy 13d-2 |
+| **Status** | ✅ udokumentowane i przeportowane 1:1; nie wymaga dalszej akcji, chyba że Ania naprawi u siebie — wtedy do rewizji przy 13d-2. Tor 2 (ticket 109, I15.7) odtwarza ten sam charakter defektu: gałęzie „PUT zwrócił status spoza 2xx” po zapisie są martwe (klient rzuca na non-2xx). |
 
 ### #67 · 2026-09-08 · [BACKEND][BAZA] · stary `POST /api/selly/sync-supplier` (I8) zepsuty przez nowy schemat `selly_products`
 | pole | wartość |
@@ -3421,7 +3421,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Brak — zastany defekt, wyszedł przy pisaniu testów w `45-FEATURE-selly-rest-sync-tor1` (13d-1, port cofnięty), niezależnie zweryfikowany w code review na oryginale. Krok „rodzeństwo" szuka `selly_product_id` po samym `kod_importu`, a ta kolumna jest `NOT NULL` — więc **jeśli wiersz istnieje, rodzeństwo zawsze poda `product_id`** (wiersz podaje go sam sobie) i sterowanie nigdy nie dochodzi do gałęzi „brak dictMaps"; **jeśli wiersza nie ma**, komunikat `'produkt nie istnieje w Selly ale brak dictMaps do createProduct'` owszem powstaje, ale `markError` robi `UPDATE ... WHERE kod_importu=? AND dostawca=?` bez `INSERT` i nie trafia w żaden wiersz. Błąd jest policzony w `stats.err`/`errors[]`, ale w bazie nie zostaje ślad — zgodne z komentarzem DDL, który zna tylko `pending \| ok \| error \| not_found` (nie `pending_create`). |
 | **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** w porcie. Kosmetyczny defekt operacyjny: Tor 1 i tak ustawia `ok` po udanym PUT-cie, więc synchronizacja się nie psuje, ale diagnostyka w panelu jest myląca (produkt nieznany w Selly nie zostawia śladu). |
 | **Iteracja** | port defektu zamknięty w **I15.6** (ticket 108, 2026-09-22, świeży port z `origin/main:7d6cfc9`; poprzedni port `13d-1` był cofnięty rewertem #58); naprawa → **do decyzji Ani po cutoverze** |
-| **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę |
+| **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę. Tor 2 (ticket 109, I15.7) odtwarza ten sam charakter defektu: `markError` robi `UPDATE` bez `INSERT` (własna klasyfikacja `missing_dict`/`error`, inna niż Tor 1). |
 
 ### #70 · 2026-09-09 · [BACKEND][BAZA] · `ON CONFLICT DO UPDATE` w discovery nie odświeża `ostatni_status` — stary `pending_create` przeżywa udane odnalezienie wariantu
 | pole | wartość |
@@ -3431,7 +3431,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Brak — zastany defekt, zweryfikowany w `45-FEATURE-selly-rest-sync-tor1` (13d-1, port cofnięty). UPSERT po odnalezieniu/utworzeniu wariantu nie nadpisuje kolumny `ostatni_status`, więc wiersz, który wcześniej dostał `pending_create`, po udanym `found_variant`/`created_variant` nadal pokazuje `pending_create` w panelu, mimo że mapowanie jest już poprawne. |
 | **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** w porcie. Kosmetyczny defekt operacyjny, ten sam charakter co #69 (nie psuje synchronizacji, tylko diagnostykę). |
 | **Iteracja** | port defektu zamknięty w **I15.6** (ticket 108, 2026-09-22, świeży port z `origin/main:7d6cfc9`; poprzedni port `13d-1` był cofnięty rewertem #58); naprawa → **do decyzji Ani po cutoverze** |
-| **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę |
+| **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę. Ścieżki B/C Toru 2 (ticket 109, I15.7) wołają ten sam `discovery.ensureMapping`, więc odziedziczają ten defekt bez zmian. |
 
 ### #71 · 2026-09-09 · [FRONTEND] · regresja `konstrukcja` w ŻYWEJ produkcji — łatka pass-through poszła w martwy bundle
 | pole | wartość |
@@ -3521,7 +3521,7 @@ warstw naraz. Trzy uwagi:
 | **Pliki** | `mirror/backend/kategoria_norm_map_pplx.sql` (bak `.bak_pre_category_fix_20260911_101000`), `zastosowanie_selly_map_pplx.sql` (bak j.w.), `zastosowanie_selly_map_v2_pplx.sql` (bak j.w.), `selly/sync_full.cjs` (bak j.w.) |
 | **Commit** | `2a2a1da` (2026-09-11 11:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — **wykonanie razem z przepisywanym 13d** (dziś I15.6/I15.7), nie osobno. |
-| **Status** | 🔨 **częściowo — kod gotowy, dane jeszcze nie załadowane.** Ticket 108 (I15.6, 2026-09-22): kod discovery nie ma żadnych zahardkodowanych ID kategorii — `selly_category_id` bierze się wyłącznie z `dictMaps.catMap` (wstrzykiwane z zewnątrz). Samo ładowanie tej mapy (dane z `selly_kategoria_norm_map`, `sync_full.loadDictMaps()`) to **I15.7** — dopiero tam wpis domknie się w całości. |
+| **Status** | ✅ **domknięte po stronie Toru 2 (ticket 109, I15.7, 2026-09-22).** Ticket 108 (I15.6): kod discovery nie ma żadnych zahardkodowanych ID kategorii — `selly_category_id` bierze się wyłącznie z `dictMaps.catMap` (wstrzykiwane z zewnątrz). Ticket 109: `loadDictMaps()` (`src/selly/rest/sync-full.ts`) czyta `catMap` z `selly_kategoria_norm_map` (klucz `lower(kategoria_raw)`) — zero ID kategorii zaszytych w kodzie, sprawdzone testem. |
 
 **Opis biznesowy.** Audyt synchronizacji wykazał dwie rzeczy naraz. Po pierwsze, w lokalnym cache
 `selly_products` brakowało 95 wpisów dla produktów i wariantów, które w Selly już istniały
@@ -3763,8 +3763,8 @@ pisaniem własnych testów**, bo niesie oczekiwania Ani co do wartości graniczn
 | **Kategoria** | BACKEND (Selly, Tor 2 / `sync_full`) |
 | **Pliki** | `mirror/backend/selly/sync_full.cjs` (bak `.bak_pre_filtermirror_20260917_1654`), `selly/mapper_v2.cjs` (bak j.w.), `cleanup_selly_filters_20260917.cjs` (jednorazowy, dodany w `5dedefb`, **usunięty** w `65dcbd0`), zrzuty `selly_backups/categories_filters_*.json` |
 | **Commit** | `5dedefb` (2026-09-17 17:00, drugi temat) + `65dcbd0` (18:00, scopefix + publikacja CSV) |
-| **Do nowej wersji?** | 🕒 **PÓŹNIEJ — odłożone do 13d.** Decyzja użytkownika 2026-09-18. Kod czeka na świeże przepisanie podsystemu Selly (port 13d-1 cofnięty revertem #58, docieranie u Ani trwa). **Zapisane w roadmapie, blok 13d** — razem z obalonym ustaleniem o `PUT features`, żeby nie zginęło do czasu startu 13d. |
-| **Status** | 🕒 **odłożone do 13d** — zapisane w `docs/rebuild-roadmap.md`, blok **13d** (razem z obalonym ustaleniem o `PUT features`). Nowej karty NIE zakładać. |
+| **Do nowej wersji?** | ✅ **TAK — zrobione ticketem 109 (I15.7, 2026-09-22).** Decyzja użytkownika 2026-09-18 (odłożenie do 13d/I15.7) zrealizowana: `isMetadataOwner`/`metadataScore` weszły jako świadoma logika biznesowa, nie 1:1 defekt. |
+| **Status** | ✅ **zrobione w I15.7** (`109-FEATURE-selly-rest-sync-full`, `src/selly/rest/sync-full.ts` + `mapper-v2.ts`): ścieżka A robi `GET /api/products/{pid}` → payload `includeFeatures:true` → `PUT` z cechami i `category_id`; cechy i kategorię pisze wyłącznie kanoniczny rekord (najwięcej wypełnionych metadanych, remis → niższe `products.id`), grupa o różnych kategoriach pomijana; cecha zarządzana przez Bridge i teraz pusta NIE dziedziczy starej wartości z Selly; martwa `fetchVariantFeatures` nie istnieje w porcie. |
 
 **Opis biznesowy.** Zgłoszenie Ani: dane synchronizowane z Bridge nie mają tworzyć sklejonych
 wartości filtra „Rozmiar" w sklepie ani pozwalać, żeby warianty różnych dostawców nadpisywały sobie
@@ -3796,8 +3796,8 @@ produkcyjny 2026-09-17 potwierdzil, ze PUT /api/products/{pid} przyjmuje pelna t
 mimo braku tego pola w fields_edit". **Roadmapa I14 wymienia „aktualizacja CECH istniejących
 produktów w Selly (u Ani PUT features usunięty po HTTP 400)" wśród priorytetów Ani do triażu —
 ta przesłanka jest już nieaktualna.** Przenoszę to ustalenie do bloku 13d w roadmapie.
-Sam kod czeka na przepisanie 13d (port cofnięty revertem #58); `isMetadataOwner` to **nowa
-logika biznesowa**, nie defekt do odtworzenia 1:1, więc wchodzi świadomie, nie automatem.
+✅ **Domknięte w I15.7** (ticket 109, 2026-09-22): `isMetadataOwner` to **nowa
+logika biznesowa**, nie defekt do odtworzenia 1:1, i weszła świadomie, nie automatem.
 `cleanup_selly_filters_20260917.cjs` był narzędziem jednorazowym i Ania go po użyciu usunęła —
 **nie portować**.
 
@@ -4510,7 +4510,7 @@ potwierdzenie), a celem nr 1 jest domknięcie odbudowy 1:1. W I15 port 1:1 (osie
 | **Kategoria** | BAZA + BACKEND — zgłoszony defekt produkcji |
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (lista per dostawca MO1–MO10 bez MO6, `sqlCase()`), triggery `products_blokowane_formy_ai/_au` (`origin/main:db/schema.sql`), `extensions.cjs` (`ensurePaymentBlocks()` przy starcie); powiązane #73 |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D6):** naprawić w I15 po pomiarze na kopii produkcji (23.09); karta wg przyczyny (I15.1 albo I15.6/I15.7) |
-| **Status** | — przyczyna NIEZNANA, do zmierzenia |
+| **Status** | ⬜ **do naprawy, przyczyna wciąż do rozstrzygnięcia przez użytkownika.** Pomiar ticketu 109 (I15.7, 2026-09-22): payload REST Toru 2 (`mapper-v2.ts`/`sync-full.ts`) tego pola NIE niesie — `git grep -niE "payment|platnos|płatno|block" 7d6cfc9 -- mirror/backend/selly/` daje zero trafień; pole żyje wyłącznie w starym eksporcie CSV (`generate_selly_export.cjs:75,142-143`, kolumna `Blokowane-formy-platnosci` z fallbackiem `paymentBlocks.getBlockedPaymentForms(dostawca)`) i w `payment_blocks.cjs` (triggery `products_blokowane_formy_ai/_au`). Hipoteza (b) zyskuje dowód: produkty zakładane przez REST auto-create (od 2026-09-08) wchodzą do Selly bez tego pola. Ticket 109 świadomie NIE naprawia (port 1:1; dopisanie pola wymaga decyzji użytkownika i nazwy pola w REST API Selly, której w repo nie ma). |
 
 **Odpowiedź Ani:** „trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie
 tego nie ma - każdy nowy produkt ma to pole puste a to ono wyznacza opcje metody dostawy i cenę dla danego dostawcy”.
@@ -4541,3 +4541,23 @@ pomiaru: w Bridge → karta I15.1; w Selly → karty I15.6/I15.7.
 systemowy spoza aplikacji. Po cutoverze stary cron dalej uruchamiałby STARY skrypt na tej samej bazie (dałby plik, ale
 z logiką starego stosu), a bez niego plik przestałby się odświeżać i Selly o 12:00 zaciągałby wczorajszy katalog.
 **Rekomendacja:** I15.3 dokłada polecenie CLI generatora (np. `npm run selly:csv`), cutover przepina cron na nie.
+
+---
+
+### #103 · 2026-09-22 · [BACKEND] · `routes_sync.cjs` importuje nieistniejące `runFullTodays` ze `scheduler_selly.cjs` — trasy `sync-full-today`/`sync-full-force` na produkcji zawsze dają 500
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (znalezione przy porcie ticketu 109, I15.7) |
+| **Kategoria** | BACKEND (Selly REST, trasy `sync-*`) — defekt produkcji |
+| **Pliki** | `mirror/backend/selly/routes_sync.cjs:14` (import `runFullTodays` z `./scheduler_selly.cjs`), `scheduler_selly.cjs` (eksportuje `runFullBatch`, nie `runFullTodays`) |
+| **Do nowej wersji?** | ⬜ **do decyzji — zakres karty I15.8: naprawić import czy odtworzyć awarię 1:1** |
+| **Status** | ⬜ do decyzji — zmierzone, nienaprawione (poza zakresem I15.6/I15.7, montaż tras jest w I15.8) |
+
+**Na czym polega.** `routes_sync.cjs` importuje z `scheduler_selly.cjs` funkcję `runFullTodays`, której moduł nie
+eksportuje (eksportuje `runFullBatch`). Import `undefined` wywołany jako funkcja rzuca `TypeError`, więc na
+produkcji `POST /api/selly/sync-full-today` i `POST /api/selly/sync-full-force` zawsze kończą się HTTP 500 —
+niezależnie od stanu danych czy Selly. `syncFullForDostawca` (`sync_full.cjs`, przeportowane w I15.7 jako
+`src/selly/rest/sync-full.ts`) samo w sobie działa poprawnie; awaria jest wyłącznie w montażu trasy.
+**Rekomendacja:** rozstrzygnąć w I15.8 (harmonogram + trasy `sync-*`) — naprawić import (odstępstwo świadome)
+albo odtworzyć 500 1:1, zgodnie z regułą projektu o defektach zastanych.

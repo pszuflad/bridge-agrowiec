@@ -1,6 +1,6 @@
 # 109-FEATURE-selly-rest-sync-full — Selly REST 2: nocna pełna synchronizacja (Tor 2)
 
-> Status: Draft
+> Status: Implemented
 > Branch: `feature/109-selly-rest-sync-full`
 > Worktree: `.worktrees/109-FEATURE-selly-rest-sync-full`
 > Karta: `docs/karty/I15.7/` (karta.md + wejscie-108.md)
@@ -84,9 +84,9 @@ Harmonogram i rotacja dostawców, trasy `sync-*`, montaż jednej instancji disco
 w serwerze (I15.8); `generator-csv.ts` (I15.3); migracje; naprawa #101; bug `runFullTodays` (I15.8).
 
 ## Definition of done
-- [ ] `mapper-v2.ts` i `sync-full.ts` portują oryginał 1:1 (poza D1), #81 w całości.
-- [ ] `getProduct` w kliencie, atrapie i `METODY_ODCZYTU`; test kompletności zielony.
-- [ ] Testy mappera i Toru 2 na atrapie; żaden test nie woła sieci.
-- [ ] lint, typecheck, build, test zielone; `selly.gate.test.ts` bez zmian w fixtures.
-- [ ] Karta I15.7: stan, Dowiezione, Do koordynatora (#101, sygnatura, rotacja/`buildCache`, `SELLY_TRYB`);
+- [x] `mapper-v2.ts` i `sync-full.ts` portują oryginał 1:1 (poza D1), #81 w całości.
+- [x] `getProduct` w kliencie, atrapie i `METODY_ODCZYTU`; test kompletności zielony.
+- [x] Testy mappera i Toru 2 na atrapie; żaden test nie woła sieci.
+- [x] lint, typecheck, build, test zielone; `selly.gate.test.ts` bez zmian w fixtures.
+- [x] Karta I15.7: stan, Dowiezione, Do koordynatora (#101, sygnatura, rotacja/`buildCache`, `SELLY_TRYB`);
       wejście dla I15.8.
