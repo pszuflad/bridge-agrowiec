@@ -33,13 +33,9 @@ function rawEan(record) {
 }
 function identity(r) {
   const core=['marka','model','rozmiar',...OPTIONAL].map(k=>norm(r[k]));
-  core.push(variant(r));
   // Keep a stable descriptive fallback when the supplier omits essential fields.
   if(!r.marka || !r.model || !r.rozmiar) core.push(norm(r.nazwa));
   return core;
-}
-function variant(r){
-  return /DEMO/i.test(String(r.kodDostawcy||r.kod||''))||/\bDEMO\b/i.test(String(r.nazwa||''))?'DEMO':'STANDARD';
 }
 function syntheticCode(supplier,r) {
   return `${supplier}_AUTO_${hash(identity(r)).slice(0,18).toUpperCase()}`;
@@ -56,7 +52,6 @@ function compatibility(a,b) {
       if(!norm(a[k])||!norm(b[k]))missing.push(k);else different.push(k);
     }
   }
-  if(variant(a)!==variant(b))different.push('wariant DEMO');
   return {ok:!missing.length&&!different.length,missing,different};
 }
 function version(p) {
@@ -65,15 +60,9 @@ function version(p) {
 function sourceKey(supplier,r) {
   return hash([supplier,r._kodSynthetic?'':r.kod,identity(r),String(rawEan(r)??'')]);
 }
-function codeKey(supplier,value) {
-  return norm(value).replace(new RegExp(`^${String(supplier).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}_`),'');
-}
 function fail(message) { const e=new Error(message);e.status=409;throw e; }
 function install({U,db,normalize,classify,badName,ext}) {
   db.exec('CREATE TABLE IF NOT EXISTS staging_matches(supplier TEXT NOT NULL,source_key TEXT NOT NULL,product_code TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(supplier,source_key))');
-  db.exec(`CREATE TABLE IF NOT EXISTS supplier_feed_state(supplier TEXT PRIMARY KEY,last_identity_hash TEXT,last_item_count INTEGER NOT NULL DEFAULT 0,max_item_count INTEGER NOT NULL DEFAULT 0,updated_at TEXT NOT NULL,last_counted_at TEXT);
-    CREATE TABLE IF NOT EXISTS supplier_feed_versions(supplier TEXT NOT NULL,fingerprint TEXT NOT NULL,counted_at TEXT NOT NULL,PRIMARY KEY(supplier,fingerprint));
-    CREATE TABLE IF NOT EXISTS product_absence_checks(supplier TEXT NOT NULL,product_code TEXT NOT NULL,checks_json TEXT NOT NULL,PRIMARY KEY(supplier,product_code));`);
   const original={add:U.addStaging.bind(U),accept:U.acceptStaging.bind(U),edit:U.updateStaging.bind(U)};
   const clear=db.prepare('DELETE FROM staging_items WHERE dostawca=? AND kod=?');
   const aliases=db.prepare('SELECT product_code FROM staging_matches WHERE supplier=? AND source_key=?');
@@ -125,8 +114,6 @@ function install({U,db,normalize,classify,badName,ext}) {
     const row=U.getStaging(id);
     if(!row) fail('Zgłoszenie zostało już zastąpione lub usunięte. Odśwież staging.');
     const snap=JSON.parse(row.snapshotJson||'{}'),current=find(row.kod);
-    if(snap._absenceReview) fail('Ta stara karta wymaga porównania z bieżącą ofertą. Nie można automatycznie zmienić jej w inną oponę ani wstrzymać.');
-    if(row.typZmiany==='wycofana' && (!Array.isArray(snap._absenceEvidence) || snap._absenceEvidence.length<3)) fail('Brak trzech wiarygodnych potwierdzeń nieobecności. Wczytaj aktualny cennik.');
     if(!snap._policyVersion) fail('To zgłoszenie pochodzi ze starego importu. Odśwież cennik przed akceptacją.');
     if(snap._matchIssue && !snap._resolution) fail('Najpierw rozstrzygnij dopasowanie opony przyciskiem „Rozstrzygnij”.');
     const ev=validateEan(snap.eanRaw ?? snap.ean);
@@ -179,25 +166,15 @@ function install({U,db,normalize,classify,badName,ext}) {
   };
   function importer(supplier,incoming,options={}) {
     if(!Array.isArray(incoming)) throw new Error('Nieprawidłowy cennik');
-    const meta=incoming._bridgeFeedMeta;
-    if(meta?.parserErrors>0) throw Error('Cennik zawiera błędy odczytu. Zachowano katalog i staging bez zmian.');
-    if(!incoming.length) throw Error('Pusty cennik. Zachowano katalog i staging bez zmian.');
     const time=new Date().toISOString(),products=U.listProducts().filter(p=>p.dostawca===supplier);
-    const byCode=new Map(products.map(p=>[String(p.kod),p])),byCodeNorm=new Map(),bySupplierCode=new Map(),byEan=new Map();
-    const addUnique=(map,key,p)=>{if(!key)return;const old=map.get(key);map.set(key,old===undefined?p:null);};
-    for(const p of products){
-      addUnique(byCodeNorm,codeKey(supplier,p.kod),p);
-      addUnique(bySupplierCode,codeKey(supplier,p.kodDostawcy),p);
-    }
+    const byCode=new Map(products.map(p=>[String(p.kod),p])),byEan=new Map();
     for(const p of products){const ev=validateEan(p.ean);if(ev.valid){if(!byEan.has(ev.value))byEan.set(ev.value,[]);byEan.get(ev.value).push(p);}}
     const stats={doStagingu:0,odrzuconeNieOpony:0,odrzuconeBrakDanych:0,odrzuconeSmieciMO2:0,nowe:0,zmienione:0,wycofane:0,bezZmian:0,autoZatwierdzone:0,szczegolyOdrzuconych:[]};
     const observed=new Set(),prepared=new Map(),oldQueue=new Map(U.listStaging().filter(s=>s.dostawca===supplier).map(s=>[s.kod,s]));
     for(const raw of incoming){
       if(supplier==='MO2' && /^999991$/.test(String(raw.kod||'').replace(/^MO2_/,'')) && (!raw.ean||!raw.marka||(/^\d/.test(raw.marka)&&!/[A-Za-z]{3,}/.test(raw.marka)))){stats.odrzuconeSmieciMO2++;continue;}
       const classification=classify(raw.nazwa||'',raw.kategoria);
-      const knownCode=byCode.get(String(raw.kod||''))||products.find(p=>norm(p.kod)===norm(raw.kod));
-      // Incomplete name/size cannot turn a known row into "not present".
-      if(!classification.isTire&&!knownCode){stats.odrzuconeNieOpony++;stats.szczegolyOdrzuconych.push({nazwa:raw.nazwa,powod:'nie opona ('+classification.reason+')'});continue;}
+      if(!classification.isTire){stats.odrzuconeNieOpony++;stats.szczegolyOdrzuconych.push({nazwa:raw.nazwa,powod:'nie opona ('+classification.reason+')'});continue;}
       const source={...raw},ev=validateEan(rawEan(raw),raw.ean_lossy||raw._eanLossy);
       let d=normalize({...raw,ean:null}).poz; // sizes/parameters only; strict EAN handled here
       Object.assign(d,{ean:ev.value,eanRaw:ev.raw,eanIsValid:ev.valid===null?null:Number(ev.valid),eanSourceStatus:ev.status,eanCandidates:null});
@@ -205,34 +182,15 @@ function install({U,db,normalize,classify,badName,ext}) {
       const remembered=aliases.get(supplier,key);
       if(remembered) current=byCode.get(remembered.product_code)||null;
       const synthetic=raw._kodSynthetic || !code || code.includes('_AUTO_') || (ev.value && code.replace(new RegExp('^'+supplier+'_'),'')===ev.value);
-      if(!current && code && !synthetic){
-        current=byCode.get(code)||null;
-        const canonical=byCodeNorm.get(codeKey(supplier,code));
-        // Case-only changes within the same prefixed namespace are stable.
-        // Old unprefixed CSV ids (notably MO9) are NOT API ids.
-        if(!current && canonical && norm(canonical.kod)===norm(code))current=canonical;
-        if(!current && canonical && compatibility(d,canonical).ok)current=canonical;
-      }
-      if(!current && d.kodDostawcy){
-        const p=bySupplierCode.get(codeKey(supplier,d.kodDostawcy));
-        if(p && compatibility(d,p).ok) current=p;
-        else if(p){candidates=[p];matchIssue='Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.';}
-      }
+      if(!current && code && !synthetic) current=byCode.get(code)||null;
       if(!current && synthetic && code && byCode.has(code)){
         const p=byCode.get(code);if(compatibility(d,p).ok)current=p;
       }
       if(!current && ev.valid){
         candidates=byEan.get(ev.value)||[];
         const exact=candidates.filter(p=>compatibility(d,p).ok);
-        if(exact.length===1 && !incoming.some(r=>r!==raw && norm(r.kod)===norm(exact[0].kod))) current=exact[0];
+        if(exact.length===1) current=exact[0];
         else if(candidates.length) matchIssue=exact.length>1?'Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę.':'Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.';
-      }
-      if(!current && !matchIssue){
-        const exactIdentity=products.filter(p=>compatibility(d,p).ok);
-        if(exactIdentity.length){
-          candidates=exactIdentity;
-          matchIssue='Podobna opona jest już w katalogu, ale ma inny kod lub EAN. Sprawdź dopasowanie.';
-        }
       }
       if(!current && !code) code=syntheticCode(supplier,d);
       if(!current && byCode.has(code)){candidates=[byCode.get(code)];code=syntheticCode(supplier,d);matchIssue='Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.';}
@@ -275,27 +233,9 @@ function install({U,db,normalize,classify,badName,ext}) {
         snapshotJson:JSON.stringify(d),eanRaw:d.eanRaw??null,eanIsValid:d.eanIsValid??null,eanSourceStatus:d.eanSourceStatus??null,eanCandidates:null,edytowanePola:null,utworzono:time});
       stats.doStagingu++;if(p)stats.zmienione++;else stats.nowe++;
     }
-    const feedState=db.prepare('SELECT * FROM supplier_feed_state WHERE supplier=?').get(supplier);
-    const itemCount=prepared.size;
-    const minimumReliable=feedState?.max_item_count ? Math.max(1,Math.ceil(feedState.max_item_count*.8)) : 1;
-    if(itemCount<minimumReliable)throw Error(`Cennik jest podejrzanie mały (${itemCount} zamiast co najmniej ${minimumReliable}). Import zatrzymany, bez zmiany katalogu i stagingu.`);
-    if(feedState && itemCount>=20 && observed.size<Math.min(itemCount,products.length)*.5){
-      throw Error('Większości oznaczeń z cennika nie udało się rozpoznać. Import zatrzymany do sprawdzenia zamiast tworzenia masowych braków.');
-    }
-    const fingerprint=hash(incoming.map(r=>[r.kod,r.kodDostawcy,identity(r),rawEan(r),r.cenaZakupu,r.stan]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b))));
-    const knownVersion=db.prepare('SELECT 1 FROM supplier_feed_versions WHERE supplier=? AND fingerprint=?').get(supplier,fingerprint);
-    const complete=meta?.complete===true && options.feedComplete!==false && !(options.parserErrors>0);
-    const elapsed=!feedState?.last_counted_at || Date.now()-Date.parse(feedState.last_counted_at)>=24*3600*1000;
-    const distinctCompleteFeed=complete&&!knownVersion&&elapsed&&(!options.reconcileOnly||options.verifyAbsence);
-    const clearAbsence=db.prepare('DELETE FROM product_absence_checks WHERE supplier=? AND product_code=?');
-    // Presence of a source row rejected by category is not evidence of absence.
-    for(const id of meta?.excludedCodes||[]){
-      const p=byCode.get(id)||products.find(p=>norm(p.kod)===norm(id));
-      if(p)observed.add(p.id);
-    }
     return db.transaction(()=>{
       for(const old of oldQueue.values()){
-        if(complete && !prepared.has(old.kod) && old.typZmiany!=='wycofana' && !JSON.parse(old.snapshotJson||'{}')._absenceReview)clear.run(supplier,old.kod);
+        if(!prepared.has(old.kod) && old.typZmiany!=='wycofana')clear.run(supplier,old.kod);
       }
       for(const item of prepared.values()){
         const {code,current,d,errors,changes}=item;
@@ -316,68 +256,20 @@ function install({U,db,normalize,classify,badName,ext}) {
             .run(current.id,current.kod,d.ean,supplier,current.marka,current.model,current.rozmiar,current.indeksNosnosci,current.indeksPredkosci,current.kategoria,patch.cenaZakupu??current.cenaZakupu,patch.cenaSprzedazy??current.cenaSprzedazy,patch.stan??current.stan,time);
         }else stats.bezZmian++;
       }
-      if(complete && (!options.reconcileOnly||options.verifyAbsence)){
-        db.prepare(`INSERT INTO supplier_feed_state(supplier,last_identity_hash,last_item_count,max_item_count,updated_at,last_counted_at)
-          VALUES(?,?,?,?,?,?) ON CONFLICT(supplier) DO UPDATE SET last_identity_hash=excluded.last_identity_hash,last_item_count=excluded.last_item_count,
-          max_item_count=MAX(supplier_feed_state.max_item_count,excluded.max_item_count),updated_at=excluded.updated_at,last_counted_at=excluded.last_counted_at`)
-          .run(supplier,fingerprint,itemCount,Math.max(itemCount,feedState?.max_item_count||0),time,distinctCompleteFeed?time:feedState?.last_counted_at||null);
-        if(distinctCompleteFeed)db.prepare('INSERT INTO supplier_feed_versions VALUES(?,?,?)').run(supplier,fingerprint,time);
-      }
-      if(!complete) stats.pominieteWycofania='Niepotwierdzona kompletność źródła; braków nie zliczono';
-      else if(!distinctCompleteFeed) stats.pominieteWycofania='Powtórzona oferta lub nie minęły 24 godziny od poprzedniego potwierdzenia';
       for(const p of products){
         if(observed.has(p.id)) {
-          if(!options.reconcileOnly){
-            clearAbsence.run(supplier,p.kod);
-            if(p.nieobecnoscPodRzad)U.updateProduct(p.id,{nieobecnoscPodRzad:0});
-          }
           // Candidate ambiguity keeps its own error, not an old withdrawal.
           if(!prepared.has(p.kod) && oldQueue.get(p.kod)?.typZmiany==='wycofana')clear.run(supplier,p.kod);
           continue;
         }
-        if(p.status==='wstrzymany' && Number(p.stan||0)===0){
-          if(oldQueue.get(p.kod)?.typZmiany==='wycofana')clear.run(supplier,p.kod);
-          if(!options.reconcileOnly)clearAbsence.run(supplier,p.kod);
-          if(!options.reconcileOnly && p.nieobecnoscPodRzad)U.updateProduct(p.id,{nieobecnoscPodRzad:0});
-          continue;
-        }
-        const alternatives=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod));
-        if(alternatives.length){
-          const snap={...p,_policyVersion:2,_catalogVersion:version(find(p.kod)),_absenceReview:true,
-            _candidates:alternatives.map(r=>({kod:r.kod,nazwa:r.nazwa,ean:r.ean,rozmiar:r.rozmiar,dot:r.dot}))};
-          U.addStaging({typZmiany:'blad',kod:p.kod,nazwa:p.nazwa,dostawca:supplier,magazyn:p.magazyn,
-            stanStary:p.stan,stanNowy:p.stan,cenaZakupuStara:p.cenaZakupu,cenaZakupuNowa:p.cenaZakupu,
-            powod:'Brak starego kodu, ale zgodne cechy są w bieżącej ofercie pod innym oznaczeniem. Sprawdź starą kartę.',
-            snapshotJson:JSON.stringify(snap),utworzono:time});
-          if(!options.reconcileOnly)clearAbsence.run(supplier,p.kod);
-          stats.doStagingu++;stats.zmienione++;continue;
-        }
-        // Old fallback rows have neither a stable namespaced id nor supplier
-        // code. They cannot be declared absent from a different source schema.
-        if(!norm(p.kod).startsWith(norm(supplier)+'_') && !p.kodDostawcy){
-          const old=oldQueue.get(p.kod);
-          const snap={...p,_policyVersion:2,_catalogVersion:version(find(p.kod)),_absenceReview:true,
-            _candidates:JSON.parse(old?.snapshotJson||'{}')._candidates||[]};
-          U.addStaging({typZmiany:'blad',kod:p.kod,nazwa:p.nazwa,dostawca:supplier,magazyn:p.magazyn,
-            stanStary:p.stan,stanNowy:p.stan,cenaZakupuStara:p.cenaZakupu,cenaZakupuNowa:p.cenaZakupu,
-            powod:'Stara karta z dawnego importu. Nie można potwierdzić braku po jej oznaczeniu. Sprawdź starą kartę.',
-            snapshotJson:JSON.stringify(snap),utworzono:time});
-          clearAbsence.run(supplier,p.kod);stats.doStagingu++;stats.zmienione++;continue;
-        }
-        if(!distinctCompleteFeed) continue;
-        const saved=db.prepare('SELECT checks_json FROM product_absence_checks WHERE supplier=? AND product_code=?').get(supplier,p.kod);
-        const evidence=JSON.parse(saved?.checks_json||'[]');
-        evidence.push({fingerprint,checkedAt:time,source:meta.source||'supplier',items:itemCount});
-        const recent=evidence.slice(-3);
-        db.prepare('INSERT INTO product_absence_checks VALUES(?,?,?) ON CONFLICT(supplier,product_code) DO UPDATE SET checks_json=excluded.checks_json').run(supplier,p.kod,JSON.stringify(recent));
-        const count=recent.length;
+        const count=(p.nieobecnoscPodRzad||0)+1;
         const old=oldQueue.get(p.kod);
-        if(count>=3){
-          const snap={...p,_policyVersion:2,_catalogVersion:version(find(p.kod)),_withdrawal:true,_absenceEvidence:recent};
-          U.addStaging({typZmiany:'wycofana',kod:p.kod,nazwa:p.nazwa,dostawca:supplier,magazyn:p.magazyn,stanStary:p.stan,stanNowy:0,cenaZakupuStara:p.cenaZakupu,cenaZakupuNowa:null,powod:'Brak w trzech różnych, kompletnych cennikach — sprawdź przed wstrzymaniem',snapshotJson:JSON.stringify(snap),utworzono:time});
+        if((options.reconcileOnly && old?.typZmiany==='wycofana')||(!options.reconcileOnly && count>=3)){
+          const snap={...p,_policyVersion:2,_catalogVersion:version(find(p.kod)),_withdrawal:true};
+          U.addStaging({typZmiany:'wycofana',kod:p.kod,nazwa:p.nazwa,dostawca:supplier,magazyn:p.magazyn,stanStary:p.stan,stanNowy:0,cenaZakupuStara:p.cenaZakupu,cenaZakupuNowa:null,powod:'Brak w cenniku — pozycja wycofana',snapshotJson:JSON.stringify(snap),utworzono:time});
           stats.wycofane++;stats.doStagingu++;
-        }
-        if(!options.reconcileOnly)U.updateProduct(p.id,{nieobecnoscPodRzad:count});
+          if(!options.reconcileOnly)U.updateProduct(p.id,{nieobecnoscPodRzad:0});
+        }else if(!options.reconcileOnly)U.updateProduct(p.id,{nieobecnoscPodRzad:count});
       }
       return stats;
     })();
@@ -391,7 +283,6 @@ function registerRoutes(app,{U,we,be}) {
     if(!row)return res.status(404).json({message:'Zgłoszenie zostało zastąpione. Odśwież staging.'});
     const snap=JSON.parse(row.snapshotJson||'{}');
     res.json({id:row.id,kod:row.kod,nazwa:row.nazwa,powod:row.powod,matchIssue:snap._matchIssue||null,
-      absenceReview:!!snap._absenceReview,absenceEvidence:snap._absenceEvidence||[],
       duplicateSource:!!snap._duplicateSource,eanIssue:snap._eanIssue||null,
       incoming:{marka:snap.marka,model:snap.model,rozmiar:snap.rozmiar,dot:snap.dot,ean:snap.eanRaw??snap.ean},
       candidates:snap._candidates||[]});

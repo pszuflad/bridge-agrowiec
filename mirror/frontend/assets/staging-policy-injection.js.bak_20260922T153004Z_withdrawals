@@ -48,11 +48,6 @@
       const v=await api(`${base}/${id}/review`);if(!d.isConnected)return;loading.remove();
       d.append(el('p',v.nazwa),el('p','Dane dostawcy: '+[v.incoming.marka,v.incoming.model,v.incoming.rozmiar,v.incoming.dot&&'DOT '+v.incoming.dot,'EAN '+(v.incoming.ean||'brak')].filter(Boolean).join(' · ')));
       d.append(el('p',v.matchIssue||v.powod));
-      if(v.absenceReview){
-        d.append(el('p','To zgłoszenie dotyczy starej karty, a nie potwierdzonego wycofania opony. Nie zmieniono jej danych, ceny ani stanu. Nie łączymy kart automatycznie.'));
-        for(const c of v.candidates)d.append(el('p',`${c.kod}: ${c.nazwa} · EAN ${c.ean||'brak'} · DOT ${c.dot||'brak'}`));
-        if(!v.candidates.length)d.append(el('p','Brak pewnego odpowiednika w aktualnej ofercie. Potrzebne jest sprawdzenie oznaczenia u dostawcy.'));
-      }
       const f=el('footer'),close=el('button','Zamknij');close.onclick=()=>d.close();f.append(close);
       if(v.matchIssue&&!v.duplicateSource){
         d.append(el('p','Wybierz świadomie właściwą oponę lub osobny produkt. Zapisanie wyboru nie zatwierdza jeszcze produktu w katalogu.'));
@@ -79,9 +74,9 @@
     queued=false;
     for(const row of document.querySelectorAll('tr[data-testid^="row-staging-"]')){
       if(row.querySelector('.bs-review-btn'))continue;
-      if(!/Sprawdź dopasowanie|Wybierz właściwą oponę|Wymaga sprawdzenia pliku|Sprawdź starą kartę/.test(row.textContent))continue;
+      if(!/Sprawdź dopasowanie|Wybierz właściwą oponę|Wymaga sprawdzenia pliku/.test(row.textContent))continue;
       const id=Number(row.dataset.testid.replace('row-staging-',''));if(!Number.isFinite(id))continue;
-      const b=el('button',/Sprawdź starą kartę/.test(row.textContent)?'Sprawdź kartę':'Rozstrzygnij','bs-review-btn');b.type='button';b.onclick=e=>{e.stopPropagation();review(id);};
+      const b=el('button','Rozstrzygnij','bs-review-btn');b.type='button';b.onclick=e=>{e.stopPropagation();review(id);};
       row.lastElementChild?.append(b);
     }
   }

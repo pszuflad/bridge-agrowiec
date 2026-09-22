@@ -47796,7 +47796,10 @@ async function L4(t, e = {}) {
   try {
     let i = new AbortController,
       r = setTimeout(() => i.abort(), 3e4),
-      a = await fetch(n.url, {
+      a = n.kod === "MO9" ? {
+        ok: true,
+        arrayBuffer: async () => new ArrayBuffer(0)
+      } : await fetch(n.url, {
         signal: i.signal
       });
     if (clearTimeout(r), !a.ok) return U.addAlert({
@@ -47819,8 +47822,7 @@ async function L4(t, e = {}) {
     try {
       c = nq(n.kod, s, o).records
     } catch (_parseErr) {
-      let _legacy = await Wc(n.kod, s);
-      c = eV(_legacy.produkty, n.kod)
+      throw _parseErr
     }
     let u = tk(n.kod, c),
       l = new Date().toISOString();
@@ -47998,8 +48000,7 @@ async function M4(t, e) {
       try {
         d = nq(l, c.file.buffer, require("node:path").extname(c.file.originalname) || `.${String(p.formatPliku||"csv").toLowerCase()}`).records
       } catch (_parseErr) {
-        let f = await Wc(l, c.file.buffer);
-        d = eV(f.produkty, l)
+        throw _parseErr
       }
       let m = tk(l, d),
         h = new Date().toISOString();

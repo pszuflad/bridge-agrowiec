@@ -690,12 +690,7 @@ function recordToSuroweDostawca(dostawcaKod, record) {
 }
 
 function recordsToSurowe(dostawcaKod, records) {
-  const items=[],rejected=[];
-  for(const record of records){
-    const value=recordToSuroweDostawca(dostawcaKod,record);
-    if(value)items.push(value);else rejected.push(record);
-  }
-  return require('../feed_safety.cjs').converted(dostawcaKod,records,items,rejected);
+  return records.map(record => recordToSuroweDostawca(dostawcaKod, record)).filter(Boolean);
 }
 
 module.exports = { recordToSurowe, recordToSuroweDostawca, recordsToSurowe };

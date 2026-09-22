@@ -839,10 +839,6 @@ let schedulerStarted = false;
 const lastRunPerSupplier = {};
 
 function startScheduler(app, ctx) {
-  // One owner: the core D4 scheduler already polls all configured suppliers.
-  // Running a second timer duplicated downloads and absence counters.
-  console.log('[bridge_v6] Scheduler delegated to core D4');
-  return;
   if (schedulerStarted) return;
   schedulerStarted = true;
 

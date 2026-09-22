@@ -19156,7 +19156,7 @@ function Cd({
                   e += o.ilePrzeszlo, r.nowe += o.wynik.nowe, r.zmienione += o.wynik.zmienione, r.wycofane += o.wynik.wycofane, r.bezZmian += o.wynik.bezZmian, r.odrzuconeNieOpony += o.wynik.odrzuconeNieOpony, r.odrzuconeBrakDanych += o.wynik.odrzuconeBrakDanych, r.doStagingu += o.wynik.doStagingu
                 }
                 const a = [];
-                a.push(`Pozycji w plikach: ${e}`), r.doStagingu > 0 && a.push(`Do akceptacji w stagingu: ${r.doStagingu}`), r.nowe > 0 && a.push(`Nowe: ${r.nowe}`), r.zmienione > 0 && a.push(`Zmienione: ${r.zmienione}`), r.wycofane > 0 && a.push(`Wycofane: ${r.wycofane}`), r.bezZmian > 0 && a.push(`Bez zmian: ${r.bezZmian}`), r.odrzuconeNieOpony > 0 && a.push(`Odrzucone (nie opony): ${r.odrzuconeNieOpony}`), t > 0 && a.push(`Pominięte pliki: ${t}`), x({
+                a.push(`Pozycji w plikach: ${e}`), r.doStagingu > 0 && a.push(`Do akceptacji w stagingu: ${r.doStagingu}`), r.nowe > 0 && a.push(`Nowe: ${r.nowe}`), r.zmienione > 0 && a.push(`Zmienione: ${r.zmienione}`), r.wycofane > 0 && a.push(`Braki w cenniku: ${r.wycofane}`), r.bezZmian > 0 && a.push(`Bez zmian: ${r.bezZmian}`), r.odrzuconeNieOpony > 0 && a.push(`Odrzucone (nie opony): ${r.odrzuconeNieOpony}`), t > 0 && a.push(`Pominięte pliki: ${t}`), x({
                   title: r.doStagingu > 0 ? `${r.doStagingu} pozycji czeka na akceptację` : "Import zakończony",
                   description: a.join(" • ")
                 }), i(!1), w()
@@ -20558,7 +20558,7 @@ const Xu = PRODUCT_FIELD_CONFIG.filter(function(e) {
     l: "Nowe produkty (stare)"
   }, {
     v: "wycofana",
-    l: "Wycofane"
+    l: "Braki w cenniku"
   }, {
     v: "zmiana_kluczowa",
     l: "Zmiany kluczowe"
@@ -20597,12 +20597,12 @@ function XP({
         icon: of
       },
       wycofana: {
-        l: "Wycofana",
+        l: "Brak w cenniku",
         cls: "bg-red-600 hover:bg-red-600 text-white",
         icon: py
       },
       zniknal: {
-        l: "Wycofana",
+        l: "Brak w cenniku",
         cls: "bg-red-600 hover:bg-red-600 text-white",
         icon: py
       }

@@ -331,6 +331,9 @@ CREATE INDEX idx_selly_products_varid   ON selly_products(selly_variant_id);
 CREATE INDEX idx_selly_products_status ON selly_products(ostatni_status);
 CREATE TABLE staging_matches(supplier TEXT NOT NULL,source_key TEXT NOT NULL,product_code TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(supplier,source_key));
 CREATE UNIQUE INDEX staging_one_current_product ON staging_items(dostawca,kod);
+CREATE TABLE supplier_feed_state(supplier TEXT PRIMARY KEY,last_identity_hash TEXT,last_item_count INTEGER NOT NULL DEFAULT 0,max_item_count INTEGER NOT NULL DEFAULT 0,updated_at TEXT NOT NULL,last_counted_at TEXT);
+CREATE TABLE supplier_feed_versions(supplier TEXT NOT NULL,fingerprint TEXT NOT NULL,counted_at TEXT NOT NULL,PRIMARY KEY(supplier,fingerprint));
+CREATE TABLE product_absence_checks(supplier TEXT NOT NULL,product_code TEXT NOT NULL,checks_json TEXT NOT NULL,PRIMARY KEY(supplier,product_code));
 CREATE TRIGGER products_blokowane_formy_ai
         AFTER INSERT ON products
         BEGIN

@@ -101,10 +101,25 @@ function parseFile(filePath) {
     }
   }
 
-  // Preserve all source rows. Neither an EAN nor a manufacturer code proves
-  // rows identical. The staging engine detects conflicts; never invent stock
-  // by summing repeated exports of the same stock.
-  const records = intermediate;
+  // Grupowanie po EAN — jeśli ten sam EAN w wielu wierszach, sumujemy stany
+  // (decyzja Anny: ten sam EAN = jeden wpis ze stanem = suma; różne EAN = osobne)
+  const byEan = new Map();
+  const noEan = []; // bez EAN wpadają osobno
+  for (const rec of intermediate) {
+    if (!rec.ean) {
+      noEan.push(rec);
+      continue;
+    }
+    if (byEan.has(rec.ean)) {
+      // sumujemy stan
+      const existing = byEan.get(rec.ean);
+      existing.stan_magazynowy = (existing.stan_magazynowy || 0) + (rec.stan_magazynowy || 0);
+    } else {
+      byEan.set(rec.ean, rec);
+    }
+  }
+
+  const records = [...byEan.values(), ...noEan];
   return { records, errors, dostawca: DOSTAWCA };
 }
 

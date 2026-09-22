@@ -1,0 +1,202 @@
+{
+  "at": "2026-09-22T15:30:07.975Z",
+  "beforeQueue": [
+    {
+      "typ_zmiany": "blad",
+      "n": 23
+    },
+    {
+      "typ_zmiany": "nowa",
+      "n": 7
+    },
+    {
+      "typ_zmiany": "wycofana",
+      "n": 1397
+    },
+    {
+      "typ_zmiany": "zmiana_kluczowa",
+      "n": 170
+    }
+  ],
+  "alreadySuspendedZero": 860,
+  "suppliers": [
+    {
+      "supplier": "MO1",
+      "raw": 726,
+      "rows": 717,
+      "oldWithdrawalIssues": 6,
+      "stats": {
+        "doStagingu": 4,
+        "odrzuconeNieOpony": 0,
+        "odrzuconeBrakDanych": 0,
+        "odrzuconeSmieciMO2": 0,
+        "nowe": 1,
+        "zmienione": 3,
+        "wycofane": 0,
+        "bezZmian": 713,
+        "autoZatwierdzone": 0,
+        "szczegolyOdrzuconych": []
+      }
+    },
+    {
+      "supplier": "MO2",
+      "raw": 1575,
+      "rows": 1573,
+      "oldWithdrawalIssues": 333,
+      "stats": {
+        "doStagingu": 22,
+        "odrzuconeNieOpony": 0,
+        "odrzuconeBrakDanych": 0,
+        "odrzuconeSmieciMO2": 0,
+        "nowe": 3,
+        "zmienione": 19,
+        "wycofane": 0,
+        "bezZmian": 1548,
+        "autoZatwierdzone": 0,
+        "szczegolyOdrzuconych": []
+      }
+    },
+    {
+      "supplier": "MO3",
+      "raw": 576,
+      "rows": 576,
+      "oldWithdrawalIssues": 150,
+      "stats": {
+        "doStagingu": 6,
+        "odrzuconeNieOpony": 0,
+        "odrzuconeBrakDanych": 0,
+        "odrzuconeSmieciMO2": 0,
+        "nowe": 0,
+        "zmienione": 6,
+        "wycofane": 0,
+        "bezZmian": 570,
+        "autoZatwierdzone": 0,
+        "szczegolyOdrzuconych": []
+      }
+    },
+    {
+      "supplier": "MO4",
+      "raw": 3866,
+      "rows": 313,
+      "oldWithdrawalIssues": 166,
+      "stats": {
+        "doStagingu": 10,
+        "odrzuconeNieOpony": 1,
+        "odrzuconeBrakDanych": 0,
+        "odrzuconeSmieciMO2": 0,
+        "nowe": 4,
+        "zmienione": 6,
+        "wycofane": 0,
+        "bezZmian": 301,
+        "autoZatwierdzone": 0,
+        "szczegolyOdrzuconych": [
+          {
+            "nazwa": "STARCO",
+            "powod": "nie opona (brak słów kluczowych i rozmiaru opony)"
+          }
+        ]
+      }
+    },
+    {
+      "supplier": "MO5",
+      "raw": 5183,
+      "rows": 1556,
+      "oldWithdrawalIssues": 561,
+      "stats": {
+        "doStagingu": 35,
+        "odrzuconeNieOpony": 1,
+        "odrzuconeBrakDanych": 0,
+        "odrzuconeSmieciMO2": 0,
+        "nowe": 1,
+        "zmienione": 34,
+        "wycofane": 0,
+        "bezZmian": 1521,
+        "autoZatwierdzone": 0,
+        "szczegolyOdrzuconych": [
+          {
+            "nazwa": "STARCO",
+            "powod": "nie opona (brak słów kluczowych i rozmiaru opony)"
+          }
+        ]
+      }
+    },
+    {
+      "supplier": "MO9",
+      "raw": 991,
+      "rows": 923,
+      "oldWithdrawalIssues": 181,
+      "stats": {
+        "doStagingu": 304,
+        "odrzuconeNieOpony": 4,
+        "odrzuconeBrakDanych": 0,
+        "odrzuconeSmieciMO2": 0,
+        "nowe": 0,
+        "zmienione": 304,
+        "wycofane": 0,
+        "bezZmian": 794,
+        "autoZatwierdzone": 0,
+        "szczegolyOdrzuconych": [
+          {
+            "nazwa": "BKT EARTHMAX SR 30 E TL",
+            "powod": "nie opona (brak słów kluczowych i rozmiaru opony)"
+          },
+          {
+            "nazwa": "BKT EARTHMAX SR 41 E",
+            "powod": "nie opona (brak słów kluczowych i rozmiaru opony)"
+          },
+          {
+            "nazwa": "BKT EARTHMAX SR 41 E",
+            "powod": "nie opona (brak słów kluczowych i rozmiaru opony)"
+          },
+          {
+            "nazwa": "BKT EARTHMAX SR 22 G 146A8/169A2 TL",
+            "powod": "nie opona (brak słów kluczowych i rozmiaru opony)"
+          }
+        ]
+      }
+    }
+  ],
+  "afterQueue": [
+    {
+      "typ_zmiany": "blad",
+      "n": 205
+    },
+    {
+      "typ_zmiany": "nowa",
+      "n": 7
+    },
+    {
+      "typ_zmiany": "zmiana_kluczowa",
+      "n": 169
+    }
+  ],
+  "awaitingEvidence": [
+    {
+      "supplier": "MO1",
+      "n": 39
+    },
+    {
+      "supplier": "MO2",
+      "n": 106
+    },
+    {
+      "supplier": "MO3",
+      "n": 43
+    },
+    {
+      "supplier": "MO4",
+      "n": 35
+    },
+    {
+      "supplier": "MO5",
+      "n": 171
+    },
+    {
+      "supplier": "MO9",
+      "n": 1
+    }
+  ],
+  "legacyReview": 181,
+  "duplicates": 0,
+  "catalogUnchanged": true
+}

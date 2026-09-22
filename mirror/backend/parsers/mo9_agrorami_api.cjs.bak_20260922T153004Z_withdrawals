@@ -582,11 +582,10 @@ async function fetchAllItems() {
     }
     retriedAuth = false;
 
-    if (json.errors?.length) {
+    if (json.errors && (!json.data || !json.data.products)) {
       throw new Error(`Agrorami: błąd GraphQL: ${JSON.stringify(json.errors).slice(0, 300)}`);
     }
-    const products = json.data?.products;
-    if(!products || !Array.isArray(products.items))throw new Error('Agrorami: niepełna odpowiedź z produktami');
+    const products = json.data.products;
     if (totalCount == null) totalCount = products.total_count;
     const batch = products.items || [];
     if (batch.length === 0) break;
@@ -595,15 +594,11 @@ async function fetchAllItems() {
 
     // keyset: następny kursor = id ostatniego elementu
     const lastId = batch[batch.length - 1].id;
-    if(!lastId || Number(lastId)<=Number(after))throw new Error('Agrorami: brak postępu pobierania kolejnych stron');
     after = String(lastId);
 
     if (batch.length < PAGE_SIZE) break; // ostatnia strona
   }
 
-  if(!items.length || (Number.isFinite(totalCount) && items.length!==totalCount) || new Set(items.map(x=>String(x.id))).size!==items.length){
-    throw new Error(`Agrorami: niepełna oferta (${items.length} z ${totalCount}); import zatrzymany`);
-  }
   return { items, totalCount };
 }
 
