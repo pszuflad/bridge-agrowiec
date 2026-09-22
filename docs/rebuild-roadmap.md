@@ -3329,7 +3329,7 @@ Poniżej tylko spis i kolejność (tabelę zmienia koordynator, nie karty).
 |---|---|---|---|
 | [P10.1](karty/P10.1/) | klaster backendu analityki: ożywienie kart „Dostępności” + trzy poprawki towarzyszące | #31, #32, #33, #35 | — |
 | [P10.2](karty/P10.2/) | kafel „Ostatni eksport CSV” pokazuje datę | #34 | P10.1, P6.2 |
-| [P10.3](karty/P10.3/) | eksport CSV respektuje filtry | #91 | P10.1, decyzja #91 |
+| [P10.3](karty/P10.3/) | eksport CSV = to, co widać w tabeli (plik z przeglądarki) | #91 | P10.1 |
 | [P10.4](karty/P10.4/) | delta instrukcji I10 dla Ani | — | P10.1–P10.3 |
 
 #### Przegląd 12 widoków
