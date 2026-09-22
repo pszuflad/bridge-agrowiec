@@ -1,7 +1,7 @@
 # I15.9 — delta instrukcji dla Ani — całe I15
 
-> **Stan:** ⬜ po I15.1–I15.8 (fala 5)
-> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** — · **Zależy od:** I15.1–I15.8
+> **Stan:** ⬜ po I15.1–I15.8 i I15.10–I15.11 (faza 6 — OSTATNIA karta I15)
+> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** — · **Zależy od:** I15.1–I15.8, I15.10, I15.11
 > **Ticket:** —
 
 Założona przez koordynatora ticketem `104-DOCS-plan-i15`, 2026-09-22. Plan całej iteracji: `docs/rebuild-roadmap.md`, blok „Iteracja 15”.
@@ -12,7 +12,8 @@ wdrożyła na produkcji — układ „Wdrożyłaś → Jest teraz w nowym Bridge
 blokowane formy płatności (katalog + CSV), listę zastosowań i kategorie, MO9 (quady/kosiarki, stany z hurtowni —
 test API na stagingu z hasłami `AGRORAMI_*`), szerokość bez zer (**sprostowanie** obietnicy z I3 §11 pkt 10), Staging v2
 („Rozstrzygnij”, blokada błędnego EAN — **sprostowanie** zachowania z I3-v2/14i: EAN naukowy nie jest już pusty),
-Selly REST (nocna synchronizacja 4:30, trasy bez przycisków). Wejścia od kart: `wejscie-*.md` w tym katalogu.
+Selly REST (nocna synchronizacja 4:30, trasy bez przycisków). Wejścia od kart: `wejscie-*.md` w tym katalogu. Obejmuje też zmiany z kart I15.10/I15.11 (zmiany Ani w toku).
+**Forma: polecenie Ani z 2026-09-22 — krótko: co zmieniono → polecenie → rezultat** (`wejscie-104b.md`).
 ⚠ Warunek testowalności: staging z kodem I15 i **odświeżoną bazą z kopii produkcji** (D2), inaczej zgłoszenia ze
 starego importu będą nieakceptowalne (I15.4).
 
