@@ -4206,10 +4206,10 @@ zostają nietknięte i martwe dla frontu. Szczegóły: `docs/tickets/98-FEATURE-
 |---|---|
 | **Data** | 2026-09-21 (zgłoszenie Ani, pytanie 12.4 — doprecyzowanie uwagi z przeglądu 12 widoków) |
 | **Kategoria** | BAZA (dane) + FRONTEND (filtr marek w katalogu) |
-| **Pliki** | dane `products.marka`; filtr: `rebuild/frontend/src/pages/katalog/**` |
-| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** — dane vs prezentacja, patrz niżej |
-| **Iteracja** | do zaplanowania |
-| **Status** | zgłoszone, ZMIERZONE |
+| **Pliki** | dane `products.marka` + słownik `atrybuty_wartosci` (rodzaj `marka`); `rebuild/schema/010_marka_caps.sql` |
+| **Do nowej wersji?** | ✅ **TAK — DANE (migracja), decyzja użytkownika 2026-09-22** (świadome odstępstwo; odrzucone: scalanie w filtrze) |
+| **Iteracja** | karta PR.5 — `docs/tickets/101-CHORE-migracja-marka-caps/` |
+| **Status** | ✔ **zrealizowane w rebuild (ticket 101, 2026-09-22)** — migracja `rebuild/schema/010_marka_caps.sql` · w produkcji **nadal obecne** do cutoveru |
 
 **Zgłoszenie.** Ania: „to jest wynik kopii bazy ze starego Bridge'a — np. w filtrach marki
 w katalogu jest ALLIANCE i alliance, duplikaty małą i dużą literą".
@@ -4239,6 +4239,16 @@ Po ticketcie 78 kolejka atrybutów **nie zaproponuje** tej pary jako sugestii al
 `ALLIANCE` jest dosłownie obecna w słowniku i znika przy sprzątaniu kolejki (**#40**, D1) zamiast
 dostać sugestię. Duplikat w `products.marka` i w słowniku zostaje nietknięty — to nadal wymaga
 osobnej decyzji (dane vs prezentacja, wyżej).
+
+**Rozstrzygnięte (decyzja użytkownika 2026-09-22, wdrożone w tickecie 101).** Droga **dane**.
+Migracja `010_marka_caps.sql` z predykatem ogólnym (nie „Alliance” na sztywno): marka, która
+ma w `products` drugą formę różniącą się wyłącznie wielkością liter, przechodzi na formę
+WIELKIMI. Klucz zna polskie litery mimo ASCII-only `UPPER()`. Ze słownika `marka` znika forma
+niekanoniczna, jeśli kanoniczna w nim jest.
+Na snapshocie: `MO1_71970103` `Alliance` → `ALLIANCE` (849 łącznie) + 1 wpis słownika. Poprawka
+nie wraca przy imporcie, bo adapter od 2026-09-01 zamienia markę na wielkie litery. Oczekujący
+wiersz stagingu tego produktu kasuje już `006`. `historia_cen.marka` zostaje nietknięta (dziennik).
+Frontend (filtr) bez zmian.
 
 ---
 
