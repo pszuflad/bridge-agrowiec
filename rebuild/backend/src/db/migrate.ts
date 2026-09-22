@@ -32,9 +32,56 @@ export function znajdzKatalogMigracji(env: NodeJS.ProcessEnv = process.env): str
 
 export type WynikMigracji = { zastosowane: string[]; pominiete: string[] };
 
+const DYREKTYWA = /^--\s*@(\S+)(.*)$/;
+const DODAJ_KOLUMNE = /^\s+(\w+)\s+(\w+)\s+(\S.*?)\s*$/;
+
+/**
+ * Dyrektywy migracji — linie-komentarze `-- @<nazwa> …`, które runner wykonuje PRZED treścią pliku,
+ * w tej samej transakcji. SQLite ich nie widzi (to zwykły komentarz), więc plik pozostaje poprawnym
+ * SQL-em.
+ *
+ * PO CO: SQLite nie ma `ALTER TABLE … ADD COLUMN IF NOT EXISTS`, a produkcyjna `data.db` ma kolumny
+ * dokładane runtime'owo przy każdym starcie starego backendu (np. `blokowane_formy_platnosci` z
+ * `payment_blocks.cjs`). Gołe `ALTER` w migracji wywróciłoby na niej cały plik. Dyrektywa robi to,
+ * co robił stary runtime: `PRAGMA table_info` → `ALTER` tylko przy braku kolumny (migracja 011,
+ * ticket 107).
+ *
+ * Obsługiwane:
+ *  - `-- @dodaj-kolumne-jesli-brak <tabela> <kolumna> <definicja>`
+ *
+ * Nieznana dyrektywa, zła składnia albo brak tabeli = błąd, który wycofuje całą migrację —
+ * literówka ma zatrzymać deploy, a nie po cichu pominąć kolumnę.
+ */
+export function zastosujDyrektywy(sqlite: BazaSqlite, sql: string, plik: string): void {
+  for (const linia of sql.split(/\r?\n/)) {
+    const d = DYREKTYWA.exec(linia.trim());
+    if (!d) continue;
+    const [, nazwa, reszta] = d as unknown as [string, string, string];
+
+    if (nazwa !== "dodaj-kolumne-jesli-brak") {
+      throw new Error(`${plik}: nieznana dyrektywa migracji "@${nazwa}".`);
+    }
+    const a = DODAJ_KOLUMNE.exec(reszta);
+    if (!a) {
+      throw new Error(
+        `${plik}: zła składnia "@dodaj-kolumne-jesli-brak" — oczekiwano "<tabela> <kolumna> <definicja>".`,
+      );
+    }
+    const [, tabela, kolumna, definicja] = a as unknown as [string, string, string, string];
+
+    const kolumny = sqlite.prepare(`PRAGMA table_info(${tabela})`).all() as { name: string }[];
+    if (kolumny.length === 0) {
+      throw new Error(`${plik}: "@dodaj-kolumne-jesli-brak" — tabela "${tabela}" nie istnieje.`);
+    }
+    if (kolumny.some((k) => k.name === kolumna)) continue;
+    sqlite.exec(`ALTER TABLE ${tabela} ADD COLUMN ${kolumna} ${definicja}`);
+  }
+}
+
 /**
  * Stosuje migracje idempotentnie: każdy plik .sql wykonywany jest raz, w transakcji,
  * a jego nazwa zapisywana w tabeli `_migracje`. Ponowne uruchomienie nic nie zmienia.
+ * Przed treścią pliku wykonywane są jego dyrektywy (`zastosujDyrektywy`).
  */
 export function zastosujMigracje(
   sqlite: BazaSqlite,
@@ -66,6 +113,7 @@ export function zastosujMigracje(
     }
     const sql = readFileSync(join(katalog, plik), "utf8");
     const wTransakcji = sqlite.transaction(() => {
+      zastosujDyrektywy(sqlite, sql, plik);
       sqlite.exec(sql);
       sqlite
         .prepare(`INSERT INTO ${TABELA_MIGRACJI} (nazwa, zastosowano) VALUES (?, ?)`)
