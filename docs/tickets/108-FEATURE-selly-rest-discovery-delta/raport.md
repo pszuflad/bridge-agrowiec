@@ -64,3 +64,11 @@ co zmieniało, czy `bridge_kod` jest nadpisywany); discovery wystawia `klient`, 
 - BLOCKER (dokumentacja handoffu: karta, backlog, wpis spec, wejścia I15.7/I15.8) — realizowany w fazie „sync docs” tego ticketu.
 - NICE-TO-HAVE: atrapa `createVariant` — opcja `featureIdNowegoMagazynu` (wybór dostawcy przez `Object.keys()[0]`)
   zastąpiona jawną parą `magazynNowegoWariantu: { dostawca, featureId }`.
+
+## Docs updates
+- `docs/rebuild-backlog.md` — #60 (🔨 częściowo, I15.6 zrobione), #67 (zmiana decyzji: świadome odstępstwo D4 + skutek „drugi wariant”), #68 (fakt obalony: `buildProductPayload` istnieje od 08.09 15:12, Tor 2 działa, Tor 1 nieosiągalny), #69/#70 (ścieżki portu `src/selly/rest/*`, iteracja I15.6), #74 (🔨 kod bez ID, mapy w I15.7), #77 delta (✅), preambuła bloku #66–#70; #100 bez zmian.
+- `docs/karty/I15.6/karta.md` — Stan ✅, „Dowiezione”, poprawione zdania o #67/#68, ostrzeżenie o `feature/45`, „Do koordynatora” (cutover 013, #67 dla I15.9, `syncDeltaForDostawca`, wspólne pliki).
+- **New:** `docs/karty/I15.7/wejscie-108.md`, `docs/karty/I15.8/wejscie-108.md`, `docs/spec-backend/wpis-108.md`.
+- Sprawdzone bez zmian: `rebuild/backend/README.md`, `contract/README.md`.
+
+**Pre-existing issues:** blok „Decyzje” w `docs/karty/I15.*/karta.md` powtarza decyzje całej iteracji (D1–D5 o triggerach/EAN/Staging v2), nie karty — wzorzec koordynatora, zostawiony.
