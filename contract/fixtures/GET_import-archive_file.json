@@ -1,0 +1,14 @@
+{
+  "endpoint": "/api/import-archive/file/2026-09/MO6__20260921__22113__MO6.csv",
+  "method": "GET",
+  "status": 200,
+  "json": false,
+  "body": "EAN;Beschreibung;Beschreibung 2;Hersteller;Lagerbestand;Cena;Model;VF/IF;Kategoria\r\n6900532088753;650/65R42;165D/168A8;UNIGLORY;2;4898,42;SMARTAGRO;;Rolnicze\r\n6969999612400;420/85R24;137A8/134B;UNIGLORY;2;1501,49;SMARTAGRO;;Rolnicze\r\n",
+  "_naglowki": {
+    "content-type": "text/csv; charset=utf-8",
+    "content-disposition": "attachment; filename=\"MO6__20260921__22113__MO6.csv\"",
+    "content-length": "237"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Surowy plik (res.sendFile). Treść = bajty wgranego MO6.csv; nagłówki w `_naglowki`."
+}

@@ -29,6 +29,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { queryClient } from "@/lib/queryClient";
 import { ToastProvider } from "@/components/ui/toast";
 import { Alerty } from "@/pages/Alerty";
+import { ArchiwumImportow } from "@/pages/ArchiwumImportow";
 import { Atrybuty } from "@/pages/Atrybuty";
 import { Historia } from "@/pages/Historia";
 import { Katalog } from "@/pages/Katalog";
@@ -56,7 +57,7 @@ const Analityka = lazy(async () => ({
 }));
 
 /**
- * Dwanaście tras zalogowanego użytkownika — każda w ramie z sidebarem (`AppShell`).
+ * Trzynaście tras zalogowanego użytkownika — każda w ramie z sidebarem (`AppShell`).
  *
  * ⚠ RAMĘ WPINA ROUTER, NIE WIDOK (finalny audyt 12e, D1, backlog #36). Do 12e robił to każdy
  * widok z osobna — tak jak w oryginale, gdzie komponent każdej trasy zwraca `mn(…)`
@@ -77,6 +78,7 @@ const TRASY_Z_RAMA: [string, ComponentType][] = [
   ["/staging", Staging],
   ["/konfiguracja", Konfiguracja],
   ["/historia", Historia],
+  ["/archiwum", ArchiwumImportow],
   ["/narzuty", Narzuty],
   ["/alerty", Alerty],
   ["/atrybuty", Atrybuty],

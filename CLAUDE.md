@@ -25,6 +25,11 @@ szablony, okres przejściowy: `docs/karty/README.md`; stan kart: `tools/stan-kar
 KAŻDEJ karty fali i zmerguj to do `develop` (ticket `DOCS`, PR) — dopiero potem prompty. Karty
 branchują wtedy z `develop`, który już ma ich pliki. Prompt do karty wskazuje jej katalog,
 nie powtarza jego treści.
+**Ta sama zasada dotyczy `docs/spec-backend.md`:** nowego akapitu („Potwierdzone w N”,
+„Odbudowa (…)”) nie dopisuje się na koniec żadnej sekcji — ticket tworzy NOWY plik
+`docs/spec-backend/wpis-<N>.md`. Wolno tylko poprawić w miejscu zdanie, które ticket obalił.
+Powód: karty P10.1 i PR.1 (tickety 90, 91, 2026-09-22) dopisały się w to samo miejsce §2
+i zderzyły przy merge'u. Reguła i szablon: `docs/spec-backend/README.md`.
 
 **1. Po każdej zamkniętej karcie jej `karta.md` opisuje STAN, nie zamiar.**
 Karta oznaczona jako zrobiona (data + ID ticketa), gate rozliczony, zakres faktycznie dowieziony

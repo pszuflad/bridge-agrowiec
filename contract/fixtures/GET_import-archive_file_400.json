@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/import-archive/file/2026-09/..%2F..%2Fdata.db",
+  "method": "GET",
+  "status": 400,
+  "json": true,
+  "body": {
+    "ok": false,
+    "error": "Nieprawidłowe id"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Próba wyjścia z katalogu — Express dekoduje %2F w parametrze, regex (:228) odrzuca."
+}

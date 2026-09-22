@@ -951,6 +951,9 @@ od zera):
   ujęty w #4/#6.
 - `archive_module.cjs` (nowy, obsługa `import_archive`) — archiwizacja zrzutów importu; my `import_archive`
   wykluczyliśmy z mirrora, więc **→ później (Ix)**, nie cel wczesnych iteracji.
+  **Zrealizowane w tickecie 91 (karta PR.1, 2026-09-22):** zapis od 3b (`import/archiwum.ts`),
+  odczyt (3 trasy `GET /api/import-archive*`) i widok `/archiwum` odtworzone 1:1 —
+  `docs/tickets/91-FEATURE-archiwum-importow/`.
 
 *Pominięte — triaż 2026-09-18 (zakres `94bdf11..9d1b09f`):*
 - **Dziewięć commitów `[FRONTEND]` z codziennego cyklu 06:00** — wyłącznie regeneracja pliku

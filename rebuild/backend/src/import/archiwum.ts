@@ -9,7 +9,7 @@ import {
   unlinkSync,
   writeFileSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 
 /**
  * Archiwum plików importu — port zachowania `mirror/backend/archive_module.cjs:26-130, 245-258`.
@@ -25,7 +25,8 @@ import { join, resolve } from "node:path";
  * go z `IMPORT_ARCHIVE_DIR`, domyślnie `<cwd>/import_archive` — inaczej po `npm run build`
  * archiwum lądowałoby wewnątrz `dist/`, a testy pisałyby po repozytorium.
  *
- * Endpointy `/api/import-archive*` (lista, pobranie pliku, statystyki) są POZA zakresem 3b.
+ * Odczyt dla tras `/api/import-archive*` (lista, statystyki, pobranie pliku) — port
+ * `archive_module.cjs:131-158, 168-238`, dopisany w tickecie 91 (karta PR.1). Zapis bez zmian.
  */
 
 /** Retencja z oryginału: 7 dni (zmiana 90→7 na prośbę Anny, 2026-08-21). */
@@ -183,7 +184,7 @@ export function aktualizujMeta(
   }
 }
 
-type PlikArchiwum = {
+export type PlikArchiwum = {
   pelna: string;
   nazwa: string;
   miesiac: string;
@@ -192,7 +193,7 @@ type PlikArchiwum = {
 };
 
 /** Wszystkie pliki archiwum bez `.meta.json`, najstarsze pierwsze (archive_module.cjs:131-150). */
-function listaPlikow(env: NodeJS.ProcessEnv): PlikArchiwum[] {
+export function listaPlikow(env: NodeJS.ProcessEnv): PlikArchiwum[] {
   const korzen = katalogArchiwum(env);
   if (!existsSync(korzen)) return [];
 
@@ -265,4 +266,131 @@ export function wymusRetencje(env: NodeJS.ProcessEnv = process.env): void {
   } catch (e) {
     console.error("[archiwum] BŁĄD rotacji:", e instanceof Error ? e.message : e);
   }
+}
+
+/** `readMeta` z oryginału (archive_module.cjs:152-158): brak albo zepsuty plik → `null`. */
+function czytajMeta(pelna: string): Partial<MetaArchiwum> | null {
+  try {
+    const sciezka = `${pelna}.meta.json`;
+    if (existsSync(sciezka)) return JSON.parse(readFileSync(sciezka, "utf8")) as Partial<MetaArchiwum>;
+  } catch {
+    /* zepsuty JSON traktujemy jak brak — jak oryginał */
+  }
+  return null;
+}
+
+export type FiltryArchiwum = {
+  dostawca?: string | undefined;
+  miesiac?: string | undefined;
+  status?: string | undefined;
+};
+
+/** Pozycja listy `GET /api/import-archive` — 11 pól, kolejność kluczy jak w oryginale (:181-193). */
+export type PozycjaArchiwum = {
+  id: string;
+  dostawca: string;
+  zrodlo: string | null;
+  uzytkownik: string | null;
+  data: string;
+  oryginalnaNazwa: string;
+  rozmiar: number;
+  status: string;
+  blad: string | null;
+  rekordy: number | null;
+  sha256: string | null;
+};
+
+/**
+ * Lista archiwum, najnowsze pierwsze, z filtrami łączonymi koniunkcją (archive_module.cjs:169-195).
+ *
+ * Filtry dosłownie jak w oryginale: `dostawca` po `toUpperCase()` porównany z `meta.dostawca`
+ * (plik bez meta nie przejdzie filtra dostawcy, mimo zastępczego `dostawca` z nazwy pliku),
+ * `miesiac` — z nazwą KATALOGU, nie z `meta.data`; `status` — dosłownie z `meta.status`
+ * (więc plik bez meta nie przejdzie też `?status=ok`, choć na liście pokazuje się jako `ok`).
+ * Puste wartości filtrów = brak filtra (`|| null` w oryginale).
+ *
+ * `rozmiar` bierzemy ze `stat` pliku, nie z meta — jak oryginał.
+ */
+export function listaArchiwum(
+  filtry: FiltryArchiwum,
+  env: NodeJS.ProcessEnv = process.env,
+): PozycjaArchiwum[] {
+  const fDostawca = (filtry.dostawca ?? "").toUpperCase() || null;
+  const fMiesiac = filtry.miesiac || null;
+  const fStatus = filtry.status || null;
+
+  const wynik: PozycjaArchiwum[] = [];
+  for (const plik of listaPlikow(env).reverse()) {
+    const meta = czytajMeta(plik.pelna) ?? {};
+    if (fDostawca && meta.dostawca !== fDostawca) continue;
+    if (fMiesiac && plik.miesiac !== fMiesiac) continue;
+    if (fStatus && meta.status !== fStatus) continue;
+    wynik.push({
+      id: meta.id || `${plik.miesiac}/${plik.nazwa}`,
+      dostawca: meta.dostawca || plik.nazwa.slice(0, 3),
+      zrodlo: meta.zrodlo || null,
+      uzytkownik: meta.uzytkownik || null,
+      data: meta.data || new Date(plik.mtimeMs).toISOString(),
+      oryginalnaNazwa: meta.oryginalnaNazwa || plik.nazwa,
+      rozmiar: plik.rozmiar,
+      status: meta.status || "ok",
+      blad: meta.blad || null,
+      rekordy: meta.rekordy ?? null,
+      sha256: meta.sha256 || null,
+    });
+  }
+  return wynik;
+}
+
+export type StatystykiArchiwum = {
+  plikow: number;
+  bajtow: number;
+  limitBajtow: number;
+  retencjaDni: number;
+  perMiesiac: Record<string, number>;
+};
+
+/**
+ * `GET /api/import-archive/stats` (archive_module.cjs:203-220). Klucze `perMiesiac` w kolejności
+ * pierwszego wystąpienia na liście posortowanej rosnąco po `mtime` — tak iteruje oryginał.
+ */
+export function statystykiArchiwum(env: NodeJS.ProcessEnv = process.env): StatystykiArchiwum {
+  const pliki = listaPlikow(env);
+  const perMiesiac: Record<string, number> = {};
+  for (const plik of pliki) perMiesiac[plik.miesiac] = (perMiesiac[plik.miesiac] ?? 0) + plik.rozmiar;
+  return {
+    plikow: pliki.length,
+    bajtow: pliki.reduce((s, p) => s + p.rozmiar, 0),
+    limitBajtow: MAX_BAJTOW,
+    retencjaDni: RETENCJA_DNI,
+    perMiesiac,
+  };
+}
+
+export type WynikSzukaniaPliku =
+  | { rodzaj: "plik"; sciezka: string; nazwa: string }
+  | { rodzaj: "nieprawidlowe-id" }
+  | { rodzaj: "brak" };
+
+/**
+ * Ścieżka pliku do pobrania z dwóch segmentów URL-a (archive_module.cjs:224-232).
+ *
+ * Ochrona przed path traversal JEST W ORYGINALE i odtwarzamy ją 1:1 (bez odstępstwa):
+ * `month/name` po zdekodowaniu parametrów przez Express musi pasować do
+ * `^\d{4}-\d{2}/[^/]+$` — więc `%2F` w nazwie (zdekodowany do `/`) odpada — i nie może
+ * zawierać `..`. Po tym `join(korzen, id)` nie ma jak wyjść poza katalog miesiąca.
+ *
+ * Skutek uboczny zachowany: nazwa z dwiema kropkami obok siebie (np. `a..csv`) jest nie do
+ * pobrania, choć `bezpiecznaNazwa` przy zapisie takie przepuszcza.
+ */
+export function szukajPlikuArchiwum(
+  miesiac: string,
+  nazwa: string,
+  env: NodeJS.ProcessEnv = process.env,
+): WynikSzukaniaPliku {
+  const id = `${miesiac}/${nazwa}`;
+  if (!/^\d{4}-\d{2}\/[^/]+$/.test(id) || id.includes("..")) return { rodzaj: "nieprawidlowe-id" };
+  const sciezka = join(katalogArchiwum(env), id);
+  if (!existsSync(sciezka)) return { rodzaj: "brak" };
+  return { rodzaj: "plik", sciezka, nazwa: basename(sciezka) };
 }
