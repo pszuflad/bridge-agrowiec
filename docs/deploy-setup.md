@@ -129,6 +129,16 @@ chmod 600 ~/private_apps/bridge-staging/.env
 >
 > Wzór: `rebuild/backend/.env.example`.
 
+> **MO9 Agro-Rami — dane logowania do hurtowni (`AGRORAMI_EMAIL`, `AGRORAMI_PASSWORD`).**
+> MO9 to jedyny dostawca z API: parser ignoruje plik CSV spod URL-a i pobiera dane z GraphQL
+> hurtowni (`hurtownia.agrorami.pl`). **Skrypt deployu tych zmiennych NIE ustawia** — muszą być
+> w `~/private_apps/bridge-staging/.env` (te same, których używa stary stos; sekretów nie
+> wpisujemy do repo). Bez nich „Synchronizuj teraz” przy MO9 kończy się błędem logowania,
+> a scheduler zapisuje alert importu MO9. Sprawdzenie bez ujawniania wartości:
+> `grep -c '^AGRORAMI_\(EMAIL\|PASSWORD\)=' ~/private_apps/bridge-staging/.env` → `2`.
+> Ustalone przy planowaniu testu pełnego systemu (2026-09-22) — wcześniej zmienne były opisane
+> tylko w raporcie `docs/tickets/4-FEATURE-port-parserow-charakteryzacja/raport.md`.
+
 ```bash
 # 5. Smoke test
 curl -s https://test.agritires.eu/api/health      # -> {"ok":true,"stage":"staging-placeholder",...}

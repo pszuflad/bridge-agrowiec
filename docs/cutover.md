@@ -14,7 +14,7 @@ Przełączamy **jednym ruchem** (big-bang, bez okresu współbieżnego działani
 |---|---|---|
 | Backend | `mirror/backend/index.cjs` + kilkanaście łatek `patch_*.cjs`, PM2 `bridge-backend`, `0.0.0.0:5000` | `rebuild/backend` → `dist/server.js`, PM2, ten sam port |
 | Frontend | zbudowany bundle w `public_html/panel` + trzy skrypty wstrzykiwane (`selly-injection.js`, `pending-injection.js`, `freq-injection.js`) | build `rebuild/frontend`, **skrypty wstrzykiwane znikają** — wszystkie trzy wchłonięte (I7, I8, 3f-2) |
-| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie przenosimy plików do innej bazy, ale `npm run migrate` na niej stosuje migracje SCHEMATU (001–003), DANYCH (004–006, konwencje 13c) i **nowej tabeli z seedem** (007, sześciu przewoźników wagi gabarytowej — 76-FEATURE) |
+| Baza | `/home/admin/private_apps/bridge/data.db` | **TA SAMA** `data.db` — nie przenosimy plików do innej bazy, ale `npm run migrate` na niej stosuje migracje SCHEMATU (001–003), DANYCH (004–006, konwencje 13c) **nowych tabel** (007 — sześciu przewoźników wagi gabarytowej, 76-FEATURE; 008 — statusy pseudo-alertów katalogowych, 77-FEATURE) oraz **poprawek danych** (009 — polskie znaki w alertach, 92-CHORE; 010 — marki różniące się tylko wielkością liter, 101-CHORE). Pełny opis 004–010: krok 5 w rozdziale 5 |
 | Apache | `public_html/panel/.htaccess`, proxy `/api/*` | ten sam mechanizm, przekierowanie na nowy proces |
 
 **Baza jest wspólnym mianownikiem i to jest największe ryzyko całej operacji** — dlatego
@@ -204,7 +204,8 @@ proces wstanie i będzie wyglądał na zdrowy.
 | `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`, `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` | brak / `READWRITE` | prawdziwe sekrety | sześć tras zewnętrznych oddaje 500 „Brak konfiguracji" |
 | `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` | **wartości produkcyjne** | zostawić domyślne | to jedyne trzy, których produkcja NIE nadpisuje — staging musi, produkcja nie |
 | `CORS_ORIGINS` | puste | **zostawić puste** | patrz niżej |
-| `IMPORT_ARCHIVE_DIR` | obok `dist/` | katalog trwały | archiwum importu przepadałoby przy każdym deployu |
+| `IMPORT_ARCHIVE_DIR` | `<cwd>/import_archive` (`rebuild/backend/src/import/archiwum.ts:40`) | **`/home/admin/private_apps/bridge/import_archive`** — katalog archiwum STAREGO stosu | archiwum importu przepadałoby przy każdym deployu, a widok „Archiwum importów” (PR.1) nie pokazałby plików sprzed przełączenia. Proces musi mieć prawo zapisu do katalogu. Rotacja 7 dni (po `mtime`) przy pierwszym zapisie usunie starsze pliki — tak samo jak na starym stosie |
+| `AGRORAMI_EMAIL`, `AGRORAMI_PASSWORD` | brak | **te same dane logowania do hurtowni Agro-Rami, których używa stary stos** | **MO9 (Agro-Rami/BKT) przestaje się importować** — to jedyny dostawca z API (GraphQL `hurtownia.agrorami.pl`, od 2026-07-10); plik CSV z URL w tabeli `suppliers` jest ignorowany. Proces wstaje normalnie, a błąd widać dopiero jako alert importu MO9. `AGRORAMI_GRAPHQL_URL` i `AGRORAMI_CATEGORY_ID` mają domyślne wartości zgodne z produkcją |
 
 **`CORS_ORIGINS` zostaje PUSTY i to jest stan docelowy, nie przeoczenie.** Front i `/api` stoją
 pod tą samą domeną za proxy Apache (same-origin), więc bez nagłówków `Access-Control-Allow-*`
@@ -273,6 +274,26 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    tworzy, pustą. Bez niej zakładka „Katalog" na `/alerty` pokazuje błąd zapytania SQL po
    przełączeniu.
 
+   ⚠ **`009_alerty_polskie_znaki.sql` (karta PR.3, 92-CHORE) — NIE jest no-opem.** Stary backend ma
+   znaki zapytania wpisane na sztywno w literałach (`B??d pobierania`, `R?czny upload`, `B??d HTTP`,
+   `produkt?w`, `b??dy`), więc psuje KAŻDY nowy alert aż do dnia przełączenia. Migracja naprawia
+   wszystkie takie wiersze zapisane do tego dnia (na snapshocie z 13.08: 435 `typ` + 2219 `opis`,
+   na żywej bazie więcej). Odbudowa pisze poprawnie, więc po przełączeniu problem nie wraca.
+
+   ⚠ **`010_marka_caps.sql` (karta PR.5, 101-CHORE, backlog #92) — NIE jest no-opem.** Marki różniące
+   się od istniejącej marki wyłącznie wielkością liter przechodzą na formę WIELKIMI literami, a forma
+   niekanoniczna znika ze słownika marek. Na snapshocie: 1 produkt (`MO1_71970103`, `Alliance` →
+   `ALLIANCE`) + 1 wpis słownika. Import od 09-01 i tak podaje markę wielkimi literami, więc poprawka
+   nie wróci.
+
+   **Punkty kontrolne po migracjach (na żywej bazie, po `npm run migrate`):**
+
+   ```bash
+   sqlite3 data.db "SELECT count(*) FROM alerts WHERE instr(typ,'?')>0 OR instr(opis,'produkt?w')>0;"   # → 0
+   sqlite3 data.db "SELECT count(*) FROM products WHERE marka='Alliance';"                              # → 0
+   sqlite3 data.db "SELECT count(*) FROM alerty_katalogu_statusy;"                                      # → 0 (tabela istnieje)
+   ```
+
    ⚠ **`npm run migrate` tego NIE pokaże** — wypisuje wyłącznie, które PLIKI zastosował, a które
    pominął (`migrate-cli.ts`), bez liczby zmienionych wierszy. Sprawdź to osobno, na KOPII bazy
    z kroku 1, PRZED uruchomieniem migracji na żywej:
@@ -324,10 +345,13 @@ Kolejność jest celowa: od najtańszego do najdroższego, żeby awaria wyszła 
       nie zostało przełączone.
 - [ ] Logowanie na konto Ani działa; po zalogowaniu widać jej imię w stopce sidebara.
 - [ ] `/katalog` pokazuje produkty, a licznik pozycji zgadza się z tym, co było przed oknem.
-- [ ] **Sidebar jest na każdym z 12 ekranów** (od 12e wpina go router).
+- [ ] **Sidebar jest na każdym z 13 ekranów** (od 12e wpina go router; 13. to „Archiwum importów”, PR.1).
 - [ ] `/katalog` → kolumna „Konstrukcja opony" pokazuje „Radialna"/„Diagonalna", a nie „—".
       ⚠ To **świadoma różnica wobec starej produkcji** (rozdział 1), nie usterka do zgłoszenia.
 - [ ] `/historia` pokazuje wpisy sprzed cutoveru — dowód, że to ta sama baza.
+- [ ] `/archiwum` pokazuje pliki importu z ostatnich 7 dni sprzed przełączenia — dowód, że
+      `IMPORT_ARCHIVE_DIR` wskazuje katalog starego stosu. Pusta lista = zła ścieżka.
+- [ ] `/alerty` → filtr typu: „Błąd pobierania”, „Błąd HTTP”, „Ręczny upload” — bez znaków zapytania (009).
 - [ ] `/konfiguracja` → zakładka „Dostawcy": lista i statusy wyglądają jak wcześniej.
 - [ ] `waga_gab_przewoznicy` zasiedlona przez 007: `sqlite3 data.db "SELECT count(*) FROM
       waga_gab_przewoznicy;"` → **6**. Lokalne listy z IndexedDB przeglądarki (jeśli ktoś je sobie
@@ -337,6 +361,9 @@ Kolejność jest celowa: od najtańszego do najdroższego, żeby awaria wyszła 
 - [ ] `/selly` → „Status": pokazuje realny stan, nie „Brak konfiguracji" (jeśli ma być `pelny`).
 - [ ] Jeden **odczytowy** eksport CSV — sprawdza, że ścieżki plików są produkcyjne.
 - [ ] `pm2 logs bridge-backend` przez kilka minut: brak powtarzających się błędów.
+- [ ] Po pierwszym przebiegu schedulera: import **MO9** zakończony sukcesem (`/konfiguracja` →
+      „Dostawcy” → MO9: *ostatnia próba* świeża, status aktywny; brak nowego alertu MO9). Błąd
+      logowania = brak `AGRORAMI_*` w pliku środowiska (rozdział 4).
 
 **Czego NIE testujemy w oknie:** `POST /api/selly/sync-supplier` z `dry_run=false` (realnie
 modyfikuje sklep) ani „Usuń wszystko z katalogu". Import z URL-i zostawiamy schedulerowi.

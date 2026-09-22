@@ -4308,3 +4308,121 @@ ticketa — sprawdzając `develop`, nie własną gałąź. Stacked PR, którego 
 równolegle, potrafi zmergować się 25 sekund po swojej bazie i wylądować poza `develop`
 (tu: PR #75 o 18:04:39 wobec PR #74 o 18:04:14). **Decyzja zapisana wyłącznie w opisie pull
 requesta nie istnieje** — baza wiedzy to `docs/`, nie GitHub.
+
+---
+
+### #94 · 2026-09-22 · [BACKEND] · karta 4.1 „Historia dostępności”: EAN wybierany przypadkowo i zdublowane migawki liczone podwójnie
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (znalezisko review karty P10.1, `90-FEATURE-ozywienie-kart-dostepnosci`) |
+| **Kategoria** | BACKEND (analityka, `historia_cen`) — defekt PRODUKCJI odtworzony 1:1 |
+| **Pliki** | `rebuild/backend/src/repos/analityka.ts` (`dostepnoscProduktow`), `repos/analityka-eksport.ts` (`export/availability-products`); oryginał `mirror/backend/analytics_module.cjs:161-165` |
+| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
+| **Status** | — |
+
+**Na czym polega.** Dwie rzeczy, obie w karcie 4.1 i jej eksporcie CSV, obie tego samego rodzaju co
+naprawione #33:
+1. `h.ean` wybierane GOŁE obok `GROUP BY h.dostawca, h.kod` — gdy para `(dostawca, kod)` ma w historii
+   dwa różne EAN-y, SQLite bierze jeden z nich zależnie od implementacji. Na `db/snapshot.db`: **9 par**.
+2. `COUNT(*)` i procent liczone po SUROWEJ historii — zdublowane migawki o tym samym kluczu
+   `(dostawca, kod, zarejestrowano_at)` (30 grup / 67 wierszy na snapshocie) liczą się podwójnie.
+   Decyzja #33 objęła wyłącznie `sell-through`.
+
+**Dlaczego dopiero teraz.** Do P10.1 karta 4.1 była trwale pusta (#32), więc obie usterki były
+nieosiągalne. Ożywienie kart je odsłoniło.
+
+**Rekomendacja koordynatora:** ✅ naprawić wzorem #33 — zwinąć duplikaty klucza (`MAX(id)`, wspólne CTE
+`HISTORIA_BEZ_DUPLIKATOW_KLUCZA` już istnieje) przed agregacją i brać EAN z tego samego, ostatniego wiersza.
+Mała zmiana w jednym pliku repozytorium + eksport.
+
+---
+
+### #95 · 2026-09-22 · [BACKEND] · import: przy zdublowanym kodzie w jednym cenniku katalog i historia cen mogą mieć różny stan („przypadek mieszany”)
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (pomiar karty P10.1 przy decyzji #33) |
+| **Kategoria** | BACKEND (import, `import/tk.ts`) — zachowanie PRODUKCJI, odtworzone 1:1 |
+| **Pliki** | `rebuild/backend/src/import/tk.ts` (klasyfikacja zmian, zapis `historia_cen`) |
+| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
+| **Status** | — |
+
+**Na czym polega.** Gdy ten sam kod występuje w cenniku dwa razy, import zostawia w `products`
+linię OSTATNIĄ — z jednym wyjątkiem: jeśli ostatnia linia ma `stan` równy stanowi sprzed importu,
+ale inną cenę, pole `stan` w katalogu zostaje ze wcześniejszej linii. Karta „Tempo schodzenia”
+(po #33 bierze `MAX(id)`) pokaże wtedy stan ostatniej linii, a katalog — wcześniejszej.
+
+**Skala.** Przypadek rzadki: wymaga zdublowanego kodu w jednym pliku ORAZ różnych danych w obu
+liniach. MO7 Nokian ma 14 zdublowanych kodów, ale to identyczne wiersze (pomiar parserów 21.09).
+
+**Rekomendacja koordynatora:** 🕒 później — zapisać, zająć się przy najbliższej karcie dotykającej
+`import/tk.ts`. Nie blokuje cutoveru.
+
+---
+
+### #96 · 2026-09-22 · [FRONTEND] · plik CSV z kart analityki ma sufit tras dashboardu (1000 / 500 wierszy) — mniej niż dawny eksport serwerowy
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (znalezisko karty P10.4, `100-DOCS-instrukcja-testow-i10-v2`, po P10.3) |
+| **Kategoria** | FRONTEND (analityka, eksport CSV) — skutek uboczny świadomego odstępstwa #91 |
+| **Pliki** | `rebuild/frontend/src/pages/analityka/eksport.tsx` i generator CSV (P10.3); trasy dashboardu z limitami SQL (`repos/analityka.ts`) |
+| **Do nowej wersji?** | ⬜ **czeka na odpowiedź Ani** — `docs/instrukcja-testow-I10-v2.md` §1.3 (pytanie A) |
+| **Status** | — |
+
+**Na czym polega.** Od P10.3 plik CSV powstaje w przeglądarce z wierszy tabeli (#91). Plan P10.3 zakładał,
+że karty pobierają pełne listy — nieprawda: trasy dashboardu mają limity SQL z oryginału. Zmierzone na
+`db/snapshot.db`: **Pozycje unikalne 5109 → plik 1000**; karty 4.1 / 4.2 (~5184) → **plik 500**;
+EAN wspólne 769 (poniżej sufitu, bez straty). Dawny eksport serwerowy: `unique` bez limitu,
+`availability-products` / `sell-through` do 5000.
+
+Ten sam sufit robi kafel KPI „Pozycje unikalne” = 1000 (port 1:1 oryginału, PR.2).
+
+**Powiązane:** `GET /api/analytics/export/{view}` nie ma już konsumenta we froncie (P10.3) — działa dalej
+jako API. Przy wariancie „zdjąć sufit” jedną z dróg jest przywrócenie trasy serwerowej dla tych trzech widoków.
+
+**Rekomendacja koordynatora:** zależnie od odpowiedzi Ani. Jeśli potrzebuje pełnych plików — zdjąć sufit
+tylko dla pliku (osobne zapytanie bez limitu przy eksporcie), tabela i kafel zostają 1:1.
+
+---
+
+### #97 · 2026-09-22 · [FRONTEND][BACKEND] · kafel „Ostatni eksport CSV” ożył, ale z panelu nie da się wytworzyć eksportu, który by go zasilił
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (znalezisko karty P10.4, po P10.2) |
+| **Kategoria** | FRONTEND + BACKEND (Pulpit, audyt eksportów) |
+| **Pliki** | `rebuild/frontend/src/pages/pulpit/kpi.ts` (P10.2); eksport z Katalogu (bez audytu — decyzja D3 bloku 10f); trasy `eksport_csv`/`eksport_shoper` bez konsumenta w UI |
+| **Do nowej wersji?** | ⬜ **czeka na odpowiedź Ani** — `docs/instrukcja-testow-I10-v2.md` §1.2 |
+| **Status** | — |
+
+**Na czym polega.** P10.2 (#34) podpięła kafel pod Historię (`audit_log`, typ „eksport”). Ale żaden przycisk
+w panelu nie tworzy dziś wpisu `eksport_*`: eksport CSV z Katalogu nie zapisuje audytu (10f, D3), a trasy,
+które audyt piszą, nie mają przycisku. Generowanie CSV dla Selly też się nie liczy. Kafel pokaże więc
+„—” + „Ostatni import: …”, dopóki ktoś nie wywoła eksportu z API.
+
+**Rekomendacja koordynatora:** zależnie od odpowiedzi Ani. Wariant (a) z I10-v2 — audyt przy eksporcie
+z Katalogu — to nowe, świadome odstępstwo (mała zmiana: jeden zapis audytu).
+
+---
+
+### #98 · 2026-09-22 · [BAZA] · resztki w danych po PR.5: śmieci w polu marki, pary bieżników różniące się wielkością liter, mieszane marki w historii cen
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-22 (karta PR.5, `101-CHORE-migracja-marka-caps`) |
+| **Kategoria** | BAZA (dane) — stan produkcji |
+| **Pliki** | dane: `products.marka`, słownik `atrybuty_wartosci` (rodzaj `bieznik`), `historia_cen.marka` |
+| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
+| **Status** | — |
+
+**Co zostało poza zakresem #92** (migracja `010` objęła wyłącznie marki w `products` i słowniku marek):
+- **śmieci w polu marki** — `21x7.00-15`, `18x8.50-8` (rozmiar zamiast marki), po 1 produkcie;
+- **4 pary case-only w słowniku `bieznik`** — `FLOTATION T422`, `LOGGER KING TRS-2`, `MAGLIFT LIP`,
+  `MG121 PROWADZĄCA` (ostatnia z polskim znakiem — patrz CLAUDE.md o ASCII-only `UPPER()`);
+- **`historia_cen.marka`: 953 × `Alliance`** — ma znaczenie dopiero, gdy grupowanie po marce
+  w historii cen dostanie UI.
+
+**Rekomendacja koordynatora:** 🕒 po cutoverze. Żadna z tych rzeczy nie jest widoczna w filtrach katalogu
+ani nie blokuje testu. Śmieci w polu marki Ania może poprawić ręcznie (edycja produktu).

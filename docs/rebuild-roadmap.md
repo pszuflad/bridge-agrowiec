@@ -183,7 +183,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 7 | Atrybuty (+ pending-injection) | 7a BE · 7b FE · 7c FE + P7.1–P7.5 | 2 | ✅ | 7a/7b/7c 2026-09-04 · poprawki planu P zamknięte 2026-09-21 (otwarte po stronie Ani: dwa pytania z I7-v2) — szczegóły: blok „Poprawki po testach Ani” |
 | 8 | Selly / sprzedawarka (+ selly-injection) | 8a BE · 8b FE | 2, 4 | ✅ | 8a: ticket `28-FEATURE-selly-eksport-backend` · 2026-09-04 · 8b: ticket `30-FEATURE-selly-panel-frontend` · 2026-09-04 |
 | 9 | Waga gabarytowa | 1 + P9.1 · P9.1b · P9.2 | 2 | ✅ | `18-FEATURE-waga-gabarytowa` · 2026-09-03 · poprawki planu P zamknięte 2026-09-21 (otwarte po stronie Ani: progi palety) — szczegóły: blok „Poprawki po testach Ani” |
-| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f + P10.1–P10.4 | 2, 3, 4 | ✅ / 🔨 | 10a–10f 2026-09-03…04 (blok I10) · poprawki P10.x otwarte: `tools/stan-kart.sh P10` |
+| 10 | Analityka + pulpit | 10a→[10b·10c·10d·10e]→10f + P10.1–P10.4 | 2, 3, 4 | ✅ | 10a–10f 2026-09-03…04 (blok I10) · **poprawki P10.1–P10.4 zamknięte 2026-09-22** (tickety 90, 96, 98, 100) — `tools/stan-kart.sh P10` |
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a–12c 2026-09-05 · 12d, 12e 2026-09-08 — szczegóły: nagłówki sesji w bloku I12 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f · 13a · 13b · 13c · 13d · 13e | 3, 8 | 🔨 | 13a/13b/13c/13e/13f ✅ 2026-09-08…09 · **13d ⛔ ODŁOŻONE** (13d-1 cofnięte, revert #58 — Selly dociera u Ani) — szczegóły: blok I13 |
@@ -1421,7 +1421,7 @@ jeden realny defekt znaleziony przy okazji:
   wzorzec (wykres + tabela), pozostałe zakładki puste ale nazwane. **Prompt bloku opisywał
   inny ekran niż ma oryginał** — zweryfikowane w kodzie i rozstrzygnięte czterema decyzjami
   użytkownika 2026-09-03 (D1–D4, `docs/tickets/19-FEATURE-analityka-fundament/plan.md`):
-  - O-10a-1 — nagłówek KPI (4 kafle) czyta `/api/analytics/kpi`, którego **oryginalny frontend
+  - O-10a-1 — **✅ ZAMKNIĘTE 2026-09-22 przez PR.2 (ticket 97): nagłówek pokazuje cztery kafle oryginału.** Opis historyczny: nagłówek KPI (4 kafle) czyta `/api/analytics/kpi`, którego **oryginalny frontend
     nie woła ani razu** (`analytics_module.cjs:324`: „backward-compatible alias"); oryginalne
     4 kafle liczą co innego (`filters.dostawcy.length`, `ean/comparison`, `ean/unique`,
     `status.snapshots`) i wymagają tras z 10c.
@@ -1612,7 +1612,8 @@ jeden realny defekt znaleziony przy okazji:
     limit 5, sort poziom→data malejąco. **Od P6.2 (77, 2026-09-21) już nieaktualne jako stan
     bieżący** — decyzja 3 tej karty odwróciła O-10f-1: Pulpit dziś pokazuje OBA źródła (import +
     katalog), kafel sumuje `nowy` z obu, karta ma dwie sekcje. Patrz Iteracja 6 w §5.
-  - **D3 — kafel „Ostatni eksport CSV" odtworzony 1:1 jako TRWALE MARTWY.** Szuka
+  - **D3 — kafel „Ostatni eksport CSV" odtworzony 1:1 jako TRWALE MARTWY.** ⚠ **Nieaktualne od
+    2026-09-22:** P10.2 (ticket 96, backlog #34) ożywiła kafel — czyta `GET /api/history/paged`. Opis historyczny: Szuka
     `typ === "eksport"` w `GET /api/history` (I5), a ta trasa oddaje tabelę `history`, której
     wiersz nie ma pola `typ` (niesie je `GET /api/history/paged` z `audit_log`). Pokazuje zawsze
     „—"; naprawa czeka na decyzję Ani (`docs/rebuild-backlog.md`).
@@ -1629,7 +1630,7 @@ jeden realny defekt znaleziony przy okazji:
     prawdziwym serwerze.
   - **Otwarte, BEZ przypisania do konkretnego przyszłego bloku** (Iteracja 10 była ostatnią
     analityki):
-    - O-10a-1 (nagłówek KPI `/analityka` czyta `/api/analytics/kpi` zamiast danych z
+    - ~~O-10a-1~~ ✅ zamknięte 2026-09-22 (PR.2, ticket 97). Opis historyczny: (nagłówek KPI `/analityka` czyta `/api/analytics/kpi` zamiast danych z
       `filters`/`ean/*`/`status`) — dane potrzebne do przepięcia są od 10c dostępne, ale
       przepięcie to osobna decyzja użytkownika, nikt jej nie podjął;
     - backlog #26 (pseudo-alerty katalogowe `pv()` zamiast `/api/alerts`) — D1 utrzymywała
@@ -3321,7 +3322,10 @@ założona.
 
 #### Iteracja 10 — Analityka i Pulpit
 
-Otwarte karty tej iteracji żyją w **`docs/karty/<ID>/`** (zakres, decyzje, pliki, wejścia od innych
+> **✅ ZAMKNIĘTA 2026-09-22** — P10.1 (ticket 90), P10.2 (96), P10.3 (98), P10.4 (100, delta
+> `docs/instrukcja-testow-I10-v2.md`). Pytania do Ani z I10-v2 (§1.2, §1.3) → backlog #96, #97.
+
+Karty tej iteracji żyją w **`docs/karty/<ID>/`** (zakres, decyzje, pliki, wejścia od innych
 kart) — przeniesione tam ticketem `86-DOCS-migracja-kart-etap2`. Stan: `tools/stan-kart.sh P10`.
 Poniżej tylko spis i kolejność (tabelę zmienia koordynator, nie karty).
 
@@ -3334,6 +3338,9 @@ Poniżej tylko spis i kolejność (tabelę zmienia koordynator, nie karty).
 
 #### Przegląd 12 widoków
 
+> **✅ ZAMKNIĘTY 2026-09-22** — PR.1 (ticket 91), PR.2 (97), PR.3 (92), PR.4 (93), PR.5 (101, migracja
+> `010`), PR.6 (102 — `docs/przeglad-12-widokow.md` zaktualizowany, doszedł 13. ekran „Archiwum importów”).
+
 Jak wyżej: karty w `docs/karty/<ID>/`, stan `tools/stan-kart.sh PR`.
 
 | Karta | Zakres | Wpisy | Zależy od |
@@ -3342,7 +3349,7 @@ Jak wyżej: karty w `docs/karty/<ID>/`, stan `tools/stan-kart.sh PR`.
 | [PR.2](karty/PR.2/) | kafle KPI analityki jak na produkcji | — | P10.1 |
 | [PR.3](karty/PR.3/) | migracja typów alertów (`B??d` → `Błąd`, 435 wierszy) — migracja `009` | — | — |
 | [PR.4](karty/PR.4/) | diagnoza Selly „Wygeneruj CSV” na stagingu | — | — |
-| [PR.5](karty/PR.5/) | duplikat marki `ALLIANCE` / `Alliance` | #92 | decyzja #92 |
+| [PR.5](karty/PR.5/) | duplikat marki `ALLIANCE` / `Alliance` — migracja `010` | #92 | decyzja #92 (✅ 2026-09-22, wariant A) |
 | [PR.6](karty/PR.6/) | aktualizacja przeglądu 12 widoków | — | PR.1–PR.5 |
 
 #### ⭐ Pomiar parserów na prawdziwych cennikach (2026-09-21) — zastępuje test §8.1 instrukcji I3
@@ -3399,8 +3406,13 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 
 | Decyzja | Odblokowuje | Rekomendacja |
 |---|---|---|
-| **#91** — zakres „zapisz to, co widzę" | P10.3 | do rozstrzygnięcia |
-| **#92** — duplikat marek: dane czy prezentacja | PR.5 | łącznie z #42 |
+| ~~**#91** — zakres „zapisz to, co widzę"~~ | P10.3 | ✅ rozstrzygnięte 2026-09-21 (ticket 87), dowiezione w P10.3 (98) |
+| ~~**#92** — duplikat marek: dane czy prezentacja~~ | PR.5 | ✅ 2026-09-22, wariant A — migracja `010` (ticket 101) |
+| **Pytanie 12.3 — kafle KPI Analityki** | — | PR.2 wdrożyła wariant (a) „jak na produkcji” na podstawie decyzji użytkownika 2026-09-22; odpowiedź Ani nadal pusta — pytanie ponowione w `docs/pytania-do-ani-2026-09-22.md` §3.1 |
+| **#96** — sufit 1000/500 wierszy w plikach CSV analityki | ewentualne zdjęcie sufitu dla pliku | **⬜ po stronie Ani** — I10-v2 §1.3 |
+| **#97** — kafel „Ostatni eksport CSV” bez źródła w UI | ewentualny audyt eksportu z Katalogu (nowe odstępstwo) | **⬜ po stronie Ani** — I10-v2 §1.2 |
+| **#94** — karta 4.1: przypadkowy EAN i podwójne migawki | mała karta analityki | ⬜ użytkownik — rekomendacja: naprawić wzorem #33 |
+| **#95**, **#98** — „przypadek mieszany” w imporcie, resztki danych | — | ⬜ użytkownik — rekomendacja: po cutoverze |
 | **Progi kalkulatora paletowego** (półpaleta ≤ 55 cm → 60 cm, paleta ≤ 80 cm, +10 cm paleta, współczynnik 0.000167) — właściwe czy do zmiany | ewentualną zmianę ustawień `waga_gab.*` (stała 60 cm to kod, nie ustawienie) | **⬜ po stronie Ani** — pytanie z wariantami w `docs/instrukcja-testow-I9-v2.md` §3.2 (2026-09-21) |
 | **Rodzaje `model` i `zastosowanie`** — gdzie Ania ich używa (słownik · filtry/reguły cen · mają trafiać do kolejki · nie używa) | tylko przy „mają trafiać do kolejki”: nowa funkcja (zmiana `ZAKRES_SKANU`, +199 pozycji `model` na snapshocie), nowy wpis backlogu | **⬜ po stronie Ani** — I7-v2 pkt 1.4, backlog #41 (2026-09-21) |
 | **Seed marek i bieżników przy starcie** — czy nowe wartości mogą znikać z kolejki (seed je „akceptuje”) | przy „nie”: zmiana seedu, odstępstwo od produkcji, nowy wpis backlogu | **⬜ po stronie Ani** — I7-v2 pkt 2.3, raport ticketu 78 (2026-09-21) |
@@ -3439,8 +3451,9 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
   po cutoverze.
 
 **Zostaje jako zdarzenie poza odbudową:**
-- **Przegląd 12 widoków przez Anię** — checklista gotowa w `docs/przeglad-12-widokow.md`
-  (12 sekcji + logowanie, „wygląda inaczej i to OK", „znane i nienaprawione"). Sam przegląd
+- **Przegląd widoków przez Anię** — checklista w `docs/przeglad-12-widokow.md`, **zaktualizowana
+  2026-09-22 (PR.6, ticket 102) do stanu po planie P**; od PR.1 widoków jest 13. Do ponownego przejścia
+  po deployu `develop` na staging (13 sekcji + logowanie, „wygląda inaczej i to OK", „znane i nienaprawione"). Sam przegląd
   klika Ania na stagingu (test.agritires.eu).
 - **Cutover (big-bang)** — plan gotowy w `docs/cutover.md`: przełączenie Apache/PM2 na nowy
   stos, ta sama baza `data.db`. Warunki wstępne (zielony przegląd Ani, zielone bramki, kopia
