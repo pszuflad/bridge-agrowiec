@@ -306,13 +306,15 @@ przyjmują `?ean` i obie mają zero wywołań w bundlu. Wyglądają na zaczątek
 EAN-u", którego nikt nie dokończył. Dowiezione jako trasy bez UI, tak jak
 `bootstrap-current` w 10a.
 
-**Kafle KPI oryginału zależą od tego bloku.** Oryginalny nagłówek `/analityka` liczy dwa
+**Kafle KPI oryginału zależały od tego bloku.** Oryginalny nagłówek `/analityka` liczy dwa
 z czterech kafli z `ean/comparison.rows.length` („EAN wspólne") i `ean/unique.rows.length`
-(„Pozycje unikalne"). Blok 10a świadomie wziął `GET /api/analytics/kpi` zamiast nich
-(odstępstwo O-10a-1), żeby nie czekać na 10c. **Dane są teraz dostępne, ale przepięcie
-nagłówka na oryginalne kafle jest osobną decyzją użytkownika** — 10c jej nie podjął
-(decyzja D1 z `docs/tickets/22-FEATURE-analityka-ean/plan.md`); zmiana byłaby jednym
-edytem `NaglowekKpi.tsx`, gdy ktoś zdecyduje.
+(„Pozycje unikalne"). Blok 10a świadomie wziął tymczasowo `GET /api/analytics/kpi` zamiast
+nich (odstępstwo O-10a-1), żeby nie czekać na 10c; 10c dane tylko przygotował
+(decyzja D1 z `docs/tickets/22-FEATURE-analityka-ean/plan.md`), przepięcie zostawiając na
+później. Przepięcie zrobił ticket `97-FEATURE-kafle-kpi-analityki` (2026-09-22, karta PR.2) —
+`NaglowekKpi.tsx` liczy dziś cztery kafle klientem z tras, które widok już pobiera
+(`filters`, `status`, `ean/comparison`, `ean/unique`); `GET /api/analytics/kpi` zostaje w
+backendzie i kontrakcie bez konsumenta w UI.
 
 **Co 10c zostawia następnym:** przyciski CSV kart „2.1-2.4" i „2.5" idą do bloku **10f**
 razem z `GET /api/analytics/export/{view}` (§8.1).
@@ -540,8 +542,10 @@ wcześniejszy zapis tej sekcji, który zakładał reużycie `useKpi()`/`useStatu
 - pobiera `["/api/products"]`, `["/api/staging"]`, `["/api/suppliers"]`, `["/api/history"]`;
 - cztery kafle KPI liczy **klientem** (`e?.length`, filtry `b2()` = „w tym tygodniu",
   `j2()` = „dzisiaj"), a kafel to komponent `Si()` (`:16794-16836`) z **ikoną, `href`
-  i trendem up/none** — zupełnie inny niż `Kafel` z `NaglowekKpi.tsx`, który pokazuje inne
-  cztery liczby (odstępstwo O-10a-1);
+  i trendem up/none** — zupełnie inny komponent i inne cztery liczby niż `Kafel` z
+  `NaglowekKpi.tsx` (Pulpit liczy z `/api/products`, `/api/staging`, `/api/suppliers`,
+  `/api/history`; `NaglowekKpi` liczy z `filters`/`status`/`ean/comparison`/`ean/unique` —
+  patrz D2 niżej);
 - alerty wyprowadza **klientem** z `/api/products` przez `pv()` (`:16631-16745`) —
   pseudo-alerty katalogowe (marża ujemna/niska, „nie-opona", brak importu ≥7/≥30 dni),
   filtrowane po `status === "nowy"`.

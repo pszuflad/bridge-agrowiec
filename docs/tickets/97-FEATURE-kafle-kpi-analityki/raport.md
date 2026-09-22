@@ -40,3 +40,18 @@ Brak. `useKpi()` nie miał innych konsumentów.
 - `rebuild/frontend/src/pages/pulpit/KafelKpi.tsx:8` wspomina O-10a-1 jako żywe. Pulpit należy do P10.2,
   więc sprawa idzie przez „Do koordynatora”.
 - `docs/instrukcja-testow-I10.md:171,472` opisuje stare kafle. Na to jest wejście dla P10.4.
+
+## Poprawki po review
+- Zgłoszony BLOCKER (karta PR.2 i wejścia) należał do fazy dokumentacji i jest zrobiony niżej.
+- SHOULD-FIX: odhaczone punkty DoD w `plan.md`. NICE-TO-HAVE: zawinięta za długa linia testu.
+
+## Aktualizacje dokumentacji
+- `docs/karty/PR.2/karta.md`: stan ✅ 2026-09-22, uzupełnione „Dowiezione” i „Do koordynatora”
+  (roadmapa :1424/:1632, `pulpit/KafelKpi.tsx:8`, pusta odpowiedź Ani na 12.3, nieużywane handlery `/kpi`).
+  Założenie „do potwierdzenia” zastąpione rozstrzygnięciem.
+- **Nowy** `docs/karty/PR.6/wejscie-97.md`: stan dla §8 przeglądu 12 widoków.
+- **Nowy** `docs/karty/P10.4/wejscie-97.md`: delta „Zgłosiłaś → Jest teraz → Sprawdź” do `instrukcja-testow-I10.md:171,472`.
+- `docs/spec-frontend.md` (§10a, §10c) i `docs/analityka-bloki-10b-10f.md` (§5, §8.2): O-10a-1 poprawione
+  w miejscu na „zamknięte ticketem 97”.
+- `docs/rebuild-backlog.md`: bez zmian, żaden wpis nie dotyczy kafli nagłówka.
+- Problemy zastane: roadmapa :1424/:1632 (dla koordynatora) i `pulpit/KafelKpi.tsx:8` (dla P10.2).
