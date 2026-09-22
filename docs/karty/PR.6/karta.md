@@ -45,6 +45,7 @@ pliki `wejscie-*.md` w tym katalogu.
   - Historia: bez limitu 5000 (P5.1), filtr „Edycje” (P7.1).
   - Konfiguracja: **osiem zakładek** — ręczne wgrywanie jest osobną zakładką „Wgrywanie
     ręczne”, nie częścią „Dostawcy” (błąd od pierwszej wersji dokumentu); „AI Fallback”.
+    Przycisk przy dostawcy to „Synchronizuj”, nie „Synchronizuj teraz” (też od pierwszej wersji).
   - Selly: **ekran nie ma zakładek** „Status”/„Dziennik” (błąd od pierwszej wersji) — pięć kart
     jedna pod drugą.
   - Lista zbiorcza: usunięte „wygasłe promocje nadal obniżają ceny” (sprzeczne z §4 i z kodem
