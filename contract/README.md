@@ -79,6 +79,15 @@ Co robi krok po kroku i dlaczego to jest wierne:
    na kształt `GET /api/staging`.
 5. startuje oryginał; ten sam dokłada kolumnę `uwaga_cena` (`uwaga_cena_patch.cjs:26-34`);
 6. loguje się i odgrywa scenariusze, operacje niszczące na końcu.
+7. **(od ticketu 91) zapełnia archiwum importów kodem oryginału** — snapshot bazy archiwum nie
+   niesie (leży obok `__dirname`), więc `odegrajArchiwum()` wgrywa przez `POST /api/import/parse-file`
+   trzy pliki: próbki MO1.csv i MO6.csv z `rebuild/backend/test/charakteryzacja/probki/` (status
+   `ok`) oraz CSV z niedomkniętym cudzysłowem dla MO7 (parser rzuca → status `blad`). `.meta.json`
+   pisze więc sam `archiveBuffer()`/`updateMeta()` oryginału. Potem nagrywa `GET_import-archive*.json`
+   (lista w czterech wariantach, 401, stats, pobranie 200/400/404). Samej odpowiedzi `parse-file`
+   ten krok nie nagrywa. Pobranie pliku to jedyne nagranie z `json: false`: treść jako tekst (dekoder
+   UTF-8 zdejmuje BOM z próbki MO6 — bajty potwierdza `content-length`) i wybrane nagłówki
+   w polu technicznym `_naglowki` (`content-type`, `content-disposition`, `content-length`).
 
 **Odtwarzalne znaczy „ten sam KSZTAŁT", nie „bajt w bajt"** — `PUT`/`PATCH /api/products/{id}`
 oddają zapisany rekord z `dataAktualizacji` z zegara.

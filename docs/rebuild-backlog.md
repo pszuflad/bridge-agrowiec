@@ -951,6 +951,9 @@ od zera):
   ujęty w #4/#6.
 - `archive_module.cjs` (nowy, obsługa `import_archive`) — archiwizacja zrzutów importu; my `import_archive`
   wykluczyliśmy z mirrora, więc **→ później (Ix)**, nie cel wczesnych iteracji.
+  **Zrealizowane w tickecie 91 (karta PR.1, 2026-09-22):** zapis od 3b (`import/archiwum.ts`),
+  odczyt (3 trasy `GET /api/import-archive*`) i widok `/archiwum` odtworzone 1:1 —
+  `docs/tickets/91-FEATURE-archiwum-importow/`.
 
 *Pominięte — triaż 2026-09-18 (zakres `94bdf11..9d1b09f`):*
 - **Dziewięć commitów `[FRONTEND]` z codziennego cyklu 06:00** — wyłącznie regeneracja pliku
@@ -2956,6 +2959,14 @@ opisywała ten tryb jako „ryzyko: zero" — **błędnie**; sprostowane razem z
 w repo i działa przy każdym deployu, zamiast zależeć od tego, czy ktoś pamiętał dopisać linijkę
 na serwerze. Wartości domyślnych w `env.ts` **nie zmieniono** — dla produkcji są poprawne
 i wierne oryginałowi. Przy okazji dołożono `SELLY_TRYB` (patrz niżej).
+
+**Skutek uboczny tej naprawy (znaleziony i naprawiony w `93-CHORE-diagnoza-selly-csv-staging`,
+2026-09-22).** Nowy `SELLY_CSV_DIR` stagingu leży **pod docrootem** (żeby link „Pobierz CSV"
+działał), a krok publikacji frontendu w `deploy-staging.sh` robił `rsync -a --delete` na cały
+docroot — każdy deploy kasował właśnie ten katalog razem z wygenerowanym plikiem CSV. Objaw:
+„Brak pliku CSV" wracał po każdym merge'u do `develop`, mimo że przycisk „Wygeneruj CSV teraz"
+działał poprawnie. Naprawione nowym `tools/publikuj-frontend.sh`, który wyklucza `SELLY_CSV_DIR`
+z `--delete`; produkcja bez zmian (nie ma `rsync --delete` na `panel/`).
 
 ---
 

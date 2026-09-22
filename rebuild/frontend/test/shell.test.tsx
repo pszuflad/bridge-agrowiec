@@ -41,7 +41,7 @@ beforeEach(() => {
 });
 
 describe("sidebar", () => {
-  it("ma dokładnie 11 pozycji nawigacji w kolejności z oryginału (+ Selly na końcu)", () => {
+  it("ma dokładnie 12 pozycji nawigacji w kolejności z oryginału (+ Archiwum za Historią, Selly na końcu)", () => {
     render(<App />);
     const nawigacja = screen.getByRole("navigation");
 
@@ -59,10 +59,11 @@ describe("sidebar", () => {
       "Waga gabarytowa",
       "Analityka",
       "Historia",
+      "Archiwum importów",
       "Konfiguracja",
       "Selly",
     ]);
-    expect(POZYCJE_NAWIGACJI).toHaveLength(11);
+    expect(POZYCJE_NAWIGACJI).toHaveLength(12);
   });
 
   it("pozycja „Selly” prowadzi na `/selly`", () => {

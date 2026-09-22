@@ -17176,6 +17176,197 @@ components:
         - "pages"
         - "page"
         - "limit"
+    GETImportArchiveOdpowiedz200:
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        total:
+          type: "integer"
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              dostawca:
+                type: "string"
+              zrodlo:
+                type: "string"
+              uzytkownik:
+                type: "string"
+              data:
+                type: "string"
+              oryginalnaNazwa:
+                type: "string"
+              rozmiar:
+                type: "integer"
+              status:
+                type: "string"
+              blad:
+                type: "string"
+                nullable: true
+              rekordy:
+                type: "integer"
+                nullable: true
+              sha256:
+                type: "string"
+            required:
+              - "id"
+              - "dostawca"
+              - "zrodlo"
+              - "uzytkownik"
+              - "data"
+              - "oryginalnaNazwa"
+              - "rozmiar"
+              - "status"
+              - "blad"
+              - "rekordy"
+              - "sha256"
+      required:
+        - "ok"
+        - "total"
+        - "items"
+    GETImportArchiveOdpowiedz2002:
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        total:
+          type: "integer"
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              dostawca:
+                type: "string"
+              zrodlo:
+                type: "string"
+              uzytkownik:
+                type: "string"
+              data:
+                type: "string"
+              oryginalnaNazwa:
+                type: "string"
+              rozmiar:
+                type: "integer"
+              status:
+                type: "string"
+              blad:
+                nullable: true
+              rekordy:
+                type: "integer"
+              sha256:
+                type: "string"
+            required:
+              - "id"
+              - "dostawca"
+              - "zrodlo"
+              - "uzytkownik"
+              - "data"
+              - "oryginalnaNazwa"
+              - "rozmiar"
+              - "status"
+              - "blad"
+              - "rekordy"
+              - "sha256"
+      required:
+        - "ok"
+        - "total"
+        - "items"
+    GETImportArchiveOdpowiedz2003:
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        total:
+          type: "integer"
+        items:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              dostawca:
+                type: "string"
+              zrodlo:
+                type: "string"
+              uzytkownik:
+                type: "string"
+              data:
+                type: "string"
+              oryginalnaNazwa:
+                type: "string"
+              rozmiar:
+                type: "integer"
+              status:
+                type: "string"
+              blad:
+                type: "string"
+              rekordy:
+                nullable: true
+              sha256:
+                type: "string"
+            required:
+              - "id"
+              - "dostawca"
+              - "zrodlo"
+              - "uzytkownik"
+              - "data"
+              - "oryginalnaNazwa"
+              - "rozmiar"
+              - "status"
+              - "blad"
+              - "rekordy"
+              - "sha256"
+      required:
+        - "ok"
+        - "total"
+        - "items"
+    GETImportArchiveOdpowiedz200Warianty:
+      oneOf:
+        - {"$ref":"#/components/schemas/GETImportArchiveOdpowiedz200"}
+        - {"$ref":"#/components/schemas/GETImportArchiveOdpowiedz2002"}
+        - {"$ref":"#/components/schemas/GETImportArchiveOdpowiedz2003"}
+    GETImportArchiveOdpowiedz401:
+      type: "object"
+      properties:
+        error:
+          type: "string"
+      required:
+        - "error"
+    GETImportArchiveStatsOdpowiedz200:
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        plikow:
+          type: "integer"
+        bajtow:
+          type: "integer"
+        limitBajtow:
+          type: "integer"
+        retencjaDni:
+          type: "integer"
+        perMiesiac:
+          type: "object"
+          properties:
+            "2026-09":
+              type: "integer"
+          required:
+            - "2026-09"
+      required:
+        - "ok"
+        - "plikow"
+        - "bajtow"
+        - "limitBajtow"
+        - "retencjaDni"
+        - "perMiesiac"
     GETMarkupsOdpowiedz200:
       type: "array"
       items:
@@ -17234,13 +17425,6 @@ components:
         - "imieNazwisko"
         - "iat"
         - "exp"
-    GETMeOdpowiedz401:
-      type: "object"
-      properties:
-        error:
-          type: "string"
-      required:
-        - "error"
     GETOverridesOdpowiedz200:
       type: "array"
       items:
@@ -19485,6 +19669,58 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETHistoryPagedOdpowiedz200" } } } }
         "400": { description: "Błędne żądanie" }
         "401": { description: "Nieautoryzowany — WYŁĄCZNIE w odbudowie; patrz x-odbudowa-auth" }
+  # Archiwum importów — `mirror/backend/archive_module.cjs:160-241` (ticket 91, karta PR.1).
+  # Opisane z nagrań `GET_import-archive*.json` (tools/record-write-fixtures.cjs: archiwum
+  # piaskownicy zapełnione uploadem przez parse-file oryginału). ⚠ Komentarz nagłówka modułu
+  # (`file/:id`, rotacja 90 dni) jest nieaktualny: trasa to `file/{month}/{name}`, retencja 7 dni.
+  /api/import-archive:
+    get:
+      tags: [import-archive]
+      summary: "GET /api/import-archive"
+      description: >-
+        Lista plików archiwum, najnowsze pierwsze (sort po mtime pliku). Filtry opcjonalne, łączone
+        koniunkcją. Bez paginacji. Wpis bez `.meta.json` dostaje wartości zastępcze z nazwy pliku.
+      parameters:
+        - { name: dostawca, in: query, required: false, schema: { type: string }, description: "Kod dostawcy; porównanie po toUpperCase() z `meta.dostawca`" }
+        - { name: miesiac, in: query, required: false, schema: { type: string }, description: "RRRR-MM — porównanie z nazwą katalogu miesiąca" }
+        - { name: status, in: query, required: false, schema: { type: string, enum: [ok, blad] }, description: "Porównanie dosłowne z `meta.status`" }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — `{ok, total, items[]}`", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveOdpowiedz200Warianty" } } } }
+        "401": { description: "Nieautoryzowany", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveOdpowiedz401" } } } }
+        "500": { description: "Błąd odczytu katalogu — `{ok:false, error}`" }
+  /api/import-archive/file/{month}/{name}:
+    get:
+      tags: [import-archive]
+      summary: "GET /api/import-archive/file/{month}/{name}"
+      description: >-
+        Surowy plik z archiwum (`res.sendFile`) — NIE JSON. `Content-Type` z rozszerzenia,
+        `Content-Disposition: attachment; filename="<name>"` (nazwa w archiwum, nie oryginalna).
+        Dwa segmenty zamiast jednego `id` z ukośnikiem, bo Apache (`AllowEncodedSlashes=Off`)
+        odrzuca `%2F` w ścieżce. Ochrona: `month/name` musi pasować do `^\d{4}-\d{2}/[^/]+$`
+        (po zdekodowaniu parametrów) i nie zawierać `..` — inaczej 400.
+      parameters:
+        - { name: month, in: path, required: true, schema: { type: string }, description: "RRRR-MM" }
+        - { name: name, in: path, required: true, schema: { type: string }, description: "Nazwa pliku w archiwum (`meta.id` po ukośniku)" }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — treść pliku bajt w bajt" }
+        "400": { description: "Nieprawidłowe id — `{ok:false, error}`", content: { application/json: { schema: { $ref: "#/components/schemas/GETAtrybutyUzycieOdpowiedz400" } } } }
+        "401": { description: "Nieautoryzowany" }
+        "404": { description: "Nie znaleziono pliku — `{ok:false, error}`", content: { application/json: { schema: { $ref: "#/components/schemas/GETAtrybutyUzycieOdpowiedz400" } } } }
+        "500": { description: "Błąd — `{ok:false, error}`" }
+  /api/import-archive/stats:
+    get:
+      tags: [import-archive]
+      summary: "GET /api/import-archive/stats"
+      description: >-
+        Zajętość archiwum: liczba plików (bez `.meta.json`), suma bajtów, limit (5 GB), retencja
+        w dniach (7) i suma bajtów per katalog miesiąca.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveStatsOdpowiedz200" } } } }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Błąd — `{ok:false, error}`" }
   /api/import/from-url:
     post:
       tags: [import]
@@ -19520,7 +19756,7 @@ paths:
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/POSTLoginOdpowiedz200" } } } }
         "400": { description: "Błędne żądanie" }
-        "401": { description: "Nieautoryzowany — produkcja realnie zwraca ten kod (zmierzone na oryginale)", content: { application/json: { schema: { $ref: "#/components/schemas/GETMeOdpowiedz401" } } } }
+        "401": { description: "Nieautoryzowany — produkcja realnie zwraca ten kod (zmierzone na oryginale)", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveOdpowiedz401" } } } }
   /api/logout:
     post:
       tags: [logout]
@@ -19601,7 +19837,7 @@ paths:
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETMeOdpowiedz200" } } } }
         "400": { description: "Błędne żądanie" }
-        "401": { description: "Nieautoryzowany — produkcja realnie zwraca ten kod (zmierzone na oryginale)", content: { application/json: { schema: { $ref: "#/components/schemas/GETMeOdpowiedz401" } } } }
+        "401": { description: "Nieautoryzowany — produkcja realnie zwraca ten kod (zmierzone na oryginale)", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveOdpowiedz401" } } } }
   /api/overrides:
     get:
       tags: [overrides]
@@ -19700,7 +19936,7 @@ paths:
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/DELETEProductsIdOdpowiedz200" } } } }
         "401": { description: "Nieautoryzowany" }
-        "400": { description: "Błędne żądanie", content: { application/json: { schema: { $ref: "#/components/schemas/GETMeOdpowiedz401" } } } }
+        "400": { description: "Błędne żądanie", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveOdpowiedz401" } } } }
   # ————————————————————————————————————————————————————————————————————————————————————
   # uwaga_cena — DWIE ścieżki spoza pierwotnego zamrożenia (dopisane w Iteracji 12a).
   #
@@ -19762,7 +19998,7 @@ paths:
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/PATCHProductsId200" } } } }
         "401": { description: "Nieautoryzowany" }
-        "404": { description: "Nie znaleziono produktu", content: { application/json: { schema: { $ref: "#/components/schemas/GETMeOdpowiedz401" } } } }
+        "404": { description: "Nie znaleziono produktu", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveOdpowiedz401" } } } }
         "400": { description: "Błędne żądanie" }
     put:
       tags: [products]

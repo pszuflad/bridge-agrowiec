@@ -431,7 +431,7 @@ const nagrane = [];
  * Nowe pole `request` niesie ciało ŻĄDANIA; to z niego powstają schematy
  * `requestBody` w `contract/openapi.yaml`.
  */
-async function nagraj({ plik, metoda, sciezka, cialo, token, opis, port }) {
+async function nagraj({ plik, metoda, sciezka, cialo, token, opis, port, naglowkiOdpowiedzi }) {
   const naglowki = {};
   if (token) naglowki.Authorization = `Bearer ${token}`;
   if (cialo !== undefined) naglowki["Content-Type"] = "application/json";
@@ -468,6 +468,13 @@ async function nagraj({ plik, metoda, sciezka, cialo, token, opis, port }) {
     const { wartosc, przycieteZ } = przytnij(cialo);
     fixture.request = wartosc;
     if (przycieteZ !== null) fixture._request_przyciete_z = przycieteZ;
+  }
+  // Trasa oddająca PLIK (nie JSON) niesie istotę w nagłówkach — nazwę z `Content-Disposition`
+  // i typ. Zapisujemy wybrane w polu technicznym (`_` → GATE kształtu je pomija).
+  if (naglowkiOdpowiedzi) {
+    fixture._naglowki = Object.fromEntries(
+      naglowkiOdpowiedzi.map((nazwa) => [nazwa, odp.headers.get(nazwa)]),
+    );
   }
   fixture._zrodlo = "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)";
   if (opis) fixture._opis = opis;
@@ -700,6 +707,9 @@ async function odegrajScenariusze(port, db, katalog) {
     port,
   });
 
+  // — ARCHIWUM IMPORTÓW (ticket 91, karta PR.1) ————————————————————————————————
+  await odegrajArchiwum(port, token);
+
   // — HASŁO I WYLOGOWANIE ——————————————————————————————————————————————————
   // Zmiana hasła jako przedostatnia: unieważnia hasło, którym się logowaliśmy,
   // więc każde późniejsze `POST /api/login` w tym biegu by padło.
@@ -719,6 +729,125 @@ async function odegrajScenariusze(port, db, katalog) {
     sciezka: "/api/logout",
     token,
     opis: "Ostatnie w kolejce — unieważnia sesję.",
+    port,
+  });
+}
+
+/**
+ * Archiwum importów — trzy trasy odczytu `mirror/backend/archive_module.cjs:160-241`.
+ *
+ * Snapshot nie niesie archiwum (leży obok `__dirname` produkcji, nie w bazie), więc najpierw
+ * je ZAPEŁNIAMY — i to kodem ORYGINAŁU: realny upload przez `POST /api/import/parse-file`
+ * (`extensions.cjs:206-260`), który woła `archiveBuffer()` + `updateMeta()`. Żadnego ręcznie
+ * pisanego `.meta.json`, więc nagranie dowodzi produkcji, nie naszego wyobrażenia o niej.
+ *
+ * Próbki: realne pliki dostawców z `rebuild/backend/test/charakteryzacja/probki/`
+ * (pochodzenie: `ZRODLA.md` tamże) — MO6.csv i MO1.csv dają status `ok`; trzeci plik
+ * (CSV z niedomkniętym cudzysłowem dla MO7) wywraca parser i daje status `blad`.
+ *
+ * Scenariusz idzie PO nagraniach katalogu, bo upload wrzuca pozycje do stagingu piaskownicy.
+ */
+async function odegrajArchiwum(port, token) {
+  const PROBKI = path.join(KORZEN, "rebuild", "backend", "test", "charakteryzacja", "probki");
+  const wgraj = async (kod, nazwa, bufor) => {
+    const odp = await fetch(
+      `http://127.0.0.1:${port}/api/import/parse-file?dostawcaKod=${kod}&nazwa=${encodeURIComponent(nazwa)}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/octet-stream" },
+        body: bufor,
+      },
+    );
+    const cialo = await odp.json().catch(() => null);
+    log(`      upload ${kod} ${nazwa} → ${odp.status}${cialo && cialo.archiwum ? ` (${cialo.archiwum})` : ""}`);
+    return cialo;
+  };
+
+  await wgraj("MO1", "MO1.csv", fs.readFileSync(path.join(PROBKI, "MO1.csv")));
+  // Przerwa między uploadami: kolejność listy to `mtime` pliku (:148, :176), więc bez niej
+  // dwa zapisy w tej samej milisekundzie dałyby kolejność zależną od systemu plików.
+  await czekaj(1100);
+  // Niedomknięty cudzysłów: `csv-parse/sync` parsera MO7 (`parsers/mo7_nokian.cjs:36`) rzuca
+  // „Quote Not Closed”, a parse-file oznacza wtedy wpis `status: "blad"` (`extensions.cjs:241-246`).
+  // Losowe bajty nie wystarczą — parsery są pobłażliwe (`xlsx` czyta tekst jak CSV).
+  await wgraj("MO7", "cennik MO7.csv", Buffer.from('MODEL;PRODUCENT\n"niedomkniety;NOKIAN\n'));
+  await czekaj(1100);
+  const mo6 = await wgraj("MO6", "MO6.csv", fs.readFileSync(path.join(PROBKI, "MO6.csv")));
+
+  const lista = await nagraj({
+    plik: "GET_import-archive.json",
+    metoda: "GET",
+    sciezka: "/api/import-archive",
+    token,
+    opis: "Bez filtrów, najnowsze pierwsze. Archiwum zapełnione uploadem przez parse-file oryginału.",
+    port,
+  });
+  const idMo6 = (mo6 && mo6.archiwum) || (lista.body.items || []).find((i) => i.dostawca === "MO6")?.id;
+  if (!idMo6) throw new Error("Upload MO6 nie trafił do archiwum — brak wpisu do pobrania.");
+  const [miesiac, nazwa] = idMo6.split("/");
+
+  await nagraj({
+    plik: "GET_import-archive_dostawca.json",
+    metoda: "GET",
+    sciezka: "/api/import-archive?dostawca=mo6",
+    token,
+    opis: "Filtr dostawcy małymi literami — oryginał robi toUpperCase() (:171).",
+    port,
+  });
+  await nagraj({
+    plik: "GET_import-archive_miesiac.json",
+    metoda: "GET",
+    sciezka: `/api/import-archive?miesiac=${miesiac}`,
+    token,
+    opis: "Filtr miesiąca = nazwa katalogu RRRR-MM (:179).",
+    port,
+  });
+  await nagraj({
+    plik: "GET_import-archive_status.json",
+    metoda: "GET",
+    sciezka: "/api/import-archive?status=blad",
+    token,
+    opis: "Filtr statusu (:180) — nieopisany w nagłówku modułu, używany przez widok.",
+    port,
+  });
+  await nagraj({
+    plik: "GET_import-archive_401.json",
+    metoda: "GET",
+    sciezka: "/api/import-archive",
+    opis: "Bez tokenu — middleware `we`.",
+    port,
+  });
+  await nagraj({
+    plik: "GET_import-archive_stats.json",
+    metoda: "GET",
+    sciezka: "/api/import-archive/stats",
+    token,
+    opis: "retencjaDni = 7 (zmiana 90→7 z 2026-08-21), limit 5 GB.",
+    port,
+  });
+  await nagraj({
+    plik: "GET_import-archive_file.json",
+    metoda: "GET",
+    sciezka: `/api/import-archive/file/${encodeURIComponent(miesiac)}/${encodeURIComponent(nazwa)}`,
+    token,
+    opis: "Surowy plik (res.sendFile). Treść = bajty wgranego MO6.csv; nagłówki w `_naglowki`.",
+    naglowkiOdpowiedzi: ["content-type", "content-disposition", "content-length"],
+    port,
+  });
+  await nagraj({
+    plik: "GET_import-archive_file_400.json",
+    metoda: "GET",
+    sciezka: `/api/import-archive/file/${miesiac}/..%2F..%2Fdata.db`,
+    token,
+    opis: "Próba wyjścia z katalogu — Express dekoduje %2F w parametrze, regex (:228) odrzuca.",
+    port,
+  });
+  await nagraj({
+    plik: "GET_import-archive_file_404.json",
+    metoda: "GET",
+    sciezka: `/api/import-archive/file/${miesiac}/NIE_MA__takiego.csv`,
+    token,
+    opis: "Poprawny kształt id, brak pliku (:232).",
     port,
   });
 }

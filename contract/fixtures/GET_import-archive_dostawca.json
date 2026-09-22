@@ -1,0 +1,27 @@
+{
+  "endpoint": "/api/import-archive?dostawca=mo6",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "total": 1,
+    "items": [
+      {
+        "id": "2026-09/MO6__20260921__22113__MO6.csv",
+        "dostawca": "MO6",
+        "zrodlo": "upload",
+        "uzytkownik": "Marta Bieguniak",
+        "data": "2026-09-21T22:11:35.409Z",
+        "oryginalnaNazwa": "MO6.csv",
+        "rozmiar": 237,
+        "status": "ok",
+        "blad": null,
+        "rekordy": 2,
+        "sha256": "bbe7540acfdfbfe11896af2ccc1f0508ee0e4ce176074c0a434981805235dd1d"
+      }
+    ]
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Filtr dostawcy małymi literami — oryginał robi toUpperCase() (:171)."
+}

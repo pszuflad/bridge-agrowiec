@@ -1,0 +1,18 @@
+{
+  "endpoint": "/api/import-archive/stats",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "plikow": 3,
+    "bajtow": 23498,
+    "limitBajtow": 5368709120,
+    "retencjaDni": 7,
+    "perMiesiac": {
+      "2026-09": 23498
+    }
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "retencjaDni = 7 (zmiana 90→7 z 2026-08-21), limit 5 GB."
+}

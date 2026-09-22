@@ -17,6 +17,10 @@ z naszym kodem (`deminified/backend-index.cjs`, `mirror/backend/*.cjs`,
 `02_SCHEMAT_BAZY`, `03_IMPORT_tk`, `04_WARSTWA_DANYCH`, `05_PARSERY_MODULY`,
 `06_KONFIGURACJA`, `schema.sql`.
 
+**Ustalenia odbudowy od ticketu 91** leżą w `docs/spec-backend/wpis-<N>.md` — jeden plik na
+ticket, żeby równoległe karty nie dopisywały się w to samo miejsce tego dokumentu
+(`docs/spec-backend/README.md`). Pełna specyfikacja = ten plik + tamten katalog.
+
 ---
 
 ## 1. Rozbieżności z moim audytem — 3 KOREKTY
@@ -312,21 +316,9 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 > `contract/openapi.yaml` nowym markerem `x-odbudowa-nowa-trasa`. Szczegóły:
 > `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
 
-> **Potwierdzone w P10.1** (`90-FEATURE-ozywienie-kart-dostepnosci`, 2026-09-22, karta P10.1):
-> cztery świadome odstępstwa od produkcji w module analityki (decyzje Ani, 2026-09-21). **#32** —
-> `availability/products`/`availability/sell-through` (dashboard i oba eksporty CSV) łączą
-> `historia_cen` z `products` po `(dostawca, kod)` zamiast pytać nieistniejącą kolumnę
-> `historia_cen.nazwa`; pozycja usunięta z katalogu dostaje `nazwa: null` (JSON) / pustą komórkę
-> (CSV) zamiast trwale pustego wyniku. **#33** — `sell-through` (dashboard i eksport) liczy
-> `LAG()` na historii ze zwiniętymi duplikatami klucza `(dostawca, kod, zarejestrowano_at)`
-> (wiersz `MAX(id)` per klucz); karta 4.1 i jej eksport dalej liczą `COUNT(*)` po surowej
-> historii (poza zakresem tej decyzji, follow-up). **#31** — `POST /api/analytics/bootstrap-current`
-> jest teraz idempotentny w obrębie dnia kalendarzowego UTC: drugie wywołanie tego samego dnia
-> dla produktu z już istniejącą migawką daje `inserted: 0` (kształt `{ok, inserted, at}` bez
-> zmian). **#35** — `GET /api/analytics/export/{view}` dla nieznanego widoku oddaje `404 {error}`
-> zamiast `200` + sam BOM. Fixtures nietknięte (oba nagrania mają `rows: []`; `gate/ksztalt.ts`
-> nie zagląda do elementów pustej tablicy wzorcowej). Szczegóły:
-> `docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/`.
+> **Kolejne wpisy do tej sekcji (od ticketu 91): `docs/spec-backend/wpis-<N>.md`** — jeden plik
+> na ticket, tu już nic nie dopisujemy (reguła i powód: `docs/spec-backend/README.md`).
+> Spis: `ls docs/spec-backend/wpis-*.md` — tej linii nie aktualizuje się ręcznie.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
@@ -530,7 +522,10 @@ i `availability/sell-through` (blok 10e) o nią pytają (`MAX(nazwa)`), więc w 
 zapytania wywracają się na `no such column`, `safeAll()` połyka błąd i obie trasy zawsze oddają
 pustą listę. **Odbudowa od P10.1** świadomie odstępuje: łączy `historia_cen` z `products` po
 `(dostawca, kod)` i oddaje wiersze z `nazwa` (lub `null`, gdy pozycja zniknęła z katalogu).
-Patrz §2 wyżej i `docs/rebuild-backlog.md` #32.
+Patrz `docs/spec-backend/wpis-90.md` i `docs/rebuild-backlog.md` #32.
+
+> **Kolejne wpisy do tej sekcji (od ticketu 91): `docs/spec-backend/wpis-<N>.md`** — jeden plik
+> na ticket, tu już nic nie dopisujemy (reguła i powód: `docs/spec-backend/README.md`).
 
 ## 6. Korekty do propagacji
 

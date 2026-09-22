@@ -35,6 +35,12 @@ both edit becomes a merge conflict. Rules (full table: `docs/karty/README.md`):
   (N = this ticket's number). Never append to another card's `karta.md`.
 - A falsehood in the roadmap or in another card: write it under „Do koordynatora” in the
   ticket's own `karta.md`; do not fix it there.
+- **`docs/spec-backend.md`: never append a new paragraph** (no new „Potwierdzone w N” /
+  „Odbudowa (…)” block at the end of §2, §5 or any other section). A new finding about the
+  backend goes into a NEW file `docs/spec-backend/wpis-<N>.md` (N = this ticket's number,
+  template in `docs/spec-backend/README.md`). You MAY correct in place a sentence in
+  `docs/spec-backend.md` that this ticket disproved. Reason: two parallel cards appending at
+  the end of §2 collided in tickets 90/91 (2026-09-22).
 
 ## Your goal
 

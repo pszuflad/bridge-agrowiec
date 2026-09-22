@@ -49,6 +49,8 @@ karta istnieje, zanim dostanie ticket. Plik wejścia nazywa się **numerem ticke
 | `docs/rebuild-roadmap.md` §5 — tabela kart iteracji, podsumowanie iteracji, decyzje całej iteracji | **tylko koordynator** (albo karta zamykająca iterację, jeśli ostatnia i idzie SAMA) | j.w. |
 | `docs/rebuild-roadmap.md` §0–§3 | koordynator | rzadko |
 | `docs/rebuild-backlog.md` — wpis `#N` | karta, która realizuje `#N` | przy „sync docs” (każdy wpis to osobny blok, więc konfliktuje rzadko) |
+| `docs/spec-backend/wpis-<N>.md` | **wyłącznie ticket `<N>`** — zawsze NOWY plik | przy „sync docs”, gdy ticket ustalił coś o backendzie (od ticketu 91; `docs/spec-backend/README.md`) |
+| `docs/spec-backend.md` | nikt nie dopisuje nowych akapitów; poprawka w miejscu obalonego zdania — ticket, który je obalił | przy „sync docs” |
 
 **Koordynator** = sesja, która planuje falę i pisze prompty do równoległych kart (nie jest
 kartą, nie ma własnego ticketa-feature'a; jeśli zmienia pliki, robi to własnym ticketem `DOCS`).

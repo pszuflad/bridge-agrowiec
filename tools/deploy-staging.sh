@@ -73,6 +73,13 @@ if [ -z "${JWT_SECRET:-}" ]; then
   exit 1
 fi
 
+# --- guard: pusty SELLY_CSV_DIR (np. `SELLY_CSV_DIR=` w .env) przepuszcza `set -u`, a wyłączyłby
+# po cichu ochronę katalogu CSV przy publikacji frontendu (backend i tak by nie wstał — env.ts: min(1)) ---
+if [ -z "${SELLY_CSV_DIR:-}" ]; then
+  log "BŁĄD: pusty SELLY_CSV_DIR (sprawdź $STAGING_ROOT/.env). Przerywam."
+  exit 1
+fi
+
 # --- backend: build -> release -> migracje -> pm2 ---
 RELEASE="$STAGING_ROOT/releases/$SHA"
 log "backend: build -> $RELEASE"
@@ -122,8 +129,9 @@ pm2 save >/dev/null 2>&1 || true
 # --- frontend: build -> publikacja do docroota ---
 log "frontend: build -> $DOCROOT"
 ( cd rebuild/frontend && npm ci --include=dev && npm run build )   # jw. — build wymaga devDependencies
-mkdir -p "$DOCROOT"
-rsync -a --delete --exclude '.htaccess' rebuild/frontend/dist/ "$DOCROOT"/
+# `--delete` z wyłączeniem .htaccess i katalogu CSV Selly (SELLY_CSV_DIR leży POD docrootem,
+# żeby plik był pobieralny) — bez tego każdy deploy kasował wygenerowany CSV (ticket 93).
+bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR"
 cp -f deploy/staging/htaccess "$DOCROOT/.htaccess"       # proxy utrzymywany z repo
 
 # --- sprzątanie: zostaw 5 ostatnich release ---

@@ -62,8 +62,11 @@ pierwszy deploy po Iteracji 1b podmienia placeholder na realny panel.
 > `npm ci --omit=dev` w katalogu release'u backendu **zostaje bez zmian** — tam faktycznie chcemy
 > wyłącznie zależności produkcyjne.
 
-> **Frontend nie buduje sourcemap** (`sourcemap: false`). Skrypt rsynkuje całe `dist/` do publicznego
-> docroota bez autoryzacji, więc mapy wystawiłyby źródła panelu w internet.
+> **Frontend nie buduje sourcemap** (`sourcemap: false`). Skrypt publikuje `dist/` do publicznego
+> docroota (`tools/publikuj-frontend.sh`, `rsync -a --delete`) bez autoryzacji, więc mapy
+> wystawiłyby źródła panelu w internet. Ten sam helper wyłącza z `--delete` katalog
+> `SELLY_CSV_DIR` (patrz niżej) — inaczej każdy deploy kasowałby wygenerowany plik CSV
+> (ticket `93-CHORE-diagnoza-selly-csv-staging`).
 
 ---
 
@@ -117,6 +120,12 @@ chmod 600 ~/private_apps/bridge-staging/.env
 >   podmieniłby produkcyjny plik treścią z bazy stagingowej, a Selly zaciągnąłby go o 6:00.
 >   **Każde środowisko inne niż produkcja musi je nadpisać** — dla stagingu robi to skrypt
 >   deployu. Znalezione i domknięte w tickecie `34-FEATURE-selly-blokada-srodowiska`.
+> - ⚠ **Skutek uboczny naprawy z ticketa 34, znaleziony i naprawiony w `93-CHORE-diagnoza-selly-csv-staging`:**
+>   `SELLY_CSV_DIR` stagingu leży pod docrootem (żeby link „Pobierz CSV" działał), a krok
+>   publikacji frontendu robił `rsync -a --delete` na cały docroot — każdy deploy kasował
+>   wygenerowany plik CSV. `tools/publikuj-frontend.sh` wyklucza `SELLY_CSV_DIR` z `--delete`.
+>   **Po pierwszym deployu z tą poprawką trzeba raz kliknąć „Wygeneruj CSV teraz"** — katalog
+>   z poprzedniego pliku został już skasowany ostatnim deployem sprzed poprawki.
 >
 > Wzór: `rebuild/backend/.env.example`.
 

@@ -377,7 +377,12 @@ Based on plan.md + raport.md + review.md + branch diff — decide which files in
 > 4. **usunąć z WŁASNEGO `karta.md` to, co ticket obalił** — nieaktualne założenia o zakresie,
 >    sprostowane fakty o oryginale. Nie dopisywać obok. Jeśli fałsz siedzi w roadmapie albo
 >    w cudzej karcie — zapisać to w sekcji „Do koordynatora” własnego `karta.md`, nie
->    poprawiać samemu.
+>    poprawiać samemu;
+> 5. **nowe ustalenie o backendzie zapisać jako NOWY plik `docs/spec-backend/wpis-<N>.md`**
+>    (szablon: `docs/spec-backend/README.md`) — nigdy jako akapit dopisany na koniec sekcji
+>    `docs/spec-backend.md`. Poprawka W MIEJSCU zdania, które ticket obalił, jest dozwolona.
+>    Powód: karty P10.1 i PR.1 (tickety 90 i 91) dopisały się na koniec §2 w to samo miejsce
+>    i zderzyły przy merge'u — ten sam wzorzec, który w roadmapie dał 7 konfliktów.
 >
 > **Okres przejściowy:** ticket, którego worktree powstał PRZED wprowadzeniem `docs/karty/`
 > (ticket 82), kończy po staremu — w roadmapie. Sprawdzenie: `ls docs/karty/README.md`
