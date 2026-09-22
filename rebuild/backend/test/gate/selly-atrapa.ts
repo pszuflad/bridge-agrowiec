@@ -18,14 +18,17 @@
  * że `multi_cat` poszedł tylko przy dodatkowych kategoriach.
  */
 
-import type {
-  KategoriaSelly,
-  KlientSelly,
-  MagazynSelly,
-  OdpowiedzListy,
-  ProducentSelly,
-  StawkaVatSelly,
-  WynikPing,
+import {
+  BladSelly,
+  type CechaWariantu,
+  type KategoriaSelly,
+  type KlientSelly,
+  type MagazynSelly,
+  type OdpowiedzListy,
+  type ProducentSelly,
+  type StawkaVatSelly,
+  type WariantSelly,
+  type WynikPing,
 } from "../../src/selly/klient.js";
 import { wczytajFixture } from "./fixtures.js";
 
@@ -53,11 +56,25 @@ function slownikiZFixture(): SlownikiZFixture {
 /** Zapis jednego wywołania atrapy — nazwa metody i argumenty. */
 export type WywolanieSelly = { metoda: string; argumenty: unknown[] };
 
+/**
+ * Produkt w „sklepie” atrapy — model wariantowy (karta I15.6). Stan jest mutowalny: discovery
+ * i Tor 1 zakładają warianty i aktualizują ceny/stany, a test sprawdza efekt po stronie sklepu.
+ */
+export type ProduktSklepu = {
+  product_id: number;
+  product_code?: string | null;
+  provider_code?: string | null;
+  ean?: string | null;
+  warianty: (WariantSelly & { quantity?: number | null; price?: number | null })[];
+};
+
 export type AtrapaSelly = {
   klient: KlientSelly;
   wywolania: WywolanieSelly[];
   /** Ile razy wołano daną metodę — skrót dla asercji. */
   liczba: (metoda: string) => number;
+  /** Stan sklepu (model wariantowy) — `product_id` → produkt. */
+  sklep: Map<number, ProduktSklepu>;
 };
 
 export type OpcjeAtrapy = {
@@ -65,6 +82,18 @@ export type OpcjeAtrapy = {
   nastepneProductId?: number;
   /** Metody, które mają rzucić podanym błędem zamiast odpowiedzieć. */
   bledy?: Partial<Record<keyof KlientSelly, Error>>;
+  /** Jak `bledy`, ale tylko przy PIERWSZYM wywołaniu metody (np. 400 „Istnieje produkt…”). */
+  bledyRaz?: Partial<Record<keyof KlientSelly, Error>>;
+  /** Początkowa zawartość sklepu dla metod wariantowych. */
+  sklep?: ProduktSklepu[];
+  /** Rozmiar strony `listProductsPage` — Selly oddaje 20 (`discovery.cjs:59`). */
+  rozmiarStrony?: number;
+  /**
+   * Cecha „Magazyny”, którą sklep dołoży do nowego wariantu utworzonego BEZ cech — symulacja
+   * uczenia `feature_id` dla MO1/MO6/MO7/MO8/MO10. Jawnie jedna para: ciało POST-a nie niesie
+   * dostawcy, więc atrapa nie ma z czego go wywnioskować.
+   */
+  magazynNowegoWariantu?: { dostawca: string; featureId: number };
 };
 
 /**
@@ -76,10 +105,31 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
   const slowniki = slownikiZFixture();
   let kolejneId = opcje.nastepneProductId ?? 9001;
 
+  const sklep = new Map<number, ProduktSklepu>(
+    (opcje.sklep ?? []).map((p) => [p.product_id, structuredClone(p)]),
+  );
+  const rozmiarStrony = opcje.rozmiarStrony ?? 20;
+  let kolejnyWariant = 5001;
+  const bledyRaz = new Map(Object.entries(opcje.bledyRaz ?? {}));
+
   const zapisz = (metoda: keyof KlientSelly, ...argumenty: unknown[]): void => {
     wywolania.push({ metoda, argumenty });
     const blad = opcje.bledy?.[metoda];
     if (blad) throw blad;
+    const raz = bledyRaz.get(metoda);
+    if (raz) {
+      bledyRaz.delete(metoda);
+      throw raz;
+    }
+  };
+
+  /** Selly na nieznany produkt oddaje 404 — `request()` zamienia to w wyjątek. */
+  const produktAlbo404 = (productId: number, metoda: string, sciezka: string): ProduktSklepu => {
+    const produkt = sklep.get(productId);
+    if (!produkt) {
+      throw new BladSelly(`[Selly] HTTP 404 ${metoda} https://atrapa${sciezka} :: {}`, 404, {});
+    }
+    return produkt;
   };
 
   const jakoLista = <T>(mapa: Record<string, number>, klucz: string, id: string): OdpowiedzListy<T> =>
@@ -125,7 +175,17 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
 
     createProduct(payload) {
       zapisz("createProduct", payload);
-      return Promise.resolve({ data: { product_id: kolejneId++ } });
+      const productId = kolejneId++;
+      // Selly zakłada produkt z jednym domyślnym wariantem, bez cechy „Magazyny”.
+      const p = (payload ?? {}) as { product_code?: string; provider_code?: string; ean?: string };
+      sklep.set(productId, {
+        product_id: productId,
+        product_code: p.product_code ?? null,
+        provider_code: p.provider_code ?? null,
+        ean: p.ean ?? null,
+        warianty: [{ variant_id: kolejnyWariant++, default: 1, features: [] }],
+      });
+      return Promise.resolve({ data: { product_id: productId } });
     },
 
     updateProduct(id, payload) {
@@ -142,12 +202,73 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
       zapisz("setProductMultiCat", productId, categoryIds);
       return Promise.resolve({ data: { product_id: productId, categories: categoryIds } });
     },
+
+    listProductsByEan(ean) {
+      zapisz("listProductsByEan", ean);
+      const trafiony = [...sklep.values()].find((p) => p.ean === ean);
+      return Promise.resolve({ data: trafiony ? [{ product_id: trafiony.product_id }] : [] });
+    },
+
+    listProductsPage(page) {
+      zapisz("listProductsPage", page);
+      const wszystkie = [...sklep.values()].sort((a, b) => a.product_id - b.product_id);
+      const numer = page ?? 1;
+      const strona = wszystkie.slice((numer - 1) * rozmiarStrony, numer * rozmiarStrony);
+      return Promise.resolve({
+        data: strona.map(({ product_id, product_code, provider_code }) => ({
+          product_id,
+          product_code,
+          provider_code,
+        })),
+        __metadata: {
+          page_count: Math.max(1, Math.ceil(wszystkie.length / rozmiarStrony)),
+          total_count: wszystkie.length,
+        },
+      });
+    },
+
+    async listVariants(productId) {
+      zapisz("listVariants", productId);
+      const produkt = produktAlbo404(productId, "GET", `/api/products/${productId}/variants`);
+      return { data: structuredClone(produkt.warianty) };
+    },
+
+    async createVariant(productId, cialo) {
+      zapisz("createVariant", productId, cialo);
+      const produkt = produktAlbo404(productId, "POST", `/api/products/${productId}/variants`);
+      let features: CechaWariantu[] = cialo.features ?? [];
+      const nowy = opcje.magazynNowegoWariantu;
+      if (features.length === 0 && nowy) {
+        features = [{ feature_id: nowy.featureId, name: "Magazyny", value: nowy.dostawca }];
+      }
+      const wariant = {
+        variant_id: kolejnyWariant++,
+        default: cialo.default ?? 0,
+        features,
+        quantity: cialo.quantity ?? null,
+        price: cialo.price ?? null,
+      };
+      produkt.warianty.push(wariant);
+      return { data: structuredClone(wariant) };
+    },
+
+    async updateVariant(productId, variantId, cialo) {
+      zapisz("updateVariant", productId, variantId, cialo);
+      const sciezka = `/api/products/${productId}/variants/${variantId}`;
+      const wariant = produktAlbo404(productId, "PUT", sciezka).warianty.find(
+        (w) => w.variant_id === variantId,
+      );
+      if (!wariant) throw new BladSelly(`[Selly] HTTP 404 PUT https://atrapa${sciezka} :: {}`, 404, {});
+      Object.assign(wariant, cialo);
+      return { data: structuredClone(wariant) };
+    },
   };
 
   return {
     klient,
     wywolania,
     liczba: (metoda) => wywolania.filter((w) => w.metoda === metoda).length,
+    sklep,
   };
 }
 
@@ -175,5 +296,10 @@ export function stworzAtrapeBezKonfiguracji(): KlientSelly {
     updateProduct: rzuc,
     upsertProductWarehouse: rzuc,
     setProductMultiCat: rzuc,
+    listProductsByEan: rzuc,
+    listProductsPage: rzuc,
+    listVariants: rzuc,
+    createVariant: rzuc,
+    updateVariant: rzuc,
   };
 }

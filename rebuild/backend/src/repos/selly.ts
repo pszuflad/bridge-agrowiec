@@ -189,6 +189,23 @@ export async function synchronizujJedenProdukt(
     return { action: "updated", kod: produkt.kod, selly_product_id: istniejacy.sellyProductId };
   }
 
+  /*
+   * ⚠ ŚWIADOME ODSTĘPSTWO OD PRODUKCJI — backlog #67, decyzja D4 ticketu 108.
+   *
+   * Od przebudowy tabeli na model wariantowy (07.09) `selly_products` wymaga `kod_importu`
+   * i `dostawca` (`NOT NULL`, para jest kluczem). Oryginał (`routes.cjs:417-421`) wstawia starą
+   * listę kolumn bez nich, więc na produkcji INSERT niżej pada, mapowanie się nie zapisuje,
+   * a kolejny przebieg zakłada w Selly ten sam produkt JESZCZE RAZ. U nas zapis podaje obie
+   * kolumny z produktu. Produkt bez nich (w snapshocie 0 z 7405) kończy się błędem TUTAJ,
+   * zanim cokolwiek pójdzie do Selly — lepszy błąd w logu niż produkt w sklepie bez mapowania.
+   * Komunikat jak w discovery (`discovery.cjs:306`).
+   */
+  if (!produkt.kodImportu || !produkt.dostawca) {
+    throw new Error("brak kod_importu lub dostawca");
+  }
+  const kodImportu = produkt.kodImportu;
+  const dostawcaProduktu = produkt.dostawca;
+
   const utworzony = await klient.createProduct(payload);
   const productId = utworzony?.data?.product_id;
   if (!productId) {
@@ -214,6 +231,8 @@ export async function synchronizujJedenProdukt(
 
   db.insert(sellyProducts)
     .values({
+      kodImportu,
+      dostawca: dostawcaProduktu,
       bridgeKod: produkt.kod,
       sellyProductId: productId,
       sellyCategoryId: payload.category_id,

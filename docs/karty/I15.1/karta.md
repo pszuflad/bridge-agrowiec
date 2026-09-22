@@ -139,3 +139,7 @@ kanonicznej (Rolnicze/Przemysłowe/Ciężarowe/Leśne) spada do „Uniwersalne/p
 przechodzi bez zmian. Defekt produkcji odtworzony 1:1 w 011. Skutek dla Selly: `multi_cat` praktycznie tylko dla
 kategorii niekanonicznych. Status: do pomiaru na kopii produkcji (ile wierszy ma ` ; `), potem pytanie do Ani:
 zostawić czy naprawić (świadome odstępstwo).” Źródło: `docs/tickets/107-FEATURE-products-blokady-triggery/raport.md`.
+
+**⏸ Prośba użytkownika (2026-09-22): plan kopiowania bazy produkcyjnej na staging ma zawierać krok „wróć do I15.1”.**
+PR #122 (ticket 107) jest otwarty, ale czeka na próbę `npm run migrate` na tej kopii + pomiary z sekcji „Zostało przed
+PR”. Koordynator: przy planowaniu kopii dopisz ten krok (po rozstrzygnięciu 002/003, przed mergem #122).

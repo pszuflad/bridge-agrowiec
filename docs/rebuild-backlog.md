@@ -3318,8 +3318,8 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Pliki** | `mirror/backend/selly/{discovery,sync_delta,sync_full,mapper_v2,rate_limiter,scheduler_selly,routes_sync}.cjs`; schemat `selly_products` (+ `selly_products_old`) |
 | **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
 | **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
-| **Iteracja** | **→ 13d** (nowa, BE-heavy). Podział docelowy 13d-1/13d-2/13d-3. |
-| **Status** | ⛔ **ODŁOŻONE — start wstrzymany**. 13d-1 sportowane i zmergowane (`45-FEATURE-selly-rest-sync-tor1`, PR #57), potem **COFNIĘTE** (`46-CHORE-revert-13d1-selly`, 2026-09-09). Powód: Ania (09.09) potwierdziła, że podsystem NIE jest zamrożony — ~tydzień docierania dostawców + łatanie błędów w `selly/*`. Port był ruchomym celem. **Całe 13d przepisujemy świeżo** po ustabilizowaniu. Sygnał startu: brak nowych zmian w `mirror/backend/selly/` przez kilka dni (rewizja ~2026-09-16). ⚠ Rewrite na NOWEJ gałęzi — revert #57 sprawia, że `feature/45` liczy się jako „zmergowane". |
+| **Iteracja** | **→ I15** (dawne 13d), podzielone na **I15.6** (schemat + discovery + Tor 1), **I15.7** (Tor 2), **I15.8** (harmonogram + trasy `sync-*`). |
+| **Status** | 🔨 **częściowo — I15.6 zrobione** (ticket 108, 2026-09-22, `feature/108-selly-rest-discovery-delta`): migracja 013 (`selly_products` wariantowa, stara → `selly_products_old`), discovery (odnajdywanie/zakładanie mapowań, cache kodów, limiter) i Tor 1 (`sync_delta`) przeportowane 1:1 z `origin/main:7d6cfc9`. Tor 2 (`sync_full`/`mapper_v2`/`loadDictMaps`) → **I15.7**; harmonogram i trasy `sync-*` → **I15.8** — nic z tego jeszcze nie jest uruchamiane w procesie. (Wcześniejszy port `13d-1`, PR #57, został **COFNIĘTY** `46-CHORE-revert-13d1-selly`, 2026-09-09 — I15.6 to świeży, niezależny port z finalnego stanu produkcji, nie wznowienie tamtej gałęzi.) |
 
 ### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
 | pole | wartość |
@@ -3378,6 +3378,10 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 > **NIEAKTUALNE** — kod portu usunięty. Przy ŚWIEŻYM przepisaniu 13d (z finalnego `mirror/selly/`, na
 > NOWEJ gałęzi) trzeba te defekty odtworzyć/rozstrzygnąć na nowo. #71 (regresja `konstrukcja`) NIE jest
 > tym dotknięte — to defekt produkcji FE, ważny bez zmian.
+>
+> **Domknięcie (2026-09-22, ticket 108, I15.6):** świeży port z `origin/main:7d6cfc9` zrobiony —
+> #66/#69/#70 odtworzone 1:1 (patrz ich pola niżej), #67 tym razem naprawione świadomie (D4), #68 okazał
+> się faktem obalonym (mapper istnieje, tylko nieosiągalny w Torze 1). Ten akapit zostaje jako historia.
 
 ### #66 · 2026-09-08 · [BACKEND] · Selly retry na HTTP 429 jest martwym kodem — gasi go throttle, nie retry
 | pole | wartość |
@@ -3395,38 +3399,38 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Kategoria** | BACKEND + BAZA (Selly, panel I8) |
 | **Pliki** | `mirror/backend/selly/routes.cjs:417` (INSERT gałęzi CREATE); port: `rebuild/backend/src/repos/selly.ts:215` |
 | **Zmiana Ani** | Migracja modelu wariantowego (07.09, patrz #60) dodała `NOT NULL` na `kod_importu`/`dostawca` w `selly_products`, ale stary INSERT z I8 (`routes.cjs:417`) tych kolumn nie podaje. Gałąź CREATE pada na `NOT NULL constraint failed`. Produkt **POWSTAJE w Selly** (wywołanie HTTP poszło), ale mapowanie lokalne nie zapisuje się → kolejny przebieg tworzy go **ponownie**. |
-| **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** (decyzja D3, `45-FEATURE-selly-rest-sync-tor1`): u nas ten sam `NOT NULL constraint failed`, ten sam efekt (duplikaty w Selly). Naprawa dopisaniem kolumn wprowadziłaby rozjazd z produkcją, który wyszedłby dopiero po cutoverze. Test `selly.synchronizacja.test.ts` przepisany, żeby dokumentować awarię, nie sukces. |
-| **Iteracja** | zamknięte w **13d-1** (port odtwarza defekt 1:1); **świadoma regresja funkcjonalna** wnoszona do odbudowy — stan zgodny z dzisiejszą produkcją |
-| **Status** | ✅ udokumentowane i przeportowane 1:1 — u Ani ten sam defekt jest aktywny na produkcji, więc to nie jest coś do naprawy w odbudowie, tylko fakt o źródle prawdy |
+| **Do nowej wersji?** | ⚠ **ZMIANA DECYZJI — ŚWIADOME ODSTĘPSTWO (decyzja użytkownika 2026-09-22, D4 ticketu 108).** Poprzednia decyzja (D3, `45-FEATURE-selly-rest-sync-tor1`, port cofnięty) mówiła „odtworzone 1:1". Teraz naprawione świadomie: gałąź CREATE starego `sync-supplier`/`sync-product` (I8) zapisuje `kod_importu`/`dostawca` do mapowania; produkt bez nich (0 z 7405 w snapshocie) kończy się czytelnym błędem „brak kod_importu lub dostawca" PRZED wywołaniem Selly, żeby nie zakładać produktu, którego mapowania nie da się zapisać. Gałąź UPDATE bez zmian (1:1). **Produkcja nadal ma ten defekt** — opis wyżej („Zmiana Ani") opisuje stan produkcji, nie odbudowy. |
+| **Iteracja** | naprawione w **I15.6** (ticket 108, 2026-09-22) |
+| **Status** | ✅ **naprawione (świadome odstępstwo od 1:1)** — panel I8 zapisuje mapowanie poprawnie zamiast padać na `NOT NULL`. Skutek uboczny: produkt założony tym przyciskiem ma mapowanie bez `selly_variant_id` — Tor 1 odnajdzie go po EAN, ale ponieważ domyślny wariant nie ma cechy „Magazyny", discovery dołoży DRUGI wariant (stan lepszy niż produkcja, gdzie powstaje kolejny produkt; do rozważenia z Anią po cutoverze). |
 
-### #68 · 2026-09-08 · [BACKEND] · `discovery.createProduct` woła nieistniejące `mapper.buildProductPayload`
+### #68 · 2026-09-08 (fakt obalony 2026-09-22, ticket 108) · [BACKEND] · `discovery.createProduct` — mapper istnieje, ale w Torze 1 nieosiągalny (nie brakujący, jak sądzono)
 | pole | wartość |
 |---|---|
 | **Kategoria** | BACKEND (Selly, Tor 2) |
-| **Pliki** | `mirror/backend/selly/discovery.cjs:147` (`createProduct`); ani `mapper_v2.cjs`, ani `mapper.cjs` takiej funkcji nie eksportują; port: `rebuild/backend/src/selly/discovery.ts` |
-| **Zmiana Ani** | Brak — zastany defekt. `createProduct` liczy na `mapper.buildProductPayload`, którego nie ma w żadnej wersji mappera. Nieosiągalne z Toru 1 (`sync_delta` woła `ensureMapping` BEZ `dictMaps`), ale zawsze rzuciłoby `TypeError`, gdyby Tor 2 (`sync_full`) wywołał ścieżkę tworzenia nowego produktu (nie tylko wariantu). |
-| **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** (decyzja D5, `45-FEATURE-selly-rest-sync-tor1`): `createProduct` u nas zwraca `{error: ...}` zamiast wymyślać payload, którego Ania u siebie nie ma. **Do rozstrzygnięcia w 13d-2** razem z resztą Toru 2. |
-| **Iteracja** | port defektu zamknięty w **13d-1**; rozstrzygnięcie (czy dopisać `buildProductPayload`, czy zostawić 1:1) → **13d-2** |
-| **Status** | ⬜ do decyzji w 13d-2 — dziś przeportowane 1:1 jako zablokowana gałąź |
+| **Pliki** | `mirror/backend/selly/discovery.cjs:147` (`createProduct`); `mapper_v2.cjs:159-187` (`buildProductPayload`, eksport w linii 227) — **funkcja ISTNIEJE**; port: `rebuild/backend/src/selly/rest/discovery.ts` |
+| **Zmiana Ani** | ⚠ **Fakt obalony (weryfikacja w ticket 108, 2026-09-22).** Pierwotny wpis mylił się: `mapper_v2.buildProductPayload` istnieje od 2026-09-08 15:12 (`origin/main:mirror/backend/selly/mapper_v2.cjs:159-187`, eksport :227) i działa. `createProduct` jest kompletny i używany z **Toru 2** (`sync_full.cjs:226` podaje `dictMaps`); w **Torze 1** (`sync_delta.cjs:137`) `ensureMapping` woła się BEZ `dictMaps`, więc ścieżka `createProduct` jest tam nieosiągalna z definicji — nie dlatego, że mappera brakuje. Brak w CHANGELOG dowodu udanego prawdziwego POST-a nowego produktu na produkcji. |
+| **Do nowej wersji?** | — pytanie bezprzedmiotowe, patrz Status. |
+| **Iteracja** | port `createProduct` 1:1 z wstrzykiwanym `budujPayloadProduktu` (decyzja D1) → **I15.6** (ticket 108); wpięcie prawdziwego `mapper_v2.buildProductPayload` jako `budujPayloadProduktu` → **I15.7** |
+| **Status** | ✅ **zamknięte jako fakt obalony** — nie ma tu defektu do naprawy. `createProduct` przeportowany 1:1 z wstrzykiwanym builderem payloadu (Tor 1 go i tak nie osiąga); I15.7 wpina prawdziwy mapper dla Toru 2. |
 
 ### #69 · 2026-09-09 · [BACKEND][BAZA] · `pending_create` nie ma jak trafić do `selly_products` — błąd liczy się w statystykach, nie zostawia śladu w bazie
 | pole | wartość |
 |---|---|
 | **Kategoria** | BACKEND + BAZA (Selly, discovery + sync_delta) |
-| **Pliki** | `mirror/backend/selly/discovery.cjs:213-218` (krok „rodzeństwo"), `sync_delta.cjs:96-103` (`markError`); port: `rebuild/backend/src/selly/discovery.ts`, `sync-delta.ts` |
-| **Zmiana Ani** | Brak — zastany defekt, wyszedł przy pisaniu testów w `45-FEATURE-selly-rest-sync-tor1` (13d-1), niezależnie zweryfikowany w code review na oryginale. Krok „rodzeństwo" szuka `selly_product_id` po samym `kod_importu`, a ta kolumna jest `NOT NULL` — więc **jeśli wiersz istnieje, rodzeństwo zawsze poda `product_id`** (wiersz podaje go sam sobie) i sterowanie nigdy nie dochodzi do gałęzi „brak dictMaps"; **jeśli wiersza nie ma**, komunikat `'produkt nie istnieje w Selly ale brak dictMaps do createProduct'` owszem powstaje, ale `markError` robi `UPDATE ... WHERE kod_importu=? AND dostawca=?` bez `INSERT` i nie trafia w żaden wiersz. Błąd jest policzony w `stats.err`/`errors[]`, ale w bazie nie zostaje ślad — zgodne z komentarzem DDL, który zna tylko `pending \| ok \| error \| not_found` (nie `pending_create`). |
+| **Pliki** | `mirror/backend/selly/discovery.cjs:213-218` (krok „rodzeństwo"), `sync_delta.cjs:96-103` (`markError`); port: `rebuild/backend/src/selly/rest/discovery.ts`, `rebuild/backend/src/selly/rest/sync-delta.ts` |
+| **Zmiana Ani** | Brak — zastany defekt, wyszedł przy pisaniu testów w `45-FEATURE-selly-rest-sync-tor1` (13d-1, port cofnięty), niezależnie zweryfikowany w code review na oryginale. Krok „rodzeństwo" szuka `selly_product_id` po samym `kod_importu`, a ta kolumna jest `NOT NULL` — więc **jeśli wiersz istnieje, rodzeństwo zawsze poda `product_id`** (wiersz podaje go sam sobie) i sterowanie nigdy nie dochodzi do gałęzi „brak dictMaps"; **jeśli wiersza nie ma**, komunikat `'produkt nie istnieje w Selly ale brak dictMaps do createProduct'` owszem powstaje, ale `markError` robi `UPDATE ... WHERE kod_importu=? AND dostawca=?` bez `INSERT` i nie trafia w żaden wiersz. Błąd jest policzony w `stats.err`/`errors[]`, ale w bazie nie zostaje ślad — zgodne z komentarzem DDL, który zna tylko `pending \| ok \| error \| not_found` (nie `pending_create`). |
 | **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** w porcie. Kosmetyczny defekt operacyjny: Tor 1 i tak ustawia `ok` po udanym PUT-cie, więc synchronizacja się nie psuje, ale diagnostyka w panelu jest myląca (produkt nieznany w Selly nie zostawia śladu). |
-| **Iteracja** | port defektu zamknięty w **13d-1**; naprawa → **do decyzji Ani po cutoverze** |
+| **Iteracja** | port defektu zamknięty w **I15.6** (ticket 108, 2026-09-22, świeży port z `origin/main:7d6cfc9`; poprzedni port `13d-1` był cofnięty rewertem #58); naprawa → **do decyzji Ani po cutoverze** |
 | **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę |
 
 ### #70 · 2026-09-09 · [BACKEND][BAZA] · `ON CONFLICT DO UPDATE` w discovery nie odświeża `ostatni_status` — stary `pending_create` przeżywa udane odnalezienie wariantu
 | pole | wartość |
 |---|---|
 | **Kategoria** | BACKEND + BAZA (Selly, discovery) |
-| **Pliki** | `mirror/backend/selly/discovery.cjs:229-234` (`ON CONFLICT(kod_importu, dostawca) DO UPDATE`); port: `rebuild/backend/src/selly/discovery.ts` |
-| **Zmiana Ani** | Brak — zastany defekt, zweryfikowany w `45-FEATURE-selly-rest-sync-tor1` (13d-1). UPSERT po odnalezieniu/utworzeniu wariantu nie nadpisuje kolumny `ostatni_status`, więc wiersz, który wcześniej dostał `pending_create`, po udanym `found_variant`/`created_variant` nadal pokazuje `pending_create` w panelu, mimo że mapowanie jest już poprawne. |
+| **Pliki** | `mirror/backend/selly/discovery.cjs:229-234` (`ON CONFLICT(kod_importu, dostawca) DO UPDATE`); port: `rebuild/backend/src/selly/rest/discovery.ts` |
+| **Zmiana Ani** | Brak — zastany defekt, zweryfikowany w `45-FEATURE-selly-rest-sync-tor1` (13d-1, port cofnięty). UPSERT po odnalezieniu/utworzeniu wariantu nie nadpisuje kolumny `ostatni_status`, więc wiersz, który wcześniej dostał `pending_create`, po udanym `found_variant`/`created_variant` nadal pokazuje `pending_create` w panelu, mimo że mapowanie jest już poprawne. |
 | **Do nowej wersji?** | ✅ TAK — **odtworzone 1:1** w porcie. Kosmetyczny defekt operacyjny, ten sam charakter co #69 (nie psuje synchronizacji, tylko diagnostykę). |
-| **Iteracja** | port defektu zamknięty w **13d-1**; naprawa → **do decyzji Ani po cutoverze** |
+| **Iteracja** | port defektu zamknięty w **I15.6** (ticket 108, 2026-09-22, świeży port z `origin/main:7d6cfc9`; poprzedni port `13d-1` był cofnięty rewertem #58); naprawa → **do decyzji Ani po cutoverze** |
 | **Status** | ⬜ kandydat do decyzji Ani po cutoverze — nie blokuje synchronizacji, tylko zaciemnia diagnostykę |
 
 ### #71 · 2026-09-09 · [FRONTEND] · regresja `konstrukcja` w ŻYWEJ produkcji — łatka pass-through poszła w martwy bundle
@@ -3516,8 +3520,8 @@ warstw naraz. Trzy uwagi:
 | **Kategoria** | BACKEND + BAZA (Selly, mapowanie kategorii) |
 | **Pliki** | `mirror/backend/kategoria_norm_map_pplx.sql` (bak `.bak_pre_category_fix_20260911_101000`), `zastosowanie_selly_map_pplx.sql` (bak j.w.), `zastosowanie_selly_map_v2_pplx.sql` (bak j.w.), `selly/sync_full.cjs` (bak j.w.) |
 | **Commit** | `2a2a1da` (2026-09-11 11:00) |
-| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — **wykonanie razem z przepisywanym 13d**, nie osobno. |
-| **Status** | — zatwierdzone; **czeka na start 13d** (nie zakładać karty wcześniej). |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — **wykonanie razem z przepisywanym 13d** (dziś I15.6/I15.7), nie osobno. |
+| **Status** | 🔨 **częściowo — kod gotowy, dane jeszcze nie załadowane.** Ticket 108 (I15.6, 2026-09-22): kod discovery nie ma żadnych zahardkodowanych ID kategorii — `selly_category_id` bierze się wyłącznie z `dictMaps.catMap` (wstrzykiwane z zewnątrz). Samo ładowanie tej mapy (dane z `selly_kategoria_norm_map`, `sync_full.loadDictMaps()`) to **I15.7** — dopiero tam wpis domknie się w całości. |
 
 **Opis biznesowy.** Audyt synchronizacji wykazał dwie rzeczy naraz. Po pierwsze, w lokalnym cache
 `selly_products` brakowało 95 wpisów dla produktów i wariantów, które w Selly już istniały
@@ -3620,7 +3624,7 @@ budowany przez `normalize('NFD')`, ma ten sam defekt.
 | **Pliki** | `mirror/backend/generate_selly_export.cjs` (bak `.bak_pre_wstrzymane_zero_20260914_153400`), `selly/sync_delta.cjs` (bak j.w.) |
 | **Commit** | `94492d1` (2026-09-14 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — część CSV teraz (jeden ticket z #73/#76), część delta razem z 13d. |
-| **Status** | — zatwierdzone; część CSV → ticket CSV (#73/#76), część delta → **czeka na 13d**. |
+| **Status** | część CSV → ticket CSV (#73/#76), status bez zmian tutaj; część delta → ✅ **zrobione w I15.6** (ticket 108, 2026-09-22): `findDeltaProducts` obejmuje `wstrzymany` z istniejącym wariantem, stan zerowany na 0 (test `selly.sync-delta.test.ts`). |
 
 **Opis biznesowy.** Produkt wstrzymany w Bridge, ale z dodatnim stanem, mógł zostawić w Selly
 nieaktualny dodatni stan — nie trafiał ani do CSV (filtr `status='aktywny'`), ani do delty API.
@@ -3644,7 +3648,7 @@ niedostępnego towaru), nie kosmetyka. Rozkłada się na dwie części o różny
 - **eksport CSV** → `rebuild/backend/src/selly/generator-csv.ts:158` (`.where(eq(products.status,"aktywny"))`)
   i linia stdout `Liczba produktow (aktywnych): …` w tym samym pliku, którą trasa oddaje 1:1 —
   **zmiana tekstu rusza fixture**, więc razem z #73 i #76 jako jeden ticket CSV;
-- **delta Toru 1** → należy do przepisywanego **13d**, nie ruszać osobno.
+- **delta Toru 1** → ✅ zrobione w **I15.6** (ticket 108, 2026-09-22).
 
 ### #78 · 2026-09-17 · [BACKEND] · MO9: odrzucanie po stabilnym ID kategorii Magento 163 (quady/kosiarki)
 | pole | wartość |

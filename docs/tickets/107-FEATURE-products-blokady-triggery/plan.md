@@ -82,6 +82,16 @@ Decyzje techniczne (rekomendacje Mastera — do akceptacji razem z planem):
 jednorazowa zamiast kodu przy każdym starcie, D1). Skutek uboczny mechanizmu: nowy stos nie „odświeża” wartości
 blokad przy każdym starcie — nie ma takiej potrzeby, bo triggery utrzymują wartość, a mapa MO* jest zamrożona w SQL.
 
+## ⏸ Powrót do tego wątku przy kopiowaniu bazy produkcyjnej (decyzja użytkownika 2026-09-22)
+PR #122 jest otwarty, ale **nie mergujemy go**, dopóki nie przejdzie próba na prawdziwej kopii produkcji. Kiedy
+zapadnie decyzja o skopiowaniu bazy produkcyjnej na staging (zgoda Ani od 23.09, D2), **wracamy do tego ticketu /
+tej sesji** i robimy kroki 6–7 (niżej) na tej kopii:
+1. Plan kopii musi najpierw rozstrzygnąć 002/003 (produkcyjne `products` ma 74 kolumny — obie migracje padną samym
+   `npm run migrate`; „Do koordynatora” w `docs/karty/I15.1/karta.md`).
+2. `npm run migrate` na kopii → 011 przechodzi; triggery w `sqlite_master` przed i po identyczne.
+3. Pomiar #101 (produkty dodane po 10.09: dostawca, puste blokady) i łańcuchów zastosowań (` ; ` w kategorii kanonicznej).
+4. Wynik do karty, potem merge PR #122.
+
 ## Implementation plan
 1. **Runner** — `src/db/migrate.ts`: funkcja `zastosujDyrektywy(sqlite, sql, plik)` (dyrektywa
    `@dodaj-kolumne-jesli-brak <tabela> <kolumna> <definicja>`), wołana w transakcji przed `sqlite.exec(sql)`.

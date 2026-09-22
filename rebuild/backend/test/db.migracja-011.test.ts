@@ -9,7 +9,7 @@
  *      każdym starcie (`payment_blocks.cjs`, `application_rules.cjs` @ 7d6cfc9). Na niej 011 nie może się
  *      wywrócić — to jest scenariusz cutoveru.
  */
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -74,27 +74,21 @@ const triggeryWBazie = (db: BazaSqlite): Map<string, string> =>
 const kolumnyProducts = (db: BazaSqlite): string[] =>
   (db.prepare(`PRAGMA table_info(products)`).all() as { name: string }[]).map((k) => k.name);
 
-/** Katalog z migracjami 001–010 — stan bazy tuż przed 011. */
+/**
+ * Katalog ze WSZYSTKIMI migracjami poza 011 — stan bazy, na którą 011 trafia jako jedyna brakująca
+ * (tak wygląda produkcja przy cutoverze: reszta odnotowana, 011 nie). Lista liczona z katalogu,
+ * a nie wpisana na sztywno, żeby migracje równoległych kart (np. 013 z I15.6) nie psuły testu.
+ */
 const katalogBez011 = (gdzie: string): string => {
   const k = join(gdzie, "schema-bez-011");
   mkdirSync(k);
-  for (const plik of MIGRACJE_PRZED_011) {
-    copyFileSync(join(KATALOG_SCHEMATU(), plik), join(k, plik));
+  for (const plik of readdirSync(KATALOG_SCHEMATU())) {
+    if (plik.endsWith(".sql") && plik !== PLIK_011) {
+      copyFileSync(join(KATALOG_SCHEMATU(), plik), join(k, plik));
+    }
   }
   return k;
 };
-const MIGRACJE_PRZED_011 = [
-  "001_schema.sql",
-  "002_import.sql",
-  "003_szerokosc_text.sql",
-  "004_kategoria_wielka_litera.sql",
-  "005_konstrukcja_slowa.sql",
-  "006_nazwa_caps.sql",
-  "007_waga_gab_przewoznicy.sql",
-  "008_alerty_katalogu_statusy.sql",
-  "009_alerty_polskie_znaki.sql",
-  "010_marka_caps.sql",
-];
 
 const dodajProdukt = (
   db: BazaSqlite,
@@ -357,7 +351,7 @@ describe("011 — baza 3: symulacja produkcji (kolumna i triggery już są)", ()
  *
  *   SNAPSHOT_DB=/ścieżka/do/db/snapshot.db npx vitest run test/db.migracja-011.test.ts
  *
- * Najpierw 001–010 (tak jak przy odświeżeniu stagingu), potem pełny katalog — 011 osobno, żeby
+ * Najpierw wszystkie migracje poza 011, potem pełny katalog — 011 osobno, żeby
  * porównać wiersze przed i po samej 011.
  */
 it.skipIf(!process.env.SNAPSHOT_DB)(

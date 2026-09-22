@@ -3464,22 +3464,27 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 | [I15.6](karty/I15.6/) | Selly REST 1: nowy schemat `selly_products`, odnajdywanie, aktualizacje w ciągu dnia | #60, #74, #77 (delta), #68–#70 | — | `013` |
 | [I15.7](karty/I15.7/) | Selly REST 2: nocna pełna synchronizacja | #60, #81 | I15.6 | — |
 | [I15.8](karty/I15.8/) | Selly REST 3: harmonogram i przyciski w panelu | #60 | I15.7 | — |
-| [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) | — | I15.1–I15.8 | — |
-| [I15.10](karty/I15.10/) | zmiana w toku na starym Bridge — zakres nieznany | — | triaż zmiany | ? |
+| [I15.10](karty/I15.10/) | zmiana w toku na starym Bridge nr 1 — zakres nieznany | — | triaż zmiany | przydzieli koordynator |
+| [I15.11](karty/I15.11/) | zmiana w toku na starym Bridge nr 2 — rezerwa, zakres nieznany | — | triaż zmiany | przydzieli koordynator |
+| [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) — **OSTATNIA** | — | I15.1–I15.8, I15.10, I15.11 | — |
 
 **Numery migracji przydzielone z góry przez koordynatora** (`011`, `012`, `013`). Runner (`db/migrate.ts`) stosuje
 każdy brakujący plik niezależnie od kolejności merge'y, więc równoległe karty nie kolidują. Karta, która
 potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać kolejny numer sama.
 
-**Fale (co równolegle, co na co czeka):**
+**Fazy (co równolegle, co na co czeka) — plan z 2026-09-22, ticket 106:**
 
-| Fala | Karty | Warunek startu |
+| Faza | Karty | Warunek startu |
 |---|---|---|
+| 0 | przygotowanie: odświeżenie bazy stagingu kopią produkcji (od 23.09), pomiar #101, podsumowanie logiki Selly od Ani | — |
 | 1 | **I15.1** ‖ **I15.6** | — (rozłączne: `products` + triggery vs Selly) |
 | 2 | **I15.2** ‖ **I15.3** ‖ **I15.7** | I15.1 (dla 2 i 3), I15.6 (dla 7) |
 | 3 | **I15.4** ‖ **I15.8** | I15.2 (dla 4), I15.7 (dla 8) |
 | 4 | **I15.5** | I15.4 |
-| 5 | **I15.9**, potem instrukcja pełnego testu i cutover | wszystkie |
+| 5 | **I15.10**, **I15.11** (zmiany Ani w toku) | triaż zmiany; zależności ustali koordynator (jeśli dotyczą stagingu — po I15.4/I15.5) |
+| 6 | **I15.9** — delta dla Ani, OSTATNIA karta; potem instrukcja pełnego testu i cutover | wszystkie |
+
+Karty z fazy 5 mogą wejść wcześniej, jeśli zmiana Ani wpłynie szybciej i nie koliduje plikowo z bieżącą fazą.
 
 **Odpowiedzi Ani, runda 3 (22.09)** — `docs/pytania-do-ani-2026-09-22.md`, sekcja „Co Ania odpowiedziała”. Skutki dla I15:
 Selly skończone (tor I15.6–I15.8 gotowy; Ania przygotuje podsumowanie logiki — odebrać przed I15.6); Ania używa wszystkich
