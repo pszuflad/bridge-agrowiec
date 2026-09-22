@@ -1,6 +1,6 @@
 # 107-FEATURE-products-blokady-triggery — I15.1: kolumna blokowanych form płatności + 6 triggerów (migracja 011)
 
-> Status: Approved
+> Status: Implemented (PR po próbie na kopii produkcji — scenariusz A)
 > Branch: `feature/107-products-blokady-triggery`
 > Worktree: `.worktrees/107-FEATURE-products-blokady-triggery`
 > Karta: `docs/karty/I15.1/` (karta.md + wejscie-104.md)
