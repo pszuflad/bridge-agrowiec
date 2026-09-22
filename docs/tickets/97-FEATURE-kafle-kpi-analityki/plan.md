@@ -1,6 +1,6 @@
 # 97-FEATURE-kafle-kpi-analityki — kafle KPI w Analityce jak na produkcji (PR.2)
 
-> Status: Draft
+> Status: Implemented
 > Branch: `feature/97-kafle-kpi-analityki`
 > Worktree: `.worktrees/97-FEATURE-kafle-kpi-analityki`
 
