@@ -2,6 +2,18 @@
 
 **Środowisko:** https://test.agritires.eu · **Data przygotowania:** 2026-09-04
 
+> **⚠ CZĘŚCIOWO NIEAKTUALNE od 2026-09-22 — najpierw przeczytaj [wersję 2 tej instrukcji](instrukcja-testow-I10-v2.md).**
+>
+> Po Twoich odpowiedziach na pytania 10.1–10.3 i uwadze z przeglądu 12 widoków zmieniliśmy cztery rzeczy: **karty 4.1 i 4.2 oraz ich pliki CSV mają dane**, **kafel „Ostatni eksport CSV" czyta Historię**, **plik CSV to tabela po Twoich filtrach** i **kafle w nagłówku Analityki są jak na produkcji**. Ta instrukcja opisuje stan **sprzed** tych zmian. **Zostaje bez zmian** — nie trzeba jej czytać na nowo. Zasada: **gdy coś różni się od tego, co widzisz na ekranie, prawdą jest wersja 2.**
+>
+> Co konkretnie przestało być prawdą w TEJ wersji:
+> - **ramka na górze**, **§5.4**, **§6.1**, **§6.3**, **§7.5** i lista kontrolna — karty 4.1 i 4.2 nie są już puste, ich pliki też nie;
+> - **§3.1**, **§6.2** i lista kontrolna — kafel „Ostatni eksport CSV" nie jest martwy;
+> - **§1 pkt 4**, **§6.4**, **§6.9**, **§7.4** i **§8** — plik CSV zna filtry i ma kolumny tabeli;
+> - **§4.1** i lista kontrolna — kafle nagłówka Analityki to Dostawcy · EAN wspólne · Pozycje unikalne · Snapshoty;
+> - **§2.3**, **§3.1**, **§3.3**, **§3.4**, **§3.5**, **§6.8** i lista kontrolna — Pulpit pokazuje powiadomienia z obu zakładek Alertów;
+> - **§2.2** i **§8** — migawka cen już się nie dubluje (przycisku nadal nie ma).
+
 > **To jest STAGING, nie produkcja.** Cokolwiek tu ustawisz albo zepsujesz — produkcji nie
 > dotyka. Testuj bez skrupułów.
 
