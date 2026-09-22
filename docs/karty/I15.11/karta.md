@@ -1,23 +1,25 @@
-# I15.11 — zmiana w toku na starym Bridge nr 2 (zakres nieznany)
+# I15.11 — panel „Braki w cenniku” i podgląd starej karty (frontend)
 
-> **Stan:** ⏸ czeka na zmianę od Ani
-> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** — · **Zależy od:** triaż zmiany, gdy wpłynie
+> **Stan:** ⬜ po I15.4 i I15.5 (faza 5)
+> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #103 · **Zależy od:** I15.4 (dane i trasy), I15.5 (ten sam widok Staging)
 > **Ticket:** —
 
-Założona przez koordynatora ticketem `106-DOCS-i15-plan-faz`, 2026-09-22 — rezerwa na drugą zmianę Ani (plan zakłada co najmniej dwie).
+Przepisana z karty-rezerwy przez koordynatora (ticket 110, triaż 22.09 wieczór). Źródło prawdy: `origin/main` na `abe5f14`.
 
 ## Zakres
-Paweł (22.09): po uzgodnieniu zamrożenia produkcji **jedna zmiana jest jeszcze w trakcie** w starym Bridge — dojdzie
-co najmniej jeden ticket. Treść nieznana. Wskazówka z odpowiedzi Ani na 2.1: „poprawiamy logikę tak jak np. w stagingu
-bo za dużo śmieci tam wpada” — możliwe, że dotyczy stagingu (wtedy zależność od I15.4).
-Gdy commit `sync(vps)` wpłynie: triaż (`/triaz-zmian`) → wpis backlogu → decyzja użytkownika → uzupełnienie tej karty
-(zakres, pliki, zależności) przez koordynatora.
+Port zmian panelu z #103: **„Braki w cenniku”** (widok/filtr pozycji, których dostawca nie przysłał, wraz z dowodami
+kompletności) i **podgląd starej karty** przy zablokowanych zgłoszeniach „do sprawdzenia”.
+⚠ Zmiany poszły w **ŻYWY bundel** `mirror/frontend/assets/index-PRICEFMT1783512500.js` (jedna linia minifikatu)
+oraz w `assets/staging-policy-injection.js` (+9 l.) i `index.html`. Rozłóż diff bundla
+(`git diff 7d6cfc9 abe5f14 -- mirror/frontend/assets/index-PRICEFMT1783512500.js`) zanim uwierzysz etykiecie —
+CLAUDE.md, „nazwa `.bak` daje ETYKIETĘ, nie treść”.
 
 ## Pliki (wyłączna własność)
-Do ustalenia po triażu.
+`rebuild/frontend/src/pages/staging/**` (część „Braki w cenniku” i podgląd starej karty), testy FE.
+NIE: okno „Rozstrzygnij” (I15.5), backend (I15.4).
 
 ## Decyzje
-—
+Decyzje D1–D9 z bloku I15 obowiązują.
 
 ## Dowiezione
 —
