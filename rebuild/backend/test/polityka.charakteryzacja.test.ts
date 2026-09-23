@@ -300,6 +300,36 @@ describe("GATE — `resolveStaging`", () => {
     );
   });
 
+  it("REGRESJA — `link` na kod, pod którym wisi JUŻ INNE zgłoszenie, zastępuje tamto", () => {
+    // ⚠ Znalezione w code review ticketa 129. Oryginał (`:245`) woła NADPISANE `U.addStaging`,
+    // które czyści parę `(dostawca, kod)` jeszcze raz — tym razem dla kodu DOCELOWEGO.
+    // Port wołał wersję bazową i wywracał się o indeks unikalny `staging_one_current_product`
+    // surowym 500 z treścią SQL-a. GATE tego nie łapał, bo żaden scenariusz nie zasiewał
+    // konkurencyjnego zgłoszenia dla kodu docelowego.
+    zgodne(
+      obieStrony(
+        {
+          katalog: [produkt({ id: 1, kod: "P9" }) as Wiersz],
+          staging: [
+            pozycjaV2({
+              kod: "P1",
+              snapshot: { kod: "P1", _matchIssue: "ambiguous", _candidates: [{ kod: "P9" }] },
+            }),
+            // Konkurencyjne zgłoszenie dla kodu docelowego — to ono ma zostać zastąpione.
+            pozycjaV2({
+              kod: "P9",
+              typZmiany: "zmiana_kluczowa",
+              powod: "starsze zgłoszenie dla P9",
+              snapshot: { kod: "P9" },
+            }),
+          ],
+        },
+        "resolve",
+        () => ["link", "P9"],
+      ),
+    );
+  });
+
   it("nieznana decyzja", () => {
     zgodne(
       obieStrony(

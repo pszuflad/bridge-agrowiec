@@ -158,7 +158,12 @@ export function rozstrzygnijZgloszenie(
 
   return uchwytSqlite(db).transaction(() => {
     usunZgloszeniaPary(db, row.dostawca, row.kod);
-    return dodajPozycjeBazowo(db, {
+    // ⚠ `dodajZgloszenie`, NIE `dodajPozycjeBazowo`. Oryginał (`:245`) woła NADPISANE
+    // `U.addStaging`, więc czyszczenie pary leci DWA RAZY i za drugim razem dotyczy kodu
+    // DOCELOWEGO (`code`), nie źródłowego. Bez tego `action:"link"` na kod, pod którym wisi
+    // już inne zgłoszenie, wywala się o indeks unikalny `staging_one_current_product`
+    // (surowe 500 z treścią SQL-a), zamiast — jak w produkcji — zastąpić tamto zgłoszenie.
+    return dodajZgloszenie(db, {
       ...bezId,
       kod: code,
       typZmiany: safe._eanIssue ? "blad" : current ? "zmiana_kluczowa" : "nowa",
