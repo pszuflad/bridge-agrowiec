@@ -92,18 +92,18 @@ Poza tym dwie rzeczy doprecyzowano w trakcie:
 - **Charakteryzacja na realnych cennikach:** ✓ 49/49 — port zgadza się z `install()` @ `88fa31c`
   na MO1–MO10 i na 21 scenariuszach celowanych, pole po polu.
 - **Gate polityki źródła (port vs żywy oryginał):** ✓ 17/17.
-- **Pełna bramka:** `lint` ✓, `typecheck` ✓, `build` ✓, `test` ✓ — 108 plików, 1774 przechodzi,
-  7 pominiętych (baseline `origin/develop`: 107 plików, 1754 przechodzi). Przybyło 20 testów.
-- **Wydajność:** przypadki cennikowe MO1–MO10 dostały limit 90 s (globalny to 20 s). Nowy silnik
+- **Pełna bramka po scaleniu z `develop`:** `lint` ✓, `typecheck` ✓, `build` ✓, `test` ✓ —
+  **111 plików, 1835 przechodzi, 7 pominiętych.** Gałąź zawiera całe `origin/develop`
+  (tickety 129, 119, 131, 132, 134, 135 włącznie).
+- **Wydajność:** przypadki cennikowe MO1–MO10 chodzą pod podniesionym limitem 120 s
+  (wprowadzonym przez ticket 132 wraz z budżetem `tools/czas-testow.cjs`). Nowy silnik
   wykonuje na pozycję znacznie więcej pracy niż stary `tk()` — sprawdza automatyczne wstrzymanie,
   zapamiętane dopasowanie i ręczny wybór operatora, a w pętli nieobecnych porównuje KAŻDĄ kartę
   katalogu z KAŻDYM rekordem cennika przez `compatibility()`. Dla MO2 (1729 kart) i MO5 (1989)
   to setki tysięcy porównań. Koszt jest oryginału — nie skracaliśmy go, bo zmieniłoby to
   zachowanie. Powiązany wpis: #107 (zatwierdzanie zbiorcze blokowało panel).
-- **Znany flake, NIE z tego ticketa:** `test/alerty-katalogu.gate.test.ts` („paczka równa limitowi
-  20 000 id") bywa czerwony na limicie 20 s przy pełnym przebiegu na obciążonej maszynie; osobno
-  przechodzi (sprawdzone dwukrotnie), przechodzi też na czystym `origin/develop`. Zgłoszone już
-  przez I15.4a („Do koordynatora", pkt 6) jako materiał na osobny ticket.
+- **Flake `alerty-katalogu.gate` rozwiązany poza tym ticketem** — ticket 132 podniósł limity
+  i dołożył budżet czasu; po scaleniu test przechodzi w pełnym przebiegu.
 
 ## Breaking changes
 
