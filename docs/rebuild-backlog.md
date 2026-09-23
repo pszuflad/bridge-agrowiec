@@ -19,6 +19,14 @@ bundla do ~2026-08-05, MD5 `b745bf95`). Wcześniejsze zmiany są już w specyfik
 **Legenda „Do nowej wersji?":** ⬜ do decyzji · ✅ TAK · ❌ NIE (świadomie pomijamy) · 🕒 PÓŹNIEJ
 **Legenda „Status":** — nie zaczęte · 🔨 w toku · ✔ zrobione w rebuild
 
+> **Od ticketu 128 (2026-09-23) ten plik NIE ROŚNIE.** Nowe wpisy backlogu, listy „Pominięte”
+> i podsumowania partii trafiają do `docs/rebuild-backlog/wpis-<numer ticketu>.md`, a identyfikator
+> wpisu ma postać `#<ticket>.<kolejny>` (np. `#131.1`). Powód: koniec listy, bloki „Pominięte”
+> i akapity podsumowań były trzema punktami, w które dopisywały wszystkie karty naraz — ten sam
+> wzorzec konfliktów, co kiedyś w roadmapie i w `spec-backend.md`. Reguła i szablon:
+> `docs/rebuild-backlog/README.md`. Przegląd całości: `tools/stan-backlogu.sh`.
+> Wpisy `#1`–`#108` zostają tutaj jako historia — odnośniki do nich są nadal ważne.
+
 **Partia #72–#83 (triaż 2026-09-18) — ROZSTRZYGNIĘTA przez użytkownika tego samego dnia.**
 Dziesięć wpisów ✅ TAK, jeden ❌ NIE (#72 — odbudowa ma lepsze rozwiązanie, zostawiamy nasze),
 jeden 🕒 PÓŹNIEJ (#81 → odłożony do **13d**, zapisany w roadmapie w bloku 13d).
@@ -940,6 +948,10 @@ od zera):
 
 
 ---
+
+> **Nowe listy „Pominięte” dopisuje się we własnym pliku ticketu**
+> (`docs/rebuild-backlog/wpis-<N>.md`), nie tutaj — poniższe bloki to historia sprzed ticketu 128.
+> Widać po ich kolejności, jak je poskładał git: blok ticketu 104 stoi przed blokiem ticketu 94.
 
 *Pominięte (nie kod, brak zadania rebuild):*
 - 2026-08-18 06:00 [FRONTEND] — regeneracja pliku eksportu `sellycsv-...csv` (odświeżenie
@@ -4862,3 +4874,9 @@ różne opony (inny EAN, czasem inny rocznik) pod jedną nazwą.
 **Rekomendacja koordynatora: (c) teraz + (a) po uzgodnieniu z Anią.** (c) jest tanie i odwracalne, mieści się
 w karcie **I15.10**; (a) to zmiana asortymentu w sklepie — dziś te opony są w Selly sklejone w jeden produkt.
 
+
+---
+
+**Koniec historycznej listy wpisów (`#1`–`#108`).** Nowe wpisy: `docs/rebuild-backlog/wpis-<N>.md`
+(jeden plik na ticket, identyfikatory `#<ticket>.<kolejny>`) — zob. `docs/rebuild-backlog/README.md`.
+Zestawienie wszystkiego razem: `tools/stan-backlogu.sh`.

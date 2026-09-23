@@ -30,6 +30,14 @@ nie powtarza jego treści.
 `docs/spec-backend/wpis-<N>.md`. Wolno tylko poprawić w miejscu zdanie, które ticket obalił.
 Powód: karty P10.1 i PR.1 (tickety 90, 91, 2026-09-22) dopisały się w to samo miejsce §2
 i zderzyły przy merge'u. Reguła i szablon: `docs/spec-backend/README.md`.
+**I to samo dotyczy `docs/rebuild-backlog.md` (od ticketu 128, 2026-09-23):** nowe wpisy, listy
+„Pominięte" i podsumowania partii idą do `docs/rebuild-backlog/wpis-<numer ticketu>.md`,
+identyfikator wpisu to `#<ticket>.<kolejny>` (np. `#131.1`) — nie „następny numer po #108",
+bo po ten sam numer sięgały dwa równoległe triaże. Backlog miał trzy punkty zbiorowego
+dopisywania (koniec listy, bloki „Pominięte", akapity podsumowań na górze) i konfliktował na
+każdym z nich. W miejscu wolno tylko zmienić linię `Do nowej wersji?` (decyzja użytkownika)
+albo `Status` (ten, kto wdraża). Reguła i szablon: `docs/rebuild-backlog/README.md`;
+przegląd: `tools/stan-backlogu.sh`.
 
 **1. Po każdej zamkniętej karcie jej `karta.md` opisuje STAN, nie zamiar.**
 Karta oznaczona jako zrobiona (data + ID ticketa), gate rozliczony, zakres faktycznie dowieziony
