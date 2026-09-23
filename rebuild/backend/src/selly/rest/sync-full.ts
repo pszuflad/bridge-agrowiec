@@ -422,6 +422,18 @@ export async function syncFullForDostawca(
 
   for (const row of limited) {
     try {
+      // Backlog #104 (`abe5f14`): cykl Toru 2 trwa długo, a import mógł w tym czasie wstrzymać
+      // pozycję. Status i stan czytamy więc DOPIERO TERAZ, z bazy, a nie z migawki sprzed biegu.
+      // Wstrzymany po rozpoczęciu cyklu jest pomijany — inaczej wysłalibyśmy nieaktualny stan.
+      const live = db.$client
+        .prepare("SELECT status, stan FROM products WHERE id = ?")
+        .get(row.bridge_product_id) as { status: string; stan: number | null } | undefined;
+      if (!live || live.status !== "aktywny") {
+        stats.skip++;
+        continue;
+      }
+      row.stan = live.stan;
+
       let result: WynikRekordu;
       if (row.selly_variant_id) {
         result = await updateExistingVariant(db, discovery, row, dictMaps, { dryRun });
