@@ -224,13 +224,22 @@ describe("generator CSV dla Selly (blok 8a)", () => {
 
     /**
      * Fallback oryginału (`generate_selly_export.cjs:142-144`): pusta kolumna → mapa po
-     * `dostawca`. Wymuszamy pustkę, wyłączając trigger — inaczej tej gałęzi nie da się dosięgnąć.
+     * `dostawca`.
+     *
+     * ⚠ Trigger NIE stoi tu na przeszkodzie i nie trzeba go zdejmować: `products_blokowane_formy_au`
+     * jest `AFTER UPDATE OF dostawca`, więc aktualizacja samej kolumny blokad go nie uruchamia.
+     * Dzięki temu pustkę da się wymusić zwykłym `UPDATE`, a test nie rusza schematu bazy.
      */
     it("pustą wartość uzupełnia z mapy po kodzie dostawcy", () => {
-      baza.sqlite.exec("DROP TRIGGER IF EXISTS products_blokowane_formy_au");
       baza.sqlite
         .prepare("UPDATE products SET blokowane_formy_platnosci = NULL WHERE kod = ?")
         .run("MO9_336320");
+      // Kontrola założenia: trigger faktycznie nie odtworzył wartości.
+      expect(
+        baza.sqlite
+          .prepare("SELECT blokowane_formy_platnosci AS b FROM products WHERE kod = ?")
+          .get("MO9_336320"),
+      ).toEqual({ b: null });
 
       expect(wartosc("MO9336320")).toBe(
         "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 217, 218, 219",

@@ -21,13 +21,21 @@
  *
  * Konfiguracja idzie przez `wczytajEnv()`, tak samo jak w `server.ts`, więc `SELLY_CSV_DIR`,
  * `SELLY_CSV_PLIK` i `SELLY_CSV_URL` rozwiązują się identycznie jak w trasie (domyślne =
- * wartości produkcyjne). Cron musi więc startować z tym samym środowiskiem co proces serwera.
+ * wartości produkcyjne) — bez przepisywania tych trzech domyślnych w drugie miejsce.
+ *
+ * ⚠ DLACZEGO PODSTAWIAMY `JWT_SECRET`. `wczytajEnv()` wymaga go, bo serwer bez niego nie ma prawa
+ * wstać — ale generowanie CSV nie dotyka ani logowania, ani tokenów. Cron to osobna linia
+ * w `crontab`, która NIE dziedziczy środowiska procesu serwera; gdyby brak `JWT_SECRET`
+ * przewracał to polecenie, plik dla Selly przestałby się odświeżać i **dowiedzielibyśmy się
+ * o tym dopiero z tego, że sklep ma wczorajsze ceny**. Podstawiamy więc wartość zastępczą,
+ * a realna z otoczenia i tak ma pierwszeństwo (rozwinięcie `process.env` jest DRUGIE).
+ * `DB_PATH` zostaje WYMAGANY — tam cichy fallback byłby groźny (pisalibyśmy do nie tej bazy).
  */
 import { wczytajEnv } from "../config/env.js";
 import { otworzBaze } from "../db/index.js";
 import { wygenerujCsvSelly } from "./generator-csv.js";
 
-const env = wczytajEnv();
+const env = wczytajEnv({ JWT_SECRET: "nieuzywany-przy-generowaniu-csv", ...process.env });
 const { sqlite, db } = otworzBaze(env.DB_PATH);
 
 try {

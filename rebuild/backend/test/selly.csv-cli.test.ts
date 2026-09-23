@@ -10,7 +10,7 @@
  * ani odczytu `SELLY_CSV_*`, ani budowania ścieżek, czyli tego, co przy cutoverze najłatwiej pomylić.
  */
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -36,19 +36,21 @@ describe("CLI generatora CSV dla Selly (`npm run selly:csv`, backlog #102)", () 
   afterEach(() => baza.posprzataj());
 
   /** Uruchomienie CLI tak, jak zrobi to cron: osobny proces, konfiguracja wyłącznie z env. */
-  const uruchomCli = (katalog: string): string =>
-    execFileSync(TSX, [WEJSCIE_CLI], {
-      cwd: KATALOG_BACKENDU,
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        DB_PATH: baza.sciezka,
-        JWT_SECRET: "test-cli",
-        SELLY_CSV_DIR: katalog,
-        SELLY_CSV_PLIK: "selly.csv",
-        SELLY_CSV_URL: "https://przyklad/selly.csv",
-      },
-    });
+  const uruchomCli = (katalog: string, nadpisania: Record<string, string | undefined> = {}): string => {
+    const env: Record<string, string | undefined> = {
+      ...process.env,
+      DB_PATH: baza.sciezka,
+      JWT_SECRET: "test-cli",
+      SELLY_CSV_DIR: katalog,
+      SELLY_CSV_PLIK: "selly.csv",
+      SELLY_CSV_URL: "https://przyklad/selly.csv",
+      ...nadpisania,
+    };
+    for (const [klucz, wartosc] of Object.entries(nadpisania)) {
+      if (wartosc === undefined) delete env[klucz];
+    }
+    return execFileSync(TSX, [WEJSCIE_CLI], { cwd: KATALOG_BACKENDU, encoding: "utf8", env });
+  };
 
   /**
    * ⭐ GŁÓWNA ASERCJA KARTY: „plik z CLI identyczny z plikiem z trasy". Porównujemy BAJTY,
@@ -83,6 +85,33 @@ describe("CLI generatora CSV dla Selly (`npm run selly:csv`, backlog #102)", () 
     expect(stdout).toContain("Liczba produktow aktywnych: 3");
     expect(stdout).toContain("Liczba kolumn: 60");
     expect(stdout).toMatch(/Rozmiar pliku \(bajty\): \d+/);
+  });
+
+  /**
+   * ⭐ CRON NIE DZIEDZICZY ŚRODOWISKA SERWERA. Linia w `crontab` startuje z gołym `env`, więc
+   * gdyby polecenie wymagało `JWT_SECRET` (którego generowanie CSV w ogóle nie dotyka), padłoby
+   * po cutoverze — a objawem byłoby dopiero to, że Selly o 12:00 zaciąga wczorajszy katalog.
+   * Ten test pilnuje, że do wygenerowania pliku wystarczy `DB_PATH` i ścieżki `SELLY_CSV_*`.
+   */
+  it("działa bez `JWT_SECRET` — cron nie ma pełnego środowiska serwera", () => {
+    const katalog = `${baza.sciezka}-cli-bez-jwt`;
+
+    const stdout = uruchomCli(katalog, { JWT_SECRET: undefined });
+
+    expect(stdout).toContain("Liczba kolumn: 60");
+    expect(readFileSync(join(katalog, "selly.csv")).length).toBeGreaterThan(0);
+  });
+
+  /**
+   * ⚠ `DB_PATH` zostaje WYMAGANY — w odróżnieniu od `JWT_SECRET`. Cichy fallback na domyślną
+   * ścieżkę oznaczałby generowanie pliku z NIE TEJ bazy, czego nikt by nie zauważył.
+   * Ma paść głośno i z niezerowym kodem wyjścia, żeby cron zgłosił błąd.
+   */
+  it("bez `DB_PATH` kończy się błędem, a nie plikiem z przypadkowej bazy", () => {
+    const katalog = `${baza.sciezka}-cli-bez-db`;
+
+    expect(() => uruchomCli(katalog, { DB_PATH: undefined })).toThrow();
+    expect(existsSync(join(katalog, "selly.csv"))).toBe(false);
   });
 
   /**

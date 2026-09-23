@@ -162,8 +162,9 @@ const BLOKOWANE_FORMY_PLATNOSCI: Readonly<Record<string, string>> = Object.freez
  * Port `getBlockedPaymentForms()` (`payment_blocks.cjs:19-22`) — fallback kolumny 60.
  *
  * Oryginał sięga po mapę dopiero wtedy, gdy kolumna w bazie jest PUSTA
- * (`generate_selly_export.cjs:142-144`). Na dziś to martwa gałąź: pomiar na żywej produkcji
- * (ticket 113, 2026-09-23) pokazał 0 wierszy z pustym polem na 8329 produktów. Zostaje jako
+ * (`generate_selly_export.cjs:142-144`). Na dziś to martwa gałąź: odczyt żywej bazy produkcji
+ * (ticket **113**, 2026-09-23 — osobny ticket pomiarowy zamykający backlog #101) pokazał
+ * **0 wierszy** z pustym polem na 8329 produktów, w żadnej grupie dostawcy. Gałąź zostaje jako
  * bezpiecznik dla wiersza wstawionego drogą omijającą trigger — i dlatego, że tak robi oryginał.
  */
 function blokowaneFormyDlaDostawcy(kodDostawcy: unknown): string | null {
