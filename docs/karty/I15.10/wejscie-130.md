@@ -1,3 +1,9 @@
+> ⚠ **AKTUALIZACJA po merge'u ticketu 119 (2026-09-23):** karta I15.10 zamknęła się, zanim
+> ten ticket wszedł, więc szew NIE czeka już na wpięcie — `silnikStagingu()` podaje
+> `zadajOdswiezenie` jako domyślne `odswiezDostepnosc`. Zostaje wyłącznie MONTAŻ instancji
+> (`ustawDomyslnaSynchronizacjeDostepnosci`), który należy do I15.8. Reszta pliku opisuje
+> stan sprzed tego merge'a.
+
 # Wejście dla I15.10 od ticketu 130 (I15.4b) · 2026-09-23
 
 Punkt wpięcia dostępności jest GOTOWY i czeka na Wasz moduł:

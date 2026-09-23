@@ -25,6 +25,7 @@ import {
   type StatystykiImportu,
   type ZaleznosciPolityki,
 } from "./polityka/fabryka.js";
+import { zadajOdswiezenie } from "../selly/dostepnosc.js";
 import type { RekordSurowy } from "./typy.js";
 
 export {
@@ -58,11 +59,20 @@ export type SilnikStagingu = (
 /**
  * Buduje silnik importu dla danej bazy.
  *
- * @param zaleznosci szew na moduł dostępności z karty I15.10 (`odswiezDostepnosc`).
- *   Domyślnie no-op — tak samo jak oryginał, który poza produkcyjną bazą nie woła
- *   `availability_sync` w ogóle (`staging_policy.cjs:132-134`).
+ * @param zaleznosci szew na moduł dostępności z karty I15.10. Domyślnie wpięty
+ *   `zadajOdswiezenie` z `src/selly/dostepnosc.ts` — funkcja opisana tam wprost jako
+ *   „punkt wejścia dla karty I15.4".
+ *
+ * ⚠ Wpięcie jest BEZPIECZNE bez dodatkowej konfiguracji: `zadajOdswiezenie()` bez zamontowanej
+ * instancji nie robi NIC (`dostepnosc.ts:127-130`). To celowy odpowiednik bramki oryginału
+ * (`staging_policy.cjs:131-134`), która wychodzi, gdy baza nie jest produkcyjna — kopia testowa
+ * nigdy nie wysyła do sklepu ani nie publikuje produkcyjnego CSV. Montaż instancji należy
+ * do I15.8 (`ustawDomyslnaSynchronizacjeDostepnosci`), nie do tej karty.
  */
 export function silnikStagingu(db: Baza, zaleznosci: ZaleznosciPolityki = {}): SilnikStagingu {
-  const polityka = stworzPolitykeStagingu(db, zaleznosci);
+  const polityka = stworzPolitykeStagingu(db, {
+    odswiezDostepnosc: zadajOdswiezenie,
+    ...zaleznosci,
+  });
   return (kodDostawcy, surowe, opcje) => polityka.importer(kodDostawcy, surowe, opcje);
 }

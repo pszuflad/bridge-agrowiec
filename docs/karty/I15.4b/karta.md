@@ -115,10 +115,16 @@ warstwa polityki stagingu należy teraz do plików wniesionych przez ticket 129.
    `U.updateProduct` naniesione w `src/routes/products.ts` (ręczna zmiana `status` kasuje
    znacznik automatu). Bez tego ochrona ręcznych wstrzymań nie działa end-to-end. Karta I15.1,
    która jako jedyna deklarowała ten plik, jest zamknięta.
-4. **Wpięcie modułu dostępności I15.10** — szew `odswiezDostepnosc` wystawiony, domyślnie
-   no-op; po merge'u `feature/119-selly-dostepnosc-zawor` zostaje JEDNA linia. Zadanie
-   domykające.
-5. **Wydajność:** przypadki cennikowe w charakteryzacji wymagały limitu 90 s (globalny 20 s).
+4. **Wpięcie modułu dostępności I15.10 — ZROBIONE, zostaje MONTAŻ.** Karta I15.10 (ticket 119)
+   zmergowała się w trakcie tej pracy, więc szew nie czeka już na nikogo: `silnikStagingu()`
+   podaje `zadajOdswiezenie` z `src/selly/dostepnosc.ts` jako domyślne `odswiezDostepnosc`.
+   Wpięcie jest bezpieczne bez konfiguracji — bez zamontowanej instancji funkcja nie robi NIC
+   (`dostepnosc.ts:127-130`), co jest odpowiednikiem bramki oryginału na produkcyjną bazę
+   (`staging_policy.cjs:131-134`). **Do zrobienia przez I15.8:** montaż instancji przez
+   `ustawDomyslnaSynchronizacjeDostepnosci()` przy starcie aplikacji — ta karta celowo nie
+   rusza `app.ts`.
+5. **Wydajność:** przypadki cennikowe w charakteryzacji wymagają podniesionego limitu czasu
+   (120 s po scaleniu z ticketem 132, który wprowadził też budżet `tools/czas-testow.cjs`).
    Nowy silnik porównuje KAŻDĄ kartę katalogu z KAŻDYM rekordem cennika przez `compatibility()`
    w pętli nieobecnych; `assignKodImportu` czyta całą tabelę `products` przy każdym wywołaniu
    (także wewnątrz pętli bulk/akceptacji). Materiał do wpisu #107.

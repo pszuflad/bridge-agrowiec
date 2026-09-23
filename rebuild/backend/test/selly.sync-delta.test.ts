@@ -11,10 +11,11 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { BladSelly } from "../src/selly/klient.js";
-import { findDeltaProducts, syncDelta } from "../src/selly/rest/sync-delta.js";
+import { BladSelly, type KlientSelly } from "../src/selly/klient.js";
+import { findDeltaProducts, grupyKolizyjne, syncDelta } from "../src/selly/rest/sync-delta.js";
 import { opakujKlientaTrybem } from "../src/selly/tryb.js";
 import {
+  PRODUKTY_TESTOWE,
   mapowanie,
   stworzAtrapeSelly,
   stworzDiscoveryTestowe,
@@ -24,6 +25,13 @@ import {
   type OpcjeAtrapy,
   type TestowaBaza,
 } from "./gate/index.js";
+
+/** Kopia produktu wzorcowego — `PRODUKTY_TESTOWE[i]` bez `| undefined` z indeksowania. */
+const produktWzorcowy = (i: number) => {
+  const wzorzec = PRODUKTY_TESTOWE[i];
+  if (!wzorzec) throw new Error(`brak PRODUKTY_TESTOWE[${i}]`);
+  return wzorzec;
+};
 
 const magazyn = (dostawca: string, featureId: number) => ({ feature_id: featureId, name: "Magazyny", value: dostawca });
 
@@ -102,7 +110,7 @@ describe("Tor 1 — sync_delta", () => {
       const wynik = await syncDelta(baza.db, discovery, "MO9");
 
       // MO9_336319 bez mapowania i bez produktu w sklepie → `not_found` (Tor 1 nie zakłada).
-      expect(wynik.stats).toEqual({ total: 2, ok: 1, err: 1, skip: 0, discovered: 0, created: 0 });
+      expect(wynik.stats).toEqual({ total: 2, ok: 1, err: 1, skip: 0, kolizje_kod_importu: 0, discovered: 0, created: 0 });
       expect(wynik.errors).toEqual([
         { kod: "MO9_336319", error: "produkt nie istnieje w Selly ale brak dictMaps do createProduct" },
       ]);
@@ -129,6 +137,7 @@ describe("Tor 1 — sync_delta", () => {
       });
       expect(JSON.parse(String(log.szczegoly_json))).toEqual({
         stats: wynik.stats,
+        kolizje: [],
         sample_errors: wynik.errors,
       });
     });
@@ -238,6 +247,246 @@ describe("Tor 1 — sync_delta", () => {
         error: "[Selly] Zapis do Selly zablokowany na tym środowisku (SELLY_TRYB=tylko-odczyt)",
       });
       expect(mapowanie(baza.db, "798368", "MO9")).toMatchObject({ ostatni_status: "error", stan_wyslany: 1 });
+    });
+  });
+
+  /**
+   * Backlog #104 (`origin/main:abe5f14`) — stan i cena są czytane z bazy DOPIERO tuż przed
+   * wysyłką, bo import mógł wstrzymać pozycję w trakcie biegu (discovery bywa długie).
+   */
+  describe("#104 — żywy odczyt tuż przed wysyłką", () => {
+    /** Podmienia `updateVariant` tak, by PRZED pierwszym PUT-em wykonać `zmiana()` na bazie. */
+    const wstrzyknijZmianeWTrakcie = (atrapa: { klient: { updateVariant: KlientSelly["updateVariant"] } }, zmiana: () => void) => {
+      const oryginalny = atrapa.klient.updateVariant.bind(atrapa.klient);
+      let pierwszy = true;
+      atrapa.klient.updateVariant = async (pid, vid, cialo) => {
+        if (pierwszy) {
+          pierwszy = false;
+          zmiana();
+        }
+        return oryginalny(pid, vid, cialo);
+      };
+    };
+
+    const zmapuj336319 = () =>
+      zasiejMapowanie(baza.sqlite, {
+        kodImportu: "798369",
+        dostawca: "MO9",
+        bridgeKod: "MO9_336319",
+        productId: 812,
+        variantId: 4243,
+        featureId: 1,
+        stanWyslany: 99,
+        cenaWyslana: 1,
+      });
+
+    const sklepZDwomaWariantami = () => ({
+      sklep: [
+        {
+          product_id: 812,
+          ean: null,
+          warianty: [
+            { variant_id: 4242, features: [magazyn("MO9", 1)] },
+            { variant_id: 4243, features: [magazyn("MO9", 1)] },
+          ],
+        },
+      ],
+    });
+
+    it("wstrzymany w TRAKCIE biegu → idzie stan 0, nie migawka sprzed wstrzymania", async () => {
+      zmapuj336320(0, 0);
+      zmapuj336319();
+      const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());
+      // W trakcie biegu import wstrzymuje MO9_336319 (stan w migawce: 2).
+      wstrzyknijZmianeWTrakcie(atrapa, () =>
+        baza.sqlite.prepare("UPDATE products SET status = 'wstrzymany' WHERE kod = 'MO9_336319'").run(),
+      );
+
+      await syncDelta(baza.db, discovery, "MO9");
+
+      const put = atrapa.wywolania.find((w) => w.metoda === "updateVariant" && w.argumenty[1] === 4243);
+      expect(put?.argumenty[2]).toMatchObject({ quantity: 0 });
+    });
+
+    it("wstrzymany w trakcie, ale grupa ma INNĄ aktywną ofertę → skip, żadnego PUT-a", async () => {
+      // Druga, aktywna oferta w tej samej grupie (MO9, kod_importu 798369).
+      zasiejProdukty(baza.db, [
+        {
+          ...produktWzorcowy(1),
+          kod: "MO9_336319B",
+          ean: "8903094073999",
+          eanRaw: "8903094073999",
+        },
+      ]);
+      zmapuj336320(0, 0);
+      zmapuj336319();
+      const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());
+      wstrzyknijZmianeWTrakcie(atrapa, () =>
+        baza.sqlite.prepare("UPDATE products SET status = 'wstrzymany' WHERE kod = 'MO9_336319'").run(),
+      );
+
+      const wynik = await syncDelta(baza.db, discovery, "MO9");
+
+      // Wariant 4243 jest WSPÓLNY dla grupy: aktywna bliźniaczka MOŻE go aktualizować, ale
+      // wstrzymana pozycja NIE MOŻE go wyzerować — to zabiłoby sprzedaż tamtej oferty.
+      const zerujace = atrapa.wywolania.filter(
+        (w) =>
+          w.metoda === "updateVariant" &&
+          w.argumenty[1] === 4243 &&
+          (w.argumenty[2] as { quantity?: number }).quantity === 0,
+      );
+      expect(zerujace).toHaveLength(0);
+      expect(wynik.stats.skip).toBeGreaterThanOrEqual(1);
+    });
+
+    it("produkt zniknął z bazy w trakcie biegu → skip", async () => {
+      zmapuj336320(0, 0);
+      zmapuj336319();
+      const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());
+      wstrzyknijZmianeWTrakcie(atrapa, () =>
+        baza.sqlite.prepare("DELETE FROM products WHERE kod = 'MO9_336319'").run(),
+      );
+
+      const wynik = await syncDelta(baza.db, discovery, "MO9");
+
+      expect(atrapa.wywolania.filter((w) => w.metoda === "updateVariant" && w.argumenty[1] === 4243)).toHaveLength(0);
+      expect(wynik.stats.skip).toBeGreaterThanOrEqual(1);
+    });
+
+    it("cena zmieniona w trakcie biegu → wysyłana jest ŻYWA cena, nie migawka", async () => {
+      zmapuj336320(0, 0);
+      zmapuj336319();
+      const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());
+      wstrzyknijZmianeWTrakcie(atrapa, () =>
+        baza.sqlite.prepare("UPDATE products SET cena_sprzedazy = 999 WHERE kod = 'MO9_336319'").run(),
+      );
+
+      await syncDelta(baza.db, discovery, "MO9");
+
+      const put = atrapa.wywolania.find((w) => w.metoda === "updateVariant" && w.argumenty[1] === 4243);
+      expect(put?.argumenty[2]).toMatchObject({ price: 999 });
+    });
+  });
+
+  /**
+   * Backlog #104 — mapowany wariant wchodzi do delty BEZ EAN-u (wcześniej EAN był wymagany
+   * bezwarunkowo), a wstrzymany z aktywną ofertą w grupie wypada z niej całkiem.
+   */
+  describe("#104 — warunek wyboru kandydatów", () => {
+    it("wstrzymany BEZ EAN, ale z mapowanym wariantem → wchodzi do delty i zeruje się", () => {
+      // MO1_100001 jest wstrzymany i nie ma EAN-u — bez mapowania wariantu nie wchodził.
+      expect(kody()).not.toContain("MO1_100001");
+
+      zasiejMapowanie(baza.sqlite, {
+        kodImportu: "100001",
+        dostawca: "MO1",
+        bridgeKod: "MO1_100001",
+        productId: 900,
+        variantId: 7777,
+        featureId: 3,
+      });
+
+      expect(kody()).toContain("MO1_100001");
+      expect(findDeltaProducts(baza.db).find((w) => w.kod === "MO1_100001")?.stan).toBe(0);
+    });
+
+    it("wstrzymany z wariantem, ale grupa ma inną AKTYWNĄ ofertę → wypada z delty", () => {
+      zasiejMapowanie(baza.sqlite, {
+        kodImportu: "100001",
+        dostawca: "MO1",
+        bridgeKod: "MO1_100001",
+        productId: 900,
+        variantId: 7777,
+        featureId: 3,
+      });
+      expect(kody()).toContain("MO1_100001");
+
+      // Ta sama grupa (MO1, 100001), ale oferta czynna — zerowanie wspólnego wariantu odpada.
+      zasiejProdukty(baza.db, [
+        {
+          ...produktWzorcowy(2),
+          kod: "MO1_100001B",
+          status: "aktywny",
+        },
+      ]);
+
+      expect(kody()).not.toContain("MO1_100001");
+    });
+  });
+
+  /**
+   * Backlog #108 — kolizje `kod_importu`. Zawór (pomijanie) z `wejscie-117.md` został WYCOFANY
+   * po wyjaśnieniu Ani z 2026-09-23; zostaje samo raportowanie, wysyłka bez zmian.
+   */
+  describe("#108 — kolizje kod_importu (raport, bez pomijania)", () => {
+    /** Druga AKTYWNA oferta w grupie (MO9, 798368) — różny EAN, inna cena i stan. */
+    const dodajBliznaka = () =>
+      zasiejProdukty(baza.db, [
+        {
+          ...produktWzorcowy(0),
+          kod: "MO9_336320B",
+          ean: "8903094079999",
+          eanRaw: "8903094079999",
+          stan: 9,
+          cenaSprzedazy: 6000,
+        },
+      ]);
+
+    it("grupa z >1 aktywnym produktem jest wykryta i opisana", () => {
+      dodajBliznaka();
+
+      expect(grupyKolizyjne(baza.db, "MO9")).toEqual([
+        { dostawca: "MO9", kod_importu: "798368", liczba: 2, rozne_ceny_lub_stany: true },
+      ]);
+    });
+
+    it("ten sam kod_importu u RÓŻNYCH dostawców to wielomagazynowość, NIE kolizja", () => {
+      // Potwierdzone przez Anię 2026-09-23: jedna karta w Selly, różne ceny i magazyny.
+      zasiejProdukty(baza.db, [
+        {
+          ...produktWzorcowy(0),
+          kod: "MO2_336320",
+          dostawca: "MO2",
+          ean: "8903094078888",
+          eanRaw: "8903094078888",
+        },
+      ]);
+
+      expect(grupyKolizyjne(baza.db)).toEqual([]);
+    });
+
+    it("kolizja jest RAPORTOWANA, a pozycje mimo to WYSŁANE (zachowanie produkcji)", async () => {
+      dodajBliznaka();
+      zmapuj336320(0, 0);
+      const { atrapa, discovery } = przygotuj();
+
+      const wynik = await syncDelta(baza.db, discovery, "MO9");
+
+      expect(wynik.stats.kolizje_kod_importu).toBe(1);
+      expect(wynik.kolizje).toEqual([
+        { dostawca: "MO9", kod_importu: "798368", liczba: 2, rozne_ceny_lub_stany: true },
+      ]);
+      // Sedno decyzji: NIC nie zostało pominięte z powodu kolizji.
+      expect(atrapa.liczba("updateVariant")).toBeGreaterThan(0);
+
+      const szczegoly = JSON.parse(String(wpisLogu(wynik.logId).szczegoly_json)) as {
+        stats: { kolizje_kod_importu: number };
+        kolizje: { kod_importu: string }[];
+      };
+      expect(szczegoly.stats.kolizje_kod_importu).toBe(1);
+      expect(szczegoly.kolizje).toEqual([
+        { dostawca: "MO9", kod_importu: "798368", liczba: 2, rozne_ceny_lub_stany: true },
+      ]);
+    });
+
+    it("grupa bez kolizji → licznik zero i pusta lista", async () => {
+      zmapuj336320(0, 0);
+      const { discovery } = przygotuj();
+
+      const wynik = await syncDelta(baza.db, discovery, "MO9");
+
+      expect(wynik.stats.kolizje_kod_importu).toBe(0);
+      expect(wynik.kolizje).toEqual([]);
     });
   });
 });

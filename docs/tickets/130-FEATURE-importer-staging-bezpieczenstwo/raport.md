@@ -171,8 +171,11 @@ kolejności efektów ubocznych i literałów komunikatów.
   (zweryfikowane bajtowo), więc nie blokuje tego ticketa — ale plik należy dosynchronizować.
 - **Ciche nakładanie poprawek Marty (#103) do rozstrzygnięcia przez Anię** — czy brak
   jakiegokolwiek sygnału o sprzecznym pliku jest pożądany.
-- **Wpięcie modułu dostępności I15.10** — szew jest wystawiony i domyślnie no-op; po merge'u
-  `feature/119-selly-dostepnosc-zawor` zostaje jedna linia.
+- **Wpięcie modułu dostępności I15.10 — ZROBIONE.** Ticket 119 zmergował się w trakcie tej pracy,
+  więc `silnikStagingu()` podaje już `zadajOdswiezenie` z `src/selly/dostepnosc.ts` jako domyślne
+  `odswiezDostepnosc`. Bez zamontowanej instancji funkcja nie robi nic (`dostepnosc.ts:127-130`) —
+  wiernie wobec bramki oryginału na produkcyjną bazę. **Zostaje MONTAŻ instancji**
+  (`ustawDomyslnaSynchronizacjeDostepnosci`) — to zakres I15.8, nie tej karty.
 - **Wydajność `assignKodImportu`** — czyta całą tabelę `products` przy każdym wywołaniu.
   Wiernie wobec oryginału (`U.listProducts()` w `staging_policy.cjs:145`), ale przy akceptacji
   zbiorczej to koszt liniowy na pozycję. Materiał do istniejącego wpisu **#107**.

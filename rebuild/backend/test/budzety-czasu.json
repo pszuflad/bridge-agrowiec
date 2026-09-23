@@ -1,0 +1,27 @@
+{
+  "opis": "Budżety czasu dla testów, którym podniesiono limit (ticket 132). Limit chroni przed fałszywą czerwienią przy obciążonej maszynie, budżet — przed schowaniem się regresji pod tym limitem. Czas tych testów zależy głównie od obciążenia maszyny: ten sam test to 3 s na wolnej maszynie i ponad 30 s, gdy równolegle chodzi kilka sesji. Sprawdza: tools/czas-testow.cjs",
+  "budzety": [
+    {
+      "plik": "test/alerty-katalogu.gate.test.ts",
+      "test": "paczka równa limitowi 20 000 id",
+      "zmierzone_s": {
+        "maszyna_wolna": 3.1,
+        "load_19": 21.4,
+        "load_34": 30.6
+      },
+      "budzet_s": 45,
+      "limit_s": 90,
+      "po_przekroczeniu": "najpierw sprawdź load average biegu — jeśli maszyna była wolna, to realna regresja: uruchom odłożony ticket 133-PERF-zapis-statusow-alertow (zapis porcjami zamiast 20 000 pojedynczych upsertów)"
+    },
+    {
+      "plik": "test/silnik.charakteryzacja.test.ts",
+      "test": "MO5: port silnika == oryginalne tk()",
+      "zmierzone_s": {
+        "load_34": 22.0
+      },
+      "budzet_s": 45,
+      "limit_s": 90,
+      "po_przekroczeniu": "najpierw sprawdź load average biegu; jeśli maszyna była wolna — sprawdź, czy nie urósł wzorzec charakteryzacji albo czy port nie zaczął robić czegoś po wierszu"
+    }
+  ]
+}

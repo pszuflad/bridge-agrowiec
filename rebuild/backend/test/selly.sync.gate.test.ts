@@ -199,10 +199,13 @@ describe("GATE — trasy sync-* (karta I15.8)", () => {
         odpowiedz: odp,
       });
       const body = odp.body as { stats: Record<string, number>; logId: number };
+      // `kolizje_kod_importu` dokłada ticket 119 (karta I15.10, wpis #108) — raportowanie
+      // kolizji pary (dostawca, kod_importu); trasa oddaje `stats` wprost z `syncDelta`.
       expect(Object.keys(body.stats).sort()).toEqual([
         "created",
         "discovered",
         "err",
+        "kolizje_kod_importu",
         "ok",
         "skip",
         "total",
