@@ -374,9 +374,17 @@ potwierdzone (zweryfikowane w 3c wobec ówcześnie żywego `tk = function` w
   imporcie. Reguła **nie wchodzi** do portu (decyzja D4, `docs/tickets/6-FEATURE-silnik-tk-dopasowanie-klasyfikator/plan.md`).
   `03_IMPORT_tk.md` powtarza ten sam błąd i **zostaje bez zmian** — to materiał źródłowy
   Perplexity, nieredagowany; sprostowanie mieszka tutaj;
-- `kod_importu` nadaje `bridge_ext.assignKodImportu` (nie sama `tk`), grupując po EAN
-  lub marka+rozmiar+bieznik+nazwa — potwierdzone: wywoływane wyłącznie w `addProductsBulk`
-  (`:44791`) i `acceptStaging` (`:44903`), obie poza `tk()` i poza zakresem 3c (3d).
+- `kod_importu` nadaje `bridge_ext.assignKodImportu` (nie sama `tk`) — potwierdzone: wywoływane
+  wyłącznie w `addProductsBulk` (`:44791`) i `acceptStaging` (`:44903`), obie poza `tk()` i poza
+  zakresem 3c (3d). **NIEAKTUALNE dla stanu zamrożonej produkcji (129, I15.4c):** opisane tu
+  grupowanie po EAN lub marka+rozmiar+bieznik+nazwa to BAZOWA wersja funkcji; `staging_policy.cjs`
+  (Staging v2) podmienia `ext.assignKodImportu` globalnie na `compatibility()`
+  (marka+model+rozmiar+opcjonalne), a dopiero potem EAN. W PRODUKCJI podmiana obejmuje obie
+  ścieżki wywołania, bo jest monkey-patchem na współdzielonym `ext`. **W ODBUDOWIE port
+  wstrzyknięto na razie tylko w ścieżkę akceptacji** (`acceptStaging`); `addProductsBulk`
+  (`src/import/bulk.ts`) pozostaje na wersji bazowej — świadomie, patrz
+  `docs/karty/I15.4c/karta.md` → „Do koordynatora" pkt 4.
+  Szczegóły: `docs/spec-backend/wpis-129.md`.
 
 Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
 - `U.addStaging` (`:44923`) deduplikuje po `(kod, typ_zmiany, COALESCE(powod,''))` i przy

@@ -117,6 +117,40 @@ Poza tym dwie rzeczy doprecyzowano w trakcie:
    auto-zatwierdzenia — `protect()` nakłada poprawkę cicho. Do decyzji Ani.
 5. **Różnica case-only w polu kluczowym przestała być zmianą** — nie tworzy zgłoszenia.
 
+## Scalenie z kartą I15.4c (ticket 129) — zmiana premisy planu
+
+Ticket **129** (karta I15.4c, akceptacja) wszedł do `develop` **w trakcie** tej pracy i dowiózł
+wspólną warstwę, którą plan (decyzja **D-130.2**) przypisywał tej karcie. Premisa się odwróciła:
+zamiast eksportować helpery DLA I15.4c, ta karta z nich KORZYSTA. Decyzja użytkownika 2026-09-23:
+**adaptujemy się do 129 i kasujemy duplikaty.**
+
+Co z tego wynikło:
+
+| Usunięte z tej karty | Używane zamiast tego (ticket 129) |
+|---|---|
+| `podstawy.ts` — most do 7 prymitywów + `hash`, `KEYS` | `polityka/helpery.ts` |
+| `fabryka.ts`: własne `wstrzymaj`, `nalozPoprawki`, `kartaPoKodzie`, `wyczyscZgloszenie` | `polityka/kontekst.ts`: `wstrzymajAutomatycznie`, `chron`, `produktPoKodzie`, `usunZgloszeniaPary` |
+| `polityka/kod-importu.ts` (mój `assignKodImportu`) | `polityka/kod-importu.ts` (ich `nadajKodImportu`) |
+| `polityka/edycja-stagingu.ts` | `polityka/zgloszenia.ts` → `zaktualizujZgloszenie` |
+
+`podstawy.ts` został ODCHUDZONY do tego, czego akceptacja nie wołała, a oryginał nie eksportuje:
+`LABEL`, `OPTIONAL`, `separateDotBatch`, `sourceKey`, `codeKey`. W repo jest teraz **jedna**
+definicja `norm()`, `hash()`, `suspend()` i `protect()`.
+
+**Cofnięta globalna podmiana `assignKodImportu`.** `wejscie-129.md` prosi wprost, żeby jej nie
+robić: harness `test/charakteryzacja/akceptacja/oryginal.mjs` tnie oryginał BEZ `install()`,
+więc musi dalej widzieć stare grupowanie, a politykową wersję wstrzykuje warstwa akceptacji
+(`zatwierdzPozycjeStagingu(..., nadajKod)`). Mój `importer()` **w ogóle nie woła**
+`assignKodImportu`, więc zmiana w `bulk.ts` i `akceptacja.ts` była po mojej stronie zbędna —
+oba pliki wróciły do wersji z `develop`.
+
+**Dwie połówki mostu pasują:** `checkAcceptance` z I15.4c odrzuca pozycje bez `_policyVersion`
+(`staging_policy.cjs:194`), a ustawia je wyłącznie `importer()` — czyli ten ticket. Do czasu
+jego merge'a akceptacja odrzuca wszystko, co produkuje staging. Port ustawia `_policyVersion: 2`
+i `_catalogVersion` w każdej gałęzi zapisu, więc okno zamyka się razem z tym PR-em.
+
+Po scaleniu bramki przebiegnięte od nowa — wynik niżej.
+
 ## Code review
 
 Przeprowadzone po implementacji: **0 BLOCKER, 1 SHOULD-FIX, 2 NICE-TO-HAVE**

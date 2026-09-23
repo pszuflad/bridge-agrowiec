@@ -7,8 +7,15 @@ przepisywaniu.
 
 | Plik | Co | Stan |
 |---|---|---|
-| `openapi.yaml` | 98 ścieżek / 117 operacji: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d), + 2 nowe trasy spoza produkcji (76-FEATURE, 77-FEATURE) |
-| `fixtures/` | 73 nagrania: **59 GET** + **14 tras zapisujących** | ✅ Krok 2.4 + sesja 12d |
+| `openapi.yaml` | **111 ścieżek / 130 operacji**: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d); od tego czasu dorosło o trasy spoza produkcji (76-FEATURE, 77-FEATURE) i o kolejne karty, m.in. **4 trasy polityki stagingu** (129-FEATURE, I15.4c) |
+| `fixtures/` | **83 nagrania: 68 GET** + 15 tras zapisujących | ✅ Krok 2.4 + sesja 12d; **nie pokrywają wszystkich operacji** — patrz „Wyjątek” niżej |
+
+> **Liczby przeliczone 2026-09-23** (ticket `129-FEATURE-akceptacja-stagingu`), bo tabela
+> rozjechała się ze stanem plików: deklarowała 98/117 i 73 nagrania przy faktycznych 111/130
+> i 83. Rozjazd narastał wcześniej — kolejne karty dokładały trasy bez odświeżania tej komórki;
+> ticket 129 dołożył 4 operacje (świadomie bez nagrań) i przy okazji policzył resztę.
+> Metoda: `yaml.safe_load` po `paths` oraz `ls contract/fixtures/`. **Liczba operacji NIE równa
+> się liczbie nagrań** i nigdy nie była równa — nagrania pokrywają odczyty i część zapisów.
 
 ## Co jest zamrożone
 
@@ -152,6 +159,15 @@ zostają **puste** (`rows: []`) jako dowód stanu produkcji — nie przenagrywam
 kod (#32, ta sama karta): `WyjatekGate` jest zbędny, bo `gate/ksztalt.ts` nie zagląda do
 elementów, gdy fixture ma pustą tablicę, więc rozjazd treści (dziś wiersze zamiast `rows: []`)
 nie zapala testu.
+
+**Wyjątek: cztery trasy `/api/staging/{id}/review|resolve|choose-absence-card|close-absence-review`
+(karta I15.4c, ticket `129-FEATURE-akceptacja-stagingu`).** Ścieżka i kandydat produkcji istnieją
+(`staging_policy.cjs:620-664`), ale nagrania nie ma i nie może powstać przez zwykłą nagrywarkę —
+trasy wymagają złożonego wcześniej wytworzonego stanu (`_policyVersion`, `_matchIssue`,
+`_absenceReview`). Schematy wpisane RĘCZNIE, POZA generowanym blokiem `components.schemas`.
+Dowód wierności to charakteryzacja na żywym `staging_policy.cjs` (`rebuild/backend/test/polityka.charakteryzacja.test.ts`),
+nie fixture. Odpowiedzi błędów tych czterech tras niosą `message`, nie `error` — to inny moduł
+produkcji niż reszta stagingu i różnica jest świadomie zachowana, nie ujednolicona.
 
 ## ⚠ Uwaga bezpieczeństwa wbudowana w kontrakt
 

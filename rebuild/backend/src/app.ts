@@ -23,6 +23,7 @@ import { trasyArchiwumImportu } from "./routes/import-archive.js";
 import { trasyProduktow } from "./routes/products.js";
 import { trasyStagingu } from "./routes/staging.js";
 import { trasyMutacjiStagingu } from "./routes/staging-mutacje.js";
+import { trasyPolitykiStagingu } from "./routes/staging-polityka.js";
 import { trasyOverrides } from "./routes/overrides.js";
 import { trasyNarzutow } from "./routes/markups.js";
 import { trasyPromocji } from "./routes/promotions.js";
@@ -177,6 +178,7 @@ export function stworzApp({
   );
   app.use(trasyStagingu({ db }));
   app.use(trasyMutacjiStagingu({ db }));
+  app.use(trasyPolitykiStagingu({ db }));
   app.use(trasyOverrides({ db }));
   app.use(trasyNarzutow({ db }));
   app.use(trasyPromocji({ db }));

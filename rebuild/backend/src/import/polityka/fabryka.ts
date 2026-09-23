@@ -27,16 +27,12 @@
 // żeby obejść nadpisanie. Dlatego importer w całości używa zwykłego `aktualizujProdukt()`,
 // a nadpisanie żyje w `repos/products.ts` i dotyczy `PATCH /api/products/:id` (D-130.3).
 
-import { and, eq } from "drizzle-orm";
-
 import type { Baza } from "../../db/index.js";
-import { products, stagingItems } from "../../db/schema.js";
 import {
   aktualizujProdukt,
   katalogDoImportu,
   type ProduktWewnetrzny,
 } from "../../repos/products.js";
-import { poprawkiDla } from "../../repos/overrides.js";
 import {
   listaStagingu,
   zapiszPozycjeStagingu,
@@ -55,7 +51,6 @@ import {
   usunAutomatyczneWstrzymanie,
   usunDecyzjeONieobecnej,
   usunDowodyNieobecnosci,
-  zapiszAutomatyczneWstrzymanie,
   zapiszDowodyNieobecnosci,
   zapiszStanOfertyDostawcy,
   zapiszWersjeOferty,
@@ -74,21 +69,28 @@ import {
   CennikPodejrzanieMalyBlad,
   PustyImportBlad,
 } from "./bledy.js";
+// Prymitywy WSPÓLNE z kartą I15.4c — jedna definicja w repo (`helpery.ts`, ticket 129).
 import {
-  codeKey,
   compatibility,
   hash,
   identity,
   KEYS,
-  LABEL,
   norm,
   rawEan,
-  separateDotBatch,
-  sourceKey,
   syntheticCode,
   validateEan,
   version,
-} from "./podstawy.js";
+} from "./helpery.js";
+// Prymitywy używane wyłącznie przez importer — oryginał ich nie eksportuje.
+import { codeKey, LABEL, separateDotBatch, sourceKey } from "./podstawy.js";
+// Wspólne operacje domknięcia `install()` — też z I15.4c. `suspend()` i `protect()` mają
+// w repo JEDNĄ implementację; importer dokłada do nich wyłącznie flagę dostępności.
+import {
+  chron,
+  produktPoKodzie,
+  usunZgloszeniaPary,
+  wstrzymajAutomatycznie,
+} from "./kontekst.js";
 
 /** Luźny worek na pozycję w trakcie obróbki — odpowiednik `d` z oryginału. */
 type Pozycja = Record<string, unknown>;
@@ -199,55 +201,43 @@ export function stworzPolitykeStagingu(
   let dostepnoscZmieniona = false;
 
   /**
-   * `find = code => U.getProductByKod(code)` (`staging_policy.cjs:138`).
+   * `find = code => U.getProductByKod(code)` (`staging_policy.cjs:134`).
    *
    * ⚠ Czyta ŚWIEŻO z bazy, nie z listy `produkty` zebranej na wejściu — `version(find(kod))`
    * ma opisywać kartę po zmianach naniesionych w tej samej transakcji.
    */
   const kartaPoKodzie = (kod: string): ProduktWewnetrzny | undefined =>
-    db.select().from(products).where(eq(products.kod, kod)).get();
+    produktPoKodzie(db, kod);
 
-  /**
-   * `clear` (`staging_policy.cjs:136`) — skasowanie zgłoszenia dla pary (dostawca, kod).
-   *
-   * Zostaje w fabryce, a nie w `repos/staging.ts`, bo w oryginale też jest prywatnym
-   * prepared statementem domknięcia `install()`, dzielonym przez importer i akceptację.
-   */
-  const wyczyscZgloszenie = (dostawca: string, kod: string): void => {
-    db
-      .delete(stagingItems)
-      .where(and(eq(stagingItems.dostawca, dostawca), eq(stagingItems.kod, kod)))
-      .run();
-  };
+  /** `clear` (`staging_policy.cjs:132`) — wspólne z akceptacją, patrz `kontekst.ts`. */
+  const wyczyscZgloszenie = (dostawca: string, kod: string): void =>
+    usunZgloszeniaPary(db, dostawca, kod);
 
   const dopasowanieZapamietane = (dostawca: string, kluczZrodlowy: string) =>
     dopasowanieStagingu(db, dostawca, kluczZrodlowy);
 
   /**
-   * `protect()` (`:158-162`) — poprawki Marty nakładane na pozycję.
+   * `protect()` (`:158-162`) — poprawki Marty nakładane na pozycję. Wspólne z akceptacją.
    *
    * ⚠ RÓŻNICA WOBEC STAREGO `tk()`: ta wersja nakłada poprawki CICHO. Stary silnik
-   * raportował konflikt („plik chciał czegoś innego") przez `Gq()` i zapisywał
+   * raportował konflikt („plik nadpisuje poprawke Marty") przez `Gq()` i zapisywał
    * `_srcConflict` do snapshotu. `staging_policy` tego nie robi — po prostu podmienia
-   * wartość. Odtwarzamy wiernie; rozjazd jest widoczny we wzorcach charakteryzacji.
+   * wartość. Odtwarzamy wiernie; rozjazd widać we wzorcach charakteryzacji.
    */
-  const nalozPoprawki = (dostawca: string, pozycja: Pozycja, kod: string): Pozycja => {
-    const d: Pozycja = { ...pozycja };
-    for (const o of poprawkiDla(db, dostawca, kod)) {
-      d[o.fieldName] = o.overrideValue;
-    }
-    return d;
-  };
+  const nalozPoprawki = (dostawca: string, pozycja: Pozycja, kod: string): Pozycja =>
+    chron(db, dostawca, pozycja, kod);
 
   /**
    * `suspend()` (`:120-130`) — automatyczne wstrzymanie produktu.
    *
-   * ⚠ Wpis do `product_auto_suspensions` powstaje tylko dla produktu AKTYWNEGO albo już
-   * oznaczonego jako automatycznie wstrzymany. Produkt wstrzymany RĘCZNIE nie dostaje
-   * znacznika automatu — i dzięki temu nigdy nie zostanie automatycznie odwstrzymany.
+   * Sama operacja jest WSPÓLNA z akceptacją (`wstrzymajAutomatycznie` w `kontekst.ts`) i nie
+   * jest tu powielana. Importer dokłada do niej jedyną rzecz, której akceptacja nie potrzebuje:
+   * podniesienie flagi `availabilityChanged` (`:127`), od której zależy, czy na końcu przebiegu
+   * zawołamy punkt wpięcia dostępności.
    *
-   * ⚠ `zapiszAutomatyczneWstrzymanie` NIE rusza `suspended_at` przy konflikcie (repo I15.4a):
-   * data pierwszego wstrzymania jest punktem odniesienia dla tego, jak długo produktu nie ma.
+   * ⚠ Warunek flagi musi być policzony PRZED wywołaniem, bo `wstrzymajAutomatycznie` nie
+   * raportuje, czy faktycznie coś zmieniła — a oryginał podnosi flagę tylko wtedy, gdy
+   * `UPDATE` naprawdę poszedł.
    */
   const wstrzymaj = (
     produkt: ProduktWewnetrzny,
@@ -255,21 +245,9 @@ export function stworzPolitykeStagingu(
     odcisk: string,
     powod: string,
   ): void => {
-    if (
-      produkt.status === "aktywny" ||
-      czyAutomatycznieWstrzymany(db, produkt.dostawca, produkt.kod)
-    ) {
-      zapiszAutomatyczneWstrzymanie(db, produkt.dostawca, produkt.kod, czas, odcisk, powod);
-    }
-    if (produkt.status !== "wstrzymany" || Number(produkt.stan) !== 0) {
-      aktualizujProdukt(db, produkt.id, {
-        status: "wstrzymany",
-        stan: 0,
-        nieobecnoscPodRzad: 0,
-        dataAktualizacji: czas,
-      });
-      dostepnoscZmieniona = true;
-    }
+    const zmieniStan = produkt.status !== "wstrzymany" || Number(produkt.stan) !== 0;
+    wstrzymajAutomatycznie(db, produkt, czas, odcisk, powod);
+    if (zmieniStan) dostepnoscZmieniona = true;
   };
 
   function importer(

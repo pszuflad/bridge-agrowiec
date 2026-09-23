@@ -12,12 +12,7 @@ import { zastosujRegulyCenowe } from "../repos/ceny.js";
 import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
 // Wspólny z `bulk.ts` od 12a — obie ścieżki importu zapisują tę samą tabelę tym samym odsiewem.
 import { tylkoKolumnyProduktu } from "../repos/products.js";
-import { applyDims, applyLinkMemory, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
-// ⚠ Staging v2 (#99) PODMIENIA `ext.assignKodImportu` w `install()` (`staging_policy.cjs:141`),
-// a podmiana jest GLOBALNA — `acceptStaging` w oryginale woła już nową wersję. Dlatego
-// akceptacja bierze ją stąd, a nie z mostu do `legacy/bridge_ext.cjs`. Jedyna linia tego
-// pliku dotknięta przez kartę I15.4b; reszta akceptacji należy do I15.4c.
-import { assignKodImportu } from "./polityka/kod-importu.js";
+import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
 
 /**
  * Rekord produktu budowany z pozycji stagingu. Celowo luźny: oryginał składa go ze snapshotu
@@ -27,12 +22,37 @@ import { assignKodImportu } from "./polityka/kod-importu.js";
 type RekordProduktu = Record<string, unknown>;
 
 /**
+ * Sposób nadawania `kodImportu`. Oryginał rozwiązuje go PRZEZ `__BRIDGE_EXT` w chwili
+ * wywołania, więc to, którą wersję dostanie, zależy od tego, czy `staging_policy.install()`
+ * zdążył podmienić `ext.assignKodImportu` (`staging_policy.cjs:141`).
+ *
+ * Tutaj ta sama zależność jest jawna: domyślnie stara wersja z `bridge_ext.cjs` (to widzi
+ * harness charakteryzacyjny, który tnie `acceptStaging` z `index.cjs` BEZ `install()`),
+ * a ścieżka polityki Staging v2 wstrzykuje `nadajKodImportu` z `polityka/kod-importu.ts`.
+ */
+export type NadawanieKoduImportu = (
+  db: Baza,
+  produkt: Record<string, unknown>,
+  istniejacy: Record<string, unknown> | null | undefined,
+) => void;
+
+const STARE_NADAWANIE_KODU: NadawanieKoduImportu = (db, produkt, istniejacy) => {
+  assignKodImportu(uchwytSqlite(db), produkt, istniejacy);
+};
+
+/**
  * Zatwierdza JEDNĄ pozycję stagingu — port `:44827`.
  *
  * @param uzytkownikId trafia do `manual_overrides.createdBy` przy potwierdzaniu konfliktu
+ * @param nadajKod wersja `assignKodImportu` — patrz `NadawanieKoduImportu`
  * @returns `false`, gdy pozycji o tym id nie było (oryginał robi ciche `return`)
  */
-export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: number): boolean {
+export function zatwierdzPozycjeStagingu(
+  db: Baza,
+  id: number,
+  uzytkownikId: number,
+  nadajKod: NadawanieKoduImportu = STARE_NADAWANIE_KODU,
+): boolean {
   const pozycja = db.select().from(stagingItems).where(eq(stagingItems.id, id)).get();
   if (!pozycja) return false;
 
@@ -176,7 +196,7 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
     /* jak `catch (_be) {}` */
   }
   try {
-    assignKodImportu(db, rekord, istniejacy);
+    nadajKod(db, rekord, istniejacy);
   } catch {
     /* jak `catch (_be) {}` */
   }
@@ -194,36 +214,19 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
   // ——— Zapis produktu (:44906) ———
   const doZapisu = tylkoKolumnyProduktu(rekord);
 
-  // ——— ODSTĘPSTWO ŚWIADOME (karta 14i, ticket 58) ———
-  // Decyzja Ani z 2026-09-18 (`docs/rebuild-backlog.md` #11): „EAN który jest zepsuty notacją
-  // naukową ma być importowany jako PUSTE POLE W KATALOGU". PRODUKCJA ROBI INACZEJ — oryginał
-  // zapisuje w `:44872` rozwiniętą wartość (np. „6,41944E+12" → `6419440000000`) i tylko
-  // dokleja do ostrzeżenia komunikat „zapis naukowy ma tylko null cyfr znaczących — EAN
-  // niepewny". Rozwinięcie bywa zmyślone: Excel gubi cyfry znaczące, więc do katalogu trafiał
-  // EAN, który wygląda na prawdziwy, a nim nie jest. Puste pole widać i da się poprawić.
+  // ——— ODSTĘPSTWO 14i ZDJĘTE (decyzja D4, ticket 129) ———
+  // Do ticketu 129 stało tu zerowanie `doZapisu.ean` dla EAN-u w zapisie naukowym
+  // (`eanSourceStatus === "scientific_notation_uncertain"`) — świadome odstępstwo z karty 14i,
+  // decyzja Ani z 2026-09-18: „EAN zepsuty notacją naukową ma być PUSTYM POLEM w katalogu".
   //
-  // ⚠ MIEJSCE CIĘCIA JEST TU CELOWO NAJPÓŹNIEJSZE, JAKIE SIĘ DA — na `doZapisu`, tuż przed
-  // zapisem, a NIE na `rekord` przy jego budowie. Powód jest konkretny: `assignKodImportu()`
-  // (`legacy/bridge_ext.cjs:164-167`) grupuje produkty do wspólnego `kod_importu`
-  // (wielomagazynowość Selly) po kluczu `EAN:<ean>`, ale tylko gdy `ean` jest niepusty
-  // ORAZ `eanIsValid === 1`. Zapis naukowy z poprawną sumą kontrolną spełnia oba warunki
-  // (np. „8,05997E+12" → `8059970000000`), więc wyzerowanie EAN-u WCZEŚNIEJ zrzuciłoby
-  // grupowanie na gałąź zapasową `marka|rozmiar|bieznik|nazwa` i produkt przestałby
-  // dziedziczyć numer po swoim odpowiedniku z innego magazynu. To byłoby DRUGIE, nieobjęte
-  // decyzją Ani odstępstwo. Cięcie na `doZapisu` sprawia, że `assignKodImportu()`,
-  // `applyLinkMemory()` i `rememberLink()` widzą DOKŁADNIE to samo, co w produkcji —
-  // jedyną różnicą jest wartość wpisana do kolumny `products.ean`.
+  // Staging v2 rozwiązuje to WCZEŚNIEJ i ostrzej: `checkAcceptance` (`staging_policy.cjs:197`)
+  // w ogóle nie wpuszcza takiej pozycji do akceptacji, tylko odsyła ją do poprawienia numeru
+  // (`validateEan()` odrzuca zapis naukowy już na regule `/[eE][+-]?\d/`). Pozycja z zepsutym
+  // EAN-em nie dociera więc do tego miejsca, a cichy zapis pustego pola przestał być potrzebny.
   //
-  // Zerujemy WYŁĄCZNIE `ean`. `eanRaw`, `eanIsValid`, `eanSourceStatus` i `eanCandidates`
-  // zostają, żeby z samego wiersza `products` było widać, DLACZEGO pole jest puste. Ostrzeżenie
-  // w stagingu też zostaje nietknięte — silnik nie jest tą kartą dotykany.
-  //
-  // Warunek stoi na statusie EFEKTYWNYM (`rekord.eanSourceStatus`, czyli po uwzględnieniu
-  // ręcznej poprawki z `PUT /api/staging/{id}`), a nie na samym snapshocie — dzięki temu `ean`
-  // i `eanSourceStatus` w jednym wierszu katalogu nie mogą się rozjechać.
-  if (rekord.eanSourceStatus === "scientific_notation_uncertain") {
-    doZapisu.ean = null;
-  }
+  // ⚠ Zerowanie zostało USUNIĘTE, a nie zakomentowane: ścieżka była nieosiągalna, a martwy
+  // kod w tym pliku już raz zmylił kolejną kartę. Samo odstępstwo 14i jest w backlogu
+  // oznaczone jako uchylone przez D4.
 
   if (istniejacy) {
     db.update(products).set(doZapisu).where(eq(products.id, istniejacy.id)).run();

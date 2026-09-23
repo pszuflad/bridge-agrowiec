@@ -85,6 +85,22 @@ Bramki: `lint`/`typecheck`/`build` zielone, 1774 testy przechodzą (baseline `or
 
 ## Do koordynatora
 
+### Scalenie z I15.4c — wspólna warstwa przyszła z ticketu 129
+
+Karta I15.4c (ticket 129) weszła do `develop` PRZED tą kartą i dowiozła wspólną warstwę, którą
+decyzja D-130.2 przypisywała I15.4b. Po decyzji użytkownika (2026-09-23) ta karta **adaptowała
+się do 129 i skasowała duplikaty**: `podstawy.ts` odchudzony do prymitywów importerowych
+(`LABEL`, `OPTIONAL`, `separateDotBatch`, `sourceKey`, `codeKey`), a `norm`/`hash`/`KEYS`,
+`suspend`, `protect`, `find`, `clear`, `assignKodImportu` i `updateStaging` brane z
+`polityka/helpery.ts`, `polityka/kontekst.ts`, `polityka/kod-importu.ts` i
+`polityka/zgloszenia.ts`. Cofnięta też globalna podmiana `assignKodImportu` w `bulk.ts`
+i `akceptacja.ts` — `wejscie-129.md` prosi o wstrzykiwanie, a `importer()` tej funkcji nie woła.
+
+**Dla koordynatora:** wersja tej karty sprzed scalenia zakładała odwrotną kolejność fal
+(I15.4b przed I15.4c). Jeśli planujesz kolejne fale, warto zapisać w roadmapie, że wspólna
+warstwa polityki stagingu należy teraz do plików wniesionych przez ticket 129.
+
+
 1. **`mirror/backend/index.cjs` na `develop` jest NIEAKTUALNY** — stoi na `86d9090`, a
    `staging_policy.cjs` i `bridge_ext.cjs` są już na `88fa31c` (resync I15.2 objął tylko
    wybrane pliki). Blok helperów wycinany przez charakteryzację jest między tymi commitami
