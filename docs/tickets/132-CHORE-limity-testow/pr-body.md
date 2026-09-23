@@ -50,7 +50,8 @@ obciążonej maszynie i jest błędna.
   problemy”), poparta pomiarem: dziś nie ma regresji do naprawienia.
 
 ## Tests
-Bramki backendu: `lint` ✓, `typecheck` ✓, `build` ✓, `vitest run` ✓ (108/108 plików).
+Bramki backendu **po scaleniu `develop` z ticketem 119**: `lint` ✓, `typecheck` ✓, `build` ✓,
+`vitest run` ✓ — **109/109 plików, 1793 testy zielone, 7 pominiętych**.
 Skrypt budżetów sprawdzony na realnym raporcie: ✓ 4,6 s i ✓ 2,6 s przy load 6,5; poprawnie
 obsługuje brak pliku raportu, brak testu w raporcie i test pominięty.
 
