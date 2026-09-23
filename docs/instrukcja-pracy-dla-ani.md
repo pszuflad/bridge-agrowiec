@@ -25,14 +25,14 @@ i co dzięki temu dostajesz.
 
 Trzy rzeczy, które dziś są w działającym Bridge'u i których nikt nie zauważył przez tygodnie:
 
-- **Kolumna „Konstrukcja opony" pokazuje „—"**, choć poprawka została napisana 1 września.
+- **Kolumna „Konstrukcja opony" pokazuje „—"**, choć poprawka została napisana 1 września 2026.
   Trafiła do pliku, którego przeglądarka nie ładuje — Bridge ma kilka takich plików i tylko jeden
   jest żywy. Poprawka jest, działania nie ma.
 - **Komunikat „zapis naukowy ma tylko null cyfr znaczących"** — w miejscu, gdzie powinna być liczba,
   jest słowo „null". Dwie poprawki dołożyły funkcję o tej samej nazwie; druga przesłoniła pierwszą
   i to, co miało policzyć cyfry, zaczęło robić coś zupełnie innego.
 - **Kopia zapasowa nazwana `szer_marka`** (czyli „szerokość i marka") w rzeczywistości zmieniała
-  zapis rozmiaru w 587 pozycjach i filtr na liście marek. Nazwa mówiła jedno, plik robił drugie.
+  zapis rozmiaru w 587 pozycjach z 7395 i filtr na liście marek. Nazwa mówiła jedno, plik robił drugie.
   Rozkładanie tego zajęło osobne pół dnia.
 
 **To nie kwestia czyjejś pomyłki.** Każda z tych trzech rzeczy była poprawną myślą, zapisaną
@@ -131,7 +131,7 @@ jest po naszej stronie.
 | Rodzaj | Jak rozpoznać | Co dopisać w zgłoszeniu | Co się stanie |
 |---|---|---|---|
 | **Błąd** | w starym Bridge'u było inaczej — lepiej | nic, sam opis wystarczy | traktujemy jako usterkę i naprawiamy tak, żeby było jak w starym |
-| **Świadoma zmiana** | stary Bridge robił dokładnie to samo, ale to Ci nie odpowiada | **„To zmiana świadoma, nie błąd"** | zapisujemy jako Twoją decyzję na naszej liście zmian, dopiero potem wchodzi do programu |
+| **Świadoma zmiana** | stary Bridge robił dokładnie to samo, ale to Ci nie odpowiada | **„To zmiana świadoma, nie błąd"** | zapisujemy z datą jako Twoją decyzję — w planie tego zgłoszenia, a przy szerszych zmianach także na naszej liście zmian — i dopiero potem wchodzi do programu |
 | **Obserwacja albo pytanie** | nie wiesz, czy to błąd; coś Cię zastanowiło | **„To pytanie, nie zgłoszenie błędu"** | dostajesz odpowiedź na piśmie, a pytanie zostaje w dokumentacji |
 
 Dlaczego to rozróżnienie jest ważne właśnie dla Ciebie: **nowy Bridge domyślnie odtwarza stary
@@ -156,9 +156,10 @@ Pięć rzeczy. Przy każdej jest napisane, **co się stanie**, jeśli — bo zak
 którą ktoś włącza po przeczytaniu.
 *Co się stanie:* zmiana bez propozycji nie zostaje przez nikogo przeczytana i wraca dokładnie ta
 sytuacja, od której uciekamy — poprawka w złym pliku, o której wiemy po tygodniach.
-⚠ **Uczciwie:** technicznie nikt Ci tego nie zablokuje. Mamy ostrzeżenie przy zapisie i sygnał
-w propozycji zmiany, ale to **umowa, nie zamek** — da się ją obejść. Dlatego ją tu opisujemy,
-a nie zostawiamy programowi.
+⚠ **Uczciwie:** technicznie nikt Ci tego nie zablokuje. Mamy ostrzeżenie przy zapisie zmian,
+ale jest ono ustawieniem naszego środowiska pracy, nie Twojej sesji z osobna — może się nie odezwać.
+To **umowa, nie zamek**. Dlatego ją tu opisujemy, a nie zostawiamy programowi: o tym, czy zmiana
+wchodzi, rozstrzyga przeczytana propozycja, nie sam zapis.
 
 **2. Nie pracujemy bezpośrednio na produkcji.** Do przełączenia testujemy na `test.agritires.eu`
 („staging", czyli kopia do testów) — cokolwiek tam zrobisz, produkcji nie dotyka.
@@ -166,10 +167,11 @@ a nie zostawiamy programowi.
 żeby dało się udowodnić, że nowy robi to samo. Jedna poprawka wpisana w starego Bridge'a psuje
 to porównanie i nie mamy już czego z czym zestawiać.
 
-**3. Nie uruchamiamy synchronizacji dostawcy z wyłączonym trybem próbnym.** W panelu Selly przy
-synchronizacji jest opcja „na próbę" (w kodzie: `dry_run`). Z próbą włączoną nic nie wychodzi
-na zewnątrz i możesz klikać.
-*Co się stanie z próbą wyłączoną:* program **naprawdę tworzy i zmienia produkty w sklepie**
+**3. W panelu Selly klikamy tylko próbę.** Przy synchronizacji dostawcy są **dwa osobne przyciski**:
+**„Test dry-run (5 szt.)"** — nic nie wychodzi na zewnątrz, możesz klikać do woli — i **„Wyślij
+do Selly"**, który jest już prawdziwą wysyłką. Nie ma między nimi żadnego przełącznika do zaznaczenia:
+liczy się to, który przycisk naciśniesz.
+*Co się stanie po „Wyślij do Selly":* program **naprawdę tworzy i zmienia produkty w sklepie**
 `agroopony.selly24.pl`. To jedyne miejsce w całym nowym Bridge'u, które wychodzi do świata poza
 naszym serwerem, i jedyne, którego nie da się cofnąć z naszej strony.
 

@@ -87,3 +87,34 @@ None.
 4. **Brak twardej bramki na `SELLY_CSV_DIR`** (oryginał miał ją w `mirror/backend/staging_policy.cjs:131-134`,
    odbudowa nie ma) — otwarte w backlogu jako `#139.2`, nie ten ticket. Dokument dla Ani łata to
    dziś zakazem („nie generujemy CSV na próbę"), co jest słabszą ochroną niż kod.
+
+## Review fixes applied
+
+Review: `docs/tickets/152-DOCS-instrukcja-pracy-dla-ani/review.md` (2 BLOCKER, 4 SHOULD-FIX,
+2 NICE-TO-HAVE). Wszystkie fakty o Selly, zamrożeniu produkcji, trzech skutkach dawnych łatek,
+nazwach sekretów i godzinie 12:00 reviewer potwierdził niezależnie w kodzie i repo.
+
+- **BLOCKER 1 (karta TEST.3 nie domknięta)** — słuszny, ale to Faza 5 planu (doc-checker), nie brak
+  w treści; domknięte w kolejnym kroku ticketa razem z „Do koordynatora".
+- **BLOCKER 2 (obietnica o „liście zmian" bez nazwanego kroku w `feature.md`)** — poprawione.
+  Dokument mówił: „zapisujemy jako Twoją decyzję na naszej liście zmian". Nowe brzmienie:
+  „zapisujemy z datą jako Twoją decyzję — w planie tego zgłoszenia, a przy szerszych zmianach także
+  na naszej liście zmian". Część gwarantowana procedurą (sekcja `Decisions` w `plan.md` każdego
+  ticketu) jest teraz podana jako pewna, a wpis na wspólnej liście jako to, czym jest w praktyce
+  (por. `docs/rebuild-backlog/wpis-153.md` — sesja założyła wpis dla nowego znaleziska). Luka
+  w `feature.md` idzie do „Do koordynatora" w karcie TEST.3.
+- **SHOULD-FIX „Mamy ostrzeżenie przy zapisie"** — poprawione. Dopisane, że ostrzeżenie jest
+  ustawieniem środowiska, nie jej sesji, i może się nie odezwać; puenta przeniesiona na to, co
+  faktycznie rozstrzyga („przeczytana propozycja, nie sam zapis"). Powód: hook włącza się dziś tylko
+  przez `npm install` (`134-CHORE-praca-w-chmurze/plan.md:26-31`, nieodhaczone).
+- **SHOULD-FIX „opcja na próbę" w panelu Selly** — poprawione, bo było nieprawdą: w UI są **dwa
+  osobne przyciski**, nie przełącznik — „Test dry-run (5 szt.)" (`dry_run: true`, limit 5) i „Wyślij
+  do Selly" (`dry_run: false`), `rebuild/frontend/src/pages/selly/SekcjaSync.tsx:109-124`
+  (potwierdzone przeze mnie w pliku). Dokument nazywa oba przyciski dosłownie, więc Ania nie szuka
+  nieistniejącego pola do zaznaczenia.
+- **SHOULD-FIX (worktree vs sesja w chmurze)** — reviewer sam ocenia opis jako zgodny ze stanem
+  na dziś; ticket 134 planuje dla chmury inny mechanizm („branch bez worktree"), więc fragment
+  trzeba będzie zweryfikować po jego domknięciu. Bez zmiany w treści, nota do „Do koordynatora".
+- **SHOULD-FIX (sync + PR w DoD)** — normalny krok przed pushem, wykonany w Fazie 6.
+- **NICE-TO-HAVE oba przyjęte:** data „1 września" uzupełniona rokiem; „587 pozycji" zmienione
+  na „587 pozycji z 7395" — mianownik zmienia wrażenie skali i uczciwiej oddaje proporcję.
