@@ -108,3 +108,131 @@ dokumentu — to trzeba poprawić przed wysłaniem. Reszta uwag to drobne niesp�
 podsumowaniu, format oceny 1.8) i informacja o zależności od równoległych ticketów z linkami do jeszcze
 nieistniejących dokumentów — żadna z nich nie blokuje merge'a samego dokumentu, ale BLOCKER musi być
 naprawiony.
+
+---
+
+## Obieg 2
+
+> Reviewed: 2026-09-24
+> Branch: `docs/151-instrukcja-testow-i15`
+> Diff: 5 plików (`docs/instrukcja-testow-I15.md`, `plan.md`, `raport.md`, `review.md`, `docs/triage-state.txt`), 3 commity
+> Kontekst: weryfikacja poprawek po obiegu 1 (commit `1d3e21c`) + świeże spojrzenie na resztę dokumentu.
+
+### Weryfikacja BLOCKER-a z obiegu 1
+
+**Zniknął.** Punkt 1.1 (`docs/instrukcja-testow-I15.md:59-94`) teraz poprawnie mówi, że kolumna
+pokazuje listę numerów, z przykładem dla MO1 `203, 204, 205, … 219`. Sprawdzone znak w znak:
+
+- `rebuild/backend/src/import/legacy/payment_blocks.cjs:8` — `MO1: '203, 204, 205, 206, 207, 208,
+  209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219'` — identyczne z przykładem w dokumencie.
+- `rebuild/frontend/src/pages/katalog/formatowanie.tsx:47-70` — czwarta kopia tej samej mapy,
+  identyczna co do znaku (potwierdzone też komentarzem w kodzie: „zweryfikowane 2026-09-23, że
+  dziś są identyczne co do znaku").
+- `formatowanie.tsx:257-260` — `<span title={lista}>{lista}</span>` dla niepustej listy, `<Kreska/>`
+  („—") gdy `blokowaneFormyPlatnosci()` zwraca pusty string — potwierdza zarówno dymek (`title`)
+  z dokumentu, jak i zachowanie dla MO6 (mapa nie ma klucza `MO6`, więc `?? ""` daje pustkę →
+  kreska). Komentarz w kodzie (`formatowanie.tsx:32-34`) potwierdza też fakt „MO6 celowo bez wpisu"
+  cytowany w dokumencie.
+- Nowy punkt **4.6** (`:412-418`) jest prawdziwy i nie obiecuje niczego ponad stan faktyczny —
+  `grep` po „odroczon"/„kupieck" w repo rzeczywiście daje zero trafień (sam sprawdziłem), więc
+  zdanie „nigdzie nie mamy listy numer→nazwa" się broni.
+
+### Weryfikacja obu SHOULD-FIX z obiegu 1
+
+- **Licznik rozdz. 5** (`:438`): „Sprawdzonych ____ / 11”. Tabela ma dokładnie 11 wierszy
+  (1.1–1.8, 2.1, 2.2, 3) — zgadza się. Decyzje: rozdział 4 ma punkty 4.1–4.6, licznik „/ 6” —
+  zgadza się.
+- **Punkt 1.8** (`:290`): teraz kończy się „☐ OK ☐ ŹLE — uwagi: _______________”, tak samo jak
+  reszta punktów — niespójność formy zniknęła.
+
+Oba SHOULD-FIX z obiegu 1 potwierdzone jako naprawione.
+
+### Regresja po poprawkach
+
+- Numeracja punktów i odsyłaczy wewnętrznych spójna: „patrz punkty 4.1 i 4.2” (1.8), „punkt 4.6”
+  (1.1), „punkt 4.3” (1.8), tabela w rozdz. 3 odsyła do punktów 1.4/1.5/2.1 — wszystkie istnieją
+  i treściowo się zgadzają.
+- Rozdział 6 „Siedem rzeczy... wygląda na błąd”: policzone — lista ma dokładnie 7 pozycji, zgadza
+  się z zapowiedzią „Siedem rzeczy”. Punkt 1 listy („numery zamiast nazw... i „—” przy MO6”)
+  poprawnie odzwierciedla nową treść 1.1 (przed poprawką ten punkt siłą rzeczy nie mógł być
+  spójny, bo mówił o czymś innym — sprawdzone, teraz jest spójny).
+- Tabela sprostowań w rozdziale 3 (trzy wiersze) nie została naruszona poprawką BLOCKER-a — nie
+  dotyczy kolumny blokowanych form płatności, więc nie było ryzyka kolizji; sprawdzone, że nadal
+  ma 3 wiersze zgodne z zapowiedzią „Trzy zdania”.
+- Nic nie wskazuje, żeby poprawka BLOCKER-a naruszyła sąsiadujące akapity (dymek z tooltipem, opis
+  MO6, sekcja „Dwie rzeczy, które wyglądają na brak”) — wszystkie nadal prawdziwe i spójne z resztą
+  dokumentu.
+
+### Świeże spojrzenie — szukanie tego samego wzorca błędu (fakt z karty bez weryfikacji w kodzie)
+
+Przeszedłem punkt po punkcie liczby, godziny i treści komunikatów, sprawdzając każdą wartość
+bezpośrednio w kodzie (nie tylko w kartach `docs/karty/I15.9/wejscie-*.md`):
+
+- **1.2** — lista 7 wartości zastosowań Rolniczych (`Ciągnik · Kombajn · Opryskiwacz · Przyczepa
+  · Kosiarka/ogród · Wózek widłowy · Uniwersalne/pozostałe`) zgadza się słowo w słowo z
+  `CATEGORY_VALUES.Rolnicze` w `rebuild/backend/src/import/legacy/application_rules.cjs:9-17`;
+  „Ładowarka” zostaje w `Przemysłowe` (`:19-26`) — potwierdzone. Liczba **265 rekordów** potwierdzona
+  niezależnie w `docs/rebuild-backlog.md:3843` („265 rekordów Rolniczych, po korekcie zostało 0
+  Rolniczych z zastosowaniem «Ładowarka»”).
+- **1.3** — liczby **1114/991/123** dla MO9 z 17.09 potwierdzone w `docs/rebuild-backlog.md:3690`
+  („1114 pozycji, 991 dopuszczonych, 123 odrzucone, 0 błędów”).
+- **1.4** — **172 pozycje u 9 z 10 dostawców (wszyscy poza MO6)** — nie zweryfikowałem tej
+  konkretnej liczby bezpośrednio (wymagałoby uruchomienia pomiaru na `db/snapshot.db`), ale
+  mechanizm obcinania zer (`formatowanie.tsx` — sekcja „Zera końcowe PRZEŻYŁY usunięcie gałęzi”)
+  jest w kodzie i opisany zgodnie z dokumentem. Brak w repo alternatywnego źródła liczby „172” do
+  krzyżowej weryfikacji — nie mogę ani potwierdzić, ani obalić; nie flaguję jako błąd (dokument
+  jasno przypisuje to do „wzorca dziesięciu dostawców”, czyli konkretnego pomiaru autora), ale
+  odnotowuję jako pozycję nie w 100% zweryfikowaną z mojej strony.
+- **1.8 / harmonogram** — `MINUTY_TORU_1 = [55, 10, 25, 40]`, `TOR2_HOUR=4`, `TOR2_MINUTE=30`,
+  `FULL_ROTATION` (`rebuild/backend/src/selly/rest/scheduler.ts:36-64`) zgadzają się dosłownie z
+  tabelą w dokumencie, łącznie z „śr MO5+MO6” (a nie samo MO5) i „pierwsza sobota/niedziela”.
+- **Komunikaty** — wszystkie trzy dosłowne cytaty sprawdzone bajt w bajt w kodzie:
+  `„Błędy odczytu cennika (N). Import zatrzymany bez przełączania na stary format."`
+  (`rebuild/backend/src/import/legacy/feed_safety.cjs:13`), `„Błędny EAN: popraw numer w edycji
+  zgłoszenia przed akceptacją."` (`rebuild/backend/src/import/polityka/blokady.ts:70`), `„Brak
+  trzech wiarygodnych potwierdzeń nieobecności. Wczytaj aktualny cennik."` (`blokady.ts:53`).
+- **CSV / Analityka (2.1)** — liczby 5109 / po 5184 / 1716 / 1644 / 1100 potwierdzone niezależnie
+  w `docs/karty/P10.5/karta.md:48-53` i `docs/rebuild-backlog.md:4410-4411` (nie tylko w karcie
+  I15.9) — dwa niezależne źródła się zgadzają. „EAN wspólne (769)” i „Marża (335)” też potwierdzone
+  w tych samych źródłach.
+- **2.2** — **526 pozycji** potwierdzone w `docs/karty/I15.9/wejscie-113.md:6,10` („usunięto z
+  kolejki 526 pozycji obecnych w słowniku” / „znika 526 pozycji”) — jedyne źródło jest kartą, nie
+  ma niezależnego drugiego potwierdzenia w `rebuild-backlog.md`, ale treść jest spójna i
+  konkretna (nie ogólnikowa), więc nie flaguję.
+- **Warunki (8329 produktów, 23.09)** — potwierdzone w `docs/karty/I15.9/wejscie-113.md:3`
+  („Staging dostał 23.09 świeżą kopię bazy produkcji (8329 produktów)”) i niezależnie w
+  `rebuild/backend/src/selly/generator-csv.ts:170-172` (pomiar z ticketu 113: „0 wierszy z pustym
+  polem na 8329 produktów”) — dwa niezależne miejsca, ta sama liczba.
+- **60. kolumna CSV / nazwy kategorii** — policzyłem ręcznie wpisy w `KOLUMNY` w
+  `generator-csv.ts:49-108` = dokładnie 60, `Blokowane-formy-platnosci` jest ostatnia (60.).
+  Nazwy kategorii („Opony rolnicze”, „Opony leśne”, „Opony przemysłowe”, „Opony ciężarowe”)
+  zgadzają się dosłownie z `NAZWY_KATEGORII_SKLEPU` (`generator-csv.ts:172-178`).
+- **Godziny CSV (6:00 generacja / 12:00 pobranie przez Selly)** — potwierdzone w komentarzach
+  `csv-cli.ts:5-10`, `generator-csv.ts:5,202` i niezależnie w `docs/karty/I15.9/wejscie-104.md:6`.
+- **Przycisk „Rozstrzygnij” / „Sprawdź kartę”** — potwierdzony w `OknoRozstrzygniecia.tsx`,
+  `TabelaStagingu.tsx:221`, `Staging.tsx:65,381`.
+- **Etykiety Stagingu** („Braki w cenniku”, „Brak w cenniku”, podsumowanie importu) — potwierdzone
+  w `pages/staging/dane.ts:78,103-104` i `pages/konfiguracja/DialogWgrywania.tsx:217-220`.
+
+Nie znalazłem żadnego drugiego przypadku wzorca „fakt z karty bez weryfikacji w kodzie” — dokument
+po poprawkach jest wyjątkowo starannie podparty kodem, w tym liczbami i cytatami dosłownymi.
+
+### Wynik
+
+**0 BLOCKER / 0 SHOULD-FIX / 1 NICE-TO-HAVE**
+
+- [ ] `docs/instrukcja-testow-I15.md:163` — liczba „172 pozycje u dziewięciu z dziesięciu
+  dostawców (wszyscy poza MO6)” nie ma w repo niezależnego źródła do krzyżowej weryfikacji (jest
+  tylko w tym dokumencie); mechanizm, który ją produkuje, jest w kodzie i zgodny z opisem, ale
+  samej liczby nie da się potwierdzić bez odpalenia pomiaru na `db/snapshot.db`. Nie blokuje —
+  odnotowuję dla porządku, gdyby ktoś chciał to później zweryfikować.
+
+### Ogólna ocena
+
+BLOCKER z obiegu 1 został naprawiony poprawnie i dokładnie — nowa treść punktu 1.1 zgadza się co
+do znaku z trzema niezależnymi miejscami w kodzie (backend, front, render komórki), a nowy punkt
+4.6 nie obiecuje niczego, czego nie ma. Oba SHOULD-FIX naprawione bez regresji — sprawdziłem
+liczniki, odsyłacze wewnętrzne, tabelę rozdz. 3 i listę w rozdz. 6, wszystko spójne. Świeży
+przegląd całego dokumentu pod kątem tego samego wzorca błędu (liczby, godziny, cytaty) nie znalazł
+żadnego kolejnego przypadku — każda sprawdzalna wartość ma pokrycie w kodzie lub w co najmniej
+jednym niezależnym źródle. Dokument jest gotowy do wysłania Ani.

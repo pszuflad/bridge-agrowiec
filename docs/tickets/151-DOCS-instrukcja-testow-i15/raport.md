@@ -92,6 +92,18 @@ sprawdzona w kodzie, nie przepisana z kart:
   `rebuild/`). Uruchomione mimo to po synchronizacji z `develop` — wynik niżej.
 - **Weryfikacja treści:** każda etykieta UI i każdy komunikat sprawdzone w kodzie (tabela wyżej).
 
+### Obieg 2 recenzji — czysty
+
+0 BLOCKER / 0 SHOULD-FIX / 1 NICE-TO-HAVE. Wszystkie poprawki z obiegu 1 potwierdzone w kodzie
+(przykład MO1 co do znaku, MO6 → „—", dymek `title`, licznik 11/6, ujednolicona ocena w 1.8),
+brak regresji w numeracji i odsyłaczach. Recenzent przeszedł też cały dokument w poszukiwaniu
+drugiego przypadku „fakt z karty bez weryfikacji w kodzie" — nie znalazł.
+
+**NICE-TO-HAVE rozliczony:** recenzent zgłosił, że liczba „172 pozycje u dziewięciu z dziesięciu
+dostawców" (punkt 1.4) nie ma niezależnego źródła. **Ma** — to zmierzony wynik z ticketu 120:
+`docs/tickets/120-CHORE-i15-2-resync-parserow/raport.md:91` (tabela zmian: `szerokosc "10.0" → "10"`
+= 172, wpis #83) i `:209`, potwierdzone w `docs/karty/I15.2/karta.md:69`. Bez zmian w dokumencie.
+
 ## Sąsiedni ticket 153 — sprawdzone, że nie rusza treści tego dokumentu
 
 W trakcie ticketa na `develop` wszedł wpis `#153.1` (karta `FIX.1`): CSV dla Selly gubi flagi
