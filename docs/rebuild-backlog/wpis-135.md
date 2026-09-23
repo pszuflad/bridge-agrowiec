@@ -22,8 +22,8 @@ Domknięte w miejscu (w `docs/rebuild-backlog.md` / `wpis-129.md`, zmieniona wy�
 | **Kategoria** | ORGANIZACYJNE (nie zmiana produkcji — zadanie dla koordynatora) |
 | **Pliki** | `docs/rebuild-backlog.md` |
 | **Commit** | — |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | ⬜ **do zaplanowania jako osobna karta** |
+| **Do nowej wersji?** | ✅ **ZREALIZOWANE** — runda decyzyjna przeprowadzona kartą **DEC.1** (ticket 141, 2026-09-23). |
+| **Status** | ✅ **ZAMKNIĘTE 2026-09-23** — wszystkie wpisy z listy przejrzane, stan faktyczny zmierzony w kodzie na `develop`, decyzje zapisane. Pełny przebieg i dowody: `docs/karty/DEC.1/karta.md`. ⚠ Lista okazała się dłuższa niż 11: na `develop` @ `ab30674` narzędzie pokazywało **14** pozycji — doszły `#137.1` i `#137.2` (ticket 137, zmergowany po wystawieniu tego wpisu) oraz sam `#135.1`. |
 
 **Opis.** `tools/stan-backlogu.sh --do-decyzji` pokazuje dziś **11 wpisów bez decyzji użytkownika**.
 Najstarszy wisi od **2026-08-24**, jeden ma w etykiecie wprost dopisane „wisi bez decyzji do
