@@ -3464,7 +3464,7 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 | [I15.6](karty/I15.6/) | Selly REST 1: nowy schemat `selly_products`, odnajdywanie, aktualizacje w ciągu dnia | #60, #74, #77 (delta), #68–#70 | — | `013` |
 | [I15.7](karty/I15.7/) | Selly REST 2: nocna pełna synchronizacja | #60, #81 | I15.6 | — |
 | [I15.8](karty/I15.8/) | Selly REST 3: harmonogram i przyciski w panelu | #60 | I15.7 | — |
-| [I15.10](karty/I15.10/) | dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1) | #104 | I15.3, I15.4, I15.6 | — |
+| [I15.10](karty/I15.10/) | dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1) **i w Torze 2** | #104 | I15.3, I15.4, I15.6, I15.7 | — |
 | [I15.11](karty/I15.11/) | panel „Braki w cenniku” i podgląd starej karty (FE) | #103 | I15.4, I15.5 | — |
 | [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) — **OSTATNIA** | — | I15.1–I15.8, I15.10, I15.11 | — |
 
