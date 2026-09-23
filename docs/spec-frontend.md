@@ -183,8 +183,10 @@ ma endpoint:
 > **bez żadnych parametrów** i zwraca gołą tablicę ~7405 produktów; szukajka (tokeny, AND
 > między tokenami / OR po 16 polach, bez debounce), filtry, sortowanie, paginacja
 > (25/50/100/Wszystkie) i wirtualizacja (> 150 wierszy) są **w 100% po stronie klienta**
-> (`frontend-index.js:23261-23312`). Tabela ma 59 konfigurowalnych kolumn (15 domyślnych,
-> zapis w IndexedDB), z `nazwa`/`ean`/`dostawca` zawsze widocznymi i przyklejonymi do lewej;
+> (`frontend-index.js:23261-23312`). Tabela miała w I2 59 konfigurowalnych kolumn (15
+> domyślnych, zapis w IndexedDB); od karty I15.3 (ticket 122, 2026-09-23) jest ich **60 (16
+> domyślnych)** — doszła „Blokowane formy płatności", jako natywna kolumna tabeli React, nie
+> wstrzykiwany skrypt jak w oryginale (`payment-blocks-injection.js`). `nazwa`/`ean`/`dostawca` są zawsze widoczne i przyklejone do lewej;
 > nagłówki mają statyczną, przygaszoną ikonę sortowania — bez wskazania aktywnej kolumny/kierunku.
 > Oryginał **nie ma** szczegółu produktu w trybie odczytu (tylko modal edycji) — I2 dokładała
 > chwilowo podgląd read-only jako odstępstwo D4; **zniesione w 12c** (patrz blok niżej), gdzie
