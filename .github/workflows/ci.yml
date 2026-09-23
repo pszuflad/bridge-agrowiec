@@ -54,8 +54,12 @@ jobs:
           npm ci
           npm run lint --if-present
           npm run typecheck --if-present
-          npm test --if-present            # zawiera GATE fixtures/kontrakt (feature.md Krok 9)
+          # Raport JSON obok zwykłego wyjścia — karmi budżety czasu z następnego kroku (ticket 132).
+          npx vitest run --reporter=default --reporter=json --outputFile.json="$RUNNER_TEMP/wyniki-testow.json"
           npm run build --if-present
+      - name: Budżety czasu testów
+        if: steps.det.outputs.exists == 'true' && always()
+        run: node tools/czas-testow.cjs "$RUNNER_TEMP/wyniki-testow.json"
       - name: Backendu jeszcze nie ma (I1)
         if: steps.det.outputs.exists != 'true'
         run: echo "rebuild/backend nie istnieje — I1 niezrobione. CI zielone (nic do testowania)."
