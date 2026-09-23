@@ -26,7 +26,8 @@ wartość w froncie — dokładnie jak produkcja. Szczegóły niżej.
 - **Nowy:** `rebuild/backend/test/nagrania/selly-csv-naglowek.csv` + `README.md` — linia nagłówkowa
   realnego pliku produkcji z `88fa31c` jako wzorzec dla testu.
 - `rebuild/backend/test/selly.generator-csv.test.ts` — 12 → 24 testy.
-- **Nowy:** `rebuild/backend/test/selly.csv-cli.test.ts` — 3 testy, CLI odpalane jako osobny proces.
+- **Nowy:** `rebuild/backend/test/selly.csv-cli.test.ts` — 5 testów, CLI odpalane jako osobny proces
+  (w tym: bieg bez `JWT_SECRET` działa, bieg bez `DB_PATH` pada bez utworzenia pliku).
 
 ### Kolumna w katalogu
 - `rebuild/frontend/src/pages/katalog/formatowanie.tsx` — mapa `BLOKOWANE_FORMY_PLATNOSCI`
@@ -91,7 +92,7 @@ przeczący nagraniu z oryginału — czyli dokładnie taki, jaki następna sesja
   (`rebuild/frontend/test/msw/kontrakt.ts` czyta `contract/fixtures/GET_products.json`).
 - **Format CSV:** linia nagłówkowa naszego generatora **bajt w bajt** równa pierwszej linii realnego
   pliku produkcji z `88fa31c`.
-- **Unit/integracja backend:** ✓ 1647 zdanych, 3 pominięte, 101 plików.
+- **Unit/integracja backend:** ✓ 1649 zdanych, 3 pominięte, 101 plików (bieg po naprawach z review).
 - **Unit/integracja frontend:** ✓ 949 zdanych, 54 pliki.
 - **lint / typecheck / build:** ✓ po obu stronach.
 - ⚠ Przy pierwszym biegu, gdy obie suity szły równolegle, 4 testy
@@ -188,3 +189,20 @@ koordynator); `contract/` **nietknięty** (i to jest wynik pomiaru, nie przeocze
   zdubluje się przy kolejnych wpisach.
 - `rebuild/backend/test/alerty-katalogu.gate.test.ts` potrafi paść na limicie 20 s także w izolacji
   (obserwacja reviewera; w moich biegach cała suita przechodziła).
+
+## Naprawy po review
+
+Review: **0 BLOCKER**, 2 SHOULD-FIX, 2 NICE-TO-HAVE — wszystkie naprawione (commit `f85618f`).
+Reviewer niezależnie potwierdził kluczowy pomiar (`grep` = 0, mechanizm `uwagaCena`) oraz porównał
+programowo trzy kopie mapy MO1–MO10 z oryginałem `payment_blocks.cjs` — identyczne co do znaku.
+
+- **SHOULD-FIX (istotne dla cutoveru):** CLI wołało pełne `wczytajEnv()`, które wymaga `JWT_SECRET`,
+  choć generowanie CSV go nie dotyka. Linia w `crontab` **nie dziedziczy środowiska procesu serwera**,
+  więc po przełączeniu polecenie by padło — a objawem byłby dopiero wczorajszy katalog w sklepie.
+  Teraz wystarcza `DB_PATH`; `JWT_SECRET` ma wartość zastępczą (realna z otoczenia ma pierwszeństwo),
+  a `DB_PATH` celowo **pozostaje wymagany**, bo cichy fallback pisałby do nie tej bazy. Oba przypadki
+  mają test.
+- **SHOULD-FIX:** `karta.md` bez sekcji „Dowiezione"/„Do koordynatora" — uzupełnione w kroku docs.
+- **NICE-TO-HAVE:** zbędny `DROP TRIGGER` w teście fallbacku (trigger to `AFTER UPDATE OF dostawca`,
+  więc aktualizacja samej kolumny blokad i tak go nie uruchamia) — zdjęty, dołożona kontrola założenia.
+- **NICE-TO-HAVE:** doprecyzowane odwołanie do ticketu 113 (osobny ticket pomiarowy, nie literówka).
