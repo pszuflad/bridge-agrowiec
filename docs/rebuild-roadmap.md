@@ -3459,13 +3459,15 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 | [I15.1](karty/I15.1/) | schemat `products`: kolumna blokowanych form płatności + 6 triggerów | #73, #75, #79, #80, #82 | — | `011` |
 | [I15.2](karty/I15.2/) | resync parserów + `application_rules`, `payment_blocks`, część parserowa Staging v2 | #73, #75, #78, #79, #80, #82, #83, #99 | I15.1 | — |
 | [I15.3](karty/I15.3/) | blokowane formy płatności w katalogu + eksport CSV Selly | #73, #76, #77 (CSV) | I15.1 | — |
-| [I15.4](karty/I15.4/) | Staging v2 — backend (importer, akceptacja, trasy review/resolve) | #99 | I15.2 | `012` |
-| [I15.5](karty/I15.5/) | Staging v2 — frontend („Rozstrzygnij”) | #99 | I15.4 | — |
+| [I15.4a](karty/I15.4a/) | fundament stagingu: migracja `012` (6 tabel), model, repozytoria | #99, #103, #104, #106 | — | `012` |
+| [I15.4b](karty/I15.4b/) | importer: bezpieczeństwo źródła, wycofania, auto-wstrzymania, dopasowanie EAN/DOT | #99, #103, #104, #105 | I15.4a, I15.2 | — |
+| [I15.4c](karty/I15.4c/) | akceptacja: cztery blokady, trasy review/resolve, decyzje o nieobecnych kartach | #99, #106, #107 | I15.4a | — |
+| [I15.5](karty/I15.5/) | Staging v2 — frontend („Rozstrzygnij”) | #99 | I15.4c | — |
 | [I15.6](karty/I15.6/) | Selly REST 1: nowy schemat `selly_products`, odnajdywanie, aktualizacje w ciągu dnia | #60, #74, #77 (delta), #68–#70 | — | `013` |
 | [I15.7](karty/I15.7/) | Selly REST 2: nocna pełna synchronizacja | #60, #81 | I15.6 | — |
 | [I15.8](karty/I15.8/) | Selly REST 3: harmonogram i przyciski w panelu | #60 | I15.7 | — |
-| [I15.10](karty/I15.10/) | dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1) **i w Torze 2** | #104 | I15.3, I15.4, I15.6, I15.7 | — |
-| [I15.11](karty/I15.11/) | panel „Braki w cenniku” i podgląd starej karty (FE) | #103 | I15.4, I15.5 | — |
+| [I15.10](karty/I15.10/) | dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1) **i w Torze 2** + zawór na kolizje `kod_importu` | #104, #108 | — (zdjęte, ticket 117) | — |
+| [I15.11](karty/I15.11/) | panel „Braki w cenniku” i podgląd starej karty (FE) | #103 | I15.4b, I15.4c, I15.5 | — |
 | [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) — **OSTATNIA** | — | I15.1–I15.8, I15.10, I15.11 | — |
 
 **Numery migracji przydzielone z góry przez koordynatora** (`011`, `012`, `013`). Runner (`db/migrate.ts`) stosuje
@@ -3476,16 +3478,16 @@ potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać 
 
 | Faza | Karty | Warunek startu |
 |---|---|---|
-| 0 | przygotowanie: odświeżenie bazy stagingu kopią produkcji (od 23.09), pomiar #101, podsumowanie logiki Selly od Ani | — |
-| 1 | **I15.1** ‖ **I15.6** | — (rozłączne: `products` + triggery vs Selly) |
-| 2 | **I15.2** ‖ **I15.3** ‖ **I15.7** | I15.1 (dla 2 i 3), I15.6 (dla 7) |
-| 3 | **I15.4** ‖ **I15.8** | I15.2 (dla 4), I15.7 (dla 8) |
-| 4 | **I15.5** | I15.4 |
-| 4b | **I15.10** (dostępność w Selly) | I15.3, I15.4 |
-| 5 | **I15.11** (panel „Braki w cenniku”) | I15.4, I15.5 |
-| 6 | **I15.9** — delta dla Ani, OSTATNIA karta; potem instrukcja pełnego testu i cutover | wszystkie |
+| 0 | przygotowanie: ✅ odświeżenie bazy stagingu kopią produkcji (23.09), ✅ pomiar #101, ✅ podsumowanie Selly od Ani | — |
+| **A** (w toku od 23.09) | **I15.2** ‖ **I15.3** ‖ **I15.8** ‖ **I15.10** ‖ **I15.4a** | rozłączne plikowo; I15.1, I15.6, I15.7 ✅ |
+| B | **I15.4b** (po I15.2 i I15.4a) ‖ **I15.4c** (po I15.4a) | ścieżka zapisu i ścieżka akceptacji, rozdzielone plikowo |
+| C | **I15.5** (po I15.4c) | — |
+| D | **I15.11** (po I15.4b, I15.4c, I15.5) | ten sam widok Staging co I15.5 |
+| E | **I15.9** — delta dla Ani, OSTATNIA karta; potem instrukcja pełnego testu i cutover | wszystkie |
 
-Karty z fazy 5 mogą wejść wcześniej, jeśli zmiana Ani wpłynie szybciej i nie koliduje plikowo z bieżącą fazą.
+⭐ **Zakres I15 ZAMKNIĘTY 2026-09-23** — Ania potwierdziła koniec zmian na produkcji i czeka na nową wersję do testów.
+Źródło prawdy: `origin/main` na `88fa31c`. Dawne karty-rezerwy I15.10 i I15.11 dostały konkretny zakres (#104, #103),
+a dawna I15.4 została podzielona na I15.4a/b/c (ticket 123).
 
 ⭐ **ZAKRES POSZERZONY 22.09 WIECZOREM (triaż, ticket 110).** Produkcja dołożyła dwie duże zmiany — backlog **#103**
 („braki w cenniku”: `feed_safety.cjs`, wycofanie dopiero po trzech kompletnych ofertach i 24 h, blokada źródła

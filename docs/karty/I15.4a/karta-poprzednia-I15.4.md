@@ -46,3 +46,8 @@ Numer migracji `012` zarezerwowany.
 
 ## Do koordynatora
 —
+
+---
+
+> **PLIK HISTORYCZNY.** To treść karty I15.4 sprzed podziału na I15.4a/I15.4b/I15.4c (ticket 123, 2026-09-23).
+> Zostaje jako zapis zakresu, z którego wyszedł podział. Obowiązują karty I15.4a/b/c.
