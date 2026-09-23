@@ -37,6 +37,9 @@ Dopisz kolejny numerowany wpis `#N` w formacie jak istniejące (#1, #2):
 - Zaktualizuj `docs/triage-state.txt` na SHA NAJNOWSZEGO przetworzonego commita (pełny SHA + linia komentarza z datą/etykietą).
 - `git add docs/ contract/ 2>/dev/null; git commit -m "triaż: N nowych zmian → backlog (<etykiety>)"`
 - **NIE pushuj automatycznie.** Push zostaw userowi (chyba że wprost poprosi).
+- Jeśli user poprosi o push/PR: `tools/push-i-pr.sh --tytul "…" --tresc-plik <plik>` — sam robi
+  sync z `develop`, push, PR i ponawia blokady `.git` od równoległych kart. Konflikty rozwiązujesz
+  tutaj, nie w GitHubie (zasada w CLAUDE.md, „Przed każdym PR").
 
 ## 6. Podsumuj userowi (zwięźle)
 - ile commitów przetworzono, ile trafiło do backlogu, ile pominięto (dane),

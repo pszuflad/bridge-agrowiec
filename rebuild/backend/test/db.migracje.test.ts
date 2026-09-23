@@ -49,10 +49,11 @@ describe("zastosujMigracje", () => {
     "009_alerty_polskie_znaki.sql",
     "010_marka_caps.sql",
     "011_blokowane_formy_i_triggery.sql",
+    "012_staging_polityka.sql",
     "013_selly_products_warianty.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 29 tabel i 19 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 35 tabel i 21 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -62,9 +63,11 @@ describe("zastosujMigracje", () => {
     // 009 (PR.3) to wyłącznie migracja danych `alerts` — bilans bez zmian.
     // 010 (PR.5) to migracja danych `products.marka` + słownika marek — bilans bez zmian.
     // 011 (I15.1) dokłada kolumnę `products` i sześć triggerów — bilans tabel i indeksów bez zmian.
+    // 012 (I15.4a) dokłada sześć tabel polityki stagingu i dwa indeksy unikalne
+    // (`staging_one_current_product` na `staging_items`, częściowy `staging_absence_one_choice`): +6 tabel, +2.
     // 013 (I15.6) zostawia starą `selly_products` jako `selly_products_old` (z jej indeksem
     // `_kod`), zabiera jej `_status` i zakłada nową tabelę z sześcioma indeksami: +1 tabela, +5.
-    expect(policzTabele(sqlite)).toBe(29);
+    expect(policzTabele(sqlite)).toBe(35);
 
     const indeksy = (
       sqlite
@@ -73,7 +76,7 @@ describe("zastosujMigracje", () => {
         )
         .get() as { c: number }
     ).c;
-    expect(indeksy).toBe(19);
+    expect(indeksy).toBe(21);
   });
 
   it("baza działa w trybie WAL (jak produkcja)", () => {
@@ -94,7 +97,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(29);
+    expect(policzTabele(sqlite)).toBe(35);
   });
 
   /**
@@ -203,13 +206,20 @@ describe("migracje danych — konwencje 13c", () => {
       )
       .run(kod, pola.nazwa, pola.kategoria, pola.konstrukcja);
 
+  /**
+   * ⚠ Każde zgłoszenie dostaje WŁASNY `kod`. Od migracji 012 (I15.4a, backlog #99) na
+   * `staging_items` stoi indeks unikalny `staging_one_current_product (dostawca, kod)`, więc
+   * kilka zgłoszeń tej samej pary nie może już współistnieć — wcześniej wszystkie szły jako
+   * `K1`. Testy niżej śledzą wiersze po `id`, nie po `kod`, więc zakres tego, co mierzą, zostaje.
+   */
+  let licznikStagingu = 0;
   const dodajStaging = (powod: string, typZmiany = "zmiana_kluczowa") =>
     sqlite
       .prepare(
         `INSERT INTO staging_items (typ_zmiany, kod, nazwa, dostawca, magazyn, powod, utworzono)
-         VALUES (?, 'K1', 'N', 'MO1', 'GL', ?, '2026-09-09')`,
+         VALUES (?, ?, 'N', 'MO1', 'GL', ?, '2026-09-09')`,
       )
-      .run(typZmiany, powod).lastInsertRowid;
+      .run(typZmiany, `K${++licznikStagingu}`, powod).lastInsertRowid;
 
   const wartosc = (sql: string, ...param: unknown[]): unknown =>
     (sqlite.prepare(sql).get(...(param as never[])) as Record<string, unknown> | undefined)?.["w"];
@@ -217,6 +227,7 @@ describe("migracje danych — konwencje 13c", () => {
   beforeEach(() => {
     katalog = mkdtempSync(join(tmpdir(), "bridge-migracje-dane-"));
     ({ sqlite } = otworzBaze(join(katalog, "test.db")));
+    licznikStagingu = 0;
     zastosujMigracje(sqlite, KATALOG_SCHEMATU());
   });
   afterEach(() => {

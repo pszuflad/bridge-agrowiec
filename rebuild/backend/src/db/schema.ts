@@ -14,7 +14,7 @@
 //  (`hasloHash`) — zgodnie z kontraktem (contract/README.md: „API zwraca camelCase").
 //  Terminy domenowe po polsku ZOSTAJĄ (kategoria, zastosowanie, cenaZakupu, dostawca).
 // ─────────────────────────────────────────────────────────────────────────────
-import { sqliteTable, AnySQLiteColumn, index, integer, text, real, foreignKey, primaryKey, unique } from "drizzle-orm/sqlite-core"
+import { sqliteTable, AnySQLiteColumn, index, integer, text, real, foreignKey, primaryKey, unique, uniqueIndex } from "drizzle-orm/sqlite-core"
   import { sql } from "drizzle-orm"
 
 export const products = sqliteTable("products", {
@@ -139,7 +139,11 @@ export const stagingItems = sqliteTable("staging_items", {
 	utworzono: text().notNull(),
 	zatwierdzilUzytkownikId: integer("zatwierdzil_uzytkownik_id"),
 	zatwierdzonoData: text("zatwierdzono_data"),
-});
+}, (table) => [
+	// dopieszczenie (migracja 012, ticket 124, backlog #99): Staging v2 dopuszcza tylko JEDNO
+	// bieżące zgłoszenie na parę dostawca+kod. Indeks jest w produkcji od 22.09.
+	uniqueIndex("staging_one_current_product").on(table.dostawca, table.kod),
+]);
 
 export const manualOverrides = sqliteTable("manual_overrides", {
 	id: integer().primaryKey({ autoIncrement: true }),
@@ -489,3 +493,98 @@ export const wagaPamiec = sqliteTable("waga_pamiec", {
 	source: text(),
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+//  dopieszczenie (migracja 012, ticket 124, karta I15.4a) — SZEŚĆ TABEL SPOZA KANONU 001.
+//
+//  Produkcja nie ma ich w żadnej migracji: zakłada je `staging_policy.cjs` `install()`
+//  (`origin/main` @ 88fa31c, linie 86–107) przy każdym starcie procesu. U nas wnosi je
+//  `rebuild/schema/012_staging_polityka.sql` — i to ON jest źródłem prawdy o kształcie,
+//  nie ten plik (`rebuild/schema/README.md`).
+//
+//  ⚠ Te tabele NIE zasilają żadnej odpowiedzi HTTP — trasy stagingu wnosi dopiero I15.4c.
+//  Dlatego camelCase pól modelu nikomu tu nie szkodzi. Gdy I15.4c wystawi z nich trasę,
+//  to ONA odpowiada za jawną projekcję pod fixture (CLAUDE.md: `select()` bez listy pól
+//  oddaje nazwy PÓL, a fixture nagrany z oryginału ma nazwy KOLUMN).
+//
+//  Nazwy kolumn zostają ANGIELSKIE (`supplier`, `product_code`), bo takie są w produkcji —
+//  inaczej niż starsze tabele rdzenia, gdzie kontrakt wymusił polskie (`dostawca`, `kod`).
+//  To nie niekonsekwencja odbudowy, tylko wierne odtworzenie dwóch warstw oryginału.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Świadome dopasowania zgłoszenia do karty produktu (backlog #99). */
+export const stagingMatches = sqliteTable("staging_matches", {
+	supplier: text().notNull(),
+	sourceKey: text("source_key").notNull(),
+	productCode: text("product_code").notNull(),
+	createdAt: text("created_at").notNull(),
+}, (table) => [
+	primaryKey({ columns: [table.supplier, table.sourceKey] }),
+]);
+
+/**
+ * Bezpieczeństwo źródła — stan ostatniej oferty dostawcy (backlog #103).
+ * `maxItemCount` jest szczytem historycznym: upsert w oryginale podnosi go przez `MAX(…)`
+ * i nigdy nie obniża, bo służy do wykrycia oferty „mniejszej o ponad 20%".
+ */
+export const supplierFeedState = sqliteTable("supplier_feed_state", {
+	supplier: text().primaryKey(),
+	lastIdentityHash: text("last_identity_hash"),
+	lastItemCount: integer("last_item_count").default(0).notNull(),
+	maxItemCount: integer("max_item_count").default(0).notNull(),
+	updatedAt: text("updated_at").notNull(),
+	lastCountedAt: text("last_counted_at"),
+});
+
+/** Odciski kompletnych ofert — wycofanie wymaga trzech RÓŻNYCH ofert (backlog #103). */
+export const supplierFeedVersions = sqliteTable("supplier_feed_versions", {
+	supplier: text().notNull(),
+	fingerprint: text().notNull(),
+	countedAt: text("counted_at").notNull(),
+}, (table) => [
+	primaryKey({ columns: [table.supplier, table.fingerprint] }),
+]);
+
+/**
+ * Dowody nieobecności produktu w kolejnych ofertach (backlog #103).
+ * `checksJson` to surowy JSON z oryginału — struktury nie rozpakowujemy, bo to zakres I15.4b.
+ */
+export const productAbsenceChecks = sqliteTable("product_absence_checks", {
+	supplier: text().notNull(),
+	productCode: text("product_code").notNull(),
+	checksJson: text("checks_json").notNull(),
+}, (table) => [
+	primaryKey({ columns: [table.supplier, table.productCode] }),
+]);
+
+/**
+ * Wstrzymania AUTOMATYCZNE — odróżnione od ręcznych, żeby powrót produktu do oferty
+ * nie odwstrzymał tego, co Ania wstrzymała sama (backlog #104).
+ */
+export const productAutoSuspensions = sqliteTable("product_auto_suspensions", {
+	supplier: text().notNull(),
+	productCode: text("product_code").notNull(),
+	suspendedAt: text("suspended_at").notNull(),
+	sourceFingerprint: text("source_fingerprint"),
+	reason: text().notNull(),
+}, (table) => [
+	primaryKey({ columns: [table.supplier, table.productCode] }),
+]);
+
+/**
+ * Decyzje o nieobecnych kartach — zamknięta sprawa nie wraca po kolejnym imporcie (backlog #106).
+ * `selectedSourceCode` NULL = „zostaw starą wstrzymaną i zamknij sprawę"; niepuste = wskazana
+ * karta z bieżącej oferty. Indeks jest CZĘŚCIOWY, żeby wiele spraw zamkniętych bez wyboru
+ * mogło współistnieć, a jeden kod źródłowy dostawcy nie mógł być przypisany dwa razy.
+ */
+export const stagingAbsenceDecisions = sqliteTable("staging_absence_decisions", {
+	supplier: text().notNull(),
+	productCode: text("product_code").notNull(),
+	candidatesHash: text("candidates_hash").notNull(),
+	decidedAt: text("decided_at").notNull(),
+	selectedSourceCode: text("selected_source_code"),
+}, (table) => [
+	primaryKey({ columns: [table.supplier, table.productCode] }),
+	uniqueIndex("staging_absence_one_choice")
+		.on(table.supplier, table.selectedSourceCode)
+		.where(sql`selected_source_code IS NOT NULL`),
+]);
