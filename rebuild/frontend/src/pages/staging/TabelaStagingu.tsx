@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { WYGLAD_TYPU, type PozycjaStagingu } from "./dane";
 import type { WidocznoscKolumn } from "./kolumny";
+import { etykietaRozstrzygniecia, wymagaRozstrzygniecia } from "./polityka";
 
 /** Odznaka typu zmiany — etykiety i kolory 1:1 z `XP` (`fe.js:597593`). */
 export function OdznakaTypu({ typ }: { typ: string }) {
@@ -53,6 +54,11 @@ export type WlasciwosciTabeli = {
   przelaczZaznaczenie: (id: number) => void;
   przelaczWszystkie: () => void;
   otworzSzczegoly: (id: number) => void;
+  /**
+   * Otwiera okno „Rozstrzygnij"/„Sprawdź kartę" (Staging v2, `staging-policy-injection.js`).
+   * W oryginale przycisk doklejała nakładka DOM-owa; tutaj renderuje go sama tabela.
+   */
+  otworzRozstrzygniecie: (id: number) => void;
   ladowanie: boolean;
   /** Mapa z konfiguratora kolumn; `checkbox` i `akcje` są w niej zawsze prawdziwe. */
   widoczneKolumny: WidocznoscKolumn;
@@ -64,6 +70,7 @@ export function TabelaStagingu({
   przelaczZaznaczenie,
   przelaczWszystkie,
   otworzSzczegoly,
+  otworzRozstrzygniecie,
   ladowanie,
   widoczneKolumny,
 }: WlasciwosciTabeli) {
@@ -201,14 +208,37 @@ export function TabelaStagingu({
                 </td>
               )}
               <td className="p-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  data-testid={`button-details-${pozycja.id}`}
-                  onClick={() => otworzSzczegoly(pozycja.id)}
-                >
-                  Szczegóły
-                </Button>
+                <div className="flex flex-wrap items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-testid={`button-details-${pozycja.id}`}
+                    onClick={() => otworzSzczegoly(pozycja.id)}
+                  >
+                    Szczegóły
+                  </Button>
+                  {/*
+                    Przycisk „Rozstrzygnij" / „Sprawdź kartę" — port
+                    `staging-policy-injection.js:144-152`. Oryginał doklejał go do OSTATNIEJ
+                    komórki wiersza (`row.lastElementChild?.append(b)`), czyli właśnie tutaj,
+                    za „Szczegóły".
+
+                    ⚠ WARUNEK CZYTAMY Z DANYCH, NIE Z DOM-U (plan.md D2). Oryginał testował
+                    `row.textContent`, więc ukrycie kolumny „Powód" w konfiguratorze chowało
+                    też przycisk — niezamierzony efekt uboczny nakładki, nie funkcja.
+                  */}
+                  {wymagaRozstrzygniecia(pozycja) ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-600 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                      data-testid={`button-rozstrzygnij-${pozycja.id}`}
+                      onClick={() => otworzRozstrzygniecie(pozycja.id)}
+                    >
+                      {etykietaRozstrzygniecia(pozycja)}
+                    </Button>
+                  ) : null}
+                </div>
               </td>
             </tr>
           ))}
