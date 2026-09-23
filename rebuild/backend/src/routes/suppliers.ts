@@ -7,7 +7,7 @@ import {
   type MetaArchiwum,
   type OpcjeArchiwizacji,
 } from "../import/archiwum.js";
-import { parsujBufor } from "../import/parsuj.js";
+import { BladCennika, parsujBufor } from "../import/parsuj.js";
 import { synchronizujDostawce, type OpcjeSynchronizacji, type WynikSynchronizacji } from "../import/synchronizuj.js";
 import { PustyImportBlad, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -241,8 +241,13 @@ export function trasyDostawcow({
         }
 
         // Pusty wsad to wina PLIKU, nie serwera — 400, jak w trasach z 3b.
-        // Reszta zostaje przy 500 oryginału (`:48279`).
-        const status = e instanceof PustyImportBlad ? 400 : 500;
+        // Od resyncu 23.09 (#103) dochodzi `BladCennika`: parser ZGŁOSIŁ błędy odczytu
+        // i `feed_safety` zatrzymał import. To też wina pliku, więc też 400 — inaczej ta
+        // trasa (główne wejście dla ręcznych importów MO6/MO8) oddawałaby 500 tam, gdzie
+        // `POST /api/import/parse-file` oddaje 400.
+        // Reszta zostaje przy 500 oryginału (`:48279`) — twarda awaria czytnika to nie
+        // to samo co rozpoznany błąd danych wejściowych.
+        const status = e instanceof PustyImportBlad || e instanceof BladCennika ? 400 : 500;
         res.status(status).json({ error: komunikat, dostawcaKod: kod, nazwaPliku });
       }
     },

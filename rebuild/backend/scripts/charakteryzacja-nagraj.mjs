@@ -43,12 +43,31 @@ export const PROBKI_PLIKOWE = {
   MO10: "MO10.xlsx",
 };
 
+/**
+ * Moduły z korzenia mirror/backend/, które parsery requireują po ścieżce względnej `../`.
+ * Bez nich `require` w kopii padnie — `tyre_params.cjs` sięga po `application_rules.cjs`,
+ * `adapter.cjs` po `payment_blocks.cjs` i `staging_policy.cjs`, a `dispatcher.cjs`
+ * i `adapter.cjs` po `feed_safety.cjs` (ticket 120, resync 23.09).
+ *
+ * Lista jest jawna, a nie „skopiuj cały mirror/backend", bo mirror ma kilkaset plików
+ * produkcji (Selly, availability, kopie .bak) nieużywanych przez warstwę parserów.
+ */
+const MODULY_KORZENIA = [
+  "common.cjs",
+  "application_rules.cjs",
+  "payment_blocks.cjs",
+  "feed_safety.cjs",
+  "staging_policy.cjs",
+];
+
 /** Przygotowuje kopię oryginału pod rebuild/backend/ i zwraca require wskazujący na nią. */
 function przygotujOryginal() {
   rmSync(katalogTymczasowy, { recursive: true, force: true });
   mkdirSync(katalogTymczasowy, { recursive: true });
 
-  cpSync(join(zrodloOryginalu, "common.cjs"), join(katalogTymczasowy, "common.cjs"));
+  for (const modul of MODULY_KORZENIA) {
+    cpSync(join(zrodloOryginalu, modul), join(katalogTymczasowy, modul));
+  }
   cpSync(join(zrodloOryginalu, "dictionaries"), join(katalogTymczasowy, "dictionaries"), {
     recursive: true,
   });
