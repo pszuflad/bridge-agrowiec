@@ -43,6 +43,9 @@ dostępność produktu, **nie powstanie nowy plik CSV** — bo to część integ
 a ta jest wyłączona. Nie ma błędu, nie ma komunikatu, po prostu nic się nie dzieje.
 **Tak ma być.** Włączymy to dopiero na produkcji.
 
+Nie myl tego z przyciskiem **„Wygeneruj CSV teraz"** na ekranie Selly — ten **działa** i plik
+po nim powstaje. Wyłączone jest tylko samoczynne odświeżanie pliku po imporcie.
+
 ---
 
 ## Zanim klikniesz cokolwiek w poczekalni
