@@ -4,7 +4,7 @@
  *
  * W produkcji ten plik generuje cron ok. 6:00, a `POST /api/selly/generate-csv` jest
  * przyciskiem awaryjnym „zrób to teraz". Format odwzorowuje plik wzorcowy uzgodniony
- * z Selly: 59 kolumn, separator `;`, BOM UTF-8, złamania `\r\n`.
+ * z Selly: 60 kolumn, separator `;`, BOM UTF-8, złamania `\r\n`.
  *
  * ODSTĘPSTWO ŚWIADOME W SPOSOBIE URUCHOMIENIA (plan.md D5, decyzja użytkownika 2026-09-04):
  * oryginał odpala PODPROCES (`execFile(process.execPath, [generate_selly_export.cjs])`,
@@ -26,7 +26,7 @@
  *     nie liczba (zmiana z 2026-07-31).
  */
 
-import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -40,7 +40,7 @@ import type { ProduktWewnetrzny } from "../repos/products.js";
 const BOM = "﻿";
 
 /**
- * 59 kolumn w kolejności z pliku wzorcowego (`generate_selly_export.cjs:13-74`).
+ * 60 kolumn w kolejności z pliku wzorcowego (`generate_selly_export.cjs:14-75`, stan `88fa31c`).
  * `null` w drugim polu = kolumna zawsze pusta (nie ma jej w bazie) — dotyczy `Promocja`.
  *
  * Klucze po prawej to nazwy pól drizzle (camelCase), nie nazwy kolumn SQL — to jedyna
@@ -106,6 +106,7 @@ const KOLUMNY: readonly (readonly [string, keyof ProduktWewnetrzny | null])[] = 
   ["status", "status"],
   ["Zastosowanie", "zastosowanie"],
   ["data_aktualizacji", "dataAktualizacji"],
+  ["Blokowane-formy-platnosci", "blokowaneFormyPlatnosci"],
 ] as const;
 
 /** Liczba kolumn — wystawiona, bo trafia do `stdout` odpowiedzi trasy. */
@@ -130,6 +131,84 @@ const KOLUMNY_BOOL = new Set<keyof ProduktWewnetrzny>([
   "snow3pmsf",
   "cfo",
 ]);
+
+/**
+ * Blokowane formy płatności per magazyn — port `BLOCKED_PAYMENT_FORMS`
+ * (`mirror/backend/payment_blocks.cjs:7-17`, backlog #73).
+ *
+ * ⚠ ŹRÓDŁEM KANONICZNYM TEJ MAPY JEST BAZA, nie ten plik: wartość kolumny
+ * `products.blokowane_formy_platnosci` utrzymują triggery `products_blokowane_formy_ai/_au`
+ * z `rebuild/schema/011_blokowane_formy_i_triggery.sql` (karta I15.1). Kopia tutaj jest
+ * wyłącznie po to, żeby odtworzyć FALLBACK oryginału (niżej) — przy każdej zmianie listy
+ * trzeba ruszyć oba miejsca, dokładnie jak w produkcji (`payment_blocks.cjs` + triggery).
+ *
+ * ⚠ MO6 (Uniglory) CELOWO NIE MA WPISU — CHANGELOG produkcji 2026-09-10 14:53: „nie będzie
+ * na razie w sprzedaży". Dla MO6 i dla nieznanego dostawcy pole zostaje puste; to zamierzone
+ * zachowanie, nie luka do załatania (backlog #101, zamknięte 2026-09-23).
+ */
+const BLOKOWANE_FORMY_PLATNOSCI: Readonly<Record<string, string>> = Object.freeze({
+  MO1: "203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO2: "201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO3: "201, 202, 203, 204, 205, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO4: "201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO5: "201, 202, 203, 204, 205, 206, 207, 208, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO7: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 213, 214, 215, 216, 217, 218, 219",
+  MO8: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 215, 216, 217, 218, 219",
+  MO9: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 217, 218, 219",
+  MO10: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216",
+});
+
+/**
+ * Port `getBlockedPaymentForms()` (`payment_blocks.cjs:19-22`) — fallback kolumny 60.
+ *
+ * Oryginał sięga po mapę dopiero wtedy, gdy kolumna w bazie jest PUSTA
+ * (`generate_selly_export.cjs:142-144`). Na dziś to martwa gałąź: pomiar na żywej produkcji
+ * (ticket 113, 2026-09-23) pokazał 0 wierszy z pustym polem na 8329 produktów. Zostaje jako
+ * bezpiecznik dla wiersza wstawionego drogą omijającą trigger — i dlatego, że tak robi oryginał.
+ */
+function blokowaneFormyDlaDostawcy(kodDostawcy: unknown): string | null {
+  const kod = String(kodDostawcy ?? "")
+    .trim()
+    .toUpperCase();
+  return BLOKOWANE_FORMY_PLATNOSCI[kod] ?? null;
+}
+
+/** Nazwy kategorii sklepu Selly — port `sellyCategoryNames` (`generate_selly_export.cjs:77-83`). */
+const NAZWY_KATEGORII_SKLEPU = new Map<string, string>([
+  ["rolnicze", "Opony rolnicze"],
+  ["rolnicze male", "Opony rolnicze"],
+  ["lesne", "Opony leśne"],
+  ["przemyslowe", "Opony przemysłowe"],
+  ["ciezarowe", "Opony ciężarowe"],
+]);
+
+/**
+ * Port `toSellyCategoryName()` (`generate_selly_export.cjs:85-95`, backlog #76).
+ *
+ * Integrator Selly o 12:00 przypisywał produkty do starych, ukrytych kategorii 7–10, bo CSV
+ * niósł WEWNĘTRZNE nazwy Bridge (`Rolnicze`, `Leśne`…). Generator mapuje je na nazwy ŻYWYCH
+ * kategorii sklepu; wartość spoza mapy przechodzi bez zmian (`raw`), a `null` daje pusty string.
+ *
+ * ⚠ `.replace(/ł/g, "l")` NIE JEST NADMIAROWE. `normalize("NFD")` rozkłada `ś`→`s`+znak
+ * diakrytyczny, ale `ł` to OSOBNY punkt kodowy (U+0142) i NFD go nie rusza — więc
+ * „Przemysłowe" po samej normalizacji zostaje „przemysłowe" i nie trafia w klucz
+ * `przemyslowe`. Dokładnie ten błąd naprawiła druga łatka z 14.09
+ * (`.bak_fix_polish_l_20260914_131800`): jedna z czterech kategorii zachowała starą nazwę.
+ *
+ * ⚠ Kolejność ma znaczenie: `ł`→`l` PO zdjęciu diakrytyków, bo `replace` na
+ * zdekomponowanym tekście i tak nie zobaczyłby `ł` inaczej — trzymamy się kolejności oryginału.
+ */
+export function nazwaKategoriiSklepu(wartosc: unknown): string {
+  if (wartosc === null || wartosc === undefined) return "";
+  const surowa = String(wartosc).trim();
+  const klucz = surowa
+    .toLocaleLowerCase("pl-PL")
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/ł/g, "l")
+    .replace(/\s+/g, " ");
+  return NAZWY_KATEGORII_SKLEPU.get(klucz) ?? surowa;
+}
 
 /**
  * Port `esc()` (`generate_selly_export.cjs:78-85`). Cudzysłów zakładany na pola z `;`, `"`,
@@ -173,6 +252,12 @@ export function zbudujCsvSelly(db: Baza): { tresc: string; wiersze: number } {
         }
         if (naglowek === "cena_sprzedazy" && typeof wartosc === "number") {
           wartosc = `${Math.floor(wartosc)},-`;
+        }
+        if (naglowek === "Kategoria") {
+          wartosc = nazwaKategoriiSklepu(wartosc);
+        }
+        if (naglowek === "Blokowane-formy-platnosci" && !wartosc) {
+          wartosc = blokowaneFormyDlaDostawcy(produkt.dostawca);
         }
         return esc(wartosc);
       }).join(";"),
@@ -275,6 +360,37 @@ export function statusPlikuCsv(sciezki: SciezkiCsvSelly, teraz = new Date()): St
   };
 }
 
+/**
+ * Zapis przez plik tymczasowy + `rename` — port `generate_selly_export.cjs:154-156`
+ * (backlog #104, produkcja 2026-09-22).
+ *
+ * Po co: `rename` w obrębie jednego systemu plików jest atomowy, więc Selly przychodzące
+ * po plik NIGDY nie zobaczy go w połowie zapisu (~2 MB, kilkaset ms). Wcześniej produkcja
+ * pisała wprost w miejsce i przy pechowym zbiegu w czasie sklep zaciągał ucięty katalog.
+ *
+ * ⚠ Plik tymczasowy MUSI leżeć w tym samym katalogu co docelowy — `rename` przez granicę
+ * systemu plików rzuca `EXDEV`. Stąd sufiks na pełnej ścieżce, a nie `os.tmpdir()`.
+ *
+ * ⚠ Ten zapis nadpisuje WYŁĄCZNIE plik CSV. Katalog eksportu na produkcji jest chroniony
+ * `.htaccess` z białą listą IP (Selly + Agrowiec) i ten plik musi w nim zostać nietknięty —
+ * `docs/cutover.md`, krok „Frontend na miejsce".
+ */
+function zapiszAtomowo(pelna: string, tresc: string): void {
+  const tymczasowy = `${pelna}.tmp-${process.pid}`;
+  try {
+    writeFileSync(tymczasowy, tresc, "utf8");
+    renameSync(tymczasowy, pelna);
+  } catch (blad) {
+    // Nieudany zapis nie może zostawić śmiecia obok pliku, po który przychodzi Selly.
+    try {
+      rmSync(tymczasowy, { force: true });
+    } catch {
+      /* sprzątanie jest best-effort — oryginalny błąd jest ważniejszy */
+    }
+    throw blad;
+  }
+}
+
 /** Odpowiedź `POST /api/selly/generate-csv` (`routes.cjs:359-365`). */
 export type WynikGenerowania = {
   ok: true;
@@ -298,12 +414,12 @@ export function wygenerujCsvSelly(db: Baza, sciezki: SciezkiCsvSelly): WynikGene
 
   mkdirSync(sciezki.katalog, { recursive: true });
   const { tresc, wiersze } = zbudujCsvSelly(db);
-  writeFileSync(pelna, tresc, "utf8");
+  zapiszAtomowo(pelna, tresc);
 
   const st = statSync(pelna);
   const stdout = [
     `Zapisano: ${pelna}`,
-    `Liczba produktow (aktywnych): ${wiersze}`,
+    `Liczba produktow aktywnych: ${wiersze}`,
     `Liczba kolumn: ${LICZBA_KOLUMN}`,
     `Rozmiar pliku (bajty): ${st.size}`,
     "",
