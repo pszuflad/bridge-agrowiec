@@ -20,6 +20,56 @@ function Kreska() {
 }
 
 /**
+ * Blokowane formy płatności per magazyn — port `VALUES`
+ * (`mirror/frontend/assets/payment-blocks-injection.js:8-18`, backlog #73).
+ *
+ * ⭐ DLACZEGO MAPA STOI W FRONCIE, A NIE PRZYCHODZI Z API. Bo tak jest w produkcji — i nie
+ * jest to niedopatrzenie, tylko konsekwencja tego, jak pole powstało. `payment_blocks.cjs`
+ * dokłada kolumnę `products.blokowane_formy_platnosci` runtime'owym `ALTER TABLE` przy każdym
+ * starcie, ale bundle backendu tej kolumny NIE ZNA (`grep -c blokowane_formy_platnosci
+ * mirror/backend/index.cjs` = 0), a produkty czyta Drizzle bez jawnej listy pól — więc
+ * `GET /api/products` jej nie oddaje. Dokładnie ten sam mechanizm co przy `uwagaCena`
+ * (`rebuild/backend/src/repos/kolumny.ts`, `KOLUMNY_POZA_KONTRAKTEM`).
+ *
+ * ⭐ ZMIERZONE, NIE ZAŁOŻONE (ticket 122): oryginał z `origin/main` @ `88fa31c`, postawiony
+ * na kopii bazy Z KOLUMNĄ WYPEŁNIONĄ dla wszystkich 7405 produktów i z obydwoma triggerami,
+ * oddaje na `GET /api/products` **72 klucze bez tego pola**. Dlatego skrypt wstrzykujący
+ * w produkcji liczy wartość w przeglądarce z kodu dostawcy — i dlatego my robimy tak samo.
+ * Sięgnięcie po wartość z API wymagałoby wystawienia pola, czyli ODSTĘPSTWA od produkcji.
+ *
+ * ⚠ CZWARTA KOPIA TEJ SAMEJ LISTY. Pozostałe trzy są po stronie backendu:
+ * `rebuild/schema/011_blokowane_formy_i_triggery.sql` (triggery — źródło wartości w bazie, z niej
+ * idzie CSV), `rebuild/backend/src/import/legacy/payment_blocks.cjs` (kopia oryginału bajt w bajt,
+ * karta I15.2) i `rebuild/backend/src/selly/generator-csv.ts` (fallback eksportu). Front i tak nie
+ * mógłby użyć żadnej z nich — to osobny pakiet. Produkcja ma ten sam podział (`payment_blocks.cjs`
+ * + skrypt front-endowy). Zmiana listy przez Anię = zmiana we wszystkich czterech miejscach;
+ * zweryfikowane 2026-09-23, że dziś są identyczne co do znaku.
+ *
+ * ⚠ MO6 (Uniglory) CELOWO BEZ WPISU — CHANGELOG produkcji 2026-09-10 14:53: „nie będzie na
+ * razie w sprzedaży". Dla MO6 i nieznanego dostawcy komórka pokazuje „—", i tak ma być
+ * (backlog #101, zamknięte 2026-09-23 po pomiarze na żywej produkcji).
+ */
+const BLOKOWANE_FORMY_PLATNOSCI: Readonly<Record<string, string>> = Object.freeze({
+  MO1: "203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO2: "201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO3: "201, 202, 203, 204, 205, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO4: "201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO5: "201, 202, 203, 204, 205, 206, 207, 208, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+  MO7: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 213, 214, 215, 216, 217, 218, 219",
+  MO8: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 215, 216, 217, 218, 219",
+  MO9: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 217, 218, 219",
+  MO10: "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216",
+});
+
+/**
+ * Wartość kolumny „Blokowane formy płatności" dla danego dostawcy.
+ * Port `VALUES[supplier] || ""` ze skryptu wstrzykującego (`:52`), razem z `toUpperCase()`.
+ */
+export function blokowaneFormyPlatnosci(dostawca: string | null | undefined): string {
+  return BLOKOWANE_FORMY_PLATNOSCI[String(dostawca ?? "").trim().toUpperCase()] ?? "";
+}
+
+/**
  * Odtworzenie zapisu szerokości opony (`Wfmt`, frontend-index.js:23098-23119).
  *
  * ⚠ To jest odpowiedź na pytanie „jak prezentować mieszane `szerokosc`" (plan.md D1,
@@ -196,6 +246,18 @@ export function formatujKomorke(produkt: Produkt, klucz: string): ReactNode {
 
   if (klucz === "dataAktualizacji" && typeof wartosc === "string") {
     return new Date(wartosc).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
+  }
+
+  /**
+   * Kolumna „Blokowane formy płatności" (backlog #73). Wartość NIE pochodzi z produktu —
+   * liczy się z kodu dostawcy, bo `GET /api/products` tego pola nie niesie (patrz komentarz
+   * przy `BLOKOWANE_FORMY_PLATNOSCI`). `title` z pełną listą, jak `td.title` w oryginale
+   * (`payment-blocks-injection.js:54`): kolumna bywa węższa niż 17 identyfikatorów.
+   */
+  if (klucz === "blokowaneFormyPlatnosci") {
+    const lista = blokowaneFormyPlatnosci(produkt.dostawca);
+    if (!lista) return <Kreska />;
+    return <span title={lista}>{lista}</span>;
   }
 
   if (klucz === "status") {

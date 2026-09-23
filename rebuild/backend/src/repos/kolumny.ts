@@ -75,9 +75,26 @@ export const KOLUMNY_POZA_KONTRAKTEM = {
     /**
      * Migracja 011 / karta I15.1 / backlog #73 — blokowane formy płatności per magazyn.
      *
-     * Ukrycie jest tu STANEM PRZEJŚCIOWYM (w odróżnieniu od `uwagaCena`): karta I15.1 dokłada kolumnę
-     * i triggery, a o kształcie odpowiedzi (katalog, eksport CSV Selly) decyduje karta I15.3.
-     * Do tego czasu `GET /api/products` zostaje przy 72 kluczach z `contract/fixtures/GET_products.json`.
+     * ⭐ TO NIE JEST STAN PRZEJŚCIOWY — wcześniejsza wersja tego komentarza tak twierdziła
+     * („o kształcie odpowiedzi decyduje karta I15.3") i była BŁĘDNA. Karta I15.3 (ticket 122)
+     * sprawdziła to pomiarem i ukrycie ZOSTAJE: to dokładnie ten sam przypadek co `uwagaCena`
+     * wyżej, a nie dług do domknięcia.
+     *
+     * Dowód (ticket 122, 2026-09-23):
+     *  • `payment_blocks.cjs` dokłada kolumnę runtime'owym `ALTER TABLE` przy każdym starcie
+     *    (`extensions.cjs` → `ensurePaymentBlocks()`), więc jest ona w bazie produkcji;
+     *  • ale bundle backendu jej NIE ZNA: `grep -c blokowane_formy_platnosci
+     *    mirror/backend/index.cjs` = 0 (stan `origin/main` @ `88fa31c`), a produkty czyta
+     *    Drizzle bez jawnej listy pól — oddaje więc pola MODELU, nie kolumny tabeli;
+     *  • ZMIERZONE NA ORYGINALE: `mirror/backend` z `88fa31c` postawiony na kopii bazy
+     *    Z KOLUMNĄ WYPEŁNIONĄ dla wszystkich 7405 produktów i obydwoma triggerami oddaje na
+     *    `GET /api/products` **72 klucze bez tego pola**.
+     *
+     * Kolumnę „Blokowane formy płatności" w `/katalog` produkcja liczy W PRZEGLĄDARCE z kodu
+     * dostawcy (`mirror/frontend/assets/payment-blocks-injection.js`) — właśnie dlatego, że API
+     * jej nie oddaje. Odbudowa robi tak samo: `rebuild/frontend/src/pages/katalog/formatowanie.tsx`.
+     * Eksport CSV Selly bierze wartość wprost z bazy (`src/selly/generator-csv.ts`), bez udziału API.
+     *
      * Strażnicy: `test/katalog.gate.test.ts` (GET) i `test/produkty.mutacje.test.ts` (PATCH).
      */
     "blokowaneFormyPlatnosci",
