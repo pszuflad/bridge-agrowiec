@@ -12,6 +12,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { sellyDict } from "../src/db/schema.js";
+import type { KlientSelly } from "../src/selly/klient.js";
 import { budujPayloadProduktuV2 } from "../src/selly/rest/mapper-v2.js";
 import { collectFullSyncItems, loadDictMaps, syncFullForDostawca } from "../src/selly/rest/sync-full.js";
 import { opakujKlientaTrybem } from "../src/selly/tryb.js";
@@ -318,6 +319,71 @@ describe("Tor 2 — sync_full", () => {
     it("bez dostawcy rzuca — `sync_full: dostawca wymagany`", async () => {
       const { discovery } = przygotuj();
       await expect(syncFullForDostawca(baza.db, discovery, "")).rejects.toThrow("sync_full: dostawca wymagany");
+    });
+  });
+
+  /**
+   * Backlog #104 (`origin/main:abe5f14`) — cykl Toru 2 trwa długo, więc status i stan czytane
+   * są z bazy tuż przed wysyłką, a nie z migawki sprzed biegu. Karta I15.7 zamknęła się na
+   * starszym `7d6cfc9`, więc ta poprawka należy do I15.10 (`docs/karty/I15.10/wejscie-111.md`).
+   */
+  describe("#104 — żywy odczyt statusu i stanu tuż przed wysyłką", () => {
+    /** Podmienia `updateProduct` tak, by PRZED pierwszym wywołaniem wykonać `zmiana()`. */
+    const wstrzyknijZmianeWTrakcie = (
+      atrapa: { klient: { updateProduct: KlientSelly["updateProduct"] } },
+      zmiana: () => void,
+    ) => {
+      const oryginalny = atrapa.klient.updateProduct.bind(atrapa.klient);
+      let pierwszy = true;
+      atrapa.klient.updateProduct = async (productId, cialo) => {
+        if (pierwszy) {
+          pierwszy = false;
+          zmiana();
+        }
+        return oryginalny(productId, cialo);
+      };
+    };
+
+    const sklepZDwomaWariantami = () => ({
+      sklep: [
+        {
+          product_id: 812,
+          ean: null,
+          warianty: [
+            { variant_id: 4242, features: [magazyn("MO9", 1)] },
+            { variant_id: 4243, features: [magazyn("MO9", 1)] },
+          ],
+        },
+      ],
+    });
+
+    it("produkt wstrzymany PO rozpoczęciu cyklu → skip, wariant nietknięty", async () => {
+      zmapuj336320();
+      zmapuj336319();
+      const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());
+      wstrzyknijZmianeWTrakcie(atrapa, () =>
+        baza.sqlite.prepare("UPDATE products SET status = 'wstrzymany' WHERE kod = 'MO9_336320'").run(),
+      );
+
+      const wynik = await syncFullForDostawca(baza.db, discovery, "MO9");
+
+      expect(wynik.stats.skip).toBe(1);
+      // Migawka miała MO9_336320 jako aktywny — mimo to jego wariant nie dostał PUT-a.
+      expect(atrapa.wywolania.filter((w) => w.metoda === "updateVariant" && w.argumenty[1] === 4242)).toHaveLength(0);
+    });
+
+    it("produkt usunięty z bazy w trakcie cyklu → skip", async () => {
+      zmapuj336320();
+      zmapuj336319();
+      const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());
+      wstrzyknijZmianeWTrakcie(atrapa, () =>
+        baza.sqlite.prepare("DELETE FROM products WHERE kod = 'MO9_336320'").run(),
+      );
+
+      const wynik = await syncFullForDostawca(baza.db, discovery, "MO9");
+
+      expect(wynik.stats.skip).toBe(1);
+      expect(atrapa.wywolania.filter((w) => w.metoda === "updateVariant" && w.argumenty[1] === 4242)).toHaveLength(0);
     });
   });
 });

@@ -22,6 +22,8 @@ import type { Discovery, WierszBridge, WynikMapowania } from "./discovery.js";
 
 /** Wiersz `findDeltaProducts` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszDelta = WierszBridge & {
+  id: number;
+  status: string;
   kod_importu: string;
   dostawca: string;
   nazwa: string | null;
@@ -43,26 +45,50 @@ export type StatystykiDelta = {
   skip: number;
   discovered: number;
   created: number;
+  /**
+   * Grupy `(dostawca, kod_importu)` z więcej niż jednym aktywnym produktem, napotkane w tym
+   * biegu. Backlog #108 — patrz `grupyKolizyjne()`. Sama liczba; wysyłki NIE zmienia.
+   */
+  kolizje_kod_importu: number;
+};
+
+/** Grupa `(dostawca, kod_importu)` z >1 aktywnym produktem — raport do `selly_sync_log`. */
+export type GrupaKolizyjna = {
+  dostawca: string;
+  kod_importu: string;
+  liczba: number;
+  rozne_ceny_lub_stany: boolean;
 };
 
 export type WynikSyncDelta = {
   stats: StatystykiDelta;
   errors: { kod: string; error: string }[];
+  kolizje: GrupaKolizyjna[];
   logId: number;
 };
 
 /**
- * Port `findDeltaProducts()` (`:22-54`) — SQL verbatim.
+ * Port `findDeltaProducts()` (`:22-54`) — SQL verbatim, stan `origin/main:abe5f14`
+ * (zmiana „dostępność”, 2026-09-22; karta I15.10, ticket 119).
  *
  * Backlog #77: `wstrzymany` wchodzi TYLKO z istniejącym wariantem i wysyła stan 0 (zerujemy
- * wariant w sklepie, ale nie zakładamy produktu, który nigdy nie był opublikowany). EAN
- * i `kod_importu` są wymagane — produkt bez EAN-u Tor 1 pomija w ogóle.
+ * wariant w sklepie, ale nie zakładamy produktu, który nigdy nie był opublikowany).
+ *
+ * Backlog #104 wprowadza do tego warunku dwie zmiany:
+ * 1. `wstrzymany` jest wykluczony, jeśli w TEJ SAMEJ grupie `(dostawca, kod_importu)` jest inna
+ *    pozycja `aktywna` — inaczej zerowalibyśmy wariant, który druga oferta właśnie sprzedaje.
+ * 2. EAN nie jest już bezwarunkowo wymagany: wiersz z GOTOWYM mapowaniem wariantu
+ *    (`sp.selly_variant_id`) wchodzi bez EAN-u, bo wariant i tak trzeba zaktualizować.
+ *    Bez mapowania EAN nadal jest konieczny (discovery nie ma po czym szukać).
  */
 export function findDeltaProducts(db: Baza, dostawca: string | null = null, limit = 10000): WierszDelta[] {
   const where = [
-    "(p.status = 'aktywny' OR (p.status = 'wstrzymany' AND sp.selly_variant_id IS NOT NULL))",
-    "p.ean IS NOT NULL",
-    "p.ean != ''",
+    `(p.status = 'aktywny' OR (p.status = 'wstrzymany' AND sp.selly_variant_id IS NOT NULL
+        AND NOT EXISTS(SELECT 1 FROM products active
+                        WHERE active.dostawca = p.dostawca
+                          AND active.kod_importu = p.kod_importu
+                          AND active.status = 'aktywny')))`,
+    "(sp.selly_variant_id IS NOT NULL OR (p.ean IS NOT NULL AND p.ean != ''))",
     "p.kod_importu IS NOT NULL",
     "p.kod_importu != ''",
   ];
@@ -72,7 +98,7 @@ export function findDeltaProducts(db: Baza, dostawca: string | null = null, limi
     params.push(dostawca);
   }
   const sql = `
-    SELECT p.kod, p.kod_importu, p.dostawca, p.ean, p.nazwa,
+    SELECT p.id, p.status, p.kod, p.kod_importu, p.dostawca, p.ean, p.nazwa,
            p.marka, p.kategoria,
            CASE WHEN p.status = 'wstrzymany' THEN 0 ELSE p.stan END AS stan,
            p.cena_sprzedazy, p.cena_zakupu, p.vat AS vat_rate,
@@ -91,6 +117,56 @@ export function findDeltaProducts(db: Baza, dostawca: string | null = null, limi
   `;
   params.push(limit);
   return db.$client.prepare(sql).all(...params) as WierszDelta[];
+}
+
+/**
+ * Grupy `(dostawca, kod_importu)`, w których JEDEN dostawca ma więcej niż jeden aktywny produkt
+ * — backlog #108. **Nie ma odpowiednika w oryginale**: to czysto raportowe rozszerzenie
+ * dołożone w karcie I15.10 (ticket 119), które NIE zmienia tego, co Tor 1 wysyła.
+ *
+ * Po co: `markSynced()` kluczuje snapshot (`stan_wyslany`, `cena_sprzedazy_wyslana`) po
+ * `kod_importu + dostawca`, więc dwa aktywne wiersze jednej grupy piszą do TEGO SAMEGO wiersza
+ * `selly_products`. Każdy nadpisuje poprzedni, warunek delty znów widzi różnicę i obie pozycje
+ * lecą w kółko przy każdym cyklu.
+ *
+ * ⚠ Celowo grupujemy po PARZE `(dostawca, kod_importu)`, nie po samym `kod_importu`. Ten sam
+ * `kod_importu` u RÓŻNYCH dostawców to zamierzona wielomagazynowość Selly (potwierdziła Ania
+ * 2026-09-23: jedna karta produktu, różne ceny i magazyny; różne EAN-y nie znaczą, że to inna
+ * opona — klasyfikuje nazwa, model i indeksy). Tamten przypadek NIE jest kolizją i nie może
+ * tu wpaść; odbudowa obsługuje go w `isMetadataOwner()` w Torze 2.
+ */
+export function grupyKolizyjne(db: Baza, dostawca: string | null = null): GrupaKolizyjna[] {
+  const params: string[] = [];
+  let filtr = "";
+  if (dostawca) {
+    filtr = " AND dostawca = ?";
+    params.push(dostawca);
+  }
+  return db.$client
+    .prepare(
+      `SELECT dostawca, kod_importu, COUNT(*) AS liczba,
+              CASE WHEN COUNT(DISTINCT IFNULL(stan, -1) || '/' || IFNULL(cena_sprzedazy, -1)) > 1
+                   THEN 1 ELSE 0 END AS rozne
+       FROM products
+       WHERE status = 'aktywny' AND kod_importu IS NOT NULL AND kod_importu != ''${filtr}
+       GROUP BY dostawca, kod_importu
+       HAVING COUNT(*) > 1`,
+    )
+    .all(...params)
+    .map((r) => {
+      const w = r as { dostawca: string; kod_importu: string; liczba: number; rozne: number };
+      return {
+        dostawca: w.dostawca,
+        kod_importu: w.kod_importu,
+        liczba: w.liczba,
+        rozne_ceny_lub_stany: w.rozne === 1,
+      };
+    });
+}
+
+/** Klucz grupy — `\u0000` nie wystąpi w żadnej z obu wartości. */
+function kluczGrupy(dostawca: string | null, kodImportu: string | null): string {
+  return `${dostawca ?? ""}\u0000${kodImportu ?? ""}`;
 }
 
 /** `logSyncStart` (`:59-66`) — `dostawca_kod = 'ALL'`, gdy bez filtra. */
@@ -178,13 +254,36 @@ export async function syncDelta(
   const rows = findDeltaProducts(db, dostawca, maxProducts);
   const logId = logSyncStart(db, dostawca);
 
-  const stats: StatystykiDelta = { total: rows.length, ok: 0, err: 0, skip: 0, discovered: 0, created: 0 };
+  const stats: StatystykiDelta = {
+    total: rows.length,
+    ok: 0,
+    err: 0,
+    skip: 0,
+    discovered: 0,
+    created: 0,
+    kolizje_kod_importu: 0,
+  };
   const errors: { kod: string; error: string }[] = [];
+
+  // #108: grupy kolizyjne wykrywamy RAZ, jednym zapytaniem — zamiast pytać per wiersz.
+  // Raportujemy tylko te, które faktycznie weszły do tego biegu.
+  const wszystkieKolizje = new Map(grupyKolizyjne(db, dostawca).map((g) => [kluczGrupy(g.dostawca, g.kod_importu), g]));
+  const kolizjeBiegu = new Map<string, GrupaKolizyjna>();
 
   console.log(`[sync_delta] Start: ${rows.length} produktow, dostawca=${dostawca || "ALL"}, dryRun=${dryRun}`);
 
   for (const row of rows) {
     try {
+      // 0. #108: sam raport — wiersz leci dalej normalną ścieżką i ZOSTANIE wysłany.
+      // Pomijanie takiej grupy zatrzymałoby pozycje, których dane Ania uznaje za poprawne
+      // (wyjaśnienie z 2026-09-23), dlatego zawór z `wejscie-117.md` został wycofany.
+      const klucz = kluczGrupy(row.dostawca, row.kod_importu);
+      const kolizja = wszystkieKolizje.get(klucz);
+      if (kolizja && !kolizjeBiegu.has(klucz)) {
+        kolizjeBiegu.set(klucz, kolizja);
+        stats.kolizje_kod_importu++;
+      }
+
       // 1. Mapping — z JOIN-a albo przez discovery
       let mapping: WynikMapowania;
       if (row.selly_variant_id) {
@@ -209,6 +308,37 @@ export async function syncDelta(
       }
 
       // 2. Aktualizacja wariantu (quantity + price)
+      //
+      // Backlog #104 (`abe5f14`): import mógł wstrzymać pozycję W TRAKCIE tego biegu, kiedy
+      // discovery szukało wariantów. Migawka sprzed pętli jest wtedy nieaktualna, więc stan
+      // i cenę czytamy z bazy DOPIERO TERAZ. Komentarz oryginału: „Never send a stock captured
+      // before suspension.”
+      const live = db.$client
+        .prepare("SELECT status, stan, cena_sprzedazy FROM products WHERE id = ?")
+        .get(row.id) as { status: string; stan: number | null; cena_sprzedazy: number | null } | undefined;
+
+      if (!live) {
+        // Produkt zniknął z bazy w trakcie biegu — nie ma czego wysyłać.
+        stats.skip++;
+        continue;
+      }
+
+      if (live.status === "wstrzymany") {
+        // Wstrzymany, ale grupa ma inną CZYNNĄ ofertę — zerowanie wariantu zabiłoby sprzedaż
+        // tamtej pozycji, bo wariant w Selly jest wspólny dla grupy.
+        const innaAktywna = db.$client
+          .prepare("SELECT 1 FROM products WHERE dostawca = ? AND kod_importu = ? AND status = 'aktywny' LIMIT 1")
+          .get(row.dostawca, row.kod_importu);
+        if (innaAktywna) {
+          stats.skip++;
+          continue;
+        }
+        row.stan = 0;
+      } else {
+        row.stan = live.stan;
+        row.cena_sprzedazy = live.cena_sprzedazy;
+      }
+
       if (dryRun) {
         stats.skip++;
         console.log(
@@ -245,18 +375,28 @@ export async function syncDelta(
     }
   }
 
+  const kolizje = [...kolizjeBiegu.values()];
+
   logSyncEnd(
     db,
     logId,
     stats.ok,
     stats.err,
     stats.skip,
-    { stats, sample_errors: errors.slice(0, 20) },
+    { stats, kolizje: kolizje.slice(0, 20), sample_errors: errors.slice(0, 20) },
     stats.err > 0 && stats.ok === 0 ? "blad" : "zakonczono",
   );
+
+  if (kolizje.length) {
+    // #108: nie blokujemy wysyłki, ale zostawiamy ślad — inaczej pętla jest niewidoczna.
+    console.warn(
+      `[sync_delta] Kolizje kod_importu: ${kolizje.length} grup (ten sam dostawca, >1 aktywny produkt) ` +
+        `— pozycje wysłane, snapshot współdzielony, patrz backlog #108`,
+    );
+  }
 
   console.log(
     `[sync_delta] Koniec: ok=${stats.ok}, err=${stats.err}, skip=${stats.skip}, discovered=${stats.discovered}`,
   );
-  return { stats, errors, logId };
+  return { stats, errors, kolizje, logId };
 }

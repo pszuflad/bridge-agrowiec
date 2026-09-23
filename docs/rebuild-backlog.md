@@ -4555,7 +4555,7 @@ potwierdzenie), a celem nr 1 jest domknięcie odbudowy 1:1. W I15 port 1:1 (osie
 | **Kategoria** | BAZA + BACKEND — zgłoszony defekt produkcji |
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (lista per dostawca MO1–MO10 bez MO6, `sqlCase()`), triggery `products_blokowane_formy_ai/_au` (`origin/main:db/schema.sql`), `extensions.cjs` (`ensurePaymentBlocks()` przy starcie); powiązane #73 |
 | **Do nowej wersji?** | ❌ **NIE — temat zamknięty 2026-09-23 przez Anię** (patrz niżej). Nie ma czego naprawiać ani w Bridge, ani w Selly. |
-| **Status** | ✅ **zamknięte 2026-09-23 — zgłoszenie było nieporozumieniem.** Ania: „Nie widzę pustych pól tylko myślałam że nie mamy zrobionej tej logiki. Jest zrobiona to super zamknij temat." Logika istnieje w produkcji (triggery `products_blokowane_formy_ai/_au` + `ensurePaymentBlocks()` przy starcie) i jest już przeniesiona do odbudowy (ticket 107, migracja 011). Pomiar ticketu 109 (I15.7): payload REST Toru 2 tego pola nie niesie — wysyłał je tylko stary eksport CSV (`generate_selly_export.cjs:75,142-143`); zostaje jako FAKT o różnicy CSV ↔ REST, nie jako defekt do naprawy. |
+| **Status** | ✅ **zamknięte 2026-09-23 — zgłoszenie było nieporozumieniem.** Ania: „Nie widzę pustych pól tylko myślałam że nie mamy zrobionej tej logiki. Jest zrobiona to super zamknij temat." Logika istnieje w produkcji (triggery `products_blokowane_formy_ai/_au` + `ensurePaymentBlocks()` przy starcie) i jest już przeniesiona do odbudowy (ticket 107, migracja 011). Pomiar ticketu 109 (I15.7): payload REST Toru 2 tego pola nie niesie — wysyłał je tylko stary eksport CSV (`generate_selly_export.cjs:75,142-143`); zostaje jako FAKT o różnicy CSV ↔ REST, nie jako defekt do naprawy. **⭐ Ticket 119 (I15.10, 2026-09-23) zmierzył też Tor 1:** `budujPayloadProduktuV2` (`src/selly/rest/mapper-v2.ts`) nie ma pola `blokowane_formy_platnosci` ani żadnego `payment_form*`, tak samo oryginał `mirror/backend/selly/mapper_v2.cjs` na `88fa31c` — zero trafień grepem w obu. Potwierdza to wcześniejszy wniosek: REST (Tor 1 i Tor 2) nigdy tego pola nie wysyłał, więc nie mógł być źródłem żadnej regresji; pole istnieje wyłącznie w kolumnie bazy i w CSV. |
 
 **Odpowiedź Ani:** „trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie
 tego nie ma - każdy nowy produkt ma to pole puste a to ono wyznacza opcje metody dostawy i cenę dla danego dostawcy”.
@@ -4687,8 +4687,8 @@ nie przenosić (jak D5 dla reconcile Staging v2).
 | **Kategoria** | BACKEND + BAZA (staging, eksport CSV, Selly delta/full) + operacja na danych |
 | **Pliki** | `mirror/backend/availability_sync.cjs` (**nowy**), `staging_policy.cjs` (+87 l. → 488), `generate_selly_export.cjs` (+19), `selly/sync_delta.cjs` (+18), `selly/sync_full.cjs` (+3); `db/schema.sql`: `product_auto_suspensions`; jednorazowe: `apply_availability_20260922.cjs`, `zero_and_delete_agrorami_20260922.cjs` + archiwa JSON |
 | **Commit** | `abe5f14` |
-| **Do nowej wersji?** | ⬜ **do decyzji (częściowo rozstrzygnięte)** |
-| **Status** | ⬜ **częściowo.** ✅ **CSV → ticket 122 (I15.3)** — zapis atomowy naniesiony; filtr „tylko aktywne” odbudowa miała od I8a. ✅ **schemat → ticket 124 (I15.4a)** — tabela `product_auto_suspensions` migracją `012`. ✅ **ochrona ręcznych wstrzymań w AKCEPTACJI → ticket 129 (I15.4c, 2026-09-23)** — akceptacja zdejmuje wyłącznie wstrzymanie AUTOMATYCZNE, ręczne zostaje (`staging_policy.cjs:216-222`); `suspend()` sportowany jako `wstrzymajAutomatycznie` (znacznik tylko dla produktu `aktywny` albo już oznaczonego, `suspended_at` nietykane przy konflikcie). **Otwarte:** auto-wstrzymania po stronie IMPORTU — **I15.4b**; `availability_sync`, delta i tor pełny — **I15.10** (punkt wpięcia wystawiony jawnie przez ticket 129, patrz `docs/karty/I15.10/wejscie-129.md`). ⚠ **Bez gospodarza:** nadpisanie `U.updateProduct` (`:113-119`), przez które ręczny wybór statusu kasuje znacznik auto-wstrzymania — dotyczy `PUT /api/products/:id`, czyli plików spoza kart I15.4a/b/c. |
+| **Do nowej wersji?** | ✅ **TAK — Tor 1 i Tor 2 zrealizowane** (ticket 119); staging/auto-wstrzymania zostają do I15.4b |
+| **Status** | 🔨 **częściowo.** ✅ **CSV → ticket 122 (I15.3, 2026-09-23)** — zapis atomowy naniesiony (`generator-csv.ts`, tmp+`renameSync` w tym samym katalogu); filtr „tylko aktywne” odbudowa miała już od I8a, więc nie było tu czego zmieniać. ✅ **schemat → ticket 124 (I15.4a, 2026-09-23)** — tabela `product_auto_suspensions` założona migracją `012`. ✅ **Tor 1 i Tor 2 + `availability_sync` → ticket `119-FEATURE-selly-dostepnosc-zawor` (karta I15.10, 2026-09-23)** — żywy odczyt statusu/stanu/ceny przed wysyłką, warunek wyboru z `abe5f14`, moduł `dostepnosc.ts` (port `availability_sync.cjs`, celowo niewpięty — czeka na I15.4b); patrz „Zrealizowane" niżej. **Zostaje otwarte:** logika auto-wstrzymań (`staging_policy.cjs`) → **I15.4b**. |
 
 **Opis biznesowy (CHANGELOG Ani).** „Brak produktu w poprawnej pełnej ofercie natychmiast ustawia wstrzymany/0. Tabela
 `product_auto_suspensions` odróżnia automatyczny brak od ręcznego wstrzymania. Pewny powrót przywraca aktywność i bieżący
@@ -4711,6 +4711,17 @@ status/stan/cena produktu (`SELECT … FROM products WHERE id=?`), żeby nie wys
 nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4b** (otwarte), CSV tylko aktywne + zapis atomowy → **I15.3 — ✅ zapis atomowy zrobiony ticketem 122 (23.09); filtr „tylko aktywne” odbudowa miała już wcześniej, nic do naniesienia**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
 ⚠ Operacje na danych (395 wstrzymań, 179 usuniętych kart MO9) — **nie odtwarzamy** (decyzja D2: świeża kopia produkcji
 na staging), ale **trzeba je uwzględnić przy pomiarach**: liczba produktów w katalogu spadła o 179.
+
+**⭐ Zrealizowane (ticket 119, karta I15.10, 2026-09-23) — TYLKO część Selly delta/full.** Tor 1
+(`sync-delta.ts`): WHERE wyklucza wstrzymane mające inną aktywną ofertę w grupie `(dostawca, kod_importu)`,
+EAN wymagany tylko bez gotowego mapowania wariantu, żywy odczyt `status`/`stan`/`cena_sprzedazy` tuż przed
+wysyłką (wstrzymany → stan 0, wstrzymany przy innej aktywnej ofercie → `skip`). Tor 2 (`sync-full.ts`): żywy
+`status`/`stan` na starcie pętli, wstrzymany/usunięty po rozpoczęciu cyklu → `skip`. Dołożony też
+`rebuild/backend/src/selly/dostepnosc.ts` (port `availability_sync.cjs`) — **celowo niewpięty**, punkt
+wpięcia dołoży karta I15.4. ⚠ `row.stan = live.stan` w Torze 2 jest **martwe** — payload Toru 2 nie niesie
+stanu, ani u nas, ani w oryginale (`sync_full.cjs:291`); realny skutek poprawki Toru 2 to wyłącznie `skip`.
+**CSV tylko aktywne + zapis atomowy (I15.3) oraz staging i auto-wstrzymania (I15.4) NIE były w zakresie
+ticketa 119** — ten wpis zostaje częściowo otwarty dla nich. Szczegóły: `docs/tickets/119-FEATURE-selly-dostepnosc-zawor/`.
 
 ---
 
@@ -4810,8 +4821,8 @@ zadanie przekazane tam plikiem `docs/karty/I15.4c/wejscie-124.md` (decyzja D-124
 | **Data** | 2026-09-23 (specyfikacja Selly od Ani, stan opisu na 22.09) |
 | **Kategoria** | BACKEND (grupowanie produktów) + BAZA |
 | **Pliki** | `assignKodImportu` — w produkcji `bridge_ext.cjs`, od Staging v2 **nadpisany** w `staging_policy.cjs` (`origin/main`); mapowanie `selly_products` `(kod_importu, dostawca)`; port: `rebuild/backend/src/**` (I15.4 przejmuje nadpisanie) |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI — problem POTWIERDZONY pomiarem 2026-09-23** |
-| **Status** | ⚠ żywy: 80 grup / 174 produkty · **przyczyna USTALONA (niżej)** · Ania (23.09) poprosiła o listę przypadków przed decyzją — lista wysłana, czeka na jej przegląd |
+| **Do nowej wersji?** | ✅ **częściowo TAK — wykrywanie i raportowanie zrealizowane (ticket 119, 2026-09-23); pomijanie/zawór WYCOFANY decyzją Ani.** Rozstrzygnięcie semantyczne („ten sam dostawca, ten sam `kod_importu`”) ⬜ **DO DECYZJI Ani** — poprosiła 23.09 o listę przypadków, lista wysłana, czeka na jej przegląd |
+| **Status** | 🔨 **potwierdzony, częściowo zaadresowany, NADAL OTWARTY** — patrz „⭐ Rewizja" niżej. Żywy na produkcji: 80 grup / 174 produkty, 76 grup z różnymi cenami lub stanami, wszystkie 80 z mapowaniem w `selly_products`; **przyczyna USTALONA (niżej)** |
 
 **Opis (specyfikacja Ani).** „121 zduplikowanych kluczy `(dostawca, kod_importu)` = 259 aktywnych wierszy;
 114 grup/245 z różnymi cenami/stanami. Współdzielony `selly_products` → snapshot nadpisywany → delty wracają
@@ -4853,13 +4864,15 @@ różne produkty pod jednym kluczem.
 sześciocyfrowy `kod_importu`** (`if (retained && /^\d{6}$/.test(retained))`), więc nowa reguła grupowania dotyczy
 wyłącznie pozycji bez klucza. Stare kolizje zostają w danych i przejdą przez cutover razem z bazą.
 
-**Trzy drogi (decyzja użytkownika + Ani):**
+**Trzy drogi rozważane przed I15.10 (decyzja użytkownika + Ani) — (c) NIEAKTUALNE, patrz „⭐ Rewizja" niżej:**
 - **(a) naprawa danych przed cutoverem** — rozdzielić kolidujące grupy (nowy `kod_importu` dla wierszy poza
   kanonicznym). ⚠ Skutek w sklepie: discovery utworzy dla nich osobne produkty/warianty w Selly — zmiana
   widoczna dla klientów, wymaga zgody Ani;
 - **(b) zostawić 1:1** — odbudowa odtworzy dzisiejszy stan produkcji, czyli pętlę delty co 15 minut;
-- **(c) zawór bezpieczeństwa w Torze 1** — wykryć kolizję przed wysyłką, pominąć grupę i zaraportować
-  w `selly_sync_log`. Nie zmienia danych ani sklepu, zatrzymuje pętlę.
+- ~~(c) zawór bezpieczeństwa w Torze 1 — wykryć kolizję przed wysyłką, pominąć grupę i zaraportować w
+  `selly_sync_log`.~~ **Wycofane 23.09** — Ania wyjaśniła, że współdzielony `kod_importu` bywa ZAMIERZONą
+  wielomagazynowością (ta sama opona u kilku dostawców = jedna karta w Selly), więc pomijanie zatrzymałoby
+  też produkty o poprawnych danych. Zamiast (c) wszedł sam mechanizm raportowania (bez pomijania) — patrz niżej.
 
 **⭐ PRZYCZYNA — USTALONA 2026-09-23 (kod + pomiar).** Stara reguła `assignKodImportu`
 (`origin/main:mirror/backend/bridge_ext.cjs:156-178`) działa czterostopniowo: (1) produkt, który ma już
@@ -4875,8 +4888,31 @@ już zmienić numeru.
 **74 z 80**; grup z różnymi EAN-ami — **75 z 80**; grup z różnym DOT — **9**. Czyli to prawie zawsze dwie fizycznie
 różne opony (inny EAN, czasem inny rocznik) pod jedną nazwą.
 
-**Rekomendacja koordynatora: (c) teraz + (a) po uzgodnieniu z Anią.** (c) jest tanie i odwracalne, mieści się
+**Rekomendacja koordynatora (22.09) — CZĘŚCIOWO NIEAKTUALNA: (c) teraz + (a) po uzgodnieniu z Anią.**
+⚠ (c) wycofane decyzją Ani z 23.09 (wyżej); w jego miejsce wszedł sam mechanizm raportowania (ticket 119,
+niżej). (a) nadal do uzgodnienia z Anią. (c) jest tanie i odwracalne, mieści się
 w karcie **I15.10**; (a) to zmiana asortymentu w sklepie — dziś te opony są w Selly sklejone w jeden produkt.
+
+**⭐ Rewizja zakresu (ticket 119, karta I15.10, 2026-09-23) — zawór wycofany, zostaje wykrywanie i
+raportowanie.** Rozstrzygnięcie: **wysyłka zostaje 1:1 z produkcją** (pętla delty co 15 minut trwa, jak
+dziś), dołożona jest wyłącznie widoczność — `grupyKolizyjne()` w `sync-delta.ts`, licznik
+`stats.kolizje_kod_importu`, lista `kolizje` w wyniku `syncDelta` i w `selly_sync_log.szczegoly_json`
+(+ pole diagnostyczne `rozne_ceny_lub_stany`, poza planem). **Rozróżnienie, którego wcześniejszy opis wpisu
+nie miał:** problem dotyczy WYŁĄCZNIE przypadku „ten sam dostawca, ten sam `kod_importu`" (grupowanie
+`grupyKolizyjne()` jest po PARZE `(dostawca, kod_importu)`, zgodnie z tabelą SQL wyżej) — bo snapshot
+`selly_products` jest kluczowany tą samą parą i dwa aktywne wiersze grupy nadpisują się nawzajem. Przypadek
+„różni dostawcy, ten sam `kod_importu`" to właśnie wielomagazynowość Ani i NIE jest kolizją; odbudowa go
+respektuje w `isMetadataOwner()` (`sync-full.ts`) i `grupyKolizyjne()` go nie dotyka.
+**Pomiar ticketu 119** (migawka `db/snapshot.db`, 13.08, 6898 aktywnych produktów — inna data niż pomiar
+23.09 wyżej, więc liczby się różnią): ten sam dostawca — **121 grup / 259 produktów**, z czego **116 grup
+ma różne ceny lub stany**; różni dostawcy (nie-kolizja) — **793 grupy / 1734 produkty**. Przykład (MO1,
+`kod_importu` 326606): `MO1_15126983`/`MO1_15126981` — identyczna nazwa/model/rozmiar, różne EAN-y, stany
+5 vs 2, ceny 12016 vs 10676 — zgodnie z regułą Ani te dane są POPRAWNE, nie anomalią do pominięcia.
+**Co zostaje otwarte:** rozstrzygnięcie semantyczne przypadku „ten sam dostawca" (deduplikacja, agregacja
+stanu czy rozdzielenie grup) to decyzja handlowa Ani, poza zakresem odbudowy — danych nie ruszano. Wpis
+zostaje 🔨 **częściowo zaadresowany, nie zamknięty**: pętla delty co 15 minut nadal istnieje, tylko jest
+teraz widoczna w logach. Szczegóły: `docs/tickets/119-FEATURE-selly-dostepnosc-zawor/`.
+
 
 
 ---
