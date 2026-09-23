@@ -95,6 +95,20 @@ Co dowodzą nowe testy:
   filtr zawęża PEŁNY zbiór (600, nie 200), pobranie dopiero po kliknięciu, Rotacja z dwoma
   parametrami, 500 i 401 → komunikat i **zero plików**, karta bez sufitu bez drugiego zapytania.
 
+## Poprawki po review
+
+Review (`review.md`): **0** uwag merytorycznych do kodu — reviewer przeszedł osiem tras repo, obie
+gałęzie SQL `dostepnoscProduktow`, rozdzielenie dwóch limitów `marze()`, spójność filtrów CSV vs
+tabela we wszystkich siedmiu sekcjach i przepuścił GATE (69/69) oraz nowe testy. Trzy zgłoszone
+BLOCKER-y dotyczyły wyłącznie artefaktów dokumentacyjnych z DoD i są rozliczone w „Docs updates"
+niżej (karta P10.5, status backlogu #96, wejście dla I15.9).
+
+- **SHOULD-FIX — brak testu stanu przycisku w trakcie pobierania (decyzja D4).** Dodany
+  (`analityka.eksport-pelne.test.tsx`, commit `bc14a00`): handler `?limit=0` wisi, dopóki test go
+  nie zwolni, co pozwala zaasertować stan POŚREDNI — przycisk nieaktywny, spinner widoczny, zero
+  plików — a po zwolnieniu: znowu aktywny, bez spinnera, dokładnie jeden plik z pełnym zbiorem.
+  Frontend: 8/8 w tym pliku, 946 w całym pakiecie.
+
 ## Zmiany łamiące zgodność
 
 Brak. Nowy parametr jest opt-in; bez niego wszystkie osiem tras odpowiada identycznie jak przed
@@ -109,3 +123,55 @@ ticketem, co pilnują nowe testy i niezmienione fixtures.
   w `WidokEksportu`), więc sufit nie wchodzi do żadnego pliku. Poza zakresem #96.
 - **Serwerowy `GET /api/analytics/export/{view}`** nadal nie ma konsumenta we froncie
   (`repos/analityka-eksport.ts`, `LIMIT_EKSPORTU = 5000` na 6/10 widoków). Świadomie nietknięty.
+
+## Docs updates
+
+### `docs/karty/P10.5/karta.md`
+- `Stan` z `⬜ gotowe` na `✅ 2026-09-23 · 126-FEATURE-pelne-pliki-csv-analityki`, pole `Ticket` uzupełnione.
+- Sekcja „Zakres" — zdanie o „trzech dotkniętych widokach" poprawione **w miejscu** na stan faktyczny
+  (osiem z sufitem, sześć realnie ucinających, z liczbami); punkt o pomiarze też z „trzech" na „ośmiu".
+- **Dowiezione** (była `—`) — mechanizm `?limit=0`, osiem funkcji repo z `bezLimitu = false`, osiem
+  ścieżek openapi z `enum: [0]`, leniwe dociąganie z tymi samymi filtrami co tabela, pełna tabela
+  pomiaru, świadome odstępstwo (błąd → toast, brak pliku), lista nietkniętego, wyniki bramek.
+- **Do koordynatora** (była `—`) — trzy punkty: rozjazd zakresu 3→8/6 z odsyłaczem do pomiaru
+  i `docs/instrukcja-testow-I10-v2.md:174-179`; luka w kontrakcie (brak `parameters:` dla
+  `?days`/`?ean`/`?kod`/`?group`/`?minDiffPct`); `lifecycle/models` ucina 1691→1000, ale bez przycisku CSV.
+
+### `docs/karty/I15.9/wejscie-126.md` (NOWY)
+Wejście dla karty piszącej instrukcję testów I15 dla Ani, w formacie delty: pytanie A z I10-v2 §1.3
+i odpowiedź Ani, liczby przed→po dla sześciu ucinanych kart, jawne „2.1-2.4 i Marża bez zmian",
+ostrzeżenie że **plik jest teraz WIĘKSZY niż N ze stopki** (to nie błąd), sprostowanie zdania
+„plik ma tyle wierszy, ile mówi stopka" z I10-v2 §1.3, opis spinnera i zachowania przy błędzie,
+zastrzeżenie o podstawie pomiaru (snapshot 2026-08-13 vs odświeżony staging z decyzji D2).
+
+### `docs/rebuild-backlog.md` — wpis `#96`
+- `Status` → ✅ ZAMKNIĘTE 2026-09-23 + ticket + podsumowanie mechanizmu.
+- „Na czym polega" — poprawione **w miejscu**: zmierzone liczby dla wszystkich sześciu ucinanych
+  widoków (dodane `suppliers-lifecycle`, `prices-last`, `rotation-inactive`).
+- Zdanie o kaflu „Pozycje unikalne" — doprecyzowane, że zostaje bez zmian.
+- „Powiązane" — poprawione **w miejscu** zdanie sugerujące przywrócenie serwerowego `export/:view`
+  jako drogę rozwiązania: ta droga została odrzucona (odebrałaby plikowi filtry, cofnęła sens #91).
+- Zakres z „trzech" na „osiem" widoków + odsyłacz do `docs/spec-backend/wpis-126.md`.
+- Sprawdzone #91 i #34: #91 („limit 300 nie dotyczy pliku — CSV ma WSZYSTKIE wiersze po filtrach")
+  było nieprawdziwe przez ukryty sufit SQL, ale po tym ticketcie znów jest prawdziwe — bez poprawki.
+
+### `docs/spec-backend/wpis-126.md` (NOWY — nie dopisek do `docs/spec-backend.md`)
+Osiem tras z opcjonalnym `?limit` jako świadome odstępstwo; semantyka `czyBezLimitu()`; wzorzec
+wierności (limit jako domyślna wartość parametru funkcji repo); dwie osobliwości (`marze()` z dwoma
+limitami, `dostepnoscProduktow()` z dwiema gałęziami SQL); **znalezisko ticketu** — przed nim żaden
+test nie bronił liczbowych `LIMIT_*`, bo fixtures nagrano poniżej sufitu, a GATE porównuje kształt,
+nie liczbę wierszy; tabela pomiaru z zastrzeżeniem o dacie snapshotu.
+
+### `rebuild/frontend/src/pages/analityka/README.md` (Master)
+- §7a poprawione **w miejscu**: sygnatura `PrzyciskCsv` (doszedł `pobierzPelne`) i akapit „Zakres
+  pliku" — zdanie „wszystkie wiersze po filtrach" było prawdziwe tylko modulo sufit SQL.
+- **Nowa §7b** — kiedy karta musi podać `pobierzPelne` (tabelka: trasa z `LIMIT` → tak, bez → nie),
+  przykład użycia i cztery rzeczy, które łatwo zepsuć: filtr musi być ten sam co w tabeli, pobranie
+  ma zostać leniwe, `null` to błąd a nie pusty zbiór, adres musi nieść oba parametry w Rotacji.
+  Plus ⚠ pułapka testowa: **MSW dopasowuje handlery po ścieżce i ignoruje query string**, więc test
+  z jednym handlerem na trasę nie dowodzi o suficie niczego.
+
+### Pre-existing issues (zgłoszone, nienaprawione — poza własnością tego ticketu)
+- `docs/instrukcja-testow-I10-v2.md:171-179` — „Plik ma tyle wierszy, ile mówi stopka" jest od teraz
+  nieaktualne dla ośmiu kart z sufitem. Plik należy do karty P10.4 (zamkniętej); sprostowanie
+  zapisane jako zadanie dla I15.9 w `docs/karty/I15.9/wejscie-126.md`.
