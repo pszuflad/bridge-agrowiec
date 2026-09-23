@@ -4742,3 +4742,66 @@ Karta **I15.4** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i za
   backlogu, **nie istnieje już na `origin/main`** — przy analizie łatek trzeba sięgać do historii gitowej
   (`git show <starszy-commit>:<ścieżka>`), nie do stanu bieżącego.
 
+---
+
+### #108 · 2026-09-23 · [BACKEND][BAZA] · kolizje `kod_importu` — delty do Selly mogą wracać w pętli co 15 minut
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-23 (specyfikacja Selly od Ani, stan opisu na 22.09) |
+| **Kategoria** | BACKEND (grupowanie produktów) + BAZA |
+| **Pliki** | `assignKodImportu` — w produkcji `bridge_ext.cjs`, od Staging v2 **nadpisany** w `staging_policy.cjs` (`origin/main`); mapowanie `selly_products` `(kod_importu, dostawca)`; port: `rebuild/backend/src/**` (I15.4 przejmuje nadpisanie) |
+| **Do nowej wersji?** | ⬜ **DO DECYZJI — problem POTWIERDZONY pomiarem 2026-09-23** |
+| **Status** | ⚠ **żywy na produkcji**: 80 grup / 174 produkty, 76 grup z różnymi cenami lub stanami, wszystkie 80 z mapowaniem w `selly_products` |
+
+**Opis (specyfikacja Ani).** „121 zduplikowanych kluczy `(dostawca, kod_importu)` = 259 aktywnych wierszy;
+114 grup/245 z różnymi cenami/stanami. Współdzielony `selly_products` → snapshot nadpisywany → delty wracają
+co 15 min. **Naprawa `assignKodImportu` to warunek przed dalszym syncem.**"
+
+**Dlaczego to boli.** Tor 1 zapisuje ostatnio wysłaną cenę i stan w `selly_products` per `(kod_importu, dostawca)`.
+Gdy dwa RÓŻNE produkty tego samego dostawcy dostaną ten sam `kod_importu`, dzielą jeden wiersz mapowania:
+snapshot jednego nadpisuje snapshot drugiego, więc oba wyglądają na „zmienione" przy każdym cyklu i są wysyłane
+w kółko — co 15 minut, bez końca.
+
+**Co się zmieniło od czasu opisu.** Staging v2 (22.09, backlog #99) **nadpisał `ext.assignKodImportu`**: grupa
+powstaje tylko przy zgodności marka/model/rozmiar oraz indeksów i DOT, a numer sześciocyfrowy jest losowany, gdy
+zgodnej grupy nie ma. To mogło problem usunąć — **wymaga pomiaru, nie założenia.**
+
+**Pomiar do wykonania** (kopia produkcji jest od 23.09 na stagingu):
+
+```sql
+SELECT count(*) FROM (
+  SELECT dostawca, kod_importu FROM products
+  WHERE status='aktywny' AND kod_importu IS NOT NULL AND kod_importu<>''
+  GROUP BY dostawca, kod_importu HAVING count(*) > 1);
+```
+
+**⭐ POMIAR 2026-09-23 (ticket 116, świeża kopia produkcji na stagingu, 8329 produktów):**
+
+| Miara | Wynik |
+|---|---|
+| grup kolizji `(dostawca, kod_importu)` wśród aktywnych | **80** |
+| produktów w kolizjach | **174** |
+| grup z RÓŻNYMI cenami lub stanami (realna pętla) | **76** |
+| grup, które mają już mapowanie w `selly_products` | **80 z 80** |
+| rozkład per dostawca | MO2 42 · MO8 19 · MO5 12 · MO1 4 · MO4 2 · MO7 1 |
+
+Przykład (MO1, `kod_importu` 326606): `MO1_15126983` (EAN 8906117626572, 12 016 zł, stan 5) i `MO1_15126981`
+(EAN 8906117624387, 10 676 zł, stan 2) — ta sama marka, model i rozmiar, ale **różne EAN-y**, czyli dwa realnie
+różne produkty pod jednym kluczem.
+
+**Dlaczego Staging v2 tego nie naprawił.** Nadpisane `ext.assignKodImportu` (#99) **zachowuje istniejący
+sześciocyfrowy `kod_importu`** (`if (retained && /^\d{6}$/.test(retained))`), więc nowa reguła grupowania dotyczy
+wyłącznie pozycji bez klucza. Stare kolizje zostają w danych i przejdą przez cutover razem z bazą.
+
+**Trzy drogi (decyzja użytkownika + Ani):**
+- **(a) naprawa danych przed cutoverem** — rozdzielić kolidujące grupy (nowy `kod_importu` dla wierszy poza
+  kanonicznym). ⚠ Skutek w sklepie: discovery utworzy dla nich osobne produkty/warianty w Selly — zmiana
+  widoczna dla klientów, wymaga zgody Ani;
+- **(b) zostawić 1:1** — odbudowa odtworzy dzisiejszy stan produkcji, czyli pętlę delty co 15 minut;
+- **(c) zawór bezpieczeństwa w Torze 1** — wykryć kolizję przed wysyłką, pominąć grupę i zaraportować
+  w `selly_sync_log`. Nie zmienia danych ani sklepu, zatrzymuje pętlę.
+
+**Rekomendacja koordynatora: (c) teraz + (a) po uzgodnieniu z Anią.** (c) jest tanie i odwracalne, mieści się
+w karcie **I15.10**; (a) to zmiana asortymentu w sklepie — dziś te opony są w Selly sklejone w jeden produkt.
+
