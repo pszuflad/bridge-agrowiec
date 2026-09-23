@@ -1,8 +1,8 @@
 # TEST.2 — instrukcja testu ŚCIEŻKI KRYTYCZNEJ dla Ani
 
-> **Stan:** ⬜ do zrobienia (razem z TEST.1 i TEST.3, fala „dokumenty dla Ani")
+> **Stan:** ✅ 2026-09-24 · 150-DOCS-test-sciezki-krytycznej
 > **Iteracja:** poza iteracjami (przygotowanie do cutoveru) · **Wpisy backlogu:** — · **Zależy od:** I15.9 (delta), I15.11
-> **Ticket:** —
+> **Ticket:** `150-DOCS-test-sciezki-krytycznej`
 
 Założona przez koordynatora ticketem `148-DOCS-karty-testow`, 2026-09-24, na polecenie użytkownika:
 ścieżka krytyczna ma być **osobnym, krótkim dokumentem**, nie rozdziałem w instrukcji całego systemu.
@@ -14,7 +14,7 @@ Ania ma jeden ciąg do przejścia od początku do końca, bez wchodzenia w panel
 Jeśli ten ciąg działa, cutover jest możliwy; reszta systemu (TEST.1) może mieć usterki, które
 poprawimy po przełączeniu. Dokument ma być **na jedno posiedzenie**.
 
-## Zakres — cztery odcinki, w tej kolejności
+## Zakres — pięć odcinków, w tej kolejności
 
 **1. Import od dostawców.** Dziesięciu dostawców, trzy drogi dostarczania — opisz je jako trzy
 KRÓTKIE scenariusze, nie dziesięć: `url` (MO2, MO3, MO4, MO5, MO9 — automat co 60 min),
@@ -73,10 +73,56 @@ są włączone (import) i wyłączone (Selly).
 NIE: `docs/instrukcja-pelnego-testu.md` (TEST.1), `docs/przeglad-12-widokow.md`, `docs/cutover.md`.
 
 ## Decyzje
-—
+
+Trzy decyzje użytkownika, 2026-09-24 (pełny kontekst: `docs/tickets/150-DOCS-test-sciezki-krytycznej/plan.md`,
+sekcja „Decyzje" D1–D3):
+
+- **D1 — dowód równoważności generatorów CSV przeprowadzony w tym tickecie**, nie odesłany do
+  I15.3/ticket 122 — tamten dowód pokrywa tylko wiersz nagłówkowy, nie treść wierszy.
+- **D2 — MO9 (brak sekretów) tylko opisane, bez klikania na stagingu** — `AGRORAMI_*` są tam
+  ustawione, więc scenariusz awarii wymagałby ich usunięcia i restartu; ryzyko zostawienia
+  stagingu bez MO9 nieuzasadnione.
+- **D3 — droga `url` testowana przyciskiem ręcznym, automat (włączony, co 60 min) tylko jako
+  obserwacja** — dokument ma być powtarzalny i „na jedno posiedzenie".
 
 ## Dowiezione
-—
+
+Ticket `150-DOCS-test-sciezki-krytycznej`, 2026-09-24.
+
+- **`docs/instrukcja-testu-sciezki-krytycznej.md`** — pięć odcinków: (1) import trzema drogami
+  (`url`/`mail`/`upload`) z MO9 osobno jako jedyny dostawca przez API; (2) parsery i zapis do
+  bazy, z przeprowadzeniem jednej pozycji od pliku dostawcy do katalogu; (3) generowanie pliku
+  CSV; (4) dowód równoważności generatorów; (5) adres feedu w Selly (model pull).
+- **Rozstrzygnięcie metody porównania CSV.** Karta kazała sprawdzić, czy dowód nie jest już
+  zrobiony w I15.3 — jest tam **tylko częściowo**: stały test porównuje wyłącznie wiersz
+  **nagłówkowy** bajt w bajt (`rebuild/backend/test/selly.generator-csv.test.ts`); porównania
+  treści wierszy na tej samej bazie nie było. Dlatego przeprowadzono realnie **pierwszy wariant
+  z karty** (stary generator z `88fa31c` na kopii `db/snapshot.db` z nałożonymi migracjami
+  001–013, obok nowego `npm run selly:csv`, `diff`). **Wynik: pliki identyczne bajt w bajt** —
+  ten sam sha256, 6899 linii, 3 177 786 B, 60 kolumn, 6898 pozycji. Reviewer powtórzył dowód
+  niezależnie na własnej kopii i uzyskał ten sam sha256. Pełny przebieg i wynik:
+  `docs/tickets/150-DOCS-test-sciezki-krytycznej/dowod-csv.md`.
+- **Rozstrzygnięcie wariantu Selly.** Docelowy = „przy cutoverze nic się nie przepina", bo
+  `rebuild/backend/src/config/env.ts:138-146` ma domyślne `SELLY_CSV_DIR`/`SELLY_CSV_PLIK`/
+  `SELLY_CSV_URL` ustawione na tę samą ścieżkę produkcyjną co stary generator. Wariant testowy
+  (przestawienie adresu w panelu Selly na plik stagingu) opisany razem z ceną (żywy sklep, okno,
+  integrator, `.htaccess` z białą listą IP) i odradzony.
 
 ## Do koordynatora
-—
+
+1. **Dwa założenia tej karty rozjechały się ze stanem stagingu** po audycie środowiska z
+   2026-09-24 (`docs/cutover.md` §3a): karta zakładała, że automat importu jest czymś tylko
+   opisywanym, a na stagingu jest **włączony** (`IMPORT_SCHEDULER=true`,
+   `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG=true`) i realnie odpytuje serwery dostawców co 60 min;
+   karta zakładała też, że przy MO9 da się pokazać awarię przy braku sekretów, a `AGRORAMI_*`
+   **są na stagingu ustawione**, więc MO9 importuje się normalnie. Korekta faktu, nie zmiana
+   zakresu — instrukcja to uwzględnia (automat opisany jako „chodzi sam", MO9 tylko opisane
+   bez klikania scenariusza awarii, decyzja D2).
+2. **Pułapka dla każdej przyszłej karty sięgającej po „oryginał":**
+   `mirror/backend/generate_selly_export.cjs` na `develop` jest **nieaktualny** — ma 59 kolumn,
+   bez `Blokowane-formy-platnosci`. Wersja produkcyjna z 60 kolumnami jest na `88fa31c`.
+   Porównanie z wersją z `develop` dałoby fałszywy rozjazd.
+3. **Instrukcja opisała zachowanie, którego karta nie przewidziała:** przy
+   `SELLY_TRYB=wylaczony` serwer nie montuje modułu dostępności (`rebuild/backend/src/server.ts:90`),
+   więc na stagingu plik CSV **nie odświeża się sam po imporcie** — trzeba kliknąć
+   „Wygeneruj CSV teraz". Na produkcji odświeża się automatycznie.
