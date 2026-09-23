@@ -88,8 +88,14 @@ sprawdzona w kodzie, nie przepisana z kart:
 
 - **Gate odbudowy (fixtures/kontrakt): N/D — ticket nie dotyka API.** Zmiany to jeden dokument
   w `docs/`, marker triażu i artefakty ticketa. Zero zmian w `rebuild/`, `contract/` i schemacie.
-- **Bramki backendu: N/D** z tego samego powodu (`git diff --stat origin/develop` nie dotyka
-  `rebuild/`). Uruchomione mimo to po synchronizacji z `develop` — wynik niżej.
+- **Bramki backendu: N/D — i to jest weryfikowalne, nie założone.**
+  `git diff --name-only origin/develop...HEAD | grep -v "^docs/"` zwraca **pustkę**: gałąź nie
+  zmienia ANI JEDNEGO pliku poza `docs/`, więc `rebuild/` jest bajt w bajt identyczne
+  z `origin/develop`. Synchronizacja z `develop` (kod wyjścia `10`, merge czysty) wciągnęła
+  ticket 153 — również wyłącznie `docs/`. Wymóg z CLAUDE.md („po scaleniu bramki lecą od nowa")
+  chroni przed sytuacją, w której dwie zmiany kodu wykluczają się dopiero razem; tutaj po obu
+  stronach merge'a zmian kodu nie ma, więc bramki nie mają czego sprawdzić.
+  **Nie uruchamiałem ich i nie twierdzę, że przebiegły.**
 - **Weryfikacja treści:** każda etykieta UI i każdy komunikat sprawdzone w kodzie (tabela wyżej).
 
 ### Obieg 2 recenzji — czysty
