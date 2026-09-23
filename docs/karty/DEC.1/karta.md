@@ -1,6 +1,6 @@
 # DEC.1 — runda decyzyjna: wpisy backlogu wiszące bez decyzji
 
-> **Stan:** 🔨 ticket 141
+> **Stan:** ✅ 2026-09-23 · 141-DOCS-runda-decyzyjna-backlog
 > **Iteracja:** poza iteracjami (porządkowa) · **Wpisy backlogu:** #135.1 (zakładający), #5, #12, #43, #65, #88, #89, #94, #95, #98, #103, #108, #137.1, #137.2 · **Zależy od:** I15.4b (domknięta)
 > **Ticket:** 141 (`141-DOCS-runda-decyzyjna-backlog`)
 
@@ -219,10 +219,112 @@ Wniosek dla wyceny: wariant „przywróć sam meldunek" nie jest pisaniem od zer
 konfliktu już istnieje, brakuje wpięcia i decyzji.
 
 ## Decyzje
-<decyzje użytkownika z datą — wypełniane po rundzie>
+
+### Reguła nadrzędna (użytkownik, 2026-09-23)
+> **Wszystko, co da się zrobić po cutoverze — robimy po cutoverze.** Teraz doprowadzamy stos do
+> stanu pozwalającego na wdrożenie produkcyjne w najbliższym czasie.
+
+Konsekwencja dla tej rundy: **żaden wpis z listy nie jest blokerem cutoveru** i żaden nie dostał
+zakresu „przed cutoverem". Wpisy merytorycznie warte naprawy (#94, #43, #98 pkt 3) zachowują
+rekomendację — przesunięty jest wyłącznie termin.
+
+### Decyzje per wpis
+
+| Wpis | Decyzja | Uzasadnienie |
+|---|---|---|
+| `#5` | ❌ **NIE**, zamknięte | Skrypt jednorazowy bez żadnego wywołania; I8 zamknięta bez niego; temat martwy od miesiąca |
+| `#12` | 🕒 po cutoverze | Naprawa = odstępstwo od 1:1; produkcja ma dziś tę samą stratę (84 opony) |
+| `#43` | 🕒 po cutoverze | Dotyczy wyłącznie siatki testowej, ryzyko runtime zerowe — nie blokuje wdrożenia |
+| `#65` | 🕒 po cutoverze | Luka produkcji, nie regresja; skala 3 produkty |
+| `#88` | 🕒 po cutoverze | Naprawa = odstępstwo od oryginału; brak promocji w danych |
+| `#89` | ⬜ czeka na Anię | Pytanie z 19.09 bez odpowiedzi; wdrożenie i tak po cutoverze |
+| `#94` | 🕒 po cutoverze | Rekomendacja „naprawić wzorem #33" **zostaje w mocy**, przesunięty termin |
+| `#95` | ❌ **nieaktualny**, zamknięte | I15.4b zastąpił silnik; nowy `importer()` jawnie blokuje ten scenariusz |
+| `#98` | 🕒 po cutoverze | Trzy punkty; uzasadnienie odłożenia pkt 3 było błędne — do rewizji priorytetu |
+| `#103` (Selly) | ✅ **dowiezione**, zamknięte | Rozstrzygnięte kodem w I15.8 (ticket 121) — naprawa, nie odtworzenie 500 |
+| `#108` | ⬜ czeka na Anię | Decyzja handlowa; po stronie odbudowy nic do zrobienia przed odpowiedzią |
+| `#135.1` | ✅ zamknięte | Domknięte tą kartą |
+| `#137.1` | 🕒 po cutoverze | ⚠ Rekomendacja wpisu wymagała korekty — patrz „Do koordynatora" pkt 1 |
+| `#137.2` | ⬜ czeka na Anię | Zachowanie 1:1 z produkcją; wariant (b) tańszy, niż zakładał wpis |
+
+**Stan po rundzie:** `tools/stan-backlogu.sh --do-decyzji` pokazuje **3 pozycje** (#89, #108,
+#137.2) — wszystkie faktycznie czekające na Anię. Było 14.
 
 ## Dowiezione
-<wypełnia karta przy zamknięciu>
+**Ticket 141, 2026-09-23.** Runda decyzyjna przeprowadzona w całości.
+
+- **14 wpisów przejrzanych** (nie 11 — lista wzięta z narzędzia, patrz sekcja „Lista rozstrzygana").
+- **Stan faktyczny każdego wpisu zmierzony w kodzie na `develop` @ `ab30674`** — sekcja „Stan
+  faktyczny", każde twierdzenie z odnośnikiem plik:linia albo pomiarem na `db/snapshot.db`.
+- **Decyzje zapisane** w polach `Do nowej wersji?` i `Status`: `docs/rebuild-backlog.md`
+  (11 wpisów), `docs/rebuild-backlog/wpis-135.md` (1), `docs/rebuild-backlog/wpis-137.md` (2).
+- **Zero zmian w `rebuild/`, `contract/` i roadmapie** — potwierdzone `git diff --name-only`.
+- **Nie implementowano żadnej naprawy** — propozycje kart niżej.
+
+### Ustalenia, które obaliły treść wpisów (najcenniejsza część rundy)
+1. **#43** — teza „w całym `openapi.yaml` zero 403/404/409" **nieprawdziwa**: 404 → 6, 409 → 3.
+   Ticket 129 lukę **zwęził**, nie pogłębił (wbrew założeniu promptu). GATE nie jest ślepy —
+   **pada** na niezadeklarowany kod, dlatego świadomie nie jest wołany tam, gdzie kontrakt milczy.
+2. **#88** — wpis i test mierzą **węższy przypadek niż kod**: operator to **OR**, więc pusta
+   *sama* `marka` wystarczy. Skala to 1 produkt, nie 0; a efekt zerowy bierze się z pustej tabeli
+   `promotions`, nie z braku pasujących produktów.
+3. **#95** — **nieaktualny**: opisuje silnik, którego już nie ma.
+4. **#98 pkt 3** — uzasadnienie odłożenia („brak UI") **obalone**: UI istnieje od 2026-09-04,
+   czyli sprzed samego wpisu.
+5. **#137.1** — wpis przedstawia stan jako zaniedbanie; to **skutek świadomej decyzji użytkownika
+   z 2026-09-08** (`6594525`).
+6. **#12** — przyczyna inna, niż zakładał wpis: 84 produkty wypadają przez **wielkość liter**
+   w `selly_kategoria_norm_map`, co otwiera tańszą drogę naprawy niż port CSV.
+7. **#137.2** — wariant „przywróć meldunek" to **wpięcie istniejącego martwego kodu**
+   (`poprawkiMarty`, zero wywołań), nie pisanie od zera.
 
 ## Do koordynatora
-<propozycje kart z decyzji „naprawiamy" + fakty do przeniesienia do roadmapy>
+
+1. **`#137.1` — rekomendacja wpisu kłóci się z decyzją użytkownika z 2026-09-08.** Wpis zaleca
+   „dosynchronizować `mirror/backend/index.cjs` do `88fa31c`", a commit `6594525` ustanowił
+   politykę odwrotną: `develop` trzyma mirror na 25.08, `main` jest źródłem prawdy, każdy ticket
+   dociąga swój wycinek razem z portem i bramką. Powód: pełny mirror zapalił 12 bramek wierności.
+   **Fakt zapisany w Statusie wpisu; zmiana polityki to decyzja użytkownika, nie karty.**
+   Dodatkowo: po cutoverze `mirror/` przestaje być wzorcem do odtwarzania, więc warto najpierw
+   rozstrzygnąć, czy wpis nie staje się bezprzedmiotowy.
+
+2. **Zduplikowany numer `#103`** — w `docs/rebuild-backlog.md` są DWA różne wpisy o tym numerze
+   (Selly/`runFullTodays` ok. :4613 oraz „Braki w cenniku" ok. :4638). DEC.1 zamknęła pierwszy;
+   drugi żyje dalej. Przenumerowanie należy do koordynatora — karta go nie ruszała, zgodnie
+   z adnotacją w samym wpisie.
+
+3. **`docs/karty/DEC.1/` nie istniała** w chwili wydania promptu — założył ją ten ticket.
+   Zgodnie z `docs/karty/README.md` („Przepływ fali") katalog karty zakłada **koordynator**
+   PRZED wydaniem promptów. Warto to domknąć przy planowaniu następnej fali.
+
+4. **`docs/karty/I15.10b/karta.md` ma `Stan: ⬜ do wstawienia w kolejkę`**, choć PR #149
+   (ticket 136) jest zmergowany. Drobna niespójność w `tools/stan-kart.sh` — do odświeżenia
+   przez koordynatora.
+
+5. **Propozycje kart wynikających z decyzji (wszystkie PO CUTOVERZE).** Kolejność = mój
+   proponowany priorytet:
+
+   | Proponowana karta | Wpisy | Zakres | Koszt |
+   |---|---|---|---|
+   | **Analityka: zwinięcie duplikatów** | `#94` | `dostepnoscProduktow` + `eksportDostepnosciProduktow` na CTE `HISTORIA_BEZ_DUPLIKATOW_KLUCZA`; EAN z ostatniego wiersza. Fixture nie wymaga przenagrania | ~0,5 dnia |
+   | **Marka w historii cen** | `#98` pkt 3 | Normalizacja `historia_cen.marka` (migracja albo normalizacja w `sezonowoscMiesieczna`) — karta 4.4 pokazuje dziś `Alliance` i `ALLIANCE` jako dwie marki | ~0,5 dnia |
+   | **Kontrakt: kody błędów** | `#43` krok 1 | Dopisać 403/404/409 do ~20-25 operacji w `openapi.yaml` | kilka godzin |
+   | **GATE: dowiązanie testów** | `#43` krok 2 | ~10 plików testowych → `sprawdzZgodnoscZKontraktem`; osobno `staging-polityka.trasy.test.ts` | 1-2 dni |
+   | **Selly: kategorie z wielkiej litery** | `#12` | Poszerzyć `selly_kategoria_norm_map` o `Rolnicze`/`Ciężarowe` — zdejmuje 84 z 84 pominięć **bez** portu CSV. Osobno decyzja o `__restoreZastosowanie()` | ~0,5 dnia |
+   | **Porządki w danych** | `#65`, `#98` pkt 1-2 | 3 wpisy `manual_overrides.konstrukcja='D'`, 2 marki-śmieci, 4 pary case-only w słowniku `bieznik` | ~1-2 h łącznie |
+   | **Silnik cen: dopasowanie przez pustkę** | `#88` | Warunek w `promocjaPasuje` + test wariantu częściowego (dziś niepokryty) | ~1 h |
+
+6. **Do zgłoszenia Ani (fakty, nie pytania):** `#12` — **84 opony nie docierają dziś do Selly**
+   (tak samo w produkcji). To jej strata handlowa i jej decyzja, czy priorytetyzować.
+
+7. **Trzy rzeczy, które Ania może zgłosić jako błąd podczas pełnego testu (karta TEST.1)** —
+   wszystkie są znane i świadomie odłożone, więc taniej **uprzedzić ją w instrukcji** niż
+   naprawiać przed cutoverem:
+   - `/atrybuty`, rodzaj `bieznik` — 4 pary różniące się tylko wielkością liter wyglądają jak
+     8 osobnych wartości (`#98` pkt 2);
+   - karta 4.4 „Sezonowy wzorzec cen" — `Alliance` i `ALLIANCE` jako dwie marki (`#98` pkt 3);
+   - karta 4.1 „Historia dostępności" — 9 pozycji z przypadkowym EAN-em i 67 wierszy liczonych
+     podwójnie (`#94`).
+   **Zapisane jako `docs/karty/TEST.1/wejscie-141.md`** (CLAUDE.md reguła 2 — ustalenie dla
+   przyszłej karty idzie do JEJ katalogu, nowym plikiem). Dołożono tam też pytanie `#89`,
+   którego odpowiedź naturalnie zbierze się przy pełnym teście.

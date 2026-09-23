@@ -396,9 +396,9 @@ w stagingu, nic dodatkowego nie trzeba było robić w 3c.
 |---|---|
 | **Pliki** | `frazy_migruj.cjs` (nowy, +64), `common.cjs` (+23), `frazy_niedopasowane.json` (dane), `frazy_raport.json` |
 | **Commit** | `33455c8` |
-| **Do nowej wersji?** | ❌ **NIE** jako zadanie importu (rozstrzygnięte 2026-08-26, I3/3a — patrz niżej); ⬜ **DO DECYZJI** jako osobne narzędzie Selly, świadomie poza zakresem całej I8 (8a+8b, zamknięta 2026-09-04) |
+| **Do nowej wersji?** | ❌ **NIE** — decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141). Jako zadanie importu rozstrzygnięte już 2026-08-26 (I3/3a); jako osobne narzędzie Selly **nie portujemy**: `frazy_migruj.cjs` to skrypt jednorazowy, czyta nieistniejący dziś `/tmp/frazy_migracja.json`, a I8 (8a+8b) zamknięta 2026-09-04 świadomie bez niego. |
 | **Iteracja** | → rozstrzygnięte przy **I3/3a**: nie jest normalizacją w adapterze; backend Selly dowieziony w **I8/8a**, natywny panel `/selly` we froncie w **I8/8b**, oba BEZ `frazy` — poza zakresem obu sesji (`docs/tickets/28-FEATURE-selly-eksport-backend/plan.md`, „Poza zakresem"; `docs/tickets/30-FEATURE-selly-panel-frontend/plan.md`, D1) |
-| **Status** | ✔ zbadane i rozstrzygnięte (I3/3a, 2026-08-26); narzędzie `frazy` samo nadal nieportowane po zamknięciu I8 |
+| **Status** | ✔ **ZAMKNIĘTE 2026-09-23** (DEC.1, ticket 141) — zbadane w I3/3a, decyzja formalna dopiero teraz. Dowód zebrany w DEC.1: zero wywołań (`require('./frazy_migruj')` — 0 trafień w `mirror/backend/`), zero słowa „frazy" w `common.cjs`, zero wystąpień w `CHANGELOG.md` Ani po 2026-08-24, zero związku w `rebuild/`. |
 
 **Opis (stan na 2026-08-24, przed zbadaniem):** system migracji/dopasowania „fraz" — podejrzewany
 jako normalizacja `zastosowanie`/nazw w adapterze. Changelog Ani nieaktualny, szczegóły wymagały
@@ -877,8 +877,8 @@ A podjęta tego samego dnia. Rozszerzono 2026-08-26 przy tickecie
 |---|---|
 | **Kategoria** | BACKEND (import / dane) |
 | **Pliki** | `deminified/backend-index.cjs:44105` (funkcja), `:48546` (wywołanie); dane: `mirror/backend/zastosowania/zastosowania_master.csv` (6823 wiersze) |
-| **Do nowej wersji?** | ⬜ **DO DECYZJI** — najpierw ustalić przyczynę (niżej) |
-| **Status** | otwarte; I8 (8a+8b) zamknięta 2026-09-04 BEZ portowania — decyzja „nie portujemy" podtrzymana, konsekwencja dla Selly zmierzona |
+| **Do nowej wersji?** | 🕒 **PO CUTOVERZE** — decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141); reguła przyjęta 2026-09-23: *co da się zrobić po cutoverze — robimy po cutoverze*, priorytet to szybkie wdrożenie produkcyjne. Naprawa byłaby odstępstwem od 1:1, a produkcja ma dziś dokładnie tę samą stratę, więc nie jest to regresja odbudowy. |
+| **Status** | 🕒 odłożone po cutover (DEC.1) · **skala zmierzona 2026-09-23** na `db/snapshot.db`: 625 z 7405 produktów ma puste `zastosowanie`, z czego **84 realnie nie trafia do Selly**. ⭐ Przyczyna inna, niż zakładał wpis: te 84 wypadają przez niezgodność WIELKOŚCI LITER w `selly_kategoria_norm_map` (69× `Rolnicze`, 15× `Ciężarowe`, a mapa ma tylko warianty małą literą) → `category_id: null` → `walidujPayload` (`rebuild/backend/src/selly/mapper.ts:284`) odrzuca payload. To druga, TAŃSZA droga naprawy niż port CSV. Do zgłoszenia Ani jako fakt handlowy (84 opony nie docierają do sklepu — tak samo dziś w produkcji). |
 
 **Co robi produkcja.** Endpoint `POST /api/staging/accept` po zatwierdzeniu pozycji woła
 `__restoreZastosowanie()`. Funkcja czyta CSV z **zahardkodowanej ścieżki produkcyjnej**
@@ -2866,9 +2866,9 @@ Cofnięcia „akceptuj jako alias" nadal nie ma. Szczegóły:
 |---|---|
 | **Kategoria** | KONTRAKT (opis API, nie kod) — problem systemowy, ujawniony przy atrybutach |
 | **Pliki** | `contract/openapi.yaml` — w CAŁYM pliku zero wystąpień `403:` / `404:` / `409:` (sprawdzone grepem); trasy, które te kody zwracają: `mirror/backend/atrybuty_module.cjs:174` (403), `:158,:173,:225,:241` i `mirror/backend/pending_module.cjs:257,281,318,349` (404), `atrybuty_module.cjs:146,:212,:230` (409); dowód po naszej stronie: `rebuild/backend/test/atrybuty.crud.test.ts` |
-| **Do nowej wersji?** | ⬜ **do decyzji Ani** — kandydat do zakresu **I12** („Odświeżenie kontraktu + nagranie fixtures", `docs/rebuild-roadmap.md:296`) |
+| **Do nowej wersji?** | 🕒 **PO CUTOVERZE** — decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141); reguła przyjęta 2026-09-23: *co da się zrobić po cutoverze — robimy po cutoverze*, priorytet to szybkie wdrożenie produkcyjne. Zmiana dotyczy wyłącznie siatki testowej, nie zachowania serwera, więc nie blokuje wdrożenia. |
 | **Iteracja** | ujawnione przy **7a** (`docs/tickets/29-FEATURE-atrybuty-backend/`) |
-| **Status** | — nie zaczęte (luka po stronie kontraktu, kod jest zgodny z oryginałem) |
+| **Status** | 🕒 odłożone po cutover (DEC.1) · **teza wpisu CZĘŚCIOWO NIEAKTUALNA** (pomiar 2026-09-23): `"403"` → 0 (teza trzyma), ale `"404"` → **6** i `"409"` → **3**. ⭐ Ticket 129 lukę **ZWĘZIŁ**, nie pogłębił — cztery trasy polityki stagingu są w kontrakcie z kodami (`choose-absence-card`, `close-absence-review`, `resolve` → 409; `review` → 404). ⭐ GATE nie jest ślepy, tylko **restrykcyjny**: `sprawdzOdpowiedz` (`test/gate/kontrakt.ts:68-87`) PADA na niezadeklarowany status, dlatego świadomie nie jest wołany tam, gdzie kontrakt milczy. Realna luka: ~20-25 operacji ze 130 (głównie cały `routes/atrybuty.ts`). Ryzyko runtime ZEROWE — `openapi.yaml` czyta tylko kod testowy. Robota dzieli się na dwa kroki: dopisanie kodów (kilka godzin) i dowiązanie ~10 plików testowych do GATE (1-2 dni). Osobna, węższa luka: `test/staging-polityka.trasy.test.ts` nie woła GATE mimo zadeklarowanych kodów. |
 
 **Co znaleziono.** Zamrożony kontrakt deklaruje dla operacji wyłącznie 200/401/400. Moduł
 atrybutów zwraca ponadto **403** (próba usunięcia wbudowanego rodzaju `core=1`), **404**
@@ -3379,9 +3379,9 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Kategoria** | BAZA (dane, `manual_overrides`) |
 | **Pliki** | tabela `manual_overrides` (`field_name='konstrukcja'`, `field_name='kategoria'`) |
 | **Zmiana Ani** | Brak — to luka, nie zmiana. Zmierzone na `db/snapshot.db`: `field_name='konstrukcja'` → 3 rekordy z wartością `'D'`; `field_name='kategoria'` → 6944 rekordy ogółem, z tego 14 małą literą (9× `przemysłowe`, 5× `rolnicze`). Ania NIE migrowała ich ani 2026-08-18 (`apply_kategoria.cjs` dotyka wyłącznie `products`), ani 2026-09-01 (CHANGELOG 12:30 rusza `manual_overrides` tylko dla `field_name='nazwa'`). Skutek: przy kolejnym imporcie override wstrzykuje surową wartość z powrotem, więc te konkretne produkty wracają do kodu `D` / małej litery, mimo poprawnej kolumny w `products`. |
-| **Do nowej wersji?** | ⬜ **do decyzji** — naprawa byłaby świadomym odstępstwem od 1:1 (13c odtworzyła zachowanie 1:1, plan D7; to luka PRODUKCJI, nie regresja odbudowy) |
+| **Do nowej wersji?** | 🕒 **PO CUTOVERZE** — decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141); reguła przyjęta 2026-09-23: *co da się zrobić po cutoverze — robimy po cutoverze*, priorytet to szybkie wdrożenie produkcyjne. Naprawa byłaby świadomym odstępstwem od 1:1 (to luka PRODUKCJI, nie regresja odbudowy), a skala wynosi 3 produkty. |
 | **Iteracja** | — (follow-up, nieprzypisany) |
-| **Status** | ⬜ nierozstrzygnięte, ale **ZAWĘŻONE (triaż 2026-09-18)** — Ania rozwiązała u siebie połowę kategoryjną: `ca8a694` (17.09) przemigrował 14 wpisów `field_name='kategoria'` i dołożył triggery `manual_overrides_kategoria_ai/_au` normalizujące `override_value` przy każdym zapisie. **Zostają 3 wpisy `field_name='konstrukcja'` z wartością `'D'`** — ich Ania nie ruszyła, więc opisany tu mechanizm cofania konwencji dotyczy dziś już tylko `konstrukcja`. Kontekst: **#79**. Znalezione w `44-CHORE-i13c-migracje-konwencji`. |
+| **Status** | 🕒 odłożone po cutover (DEC.1) · **ZAWĘŻONE** (triaż 2026-09-18): Ania rozwiązała u siebie połowę kategoryjną — `ca8a694` (17.09) przemigrował 14 wpisów `field_name='kategoria'` i dołożył triggery `manual_overrides_kategoria_ai/_au`. **Zostają 3 wpisy `field_name='konstrukcja'` z wartością `'D'`** — potwierdzone pomiarem DEC.1 2026-09-23 (id 3738/3739/3740, MO8, kody `MO8_0207900`, `MO8_0198800`, `MO8_0198600`). Migracja `rebuild/schema/011_blokowane_formy_i_triggery.sql` odtwarza wyłącznie stronę `kategoria` (:89-101), dla `konstrukcja` nie ma ani triggera, ani backfillu — luka 1:1. Kontekst: **#79**. |
 
 > ⚠ **AKTUALIZACJA 2026-09-09 (po revercie #58) — dotyczy #66–#70.** Te pięć wpisów to defekty Selly
 > znalezione podczas portu **13d-1**, który został **COFNIĘTY** (`git revert -m 1`, PR #58). Analiza
@@ -4092,8 +4092,8 @@ fraza, `total` i paginacja zostają w pamięci jak dotąd.
 |---|---|
 | **Kategoria** | BACKEND (silnik cen) |
 | **Pliki** | `rebuild/backend/src/repos/ceny.ts` (`promocjaPasuje`); test utrwalający: `rebuild/backend/test/katalog.promocja.test.ts` |
-| **Do nowej wersji?** | ⬜ **do decyzji** — naprawa byłaby odstępstwem od oryginału |
-| **Status** | — nie zaczęte (świadomie odłożone do 14f) |
+| **Do nowej wersji?** | 🕒 **PO CUTOVERZE** — decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141); reguła przyjęta 2026-09-23: *co da się zrobić po cutoverze — robimy po cutoverze*, priorytet to szybkie wdrożenie produkcyjne. Naprawa byłaby odstępstwem od oryginału. |
+| **Status** | 🕒 odłożone po cutover (DEC.1) · ⭐ **DOPRECYZOWANIE 2026-09-23 — wpis mierzył WĘŻSZY przypadek niż kod.** Warunek w `rebuild/backend/src/repos/ceny.ts:127-136` łączy oba człony operatorem **OR**, nie AND: `zasieg.includes(tekst(produkt.marka)) || zasieg.includes(tekst(produkt.kategoria))`. Wystarczy więc pusta **sama `marka`**. Pomiar na `db/snapshot.db`: oba puste → 0 (jak we wpisie), sama `marka` pusta → **1** (id 100577, MO4, `MO4_LLCR17523575MLLS0`), sama `kategoria` → 0. Efekt obserwowalny dziś to zero, ale **z innego powodu, niż podawał wpis**: tabela `promotions` jest PUSTA (0 wierszy), a nie „brak pasujących produktów". Test `test/katalog.promocja.test.ts:125-129` utrwala wyłącznie wariant „oba puste" — wariantu częściowego NIE pokrywa, do dołożenia przy naprawie. |
 
 **Opis.** `promocjaPasuje` dopasowuje przez `zasieg.includes(tekst(produkt.marka))` (analogicznie
 dla `kategoria`), a **każdy napis zawiera pusty napis** — więc produkt z pustą `marka` ORAZ pustą
@@ -4141,8 +4141,8 @@ nowego powodu (np. zmiany danych podnoszącej skalę powyżej zera).
 |---|---|
 | **Kategoria** | FRONTEND (formularz reguły narzutu/promocji) |
 | **Pliki** | oryginał: pole „priorytet" pod `display:none` (`:24468-24472`); port: `rebuild/frontend/src/pages/narzuty/DialogReguly.tsx:141-143` (stan trzymany WYŁĄCZNIE po to, żeby przy edycji odesłać istniejącą wartość, domyślnie 50, i nie zbić jej po cichu); backend: `rebuild/backend/src/repos/ceny.ts:161-165` (`wybierzPromocje` sortuje po `priorytet` malejąco i bierze pierwszą pasującą) |
-| **Do nowej wersji?** | ⬜ **do decyzji — czeka na odpowiedź Ani (pytanie zadane 2026-09-19)** |
-| **Status** | ⬜ do decyzji — czeka na odpowiedź Ani (pytanie zadane 2026-09-19) |
+| **Do nowej wersji?** | ⬜ **do decyzji — czeka na odpowiedź Ani** (pytanie zadane 2026-09-19). Sprawdzone 2026-09-23 (DEC.1): kratka w `docs/instrukcja-testow-I4-v2.md` §6.3 (:546, :565) nadal pusta, odpowiedzi nie ma nigdzie w `docs/`. Niezależnie od jej odpowiedzi **wdrożenie pola i tak idzie po cutoverze** (decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141)). |
+| **Status** | ⬜ czeka na Anię — odpowiedzi spodziewamy się przy pełnym teście systemu (karta **TEST.1**), bo tam żyje to pytanie. ⭐ **Skala dziś ZEROWA** (pomiar DEC.1, 2026-09-23): `markups` = 1 wiersz z domyślnym `priorytet=50`, `promotions` = 0 wierszy — nie ma pary, która mogłaby wejść w remis szczegółowości. Scenariusz z opisu („dwie promocje na tę samą markę") pochodził z danych testowych karty 14m, nie z produkcji. |
 
 **Opis.** Priorytet reguły ma znaczenie **tylko przy remisie szczegółowości** (dwie reguły
 pasujące jednocześnie do tego samego produktu) — o wygranej decyduje wtedy wyłącznie kolejność
@@ -4351,8 +4351,8 @@ requesta nie istnieje** — baza wiedzy to `docs/`, nie GitHub.
 | **Data** | 2026-09-22 (znalezisko review karty P10.1, `90-FEATURE-ozywienie-kart-dostepnosci`) |
 | **Kategoria** | BACKEND (analityka, `historia_cen`) — defekt PRODUKCJI odtworzony 1:1 |
 | **Pliki** | `rebuild/backend/src/repos/analityka.ts` (`dostepnoscProduktow`), `repos/analityka-eksport.ts` (`export/availability-products`); oryginał `mirror/backend/analytics_module.cjs:161-165` |
-| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
-| **Status** | — |
+| **Do nowej wersji?** | 🕒 **PO CUTOVERZE** — decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141); reguła przyjęta 2026-09-23: *co da się zrobić po cutoverze — robimy po cutoverze*, priorytet to szybkie wdrożenie produkcyjne. Rekomendacja merytoryczna (naprawić wzorem #33) **zostaje w mocy**, przesunięty jest wyłącznie termin. |
+| **Status** | 🕒 odłożone po cutover (DEC.1) · **oba defekty potwierdzone w kodzie 2026-09-23**: `rebuild/backend/src/repos/analityka.ts:1398,1404` (gołe `h.ean` obok `GROUP BY h.dostawca, h.kod`; `COUNT(*)` na surowej historii) oraz `repos/analityka-eksport.ts:271-280` (tu `ean` jest w `GROUP BY`, więc nie jest losowy, ale MNOŻY wiersze). **Liczby wpisu potwierdzone co do joty**: 9 par z >1 różnym EAN-em (MO2×3, MO5×5, MO9×1), 30 grup / 67 wierszy zdublowanych migawek. Wzorzec naprawy gotowy: CTE `HISTORIA_BEZ_DUPLIKATOW_KLUCZA` (`analityka.ts:1330-1333`), używane już przez `tempoSchodzenia()` i eksport `sell-through`. ⭐ **Fixture NIE blokuje naprawy** — `contract/fixtures/GET_analytics_availability_products.json` ma `rows: []` CELOWO (`contract/README.md:155-162`), a `gate/ksztalt.ts` nie zagląda do elementów pustej tablicy; eksport fixture'a nie ma w ogóle. Przenagranie zbędne. Koszt: ~0,5 dnia, 2 pliki. |
 
 **Na czym polega.** Dwie rzeczy, obie w karcie 4.1 i jej eksporcie CSV, obie tego samego rodzaju co
 naprawione #33:
@@ -4378,8 +4378,8 @@ Mała zmiana w jednym pliku repozytorium + eksport.
 | **Data** | 2026-09-22 (pomiar karty P10.1 przy decyzji #33) |
 | **Kategoria** | BACKEND (import, `import/tk.ts`) — zachowanie PRODUKCJI, odtworzone 1:1 |
 | **Pliki** | `rebuild/backend/src/import/tk.ts` (klasyfikacja zmian, zapis `historia_cen`) |
-| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
-| **Status** | — |
+| **Do nowej wersji?** | ❌ **NIEAKTUALNY — zamykamy bez pracy** (decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141)). Wpis opisuje zachowanie silnika, który już nie istnieje. |
+| **Status** | ✔ **ZAMKNIĘTE 2026-09-23** (DEC.1) — rozwiązane niejako przy okazji przez **I15.4b** (ticket 130). `src/import/tk.ts` to dziś tylko cienki wrapper delegujący do `polityka/fabryka.ts` (`tk.ts:77`), a nowy `importer()` **jawnie wykrywa i blokuje** dokładnie ten scenariusz zamiast go po cichu mieszać: `fabryka.ts:513-559` — dwie pozycje o tym samym `kod` różniące się `identity/ean/cenaZakupu/stan` dostają błąd „Kilka różnych pozycji dostawcy wskazuje tę samą oponę. Wymaga sprawdzenia pliku." + `_duplicateSource`; `fabryka.ts:703-706` kieruje taką pozycję do `doStagingu(…, "blad")` i `continue`, więc NIE dochodzi ani do patcha `products`, ani do `zapiszHistorieCen` (:755). Duplikaty identyczne (przypadek MO7 z wpisu) konfliktu nie dają. Test: `test/polityka.charakteryzacja.test.ts`. |
 
 **Na czym polega.** Gdy ten sam kod występuje w cenniku dwa razy, import zostawia w `products`
 linię OSTATNIĄ — z jednym wyjątkiem: jeśli ostatnia linia ma `stan` równy stanowi sprzed importu,
@@ -4457,8 +4457,8 @@ bez pracy w kodzie. Gdyby kiedyś doszedł audyt eksportu z Katalogu, kafel oży
 | **Data** | 2026-09-22 (karta PR.5, `101-CHORE-migracja-marka-caps`) |
 | **Kategoria** | BAZA (dane) — stan produkcji |
 | **Pliki** | dane: `products.marka`, słownik `atrybuty_wartosci` (rodzaj `bieznik`), `historia_cen.marka` |
-| **Do nowej wersji?** | ⬜ **do decyzji użytkownika** |
-| **Status** | — |
+| **Do nowej wersji?** | 🕒 **PO CUTOVERZE** — decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141); reguła przyjęta 2026-09-23: *co da się zrobić po cutoverze — robimy po cutoverze*, priorytet to szybkie wdrożenie produkcyjne. Dotyczy wszystkich trzech punktów, ale patrz Status: **uzasadnienie odłożenia punktu 3 było błędne** i wymaga rewizji priorytetu, gdy tylko ruszymy temat. |
+| **Status** | 🕒 odłożone po cutover (DEC.1) · **pomiary potwierdzone 2026-09-23**: (1) śmieci w marce — 2 produkty (`21x7.00-15`, `18x8.50-8`); (2) pary case-only w `atrybuty_wartosci`/`bieznik` — 4 pary przy 1665 wartościach; (3) `historia_cen.marka` — `Alliance` **953** i `ALLIANCE` **650**, zakresy dat nakładają się w miesiącu „07". Widoczność dziś: marki-śmieci **NIE wyciekają** do filtra katalogu (`pages/katalog/filtrowanie.ts:152-163` odrzuca wartości z cyfrą), ale pary `bieznik` **SĄ widoczne** w `/atrybuty` (`PanelWartosci.tsx` listuje słownik bez deduplikacji → 8 wierszy zamiast 4). ⭐ **PUNKT 3 WPISU OBALONY:** odkładał sprawę, „bo grupowanie po marce w historii cen dopiero dostanie UI" — a UI **istnieje od 2026-09-04**, czyli sprzed samego wpisu: `sezonowoscMiesieczna()` (`analityka.ts:1507-1521`) robi `GROUP BY miesiac, marka` na surowym `historia_cen.marka`, a `pages/analityka/SekcjaSezonowosci.tsx:51` renderuje kolumnę „Marka" (karta 4.4). Ania zobaczy dla lipca DWA wiersze — `Alliance` i `ALLIANCE` — jak dwie różne marki. |
 
 **Co zostało poza zakresem #92** (migracja `010` objęła wyłącznie marki w `products` i słowniku marek):
 - **śmieci w polu marki** — `21x7.00-15`, `18x8.50-8` (rozmiar zamiast marki), po 1 produkcie;
@@ -4622,8 +4622,8 @@ przenumerowano samodzielnie.
 | **Data** | 2026-09-22 (znalezione przy porcie ticketu 109, I15.7) |
 | **Kategoria** | BACKEND (Selly REST, trasy `sync-*`) — defekt produkcji |
 | **Pliki** | `mirror/backend/selly/routes_sync.cjs:14` (import `runFullTodays` z `./scheduler_selly.cjs`), `scheduler_selly.cjs` (eksportuje `runFullBatch`, nie `runFullTodays`) |
-| **Do nowej wersji?** | ⬜ **do decyzji — zakres karty I15.8: naprawić import czy odtworzyć awarię 1:1** |
-| **Status** | ⬜ do decyzji — zmierzone, nienaprawione (poza zakresem I15.6/I15.7, montaż tras jest w I15.8) |
+| **Do nowej wersji?** | ✅ **DOWIEZIONE — naprawa importu** (decyzja 2026-09-23, karta I15.8, ticket 121). Wpis formalnie zamknięty w DEC.1 (ticket 141). |
+| **Status** | ✅ **ZAMKNIĘTE 2026-09-23** (DEC.1) — rozstrzygnięte kodem, nie decyzją do podjęcia. Defekt produkcji potwierdzony na zamrożonym `88fa31c` (`routes_sync.cjs:14` importuje `runFullTodays`, a `scheduler_selly.cjs:148-153` eksportuje `runFullBatch`). Odbudowa poszła drogą **naprawy** (świadome odstępstwo, `docs/karty/I15.8/karta.md` → „Odstępstwa świadome" pkt 2): `rebuild/backend/src/routes/selly-sync.ts:154` i `:168` wołają `runFullBatch`; testy `test/selly.sync.gate.test.ts:235` i `:249` dają HTTP 200, nie 500. ⭐ Ticket 121 znalazł przy okazji DRUGI, niezależny błąd: oryginał podaje `{forceSuppliers}`, a `runFullBatch` czyta `opts.suppliers`, więc „force MO1,MO2" wykonałoby rotację z dziś zamiast wskazanych dostawców — też naprawione. |
 
 **Na czym polega.** `routes_sync.cjs` importuje z `scheduler_selly.cjs` funkcję `runFullTodays`, której moduł nie
 eksportuje (eksportuje `runFullBatch`). Import `undefined` wywołany jako funkcja rzuca `TypeError`, więc na
@@ -4821,8 +4821,8 @@ zadanie przekazane tam plikiem `docs/karty/I15.4c/wejscie-124.md` (decyzja D-124
 | **Data** | 2026-09-23 (specyfikacja Selly od Ani, stan opisu na 22.09) |
 | **Kategoria** | BACKEND (grupowanie produktów) + BAZA |
 | **Pliki** | `assignKodImportu` — w produkcji `bridge_ext.cjs`, od Staging v2 **nadpisany** w `staging_policy.cjs` (`origin/main`); mapowanie `selly_products` `(kod_importu, dostawca)`; port: `rebuild/backend/src/**` (I15.4 przejmuje nadpisanie) |
-| **Do nowej wersji?** | ✅ **częściowo TAK — wykrywanie i raportowanie zrealizowane (ticket 119, 2026-09-23); pomijanie/zawór WYCOFANY decyzją Ani.** Rozstrzygnięcie semantyczne („ten sam dostawca, ten sam `kod_importu`”) ⬜ **DO DECYZJI Ani** — poprosiła 23.09 o listę przypadków, lista wysłana, czeka na jej przegląd |
-| **Status** | 🔨 **potwierdzony, częściowo zaadresowany, NADAL OTWARTY** — patrz „⭐ Rewizja" niżej. Żywy na produkcji: 80 grup / 174 produkty, 76 grup z różnymi cenami lub stanami, wszystkie 80 z mapowaniem w `selly_products`; **przyczyna USTALONA (niżej)** · **gałąź „zachowaj istniejący sześciocyfrowy `kod_importu`” przeniesiona DOSŁOWNIE w I15.4b (ticket 130, 2026-09-23)**, zgodnie z `docs/karty/I15.4b/wejscie-116.md` — to ona jest przyczyną kolizji i NIE jest błędem do naprawy; rozstrzygnięcie należy do Ani |
+| **Do nowej wersji?** | ✅ **częściowo TAK — wykrywanie i raportowanie zrealizowane (ticket 119, 2026-09-23); pomijanie/zawór WYCOFANY decyzją Ani.** Rozstrzygnięcie semantyczne („ten sam dostawca, ten sam `kod_importu`”) ⬜ **DO DECYZJI Ani** — poprosiła 23.09 o listę przypadków, lista wysłana, czeka na jej przegląd. Przejrzane w DEC.1 (2026-09-23): po stronie odbudowy **nie ma nic do zrobienia przed jej odpowiedzią**, a ewentualne rozdzielenie grup i tak idzie po cutoverze (decyzja użytkownika 2026-09-23 (karta DEC.1, ticket 141)). |
+| **Status** | 🔨 **potwierdzony, częściowo zaadresowany, NADAL OTWARTY** — patrz „⭐ Rewizja" niżej. Żywy na produkcji: 80 grup / 174 produkty, 76 grup z różnymi cenami lub stanami, wszystkie 80 z mapowaniem w `selly_products`; **przyczyna USTALONA (niżej)** · **gałąź „zachowaj istniejący sześciocyfrowy `kod_importu`” przeniesiona DOSŁOWNIE w I15.4b (ticket 130, 2026-09-23)**, zgodnie z `docs/karty/I15.4b/wejscie-116.md` — to ona jest przyczyną kolizji i NIE jest błędem do naprawy; rozstrzygnięcie należy do Ani. **Weryfikacja DEC.1 (2026-09-23):** `grupyKolizyjne()` (`rebuild/backend/src/selly/rest/sync-delta.ts:138-172`) grupuje po PARZE `(dostawca, kod_importu)`, licznik `stats.kolizje_kod_importu` (:52,:284) i lista `kolizje` (:66,:378) trafiają do wyniku i do `selly_sync_log.szczegoly_json` (:386); przyczyna w `src/import/polityka/kod-importu.ts:25,:41-44`; testy `test/selly.sync-delta.test.ts:421-489`. |
 
 **Opis (specyfikacja Ani).** „121 zduplikowanych kluczy `(dostawca, kod_importu)` = 259 aktywnych wierszy;
 114 grup/245 z różnymi cenami/stanami. Współdzielony `selly_products` → snapshot nadpisywany → delty wracają
