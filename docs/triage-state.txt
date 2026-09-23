@@ -1,7 +1,19 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
 # Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
 # Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
-88fa31c4568ceccfed96a1670257185c416117d1
+5bd4a7baa6b39fda61b37b8f82a7aa0b68209497
+# ^ 2026-09-23 18:00 (regeneracja sellycsv). STRIAŻOWANE 2026-09-24 (ticket 151).
+#   Zakres 88fa31c..5bd4a7b = 5 commitów sync(vps) (23.09, godziny 14:00, 15:00, 16:00, 17:00, 18:00),
+#   KAŻDY zmienia wyłącznie mirror/frontend/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.
+#   ZERO kodu → nowych wpisów backlogu NIE MA. Nagłówek CSV bajt w bajt identyczny na 88fa31c
+#   i na 5bd4a7b (60 kolumn, ostatnia „Link-do-zdjeci") — kolumna blokowanych form płatności
+#   ani nazwy kategorii się nie ruszyły.
+#   ZAKRES I15 POZOSTAJE DOMKNIĘTY NA 88fa31c — te 5 commitów to dane, nie zmiana zachowania.
+#   Regeneracja chodzi CO GODZINĘ (skutek #104), więc kolejne triaże będą zwykle puste kodowo.
+#   Następny triaż: git fetch origin main && git log 5bd4a7b..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 23.09 13:00) ---
+# 88fa31c4568ceccfed96a1670257185c416117d1
 # ^ 2026-09-23 13:00 („dotchoice”, „modeldot”). STRIAŻOWANE 2026-09-23 (ticket 112).
 #   Zakres abe5f14..88fa31c = 21 commitów: 4 z KODEM → backlog #105 (DOT/EAN W2, model MO9), #106 (decyzje
 #   o nieobecnych kartach + tabela staging_absence_decisions), #107 (wydajność uwaga_cena);
