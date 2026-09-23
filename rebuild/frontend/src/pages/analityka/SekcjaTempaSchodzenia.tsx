@@ -17,7 +17,7 @@ import { useMemo } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import type { TempoSchodzenia, WierszTempaSchodzenia } from "./api";
+import { pobierzPelneWiersze, type TempoSchodzenia, type WierszTempaSchodzenia } from "./api";
 import {
   zastosujFiltry,
   wymiaryNieobslugiwane,
@@ -66,6 +66,12 @@ export function SekcjaTempaSchodzenia({
           obok={<PrzyciskCsv
               widok="sell-through"
               wiersze={wiersze}
+              pobierzPelne={() =>
+                pobierzPelneWiersze<TempoSchodzenia, WierszTempaSchodzenia>(
+                  "/api/analytics/availability/sell-through",
+                  (pelne) => zastosujFiltry(pelne.rows, wybor, MAPOWANIE),
+                )
+              }
               kolumny={KOLUMNY}
               wczytywanie={ladowanie}
             />}

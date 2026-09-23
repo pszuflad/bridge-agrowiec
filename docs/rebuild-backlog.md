@@ -4390,23 +4390,30 @@ liniach. MO7 Nokian ma 14 zdublowanych kodów, ale to identyczne wiersze (pomiar
 | **Kategoria** | FRONTEND (analityka, eksport CSV) — skutek uboczny świadomego odstępstwa #91 |
 | **Pliki** | `rebuild/frontend/src/pages/analityka/eksport.tsx` i generator CSV (P10.3); trasy dashboardu z limitami SQL (`repos/analityka.ts`) |
 | **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-23: „chcę pełne pliki"** (świadome odstępstwo; karta **P10.5**) |
-| **Status** | — |
+| **Status** | ✅ **ZAMKNIĘTE 2026-09-23, ticket `126-FEATURE-pelne-pliki-csv-analityki`.** Osiem widoków dostało opcjonalny `?limit=0` (brak klauzuli `LIMIT`, wyłącznie dla pliku CSV); trasa bez parametru 1:1 jak przed ticketem, tabela nadal 300 wierszy, kafel „Pozycje unikalne" nadal 1000. Szczegóły niżej i w `docs/tickets/126-FEATURE-pelne-pliki-csv-analityki/raport.md`. |
 
 **Na czym polega.** Od P10.3 plik CSV powstaje w przeglądarce z wierszy tabeli (#91). Plan P10.3 zakładał,
 że karty pobierają pełne listy — nieprawda: trasy dashboardu mają limity SQL z oryginału. Zmierzone na
-`db/snapshot.db`: **Pozycje unikalne 5109 → plik 1000**; karty 4.1 / 4.2 (~5184) → **plik 500**;
-EAN wspólne 769 (poniżej sufitu, bez straty). Dawny eksport serwerowy: `unique` bez limitu,
-`availability-products` / `sell-through` do 5000.
+`db/snapshot.db` (liczba wierszy PRZED `LIMIT`) — **sufit uciął SZEŚĆ widoków, nie trzy**: Pozycje
+unikalne 5109 → plik 1000; karty 4.1 / 4.2 (~5184 każda) → plik 500; `suppliers-lifecycle` 1716 → 500;
+`prices-last` 1644 → 500; `rotation-inactive` 1100 (przy `days=60`) → 1000. `ean-comparison` (769) i
+`margins` (335) mieściły się w suficie 1000, ale z zapasem, który mógł się skończyć. Dawny eksport
+serwerowy: `unique` bez limitu, `availability-products` / `sell-through` do 5000.
 
-Ten sam sufit robi kafel KPI „Pozycje unikalne” = 1000 (port 1:1 oryginału, PR.2).
+Ten sam sufit robi kafel KPI „Pozycje unikalne” = 1000 (port 1:1 oryginału, PR.2) — **to zostaje bez zmian**,
+sufit zdjęty wyłącznie dla pliku CSV.
 
 **Powiązane:** `GET /api/analytics/export/{view}` nie ma już konsumenta we froncie (P10.3) — działa dalej
-jako API. Przy wariancie „zdjąć sufit” jedną z dróg jest przywrócenie trasy serwerowej dla tych trzech widoków.
+jako API. Przywrócenie tej trasy jako drogi rozwiązania zostało odrzucone (karta P10.5): odebrałoby
+plikowi filtry kliencie, czyli cofnęłoby sens #91. Wybrany mechanizm zamiast tego: opcjonalny `?limit=0`
+na trasach dashboardu, zdejmujący `LIMIT` tylko na żądanie eksportu.
 
 **⭐ DECYZJA ANI 2026-09-23: pełne pliki.** Cytat: „chce pełne pliki". Zakres: **sufit zdejmujemy TYLKO dla pliku CSV**
-(osobne zapytanie bez limitu przy eksporcie); tabela na ekranie zostaje przy 300 wierszach (limit rysowania
-z oryginału), a kafel „Pozycje unikalne" nadal liczy 1000 (port 1:1). Iteracja 10 jest zamknięta, więc realizuje to
-nowa karta **P10.5** (`docs/karty/P10.5/`).
+(osobne, leniwe zapytanie bez limitu, dopiero po kliknięciu CSV, przez `?limit=0`); tabela na ekranie
+zostaje przy 300 wierszach (limit rysowania z oryginału), a kafel „Pozycje unikalne" nadal liczy 1000
+(port 1:1). Karta **P10.5** (`docs/karty/P10.5/`) objęła docelowo **osiem** widoków z sufitem (D1), nie
+trzy — pomiar pokazał, że sufit dotyka więcej kart niż wymieniał backlog i karta w chwili otwarcia.
+Semantyka `limit=0` i testy broniące stałych `LIMIT_*` (dotąd niebronionych żadnym testem): `docs/spec-backend/wpis-126.md`.
 
 ---
 

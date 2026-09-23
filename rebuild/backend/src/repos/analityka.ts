@@ -229,7 +229,7 @@ function listaProduktowMarzy(
  * `low` i `high` produkcyjny frontend pobiera, ale NIGDY nie renderuje. Dowozimy je, bo
  * są w kształcie odpowiedzi; w UI 10a też się nie pojawiają.
  */
-export function marze(db: Baza): Marze {
+export function marze(db: Baza, bezLimituGrup = false): Marze {
   const rows = db.all<GrupaMarzy>(sql`
     SELECT dostawca, kategoria, marka,
            COUNT(*) AS produkty,
@@ -240,7 +240,7 @@ export function marze(db: Baza): Marze {
     WHERE status = 'aktywny'
     GROUP BY dostawca, kategoria, marka
     ORDER BY avgMarza ASC
-    LIMIT ${LIMIT_GRUP_MARZY}
+    ${bezLimituGrup ? sql`` : sql`LIMIT ${LIMIT_GRUP_MARZY}`}
   `);
 
   return {
@@ -485,7 +485,10 @@ export type WierszZmianyCeny = {
  * `ORDER BY id DESC` = najświeższe pozycje stagingu pierwsze; „ostatni import" jest więc
  * przybliżeniem przez kolejność wstawiania, a nie filtrem po identyfikatorze importu.
  */
-export function zmianyCenOstatniegoImportu(db: Baza): { rows: WierszZmianyCeny[] } {
+export function zmianyCenOstatniegoImportu(
+  db: Baza,
+  bezLimitu = false,
+): { rows: WierszZmianyCeny[] } {
   const rows = db.all<WierszZmianyCeny>(sql`
     SELECT kod, nazwa, dostawca,
            cena_zakupu_stara AS cenaStara,
@@ -495,7 +498,7 @@ export function zmianyCenOstatniegoImportu(db: Baza): { rows: WierszZmianyCeny[]
     FROM staging_items
     WHERE cena_zakupu_stara IS NOT NULL AND cena_zakupu_nowa IS NOT NULL
     ORDER BY id DESC
-    LIMIT ${LIMIT_OSTATNIEGO_IMPORTU}
+    ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_OSTATNIEGO_IMPORTU}`}
   `);
 
   return { rows };
@@ -749,7 +752,11 @@ export type WierszPorownaniaEan = {
  * parametru, `0`, wartość nieliczbowa) wyłącza filtr — `!minDiff` w oryginale, odtworzone
  * dosłownie razem z `(spreadPct || 0)` po drugiej stronie porównania.
  */
-export function porownanieEan(db: Baza, minDiffPct: unknown = undefined): { rows: WierszPorownaniaEan[] } {
+export function porownanieEan(
+  db: Baza,
+  minDiffPct: unknown = undefined,
+  bezLimitu = false,
+): { rows: WierszPorownaniaEan[] } {
   const minDiff = liczba(minDiffPct, 0);
 
   const surowe = db.all<{
@@ -769,7 +776,7 @@ export function porownanieEan(db: Baza, minDiffPct: unknown = undefined): { rows
     GROUP BY ean
     HAVING COUNT(DISTINCT dostawca) >= 2
     ORDER BY (MAX(cena_zakupu) - MIN(cena_zakupu)) DESC
-    LIMIT ${LIMIT_PORWNANIA_EAN}
+    ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_PORWNANIA_EAN}`}
   `);
 
   const rows = surowe
@@ -874,7 +881,7 @@ export type WierszUnikalnegoEan = {
  * Inaczej niż `ean/comparison`, ta trasa NIE wymaga `cena_zakupu > 0` — pozycje z zerową ceną
  * zakupu są w niej widoczne.
  */
-export function unikalneEan(db: Baza): { rows: WierszUnikalnegoEan[] } {
+export function unikalneEan(db: Baza, bezLimitu = false): { rows: WierszUnikalnegoEan[] } {
   const rows = db.all<WierszUnikalnegoEan>(sql`
     SELECT ean, MAX(nazwa) AS nazwa, MAX(dostawca) AS dostawca,
            MAX(cena_zakupu) AS cenaZakupu, MAX(stan) AS stan
@@ -883,7 +890,7 @@ export function unikalneEan(db: Baza): { rows: WierszUnikalnegoEan[] } {
     GROUP BY ean
     HAVING COUNT(DISTINCT dostawca) = 1
     ORDER BY nazwa
-    LIMIT ${LIMIT_UNIKALNYCH_EAN}
+    ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_UNIKALNYCH_EAN}`}
   `);
   return { rows };
 }
@@ -1147,14 +1154,14 @@ export type WierszCykluZycia = {
  * Zapytanie NIE odsiewa pozycji niezatwierdzonych — `zmiana_kluczowa` i `blad` odpadają same,
  * bo nie mieszczą się w filtrze `typ_zmiany`.
  */
-export function cyklZyciaDostawcow(db: Baza): { rows: WierszCykluZycia[] } {
+export function cyklZyciaDostawcow(db: Baza, bezLimitu = false): { rows: WierszCykluZycia[] } {
   return {
     rows: db.all<WierszCykluZycia>(sql`
       SELECT dostawca, typ_zmiany AS typ, kod, nazwa, utworzono AS kiedy, powod
       FROM staging_items
       WHERE typ_zmiany IN ('nowa', 'wycofana')
       ORDER BY utworzono DESC
-      LIMIT ${LIMIT_CYKLU_ZYCIA}
+      ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_CYKLU_ZYCIA}`}
     `),
   };
 }
@@ -1379,7 +1386,7 @@ export type Dostepnosc = { hasHistory: boolean; rows: WierszDostepnosci[] };
  * przy parze z dwoma EAN-ami w historii SQLite weźmie EAN z arbitralnego wiersza (snapshot:
  * 9 takich par). Port 1:1, poza decyzjami P10.1 — zapisane w follow-upie ticketu 90.
  */
-export function dostepnoscProduktow(db: Baza): Dostepnosc {
+export function dostepnoscProduktow(db: Baza, bezLimitu = false): Dostepnosc {
   const jestHistoria = czyJestHistoria(db);
 
   if (jestHistoria) {
@@ -1396,7 +1403,7 @@ export function dostepnoscProduktow(db: Baza): Dostepnosc {
         LEFT JOIN products p ON p.dostawca = h.dostawca AND p.kod = h.kod
         GROUP BY h.dostawca, h.kod
         ORDER BY dostepnoscPct ASC
-        LIMIT ${LIMIT_DOSTEPNOSCI}
+        ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_DOSTEPNOSCI}`}
       `),
     };
   }
@@ -1412,7 +1419,7 @@ export function dostepnoscProduktow(db: Baza): Dostepnosc {
       FROM products
       WHERE status = 'aktywny'
       ORDER BY stan ASC
-      LIMIT ${LIMIT_DOSTEPNOSCI}
+      ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_DOSTEPNOSCI}`}
     `),
   };
 }
@@ -1449,7 +1456,7 @@ export type TempoSchodzenia = { hasHistory: boolean; rows: WierszTempaSchodzenia
  *
  * Bez historii oryginał NIE MA gałęzi zapasowej — zwraca pustą listę (`:174`).
  */
-export function tempoSchodzenia(db: Baza): TempoSchodzenia {
+export function tempoSchodzenia(db: Baza, bezLimitu = false): TempoSchodzenia {
   const jestHistoria = czyJestHistoria(db);
   if (!jestHistoria) return { hasHistory: false, rows: [] };
 
@@ -1470,7 +1477,7 @@ export function tempoSchodzenia(db: Baza): TempoSchodzenia {
       LEFT JOIN products p ON p.dostawca = s.dostawca AND p.kod = s.kod
       GROUP BY s.dostawca, s.kod
       ORDER BY zeszloSztuk DESC
-      LIMIT ${LIMIT_TEMPA_SCHODZENIA}
+      ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_TEMPA_SCHODZENIA}`}
     `),
   };
 }
@@ -1626,6 +1633,26 @@ export type Rotacja = {
  *    i zostają wyłącznie produkty z pustą datą aktualizacji. W odpowiedzi `days` jest wtedy
  *    `null`. Dokładnie to samo robi produkcja — nie „naprawiamy" tego walidacją 400.
  */
+/**
+ * `?limit=0` — JEDYNY parametr, który zdejmuje `LIMIT` z trasy dashboardu (karta P10.5,
+ * backlog #96, decyzja Ani 2026-09-23 „chcę pełne pliki").
+ *
+ * ⚠ `0` ZNACZY „BEZ KLAUZULI `LIMIT`", NIE SQL-owe `LIMIT 0` (czyli zero wierszy). Mapowanie
+ * siedzi TYLKO tutaj — do zapytań idzie `boolean`, więc dosłowne zero nigdy nie dociera do SQL-a.
+ *
+ * Wszystko poza `"0"` (brak parametru, `""`, `"1"`, `"500"`, `"abc"`, `"00"`) daje `false`,
+ * czyli trasa używa swojego oryginalnego limitu. To celowo NIE jest paginacja: `limit=250` jest
+ * ignorowane, a nie honorowane. Powód — domyślne zachowanie ośmiu tras musi zostać 1:1
+ * z oryginałem (limity są portem produkcji i pilnują ich fixtures), a jedyna potrzeba to
+ * „daj wszystko do pliku CSV". Kontrakt opisuje to jako `enum: [0]`.
+ *
+ * Zdejmujemy limit WYŁĄCZNIE dla pliku — tabela nadal rysuje 300 wierszy
+ * (`TabelaAnalityki.tsx`), a kafel „Pozycje unikalne" nadal liczy 1000 (port 1:1, karta PR.2).
+ */
+export function czyBezLimitu(surowe: unknown): boolean {
+  return String(surowe ?? "") === "0";
+}
+
 export function zacisnijDniRotacji(surowe: unknown): number {
   const napis = surowe ? String(surowe) : String(DNI_ROTACJI_DOMYSLNE);
   return Math.min(DNI_ROTACJI_MAX, Math.max(DNI_ROTACJI_MIN, parseInt(napis, 10)));
@@ -1642,7 +1669,7 @@ export function zacisnijDniRotacji(surowe: unknown): number {
  * „bez ruchu" niezależnie od progu. Sortowanie `ASC` stawia najstarsze na górze, a `NULL`-e
  * w SQLite sortują się przed wszystkim — czyli produkty bez daty są pierwsze.
  */
-export function rotacjaNieaktywnych(db: Baza, dni: number): Rotacja {
+export function rotacjaNieaktywnych(db: Baza, dni: number, bezLimitu = false): Rotacja {
   return {
     days: dni,
     rows: bezpiecznieWiersze<WierszRotacji>(
@@ -1655,7 +1682,7 @@ export function rotacjaNieaktywnych(db: Baza, dni: number): Rotacja {
         AND (data_aktualizacji IS NULL
              OR data_aktualizacji < datetime('now', '-' || ${dni} || ' days'))
       ORDER BY data_aktualizacji ASC
-      LIMIT ${LIMIT_ROTACJI}
+      ${bezLimitu ? sql`` : sql`LIMIT ${LIMIT_ROTACJI}`}
     `),
   };
 }

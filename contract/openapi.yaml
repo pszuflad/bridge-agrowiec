@@ -19058,6 +19058,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/availability/products"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsAvailabilityProductsOdpowiedz200" } } } }
@@ -19067,6 +19070,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/availability/sell-through"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsAvailabilityProductsOdpowiedz200" } } } }
@@ -19106,6 +19112,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/ean/comparison"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsEanComparisonOdpowiedz200" } } } }
@@ -19142,6 +19151,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/ean/unique"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsEanUniqueOdpowiedz200" } } } }
@@ -19205,6 +19217,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/margins"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsMarginsOdpowiedz200" } } } }
@@ -19232,6 +19247,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/prices/last-import"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsPricesLastImportOdpowiedz200" } } } }
@@ -19250,6 +19268,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/rotation/inactive"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsRotationInactiveOdpowiedz200" } } } }
@@ -19277,6 +19298,9 @@ paths:
     get:
       tags: [analytics]
       summary: "GET /api/analytics/suppliers/lifecycle"
+      parameters:
+        - { name: limit, in: query, required: false, schema: { type: integer, enum: [0] },
+            description: "0 = bez limitu (pełny plik CSV z Analityki, karta P10.5 / backlog #96). Brak parametru albo inna wartość = oryginalny limit trasy, 1:1 z produkcją." }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETAnalyticsSuppliersLifecycleOdpowiedz200" } } } }

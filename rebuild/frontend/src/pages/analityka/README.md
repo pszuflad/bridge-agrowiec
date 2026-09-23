@@ -389,7 +389,7 @@ katalogiem — szczegóły w `docs/analityka-bloki-10b-10f.md` §8.2.
 nie znał filtrów, bo każdy `{view}` ma na serwerze własny SQL, inny niż karta. W produkcji to
 nie bolało, bo produkcja nie ma paska filtrów — pasek to nasze O-10a-2, więc lukę stworzyła odbudowa.
 
-**Jak działa teraz.** `PrzyciskCsv({ widok, wiersze, kolumny, wczytywanie })` (`eksport.tsx`)
+**Jak działa teraz.** `PrzyciskCsv({ widok, wiersze, kolumny, wczytywanie, pobierzPelne })` (`eksport.tsx`)
 buduje plik w przeglądarce (`zbudujCsvTabeli` z `csv.ts`) i zapisuje go przez `pobierzPlik()`
 z `pages/katalog/eksport.ts` (BOM + `text/csv;charset=utf-8` + kotwica `download`). Karta podaje
 **tę samą tablicę** `wiersze`, którą daje `TabelaAnalityki` (po `zastosujFiltry*`, przed
@@ -416,6 +416,65 @@ a `wczytywanie` = flaga, od której tabela pisze „Wczytywanie…”.
 **Reguła wartości:** do komórki idzie pole wiersza spod `kolumna.key`, nigdy tekst z ekranu,
 także dla kolumn z `render()`. Dlatego `key` kolumny musi wskazywać pole z wartością.
 
-**Zakres pliku:** wszystkie wiersze po filtrach (limit 300 to tylko rysowanie). Marża ma przekrój
-tabeli (grupy dostawca/kategoria/marka), nie listę per produkt serwera. Pusta tabela po filtrach
-daje plik z samym nagłówkiem, a przycisk jest nieaktywny tylko podczas wczytywania.
+**Zakres pliku:** wszystkie wiersze po filtrach (limit 300 to tylko rysowanie) — od karty P10.5
+także ponad sufitem `LIMIT` trasy, patrz §7b. Marża ma przekrój tabeli (grupy
+dostawca/kategoria/marka), nie listę per produkt serwera. Pusta tabela po filtrach daje plik
+z samym nagłówkiem; przycisk jest nieaktywny podczas wczytywania karty i w trakcie pobierania
+pełnego zbioru.
+
+## 7b. Pełny plik = zdjęcie sufitu trasy, ale TYLKO dla pliku (karta P10.5, `126-FEATURE-pelne-pliki-csv-analityki`, 2026-09-23)
+
+Świadome odstępstwo (backlog **#96** ✅, decyzja Ani 2026-09-23 „chcę pełne pliki").
+
+**Czego §7a nie mówiło.** „Wszystkie wiersze po filtrach" znaczyło naprawdę „wszystkie z tego, co
+przyszło z trasy" — a osiem tras dashboardu ma `LIMIT` przepisany z produkcji. Plik dziedziczył
+więc sufit: na kopii produkcji „2.5 Pozycje unikalne" 5109 pozycji → plik 1000, karty „4.1"/„4.2"
+5184 → plik 500, „1.2" 1716 → 500, „3.1" 1644 → 500, Rotacja 1100 → 1000.
+
+**Jak jest teraz.** Karta, której trasa ma `LIMIT`, podaje `PrzyciskCsv` prop `pobierzPelne` —
+funkcję, która dociąga TĘ SAMĄ trasę z `?limit=0` i stosuje na pełnym zbiorze **te same filtry
+co tabela**. Plik zostaje „tym, co widzę", tylko bez ucięcia.
+
+```tsx
+pobierzPelne={() =>
+  pobierzPelneWiersze<Dostepnosc, WierszDostepnosci>(
+    "/api/analytics/availability/products",
+    (pelne) => zastosujFiltry(pelne.rows, wybor, MAPOWANIE),
+  )
+}
+```
+
+**Nowa karta z przyciskiem — którą ścieżką iść:**
+
+| Trasa karty | Co podać | Dlaczego |
+|---|---|---|
+| ma `LIMIT` w SQL | `wiersze` **i** `pobierzPelne` | inaczej plik po cichu urwie się na suficie |
+| nie ma `LIMIT` | samo `wiersze` | nie ma czego zdejmować, drugie zapytanie byłoby marnotrawstwem |
+
+Dziś bez `pobierzPelne` są tylko `suppliers-stability` i `suppliers-stock` (grupowane po
+dostawcy, kilkanaście wierszy).
+
+**Cztery rzeczy, które łatwo zepsuć:**
+
+1. **Filtr musi być TEN SAM co w tabeli.** `pobierzPelne` zwraca wiersze **już przefiltrowane** —
+   jeśli sekcja użyje tu innego filtra niż dla `TabelaAnalityki`, plik przestanie być „tym, co
+   widzę", a nic tego nie złapie poza testem. Wygodnie jest wywołać dokładnie to samo wyrażenie.
+2. **Pobranie jest LENIWE i ma takie zostać.** `pobierzPelneWiersze` stoi na
+   `queryClient.fetchQuery`, więc strzela dopiero z `onClick`. Zamiana tego na `useQuery`
+   ściągałaby pełne zbiory (na karcie 4.1 ~825 KB) każdemu, kto wejdzie na zakładkę i nigdy nie
+   kliknie CSV.
+3. **`null` to BŁĄD, nie pusty zbiór.** Domyślny `queryFn` ma `on401: "returnNull"`, więc wygasła
+   sesja daje `null`. Przycisk pokazuje wtedy komunikat i **nie pobiera pliku**. Kuszące „to
+   zapiszmy chociaż to, co mamy w pamięci" odtwarza dokładnie usterkę #96, tylko niewidocznie.
+4. **Adres z parametrem.** `zAdresemBezLimitu()` dokleja `?limit=0` albo `&limit=0`. Rotacja jest
+   jedyną kartą z dwoma parametrami (`?days` z oryginału + `?limit=0`) — adres musi nieść oba.
+
+**Czego to NIE rusza:** tabela nadal rysuje 300 wierszy, kafel „Pozycje unikalne" nadal liczy 1000
+(port 1:1, karta PR.2) — oba czytają niezmienione hooki, bez parametru. Trasa wołana bez `?limit`
+odpowiada dokładnie jak przed P10.5; `limit` przyjmuje wyłącznie wartość `0`, inne są ignorowane
+(`contract/openapi.yaml`, `enum: [0]`).
+
+⚠ **Pułapka testowa.** MSW dopasowuje handlery po ŚCIEŻCE i **ignoruje query string**, więc test
+z jednym handlerem na trasę oddaje to samo dla `?limit=0` i bez parametru — i nie dowodzi o suficie
+NICZEGO. Handler musi czytać `new URL(request.url).searchParams`. Wzór:
+`test/analityka.eksport-pelne.test.tsx`.
