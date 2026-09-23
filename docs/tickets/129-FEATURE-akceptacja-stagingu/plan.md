@@ -79,9 +79,10 @@ Wszystkie z rundy Q&A z użytkownikiem (2026-09-23). Decyzje całej I15 (D1–D5
   `POST /close-absence-review` (`:649`). To dokładnie te, które wystawiają #106 („wybór jednej
   karty", „sprawa nie wraca"). *Za:* odtworzenie 1:1, I15.11 ma co wołać, #106 nie zostaje
   w połowie. *Przeciw:* karta rośnie o dwie trasy. **Wybrano: wszystkie cztery.**
-- **D129.2 — sześć blokad `checkAcceptance`, nie cztery.** Oryginał (`:188-200`) ma sześć
-  wywołań `fail()`. Karta opisuje cztery, pomijając `_absenceReview` (`:192`) i `_catalogVersion`
-  (`:198`). *Za pełną szóstką:* `_absenceReview` kieruje sprawę na ścieżkę choose/close zamiast
+- **D129.2 — wszystkie blokady `checkAcceptance`, nie cztery.** Oryginał (`:188-200`) ma SIEDEM
+  wywołań `fail()`: brak wiersza + sześć blokad treści. Karta wymienia w nagłówku cztery;
+  poza nią zostają `_absenceReview` (`:192`), próg trzech dowodów nieobecności (`:193`,
+  opisany w karcie osobno, w `wejscie-110.md` pod #103) i `_catalogVersion` (`:198`). *Za pełną szóstką:* `_absenceReview` kieruje sprawę na ścieżkę choose/close zamiast
   zwykłej akceptacji, `_catalogVersion` chroni przed nadpisaniem produktu zmienionego po
   utworzeniu zgłoszenia; pominięcie = ciche odstępstwo. **Wybrano: wszystkie sześć, komunikaty
   znak w znak.**
@@ -101,7 +102,7 @@ Wszystkie z rundy Q&A z użytkownikiem (2026-09-23). Decyzje całej I15 (D1–D5
 - **D129.5 — dowód wierności: charakteryzacja na żywym module.** `staging_policy.cjs` NIE jest
   zminifikowany i nie ma efektów ubocznych przy `require()` (`install()` dostaje `db` argumentem),
   więc da się go załadować wprost, podać atrapę `U` i realną bazę SQLite, i porównać zachowanie
-  nowego kodu z oryginałem. *Za:* sprawdza sześć komunikatów znak w znak i kształty czterech tras
+  nowego kodu z oryginałem. *Za:* sprawdza siedem komunikatów znak w znak i kształty czterech tras
   na ZMIERZONYM zachowaniu, nie na moim odczycie kodu. *Przeciw:* trzeba zbudować obiekt `U`
   (~10 metod). **Wybrano charakteryzację**; nagrywanie fixtures odpada, bo trasy wymagają złożonego
   stanu (`_policyVersion`, `_matchIssue`, `_absenceReview`), który trzeba by najpierw wytworzyć importem.
@@ -125,7 +126,7 @@ oraz z zachowaniem zatwierdzania zbiorczego opisanym niżej.
 
 `POST /api/staging/accept` w oryginale (`deminified/backend-index.cjs:48544`) robi
 `for (let p of l) U.acceptStaging(p, c.user.id);` — **bez `try`/`catch`**. Skutek: pierwsza pozycja
-zablokowana którąkolwiek z sześciu blokad **przerywa całe żądanie** (409, Express łapie
+zablokowana którąkolwiek z blokad **przerywa całe żądanie** (409, Express łapie
 synchroniczny throw), audyt się NIE zapisuje, a pozycje zatwierdzone wcześniej **zostają
 zatwierdzone** — bo `acceptStaging` to `db.transaction(...)()` per pozycja, nie per żądanie.
 „Akceptacja atomowa" z karty znaczy właśnie: atomowa **per pozycja**. Odtwarzam to 1:1.
@@ -146,8 +147,8 @@ są już w `rebuild/` (I15.2) — **reużywam, nie duplikuję**.
 Port `:141-157` jako funkcja w module akceptacji; podmiana wywołań w `akceptacja.ts:174`
 i `bulk.ts:116`. `bridge-ext.ts` i `legacy/bridge_ext.cjs` **nietknięte**.
 
-**3. `checkAcceptance` — sześć blokad (`src/import/polityka-stagingu/akceptacja-polityka.ts`)**
-Port `:188-200`, komunikaty kopiowane znak w znak z oryginału (z „ " i polskimi znakami).
+**3. `checkAcceptance` — siedem blokad (`src/import/polityka-stagingu/akceptacja-polityka.ts`)**
+Port `:188-200` (siedem `fail()`), komunikaty kopiowane znak w znak z oryginału (z „ " i polskimi znakami).
 Kolejność sprawdzeń zachowana — ma znaczenie, bo pierwszy `fail()` wygrywa.
 
 **4. Warstwa `acceptStaging` nad istniejącym `zatwierdzPozycjeStagingu`**
@@ -221,7 +222,7 @@ realne odświeżanie CSV/Selly to zakres I15.10 — **wystawiam punkt wpięcia, 
 
 ## Definition of done
 
-- [ ] Sześć blokad `checkAcceptance` odtworzonych, komunikaty znak w znak zgodne z `:188-200`
+- [ ] Siedem `fail()` z `checkAcceptance` odtworzonych, komunikaty znak w znak zgodne z `:188-200`
 - [ ] Cztery trasy działają i są opisane w `contract/openapi.yaml`
 - [ ] `addStaging` zastępuje poprzednie zgłoszenie pary; `updateStaging` przelicza status EAN
 - [ ] #106: `candidates_hash` z kod+EAN+DOT, obie gałęzie wyboru karty, `selected_source_code`
