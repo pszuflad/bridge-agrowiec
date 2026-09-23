@@ -162,7 +162,28 @@ Backlog zleca pomiar zatwierdzania zbiorczego karcie **I15.4** — sprzed podzia
 zbiorcze jest zakresem **I15.4c**; I15.4a nie dotyka akceptacji. Decyzją użytkownika (D-124.4) zadanie
 trafiło do `docs/karty/I15.4c/wejscie-124.md`. Do rozważenia poprawka odsyłacza w samym backlogu.
 
-### 5. Drobiazg w teście zastanym
+### 5. ⚠ `docs/karty/I15.4/wejscie-120.md` jest OSIEROCONE — 99 linii, których nikt nie przeczyta
+
+Ticket 120 (karta I15.2, zmergowany 23.09 PR #135) założył **`docs/karty/I15.4/wejscie-120.md`** — katalog
+karty, która **już nie istnieje**, bo ticket 123 podzielił I15.4 na I15.4a/I15.4b/I15.4c tego samego dnia.
+Plik ma 99 linii realnej treści dla backendu stagingu: `_bridgeFeedMeta` gotowe do konsumpcji, **zmierzony**
+stan przejściowy D4, dublujący się bezpiecznik pustego wejścia do rozstrzygnięcia, informacja że
+`staging_policy.cjs` leży już CAŁY w `legacy/`, oraz hunki `extensions.cjs` należące do tej karty.
+
+**To jest dokładnie ta pułapka, o której mówi CLAUDE.md reguła 2** („Sesja 3c czyta katalog 3c; nota schowana
+gdzie indziej do niej nie dojdzie"). Sesje I15.4b i I15.4c czytają swoje katalogi i **tej noty nie zobaczą**.
+Treść dotyczy obu: punkty 1, 2, 4 i 5 → **I15.4b** (importer), punkt 3 → decyzja, punkt 6 → obie.
+
+Nie ruszam tego sam, bo to plik cudzej karty, a podział kart jest domeną koordynatora (CLAUDE.md: „fałsz
+w cudzej karcie → zapisz w »Do koordynatora«, nie poprawiaj sam"). **Do zrobienia: rozdzielić treść
+`docs/karty/I15.4/wejscie-120.md` do `I15.4b/` i `I15.4c/` i usunąć osierocony katalog.**
+
+Przy okazji: w `docs/rebuild-backlog.md` zostało **siedem odsyłaczy do niepodzielonej karty `I15.4`**
+wniesionych przez ticket 120 (linie ok. 664, 4492, 4495, 4594, 4702, 4703, 4789). Poprawiłem tylko te,
+których i tak dotykał konflikt merge'a — reszty nie ruszam, żeby nie mnożyć konfliktów w pliku,
+w którym pracują równoległe karty.
+
+### 6. Drobiazg w teście zastanym
 
 `test/alerty-katalogu.gate.test.ts` („paczka równa limitowi 20 000 id") bywa flaky na timeoucie 20 s
 przy pełnym przebiegu na obciążonej maszynie; osobno przechodzi. Sprawdzone, że pęka tak samo **bez**
