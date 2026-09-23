@@ -156,3 +156,14 @@ były już wniesione.
 
 **`docs/rebuild-roadmap.md` nietknięty** — zmienia go wyłącznie koordynator (CLAUDE.md, pkt 0).
 Stan karty TEST.3 w roadmapie odświeży koordynator na podstawie sekcji „Do koordynatora".
+
+## Synchronizacja z `develop` przed PR
+
+`tools/sync-z-develop.sh` → kod wyjścia **10** (scalone czysto, baza się zmieniła). Weszły
+2 commity z `origin/develop` (`6288066`, ticket 153 — wpis `#153.1` i karta FIX.1), wyłącznie pliki
+w `docs/`, zero kolizji z zakresem tego ticketa. Baza po merge'u: `origin/develop` = `6288066`.
+
+**Bramki po synchronizacji:** nie dotyczą i nie były uruchamiane — ani ten ticket, ani to, co weszło
+z bazy, nie zmienia nawet linii w `rebuild/`. Dowód: `git diff --name-only origin/develop HEAD`
+zwraca pięć ścieżek, wszystkie w `docs/` (sprawdzone filtrem `grep -v '^docs/'` → pusto). GATE
+odbudowy nadal N/D.
