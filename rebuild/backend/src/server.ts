@@ -5,6 +5,11 @@ import { stworzApp } from "./app.js";
 import { stworzScheduler } from "./import/scheduler.js";
 import { synchronizujDostawce } from "./import/synchronizuj.js";
 import { stworzWygaszacz } from "./promocje/wygaszacz.js";
+import { stworzKlientaSelly } from "./selly/klient.js";
+import { opakujKlientaTrybem } from "./selly/tryb.js";
+import { stworzDiscovery } from "./selly/rest/discovery.js";
+import { budujPayloadProduktuV2 } from "./selly/rest/mapper-v2.js";
+import { stworzHarmonogramSelly } from "./selly/rest/scheduler.js";
 
 const env = wczytajEnv();
 const { sqlite, db } = otworzBaze(env.DB_PATH);
@@ -29,12 +34,39 @@ const wygaszacz = stworzWygaszacz({
   interwalMs: env.PROMO_WYGASZACZ_MINUTY * 60 * 1000,
 });
 
+// JEDNA instancja discovery na proces (karta I15.8) — tę samą dostają trasy `sync-*`
+// i harmonogram Selly. Stan (nauczone `feature_id`, cache kodów produktów Selly) żyje
+// w jej domknięciu, więc druga instancja miałaby własny, zimny cache i rozjechałaby się
+// z pierwszą. Ta sama zasada co przy `synchronizuj` wyżej.
+const klientSelly = opakujKlientaTrybem(
+  stworzKlientaSelly({
+    shopUrl: env.SELLY_SHOP_URL,
+    clientId: env.SELLY_CLIENT_ID,
+    clientSecret: env.SELLY_CLIENT_SECRET,
+    scope: env.SELLY_SCOPE,
+  }),
+  env.SELLY_TRYB,
+);
+const discoverySelly = stworzDiscovery({
+  klient: klientSelly,
+  budujPayloadProduktu: budujPayloadProduktuV2,
+});
+
+// Jak scheduler importu wyżej — sam obiekt niczego nie uruchamia, timer stawia `uruchom()`.
+const harmonogramSelly = stworzHarmonogramSelly({
+  db,
+  discovery: discoverySelly,
+  tryb: env.SELLY_TRYB,
+});
+
 const app = stworzApp({
   env,
   db,
   sqlite,
   synchronizuj,
   przeplanujScheduler: () => scheduler.przeplanuj(),
+  klientSelly,
+  discoverySelly,
 });
 
 const server = app.listen(env.PORT, env.HOST, () => {
@@ -64,6 +96,17 @@ const server = app.listen(env.PORT, env.HOST, () => {
     console.log("[scheduler] wyłączony (IMPORT_SCHEDULER nie jest ustawione)");
   }
 
+  // Harmonogram Selly (karta I15.8) — Tor 1 o HH:55 + HH:10/25/40, Tor 2 o 04:30.
+  // ODSTĘPSTWO ŚWIADOME: produkcja nie ma tu przełącznika (`extensions.cjs:486-487`
+  // instaluje bezwarunkowo), ale włączony harmonogram REALNIE ZAPISUJE do cudzego sklepu,
+  // więc u nas rusza dopiero po jawnym `SELLY_SCHEDULER`. Sam `uruchom()` dodatkowo odmawia
+  // startu przy `SELLY_TRYB=wylaczony` — uzasadnienie w nagłówku `selly/rest/scheduler.ts`.
+  if (env.SELLY_SCHEDULER) {
+    harmonogramSelly.uruchom();
+  } else {
+    console.log("[selly-scheduler] wyłączony (SELLY_SCHEDULER nie jest ustawione)");
+  }
+
   // ⚠ ODSTĘPSTWO ŚWIADOME (karta 14f, zatwierdzone przez Anię 2026-09-18: „data ma naprawdę
   // kończyć promocje"). Bezwarunkowo, w odróżnieniu od schedulera wyżej — wygaszacz rusza
   // wyłącznie naszą bazę i JEST tą naprawą, więc za flagą domyślnie wyłączoną byłby martwy
@@ -75,6 +118,7 @@ const server = app.listen(env.PORT, env.HOST, () => {
 function zamknij(sygnal: string): void {
   console.log(`${sygnal} — zamykam serwer…`);
   scheduler.zatrzymaj();
+  harmonogramSelly.zatrzymaj();
   wygaszacz.zatrzymaj();
   server.close(() => {
     sqlite.close();
