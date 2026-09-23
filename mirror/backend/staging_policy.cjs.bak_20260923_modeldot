@@ -170,18 +170,12 @@ function install({U,db,normalize,classify,badName,ext}) {
     if(row && patch.snapshotJson){
       const snap=JSON.parse(patch.snapshotJson);
       const old=JSON.parse(row.snapshotJson||'{}');
-      // Formularz edytuje model, ale nie pokazuje pola bieżnika. Synchronizujemy
-      // tylko automatyczną kopię starego modelu; osobnego bieżnika nie ruszamy.
-      if(snap.model!==old.model && old.bieznik===old.model && snap.bieznik===old.bieznik){
-        snap.bieznik=snap.model;
-      }
       if(snap.ean!==old.ean || (patch.edytowanePola && JSON.parse(patch.edytowanePola).includes('ean'))){
         const v=validateEan(snap.ean);
         snap.eanRaw=v.raw;snap.eanIsValid=v.valid===null?null:Number(v.valid);
         snap.eanSourceStatus=v.status;snap._eanIssue=v.error;
-        patch={...patch,eanRaw:v.raw,eanIsValid:snap.eanIsValid,eanSourceStatus:v.status};
+        patch={...patch,eanRaw:v.raw,eanIsValid:snap.eanIsValid,eanSourceStatus:v.status,snapshotJson:JSON.stringify(snap)};
       }
-      patch={...patch,snapshotJson:JSON.stringify(snap)};
     }
     return original.edit(id,patch);
   };

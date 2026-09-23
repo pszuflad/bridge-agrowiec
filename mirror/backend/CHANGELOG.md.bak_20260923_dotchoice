@@ -1,21 +1,3 @@
-2026-09-23 12:57
-obszar: backend | baza danych
-
-pliki: parsers/mo9_agrorami_api.cjs, parsers/mo9_agrorami_api.cjs.bak_20260923_modeldot, staging_policy.cjs, staging_policy.cjs.bak_20260923_modeldot, data.db, data.db.bak_20260923_modeldot, CHANGELOG.md.bak_20260923_modeldot
-
-zmiana: parser Agrorami usuwa samotny dopisek DOT przed PR/TL/TT z modelu, pozostawiając oznaczenia z rokiem. Edycja modelu w stagingu aktualizuje także bieżnik, jeśli wcześniej był jego automatyczną kopią. Skorygowano pięć potwierdzonych kart MO9 i ukryte pole bieżnika w już poprawionym zgłoszeniu 732915. Zachowano osobne produkty, wartości DOT, EAN i ich statusy.
-
-powód: edycja zgłoszenia 18.00x33 nie dotyczyła zatwierdzonego zgłoszenia 18.00x25; dodatkowo ukryty bieżnik i parser źródłowy pozostawiały DOT w modelu oraz nazwie katalogowej.
-
-2026-09-23 12:31
-obszar: backend | frontend | baza danych
-
-pliki: staging_policy.cjs, staging_policy.cjs.bak_20260923_dotchoice, data.db, data.db.bak_20260923_dotchoice, /home/admin/domains/agritires.eu/public_html/panel/assets/staging-policy-injection.js, staging-policy-injection.js.bak_20260923_dotchoice, /home/admin/domains/agritires.eu/public_html/panel/index.html, index.html.bak_20260923_dotchoice, CHANGELOG.md.bak_20260923_dotchoice
-
-zmiana: porównanie starej karty z bieżącą ofertą sprawdza również DOT już istniejącej karty wskazanej przez kod oferty. Różne DOT nie tworzą zgłoszenia o możliwym scaleniu; trzy już istniejące błędne zgłoszenia 732903–732905 usunięto po sprawdzeniu DOT, bez zmiany produktów katalogowych. Dla rzeczywiście zgodnych kart ekran pozwala wskazać jedną kartę; decyzja bez kolejnego zgłoszenia wstrzymuje niewybraną i zachowuje wybraną w katalogu. Baza zapamiętuje kod źródłowy przypisany przez świadomy wybór, aby sprawa nie wracała po kolejnym imporcie; do przeniesienia ceny i stanu potrzebny jest świeży odczyt lub już aktywna zgodna karta.
-
-powód: trzy zgłoszenia sugerowały scalenie opon o różnych latach produkcji; użytkowniczka chce odrębnych produktów dla różnych DOT oraz jednoetapowego zapisu wyboru przy prawdziwie zgodnych kartach.
-
 2026-09-23 11:27
 obszar: backend
 

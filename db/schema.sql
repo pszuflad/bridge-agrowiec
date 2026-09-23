@@ -341,9 +341,10 @@ CREATE TABLE staging_absence_decisions(
       supplier TEXT NOT NULL,
       product_code TEXT NOT NULL,
       candidates_hash TEXT NOT NULL,
-      decided_at TEXT NOT NULL,
+      decided_at TEXT NOT NULL, selected_source_code TEXT,
       PRIMARY KEY(supplier,product_code)
     );
+CREATE UNIQUE INDEX staging_absence_one_choice ON staging_absence_decisions(supplier,selected_source_code) WHERE selected_source_code IS NOT NULL;
 CREATE TRIGGER products_blokowane_formy_ai
         AFTER INSERT ON products
         BEGIN

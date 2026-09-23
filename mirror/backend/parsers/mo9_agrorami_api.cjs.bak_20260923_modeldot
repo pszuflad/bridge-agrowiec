@@ -162,11 +162,6 @@ function parseAgroramiName(fullName) {
     })
     .join(' ');
 
-  // Samo "DOT" przed oznaczeniami technicznymi jest opisem partii, nie modelem
-  // bieznika. Nie usuwamy roku DOT (np. DOT 2016) ani innych nazw modeli.
-  s = s.replace(/\bDOT(?=\s+\d{1,2}\s*PR\b|\s+(?:TL|TT)\b|$)/gi, ' ');
-  s = s.replace(/\s+/g, ' ').trim();
-
   // 3) PR (płótna): liczba + "PR" (z opcjonalnym "/" przed i "pr." śmieciem po)
   let pr = null;
   {

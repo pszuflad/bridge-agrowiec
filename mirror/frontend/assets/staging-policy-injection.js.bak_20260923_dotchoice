@@ -14,8 +14,6 @@
   .bs-dialog button{border:1px solid #94a3b8;border-radius:6px;padding:8px 14px;cursor:pointer}.bs-dialog button.bs-save{background:#b77721;color:white;border-color:#b77721}.bs-dialog button:disabled{opacity:.5;cursor:default}
   .bs-card{border:1px solid #cbd5e1;border-radius:9px;padding:12px 15px;margin:12px 0;background:#f8fafc}
   .bs-card strong{display:block;margin-bottom:6px}.bs-card p{margin:4px 0}.bs-note{border-left:3px solid #b77721;padding:8px 12px;background:#fffbeb}
-  .bs-card.bs-selected{border:2px solid #b77721}.bs-dialog .bs-card-choice{display:flex;align-items:center;gap:10px;border:0;padding:0;margin:0 0 6px}
-  .bs-dialog .bs-card-choice input{margin:0}.bs-dialog .bs-card-choice span{font-weight:650}
   .bs-dialog .bs-error{color:#b91c1c}.dark .bs-dialog{background:#172033;color:#f8fafc}.dark .bs-dialog label,.dark .bs-card{border-color:#64748b}.dark .bs-card{background:#253147}.dark .bs-note{background:#332514}.dark .bs-review-btn{background:#332514;color:#fcd58b}`;
   document.head.append(css);
   function el(tag,text,cls){const e=document.createElement(tag);if(text)e.textContent=text;if(cls)e.className=cls;return e;}
@@ -53,57 +51,39 @@
       const details=o=>[o.marka,o.model,o.rozmiar,o.dot&&'DOT '+o.dot,'EAN '+(o.ean||'brak')].filter(Boolean).join(' · ');
       function card(title,lines){
         const box=el('section',null,'bs-card');box.append(el('strong',title));
-        for(const line of lines)box.append(el('p',line));d.append(box);return box;
+        for(const line of lines)box.append(el('p',line));d.append(box);
       }
-      let selectedCard=null,saveAbsence=null;
       if(v.absenceReview){
         d.querySelector('h2').textContent='Porównaj starą kartę z obecną ofertą';
-        d.append(el('p','Wybierz jedną kartę tylko wtedy, gdy DOT w obu kartach i w aktualnej ofercie jest taki sam. Druga karta zostanie wstrzymana. Opony z różnym DOT pozostają osobnymi produktami.'));
-        const valid=v.candidates.filter(c=>c.selectable);
-        function choice(box,code,label,enabled){
-          const l=el('label',null,'bs-card-choice'),r=el('input'),span=el('span',label);
-          r.type='radio';r.name='bs-absence-choice';r.value=code;r.disabled=!enabled;
-          r.onchange=()=>{selectedCard=code;saveAbsence.disabled=false;
-            d.querySelectorAll('.bs-card').forEach(x=>x.classList.toggle('bs-selected',x===box));};
-          l.append(r,span);box.prepend(l);
-        }
-        const oldBox=card('Stara karta w katalogu',[
+        d.append(el('p','Starego kodu nie ma w aktualnej ofercie. Podobne cechy nie dowodzą, że to ta sama opona.'));
+        card('Stara karta w katalogu',[
           v.kod+' · '+v.nazwa,details(v.incoming),
           'Stan: '+(v.incoming.status==='wstrzymany'?'wstrzymana, niedostępna w sprzedaży':v.incoming.status||'nieznany')
         ]);
-        choice(oldBox,v.kod,'Zostaw tę kartę',valid.length===1&&
-          ((!!valid[0].sourceKey&&valid[0].stan!=null&&valid[0].cenaZakupu!=null)||valid[0].status==='aktywny'));
         for(const c of v.candidates){
-          const box=card('Pozycja w obecnej ofercie',[
+          card('Możliwa pozycja w obecnej ofercie',[
             c.kod+' · '+c.nazwa,
-            'EAN '+(c.ean||'brak')+' · DOT w ofercie: '+(c.dot||'brak'),
-            'DOT w karcie katalogowej: '+(c.catalogDot||'brak'),
-            'EAN: '+(c.sameEan?'taki sam':'inny niż na starej karcie')+'; DOT: '+(c.sameDot?'zgodny':'RÓŻNY — nie łączyć'),
+            'EAN '+(c.ean||'brak')+' · DOT '+(c.dot||'brak'),
+            'EAN: '+(c.sameEan?'taki sam':'INNY niż na starej karcie')+'; DOT: '+(c.sameDot?'taki sam':'INNY'),
             'Stan w katalogu: '+(c.status==='aktywny'?'dostępna':c.status==='wstrzymany'?'wstrzymana':c.status||'brak karty')
           ]);
-          choice(box,c.kod,'Zostaw tę kartę',c.selectable&&(c.status==='aktywny'||(c.sourceKey&&c.stan!=null&&c.cenaZakupu!=null&&Number.isFinite(Number(c.stan))&&Number.isFinite(Number(c.cenaZakupu)))));
         }
-        d.append(el('p',!valid.length
-          ?'Różny DOT oznacza inną oponę. W tym przypadku nie wybieraj jednej karty: system powinien pozostawić je osobno i usunąć błędne zgłoszenie po następnym odczycie oferty.'
-          :!valid[0].sourceKey&&valid[0].status!=='aktywny'
-            ?'Przed wyborem starej karty wczytaj ponownie cennik, żeby potwierdzić bieżącą cenę i liczbę opon.'
-          :'Wybór działa od razu w katalogu: wybrana karta przejmuje potwierdzoną ofertę, a druga zostaje wstrzymana ze stanem zero. Nie tworzy to kolejnego zgłoszenia.','bs-note'));
+        d.append(el('p',v.candidates.length
+          ?'Co sprawdzić: porównaj kod producenta, EAN i DOT w aktualnej ofercie lub potwierdź u dostawcy, czy nowy kod zastąpił stary. Sama zgodność nazwy i rozmiaru nie wystarczy.'
+          :'W obecnej ofercie nie znaleziono pewnego odpowiednika. Sprawdź kod i dostępność starej karty u dostawcy.','bs-note'));
+        d.append(el('p','Nie ma tu przycisku „Połącz”, ponieważ bez potwierdzenia nie wolno zmieniać starego EAN-u ani scalać produktów. Zamknięcie sprawy usuwa komunikat i zapamiętuje decyzję dla tego zestawu danych; stara karta pozostaje wstrzymana, a druga karta bez zmian. Sprawa wróci tylko wtedy, gdy dostawca zmieni możliwy odpowiednik, EAN lub DOT.'));
       }else{
         d.append(el('p',v.nazwa),el('p','Pozycja z oferty: '+details(v.incoming)));
         d.append(el('p',v.matchIssue||v.powod));
       }
       const f=el('footer'),close=el('button','Zamknij');close.onclick=()=>d.close();f.append(close);
       if(v.absenceReview){
-        const done=el('button','Zapisz wybór w katalogu','bs-save');saveAbsence=done;done.disabled=true;
+        const done=el('button','Pozostaw starą wstrzymaną i zamknij sprawę','bs-save');
         const error=el('p',null,'bs-error');error.setAttribute('role','alert');
         done.onclick=async()=>{
-          if(!selectedCard)return;
-          const candidate=v.candidates.find(c=>c.kod===selectedCard)||(v.candidates.filter(c=>c.selectable).length===1?v.candidates.find(c=>c.selectable):null);
-          if(!candidate)return;
-          if(!window.confirm('Zostawić w katalogu kartę '+selectedCard+'? Druga karta zostanie wstrzymana, a jej stan wyzerowany.'))return;
+          if(!window.confirm('Stara karta pozostanie wstrzymana. Możliwy odpowiednik pozostanie bez zmian. Zamknąć to zgłoszenie bez łączenia produktów?'))return;
           done.disabled=true;close.disabled=true;
-          try{await api(`${base}/${id}/choose-absence-card`,{method:'POST',
-            body:JSON.stringify({selectedCode:selectedCard,candidateVersion:candidate.catalogVersion})});location.reload();}
+          try{await api(`${base}/${id}/close-absence-review`,{method:'POST',body:'{}'});location.reload();}
           catch(e){error.textContent=e.message;done.disabled=false;close.disabled=false;}
         };
         d.append(error);f.append(done);

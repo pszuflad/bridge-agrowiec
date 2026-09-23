@@ -102,9 +102,6 @@ function install({U,db,normalize,classify,badName,ext}) {
       decided_at TEXT NOT NULL,
       PRIMARY KEY(supplier,product_code)
     );`);
-  if(!db.prepare('PRAGMA table_info(staging_absence_decisions)').all().some(c=>c.name==='selected_source_code'))
-    db.exec('ALTER TABLE staging_absence_decisions ADD COLUMN selected_source_code TEXT');
-  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS staging_absence_one_choice ON staging_absence_decisions(supplier,selected_source_code) WHERE selected_source_code IS NOT NULL');
   const original={add:U.addStaging.bind(U),accept:U.acceptStaging.bind(U),edit:U.updateStaging.bind(U)};
   const originalUpdate=U.updateProduct.bind(U);
   let availabilityChanged=false;
@@ -170,18 +167,12 @@ function install({U,db,normalize,classify,badName,ext}) {
     if(row && patch.snapshotJson){
       const snap=JSON.parse(patch.snapshotJson);
       const old=JSON.parse(row.snapshotJson||'{}');
-      // Formularz edytuje model, ale nie pokazuje pola bieżnika. Synchronizujemy
-      // tylko automatyczną kopię starego modelu; osobnego bieżnika nie ruszamy.
-      if(snap.model!==old.model && old.bieznik===old.model && snap.bieznik===old.bieznik){
-        snap.bieznik=snap.model;
-      }
       if(snap.ean!==old.ean || (patch.edytowanePola && JSON.parse(patch.edytowanePola).includes('ean'))){
         const v=validateEan(snap.ean);
         snap.eanRaw=v.raw;snap.eanIsValid=v.valid===null?null:Number(v.valid);
         snap.eanSourceStatus=v.status;snap._eanIssue=v.error;
-        patch={...patch,eanRaw:v.raw,eanIsValid:snap.eanIsValid,eanSourceStatus:v.status};
+        patch={...patch,eanRaw:v.raw,eanIsValid:snap.eanIsValid,eanSourceStatus:v.status,snapshotJson:JSON.stringify(snap)};
       }
-      patch={...patch,snapshotJson:JSON.stringify(snap)};
     }
     return original.edit(id,patch);
   };
@@ -258,77 +249,12 @@ function install({U,db,normalize,classify,badName,ext}) {
     if(snap._catalogVersion!==version(current))
       fail('Dane starej karty się zmieniły. Odśwież staging i sprawdź ją ponownie.');
     const candidateHash=hash((snap._candidates||[]).map(c=>[c.kod,c.ean,c.dot]).sort());
-    db.prepare(`INSERT INTO staging_absence_decisions(supplier,product_code,candidates_hash,decided_at) VALUES(?,?,?,?)
+    db.prepare(`INSERT INTO staging_absence_decisions VALUES(?,?,?,?)
       ON CONFLICT(supplier,product_code) DO UPDATE SET candidates_hash=excluded.candidates_hash,decided_at=excluded.decided_at`)
       .run(row.dostawca,row.kod,candidateHash,new Date().toISOString());
     clear.run(row.dostawca,row.kod);
     return {kod:row.kod};
   })();
-  U.chooseAbsenceCard=(id,selectedCode,expectedCandidateVersion)=>db.transaction(()=>{
-    const row=U.getStaging(id);
-    if(!row)fail('Zgłoszenie zostało już zmienione. Odśwież staging.');
-    const snap=JSON.parse(row.snapshotJson||'{}'),old=find(row.kod);
-    const sameTyre=old && [...KEYS,'dot','ean'].every(k=>norm(snap[k])===norm(old[k]));
-    if(!snap._absenceReview||!old||!sameTyre)
-      fail('Dane starej karty zmieniły się. Odśwież staging.');
-    const options=(snap._candidates||[]).filter(c=>{
-      const p=find(c.kod);
-      return p && p.dostawca===row.dostawca && norm(c.dot)===norm(p.dot) &&
-        norm(c.dot)===norm(old.dot) && norm(c.rozmiar)===norm(p.rozmiar) &&
-        (!c.ean || !p.ean || norm(c.ean)===norm(p.ean));
-    });
-    if(!options.length)fail('Różny DOT lub brak potwierdzonej karty. Tych opon nie można połączyć.');
-    const chosen=options.find(c=>c.kod===selectedCode);
-    if(selectedCode!==row.kod&&!chosen)fail('Wybierz jedną z widocznych kart.');
-    if(selectedCode===row.kod && options.length!==1)
-      fail('Wybierz dokładnie jedną pozycję bieżącej oferty, aby przypisać ją starej karcie.');
-    const feed=chosen||options[0],candidate=find(feed.kod);
-    if(!expectedCandidateVersion || expectedCandidateVersion!==version(candidate))
-      fail('Karta z bieżącej oferty została zmieniona. Odśwież cennik.');
-    const liveOffer=feed.sourceKey && feed.stan!=null && feed.cenaZakupu!=null
-      ? feed : candidate.status==='aktywny' ? candidate : null;
-    const inStock=Number(liveOffer?.stan),price=Number(liveOffer?.cenaZakupu);
-    const hasFreshPriceAndStock=!!feed.sourceKey && feed.stan!=null && feed.cenaZakupu!=null &&
-      Number.isFinite(Number(feed.stan)) && Number.isFinite(Number(feed.cenaZakupu));
-    if(selectedCode===row.kod){
-      if(!liveOffer || !Number.isFinite(inStock) || !Number.isFinite(price))
-        fail('Potrzebny świeży odczyt tej oferty przed przeniesieniem jej na starą kartę. Wczytaj cennik ponownie.');
-      if(candidate.kod===old.kod)fail('Obie pozycje wskazują tę samą kartę.');
-      const patch={stan:inStock>0&&price>0?inStock:0,cenaZakupu:price,
-        status:inStock>0&&price>0?'aktywny':'wstrzymany',dataAktualizacji:new Date().toISOString()};
-      if(Number.isFinite(Number(liveOffer.cenaSprzedazy))&&Number(liveOffer.cenaSprzedazy)>0)
-        patch.cenaSprzedazy=Number(liveOffer.cenaSprzedazy);
-      originalUpdate(old.id,patch);
-      db.prepare('DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?').run(row.dostawca,old.kod);
-      suspend(candidate,new Date().toISOString(),null,'Wybrano inną kartę dla bieżącej oferty');
-      if(feed.sourceKey)
-        db.prepare('INSERT INTO staging_matches(supplier,source_key,product_code,created_at) VALUES(?,?,?,?) ON CONFLICT(supplier,source_key) DO UPDATE SET product_code=excluded.product_code,created_at=excluded.created_at')
-          .run(row.dostawca,feed.sourceKey,old.kod,new Date().toISOString());
-      const candidateHash=hash((snap._candidates||[]).map(c=>[c.kod,c.ean,c.dot]).sort());
-      db.prepare(`INSERT INTO staging_absence_decisions(supplier,product_code,candidates_hash,decided_at,selected_source_code)
-        VALUES(?,?,?,?,?) ON CONFLICT(supplier,product_code) DO UPDATE SET
-        candidates_hash=excluded.candidates_hash,decided_at=excluded.decided_at,selected_source_code=excluded.selected_source_code`)
-        .run(row.dostawca,old.kod,candidateHash,new Date().toISOString(),candidate.kod);
-    }else{
-      if(candidate.status==='wstrzymany'){
-        if(!hasFreshPriceAndStock)
-          fail('Nie ma aktualnego stanu i ceny tej karty. Wczytaj cennik ponownie.');
-        originalUpdate(candidate.id,{stan:inStock>0&&price>0?inStock:0,cenaZakupu:price,
-          status:inStock>0&&price>0?'aktywny':'wstrzymany',dataAktualizacji:new Date().toISOString()});
-        db.prepare('DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?').run(row.dostawca,candidate.kod);
-      }
-      suspend(old,new Date().toISOString(),null,'Wybrano kartę z bieżącej oferty');
-      const candidateHash=hash((snap._candidates||[]).map(c=>[c.kod,c.ean,c.dot]).sort());
-      db.prepare(`INSERT INTO staging_absence_decisions(supplier,product_code,candidates_hash,decided_at,selected_source_code)
-        VALUES(?,?,?,?,NULL) ON CONFLICT(supplier,product_code) DO UPDATE SET
-        candidates_hash=excluded.candidates_hash,decided_at=excluded.decided_at,selected_source_code=NULL`)
-        .run(row.dostawca,old.kod,candidateHash,new Date().toISOString());
-    }
-    clear.run(row.dostawca,row.kod);
-    availabilityChanged=true;
-    return {kod:selectedCode,dostawca:row.dostawca};
-  })();
-  U.refreshAbsenceAvailability=refreshAvailability;
   function importer(supplier,incoming,options={}) {
     availabilityChanged=false;
     if(!Array.isArray(incoming)) throw new Error('Nieprawidłowy cennik');
@@ -355,19 +281,8 @@ function install({U,db,normalize,classify,badName,ext}) {
       let d=normalize({...raw,ean:null}).poz; // sizes/parameters only; strict EAN handled here
       Object.assign(d,{ean:ev.value,eanRaw:ev.raw,eanIsValid:ev.valid===null?null:Number(ev.valid),eanSourceStatus:ev.status,eanCandidates:null});
       let code=String(raw.kod||''),key=sourceKey(supplier,source),current=null,matchIssue=null,candidates=[];
-      const manualChoice=db.prepare('SELECT product_code FROM staging_absence_decisions WHERE supplier=? AND selected_source_code=?').get(supplier,code);
-      if(manualChoice){
-        const picked=byCode.get(manualChoice.product_code);
-        if(picked && compatibility(d,picked).ok && norm(d.dot)===norm(picked.dot)){
-          current=picked;
-          // The operator kept the old card deliberately. The new source code
-          // identifies its offer, not a request to replace its code or EAN.
-          d.kodDostawcy=picked.kodDostawcy;
-          d.ean=picked.ean;
-        }
-      }
       const remembered=aliases.get(supplier,key);
-      if(!current && remembered) current=byCode.get(remembered.product_code)||null;
+      if(remembered) current=byCode.get(remembered.product_code)||null;
       const synthetic=raw._kodSynthetic || !code || code.includes('_AUTO_') || (ev.value && code.replace(new RegExp('^'+supplier+'_'),'')===ev.value);
       if(!current && code && !synthetic){
         current=byCode.get(code)||null;
@@ -543,8 +458,7 @@ function install({U,db,normalize,classify,badName,ext}) {
           if(!options.reconcileOnly && p.nieobecnoscPodRzad)U.updateProduct(p.id,{nieobecnoscPodRzad:0});
           const closed=db.prepare('SELECT candidates_hash FROM staging_absence_decisions WHERE supplier=? AND product_code=?').get(supplier,p.kod);
           if(!closed)continue;
-        const alternativesNow=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod) &&
-          (!byCode.get(String(r.kod))||compatibility(r,byCode.get(String(r.kod))).ok));
+          const alternativesNow=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod));
           const currentHash=hash(alternativesNow.map(r=>[r.kod,r.ean,r.dot]).sort());
           if(closed.candidates_hash===currentHash)continue;
           db.prepare('DELETE FROM staging_absence_decisions WHERE supplier=? AND product_code=?').run(supplier,p.kod);
@@ -560,8 +474,7 @@ function install({U,db,normalize,classify,badName,ext}) {
           clearAbsence.run(supplier,p.kod);
           if(oldQueue.get(p.kod)?.typZmiany==='wycofana')clear.run(supplier,p.kod);
         }
-        const alternatives=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod) &&
-          (!byCode.get(String(r.kod))||compatibility(r,byCode.get(String(r.kod))).ok));
+        const alternatives=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod));
         if(alternatives.length){
           const candidateHash=hash(alternatives.map(r=>[r.kod,r.ean,r.dot]).sort());
           const closed=db.prepare('SELECT candidates_hash FROM staging_absence_decisions WHERE supplier=? AND product_code=?').get(supplier,p.kod);
@@ -569,9 +482,7 @@ function install({U,db,normalize,classify,badName,ext}) {
             clear.run(supplier,p.kod);stats.bezZmian++;continue;
           }
           const snap={...p,_policyVersion:2,_catalogVersion:version(find(p.kod)),_absenceReview:true,
-            _candidates:alternatives.map(r=>({kod:r.kod,nazwa:r.nazwa,ean:r.ean,rozmiar:r.rozmiar,dot:r.dot,
-              stan:r.stan,cenaZakupu:r.cenaZakupu,cenaSprzedazy:r.cenaSprzedazy,
-              sourceKey:sourceKey(supplier,r)}))};
+            _candidates:alternatives.map(r=>({kod:r.kod,nazwa:r.nazwa,ean:r.ean,rozmiar:r.rozmiar,dot:r.dot}))};
           U.addStaging({typZmiany:'blad',kod:p.kod,nazwa:p.nazwa,dostawca:supplier,magazyn:p.magazyn,
             stanStary:p.stan,stanNowy:p.stan,cenaZakupuStara:p.cenaZakupu,cenaZakupuNowa:p.cenaZakupu,
             powod:'Brak starego kodu, ale zgodne cechy są w bieżącej ofercie pod innym oznaczeniem. Sprawdź starą kartę.',
@@ -579,8 +490,6 @@ function install({U,db,normalize,classify,badName,ext}) {
           if(!options.reconcileOnly)clearAbsence.run(supplier,p.kod);
           stats.doStagingu++;stats.zmienione++;continue;
         }
-        if(oldQueue.get(p.kod) && JSON.parse(oldQueue.get(p.kod).snapshotJson||'{}')._absenceReview)
-          clear.run(supplier,p.kod);
         // Old fallback rows have neither a stable namespaced id nor supplier
         // code. They cannot be declared absent from a different source schema.
         if(!norm(p.kod).startsWith(norm(supplier)+'_') && !p.kodDostawcy){
@@ -629,22 +538,9 @@ function registerRoutes(app,{U,we,be}) {
       incoming:{marka:snap.marka,model:snap.model,rozmiar:snap.rozmiar,dot:snap.dot,ean:snap.eanRaw??snap.ean,stan:product?.stan,status:product?.status},
       candidates:(snap._candidates||[]).map(c=>{
         const p=U.getProductByKod(c.kod);
-        const selectable=!!p && p.dostawca===row.dostawca && norm(c.dot)===norm(p.dot) &&
-          norm(c.dot)===norm(snap.dot) && norm(c.rozmiar)===norm(p.rozmiar) &&
-          (!c.ean || !p.ean || norm(c.ean)===norm(p.ean));
-        return {...c,catalogStan:p?.stan??null,status:p?.status??null,catalogDot:p?.dot??null,
-          catalogVersion:version(p),
-          selectable,sameEan:norm(c.ean)===norm(snap.ean),sameDot:selectable};
+        return {...c,stan:p?.stan??null,status:p?.status??null,
+          sameEan:norm(c.ean)===norm(snap.ean),sameDot:norm(c.dot)===norm(snap.dot)};
       })});
-  });
-  app.post('/api/staging/:id/choose-absence-card',we,(req,res)=>{
-    try{
-      const result=U.chooseAbsenceCard(Number(req.params.id),req.body?.selectedCode,req.body?.candidateVersion);
-      be(req.user.id,req.user.imieNazwisko,'wybor_karty_z_biezacej_oferty','staging',String(req.params.id),
-        {wybranyKod:result.kod});
-      U.refreshAbsenceAvailability(result.dostawca);
-      res.json({ok:true,kod:result.kod});
-    }catch(e){res.status(e.status||500).json({message:e.message});}
   });
   app.post('/api/staging/:id/close-absence-review',we,(req,res)=>{
     try{
