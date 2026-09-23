@@ -18,10 +18,16 @@ a. Odczytaj zmianę (bez zbędnych bajtów):
    - wpis changelog Ani jest w treści commita (`git show <sha> -s`) — użyj go jako „dlaczego".
 b. Zaklasyfikuj:
    - **kod / schemat / parser** → wpis do backlogu (krok 3),
-   - **tylko dane** (np. regeneracja `sellycsv-*.csv`, odświeżenie eksportu) → dopisz jedną linijkę do sekcji „Pominięte" w backlogu, bez pełnego wpisu.
+   - **tylko dane** (np. regeneracja `sellycsv-*.csv`, odświeżenie eksportu) → jedna linijka
+     w sekcji „Pominięte" **własnego pliku** `docs/rebuild-backlog/wpis-<N>.md`, bez pełnego wpisu.
+     NIE dopisujesz do bloków „Pominięte" w `docs/rebuild-backlog.md` — to historia.
 
-## 3. Wpis do `docs/rebuild-backlog.md` (dla zmian kodu/schematu)
-Dopisz kolejny numerowany wpis `#N` w formacie jak istniejące (#1, #2):
+## 3. Wpis do backlogu (dla zmian kodu/schematu) — do WŁASNEGO pliku ticketu
+Wszystko, co ten triaż dokłada do backlogu, idzie do **jednego nowego pliku**
+`docs/rebuild-backlog/wpis-<N>.md`, gdzie `N` to numer Twojego ticketu (reguła i szablon:
+`docs/rebuild-backlog/README.md`). **Nie dopisujesz nic na koniec `docs/rebuild-backlog.md`** —
+to był punkt, w którym równoległe triaże kolidowały i treścią, i numerem wpisu.
+Identyfikator wpisu: `#<N>.1`, `#<N>.2`, … Format pojedynczego wpisu jak dotychczas:
 - nagłówek: `### #N · DATA · [KATEGORIE] · etykieta`
 - tabela: Data, Kategoria, Pliki (+ nazwy `.bak`), Commit (skrót), „Do nowej wersji?" = **⬜ do decyzji**, Status = —
 - **Opis biznesowy** — językiem biznesowym, co realnie się zmieniło i po co (z diffa + wpisu Ani, NIE z pamięci).
@@ -36,6 +42,7 @@ Dopisz kolejny numerowany wpis `#N` w formacie jak istniejące (#1, #2):
 ## 5. Zapisz stan i commituj
 - Zaktualizuj `docs/triage-state.txt` na SHA NAJNOWSZEGO przetworzonego commita (pełny SHA + linia komentarza z datą/etykietą).
 - `git add docs/ contract/ 2>/dev/null; git commit -m "triaż: N nowych zmian → backlog (<etykiety>)"`
+- Sprawdź zestawienie: `tools/stan-backlogu.sh <N>` (Twoje wpisy) i `tools/stan-backlogu.sh --do-decyzji`
 - **NIE pushuj automatycznie.** Push zostaw userowi (chyba że wprost poprosi).
 
 ## 6. Podsumuj userowi (zwięźle)
