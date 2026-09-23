@@ -163,3 +163,148 @@ którego już nie było. BLOCKER na szczęście dotyczył pliku spoza tych zmian
 co recenzent sam poprawnie odnotował.
 
 **Bramki po poprawce:** lint ✓, typecheck ✓, `dostawcy.upload.test.ts` 15/15.
+
+---
+
+## Review — iteracja 2
+
+> Reviewed: 2026-09-23
+> Branch: `chore/120-i15-2-resync-parserow`
+> Diff: 63 pliki, 14 commitów (`a46d463`…`362f2d9`)
+
+Zakres tej rundy: weryfikacja poprawki BLOCKER-a (`ed19753`) i poszukiwanie regresji, których
+pierwsza runda nie mogła zobaczyć (worktree był w edycji). Poniżej wynik.
+
+### Weryfikacja BLOCKER-a — `suppliers.ts:250`
+
+**Poprawiony poprawnie.** `BladCennika` jest importowane (`routes/suppliers.ts:10`, obok
+`parsujBufor`) i użyte w warunku `e instanceof PustyImportBlad || e instanceof BladCennika ? 400 : 500`
+(`suppliers.ts:250`). Zweryfikowałem empirycznie, nie tylko czytaniem:
+
+- `npx vitest run test/dostawcy.upload.test.ts` → **15/15 zielone**.
+- Cofnąłem lokalnie (bez commitowania) warunek do samego `PustyImportBlad` i uruchomiłem
+  ponownie test „błąd odczytu wierszy (#103) daje DOKŁADNIE 400, nie 500” — czerwienił się
+  dokładnie tak, jak deklaruje raport (`expected 500 to be 400`), po czym przywróciłem plik.
+  Test **nie jest tautologiczny** — sprawdza dokładny kod (nie `>=400`) i realnie łapie regresję.
+- Twarda awaria czytnika (śmieci jako XLSX, test „zwraca czytelny błąd i NIE zapisuje pozycji”,
+  `dostawcy.upload.test.ts:185-196`) w tym repo nadal używa luźnej asercji `toBeGreaterThanOrEqual(400)`,
+  ale scenariusz faktycznie trafia w SheetJS przed `feed_safety` (potwierdzone też przez
+  `archiwum-importow.gate.test.ts:79-88`, gdzie analogiczny `ZEPSUTY_MO7` w CSV daje **500** —
+  gate 22/22 zielony, fixture bez zmian). Zachowanie dla twardej awarii pozostaje 500, zgodnie z wymaganiem.
+
+### Ścieżki gubiące nowe wyjątki — przegląd wszystkich trzech wołających + reszty `src/`
+
+- **`routes/import.ts:141-146`** (`przetworzBufor`) — `catch` łapie `BladCennika` i `PustyImportBlad`
+  osobno i mapuje oba na `{blad}` → 400 (linia 144), reszta leci dalej i kończy się w zewnętrznym
+  `catch` trasy jako 500 (linie 297-301 dla `parse-file`, 368+ dla `from-url`). Poprawnie, obie trasy
+  korzystają z tej samej funkcji.
+- **`routes/suppliers.ts:159-251`** — jak wyżej, naprawione.
+- **`import/synchronizuj.ts:198-246`** — `catch` na zewnątrz całego bloku (linia 230) jest generyczny,
+  nie rozróżnia typu wyjątku: zapisuje alert „Błąd pobierania”, oznacza dostawcę błędem i zwraca
+  `{ok:false, error}` — **nigdy nie rzuca**. `PustyImportBlad`/`BladCennika`/twardy wyjątek parsera
+  trafiają w tę samą, bezpieczną gałąź. Potwierdzone też przez wołającego: `scheduler.ts:145` owija
+  wywołanie dodatkowym `void synchronizuj(kod).catch(() => {})` — podwójny bezpiecznik. Sprawdziłem,
+  kto woła scheduler dla wielu dostawców naraz — `synchronizujDostawce()` zwraca pojedynczą funkcję
+  per-kod, wywoływaną raz na dostawcę; brak wspólnej pętli, która mogłaby przerwać się w środku.
+  **Jeden zepsuty cennik nie zatrzymuje pozostałych — potwierdzone czytaniem, zgodne z opisem w
+  raport.md i karta.md.**
+- **`routes/staging-mutacje.ts`** (`POST /api/staging/import`) — NIE woła `parsujBufor`/`parsujPlik`
+  w ogóle (pozycje idą wprost z ciała żądania), więc `BladCennika` nie może tam wystąpić. To nie jest
+  luka — poza zakresem tego typu wyjątku.
+- Grep całego `src/` po `PustyImportBlad|BladCennika` (poza testami) pokazuje tylko cztery pliki:
+  `parsuj.ts` (definicja), `tk.ts` (definicja `PustyImportBlad`), `routes/import.ts`, `routes/suppliers.ts`,
+  `routes/staging-mutacje.ts` (tylko `PustyImportBlad`, z innego źródła — `uruchomImport()`, nie z
+  `parsujBufor`). **Nie znalazłem żadnej dodatkowej ścieżki, która gubi `BladCennika`.**
+
+### `parsuj.ts` — zawężone tłumaczenie wyjątków
+
+Przeczytałem `legacy/feed_safety.cjs` (29 linii) w całości. Trzy miejsca rzucania `Error`:
+- `attach()` linia 11: `'Brak listy produktów w odpowiedzi dostawcy'` → pasuje do `BRAK_LISTY = /^Brak listy produktów/`.
+- linia 13: `` `Błędy odczytu cennika (${errors}). Import zatrzymany bez przełączania na stary format.` `` → pasuje do `BLEDY_PARSERA = /^Błędy odczytu cennika/`.
+- linia 14: `'Pusty cennik. Import zatrzymany.'` → pasuje do `PUSTY_CENNIK = /^Pusty cennik/`.
+
+Wszystkie trzy komunikaty pokryte, kotwiczone na początku (`^`), bez ryzyka przypadkowego
+dopasowania innego wyjątku (żaden inny komunikat błędu w warstwie parserów/silnika nie zaczyna się
+tymi samymi frazami — sprawdziłem `grep -rn "^Error\|throw new Error" src/import/` pobieżnie, bez trafień
+kolizyjnych). `test/feed-safety.test.ts` ładuje **prawdziwy** `legacy/feed_safety.cjs` (nie atrapę)
+i asercjuje treści przez `toThrow(/regex/)` — realnie przypina komunikaty; kolejny resync, który
+zmieni treść, faktycznie zaświeci na czerwono. Osobny test (`test/feed-safety.test.ts:102-121`)
+weryfikuje wprost, że wszystkie trzy komunikaty pasują do tych samych trzech regexów co w `parsuj.ts`
+— to redundantne z testem gate gdzie indziej, ale nie szkodzi.
+
+### Dokumentacja vs stan kodu
+
+Sprawdzone: `raport.md`, `docs/karty/I15.2/karta.md`, `docs/spec-backend/wpis-120.md`,
+`docs/karty/I15.{4,8,9,10}/wejscie-120.md`. Wszystkie twierdzenia o kodach HTTP (400/400/500) są
+dziś prawdziwe wobec finalnego kodu — w szczególności `karta.md:78-83` i `wpis-120.md:18-34` mówią
+teraz „wszystkie trzy wejścia” w kontekście tłumaczenia wyjątku na typ, co jest prawdą na poziomie
+typu ORAZ (po poprawce BLOCKER-a) na poziomie mapowania na kod HTTP w każdej trasie — nie znalazłem
+już rozjazdu, który zgłosiła pierwsza runda. `raport.md` ma osobną sekcję „Poprawki po review”
+(linie 175-188), która poprawnie referencjonuje commit `ed19753` i wyjaśnia, dlaczego dwa SHOULD-FIX
+z pierwszej rundy były już nieaktualne.
+
+### `docs/rebuild-backlog.md`
+
+Statusy zgadzają się z dowiezionym zakresem: #73, #75, #78, #79, #80, #82, #83, #99/D4, oba wpisy
+#103 (Selly/`runFullTodays` i `feed_safety`/staging) i #105 mają zaktualizowane pola „Do nowej
+wersji?”/„Status” odzwierciedlające faktyczny stan po tickecie 120, nie zamiar. **Duplikat #103 jest
+opisany przy OBU wpisach** (linie ok. 4570-4573 i 4595-4598) — każdy odsyła do drugiego z numerem
+linii i rozróżnieniem tematu (Selly vs `feed_safety`), więc nie ma ryzyka pomylenia. Nie znalazłem
+zdania, które ten ticket by obalił, a backlog by wciąż powtarzał.
+
+### Ogólnie — ryzyko regresji develop po merge'u
+
+- `docs/rebuild-roadmap.md` — diff pusty (`git diff --name-only origin/develop...HEAD` bez wyniku).
+- Brak plików `.csv`/`.xlsx`/`.db`/`snapshot` w diffie.
+- `npm run lint` i `npm run typecheck` — czyste w tym worktree (nie uruchamiałem pełnego `npm test`,
+  zgodnie z poleceniem).
+- `test/dostawcy.upload.test.ts` uruchomiony osobno: 15/15.
+
+### BLOCKER
+
+Brak.
+
+### SHOULD-FIX
+
+Brak nowych. (Dwa SHOULD-FIX z iteracji 1 były nieaktualne — potwierdzone w rozliczeniu Mastera i
+w tej rundzie ponownie zweryfikowane jako zrobione.)
+
+### NICE-TO-HAVE
+
+- [ ] `rebuild/backend/test/dostawcy.upload.test.ts:189` — test „zwraca czytelny błąd i NIE zapisuje
+  pozycji” (twarda awaria SheetJS) nadal ma luźną asercję `toBeGreaterThanOrEqual(400)`. Skoro obok
+  (linia 211) jest już precedens testu na dokładny kod dla `BladCennika`, warto tym samym rygorem
+  objąć i tę ścieżkę (`toBe(500)`) — nie blokuje, bo dziś zachowanie jest poprawne i pilnowane przez
+  `archiwum-importow.gate.test.ts` z inną próbką, ale to jest dokładnie ten sam typ luki, którą
+  złapał BLOCKER z iteracji 1.
+
+### Wynik
+
+**0 BLOCKER / 0 SHOULD-FIX (nowych) / 1 NICE-TO-HAVE.** Poprawka BLOCKER-a jest kompletna i
+zweryfikowana empirycznie (nie tylko czytaniem) — nie znalazłem dodatkowych ścieżek gubiących
+`BladCennika`, `synchronizuj.ts` degraduje się poprawnie per-dostawca, granica tłumaczenia wyjątków
+w `parsuj.ts` pokrywa dokładnie trzy komunikaty `feed_safety.cjs` bez ryzyka fałszywego dopasowania,
+a dokumentacja (raport, karta, wpis spec-backend, cztery wejścia, backlog) jest spójna z finalnym
+kodem. Ticket gotowy do merge'u z perspektywy tej rundy review.
+
+## Rozliczenie iteracji 2 przez Mastera (2026-09-23)
+
+**NICE-TO-HAVE (luźna asercja `toBeGreaterThanOrEqual(400)`): PRZYJĘTE, ale z inną wartością niż
+sugerowana.** Recenzent zaproponował `toBe(500)`, zakładając, że śmieci wysłane jako XLSX wywracają
+czytnik SheetJS. **Pomiar pokazał `400`** (`expected 400 to be 500` przy próbie wstawienia 500):
+SheetJS jest pobłażliwy i na takim wejściu NIE rzuca — zwraca zero rekordów bez błędów, więc
+zatrzymuje to dopiero bezpiecznik pustego cennika. Asercja zaostrzona na zmierzone `400`,
+z komentarzem tłumaczącym, gdzie naprawdę leży ścieżka 500 (`CsvError` z `csv-parse`,
+`test/archiwum-importow.gate.test.ts`).
+
+Morał ten sam co w całym tickecie: kod odpowiedzi trzeba zmierzyć, nie wyprowadzić z nazwy
+scenariusza. Sama rekomendacja („nie zostawiaj luźnej asercji obok precedensu na dokładny kod")
+była słuszna i dlatego ją zrealizowałem.
+
+**Pozostałe ustalenia iteracji 2 przyjmuję bez zmian** — w szczególności weryfikację, że
+`synchronizuj.ts` i `scheduler.ts:145` degradują się poprawnie i jeden zepsuty cennik nie zatrzymuje
+pobierania pozostałych dostawców. To było realne ryzyko produkcyjne i dobrze, że zostało sprawdzone
+niezależnie.
+
+**Bramki końcowe:** lint ✓, typecheck ✓, build ✓, `npm test` **1 648/1 648 zielonych** (101 plików,
+bezczynna maszyna).

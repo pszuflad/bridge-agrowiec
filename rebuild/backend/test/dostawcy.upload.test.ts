@@ -186,7 +186,16 @@ describe("POST /api/dostawcy/:kod/upload", () => {
       zasiejDostawce("MO8");
       const odp = await wgraj("MO8", Buffer.from("to nie jest xlsx, tylko tekst"), "smieci.xlsx");
 
-      expect(odp.status).toBeGreaterThanOrEqual(400);
+      // Asercja na DOKŁADNY kod, nie `>= 400` — luźna przepuściła tu regresję raz
+      // (ticket 120, review: ta trasa oddawała 500 tam, gdzie `parse-file` oddawało 400).
+      //
+      // ⚠ Zmierzone, wbrew intuicji: śmieci wysłane jako XLSX dają **400**, nie 500.
+      // SheetJS jest pobłażliwy i NIE wywraca się na takim wejściu — zwraca zero rekordów
+      // bez błędów, więc zatrzymuje to dopiero bezpiecznik pustego cennika
+      // (`PustyImportBlad`, po resyncu wykrywane już przez `feed_safety`). Twarda awaria
+      // czytnika, która naprawdę daje 500, to np. `CsvError: Quote Not Closed` z `csv-parse`
+      // — patrz `test/archiwum-importow.gate.test.ts`.
+      expect(odp.status).toBe(400);
       const cialo = odp.body as { error: string; dostawcaKod: string; nazwaPliku: string };
       expect(cialo.error).toBeTruthy();
       expect(cialo.error).not.toBe("Błąd serwera");
