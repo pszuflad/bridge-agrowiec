@@ -20144,6 +20144,201 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETSellyStatusOdpowiedz200" } } } }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  /api/selly/sync-delta-all:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-delta-all"
+      description: "Tor 1 (delta cena/stan) po kolei dla wszystkich dostawców z activeSuppliers."
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: "Rozpłaszczone stats + dostawca. Przy błędzie fatalnym zamiast statystyk przychodzi { ok: false, dostawca, error }."
+                      additionalProperties: true
+                      properties:
+                        dostawca: { type: string }
+                        ok: { type: boolean }
+                        error: { type: string }
+                        total: { type: integer }
+                        duration_ms: { type: integer }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+        "500": { description: "Błąd — ciało { ok: false, error }" }
+  /api/selly/sync-delta-supplier:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-delta-supplier"
+      description: "Tor 1 dla jednego dostawcy. ODSTĘPSTWO (karta I15.8): produkcja importuje tu nieistniejące syncDeltaForDostawca i oddaje 500; odbudowa woła syncDelta."
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dostawca]
+              properties:
+                dostawca: { type: string, description: "Kod z activeSuppliers (MO1…MO10)" }
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                description: "Zwracany wprost przez syncDelta, bez opakowania ok."
+                properties:
+                  stats:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      ok: { type: integer }
+                      err: { type: integer }
+                      skip: { type: integer }
+                      discovered: { type: integer }
+                      created: { type: integer }
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kod: { type: string }
+                        error: { type: string }
+                  logId: { type: integer }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+        "500": { description: "Błąd — ciało { ok: false, error }" }
+  /api/selly/sync-full-force:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-full-force"
+      description: "Tor 2 wymuszony dla podanych dostawców; autoCreate DOMYŚLNIE FALSE, inaczej niż w sync-full-supplier. ODSTĘPSTWO (karta I15.8): produkcja gubi tu listę dostawców (forceSuppliers vs opts.suppliers) i oddaje 500; odbudowa ją honoruje."
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dostawcy]
+              properties:
+                dostawcy:
+                  type: array
+                  minItems: 1
+                  items: { type: string }
+                autoCreate: { type: boolean, default: false }
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: "Rozpłaszczone stats + dostawca. Przy błędzie fatalnym zamiast statystyk przychodzi { ok: false, dostawca, error }."
+                      additionalProperties: true
+                      properties:
+                        dostawca: { type: string }
+                        ok: { type: boolean }
+                        error: { type: string }
+                        total: { type: integer }
+                        duration_ms: { type: integer }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+        "500": { description: "Błąd — ciało { ok: false, error }" }
+  /api/selly/sync-full-supplier:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-full-supplier"
+      description: "Tor 2 (pełny mirror + auto-create) dla jednego dostawcy; autoCreate domyślnie TRUE."
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dostawca]
+              properties:
+                dostawca: { type: string }
+                autoCreate: { type: boolean, default: true }
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                description: "Zwracany wprost przez syncFullForDostawca, bez opakowania ok."
+                properties:
+                  stats:
+                    type: object
+                    properties:
+                      total: { type: integer }
+                      updated_A: { type: integer }
+                      created_variant_B: { type: integer }
+                      created_C: { type: integer }
+                      err: { type: integer }
+                      skip: { type: integer }
+                      dry: { type: integer }
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kod: { type: string }
+                        kod_importu: { type: string }
+                        error: { type: string }
+                  logId: { type: integer }
+                  durationMs: { type: integer }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+        "500": { description: "Błąd — ciało { ok: false, error }" }
+  /api/selly/sync-full-today:
+    post:
+      tags: [selly]
+      summary: "POST /api/selly/sync-full-today"
+      description: "Tor 2 dla dzisiejszej rotacji: pn MO1+MO2, wt MO3+MO4, śr MO5+MO6, czw MO9, pt MO10, pierwsza sobota MO7, pierwsza niedziela MO8. ODSTĘPSTWO (karta I15.8): produkcja importuje nieistniejące runFullTodays i oddaje 500; odbudowa woła runFullBatch."
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      description: "Rozpłaszczone stats + dostawca. Przy błędzie fatalnym zamiast statystyk przychodzi { ok: false, dostawca, error }."
+                      additionalProperties: true
+                      properties:
+                        dostawca: { type: string }
+                        ok: { type: boolean }
+                        error: { type: string }
+                        total: { type: integer }
+                        duration_ms: { type: integer }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+        "500": { description: "Błąd — ciało { ok: false, error }" }
   /api/selly/sync-product:
     post:
       tags: [selly]
@@ -20156,6 +20351,55 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  /api/selly/sync-status:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/sync-status"
+      description: "Stan limitera, rotacja Toru 2 na dziś i ostatnie 20 wpisów selly_sync_log."
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  limiter:
+                    type: object
+                    description: "globalnyLimiter.getStats() — okno przesuwne 250 zapytań/min."
+                    properties:
+                      requestsInWindow: { type: integer }
+                      capacity: { type: integer }
+                      utilizationPct: { type: number }
+                  todayRotation:
+                    type: array
+                    description: "Dostawcy Toru 2 na dziś; pusta lista w dzień bez rotacji."
+                    items: { type: string }
+                  activeSuppliers:
+                    type: array
+                    items: { type: string }
+                  recentLogs:
+                    type: array
+                    description: "Ostatnie 20 wpisów, malejąco po rozpoczeto."
+                    items:
+                      type: object
+                      description: "Wiersz selly_sync_log. Klucze snake_case (nazwy KOLUMN) — oryginał czyta jawną listę kolumn przez better-sqlite3. Bez uzytkownik_id/uzytkownik_imie, inaczej niż GET /api/selly/log."
+                      properties:
+                        id: { type: integer }
+                        operacja: { type: string }
+                        dostawca_kod: { type: [string, "null"] }
+                        liczba_ok: { type: integer }
+                        liczba_blad: { type: integer }
+                        liczba_skip: { type: integer }
+                        rozpoczeto: { type: string }
+                        zakonczono: { type: [string, "null"] }
+                        status: { type: string, description: "w_trakcie | zakonczono | blad | ok" }
+                        szczegoly_json: { type: [string, "null"] }
+        "401": { description: "Nieautoryzowany" }
+        "400": { description: "Błędne żądanie" }
+        "500": { description: "Błąd — ciało { ok: false, error }" }
   /api/selly/sync-supplier:
     post:
       tags: [selly]
