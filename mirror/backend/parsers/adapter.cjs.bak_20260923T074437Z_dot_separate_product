@@ -509,18 +509,6 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
   const oz = Array.isArray(record.oznaczenia_techniczne) ? record.oznaczenia_techniczne : [];
   const enriched = normalizeBySupplier(dostawcaKod, record) || {};
   if (shouldRejectRecord(record, enriched)) return null;
-  const supplierEanRaw = stagingPolicy.rawEan(record);
-  let canonicalEanRaw = supplierEanRaw;
-  // Handlopex marks dated variants with W2 after a real EAN. Only accept
-  // that known convention when its producer code and explicit DOT agree.
-  const datedEan = /^([0-9]{13})W2$/i.exec(String(supplierEanRaw ?? '').trim());
-  const producerYear = /W(20[0-9]{2})$/i.exec(String(record.surowe_pola?.['kod producenta'] ?? '').trim());
-  if (['MO4', 'MO5'].includes(baseSupplierCode(dostawcaKod, record)) &&
-      datedEan && producerYear &&
-      String(record.surowe_pola?.dot ?? '').trim() === producerYear[1] &&
-      stagingPolicy.validateEan(datedEan[1]).valid) {
-    canonicalEanRaw = datedEan[1];
-  }
   let kodDisplay = firstValue(enriched.kodDostawcy, record.kod_dostawcy);
   // POPRAWKA 2026-06-18: odrzucamy kod_dostawcy znieksztalcony przez notacje naukowa
   // Excela (np. "5,02E+12") — taki "kod" nie jest unikalny i nie powinien byc uzywany
@@ -568,9 +556,8 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
   return {
     kod: kod ? String(kod) : null,
     kodDostawcy: kodDisplay ? String(kodDisplay) : null,
-    ean: stagingPolicy.validateEan(canonicalEanRaw,record.ean_lossy).value,
-    eanRaw: canonicalEanRaw ?? null,
-    _supplierEanOriginal: canonicalEanRaw !== supplierEanRaw ? supplierEanRaw : null,
+    ean: stagingPolicy.validateEan(stagingPolicy.rawEan(record),record.ean_lossy).value,
+    eanRaw: stagingPolicy.rawEan(record) ?? null,
     _eanLossy: !!record.ean_lossy,
 
     nazwa: toUpperPLName(nazwa),
@@ -706,29 +693,7 @@ function recordsToSurowe(dostawcaKod, records) {
   const items=[],rejected=[];
   for(const record of records){
     const value=recordToSuroweDostawca(dostawcaKod,record);
-    if(value){
-      if(dostawcaKod==='MO2')value._jmkRowId=record.surowe_pola?.['id JMK']??null;
-      items.push(value);
-    }else rejected.push(record);
-  }
-  if (dostawcaKod === 'MO2') {
-    // JMK repeats a manufacturer's code for different stock batches. Its own
-    // row identifier is stable and separates the offers; the staging matcher
-    // can still recognize an already accepted legacy card by EAN + DOT.
-    const counts=new Map();
-    for(const item of items){
-      const code=String(item.kodDostawcy||'').trim();
-      if(code) counts.set(code,(counts.get(code)||0)+1);
-    }
-    for(const item of items){
-      const code=String(item.kodDostawcy||'').trim();
-      if(!code || counts.get(code)<2) continue;
-      const rowId=String(item._jmkRowId||'').trim();
-      // If JMK does not supply a unique row ID, keep the old conservative
-      // conflict rather than inventing an identifier or summing stock.
-      if(/^\d+$/.test(rowId))item.kod=`MO2_JMK_${rowId}`;
-    }
-    for(const item of items)delete item._jmkRowId;
+    if(value)items.push(value);else rejected.push(record);
   }
   return require('../feed_safety.cjs').converted(dostawcaKod,records,items,rejected);
 }

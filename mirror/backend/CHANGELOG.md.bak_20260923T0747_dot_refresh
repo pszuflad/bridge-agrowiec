@@ -1,39 +1,3 @@
-2026-09-23 09:57
-obszar: backend | baza danych
-
-pliki: data.db, parsers/adapter.cjs, import_archive/2026-09/MO4__20260923__07100__rdzen.csv, import_archive/2026-09/MO5__20260923__06100__rdzen.csv, CHANGELOG.md.bak_20260923T075630Z_handlopex_catalog_ean
-
-zmiana: ponownie odczytano bieżące oferty Handlopex MO4 i MO5 po zmianie zasad EAN. Liczba zgłoszeń błędnego EAN z końcówką W2 spadła z 14 do 0, nie powstały zdublowane zgłoszenia. Potwierdzono osobne karty CEAT DOT 2024 i DOT 2024/2025. Drugi magazyn utworzył 244 zgłoszenia nowych wariantów do oceny; nie zostały automatycznie zatwierdzone w stagingu.
-
-powód: usunięcie nieaktualnych błędów EAN i odświeżenie zgłoszeń z bieżącej oferty bez łączenia różnych roczników.
-
-2026-09-23 09:56
-obszar: baza danych
-
-pliki: data.db, data.db.bak_20260923T075630Z_handlopex_catalog_ean, CHANGELOG.md.bak_20260923T075630Z_handlopex_catalog_ean
-
-zmiana: poprawiono stary zapis ean_raw z dopiskiem W2 na prawidłowy 13-cyfrowy EAN dla 13 jednoznacznie potwierdzonych kart MO4/MO5 z aktualnej oferty. Nie ruszono nieobecnych lub wieloznacznych kart. Pełny zapis dostawcy pozostaje w aktualnym pliku oferty.
-
-powód: po poprawce importu stare karty katalogowe nadal pokazywały dawny dopisek przy EAN.
-
-2026-09-23 09:54
-obszar: backend | baza danych
-
-pliki: parsers/adapter.cjs, data.db.bak_20260923T075453Z_handlopex_ean_dot, CHANGELOG.md.bak_20260923T075453Z_handlopex_ean_dot, adapter.cjs.bak_20260923T075453Z_handlopex_ean_dot
-
-zmiana: w ofertach Handlopex MO4/MO5 końcówka W2 po prawidłowym 13-cyfrowym EAN jest rozpoznawana jako oznaczenie wariantu rocznikowego, jeżeli rok zgadza się z polem DOT i końcówką kodu producenta. Do EAN trafia sam numer, pełny zapis dostawcy zostaje zachowany w szczegółach. Inny DOT nadal tworzy osobny produkt.
-
-powód: dopisek W2 nie jest błędem EAN; identyczna opona może mieć inny rok produkcji i musi pozostać osobną pozycją.
-
-2026-09-23 09:47
-obszar: backend | baza danych
-
-pliki: data.db, jednorazowy skrypt refresh_dot_feeds_20260923.cjs (usunięty po użyciu), import_archive/2026-09/MO2__20260923__07095__rdzen.csv, import_archive/2026-09/MO4__20260923__07100__rdzen.csv, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, CHANGELOG.md.bak_20260923T0747_dot_refresh
-
-zmiana: ponownie przeliczono staging MO2 i MO4 po wdrożeniu rozdzielania DOT. MO2_JMK_8032 jest osobną nową pozycją; stara karta MO2_55002475 DOT 2019 pozostała bez zmian. Dla MO4 oddzielono wariant DOT 2024/2025, a przy DOT 2024 pozostawiono wyłącznie błąd surowego EAN 8904288108224W2. Wygenerowano aktywny CSV (5367 pozycji). Brak duplikatów stagingu, integralność bazy OK.
-
-powód: zastosowanie nowej reguły do bieżących cenników i usunięcie mylących, połączonych komunikatów z różnych wariantów opony.
-
 2026-09-23 09:44
 obszar: backend | baza danych
 

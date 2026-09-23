@@ -59,16 +59,6 @@ function compatibility(a,b) {
   if(variant(a)!==variant(b))different.push('wariant DEMO');
   return {ok:!missing.length&&!different.length,missing,different};
 }
-function separateDotBatch(a,b) {
-  if(norm(a.dot)===norm(b.dot))return false;
-  for(const k of ['marka','model','rozmiar']){
-    if(!norm(a[k])||norm(a[k])!==norm(b[k]))return false;
-  }
-  // A different DOT (including an explicitly undated batch) distinguishes
-  // otherwise matching tyres. Other contradictory specifications remain
-  // manual-review cases, not automatic new catalogue products.
-  return OPTIONAL.filter(k=>k!=='dot').every(k=>!norm(a[k])||!norm(b[k])||norm(a[k])===norm(b[k]));
-}
 function version(p) {
   return p ? hash([p.id,...KEYS.map(k=>p[k]??null),p.ean,p.cenaZakupu,p.cenaSprzedazy,p.stan,p.status,p.dataAktualizacji]) : null;
 }
@@ -260,17 +250,16 @@ function install({U,db,normalize,classify,badName,ext}) {
       const synthetic=raw._kodSynthetic || !code || code.includes('_AUTO_') || (ev.value && code.replace(new RegExp('^'+supplier+'_'),'')===ev.value);
       if(!current && code && !synthetic){
         current=byCode.get(code)||null;
-        if(current && norm(d.dot)!==norm(current.dot))current=null;
         const canonical=byCodeNorm.get(codeKey(supplier,code));
         // Case-only changes within the same prefixed namespace are stable.
         // Old unprefixed CSV ids (notably MO9) are NOT API ids.
-        if(!current && canonical && norm(canonical.kod)===norm(code) && norm(d.dot)===norm(canonical.dot))current=canonical;
+        if(!current && canonical && norm(canonical.kod)===norm(code))current=canonical;
         if(!current && canonical && compatibility(d,canonical).ok)current=canonical;
       }
       if(!current && d.kodDostawcy){
         const p=bySupplierCode.get(codeKey(supplier,d.kodDostawcy));
-        if(p && compatibility(d,p).ok && (!ev.valid || p.ean===ev.value)) current=p;
-        else if(p && !separateDotBatch(d,p)){candidates=[p];matchIssue='Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.';}
+        if(p && compatibility(d,p).ok) current=p;
+        else if(p){candidates=[p];matchIssue='Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.';}
       }
       if(!current && synthetic && code && byCode.has(code)){
         const p=byCode.get(code);if(compatibility(d,p).ok)current=p;
@@ -279,8 +268,7 @@ function install({U,db,normalize,classify,badName,ext}) {
         candidates=byEan.get(ev.value)||[];
         const exact=candidates.filter(p=>compatibility(d,p).ok);
         if(exact.length===1 && !incoming.some(r=>r!==raw && norm(r.kod)===norm(exact[0].kod))) current=exact[0];
-        else if(candidates.length && !candidates.every(p=>separateDotBatch(d,p)))
-          matchIssue=exact.length>1?'Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę.':'Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.';
+        else if(candidates.length) matchIssue=exact.length>1?'Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę.':'Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.';
       }
       if(!current && !matchIssue){
         const exactIdentity=products.filter(p=>compatibility(d,p).ok);
@@ -290,11 +278,7 @@ function install({U,db,normalize,classify,badName,ext}) {
         }
       }
       if(!current && !code) code=syntheticCode(supplier,d);
-      if(!current && byCode.has(code)){
-        const existing=byCode.get(code);
-        candidates=[existing];code=syntheticCode(supplier,d);
-        if(!separateDotBatch(d,existing))matchIssue='Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.';
-      }
+      if(!current && byCode.has(code)){candidates=[byCode.get(code)];code=syntheticCode(supplier,d);matchIssue='Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.';}
       if(current){
         code=current.kod;observed.add(current.id);
         // Names deliberately unified by the user have the same protection as
