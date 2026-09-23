@@ -25,9 +25,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { podpiszToken } from "../src/auth/jwt.js";
 import { products, stagingItems } from "../src/db/schema.js";
-import { stworzAtrapy } from "./charakteryzacja/silnik/atrapy.mjs";
-import { zaladujOryginal } from "./charakteryzacja/silnik/oryginal.mjs";
-import { POLA_WIERSZA } from "./charakteryzacja/silnik/wzorzec.mjs";
+import { stworzPolitykeOryginalu } from "./charakteryzacja/silnik/polityka.mjs";
+import { normalizujWiersz, POLA_WIERSZA } from "./charakteryzacja/silnik/wzorzec.mjs";
 import { parsujBufor } from "../src/import/parsuj.js";
 import { SEKRET_TESTOWY, stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 
@@ -47,7 +46,22 @@ const WIERSZE_CENNIKA = [
 
 const CENNIK = Buffer.from(`${WIERSZE_CENNIKA.join("\n")}\n`, "utf-8");
 
-/** Szkielet wiersza `products` — pola wymagane przez schemat, reszta dosypywana per scenariusz. */
+/**
+ * Szkielet wiersza `products` — pola wymagane przez schemat, reszta dosypywana per scenariusz.
+ *
+ * ⚠⚠ `dot` JEST TU KLUCZOWY i został dodany w I15.4b (ticket 130).
+ *
+ * Parser MO1 (Bohnenkamp) stempluje KAŻDY rekord wartością `dot: "nie starsza niz 3 lata"` —
+ * to stała gwarancja dostawcy z nagłówka cennika, a nie numer partii. Od #103/#105 silnik
+ * chroni partie DOT: `norm(d.dot) !== norm(current.dot)` ZRYWA dopasowanie po kodzie
+ * (`staging_policy.cjs:374`). Karta katalogowa bez `dot` nie dopasuje się więc do ŻADNEGO
+ * rekordu MO1 — cały katalog zostałby uznany za nieobecny i wstrzymany.
+ *
+ * W produkcji to nie występuje, bo karty MO1 zakłada ten sam importer i mają ten sam `dot`
+ * (widać to w charakteryzacji na realnym zrzucie: MO1 auto=173, bezZmian=2). Fikcyjny katalog
+ * bez `dot` był po prostu NIEREALISTYCZNY i maskował tę gałąź. `konstrukcja` i `tlTt` są tu
+ * z tego samego powodu: `compatibility()` porównuje pełną listę pól opcjonalnych.
+ */
 function produkt(pola: Record<string, unknown>) {
   return {
     dostawca: "MO1",
@@ -64,6 +78,9 @@ function produkt(pola: Record<string, unknown>) {
     status: "aktywny",
     dataAktualizacji: "2026-01-01T00:00:00.000Z",
     nieobecnoscPodRzad: 0,
+    dot: "nie starsza niz 3 lata",
+    konstrukcja: "Radialna",
+    tlTt: "TL",
     ...pola,
   } as typeof products.$inferInsert;
 }
@@ -75,13 +92,46 @@ function produkt(pola: Record<string, unknown>) {
 const KATALOG = [
   // dopasowanie PO KODZIE
   produkt({ id: 101, kod: "MO1_GATE-KOD", nazwa: "STARA NAZWA PO KODZIE" }),
-  // dopasowanie PO EAN — kod w katalogu inny niż w cenniku
-  produkt({ id: 102, kod: "MO1_INNY-KOD", ean: "5901234123471", eanIsValid: 1 }),
+  // dopasowanie PO EAN — kod w katalogu inny niż w cenniku.
+  // ⚠ Cechy MUSZĄ się zgadzać z rekordem `GATE-EAN`: od #103 dopasowanie po EAN wymaga
+  // `compatibility().ok`, czyli marki, modelu, rozmiaru i pól opcjonalnych.
+  produkt({
+    id: 102,
+    kod: "MO1_INNY-KOD",
+    ean: "5901234123471",
+    eanIsValid: 1,
+    model: "AGRIMAX RT 945",
+    rozmiar: "340/85R24",
+    indeksNosnosci: "125",
+    indeksPredkosci: "A8",
+  }),
   // dopasowanie PO EAN ZNORMALIZOWANYM — w cenniku „8,05997E+12", tu już rozwinięte
   produkt({ id: 103, kod: "MO1_INNY-KOD-2", ean: "8059970000000", eanIsValid: 1 }),
   // KONFLIKT EAN — dwa produkty dzielą ten sam EAN, więc mapa EAN nie rozstrzyga
-  produkt({ id: 104, kod: "MO1_DUP-A", nazwa: "DUPLIKAT A", ean: "5901234123495", eanIsValid: 1 }),
-  produkt({ id: 105, kod: "MO1_DUP-B", nazwa: "DUPLIKAT B", ean: "5901234123495", eanIsValid: 1 }),
+  // Obie karty są ZGODNE z rekordem `GATE-KONFLIKT`, więc silnik widzi DWIE pasujące opony
+  // pod jednym EAN-em i oddaje sprawę człowiekowi zamiast zgadywać (#103).
+  produkt({
+    id: 104,
+    kod: "MO1_DUP-A",
+    nazwa: "DUPLIKAT A",
+    ean: "5901234123495",
+    eanIsValid: 1,
+    model: "AGRIMAX RT 765",
+    rozmiar: "380/70R24",
+    indeksNosnosci: "125",
+    indeksPredkosci: "A8",
+  }),
+  produkt({
+    id: 105,
+    kod: "MO1_DUP-B",
+    nazwa: "DUPLIKAT B",
+    ean: "5901234123495",
+    eanIsValid: 1,
+    model: "AGRIMAX RT 765",
+    rozmiar: "380/70R24",
+    indeksNosnosci: "125",
+    indeksPredkosci: "A8",
+  }),
   // NIE-OPONA — ten produkt ma zniknąć z katalogu
   produkt({ id: 106, kod: "MO1_GATE-TARCZA", nazwa: "OPONA DO SKASOWANIA" }),
   // dopasowany produkt z niezerowym licznikiem nieobecności — ma się wyzerować
@@ -126,17 +176,27 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
     const katalogZBazy = srodowisko.db.select().from(products).all();
     const sparsowane = parsujBufor("MO1", CENNIK, "gate.csv");
 
-    const atrapy = stworzAtrapy({ produkty: katalogZBazy as unknown as Record<string, unknown>[] });
-    const oryginal = zaladujOryginal(atrapy.zaleznosci) as unknown as {
-      tk: (dostawca: string, rekordy: unknown[]) => Record<string, number>;
-    };
-    const statystykiOryginalu = oryginal.tk("MO1", sparsowane.rekordy);
+    // ⚠ Oryginałowi podajemy DOKŁADNIE to `_bridgeFeedMeta`, które trasa przekazuje naszemu
+    // silnikowi — inaczej jedna strona liczyłaby ofertę jako kompletną, a druga nie, i cała
+    // gałąź #103/#104 rozjechałaby się bez związku z wiernością portu.
+    const h = stworzPolitykeOryginalu({
+      produkty: katalogZBazy as unknown as Record<string, unknown>[],
+    });
+    const rekordyOryginalu = [...sparsowane.rekordy];
+    if (sparsowane.meta) {
+      Object.defineProperty(rekordyOryginalu, "_bridgeFeedMeta", {
+        value: sparsowane.meta,
+        configurable: true,
+      });
+    }
+    const statystykiOryginalu = h.importer("MO1", rekordyOryginalu) as Record<string, number>;
+    const oryginalne = h.staging().map(normalizujWiersz) as unknown as Wiersz[];
+    h.zamknij();
 
     const odp = await zaimportuj();
     expect(odp.status).toBe(200);
 
-    const nasze = wiersze();
-    const oryginalne = atrapy.staging as unknown as Wiersz[];
+    const nasze = wiersze().map((w) => normalizujWiersz(w as Record<string, unknown>));
 
     expect(nasze.length, "liczba wierszy stagingu").toBe(oryginalne.length);
 
@@ -186,7 +246,11 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
     expect(w.eanRaw).toBe("5901234123457");
     expect(w.eanIsValid).toBe(1);
     expect(w.eanSourceStatus).toBe("ok");
-    expect(w.eanCandidates).toBe('["5901234123457"]');
+    // ⚠ ZMIANA I15.4b: `staging_policy` zawsze ustawia `eanCandidates: null`
+    // (`staging_policy.cjs:356`). Stary `tk()` wpisywał tu listę kandydatów z `Hq()`.
+    // Ścisła walidacja EAN (D4) nie „proponuje" już numerów — albo EAN jest poprawny,
+    // albo zostaje odrzucony z powodem w `eanSourceStatus`.
+    expect(w.eanCandidates).toBeNull();
     expect(JSON.parse(String(w.snapshotJson)).rozmiar).toBe("480/70R28");
   });
 
@@ -211,11 +275,11 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
     expect(wiersze().some((r) => r.kod === "MO1_GATE-EAN")).toBe(false);
     expect(String(w.powod)).toContain("nazwa: STARA NAZWA → 340/85R24 BKT AGRIMAX RT 945");
 
-    // ⚠ `kodDostawcy` RÓŻNI się (katalog ma null, cennik „GATE-EAN"), a mimo to w `powod`
-    // go nie ma — pętla po `Vq` (:47746) pomija przypadek „stara pusta, nowa niepusta".
-    // Klasyfikację i tak wywołuje, bo `kodDostawcy` jest w `_KP` (:47751). To zachowanie
-    // oryginału, nie przeoczenie: uzupełnienie brakującego pola nie jest „zmianą" do pokazania.
-    expect(String(w.powod)).not.toContain("kod dostawcy");
+    // ⚠ ZMIANA I15.4b: `kodDostawcy` RÓŻNI się (katalog ma null, cennik „GATE-EAN") i teraz
+    // JEST wymieniony w `powod`. Stary `tk()` pomijał przypadek „stara pusta, nowa niepusta";
+    // `staging_policy` liczy różnice prostym `KEYS.filter(k => norm(a[k]) !== norm(b[k]))`
+    // (`:426`), więc uzupełnienie brakującego pola też jest zmianą do pokazania człowiekowi.
+    expect(String(w.powod)).toContain("kod dostawcy: brak → GATE-EAN");
     expect(JSON.parse(String(w.snapshotJson)).kodDostawcy).toBe("GATE-EAN");
   });
 
@@ -250,10 +314,16 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
 
     const w = wierszPoKodzie("MO1_GATE-KONFLIKT");
     expect(w.typZmiany).toBe("blad");
-    expect(String(w.ostrzezenie)).toContain("Konflikt EAN — ten EAN (5901234123495)");
-    expect(String(w.ostrzezenie)).toContain('MO1_DUP-A "DUPLIKAT A"');
-    expect(String(w.ostrzezenie)).toContain('MO1_DUP-B "DUPLIKAT B"');
-    expect(String(w.powod)).toContain("Nowa pozycja wymaga sprawdzenia");
+    // ⚠ ZMIANA I15.4b: inny komunikat i inna ZAWARTOŚĆ. Stary `tk()` wypisywał kolidujące
+    // kody wprost w ostrzeżeniu. `staging_policy` oddaje je strukturalnie w
+    // `snapshotJson._candidates`, a ostrzeżenie mówi tylko, że decyzja należy do człowieka
+    // — to jest reguła „EAN dopasowuje TYLKO do jednej zgodnej opony" (#103).
+    expect(String(w.ostrzezenie)).toContain("Kilka zgodnych produktów z tym EAN");
+    const kandydaci = (
+      JSON.parse(String(w.snapshotJson)) as { _candidates: { kod: string }[] }
+    )._candidates.map((k) => k.kod);
+    expect(kandydaci).toContain("MO1_DUP-A");
+    expect(kandydaci).toContain("MO1_DUP-B");
   });
 
   it("błędny zapis nazwy — Kq() wymusza 'blad'", async () => {
@@ -261,27 +331,51 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
 
     const w = wierszPoKodzie("MO1_GATE-ZLANAZWA");
     expect(w.typZmiany).toBe("blad");
-    expect(String(w.ostrzezenie)).toContain("bledny zapis nazwy: nazwa bez spacji po słowie Opona");
+    // ⚠ ZMIANA I15.4b: `staging_policy` formatuje ten sam błąd inaczej niż stary `tk()`
+    // („Błędny zapis nazwy: …" zamiast „bledny zapis nazwy: …"). Sam warunek — `badName()`,
+    // czyli `Kq()` z bundla — jest ten sam.
+    expect(String(w.ostrzezenie)).toContain("Błędny zapis nazwy: nazwa bez spacji po słowie Opona");
   });
 
-  it("nie-opona — pozycja odrzucona, a odpowiadający produkt SKASOWANY z katalogu", async () => {
+  /**
+   * ⚠⚠ ZMIANA ZACHOWANIA I15.4b — DWIE NARAZ, obie celowe w `staging_policy`.
+   *
+   * 1. **Znany kod CHRONI wiersz przed odrzuceniem.** Warunek odrzucenia brzmi
+   *    `!classification.isTire && !knownCode` (`staging_policy.cjs:352`), z komentarzem
+   *    „Incomplete name/size cannot turn a known row into »not present«". Skoro
+   *    `MO1_GATE-TARCZA` JEST w katalogu, pozycja nie jest odrzucana jako nie-opona —
+   *    w przeciwieństwie do starego `tk()`, które patrzyło wyłącznie na nazwę.
+   * 2. **Karta NIE jest kasowana.** Stary `tk()` usuwał produkt z katalogu (`:47689`).
+   *    `staging_policy` nie ma ani jednego `deleteProduct` — sprawa idzie do człowieka,
+   *    a katalog zostaje nietknięty.
+   *
+   * Razem znaczy to, że import nie kasuje już kart na podstawie samej nazwy z cennika.
+   */
+  it("nie-opona ze ZNANYM kodem nie jest odrzucana, a karta NIE jest kasowana", async () => {
     const przed = srodowisko.db.select().from(products).all();
     expect(przed.some((p) => p.kod === "MO1_GATE-TARCZA")).toBe(true);
 
     const odp = await zaimportuj();
 
+    expect((odp.body as { odrzuconeNieOpony: number }).odrzuconeNieOpony).toBe(0);
+
+    const po = srodowisko.db.select().from(products).all();
+    expect(po.some((p) => p.kod === "MO1_GATE-TARCZA"), "karta nie może zniknąć").toBe(true);
+    expect(po.length, "import nie kasuje kart z katalogu").toBe(przed.length);
+  });
+
+  it("nie-opona z NIEZNANYM kodem jest odrzucana i nie wchodzi do stagingu", async () => {
+    const cennikZObca = Buffer.from(
+      `${WIERSZE_CENNIKA.join("\n")}\nOBCA-TARCZA;5901234123525;BKT;Opona 480 / 70 R 28, Tarcza hamulcowa;150 D, TL;BKT;1;900,00;0,00;\n`,
+      "utf-8",
+    );
+    const odp = await zaimportuj(cennikZObca);
+
     expect((odp.body as { odrzuconeNieOpony: number }).odrzuconeNieOpony).toBe(1);
     expect(
-      (odp.body as { szczegolyOdrzuconych: { nazwa: string; powod: string }[] }).szczegolyOdrzuconych,
-    ).toContainEqual({
-      nazwa: "MO1_GATE-TARCZA — 480/70R28 BKT TARCZA HAMULCOWA 150D TL",
-      powod: 'nie opona (wykryto "tarcza" w nazwie/kategorii)',
-    });
-
-    expect(wiersze().some((w) => w.kod === "MO1_GATE-TARCZA")).toBe(false);
-    const po = srodowisko.db.select().from(products).all();
-    expect(po.some((p) => p.kod === "MO1_GATE-TARCZA")).toBe(false);
-    expect(po.length).toBe(przed.length - 1);
+      (odp.body as { szczegolyOdrzuconych: { powod: string }[] }).szczegolyOdrzuconych[0]!.powod,
+    ).toContain("nie opona");
+    expect(wiersze().some((w) => w.kod === "MO1_OBCA-TARCZA")).toBe(false);
   });
 
   it("dopasowanie zeruje licznik nieobecności", async () => {

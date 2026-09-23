@@ -9,8 +9,17 @@
  *
  * Trzy reguły, które są tu stawką:
  *   1. Import ZATWIERDZA SAM tylko to, co nie rusza tożsamości opony (cena/marża/stan/magazyn).
- *   2. Produkt wycofuje się po TRZECIEJ nieobecności pod rząd — nie drugiej, nie czwartej.
- *   3. Ręczna poprawka Marty WYGRYWA z plikiem dostawcy. Zawsze.
+ *   2. Brak w KOMPLETNEJ ofercie wstrzymuje produkt NATYCHMIAST (#104), a osobna ścieżka
+ *      dowodowa wystawia „wycofana" dopiero po trzech różnych kompletnych ofertach
+ *      oddalonych o co najmniej 24 h (#103).
+ *   3. Ręczna poprawka Marty WYGRYWA z plikiem dostawcy. Zawsze — ale od Staging v2 robi to
+ *      po cichu, bez meldowania konfliktu.
+ *
+ * ⚠ AKTUALIZACJA I15.4b (ticket 130). Reguła 2 wyglądała wcześniej inaczej: stary `tk()`
+ * liczył „trzy nieobecności POD RZĄD" w kolumnie `nieobecnosc_pod_rzad` i dopiero wtedy
+ * wystawiał wiersz `wycofana`. `staging_policy` rozdziela to na DWA niezależne mechanizmy —
+ * natychmiastowe wstrzymanie i powolne dowodzenie nieobecności — bo licznik przebiegów dawał
+ * fałszywe wycofania, gdy dostawca przysłał ten sam plik kilka razy (backlog #103).
  */
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -160,62 +169,141 @@ describe("Silnik importu — decyzje", () => {
     });
   });
 
-  describe("2. Wycofanie — po TRZECIEJ nieobecności, nie wcześniej i nie później", () => {
-    /** Import cennika, w którym nie ma naszego produktu. */
-    const importBezProduktu = () => uruchom(DOSTAWCA, [rekord({ kod: "INNY", ean: "" })]);
-
-    it("trzy kolejne przebiegi: licznik 1 → 2 → wycofanie, i dopiero wtedy wiersz `wycofana`", () => {
-      const id = zasiejProdukt(baza.db, { nieobecnoscPodRzad: 0 });
-
-      const pierwszy = importBezProduktu();
-      expect(pierwszy.wycofane, "po PIERWSZEJ nieobecności nic się nie wycofuje").toBe(0);
-      expect(produkt(id).nieobecnoscPodRzad).toBe(1);
-      expect(staging().filter((w) => w.typZmiany === "wycofana")).toHaveLength(0);
-
-      const drugi = importBezProduktu();
-      expect(drugi.wycofane, "po DRUGIEJ nieobecności nadal nic — to jest granica").toBe(0);
-      expect(produkt(id).nieobecnoscPodRzad).toBe(2);
-      expect(staging().filter((w) => w.typZmiany === "wycofana")).toHaveLength(0);
-
-      const trzeci = importBezProduktu();
-      expect(trzeci.wycofane, "dopiero TRZECIA nieobecność wycofuje").toBe(1);
-      const wycofane = staging().filter((w) => w.typZmiany === "wycofana");
-      expect(wycofane).toHaveLength(1);
-      expect(wycofane[0]!.kod).toBe("P1");
-      expect(wycofane[0]!.powod).toBe("Brak w cenniku — pozycja wycofana");
-      expect(wycofane[0]!.stanNowy).toBe(0);
-      expect(wycofane[0]!.cenaZakupuNowa).toBeNull();
-      expect(wycofane[0]!.snapshotJson).toBeNull();
+  describe("2. Nieobecność: natychmiastowe wstrzymanie (#104) i dowody wycofania (#103)", () => {
+    /** Kompletna oferta dostawcy, w której NIE MA naszego produktu. */
+    const meta = (rawCount = 1) => ({
+      complete: true,
+      parserErrors: 0,
+      source: "supplier file",
+      rawCount,
+      excludedCodes: [] as string[],
     });
+    const obcaPozycja = (stan = 3) =>
+      rekord({ kod: "INNY", ean: "", nazwa: "Opona 420/85R30 BKT AGRIMAX RT 855", model: "AGRIMAX RT 855", rozmiar: "420/85R30", stan });
 
-    it("po wycofaniu licznik wraca do ZERA — cykl liczy się od nowa", () => {
-      const id = zasiejProdukt(baza.db, { nieobecnoscPodRzad: 2 });
+    const importBezProduktu = (opcje: Record<string, unknown> = {}, stan = 3) =>
+      uruchom(DOSTAWCA, [obcaPozycja(stan)], { meta: meta(), ...opcje });
+
+    it("brak w KOMPLETNEJ ofercie wstrzymuje produkt natychmiast i zeruje stan", () => {
+      const id = zasiejProdukt(baza.db, { nieobecnoscPodRzad: 0 });
 
       importBezProduktu();
 
-      expect(produkt(id).nieobecnoscPodRzad).toBe(0);
+      const p = produkt(id);
+      expect(p.status, "produkt znika z oferty → nikt nie może go kupić").toBe("wstrzymany");
+      expect(p.stan).toBe(0);
+      // ⚠ To NIE jest licznik przebiegów — wstrzymanie następuje przy PIERWSZYM braku.
+      expect(p.nieobecnoscPodRzad).toBe(0);
     });
 
-    it("wycofanie NIE kasuje produktu — decyzję podejmuje człowiek na stagingu", () => {
-      const id = zasiejProdukt(baza.db, { nieobecnoscPodRzad: 2 });
+    it("oferta NIEKOMPLETNA nie rusza produktu i mówi wprost dlaczego", () => {
+      const id = zasiejProdukt(baza.db, { nieobecnoscPodRzad: 0 });
+
+      const statystyki = uruchom(DOSTAWCA, [obcaPozycja()], {});
+
+      expect(produkt(id).status, "bez potwierdzonej kompletności nie wolno wstrzymywać").toBe(
+        "aktywny",
+      );
+      expect(produkt(id).stan).toBe(4);
+      expect(statystyki.pominieteWycofania).toBe(
+        "Niepotwierdzona kompletność źródła; braków nie zliczono",
+      );
+    });
+
+    it("wstrzymanie NIE kasuje produktu — decyzję podejmuje człowiek", () => {
+      const id = zasiejProdukt(baza.db, {});
 
       importBezProduktu();
 
       expect(produkt(id), "produkt ma zostać w katalogu").toBeDefined();
-      expect(produkt(id).status).toBe("aktywny");
     });
 
-    it("liczą się nieobecności POD RZĄD — dopasowanie w międzyczasie zeruje licznik", () => {
-      const id = zasiejProdukt(baza.db, { nieobecnoscPodRzad: 2 });
+    it("ta sama oferta drugi raz nie liczy się jako kolejne potwierdzenie", () => {
+      zasiejProdukt(baza.db, {});
 
-      // Produkt JEST w tym cenniku → licznik zeruje się w pętli głównej.
-      uruchom(DOSTAWCA, [rekord({})]);
-      expect(produkt(id).nieobecnoscPodRzad).toBe(0);
+      importBezProduktu({}, 3);
+      importBezProduktu({}, 3); // identyczny plik → ten sam odcisk
 
-      // …więc kolejna nieobecność zaczyna liczenie od jedynki, a nie od trzeciej.
-      const statystyki = importBezProduktu();
-      expect(statystyki.wycofane).toBe(0);
-      expect(produkt(id).nieobecnoscPodRzad).toBe(1);
+      const wersje = baza.sqlite
+        .prepare("SELECT COUNT(*) AS n FROM supplier_feed_versions")
+        .get() as { n: number };
+      expect(wersje.n, "powtórka tego samego pliku to JEDNA wersja oferty").toBe(1);
+    });
+
+    /**
+     * ⚠ ŚCIEŻKA DOWODOWA CHODZI TYLKO W PRZEBIEGU WERYFIKACYJNYM.
+     *
+     * W zwykłym imporcie `importer()` wychodzi z pętli nieobecnych wcześniej
+     * (`if (complete && !reconcileOnly) continue;`, `staging_policy.cjs:597`) — bo produkt
+     * został już WSTRZYMANY i nie ma po co go dodatkowo „wycofywać". Dowody zbiera dopiero
+     * przebieg z `reconcileOnly` + `verifyAbsence`, czyli kontrola, która nie rusza katalogu.
+     *
+     * Dlatego `wycofana` nie pojawia się w zwykłym imporcie — i dlatego nie ma go też
+     * we wzorcach charakteryzacji.
+     */
+    it("trzy RÓŻNE kompletne oferty w odstępie doby → dopiero wtedy wiersz `wycofana`", () => {
+      // ⚠ `kodDostawcy` jest tu KONIECZNY. Karta, której kod nie zaczyna się od prefiksu
+      // dostawcy ANI nie ma kodu dostawcy, trafia wcześniej w gałąź „stara karta z dawnego
+      // importu" (`staging_policy.cjs:586`) — silnik nie potrafi orzec jej braku po samym
+      // oznaczeniu i oddaje sprawę człowiekowi, zamiast zbierać dowody. W produkcji kody są
+      // prefiksowane (`MO5_…`), więc ta gałąź dotyczy tylko kart sprzed ujednolicenia.
+      zasiejProdukt(baza.db, { kodDostawcy: "P1-DOST" });
+      const przesunZegarOferty = () =>
+        baza.sqlite
+          .prepare("UPDATE supplier_feed_state SET last_counted_at = ? WHERE supplier = ?")
+          .run(new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(), DOSTAWCA);
+
+      const dowody = () =>
+        JSON.parse(
+          (
+            (baza.sqlite
+              .prepare("SELECT checks_json FROM product_absence_checks WHERE product_code = 'P1'")
+              .get() as { checks_json?: string } | undefined)?.checks_json
+          ) ?? "[]",
+        ) as unknown[];
+      const wycofania = () => staging().filter((w) => w.typZmiany === "wycofana");
+
+      const pierwszy = importBezProduktu({ reconcileOnly: true, verifyAbsence: true }, 3);
+      expect(pierwszy.wycofane, "jedna oferta to za mało").toBe(0);
+      expect(dowody()).toHaveLength(1);
+      expect(wycofania()).toHaveLength(0);
+      przesunZegarOferty();
+
+      const drugi = importBezProduktu({ reconcileOnly: true, verifyAbsence: true }, 4);
+      expect(drugi.wycofane, "dwie oferty to nadal za mało — to jest granica").toBe(0);
+      expect(dowody()).toHaveLength(2);
+      expect(wycofania()).toHaveLength(0);
+      przesunZegarOferty();
+
+      const trzeci = importBezProduktu({ reconcileOnly: true, verifyAbsence: true }, 5);
+      expect(trzeci.wycofane, "dopiero TRZECIA różna kompletna oferta wycofuje").toBe(1);
+      expect(dowody()).toHaveLength(3);
+
+      const wycofane = wycofania();
+      expect(wycofane).toHaveLength(1);
+      expect(wycofane[0]!.kod).toBe("P1");
+      expect(wycofane[0]!.powod).toBe(
+        "Brak w trzech różnych, kompletnych cennikach — sprawdź przed wstrzymaniem",
+      );
+      expect(wycofane[0]!.stanNowy).toBe(0);
+      expect(wycofane[0]!.cenaZakupuNowa).toBeNull();
+      // Dowody jadą w snapshocie, żeby człowiek widział, NA CZYM oparto wycofanie.
+      const snap = JSON.parse(String(wycofane[0]!.snapshotJson)) as {
+        _withdrawal: boolean;
+        _absenceEvidence: unknown[];
+      };
+      expect(snap._withdrawal).toBe(true);
+      expect(snap._absenceEvidence).toHaveLength(3);
+    });
+
+    it("przebieg weryfikacyjny NIE rusza katalogu", () => {
+      const id = zasiejProdukt(baza.db, {});
+
+      importBezProduktu({ reconcileOnly: true, verifyAbsence: true });
+
+      const p = produkt(id);
+      expect(p.status, "kontrola nie wstrzymuje — od tego jest zwykły import").toBe("aktywny");
+      expect(p.stan).toBe(4);
     });
   });
 
@@ -233,29 +321,33 @@ describe("Silnik importu — decyzje", () => {
         } as typeof manualOverrides.$inferInsert)
         .run();
 
-    it("plik przynosi inny model → wygrywa Marta, a konflikt jest zgłoszony", () => {
+    /**
+     * ⚠⚠ ZMIANA ZACHOWANIA I15.4b — najważniejsza w tym pliku.
+     *
+     * Stary `tk()` meldował konflikt: wiersz szedł do stagingu jako `blad` z ostrzeżeniem
+     * „plik nadpisuje poprawke Marty: model" i z wartością z pliku w `snapshotJson._srcConflict`.
+     *
+     * `staging_policy` nakłada poprawki CICHO — `protect()` (`staging_policy.cjs:158-162`) to
+     * trzy linijki, które podmieniają pole i nic nie raportują. Skutek: plik dostawcy sprzeczny
+     * z ręczną decyzją Marty NIE jest już nigdzie sygnalizowany. Sama reguła nadrzędna zostaje
+     * — wartość Marty wygrywa — ale człowiek nie dowie się, że dostawca chciał czegoś innego.
+     *
+     * To jest ODSTĘPSTWO PRODUKCJI, nie nasze: odtwarzamy je wiernie i zgłaszamy
+     * w „Do koordynatora" karty I15.4b jako rzecz do decyzji Ani.
+     */
+    it("plik przynosi inny model → wygrywa Marta, ale konflikt NIE jest już zgłaszany", () => {
       const id = zasiejProdukt(baza.db, { model: "MODEL OD MARTY" });
       dodajPoprawke({});
 
       const statystyki = uruchom(DOSTAWCA, [rekord({ model: "MODEL Z PLIKU" })]);
 
-      // Pozycja idzie do człowieka jako `blad` — nie wolno jej przepuścić po cichu.
-      expect(statystyki.autoZatwierdzone).toBe(0);
-      const wiersz = staging()[0]!;
-      expect(wiersz.typZmiany).toBe("blad");
-      expect(wiersz.ostrzezenie).toContain("plik nadpisuje poprawke Marty: model");
-      expect(wiersz.powod).toContain("ZOSTANIE ZACHOWANA wartosc Marty");
-
-      // ⭐ SEDNO REGUŁY: wartość w katalogu się NIE zmieniła.
+      // ⭐ SEDNO REGUŁY, NIETKNIĘTE: wartość w katalogu się NIE zmieniła.
       expect(produkt(id).model).toBe("MODEL OD MARTY");
 
-      // Wartość z pliku jest zachowana w snapshocie — to z niej 3d-2 zrobi `acknowledged`.
-      const snapshot = JSON.parse(String(wiersz.snapshotJson)) as {
-        model: string;
-        _srcConflict: Record<string, string>;
-      };
-      expect(snapshot.model, "snapshot niesie wartość MARTY, nie z pliku").toBe("MODEL OD MARTY");
-      expect(snapshot._srcConflict).toEqual({ model: "MODEL Z PLIKU" });
+      // ⚠ …ale pozycja nie trafia już do człowieka. Po nałożeniu poprawki pozycja jest
+      // IDENTYCZNA z kartą, więc silnik widzi „brak zmian" i nie ma o czym meldować.
+      expect(statystyki.bezZmian, "pozycja wygląda jak niezmieniona").toBe(1);
+      expect(staging(), "żadnego zgłoszenia — konflikt przepada po cichu").toHaveLength(0);
     });
 
     it("konflikt już potwierdzony (acknowledgedSourceValue) NIE alarmuje ponownie", () => {
@@ -274,7 +366,14 @@ describe("Silnik importu — decyzje", () => {
       expect(produkt(id).model).toBe("MODEL OD MARTY");
     });
 
-    it("naruszenie poprawki BLOKUJE auto-zatwierdzenie nawet czystej zmiany ceny", () => {
+    /**
+     * ⚠ ZMIANA ZACHOWANIA I15.4b — bezpośrednia konsekwencja cichego `protect()`.
+     *
+     * Stary `tk()` traktował naruszenie poprawki jako otwarty konflikt i BLOKOWAŁ
+     * auto-zatwierdzenie, nawet gdy jedyną realną zmianą była cena. `staging_policy` nie widzi
+     * już żadnego konfliktu, więc cena wchodzi bez pytania — a model dalej broni się sam.
+     */
+    it("naruszenie poprawki NIE blokuje już auto-zatwierdzenia zmiany ceny", () => {
       const id = zasiejProdukt(baza.db, { model: "MODEL OD MARTY", cenaZakupu: 1000 });
       dodajPoprawke({});
 
@@ -282,10 +381,10 @@ describe("Silnik importu — decyzje", () => {
         rekord({ model: "MODEL Z PLIKU", cenaZakupu: 1234.5 }),
       ]);
 
-      expect(statystyki.autoZatwierdzone).toBe(0);
-      expect(produkt(id).cenaZakupu, "cena nie może wejść po cichu przy otwartym konflikcie").toBe(
-        1000,
-      );
+      expect(statystyki.autoZatwierdzone).toBe(1);
+      expect(produkt(id).cenaZakupu, "cena wchodzi bez pytania").toBe(1234.5);
+      expect(produkt(id).model, "poprawka Marty dalej wygrywa z plikiem").toBe("MODEL OD MARTY");
+      expect(staging()).toHaveLength(0);
     });
 
     it("poprawka bez konfliktu nakłada się bezgłośnie", () => {
