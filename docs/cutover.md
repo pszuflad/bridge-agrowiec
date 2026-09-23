@@ -336,7 +336,8 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    `rebuild/frontend/dist` i wgraj `.htaccess` z regułą proxy oraz SPA fallbackiem (wzór:
    `deploy/staging/htaccess`, z portem produkcyjnym).
    ⚠⚠ **ZACHOWAJ `public_html/panel/ex-port-files/.htaccess`** — plik CSV dla Selly jest chroniony białą listą
-   IP (`Require ip 212.91.27.191 46.170.251.129` — integrator Selly + Agrowiec; wzór:
+   IP (`Require ip 212.91.27.191 46.170.251.129` — integrator Selly + Agrowiec; **lista potwierdzona przez Anię
+   2026-09-23: „ma tam być tylko Selly i Agrowiec”, bez zmian po cutoverze**; wzór:
    `git show origin/main:mirror/frontend/ex-port-files/.htaccess`). Podmiana zawartości panelu bez tego pliku
    odbiera **Selly dostęp do codziennego CSV** (403) albo kasuje sam katalog eksportu. Ustalone 2026-09-23
    ze specyfikacji Selly od Ani; wcześniej nie było tego w żadnym dokumencie wdrożeniowym.

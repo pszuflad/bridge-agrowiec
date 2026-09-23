@@ -37,10 +37,13 @@ function Kreska() {
  * w produkcji liczy wartość w przeglądarce z kodu dostawcy — i dlatego my robimy tak samo.
  * Sięgnięcie po wartość z API wymagałoby wystawienia pola, czyli ODSTĘPSTWA od produkcji.
  *
- * ⚠ TRZECIA KOPIA TEJ SAMEJ LISTY. Pozostałe dwie: `rebuild/schema/011_blokowane_formy_i_triggery.sql`
- * (triggery — źródło wartości w bazie, z niej idzie CSV) i `rebuild/backend/src/selly/generator-csv.ts`
- * (fallback eksportu). Produkcja ma ten sam podział (`payment_blocks.cjs` + skrypt front-endowy).
- * Zmiana listy przez Anię = zmiana we wszystkich trzech miejscach.
+ * ⚠ CZWARTA KOPIA TEJ SAMEJ LISTY. Pozostałe trzy są po stronie backendu:
+ * `rebuild/schema/011_blokowane_formy_i_triggery.sql` (triggery — źródło wartości w bazie, z niej
+ * idzie CSV), `rebuild/backend/src/import/legacy/payment_blocks.cjs` (kopia oryginału bajt w bajt,
+ * karta I15.2) i `rebuild/backend/src/selly/generator-csv.ts` (fallback eksportu). Front i tak nie
+ * mógłby użyć żadnej z nich — to osobny pakiet. Produkcja ma ten sam podział (`payment_blocks.cjs`
+ * + skrypt front-endowy). Zmiana listy przez Anię = zmiana we wszystkich czterech miejscach;
+ * zweryfikowane 2026-09-23, że dziś są identyczne co do znaku.
  *
  * ⚠ MO6 (Uniglory) CELOWO BEZ WPISU — CHANGELOG produkcji 2026-09-10 14:53: „nie będzie na
  * razie w sprzedaży". Dla MO6 i nieznanego dostawcy komórka pokazuje „—", i tak ma być

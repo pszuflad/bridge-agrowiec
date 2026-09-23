@@ -219,15 +219,30 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
     expect(JSON.parse(String(w.snapshotJson)).kodDostawcy).toBe("GATE-EAN");
   });
 
-  it("dopasowanie po EAN ZNORMALIZOWANYM — surowy EAN nie trafia, rozwinięty już tak", async () => {
+  /**
+   * ⚠ STAN PRZEJŚCIOWY D4 (ticket 120, karta I15.2 → I15.4).
+   *
+   * Do resyncu 23.09 EAN w notacji naukowej („8,05997E+12") był ROZWIJANY przez `Hq()` do
+   * `8059970000000` i po tej wartości pozycja trafiała w katalogowy `MO1_INNY-KOD-2`.
+   *
+   * Po resyncu adapter realizuje decyzję D4: błędny EAN (w tym zapis naukowy) daje
+   * `ean: null` + zachowany `eanRaw`. Zmierzone na tym samym wierszu cennika:
+   *   kod = MO1_GATE-NORMEAN, ean = null, eanRaw = "8,05997E+12", _eanLossy = true
+   *
+   * Pozycja NIE GINIE — nie ma dopasowania po EAN, więc wchodzi pod własnym kodem
+   * dostawcy jako nowa. Docelowo (I15.4) ma być BLOKADĄ akceptacji do ręcznej poprawki,
+   * ale silnik nie zna jeszcze flag `eanRaw`/`_eanLossy`, więc w oknie przejściowym
+   * zachowuje się jak zwykła nowa pozycja. Ten test pilnuje właśnie tego okna —
+   * przy porcie silnika w I15.4 trzeba go przepisać na oczekiwaną blokadę.
+   */
+  it("EAN w notacji naukowej — D4 daje ean=null, pozycja wchodzi pod własnym kodem", async () => {
     await zaimportuj();
 
-    const w = wierszPoKodzie("MO1_INNY-KOD-2");
-    expect(w.typZmiany).toBe("zmiana_kluczowa");
-    expect(w.eanRaw).toBe("8,05997E+12");
-    expect(w.eanSourceStatus).toBe("scientific_notation_uncertain");
-    // Dopasowanie zaszło dopiero po Hq(), bo w cenniku EAN jest w notacji naukowej.
-    expect(JSON.parse(String(w.snapshotJson)).ean).toBe("8059970000000");
+    expect(wiersze().some((r) => r.kod === "MO1_INNY-KOD-2")).toBe(false);
+
+    const w = wierszPoKodzie("MO1_GATE-NORMEAN");
+    expect(JSON.parse(String(w.snapshotJson)).ean).toBeNull();
+    expect(JSON.parse(String(w.snapshotJson)).kodDostawcy).toBe("GATE-NORMEAN");
   });
 
   it("konflikt EAN — pozycja zostaje niedopasowana i dostaje 'blad' z listą kolidujących", async () => {
@@ -293,7 +308,10 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
     const odp = await zaimportuj(Buffer.from("nie;jest;cennikiem\n", "utf-8"));
 
     expect(odp.status).toBe(400);
-    expect((odp.body as { error: string }).error).toMatch(/ani jednej pozycji/);
+    // ⚠ ZMIANA OD RESYNCU 23.09 (#103): ta treść daje BŁĄD PARSERA, nie pusty wynik, więc
+    // zatrzymuje ją `feed_safety` swoim komunikatem. Istota bezpiecznika bez zmian: 400,
+    // zero wierszy stagingu, katalog nietknięty.
+    expect((odp.body as { error: string }).error).toMatch(/Błędy odczytu cennika/);
     expect(wiersze().length).toBe(0);
     expect(srodowisko.db.select().from(products).all().length).toBe(przed);
   });

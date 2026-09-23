@@ -1,7 +1,7 @@
 # I15.10 — dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1)
 
-> **Stan:** ⬜ po I15.4 i I15.3 (faza 4)
-> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #104 · **Zależy od:** I15.4 (auto-wstrzymania, punkt wpięcia), I15.3 (generator CSV), I15.6 (✅ delta), I15.7 (✅ Tor 2)
+> **Stan:** ⬜ gotowe (faza A — zależności zdjęte ticketem 117)
+> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #104 · **Zależy od:** — (I15.6 ✅, I15.7 ✅; hook dokłada I15.4b, generator woła w procesie — `wejscie-117.md`)
 > **Ticket:** —
 
 Przepisana z karty-rezerwy przez koordynatora (ticket 110, triaż 22.09 wieczór). Źródło prawdy: `origin/main` na `abe5f14`.

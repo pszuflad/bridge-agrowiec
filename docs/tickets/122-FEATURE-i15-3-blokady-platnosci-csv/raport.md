@@ -142,8 +142,12 @@ Brak zmian łamiących kontrakt API. Dwie zmiany widoczne dla użytkownika i dla
   Poza zakresem tej karty (`mirror/` i `tools/` nie są jej własnością) — zgłoszone koordynatorowi.
 - **`silnik.charakteryzacja.test.ts` ma limit 20 s na test** i pada przy równoległym biegu obu
   suit na obciążonej maszynie. Warte podniesienia limitu albo oznaczenia jako wolne — poza zakresem.
-- **Mapa MO→formy płatności żyje w trzech miejscach** (migracja 011, fallback generatora, front).
-  Tak jest w produkcji i tak zostawiam; gdyby kiedyś doszło czwarte, warto rozważyć wspólne źródło.
+- **Mapa MO→formy płatności żyje w CZTERECH miejscach** — migracja 011 (I15.1), `src/import/legacy/
+  payment_blocks.cjs` (I15.2, doszło równolegle), fallback generatora CSV i front. Zweryfikowane przy
+  scalaniu z `develop`: wszystkie cztery identyczne co do znaku, MO6 nieobecne we wszystkich.
+  Generator świadomie NIE importuje kopii z `legacy/` — to zawekowany CJS należący do potoku importu,
+  z `require("better-sqlite3")` i zaszytą ścieżką produkcyjną na górze modułu; sprzęgnięcie z nim
+  eksportu Selly byłoby decyzją projektową, nie porządkami. **Do rozstrzygnięcia przez koordynatora.**
 - **`PATCH` nie pozwala edytować pola** (D6) — zgodnie z produkcją. Gdyby Ania kiedyś chciała
   edycji ręcznej, to osobna decyzja i osobny ticket.
 
@@ -206,3 +210,28 @@ programowo trzy kopie mapy MO1–MO10 z oryginałem `payment_blocks.cjs` — ide
 - **NICE-TO-HAVE:** zbędny `DROP TRIGGER` w teście fallbacku (trigger to `AFTER UPDATE OF dostawca`,
   więc aktualizacja samej kolumny blokad i tak go nie uruchamia) — zdjęty, dołożona kontrola założenia.
 - **NICE-TO-HAVE:** doprecyzowane odwołanie do ticketu 113 (osobny ticket pomiarowy, nie literówka).
+
+
+## Scalenie z `develop` (2026-09-23, po otwarciu PR)
+
+W międzyczasie zmergowały się karty **I15.2** (ticket 120) i **I15.8** (ticket 121). Jeden konflikt
+tekstowy: `docs/rebuild-backlog.md`, wpis **#73** — obie strony pisały w ten sam wiersz `Status`.
+To dokładnie ten wzorzec, przed którym ostrzega `CLAUDE.md` (wspólna linia pliku dzielonego przez karty).
+
+**Rozwiązany przez SCALENIE obu faktów, nie wybór strony** — każda strona niosła prawdziwą informację:
+- z `develop` (ticket 120): parser dowieziony, `payment_blocks.cjs` w `legacy/` bajt w bajt, adapter
+  nadaje pole wszystkim rekordom (4 843 + 1 838 rekordów);
+- z gałęzi (ticket 122): katalog i CSV dowiezione, pole zostaje ukryte w API.
+
+Wersja po scaleniu opisuje wszystkie trzy kroki (I15.1 schemat → I15.2 parser → I15.3 katalog i CSV)
+i usuwa nieaktualne już „Katalog i CSV zostają w I15.3 (otwarte)".
+
+**Konflikt semantyczny sprawdzony osobno** (nie ufając temu, że merge był tekstowo czysty):
+- ticket 120 dołożył **czwartą kopię mapy MO** (`src/import/legacy/payment_blocks.cjs`) —
+  porównane programowo z pozostałymi trzema: **identyczne co do znaku**, MO6 nieobecne we wszystkich.
+  Komentarze w generatorze i we froncie poprawione z „trzecia kopia" na „czwarta", z wyliczeniem miejsc;
+- ticket 121 ruszał `contract/openapi.yaml`, `repos/selly.ts`, `selly/rest/**` — obszary rozłączne
+  z tą kartą; gate kontraktu przechodzi bez zmian po mojej stronie.
+
+**Bramki po scaleniu:** backend ✓ 1691 zdanych, 3 pominięte, 104 pliki; frontend ✓ 949 zdanych,
+54 pliki; lint / typecheck / build ✓ po obu stronach.

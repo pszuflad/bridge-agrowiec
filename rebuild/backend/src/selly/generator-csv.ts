@@ -139,8 +139,21 @@ const KOLUMNY_BOOL = new Set<keyof ProduktWewnetrzny>([
  * ⚠ ŹRÓDŁEM KANONICZNYM TEJ MAPY JEST BAZA, nie ten plik: wartość kolumny
  * `products.blokowane_formy_platnosci` utrzymują triggery `products_blokowane_formy_ai/_au`
  * z `rebuild/schema/011_blokowane_formy_i_triggery.sql` (karta I15.1). Kopia tutaj jest
- * wyłącznie po to, żeby odtworzyć FALLBACK oryginału (niżej) — przy każdej zmianie listy
- * trzeba ruszyć oba miejsca, dokładnie jak w produkcji (`payment_blocks.cjs` + triggery).
+ * wyłącznie po to, żeby odtworzyć FALLBACK oryginału (niżej).
+ *
+ * ⚠ TA LISTA ŻYJE W CZTERECH MIEJSCACH i zmiana u Ani musi trafić do wszystkich:
+ *  1. `rebuild/schema/011_blokowane_formy_i_triggery.sql` — triggery, źródło wartości w bazie;
+ *  2. `rebuild/backend/src/import/legacy/payment_blocks.cjs` — kopia oryginału bajt w bajt,
+ *     wniesiona kartą I15.2 (ticket 120) na potrzeby potoku importu;
+ *  3. ten plik — fallback eksportu CSV;
+ *  4. `rebuild/frontend/src/pages/katalog/formatowanie.tsx` — kolumna w `/katalog`.
+ * Produkcja ma ten sam podział (`payment_blocks.cjs` + skrypt front-endowy); zweryfikowane
+ * 2026-09-23, że wszystkie cztery są identyczne co do znaku.
+ *
+ * Świadomie NIE importujemy tu (2): `legacy/` to zawekowana kopia CJS należąca do potoku importu
+ * (karta I15.2), z `require("better-sqlite3")` i zaszytą ścieżką produkcyjną na górze modułu.
+ * Sprzęgnięcie z nim eksportu Selly byłoby decyzją projektową, nie porządkami — zgłoszone
+ * koordynatorowi zamiast rozstrzygane po cichu.
  *
  * ⚠ MO6 (Uniglory) CELOWO NIE MA WPISU — CHANGELOG produkcji 2026-09-10 14:53: „nie będzie
  * na razie w sprzedaży". Dla MO6 i dla nieznanego dostawcy pole zostaje puste; to zamierzone
