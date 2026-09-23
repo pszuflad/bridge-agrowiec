@@ -43,8 +43,13 @@ CREATE TABLE IF NOT EXISTS staging_matches(supplier TEXT NOT NULL,source_key TEX
 -- `CREATE UNIQUE INDEX` na danych z duplikatami wywróciłby się na `UNIQUE constraint failed`.
 -- Zostaje wiersz o NAJWIĘKSZYM `id` w grupie, czyli najnowsze zgłoszenie — tak samo jak `addStaging`
 -- ze Staging v2, które przed wstawieniem kasuje poprzednie zgłoszenie tej samej pary.
--- ZMIERZONE: na kopii `db/snapshot.db` (13.08) 3362 wiersze `staging_items` → 3124, znika 238.
--- NA PRODUKCJI NO-OP: indeks unikalny istnieje tam od 22.09, więc duplikaty są niemożliwe.
+-- ZMIERZONE na kopii `db/snapshot.db` (13.08) — DWIE różne liczby, obie prawdziwe:
+--   • sam snapshot ma 3362 wiersze `staging_items` i 238 duplikatów `(dostawca, kod)`;
+--   • ale w ŁAŃCUCHU migracja 006 sprząta szum CASE_ONLY wcześniej (3362 → 2639, zostaje
+--     137 duplikatów), więc TA migracja usuwa realnie **137 wierszy** (2639 → 2502).
+-- Łącznie od surowego snapshotu ubywa 860 wierszy: 723 przez 006 i 137 przez 012.
+-- NA PRODUKCJI NO-OP: indeks unikalny istnieje tam od 22.09 (jest już w zrzucie `7d6cfc9`),
+-- więc duplikaty są tam niemożliwe i `DELETE` nie ma czego skasować.
 DELETE FROM staging_items
  WHERE id NOT IN (SELECT MAX(id) FROM staging_items GROUP BY dostawca, kod);
 
