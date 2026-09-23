@@ -109,3 +109,36 @@ Warta osobnego ticketa (podniesienie limitu albo odchudzenie przypadku).
    wysyłać stan, linia zacznie działać sama z siebie — warto o niej pamiętać, nie usuwać.
 4. **Moduł dostępności jest niewpięty** — dopóki I15.4 albo I15.8 nie zawoła
    `ustawDomyslnaSynchronizacjeDostepnosci()`, `zadajOdswiezenie()` jest świadomym no-opem.
+
+## Docs updates
+
+**`docs/karty/I15.10/karta.md`** — karta oznaczona ✅ 2026-09-23 · 119-FEATURE-selly-dostepnosc-zawor.
+Usunięte nieaktualne treści (zależności od I15.3/I15.4 — zdjęte ticketem 117; nazwy plików `.cjs`
+zamiast `.ts`; „generator w osobnym procesie"; źródło prawdy `abe5f14` → `88fa31c`). Wypełnione
+„Dowiezione" i „Do koordynatora" (5 punktów: pochodzenie `generator-csv.ts`, pomiar #101, martwe
+`row.stan` w Torze 2, otwarty #108, nieaktualne zdanie o EAN w `wpis-109.md`). Dodana podsekcja
+„⭐ Rewizja zakresu" z wycofaniem zaworu i pomiarem.
+
+**`docs/karty/I15.4/wejscie-119.md`** (nowy) — punkt wpięcia modułu dostępności: co wołać, gdzie
+w oryginale (`staging_policy.cjs:131-134`, `importer():614`, `refreshAbsenceAvailability:331`), jak
+montować, ostrzeżenie o pętli nieskończonej (OOM) przy wołaniu z wnętrza `syncDelta`, semantyka
+kolejki i świadome odstępstwo z generatorem CSV.
+
+**`docs/karty/I15.8/wejscie-119.md`** (nowy) — montaż w `app.ts` do uzgodnienia z I15.4, nowe pola
+`kolizje`/`stats.kolizje_kod_importu`, okresowa synchronizacja jako jedyny mechanizm ponawiania.
+
+**`docs/rebuild-backlog.md`** — #104 → 🔨 częściowo zrealizowane (z zaznaczeniem, że CSV i staging
+zostają dla I15.3/I15.4); #108 → 🔨 potwierdzony, częściowo zaadresowany, NADAL OTWARTY, z korektą
+W MIEJSCU nieaktualnej rekomendacji wariantu (c) „pominąć grupę" i dopisanym rozróżnieniem
+„ten sam dostawca" vs „różni dostawcy"; #101 — dopisane niezależne potwierdzenie pomiaru.
+
+**`docs/spec-backend/wpis-119.md`** (nowy, §2) — żywy odczyt w obu torach, martwe `row.stan`,
+warunkowy EAN Toru 1 (z jawną korektą zdania z `wpis-109.md:14`), wykrywanie kolizji jako
+rozszerzenie odbudowy ponad oryginał, moduł `dostepnosc.ts`, pomiar #101.
+
+**Roadmapa `docs/rebuild-roadmap.md` — NIETKNIĘTA** (zweryfikowane `git status`), zgodnie z zasadą
+własności plików: zmienia ją wyłącznie koordynator.
+
+### Zastane, wykryte przy okazji (nie naprawiane)
+- `docs/rebuild-backlog.md` ma **zduplikowany nagłówek `### #103`** (dwa różne tematy pod jednym
+  numerem, ok. linii 4564 i 4584) — problem numeracji sprzed tego ticketa.
