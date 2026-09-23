@@ -300,15 +300,15 @@ filtrach**, a nie tylko te, które zmieściły się w tabeli.
 | Karta | Plik miał | Plik ma |
 |---|---|---|
 | 2.5 Pozycje unikalne | 1000 | **5109** |
-| 4.1 Historia dostępności · 4.2 Tempo schodzenia | po 500 | **po 5184** |
+| 4.1 Historia dostępności · 4.2 Tempo schodzenia *(zakładka „Dostępność”)* | po 500 | **po 5184** |
 | 1.2 Nowości i wycofania | 500 | **1716** |
 | 3.1 Zmiany cen | 500 | **1644** |
 | Rotacja | 1000 | **1100** |
 
 Karty **EAN wspólne** (769) i **Marża** (335) mieściły się w limicie — u nich plik się nie zmienił.
 
-**Polecenie.** Menu → **Analityka** → karta **2.5 Pozycje unikalne** → przycisk **CSV**. Otwórz plik
-i sprawdź liczbę wierszy.
+**Polecenie.** Menu → **Analityka** → zakładka **„EAN i ceny”** → karta **2.5 Pozycje unikalne** →
+przycisk **CSV**. Otwórz plik i sprawdź liczbę wierszy.
 
 **Rezultat.** Plik ma **więcej wierszy, niż mówi stopka tabeli**.
 
