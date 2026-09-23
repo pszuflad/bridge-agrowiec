@@ -3414,8 +3414,8 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 | ~~**#92** — duplikat marek: dane czy prezentacja~~ | PR.5 | ✅ 2026-09-22, wariant A — migracja `010` (ticket 101) |
 | ~~**Pytanie 12.3 — kafle KPI Analityki**~~ | — | ✅ Ania 22.09 (runda 3, 3.1): „przenieść analitykę 1:1” — zgodne z PR.2 |
 | ~~**Pytanie 12.5 — podział admin / użytkownik**~~ | — | ✅ Ania 22.09 (runda 3, 3.2): bez ról, wszyscy mają te same prawa |
-| **#96** — sufit 1000/500 wierszy w plikach CSV analityki | ewentualne zdjęcie sufitu dla pliku | **⬜ po stronie Ani** — I10-v2 §1.3 |
-| **#97** — kafel „Ostatni eksport CSV” bez źródła w UI | ewentualny audyt eksportu z Katalogu (nowe odstępstwo) | **⬜ po stronie Ani** — I10-v2 §1.2 |
+| ~~**#96** — sufit 1000/500 wierszy w plikach CSV analityki~~ | karta **P10.5** | ✅ Ania 2026-09-23: „chcę pełne pliki” — sufit zdejmujemy tylko dla pliku |
+| ~~**#97** — kafel „Ostatni eksport CSV” bez źródła w UI~~ | — | ❌ Ania 2026-09-23: „zostawcie tak jak jest” — wpis zamknięty |
 | **#94** — karta 4.1: przypadkowy EAN i podwójne migawki | mała karta analityki | ⬜ użytkownik — rekomendacja: naprawić wzorem #33 |
 | **#95**, **#98** — „przypadek mieszany” w imporcie, resztki danych | — | ⬜ użytkownik — rekomendacja: po cutoverze |
 | **Progi kalkulatora paletowego** (półpaleta ≤ 55 cm → 60 cm, paleta ≤ 80 cm, +10 cm paleta, współczynnik 0.000167) — właściwe czy do zmiany | ewentualną zmianę ustawień `waga_gab.*` (stała 60 cm to kod, nie ustawienie) | **⬜ po stronie Ani** — pytanie z wariantami w `docs/instrukcja-testow-I9-v2.md` §3.2 (2026-09-21) |
