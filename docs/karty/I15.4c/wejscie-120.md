@@ -1,4 +1,9 @@
-# Wejście dla I15.4 od ticketu 120 (karta I15.2, resync parserów) · 2026-09-23
+# Wejście dla I15.4c od ticketu 120 (karta I15.2, resync parserów) · 2026-09-23
+
+> Plik napisany dla DAWNEJ karty I15.4, przed jej podziałem na I15.4a/b/c (ticket 123). Przeniesiony przez
+> koordynatora (ticket 127) do **I15.4b i I15.4c** — punkty o `_bridgeFeedMeta` i stanie przejściowym D4
+> dotyczą ścieżki zapisu (I15.4b), a wszystko o akceptacji i zgłoszeniach — ścieżki akceptacji (I15.4c).
+> Czytaj całość, wykonuj to, co należy do Twojego zakresu.
 
 Warstwa parserów jest już na stanie `88fa31c`. Poniżej to, co z tego wynika dla silnika i stagingu.
 
