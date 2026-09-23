@@ -101,12 +101,14 @@ i `akceptacja.ts` — `wejscie-129.md` prosi o wstrzykiwanie, a `importer()` tej
 warstwa polityki stagingu należy teraz do plików wniesionych przez ticket 129.
 
 
-1. **`mirror/backend/index.cjs` na `develop` jest NIEAKTUALNY** — stoi na `86d9090`, a
+1. **`mirror/backend/index.cjs` na `develop` jest NIEAKTUALNY** *(przeniesione do backlogu
+   jako `#137.1` — `docs/rebuild-backlog/wpis-137.md`)* — stoi na `86d9090`, a
    `staging_policy.cjs` i `bridge_ext.cjs` są już na `88fa31c` (resync I15.2 objął tylko
    wybrane pliki). Blok helperów wycinany przez charakteryzację jest między tymi commitami
    IDENTYCZNY (zweryfikowane bajtowo), więc nie zablokował tego ticketa — ale plik trzeba
    dosynchronizować.
-2. **Ciche nakładanie poprawek Marty — do decyzji Ani.** `protect()`
+2. **Ciche nakładanie poprawek Marty — do decyzji Ani.** *(przeniesione do backlogu jako
+   `#137.2`, z trzema wariantami do przedstawienia Ani — `docs/rebuild-backlog/wpis-137.md`)* `protect()`
    (`staging_policy.cjs:158-162`) podmienia wartość bez żadnego sygnału. Stary `tk()` meldował
    konflikt („plik nadpisuje poprawkę Marty") i BLOKOWAŁ auto-zatwierdzenie. Teraz plik
    dostawcy sprzeczny z ręczną decyzją Marty nie jest nigdzie widoczny, a cena przechodzi bez
