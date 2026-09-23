@@ -23,7 +23,7 @@ import {
   zatwierdzPozycjeStagingu,
 } from "../import/akceptacja.js";
 import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
-import { PustyImportBlad, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
+import { jestBlokadaZrodla, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
 import type { RekordSurowy } from "../import/typy.js";
 
 export type ZaleznosciMutacjiStagingu = {
@@ -128,12 +128,16 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
 
     let statystyki;
     try {
+      // ⚠ BEZ `meta` — i tak ma zostać. Pozycje przychodzą tu wprost z ciała żądania,
+      // nie przez dispatcher, więc nikt nie potwierdził, że to KOMPLETNA oferta dostawcy.
+      // Silnik traktuje taki wsad jako niekompletny: nie wstrzymuje braków i nie zapisuje
+      // wersji oferty. To jest bezpieczny domyślny stan, nie niedopatrzenie.
       statystyki = uruchomImport(String(kodDostawcy), surowe as RekordSurowy[]);
     } catch (blad) {
       // Oryginał zwraca 500 na każdy błąd importu (`:48530`). Pusty wsad to u nas świadome
       // odstępstwo (D7) — dajemy 400, bo to błąd żądania, nie serwera.
-      if (blad instanceof PustyImportBlad) {
-        return res.status(400).json({ error: blad.message });
+      if (jestBlokadaZrodla(blad)) {
+        return res.status(400).json({ error: (blad as Error).message });
       }
       return res.status(500).json({ error: (blad as Error)?.message || "Błąd importu" });
     }

@@ -10,6 +10,7 @@ import {
 import { BladCennika, parsujBufor, urlDostawcy } from "../import/parsuj.js";
 import { pobierzZUrl } from "../import/pobierz.js";
 import {
+  jestBlokadaZrodla,
   PustyImportBlad,
   silnikStagingu,
   type SilnikStagingu,
@@ -158,9 +159,10 @@ export function trasyImportu({
     // i powstanie dopiero w 3d. Tutaj zostaje wyłącznie tłumaczenie wyjątku na odpowiedź HTTP.
     let statystyki: StatystykiImportu;
     try {
-      statystyki = uruchomImport(kodDostawcy, sparsowane.rekordy);
+      statystyki = uruchomImport(kodDostawcy, sparsowane.rekordy, { meta: sparsowane.meta });
     } catch (e) {
-      if (e instanceof PustyImportBlad) return { blad: e.message };
+      // Każda blokada źródła (#103) to odpowiedź 400 z treścią wyjątku, nie 500.
+      if (jestBlokadaZrodla(e)) return { blad: (e as Error).message };
       throw e;
     }
 
