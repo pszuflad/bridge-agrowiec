@@ -160,6 +160,26 @@ sqlite3 /tmp/kanon.db "PRAGMA table_info(products);" > /tmp/kanon-products.txt
 diff ~/cutover-proba/products.txt /tmp/kanon-products.txt
 ```
 
+### 4a. Migracje w `dist/` muszą się zgadzać z repo (lekcja ze stagingu, ticket 147)
+
+Runner czyta migracje z `dist/schema/`, nie z `rebuild/schema/`, i stosuje je **po nazwie pliku**.
+Do ticketu 147 `npm run build` tego katalogu nie czyścił, więc migracja usunięta albo
+przenumerowana w repo zostawała w `dist/` jako widmo i wyglądała na niezastosowaną. Na stagingu
+`007_selly_products_warianty.sql` z cofniętej gałęzi (revert `48d8d84`) wywracał tak **sześć
+kolejnych deployów** pod rząd na `there is already another table or index with this name:
+selly_products_old`, a log deployu urywał się bez przyczyny. Od 147 oba skrypty kopiujące
+(`copy-schema.mjs`, `copy-parsery.mjs`) kasują katalog docelowy przed kopiowaniem — ale przed
+oknem i tak potwierdź, że budujesz z czystego katalogu:
+
+```bash
+cd ~/private_apps/bridge-staging/repo/rebuild/backend
+diff <(ls ../schema/*.sql | xargs -n1 basename) <(ls dist/schema) && echo "OK — dist zgodny z repo"
+```
+
+Różnica = przerwij i zbuduj od nowa (`rm -rf dist && npm run build`). **Nigdy nie migruj
+produkcji z katalogu, którego zawartości nie potwierdziłeś** — widmowa migracja wykona na żywej
+bazie DDL, którego nie ma w repo.
+
 ### 5. PRÓBA MIGRACJI NA KOPII — obowiązkowa
 
 ```bash
@@ -264,6 +284,19 @@ pm2 logs bridge-backend-staging --lines 40 --nostream | grep -iE "scheduler|cors
 3. **Uprawnienia do katalogów:** archiwum importu i katalog CSV muszą być zapisywalne przez proces.
 4. **PM2:** stary wpis `bridge-backend` usunięty, nowy zapisany (`pm2 save`), żeby restart serwera nie wskrzesił
    starego stosu na tej samej bazie.
+
+**WYNIK AUDYTU NA STAGINGU — 2026-09-24, wykonany.** Znalezione braki i co z nimi zrobiono:
+
+| Brak | Działanie |
+|---|---|
+| `.env` miał tylko `JWT_SECRET` | dopisane `IMPORT_SCHEDULER=true`, `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG=true`, `IMPORT_ARCHIVE_DIR=…/bridge-staging/data/import_archive` |
+| brak `AGRORAMI_*` | skopiowane z `.env` produkcji (`~/private_apps/bridge/.env` — wszystkie cztery klucze tam są; to samo źródło obsłuży produkcję po cutoverze) |
+| brak katalogów `data/import_archive` i `public_html/test/ex-port-files` | założone |
+| **staging stał na wydaniu z 22.09** (`ca51238`), mimo 6 nowszych buildów | przyczyna: widmowa migracja w `dist/` — patrz 4a i ticket 147; po sprzątnięciu `dist/` deploy przeszedł, staging stoi na `c0ee7a5` (czubek `develop` z kartą I15.11) |
+
+Sprawdzone przy okazji: produkcyjny `panel/ex-port-files/.htaccess` ma nienaruszoną białą listę
+`Require ip 212.91.27.191 46.170.251.129`; baza stagingu to kopia produkcji (8329 produktów),
+komplet migracji 001–013.
 
 ## 4. Zmienne środowiskowe — różnice staging vs produkcja
 
