@@ -79,7 +79,12 @@ describe("GATE — kontrakt i fixtures dla archiwum importów", () => {
       await wgraj("MO7", "cennik MO7.csv", ZEPSUTY_MO7),
       await wgraj("MO6", "MO6.csv", probka("MO6.csv")),
     ];
-    expect(wyniki.map((w) => w.status)).toEqual([200, 500, 200]);
+    // ⚠ ZMIANA OD RESYNCU 23.09 (ticket 120, backlog #103): zepsuty cennik daje 400, nie 500.
+    // `feed_safety.attach()` rozpoznaje błąd odczytu i zatrzymuje import jako błąd DANYCH
+    // WEJŚCIOWYCH; wcześniej wyjątek z parsera leciał do zewnętrznego `catch` trasy i kończył
+    // się awarią serwera. Dla tego gate'u istotne jest to, co niezmienne: upload mimo błędu
+    // trafia do archiwum ze statusem `blad`, co sprawdzają testy niżej.
+    expect(wyniki.map((w) => w.status)).toEqual([200, 400, 200]);
 
     // Kolejność listy to `mtime`. Trzy uploady mieszczą się w tej samej milisekundzie, więc
     // ustawiamy znaczniki jawnie — w kolejności wgrania, jak w nagraniu (odstęp ~1 s).
