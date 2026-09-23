@@ -30,8 +30,8 @@ w polach** na 4 843 rekordach. Przy okazji zamknięta regresja, którą resync w
 - **Nowe:** `rebuild/backend/test/feed-safety.test.ts` — 10 testów ścieżek błędu #103.
 - `rebuild/backend/test/charakteryzacja/MOx.expected.json` (10) — wzorzec parserów przenagrany.
 - `rebuild/backend/test/charakteryzacja/silnik/MOx.expected.json` (10) — wzorzec silnika przenagrany.
-- `rebuild/backend/test/import.test.ts`, `test/silnik.gate.test.ts` — 5 asercji przestawionych na nowe,
-  zamierzone zachowanie (szczegóły niżej).
+- `rebuild/backend/test/import.test.ts`, `test/silnik.gate.test.ts`, `test/archiwum-importow.gate.test.ts`
+  — 6 asercji przestawionych na nowe, zamierzone zachowanie (szczegóły niżej).
 
 ## Odstępstwa od planu
 
@@ -46,11 +46,16 @@ Poza tym 1:1 z planem.
 
 ## Wyniki testów
 
-### Gate odbudowy (fixtures/kontrakt): **N/D — ticket nie dotyka kontraktu HTTP**
+### Gate odbudowy (fixtures/kontrakt): **N/D jako wymóg — ale i tak potwierdzony**
 Warstwa parserów kończy się na `adapter.recordsToSurowe()`, przed zapisem do bazy i przed jakąkolwiek trasą.
 Kształt odpowiedzi API nie zmienia się. Zamiast gate'u fixtures obowiązuje **mocniejszy** gate właściwy dla
-tej warstwy — charakteryzacja wobec ORYGINALNYCH parserów produkcji (niżej). Weryfikacja negatywna: pełny
-`npm test` obejmuje `silnik.gate.test.ts` i trasy importu, więc przeciek zmian do API by się pokazał.
+tej warstwy — charakteryzacja wobec ORYGINALNYCH parserów produkcji (niżej).
+
+**Potwierdzenie mimo to:** `archiwum-importow.gate.test.ts` porównuje `GET /api/import-archive`
+z `contract/fixtures/GET_import-archive.json` i ze schematem z `contract/openapi.yaml` — i przechodzi
+**22/22 bez zmian w fixture**, mimo że scenariusz tego gate'u zawiera upload zepsutego cennika.
+Czyli: kształt i wartości odpowiedzi API nie drgnęły. Zmienił się wyłącznie KOD odpowiedzi przy
+zepsutym pliku (500 → 400), którego fixture nie obejmuje.
 
 ### Test akceptacyjny karty — **✓ ZERO różnic w polach**
 `porownaj-parsery.cjs`, strona PROD = drzewo `88fa31c:mirror/backend/` zmaterializowane w katalogu
@@ -124,10 +129,15 @@ dostawcy** (`MO1_GATE-NORMEAN`) zamiast dopasować się do katalogowego `MO1_INN
 ma to być blokada akceptacji; w oknie przejściowym jest zwykłą nową pozycją. Nie ma wyjątku ani utraty danych.
 
 ### Bramki
-- lint ✓ · typecheck ✓ · build ✓
-- `npm test` — patrz sekcja „Stan bramek" niżej (uzupełniona po przebiegu).
+- **lint ✓ · typecheck ✓ · build ✓** (build kopiuje teraz 23 pliki do `dist/import/legacy/`, było 19)
+- **`npm test` ✓** — 1 649 testów, 101 plików.
 
-### Testy przestawione na nowe zachowanie (5)
+⚠ Jeden test (`alerty-katalogu.gate.test.ts`, „paczka równa limitowi 20 000 id") zaświecił raz na
+czerwono w przebiegu zbiorczym, **w izolacji przechodzi (37/37)**. To najcięższy test w suite, a przebieg
+zbiorczy jechał równolegle z porównaniem na pełnych cennikach i z sesją review — flak od obciążenia,
+nie regresja. Nie zmieniałem go.
+
+### Testy przestawione na nowe zachowanie (6)
 Żadna asercja nie została osłabiona — kod **400** i „zero zapisu do stagingu" zostają wszędzie:
 
 1. `import.test.ts` MO2 — `staging == doStagingu` zamiast `- 2`. #103 zniósł dwa powtórzone kody EAN-owe;
@@ -139,6 +149,11 @@ ma to być blokada akceptacji; w oknie przejściowym jest zwykłą nową pozycj�
    więc komunikat pochodzi z `feed_safety`. Kod 400 bez zmian.
 5. `silnik.gate.test.ts` — test EAN-u w notacji naukowej przepisany na stan przejściowy D4, z notą, że
    I15.4 ma go przestawić na oczekiwaną blokadę.
+6. `archiwum-importow.gate.test.ts` — zepsuty cennik (`ZEPSUTY_MO7`: CSV z niedomkniętym cudzysłowem)
+   daje **400 zamiast 500**. To asercja z `beforeAll`, nie przedmiot tego gate'u — i jest to dokładnie
+   ta poprawka, o którą chodziło w D-6. **Reszta suite przechodzi bez zmian (22/22)**: upload mimo błędu
+   nadal trafia do archiwum ze statusem `blad`, a `GET /api/import-archive` nadal zgadza się z fixture
+   i z kontraktem. To mocny dowód, że kontrakt HTTP nie ucierpiał.
 
 ## Breaking changes
 
