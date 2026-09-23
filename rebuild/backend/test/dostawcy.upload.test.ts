@@ -195,6 +195,26 @@ describe("POST /api/dostawcy/:kod/upload", () => {
       expect(policzStaging()).toBe(0);
     });
 
+    /**
+     * Rozróżnienie wprowadzone resyncem 23.09 (ticket 120, backlog #103): plik, który parser
+     * ODCZYTAŁ i zgłosił błędy wierszy, to błąd DANYCH WEJŚCIOWYCH — 400. Twarda awaria
+     * czytnika (test wyżej: śmieci jako XLSX wywracają SheetJS) zostaje przy 500.
+     *
+     * Asercja jest na DOKŁADNY kod, nie na `>= 400`. Luźna asercja w teście wyżej przepuściła
+     * regresję, w której ta trasa oddawała 500 tam, gdzie `POST /api/import/parse-file`
+     * oddawało już 400 — mimo że obie idą przez ten sam `parsujBufor()`.
+     */
+    it("błąd odczytu wierszy (#103) daje DOKŁADNIE 400, nie 500", async () => {
+      zasiejDostawce("MO1");
+      const odp = await wgraj("MO1", Buffer.from("nie;jest;cennikiem\n"), "cennik.csv");
+
+      expect(odp.status).toBe(400);
+      const cialo = odp.body as { error: string; dostawcaKod: string };
+      expect(cialo.error).toMatch(/Błędy odczytu cennika/);
+      expect(cialo.dostawcaKod).toBe("MO1");
+      expect(policzStaging()).toBe(0);
+    });
+
     it("zostawia alert ostrzegawczy o nieudanym wgraniu", async () => {
       zasiejDostawce("MO8");
       await wgraj("MO8", Buffer.from("to nie jest xlsx, tylko tekst"), "smieci.xlsx");
