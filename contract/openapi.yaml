@@ -20231,6 +20231,10 @@ paths:
                       skip: { type: integer }
                       discovered: { type: integer }
                       created: { type: integer }
+                      # Dołożone ticketem 119 (wpis backlogu #108): licznik grup dzielących
+                      # parę (dostawca, kod_importu). Sama wysyłka pozostaje 1:1 z produkcją —
+                      # to wyłącznie raportowanie, patrz docs/spec-backend/wpis-119.md.
+                      kolizje_kod_importu: { type: integer }
                   errors:
                     type: array
                     items:
