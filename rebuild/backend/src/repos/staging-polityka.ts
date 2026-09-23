@@ -156,7 +156,7 @@ export function zapiszDowodyNieobecnosci(
     .run();
 }
 
-/** Skasowanie dowodów — `staging_policy.cjs:467` (`clearAbsence`, wołane w :507, :533, :542, :560, :579). */
+/** Skasowanie dowodów — `staging_policy.cjs:467` (`clearAbsence`, wołane w :507, :533, :542, :560, :579, :594). */
 export function usunDowodyNieobecnosci(db: Baza, dostawca: string, kodProduktu: string): void {
   db.delete(productAbsenceChecks)
     .where(and(eq(productAbsenceChecks.supplier, dostawca), eq(productAbsenceChecks.productCode, kodProduktu)))
