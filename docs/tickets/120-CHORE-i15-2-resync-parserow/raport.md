@@ -131,10 +131,16 @@ ma to być blokada akceptacji; w oknie przejściowym jest zwykłą nową pozycj�
 - **lint ✓ · typecheck ✓ · build ✓** (build kopiuje teraz 23 pliki do `dist/import/legacy/`, było 19)
 - **`npm test` ✓** — 1 649 testów, 101 plików.
 
-⚠ Jeden test (`alerty-katalogu.gate.test.ts`, „paczka równa limitowi 20 000 id") zaświecił raz na
-czerwono w przebiegu zbiorczym, **w izolacji przechodzi (37/37)**. To najcięższy test w suite, a przebieg
-zbiorczy jechał równolegle z porównaniem na pełnych cennikach i z sesją review — flak od obciążenia,
-nie regresja. Nie zmieniałem go.
+⚠ **Cztery testy w trzech plikach zaświeciły na czerwono w przebiegu zbiorczym i wszystkie cztery
+przechodzą w izolacji** (`silnik.charakteryzacja.test.ts` MO2 i MO5, `scheduler.test.ts` „po dwóch
+interwałach", `alerty-katalogu.gate.test.ts` „paczka 20 000 id") — sprawdzone: **110/110 zielonych**
+przy ponownym uruchomieniu tych trzech plików osobno.
+
+Przyczyna jest zmierzona, nie domniemana: na maszynie pracowały równolegle inne karty I15
+(`119-FEATURE-selly-dostepnosc-zawor` i `122-FEATURE-i15-3-blokady-platnosci-csv`), **load average
+sięgnął 36** przy 25 procesach node. Wszystkie cztery testy są wrażliwe na czas albo na rozmiar
+(scheduler mierzy interwały, `alerty` przetwarza paczkę 20 000 id, MO2 i MO5 to dwa największe
+cenniki). Żadnego z nich nie zmieniałem.
 
 ### Testy przestawione na nowe zachowanie (5)
 Żadna asercja nie została osłabiona — kod **400** i „zero zapisu do stagingu" zostają wszędzie:
@@ -165,6 +171,21 @@ dodatkowy test w `test/feed-safety.test.ts`.
 
 Wniosek ogólny: różnica między „zepsuty plik" a „zepsuty czytnik" jest realna i tylko pierwsza z nich
 jest błędem danych wejściowych.
+
+## Poprawki po review
+
+**BLOCKER — `routes/suppliers.ts:245` oddawało 500 zamiast 400.** `POST /api/dostawcy/:kod/upload`
+(główne wejście dla ręcznych importów MO6/MO8) mapowało na 400 tylko `PustyImportBlad`; nowy
+`BladCennika` wpadał w gałąź 500, mimo że `POST /api/import/parse-file` dla tego samego pliku
+oddawało już 400. **Mój błąd w D-6:** tłumaczenie wyjątku wstawiłem w `parsuj.ts`, wspólne dla
+wszystkich trzech wołających — ale MAPOWANIE na kod HTTP jest per-trasa i zrobiłem je tylko
+w `routes/import.ts`. Naprawione, z testem asercjującym **dokładny** kod (istniejący gate tej trasy
+ma `toBeGreaterThanOrEqual(400)` i dlatego tego nie łapał). Sprawdzone, że nowy test czerwieni się
+bez poprawki: `expected 500 to be 400`.
+
+**Dwa SHOULD-FIX z review były już nieaktualne** w chwili raportu — recenzent czytał drzewo przed
+commitami `9ef7943` (statusy backlogu) i `28bbd86` (korekta raportu i zawężenie tłumaczenia).
+Oba punkty są zrobione.
 
 ## Breaking changes
 
