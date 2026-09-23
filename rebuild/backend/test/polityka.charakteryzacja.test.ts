@@ -64,8 +64,6 @@ function stan(baza: TestowaBaza, numeryZKatalogu: Set<string>) {
     }
     return kopia;
   };
-  const tabela = (t: Parameters<TestowaBaza["db"]["select"]>[0] extends never ? never : never) => t;
-  void tabela;
   return {
     produkty: (baza.db.select().from(products).all() as unknown as Wiersz[]).map(maskuj),
     staging: (baza.db.select().from(stagingItems).all() as unknown as Wiersz[]).map(maskuj),
