@@ -1,3 +1,190 @@
+2026-09-22 18:13
+obszar: baza danych
+
+pliki: data.db + /home/admin/private_apps/bridge/data.db.bak_20260922T161344Z_old_agrorami_delete; CHANGELOG.md + /home/admin/private_apps/bridge/CHANGELOG.md.bak_20260922T161344Z_old_agrorami_delete; availability_migration_archive_20260922.json; availability_shop_result_20260922.json
+
+zmiana: Po zabezpieczeniu dostępności w sklepie usunięto dokładnie 179 dawnych kart MO9 Agrorami z katalogu oraz ich stare zgłoszenia i ręczne powiązania staging_matches. Zachowano historię i wyzerowane mapowania Selly, pozostałych dostawców nie usuwano. Powrót opony nie odtwarza usuniętej karty: przechodzi zwykłe dopasowanie i staging do akceptacji Marty.
+
+powód: Decyzja Anny 22.09.2026 o usunięciu nieobecnych starych kart Agrorami po przejściu z CSV na API.
+
+---
+
+2026-09-22 18:09
+obszar: backend | baza danych
+
+pliki: /home/admin/private_apps/bridge/staging_policy.cjs + /home/admin/private_apps/bridge/staging_policy.cjs.bak_20260922T160912Z_availability, /home/admin/private_apps/bridge/generate_selly_export.cjs + /home/admin/private_apps/bridge/generate_selly_export.cjs.bak_20260922T160912Z_availability, /home/admin/private_apps/bridge/selly/sync_delta.cjs + /home/admin/private_apps/bridge/selly/sync_delta.cjs.bak_20260922T160912Z_availability, /home/admin/private_apps/bridge/selly/sync_full.cjs + /home/admin/private_apps/bridge/selly/sync_full.cjs.bak_20260922T160912Z_availability, /home/admin/private_apps/bridge/availability_sync.cjs (nowy), /home/admin/private_apps/bridge/apply_availability_20260922.cjs (nowy), /home/admin/private_apps/bridge/zero_and_delete_agrorami_20260922.cjs (nowy), /home/admin/private_apps/bridge/CHANGELOG.md + /home/admin/private_apps/bridge/CHANGELOG.md.bak_20260922T160912Z_availability; data.db + /home/admin/private_apps/bridge/data.db.bak_20260922T160912Z_availability; wygenerowany CSV + /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_20260922T160912Z_availability
+
+zmiana: Brak produktu w poprawnej pełnej ofercie natychmiast ustawia wstrzymany/0. Tabela product_auto_suspensions odróżnia automatyczny brak od ręcznego wstrzymania. Pewny powrót przywraca aktywność i bieżący stan; błędy/zmiany wymagają decyzji, ręczne wstrzymania chronione. Eksport CSV zawiera tylko aktywne produkty, zapis atomowy. Zmiana dostępności uruchamia odświeżenie CSV i Selly delta; delta zeruje również mapowane produkty bez EAN, sprawdza aktualny status tuż przed wysyłką i nie zeruje współdzielonego wariantu mającego inną aktywną ofertę. Tor pełny pomija produkty wstrzymane po rozpoczęciu cyklu. Migracja: 395 brakujących i 2 niepewne karty wstrzymane/0; 179 starych MO9 tymczasowo wstrzymanych do wyzerowania sklepu i zatwierdzonego usunięcia w kolejnym kroku. Kopia bazy i archiwum kart. Testy: 15 przypadków + dwa importy sześciu rzeczywistych źródeł na izolowanej kopii.
+
+powód: Decyzja Anny 22.09.2026 17:59: braki wstrzymywać, nie wysyłać do CSV, przywracać po powrocie; stare karty Agrorami usunąć po zabezpieczeniu sklepu.
+
+---
+
+2026-09-22 17:30
+obszar: backend | frontend | baza danych
+
+pliki: /home/admin/private_apps/bridge/index.cjs + /home/admin/private_apps/bridge/index.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/staging_policy.cjs + /home/admin/private_apps/bridge/staging_policy.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/feed_safety.cjs (nowy), /home/admin/private_apps/bridge/extensions.cjs + /home/admin/private_apps/bridge/extensions.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/parsers/adapter.cjs + /home/admin/private_apps/bridge/parsers/adapter.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/parsers/dispatcher.cjs + /home/admin/private_apps/bridge/parsers/dispatcher.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/parsers/mo2_jmk.cjs + /home/admin/private_apps/bridge/parsers/mo2_jmk.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/parsers/mo9_agrorami.cjs + /home/admin/private_apps/bridge/parsers/mo9_agrorami.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs + /home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/parsers/_agrorami_fetch_helper.cjs + /home/admin/private_apps/bridge/parsers/_agrorami_fetch_helper.cjs.bak_20260922T153004Z_withdrawals, /home/admin/domains/agritires.eu/public_html/panel/assets/index-PRICEFMT1783512500.js + /home/admin/domains/agritires.eu/public_html/panel/assets/index-PRICEFMT1783512500.js.bak_20260922T153004Z_withdrawals, /home/admin/domains/agritires.eu/public_html/panel/assets/staging-policy-injection.js + /home/admin/domains/agritires.eu/public_html/panel/assets/staging-policy-injection.js.bak_20260922T153004Z_withdrawals, /home/admin/domains/agritires.eu/public_html/panel/index.html + /home/admin/domains/agritires.eu/public_html/panel/index.html.bak_20260922T153004Z_withdrawals, /home/admin/private_apps/bridge/withdrawals_reconcile_20260922.cjs (nowy), /home/admin/private_apps/bridge/CHANGELOG.md + /home/admin/private_apps/bridge/CHANGELOG.md.bak_20260922T153004Z_withdrawals; data.db + /home/admin/private_apps/bridge/data.db.bak_20260922T153004Z_withdrawals; withdrawals_reconcile_report_20260922.json (raport)
+
+zmiana: Naprawa nieobecności w stagingu. Usunięto cichy fallback do starych parserów w imporcie URL i ręcznym. Agrorami: pełny zapis JSON przed zamknięciem procesu, kontrola liczby/unikalności produktów i postępu pobierania, import rdzenia bez pobierania nieużywanego starego CSV. Jeden scheduler (rdzeń), wyłączony drugi w extensions. Przenoszenie informacji o kompletności i wierszach odfiltrowanych dispatcher→adapter→silnik. Blokada pustego, błędnego, mniejszego o ponad 20% lub masowo nierozpoznanego źródła. Trzy różne kompletne oferty, minimum 24h pomiędzy potwierdzeniami; trwałe dowody i ochrona przed ponownym liczeniem tego samego pliku. Wstrzymane/0 nie wracają. Stare karty bez stabilnego oznaczenia i możliwe zmiany kodów mają osobne zablokowane zgłoszenia do sprawdzenia. Bezpieczne dopasowanie wielkości liter oraz jednoznacznego kodu dostawcy, ochrona DEMO i wariantów; podobne cechy z innym EAN do decyzji. JMK: nie łączy i nie sumuje wierszy po samym EAN. Panel: Braki w cenniku, podgląd starej karty. Przebudowano kolejkę z sześciu świeżo sprawdzonych źródeł, wyzerowano niewiarygodne stare liczniki, bez zmian cen/stanów/statusów/nazw katalogu. Testy 39 przypadków, dwa pełne importy sześciu dostawców oraz trzy pełne odczyty Agrorami na izolowanej kopii.
+
+powód: Anna 22.09.2026 poleciła zweryfikować rzeczywiste braki i naprawić wszystkie wykazane przyczyny fałszywych wycofań. Kopie przed wdrożeniem i kontrola integralności.
+
+---
+
+2026-09-22 13:03
+obszar: backend | frontend | baza danych
+
+pliki: /home/admin/private_apps/bridge/index.cjs + /home/admin/private_apps/bridge/index.cjs.bak_20260922T110248Z_staging_v2, /home/admin/private_apps/bridge/common.cjs + /home/admin/private_apps/bridge/common.cjs.bak_20260922T110248Z_staging_v2, /home/admin/private_apps/bridge/parsers/adapter.cjs + /home/admin/private_apps/bridge/parsers/adapter.cjs.bak_20260922T110248Z_staging_v2, /home/admin/private_apps/bridge/staging_policy.cjs (nowy), /home/admin/domains/agritires.eu/public_html/panel/assets/staging-policy-injection.js (nowy), /home/admin/domains/agritires.eu/public_html/panel/index.html + /home/admin/domains/agritires.eu/public_html/panel/index.html.bak_20260922T110248Z_staging_v2, /home/admin/private_apps/bridge/staging_reconcile_20260922.cjs (nowy), /home/admin/private_apps/bridge/CHANGELOG.md + /home/admin/private_apps/bridge/CHANGELOG.md.bak_20260922T110248Z_staging_v2; baza data.db + /home/admin/private_apps/bridge/data.db.bak_20260922T110248Z_staging_v2
+
+zmiana: Staging v2: jedno najnowsze zgłoszenie na produkt/dostawcę; świeże ceny i stany; ścisła kontrola surowego EAN w parserze/adapterze; dopasowanie po EAN wyłącznie do jednej zgodnej opony, z ochroną DOT; niejednoznaczności do ręcznej decyzji; poprawki ręczne chronione bez osobnego błędu; kontrola aktualności i atomowa akceptacja; przycisk Rozstrzygnij; przebudowa stagingu z archiwów bez zmiany katalogu; indeks unikalny i tabela świadomych dopasowań.
+
+powód: Prośba Anny z 2026-09-22; nieaktualne zgłoszenia, błędne EAN i łączenie różnych partii opon.
+
+---
+
+2026-09-18 15:39
+obszar: backend | baza danych
+
+pliki: application_rules.cjs, parsers/tyre_params.cjs, parsers/tyre_params.cjs.bak_20260918_1500_width_norm, parsers/adapter.cjs, parsers/adapter.cjs.bak_20260918_1500_width_norm, parsers/mo9_agrorami_api.cjs, parsers/mo9_agrorami_api.cjs.bak_20260918_1500_width_norm, normalize_widths_selly_20260918.cjs, data.db, data.db.bak_20260918_1500_width_norm, CHANGELOG.md, CHANGELOG.md.bak_20260918_1500_width_norm, CHANGELOG.md.bak_pre_20260918_entry_1539
+
+zmiana: w application_rules.cjs dodano zależne od kategorii mapowanie zastosowania: w Rolniczych wartości Ładowarka, ładowarka kołowa i ładowarka rolnicza są zapisywane jako Ciągnik, natomiast w Przemysłowych Ładowarka pozostaje bez zmian. Backfill zaktualizował 265 rekordów Rolniczych; po korekcie pozostało 0 Rolniczych z zastosowaniem Ładowarka. W parserze wspólnym i adapterze dodano kanoniczny zapis wyłącznie kolumny szerokosc: nieznaczące zera końcowe są usuwane (5.00→5, 12.50→12.5, 340.0→340), bez zmiany pełnych nazw i pola rozmiar. Jednorazowo ujednolicono 1297 istniejących wartości szerokości; kontrola końcowa wykazała 0 niekanonicznych szerokości i integrity_check=ok. W parserze MO9 usunięto znak $ stojący bezpośrednio przed wymiarem i poprawiono products.id=105986 z $7-14 na 7-14, pozostawiając nazwę „BKT TR 144 $7-14” bez zmian.
+
+powód: zgłoszenie Anny — filtr Rolniczych nie powinien pokazywać zastosowania Ładowarka, a filtr Szerokość opony nie powinien rozdzielać tej samej liczby na warianty 5, 5.0 i 5.00. Błędny rozmiar $7-14 z MO9 miał zostać poprawiony u źródła, aby nie wracał po imporcie.
+
+---
+
+2026-09-17 18:40
+obszar: baza danych
+
+pliki: data.db, data.db.bak_pre_selly_search_20260917_1840, CHANGELOG.md, CHANGELOG.md.bak_pre_selly_search_20260917_1840
+
+zmiana: usunięto jedno martwe mapowanie selly_products dla produktu Selly 639 (kod_importu 668772, MO9_23814), którego rekord źródłowy nie istniał już w katalogu products. Pełny rekord produktu Selly zapisano przed usunięciem w selly_backups/product_639_pre_delete_20260917T164000Z.json, a odpowiedź operacji w selly_backups/product_639_delete_result_20260917T164000Z.json.
+
+powód: zgłoszenie Anny — osierocony produkt zachowywał w wyszukiwarce Selly starą wartość zastosowania „harwester” w kategorii Opony rolnicze.
+
+---
+
+2026-09-17 17:07
+obszar: backend | baza danych
+
+pliki: selly/sync_full.cjs, selly/sync_full.cjs.bak_pre_filtermirror_20260917_1654, selly/mapper_v2.cjs, selly/mapper_v2.cjs.bak_pre_filtermirror_20260917_1654, data.db, data.db.bak_selly_filters_20260917_1645, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_selly_filters_20260917_1707, CHANGELOG.md, CHANGELOG.md.bak_pre_selly_filters_20260917_1707, CHANGELOG.md.bak_scopefix_selly_filters_20260917_1720
+
+zmiana: poprawiono w Bridge trzy historyczne rekordy MO9 ze sklejonym rozmiarem głównym i alternatywnym (0 pozostałych wartości z nawiasem w products.rozmiar) i wygenerowano ponownie CSV (8088 produktów, 60 kolumn, 0 zgłoszonych sklejonych wartości). W sync_full dodano wybór jednego właściciela metadanych dla wspólnego produktu, blokadę automatycznego zapisu dla grup z różnymi aktywnymi kategoriami oraz aktualizację kategorii i cech istniejących produktów. buildFeaturesMirror nie zachowuje już w payloadzie starej wartości cechy zarządzanej przez Bridge, gdy bieżąca wartość jest pusta; cechy spoza mapy Bridge pozostają nietknięte.
+
+powód: zgłoszenie Anny — dane eksportowane i synchronizowane z Bridge miały nie tworzyć sklejonych wartości filtra Rozmiar ani pozwalać wariantom różnych dostawców na wzajemne nadpisywanie kategorii i cech produktu.
+
+---
+
+2026-09-17 16:10
+obszar: backend | baza danych
+
+pliki: application_rules.cjs, application_rules.cjs.bak_pre_forwarder_harwester_20260917_1608, data.db, data.db.bak_pre_forwarder_harwester_20260917_1608, CHANGELOG.md, CHANGELOG.md.bak_pre_forwarder_harwester_20260917_1608
+
+zmiana: ujednolicono zapis zastosowania w kategorii Leśne — Forwarder, Harwester oraz ich połączenia (w dowolnej kolejności/separatorze) są teraz zawsze zapisywane jako jedna wartość "Forwarder/Harwester". Poprawiono splitApplications/normalizeApplication oraz sqlNormalizeExpression w application_rules.cjs (separator " ; " -> "/", kolejność Forwarder przed Harwester), naprawiono kolejność backfill/triggery w ensureApplicationRules (najpierw podmiana triggerów, potem UPDATE danych — inaczej stary trigger nadpisywał wynik). Jednorazowo scalono 100 produktów: Forwarder 29, Harwester 2, Harwester ; Forwarder 69. Kategoria bez zmian, manual_overrides zastosowania (17 wpisów) nie miały wariantów Forwarder/Harwester. Test UPDATE z rollbackiem potwierdził automatyczne scalanie przy przyszłych zapisach.
+
+powód: zgłoszenie Anny — pole zastosowanie miało Forwarder i Harwester zapisywane osobno lub jako "Harwester ; Forwarder", a miało być jedno połączone "Forwarder/Harwester" z wielkiej litery po ukośniku.
+
+---
+
+2026-09-17 15:45
+obszar: backend | baza danych
+
+pliki: common.cjs, common.cjs.bak_pre_category_case_20260917_1545, parsers/tyre_params.cjs, parsers/tyre_params.cjs.bak_pre_category_case_20260917_1545, application_rules.cjs, application_rules.cjs.bak_pre_category_case_20260917_1545, data.db, data.db.bak_pre_category_case_20260917_1545, CHANGELOG.md, CHANGELOG.md.bak_pre_category_case_20260917_1545
+
+zmiana: ujednolicono wielkość liter kategorii w 283 produktach oraz 14 ręcznych nadpisaniach: rolnicze→Rolnicze, przemysłowe→Przemysłowe, ciężarowe→Ciężarowe, leśne→Leśne. Dodano kanonizację na wyjściu parserów, poprawiono cztery miejsca w tyre_params.cjs zwracające małe litery oraz rozszerzono triggery bazy, aby normalizowały kategorię przy każdym INSERT/UPDATE produktów i ręcznych nadpisań.
+
+powód: zgłoszenie Anny — filtr katalogu pokazywał zdublowane kategorie zapisane małą i wielką literą, a kolejne importy mogły ponownie tworzyć warianty małymi literami.
+
+---
+
+2026-09-17 15:23
+obszar: backend | baza danych
+
+pliki: parsers/mo9_agrorami_api.cjs, parsers/mo9_agrorami_api.cjs.bak_pre_bkt_recategory_20260917_1523, data.db, data.db.bak_pre_bkt_recategory_20260917_1523, CHANGELOG.md, CHANGELOG.md.bak_pre_bkt_recategory_20260917_1523
+
+zmiana: usunięto ogólną regułę MO9 „inne → Rolnicze” i dodano klasyfikację awaryjną według rodzin bieżników BKT na Rolnicze, Przemysłowe lub Leśne. Jednorazowo przeklasyfikowano 58 historycznych produktów MO9 z kategorii „inne”: 28 na Rolnicze i 30 na Przemysłowe. Przeoczoną pozycję BKT LG 306 20X10.00-10 należącą do wykluczonej kategorii Magento 163 usunięto z Selly i Bridge.
+
+powód: prośba Anny — kategoria „inne” nie ma występować w katalogu; opony mają trafiać do właściwych kategorii zależnie od rodzaju, a małe opony do quadów i kosiarek nadal nie mogą być importowane.
+
+---
+
+2026-09-17 14:58
+obszar: backend | baza danych
+
+pliki: parsers/mo9_agrorami_api.cjs, parsers/mo9_agrorami_api.cjs.bak_pre_bkt_category_163_20260917_145511, data.db, data.db.bak_full_bkt_category_163_20260917_145511, CHANGELOG.md, CHANGELOG.md.bak_pre_bkt_category_163_20260917_145511
+
+zmiana: filtr importu MO9 odrzuca po stabilnym ID kategorii Magento 163 wszystkie pozycje Agrorami z kategorii „Opony do quadów i kosiarek”, zachowując tekstowy filtr quad jako fallback. Aktualne API: 1114 pozycji, 991 dopuszczonych, 123 odrzucone, 0 błędów. Jednorazowo usunięto z katalogu Bridge 83 istniejące odpowiedniki tej grupy; 40 z 123 pozycji źródłowych nie było zapisanych w katalogu. Usunięto także 76 odpowiadających mapowań selly_products po poprawnym usunięciu produktów w Selly. Nie usuwano pozostałych rekordów historycznej kategorii inne.
+
+powód: prośba Anny — opony BKT do quadów, kosiarek, gokartów i podobnych małych pojazdów nie mają być importowane z API ani publikowane w Selly.
+
+---
+
+2026-09-14 15:34
+obszar: backend | baza danych
+
+pliki: generate_selly_export.cjs, generate_selly_export.cjs.bak_pre_wstrzymane_zero_20260914_153400, selly/sync_delta.cjs, selly/sync_delta.cjs.bak_pre_wstrzymane_zero_20260914_153400, data.db, data.db.bak_pre_mapping_1164_20260914_153400, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_wstrzymane_zero_20260914_153400, CHANGELOG.md, CHANGELOG.md.bak_pre_wstrzymane_zero_20260914_153400
+
+zmiana: eksport CSV obejmuje produkty aktywne i wstrzymane; dla wstrzymanych zawsze zapisuje stan 0. Delta API obejmuje wstrzymane produkty posiadające już wariant Selly i wysyła dla nich stan 0, ale nie tworzy nowych produktów wstrzymanych. Odtworzono prawidłowe mapowania produktu 191462: MO5 do Selly 1164/wariantu 1164 i MO4 do Selly 1164/wariantu 2632. Główną cenę produktu Selly 1164 skorygowano z 3305 zł do 368 zł, a CSV wygenerowano ponownie.
+
+powod: wstrzymany produkt ze stanem dodatnim w Bridge mógł pozostawić nieaktualny dodatni stan w Selly, ponieważ nie trafiał ani do CSV, ani do delty API. Błędny historyczny mapping łączył produkt OZKA z ceną produktu CULTOR.
+
+---
+
+2026-09-14 14:00
+obszar: backend
+
+pliki: generate_selly_export.cjs, generate_selly_export.cjs.bak_pre_restore_rd_header_20260914_140000, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_restore_rd_header_20260914_140000, CHANGELOG.md, CHANGELOG.md.bak_pre_restore_rd_header_20260914_140000
+
+zmiana: przywrócono w eksporcie Selly nagłówek R/D zgodny z istniejącym mapowaniem integratora; wartości w kolumnie pozostają pełne: Radialna albo Diagonalna. Ponownie wygenerowano i opublikowano pełny CSV.
+
+powod: Selly nie aktualizowało cechy konstrukcji po zmianie nagłówka CSV z R/D na Konstrukcja 2026-09-01.
+
+---
+
+2026-09-14 13:18
+obszar: backend
+
+pliki: generate_selly_export.cjs, generate_selly_export.cjs.bak_fix_polish_l_20260914_131800, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_fix_polish_l_20260914_131800, CHANGELOG.md, CHANGELOG.md.bak_fix_polish_l_20260914_131800
+
+zmiana: poprawiono normalizację nazw kategorii o jawne mapowanie polskiej litery ł do l. Dzięki temu Przemysłowe jest prawidłowo eksportowane jako Opony przemysłowe. Ponownie wygenerowano i opublikowano pełny CSV Selly oraz zweryfikowano, że poza kolumną Kategoria nie zmieniła się żadna komórka.
+
+powod: kontrola pierwszego eksportu wykazała, że standardowa normalizacja Unicode nie rozkłada litery ł, przez co jedna z czterech kategorii zachowała starą nazwę.
+
+---
+
+2026-09-13 19:31
+obszar: backend | baza danych
+
+pliki: application_rules.cjs (nowy), parsers/tyre_params.cjs, parsers/tyre_params.cjs.bak_pre_zastosowania_20260913_192923, parsers/adapter.cjs, parsers/adapter.cjs.bak_pre_zastosowania_20260913_192923, extensions.cjs, extensions.cjs.bak_pre_zastosowania_20260913_192923, data.db, data.db.bak_full_zastosowania_20260913_192923, CHANGELOG.md, CHANGELOG.md.bak_pre_zastosowania_20260913_192923
+
+zmiana: dodano wspolne reguly zgodnosci kategorii i zastosowania, uzywane przez parser parametrow, adapter importu i triggery SQLite. Jednorazowy backfill poprawil 678 niezgodnych rekordow: Przemyslowe 373, Rolnicze 151, Lesne 106, Ciezarowe 48. Nieprawidlowe zastosowanie dla danej kategorii jest ustawiane na Uniwersalne/pozostale; wartosc Forwarder, harwester w kategorii Lesne jest normalizowana do Harwester ; Forwarder. Reguly i triggery sa odtwarzane przy starcie backendu.
+
+powod: audyt wykazal zastosowania z innych kategorii, m.in. Rolnicze z Harwester/Forwarder. Poprawka ma wyczyscic obecne dane i zapobiec ich ponownemu nadpisaniu przez import lub odtwarzanie zastosowan.
+
+---
+
+2026-09-14 13:00
+obszar: backend
+
+pliki: generate_selly_export.cjs, generate_selly_export.cjs.bak_pre_selly_category_names_20260914_130000, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_selly_category_names_20260914_130000, CHANGELOG.md, CHANGELOG.md.bak_pre_selly_category_names_20260914_130000
+
+zmiana: generator eksportu Selly mapuje wewnetrzne kategorie Bridge na nazwy aktywnych kategorii sklepu: Rolnicze i Rolnicze male -> Opony rolnicze, Lesne -> Opony lesne, Przemyslowe -> Opony przemyslowe, Ciezarowe -> Opony ciezarowe. Wygenerowano i opublikowano nowy plik CSV.
+
+powod: automatyczny integrator CSV Selly o 12:00 ponownie przypisywal produkty do starych, ukrytych kategorii 7-10 podczas recznej migracji.
+
+---
+
+2026-09-11 13:33
+obszar: baza danych
+
+pliki: data.db, data.db.bak_pre_category_test_20260911_133323, selly_category_test_before_20260911_133323.json, CHANGELOG.md, CHANGELOG.md.bak_pre_category_test_20260911_133323
+
+zmiana: wykonano kontrolowany test mapowania kategorii Selly na czterech istniejacych produktach, po jednym z kazdej kategorii: product_id 528 (7->1), 3430 (8->2), 961 (9->3), 1577 (10->4). Po kazdym PUT zweryfikowano category_id przez API. Lokalny cache selly_products zaktualizowano do nowych ID dla wszystkich mapowan wariantow tych produktow. Nie utworzono ani nie usunieto produktow.
+
+powod: potwierdzenie, ze poprawione mapowanie Bridge kieruje produkty do nowych, widocznych kategorii Selly 1-4 zamiast starych, ukrytych 7-10.
+
+---
+
 2026-09-11 10:10
 obszar: backend | baza danych
 
@@ -592,3 +779,13 @@ z nazwą, aby dało się powiązać z wpisem.
     4) Klasyfikator opon Zc() — rozszerzone rozpoznawanie formatów rozmiarów (skid-steer z częścią dziesiętną, VF, wartości całkowite/ułamkowe, modele TR-, sygnały PR TL/TT); rekordy bez danych rozpoznawczych nadal odrzucane.
     5) Czyszczenie słownika — schemat/dane: z tabeli słownikowej atrybuty_wartosci usunięto 1755 z 6899 wartości nieużywanych przez żaden produkt (po pełnym przeliczeniu użycia). Bez zmiany struktury tabel (brak ALTER TABLE) — operacja tylko na danych (DELETE nieużywanych wierszy). Dane produktów nie migrowane; puste 'sezon'/'wentyl' wynikają z pustych kolumn produktów. Kopia bazy przed operacją: data.db.bak_pre_atrybutycleanup_20260805095548.
 - powód: zamknięcie publicznego dostępu do API katalogu (bezpieczeństwo), usunięcie konfliktu duplikujących się tras maskujących moduł Atrybuty, ograniczenie błędnych wycofań przy niepełnym imporcie, poprawność klasyfikacji rozmiarów opon oraz uporządkowanie słownika atrybutów.
+2026-09-14 15:34
+obszar: backend | baza danych
+
+pliki: generate_selly_export.cjs, generate_selly_export.cjs.bak_pre_wstrzymane_zero_20260914_153400, selly/sync_delta.cjs, selly/sync_delta.cjs.bak_pre_wstrzymane_zero_20260914_153400, data.db, data.db.bak_pre_mapping_1164_20260914_153400, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv, /home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_wstrzymane_zero_20260914_153400, CHANGELOG.md, CHANGELOG.md.bak_pre_wstrzymane_zero_20260914_153400
+
+zmiana: produkty o statusie wstrzymany sa nadal eksportowane do CSV, ale ze stanem 0. Tor 1 uwzglednia wstrzymane pozycje majace istniejace mapowanie Selly i zeruje ich warianty bez tworzenia nowych produktow. Odtworzono mapowania kodu_importu 191462: MO5 -> produkt 1164/wariant 1164 oraz MO4 -> produkt 1164/wariant 2632.
+
+powod: pominiecie wstrzymanych produktow pozostawialo w Selly ostatni dodatni stan. Produkt OZKA Selly 1164 mial ponadto brakujace mapowanie i glowna cene 3305 zl omylkowo zapisana 2026-09-07 ze starego mapowania produktu CULTOR.
+
+---

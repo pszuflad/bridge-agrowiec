@@ -1,0 +1,1003 @@
+{
+  "apply": true,
+  "removeFiles": 195,
+  "removeBytes": 6381918890,
+  "temporary": [
+    "/tmp/bridge-staging-v2-test",
+    "/tmp/bridge-withdrawals-test",
+    "/tmp/bridge-availability-test"
+  ],
+  "tempBytes": 669085696,
+  "keptDatabase": [
+    "data.db.bak_20260922T160912Z_availability",
+    "data.db.bak_20260922T161344Z_old_agrorami_delete"
+  ],
+  "keepCodeFiles": 119,
+  "remove": [
+    {
+      "path": "/home/admin/private_apps/bridge/data.db-shm.bak_pre_atrybutycleanup_20260805095548",
+      "bytes": 32768,
+      "mtime": 1785923750201.1304
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db-wal.bak_pre_atrybutycleanup_20260805095548",
+      "bytes": 7354232,
+      "mtime": 1785923750199.1304
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak-selly-migration-2026-09-07",
+      "bytes": 219283456,
+      "mtime": 1788801644863.4575
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak-selly-migration-2026-09-07-shm",
+      "bytes": 32768,
+      "mtime": 1789453472948.6072
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak-selly-migration-2026-09-07-wal",
+      "bytes": 0,
+      "mtime": 1789453281598.0737
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_20260918_1500_width_norm",
+      "bytes": 219283456,
+      "mtime": 1789736243948.401
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_20260922T110248Z_staging_v2",
+      "bytes": 219283456,
+      "mtime": 1790074969405.6523
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_20260922T153004Z_withdrawals",
+      "bytes": 219283456,
+      "mtime": 1790091006451.6816
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b10_20260831_1435",
+      "bytes": 219283456,
+      "mtime": 1788179756776
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b10_20260831_1435-shm",
+      "bytes": 32768,
+      "mtime": 1789453472637.5999
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b10_20260831_1435-wal",
+      "bytes": 0,
+      "mtime": 1789453289051.2505
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b1_marta_20260826_1512",
+      "bytes": 219283456,
+      "mtime": 1787749941145.4124
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b1_marta_20260826_1512-shm",
+      "bytes": 32768,
+      "mtime": 1789453471996.5845
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b1_marta_20260826_1512-wal",
+      "bytes": 0,
+      "mtime": 1789453290631.2878
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b4_20260831_1410",
+      "bytes": 219283456,
+      "mtime": 1788178224745.7493
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b4_20260831_1410-shm",
+      "bytes": 32768,
+      "mtime": 1789453472200.5894
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_b4_20260831_1410-wal",
+      "bytes": 0,
+      "mtime": 1789453289844.2693
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_bugs_20260901_0958",
+      "bytes": 219283456,
+      "mtime": 1788249491343.1582
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_bugs_20260901_0958-shm",
+      "bytes": 32768,
+      "mtime": 1789453472673.6006
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_bugs_20260901_0958-wal",
+      "bytes": 0,
+      "mtime": 1789453288301.2327
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_caps_20260901_1220",
+      "bytes": 219283456,
+      "mtime": 1788257912608.886
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_caps_20260901_1220-shm",
+      "bytes": 32768,
+      "mtime": 1789453472745.6023
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_caps_20260901_1220-wal",
+      "bytes": 0,
+      "mtime": 1789453286533.1907
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_fix100577_20260825_1530",
+      "bytes": 219283456,
+      "mtime": 1787664612337.7705
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_fix100577_20260825_1530-shm",
+      "bytes": 32768,
+      "mtime": 1789453471264.5671
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_fix100577_20260825_1530-wal",
+      "bytes": 0,
+      "mtime": 1789453293038.345
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_fix105056_20260825_1554",
+      "bytes": 219283456,
+      "mtime": 1787666100200.7507
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_fix105056_20260825_1554-shm",
+      "bytes": 32768,
+      "mtime": 1789453471430.5713
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_fix105056_20260825_1554-wal",
+      "bytes": 0,
+      "mtime": 1789453292203.3252
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_full_bkt_category_163_20260917_145511",
+      "bytes": 52273152,
+      "mtime": 1789649713785.3948
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_full_zastosowania_20260913_192923",
+      "bytes": 46178304,
+      "mtime": 1789320563182.8655
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_indekssrkrt_20260904_0900",
+      "bytes": 219283456,
+      "mtime": 1788505297119.7563
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_indekssrkrt_20260904_0900-shm",
+      "bytes": 32768,
+      "mtime": 1789453472779.603
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_indekssrkrt_20260904_0900-wal",
+      "bytes": 0,
+      "mtime": 1789453285494.1663
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_konstr_20260901_1122",
+      "bytes": 219283456,
+      "mtime": 1788254602914.341
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_konstr_20260901_1122-shm",
+      "bytes": 32768,
+      "mtime": 1789453472711.6016
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_konstr_20260901_1122-wal",
+      "bytes": 0,
+      "mtime": 1789453287432.2122
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_mo9expand_20260904_0930",
+      "bytes": 219283456,
+      "mtime": 1788507092676.989
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_mo9expand_20260904_0930-shm",
+      "bytes": 32768,
+      "mtime": 1789453472822.6042
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_mo9expand_20260904_0930-wal",
+      "bytes": 0,
+      "mtime": 1789453284396.1401
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_p2_4_20260825_1602",
+      "bytes": 219283456,
+      "mtime": 1787666535245.9753
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_p2_4_20260825_1602-shm",
+      "bytes": 32768,
+      "mtime": 1789453471737.5784
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_p2_4_20260825_1602-wal",
+      "bytes": 0,
+      "mtime": 1789453291441.3071
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_atrybutycleanup_20260805095548",
+      "bytes": 219283456,
+      "mtime": 1785923750187.1301
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_atrybutycleanup_20260805095548-shm",
+      "bytes": 32768,
+      "mtime": 1789453470967.5603
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_atrybutycleanup_20260805095548-wal",
+      "bytes": 0,
+      "mtime": 1785924047799.1558
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_bkt_recategory_20260917_1523",
+      "bytes": 219283456,
+      "mtime": 1789651448558.4453
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_category_case_20260917_1545",
+      "bytes": 219283456,
+      "mtime": 1789652794745.486
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_category_test_20260911_133323",
+      "bytes": 219283456,
+      "mtime": 1789126403738.6313
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_category_test_20260911_133323-shm",
+      "bytes": 32768,
+      "mtime": 1789453473116.611
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_category_test_20260911_133323-wal",
+      "bytes": 0,
+      "mtime": 1789453278669.0044
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_flagsfix_20260825_1315",
+      "bytes": 219283456,
+      "mtime": 1787656365658.4387
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_flagsfix_20260825_1315-shm",
+      "bytes": 32768,
+      "mtime": 1789453471166.565
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_flagsfix_20260825_1315-wal",
+      "bytes": 0,
+      "mtime": 1789453293875.3647
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_forwarder_harwester_20260917_1608",
+      "bytes": 219283456,
+      "mtime": 1789654328794.9778
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_mapping_1164_20260914_153400",
+      "bytes": 219283456,
+      "mtime": 1789392954398.4714
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_mapping_1164_20260914_153400-shm",
+      "bytes": 32768,
+      "mtime": 1789453473213.6135
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_mapping_1164_20260914_153400-wal",
+      "bytes": 0,
+      "mtime": 1789453277258.971
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_payment_blocks_20260910_145354",
+      "bytes": 219283456,
+      "mtime": 1789044881784.599
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_payment_blocks_20260910_145354-shm",
+      "bytes": 32768,
+      "mtime": 1789453473004.6084
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_payment_blocks_20260910_145354-wal",
+      "bytes": 0,
+      "mtime": 1789453280671.052
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_selly_mapping_categories_20260911_080630",
+      "bytes": 219283456,
+      "mtime": 1789113992851.2485
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_selly_mapping_categories_20260911_080630-shm",
+      "bytes": 32768,
+      "mtime": 1789453473065.6099
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_selly_mapping_categories_20260911_080630-wal",
+      "bytes": 0,
+      "mtime": 1789453279675.0283
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_selly_search_20260917_1840",
+      "bytes": 219283456,
+      "mtime": 1789663258010.3848
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_szerorig_20260819_145623",
+      "bytes": 34213888,
+      "mtime": 1787144195092.353
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_szertxt_20260819_154550",
+      "bytes": 34230272,
+      "mtime": 1787147150381.6694
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_pre_uwagacena_20260824_121500",
+      "bytes": 35192832,
+      "mtime": 1787566452483.5186
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_selly_filters_20260917_1645",
+      "bytes": 219283456,
+      "mtime": 1789656100754.9438
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_selly_kod_20260907_173011",
+      "bytes": 219283456,
+      "mtime": 1788795012165.413
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_selly_kod_20260907_173011-shm",
+      "bytes": 32768,
+      "mtime": 1789453472905.6062
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_selly_kod_20260907_173011-wal",
+      "bytes": 0,
+      "mtime": 1789453282470.0945
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_tltt_20260904_1339",
+      "bytes": 219283456,
+      "mtime": 1788521973633.5671
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_tltt_20260904_1339-shm",
+      "bytes": 32768,
+      "mtime": 1789453472861.605
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/data.db.bak_tltt_20260904_1339-wal",
+      "bytes": 0,
+      "mtime": 1789453283409.1167
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_20260922T110248Z_staging_v2",
+      "bytes": 70225,
+      "mtime": 1790075021546.8809
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_20260918_entry_1539",
+      "bytes": 68539,
+      "mtime": 1789738733125.3535
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_20260918_1500_width_norm",
+      "bytes": 68539,
+      "mtime": 1789663374324.15
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_selly_search_20260917_1840",
+      "bytes": 67832,
+      "mtime": 1789663255021.3137
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_scopefix_selly_filters_20260917_1720",
+      "bytes": 68110,
+      "mtime": 1789657734889.7244
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_selly_filters_20260917_1707",
+      "bytes": 66312,
+      "mtime": 1789654413461.9905
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_forwarder_harwester_20260917_1608",
+      "bytes": 64989,
+      "mtime": 1789654328151.9624
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_category_case_20260917_1545",
+      "bytes": 63974,
+      "mtime": 1789652794388.4775
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_bkt_recategory_20260917_1523",
+      "bytes": 63068,
+      "mtime": 1789651429458.9902
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_bkt_category_163_20260917_145511",
+      "bytes": 62041,
+      "mtime": 1789649928919.5098
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_wstrzymane_zero_20260914_153400",
+      "bytes": 59566,
+      "mtime": 1789386947541.8064
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_restore_rd_header_20260914_140000",
+      "bytes": 58778,
+      "mtime": 1789384410679.743
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_restore_rd_header_20260914_135700",
+      "bytes": 58778,
+      "mtime": 1789384410679.743
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_fix_polish_l_20260914_131800",
+      "bytes": 57860,
+      "mtime": 1789383622201.0986
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_selly_category_names_20260914_131500",
+      "bytes": 56968,
+      "mtime": 1789320633038.5144
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_zastosowania_20260913_192923",
+      "bytes": 55836,
+      "mtime": 1789320563025.8616
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_category_test_20260911_133323",
+      "bytes": 55080,
+      "mtime": 1789126518925.39
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_category_fix_20260911_101000",
+      "bytes": 53879,
+      "mtime": 1789045954654.8086
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_publish_20260910_151234",
+      "bytes": 53308,
+      "mtime": 1789045350831.6191
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_routefix_20260910_150140",
+      "bytes": 52289,
+      "mtime": 1789044909144.242
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_payment_blocks_20260910_145354",
+      "bytes": 50252,
+      "mtime": 1788961627974.0127
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_konstrukcja_full_20260909154703",
+      "bytes": 49459,
+      "mtime": 1788961624834.9387
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak-2026-09-08-1250",
+      "bytes": 44004,
+      "mtime": 1788864546557.295
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak-2026-09-07-2035",
+      "bytes": 42975,
+      "mtime": 1788806072501.5798
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak-2026-09-07-selly-refactor",
+      "bytes": 40686,
+      "mtime": 1788804252843.5967
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_tltt_20260904_1341",
+      "bytes": 39952,
+      "mtime": 1788522098574.5015
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_konstr_20260901_1135",
+      "bytes": 33898,
+      "mtime": 1788255096989.9858
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_katunify_20260901_1035",
+      "bytes": 32021,
+      "mtime": 1788251469085.6282
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_b1_20260826_1514",
+      "bytes": 23470,
+      "mtime": 1787750085052.8015
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_pre_flagsfix_20260825_1315",
+      "bytes": 16859,
+      "mtime": 1787656874324.39
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/CHANGELOG.md.bak_scope_20260823",
+      "bytes": 14614,
+      "mtime": 1787499226026.5166
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/common.cjs.bak_katunify_20260901_1030",
+      "bytes": 27534,
+      "mtime": 1788251327716.3062
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/common.cjs.bak_pre_uwagacena_20260824_121500",
+      "bytes": 26209,
+      "mtime": 1787566438311.1865
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/common.cjs.bak_pre_kategoriafix_20260818114801",
+      "bytes": 24658,
+      "mtime": 1787046483260.8586
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/extensions.cjs.bak-selly-sync-2026-09-07",
+      "bytes": 38818,
+      "mtime": 1788800163322.8237
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/extensions.cjs.bak_pre_uwagacena_20260824_121500",
+      "bytes": 38268,
+      "mtime": 1787567104203.8035
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/extensions.cjs.bak_archiwum_20260821",
+      "bytes": 34916,
+      "mtime": 1787301928320.587
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/generate_selly_export.cjs.bak_pre_restore_rd_header_20260914_135700",
+      "bytes": 5322,
+      "mtime": 1789384408563.6929
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/generate_selly_export.cjs.bak_fix_polish_l_20260914_131800",
+      "bytes": 5297,
+      "mtime": 1789383619647.038
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/generate_selly_export.cjs.bak_pre_selly_category_names_20260914_131500",
+      "bytes": 4687,
+      "mtime": 1789044906323.1755
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/generate_selly_export.cjs.bak_pre_payment_blocks_20260910_145354",
+      "bytes": 4446,
+      "mtime": 1788254960240.763
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/generate_selly_export.cjs.bak_konstr_20260901_1122",
+      "bytes": 4317,
+      "mtime": 1788254582132.8513
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/generate_selly_export.cjs.bak_pre_pricefmt_20260731",
+      "bytes": 4142,
+      "mtime": 1785504240637.423
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/generate_selly_export.cjs.bak_pre_filter_wstrzymany_20260731_072702",
+      "bytes": 4117,
+      "mtime": 1785482824398.86
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/index.cjs.bak_p3_20260831_1458",
+      "bytes": 1483767,
+      "mtime": 1788181085635.4517
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/index.cjs.bak_pre_uwagacena_20260824_121500",
+      "bytes": 1483767,
+      "mtime": 1787566438315.1868
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/index.cjs.bak_arch_core_20260821",
+      "bytes": 1483559,
+      "mtime": 1787309874395.8254
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/index.cjs.bak_pre_atrybutyfix_20260805093822",
+      "bytes": 1484421,
+      "mtime": 1785922703854.497
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/index.cjs.bak_post_masowaakceptacja_20260804143100",
+      "bytes": 1485304,
+      "mtime": 1785853864526.4177
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/adapter.cjs.bak_pre_zastosowania_20260913_192923",
+      "bytes": 32659,
+      "mtime": 1789320563021.8616
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/adapter.cjs.bak_pre_payment_blocks_20260910_145354",
+      "bytes": 32359,
+      "mtime": 1788254957771.7048
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/adapter.cjs.bak_konstr_20260901_1122",
+      "bytes": 32091,
+      "mtime": 1788254582125.851
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/adapter.cjs.bak_bug2_20260901_1005",
+      "bytes": 31784,
+      "mtime": 1788249895926.6628
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/adapter.cjs.bak_pre_flagsfix_20260825_1315",
+      "bytes": 31294,
+      "mtime": 1787656348391.0332
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/adapter.cjs.bak_pre_uwagacena_20260824_121500",
+      "bytes": 30988,
+      "mtime": 1787566438309.1865
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/adapter.cjs.bak_pre_kategoriafix_20260818114801",
+      "bytes": 30987,
+      "mtime": 1787046497968.205
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/mo8_trelleborg.cjs.bak_2026-07-01_pre_xlsx",
+      "bytes": 3591,
+      "mtime": 1782915694091.0105
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs.bak_pre_bkt_category_163_20260917_145511",
+      "bytes": 36656,
+      "mtime": 1789649712849.3723
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs.bak_mo9expand_v2_20260904_074708",
+      "bytes": 36651,
+      "mtime": 1788507124862.7463
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs.bak_mo9expand_20260904_0930",
+      "bytes": 34809,
+      "mtime": 1788507092697.9895
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs.bak_katunify_20260901_1030",
+      "bytes": 34828,
+      "mtime": 1788250799051.8826
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs.bak_bug1_20260901_1025",
+      "bytes": 34529,
+      "mtime": 1788250252725.045
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/mo9_agrorami_api.cjs.bak_pre_anom_20260721_153631",
+      "bytes": 32272,
+      "mtime": 1784640991774.052
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_odswinch_20260904_1403",
+      "bytes": 89730,
+      "mtime": 1788523403173.116
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_konstr_20260901_1122",
+      "bytes": 89730,
+      "mtime": 1788254582123.851
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_katunify_20260901_1030",
+      "bytes": 88926,
+      "mtime": 1788251327721.3062
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_bug2_20260901_1005",
+      "bytes": 88568,
+      "mtime": 1788249895924.6628
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_b10_20260831_1435",
+      "bytes": 87538,
+      "mtime": 1788179756153.9854
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_b4_20260831_1410",
+      "bytes": 85628,
+      "mtime": 1788178222246.6902
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_p2_4_20260825_1601",
+      "bytes": 84406,
+      "mtime": 1787656568581.2058
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_pre_flagsfix_20260825_1315",
+      "bytes": 83518,
+      "mtime": 1787656348390.033
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/parsers/tyre_params.cjs.bak_pre_szertxt_20260819_154550",
+      "bytes": 82596,
+      "mtime": 1787147150296.6675
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/public/assets/index-CX3xlcrC.js.bak_pre_freq_edit_20260709_110000",
+      "bytes": 540250,
+      "mtime": 1783587839329.3381
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/public/assets/index-CX3xlcrC.js.bak_search_1781168681",
+      "bytes": 539999,
+      "mtime": 1781168681099.1765
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/public/assets/pending-injection.js.bak_v4_1783016227",
+      "bytes": 38587,
+      "mtime": 1783016228511.1965
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/public/assets/pending-injection.js.bak_v4_1783016218",
+      "bytes": 38587,
+      "mtime": 1783016219893.9978
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/public/assets/pending-injection.js.bak_v3_1783013129",
+      "bytes": 16940,
+      "mtime": 1783013130862.6248
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/selly/sync_full.cjs.bak-2026-09-08-1555",
+      "bytes": 11311,
+      "mtime": 1788875648144.4119
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/selly/sync_full.cjs.bak-2026-09-08-1520",
+      "bytes": 12047,
+      "mtime": 1788873521332.3083
+    },
+    {
+      "path": "/home/admin/private_apps/bridge/selly/sync_full.cjs.bak-2026-09-08-1509",
+      "bytes": 8659,
+      "mtime": 1788872942143.6558
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/assets/index-BRIDGEONE21783342500.js.bak_konstr_20260901_1122",
+      "bytes": 602633,
+      "mtime": 1788254582128.8513
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/assets/index-PRICEFMT1783512500.js.bak_ackalerts_20260904_1440",
+      "bytes": 602681,
+      "mtime": 1788525752856.206
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/assets/index-PRICEFMT1783512500.js.bak_tr_fix_20260904_1418",
+      "bytes": 602687,
+      "mtime": 1788524406293.6233
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_restore_rd_header_20260914_140000",
+      "bytes": 3156403,
+      "mtime": 1789384426262.1113
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_restore_rd_header_20260914_135700",
+      "bytes": 3156403,
+      "mtime": 1789384426262.1113
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_fix_polish_l_20260914_131800",
+      "bytes": 3149569,
+      "mtime": 1789384348272.2673
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_selly_category_names_20260914_131500",
+      "bytes": 3115026,
+      "mtime": 1789358406186.969
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_publish_20260910_151234",
+      "bytes": 3109223,
+      "mtime": 1789044948437.165
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.bak_pre_payment_blocks_20260910_145354",
+      "bytes": 2536338,
+      "mtime": 1789012806171.9165
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_payment_blocks_20260910_145354",
+      "bytes": 7458,
+      "mtime": 1787567235674.8877
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_holdreason_20260824_121500",
+      "bytes": 7387,
+      "mtime": 1787567216544.439
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_archiwum_20260821",
+      "bytes": 7323,
+      "mtime": 1787301928321.587
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_pricefmt_20260731",
+      "bytes": 7325,
+      "mtime": 1785504153980.3625
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_bridgeone2_20260731_1355",
+      "bytes": 7324,
+      "mtime": 1785498954763.6145
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_title_20260731_1350",
+      "bytes": 7332,
+      "mtime": 1785498593627.9854
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_bridgeone_20260731_1301",
+      "bytes": 7331,
+      "mtime": 1785495709025.9436
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_autofill_20260731_1240",
+      "bytes": 7331,
+      "mtime": 1785494427185.2307
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_rememberme_v2_20260731_0935",
+      "bytes": 7333,
+      "mtime": 1785483334040.9587
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_rememberme_20260731_0925",
+      "bytes": 7333,
+      "mtime": 1785482847300.4026
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_kodimportu_col_20260717104741",
+      "bytes": 7328,
+      "mtime": 1784285262763.131
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_freq_inject_20260709_110700",
+      "bytes": 5944,
+      "mtime": 1783588027389.6863
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_before_selly_restore_20260709_075939",
+      "bytes": 5818,
+      "mtime": 1783583980460.1636
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_orig_20260707",
+      "bytes": 2695,
+      "mtime": 1783420192415.5466
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_20260707",
+      "bytes": 2695,
+      "mtime": 1783419685980.7175
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_shiph_20260707_090610",
+      "bytes": 2698,
+      "mtime": 1783415173517.3457
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_widthfix_20260706_134807",
+      "bytes": 2697,
+      "mtime": 1783345687889.4473
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_boolexp_20260706_133751",
+      "bytes": 2697,
+      "mtime": 1783345072115.052
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_dostcol_20260706_130544",
+      "bytes": 2698,
+      "mtime": 1783343144659.8606
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_promocol_1783080243",
+      "bytes": 2698,
+      "mtime": 1783080243251.474
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pre_selly_20260703_125206",
+      "bytes": 2634,
+      "mtime": 1783075926369.6653
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_bieznik_1783070762",
+      "bytes": 2634,
+      "mtime": 1783070762494.356
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_input_1783069921",
+      "bytes": 2634,
+      "mtime": 1783069921290.7375
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_rulesync_1783069347",
+      "bytes": 2631,
+      "mtime": 1783069347540.386
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_rules_1783068479",
+      "bytes": 2631,
+      "mtime": 1783068481716.2668
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_route_1783064037",
+      "bytes": 2630,
+      "mtime": 1783064040319.935
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_attr_1783061491",
+      "bytes": 2629,
+      "mtime": 1783061498162.9194
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_pending_inject_1783009955",
+      "bytes": 2563,
+      "mtime": 1783009955006.7502
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_whl_1782916352",
+      "bytes": 2564,
+      "mtime": 1782916359759.3088
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_scv2_1782911674",
+      "bytes": 2565,
+      "mtime": 1782911680850.4497
+    },
+    {
+      "path": "/home/admin/domains/agritires.eu/public_html/panel/index.html.bak_scols_1782910181",
+      "bytes": 2563,
+      "mtime": 1782910188321.816
+    }
+  ],
+  "removedFiles": 195,
+  "removedFileBytes": 6381918890,
+  "removedTemporaryBytes": 669085696,
+  "removedTemporary": [
+    "/tmp/bridge-staging-v2-test",
+    "/tmp/bridge-withdrawals-test",
+    "/tmp/bridge-availability-test"
+  ],
+  "freshBackup": "/home/admin/private_apps/bridge/data.db.bak_20260923T061445Z_before_backup_cleanup",
+  "finished": "2026-09-23T06:14:46.672Z"
+}

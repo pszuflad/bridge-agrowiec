@@ -1,3 +1,12 @@
+2026-09-23 08:14
+obszar: backend | baza danych
+
+pliki: stare kopie .bak Bridge i panelu; trzy katalogi testowe /tmp; pełna lista: backup_cleanup_20260923T061445Z.json; nowa kopia: data.db.bak_20260923T061445Z_before_backup_cleanup; kopia logu: CHANGELOG.md.bak_20260923T061445Z_backup_cleanup
+
+zmiana: porządkowanie 195 starych kopii i 3 zakończonych kopii testowych. Zachowano świeżą, sprawdzoną kopię bazy oraz zabezpieczenia availability i old_agrorami_delete z 22.09; pozostawiono do 3 kopii każdego pliku kodu. Nie zmieniano działających danych ani konfiguracji aplikacji.
+
+powód: prośba użytkowniczki o usunięcie starych i niepotrzebnych backupów wobec braku miejsca na hostingu.
+
 2026-09-22 18:13
 obszar: baza danych
 
