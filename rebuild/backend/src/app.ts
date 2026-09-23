@@ -27,12 +27,15 @@ import { trasyOverrides } from "./routes/overrides.js";
 import { trasyNarzutow } from "./routes/markups.js";
 import { trasyPromocji } from "./routes/promotions.js";
 import { trasySelly } from "./routes/selly.js";
+import { trasySellySync } from "./routes/selly-sync.js";
 import { trasyEksportuShoper } from "./routes/export-shoper.js";
 import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
 import { opakujKlientaTrybem } from "./selly/tryb.js";
+import { stworzDiscovery, type Discovery } from "./selly/rest/discovery.js";
+import { budujPayloadProduktuV2 } from "./selly/rest/mapper-v2.js";
 
 export type ZaleznosciApp = {
   env: Env;
@@ -70,6 +73,13 @@ export type ZaleznosciApp = {
    * dotknąć nawet przez pomyłkę.
    */
   klientSelly?: KlientSelly;
+  /**
+   * JEDNA instancja `discovery` na proces (karta I15.8) — tę samą dostają trasy `sync-*`
+   * i harmonogram. Stan (nauczone `feature_id`, cache kodów produktów Selly) żyje w jej
+   * domknięciu, więc druga instancja miałaby własny, zimny cache.
+   * Pominięta (testy, dev) ⇒ `stworzApp` buduje własną na tym samym kliencie, co panel.
+   */
+  discoverySelly?: Discovery;
 };
 
 /**
@@ -83,6 +93,7 @@ export function stworzApp({
   synchronizuj,
   przeplanujScheduler,
   klientSelly,
+  discoverySelly,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -180,31 +191,50 @@ export function stworzApp({
   app.use(trasyAdmina({ db, przeplanujScheduler }));
   app.use(trasyUtrzymania({ db, dbPath: env.DB_PATH, sqlite }));
   app.use(trasySpedycji({ db }));
+  /*
+   * ⚠ Blokada trybu obejmuje TYLKO klienta budowanego z env (ticket 34, D3).
+   * Klient wstrzyknięty z zewnątrz (`klientSelly`) idzie nietknięty — to atrapa testowa
+   * (`test/gate/selly-atrapa.ts`), a test sam decyduje, co sprawdza; opakowanie jej
+   * domyślnym `wylaczony` wywróciłoby GATE 8a/8b, który z blokadą nie ma nic wspólnego.
+   */
+  const klientSellyDoUzycia =
+    klientSelly ??
+    opakujKlientaTrybem(
+      stworzKlientaSelly({
+        shopUrl: env.SELLY_SHOP_URL,
+        clientId: env.SELLY_CLIENT_ID,
+        clientSecret: env.SELLY_CLIENT_SECRET,
+        scope: env.SELLY_SCOPE,
+      }),
+      env.SELLY_TRYB,
+    );
+
   app.use(
     trasySelly({
       db,
-      /*
-       * ⚠ Blokada trybu obejmuje TYLKO klienta budowanego z env (ticket 34, D3).
-       * Klient wstrzyknięty z zewnątrz (`klientSelly`) idzie nietknięty — to atrapa testowa
-       * (`test/gate/selly-atrapa.ts`), a test sam decyduje, co sprawdza; opakowanie jej
-       * domyślnym `wylaczony` wywróciłoby GATE 8a/8b, który z blokadą nie ma nic wspólnego.
-       */
-      klient:
-        klientSelly ??
-        opakujKlientaTrybem(
-          stworzKlientaSelly({
-            shopUrl: env.SELLY_SHOP_URL,
-            clientId: env.SELLY_CLIENT_ID,
-            clientSecret: env.SELLY_CLIENT_SECRET,
-            scope: env.SELLY_SCOPE,
-          }),
-          env.SELLY_TRYB,
-        ),
+      klient: klientSellyDoUzycia,
       sciezkiCsv: {
         katalog: env.SELLY_CSV_DIR,
         plik: env.SELLY_CSV_PLIK,
         url: env.SELLY_CSV_URL,
       },
+    }),
+  );
+
+  /*
+   * Trasy `sync-*` (karta I15.8) — Tor 1 i Tor 2 na żądanie. Discovery jest JEDNA na proces
+   * i współdzielona z harmonogramem: `server.ts` tworzy ją i podaje jako `discoverySelly`.
+   * Pominięta (testy, dev) ⇒ budujemy ją tutaj na tym samym kliencie, co panel wyżej.
+   */
+  app.use(
+    trasySellySync({
+      db,
+      discovery:
+        discoverySelly ??
+        stworzDiscovery({
+          klient: klientSellyDoUzycia,
+          budujPayloadProduktu: budujPayloadProduktuV2,
+        }),
     }),
   );
   app.use(trasyEksportuShoper({ db }));

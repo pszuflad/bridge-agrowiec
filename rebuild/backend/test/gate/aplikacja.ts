@@ -3,6 +3,7 @@ import type { Express } from "express";
 import { wczytajEnv, type Env } from "../../src/config/env.js";
 import { stworzApp } from "../../src/app.js";
 import type { KlientSelly } from "../../src/selly/klient.js";
+import type { Discovery } from "../../src/selly/rest/discovery.js";
 import {
   stworzTestowaBaze,
   zasiejUzytkownika,
@@ -36,6 +37,12 @@ export type OpcjeSrodowiska = {
    * z `dry_run=false` tworzy i modyfikuje produkty w cudzym, produkcyjnym sklepie.
    */
   klientSelly?: KlientSelly;
+  /**
+   * Instancja `discovery` dzielona przez trasy `sync-*` (karta I15.8). Bez niej `stworzApp`
+   * zbuduje własną na `klientSelly` — dla testów kształtu tras to wystarcza. Podaje się ją
+   * wtedy, gdy test chce POLICZYĆ wywołania Selly (`stworzDiscoveryTestowe`).
+   */
+  discoverySelly?: Discovery;
 };
 
 /**
@@ -65,6 +72,12 @@ export async function stworzSrodowiskoTestowe(
     // SELLY_SHOP_URL/CLIENT_ID/CLIENT_SECRET celowo PUSTE — środowisko testowe nie ma
     // i nie może mieć sekretów do cudzego sklepu.
   } as NodeJS.ProcessEnv);
-  const app = stworzApp({ env, db: baza.db, sqlite: baza.sqlite, klientSelly: opcje.klientSelly });
+  const app = stworzApp({
+    env,
+    db: baza.db,
+    sqlite: baza.sqlite,
+    klientSelly: opcje.klientSelly,
+    discoverySelly: opcje.discoverySelly,
+  });
   return { ...baza, app, env, uzytkownik, dane, katalogArchiwum, katalogCsvSelly };
 }

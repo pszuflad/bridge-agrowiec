@@ -3236,7 +3236,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | B4 #53, B10 #54, mo9expand #55, katunify(parser) #57, konstr(parser) #58, WULSTBAND #10, NRO/CHO #9, MO8-CSV #8, **p2_4 #63**, **odswinch #64** | **13a** | parsery — kopia `src/import/legacy/**` + charakteryzacja |
 | P3 #56, CAPS/Xq #59 (część silnikowa) | **13b** | silnik `tk()`/`acceptStaging` — reimpl TS |
 | katunify(migracja) #57, konstr(migracja) #58, CAPS(nazwa) #59 | **13c ✅ zrobione** (`44-CHORE-i13c-migracje-konwencji`, 2026-09-09) | migracje danych + przenagranie fixtures |
-| Selly REST #60 | **13d** | ⛔ ODŁOŻONE — 13d-1 sportowane i **COFNIĘTE** (revert #58); Tor 2 dociera u Ani (zegar zresetowany) |
+| Selly REST #60 | **I15.6–I15.8** | ✅ ZROBIONE — discovery + Tor 1 (t. 108), Tor 2 (t. 109), harmonogram + trasy `sync-*` (t. 121) |
 | Bridge ONE + drobne #61 | **13e ✅ zrobione** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09) | frontend — realny kod tylko `szer_marka` |
 | regresja `konstrukcja` w żywym bundlu #71 | **13e** (wykryte, bez kodu) | frontend PRODUKCJI — ❌ nie odtwarzamy (D4) |
 | backfille #62 | **13f** | DECYZJA (najpierw) |
@@ -3319,7 +3319,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
 | **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
 | **Iteracja** | **→ I15** (dawne 13d), podzielone na **I15.6** (schemat + discovery + Tor 1), **I15.7** (Tor 2), **I15.8** (harmonogram + trasy `sync-*`). |
-| **Status** | 🔨 **częściowo — I15.6 i I15.7 zrobione.** I15.6 (ticket 108, 2026-09-22, `feature/108-selly-rest-discovery-delta`): migracja 013 (`selly_products` wariantowa, stara → `selly_products_old`), discovery (odnajdywanie/zakładanie mapowań, cache kodów, limiter) i Tor 1 (`sync_delta`) przeportowane 1:1 z `origin/main:7d6cfc9`. I15.7 (ticket 109, 2026-09-22, `feature/109-selly-rest-sync-full`): Tor 2 (`sync_full`→`src/selly/rest/sync-full.ts`, `mapper_v2`→`src/selly/rest/mapper-v2.ts`, `loadDictMaps`) przeportowany 1:1, w tym #81. Zostaje **I15.8**: harmonogram i trasy `sync-*` — nic z tego jeszcze nie jest uruchamiane w procesie. (Wcześniejszy port `13d-1`, PR #57, został **COFNIĘTY** `46-CHORE-revert-13d1-selly`, 2026-09-09 — I15.6/I15.7 to świeży, niezależny port z finalnego stanu produkcji, nie wznowienie tamtej gałęzi.) |
+| **Status** | ✅ **ZROBIONE — I15.6, I15.7 i I15.8.** I15.6 (ticket 108, 2026-09-22, `feature/108-selly-rest-discovery-delta`): migracja 013 (`selly_products` wariantowa, stara → `selly_products_old`), discovery (odnajdywanie/zakładanie mapowań, cache kodów, limiter) i Tor 1 (`sync_delta`) przeportowane 1:1 z `origin/main:7d6cfc9`. I15.7 (ticket 109, 2026-09-22, `feature/109-selly-rest-sync-full`): Tor 2 (`sync_full`→`src/selly/rest/sync-full.ts`, `mapper_v2`→`src/selly/rest/mapper-v2.ts`, `loadDictMaps`) przeportowany 1:1, w tym #81. I15.8 (ticket 121, 2026-09-23, `feature/121-selly-harmonogram-sync`): harmonogram (`scheduler_selly`→`src/selly/rest/scheduler.ts`, Tor 1 HH:55 + HH:10/25/40, Tor 2 04:30 z rotacją) i sześć tras `sync-*` (`routes_sync`→`src/routes/selly-sync.ts`) przeportowane z `88fa31c`, zamontowane w `server.ts`/`app.ts` z JEDNĄ instancją `discovery` na proces, za flagą `SELLY_SCHEDULER` (domyślnie wyłączoną). Naprawione trzy zastane defekty produkcji jako świadome odstępstwa: importy `syncDeltaForDostawca` i `runFullTodays` (obie nazwy nie istnieją → 500) oraz zgubiona lista dostawców w `sync-full-force` (`forceSuppliers` vs `opts.suppliers`). (Wcześniejszy port `13d-1`, PR #57, został **COFNIĘTY** `46-CHORE-revert-13d1-selly`, 2026-09-09 — I15.6/I15.7 to świeży, niezależny port z finalnego stanu produkcji, nie wznowienie tamtej gałęzi.) |
 
 ### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
 | pole | wartość |
@@ -4388,7 +4388,7 @@ liniach. MO7 Nokian ma 14 zdublowanych kodów, ale to identyczne wiersze (pomiar
 | **Data** | 2026-09-22 (znalezisko karty P10.4, `100-DOCS-instrukcja-testow-i10-v2`, po P10.3) |
 | **Kategoria** | FRONTEND (analityka, eksport CSV) — skutek uboczny świadomego odstępstwa #91 |
 | **Pliki** | `rebuild/frontend/src/pages/analityka/eksport.tsx` i generator CSV (P10.3); trasy dashboardu z limitami SQL (`repos/analityka.ts`) |
-| **Do nowej wersji?** | ⬜ **czeka na odpowiedź Ani** — `docs/instrukcja-testow-I10-v2.md` §1.3 (pytanie A) |
+| **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-23: „chcę pełne pliki"** (świadome odstępstwo; karta **P10.5**) |
 | **Status** | — |
 
 **Na czym polega.** Od P10.3 plik CSV powstaje w przeglądarce z wierszy tabeli (#91). Plan P10.3 zakładał,
@@ -4402,8 +4402,10 @@ Ten sam sufit robi kafel KPI „Pozycje unikalne” = 1000 (port 1:1 oryginału,
 **Powiązane:** `GET /api/analytics/export/{view}` nie ma już konsumenta we froncie (P10.3) — działa dalej
 jako API. Przy wariancie „zdjąć sufit” jedną z dróg jest przywrócenie trasy serwerowej dla tych trzech widoków.
 
-**Rekomendacja koordynatora:** zależnie od odpowiedzi Ani. Jeśli potrzebuje pełnych plików — zdjąć sufit
-tylko dla pliku (osobne zapytanie bez limitu przy eksporcie), tabela i kafel zostają 1:1.
+**⭐ DECYZJA ANI 2026-09-23: pełne pliki.** Cytat: „chce pełne pliki". Zakres: **sufit zdejmujemy TYLKO dla pliku CSV**
+(osobne zapytanie bez limitu przy eksporcie); tabela na ekranie zostaje przy 300 wierszach (limit rysowania
+z oryginału), a kafel „Pozycje unikalne" nadal liczy 1000 (port 1:1). Iteracja 10 jest zamknięta, więc realizuje to
+nowa karta **P10.5** (`docs/karty/P10.5/`).
 
 ---
 
@@ -4414,7 +4416,7 @@ tylko dla pliku (osobne zapytanie bez limitu przy eksporcie), tabela i kafel zos
 | **Data** | 2026-09-22 (znalezisko karty P10.4, po P10.2) |
 | **Kategoria** | FRONTEND + BACKEND (Pulpit, audyt eksportów) |
 | **Pliki** | `rebuild/frontend/src/pages/pulpit/kpi.ts` (P10.2); eksport z Katalogu (bez audytu — decyzja D3 bloku 10f); trasy `eksport_csv`/`eksport_shoper` bez konsumenta w UI |
-| **Do nowej wersji?** | ⬜ **czeka na odpowiedź Ani** — `docs/instrukcja-testow-I10-v2.md` §1.2 |
+| **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-23: „zostawcie tak jak jest"** |
 | **Status** | — |
 
 **Na czym polega.** P10.2 (#34) podpięła kafel pod Historię (`audit_log`, typ „eksport”). Ale żaden przycisk
@@ -4422,8 +4424,9 @@ w panelu nie tworzy dziś wpisu `eksport_*`: eksport CSV z Katalogu nie zapisuje
 które audyt piszą, nie mają przycisku. Generowanie CSV dla Selly też się nie liczy. Kafel pokaże więc
 „—” + „Ostatni import: …”, dopóki ktoś nie wywoła eksportu z API.
 
-**Rekomendacja koordynatora:** zależnie od odpowiedzi Ani. Wariant (a) z I10-v2 — audyt przy eksporcie
-z Katalogu — to nowe, świadome odstępstwo (mała zmiana: jeden zapis audytu).
+**⭐ DECYZJA ANI 2026-09-23: ZOSTAWIAMY.** Cytat: „zostawcie tak jak jest". Kafel czyta prawdziwą historię, ale skoro
+żaden przycisk w panelu nie tworzy wpisu eksportu, w praktyce pokaże „—" i datę ostatniego importu. Wpis ZAMKNIĘTY
+bez pracy w kodzie. Gdyby kiedyś doszedł audyt eksportu z Katalogu, kafel ożyje sam.
 
 ---
 
@@ -4769,7 +4772,7 @@ Karta **I15.4** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i za
 | **Kategoria** | BACKEND (grupowanie produktów) + BAZA |
 | **Pliki** | `assignKodImportu` — w produkcji `bridge_ext.cjs`, od Staging v2 **nadpisany** w `staging_policy.cjs` (`origin/main`); mapowanie `selly_products` `(kod_importu, dostawca)`; port: `rebuild/backend/src/**` (I15.4 przejmuje nadpisanie) |
 | **Do nowej wersji?** | ⬜ **DO DECYZJI — problem POTWIERDZONY pomiarem 2026-09-23** |
-| **Status** | ⚠ **żywy na produkcji**: 80 grup / 174 produkty, 76 grup z różnymi cenami lub stanami, wszystkie 80 z mapowaniem w `selly_products` |
+| **Status** | ⚠ żywy: 80 grup / 174 produkty · **przyczyna USTALONA (niżej)** · Ania (23.09) poprosiła o listę przypadków przed decyzją — lista wysłana, czeka na jej przegląd |
 
 **Opis (specyfikacja Ani).** „121 zduplikowanych kluczy `(dostawca, kod_importu)` = 259 aktywnych wierszy;
 114 grup/245 z różnymi cenami/stanami. Współdzielony `selly_products` → snapshot nadpisywany → delty wracają
@@ -4818,6 +4821,20 @@ wyłącznie pozycji bez klucza. Stare kolizje zostają w danych i przejdą przez
 - **(b) zostawić 1:1** — odbudowa odtworzy dzisiejszy stan produkcji, czyli pętlę delty co 15 minut;
 - **(c) zawór bezpieczeństwa w Torze 1** — wykryć kolizję przed wysyłką, pominąć grupę i zaraportować
   w `selly_sync_log`. Nie zmienia danych ani sklepu, zatrzymuje pętlę.
+
+**⭐ PRZYCZYNA — USTALONA 2026-09-23 (kod + pomiar).** Stara reguła `assignKodImportu`
+(`origin/main:mirror/backend/bridge_ext.cjs:156-178`) działa czterostopniowo: (1) produkt, który ma już
+sześciocyfrowy numer, **zachowuje go na zawsze**; (2) przy POPRAWNYM EAN szuka innego produktu z tym samym EAN-em;
+(3) **gdy EAN-u brak albo jest niepoprawny — dopasowuje po `marka` + `rozmiar` + `bieznik` + `nazwa`**;
+(4) dopiero na końcu losuje nowy numer.
+
+Sklejenia powstają w punkcie (3): w chwili importu opona nie miała jeszcze EAN-u (albo został odrzucony), więc
+dostała numer pierwszej pozycji o tej samej nazwie i rozmiarze. Gdy EAN-y później doszły, punkt (1) nie pozwolił
+już zmienić numeru.
+
+**Pomiar potwierdzający (23.09, kopia produkcji):** grup o identycznej nazwie, marce, rozmiarze i bieżniku —
+**74 z 80**; grup z różnymi EAN-ami — **75 z 80**; grup z różnym DOT — **9**. Czyli to prawie zawsze dwie fizycznie
+różne opony (inny EAN, czasem inny rocznik) pod jedną nazwą.
 
 **Rekomendacja koordynatora: (c) teraz + (a) po uzgodnieniu z Anią.** (c) jest tanie i odwracalne, mieści się
 w karcie **I15.10**; (a) to zmiana asortymentu w sklepie — dziś te opony są w Selly sklejone w jeden produkt.

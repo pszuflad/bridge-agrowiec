@@ -109,6 +109,16 @@ const schemaEnvBazowe = z.object({
    * Egzekwowane w `src/selly/tryb.ts`, wpinane w `app.ts`. Sekrety niżej są nadal wymagane —
    * tryb ich nie zastępuje, tylko dokłada drugi zamek.
    */
+  /**
+   * Harmonogram synchronizacji Selly (Tor 1 co 15 min + HH:55, Tor 2 o 04:30) — DOMYŚLNIE
+   * WYŁĄCZONY, wzorem `IMPORT_SCHEDULER`; produkcja włącza go jawnie (cutover).
+   *
+   * ODSTĘPSTWO ŚWIADOME W UMIEJSCOWIENIU (karta I15.8): oryginał nie ma tu żadnego
+   * przełącznika — `extensions.cjs:486-487` woła `installScheduler(_bridgeDb)` bezwarunkowo.
+   * U nas włączony harmonogram REALNIE ZAPISUJE do cudzego sklepu `agroopony.selly24.pl`,
+   * więc na stagingu i w testach musi milczeć, dopóki ktoś go świadomie nie włączy.
+   */
+  SELLY_SCHEDULER: flagaBoolDomyslnieWylaczona,
   SELLY_TRYB: z.enum(["wylaczony", "tylko-odczyt", "pelny"]).default("wylaczony"),
   SELLY_SHOP_URL: z.string().default(""),
   SELLY_CLIENT_ID: z.string().default(""),

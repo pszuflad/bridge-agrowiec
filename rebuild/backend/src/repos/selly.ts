@@ -122,6 +122,72 @@ export function logSelly(db: Baza, limit: number = DOMYSLNY_LIMIT_LOGU): WpisLog
     .all();
 }
 
+/**
+ * Wiersz `GET /api/selly/sync-status` → `recentLogs` (`routes_sync.cjs:26-32`).
+ *
+ * ⚠ To ZAWĘŻENIE `WpisLoguSelly` do 9 kolumn — oryginał wypisuje tu jawną listę i NIE bierze
+ * `uzytkownik_id` ani `uzytkownik_imie` (inaczej niż `GET /api/selly/log`, które robi `SELECT *`).
+ * Klucze `snake_case` z tego samego powodu co przy `WpisLoguSelly` — patrz nota tam.
+ */
+export type WpisStatusuSync = Omit<WpisLoguSelly, "uzytkownik_id" | "uzytkownik_imie">;
+
+/** Projekcja 9 kolumn — zawężenie `KOLUMNY_LOGU`, nie druga jej kopia. */
+const KOLUMNY_STATUSU_SYNC = {
+  id: KOLUMNY_LOGU.id,
+  operacja: KOLUMNY_LOGU.operacja,
+  dostawca_kod: KOLUMNY_LOGU.dostawca_kod,
+  liczba_ok: KOLUMNY_LOGU.liczba_ok,
+  liczba_blad: KOLUMNY_LOGU.liczba_blad,
+  liczba_skip: KOLUMNY_LOGU.liczba_skip,
+  rozpoczeto: KOLUMNY_LOGU.rozpoczeto,
+  zakonczono: KOLUMNY_LOGU.zakonczono,
+  status: KOLUMNY_LOGU.status,
+  szczegoly_json: KOLUMNY_LOGU.szczegoly_json,
+};
+
+/** `routes_sync.cjs:33` — stałe 20 ostatnich wpisów, bez parametru. */
+export const LIMIT_STATUSU_SYNC = 20;
+
+/** Port `recentLogs` z `GET /api/selly/sync-status` (`routes_sync.cjs:26-32`). */
+export function ostatnieWpisySync(db: Baza): WpisStatusuSync[] {
+  return db
+    .select(KOLUMNY_STATUSU_SYNC)
+    .from(sellySyncLog)
+    .orderBy(desc(sellySyncLog.rozpoczeto))
+    .limit(LIMIT_STATUSU_SYNC)
+    .all();
+}
+
+/** Powód wpisywany do `szczegoly_json` przy domykaniu przerwanego cyklu. */
+export const POWOD_PRZERWANIA = "przerwany restartem procesu";
+
+/**
+ * ODSTĘPSTWO ŚWIADOME (karta I15.8, `wejscie-117.md`, decyzja użytkownika 2026-09-23):
+ * domyka wpisy `selly_sync_log`, które zostały w stanie `w_trakcie` po ubiciu procesu.
+ *
+ * Oryginał tego NIE robi — u Ani wpis MO2 wisi jako „w trakcie" od 10.09, przez co
+ * `GET /api/selly/sync-status` pokazuje wiecznie trwający cykl. Zmiana jest czysto
+ * diagnostyczna: nie dotyka sklepu ani danych katalogu.
+ *
+ * Status `blad` (a nie nowa wartość w rodzaju `przerwany`) — decyzja użytkownika: kolumna
+ * zna `w_trakcie|zakonczono|blad`, więc nic, co mapuje statusy, nie zobaczy nieznanej
+ * wartości; rozróżnienie niesie `szczegoly_json`.
+ *
+ * Zwraca liczbę domkniętych wpisów.
+ */
+export function zamknijOsieroconeWpisySync(db: Baza): number {
+  const wynik = db
+    .update(sellySyncLog)
+    .set({
+      status: "blad",
+      zakonczono: sql`datetime('now')`,
+      szczegolyJson: JSON.stringify({ powod: POWOD_PRZERWANIA }),
+    })
+    .where(eq(sellySyncLog.status, "w_trakcie"))
+    .run();
+  return wynik.changes;
+}
+
 /** Wynik pojedynczej synchronizacji — kształt odpowiedzi `POST /api/selly/sync-product`. */
 export type WynikSynchronizacjiProduktu = {
   action: "created" | "updated";
