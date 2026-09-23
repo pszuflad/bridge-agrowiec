@@ -13,8 +13,8 @@ z regułą tego katalogu).
 | **Kategoria** | BACKEND |
 | **Pliki** | `mirror/backend/staging_policy.cjs:141-157` (`ext.assignKodImportu`) |
 | **Commit** | `88fa31c` (stan zamrożony) |
-| **Do nowej wersji?** | ⬜ **do decyzji** — port jest już wierny; decyzji wymaga ewentualne ODSTĘPSTWO |
-| **Status** | 🔨 zmierzone i opisane, nieoptymalizowane (świadomie) |
+| **Do nowej wersji?** | ❌ **NIE ZMIENIAMY — decyzja użytkownika 2026-09-23** (ticket 135). Port jest wierny, a produkcja ma **dokładnie ten sam koszt**, więc nie ma od czego odstępować. Wraca do rozważenia dopiero, **gdy Ania zgłosi, że panel stoi.** |
+| **Status** | ✅ zmierzone, opisane, świadomie nieoptymalizowane — sprawa zamknięta do czasu zgłoszenia z produkcji |
 
 **Opis biznesowy.** Zatwierdzenie całego stagingu z kopii produkcji (2502 pozycje po migracji 012)
 zajmuje **ok. 16 minut** jednego żądania. Nie jest to problem z wpisu #107 (tamten dotyczył blokady

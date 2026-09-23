@@ -4733,8 +4733,8 @@ ticketa 119** — ten wpis zostaje częściowo otwarty dla nich. Szczegóły: `d
 | **Kategoria** | BACKEND (adapter, parser MO9) + operacje na danych |
 | **Pliki** | `mirror/backend/parsers/adapter.cjs`, `mirror/backend/parsers/mo9_agrorami_api.cjs`, `staging_policy.cjs` (edycja modelu w stagingu), `data.db` (poprawki 13 kart MO4/MO5 i 5 kart MO9) |
 | **Commit** | `06a8aa3`, `88fa31c` |
-| **Do nowej wersji?** | ✅ **TAK — część parserowa DOWIEZIONA w I15.2** (ticket 120, 2026-09-23); edycja modelu w stagingu → **I15.4** (otwarte). |
-| **Status** | ✅ **parser: I15.2** — `adapter.cjs`/`mo9_agrorami_api.cjs` resyncowane bajt w bajt; W2 Handlopeksa zadziałało **15×** na pełnych cennikach (MO4 1, MO5 14 — próbki 200-wierszowe pokazywały tylko 2), `_supplierEanOriginal` niesie oryginał dostawcy. Edycja modelu w stagingu (usunięcie samotnego DOT) zostaje dla **I15.4**. |
+| **Do nowej wersji?** | ✅ **TAK — DOWIEZIONE W CAŁOŚCI**: część parserowa w I15.2 (ticket 120), edycja zgłoszenia w I15.4c (ticket 129), oba 2026-09-23. |
+| **Status** | ✅ **parser: I15.2** — `adapter.cjs`/`mo9_agrorami_api.cjs` resyncowane bajt w bajt; W2 Handlopeksa zadziałało **15×** na pełnych cennikach (MO4 1, MO5 14 — próbki 200-wierszowe pokazywały tylko 2), `_supplierEanOriginal` niesie oryginał dostawcy. ✅ **edycja zgłoszenia: I15.4c** (ticket 129, 2026-09-23) — drugi wątek CHANGELOGU Ani („Edycja modelu w stagingu aktualizuje także bieżnik, jeśli wcześniej był jego automatyczną kopią") sportowany w `zaktualizujZgloszenie` (`rebuild/backend/src/import/polityka/zgloszenia.ts:81-83`, port `staging_policy.cjs:172-176`) i pokryty testem. Warunek jest wąski i taki ma być: bieżnik nadąża za modelem **tylko** wtedy, gdy był jego automatyczną kopią — ręcznie ustawionego bieżnika edycja nie rusza. Wpis zamknięty. |
 
 **Opis biznesowy (CHANGELOG Ani).** „W ofertach Handlopex MO4/MO5 końcówka `W2` po prawidłowym 13-cyfrowym EAN jest
 rozpoznawana jako oznaczenie wariantu rocznikowego, jeżeli rok zgadza się z polem DOT i końcówką kodu producenta.
