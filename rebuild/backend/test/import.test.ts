@@ -373,12 +373,15 @@ describe("endpointy importu", () => {
       expect(cialo.wczytanych).toBe(oczekiwaneRekordy("MO2"));
       expect(cialo.doStagingu).toBe(oczekiwanyStaging(cialo));
 
-      // ⚠ Wierszy jest MNIEJ niż `doStagingu` i tak ma być. Próbka MO2 zawiera dwa kody
-      // powtórzone (`MO2_13760840000`, `MO2_13763530000`), a `U.addStaging`
-      // (backend-index.cjs:44923) deduplikuje po (kod, typZmiany, powod). `doStagingu` liczy
-      // BUFOR, nie zapisy (`:47850`), więc obie liczby rozjeżdżają się o liczbę duplikatów.
-      // Potwierdzone uruchomieniem ORYGINAŁU na tej samej próbce: 200 w buforze, 198 zapisów.
-      expect(policzStaging().c).toBe(Number(cialo.doStagingu) - 2);
+      // ⚠ ZMIANA OD RESYNCU 23.09 (ticket 120, backlog #103): wierszy jest DOKŁADNIE tyle,
+      // ile `doStagingu`. Wcześniej było o 2 mniej, bo próbka MO2 miała dwa kody powtórzone
+      // (`MO2_13760840000`, `MO2_13763530000`) budowane z samego EAN-u, a `U.addStaging`
+      // (backend-index.cjs:44923) deduplikuje po (kod, typZmiany, powod).
+      //
+      // JMK nie łączy już wierszy po samym EAN — kod pozycji powstaje z identyfikatora
+      // wiersza dostawcy (`MO2_JMK_<id>`), więc w próbce jest 200 kodów i wszystkie 200 są
+      // unikalne. Nie ma czego deduplikować i obie liczby się schodzą.
+      expect(policzStaging().c).toBe(Number(cialo.doStagingu));
     });
 
     it("ponowny import tego samego cennika nie dokłada wierszy (deduplikacja addStaging)", async () => {
@@ -462,7 +465,11 @@ describe("endpointy importu", () => {
       >;
       expect(meta.status).toBe("blad");
       expect(String(meta.blad)).toMatch(/ani jednej pozycji/);
-      expect(meta.rekordy).toBe(0);
+      // ⚠ ZMIANA OD RESYNCU 23.09: `rekordy` zostaje NULL, a nie 0. `feed_safety.attach()`
+      // przerywa już w `dispatcher.parseByKod()`, czyli PRZED `oznaczWArchiwum({rekordy})`.
+      // Produkcja robi tak samo — plik archiwizuje się przed parsowaniem, więc przy zerwanym
+      // parsowaniu liczniki nie mają skąd powstać.
+      expect(meta.rekordy).toBeNull();
     });
   });
 
@@ -618,7 +625,10 @@ describe("endpointy importu", () => {
         dostawcaKod: "MO1",
         url: "https://przyklad.test/cennik-mo1.csv",
       });
-      expect((odp.body as { error: string }).error).toMatch(/ani jednej pozycji/);
+      // ⚠ ZMIANA OD RESYNCU 23.09 (#103): śmieciowa treść daje BŁĄD PARSERA, nie pusty
+      // wynik, więc zatrzymuje ją `feed_safety` swoim komunikatem. Kod 400 i brak zapisu
+      // do stagingu bez zmian.
+      expect((odp.body as { error: string }).error).toMatch(/Błędy odczytu cennika/);
       expect(policzStaging().c).toBe(0);
     });
   });

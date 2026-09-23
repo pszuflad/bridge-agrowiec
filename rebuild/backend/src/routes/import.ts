@@ -7,7 +7,7 @@ import {
   type OpcjeArchiwizacji,
   type ZrodloImportu,
 } from "../import/archiwum.js";
-import { parsujBufor, urlDostawcy } from "../import/parsuj.js";
+import { BladCennika, parsujBufor, urlDostawcy } from "../import/parsuj.js";
 import { pobierzZUrl } from "../import/pobierz.js";
 import {
   PustyImportBlad,
@@ -133,7 +133,17 @@ export function trasyImportu({
     idArchiwum: string | null,
     nazwaPliku: string,
   ): { blad: string } | { wynik: WynikPrzetworzenia } => {
-    const sparsowane = parsujBufor(kodDostawcy, bufor, nazwaPliku);
+    // Błąd odczytu cennika (#103) to błąd DANYCH WEJŚCIOWYCH, nie awaria serwera — bez tego
+    // wyjątek z `feed_safety` leci do zewnętrznego `catch` trasy i kończy się 500 zamiast 400.
+    // Pusty cennik kończy się tym samym `PustyImportBlad` i tą samą treścią co dotąd —
+    // `feed_safety` tylko wykrywa go wcześniej, jeszcze przed silnikiem.
+    let sparsowane;
+    try {
+      sparsowane = parsujBufor(kodDostawcy, bufor, nazwaPliku);
+    } catch (e) {
+      if (e instanceof BladCennika || e instanceof PustyImportBlad) return { blad: e.message };
+      throw e;
+    }
 
     if (idArchiwum) {
       oznaczWArchiwum(idArchiwum, {

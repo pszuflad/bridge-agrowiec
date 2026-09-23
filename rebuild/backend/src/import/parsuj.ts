@@ -24,6 +24,10 @@ import {
   type RekordSurowy,
   type WynikParsowania,
 } from "./typy.js";
+// Pusty cennik ma JEDEN bezpiecznik w całym backendzie (odstępstwo D7) — `feed_safety`
+// wykrywa go teraz wcześniej, ale kończy się tym samym wyjątkiem i tą samą odpowiedzią 400,
+// żeby nie rozjechały się dwa komunikaty o tej samej sytuacji.
+import { PustyImportBlad } from "./tk.js";
 
 // Moduły portu są CommonJS (.cjs), a backend jest ESM — createRequire jest tu
 // właściwym mostem. Ścieżka jest względna wobec TEGO pliku, więc działa tak samo
@@ -58,6 +62,49 @@ export class BladImportu extends Error {
 }
 
 /**
+ * Cennik dotarł, ale parser go nie odczytał — `feed_safety.attach()` przerwał import
+ * (backlog #103, resync 23.09, ticket 120).
+ *
+ * To NIE jest to samo co pusty wynik: pusty cennik ma własny, starszy bezpiecznik
+ * (`PustyImportBlad`, odstępstwo D7) i własny komunikat. Tutaj chodzi o sytuację, w której
+ * parser ZGŁOSIŁ błędy odczytu — przed #103 przechodziły dalej w polu `bledy` i import
+ * leciał na niekompletnych danych, teraz zatrzymują go bez przełączania na stary format.
+ */
+export class BladCennika extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BladCennika";
+  }
+}
+
+/**
+ * Komunikaty, którymi `legacy/feed_safety.cjs` sygnalizuje przerwanie importu.
+ *
+ * Rozpoznajemy je po treści, bo `attach()` rzuca goły `Error` bez kodu ani typu — a musimy
+ * odróżnić „pusty cennik" (nasz starszy bezpiecznik D7, komunikat i kod HTTP zostają
+ * bez zmian) od „błędów parsera" (nowość #103). Treści są przypięte testem
+ * w `test/feed-safety.test.ts`, więc kolejny resync, który je zmieni, zaświeci na czerwono
+ * zamiast po cichu wpaść w gałąź `else`.
+ */
+const PUSTY_CENNIK = /^Pusty cennik/;
+const BRAK_LISTY = /^Brak listy produktów/;
+
+/**
+ * Tłumaczy wyjątek z `feed_safety.attach()` na typ, który znają trasy importu.
+ *
+ * Bez tego wyjątek leci przez `parsujBufor()` aż do zewnętrznego `catch` w trasie i kończy
+ * się odpowiedzią 500, mimo że to zwykły błąd danych wejściowych (400). Dotyczy wszystkich
+ * trzech wejść: `routes/import.ts`, `routes/suppliers.ts` i auto-pulla `synchronizuj.ts`.
+ */
+function przetlumaczBladParsera(kodDostawcy: string, e: unknown): unknown {
+  if (!(e instanceof Error)) return e;
+  if (PUSTY_CENNIK.test(e.message) || BRAK_LISTY.test(e.message)) {
+    return new PustyImportBlad(kodDostawcy);
+  }
+  return new BladCennika(e.message);
+}
+
+/**
  * Sprawdza kod dostawcy wobec DWÓCH źródeł: listy dispatchera z produkcji (autorytet
  * runtime — to on wie, którzy dostawcy mają parser) i naszego typu `KodDostawcy`
  * (potrzebnego do zawężenia typu). Rozjazd między nimi może się pojawić dopiero przy
@@ -83,7 +130,16 @@ function sprawdzKodDostawcy(kodDostawcy: string): KodDostawcy {
  */
 export function parsujPlik(kodDostawcy: string, sciezkaPliku: string): WynikParsowania {
   const kod = sprawdzKodDostawcy(kodDostawcy);
-  const wynikParsera = dispatcher.parseByKod(kod, sciezkaPliku);
+
+  // Od resyncu 23.09 `parseByKod()` woła `feed_safety.attach()`, które RZUCA przy pustym
+  // cenniku i przy błędach parsera (#103) — wcześniej ta ścieżka nigdy nie rzucała.
+  let wynikParsera: WynikParseraDostawcy;
+  try {
+    wynikParsera = dispatcher.parseByKod(kod, sciezkaPliku);
+  } catch (e) {
+    throw przetlumaczBladParsera(kod, e);
+  }
+
   const rekordy = adapter.recordsToSurowe(kod, wynikParsera.records);
 
   return {
