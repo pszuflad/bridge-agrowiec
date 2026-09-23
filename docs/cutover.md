@@ -210,6 +210,61 @@ idempotentny (`CREATE TABLE IF NOT EXISTS`) i na bazie produkcyjnej ma być no-o
 
 ---
 
+## 3a. ⭐ AUDYT ŚRODOWISKA — wykonaj NA STAGINGU przed testami Ani i NA PRODUKCJI przed oknem
+
+Polecenie użytkownika (2026-09-24): przed cutoverem sprawdzamy **po kolei każdą zmienną i każdy klucz API**,
+i dokonfigurowujemy to, czego brakuje — zamiast zakładać, że skoro proces wstał, to wszystko jest ustawione.
+
+> ⚠ **Fail-fast NIE obejmuje wszystkiego.** `src/config/env.ts` waliduje tylko zmienne, które zna. Proces
+> **wstanie bez** `AGRORAMI_EMAIL`/`AGRORAMI_PASSWORD` (czyta je parser MO9 wprost z `process.env`) i bez
+> sekretów Selly — objawi się to dopiero błędem importu MO9 albo milczącą integracją sklepu. Dlatego ta lista.
+
+**Jak sprawdzać, nie ujawniając sekretów** (na VPS, w pliku środowiska danego środowiska):
+
+```bash
+ENVFILE=~/private_apps/bridge-staging/.env        # produkcja: plik środowiska nowego stosu
+for K in DB_PATH JWT_SECRET NODE_ENV HOST PORT IMPORT_SCHEDULER IMPORT_ARCHIVE_DIR \
+         AGRORAMI_EMAIL AGRORAMI_PASSWORD AGRORAMI_GRAPHQL_URL AGRORAMI_CATEGORY_ID \
+         SELLY_TRYB SELLY_SCHEDULER SELLY_SHOP_URL SELLY_CLIENT_ID SELLY_CLIENT_SECRET SELLY_SCOPE \
+         SELLY_CSV_DIR SELLY_CSV_PLIK SELLY_CSV_URL CORS_ORIGINS; do
+  printf '%-28s %s\n' "$K" "$(grep -c "^$K=" "$ENVFILE" | sed 's/^0$/BRAK/; s/^[1-9].*/jest/')"
+done
+pm2 logs bridge-backend-staging --lines 40 --nostream | grep -iE "scheduler|cors|DB_PATH|selly"
+```
+
+| Zmienna | Staging (testy Ani) | Produkcja (po cutoverze) | Co się stanie po przeoczeniu |
+|---|---|---|---|
+| `DB_PATH`, `JWT_SECRET` | wymagane (fail-fast) | wymagane | proces nie wstanie |
+| `NODE_ENV`, `HOST`, `PORT` | `production` / `127.0.0.1` / `5001` | `production` / `0.0.0.0` / `5000` | proxy w pustkę, ciasteczko bez `Secure` |
+| `IMPORT_SCHEDULER` | **`true`** (Ania porównuje importy) | **`true`** | cenniki przestają się pobierać, panel wygląda normalnie |
+| `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` | `true` (pierwszy przebieg od razu) | do decyzji | bez niego pierwszy przebieg po pełnym cyklu |
+| `IMPORT_ARCHIVE_DIR` | katalog stagingu | **katalog archiwum starego stosu** | ekran „Archiwum importów" pusty po przełączeniu |
+| **`AGRORAMI_EMAIL`, `AGRORAMI_PASSWORD`** | **wymagane** | **wymagane** | **MO9 (jedyny dostawca z API) przestaje się importować — bez ostrzeżenia przy starcie** |
+| `AGRORAMI_GRAPHQL_URL`, `AGRORAMI_CATEGORY_ID` | domyślne OK | domyślne OK | tylko przy świadomej zmianie |
+| `SELLY_TRYB` | **`wylaczony`** | **`pelny`** (jawnie) | staging pisałby do sklepu / produkcja milczy |
+| `SELLY_SCHEDULER` | **wyłączony** | **włączony** | brak torów API: ceny i stany nie idą do sklepu w ciągu dnia |
+| `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`, `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` | brak (celowo) | prawdziwe sekrety | sześć tras oddaje 500 „Brak konfiguracji" |
+| `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` | ścieżki stagingu (ustawia skrypt deployu) | **wartości produkcyjne** | staging nadpisałby produkcyjny plik CSV |
+| `CORS_ORIGINS` | puste | **puste** (stan docelowy) | patrz rozdział 4 |
+
+**Dostawcy — co wymaga konfiguracji poza zmiennymi** (stan z tabeli `suppliers`):
+
+| Dostawcy | Sposób | Czego potrzebują |
+|---|---|---|
+| MO2, MO3, MO4, MO5 | `url`, co 60 min | poprawny adres cennika w karcie dostawcy + włączony `IMPORT_SCHEDULER` |
+| **MO9** | `url`, co 60 min, **ale realnie API GraphQL** | **`AGRORAMI_*`** — bez nich import pada mimo poprawnego adresu |
+| MO1, MO7, MO8, MO10 | `mail` | nic w środowisku; pliki wgrywa człowiek (MO1 ma ustawioną częstotliwość 10080 min) |
+| MO6 | `upload` | j.w. |
+
+**Poza zmiennymi — do sprawdzenia i dokonfigurowania przed oknem:**
+1. **Cron generujący CSV o 6:00** przepięty na polecenie nowego stosu (backlog #102, karta I15.3) — stary
+   skrypt po cutoverze zostaje bez opieki.
+2. **`public_html/panel/ex-port-files/.htaccess`** z białą listą IP (Selly + Agrowiec, potwierdzona przez
+   Anię 23.09) — przeżywa podmianę frontendu.
+3. **Uprawnienia do katalogów:** archiwum importu i katalog CSV muszą być zapisywalne przez proces.
+4. **PM2:** stary wpis `bridge-backend` usunięty, nowy zapisany (`pm2 save`), żeby restart serwera nie wskrzesił
+   starego stosu na tej samej bazie.
+
 ## 4. Zmienne środowiskowe — różnice staging vs produkcja
 
 Sekrety trzymamy w pliku poza repo (`chmod 600`), wczytywanym przez skrypt startowy — tak jak
