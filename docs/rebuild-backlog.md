@@ -4638,3 +4638,90 @@ nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4**,
 ⚠ Operacje na danych (395 wstrzymań, 179 usuniętych kart MO9) — **nie odtwarzamy** (decyzja D2: świeża kopia produkcji
 na staging), ale **trzeba je uwzględnić przy pomiarach**: liczba produktów w katalogu spadła o 179.
 
+---
+
+### #105 · 2026-09-23 09:54–12:57 · [BACKEND][BAZA] · DOT jako osobny produkt: końcówka `W2` w EAN Handlopeksa, DOT w modelu Agrorami
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-23, etykiety `20260923T075453Z_handlopex_ean_dot`, `20260923T075630Z_handlopex_catalog_ean`, `20260923_modeldot` |
+| **Kategoria** | BACKEND (adapter, parser MO9) + operacje na danych |
+| **Pliki** | `mirror/backend/parsers/adapter.cjs`, `mirror/backend/parsers/mo9_agrorami_api.cjs`, `staging_policy.cjs` (edycja modelu w stagingu), `data.db` (poprawki 13 kart MO4/MO5 i 5 kart MO9) |
+| **Commit** | `06a8aa3`, `88fa31c` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — |
+
+**Opis biznesowy (CHANGELOG Ani).** „W ofertach Handlopex MO4/MO5 końcówka `W2` po prawidłowym 13-cyfrowym EAN jest
+rozpoznawana jako oznaczenie wariantu rocznikowego, jeżeli rok zgadza się z polem DOT i końcówką kodu producenta.
+Do EAN trafia sam numer, pełny zapis dostawcy zostaje zachowany w szczegółach. Inny DOT nadal tworzy osobny produkt.”
+Powód: „dopisek W2 nie jest błędem EAN; identyczna opona może mieć inny rok produkcji i musi pozostać osobną pozycją”.
+Efekt zmierzony przez Anię: zgłoszenia błędnego EAN z końcówką W2 spadły z 14 do 0.
+Drugi wątek (12:57): „parser Agrorami usuwa samotny dopisek DOT przed PR/TL/TT z modelu, pozostawiając oznaczenia
+z rokiem. Edycja modelu w stagingu aktualizuje także bieżnik, jeśli wcześniej był jego automatyczną kopią.”
+
+**Szczegół techniczny.** `adapter.cjs`: dla MO4/MO5 wzorzec `^(\d{13})W2$` + zgodność roku z `kod producenta`
+(`W20xx`) i polem `dot` → do `ean`/`eanRaw` trafia sam 13-cyfrowy numer, oryginał dostawcy ląduje
+w `_supplierEanOriginal`. Dodatkowo dla MO2 rekord niesie `_jmkRowId` (identyfikator wiersza JMK).
+`mo9_agrorami_api.cjs`: usunięcie samotnego `DOT` przed `PR`/`TL`/`TT` z modelu.
+
+**Rekomendacja (moja):** ✅ nanieść — to warstwa parserów, więc zakres karty **I15.2** (adapter, MO9), a edycja modelu
+w stagingu → **I15.4**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie do odtworzenia (D2 — świeża kopia produkcji).
+
+---
+
+### #106 · 2026-09-23 10:53–12:31 · [BACKEND][BAZA][FRONTEND] · decyzje o nieobecnych kartach: okno „Sprawdź kartę”, wybór jednej karty przy zgodnym DOT, ponowne otwarcie sprawy
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-23, etykiety `…review_explanations`, `…review_reopen`, `20260923_dotchoice` |
+| **Kategoria** | BACKEND + BAZA + FRONTEND (staging) |
+| **Pliki** | `mirror/backend/staging_policy.cjs` (488 → 665 l.), `db/schema.sql`: `staging_absence_decisions` + unikalny indeks `staging_absence_one_choice`, FE: `assets/staging-policy-injection.js`, `index.html` |
+| **Commit** | `58d9d1d`, `88fa31c` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — |
+
+**Opis biznesowy (CHANGELOG Ani).** Okno sprawdzania pokazuje **osobno starą kartę i możliwy odpowiednik**, wskazuje
+zgodność lub różnicę EAN i DOT oraz stan obu kart; doszedł bezpieczny przycisk „Pozostaw starą wstrzymaną i zamknij
+sprawę” (nie scala, nie akceptuje, nie zmienia produktów). Zamknięcie sprawy zapisuje decyzję w
+`staging_absence_decisions`, więc **sprawa nie wraca po kolejnym imporcie**; zmiana kodu, EAN lub DOT otwiera ją
+ponownie. Porównanie starej karty z bieżącą ofertą **sprawdza też DOT** — różne DOT nie tworzą już zgłoszenia
+o możliwym scaleniu (trzy błędne zgłoszenia 732903–732905 usunięte). Dla naprawdę zgodnych kart ekran pozwala wskazać
+jedną kartę: niewybrana zostaje wstrzymana, wybrana zostaje w katalogu, a baza zapamiętuje przypisany kod źródłowy.
+Powód: „użytkowniczka chce odrębnych produktów dla różnych DOT oraz jednoetapowego zapisu wyboru”.
+
+**Rekomendacja (moja):** ✅ nanieść — backend i tabela do karty **I15.4** (migracja `012` rośnie o piątą tabelę),
+panel do **I15.11** (ten sam obszar co „Braki w cenniku”). ⚠ To już trzecia warstwa dokładana do `staging_policy.cjs`
+w ciągu doby (298 → 407 → 488 → 665 linii) — patrz nota o zamrożeniu niżej.
+
+---
+
+### #107 · 2026-09-23 11:27 · [BACKEND] · zatwierdzanie zbiorcze stagingu blokowało panel na 5 s na pozycję
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-23, etykieta `20260923_performance` |
+| **Kategoria** | BACKEND (staging, `uwaga_cena`) |
+| **Pliki** | `mirror/backend/staging_policy.cjs`, `mirror/backend/uwaga_cena_patch.cjs` |
+| **Commit** | `a2c979b` |
+| **Do nowej wersji?** | ⬜ **do decyzji** |
+| **Status** | — |
+
+**Opis biznesowy (CHANGELOG Ani).** „Zapis uwagi o cenie przy zatwierdzaniu stagingu i zbiorczym dodawaniu produktów
+korzysta z tego samego połączenia do bazy co operacja główna; nie czeka na własną blokadę przy zatwierdzaniu wielu
+pozycji.” Powód: „po każdej pozycji zatwierdzania zbiorczego następował pięciosekundowy błąd blokady, przez co panel
+przestawał odpowiadać także na zwykłe odczyty”.
+
+**Rekomendacja (moja):** ⬜ **sprawdzić, czy nas dotyczy, zanim cokolwiek naniesiemy.** To naprawa skutku architektury
+produkcji: `uwaga_cena_patch.cjs` otwiera WŁASNE połączenie do `data.db` (ten sam wzorzec co `payment_blocks.cjs`).
+Odbudowa ma jedno połączenie i `uwaga_cena` jako normalną kolumnę modelu, więc problem prawdopodobnie u nas nie istnieje.
+Karta **I15.4** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i zapisać wynik zamiast portować mechanicznie.
+
+*Pominięte — triaż 2026-09-23 (zakres `abe5f14..88fa31c`, ticket 112):*
+- **16 commitów `[FRONTEND]`** (22.09 21:00 – 23.09 08:00, co godzinę) — wyłącznie regeneracja
+  `mirror/frontend/ex-port-files/sellycsv-*.csv`. ⚠ **Częstotliwość wzrosła z dobowej na GODZINOWĄ** — to skutek #104
+  (zmiana dostępności uruchamia odświeżenie CSV), nie osobna zmiana.
+- `85e8322` (23.09 09:00, `backup_cleanup`) — **usunięcie 118 plików `.bak`** z katalogu produkcji (−95 087 linii)
+  plus raport JSON. Porządki, zero kodu. ⚠ Skutek dla nas: część kopii `.bak`, do których odwołują się starsze wpisy
+  backlogu, **nie istnieje już na `origin/main`** — przy analizie łatek trzeba sięgać do historii gitowej
+  (`git show <starszy-commit>:<ścieżka>`), nie do stanu bieżącego.
+
