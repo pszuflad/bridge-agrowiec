@@ -145,3 +145,46 @@ Brak zmian łamiących kontrakt API. Dwie zmiany widoczne dla użytkownika i dla
   Tak jest w produkcji i tak zostawiam; gdyby kiedyś doszło czwarte, warto rozważyć wspólne źródło.
 - **`PATCH` nie pozwala edytować pola** (D6) — zgodnie z produkcją. Gdyby Ania kiedyś chciała
   edycji ręcznej, to osobna decyzja i osobny ticket.
+
+## Aktualizacja dokumentacji
+
+Trzy doc-checkery równolegle. `docs/rebuild-roadmap.md` **nietknięta** (zmienia ją wyłącznie
+koordynator); `contract/` **nietknięty** (i to jest wynik pomiaru, nie przeoczenie).
+
+### `docs/karty/I15.3/karta.md` + wejścia dla przyszłych kart
+- Stan: ✅ 2026-09-23 · ticket 122. Wpisy backlogu poprawione na `#73, #76, #102, #104 (nie: #77)`.
+- **Usunięte jako obalone:** (a) „#73 w API i UI: zmierz, jak produkcja je wystawia" — produkcja
+  go nie wystawia; (b) „#77: wstrzymane w eksporcie ze stanem 0" — stan pośredni, cofnięty przez
+  #104, nigdy nie wszedł do odbudowy; (c) źródło prawdy `7d6cfc9` → `88fa31c`.
+- „Dowiezione": faktyczny zakres + pomiar CSV z wyjaśnieniem, **dlaczego liczba wierszy się nie zmienia**.
+- „Do koordynatora": polecenie crona, sygnatura `wygenerujCsvSelly` dla I15.10, fakt o nieaktualnym
+  `mirror/` na `develop`, fakt o zaszytej ścieżce w `payment_blocks.cjs`.
+- **Nowe:** `docs/karty/I15.10/wejscie-122.md` (sygnatura do wywołania in-process + ostrzeżenie, że
+  generowanie jest SYNCHRONICZNE i blokuje pętlę zdarzeń, podczas gdy oryginał odpalał podproces),
+  `docs/karty/I15.9/wejscie-122.md` (delta instrukcji dla Ani: nowa kolumna i 60. kolumna CSV,
+  z uwagą, że pola nie da się sprawdzić `curl`em — produkcja też go z API nie oddaje).
+
+### `docs/rebuild-backlog.md` — 6 wpisów
+- **#73** ✅ zrobione (schemat w 107, katalog i CSV w 122) + pomiar rozstrzygający.
+- **#76** ✅ zrobione; pkt 3 (`R/D`) oznaczony jako **potwierdzony testem**, nie założony.
+- **#77** — ⚠ **najważniejsza korekta:** część CSV zmieniona z „✅ nanieść" na **„NIE nanosić —
+  obalona przez #104"**. Backlog trzymał stan z triażu 18.09; bez tej poprawki następna sesja mogłaby
+  w dobrej wierze „dokończyć" #77 i cofnąć #104.
+- **#102** ✅ zrobione. **#104** — część CSV ✅, reszta (staging, `availability_sync`, delta) otwarta
+  dla I15.4/I15.10. **#101** — status bez zmian (zamknięty przez Anię), dopisany fakt o fallbacku i MO6.
+
+### `docs/spec-backend/wpis-122.md` (nowy) i `docs/cutover.md`
+- Wpis: pomiar + mechanizm (trzeci udokumentowany przypadek po `uwagaCena`), dwie pułapki pomiarowe,
+  stan generatora po tickecie.
+- `cutover.md`: dokładne polecenie crona w rozdz. 2 i w checkliście rozdz. 8, wraz z tym, że wymagany
+  jest tylko `DB_PATH`, `JWT_SECRET` świadomie nie, i że polecenie nie rusza `.htaccess`.
+  Sprawdzone: plik NIE zawierał zdania o „wstrzymanych ze stanem 0" — nic do prostowania.
+- `docs/spec-frontend.md`: „59 kolumn (15 domyślnych)" → „60 (16 domyślnych)", z notą, że u nas to
+  natywna kolumna React, a nie wstrzykiwany skrypt.
+- `docs/spec-backend.md`: bez zmian — świadomie, nic nie zostało obalone (sprawdzone `grep`em).
+
+### Zgłoszone przy okazji (poza zakresem, nienaprawione)
+- `docs/rebuild-backlog.md` ma **dwa wpisy o numerze #103** (z 22.09 i 22.09 17:30) — numeracja
+  zdubluje się przy kolejnych wpisach.
+- `rebuild/backend/test/alerty-katalogu.gate.test.ts` potrafi paść na limicie 20 s także w izolacji
+  (obserwacja reviewera; w moich biegach cała suita przechodziła).

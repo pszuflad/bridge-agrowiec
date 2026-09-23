@@ -3480,7 +3480,7 @@ różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej 
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
 | **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
-| **Status** | 🔨 w toku — część schematowa: **107 / migracja 011** (kolumna `blokowane_formy_platnosci` + backfill + triggery `products_blokowane_formy_ai/_au` bajt w bajt z `7d6cfc9`, pole ukryte w API); PR po próbie na kopii produkcji (23.09). Katalog i CSV zostają w I15.3. ⚠ Ania 22.09 zgłaszała puste pole przy nowych produktach → **#101 zamknięte 23.09**: pomiar i potwierdzenie Ani — problemu nie ma. |
+| **Status** | ✅ **zrobione — schemat w 107 / migracja 011, katalog i CSV w ticketcie 122 (I15.3, 2026-09-23).** 60. kolumna CSV `Blokowane-formy-platnosci` i kolumna „Blokowane formy płatności” w `/katalog` naniesione. Pole pozostaje ukryte w `GET /api/products` — patrz „Szczegół techniczny” niżej, to nie jest dług, tylko odtworzenie produkcji. ⚠ Ania 22.09 zgłaszała puste pole przy nowych produktach → **#101 zamknięte 23.09**: pomiar i potwierdzenie Ani — problemu nie ma. |
 
 **Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
 i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
@@ -3502,6 +3502,16 @@ blokowane_formy_platnosci TEXT`, uzupełnia istniejące wiersze i zakłada trigg
 w `try/catch` z logiem. `adapter.recordToSuroweDostawca()` dokłada `s.blokowaneFormyPlatnosci`.
 `generate_selly_export.cjs` dostaje 60. kolumnę i fallback `getBlockedPaymentForms(row.dostawca)`,
 gdy pole w bazie puste.
+
+**Pomiar rozstrzygający (ticket 122, 23.09).** Oryginał `88fa31c` postawiony na kopii
+`db/snapshot.db` z kolumną wypełnioną dla 7405 produktów i obydwoma triggerami (via
+`payment_blocks.ensurePaymentBlocks()`) oddaje na `GET /api/products?limit=5` **72 klucze, bez
+`blokowaneFormyPlatnosci`** — `grep -c blokowane_formy_platnosci mirror/backend/index.cjs` = **0**,
+bundle nie zna kolumny dokładanej runtime'owym `ALTER TABLE`, a produkty czyta Drizzle bez jawnej
+listy pól (ten sam mechanizm co `uwagaCena`). Dlatego wartość w katalogu produkcja liczy w
+przeglądarce (`payment-blocks-injection.js`), a nie z API — i odbudowa robi identycznie
+(`rebuild/frontend/src/pages/katalog/formatowanie.tsx`). Pole zostaje w `KOLUMNY_POZA_KONTRAKTEM`,
+fixture'y i `openapi.yaml` bez zmian.
 
 **Rekomendacja (moja).** ✅ **nanieść** — to nowa funkcja produktowa, nie defekt, i dotyka trzech
 warstw naraz. Trzy uwagi:
@@ -3589,7 +3599,7 @@ Wprost: **`ensureApplicationRules()` jest w odbudowie nowym bytem** (dziś `grep
 | **Pliki** | `mirror/backend/generate_selly_export.cjs` (baki `.bak_pre_selly_category_names_20260914_130000`, `.bak_fix_polish_l_20260914_131800`, `.bak_pre_restore_rd_header_20260914_140000`) |
 | **Commit** | `b580628` (2026-09-14 14:00 — trzy wpisy CHANGELOG w jednym commicie) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — do naniesienia `toSellyCategoryName` (pkt 1–2); pkt 3 (nagłówek `R/D`) odbudowa już ma. |
-| **Status** | — zatwierdzone; **jeden ticket CSV razem z #73 i #77**. |
+| **Status** | ✅ **zrobione ticketem 122 (I15.3, 2026-09-23).** Pkt 1–2: `toSellyCategoryName` → `nazwaKategoriiSklepu`, z jawnym `ł`→`l`, naniesione i pokryte testem (`Przemysłowe`→`Opony przemysłowe`). Pkt 3: potwierdzone testem, nie tylko założone — nagłówek `R/D` na pozycji 30 z wartościami „Radialna”/„Diagonalna”. |
 
 **Opis biznesowy.** Trzy poprawki tego samego pliku w ciągu godziny, wszystkie wokół importera CSV
 Selly. (1) Automatyczny integrator o 12:00 wciąż przypisywał produkty do starych, ukrytych kategorii
@@ -3624,7 +3634,7 @@ budowany przez `normalize('NFD')`, ma ten sam defekt.
 | **Pliki** | `mirror/backend/generate_selly_export.cjs` (bak `.bak_pre_wstrzymane_zero_20260914_153400`), `selly/sync_delta.cjs` (bak j.w.) |
 | **Commit** | `94492d1` (2026-09-14 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — część CSV teraz (jeden ticket z #73/#76), część delta razem z 13d. |
-| **Status** | część CSV → ticket CSV (#73/#76), status bez zmian tutaj; część delta → ✅ **zrobione w I15.6** (ticket 108, 2026-09-22): `findDeltaProducts` obejmuje `wstrzymany` z istniejącym wariantem, stan zerowany na 0 (test `selly.sync-delta.test.ts`). |
+| **Status** | ❌ **część CSV NIE naniesiona — obalona przez #104.** Zmiana `WHERE status='aktywny'` → `IN ('aktywny','wstrzymany')` ze stanem 0 została na produkcji **cofnięta** przez #104 (22.09, commit `abe5f14`): stan na `88fa31c` to znów tylko `aktywny`, plus zapis atomowy. Odbudowa filtru `IN(...)` z #77 nigdy nie przejęła, więc ticket 122 (I15.3, 23.09) nie miał tu czego cofać — naniósł tylko zapis atomowy (część #104). Zostaje delta → ✅ **zrobione w I15.6** (ticket 108, 2026-09-22): `findDeltaProducts` obejmuje `wstrzymany` z istniejącym wariantem, stan zerowany na 0 (test `selly.sync-delta.test.ts`) — ta część #77 wciąż aktualna, bez zmian. |
 
 **Opis biznesowy.** Produkt wstrzymany w Bridge, ale z dodatnim stanem, mógł zostawić w Selly
 nieaktualny dodatni stan — nie trafiał ani do CSV (filtr `status='aktywny'`), ani do delty API.
@@ -3643,12 +3653,14 @@ produkt OZKA z ceną CULTOR-a.
 `p.stan` w SELECT i w porównaniu z `sp.stan_wyslany` owinięte w
 `CASE WHEN p.status='wstrzymany' THEN 0 ELSE p.stan END`.
 
-**Rekomendacja (moja).** ✅ **nanieść** — to naprawa realnego błędu biznesowego (sprzedaż
-niedostępnego towaru), nie kosmetyka. Rozkłada się na dwie części o różnym losie:
-- **eksport CSV** → `rebuild/backend/src/selly/generator-csv.ts:158` (`.where(eq(products.status,"aktywny"))`)
-  i linia stdout `Liczba produktow (aktywnych): …` w tym samym pliku, którą trasa oddaje 1:1 —
-  **zmiana tekstu rusza fixture**, więc razem z #73 i #76 jako jeden ticket CSV;
-- **delta Toru 1** → ✅ zrobione w **I15.6** (ticket 108, 2026-09-22).
+**Rekomendacja (moja).** ⚠ **CSV: NIE nanosić — historia produkcji poszła dalej.** Pierwotnie
+rozkładała się na dwie części:
+- **eksport CSV** — plan „`WHERE status='aktywny'` → `IN(...)` ze stanem 0” jest **nieaktualny**:
+  produkcja sama to cofnęła w #104 (22.09), więc naniesienie dziś oznaczałoby cofnięcie się do
+  stanu pośredniego produkcji z 14–22.09, a nie dogonienie jej. Tekst stdout przeszedł tę samą
+  ewolucję: `(aktywnych)` → `(aktywnych i wstrzymanych)` (#77) → `aktywnych` (#104, naniesione
+  ticketem 122 jako D7);
+- **delta Toru 1** → ✅ zrobione w **I15.6** (ticket 108, 2026-09-22), bez zmian.
 
 ### #78 · 2026-09-17 · [BACKEND] · MO9: odrzucanie po stabilnym ID kategorii Magento 163 (quady/kosiarki)
 | pole | wartość |
@@ -4540,6 +4552,10 @@ w Selly. Karty I15.6 i I15.7 nie mają tu nic do zrobienia.
 produktu, więc nic się nie psuje; gdyby ten dostawca ruszył, jego produkty zostaną z pustym polem. Numery dla MO6
 trzeba wtedy wziąć od Ani.
 
+**Fakt z ticketu 122 (I15.3, 2026-09-23):** generator CSV odbudowy odtwarza ten sam fallback co
+produkcja (mapa po `dostawca`, gdy kolumna w bazie pusta) — MO6 i nieznany dostawca dają puste pole
+w 60. kolumnie, zamierzenie pokryte testem, nie defekt.
+
 **Rekomendacja koordynatora:** ❌ zamknięte — nic do zrobienia (potwierdzenie Ani, patrz wyżej).
 
 ---
@@ -4552,7 +4568,7 @@ trzeba wtedy wziąć od Ani.
 | **Kategoria** | DEPLOY / BACKEND (eksport CSV Selly) — luka cutoveru |
 | **Pliki** | produkcja: cron serwera uruchamia `mirror/backend/generate_selly_export.cjs` (`selly/routes.cjs:297` „Plik generowany cronem ~6:00”); odbudowa: `rebuild/backend/src/selly/generator-csv.ts` (tylko trasa ręczna `POST /api/selly/generate-csv`) |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D8)**, wymagane do cutoveru (Ania używa: „o 6 rano katalog wypycha nowy CSV na serwer”, Selly zaciąga go o 12:00) |
-| **Status** | — przypisane do karty I15.3 (polecenie CLI) + `docs/cutover.md` (przepięcie crona) |
+| **Status** | ✅ **zrobione ticketem 122 (I15.3, 2026-09-23).** `npm run selly:csv` (= `node dist/selly/csv-cli.js`, `rebuild/backend/src/selly/csv-cli.ts`) woła tę samą `wygenerujCsvSelly()` co trasa `POST /api/selly/generate-csv`; test porównuje plik z CLI i plik z trasy **bajt w bajt**. W środowisku wymaga tylko `DB_PATH` (⚠ pełny `wczytajEnv()` wymaga też `JWT_SECRET`, niezwiązanego z zadaniem crona — patrz `review.md` SHOULD-FIX); nie rusza `.htaccess`. Przepięcie crona zostaje w `docs/cutover.md`. |
 
 **Na czym polega.** Odbudowa ma generator (8a), ale nie ma nic, co uruchamia go codziennie — w produkcji robi to cron
 systemowy spoza aplikacji. Po cutoverze stary cron dalej uruchamiałby STARY skrypt na tej samej bazie (dałby plik, ale
@@ -4629,8 +4645,8 @@ nie przenosić (jak D5 dla reconcile Staging v2).
 | **Kategoria** | BACKEND + BAZA (staging, eksport CSV, Selly delta/full) + operacja na danych |
 | **Pliki** | `mirror/backend/availability_sync.cjs` (**nowy**), `staging_policy.cjs` (+87 l. → 488), `generate_selly_export.cjs` (+19), `selly/sync_delta.cjs` (+18), `selly/sync_full.cjs` (+3); `db/schema.sql`: `product_auto_suspensions`; jednorazowe: `apply_availability_20260922.cjs`, `zero_and_delete_agrorami_20260922.cjs` + archiwa JSON |
 | **Commit** | `abe5f14` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ⬜ **do decyzji (częściowo rozstrzygnięte)** |
+| **Status** | ⬜ **częściowo: CSV → ✅ zrobione ticketem 122 (I15.3, 2026-09-23)** — zapis atomowy naniesiony (`generator-csv.ts`, tmp+`renameSync` w tym samym katalogu); filtr „tylko aktywne” odbudowa miała już od I8a, więc nie było tu czego zmieniać. **Reszta (staging i auto-wstrzymania `product_auto_suspensions`, `availability_sync`, delta/tor pełny) NIE zrobiona** — należy do I15.4/I15.10, zostaje otwarta. |
 
 **Opis biznesowy (CHANGELOG Ani).** „Brak produktu w poprawnej pełnej ofercie natychmiast ustawia wstrzymany/0. Tabela
 `product_auto_suspensions` odróżnia automatyczny brak od ręcznego wstrzymania. Pewny powrót przywraca aktywność i bieżący
@@ -4650,8 +4666,9 @@ status/stan/cena produktu (`SELECT … FROM products WHERE id=?`), żeby nie wys
 `sync_full` pomija produkty wstrzymane po rozpoczęciu cyklu. Eksport CSV: tylko `aktywny`, zapis atomowy.
 
 **Rekomendacja (moja):** ✅ **nanieść** — bez tego nowy Bridge wysyłałby do sklepu stany produktów, których dostawca już
-nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4**, CSV tylko aktywne + zapis atomowy →
-**I15.3**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
+nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4** (otwarte), CSV tylko aktywne + zapis atomowy →
+**I15.3 — ✅ zapis atomowy zrobiony ticketem 122 (23.09); filtr „tylko aktywne” odbudowa miała już wcześniej, nic do
+naniesienia**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
 ⚠ Operacje na danych (395 wstrzymań, 179 usuniętych kart MO9) — **nie odtwarzamy** (decyzja D2: świeża kopia produkcji
 na staging), ale **trzeba je uwzględnić przy pomiarach**: liczba produktów w katalogu spadła o 179.
 

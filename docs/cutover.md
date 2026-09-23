@@ -50,7 +50,9 @@ przestoju je uporządkuje.
 
 > **Ustalenia z Anią (runda 3, 2026-09-22):** okno przełączenia **w weekend** (nie w dni robocze pn–pt), konkretny
 > dzień i porę ustala Paweł z Anią. **Cron CSV Selly o 6:00** (dziś uruchamia stary `generate_selly_export.cjs`) trzeba
-> przepiąć na polecenie generatora nowego stosu (backlog #102, karta I15.3). **Stary Bridge po przełączeniu NIE może
+> przepiąć na `cd <katalog backendu> && npm run selly:csv` (równoważnie
+> `node <katalog backendu>/dist/selly/csv-cli.js`; backlog #102, karta I15.3 — szczegóły w rozdziale 8).
+> **Stary Bridge po przełączeniu NIE może
 > działać równolegle** na tej samej `data.db` (dwa schedulery importu i dwie synchronizacje Selly) — **decyzja D9 (użytkownik, 2026-09-22):
 > stary Bridge wyłączony od razu po przełączeniu**; kod i kopia bazy zostają ~2 tygodnie na rollback; zmiany po
 > cutoverze wyłącznie w nowym stosie (`develop` → staging → test → produkcja).
@@ -437,7 +439,14 @@ rm -f data.db-wal data.db-shm            # resztki WAL po nowej bazie
 
 - [ ] Obserwacja przez pierwszy pełny cykl importu — czy scheduler ruszył i czy `/historia`
       notuje przebiegi.
-- [ ] Następnego dnia: po 6:00 — czy plik CSV dla Selly powstał (generuje go cron → polecenie z karty I15.3, backlog #102);
+- [ ] Następnego dnia: po 6:00 — czy plik CSV dla Selly powstał. Polecenie crona (karta I15.3,
+      backlog #102): `cd <katalog backendu> && npm run selly:csv` (równoważnie
+      `node <katalog backendu>/dist/selly/csv-cli.js`). W środowisku crona wymagany **tylko
+      `DB_PATH`** — `SELLY_CSV_DIR`/`SELLY_CSV_PLIK`/`SELLY_CSV_URL` mają domyślne wartości
+      produkcyjne (rozdział 4), a **`JWT_SECRET` nie jest potrzebny** (świadomie — linia
+      `crontab` nie dziedziczy środowiska procesu serwera; pokryte testem). Polecenie nadpisuje
+      wyłącznie sam plik CSV (plik tymczasowy + `rename`) i **nie rusza**
+      `ex-port-files/.htaccess` (pokryte testem) — ostrzeżenie o tym pliku patrz krok 6 wyżej;
       po **12:00** — czy Selly go zaciągnął (Ania, runda 3: Selly pobiera plik o 12:00).
 - [ ] Kopia `data.db.przed-cutover-*` zostaje **co najmniej tydzień** — dopiero potem kasujemy.
 - [ ] `docs/rebuild-roadmap.md` §6 — odnotować datę cutoveru.
