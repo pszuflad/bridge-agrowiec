@@ -25,7 +25,7 @@ automatyczne złączenie par wymaga innego podejścia niż przy markach (zob. `C
 **Co zobaczy:** dla miesiąca **07** dwa osobne wiersze tej samej marki, z różną średnią ceną.
 **Dlaczego:** `sezonowoscMiesieczna()` (`rebuild/backend/src/repos/analityka.ts:1507-1521`) robi
 `GROUP BY miesiac, marka` na surowym `historia_cen.marka`, a migracja `010` świadomie nie ruszała
-historii („dziennik stanu w chwili rejestracji", komentarz `010_marka_caps.sql:24-26`).
+historii („dziennik stanu w chwili rejestracji", komentarz `010_marka_caps.sql:31-33`).
 Zmierzone: `Alliance` 953 wiersze, `ALLIANCE` 650; zakresy dat nakładają się w lipcu.
 **Status:** backlog `#98` pkt 3, 🕒 po cutoverze.
 **Uwaga dla TEST.1:** uzasadnienie w samym wpisie backlogu („ma znaczenie dopiero, gdy grupowanie

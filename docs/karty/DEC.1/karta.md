@@ -152,7 +152,7 @@ Pomiary potwierdzone: (1) śmieci w marce — **2 produkty** (`21x7.00-15`, `18x
 (3) `historia_cen.marka` — `Alliance` **953** i `ALLIANCE` **650**; zakresy dat nakładają się
 w miesiącu „07".
 Migracja `rebuild/schema/010_marka_caps.sql` obejmuje wyłącznie `products.marka` i słownik
-`atrybuty_wartosci` rodzaju `marka`; komentarz :24-26 wprost wyłącza `historia_cen.marka`.
+`atrybuty_wartosci` rodzaju `marka`; komentarz :31-33 wprost wyłącza `historia_cen.marka`.
 Widoczność dziś: marki-śmieci **NIE wyciekają** do filtra katalogu — `listaMarek()`
 (`pages/katalog/filtrowanie.ts:152-163`) odrzuca wartości z cyfrą; pary `bieznik` **są widoczne**
 w `/atrybuty` (`PanelWartosci.tsx` listuje słownik bez deduplikacji → 8 wierszy zamiast 4).
@@ -173,7 +173,7 @@ nieistniejącego `runFullTodays` (decyzja 2026-09-23).
 ⭐ Ticket 121 znalazł przy okazji **drugi, niezależny błąd**: oryginał podaje `{forceSuppliers}`,
 a `runFullBatch` czyta `opts.suppliers` — „force MO1,MO2" wykonałoby rotację z dziś zamiast
 wskazanych dostawców. Też naprawione.
-Odbudowa: `src/routes/selly-sync.ts:154` i `:168` wołają `runFullBatch`; testy
+Odbudowa: `src/routes/selly-sync.ts:156` i `:179` wołają `runFullBatch`; testy
 `test/selly.sync.gate.test.ts:235` i `:249` — HTTP 200, nie 500.
 
 ### #108 — kolizje `kod_importu` · OTWARTY, CZEKA NA ANIĘ

@@ -1,6 +1,6 @@
 # 141-DOCS-runda-decyzyjna-backlog — runda decyzyjna backlogu (karta DEC.1)
 
-> Status: Draft
+> Status: Implemented
 > Branch: `docs/141-runda-decyzyjna-backlog`
 > Worktree: `.worktrees/141-DOCS-runda-decyzyjna-backlog`
 
@@ -24,7 +24,9 @@ zmergowany po napisaniu promptu) oraz `#135.1`, który sam ma ⬜ i domyka się 
 Zgodnie z poleceniem („aktualną listę bierz zawsze z narzędzia") rundą objęte są wszystkie 14.
 
 ## Decisions
-<uzupełniane po rundzie decyzyjnej z użytkownikiem>
+**Reguła nadrzędna (użytkownik, 2026-09-23):** wszystko, co da się zrobić po cutoverze —
+robimy po cutoverze; priorytet to szybkie wdrożenie produkcyjne. Decyzje per wpis:
+`docs/karty/DEC.1/karta.md` → „Decyzje".
 
 ## Implementation plan
 1. Ustalić stan faktyczny każdego wpisu (researcherzy + weryfikacja własna) — ZROBIONE.
@@ -55,9 +57,9 @@ Brak testów kodu — ticket nie rusza kodu. Weryfikacja:
 - Karty innych kart, `rebuild/**`, `contract/**`.
 
 ## Definition of done
-- [ ] Każdy wpis z listy narzędzia ma wypełnione `Do nowej wersji?` i `Status` z datą
-- [ ] `--do-decyzji` pokazuje wyłącznie wpisy czekające na Anię
-- [ ] `docs/karty/DEC.1/karta.md` opisuje STAN (nie zamiar), z dowodami plik:linia
-- [ ] `#135.1` zamknięty odsyłaczem do DEC.1
-- [ ] Zero zmian w `rebuild/` i `contract/`
+- [x] Każdy wpis z listy narzędzia ma wypełnione `Do nowej wersji?` i `Status` z datą
+- [x] `--do-decyzji` pokazuje wyłącznie wpisy czekające na Anię
+- [x] `docs/karty/DEC.1/karta.md` opisuje STAN (nie zamiar), z dowodami plik:linia
+- [x] `#135.1` zamknięty odsyłaczem do DEC.1
+- [x] Zero zmian w `rebuild/` i `contract/`
 - [ ] Gałąź zsynchronizowana z `origin/develop`, PR `MERGEABLE`
