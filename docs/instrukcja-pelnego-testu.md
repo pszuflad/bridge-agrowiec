@@ -35,8 +35,9 @@ i nic się nie stało" w zupełności wystarczy.
 
 **Co znaczy „Selly wyłączone":** integracja odmawia każdej operacji, nocna i dzienna
 synchronizacja nie chodzi, a hasła do sklepu celowo nie są tu wpisane. Nawet gdyby ktoś je
-wpisał, staging i tak nic nie wyśle. Wszystko, co zobaczysz na ekranie Selly w stylu „tryb
-wyłączony", jest **poprawne**.
+wpisał, staging i tak nic nie wyśle. Komunikat **„Integracja Selly wyłączona na tym
+środowisku"** na ekranie Selly jest **poprawny** — sekcje czytające dane lokalne (status pliku
+CSV, mapowanie dostawców, historia operacji) działają przy nim normalnie.
 
 ⚠ **Jedna rzecz, która z tego wynika i wygląda jak awaria.** Po imporcie, który zmienił
 dostępność produktu, **nie powstanie nowy plik CSV** — bo to część integracji ze sklepem,
@@ -211,7 +212,7 @@ wejdź, sprawdź, że ekran działa i wygląda sensownie, i zaznacz kratkę.
 - [ ] ✅ / ❌ — **Historia** — widać wpisy z ostatnich importów, filtry po dostawcy i typie działają.
 - [ ] ✅ / ❌ — **Archiwum importów** — filtry działają, a „Pobierz" zapisuje plik pod nazwą od dostawcy.
 - [ ] ✅ / ❌ — **Konfiguracja** — wszystkie osiem zakładek otwiera się, a ustawienia zapisują się i przeżywają odświeżenie strony.
-- [ ] ✅ / ❌ — **Selly** — ekran się otwiera i pokazuje „tryb wyłączony" (to poprawne, patrz wyżej).
+- [ ] ✅ / ❌ — **Selly** — ekran się otwiera i pokazuje „Integracja Selly wyłączona na tym środowisku" (to poprawne, patrz wyżej).
 - [ ] ✅ / ❌ — **Moje konto** — dane się zgadzają, zmiana hasła działa, „Wyloguj" wylogowuje.
 - [ ] ✅ / ❌ — **menu po lewej jest widoczne na KAŻDYM ekranie.**
 
@@ -229,16 +230,16 @@ ale nie są to nowe usterki:
 
 1. **Atrybuty, rodzaj „bieżnik" — cztery bieżniki widać podwójnie.** `FLOTATION T422` i
    `Flotation T422`, `LOGGER KING TRS-2` i `Logger King TRS-2`, `MAGLIFT LIP` i `Maglift LIP`,
-   `MG121 PROWADZĄCA` i `MG121 prowadząca` — 8 wierszy zamiast 4. Porządkowaliśmy pisownię marek,
-   ale nie bieżników. *(Jest o tym pytanie niżej.)*
+   `MG121 PROWADZĄCA` i `MG121 prowadząca` — każda para zajmuje dwa wiersze zamiast jednego.
+   Porządkowaliśmy pisownię marek, ale nie bieżników. *(Jest o tym pytanie niżej.)*
 
 2. **Analityka, „Sezonowy wzorzec cen" — `Alliance` i `ALLIANCE` jako dwie marki.** Dla lipca
    zobaczysz dwa wiersze tej samej marki z różną średnią ceną. Ta karta czyta archiwalny zapis
    cen, a archiwum celowo zostawiliśmy nietknięte — to dziennik stanu z chwili zapisu.
 
 3. **Analityka, „Historia dostępności" — kilka pozycji z niewłaściwym EAN-em i zawyżonym
-   procentem.** Przy dokładnym sprawdzaniu znajdziesz 9 takich pozycji. To usterka odziedziczona
-   po starym Bridgu; wcześniej jej nie było widać, bo ta karta była zawsze pusta.
+   procentem.** Przy dokładnym sprawdzaniu znajdziesz kilka takich pozycji. To usterka
+   odziedziczona po starym Bridgu; wcześniej jej nie było widać, bo ta karta była zawsze pusta.
 
 Poza tym nadal obowiązuje wszystko z sekcji **„Rzeczy, które wyglądają inaczej — i to jest
 w porządku"** w „Przeglądzie widoków" (adresy bez `#`, okna potwierdzeń w stylu panelu,
