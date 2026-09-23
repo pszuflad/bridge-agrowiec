@@ -243,11 +243,31 @@ describe("katalog — sortowanie i paginacja", () => {
 });
 
 describe("katalog — kolumny i podgląd produktu", () => {
-  it("domyślnie pokazuje 15 z 59 kolumn", async () => {
+  it("domyślnie pokazuje 16 z 60 kolumn", async () => {
     zamockujApi();
     render(<App />);
     await screen.findByTestId(`row-product-${PRODUKTY[0]?.id}`);
-    expect(screen.getByTestId("button-columns")).toHaveTextContent("15/59");
+    // 16/60 od ticketu 122 (backlog #73): doszła kolumna „Blokowane formy płatności",
+    // domyślnie włączona, bo w produkcji jest wstrzykiwana i widać ją zawsze.
+    expect(screen.getByTestId("button-columns")).toHaveTextContent("16/60");
+  });
+
+  /**
+   * Kolumna z backlogu #73 ma być widoczna BEZ grzebania w konfiguratorze — w produkcji
+   * wstrzykuje ją skrypt, więc Ania widzi ją dziś zawsze. Wartość liczy się z kodu dostawcy
+   * (`GET /api/products` tego pola nie niesie — zmierzone na oryginale @88fa31c).
+   */
+  it("kolumna blokowanych form płatności jest widoczna domyślnie i niesie listę", async () => {
+    zamockujApi();
+    render(<App />);
+    const pierwszy = PRODUKTY[0] as Produkt;
+    await screen.findByTestId(`row-product-${pierwszy.id}`);
+
+    expect(screen.getByTestId("header-blokowaneFormyPlatnosci")).toBeInTheDocument();
+    expect(screen.getByTestId("header-blokowaneFormyPlatnosci")).toHaveTextContent(
+      "Blokowane formy płatności",
+    );
+    expect(screen.getAllByTitle(/^20\d(, 2\d\d)+$/).length).toBeGreaterThan(0);
   });
 
   it("konfigurator kolumn dokłada kolumnę do tabeli", async () => {
