@@ -271,6 +271,53 @@ describe("pełny plik CSV — zdjęcie sufitu tylko dla eksportu (P10.5)", () =>
     expect(zapytaniaStanu.every((q) => !q.includes("limit=0"))).toBe(true);
   });
 
+  /**
+   * Decyzja D4: przycisk jest `disabled` i pokazuje spinner na czas pobierania pełnego zbioru.
+   * Serwer odpowiada <100 ms, ale transfer ~825 KB na wolnym łączu bywa odczuwalny — bez
+   * sygnału user kliknie drugi raz i dostanie drugi plik.
+   */
+  it("na czas pobierania przycisk jest nieaktywny i ma spinner", async () => {
+    let zwolnij: () => void = () => {};
+    const wstrzymane = new Promise<void>((res) => {
+      zwolnij = res;
+    });
+
+    zamockujApi();
+    // Nadpisujemy handler `?limit=0` tak, żeby wisiał, dopóki test go nie zwolni.
+    server.use(
+      http.get("*/api/analytics/ean/unique", async ({ request }) => {
+        const url = new URL(request.url);
+        if (url.searchParams.get("limit") === "0") {
+          await wstrzymane;
+          return HttpResponse.json({ rows: unikalne(PELNY) });
+        }
+        return HttpResponse.json({ rows: unikalne(SUFIT) });
+      }),
+    );
+
+    const uzytkownik = await otworzZakladke("tab-ean");
+    await screen.findByTestId("tabela-ean-unikalne");
+
+    const przycisk = await screen.findByTestId("csv-unique");
+    await waitFor(() => expect(przycisk).toBeEnabled());
+    expect(przycisk.querySelector(".animate-spin")).toBeNull();
+
+    await uzytkownik.click(przycisk);
+
+    // W trakcie pobierania: nieaktywny, ze spinnerem, bez pliku.
+    await waitFor(() => expect(przycisk).toBeDisabled());
+    expect(przycisk.querySelector(".animate-spin")).not.toBeNull();
+    expect(pobrania).toHaveLength(0);
+
+    zwolnij();
+
+    // Po pobraniu: znowu aktywny, bez spinnera, plik jeden.
+    await waitFor(() => expect(pobrania).toHaveLength(1));
+    await waitFor(() => expect(przycisk).toBeEnabled());
+    expect(przycisk.querySelector(".animate-spin")).toBeNull();
+    expect(wierszyDanych(pobrania[0]!.tresc)).toBe(PELNY);
+  });
+
   describe("błąd pobrania nie daje pliku", () => {
     it("trasa zwraca 500 → komunikat, ŻADNEGO pliku", async () => {
       zamockujApi({ unikalneBezLimitu: () => new HttpResponse(null, { status: 500 }) });
