@@ -3482,10 +3482,10 @@ potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać 
 | 0 | przygotowanie: odświeżenie bazy stagingu kopią produkcji, pomiar #101, podsumowanie Selly od Ani | ✅ 23.09 |
 | A | I15.1, I15.2, I15.3, I15.4a, I15.6, I15.7, I15.8, I15.10 (+ P10.5) | ✅ 22–23.09 |
 | B | **I15.4c** (ticket 129) → **I15.4b** (ticket 130) | ✅ 23.09 — ⚠ kolejność ODWRÓCONA wobec planu, patrz nota niżej |
-| C | **I15.10b** (montaż) ‖ **I15.5** („Rozstrzygnij") — rozłączne plikowo | ⬜ do startu |
-| D | **I15.11** (panel „Braki w cenniku") | ⬜ po I15.5 |
-| E | **I15.9** (delta dla Ani) → **TEST.1** (instrukcja pełnego testu) | ⬜ na końcu |
-| równolegle | **DEC.1** — runda decyzyjna (#135.1, jedenaście wpisów) | ⬜ niezależna |
+| C | **I15.10b** (montaż) ‖ **I15.5** („Rozstrzygnij") — rozłączne plikowo | ✅ 23.09 (tickety 139, 140) |
+| D | **I15.11** (panel „Braki w cenniku") | ✅ 24.09 (ticket 142) |
+| E | **I15.9** (delta dla Ani) → **TEST.1 ‖ TEST.2 ‖ TEST.3** (trzy dokumenty dla Ani) | ⬜ ostatnia fala |
+| równolegle | **DEC.1** — runda decyzyjna (#135.1, jedenaście wpisów) | ✅ 23.09 (ticket 141) |
 
 ⚠ **KOLEJNOŚĆ FAL B ODWRÓCONA — fakt, nie plan.** Plan zakładał I15.4b (importer) przed I15.4c (akceptacja).
 W rzeczywistości pierwszy wszedł **ticket 129 (I15.4c)** i to jego pliki są dziś **wspólną warstwą polityki
