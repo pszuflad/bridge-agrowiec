@@ -259,6 +259,25 @@ describe("Mutacje produktów", () => {
       expect(Object.keys(odp.body as object)).not.toContain("uwagaCena");
       expect(Object.keys(odp.body as object)).not.toContain("uwaga_cena");
     });
+
+    /**
+     * Migracja 011 (karta I15.1, backlog #73): kolumnę utrzymują triggery po `dostawca` — nie jest
+     * na liście pól edytowalnych, a do odpowiedzi nie wychodzi, dopóki kształtu nie zmieni I15.3.
+     */
+    it("`blokowaneFormyPlatnosci` — PATCH jej nie zapisuje, odpowiedź jej nie niesie", async () => {
+      const id = zasiejProdukt();
+      const przed = produktZBazy(id);
+      expect(przed.blokowane_formy_platnosci).not.toBeNull(); // MO5 — wypełnił trigger
+
+      const odp = await auth(request(srodowisko.app).patch(`/api/products/${id}`)).send({
+        stan: 2,
+        blokowaneFormyPlatnosci: "wstrzyknięte",
+      });
+      expect(odp.status).toBe(200);
+      expect(produktZBazy(id).blokowane_formy_platnosci).toBe(przed.blokowane_formy_platnosci);
+      expect(Object.keys(odp.body as object)).not.toContain("blokowaneFormyPlatnosci");
+      expect(Object.keys(odp.body as object)).toHaveLength(72);
+    });
   });
 
   // ——————————————————————————————————————————————————————————————————————————————————

@@ -43,7 +43,15 @@ function atrapaKlienta(): { klient: KlientSelly; wywolania: string[] } {
     updateProduct: metoda("updateProduct"),
     upsertProductWarehouse: metoda("upsertProductWarehouse"),
     setProductMultiCat: metoda("setProductMultiCat"),
-  } as unknown as KlientSelly;
+    getProduct: metoda("getProduct"),
+    listProductsByEan: metoda("listProductsByEan"),
+    listProductsPage: metoda("listProductsPage"),
+    listVariants: metoda("listVariants"),
+    createVariant: metoda("createVariant"),
+    updateVariant: metoda("updateVariant"),
+    // `satisfies` — metoda dopisana do `KlientSelly`, a pominięta tutaj, wywali typecheck,
+    // zanim test kompletności porówna listy z NIEPEŁNĄ atrapą (ticket 108).
+  } satisfies Record<keyof KlientSelly, unknown> as unknown as KlientSelly;
 
   return { klient, wywolania };
 }

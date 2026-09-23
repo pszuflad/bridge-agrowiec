@@ -50,11 +50,61 @@ export type StawkaVatSelly = { vat_id?: number; rate: number | string };
 export type MagazynSelly = { warehouse_id: number; name?: string };
 
 /**
+ * ── Model wariantowy (karta I15.6, ticket 108; backlog #60) ─────────────────────────────
+ *
+ * Cecha wariantu. Interesuje nas wyłącznie „Magazyny” — jej wartość (MO1..MO10) mówi,
+ * KTÓREGO dostawcy dotyczy wariant (`discovery.cjs:163-173`).
+ */
+export type CechaWariantu = { feature_id?: number; name?: string; value?: string };
+
+/** Wariant produktu Selly — cena i stan siedzą TUTAJ, nie na produkcie. */
+export type WariantSelly = {
+  variant_id: number;
+  default?: number;
+  features?: CechaWariantu[];
+};
+
+/** Produkt Selly w listach `GET /api/products` — tylko pola czytane przez discovery. */
+export type ProduktSelly = {
+  product_id: number;
+  product_code?: string | null;
+  provider_code?: string | null;
+};
+
+/** Cecha PRODUKTU Selly (poziom produktu, nie wariantu) — kształt z `mapper_v2.cjs:77-87`. */
+export type CechaProduktu = { name: string; values: unknown };
+
+/**
+ * `GET /api/products/{id}` — oryginał czyta `current.data?.data || current.data` (`sync_full.cjs:190`),
+ * więc produkt może przyjść w kopercie `data` albo goły. Interesują nas tylko `features`.
+ */
+export type ProduktSzczegolySelly = { product_id?: number; features?: CechaProduktu[] };
+export type OdpowiedzProduktu = ({ data?: ProduktSzczegolySelly } & ProduktSzczegolySelly) | null;
+
+/** Strona `GET /api/products` z metadanymi paginacji (`discovery.cjs:77-79`). */
+export type StronaProduktow = {
+  data?: ProduktSelly[];
+  __metadata?: { page_count?: number; total_count?: number };
+} | null;
+
+/** Ciało `POST`/`PUT` wariantu — pola wg `discovery.cjs:180-190,266-268` i `sync_delta.cjs:160`. */
+export type CialoWariantu = {
+  quantity?: number | null;
+  price?: number | null;
+  vat?: number;
+  ean?: string;
+  default?: number;
+  attributes?: unknown[];
+  features?: CechaWariantu[];
+};
+
+/**
  * Powierzchnia klienta, z której korzystają trasy i synchronizacja. Węższa niż moduł
- * oryginału — celowo: `listProducts`, `getProduct`, `deleteProduct`, `bulkPriceUpdate`,
+ * oryginału — celowo: `listProducts`, `deleteProduct`, `bulkPriceUpdate`,
  * `bulkWarehouseQuantity`, `listOrders`, `getOrder`, `listUnits`, `getProductMultiCat`
  * i `deleteProductMultiCat` nie są wołane z ŻADNEJ trasy (sprawdzone grafem wywołań
  * w `mirror/backend/selly/routes.cjs`), więc port bez konsumenta byłby martwym kodem.
+ * `getProduct` doszedł z Torem 2 (karta I15.7) — woła go `sync_full.cjs` (ścieżka A, #81).
  */
 export type KlientSelly = {
   ping(): Promise<WynikPing>;
@@ -75,6 +125,36 @@ export type KlientSelly = {
     dane: { warehouse_id?: number; quantity?: number },
   ): Promise<unknown>;
   setProductMultiCat(productId: number, categoryIds: number[]): Promise<unknown>;
+
+  /*
+   * ── Model wariantowy (karta I15.6) — konsumenci: `selly/rest/discovery.ts`, `sync-delta.ts`,
+   * `sync-full.ts` (I15.7).
+   *
+   * ⚠ DLACZEGO NAZWANE METODY, A NIE GENERYCZNE `api(metoda, sciezka, opcje)`. Oryginał woła
+   * `client.api(...)` wprost (`discovery.cjs:24`), ale blokada `SELLY_TRYB` (`tryb.ts`) stoi na
+   * podziale metod na zapisujące i odczytowe. Generyczne `api()` jest nieklasyfikowalne —
+   * w trybie `tylko-odczyt` przepuściłoby PUT wariantu do żywego sklepu. Każda metoda niżej
+   * odpowiada DOKŁADNIE jednemu wywołaniu `apiWithRetry` z oryginału (ścieżka + query + ciało).
+   */
+
+  /**
+   * `GET /api/products/{pid}` — Tor 2, ścieżka A (`sync_full.cjs:189`, karta I15.7): bieżące cechy
+   * produktu pod `buildFeaturesMirror`.
+   */
+  getProduct(productId: number): Promise<OdpowiedzProduktu>;
+  /** `GET /api/products?ean=…&limit=1` (`discovery.cjs:138`). */
+  listProductsByEan(ean: string): Promise<OdpowiedzListy<ProduktSelly>>;
+  /**
+   * `GET /api/products?sort_by=product_id&sort=ASC` — pierwsza strona bez `page`, kolejne
+   * z `&page=N` (`discovery.cjs:76,91`). Paginacja pod cache kodów produktów.
+   */
+  listProductsPage(page?: number): Promise<StronaProduktow>;
+  /** `GET /api/products/{pid}/variants` (`discovery.cjs:152`). */
+  listVariants(productId: number): Promise<OdpowiedzListy<WariantSelly>>;
+  /** `POST /api/products/{pid}/variants` (`discovery.cjs:192`). */
+  createVariant(productId: number, cialo: CialoWariantu): Promise<{ data?: WariantSelly } | null>;
+  /** `PUT /api/products/{pid}/variants/{vid}` — Tor 1 (`sync_delta.cjs:158`) i `discovery.cjs:266`. */
+  updateVariant(productId: number, variantId: number, cialo: CialoWariantu): Promise<unknown>;
 };
 
 /** Błąd HTTP z Selly — niesie status, żeby `api()` mogło ponowić na 401, a upsert na 400/409. */
@@ -328,5 +408,37 @@ export function stworzKlientaSelly(konfiguracja: KonfiguracjaSelly): KlientSelly
         body: { product_id: productId, categories },
       });
     },
+
+    // ── Model wariantowy (I15.6) ──────────────────────────────────────────────────────
+    //
+    // ⚠ Rzucają `BladSelly` na każdy status spoza 2xx — jak reszta pliku i jak `request()`
+    // w oryginale. Właśnie dlatego retry na HTTP 429 w `discovery.cjs` jest martwym kodem
+    // (backlog #66; nota przy `apiWithRetry` w `selly/rest/discovery.ts`).
+
+    getProduct: async (productId) =>
+      (await dane("GET", `/api/products/${productId}`)) as OdpowiedzProduktu,
+
+    /** `limit: 1` z oryginału — discovery bierze PIERWSZY trafiony produkt, duplikatów EAN nie bada. */
+    listProductsByEan: async (ean) =>
+      (await dane("GET", "/api/products", { query: { ean, limit: 1 } })) as OdpowiedzListy<ProduktSelly>,
+
+    listProductsPage: async (page) =>
+      (await dane(
+        "GET",
+        page === undefined
+          ? "/api/products?sort_by=product_id&sort=ASC"
+          : `/api/products?sort_by=product_id&sort=ASC&page=${page}`,
+      )) as StronaProduktow,
+
+    listVariants: async (productId) =>
+      (await dane("GET", `/api/products/${productId}/variants`)) as OdpowiedzListy<WariantSelly>,
+
+    createVariant: async (productId, cialo) =>
+      (await dane("POST", `/api/products/${productId}/variants`, { body: cialo })) as {
+        data?: WariantSelly;
+      } | null,
+
+    updateVariant: (productId, variantId, cialo) =>
+      dane("PUT", `/api/products/${productId}/variants/${variantId}`, { body: cialo }),
   };
 }

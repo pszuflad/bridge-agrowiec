@@ -48,9 +48,11 @@ describe("zastosujMigracje", () => {
     "008_alerty_katalogu_statusy.sql",
     "009_alerty_polskie_znaki.sql",
     "010_marka_caps.sql",
+    "011_blokowane_formy_i_triggery.sql",
+    "013_selly_products_warianty.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 28 tabel i 14 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 29 tabel i 19 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -59,7 +61,10 @@ describe("zastosujMigracje", () => {
     // 008 (P6.2) dokłada jedną tabelę z jednym indeksem — statusy pseudo-alertów katalogowych.
     // 009 (PR.3) to wyłącznie migracja danych `alerts` — bilans bez zmian.
     // 010 (PR.5) to migracja danych `products.marka` + słownika marek — bilans bez zmian.
-    expect(policzTabele(sqlite)).toBe(28);
+    // 011 (I15.1) dokłada kolumnę `products` i sześć triggerów — bilans tabel i indeksów bez zmian.
+    // 013 (I15.6) zostawia starą `selly_products` jako `selly_products_old` (z jej indeksem
+    // `_kod`), zabiera jej `_status` i zakłada nową tabelę z sześcioma indeksami: +1 tabela, +5.
+    expect(policzTabele(sqlite)).toBe(29);
 
     const indeksy = (
       sqlite
@@ -68,7 +73,7 @@ describe("zastosujMigracje", () => {
         )
         .get() as { c: number }
     ).c;
-    expect(indeksy).toBe(14);
+    expect(indeksy).toBe(19);
   });
 
   it("baza działa w trybie WAL (jak produkcja)", () => {
@@ -89,7 +94,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(28);
+    expect(policzTabele(sqlite)).toBe(29);
   });
 
   /**
@@ -99,8 +104,9 @@ describe("zastosujMigracje", () => {
    * po cichu (ktoś doda kolumnę do `001`, zapomni o `003`), a wtedy `INSERT … SELECT *`
    * przepisze dane do złych kolumn albo migracja padnie dopiero na produkcji.
    *
-   * Dlatego porównujemy kolumny ŻYWEJ tabeli z kanonem i dopuszczamy DOKŁADNIE dwie różnice:
-   * `szerokosc` REAL→TEXT (ta migracja) i doklejoną `uwaga_cena` (migracja 002).
+   * Dlatego porównujemy kolumny ŻYWEJ tabeli z kanonem i dopuszczamy DOKŁADNIE trzy różnice:
+   * `szerokosc` REAL→TEXT (ta migracja), doklejoną `uwaga_cena` (migracja 002) i doklejoną
+   * `blokowane_formy_platnosci` (migracja 011 — dochodzi po przebudowie, 003 jej nie kopiuje).
    */
   it("003 nie rozjeżdża `products` z kanonem — zmienia wyłącznie typ `szerokosc`", () => {
     const ddlKanonu = readFileSync(join(KATALOG_SCHEMATU(), "001_schema.sql"), "utf8");
@@ -126,6 +132,8 @@ describe("zastosujMigracje", () => {
     const oczekiwane = [
       ...kanon.map((k) => (k.nazwa === "szerokosc" ? { nazwa: "szerokosc", typ: "TEXT" } : k)),
       { nazwa: "uwaga_cena", typ: "TEXT" },
+      // migracja 011 (karta I15.1) — dokładana PO 003, więc przebudowy tabeli nie dotyczy.
+      { nazwa: "blokowane_formy_platnosci", typ: "TEXT" },
     ];
 
     expect(zywe).toEqual(oczekiwane);

@@ -12,12 +12,16 @@ if (!dbPath) {
 const katalog = znajdzKatalogMigracji();
 const { sqlite } = otworzBaze(dbPath);
 try {
-  const { zastosowane, pominiete } = zastosujMigracje(sqlite, katalog);
+  const { zastosowane, pominiete, bezTresci } = zastosujMigracje(sqlite, katalog);
   console.log(`migrate: baza ${dbPath}, migracje z ${katalog}`);
   console.log(
     `migrate: zastosowano ${zastosowane.length} (${zastosowane.join(", ") || "—"}), ` +
       `pominięto ${pominiete.length} (już zastosowane)`,
   );
+  if (bezTresci.length > 0) {
+    // Np. 003 na bazie produkcji, gdzie `szerokosc` jest już TEXT — odnotowana, treść niewykonana.
+    console.log(`migrate: w tym bez treści (warunek dyrektywy @pomin-jesli-…): ${bezTresci.join(", ")}`);
+  }
 } finally {
   sqlite.close();
 }

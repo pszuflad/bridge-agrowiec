@@ -14,7 +14,7 @@
 //  (`hasloHash`) — zgodnie z kontraktem (contract/README.md: „API zwraca camelCase").
 //  Terminy domenowe po polsku ZOSTAJĄ (kategoria, zastosowanie, cenaZakupu, dostawca).
 // ─────────────────────────────────────────────────────────────────────────────
-import { sqliteTable, AnySQLiteColumn, index, integer, text, real, foreignKey, primaryKey } from "drizzle-orm/sqlite-core"
+import { sqliteTable, AnySQLiteColumn, index, integer, text, real, foreignKey, primaryKey, unique } from "drizzle-orm/sqlite-core"
   import { sql } from "drizzle-orm"
 
 export const products = sqliteTable("products", {
@@ -105,6 +105,10 @@ export const products = sqliteTable("products", {
 	// NIE wychodzi w API — repos/products.ts wybiera kolumny projekcją kontraktową.
 	// Pisarz i `GET /api/products/uwagi-cena` dochodzą w 3d.
 	uwagaCena: text("uwaga_cena"),
+	// migracja 011 (karta I15.1, backlog #73): blokowane formy płatności per magazyn — wartość
+	// utrzymują triggery `products_blokowane_formy_ai/_au`, nie kod aplikacji.
+	// NIE wychodzi w API (repos/kolumny.ts) — wystawia ją karta I15.3.
+	blokowaneFormyPlatnosci: text("blokowane_formy_platnosci"),
 },
 (table) => [
 	index("idx_products_kod_importu").on(table.kodImportu),
@@ -359,9 +363,47 @@ export const atrybutyWartosciOdrzucone = sqliteTable("atrybuty_wartosci_odrzucon
 	index("idx_odrzucone_rodzaj").on(table.rodzaj),
 ]);
 
+// ── Karta I15.6 (ticket 108) — MODEL WARIANTOWY, migracja `013_selly_products_warianty.sql`.
+//
+// Klucz to (kod_importu, dostawca) → (selly_product_id, selly_variant_id): ten sam
+// `kod_importu` jest JEDNYM produktem w Selly z N wariantami, po jednym na dostawcę.
+// Cena i stan siedzą w Selly NA WARIANCIE (backlog #60, CHANGELOG produkcji 2026-09-07 20:03).
+//
+// `bridgeKod` nie jest już `UNIQUE` (unikatowa jest para), ale niesie pełny kod Bridge
+// (np. `MO2_19539`), więc join panelu I8 po `bridge_kod = products.kod` działa jak dawniej.
 export const sellyProducts = sqliteTable("selly_products", {
 	id: integer().primaryKey({ autoIncrement: true }),
+	kodImportu: text("kod_importu").notNull(),
+	dostawca: text().notNull(),
 	bridgeKod: text("bridge_kod").notNull(),
+	sellyProductId: integer("selly_product_id").notNull(),
+	sellyVariantId: integer("selly_variant_id"),
+	sellyCategoryId: integer("selly_category_id"),
+	sellyProducerId: integer("selly_producer_id"),
+	featureIdMagazyn: integer("feature_id_magazyn"),
+	ostatniaSync: text("ostatnia_sync").default("sql`(datetime('now'))`").notNull(),
+	ostatniStatus: text("ostatni_status").default("pending").notNull(),
+	ostatniBlad: text("ostatni_blad"),
+	cenaSprzedazyWyslana: real("cena_sprzedazy_wyslana"),
+	cenaZakupuWyslana: real("cena_zakupu_wyslana"),
+	stanWyslany: integer("stan_wyslany"),
+	utworzono: text().default("sql`(datetime('now'))`").notNull(),
+},
+(table) => [
+	unique().on(table.kodImportu, table.dostawca),
+	index("idx_selly_products_bridge").on(table.bridgeKod),
+	index("idx_selly_products_kod_imp").on(table.kodImportu),
+	index("idx_selly_products_dostaw").on(table.dostawca),
+	index("idx_selly_products_prodid").on(table.sellyProductId),
+	index("idx_selly_products_varid").on(table.sellyVariantId),
+	index("idx_selly_products_status").on(table.ostatniStatus),
+]);
+
+// Stara tabela sprzed modelu wariantowego, zachowana przez `ALTER TABLE … RENAME` (013).
+// Nic jej nie czyta — archiwum, jak u Ani (2174 wpisy MO1/MO2).
+export const sellyProductsOld = sqliteTable("selly_products_old", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	bridgeKod: text("bridge_kod").notNull().unique(),
 	sellyProductId: integer("selly_product_id").notNull(),
 	sellyCategoryId: integer("selly_category_id"),
 	sellyProducerId: integer("selly_producer_id"),
@@ -374,7 +416,6 @@ export const sellyProducts = sqliteTable("selly_products", {
 	utworzono: text().default("sql`(datetime('now'))`").notNull(),
 },
 (table) => [
-	index("idx_selly_products_status").on(table.ostatniStatus),
 	index("idx_selly_products_kod").on(table.bridgeKod),
 ]);
 

@@ -112,7 +112,7 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
    * tę kolumnę. To było błędne — ujawnienie byłoby ODSTĘPSTWEM od produkcji. Ten test pilnuje,
    * żeby nikt nie zdjął jej z `KOLUMNY_POZA_KONTRAKTEM` w dobrej wierze.
    */
-  it("GET /api/products NIE oddaje uwagaCena — tak jak produkcja (D1)", async () => {
+  it("GET /api/products NIE oddaje uwagaCena (D1) ani blokowaneFormyPlatnosci (I15.1)", async () => {
     for (const sciezka of ["/api/products", "/api/products?limit=5"]) {
       const odp = await request(srodowisko.app)
         .get(sciezka)
@@ -123,6 +123,10 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
       for (const pozycja of pozycje) {
         expect(Object.keys(pozycja), `${sciezka} — kolumna spoza kontraktu`).not.toContain(
           "uwagaCena",
+        );
+        // Migracja 011 (karta I15.1): wystawienie pola to decyzja karty I15.3, nie tej.
+        expect(Object.keys(pozycja), `${sciezka} — kolumna spoza kontraktu`).not.toContain(
+          "blokowaneFormyPlatnosci",
         );
         expect(Object.keys(pozycja), sciezka).toHaveLength(72);
       }

@@ -390,6 +390,9 @@ function normalizeRecord(rec) {
   }
 
   return {
+    // Retain the supplier's exact input before normalization can strip invalid
+    // suffixes, truncate a long number or discard an invalid value.
+    ean_raw: require('./staging_policy.cjs').rawEan(rec) ?? null,
     ean: eanValue,
     ean_lossy: eanLossy,
     kod_dostawcy: rec.kod_dostawcy ? String(rec.kod_dostawcy).trim() : null,
@@ -404,8 +407,9 @@ function normalizeRecord(rec) {
     // Adapter propaguje to do output i finalnie do products.uwaga_cena.
     uwaga_cena: rec.uwaga_cena || null,
     stan_magazynowy: normalizeQty(rec.stan_magazynowy),
-    // POPRAWKA 2026-09-01 (unifikacja kategorii): fallback z Wielkiej litery.
-    kategoria: rec.kategoria || 'Rolnicze',
+    // POPRAWKA 2026-09-17: kanonizujemy kategorię już na wyjściu każdego parsera.
+    // To zabezpiecza także ścieżki, które używają normalizeRecord() bez adaptera.
+    kategoria: capitalizeKategoria(rec.kategoria || 'Rolnicze'),
     oznaczenia_techniczne: rec.oznaczenia_techniczne || [],
     dostawca: rec.dostawca,
     // POPRAWKA 2026-06-30 (v4): DOT w osobnej kolumnie
@@ -647,4 +651,3 @@ module.exports = {
   dedupeSpeedSuffix,
   hasIndustrialMarkInBieznik
 };
-

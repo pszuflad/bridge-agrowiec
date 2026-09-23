@@ -61,6 +61,11 @@ describe("synchronizacja z Selly (blok 8a)", () => {
 
       const zapis = mapowanie("MO9_336320");
       expect(zapis).toMatchObject({
+        // #67 (ticket 108, D4 — świadome odstępstwo): para (kod_importu, dostawca) jest
+        // kluczem nowej tabeli; na produkcji ten INSERT pada na NOT NULL.
+        kodImportu: "798368",
+        dostawca: "MO9",
+        sellyVariantId: null,
         sellyProductId: (odp.body as { selly_product_id: number }).selly_product_id,
         ostatniStatus: "ok",
         ostatniBlad: null,
@@ -83,6 +88,23 @@ describe("synchronizacja z Selly (blok 8a)", () => {
       expect(mapowanie("MO9_336320")?.id).toBe(pierwszeId);
     });
 
+    /**
+     * #67 (D4 ticketu 108): produkt, którego mapowania nie da się zapisać (brak pary klucza),
+     * NIE trafia do Selly — inaczej każdy przebieg zakładałby w sklepie kolejny duplikat.
+     */
+    it("produkt bez `kod_importu` kończy się błędem PRZED wywołaniem Selly", async () => {
+      srodowisko.sqlite
+        .prepare("UPDATE products SET kod_importu = NULL WHERE kod = ?")
+        .run("MO9_336320");
+
+      const odp = await post("/api/selly/sync-product").send({ kod: "MO9_336320" });
+
+      expect(odp.status).toBe(500);
+      expect(odp.body).toMatchObject({ error: "brak kod_importu lub dostawca" });
+      expect(atrapa.liczba("createProduct")).toBe(0);
+      expect(mapowanie("MO9_336320")).toBeUndefined();
+    });
+
     it("stan magazynowy idzie osobnym wywołaniem, z magazynem z payloadu", async () => {
       await post("/api/selly/sync-product").send({ kod: "MO9_336320" });
 
@@ -94,18 +116,38 @@ describe("synchronizacja z Selly (blok 8a)", () => {
      * ⚠ `multi_cat` leci TYLKO wtedy, gdy są kategorie dodatkowe. Produkt z jednym
      * zastosowaniem nie generuje tego wywołania — inaczej bilibyśmy w cudze API bez potrzeby.
      */
+    /**
+     * ⚠ Od migracji 011 (karta I15.1, backlog #75) trigger `products_zastosowanie_au` rozpoznaje w
+     * kategoriach kanonicznych (Rolnicze/Przemysłowe/Ciężarowe/Leśne) tylko POJEDYNCZE wartości
+     * z zamkniętej listy — łańcuch `a + b` zamienia na „Uniwersalne/pozostałe". Kategoria spoza
+     * czterech kanonicznych przepuszcza `zastosowanie` bez zmian, więc łańcuch trzymamy na niej.
+     * To dosłowna kopia triggera produkcji (`7d6cfc9:db/schema.sql`), nie uproszczenie testu.
+     */
     it("`multi_cat` idzie tylko przy kategoriach dodatkowych", async () => {
       await post("/api/selly/sync-product").send({ kod: "MO9_336320" });
       expect(atrapa.liczba("setProductMultiCat")).toBe(0);
 
       srodowisko.sqlite
-        .prepare("UPDATE products SET zastosowanie = ? WHERE kod = ?")
-        .run("Ciągnik + Koparka", "MO9_336319");
+        .prepare("UPDATE products SET kategoria = ?, zastosowanie = ? WHERE kod = ?")
+        .run("Przyczepy", "Ciągnik + Koparka", "MO9_336319");
       await post("/api/selly/sync-product").send({ kod: "MO9_336319" });
 
       expect(atrapa.liczba("setProductMultiCat")).toBe(1);
       const wywolanie = atrapa.wywolania.find((w) => w.metoda === "setProductMultiCat");
       expect(wywolanie?.argumenty[1]).toEqual([33]);
+    });
+
+    it("w kategorii kanonicznej trigger zamienia łańcuch `a + b` na jedną wartość — bez `multi_cat`", async () => {
+      srodowisko.sqlite
+        .prepare("UPDATE products SET zastosowanie = ? WHERE kod = ?")
+        .run("Ciągnik + Koparka", "MO9_336319");
+      const { zastosowanie } = srodowisko.sqlite
+        .prepare("SELECT zastosowanie FROM products WHERE kod = ?")
+        .get("MO9_336319") as { zastosowanie: string };
+      expect(zastosowanie).toBe("Uniwersalne/pozostałe");
+
+      await post("/api/selly/sync-product").send({ kod: "MO9_336319" });
+      expect(atrapa.liczba("setProductMultiCat")).toBe(0);
     });
   });
 

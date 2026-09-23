@@ -55,6 +55,7 @@ function parseFile(_filePath) {
     records: result.records || [],
     errors: result.errors || [],
     odrzucone: result.odrzucone || [],
+    totalCount: result.totalCount,
     dostawca: DOSTAWCA
   };
 }

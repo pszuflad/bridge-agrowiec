@@ -1,0 +1,299 @@
+'use strict';
+
+const path = require('path');
+
+const DB_PATH = path.join(__dirname, 'data.db');
+const UNIVERSAL = 'Uniwersalne/pozostałe';
+
+const CATEGORY_VALUES = Object.freeze({
+  Rolnicze: Object.freeze([
+    'Ciągnik',
+    'Kombajn',
+    'Opryskiwacz',
+    'Przyczepa',
+    'Kosiarka/ogród',
+    'Wózek widłowy',
+    UNIVERSAL
+  ]),
+  Przemysłowe: Object.freeze([
+    'Ładowarka',
+    'Koparka',
+    'Kompaktor',
+    'Suwnica/dźwig',
+    'Maszyny górnicze',
+    'Wózek widłowy',
+    UNIVERSAL
+  ]),
+  Ciężarowe: Object.freeze([
+    'All position',
+    'Oś kierowana',
+    'Oś napędowa',
+    'Naczepa/przyczepa',
+    UNIVERSAL
+  ]),
+  Leśne: Object.freeze([
+    'Ciągnik leśny',
+    'Harwester',
+    'Forwarder',
+    'Skidder',
+    UNIVERSAL
+  ])
+});
+
+const CATEGORY_ALIASES = Object.freeze({
+  rolnicze: 'Rolnicze',
+  rolnicza: 'Rolnicze',
+  przemyslowe: 'Przemysłowe',
+  przemysłowe: 'Przemysłowe',
+  przemyslowa: 'Przemysłowe',
+  przemysłowa: 'Przemysłowe',
+  ciezarowe: 'Ciężarowe',
+  ciężarowe: 'Ciężarowe',
+  ciezarowa: 'Ciężarowe',
+  ciężarowa: 'Ciężarowe',
+  lesne: 'Leśne',
+  leśne: 'Leśne',
+  lesna: 'Leśne',
+  leśna: 'Leśne'
+});
+
+const APPLICATION_ALIASES = Object.freeze({
+  'ciągnik': 'Ciągnik',
+  'ciągnik leśny': 'Ciągnik leśny',
+  'kombajn': 'Kombajn',
+  'opryskiwacz': 'Opryskiwacz',
+  'przyczepa': 'Przyczepa',
+  'przyczepa / flotacja': 'Przyczepa',
+  'przyczepa/flotacja': 'Przyczepa',
+  'przyczepa leśna': 'Przyczepa',
+  'ładowarka': 'Ładowarka',
+  'ładowarka kołowa': 'Ładowarka',
+  'ładowarka rolnicza': 'Ładowarka',
+  'kosiarka': 'Kosiarka/ogród',
+  'kosiarka/ogród': 'Kosiarka/ogród',
+  'wózek widłowy': 'Wózek widłowy',
+  'koparka': 'Koparka',
+  'kompaktor': 'Kompaktor',
+  'kompaktor/walec': 'Kompaktor',
+  'suwnica/dźwig': 'Suwnica/dźwig',
+  'suwnice/dźwig': 'Suwnica/dźwig',
+  'maszyny górnicze': 'Maszyny górnicze',
+  'maszyny górnicze/kamieniołomy': 'Maszyny górnicze',
+  'maszyny górnicze/kamieniołomy (otr)': 'Maszyny górnicze',
+  'all position': 'All position',
+  'all-position': 'All position',
+  'oś kierowana': 'Oś kierowana',
+  'oś napędowa': 'Oś napędowa',
+  'naczepa': 'Naczepa/przyczepa',
+  'naczepa/przyczepa': 'Naczepa/przyczepa',
+  'harwester': 'Harwester',
+  'forwarder': 'Forwarder',
+  'skidder': 'Skidder',
+  'skider': 'Skidder',
+  'rolnicze (ogólne)': UNIVERSAL,
+  'przemysłowe (ogólne)': UNIVERSAL,
+  'ciężarowe (ogólne)': UNIVERSAL,
+  'leśne (ogólne)': UNIVERSAL,
+  'uniwersalne': UNIVERSAL,
+  'uniwersalne/pozostałe': UNIVERSAL,
+  'uniwersalne przemysłowe': UNIVERSAL,
+  'uniwersalne leśne': UNIVERSAL,
+  'implement rolniczy': UNIVERSAL
+});
+
+function normalizeKey(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('pl-PL');
+}
+
+function canonicalCategory(value) {
+  const raw = String(value || '').replace(/\s+/g, ' ').trim();
+  const key = normalizeKey(raw);
+  return CATEGORY_ALIASES[key] || raw || null;
+}
+
+function splitApplications(value) {
+  return String(value || '')
+    .replace(/forwarder\s*[,;/]\s*harwester/gi, 'Forwarder/Harwester')
+    .replace(/harwester\s*[,;/]\s*forwarder/gi, 'Forwarder/Harwester')
+    .split(/\s*(?:;|\+)\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+// Forwarder i Harwester zawsze wystepuja razem jako jedna wartosc "Forwarder/Harwester",
+// niezaleznie od tego czy zrodlowy wpis mial jeden z nich czy oba (prosba Anny 2026-09-17).
+const FORWARDER_HARWESTER = 'Forwarder/Harwester';
+const FORWARDER_HARWESTER_MEMBERS = new Set(['Forwarder', 'Harwester']);
+const CATEGORY_APPLICATION_REMAP = Object.freeze({
+  Rolnicze: Object.freeze({
+    'Ładowarka': 'Ciągnik'
+  })
+});
+
+function normalizeApplication(category, value) {
+  const canonical = canonicalCategory(category);
+  if (value === null || value === undefined || String(value).trim() === '') return null;
+  if (!CATEGORY_VALUES[canonical]) return String(value).replace(/\s+/g, ' ').trim();
+
+  const allowed = new Set(CATEGORY_VALUES[canonical]);
+  const mapped = splitApplications(value)
+    .map((item) => APPLICATION_ALIASES[normalizeKey(item)] || (item === FORWARDER_HARWESTER ? FORWARDER_HARWESTER : null))
+    .map((item) => CATEGORY_APPLICATION_REMAP[canonical]?.[item] || item)
+    .filter(Boolean);
+
+  const specific = [...new Set(mapped.filter((item) => item !== UNIVERSAL && (allowed.has(item) || item === FORWARDER_HARWESTER)))];
+  if (specific.length > 0) {
+    const hasForwarderHarwester = specific.some((item) => item === FORWARDER_HARWESTER || FORWARDER_HARWESTER_MEMBERS.has(item));
+    const rest = specific.filter((item) => !FORWARDER_HARWESTER_MEMBERS.has(item) && item !== FORWARDER_HARWESTER);
+    const ordered = CATEGORY_VALUES[canonical].filter((item) => rest.includes(item));
+    const parts = hasForwarderHarwester && allowed.has('Forwarder') ? [...ordered, FORWARDER_HARWESTER] : ordered;
+    if (parts.length > 0) return parts.join(' ; ');
+    if (hasForwarderHarwester) return FORWARDER_HARWESTER;
+  }
+  return UNIVERSAL;
+}
+
+function normalizeCategoryApplication(category, application) {
+  const kategoria = canonicalCategory(category);
+  return {
+    kategoria,
+    zastosowanie: normalizeApplication(kategoria, application)
+  };
+}
+
+function sqlQuote(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+function sqlCanonicalCategoryExpression(categoryExpression) {
+  const cases = Object.entries(CATEGORY_ALIASES)
+    .map(([raw, canonical]) => `WHEN LOWER(TRIM(${categoryExpression})) = LOWER(${sqlQuote(raw)}) THEN ${sqlQuote(canonical)}`)
+    .join(' ');
+  return `CASE ${cases} ELSE TRIM(${categoryExpression}) END`;
+}
+
+function sqlNormalizeExpression(categoryExpression, applicationExpression) {
+  const rawValues = new Set([
+    ...Object.keys(APPLICATION_ALIASES),
+    ...Object.values(APPLICATION_ALIASES),
+    'Forwarder',
+    'Harwester',
+    'Forwarder, Harwester',
+    'Harwester, Forwarder',
+    'Forwarder ; Harwester',
+    'Harwester ; Forwarder',
+    'Forwarder/Harwester',
+    'Harwester/Forwarder'
+  ]);
+  const categoryCases = [];
+  for (const category of Object.keys(CATEGORY_VALUES)) {
+    const valueCases = [];
+    for (const raw of rawValues) {
+      const normalized = normalizeApplication(category, raw);
+      valueCases.push(`WHEN LOWER(TRIM(${applicationExpression})) = LOWER(${sqlQuote(raw)}) THEN ${sqlQuote(normalized)}`);
+    }
+    categoryCases.push(
+      `WHEN LOWER(TRIM(${categoryExpression})) = LOWER(${sqlQuote(category)}) THEN CASE ${valueCases.join(' ')} ELSE ${sqlQuote(UNIVERSAL)} END`
+    );
+  }
+  return `CASE WHEN ${applicationExpression} IS NULL OR TRIM(${applicationExpression}) = '' THEN NULL ${categoryCases.join(' ')} ELSE TRIM(${applicationExpression}) END`;
+}
+
+function ensureApplicationRules(options = {}) {
+  const Database = require('better-sqlite3');
+  const dbPath = options.dbPath || DB_PATH;
+  const backfill = options.backfill === true;
+  const db = new Database(dbPath);
+  let updated = 0;
+  const byCategory = {};
+
+  try {
+    const categoryForNew = sqlCanonicalCategoryExpression('NEW.kategoria');
+    const overrideCategoryForNew = sqlCanonicalCategoryExpression('NEW.override_value');
+    const valueForNew = sqlNormalizeExpression('NEW.kategoria', 'NEW.zastosowanie');
+    db.exec(`
+      DROP TRIGGER IF EXISTS products_zastosowanie_ai;
+      DROP TRIGGER IF EXISTS products_zastosowanie_au;
+      DROP TRIGGER IF EXISTS manual_overrides_kategoria_ai;
+      DROP TRIGGER IF EXISTS manual_overrides_kategoria_au;
+
+      CREATE TRIGGER products_zastosowanie_ai
+      AFTER INSERT ON products
+      BEGIN
+        UPDATE products
+        SET kategoria = ${categoryForNew},
+            zastosowanie = CASE
+              WHEN NEW.zastosowanie IS NULL OR TRIM(NEW.zastosowanie) = '' THEN NEW.zastosowanie
+              ELSE ${valueForNew}
+            END
+        WHERE id = NEW.id;
+      END;
+
+      CREATE TRIGGER products_zastosowanie_au
+      AFTER UPDATE OF kategoria, zastosowanie ON products
+      BEGIN
+        UPDATE products
+        SET kategoria = ${categoryForNew},
+            zastosowanie = CASE
+              WHEN NEW.zastosowanie IS NULL OR TRIM(NEW.zastosowanie) = '' THEN NEW.zastosowanie
+              ELSE ${valueForNew}
+            END
+        WHERE id = NEW.id;
+      END;
+
+      CREATE TRIGGER manual_overrides_kategoria_ai
+      AFTER INSERT ON manual_overrides
+      WHEN NEW.field_name = 'kategoria'
+      BEGIN
+        UPDATE manual_overrides
+        SET override_value = ${overrideCategoryForNew}
+        WHERE id = NEW.id;
+      END;
+
+      CREATE TRIGGER manual_overrides_kategoria_au
+      AFTER UPDATE OF field_name, override_value ON manual_overrides
+      WHEN NEW.field_name = 'kategoria'
+      BEGIN
+        UPDATE manual_overrides
+        SET override_value = ${overrideCategoryForNew}
+        WHERE id = NEW.id;
+      END;
+    `);
+
+    // Backfill DOPIERO po podmianie triggerow: kazdy UPDATE ponizej odpala
+    // products_zastosowanie_au, ktory musi juz byc nowa wersja - inaczej
+    // stary trigger nadpisuje wynik backfillu (np. Forwarder/Harwester wraca
+    // do Uniwersalne/pozostale). Zob. incydent 2026-09-17 16:xx.
+    if (backfill) {
+      const rows = db.prepare(`
+        SELECT id, kategoria, zastosowanie
+        FROM products
+        WHERE zastosowanie IS NOT NULL AND TRIM(zastosowanie) <> ''
+      `).all();
+      const update = db.prepare('UPDATE products SET kategoria = ?, zastosowanie = ? WHERE id = ?');
+      db.transaction(() => {
+        for (const row of rows) {
+          const next = normalizeCategoryApplication(row.kategoria, row.zastosowanie);
+          if (next.kategoria !== row.kategoria || next.zastosowanie !== row.zastosowanie) {
+            update.run(next.kategoria, next.zastosowanie, row.id);
+            updated += 1;
+            byCategory[next.kategoria] = (byCategory[next.kategoria] || 0) + 1;
+          }
+        }
+      })();
+    }
+
+    return { ok: true, updated, byCategory };
+  } finally {
+    db.close();
+  }
+}
+
+module.exports = {
+  CATEGORY_VALUES,
+  UNIVERSAL,
+  canonicalCategory,
+  normalizeApplication,
+  normalizeCategoryApplication,
+  ensureApplicationRules
+};

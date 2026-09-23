@@ -72,6 +72,16 @@ przestoju je uporządkuje.
 
 ## 3. ⚠ Weryfikacja schematu bazy — NAJWAŻNIEJSZY KROK
 
+> **⭐ PRÓBA GENERALNA WYKONANA 2026-09-23 (ticket 113) — łańcuch migracji PRZECHODZI na kopii produkcji.**
+> Na kopii żywej `data.db` (8329 produktów, `.backup`, `integrity_check = ok`, brak `_migracje`) `npm run migrate`
+> z gałęzi I15.1 zastosował **12 migracji bez błędu**; `003_szerokosc_text.sql` i `013_selly_products_warianty.sql`
+> pominęły treść dzięki warunkom dyrektyw (produkcja ma już `szerokosc` TEXT i nowy kształt `selly_products`),
+> a `002_import.sql` przeszedł dzięki `@dodaj-kolumne-jesli-brak` (kolumna `uwaga_cena` już istnieje).
+> **Ręczna procedura opisana niżej (rejestrowanie `002` jako zastosowanej, wariant 003) przestaje być potrzebna,
+> o ile cutover idzie z kodem zawierającym I15.1.** Kontrola po migracji na kopii: triggery **6**, alerty z „?” **0**,
+> `marka='Alliance'` **0**, przewoźnicy **6**, puste blokady płatności **0**. Rozdział zostaw jako plan awaryjny
+> i powtórz próbę na świeżej kopii **w dniu cutoveru** — schemat produkcji zmieniał się we wrześniu kilka razy.
+
 ### Dlaczego to jest niebezpieczne
 
 Nasze migracje zakładają kształt tabel z `rebuild/schema/001_schema.sql`. **Produkcyjna
@@ -323,6 +333,13 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
 6. **Frontend na miejsce.** Podmień zawartość `public_html/panel` buildem z
    `rebuild/frontend/dist` i wgraj `.htaccess` z regułą proxy oraz SPA fallbackiem (wzór:
    `deploy/staging/htaccess`, z portem produkcyjnym).
+   ⚠⚠ **ZACHOWAJ `public_html/panel/ex-port-files/.htaccess`** — plik CSV dla Selly jest chroniony białą listą
+   IP (`Require ip 212.91.27.191 46.170.251.129` — integrator Selly + Agrowiec; **lista potwierdzona przez Anię
+   2026-09-23: „ma tam być tylko Selly i Agrowiec”, bez zmian po cutoverze**; wzór:
+   `git show origin/main:mirror/frontend/ex-port-files/.htaccess`). Podmiana zawartości panelu bez tego pliku
+   odbiera **Selly dostęp do codziennego CSV** (403) albo kasuje sam katalog eksportu. Ustalone 2026-09-23
+   ze specyfikacji Selly od Ani; wcześniej nie było tego w żadnym dokumencie wdrożeniowym.
+
    ⚠ **Usuń stare skrypty wstrzykiwane** — `selly-injection.js`, `pending-injection.js`,
    `freq-injection.js`. Wszystkie trzy zostały wchłonięte; zostawione podpięte robiłyby drugą,
    równoległą wersję tych ekranów.

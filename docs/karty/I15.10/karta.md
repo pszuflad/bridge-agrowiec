@@ -1,23 +1,30 @@
-# I15.10 — zmiana w toku na starym Bridge (zakres nieznany)
+# I15.10 — dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1)
 
-> **Stan:** ⏸ czeka na zmianę od Ani
-> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** — · **Zależy od:** triaż zmiany, gdy wpłynie
+> **Stan:** ⬜ gotowe (faza A — zależności zdjęte ticketem 117)
+> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #104 · **Zależy od:** — (I15.6 ✅, I15.7 ✅; hook dokłada I15.4b, generator woła w procesie — `wejscie-117.md`)
 > **Ticket:** —
 
-Założona przez koordynatora ticketem `104-DOCS-plan-i15`, 2026-09-22.
+Przepisana z karty-rezerwy przez koordynatora (ticket 110, triaż 22.09 wieczór). Źródło prawdy: `origin/main` na `abe5f14`.
 
 ## Zakres
-Paweł (22.09): po uzgodnieniu zamrożenia produkcji **jedna zmiana jest jeszcze w trakcie** w starym Bridge — dojdzie
-co najmniej jeden ticket. Treść nieznana. Wskazówka z odpowiedzi Ani na 2.1: „poprawiamy logikę tak jak np. w stagingu
-bo za dużo śmieci tam wpada” — możliwe, że dotyczy stagingu (wtedy zależność od I15.4).
-Gdy commit `sync(vps)` wpłynie: triaż (`/triaz-zmian`) → wpis backlogu → decyzja użytkownika → uzupełnienie tej karty
-(zakres, pliki, zależności) przez koordynatora.
+- **`availability_sync.cjs` (nowy moduł):** `request(db, dostawca)` kolejkuje odświeżenie — uruchamia generator CSV
+  w osobnym procesie, a po nim `syncDelta` dla dotkniętych dostawców; okresowa synchronizacja zostaje mechanizmem
+  ponawiania; błąd tylko loguje.
+- **`selly/sync_delta.cjs` (zmiany z #104):** warunek `WHERE` obejmuje wstrzymane z wariantem, ale **wyklucza** te,
+  które mają inną aktywną ofertę w tej samej grupie `kod_importu`; **mapowany wariant bez EAN też się zeruje**;
+  tuż przed wysyłką czytany jest ŻYWY `status`/`stan`/`cena_sprzedazy` produktu (import mógł wstrzymać pozycję
+  w trakcie biegu) — przy `wstrzymany` wysyłany jest stan 0.
+- **`selly/sync_full.cjs` (Tor 2, #104):** tuż przed wysyłką czytany jest żywy `status`/`stan`; produkt wstrzymany
+  po rozpoczęciu cyklu jest pomijany. I15.7 zamknęła się na stanie `7d6cfc9`, więc ta poprawka należy do tej karty —
+  szczegóły i dokładny fragment: `wejscie-111.md`.
 
 ## Pliki (wyłączna własność)
-Do ustalenia po triażu.
+`rebuild/backend/src/selly/rest/sync-delta.ts` i `sync-full.ts` (tylko zmiany z #104), nowy moduł dostępności,
+montaż uzgodniony z I15.8; testy.
+NIE: generator CSV (I15.3), staging i auto-wstrzymania (I15.4).
 
 ## Decyzje
-—
+Decyzje D1–D9 z bloku I15 obowiązują. Port 1:1 z `abe5f14`.
 
 ## Dowiezione
 —

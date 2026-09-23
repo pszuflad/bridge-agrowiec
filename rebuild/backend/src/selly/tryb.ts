@@ -39,6 +39,8 @@ export const METODY_ZAPISUJACE = [
   "updateProduct",
   "upsertProductWarehouse",
   "setProductMultiCat",
+  "createVariant",
+  "updateVariant",
 ] as const satisfies readonly (keyof KlientSelly)[];
 
 /** Metody wyłącznie odczytowe — przechodzą w trybie `tylko-odczyt`. */
@@ -48,6 +50,10 @@ export const METODY_ODCZYTU = [
   "listCategories",
   "listVatRates",
   "listWarehouses",
+  "getProduct",
+  "listProductsByEan",
+  "listProductsPage",
+  "listVariants",
 ] as const satisfies readonly (keyof KlientSelly)[];
 
 /**

@@ -17,6 +17,40 @@ danych dla odbudowy backendu.
 | `008_alerty_katalogu_statusy.sql` | **Karta P6.2** (`77-FEATURE-pseudo-alerty-katalogowe`): tabela `alerty_katalogu_statusy` (+ indeks na `klucz`) dla statusu pseudo-alertów katalogowych. ⚠ **Ta migracja NIE odtwarza stan produkcji** — produkcja tej tabeli nie ma (status żył w IndexedDB przeglądarki), to nowa funkcja odbudowy. Na cutoverze tworzy pustą tabelę = wszystkie pseudo-alerty katalogowe startują jako „nowy". |
 | `009_alerty_polskie_znaki.sql` | **Karta PR.3** (`92-CHORE-migracja-typow-alertow`): migracja DANYCH `alerts` — polskie litery zamienione na „?" wracają (`B??d pobierania`→`Błąd pobierania`, `R?czny upload`→`Ręczny upload`, `B??d HTTP`→`Błąd HTTP`; w `opis` fragmenty szablonu `produkt?w`→`produktów`, `kluczowe/b??dy`→`kluczowe/błędy`). Na `db/snapshot.db`: 435 `typ` + 2219 `opis`. ⚠ **Świadome odstępstwo od produkcji** — tam „?" są wpisane w literały bundla i produkcja psuje każdy nowy alert aż do cutoveru; odbudowa pisze poprawnie. Test na kopii snapshotu: `SNAPSHOT_DB=… npx vitest run test/db.migracje.test.ts`. |
 | `010_marka_caps.sql` | **Karta PR.5** (`101-CHORE-migracja-marka-caps`, backlog #92): migracja DANYCH `products.marka` — marka, która w katalogu ma drugą formę różniącą się WYŁĄCZNIE wielkością liter, przechodzi na formę WIELKIMI; ze słownika `marka` znika forma niekanoniczna, gdy kanoniczna już w nim jest. Klucz porównania sprowadza `ąćęłńóśźż` przed `UPPER()` (ASCII-only), inne litery spoza ASCII nie są sprowadzane (ograniczenie opisane w pliku). Na `db/snapshot.db`: 1 produkt (`MO1_71970103` `Alliance`→`ALLIANCE`, razem 849) + 1 wpis słownika. ⚠ **Świadome odstępstwo od produkcji** (decyzja użytkownika 2026-09-22). `historia_cen.marka` celowo nietknięta. |
+| `011_blokowane_formy_i_triggery.sql` | **Karta I15.1** (`107-FEATURE-products-blokady-triggery`, backlog #73/#75/#79/#80/#82): kolumna `products.blokowane_formy_platnosci`, uzupełnienie jej dla istniejących wierszy (mapa MO1–MO10, MO6 celowo `NULL`) i sześć triggerów produkcji — blokady płatności po `dostawca`, kanoniczna kategoria i zamknięta lista zastosowań (`products`), kanoniczna kategoria w poprawkach ręcznych (`manual_overrides`). Treść triggerów to kopia bajt w bajt `git show 7d6cfc9:db/schema.sql:334-385`. Produkcja zakłada to samo przy każdym starcie (`payment_blocks.cjs`, `application_rules.cjs`), więc migracja jest **odporna na istniejące obiekty**: kolumna przez dyrektywę runnera (niżej), triggery `DROP IF EXISTS` + `CREATE`, uzupełnienie `WHERE … IS NOT`. Kategorii/zastosowań istniejących wierszy NIE normalizuje (produkcja przy starcie też nie; D2). Kolumna nie wychodzi w API do czasu I15.3. |
+| `013_selly_products_warianty.sql` | **Karta I15.6** (`108-FEATURE-selly-rest-discovery-delta`, backlog #60): `selly_products` → model wariantowy. Stara tabela przemianowana na `selly_products_old` (zachowuje dane i indeks `idx_selly_products_kod`), nowa z kluczem `(kod_importu, dostawca)`, `selly_variant_id`, `feature_id_magazyn` i sześcioma indeksami — DDL verbatim z `origin/main:db/schema.sql`. Danych nie przenosi (Ania też nie). ⚠ **Na bazie produkcji pada** (oba obiekty już istnieją od 07.09) i wycofuje się w całości — przy cutoverze weryfikacja kształtu + ręczny wpis do `_migracje`, jak dla 002. (`011`, `012` zarezerwowane dla I15.1 i I15.4.) |
+
+### Dyrektywy runnera (od ticketu 107)
+
+SQLite nie ma `ALTER TABLE … ADD COLUMN IF NOT EXISTS`, a runner wykonuje plik w jednej transakcji — gołe
+`ALTER` na kolumnie, którą produkcja już ma, wycofałoby całą migrację. Dlatego plik może zawierać linię-komentarz
+
+```sql
+-- @dodaj-kolumne-jesli-brak <tabela> <kolumna> <definicja>
+```
+
+Runner (`rebuild/backend/src/db/migrate.ts`, `zastosujDyrektywy`) wykonuje dyrektywy PRZED treścią pliku, w tej samej
+transakcji. Dla SQLite to zwykły komentarz, więc plik zostaje poprawnym SQL-em.
+
+| Dyrektywa | Co robi | Gdzie użyta |
+|---|---|---|
+| `-- @dodaj-kolumne-jesli-brak <tabela> <kolumna> <definicja>` | `PRAGMA table_info` → `ALTER TABLE … ADD COLUMN` tylko przy braku kolumny | 002 (`uwaga_cena`), 011 (`blokowane_formy_platnosci`) |
+| `-- @pomin-jesli-typ-kolumny <tabela> <kolumna> <typ>` | kolumna ma już ten typ → treść pliku i pozostałe dyrektywy NIE są wykonywane, migracja zostaje odnotowana jako zastosowana; brak kolumny = cel nieosiągnięty, treść się wykonuje | 003 (`szerokosc` już `TEXT`), 013 (`selly_products.selly_variant_id` = kształt wariantowy już jest) |
+
+**Po co pominięcia (ticket 107, decyzja koordynatora 2026-09-22).** Produkcyjna `data.db` nie pochodzi z kanonu:
+`products` ma tam 74 kolumny, `szerokosc` jest już `TEXT` (własna migracja `szertxt` Ani), a Selly przebudowane
+ręcznie 07.09. Migracje 002, 003 i 013 padały na niej po kolei, więc `npm run migrate` na kopii produkcji wymagał
+ręcznych kroków z `docs/cutover.md` §3. Z dyrektywami pełny łańcuch przechodzi sam — dowód:
+`rebuild/backend/test/db.migracje-produkcja.test.ts` (baza stawiana z `git show 7d6cfc9:db/schema.sql`).
+
+**Zmiana treści już zastosowanej migracji jest bezpieczna** — runner pomija pliki po NAZWIE (`_migracje`), więc bazy
+dev/staging, które mają 002/003/013 odnotowane, nie zobaczą nowej treści. Dotyczy to wyłącznie baz, gdzie danej
+migracji jeszcze nie ma — czyli produkcji.
+
+Warunek pominięcia ma wskazywać KSZTAŁT CELU migracji (kolumnę, którą ona wprowadza), a nie poszlakę w rodzaju
+nazwy tabeli — inaczej baza w nieznanym stanie zostałaby po cichu przepuszczona zamiast zatrzymać deploy.
+Nieznana dyrektywa, zła składnia albo brak tabeli = błąd i wycofanie całej migracji. ⚠ Linia zaczynająca się od `-- @` jest ZAWSZE traktowana jako dyrektywa — nie zaczynaj tak komentarzy
+opisowych. `npm run migrate` wypisuje osobno, które migracje odnotował bez wykonania treści.
 
 ## Skąd pochodzi
 
