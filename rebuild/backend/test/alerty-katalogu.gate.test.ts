@@ -271,7 +271,11 @@ describe("GATE — statusy pseudo-alertów katalogowych", () => {
       expect(odp.body).toEqual({ ok: true, zmienione: 20_000 });
       // Wszystkie to ta sama para (produkt, reguła) — zostaje ostatni odcisk.
       expect(wiersze().map((w) => w.id)).toEqual([`${idProduktu}-marza-niska-19999`]);
-    });
+      // Limit 120 s zamiast domyślnych 20 s. Zmierzone (ticket 132): 3,1 s na wolnej maszynie,
+      // 21,4 s przy load ≈ 19, 30,6 s przy load ≈ 34 — czyli o kolorze decydowało obciążenie,
+      // nie sam test. Budżet czasu (`tools/czas-testow.cjs`, 45 s) daje znać, gdyby czas urósł
+      // realnie; wtedy w grę wchodzi odłożony ticket 133-PERF (zapis porcjami).
+    }, 120_000);
 
     it("jeden zły id w paczce odrzuca całą paczkę", async () => {
       const odp = await ustaw({ ids: ["1-marza-niska-3", "śmieć"], status: "przejrzany" });

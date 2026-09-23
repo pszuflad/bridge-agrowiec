@@ -302,7 +302,11 @@ describe("2. Charakteryzacja na realnych cennikach MO1–MO10", () => {
 
       baza = bezTriggerowBazy(stworzTestowaBaze());
       porownajZWzorcem(uruchomPort(baza.db, kod, katalog, rekordy, overridy), wzorzec, kod);
-    });
+      // Limit 120 s zamiast domyślnych 20 s: MO5 to 1989 wierszy po 34 kolumny i przy kilku
+      // równoległych sesjach agentów bieg dobija do 22 s (na wolnej maszynie jest znacznie
+      // szybciej). Budżet czasu pilnuje, żeby pod podniesionym limitem nie schowała się
+      // regresja — `tools/czas-testow.cjs` (ticket 132).
+    }, 120_000);
   }
 });
 
