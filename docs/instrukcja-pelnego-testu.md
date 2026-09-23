@@ -52,9 +52,10 @@ zanim pozwoli je zaakceptować.
 
 **Czego się spodziewać:** baza jest kopią produkcji z 23 września, więc w poczekalni leży
 **dużo zgłoszeń sprzed tej zmiany** — przyszły wcześniej i nie przeszły przez nowe sprawdzenia.
-Panel **odmówi ich zaakceptowania**
-i pokaże okno „Nie zapisano zmian" z wyjaśnieniem *„To zgłoszenie pochodzi ze starego importu.
-Odśwież cennik przed akceptacją."*
+Panel **odmówi ich zaakceptowania** i pokaże okno **„Nie zapisano zmian"** z wyjaśnieniem — najczęściej *„To zgłoszenie pochodzi
+ze starego importu. Odśwież cennik przed akceptacją."*, a przy pozycjach z odznaką
+„Brak w cenniku" *„Brak trzech wiarygodnych potwierdzeń nieobecności. Wczytaj aktualny cennik."*
+Które wyjaśnienie dostaniesz, zależy od tego, czego akurat brakuje danej pozycji.
 
 **To nie jest usterka — to działające zabezpieczenie.** Żeby przetestować akceptację normalnie:
 
