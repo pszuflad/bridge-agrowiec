@@ -28,7 +28,7 @@ Staging v2 (backlog #99) dowiózł w produkcji backend i wstrzykiwaną nakładk�
 - **Gate odbudowy (fixtures):** **N/D — uzasadnione.** Dla czterech tras polityki `contract/fixtures/` nie zawiera nic i nie było czego nagrać (ustalenie D129.5 karty I15.4c). Ticket nie zmienia backendu ani `contract/openapi.yaml`.
 - **W zamian — gate na dosłowność:** `test/staging.rozstrzygnij.test.tsx` porównuje treść okna **znak w znak** z oryginałem @ `88fa31c` we wszystkich trzech gałęziach, a ciała żądań (`{action,targetCode}`, `{selectedCode,candidateVersion}`) ze schematami z `contract/openapi.yaml`. Lista `/paged` nadal jedzie z nagranego fixture'a, więc kształt wiersza pozostaje kontraktowy.
 - **Skuteczność gate'u zweryfikowana mutacją:** podmiana notatki w `polityka.ts` i frazy „RÓŻNY — nie łączyć” w oknie wywaliła dokładnie te testy, które ich pilnują (2 próby → 2 trafienia); źródła przywrócone z gita.
-- **Bramki:** `lint` ✓ · `typecheck` ✓ (trzy projekty tsconfig) · `build` ✓ · `npm test` ✓ **991 testów w 56 plikach** (przed kartą 957 w 55), Node 20.20.2. Przebiegnięte ponownie **po** synchronizacji z `develop`.
+- **Bramki:** `lint` ✓ · `typecheck` ✓ (trzy projekty tsconfig) · `build` ✓ · `npm test` ✓ **991 testów w 56 plikach** (przed kartą 957 w 55), Node 20.20.2. Przebiegnięte na finalnym stanie gałęzi, która zawiera całe `origin/develop` (`ab30674`).
 
 ## Breaking changes
 Brak dla użytkownika. Dwie zmiany sygnatur wewnętrznych, obie w plikach tej karty: `TabelaStagingu` wymaga propa `otworzRozstrzygniecie`, a mutacja `akcja` w `Staging.tsx` przyjmuje `{wykonaj, akceptacja}` zamiast gołej funkcji. ⚠ Dla karty I15.11: `zamockujApi()` w `staging.test.tsx` nie tworzy już handlerów sam — nowe trasy dokłada się w `test/msw/staging.ts`.
@@ -179,3 +179,4 @@ oba są wymagane przez DoD z `plan.md` i CLAUDE.md, i to jest łatwe do naprawie
 
 ---
 Ticket docs: `docs/tickets/140-FEATURE-staging-rozstrzygnij-frontend/`
+Zsynchronizowane z `develop` (`ab30674`); bramki przebiegnięte po synchronizacji.
