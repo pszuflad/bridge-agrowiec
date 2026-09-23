@@ -85,3 +85,76 @@ Brak zmian w API. **Jest natomiast zmiana zachowania procesu** i ona wymaga uwag
   jest poprawny `.env`. Dotyczy to też istniejącej trasy `POST /api/selly/generate-csv`
   (od I15.3), więc nie jest to dług wniesiony przez ten ticket.
 - **Brak testu na tożsamość `discoverySelly`** — patrz „Test results", ostatni punkt.
+
+## Review fixes applied
+
+Review (`review.md`): 3 BLOCKER / 3 SHOULD-FIX / 1 NICE-TO-HAVE. Kod produkcyjny bez zastrzeżeń
+— bramki potwierdzone niezależnie przez reviewera (112 plików / 1837 testów).
+
+**BLOCKER-y** — wszystkie trzy były pozycjami dokumentacyjnymi, rozliczonymi w Fazie 5:
+`docs/karty/I15.10b/karta.md` doprowadzona do STANU, `docs/rebuild-backlog/wpis-139.md` założony,
+`raport.md` zacommitowany (wszedł z commitem poprawek review).
+
+**SHOULD-FIX** — wszystkie trzy naprawione, commit `139-FEATURE: review fix …`:
+- `test/server.montaz-dostepnosci.test.ts` — `uruchomiony` przypisywane PRZED asercją obronną,
+  a sprzątanie w `afterEach` idzie przez `finally`. Wcześniej padnięcie asercji
+  `expect(zamknij).toBeDefined()` zostawiłoby na workerze Vitesta żywy nasłuch HTTP i handlery
+  sygnałów.
+- `wolnyPort()` opisuje swoje okno TOCTOU, a `vitest.config.ts` odnotowuje, że ten jeden plik
+  łamie niezmiennik „testy nie zajmują portu" — bo `server.ts` zawsze woła `listen()` i nie da
+  się tego obejść bez zmiany kodu produkcyjnego.
+- Komentarz w `zamknij()` nie obiecuje już, że trwający bieg kolejki „dobiega sam": mówi wprost,
+  że albo trafi na zamkniętą bazę (błąd złapany i zalogowany), albo utnie go `process.exit`.
+
+Po poprawkach powtórzone sabotaże 1 i 2 — oba nadal dają czerwony test.
+
+## Docs updates
+
+### `docs/karty/` (karta + wejścia)
+- `docs/karty/I15.10b/karta.md` — `> **Stan:** ✅ 2026-09-23 · 139-FEATURE-montaz-dostepnosci`;
+  `**Ticket:**` przeniesiony z 136 na 139 (136 dowiózł sam plan, PR #149). Nowa sekcja
+  „Dowiezione" z zakresem faktycznym i **jawnie oznaczonym odstępstwem od założenia karty**:
+  karta zakładała montaż bezwarunkowy, dowieziony jest za bramką `SELLY_TRYB`. Sekcja
+  „Do koordynatora" przepisana na dwa aktualne punkty (sprawdzenie `SELLY_TRYB` przed deployem,
+  otwarta sprawa bramki na `SELLY_CSV_DIR`); nieaktualne punkty o kolejności i ryzyku odłożenia
+  usunięte, nie dopisane obok.
+- **Nowy** `docs/karty/I15.9/wejscie-139.md` — I15.9 (ostatnia karta I15) dowiaduje się, że
+  łańcuch jest kompletny, ale **bezczynny przy `SELLY_TRYB=wylaczony`**, więc „na stagingu nic
+  się nie dzieje" nie jest dowodem zepsucia.
+- **Nowy** `docs/karty/TEST.1/wejscie-139.md` — instrukcja w układzie delty (co zmieniono →
+  polecenie → rezultat) z rozbiciem na oba tryby.
+
+### `docs/rebuild-backlog/`
+- **Nowy** `docs/rebuild-backlog/wpis-139.md`: `#139.1` (montaż + odstępstwo D1, ✅ wdrożone),
+  `#139.2` (`SELLY_CSV_DIR` bez własnej bramki, ⬜ do decyzji — odnotowane jako **nie dług tego
+  ticketu**, bo istnieje od I15.3 dla `POST /api/selly/generate-csv`).
+- `docs/rebuild-backlog.md` — korekta W MIEJSCU dwóch zdań obalonych przez ten ticket
+  (pole „Status" wpisu `#104` i blok „⭐ Zrealizowane" ticketu 119 mówiły, że moduł jest
+  „celowo niewpięty — czeka na I15.4b"). Plik nie urósł.
+- `docs/rebuild-backlog/wpis-129.md` — **bez zmian**: wiersz `#104` nie ma komórki
+  `Status`/`Do nowej wersji?`, więc regulamin nie daje prawa do edycji w miejscu. Odnośnik idzie
+  z `wpis-139.md`.
+
+### `docs/spec-backend/` i `docs/cutover.md`
+- **Nowy** `docs/spec-backend/wpis-139.md` — montaż, wspólna instancja `discoverySelly`,
+  kolejność względem `listen()`, wyrejestrowanie w `zamknij()`, skutek systemowy i odstępstwo
+  w kryterium bramki. Nic nie dopisane na koniec sekcji `docs/spec-backend.md`.
+- `docs/spec-backend.md` — **bez zmian**, sprawdzone `grep`em: nie zawiera zdania obalonego
+  przez ten ticket.
+- `docs/cutover.md` §4 — dwa wiersze tabeli zmiennych środowiskowych doprecyzowane:
+  `SELLY_TRYB` (bramkuje teraz także moduł dostępności — przy `wylaczony` import nie regeneruje
+  CSV i nie woła Toru 1, **cicho, bez błędu**) oraz `SELLY_CSV_DIR`/`SELLY_CSV_PLIK`/`SELLY_CSV_URL`
+  (ścieżka jest od teraz zapisywana automatycznie po każdym imporcie zmieniającym dostępność,
+  nie tylko ręcznym wywołaniem trasy).
+
+### Pre-existing issues zgłoszone przez doc-checkery (nie naprawione — cudza własność pliku)
+- `docs/spec-backend/wpis-119.md:57-58` — „moduł jest CELOWO niewpięty, wpięcie to karta I15.4"
+  jest po tym tickecie nieaktualne. Plik jest własnością ticketu 119, a regulamin
+  (`docs/spec-backend/README.md`) zabrania innym ticketom go edytować. Sprostowanie stoi
+  w `docs/spec-backend/wpis-139.md`, który się do niego odwołuje. **Do decyzji koordynatora.**
+- `docs/rebuild-backlog.md`, pole „Do nowej wersji?" wpisu `#104` — mówi „staging/auto-wstrzymania
+  zostają do I15.4b", choć ta praca jest już dowieziona ticketem 130. Niespójność sprzed tego
+  ticketu, dotyczy karty I15.4b. **Zgłoszone, nie poprawione.**
+- `docs/rebuild-backlog/wpis-129.md`, wiersz `#104` — opis „Import i `availability_sync` →
+  I15.4b / I15.10" jest nadal prawdziwy, ale nie wspomina montażu (I15.10b). Brak uprawnionego
+  miejsca do edycji w miejscu. **Do decyzji koordynatora.**
