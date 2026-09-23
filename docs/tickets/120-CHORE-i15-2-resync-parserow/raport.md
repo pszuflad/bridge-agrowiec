@@ -129,18 +129,18 @@ ma to być blokada akceptacji; w oknie przejściowym jest zwykłą nową pozycj�
 
 ### Bramki
 - **lint ✓ · typecheck ✓ · build ✓** (build kopiuje teraz 23 pliki do `dist/import/legacy/`, było 19)
-- **`npm test` ✓** — 1 649 testów, 101 plików.
+- **`npm test` ✓ — 101/101 plików, 1 648 testów zielonych, 3 pominięte, 0 czerwonych** (70,9 s).
+  Przebieg wykonany na **bezczynnej maszynie** (load 4,6), już po naprawie BLOCKER-a z review.
+  Baseline `develop` przed ticketem: 1 632 zielone — przybyło 16 testów.
 
-⚠ **Cztery testy w trzech plikach zaświeciły na czerwono w przebiegu zbiorczym i wszystkie cztery
-przechodzą w izolacji** (`silnik.charakteryzacja.test.ts` MO2 i MO5, `scheduler.test.ts` „po dwóch
-interwałach", `alerty-katalogu.gate.test.ts` „paczka 20 000 id") — sprawdzone: **110/110 zielonych**
-przy ponownym uruchomieniu tych trzech plików osobno.
-
-Przyczyna jest zmierzona, nie domniemana: na maszynie pracowały równolegle inne karty I15
-(`119-FEATURE-selly-dostepnosc-zawor` i `122-FEATURE-i15-3-blokady-platnosci-csv`), **load average
-sięgnął 36** przy 25 procesach node. Wszystkie cztery testy są wrażliwe na czas albo na rozmiar
-(scheduler mierzy interwały, `alerty` przetwarza paczkę 20 000 id, MO2 i MO5 to dwa największe
-cenniki). Żadnego z nich nie zmieniałem.
+ℹ **O czerwonych testach z wcześniejszych przebiegów — rozstrzygnięte, to były flaki od obciążenia.**
+We wcześniejszych przebiegach zbiorczych czerwieniły się cztery testy w trzech plikach
+(`silnik.charakteryzacja.test.ts` MO2 i MO5, `scheduler.test.ts` „po dwóch interwałach",
+`alerty-katalogu.gate.test.ts` „paczka 20 000 id"). Na maszynie pracowały wtedy równolegle inne karty
+I15 (`119`, `121`, `122`) — **load average sięgał 36** przy 25 procesach node, a wszystkie cztery testy
+są wrażliwe na czas albo rozmiar. Dowód: te same trzy pliki uruchomione osobno dały **110/110**,
+a **pełny przebieg na bezczynnej maszynie dał 1 648/1 648 bez jednej czerwieni**.
+Żadnego z tych testów nie zmieniałem.
 
 ### Testy przestawione na nowe zachowanie (5)
 Żadna asercja nie została osłabiona — kod **400** i „zero zapisu do stagingu" zostają wszędzie:
