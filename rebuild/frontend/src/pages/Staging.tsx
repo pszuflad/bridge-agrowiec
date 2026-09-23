@@ -30,6 +30,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { KonfiguratorKolumn } from "./staging/KonfiguratorKolumn";
+import { OknoBlokady } from "./staging/OknoBlokady";
+import { OknoRozstrzygniecia } from "./staging/OknoRozstrzygniecia";
 import { SzczegolyPozycji } from "./staging/SzczegolyPozycji";
 import { TabelaStagingu } from "./staging/TabelaStagingu";
 import { wczytajKolumny, zapiszKolumny, type WidocznoscKolumn } from "./staging/kolumny";
@@ -43,6 +45,7 @@ import {
   zatwierdzWszystkie,
   type StronaStagingu,
 } from "./staging/dane";
+import { komunikatBledu, ZAPASOWY_KOMUNIKAT_AKCEPTACJI } from "./staging/polityka";
 
 export function Staging() {
   const klient = useQueryClient();
@@ -59,6 +62,13 @@ export function Staging() {
   const [naStronie, ustawNaStronie] = useState<number>(ROZMIARY_STRONY[0]);
   const [zaznaczone, ustawZaznaczone] = useState<Set<number>>(new Set());
   const [szczegolyId, ustawSzczegolyId] = useState<number | null>(null);
+  /** Zgłoszenie otwarte w oknie „Rozstrzygnij"/„Sprawdź kartę" (`null` = okno zamknięte). */
+  const [rozstrzyganeId, ustawRozstrzyganeId] = useState<number | null>(null);
+  /**
+   * Treść okna „Nie zapisano zmian" — komunikat blokady akceptacji prosto z serwera.
+   * `null` = okno zamknięte. Port `notice()` ze `staging-policy-injection.js:39-42`.
+   */
+  const [blokada, ustawBlokade] = useState<string | null>(null);
   const [komunikat, ustawKomunikat] = useState<string | null>(null);
   /**
    * Która z dwóch operacji masowych czeka na potwierdzenie (`null` = żadna).
@@ -111,13 +121,33 @@ export function Staging() {
     ustawZaznaczone(new Set());
   };
 
+  /**
+   * Jedna operacja masowa. `akceptacja` mówi, czy poszła przez `POST /api/staging/accept` —
+   * od tego zależy, czy błąd trafi do okna „Nie zapisano zmian", czy do paska komunikatu.
+   *
+   * ⭐ TO JEST ODPOWIEDNIK FILTRA PO URL-U Z ORYGINAŁU. Skrypt wstrzykiwany nakłada się na
+   * globalny `window.fetch` i pokazuje okno dla KAŻDEJ nieudanej odpowiedzi z
+   * `/api/staging/accept` (`:33-38`). Wszystkie trzy przyciski akceptacji idą u nas przez tę
+   * jedną mutację, więc zbiór zdarzeń jest ten sam — bez mutowania globalnego `fetch`
+   * (plan.md D4). Odrzucanie zostaje przy pasku, tak jak w produkcji.
+   */
+  type OperacjaMasowa = { wykonaj: () => Promise<number>; akceptacja: boolean };
+
   const akcja = useMutation({
-    mutationFn: async (wykonaj: () => Promise<number>) => wykonaj(),
+    mutationFn: async ({ wykonaj }: OperacjaMasowa) => wykonaj(),
     onSuccess: async (ile: number) => {
       ustawKomunikat(`Przetworzono pozycji: ${ile}`);
       await odswiez();
     },
-    onError: (e: Error) => ustawKomunikat(`Błąd: ${e.message}`),
+    onError: (e: Error, zmienne: OperacjaMasowa) => {
+      if (zmienne.akceptacja) {
+        // Komunikat pokazujemy DOSŁOWNIE tak, jak przyszedł z serwera — backend ma sześć
+        // blokad 409 i każda mówi, co konkretnie zrobić (`import/polityka/blokady.ts`).
+        ustawBlokade(komunikatBledu(e, ZAPASOWY_KOMUNIKAT_AKCEPTACJI));
+        return;
+      }
+      ustawKomunikat(`Błąd: ${e.message}`);
+    },
   });
 
   const idWidoczne = pozycje.map((p) => p.id);
@@ -229,7 +259,7 @@ export function Staging() {
                 size="sm"
                 data-testid="button-accept-checked"
                 disabled={akcja.isPending}
-                onClick={() => akcja.mutate(() => zatwierdzPozycje(idZaznaczone))}
+                onClick={() => akcja.mutate({ wykonaj: () => zatwierdzPozycje(idZaznaczone), akceptacja: true })}
               >
                 Akceptuj zaznaczone ({idZaznaczone.length})
               </Button>
@@ -238,7 +268,7 @@ export function Staging() {
                 variant="outline"
                 data-testid="button-reject-checked"
                 disabled={akcja.isPending}
-                onClick={() => akcja.mutate(() => odrzucPozycje(idZaznaczone))}
+                onClick={() => akcja.mutate({ wykonaj: () => odrzucPozycje(idZaznaczone), akceptacja: false })}
               >
                 Odrzuć zaznaczone ({idZaznaczone.length})
               </Button>
@@ -252,7 +282,7 @@ export function Staging() {
             variant="ghost"
             data-testid="button-accept-selected"
             disabled={idWidoczne.length === 0 || akcja.isPending}
-            onClick={() => akcja.mutate(() => zatwierdzPozycje(idWidoczne))}
+            onClick={() => akcja.mutate({ wykonaj: () => zatwierdzPozycje(idWidoczne), akceptacja: true })}
           >
             Akceptuj widoczne
           </Button>
@@ -261,7 +291,7 @@ export function Staging() {
             variant="ghost"
             data-testid="button-reject-selected"
             disabled={idWidoczne.length === 0 || akcja.isPending}
-            onClick={() => akcja.mutate(() => odrzucPozycje(idWidoczne))}
+            onClick={() => akcja.mutate({ wykonaj: () => odrzucPozycje(idWidoczne), akceptacja: false })}
           >
             Odrzuć widoczne
           </Button>
@@ -287,6 +317,7 @@ export function Staging() {
               przelaczZaznaczenie={przelaczZaznaczenie}
               przelaczWszystkie={przelaczWszystkie}
               otworzSzczegoly={ustawSzczegolyId}
+              otworzRozstrzygniecie={ustawRozstrzyganeId}
               ladowanie={isLoading}
               widoczneKolumny={widoczneKolumny}
             />
@@ -346,6 +377,18 @@ export function Staging() {
 
       <SzczegolyPozycji id={szczegolyId} zamknij={() => ustawSzczegolyId(null)} />
 
+      {/*
+        Okno „Rozstrzygnij"/„Sprawdź kartę" (Staging v2, backlog #99). Po zapisie decyzji
+        odświeżamy listę zamiast przeładowywać stronę — plan.md D3.
+      */}
+      <OknoRozstrzygniecia
+        id={rozstrzyganeId}
+        zamknij={() => ustawRozstrzyganeId(null)}
+        onZapisano={odswiez}
+      />
+
+      <OknoBlokady komunikat={blokada} zamknij={() => ustawBlokade(null)} />
+
       {/* Teksty DOSŁOWNIE takie, jakie stały w `confirm()` do 12e — parytet treści zostaje. */}
       <DialogPotwierdzenia
         otwarty={doPotwierdzenia === "akceptuj"}
@@ -355,7 +398,7 @@ export function Staging() {
         zajety={akcja.isPending}
         onPotwierdz={() => {
           ustawDoPotwierdzenia(null);
-          akcja.mutate(() => zatwierdzWszystkie(typZmiany));
+          akcja.mutate({ wykonaj: () => zatwierdzWszystkie(typZmiany), akceptacja: true });
         }}
         onZamknij={() => ustawDoPotwierdzenia(null)}
         testId="dialog-akceptuj-wszystkie"
@@ -370,7 +413,7 @@ export function Staging() {
         zajety={akcja.isPending}
         onPotwierdz={() => {
           ustawDoPotwierdzenia(null);
-          akcja.mutate(() => odrzucWszystkie(typZmiany));
+          akcja.mutate({ wykonaj: () => odrzucWszystkie(typZmiany), akceptacja: false });
         }}
         onZamknij={() => ustawDoPotwierdzenia(null)}
         testId="dialog-odrzuc-wszystkie"

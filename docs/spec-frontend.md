@@ -226,6 +226,26 @@ ma endpoint:
 >
 > Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
 
+> **Odbudowa (I15.5, `140-FEATURE-staging-rozstrzygnij-frontend`, 2026-09-23):** port
+> `staging-policy-injection.js` @ `88fa31c` (wersja `?v=20260923dotchoice`, ta, którą realnie
+> ładuje `index.html`). Wiersz w kolumnie „Akcje", za „Szczegóły", dostaje przycisk
+> „Rozstrzygnij" (albo „Sprawdź kartę" dla starej wstrzymanej karty), gdy `powod` lub
+> `ostrzezenie` pozycji pasuje do jednej z czterech fraz importera („Sprawdź dopasowanie",
+> „Wybierz właściwą oponę", „Wymaga sprawdzenia pliku", „Sprawdź starą kartę"). Przycisk otwiera
+> `GET /api/staging/{id}/review` w oknie z **trzema rozłącznymi gałęziami**: `absenceReview`
+> (porównanie starej karty z bieżącą ofertą, wybór jednej → `POST …/choose-absence-card`),
+> `matchIssue && !duplicateSource` (wybór kandydata albo „osobna opona" → `POST …/resolve`),
+> `duplicateSource` (sam podgląd dwóch sprzecznych wierszy z pliku dostawcy, bez akcji). Blokada
+> akceptacji 409 (`POST /api/staging/accept`) pokazuje osobne okno „Nie zapisano zmian" z treścią
+> DOSŁOWNIE z ciała odpowiedzi (`message`, zapasowo `error`). **Cztery świadome odstępstwa:**
+> przycisk „Pozostaw starą wstrzymaną i zamknij sprawę" i trasa `POST …/close-absence-review`
+> NIE są używane (zamrożona produkcja usunęła przycisk łatką `20260923dotchoice`; trasa zostaje
+> w backendzie i kontrakcie bez konsumenta); warunek przycisku czyta pola danych
+> (`powod`/`ostrzezenie`), nie `row.textContent` jak oryginał, więc ukrycie kolumny „Powód" w
+> konfiguratorze go nie chowa; po zapisie decyzji `invalidateQueries` zamiast
+> `location.reload()`; okno blokady podpięte w `onError` mutacji akceptacji, nie nakładką na
+> `window.fetch`. Szczegóły: `docs/tickets/140-FEATURE-staging-rozstrzygnij-frontend/`.
+
 > **Odbudowa (4b, `16-FEATURE-widok-narzuty-promocje` — 2026-09-02):** `/narzuty`
 > odbudowany — dwie zakładki, „Narzuty" (tabela reguł + symulator ceny krok po kroku) i
 > „Promocje" (tabela), pełny CRUD obu zasobów przez React Query (bez optimistic update/

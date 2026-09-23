@@ -17,60 +17,38 @@ import { queryClient } from "@/lib/queryClient";
 import { KLUCZE_STORAGE } from "@/lib/api";
 import { _zresetujStanSesji } from "@/lib/auth";
 import { server } from "./msw/server";
+import { handleryStagingu } from "./msw/staging";
 import { WYGLAD_TYPU } from "@/pages/staging/dane";
 import {
   domyslneKolumny,
   KOLEJNOSC_KOLUMN,
   KOLUMNY_STAGINGU,
 } from "@/pages/staging/kolumny";
-import {
-  pozycjaStaginguZFixtura,
-  stronaStaginguZFixtura,
-  TOKEN_TESTOWY,
-  uzytkownikZFixtura,
-} from "./msw/kontrakt";
+import { stronaStaginguZFixtura, TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 
 const UZYTKOWNIK = uzytkownikZFixtura();
 const STRONA = stronaStaginguZFixtura();
-const POZYCJA = pozycjaStaginguZFixtura();
 
 /** Adresy, pod które poszły żądania — na nich sprawdzamy parametry filtrów. */
 let zapytania: string[] = [];
 /** Ciała żądań mutacji — na nich sprawdzamy `ids` vs `allFiltered`. */
 let mutacje: { url: string; body: unknown }[] = [];
 
-// ⚠ KOLEJNOŚĆ HANDLERÓW MA ZNACZENIE: wzorzec `.../api/staging/:id` pasuje TAKŻE do
-// `/api/staging/paged` (dopasowuje `id = "paged"`), a MSW bierze handler zarejestrowany
-// PÓŹNIEJ. Dlatego oba rejestrujemy w JEDNYM wywołaniu, z `paged` na początku — dołożenie
-// `:id` osobnym `server.use()` przechwyciłoby listę i tabela zostałaby pusta.
 function zamockujApi(
   strona: Record<string, unknown> = STRONA,
   szczegol: Record<string, unknown> | null = null,
 ) {
+  // Handlery są WSPÓLNE (`test/msw/staging.ts`) — razem z czterema trasami polityki
+  // Staging v2, których ten plik nie używa, ale które widok potrafi zawołać. Bez nich
+  // `onUnhandledRequest: "error"` nie wywaliłby testu, tylko po cichu zamienił zapytanie
+  // w błąd (CLAUDE.md, pułapka MSW).
   server.use(
-    http.get("*/api/staging/paged", ({ request }) => {
-      zapytania.push(request.url);
-      return HttpResponse.json(strona);
+    ...handleryStagingu({
+      strona,
+      szczegol,
+      naZapytanie: (url) => zapytania.push(url),
+      naMutacje: (wpis) => mutacje.push(wpis),
     }),
-    http.get("*/api/staging/:id", ({ params }) =>
-      HttpResponse.json(szczegol ?? { ...POZYCJA, id: Number(params.id) }),
-    ),
-    http.post("*/api/staging/accept", async ({ request }) => {
-      const body = await request.json();
-      mutacje.push({ url: request.url, body });
-      return HttpResponse.json({ ok: true, accepted: 2 });
-    }),
-    http.post("*/api/staging/reject", async ({ request }) => {
-      const body = await request.json();
-      mutacje.push({ url: request.url, body });
-      return HttpResponse.json({ ok: true, rejected: 1 });
-    }),
-    http.put("*/api/staging/:id", async ({ request }) => {
-      const body = await request.json();
-      mutacje.push({ url: request.url, body });
-      return HttpResponse.json(POZYCJA);
-    }),
-    http.get("*/api/products", () => HttpResponse.json([])),
   );
 }
 
