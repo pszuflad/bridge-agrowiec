@@ -21,6 +21,7 @@ import {
   type BladWiersza,
   type KodDostawcy,
   type OdrzuconyWiersz,
+  type MetaCennika,
   type RekordSurowy,
   type WynikParsowania,
 } from "./typy.js";
@@ -127,6 +128,33 @@ function sprawdzKodDostawcy(kodDostawcy: string): KodDostawcy {
 }
 
 /**
+ * Zdejmuje `_bridgeFeedMeta` z TABLICY rekordów (#103).
+ *
+ * `feed_safety.converted()` (`legacy/feed_safety.cjs:26`) dokłada tę właściwość przez
+ * `Object.defineProperty` bez `enumerable: true`, więc nie przeniesie jej ani spread,
+ * ani `Object.keys`, ani `structuredClone` — trzeba sięgnąć po nią wprost. To jedyne
+ * miejsce w backendzie, które to robi; dalej meta podróżuje jawnym polem
+ * `WynikParsowania.meta`.
+ *
+ * Zwraca `undefined`, gdy źródło szło ścieżką bez `feed_safety` — silnik traktuje
+ * wtedy ofertę jako niekompletną i nie zlicza braków.
+ */
+function zdejmijMeta(rekordy: RekordSurowy[]): MetaCennika | undefined {
+  const meta = (rekordy as RekordSurowy[] & { _bridgeFeedMeta?: MetaCennika })
+    ._bridgeFeedMeta;
+  if (!meta) return undefined;
+  // Kopiujemy do zwykłego obiektu — `excludedCodes` bywa długie (718 pozycji na pełnym
+  // MO3), ale referencja do tablicy rekordów nie ma prawa przeżyć dłużej niż import.
+  return {
+    complete: meta.complete === true,
+    parserErrors: Number(meta.parserErrors ?? 0),
+    source: meta.source ?? null,
+    rawCount: meta.rawCount ?? null,
+    excludedCodes: [...(meta.excludedCodes ?? [])],
+  };
+}
+
+/**
  * Parsuje plik dostawcy z dysku i zwraca rekordy gotowe dla stagingu.
  *
  * Odtwarza potok produkcji 1:1: dispatcher.parseByKod() → adapter.recordsToSurowe().
@@ -153,6 +181,7 @@ export function parsujPlik(kodDostawcy: string, sciezkaPliku: string): WynikPars
     bledy: wynikParsera.errors ?? [],
     odrzucone: wynikParsera.odrzucone ?? [],
     odrzuconePrzezAdapter: wynikParsera.records.length - rekordy.length,
+    meta: zdejmijMeta(rekordy),
   };
 }
 
@@ -203,4 +232,4 @@ export function urlDostawcy(kodDostawcy: string): string | null {
   return dispatcher.getUrl(kodDostawcy) ?? null;
 }
 
-export type { RekordSurowy, WynikParsowania, KodDostawcy };
+export type { MetaCennika, RekordSurowy, WynikParsowania, KodDostawcy };

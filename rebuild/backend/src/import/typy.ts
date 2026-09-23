@@ -109,6 +109,34 @@ export interface RekordSurowy {
   wentyl: string | null;
 }
 
+/**
+ * `_bridgeFeedMeta` — metadane bezpieczeństwa źródła doklejane przez `feed_safety.attach()`
+ * (`legacy/feed_safety.cjs`, wołane w `dispatcher.cjs:47`) do TABLICY rekordów, a przenoszone
+ * na wynik adaptera przez `converted()` (`adapter.cjs:733`). Wpis backlogu #103.
+ *
+ * ⚠ W oryginale właściwość jest `enumerable: false`, więc NIE wchodzi do `JSON.stringify`
+ * ani `Object.keys` — to celowe, żeby nie wyciekła do odpowiedzi API ani do
+ * `staging_items.snapshot_json`. Trzeba po nią sięgnąć wprost: `rekordy._bridgeFeedMeta`.
+ * Dlatego nasza warstwa przepisuje ją do jawnego pola `WynikParsowania.meta` — spread
+ * ani `structuredClone` by jej nie przeniosły.
+ */
+export interface MetaCennika {
+  /** Czy źródło jest KOMPLETNĄ ofertą dostawcy — warunek wstępny wycofań i auto-wstrzymań. */
+  complete: boolean;
+  /** Liczba błędów odczytu zgłoszonych przez parser; > 0 blokuje cały import. */
+  parserErrors: number;
+  /** `'Agrorami GraphQL'` dla MO9, `'supplier file'` dla pozostałych. */
+  source: string | null;
+  /** Ile wierszy miało źródło przed odrzuceniami. */
+  rawCount: number | null;
+  /**
+   * Kody odrzucone przez parser ORAZ przez adapter, każdy z prefiksem dostawcy (`MO1_ABC`).
+   * Na pełnym cenniku MO3 to 718 pozycji. Silnik traktuje je jako OBSERWOWANE — wiersz
+   * odrzucony po kategorii nie jest dowodem nieobecności produktu w ofercie.
+   */
+  excludedCodes: string[];
+}
+
 /** Błąd pojedynczego wiersza zgłoszony przez parser dostawcy. */
 export interface BladWiersza {
   error?: string;
@@ -136,4 +164,10 @@ export interface WynikParsowania {
    * `rekordy.length + odrzuconePrzezAdapter` = liczba rekordów z parsera.
    */
   odrzuconePrzezAdapter: number;
+  /**
+   * Metadane bezpieczeństwa źródła z `feed_safety` (#103). `undefined`, gdy źródło
+   * przeszło ścieżką, która ich nie dokleja — silnik traktuje wtedy ofertę jako
+   * NIEKOMPLETNĄ, czyli nie zlicza braków i nie wstrzymuje automatycznie.
+   */
+  meta?: MetaCennika;
 }
