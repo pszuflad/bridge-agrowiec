@@ -44,6 +44,7 @@ użytkownikowi** zamiast po cichu wybierać.
 - **Cross-platform.** Assume the project may be developed on Windows, macOS, or Linux. Use shell syntax that works in the user's environment, prefer cross-platform tooling, avoid OS-specific paths in code/scripts. Other agents and the user may be working in parallel — assume the main project may be running, so you can only run tests safely.
 - **Save time** — parallelize independent work. Deliver fast (but priority is HIGHEST QUALITY).
 - Don't peek at env, secrets, tokens! — you can copy `.env` to the worktree, check whether secrets are set, how many characters they have, etc., but don't read them and don't display them.
+- **PR bez konfliktów to część roboty, nie życzenie.** Zanim wypchniesz gałąź i otworzysz PR, gałąź MUSI zawierać całe `origin/develop` (`tools/sync-z-develop.sh`, Krok 16). Konflikty rozwiązujesz Ty, a po scaleniu bramki lecą od nowa. Użytkownik dostaje PR gotowy do merge'a — nigdy „Resolve conflicts".
 - **Production quality** — high-quality code expected, no tech debt, current docs, and above all that the ticket works 100% after implementation (cross-platform) and doesn't break anything else.
 
 ## Worktree rules (CRITICAL)
@@ -183,7 +184,11 @@ Branch naming convention (prefix maps from ticket type — **N in branch without
 ```bash
 git fetch origin
 git worktree add .worktrees/<TICKET-ID> -b <branch-name> origin/develop
+git config --get core.hooksPath   # ma dać `.githooks`; jeśli pusto → tools/wlacz-hooki.sh
 ```
+
+Hooki repo (`pre-push`) pilnują potem, żeby nie dało się wypchnąć gałęzi nieaktualnej wobec
+`develop` — ustawienie jest wspólne dla klonu i wszystkich jego worktree.
 
 **From this point all bash operations run with `cwd=.worktrees/<TICKET-ID>`** (path relative to main repo) or use full absolute paths. `cd` in the Bash tool doesn't persist between calls — remember that, don't fall into the trap.
 
@@ -233,6 +238,7 @@ Co pomijamy i dlaczego. GATE z Kroku 9 obowiązuje: brak zgodności z fixtures/k
 ## Definition of done
 - [ ] <concrete testable outcome>
 - [ ] …
+- [ ] Gałąź zsynchronizowana z `origin/develop`, bramki zielone PO synchronizacji, PR `MERGEABLE`
 ```
 
 ### Step 7: Summary for the user + approve
@@ -422,14 +428,102 @@ git add docs/ && git commit -m "<TICKET-ID>: sync docs"
 
 ## PHASE 6 — Ship
 
-### Step 16: Push + PR
+### Step 16: Synchronizacja z `develop` (OBOWIĄZKOWA przed pushem)
+
+**Nie wypychasz gałęzi i nie otwierasz PR-a, dopóki gałąź nie zawiera całego `origin/develop`.**
+Powód: kart chodzi kilka równolegle, `develop` przesuwa się w trakcie ticketa, a PR z konfliktami
+zrzuca ich rozwiązanie na użytkownika. Konflikt rozwiązuje ta sesja, która go wywołała — tylko ona
+zna swój zakres. Użytkownik ma dostać PR gotowy do merge'a, bez „Resolve conflicts".
+
+```bash
+tools/sync-z-develop.sh        # cwd = worktree ticketa: .worktrees/<TICKET-ID>
+```
+
+Skrypt robi `git fetch origin --prune`, dociąga ewentualne commity z `origin/<gałąź>` i scala
+`origin/develop` **mergem, nie rebasem** (tak wygląda cała historia tego repo, a gałąź mogła już
+zostać wypchnięta — rebase wymusiłby `--force`). Operacje na `.git` ponawia przy blokadach
+(`tools/lib-ponow.sh`) — repo ma kilkadziesiąt worktree kart na jednym `.git`.
+
+Kody wyjścia:
+- `0` — gałąź była już aktualna, nic nie weszło → idź do Kroku 17;
+- `10` — **scalone czysto, ale coś weszło** → bramki od nowa (niżej), dopiero potem Krok 17;
+- `2` — konflikty do ręcznego rozwiązania;
+- `1` — warunek wstępny (niezacommitowane zmiany, HEAD odłączony, gałąź bazowa);
+- `3` — uwierzytelnienie przy `git fetch` — to do użytkownika, nie ponawiaj w kółko.
+
+Jeśli skryptu nie ma (stara gałąź), zrób to samo ręcznie:
+`git fetch origin && git merge --no-edit origin/develop`.
+
+**Wyjście `2` — konflikty rozwiązujesz TY, teraz:**
+1. Dla każdego pliku z listy połącz **obie** strony — zmiana z `develop` zostaje, Twoja zostaje.
+   Nie „wygrywaj" całym plikiem (`--ours` / `--theirs`) bez przeczytania, co w nim jest.
+2. `git add <plik>` dla każdego, potem `git commit --no-edit`.
+3. Uruchom skrypt ponownie — ma wyjść „Gałąź zawiera już całe origin/develop".
+4. **Nie rób `git merge --abort`** i nie omijaj synchronizacji, żeby „zdążyć z PR-em".
+5. Jeśli konflikt jest merytoryczny i nie wiesz, która wersja jest poprawna (dwie karty zmieniły
+   to samo zachowanie, cudza migracja zajęła Twój numer, ktoś zmienił sygnaturę, którą wołasz) —
+   **STOP, pytasz użytkownika**. To jedyny przypadek, w którym przerywasz ciszę Fazy 3–6.
+6. Konflikt w pliku współdzielonym (`docs/rebuild-roadmap.md`, `docs/spec-backend.md`,
+   `docs/karty/README.md`) = ktoś złamał zasadę „karty piszą we własnych plikach" (CLAUDE.md).
+   Rozwiąż zachowując OBA wpisy i odnotuj to w `raport.md` → „Follow-up".
+
+**Po każdym scaleniu, które coś przyniosło (wyjście `10`) — bramki od nowa:**
+lint, typecheck, build, test (Krok 9), a jeśli ticket dotyka kontraktu, także GATE na fixtures.
+Merge łączy dwie zmiany, z których każda osobno przechodziła; dopiero razem mogą się wykluczać.
+Czerwona bramka po merge'u = naprawiasz przed pushem, nie po. Wynik dopisz do `raport.md`
+(„Test results": że bramki przebiegły **po** synchronizacji z `develop`, z datą/SHA bazy).
+
+Sprawdź też numer migracji, jeśli ticket ją dodaje: po ściągnięciu `develop` mogło dojść do
+kolizji numeru (zob. `docs/` i zasady migracji) — dwie karty potrafią zarezerwować ten sam.
+
+### Step 17: Push + PR
+
+Dopiero teraz — po czystym Kroku 16 i zielonych bramkach. Treść PR-a (format niżej) zapisz do
+pliku i wypchnij jednym poleceniem:
+
+```bash
+tools/push-i-pr.sh --tytul "<TICKET-ID>: <title>" --tresc-plik docs/tickets/<TICKET-ID>/pr-body.md
+```
+
+Skrypt robi po kolei: sprawdza dostęp `gh` → **powtarza synchronizację z Kroku 16** (żeby nie
+wypchnąć gałęzi, którą `develop` wyprzedził w międzyczasie) → `git push -u origin <gałąź>` →
+`gh pr create --base develop` → odczyt scalalności. **Blokady ponawia sam**: przy
+`index.lock` / `cannot lock ref` / limicie GitHuba czeka 5 s, 15 s, 40 s, 90 s, 180 s i próbuje
+ponownie (`PONOW_PROBY`, `PONOW_PRZERWY` w env, jeśli chcesz inaczej). Przy `[rejected]
+(non-fast-forward)` sam robi sync i próbuje raz jeszcze. `--base develop` jest w skrypcie na
+sztywno-domyślnie (`--baza` zmienia): domyślną gałęzią repo jest `main`, a PR ticketa do `main`
+to błąd.
+
+**Kody wyjścia i co z nimi zrobić:**
+
+| Kod | Znaczenie | Twoja reakcja |
+|---|---|---|
+| `0` | wypchnięte, PR istnieje, `MERGEABLE` | Krok 18 |
+| `1` | warunek wstępny (niezacommitowane zmiany, brak pliku treści) | popraw i powtórz |
+| `2` | konflikty z `develop` | rozwiąż (Krok 16), bramki, powtórz |
+| `3` | **uwierzytelnienie `gh`/git** | **NIE ponawiaj** — zgłoś użytkownikowi, to jego decyzja (`gh auth login`) |
+| `4` | sync wciągnął zmiany z bazy | przebiegnij bramki, powtórz |
+| `5` | PR jest, ale GitHub widzi `CONFLICTING` | sync + bramki + `git push`, sprawdź ponownie |
+| `6` | blokada nie ustąpiła mimo ponawiania | poczekaj i uruchom **raz** jeszcze; dalej `6` → zgłoś użytkownikowi, co blokuje |
+
+**Nie zapętlaj się.** Skrypt już odczekał swoje. Jeśli po drugim ręcznym podejściu dalej `3` lub
+`6` — kończysz i piszesz użytkownikowi, co konkretnie blokuje (treść błędu, nie domysł).
+
+Ręczny wariant, gdy skryptu nie ma na gałęzi:
 
 ```bash
 git push -u origin <branch-name>
-gh pr create --title "<TICKET-ID>: <title>" --body "<body>"
+gh pr create --base develop --title "<TICKET-ID>: <title>" --body-file <plik>
+gh pr view --json mergeable,mergeStateStatus -q '.mergeable + " / " + .mergeStateStatus'
 ```
 
-**PR body (exactly this format):**
+W wariancie ręcznym sam ponawiasz: przy `index.lock` / `cannot lock ref` odczekaj ~15 s i powtórz
+(inna karta trzyma to samo `.git`), przy `[rejected] (non-fast-forward)` zrób sync i wypchnij
+jeszcze raz, przy `CONFLICTING` — sync + bramki + push. Błąd uwierzytelnienia = stop i zgłoszenie
+użytkownikowi.
+
+**PR body (exactly this format)** — zapisz go do `docs/tickets/<TICKET-ID>/pr-body.md`
+i podaj jako `--tresc-plik` (plik zostaje w repo razem z resztą artefaktów ticketa):
 
 ```markdown
 ## Ticket
@@ -468,9 +562,10 @@ gh pr create --title "<TICKET-ID>: <title>" --body "<body>"
 
 ---
 Ticket docs: `docs/tickets/<TICKET-ID>/`
+Zsynchronizowane z `develop` (`<SHA origin/develop w chwili merge'a>`); bramki przebiegnięte po synchronizacji.
 ```
 
-### Step 17: Cleanup worktree
+### Step 18: Cleanup worktree
 
 After successful push + PR create **remove the worktree**. Only if everything is clean — otherwise skip and tell the user what's blocking.
 
@@ -483,10 +578,11 @@ git worktree remove .worktrees/<TICKET-ID>
 
 Don't delete the local branch. Don't force `--force` — if `remove` failed, leave the worktree and give the user the command for manual cleanup.
 
-### Step 18: Final report to the user
+### Step 19: Final report to the user
 
 Write to the user **briefly**:
 - PR URL
+- **Stan scalalności** — jedna linia: `Zsynchronizowane z develop (<SHA>), PR: MERGEABLE` albo co konkretnie koliduje i dlaczego nie dało się rozwiązać
 - One sentence on what was done
 - Anything that didn't get done, if so
 - **If there are things requiring their manual verification** (from "Breaking changes" or "Docs review needed") — list them explicitly; same for env vars to add, etc.
