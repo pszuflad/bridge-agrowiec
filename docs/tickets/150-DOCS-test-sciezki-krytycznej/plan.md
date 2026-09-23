@@ -1,6 +1,6 @@
 # 150-DOCS-test-sciezki-krytycznej — instrukcja testu ścieżki krytycznej dla Ani
 
-> Status: Draft
+> Status: Implemented
 > Branch: `docs/150-test-sciezki-krytycznej`
 > Worktree: `.worktrees/150-DOCS-test-sciezki-krytycznej`
 > Karta: `docs/karty/TEST.2/karta.md`

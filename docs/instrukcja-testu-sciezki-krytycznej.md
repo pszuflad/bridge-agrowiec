@@ -316,6 +316,12 @@ odczytu z bazy.** To nasz błąd, nie Wasz, i poprawiamy go po naszej stronie.
   liczbowy, oba generatory dają plik **identyczny co do bajtu** (sprawdzone 24.09 na starszej
   kopii bazy — ta sama suma kontrolna, 6898 pozycji). Czyli **cała reszta formatu jest
   w porządku** i problem ogranicza się do tych pięciu rubryk.
+- **Układ pliku jest dodatkowo pilnowany automatycznie.** W systemie stoi stały test, który przy
+  każdej zmianie kodu porównuje wiersz nagłówkowy — nazwy i kolejność wszystkich 60 rubryk —
+  z **prawdziwym plikiem zdjętym z produkcji**. Gdyby ktoś zmienił nazwę albo przestawił
+  kolejność którejkolwiek rubryki, zapali się on na czerwono, zanim zmiana gdziekolwiek trafi.
+  Ten test **nie obejmuje treści** wierszy — i właśnie dlatego błąd z flagami `Tak` trzeba było
+  złapać ręcznym pomiarem (patrz „Do Twojej decyzji", punkt 3).
 
 ### Co możesz sprawdzić sama
 
@@ -418,8 +424,10 @@ pozycji MO6** — jest dziewięciu dostawców z dziesięciu.
 
 ### 2. Czy chcesz testu z przepięciem adresu w Selly przed przełączeniem?
 
-**Nasze zdanie: nie warto** (uzasadnienie w odcinku 5 — plik jest identyczny co do bajtu,
-a test przełącza żywy sklep na dane z 23.09).
+**Nasze zdanie: nie warto** (uzasadnienie w odcinku 5 — sposób pobierania pliku po przełączeniu
+się nie zmienia, a test przełączyłby żywy sklep na dane z 23.09). **Dziś doszedł drugi powód:**
+plik stagingu ma jeszcze błąd z odcinka 4, więc sklep zaciągnąłby 899 pozycji bez oznaczeń
+zimowych.
 
 - ☐ **Zgadzam się, pomijamy** — przy przełączeniu nie ruszamy panelu Selly.
 - ☐ **Chcę to przejść** — wtedy ustalamy okno, angażujemy integratora Selly i **najpierw**

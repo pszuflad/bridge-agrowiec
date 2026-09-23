@@ -6,8 +6,15 @@ Powstał `docs/instrukcja-testu-sciezki-krytycznej.md` — instrukcja testu ści
 Ani (dokument 2 z trzech), pięć odcinków: import trzema drogami z MO9 osobno, parsery i zapis do
 bazy z przeprowadzeniem jednej pozycji od pliku do katalogu, generowanie CSV, dowód równoważności
 generatorów i sprawa adresu feedu w Selly. Obie rzeczy, które karta kazała rozstrzygnąć przed
-pisaniem, zostały rozstrzygnięte: **dowód CSV przeprowadzono realnie** (pliki identyczne bajt
-w bajt), a wariant Selly wskazano wprost (przy cutoverze nic się nie przepina).
+pisaniem, zostały rozstrzygnięte: **dowód CSV przeprowadzono realnie**, a wariant Selly wskazano
+wprost (przy cutoverze nic się nie przepina).
+
+⚠ **Wynik dowodu wymaga jednego zdania zastrzeżenia, bez którego myli:** na użytej bazie
+(`db/snapshot.db` z 13.08 + migracje) pliki wyszły **identyczne bajt w bajt**, ale **na bazie
+stagingu ten sam pomiar daje 899 różniących się wierszy** (ticket 153, wpis `#153.1`, karta
+`FIX.1` — blokada cutoveru). Sierpniowy snapshot nie zawiera danych, na których defekt się
+ujawnia. Instrukcja dla Ani opisuje **stan faktyczny**, nie ten pomiar. Rozbiór: sekcja
+„Korekta po `wejscie-153.md`" niżej.
 
 ## Zmiany
 
