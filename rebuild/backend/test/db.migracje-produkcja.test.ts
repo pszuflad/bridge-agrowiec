@@ -130,6 +130,14 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
     ]);
   });
 
+  /**
+   * ⚠ Fixture `7d6cfc9` (22.09 14:00) ma JUŻ `staging_matches` i indeks `staging_one_current_product`
+   * — Staging v2 (#99) wdrożono tego samego dnia rano. Dlatego tych dwóch obiektów NIE MA na liście
+   * niżej: migracja 012 jest na nich no-opem (`IF NOT EXISTS` nie robi nic), i to jest pierwszy,
+   * mimochodem uzyskany dowód jej idempotencji. Dokłada natomiast cztery tabele z #103/#104 i dwie
+   * z #106, bo te powstały na produkcji dopiero 22.09 wieczorem i 23.09 — czyli PO tym zrzucie.
+   * Stan docelowy (`88fa31c`, gdzie jest już komplet) sprawdza osobny opis niżej.
+   */
   it("dokłada tylko to, czego produkcja nie ma: `suppliers.import_wylaczony` (MO6 = 1) i tabele odbudowy", () => {
     const przed = obiekty(sqlite) as { name: string }[];
     zastosujMigracje(sqlite, KATALOG_SCHEMATU());
@@ -139,6 +147,12 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
     expect(po.filter((o) => !nazwyPrzed.has(o.name)).map((o) => o.name).sort()).toEqual([
       "alerty_katalogu_statusy",
       "idx_alerty_katalogu_statusy_klucz",
+      "product_absence_checks",
+      "product_auto_suspensions",
+      "staging_absence_decisions",
+      "staging_absence_one_choice",
+      "supplier_feed_state",
+      "supplier_feed_versions",
       "waga_gab_przewoznicy",
     ]);
     expect(

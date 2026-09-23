@@ -4462,7 +4462,7 @@ ani nie blokuje testu. Śmieci w polu marki Ania może poprawić ręcznie (edycj
 | **Pliki** | `mirror/backend/staging_policy.cjs` (**nowy**, 298 l.), `mirror/backend/index.cjs` (dwa wywołania: `staging_policy.install({U,db,normalize,classify,badName,ext})` i `registerRoutes`), `mirror/backend/common.cjs` (`ean_raw`), `mirror/backend/parsers/adapter.cjs` (EAN przez `validateEan`, `eanRaw`, kod zastępczy bez samego EAN), `mirror/frontend/assets/staging-policy-injection.js` (**nowy**), `mirror/frontend/index.html`, `db/schema.sql` (tabela `staging_matches`, indeks unikalny `staging_one_current_product ON staging_items(dostawca,kod)`), `mirror/backend/staging_reconcile_20260922.cjs` (skrypt jednorazowy); kopie `.bak_20260922T110248Z_staging_v2` |
 | **Commit** | `7d6cfc9` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22** (D3 planu I15) |
-| **Status** | zatwierdzone; **I15.2 (część parserowa) — ✅ DOWIEZIONA** (ticket 120, 2026-09-23): `staging_policy.cjs` w `legacy/` skopiowany bajt w bajt, adapter/common używają `validateEan`, `rawEan`, `syntheticCode`; `install()`/`registerRoutes()` leżą UŚPIONE (nikt ich nie woła) — to zakres **I15.4** (backend, otwarte), **I15.5** (frontend, otwarte) — `docs/karty/I15.*` |
+| **Status** | zatwierdzone; **I15.2 (część parserowa) — ✅ DOWIEZIONA** (ticket 120, 2026-09-23): `staging_policy.cjs` w `legacy/` skopiowany bajt w bajt, adapter/common używają `validateEan`, `rawEan`, `syntheticCode`; `install()`/`registerRoutes()` leżą UŚPIONE (nikt ich nie woła). **I15.4a (schemat) — ✅ DOWIEZIONA** (ticket 124, 2026-09-23): tabela `staging_matches` i indeks unikalny `staging_one_current_product` założone migracją `012`. Otwarte: **I15.4b** (importer), **I15.4c** (akceptacja i trasy), **I15.5** (frontend) — `docs/karty/I15.*` |
 
 **Opis biznesowy (CHANGELOG Ani, 2026-09-22 13:03).** „Staging v2: jedno najnowsze zgłoszenie na produkt/dostawcę;
 świeże ceny i stany; ścisła kontrola surowego EAN w parserze/adapterze; dopasowanie po EAN wyłącznie do jednej
@@ -4497,7 +4497,7 @@ rekordów identyczna po obu stronach, nic nie ginie. Szczegóły: `docs/karty/I1
 **Skrypt `staging_reconcile_20260922.cjs`** — jednorazowa przebudowa stagingu z archiwów importu (dedup
 `MAX(id)` per dostawca+kod, potem ponowny import najnowszego pliku każdego dostawcy w `SAVEPOINT`, z kontrolą, że
 `products` się nie zmienił). **Decyzja użytkownika 2026-09-22 (D5): nie przenosimy** — na produkcji wykonany;
-u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu unikalnego (karta I15.4).
+u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu unikalnego (karta I15.4a, zrobione migracją `012`, ticket 124).
 
 **Zamrożenie.** To ostatnia zmiana produkcji przed cutoverem — od 2026-09-22 stary Bridge jest zamrożony
 (uzgodnienie Pawła z Anią). Staging v2 jest więc w wersji ostatecznej.
@@ -4624,8 +4624,8 @@ Przenumerowanie zostawione koordynatorowi — nie przenumerowano samodzielnie.
 | **Kategoria** | BACKEND + BAZA + FRONTEND — rdzeń importu, staging, panel |
 | **Pliki** | `mirror/backend/feed_safety.cjs` (**nowy**), `staging_policy.cjs` (+131 l. → 407), `extensions.cjs` (jeden scheduler — drugi wyłączony), `index.cjs`, `parsers/dispatcher.cjs` (usunięty cichy fallback do starych parserów), `parsers/mo2_jmk.cjs`, `parsers/mo9_agrorami.cjs`, `parsers/mo9_agrorami_api.cjs`, `parsers/_agrorami_fetch_helper.cjs`, `parsers/adapter.cjs`; FE: `assets/index-PRICEFMT1783512500.js` (ŻYWY bundel), `assets/staging-policy-injection.js`, `index.html`; `db/schema.sql`: `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks`; jednorazowe: `withdrawals_reconcile_20260922.cjs` + raport JSON |
 | **Commit** | `3f00533` |
-| **Do nowej wersji?** | ✅ **TAK — część parserowa DOWIEZIONA w I15.2** (ticket 120, 2026-09-23); reszta do decyzji w I15.4/I15.5/I15.11. |
-| **Status** | ✅ **parser: I15.2** (ticket 120) — `feed_safety.cjs` w `legacy/`, wpięty w `dispatcher.cjs:47` i `adapter.cjs:733`; usunięty cichy fallback do starych parserów; JMK nie łączy już wierszy po EAN (zmierzone: próbka MO2 200 kodów, wszystkie unikalne, dawne zdublowane `MO2_13760840000`/`MO2_13763530000` znikają). Konsumpcja `_bridgeFeedMeta` przez silnik i panel „Braki w cenniku” — **I15.4/I15.5/I15.11** (otwarte). |
+| **Do nowej wersji?** | ✅ **TAK — część parserowa DOWIEZIONA w I15.2** (ticket 120, 2026-09-23); reszta do decyzji w I15.4b/I15.5/I15.11. |
+| **Status** | ✅ **parser: I15.2** (ticket 120) — `feed_safety.cjs` w `legacy/`, wpięty w `dispatcher.cjs:47` i `adapter.cjs:733`; usunięty cichy fallback do starych parserów; JMK nie łączy już wierszy po EAN (zmierzone: próbka MO2 200 kodów, wszystkie unikalne, dawne zdublowane `MO2_13760840000`/`MO2_13763530000` znikają). ✅ **schemat: I15.4a** (ticket 124, 2026-09-23) — tabele `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks` założone w odbudowie migracją `012`. Konsumpcja `_bridgeFeedMeta` przez silnik i panel „Braki w cenniku” — **I15.4b/I15.5/I15.11** (otwarte). |
 
 **Opis biznesowy (CHANGELOG Ani).** „Naprawa nieobecności w stagingu. Usunięto cichy fallback do starych parserów
 w imporcie URL i ręcznym. Agrorami: pełny zapis JSON przed zamknięciem procesu, kontrola liczby/unikalności produktów
@@ -4650,7 +4650,7 @@ kodzie dostawcy i wielkości liter, ochronę DEMO i wariantów. FE: **zmiana w �
 nowy widok/filtr „Braki w cenniku” i podgląd starej karty.
 
 **Rekomendacja (moja):** ✅ **nanieść — to rdzeń importu i wprost naprawa problemu, który Ania nazwała „fałszywymi
-wycofaniami”.** Zakres wchodzi do istniejących kart I15 (parsery → I15.2, staging BE → I15.4, panel → I15.5), bo rusza
+wycofaniami”.** Zakres wchodzi do istniejących kart I15 (parsery → I15.2, staging BE → I15.4b, panel → I15.5), bo rusza
 te same pliki; osobnej karty nie zakładać. Skrypt `withdrawals_reconcile_20260922.cjs` to operacja jednorazowa —
 nie przenosić (jak D5 dla reconcile Staging v2).
 
@@ -4665,7 +4665,7 @@ nie przenosić (jak D5 dla reconcile Staging v2).
 | **Pliki** | `mirror/backend/availability_sync.cjs` (**nowy**), `staging_policy.cjs` (+87 l. → 488), `generate_selly_export.cjs` (+19), `selly/sync_delta.cjs` (+18), `selly/sync_full.cjs` (+3); `db/schema.sql`: `product_auto_suspensions`; jednorazowe: `apply_availability_20260922.cjs`, `zero_and_delete_agrorami_20260922.cjs` + archiwa JSON |
 | **Commit** | `abe5f14` |
 | **Do nowej wersji?** | ⬜ **do decyzji (częściowo rozstrzygnięte)** |
-| **Status** | ⬜ **częściowo: CSV → ✅ zrobione ticketem 122 (I15.3, 2026-09-23)** — zapis atomowy naniesiony (`generator-csv.ts`, tmp+`renameSync` w tym samym katalogu); filtr „tylko aktywne” odbudowa miała już od I8a, więc nie było tu czego zmieniać. **Reszta (staging i auto-wstrzymania `product_auto_suspensions`, `availability_sync`, delta/tor pełny) NIE zrobiona** — należy do I15.4/I15.10, zostaje otwarta. |
+| **Status** | ⬜ **częściowo.** ✅ **CSV → ticket 122 (I15.3, 2026-09-23)** — zapis atomowy naniesiony (`generator-csv.ts`, tmp+`renameSync` w tym samym katalogu); filtr „tylko aktywne” odbudowa miała już od I8a, więc nie było tu czego zmieniać. ✅ **schemat → ticket 124 (I15.4a, 2026-09-23)** — tabela `product_auto_suspensions` założona migracją `012`. **Reszta NIE zrobiona** — logika auto-wstrzymań (`staging_policy.cjs`), `availability_sync`, delta i tor pełny: **I15.4b/I15.10**, zostaje otwarta. |
 
 **Opis biznesowy (CHANGELOG Ani).** „Brak produktu w poprawnej pełnej ofercie natychmiast ustawia wstrzymany/0. Tabela
 `product_auto_suspensions` odróżnia automatyczny brak od ręcznego wstrzymania. Pewny powrót przywraca aktywność i bieżący
@@ -4685,9 +4685,7 @@ status/stan/cena produktu (`SELECT … FROM products WHERE id=?`), żeby nie wys
 `sync_full` pomija produkty wstrzymane po rozpoczęciu cyklu. Eksport CSV: tylko `aktywny`, zapis atomowy.
 
 **Rekomendacja (moja):** ✅ **nanieść** — bez tego nowy Bridge wysyłałby do sklepu stany produktów, których dostawca już
-nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4** (otwarte), CSV tylko aktywne + zapis atomowy →
-**I15.3 — ✅ zapis atomowy zrobiony ticketem 122 (23.09); filtr „tylko aktywne” odbudowa miała już wcześniej, nic do
-naniesienia**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
+nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4b** (otwarte), CSV tylko aktywne + zapis atomowy → **I15.3 — ✅ zapis atomowy zrobiony ticketem 122 (23.09); filtr „tylko aktywne” odbudowa miała już wcześniej, nic do naniesienia**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
 ⚠ Operacje na danych (395 wstrzymań, 179 usuniętych kart MO9) — **nie odtwarzamy** (decyzja D2: świeża kopia produkcji
 na staging), ale **trzeba je uwzględnić przy pomiarach**: liczba produktów w katalogu spadła o 179.
 
@@ -4718,7 +4716,7 @@ w `_supplierEanOriginal`. Dodatkowo dla MO2 rekord niesie `_jmkRowId` (identyfik
 `mo9_agrorami_api.cjs`: usunięcie samotnego `DOT` przed `PR`/`TL`/`TT` z modelu.
 
 **Rekomendacja (moja):** ✅ nanieść — to warstwa parserów, więc zakres karty **I15.2** (adapter, MO9), a edycja modelu
-w stagingu → **I15.4**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie do odtworzenia (D2 — świeża kopia produkcji).
+w stagingu → **I15.4b**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie do odtworzenia (D2 — świeża kopia produkcji).
 
 ---
 
@@ -4731,7 +4729,7 @@ w stagingu → **I15.4**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie d
 | **Pliki** | `mirror/backend/staging_policy.cjs` (488 → 665 l.), `db/schema.sql`: `staging_absence_decisions` + unikalny indeks `staging_absence_one_choice`, FE: `assets/staging-policy-injection.js`, `index.html` |
 | **Commit** | `58d9d1d`, `88fa31c` |
 | **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Status** | tabela `staging_absence_decisions` + indeks `staging_absence_one_choice` już założone w odbudowie migracją `012` (ticket 124, karta I15.4a); logika wciąż otwarta — karty I15.4c/I15.11 |
 
 **Opis biznesowy (CHANGELOG Ani).** Okno sprawdzania pokazuje **osobno starą kartę i możliwy odpowiednik**, wskazuje
 zgodność lub różnicę EAN i DOT oraz stan obu kart; doszedł bezpieczny przycisk „Pozostaw starą wstrzymaną i zamknij
@@ -4742,7 +4740,8 @@ o możliwym scaleniu (trzy błędne zgłoszenia 732903–732905 usunięte). Dla 
 jedną kartę: niewybrana zostaje wstrzymana, wybrana zostaje w katalogu, a baza zapamiętuje przypisany kod źródłowy.
 Powód: „użytkowniczka chce odrębnych produktów dla różnych DOT oraz jednoetapowego zapisu wyboru”.
 
-**Rekomendacja (moja):** ✅ nanieść — backend i tabela do karty **I15.4** (migracja `012` rośnie o piątą tabelę),
+**Rekomendacja (moja):** ✅ nanieść — backend do karty **I15.4c** (tabela `staging_absence_decisions` + indeks
+`staging_absence_one_choice` — szósta i ostatnia z sześciu tabel migracji `012` — już założone kartą I15.4a, ticket 124),
 panel do **I15.11** (ten sam obszar co „Braki w cenniku”). ⚠ To już trzecia warstwa dokładana do `staging_policy.cjs`
 w ciągu doby (298 → 407 → 488 → 665 linii) — patrz nota o zamrożeniu niżej.
 
@@ -4767,7 +4766,8 @@ przestawał odpowiadać także na zwykłe odczyty”.
 **Rekomendacja (moja):** ⬜ **sprawdzić, czy nas dotyczy, zanim cokolwiek naniesiemy.** To naprawa skutku architektury
 produkcji: `uwaga_cena_patch.cjs` otwiera WŁASNE połączenie do `data.db` (ten sam wzorzec co `payment_blocks.cjs`).
 Odbudowa ma jedno połączenie i `uwaga_cena` jako normalną kolumnę modelu, więc problem prawdopodobnie u nas nie istnieje.
-Karta **I15.4** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i zapisać wynik zamiast portować mechanicznie.
+Karta **I15.4c** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i zapisać wynik zamiast portować mechanicznie —
+zadanie przekazane tam plikiem `docs/karty/I15.4c/wejscie-124.md` (decyzja D-124.4, ticket 124, 2026-09-23).
 
 *Pominięte — triaż 2026-09-23 (zakres `abe5f14..88fa31c`, ticket 112):*
 - **16 commitów `[FRONTEND]`** (22.09 21:00 – 23.09 08:00, co godzinę) — wyłącznie regeneracja
