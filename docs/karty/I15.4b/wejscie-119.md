@@ -1,4 +1,4 @@
-# Wejście dla I15.4 od ticketu 119 (I15.10) · 2026-09-23 — punkt wpięcia modułu dostępności
+# Wejście dla I15.4b od ticketu 119 (I15.10) · 2026-09-23 — punkt wpięcia modułu dostępności
 
 Karta I15.10 dołożyła moduł `src/selly/dostepnosc.ts`, celowo NIEWPIĘTY — montaż i wołanie robi ta karta
 (staging, auto-wstrzymania).

@@ -50,7 +50,9 @@ przestoju je uporządkuje.
 
 > **Ustalenia z Anią (runda 3, 2026-09-22):** okno przełączenia **w weekend** (nie w dni robocze pn–pt), konkretny
 > dzień i porę ustala Paweł z Anią. **Cron CSV Selly o 6:00** (dziś uruchamia stary `generate_selly_export.cjs`) trzeba
-> przepiąć na polecenie generatora nowego stosu (backlog #102, karta I15.3). **Stary Bridge po przełączeniu NIE może
+> przepiąć na `cd <katalog backendu> && npm run selly:csv` (równoważnie
+> `node <katalog backendu>/dist/selly/csv-cli.js`; backlog #102, karta I15.3 — szczegóły w rozdziale 8).
+> **Stary Bridge po przełączeniu NIE może
 > działać równolegle** na tej samej `data.db` (dwa schedulery importu i dwie synchronizacje Selly) — **decyzja D9 (użytkownik, 2026-09-22):
 > stary Bridge wyłączony od razu po przełączeniu**; kod i kopia bazy zostają ~2 tygodnie na rollback; zmiany po
 > cutoverze wyłącznie w nowym stosie (`develop` → staging → test → produkcja).
@@ -81,6 +83,20 @@ przestoju je uporządkuje.
 > o ile cutover idzie z kodem zawierającym I15.1.** Kontrola po migracji na kopii: triggery **6**, alerty z „?” **0**,
 > `marka='Alliance'` **0**, przewoźnicy **6**, puste blokady płatności **0**. Rozdział zostaw jako plan awaryjny
 > i powtórz próbę na świeżej kopii **w dniu cutoveru** — schemat produkcji zmieniał się we wrześniu kilka razy.
+
+**Stan po `012_staging_polityka.sql` (karta I15.4a, ticket `124-FEATURE-fundament-stagingu`, 23.09,
+poza gałęzią I15.1 z próby wyżej — łańcuch rośnie do 13 migracji).** `012` **nie wymaga żadnego kroku
+ręcznego** — inaczej niż `002`/`003`/`013`. Na produkcji jest w całości no-opem: wszystkie sześć tabel
+i oba indeksy tam już istnieją (Ania założyła je 22–23.09), a każdy `CREATE` w tej migracji ma
+`IF NOT EXISTS` — natywny mechanizm SQLite, którego `ALTER TABLE` z `002`/`011` i przebudowa tabeli
+z `013` nie mają, i dlatego tamte potrzebowały dyrektyw runnera albo kroku ręcznego. Gołe
+`CREATE TABLE` wywróciłoby tu całą migrację (`table … already exists`), bo runner wykonuje plik
+jednym `exec()` w transakcji — i właśnie temu `IF NOT EXISTS` zapobiega.
+Ryzyko resztkowe: `CREATE TABLE IF NOT EXISTS` **nie waliduje kształtu** istniejącej
+tabeli — gdyby produkcja miała którąś z tych sześciu tabel w innym kształcie, migracja przeszłaby po
+cichu. Zabezpieczeniem jest test na fixture `rebuild/backend/test/schemat-produkcji/88fa31c-schema.sql`
+(zrzut `db/schema.sql` z zamrożonej produkcji) — po każdej zmianie tych tabel przez Anię trzeba go
+przenagrać.
 
 ### Dlaczego to jest niebezpieczne
 
@@ -334,7 +350,8 @@ Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
    `rebuild/frontend/dist` i wgraj `.htaccess` z regułą proxy oraz SPA fallbackiem (wzór:
    `deploy/staging/htaccess`, z portem produkcyjnym).
    ⚠⚠ **ZACHOWAJ `public_html/panel/ex-port-files/.htaccess`** — plik CSV dla Selly jest chroniony białą listą
-   IP (`Require ip 212.91.27.191 46.170.251.129` — integrator Selly + Agrowiec; wzór:
+   IP (`Require ip 212.91.27.191 46.170.251.129` — integrator Selly + Agrowiec; **lista potwierdzona przez Anię
+   2026-09-23: „ma tam być tylko Selly i Agrowiec”, bez zmian po cutoverze**; wzór:
    `git show origin/main:mirror/frontend/ex-port-files/.htaccess`). Podmiana zawartości panelu bez tego pliku
    odbiera **Selly dostęp do codziennego CSV** (403) albo kasuje sam katalog eksportu. Ustalone 2026-09-23
    ze specyfikacji Selly od Ani; wcześniej nie było tego w żadnym dokumencie wdrożeniowym.
@@ -437,7 +454,14 @@ rm -f data.db-wal data.db-shm            # resztki WAL po nowej bazie
 
 - [ ] Obserwacja przez pierwszy pełny cykl importu — czy scheduler ruszył i czy `/historia`
       notuje przebiegi.
-- [ ] Następnego dnia: po 6:00 — czy plik CSV dla Selly powstał (generuje go cron → polecenie z karty I15.3, backlog #102);
+- [ ] Następnego dnia: po 6:00 — czy plik CSV dla Selly powstał. Polecenie crona (karta I15.3,
+      backlog #102): `cd <katalog backendu> && npm run selly:csv` (równoważnie
+      `node <katalog backendu>/dist/selly/csv-cli.js`). W środowisku crona wymagany **tylko
+      `DB_PATH`** — `SELLY_CSV_DIR`/`SELLY_CSV_PLIK`/`SELLY_CSV_URL` mają domyślne wartości
+      produkcyjne (rozdział 4), a **`JWT_SECRET` nie jest potrzebny** (świadomie — linia
+      `crontab` nie dziedziczy środowiska procesu serwera; pokryte testem). Polecenie nadpisuje
+      wyłącznie sam plik CSV (plik tymczasowy + `rename`) i **nie rusza**
+      `ex-port-files/.htaccess` (pokryte testem) — ostrzeżenie o tym pliku patrz krok 6 wyżej;
       po **12:00** — czy Selly go zaciągnął (Ania, runda 3: Selly pobiera plik o 12:00).
 - [ ] Kopia `data.db.przed-cutover-*` zostaje **co najmniej tydzień** — dopiero potem kasujemy.
 - [ ] `docs/rebuild-roadmap.md` §6 — odnotować datę cutoveru.

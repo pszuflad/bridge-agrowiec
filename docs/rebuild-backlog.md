@@ -19,6 +19,14 @@ bundla do ~2026-08-05, MD5 `b745bf95`). Wcześniejsze zmiany są już w specyfik
 **Legenda „Do nowej wersji?":** ⬜ do decyzji · ✅ TAK · ❌ NIE (świadomie pomijamy) · 🕒 PÓŹNIEJ
 **Legenda „Status":** — nie zaczęte · 🔨 w toku · ✔ zrobione w rebuild
 
+> **Od ticketu 128 (2026-09-23) ten plik NIE ROŚNIE.** Nowe wpisy backlogu, listy „Pominięte”
+> i podsumowania partii trafiają do `docs/rebuild-backlog/wpis-<numer ticketu>.md`, a identyfikator
+> wpisu ma postać `#<ticket>.<kolejny>` (np. `#131.1`). Powód: koniec listy, bloki „Pominięte”
+> i akapity podsumowań były trzema punktami, w które dopisywały wszystkie karty naraz — ten sam
+> wzorzec konfliktów, co kiedyś w roadmapie i w `spec-backend.md`. Reguła i szablon:
+> `docs/rebuild-backlog/README.md`. Przegląd całości: `tools/stan-backlogu.sh`.
+> Wpisy `#1`–`#108` zostają tutaj jako historia — odnośniki do nich są nadal ważne.
+
 **Partia #72–#83 (triaż 2026-09-18) — ROZSTRZYGNIĘTA przez użytkownika tego samego dnia.**
 Dziesięć wpisów ✅ TAK, jeden ❌ NIE (#72 — odbudowa ma lepsze rozwiązanie, zostawiamy nasze),
 jeden 🕒 PÓŹNIEJ (#81 → odłożony do **13d**, zapisany w roadmapie w bloku 13d).
@@ -660,9 +668,9 @@ przejrzeć cennik Bohnenkampa pod kątem innych niemieckich nazw akcesoriów.
 | **Data** | 2026-08-26 (znalezione przy I3/3c) |
 | **Kategoria** | BACKEND (silnik importu, normalizacja EAN) |
 | **Pliki** | `index.cjs` — `ZT()` (deminified `:46971`, wywołanie `:46984`), `Lq()` (`:46965` i `:47312`) |
-| **Do nowej wersji?** | ✅ **TAK — puste pole w katalogu, ROZSTRZYGNIĘTE 2026-09-18 przez Anię i WDROŻONE** (świadome odstępstwo). Komunikat „null cyfr znaczących" (część (b) niżej) NIE jest tym objęty. |
-| **Iteracja** | odtworzone 1:1 w **3c**; puste pole w katalogu → **I14, karta 14i** (`58-FEATURE-i14i-ean-naukowy-pusty`, 2026-09-18) |
-| **Status** | (a) puste pole w katalogu: **✔ zrobione** (58, 2026-09-18). (b) cieniowanie `Lq()` / komunikat „null cyfr znaczących": **nadal otwarte** — karta 58 celowo go NIE naprawiała (zakaz wprost w treści karty, żeby nie mieszać dwóch zmian naraz) |
+| **Do nowej wersji?** | ⚠️ **ZASTĄPIONE przez #99/D4 (decyzja użytkownika 2026-09-22).** Puste pole w katalogu (58/14i) przestało być docelowym zachowaniem — Ania zdecydowała, że błędny EAN (w tym notacja naukowa) ma BLOKOWAĆ akceptację, nie wchodzić po cichu jako puste pole. |
+| **Iteracja** | odtworzone 1:1 w **3c**; puste pole w katalogu → **I14, karta 14i** (`58-FEATURE-i14i-ean-naukowy-pusty`, 2026-09-18) → **ZASTĄPIONE decyzją D4/#99**: `eanRaw`/`_eanLossy` w parserach — **I15.2** (ticket 120, ✅ dowiezione); blokada akceptacji — **I15.4** (otwarte) |
+| **Status** | ⚠️ **ZASTĄPIONE przez #99/D4 — obie części tego wpisu są dziś historią decyzji, nie stanem docelowym.** (a) puste pole w katalogu (58, 2026-09-18): nieaktualne, produkcja od 22.09 traktuje taki EAN jako błąd. (b) cieniowanie `Lq()` / komunikat „null cyfr znaczących": nieaktualne z tego samego powodu — ścieżka, którą ten komunikat opisywał (cichy fallback na puste pole), nie jest już docelowym zachowaniem do naprawienia, tylko zastąpiona blokadą akceptacji. Część parserowa D4 dowieziona w **I15.2** (ticket 120, 2026-09-23): stan przejściowy zmierzony na pełnych cennikach — **+6 rekordów z 4 843 (0,12 %)**, wyłącznie MO5, import się nie psuje. |
 
 **Ten wpis miesza dwie osobne rzeczy — rozdzielone tu, żeby nie sprawiały wrażenia jednego
 zagadnienia:**
@@ -940,6 +948,10 @@ od zera):
 
 
 ---
+
+> **Nowe listy „Pominięte” dopisuje się we własnym pliku ticketu**
+> (`docs/rebuild-backlog/wpis-<N>.md`), nie tutaj — poniższe bloki to historia sprzed ticketu 128.
+> Widać po ich kolejności, jak je poskładał git: blok ticketu 104 stoi przed blokiem ticketu 94.
 
 *Pominięte (nie kod, brak zadania rebuild):*
 - 2026-08-18 06:00 [FRONTEND] — regeneracja pliku eksportu `sellycsv-...csv` (odświeżenie
@@ -3236,7 +3248,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | B4 #53, B10 #54, mo9expand #55, katunify(parser) #57, konstr(parser) #58, WULSTBAND #10, NRO/CHO #9, MO8-CSV #8, **p2_4 #63**, **odswinch #64** | **13a** | parsery — kopia `src/import/legacy/**` + charakteryzacja |
 | P3 #56, CAPS/Xq #59 (część silnikowa) | **13b** | silnik `tk()`/`acceptStaging` — reimpl TS |
 | katunify(migracja) #57, konstr(migracja) #58, CAPS(nazwa) #59 | **13c ✅ zrobione** (`44-CHORE-i13c-migracje-konwencji`, 2026-09-09) | migracje danych + przenagranie fixtures |
-| Selly REST #60 | **13d** | ⛔ ODŁOŻONE — 13d-1 sportowane i **COFNIĘTE** (revert #58); Tor 2 dociera u Ani (zegar zresetowany) |
+| Selly REST #60 | **I15.6–I15.8** | ✅ ZROBIONE — discovery + Tor 1 (t. 108), Tor 2 (t. 109), harmonogram + trasy `sync-*` (t. 121) |
 | Bridge ONE + drobne #61 | **13e ✅ zrobione** (`47-CHORE-i13e-frontend-bridgeone`, 2026-09-09) | frontend — realny kod tylko `szer_marka` |
 | regresja `konstrukcja` w żywym bundlu #71 | **13e** (wykryte, bez kodu) | frontend PRODUKCJI — ❌ nie odtwarzamy (D4) |
 | backfille #62 | **13f** | DECYZJA (najpierw) |
@@ -3319,7 +3331,7 @@ więc zmiany w jednym pliku `.cjs` wchodzą atomowo; szczegóły: roadmapa blok 
 | **Zmiana Ani** | Synchronizacja Bridge→Selly przez REST API zamiast/obok CSV: cena/stan są PER WARIANT (19% >1 wariant), bulk-endpoint zwracał HTTP 400. Klucz `(kod_importu, dostawca)`→`(selly_product_id, selly_variant_id)` + `feature_id_magazyn`. Tor 1 delta `PUT .../variants/{vid}` AKTYWNY; rate limiter 250/60s + `apiWithRetry` (429/Retry-After); `provider_code=kod_importu` (bugfix). Feature Magazynów: MO2=5,MO3=4,MO4=3,MO5=2,MO9=1. |
 | **Do nowej wersji?** | ✅ TAK — **wykracza poza I8** |
 | **Iteracja** | **→ I15** (dawne 13d), podzielone na **I15.6** (schemat + discovery + Tor 1), **I15.7** (Tor 2), **I15.8** (harmonogram + trasy `sync-*`). |
-| **Status** | 🔨 **częściowo — I15.6 i I15.7 zrobione.** I15.6 (ticket 108, 2026-09-22, `feature/108-selly-rest-discovery-delta`): migracja 013 (`selly_products` wariantowa, stara → `selly_products_old`), discovery (odnajdywanie/zakładanie mapowań, cache kodów, limiter) i Tor 1 (`sync_delta`) przeportowane 1:1 z `origin/main:7d6cfc9`. I15.7 (ticket 109, 2026-09-22, `feature/109-selly-rest-sync-full`): Tor 2 (`sync_full`→`src/selly/rest/sync-full.ts`, `mapper_v2`→`src/selly/rest/mapper-v2.ts`, `loadDictMaps`) przeportowany 1:1, w tym #81. Zostaje **I15.8**: harmonogram i trasy `sync-*` — nic z tego jeszcze nie jest uruchamiane w procesie. (Wcześniejszy port `13d-1`, PR #57, został **COFNIĘTY** `46-CHORE-revert-13d1-selly`, 2026-09-09 — I15.6/I15.7 to świeży, niezależny port z finalnego stanu produkcji, nie wznowienie tamtej gałęzi.) |
+| **Status** | ✅ **ZROBIONE — I15.6, I15.7 i I15.8.** I15.6 (ticket 108, 2026-09-22, `feature/108-selly-rest-discovery-delta`): migracja 013 (`selly_products` wariantowa, stara → `selly_products_old`), discovery (odnajdywanie/zakładanie mapowań, cache kodów, limiter) i Tor 1 (`sync_delta`) przeportowane 1:1 z `origin/main:7d6cfc9`. I15.7 (ticket 109, 2026-09-22, `feature/109-selly-rest-sync-full`): Tor 2 (`sync_full`→`src/selly/rest/sync-full.ts`, `mapper_v2`→`src/selly/rest/mapper-v2.ts`, `loadDictMaps`) przeportowany 1:1, w tym #81. I15.8 (ticket 121, 2026-09-23, `feature/121-selly-harmonogram-sync`): harmonogram (`scheduler_selly`→`src/selly/rest/scheduler.ts`, Tor 1 HH:55 + HH:10/25/40, Tor 2 04:30 z rotacją) i sześć tras `sync-*` (`routes_sync`→`src/routes/selly-sync.ts`) przeportowane z `88fa31c`, zamontowane w `server.ts`/`app.ts` z JEDNĄ instancją `discovery` na proces, za flagą `SELLY_SCHEDULER` (domyślnie wyłączoną). Naprawione trzy zastane defekty produkcji jako świadome odstępstwa: importy `syncDeltaForDostawca` i `runFullTodays` (obie nazwy nie istnieją → 500) oraz zgubiona lista dostawców w `sync-full-force` (`forceSuppliers` vs `opts.suppliers`). (Wcześniejszy port `13d-1`, PR #57, został **COFNIĘTY** `46-CHORE-revert-13d1-selly`, 2026-09-09 — I15.6/I15.7 to świeży, niezależny port z finalnego stanu produkcji, nie wznowienie tamtej gałęzi.) |
 
 ### #61 · 2026-09-01…04 · [FRONTEND] · Bridge ONE (rebrand) + tr_fix/ackalerts/szer_marka/PRICEFMT
 | pole | wartość |
@@ -3480,7 +3492,7 @@ różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej 
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
 | **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
-| **Status** | 🔨 w toku — część schematowa: **107 / migracja 011** (kolumna `blokowane_formy_platnosci` + backfill + triggery `products_blokowane_formy_ai/_au` bajt w bajt z `7d6cfc9`, pole ukryte w API); PR po próbie na kopii produkcji (23.09). Katalog i CSV zostają w I15.3. ⚠ Ania 22.09 zgłaszała puste pole przy nowych produktach → **#101 zamknięte 23.09**: pomiar i potwierdzenie Ani — problemu nie ma. |
+| **Status** | ✅ **zrobione w trzech krokach.** Schemat: **I15.1** (ticket 107, migracja 011) — kolumna `blokowane_formy_platnosci` + backfill + triggery `products_blokowane_formy_ai/_au` bajt w bajt z `7d6cfc9`. Parser: **I15.2** (ticket 120, 2026-09-23) — `payment_blocks.cjs` w `legacy/` bajt w bajt, adapter nadaje `blokowaneFormyPlatnosci` wszystkim rekordom (potwierdzone na 4 843 rekordach pełnych cenników i na 1 838 rekordach wzorca charakteryzacji). Katalog i CSV: **I15.3** (ticket 122, 2026-09-23) — 60. kolumna CSV `Blokowane-formy-platnosci` (z fallbackiem po `dostawca`) i kolumna „Blokowane formy płatności” w `/katalog`, liczona w froncie z kodu dostawcy. Pole pozostaje ukryte w `GET /api/products` — patrz „Szczegół techniczny” niżej; to **nie jest dług, tylko odtworzenie produkcji**. ⚠ Ania 22.09 zgłaszała puste pole przy nowych produktach → **#101 zamknięte 23.09**: pomiar i potwierdzenie Ani — problemu nie ma. |
 
 **Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
 i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
@@ -3502,6 +3514,16 @@ blokowane_formy_platnosci TEXT`, uzupełnia istniejące wiersze i zakłada trigg
 w `try/catch` z logiem. `adapter.recordToSuroweDostawca()` dokłada `s.blokowaneFormyPlatnosci`.
 `generate_selly_export.cjs` dostaje 60. kolumnę i fallback `getBlockedPaymentForms(row.dostawca)`,
 gdy pole w bazie puste.
+
+**Pomiar rozstrzygający (ticket 122, 23.09).** Oryginał `88fa31c` postawiony na kopii
+`db/snapshot.db` z kolumną wypełnioną dla 7405 produktów i obydwoma triggerami (via
+`payment_blocks.ensurePaymentBlocks()`) oddaje na `GET /api/products?limit=5` **72 klucze, bez
+`blokowaneFormyPlatnosci`** — `grep -c blokowane_formy_platnosci mirror/backend/index.cjs` = **0**,
+bundle nie zna kolumny dokładanej runtime'owym `ALTER TABLE`, a produkty czyta Drizzle bez jawnej
+listy pól (ten sam mechanizm co `uwagaCena`). Dlatego wartość w katalogu produkcja liczy w
+przeglądarce (`payment-blocks-injection.js`), a nie z API — i odbudowa robi identycznie
+(`rebuild/frontend/src/pages/katalog/formatowanie.tsx`). Pole zostaje w `KOLUMNY_POZA_KONTRAKTEM`,
+fixture'y i `openapi.yaml` bez zmian.
 
 **Rekomendacja (moja).** ✅ **nanieść** — to nowa funkcja produktowa, nie defekt, i dotyka trzech
 warstw naraz. Trzy uwagi:
@@ -3552,7 +3574,7 @@ plikowego, a tu po stronie API.
 | **Pliki** | `mirror/backend/application_rules.cjs` (**nowy**, 238 l.), `parsers/tyre_params.cjs` (bak `.bak_pre_zastosowania_20260913_192923`), `parsers/adapter.cjs` (bak j.w.), `extensions.cjs` (bak j.w.), `db/schema.sql` (2 triggery), `zastosowanie_niezmapowane.json` (raport) |
 | **Commit** | `74b7442` (2026-09-13 20:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #79/#80/#82. |
-| **Status** | 🔨 w toku — część schematowa (triggery `products_zastosowanie_ai/_au`): **107 / migracja 011**, w stanie końcowym uwzględniającym #79/#80/#82, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł `application_rules.cjs` i parsery/adapter (normalizacja JS przed zapisem) zostają do **I15.2**. |
+| **Status** | ✅ schemat: triggery `products_zastosowanie_ai/_au` — **107 / migracja 011**, w stanie końcowym uwzględniającym #79/#80/#82, bajt w bajt z `7d6cfc9`. ✅ **parser: DOWIEZIONY w I15.2** (ticket 120, 2026-09-23) — `application_rules.cjs` w `legacy/` bajt w bajt, `tyre_params.cjs` deleguje do niego; `zastosowanie` i kanonizacja `kategoria` pojawiły się w 1 838 rekordach wzorca charakteryzacji. |
 
 **Opis biznesowy.** Audyt wykazał produkty z zastosowaniem z zupełnie innej kategorii — np. opony
 Rolnicze z zastosowaniem „Harwester"/„Forwarder". Ania wprowadziła zamkniętą listę dopuszczalnych
@@ -3589,7 +3611,7 @@ Wprost: **`ensureApplicationRules()` jest w odbudowie nowym bytem** (dziś `grep
 | **Pliki** | `mirror/backend/generate_selly_export.cjs` (baki `.bak_pre_selly_category_names_20260914_130000`, `.bak_fix_polish_l_20260914_131800`, `.bak_pre_restore_rd_header_20260914_140000`) |
 | **Commit** | `b580628` (2026-09-14 14:00 — trzy wpisy CHANGELOG w jednym commicie) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — do naniesienia `toSellyCategoryName` (pkt 1–2); pkt 3 (nagłówek `R/D`) odbudowa już ma. |
-| **Status** | — zatwierdzone; **jeden ticket CSV razem z #73 i #77**. |
+| **Status** | ✅ **zrobione ticketem 122 (I15.3, 2026-09-23).** Pkt 1–2: `toSellyCategoryName` → `nazwaKategoriiSklepu`, z jawnym `ł`→`l`, naniesione i pokryte testem (`Przemysłowe`→`Opony przemysłowe`). Pkt 3: potwierdzone testem, nie tylko założone — nagłówek `R/D` na pozycji 30 z wartościami „Radialna”/„Diagonalna”. |
 
 **Opis biznesowy.** Trzy poprawki tego samego pliku w ciągu godziny, wszystkie wokół importera CSV
 Selly. (1) Automatyczny integrator o 12:00 wciąż przypisywał produkty do starych, ukrytych kategorii
@@ -3624,7 +3646,7 @@ budowany przez `normalize('NFD')`, ma ten sam defekt.
 | **Pliki** | `mirror/backend/generate_selly_export.cjs` (bak `.bak_pre_wstrzymane_zero_20260914_153400`), `selly/sync_delta.cjs` (bak j.w.) |
 | **Commit** | `94492d1` (2026-09-14 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — część CSV teraz (jeden ticket z #73/#76), część delta razem z 13d. |
-| **Status** | część CSV → ticket CSV (#73/#76), status bez zmian tutaj; część delta → ✅ **zrobione w I15.6** (ticket 108, 2026-09-22): `findDeltaProducts` obejmuje `wstrzymany` z istniejącym wariantem, stan zerowany na 0 (test `selly.sync-delta.test.ts`). |
+| **Status** | ❌ **część CSV NIE naniesiona — obalona przez #104.** Zmiana `WHERE status='aktywny'` → `IN ('aktywny','wstrzymany')` ze stanem 0 została na produkcji **cofnięta** przez #104 (22.09, commit `abe5f14`): stan na `88fa31c` to znów tylko `aktywny`, plus zapis atomowy. Odbudowa filtru `IN(...)` z #77 nigdy nie przejęła, więc ticket 122 (I15.3, 23.09) nie miał tu czego cofać — naniósł tylko zapis atomowy (część #104). Zostaje delta → ✅ **zrobione w I15.6** (ticket 108, 2026-09-22): `findDeltaProducts` obejmuje `wstrzymany` z istniejącym wariantem, stan zerowany na 0 (test `selly.sync-delta.test.ts`) — ta część #77 wciąż aktualna, bez zmian. |
 
 **Opis biznesowy.** Produkt wstrzymany w Bridge, ale z dodatnim stanem, mógł zostawić w Selly
 nieaktualny dodatni stan — nie trafiał ani do CSV (filtr `status='aktywny'`), ani do delty API.
@@ -3643,12 +3665,14 @@ produkt OZKA z ceną CULTOR-a.
 `p.stan` w SELECT i w porównaniu z `sp.stan_wyslany` owinięte w
 `CASE WHEN p.status='wstrzymany' THEN 0 ELSE p.stan END`.
 
-**Rekomendacja (moja).** ✅ **nanieść** — to naprawa realnego błędu biznesowego (sprzedaż
-niedostępnego towaru), nie kosmetyka. Rozkłada się na dwie części o różnym losie:
-- **eksport CSV** → `rebuild/backend/src/selly/generator-csv.ts:158` (`.where(eq(products.status,"aktywny"))`)
-  i linia stdout `Liczba produktow (aktywnych): …` w tym samym pliku, którą trasa oddaje 1:1 —
-  **zmiana tekstu rusza fixture**, więc razem z #73 i #76 jako jeden ticket CSV;
-- **delta Toru 1** → ✅ zrobione w **I15.6** (ticket 108, 2026-09-22).
+**Rekomendacja (moja).** ⚠ **CSV: NIE nanosić — historia produkcji poszła dalej.** Pierwotnie
+rozkładała się na dwie części:
+- **eksport CSV** — plan „`WHERE status='aktywny'` → `IN(...)` ze stanem 0” jest **nieaktualny**:
+  produkcja sama to cofnęła w #104 (22.09), więc naniesienie dziś oznaczałoby cofnięcie się do
+  stanu pośredniego produkcji z 14–22.09, a nie dogonienie jej. Tekst stdout przeszedł tę samą
+  ewolucję: `(aktywnych)` → `(aktywnych i wstrzymanych)` (#77) → `aktywnych` (#104, naniesione
+  ticketem 122 jako D7);
+- **delta Toru 1** → ✅ zrobione w **I15.6** (ticket 108, 2026-09-22), bez zmian.
 
 ### #78 · 2026-09-17 · [BACKEND] · MO9: odrzucanie po stabilnym ID kategorii Magento 163 (quady/kosiarki)
 | pole | wartość |
@@ -3657,7 +3681,7 @@ niedostępnego towaru), nie kosmetyka. Rozkłada się na dwie części o różny
 | **Pliki** | `mirror/backend/parsers/mo9_agrorami_api.cjs` (bak `.bak_pre_bkt_category_163_20260917_145511`) |
 | **Commit** | `cba212d` (2026-09-17 15:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
-| **Status** | — zatwierdzone do naniesienia (jeden plik, `mo9_agrorami_api.cjs`; razem z drugim hunkiem z #79). |
+| **Status** | ✅ **DOWIEZIONE w I15.2** (ticket 120, 2026-09-23) — `mo9_agrorami_api.cjs` resyncowany bajt w bajt; `ODRZUCONE_CATEGORY_IDS = new Set(['163'])` + `powodOdrzucenia()` potwierdzone w porcie. Nie było widać jako osobny wpis w diffie ticketu — odnaleziony przy przeglądzie pliku. |
 
 **Opis biznesowy.** Prośba Ani: opony BKT do quadów, kosiarek, gokartów i podobnych małych pojazdów
 nie mają być ani importowane z API, ani publikowane w Selly. Agrorami grupuje je w kategorii Magento
@@ -3686,7 +3710,7 @@ Idzie w parze z #79 (drugi hunk tego samego pliku).
 | **Pliki** | `mirror/backend/common.cjs` (bak `.bak_pre_category_case_20260917_1545`), `parsers/tyre_params.cjs` (bak j.w.), `application_rules.cjs` (bak j.w.), `parsers/mo9_agrorami_api.cjs` (bak `.bak_pre_bkt_recategory_20260917_1523`), `db/schema.sql` (4 triggery) |
 | **Commit** | `ca8a694` (2026-09-17 16:00 — dwa wpisy CHANGELOG) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#80/#82. |
-| **Status** | 🔨 w toku — część schematowa (triggery `products_zastosowanie_ai/_au` bez `WHEN`, `manual_overrides_kategoria_ai/_au`): **107 / migracja 011**, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł `common.cjs`/`tyre_params.cjs`/`mo9_agrorami_api.cjs` (kanonizacja w JS parserów) zostaje do **I15.2**; jednorazowy backfill (283 produkty + 14 nadpisań, 58 MO9) poza migracjami (D2). |
+| **Status** | ✅ schemat: triggery `products_zastosowanie_ai/_au` bez `WHEN`, `manual_overrides_kategoria_ai/_au` — **107 / migracja 011**, bajt w bajt z `7d6cfc9`. ✅ **Moduł `common.cjs`/`tyre_params.cjs`/`mo9_agrorami_api.cjs` (kanonizacja w JS parserów) — DOWIEZIONY w I15.2** (ticket 120, patrz #75). Jednorazowy backfill (283 produkty + 14 nadpisań, 58 MO9) poza migracjami (D2). |
 
 **Opis biznesowy.** Dwie prośby Ani w jednym commicie. (1) Filtr katalogu pokazywał zdublowane
 kategorie — tę samą raz małą, raz wielką literą; ujednolicono 283 produkty i 14 ręcznych nadpisań
@@ -3712,10 +3736,11 @@ JUMBOTRAX|SURETRAX|PAC MASTER|PL 801|PT-HD|ROCK GRIP|SKID POWER|TR 387` → Prze
 `AGRIMAX|AS 504|AW 702|AW 909|FARM 2000|FARM HIGHWAY|FL 630|FL 693|FLOT 648|TF 9090|TR 128|TR 135|
 TR 171|TR 678` → Rolnicze), z `c.classifyByName()` jako ostatecznym fallbackiem.
 
-**Rekomendacja (moja).** ✅ **nanieść** — i to jest **najważniejszy wpis tej partii dla odbudowy**,
-bo trafia w kod, który odbudowa ma 1:1 i który dziś rozjeżdża się z produkcją:
-`rebuild/backend/src/import/legacy/parsers/tyre_params.cjs:562,1206,1303,1367` mają wciąż
-`cleanText(...).toLowerCase()`, a `mo9_agrorami_api.cjs:422` wciąż `'inne': 'Rolnicze'`.
+**Rekomendacja (moja).** ✅ **nanieść** — był to **najważniejszy wpis tej partii dla odbudowy**,
+bo trafiał w kod, który odbudowa miała 1:1 i który się rozjeżdżał z produkcją (`tyre_params.cjs`
+wciąż `cleanText(...).toLowerCase()`, `mo9_agrorami_api.cjs` wciąż `'inne': 'Rolnicze'`).
+✅ **Rozjazd zamknięty w I15.2** (ticket 120, 2026-09-23): oba pliki resyncowane bajt w bajt
+z `88fa31c`, kanonizacja w porcie działa dziś tak samo jak w produkcji.
 ⭐ **Trigger na `manual_overrides` częściowo domyka wpis #65** („`manual_overrides` nieprzemigrowane
 — override cofa konwencję przy imporcie"): Ania rozwiązała **połowę kategorii** (14 wpisów
 `field_name='kategoria'` przemigrowane + trigger na przyszłość). **Nie ruszyła** drugiej połowy —
@@ -3728,7 +3753,7 @@ bo trafia w kod, który odbudowa ma 1:1 i który dziś rozjeżdża się z produk
 | **Pliki** | `mirror/backend/application_rules.cjs` (bak `.bak_pre_forwarder_harwester_20260917_1608`), `db/schema.sql`, `application_rules_v2_test.cjs` (**nowy**, 294 l. — test) |
 | **Commit** | `5dedefb` (2026-09-17 17:00, pierwszy z dwóch tematów commita) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#79/#82. |
-| **Status** | 🔨 w toku — część schematowa (`sqlNormalizeExpression()` w triggerach `products_zastosowanie_ai/_au`, kolejność trigger→backfill): **107 / migracja 011**, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł JS `application_rules.cjs` (`splitApplications()`, `normalizeApplication()`) zostaje do **I15.2**; jednorazowe scalenie 100 produktów poza migracjami (D2). |
+| **Status** | ✅ schemat: `sqlNormalizeExpression()` w triggerach `products_zastosowanie_ai/_au`, kolejność trigger→backfill — **107 / migracja 011**, bajt w bajt z `7d6cfc9`. ✅ **Moduł JS `application_rules.cjs` (`splitApplications()`, `normalizeApplication()`) — DOWIEZIONY w I15.2** (ticket 120, patrz #75). Jednorazowe scalenie 100 produktów poza migracjami (D2). |
 
 **Opis biznesowy.** Zgłoszenie Ani: w kategorii Leśne pole „zastosowanie" miało „Forwarder"
 i „Harwester" zapisywane osobno albo jako „Harwester ; Forwarder", a miała być jedna wartość
@@ -3808,7 +3833,7 @@ logika biznesowa**, nie defekt do odtworzenia 1:1, i weszła świadomie, nie aut
 | **Pliki** | `mirror/backend/application_rules.cjs`, `db/schema.sql` (regeneracja 2 triggerów) |
 | **Commit** | `03fe892` (2026-09-18 14:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ✅ **blokada ZDJĘTA 2026-09-18**: Ania dosłała uzasadnienie (`86d9090`), gotowe do implementacji. |
-| **Status** | 🔨 w toku — część schematowa (`CATEGORY_APPLICATION_REMAP` w triggerach `products_zastosowanie_ai/_au`): **107 / migracja 011**, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł JS `application_rules.cjs` (`CATEGORY_VALUES`, remap przed testem dozwolonych wartości) zostaje do **I15.2**; jednorazowy backfill 265 rekordów Rolniczych poza migracjami (D2). |
+| **Status** | ✅ schemat: `CATEGORY_APPLICATION_REMAP` w triggerach `products_zastosowanie_ai/_au` — **107 / migracja 011**, bajt w bajt z `7d6cfc9`. ✅ **Moduł JS `application_rules.cjs` (`CATEGORY_VALUES`, remap przed testem dozwolonych wartości) — DOWIEZIONY w I15.2** (ticket 120, patrz #75). Jednorazowy backfill 265 rekordów Rolniczych poza migracjami (D2). |
 
 **Opis biznesowy.** ✅ **UZUPEŁNIONE 2026-09-18 z wpisu CHANGELOG Ani** (dopisany przez nią
 o 15:39, przyszedł commitem `86d9090`; wcześniej ten commit nie miał uzasadnienia).
@@ -3851,7 +3876,7 @@ uzna się powód za NIEZNANY na stałe**.
 | **Pliki** | `mirror/backend/parsers/tyre_params.cjs`, `parsers/adapter.cjs`, `parsers/mo9_agrorami_api.cjs`, `normalize_widths_selly_20260918.cjs` (**nowy**, 146 l., jednorazowy) |
 | **Commit** | `9d1b09f` (2026-09-18 15:00, etykieta `20260918_1500_width_norm`) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ✅ **blokada ZDJĘTA 2026-09-18**: Ania dosłała uzasadnienie (`86d9090`) — świadome odwrócenie decyzji z 19.08, powód to filtr „Szerokość opony”. |
-| **Status** | — **odblokowane 2026-09-18** (`57-CHORE-triaz-uzasadnienia-ani`), zatwierdzone do naniesienia. Oczekiwania do testu: **1297 ujednoliconych wartości** szerokości, 0 niekanonicznych po zmianie; rekord kontrolny dla `$` w MO9: `products.id=105986` (`$7-14` → `7-14`, nazwa bez zmian). |
+| **Status** | ✅ **DOWIEZIONE w I15.2** (ticket 120, 2026-09-23) — resync `tyre_params.cjs`/`adapter.cjs`/`mo9_agrorami_api.cjs` bajt w bajt; zmierzone na próbkach charakteryzacji **172 zmiany szerokości u 9 dostawców** (`"10.0"`→`"10"`). Efekt uboczny NA PLUS: mniej fałszywych „zmian kluczowych” w stagingu (MO8 `zmienione` 30→27, MO10 `zmienione` 2→0 i `autoZatwierdzone` 15→17). ⚠ Łamie obietnicę z `docs/instrukcja-testow-I3.md` §11 pkt 10 („10.00 zostaje”) — wejście dla karty I15.9 już zapisane: `docs/karty/I15.9/wejscie-120.md`. Oczekiwania produkcji (referencyjnie): **1297 ujednoliconych wartości** szerokości, 0 niekanonicznych po zmianie; rekord kontrolny dla `$` w MO9: `products.id=105986` (`$7-14` → `7-14`, nazwa bez zmian). |
 
 **Opis biznesowy.** ✅ **UZUPEŁNIONE 2026-09-18 z wpisu CHANGELOG Ani** (`86d9090`).
 **Powód:** zgłoszenie Anny — *filtr „Szerokość opony" nie powinien rozdzielać tej samej liczby
@@ -4376,22 +4401,31 @@ liniach. MO7 Nokian ma 14 zdublowanych kodów, ale to identyczne wiersze (pomiar
 | **Data** | 2026-09-22 (znalezisko karty P10.4, `100-DOCS-instrukcja-testow-i10-v2`, po P10.3) |
 | **Kategoria** | FRONTEND (analityka, eksport CSV) — skutek uboczny świadomego odstępstwa #91 |
 | **Pliki** | `rebuild/frontend/src/pages/analityka/eksport.tsx` i generator CSV (P10.3); trasy dashboardu z limitami SQL (`repos/analityka.ts`) |
-| **Do nowej wersji?** | ⬜ **czeka na odpowiedź Ani** — `docs/instrukcja-testow-I10-v2.md` §1.3 (pytanie A) |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK — decyzja Ani 2026-09-23: „chcę pełne pliki"** (świadome odstępstwo; karta **P10.5**) |
+| **Status** | ✅ **ZAMKNIĘTE 2026-09-23, ticket `126-FEATURE-pelne-pliki-csv-analityki`.** Osiem widoków dostało opcjonalny `?limit=0` (brak klauzuli `LIMIT`, wyłącznie dla pliku CSV); trasa bez parametru 1:1 jak przed ticketem, tabela nadal 300 wierszy, kafel „Pozycje unikalne" nadal 1000. Szczegóły niżej i w `docs/tickets/126-FEATURE-pelne-pliki-csv-analityki/raport.md`. |
 
 **Na czym polega.** Od P10.3 plik CSV powstaje w przeglądarce z wierszy tabeli (#91). Plan P10.3 zakładał,
 że karty pobierają pełne listy — nieprawda: trasy dashboardu mają limity SQL z oryginału. Zmierzone na
-`db/snapshot.db`: **Pozycje unikalne 5109 → plik 1000**; karty 4.1 / 4.2 (~5184) → **plik 500**;
-EAN wspólne 769 (poniżej sufitu, bez straty). Dawny eksport serwerowy: `unique` bez limitu,
-`availability-products` / `sell-through` do 5000.
+`db/snapshot.db` (liczba wierszy PRZED `LIMIT`) — **sufit uciął SZEŚĆ widoków, nie trzy**: Pozycje
+unikalne 5109 → plik 1000; karty 4.1 / 4.2 (~5184 każda) → plik 500; `suppliers-lifecycle` 1716 → 500;
+`prices-last` 1644 → 500; `rotation-inactive` 1100 (przy `days=60`) → 1000. `ean-comparison` (769) i
+`margins` (335) mieściły się w suficie 1000, ale z zapasem, który mógł się skończyć. Dawny eksport
+serwerowy: `unique` bez limitu, `availability-products` / `sell-through` do 5000.
 
-Ten sam sufit robi kafel KPI „Pozycje unikalne” = 1000 (port 1:1 oryginału, PR.2).
+Ten sam sufit robi kafel KPI „Pozycje unikalne” = 1000 (port 1:1 oryginału, PR.2) — **to zostaje bez zmian**,
+sufit zdjęty wyłącznie dla pliku CSV.
 
 **Powiązane:** `GET /api/analytics/export/{view}` nie ma już konsumenta we froncie (P10.3) — działa dalej
-jako API. Przy wariancie „zdjąć sufit” jedną z dróg jest przywrócenie trasy serwerowej dla tych trzech widoków.
+jako API. Przywrócenie tej trasy jako drogi rozwiązania zostało odrzucone (karta P10.5): odebrałoby
+plikowi filtry kliencie, czyli cofnęłoby sens #91. Wybrany mechanizm zamiast tego: opcjonalny `?limit=0`
+na trasach dashboardu, zdejmujący `LIMIT` tylko na żądanie eksportu.
 
-**Rekomendacja koordynatora:** zależnie od odpowiedzi Ani. Jeśli potrzebuje pełnych plików — zdjąć sufit
-tylko dla pliku (osobne zapytanie bez limitu przy eksporcie), tabela i kafel zostają 1:1.
+**⭐ DECYZJA ANI 2026-09-23: pełne pliki.** Cytat: „chce pełne pliki". Zakres: **sufit zdejmujemy TYLKO dla pliku CSV**
+(osobne, leniwe zapytanie bez limitu, dopiero po kliknięciu CSV, przez `?limit=0`); tabela na ekranie
+zostaje przy 300 wierszach (limit rysowania z oryginału), a kafel „Pozycje unikalne" nadal liczy 1000
+(port 1:1). Karta **P10.5** (`docs/karty/P10.5/`) objęła docelowo **osiem** widoków z sufitem (D1), nie
+trzy — pomiar pokazał, że sufit dotyka więcej kart niż wymieniał backlog i karta w chwili otwarcia.
+Semantyka `limit=0` i testy broniące stałych `LIMIT_*` (dotąd niebronionych żadnym testem): `docs/spec-backend/wpis-126.md`.
 
 ---
 
@@ -4402,7 +4436,7 @@ tylko dla pliku (osobne zapytanie bez limitu przy eksporcie), tabela i kafel zos
 | **Data** | 2026-09-22 (znalezisko karty P10.4, po P10.2) |
 | **Kategoria** | FRONTEND + BACKEND (Pulpit, audyt eksportów) |
 | **Pliki** | `rebuild/frontend/src/pages/pulpit/kpi.ts` (P10.2); eksport z Katalogu (bez audytu — decyzja D3 bloku 10f); trasy `eksport_csv`/`eksport_shoper` bez konsumenta w UI |
-| **Do nowej wersji?** | ⬜ **czeka na odpowiedź Ani** — `docs/instrukcja-testow-I10-v2.md` §1.2 |
+| **Do nowej wersji?** | ❌ **NIE — decyzja Ani 2026-09-23: „zostawcie tak jak jest"** |
 | **Status** | — |
 
 **Na czym polega.** P10.2 (#34) podpięła kafel pod Historię (`audit_log`, typ „eksport”). Ale żaden przycisk
@@ -4410,8 +4444,9 @@ w panelu nie tworzy dziś wpisu `eksport_*`: eksport CSV z Katalogu nie zapisuje
 które audyt piszą, nie mają przycisku. Generowanie CSV dla Selly też się nie liczy. Kafel pokaże więc
 „—” + „Ostatni import: …”, dopóki ktoś nie wywoła eksportu z API.
 
-**Rekomendacja koordynatora:** zależnie od odpowiedzi Ani. Wariant (a) z I10-v2 — audyt przy eksporcie
-z Katalogu — to nowe, świadome odstępstwo (mała zmiana: jeden zapis audytu).
+**⭐ DECYZJA ANI 2026-09-23: ZOSTAWIAMY.** Cytat: „zostawcie tak jak jest". Kafel czyta prawdziwą historię, ale skoro
+żaden przycisk w panelu nie tworzy wpisu eksportu, w praktyce pokaże „—" i datę ostatniego importu. Wpis ZAMKNIĘTY
+bez pracy w kodzie. Gdyby kiedyś doszedł audyt eksportu z Katalogu, kafel ożyje sam.
 
 ---
 
@@ -4446,7 +4481,7 @@ ani nie blokuje testu. Śmieci w polu marki Ania może poprawić ręcznie (edycj
 | **Pliki** | `mirror/backend/staging_policy.cjs` (**nowy**, 298 l.), `mirror/backend/index.cjs` (dwa wywołania: `staging_policy.install({U,db,normalize,classify,badName,ext})` i `registerRoutes`), `mirror/backend/common.cjs` (`ean_raw`), `mirror/backend/parsers/adapter.cjs` (EAN przez `validateEan`, `eanRaw`, kod zastępczy bez samego EAN), `mirror/frontend/assets/staging-policy-injection.js` (**nowy**), `mirror/frontend/index.html`, `db/schema.sql` (tabela `staging_matches`, indeks unikalny `staging_one_current_product ON staging_items(dostawca,kod)`), `mirror/backend/staging_reconcile_20260922.cjs` (skrypt jednorazowy); kopie `.bak_20260922T110248Z_staging_v2` |
 | **Commit** | `7d6cfc9` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22** (D3 planu I15) |
-| **Status** | zatwierdzone; karty **I15.2** (część parserowa), **I15.4** (backend), **I15.5** (frontend) — `docs/karty/I15.*` |
+| **Status** | zatwierdzone; **I15.2 (część parserowa) — ✅ DOWIEZIONA** (ticket 120, 2026-09-23): `staging_policy.cjs` w `legacy/` skopiowany bajt w bajt, adapter/common używają `validateEan`, `rawEan`, `syntheticCode`; `install()`/`registerRoutes()` leżą UŚPIONE (nikt ich nie woła). **I15.4a (schemat) — ✅ DOWIEZIONA** (ticket 124, 2026-09-23): tabela `staging_matches` i indeks unikalny `staging_one_current_product` założone migracją `012`. Otwarte: **I15.4b** (importer), **I15.4c** (akceptacja i trasy), **I15.5** (frontend) — `docs/karty/I15.*` |
 
 **Opis biznesowy (CHANGELOG Ani, 2026-09-22 13:03).** „Staging v2: jedno najnowsze zgłoszenie na produkt/dostawcę;
 świeże ceny i stany; ścisła kontrola surowego EAN w parserze/adapterze; dopasowanie po EAN wyłącznie do jednej
@@ -4472,10 +4507,16 @@ i łączenie różnych partii opon.”
 22.09 traktuje taki EAN jako BŁĄD blokujący akceptację do ręcznej poprawki. **Decyzja użytkownika
 2026-09-22 (D4): przyjmujemy wersję Ani** — zastępuje 14i. Dotyczy też wpisu #11.
 
+**Zmierzone w I15.2 (ticket 120, 2026-09-23).** Stan przejściowy — port ma już `eanRaw`/`_eanLossy`
+z parserów, ale import (`import/tk.ts`) jeszcze nie blokuje akceptacji (blokada to zakres **I15.4**) —
+nie psuje importu: na pełnych cennikach nowa ekspozycja `ean: null` to **+6 rekordów z 4 843 (0,12 %)**,
+wyłącznie MO5, i są to pozycje, które wcześniej niosły bezsensowny EAN `…W2` (patrz #105). Liczba
+rekordów identyczna po obu stronach, nic nie ginie. Szczegóły: `docs/karty/I15.4/wejscie-120.md`.
+
 **Skrypt `staging_reconcile_20260922.cjs`** — jednorazowa przebudowa stagingu z archiwów importu (dedup
 `MAX(id)` per dostawca+kod, potem ponowny import najnowszego pliku każdego dostawcy w `SAVEPOINT`, z kontrolą, że
 `products` się nie zmienił). **Decyzja użytkownika 2026-09-22 (D5): nie przenosimy** — na produkcji wykonany;
-u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu unikalnego (karta I15.4).
+u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu unikalnego (karta I15.4a, zrobione migracją `012`, ticket 124).
 
 **Zamrożenie.** To ostatnia zmiana produkcji przed cutoverem — od 2026-09-22 stary Bridge jest zamrożony
 (uzgodnienie Pawła z Anią). Staging v2 jest więc w wersji ostatecznej.
@@ -4540,6 +4581,10 @@ w Selly. Karty I15.6 i I15.7 nie mają tu nic do zrobienia.
 produktu, więc nic się nie psuje; gdyby ten dostawca ruszył, jego produkty zostaną z pustym polem. Numery dla MO6
 trzeba wtedy wziąć od Ani.
 
+**Fakt z ticketu 122 (I15.3, 2026-09-23):** generator CSV odbudowy odtwarza ten sam fallback co
+produkcja (mapa po `dostawca`, gdy kolumna w bazie pusta) — MO6 i nieznany dostawca dają puste pole
+w 60. kolumnie, zamierzenie pokryte testem, nie defekt.
+
 **Rekomendacja koordynatora:** ❌ zamknięte — nic do zrobienia (potwierdzenie Ani, patrz wyżej).
 
 ---
@@ -4552,7 +4597,7 @@ trzeba wtedy wziąć od Ani.
 | **Kategoria** | DEPLOY / BACKEND (eksport CSV Selly) — luka cutoveru |
 | **Pliki** | produkcja: cron serwera uruchamia `mirror/backend/generate_selly_export.cjs` (`selly/routes.cjs:297` „Plik generowany cronem ~6:00”); odbudowa: `rebuild/backend/src/selly/generator-csv.ts` (tylko trasa ręczna `POST /api/selly/generate-csv`) |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D8)**, wymagane do cutoveru (Ania używa: „o 6 rano katalog wypycha nowy CSV na serwer”, Selly zaciąga go o 12:00) |
-| **Status** | — przypisane do karty I15.3 (polecenie CLI) + `docs/cutover.md` (przepięcie crona) |
+| **Status** | ✅ **zrobione ticketem 122 (I15.3, 2026-09-23).** `npm run selly:csv` (= `node dist/selly/csv-cli.js`, `rebuild/backend/src/selly/csv-cli.ts`) woła tę samą `wygenerujCsvSelly()` co trasa `POST /api/selly/generate-csv`; test porównuje plik z CLI i plik z trasy **bajt w bajt**. W środowisku wymaga tylko `DB_PATH` (⚠ pełny `wczytajEnv()` wymaga też `JWT_SECRET`, niezwiązanego z zadaniem crona — patrz `review.md` SHOULD-FIX); nie rusza `.htaccess`. Przepięcie crona zostaje w `docs/cutover.md`. |
 
 **Na czym polega.** Odbudowa ma generator (8a), ale nie ma nic, co uruchamia go codziennie — w produkcji robi to cron
 systemowy spoza aplikacji. Po cutoverze stary cron dalej uruchamiałby STARY skrypt na tej samej bazie (dałby plik, ale
@@ -4562,6 +4607,11 @@ z logiką starego stosu), a bez niego plik przestałby się odświeżać i Selly
 ---
 
 ### #103 · 2026-09-22 · [BACKEND] · `routes_sync.cjs` importuje nieistniejące `runFullTodays` ze `scheduler_selly.cjs` — trasy `sync-full-today`/`sync-full-force` na produkcji zawsze dają 500
+
+⚠ **Numer zduplikowany w tym pliku** (znalezisko ticketu 120) — niżej jest DRUGI, niepowiązany wpis
+oznaczony też jako `#103` („Braki w cenniku", ok. linii 4584). Ta karta to Selly/`sync-*` (I15.8), tamta
+to `feed_safety`/staging (I15.2/I15.4/I15.5/I15.11). Przenumerowanie zostawione koordynatorowi — nie
+przenumerowano samodzielnie.
 
 | Pole | Wartość |
 |---|---|
@@ -4583,14 +4633,18 @@ albo odtworzyć 500 1:1, zgodnie z regułą projektu o defektach zastanych.
 
 ### #103 · 2026-09-22 17:30 · [BACKEND][BAZA][FRONTEND] · „Braki w cenniku” — bezpieczeństwo źródła, koniec fałszywych wycofań, staging v3
 
+⚠ **Numer zduplikowany w tym pliku** (znalezisko ticketu 120) — wyżej jest INNY wpis oznaczony też
+`#103` (`routes_sync.cjs`/`runFullTodays`, Selly, I15.8, ok. linii 4564). Ten wpis to `feed_safety`/staging.
+Przenumerowanie zostawione koordynatorowi — nie przenumerowano samodzielnie.
+
 | Pole | Wartość |
 |---|---|
 | **Data** | 2026-09-22 17:30 (etykieta `20260922T153004Z_withdrawals`) |
 | **Kategoria** | BACKEND + BAZA + FRONTEND — rdzeń importu, staging, panel |
 | **Pliki** | `mirror/backend/feed_safety.cjs` (**nowy**), `staging_policy.cjs` (+131 l. → 407), `extensions.cjs` (jeden scheduler — drugi wyłączony), `index.cjs`, `parsers/dispatcher.cjs` (usunięty cichy fallback do starych parserów), `parsers/mo2_jmk.cjs`, `parsers/mo9_agrorami.cjs`, `parsers/mo9_agrorami_api.cjs`, `parsers/_agrorami_fetch_helper.cjs`, `parsers/adapter.cjs`; FE: `assets/index-PRICEFMT1783512500.js` (ŻYWY bundel), `assets/staging-policy-injection.js`, `index.html`; `db/schema.sql`: `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks`; jednorazowe: `withdrawals_reconcile_20260922.cjs` + raport JSON |
 | **Commit** | `3f00533` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK — część parserowa DOWIEZIONA w I15.2** (ticket 120, 2026-09-23); reszta do decyzji w I15.4b/I15.5/I15.11. |
+| **Status** | ✅ **parser: I15.2** (ticket 120) — `feed_safety.cjs` w `legacy/`, wpięty w `dispatcher.cjs:47` i `adapter.cjs:733`; usunięty cichy fallback do starych parserów; JMK nie łączy już wierszy po EAN (zmierzone: próbka MO2 200 kodów, wszystkie unikalne, dawne zdublowane `MO2_13760840000`/`MO2_13763530000` znikają). ✅ **schemat: I15.4a** (ticket 124, 2026-09-23) — tabele `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks` założone w odbudowie migracją `012`. Konsumpcja `_bridgeFeedMeta` przez silnik i panel „Braki w cenniku” — **I15.4b/I15.5/I15.11** (otwarte). |
 
 **Opis biznesowy (CHANGELOG Ani).** „Naprawa nieobecności w stagingu. Usunięto cichy fallback do starych parserów
 w imporcie URL i ręcznym. Agrorami: pełny zapis JSON przed zamknięciem procesu, kontrola liczby/unikalności produktów
@@ -4615,7 +4669,7 @@ kodzie dostawcy i wielkości liter, ochronę DEMO i wariantów. FE: **zmiana w �
 nowy widok/filtr „Braki w cenniku” i podgląd starej karty.
 
 **Rekomendacja (moja):** ✅ **nanieść — to rdzeń importu i wprost naprawa problemu, który Ania nazwała „fałszywymi
-wycofaniami”.** Zakres wchodzi do istniejących kart I15 (parsery → I15.2, staging BE → I15.4, panel → I15.5), bo rusza
+wycofaniami”.** Zakres wchodzi do istniejących kart I15 (parsery → I15.2, staging BE → I15.4b, panel → I15.5), bo rusza
 te same pliki; osobnej karty nie zakładać. Skrypt `withdrawals_reconcile_20260922.cjs` to operacja jednorazowa —
 nie przenosić (jak D5 dla reconcile Staging v2).
 
@@ -4629,8 +4683,8 @@ nie przenosić (jak D5 dla reconcile Staging v2).
 | **Kategoria** | BACKEND + BAZA (staging, eksport CSV, Selly delta/full) + operacja na danych |
 | **Pliki** | `mirror/backend/availability_sync.cjs` (**nowy**), `staging_policy.cjs` (+87 l. → 488), `generate_selly_export.cjs` (+19), `selly/sync_delta.cjs` (+18), `selly/sync_full.cjs` (+3); `db/schema.sql`: `product_auto_suspensions`; jednorazowe: `apply_availability_20260922.cjs`, `zero_and_delete_agrorami_20260922.cjs` + archiwa JSON |
 | **Commit** | `abe5f14` |
-| **Do nowej wersji?** | ✅ **TAK — Tor 1 i Tor 2 zrealizowane** (CSV tylko aktywne i staging/auto-wstrzymania zostają do I15.3/I15.4) |
-| **Status** | 🔨 **częściowo zrealizowane w rebuild 2026-09-23**, ticket `119-FEATURE-selly-dostepnosc-zawor` (karta I15.10) — patrz „Zrealizowane" niżej |
+| **Do nowej wersji?** | ✅ **TAK — Tor 1 i Tor 2 zrealizowane** (ticket 119); staging/auto-wstrzymania zostają do I15.4b |
+| **Status** | 🔨 **częściowo.** ✅ **CSV → ticket 122 (I15.3, 2026-09-23)** — zapis atomowy naniesiony (`generator-csv.ts`, tmp+`renameSync` w tym samym katalogu); filtr „tylko aktywne” odbudowa miała już od I8a, więc nie było tu czego zmieniać. ✅ **schemat → ticket 124 (I15.4a, 2026-09-23)** — tabela `product_auto_suspensions` założona migracją `012`. ✅ **Tor 1 i Tor 2 + `availability_sync` → ticket `119-FEATURE-selly-dostepnosc-zawor` (karta I15.10, 2026-09-23)** — żywy odczyt statusu/stanu/ceny przed wysyłką, warunek wyboru z `abe5f14`, moduł `dostepnosc.ts` (port `availability_sync.cjs`, celowo niewpięty — czeka na I15.4b); patrz „Zrealizowane" niżej. **Zostaje otwarte:** logika auto-wstrzymań (`staging_policy.cjs`) → **I15.4b**. |
 
 **Opis biznesowy (CHANGELOG Ani).** „Brak produktu w poprawnej pełnej ofercie natychmiast ustawia wstrzymany/0. Tabela
 `product_auto_suspensions` odróżnia automatyczny brak od ręcznego wstrzymania. Pewny powrót przywraca aktywność i bieżący
@@ -4650,8 +4704,7 @@ status/stan/cena produktu (`SELECT … FROM products WHERE id=?`), żeby nie wys
 `sync_full` pomija produkty wstrzymane po rozpoczęciu cyklu. Eksport CSV: tylko `aktywny`, zapis atomowy.
 
 **Rekomendacja (moja):** ✅ **nanieść** — bez tego nowy Bridge wysyłałby do sklepu stany produktów, których dostawca już
-nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4**, CSV tylko aktywne + zapis atomowy →
-**I15.3**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
+nie ma. Podział na istniejące karty: staging i auto-wstrzymania → **I15.4b** (otwarte), CSV tylko aktywne + zapis atomowy → **I15.3 — ✅ zapis atomowy zrobiony ticketem 122 (23.09); filtr „tylko aktywne” odbudowa miała już wcześniej, nic do naniesienia**, zmiany w delcie i torze pełnym Selly → **nowa karta I15.12** (I15.6 już zmergowana, I15.7 dotyczy `sync_full`).
 ⚠ Operacje na danych (395 wstrzymań, 179 usuniętych kart MO9) — **nie odtwarzamy** (decyzja D2: świeża kopia produkcji
 na staging), ale **trzeba je uwzględnić przy pomiarach**: liczba produktów w katalogu spadła o 179.
 
@@ -4676,8 +4729,8 @@ ticketa 119** — ten wpis zostaje częściowo otwarty dla nich. Szczegóły: `d
 | **Kategoria** | BACKEND (adapter, parser MO9) + operacje na danych |
 | **Pliki** | `mirror/backend/parsers/adapter.cjs`, `mirror/backend/parsers/mo9_agrorami_api.cjs`, `staging_policy.cjs` (edycja modelu w stagingu), `data.db` (poprawki 13 kart MO4/MO5 i 5 kart MO9) |
 | **Commit** | `06a8aa3`, `88fa31c` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ✅ **TAK — część parserowa DOWIEZIONA w I15.2** (ticket 120, 2026-09-23); edycja modelu w stagingu → **I15.4** (otwarte). |
+| **Status** | ✅ **parser: I15.2** — `adapter.cjs`/`mo9_agrorami_api.cjs` resyncowane bajt w bajt; W2 Handlopeksa zadziałało **15×** na pełnych cennikach (MO4 1, MO5 14 — próbki 200-wierszowe pokazywały tylko 2), `_supplierEanOriginal` niesie oryginał dostawcy. Edycja modelu w stagingu (usunięcie samotnego DOT) zostaje dla **I15.4**. |
 
 **Opis biznesowy (CHANGELOG Ani).** „W ofertach Handlopex MO4/MO5 końcówka `W2` po prawidłowym 13-cyfrowym EAN jest
 rozpoznawana jako oznaczenie wariantu rocznikowego, jeżeli rok zgadza się z polem DOT i końcówką kodu producenta.
@@ -4693,7 +4746,7 @@ w `_supplierEanOriginal`. Dodatkowo dla MO2 rekord niesie `_jmkRowId` (identyfik
 `mo9_agrorami_api.cjs`: usunięcie samotnego `DOT` przed `PR`/`TL`/`TT` z modelu.
 
 **Rekomendacja (moja):** ✅ nanieść — to warstwa parserów, więc zakres karty **I15.2** (adapter, MO9), a edycja modelu
-w stagingu → **I15.4**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie do odtworzenia (D2 — świeża kopia produkcji).
+w stagingu → **I15.4b**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie do odtworzenia (D2 — świeża kopia produkcji).
 
 ---
 
@@ -4706,7 +4759,7 @@ w stagingu → **I15.4**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie d
 | **Pliki** | `mirror/backend/staging_policy.cjs` (488 → 665 l.), `db/schema.sql`: `staging_absence_decisions` + unikalny indeks `staging_absence_one_choice`, FE: `assets/staging-policy-injection.js`, `index.html` |
 | **Commit** | `58d9d1d`, `88fa31c` |
 | **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Status** | tabela `staging_absence_decisions` + indeks `staging_absence_one_choice` już założone w odbudowie migracją `012` (ticket 124, karta I15.4a); logika wciąż otwarta — karty I15.4c/I15.11 |
 
 **Opis biznesowy (CHANGELOG Ani).** Okno sprawdzania pokazuje **osobno starą kartę i możliwy odpowiednik**, wskazuje
 zgodność lub różnicę EAN i DOT oraz stan obu kart; doszedł bezpieczny przycisk „Pozostaw starą wstrzymaną i zamknij
@@ -4717,7 +4770,8 @@ o możliwym scaleniu (trzy błędne zgłoszenia 732903–732905 usunięte). Dla 
 jedną kartę: niewybrana zostaje wstrzymana, wybrana zostaje w katalogu, a baza zapamiętuje przypisany kod źródłowy.
 Powód: „użytkowniczka chce odrębnych produktów dla różnych DOT oraz jednoetapowego zapisu wyboru”.
 
-**Rekomendacja (moja):** ✅ nanieść — backend i tabela do karty **I15.4** (migracja `012` rośnie o piątą tabelę),
+**Rekomendacja (moja):** ✅ nanieść — backend do karty **I15.4c** (tabela `staging_absence_decisions` + indeks
+`staging_absence_one_choice` — szósta i ostatnia z sześciu tabel migracji `012` — już założone kartą I15.4a, ticket 124),
 panel do **I15.11** (ten sam obszar co „Braki w cenniku”). ⚠ To już trzecia warstwa dokładana do `staging_policy.cjs`
 w ciągu doby (298 → 407 → 488 → 665 linii) — patrz nota o zamrożeniu niżej.
 
@@ -4742,7 +4796,8 @@ przestawał odpowiadać także na zwykłe odczyty”.
 **Rekomendacja (moja):** ⬜ **sprawdzić, czy nas dotyczy, zanim cokolwiek naniesiemy.** To naprawa skutku architektury
 produkcji: `uwaga_cena_patch.cjs` otwiera WŁASNE połączenie do `data.db` (ten sam wzorzec co `payment_blocks.cjs`).
 Odbudowa ma jedno połączenie i `uwaga_cena` jako normalną kolumnę modelu, więc problem prawdopodobnie u nas nie istnieje.
-Karta **I15.4** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i zapisać wynik zamiast portować mechanicznie.
+Karta **I15.4c** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i zapisać wynik zamiast portować mechanicznie —
+zadanie przekazane tam plikiem `docs/karty/I15.4c/wejscie-124.md` (decyzja D-124.4, ticket 124, 2026-09-23).
 
 *Pominięte — triaż 2026-09-23 (zakres `abe5f14..88fa31c`, ticket 112):*
 - **16 commitów `[FRONTEND]`** (22.09 21:00 – 23.09 08:00, co godzinę) — wyłącznie regeneracja
@@ -4762,8 +4817,8 @@ Karta **I15.4** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i za
 | **Data** | 2026-09-23 (specyfikacja Selly od Ani, stan opisu na 22.09) |
 | **Kategoria** | BACKEND (grupowanie produktów) + BAZA |
 | **Pliki** | `assignKodImportu` — w produkcji `bridge_ext.cjs`, od Staging v2 **nadpisany** w `staging_policy.cjs` (`origin/main`); mapowanie `selly_products` `(kod_importu, dostawca)`; port: `rebuild/backend/src/**` (I15.4 przejmuje nadpisanie) |
-| **Do nowej wersji?** | ✅ **TAK — wykrywanie i raportowanie zrealizowane (ticket 119, 2026-09-23); pomijanie/zawór WYCOFANY decyzją Ani** |
-| **Status** | 🔨 **potwierdzony, częściowo zaadresowany, NADAL OTWARTY** — patrz „⭐ Rewizja" niżej; żywy na produkcji: 80 grup / 174 produkty, 76 grup z różnymi cenami lub stanami, wszystkie 80 z mapowaniem w `selly_products` |
+| **Do nowej wersji?** | ✅ **częściowo TAK — wykrywanie i raportowanie zrealizowane (ticket 119, 2026-09-23); pomijanie/zawór WYCOFANY decyzją Ani.** Rozstrzygnięcie semantyczne („ten sam dostawca, ten sam `kod_importu`”) ⬜ **DO DECYZJI Ani** — poprosiła 23.09 o listę przypadków, lista wysłana, czeka na jej przegląd |
+| **Status** | 🔨 **potwierdzony, częściowo zaadresowany, NADAL OTWARTY** — patrz „⭐ Rewizja" niżej. Żywy na produkcji: 80 grup / 174 produkty, 76 grup z różnymi cenami lub stanami, wszystkie 80 z mapowaniem w `selly_products`; **przyczyna USTALONA (niżej)** |
 
 **Opis (specyfikacja Ani).** „121 zduplikowanych kluczy `(dostawca, kod_importu)` = 259 aktywnych wierszy;
 114 grup/245 z różnymi cenami/stanami. Współdzielony `selly_products` → snapshot nadpisywany → delty wracają
@@ -4815,6 +4870,25 @@ wyłącznie pozycji bez klucza. Stare kolizje zostają w danych i przejdą przez
   wielomagazynowością (ta sama opona u kilku dostawców = jedna karta w Selly), więc pomijanie zatrzymałoby
   też produkty o poprawnych danych. Zamiast (c) wszedł sam mechanizm raportowania (bez pomijania) — patrz niżej.
 
+**⭐ PRZYCZYNA — USTALONA 2026-09-23 (kod + pomiar).** Stara reguła `assignKodImportu`
+(`origin/main:mirror/backend/bridge_ext.cjs:156-178`) działa czterostopniowo: (1) produkt, który ma już
+sześciocyfrowy numer, **zachowuje go na zawsze**; (2) przy POPRAWNYM EAN szuka innego produktu z tym samym EAN-em;
+(3) **gdy EAN-u brak albo jest niepoprawny — dopasowuje po `marka` + `rozmiar` + `bieznik` + `nazwa`**;
+(4) dopiero na końcu losuje nowy numer.
+
+Sklejenia powstają w punkcie (3): w chwili importu opona nie miała jeszcze EAN-u (albo został odrzucony), więc
+dostała numer pierwszej pozycji o tej samej nazwie i rozmiarze. Gdy EAN-y później doszły, punkt (1) nie pozwolił
+już zmienić numeru.
+
+**Pomiar potwierdzający (23.09, kopia produkcji):** grup o identycznej nazwie, marce, rozmiarze i bieżniku —
+**74 z 80**; grup z różnymi EAN-ami — **75 z 80**; grup z różnym DOT — **9**. Czyli to prawie zawsze dwie fizycznie
+różne opony (inny EAN, czasem inny rocznik) pod jedną nazwą.
+
+**Rekomendacja koordynatora (22.09) — CZĘŚCIOWO NIEAKTUALNA: (c) teraz + (a) po uzgodnieniu z Anią.**
+⚠ (c) wycofane decyzją Ani z 23.09 (wyżej); w jego miejsce wszedł sam mechanizm raportowania (ticket 119,
+niżej). (a) nadal do uzgodnienia z Anią. (c) jest tanie i odwracalne, mieści się
+w karcie **I15.10**; (a) to zmiana asortymentu w sklepie — dziś te opony są w Selly sklejone w jeden produkt.
+
 **⭐ Rewizja zakresu (ticket 119, karta I15.10, 2026-09-23) — zawór wycofany, zostaje wykrywanie i
 raportowanie.** Rozstrzygnięcie: **wysyłka zostaje 1:1 z produkcją** (pętla delty co 15 minut trwa, jak
 dziś), dołożona jest wyłącznie widoczność — `grupyKolizyjne()` w `sync-delta.ts`, licznik
@@ -4835,3 +4909,10 @@ stanu czy rozdzielenie grup) to decyzja handlowa Ani, poza zakresem odbudowy —
 zostaje 🔨 **częściowo zaadresowany, nie zamknięty**: pętla delty co 15 minut nadal istnieje, tylko jest
 teraz widoczna w logach. Szczegóły: `docs/tickets/119-FEATURE-selly-dostepnosc-zawor/`.
 
+
+
+---
+
+**Koniec historycznej listy wpisów (`#1`–`#108`).** Nowe wpisy: `docs/rebuild-backlog/wpis-<N>.md`
+(jeden plik na ticket, identyfikatory `#<ticket>.<kolejny>`) — zob. `docs/rebuild-backlog/README.md`.
+Zestawienie wszystkiego razem: `tools/stan-backlogu.sh`.

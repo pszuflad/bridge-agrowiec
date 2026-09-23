@@ -18,7 +18,7 @@ import { useMemo } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import type { Dostepnosc, WierszDostepnosci } from "./api";
+import { pobierzPelneWiersze, type Dostepnosc, type WierszDostepnosci } from "./api";
 import {
   zastosujFiltry,
   wymiaryNieobslugiwane,
@@ -80,6 +80,12 @@ export function SekcjaDostepnosciProduktow({
               wiersze={wiersze}
               kolumny={KOLUMNY}
               wczytywanie={ladowanie}
+              pobierzPelne={() =>
+                pobierzPelneWiersze<Dostepnosc, WierszDostepnosci>(
+                  "/api/analytics/availability/products",
+                  (pelne) => zastosujFiltry(pelne.rows, wybor, MAPOWANIE),
+                )
+              }
             />}
         />
         <TabelaAnalityki

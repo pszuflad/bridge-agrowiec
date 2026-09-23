@@ -1,7 +1,7 @@
 # I15.10 — dostępność w Selly: `dostepnosc.ts` + zmiany w delcie (Tor 1) i pełnym cyklu (Tor 2)
 
 > **Stan:** ✅ 2026-09-23 · 119-FEATURE-selly-dostepnosc-zawor
-> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #104 (dowieziona), #108 (pozostaje otwarty), #101 (zmierzona, nienaprawiona)
+> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #104 (dowieziona), #108 (pozostaje otwarty), #101 (zmierzona, nienaprawiona) · **Zależy od:** — (I15.6 ✅, I15.7 ✅; hook dokłada I15.4b, generator woła w procesie — `wejscie-117.md`)
 > **Ticket:** 119-FEATURE-selly-dostepnosc-zawor
 
 Przepisana z karty-rezerwy przez koordynatora (ticket 110, triaż 22.09 wieczór). Źródło prawdy: `origin/main`
@@ -93,3 +93,18 @@ i raportujemy, NIE pomijamy.** Zawór grupujący po parze `(dostawca, kod_import
    bez EAN-u też się zeruje. Plik jest własnością ticketu 109, więc go NIE edytowaliśmy; korekta
    jest zapisana w `docs/spec-backend/wpis-119.md`. Zgodnie z regułą „jeden plik na ticket" to
    wystarcza, ale odnotowuję, bo czytający sam `wpis-109.md` dostanie nieaktualny obraz.
+6. **Trzy wejścia przyszły PO zamknięciu ticketu 119 (16:08) i NIE są objęte tym, co dowieziono** —
+   przy scaleniu z `develop` (2026-09-23 wieczór) doszły `wejscie-120.md`, `wejscie-121.md`
+   i `wejscie-122.md`. Dwa z nich zmieniają obraz zakresu:
+   - `wejscie-121.md` (I15.8) mówi, że **montaż `availability_sync` należy do I15.10**, czyli do tej
+     karty, a ticket 119 świadomie zostawił moduł NIEWPIĘTY, przekazując montaż do I15.4b
+     (`docs/karty/I15.4b/wejscie-119.md`). Te dwa ustalenia są sprzeczne — rozstrzygnięcie należy
+     do koordynatora. Kod jest gotowy w obu wariantach: `zadajOdswiezenie()` to jedyny punkt wejścia.
+   - `wejscie-122.md` (I15.3) mówi, że generator CSV da się wołać **in-process**
+     (`wygenerujCsvSelly()`), a `dostepnosc.ts` uruchamia go w osobnym procesie — 1:1 za oryginałem
+     (`availability_sync.cjs`). Do decyzji: zostawić wierność czy uprościć do wywołania w procesie.
+   - `wejscie-120.md` (I15.2) dotyczy wygaszonego drugiego schedulera — do przejrzenia przy montażu.
+
+   **Stan ✅ tej karty dotyczy zakresu z chwili zamknięcia ticketu** (Tor 1, Tor 2, moduł dostępności
+   jako gotowy port). Montaż i trzy powyższe ustalenia to otwarta reszta — karta NIE jest domknięta
+   w sensie „nic więcej do zrobienia".

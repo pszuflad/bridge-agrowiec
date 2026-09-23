@@ -15,7 +15,12 @@ import {
   zastosujFiltry,
   type Produkt,
 } from "@/pages/katalog/filtrowanie";
-import { uzupelnijKodImportu } from "@/pages/katalog/kolumny";
+import {
+  KOLUMNY,
+  KOLUMNY_DOMYSLNE,
+  uzupelnijBlokowaneFormy,
+  uzupelnijKodImportu,
+} from "@/pages/katalog/kolumny";
 
 function produkt(nadpisania: Partial<Produkt> & { id: number }): Produkt {
   return {
@@ -324,5 +329,57 @@ describe("uzupelnijKodImportu (retrofit zapisu kolumn)", () => {
     const zapis = ["nazwa", "marka"];
     uzupelnijKodImportu(zapis);
     expect(zapis).toEqual(["nazwa", "marka"]);
+  });
+});
+
+/**
+ * Retrofit kolumny blokowanych form płatności (backlog #73, ticket 122).
+ *
+ * ⭐ PO CO ON JEST. W produkcji tę kolumnę WSTRZYKUJE skrypt, więc konfigurator o niej nie wie
+ * i nikt nie ma jej w zapisanym wyborze. U nas to zwykła kolumna, a wybór kolumn żyje
+ * w IndexedDB — PER ORIGIN. Po cutoverze nowy panel stanie pod tą samą domeną co stary, więc
+ * zastany zapis Ani tam realnie będzie i bez retrofitu kolumna by jej zniknęła, mimo że dziś
+ * ją widzi. To nie jest kod „na wszelki wypadek".
+ */
+describe("uzupelnijBlokowaneFormy (retrofit zapisu kolumn)", () => {
+  it("dokłada kolumnę na koniec, gdy zapis jej nie ma", () => {
+    expect(uzupelnijBlokowaneFormy(["nazwa", "marka"])).toEqual([
+      "nazwa",
+      "marka",
+      "blokowaneFormyPlatnosci",
+    ]);
+  });
+
+  it("zapis, który już ma tę kolumnę, zostaje nietknięty", () => {
+    const zapis = ["nazwa", "blokowaneFormyPlatnosci", "marka"];
+    expect(uzupelnijBlokowaneFormy(zapis)).toEqual(zapis);
+  });
+
+  it("nie gubi retrofitu kodImportu, gdy oba są potrzebne", () => {
+    expect(uzupelnijBlokowaneFormy(uzupelnijKodImportu(["nazwa", "marka"]))).toEqual([
+      "nazwa",
+      "kodImportu",
+      "marka",
+      "blokowaneFormyPlatnosci",
+    ]);
+  });
+});
+
+describe("definicje kolumn katalogu", () => {
+  it("kolumna blokowanych form płatności jest zdefiniowana i domyślnie włączona", () => {
+    const definicja = KOLUMNY.find((k) => k.key === "blokowaneFormyPlatnosci");
+
+    expect(definicja).toBeDefined();
+    // Etykieta i szerokość są DOSŁOWNIE ze skryptu produkcji
+    // (`payment-blocks-injection.js`: `th.textContent`, `style.minWidth = "420px"`) —
+    // stąd polskie znaki, mimo że sąsiednie etykiety ich nie mają.
+    expect(definicja?.label).toBe("Blokowane formy płatności");
+    expect(definicja?.width).toBe(420);
+    expect(KOLUMNY_DOMYSLNE).toContain("blokowaneFormyPlatnosci");
+  });
+
+  /** Oryginał wstrzykiwał `<th>` PRZED „Akcje"; u nas „Akcje" są poza tablicą, więc = koniec. */
+  it("stoi na końcu tablicy kolumn, czyli tam gdzie wstrzykiwał ją oryginał", () => {
+    expect(KOLUMNY[KOLUMNY.length - 1]?.key).toBe("blokowaneFormyPlatnosci");
   });
 });

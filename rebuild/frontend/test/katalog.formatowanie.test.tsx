@@ -233,6 +233,61 @@ describe("formatujKomorke (DT)", () => {
    * zniesiona gałąź `AxB` pokazywała jako „8.00x20". Fixture jest nietknięty — zmieniło się
    * oczekiwanie, bo zmienił się formater.
    */
+  /**
+   * Kolumna „Blokowane formy płatności" (backlog #73).
+   *
+   * ⭐ WARTOŚĆ LICZY SIĘ Z KODU DOSTAWCY, NIE Z PRODUKTU — i to nie jest skrót, tylko
+   * odtworzenie produkcji. Zmierzone w tickecie 122 na oryginale z `origin/main` @ `88fa31c`,
+   * postawionym na kopii bazy Z KOLUMNĄ WYPEŁNIONĄ dla wszystkich 7405 produktów i obydwoma
+   * triggerami: `GET /api/products` oddaje 72 klucze BEZ tego pola (bundle backendu nie zna
+   * kolumny dokładanej runtime'owym `ALTER TABLE` — mechanizm `uwagaCena`). Dlatego skrypt
+   * produkcji liczy wartość w przeglądarce i dlatego my robimy tak samo.
+   *
+   * Gdyby ktoś kiedyś wystawił to pole z API, ten test NADAL przechodzi — i właśnie dlatego
+   * jest tu asercja na produkt, który pole NIESIE z inną wartością: pilnuje, że źródłem
+   * pozostaje `dostawca`, a nie przypadkowa zawartość odpowiedzi.
+   */
+  describe("kolumna blokowanych form płatności", () => {
+    it("bierze listę z kodu dostawcy", () => {
+      expect(tekstKomorki(produkt({ dostawca: "MO1" }), "blokowaneFormyPlatnosci")).toBe(
+        "203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+      );
+      expect(tekstKomorki(produkt({ dostawca: "MO10" }), "blokowaneFormyPlatnosci")).toBe(
+        "201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216",
+      );
+    });
+
+    /**
+     * ⚠ MO6 (Uniglory) CELOWO bez mapowania — CHANGELOG produkcji 2026-09-10 14:53:
+     * „nie będzie na razie w sprzedaży". „—" jest tu POPRAWNYM wynikiem, nie błędem
+     * (backlog #101, zamknięte 2026-09-23). Ta asercja istnieje po to, żeby nikt tego
+     * nie „naprawił" dopisaniem MO6 do mapy.
+     */
+    it("MO6 i nieznany dostawca dają „—”, nie pustkę i nie wartość zastępczą", () => {
+      expect(tekstKomorki(produkt({ dostawca: "MO6" }), "blokowaneFormyPlatnosci")).toBe("—");
+      expect(tekstKomorki(produkt({ dostawca: "XYZ" }), "blokowaneFormyPlatnosci")).toBe("—");
+      expect(tekstKomorki(produkt({ dostawca: "" }), "blokowaneFormyPlatnosci")).toBe("—");
+    });
+
+    it("rozpoznaje kod dostawcy niezależnie od wielkości liter i spacji", () => {
+      expect(tekstKomorki(produkt({ dostawca: " mo2 " }), "blokowaneFormyPlatnosci")).toBe(
+        "201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219",
+      );
+    });
+
+    /** Źródłem jest `dostawca`, nawet gdyby produkt niósł własną wartość pola. */
+    it("nie ufa wartości pola w produkcie — źródłem jest `dostawca`", () => {
+      const zPolem = produkt({ dostawca: "MO1", blokowaneFormyPlatnosci: "999" } as Partial<Produkt>);
+      expect(tekstKomorki(zPolem, "blokowaneFormyPlatnosci")).not.toBe("999");
+    });
+
+    /** Pełna lista trafia w `title` — kolumna bywa węższa niż 17 identyfikatorów. */
+    it("pełną listę powtarza w `title` komórki", () => {
+      render(<>{formatujKomorke(produkt({ dostawca: "MO9" }), "blokowaneFormyPlatnosci")}</>);
+      expect(screen.getByTitle(/^201, 202, .*217, 218, 219$/)).toBeTruthy();
+    });
+  });
+
   it("pozycja AxB z contract/fixtures/GET_products.json daje sam człon szerokości", () => {
     const zNotacjaAxB = produktyZFixtura()[2] as Produkt;
     expect(zNotacjaAxB.rozmiar).toBe("8.00x20");

@@ -124,7 +124,12 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
         expect(Object.keys(pozycja), `${sciezka} — kolumna spoza kontraktu`).not.toContain(
           "uwagaCena",
         );
-        // Migracja 011 (karta I15.1): wystawienie pola to decyzja karty I15.3, nie tej.
+        // ⭐ ZMIERZONE, NIE ZAŁOŻONE (ticket 122 / karta I15.3): produkcja tego pola też nie
+        // oddaje — oryginał z `88fa31c` na kopii bazy Z KOLUMNĄ WYPEŁNIONĄ dla 7405 produktów
+        // i obydwoma triggerami daje 72 klucze bez niego. Ten sam mechanizm co `uwagaCena`:
+        // `payment_blocks.cjs` dokłada kolumnę `ALTER TABLE`, ale bundle jej nie zna
+        // (`grep -c blokowane_formy_platnosci mirror/backend/index.cjs` = 0). Karta I15.3
+        // ROZSTRZYGNĘŁA, że ukrycie zostaje — nie jest to już „decyzja na później".
         expect(Object.keys(pozycja), `${sciezka} — kolumna spoza kontraktu`).not.toContain(
           "blokowaneFormyPlatnosci",
         );

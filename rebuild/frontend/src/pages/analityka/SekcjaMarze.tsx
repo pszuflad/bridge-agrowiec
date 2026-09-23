@@ -42,7 +42,7 @@ import {
   TrescTooltipa,
 } from "@/components/ui/chart";
 
-import type { GrupaMarzy, Marze } from "./api";
+import { pobierzPelneWiersze, type GrupaMarzy, type Marze } from "./api";
 import {
   WYMIARY_MARZ,
   wymiaryNieobslugiwane,
@@ -124,7 +124,19 @@ export function SekcjaMarze({
           wyjasnieniePominietych="Ta sekcja grupuje po dostawcy, kategorii i marce, więc nie stosuje filtrów:"
           rzeczownik="grup"
           prefiksTestu="marze"
-          obok={<PrzyciskCsv widok="margins" wiersze={wiersze} kolumny={KOLUMNY} wczytywanie={ladowanie} />}
+          obok={
+            <PrzyciskCsv
+              widok="margins"
+              wiersze={wiersze}
+              kolumny={KOLUMNY}
+              wczytywanie={ladowanie}
+              pobierzPelne={() =>
+                pobierzPelneWiersze<Marze, GrupaMarzy>("/api/analytics/margins", (pelne) =>
+                  zastosujFiltryMarz(pelne.rows, wybor),
+                )
+              }
+            />
+          }
         />
 
         {/*

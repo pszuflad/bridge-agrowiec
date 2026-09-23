@@ -8,11 +8,14 @@
     "node": ">=20"
   },
   "scripts": {
+    "prepare": "node ../../tools/wlacz-hooki.cjs",
     "build": "tsc -p tsconfig.build.json && node scripts/copy-schema.mjs && node scripts/copy-parsery.mjs",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "migrate": "node dist/db/migrate-cli.js",
     "migrate:dev": "tsx src/db/migrate-cli.ts",
+    "selly:csv": "node dist/selly/csv-cli.js",
+    "selly:csv:dev": "tsx src/selly/csv-cli.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -38,11 +38,12 @@ import {
   TrescTooltipa,
 } from "@/components/ui/chart";
 
-import type {
-  WierszPokryciaEan,
-  WierszPorownaniaEan,
-  WierszRankinguEan,
-  WierszUnikalnegoEan,
+import {
+  pobierzPelneWiersze,
+  type WierszPokryciaEan,
+  type WierszPorownaniaEan,
+  type WierszRankinguEan,
+  type WierszUnikalnegoEan,
 } from "./api";
 import {
   ETYKIETY_WYMIAROW,
@@ -260,6 +261,14 @@ export function SekcjaEan({
                 wiersze={wierszePorownania}
                 kolumny={KOLUMNY_PORWNANIA}
                 wczytywanie={porownanie.ladowanie}
+                pobierzPelne={() =>
+                  pobierzPelneWiersze<{ rows: WierszPorownaniaEan[] }, WierszPorownaniaEan>(
+                    "/api/analytics/ean/comparison",
+                    // Ta karta nie stosuje filtrów (`WYMIARY_EAN_PORWNANIE` jest puste):
+                    // grupuje po EAN-ie i nie niesie kolumn katalogu.
+                    (pelne) => pelne.rows,
+                  )
+                }
               />
             }
           >
@@ -290,6 +299,12 @@ export function SekcjaEan({
                 wiersze={wierszeUnikalne}
                 kolumny={KOLUMNY_UNIKALNYCH}
                 wczytywanie={unikalne.ladowanie}
+                pobierzPelne={() =>
+                  pobierzPelneWiersze<{ rows: WierszUnikalnegoEan[] }, WierszUnikalnegoEan>(
+                    "/api/analytics/ean/unique",
+                    (pelne) => zastosujFiltryDostawcow(pelne.rows, wybor),
+                  )
+                }
               />
             }
           >
