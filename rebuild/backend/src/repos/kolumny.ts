@@ -70,5 +70,16 @@ export const KOLUMNY_POZA_KONTRAKTEM = {
    * i `/hold-reasons` (klucz `uwaga_cena` w snake_case). Strażnik: test „GET /api/products
    * NIE oddaje uwagaCena" w `test/katalog.gate.test.ts`.
    */
-  products: ["uwagaCena"],
+  products: [
+    "uwagaCena",
+    /**
+     * Migracja 011 / karta I15.1 / backlog #73 — blokowane formy płatności per magazyn.
+     *
+     * Ukrycie jest tu STANEM PRZEJŚCIOWYM (w odróżnieniu od `uwagaCena`): karta I15.1 dokłada kolumnę
+     * i triggery, a o kształcie odpowiedzi (katalog, eksport CSV Selly) decyduje karta I15.3.
+     * Do tego czasu `GET /api/products` zostaje przy 72 kluczach z `contract/fixtures/GET_products.json`.
+     * Strażnicy: `test/katalog.gate.test.ts` (GET) i `test/produkty.mutacje.test.ts` (PATCH).
+     */
+    "blokowaneFormyPlatnosci",
+  ],
 } as const;

@@ -105,6 +105,10 @@ export const products = sqliteTable("products", {
 	// NIE wychodzi w API — repos/products.ts wybiera kolumny projekcją kontraktową.
 	// Pisarz i `GET /api/products/uwagi-cena` dochodzą w 3d.
 	uwagaCena: text("uwaga_cena"),
+	// migracja 011 (karta I15.1, backlog #73): blokowane formy płatności per magazyn — wartość
+	// utrzymują triggery `products_blokowane_formy_ai/_au`, nie kod aplikacji.
+	// NIE wychodzi w API (repos/kolumny.ts) — wystawia ją karta I15.3.
+	blokowaneFormyPlatnosci: text("blokowane_formy_platnosci"),
 },
 (table) => [
 	index("idx_products_kod_importu").on(table.kodImportu),

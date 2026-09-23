@@ -84,12 +84,29 @@ const RODZAJE = [
  * takiego rodzaju nie powstaje ze skanu, więc testy wstawiają ją do tabeli ręcznie.
  */
 const RODZAJE_POZA_SKANEM = [
-  { rodzaj: "model", pole: "model", kolumna: "model" },
-  { rodzaj: "zastosowanie", pole: "zastosowanie", kolumna: "zastosowanie" },
+  {
+    rodzaj: "model",
+    pole: "model",
+    kolumna: "model",
+    wartosci: { stara: "P71_STARA_model", nowa: "P71_NOWA_model", inna: "P71_INNA_model", kanon: "P71_KANON_model" },
+  },
+  /**
+   * `zastosowanie` bierze wartości z ZAMKNIĘTEJ listy kategorii `Rolnicze` (kategoria
+   * `PRODUKTY_TESTOWE[0]`). Od migracji 011 (karta I15.1, backlog #75) trigger
+   * `products_zastosowanie_ai/_au` sprowadza każdą wartość spoza listy do „Uniwersalne/pozostałe",
+   * więc napisy typu `P71_STARA_zastosowanie` znikałyby już przy wstawieniu produktu.
+   */
+  {
+    rodzaj: "zastosowanie",
+    pole: "zastosowanie",
+    kolumna: "zastosowanie",
+    wartosci: { stara: "Kombajn", nowa: "Opryskiwacz", inna: "Przyczepa", kanon: "Kosiarka/ogród" },
+  },
 ] as const satisfies readonly {
   rodzaj: string;
   pole: keyof NowyProdukt;
   kolumna: string;
+  wartosci: { stara: string; nowa: string; inna: string; kanon: string };
 }[];
 
 type Rodzaj = (typeof RODZAJE)[number] | (typeof RODZAJE_POZA_SKANEM)[number];
@@ -274,10 +291,9 @@ describe("atrybuty — niezmiennik „ostrzeżenie = liczba realnie przepisanych
       );
 
     it.each(RODZAJE_POZA_SKANEM)("akceptuj-z-edycja: $rodzaj", async (r) => {
-      const stara = `P71_STARA_${r.rodzaj}`;
-      const nowa = `P71_NOWA_${r.rodzaj}`;
+      const { stara, nowa, inna } = r.wartosci;
       dodajProdukty(r, stara, 3);
-      dodajProdukty(r, `P71_INNA_${r.rodzaj}`, 2);
+      dodajProdukty(r, inna, 2);
       const id = pozycjaRecznie(r, stara);
 
       const B = await uzycie(r, stara);
@@ -286,12 +302,11 @@ describe("atrybuty — niezmiennik „ostrzeżenie = liczba realnie przepisanych
       expect({ B, C }).toEqual({ B: 3, C: 3 });
       expect(ileZWartoscia(r, nowa)).toBe(C);
       expect(ileZWartoscia(r, stara)).toBe(0);
-      expect(ileZWartoscia(r, `P71_INNA_${r.rodzaj}`)).toBe(2);
+      expect(ileZWartoscia(r, inna)).toBe(2);
     });
 
     it.each(RODZAJE_POZA_SKANEM)("akceptuj-jako-alias: $rodzaj", async (r) => {
-      const stara = `P71_STARA_${r.rodzaj}`;
-      const kanoniczna = `P71_KANON_${r.rodzaj}`;
+      const { stara, kanon: kanoniczna } = r.wartosci;
       dodajProdukty(r, stara, 4);
       dodajProdukty(r, kanoniczna, 1);
       await doSlownika(r, kanoniczna);

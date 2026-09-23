@@ -382,9 +382,14 @@ describe("atrybuty — kolejka pending", () => {
         .all()
         .filter((p) => p[kolumna] === wartosc).length;
 
+    /**
+     * Wartości `zastosowanie` z ZAMKNIĘTEJ listy kategorii `Rolnicze` (produkty z „Ciągnik" mają
+     * tę kategorię). Od migracji 011 (karta I15.1, backlog #75) trigger `products_zastosowanie_au`
+     * sprowadza wartość spoza listy do „Uniwersalne/pozostałe" — osobny test niżej.
+     */
     it.each([
       ["model", "AGRIMAX FACTOR", "AGRIMAX FACTOR II"],
-      ["zastosowanie", "Ciągnik", "Ciągnik rolniczy"],
+      ["zastosowanie", "Ciągnik", "Kombajn"],
     ] as const)("akceptacja z edycją dla `%s` przepisuje właściwą kolumnę", async (rodzaj, stara, nowa) => {
       const przed = ileProduktow(rodzaj, stara);
       expect(przed).toBeGreaterThan(0);
@@ -408,7 +413,7 @@ describe("atrybuty — kolejka pending", () => {
 
     it.each([
       ["model", "AGRIMAX FACTOR", "AGRIMAX KANON"],
-      ["zastosowanie", "Ciągnik", "Rolnicze"],
+      ["zastosowanie", "Ciągnik", "Opryskiwacz"],
     ] as const)("akceptacja jako alias dla `%s` przepisuje właściwą kolumnę", async (rodzaj, stara, kanoniczna) => {
       srodowisko.db.insert(atrybutyWartosci).values({ rodzaj, wartosc: kanoniczna }).run();
       const przed = ileProduktow(rodzaj, stara);
@@ -428,6 +433,26 @@ describe("atrybuty — kolejka pending", () => {
       });
       expect(ileProduktow(rodzaj, stara)).toBe(0);
       expect(ileProduktow(rodzaj, kanoniczna)).toBe(przed);
+    });
+
+    /**
+     * Migracja 011 (karta I15.1, backlog #75): akceptacja przepisuje kolumnę, ale trigger
+     * `products_zastosowanie_au` sprowadza wartość spoza zamkniętej listy kategorii do
+     * „Uniwersalne/pozostałe" — tak jak na produkcji. Licznik w odpowiedzi to liczba
+     * przepisanych wierszy (UPDATE), nie wartość, która ostatecznie została w kolumnie.
+     */
+    it("akceptacja z edycją na `zastosowanie` spoza listy kategorii kończy się „Uniwersalne/pozostałe\"", async () => {
+      const przed = ileProduktow("zastosowanie", "Ciągnik");
+      expect(przed).toBeGreaterThan(0);
+      const wpis = await dodajPozycje("zastosowanie", "Ciągnik");
+
+      const odp = await post(`/api/atrybuty/pending/${wpis.id}/akceptuj-z-edycja`, {
+        nowa_wartosc: "Ciągnik rolniczy",
+      });
+      expect(odp.status).toBe(200);
+      expect(odp.body).toMatchObject({ produktow_zaktualizowano: przed });
+      expect(ileProduktow("zastosowanie", "Ciągnik rolniczy")).toBe(0);
+      expect(ileProduktow("zastosowanie", "Uniwersalne/pozostałe")).toBe(przed);
     });
 
     it("skan nadal NIE tworzy pozycji rodzaju `model` ani `zastosowanie`", async () => {

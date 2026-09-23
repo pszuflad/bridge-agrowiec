@@ -3480,7 +3480,7 @@ różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej 
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
 | **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
-| **Status** | — zatwierdzone; realizacja w I15 (karty I15.1 — kolumna i triggery, I15.3 — katalog i CSV). ⚠ Ania 22.09: nowe produkty mają to pole puste → **#101**. |
+| **Status** | 🔨 w toku — część schematowa: **107 / migracja 011** (kolumna `blokowane_formy_platnosci` + backfill + triggery `products_blokowane_formy_ai/_au` bajt w bajt z `7d6cfc9`, pole ukryte w API); PR po próbie na kopii produkcji (23.09). Katalog i CSV zostają w I15.3. ⚠ Ania 22.09: nowe produkty mają to pole puste → **#101**. |
 
 **Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
 i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
@@ -3552,7 +3552,7 @@ plikowego, a tu po stronie API.
 | **Pliki** | `mirror/backend/application_rules.cjs` (**nowy**, 238 l.), `parsers/tyre_params.cjs` (bak `.bak_pre_zastosowania_20260913_192923`), `parsers/adapter.cjs` (bak j.w.), `extensions.cjs` (bak j.w.), `db/schema.sql` (2 triggery), `zastosowanie_niezmapowane.json` (raport) |
 | **Commit** | `74b7442` (2026-09-13 20:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #79/#80/#82. |
-| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #79/#80/#82** (stan końcowy modułu). |
+| **Status** | 🔨 w toku — część schematowa (triggery `products_zastosowanie_ai/_au`): **107 / migracja 011**, w stanie końcowym uwzględniającym #79/#80/#82, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł `application_rules.cjs` i parsery/adapter (normalizacja JS przed zapisem) zostają do **I15.2**. |
 
 **Opis biznesowy.** Audyt wykazał produkty z zastosowaniem z zupełnie innej kategorii — np. opony
 Rolnicze z zastosowaniem „Harwester"/„Forwarder". Ania wprowadziła zamkniętą listę dopuszczalnych
@@ -3686,7 +3686,7 @@ Idzie w parze z #79 (drugi hunk tego samego pliku).
 | **Pliki** | `mirror/backend/common.cjs` (bak `.bak_pre_category_case_20260917_1545`), `parsers/tyre_params.cjs` (bak j.w.), `application_rules.cjs` (bak j.w.), `parsers/mo9_agrorami_api.cjs` (bak `.bak_pre_bkt_recategory_20260917_1523`), `db/schema.sql` (4 triggery) |
 | **Commit** | `ca8a694` (2026-09-17 16:00 — dwa wpisy CHANGELOG) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#80/#82. |
-| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #75/#80/#82**. |
+| **Status** | 🔨 w toku — część schematowa (triggery `products_zastosowanie_ai/_au` bez `WHEN`, `manual_overrides_kategoria_ai/_au`): **107 / migracja 011**, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł `common.cjs`/`tyre_params.cjs`/`mo9_agrorami_api.cjs` (kanonizacja w JS parserów) zostaje do **I15.2**; jednorazowy backfill (283 produkty + 14 nadpisań, 58 MO9) poza migracjami (D2). |
 
 **Opis biznesowy.** Dwie prośby Ani w jednym commicie. (1) Filtr katalogu pokazywał zdublowane
 kategorie — tę samą raz małą, raz wielką literą; ujednolicono 283 produkty i 14 ręcznych nadpisań
@@ -3728,7 +3728,7 @@ bo trafia w kod, który odbudowa ma 1:1 i który dziś rozjeżdża się z produk
 | **Pliki** | `mirror/backend/application_rules.cjs` (bak `.bak_pre_forwarder_harwester_20260917_1608`), `db/schema.sql`, `application_rules_v2_test.cjs` (**nowy**, 294 l. — test) |
 | **Commit** | `5dedefb` (2026-09-17 17:00, pierwszy z dwóch tematów commita) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — nanieść jako jeden stan końcowy z #75/#79/#82. |
-| **Status** | — zatwierdzone; **jeden ticket „application_rules” razem z #75/#79/#82**. |
+| **Status** | 🔨 w toku — część schematowa (`sqlNormalizeExpression()` w triggerach `products_zastosowanie_ai/_au`, kolejność trigger→backfill): **107 / migracja 011**, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł JS `application_rules.cjs` (`splitApplications()`, `normalizeApplication()`) zostaje do **I15.2**; jednorazowe scalenie 100 produktów poza migracjami (D2). |
 
 **Opis biznesowy.** Zgłoszenie Ani: w kategorii Leśne pole „zastosowanie" miało „Forwarder"
 i „Harwester" zapisywane osobno albo jako „Harwester ; Forwarder", a miała być jedna wartość
@@ -3808,7 +3808,7 @@ logika biznesowa**, nie defekt do odtworzenia 1:1, i weszła świadomie, nie aut
 | **Pliki** | `mirror/backend/application_rules.cjs`, `db/schema.sql` (regeneracja 2 triggerów) |
 | **Commit** | `03fe892` (2026-09-18 14:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) — ✅ **blokada ZDJĘTA 2026-09-18**: Ania dosłała uzasadnienie (`86d9090`), gotowe do implementacji. |
-| **Status** | — **odblokowane 2026-09-18** (`57-CHORE-triaz-uzasadnienia-ani`), zatwierdzone do naniesienia; **jeden ticket „application_rules” razem z #75/#79/#80**. Oczekiwanie do testu: backfill Rolniczych = **265 rekordów**, po korekcie 0 Rolniczych z „Ładowarka”. |
+| **Status** | 🔨 w toku — część schematowa (`CATEGORY_APPLICATION_REMAP` w triggerach `products_zastosowanie_ai/_au`): **107 / migracja 011**, bajt w bajt z `7d6cfc9`; PR po próbie na kopii produkcji (23.09). Moduł JS `application_rules.cjs` (`CATEGORY_VALUES`, remap przed testem dozwolonych wartości) zostaje do **I15.2**; jednorazowy backfill 265 rekordów Rolniczych poza migracjami (D2). |
 
 **Opis biznesowy.** ✅ **UZUPEŁNIONE 2026-09-18 z wpisu CHANGELOG Ani** (dopisany przez nią
 o 15:39, przyszedł commitem `86d9090`; wcześniej ten commit nie miał uzasadnienia).
@@ -4521,6 +4521,10 @@ produkty powinny dostawać wartość. Hipotezy do sprawdzenia: (a) dostawca spoz
 (b) pole puste nie w Bridge, tylko w **Selly** (nowe produkty zakładane w sklepie bez tej cechy — ścieżka auto-create,
 #68); (c) produkty wstawiane ścieżką, która omija trigger. **Nie wiadomo, gdzie Ania widzi puste pole** — pytanie do niej.
 Pomiar: kopia bazy produkcji z 23.09 — produkty utworzone po 10.09 z pustym polem.
+
+**Ustalenie 107 (2026-09-22, `CHANGELOG` produkcji 2026-09-10 14:53):** hipoteza (a) dla MO6 jest **zamierzonym
+zachowaniem, nie błędem** — wpis CHANGELOG wprost: „MO6 Uniglory pozostaje bez mapowania, ponieważ nie będzie na
+razie w sprzedaży”. `NULL` dla MO6 więc się zgadza (w katalogu i tak nie ma ani jednego produktu MO6).
 
 **⭐ POMIAR NA ŻYWEJ PRODUKCJI 2026-09-23 (ticket 113, odczyt `sqlite3 -readonly`):** produktów z pustym
 `blokowane_formy_platnosci` — **0**, w żadnej grupie dostawcy (także MO6); triggerów w bazie produkcji **6**.

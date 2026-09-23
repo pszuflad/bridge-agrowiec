@@ -196,11 +196,13 @@ describe("migracja 013 — dane i baza w kształcie produkcji", () => {
   });
 
   /**
-   * ⚠ CUTOVER. Produkcja ma OBA obiekty od 07.09 (przebudowa ręczna Ani). Migracja musi
-   * wtedy paść cała — nie zostawić bazy w pół drogi — a `_migracje` nie może odnotować 013.
-   * Procedurę (weryfikacja kształtu + ręczny wpis do `_migracje`) opisuje `docs/cutover.md`.
+   * ⚠ CUTOVER. Produkcja ma OBA obiekty od 07.09 (przebudowa ręczna Ani). Do ticketu 107 migracja
+   * padała tu cała, a 013 trzeba było odnotować w `_migracje` ręcznie. Od 107 (karta I15.1, decyzja
+   * użytkownika 2026-09-22) dyrektywa `@pomin-jesli-tabela-istnieje selly_products_old` odnotowuje
+   * 013 BEZ wykonania treści — kształt produkcji jest celem tej migracji. Pełny łańcuch na schemacie
+   * produkcji: `test/db.migracje-produkcja.test.ts`.
    */
-  it("na bazie, która już ma nowy kształt, pada i niczego nie zmienia", () => {
+  it("na bazie, która już ma nowy kształt, odnotowuje się bez wykonania treści i niczego nie zmienia", () => {
     // Odtworzenie stanu produkcji: 013 zastosowana „ręcznie”, bez wpisu w `_migracje`.
     dolozMigracje();
     zastosujMigracje(sqlite, katalogSchematu);
@@ -211,11 +213,34 @@ describe("migracja 013 — dane i baza w kształcie produkcji", () => {
          VALUES ('798368', 'MO2', 'MO2_798368', 812)`,
       )
       .run();
+    const schematPrzed = sqlite.prepare(`SELECT name, sql FROM sqlite_master ORDER BY name`).all();
+
+    const wynik = zastosujMigracje(sqlite, katalogSchematu);
+    expect(wynik.zastosowane).toEqual([MIGRACJA]);
+    expect(wynik.bezTresci).toEqual([MIGRACJA]);
+    expect(sqlite.prepare(`SELECT count(*) AS c FROM selly_products`).get()).toEqual({ c: 1 });
+    expect(sqlite.prepare(`SELECT name, sql FROM sqlite_master ORDER BY name`).all()).toEqual(schematPrzed);
+  });
+
+  /**
+   * PRZYPADEK NEGATYWNY warunku pominięcia (review II ticketu 107). Sama nazwa `selly_products_old`
+   * nie dowodzi, że przebudowa się odbyła — stara tabela nie ma `selly_variant_id`
+   * (`7d6cfc9:db/schema.sql:174-188`). Baza z tą nazwą, ale ze STARĄ `selly_products`, ma zatrzymać
+   * deploy (013 rusza i pada na `RENAME`), a nie zostać po cichu przepuszczona.
+   */
+  it("sama nazwa `selly_products_old` NIE pomija migracji, gdy `selly_products` ma stary kształt", () => {
+    sqlite.exec(`ALTER TABLE selly_products RENAME TO selly_products_old;
+      CREATE TABLE selly_products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bridge_kod TEXT NOT NULL UNIQUE,
+        selly_product_id INTEGER NOT NULL,
+        ostatni_status TEXT NOT NULL DEFAULT 'ok'
+      );`);
+    dolozMigracje();
 
     expect(() => zastosujMigracje(sqlite, katalogSchematu)).toThrow(
       /there is already another table or index with this name: selly_products_old/,
     );
-    expect(sqlite.prepare(`SELECT count(*) AS c FROM selly_products`).get()).toEqual({ c: 1 });
     expect(sqlite.prepare(`SELECT nazwa FROM _migracje WHERE nazwa = ?`).get(MIGRACJA)).toBeUndefined();
   });
 });

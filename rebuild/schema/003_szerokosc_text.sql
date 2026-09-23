@@ -25,6 +25,13 @@
 -- trzyma `szerokosc` jako liczbę. Rozjazd jest ZADEKLAROWANY jako wyjątek w gate'cie
 -- (`test/gate/asercje.ts`, `WYJATKI_GET_PRODUCTS`) i domykany przenagraniem fixtures w I12.
 
+-- ⚠ POMINIĘCIE NA BAZIE PRODUKCJI (ticket 107, decyzja koordynatora 2026-09-22). Produkcja przeszła WŁASNĄ
+-- migrację `szertxt` (2026-08-19) — `szerokosc` jest tam już TEXT, a tabela ma 74 kolumny (kanon + `uwaga_cena`
+-- + `blokowane_formy_platnosci` z runtime'u), więc `INSERT … SELECT *` niżej padałby na liczbie kolumn.
+-- Cel tej migracji jest tam osiągnięty, więc runner (`db/migrate.ts`) sprawdza typ na żywym schemacie i przy
+-- `TEXT` odnotowuje 003 jako zastosowaną BEZ wykonywania treści. Bazy z 003 w `_migracje` runner pomija po nazwie.
+-- @pomin-jesli-typ-kolumny products szerokosc TEXT
+
 CREATE TABLE products_szertxt (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   kod TEXT NOT NULL UNIQUE,
