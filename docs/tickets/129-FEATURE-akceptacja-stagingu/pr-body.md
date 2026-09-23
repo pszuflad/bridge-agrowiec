@@ -1,3 +1,68 @@
+## Ticket
+129-FEATURE-akceptacja-stagingu — akceptacja stagingu: blokady `checkAcceptance`, cztery trasy polityki, decyzje o nieobecnych kartach (karta **I15.4c**)
+
+## Summary
+Sportowana druga połowa `staging_policy.cjs` @ `88fa31c` — ścieżka odczytu i decyzji użytkownika: bramka akceptacji, nadpisania dodawania i edycji zgłoszenia, rozstrzyganie dopasowań, decyzje o nieobecnych kartach (#106) i cztery trasy HTTP. Wierność dowiedziona GATE-em różnicowym na **uruchomionym** oryginale (23 scenariusze porównujące komunikat, status i stan pięciu tabel). Odstępstwo 14i zdjęte decyzją D4; pomiar #107 wykonany.
+
+## Problem / Motivation
+Karta I15.4c to druga połowa podziału dawnej karty I15.4 (665 linii `staging_policy.cjs` na jeden przegląd to za dużo). Fundament — migracja 012, model i repozytoria — dowiozła I15.4a (ticket 124); importer robi równolegle I15.4b (ticket 130). Bez tej karty odbudowa nie ma ani kontroli aktualności przy akceptacji, ani tras, którymi człowiek rozstrzyga to, czego import nie zatwierdził sam.
+
+## Solution
+- **`checkAcceptance` — SIEDEM blokad 409** (`staging_policy.cjs:188-200`), komunikaty znak w znak; kolejność sprawdzeń zachowana, bo pierwszy `fail()` wygrywa.
+- **Akceptacja jako WARSTWA** nad istniejącym `zatwierdzPozycjeStagingu` — dokładnie jak `original.accept` w oryginale; bazowa akceptacja nietknięta, więc jej charakteryzacja dalej pilnuje wierności.
+- **Dodawanie i edycja zgłoszenia** — nowe zastępuje poprzednie tej samej pary `(dostawca, kod)`; edycja przelicza `eanRaw`/`eanIsValid`/`eanSourceStatus`/`_eanIssue`.
+- **Decyzje o nieobecnych kartach (#106)** — `closeAbsenceReview` i `chooseAbsenceCard`, obie gałęzie wyboru, trójstronna zgodność DOT, `candidates_hash` z `[kod, ean, dot]`.
+- **Cztery trasy** + `contract/openapi.yaml`: `review`, `resolve`, `choose-absence-card`, `close-absence-review`.
+- **Grupowanie `kod_importu` przez `compatibility()`** wstrzykiwane w ścieżkę akceptacji.
+- **Odstępstwo 14i usunięte**; testy 14i przepisane na dowód, że zostało zdjęte.
+- **`scripts/pomiar-107.ts`** — powtarzalny pomiar zatwierdzania zbiorczego.
+
+## Design decisions
+- **D129.1 — cztery trasy, nie dwie.** Karta wymieniała `review` i `resolve`; `registerRoutes` (`:620-664`) ma też `choose-absence-card` (`:640`) i `close-absence-review` (`:649`) — czyli dokładnie te, które wystawiają #106. Bez nich logika byłaby wdrożona, ale niewywoływalna.
+- **D129.2 — siedem `fail()`, nie „cztery blokady”.** Poza czwórką z karty: `_absenceReview`, próg trzech dowodów nieobecności i `_catalogVersion`. Pominięcie któregokolwiek byłoby cichym odstępstwem.
+- **D129.3 — `88fa31c` = decyzja już podjęta.** D3 („Staging v2 przenosimy”) obejmuje całość zamrożonej produkcji, więc logika #103/#104/#106 wchodzi, a statusy backlogu idą w górę.
+- **D129.4 — `assignKodImportu` wstrzykiwane, nie podmieniane globalnie.** W produkcji to globalny monkey-patch; u nas parametr z domyślną starą wersją. Powód: `bridge-ext.ts` dzieli z nami równoległa karta I15.4b, a harness charakteryzacyjny bazowej akceptacji tnie oryginał **bez** `install()` i musi dalej widzieć stare grupowanie.
+- **D129.5 — dowód wierności inny niż fixtures.** Dla tych tras `contract/fixtures/` nie ma nic. `staging_policy.cjs` nie jest zminifikowany i dostaje `db` argumentem, więc da się go `require()` i uruchomić — GATE porównuje z nim port zamiast z nagraniem.
+- **D129.6 — pomiar #107 na kopii `db/snapshot.db` (13.08)**, bo staging to serwer zdalny i lokalnie nie ma kopii z 23.09.
+- **D129.7 — odstępstwo 14i usuwane, nie zostawiane jako martwy kod.**
+- **D129.8 — wpinamy mimo zależności od I15.4b** (patrz Breaking changes).
+
+## Tests
+- **Gate odbudowy:** ✓ — dla czterech tras **fixtures nie istnieją**, więc gate zbudowany inaczej i mocniej: `test/polityka.charakteryzacja.test.ts` ładuje PRAWDZIWY `staging_policy.cjs` @ `88fa31c`, wykonuje `install()` na `U` wyciętym z produkcyjnego bundla i porównuje z portem komunikat + status + stan pięciu tabel w **23 scenariuszach**. Dwa istniejące fixtures stagingu przechodzą bez zmian.
+- **Testy HTTP tras:** ✓ 14/14 — kody 200/401/404/409, kształt `{message}`, wpisy audytu.
+- **Pełny przebieg:** ✓ **1800 testów w 109 plikach** (przed ticketem 1761 w 107).
+- **Bramki:** `lint` ✓, `typecheck` ✓, `build` ✓, `test` ✓ (Node 20.20.2, `SNAPSHOT_DB`).
+- ⚠ Przy `load average ≈ 22` (równoległe karty) potrafią wypaść na timeoucie `alerty-katalogu.gate`, `silnik.charakteryzacja` (MO1/MO2/MO5) i `scheduler` — osobno wszystkie przechodzą, żaden nie dotyka kodu tej karty.
+
+### Pomiar #107
+
+| wariant | średnia/pozycja | p95 | najwolniejsza | 200 pozycji |
+|---|---|---|---|---|
+| bazowy (grupowanie po EAN) | 6,7 ms | 10,8 ms | 20,0 ms | 1,3 s |
+| Staging v2 (`compatibility()`) | 386,0 ms | 588,8 ms | 863,7 ms | 77,2 s |
+
+**(a) Problemu z #107 u nas NIE MA** — pięć sekund brało się z osobnego połączenia w `uwaga_cena_patch.cjs`; mamy jedno połączenie i kolumnę modelu, najwolniejsza pozycja 0,86 s wobec progu 5 s. Łatki nie portujemy.
+**(b) Pomiar odsłonił INNY koszt** — Staging v2 jest 58× wolniejszy, bo nadpisane `assignKodImportu` woła `listProducts()` dla każdej pozycji i przepuszcza katalog przez `compatibility()` (zmierzone: 251,7 + 116,4 ms = 95 % z 386 ms). **To kod produkcji i świadomie go nie optymalizuję** — zapisany jako `#129.1` w backlogu.
+
+## Breaking changes
+**Jedna, świadoma i uzgodniona (D129.8).** `POST /api/staging/accept` odrzuca teraz pozycje bez `_policyVersion` (409). To pole ustawia **wyłącznie `importer()`** (`:428`, `:571`, `:588`, `:606`) — czyli kod karty **I15.4b (ticket 130)**. Do czasu jej merge'a akceptacja odrzuca wszystko, co produkuje obecny importer.
+➡ **Obie karty powinny wejść do `develop` tą samą falą.**
+
+Drugorzędnie: `POST /api/staging/accept` może zwrócić 409 z `{message}` (wcześniej tylko 200). Trasy polityki używają klucza `message`, nie `error` — wierne odtworzenie dwóch osobnych modułów produkcji, świadomie nieujednolicane.
+
+## Follow-up
+1. **Kolejność merge'a z I15.4b** — jak wyżej.
+2. **Globalny error middleware** (`:48977-48982`) — odbudowa go nie ma; odtworzony lokalnie w trasie `accept`, dołożenie globalnie to osobny ticket.
+3. **`U.updateProduct` override (`:113-119`) bez gospodarza** — ręczne odwstrzymanie nie zdejmuje znacznika auto-wstrzymania; dotyczy `PUT /api/products/:id`, czyli plików spoza kart I15.4a/b/c.
+4. **`bulk.ts` zostaje na starym grupowaniu `kod_importu`** — wymaga tego samego zabiegu z wstrzykiwaniem plus decyzji, czy przenagrać wzorzec charakteryzacji.
+5. **Wydajność zatwierdzania zbiorczego** — `#129.1`; ewentualna optymalizacja wymaga decyzji o świadomym odstępstwie.
+6. **`silnik.gate.test.ts`** — przepisanie należy do portu silnika (I15.4b).
+7. **`PustyImportBlad` vs `feed_safety`** — rozstrzygnięcie siedzi w `parsuj.ts` (I15.4b).
+
+## Review
+<details>
+<summary>Code review</summary>
+
 # 129-FEATURE-akceptacja-stagingu — Code review
 
 > Reviewed: 2026-09-23
@@ -173,3 +238,10 @@ egzotycznym układzie danych kończy się nieobsłużonym 500 zamiast działania
 i wymaga naprawy przed merge'em. Druga sprawa to zaniedbana „papierologia" tego samego rodzaju,
 przed którą CLAUDE.md wprost ostrzega: `karta.md` i statusy backlogu zostały bez aktualizacji mimo
 jawnej decyzji D129.3, co bezpośrednio myli planowanie kolejnych fal (I15.5/I15.10/I15.11).
+
+</details>
+
+---
+Ticket docs: `docs/tickets/129-FEATURE-akceptacja-stagingu/`
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

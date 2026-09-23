@@ -222,14 +222,21 @@ realne odświeżanie CSV/Selly to zakres I15.10 — **wystawiam punkt wpięcia, 
 
 ## Definition of done
 
-- [ ] Siedem `fail()` z `checkAcceptance` odtworzonych, komunikaty znak w znak zgodne z `:188-200`
-- [ ] Cztery trasy działają i są opisane w `contract/openapi.yaml`
-- [ ] `addStaging` zastępuje poprzednie zgłoszenie pary; `updateStaging` przelicza status EAN
-- [ ] #106: `candidates_hash` z kod+EAN+DOT, obie gałęzie wyboru karty, `selected_source_code`
+- [x] Siedem `fail()` z `checkAcceptance` odtworzonych, komunikaty znak w znak zgodne z `:188-200`
+      — zweryfikowane automatycznym porównaniem ciągów oraz GATE-em różnicowym
+- [x] Cztery trasy działają i są opisane w `contract/openapi.yaml`
+- [x] `addStaging` zastępuje poprzednie zgłoszenie pary; `updateStaging` przelicza status EAN
+- [x] #106: `candidates_hash` z kod+EAN+DOT, obie gałęzie wyboru karty, `selected_source_code`
       ustawiany/zerowany/zachowywany zgodnie z trzema różnymi zapisami
-- [ ] Grupowanie `kod_importu` przez `compatibility()` na obu ścieżkach akceptacji
-- [ ] Odstępstwo 14i usunięte, `silnik.gate.test.ts` przepisany na blokadę
-- [ ] Testy charakteryzacyjne przeciw żywemu `staging_policy.cjs` zielone (GATE)
-- [ ] Wszystkie testy zastane zielone; `lint`, `typecheck`, `build`, `test` w `rebuild/backend/`
-- [ ] Pomiar #107 wykonany i opisany w `docs/karty/I15.4c/karta.md`
-- [ ] `karta.md` opisuje STAN (zakres faktycznie dowieziony), statusy backlogu zaktualizowane
+- [x] Grupowanie `kod_importu` przez `compatibility()` na ścieżce akceptacji
+      (⚠ **nie** na `bulk.ts` — poza zakresem karty, uzasadnienie w raporcie i „Do koordynatora")
+- [x] Odstępstwo 14i usunięte
+- [ ] ~~`silnik.gate.test.ts` przepisany na blokadę~~ — **NIEZREALIZOWANE ŚWIADOMIE.** Test
+      sprawdza wyjście SILNIKA (`tk.ts`), którego ta karta nie dotyka; jego asercje są nadal
+      prawdziwe i przechodzi. Przepisanie należy do portu silnika, czyli karty **I15.4b**.
+      Blokada po stronie akceptacji jest pokryta w `test/akceptacja.odstepstwa.test.ts`.
+- [x] Testy charakteryzacyjne przeciw żywemu `staging_policy.cjs` zielone (GATE) — 23 scenariusze
+- [x] Wszystkie testy zastane zielone; `lint`, `typecheck`, `build`, `test` w `rebuild/backend/`
+      (1800 testów w 109 plikach)
+- [x] Pomiar #107 wykonany i opisany w `docs/karty/I15.4c/karta.md`
+- [x] `karta.md` opisuje STAN, statusy backlogu zaktualizowane

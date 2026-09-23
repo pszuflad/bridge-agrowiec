@@ -162,3 +162,65 @@ odtworzenie (dwa osobne moduły produkcji), nie do ujednolicenia.
    i po stronie akceptacji jest już nieaktualny.
 8. **`PustyImportBlad` vs `feed_safety`** (`wejscie-120.md` pkt 3) — rozstrzygnięcie siedzi
    w `parsuj.ts`, czyli w plikach I15.4b. Nie moja karta; zgłoszone koordynatorowi.
+
+## Docs updates
+
+Dwóch doc-checkerów, równolegle. Karty, backlog i wpis do spec-backend napisałem sam
+(reguła CLAUDE.md: kartę opisuje sesja, która ją realizowała).
+
+### Napisane przeze mnie
+
+- `docs/karty/I15.4c/karta.md` — `Stan: ✅ 2026-09-23 · 129-FEATURE-akceptacja-stagingu`, sekcja
+  „Dowiezione" ze **stanem faktycznym** (w tym pięć miejsc, gdzie karta odbiegła od pierwotnego
+  założenia) i „Do koordynatora" (8 punktów). Poprawione w miejscu: tytuł i „Zakres" mówiły
+  „cztery blokady" i dwie trasy — ticket obalił jedno i drugie.
+- `docs/karty/I15.4b/wejscie-129.md` — zależność `_policyVersion`, gotowe helpery do wołania,
+  pułapka „wersja nadpisana vs bazowa" (źródło BLOCKERA z review), zakaz globalnej podmiany
+  `assignKodImportu`, pomiar.
+- `docs/karty/I15.10/wejscie-129.md` — jawny punkt wpięcia `availability_sync` i dlaczego jest
+  dziś no-opem (warunek ścieżki produkcyjnej w oryginale).
+- `docs/karty/I15.11/wejscie-129.md` — kontrakt czterech tras, trzy rzeczy, które zaskoczą w UI
+  (`message` zamiast `error`, zmiana `id` po rozstrzygnięciu, przerwanie partii na pierwszej
+  blokadzie), komunikaty blokad i ostrzeżenie o 16 minutach na pełny staging.
+- `docs/rebuild-backlog/wpis-129.md` — nowy wpis **#129.1** (koszt grupowania `kod_importu`)
+  + tabela zmian statusów.
+- `docs/rebuild-backlog.md` — **wyłącznie linie `Do nowej wersji?` / `Status`** we wpisach
+  #99/#103/#104/#106/#107 (reguła katalogu) oraz poprawka w miejscu listy tras w #99, która
+  wymieniała dwie z czterech.
+- `docs/spec-backend/wpis-129.md` — osiem ustaleń o backendzie, w tym domknięcie „stanu
+  przejściowego D4" z `wpis-120.md`.
+
+### doc-checker 1 — `docs/spec-backend.md` + `docs/spec-backend/`
+
+1 plik zmieniony, 1 edycja **w miejscu**: §5 („Dodatkowe ustalenia z charakteryzacji 3c") opisywał
+grupowanie `kod_importu` po EAN / marka+rozmiar+bieznik+nazwa jako stan BIEŻĄCY. Ticket obalił to
+dla zamrożonej produkcji — Staging v2 podmienia `ext.assignKodImportu` na `compatibility()`.
+Zdanie zostało jako opis wersji BAZOWEJ z oznaczeniem „NIEAKTUALNE dla stanu zamrożonej produkcji".
+**Doprecyzowałem tę edycję po nim:** w produkcji podmiana obejmuje obie ścieżki wywołania (monkey-patch
+na współdzielonym `ext`), ale **w odbudowie port wstrzyknięto na razie tylko w ścieżkę akceptacji** —
+`bulk.ts` zostaje na wersji bazowej i to jest udokumentowany follow-up. Bez tej poprawki spec
+sugerowałby, że odbudowa robi coś, czego nie robi.
+
+Reszta `spec-backend.md` i wszystkie `wpis-*.md` — bez zmian; tematy tego ticketa (liczba blokad,
+kody błędów, wydajność) nie były tam wcześniej opisane, więc nie było czego obalać.
+
+### doc-checker 2 — `contract/README.md`, `docs/cutover.md`, `CLAUDE.md` + własny grep
+
+1 plik zmieniony: `contract/README.md` — nowy blok „Wyjątek" przy sekcji o schematach ciał,
+opisujący cztery trasy bez fixture'ów, powód (wymagają złożonego stanu wejściowego), to że
+schematy wpisano ręcznie, i że dowodem wierności jest charakteryzacja na żywym module.
+
+Bez zmian i z uzasadnieniem: `docs/przeglad-12-widokow.md` (opisuje UI listy stagingu; frontend
+przeglądu to I15.5/I15.11), `docs/cutover.md` („staging" = środowisko wdrożeniowe; ten ticket nie
+dodaje migracji), `CLAUDE.md`, `docs/spec-frontend.md` i osiem innych plików sprawdzonych po grepie.
+
+### Zastane problemy — oba naprawione przeze mnie
+
+1. **`docs/rebuild-backlog.md:4503`** wymieniał dwie z czterech tras polityki. Doc-checker nie mógł
+   tego ruszyć (plik poza jego zakresem) — poprawiłem w miejscu, bo to fałsz, który ten ticket obalił.
+2. **`contract/README.md` — tabela „Zawartość" rozjechana ze stanem plików.** Deklarowała
+   „98 ścieżek / 117 operacji" i „73 nagrania" przy faktycznych **111 / 130** i **83**. Rozjazd
+   narastał przed tym ticketem (kolejne karty dokładały trasy bez odświeżania komórki); ticket 129
+   dołożył 4 operacje i pogłębiłby go o kolejne 4. **Przeliczyłem i poprawiłem**, z notą o metodzie
+   pomiaru i o tym, że liczba operacji nigdy nie równała się liczbie nagrań — żeby następna sesja
+   nie wzięła tej tabeli za dowód kompletności fixtures.

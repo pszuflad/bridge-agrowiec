@@ -184,9 +184,8 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
     try {
       for (const id of identyfikatory) zatwierdzPozycjeZPolityka(db, id, req.user!.id);
     } catch (e) {
-      const status = (e as { status?: number; statusCode?: number }).status
-        ?? (e as { statusCode?: number }).statusCode
-        ?? 500;
+      const blad = e as { status?: number; statusCode?: number };
+      const status = blad.status ?? blad.statusCode ?? 500;
       const message = e instanceof Error ? e.message : "Internal Server Error";
       console.error("Internal Server Error:", e);
       return res.status(status).json({ message });
