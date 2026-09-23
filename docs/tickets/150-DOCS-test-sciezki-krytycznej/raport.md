@@ -34,9 +34,12 @@ Wybrano **pierwszy wariant z karty**: stary generator uruchomiony na kopii bazy,
 wygenerowane z jednego stanu danych. Wariant drugi (porównanie z produkcyjnym CSV z 23.09)
 odrzucony — pliku nie mamy, a odtworzenie wymagałoby dostępu do produkcji.
 
-**Wynik: pliki identyczne bajt w bajt** — ten sam sha256
+**Wynik na użytej bazie: pliki identyczne bajt w bajt** — ten sam sha256
 (`70dacfd7…b87c5`), 6899 linii, 3 177 786 bajtów, 60 kolumn, 6898 pozycji.
 Pełny przebieg: `dowod-csv.md`.
+
+⚠ **Ten wynik NIE uogólnia się na dzisiejsze dane produkcji — patrz sekcja „Korekta
+po `wejscie-153.md`" niżej.** Instrukcja dla Ani opisuje stan faktyczny, nie ten pomiar.
 
 Dwie pułapki, które dowód musiał ominąć i które są w nim opisane:
 - stary generator w `mirror/` **na `develop` ma 59 kolumn** (brak `Blokowane-formy-platnosci`);
@@ -110,8 +113,61 @@ zrealizowane (dowód w tym tickecie, MO9 tylko opisane, droga `url` na przycisku
     (`routes/selly.ts:372,389`) — dlatego przycisk na stagingu działa;
   - MO9 pobiera stronami przez GraphQL (`mo9_agrorami_api.cjs:579-599`) — stąd uzasadnione
     zdanie w instrukcji, że synchronizacja MO9 trwa zauważalnie dłużej.
-- **Bramki backendu** (`lint`, `typecheck`, `build`, `test`) — przebiegnięte po synchronizacji
-  z `develop`; wynik niżej, w sekcji dopisanej po Kroku 16.
+- **Bramki backendu — przebiegnięte PO synchronizacji z `develop`** (merge wciągnął 6 commitów,
+  m.in. tickety 148 i 153), wszystkie zielone:
+  - `npm run lint` — ✓ (kod wyjścia 0)
+  - `npm run typecheck` — ✓ (kod wyjścia 0)
+  - `npm run build` — ✓ (13 plików `.sql`, 23 parsery skopiowane do `dist/`)
+  - `npm test` — ✓ **112 plików testowych, 1837 testów zdanych, 7 pominiętych**
+    (komunikat o `DB_PATH: Required` w wyjściu pochodzi z testu sprawdzającego, że `selly:csv`
+    i `kopia-bazy` padają czysto przy braku zmiennej — to oczekiwane, suite przeszedł)
+  - baza merge'a: `origin/develop` @ `6288066`
+
+## ⭐ Korekta po `wejscie-153.md` — dowód był fałszywie zielony
+
+W trakcie ticketu na `develop` weszło `docs/karty/TEST.2/wejscie-153.md`: koordynator wykonał
+**tę samą procedurę na bazie stagingu** (kopia produkcji z 23.09) i dostał wynik **niezerowy** —
+**899 z 5396 wierszy różni się treścią** w pięciu kolumnach flagowych (`Snieg-3PMSF` 750,
+`Bloto+snieg` 713, `CFO` 52, `NRO` 12, `CHO` 10). Wpis backlogu `#153.1`, karta `FIX.1`,
+oznaczona jako **blokada cutoveru**.
+
+**Dlaczego u mnie wyszło zero.** Zmierzone na bazie użytej w moim dowodzie (`db/snapshot.db`
+z 13.08 + migracje 001–013): **wszystkie dziesięć kolumn flagowych ma wyłącznie typ `integer`**,
+ani jednej wartości tekstowej. Tekst `'Tak'`, który wyzwala błąd (Drizzle
+`integer({ mode: "boolean" })` mapuje `'Tak'` na `false`), wszedł do bazy **po 13.08**. Na tym
+snapshocie defekt **nie ma jak się ujawnić**.
+
+**Czego zabrakło w mojej kontroli.** Sprawdziłem nietrywialność dowodu — 60. kolumna wypełniona
+we wszystkich 6898 wierszach, 5469 linii z polskimi znakami, BOM obecny — ale **nie sprawdziłem
+rozkładu TYPÓW w kolumnach flagowych**, a to była właściwa kontrola. Reguła, którą z tego
+zapisuję: **zerowy `diff` podważa się tak samo jak niezerowy — najpierw sprawdź, czy dane
+w ogóle zawierają przypadek, który mógłby zapalić czerwone.** Porównanie generatorów prowadzi
+się na **bazie stagingu**, nie na sierpniowym snapshocie.
+
+**Co zostaje w mocy:**
+- **wersja starego generatora była wzięta poprawnie** — `88fa31c` jest na `origin/main`
+  i daje tam identyczny plik (sprawdzone `diff`-em);
+- **format jest odtworzony wiernie** — przy danych bez wartości tekstowych pliki są bajtowo
+  nieodróżnialne; rozjazd z `#153.1` leży w warstwie **odczytu**, nie w formatowaniu;
+- **moje ostrzeżenie o `mirror/` na `develop` było trafne co do skutku, ale błędne co do
+  przyczyny** — `mirror/` jest tam **świadomie cofnięty do 25.08** (commit `6594525`, bramki
+  wierności), nie „nieaktualny przez zaniedbanie". Poprawione w karcie, w `wejscie-150.md`
+  dla TEST.3 i w `wpis-150.md`.
+
+**Co zmieniono w dokumentach po tym odkryciu:**
+- `docs/instrukcja-testu-sciezki-krytycznej.md` — odcinek 4 przepisany: opisuje realny błąd,
+  jego skutek dla sklepu (899 pozycji, 17% katalogu, bez oznaczeń zimowych), status blokady
+  cutoveru i to, że po poprawce pomiar zostanie powtórzony. Dodane ostrzeżenie w nagłówku
+  dokumentu, skorygowany argument w odcinku 5, przeformułowane pytanie 3 w „Do Twojej decyzji"
+  (teraz z rekomendacją stałego porównania, bo to właśnie ono złapałoby ten błąd od razu).
+- `dowod-csv.md` — nowa sekcja „Dlaczego ten wynik NIE uogólnia się".
+- `docs/karty/TEST.2/karta.md`, `docs/spec-backend/wpis-150.md`, `docs/karty/TEST.3/wejscie-150.md`
+  — skorygowane (doc-checker pisał je przed merge'em `wejscie-153.md`).
+
+**Uwaga o przebiegu:** doc-checker sam zgłosił rozbieżność między treścią instrukcji a artefaktami
+ticketu i **wstrzymał się z oparciem na niej swoich wpisów**, zamiast po cichu wybrać jedną
+wersję. To było zachowanie prawidłowe — rozbieżność wynikała z tego, że gałąź nie miała jeszcze
+`wejscie-153.md`.
 
 ## Poprawki po review
 
