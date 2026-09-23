@@ -103,8 +103,18 @@ ciała żądań ze schematami z `contract/openapi.yaml`. Skuteczność potwierdz
 3. **Brak globalnego error middleware w backendzie** — nota z I15.4c „Do koordynatora” p. 6 nadal aktualna;
    bez niego okno „Nie zapisano zmian” pokaże tekst zapasowy zamiast treści błędu dla wyjątków spoza
    `POST /api/staging/accept`.
-4. **Zakres I15.11 do zawężenia — ZMIANA PRZYPISANIA, nie fakt dokonany.** `docs/karty/I15.11/wejscie-110.md`
-   przypisuje „podgląd starej karty” do I15.11, ale gałąź `absenceReview` (stara karta obok możliwego
-   odpowiednika, ocena EAN i DOT, wybór karty) siedzi w `staging-policy-injection.js` i **została dowieziona
-   TU** (ten ticket, nie żywy bundel). I15.11 zostaje panel „Braki w cenniku” z żywego bundla
-   `index-PRICEFMT1783512500.js`. Ustalenie i punkty wejścia dla I15.11: `docs/karty/I15.11/wejscie-140.md`.
+4. **Zakres I15.11 — ROZSTRZYGNIĘTY, nic do decyzji.** Ticket 140 zgłosił to jako otwartą sprawę
+   („zmiana przypisania zakresu”) niepotrzebnie: koordynator zawęził I15.11 do panelu **„Braki
+   w cenniku”** jeszcze zanim wydał prompt, a karta chodzi od 2026-09-23 jako ticket
+   **`142-FEATURE-braki-w-cenniku`** (gałąź `feature/142-braki-w-cenniku`). Sprostowane
+   ticketem `145-DOCS-ustalenia-i15-5` (2026-09-24).
+   **Fakt, który zostaje w mocy:** gałąź `absenceReview` — stara karta obok możliwego odpowiednika,
+   ocena zgodności EAN i DOT, stan obu kart, wybór jednej karty — **została dowieziona TU**, bo
+   siedziała w `mirror/frontend/assets/staging-policy-injection.js` @ `88fa31c`, a nie w żywym
+   bundlu `index-PRICEFMT1783512500.js`, jak sugerował opis w `wejscie-110.md`.
+   **Morał dla kolejnych kart:** zanim zgłosisz „zmianę przypisania zakresu”, sprawdź stan fali
+   (`tools/stan-kart.sh`, `git worktree list`, `git ls-remote --heads origin`) — karta, o którą
+   pytasz, może już chodzić z zawężonym zakresem.
+
+**Do rozstrzygnięcia zostają wyłącznie punkty 1–3.** Punkt 1 jest decyzją produktową na cutover,
+punkty 2 i 3 to osobne tickety techniczne, nie zakres żadnej karty I15.
