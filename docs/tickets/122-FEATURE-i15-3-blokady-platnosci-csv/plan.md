@@ -1,6 +1,6 @@
 # 122-FEATURE-i15-3-blokady-platnosci-csv — I15.3: blokowane formy płatności w katalogu + eksport CSV Selly
 
-> Status: Draft → Approved → Implemented → Shipped
+> Status: Draft → Approved → **Implemented**
 > Branch: `feature/122-i15-3-blokady-platnosci-csv`
 > Worktree: `.worktrees/122-FEATURE-i15-3-blokady-platnosci-csv`
 > Karta: `docs/karty/I15.3/` (karta.md + wejscie-104/107/110/114) · Backlog: #73, #76, #77 (część CSV), #102, #104
@@ -69,18 +69,37 @@ szerokość, `font-mono`, `—` dla pustej wartości, `title` z pełną wartośc
 
 | Ścieżka | Fixture | Co się zmienia |
 |---|---|---|
-| `GET /api/products` | `contract/fixtures/GET_products.json`, `GET_products_bez-parametrow.json` | **72 → 73 klucze** (dochodzi `blokowaneFormyPlatnosci`) |
-| `PATCH /api/products/{id}` | `contract/fixtures/PATCH_products_id.json` | j.w. |
-| `PUT /api/products/{id}` | `contract/fixtures/PUT_products_id.json` | j.w. |
+| `GET /api/products` | `contract/fixtures/GET_products.json`, `GET_products_bez-parametrow.json` | **BEZ ZMIAN — 72 klucze** (patrz „Pomiar rozstrzygający") |
+| `PATCH /api/products/{id}` | `contract/fixtures/PATCH_products_id.json` | bez zmian |
+| `PUT /api/products/{id}` | `contract/fixtures/PUT_products_id.json` | bez zmian |
 | `POST /api/selly/generate-csv` | brak fixture'a JSON (openapi `type: object`) | kształt odpowiedzi bez zmian; zmienia się `stdout` (liczba kolumn 59→60, tekst linii) |
 | `GET /api/selly/csv-status` | `contract/fixtures/GET_selly_csv-status.json` | bez zmian |
 
-**To jest ZATWIERDZONE ODSTĘPSTWO od dzisiejszych fixture'ów**, a nie rozjazd: dzisiejsze nagrania
-pochodzą sprzed wdrożenia #73 na produkcji. Fixture'y **przenagrywamy z oryginału**
-(`tools/record-write-fixtures.cjs` na kopii `db/snapshot.db`) — oryginał przy starcie woła
-`ensurePaymentBlocks()`, który sam dokłada kolumnę i ją wypełnia, więc nagranie da **realną**
-wartość produkcji, nie wymyśloną. Jeśli nagranie NIE da 73 kluczy — STOP i zgłoszenie, bo to by
-znaczyło, że produkcja tego pola nie wystawia.
+### ⭐ Pomiar rozstrzygający (2026-09-23) — karta zakładała nieprawdę
+
+Plan przewidywał tu 73 klucze i zapowiadał: „jeśli nagranie NIE da 73 kluczy — STOP i zgłoszenie,
+bo to by znaczyło, że produkcja tego pola nie wystawia". **Dokładnie tak się stało.**
+
+Metoda (ta sama, którą ticket 38 rozstrzygnął `uwagaCena`):
+1. `git archive 88fa31c mirror/backend` → piaskownica (⚠ `mirror/` na `develop` jest NIEAKTUALNY,
+   nie ma w nim `payment_blocks.cjs` — nagrywarka użyłaby złej wersji oryginału);
+2. `db/snapshot.db` jako `data.db`, wygaszony scheduler dostawców;
+3. baza doprowadzona do stanu produkcji **własnym modułem oryginału**:
+   `payment_blocks.ensurePaymentBlocks(<ścieżka>)` → `{ ok: true, rows: 7405 }`, kolumna obecna,
+   oba triggery założone (⚠ przy zwykłym starcie moduł pada lokalnie — ma zaszytą ścieżkę produkcyjną
+   `/home/admin/private_apps/bridge/data.db`, stąd jawny argument);
+4. start `index.cjs`, logowanie, `GET /api/products?limit=5`.
+
+Wynik: **72 klucze, bez `blokowaneFormyPlatnosci`.**
+
+Mechanizm: `grep -c blokowane_formy_platnosci mirror/backend/index.cjs` = **0** — bundle nie zna
+kolumny dokładanej runtime'owym `ALTER TABLE`, a produkty czyta Drizzle bez jawnej listy pól, więc
+oddaje pola MODELU. To jest ten sam przypadek co `uwagaCena` i dlatego właśnie produkcja liczy
+kolumnę w katalogu **w przeglądarce** (`payment-blocks-injection.js`) — API nie miało jej skąd wziąć.
+
+**Skutek dla zakresu:** zdjęcie pola z `KOLUMNY_POZA_KONTRAKTEM` byłoby ODSTĘPSTWEM, nie
+domknięciem długu. Fixture'y, `openapi.yaml` i obaj strażnicy 72 kluczy **zostają bez zmian**;
+poprawione zostały komentarze, które twierdziły, że to stan przejściowy.
 
 ⚠ `contract/fixtures/` czyta GATE **obu stron**: backend oraz
 `rebuild/frontend/test/msw/kontrakt.ts:63-77` (`produktyZFixtura()` ładuje `GET_products.json`
@@ -101,11 +120,17 @@ nagłówkową** z linią nagłówkową **realnego pliku produkcji**
   cutoverze) też ją dostały. *Za:* efekt dla Ani = jak dziś na produkcji, kolumna jest.
   *Przeciw odrzuconym:* „tylko w konfiguratorze" znaczyłoby, że kolumna po cutoverze znika;
   „zawsze widoczna poza konfiguratorem" przybija 420 px do i tak szerokiej tabeli.
-- **D2 — wartość kolumny w UI bierzemy z API** (pole `blokowaneFormyPlatnosci`), nie z mapy
-  przepisanej do frontu. *Za:* jedno źródło prawdy (triggery migracji 011), zgodność z bazą —
-  MO6 i nieznany dostawca dają `null` → „—". *Przeciw:* oryginał liczył to w froncie z kodu
-  dostawcy, bo nie miał pola w API; my je właśnie wystawiamy, więc duplikat reguły w trzecim
-  miejscu byłby kosztem bez korzyści.
+- **D2 — WYCOFANA 2026-09-23 PO POMIARZE.** Pierwotnie: „wartość kolumny w UI bierzemy z API".
+  Decyzja opierała się na założeniu (moim, z karty), że produkcja to pole wystawia. **Pomiar je
+  obalił** — patrz D2′ niżej. Zostawiam wpis, żeby było widać, co się zmieniło i dlaczego.
+- **D2′ — wartość kolumny w UI liczy się z kodu dostawcy; pole NIE wychodzi z API.**
+  Odtworzenie produkcji, zero odstępstwa. *Dowód:* sekcja „Pomiar rozstrzygający" niżej.
+  *Za:* fixture i kontrakt zostają zgodne z nagraniem; brak pierwszego w projekcie fixture'a
+  przeczącego oryginałowi (którego następna sesja mogłaby w dobrej wierze „naprawić"); spójne
+  z tym, jak odbudowa portuje logikę frontu (`formatowanie.tsx` trzyma inne przeniesione mapy).
+  *Przeciw:* trzecia kopia mapy MO w repo — ale produkcja ma ten sam podział
+  (`payment_blocks.cjs` + skrypt front-endowy), a odstępstwo nie dałoby Ani nic widocznego.
+  Wariant „wystawić mimo to" przedstawiony użytkownikowi i odrzucony jako droższy bez zysku.
 - **D3 — fallback CSV portujemy 1:1.** `getBlockedPaymentForms(row.dostawca)` gdy kolumna pusta.
   *Za:* domyślna reguła projektu = odtwarzamy zachowanie 1:1; tani bezpiecznik dla wiersza
   wstawionego drogą omijającą trigger. *Efekt mierzalny:* pomiar 113 na żywej produkcji — 0 wierszy
@@ -233,17 +258,19 @@ testu — asercje muszą sprawdzać TREŚĆ komórki, nie sam brak wyjątku.
 
 ## Definition of done
 
-- [ ] `LICZBA_KOLUMN === 60`, 60. nagłówek = `Blokowane-formy-platnosci`, linia nagłówkowa identyczna z plikiem produkcji z `88fa31c`
-- [ ] `nazwaKategoriiSklepu` pokrywa 5 kluczy mapy + przypadek `ł` (`Przemysłowe`), fallback bez zmian
-- [ ] Test potwierdza nagłówek `R/D` i wartości „Radialna"/„Diagonalna"
-- [ ] W pliku wyłącznie produkty `aktywny`; zapis atomowy, po generowaniu brak plików `.tmp-*`
-- [ ] Fallback kolumny 60 działa; MO6 i nieznany dostawca → puste pole
-- [ ] `npm run selly:csv` tworzy plik **bajt w bajt** identyczny z plikiem z trasy; nie dotyka `.htaccess`
-- [ ] `GET /api/products` oddaje `blokowaneFormyPlatnosci` — 73 klucze, zgodne z **przenagranym** fixture'em
-- [ ] Strażnicy w `katalog.gate.test.ts` i `produkty.mutacje.test.ts` świadomie przestawieni na 73
-- [ ] Pole opisane w `contract/openapi.yaml`
-- [ ] Kolumna „Blokowane formy płatności" widoczna domyślnie w `/katalog`, „—" dla `null`, retrofit działa
-- [ ] GATE: fixtures + openapi zgodne po OBU stronach (backend i front)
-- [ ] Bramki zielone: `lint`, `typecheck`, `build`, `test` w `rebuild/backend/` i `rebuild/frontend/`
-- [ ] Pomiar wierszy przed/po w `raport.md`
-- [ ] `docs/karty/I15.3/karta.md` opisuje STAN; sygnatura funkcji dla I15.10 i polecenie crona w „Do koordynatora"
+- [x] `LICZBA_KOLUMN === 60`, 60. nagłówek = `Blokowane-formy-platnosci`, linia nagłówkowa identyczna z plikiem produkcji z `88fa31c`
+- [x] `nazwaKategoriiSklepu` pokrywa 5 kluczy mapy + przypadek `ł` (`Przemysłowe`), fallback bez zmian
+- [x] Test potwierdza nagłówek `R/D` i wartości „Radialna"/„Diagonalna"
+- [x] W pliku wyłącznie produkty `aktywny`; zapis atomowy, po generowaniu brak plików `.tmp-*`
+- [x] Fallback kolumny 60 działa; MO6 i nieznany dostawca → puste pole
+- [x] `npm run selly:csv` tworzy plik **bajt w bajt** identyczny z plikiem z trasy; nie dotyka `.htaccess`
+- [x] ~~`GET /api/products` oddaje `blokowaneFormyPlatnosci`~~ → **rozstrzygnięte pomiarem: produkcja
+      tego pola nie oddaje, więc ukrycie zostaje** (D2′). Fixture'y i openapi bez zmian.
+- [x] ~~Strażnicy przestawieni na 73~~ → zostają na 72; poprawione komentarze, które błędnie
+      zapowiadały ujawnienie
+- [x] ~~Pole opisane w `contract/openapi.yaml`~~ → nie dotyczy, pole nie wychodzi z API
+- [x] Kolumna „Blokowane formy płatności" widoczna domyślnie w `/katalog`, „—" dla MO6/nieznanego, retrofit działa
+- [x] GATE: fixtures + openapi zgodne po OBU stronach (backend i front) — bez zmian, zgodne z nagraniem
+- [x] Bramki zielone: `lint`, `typecheck`, `build`, `test` w `rebuild/backend/` i `rebuild/frontend/`
+- [x] Pomiar wierszy przed/po w `raport.md`
+- [ ] `docs/karty/I15.3/karta.md` opisuje STAN; sygnatura funkcji dla I15.10 i polecenie crona w „Do koordynatora" *(krok 13-15)*
