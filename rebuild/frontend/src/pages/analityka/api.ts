@@ -19,6 +19,47 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
 import { BAZA_API, naglowki, rzucGdyBlad } from "@/lib/api";
+import { queryClient } from "@/lib/queryClient";
+
+/**
+ * ── PEŁNE POBRANIE DO PLIKU CSV (karta P10.5, backlog #96) ─────────────────────────────
+ *
+ * Osiem tras dashboardu ma `LIMIT` przepisany z produkcji, więc plik CSV — który od karty
+ * P10.3 powstaje z wierszy TABELI — dziedziczył sufit i bywał uboższy niż dawny eksport
+ * serwerowy. Decyzja Ani 2026-09-23: „chcę pełne pliki".
+ *
+ * ⚠ SUFIT ZDEJMUJEMY WYŁĄCZNIE DLA PLIKU. Hooki wyżej zostają bez zmian, więc TABELA i KAFLE
+ * KPI nadal widzą dokładnie to, co widziały (kafel „Pozycje unikalne" to nadal 1000 — port 1:1,
+ * karta PR.2). Pełny zbiór leci osobnym zapytaniem z `?limit=0` i TYLKO po kliknięciu CSV.
+ *
+ * ⚠ LENIWIE, NIE HOOKIEM. Gdyby to był `useQuery`, każde wejście na zakładkę ciągnęłoby pełne
+ * zbiory (na karcie 4.1 to ~825 KB) także dla kogoś, kto CSV nigdy nie kliknie. `fetchQuery`
+ * odpala się dopiero z `onClick`, a że korzysta z domyślnego `queryFn`, dziedziczy nagłówki,
+ * `credentials` i `on401: "returnNull"`; wynik ląduje w tym samym cache (`staleTime: Infinity`),
+ * więc drugie kliknięcie tego samego widoku jest natychmiastowe.
+ */
+
+/** `?limit=0` doklejone tak, żeby nie zepsuć adresu, który ma już parametr (`rotation/inactive?days=`). */
+export function zAdresemBezLimitu(adres: string): string {
+  return `${adres}${adres.includes("?") ? "&" : "?"}limit=0`;
+}
+
+/**
+ * Pobiera trasę bez sufitu i wyjmuje z niej wiersze.
+ *
+ * Zwraca `null`, gdy odpowiedź jest `null` — to `on401: "returnNull"`, czyli wygasła sesja.
+ * Wywołujący MUSI potraktować `null` jak błąd, a nie jak pusty zbiór: cicho zapisany pusty
+ * (albo ucięty) plik to dokładnie ta klasa usterki, którą zamyka #96.
+ */
+export async function pobierzPelneWiersze<TOdpowiedz, TWiersz>(
+  adres: string,
+  wyjmij: (odpowiedz: TOdpowiedz) => TWiersz[],
+): Promise<TWiersz[] | null> {
+  const odpowiedz = await queryClient.fetchQuery<TOdpowiedz | null>({
+    queryKey: [zAdresemBezLimitu(adres)],
+  });
+  return odpowiedz === null || odpowiedz === undefined ? null : wyjmij(odpowiedz);
+}
 
 /** Pozycja listy filtra — kolumna aliasowana na `value` (`analytics_module.cjs:98-107`). */
 export type WartoscFiltru = { value: string };

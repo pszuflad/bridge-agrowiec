@@ -45,6 +45,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import {
+  pobierzPelneWiersze,
   useHistoriaCenyProduktu,
   useInflacjaCen,
   useZmianyCenOstatniegoImportu,
@@ -267,6 +268,12 @@ export function SekcjaCeny({ wybor }: { wybor: WyborFiltrow }) {
             wiersze={wierszeImportu}
             kolumny={KOLUMNY_OSTATNI_IMPORT}
             wczytywanie={ostatniImportWczytywany}
+            pobierzPelne={() =>
+              pobierzPelneWiersze<{ rows: WierszZmianyCeny[] }, WierszZmianyCeny>(
+                "/api/analytics/prices/last-import",
+                (pelne) => zastosujFiltryDostawcow(pelne.rows, wybor),
+              )
+            }
           />
         }
         notka={

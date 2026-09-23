@@ -20,7 +20,7 @@ import { useMemo } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
-import type { WierszCykluZycia } from "./api";
+import { pobierzPelneWiersze, type WierszCykluZycia } from "./api";
 import {
   ETYKIETY_WYMIAROW,
   WYMIARY_DOSTAWCOW,
@@ -72,6 +72,12 @@ export function SekcjaCyklZyciaDostawcow({
             <PrzyciskCsv
               widok="suppliers-lifecycle"
               wiersze={wiersze}
+              pobierzPelne={() =>
+                pobierzPelneWiersze<{ rows: WierszCykluZycia[] }, WierszCykluZycia>(
+                  "/api/analytics/suppliers/lifecycle",
+                  (pelne) => zastosujFiltryDostawcow(pelne.rows, wybor),
+                )
+              }
               kolumny={KOLUMNY}
               wczytywanie={ladowanie}
             />
