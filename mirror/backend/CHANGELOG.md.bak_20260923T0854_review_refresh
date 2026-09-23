@@ -1,30 +1,3 @@
-2026-09-23 10:56
-obszar: backend
-
-pliki: staging_policy.cjs, staging_policy.cjs.bak_20260923T085655Z_review_reopen, CHANGELOG.md.bak_20260923T085655Z_review_reopen
-
-zmiana: przy już wstrzymanej starej karcie zapamiętana decyzja pozostaje ważna tylko przy identycznym zestawie możliwych odpowiedników. Zmiana kodu, EAN lub DOT ponownie otwiera sprawę w stagingu; niczego nie przywraca automatycznie do sprzedaży.
-
-powód: wstrzymane karty były pomijane przed porównaniem późniejszej zmiany odpowiednika.
-
-2026-09-23 10:56
-obszar: frontend | backend | baza danych
-
-pliki: staging_policy.cjs, /home/admin/domains/agritires.eu/public_html/panel/assets/staging-policy-injection.js, /home/admin/domains/agritires.eu/public_html/panel/index.html, data.db.bak_20260923T085605Z_review_explanations, CHANGELOG.md.bak_20260923T085605Z_review_explanations, staging_policy.cjs.bak_20260923T085605Z_review_explanations, staging-policy-injection.js.bak_20260923T085605Z_review_explanations, index.html.bak_20260923T085605Z_review_explanations
-
-zmiana: zamknięcie zgłoszenia starej wstrzymanej karty zapisuje decyzję do staging_absence_decisions i nie odtwarza tego samego komunikatu przy kolejnym odczycie identycznego odpowiednika; zmiana kodu/EAN/DOT ponownie uruchamia sprawdzenie. Odświeżono opis w panelu.
-
-powód: samo usunięcie zgłoszenia nie wystarczało; po następnym imporcie sprawa wracała mimo decyzji użytkowniczki.
-
-2026-09-23 10:54
-obszar: baza danych
-
-pliki: data.db, import_archive/2026-09/MO2__20260923__07095__rdzen.csv, import_archive/2026-09/MO5__20260923__06100__rdzen.csv, CHANGELOG.md.bak_20260923T0854_review_refresh
-
-zmiana: bez automatycznego zatwierdzania ponownie odczytano dwie aktualne oferty i zapisano dokładne porównania dla dwóch sprzecznych par wierszy. MO2: ten sam EAN i DOT, lecz inny kod dostawcy oraz stan 13/1. MO5: różne kody dostawcy, EAN, ceny i stany. Wskazana stara karta MO5_GGCR22530570LKS01 nadal wstrzymana ze stanem 0; możliwy odpowiednik ma osobny EAN i pozostaje aktywny. Brak duplikatów stagingu; integralność bazy OK.
-
-powód: pokazanie konkretnej przyczyny komunikatu i weryfikacja, że nowa funkcja niczego nie scaliła ani nie zatwierdziła.
-
 2026-09-23 10:53
 obszar: frontend | backend | baza danych
 

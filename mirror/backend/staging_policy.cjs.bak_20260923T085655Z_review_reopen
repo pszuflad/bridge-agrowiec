@@ -453,14 +453,7 @@ function install({U,db,normalize,classify,badName,ext}) {
           if(oldQueue.get(p.kod)?.typZmiany==='wycofana')clear.run(supplier,p.kod);
           if(!options.reconcileOnly)clearAbsence.run(supplier,p.kod);
           if(!options.reconcileOnly && p.nieobecnoscPodRzad)U.updateProduct(p.id,{nieobecnoscPodRzad:0});
-          const closed=db.prepare('SELECT candidates_hash FROM staging_absence_decisions WHERE supplier=? AND product_code=?').get(supplier,p.kod);
-          if(!closed)continue;
-          const alternativesNow=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod));
-          const currentHash=hash(alternativesNow.map(r=>[r.kod,r.ean,r.dot]).sort());
-          if(closed.candidates_hash===currentHash)continue;
-          db.prepare('DELETE FROM staging_absence_decisions WHERE supplier=? AND product_code=?').run(supplier,p.kod);
-          // A changed candidate deserves a fresh review even while the old
-          // card remains safely suspended. Never restore its stock here.
+          continue;
         }
         // A valid complete feed is the source of truth for sale availability.
         // Missing products are suspended immediately; no customer may buy an

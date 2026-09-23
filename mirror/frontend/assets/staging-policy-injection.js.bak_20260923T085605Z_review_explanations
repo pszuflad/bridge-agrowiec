@@ -71,7 +71,7 @@
         d.append(el('p',v.candidates.length
           ?'Co sprawdzić: porównaj kod producenta, EAN i DOT w aktualnej ofercie lub potwierdź u dostawcy, czy nowy kod zastąpił stary. Sama zgodność nazwy i rozmiaru nie wystarczy.'
           :'W obecnej ofercie nie znaleziono pewnego odpowiednika. Sprawdź kod i dostępność starej karty u dostawcy.','bs-note'));
-        d.append(el('p','Nie ma tu przycisku „Połącz”, ponieważ bez potwierdzenia nie wolno zmieniać starego EAN-u ani scalać produktów. Zamknięcie sprawy usuwa komunikat i zapamiętuje decyzję dla tego zestawu danych; stara karta pozostaje wstrzymana, a druga karta bez zmian. Sprawa wróci tylko wtedy, gdy dostawca zmieni możliwy odpowiednik, EAN lub DOT.'));
+        d.append(el('p','Nie ma tu przycisku „Połącz”, ponieważ bez potwierdzenia nie wolno zmieniać starego EAN-u ani scalać produktów. Zamknięcie sprawy tylko usuwa ten komunikat; stara karta pozostaje wstrzymana, a druga karta bez zmian.'));
       }else{
         d.append(el('p',v.nazwa),el('p','Pozycja z oferty: '+details(v.incoming)));
         d.append(el('p',v.matchIssue||v.powod));

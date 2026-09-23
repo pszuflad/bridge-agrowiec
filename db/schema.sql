@@ -337,6 +337,13 @@ CREATE TABLE product_absence_checks(supplier TEXT NOT NULL,product_code TEXT NOT
 CREATE TABLE product_auto_suspensions(
   supplier TEXT NOT NULL,product_code TEXT NOT NULL,suspended_at TEXT NOT NULL,
   source_fingerprint TEXT,reason TEXT NOT NULL,PRIMARY KEY(supplier,product_code));
+CREATE TABLE staging_absence_decisions(
+      supplier TEXT NOT NULL,
+      product_code TEXT NOT NULL,
+      candidates_hash TEXT NOT NULL,
+      decided_at TEXT NOT NULL,
+      PRIMARY KEY(supplier,product_code)
+    );
 CREATE TRIGGER products_blokowane_formy_ai
         AFTER INSERT ON products
         BEGIN

@@ -12,9 +12,7 @@
   .bs-dialog label{display:flex;gap:10px;align-items:flex-start;border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin:10px 0;cursor:pointer;overflow-wrap:anywhere}
   .bs-dialog input{margin-top:5px;flex-shrink:0}.bs-dialog footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}
   .bs-dialog button{border:1px solid #94a3b8;border-radius:6px;padding:8px 14px;cursor:pointer}.bs-dialog button.bs-save{background:#b77721;color:white;border-color:#b77721}.bs-dialog button:disabled{opacity:.5;cursor:default}
-  .bs-card{border:1px solid #cbd5e1;border-radius:9px;padding:12px 15px;margin:12px 0;background:#f8fafc}
-  .bs-card strong{display:block;margin-bottom:6px}.bs-card p{margin:4px 0}.bs-note{border-left:3px solid #b77721;padding:8px 12px;background:#fffbeb}
-  .bs-dialog .bs-error{color:#b91c1c}.dark .bs-dialog{background:#172033;color:#f8fafc}.dark .bs-dialog label,.dark .bs-card{border-color:#64748b}.dark .bs-card{background:#253147}.dark .bs-note{background:#332514}.dark .bs-review-btn{background:#332514;color:#fcd58b}`;
+  .bs-dialog .bs-error{color:#b91c1c}.dark .bs-dialog{background:#172033;color:#f8fafc}.dark .bs-dialog label{border-color:#64748b}.dark .bs-review-btn{background:#332514;color:#fcd58b}`;
   document.head.append(css);
   function el(tag,text,cls){const e=document.createElement(tag);if(text)e.textContent=text;if(cls)e.className=cls;return e;}
   function headers(){
@@ -48,52 +46,20 @@
     const d=dialog('Sprawdź dopasowanie opony'),loading=el('p','Wczytywanie…');d.append(loading);
     try{
       const v=await api(`${base}/${id}/review`);if(!d.isConnected)return;loading.remove();
-      const details=o=>[o.marka,o.model,o.rozmiar,o.dot&&'DOT '+o.dot,'EAN '+(o.ean||'brak')].filter(Boolean).join(' · ');
-      function card(title,lines){
-        const box=el('section',null,'bs-card');box.append(el('strong',title));
-        for(const line of lines)box.append(el('p',line));d.append(box);
-      }
+      d.append(el('p',v.nazwa),el('p','Dane dostawcy: '+[v.incoming.marka,v.incoming.model,v.incoming.rozmiar,v.incoming.dot&&'DOT '+v.incoming.dot,'EAN '+(v.incoming.ean||'brak')].filter(Boolean).join(' · ')));
+      d.append(el('p',v.matchIssue||v.powod));
       if(v.absenceReview){
-        d.querySelector('h2').textContent='Porównaj starą kartę z obecną ofertą';
-        d.append(el('p','Starego kodu nie ma w aktualnej ofercie. Podobne cechy nie dowodzą, że to ta sama opona.'));
-        card('Stara karta w katalogu',[
-          v.kod+' · '+v.nazwa,details(v.incoming),
-          'Stan: '+(v.incoming.status==='wstrzymany'?'wstrzymana, niedostępna w sprzedaży':v.incoming.status||'nieznany')
-        ]);
-        for(const c of v.candidates){
-          card('Możliwa pozycja w obecnej ofercie',[
-            c.kod+' · '+c.nazwa,
-            'EAN '+(c.ean||'brak')+' · DOT '+(c.dot||'brak'),
-            'EAN: '+(c.sameEan?'taki sam':'INNY niż na starej karcie')+'; DOT: '+(c.sameDot?'taki sam':'INNY'),
-            'Stan w katalogu: '+(c.status==='aktywny'?'dostępna':c.status==='wstrzymany'?'wstrzymana':c.status||'brak karty')
-          ]);
-        }
-        d.append(el('p',v.candidates.length
-          ?'Co sprawdzić: porównaj kod producenta, EAN i DOT w aktualnej ofercie lub potwierdź u dostawcy, czy nowy kod zastąpił stary. Sama zgodność nazwy i rozmiaru nie wystarczy.'
-          :'W obecnej ofercie nie znaleziono pewnego odpowiednika. Sprawdź kod i dostępność starej karty u dostawcy.','bs-note'));
-        d.append(el('p','Nie ma tu przycisku „Połącz”, ponieważ bez potwierdzenia nie wolno zmieniać starego EAN-u ani scalać produktów. Zamknięcie sprawy usuwa komunikat i zapamiętuje decyzję dla tego zestawu danych; stara karta pozostaje wstrzymana, a druga karta bez zmian. Sprawa wróci tylko wtedy, gdy dostawca zmieni możliwy odpowiednik, EAN lub DOT.'));
-      }else{
-        d.append(el('p',v.nazwa),el('p','Pozycja z oferty: '+details(v.incoming)));
-        d.append(el('p',v.matchIssue||v.powod));
+        d.append(el('p','To zgłoszenie dotyczy starej karty, a nie potwierdzonego wycofania opony. Nie zmieniono jej danych, ceny ani stanu. Nie łączymy kart automatycznie.'));
+        for(const c of v.candidates)d.append(el('p',`${c.kod}: ${c.nazwa} · EAN ${c.ean||'brak'} · DOT ${c.dot||'brak'}`));
+        if(!v.candidates.length)d.append(el('p','Brak pewnego odpowiednika w aktualnej ofercie. Potrzebne jest sprawdzenie oznaczenia u dostawcy.'));
       }
       const f=el('footer'),close=el('button','Zamknij');close.onclick=()=>d.close();f.append(close);
-      if(v.absenceReview){
-        const done=el('button','Pozostaw starą wstrzymaną i zamknij sprawę','bs-save');
-        const error=el('p',null,'bs-error');error.setAttribute('role','alert');
-        done.onclick=async()=>{
-          if(!window.confirm('Stara karta pozostanie wstrzymana. Możliwy odpowiednik pozostanie bez zmian. Zamknąć to zgłoszenie bez łączenia produktów?'))return;
-          done.disabled=true;close.disabled=true;
-          try{await api(`${base}/${id}/close-absence-review`,{method:'POST',body:'{}'});location.reload();}
-          catch(e){error.textContent=e.message;done.disabled=false;close.disabled=false;}
-        };
-        d.append(error);f.append(done);
-      }
       if(v.matchIssue&&!v.duplicateSource){
-        d.append(el('p','Wybierz produkt z katalogu lub utwórz osobny wpis w stagingu. „Zapisz wybór” NIE zatwierdza produktu ani nie wysyła go do sklepu. Po wyborze sprawdź nowe zgłoszenie i dopiero wtedy osobno je zaakceptuj.'));
+        d.append(el('p','Wybierz świadomie właściwą oponę lub osobny produkt. Zapisanie wyboru nie zatwierdza jeszcze produktu w katalogu.'));
         const form=el('div');let choice=null;
         const save=el('button','Zapisz wybór','bs-save');save.disabled=true;
         function option(value,label){const l=el('label'),r=el('input');r.type='radio';r.name='bs-target';r.value=value;r.onchange=()=>{choice=value;save.disabled=false;};l.append(r,el('span',label));form.append(l);}
-        for(const c of v.candidates)option(c.kod,`${c.kod}: ${c.nazwa} · ${c.rozmiar||'brak rozmiaru'} · DOT ${c.dot||'brak'} · EAN ${c.ean||'brak'}${c.sameEan?'':' (inny EAN)'}`);
+        for(const c of v.candidates)option(c.kod,`${c.kod}: ${c.nazwa} · ${c.rozmiar||'brak rozmiaru'} · DOT ${c.dot||'brak'}`);
         option('__new__','To osobna opona. Przygotuj ją jako nowy produkt.');
         d.append(form);
         if(v.eanIssue)d.append(el('p','EAN nadal wymaga poprawy w edycji zgłoszenia.','bs-error'));
@@ -104,18 +70,7 @@
           catch(e){error.textContent=e.message;save.disabled=false;close.disabled=false;}
         };
         f.append(save);
-      }else if(v.duplicateSource){
-        const conflict=v.sourceConflict;
-        d.append(el('p','W bieżącym pliku są dwa wiersze przypisane do jednej karty, ale ich dane się różnią. To NIE oznacza automatycznie, że EAN jest inny.'));
-        if(conflict){
-          d.append(el('p','Różnią się: '+(conflict.different.join(', ')||'danymi zapisanymi w pliku')+'.','bs-note'));
-          for(const [title,row] of [['Pierwszy wiersz',conflict.earlier],['Drugi wiersz',conflict.later]])
-            card(title,['Kod w pliku: '+(row.kod||'brak'),
-              'EAN: '+(row.EAN||'brak')+' · DOT: '+(row.DOT||'brak'),
-              'Cena zakupu: '+(row['cena zakupu']??'brak')+' · Stan: '+(row.stan??'brak')]);
-        }else d.append(el('p','To starsze zgłoszenie nie zawiera porównania wierszy. Wczytaj ponownie aktualny cennik, aby zobaczyć dokładne różnice.'));
-        d.append(el('p','Sprawdź te dwa wiersze u dostawcy. Jeśli to dwie różne opony, muszą otrzymać osobne oznaczenia; jeśli to jeden produkt, dostawca powinien wyjaśnić sprzeczne dane. Tego zgłoszenia nie można rozwiązać kliknięciem ani zaakceptować bez wyjaśnienia.'));
-      }
+      }else if(v.duplicateSource)d.append(el('p','Nie wybieramy automatycznie jednego z różnych wierszy. Trzeba sprawdzić i poprawić cennik dostawcy.'));
       d.append(f);
     }catch(e){loading.textContent=e.message;const close=el('button','Zamknij');close.onclick=()=>d.close();d.append(close);}
   }

@@ -91,13 +91,6 @@ function install({U,db,normalize,classify,badName,ext}) {
       source_fingerprint TEXT,
       reason TEXT NOT NULL,
       PRIMARY KEY(supplier,product_code)
-    );
-    CREATE TABLE IF NOT EXISTS staging_absence_decisions(
-      supplier TEXT NOT NULL,
-      product_code TEXT NOT NULL,
-      candidates_hash TEXT NOT NULL,
-      decided_at TEXT NOT NULL,
-      PRIMARY KEY(supplier,product_code)
     );`);
   const original={add:U.addStaging.bind(U),accept:U.acceptStaging.bind(U),edit:U.updateStaging.bind(U)};
   const originalUpdate=U.updateProduct.bind(U);
@@ -245,10 +238,6 @@ function install({U,db,normalize,classify,badName,ext}) {
       fail('Stan starej karty się zmienił. Odśwież staging i sprawdź ją ponownie.');
     if(snap._catalogVersion!==version(current))
       fail('Dane starej karty się zmieniły. Odśwież staging i sprawdź ją ponownie.');
-    const candidateHash=hash((snap._candidates||[]).map(c=>[c.kod,c.ean,c.dot]).sort());
-    db.prepare(`INSERT INTO staging_absence_decisions VALUES(?,?,?,?)
-      ON CONFLICT(supplier,product_code) DO UPDATE SET candidates_hash=excluded.candidates_hash,decided_at=excluded.decided_at`)
-      .run(row.dostawca,row.kod,candidateHash,new Date().toISOString());
     clear.run(row.dostawca,row.kod);
     return {kod:row.kod};
   })();
@@ -453,14 +442,7 @@ function install({U,db,normalize,classify,badName,ext}) {
           if(oldQueue.get(p.kod)?.typZmiany==='wycofana')clear.run(supplier,p.kod);
           if(!options.reconcileOnly)clearAbsence.run(supplier,p.kod);
           if(!options.reconcileOnly && p.nieobecnoscPodRzad)U.updateProduct(p.id,{nieobecnoscPodRzad:0});
-          const closed=db.prepare('SELECT candidates_hash FROM staging_absence_decisions WHERE supplier=? AND product_code=?').get(supplier,p.kod);
-          if(!closed)continue;
-          const alternativesNow=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod));
-          const currentHash=hash(alternativesNow.map(r=>[r.kod,r.ean,r.dot]).sort());
-          if(closed.candidates_hash===currentHash)continue;
-          db.prepare('DELETE FROM staging_absence_decisions WHERE supplier=? AND product_code=?').run(supplier,p.kod);
-          // A changed candidate deserves a fresh review even while the old
-          // card remains safely suspended. Never restore its stock here.
+          continue;
         }
         // A valid complete feed is the source of truth for sale availability.
         // Missing products are suspended immediately; no customer may buy an
@@ -473,11 +455,6 @@ function install({U,db,normalize,classify,badName,ext}) {
         }
         const alternatives=incoming.filter(r=>compatibility(p,r).ok && codeKey(supplier,r.kod)!==codeKey(supplier,p.kod));
         if(alternatives.length){
-          const candidateHash=hash(alternatives.map(r=>[r.kod,r.ean,r.dot]).sort());
-          const closed=db.prepare('SELECT candidates_hash FROM staging_absence_decisions WHERE supplier=? AND product_code=?').get(supplier,p.kod);
-          if(closed?.candidates_hash===candidateHash){
-            clear.run(supplier,p.kod);stats.bezZmian++;continue;
-          }
           const snap={...p,_policyVersion:2,_catalogVersion:version(find(p.kod)),_absenceReview:true,
             _candidates:alternatives.map(r=>({kod:r.kod,nazwa:r.nazwa,ean:r.ean,rozmiar:r.rozmiar,dot:r.dot}))};
           U.addStaging({typZmiany:'blad',kod:p.kod,nazwa:p.nazwa,dostawca:supplier,magazyn:p.magazyn,
