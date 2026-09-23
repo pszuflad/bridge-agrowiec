@@ -4481,7 +4481,7 @@ ani nie blokuje testu. Śmieci w polu marki Ania może poprawić ręcznie (edycj
 | **Pliki** | `mirror/backend/staging_policy.cjs` (**nowy**, 298 l.), `mirror/backend/index.cjs` (dwa wywołania: `staging_policy.install({U,db,normalize,classify,badName,ext})` i `registerRoutes`), `mirror/backend/common.cjs` (`ean_raw`), `mirror/backend/parsers/adapter.cjs` (EAN przez `validateEan`, `eanRaw`, kod zastępczy bez samego EAN), `mirror/frontend/assets/staging-policy-injection.js` (**nowy**), `mirror/frontend/index.html`, `db/schema.sql` (tabela `staging_matches`, indeks unikalny `staging_one_current_product ON staging_items(dostawca,kod)`), `mirror/backend/staging_reconcile_20260922.cjs` (skrypt jednorazowy); kopie `.bak_20260922T110248Z_staging_v2` |
 | **Commit** | `7d6cfc9` |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22** (D3 planu I15) |
-| **Status** | zatwierdzone; **I15.2 (część parserowa) — ✅ DOWIEZIONA** (ticket 120, 2026-09-23): `staging_policy.cjs` w `legacy/` skopiowany bajt w bajt, adapter/common używają `validateEan`, `rawEan`, `syntheticCode`; `install()`/`registerRoutes()` leżą UŚPIONE (nikt ich nie woła). **I15.4a (schemat) — ✅ DOWIEZIONA** (ticket 124, 2026-09-23): tabela `staging_matches` i indeks unikalny `staging_one_current_product` założone migracją `012`. Otwarte: **I15.4b** (importer), **I15.4c** (akceptacja i trasy), **I15.5** (frontend) — `docs/karty/I15.*` |
+| **Status** | zatwierdzone; **I15.2 (część parserowa) — ✅ DOWIEZIONA** (ticket 120, 2026-09-23): `staging_policy.cjs` w `legacy/` skopiowany bajt w bajt, adapter/common używają `validateEan`, `rawEan`, `syntheticCode`. **I15.4a (schemat) — ✅ DOWIEZIONA** (ticket 124): tabela `staging_matches` i indeks `staging_one_current_product` migracją `012`. **I15.4c (akceptacja i trasy) — ✅ DOWIEZIONA** (ticket 129, 2026-09-23): `checkAcceptance` z SIEDMIOMA blokadami 409 (nie czterema — zmierzone w `:188-200`), nadpisania `addStaging`/`updateStaging`, `resolveStaging`, trasy `review` i `resolve` w `contract/openapi.yaml`; dowód wierności = GATE różnicowy na uruchomionym `staging_policy.cjs`. Otwarte: **I15.4b** (importer), **I15.5**/**I15.11** (frontend) — `docs/karty/I15.*` |
 
 **Opis biznesowy (CHANGELOG Ani, 2026-09-22 13:03).** „Staging v2: jedno najnowsze zgłoszenie na produkt/dostawcę;
 świeże ceny i stany; ścisła kontrola surowego EAN w parserze/adapterze; dopasowanie po EAN wyłącznie do jednej
@@ -4500,7 +4500,11 @@ i łączenie różnych partii opon.”
 - `validateEan()`: puste → `empty`; zapis naukowy lub utracone cyfry → błąd; znaki nie-cyfry, zła długość
   (8/12/13/14), same zera, zła cyfra kontrolna → błąd. **Nigdy nie obcina, nie zaokrągla, nie „naprawia”.**
 - `syntheticCode()`: kod zastępczy `<dostawca>_AUTO_<sha>` z tożsamości opony, **nigdy z samego EAN**.
-- Trasy: `GET /api/staging/:id/review`, `POST /api/staging/:id/resolve` (`action`, `targetCode`).
+- Trasy — **CZTERY**, nie dwie (zmierzone w `staging_policy.cjs:620-664`, ticket 129):
+  `GET /api/staging/:id/review`, `POST /api/staging/:id/resolve` (`action`, `targetCode`),
+  `POST /api/staging/:id/choose-absence-card` (`selectedCode`, `candidateVersion`),
+  `POST /api/staging/:id/close-absence-review`. Dwie ostatnie wystawiają decyzje
+  o nieobecnych kartach (#106).
 - Frontend: wstrzykiwany skrypt z przyciskiem i oknem „Rozstrzygnij”.
 
 **⚠ Kolizja ze świadomym odstępstwem 14i** (ticket 58, EAN w zapisie naukowym → puste pole): produkcja od
@@ -4644,7 +4648,7 @@ Przenumerowanie zostawione koordynatorowi — nie przenumerowano samodzielnie.
 | **Pliki** | `mirror/backend/feed_safety.cjs` (**nowy**), `staging_policy.cjs` (+131 l. → 407), `extensions.cjs` (jeden scheduler — drugi wyłączony), `index.cjs`, `parsers/dispatcher.cjs` (usunięty cichy fallback do starych parserów), `parsers/mo2_jmk.cjs`, `parsers/mo9_agrorami.cjs`, `parsers/mo9_agrorami_api.cjs`, `parsers/_agrorami_fetch_helper.cjs`, `parsers/adapter.cjs`; FE: `assets/index-PRICEFMT1783512500.js` (ŻYWY bundel), `assets/staging-policy-injection.js`, `index.html`; `db/schema.sql`: `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks`; jednorazowe: `withdrawals_reconcile_20260922.cjs` + raport JSON |
 | **Commit** | `3f00533` |
 | **Do nowej wersji?** | ✅ **TAK — część parserowa DOWIEZIONA w I15.2** (ticket 120, 2026-09-23); reszta do decyzji w I15.4b/I15.5/I15.11. |
-| **Status** | ✅ **parser: I15.2** (ticket 120) — `feed_safety.cjs` w `legacy/`, wpięty w `dispatcher.cjs:47` i `adapter.cjs:733`; usunięty cichy fallback do starych parserów; JMK nie łączy już wierszy po EAN (zmierzone: próbka MO2 200 kodów, wszystkie unikalne, dawne zdublowane `MO2_13760840000`/`MO2_13763530000` znikają). ✅ **schemat: I15.4a** (ticket 124, 2026-09-23) — tabele `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks` założone w odbudowie migracją `012`. Konsumpcja `_bridgeFeedMeta` przez silnik i panel „Braki w cenniku” — **I15.4b/I15.5/I15.11** (otwarte). |
+| **Status** | ✅ **parser: I15.2** (ticket 120) — `feed_safety.cjs` w `legacy/`, wpięty w `dispatcher.cjs:47` i `adapter.cjs:733`; usunięty cichy fallback do starych parserów; JMK nie łączy już wierszy po EAN. ✅ **schemat: I15.4a** (ticket 124) — tabele `supplier_feed_state`, `supplier_feed_versions`, `product_absence_checks` migracją `012`. ✅ **akceptacja: I15.4c** (ticket 129, 2026-09-23) — próg „trzech wiarygodnych potwierdzeń nieobecności” egzekwowany w `checkAcceptance` (`staging_policy.cjs:193`) i pokryty GATE-em. **Otwarte:** konsumpcja `_bridgeFeedMeta`, blokada źródła i liczniki nieobecności po stronie IMPORTU — **I15.4b**; panel „Braki w cenniku” — **I15.5/I15.11**. |
 
 **Opis biznesowy (CHANGELOG Ani).** „Naprawa nieobecności w stagingu. Usunięto cichy fallback do starych parserów
 w imporcie URL i ręcznym. Agrorami: pełny zapis JSON przed zamknięciem procesu, kontrola liczby/unikalności produktów
@@ -4684,7 +4688,7 @@ nie przenosić (jak D5 dla reconcile Staging v2).
 | **Pliki** | `mirror/backend/availability_sync.cjs` (**nowy**), `staging_policy.cjs` (+87 l. → 488), `generate_selly_export.cjs` (+19), `selly/sync_delta.cjs` (+18), `selly/sync_full.cjs` (+3); `db/schema.sql`: `product_auto_suspensions`; jednorazowe: `apply_availability_20260922.cjs`, `zero_and_delete_agrorami_20260922.cjs` + archiwa JSON |
 | **Commit** | `abe5f14` |
 | **Do nowej wersji?** | ⬜ **do decyzji (częściowo rozstrzygnięte)** |
-| **Status** | ⬜ **częściowo.** ✅ **CSV → ticket 122 (I15.3, 2026-09-23)** — zapis atomowy naniesiony (`generator-csv.ts`, tmp+`renameSync` w tym samym katalogu); filtr „tylko aktywne” odbudowa miała już od I8a, więc nie było tu czego zmieniać. ✅ **schemat → ticket 124 (I15.4a, 2026-09-23)** — tabela `product_auto_suspensions` założona migracją `012`. **Reszta NIE zrobiona** — logika auto-wstrzymań (`staging_policy.cjs`), `availability_sync`, delta i tor pełny: **I15.4b/I15.10**, zostaje otwarta. |
+| **Status** | ⬜ **częściowo.** ✅ **CSV → ticket 122 (I15.3)** — zapis atomowy naniesiony; filtr „tylko aktywne” odbudowa miała od I8a. ✅ **schemat → ticket 124 (I15.4a)** — tabela `product_auto_suspensions` migracją `012`. ✅ **ochrona ręcznych wstrzymań w AKCEPTACJI → ticket 129 (I15.4c, 2026-09-23)** — akceptacja zdejmuje wyłącznie wstrzymanie AUTOMATYCZNE, ręczne zostaje (`staging_policy.cjs:216-222`); `suspend()` sportowany jako `wstrzymajAutomatycznie` (znacznik tylko dla produktu `aktywny` albo już oznaczonego, `suspended_at` nietykane przy konflikcie). **Otwarte:** auto-wstrzymania po stronie IMPORTU — **I15.4b**; `availability_sync`, delta i tor pełny — **I15.10** (punkt wpięcia wystawiony jawnie przez ticket 129, patrz `docs/karty/I15.10/wejscie-129.md`). ⚠ **Bez gospodarza:** nadpisanie `U.updateProduct` (`:113-119`), przez które ręczny wybór statusu kasuje znacznik auto-wstrzymania — dotyczy `PUT /api/products/:id`, czyli plików spoza kart I15.4a/b/c. |
 
 **Opis biznesowy (CHANGELOG Ani).** „Brak produktu w poprawnej pełnej ofercie natychmiast ustawia wstrzymany/0. Tabela
 `product_auto_suspensions` odróżnia automatyczny brak od ręcznego wstrzymania. Pewny powrót przywraca aktywność i bieżący
@@ -4747,8 +4751,8 @@ w stagingu → **I15.4b**. Operacje na danych (13 kart MO4/MO5, 5 kart MO9) nie 
 | **Kategoria** | BACKEND + BAZA + FRONTEND (staging) |
 | **Pliki** | `mirror/backend/staging_policy.cjs` (488 → 665 l.), `db/schema.sql`: `staging_absence_decisions` + unikalny indeks `staging_absence_one_choice`, FE: `assets/staging-policy-injection.js`, `index.html` |
 | **Commit** | `58d9d1d`, `88fa31c` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | tabela `staging_absence_decisions` + indeks `staging_absence_one_choice` już założone w odbudowie migracją `012` (ticket 124, karta I15.4a); logika wciąż otwarta — karty I15.4c/I15.11 |
+| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-23** (D129.3: `88fa31c` = decyzja już podjęta, D3 „Staging v2 przenosimy” obejmuje całość zamrożonej produkcji) |
+| **Status** | ✅ **DOWIEZIONE — ticket 129 (I15.4c, 2026-09-23).** Tabela `staging_absence_decisions` + indeks `staging_absence_one_choice` założone migracją `012` (ticket 124). Logika: `closeAbsenceReview` (`:251-266`) i `chooseAbsenceCard` (`:267-330`) — obie gałęzie wyboru, trójstronna zgodność DOT, `candidates_hash` liczony z `[kod, ean, dot]` (zmiana ceny/stanu NIE otwiera sprawy ponownie). Trasy `POST .../choose-absence-card` i `POST .../close-absence-review` wdrożone i opisane w `contract/openapi.yaml` — **karta wymieniała dwie trasy, oryginał ma cztery**. Otwarte: panel — **I15.11** (`docs/karty/I15.11/wejscie-129.md`). |
 
 **Opis biznesowy (CHANGELOG Ani).** Okno sprawdzania pokazuje **osobno starą kartę i możliwy odpowiednik**, wskazuje
 zgodność lub różnicę EAN i DOT oraz stan obu kart; doszedł bezpieczny przycisk „Pozostaw starą wstrzymaną i zamknij
@@ -4774,8 +4778,8 @@ w ciągu doby (298 → 407 → 488 → 665 linii) — patrz nota o zamrożeniu n
 | **Kategoria** | BACKEND (staging, `uwaga_cena`) |
 | **Pliki** | `mirror/backend/staging_policy.cjs`, `mirror/backend/uwaga_cena_patch.cjs` |
 | **Commit** | `a2c979b` |
-| **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | — |
+| **Do nowej wersji?** | ❌ **NIE — zmierzone, nie dotyczy odbudowy** (ticket 129, 2026-09-23) |
+| **Status** | ✅ **ROZSTRZYGNIĘTE POMIAREM — ticket 129 (I15.4c, 2026-09-23).** Pięć sekund na pozycję brało się z OSOBNEGO połączenia do bazy w `uwaga_cena_patch.cjs`, czekającego na blokadę zapisu. Odbudowa ma jedno połączenie i `uwagaCena` jako kolumnę modelu — zmierzone na kopii `db/snapshot.db` (7405 produktów, 200 pozycji): najwolniejsza pozycja **0,86 s**, czyli ~6× poniżej progu 5 s. **Łatki nie portujemy.** ⚠ Pomiar odsłonił natomiast INNY, niezależny koszt — grupowanie `kod_importu` przez `compatibility()` (386 ms/pozycja wobec 6,7 ms przed Staging v2) — opisany jako **`#129.1`** w `docs/rebuild-backlog/wpis-129.md`. Narzędzie: `rebuild/backend/scripts/pomiar-107.ts`. |
 
 **Opis biznesowy (CHANGELOG Ani).** „Zapis uwagi o cenie przy zatwierdzaniu stagingu i zbiorczym dodawaniu produktów
 korzysta z tego samego połączenia do bazy co operacja główna; nie czeka na własną blokadę przy zatwierdzaniu wielu

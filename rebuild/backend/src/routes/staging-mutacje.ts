@@ -10,14 +10,15 @@ import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { dostawcaPoKodzie, zapiszWynikImportu } from "../repos/suppliers.js";
-import { pozycjaStaginguPoId, zaktualizujPozycjeStagingu } from "../repos/staging.js";
+import { pozycjaStaginguPoId } from "../repos/staging.js";
 import { zapiszPoprawke } from "../repos/overrides.js";
 import {
   idPozycjiZFiltrow,
   odrzucPozycjeStagingu,
   wyczyscStaging,
-  zatwierdzPozycjeStagingu,
 } from "../import/akceptacja.js";
+import { zatwierdzPozycjeZPolityka } from "../import/polityka/akceptacja.js";
+import { zaktualizujZgloszenie } from "../import/polityka/zgloszenia.js";
 import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
 import { PustyImportBlad, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
 import type { RekordSurowy } from "../import/typy.js";
@@ -169,7 +170,26 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
     const cialo = (req.body ?? {}) as FiltryMasowe;
     const identyfikatory = wybierzId(db, cialo);
 
-    for (const id of identyfikatory) zatwierdzPozycjeStagingu(db, id, req.user!.id);
+    // ⚠ PĘTLA BEZ ZBIORCZEJ TRANSAKCJI I BEZ POŁYKANIA BŁĘDU — dosłownie jak oryginał
+    // (`deminified/backend-index.cjs:48544`: `for (let p of l) U.acceptStaging(p, c.user.id)`).
+    // Pierwsza pozycja zablokowana przez politykę Staging v2 przerywa CAŁE żądanie: audyt się
+    // nie zapisuje, a pozycje zatwierdzone wcześniej ZOSTAJĄ zatwierdzone (każda ma własną
+    // transakcję). Zaskakujące, ale takie jest zachowanie produkcji i takie odtwarzamy.
+    //
+    // `try` jest tu WYŁĄCZNIE po to, żeby odtworzyć KSZTAŁT odpowiedzi. Produkcja ma globalny
+    // error middleware (`:48977-48982`: `status = e.status || e.statusCode || 500`, ciało
+    // `{message}`), którego odbudowa jeszcze nie ma — bez tego blokada 409 wyszłaby jako
+    // HTML-owe 500 Express‑a. Dołożenie tego middleware globalnie to osobny ticket
+    // (raport.md → Follow-up); tutaj nie zmieniam zachowania innych tras.
+    try {
+      for (const id of identyfikatory) zatwierdzPozycjeZPolityka(db, id, req.user!.id);
+    } catch (e) {
+      const blad = e as { status?: number; statusCode?: number };
+      const status = blad.status ?? blad.statusCode ?? 500;
+      const message = e instanceof Error ? e.message : "Internal Server Error";
+      console.error("Internal Server Error:", e);
+      return res.status(status).json({ message });
+    }
 
     zapiszAudyt(db, {
       uzytkownikId: req.user?.id ?? null,
@@ -329,7 +349,10 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
 
     doZapisu.snapshotJson = JSON.stringify(snapshot);
     doZapisu.edytowanePola = JSON.stringify(edytowanePola);
-    const zaktualizowana = zaktualizujPozycjeStagingu(db, id, doZapisu);
+    // Staging v2: edycja przechodzi przez politykę, która synchronizuje bieżnik z modelem
+    // i PRZELICZA status EAN (`staging_policy.cjs:168-187`). Bez tego ręcznie poprawiony EAN
+    // nie zdjąłby blokady akceptacji z decyzji D4.
+    const zaktualizowana = zaktualizujZgloszenie(db, id, doZapisu);
 
     zapiszAudyt(db, {
       uzytkownikId: req.user?.id ?? null,
