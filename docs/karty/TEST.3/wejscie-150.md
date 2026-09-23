@@ -16,9 +16,14 @@ zacytować wprost:
 ## Dodatkowy konkret do tej samej listy: `mirror/` na `develop` nie jest wiarygodną kopią produkcji
 
 `mirror/backend/generate_selly_export.cjs` na `develop` ma **59 kolumn**, bez
-`Blokowane-formy-platnosci` — wersja produkcyjna (60 kolumn) jest na `88fa31c`. To pułapka
-konkretnie dla kogoś, kto sięga po `mirror/` jako po „oryginał" do porównania albo do
-skopiowania logiki: `develop` może być nieaktualny względem zamrożonej produkcji. Warto, żeby
-TEST.3 dodał to jako przykład przy zasadzie „sprawdzaj w źródle, nie z pamięci" (jeśli taka
-zasada w dokumencie występuje) albo przy liście rzeczy, których nie wolno brać za pewnik bez
-sprawdzenia commita. Dowód i metoda: `docs/tickets/150-DOCS-test-sciezki-krytycznej/dowod-csv.md`.
+`Blokowane-formy-platnosci` — o jedną mniej niż wersja produkcyjna. **To nie jest zaniedbanie,
+tylko stan celowy:** `mirror/` w `develop` jest cofnięty do stanu z 25.08 (commit `6594525`,
+bramki wierności) — ustalenie z `docs/karty/TEST.2/wejscie-153.md`. **Żywy oryginał bierze się
+z `origin/main`**, nie z gałęzi roboczej.
+
+To jest dobry, konkretny przykład dla TEST.3 przy zasadzie „sprawdzaj w źródle, nie z pamięci":
+zarówno ticket 153, jak i ticket 150 opisały tę różnicę najpierw jako „`mirror/` jest
+nieaktualny", zanim wyszło, że jest cofnięty świadomie. Morał dla Ani jest praktyczny: **nazwa
+katalogu nie mówi, z którego momentu pochodzi jego treść** — to ten sam rodzaj pomyłki co
+„etykieta kopii `.bak` daje etykietę, nie treść" z `CLAUDE.md`.
+Dowód i metoda: `docs/tickets/150-DOCS-test-sciezki-krytycznej/dowod-csv.md`.

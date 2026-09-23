@@ -96,12 +96,24 @@ Ticket `150-DOCS-test-sciezki-krytycznej`, 2026-09-24.
 - **Rozstrzygnięcie metody porównania CSV.** Karta kazała sprawdzić, czy dowód nie jest już
   zrobiony w I15.3 — jest tam **tylko częściowo**: stały test porównuje wyłącznie wiersz
   **nagłówkowy** bajt w bajt (`rebuild/backend/test/selly.generator-csv.test.ts`); porównania
-  treści wierszy na tej samej bazie nie było. Dlatego przeprowadzono realnie **pierwszy wariant
-  z karty** (stary generator z `88fa31c` na kopii `db/snapshot.db` z nałożonymi migracjami
-  001–013, obok nowego `npm run selly:csv`, `diff`). **Wynik: pliki identyczne bajt w bajt** —
-  ten sam sha256, 6899 linii, 3 177 786 B, 60 kolumn, 6898 pozycji. Reviewer powtórzył dowód
-  niezależnie na własnej kopii i uzyskał ten sam sha256. Pełny przebieg i wynik:
-  `docs/tickets/150-DOCS-test-sciezki-krytycznej/dowod-csv.md`.
+  treści wierszy na tej samej bazie nie było. Przeprowadzono więc **pierwszy wariant z karty**.
+  ⚠ **Wynik wymaga czytania razem z `wejscie-153.md`** (weszło na `develop` w trakcie ticketu):
+  - **na kopii `db/snapshot.db` z 13.08 + migracje 001–013 pliki wyszły identyczne bajt w bajt**
+    (ten sam sha256, 6899 linii, 3 177 786 B, 60 kolumn, 6898 pozycji; reviewer powtórzył
+    niezależnie i dostał ten sam sha256);
+  - **na bazie stagingu (kopia produkcji z 23.09) ten sam pomiar daje 899 różniących się
+    wierszy** — ticket 153, wpis backlogu `#153.1`, karta `FIX.1`, **blokada cutoveru**;
+  - **oba wyniki są prawdziwe.** Snapshot z 13.08 ma wszystkie dziesięć kolumn flagowych
+    wyłącznie w typie `integer`, więc błąd „tekst `'Tak'` czytany przez Drizzle jako `false`"
+    **nie ma tam jak się ujawnić**. Tekst `'Tak'` wszedł do bazy po 13.08.
+  - **Wniosek metodyczny dla przyszłych pomiarów:** porównanie generatorów prowadzi się **na
+    bazie stagingu**, nie na sierpniowym snapshocie; a zerowy `diff` podważa się tak samo jak
+    niezerowy — trzeba sprawdzić, czy dane w ogóle zawierają przypadek, który mógłby zapalić
+    czerwone. Kontrola nietrywialności w tym tickecie objęła wypełnienie 60. kolumny, ale nie
+    rozkład TYPÓW w kolumnach flagowych, i to był brakujący krok.
+  - Instrukcja dla Ani opisuje **stan faktyczny**, czyli wynik ticketu 153, i nazywa go blokadą
+    przełączenia. Pełny rozbiór: `docs/tickets/150-DOCS-test-sciezki-krytycznej/dowod-csv.md`,
+    sekcja „Dlaczego ten wynik NIE uogólnia się".
 - **Rozstrzygnięcie wariantu Selly.** Docelowy = „przy cutoverze nic się nie przepina", bo
   `rebuild/backend/src/config/env.ts:138-146` ma domyślne `SELLY_CSV_DIR`/`SELLY_CSV_PLIK`/
   `SELLY_CSV_URL` ustawione na tę samą ścieżkę produkcyjną co stary generator. Wariant testowy
@@ -119,9 +131,13 @@ Ticket `150-DOCS-test-sciezki-krytycznej`, 2026-09-24.
    zakresu — instrukcja to uwzględnia (automat opisany jako „chodzi sam", MO9 tylko opisane
    bez klikania scenariusza awarii, decyzja D2).
 2. **Pułapka dla każdej przyszłej karty sięgającej po „oryginał":**
-   `mirror/backend/generate_selly_export.cjs` na `develop` jest **nieaktualny** — ma 59 kolumn,
-   bez `Blokowane-formy-platnosci`. Wersja produkcyjna z 60 kolumnami jest na `88fa31c`.
-   Porównanie z wersją z `develop` dałoby fałszywy rozjazd.
+   `mirror/backend/generate_selly_export.cjs` na `develop` ma 59 kolumn, bez
+   `Blokowane-formy-platnosci` — o jedną mniej niż wersja produkcyjna. **Nie jest to jednak
+   zaniedbanie, tylko stan świadomy:** `mirror/` w `develop` jest cofnięty do stanu z 25.08
+   (commit `6594525`, bramki wierności) — ustalenie z `wejscie-153.md`. Żywy generator produkcji
+   bierze się więc z **`origin/main`** (sprawdzone: `88fa31c` i `origin/main` dają tu identyczny
+   plik). Porównanie z wersją z `develop` pokazuje nieistniejącą różnicę „59 kontra 60 kolumn" —
+   ticket 153 wszedł w tę pułapkę przy pierwszym podejściu.
 3. **Instrukcja opisała zachowanie, którego karta nie przewidziała:** przy
    `SELLY_TRYB=wylaczony` serwer nie montuje modułu dostępności (`rebuild/backend/src/server.ts:90`),
    więc na stagingu plik CSV **nie odświeża się sam po imporcie** — trzeba kliknąć
