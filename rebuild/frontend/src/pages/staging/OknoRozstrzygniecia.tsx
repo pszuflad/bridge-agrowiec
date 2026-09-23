@@ -12,8 +12,15 @@
  *  3. `duplicateSource` — dwa sprzeczne wiersze w jednym pliku dostawcy. SAM PODGLĄD:
  *     oryginał świadomie nie daje tu żadnej akcji, bo sprzeczność musi wyjaśnić dostawca.
  *
- * Gałęzie 1 i 2 mogą wystąpić razem (stara karta z niejednoznacznym dopasowaniem) — oryginał
- * renderuje wtedy obie sekcje i obie stopki, więc odtwarzamy to samo.
+ * ⚠ GAŁĘZIE 1 i 2 SĄ ROZŁĄCZNE — ZMIERZONE, nie założone (ticket 140). Oryginał ma dla nich
+ * dwa OSOBNE elementy błędu (`:113` i `:127`), co sugeruje, że mogą wystąpić razem; w danych
+ * nie mogą. `_absenceReview` ustawiają wyłącznie dwie gałęzie importera
+ * (`import/polityka/fabryka.ts:855` i `:902`), a obie budują snapshot od zera z PRODUKTU
+ * KATALOGOWEGO (`{...p, _policyVersion, _catalogVersion, _absenceReview, _candidates}`) —
+ * produkt nie niesie `_matchIssue`, bo to pole powstaje w ścieżce dopasowania wiersza
+ * importu (`:485`, `:501`) i tamta kończy się własnym `dodajZgloszenie` + `continue`.
+ * Dlatego port ma JEDEN stan błędu zamiast dwóch: w każdym osiągalnym przypadku renderuje
+ * się dokładnie jedna gałąź, więc miejsce komunikatu jest to samo co w oryginale.
  *
  * ⚠ TEKSTY SĄ DOSŁOWNE. Cudzysłowy („…"), wielokropek `…`, wersaliki („RÓŻNY — nie łączyć",
  * „NIE zatwierdza") i interpunkcja są przeniesione znak w znak. To nie jest stylistyka —

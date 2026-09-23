@@ -48,6 +48,12 @@ w `rebuild/backend/src/import/polityka/fabryka.ts` (`:412`, `:436`, `:437`, `:44
 | **dopasowanie** | `matchIssue && !duplicateSource` | „Sprawdź dopasowanie opony" | `POST …/resolve` |
 | **sprzeczne wiersze** | `duplicateSource === true` | „Sprawdź dopasowanie opony" | brak — sam podgląd |
 
+⚠ **Gałęzie „stara karta" i „dopasowanie" są ROZŁĄCZNE** — sprawdzone w importerze po code
+review (ticket 140): `_absenceReview` ustawiają tylko `fabryka.ts:855` i `:902`, a obie te
+gałęzie budują snapshot z produktu katalogowego, który `_matchIssue` nie ma. Oryginał ma dla
+nich dwa osobne elementy błędu, co sugeruje współwystępowanie — w danych jest ono nieosiągalne.
+Port ma więc jeden stan błędu.
+
 Gałąź „sprzeczne wiersze" jest w zakresie, mimo że nagłówek karty jej nie wymienia: otwiera ją
 ten sam przycisk (fraza „Wymaga sprawdzenia pliku" jest w regexie), więc bez niej „Rozstrzygnij"
 otwierałby puste okno. Gałąź „stara karta" też jest w zakresie — prompt karty opisuje ją wprost
