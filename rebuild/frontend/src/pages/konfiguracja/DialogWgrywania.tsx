@@ -214,7 +214,10 @@ export function DialogWgrywania({
       if (sumy.doStagingu > 0) czlony.push(`Do akceptacji w stagingu: ${sumy.doStagingu}`);
       if (sumy.nowe > 0) czlony.push(`Nowe: ${sumy.nowe}`);
       if (sumy.zmienione > 0) czlony.push(`Zmienione: ${sumy.zmienione}`);
-      if (sumy.wycofane > 0) czlony.push(`Wycofane: ${sumy.wycofane}`);
+      // ⚠ „Braki w cenniku", nie „Wycofane" — łatka #103 przemianowała ten człon w ŻYWYM
+      // bundlu (`index-PRICEFMT1783512500.js` @ `88fa31c`). Klucz `sumy.wycofane` zostaje
+      // bez zmian: zmieniła się wyłącznie etykieta widoczna dla użytkownika (ticket 142).
+      if (sumy.wycofane > 0) czlony.push(`Braki w cenniku: ${sumy.wycofane}`);
       if (sumy.bezZmian > 0) czlony.push(`Bez zmian: ${sumy.bezZmian}`);
       if (sumy.odrzuconeNieOpony > 0)
         czlony.push(`Odrzucone (nie opony): ${sumy.odrzuconeNieOpony}`);

@@ -13,8 +13,11 @@
  * wygrywa handler WCZEŚNIEJSZY, więc `paged` musi stać przed `:id` — i dlatego wszystko
  * wychodzi z tej funkcji jedną tablicą, a nie osobnymi wywołaniami `server.use`.
  *
- * ⭐ PUNKT WEJŚCIA DLA KARTY I15.11: panel „Braki w cenniku" dokłada tu swoje trasy
- * (`opcje` rozszerzamy o kolejne pola), zamiast zakładać własny plik mocków.
+ * ⭐ KARTA I15.11 NIE DOŁOŻYŁA TU ŻADNEJ TRASY (ticket 142) — i tak ma zostać. Panel
+ * „Braki w cenniku" okazał się zmianą czterech ETYKIET w istniejącym filtrze i odznakach,
+ * bez nowego zapytania; blokadę 409 obsługuje już `bladAkceptacji`. Jeśli kiedyś dojdzie
+ * trasa, rozszerza się `OpcjeHandlerowStagingu` o kolejne pole — nie zakłada własnego pliku
+ * mocków ani `server.use` w teście.
  */
 import { http, HttpResponse } from "msw";
 
