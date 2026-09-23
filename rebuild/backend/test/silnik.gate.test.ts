@@ -284,29 +284,49 @@ describe("GATE treści 3c — realny import przez HTTP", () => {
   });
 
   /**
-   * ⚠ STAN PRZEJŚCIOWY D4 (ticket 120, karta I15.2 → I15.4).
+   * ⭐ DECYZJA D4 — OKNO PRZEJŚCIOWE ZAMKNIĘTE W I15.4b (ticket 130).
    *
-   * Do resyncu 23.09 EAN w notacji naukowej („8,05997E+12") był ROZWIJANY przez `Hq()` do
-   * `8059970000000` i po tej wartości pozycja trafiała w katalogowy `MO1_INNY-KOD-2`.
+   * Historia: do resyncu 23.09 EAN w notacji naukowej („8,05997E+12") był ROZWIJANY przez
+   * `Hq()` do `8059970000000` i po tej wartości pozycja trafiała w katalogowy `MO1_INNY-KOD-2`.
+   * Po resyncu adapter realizuje D4 — błędny EAN daje `ean: null` z zachowanym `eanRaw` —
+   * ale STARY silnik tych flag nie znał, więc pozycja wchodziła jak zwykła nowa. To okno
+   * opisywał poprzedni kształt tego testu.
    *
-   * Po resyncu adapter realizuje decyzję D4: błędny EAN (w tym zapis naukowy) daje
-   * `ean: null` + zachowany `eanRaw`. Zmierzone na tym samym wierszu cennika:
-   *   kod = MO1_GATE-NORMEAN, ean = null, eanRaw = "8,05997E+12", _eanLossy = true
+   * Teraz `staging_policy` waliduje EAN ŚCIŚLE sam (`validateEan`, `staging_policy.cjs:9`)
+   * i dokłada błąd do pozycji (`:422`), więc zgłoszenie ma `typZmiany = 'blad'` i nie da się
+   * go zatwierdzić bez ręcznej poprawki. To jest realizacja D4 na poziomie silnika.
    *
-   * Pozycja NIE GINIE — nie ma dopasowania po EAN, więc wchodzi pod własnym kodem
-   * dostawcy jako nowa. Docelowo (I15.4) ma być BLOKADĄ akceptacji do ręcznej poprawki,
-   * ale silnik nie zna jeszcze flag `eanRaw`/`_eanLossy`, więc w oknie przejściowym
-   * zachowuje się jak zwykła nowa pozycja. Ten test pilnuje właśnie tego okna —
-   * przy porcie silnika w I15.4 trzeba go przepisać na oczekiwaną blokadę.
+   * ⚠ Twarda BLOKADA akceptacji (odrzucenie `POST /api/staging/:id/accept`) siedzi w
+   * `checkAcceptance()` (`staging_policy.cjs:188-226`) i należy do karty **I15.4c** —
+   * tutaj dowodzimy tego, co dowieźć może ścieżka zapisu.
    */
-  it("EAN w notacji naukowej — D4 daje ean=null, pozycja wchodzi pod własnym kodem", async () => {
+  it("EAN w notacji naukowej — D4: pozycja jest BŁĘDEM do ręcznej poprawki, nie cichą nowością", async () => {
     await zaimportuj();
 
+    // Nie ma dopasowania po rozwiniętym EAN-ie — karta `MO1_INNY-KOD-2` zostaje nietknięta.
     expect(wiersze().some((r) => r.kod === "MO1_INNY-KOD-2")).toBe(false);
 
     const w = wierszPoKodzie("MO1_GATE-NORMEAN");
-    expect(JSON.parse(String(w.snapshotJson)).ean).toBeNull();
-    expect(JSON.parse(String(w.snapshotJson)).kodDostawcy).toBe("GATE-NORMEAN");
+
+    // ⭐ SEDNO D4: zgłoszenie jest błędem, a nie zwykłą nową pozycją.
+    expect(w.typZmiany, "błędny EAN nie może wejść po cichu").toBe("blad");
+    expect(String(w.ostrzezenie)).toContain("Błędny EAN „8,05997E+12”");
+    expect(String(w.ostrzezenie)).toContain("zapis naukowy lub utracone cyfry");
+    expect(String(w.ostrzezenie)).toContain("Numer nie zostanie zapisany");
+
+    // Surowa wartość z cennika zostaje — bez niej nie dałoby się jej ręcznie poprawić.
+    expect(w.eanRaw).toBe("8,05997E+12");
+    expect(w.eanIsValid).toBe(0);
+    expect(w.eanSourceStatus).toBe("invalid");
+
+    const snapshot = JSON.parse(String(w.snapshotJson)) as {
+      ean: null;
+      kodDostawcy: string;
+      _eanIssue: string;
+    };
+    expect(snapshot.ean, "błędny numer NIE trafia do katalogu").toBeNull();
+    expect(snapshot.kodDostawcy).toBe("GATE-NORMEAN");
+    expect(snapshot._eanIssue, "powód jedzie w snapshocie dla panelu").toContain("zapis naukowy");
   });
 
   it("konflikt EAN — pozycja zostaje niedopasowana i dostaje 'blad' z listą kolidujących", async () => {

@@ -61,7 +61,15 @@ ten ticket wymienia rdzeń, a nie go rozszerza.
 
 ## Odstępstwa od planu
 
-Brak odstępstw od zatwierdzonego planu. Dwie rzeczy doprecyzowano w trakcie:
+**Jedno odstępstwo częściowe (Krok 12, podpunkt D4).** Plan zapowiadał przepisanie przypadku
+„EAN w notacji naukowej" na *oczekiwaną blokadę akceptacji*. Dowieziono tyle, ile może dowieźć
+ścieżka ZAPISU: zgłoszenie ma teraz `typZmiany = 'blad'` z komunikatem walidacji i zachowanym
+`eanRaw`, więc nie da się go zatwierdzić bez ręcznej poprawki. **Twarda blokada akceptacji**
+(odrzucenie `POST /api/staging/:id/accept`) siedzi w `checkAcceptance()`
+(`staging_policy.cjs:188-226`) i należy do karty **I15.4c** — ta część jest przesunięta tam,
+nie pominięta. Wychwycone w code review tego ticketa.
+
+Poza tym dwie rzeczy doprecyzowano w trakcie:
 
 1. **Cenniki charakteryzacji nagrywane jako oferta NIEKOMPLETNA.** Wzorce 3a to próbki
    (~200 wierszy) przy katalogu kilku tysięcy kart. Zadeklarowanie ich jako kompletnej oferty
@@ -109,6 +117,18 @@ Brak odstępstw od zatwierdzonego planu. Dwie rzeczy doprecyzowano w trakcie:
    auto-zatwierdzenia — `protect()` nakłada poprawkę cicho. Do decyzji Ani.
 5. **Różnica case-only w polu kluczowym przestała być zmianą** — nie tworzy zgłoszenia.
 
+## Code review
+
+Przeprowadzone po implementacji: **0 BLOCKER, 1 SHOULD-FIX, 2 NICE-TO-HAVE**
+(`review.md`). SHOULD-FIX — niedokończony podpunkt D4 Kroku 12 — **naprawiony**: test
+`silnik.gate.test.ts` sprawdza teraz blokadę na poziomie silnika, a raport wprost nazywa
+przesunięcie twardej blokady akceptacji do I15.4c.
+
+Reviewer potwierdził wierność portu linia po linii przeciw `staging_policy.cjs:332-616`:
+kolejność łańcucha dopasowania, progi bezpieczeństwa źródła, „pewny powrót", zapis
+`historia_cen`, dowody ze `slice(-3)` i pętla po nieobecnych zgadzają się co do warunków,
+kolejności efektów ubocznych i literałów komunikatów.
+
 ## Follow-up
 
 - **`mirror/backend/index.cjs` na `develop` jest NIEAKTUALNY** — stoi na `86d9090`, podczas gdy
@@ -119,5 +139,11 @@ Brak odstępstw od zatwierdzonego planu. Dwie rzeczy doprecyzowano w trakcie:
   jakiegokolwiek sygnału o sprzecznym pliku jest pożądany.
 - **Wpięcie modułu dostępności I15.10** — szew jest wystawiony i domyślnie no-op; po merge'u
   `feature/119-selly-dostepnosc-zawor` zostaje jedna linia.
+- **Wydajność `assignKodImportu`** — czyta całą tabelę `products` przy każdym wywołaniu.
+  Wiernie wobec oryginału (`U.listProducts()` w `staging_policy.cjs:145`), ale przy akceptacji
+  zbiorczej to koszt liniowy na pozycję. Materiał do istniejącego wpisu **#107**.
+- **Helpery dostępności `dostepnoscZmieniona()` / `oznaczZmianeDostepnosci()`** są dziś bez
+  wołających — to celowe API międzykartowe dla I15.4c (D-130.2). Warto o nich przypomnieć
+  w karcie I15.4c, żeby nie zostały uznane za martwy kod.
 - **#108 (kolizje `kod_importu`) pozostaje otwarty** — gałąź „zachowaj istniejący sześciocyfrowy
   numer" przeniesiona dosłownie, zgodnie z `wejscie-116.md`.
