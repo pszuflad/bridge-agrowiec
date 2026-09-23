@@ -68,9 +68,15 @@ dla Selly — 60. kolumna `Blokowane-formy-platnosci`.
 3. Teraz znajdź produkt dostawcy **MO6 (Uniglory)**.
 
 **Rezultat.**
-- krok 2: kolumna pokazuje listę zablokowanych form, np. *„Płatność odroczona, Kredyt kupiecki"*.
-  Dokładna treść zależy od dostawcy i ma się zgadzać z tym, co dziś pokazuje produkcja;
-- krok 3: przy MO6 (i przy dostawcy spoza mapy) kolumna pokazuje **„—"**.
+- krok 2: kolumna pokazuje **listę numerów** form płatności oddzielonych przecinkami — dla MO1
+  jest to `203, 204, 205, … 219`. **Każdy dostawca ma inny zestaw** i ma się on zgadzać z tym,
+  co dziś pokazuje produkcja. Jeśli kolumna jest za wąska, najedź na nią myszą — pełna lista
+  pokaże się w dymku;
+- krok 3: przy MO6 (i przy dostawcy spoza listy) kolumna pokazuje **„—"**.
+
+> **⚠ To mają być numery, a nie nazwy form płatności.** Kolumna pokazuje identyfikatory
+> z Selly — dokładnie tak, jak dziś na produkcji. **Nie zgłaszaj tego jako błędu.** Jeśli wolisz
+> widzieć nazwy zamiast numerów, to osobna decyzja: punkt **4.6**.
 
 **Kolumny nie musisz włączać** — jest widoczna od razu, także jeśli masz zapisane własne ustawienia
 kolumn z wcześniejszych testów.
@@ -78,6 +84,7 @@ kolumn z wcześniejszych testów.
 > **⚠ Dwie rzeczy, które wyglądają na brak, a są poprawne.**
 > 1. Wartość liczy się **w Twojej przeglądarce**, a nie przychodzi z serwera — dokładnie tak samo
 >    jak dziś na produkcji. Nie da się jej sprawdzić przez API.
+>    **MO6 nie ma wpisu celowo** („nie będzie na razie w sprzedaży", Twój wpis z 10.09).
 > 2. **Pliku CSV nie pobierzesz z panelu** — nie ma takiego przycisku i nigdy nie było. Plik powstaje
 >    na serwerze o 6:00, a Selly zabiera go o 12:00. Zawartość CSV (w tym pełne nazwy kategorii:
 >    **„Opony rolnicze"** zamiast „Rolnicze", **„Opony leśne"**, **„Opony przemysłowe"**,
@@ -280,7 +287,7 @@ sprawdzenia dopiero po przełączeniu na produkcję, razem ze
 >
 > **Dwie rzeczy nie zgadzają się z Twoim opisem** — patrz punkty **4.1** i **4.2**.
 
-> **Twoja ocena:** ☐ przeczytane
+> **Twoja ocena:** ☐ OK ☐ ŹLE — uwagi: _______________
 
 ---
 
@@ -402,6 +409,14 @@ próbie akceptacji.
 
 ☐ zostaw jak jest ☐ pokaż dowody w oknie „Rozstrzygnij" ☐ porozmawiajmy o tym
 
+## 4.6 Blokowane formy płatności pokazują numery, nie nazwy
+
+Kolumna w Katalogu i w pliku CSV pokazuje **identyfikatory** form płatności (`203, 204, …`),
+bo tak trzyma je Selly i tak robi dzisiejsza produkcja. Nigdzie nie mamy listy „numer → nazwa",
+więc żeby pokazać nazwy, musiałabyś nam ją podać.
+
+☐ zostaw numery ☐ chcę nazwy — podam listę numer→nazwa ☐ porozmawiajmy o tym
+
 ---
 
 # 5. Podsumowanie
@@ -420,7 +435,7 @@ próbie akceptacji.
 | 2.2 | Krótsza kolejka w Atrybutach; katalog nietknięty | ☐ | ☐ | |
 | 3 | Żadne z trzech unieważnionych zdań nie działa po staremu | ☐ | ☐ | |
 
-**Sprawdzonych ____ / 10 · błędów ____ · pominiętych ____ · decyzji z rozdz. 4 ____ / 5**
+**Sprawdzonych ____ / 11 · błędów ____ · pominiętych ____ · decyzji z rozdz. 4 ____ / 6**
 
 ---
 
@@ -433,7 +448,7 @@ godzinę i zrzut ekranu. Przy problemie z plikiem **załącz plik** i napisz, w 
 **Najpierw sprawdź ramki ⚠ przy punkcie.** Siedem rzeczy w tej kartce wygląda na błąd, a jest
 poprawnych:
 
-1. **„—" w kolumnie blokowanych form płatności** przy MO6 (1.1);
+1. **numery zamiast nazw** w kolumnie blokowanych form płatności, i **„—"** przy MO6 (1.1);
 2. **brak filtra „Zastosowanie"** w Katalogu (1.2);
 3. **pusta lista „Braki w cenniku"** (1.6);
 4. **brak przycisku dla nocnej synchronizacji Selly** — przyciski na ekranie Selly robią co innego (1.8);

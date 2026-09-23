@@ -60,7 +60,8 @@ zapisuje do cudzego sklepu (CLAUDE.md, „Środowisko").
 5. **Scheduler importu na stagingu** — `wejscie-113.md` (23.09) mówi „wyłączony", stan podany przez
    użytkownika (24.09, zweryfikowany) mówi „włączony". Poszedłem za stanem z 24.09; zgadza się on
    z docelową tabelą w `docs/cutover.md` §3a (`IMPORT_SCHEDULER` = `true` na stagingu).
-   `wejscie-113.md` jest w tym punkcie nieaktualne.
+   `wejscie-113.md` jest w tym punkcie nieaktualne. **Potwierdzone niezależnie** przez ticket 153
+   (`docs/karty/TEST.2/wejscie-153.md`, pkt 4): „scheduler importu na stagingu jest włączony".
 6. **Pliku CSV nie da się pobrać z panelu** — powstaje na serwerze o 6:00, Selly zabiera o 12:00.
    Sprawdzenie nazw kategorii w CSV to krok poza UI, odesłany do ścieżki krytycznej.
 
@@ -91,6 +92,46 @@ sprawdzona w kodzie, nie przepisana z kart:
   `rebuild/`). Uruchomione mimo to po synchronizacji z `develop` — wynik niżej.
 - **Weryfikacja treści:** każda etykieta UI i każdy komunikat sprawdzone w kodzie (tabela wyżej).
 
+## Sąsiedni ticket 153 — sprawdzone, że nie rusza treści tego dokumentu
+
+W trakcie ticketa na `develop` wszedł wpis `#153.1` (karta `FIX.1`): CSV dla Selly gubi flagi
+zapisane w bazie jako tekst `'Tak'` — 899 z 5396 wierszy, w pięciu kolumnach flagowych
+(`Snieg-3PMSF`, `Bloto+snieg`, `CFO`, `NRO`, `CHO`). Sprawdzone: **nie dotyka niczego, co opisuje
+ten dokument** — kolumna `Blokowane-formy-platnosci` i nazwy kategorii są poza zakresem tej usterki,
+a pomiar potwierdza przy okazji, że nagłówek CSV ma 60 kolumn i jest identyczny z produkcyjnym.
+Dowód porównania plików CSV należy do ścieżki krytycznej (TEST.2), nie do tej delty.
+
+## Poprawki po recenzji
+
+**BLOCKER — naprawiony.** Punkt 1.1 obiecywał, że kolumna „Blokowane formy płatności" pokaże
+nazwy form, „np. «Płatność odroczona, Kredyt kupiecki»". **Nieprawda.** Kolumna pokazuje
+**listę numerycznych identyfikatorów** — dla MO1 `203, 204, … 219`. Zweryfikowane w trzech
+miejscach: `rebuild/backend/src/import/legacy/payment_blocks.cjs:7-18` (`BLOCKED_PAYMENT_FORMS`),
+`rebuild/frontend/src/pages/katalog/formatowanie.tsx:52-70` (czwarta kopia tej samej listy)
+i `formatowanie.tsx:257-260` (render: `<span title={lista}>{lista}</span>`). **Mapy numer→nazwa
+nie ma nigdzie w repo** (`grep` po „odroczon", „kupieck" — zero trafień).
+
+Fraza pochodzi wprost z `docs/karty/I15.9/wejscie-122.md` i została przeze mnie przepisana bez
+sprawdzenia w kodzie — dokładnie ten błąd, przed którym ostrzega CLAUDE.md („każdą tezę potwierdź
+w fixtures/oryginale"). Gdyby poszła do Ani, pierwszy i najważniejszy punkt kartki kazałby jej
+szukać nazw, a zobaczyłaby ciąg liczb.
+
+Poprawione: punkt 1.1 podaje prawdziwy przykład (`203, 204, 205, … 219`), ostrzega, że **numery
+to stan poprawny**, wspomina o dymku z pełną listą (kolumna bywa węższa niż 17 numerów) i o tym,
+że MO6 nie ma wpisu celowo. Dołożona decyzja **4.6** — czy Ania chce nazwy zamiast numerów
+(wymagałoby to listy od niej, bo w systemie jej nie ma).
+
+**SHOULD-FIX — oba naprawione.**
+- Licznik w podsumowaniu mówił „____ / 10" przy 11 wierszach tabeli → **11**, a decyzje **/ 6**
+  (doszła 4.6).
+- Punkt 1.8 kończył się „☐ przeczytane", a w tabeli miał kolumny OK/ŹLE → ujednolicone do
+  „☐ OK ☐ ŹLE".
+
+**Do wiadomości (nie naprawiane):** trzy odsyłacze (`instrukcja-testu-sciezki-krytycznej.md`,
+`instrukcja-pelnego-testu.md`, `instrukcja-pracy-dla-ani.md`) wskazują pliki powstające
+w równoległych ticketach 149/150 — to świadoma decyzja D2. **Muszą trafić do `develop`, zanim
+kartka pójdzie do Ani.**
+
 ## Breaking changes
 
 Brak.
@@ -99,7 +140,10 @@ Brak.
 
 1. **Błędne odwołanie „I3 §11 pkt 10"** siedzi w `docs/rebuild-backlog.md:3879` (#83)
    i w `docs/karty/I15.9/wejscie-120.md`. Oba to cudze pliki — do poprawienia przez koordynatora.
-2. **`wejscie-113.md` jest nieaktualne** w punkcie o wyłączonym schedulerze importu na stagingu.
-3. **Trzy nieaktualne zdania z `wejscie-144.md` pkt 3** — nadal nierozliczone (decyzja koordynatora,
+2. **⭐ `docs/karty/I15.9/wejscie-122.md` zawiera nieprawdziwy przykład** treści kolumny blokowanych
+   form płatności („Płatność odroczona, Kredyt kupiecki"). Realnie kolumna pokazuje numery
+   (`203, 204, …`). Cudzy plik — do poprawienia przez koordynatora, zanim ktoś przepisze to dalej.
+3. **`wejscie-113.md` jest nieaktualne** w punkcie o wyłączonym schedulerze importu na stagingu.
+4. **Trzy nieaktualne zdania z `wejscie-144.md` pkt 3** — nadal nierozliczone (decyzja koordynatora,
    czy poprawiać przed cutoverem).
-4. **Pięć decyzji Ani** z rozdziału 4 dokumentu wraca do nas po jej odpowiedzi.
+5. **Sześć decyzji Ani** z rozdziału 4 dokumentu wraca do nas po jej odpowiedzi.
