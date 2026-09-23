@@ -93,3 +93,53 @@ w kodzie nie ma; realny tekst to **„Integracja Selly wyłączona na tym środo
 że sekcje czytające dane lokalne działają przy tym komunikacie normalnie.
 ⚠ Ten sam niedosłowny cytat jest w `docs/przeglad-12-widokow.md` (punkt 12) — poprawka tamtego
 pliku należy do koordynatora, zgłoszona w „Do koordynatora" karty TEST.1.
+
+
+## Synchronizacja z `develop`
+
+Gałąź scalona z `origin/develop` (`6288066`) — merge **czysty, zero konfliktów**. Z bazy weszło
+8 plików, wszystkie w `docs/`: karta `FIX.1`, `docs/karty/I15.9/wejscie-148.md`,
+`docs/karty/TEST.2/wejscie-153.md`, `docs/rebuild-backlog/wpis-153.md`, linia w roadmapie
+i artefakty ticketów 148/153.
+
+**Bramki `rebuild/backend/` (lint/typecheck/build/test) świadomie NIE uruchamiane — i tu jest
+uzasadnienie, bo skrypt synchronizacji zwrócił kod `10` („baza się zmieniła, przebiegnij bramki"):**
+zakres tej gałęzi wobec `develop` to **wyłącznie `docs/`** (zweryfikowane:
+`git diff --name-only origin/develop...HEAD | grep -v '^docs/'` → pusto), a wszystko, co weszło
+z bazy, też jest wyłącznie w `docs/`. Nie ma kodu, który mógłby się wykluczyć — ostrzeżenie skryptu
+jest generyczne i dotyczy ticketów dotykających `rebuild/`.
+
+**Kolizja zakresu sprawdzona:** `docs/karty/TEST.2/wejscie-153.md` i karta `FIX.1` (ticket 153)
+dotyczą flag zapisanych jako tekst „Tak" gubionych w **eksporcie CSV do Selly** — to ścieżka
+krytyczna, czyli TEST.2. Nie wchodzi w zakres tego dokumentu i nie wymaga w nim zmian.
+
+## Docs updates
+
+**`docs/karty/TEST.1/karta.md`** — karta oznaczona `✅ 2026-09-24 · 149-DOCS-instrukcja-pelnego-testu`.
+Sekcja „Zakres" przepisana na stan faktyczny: **usunięte** punkty, które ticket obalił (MO9 przez API,
+Selly CSV o 6:00 z Torem 1 i 2, „jeden dokument obejmujący cały system") — nie dopisane obok, tylko
+poprawione w miejscu. Dodany akapit o odstępstwie od pierwotnego założenia (podział na trzy dokumenty
+wg `wejscie-148`, granica D2). Wypełnione „Decyzje" (D1–D7 + ustalenie o kolejności blokad),
+„Dowiezione" i „Do koordynatora".
+
+**`docs/karty/TEST.2/wejscie-149.md`** (nowy) — granica „ekran vs. potok" i lista tego, czego TEST.2
+może już nie opisywać; ostrzeżenie o zastanych zgłoszeniach w poczekalni wraz z **kolejnością blokad**
+(`blokady.ts:34-77` — blokada o trzech potwierdzeniach wyprzedza blokadę o starym imporcie, więc nie
+wolno podać Ani jednego komunikatu jako jedynego); ostrzeżenie o czasie masowej akceptacji; fakt,
+że `SELLY_CSV_DIR` na stagingu wskazuje katalog testowy.
+
+**`docs/karty/TEST.3/wejscie-149.md`** (nowy) — cztery decyzje, na które dokument 1 zbiera odpowiedź,
+i droga powrotna (decyzja użytkownika → wpis w backlogu → `/feature`), żeby nie zginęły w czacie.
+
+**`docs/rebuild-backlog.md` i `docs/rebuild-backlog/`** — bez zmian, świadomie. Ticket niczego nie
+implementuje; cztery pytania z „Do Twojej decyzji" trafią do backlogu dopiero po odpowiedzi Ani.
+Żaden istniejący wpis nie zmienia statusu przez ten ticket.
+
+**Nietknięte zgodnie z regułami własności:** `docs/rebuild-roadmap.md` (zmienia wyłącznie koordynator),
+`docs/przeglad-12-widokow.md` (nie należy do tej karty — trzy poprawki zgłoszone w „Do koordynatora"),
+`docs/karty/README.md`, karty innych kart.
+
+### Pre-existing issues
+Trzy nieścisłości w `docs/przeglad-12-widokow.md` (plik CSV analityki ≠ tabela po P10.5; opis filtra
+stagingu; cytat komunikatu Selly) — zapisane w „Do koordynatora" karty TEST.1, bo ten plik nie należy
+do tej karty. Poza tym doc-checker nie znalazł nowych.
