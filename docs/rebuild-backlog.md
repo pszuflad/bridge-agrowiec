@@ -3480,7 +3480,7 @@ różnica teoretyczna — ale gdyby 14b/14c dotykały tej kolumny, warto o niej 
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (**nowy**, 84 l.), `extensions.cjs` (bak `.bak_pre_payment_blocks_20260910_145354`), `parsers/adapter.cjs` (bak j.w.), `generate_selly_export.cjs` (bak j.w.), `db/schema.sql` (kolumna + 2 triggery), `mirror/frontend/assets/payment-blocks-injection.js` (**nowy**, 74 l., bak `.bak_routefix_20260910_150140`), `mirror/frontend/index.html` |
 | **Commit** | `7fe02fd` (2026-09-10 15:00) + `0c4d2f2` (routefix + publikacja CSV, 16:00) |
 | **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-09-18 (`52-CHORE-triaz-produkcja-i14`) |
-| **Status** | 🔨 w toku — część schematowa: **107 / migracja 011** (kolumna `blokowane_formy_platnosci` + backfill + triggery `products_blokowane_formy_ai/_au` bajt w bajt z `7d6cfc9`, pole ukryte w API); PR po próbie na kopii produkcji (23.09). Katalog i CSV zostają w I15.3. ⚠ Ania 22.09: nowe produkty mają to pole puste → **#101**. |
+| **Status** | 🔨 w toku — część schematowa: **107 / migracja 011** (kolumna `blokowane_formy_platnosci` + backfill + triggery `products_blokowane_formy_ai/_au` bajt w bajt z `7d6cfc9`, pole ukryte w API); PR po próbie na kopii produkcji (23.09). Katalog i CSV zostają w I15.3. ⚠ Ania 22.09 zgłaszała puste pole przy nowych produktach → **#101 zamknięte 23.09**: pomiar i potwierdzenie Ani — problemu nie ma. |
 
 **Opis biznesowy.** Prośba Ani po korespondencji z Selly: sklep chce blokować formy płatności
 i dostawy niedostępne dla danego magazynu. Każdy dostawca MO1–MO5 i MO7–MO10 dostał własną listę
@@ -4509,8 +4509,8 @@ potwierdzenie), a celem nr 1 jest domknięcie odbudowy 1:1. W I15 port 1:1 (osie
 | **Data** | 2026-09-22 (odpowiedź Ani na pytanie 2.2 rundy 3) |
 | **Kategoria** | BAZA + BACKEND — zgłoszony defekt produkcji |
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (lista per dostawca MO1–MO10 bez MO6, `sqlCase()`), triggery `products_blokowane_formy_ai/_au` (`origin/main:db/schema.sql`), `extensions.cjs` (`ensurePaymentBlocks()` przy starcie); powiązane #73 |
-| **Do nowej wersji?** | ⏸ **POMIAR 2026-09-23: w bazie Bridge problemu NIE MA** (patrz niżej) — zakres zawężony do strony Selly, sprawdza I15.6/I15.7 |
-| **Status** | ⬜ **do naprawy, przyczyna wciąż do rozstrzygnięcia przez użytkownika.** Pomiar ticketu 109 (I15.7, 2026-09-22): payload REST Toru 2 (`mapper-v2.ts`/`sync-full.ts`) tego pola NIE niesie — `git grep -niE "payment|platnos|płatno|block" 7d6cfc9 -- mirror/backend/selly/` daje zero trafień; pole żyje wyłącznie w starym eksporcie CSV (`generate_selly_export.cjs:75,142-143`, kolumna `Blokowane-formy-platnosci` z fallbackiem `paymentBlocks.getBlockedPaymentForms(dostawca)`) i w `payment_blocks.cjs` (triggery `products_blokowane_formy_ai/_au`). Hipoteza (b) zyskuje dowód: produkty zakładane przez REST auto-create (od 2026-09-08) wchodzą do Selly bez tego pola. Ticket 109 świadomie NIE naprawia (port 1:1; dopisanie pola wymaga decyzji użytkownika i nazwy pola w REST API Selly, której w repo nie ma). |
+| **Do nowej wersji?** | ❌ **NIE — temat zamknięty 2026-09-23 przez Anię** (patrz niżej). Nie ma czego naprawiać ani w Bridge, ani w Selly. |
+| **Status** | ✅ **zamknięte 2026-09-23 — zgłoszenie było nieporozumieniem.** Ania: „Nie widzę pustych pól tylko myślałam że nie mamy zrobionej tej logiki. Jest zrobiona to super zamknij temat." Logika istnieje w produkcji (triggery `products_blokowane_formy_ai/_au` + `ensurePaymentBlocks()` przy starcie) i jest już przeniesiona do odbudowy (ticket 107, migracja 011). Pomiar ticketu 109 (I15.7): payload REST Toru 2 tego pola nie niesie — wysyłał je tylko stary eksport CSV (`generate_selly_export.cjs:75,142-143`); zostaje jako FAKT o różnicy CSV ↔ REST, nie jako defekt do naprawy. |
 
 **Odpowiedź Ani:** „trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie
 tego nie ma - każdy nowy produkt ma to pole puste a to ono wyznacza opcje metody dostawy i cenę dla danego dostawcy”.
@@ -4532,10 +4532,15 @@ razie w sprzedaży”. `NULL` dla MO6 więc się zgadza (w katalogu i tak nie ma
 Zostaje hipoteza (b): Ania widzi puste pole **w Selly**, na kartach produktów zakładanych przez synchronizację
 (payload `mapper_v2` / auto-create). To sprawdzają karty I15.6 i I15.7.
 
-**Pytanie do Ani (zawężone):** czy chodziło o kartę produktu w sklepie Selly, a nie o katalog w Bridge?
+**⭐ ODPOWIEDŹ ANI 2026-09-23 (zamyka wpis):** „Nie widzę pustych pól tylko myślałam że nie mamy zrobionej tej
+logiki. Jest zrobiona to super zamknij temat." Hipoteza (b) też odpada — Ania nigdzie nie widzi pustego pola, także
+w Selly. Karty I15.6 i I15.7 nie mają tu nic do zrobienia.
 
-**Rekomendacja koordynatora:** ✅ naprawić, jeśli potwierdzi się strona Selly — karty I15.6/I15.7. Po stronie Bridge
-nie ma czego naprawiać.
+**Luka na przyszłość (nie defekt):** `BLOCKED_PAYMENT_FORMS` nie ma wpisu dla **MO6**. Dziś MO6 nie ma ani jednego
+produktu, więc nic się nie psuje; gdyby ten dostawca ruszył, jego produkty zostaną z pustym polem. Numery dla MO6
+trzeba wtedy wziąć od Ani.
+
+**Rekomendacja koordynatora:** ❌ zamknięte — nic do zrobienia (potwierdzenie Ani, patrz wyżej).
 
 ---
 
