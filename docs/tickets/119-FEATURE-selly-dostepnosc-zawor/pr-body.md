@@ -42,11 +42,28 @@ dzielącymi klucz snapshotu.
   „porządek”. Realny skutek poprawki Toru 2 to wyłącznie `skip`.
 - **Moduł dostępności niewpięty** — montaż wymaga rozstrzygnięcia sprzecznych ustaleń (niżej).
 
+## Szew z kartą I15.8 — wykryty dopiero po scaleniu (commit `3516bbf`)
+W chwili zamykania ticketu 119 tras `sync-*` jeszcze nie było, więc raport słusznie mówił „ticket
+nie dotyka API”. Po scaleniu `develop` (ticket 121, karta I15.8) **trasa
+`POST /api/selly/sync-delta-supplier` oddaje `stats` wprost z `syncDelta`** — czyli nowy licznik
+`kolizje_kod_importu` stał się częścią kontraktowanej odpowiedzi. GATE karty I15.8
+(`test/selly.sync.gate.test.ts:202`) to wyłapał: `expected [ Array(7) ] to deeply equal [ Array(6) ]`.
+Naniesione: pole dopisane do `contract/openapi.yaml` (z komentarzem, skąd pochodzi) i do asercji
+GATE. To jest dokładnie ten przypadek, dla którego bramki mają lecieć **po** synchronizacji z bazą:
+obie zmiany osobno przechodziły, razem się wykluczały.
+
 ## Tests
-Bieg po scaleniu z `develop` (80 commitów bazy): `lint` ✓, `typecheck` ✓, `build` ✓, `vitest run` ✓.
-GATE fixtures/kontraktu: N/D — ticket nie dotyka tras z `contract/openapi.yaml`, zmienia funkcje
-wewnętrzne i dokłada moduł bez wywołań; kształt `GET /api/selly/log` bez zmian (treść idzie do
-wolnego pola `szczegoly_json`, pisanego surowym SQL-em).
+Bieg po scaleniu z `develop` (80 commitów bazy): `lint` ✓, `typecheck` ✓, `build` ✓.
+`vitest run`: **1773 przechodzi, 7 pominiętych, 105 z 108 plików zielonych**. Trzy czerwone:
+- `test/selly.sync.gate.test.ts` — realny szew z I15.8, **naprawiony** (12/12 zielone po poprawce);
+- `test/alerty-katalogu.gate.test.ts` (20 000 id) i `test/silnik.charakteryzacja.test.ts` (MO5) —
+  **oba poza diffem tego ticketu**, wypadły na TIMEOUT 20 s przy obciążonej maszynie (równolegle
+  chodził `vitest` innej sesji). Przebieg tych dwóch plików w izolacji: **86/86 zielone** (58,9 s,
+  load average ≈ 19). Zgłoszone jako osobny temat (Follow-up 5).
+
+GATE fixtures/kontraktu: kształt `GET /api/selly/log` bez zmian (treść idzie do wolnego pola
+`szczegoly_json`, pisanego surowym SQL-em); `sync-delta-supplier` — kontrakt zaktualizowany, GATE
+karty I15.8 zielony.
 
 ## Breaking changes
 Brak zmian w API. Dwie zmiany kontraktu wewnętrznego, obsłużone w repo: `StatystykiDelta` ma pole
