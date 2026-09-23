@@ -47,8 +47,16 @@ Pozostałe punkty planu bez zmian.
   zmieniamy wyłącznie funkcje wewnętrzne i dokładamy moduł, którego nikt jeszcze nie woła.
   Kształt `GET /api/selly/log` się nie zmienia — dokładamy treść do wolnego pola `szczegoly_json`.
   Pułapka projekcji Drizzle nie dotyczy tego kodu: `selly_sync_log` jest pisany surowym SQL-em.
-- **Unit/integracyjne: ✓ 1654 przechodzi, 3 pominięte, 101 plików.** Baseline przed ticketem:
-  1632 / 3 / 100 — czyli +22 nowe testy i **zero regresji**.
+- **Unit/integracyjne: ✓ 1654 przechodzi, 3 pominięte, 101 plików** (bieg przy spokojnej maszynie).
+  Baseline przed ticketem: 1632 / 3 / 100 — czyli +22 nowe testy i **zero regresji**.
+- **Testy dotknięte przez ticket: ✓ 86/86** (`selly.sync-delta`, `selly.sync-full`, `selly.dostepnosc`,
+  `selly.synchronizacja`, `selly.gate`) — przechodzą powtarzalnie, także pod obciążeniem.
+- ⚠ **Czułość na obciążenie (zastana, nie z tego ticketa).** Przy `load average ≈ 34` (siedem
+  równoległych sesji agentów) dwa pliki POZA diffem przekraczają limit 20 s i wypadają na TIMEOUT,
+  nie na asercji: `test/alerty-katalogu.gate.test.ts` (24,4 s) i `test/silnik.charakteryzacja.test.ts`
+  (26,1 s). W izolacji oba przechodzą (86 testów, 29 s łącznie), a przy spokojnej maszynie przechodzi
+  cały zestaw. To samo zjawisko zaobserwował niezależnie recenzent. Żaden z tych plików nie jest
+  w `git diff --name-only origin/develop...HEAD`.
 - **Bezpieczeństwo: ✓** atrapa Selly wstrzykiwana, generator CSV i `syncDelta` w testach modułu
   podmienione; żaden test nie woła sieci ani nie zapisuje pliku CSV.
 - `lint` ✓, `typecheck` ✓, `build` ✓ (Node v20.20.2).
@@ -89,11 +97,16 @@ po stronie Selly. Naprawa = decyzja użytkownika, poza tym ticketem.
 
 ## Zastane, niezwiązane z ticketem
 
-`test/alerty-katalogu.gate.test.ts:267` bywa czerwony pod obciążeniem: u recenzenta przekroczył
-limit 20 s (37–50 s), u mnie przechodzi w izolacji w ~12 s i przeszedł w pełnym biegu. Plik jest
-POZA diffem tego ticketa (`git diff --name-only origin/develop...HEAD` go nie zawiera), więc to
-wrażliwość zastana, ujawniana przez równoległą pracę kilku agentów — nie regresja z tej karty.
-Warta osobnego ticketa (podniesienie limitu albo odchudzenie przypadku).
+Dwa pliki testowe POZA diffem tego ticketa są wrażliwe na obciążenie maszyny i wypadają na
+TIMEOUT (limit 20 s), gdy równolegle pracuje kilku agentów:
+- `test/alerty-katalogu.gate.test.ts` („paczka równa limitowi 20 000 id…") — 24,4 s u mnie przy
+  `load ≈ 34`, 37–50 s u recenzenta; w izolacji ~12 s,
+- `test/silnik.charakteryzacja.test.ts` („MO5: port silnika == oryginalne tk()") — 26,1 s.
+
+Oba przechodzą w izolacji i przy spokojnej maszynie, oba są poza `git diff origin/develop...HEAD`,
+więc to wrażliwość ZASTANA, nie regresja z tej karty. Warta osobnego ticketa: podniesienie limitu
+dla tych dwóch przypadków albo ich odchudzenie — inaczej GATE będzie bywał czerwony losowo,
+a przy równoległych kartach to realne ryzyko fałszywego alarmu.
 
 ## Follow-up
 
