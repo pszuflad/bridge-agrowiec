@@ -152,7 +152,7 @@ describe("dostępność — błędy tylko logowane", () => {
     konsola.mockRestore();
   });
 
-  it("błąd przerywający partię zostawia niedokończonych dostawców w kolejce", async () => {
+  it("błąd w środku partii GUBI niedokończonych dostawców — ponawia dopiero cykl okresowy", async () => {
     const konsola = vi.spyOn(console, "error").mockImplementation(() => {});
     let padnij = true;
     const { instancja, slad } = stworz({
@@ -164,12 +164,14 @@ describe("dostępność — błędy tylko logowane", () => {
       },
     });
 
-    // Partia {MO9, MO2}: MO9 rzuca, więc MO2 nie zostaje obsłużony w tym obrocie…
     instancja.zadajOdswiezenie("MO9");
     instancja.zadajOdswiezenie("MO2");
     await instancja.poczekajNaKoniec();
 
-    // …ale zgłoszenie nie ginie: oryginał restartuje bieg z `finally`.
+    // Pętla CZYŚCI `oczekujace` PRZED przetwarzaniem partii, więc po wyjątku na MO9 nie ma już
+    // śladu po MO2 — restart z `finally` nie ma czego wznowić. MO2 NIE zostanie odświeżony
+    // w tym biegu; nadrabia to dopiero okresowa synchronizacja (komentarz oryginału:
+    // „periodic sync will retry”). Zachowanie wierne `availability_sync.cjs` — nie naprawiamy.
     expect(slad).toEqual(["csv", "delta:MO9"]);
     konsola.mockRestore();
   });

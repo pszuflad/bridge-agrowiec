@@ -9,8 +9,11 @@
  *
  * Semantyka kolejki 1:1 z oryginałem:
  * - zgłoszenie ZAWSZE dopisuje dostawcę do zbioru oczekujących;
- * - jeśli bieg już trwa, `zadajOdswiezenie()` wraca natychmiast — zgłoszenie NIE GINIE,
- *   tylko czeka na kolejny obrót pętli;
+ * - jeśli bieg już trwa, `zadajOdswiezenie()` wraca natychmiast, a dostawca czeka na kolejny
+ *   obrót pętli. ⚠ Dotyczy to zgłoszeń, które przyszły PO skompletowaniu bieżącej partii.
+ *   Dostawca, który JEST w przetwarzanej właśnie partii, przepada, jeśli wyjątek przerwie
+ *   pętlę — `oczekujace` jest czyszczone przed przetwarzaniem, więc nie ma go już czym wznowić.
+ *   Tak działa oryginał i dlatego ponowieniem jest okresowa synchronizacja, nie ten moduł;
  * - pętla DRENUJE kolejkę: bierze całą bieżącą partię, czyści zbiór, generuje CSV RAZ na
  *   partię, potem `syncDelta` SEKWENCYJNIE dla każdego dostawcy z partii;
  * - błąd jest wyłącznie logowany — mechanizmem ponawiania zostaje okresowa synchronizacja
