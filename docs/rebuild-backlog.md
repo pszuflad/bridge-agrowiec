@@ -4737,3 +4737,40 @@ Karta **I15.4** ma to zmierzyć (zatwierdzanie zbiorcze na kopii produkcji) i za
   backlogu, **nie istnieje już na `origin/main`** — przy analizie łatek trzeba sięgać do historii gitowej
   (`git show <starszy-commit>:<ścieżka>`), nie do stanu bieżącego.
 
+---
+
+### #108 · 2026-09-23 · [BACKEND][BAZA] · kolizje `kod_importu` — delty do Selly mogą wracać w pętli co 15 minut
+
+| Pole | Wartość |
+|---|---|
+| **Data** | 2026-09-23 (specyfikacja Selly od Ani, stan opisu na 22.09) |
+| **Kategoria** | BACKEND (grupowanie produktów) + BAZA |
+| **Pliki** | `assignKodImportu` — w produkcji `bridge_ext.cjs`, od Staging v2 **nadpisany** w `staging_policy.cjs` (`origin/main`); mapowanie `selly_products` `(kod_importu, dostawca)`; port: `rebuild/backend/src/**` (I15.4 przejmuje nadpisanie) |
+| **Do nowej wersji?** | ⬜ **do decyzji po pomiarze** |
+| **Status** | — do zmierzenia na świeżej kopii produkcji |
+
+**Opis (specyfikacja Ani).** „121 zduplikowanych kluczy `(dostawca, kod_importu)` = 259 aktywnych wierszy;
+114 grup/245 z różnymi cenami/stanami. Współdzielony `selly_products` → snapshot nadpisywany → delty wracają
+co 15 min. **Naprawa `assignKodImportu` to warunek przed dalszym syncem.**"
+
+**Dlaczego to boli.** Tor 1 zapisuje ostatnio wysłaną cenę i stan w `selly_products` per `(kod_importu, dostawca)`.
+Gdy dwa RÓŻNE produkty tego samego dostawcy dostaną ten sam `kod_importu`, dzielą jeden wiersz mapowania:
+snapshot jednego nadpisuje snapshot drugiego, więc oba wyglądają na „zmienione" przy każdym cyklu i są wysyłane
+w kółko — co 15 minut, bez końca.
+
+**Co się zmieniło od czasu opisu.** Staging v2 (22.09, backlog #99) **nadpisał `ext.assignKodImportu`**: grupa
+powstaje tylko przy zgodności marka/model/rozmiar oraz indeksów i DOT, a numer sześciocyfrowy jest losowany, gdy
+zgodnej grupy nie ma. To mogło problem usunąć — **wymaga pomiaru, nie założenia.**
+
+**Pomiar do wykonania** (kopia produkcji jest od 23.09 na stagingu):
+
+```sql
+SELECT count(*) FROM (
+  SELECT dostawca, kod_importu FROM products
+  WHERE status='aktywny' AND kod_importu IS NOT NULL AND kod_importu<>''
+  GROUP BY dostawca, kod_importu HAVING count(*) > 1);
+```
+
+**Rekomendacja koordynatora:** jeśli wynik > 0 — to **blokada Toru 1** i trzeba ją rozstrzygnąć przed cutoverem
+(karta I15.4, razem z portem `assignKodImportu`). Jeśli 0 — zamknąć wpis jako nieaktualny, z datą pomiaru.
+
