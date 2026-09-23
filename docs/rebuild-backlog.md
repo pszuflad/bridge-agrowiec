@@ -4509,7 +4509,7 @@ potwierdzenie), a celem nr 1 jest domknięcie odbudowy 1:1. W I15 port 1:1 (osie
 | **Data** | 2026-09-22 (odpowiedź Ani na pytanie 2.2 rundy 3) |
 | **Kategoria** | BAZA + BACKEND — zgłoszony defekt produkcji |
 | **Pliki** | `mirror/backend/payment_blocks.cjs` (lista per dostawca MO1–MO10 bez MO6, `sqlCase()`), triggery `products_blokowane_formy_ai/_au` (`origin/main:db/schema.sql`), `extensions.cjs` (`ensurePaymentBlocks()` przy starcie); powiązane #73 |
-| **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-22 (D6):** naprawić w I15 po pomiarze na kopii produkcji (23.09); karta wg przyczyny (I15.1 albo I15.6/I15.7) |
+| **Do nowej wersji?** | ⏸ **POMIAR 2026-09-23: w bazie Bridge problemu NIE MA** (patrz niżej) — zakres zawężony do strony Selly, sprawdza I15.6/I15.7 |
 | **Status** | ⬜ **do naprawy, przyczyna wciąż do rozstrzygnięcia przez użytkownika.** Pomiar ticketu 109 (I15.7, 2026-09-22): payload REST Toru 2 (`mapper-v2.ts`/`sync-full.ts`) tego pola NIE niesie — `git grep -niE "payment|platnos|płatno|block" 7d6cfc9 -- mirror/backend/selly/` daje zero trafień; pole żyje wyłącznie w starym eksporcie CSV (`generate_selly_export.cjs:75,142-143`, kolumna `Blokowane-formy-platnosci` z fallbackiem `paymentBlocks.getBlockedPaymentForms(dostawca)`) i w `payment_blocks.cjs` (triggery `products_blokowane_formy_ai/_au`). Hipoteza (b) zyskuje dowód: produkty zakładane przez REST auto-create (od 2026-09-08) wchodzą do Selly bez tego pola. Ticket 109 świadomie NIE naprawia (port 1:1; dopisanie pola wymaga decyzji użytkownika i nazwy pola w REST API Selly, której w repo nie ma). |
 
 **Odpowiedź Ani:** „trzeba dorobić jeszcze logikę przypisywania numerów blokad płatności do nowych produktów bo obecnie
@@ -4522,8 +4522,16 @@ produkty powinny dostawać wartość. Hipotezy do sprawdzenia: (a) dostawca spoz
 #68); (c) produkty wstawiane ścieżką, która omija trigger. **Nie wiadomo, gdzie Ania widzi puste pole** — pytanie do niej.
 Pomiar: kopia bazy produkcji z 23.09 — produkty utworzone po 10.09 z pustym polem.
 
-**Rekomendacja koordynatora:** ✅ naprawić w I15 (to warunek poprawnych metod dostawy i cen w sklepie). Zakres zależy od
-pomiaru: w Bridge → karta I15.1; w Selly → karty I15.6/I15.7.
+**⭐ POMIAR NA ŻYWEJ PRODUKCJI 2026-09-23 (ticket 113, odczyt `sqlite3 -readonly`):** produktów z pustym
+`blokowane_formy_platnosci` — **0**, w żadnej grupie dostawcy (także MO6); triggerów w bazie produkcji **6**.
+**Hipotezy (a) i (c) odpadają — w bazie Bridge pole jest wypełnione dla wszystkich 8329 produktów.**
+Zostaje hipoteza (b): Ania widzi puste pole **w Selly**, na kartach produktów zakładanych przez synchronizację
+(payload `mapper_v2` / auto-create). To sprawdzają karty I15.6 i I15.7.
+
+**Pytanie do Ani (zawężone):** czy chodziło o kartę produktu w sklepie Selly, a nie o katalog w Bridge?
+
+**Rekomendacja koordynatora:** ✅ naprawić, jeśli potwierdzi się strona Selly — karty I15.6/I15.7. Po stronie Bridge
+nie ma czego naprawiać.
 
 ---
 
