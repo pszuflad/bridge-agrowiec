@@ -28,19 +28,28 @@ Poniżej trzy konkretne punkty wejścia zostawione w kodzie i ostrzeżenie o zak
 - `zamockujApi()` w `test/staging.test.tsx` deleguje teraz do `handleryStagingu()` z
   `test/msw/staging.ts`, zamiast tworzyć handlery lokalnie.
 
-## Ostrzeżenie o zakresie — ZMIANA PRZYPISANIA, nie fakt dokonany
+## Zakres — już zawężony, nie pytaj o niego ponownie
 
-`docs/karty/I15.11/wejscie-110.md` przypisuje do I15.11 „podgląd starej karty” razem z panelem
-„Braki w cenniku”. **Gałąź `absenceReview`** (stara karta obok możliwego odpowiednika, ocena
-zgodności EAN i DOT, wybór jednej karty) **JEST JUŻ DOWIEZIONA w tickecie 140** — siedziała w
-`mirror/frontend/assets/staging-policy-injection.js` @ `88fa31c`, nie w żywym bundlu
-`index-PRICEFMT1783512500.js`, jak sugerował prompt karty I15.5. Zanim zaczniesz I15.11:
-rozłóż diffem, co żywy bundel faktycznie dokłada do tej samej sprawy
-(`git diff 7d6cfc9 abe5f14 -- mirror/frontend/assets/index-PRICEFMT1783512500.js`) — nie
-zakładaj z góry, że „podgląd starej karty” z `wejscie-110.md` to coś więcej niż to, co już
-jest w `OknoRozstrzygniecia.tsx`. To do rozstrzygnięcia z koordynatorem: czy w zakresie
-I15.11 zostaje jeszcze cokolwiek poza panelem „Braki w cenniku” (CLAUDE.md: nazwa/etykieta
-daje etykietę, nie treść — sprawdź diff, nie ufaj opisowi).
+Koordynator zawęził I15.11 do panelu **„Braki w cenniku”** jeszcze przed wydaniem promptu do
+ticketu `142-FEATURE-braki-w-cenniku`. Pierwsza wersja tej noty (ticket 140) kazała wracać
+z pytaniem o zakres — **to było zbędne i zostało skreślone** ticketem `145-DOCS-ustalenia-i15-5`
+(2026-09-24).
+
+Fakt, który zostaje w mocy i który warto znać, zanim ruszysz ten widok:
+
+**Gałąź `absenceReview` jest już dowieziona** — stara karta obok możliwego odpowiednika, ocena
+zgodności EAN i DOT, stan obu kart i wybór jednej karty siedzą w
+`src/pages/staging/OknoRozstrzygniecia.tsx` (ticket 140). Pochodziły z
+`mirror/frontend/assets/staging-policy-injection.js` @ `88fa31c`, a **nie** z żywego bundla
+`index-PRICEFMT1783512500.js`, jak sugerował opis „podgląd starej karty” w `wejscie-110.md`.
+
+⚠ Uwaga na `docs/karty/I15.11/karta.md`: jej sekcja „Zakres” nadal wymienia „**i podgląd starej
+karty**”, a jako źródło prawdy podaje `abe5f14` zamiast `88fa31c`. To Twój plik — popraw go
+w miejscu przy zamykaniu karty (CLAUDE.md reguła 1), zamiast dopisywać sprostowanie obok.
+
+Co żywy bundel faktycznie dokłada do tej samej sprawy, sprawdź diffem — nie opisem:
+`git diff 7d6cfc9 abe5f14 -- mirror/frontend/assets/index-PRICEFMT1783512500.js`
+(CLAUDE.md: nazwa daje ETYKIETĘ, nie treść).
 
 ## Pułapka MSW (przypomnienie z CLAUDE.md)
 
