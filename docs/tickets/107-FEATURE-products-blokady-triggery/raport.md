@@ -34,8 +34,8 @@ testy na bazie świeżej, kopii `db/snapshot.db` i bazie symulującej produkcję
 
 ## Deviations from plan
 - Testy 011 w osobnym pliku `db.migracja-011.test.ts` (plan: blok w `db.migracje.test.ts`) — ten plik ma już 757 linii.
-- Kroki 6–7 planu (próba na kopii produkcji, pomiar #101) — **jeszcze nie wykonane**: kopia produkcji dostępna od 23.09
-  (scenariusz A). PR czeka na ten krok.
+- Kroki 6–7 planu (próba na kopii produkcji, pomiar #101) wykonał ticket 113 (2026-09-23) na VPS — wyniki w
+  `docs/karty/I15.1/wejscie-113.md`; warunek scenariusza A spełniony, PR #122 gotowy do merge.
 
 ## Test results
 - **Gate odbudowy (fixtures/kontrakt):** ✓ — `GET /api/products` (`GET_products.json`, 72 klucze, bez
@@ -46,7 +46,7 @@ testy na bazie świeżej, kopii `db/snapshot.db` i bazie symulującej produkcję
   wierszu zmienia się wyłącznie `blokowane_formy_platnosci`, zgodnie z niezależną kopią mapy z `payment_blocks.cjs`).
 - Bramki BE: lint ✓, typecheck ✓, build ✓ (11 plików `.sql` w `dist/schema/`), `npm test` ✓ 93 pliki, 1549 passed, 3 skipped.
 - Frontend: nie dotyczy (bez zmian w `contract/`).
-- Próba na prawdziwej kopii produkcji: ⏳ 23.09 (scenariusz A).
+- Próba na prawdziwej kopii produkcji: ✓ wykonana 2026-09-23 (ticket 113) — 12 migracji bez błędu, „bez treści” = 003 i 013, triggery 6, blokady puste 0, łańcuchy `zastosowanie` 0; #101 zmierzone na żywej produkcji (0 pustych) → zgłoszenie Ani nie dotyczy Bridge.
 
 ## Breaking changes
 Triggery zmieniają zapisy: każdy INSERT/UPDATE kategorii, zastosowania i dostawcy produktu oraz poprawki `kategoria`
@@ -119,3 +119,9 @@ Review II: 0 BLOCKER / 2 SHOULD-FIX / 2 NICE-TO-HAVE.
 - NICE-TO-HAVE (test CRLF dla linii dyrektywy; „znana nazwa dyrektywy w komentarzu opisowym”) — follow-up;
   parser rozbija plik po `\r?\n`, a grep po `rebuild/schema/*.sql` pokazuje tylko 4 zamierzone wystąpienia `-- @`.
 - Bramki po poprawkach: lint ✓, typecheck ✓, `npm test` ✓ 98 plików, 1606 passed, 3 skipped.
+
+## Merge `develop` (2026-09-23)
+Wciągnięty `develop` po ticketach 110–113. Jedyny konflikt: `docs/rebuild-backlog.md` #101 — połączone oba
+akapity (fakt 107 o celowym braku mapowania MO6 + pomiar 113 na żywej produkcji; zdanie „nadal do zmierzenia”
+usunięte jako nieaktualne). Bramki BE po merge'u: lint ✓, typecheck ✓, build ✓, `npm test` ✓ 100 plików,
+1632 passed, 3 skipped.

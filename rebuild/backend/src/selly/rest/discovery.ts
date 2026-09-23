@@ -73,7 +73,8 @@ export type SlownikiSelly = {
 export type PayloadProduktu = {
   _error?: string;
   product_code?: string;
-  provider_code?: string;
+  /** `null`, gdy wiersz nie ma ani `kod_importu`, ani `kod_dostawcy` (`mapper_v2.cjs:128`). */
+  provider_code?: string | null;
   [pole: string]: unknown;
 };
 

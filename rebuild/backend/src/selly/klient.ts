@@ -71,6 +71,16 @@ export type ProduktSelly = {
   provider_code?: string | null;
 };
 
+/** Cecha PRODUKTU Selly (poziom produktu, nie wariantu) — kształt z `mapper_v2.cjs:77-87`. */
+export type CechaProduktu = { name: string; values: unknown };
+
+/**
+ * `GET /api/products/{id}` — oryginał czyta `current.data?.data || current.data` (`sync_full.cjs:190`),
+ * więc produkt może przyjść w kopercie `data` albo goły. Interesują nas tylko `features`.
+ */
+export type ProduktSzczegolySelly = { product_id?: number; features?: CechaProduktu[] };
+export type OdpowiedzProduktu = ({ data?: ProduktSzczegolySelly } & ProduktSzczegolySelly) | null;
+
 /** Strona `GET /api/products` z metadanymi paginacji (`discovery.cjs:77-79`). */
 export type StronaProduktow = {
   data?: ProduktSelly[];
@@ -90,10 +100,11 @@ export type CialoWariantu = {
 
 /**
  * Powierzchnia klienta, z której korzystają trasy i synchronizacja. Węższa niż moduł
- * oryginału — celowo: `listProducts`, `getProduct`, `deleteProduct`, `bulkPriceUpdate`,
+ * oryginału — celowo: `listProducts`, `deleteProduct`, `bulkPriceUpdate`,
  * `bulkWarehouseQuantity`, `listOrders`, `getOrder`, `listUnits`, `getProductMultiCat`
  * i `deleteProductMultiCat` nie są wołane z ŻADNEJ trasy (sprawdzone grafem wywołań
  * w `mirror/backend/selly/routes.cjs`), więc port bez konsumenta byłby martwym kodem.
+ * `getProduct` doszedł z Torem 2 (karta I15.7) — woła go `sync_full.cjs` (ścieżka A, #81).
  */
 export type KlientSelly = {
   ping(): Promise<WynikPing>;
@@ -116,7 +127,8 @@ export type KlientSelly = {
   setProductMultiCat(productId: number, categoryIds: number[]): Promise<unknown>;
 
   /*
-   * ── Model wariantowy (karta I15.6) — konsumenci: `selly/rest/discovery.ts`, `sync-delta.ts`.
+   * ── Model wariantowy (karta I15.6) — konsumenci: `selly/rest/discovery.ts`, `sync-delta.ts`,
+   * `sync-full.ts` (I15.7).
    *
    * ⚠ DLACZEGO NAZWANE METODY, A NIE GENERYCZNE `api(metoda, sciezka, opcje)`. Oryginał woła
    * `client.api(...)` wprost (`discovery.cjs:24`), ale blokada `SELLY_TRYB` (`tryb.ts`) stoi na
@@ -125,6 +137,11 @@ export type KlientSelly = {
    * odpowiada DOKŁADNIE jednemu wywołaniu `apiWithRetry` z oryginału (ścieżka + query + ciało).
    */
 
+  /**
+   * `GET /api/products/{pid}` — Tor 2, ścieżka A (`sync_full.cjs:189`, karta I15.7): bieżące cechy
+   * produktu pod `buildFeaturesMirror`.
+   */
+  getProduct(productId: number): Promise<OdpowiedzProduktu>;
   /** `GET /api/products?ean=…&limit=1` (`discovery.cjs:138`). */
   listProductsByEan(ean: string): Promise<OdpowiedzListy<ProduktSelly>>;
   /**
@@ -397,6 +414,9 @@ export function stworzKlientaSelly(konfiguracja: KonfiguracjaSelly): KlientSelly
     // ⚠ Rzucają `BladSelly` na każdy status spoza 2xx — jak reszta pliku i jak `request()`
     // w oryginale. Właśnie dlatego retry na HTTP 429 w `discovery.cjs` jest martwym kodem
     // (backlog #66; nota przy `apiWithRetry` w `selly/rest/discovery.ts`).
+
+    getProduct: async (productId) =>
+      (await dane("GET", `/api/products/${productId}`)) as OdpowiedzProduktu,
 
     /** `limit: 1` z oryginału — discovery bierze PIERWSZY trafiony produkt, duplikatów EAN nie bada. */
     listProductsByEan: async (ean) =>

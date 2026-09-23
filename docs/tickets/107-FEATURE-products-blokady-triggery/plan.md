@@ -1,6 +1,6 @@
 # 107-FEATURE-products-blokady-triggery — I15.1: kolumna blokowanych form płatności + 6 triggerów (migracja 011)
 
-> Status: Implemented (PR po próbie na kopii produkcji — scenariusz A)
+> Status: Implemented → gotowe do merge (próba na kopii produkcji wykonana ticketem 113, 2026-09-23)
 > Branch: `feature/107-products-blokady-triggery`
 > Worktree: `.worktrees/107-FEATURE-products-blokady-triggery`
 > Karta: `docs/karty/I15.1/` (karta.md + wejscie-104.md)
@@ -82,10 +82,11 @@ Decyzje techniczne (rekomendacje Mastera — do akceptacji razem z planem):
 jednorazowa zamiast kodu przy każdym starcie, D1). Skutek uboczny mechanizmu: nowy stos nie „odświeża” wartości
 blokad przy każdym starcie — nie ma takiej potrzeby, bo triggery utrzymują wartość, a mapa MO* jest zamrożona w SQL.
 
-## ⏸ Powrót do tego wątku przy kopiowaniu bazy produkcyjnej (decyzja użytkownika 2026-09-22)
-PR #122 jest otwarty, ale **nie mergujemy go**, dopóki nie przejdzie próba na prawdziwej kopii produkcji. Kiedy
-zapadnie decyzja o skopiowaniu bazy produkcyjnej na staging (zgoda Ani od 23.09, D2), **wracamy do tego ticketu /
-tej sesji** i robimy kroki 6–7 (niżej) na tej kopii:
+## ✅ Próba na kopii produkcji — WYKONANA (ticket 113, 2026-09-23)
+Warunek „PR mergujemy po próbie na prawdziwej kopii produkcji” (scenariusz A) jest **spełniony**: cały łańcuch
+migracji przeszedł na kopii żywej `data.db` (12 migracji, 0 błędów, „bez treści” = dokładnie 003 i 013), a #101
+zmierzono na produkcji. Szczegóły i liczby: `docs/karty/I15.1/wejscie-113.md` i sekcja „Próba na kopii produkcji”
+w `docs/karty/I15.1/karta.md`. Pierwotna lista kroków (już rozliczona):
 1. Plan kopii musi najpierw rozstrzygnąć 002/003 (produkcyjne `products` ma 74 kolumny — obie migracje padną samym
    `npm run migrate`; „Do koordynatora” w `docs/karty/I15.1/karta.md`).
 2. `npm run migrate` na kopii → 011 przechodzi; triggery w `sqlite_master` przed i po identyczne.

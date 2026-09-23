@@ -1,6 +1,6 @@
 # I15.1 — schemat `products`: kolumna blokowanych form płatności + triggery kategorii i zastosowań
 
-> **Stan:** 🔨 ticket 107
+> **Stan:** ✅ 2026-09-23 · 107-FEATURE-products-blokady-triggery
 > **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #73, #75, #79, #80, #82 · **Zależy od:** —
 > **Ticket:** 107-FEATURE-products-blokady-triggery
 
@@ -82,15 +82,20 @@ zamknięta (patrz „Zostało przed PR” niżej, scenariusz A).
   mapowania, CHANGELOG produkcji 2026-09-10 14:53 „nie będzie na razie w sprzedaży”) prawdopodobna, ale pomiar na
   prawdziwej kopii produkcji jeszcze nie wykonany — patrz „Zostało przed PR”.
 
-### Zostało przed PR (scenariusz A, od 23.09)
-Implementacja stoi na bazie symulującej produkcję; przed PR (decyzja użytkownika, scenariusz A) brakuje:
-- próba `npm run migrate` na prawdziwej kopii produkcji, z procedurą 002/003 z `docs/cutover.md` §3 (kopia ma 74
-  kolumny, 002/003 padają deterministycznie bez tej procedury — patrz „Do koordynatora”);
-- porównanie `sqlite_master` triggerów przed i po migracji 011 (mają wyjść identyczne);
-- pomiar #101 na kopii produkcji: ile produktów dodanych po 10.09 ma dostawcę spoza `MO6` i puste
-  `blokowane_formy_platnosci` (jeśli 0 — #101 to MO6, nie błąd; jeśli >0 — nadal niewyjaśnione);
-- pomiar ile wierszy `products.zastosowanie` zawiera ` ; ` (łańcuch) w kategorii kanonicznej — obecność świadczyłaby
-  o rozjeździe z triggerem produkcji (nie powinno ich być, bo trigger je spłaszcza od razu przy zapisie).
+### Próba na kopii produkcji — WYKONANA (ticket 113, 2026-09-23; `wejscie-113.md`)
+Lista „Zostało przed PR (scenariusz A)” jest wyczerpana; sekcja zdjęta, liczby przepisane tutaj.
+Kopia `.backup` żywej `data.db` (8329 produktów, `integrity_check = ok`, bez `_migracje`), migracje z gałęzi
+`feature/107-products-blokady-triggery` (`3eabfee`), build i binarka `better-sqlite3` z VPS:
+- `npm run migrate` zastosował **12 migracji, 0 błędów**; linia „bez treści (warunek dyrektywy)” pokazała
+  **dokładnie `003` i `013`** — tak, jak przewiduje punkt kontrolny niżej;
+- po migracji: triggery **6**, blokady puste (znani dostawcy) **0**, blokady puste MO6 **0**,
+  `zastosowanie` z łańcuchem ` ; ` **0**, alerty z „?” **0**, `marka='Alliance'` **0**, przewoźnicy **6**;
+- **#101 zmierzone na ŻYWEJ produkcji (tylko odczyt):** 0 produktów z pustym `blokowane_formy_platnosci`
+  w każdej grupie dostawcy, 6 triggerów. Zgłoszenie Ani NIE dotyczy bazy Bridge — zostaje hipoteza „puste pole
+  po stronie Selly” (karty I15.6/I15.7). Wejście `wejscie-104.md` (#101) tym samym rozliczone.
+- **Pomiar łańcuchów zastosowań = 0** potwierdza, że spłaszczanie `a ; b` do „Uniwersalne/pozostałe” dzieje się
+  na produkcji od razu przy zapisie (nie ma ani jednego wiersza z łańcuchem) — wpis backlogu opisany niżej
+  zostaje aktualny jako pytanie do Ani, nie jako rozjazd odbudowy.
 
 ## Do koordynatora
 **⚠ PILNE przed odświeżeniem stagingu kopią produkcji (D2, od 23.09) — kopia NIE przejdzie samym `npm run migrate`.**
