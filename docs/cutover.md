@@ -82,6 +82,20 @@ przestoju je uporządkuje.
 > `marka='Alliance'` **0**, przewoźnicy **6**, puste blokady płatności **0**. Rozdział zostaw jako plan awaryjny
 > i powtórz próbę na świeżej kopii **w dniu cutoveru** — schemat produkcji zmieniał się we wrześniu kilka razy.
 
+**Stan po `012_staging_polityka.sql` (karta I15.4a, ticket `124-FEATURE-fundament-stagingu`, 23.09,
+poza gałęzią I15.1 z próby wyżej — łańcuch rośnie do 13 migracji).** `012` **nie wymaga żadnego kroku
+ręcznego** — inaczej niż `002`/`003`/`013`. Na produkcji jest w całości no-opem: wszystkie sześć tabel
+i oba indeksy tam już istnieją (Ania założyła je 22–23.09), a każdy `CREATE` w tej migracji ma
+`IF NOT EXISTS` — natywny mechanizm SQLite, którego `ALTER TABLE` z `002`/`011` i przebudowa tabeli
+z `013` nie mają, i dlatego tamte potrzebowały dyrektyw runnera albo kroku ręcznego. Gołe
+`CREATE TABLE` wywróciłoby tu całą migrację (`table … already exists`), bo runner wykonuje plik
+jednym `exec()` w transakcji — i właśnie temu `IF NOT EXISTS` zapobiega.
+Ryzyko resztkowe: `CREATE TABLE IF NOT EXISTS` **nie waliduje kształtu** istniejącej
+tabeli — gdyby produkcja miała którąś z tych sześciu tabel w innym kształcie, migracja przeszłaby po
+cichu. Zabezpieczeniem jest test na fixture `rebuild/backend/test/schemat-produkcji/88fa31c-schema.sql`
+(zrzut `db/schema.sql` z zamrożonej produkcji) — po każdej zmianie tych tabel przez Anię trzeba go
+przenagrać.
+
 ### Dlaczego to jest niebezpieczne
 
 Nasze migracje zakładają kształt tabel z `rebuild/schema/001_schema.sql`. **Produkcyjna
