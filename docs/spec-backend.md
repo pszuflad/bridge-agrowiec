@@ -352,8 +352,9 @@ pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie
 
 `03_IMPORT_tk.md` zawiera **realny diagram decyzyjny** wyprowadzony z kodu (z cytatami
 linii) — to bezpośrednie wejście do odbudowy (Faza 4, kierunek A). Kluczowe reguły
-potwierdzone (zweryfikowane w 3c wobec żywego `tk = function` w
-`deminified/backend-index.cjs:47584-47851`):
+potwierdzone (zweryfikowane w 3c wobec ówcześnie żywego `tk = function` w
+`deminified/backend-index.cjs:47584-47851`; **na `88fa31c` ta funkcja jest już martwa** —
+`tk` jest przypisywany wynikiem `staging_policy.install()`, patrz `docs/spec-backend/wpis-130.md`):
 - dopasowanie po kodzie → po EAN → **po EAN znormalizowanym** (`:47698`, gdy surowy EAN
   dostawcy nie trafił w mapę, dopasowanie po wartości z `Hq()`) → kod zastępczy `Lq()`
   tylko dla opony;

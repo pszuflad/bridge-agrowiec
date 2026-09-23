@@ -125,16 +125,27 @@ describe("2. Zasięg zmiany w silniku — co CAPS ucisza, a czego NIE", () => {
 
   const staging = () => baza.db.select().from(stagingItems).all();
 
-  it("⚠ różnica case-only w polu KLUCZOWYM dalej daje `zmiana_kluczowa` (D1)", () => {
+  /**
+   * ⚠⚠ ZMIANA ZACHOWANIA I15.4b (#99).
+   *
+   * Stary `tk()` porównywał pola kluczowe bez normalizacji wielkości liter, więc sama zmiana
+   * „Kleber GRIPKER" → „KLEBER GRIPKER" wystawiała wiersz `zmiana_kluczowa` i kazała
+   * człowiekowi klikać. `staging_policy` liczy różnice przez `norm()`
+   * (`staging_policy.cjs:426`), a `norm()` podnosi do wielkich liter — więc różnica
+   * case-only PRZESTAJE być zmianą i pozycja przechodzi jako „bez zmian".
+   *
+   * ⚠ To JS-owe `toUpperCase()`, czyli Unicode-aware („prowadząca" → „PROWADZĄCA"),
+   * w odróżnieniu od SQLite `UPPER()` z migracji `006`, które jest ASCII-only. Dwa różne
+   * mechanizmy o tej samej nazwie — nie mylić ich ze sobą.
+   */
+  it("różnica case-only w polu KLUCZOWYM jest teraz MILCZĄCA — bez wiersza stagingu", () => {
     zasiejProdukt(baza.db, { marka: "Kleber GRIPKER" });
 
     const statystyki = uruchom(DOSTAWCA, [rekord({ marka: "KLEBER GRIPKER" })]);
 
-    // To jest zachowanie PRODUKCJI, nie przeoczenie: klasyfikacja nie woła `wartosciRowne`.
-    expect(statystyki.bezZmian).toBe(0);
-    expect(statystyki.zmienione).toBe(1);
-    expect(staging()).toHaveLength(1);
-    expect(staging()[0]!.typZmiany).toBe("zmiana_kluczowa");
+    expect(statystyki.bezZmian, "sama wielkość liter to już nie zmiana").toBe(1);
+    expect(statystyki.zmienione).toBe(0);
+    expect(staging(), "nikt nie musi tego zatwierdzać").toHaveLength(0);
   });
 
   it("…ale znika już z narracji `powod` — i to jest cały efekt CAPS", () => {

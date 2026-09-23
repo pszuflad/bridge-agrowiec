@@ -125,6 +125,14 @@ describe("endpointy importu", () => {
           "wycofane",
           "bezZmian",
           "autoZatwierdzone",
+          // ⚠ NOWY KLUCZ od I15.4b (#103). `importer()` dopisuje do statystyk
+          // `pominieteWycofania` z wyjaśnieniem, dlaczego w tym przebiegu nie liczono braków
+          // („Niepotwierdzona kompletność źródła…" albo „Powtórzona oferta lub nie minęły
+          // 24 godziny…"). Trasa i tak rozsypuje statystyki do ciała (`...tkResult`), więc
+          // klucz wychodzi na zewnątrz — tak samo jak w produkcji na `88fa31c`.
+          // Kształt tej odpowiedzi NIE jest zamrożony w `contract/openapi.yaml`
+          // („do zamrożenia w 2.4"), więc to rozszerzenie jest dopuszczalne.
+          "pominieteWycofania",
           "szczegolyOdrzuconych",
         ].sort(),
       );

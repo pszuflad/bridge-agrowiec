@@ -6,6 +6,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { zapiszWpisDziennika } from "../repos/dziennik-zmian.js";
 import { zapiszPoprawke } from "../repos/overrides.js";
+import { usunAutomatyczneWstrzymanie } from "../repos/staging-polityka.js";
 import {
   aktualizujProdukt,
   dolaczReguly,
@@ -221,6 +222,21 @@ export function trasyProduktow({ db }: ZaleznosciProduktow): Router {
     const { _reason, ...reszta } = (req.body ?? {}) as Record<string, unknown>;
     const zmiany = odsiejPolaEdytowalneProduktu(reszta);
     const powod = (_reason as string | undefined) ?? "edycja w katalogu";
+
+    // ⚠ NADPISANIE `U.updateProduct` ze Staging v2 (`staging_policy.cjs:112-119`, #104).
+    //
+    // Jawna, RĘCZNA zmiana statusu odbiera automatowi własność nad tym produktem: znacznik
+    // w `product_auto_suspensions` znika, a przez to najbliższy import nie przywróci
+    // produktu do `aktywny` „pewnym powrotem" ani nie uzna, że sam go kiedyś wstrzymał.
+    // To jest CAŁY mechanizm „ręczne wstrzymania są chronione" — bez tej linii operator
+    // odwstrzymuje produkt, a kolejny import wstrzymuje go z powrotem.
+    //
+    // Oryginał robi to mutacją `U.updateProduct`, więc dotyczy KAŻDEGO wołającego; u nas
+    // dotyczy tej trasy, bo to jedyne wejście ręcznej zmiany statusu (importer celowo
+    // omija nadpisanie — patrz nagłówek `import/polityka/fabryka.ts`).
+    if (Object.hasOwn(zmiany, "status")) {
+      usunAutomatyczneWstrzymanie(db, przed.dostawca, przed.kod);
+    }
 
     const po = aktualizujProdukt(db, id, zmiany);
     if (!po) {

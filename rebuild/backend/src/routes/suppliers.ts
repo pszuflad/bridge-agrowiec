@@ -9,7 +9,7 @@ import {
 } from "../import/archiwum.js";
 import { BladCennika, parsujBufor } from "../import/parsuj.js";
 import { synchronizujDostawce, type OpcjeSynchronizacji, type WynikSynchronizacji } from "../import/synchronizuj.js";
-import { PustyImportBlad, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
+import { jestBlokadaZrodla, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAlert } from "../repos/alerts.js";
 import { zapiszAudyt } from "../repos/audit.js";
@@ -175,7 +175,9 @@ export function trasyDostawcow({
           });
         }
 
-        const statystyki = uruchomImport(kod, sparsowane.rekordy);
+        // `meta` z `feed_safety` (#103) decyduje o tym, czy oferta liczy się jako
+        // KOMPLETNA — a więc czy wolno wstrzymywać braki i zliczać dowody nieobecności.
+        const statystyki = uruchomImport(kod, sparsowane.rekordy, { meta: sparsowane.meta });
         const teraz = new Date().toISOString();
 
         // Oryginał ustawia OBA znaczniki czasu, nie tylko `ostatniPlik` (`:48260-48265`).
@@ -247,7 +249,10 @@ export function trasyDostawcow({
         // `POST /api/import/parse-file` oddaje 400.
         // Reszta zostaje przy 500 oryginału (`:48279`) — twarda awaria czytnika to nie
         // to samo co rozpoznany błąd danych wejściowych.
-        const status = e instanceof PustyImportBlad || e instanceof BladCennika ? 400 : 500;
+        // Od I15.4b dochodzą trzy kolejne blokady źródła (#103): cennik z błędami odczytu,
+        // mniejszy o ponad 20% od historycznego maksimum i masowo nierozpoznany. Wszystkie
+        // są rozpoznanym błędem DANYCH, więc idą tą samą ścieżką 400 (D-130.4).
+        const status = jestBlokadaZrodla(e) || e instanceof BladCennika ? 400 : 500;
         res.status(status).json({ error: komunikat, dostawcaKod: kod, nazwaPliku });
       }
     },

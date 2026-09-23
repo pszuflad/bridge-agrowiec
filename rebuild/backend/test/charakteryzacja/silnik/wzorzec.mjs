@@ -53,10 +53,40 @@ export const POLA_WIERSZA = [
   "utworzono",
 ];
 
+/**
+ * Podstawiane za `_catalogVersion` w `snapshotJson`.
+ *
+ * ⚠ Ta wartość jest NIEPOROWNYWALNA między przebiegami z definicji. `version()`
+ * (`staging_policy.cjs:70`) liczy sha256 m.in. z `dataAktualizacji` karty, a karta bywa
+ * zaktualizowana W TYM SAMYM przebiegu — auto-zatwierdzeniem albo automatycznym wstrzymaniem
+ * (#104) — więc do hasza wchodzi znacznik czasu tego uruchomienia. Zamiast wycinać pole
+ * z porównania, podmieniamy wartość i pilnujemy KSZTAŁTU (64 znaki hex), żeby zniknięcie
+ * albo zepsucie odcisku nadal było widoczne.
+ */
+export const WERSJA_KARTY_WZORCOWA = "<_catalogVersion: sha256 zależne od przebiegu>";
+
+const HEX64 = /^[0-9a-f]{64}$/;
+
+/** Normalizuje `_catalogVersion` w treści snapshotu, zachowując sprawdzenie kształtu. */
+function normalizujSnapshot(snapshotJson) {
+  if (typeof snapshotJson !== "string" || !snapshotJson.includes('"_catalogVersion"')) {
+    return snapshotJson;
+  }
+  const snap = JSON.parse(snapshotJson);
+  if (typeof snap._catalogVersion === "string" && HEX64.test(snap._catalogVersion)) {
+    snap._catalogVersion = WERSJA_KARTY_WZORCOWA;
+  }
+  return JSON.stringify(snap);
+}
+
 /** Sprowadza wiersz stagingu do porównywalnego kształtu: stałe pola, znormalizowany znacznik. */
-function normalizujWiersz(wiersz) {
+export function normalizujWiersz(wiersz) {
   const wynik = {};
   for (const pole of POLA_WIERSZA) {
+    if (pole === "snapshotJson") {
+      wynik[pole] = normalizujSnapshot(wiersz[pole] ?? null);
+      continue;
+    }
     wynik[pole] = pole === "utworzono" ? UTWORZONO_WZORCOWE : (wiersz[pole] ?? null);
   }
   return wynik;
@@ -113,6 +143,12 @@ export function normalizujPrzebieg(przebieg) {
      */
     wierszyPoDeduplikacji: przebieg.staging.length,
     staging: przebieg.staging.map(normalizujWiersz),
+    /**
+     * ⚠ Od I15.4b zawsze PUSTE. Stary `tk()` kasował produkt z katalogu, gdy cennik przyniósł
+     * pod jego kodem pozycję niebędącą oponą (`:47689`). `staging_policy` tego NIE robi —
+     * nierozpoznana pozycja idzie do stagingu jako sprawa do sprawdzenia, a karta zostaje.
+     * Pole zostaje we wzorcu, żeby powrót kasowania był widoczny w diffie.
+     */
     skasowane: [...przebieg.skasowane].sort((a, b) => a - b),
     /** Wiersze `historia_cen` z gałęzi auto-zatwierdzania (`:47800`). */
     historiaCen: przebieg.historiaCen.map((w) => normalizujHistorie(w, znacznikPrzebiegu)),
@@ -124,12 +160,5 @@ export function normalizujPrzebieg(przebieg) {
     zmianyProduktow: przebieg.zmianyProduktow.map((w) =>
       normalizujZmianeProduktu(w, znacznikPrzebiegu),
     ),
-    /**
-     * Ile razy `applyLinkMemory` sięgnęło do tabel pamięci linków. W `tk()` dostaje PATCH
-     * (bez `kod` i bez `marka/model/rozmiar`), więc wszystkie ścieżki pamięci odpadają na
-     * warunku wstępnym i wartość jest 0. Trzymamy ją we wzorcu, żeby ewentualna zmiana
-     * w produkcji wyszła w diffie, zamiast przejść niezauważona.
-     */
-    zapytanDoPamieciLinkow: przebieg.zapytanDoPamieciLinkow,
   };
 }

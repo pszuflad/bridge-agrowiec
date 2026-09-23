@@ -204,7 +204,9 @@ export function synchronizujDostawce({
         });
       }
 
-      const statystyki = uruchomImport(dostawca.kod, sparsowane.rekordy);
+      const statystyki = uruchomImport(dostawca.kod, sparsowane.rekordy, {
+        meta: sparsowane.meta,
+      });
       const teraz = new Date().toISOString();
 
       // Oryginał ustawia OBA znaczniki i `status: aktywny` (`:48078-48083`).
