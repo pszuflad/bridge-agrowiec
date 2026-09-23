@@ -13,6 +13,11 @@ możemy poprawiać po przełączeniu, tutaj nie.
 
 Liczę, że zajmie Ci to **jedno posiedzenie**. Pięć odcinków, po kolei.
 
+> ⚠ **Jedna rzecz z góry, żebyś nie była zaskoczona.** W odcinku 4 piszę o błędzie, który
+> znaleźliśmy 24.09: plik dla Selly gubi oznaczenia opon zimowych w 899 pozycjach. Jest
+> zdiagnozowany, przypisany do naprawy i **blokuje przełączenie** — czyli nie przełączymy się,
+> dopóki nie zniknie. Nie musisz go szukać; reszta instrukcji jest nim nietknięta.
+
 ---
 
 ## Zanim zaczniesz
@@ -263,44 +268,67 @@ to jedno i to samo.
 
 ## Odcinek 4 — Czy nowy plik jest taki sam jak stary
 
-**To sprawdziliśmy za Ciebie i jest zrobione — nie musisz nic robić.** Piszę o tym, żebyś
-wiedziała, na jakiej podstawie twierdzimy, że sklep nie zauważy podmiany.
+**Sprawdzamy to my, nie Ty** — ale musisz znać wynik, bo od niego zależy termin przełączenia.
+**Na dziś odpowiedź brzmi: jeszcze nie.** Znamy przyczynę i jest poprawka do zrobienia.
 
 **Dlaczego nie da się tego sprawdzić „na oko".** Porównanie dzisiejszego pliku ze stagingu
 z dzisiejszym plikiem z produkcji **nic by nie dowiodło**: baza stagingu to kopia z 23.09,
 a produkcja importuje dalej. Różnice pokazałyby rozjazd **danych**, a nie to, czy generator
-liczy tak samo. Sensowne jest tylko porównanie **obu generatorów puszczonych na tej samej bazie**.
+liczy tak samo. Sensowne jest tylko porównanie **obu generatorów puszczonych na tej samej bazie**
+— i tak to robimy.
 
-**Co zrobiliśmy (2026-09-24).** Wzięliśmy kopię bazy, uruchomiliśmy na niej **stary generator
-produkcyjny** — dokładnie ten plik, który dziś o 6:00 robi plik dla sklepu — i **nowy**,
-a potem porównaliśmy wyniki bajt po bajcie.
+### Co pokazał pomiar
 
-**Wynik:**
+Na kopii Waszej bazy z 23.09 oba generatory dały plik o **tej samej liczbie pozycji (5396)**
+i **identycznym nagłówku 60 kolumn** — ale **899 wierszy różni się treścią**. Zawsze w tych
+samych pięciu rubrykach i zawsze w tę samą stronę: stary plik ma `Tak`, nowy ma **pusto**.
 
-| | Stary generator | Nowy generator |
-|---|---|---|
-| Pozycji w pliku | 6898 | 6898 |
-| Kolumn | 60 | 60 |
-| Rozmiar pliku | 3 177 786 B | 3 177 786 B |
-| Suma kontrolna | `70dacfd7…b87c5` | `70dacfd7…b87c5` |
+| Rubryka w pliku | Ilu pozycji dotyczy |
+|---|---|
+| `Snieg-3PMSF` | 750 |
+| `Bloto+snieg` | 713 |
+| `CFO` | 52 |
+| `NRO` | 12 |
+| `CHO` | 10 |
 
-**Pliki są identyczne co do bajtu** — ta sama suma kontrolna. Nie „prawie takie same"
-i nie „takie same po zaokrągleniu": bez jednej różnicy, łącznie ze znacznikiem kodowania
-na początku pliku i znakami końca linii.
+*(suma jest większa niż 899, bo „śnieg" i „błoto+śnieg" zwykle występują w tej samej pozycji)*
 
-Dodatkowo w systemie stoi **stały test**, który przy każdej zmianie kodu porównuje wiersz
-nagłówkowy nowego generatora z **prawdziwym plikiem zdjętym z produkcji**. Gdyby ktoś
-kiedykolwiek zmienił nazwę albo kolejność którejkolwiek z 60 kolumn, ten test zapali się
-na czerwono, zanim zmiana gdziekolwiek trafi.
+**Co to znaczy praktycznie.** Gdybyśmy przełączyli dziś, sklep dostałby **899 pozycji — 17%
+katalogu — bez oznaczeń zimowych i specjalistycznych**. Ceny, stany i nazwy byłyby poprawne,
+plik wyglądałby zdrowo, a klient po prostu **nie znalazłby tych opon filtrem** „opony zimowe".
+Nic by o tym nie krzyknęło.
 
-**Co mimo to warto, żebyś sprawdziła** — to jest punkt 3 wyżej: czy plik w ogóle powstaje,
-czy liczba wierszy jest sensowna i czy otwiera się w Excelu z polskimi znakami. Dowód mówi
-o **generatorze**; Ty patrzysz na **dane**, które do niego wchodzą, a tego żaden test za Ciebie
-nie oceni.
+**Skąd to się bierze.** W bazie te pięć rubryk ma **pomieszane zapisy** — część pozycji ma
+zapisaną liczbę, a część słowo `Tak`. Stary generator czyta bazę „na surowo" i przepisuje
+`Tak`, jak stoi. Nowy odczytuje te rubryki jako „tak/nie" i słowa `Tak` nie rozpoznaje,
+więc zostawia pustkę. **Sama logika pliku jest w obu identyczna — różni się tylko sposób
+odczytu z bazy.** To nasz błąd, nie Wasz, i poprawiamy go po naszej stronie.
 
-> ☐ Przeczytałam, rozumiem — ☐ mam pytanie: _______________________
+### Status i co z tego wynika dla przełączenia
 
----
+- **Błąd jest zdiagnozowany i przypisany do naprawy.** Jest oznaczony jako **blokada
+  przełączenia** — cutover nie odbędzie się, dopóki to porównanie nie wyjdzie na zero.
+- Po poprawce **powtarzamy dokładnie ten sam pomiar** na tej samej bazie i dopiero jego pusty
+  wynik uznajemy za dowód.
+- Dla porządku: ta metoda **działa** — wykryła realny błąd, którego nie złapał żaden test
+  ani przegląd kodu. To jest argument za tym, żeby ją powtarzać, a nie przeciw niej.
+- Osobno, niezależnie od tej sprawy: na danych, w których wszystkie pięć rubryk ma zapis
+  liczbowy, oba generatory dają plik **identyczny co do bajtu** (sprawdzone 24.09 na starszej
+  kopii bazy — ta sama suma kontrolna, 6898 pozycji). Czyli **cała reszta formatu jest
+  w porządku** i problem ogranicza się do tych pięciu rubryk.
+
+### Co możesz sprawdzić sama
+
+Nie musisz szukać tego błędu — znamy go. Ale jeśli chcesz zobaczyć go na oczy, po wygenerowaniu
+pliku (odcinek 3):
+- [ ] otwórz plik w Excelu, znajdź kolumny **`Bloto+snieg`** i **`Snieg-3PMSF`**;
+- [ ] policz, ile wierszy ma w nich `Tak`.
+
+**Dziś będzie ich zauważalnie mniej, niż powinno** — to właśnie ten błąd. **Po poprawce ta sama
+kolumna ma się zapełnić.** To dobry, szybki sposób, żebyś sama potwierdziła, że naprawa zadziałała.
+
+> ☐ Przeczytałam, rozumiem, że to blokuje przełączenie
+> ☐ Mam pytanie: _______________________________________________
 
 ## Odcinek 5 — Adres pliku w panelu Selly
 
@@ -331,10 +359,11 @@ zachowa się z plikiem z nowego systemu. **Ma to realną cenę i trzeba ją zna�
 - katalog stagingu trzeba wtedy najpierw zamknąć **listą dozwolonych adresów IP**, tak jak jest
   zamknięty produkcyjny — bo plik zawiera kolumnę **`Cena-zakupu`** i nie może być publiczny.
 
-**Nasza rekomendacja: nie robić tego.** Dowód z odcinka 4 pokazuje, że plik jest identyczny
-co do bajtu, więc test „czy sklep to zaciągnie" nie sprawdziłby niczego nowego, a ryzykuje
-pokazanie klientom złych cen. Jeśli mimo to chcesz to przejść — patrz **„Do Twojej decyzji"**,
-punkt 2.
+**Nasza rekomendacja: nie robić tego.** Sposób, w jaki sklep pobiera plik, po przełączeniu się
+nie zmienia — ten sam adres, ten sam katalog — więc test „czy sklep to zaciągnie" sprawdzałby
+coś, czego nie ruszamy, a ryzykowałby pokazanie klientom cen z 23.09. Dodatkowo dziś byłby
+wręcz szkodliwy: plik stagingu ma jeszcze błąd z odcinka 4, więc sklep zaciągnąłby 899 pozycji
+bez oznaczeń zimowych. Jeśli mimo to chcesz to przejść — patrz **„Do Twojej decyzji"**, punkt 2.
 
 > ☐ Przeczytałam, zgadzam się na wariant „nic nie przepinamy"
 > ☐ Chcę porozmawiać o teście przed przełączeniem
@@ -398,12 +427,16 @@ a test przełącza żywy sklep na dane z 23.09).
 
 ### 3. Czy chcesz, żeby porównanie generatorów działało na stałe?
 
-Dowód z odcinka 4 jest **jednorazowy** — zrobiliśmy go 24.09. Na stałe pilnowany jest tylko
-wiersz nagłówkowy (nazwy i kolejność 60 kolumn).
+Porównanie z odcinka 4 uruchamiamy **ręcznie**. Na stałe, automatycznie, pilnowany jest tylko
+wiersz nagłówkowy — nazwy i kolejność 60 rubryk. Gdyby porównanie całej treści chodziło
+automatycznie, **błąd z flagami `Tak` wyszedłby od razu**, a nie przy ręcznym pomiarze
+tydzień przed przełączeniem.
 
-- ☐ **Wystarczy** — pełne porównanie było potrzebne raz, przed przełączeniem.
-- ☐ **Chcę je na stałe** — żeby każda przyszła zmiana w generatorze była automatycznie
-  porównywana ze starym. Dorobimy to jako osobne zadanie.
+- ☐ **Chcę je na stałe** *(nasza rekomendacja)* — każda przyszła zmiana w generatorze byłaby
+  automatycznie porównywana ze starym. Kosztuje trochę pracy raz i wymaga trzymania starego
+  generatora jako wzorca.
+- ☐ **Wystarczy ręcznie** — powtarzamy pomiar przed przełączeniem i po każdej zmianie
+  w generatorze, pamiętając o tym za każdym razem.
 
 ---
 

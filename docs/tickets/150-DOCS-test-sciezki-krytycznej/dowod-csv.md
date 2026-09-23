@@ -1,7 +1,13 @@
 # Dowód równoważności generatorów CSV — przebieg i wynik
 
 > Wykonane 2026-09-24 w ramach ticketu `150-DOCS-test-sciezki-krytycznej` (plan.md, D1).
-> **Wynik: pliki identyczne bajt w bajt.**
+> **Wynik na użytej bazie: pliki identyczne bajt w bajt.**
+>
+> ⚠ **CZYTAJ RAZEM Z SEKCJĄ „Dlaczego ten wynik NIE uogólnia się" NA KOŃCU.** Równolegle
+> prowadzony ticket 153 wykonał ten sam pomiar na **bazie stagingu** (kopia produkcji z 23.09)
+> i znalazł **899 różniących się wierszy** (wpis backlogu `#153.1`, karta `FIX.1`, blokada
+> cutoveru). Oba wyniki są prawdziwe — różni je zawartość bazy. Instrukcja dla Ani opisuje
+> stan faktyczny, czyli wynik ticketu 153.
 
 ## Po co
 
@@ -101,3 +107,64 @@ może być inaczej. Skierowane do użytkownika jako pytanie w instrukcji
   ale nie jest to pomiar dzisiejszej produkcji.
 - Migracje zmieniają dane (006 `UPPER` na nazwach, 010 marka, 004/005 kategoria i konstrukcja),
   więc plik nie jest bajtowo równy dzisiejszemu plikowi produkcji — i nie miał być.
+
+
+---
+
+## ⭐ Dlaczego ten wynik NIE uogólnia się — korekta z 2026-09-24
+
+Po wykonaniu tego dowodu na `develop` pojawiło się `docs/karty/TEST.2/wejscie-153.md`: koordynator
+przeprowadził **tę samą procedurę na bazie stagingu** (kopia produkcji z 23.09) i dostał wynik
+**niezerowy** — 5396 = 5396 pozycji, nagłówek identyczny, ale **899 wierszy różni się treścią**
+w pięciu kolumnach flagowych (`Snieg-3PMSF` 750, `Bloto+snieg` 713, `CFO` 52, `NRO` 12, `CHO` 10).
+
+**Przyczyna (wpis `#153.1`):** te kolumny mają w bazie **mieszane typy** — część wierszy trzyma
+`integer`, część **tekst `'Tak'`**. Nowy generator czyta produkty przez Drizzle, gdzie kolumny są
+`integer({ mode: "boolean" })`, a `Number('Tak') === 1` daje `false` → pusta komórka. Produkcyjny
+skrypt czyta `SELECT *` przez `better-sqlite3` i przepisuje `'Tak'` surowo.
+
+**Dlaczego TUTAJ wyszło zero.** Zmierzone na bazie użytej w tym dowodzie
+(`db/snapshot.db` z 13.08 + migracje 001–013) — **wszystkie dziesięć kolumn flagowych ma wyłącznie
+typ `integer`**, ani jednej wartości tekstowej:
+
+```
+stubble_resistant  integer 0: 2147   integer 1: 2
+nro                integer 0: 2133   integer 1: 16
+cho                integer 0: 2136   integer 1: 13
+ms                 integer 0: 2830   integer 1: 1311
+snow_3pmsf         integer 0: 2783   integer 1: 1358
+cfo                integer 0: 2716   integer 1: 57
+```
+
+Tekst `'Tak'` wszedł do bazy **po 13.08** (importy i łatki produkcji z września), więc na tym
+snapshocie **błąd nie ma jak się ujawnić**. Dowód był metodycznie poprawny — ale substrat był
+niereprezentatywny, a zielony wynik mylący.
+
+**To jest dokładnie ta pułapka, przed którą ostrzega `CLAUDE.md`** („nie ufaj pustym
+odpowiedziom" / „nie ufaj `rows: []`"), w wariancie „nie ufaj zerowemu `diff`-owi": wynik zgodny
+z oczekiwaniem trzeba podważyć tak samo jak niezgodny. Konkretnie: **zanim uznasz porównanie
+za zielone, sprawdź, czy dane w ogóle zawierają przypadek, który mógłby je zapalić na czerwono.**
+W tym dowodzie zweryfikowałem, że 60. kolumna nie jest pusta — ale nie sprawdziłem rozkładu
+TYPÓW w kolumnach flagowych, a to była właściwa kontrola.
+
+### Co z tego zostaje w mocy
+
+- **Wersja starego generatora była wzięta poprawnie.** `88fa31c` jest na `origin/main`
+  i `git diff` z `origin/main:mirror/backend/generate_selly_export.cjs` jest pusty
+  (sprawdzone). Ostrzeżenie o `mirror/` na `develop` jest trafne, ale przyczyna jest inna, niż
+  napisałem wyżej: `mirror/` w `develop` jest **świadomie cofnięty do stanu z 25.08**
+  (commit `6594525`, bramki wierności), a nie „nieaktualny przez zaniedbanie". Wniosek
+  praktyczny bez zmian: **żywy generator produkcji bierze się z `origin/main`**.
+- **Pozostała część formatu jest potwierdzona** — przy danych bez wartości tekstowych pliki
+  są bajtowo identyczne (ta sama suma kontrolna, 6898 pozycji, 60 kolumn, BOM, `\r\n`,
+  separator, kolumna `Blokowane-formy-platnosci` wypełniona). Różnica z ticketu 153 ogranicza
+  się do pięciu kolumn flagowych i do warstwy odczytu, nie do formatowania.
+- **Metoda jest dobra i ma być powtarzana** — w wariancie ticketu 153 (na bazie stagingu,
+  oba pliki jeden po drugim, z rozkładem różnic na kolumny). Sam `diff` mówi „899 linii"
+  i nic więcej; dopiero rozbicie na kolumny wskazało flagi.
+
+### Wniosek dla przyszłych pomiarów
+
+Porównanie generatorów prowadzi się **na bazie stagingu**, nie na `db/snapshot.db` z sierpnia.
+Snapshot nadaje się do sprawdzenia formatu, ale nie do orzekania o wierności na dzisiejszych
+danych. Procedura referencyjna: `docs/tickets/153-DOCS-flagi-tak-w-csv/raport.md`.
