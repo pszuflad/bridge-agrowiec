@@ -71,18 +71,19 @@ Brak zmian w API. Dwie zmiany kontraktu wewnętrznego, obsłużone w repo: `Stat
 `kolizje`.
 
 ## Follow-up
-1. **Montaż `availability_sync` — sprzeczne ustalenia do rozstrzygnięcia przez koordynatora.**
-   Ten ticket przekazał montaż do I15.4b (`docs/karty/I15.4b/wejscie-119.md`), a `wejscie-121.md`
-   (od I15.8, przyszło PO zamknięciu ticketu) mówi, że montaż należy do I15.10. Kod jest gotowy
-   w obu wariantach — `zadajOdswiezenie()` to jedyny punkt wejścia.
-2. **Generator CSV in-process** — `wejscie-122.md` (I15.3) pokazuje `wygenerujCsvSelly()` do wołania
-   w procesie; `dostepnosc.ts` uruchamia go w osobnym procesie, 1:1 za oryginałem. Do decyzji:
-   wierność czy uproszczenie.
-3. **#108 pozostaje otwarty** — rozstrzygnięcie semantyczne przypadku „ten sam dostawca” to decyzja
+1. **Montaż modułu nie ma właściciela — do przypisania przez koordynatora.** Są dwie czynności:
+   *wołanie* `zadajOdswiezenie(dostawca)` z importera stagingu (to należy do **I15.4b**, przekazane
+   w `docs/karty/I15.4b/wejscie-119.md`) oraz *montaż*, czyli zbudowanie instancji i rejestracja
+   w `src/server.ts`/`src/app.ts`. Ticket 119 celowo `app.ts` nie ruszał i zostawił montaż „do
+   uzgodnienia z I15.8"; `wejscie-121.md` (przyszło po zamknięciu ticketu) odpowiada, że montaż
+   należy do I15.10 — czyli do karty, która właśnie się zamyka. **Dopóki nikt go nie zrobi,
+   `zadajOdswiezenie()` jest świadomym no-opem.** Wymaganie z `wejscie-121.md`: użyć TEJ SAMEJ
+   instancji `discoverySelly` co Tor 1 i Tor 2 (stan `feature_id` i cache żyją w jej domknięciu).
+2. **#108 pozostaje otwarty** — rozstrzygnięcie semantyczne przypadku „ten sam dostawca” to decyzja
    handlowa Ani; mamy teraz tylko liczby z każdego cyklu.
-4. **`docs/spec-backend/wpis-109.md:14` jest nieaktualny** (mówi „EAN wymagany w Torze 1”); korekta
+3. **`docs/spec-backend/wpis-109.md:14` jest nieaktualny** (mówi „EAN wymagany w Torze 1”); korekta
    w `wpis-119.md`, cudzego pliku nie ruszano.
-5. **Czułość zestawu testów na obciążenie maszyny** — `test/alerty-katalogu.gate.test.ts`
+4. **Czułość zestawu testów na obciążenie maszyny** — `test/alerty-katalogu.gate.test.ts`
    i `test/silnik.charakteryzacja.test.ts` (oba poza diffem) ocierają się o limit 20 s i przy
    kilku równoległych sesjach wypadają na TIMEOUT. Osobny ticket.
 

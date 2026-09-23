@@ -96,15 +96,23 @@ i raportujemy, NIE pomijamy.** Zawór grupujący po parze `(dostawca, kod_import
 6. **Trzy wejścia przyszły PO zamknięciu ticketu 119 (16:08) i NIE są objęte tym, co dowieziono** —
    przy scaleniu z `develop` (2026-09-23 wieczór) doszły `wejscie-120.md`, `wejscie-121.md`
    i `wejscie-122.md`. Dwa z nich zmieniają obraz zakresu:
-   - `wejscie-121.md` (I15.8) mówi, że **montaż `availability_sync` należy do I15.10**, czyli do tej
-     karty, a ticket 119 świadomie zostawił moduł NIEWPIĘTY, przekazując montaż do I15.4b
-     (`docs/karty/I15.4b/wejscie-119.md`). Te dwa ustalenia są sprzeczne — rozstrzygnięcie należy
-     do koordynatora. Kod jest gotowy w obu wariantach: `zadajOdswiezenie()` to jedyny punkt wejścia.
-   - `wejscie-122.md` (I15.3) mówi, że generator CSV da się wołać **in-process**
-     (`wygenerujCsvSelly()`), a `dostepnosc.ts` uruchamia go w osobnym procesie — 1:1 za oryginałem
-     (`availability_sync.cjs`). Do decyzji: zostawić wierność czy uprościć do wywołania w procesie.
+   **To NIE są ustalenia sprzeczne — to dwie różne czynności, z których jedna nie ma dziś właściciela:**
+   - **Wołanie** `zadajOdswiezenie(dostawca)` z importera stagingu i decyzji „brak karty" — należy do
+     **I15.4b**, przekazane w `docs/karty/I15.4b/wejscie-119.md` (razem z ostrzeżeniem o OOM).
+     To ustalenie jest aktualne.
+   - **Montaż**, czyli zbudowanie instancji i rejestracja
+     (`ustawDomyslnaSynchronizacjeDostepnosci(stworzSynchronizacjeDostepnosci({db, discovery, sciezkiCsv}))`)
+     w `src/server.ts` / `src/app.ts`. Ticket 119 celowo `app.ts` nie ruszał i zostawił to „do uzgodnienia
+     z I15.8". `wejscie-121.md` (przyszło PO zamknięciu ticketu) odpowiada: **montaż należy do I15.10**,
+     w `server.ts`, wzorem `harmonogramSelly`, z **tą samą instancją `discoverySelly`** co Tor 1 i Tor 2.
+     **Nikt tego dziś nie robi** — I15.10 zamknięta, I15.4b dostała tylko wołanie. To jest realna luka
+     do przypisania przez koordynatora: albo dopisek do zakresu I15.4b, albo nowy ticket na I15.10.
+     Dopóki montażu nie ma, `zadajOdswiezenie()` jest świadomym no-opem.
    - `wejscie-120.md` (I15.2) dotyczy wygaszonego drugiego schedulera — do przejrzenia przy montażu.
+   - `wejscie-122.md` (I15.3) potwierdza to, co ticket 119 już zrobił: generator wołany **w tym samym
+     procesie** (`wygenerujCsvSelly`), a nie przez `execFileSync` jak oryginał — świadome odstępstwo,
+     opisane w nagłówku `dostepnosc.ts:23-26`. Nic do zmiany.
 
    **Stan ✅ tej karty dotyczy zakresu z chwili zamknięcia ticketu** (Tor 1, Tor 2, moduł dostępności
-   jako gotowy port). Montaż i trzy powyższe ustalenia to otwarta reszta — karta NIE jest domknięta
-   w sensie „nic więcej do zrobienia".
+   jako gotowy port). Montaż to otwarta reszta — karta NIE jest domknięta w sensie „nic więcej
+   do zrobienia".
