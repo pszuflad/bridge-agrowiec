@@ -140,3 +140,51 @@ w praktyce 1–3 pozycje, a `find` po niej przy renderze okna nie jest kosztem; 
 zależności bez zysku. Odnotowane dla I15.11, która i tak wejdzie w ten plik.
 
 Bramki po poprawkach: `lint` ✓, `typecheck` ✓, testy stagingu 62/62.
+
+## Docs updates
+
+Trzy doc-checkery na ROZŁĄCZNYCH plikach (CLAUDE.md reguła 0 — żadna karta nie pisze w cudzym
+pliku ani w roadmapie).
+
+### `docs/karty/I15.5/karta.md` + `docs/karty/I15.11/wejscie-140.md`
+
+- `karta.md`: `Stan:` → `✅ 2026-09-23 · 140-FEATURE-staging-rozstrzygnij-frontend`, wypełnione
+  pole `Ticket:`. Sekcja „Zakres" poprawiona **W MIEJSCU** — „okno wyboru (trasy `review`/
+  `resolve`)" zastąpione opisem trzech rozłącznych gałęzi, dopisane `choose-absence-card`;
+  źródło prawdy poprawione z `7d6cfc9` na faktyczne **`88fa31c`** (także w sekcji „Decyzje").
+- `karta.md` → „Dowiezione": lista ośmiu plików, rozliczenie bramek (991 testów w 56 plikach,
+  Node 20.20.2), podsekcja „Gdzie karta odbiegła od pierwotnego założenia" (sześć punktów:
+  trzy gałęzie zamiast jednej + D1–D6), podsekcja „Fakt zmierzony w trakcie" (rozłączność
+  `absenceReview`/`matchIssue`) i „Dowód wierności zamiast GATE na fixtures".
+- `karta.md` → „Do koordynatora": cztery punkty — martwa trasa `close-absence-review` (D1),
+  `zadanie()` gubiące strukturę błędu, brak globalnego error middleware, **zmiana przypisania
+  zakresu I15.11** (zapisana jako rzecz do decyzji koordynatora, nie jako fakt dokonany).
+- **Nowy** `docs/karty/I15.11/wejscie-140.md` (51 l.) — CLAUDE.md reguła 2: ustalenie dla
+  PRZYSZŁEJ karty w JEJ katalogu. Trzy punkty wpięcia, lista zmian w plikach, które I15.11 też
+  rusza, ostrzeżenie o zakresie (gałąź `absenceReview` już dowieziona) i przypomnienie
+  o pułapce MSW.
+
+### `docs/rebuild-backlog.md` (wpis #99)
+
+Zmieniona **wyłącznie linia `Status`** — jedna linia, zgodnie z regułą 0. I15.5 oznaczona jako
+dowieziona wraz z faktem o usunięciu przycisku „Pozostaw starą wstrzymaną…" przez łatkę
+`20260923_dotchoice`; „Otwarte: I15.5/I15.11" → „Otwarte: I15.11".
+
+Doc-checker **świadomie nie ruszył** zdania „Frontend: wstrzykiwany skrypt z przyciskiem i oknem
+„Rozstrzygnij"" w sekcji „Szczegół techniczny" — i słusznie: ono opisuje PRODUKCJĘ (mirror),
+której ten ticket nie zmienia, więc nie jest zdaniem obalonym.
+
+### `docs/spec-frontend.md`
+
+Jeden zwarty blok `> **Odbudowa (I15.5, …)**` wstawiony po istniejącym bloku `3e, 3f-1, 3f-2`
+(20 linii, zero zmian gdzie indziej — plik rusza zaraz I15.11, więc zmiana trzymana w jednym
+miejscu). Opisuje warunek pojawienia się przycisku, trzy gałęzie okna, okno blokady 409
+i cztery odstępstwa D1–D4.
+
+### Pre-existing issues
+
+- `docs/karty/I15.5/wejscie-110.md` (plik CUDZEGO ticketu, nieruszany) podaje źródło prawdy
+  `abe5f14`, a realnym źródłem było `88fa31c` — o dwie fale łatek dalej. Poprawione w `karta.md`,
+  rozbieżność odnotowana w „Do koordynatora".
+- `docs/spec-frontend.md` nie opisuje układu ekranu stagingu z I14 (grep po `I14`/`14a`/`14b`/
+  `14c` — zero trafień), więc nie było tam czego korygować przy zmianie kolumny „Akcje".
