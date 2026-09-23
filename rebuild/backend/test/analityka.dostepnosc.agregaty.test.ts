@@ -20,7 +20,7 @@ import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { Baza } from "../src/db/index.js";
-import { auditLog, historiaCen, products } from "../src/db/schema.js";
+import { auditLog, historiaCen, products, stagingItems } from "../src/db/schema.js";
 import { silnikStagingu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
 import {
@@ -232,10 +232,19 @@ describe("agregaty analityki (blok 10e)", () => {
 
     /**
      * Duplikat z PRAWDZIWEGO importu, nie wstawiony ręcznie: dwie linie tego samego kodu
-     * w jednym cenniku. Pomiar z ticketu 90 — w katalogu zostaje linia OSTATNIA, i karta ma
-     * powiedzieć to samo co katalog.
+     * w jednym cenniku.
+     *
+     * ⚠⚠ ZMIANA ZACHOWANIA I15.4b (#103). Pomiar z ticketu 90 opisywał stary silnik: obie linie
+     * przechodziły przez auto-zatwierdzenie, katalog zostawał z linią OSTATNIĄ, a `historia_cen`
+     * dostawała DWA wiersze o identycznym znaczniku. `staging_policy` trzyma pozycje w mapie
+     * po kodzie i przy drugiej linii tego samego kodu wystawia błąd „Kilka różnych pozycji
+     * dostawcy wskazuje tę samą oponę. Wymaga sprawdzenia pliku." (`staging_policy.cjs:430-441`).
+     *
+     * Skutek dla analityki: sprzeczny cennik NIE rusza już katalogu ani historii — obie linie
+     * czekają na człowieka. Karta „tempo schodzenia" pokazuje więc stan sprzed importu, i to
+     * jest poprawne: nie wolno liczyć spadku na podstawie pliku, którego nikt nie zatwierdził.
      */
-    it("duplikat z importu (dwie linie tego samego kodu) — karta zgodna z katalogiem", () => {
+    it("duplikat z importu (dwie linie tego samego kodu) — sprawa dla człowieka, katalog nietknięty", () => {
       const EAN = "5901234123457";
       // Wiersz katalogu jak w `silnik.decyzje.test.ts` — bez pól spoza tego zestawu, żeby
       // linie cennika różniły się od katalogu WYŁĄCZNIE ceną i stanem (auto-zatwierdzenie).
@@ -255,18 +264,42 @@ describe("agregaty analityki (blok 10e)", () => {
           kod: "P1", nazwa: "Opona 480/70R28 BKT AGRIMAX RT 765", rozmiar: "480/70R28", marka: "BKT",
           model: "AGRIMAX RT 765", kategoria: "Opony rolnicze", ean: EAN, magazyn: "PL", ...pola,
         }) as unknown as RekordSurowy;
-      silnikStagingu(db)("MO5", [linia({ stan: 7, cenaZakupu: 1100 }), linia({ stan: 2, cenaZakupu: 1200 })]);
+      const statystyki = silnikStagingu(db)("MO5", [
+        linia({ stan: 7, cenaZakupu: 1100 }),
+        linia({ stan: 2, cenaZakupu: 1200 }),
+      ]);
 
-      // Import dał dwa wiersze historii o identycznym kluczu…
+      // Sprzeczne linie idą do człowieka, nie do katalogu.
+      expect(statystyki.autoZatwierdzone, "nic nie wchodzi automatycznie").toBe(0);
+      const zgloszenia = db.select().from(stagingItems).all().filter((w) => w.kod === "P1");
+      expect(zgloszenia).toHaveLength(1);
+      expect(zgloszenia[0]!.typZmiany).toBe("blad");
+      expect(String(zgloszenia[0]!.ostrzezenie)).toContain(
+        "Kilka różnych pozycji dostawcy wskazuje tę samą oponę",
+      );
+      // Snapshot niesie OBIE sprzeczne linie, żeby dało się je porównać bez otwierania pliku.
+      const konflikt = (
+        JSON.parse(String(zgloszenia[0]!.snapshotJson)) as {
+          _sourceConflict: { different: string[] };
+        }
+      )._sourceConflict;
+      expect(konflikt.different).toContain("stan");
+      expect(konflikt.different).toContain("cena zakupu");
+
+      // Katalog i historia zostają nietknięte…
       const migawkiImportu = db.select().from(historiaCen).all().filter((w) => w.produktId === idProduktu);
-      expect(migawkiImportu).toHaveLength(2);
-      expect(new Set(migawkiImportu.map((w) => w.zarejestrowanoAt)).size).toBe(1);
-      // …katalog ma stan linii ostatniej…
+      expect(migawkiImportu, "sprzeczny cennik nie pisze do historia_cen").toHaveLength(0);
       const stanKatalogu = db.select().from(products).where(eq(products.id, idProduktu)).get()!.stan;
-      expect(stanKatalogu).toBe(2);
-      // …i karta liczy spadek 10 → 2, nie 10 → 7.
+      expect(stanKatalogu, "stan sprzed importu").toBe(10);
+
+      // …więc karta nie widzi ŻADNEGO spadku: migawka i katalog mówią to samo (10 → 10).
       expect(tempoSchodzenia(db).rows).toEqual([
-        { dostawca: "MO5", kod: "P1", nazwa: "Opona 480/70R28 BKT AGRIMAX RT 765", zeszloSztuk: 10 - stanKatalogu },
+        {
+          dostawca: "MO5",
+          kod: "P1",
+          nazwa: "Opona 480/70R28 BKT AGRIMAX RT 765",
+          zeszloSztuk: 0,
+        },
       ]);
     });
   });

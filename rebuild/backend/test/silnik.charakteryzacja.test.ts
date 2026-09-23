@@ -311,7 +311,14 @@ describe("2. Charakteryzacja na realnych cennikach MO1–MO10", () => {
 
       baza = bezTriggerowBazy(stworzTestowaBaze());
       porownajZWzorcem(uruchomPort(baza.db, kod, katalog, rekordy, overridy), wzorzec, kod);
-    });
+      // ⚠ Podniesiony limit czasu (globalny to 20 s). Od I15.4b silnik wykonuje znacznie
+      // więcej pracy na pozycję niż stary `tk()`: sprawdza automatyczne wstrzymanie,
+      // zapamiętane dopasowanie i ręczny wybór operatora, a w pętli nieobecnych szuka
+      // alternatyw, porównując KAŻDY produkt katalogu z KAŻDYM rekordem cennika przez
+      // `compatibility()`. Dla MO2 (1729 kart) i MO5 (1989 kart) to setki tysięcy porównań.
+      // Taki jest koszt oryginału — nie skracamy go, bo to zmieniłoby zachowanie; problem
+      // wydajności stagingu ma własny wpis w backlogu (#107).
+    }, 90_000);
   }
 });
 

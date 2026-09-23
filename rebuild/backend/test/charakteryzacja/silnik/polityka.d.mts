@@ -18,13 +18,13 @@ interface UchwytBazy {
 }
 
 export declare function stworzPolitykeOryginalu(opcje: {
-  produkty: Record<string, unknown>[];
-  overrides?: Record<string, unknown>[];
+  produkty: readonly unknown[];
+  overrides?: readonly unknown[];
 }): {
   /** Oryginalny `importer(supplier, incoming, options)` zwrócony przez `install()`. */
   importer: (
     dostawca: string,
-    wejscie: Record<string, unknown>[],
+    wejscie: readonly unknown[],
     opcje?: Record<string, unknown>,
   ) => Record<string, unknown>;
   db: UchwytBazy;
@@ -50,7 +50,7 @@ export declare function oryginalneAssignKodImportu(zaleznosci: {
  * Ładuje oryginał akceptacji/bulku z nadpisanym `ext.assignKodImportu` (Staging v2).
  * `zaladuj` to loader z `charakteryzacja/akceptacja/oryginal.mjs`.
  */
-export declare function zaladujOryginalZeStagingV2<T extends { U: Record<string, unknown> }>(
-  zaladuj: (baza: unknown, podmianaBridgeExt?: Record<string, unknown>) => T,
-  baza: { sqlite: unknown },
+export declare function zaladujOryginalZeStagingV2<B, T extends { U: Record<string, unknown> }>(
+  zaladuj: (baza: B, podmianaBridgeExt?: Record<string, unknown>) => T,
+  baza: B,
 ): T;
