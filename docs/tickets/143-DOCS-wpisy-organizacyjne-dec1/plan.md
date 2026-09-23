@@ -1,6 +1,6 @@
 # 143-DOCS-wpisy-organizacyjne-dec1 — przeniesienie notatek DEC.1 do backlogu
 
-> Status: Implemented
+> Status: Shipped
 > Branch: `docs/143-wpisy-organizacyjne-dec1`
 > Worktree: `.worktrees/143-DOCS-wpisy-organizacyjne-dec1`
 
@@ -56,4 +56,4 @@ Brak testów kodu. Weryfikacja:
 - [x] `--do-decyzji` niezmienione (3 wpisy czekające na Anię)
 - [x] Zero zmian w `rebuild/`, `contract/`, roadmapie i cudzych kartach
 - [x] Nieaktualna nota o `I15.10b` odnotowana, nie przepisana
-- [ ] Gałąź zsynchronizowana z `origin/develop`, PR `MERGEABLE`
+- [x] Gałąź zsynchronizowana z `origin/develop` (`b0bccac`), PR `MERGEABLE`
