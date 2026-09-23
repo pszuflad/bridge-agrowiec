@@ -7,6 +7,8 @@
 const crypto = require('crypto');
 const tyre = require('./tyre_params.cjs');
 const common = require('../common.cjs');
+const paymentBlocks = require('../payment_blocks.cjs');
+const stagingPolicy = require('../staging_policy.cjs');
 
 function firstValue(...values) {
   for (const value of values) {
@@ -507,6 +509,18 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
   const oz = Array.isArray(record.oznaczenia_techniczne) ? record.oznaczenia_techniczne : [];
   const enriched = normalizeBySupplier(dostawcaKod, record) || {};
   if (shouldRejectRecord(record, enriched)) return null;
+  const supplierEanRaw = stagingPolicy.rawEan(record);
+  let canonicalEanRaw = supplierEanRaw;
+  // Handlopex marks dated variants with W2 after a real EAN. Only accept
+  // that known convention when its producer code and explicit DOT agree.
+  const datedEan = /^([0-9]{13})W2$/i.exec(String(supplierEanRaw ?? '').trim());
+  const producerYear = /W(20[0-9]{2})$/i.exec(String(record.surowe_pola?.['kod producenta'] ?? '').trim());
+  if (['MO4', 'MO5'].includes(baseSupplierCode(dostawcaKod, record)) &&
+      datedEan && producerYear &&
+      String(record.surowe_pola?.dot ?? '').trim() === producerYear[1] &&
+      stagingPolicy.validateEan(datedEan[1]).valid) {
+    canonicalEanRaw = datedEan[1];
+  }
   let kodDisplay = firstValue(enriched.kodDostawcy, record.kod_dostawcy);
   // POPRAWKA 2026-06-18: odrzucamy kod_dostawcy znieksztalcony przez notacje naukowa
   // Excela (np. "5,02E+12") — taki "kod" nie jest unikalny i nie powinien byc uzywany
@@ -536,6 +550,16 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
   const marks = detectTechMarks(nazwa, modelRaw, ...(Array.isArray(oz) ? oz : []));
   // oczyszczenie modelu/bieżnika z oznaczeń technicznych (SB/SF/HF/LS/HS nie należą do nazwy modelu)
   const modelBieznikClean = stripTechMarks(modelRaw);
+  const categoryApplication = tyre.normalizeCategoryApplication(
+    common.capitalizeKategoria(firstValue(enriched.kategoria, record.kategoria)),
+    firstValue(
+      enriched.zastosowanie,
+      record.zastosowanie,
+      record.Zastosowanie,
+      record.surowe_pola?.Zastosowanie,
+      record.surowe_pola?.zastosowanie
+    )
+  );
 
   // POPRAWKA 2026-07-21 (standaryzacja WIELKICH liter, decyzja Anny): nazwa/marka/model/bieznik
   // oraz oznaczenieBieznika/rodzaj zapisujemy DRUKOWANYMI literami niezaleznie od pisowni feedu
@@ -544,7 +568,10 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
   return {
     kod: kod ? String(kod) : null,
     kodDostawcy: kodDisplay ? String(kodDisplay) : null,
-    ean: firstValue(enriched.ean, record.ean),
+    ean: stagingPolicy.validateEan(canonicalEanRaw,record.ean_lossy).value,
+    eanRaw: canonicalEanRaw ?? null,
+    _supplierEanOriginal: canonicalEanRaw !== supplierEanRaw ? supplierEanRaw : null,
+    _eanLossy: !!record.ean_lossy,
 
     nazwa: toUpperPLName(nazwa),
     marka: toUpperPL(firstValue(enriched.marka, record.producent, record.marka)),
@@ -557,7 +584,11 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
     // ciezarowe/Ciezarowe, lesne/Lesne) psujacymi statystyki/filtry w panelu. To centralne
     // miejsce (koniec pipeline, przed zapisem do DB) gwarantuje konsekwentnosc dla wszystkich
     // obecnych i przyszlych dostawcow bez potrzeby edycji kazdego parsera osobno.
-    kategoria: common.capitalizeKategoria(firstValue(enriched.kategoria, record.kategoria)),
+    kategoria: categoryApplication.kategoria,
+    // POPRAWKA 2026-09-13: zastosowanie jest normalizowane względem kategorii
+    // w jednym wspólnym miejscu dla wszystkich dostawców. Nieprawidłowe połączenia
+    // (np. Rolnicze + Harwester) przechodzą na Uniwersalne/pozostałe.
+    zastosowanie: categoryApplication.zastosowanie,
 
     magazyn: null,
     magazynRaw: null,
@@ -572,7 +603,9 @@ function recordToSurowe(record, dostawcaKod = record.dostawca) {
 
     rozmiar: firstValue(enriched.rozmiar, record.rozmiar, record.rozmiar_alternatywny),
     rozmiarAlternatywny: firstValue(enriched.rozmiarAlternatywny, record.rozmiar_alternatywny),
-    szerokosc: enriched.szerokosc ?? null,
+    // Normalizujemy tylko samą kolumnę szerokości; pełna nazwa i rozmiar
+    // zachowują zapis źródłowy.
+    szerokosc: tyre.normalizeWidthValue(enriched.szerokosc),
     profil: enriched.profil ?? null,
     srednica: enriched.srednica ?? null,
     // POPRAWKA 2026-09-01 (unifikacja konstrukcji): centralne mapowanie na pełne słowa
@@ -643,7 +676,12 @@ function recordToSuroweDostawca(dostawcaKod, record) {
     s.magazynRaw = record.surowe_pola.Lagerbestand;
   }
 
-  if (!s.kod) s.kod = syntheticKod(kod, record, enriched);
+  if (!s.kod) {
+    s._kodSynthetic = true;
+    // An EAN may identify different models or batches. Never use EAN alone
+    // as a generated product code.
+    s.kod = stagingPolicy.syntheticCode(kod,s);
+  }
 
   // POPRAWKA 2026-07-09: kolumna products.kod jest unikalna GLOBALNIE (dla wszystkich
   // dostawcow razem), a nie per-dostawca. Kod producenta opony (np. z Handlopex WR/RZ)
@@ -657,12 +695,42 @@ function recordToSuroweDostawca(dostawcaKod, record) {
     s.kod = `${kod}_${s.kod}`;
   }
 
+  // Reguła logistyczna Selly zależna wyłącznie od magazynu/dostawcy.
+  // Warstwa bazy utrwala ją triggerem, a adapter przekazuje ją również w rekordzie importu.
+  s.blokowaneFormyPlatnosci = paymentBlocks.getBlockedPaymentForms(kod);
+
   return s;
 }
 
 function recordsToSurowe(dostawcaKod, records) {
-  return records.map(record => recordToSuroweDostawca(dostawcaKod, record)).filter(Boolean);
+  const items=[],rejected=[];
+  for(const record of records){
+    const value=recordToSuroweDostawca(dostawcaKod,record);
+    if(value){
+      if(dostawcaKod==='MO2')value._jmkRowId=record.surowe_pola?.['id JMK']??null;
+      items.push(value);
+    }else rejected.push(record);
+  }
+  if (dostawcaKod === 'MO2') {
+    // JMK repeats a manufacturer's code for different stock batches. Its own
+    // row identifier is stable and separates the offers; the staging matcher
+    // can still recognize an already accepted legacy card by EAN + DOT.
+    const counts=new Map();
+    for(const item of items){
+      const code=String(item.kodDostawcy||'').trim();
+      if(code) counts.set(code,(counts.get(code)||0)+1);
+    }
+    for(const item of items){
+      const code=String(item.kodDostawcy||'').trim();
+      if(!code || counts.get(code)<2) continue;
+      const rowId=String(item._jmkRowId||'').trim();
+      // If JMK does not supply a unique row ID, keep the old conservative
+      // conflict rather than inventing an identifier or summing stock.
+      if(/^\d+$/.test(rowId))item.kod=`MO2_JMK_${rowId}`;
+    }
+    for(const item of items)delete item._jmkRowId;
+  }
+  return require('../feed_safety.cjs').converted(dostawcaKod,records,items,rejected);
 }
 
 module.exports = { recordToSurowe, recordToSuroweDostawca, recordsToSurowe };
-

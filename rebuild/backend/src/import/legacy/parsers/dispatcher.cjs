@@ -26,7 +26,7 @@ const URLS = {
   MO10: 'https://agroopony.eu/imports/gri.csv'
 };
 
-function parseByKod(dostawcaKod, filePath) {
+function parseRawByKod(dostawcaKod, filePath) {
   switch ((dostawcaKod || '').toUpperCase()) {
     case 'MO1':  return mo1.parseFile(filePath);
     case 'MO2':  return mo2.parseFile(filePath);
@@ -41,6 +41,10 @@ function parseByKod(dostawcaKod, filePath) {
     default:
       throw new Error(`Nieznany dostawca: ${dostawcaKod}`);
   }
+}
+
+function parseByKod(dostawcaKod,filePath){
+  return require('../feed_safety.cjs').attach(String(dostawcaKod).toUpperCase(),parseRawByKod(dostawcaKod,filePath));
 }
 
 // getUrl: preferuje URL z tabeli suppliers (jeśli podano db handle), fallback do URLS w kodzie.
