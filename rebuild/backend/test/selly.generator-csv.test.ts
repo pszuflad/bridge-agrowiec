@@ -248,6 +248,11 @@ describe("generator CSV dla Selly (blok 8a)", () => {
     /**
      * Dowód mechanizmu z komentarza wyżej, na tej samej bazie i tej samej kolumnie — żeby
      * „SQLite to konwertuje" nie było w tym pliku gołym twierdzeniem.
+     *
+     * ⚠ TO NIE JEST TEST REGRESJI NASZEGO KODU. Opisuje zachowanie samego SQLite, więc
+     * przechodzi niezależnie od treści `generator-csv.ts` — także na wersji sprzed naprawy.
+     * Regresję pilnują testy wyżej (bez poprawki pada ich pięć); ten jest tu po to, żeby
+     * uzasadnić, dlaczego w tabelce reguły `'0'` daje pustkę, a nie „Tak".
      */
     it("powinowactwo typów: `'0'`/`'1'` wchodzą jako liczby, `'Tak'`/`'Nie'`/`''` jako tekst", () => {
       const typWKolumnie = (wartosc: unknown): string => {

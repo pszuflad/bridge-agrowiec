@@ -138,11 +138,14 @@ type WartoscSurowaFlagi = string | number | null;
  * `'Tak'` to samo `false` co nasze — API jest wierne i ma takie zostać. Zmiana schematu
  * naprawiłaby CSV kosztem rozjazdu z `contract/fixtures/GET_products.json`.
  *
- * DLACZEGO `sql` OMIJA MAPPER: `mapResultRow` (`drizzle-orm/sqlite-core/utils.cjs:40-75`)
- * wybiera dekoder po typie pola — `is(field, Column)` daje `column.mapFromDriverValue`
- * (czyli `Number(v) === 1`), a `is(field, SQL)` daje `field.decoder`, którym bez `.mapWith()`
- * jest `noopDecoder` = `(v) => v` (`drizzle-orm/sql/sql.cjs:297`). Pole zbudowane jako
- * sql`${products.ms}` jest więc `SQL`, nie `Column`, i wartość wychodzi surowa.
+ * DLACZEGO `sql` OMIJA MAPPER: `mapResultRow` (`drizzle-orm/utils.cjs:40`, wybór dekodera
+ * w `:45-52`, użycie w `:63`) bierze dekoder Z TYPU POLA — `is(field, Column)` daje sam
+ * `Column`, czyli `column.mapFromDriverValue` (dla `mode: "boolean"` to `Number(v) === 1`),
+ * a `is(field, SQL)` daje `field.decoder`, którym bez `.mapWith()` jest `noopDecoder`
+ * = `{ mapFromDriverValue: (value) => value }` (`drizzle-orm/sql/sql.cjs:296-298`).
+ * Pole zbudowane jako sql`${products.ms}` jest więc `SQL`, nie `Column`, i wartość wychodzi
+ * surowa. (Ścieżki sprawdzone w `node_modules/drizzle-orm` 0.45.2 — mapper NIE jest
+ * w `sqlite-core/`, tylko w korzeniu paczki.)
  */
 const FLAGI_SUROWE = {
   reinforced: sql<WartoscSurowaFlagi>`${products.reinforced}`,
