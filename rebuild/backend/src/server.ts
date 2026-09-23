@@ -5,6 +5,10 @@ import { stworzApp } from "./app.js";
 import { stworzScheduler } from "./import/scheduler.js";
 import { synchronizujDostawce } from "./import/synchronizuj.js";
 import { stworzWygaszacz } from "./promocje/wygaszacz.js";
+import {
+  stworzSynchronizacjeDostepnosci,
+  ustawDomyslnaSynchronizacjeDostepnosci,
+} from "./selly/dostepnosc.js";
 import { stworzKlientaSelly } from "./selly/klient.js";
 import { opakujKlientaTrybem } from "./selly/tryb.js";
 import { stworzDiscovery } from "./selly/rest/discovery.js";
@@ -58,6 +62,49 @@ const harmonogramSelly = stworzHarmonogramSelly({
   discovery: discoverySelly,
   tryb: env.SELLY_TRYB,
 });
+
+// Odświeżanie dostępności (karta I15.10b). Wpięcie modułu `selly/dostepnosc.ts` z I15.10:
+// importer stagingu woła globalne `zadajOdswiezenie(dostawca)` (`import/polityka/fabryka.ts`,
+// koniec `importer()`), a ono bez zamontowanej instancji NIE ROBI NIC. Ta rejestracja jest
+// jedynym miejscem, które nadaje tamtym wywołaniom skutek.
+//
+// TA SAMA instancja `discoverySelly` co wyżej — w jej domknięciu żyją nauczone `feature_id`
+// i cache kodów produktów Selly (`docs/karty/I15.10/wejscie-121.md`). Druga instancja miałaby
+// własny, zimny cache i rozjechałaby się z pierwszą.
+//
+// Rejestracja stoi TUTAJ, a nie w callbacku `listen()` jak starty schedulerów, bo nie jest
+// startem: instancja nie ma timera, a rejestracja to czysty stan. Musi być żywa, ZANIM
+// w `listen()` ruszy `scheduler.uruchom()` — jego pierwszy przebieg potrafi od razu wykonać
+// import i wywołać `zadajOdswiezenie()`.
+//
+// ⚠ BRAMKA — ŚWIADOME ODSTĘPSTWO W KRYTERIUM (decyzja użytkownika 2026-09-23, karta I15.10b).
+// Oryginał ma tu twardą bramkę po ścieżce bazy (`staging_policy.cjs:131-134`: wychodzi, gdy
+// `db.name` to nie produkcyjna `data.db`), więc każda kopia milczy. Odbudowa nie hardkoduje
+// ścieżki produkcyjnej bazy, a bramkę mieć MUSI: montaż otwiera generatorowi CSV drogę
+// automatyczną, z każdego importu, podczas gdy `SELLY_CSV_DIR` domyślnie wskazuje katalog
+// PRODUKCYJNY (`config/env.ts`, domyślka świadoma — pusty `.env` ma działać jak oryginał),
+// a staging dzieli VPS z produkcją. Do tej pory ta ścieżka była osiągalna wyłącznie ręcznym
+// `POST /api/selly/generate-csv` za `requireAuth`. Kryterium zastępczym jest `SELLY_TRYB`:
+// domyślnie i na stagingu `wylaczony` → zachowanie jak dotąd (ciche no-opy), na produkcji
+// `pelny` → odświeżanie działa. Kierunek ten sam co w oryginale, kryterium inne.
+if (env.SELLY_TRYB === "wylaczony") {
+  console.log(
+    "[dostepnosc] niezamontowana (SELLY_TRYB=wylaczony) — zgłoszenia odświeżenia są no-opem",
+  );
+} else {
+  ustawDomyslnaSynchronizacjeDostepnosci(
+    stworzSynchronizacjeDostepnosci({
+      db,
+      discovery: discoverySelly,
+      // Ścieżki CSV z env, dokładnie jak w `app.ts` dla tras `selly/*` — jedno źródło prawdy.
+      sciezkiCsv: {
+        katalog: env.SELLY_CSV_DIR,
+        plik: env.SELLY_CSV_PLIK,
+        url: env.SELLY_CSV_URL,
+      },
+    }),
+  );
+}
 
 const app = stworzApp({
   env,
@@ -120,6 +167,16 @@ function zamknij(sygnal: string): void {
   scheduler.zatrzymaj();
   harmonogramSelly.zatrzymaj();
   wygaszacz.zatrzymaj();
+  // Wyrejestrowanie jest bezwarunkowe — zdjęcie instancji, której nie ma, jest no-opem.
+  // Od tej chwili `zadajOdswiezenie()` nie ROZPOCZNIE już nowego biegu.
+  //
+  // Biegu, który trwa, to NIE przerywa i nikt na niego nie czeka: moduł celowo nie ma
+  // anulowania (oryginał też nie ma), a `server.close()` pilnuje tylko połączeń HTTP. Taki
+  // bieg kończy się więc jednym z dwóch sposobów — trafia na `sqlite.close()` i wywala się
+  // w generatorze (błąd złapany i zalogowany, `selly/dostepnosc.ts`), albo zostaje ucięty
+  // w połowie przez `process.exit(0)`, bez żadnego logu. Jedno i drugie jest akceptowalne:
+  // mechanizmem ponawiania jest okresowa synchronizacja, nie ten moduł.
+  ustawDomyslnaSynchronizacjeDostepnosci(null);
   server.close(() => {
     sqlite.close();
     process.exit(0);
