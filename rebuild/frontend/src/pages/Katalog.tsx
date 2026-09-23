@@ -62,7 +62,12 @@ import {
 import { usunProdukt, zapiszProdukt } from "./katalog/api";
 import { DialogEdycjiProduktu } from "./katalog/DialogEdycjiProduktu";
 import { KonfiguratorKolumn } from "./katalog/KonfiguratorKolumn";
-import { KOLUMNY, KOLUMNY_DOMYSLNE, uzupelnijKodImportu } from "./katalog/kolumny";
+import {
+  KOLUMNY,
+  KOLUMNY_DOMYSLNE,
+  uzupelnijBlokowaneFormy,
+  uzupelnijKodImportu,
+} from "./katalog/kolumny";
 import { przeciwnyStatus } from "./katalog/MenuAkcji";
 import { TabelaProduktow } from "./katalog/TabelaProduktow";
 import { WyborWielokrotny } from "./katalog/WyborWielokrotny";
@@ -208,7 +213,9 @@ export function Katalog() {
     let aktualne = true;
     void odczytajKV<string[]>(KLUCZ_KOLUMN_KATALOGU).then((zapisane) => {
       if (aktualne && Array.isArray(zapisane) && zapisane.length > 0) {
-        setKolumnyWybrane(new Set(uzupelnijKodImportu(zapisane)));
+        // Retrofity zastanych zapisów w IndexedDB składamy kolejno — każdy dokłada swoją
+        // kolumnę, jeśli zapisu w niej brakuje. Kolejność bez znaczenia, wynik to zbiór.
+        setKolumnyWybrane(new Set(uzupelnijBlokowaneFormy(uzupelnijKodImportu(zapisane))));
       }
       if (aktualne) setZaladowanoKolumny(true);
     });
