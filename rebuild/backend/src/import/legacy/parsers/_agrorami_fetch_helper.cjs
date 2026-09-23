@@ -11,8 +11,10 @@ const api = require(path.join(__dirname, 'mo9_agrorami_api.cjs'));
 (async () => {
   try {
     const result = await api.fetchAll();
-    process.stdout.write(JSON.stringify(result));
-    process.exit(0);
+    // Zaczekaj aż cały duży JSON zostanie przekazany do procesu nadrzędnego.
+    // Natychmiastowy process.exit(0) potrafił uciąć końcówkę odpowiedzi.
+    await new Promise((resolve, reject) => process.stdout.write(JSON.stringify(result), err => err ? reject(err) : resolve()));
+    process.exitCode = 0;
   } catch (e) {
     process.stderr.write(String(e && e.stack ? e.stack : e));
     process.exit(1);

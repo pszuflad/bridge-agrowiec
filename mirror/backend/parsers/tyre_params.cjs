@@ -3,6 +3,7 @@
 // POPRAWKA 2026-06-30: importujemy helpery z common.cjs do normalizacji bieżników typu
 // "Agriflex 372 +" oraz ekstrakcji PR z indeksów (np. "16P/159A8" -> PR=16, LI/SI=159A8).
 const commonHelpers = require('../common.cjs');
+const applicationRules = require('../application_rules.cjs');
 const { normalizeBieznikPlus, extractPrFromText } = commonHelpers;
 
 function cleanText(value) {
@@ -17,6 +18,13 @@ function emptyToNull(value) {
   return text ? text : null;
 }
 
+// POPRAWKA 2026-09-13: jedna zamknięta mapa kategoria → zastosowanie dla wszystkich
+// parserów MO1-MO10. Adapter wywołuje ten helper na końcu wspólnego pipeline'u,
+// dzięki czemu wartości spoza listy danej kategorii nie wracają przy kolejnym imporcie.
+function normalizeCategoryApplication(kategoria, zastosowanie) {
+  return applicationRules.normalizeCategoryApplication(kategoria, zastosowanie);
+}
+
 function parseNumber(value) {
   if (value === null || value === undefined || value === '') return null;
   const text = String(value)
@@ -25,6 +33,17 @@ function parseNumber(value) {
     .replace(',', '.');
   const num = Number.parseFloat(text);
   return Number.isFinite(num) ? num : null;
+}
+
+// Kanoniczny zapis wyłącznie dla kolumny products.szerokosc i odpowiadającej jej
+// cechy Selly. Usuwa nieznaczące zera końcowe, ale nie zmienia pól nazwa/rozmiar:
+// 5.00 -> 5, 12.50 -> 12.5, 340.0 -> 340.
+function normalizeWidthValue(value) {
+  if (value === null || value === undefined || String(value).trim() === '') return null;
+  const text = String(value).trim().replace(',', '.');
+  if (!/^\d+(?:\.\d+)?$/.test(text)) return text;
+  const number = Number(text);
+  return Number.isFinite(number) ? String(number) : text;
 }
 
 // POPRAWKA 2026-08-18: fallback szerokosci (gdy rozbicie rozmiaru przez parseSize() nie dalo
@@ -331,41 +350,9 @@ function parseSize(value) {
     // widthCm powyzej dalej dobrze liczy wysokoscBokuCm/wysokoscRzeczywistaCm (formula wymaga cm).
   }
 
-  // POPRAWKA 2026-08-19 (v2): Anna wymaga zachowania oryginalnego zapisu pierwszej
-  // liczby z rozmiaru — z zerami koncowymi (10.0, 10.00). result.szerokosc to float
-  // (potrzebny do widthCm/wysokoscBokuCm), wiec dodajemy osobne pole szerokoscRaw
-  // jako string 1:1 z rozmiaru. Trafi do kolumny products.szerokosc (TEXT).
-  if (result.szerokosc !== null && size) {
-    // POPRAWKA 2026-08-31: dla notacji WxSxD (stara diagonalna rolnicza) NIE nadpisujemy
-    // szerokosc pierwsza liczba z rozmiaru — tam pierwsza liczba to srednica zewnetrzna mm,
-    // a szerokosc siedzi na drugim miejscu. Wykrywamy przez size ~ /^\d{3,4}x\d{3}-\d/.
-    // POPRAWKA 2026-09-04: dodano wariant calowy "OD x SW - Rim" dla malych opon
-    // wozkowych (16x6-8, 23x10-12) — tam rowniez pierwsza liczba z 'size' to OD (cale),
-    // a rzeczywista szerokosc jest w result.szerokosc po parsowaniu. Bez tego blok
-    // "szerokoscRaw z pierwszej liczby" nadpisywalby prawidlowa szerokosc pierwsza
-    // liczba z rozmiaru (OD).
-    const isWxSxDcale = /^\d{1,2}(?:\.\d+)?x\d{1,2}(?:\.\d+)?-\d{1,2}/.test(size)
-      && (function(){
-           const m = size.match(/^(\d{1,2}(?:\.\d+)?)x\d{1,2}(?:\.\d+)?-(\d{1,2}(?:\.\d+)?)/);
-           return m && parseFloat(m[1]) > parseFloat(m[2]) && parseFloat(m[1]) < 30;
-         })();
-    const isWxSxD = (/^\d{3,4}x\d{3}-\d/.test(size) && Number(String(result.szerokosc)) < 400) || isWxSxDcale;
-    if (isWxSxD) {
-      // pierwsza liczba z 'size' to OD mm, druga to SW mm (juz w result.szerokosc jako number).
-      // Ustawiamy szerokoscRaw z aktualnego result.szerokosc (SW), nie z pierwszej liczby.
-      result.szerokoscRaw = String(result.szerokosc);
-      result.szerokosc = result.szerokoscRaw;
-    } else {
-      const rawMatch = size.match(/(\d+(?:[.,]\d+)?)/);
-      if (rawMatch) {
-        result.szerokoscRaw = rawMatch[1].replace(',', '.');
-        // POPRAWKA 2026-08-19 (v3): nadpisuje result.szerokosc stringiem 1:1 z rozmiaru
-        // (10.0, 14.9, 800, 10.00). Kolumna products.szerokosc jest teraz TEXT.
-        // wysokoscBokuCm/wysokoscRzeczywistaCm sa juz policzone powyzej z floata,
-        // wiec ta zmiana ich nie ruszy. Zachowujemy zera koncowe zgodnie z prosba Anny.
-        result.szerokosc = result.szerokoscRaw;
-      }
-    }
+  if (result.szerokosc !== null) {
+    result.szerokoscRaw = normalizeWidthValue(result.szerokosc);
+    result.szerokosc = result.szerokoscRaw;
   }
 
   return result;
@@ -559,7 +546,7 @@ function normalizeJmk(record) {
   // POPRAWKA 2026-07-21: doklejamy record.bieznik do wykrywania SB/SF/HS - dostawca (Alliance
   // przez JMK) czasem wpisuje "STEEL BELTED"/"HIGH SPEED" w kolumnie Bieżnik, a nie w Nazwie.
   const marks = parseTechnicalMarks(record.nazwa, record.system, record.bieznik);
-  const kategoria = cleanText(record.rodzaj).toLowerCase() || null;
+  const kategoria = applicationRules.canonicalCategory(record.rodzaj);
   const liSi = formatLiSi(loadSpeed.indeksNosnosci, loadSpeed.indeksPredkosci);
   const cenaZakupu = normalizePrice(record.cenaKlientNetto);
   const stan = normalizeQty(record.magazyn1);
@@ -1203,7 +1190,7 @@ function normalizeAgrowiec(record) {
   const loadSpeed = parseLoadSpeed(record.indeksy);
   const vfIf = emptyToNull(record.vfIf);
   const result = {
-    kategoria: cleanText(record.kategoria).toLowerCase() || null,
+    kategoria: applicationRules.canonicalCategory(record.kategoria),
     kodDostawcy: null,
     ean: emptyToNull(record.ean),
     marka: emptyToNull(record.producent),
@@ -1300,7 +1287,7 @@ function normalizeTrelleborg(record) {
   const vfIf = emptyToNull(record.vfIf);
   const cfo = emptyToNull(record.cfo) ? 1 : 0;
   const result = {
-    kategoria: cleanText(record.rodzaj).toLowerCase() || null,
+    kategoria: applicationRules.canonicalCategory(record.rodzaj),
     kodDostawcy: emptyToNull(record.kodProducenta),
     ean: normalizeScientificEan(record.ean),
     marka: emptyToNull(record.producent),
@@ -1376,7 +1363,7 @@ function normalizeAgrorami(record) {
     else if (reIndustrial.test(txt)) kategoria = 'Przemys\u0142owe';
     else kategoria = 'Rolnicze';
   } else {
-    kategoria = katRaw;
+    kategoria = applicationRules.canonicalCategory(record.kategoria);
   }
   // POPRAWKA 2026-09-01: porównanie z Wielkiej litery.
   let tlTt = normalizeTlTt(record.tlTt) || marks.tlTt;
@@ -1806,8 +1793,10 @@ module.exports = {
   cleanText,
   normalizePrice,
   normalizeQty,
+  normalizeWidthValue,
   normalizeLabelFlag,
   normalizeLabelNoise,
+  normalizeCategoryApplication,
   parseSize,
   parseLoadSpeed,
   parseTechnicalMarks,

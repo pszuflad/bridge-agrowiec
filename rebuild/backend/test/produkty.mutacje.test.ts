@@ -262,7 +262,13 @@ describe("Mutacje produktów", () => {
 
     /**
      * Migracja 011 (karta I15.1, backlog #73): kolumnę utrzymują triggery po `dostawca` — nie jest
-     * na liście pól edytowalnych, a do odpowiedzi nie wychodzi, dopóki kształtu nie zmieni I15.3.
+     * na liście pól edytowalnych i do odpowiedzi nie wychodzi.
+     *
+     * ⭐ KARTA I15.3 (ticket 122) TO ROZSTRZYGNĘŁA — poprzednia wersja tego komentarza mówiła
+     * „dopóki kształtu nie zmieni I15.3", jakby ujawnienie było przesądzone. Nie jest: pomiar na
+     * oryginale z `88fa31c` (baza z kolumną wypełnioną dla 7405 produktów, obydwa triggery)
+     * pokazał 72 klucze bez tego pola, więc ujawnienie byłoby ODSTĘPSTWEM. Ukrycie zostaje.
+     * Pełny wywód: `src/repos/kolumny.ts`, `KOLUMNY_POZA_KONTRAKTEM.products`.
      */
     it("`blokowaneFormyPlatnosci` — PATCH jej nie zapisuje, odpowiedź jej nie niesie", async () => {
       const id = zasiejProdukt();

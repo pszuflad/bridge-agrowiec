@@ -186,12 +186,41 @@ describe("POST /api/dostawcy/:kod/upload", () => {
       zasiejDostawce("MO8");
       const odp = await wgraj("MO8", Buffer.from("to nie jest xlsx, tylko tekst"), "smieci.xlsx");
 
-      expect(odp.status).toBeGreaterThanOrEqual(400);
+      // Asercja na DOKŁADNY kod, nie `>= 400` — luźna przepuściła tu regresję raz
+      // (ticket 120, review: ta trasa oddawała 500 tam, gdzie `parse-file` oddawało 400).
+      //
+      // ⚠ Zmierzone, wbrew intuicji: śmieci wysłane jako XLSX dają **400**, nie 500.
+      // SheetJS jest pobłażliwy i NIE wywraca się na takim wejściu — zwraca zero rekordów
+      // bez błędów, więc zatrzymuje to dopiero bezpiecznik pustego cennika
+      // (`PustyImportBlad`, po resyncu wykrywane już przez `feed_safety`). Twarda awaria
+      // czytnika, która naprawdę daje 500, to np. `CsvError: Quote Not Closed` z `csv-parse`
+      // — patrz `test/archiwum-importow.gate.test.ts`.
+      expect(odp.status).toBe(400);
       const cialo = odp.body as { error: string; dostawcaKod: string; nazwaPliku: string };
       expect(cialo.error).toBeTruthy();
       expect(cialo.error).not.toBe("Błąd serwera");
       expect(cialo.dostawcaKod).toBe("MO8");
       expect(cialo.nazwaPliku).toBe("smieci.xlsx");
+      expect(policzStaging()).toBe(0);
+    });
+
+    /**
+     * Rozróżnienie wprowadzone resyncem 23.09 (ticket 120, backlog #103): plik, który parser
+     * ODCZYTAŁ i zgłosił błędy wierszy, to błąd DANYCH WEJŚCIOWYCH — 400. Twarda awaria
+     * czytnika (test wyżej: śmieci jako XLSX wywracają SheetJS) zostaje przy 500.
+     *
+     * Asercja jest na DOKŁADNY kod, nie na `>= 400`. Luźna asercja w teście wyżej przepuściła
+     * regresję, w której ta trasa oddawała 500 tam, gdzie `POST /api/import/parse-file`
+     * oddawało już 400 — mimo że obie idą przez ten sam `parsujBufor()`.
+     */
+    it("błąd odczytu wierszy (#103) daje DOKŁADNIE 400, nie 500", async () => {
+      zasiejDostawce("MO1");
+      const odp = await wgraj("MO1", Buffer.from("nie;jest;cennikiem\n"), "cennik.csv");
+
+      expect(odp.status).toBe(400);
+      const cialo = odp.body as { error: string; dostawcaKod: string };
+      expect(cialo.error).toMatch(/Błędy odczytu cennika/);
+      expect(cialo.dostawcaKod).toBe("MO1");
       expect(policzStaging()).toBe(0);
     });
 
