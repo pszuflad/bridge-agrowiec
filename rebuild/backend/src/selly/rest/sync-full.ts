@@ -425,6 +425,12 @@ export async function syncFullForDostawca(
       // Backlog #104 (`abe5f14`): cykl Toru 2 trwa długo, a import mógł w tym czasie wstrzymać
       // pozycję. Status i stan czytamy więc DOPIERO TERAZ, z bazy, a nie z migawki sprzed biegu.
       // Wstrzymany po rozpoczęciu cyklu jest pomijany — inaczej wysłalibyśmy nieaktualny stan.
+      //
+      // ⚠ `row.stan` jest tu przypisywane, ale NIC go dalej nie czyta: payload Toru 2
+      // (`toSellyPayloadV2`) nie niesie stanu, a `markProductSynced` nie zapisuje
+      // `stan_wyslany`. Tak samo jest w ORYGINALE (`sync_full.cjs:291` — przypisanie bez
+      // odbiorcy), więc port zostaje 1:1. Realny skutek tej poprawki to wyłącznie `skip`
+      // dla pozycji wstrzymanej w trakcie cyklu. Stan wysyła Tor 1.
       const live = db.$client
         .prepare("SELECT status, stan FROM products WHERE id = ?")
         .get(row.bridge_product_id) as { status: string; stan: number | null } | undefined;
