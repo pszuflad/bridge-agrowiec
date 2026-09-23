@@ -1,7 +1,7 @@
 # I15.5 — Staging v2 — frontend: przycisk i okno „Rozstrzygnij”, komunikaty blokady akceptacji
 
-> **Stan:** ⬜ po I15.4 (fala 4)
-> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #99 · **Zależy od:** I15.4
+> **Stan:** ⬜ po I15.4c (fala 4)
+> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #99 · **Zależy od:** I15.4c
 > **Ticket:** —
 
 Założona przez koordynatora ticketem `104-DOCS-plan-i15`, 2026-09-22. Plan całej iteracji: `docs/rebuild-roadmap.md`, blok „Iteracja 15”.
