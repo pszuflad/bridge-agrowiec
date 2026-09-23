@@ -3486,6 +3486,7 @@ potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać 
 | D | **I15.11** (panel „Braki w cenniku") | ✅ 24.09 (ticket 142) |
 | E | **I15.9** (delta dla Ani) → **TEST.1 ‖ TEST.2 ‖ TEST.3** (trzy dokumenty dla Ani) | ⬜ ostatnia fala |
 | równolegle | **DEC.1** — runda decyzyjna (#135.1, jedenaście wpisów) | ✅ 23.09 (ticket 141) |
+| ⛔ przed cutoverem | **FIX.1** — CSV gubi flagi zapisane jako tekst `'Tak'` (899 z 5396 wierszy, wpis #153.1) | ⬜ BLOKADA |
 
 ⚠ **KOLEJNOŚĆ FAL B ODWRÓCONA — fakt, nie plan.** Plan zakładał I15.4b (importer) przed I15.4c (akceptacja).
 W rzeczywistości pierwszy wszedł **ticket 129 (I15.4c)** i to jego pliki są dziś **wspólną warstwą polityki
