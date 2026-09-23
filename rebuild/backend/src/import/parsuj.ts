@@ -78,30 +78,35 @@ export class BladCennika extends Error {
 }
 
 /**
- * Komunikaty, którymi `legacy/feed_safety.cjs` sygnalizuje przerwanie importu.
+ * Trzy komunikaty, którymi `legacy/feed_safety.cjs` sygnalizuje przerwanie importu.
  *
- * Rozpoznajemy je po treści, bo `attach()` rzuca goły `Error` bez kodu ani typu — a musimy
- * odróżnić „pusty cennik" (nasz starszy bezpiecznik D7, komunikat i kod HTTP zostają
- * bez zmian) od „błędów parsera" (nowość #103). Treści są przypięte testem
- * w `test/feed-safety.test.ts`, więc kolejny resync, który je zmieni, zaświeci na czerwono
- * zamiast po cichu wpaść w gałąź `else`.
+ * Rozpoznajemy je PO TREŚCI, bo `attach()` rzuca goły `Error` — bez kodu, typu ani własnej
+ * klasy. Treści są przypięte testem w `test/feed-safety.test.ts`, więc kolejny resync, który
+ * je zmieni, zaświeci na czerwono, zamiast po cichu przestać rozpoznawać wyjątek.
  */
 const PUSTY_CENNIK = /^Pusty cennik/;
 const BRAK_LISTY = /^Brak listy produktów/;
+const BLEDY_PARSERA = /^Błędy odczytu cennika/;
 
 /**
  * Tłumaczy wyjątek z `feed_safety.attach()` na typ, który znają trasy importu.
  *
- * Bez tego wyjątek leci przez `parsujBufor()` aż do zewnętrznego `catch` w trasie i kończy
- * się odpowiedzią 500, mimo że to zwykły błąd danych wejściowych (400). Dotyczy wszystkich
- * trzech wejść: `routes/import.ts`, `routes/suppliers.ts` i auto-pulla `synchronizuj.ts`.
+ * Bez tego wyjątek leci przez `parsujBufor()` aż do zewnętrznego `catch` w trasie i kończy się
+ * odpowiedzią 500, mimo że to zwykły błąd DANYCH WEJŚCIOWYCH (400). Dotyczy wszystkich trzech
+ * wejść: `routes/import.ts`, `routes/suppliers.ts` i auto-pulla `synchronizuj.ts`.
+ *
+ * ⚠ Tłumaczymy WYŁĄCZNIE te trzy znane komunikaty. Każdy inny wyjątek — awaria czytnika XLSX,
+ * `TypeError` z naszego kodu, cokolwiek nieprzewidzianego — leci dalej nietknięty i kończy się
+ * kodem 500, dokładnie jak przed tym ticketem. Gdyby tłumaczyć wszystko, prawdziwy błąd
+ * serwera przebierałby się za błąd klienta i znikał z radaru.
  */
 function przetlumaczBladParsera(kodDostawcy: string, e: unknown): unknown {
   if (!(e instanceof Error)) return e;
   if (PUSTY_CENNIK.test(e.message) || BRAK_LISTY.test(e.message)) {
     return new PustyImportBlad(kodDostawcy);
   }
-  return new BladCennika(e.message);
+  if (BLEDY_PARSERA.test(e.message)) return new BladCennika(e.message);
+  return e;
 }
 
 /**

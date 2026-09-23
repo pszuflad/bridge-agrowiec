@@ -30,8 +30,8 @@ w polach** na 4 843 rekordach. Przy okazji zamknięta regresja, którą resync w
 - **Nowe:** `rebuild/backend/test/feed-safety.test.ts` — 10 testów ścieżek błędu #103.
 - `rebuild/backend/test/charakteryzacja/MOx.expected.json` (10) — wzorzec parserów przenagrany.
 - `rebuild/backend/test/charakteryzacja/silnik/MOx.expected.json` (10) — wzorzec silnika przenagrany.
-- `rebuild/backend/test/import.test.ts`, `test/silnik.gate.test.ts`, `test/archiwum-importow.gate.test.ts`
-  — 6 asercji przestawionych na nowe, zamierzone zachowanie (szczegóły niżej).
+- `rebuild/backend/test/import.test.ts`, `test/silnik.gate.test.ts` — 5 asercji przestawionych na nowe,
+  zamierzone zachowanie (szczegóły niżej).
 
 ## Odstępstwa od planu
 
@@ -53,9 +53,8 @@ tej warstwy — charakteryzacja wobec ORYGINALNYCH parserów produkcji (niżej).
 
 **Potwierdzenie mimo to:** `archiwum-importow.gate.test.ts` porównuje `GET /api/import-archive`
 z `contract/fixtures/GET_import-archive.json` i ze schematem z `contract/openapi.yaml` — i przechodzi
-**22/22 bez zmian w fixture**, mimo że scenariusz tego gate'u zawiera upload zepsutego cennika.
-Czyli: kształt i wartości odpowiedzi API nie drgnęły. Zmienił się wyłącznie KOD odpowiedzi przy
-zepsutym pliku (500 → 400), którego fixture nie obejmuje.
+**22/22 bez zmian w fixture ani w jednej asercji**, mimo że scenariusz tego gate'u zawiera upload
+zepsutego cennika. Kształt, wartości ORAZ kody odpowiedzi tej trasy nie drgnęły.
 
 ### Test akceptacyjny karty — **✓ ZERO różnic w polach**
 `porownaj-parsery.cjs`, strona PROD = drzewo `88fa31c:mirror/backend/` zmaterializowane w katalogu
@@ -137,7 +136,7 @@ czerwono w przebiegu zbiorczym, **w izolacji przechodzi (37/37)**. To najciężs
 zbiorczy jechał równolegle z porównaniem na pełnych cennikach i z sesją review — flak od obciążenia,
 nie regresja. Nie zmieniałem go.
 
-### Testy przestawione na nowe zachowanie (6)
+### Testy przestawione na nowe zachowanie (5)
 Żadna asercja nie została osłabiona — kod **400** i „zero zapisu do stagingu" zostają wszędzie:
 
 1. `import.test.ts` MO2 — `staging == doStagingu` zamiast `- 2`. #103 zniósł dwa powtórzone kody EAN-owe;
@@ -149,11 +148,23 @@ nie regresja. Nie zmieniałem go.
    więc komunikat pochodzi z `feed_safety`. Kod 400 bez zmian.
 5. `silnik.gate.test.ts` — test EAN-u w notacji naukowej przepisany na stan przejściowy D4, z notą, że
    I15.4 ma go przestawić na oczekiwaną blokadę.
-6. `archiwum-importow.gate.test.ts` — zepsuty cennik (`ZEPSUTY_MO7`: CSV z niedomkniętym cudzysłowem)
-   daje **400 zamiast 500**. To asercja z `beforeAll`, nie przedmiot tego gate'u — i jest to dokładnie
-   ta poprawka, o którą chodziło w D-6. **Reszta suite przechodzi bez zmian (22/22)**: upload mimo błędu
-   nadal trafia do archiwum ze statusem `blad`, a `GET /api/import-archive` nadal zgadza się z fixture
-   i z kontraktem. To mocny dowód, że kontrakt HTTP nie ucierpiał.
+### Korekta w trakcie implementacji — granica tłumaczenia wyjątków
+
+Pierwsza wersja D-6 tłumaczyła na 400 **każdy** wyjątek z `parseByKod()`. Wyszło to przy
+`archiwum-importow.gate.test.ts`, który oczekiwał 500 dla `ZEPSUTY_MO7` (CSV z niedomkniętym
+cudzysłowem) — najpierw przestawiłem ten test na 400, a potem sprawdziłem, **co ten plik naprawdę
+rzuca**. Okazało się, że `CsvError: Quote Not Closed` leci wprost z `csv-parse`, wewnątrz
+`parseRawByKod` — **nigdy nie dociera do `feed_safety`**. Mój zbyt szeroki `else` zamieniał więc
+twardą awarię czytnika w błąd klienta, a przestawiony test to maskował.
+
+Poprawione: `przetlumaczBladParsera()` rozpoznaje **wyłącznie trzy znane komunikaty** `feed_safety`
+(`Pusty cennik`, `Brak listy produktów`, `Błędy odczytu cennika`). Każdy inny wyjątek leci dalej
+nietknięty i kończy się kodem 500, **dokładnie jak przed tym ticketem**. Asercja w gate archiwum
+wróciła do 500 — ten ticket nie zmienia zachowania przy twardej awarii parsera. Granicy pilnuje
+dodatkowy test w `test/feed-safety.test.ts`.
+
+Wniosek ogólny: różnica między „zepsuty plik" a „zepsuty czytnik" jest realna i tylko pierwsza z nich
+jest błędem danych wejściowych.
 
 ## Breaking changes
 

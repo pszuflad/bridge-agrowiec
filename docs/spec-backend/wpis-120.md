@@ -21,13 +21,17 @@ trasom, żeby nie zmienić kontraktu HTTP:
   **bez zmian** względem stanu sprzed resyncu;
 - błędy parsera → nowy `BladCennika` — również **400**.
 
-**Sprostowanie stanu faktycznego:** zepsuty cennik (np. CSV z niedomkniętym cudzysłowem) dawał
-wcześniej w odbudowie **500**, bo `parsujBufor()` nie było objęte `try/catch` w żadnym z trzech
-miejsc wywołania (`routes/import.ts:136`, `routes/suppliers.ts:169`, `import/synchronizuj.ts:198`).
-Było to zapisane jako stan oczekiwany w `test/archiwum-importow.gate.test.ts`. Od tego ticketu
-jest **400**. Kształt odpowiedzi `GET /api/import-archive` się nie zmienił — gate fixture/kontrakt
-przechodzi bez zmian w nagraniu (22/22), a upload mimo błędu nadal trafia do archiwum ze
-statusem `blad`.
+**Granica, która ma znaczenie dla specyfikacji — „zepsuty plik" to nie to samo co „zepsuty czytnik":**
+- plik, który parser ODCZYTAŁ i zgłosił błędy wierszy, albo oddał pustą listę → rozpoznany przez
+  `feed_safety` → **400** (błąd danych wejściowych);
+- plik, który wywraca sam czytnik (np. `CsvError: Quote Not Closed` z `csv-parse`, rzucone wprost
+  w `parseRawByKod`, zanim `attach()` w ogóle zostanie wywołane) → **500, bez zmian względem stanu
+  sprzed ticketu**. Odbudowa tłumaczy wyłącznie trzy znane komunikaty `feed_safety`, żeby twarda
+  awaria nie przebierała się za błąd klienta.
+
+Kody odpowiedzi trasy `POST /api/import/parse-file` dla twardej awarii parsera pozostają więc
+niezmienione, co potwierdza `test/archiwum-importow.gate.test.ts` (22/22, bez zmian w asercjach
+ani w nagraniu fixture).
 
 ## Potwierdzone w 120 — `_bridgeFeedMeta` jest NIEWYLICZALNE
 

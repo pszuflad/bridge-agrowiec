@@ -93,6 +93,33 @@ describe("feed_safety.attach — zatrzymuje niekompletny cennik", () => {
   });
 });
 
+/**
+ * Granica tłumaczenia wyjątków w `parsuj.ts`. Tłumaczymy WYŁĄCZNIE trzy komunikaty
+ * `feed_safety` — wszystko inne ma lecieć dalej nietknięte i kończyć się kodem 500,
+ * tak jak przed ticketem 120. Inaczej prawdziwa awaria serwera (zepsuty czytnik XLSX,
+ * `TypeError` z naszego kodu) przebierałaby się za błąd klienta i znikała z radaru.
+ */
+describe("feed_safety — komunikaty, po których rozpoznajemy wyjątek", () => {
+  it("trzy rozpoznawane komunikaty zaczynają się dokładnie tak, jak zakłada parsuj.ts", () => {
+    const zlap = (f: () => unknown) => {
+      try {
+        f();
+        return "";
+      } catch (e) {
+        return (e as Error).message;
+      }
+    };
+
+    expect(zlap(() => feedSafety.attach("MO1", { records: [], errors: [] }))).toMatch(
+      /^Pusty cennik/,
+    );
+    expect(zlap(() => feedSafety.attach("MO1", { errors: [] }))).toMatch(/^Brak listy produktów/);
+    expect(
+      zlap(() => feedSafety.attach("MO1", { records: [rekord("A")], errors: [{ w: 1 }] })),
+    ).toMatch(/^Błędy odczytu cennika/);
+  });
+});
+
 describe("feed_safety — `_bridgeFeedMeta` nie wycieka do danych", () => {
   it("jest NIEWYLICZALNE, więc nie wchodzi do JSON.stringify ani do Object.keys", () => {
     const wynik = feedSafety.attach("MO1", { records: [rekord("A")], errors: [] });
