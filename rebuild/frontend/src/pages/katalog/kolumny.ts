@@ -75,7 +75,24 @@ export const KOLUMNY: DefinicjaKolumny[] = [
   { key: "status", label: "status", width: 90 },
   { key: "zastosowanie", label: "Zastosowanie", width: 220 },
   { key: "dataAktualizacji", label: "data_aktualizacji", width: 140 },
-]; 
+  /**
+   * Backlog #73 — kolumna dołożona produkcji 2026-09-10 skryptem
+   * `mirror/frontend/assets/payment-blocks-injection.js`, nie obecna w tablicy `$r`.
+   *
+   * Etykieta i szerokość są z tego skryptu (`th.textContent`, `style.minWidth = "420px"`) —
+   * stąd polskie znaki, mimo że sąsiednie etykiety ich nie mają: tak to widzi Ania.
+   * Oryginał wstrzykiwał `<th>` PRZED kolumną „Akcje"; u nas ta kolumna jest osobnym,
+   * stałym `<th>` poza tą tablicą (`TabelaProduktow.tsx`), więc wpis na końcu daje tę samą
+   * pozycję. Wartość liczy `formatujKomorke` z kodu dostawcy (patrz `formatowanie.tsx`).
+   *
+   * ⚠ MECHANIZMU ZE SKRYPTU NIE PORTUJEMY. `MutationObserver`, `hashchange` i `setInterval`
+   * z oryginału obsługiwały wstrzykiwanie do CUDZEGO DOM-u przy routerze haszowym
+   * (`#/katalog`, poprawka `routefix` z `0c4d2f2`). Odbudowa porzuciła routing po hashu
+   * (odstępstwo O1 z I1, `docs/cutover.md`) i renderuje kolumnę natywnie — cała ta maszyneria
+   * jest tu bezprzedmiotowa.
+   */
+  { key: "blokowaneFormyPlatnosci", label: "Blokowane formy płatności", width: 420 },
+];
 
 /**
  * Kolumny widoczne domyślnie (`Nn`, frontend-index.js:23021).
@@ -105,6 +122,9 @@ export const KOLUMNY_DOMYSLNE: string[] = [
   "rozmiarAlternatywny",
   "model",
   "zastosowanie",
+  // Backlog #73 — w produkcji kolumna jest WSTRZYKIWANA, czyli widoczna zawsze i niezależnie
+  // od konfiguratora. Domyślnie włączona = ten sam widok co dziś, a Ania może ją schować.
+  "blokowaneFormyPlatnosci",
 ];
 
 /**
@@ -131,4 +151,19 @@ export function uzupelnijKodImportu(zapisane: string[]): string[] {
   if (poNazwie >= 0) wynik.splice(poNazwie + 1, 0, "kodImportu");
   else wynik.unshift("kodImportu");
   return wynik;
+}
+
+/**
+ * Retrofit kolumny blokowanych form płatności (backlog #73) — ta sama potrzeba co przy
+ * `uzupelnijKodImportu`, inny powód.
+ *
+ * W produkcji kolumna jest WSTRZYKIWANA do tabeli, więc konfigurator o niej nie wie i nikt
+ * nie ma jej w zapisanym wyborze. U nas jest zwykłą kolumną, a wybór kolumn żyje w IndexedDB
+ * — per origin. Po cutoverze nowy panel stanie pod TĄ SAMĄ domeną co stary, więc zastany
+ * zapis Ani realnie tam będzie i bez tego retrofitu kolumna po prostu by jej zniknęła,
+ * mimo że dziś ją widzi. Dokładamy na KONIEC, czyli tam, gdzie wstrzykiwał ją oryginał.
+ */
+export function uzupelnijBlokowaneFormy(zapisane: string[]): string[] {
+  if (zapisane.includes("blokowaneFormyPlatnosci")) return zapisane;
+  return [...zapisane, "blokowaneFormyPlatnosci"];
 }
