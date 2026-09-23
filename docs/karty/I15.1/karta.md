@@ -48,15 +48,14 @@ przenosimy · D4 błędny EAN = błąd blokujący akceptację (wersja Ani zastę
 Numer migracji `011` zarezerwowany. Druga migracja → „Do koordynatora”, nie bierz kolejnego numeru sam.
 
 ## Dowiezione
-Ticket `107-FEATURE-products-blokady-triggery`, implementacja zamknięta 2026-09-22 — karta NIE jest jeszcze
-zamknięta (patrz „Zostało przed PR” niżej, scenariusz A).
+Ticket `107-FEATURE-products-blokady-triggery`: implementacja 2026-09-22, próba na kopii produkcji 2026-09-23
+(ticket 113) — karta ZAMKNIĘTA, zostaje merge PR #122.
 
 - **Runner** (`src/db/migrate.ts`): `zastosujDyrektywy()` — linia `-- @dodaj-kolumne-jesli-brak <tabela> <kolumna>
   <definicja>` wykonywana przed treścią pliku, w tej samej transakcji (`PRAGMA table_info` → `ALTER` tylko przy
   braku kolumny). Nieznana dyrektywa / zła składnia / brak tabeli = błąd i rollback całej migracji.
 - **Migracja `011_blokowane_formy_i_triggery.sql`**: kolumna przez dyrektywę; backfill `UPDATE … WHERE … IS NOT
-  <CASE>` — TYLKO `blokowane_formy_platnosci` (jak `ensurePaymentBlocks()`; #101 wciąż niewyjaśnione, patrz
-  `wejscie-104.md`); 6 triggerów `DROP TRIGGER IF EXISTS` + `CREATE TRIGGER` bajt w bajt z
+  <CASE>` — TYLKO `blokowane_formy_platnosci` (jak `ensurePaymentBlocks()`); 6 triggerów `DROP TRIGGER IF EXISTS` + `CREATE TRIGGER` bajt w bajt z
   `7d6cfc9:db/schema.sql:334-385` (zweryfikowane niezależnym `diff`em w review). Kategorii/zastosowań istniejących
   wierszy migracja nie rusza (zgodnie z poprawką w „Zakres” wyżej).
 - **Model/kontrakt**: `products.blokowaneFormyPlatnosci` w `schema.ts`; ukryte w `KOLUMNY_POZA_KONTRAKTEM.products`
@@ -76,11 +75,17 @@ zamknięta (patrz „Zostało przed PR” niżej, scenariusz A).
   w `BEGIN…END`) albo ręcznego kroku cutoveru; T2 `DROP TRIGGER IF EXISTS` + `CREATE` zamiast `IF NOT EXISTS` (żeby
   definicja była zawsze ta z 011, nawet na bazie ze starszą wersją triggera); T3 backfill tylko blokad płatności;
   T4 `blokowaneFormyPlatnosci` do `KOLUMNY_POZA_KONTRAKTEM` + typ `Produkt` z listy wykluczeń.
+- **Rozszerzenie zakresu (koordynator, 2026-09-22)**: uodpornienie całego łańcucha migracji na schemat produkcji —
+  002 (`uwaga_cena` dyrektywą), 003 (`@pomin-jesli-typ-kolumny products szerokosc TEXT`), 013 z karty I15.6
+  (`@pomin-jesli-typ-kolumny selly_products selly_variant_id INTEGER`, za zgodą użytkownika), `WynikMigracji.bezTresci`
+  + wypis w `npm run migrate`, test pełnego łańcucha na zrzucie `7d6cfc9:db/schema.sql`
+  (`test/db.migracje-produkcja.test.ts`). Skutek: ręczne kroki z `docs/cutover.md` §3 znikają (lista niżej).
 - **Odstępstwo od planu**: testy 011 w osobnym pliku zamiast bloku w `db.migracje.test.ts` (rozmiar pliku); poza
   tym plan zrealizowany jak zapisano.
 - **Wejście `wejscie-104.md` (#101)** — rozliczone jako trop, nie jako naprawa: hipoteza MO6 (dostawca celowo bez
-  mapowania, CHANGELOG produkcji 2026-09-10 14:53 „nie będzie na razie w sprzedaży”) prawdopodobna, ale pomiar na
-  prawdziwej kopii produkcji jeszcze nie wykonany — patrz „Zostało przed PR”.
+  mapowania, CHANGELOG produkcji 2026-09-10 14:53 „nie będzie na razie w sprzedaży”) potwierdzona jako zamierzone
+  zachowanie, a pomiar na żywej produkcji (ticket 113) pokazał 0 pustych blokad w KAŻDEJ grupie dostawcy — zgłoszenie
+  Ani nie dotyczy bazy Bridge, zostaje strona Selly (I15.6/I15.7). Wejście rozliczone.
 
 ### Próba na kopii produkcji — WYKONANA (ticket 113, 2026-09-23; `wejscie-113.md`)
 Lista „Zostało przed PR (scenariusz A)” jest wyczerpana; sekcja zdjęta, liczby przepisane tutaj.
