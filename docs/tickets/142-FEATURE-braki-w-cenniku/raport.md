@@ -150,3 +150,12 @@ Rozliczone poniżej — żadne nie wymagało zmiany w kodzie.
 6. Wejście dla I15.9 zapisane.
 7. Drobiazgi: niepełna lista `BLOKADY`, nieaktualny komentarz, nieaktualne fixtures, kolizja
    numeracji `#103` w backlogu.
+
+## Synchronizacja z `develop` (Krok 16)
+
+Gałąź scalona z `origin/develop` @ `7ff55d4` (2026-09-24), merge **czysty, bez konfliktów**.
+Z bazy weszły **wyłącznie dokumenty** (tickety 143–146, karty I15.5/I15.9/TEST.1, `docs/cutover.md`)
+— `git diff` na `rebuild/` i `contract/` po scaleniu jest PUSTY, więc kod nie został dotknięty.
+
+**Bramki przebiegnięte PONOWNIE po scaleniu** (nie przed): frontend lint ✓ · typecheck ✓ · build ✓ ·
+`npm test` **56 plików, 995 testów, 0 błędów**. Backend bez zmian w tym tickecie.
