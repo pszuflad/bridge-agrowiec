@@ -64,18 +64,14 @@ Ticket `109-FEATURE-selly-rest-sync-full`, 2026-09-22.
   20.20.2). Żaden test nie woła sieci (atrapa `test/gate/selly-atrapa.ts`).
 
 ## Do koordynatora
-- **#101 (blokowane formy płatności) — sprawdzone, NIE naprawione.** Payload Toru 2 tego pola nie
-  niesie. Dowód: `git grep -niE "payment|platnos|płatno|block" 7d6cfc9 -- mirror/backend/selly/`
-  daje zero trafień; pole występuje wyłącznie w starym eksporcie CSV
-  (`mirror/backend/generate_selly_export.cjs:75`, kolumna `Blokowane-formy-platnosci`, wartość z
-  `paymentBlocks.getBlockedPaymentForms(row.dostawca)` jako fallback przy pustej kolumnie
-  `products.blokowane_formy_platnosci`, `:142-143`) i w `payment_blocks.cjs` (triggery
-  `products_blokowane_formy_ai/_au`). Wniosek: produkty zakładane przez REST auto-create (Tor 2,
-  od 2026-09-08) trafiają do Selly bez tego pola — mocny kandydat na przyczynę zgłoszenia Ani,
-  obok hipotezy „puste w samej bazie Bridge” (#73, karta I15.1). Świadomie NIEnaprawione: port jest
-  1:1, a dopisanie pola wymaga (a) decyzji użytkownika i (b) nazwy pola w REST API Selly, której w
-  repo NIE MA (żaden fixture ani dokument Selly jej nie wymienia) — trzeba ją ustalić z Anią albo
-  z dokumentacji Selly.
+- **#101 (blokowane formy płatności) — ZAMKNIĘTE 2026-09-23, nic do zrobienia.** Ania: „Nie widzę
+  pustych pól tylko myślałam że nie mamy zrobionej tej logiki. Jest zrobiona to super zamknij temat."
+  Pomiar na żywej produkcji (ticket 113): zero produktów z pustym polem, 6 triggerów w bazie.
+  Zostaje sam FAKT z tego ticketu, przydatny przy porównaniach CSV ↔ REST: payload Toru 2 tego pola
+  NIE niesie (`git grep -niE "payment|platnos|płatno|block" 7d6cfc9 -- mirror/backend/selly/` — zero
+  trafień); wysyłał je wyłącznie stary eksport CSV (`generate_selly_export.cjs:75,142-143`, kolumna
+  `Blokowane-formy-platnosci` z fallbackiem `paymentBlocks.getBlockedPaymentForms(dostawca)`).
+  Luka na przyszłość: `BLOCKED_PAYMENT_FORMS` nie ma MO6 — dziś ten dostawca nie ma produktów.
 - **Sygnatura Toru 2 dla I15.8:** `syncFullForDostawca(db, discovery, dostawca, opts)`,
   `opts = { dryRun=false, maxProducts=5000, autoCreate=true, buildCache=true }`, zwraca
   `{ stats, errors, logId, durationMs }`. Instancja discovery jest argumentem (JEDNA na proces,
