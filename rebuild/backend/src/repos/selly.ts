@@ -133,16 +133,16 @@ export type WpisStatusuSync = Omit<WpisLoguSelly, "uzytkownik_id" | "uzytkownik_
 
 /** Projekcja 9 kolumn — zawężenie `KOLUMNY_LOGU`, nie druga jej kopia. */
 const KOLUMNY_STATUSU_SYNC = {
-	id: KOLUMNY_LOGU.id,
-	operacja: KOLUMNY_LOGU.operacja,
-	dostawca_kod: KOLUMNY_LOGU.dostawca_kod,
-	liczba_ok: KOLUMNY_LOGU.liczba_ok,
-	liczba_blad: KOLUMNY_LOGU.liczba_blad,
-	liczba_skip: KOLUMNY_LOGU.liczba_skip,
-	rozpoczeto: KOLUMNY_LOGU.rozpoczeto,
-	zakonczono: KOLUMNY_LOGU.zakonczono,
-	status: KOLUMNY_LOGU.status,
-	szczegoly_json: KOLUMNY_LOGU.szczegoly_json,
+  id: KOLUMNY_LOGU.id,
+  operacja: KOLUMNY_LOGU.operacja,
+  dostawca_kod: KOLUMNY_LOGU.dostawca_kod,
+  liczba_ok: KOLUMNY_LOGU.liczba_ok,
+  liczba_blad: KOLUMNY_LOGU.liczba_blad,
+  liczba_skip: KOLUMNY_LOGU.liczba_skip,
+  rozpoczeto: KOLUMNY_LOGU.rozpoczeto,
+  zakonczono: KOLUMNY_LOGU.zakonczono,
+  status: KOLUMNY_LOGU.status,
+  szczegoly_json: KOLUMNY_LOGU.szczegoly_json,
 };
 
 /** `routes_sync.cjs:33` — stałe 20 ostatnich wpisów, bez parametru. */
@@ -150,12 +150,12 @@ export const LIMIT_STATUSU_SYNC = 20;
 
 /** Port `recentLogs` z `GET /api/selly/sync-status` (`routes_sync.cjs:26-32`). */
 export function ostatnieWpisySync(db: Baza): WpisStatusuSync[] {
-	return db
-		.select(KOLUMNY_STATUSU_SYNC)
-		.from(sellySyncLog)
-		.orderBy(desc(sellySyncLog.rozpoczeto))
-		.limit(LIMIT_STATUSU_SYNC)
-		.all();
+  return db
+    .select(KOLUMNY_STATUSU_SYNC)
+    .from(sellySyncLog)
+    .orderBy(desc(sellySyncLog.rozpoczeto))
+    .limit(LIMIT_STATUSU_SYNC)
+    .all();
 }
 
 /** Powód wpisywany do `szczegoly_json` przy domykaniu przerwanego cyklu. */
@@ -176,16 +176,16 @@ export const POWOD_PRZERWANIA = "przerwany restartem procesu";
  * Zwraca liczbę domkniętych wpisów.
  */
 export function zamknijOsieroconeWpisySync(db: Baza): number {
-	const wynik = db
-		.update(sellySyncLog)
-		.set({
-			status: "blad",
-			zakonczono: sql`datetime('now')`,
-			szczegolyJson: JSON.stringify({ powod: POWOD_PRZERWANIA }),
-		})
-		.where(eq(sellySyncLog.status, "w_trakcie"))
-		.run();
-	return wynik.changes;
+  const wynik = db
+    .update(sellySyncLog)
+    .set({
+      status: "blad",
+      zakonczono: sql`datetime('now')`,
+      szczegolyJson: JSON.stringify({ powod: POWOD_PRZERWANIA }),
+    })
+    .where(eq(sellySyncLog.status, "w_trakcie"))
+    .run();
+  return wynik.changes;
 }
 
 /** Wynik pojedynczej synchronizacji — kształt odpowiedzi `POST /api/selly/sync-product`. */

@@ -65,3 +65,19 @@ nocna synchronizacja Selly nie ruszy. Wkład do `docs/cutover.md` w „Do koordy
   Harmonogram nie używa `dryRun`, więc go to nie dotyka; zostaje jako znana właściwość.
 - **Montaż modułu dostępności** (`availability_sync`, karta I15.10) — punkt wpięcia jest
   przygotowany (`server.ts` tworzy i wstrzykuje zależności Selly); ustalenie w `wejscie-121.md`.
+
+## Review fixes applied
+Review (`review.md`): **0 BLOCKER**, 1 SHOULD-FIX, 1 NICE-TO-HAVE.
+- **SHOULD-FIX „dokumenty karty niezacommitowane" — nieaktualny w chwili zgłoszenia.**
+  Reviewer widział gałąź na dwóch commitach (`456ebaa`, `5200a3c`); dokumentacja poszła
+  commitem `1b23694` („sync docs") równolegle z jego biegiem. Zweryfikowane: karta,
+  backlog, raport i oba wejścia są w diffie `origin/develop...HEAD`.
+- **NICE-TO-HAVE „tabulatory w `KOLUMNY_STATUSU_SYNC`" — poprawione.** 26 linii wcięcia
+  tabami → spacje, zgodnie z resztą pliku. ⚠ Nie użyto do tego `prettier --write`: repo ma
+  inną konfigurację formatowania, więc prettier przeformatował także niezwiązany kod
+  (sygnatura `logSelly`, blok `and(eq(...))` w innej funkcji). Zamiana ograniczona do samych
+  tabulatorów — diff to dokładnie 26 linii.
+- **4 niepowodzenia w pełnym biegu u reviewera** (`test/scheduler.test.ts`,
+  `test/silnik.charakteryzacja.test.ts`) — poza zakresem ticketa, przechodzą 73/73 w izolacji;
+  reviewer potwierdził w `ps aux` równoległe worktree'y na tej samej maszynie. W biegu przed
+  commitem `5200a3c` cała suita była zielona (102 pliki, 1658 testów).
