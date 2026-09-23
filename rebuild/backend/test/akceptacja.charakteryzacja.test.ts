@@ -38,6 +38,10 @@ import {
 } from "../src/db/schema.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
 import { wytnijFragmenty, zaladujOryginal } from "./charakteryzacja/akceptacja/oryginal.mjs";
+// ⚠ Staging v2 (#99) PODMIENIA `ext.assignKodImportu` w `install()`, a podmiana jest
+// GLOBALNA — `acceptStaging` i `addProductsBulk` w produkcji wołają już nową wersję. Bez tego
+// opakowania charakteryzacja porównywałaby się z funkcją, której produkcja nie uruchamia.
+import { zaladujOryginalZeStagingV2 } from "./charakteryzacja/silnik/polityka.mjs";
 import { SCENARIUSZE } from "./charakteryzacja/akceptacja/scenariusze.mjs";
 
 type Wiersz = Record<string, unknown>;
@@ -170,7 +174,7 @@ describe("2. acceptStaging — port == uruchomiony oryginał", () => {
 
       bazaOryginalu = stworzTestowaBaze();
       const idOryginal = zasiej(bazaOryginalu, scenariusz);
-      const { U } = zaladujOryginal(bazaOryginalu);
+      const { U } = zaladujOryginalZeStagingV2(zaladujOryginal, bazaOryginalu);
       U.acceptStaging(idOryginal, 1);
       const oczekiwany = normalizuj(bazaOryginalu, numery);
 
@@ -238,7 +242,7 @@ describe("3. Przydatność próby — zielony wynik nie może brać się z puste
     const baza = stworzTestowaBaze();
     try {
       const id = zasiej(baza, scenariusz);
-      const { U } = zaladujOryginal(baza);
+      const { U } = zaladujOryginalZeStagingV2(zaladujOryginal, baza);
       U.acceptStaging(id, 1);
 
       const produkt = baza.db.select().from(products).all()[0] as unknown as Wiersz;
@@ -263,7 +267,7 @@ describe("3. Przydatność próby — zielony wynik nie może brać się z puste
     const baza = stworzTestowaBaze();
     try {
       const id = zasiej(baza, scenariusz);
-      const { U } = zaladujOryginal(baza);
+      const { U } = zaladujOryginalZeStagingV2(zaladujOryginal, baza);
       U.acceptStaging(id, 1);
 
       const produkt = baza.db.select().from(products).all()[0] as unknown as Wiersz;
@@ -281,7 +285,7 @@ describe("3. Przydatność próby — zielony wynik nie może brać się z puste
     const baza = stworzTestowaBaze();
     try {
       const id = zasiej(baza, SCENARIUSZE[0]!);
-      const { U } = zaladujOryginal(baza);
+      const { U } = zaladujOryginalZeStagingV2(zaladujOryginal, baza);
       U.acceptStaging(id, 1);
       expect(baza.db.select().from(products).all()).toHaveLength(1);
       expect(baza.db.select().from(stagingItems).all()).toHaveLength(0);

@@ -26,6 +26,10 @@ import { zatwierdzPozycjeStagingu } from "../src/import/akceptacja.js";
 import { products, stagingItems } from "../src/db/schema.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
 import { zaladujOryginal } from "./charakteryzacja/akceptacja/oryginal.mjs";
+// ⚠ Staging v2 (#99) PODMIENIA `ext.assignKodImportu` w `install()`, a podmiana jest
+// GLOBALNA — `acceptStaging` i `addProductsBulk` w produkcji wołają już nową wersję. Bez tego
+// opakowania charakteryzacja porównywałaby się z funkcją, której produkcja nie uruchamia.
+import { zaladujOryginalZeStagingV2 } from "./charakteryzacja/silnik/polityka.mjs";
 import { pozycja, produkt } from "./charakteryzacja/akceptacja/scenariusze.mjs";
 
 type Wiersz = Record<string, unknown>;
@@ -109,7 +113,7 @@ function obieStrony(wiersz: Wiersz, katalog: Wiersz[] = []) {
   const bazaPortu = stworzTestowaBaze();
   otwarte.push(bazaOryginalu, bazaPortu);
 
-  const { U } = zaladujOryginal(bazaOryginalu);
+  const { U } = zaladujOryginalZeStagingV2(zaladujOryginal, bazaOryginalu);
   U.acceptStaging(zasiejObie(bazaOryginalu), 1);
 
   zatwierdzPozycjeStagingu(bazaPortu.db, zasiejObie(bazaPortu), 1);
@@ -198,10 +202,16 @@ describe("14i — kontrole negatywne: warunek nie może być szerszy, niż decyz
 
 describe("14i — grupowanie `kod_importu` po EAN-ie musi zostać NIETKNIĘTE", () => {
   /**
-   * ⚠ REGRESJA WYKRYTA W CODE REVIEW TEGO TICKETA — najważniejszy test w tym pliku.
+   * ⚠ REGRESJA WYKRYTA W CODE REVIEW TICKETA 70 — najważniejszy test w tym pliku.
    *
-   * `assignKodImportu()` (`legacy/bridge_ext.cjs:164-167`) nadaje produktom z różnych magazynów
-   * WSPÓLNY sześciocyfrowy `kod_importu` (wielomagazynowość Selly), grupując je po kluczu
+   * ⚠ AKTUALIZACJA I15.4b: grupowanie robi teraz NADPISANE `assignKodImportu` ze Staging v2
+   * (`staging_policy.cjs:141-157`), nie `legacy/bridge_ext.cjs:164-167`. Reguła jest OSTRZEJSZA
+   * — zamiast klucza `EAN:<ean>` liczy się `compatibility()` (marka, model, rozmiar, pola
+   * opcjonalne, wariant DEMO) ORAZ zgodny EAN. Sama teza testu zostaje: odstępstwo 14i nie
+   * może zepsuć grupowania między magazynami.
+   *
+   * Stara wersja nadawała produktom z różnych magazynów WSPÓLNY sześciocyfrowy `kod_importu`
+   * (wielomagazynowość Selly), grupując je po kluczu
    * `EAN:<ean>` — ale tylko gdy `ean` jest niepusty ORAZ `eanIsValid === 1`. Zapis naukowy
    * z POPRAWNĄ sumą kontrolną spełnia oba warunki, więc jest realnym przypadkiem, a nie
    * teoretycznym: `8,05997E+12` rozwija się do `8059970000000`, którego suma kontrolna się
@@ -216,10 +226,20 @@ describe("14i — grupowanie `kod_importu` po EAN-ie musi zostać NIETKNIĘTE", 
   const EAN_Z_POPRAWNA_SUMA = "8059970000000";
   const NUMER_GRUPY = "424242";
 
-  /** Ten sam produkt w innym magazynie — ma już numer grupy, nadany przy wcześniejszym imporcie. */
+  /**
+   * Ten sam produkt w innym magazynie — ma już numer grupy z wcześniejszego importu.
+   *
+   * ⚠ `model` JEST TU ISTOTNY i został dodany w I15.4b. Staging v2 (#99) podmienia
+   * `ext.assignKodImportu` (`staging_policy.cjs:141`) i nowa wersja grupuje przez
+   * `compatibility()` — czyli wymaga zgodnej marki, MODELU, rozmiaru i pól opcjonalnych —
+   * a nie, jak stara, po gołym kluczu `EAN:<ean>`. Karta katalogowa bez `model` jest dla
+   * `compatibility()` niezgodna (pole trafia do `missing`), więc produkcja NIE dziedziczyłaby
+   * numeru i test mierzyłby losowanie zamiast grupowania.
+   */
   const innyMagazyn = [
     produkt({
       kod: "P0-INNY-MAGAZYN",
+      model: "AGRIMAX RT 765",
       ean: EAN_Z_POPRAWNA_SUMA,
       eanIsValid: 1,
       kodImportu: NUMER_GRUPY,

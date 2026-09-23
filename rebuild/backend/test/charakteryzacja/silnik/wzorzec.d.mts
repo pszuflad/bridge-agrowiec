@@ -31,3 +31,11 @@ export interface PrzebiegWzorca {
 }
 
 export declare function normalizujPrzebieg(przebieg: unknown): PrzebiegWzorca;
+
+/** Sprowadza wiersz `staging_items` do kształtu wzorca — te same pola, ten sam znacznik. */
+export declare function normalizujWiersz(
+  wiersz: Record<string, unknown>,
+): Record<string, unknown>;
+
+/** Podstawiane za `_catalogVersion`, które jest z definicji zależne od przebiegu. */
+export declare const WERSJA_KARTY_WZORCOWA: string;

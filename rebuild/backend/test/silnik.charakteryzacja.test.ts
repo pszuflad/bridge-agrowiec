@@ -351,7 +351,7 @@ describe("3. Scenariusze celowane w gałęzie, których cenniki nie ruszają", (
                   source: scenariusz.dostawca === "MO9" ? "Agrorami GraphQL" : "supplier file",
                   rawCount: scenariusz.rekordy.length,
                   excludedCodes: [],
-                }) as OpcjeImportu["meta"],
+                }) as unknown as OpcjeImportu["meta"],
                 ...(scenariusz.opcje ?? {}),
               },
         ),
