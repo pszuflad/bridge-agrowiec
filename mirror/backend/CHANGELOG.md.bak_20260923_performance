@@ -1,12 +1,3 @@
-2026-09-23 11:27
-obszar: backend
-
-pliki: staging_policy.cjs, uwaga_cena_patch.cjs, staging_policy.cjs.bak_20260923_performance, uwaga_cena_patch.cjs.bak_20260923_performance, CHANGELOG.md.bak_20260923_performance
-
-zmiana: zapis uwagi o cenie przy zatwierdzaniu stagingu i zbiorczym dodawaniu produktów korzysta z tego samego połączenia do bazy co operacja główna; nie czeka na własną blokadę przy zatwierdzaniu wielu pozycji.
-
-powód: po każdej pozycji zatwierdzania zbiorczego następował pięciosekundowy błąd blokady, przez co panel przestawał odpowiadać także na zwykłe odczyty.
-
 2026-09-23 10:56
 obszar: backend
 
