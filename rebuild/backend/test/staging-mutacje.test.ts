@@ -13,9 +13,21 @@ import { eq } from "drizzle-orm";
 import { auditLog, manualOverrides, products, stagingItems } from "../src/db/schema.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 
-/** Wiersz stagingu w kształcie, jaki produkuje silnik z 3d-1. */
+/**
+ * Wiersz stagingu w kształcie, jaki produkuje silnik z 3d-1.
+ *
+ * Od ticketu 129 (Staging v2) snapshot niesie dwa pola polityki, bez których
+ * `checkAcceptance` (`staging_policy.cjs:194`, `:198`) odrzuca pozycję:
+ *  • `_policyVersion: 2` — znacznik „to zgłoszenie przeszło przez nową politykę"; w produkcji
+ *    nadaje go `importer()` (`:428`), u nas dowiezie go karta I15.4b;
+ *  • `_catalogVersion: null` — odcisk produktu w katalogu z chwili utworzenia zgłoszenia.
+ *    `null` jest tu poprawne, bo te pozycje dotyczą kodów, których w katalogu jeszcze nie ma
+ *    (`version(undefined) === null`). Test, który zasiewa produkt, musi podać własny odcisk.
+ */
 function pozycja(pola: Record<string, unknown> = {}) {
   const snapshot = {
+    _policyVersion: 2,
+    _catalogVersion: null,
     kod: "P1",
     nazwa: "Opona 480/70R28 BKT AGRIMAX RT 765",
     marka: "BKT",
