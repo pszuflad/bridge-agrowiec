@@ -187,7 +187,7 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a–12c 2026-09-05 · 12d, 12e 2026-09-08 — szczegóły: nagłówki sesji w bloku I12 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f · 13a · 13b · 13c · 13d · 13e | 3, 8 | ✅ | 13a/13b/13c/13e/13f ✅ 2026-09-08…09 · **13d wchłonięte do I15** (karty I15.6–I15.8, 2026-09-22) — szczegóły: blok I13 |
-| 15 | Domknięcie zakresu produkcji: wrzesień (#73–#83) + Staging v2 (#99) + Selly REST (dawne 13d) | I15.1–I15.9 | 3, 8, 13 | 🔨 | zaplanowane 2026-09-22 (ticket 104) — **produkcja zamrożona od 22.09**, zakres zamknięty; stan: `tools/stan-kart.sh I15` |
+| 15 | Domknięcie zakresu produkcji: wrzesień (#73–#83) + Staging v2/v3 (#99, #103–#107) + Selly REST (dawne 13d) | I15.1–I15.11 | 3, 8, 13 | 🔨 | **10 z 14 kart ✅ (23.09)**; zostają I15.10b, I15.5, I15.11, I15.9. Zakres zamknięty na `88fa31c`; stan: `tools/stan-kart.sh I15` |
 | 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | fala 1: 14a–14d · fala 2: 14e–14m (14g skasowana) | 3, 4 | ✅ | fala 1 zamknięta 2026-09-18 · fala 2 zamknięta 2026-09-19 — szczegóły: blok I14 |
 | P | Poprawki po testach Ani (I5, I6, I7, I9, I10, przegląd 12 widoków) | karty `P{iteracja}.{n}` i `PR.{n}` | 5–10 | 🔨 | stan każdej karty: `tools/stan-kart.sh` · karty otwarte mają katalogi `docs/karty/<ID>/` · plan: blok „Poprawki po testach Ani” |
 
@@ -3467,6 +3467,7 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 | [I15.7](karty/I15.7/) | Selly REST 2: nocna pełna synchronizacja | #60, #81 | I15.6 | — |
 | [I15.8](karty/I15.8/) | Selly REST 3: harmonogram i przyciski w panelu | #60 | I15.7 | — |
 | [I15.10](karty/I15.10/) | dostępność w Selly: `availability_sync` + zmiany w delcie (Tor 1) **i w Torze 2** + zawór na kolizje `kod_importu` | #104, #108 | — (zdjęte, ticket 117) | — |
+| [I15.10b](karty/I15.10b/) | montaż modułu dostępności w `server.ts` (czynność bez właściciela po I15.10) | #104 | I15.10 ✅ | — |
 | [I15.11](karty/I15.11/) | panel „Braki w cenniku” i podgląd starej karty (FE) | #103 | I15.4b, I15.4c, I15.5 | — |
 | [I15.9](karty/I15.9/) | delta instrukcji dla Ani (całe I15) — **OSTATNIA** | — | I15.1–I15.8, I15.10, I15.11 | — |
 
@@ -3476,14 +3477,22 @@ potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać 
 
 **Fazy (co równolegle, co na co czeka) — plan z 2026-09-22, ticket 106:**
 
-| Faza | Karty | Warunek startu |
+| Faza | Karty | Stan |
 |---|---|---|
-| 0 | przygotowanie: ✅ odświeżenie bazy stagingu kopią produkcji (23.09), ✅ pomiar #101, ✅ podsumowanie Selly od Ani | — |
-| **A** (w toku od 23.09) | **I15.2** ‖ **I15.3** ‖ **I15.8** ‖ **I15.10** ‖ **I15.4a** | rozłączne plikowo; I15.1, I15.6, I15.7 ✅ |
-| B | **I15.4b** (po I15.2 i I15.4a) ‖ **I15.4c** (po I15.4a) | ścieżka zapisu i ścieżka akceptacji, rozdzielone plikowo |
-| C | **I15.5** (po I15.4c) | — |
-| D | **I15.11** (po I15.4b, I15.4c, I15.5) | ten sam widok Staging co I15.5 |
-| E | **I15.9** — delta dla Ani, OSTATNIA karta; potem instrukcja pełnego testu i cutover | wszystkie |
+| 0 | przygotowanie: odświeżenie bazy stagingu kopią produkcji, pomiar #101, podsumowanie Selly od Ani | ✅ 23.09 |
+| A | I15.1, I15.2, I15.3, I15.4a, I15.6, I15.7, I15.8, I15.10 (+ P10.5) | ✅ 22–23.09 |
+| B | **I15.4c** (ticket 129) → **I15.4b** (ticket 130) | ✅ 23.09 — ⚠ kolejność ODWRÓCONA wobec planu, patrz nota niżej |
+| C | **I15.10b** (montaż) ‖ **I15.5** („Rozstrzygnij") — rozłączne plikowo | ⬜ do startu |
+| D | **I15.11** (panel „Braki w cenniku") | ⬜ po I15.5 |
+| E | **I15.9** (delta dla Ani) → **TEST.1** (instrukcja pełnego testu) | ⬜ na końcu |
+| równolegle | **DEC.1** — runda decyzyjna (#135.1, jedenaście wpisów) | ⬜ niezależna |
+
+⚠ **KOLEJNOŚĆ FAL B ODWRÓCONA — fakt, nie plan.** Plan zakładał I15.4b (importer) przed I15.4c (akceptacja).
+W rzeczywistości pierwszy wszedł **ticket 129 (I15.4c)** i to jego pliki są dziś **wspólną warstwą polityki
+stagingu**: `src/import/polityka/helpery.ts`, `kontekst.ts`, `kod-importu.ts`, `zgloszenia.ts`.
+Karta I15.4b (ticket 130) **adaptowała się do nich i skasowała własne duplikaty**, zamiast tworzyć drugą
+implementację tych samych funkcji. Skutek dla przyszłych kart: warstwa `import/polityka/**` jest wspólna
+i nie należy do jednej karty — zmiany w niej uzgadnia koordynator.
 
 ⭐ **Zakres I15 ZAMKNIĘTY 2026-09-23** — Ania potwierdziła koniec zmian na produkcji i czeka na nową wersję do testów.
 Źródło prawdy: `origin/main` na `88fa31c`. Dawne karty-rezerwy I15.10 i I15.11 dostały konkretny zakres (#104, #103),
