@@ -8,6 +8,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "prepare": "node ../../tools/wlacz-hooki.cjs",
     "build": "tsc -p tsconfig.build.json && node scripts/copy-schema.mjs && node scripts/copy-parsery.mjs",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",

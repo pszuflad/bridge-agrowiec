@@ -11,6 +11,28 @@ on:
     branches: [develop]
 
 jobs:
+  # Gałąź PR-a musi zawierać całą bazę (CLAUDE.md, „Przed każdym PR"). Przy kilku kartach naraz
+  # develop przesuwa się w trakcie roboty i PR-y przychodzą z konfliktami — ten job wyłapuje to
+  # niezależnie od maszyny autora i od tego, czy ma włączone hooki repo (tools/wlacz-hooki.sh).
+  synchronizacja:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Gałąź zawiera całe origin/${{ github.base_ref }}
+        run: |
+          git fetch -q --no-tags origin "$GITHUB_BASE_REF"
+          if git merge-base --is-ancestor "origin/$GITHUB_BASE_REF" HEAD; then
+            echo "OK — gałąź zawiera całe origin/$GITHUB_BASE_REF."
+          else
+            brakuje=$(git rev-list --count "HEAD..origin/$GITHUB_BASE_REF")
+            echo "::error::Gałąź nie zawiera $brakuje commit(ów) z origin/$GITHUB_BASE_REF. Scal bazę (tools/sync-z-develop.sh), przebiegnij bramki i wypchnij ponownie."
+            exit 1
+          fi
+
   backend:
     runs-on: ubuntu-latest
     steps:
