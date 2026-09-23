@@ -42,6 +42,13 @@ const odczekaj = (ms: number): Promise<void> => new Promise((resolve) => setTime
 /**
  * Wolny port od systemu. `PORT=0` (port efemeryczny) odpada, bo strażnik konfiguracji wymaga
  * `PORT >= 1` (`config/env.ts`) — a stały numer biłby się z równoległymi sesjami i workerami.
+ *
+ * ⚠ To jedyne miejsce w suicie, które realnie WIĄŻE port (reszta idzie przez supertest —
+ * niezmiennik opisany w `vitest.config.ts`). Nie da się inaczej: `server.ts` zawsze woła
+ * `listen()`. Sonda ma okno TOCTOU — między jej zamknięciem a `listen()` w `server.ts` ktoś
+ * mógłby ten numer zająć. Okno to kilkadziesiąt milisekund na porcie, który system właśnie
+ * wskazał jako wolny, więc ryzyko jest znikome, ale nie zerowe: jeśli ten plik kiedyś zacznie
+ * migotać z `EADDRINUSE`, to jest ta przyczyna, a nie montaż.
  */
 function wolnyPort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -89,16 +96,20 @@ describe("montaż modułu dostępności w server.ts", () => {
   });
 
   afterEach(async () => {
-    if (uruchomiony && !zamkniety) await uruchomiony.zamknij();
-    // `server.ts` dokłada handlery sygnałów — bez zdjęcia zostałyby na workerze Vitesta.
-    for (const sygnal of ["SIGTERM", "SIGINT"] as const) {
-      for (const sluchacz of process.listeners(sygnal)) {
-        if (!sluchaczePrzed.has(sluchacz)) process.off(sygnal, sluchacz);
+    try {
+      if (uruchomiony && !zamkniety) await uruchomiony.zamknij();
+    } finally {
+      // Sprzątanie musi pójść nawet wtedy, gdy domykanie się wywróci — inaczej handlery
+      // sygnałów i atrapa `process.exit` zostałyby na workerze i zatruły następne pliki.
+      for (const sygnal of ["SIGTERM", "SIGINT"] as const) {
+        for (const sluchacz of process.listeners(sygnal)) {
+          if (!sluchaczePrzed.has(sluchacz)) process.off(sygnal, sluchacz);
+        }
       }
+      vi.restoreAllMocks();
+      process.env = envPrzed;
+      rmSync(katalog, { recursive: true, force: true });
     }
-    vi.restoreAllMocks();
-    process.env = envPrzed;
-    rmSync(katalog, { recursive: true, force: true });
   });
 
   /**
@@ -138,12 +149,15 @@ describe("montaż modułu dostępności w server.ts", () => {
     const zamknij = process
       .listeners("SIGTERM")
       .find((sluchacz) => !sluchaczeSigterm.has(sluchacz));
-    expect(zamknij, "server.ts ma zarejestrować handler SIGTERM").toBeDefined();
 
+    // `uruchomiony` przypisujemy PRZED jakąkolwiek asercją: od chwili importu `server.ts`
+    // wisi już żywy nasłuch HTTP i handlery sygnałów, więc `afterEach` musi mieć co sprzątać
+    // nawet wtedy, gdy asercja niżej padnie.
     uruchomiony = {
       zadajOdswiezenie,
       zamknij: async () => {
         zamkniety = true;
+        if (zamknij === undefined) return; // nie ma czego wołać — asercja niżej to zgłosi
         (zamknij as (sygnal: string) => void)("SIGTERM");
         // `server.close()` domyka nasłuch asynchronicznie, a dopiero jego callback zamyka bazę
         // i woła `process.exit`. Czekamy na to TUTAJ — inaczej `afterEach` zdjąłby atrapę
@@ -154,6 +168,8 @@ describe("montaż modułu dostępności w server.ts", () => {
       },
       sciezkaCsv: join(katalog, "csv", PLIK_CSV),
     };
+
+    expect(zamknij, "server.ts ma zarejestrować handler SIGTERM").toBeDefined();
     return uruchomiony;
   }
 

@@ -168,9 +168,14 @@ function zamknij(sygnal: string): void {
   harmonogramSelly.zatrzymaj();
   wygaszacz.zatrzymaj();
   // Wyrejestrowanie jest bezwarunkowe — zdjęcie instancji, której nie ma, jest no-opem.
-  // Po nim `zadajOdswiezenie()` znów nic nie robi: żaden nowy bieg kolejki nie ruszy po tym,
-  // jak zamknęliśmy bazę w `server.close()`. (Bieg już trwający dobiega sam — moduł celowo
-  // nie ma anulowania, bo oryginał też go nie ma.)
+  // Od tej chwili `zadajOdswiezenie()` nie ROZPOCZNIE już nowego biegu.
+  //
+  // Biegu, który trwa, to NIE przerywa i nikt na niego nie czeka: moduł celowo nie ma
+  // anulowania (oryginał też nie ma), a `server.close()` pilnuje tylko połączeń HTTP. Taki
+  // bieg kończy się więc jednym z dwóch sposobów — trafia na `sqlite.close()` i wywala się
+  // w generatorze (błąd złapany i zalogowany, `selly/dostepnosc.ts`), albo zostaje ucięty
+  // w połowie przez `process.exit(0)`, bez żadnego logu. Jedno i drugie jest akceptowalne:
+  // mechanizmem ponawiania jest okresowa synchronizacja, nie ten moduł.
   ustawDomyslnaSynchronizacjeDostepnosci(null);
   server.close(() => {
     sqlite.close();
