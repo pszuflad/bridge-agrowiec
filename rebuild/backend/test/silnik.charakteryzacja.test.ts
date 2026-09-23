@@ -24,15 +24,20 @@ import { fileURLToPath } from "node:url";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { silnikStagingu } from "../src/import/tk.js";
+import { silnikStagingu, type OpcjeImportu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
 import { historiaCen, manualOverrides, products, stagingItems } from "../src/db/schema.js";
 import type { Baza } from "../src/db/index.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
 import { wytnijFragmenty } from "./charakteryzacja/silnik/oryginal.mjs";
 import { SCENARIUSZE } from "./charakteryzacja/silnik/scenariusze.mjs";
-import { KOLUMNY_HISTORII, POLA_PRODUKTU } from "./charakteryzacja/silnik/atrapy.mjs";
-import { KODY_DOSTAWCOW, POLA_WIERSZA, UTWORZONO_WZORCOWE } from "./charakteryzacja/silnik/wzorzec.mjs";
+import { KOLUMNY_HISTORII, POLA_PRODUKTU } from "./charakteryzacja/silnik/polityka.mjs";
+import {
+  KODY_DOSTAWCOW,
+  normalizujWiersz,
+  POLA_WIERSZA,
+  UTWORZONO_WZORCOWE,
+} from "./charakteryzacja/silnik/wzorzec.mjs";
 
 const backendDir = dirname(fileURLToPath(import.meta.url));
 const katalog3a = join(backendDir, "charakteryzacja");
@@ -51,7 +56,7 @@ type Wzorzec = {
   skasowane: number[];
   historiaCen: Wiersz[];
   zmianyProduktow: ZmianaProduktu[];
-  zapytanDoPamieciLinkow: number;
+  blad?: string | null;
 };
 
 const wczytaj = <T>(sciezka: string): T => JSON.parse(readFileSync(sciezka, "utf-8")) as T;
@@ -69,15 +74,6 @@ const overridyDostawcy = (kod: string) =>
 /** Rekordy wejściowe = wzorzec 3a, czyli nagrane wyjście ORYGINALNYCH parserów. */
 const rekordyDostawcy = (kod: string) =>
   wczytaj<{ rekordy: RekordSurowy[] }>(join(katalog3a, `${kod}.expected.json`)).rekordy;
-
-/** Sprowadza wiersz `staging_items` do kształtu wzorca — te same pola, ten sam znacznik. */
-function normalizujWiersz(wiersz: Wiersz): Wiersz {
-  const wynik: Wiersz = {};
-  for (const nazwaPola of POLA_WIERSZA) {
-    wynik[nazwaPola] = nazwaPola === "utworzono" ? UTWORZONO_WZORCOWE : (wiersz[nazwaPola] ?? null);
-  }
-  return wynik;
-}
 
 /**
  * Znacznik czasu jest jeden na przebieg (`tk()`, :47585) i nieporównywalny między
@@ -108,6 +104,8 @@ function normalizujZmianeProduktu(wpis: ZmianaProduktu, znacznik: unknown): Zmia
 
 interface WynikPortu {
   statystyki: Record<string, unknown>;
+  /** Komunikat blokady źródła (#103), gdy import się zatrzymał; `null` przy przebiegu udanym. */
+  blad: string | null;
   staging: Wiersz[];
   skasowane: number[];
   historiaCen: Wiersz[];
@@ -151,6 +149,7 @@ function uruchomPort(
   katalog: Wiersz[],
   rekordy: RekordSurowy[],
   overridy: Wiersz[],
+  opcje: OpcjeImportu = {},
 ): WynikPortu {
   // Partiami, bo SQLite ma twardy limit zmiennych w jednym zapytaniu (domyślnie 32766),
   // a katalog MO5 to 1989 wierszy po 34 kolumny.
@@ -182,7 +181,15 @@ function uruchomPort(
     );
 
   const przed = stanProduktow();
-  const statystyki = silnikStagingu(db)(dostawca, rekordy);
+  // Blokada źródła (#103) jest WYNIKIEM przebiegu, nie awarią testu — wzorzec nagrywa ją
+  // w polu `blad`, więc port musi ją tak samo oddać, a nie wywrócić się na niej.
+  let statystyki: WynikPortu["statystyki"] | null = null;
+  let blad: string | null = null;
+  try {
+    statystyki = silnikStagingu(db)(dostawca, rekordy, opcje);
+  } catch (e) {
+    blad = (e as Error).message;
+  }
   const po = stanProduktow();
 
   const skasowane = [...przed.keys()].filter((id) => !po.has(id)).sort((a, b) => a - b);
@@ -209,7 +216,8 @@ function uruchomPort(
   const znacznik = wiersze[0]?.utworzono ?? historia[0]?.zarejestrowanoAt ?? null;
 
   return {
-    statystyki,
+    statystyki: statystyki ?? ({} as WynikPortu["statystyki"]),
+    blad,
     staging: wiersze.map(normalizujWiersz),
     skasowane,
     historiaCen: historia.map((w) => normalizujHistorie(w, znacznik)),
@@ -231,6 +239,7 @@ function porownajZWzorcem(wynik: WynikPortu, wzorzec: Wzorzec, etykieta: string)
     }
   }
 
+  expect(wynik.blad ?? null, `${etykieta}: blokada źródła`).toEqual(wzorzec.blad ?? null);
   expect(wynik.statystyki, `${etykieta}: liczniki`).toEqual(wzorzec.statystyki);
   expect(wynik.skasowane, `${etykieta}: skasowane produkty`).toEqual(wzorzec.skasowane);
 
@@ -331,6 +340,20 @@ describe("3. Scenariusze celowane w gałęzie, których cenniki nie ruszają", (
           scenariusz.katalog as Wiersz[],
           scenariusz.rekordy as unknown as RekordSurowy[],
           (scenariusz.overrides ?? []) as Wiersz[],
+          // Scenariusze mają SPÓJNY katalog, więc — jak w nagrywarce — deklarują kompletną
+          // ofertę i przechodzą przez gałęzie #103/#104.
+          scenariusz.meta === null
+            ? {}
+            : {
+                meta: (scenariusz.meta ?? {
+                  complete: true,
+                  parserErrors: 0,
+                  source: scenariusz.dostawca === "MO9" ? "Agrorami GraphQL" : "supplier file",
+                  rawCount: scenariusz.rekordy.length,
+                  excludedCodes: [],
+                }) as OpcjeImportu["meta"],
+                ...(scenariusz.opcje ?? {}),
+              },
         ),
         wzorzec!,
         scenariusz.nazwa,
@@ -354,9 +377,13 @@ describe("4. Przydatność próby — zielony wynik nie może brać się z puste
     expect(wzorce.every((w) => w.wejscie.rekordow > 0)).toBe(true);
   });
 
-  it("każdy typ zmiany jest realnie pokryty — z `wycofana` włącznie", () => {
+  it("typy zmian pokryte przez cenniki i scenariusze", () => {
     const typy = new Set(wszystkieWiersze.map((w) => w.typZmiany));
-    expect([...typy].sort()).toEqual(["blad", "nowa", "wycofana", "zmiana_kluczowa"]);
+    // ⚠ BEZ `wycofana` — i tak ma być. Od #103 wycofanie wymaga TRZECH różnych kompletnych
+    // ofert i minimum 24 h między potwierdzeniami, więc pojedynczy przebieg nie może go
+    // wytworzyć. Regułę 3×24 h pokrywa `test/silnik.polityka-zrodla.test.ts`, który
+    // porównuje port z ŻYWYM oryginałem na serii przebiegów.
+    expect([...typy].sort()).toEqual(["blad", "nowa", "zmiana_kluczowa"]);
   });
 
   it("gałęzie boczne silnika są pokryte", () => {
@@ -365,53 +392,74 @@ describe("4. Przydatność próby — zielony wynik nie może brać się z puste
       wszystkie.reduce((s: number, w: Wzorzec) => s + Number(w.statystyki[klucz] ?? 0), 0);
 
     expect(suma("odrzuconeNieOpony"), "odrzucenia nie-opon").toBeGreaterThan(0);
-    expect(suma("odrzuconeBrakDanych"), "odrzucenia braku danych").toBeGreaterThan(0);
-    expect(suma("odrzuconeSmieciMO2"), "filtr śmieci MO2").toBeGreaterThan(0);
     expect(suma("autoZatwierdzone"), "decyzje auto-zatwierdzenia").toBeGreaterThan(0);
     expect(suma("bezZmian"), "pozycje bez zmian").toBeGreaterThan(0);
+    expect(suma("nowe"), "nowe pozycje").toBeGreaterThan(0);
+    expect(suma("zmienione"), "pozycje zmienione").toBeGreaterThan(0);
 
-    // ZAKRES 3d-1 — bez tych trzech linii zielony wynik nie znaczyłby nic dla tej sesji.
-    expect(suma("wycofane"), "wycofania po trzech nieobecnościach").toBeGreaterThan(0);
-
-    const skasowanych = wszystkie.reduce((s: number, w: Wzorzec) => s + w.skasowane.length, 0);
     const historii = wszystkie.reduce((s: number, w: Wzorzec) => s + w.historiaCen.length, 0);
     const zmianProduktow = wszystkie.reduce(
       (s: number, w: Wzorzec) => s + w.zmianyProduktow.length,
       0,
     );
-    expect(skasowanych, "kasowanie produktu przy nie-oponie").toBeGreaterThan(0);
     expect(historii, "wpisy do historia_cen z auto-zatwierdzania").toBeGreaterThan(0);
     expect(zmianProduktow, "mutacje katalogu przez import").toBeGreaterThan(0);
+
+    // ⚠ Liczniki, które `staging_policy` deklaruje, ale których NIGDY nie podbija.
+    // `odrzuconeBrakDanych` nie ma w module ani jednego `++` — pozycja bez danych idzie do
+    // stagingu jako `blad`, a nie do licznika odrzuceń. Utrwalamy to, bo gdyby produkcja
+    // zaczęła go używać, wzorzec to pokaże.
+    expect(suma("odrzuconeBrakDanych"), "licznik braku danych jest martwy").toBe(0);
+
+    // ⚠ Od I15.4b kasowanie produktu przy nie-oponie NIE ZACHODZI. Stary `tk()` usuwał kartę
+    // z katalogu (`:47689`); `staging_policy` zostawia ją i wystawia sprawę do sprawdzenia.
+    const skasowanych = wszystkie.reduce((s: number, w: Wzorzec) => s + w.skasowane.length, 0);
+    expect(skasowanych, "polityka stagingu nie kasuje kart z katalogu").toBe(0);
   });
 
-  it("poprawki Marty są realnie w grze — inaczej `Gq()` jechałoby na pustej ścieżce", () => {
-    const overridow = wzorce.reduce((s, w) => s + w.overridy.wierszy, 0);
-    expect(overridow, "wiersze manual_overrides w charakteryzacji cenników").toBeGreaterThan(10000);
-
-    const ostrzezenia = wszystkieWiersze.map((w) => String(w.ostrzezenie ?? ""));
+  it("blokady źródła (#103) są realnie wyzwalane", () => {
+    const zablokowane = scenariusze.filter((w) => w.blad);
+    expect(zablokowane.length, "scenariusze zatrzymane blokadą źródła").toBeGreaterThan(0);
+    // Cennik, z którego po filtrach nie zostaje ani jedna pozycja, jest „podejrzanie mały" —
+    // to ta sama gałąź, która chroni przed obciętym plikiem dostawcy.
     expect(
-      ostrzezenia.some((o) => o.includes("plik nadpisuje poprawke Marty")),
-      "konflikt z poprawką Marty musi realnie wystąpić",
+      zablokowane.some((w) => String(w.blad).includes("podejrzanie mały")),
+      "próg minimalnej wielkości cennika",
     ).toBe(true);
   });
 
-  /**
-   * Obserwacja ze strony ORYGINAŁU, nie porównanie portu: w `tk()` `applyLinkMemory` dostaje
-   * PATCH auto-zatwierdzenia (bez `kod` i bez `marka/model/rozmiar`), więc wszystkie trzy
-   * ścieżki pamięci linków odpadają na warunku wstępnym. Utrwalamy to, bo gdyby produkcja
-   * zaczęła tu jednak czytać pamięć, przenagranie wzorca zapali ten test i wymusi decyzję.
-   */
-  it("tk() nie czyta pamięci linków — applyLinkMemory tylko przepisuje istniejący link", () => {
-    const wszystkie: Wzorzec[] = [...wzorce, ...scenariusze];
-    expect(wszystkie.map((w) => w.zapytanDoPamieciLinkow)).toEqual(wszystkie.map(() => 0));
+  it("poprawki Marty są realnie w grze — inaczej `protect()` jechałoby na pustej ścieżce", () => {
+    const overridow = wzorce.reduce((s, w) => s + w.overridy.wierszy, 0);
+    expect(overridow, "wiersze manual_overrides w charakteryzacji cenników").toBeGreaterThan(10000);
+
+    // ⚠ BEZ asercji na ostrzeżenie „plik nadpisuje poprawke Marty". Stary `tk()` meldował
+    // konflikt przez `Gq()`; `protect()` w `staging_policy` (`:158-162`) nakłada poprawkę
+    // CICHO i nie zostawia śladu w ostrzeżeniu. Że poprawki realnie się nakładają, widać
+    // w scenariuszach `override-*`, które porównują się z oryginałem pole po polu.
+    const scenariuszeOverride = scenariusze.filter((w) => w.nazwa.startsWith("override-"));
+    expect(scenariuszeOverride.length, "scenariusze poprawek Marty").toBeGreaterThan(0);
   });
 
-  it("ostrzeżenia i identyfikatory zastępcze faktycznie występują", () => {
+  it("ostrzeżenia nowego silnika faktycznie występują", () => {
     const ostrzezenia = wszystkieWiersze.map((w) => String(w.ostrzezenie ?? ""));
-    expect(ostrzezenia.some((o) => o.includes("Konflikt EAN"))).toBe(true);
-    expect(ostrzezenia.some((o) => o.includes("identyfikatora technicznego"))).toBe(true);
-    expect(ostrzezenia.some((o) => o.includes("bledny zapis nazwy"))).toBe(true);
-    expect(ostrzezenia.some((o) => o.includes("nie wykryto rozmiaru"))).toBe(true);
-    expect(ostrzezenia.some((o) => o.startsWith("EAN: "))).toBe(true);
+    // Słownik ostrzeżeń zmienił się razem z silnikiem — to są komunikaty `staging_policy`,
+    // nie starego `tk()`.
+    expect(ostrzezenia.some((o) => o.includes("Sprawdź dopasowanie")), "sprawy dopasowania").toBe(
+      true,
+    );
+    expect(ostrzezenia.some((o) => o.includes("Błędny EAN")), "ścisła walidacja EAN (D4)").toBe(
+      true,
+    );
+    expect(ostrzezenia.some((o) => o.includes("Nie wykryto rozmiaru opony")), "brak rozmiaru").toBe(
+      true,
+    );
+    expect(
+      ostrzezenia.some((o) => o.includes("Błędny zapis nazwy")),
+      "kontrola zapisu nazwy",
+    ).toBe(true);
+    expect(
+      ostrzezenia.some((o) => o.includes("Brak kodu dostawcy i poprawnego EAN")),
+      "pozycja bez jakiegokolwiek identyfikatora",
+    ).toBe(true);
   });
 });

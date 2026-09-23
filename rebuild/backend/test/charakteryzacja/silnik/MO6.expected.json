@@ -2,11 +2,12 @@
   "dostawca": "MO6",
   "wejscie": {
     "rekordow": 2,
-    "zrodlo": "test/charakteryzacja/MO6.expected.json → rekordy (wzorzec 3a)"
+    "zrodlo": "test/charakteryzacja/MO6.expected.json → rekordy (wzorzec 3a)",
+    "kompletnaOferta": false
   },
   "katalog": {
     "produktow": 0,
-    "zrodlo": "db/snapshot.db → products (projekcja 34 kolumn)"
+    "zrodlo": "db/snapshot.db → products (projekcja 37 kolumn)"
   },
   "overridy": {
     "wierszy": 14
@@ -21,12 +22,13 @@
     "wycofane": 0,
     "bezZmian": 0,
     "autoZatwierdzone": 0,
-    "szczegolyOdrzuconych": []
+    "szczegolyOdrzuconych": [],
+    "pominieteWycofania": "Niepotwierdzona kompletność źródła; braków nie zliczono"
   },
   "wierszyPoDeduplikacji": 2,
   "staging": [
     {
-      "typZmiany": "nowa",
+      "typZmiany": "blad",
       "kod": "MO6_AUTO_8846A16E4FF25C663D",
       "nazwa": "650/65R42 UNIGLORY SMARTAGRO 165D/168A8",
       "dostawca": "MO6",
@@ -38,12 +40,12 @@
       "cenaZakupuNowa": 4898.42,
       "cenaSprzedazyNowa": null,
       "zmianaPct": null,
-      "ostrzezenie": null,
-      "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO6_AUTO_8846A16E4FF25C663D\",\"kodDostawcy\":null,\"ean\":null,\"eanRaw\":\"6900532088753\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"650/65R42 UNIGLORY SMARTAGRO 165D/168A8\",\"marka\":\"UNIGLORY\",\"model\":\"SMARTAGRO\",\"bieznik\":\"SMARTAGRO\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"2\",\"magazynRaw\":\"2\",\"stan\":2,\"cenaZakupu\":4898.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"650/65R42\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"650\",\"profil\":65,\"srednica\":42,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"165/168\",\"indeksPredkosci\":\"D/A8\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":191.18,\"indeks1\":\"165/168\",\"indeks2\":\"D/A8\",\"indeksy\":\"165D/168A8\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"_kodSynthetic\":true,\"blokowaneFormyPlatnosci\":null}",
+      "ostrzezenie": "Błędny EAN „6900532088753”: nieprawidłowa cyfra kontrolna. Numer nie zostanie zapisany.",
+      "powod": "Błędny EAN „6900532088753”: nieprawidłowa cyfra kontrolna. Numer nie zostanie zapisany.",
+      "snapshotJson": "{\"kod\":\"MO6_AUTO_8846A16E4FF25C663D\",\"kodDostawcy\":null,\"ean\":null,\"eanRaw\":\"6900532088753\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"650/65R42 UNIGLORY SMARTAGRO 165D/168A8\",\"marka\":\"UNIGLORY\",\"model\":\"SMARTAGRO\",\"bieznik\":\"SMARTAGRO\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"2\",\"magazynRaw\":\"2\",\"stan\":2,\"cenaZakupu\":4898.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"650/65R42\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"650\",\"profil\":65,\"srednica\":42,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"165/168\",\"indeksPredkosci\":\"D/A8\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":191.18,\"indeks1\":\"165/168\",\"indeks2\":\"D/A8\",\"indeksy\":\"165D/168A8\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"_kodSynthetic\":true,\"blokowaneFormyPlatnosci\":null,\"eanIsValid\":0,\"eanSourceStatus\":\"invalid\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"dea9c69dd451bfcd188c2f255bf1fe019b766e61bd080991170d2ba19ea1c487\",\"_catalogVersion\":null,\"_eanIssue\":\"nieprawidłowa cyfra kontrolna\",\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "6900532088753",
-      "eanIsValid": null,
-      "eanSourceStatus": null,
+      "eanIsValid": 0,
+      "eanSourceStatus": "invalid",
       "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
@@ -63,17 +65,16 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO6_AUTO_08632BFBE1D711BBE8\",\"kodDostawcy\":null,\"ean\":\"6969999612400\",\"eanRaw\":\"6969999612400\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"420/85R24 UNIGLORY SMARTAGRO 137A8/134B\",\"marka\":\"UNIGLORY\",\"model\":\"SMARTAGRO\",\"bieznik\":\"SMARTAGRO\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"2\",\"magazynRaw\":\"2\",\"stan\":2,\"cenaZakupu\":1501.49,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"420/85R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"420\",\"profil\":85,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"137/134\",\"indeksPredkosci\":\"A8/B\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":132.36,\"indeks1\":\"137/134\",\"indeks2\":\"A8/B\",\"indeksy\":\"137A8/134B\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"_kodSynthetic\":true,\"blokowaneFormyPlatnosci\":null,\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"6969999612400\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO6_AUTO_08632BFBE1D711BBE8\",\"kodDostawcy\":null,\"ean\":\"6969999612400\",\"eanRaw\":\"6969999612400\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"420/85R24 UNIGLORY SMARTAGRO 137A8/134B\",\"marka\":\"UNIGLORY\",\"model\":\"SMARTAGRO\",\"bieznik\":\"SMARTAGRO\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"2\",\"magazynRaw\":\"2\",\"stan\":2,\"cenaZakupu\":1501.49,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"420/85R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"420\",\"profil\":85,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"137/134\",\"indeksPredkosci\":\"A8/B\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":132.36,\"indeks1\":\"137/134\",\"indeks2\":\"A8/B\",\"indeksy\":\"137A8/134B\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"_kodSynthetic\":true,\"blokowaneFormyPlatnosci\":null,\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"e792f5522a66e250846322e13a796567116f1185d9dcabf210c58c73ffd46a25\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "6969999612400",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"6969999612400\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     }
   ],
   "skasowane": [],
   "historiaCen": [],
-  "zmianyProduktow": [],
-  "zapytanDoPamieciLinkow": 0
+  "zmianyProduktow": []
 }

@@ -2,11 +2,12 @@
   "dostawca": "MO10",
   "wejscie": {
     "rekordow": 223,
-    "zrodlo": "test/charakteryzacja/MO10.expected.json → rekordy (wzorzec 3a)"
+    "zrodlo": "test/charakteryzacja/MO10.expected.json → rekordy (wzorzec 3a)",
+    "kompletnaOferta": false
   },
   "katalog": {
     "produktow": 220,
-    "zrodlo": "db/snapshot.db → products (projekcja 34 kolumn)"
+    "zrodlo": "db/snapshot.db → products (projekcja 37 kolumn)"
   },
   "overridy": {
     "wierszy": 444
@@ -21,7 +22,8 @@
     "wycofane": 0,
     "bezZmian": 199,
     "autoZatwierdzone": 17,
-    "szczegolyOdrzuconych": []
+    "szczegolyOdrzuconych": [],
+    "pominieteWycofania": "Niepotwierdzona kompletność źródła; braków nie zliczono"
   },
   "wierszyPoDeduplikacji": 7,
   "staging": [
@@ -40,11 +42,11 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO10_PCB1404\",\"kodDostawcy\":\"PCB1404\",\"ean\":\"4792290031081\",\"eanRaw\":\"4792290031081\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"12-16.5 GRI XPT+ 12PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT+\",\"bieznik\":\"XPT+\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":457,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"12-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"12\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"12\",\"wysokosc\":92.51,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290031081\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO10_PCB1404\",\"kodDostawcy\":\"PCB1404\",\"ean\":\"4792290031081\",\"eanRaw\":\"4792290031081\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"12-16.5 GRI XPT+ 12PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT+\",\"bieznik\":\"XPT+\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":457,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"12-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"12\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"12\",\"wysokosc\":92.51,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"1bccad434e40ac2abaac7f86ef00e60ff01eb46701be763f0d3a1f76171597b0\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "4792290031081",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290031081\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -63,11 +65,11 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO10_PCB1405\",\"kodDostawcy\":\"PCB1405\",\"ean\":\"4792290031074\",\"eanRaw\":\"4792290031074\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"10-16.5 GRI XPT+ 10PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT+\",\"bieznik\":\"XPT+\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":309,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"10-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"10\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"10\",\"wysokosc\":84.07,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290031074\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO10_PCB1405\",\"kodDostawcy\":\"PCB1405\",\"ean\":\"4792290031074\",\"eanRaw\":\"4792290031074\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"10-16.5 GRI XPT+ 10PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT+\",\"bieznik\":\"XPT+\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":309,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"10-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"10\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"10\",\"wysokosc\":84.07,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"7d1a4ce4aef4a5342f03d8ee19130e62ac006e7c080ed604ccbf77588dc96813\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "4792290031074",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290031074\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -86,11 +88,11 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO10_PCB1605\",\"kodDostawcy\":\"PCB1605\",\"ean\":\"4792290033191\",\"eanRaw\":\"4792290033191\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"12-16.5 GRI XPT HD 14PR L-5 TL\",\"marka\":\"GRI\",\"model\":\"XPT HD\",\"bieznik\":\"XPT HD\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":759,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"12-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"12\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"14\",\"wysokosc\":92.51,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"L-5\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"L-5\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290033191\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO10_PCB1605\",\"kodDostawcy\":\"PCB1605\",\"ean\":\"4792290033191\",\"eanRaw\":\"4792290033191\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"12-16.5 GRI XPT HD 14PR L-5 TL\",\"marka\":\"GRI\",\"model\":\"XPT HD\",\"bieznik\":\"XPT HD\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":759,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"12-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"12\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"14\",\"wysokosc\":92.51,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"L-5\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"L-5\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"f8bf78783c4dbc6d60e3fa3b264e7cbc6d4e405265dc40b5efc49cc44e1499a3\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "4792290033191",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290033191\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -109,11 +111,11 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO10_PCB1606\",\"kodDostawcy\":\"PCB1606\",\"ean\":\"4792290033306\",\"eanRaw\":\"4792290033306\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"10-16.5 GRI XPT HD 12PR L-5 TL\",\"marka\":\"GRI\",\"model\":\"XPT HD\",\"bieznik\":\"XPT HD\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":572,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"10-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"10\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"12\",\"wysokosc\":84.07,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"L-5\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"L-5\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290033306\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO10_PCB1606\",\"kodDostawcy\":\"PCB1606\",\"ean\":\"4792290033306\",\"eanRaw\":\"4792290033306\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"10-16.5 GRI XPT HD 12PR L-5 TL\",\"marka\":\"GRI\",\"model\":\"XPT HD\",\"bieznik\":\"XPT HD\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":572,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"10-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"10\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"12\",\"wysokosc\":84.07,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"L-5\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"L-5\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"4b098b6e73b325755c9b84021cde13458c1542b9630f6858a8be17250f131d09\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "4792290033306",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290033306\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -132,11 +134,11 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO10_PCB1804\",\"kodDostawcy\":\"PCB1804\",\"ean\":\"4792290033276\",\"eanRaw\":\"4792290033276\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"10-16.5 GRI XPT SS 12PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT SS\",\"bieznik\":\"XPT SS\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":431,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"10-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"10\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"12\",\"wysokosc\":84.07,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290033276\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO10_PCB1804\",\"kodDostawcy\":\"PCB1804\",\"ean\":\"4792290033276\",\"eanRaw\":\"4792290033276\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"10-16.5 GRI XPT SS 12PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT SS\",\"bieznik\":\"XPT SS\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":431,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"10-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"10\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"12\",\"wysokosc\":84.07,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"940185a0ac85f879593030e4488688fe540aeb8685f26448677b0a91964183e4\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "4792290033276",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290033276\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -155,11 +157,11 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO10_PCB1806\",\"kodDostawcy\":\"PCB1806\",\"ean\":\"4792290033283\",\"eanRaw\":\"4792290033283\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"12-16.5 GRI XPT SS 14PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT SS\",\"bieznik\":\"XPT SS\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":540,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"12-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"12\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"14\",\"wysokosc\":92.51,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290033283\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO10_PCB1806\",\"kodDostawcy\":\"PCB1806\",\"ean\":\"4792290033283\",\"eanRaw\":\"4792290033283\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"12-16.5 GRI XPT SS 14PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"XPT SS\",\"bieznik\":\"XPT SS\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":540,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"12-16.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"12\",\"profil\":null,\"srednica\":16.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"14\",\"wysokosc\":92.51,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"217d4be34027b805b86ddb31bafba297ffb66792c48b00f9d5b394654e7cbca7\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "4792290033283",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290033283\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     },
@@ -178,11 +180,11 @@
       "zmianaPct": null,
       "ostrzezenie": null,
       "powod": "Nowa pozycja w cenniku",
-      "snapshotJson": "{\"kod\":\"MO10_PCB3512\",\"kodDostawcy\":\"PCB3512\",\"ean\":\"4792290036734\",\"eanRaw\":\"4792290036734\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"18-22.5 GRI GRIP EX MP500 18PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"GRIP EX MP500\",\"bieznik\":\"GRIP EX MP500\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":1364,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"18-22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"18\",\"profil\":null,\"srednica\":22.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"18\",\"wysokosc\":133.05,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":\"[\\\"4792290036734\\\"]\"}",
+      "snapshotJson": "{\"kod\":\"MO10_PCB3512\",\"kodDostawcy\":\"PCB3512\",\"ean\":\"4792290036734\",\"eanRaw\":\"4792290036734\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"18-22.5 GRI GRIP EX MP500 18PR R-4 TL\",\"marka\":\"GRI\",\"model\":\"GRIP EX MP500\",\"bieznik\":\"GRIP EX MP500\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":1364,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"18-22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"18\",\"profil\":null,\"srednica\":22.5,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"18\",\"wysokosc\":133.05,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":\"R-4\",\"linkZdjecia\":null,\"oznaczenieBieznika\":\"R-4\",\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"137d24a2e687410b52c8a7e25cb23f68ca9ee4d4469a0b0aff184498b2c3cc99\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
       "eanRaw": "4792290036734",
       "eanIsValid": 1,
       "eanSourceStatus": "ok",
-      "eanCandidates": "[\"4792290036734\"]",
+      "eanCandidates": null,
       "edytowanePola": null,
       "utworzono": "<utworzono: jeden znacznik na przebieg>"
     }
@@ -190,6 +192,7 @@
   "skasowane": [],
   "historiaCen": [
     {
+      "id": 1,
       "produktId": 103119,
       "kod": "MO10_PAB1102",
       "ean": "4792290022454",
@@ -202,10 +205,11 @@
       "kategoria": "Rolnicze",
       "cenaZakupu": 408,
       "cenaSprzedazy": 531,
-      "stan": 8,
+      "stan": 0,
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 2,
       "produktId": 103115,
       "kod": "MO10_PAB1112",
       "ean": "4792290030237",
@@ -222,6 +226,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 3,
       "produktId": 103087,
       "kod": "MO10_PAB1256",
       "ean": "4792290030053",
@@ -234,10 +239,11 @@
       "kategoria": "Rolnicze",
       "cenaZakupu": 521,
       "cenaSprzedazy": 679,
-      "stan": 1,
+      "stan": 0,
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 4,
       "produktId": 103078,
       "kod": "MO10_PAB1354",
       "ean": "4792290043251",
@@ -254,6 +260,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 5,
       "produktId": 103077,
       "kod": "MO10_PAB1822",
       "ean": "4792290039018",
@@ -270,6 +277,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 6,
       "produktId": 103074,
       "kod": "MO10_PAB2720",
       "ean": "4792290039315",
@@ -286,6 +294,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 7,
       "produktId": 103048,
       "kod": "MO10_PAR1249",
       "ean": "4792290041813",
@@ -302,6 +311,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 8,
       "produktId": 103046,
       "kod": "MO10_PAR1251",
       "ean": "4792290041264",
@@ -318,6 +328,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 9,
       "produktId": 103043,
       "kod": "MO10_PAR1254",
       "ean": "4792290041844",
@@ -334,6 +345,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 10,
       "produktId": 103032,
       "kod": "MO10_PAR1265",
       "ean": "4792290041271",
@@ -350,6 +362,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 11,
       "produktId": 103031,
       "kod": "MO10_PAR1266",
       "ean": "4792290041950",
@@ -366,6 +379,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 12,
       "produktId": 103030,
       "kod": "MO10_PAR1267",
       "ean": "4792290041967",
@@ -378,10 +392,11 @@
       "kategoria": "Rolnicze",
       "cenaZakupu": 2777,
       "cenaSprzedazy": 3620,
-      "stan": 4,
+      "stan": 0,
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 13,
       "produktId": 103015,
       "kod": "MO10_PAR1292",
       "ean": "4792290042223",
@@ -398,6 +413,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 14,
       "produktId": 102994,
       "kod": "MO10_PAR1404",
       "ean": "4792290023543",
@@ -414,6 +430,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 15,
       "produktId": 102991,
       "kod": "MO10_PAR1407",
       "ean": "4792290023574",
@@ -430,6 +447,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 16,
       "produktId": 102974,
       "kod": "MO10_PAR5611",
       "ean": "4792290039667",
@@ -446,6 +464,7 @@
       "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
     },
     {
+      "id": 17,
       "produktId": 102964,
       "kod": "MO10_PAR7103",
       "ean": "4792290042933",
@@ -531,10 +550,6 @@
     {
       "id": 103030,
       "zmiany": {
-        "stan": {
-          "przed": 0,
-          "po": 4
-        },
         "dataAktualizacji": {
           "przed": "2026-07-21T12:13:36.473Z",
           "po": "<utworzono: jeden znacznik na przebieg>"
@@ -648,10 +663,6 @@
     {
       "id": 103087,
       "zmiany": {
-        "stan": {
-          "przed": 0,
-          "po": 1
-        },
         "dataAktualizacji": {
           "przed": "2026-07-21T12:13:36.472Z",
           "po": "<utworzono: jeden znacznik na przebieg>"
@@ -674,52 +685,11 @@
     {
       "id": 103119,
       "zmiany": {
-        "stan": {
-          "przed": 0,
-          "po": 8
-        },
         "dataAktualizacji": {
           "przed": "2026-07-21T12:13:36.471Z",
           "po": "<utworzono: jeden znacznik na przebieg>"
         }
       }
-    },
-    {
-      "id": 104681,
-      "zmiany": {
-        "nieobecnoscPodRzad": {
-          "przed": 0,
-          "po": 1
-        }
-      }
-    },
-    {
-      "id": 104682,
-      "zmiany": {
-        "nieobecnoscPodRzad": {
-          "przed": 0,
-          "po": 1
-        }
-      }
-    },
-    {
-      "id": 104683,
-      "zmiany": {
-        "nieobecnoscPodRzad": {
-          "przed": 0,
-          "po": 1
-        }
-      }
-    },
-    {
-      "id": 104684,
-      "zmiany": {
-        "nieobecnoscPodRzad": {
-          "przed": 0,
-          "po": 1
-        }
-      }
     }
-  ],
-  "zapytanDoPamieciLinkow": 0
+  ]
 }

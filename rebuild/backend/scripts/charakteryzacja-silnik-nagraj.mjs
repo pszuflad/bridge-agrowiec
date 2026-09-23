@@ -1,5 +1,27 @@
-// Nagrywa OCZEKIWANE wyjście silnika importu, uruchamiając ORYGINALNE `tk()` wycięte
-// z produkcyjnego bundla `mirror/backend/index.cjs` (nie nasz port!).
+// Nagrywa OCZEKIWANE wyjście silnika importu, uruchamiając ORYGINALNĄ politykę stagingu
+// `staging_policy.install()` @ `88fa31c` (nie nasz port!).
+//
+// ⭐ ZMIANA W I15.4b (ticket 130). Do tej pory skrypt wycinał z bundla `tk = function`.
+// Na `88fa31c` ta funkcja jest MARTWA — ostatnim przypisaniem do `tk` w `mirror/backend/index.cjs`
+// jest `require("./staging_policy.cjs").install({...})`. Wzorzec nagrany ze starego `tk()`
+// mierzył więc silnik, którego produkcja nie uruchamia. Harness oryginału:
+// `test/charakteryzacja/silnik/polityka.mjs`.
+//
+// ⚠⚠ CENNIKI NAGRYWAMY JAKO OFERTĘ NIEKOMPLETNĄ — i to jest świadoma decyzja, nie uproszczenie.
+//
+// Wzorce 3a to PRÓBKI (ok. 200 wierszy na dostawcę), a katalog pochodzi z pełnego zrzutu
+// produkcji (kilka tysięcy produktów na dostawcę). Podanie próbki jako „kompletnej oferty"
+// jest po prostu NIEPRAWDĄ i produkcja zareagowałaby na to dokładnie tak, jak powinna:
+// wstrzymałaby cały katalog dostawcy poza próbką (~4800 produktów), bo #104 każe natychmiast
+// wstrzymać wszystko, czego nie ma w kompletnym cenniku. Wzorzec byłby wtedy listą kilku
+// tysięcy wstrzymań i nie mierzyłby już niczego o dopasowaniu.
+//
+// Dlatego cenniki mierzą to, co próbka może zmierzyć UCZCIWIE: łańcuch dopasowania na realnych,
+// brudnych danych (kod → wielkość liter → kod dostawcy → EAN z ochroną DOT → cechy), staging
+// i auto-zatwierdzanie. Zachowania zależne od KOMPLETNOŚCI źródła (#103/#104: blokady,
+// auto-wstrzymania, dowody nieobecności, reguła 3×24 h) mają własny gate, który porównuje port
+// z ŻYWYM oryginałem na scenariuszach o spójnym katalogu:
+// `test/silnik.polityka-zrodla.test.ts`. Tamten nie potrzebuje zrzutu i chodzi w CI.
 //
 // To jest wzorzec, do którego `test/silnik.charakteryzacja.test.ts` porównuje port z 3c.
 // Odpowiednik `charakteryzacja-nagraj.mjs` z 3a, o jedną warstwę wyżej: 3a nagrywała wyjście
@@ -35,14 +57,14 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { stworzAtrapy } from "../test/charakteryzacja/silnik/atrapy.mjs";
 import { SCENARIUSZE } from "../test/charakteryzacja/silnik/scenariusze.mjs";
 import {
   KODY_DOSTAWCOW,
   UTWORZONO_WZORCOWE,
   normalizujPrzebieg,
 } from "../test/charakteryzacja/silnik/wzorzec.mjs";
-import { wytnijFragmenty, zaladujOryginal } from "../test/charakteryzacja/silnik/oryginal.mjs";
+import { wytnijFragmenty } from "../test/charakteryzacja/silnik/oryginal.mjs";
+import { stworzPolitykeOryginalu } from "../test/charakteryzacja/silnik/polityka.mjs";
 
 const backendDir = dirname(dirname(fileURLToPath(import.meta.url)));
 const repoDir = join(backendDir, "..", "..");
@@ -84,6 +106,13 @@ const KOLUMNY_KATALOGU = [
   "indeksPredkosci",
   "vfIf",
   "pr",
+  // ZAKRES I15.4b: `compatibility()` (`staging_policy.cjs:44`) porównuje pełną listę
+  // OPTIONAL, w tym `dot` i `tlTt`, których stary `tk()` w ogóle nie czytał. `kodImportu`
+  // przepisuje się na pozycję przy dopasowaniu (`:412`). Brak któregokolwiek z tych pól
+  // w projekcji zmienia wynik — wyłapał to strażnik „pełny vs przycięty katalog".
+  "dot",
+  "tlTt",
+  "kodImportu",
   "cenaZakupu",
   "cenaSprzedazy",
   "marzaPct",
@@ -137,36 +166,40 @@ const przytnijOverride = (wiersz) =>
  * Znacznik `new Date().toISOString()`, który `tk()` wzięło na wejściu (`:47585`).
  * Nie da się go odczytać z zewnątrz, więc czytamy go z pierwszego artefaktu, który go niesie.
  */
-function znacznikPrzebiegu(atrapy) {
-  return atrapy.staging[0]?.utworzono ?? atrapy.historiaCen[0]?.zarejestrowanoAt ?? null;
+function znacznikPrzebiegu(staging, historiaCen) {
+  return staging[0]?.utworzono ?? historiaCen[0]?.zarejestrowanoAt ?? null;
 }
 
-/** Uruchamia ORYGINALNE `tk()` na podanym katalogu i zwraca znormalizowany przebieg. */
+/**
+ * Uruchamia ORYGINALNĄ politykę na podanym katalogu i zwraca znormalizowany przebieg.
+ *
+ * `meta` celowo NIE jest doklejane — patrz nagłówek: próbka nie jest kompletną ofertą,
+ * więc silnik nie zlicza braków ani nie wstrzymuje. Mierzymy sam łańcuch dopasowania.
+ */
 function uruchomOryginal(kod, rekordy, produkty, overrides, opisKatalogu) {
-  const atrapy = stworzAtrapy({ produkty, overrides });
-  const oryginal = zaladujOryginal(atrapy.zaleznosci);
-  const statystyki = oryginal.tk(kod, rekordy);
-  atrapy.sprawdzUkladPetli();
+  const h = stworzPolitykeOryginalu({ produkty, overrides });
+  const statystyki = h.importer(kod, rekordy);
+  const staging = h.staging();
+  const historiaCen = h.historiaCen();
+  const zmianyProduktow = h.zmianyProduktow();
+  h.zamknij();
 
-  const przebieg = normalizujPrzebieg({
+  return normalizujPrzebieg({
     dostawca: kod,
     wejscie: {
       rekordow: rekordy.length,
       zrodlo: `test/charakteryzacja/${kod}.expected.json → rekordy (wzorzec 3a)`,
+      kompletnaOferta: false,
     },
     katalog: { produktow: produkty.length, zrodlo: opisKatalogu },
     overridy: { wierszy: overrides.length },
     statystyki,
-    staging: atrapy.staging,
-    skasowane: atrapy.skasowane,
-    historiaCen: atrapy.historiaCen,
-    zmianyProduktow: atrapy.zmianyProduktow(),
-    zapytanDoPamieciLinkow: atrapy.zapytanDoPamieciLinkow(),
-    znacznikPrzebiegu: znacznikPrzebiegu(atrapy),
+    staging,
+    skasowane: [],
+    historiaCen,
+    zmianyProduktow,
+    znacznikPrzebiegu: znacznikPrzebiegu(staging, historiaCen),
   });
-
-  atrapy.zamknij();
-  return przebieg;
 }
 
 /**
@@ -176,27 +209,53 @@ function uruchomOryginal(kod, rekordy, produkty, overrides, opisKatalogu) {
 function nagrajScenariusze() {
   const wyniki = SCENARIUSZE.map((s) => {
     const overrides = s.overrides ?? [];
-    const atrapy = stworzAtrapy({ produkty: s.katalog, overrides });
-    const oryginal = zaladujOryginal(atrapy.zaleznosci);
-    const statystyki = oryginal.tk(s.dostawca, s.rekordy);
-    atrapy.sprawdzUkladPetli();
+    const h = stworzPolitykeOryginalu({ produkty: s.katalog, overrides });
+    const rekordy = [...s.rekordy];
+    // Scenariusze mają SPÓJNY katalog (kilka pozycji), więc mogą uczciwie deklarować
+    // kompletną ofertę — i dzięki temu przechodzą przez gałęzie #103/#104.
+    if (s.meta !== null) {
+      Object.defineProperty(rekordy, "_bridgeFeedMeta", {
+        value: s.meta ?? {
+          complete: true,
+          parserErrors: 0,
+          source: s.dostawca === "MO9" ? "Agrorami GraphQL" : "supplier file",
+          rawCount: s.rekordy.length,
+          excludedCodes: [],
+        },
+        configurable: true,
+      });
+    }
+
+    let statystyki = null;
+    let blad = null;
+    try {
+      statystyki = h.importer(s.dostawca, rekordy, s.opcje ?? {});
+    } catch (e) {
+      blad = e.message;
+    }
+    const staging = h.staging();
+    const historiaCen = h.historiaCen();
+    const zmianyProduktow = h.zmianyProduktow();
+    h.zamknij();
 
     const przebieg = normalizujPrzebieg({
       dostawca: s.dostawca,
-      wejscie: { rekordow: s.rekordy.length, zrodlo: "test/charakteryzacja/silnik/scenariusze.mjs" },
+      wejscie: {
+        rekordow: s.rekordy.length,
+        zrodlo: "test/charakteryzacja/silnik/scenariusze.mjs",
+        kompletnaOferta: s.meta !== null,
+      },
       katalog: { produktow: s.katalog.length, zrodlo: "scenariusze.mjs" },
       overridy: { wierszy: overrides.length },
-      statystyki,
-      staging: atrapy.staging,
-      skasowane: atrapy.skasowane,
-      historiaCen: atrapy.historiaCen,
-      zmianyProduktow: atrapy.zmianyProduktow(),
-      zapytanDoPamieciLinkow: atrapy.zapytanDoPamieciLinkow(),
-      znacznikPrzebiegu: znacznikPrzebiegu(atrapy),
+      statystyki: statystyki ?? {},
+      staging,
+      skasowane: [],
+      historiaCen,
+      zmianyProduktow,
+      znacznikPrzebiegu: znacznikPrzebiegu(staging, historiaCen),
     });
 
-    atrapy.zamknij();
-    return { nazwa: s.nazwa, opis: s.opis, ...przebieg };
+    return { nazwa: s.nazwa, opis: s.opis, blad, ...przebieg };
   });
 
   writeFileSync(
@@ -322,7 +381,6 @@ function nagraj() {
         `nowe=${przebieg.statystyki.nowe} zmienione=${przebieg.statystyki.zmienione} ` +
         `blad=${przebieg.staging.filter((w) => w.typZmiany === "blad").length} ` +
         `nieOpony=${przebieg.statystyki.odrzuconeNieOpony} ` +
-        `skasowane=${przebieg.skasowane.length} ` +
         `auto=${przebieg.statystyki.autoZatwierdzone} ` +
         `wycofane=${przebieg.statystyki.wycofane} ` +
         `historia=${przebieg.historiaCen.length} ` +
