@@ -58,6 +58,8 @@ lokalnie (hook) i czerwony w CI.
 
 ## Review
 Bez subagenta — zmiana narzędziowo-procesowa, sprawdzona testami w piaskownicy.
+Bramki backendu po scaleniu `develop` (89 plików z bazy): lint + typecheck + build + `vitest run`
+— 103 pliki testów, 1674 testy zielone.
 
 ---
 Ticket docs: `docs/tickets/127-CHORE-pr-sync-i-hooki/`
