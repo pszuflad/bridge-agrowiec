@@ -20,10 +20,12 @@ import {
   applyLinkMemory,
   applyNazwaPamiec,
   applyWagaPamiec,
-  assignKodImportu,
   rememberLink,
   uchwytSqlite,
 } from "./silnik/bridge-ext.js";
+// Staging v2 (#99) PODMIENIA `ext.assignKodImportu` globalnie (`staging_policy.cjs:141`),
+// więc bulk dostaje tę samą nową wersję co importer i akceptacja.
+import { assignKodImportu } from "./polityka/kod-importu.js";
 
 /**
  * Pozycja wejściowa bulku. Celowo luźna — oryginał bierze ciało żądania takie, jakie przyszło,
@@ -113,7 +115,7 @@ export function dodajProduktyBulk(db: Baza, pozycje: PozycjaBulku[]): number {
         /* jak `catch (_be) {}` */
       }
       try {
-        assignKodImportu(sqlite, rekord, istniejacy);
+        assignKodImportu(db, rekord, istniejacy);
       } catch {
         /* jak `catch (_be) {}` */
       }

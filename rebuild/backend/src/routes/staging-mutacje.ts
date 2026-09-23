@@ -10,7 +10,11 @@ import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { dostawcaPoKodzie, zapiszWynikImportu } from "../repos/suppliers.js";
-import { pozycjaStaginguPoId, zaktualizujPozycjeStagingu } from "../repos/staging.js";
+import { pozycjaStaginguPoId } from "../repos/staging.js";
+// Staging v2 (#99) nadpisuje `U.updateStaging` (`staging_policy.cjs:168`): bieżnik idzie za
+// modelem, gdy był jego automatyczną kopią (#105), a zmieniony EAN przechodzi ścisłą
+// walidację (D4). Zapis idzie więc przez politykę, nie wprost przez repozytorium.
+import { zapiszEdycjeStagingu } from "../import/polityka/edycja-stagingu.js";
 import { zapiszPoprawke } from "../repos/overrides.js";
 import {
   idPozycjiZFiltrow,
@@ -329,7 +333,7 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
 
     doZapisu.snapshotJson = JSON.stringify(snapshot);
     doZapisu.edytowanePola = JSON.stringify(edytowanePola);
-    const zaktualizowana = zaktualizujPozycjeStagingu(db, id, doZapisu);
+    const zaktualizowana = zapiszEdycjeStagingu(db, id, doZapisu, pozycja.snapshotJson);
 
     zapiszAudyt(db, {
       uzytkownikId: req.user?.id ?? null,

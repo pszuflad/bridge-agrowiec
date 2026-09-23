@@ -12,7 +12,12 @@ import { zastosujRegulyCenowe } from "../repos/ceny.js";
 import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
 // Wspólny z `bulk.ts` od 12a — obie ścieżki importu zapisują tę samą tabelę tym samym odsiewem.
 import { tylkoKolumnyProduktu } from "../repos/products.js";
-import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
+import { applyDims, applyLinkMemory, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
+// ⚠ Staging v2 (#99) PODMIENIA `ext.assignKodImportu` w `install()` (`staging_policy.cjs:141`),
+// a podmiana jest GLOBALNA — `acceptStaging` w oryginale woła już nową wersję. Dlatego
+// akceptacja bierze ją stąd, a nie z mostu do `legacy/bridge_ext.cjs`. Jedyna linia tego
+// pliku dotknięta przez kartę I15.4b; reszta akceptacji należy do I15.4c.
+import { assignKodImportu } from "./polityka/kod-importu.js";
 
 /**
  * Rekord produktu budowany z pozycji stagingu. Celowo luźny: oryginał składa go ze snapshotu
@@ -171,7 +176,7 @@ export function zatwierdzPozycjeStagingu(db: Baza, id: number, uzytkownikId: num
     /* jak `catch (_be) {}` */
   }
   try {
-    assignKodImportu(sqlite, rekord, istniejacy);
+    assignKodImportu(db, rekord, istniejacy);
   } catch {
     /* jak `catch (_be) {}` */
   }
