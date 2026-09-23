@@ -162,6 +162,11 @@ function parseAgroramiName(fullName) {
     })
     .join(' ');
 
+  // Samo "DOT" przed oznaczeniami technicznymi jest opisem partii, nie modelem
+  // bieznika. Nie usuwamy roku DOT (np. DOT 2016) ani innych nazw modeli.
+  s = s.replace(/\bDOT(?=\s+\d{1,2}\s*PR\b|\s+(?:TL|TT)\b|$)/gi, ' ');
+  s = s.replace(/\s+/g, ' ').trim();
+
   // 3) PR (płótna): liczba + "PR" (z opcjonalnym "/" przed i "pr." śmieciem po)
   let pr = null;
   {
@@ -418,9 +423,44 @@ const KATEGORIA_MAP = {
   'przemysłowe': 'Przemysłowe', 'przemyslowe': 'Przemysłowe',
   'ciężarowe': 'Ciężarowe', 'ciezarowe': 'Ciężarowe',
   'dętki': 'Dętki', 'detki': 'Dętki',
-  'akcesoria': 'Akcesoria',
-  'inne': 'Rolnicze' // DECYZJA ANNY: inne → rolnicze
+  'akcesoria': 'Akcesoria'
 };
+
+// POPRAWKA 2026-09-17: Agrorami historycznie zwracało część produktów jako
+// „inne”. Nie wolno mapować całej tej grupy na Rolnicze, bo zawiera również
+// opony przemysłowe. Gdy drzewo kategorii nie daje rozstrzygnięcia, używamy
+// rodziny bieżnika; nieznane serie trafiają do centralnego klasyfikatora.
+function classifyBktFallback(fullName) {
+  const name = String(fullName || '');
+  if (/\bFRS\b/i.test(name)) return 'Leśne';
+  if (/\b(?:AT\s*621|BK-?LOADER|EARTHMAX|EM\s*936|FS\s*216|GR\s*288|LG\s*(?:306|408)|LIFTMAX|MAGLIFT|MULTIMAX|JUMBOTRAX|SURETRAX|PAC\s*MASTER|PACMASTER|PL\s*801|PT\s*-?\s*HD|ROCK\s*GRIP|SKID\s*POWER|TR\s*387)\b/i.test(name)) {
+    return 'Przemysłowe';
+  }
+  if (/\b(?:AGRIMAX|AS\s*504|AW\s*702|AW\s*909|FARM\s*2000|FARM\s*HIGHWAY|FL\s*630|FL\s*693|FLOT\s*648|TF\s*9090|TR\s*128|TR\s*135|TR\s*171|TR\s*678)\b/i.test(name)) {
+    return 'Rolnicze';
+  }
+  return c.classifyByName(name);
+}
+
+// DECYZJA ANNY 2026-09-17: nie importujemy opon do quadów, kosiarek,
+// gokartów ani podobnych małych pojazdów. Agrorami grupuje je w kategorii
+// Magento 163 „Opony do quadów i kosiarek”. ID jest stabilniejszym warunkiem
+// niż sama odmiana słowa „quad” w nazwie kategorii.
+const ODRZUCONE_CATEGORY_IDS = new Set(['163']);
+
+function powodOdrzucenia(it) {
+  const categories = Array.isArray(it && it.categories) ? it.categories : [];
+  if (categories.some(x => ODRZUCONE_CATEGORY_IDS.has(String(x && x.id)))) {
+    return 'kategoria_163_quady_kosiarki';
+  }
+
+  const nameL = String((it && it.name) || '').toLowerCase();
+  const catL = categories.map(x => (x && x.name) || '').join(' ').toLowerCase();
+  if (/\bquad\b/.test(nameL) || /\bquad\b/.test(catL)) {
+    return 'quad';
+  }
+  return null;
+}
 
 // Override rozmiaru dla pozycji, gdzie dostawca wpisuje indeks zamiast wymiaru (jak w CSV parserze)
 const ROZMIAR_OVERRIDE = {
@@ -547,10 +587,11 @@ async function fetchAllItems() {
     }
     retriedAuth = false;
 
-    if (json.errors && (!json.data || !json.data.products)) {
+    if (json.errors?.length) {
       throw new Error(`Agrorami: błąd GraphQL: ${JSON.stringify(json.errors).slice(0, 300)}`);
     }
-    const products = json.data.products;
+    const products = json.data?.products;
+    if(!products || !Array.isArray(products.items))throw new Error('Agrorami: niepełna odpowiedź z produktami');
     if (totalCount == null) totalCount = products.total_count;
     const batch = products.items || [];
     if (batch.length === 0) break;
@@ -559,11 +600,15 @@ async function fetchAllItems() {
 
     // keyset: następny kursor = id ostatniego elementu
     const lastId = batch[batch.length - 1].id;
+    if(!lastId || Number(lastId)<=Number(after))throw new Error('Agrorami: brak postępu pobierania kolejnych stron');
     after = String(lastId);
 
     if (batch.length < PAGE_SIZE) break; // ostatnia strona
   }
 
+  if(!items.length || (Number.isFinite(totalCount) && items.length!==totalCount) || new Set(items.map(x=>String(x.id))).size!==items.length){
+    throw new Error(`Agrorami: niepełna oferta (${items.length} z ${totalCount}); import zatrzymany`);
+  }
   return { items, totalCount };
 }
 
@@ -609,7 +654,9 @@ function itemToRecord(it) {
   if (ROZMIAR_OVERRIDE[idDostawcy]) {
     rozmiar = ROZMIAR_OVERRIDE[idDostawcy];
   } else {
-    rozmiar = parsedName.rozmiar || '';
+    // Znak "$" bezpośrednio przed wymiarem nie jest częścią rozmiaru.
+    // Czyścimy wyłącznie pole rozmiar; pełna nazwa produktu pozostaje bez zmian.
+    rozmiar = (parsedName.rozmiar || '').replace(/^\$\s*/, '');
   }
 
   // bieznik: TERAZ czysty model (bez rozmiaru/LI-SI/PR/TL) — to jest pole, które
@@ -629,7 +676,7 @@ function itemToRecord(it) {
   }
   let kategoria = KATEGORIA_MAP[kategoriaRaw] || null;
   if (!kategoria) {
-    kategoria = c.classifyByName(fullName);
+    kategoria = classifyBktFallback(fullName);
   }
   // Override FLOT/Flotation (zgodnie z CSV parserem)
   // POPRAWKA 2026-09-01: kategorie z Wielkiej litery (jak w reszcie systemu).
@@ -721,11 +768,9 @@ async function fetchAll() {
 
   for (const it of items) {
     try {
-      // Odrzucamy quady (jak w CSV parserze) — po nazwie/kategorii
-      const nameL = (it.name || '').toLowerCase();
-      const catL = (Array.isArray(it.categories) ? it.categories.map(x => (x && x.name) || '').join(' ') : '').toLowerCase();
-      if (/\bquad\b/.test(nameL) || /\bquad\b/.test(catL)) {
-        odrzucone.push({ powod: 'quad', id: it.id, name: it.name });
+      const powod = powodOdrzucenia(it);
+      if (powod) {
+        odrzucone.push({ powod, id: it.id, name: it.name });
         continue;
       }
       records.push(itemToRecord(it));
