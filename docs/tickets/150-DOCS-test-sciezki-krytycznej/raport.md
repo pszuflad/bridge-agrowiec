@@ -113,6 +113,40 @@ zrealizowane (dowód w tym tickecie, MO9 tylko opisane, droga `url` na przycisku
 - **Bramki backendu** (`lint`, `typecheck`, `build`, `test`) — przebiegnięte po synchronizacji
   z `develop`; wynik niżej, w sekcji dopisanej po Kroku 16.
 
+## Poprawki po review
+
+**BLOCKER 1 — punkt 2.2 był niewykonalny jak napisany. Naprawione.**
+Instrukcja kazała Ani włączyć przyciskiem „Kolumny" pola **EAN, Rozmiar, Producent-opony,
+Bieznik/model** i porównać je z plikiem. Te cztery pozycje są w `pages/staging/kolumny.ts`
+oznaczone jako `dodatkowa` i **nie ma ich w `KOLEJNOSC_KOLUMN`** (`kolumny.ts:116-129`), więc
+`TabelaStagingu.tsx` ich nie renderuje — zaznaczenie checkboxów nie pokazuje nic. Popover sam
+o tym pisze: *„Te kolumny nie są jeszcze wyświetlane w tabeli stagingu"*
+(`KonfiguratorKolumn.tsx:131`). To wierne odtworzenie oryginału (decyzja D3 przy 14b), więc
+**nie jest to błąd do naprawienia w kodzie** — błędem była instrukcja.
+
+Poprawiona ścieżka, zweryfikowana w kodzie:
+- przez **„Kolumny"** włącza się **Stan**, **Cena zakupu**, **Cena sprzedaży** — te trzy są
+  w `KOLEJNOSC_KOLUMN` i realnie się renderują;
+- EAN, rozmiar, marka i bieżnik idą przez przycisk **„Szczegóły"**
+  (`TabelaStagingu.tsx:212-218`) → sekcja **„Podgląd różnic"** (`SzczegolyPozycji.tsx:123`),
+  która wypisuje **cały snapshot wiersza z pliku dostawcy**, pole po polu
+  (`SzczegolyPozycji.tsx:135-146`). To jest właściwe i mocniejsze narzędzie do zadania
+  „jedna pozycja od pliku do katalogu" niż kolumny tabeli.
+- Dodane ostrzeżenie dla Ani, że lista „Dodatkowe (z katalogu)" w okienku „Kolumny" nic nie
+  pokazuje — żeby nie straciła czasu na szukanie tam EAN-u.
+- Potwierdzone niezależnie, że szukanie w Stagingu faktycznie obejmuje EAN:
+  `repos/staging.ts:117` (`like(stagingItems.eanRaw, wzorzec)`).
+
+**SHOULD-FIX — cytaty doprowadzone do zgodności ze źródłem.**
+- nazwa dostawcy: „Agro-Rami / BKT" → **„Agro-Rami (BKT)"** (tak jest w `suppliers.nazwa`);
+- wielokropki w cytowanych komunikatach UI: *„…EAN..."* i *„…kilkanaście sekund..."* mają
+  w kodzie trzy kropki, nie znak `…` — cytaty poprawione (`Staging.tsx:222`,
+  `SekcjaCsv.tsx:116`).
+
+**Dowód CSV — potwierdzony niezależnie.** Reviewer powtórzył całą procedurę z `dowod-csv.md`
+na własnej kopii bazy i uzyskał **ten sam sha256**. Metodologia uznana za poprawną, obie
+pułapki (59 vs 60 kolumn, brak migracji na surowym snapshocie) za prawidłowo ominięte.
+
 ## Breaking changes
 
 Brak.

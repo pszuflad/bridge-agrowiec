@@ -42,7 +42,7 @@ dziesięciu — wystarczy **po jednym z każdej drogi**, plus MO9 osobno.
 
 | Droga | Dostawcy | Jak plik przychodzi |
 |---|---|---|
-| `url` | MO2 JMK, MO3 Grasdorf, MO4 Handlopex Wrocław, MO5 Handlopex Rzeszów, MO9 Agro-Rami | system sam pobiera z adresu, co 60 min |
+| `url` | MO2 JMK, MO3 Grasdorf, MO4 Handlopex Wrocław, MO5 Handlopex Rzeszów, MO9 Agro-Rami (BKT) | system sam pobiera z adresu, co 60 min |
 | `mail` | MO1 Bohnenkamp, MO7 Nokian, MO8 Trelleborg, MO10 GRI | plik przychodzi pocztą, wgrywasz go ręcznie |
 | `upload` | MO6 Agrowiec / Uniglory (SMARTAGRO) | wgrywasz ręcznie |
 
@@ -114,7 +114,7 @@ ani jednego produktu w katalogu**, a jego automatyczny import jest wyłączony. 
 (sami wgrywacie ten plik, gdy trzeba), ale chcemy to potwierdzić — patrz sekcja
 **„Do Twojej decyzji"**, punkt 1.
 
-### 1.4 MO9 (Agro-Rami / BKT) — jedyny dostawca przez API ⭐
+### 1.4 MO9 — Agro-Rami (BKT), jedyny dostawca przez API ⭐
 
 **Jest teraz.** MO9 jako jedyny **nie przysyła pliku** — system loguje się do jego systemu
 i pobiera dane wprost stamtąd. W tabeli dostawców MO9 ma wpisany adres URL, ale to tylko
@@ -172,18 +172,28 @@ i wyłapuje błędy, których nie widać w żadnej liczbie zbiorczej.
       **EAN · rozmiar · marka · bieżnik/model · cena zakupu · stan magazynowy**.
 
 **Krok 2 — znajdź ją w `Staging`.**
-- [ ] Menu → **Staging**. W polu szukania (*„Szukaj po kodzie, nazwie, dostawcy lub EAN…"*)
+- [ ] Menu → **Staging**. W polu szukania (*„Szukaj po kodzie, nazwie, dostawcy lub EAN..."*)
       wklej **EAN**.
-- [ ] Domyślnie nie wszystkie rubryki są widoczne. Kliknij przycisk **„Kolumny"** nad tabelą
-      i włącz: **EAN**, **Rozmiar**, **Producent-opony**, **Bieznik/model**, **Cena zakupu**,
-      **Stan**.
+- [ ] Cena i stan nie są w tabeli pokazywane od razu. Kliknij przycisk **„Kolumny"** nad tabelą
+      i włącz **Stan**, **Cena zakupu** i **Cena sprzedaży**.
+- [ ] Teraz kliknij przy znalezionym wierszu przycisk **„Szczegóły"**. W okienku, które się
+      otworzy, zjedź do sekcji **„Podgląd różnic"** — tam jest **cała zawartość wiersza
+      z pliku dostawcy**, pole po polu, dokładnie tak, jak system go odczytał.
 
-**Ma się stać:** wszystkie sześć wartości zgadza się z Twoją kartką. Zwróć szczególną uwagę na:
+**Ma się stać:** w „Podglądzie różnic" odnajdujesz wszystkie sześć wartości z kartki i każda
+się zgadza. Zwróć szczególną uwagę na:
 - **rozmiar** — czy nie rozsypał się na kawałki ani nie skleił w jedno;
 - **cenę zakupu** — czy przecinek dziesiętny jest tam, gdzie ma być (nie 10× za dużo ani za mało);
 - **markę i bieżnik** — czy nie zamieniły się miejscami.
 
 > ☐ OK ☐ ŹLE — uwagi: ______________________________________________
+
+> ⚠ **Jedna rzecz, żeby Cię nie zmyliła.** W okienku „Kolumny", pod nagłówkiem
+> **„Dodatkowe (z katalogu)"**, jest druga lista — EAN, Rozmiar, Producent-opony,
+> Bieznik/model i tak dalej. **Te przełączniki nic nie pokazują** i jest tam o tym napisane:
+> *„Te kolumny nie są jeszcze wyświetlane w tabeli stagingu."* Tak samo było w starym Bridge
+> i celowo tego nie zmienialiśmy. Dlatego EAN, rozmiar i markę sprawdzasz przez
+> **„Szczegóły" → „Podgląd różnic"**, a nie przez tamte przełączniki.
 
 **Krok 3 — znajdź tę samą pozycję w `Katalog`.**
 - [ ] Menu → **Katalog**. W polu **„Szukaj"** wklej ten sam **EAN**.
@@ -219,7 +229,7 @@ to jedno i to samo.
 - [ ] Potwierdź pytanie: *„Wygenerować plik CSV teraz? Zastąpi bieżący plik pobierany przez Selly."*
 
 **Ma się stać:**
-- pojawia się *„⏳ Generuję plik CSV, to może potrwać kilkanaście sekund…"*;
+- pojawia się *„⏳ Generuję plik CSV, to może potrwać kilkanaście sekund..."*;
 - potem **✓ Wygenerowano — N produktów (X MB) w Y s**;
 - status sekcji przechodzi na **OK** z opisem *„✓ Synchronizacja OK — plik wygenerowany dzisiaj"*;
 - **„Ostatnia synchronizacja"** pokazuje dzisiejszą datę i godzinę.
@@ -406,7 +416,8 @@ Jeśli chcesz przejść wszystko szybko i wrócić do szczegółów tylko tam, g
 3. Wgraj plik dla **MO1** (droga mailowa) → „Plik wczytany".
 4. Wgraj plik dla **MO6** (droga ręczna).
 5. **MO9** → „Synchronizuj" → trwa dłużej, stany wyglądają sensownie.
-6. Weź jedną pozycję z pliku → znajdź po **EAN** w **Stagingu** → i w **Katalogu**.
+6. Weź jedną pozycję z pliku → znajdź po **EAN** w **Stagingu** → **„Szczegóły"**
+   → **„Podgląd różnic"** → i ta sama pozycja w **Katalogu**.
 7. Selly → **„Wygeneruj CSV teraz"** → ✓ Wygenerowano.
 8. Pobierz plik → Excel → polskie znaki, kilka tysięcy wierszy, 60. kolumna wypełniona.
 
