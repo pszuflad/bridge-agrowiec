@@ -1,7 +1,7 @@
 # Specyfikacja synchronizacji Selly od Ani (22.09) — weryfikacja wobec kodu
 
 **Skąd:** Ania przysłała 2026-09-23 dokument „Specyfikacja synchronizacji Selly — nowy Bridge" (stan na 22.09),
-zapowiedziany w odpowiedzi na pytanie 1.1 rundy 3. **Oryginał wrzuca do repo Paweł** jako
+zapowiedziany w odpowiedzi na pytanie 1.1 rundy 3. **Oryginał leży obok:**
 `docs/selly-spec-od-ani-2026-09-22.md` — ten plik jest wyłącznie weryfikacją: co się zgadza z kodem, co nie,
 i czego nadal brakuje.
 
@@ -44,8 +44,8 @@ Dokument Ani opisuje ZAMIAR i kontekst biznesowy; przy rozbieżności wygrywa ko
    (Selly/integrator + Agrowiec). **Ani `docs/cutover.md`, ani `docs/deploy-setup.md` o tym nie wspominały.**
    Przy cutoverze podmieniamy zawartość `public_html/panel` — bez zachowania tego pliku **Selly straci dostęp
    do CSV** (403), a plik może w ogóle zniknąć. Dopisane do `cutover.md` tym ticketem.
-2. **Kolizje `kod_importu`** — 121 zduplikowanych kluczy `(dostawca, kod_importu)` = 259 aktywnych wierszy,
-   114 grup z różnymi cenami/stanami. Skutek: wspólny wpis `selly_products` → nadpisywany snapshot → **delty
+2. **Kolizje `kod_importu`** — opis Ani: 121 kluczy / 259 wierszy. **Pomiar 23.09 na świeżej kopii produkcji:
+   80 grup / 174 produkty, 76 z różnymi cenami lub stanami, wszystkie z mapowaniem w Selly — problem ŻYWY.** Skutek: wspólny wpis `selly_products` → nadpisywany snapshot → **delty
    wracają co 15 minut w pętli**. Ania nazywa to blokadą krytyczną i wskazuje `assignKodImportu`. Nowy wpis
    backlogu **#108** (do zmierzenia na świeżej kopii produkcji — Staging v2 nadpisał `assignKodImportu`,
    więc problem mógł zniknąć).
