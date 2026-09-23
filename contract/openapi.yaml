@@ -20570,6 +20570,179 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  /api/staging/{id}/choose-absence-card:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/{id}/choose-absence-card"
+      description: >-
+        Wskazanie jednej karty przy sprawie nieobecnej opony (Staging v2, backlog #106).
+        `selectedCode` równe kodowi zgłoszenia oznacza, że STARA karta przejmuje bieżącą
+        ofertę, a kandydat zostaje wstrzymany; każdy inny kod oznacza odwrotnie.
+        `candidateVersion` to odcisk karty kandydata z `GET .../review` (pole
+        `candidates[].catalogVersion`) — nieaktualny odcisk zatrzymuje operację.
+        Port `staging_policy.cjs:640-648`.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                selectedCode: { type: string }
+                candidateVersion: { type: string }
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  kod: { type: string }
+        "401": { description: "Nieautoryzowany" }
+        "409":
+          description: >-
+            Blokada polityki — m.in. różny DOT, nieaktualny odcisk karty, brak świeżego
+            odczytu oferty. Ciało niesie `message`, NIE `error`.
+          content:
+            application/json:
+              schema: { type: object, properties: { message: { type: string } } }
+  /api/staging/{id}/close-absence-review:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/{id}/close-absence-review"
+      description: >-
+        Zamknięcie sprawy nieobecnej karty BEZ scalania — stara karta zostaje wstrzymana,
+        a decyzja trafia do `staging_absence_decisions`, żeby sprawa nie wróciła przy
+        kolejnym imporcie. Port `staging_policy.cjs:649-656`.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  kod: { type: string }
+        "401": { description: "Nieautoryzowany" }
+        "409":
+          description: "Blokada polityki. Ciało niesie `message`, NIE `error`."
+          content:
+            application/json:
+              schema: { type: object, properties: { message: { type: string } } }
+  /api/staging/{id}/resolve:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/{id}/resolve"
+      description: >-
+        Ręczne rozstrzygnięcie niejednoznacznego dopasowania. `action: "link"` łączy
+        zgłoszenie z produktem z listy kandydatów (`targetCode`), `action: "new"` zakłada
+        osobny produkt. Rozstrzygnięcie NIE edytuje zgłoszenia — kasuje je i zakłada nowe,
+        więc `id` w odpowiedzi jest inne niż w ścieżce. Port `staging_policy.cjs:657-663`.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action: { type: string, enum: [link, new] }
+                targetCode:
+                  type: string
+                  description: "Wymagane dla `action: link` — kod z listy kandydatów tego dostawcy."
+      responses:
+        "200":
+          description: "OK — `id` NOWEGO zgłoszenia"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  id: { type: integer }
+                  kod: { type: string }
+        "401": { description: "Nieautoryzowany" }
+        "409":
+          description: "Blokada polityki. Ciało niesie `message`, NIE `error`."
+          content:
+            application/json:
+              schema: { type: object, properties: { message: { type: string } } }
+  /api/staging/{id}/review:
+    get:
+      tags: [staging]
+      summary: "GET /api/staging/{id}/review"
+      description: >-
+        Materiał do ręcznego przeglądu zgłoszenia: co przyszło z cennika, co stoi dziś
+        w katalogu i jacy są kandydaci do połączenia. `incoming.stan` i `incoming.status`
+        pochodzą z PRODUKTU W KATALOGU, reszta `incoming` ze snapshotu zgłoszenia.
+        Port `staging_policy.cjs:621-639`.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: integer }
+                  kod: { type: string }
+                  nazwa: { type: string }
+                  powod: { type: string, nullable: true }
+                  matchIssue: { type: string, nullable: true }
+                  absenceReview: { type: boolean }
+                  absenceEvidence: { type: array, items: { type: object } }
+                  duplicateSource: { type: boolean }
+                  sourceConflict: { type: object, nullable: true }
+                  eanIssue: { type: string, nullable: true }
+                  incoming:
+                    type: object
+                    properties:
+                      marka: { type: string, nullable: true }
+                      model: { type: string, nullable: true }
+                      rozmiar: { type: string, nullable: true }
+                      dot: { type: string, nullable: true }
+                      ean: { type: string, nullable: true }
+                      stan: { type: integer, nullable: true }
+                      status: { type: string, nullable: true }
+                  candidates:
+                    type: array
+                    items:
+                      type: object
+                      description: >-
+                        Kandydat ze snapshotu, wzbogacony o stan jego ŻYWEJ karty.
+                        `selectable` i `sameDot` niosą tę samą wartość — trójstronną
+                        zgodność DOT, ten sam warunek, który stosuje `choose-absence-card`.
+                      properties:
+                        kod: { type: string }
+                        catalogStan: { type: integer, nullable: true }
+                        status: { type: string, nullable: true }
+                        catalogDot: { type: string, nullable: true }
+                        catalogVersion: { type: string, nullable: true }
+                        selectable: { type: boolean }
+                        sameEan: { type: boolean }
+                        sameDot: { type: boolean }
+        "401": { description: "Nieautoryzowany" }
+        "404":
+          description: >-
+            Zgłoszenia już nie ma. Jedyna trasa polityki, która oddaje 404 zamiast 409 —
+            to nie konflikt stanu, tylko pytanie o coś, czego nie ma.
+          content:
+            application/json:
+              schema: { type: object, properties: { message: { type: string } } }
   /api/suppliers:
     get:
       tags: [suppliers]

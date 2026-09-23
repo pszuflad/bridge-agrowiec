@@ -1,28 +1,32 @@
 /**
- * ŚWIADOME ODSTĘPSTWO OD PRODUKCJI — karta 14i (ticket 58).
+ * ODSTĘPSTWO 14i — ZDJĘTE. Ten plik pilnuje, że ZOSTAŁO zdjęte i co weszło w jego miejsce.
  *
- * Decyzja Ani z 2026-09-18 (`docs/rebuild-backlog.md` #11): „EAN który jest zepsuty notacją
- * naukową ma być importowany jako PUSTE POLE W KATALOGU". Produkcja robi inaczej — zapisuje
- * rozwiniętą wartość (`:44872`) i tylko dokleja ostrzeżenie „zapis naukowy ma tylko null cyfr
- * znaczących — EAN niepewny".
+ * HISTORIA. Karta 14i (ticket 58) wprowadziła świadome odstępstwo: EAN zepsuty notacją
+ * naukową miał trafiać do katalogu jako PUSTE pole, zamiast — jak w produkcji — jako wartość
+ * rozwinięta (`6,41944E+12` → `6419440000000`), która wygląda na prawdziwy numer, a nim nie
+ * jest. Decyzja Ani z 2026-09-18, `docs/rebuild-backlog.md` #11.
  *
- * ⚠ DLACZEGO TEN PLIK ISTNIEJE OSOBNO, ZAMIAST DOŁOŻYĆ SCENARIUSZ DO CHARAKTERYZACJI.
- * `akceptacja.charakteryzacja.test.ts` porównuje nasz port z URUCHOMIONYM oryginałem i żąda
- * pełnej równości (`expect(nasz.produkty).toEqual(oczekiwany.produkty)`) dla każdego wpisu
- * z `charakteryzacja/akceptacja/scenariusze.mjs`. Scenariusz ze świadomym odstępstwem
- * MUSIAŁBY tam paść, a w typie scenariusza nie ma pola wyjątku. Dokładanie takiego pola
- * rozluźniłoby porównanie dla wszystkich 31 scenariuszy — czyli osłabiło jedyną siatkę, która
- * pilnuje wierności akceptacji. Dlatego odstępstwo mieszka tutaj, w jednym miejscu, jawnie.
+ * CO SIĘ ZMIENIŁO. Decyzja **D4** (Staging v2, ticket 129) rozwiązuje ten sam problem
+ * WCZEŚNIEJ i ostrzej: taka pozycja w ogóle NIE JEST WPUSZCZANA do akceptacji.
+ * `checkAcceptance` (`staging_policy.cjs:197`) odsyła ją do ręcznej poprawki numeru
+ * komunikatem „Błędny EAN: popraw numer w edycji zgłoszenia przed akceptacją.". Ciche
+ * zapisywanie pustego pola przestało być potrzebne i zostało z `akceptacja.ts` usunięte.
  *
- * METODA JEST TA SAMA CO W CHARAKTERYZACJI I TO JEST SENS TEGO PLIKU: nie wpisujemy ręcznie,
- * co „powinno wyjść". Uruchamiamy oryginał i nasz port na dwóch identycznie zasianych bazach
- * i pokazujemy, że różnią się DOKŁADNIE JEDNYM POLEM. Dzięki temu test jest jednocześnie
- * dowodem, że odstępstwo jest WĄSKIE — gdyby przeciekło na inne pole albo inną tabelę,
- * asercja „reszta identyczna" zapali.
+ * DLATEGO TEN PLIK MA DZIŚ DWA ZADANIA, oba negatywne wobec przeszłości:
+ *  1. **Bazowa akceptacja jest znów IDENTYCZNA z produkcją** — żadnego pola wyjątku. Gdyby
+ *     ktoś przywrócił zerowanie `ean`, asercja „port == oryginał" zapali.
+ *  2. **Blokada D4 naprawdę działa** — pozycja z zapisem naukowym nie przechodzi przez
+ *     `sprawdzAkceptacje`, więc do bazowej akceptacji nigdy nie dociera.
+ *
+ * METODA ZOSTAJE TA SAMA CO W CHARAKTERYZACJI i to jest sens tego pliku: nie wpisujemy
+ * ręcznie, co „powinno wyjść". Uruchamiamy oryginał i nasz port na dwóch identycznie
+ * zasianych bazach i porównujemy stan. Zmieniło się tylko to, czego dowodzimy: kiedyś
+ * „różnią się dokładnie jednym polem", dziś „nie różnią się niczym".
  */
 import { afterEach, describe, expect, it } from "vitest";
 
 import { zatwierdzPozycjeStagingu } from "../src/import/akceptacja.js";
+import { sprawdzAkceptacje } from "../src/import/polityka/blokady.js";
 import { products, stagingItems } from "../src/db/schema.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
 import { zaladujOryginal } from "./charakteryzacja/akceptacja/oryginal.mjs";
@@ -34,6 +38,9 @@ type Wiersz = Record<string, unknown>;
 const EAN_SUROWY = "6,41944E+12";
 const EAN_ROZWINIETY = "6419440000000";
 const KANDYDACI = JSON.stringify([EAN_ROZWINIETY]);
+
+/** EAN o POPRAWNEJ cyfrze kontrolnej — rozwinięcie `8,05997E+12`. Używany jako kontrola negatywna. */
+const EAN_Z_POPRAWNA_SUMA = "8059970000000";
 
 const ZNACZNIK_CZASU = "<czas przebiegu>";
 const ZNACZNIK_LOSOWY = "<losowy numer sześciocyfrowy>";
@@ -123,52 +130,100 @@ afterEach(() => {
   for (const baza of otwarte.splice(0)) baza.posprzataj();
 });
 
-describe("14i — EAN w notacji naukowej trafia do katalogu jako PUSTE pole", () => {
-  it("produkcja zapisuje rozwinięty EAN, my zapisujemy NULL — i to jest cała różnica", () => {
+describe("14i zdjęte — bazowa akceptacja zapisuje EAN dokładnie jak produkcja", () => {
+  it("port zapisuje rozwinięty EAN, tak samo jak oryginał — odstępstwa już nie ma", () => {
     const { oryginal, port } = obieStrony(pozycjaZEanem("scientific_notation_uncertain"));
 
     expect(oryginal.produkty).toHaveLength(1);
     expect(port.produkty).toHaveLength(1);
 
-    // Najpierw DOWÓD, że oryginał naprawdę robi to, od czego odstępujemy — bez tego test
-    // przechodziłby także wtedy, gdyby produkcja sama przestała zapisywać tę wartość.
+    // Dowód, że oryginał naprawdę to robi — bez tego test nie mierzyłby niczego.
     expect(oryginal.produkty[0]!.ean, "oryginał zapisuje rozwinięty zapis naukowy").toBe(
       EAN_ROZWINIETY,
     );
 
-    // I właściwe odstępstwo.
-    expect(port.produkty[0]!.ean, "decyzja Ani 2026-09-18: puste pole w katalogu").toBeNull();
+    // I właściwa asercja: po zdjęciu 14i port robi TO SAMO.
+    expect(port.produkty[0]!.ean, "14i zdjęte decyzją D4 — port nie zeruje już EAN-u").toBe(
+      EAN_ROZWINIETY,
+    );
   });
 
-  it("odstępstwo jest WĄSKIE — poza `ean` produkt jest identyczny jak u produkcji", () => {
+  it("żadnego pola wyjątku — CAŁY produkt jest identyczny jak u produkcji", () => {
     const { oryginal, port } = obieStrony(pozycjaZEanem("scientific_notation_uncertain"));
 
-    // Zdejmujemy JEDNO pole, którego różnica jest zamierzona, i żądamy równości reszty.
-    // Wszystkie 70+ pozostałych kolumn `products` musi się zgadzać co do wartości.
-    const { ean: _pominietyOryginal, ...resztaOryginalu } = oryginal.produkty[0]!;
-    const { ean: _pominietyPort, ...resztaPortu } = port.produkty[0]!;
-
-    expect(resztaPortu).toEqual(resztaOryginalu);
+    // Kiedyś zdejmowaliśmy tu `ean` przed porównaniem. Dziś porównujemy wszystko:
+    // to jest dowód, że odstępstwo zniknęło w całości, a nie przesunęło się gdzie indziej.
+    expect(port.produkty[0]!).toEqual(oryginal.produkty[0]!);
   });
 
-  it("pola towarzyszące ZOSTAJĄ w katalogu — widać, dlaczego `ean` jest pusty", () => {
+  it("pola towarzyszące dalej opisują pochodzenie EAN-u", () => {
     const { port } = obieStrony(pozycjaZEanem("scientific_notation_uncertain"));
     const produkt = port.produkty[0]!;
 
-    // Bez tego pominięty EAN stałby się niewidzialny: zostałby pusty wiersz bez śladu,
-    // że w cenniku EAN w ogóle był i dlaczego go odrzucono.
     expect(produkt.eanRaw, "surowa wartość z cennika").toBe(EAN_SUROWY);
-    expect(produkt.eanSourceStatus, "powód pustego pola").toBe("scientific_notation_uncertain");
+    expect(produkt.eanSourceStatus, "ślad po zapisie naukowym").toBe(
+      "scientific_notation_uncertain",
+    );
     expect(produkt.eanCandidates, "co dało rozwinięcie").toBe(KANDYDACI);
     expect(produkt.eanIsValid).toBe(0);
   });
 
-  it("ostrzeżenie w stagingu jest nietknięte — staging zachowuje się jak produkcja", () => {
+  it("staging zachowuje się jak produkcja", () => {
     const { oryginal, port } = obieStrony(pozycjaZEanem("scientific_notation_uncertain"));
-
-    // Karta 14i tnie WYŁĄCZNIE przy zapisie do katalogu. Silnik i staging zostają, więc
-    // tabela `staging_items` musi być po obu stronach identyczna — bez żadnego wyjątku.
     expect(port.staging).toEqual(oryginal.staging);
+  });
+});
+
+describe("D4 — to, co zastąpiło 14i: pozycja z zapisem naukowym NIE WCHODZI do akceptacji", () => {
+  /**
+   * ⭐ SEDNO ZMIANY. Bazowa akceptacja (wyżej) zachowuje się jak produkcja, bo w produkcji
+   * też nigdy nie dostaje takiej pozycji — bramka odrzuca ją wcześniej. Ten test pokazuje
+   * tę bramkę: ten sam wiersz, który wyżej przechodzi przez `zatwierdzPozycjeStagingu`,
+   * przez `sprawdzAkceptacje` NIE przechodzi.
+   */
+  it("blokada oddaje 409 i DOSŁOWNY komunikat z `staging_policy.cjs:197`", () => {
+    const baza = stworzTestowaBaze();
+    otwarte.push(baza);
+
+    const wiersz = pozycjaZEanem("scientific_notation_uncertain") as Wiersz;
+    const snapshot = JSON.parse(String(wiersz.snapshotJson)) as Record<string, unknown>;
+    // Pozycja poza tym KOMPLETNA wobec Staging v2 — żeby paść na EAN-ie, a nie na
+    // „starym imporcie" czy nieaktualnym katalogu.
+    snapshot._policyVersion = 2;
+    snapshot._catalogVersion = null;
+    wiersz.snapshotJson = JSON.stringify(snapshot);
+
+    const id = zasiej(baza, wiersz);
+
+    expect(() => sprawdzAkceptacje(baza.db, id)).toThrowError(
+      "Błędny EAN: popraw numer w edycji zgłoszenia przed akceptacją.",
+    );
+
+    try {
+      sprawdzAkceptacje(baza.db, id);
+    } catch (e) {
+      expect((e as { status?: number }).status, "`fail()` zawsze daje 409").toBe(409);
+    }
+  });
+
+  it("poprawny EAN przechodzi przez bramkę — blokada nie jest szersza, niż ma być", () => {
+    const baza = stworzTestowaBaze();
+    otwarte.push(baza);
+
+    // ⚠ `EAN_ROZWINIETY` (`6419440000000`) NIE nadaje się na kontrolę negatywną: to wynik
+    // rozwinięcia zapisu naukowego i jego cyfra kontrolna się NIE zgadza, więc `validateEan`
+    // odrzuca go niezależnie od notacji. Bierzemy numer o poprawnej sumie — ten sam,
+    // na którym stoi niżej test grupowania `kod_importu`.
+    const wiersz = pozycjaZEanem("ok", EAN_Z_POPRAWNA_SUMA, 1) as Wiersz;
+    const snapshot = JSON.parse(String(wiersz.snapshotJson)) as Record<string, unknown>;
+    snapshot._policyVersion = 2;
+    snapshot._catalogVersion = null;
+    snapshot.eanRaw = EAN_Z_POPRAWNA_SUMA;
+    wiersz.snapshotJson = JSON.stringify(snapshot);
+
+    const id = zasiej(baza, wiersz);
+
+    expect(() => sprawdzAkceptacje(baza.db, id)).not.toThrow();
   });
 });
 
@@ -213,7 +268,6 @@ describe("14i — grupowanie `kod_importu` po EAN-ie musi zostać NIETKNIĘTE", 
    * nieobjęte decyzją Ani odstępstwo. Dlatego cięcie przeniesiono na `doZapisu`, tuż przed
    * zapisem. Ten test pilnuje, żeby nikt go nie przesunął z powrotem.
    */
-  const EAN_Z_POPRAWNA_SUMA = "8059970000000";
   const NUMER_GRUPY = "424242";
 
   /** Ten sam produkt w innym magazynie — ma już numer grupy, nadany przy wcześniejszym imporcie. */
@@ -243,7 +297,7 @@ describe("14i — grupowanie `kod_importu` po EAN-ie musi zostać NIETKNIĘTE", 
     );
   });
 
-  it("…a jedyną różnicą wobec produkcji dalej jest samo pole `ean`", () => {
+  it("…a produkt jest poza tym identyczny jak u produkcji — bez pola wyjątku", () => {
     const { oryginal, port } = obieStrony(pozycjaNaukowa, innyMagazyn);
 
     expect(port.produkty.map((p) => p.kod)).toEqual(oryginal.produkty.map((p) => p.kod));
@@ -253,12 +307,10 @@ describe("14i — grupowanie `kod_importu` po EAN-ie musi zostać NIETKNIĘTE", 
       oryginal.produkty.find((p) => p.kod === "P0-INNY-MAGAZYN"),
     );
 
-    const { ean: _o, ...resztaOryginalu } = oryginal.produkty.find((p) => p.kod === "P1")!;
-    const { ean: _p, ...resztaPortu } = port.produkty.find((p) => p.kod === "P1")!;
-    expect(resztaPortu).toEqual(resztaOryginalu);
-
-    // Samo odstępstwo dalej obowiązuje — mimo poprawnej sumy kontrolnej EAN ma być pusty.
-    expect(port.produkty.find((p) => p.kod === "P1")!.ean).toBeNull();
-    expect(oryginal.produkty.find((p) => p.kod === "P1")!.ean).toBe(EAN_Z_POPRAWNA_SUMA);
+    // Po zdjęciu 14i porównujemy CAŁY wiersz, razem z `ean`.
+    expect(port.produkty.find((p) => p.kod === "P1")!).toEqual(
+      oryginal.produkty.find((p) => p.kod === "P1")!,
+    );
+    expect(port.produkty.find((p) => p.kod === "P1")!.ean).toBe(EAN_Z_POPRAWNA_SUMA);
   });
 });
