@@ -1,7 +1,7 @@
 # I15.11 — panel „Braki w cenniku” i podgląd starej karty (frontend)
 
-> **Stan:** ⬜ po I15.4 i I15.5 (faza 5)
-> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #103 · **Zależy od:** I15.4 (dane i trasy), I15.5 (ten sam widok Staging)
+> **Stan:** ⬜ po I15.4b, I15.4c i I15.5 (faza 5)
+> **Iteracja:** 15 — domknięcie zakresu produkcji · **Wpisy backlogu:** #103 · **Zależy od:** I15.4b, I15.4c (dane i trasy), I15.5 (ten sam widok Staging)
 > **Ticket:** —
 
 Przepisana z karty-rezerwy przez koordynatora (ticket 110, triaż 22.09 wieczór). Źródło prawdy: `origin/main` na `abe5f14`.
