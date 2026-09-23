@@ -1,8 +1,8 @@
 # TEST.3 — zasady pracy Ani z Claude Code (przeglądarka) po testach
 
-> **Stan:** ⬜ do zrobienia (fala „dokumenty dla Ani")
+> **Stan:** ✅ 2026-09-24 · 152-DOCS-instrukcja-pracy-dla-ani
 > **Iteracja:** poza iteracjami (przygotowanie do cutoveru) · **Wpisy backlogu:** — · **Zależy od:** —
-> **Ticket:** —
+> **Ticket:** `152-DOCS-instrukcja-pracy-dla-ani`
 
 Założona przez koordynatora ticketem `148-DOCS-karty-testow`, 2026-09-24, na polecenie użytkownika.
 
@@ -33,9 +33,10 @@ proceduralne — bez `/feature` znika:
    ekranu/adres. To samo, czego my od niej wymagamy przy testach.
 3. **Trzy rodzaje zgłoszeń i co z nimi robić** (to jest sedno dokumentu):
    - **błąd** (jest inaczej niż w starym Bridge) → `/feature` z opisem różnicy,
-   - **świadoma zmiana** (ma być inaczej niż dotąd) → `/feature`, ale najpierw wpis do backlogu
-     jako decyzja — ⚠ karta ma sprawdzić i opisać aktualną drogę wpisu
-     (`docs/rebuild-backlog/wpis-<ticket>.md`, `docs/rebuild-backlog/README.md`),
+   - **świadoma zmiana** (ma być inaczej niż dotąd) → `/feature`; Ania w zgłoszeniu pisze tylko
+     „to zmiana świadoma, nie błąd" — zapis do `docs/rebuild-backlog/wpis-<ticket>.md` robi sesja,
+     bez ścieżek plików i numeracji w jej dokumencie (decyzja użytkownika, patrz „Decyzje" niżej;
+     rozstrzygnięte, znacznik ⚠ nieaktualny),
    - **obserwacja/pytanie** → też `/feature` (typ `DOCS`), żeby nie ginęło w czacie.
 4. **Czego nie wolno** — push na `develop`/`main` z pominięciem PR-a, praca bezpośrednio na
    produkcji, `POST /api/selly/sync-supplier` z `dry_run=false`, generowanie CSV z domyślnymi
@@ -58,10 +59,66 @@ wiedzieć, CO dostanie na każdym etapie i CO ma zatwierdzić, a nie jak Master 
 NIE: `.claude/commands/feature.md` (zmiana samej komendy = osobna decyzja użytkownika), `CLAUDE.md`.
 
 ## Decyzje
-—
+
+Cztery decyzje użytkownika, 2026-09-24 (runda pytań ticketu 152):
+
+1. **Zakazy jako UMOWA, nie zamek.** Dokument mówi „tak się u nas pracuje" i uczciwie dodaje, że
+   technicznie da się to obejść (hook `pre-push` ma udokumentowane obejście, CI na prywatnym repo
+   w planie Free nie blokuje merge'a) — bo „nie da się" byłoby nieprawdą i psuje zaufanie przy
+   pierwszym obejściu.
+2. **Ścieżka awaryjna = telefon do Pawła.** Nie naprawa, nie łatka w czacie — decyduje człowiek,
+   nie czat; `/feature` z researchem i planem jest za wolne na sytuację zatrzymującą sprzedaż.
+3. **Backlog: Ania pisze tylko „to zmiana świadoma, nie błąd".** Zapis do
+   `docs/rebuild-backlog/wpis-<N>.md` robi sesja; w dokumencie dla Ani zero ścieżek plików i
+   numeracji — w praktyce wpisy zakładały dotąd sesje, nie interesariusze.
+4. **Wejście opisane krok po kroku** (logowanie → repozytorium → gałąź `develop` → `/feature`),
+   bo Ania ma/będzie mieć własne konto i dostęp do repozytorium — założenie wchodzi do warunków
+   wstępnych dokumentu.
 
 ## Dowiezione
-—
+
+- `docs/instrukcja-pracy-dla-ani.md` — nowy plik, ~2000 słów, 10 rozdziałów: Po co ta kartka ·
+  Dlaczego nie poprawiamy już plików produkcji bezpośrednio · Co dostajesz w zamian · Jak wejść ·
+  Jak napisać zgłoszenie (szablon + przykład dobry/źle) · Trzy rodzaje zgłoszeń · Czego nie
+  robimy · Gdy pali się · Czego się spodziewać po drodze · Do Twojej decyzji.
+- Pokryte wszystkie pięć punktów zakresu karty: jak wejść, jak zgłaszać, trzy rodzaje zgłoszeń,
+  czego nie wolno, czego się spodziewać.
+- Wymóg twardy spełniony: każde zgłoszenie prowadzi do `/feature`, w dokumencie nie ma zdania
+  sugerującego „popraw mi to szybko w czacie".
+- **Czego karta nie zamawiała, a weszło:** sekcja „Gdy pali się" (decyzja 2) — granica awarii to
+  „zatrzymuje sprzedaż", nie każda usterka; sekcja „Do Twojej decyzji" z dwoma pytaniami (czy
+  dostęp do repozytorium dla Ani jest już założony; czy telefon jest właściwym kanałem
+  awaryjnym) — wzorem pozostałych dokumentów fali.
+- Punkt 3 „Zakresu dokumentu" (znacznik ⚠ o drodze wpisu do backlogu) rozstrzygnięty decyzją 3 —
+  usunięty z treści punktu, żeby nie sugerował przyszłej sesji zadania do wykonania.
 
 ## Do koordynatora
-—
+
+1. **`/feature` nie ma jawnego kroku „utwórz NOWY wpis backlogu dla świadomej zmiany".**
+   `.claude/commands/feature.md:29` nanosi do `docs/rebuild-backlog.md` tylko wpisy już oznaczone
+   ✅ TAK; Faza 5 (`:382`) aktualizuje statusy ISTNIEJĄCYCH wpisów. Dokument dla Ani obiecuje zapis
+   jej decyzji — część gwarantowana procedurą to sekcja `Decisions` w `plan.md` każdego ticketu
+   (zawsze istnieje, z datą); wpis na wspólnej liście backlogu istnieje dziś przez praktykę sesji
+   (np. `docs/rebuild-backlog/wpis-153.md`), nie przez nazwany krok w `feature.md`. Karta TEST.3
+   zakazuje edycji `feature.md` (zmiana komendy = osobna decyzja użytkownika) — zgłaszam fakt, nie
+   poprawiam.
+2. **Ticket 134 (praca w chmurze) to na dziś sam plan.** `.claude/settings.json` nie ma bloku
+   `hooks`/`SessionStart`, `.claude/commands/feature.md` nie ma wariantu „branch w chmurze" (zero
+   wystąpień „chmur"/„cloud"/„claude.ai"), hook `pre-push` włącza się dopiero przez `npm install`
+   (`rebuild/backend/package.json:11`). Skutek: `docs/instrukcja-pracy-dla-ani.md` musiał opisać
+   zasady jako umowę (decyzja 1), a fragment o „osobnej kopii plików (worktree)" w rozdziale „Jak
+   wejść" jest zgodny ze stanem na dziś, ale ticket 134 planuje dla sesji w chmurze inny mechanizm
+   (kontener/klon per sesja, worktree „zbędny") — po domknięciu 134 ten fragment trzeba
+   zweryfikować i ewentualnie poprawić.
+3. **Błędny odsyłacz w `CLAUDE.md`.** Jako dowód na łatkę `konstrukcja` wpisaną w martwy bundel
+   wskazuje `mirror/backend/CHANGELOG.md:101` — dziś jest tam inny wpis (hold-reasons).
+   Weryfikowalny dowód leży w tabeli łatek w `deminified/README.md`. `CLAUDE.md` jest zakazany
+   przez kartę TEST.3, więc nie poprawiam go sam — zgłaszam.
+4. **Brak twardej bramki na `SELLY_CSV_DIR`** — oryginał miał ją w
+   `mirror/backend/staging_policy.cjs:131-134`, odbudowa nie ma odpowiednika; otwarte w backlogu
+   jako `#139.2` (`docs/rebuild-backlog/wpis-139.md`, ⬜ do decyzji użytkownika). Dokument dla Ani
+   łata to dziś zakazem dla człowieka („nie generujemy CSV na próbę"), co jest słabszą ochroną niż
+   kod — propozycja: rozważyć przed cutoverem.
+5. **Warto rozważyć odsyłacz do `docs/instrukcja-pracy-dla-ani.md` z `docs/cutover.md`.** Ten
+   ticket go nie dopisał — `cutover.md` nie jest własnością karty TEST.3, a dopisek groziłby
+   konfliktem przy merge'u z inną kartą tej samej fali.

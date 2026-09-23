@@ -118,3 +118,41 @@ nazwach sekretów i godzinie 12:00 reviewer potwierdził niezależnie w kodzie i
 - **SHOULD-FIX (sync + PR w DoD)** — normalny krok przed pushem, wykonany w Fazie 6.
 - **NICE-TO-HAVE oba przyjęte:** data „1 września" uzupełniona rokiem; „587 pozycji" zmienione
   na „587 pozycji z 7395" — mianownik zmienia wrażenie skali i uczciwiej oddaje proporcję.
+
+## Docs updates
+
+**`docs/karty/TEST.3/karta.md`** — karta domknięta (BLOCKER 1 z review):
+- linia stanu `⬜ do zrobienia` → `✅ 2026-09-24 · 152-DOCS-instrukcja-pracy-dla-ani`, pole `Ticket`
+  wypełnione;
+- **`## Decyzje`** — cztery decyzje użytkownika z 2026-09-24 (umowa nie zamek · telefon jako droga
+  awaryjna · backlog bez ścieżek plików w dokumencie Ani · wejście krok po kroku);
+- **`## Dowiezione`** — faktyczny zakres (~2000 słów, 10 rozdziałów), pokrycie pięciu punktów karty
+  oraz to, co weszło ponad zamówienie: „Gdy pali się" i „Do Twojej decyzji";
+- **`## Do koordynatora`** — pięć pozycji z dowodami: brak kroku w `feature.md` tworzącego nowy wpis
+  backlogu · ticket 134 to sam plan (+ nota, że po jego domknięciu trzeba zweryfikować fragment
+  o osobnej kopii plików) · błędny odsyłacz w `CLAUDE.md` do `CHANGELOG.md:101` · brak twardej
+  bramki na `SELLY_CSV_DIR` (`#139.2` zostaje otwarte) · propozycja odsyłacza z `docs/cutover.md`;
+- w miejscu poprawiony punkt 3 „Zakresu dokumentu" — znacznik ⚠ „karta ma sprawdzić i opisać aktualną
+  drogę wpisu" przestał być zadaniem (rozstrzygnięte decyzją c), więc zastąpiony wynikiem, żeby nie
+  wprowadzał w błąd przyszłej sesji.
+
+**Backlog — zero zmian, uzasadnione.** Ticket jest czysto dokumentacyjny i nie zmienia stanu żadnego
+istniejącego wpisu; `#139.2` (brak bramki na `SELLY_CSV_DIR`) **zostaje otwarte**, bo dokument opisuje
+zakaz dla człowieka, a nie dokłada zabezpieczenia w kodzie. `docs/rebuild-backlog/wpis-152.md`
+świadomie nie powstał — ticket nie wnosi nowego ustalenia o produkcji, a ustalenia organizacyjne
+poszły do „Do koordynatora".
+
+**`docs/instrukcja-pracy-dla-ani.md` — zero zmian w drugim przebiegu.** Kontrola prawdziwości opisu
+NASZEGO procesu wobec `.claude/commands/feature.md` (pytania na początku, plan zatwierdzany jednym
+słowem, review + aktualizacja dokumentacji, PR na końcu) nie wykazała nieprawdy; poprawki z review
+były już wniesione.
+
+**Pre-existing issues (zastane, nienaprawione — poza własnością karty):**
+- `CLAUDE.md` — błędny odsyłacz `mirror/backend/CHANGELOG.md:101` jako dowód łatki `konstrukcja`
+  (dziś w tym miejscu jest wpis o hold-reasons); prawdziwy dowód w `deminified/README.md`.
+- `docs/instrukcja-pracy-dla-ani.md:73-76` — opis osobnej kopii plików jest prawdziwy DZIŚ, ale
+  ticket 134 planuje dla sesji w chmurze inny mechanizm; do weryfikacji po jego domknięciu.
+- `#139.2` — brak twardej bramki na `SELLY_CSV_DIR` w kodzie (oryginał ją miał), wciąż otwarte.
+
+**`docs/rebuild-roadmap.md` nietknięty** — zmienia go wyłącznie koordynator (CLAUDE.md, pkt 0).
+Stan karty TEST.3 w roadmapie odświeży koordynator na podstawie sekcji „Do koordynatora".
