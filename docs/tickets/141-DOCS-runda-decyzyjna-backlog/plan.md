@@ -1,6 +1,6 @@
 # 141-DOCS-runda-decyzyjna-backlog — runda decyzyjna backlogu (karta DEC.1)
 
-> Status: Implemented
+> Status: Shipped
 > Branch: `docs/141-runda-decyzyjna-backlog`
 > Worktree: `.worktrees/141-DOCS-runda-decyzyjna-backlog`
 
