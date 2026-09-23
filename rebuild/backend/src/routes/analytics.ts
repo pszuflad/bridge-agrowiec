@@ -27,15 +27,22 @@
 // `openapi.yaml:178-188` nie deklaruje dla tej ścieżki żadnego `content`. Sposób sprawdzania
 // (ścieżka + status z kontraktu, content-type osobno) siedzi w `analityka.eksport.gate.test.ts`.
 //
-// ⚠ PIĘĆ TRAS CZYTA `req.query` — trzy z bloku 10c (`ean/comparison`, `ean/details`,
+// ⚠ PIĘĆ TRAS CZYTA WŁASNY `req.query` — trzy z bloku 10c (`ean/comparison`, `ean/details`,
 // `ean-porownanie`) i dwie z 10b (`market/group-prices`, `prices/product-history`); trasy
-// dostawców z 10d nie mają żadnego parametru. Trasy EAN podają go SUROWO (`req.query.x`),
+// dostawców z 10d nie mają żadnego WŁASNEGO parametru. Trasy EAN podają go SUROWO (`req.query.x`),
 // bo oryginał parsuje go dopiero w handlerze (`num()`,
 // `String(x || '')`) i jego luźna semantyka — tablica z powtórzonego parametru, wartość
 // nieliczbowa, pusty napis — jest częścią odtwarzanego zachowania. Rozpakowanie tego
 // wcześniej zmieniłoby wynik. Czwartym takim parametrem jest `?days` w `rotation/inactive`
 // (blok 10e) — z tą różnicą, że tam zaciski oryginału są na tyle osobne, że mieszkają
 // w nazwanej funkcji `zacisnijDniRotacji`, żeby dało się je pokryć testem bez serwera.
+//
+// ⚠ PONAD TO OSIEM TRAS Z `LIMIT`-em czyta WSPÓLNY `?limit` (karta P10.5, backlog #96):
+// `ean/unique`, `ean/comparison`, `availability/products`, `availability/sell-through`,
+// `suppliers/lifecycle`, `prices/last-import`, `rotation/inactive`, `margins`. To NIE jest
+// port oryginału, tylko świadome odstępstwo — jedyna wartość ze znaczeniem to `0` („bez
+// limitu", dla pliku CSV). Parsuje je `czyBezLimitu`; bez parametru każda z ośmiu tras
+// odpowiada dokładnie tak jak przed P10.5, co pilnują fixtures i testy limitów.
 
 import { Router, type Request, type Response } from "express";
 
@@ -47,6 +54,7 @@ import {
   cenyGrupRynku,
   cyklZyciaDostawcow,
   cyklZyciaModeli,
+  czyBezLimitu,
   dostepnoscProduktow,
   historiaCenProduktu,
   inflacjaCennika,
@@ -120,8 +128,8 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
   });
 
   /** Nowości i wycofania — dziennik stagingu, nie katalog (`:133-141`). */
-  router.get("/api/analytics/suppliers/lifecycle", requireAuth, (_req: Request, res: Response) => {
-    res.json(cyklZyciaDostawcow(db));
+  router.get("/api/analytics/suppliers/lifecycle", requireAuth, (req: Request, res: Response) => {
+    res.json(cyklZyciaDostawcow(db, czyBezLimitu(req.query.limit)));
   });
 
   /** Stan i dostępność dostawcy (`:143-154`). Bez limitu — wiersz na dostawcę. */
@@ -144,9 +152,9 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
     res.json(statystykiDostawcow(db));
   });
 
-  /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Bez parametrów query. */
-  router.get("/api/analytics/margins", requireAuth, (_req: Request, res: Response) => {
-    res.json(marze(db));
+  /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Tylko `?limit` (P10.5). */
+  router.get("/api/analytics/margins", requireAuth, (req: Request, res: Response) => {
+    res.json(marze(db, czyBezLimitu(req.query.limit)));
   });
 
   // ───────────────────────────────────────────────────────────────────────────────────────
@@ -163,16 +171,16 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
   // ───────────────────────────────────────────────────────────────────────────────────────
 
   /** „4.1 Historia dostępności pozycji" (`:156-171`). Dwie gałęzie, różne kolumny — patrz repo. */
-  router.get("/api/analytics/availability/products", requireAuth, (_req: Request, res: Response) => {
-    res.json(dostepnoscProduktow(db));
+  router.get("/api/analytics/availability/products", requireAuth, (req: Request, res: Response) => {
+    res.json(dostepnoscProduktow(db, czyBezLimitu(req.query.limit)));
   });
 
   /** „4.2 Tempo schodzenia z magazynu" (`:173-184`). SQL odtworzony 1:1 z pułapką — patrz repo. */
   router.get(
     "/api/analytics/availability/sell-through",
     requireAuth,
-    (_req: Request, res: Response) => {
-      res.json(tempoSchodzenia(db));
+    (req: Request, res: Response) => {
+      res.json(tempoSchodzenia(db, czyBezLimitu(req.query.limit)));
     },
   );
 
@@ -194,7 +202,9 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
    * w `zacisnijDniRotacji`, żeby dało się je pokryć testem bez podnoszenia serwera.
    */
   router.get("/api/analytics/rotation/inactive", requireAuth, (req: Request, res: Response) => {
-    res.json(rotacjaNieaktywnych(db, zacisnijDniRotacji(req.query.days)));
+    res.json(
+      rotacjaNieaktywnych(db, zacisnijDniRotacji(req.query.days), czyBezLimitu(req.query.limit)),
+    );
   });
 
   /** Oś czasu importów z `audit_log` (`:334`). GOŁA TABLICA, bez koperty. Bez UI (decyzja D2). */
@@ -208,7 +218,7 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
 
   /** Porównanie cen po EAN u ≥2 dostawców (`:188-200`). Parametr `minDiffPct` — próg spreadu. */
   router.get("/api/analytics/ean/comparison", requireAuth, (req: Request, res: Response) => {
-    res.json(porownanieEan(db, req.query.minDiffPct));
+    res.json(porownanieEan(db, req.query.minDiffPct, czyBezLimitu(req.query.limit)));
   });
 
   /**
@@ -219,9 +229,9 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
     res.json(szczegolyEan(db, req.query.ean));
   });
 
-  /** EAN-y dostępne u dokładnie jednego dostawcy (`:210-217`). Bez parametrów query. */
-  router.get("/api/analytics/ean/unique", requireAuth, (_req: Request, res: Response) => {
-    res.json(unikalneEan(db));
+  /** EAN-y dostępne u dokładnie jednego dostawcy (`:210-217`). Tylko `?limit` (P10.5). */
+  router.get("/api/analytics/ean/unique", requireAuth, (req: Request, res: Response) => {
+    res.json(unikalneEan(db, czyBezLimitu(req.query.limit)));
   });
 
   /** Rozkład „ilu dostawców ma dany EAN" (`:219-222`). Bez parametrów query i bez LIMIT-u. */
@@ -267,9 +277,9 @@ export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
     res.json(cenyGrupRynku(db, zacisnijGrupeRynku(req.query.group)));
   });
 
-  /** Zmiany cen z ostatnich importów — karta „3.1" (`:245-248`). Bez parametrów query. */
-  router.get("/api/analytics/prices/last-import", requireAuth, (_req: Request, res: Response) => {
-    res.json(zmianyCenOstatniegoImportu(db));
+  /** Zmiany cen z ostatnich importów — karta „3.1" (`:245-248`). Tylko `?limit` (P10.5). */
+  router.get("/api/analytics/prices/last-import", requireAuth, (req: Request, res: Response) => {
+    res.json(zmianyCenOstatniegoImportu(db, czyBezLimitu(req.query.limit)));
   });
 
   /**

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Blokuje wypchnięcie gałęzi ticketa, która nie zawiera całego origin/develop.
+# Działa dla KAŻDEGO (człowiek, agent, dowolne narzędzie), na każdym klonie, w każdym worktree.
+# Włączenie po klonie: tools/wlacz-hooki.sh  (albo `npm install` w rebuild/backend — patrz `prepare`).
+#
+# Obejście, gdy naprawdę trzeba: POMIN_SYNC=1 git push   albo   git push --no-verify
+# Powód istnienia: przy kilku kartach naraz develop przesuwa się w trakcie roboty i PR-y
+# przychodzą z konfliktami. Zasada i procedura: CLAUDE.md, „Przed każdym PR".
+set -uo pipefail
+
+BAZA="${GALAZ_BAZOWA:-develop}"
+
+if [[ "${POMIN_SYNC:-0}" == "1" ]]; then
+  echo "pre-push: POMIN_SYNC=1 — pomijam kontrolę synchronizacji z $BAZA." >&2
+  exit 0
+fi
+
+# Nie ma sensu porównywać bazy z samą sobą ani liczyć czegokolwiek bez origin/<baza>.
+git rev-parse --verify -q "refs/remotes/origin/$BAZA" >/dev/null || exit 0
+
+# Odśwież bazę; offline/brak sieci — pracujemy na tym, co lokalnie (lepiej to niż blokada pushu).
+git fetch -q --no-tags origin "$BAZA" 2>/dev/null || true
+
+status=0
+while read -r ref_lokalny sha_lokalny ref_zdalny _sha_zdalny; do
+  [[ -z "${ref_lokalny:-}" ]] && continue
+  # usunięcie gałęzi (sha z samych zer) — przepuszczamy
+  [[ "$sha_lokalny" =~ ^0+$ ]] && continue
+  # push samej bazy / main — nie dotyczy
+  case "$ref_zdalny" in
+    "refs/heads/$BAZA"|refs/heads/main|refs/heads/master) continue;;
+  esac
+  # tagi i inne refy — nie dotyczy
+  [[ "$ref_zdalny" == refs/heads/* ]] || continue
+
+  if ! git merge-base --is-ancestor "refs/remotes/origin/$BAZA" "$sha_lokalny"; then
+    brakuje=$(git rev-list --count "$sha_lokalny..refs/remotes/origin/$BAZA")
+    cat >&2 <<POMOC
+
+✗ pre-push: ${ref_zdalny#refs/heads/} nie zawiera całego origin/$BAZA (brakuje $brakuje commit(ów)).
+  PR z takiej gałęzi potrafi przyjść z konfliktami — rozwiązuje je autor, nie recenzent.
+
+  Zrób to tak:
+      tools/sync-z-develop.sh $BAZA     # merge bazy; przy konfliktach wypisze pliki
+      # po scaleniu: bramki od nowa (lint / typecheck / build / test)
+      tools/push-i-pr.sh --tytul "…" --tresc-plik docs/tickets/<ID>/pr-body.md
+
+  Świadome obejście: POMIN_SYNC=1 git push   (albo git push --no-verify)
+POMOC
+    status=1
+  fi
+done
+
+exit "$status"

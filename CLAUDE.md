@@ -137,8 +137,87 @@ stan błędu zamiast danych, dopóki nikt nie doda asercji na treść. Zmierzone
 
 ---
 
+## Przed każdym PR — synchronizacja z `develop` (dotyczy KAŻDEJ sesji)
+
+Kart chodzi kilka równolegle, więc `develop` przesuwa się w trakcie roboty. **Gałąź musi zawierać
+całe `origin/develop`, zanim ją wypchniesz i otworzysz PR.** Użytkownik ma dostać PR gotowy do
+merge'a — rozwiązywanie konfliktów w GitHubie („Resolve conflicts") i ręczne aktualizowanie gałęzi
+to robota, której nie wolno na niego zrzucać. Obowiązuje tak samo kartę, triaż, DOCS-a i poprawkę
+na szybko — w worktree i w głównym repo.
+
+```bash
+tools/sync-z-develop.sh        # uruchom z katalogu gałęzi (worktree ticketa/karty)
+```
+
+Skrypt: `git fetch origin --prune`, dociągnięcie commitów z `origin/<gałąź>` i **merge**
+`origin/develop` (merge, nie rebase — taka jest cała historia repo, a gałąź bywa już wypchnięta).
+Kody wyjścia: `0` aktualna/scalone czysto · `2` konflikty · `1` warunek wstępny (niezacommitowane
+zmiany, HEAD odłączony, jesteś na gałęzi bazowej).
+
+- **Konflikty rozwiązuje ta sesja, która je wywołała** — tylko ona zna swój zakres. Łącz OBIE
+  strony, nie „wygrywaj" całym plikiem. Konflikt merytoryczny, którego nie umiesz rozstrzygnąć
+  (dwie karty zmieniły to samo zachowanie, kolizja numeru migracji) → **STOP i pytanie do
+  użytkownika**, nie zgadywanie.
+- **Konflikt w pliku współdzielonym** (`docs/rebuild-roadmap.md`, `docs/spec-backend.md`,
+  `docs/karty/README.md`) = ktoś złamał zasadę „karty piszą wyłącznie we własnych plikach"
+  (sekcja wyżej, pkt 0). Rozwiąż zachowując oba wpisy i odnotuj to w raporcie/karcie.
+- **Po scaleniu bramki lecą od nowa** (`npm run lint && npm run typecheck && npm run build &&
+  npm test` w `rebuild/backend/`, plus GATE na fixtures, jeśli ticket dotyka kontraktu). Dwie
+  zmiany, z których każda osobno przechodziła, razem potrafią się wykluczyć. Czerwona bramka po
+  merge'u = naprawa **przed** pushem.
+- **Po utworzeniu PR-a sprawdź scalalność:**
+  `gh pr view --json mergeable,mergeStateStatus`. `MERGEABLE` = koniec; `CONFLICTING` = ktoś
+  zmergował coś w międzyczasie → powtórz synchronizację i push. `UNKNOWN` = powtórz odczyt raz.
+- PR-y ticketów idą **do `develop`** (`gh pr create --base develop`) — domyślną gałęzią repo jest
+  `main`, więc bazę podawaj jawnie.
+
+**Push i PR jednym poleceniem, z ponawianiem blokad:**
+
+```bash
+tools/push-i-pr.sh --tytul "<TICKET-ID>: tytuł" --tresc-plik docs/tickets/<TICKET-ID>/pr-body.md
+```
+
+Robi: kontrola dostępu `gh` → sync z `develop` → `git push` → `gh pr create --base develop` →
+odczyt scalalności. Kody wyjścia: `0` gotowe · `1` warunek wstępny · `2` konflikty · `3`
+uwierzytelnienie · `4` weszły zmiany z bazy, bramki od nowa · `5` GitHub widzi `CONFLICTING` ·
+`6` blokada nie ustąpiła.
+
+**Gdy push/PR się blokuje — najpierw rozpoznaj, co to za blokada.** Tylko dwie pierwsze
+kategorie mają sens do ponawiania; skrypt robi to sam (5 s → 15 s → 40 s → 90 s → 180 s):
+
+- **Blokada `.git` od równoległej karty** (`index.lock`, `cannot lock ref`, `packed-refs.lock`) —
+  tak, to jest realny wyścig: wszystkie worktree kart (dziś ~46) dzielą JEDEN katalog `.git`,
+  więc równoległe `fetch`/`push` biją się o te same pliki blokad. Mija samo. Jeśli plik blokady
+  jest starszy niż 10 min, to nie wyścig, tylko pozostałość po zabitym procesie git — skrypt to
+  rozróżnia i wypisuje ścieżki; usuwa je użytkownik, nie sesja.
+- **Limit / awaria GitHuba** (`rate limit`, `was submitted too quickly`, HTTP 429/5xx) — czekać.
+- **`[rejected] (non-fast-forward)`** — to NIE blokada, tylko nieaktualna gałąź: sync i push
+  jeszcze raz (skrypt robi to automatycznie, jeden raz).
+- **Uwierzytelnienie** (`gh auth login`, `Authentication failed`, `token in keyring is invalid`) —
+  **ponawianie nic nie da, nie zapętlaj się**: zgłoś użytkownikowi. Na tej maszynie `gh` trzyma
+  token w keyringu i `gh auth status` potrafi krzyczeć „token in keyring is invalid”, choć
+  wywołania API działają — dlatego skrypt sprawdza realne `gh api user`, nie `gh auth status`.
+
+**Zasada jest egzekwowana mechanicznie, nie tylko opisana** — na trzech poziomach, żeby działała
+na każdym środowisku i dla każdego, kto tu programuje:
+
+1. **Hook `pre-push`** (`.githooks/pre-push`) — odbija push gałęzi, która nie zawiera całego
+   `origin/develop`, i wypisuje, co zrobić. Dotyczy człowieka i agenta tak samo. Git nie przenosi
+   hooków przy klonowaniu, więc **na nowym klonie raz**: `tools/wlacz-hooki.sh` (robi to też
+   `npm install` w `rebuild/backend` lub `rebuild/frontend` — skrypt `prepare`). Świadome
+   obejście: `POMIN_SYNC=1 git push` albo `git push --no-verify`.
+2. **Job `synchronizacja` w CI** (`.github/workflows/ci.yml`) — ta sama kontrola po stronie
+   GitHuba, na każdym PR-ze; łapie też kogoś, kto hooków nie włączył.
+3. **Skrypty** `tools/sync-z-develop.sh` i `tools/push-i-pr.sh` — robią to poprawnie za Ciebie.
+
+Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.md`, Kroki 16–17.
+
 ## Środowisko
 
+- **Nowy klon repo (nowa maszyna, nowa osoba) — raz:** `tools/wlacz-hooki.sh`
+  (ustawia `core.hooksPath=.githooks`, więc `pre-push` pilnuje synchronizacji z `develop`
+  we wszystkich worktree tego klonu). `npm install` w `rebuild/backend` albo `rebuild/frontend`
+  robi to samo automatycznie (`prepare`). Sprawdzenie: `git config --get core.hooksPath`.
 - Backend wymaga **Node ≥ 20** (`better-sqlite3`). Domyślny `node` na maszynie deweloperskiej to
   v14 — przed pracą: `export PATH="$HOME/.nvm/versions/node/v20.20.2/bin:$PATH"`.
 - Bramki backendu: `npm run lint`, `npm run typecheck`, `npm run build`, `npm test`

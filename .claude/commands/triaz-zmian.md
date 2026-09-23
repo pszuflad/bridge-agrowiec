@@ -44,6 +44,9 @@ Identyfikator wpisu: `#<N>.1`, `#<N>.2`, … Format pojedynczego wpisu jak dotyc
 - `git add docs/ contract/ 2>/dev/null; git commit -m "triaż: N nowych zmian → backlog (<etykiety>)"`
 - Sprawdź zestawienie: `tools/stan-backlogu.sh <N>` (Twoje wpisy) i `tools/stan-backlogu.sh --do-decyzji`
 - **NIE pushuj automatycznie.** Push zostaw userowi (chyba że wprost poprosi).
+- Jeśli user poprosi o push/PR: `tools/push-i-pr.sh --tytul "…" --tresc-plik <plik>` — sam robi
+  sync z `develop`, push, PR i ponawia blokady `.git` od równoległych kart. Konflikty rozwiązujesz
+  tutaj, nie w GitHubie (zasada w CLAUDE.md, „Przed każdym PR").
 
 ## 6. Podsumuj userowi (zwięźle)
 - ile commitów przetworzono, ile trafiło do backlogu, ile pominięto (dane),

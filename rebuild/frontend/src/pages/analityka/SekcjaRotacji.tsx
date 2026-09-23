@@ -32,7 +32,7 @@ import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-import { useRotacjeNieaktywnych, type WierszRotacji } from "./api";
+import { pobierzPelneWiersze, useRotacjeNieaktywnych, type Rotacja, type WierszRotacji } from "./api";
 import {
   zastosujFiltry,
   wymiaryNieobslugiwane,
@@ -98,6 +98,14 @@ export function SekcjaRotacji({
               wiersze={wiersze}
               kolumny={KOLUMNY}
               wczytywanie={isPending}
+              // Jedyna karta z DWOMA parametrami: `?days` to port oryginału (filtr liczy
+              // backend), `?limit=0` dokłada P10.5. Adres musi nieść oba.
+              pobierzPelne={() =>
+                pobierzPelneWiersze<Rotacja, WierszRotacji>(
+                  `/api/analytics/rotation/inactive?days=${encodeURIComponent(dni)}`,
+                  (pelne) => zastosujFiltry(pelne.rows, wybor, MAPOWANIE),
+                )
+              }
             />}
         />
 
