@@ -58,7 +58,14 @@ export type StronaStagingu = {
 };
 
 /**
- * Opcje filtra typu — `YP` z oryginału (`frontend-index.js:597086`).
+ * Opcje filtra typu — `YP` z ŻYWEGO bundla produkcji
+ * (`mirror/frontend/assets/index-PRICEFMT1783512500.js` @ `88fa31c`).
+ *
+ * ⭐ ŹRÓDŁEM JEST ŻYWY BUNDEL, NIE `deminified/frontend-index.js`. Deminifikat to bundel
+ * z 2026-08-13, sprzed czterech łatek, i niesie STARĄ etykietę „Wycofane". Łatka #103
+ * przemianowała ją na „Braki w cenniku" — jedna z czterech zmian tekstowych, które są
+ * CAŁYM zakresem tej funkcji w produkcji (karta I15.11, ticket 142). Pozostałe opcje są
+ * w obu bundlach identyczne, dlatego rozjazd dotyczył wyłącznie tej jednej linii.
  *
  * ⚠ `nowy` i `zmiana` to POZOSTAŁOŚCI po starszym schemacie. Nasz silnik (3c/3d-1) produkuje
  * wyłącznie `nowa`, `blad`, `zmiana_kluczowa` i `wycofana`, więc opcja „Nowe produkty (stare)"
@@ -68,12 +75,22 @@ export const OPCJE_FILTRA_TYPU = [
   { wartosc: "all", etykieta: "Wszystkie" },
   { wartosc: "nowa", etykieta: "Nowe produkty" },
   { wartosc: "nowy", etykieta: "Nowe produkty (stare)" },
-  { wartosc: "wycofana", etykieta: "Wycofane" },
+  { wartosc: "wycofana", etykieta: "Braki w cenniku" },
   { wartosc: "zmiana_kluczowa", etykieta: "Zmiany kluczowe" },
   { wartosc: "blad", etykieta: "Błędy importu" },
 ] as const;
 
-/** Wygląd odznaki typu — `XP` z oryginału (`frontend-index.js:597593`). */
+/**
+ * Wygląd odznaki typu — `XP` z ŻYWEGO bundla produkcji
+ * (`index-PRICEFMT1783512500.js` @ `88fa31c`), nie z deminifikatu.
+ *
+ * ⚠ `zniknal` NIE JEST LITERÓWKĄ ANI MARTWYM KODEM DO USUNIĘCIA. Oryginał trzyma dla niego
+ * OSOBNY wpis o tej samej treści co `wycofana`, mimo że nasz silnik tej wartości nie produkuje
+ * (jedyne wystąpienie w odbudowie to dosłowny port zapytania analityki,
+ * `repos/analityka-eksport.ts:176`, gdzie `IN ('nowa','nowy','wycofana','zniknal')` jest
+ * przeniesione znak w znak). To ta sama sytuacja co zachowana opcja filtra „Nowe produkty
+ * (stare)": wartość zaszła, która może siedzieć w starych danych stagingu.
+ */
 export const WYGLAD_TYPU: Record<string, { etykieta: string; klasa: string }> = {
   nowy: { etykieta: "Nowa", klasa: "bg-emerald-600 hover:bg-emerald-600 text-white" },
   nowa: { etykieta: "Nowa", klasa: "bg-emerald-600 hover:bg-emerald-600 text-white" },
@@ -83,7 +100,8 @@ export const WYGLAD_TYPU: Record<string, { etykieta: string; klasa: string }> = 
     klasa: "bg-blue-600 hover:bg-blue-600 text-white",
   },
   blad: { etykieta: "Błąd", klasa: "bg-red-700 hover:bg-red-700 text-white" },
-  wycofana: { etykieta: "Wycofana", klasa: "bg-red-600 hover:bg-red-600 text-white" },
+  wycofana: { etykieta: "Brak w cenniku", klasa: "bg-red-600 hover:bg-red-600 text-white" },
+  zniknal: { etykieta: "Brak w cenniku", klasa: "bg-red-600 hover:bg-red-600 text-white" },
 };
 
 /** Rozmiary strony z oryginału — „Na stronie: 25/50/100". */

@@ -223,7 +223,7 @@ describe("Widok /staging", () => {
 
       // Filtr ustawiony na coś innego niż domyślne — ma trafić do ciała żądania.
       await uzytkownik.click(screen.getByTestId("select-filter-type"));
-      await uzytkownik.click(await screen.findByRole("option", { name: "Wycofane" }));
+      await uzytkownik.click(await screen.findByRole("option", { name: "Braki w cenniku" }));
       await uzytkownik.click(screen.getByTestId("button-accept-all"));
       await uzytkownik.click(
         within(await screen.findByTestId("dialog-akceptuj-wszystkie")).getByTestId(
@@ -320,7 +320,7 @@ describe("Widok /staging", () => {
       const uzytkownik = userEvent.setup();
       await otworzStaging();
 
-      expect(await screen.findByText("Wycofana")).toBeInTheDocument();
+      expect(await screen.findByText("Brak w cenniku")).toBeInTheDocument();
       await uzytkownik.click(await screen.findByTestId("button-details-999001"));
 
       const dialog = await screen.findByTestId("dialog-staging");
@@ -329,6 +329,66 @@ describe("Widok /staging", () => {
       );
       // Dla wycofania nie ma czego edytować — przycisk zapisu nie powstaje.
       expect(within(dialog).queryByTestId("button-save-details")).not.toBeInTheDocument();
+    });
+  });
+
+  /**
+   * „Braki w cenniku" — CAŁY zakres tej funkcji w produkcji (karta I15.11, ticket 142).
+   *
+   * ⭐ PO CO TE ASERCJE ISTNIEJĄ. Łatka #103 zmieniła w żywym bundlu
+   * (`index-PRICEFMT1783512500.js` @ `88fa31c`) dokładnie CZTERY napisy i nic poza nimi:
+   * opcję filtra, dwie odznaki (`wycofana`, `zniknal`) i człon podsumowania importu (ten
+   * ostatni sprawdza `konfiguracja.test.tsx`). Odbudowa niosła etykiety ze STAREGO
+   * deminifikatu z 2026-08-13 i przez to mówiła „Wycofane"/„Wycofana".
+   *
+   * ⚠ Fixtures stagingu pochodzą sprzed #103, więc GATE na fixtures NIE złapie powrotu
+   * starej etykiety. Te asercje na dosłowny tekst są jedyną siatką bezpieczeństwa.
+   */
+  describe("„Braki w cenniku” — etykiety z żywego bundla 88fa31c", () => {
+    it("filtr „Typ sprawy” oferuje „Braki w cenniku”, a nie dawne „Wycofane”", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+
+      await uzytkownik.click(screen.getByTestId("select-filter-type"));
+
+      expect(await screen.findByRole("option", { name: "Braki w cenniku" })).toBeInTheDocument();
+      expect(screen.queryByRole("option", { name: "Wycofane" })).not.toBeInTheDocument();
+    });
+
+    /**
+     * `zniknal` to wartość ZASZŁA — nasz silnik jej nie produkuje, ale oryginał trzyma dla
+     * niej osobny wpis w `XP`, a stare dane stagingu mogą ją nieść. Bez wpisu w mapie
+     * odznaka spadłaby na fallback i pokazała surowe „zniknal”.
+     */
+    it.each(["wycofana", "zniknal"])(
+      "wiersz `%s` dostaje odznakę „Brak w cenniku”",
+      async (typZmiany) => {
+        const wiersz = {
+          ...(STRONA.items[0] as Record<string, unknown>),
+          id: 999002,
+          typZmiany,
+          stanNowy: 0,
+          cenaZakupuNowa: null,
+          zmianaPct: null,
+        };
+        zamockujApi({ ...STRONA, items: [wiersz] }, { ...wiersz, snapshotJson: null });
+
+        await otworzStaging();
+
+        expect(await screen.findByText("Brak w cenniku")).toBeInTheDocument();
+        expect(screen.queryByText("Wycofana")).not.toBeInTheDocument();
+        // Fallback odznaki pokazuje surową wartość — sprawdzamy, że do niego NIE doszło.
+        expect(screen.queryByText(typZmiany)).not.toBeInTheDocument();
+      },
+    );
+
+    it("obie odznaki niosą tę samą treść i klasę co oryginał", () => {
+      for (const typ of ["wycofana", "zniknal"]) {
+        expect(WYGLAD_TYPU[typ], `brak wpisu odznaki dla ${typ}`).toEqual({
+          etykieta: "Brak w cenniku",
+          klasa: "bg-red-600 hover:bg-red-600 text-white",
+        });
+      }
     });
   });
 

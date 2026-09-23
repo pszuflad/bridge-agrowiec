@@ -353,7 +353,7 @@ describe("Widok /konfiguracja", () => {
       const toast = await screen.findByTestId("toast-default");
       expect(toast).toHaveTextContent("118 pozycji czeka na akceptację");
       expect(toast).toHaveTextContent(
-        "Pozycji w plikach: 120 • Do akceptacji w stagingu: 118 • Nowe: 100 • Zmienione: 15 • Wycofane: 3 • Odrzucone (nie opony): 1",
+        "Pozycji w plikach: 120 • Do akceptacji w stagingu: 118 • Nowe: 100 • Zmienione: 15 • Braki w cenniku: 3 • Odrzucone (nie opony): 1",
       );
       expect(toast).not.toHaveTextContent("Bez zmian");
       expect(toast).not.toHaveTextContent("Brak danych");

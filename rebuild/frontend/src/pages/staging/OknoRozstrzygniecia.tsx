@@ -30,10 +30,19 @@
  * projektu), `DialogPotwierdzenia` zamiast `window.confirm()` (D5), unieważnienie zapytań
  * zamiast `location.reload()` (D3).
  *
- * ⭐ PUNKT WPIĘCIA DLA KARTY I15.11: podgląd starej karty z żywego bundla
- * (`index-PRICEFMT1783512500.js`, backlog #103) dochodzi do sekcji „Stara karta w katalogu"
- * niżej — komponent `KartaPorownania` przyjmuje dowolne dodatkowe linie, więc I15.11 nie musi
- * ruszać struktury okna. Panel „Braki w cenniku" wpina się w `Staging.tsx`, nie tutaj.
+ * ⭐ PUNKT WPIĘCIA DLA I15.11 ZAMKNIĘTY BEZ ZMIAN W TYM PLIKU (ticket 142). Karta I15.11
+ * zakładała, że „podgląd starej karty" dokłada tu coś z żywego bundla. Rozłożenie diffu
+ * pokazało, że nie ma czego dokładać: CAŁY diff `staging-policy-injection.js` @ `88fa31c`
+ * (gałąź `absenceReview`, sekcja „Stara karta w katalogu", `choose-absence-card`, przycisk
+ * „Sprawdź kartę") jest już sportowany TUTAJ przez ticket 140, a żywy bundel zmienia w sprawie
+ * braków w cenniku wyłącznie CZTERY NAPISY — i żaden z nich nie jest w tym oknie.
+ *
+ * ⚠ `absenceEvidence` (dowody kompletności: trzy oferty, 24 h) przychodzi w odpowiedzi
+ * `GET /api/staging/{id}/review` i jest typowane w `polityka.ts`, ale CELOWO nie jest tu
+ * renderowane: produkcja @ `88fa31c` nie pokazuje go nigdzie w UI. Pokazanie go byłoby
+ * wymyślaniem nowego zachowania, nie odtwarzaniem (decyzja użytkownika, ticket 142).
+ * Dowody działają wyłącznie po stronie backendu, jako blokada akceptacji
+ * („Brak trzech wiarygodnych potwierdzeń nieobecności. Wczytaj aktualny cennik.").
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
