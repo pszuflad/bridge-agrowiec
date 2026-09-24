@@ -522,6 +522,29 @@ W wariancie ręcznym sam ponawiasz: przy `index.lock` / `cannot lock ref` odczek
 jeszcze raz, przy `CONFLICTING` — sync + bramki + push. Błąd uwierzytelnienia = stop i zgłoszenie
 użytkownikowi.
 
+**Wariant dla sesji w przeglądarce (`claude.ai/code`) — tam NIE MA `gh`.** Zmierzone 2026-09-24
+(ticket 157): binarki `gh` nie ma w kontenerze, więc `tools/push-i-pr.sh` i każde `gh …` padnie na
+`command not found`. Wtedy:
+
+1. **Synchronizacja z `develop`: normalnie** — `tools/sync-z-develop.sh` to czysty `git` i działa.
+2. **Push: normalnie** — `git push -u origin <branch-name>`.
+3. **Pull request: narzędziami MCP GitHub**, nie `gh`. Nazwy weź z listy narzędzi swojej sesji
+   (w przelocie działały `mcp__github__get_me`, `mcp__github__list_pull_requests`); treść PR-a
+   podajesz jako tekst z `docs/tickets/<TICKET-ID>/pr-body.md`, baza to `develop`.
+4. **Odczyt scalalności:** tym samym narzędziem MCP, którym czytasz pull requesta — zamiast
+   `gh pr view --json mergeable`.
+
+⚠ **`403` przy `git push` albo przy tworzeniu gałęzi przez MCP („Claude doesn't have GitHub access
+to …") to NIE brak uprawnień użytkownika.** To brak zainstalowanej aplikacji Claude GitHub App na
+repozytorium — konto może mieć `permission: write` i `push: true`, a zapis i tak wróci z 403.
+**Ponawianie nic nie da: stop i zgłoszenie użytkownikowi** z tym rozróżnieniem i z adresem
+https://github.com/apps/claude/installations/select_target. Nie próbuj obejść tego innym zdalnym
+repozytorium ani `--force`.
+
+⚠ Hooki w takiej sesji na starcie nie są aktywne (`core.hooksPath` pusty) — włącza je `npm ci`
+w `rebuild/backend` (skrypt `prepare`) albo `tools/wlacz-hooki.sh`. Nie licz na to, że `pre-push`
+odbije nieaktualną gałąź; synchronizację z Kroku 16 przeprowadź świadomie.
+
 **PR body (exactly this format)** — zapisz go do `docs/tickets/<TICKET-ID>/pr-body.md`
 i podaj jako `--tresc-plik` (plik zostaje w repo razem z resztą artefaktów ticketa):
 

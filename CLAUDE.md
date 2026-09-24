@@ -243,6 +243,31 @@ Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.
   robi to samo automatycznie (`prepare`). Sprawdzenie: `git config --get core.hooksPath`.
 - Backend wymaga **Node ≥ 20** (`better-sqlite3`). Domyślny `node` na maszynie deweloperskiej to
   v14 — przed pracą: `export PATH="$HOME/.nvm/versions/node/v20.20.2/bin:$PATH"`.
+- **Sesja w przeglądarce (`claude.ai/code`) NIE MA `gh` — to nie jest problem z logowaniem, binarki
+  po prostu nie ma w kontenerze.** Zmierzone 2026-09-24 (ticket 157, konto `Devilian07`). Skutki,
+  o które rozbije się każda sesja chmurowa, jeśli tego nie wie:
+  - `tools/push-i-pr.sh` **nie zadziała** (cały opiera się na `gh api`/`gh pr create`).
+    `tools/sync-z-develop.sh` **działa** — to czysty `git`. Push robisz `git push`, a pull requesta
+    i odczyt scalalności **narzędziami MCP GitHub** (nazwy sprawdź listą narzędzi sesji; w tamtym
+    przelocie działały `mcp__github__get_me`, `mcp__github__list_pull_requests`).
+  - Zapis na GitHubie wymaga **zainstalowanej aplikacji Claude GitHub App na repozytorium**.
+    Bez niej `git push` i `mcp__github__create_branch` dają **403** („Claude doesn't have GitHub
+    access to …") — nawet gdy konto użytkownika ma `permission: write`. Prawo zapisu konta i dostęp
+    aplikacji to DWIE różne rzeczy; komunikat 403 mówi o drugiej, nie o pierwszej.
+    Instalacja: https://github.com/apps/claude/installations/select_target.
+  - `pre-push` w takiej sesji **początkowo nie jest aktywny** (`core.hooksPath` pusty) i włącza się
+    sam dopiero po `npm ci` w `rebuild/backend` (skrypt `prepare`). Sesja czysto dokumentacyjna
+    zostaje bez hooka — dlatego regułę „PR do `develop`" traktujemy jako umowę, nie jako zamek.
+  - Co w chmurze **działa** (sprawdzone): Node 22 i pełne bramki backendu (`npm ci`, lint,
+    typecheck, build, `npm test` → 1844 testy zielone, ~86 s); atomowa rezerwacja numeru ticketa
+    z Kroku 4 mimo braku lokalnego `.worktrees/.numery`; `git worktree add`; widoczność
+    `CLAUDE.md` i `.claude/commands/feature.md`.
+  - Czego w chmurze **nie da się zrobić**: nagrać fixtures z oryginału — `db/snapshot.db` jest
+    w `.gitignore`, więc do kontenera nie jedzie.
+- **`npm test` wypisuje na stderr `DB_PATH: Required` i „kopia-bazy: brak DB_PATH — nie wiem, co
+  kopiować. Przerywam."** To NIE jest usterka, tylko dwa testy, które celowo sprawdzają tę gałąź:
+  `test/kopia-bazy.test.ts:117` i `test/selly.csv-cli.test.ts:110`. Zielony bieg z tym szumem jest
+  poprawny — nie „naprawiaj" tego i nie zgłaszaj.
 - Bramki backendu: `npm run lint`, `npm run typecheck`, `npm run build`, `npm test`
   w `rebuild/backend/`.
 - Zakładaj, że projekt może być uruchomiony i że równolegle pracuje ktoś inny — testy używają
