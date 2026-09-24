@@ -91,6 +91,14 @@ Cztery decyzje użytkownika, 2026-09-24 (runda pytań ticketu 152):
   awaryjnym) — wzorem pozostałych dokumentów fali.
 - Punkt 3 „Zakresu dokumentu" (znacznik ⚠ o drodze wpisu do backlogu) rozstrzygnięty decyzją 3 —
   usunięty z treści punktu, żeby nie sugerował przyszłej sesji zadania do wykonania.
+- **Zmienione po zamknięciu karty, ticketem `156-DOCS-ania-merguje-i-sprawdza-wdrozenie`**
+  (decyzja użytkownika 2026-09-24): dokument mówił „Włączenie zmiany robi Paweł" — teraz **merguje
+  Ania sama**. Doszedł rozdział „Jak włączyć zmianę i sprawdzić, że jest na teście": cztery kroki
+  na GitHubie, reguła „tylko przy zielonym ✓" (z ostrzeżeniem, że GitHub nie zablokuje przycisku,
+  bo `develop` nie ma ochrony gałęzi) i sprawdzenie biegu **„Deploy staging"** w zakładce Actions
+  (`.github/workflows/deploy-staging.yml` — push do `develop` ze zmianą w `rebuild/**`, ~1 min,
+  zmierzone na realnych biegach). Kto zmienia ten dokument dalej: ta karta pozostaje jego
+  właścicielem.
 
 ## Do koordynatora
 
@@ -110,6 +118,16 @@ Cztery decyzje użytkownika, 2026-09-24 (runda pytań ticketu 152):
    wejść" jest zgodny ze stanem na dziś, ale ticket 134 planuje dla sesji w chmurze inny mechanizm
    (kontener/klon per sesja, worktree „zbędny") — po domknięciu 134 ten fragment trzeba
    zweryfikować i ewentualnie poprawić.
+   **Lista rzeczy do sprawdzenia EMPIRYCZNIE w sesji przeglądarkowej** (nie da się tego ustalić
+   z repo, a od tego zależy, czy Ania w ogóle dojdzie do PR-a): czy `gh` jest zalogowany
+   (`gh api user`, nie `gh auth status` — patrz `CLAUDE.md`) i czy konto ma prawo zapisu
+   i merge'a; czy `node -v` daje ≥ 20 i czy `better-sqlite3` się kompiluje, czyli czy bramki
+   (`lint`/`typecheck`/`build`/`test`) w ogóle przechodzą w kontenerze; czy `git worktree add`
+   i atomowa rezerwacja numeru z Kroku 4 działają bez lokalnego `.worktrees/.numery`; czy hook
+   `pre-push` jest aktywny (`git config --get core.hooksPath`); czy w środowisku NIE ma sekretów
+   `SELLY_*`/`AGRORAMI_*` (ma nie być — staging i chmura nie dotykają cudzego sklepu); czy
+   `db/snapshot.db` jest nieobecny (jest w `.gitignore`, więc nagrywanie fixtures w chmurze
+   nie zadziała). Ticket na ten przelot jeszcze nie istnieje.
 3. **Błędny odsyłacz w `CLAUDE.md`.** Jako dowód na łatkę `konstrukcja` wpisaną w martwy bundel
    wskazuje `mirror/backend/CHANGELOG.md:101` — dziś jest tam inny wpis (hold-reasons).
    Weryfikowalny dowód leży w tabeli łatek w `deminified/README.md`. `CLAUDE.md` jest zakazany
