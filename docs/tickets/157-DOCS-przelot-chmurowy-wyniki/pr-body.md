@@ -56,6 +56,17 @@ None.
 4. Bez zmian z 152/156: wariant `/feature` dla zgłoszeń Ani, błędny odsyłacz w `CLAUDE.md`,
    `#139.2`, odsyłacz z `docs/cutover.md`.
 
+## Korekta w trakcie ticketa — `develop` JEST chroniony
+Przy okazji sprawdzania stanu repozytorium wyszło, że założenie z ticketu 134 („prywatne repo, plan Free,
+rulesety 403, CI jest sygnałem") jest **nieaktualne**: repo jest publiczne, a na `develop` stoi aktywny
+ruleset `21299243` (aktualizowany 2026-09-23) wymagający PR-a i przejścia `backend`, `frontend`,
+`synchronizacja`; obejście ma tylko rola admina. Dowód na żywo: ten PR ma `mergeable: MERGEABLE`, ale
+`mergeStateStatus: BLOCKED`. Poprawione **w miejscu**: zdanie w dokumencie Ani („GitHub nie zablokuje Ci
+przycisku" → blokuje, z komunikatem „Required statuses must pass before merging"), zakaz 1 w „Czego nie
+robimy" (nie „umowa, nie zamek", a realne zabezpieczenie) i punkt 2 w `CLAUDE.md` (parametry rulesetu,
+różnica `mergeable` vs `mergeStateStatus`, nieaktualność notatki z 134). Szczegóły i przyznanie własnej
+pomyłki: `raport.md`, sekcja „Korekta w trakcie ticketa".
+
 ## Review
 Bez osobnego przebiegu review — trzy edycje tekstowe, każda oparta na fakcie sprawdzonym w repo albo
 na dosłownym cytacie z przelotu; zmiana jest pilna przed sesją testową.

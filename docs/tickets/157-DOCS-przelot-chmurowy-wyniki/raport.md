@@ -66,3 +66,42 @@ None.
 4. Niezmienione z ticketów 152 i 156: wariant `/feature` z pytaniami biznesowymi dla Ani i jawnym
    krokiem tworzącym wpis w backlogu; błędny odsyłacz w `CLAUDE.md` do `CHANGELOG.md:101`; brak
    twardej bramki na `SELLY_CSV_DIR` (`#139.2`); odsyłacz z `docs/cutover.md`.
+
+## Korekta w trakcie ticketa — `develop` JEST chroniony (obala trzy wcześniejsze zdania)
+
+Przy pisaniu instrukcji instalacji aplikacji sprawdziłem stan repozytorium i wyszło coś, co obala
+założenie ciągnięte od ticketu 134:
+
+- repozytorium `pszuflad/bridge-agrowiec` jest **publiczne** (`gh api repos/... --jq .private` →
+  `false`), właściciel to konto osobiste (`type: User`), organizacji nie ma;
+- na `develop` stoi **aktywny ruleset** `21299243` (`enforcement: active`, zakres dokładnie
+  `refs/heads/develop`, `updated_at` 2026-09-23 21:34): wymaga **pull requesta** i **przejścia
+  trzech sprawdzeń** (`backend`, `frontend`, `synchronizacja`), zakazuje usunięcia gałęzi
+  i `non-fast-forward`; wymaganych zatwierdzeń: **0**; obejście: jedna rola repozytorium
+  (`RepositoryRole` id 5, `bypass_mode: always`) — czyli admin, a `Devilian07` ma `admin: false`;
+- `gh api repos/.../branches/develop --jq .protected` → `true`;
+- **dowód na żywo:** PR #172 tego ticketa ma `mergeable: MERGEABLE`, ale
+  `mergeStateStatus: **BLOCKED**` — dopóki sprawdzenia nie przejdą, GitHub przycisku nie daje.
+
+**Co z tego poprawiłem (w miejscu, nie dopiskiem):**
+1. `docs/instrukcja-pracy-dla-ani.md` — zdanie „GitHub nie zablokuje Ci przycisku przy czerwonym
+   znaczku… to Ty jesteś ostatnim sprawdzeniem" było **nieprawdą**. Teraz: przycisk jest wtedy
+   nieaktywny, nad nim komunikat „Required statuses must pass before merging", to nie awaria
+   i nie brak uprawnień. Poprawiony też zakaz 1 w „Czego nie robimy" — nie „umowa, nie zamek",
+   a realne zabezpieczenie po stronie GitHuba.
+2. `CLAUDE.md` — punkt 2 w „Zasada jest egzekwowana mechanicznie" opisywał CI jako „sygnał, który
+   łapie kogoś, kto hooków nie włączył". Teraz opisuje ruleset z parametrami, rolę z obejściem,
+   różnicę `mergeable` vs `mergeStateStatus` oraz to, że `tools/push-i-pr.sh` czyta tylko
+   `mergeable` (`:113`), więc jego „Scalalny: MERGEABLE" nie znaczy „gotowe do merge'a".
+   Oznaczyłem też jako nieaktualne `134-CHORE-praca-w-chmurze/plan.md:4-6,21-22` („rulesety dają
+   403 na planie Free", „CI jest sygnałem, nie blokadą") — mierzone przed włączeniem rulesetu.
+3. Punkt o hookach w sesji chmurowej: brak hooka to gorszy komunikat o błędzie, nie otwarta furtka.
+
+**Moja pomyłka do odnotowania:** w rozmowie z użytkownikiem napisałem wcześniej, że „`develop` nie
+ma ochrony gałęzi ani wymogu review". Wzięło się to z `plan.md` ticketu 134, a nie z pomiaru —
+jedyne moje `gh api .../protection` padło wtedy na błędzie sieci i nie powtórzyłem go. To ta sama
+pułapka, o której mówi `CLAUDE.md` („nie ufaj notatce, zmierz") — tylko że tym razem nieaktualną
+notatką był nasz własny plan.
+
+**Follow-up dołożony:** `tools/push-i-pr.sh` powinien wypisywać także `mergeStateStatus`, inaczej
+każda sesja raportuje „MERGEABLE" przy PR-ze, którego GitHub nie pozwoli zmergować.

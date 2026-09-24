@@ -157,10 +157,10 @@ którą włączasz sama — po sprawdzeniu, że automatyczne sprawdzenia świec�
 „Jak włączyć zmianę i sprawdzić, że jest na teście").
 *Co się stanie:* zmiana bez propozycji nie zostaje przez nikogo przeczytana i wraca dokładnie ta
 sytuacja, od której uciekamy — poprawka w złym pliku, o której wiemy po tygodniach.
-⚠ **Uczciwie:** technicznie nikt Ci tego nie zablokuje. Mamy ostrzeżenie przy zapisie zmian,
-ale jest ono ustawieniem naszego środowiska pracy, nie Twojej sesji z osobna — może się nie odezwać.
-To **umowa, nie zamek**. Dlatego ją tu opisujemy, a nie zostawiamy programowi: o tym, czy zmiana
-wchodzi, rozstrzyga przeczytana propozycja, nie sam zapis.
+⚠ Tego nawet nie musisz pilnować: **`develop` jest zabezpieczony po stronie GitHuba** — zapis
+prosto na niego jest odrzucany, każda zmiana musi przejść przez propozycję, a propozycja przez
+sprawdzenia. Gdybyś kiedyś zobaczyła odmowę przy zapisie, to nie awaria — to właśnie to
+zabezpieczenie.
 
 **2. Nie pracujemy bezpośrednio na produkcji.** Do przełączenia testujemy na `test.agritires.eu`
 („staging", czyli kopia do testów) — cokolwiek tam zrobisz, produkcji nie dotyka.
@@ -249,9 +249,10 @@ automatycznych sprawdzeń.
 - **Cokolwiek czerwonego ✗** — **nie włączaj.** Napisz w komentarzu pod propozycją, że sprawdzenie
   jest czerwone, i daj znać Pawłowi.
 
-⚠ **GitHub nie zablokuje Ci przycisku przy czerwonym znaczku** — pozwoli włączyć zmianę tak samo.
-Dlatego to Ty jesteś w tym miejscu ostatnim sprawdzeniem: czerwony znaczek znaczy, że zmiana psuje
-coś, czego nie widać na ekranie.
+**Przy czerwonym albo niedokończonym sprawdzeniu GitHub nie da Ci kliknąć** — zielony przycisk jest
+wtedy nieaktywny, a nad nim piszą „Required statuses must pass before merging". To nie awaria i nie
+brak uprawnień: tak jest ustawione i ma Cię chronić przed włączeniem zmiany, która psuje coś,
+czego nie widać na ekranie. Czekasz albo — przy czerwonym — piszesz komentarz i dajesz znać Pawłowi.
 
 **3. Kliknij zielony przycisk „Merge pull request", potem „Confirm merge".** Gałąź, którą GitHub
 zaproponuje usunąć, możesz zostawić — nie przeszkadza i nie musisz nic z nią robić.

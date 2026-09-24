@@ -229,8 +229,22 @@ na każdym środowisku i dla każdego, kto tu programuje:
    hooków przy klonowaniu, więc **na nowym klonie raz**: `tools/wlacz-hooki.sh` (robi to też
    `npm install` w `rebuild/backend` lub `rebuild/frontend` — skrypt `prepare`). Świadome
    obejście: `POMIN_SYNC=1 git push` albo `git push --no-verify`.
-2. **Job `synchronizacja` w CI** (`.github/workflows/ci.yml`) — ta sama kontrola po stronie
-   GitHuba, na każdym PR-ze; łapie też kogoś, kto hooków nie włączył.
+2. **Ruleset na `develop` + joby CI** — i to jest REALNY zamek, nie tylko sygnał. Repozytorium jest
+   **publiczne**, więc rulesety są dostępne; ruleset `develop` (id `21299243`, `enforcement: active`,
+   zakres dokładnie `refs/heads/develop`, aktualizowany 2026-09-23) wymaga **pull requesta** oraz
+   **przejścia trzech sprawdzeń: `backend`, `frontend`, `synchronizacja`** (plus zakaz usunięcia
+   gałęzi i `non-fast-forward`). Zatwierdzeń wymaga **zero** — PR wolno zmergować samemu, ale
+   dopiero po zielonych sprawdzeniach. Obejście ma jedna rola repozytorium (`bypass_mode: always`,
+   `RepositoryRole` id 5 — czyli admin, dziś tylko `pszuflad`); konto ze zwykłym `write` (np.
+   `Devilian07`) obejścia NIE ma. Zmierzone 2026-09-24, ticket 157.
+   ⚠ **Sprawdzając scalalność czytaj OBA pola.** `mergeable: MERGEABLE` mówi tylko „brak
+   konfliktów"; dopóki sprawdzenia nie przejdą, `mergeStateStatus` = **`BLOCKED`** i GitHub
+   przycisku nie da. `tools/push-i-pr.sh` wypisuje tylko `mergeable` (`:113`), więc jego
+   „Scalalny: MERGEABLE" NIE znaczy „gotowe do merge'a" — dopytaj
+   `gh pr view <nr> --json mergeable,mergeStateStatus`.
+   ⚠ **Nieaktualne w starszych notatkach:** `docs/tickets/134-CHORE-praca-w-chmurze/plan.md:4-6,21-22`
+   twierdzi, że rulesety dają HTTP 403 („prywatne repo, plan Free") i że „CI jest sygnałem, nie
+   blokadą". Było to mierzone 2026-09-23 przed włączeniem rulesetu; dziś jest odwrotnie.
 3. **Skrypty** `tools/sync-z-develop.sh` i `tools/push-i-pr.sh` — robią to poprawnie za Ciebie.
 
 Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.md`, Kroki 16–17.
@@ -257,7 +271,9 @@ Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.
     Instalacja: https://github.com/apps/claude/installations/select_target.
   - `pre-push` w takiej sesji **początkowo nie jest aktywny** (`core.hooksPath` pusty) i włącza się
     sam dopiero po `npm ci` w `rebuild/backend` (skrypt `prepare`). Sesja czysto dokumentacyjna
-    zostaje bez hooka — dlatego regułę „PR do `develop`" traktujemy jako umowę, nie jako zamek.
+    zostaje bez hooka — ale po stronie GitHuba `develop` jest chroniony rulesetem (sekcja wyżej,
+    „Zasada jest egzekwowana mechanicznie", pkt 2), więc brak
+    hooka oznacza gorszy komunikat o błędzie, nie otwartą furtkę.
   - Co w chmurze **działa** (sprawdzone): Node 22 i pełne bramki backendu (`npm ci`, lint,
     typecheck, build, `npm test` → 1844 testy zielone, ~86 s); atomowa rezerwacja numeru ticketa
     z Kroku 4 mimo braku lokalnego `.worktrees/.numery`; `git worktree add`; widoczność
