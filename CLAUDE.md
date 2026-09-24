@@ -100,6 +100,29 @@ wychodzi przez `GET /api/products`, mimo że fizycznie jest w tabeli (zmierzone 
 72 klucze bez `uwagaCena`). Obecność kolumny w bazie produkcji nie znaczy, że API ją oddaje —
 sprawdzaj model, nie schemat tabeli.
 
+Trzecia pułapka tej samej rodziny: **kolumna deklarowana `INTEGER` może fizycznie trzymać
+TEKST, a tryb `boolean` w modelu go milcząco zjada.** Dziesięć kolumn flagowych `products`
+(`reinforced`, `extra_load`, `cut_resistant`, `heat_resistant`, `stubble_resistant`, `nro`,
+`cho`, `ms`, `snow_3pmsf`, `cfo`) ma w produkcji mieszane typy — obok `0`/`1` siedzi napis
+`'Tak'` (powinowactwo typów SQLite konwertuje przy zapisie tylko to, co czyta się jako liczba;
+`'Tak'`/`'Nie'`/`''` zostają tekstem, więc tekstowe `'0'` w tych kolumnach nie istnieje).
+Mapper `integer({ mode: "boolean" })` robi `Number(v) === 1`, więc `'Tak'` → `false`, cicho —
+zmierzone na kopii produkcji z 23.09: `snow_3pmsf` 750 × `'Tak'`, `ms` 713, `cfo` 52, `nro` 12,
+`cho` 10. Skutek: generator CSV dla Selly (`SELECT *` po stronie oryginału) tracił te oznaczenia,
+a nasz, czytający przez model, wypisywał puste pole — 899 z 5396 wierszy (17%) katalogu bez
+`Śnieg 3PMSF`/`M+S`/`CFO`/`NRO`/`CHO`, bez żadnego zgłoszonego błędu; wykrył to dopiero bajtowy
+pomiar porównawczy z generatorem produkcji, nie test i nie code review. Dla trasy/pliku, który ma
+odwzorować `SELECT *` oryginału, samo wypisanie projekcji jawnie NIE WYSTARCZY — trzeba jeszcze
+ominąć mapper: `` sql<T>`${products.<pole>}` `` w `select({...})` idzie przez `noopDecoder`, a nie
+przez `column.mapFromDriverValue` (`mapResultRow` w **korzeniu** paczki `drizzle-orm`,
+`utils.cjs:40`, wybór dekodera `:45-52` — NIE w `sqlite-core/`, tę ścieżkę łatwo zacytować źle).
+I druga strona tej monety: nie „napraw" schematu — tryb `boolean` w modelu jest wierny (oryginał
+trzyma te kolumny tak samo, `deminified/backend-index.cjs:43733-43752`), więc `GET /api/products`
+ma zostać przy `false` na `'Tak'`; poprawka należy do warstwy odczytu konkretnego konsumenta
+(`src/selly/generator-csv.ts`), nigdy do `src/db/schema.ts`. Ten sam błąd czeka nienaprawiony w
+`src/selly/mapper.ts:197-203` (sync REST do Selly, backlog `#154.1`). Szczegóły i pomiar:
+`docs/rebuild-backlog/wpis-153.md`, `docs/tickets/154-BUG-csv-selly-flagi-tak/raport.md`.
+
 **`UPPER()`/`LOWER()` w SQLite są ASCII-only.** `UPPER('prowadząca')` daje `'PROWADZąCA'` —
 małe `ą` przechodzi nietknięte. Skutek zmierzony w 13c: migracja `006_nazwa_caps.sql` zostawia
 16 wierszy `staging_items`, które semantycznie SĄ case-only, ale predykat `UPPER(A)=UPPER(B)`

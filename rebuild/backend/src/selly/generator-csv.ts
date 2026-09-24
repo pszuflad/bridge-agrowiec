@@ -30,7 +30,7 @@ import { mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } 
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { products } from "../db/schema.js";
@@ -112,25 +112,63 @@ const KOLUMNY: readonly (readonly [string, keyof ProduktWewnetrzny | null])[] = 
 /** Liczba kolumn — wystawiona, bo trafia do `stdout` odpowiedzi trasy. */
 export const LICZBA_KOLUMN = KOLUMNY.length;
 
+/** Surowa wartość flagi — dokładnie to, co oddaje SQLite, bez mappera boolean drizzle. */
+type WartoscSurowaFlagi = string | number | null;
+
 /**
- * Kolumny oddawane jako `"Tak"` / puste (`generate_selly_export.cjs:76`).
+ * Dziesięć kolumn oddawanych jako `"Tak"` / puste (`boolCols`,
+ * `generate_selly_export.cjs:76`) — czytanych SUROWO, z pominięciem mappera drizzle.
  *
- * ⚠ W drizzle te pola są już `boolean` (`db/schema.ts`, dopieszczenie D5 z I2), a w oryginale
- * były surowymi `0`/`1` z SQLite. Warunek `v ? "Tak" : ""` działa tak samo dla obu — `false`
- * i `0` dają puste pole, `true` i `1` dają `"Tak"`.
+ * ⚠ TE KOLUMNY MAJĄ W BAZIE MIESZANE TYPY i dlatego NIE WOLNO ich tu czytać przez model.
+ * SQLite pozwala trzymać tekst w kolumnie `INTEGER`, a import z tego korzysta: obok `0`/`1`
+ * siedzi napis `'Tak'`. Pomiar na kopii produkcji z 23.09 (5396 produktów `status='aktywny'`,
+ * wpis backlogu #153.1): `snow_3pmsf` 750 × `'Tak'`, `ms` 713, `cfo` 52, `nro` 12, `cho` 10,
+ * `stubble_resistant` 1 (wiersz nieaktywny).
+ *
+ * W modelu te pola są `integer({ mode: "boolean" })` (`db/schema.ts:71-77`), a mapper drizzle
+ * robi `Number(v) === 1` — więc tekst `'Tak'` stawał się `false` i `wartosc ? "Tak" : ""`
+ * wypisywało PUSTE pole. Produkcyjny generator czyta `SELECT *` przez `better-sqlite3`
+ * i dostaje wartość surową, dlatego wypisywał `Tak`. Efekt rozjazdu: 899 z 5396 wierszy
+ * (17% katalogu) traciło oznaczenia `Śnieg 3PMSF`, `M+S`, `CFO`, `NRO`, `CHO` — czyli cechy,
+ * po których klient filtruje opony zimowe i specjalistyczne. Nic nie zgłaszało błędu: plik
+ * miał poprawny nagłówek, poprawną liczbę wierszy i poprawne ceny.
+ *
+ * ⚠ MODELU NIE RUSZAMY (karta FIX.1). Oryginał trzyma te kolumny w tym samym trybie boolean
+ * (`deminified/backend-index.cjs:43733-43752`), więc produkcyjne `GET /api/products` zwraca na
+ * `'Tak'` to samo `false` co nasze — API jest wierne i ma takie zostać. Zmiana schematu
+ * naprawiłaby CSV kosztem rozjazdu z `contract/fixtures/GET_products.json`.
+ *
+ * DLACZEGO `sql` OMIJA MAPPER: `mapResultRow` (`drizzle-orm/utils.cjs:40`, wybór dekodera
+ * w `:45-52`, użycie w `:63`) bierze dekoder Z TYPU POLA — `is(field, Column)` daje sam
+ * `Column`, czyli `column.mapFromDriverValue` (dla `mode: "boolean"` to `Number(v) === 1`),
+ * a `is(field, SQL)` daje `field.decoder`, którym bez `.mapWith()` jest `noopDecoder`
+ * = `{ mapFromDriverValue: (value) => value }` (`drizzle-orm/sql/sql.cjs:296-298`).
+ * Pole zbudowane jako sql`${products.ms}` jest więc `SQL`, nie `Column`, i wartość wychodzi
+ * surowa. (Ścieżki sprawdzone w `node_modules/drizzle-orm` 0.45.2 — mapper NIE jest
+ * w `sqlite-core/`, tylko w korzeniu paczki.)
  */
-const KOLUMNY_BOOL = new Set<keyof ProduktWewnetrzny>([
-  "reinforced",
-  "extraLoad",
-  "cutResistant",
-  "heatResistant",
-  "stubbleResistant",
-  "nro",
-  "cho",
-  "ms",
-  "snow3pmsf",
-  "cfo",
-]);
+const FLAGI_SUROWE = {
+  reinforced: sql<WartoscSurowaFlagi>`${products.reinforced}`,
+  extraLoad: sql<WartoscSurowaFlagi>`${products.extraLoad}`,
+  cutResistant: sql<WartoscSurowaFlagi>`${products.cutResistant}`,
+  heatResistant: sql<WartoscSurowaFlagi>`${products.heatResistant}`,
+  stubbleResistant: sql<WartoscSurowaFlagi>`${products.stubbleResistant}`,
+  nro: sql<WartoscSurowaFlagi>`${products.nro}`,
+  cho: sql<WartoscSurowaFlagi>`${products.cho}`,
+  ms: sql<WartoscSurowaFlagi>`${products.ms}`,
+  snow3pmsf: sql<WartoscSurowaFlagi>`${products.snow3pmsf}`,
+  cfo: sql<WartoscSurowaFlagi>`${products.cfo}`,
+} satisfies Partial<Record<keyof ProduktWewnetrzny, SQL<WartoscSurowaFlagi>>>;
+
+/**
+ * Które pola lecą przez warunek `"Tak"` / puste — WYPROWADZONE z `FLAGI_SUROWE`, żeby nie dało
+ * się dopisać kolumny do jednego miejsca i zapomnieć o drugim. Rozjazd tych dwóch list jest
+ * dokładnie tym błędem, który naprawia ten ticket, tylko w drugą stronę: kolumna czytana
+ * surowo, a nieoznaczona jako boolowska, trafiłaby do pliku jako goły tekst `'Tak'`/`1`.
+ */
+const KOLUMNY_BOOL: ReadonlySet<keyof ProduktWewnetrzny> = new Set(
+  Object.keys(FLAGI_SUROWE) as (keyof ProduktWewnetrzny)[],
+);
 
 /**
  * Blokowane formy płatności per magazyn — port `BLOCKED_PAYMENT_FORMS`
@@ -246,7 +284,10 @@ function esc(wartosc: unknown): string {
  */
 export function zbudujCsvSelly(db: Baza): { tresc: string; wiersze: number } {
   const aktywne = db
-    .select()
+    // Projekcja: całość modelu, ale dziesięć flag SUROWO — patrz komentarz `FLAGI_SUROWE`.
+    // Bez tego mapper boolean drizzle zamienia napis `'Tak'` z bazy na `false` i flaga
+    // wypada z pliku (wpis backlogu #153.1, 899 z 5396 wierszy).
+    .select({ ...getTableColumns(products), ...FLAGI_SUROWE })
     .from(products)
     .where(eq(products.status, "aktywny"))
     .orderBy(asc(products.id))

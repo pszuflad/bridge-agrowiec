@@ -150,6 +150,141 @@ describe("generator CSV dla Selly (blok 8a)", () => {
     expect(zNull?.[kolumny.indexOf("CFO")]).toBe("");
   });
 
+  /**
+   * Wpis backlogu #153.1 — generator gubił flagi zapisane w bazie jako TEKST `'Tak'`.
+   *
+   * SQLite pozwala trzymać tekst w kolumnie `INTEGER`, a import z tego korzystał: na kopii
+   * produkcji z 23.09 obok `0`/`1` siedział napis `'Tak'` w 750 (`snow_3pmsf`), 713 (`ms`),
+   * 52 (`cfo`), 12 (`nro`) i 10 (`cho`) wierszach. Mapper boolean drizzle robi
+   * `Number(v) === 1`, więc tekst dawał `false` i `wartosc ? "Tak" : ""` wypisywało pustkę —
+   * 899 z 5396 wierszy różniło się od pliku produkcji, która czyta `SELECT *` surowo.
+   *
+   * ⚠ Te testy MUSZĄ wstrzykiwać wartości surowym SQL-em (`baza.sqlite`), bo typowany insert
+   * drizzle zmapowałby `boolean` z powrotem na `0`/`1` i usterka byłaby nieodtwarzalna.
+   */
+  describe("flagi zapisane jako tekst (#153.1, karta FIX.1)", () => {
+    /**
+     * Dziesiątka z `boolCols` oryginału (`generate_selly_export.cjs:76`) — nazwa kolumny SQL
+     * i odpowiadający jej nagłówek CSV. Lista jest tu wypisana wprost, bo to ODWZOROWANIE
+     * oryginału: gdyby ktoś zmienił ją w generatorze, ten test ma o tym powiedzieć.
+     */
+    const FLAGI: readonly (readonly [kolumnaSql: string, naglowekCsv: string])[] = [
+      ["reinforced", "Reinforced"],
+      ["extra_load", "ExtraLoad"],
+      ["cut_resistant", "CutResistant"],
+      ["heat_resistant", "HeatResistant"],
+      ["stubble_resistant", "StubbleResistant"],
+      ["nro", "NRO"],
+      ["cho", "CHO"],
+      ["ms", "Bloto+snieg"],
+      ["snow_3pmsf", "Snieg-3PMSF"],
+      ["cfo", "CFO"],
+    ] as const;
+
+    /** Wstawia wartość do kolumny poza typowaniem drizzle — inaczej nie da się tu wsadzić tekstu. */
+    const ustawSurowo = (kolumnaSql: string, wartosc: unknown, kod = "MO9_336320"): void => {
+      baza.sqlite.prepare(`UPDATE products SET ${kolumnaSql} = ? WHERE kod = ?`).run(wartosc, kod);
+    };
+
+    it("tekst `'Tak'` w pięciu kolumnach z pomiaru daje `Tak`, nie pustkę", () => {
+      for (const kolumna of ["ms", "snow_3pmsf", "cfo", "nro", "cho"]) {
+        ustawSurowo(kolumna, "Tak");
+      }
+
+      const kolumny = naglowek();
+      const dane = wiersz("MO9336320");
+
+      expect(dane?.[kolumny.indexOf("Bloto+snieg")]).toBe("Tak");
+      expect(dane?.[kolumny.indexOf("Snieg-3PMSF")]).toBe("Tak");
+      expect(dane?.[kolumny.indexOf("CFO")]).toBe("Tak");
+      expect(dane?.[kolumny.indexOf("NRO")]).toBe("Tak");
+      expect(dane?.[kolumny.indexOf("CHO")]).toBe("Tak");
+    });
+
+    /**
+     * Karta FIX.1: „popraw wszystkie dziesięć, bo kolejny import może wstawić tekst do każdej".
+     * Pomiar zastał tekst w sześciu kolumnach — ten test pilnuje pozostałych czterech.
+     */
+    it("tekst `'Tak'` daje `Tak` w KAŻDEJ z dziesięciu kolumn, nie tylko w zmierzonych", () => {
+      for (const [kolumnaSql] of FLAGI) ustawSurowo(kolumnaSql, "Tak");
+
+      const kolumny = naglowek();
+      const dane = wiersz("MO9336320");
+      const puste = FLAGI.filter(([, naglowekCsv]) => dane?.[kolumny.indexOf(naglowekCsv)] !== "Tak");
+
+      expect(puste.map(([, naglowekCsv]) => naglowekCsv)).toEqual([]);
+    });
+
+    /**
+     * Reguła oryginału to goły `v ? 'Tak' : ''` na wartości SUROWEJ (`:127-131`) — patrzy na
+     * pustość, nie na treść. Odtwarzamy ją WIERNIE i ten test jest po to, żeby nikt jej później
+     * „nie poprawił" na wariant `v === 1 || v === 'Tak'` — zawężenie rozjechałoby nas z produkcją
+     * (napisy inne niż `'Tak'` przestałyby działać).
+     *
+     * ⚠ CO FILTRUJE SAMO SQLITE, a czego nie musimy filtrować my: kolumna jest zadeklarowana
+     * `INTEGER`, więc działa na niej POWINOWACTWO TYPÓW — napis dający się przeczytać jako
+     * liczba jest przy zapisie KONWERTOWANY, i to zanim jakikolwiek kod go zobaczy. Zmierzone:
+     * `'0'` → `integer 0`, `'1'` → `integer 1`, a `'Tak'`, `'Nie'` i `''` zostają tekstem.
+     * Dlatego tekstowe `'0'` w tych kolumnach NIE ISTNIEJE i nie ma jak dać „Tak" — pytanie
+     * „czy niepusty napis `'0'` jest truthy" jest tu bezprzedmiotowe. Produkcja stoi na tym samym
+     * SQLite z tą samą deklaracją kolumny, więc zachowuje się identycznie.
+     */
+    it.each([
+      { opis: "liczba 1", wartosc: 1, oczekiwane: "Tak" },
+      { opis: "liczba 0", wartosc: 0, oczekiwane: "" },
+      { opis: "tekst 'Tak' (zostaje tekstem)", wartosc: "Tak", oczekiwane: "Tak" },
+      { opis: "NULL", wartosc: null, oczekiwane: "" },
+      { opis: "tekst pusty (zostaje tekstem, falsy)", wartosc: "", oczekiwane: "" },
+      { opis: "tekst '0' — SQLite zamienia na integer 0", wartosc: "0", oczekiwane: "" },
+      { opis: "tekst '1' — SQLite zamienia na integer 1", wartosc: "1", oczekiwane: "Tak" },
+      { opis: "tekst 'Nie' — zostaje tekstem, oryginał nie patrzy na treść", wartosc: "Nie", oczekiwane: "Tak" },
+    ])("$opis → `$oczekiwane`", ({ wartosc, oczekiwane }) => {
+      ustawSurowo("ms", wartosc);
+
+      const kolumny = naglowek();
+      expect(wiersz("MO9336320")?.[kolumny.indexOf("Bloto+snieg")]).toBe(oczekiwane);
+    });
+
+    /**
+     * Dowód mechanizmu z komentarza wyżej, na tej samej bazie i tej samej kolumnie — żeby
+     * „SQLite to konwertuje" nie było w tym pliku gołym twierdzeniem.
+     *
+     * ⚠ TO NIE JEST TEST REGRESJI NASZEGO KODU. Opisuje zachowanie samego SQLite, więc
+     * przechodzi niezależnie od treści `generator-csv.ts` — także na wersji sprzed naprawy.
+     * Regresję pilnują testy wyżej (bez poprawki pada ich pięć); ten jest tu po to, żeby
+     * uzasadnić, dlaczego w tabelce reguły `'0'` daje pustkę, a nie „Tak".
+     */
+    it("powinowactwo typów: `'0'`/`'1'` wchodzą jako liczby, `'Tak'`/`'Nie'`/`''` jako tekst", () => {
+      const typWKolumnie = (wartosc: unknown): string => {
+        ustawSurowo("ms", wartosc);
+        return (
+          baza.sqlite.prepare("SELECT typeof(ms) t FROM products WHERE kod = ?").get("MO9_336320") as {
+            t: string;
+          }
+        ).t;
+      };
+
+      expect(typWKolumnie("0")).toBe("integer");
+      expect(typWKolumnie("1")).toBe("integer");
+      expect(typWKolumnie("Tak")).toBe("text");
+      expect(typWKolumnie("Nie")).toBe("text");
+      expect(typWKolumnie("")).toBe("text");
+    });
+
+    it("surowy odczyt nie przecieka do pliku — nigdy nie wychodzi `1` ani goły tekst", () => {
+      for (const [kolumnaSql] of FLAGI) ustawSurowo(kolumnaSql, "Tak");
+      const kolumny = naglowek();
+      // MO9336319 ma wszystkie dziesięć jako `true` (czyli `1` w bazie).
+      const zJedynkami = wiersz("MO9336319");
+      const zTekstem = wiersz("MO9336320");
+
+      for (const [, naglowekCsv] of FLAGI) {
+        expect(zJedynkami?.[kolumny.indexOf(naglowekCsv)]).toBe("Tak");
+        expect(zTekstem?.[kolumny.indexOf(naglowekCsv)]).toBe("Tak");
+      }
+    });
+  });
+
   /** ⚠ Zmiana z 2026-07-31: `123,-` zamiast surowej liczby z kropką. */
   it("`cena_sprzedazy` wychodzi w formacie `123,-`", () => {
     const kolumny = naglowek();
