@@ -229,8 +229,22 @@ na każdym środowisku i dla każdego, kto tu programuje:
    hooków przy klonowaniu, więc **na nowym klonie raz**: `tools/wlacz-hooki.sh` (robi to też
    `npm install` w `rebuild/backend` lub `rebuild/frontend` — skrypt `prepare`). Świadome
    obejście: `POMIN_SYNC=1 git push` albo `git push --no-verify`.
-2. **Job `synchronizacja` w CI** (`.github/workflows/ci.yml`) — ta sama kontrola po stronie
-   GitHuba, na każdym PR-ze; łapie też kogoś, kto hooków nie włączył.
+2. **Ruleset na `develop` + joby CI** — i to jest REALNY zamek, nie tylko sygnał. Repozytorium jest
+   **publiczne**, więc rulesety są dostępne; ruleset `develop` (id `21299243`, `enforcement: active`,
+   zakres dokładnie `refs/heads/develop`, aktualizowany 2026-09-23) wymaga **pull requesta** oraz
+   **przejścia trzech sprawdzeń: `backend`, `frontend`, `synchronizacja`** (plus zakaz usunięcia
+   gałęzi i `non-fast-forward`). Zatwierdzeń wymaga **zero** — PR wolno zmergować samemu, ale
+   dopiero po zielonych sprawdzeniach. Obejście ma jedna rola repozytorium (`bypass_mode: always`,
+   `RepositoryRole` id 5 — czyli admin, dziś tylko `pszuflad`); konto ze zwykłym `write` (np.
+   `Devilian07`) obejścia NIE ma. Zmierzone 2026-09-24, ticket 157.
+   ⚠ **Sprawdzając scalalność czytaj OBA pola.** `mergeable: MERGEABLE` mówi tylko „brak
+   konfliktów"; dopóki sprawdzenia nie przejdą, `mergeStateStatus` = **`BLOCKED`** i GitHub
+   przycisku nie da. `tools/push-i-pr.sh` wypisuje tylko `mergeable` (`:113`), więc jego
+   „Scalalny: MERGEABLE" NIE znaczy „gotowe do merge'a" — dopytaj
+   `gh pr view <nr> --json mergeable,mergeStateStatus`.
+   ⚠ **Nieaktualne w starszych notatkach:** `docs/tickets/134-CHORE-praca-w-chmurze/plan.md:4-6,21-22`
+   twierdzi, że rulesety dają HTTP 403 („prywatne repo, plan Free") i że „CI jest sygnałem, nie
+   blokadą". Było to mierzone 2026-09-23 przed włączeniem rulesetu; dziś jest odwrotnie.
 3. **Skrypty** `tools/sync-z-develop.sh` i `tools/push-i-pr.sh` — robią to poprawnie za Ciebie.
 
 Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.md`, Kroki 16–17.
@@ -243,6 +257,43 @@ Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.
   robi to samo automatycznie (`prepare`). Sprawdzenie: `git config --get core.hooksPath`.
 - Backend wymaga **Node ≥ 20** (`better-sqlite3`). Domyślny `node` na maszynie deweloperskiej to
   v14 — przed pracą: `export PATH="$HOME/.nvm/versions/node/v20.20.2/bin:$PATH"`.
+- **Sesja w przeglądarce (`claude.ai/code`) NIE MA `gh` — to nie jest problem z logowaniem, binarki
+  po prostu nie ma w kontenerze.** Zmierzone 2026-09-24 (ticket 157, konto `Devilian07`). Skutki,
+  o które rozbije się każda sesja chmurowa, jeśli tego nie wie:
+  - `tools/push-i-pr.sh` **nie zadziała** (cały opiera się na `gh api`/`gh pr create`).
+    `tools/sync-z-develop.sh` **działa** — to czysty `git`. Push robisz `git push`, a pull requesta
+    i odczyt scalalności **narzędziami MCP GitHub** (nazwy sprawdź listą narzędzi sesji; w tamtym
+    przelocie działały `mcp__github__get_me`, `mcp__github__list_pull_requests`).
+  - Zapis na GitHubie wymaga **zainstalowanej aplikacji Claude GitHub App na repozytorium**.
+    Bez niej `git push` i `mcp__github__create_branch` dają **403** („Claude doesn't have GitHub
+    access to …") — nawet gdy konto użytkownika ma `permission: write`. Prawo zapisu konta i dostęp
+    aplikacji to DWIE różne rzeczy; komunikat 403 mówi o drugiej, nie o pierwszej.
+    Instalacja: https://github.com/apps/claude/installations/select_target.
+    **Zainstalowana 2026-09-24 na `pszuflad/bridge-agrowiec`; łańcuch potwierdzony przelotem**
+    (sesja Ani): `git push` bez 403 → PR utworzony przez MCP (#173) → `blocked` zaraz po
+    utworzeniu → `clean` po ~2,5 min. Jeśli 403 wróci, to znak, że repozytorium wypadło z listy
+    w „Configure" aplikacji — nie że komuś zabrano uprawnienia.
+  - **Stan PR-a czytany przez MCP nazywa się inaczej niż w `gh`:** pole to `mergeable_state`
+    z wartościami małymi literami (`blocked`, `clean`, `dirty`), a nie `mergeStateStatus`
+    (`BLOCKED`, `CLEAN`). `blocked` zaraz po utworzeniu PR-a jest NORMALNE — sprawdzenia jeszcze
+    lecą (~2-3 min). Nie interpretuj tego jako konfliktu ani jako braku uprawnień.
+  - `pre-push` w takiej sesji **początkowo nie jest aktywny** (`core.hooksPath` pusty) i włącza się
+    sam dopiero po `npm ci` w `rebuild/backend` (skrypt `prepare`) albo przez `tools/wlacz-hooki.sh`.
+    Potwierdzone 2026-09-24: w przelocie z pushem hook **w ogóle się nie odezwał** — push przeszedł
+    bez ani jednej linii o synchronizacji z `develop`. Sesja czysto dokumentacyjna
+    zostaje bez hooka — ale po stronie GitHuba `develop` jest chroniony rulesetem (sekcja wyżej,
+    „Zasada jest egzekwowana mechanicznie", pkt 2), więc brak
+    hooka oznacza gorszy komunikat o błędzie, nie otwartą furtkę.
+  - Co w chmurze **działa** (sprawdzone): Node 22 i pełne bramki backendu (`npm ci`, lint,
+    typecheck, build, `npm test` → 1844 testy zielone, ~86 s); atomowa rezerwacja numeru ticketa
+    z Kroku 4 mimo braku lokalnego `.worktrees/.numery`; `git worktree add`; widoczność
+    `CLAUDE.md` i `.claude/commands/feature.md`.
+  - Czego w chmurze **nie da się zrobić**: nagrać fixtures z oryginału — `db/snapshot.db` jest
+    w `.gitignore`, więc do kontenera nie jedzie.
+- **`npm test` wypisuje na stderr `DB_PATH: Required` i „kopia-bazy: brak DB_PATH — nie wiem, co
+  kopiować. Przerywam."** To NIE jest usterka, tylko dwa testy, które celowo sprawdzają tę gałąź:
+  `test/kopia-bazy.test.ts:117` i `test/selly.csv-cli.test.ts:110`. Zielony bieg z tym szumem jest
+  poprawny — nie „naprawiaj" tego i nie zgłaszaj.
 - Bramki backendu: `npm run lint`, `npm run typecheck`, `npm run build`, `npm test`
   w `rebuild/backend/`.
 - Zakładaj, że projekt może być uruchomiony i że równolegle pracuje ktoś inny — testy używają

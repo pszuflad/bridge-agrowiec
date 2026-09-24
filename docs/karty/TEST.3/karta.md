@@ -118,16 +118,31 @@ Cztery decyzje użytkownika, 2026-09-24 (runda pytań ticketu 152):
    wejść" jest zgodny ze stanem na dziś, ale ticket 134 planuje dla sesji w chmurze inny mechanizm
    (kontener/klon per sesja, worktree „zbędny") — po domknięciu 134 ten fragment trzeba
    zweryfikować i ewentualnie poprawić.
-   **Lista rzeczy do sprawdzenia EMPIRYCZNIE w sesji przeglądarkowej** (nie da się tego ustalić
-   z repo, a od tego zależy, czy Ania w ogóle dojdzie do PR-a): czy `gh` jest zalogowany
-   (`gh api user`, nie `gh auth status` — patrz `CLAUDE.md`) i czy konto ma prawo zapisu
-   i merge'a; czy `node -v` daje ≥ 20 i czy `better-sqlite3` się kompiluje, czyli czy bramki
-   (`lint`/`typecheck`/`build`/`test`) w ogóle przechodzą w kontenerze; czy `git worktree add`
-   i atomowa rezerwacja numeru z Kroku 4 działają bez lokalnego `.worktrees/.numery`; czy hook
-   `pre-push` jest aktywny (`git config --get core.hooksPath`); czy w środowisku NIE ma sekretów
-   `SELLY_*`/`AGRORAMI_*` (ma nie być — staging i chmura nie dotykają cudzego sklepu); czy
-   `db/snapshot.db` jest nieobecny (jest w `.gitignore`, więc nagrywanie fixtures w chmurze
-   nie zadziała). Ticket na ten przelot jeszcze nie istnieje.
+   **PRZELOT WYKONANY 2026-09-24** (sesja Ani w przeglądarce, konto `Devilian07`; wyniki
+   naniesione ticketem `157-DOCS-przelot-chmurowy-wyniki`, szczegóły w `CLAUDE.md` → „Środowisko").
+   Co wyszło:
+   - **DZIAŁA:** Node 22.22.2; pełne bramki backendu (`npm ci` 10 s, lint 7 s, typecheck 7 s,
+     build 4 s, `npm test` → **1844 testy zielone, 12 pominiętych, ~86 s**); atomowa rezerwacja
+     numeru ticketa mimo braku lokalnego `.worktrees/.numery`; `git worktree add`; widoczność
+     `CLAUDE.md` i `.claude/commands/feature.md`; brak sekretów `SELLY_*`/`AGRORAMI_*` w środowisku
+     (0 zmiennych — tak ma być); `core.hooksPath` pusty na starcie, włącza się sam po `npm ci`.
+   - **BLOKER ZDJĘTY 2026-09-24** — aplikacja Claude GitHub App zainstalowana na repozytorium,
+     drugi przelot potwierdził cały łańcuch z sesji w przeglądarce: `git push` bez 403, PR #173
+     utworzony narzędziem MCP, stan `blocked` → `clean` po ~2,5 min. Brak `gh` **zostaje** faktem
+     środowiska (patrz niżej) — obchodzimy go wariantem Kroku 17 w `feature.md`, nie instalacją.
+   - **BLOKER (stan przed instalacją, do kontekstu):** **w kontenerze nie ma `gh`** („command not found") — więc `tools/push-i-pr.sh`
+     i każde `gh …` padnie; dostęp do GitHuba idzie wyłącznie narzędziami MCP. Odczyt działa
+     (`get_me`, `list_pull_requests`), **zapis wraca 403**: `git push` i `mcp__github__create_branch`
+     dają „Claude doesn't have GitHub access to pszuflad/bridge-agrowiec…". **Nie jest to brak
+     uprawnień konta** — `Devilian07` ma `permission: write`, `push: true` (sprawdzone przez
+     `gh api repos/.../collaborators`); brakuje **instalacji aplikacji Claude GitHub App na
+     repozytorium** (https://github.com/apps/claude/installations/select_target). Dopóki tego nie
+     ma, żaden ticket przez `/feature` nie dojdzie do „push + PR".
+   - **Nie do sprawdzenia w tym przelocie:** czy `pre-push` odbije nieaktualną gałąź przy realnym
+     pushu (403 przyszedł wcześniej, hook się nie odezwał).
+   - **Wniosek dla dokumentu Ani:** rozdział „Jak włączyć zmianę i sprawdzić, że jest na teście"
+     zostaje bez zmian — opisuje to, co robi ONA na GitHubie, i to działa. Zmiany wymagał krok
+     WCZEŚNIEJSZY, po stronie sesji: `feature.md` Krok 17 ma teraz wariant bez `gh`.
 3. **Błędny odsyłacz w `CLAUDE.md`.** Jako dowód na łatkę `konstrukcja` wpisaną w martwy bundel
    wskazuje `mirror/backend/CHANGELOG.md:101` — dziś jest tam inny wpis (hold-reasons).
    Weryfikowalny dowód leży w tabeli łatek w `deminified/README.md`. `CLAUDE.md` jest zakazany
