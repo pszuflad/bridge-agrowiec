@@ -486,7 +486,10 @@ stan ze starym procesem.
       (`ls -la …/ex-port-files/sellycsv-*.csv`);
 - [ ] **po 12:00** — Selly zaciągnął plik (widać po stanach w sklepie);
 - [ ] `pm2 logs` — czy Tory 1 i 2 nie sypią błędami;
-- [ ] kopia `data.db.przed-cutover-*` zostaje **co najmniej tydzień**.
+- [ ] kopia `data.db.przed-cutover-*` zostaje **co najmniej tydzień**;
+- [ ] **pierwsza karta po oknie: `PO.0`** — przestrojenie `/feature` i trzech agentów z trybu
+      „odbudowa" na „utrzymanie" (`docs/po-cutoverze-proces.md`, wpis `#162.1`, roadmapa §6b
+      Blok 2). Dopiero teraz — wcześniej instrukcja musi mówić o wiernym odtwarzaniu.
 
 ---
 

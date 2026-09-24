@@ -3686,10 +3686,19 @@ w trakcie testów Ani** — a domenę przełączamy dopiero, gdy poniższe jest 
 ⚠ **Rollback (`cutover.md` §7) NIE jest realizowany** — decyzja użytkownika 2026-09-24. Jeśli po
 przełączeniu coś pójdzie źle, wracamy do tego odrębną decyzją, nie wg tamtego rozdziału.
 
-### Blok 2 — fala „PO” z rundy decyzyjnej DEC.1 (wpis `#143.3`, razem ~3–4 dni)
+### Blok 2 — fala „PO”: PO.0 (proces) + karty z rundy decyzyjnej DEC.1 (wpis `#143.3`, razem ~4 dni)
+
+⭐ **PO.0 wchodzi PIERWSZA — decyzja użytkownika 2026-09-24.** Nie pochodzi z DEC.1; to dług
+procesowy (wpis `#162.1`): `/feature` i trzej agenci są napisani pod **wierną odbudowę** i po
+wyłączeniu starego Bridge każą szukać prawdy w systemie, którego już nie ma — `deminified/`
+jako „ostateczne źródło", `openapi.yaml` jako „zamrożony kontrakt", rozbieżność z fixture jako
+**STOP**. Każda następna karta jest realizowana **tą komendą**, więc każdy dzień zwłoki to kolejne
+tickety prowadzone złą instrukcją. Pełny audyt — co zmienić, **co zostawić bez zmian** i trzy
+decyzje do postawienia użytkownikowi: `docs/po-cutoverze-proces.md`.
 
 | # | Proponowana karta | Wpisy | Zakres | Koszt |
 |---|---|---|---|---|
+| **PO.0** | ⭐ **Przestrojenie procesu na tryb utrzymania** | `#162.1` | `.claude/commands/feature.md` (opis, „Kontekst odbudowy", GATE Kroku 9, blok o kartach w Kroku 13), hierarchia źródeł w `researcher`, jedna linia w `reviewer`, własność docs w `doc-checker`, usunięcie `/triaz-zmian`, przecięcie `CLAUDE.md` na „nasz kod" / „archeologia oryginału". **Zero zmian w `rebuild/` i `contract/`** | ~0,5 dnia |
 | PO.1 | **Selly: kategorie z wielkiej litery** | `#12` | poszerzyć `selly_kategoria_norm_map` o `Rolnicze`/`Ciężarowe` — zdejmuje **84 z 84** pominięć **bez** portu CSV. To realna strata handlowa: 84 opony nie docierają dziś do Selly (tak samo w produkcji) | ~0,5 dnia |
 | PO.2 | **Analityka: zwinięcie duplikatów** | `#94` | `dostepnoscProduktow` + `eksportDostepnosciProduktow` na CTE `HISTORIA_BEZ_DUPLIKATOW_KLUCZA`; EAN z ostatniego wiersza. Fixture NIE wymaga przenagrania | ~0,5 dnia |
 | PO.3 | **Marka w historii cen** | `#98` pkt 3 | karta 4.4 „Sezonowy wzorzec cen” pokazuje `Alliance` i `ALLIANCE` jako dwie marki (953 vs 650 wierszy) | ~0,5 dnia |
@@ -3698,7 +3707,8 @@ przełączeniu coś pójdzie źle, wracamy do tego odrębną decyzją, nie wg ta
 | PO.6 | **Kontrakt: kody błędów** | `#43` krok 1 | dopisać 403/404/409 do ~20–25 z 130 operacji `openapi.yaml` | kilka godzin |
 | PO.7 | **GATE: dowiązanie testów** | `#43` krok 2 | ~10 plików testowych → `sprawdzZgodnoscZKontraktem`; osobno `staging-polityka.trasy.test.ts` | 1–2 dni |
 
-Rekomendacja kolejności z DEC.1: PO.1 najpierw (strata handlowa), potem PO.2–PO.3 (widoczne dla
+Kolejność: **PO.0 najpierw** (decyzja użytkownika 2026-09-24 — patrz wyżej). Dalej rekomendacja
+z DEC.1: PO.1 (strata handlowa), potem PO.2–PO.3 (widoczne dla
 Ani na kartach analityki); PO.6–PO.7 to dług kontraktowy o **zerowym ryzyku runtime** — dobre wypełniacze.
 
 ### Blok 3 — dług wykryty przy ostatniej fali (poza DEC.1)
@@ -3730,7 +3740,12 @@ Ani na kartach analityki); PO.6–PO.7 to dług kontraktowy o **zerowym ryzyku r
   `docs/instrukcja-pracy-dla-ani.md`. Przelot chmurowy wykonany 24.09 (ticket 157): bramki
   zielone (1844 testy, ~86 s), łańcuch `push → PR → clean` potwierdzony po instalacji Claude
   GitHub App; `gh` w kontenerze **nie ma** — obejście jest w `feature.md` Krok 17.
+- **Instrukcje procesu przestraja karta PO.0** — dopóki nie jest zrobiona, `/feature`
+  i trzej agenci opisują odbudowę, nie utrzymanie. Audyt i lista zadań: `docs/po-cutoverze-proces.md`,
+  wpis `#162.1`.
 - **`mirror/` zostaje w repo** jako źródło prawdy o zachowaniu starej produkcji — nie kasujemy go.
+  ⚠ PO.0 stawia to pod decyzję (archiwizacja do `archive/`) — zmiana D9, nie jej wykonanie;
+  do czasu decyzji obowiązuje D9.
 
 ---
 
