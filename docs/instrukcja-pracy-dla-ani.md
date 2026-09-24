@@ -72,7 +72,7 @@ Pięć rzeczy, których przy poprawce wpisanej wprost do plików produkcji nie m
    to gałąź wydana, do niej zmiany dochodzą dopiero po sprawdzeniu.
 4. Wpisz **`/feature`** i za nim swoje zgłoszenie. Sesja sama zakłada osobną kopię plików do pracy
    (zobaczysz słowo *worktree* — to właśnie ona). **Dlatego nie da się przypadkiem zepsuć niczyjej
-   roboty ani produkcji**: dopóki nie powstanie propozycja zmiany i ktoś jej nie włączy, wszystko
+   roboty ani produkcji**: dopóki nie powstanie propozycja zmiany i dopóki jej nie włączysz, wszystko
    dzieje się w tej kopii.
 
 To wszystko. Jednej sesji = jedno zgłoszenie; drugą sprawę zgłaszasz od nowa, osobno.
@@ -153,7 +153,8 @@ nie musisz pytać drugi raz.
 Pięć rzeczy. Przy każdej jest napisane, **co się stanie**, jeśli — bo zakaz bez powodu i tak nie działa.
 
 **1. Nie wpisujemy zmian prosto do `develop` ani `main`.** Zmiana idzie jako propozycja (PR),
-którą ktoś włącza po przeczytaniu.
+którą włączasz sama — po sprawdzeniu, że automatyczne sprawdzenia świecą na zielono (rozdział
+„Jak włączyć zmianę i sprawdzić, że jest na teście").
 *Co się stanie:* zmiana bez propozycji nie zostaje przez nikogo przeczytana i wraca dokładnie ta
 sytuacja, od której uciekamy — poprawka w złym pliku, o której wiemy po tygodniach.
 ⚠ **Uczciwie:** technicznie nikt Ci tego nie zablokuje. Mamy ostrzeżenie przy zapisie zmian,
@@ -221,13 +222,58 @@ Cztery momenty, w każdym wiesz, co masz zrobić:
 3. **Propozycja zmiany (PR) i krótki raport.** Na koniec dostajesz odsyłacz i podsumowanie: co zostało
    zrobione, co wymaga Twojego sprawdzenia, co odłożyliśmy świadomie na później. Między punktem 2 a 3
    sesja pracuje sama i nie zawraca Ci głowy.
-4. **Włączenie zmiany robi Paweł.** Propozycja czeka, aż ktoś ją przeczyta i włączy — to ostatni
-   moment, w którym da się coś zatrzymać bez kosztów.
+4. **Włączenie zmiany robisz Ty.** Propozycja czeka na Ciebie na GitHubie — otwierasz, sprawdzasz
+   zielone znaczki, klikasz „Merge pull request", a po minucie zmiana jest na środowisku testowym.
+   Krok po kroku w następnym rozdziale. To ostatni moment, w którym da się coś zatrzymać bez kosztów,
+   i dlatego jest po Twojej stronie.
 
 **Ile to trwa:** zależy od zgłoszenia i nie chcemy podawać liczby, której nie umiemy dowieść.
 Pewne jest za to jedno: **pytania dostajesz na początku**, więc nie czekasz tygodnia, żeby dowiedzieć
 się, że zrozumieliśmy Cię inaczej. Jeśli coś pilnie potrzebujesz mieć wcześniej, napisz to
 w zgłoszeniu — kolejność ustalamy my, ale tylko jeśli wiemy, co jest dla Ciebie pierwsze.
+
+---
+
+## Jak włączyć zmianę i sprawdzić, że jest na teście
+
+Gdy dostaniesz odsyłacz do propozycji zmiany, resztę robisz sama. Cztery kroki.
+
+**1. Otwórz propozycję na GitHubie.** Odsyłacz wygląda tak:
+`github.com/pszuflad/bridge-agrowiec/pull/166`. Zjedź na dół strony — tam jest ramka z wynikami
+automatycznych sprawdzeń.
+
+**2. ⭐ Poczekaj na zielone znaczki. To najważniejszy punkt na tej kartce.** Sprawdzenia nazywają się
+`synchronizacja`, `backend` i `frontend`, a razem trwają **około dwóch minut**.
+
+- **Wszystkie zielone ✓** — możesz włączać.
+- **Cokolwiek czerwonego ✗** — **nie włączaj.** Napisz w komentarzu pod propozycją, że sprawdzenie
+  jest czerwone, i daj znać Pawłowi.
+
+⚠ **GitHub nie zablokuje Ci przycisku przy czerwonym znaczku** — pozwoli włączyć zmianę tak samo.
+Dlatego to Ty jesteś w tym miejscu ostatnim sprawdzeniem: czerwony znaczek znaczy, że zmiana psuje
+coś, czego nie widać na ekranie.
+
+**3. Kliknij zielony przycisk „Merge pull request", potem „Confirm merge".** Gałąź, którą GitHub
+zaproponuje usunąć, możesz zostawić — nie przeszkadza i nie musisz nic z nią robić.
+
+**4. Sprawdź, że wdrożenie poszło — zakładka „Actions"** u góry repozytorium. Na samej górze listy
+pojawią się dwa biegi z Twoim tytułem („Merge pull request #…"): **„CI"** i **„Deploy staging"**.
+Ten drugi jest tym, o który Ci chodzi — to on wstawia nową wersję na `test.agritires.eu`.
+
+- **Żółte, kręcące się kółko** — trwa. Wdrożenie zajmuje **około minuty**.
+- **Zielony ✓** — gotowe, zmiana jest na teście. Odśwież stronę z przytrzymanym Shiftem
+  (`Ctrl+Shift+R`), żeby przeglądarka nie pokazała Ci starej wersji.
+- **Czerwony ✗** — wdrożenie nie doszło do końca. **Nie klikaj „Re-run"** — powiedz Pawłowi.
+  Na teście została wtedy poprzednia wersja, więc nic się nie zepsuło; Twoja zmiana po prostu
+  jeszcze nie weszła.
+
+⚠ **Jeden wyjątek, żebyś nie czekała na darmo:** jeśli zmiana dotyczyła wyłącznie dokumentów
+(opisy, instrukcje, notatki), biegu **„Deploy staging" nie będzie w ogóle** — nie ma czego wdrażać
+na środowisko testowe. Sam bieg „CI" i tak się pojawi. Przy zmianach w samym programie „Deploy
+staging" pojawia się zawsze.
+
+**Czego wdrożenie NIE robi:** nie kasuje danych na teście. Baza stagingu przeżywa podmianę wersji,
+więc to, co wcześniej zaimportowałaś, zostaje na miejscu.
 
 ---
 
