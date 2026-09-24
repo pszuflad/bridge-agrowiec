@@ -173,6 +173,23 @@ describe("POST /api/dostawcy/:kod/upload", () => {
       expect(policzStaging()).toBeGreaterThan(0);
     });
 
+    /**
+     * GRI (MO10) wysyła cennik raz jako CSV, raz jako XLSX pod tym samym adresem — bez zmiany
+     * rozszerzenia (komentarz `mo10_gri.cjs:1-6`, Anna 14.07). Test XLSX wyżej dowodzi
+     * odstępstwa „dopuszczamy XLSX w przeglądarce"; ten dowodzi, że ścieżka CSV — czyli
+     * zachowanie SPRZED tamtej zmiany formatu u dostawcy — nadal działa przez ten sam upload,
+     * niezależnie od tego, że `formatPliku` dostawcy w bazie to dziś "xlsx" (158-FEATURE-gri-upload-csv-xlsx).
+     */
+    it("wgrywa cennik CSV dostawcy MO10 (GRI, ten sam adres co XLSX)", async () => {
+      zasiejDostawce("MO10");
+      const odp = await wgraj("MO10", probka("MO10.csv"), "MO10.csv");
+
+      expect(odp.status).toBe(200);
+      const cialo = odp.body as { liczbaProduktow: number };
+      expect(cialo.liczbaProduktow).toBe(223);
+      expect(policzStaging()).toBeGreaterThan(0);
+    });
+
     it("archiwizuje bufor — tak jak produkcyjne `nq()` przed parsowaniem", async () => {
       zasiejDostawce("MO1");
       await wgraj("MO1", probka("MO1.csv"), "MO1.csv");
