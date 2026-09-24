@@ -1,8 +1,54 @@
 # Cutover — przełączenie produkcji na odbudowany stos (big-bang)
 
-**Wersja dokumentu:** 2026-09-08 (ticket `39-CHORE-audyt-bezpieczenstwa-domkniecie`, Iteracja 12e)
+**Wersja dokumentu:** 2026-09-08 (ticket `39-CHORE-audyt-bezpieczenstwa-domkniecie`, Iteracja 12e),
+zaktualizowana 2026-09-24 decyzją użytkownika (patrz rozdział 0).
 **Charakter:** plan do wykonania w umówionym oknie, wspólnie z Anią. **Ten dokument niczego nie
 uruchamia** — sam cutover to osobne zdarzenie, poza zakresem ticketa, który go opisał.
+
+---
+
+## 0. ⭐ Decyzja użytkownika 2026-09-24 — zmiana modelu cutoveru
+
+Pierwotny plan (rozdziały 1–8 niżej) zakładał **podmianę kodu na tym samym serwerze produkcyjnym**:
+stary backend zatrzymany, nowy zbudowany i wystawiony w tym samym miejscu, migracje puszczone na
+żywej `data.db` produkcji. **To NIE jest już aktualny plan.**
+
+**Nowy model, ustalony z Anią 2026-09-24:**
+
+- **Baza jest już zweryfikowana** (próba migracji z rozdziału 3 przeszła na kopii produkcji,
+  ticket 113) — nie migrujemy jej powtórnie w oknie. Pracujemy dalej na tej bazie, na której już
+  stoi środowisko testowe/staging.
+- **Cutover = zmiana domeny.** Nie przenosimy kodu na serwer produkcyjny — **środowisko, na
+  którym Ania dziś testuje, STAJE SIĘ produkcją**, gdy domena produkcyjna zacznie na nie wskazywać.
+  Rozdział 5 („Kroki przełączenia") w części dotyczącej budowania release'u i podmiany plików na
+  serwerze produkcyjnym **nie ma zastosowania** — jedyne działanie to: **zatrzymać stare środowisko
+  i przełączyć domenę na nowe**.
+- **Testy Ani (TEST.1/TEST.2/TEST.3) to właściwy test cutoveru**, nie osobny etap „przed oknem".
+  Skupiamy się na tym, czy środowisko testowe jest wiernym odbiciem starego Bridge — priorytet:
+  **poprawnie działające importy od dostawców i eksporty do Selly** (to jest oś TEST.2, ścieżka
+  krytyczna).
+- **Rozdział 3a (audyt środowiska)** zostaje w mocy jako lista kontrolna zmiennych/sekretów, ale
+  cel się zawęża: nie „dokonfiguruj przed przeniesieniem na produkcję", tylko „potwierdź, że
+  środowisko testowe ma wszystko, co potrzebne do bycia produkcją" — z naciskiem na sekcję
+  importów (`AGRORAMI_*`, `IMPORT_SCHEDULER`) i Selly (`SELLY_*`).
+- **Rozdział 6 (Rollback) NIE JEST realizowany** — decyzja użytkownika 2026-09-24. Jeśli coś
+  pójdzie nie tak po przełączeniu domeny, wraca się do tego decyzją odrębną, nie wg tego rozdziału.
+- **Rozdział 7/8 („Po cutoverze")** wykonujemy **w trakcie testów**, zanim domena zostanie
+  przełączona — nie jako osobna faza po fakcie. Skoro cutover to tylko zmiana domeny, obserwacja
+  cyklu importu i generowania CSV dla Selly ma się odbyć na środowisku testowym, zanim ktokolwiek
+  je przełączy.
+
+⚠ **Otwarte ryzyko, którego ta decyzja wprost nie rozstrzyga — do potwierdzenia z Anią przed
+przełączeniem domeny:** baza środowiska testowego to kopia produkcji z **23.09**. Jeśli stary
+Bridge między 23.09 a dniem przełączenia domeny nadal przyjmuje realne importy/zamówienia, te
+zmiany nie trafią do środowiska testowego automatycznie — sam fakt „baza zweryfikowana" dotyczy
+zgodności SCHEMATU, nie świeżości DANYCH na dzień przełączenia. Warto ustalić z Anią, czy w dniu
+przełączenia robimy jeszcze jeden import/dociąg danych ze starego środowiska, czy świadomie
+akceptujemy stan z 23.09 jako punkt startu nowego stosu.
+
+**Nowy warunek wstępny przed przełączeniem domeny:** ticket `158-FEATURE-gri-upload-csv-xlsx`
+(rozdział 2) — dostawca GRI (MO10) musi przyjmować upload zarówno CSV, jak i XLSX w zakładce
+Konfiguracja → Dostawcy, zanim uznamy środowisko testowe za gotowe do przełączenia.
 
 ---
 
@@ -69,6 +115,8 @@ przestoju je uporządkuje.
       plus czas na smoke-testy.
 - [ ] **Scheduler importu wygaszony na czas okna** albo świadomie zaakceptowany: stary proces
       rusza po URL-e dostawców, a przy przełączaniu nie chcemy importu w połowie.
+- [ ] **`158-FEATURE-gri-upload-csv-xlsx` zamknięty** — dostawca GRI (MO10) przyjmuje upload CSV
+      i XLSX w Konfiguracja → Dostawcy (rozdział 0).
 
 ---
 
@@ -345,7 +393,17 @@ Od 12e proces **wypisuje przy starcie**, w jakim jest stanie (`[cors] wyłączon
 
 ## 5. Kroki przełączenia (okno)
 
-Numeracja jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
+> ⚠ **NIEAKTUALNE wg decyzji z rozdziału 0.** Poniższe kroki 1–8 opisują podmianę kodu NA TYM
+> SAMYM serwerze produkcyjnym (build release'u, migracje na żywej bazie, podmiana plików
+> frontendu). **Tego już nie robimy.** Zostają jako materiał źródłowy dla wiedzy „co się
+> sprawdza po drodze" (np. checklisty smoke-testów w rozdziale 6), ale **faktyczne okno
+> przełączenia domeny to wyłącznie:**
+> 1. zatrzymanie starego środowiska (stary backend + stary frontend na serwerze produkcyjnym),
+> 2. przełączenie domeny produkcyjnej na środowisko testowe (już zbudowane, zmigrowane,
+>    z audytem środowiska z rozdziału 3a wykonanym),
+> 3. smoke-testy z rozdziału 6 (na docelowej domenie, po przełączeniu).
+>
+> Numeracja poniżej jest kolejnością wykonania. Każdy krok kończy się sprawdzeniem.
 
 1. **Ogłoś okno.** Ania kończy pracę w panelu i nie wchodzi do końca operacji.
 
@@ -500,6 +558,9 @@ modyfikuje sklep) ani „Usuń wszystko z katalogu". Import z URL-i zostawiamy s
 
 ## 7. Rollback
 
+> ⚠ **NIE REALIZUJEMY — decyzja użytkownika 2026-09-24 (rozdział 0).** Zostaje jako opis
+> wariantów na wypadek, gdyby decyzja się zmieniła, ale nie jest częścią aktualnego planu.
+
 **Decyzję o rollbacku podejmuj wcześnie.** Im dłużej nowy backend pisze do bazy, tym więcej
 pracy Ani przepadnie przy powrocie do kopii z kroku 3.
 
@@ -539,6 +600,12 @@ rm -f data.db-wal data.db-shm            # resztki WAL po nowej bazie
 ---
 
 ## 8. Po cutoverze
+
+> ⚠ **Kolejność wg decyzji z rozdziału 0: te punkty wykonujemy W TRAKCIE testów (TEST.2 — ścieżka
+> krytyczna), zanim domena zostanie przełączona** — nie jako osobna faza po fakcie. Skoro cutover
+> to wyłącznie zmiana domeny, obserwacja cyklu importu i generowania CSV dla Selly ma się odbyć
+> na środowisku testowym najpierw; przełączenie domeny następuje dopiero, gdy poniższe punkty są
+> odhaczone na środowisku testowym.
 
 - [ ] Obserwacja przez pierwszy pełny cykl importu — czy scheduler ruszył i czy `/historia`
       notuje przebiegi.
