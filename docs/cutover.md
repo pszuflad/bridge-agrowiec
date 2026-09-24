@@ -50,6 +50,11 @@ akceptujemy stan z 23.09 jako punkt startu nowego stosu.
 (rozdział 2) — dostawca GRI (MO10) musi przyjmować upload zarówno CSV, jak i XLSX w zakładce
 Konfiguracja → Dostawcy, zanim uznamy środowisko testowe za gotowe do przełączenia.
 
+> ⭐ **Procedura wykonawcza dla tego modelu: `docs/cutover-runbook.md`** (ticket 161) — kroki
+> 1–13 od wyłączonego starego stosu do działającej produkcji, z decyzją o docroocie, kompletem
+> zmiennych, dwufazowym włączaniem Selly i sprawdzeniem po każdym kroku. Ten dokument zostaje
+> źródłem faktów (schemat, zmienne, smoke-testy); runbook jest kolejnością wykonania.
+
 ---
 
 ## 1. Co się zmienia, a co zostaje
