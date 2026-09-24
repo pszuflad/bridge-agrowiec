@@ -2,7 +2,7 @@
 
 ### #153.1 — CSV dla Selly gubi flagi zapisane jako tekst `'Tak'` (899 z 5396 wierszy)
 
-**Status:** ⬜ do naprawy — **blokada cutoveru**
+**Status:** ✅ naprawione 2026-09-24 (`154-BUG-csv-selly-flagi-tak`) — dowód: pusty diff, identyczne MD5
 **Do nowej wersji?** ✅ TAK (to nie jest zmiana zachowania, tylko przywrócenie wierności)
 **Źródło:** pomiar na stagingu 2026-09-24 (baza = kopia produkcji z 23.09), ticket 153.
 

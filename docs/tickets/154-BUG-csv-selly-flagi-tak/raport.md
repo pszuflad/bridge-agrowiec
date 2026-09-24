@@ -167,3 +167,82 @@ oznaczenia `Śnieg 3PMSF`, `M+S`, `CFO`, `NRO`, `CHO`.
 5. **`db/snapshot.db` w repo (13.08) nie odtwarza tej klasy usterek** — ma w tych kolumnach tylko
    `integer 0/1` i `null`, zero tekstu. Kto będzie dowodził czegokolwiek o mieszanych typach, musi
    wziąć kopię produkcji, nie ten snapshot. Odnotowane w karcie.
+
+## Review fixes applied
+
+Review (`review.md`) dał 2 BLOCKER / 2 SHOULD-FIX / 1 NICE-TO-HAVE. Rozliczenie:
+
+- **BLOCKER ×2 — dokumentacja karty `FIX.1` i backlogu nie była naniesiona.** Trafne co do stanu
+  w chwili review: reviewer czytał gałąź, gdy Faza 5 ticketu (docs) jeszcze nie przebiegła, a ten
+  raport już opisywał jej wynik. Naniesione — patrz „Docs updates" niżej. Wniosek na przyszłość:
+  raport nie powinien opisywać Fazy 5 w czasie przeszłym, dopóki ona nie przebiegła.
+- **SHOULD-FIX — błędna ścieżka w komentarzu (naprawione, commit `d39595f`).** Komentarz cytował
+  `drizzle-orm/sqlite-core/utils.cjs:40-75` dla `mapResultRow`, a funkcja jest w
+  `drizzle-orm/utils.cjs:40` (wybór dekodera `:45-52`, użycie `:63`). Mechanizm był opisany
+  poprawnie, zła była tylko ścieżka — czyli dokładnie ten typ nieprawdziwego komentarza, przed
+  którym ostrzega `CLAUDE.md`. Sprawdzone w `node_modules/drizzle-orm` 0.45.2; doprecyzowany też
+  `noopDecoder` (`sql/sql.cjs:296-298`).
+- **SHOULD-FIX — brak `pr-body.md`** (wymieniony w „Changes"): utworzony.
+- **NICE-TO-HAVE — test powinowactwa typów (naprawione, commit `d39595f`).** Dostał adnotację, że
+  **nie jest** testem regresji naszego kodu: opisuje zachowanie SQLite i przechodzi niezależnie od
+  treści `generator-csv.ts`, także na wersji sprzed naprawy. Regresję pilnują testy wyżej.
+
+Reviewer potwierdził niezależnie (nie przyjął na słowo): dziesięć kolumn `FLAGI_SUROWE` zgadza się
+1:1 z `boolCols` oryginału (`origin/main:mirror/backend/generate_selly_export.cjs:76`), mechanizm
+`sql<…>` omijający mapper boolean — w `node_modules/drizzle-orm@0.45.2` i przez `.toSQL()` (poprawne
+referencje także dla kolumn aliasowanych `extra_load`/`snow_3pmsf`, brak duplikatów w projekcji),
+brak naruszeń kontraktu/fixtures, testy nietautologiczne, bramki zielone, testy w pełni izolowane
+(`mkdtempSync` per test).
+
+## Docs updates
+
+### `docs/karty/FIX.1/karta.md` — karta ZAMKNIĘTA
+- `Stan: ⬜ do zrobienia — blokada cutoveru` → `✅ 2026-09-24 · 154-BUG-csv-selly-flagi-tak`,
+  wypełnione `Ticket:`.
+- `## Zakres` — opis usterki przestawiony na czas przeszły; „Zadanie:" → stan faktyczny.
+- `## Dowód wierności` → `## Dowód wierności (wykonany)`; **usunięty nieaktualny opis metody**
+  („ta sama baza, ten sam moment", dwa przebiegi po sobie) i zastąpiony faktycznie użytą **mrożoną
+  kopią bazy**, z wynikiem i kontrolą czułości.
+- `## Decyzje` (było `—`) — D1–D5, z korektą faktu D3 o powinowactwie typów.
+- `## Dowiezione` (było `—`) — faktyczny zakres + pełne liczby gate'u.
+- `## Do koordynatora` (było `—`) — trzy punkty: `mapper.ts:197-203` z grafem wywołań i odsyłaczem
+  do `#154.1`; prośba o przestawienie wiersza `docs/rebuild-roadmap.md:3489`; ostrzeżenie o
+  `db/snapshot.db`.
+
+### `docs/rebuild-backlog/wpis-153.md` — tylko linia `Status`
+`⬜ do naprawy — blokada cutoveru` → `✅ naprawione 2026-09-24 (154-BUG-csv-selly-flagi-tak) —
+dowód: pusty diff, identyczne MD5`. Reszta pliku (objaw, przyczyna, tabele pomiaru, „Czego NIE
+zmieniać") nietknięta — zgodnie z zasadą, że w cudzym wpisie wolno zmienić wyłącznie `Status`
+albo `Do nowej wersji?`.
+
+### `docs/rebuild-backlog/wpis-154.md` — NOWY, wpis `#154.1`
+`mapper.ts:197-203` ma ten sam błąd w sync REST do Selly. Pełny łańcuch wywołań sprawdzony
+`grep`em (nie z nazw funkcji), lista siedmiu dotkniętych pól (mapper nie używa `nro`, `cho`, `cfo`),
+uzasadnienie, dlaczego nie naprawione tu, wzorzec do przepisania i ostrzeżenie, że
+`sync-supplier` z `dry_run=false` modyfikuje cudzy sklep. Status: ⬜ do decyzji.
+
+### `docs/karty/TEST.2/wejscie-154.md` — NOWY
+Warunek z `wejscie-153.md` („dopóki `FIX.1` nie jest zrobione, dowód nie wychodzi na zero") jest
+**spełniony** — z liczbami i datą. Opisana ulepszona metoda (mrożona kopia zamiast dwóch przebiegów),
+powtórzone krytyczne zabezpieczenia, utrzymane rozgraniczenie „dowód dla nas / wynik dla Ani",
+i nowe ostrzeżenie: **pusty `diff` też wymaga kontroli pozytywnej** (census `Tak` per kolumna),
+bo inaczej mógłby znaczyć „oba generatory oddały pusto".
+
+### `docs/spec-backend/wpis-154.md` — NOWY
+Wpis referencyjny: kolumny flagowe `products` mają mieszane typy; co z tego wynika dla każdego, kto
+je czyta; jak czytać surowo w tym stosie; tabela powinowactwa typów SQLite; reguła prawdziwości
+oryginału; czego nie zmieniać i dlaczego (**API jest wierne, gdy mapuje; plik CSV jest wierny, gdy
+NIE mapuje**); gdzie naprawione, a gdzie nie.
+
+### `CLAUDE.md` — trzecia pułapka w akapicie o projekcjach Drizzle
+Rozszerzony **w miejscu** istniejący akapit (nie nowa sekcja na końcu pliku): kolumna `INTEGER`
+może trzymać tekst, a tryb `boolean` go milcząco zjada; liczby z pomiaru; że samo wypisanie
+projekcji jawnie NIE WYSTARCZY — trzeba ominąć mapper; że mapper jest w **korzeniu** paczki
+`drizzle-orm`, nie w `sqlite-core/`; że schematu nie wolno „naprawiać"; wskazanie niezałatanego
+`mapper.ts:197-203`. Dotychczasowa treść akapitu (`GET /api/selly/log`, `products.uwaga_cena`)
+nietknięta — oba fakty dalej prawdziwe.
+
+**Pre-existing issues zgłoszone przez doc-checkery:** brak.
+
+**`docs/rebuild-roadmap.md` NIE był edytowany** — wiersz `⛔ przed cutoverem | FIX.1 | ⬜ BLOKADA`
+(`:3489`) zostaje do przestawienia przez koordynatora; prośba w „Do koordynatora" karty.
