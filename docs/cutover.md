@@ -46,7 +46,7 @@ zgodności SCHEMATU, nie świeżości DANYCH na dzień przełączenia. Warto ust
 przełączenia robimy jeszcze jeden import/dociąg danych ze starego środowiska, czy świadomie
 akceptujemy stan z 23.09 jako punkt startu nowego stosu.
 
-**Nowy warunek wstępny przed przełączeniem domeny:** ticket `158-FEATURE-gri-upload-csv-xlsx`
+**Nowy warunek wstępny przed przełączeniem domeny:** ticket `159-FEATURE-gri-upload-csv-xlsx`
 (rozdział 2) — dostawca GRI (MO10) musi przyjmować upload zarówno CSV, jak i XLSX w zakładce
 Konfiguracja → Dostawcy, zanim uznamy środowisko testowe za gotowe do przełączenia.
 
@@ -115,7 +115,7 @@ przestoju je uporządkuje.
       plus czas na smoke-testy.
 - [ ] **Scheduler importu wygaszony na czas okna** albo świadomie zaakceptowany: stary proces
       rusza po URL-e dostawców, a przy przełączaniu nie chcemy importu w połowie.
-- [ ] **`158-FEATURE-gri-upload-csv-xlsx` zamknięty** — dostawca GRI (MO10) przyjmuje upload CSV
+- [ ] **`159-FEATURE-gri-upload-csv-xlsx` zamknięty** — dostawca GRI (MO10) przyjmuje upload CSV
       i XLSX w Konfiguracja → Dostawcy (rozdział 0).
 
 ---
