@@ -75,7 +75,8 @@ To poczekalnia: zmiany z importu, które czekają na Twoją decyzję.
 **Ma się pokazać:** tabela pozycji z filtrem typu zmiany, szukajką i stronicowaniem.
 
 **Do kliknięcia:**
-- [ ] ✅ / ❌ — filtr typu zmiany (nowa / zmieniona / wycofana) faktycznie zawęża listę.
+- [ ] ✅ / ❌ — filtr typu zmiany faktycznie zawęża listę. Opcje: **Wszystkie · Nowe produkty ·
+      Nowe produkty (stare) · Braki w cenniku · Zmiany kluczowe · Błędy importu**.
 - [ ] ✅ / ❌ — szukajka znajduje po kodzie i po nazwie.
 - [ ] ✅ / ❌ — kliknięcie wiersza pokazuje szczegóły pozycji.
 - [ ] ✅ / ❌ — zaznaczasz kilka pozycji i akceptujesz — znikają z poczekalni.
@@ -240,8 +241,10 @@ chwilę dłużej niż inne — to normalne, wykresy są ciężkie.
 - [ ] ✅ / ❌ — **karty na zakładce „Dostępność" mają dane** — także dwie, które w starym
       Bridgu są zawsze puste. Pusto może być tylko wtedy, gdy dla danych opon nie ma jeszcze
       historii cen.
-- [ ] ✅ / ❌ — przycisk „CSV" przy karcie pobiera plik z **dokładnie tym, co widać w tabeli**
-      (po filtrach) — ta sama liczba wierszy i te same kolumny.
+- [ ] ✅ / ❌ — przycisk „CSV" przy karcie pobiera plik z **tymi samymi kolumnami i po tych
+      samych filtrach**, co tabela. ⚠ **Wierszy w pliku będzie WIĘCEJ niż w tabeli** — od karty
+      P10.5 (23.09) osiem z dziewięciu kart z eksportem dociąga do pliku pełny zbiór, a tabela
+      rysuje najwyżej 300 wierszy. Większy plik to nie błąd.
 
 > ⚠ **Kafle na górze liczą CAŁOŚĆ i nie reagują na filtry** — tak samo jak w starym Bridgu.
 > „EAN wspólne" i „Pozycje unikalne" pokażą najwyżej 1000, nawet gdy pozycji jest więcej —
@@ -352,7 +355,8 @@ drugą: „Status połączenia", „Codzienna synchronizacja CSV", „Mapowanie 
 
 > ⚠ **Na staging Selly jest CELOWO WYŁĄCZONY.** Operacje wysyłające cokolwiek do sklepu
 > odmówią działania, nawet gdyby ktoś wpisał prawdziwe hasła. Tak ma być — staging nie ma
-> prawa dotknąć Waszego sklepu. Jeśli zobaczysz „tryb wyłączony", to jest poprawne zachowanie,
+> prawa dotknąć Waszego sklepu. Jeśli zobaczysz **„Integracja Selly wyłączona na tym
+> środowisku"**, to jest poprawne zachowanie,
 > a nie usterka. Pełną integrację włączymy dopiero na produkcji.
 
 ---
@@ -388,8 +392,9 @@ Zebrane w jednym miejscu, żebyś nie musiała ich zgłaszać:
 8. **Rzeczy, które w starym Bridgu są zepsute, a tu działają:** kafel „Ostatni eksport CSV" na
    Pulpicie, dwie karty „Dostępności" w Analityce, polskie litery w nazwach alertów, jedna
    marka ALLIANCE w filtrze Katalogu, Historia bez limitu 5000 zdarzeń.
-9. **Eksport CSV w Analityce to dokładnie tabela z ekranu** (po Twoich filtrach), a nie osobny
-   zestaw danych.
+9. **Eksport CSV w Analityce to ta sama tabela** (te same kolumny, Twoje filtry), ale
+   **bez ograniczenia liczby wierszy** — tabela pokazuje najwyżej 300 pozycji, plik ma wszystkie
+   (zmiana z 23.09, karta P10.5).
 10. **Archiwum importów:** przy błędzie pobierania pliku pojawia się komunikat w rogu ekranu
     zamiast szarego okienka; wybrany w filtrze dostawca albo miesiąc zostaje widoczny, nawet
     gdy zniknie z listy (w starym Bridgu filtr wracał wtedy do „Wszyscy dostawcy"); komunikat

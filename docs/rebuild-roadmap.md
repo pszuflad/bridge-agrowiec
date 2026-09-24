@@ -157,17 +157,21 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 
 ## 4. Tablica postępu
 
-> **Stan na 2026-09-21.** Pierwotna odbudowa (iteracje 0–12) jest **zamknięta od 2026-09-08**
-> (audyt 12e bez otwartych dziur). Po niej doszły trzy rodziny zmian:
-> - **I13** — delty produkcji Ani 26.08–08.09; wszystko rozliczone poza **13d (Selly) — odłożone**.
->   Cutover idzie ze stanu produkcji 08.09, więc I13 musi być rozliczona przed nim.
-> - **I14** — uwagi Ani z testów I3 i I4; obie fale zamknięte (2026-09-19).
-> - **Plan P** — poprawki po testach I5, I6, I7, I9, I10 i przeglądzie 12 widoków; **w toku**.
->   Otwarte karty mają katalogi `docs/karty/<ID>/`, stan: `tools/stan-kart.sh`.
+> **Stan na 2026-09-24: WSZYSTKIE ZAPLANOWANE KARTY ZAMKNIĘTE — system jest u Ani na testach.**
+> `tools/stan-kart.sh` pokazuje 31 kart i ani jednej otwartej. Pierwotna odbudowa (iteracje 0–12)
+> zamknięta 2026-09-08 (audyt 12e bez otwartych dziur); po niej doszły i zostały rozliczone:
+> - **I13** — delty produkcji Ani 26.08–08.09; 13d (Selly) wchłonięte do I15 (karty I15.6–I15.8).
+> - **I14** — uwagi Ani z testów I3 i I4; obie fale zamknięte 2026-09-19.
+> - **Plan P** — poprawki po testach I5, I6, I7, I9, I10 i przeglądzie widoków; zamknięty
+>   2026-09-23 (ostatnia karta P10.5, ticket 126).
+> - **I15** — wrzesień produkcji + Staging v2/v3 + Selly REST; zamknięta 2026-09-24
+>   (ostatnia karta I15.9, ticket 151). Zakres zamrożony na `88fa31c`.
+> - **DEC.1** (runda decyzyjna backlogu), **FIX.1** (flagi `'Tak'` w CSV) oraz **TEST.1–TEST.3**
+>   (trzy dokumenty dla Ani) — zamknięte 23–24.09.
 >
-> Poza odbudową zostają: **przegląd 12 widoków przez Anię** (`docs/przeglad-12-widokow.md`)
-> i **cutover** (`docs/cutover.md`) — patrz §6. Tę tablicę odświeża **koordynator**, nie karty
-> (zob. §0 „Praca równoległa”).
+> **Nic nie jest już w toku po naszej stronie.** Następny ruch należy do Ani (testy), potem do
+> użytkownika (termin okna). Co dalej — **§6**: warunki cutoveru i pełna lista prac PO cutoverze.
+> Tę tablicę odświeża **koordynator**, nie karty (zob. §0 „Praca równoległa”).
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
 
@@ -187,9 +191,10 @@ Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany)
 | 11 | Konfiguracja: spedycja / shoper / katalog / ai (dostawcy i `freq-injection` ✅ w 3f-2) | 1 | 1 | ✅ | ticket `18-FEATURE-konfiguracja-config-spedycja` · 2026-09-03 |
 | 12 | Konto + admin + hardening bezpieczeństwa | 12a BE · 12b BE+FE · 12c FE · 12d · 12e | wszystkie | ✅ | 12a–12c 2026-09-05 · 12d, 12e 2026-09-08 — szczegóły: nagłówki sesji w bloku I12 |
 | 13 | Delty produkcji Ani 26.08–08.09 (post-odbudowa) | 13f · 13a · 13b · 13c · 13d · 13e | 3, 8 | ✅ | 13a/13b/13c/13e/13f ✅ 2026-09-08…09 · **13d wchłonięte do I15** (karty I15.6–I15.8, 2026-09-22) — szczegóły: blok I13 |
-| 15 | Domknięcie zakresu produkcji: wrzesień (#73–#83) + Staging v2/v3 (#99, #103–#107) + Selly REST (dawne 13d) | I15.1–I15.11 | 3, 8, 13 | 🔨 | **10 z 14 kart ✅ (23.09)**; zostają I15.10b, I15.5, I15.11, I15.9. Zakres zamknięty na `88fa31c`; stan: `tools/stan-kart.sh I15` |
+| 15 | Domknięcie zakresu produkcji: wrzesień (#73–#83) + Staging v2/v3 (#99, #103–#107) + Selly REST (dawne 13d) | I15.1–I15.11 | 3, 8, 13 | ✅ | **14 z 14 kart ✅** · ostatnia I15.9 (ticket 151) 2026-09-24. Zakres zamknięty na `88fa31c`; stan: `tools/stan-kart.sh I15` |
 | 14 | Uwagi Ani z testów I3 i I4 (UI importu, staging, silnik cen) | fala 1: 14a–14d · fala 2: 14e–14m (14g skasowana) | 3, 4 | ✅ | fala 1 zamknięta 2026-09-18 · fala 2 zamknięta 2026-09-19 — szczegóły: blok I14 |
-| P | Poprawki po testach Ani (I5, I6, I7, I9, I10, przegląd 12 widoków) | karty `P{iteracja}.{n}` i `PR.{n}` | 5–10 | 🔨 | stan każdej karty: `tools/stan-kart.sh` · karty otwarte mają katalogi `docs/karty/<ID>/` · plan: blok „Poprawki po testach Ani” |
+| P | Poprawki po testach Ani (I5, I6, I7, I9, I10, przegląd 12 widoków) | karty `P{iteracja}.{n}` i `PR.{n}` | 5–10 | ✅ | wszystkie karty ✅ · ostatnia P10.5 (ticket 126) 2026-09-23 · stan: `tools/stan-kart.sh` · plan: blok „Poprawki po testach Ani” |
+| TEST | Trzy dokumenty dla Ani przed cutoverem (pełny test · ścieżka krytyczna · zasady pracy) | TEST.1 · TEST.2 · TEST.3 | 15, P | ✅ | tickety 149, 150, 152 · 2026-09-24 — `docs/instrukcja-pelnego-testu.md`, `docs/instrukcja-testu-sciezki-krytycznej.md`, `docs/instrukcja-pracy-dla-ani.md` |
 
 ---
 
@@ -3416,11 +3421,14 @@ w polach. ⚠ **Cenników NIE commitujemy** — to pełne dane handlowe dostawc�
 | ~~**Pytanie 12.5 — podział admin / użytkownik**~~ | — | ✅ Ania 22.09 (runda 3, 3.2): bez ról, wszyscy mają te same prawa |
 | ~~**#96** — sufit 1000/500 wierszy w plikach CSV analityki~~ | karta **P10.5** | ✅ Ania 2026-09-23: „chcę pełne pliki” — sufit zdejmujemy tylko dla pliku |
 | ~~**#97** — kafel „Ostatni eksport CSV” bez źródła w UI~~ | — | ❌ Ania 2026-09-23: „zostawcie tak jak jest” — wpis zamknięty |
-| **#94** — karta 4.1: przypadkowy EAN i podwójne migawki | mała karta analityki | ⬜ użytkownik — rekomendacja: naprawić wzorem #33 |
-| **#95**, **#98** — „przypadek mieszany” w imporcie, resztki danych | — | ⬜ użytkownik — rekomendacja: po cutoverze |
-| **Progi kalkulatora paletowego** (półpaleta ≤ 55 cm → 60 cm, paleta ≤ 80 cm, +10 cm paleta, współczynnik 0.000167) — właściwe czy do zmiany | ewentualną zmianę ustawień `waga_gab.*` (stała 60 cm to kod, nie ustawienie) | **⬜ po stronie Ani** — pytanie z wariantami w `docs/instrukcja-testow-I9-v2.md` §3.2 (2026-09-21) |
-| **Rodzaje `model` i `zastosowanie`** — gdzie Ania ich używa (słownik · filtry/reguły cen · mają trafiać do kolejki · nie używa) | tylko przy „mają trafiać do kolejki”: nowa funkcja (zmiana `ZAKRES_SKANU`, +199 pozycji `model` na snapshocie), nowy wpis backlogu | **⬜ po stronie Ani** — I7-v2 pkt 1.4, backlog #41 (2026-09-21) |
-| **Seed marek i bieżników przy starcie** — czy nowe wartości mogą znikać z kolejki (seed je „akceptuje”) | przy „nie”: zmiana seedu, odstępstwo od produkcji, nowy wpis backlogu | **⬜ po stronie Ani** — I7-v2 pkt 2.3, raport ticketu 78 (2026-09-21) |
+| ~~**#94** — karta 4.1: przypadkowy EAN i podwójne migawki~~ | karta analityki | ✅ rozstrzygnięte 2026-09-23 w rundzie DEC.1 (ticket 141): 🕒 **po cutoverze**, rekomendacja naprawy w mocy |
+| ~~**#95**, **#98** — „przypadek mieszany” w imporcie, resztki danych~~ | — | ✅ rozstrzygnięte 2026-09-23 (DEC.1): **#95 nieaktualny** (I15.4b zastąpił silnik), **#98** 🕒 po cutoverze |
+| ~~**Progi kalkulatora paletowego**~~ | — | ✅ Ania 2026-09-24 (ticket 155): „zostawiamy jak jest” |
+| ~~**Rodzaje `model` i `zastosowanie`**~~ (backlog #41) | — | ✅ rozstrzygnięte i zrealizowane 2026-09-21; potwierdzone przez Anię 2026-09-24 (ticket 155) |
+| ~~**Seed marek i bieżników przy starcie**~~ | — | ✅ Ania 2026-09-24 (ticket 155): „zostawiamy jak jest” |
+
+**Stan tabeli na 2026-09-24: pusta — żadna decyzja planu P nie wisi.** Otwarte pytania do Ani
+przeniosły się do trzech dokumentów testowych (sekcje „Do Twojej decyzji”) — wykaz w §6.
 
 #### Kolejność
 
@@ -3431,7 +3439,8 @@ warto puścić wcześniej, bo są rozłączne ze wszystkim innym.
 
 ### Iteracja 15 — Domknięcie zakresu produkcji: wrzesień + Staging v2 + Selly REST
 
-- **Status:** 🔨 zaplanowana 2026-09-22 (ticket `104-DOCS-plan-i15`). Karty: `docs/karty/I15.1`–`I15.9`,
+- **Status:** ✅ **ZAMKNIĘTA 2026-09-24** — 14 z 14 kart dowiezionych (ostatnia I15.9, ticket 151).
+  Zaplanowana 2026-09-22 (ticket `104-DOCS-plan-i15`). Karty: `docs/karty/I15.1`–`I15.11`,
   stan: `tools/stan-kart.sh I15`. Tabelę i kolejność zmienia koordynator, nie karty.
 - **⭐ Zamrożenie produkcji (2026-09-22, Paweł + Ania):** na starym Bridge **nie będzie już żadnych zmian**
   do cutoveru. Cel nr 1 — dokończyć odbudowę i wdrożyć ją na produkcję; nowe zmiany dopiero w nowym stosie.
@@ -3484,9 +3493,9 @@ potrzebuje drugiej migracji, zgłasza to w „Do koordynatora”, zamiast brać 
 | B | **I15.4c** (ticket 129) → **I15.4b** (ticket 130) | ✅ 23.09 — ⚠ kolejność ODWRÓCONA wobec planu, patrz nota niżej |
 | C | **I15.10b** (montaż) ‖ **I15.5** („Rozstrzygnij") — rozłączne plikowo | ✅ 23.09 (tickety 139, 140) |
 | D | **I15.11** (panel „Braki w cenniku") | ✅ 24.09 (ticket 142) |
-| E | **I15.9** (delta dla Ani) → **TEST.1 ‖ TEST.2 ‖ TEST.3** (trzy dokumenty dla Ani) | ⬜ ostatnia fala |
+| E | **I15.9** (delta dla Ani) → **TEST.1 ‖ TEST.2 ‖ TEST.3** (trzy dokumenty dla Ani) | ✅ 24.09 (tickety 151, 149, 150, 152) |
 | równolegle | **DEC.1** — runda decyzyjna (#135.1, jedenaście wpisów) | ✅ 23.09 (ticket 141) |
-| ⛔ przed cutoverem | **FIX.1** — CSV gubi flagi zapisane jako tekst `'Tak'` (899 z 5396 wierszy, wpis #153.1) | ⬜ BLOKADA |
+| ⛔ przed cutoverem | **FIX.1** — CSV gubi flagi zapisane jako tekst `'Tak'` (899 z 5396 wierszy, wpis #153.1) | ✅ 24.09 (ticket 154) — blokada zdjęta. ⚠ **bliźniaczy błąd w `src/selly/mapper.ts:197-203` (sync REST) świadomie NIE naprawiony** — wpis `#154.1`, do rozstrzygnięcia po cutoverze |
 
 ⚠ **KOLEJNOŚĆ FAL B ODWRÓCONA — fakt, nie plan.** Plan zakładał I15.4b (importer) przed I15.4c (akceptacja).
 W rzeczywistości pierwszy wszedł **ticket 129 (I15.4c)** i to jego pliki są dziś **wspólną warstwą polityki
@@ -3527,15 +3536,15 @@ tabele), `contract/openapi.yaml` (I15.3, I15.4, I15.8). Oba dają najwyżej tryw
 
 ## 6. Po zakończeniu wszystkich iteracji
 
-> **Stan 2026-09-08: pierwotna odbudowa DOWIEZIONA — I0–I12 zamknięte, ostatnia sesja 12e domknęła
-> audyt bezpieczeństwa bez znalezisk.** Zostają dwa zdarzenia POZA pierwotną odbudową, opisane niżej:
-> przegląd 12 widoków przez Anię i cutover. **Doszła jednak I13** — nowa rodzina zmian, które Ania
-> wdrożyła na produkcji 26.08–08.09 (patrz blok I13 w §5); **musi być rozliczona PRZED cutoverem**,
-> bo cutover idzie ze stanu produkcji z 08.09 (`6872aea`), nie 25.08 — inaczej wdrażamy stan sprzed
-> dwóch tygodni. **Doszła też I14** — uwagi Ani z testów Iteracji 3 (warstwa UI importu
-> i stagingu, blok I14 w §5); w odróżnieniu od I13 **nie blokuje cutoveru**. Poza I13, I14
-> i tymi dwoma zdarzeniami żadna kolejna sesja programistyczna nie jest przewidziana w tym
-> dokumencie.
+> **Stan 2026-09-24: CAŁY ZAPLANOWANY ZAKRES DOWIEZIONY, SYSTEM JEST U ANI NA TESTACH.**
+> I0–I12 zamknięte 08.09 (audyt 12e bez znalezisk), I13 rozliczone (13d wchłonięte do I15), I14
+> zamknięte 19.09, plan P zamknięty 23.09, I15 zamknięta 24.09, DEC.1 i FIX.1 zamknięte,
+> TEST.1–TEST.3 wydane. `tools/stan-kart.sh` — 31 kart, zero otwartych.
+> **Żadna karta ani ticket przed cutoverem nie pozostaje do zrobienia po naszej stronie.**
+> Zostają: wynik testów Ani, okno cutoveru i **fala prac PO cutoverze** — §6a i §6b niżej.
+>
+> _Historyczne uzasadnienie kolejności (I13 przed cutoverem, bo cutover idzie ze stanu produkcji
+> 08.09, nie 25.08) jest już rozliczone — zakres zamrożony na `88fa31c` z 22–23.09._
 
 **Zrobione w 12e (patrz blok Sesja 12e w §5 po szczegóły):**
 - Audyt bezpieczeństwa (auth, CORS, JWT, mass-assignment) — bez otwartych dziur; luka procesu
@@ -3576,5 +3585,104 @@ Fixtures/kontrakt: 73 nagrania / 96 ścieżek — 12 operacji zapisujących z D3
 reszta zapisujących tras lokalnych zostaje bez fixtures (Follow-up 38, `contract/README.md`).
 12e nie zmieniła kształtu ani wartości żadnej odpowiedzi API — `contract/` nietknięty.
 
-*Utworzono 2026-08-20 (Faza 3–4). Zamknięte 2026-09-08 (12e, `39-CHORE-audyt-bezpieczenstwa-domkniecie`)
-— dalsze zmiany tego pliku to już follow-up po cutoverze, nie kontynuacja planu odbudowy.*
+---
+
+## 6a. Przed cutoverem — co zostało (stan 2026-09-24)
+
+**Po naszej stronie: NIC programistycznego.** Wszystko, co zostało, to czynności ludzkie i okno.
+
+| # | Co | Kto | Status |
+|---|---|---|---|
+| 1 | **Test ścieżki krytycznej** — `docs/instrukcja-testu-sciezki-krytycznej.md` (5 odcinków: import → parsery → baza → CSV → Selly). **To jest dokument rozstrzygający o cutoverze** — Ania zaczyna od niego | Ania | 🔨 w toku |
+| 2 | **Delta I15** — `docs/instrukcja-testow-I15.md` (11 punktów, czytana PRZED pełnym testem) | Ania | 🔨 w toku |
+| 3 | **Pełny test systemu** — `docs/instrukcja-pelnego-testu.md` (panel i pozostałe ekrany; ❌ tutaj **nie blokuje** przełączenia) | Ania | 🔨 w toku |
+| 4 | **Przegląd widoków** — `docs/przeglad-12-widokow.md` (13 sekcji + logowanie), warunek nadrzędny z `docs/cutover.md` §2 | Ania | ⬜ |
+| 5 | **Audyt środowiska produkcji** — `docs/cutover.md` §3a: zmienne, cron CSV 6:00, `.htaccess` z białą listą IP, uprawnienia katalogów, wpisy PM2. ⚠ `AGRORAMI_*` i `SELLY_*` **nie są w schemacie walidacji** — proces wstaje bez nich, a MO9 wywala się dopiero przy imporcie | Paweł | ⬜ |
+| 6 | **Weryfikacja schematu `data.db` na KOPII** + próba migracji 001→013 — `docs/cutover.md` §3 | Paweł | ⬜ |
+| 7 | **Termin okna** (weekend, ustalenie z Anią) i samo przełączenie — `docs/cutover.md` §5 | Paweł + Ania | ⬜ |
+
+**Decyzje Ani czekające w dokumentach testowych** (odpowiedzi wracają z wypełnionymi kratkami):
+
+| Dokument | Pytanie |
+|---|---|
+| ścieżka krytyczna, „Do Twojej decyzji” 1 | **MO6 (Agrowiec/Uniglory) ma zero pozycji w katalogu i w CSV** — tak ma być czy to błąd? |
+| ścieżka krytyczna 2 | test z przepięciem adresu feedu w Selly **przed** cutoverem — nasza rekomendacja: pomijamy |
+| ścieżka krytyczna 3 | czy porównanie generatorów CSV ma chodzić **automatycznie** (rekomendacja: tak — błąd flag `'Tak'` wyszedłby od razu) |
+| pełny test, 1–4 | priorytet reguł (⚠ **pytanie nieaktualne** — `#89` zamknięty decyzją Ani 24.09, ticket 155), role admin/użytkownik (`#48`), ostrzeżenie o poprawkach Marty (`#137.2`), złączenie czterech par bieżników (`#98` pkt 2) |
+| delta I15, rozdz. 4 | 6 pytań: godzina nocnego syncu Selly (04:30), środa MO5 vs MO5+MO6, brak przycisków torów, pusty ekran „Braki w cenniku”, niewidoczne dowody kompletności importu, numery zamiast nazw form płatności |
+
+⚠ **Jedna rzecz warta rozważenia PRZED oknem, mimo decyzji „wszystko po cutoverze”:** wpis
+`#139.2` — `SELLY_CSV_DIR` domyślnie wskazuje katalog **produkcyjny**, a odbudowa nie ma twardej
+bramki, którą oryginał miał w `staging_policy.cjs:131-134`. Dziś jedyną ochroną jest `.env`
+i zakaz dla człowieka. Przy stagingu na tym samym VPS co produkcja to jest realna droga do
+nadpisania produkcyjnego CSV.
+
+---
+
+## 6b. Po cutoverze — plan prac
+
+Reguła nadrzędna (użytkownik, 2026-09-23): **co da się zrobić po cutoverze, robimy po cutoverze.**
+Stąd poniższa lista. Nic z niej nie blokuje wdrożenia; kolejność to propozycja, nie zależność.
+
+### Blok 1 — czynności okna i pierwszej doby (`docs/cutover.md` §8)
+
+- [ ] pierwszy pełny cykl importu — czy scheduler ruszył i czy `/historia` notuje przebiegi;
+- [ ] następnego dnia po 6:00 — czy cron zrobił CSV (`npm run selly:csv`); po 12:00 — czy Selly go zaciągnął;
+- [ ] kopia `data.db.przed-cutover-*` zostaje **co najmniej tydzień**; stary kod i baza ~2 tygodnie (D9);
+- [ ] odnotować **datę cutoveru** w tym pliku;
+- [ ] uprzedzić Anię o trzech spodziewanych zmianach: kolumna „Konstrukcja opony” **ożyje**
+      (dziś w produkcji „—”), adresy bez `#` (stare zakładki trafią na `/`), pierwszy zapis
+      dowolnej reguły narzutu **przeliczy 2050 z 7405 cen** (znalezisko 14e, zachowanie oryginału).
+
+### Blok 2 — fala „PO” z rundy decyzyjnej DEC.1 (wpis `#143.3`, razem ~3–4 dni)
+
+| # | Proponowana karta | Wpisy | Zakres | Koszt |
+|---|---|---|---|---|
+| PO.1 | **Selly: kategorie z wielkiej litery** | `#12` | poszerzyć `selly_kategoria_norm_map` o `Rolnicze`/`Ciężarowe` — zdejmuje **84 z 84** pominięć **bez** portu CSV. To realna strata handlowa: 84 opony nie docierają dziś do Selly (tak samo w produkcji) | ~0,5 dnia |
+| PO.2 | **Analityka: zwinięcie duplikatów** | `#94` | `dostepnoscProduktow` + `eksportDostepnosciProduktow` na CTE `HISTORIA_BEZ_DUPLIKATOW_KLUCZA`; EAN z ostatniego wiersza. Fixture NIE wymaga przenagrania | ~0,5 dnia |
+| PO.3 | **Marka w historii cen** | `#98` pkt 3 | karta 4.4 „Sezonowy wzorzec cen” pokazuje `Alliance` i `ALLIANCE` jako dwie marki (953 vs 650 wierszy) | ~0,5 dnia |
+| PO.4 | **Porządki w danych** | `#65`, `#98` pkt 1–2 | 3 wpisy `manual_overrides.konstrukcja='D'`, 2 marki-śmieci, 4 pary case-only w słowniku `bieznik` | ~1–2 h |
+| PO.5 | **Silnik cen: dopasowanie przez pustkę** | `#88` | warunek w `promocjaPasuje` (operator to **OR**, więc pusta sama `marka` wystarcza) + test wariantu częściowego | ~1 h |
+| PO.6 | **Kontrakt: kody błędów** | `#43` krok 1 | dopisać 403/404/409 do ~20–25 z 130 operacji `openapi.yaml` | kilka godzin |
+| PO.7 | **GATE: dowiązanie testów** | `#43` krok 2 | ~10 plików testowych → `sprawdzZgodnoscZKontraktem`; osobno `staging-polityka.trasy.test.ts` | 1–2 dni |
+
+Rekomendacja kolejności z DEC.1: PO.1 najpierw (strata handlowa), potem PO.2–PO.3 (widoczne dla
+Ani na kartach analityki); PO.6–PO.7 to dług kontraktowy o **zerowym ryzyku runtime** — dobre wypełniacze.
+
+### Blok 3 — dług wykryty przy ostatniej fali (poza DEC.1)
+
+| Wpis | Rzecz | Stan |
+|---|---|---|
+| `#154.1` | **sync REST do Selly gubi te same flagi `'Tak'` co gubił CSV** — `src/selly/mapper.ts:197-203`, pola `ms`, `snow3pmsf`, `reinforced`, `extraLoad`, `cutResistant`, `heatResistant`, `stubbleResistant`. CSV naprawiony kartą FIX.1 (ticket 154), REST **świadomie nie** | ⬜ decyzja: do której karty Selly REST przypisać. **Najwyższy priorytet Bloku 3** — dotyka opisów produktów w żywym sklepie od pierwszego dnia po cutoverze |
+| `#139.2` | twarda bramka na `SELLY_CSV_DIR` (oryginał miał ją w `staging_policy.cjs:131-134`) | ⬜ decyzja użytkownika — ⚠ patrz §6a, warto rozważyć **przed** oknem |
+| `#142.1`–`#142.4` | dług testowo-dokumentacyjny po I15.11: lista `BLOKADY` w teście FE ma 6 z 7 komunikatów; komentarz w `SzczegolyPozycji.tsx` opisuje mechanizm sprzed `#103`; fixtures stagingu są sprzed `#103` i nie chronią przed regresją; etykiety FE portowane z nieaktualnego deminifikatu | ⬜ decyzja użytkownika |
+| `#137.1` | `mirror/backend/index.cjs` na `develop` starszy niż reszta mirrora — **skutek świadomej decyzji z 08.09** (`6594525`), nie zaniedbania. Po cutoverze `mirror/` przestaje być wzorcem, więc wpis może stać się bezprzedmiotowy | 🕒 decyzja o polityce mirrora; użytkownik 24.09: „zostawmy to na razie” |
+| `#143.1` | zduplikowany numer `#103` w `docs/rebuild-backlog.md` (dwa różne wpisy) — przenumerowanie należy do koordynatora | 🕒 higiena backlogu |
+| `#143.2` | katalog karty nie zakładany przed wydaniem promptu — dopilnować przy planowaniu następnej fali; tanie zabezpieczenie: sygnalizacja w `tools/stan-kart.sh` | 🕒 proces |
+
+### Blok 4 — czeka na Anię (kod czeka na decyzję, nie odwrotnie)
+
+| Wpis | Rzecz | Co odblokowuje |
+|---|---|---|
+| `#108` | kolizje `kod_importu` — delty do Selly mogą wracać w pętli co 15 min. Wykrywanie i raportowanie **gotowe i przetestowane**, zawór pomijania wycofany świadomie (wielomagazynowość) | decyzja handlowa Ani |
+| `#137.2` | poprawki Marty nakładane cicho — wariant „przywróć meldunek” to **wpięcie istniejącego martwego kodu** (`poprawkiMarty`, `src/import/silnik/overrides.ts`), nie pisanie od zera | pytanie 3 w pełnym teście |
+| `#100` | usunięcie produktu z katalogu nie usuwa go z Selly — **nowa funkcja**, życzenie Ani | 🕒 D7, po cutoverze |
+| `#45`, `#48`, `#50` | martwy filtr „Źródło”; brak roli w `users` (każdy zalogowany widzi „Admin” i „Dziennik” — tak samo dziś w produkcji); `parsujSzczegoly` w dwóch kopiach BE/FE | wracają jako tickety, **jeśli Ania ich chce** (`cutover.md` §8). `#48` warto ruszyć wcześnie |
+
+### Blok 5 — tryb pracy po cutoverze
+
+- **Zmiany wyłącznie w nowym stosie** (D9): `develop` → staging → test Ani → produkcja.
+  Stary Bridge wyłączony od razu po przełączeniu — nie może chodzić równolegle na tej samej
+  `data.db` (dwa schedulery importu, dwie synchronizacje Selly).
+- **Zgłoszenia Ani idą przez `/feature`** z sesji w przeglądarce (`claude.ai/code`) —
+  `docs/instrukcja-pracy-dla-ani.md`. Przelot chmurowy wykonany 24.09 (ticket 157): bramki
+  zielone (1844 testy, ~86 s), łańcuch `push → PR → clean` potwierdzony po instalacji Claude
+  GitHub App; `gh` w kontenerze **nie ma** — obejście jest w `feature.md` Krok 17.
+- **`mirror/` zostaje w repo** jako źródło prawdy o zachowaniu starej produkcji — nie kasujemy go.
+
+---
+
+*Utworzono 2026-08-20 (Faza 3–4). Pierwotna odbudowa zamknięta 2026-09-08 (12e,
+`39-CHORE-audyt-bezpieczenstwa-domkniecie`); cały zaplanowany zakres przed cutoverem zamknięty
+2026-09-24 (ticket `158-DOCS-plan-po-cutoverze` — ta aktualizacja). Dalsze zmiany tego pliku to
+follow-up po cutoverze, nie kontynuacja planu odbudowy.*
