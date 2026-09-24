@@ -162,3 +162,4 @@ Pełna treść: `docs/tickets/154-BUG-csv-selly-flagi-tak/review.md`.
 
 ---
 Ticket docs: `docs/tickets/154-BUG-csv-selly-flagi-tak/`
+Zsynchronizowane z `develop` (`6288066`) — gałąź zawierała już całe `origin/develop`, nic nie doszło; bramki (`lint`/`typecheck`/`build`/`test`) i dowód wierności na stagingu przebiegły na tej właśnie bazie.
