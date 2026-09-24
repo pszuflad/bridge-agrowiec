@@ -74,6 +74,14 @@ Cztery decyzje użytkownika, 2026-09-24 (runda pytań ticketu 152):
 4. **Wejście opisane krok po kroku** (logowanie → repozytorium → gałąź `develop` → `/feature`),
    bo Ania ma/będzie mieć własne konto i dostęp do repozytorium — założenie wchodzi do warunków
    wstępnych dokumentu.
+5. **`/feature` NIE dostaje wariantu dla Ani — zachowuje się dla niej dokładnie tak samo jak dla
+   użytkownika** (decyzja użytkownika 2026-09-24). Pytania techniczne i architektoniczne też idą do
+   Ani i ona je rozstrzyga; ryzyko takiej decyzji użytkownik świadomie bierze na siebie. Powód
+   odrzucenia wariantu „pytania biznesowe do niej, techniczne sesja rozstrzyga sama": to ona zna
+   wagę sprawy dla sprzedaży, a filtrowanie pytań za nią odbiera jej decyzje, o których nawet by
+   nie wiedziała. Jedyne, co z tego weszło do dokumentu: uprzedzenie, że pytania techniczne będą,
+   oraz jawne pozwolenie „nie wiem, zapytaj Pawła" — żeby zamiast zgadywać, mogła odłożyć jedną
+   decyzję bez zatrzymywania całości.
 
 ## Dowiezione
 
