@@ -138,3 +138,24 @@ Kroku 17, nie instalacją czegokolwiek.
 **Do sprzątnięcia po stronie GitHuba (Ania):** zmergować #173 i usunąć gałąź `chore/probe-chmura-2`.
 Bieg „Deploy staging" przy tym merge'u **nie powstanie** — pusty commit nie rusza `rebuild/**`,
 co jest zgodne z wyjątkiem opisanym w `docs/instrukcja-pracy-dla-ani.md`.
+
+## Domknięcie ostatniego follow-upu — `/feature` bez wariantu dla Ani
+
+Decyzja użytkownika 2026-09-24: **`/feature` ma zachowywać się dla Ani dokładnie tak samo jak dla
+użytkownika.** Pytania techniczne i architektoniczne też idą do niej i ona decyduje; ryzyko
+użytkownik bierze na siebie („najwyżej będzie na nią").
+
+**Skutek: `.claude/commands/feature.md` Krok 3 NIE jest zmieniany** — follow-up „wariant `/feature`
+dla zgłoszeń Ani" z ticketów 156 i 157 jest tym samym zamknięty jako **odrzucony świadomie**, nie
+zapomniany. Uzasadnienie odrzucenia (do zapamiętania, bo wróci): filtrowanie pytań za Anię odebrałoby
+jej decyzje, o których nawet by nie wiedziała, a wagę sprawy dla sprzedaży zna ona, nie sesja.
+
+**Jedyna zmiana, jaka z tego weszła** — `docs/instrukcja-pracy-dla-ani.md`, „Czego się spodziewać
+po drodze" p. 1: uprzedzenie, że część pytań będzie techniczna i że nie odsiewamy ich za nią, oraz
+jawne pozwolenie **„nie wiem, zapytaj Pawła" jako pełnoprawna odpowiedź**. Powód: bez tego zdania
+przy pierwszym pytaniu o projekcję albo migrację Ania zgadnie, a zgadywanie jest dla projektu gorsze
+niż odłożenie jednej decyzji. Praca idzie wtedy dalej tym, co nie zależy od odpowiedzi.
+
+Otwartych follow-upów z tej fali zostaje: brak jawnego kroku tworzącego wpis w backlogu
+(`feature.md`), błędny odsyłacz w `CLAUDE.md` do `CHANGELOG.md:101`, brak twardej bramki na
+`SELLY_CSV_DIR` (`#139.2`), odsyłacz z `docs/cutover.md`, `push-i-pr.sh` bez `mergeStateStatus`.

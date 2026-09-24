@@ -75,6 +75,13 @@ zabezpieczeniem jest ruleset na `develop`, nie hook. Dopisane do `CLAUDE.md`: po
 co znaczy powrót 403, oraz różnica nazw pól — MCP oddaje `mergeable_state` (`blocked`/`clean`), `gh`
 oddaje `mergeStateStatus` (`BLOCKED`/`CLEAN`); `blocked` zaraz po utworzeniu PR-a jest normalne.
 
+## Domknięcie follow-upu — `/feature` bez wariantu dla Ani
+Decyzja użytkownika 2026-09-24: `/feature` zachowuje się dla Ani **dokładnie tak samo** jak dla
+użytkownika — pytania techniczne i architektoniczne też idą do niej i ona decyduje. `feature.md`
+Krok 3 **nie jest zmieniany**; follow-up „wariant dla zgłoszeń Ani" zamknięty jako świadomie odrzucony.
+Jedyne, co z tego weszło do dokumentu Ani: uprzedzenie, że pytania techniczne będą, i jawne pozwolenie
+„nie wiem, zapytaj Pawła" jako pełnoprawna odpowiedź — żeby nie zgadywała.
+
 ## Review
 Bez osobnego przebiegu review — trzy edycje tekstowe, każda oparta na fakcie sprawdzonym w repo albo
 na dosłownym cytacie z przelotu; zmiana jest pilna przed sesją testową.

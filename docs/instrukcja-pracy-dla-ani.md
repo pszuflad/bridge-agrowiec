@@ -217,6 +217,12 @@ Cztery momenty, w każdym wiesz, co masz zrobić:
 1. **Pytania — na początku, nie na końcu.** Dostajesz listę pytań z wariantami do wyboru, zanim
    powstanie choćby linijka kodu. **Twoja odpowiedź rozstrzyga** — jeśli powiesz, że ma być inaczej
    niż w starym Bridge'u, tak będzie, i zostanie to zapisane jako Twoja decyzja.
+   Część pytań będzie **techniczna** — o to, jak coś ma być zrobione w środku, nie tylko jak ma
+   wyglądać. Nie odsiewamy ich dla Ciebie, bo zwykle to Ty wiesz, co jest ważne dla sprzedaży,
+   a to przeważa nad wygodą kodu. Przy każdym pytaniu jest zalecany wariant i krótko, co z niego
+   wynika — możesz wybrać po prostu jego.
+   ⭐ **„Nie wiem, zapytaj Pawła" jest pełnoprawną odpowiedzią.** Lepsza od zgadywania: praca idzie
+   dalej tym, co da się zrobić bez tej decyzji, a pytanie trafia do Pawła zapisane, nie zapomniane.
 2. **Plan do zatwierdzenia.** Kilka zdań: co robimy, jakie decyzje przyjęliśmy, czego świadomie
    nie ruszamy. Twoja odpowiedź to jedno słowo — „go" albo co zmienić. Wcześniej nic się nie zmienia.
 3. **Propozycja zmiany (PR) i krótki raport.** Na koniec dostajesz odsyłacz i podsumowanie: co zostało
