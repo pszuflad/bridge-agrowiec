@@ -69,6 +69,11 @@ Trzy środowiska — uwaga: **`main` NIE jest kodem do wdrażania**, tylko lustr
 | **STAGING (nowa wersja)** | `develop` | odbudowa `rebuild/` | **auto-deploy z `develop`** |
 | PRODUKCJA (nowa) | `main` po cutoverze | dopiero na końcu odbudowy | później |
 
+> ⚠ **Ten wiersz czeka na rozstrzygnięcie po zmianie modelu cutoveru z 2026-09-24**
+> (`docs/cutover.md` rozdział 0). Skoro produkcją staje się dzisiejsze środowisko testowe
+> (deploy z `develop`), to po przełączeniu domeny **nie ma osobnego stagingu**, a założenie
+> „produkcja = `main`" przestaje opisywać rzeczywistość. Do decyzji przed oknem — patrz §6a.
+
 **Przepływ iteracji:**
 `ticket → PR do develop → CI (testy + GATE fixtures/kontrakt) zielone → merge → CD (pull na VPS) → podmiana staging → Ania klika test.agritires.eu`
 
@@ -169,8 +174,13 @@ Kolejność wiarygodności: **fixtures/kontrakt > spec > mapa kodu > oryginał**
 > - **DEC.1** (runda decyzyjna backlogu), **FIX.1** (flagi `'Tak'` w CSV) oraz **TEST.1–TEST.3**
 >   (trzy dokumenty dla Ani) — zamknięte 23–24.09.
 >
-> **Nic nie jest już w toku po naszej stronie.** Następny ruch należy do Ani (testy), potem do
-> użytkownika (termin okna). Co dalej — **§6**: warunki cutoveru i pełna lista prac PO cutoverze.
+> **Z zaplanowanego zakresu nie zostało nic** — trwają testy Ani. Doszedł jednak **jeden nowy
+> warunek wstępny spoza planu**: ticket `159-FEATURE-gri-upload-csv-xlsx` (upload CSV i XLSX dla
+> dostawcy GRI/MO10), dopisany do `docs/cutover.md` §2 decyzją użytkownika 2026-09-24.
+> Co dalej — **§6a** (co zostało przed przełączeniem) i **§6b** (prace po cutoverze).
+> ⭐ **Model cutoveru zmieniony 2026-09-24** — `docs/cutover.md` rozdział 0: cutover to
+> **przełączenie domeny** na środowisko, na którym Ania testuje, a nie podmiana kodu na serwerze
+> produkcyjnym. Konsekwencje dla tego pliku — §6a.
 > Tę tablicę odświeża **koordynator**, nie karty (zob. §0 „Praca równoległa”).
 
 Legenda statusu: ⬜ nie zaczęte · 🔨 w toku · ✅ zrobione (PR zmergowany) · ⏸ wstrzymane
@@ -3540,8 +3550,10 @@ tabele), `contract/openapi.yaml` (I15.3, I15.4, I15.8). Oba dają najwyżej tryw
 > I0–I12 zamknięte 08.09 (audyt 12e bez znalezisk), I13 rozliczone (13d wchłonięte do I15), I14
 > zamknięte 19.09, plan P zamknięty 23.09, I15 zamknięta 24.09, DEC.1 i FIX.1 zamknięte,
 > TEST.1–TEST.3 wydane. `tools/stan-kart.sh` — 31 kart, zero otwartych.
-> **Żadna karta ani ticket przed cutoverem nie pozostaje do zrobienia po naszej stronie.**
-> Zostają: wynik testów Ani, okno cutoveru i **fala prac PO cutoverze** — §6a i §6b niżej.
+> **Z zaplanowanego zakresu nie zostało nic.** Doszedł jeden warunek wstępny spoza planu —
+> ticket `159-FEATURE-gri-upload-csv-xlsx` (`cutover.md` §0 i §2, decyzja użytkownika 2026-09-24).
+> Zostają: wynik testów Ani, ten ticket, okno przełączenia domeny i **fala prac PO cutoverze** —
+> §6a i §6b niżej.
 >
 > _Historyczne uzasadnienie kolejności (I13 przed cutoverem, bo cutover idzie ze stanu produkcji
 > 08.09, nie 25.08) jest już rozliczone — zakres zamrożony na `88fa31c` z 22–23.09._
@@ -3565,11 +3577,13 @@ tabele), `contract/openapi.yaml` (I15.3, I15.4, I15.8). Oba dają najwyżej tryw
   2026-09-22 (PR.6, ticket 102) do stanu po planie P**; od PR.1 widoków jest 13. Do ponownego przejścia
   po deployu `develop` na staging (13 sekcji + logowanie, „wygląda inaczej i to OK", „znane i nienaprawione"). Sam przegląd
   klika Ania na stagingu (test.agritires.eu).
-- **Cutover (big-bang)** — plan gotowy w `docs/cutover.md`: przełączenie Apache/PM2 na nowy
-  stos, ta sama baza `data.db`. Warunki wstępne (zielony przegląd Ani, zielone bramki, kopia
-  bazy), weryfikacja schematu przed migracją, migracje 001→003, różnice env staging vs
-  produkcja, kroki przełączenia, rollback, smoke-testy. **To dokument — wykonanie jest osobnym
-  zdarzeniem z Anią**, poza zakresem tej roadmapy.
+- **Cutover** — plan w `docs/cutover.md`. ⭐ **Model zmieniony 2026-09-24 (rozdział 0 tamtego
+  dokumentu):** to **przełączenie domeny produkcyjnej na środowisko, na którym Ania testuje**,
+  a nie podmiana kodu i migracja bazy na serwerze produkcyjnym. Baza jest już zweryfikowana
+  (ticket 113), rozdział 5 (kroki przełączenia) i rozdział 7 (rollback) **nie są realizowane**,
+  a punkty z rozdziału 8 przenoszą się PRZED przełączenie. W mocy zostają: warunki wstępne (§2,
+  z nowym ticketem 159), audyt środowiska (§3a) i smoke-testy (§6). Skutki dla planu — **§6a**.
+  **To dokument — wykonanie jest osobnym zdarzeniem z Anią**, poza zakresem tej roadmapy.
 
 > ⚠ **Fakt dla cutoveru i dla przeglądu 12 widoków (ustalony w 13e, 2026-09-09): kolumna
 > „Konstrukcja opony" jest dziś w ŻYWEJ produkcji PUSTA.** Łatka pass-through z 2026-09-01 11:22
@@ -3587,19 +3601,44 @@ reszta zapisujących tras lokalnych zostaje bez fixtures (Follow-up 38, `contrac
 
 ---
 
-## 6a. Przed cutoverem — co zostało (stan 2026-09-24)
+## 6a. Przed przełączeniem domeny — co zostało (stan 2026-09-24, po zmianie modelu)
 
-**Po naszej stronie: NIC programistycznego.** Wszystko, co zostało, to czynności ludzkie i okno.
+⭐ **Model cutoveru zmieniony 2026-09-24 (użytkownik + Ania) — `docs/cutover.md` rozdział 0.**
+Nie przenosimy kodu na serwer produkcyjny i nie migrujemy bazy w oknie. **Środowisko, na którym
+Ania dziś testuje, STAJE SIĘ produkcją** w chwili, gdy domena produkcyjna zacznie na nie
+wskazywać. Okno to zatem: zatrzymać stare środowisko → przełączyć domenę → smoke-testy
+(`cutover.md` §6). Cztery skutki dla tego pliku:
+
+1. **Baza jest już zweryfikowana** (próba migracji z `cutover.md` §3 przeszła na kopii produkcji,
+   ticket 113) — to nie jest już pozycja „do zrobienia przed oknem".
+2. **Kroki przełączenia z `cutover.md` §5 (build release'u, migracje na żywej bazie, podmiana
+   plików) są NIEAKTUALNE** — zostają jako materiał źródłowy, nie jako procedura.
+3. **Rollback (`cutover.md` §7) nie jest realizowany** — decyzja użytkownika 2026-09-24.
+4. **Punkty „po cutoverze" (`cutover.md` §8) wykonujemy PRZED przełączeniem domeny**, na
+   środowisku testowym, w trakcie testów Ani — patrz §6b Blok 1.
 
 | # | Co | Kto | Status |
 |---|---|---|---|
-| 1 | **Test ścieżki krytycznej** — `docs/instrukcja-testu-sciezki-krytycznej.md` (5 odcinków: import → parsery → baza → CSV → Selly). **To jest dokument rozstrzygający o cutoverze** — Ania zaczyna od niego | Ania | 🔨 w toku |
+| 1 | **Test ścieżki krytycznej** — `docs/instrukcja-testu-sciezki-krytycznej.md` (5 odcinków: import → parsery → baza → CSV → Selly). **To jest właściwy test cutoveru** — Ania zaczyna od niego | Ania | 🔨 w toku |
 | 2 | **Delta I15** — `docs/instrukcja-testow-I15.md` (11 punktów, czytana PRZED pełnym testem) | Ania | 🔨 w toku |
 | 3 | **Pełny test systemu** — `docs/instrukcja-pelnego-testu.md` (panel i pozostałe ekrany; ❌ tutaj **nie blokuje** przełączenia) | Ania | 🔨 w toku |
 | 4 | **Przegląd widoków** — `docs/przeglad-12-widokow.md` (13 sekcji + logowanie), warunek nadrzędny z `docs/cutover.md` §2 | Ania | ⬜ |
-| 5 | **Audyt środowiska produkcji** — `docs/cutover.md` §3a: zmienne, cron CSV 6:00, `.htaccess` z białą listą IP, uprawnienia katalogów, wpisy PM2. ⚠ `AGRORAMI_*` i `SELLY_*` **nie są w schemacie walidacji** — proces wstaje bez nich, a MO9 wywala się dopiero przy imporcie | Paweł | ⬜ |
-| 6 | **Weryfikacja schematu `data.db` na KOPII** + próba migracji 001→013 — `docs/cutover.md` §3 | Paweł | ⬜ |
-| 7 | **Termin okna** (weekend, ustalenie z Anią) i samo przełączenie — `docs/cutover.md` §5 | Paweł + Ania | ⬜ |
+| 5 | ⭐ **`159-FEATURE-gri-upload-csv-xlsx`** — GRI (MO10) ma przyjmować upload CSV **i** XLSX w Konfiguracja → Dostawcy. **Nowy warunek wstępny spoza planu** (`cutover.md` §0 i §2). ⚠ Zanim ktoś napisze kod: parser `mo10_gri.cjs:19-51` **już dziś rozpoznaje oba formaty po sygnaturze bajtów** (`PK\x03\x04`), przycisk „Wgraj plik" jest dostępny dla dostawców `mail` (MO10 jest `mail`), `accept=".csv,.xml,.xlsx"`, a backend nie filtruje rozszerzeń — **ticket ma zacząć od odtworzenia realnej awarii Ani**, bo inaczej może się okazać pusty albo dotyczyć czegoś innego niż format pliku | sesja | ⬜ |
+| 6 | **Audyt środowiska** — `docs/cutover.md` §3a, z celem zawężonym przez rozdział 0: **potwierdzić, że środowisko testowe ma wszystko, żeby być produkcją** (nie „dokonfigurować produkcję"). Nacisk na importy (`AGRORAMI_*`, `IMPORT_SCHEDULER`) i Selly (`SELLY_*`). ⚠ `AGRORAMI_*` i `SELLY_*` **nie są w schemacie walidacji** — proces wstaje bez nich, a MO9 wywala się dopiero przy imporcie | Paweł | ⬜ |
+| 7 | **Termin okna** (weekend, ustalenie z Anią) i **przełączenie domeny** — `docs/cutover.md` §0 | Paweł + Ania | ⬜ |
+
+⚠ **Świeżość danych — ryzyko otwarte, wskazane wprost w `cutover.md` §0.** Baza środowiska
+testowego to kopia produkcji z **23.09**. „Baza zweryfikowana" dotyczy zgodności SCHEMATU, nie
+świeżości DANYCH w dniu przełączenia. Jeśli stary Bridge do dnia przełączenia nadal przyjmuje
+realne importy i decyzje Marty, trzeba rozstrzygnąć: **dociągamy dane ze starego środowiska
+w dniu przełączenia, czy świadomie startujemy ze stanu z 23.09?** Decyzja użytkownika + Ani,
+nie sesji.
+
+⚠ **Druga rzecz, której zmiana modelu nie rozstrzyga — co jest teraz stagingiem.** §1a tego pliku
+i decyzja D9 zakładają ścieżkę `develop` → staging → test → produkcja. Jeśli dzisiejszy staging
+staje się produkcją, po przełączeniu **nie ma osobnego środowiska testowego** i automatyczny
+deploy z `develop` szedłby prosto na żywy panel. Do rozstrzygnięcia przed oknem: czy stawiamy
+nowy staging, czy zmieniamy zasadę wdrożeń. Zapis w §1a zostaje do czasu tej decyzji.
 
 **Decyzje Ani czekające w dokumentach testowych** (odpowiedzi wracają z wypełnionymi kratkami):
 
@@ -3624,15 +3663,28 @@ nadpisania produkcyjnego CSV.
 Reguła nadrzędna (użytkownik, 2026-09-23): **co da się zrobić po cutoverze, robimy po cutoverze.**
 Stąd poniższa lista. Nic z niej nie blokuje wdrożenia; kolejność to propozycja, nie zależność.
 
-### Blok 1 — czynności okna i pierwszej doby (`docs/cutover.md` §8)
+### Blok 1 — ⚠ PRZENIESIONY PRZED przełączenie domeny (`docs/cutover.md` §8 + rozdział 0)
+
+**Po zmianie modelu z 24.09 to nie są już czynności „po cutoverze".** Skoro cutover to wyłącznie
+zmiana domeny, obserwacja cyklu importu i generowania CSV ma się odbyć **na środowisku testowym,
+w trakcie testów Ani** — a domenę przełączamy dopiero, gdy poniższe jest odhaczone.
 
 - [ ] pierwszy pełny cykl importu — czy scheduler ruszył i czy `/historia` notuje przebiegi;
-- [ ] następnego dnia po 6:00 — czy cron zrobił CSV (`npm run selly:csv`); po 12:00 — czy Selly go zaciągnął;
-- [ ] kopia `data.db.przed-cutover-*` zostaje **co najmniej tydzień**; stary kod i baza ~2 tygodnie (D9);
-- [ ] odnotować **datę cutoveru** w tym pliku;
+- [ ] po 6:00 — czy cron zrobił CSV (`npm run selly:csv`); po 12:00 — czy Selly go zaciągnął
+      (to ostatnie da się sprawdzić dopiero po przełączeniu — na stagingu Selly jest wyłączone);
 - [ ] uprzedzić Anię o trzech spodziewanych zmianach: kolumna „Konstrukcja opony” **ożyje**
       (dziś w produkcji „—”), adresy bez `#` (stare zakładki trafią na `/`), pierwszy zapis
       dowolnej reguły narzutu **przeliczy 2050 z 7405 cen** (znalezisko 14e, zachowanie oryginału).
+
+**Zostaje na moment przełączenia domeny i po nim:**
+
+- [ ] smoke-testy z `cutover.md` §6 na docelowej domenie;
+- [ ] stare środowisko zatrzymane (D9 — nie może chodzić równolegle na tej samej bazie);
+- [ ] kopia bazy sprzed przełączenia zostaje **co najmniej tydzień**;
+- [ ] odnotować **datę cutoveru** w tym pliku.
+
+⚠ **Rollback (`cutover.md` §7) NIE jest realizowany** — decyzja użytkownika 2026-09-24. Jeśli po
+przełączeniu coś pójdzie źle, wracamy do tego odrębną decyzją, nie wg tamtego rozdziału.
 
 ### Blok 2 — fala „PO” z rundy decyzyjnej DEC.1 (wpis `#143.3`, razem ~3–4 dni)
 
