@@ -37,3 +37,50 @@ Ticket `159-FEATURE-gri-upload-csv-xlsx` (PR #178, zmergowany) potwierdził to, 
 statyczny pokazał przy tickecie 160: **upload CSV i XLSX dla MO10 już działał**, brakowało
 wyłącznie testu i próbki `MO10.csv`. Zmian w kodzie produkcyjnym nie było. Runbook nie niesie
 więc tego warunku jako blokady.
+
+---
+
+## Uzupełnienie 2026-09-24 — wariant A wybrany, Krok 1 rozpisany
+
+Użytkownik wybrał **wariant A**. Krok 1 przepisany z decyzji na procedurę (1.1–1.5). Przy okazji
+dwa ustalenia, które zmieniają treść dokumentu:
+
+### 1. Sprostowanie: wariant B NIE psuje adresu feedu CSV
+Pierwsza wersja runbooka twierdziła, że przy wariancie B trzeba zmienić adres w panelu Selly.
+**Nieprawda.** Plik CSV to zasób statyczny w `public_html/panel/ex-port-files/` z własnym
+`.htaccess`; reguła SPA-fallback w `mirror/frontend/.htaccess` ma `RewriteCond %{REQUEST_FILENAME} !-f`,
+więc istniejący plik jest serwowany wprost, niezależnie od tego, gdzie stoi panel. Wariant B psuje
+**zakładki Ani i adres panelu**, nie feed. Sprostowanie zapisane w treści Kroku 1.
+
+### 2. Wariant A wymaga zmiany w kodzie frontendu — to nie jest sama robota na VPS
+Zmierzone:
+
+| Co | Stan | Dowód |
+|---|---|---|
+| assety | `base: "/"` → ścieżki absolutne `/assets/…` | `rebuild/frontend/vite.config.ts:10` |
+| routing | wouter bez `<Router base=…>`; `App.tsx` importuje tylko `Route`, `Switch` | `rebuild/frontend/src/App.tsx:25` |
+| API | `BAZA_API = ""` → `fetch("/api/…")` | `rebuild/frontend/src/lib/api.ts:19,111` |
+
+Produkcja robi to inaczej i to jest wzorzec do odtworzenia:
+- `mirror/frontend/index.html` ładuje assety **względnie**: `src="./assets/index-PRICEFMT1783512500.js"`;
+- `mirror/frontend/.htaccess` (nagłówek) mówi wprost: *„Bundle uzywa stalej Vd='/panel' -> kazde
+  wywolanie API ma sciezke /panel/api/…"* — i faktycznie w żywym bundlu są ciągi `"/panel/api/atrybuty…"`;
+- komentarz `lib/api.ts:16-17` przewidział ten przypadek: *„gdyby aplikacja kiedyś wróciła pod
+  prefiks, jest to jedno miejsce do zmiany"*.
+
+**Bez tych trzech zmian wariant A daje białą stronę** (assety 404). To osobny ticket frontendowy,
+do zrobienia i zmergowania PRZED wdrożeniem.
+
+### 3. Decyzja, której ten ticket nie podejmuje: `panel.agritires.eu`
+`mirror/frontend/.htaccess` obsługuje **dwa hosty**: `agritires.eu/panel/…` i subdomenę
+`panel.agritires.eu/…` (wiodący `/panel` zdejmowany wewnętrznym rewritem, nie 301 — żeby nie
+zniszczyć ciała POST). Stary panel tego nie odczuwał, bo routował po **hashu**. Nasz routuje po
+ścieżce, więc jedna stała `base` nie obsłuży obu hostów. Jeśli subdomena ma żyć, `base` trzeba
+wyliczać z `window.location` w czasie działania. **Pytanie do Ani przed ticketem frontendowym.**
+
+### 4. Ochrona katalogu CSV przy podmianie frontendu — potwierdzona
+`tools/publikuj-frontend.sh:30-37`: `--exclude '.htaccess'` plus każdy katalog podany trzecim
+argumentem, o ile leży POD docrootem. Przy `DOCROOT=…/public_html/panel` i
+`SELLY_CSV_DIR=…/public_html/panel/ex-port-files` wykluczenie zadziała. ⚠ Warunek: `SELLY_CSV_DIR`
+musi być ustawiony w `.env` **przed** deployem — przy wartości stagingowej `rsync --delete`
+skasowałby plik, po który przychodzi Selly.

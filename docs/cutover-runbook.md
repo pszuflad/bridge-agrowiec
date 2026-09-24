@@ -21,33 +21,115 @@ stary scheduler importu nie chodzi, stary cron CSV o 6:00 jeszcze może być w `
 
 ---
 
-## Krok 1 — DECYZJA BRAMOWA: gdzie stanie nowy panel
+## Krok 1 — Wariant A: nowy stos przejmuje katalog `public_html/panel`
 
-**Od tej decyzji zależy połowa dalszych kroków. Podejmij ją, zanim cokolwiek zmienisz.**
+**Decyzja użytkownika 2026-09-24: wariant A.** Frontend trafia do `public_html/panel`, backend
+na port 5000, proxy w `public_html/panel/.htaccess`. Adres feedu CSV w panelu Selly zostaje
+bez zmian, zakładki Ani działają.
 
-Adres, po który Selly przychodzi po plik, jest wpisany **w panelu Selly** i brzmi:
+> **Sprostowanie wobec pierwszej wersji tego dokumentu.** Napisałem wcześniej, że wariant B
+> „psuje adres feedu CSV". **To nieprawda.** Plik CSV to zasób STATYCZNY w
+> `public_html/panel/ex-port-files/` z własnym `.htaccess`; Apache serwuje go wprost (reguła
+> SPA-fallback ma `!-f`), niezależnie od tego, gdzie stoi panel. Wariant B psuje **zakładki
+> Ani i adres panelu**, nie feed. Wariant A i tak zostaje wyborem lepszym, ale z innego powodu,
+> niż podałem.
 
+### ⚠ Wariant A wymaga MAŁEJ ZMIANY W KODZIE FRONTENDU — to nie jest sama robota na VPS
+
+Nasz frontend jest dziś zbudowany dla **korzenia docroota**, a nie dla podkatalogu `/panel`:
+
+| Co | Dziś | Musi być pod `/panel` | Plik |
+|---|---|---|---|
+| ścieżki do assetów | `base: "/"` → `/assets/index-….js` | `base: "./"` (względne, jak w produkcji) | `rebuild/frontend/vite.config.ts:10` |
+| routing (wouter) | brak `<Router base=…>` → ścieżka `/panel/katalog` nie pasuje do żadnej trasy | `<Router base="/panel">` | `rebuild/frontend/src/App.tsx` |
+| adres API | `BAZA_API = ""` → `fetch("/api/…")` trafia w korzeń domeny, nie w `panel/.htaccess` | `BAZA_API = "/panel"` | `rebuild/frontend/src/lib/api.ts:19` |
+
+**To nie jest wymysł — tak działa produkcja.** `mirror/frontend/.htaccess` mówi wprost:
+*„Bundle uzywa stalej Vd='/panel' -> kazde wywolanie API ma sciezke /panel/api/…"*, a
+`mirror/frontend/index.html` ładuje assety **względnie** (`src="./assets/index-….js"`).
+Komentarz w `lib/api.ts:16-17` przewidział dokładnie tę sytuację: *„gdyby aplikacja kiedyś
+wróciła pod prefiks, jest to jedno miejsce do zmiany"*.
+
+Bez tych trzech zmian po przełączeniu zobaczysz **białą stronę** (assety 404) — a jeśli
+przypadkiem się załadują, to każde wywołanie API poleci w korzeń domeny zamiast w backend.
+
+### ⚠ Decyzja do podjęcia przy tym tickecie: czy `panel.agritires.eu` ma dalej działać
+
+Produkcyjny `.htaccess` obsługuje **dwa hosty naraz**: `agritires.eu/panel/…` i subdomenę
+`panel.agritires.eu/…` (na subdomenie wiodący `/panel` jest zdejmowany wewnętrznym rewritem).
+Stary panel tego nie odczuwał, bo używał **routingu po hashu** — ścieżka serwera była zawsze
+ta sama. Nasz używa ścieżek, więc jedna stała `base` nie obsłuży obu hostów naraz.
+
+- **Jeśli nikt nie używa `panel.agritires.eu`** — wpisujemy `base="/panel"` na sztywno, koniec.
+- **Jeśli używa** — `base` trzeba wyliczać w czasie działania z `window.location`, co jest
+  większym ticketem i dodatkowym miejscem na błąd.
+
+**Ustal to z Anią, zanim ruszy ticket frontendowy.**
+
+### 1.1 Ticket frontendowy (praca w repo, nie na VPS)
+
+Zakres: trzy zmiany z tabeli wyżej + test, że build produkuje względne ścieżki. Po zmergowaniu
+do `develop` dopiero ma sens cokolwiek wdrażać — inaczej wdrożysz build, który pod `/panel`
+nie wstanie.
+
+### 1.2 Zwiad na VPS — zanim cokolwiek podmienisz
+
+```bash
+# co dziś leży w katalogu, który przejmujemy
+ls -la ~/domains/agritires.eu/public_html/panel/
+ls -la ~/domains/agritires.eu/public_html/panel/ex-port-files/
+
+# czy port 5000 zwolnił się po wyłączeniu starego stosu
+ss -ltnp | grep ':5000' || echo "5000 wolny"
+
+# kopia całego katalogu panelu — tanio, a ratuje przy pomyłce
+cp -a ~/domains/agritires.eu/public_html/panel       ~/panel.przed-cutover-$(date +%F-%H%M)
 ```
-https://agritires.eu/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv
-```
 
-Zwróć uwagę na segment **`/panel/`**. Ten sam segment mają zakładki Ani.
+**Ma być widać:** stary bundle (`index.html`, `assets/`), trzy skrypty injection
+(`selly-injection.js`, `pending-injection.js`, `freq-injection.js`), `.htaccess`
+oraz katalog `ex-port-files/` z plikiem CSV i własnym `.htaccess`.
 
-| | Wariant A — nowy stos przejmuje miejsce starego | Wariant B — domena wskazuje na katalog `test` |
+### 1.3 Co przeżywa podmianę, a co znika
+
+`tools/publikuj-frontend.sh` robi `rsync -a --delete` z dwoma wykluczeniami:
+`--exclude '.htaccess'` oraz katalog podany trzecim argumentem (u nas `$SELLY_CSV_DIR`).
+
+| Plik/katalog | Po podmianie |
+|---|---|
+| `panel/.htaccess` | **zostaje** (wykluczony) — ale i tak go podmieniasz świadomie, krok 7 |
+| `panel/ex-port-files/` z plikiem CSV i `.htaccess` | **zostaje** (wykluczony jako `$SELLY_CSV_DIR`) |
+| stary `index.html` i `assets/` | **znikają** — zastąpione nowym buildem |
+| trzy skrypty `*-injection.js` | **znikają** — i tak mają zniknąć, są wchłonięte (I7, I8, 3f-2) |
+
+⚠ **Warunek:** `SELLY_CSV_DIR` w `.env` musi być ustawiony **zanim** puścisz deploy (krok 4),
+bo to jego wartość trafia do `publikuj-frontend.sh` jako katalog chroniony. Przy stagingowej
+wartości katalog `panel/ex-port-files` nie byłby chroniony i `--delete` **skasowałby plik,
+po który przychodzi Selly**.
+
+### 1.4 Co zmienić w skrypcie wdrożenia
+
+To jest ta sama zmiana, którą opisuje krok 5 — tu tylko wartości dla wariantu A:
+
+| `tools/deploy-staging.sh` | Dziś | Wariant A |
 |---|---|---|
-| frontend ląduje w | `public_html/panel` | `public_html/test` |
-| backend nasłuchuje | `0.0.0.0:5000` (jak stary) | `127.0.0.1:5001` (jak dziś) |
-| proxy `/api` | `public_html/panel/.htaccess` | `public_html/test/.htaccess` |
-| adres feedu CSV | **bez zmian** | **przestaje działać** — trzeba go zmienić w panelu Selly |
-| zakładki Ani | działają | trafiają w nieistniejącą ścieżkę |
-| ryzyko | trzeba podmienić zawartość `panel/` | trzeba ruszyć konfigurację cudzego sklepu |
+| `DOCROOT=` (:24) | `…/public_html/test` | `…/public_html/panel` |
+| `export PORT=5001 HOST=127.0.0.1` (:28) | staging | `PORT=5000 HOST=0.0.0.0` |
+| `cp -f deploy/staging/htaccess …` (:135) | kopiuje plik na 5001, bez `/panel` | **zakomentuj** — `.htaccess` panelu utrzymujemy ręcznie (krok 7) |
 
-**Rekomendacja: wariant A.** Całym argumentem za „nic nie przepinamy w Selly" było to, że nowy
-stos pisze pod tę samą ścieżkę. Wariant B ten argument kasuje i wciąga integratora Selly
-w okno przełączenia.
+### 1.5 Wzorzec `.htaccess` dla katalogu `panel/`
 
-Dalsze kroki są napisane **dla wariantu A**. Przy wariancie B zmienia się treść kroków 5, 7 i 8
-oraz dochodzi zmiana adresu w panelu Selly.
+Nie pisz go od zera — **weź produkcyjny**, jest w repo: `mirror/frontend/.htaccess`. Obsługuje
+oba hosty, proxuje `^api/(.*)$` na `127.0.0.1:5000`, ma SPA-fallback, wymuszenie HTTPS i brak
+cache dla `html/js/css`. Jeśli rezygnujecie z `panel.agritires.eu`, sekcję 1 (dwie reguły
+warunkowane `HTTP_HOST`) można pominąć.
+
+```bash
+cp ~/private_apps/bridge-staging/repo/mirror/frontend/.htaccess    ~/domains/agritires.eu/public_html/panel/.htaccess
+```
+
+⚠ **Nie kopiuj `mirror/frontend/ex-port-files/.htaccess` na oślep** — na VPS ten plik już jest
+i jest żywy. Porównaj (`diff`) zamiast nadpisywać; wersja w repo to kopia z lipca.
 
 ---
 
@@ -191,6 +273,8 @@ innymi nazwami zmiennych albo podawane wprost:
 | `DOCROOT=` (:24) | `…/public_html/test` | `…/public_html/panel` |
 | `export PORT=5001 HOST=127.0.0.1` (:28) | staging | `PORT=5000 HOST=0.0.0.0` |
 
+(Dwa ostatnie wiersze to powtórzenie kroku 1.4 — trzymaj je zgodne.)
+
 `PM2_NAME` możesz zostawić (`bridge-backend-staging`) albo zmienić na `bridge-backend-nowy` —
 **nie na `bridge-backend`**, żeby nie pomylić się ze starym wpisem przy sprzątaniu.
 
@@ -238,9 +322,8 @@ pm2 logs <PM2_NAME> --lines 60 --nostream | grep -iE "scheduler|cors|selly|doste
 
 ## Krok 7 — Proxy i frontend pod `/panel`
 
-Plik `~/domains/agritires.eu/public_html/panel/.htaccess` ma proxować `/panel/api/*` na nowy
-port. Wzorcem jest stary produkcyjny `.htaccess` (proxy `/api/*` → `127.0.0.1:5000`) —
-**zachowaj jego kształt, zmień tylko port, jeśli zmieniłeś port backendu.**
+Wzorzec i polecenie: **krok 1.5** — bierzemy produkcyjny `mirror/frontend/.htaccess`, nie
+piszemy nowego. Proxuje `^api/(.*)$` na `127.0.0.1:5000`, ma SPA-fallback i obsługę obu hostów.
 
 ⚠ Nie nadpisz go plikiem `deploy/staging/htaccess` — tamten jest na 5001 i bez prefiksu `/panel`.
 
@@ -263,14 +346,17 @@ ls -la ~/domains/agritires.eu/public_html/panel/ex-port-files/
 cat ~/domains/agritires.eu/public_html/panel/ex-port-files/.htaccess
 ```
 
-**Ma tam być** biała lista IP, potwierdzona przez Anię 23.09:
+**Ma tam być** biała lista IP, potwierdzona przez Anię 23.09 — plik przeżywa podmianę
+frontendu (krok 1.3), więc normalnie nie ruszasz go wcale, tylko sprawdzasz:
 
 ```
 Require ip 212.91.27.191 46.170.251.129
 ```
 
-(pierwszy adres to Selly, drugi Agrowiec). **Bez niej plik z kolumną `Cena-zakupu` jest
-publiczny.** Katalog musi być zapisywalny przez proces backendu.
+(pierwszy adres to Selly, drugi Agrowiec; kopia wzorca: `mirror/frontend/ex-port-files/.htaccess`,
+z gałęzią `mod_authz_core` dla Apache 2.4 i fallbackiem `Order Deny,Allow` dla 2.2).
+**Bez tego pliku CSV z kolumną `Cena-zakupu` jest publiczny.** Katalog musi być zapisywalny
+przez proces backendu.
 
 **Sprawdzenie, że generator działa i pisze we właściwe miejsce** — zaloguj się do panelu,
 Selly → „Wygeneruj CSV teraz", potem:
