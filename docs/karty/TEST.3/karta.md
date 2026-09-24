@@ -126,7 +126,11 @@ Cztery decyzje użytkownika, 2026-09-24 (runda pytań ticketu 152):
      numeru ticketa mimo braku lokalnego `.worktrees/.numery`; `git worktree add`; widoczność
      `CLAUDE.md` i `.claude/commands/feature.md`; brak sekretów `SELLY_*`/`AGRORAMI_*` w środowisku
      (0 zmiennych — tak ma być); `core.hooksPath` pusty na starcie, włącza się sam po `npm ci`.
-   - **BLOKER:** **w kontenerze nie ma `gh`** („command not found") — więc `tools/push-i-pr.sh`
+   - **BLOKER ZDJĘTY 2026-09-24** — aplikacja Claude GitHub App zainstalowana na repozytorium,
+     drugi przelot potwierdził cały łańcuch z sesji w przeglądarce: `git push` bez 403, PR #173
+     utworzony narzędziem MCP, stan `blocked` → `clean` po ~2,5 min. Brak `gh` **zostaje** faktem
+     środowiska (patrz niżej) — obchodzimy go wariantem Kroku 17 w `feature.md`, nie instalacją.
+   - **BLOKER (stan przed instalacją, do kontekstu):** **w kontenerze nie ma `gh`** („command not found") — więc `tools/push-i-pr.sh`
      i każde `gh …` padnie; dostęp do GitHuba idzie wyłącznie narzędziami MCP. Odczyt działa
      (`get_me`, `list_pull_requests`), **zapis wraca 403**: `git push` i `mcp__github__create_branch`
      dają „Claude doesn't have GitHub access to pszuflad/bridge-agrowiec…". **Nie jest to brak

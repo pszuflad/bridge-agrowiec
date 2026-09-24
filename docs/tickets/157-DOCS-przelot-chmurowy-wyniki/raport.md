@@ -105,3 +105,36 @@ notatką był nasz własny plan.
 
 **Follow-up dołożony:** `tools/push-i-pr.sh` powinien wypisywać także `mergeStateStatus`, inaczej
 każda sesja raportuje „MERGEABLE" przy PR-ze, którego GitHub nie pozwoli zmergować.
+
+## Drugi przelot — po instalacji aplikacji: łańcuch DOMKNIĘTY
+
+Aplikacja Claude GitHub App zainstalowana na `pszuflad/bridge-agrowiec` 2026-09-24. Ania powtórzyła
+przelot w nowej sesji przeglądarkowej. Wynik:
+
+| Ogniwo | Wynik |
+|---|---|
+| `git push` nowej gałęzi z sesji w przeglądarce | ✅ **przeszedł, zero 403** |
+| pull request narzędziem MCP (bez `gh`) | ✅ **#173** utworzony, baza `develop` |
+| stan zaraz po utworzeniu | `mergeable_state: blocked` — zgodnie z przewidywaniem |
+| stan po ~2,5 min | `mergeable_state: clean` |
+| hook `pre-push` | **milczał** — świeży klon, `tools/wlacz-hooki.sh` nieuruchomiony |
+
+**Dwa fakty dopisane do `CLAUDE.md`:**
+1. Instalacja potwierdzona + co znaczy powrót 403 (repozytorium wypadło z listy w „Configure"
+   aplikacji, a NIE odebrane komuś uprawnienia).
+2. **Nazwa pola różni się między MCP a `gh`:** MCP oddaje `mergeable_state` małymi literami
+   (`blocked`, `clean`, `dirty`), `gh` — `mergeStateStatus` wielkimi (`BLOCKED`, `CLEAN`).
+   `blocked` zaraz po utworzeniu PR-a jest normalne (sprawdzenia lecą 2–3 min) i nie wolno tego
+   czytać jako konfliktu ani braku uprawnień. To dokładnie ta pułapka, która kazałaby sesji
+   „naprawiać" coś, co po prostu jeszcze się liczy.
+3. Milczenie hooka **potwierdzone empirycznie**, nie tylko wywnioskowane z `package.json` — push
+   przeszedł bez ani jednej linii o synchronizacji. Zabezpieczeniem jest ruleset na `develop`,
+   nie hook.
+
+**Karta TEST.3:** wpis o blokerze przepisany na „BLOKER ZDJĘTY 2026-09-24" z zachowaniem stanu
+przed instalacją jako kontekstu; brak `gh` zostaje faktem środowiska, obchodzonym wariantem
+Kroku 17, nie instalacją czegokolwiek.
+
+**Do sprzątnięcia po stronie GitHuba (Ania):** zmergować #173 i usunąć gałąź `chore/probe-chmura-2`.
+Bieg „Deploy staging" przy tym merge'u **nie powstanie** — pusty commit nie rusza `rebuild/**`,
+co jest zgodne z wyjątkiem opisanym w `docs/instrukcja-pracy-dla-ani.md`.

@@ -67,6 +67,14 @@ robimy" (nie „umowa, nie zamek", a realne zabezpieczenie) i punkt 2 w `CLAUDE.
 różnica `mergeable` vs `mergeStateStatus`, nieaktualność notatki z 134). Szczegóły i przyznanie własnej
 pomyłki: `raport.md`, sekcja „Korekta w trakcie ticketa".
 
+## Drugi przelot — łańcuch domknięty
+Po instalacji aplikacji Claude GitHub App (2026-09-24) Ania powtórzyła przelot: `git push` z sesji
+w przeglądarce **przeszedł bez 403**, pull request **#173** został utworzony narzędziem MCP (bez `gh`),
+stan `blocked` zaraz po utworzeniu → `clean` po ~2,5 min. Hook `pre-push` milczał (świeży klon) —
+zabezpieczeniem jest ruleset na `develop`, nie hook. Dopisane do `CLAUDE.md`: potwierdzenie instalacji,
+co znaczy powrót 403, oraz różnica nazw pól — MCP oddaje `mergeable_state` (`blocked`/`clean`), `gh`
+oddaje `mergeStateStatus` (`BLOCKED`/`CLEAN`); `blocked` zaraz po utworzeniu PR-a jest normalne.
+
 ## Review
 Bez osobnego przebiegu review — trzy edycje tekstowe, każda oparta na fakcie sprawdzonym w repo albo
 na dosłownym cytacie z przelotu; zmiana jest pilna przed sesją testową.

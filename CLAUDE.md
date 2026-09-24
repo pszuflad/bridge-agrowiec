@@ -269,8 +269,18 @@ Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.
     access to …") — nawet gdy konto użytkownika ma `permission: write`. Prawo zapisu konta i dostęp
     aplikacji to DWIE różne rzeczy; komunikat 403 mówi o drugiej, nie o pierwszej.
     Instalacja: https://github.com/apps/claude/installations/select_target.
+    **Zainstalowana 2026-09-24 na `pszuflad/bridge-agrowiec`; łańcuch potwierdzony przelotem**
+    (sesja Ani): `git push` bez 403 → PR utworzony przez MCP (#173) → `blocked` zaraz po
+    utworzeniu → `clean` po ~2,5 min. Jeśli 403 wróci, to znak, że repozytorium wypadło z listy
+    w „Configure" aplikacji — nie że komuś zabrano uprawnienia.
+  - **Stan PR-a czytany przez MCP nazywa się inaczej niż w `gh`:** pole to `mergeable_state`
+    z wartościami małymi literami (`blocked`, `clean`, `dirty`), a nie `mergeStateStatus`
+    (`BLOCKED`, `CLEAN`). `blocked` zaraz po utworzeniu PR-a jest NORMALNE — sprawdzenia jeszcze
+    lecą (~2-3 min). Nie interpretuj tego jako konfliktu ani jako braku uprawnień.
   - `pre-push` w takiej sesji **początkowo nie jest aktywny** (`core.hooksPath` pusty) i włącza się
-    sam dopiero po `npm ci` w `rebuild/backend` (skrypt `prepare`). Sesja czysto dokumentacyjna
+    sam dopiero po `npm ci` w `rebuild/backend` (skrypt `prepare`) albo przez `tools/wlacz-hooki.sh`.
+    Potwierdzone 2026-09-24: w przelocie z pushem hook **w ogóle się nie odezwał** — push przeszedł
+    bez ani jednej linii o synchronizacji z `develop`. Sesja czysto dokumentacyjna
     zostaje bez hooka — ale po stronie GitHuba `develop` jest chroniony rulesetem (sekcja wyżej,
     „Zasada jest egzekwowana mechanicznie", pkt 2), więc brak
     hooka oznacza gorszy komunikat o błędzie, nie otwartą furtkę.
