@@ -8,4 +8,8 @@
 -- produktu tej samej marki/rozmiaru/bieżnika (dziedziczenie), a nie z importu/pamięci/ręcznie.
 -- Czyszczona z powrotem na `false`, gdy ktoś ręcznie edytuje pole `waga`
 -- (`PUT/PATCH /api/products/{id}`, `routes/products.ts`).
-ALTER TABLE products ADD COLUMN waga_auto_uzupelniona INTEGER NOT NULL DEFAULT 0;
+-- Nullable, nie NOT NULL: harness charakteryzacyjny (`test/charakteryzacja/silnik/polityka.mjs`,
+-- `stworzPolitykeOryginalu`) wstawia produkty testowe RAW-SQL-em przez pełną listę kolumn z
+-- `pragma_table_info`, jawnie podając `NULL` dla pól, których scenariusz nie ustawił — NOT NULL
+-- wywróciłoby ten insert. Aplikacja i tak traktuje `null`/`undefined` jak `false` (falsy).
+ALTER TABLE products ADD COLUMN waga_auto_uzupelniona INTEGER DEFAULT 0;

@@ -83,7 +83,7 @@ export const products = sqliteTable("products", {
 	// Ticket 155 (NOWA logika biznesowa, NIE port) — flaga: `waga` uzupełniona automatycznie
 	// dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu, nie z importu/ręcznie.
 	// Zerowana z powrotem na `false` przy ręcznej edycji pola `waga` (routes/products.ts).
-	wagaAutoUzupelniona: integer("waga_auto_uzupelniona", { mode: "boolean" }).notNull().default(false),
+	wagaAutoUzupelniona: integer("waga_auto_uzupelniona", { mode: "boolean" }).default(false),
 	dlugosc: real(),
 	szerokoscPaczki: real("szerokosc_paczki"),
 	wysokosc: real(),

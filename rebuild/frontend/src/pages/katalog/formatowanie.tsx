@@ -270,12 +270,12 @@ export function formatujKomorke(produkt: Produkt, klucz: string): ReactNode {
     if (wartosc === null || wartosc === undefined || wartosc === "") return <Kreska />;
     if (!produkt.wagaAutoUzupelniona) return String(wartosc);
     return (
-      <span className="inline-flex items-center gap-1">
+      <span
+        className="inline-flex items-center gap-1"
+        title="Waga uzupełniona automatycznie na podstawie podobnego produktu (marka, rozmiar, bieżnik)"
+      >
         {String(wartosc)}
-        <Info
-          className="h-3 w-3 text-muted-foreground shrink-0"
-          title="Waga uzupełniona automatycznie na podstawie podobnego produktu (marka, rozmiar, bieżnik)"
-        />
+        <Info className="h-3 w-3 text-muted-foreground shrink-0" />
       </span>
     );
   }

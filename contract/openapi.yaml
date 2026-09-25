@@ -17574,8 +17574,6 @@ components:
           nullable: true
         waga:
           type: "integer"
-        # Ticket 155 (NOWA logika, nie odtworzenie produkcji): true, gdy `waga` uzupełniona
-        # automatycznie dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu.
         wagaAutoUzupelniona:
           type: "boolean"
         dlugosc:
@@ -17671,6 +17669,7 @@ components:
         - "indeks2"
         - "dostepnosc"
         - "waga"
+        - "wagaAutoUzupelniona"
         - "dlugosc"
         - "szerokoscPaczki"
         - "wysokosc"
@@ -18583,8 +18582,6 @@ components:
           nullable: true
         waga:
           nullable: true
-        # Ticket 155 (NOWA logika, nie odtworzenie produkcji): true, gdy `waga` uzupełniona
-        # automatycznie dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu.
         wagaAutoUzupelniona:
           type: "boolean"
         dlugosc:
@@ -18679,6 +18676,7 @@ components:
         - "indeks2"
         - "dostepnosc"
         - "waga"
+        - "wagaAutoUzupelniona"
         - "dlugosc"
         - "szerokoscPaczki"
         - "wysokosc"
