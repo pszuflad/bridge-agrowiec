@@ -12,6 +12,7 @@
  * „Radialna"/„Diagonalna", czerwone zero w stanie i kreska `—` zamiast pustki.
  */
 import type { ReactNode } from "react";
+import { Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Produkt } from "./filtrowanie";
 
@@ -258,6 +259,25 @@ export function formatujKomorke(produkt: Produkt, klucz: string): ReactNode {
     const lista = blokowaneFormyPlatnosci(produkt.dostawca);
     if (!lista) return <Kreska />;
     return <span title={lista}>{lista}</span>;
+  }
+
+  /**
+   * Ticket 155 — NOWA logika, nie odtworzenie produkcji. Gdy `waga` została uzupełniona
+   * automatycznie (dziedziczenie po marce+rozmiarze+bieżniku), obok wartości pokazujemy małą
+   * ikonę informacyjną z tooltipem — decyzja użytkownika: bez stałego Badge, tylko ikona/tooltip.
+   */
+  if (klucz === "waga") {
+    if (wartosc === null || wartosc === undefined || wartosc === "") return <Kreska />;
+    if (!produkt.wagaAutoUzupelniona) return String(wartosc);
+    return (
+      <span className="inline-flex items-center gap-1">
+        {String(wartosc)}
+        <Info
+          className="h-3 w-3 text-muted-foreground shrink-0"
+          title="Waga uzupełniona automatycznie na podstawie podobnego produktu (marka, rozmiar, bieżnik)"
+        />
+      </span>
+    );
   }
 
   if (klucz === "status") {
