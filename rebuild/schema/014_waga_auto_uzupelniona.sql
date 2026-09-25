@@ -1,0 +1,11 @@
+-- 014_waga_auto_uzupelniona.sql — ticket 155-FEATURE-dziedziczenie-wagi-po-rozmiarze
+--
+-- ⚠ NOWA LOGIKA BIZNESOWA, NIE ODTWORZENIE PRODUKCJI. Kolumna spoza kanonu — produkcja nie ma
+-- nic podobnego (jedyny pokrewny mechanizm to `waga_pamiec`, który pamięta wagę po TYM SAMYM
+-- `kod`, nie po podobieństwie marka+rozmiar+bieżnik). Decyzja użytkownika, 2026-09-25.
+--
+-- Flaga: `true`, gdy `products.waga` zostało uzupełnione automatycznie na podstawie innego
+-- produktu tej samej marki/rozmiaru/bieżnika (dziedziczenie), a nie z importu/pamięci/ręcznie.
+-- Czyszczona z powrotem na `false`, gdy ktoś ręcznie edytuje pole `waga`
+-- (`PUT/PATCH /api/products/{id}`, `routes/products.ts`).
+ALTER TABLE products ADD COLUMN waga_auto_uzupelniona INTEGER NOT NULL DEFAULT 0;

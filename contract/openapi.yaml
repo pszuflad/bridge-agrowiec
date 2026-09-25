@@ -17574,6 +17574,10 @@ components:
           nullable: true
         waga:
           type: "integer"
+        # Ticket 155 (NOWA logika, nie odtworzenie produkcji): true, gdy `waga` uzupełniona
+        # automatycznie dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu.
+        wagaAutoUzupelniona:
+          type: "boolean"
         dlugosc:
           type: "integer"
         szerokoscPaczki:
@@ -18579,6 +18583,10 @@ components:
           nullable: true
         waga:
           nullable: true
+        # Ticket 155 (NOWA logika, nie odtworzenie produkcji): true, gdy `waga` uzupełniona
+        # automatycznie dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu.
+        wagaAutoUzupelniona:
+          type: "boolean"
         dlugosc:
           type: "integer"
         szerokoscPaczki:
