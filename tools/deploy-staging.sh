@@ -14,13 +14,17 @@
 #
 #  Dopóki rebuild/ nie ma aplikacji (przed I1), skrypt nic nie buduje — placeholder działa dalej.
 #  Konfiguracja i pełna instrukcja: docs/deploy-setup.md
+#
+#  ⚠ ODBICIEM TEGO PLIKU JEST tools/deploy-produkcja.sh (gałąź main, public_html/panel,
+#  port 5000, baza data-prod.db). Zmieniasz tu cokolwiek poza konfiguracją na górze —
+#  sprawdź, czy tamten nie wymaga tej samej zmiany. Różnice: docs/wdrozenie-produkcji.md.
 # ============================================================================
 set -euo pipefail
 
 # --- konfiguracja (dostosuj do hosta) ---
 STAGING_ROOT="$HOME/private_apps/bridge-staging"          # repo/, releases/, current, data/
 REPO_DIR="$STAGING_ROOT/repo"                             # klon repo śledzący develop
-DATA_DB="$STAGING_ROOT/data/data-nowy.db"                 # baza staging (przeżywa podmiany)
+DATA_DB="$STAGING_ROOT/data/data-test.db"                 # baza testu (przeżywa podmiany)
 DOCROOT="$HOME/domains/agritires.eu/public_html/test"     # frontend (docroot subdomeny)
 PM2_NAME="bridge-backend-staging"
 BRANCH="develop"
