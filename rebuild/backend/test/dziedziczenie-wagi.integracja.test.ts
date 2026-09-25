@@ -7,9 +7,11 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type { Baza } from "../src/db/index.js";
-import { products } from "../src/db/schema.js";
+import type { Baza, BazaSqlite } from "../src/db/index.js";
+import { products, wagaPamiec } from "../src/db/schema.js";
 import { dodajProduktyBulk } from "../src/import/bulk.js";
+import { applyWagaPamiec, uchwytSqlite } from "../src/import/silnik/bridge-ext.js";
+import { applyWagaDziedziczona } from "../src/import/dziedziczenieWagi.js";
 import { aktualizujProdukt } from "../src/repos/products.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
 
@@ -96,6 +98,39 @@ describe("dziedziczenie wagi — dodajProduktyBulk (import bulk + POST /api/prod
     const zapisany = db.select().from(products).where(eq(products.kod, "NOWY")).get();
     expect(zapisany?.waga).toBe(55);
     expect(zapisany?.wagaAutoUzupelniona).toBe(false);
+  });
+});
+
+describe("dziedziczenie wagi — priorytet waga_pamiec (decyzja 5 z plan.md)", () => {
+  let baza: TestowaBaza;
+  let db: Baza;
+  let sqlite: BazaSqlite;
+
+  beforeEach(() => {
+    baza = stworzTestowaBaze();
+    db = baza.db;
+    sqlite = uchwytSqlite(db);
+  });
+
+  afterEach(() => {
+    baza.posprzataj();
+  });
+
+  it("applyWagaPamiec ustawia wagę PRZED dziedziczeniem — dziedziczenie jej nie nadpisuje, mimo lepszego kandydata po rozmiarze", () => {
+    // Kandydat do dziedziczenia — dałby WYŻSZĄ wagę (90), gdyby dziedziczenie poszło pierwsze.
+    db.insert(products).values([produkt({ kod: "KANDYDAT", waga: 90 })]).run();
+    // Pamięć wagi dla TEGO SAMEGO kodu importu — 50, zapisana wcześniej (np. ręczna edycja
+    // przy poprzednim imporcie tego samego produktu).
+    db.insert(wagaPamiec).values({ kod: "PONOWNY", waga: 50, source: "manual" }).run();
+
+    const rekord: Record<string, unknown> = { ...produkt({ kod: "PONOWNY", waga: null }) };
+
+    // Dokładnie ta sama kolejność, co w akceptacja.ts/bulk.ts.
+    applyWagaPamiec(sqlite, rekord, null);
+    applyWagaDziedziczona(db, rekord);
+
+    expect(rekord.waga).toBe(50);
+    expect(rekord.wagaAutoUzupelniona).toBeUndefined();
   });
 });
 

@@ -70,9 +70,10 @@ uzupełnionej automatycznie.
 - Unit: ✓ 22/22 (`dziedziczenie-wagi.test.ts`) — `jestPustaWaga`, `kluczZRekordu`,
   `znajdzWageDoDziedziczenia` (MAX przy rozjeździe, tolerancja pustego bieżnika w obie strony,
   wykluczenie kandydatów z pustą/zerową wagą, brak dopasowania po marce/rozmiarze/konstrukcji).
-- Integration: ✓ 4/4 (`dziedziczenie-wagi.integracja.test.ts`) — dziedziczenie przez
+- Integration: ✓ 5/5 (`dziedziczenie-wagi.integracja.test.ts`) — dziedziczenie przez
   `dodajProduktyBulk` (pokrywa import bulk i `POST /api/products`), priorytet wagi z importu,
-  reset flagi przy ręcznej edycji przez `aktualizujProdukt`.
+  priorytet `waga_pamiec` nad dziedziczeniem (dodane po review), reset flagi przy ręcznej
+  edycji przez `aktualizujProdukt`.
 - Frontend: ✓ 3/3 nowe (`katalog.formatowanie.test.tsx`) — brak ikony bez dziedziczenia, ikona +
   tooltip z dziedziczeniem, pusta waga nadal jako kreska.
 - Backend pełny: ✓ `npm run lint && npm run typecheck && npm run build && npm test` —
@@ -82,6 +83,29 @@ uzupełnionej automatycznie.
 - Skrypt backfill: ✓ ręcznie zweryfikowany na tymczasowej bazie (3 produkty tej samej
   marki/rozmiaru/bieżnika: jeden z wagą 78, jeden z wagą 0, jeden z wagą `null` — backfill
   zaktualizował 2/2 oczekiwanych, log: „zaktualizowano 2/2 produktów").
+
+## Review fixes applied
+
+Reviewer: 0 BLOCKER / 2 SHOULD-FIX / 3 NICE-TO-HAVE.
+
+- **SHOULD-FIX (naprawione):** brak testu integracyjnego na priorytet `waga_pamiec` nad
+  dziedziczeniem — dodany `test/dziedziczenie-wagi.integracja.test.ts` (`describe` „priorytet
+  waga_pamiec"), wywołuje `applyWagaPamiec` → `applyWagaDziedziczona` w tej samej kolejności co
+  `akceptacja.ts`/`bulk.ts` i potwierdza, że kandydat po rozmiarze z WYŻSZĄ wagą nie nadpisuje
+  wartości z pamięci wagi.
+- **SHOULD-FIX (naprawione):** `scripts/dziedzicz-wage.ts` robił `UPDATE` per wiersz bez
+  transakcji na całej pętli — opakowane w `sqlite.transaction()`, więc backfill jest teraz
+  atomowy (wszystko albo nic przy błędzie w trakcie).
+- **NICE-TO-HAVE (świadomie pozostawione, follow-up):** renderowanie `waga === 0` w
+  `formatowanie.tsx` pokazuje „0" zamiast kreski, mimo że biznesowo `0` = pusta waga —
+  kosmetyczny szczegół UI niezwiązany z poprawnością dziedziczenia (backend nigdy nie zapisuje
+  `0`, więc w praktyce ta gałąź nie wystąpi dla nowych/dziedziczonych produktów; dotyczy tylko
+  ewentualnych starych danych sprzed wdrożenia, zanim ktoś odpali backfill).
+- **NICE-TO-HAVE (świadomie pozostawione, follow-up):** tolerancja pustego stringu `bieznik`
+  w SQL (`eq(products.bieznik, "")`) wykracza odrobinę poza literę planu (który mówił o `NULL`)
+  — nieszkodliwe (pusty string i `NULL` mają tu to samo znaczenie biznesowe: „brak danych"),
+  zostawione bez zmian, bez dodatkowego komentarza (uznane za czytelne z istniejącego opisu
+  funkcji).
 
 ## Breaking changes
 

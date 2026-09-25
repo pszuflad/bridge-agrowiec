@@ -38,43 +38,48 @@ try {
   let pominietoBrakDanych = 0;
   let pominietoBrakDopasowania = 0;
 
-  for (const produkt of kandydaci) {
-    if (!jestPustaWaga(produkt.waga)) continue; // filtr SQL wyżej jest zgrubny, dociskamy tym samym progiem co reszta mechanizmu
+  // Cały przebieg w JEDNEJ transakcji — albo wszystkie dopasowane wiersze zapisują się razem,
+  // albo (przy błędzie w trakcie) żaden, zamiast zostawiać katalog w stanie „na wpół dociągniętym".
+  const przetworz = sqlite.transaction(() => {
+    for (const produkt of kandydaci) {
+      if (!jestPustaWaga(produkt.waga)) continue; // filtr SQL wyżej jest zgrubny, dociskamy tym samym progiem co reszta mechanizmu
 
-    const overrideWagi = db
-      .select({ id: manualOverrides.id })
-      .from(manualOverrides)
-      .where(
-        and(
-          eq(manualOverrides.supplierKod, produkt.dostawca),
-          eq(manualOverrides.supplierProductId, produkt.kod),
-          eq(manualOverrides.fieldName, "waga"),
-        ),
-      )
-      .get();
-    if (overrideWagi) {
-      pominietoOverride++;
-      continue;
+      const overrideWagi = db
+        .select({ id: manualOverrides.id })
+        .from(manualOverrides)
+        .where(
+          and(
+            eq(manualOverrides.supplierKod, produkt.dostawca),
+            eq(manualOverrides.supplierProductId, produkt.kod),
+            eq(manualOverrides.fieldName, "waga"),
+          ),
+        )
+        .get();
+      if (overrideWagi) {
+        pominietoOverride++;
+        continue;
+      }
+
+      const klucz = kluczZRekordu(produkt as unknown as Record<string, unknown>);
+      if (!klucz) {
+        pominietoBrakDanych++;
+        continue;
+      }
+
+      const waga = znajdzWageDoDziedziczenia(db, klucz);
+      if (waga === null) {
+        pominietoBrakDopasowania++;
+        continue;
+      }
+
+      db.update(products)
+        .set({ waga, wagaAutoUzupelniona: true })
+        .where(eq(products.id, produkt.id))
+        .run();
+      zaktualizowano++;
     }
-
-    const klucz = kluczZRekordu(produkt as unknown as Record<string, unknown>);
-    if (!klucz) {
-      pominietoBrakDanych++;
-      continue;
-    }
-
-    const waga = znajdzWageDoDziedziczenia(db, klucz);
-    if (waga === null) {
-      pominietoBrakDopasowania++;
-      continue;
-    }
-
-    db.update(products)
-      .set({ waga, wagaAutoUzupelniona: true })
-      .where(eq(products.id, produkt.id))
-      .run();
-    zaktualizowano++;
-  }
+  });
+  przetworz();
 
   console.log(
     `dziedzicz-wage: zaktualizowano ${zaktualizowano}/${kandydaci.length} produktów ` +
