@@ -1,0 +1,15 @@
+-- 014_waga_auto_uzupelniona.sql — ticket 155-FEATURE-dziedziczenie-wagi-po-rozmiarze
+--
+-- ⚠ NOWA LOGIKA BIZNESOWA, NIE ODTWORZENIE PRODUKCJI. Kolumna spoza kanonu — produkcja nie ma
+-- nic podobnego (jedyny pokrewny mechanizm to `waga_pamiec`, który pamięta wagę po TYM SAMYM
+-- `kod`, nie po podobieństwie marka+rozmiar+bieżnik). Decyzja użytkownika, 2026-09-25.
+--
+-- Flaga: `true`, gdy `products.waga` zostało uzupełnione automatycznie na podstawie innego
+-- produktu tej samej marki/rozmiaru/bieżnika (dziedziczenie), a nie z importu/pamięci/ręcznie.
+-- Czyszczona z powrotem na `false`, gdy ktoś ręcznie edytuje pole `waga`
+-- (`PUT/PATCH /api/products/{id}`, `routes/products.ts`).
+-- Nullable, nie NOT NULL: harness charakteryzacyjny (`test/charakteryzacja/silnik/polityka.mjs`,
+-- `stworzPolitykeOryginalu`) wstawia produkty testowe RAW-SQL-em przez pełną listę kolumn z
+-- `pragma_table_info`, jawnie podając `NULL` dla pól, których scenariusz nie ustawił — NOT NULL
+-- wywróciłoby ten insert. Aplikacja i tak traktuje `null`/`undefined` jak `false` (falsy).
+ALTER TABLE products ADD COLUMN waga_auto_uzupelniona INTEGER DEFAULT 0;

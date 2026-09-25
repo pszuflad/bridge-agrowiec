@@ -69,13 +69,19 @@ const HEX64 = /^[0-9a-f]{64}$/;
 
 /** Normalizuje `_catalogVersion` w treści snapshotu, zachowując sprawdzenie kształtu. */
 function normalizujSnapshot(snapshotJson) {
-  if (typeof snapshotJson !== "string" || !snapshotJson.includes('"_catalogVersion"')) {
+  if (typeof snapshotJson !== "string") return snapshotJson;
+  if (!snapshotJson.includes('"_catalogVersion"') && !snapshotJson.includes('"wagaAutoUzupelniona"')) {
     return snapshotJson;
   }
   const snap = JSON.parse(snapshotJson);
   if (typeof snap._catalogVersion === "string" && HEX64.test(snap._catalogVersion)) {
     snap._catalogVersion = WERSJA_KARTY_WZORCOWA;
   }
+  // Ticket 155 (NOWA logika, nie port): `wagaAutoUzupelniona` jest kolumną spoza kanonu
+  // produkcji — silnik snapshotuje CAŁY wiersz `products` genericznie, więc kolumna wchodzi
+  // do porównania mimo że oryginał (bez tej kolumny) nigdy jej nie miał. Usuwamy z obu stron
+  // porównania, tak jak `_catalogVersion` jest podmieniane, a nie porównywane wprost.
+  delete snap.wagaAutoUzupelniona;
   return JSON.stringify(snap);
 }
 

@@ -17,11 +17,12 @@ import { KOLUMNY_POZA_KONTRAKTEM, projekcjaKontraktowa } from "../src/repos/kolu
 import { wczytajFixture } from "./gate/fixtures.js";
 
 describe("projekcja kontraktowa", () => {
-  it("products: projekcja ma dokładnie te 72 klucze co GET_products.json", () => {
+  it("products: projekcja ma dokładnie te 73 klucze co GET_products.json", () => {
     const fixture = wczytajFixture("GET_products.json");
     const wzorzec = (fixture.body as { items: Record<string, unknown>[] }).items[0];
     const oczekiwane = Object.keys(wzorzec ?? {}).sort();
-    expect(oczekiwane).toHaveLength(72);
+    // 73 = 72 kolumn produkcji + `wagaAutoUzupelniona` (ticket 155, NOWA logika, nie port).
+    expect(oczekiwane).toHaveLength(73);
 
     const projekcja = projekcjaKontraktowa(products, KOLUMNY_POZA_KONTRAKTEM.products);
     expect(Object.keys(projekcja).sort()).toEqual(oczekiwane);

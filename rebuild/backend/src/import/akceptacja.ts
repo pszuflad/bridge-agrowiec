@@ -13,6 +13,7 @@ import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
 // Wspólny z `bulk.ts` od 12a — obie ścieżki importu zapisują tę samą tabelę tym samym odsiewem.
 import { tylkoKolumnyProduktu } from "../repos/products.js";
 import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
+import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 
 /**
  * Rekord produktu budowany z pozycji stagingu. Celowo luźny: oryginał składa go ze snapshotu
@@ -209,6 +210,14 @@ export function zatwierdzPozycjeStagingu(
     applyWagaPamiec(sqlite, rekord, istniejacy);
   } catch {
     /* jak `catch (_be) {}` */
+  }
+  // Piąte rozszerzenie, spoza portu — ticket 155, NOWA logika biznesowa (patrz
+  // `dziedziczenieWagi.ts`). Działa tylko, gdy `rekord.waga` jest nadal puste/0 po pamięci
+  // wagi, więc priorytet „pamięć/ręczna edycja wygrywa" wynika z samej kolejności wywołań.
+  try {
+    applyWagaDziedziczona(db, rekord);
+  } catch {
+    /* nie blokuj zapisu pozycji błędem dziedziczenia wagi */
   }
 
   // ——— Zapis produktu (:44906) ———
