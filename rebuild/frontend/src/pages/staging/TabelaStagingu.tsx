@@ -1,0 +1,249 @@
+/**
+ * Tabela pozycji stagingu — dwanaście kolumn z oryginału
+ * (`deminified/frontend-index.js:20790-20830`).
+ *
+ * Bez wirtualizacji, w odróżnieniu od katalogu: staging jest STRONICOWANY po stronie
+ * serwera (`/paged`, domyślnie 25 wierszy), więc nie ma czego wirtualizować.
+ *
+ * ⚠ KOLEJNOŚĆ KOLUMN JEST ZNACZĄCA, nie kosmetyczna. Enhancer kolumn w oryginale mapował
+ * je POZYCYJNIE — brał `i`-ty `<th>` i przypisywał mu `POS_KEYS[i]` (`fe.js:29158-29173`).
+ * Dlatego przy 14b `Magazyn` wrócił na szóstą pozycję, zaraz za `Dostawca`; odbudowa trzymała
+ * go wcześniej za `Cena sprzedaży`. Źródłem prawdy jest `KOLEJNOSC_KOLUMN` w `kolumny.ts` —
+ * przy każdej zmianie tej tabeli trzeba je przestawiać razem.
+ */
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { WYGLAD_TYPU, type PozycjaStagingu } from "./dane";
+import type { WidocznoscKolumn } from "./kolumny";
+import { etykietaRozstrzygniecia, wymagaRozstrzygniecia } from "./polityka";
+
+/** Odznaka typu zmiany — etykiety i kolory 1:1 z `XP` (`fe.js:597593`). */
+export function OdznakaTypu({ typ }: { typ: string }) {
+  const wyglad = WYGLAD_TYPU[typ];
+  // Typ spoza mapy pokazujemy DOSŁOWNIE, zamiast go ukrywać — gdyby backend zaczął
+  // produkować nowy rodzaj pozycji, ma to być widoczne, a nie zamiecione pod dywan.
+  if (!wyglad) return <Badge variant="outline">{typ}</Badge>;
+  return <Badge className={wyglad.klasa}>{wyglad.etykieta}</Badge>;
+}
+
+/** Liczba w formacie PL albo „—", gdy jej nie ma. */
+function liczba(wartosc: number | null, ulamki = 2): string {
+  if (wartosc == null) return "—";
+  return wartosc.toLocaleString("pl-PL", {
+    minimumFractionDigits: ulamki,
+    maximumFractionDigits: ulamki,
+  });
+}
+
+/** Zmiana procentowa ze znakiem i kolorem — rośnie na czerwono, spada na zielono. */
+function ZmianaProcentowa({ wartosc }: { wartosc: number | null }) {
+  if (wartosc == null) return <span className="text-muted-foreground">—</span>;
+  const rosnie = wartosc > 0;
+  return (
+    <span className={cn("tabular-nums", rosnie ? "text-red-600" : "text-emerald-600")}>
+      {rosnie ? "+" : ""}
+      {wartosc.toLocaleString("pl-PL", { maximumFractionDigits: 1 })}%
+    </span>
+  );
+}
+
+export type WlasciwosciTabeli = {
+  pozycje: PozycjaStagingu[];
+  zaznaczone: Set<number>;
+  przelaczZaznaczenie: (id: number) => void;
+  przelaczWszystkie: () => void;
+  otworzSzczegoly: (id: number) => void;
+  /**
+   * Otwiera okno „Rozstrzygnij"/„Sprawdź kartę" (Staging v2, `staging-policy-injection.js`).
+   * W oryginale przycisk doklejała nakładka DOM-owa; tutaj renderuje go sama tabela.
+   */
+  otworzRozstrzygniecie: (id: number) => void;
+  ladowanie: boolean;
+  /** Mapa z konfiguratora kolumn; `checkbox` i `akcje` są w niej zawsze prawdziwe. */
+  widoczneKolumny: WidocznoscKolumn;
+};
+
+export function TabelaStagingu({
+  pozycje,
+  zaznaczone,
+  przelaczZaznaczenie,
+  przelaczWszystkie,
+  otworzSzczegoly,
+  otworzRozstrzygniecie,
+  ladowanie,
+  widoczneKolumny,
+}: WlasciwosciTabeli) {
+  const wszystkieZaznaczone = pozycje.length > 0 && pozycje.every((p) => zaznaczone.has(p.id));
+
+  /*
+    Oryginał ukrywał kolumny wstrzykniętym `<style>` z regułami `display:none` na selektorach
+    `th[data-scol="…"]` (`fe.js:29131-29140`), bo z zewnątrz Reacta nie miał innego sposobu.
+    Tutaj po prostu nie renderujemy komórki — skutek dla użytkownika jest identyczny, a znika
+    cała warstwa taggowania DOM-u.
+  */
+  const pokaz = (klucz: string): boolean => !!widoczneKolumny[klucz];
+
+  if (ladowanie) {
+    return (
+      <div className="p-8 text-center text-sm text-muted-foreground" role="status">
+        Ładowanie…
+      </div>
+    );
+  }
+
+  if (pozycje.length === 0) {
+    return (
+      <div className="p-8 text-center text-sm text-muted-foreground">
+        Brak elementów do wyświetlenia
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="border-b bg-muted/50">
+          <tr className="text-left">
+            <th className="w-10 p-2">
+              <input
+                type="checkbox"
+                aria-label="Zaznacz wszystkie widoczne"
+                data-testid="checkbox-select-all"
+                checked={wszystkieZaznaczone}
+                onChange={przelaczWszystkie}
+              />
+            </th>
+            {pokaz("typ") && <th className="p-2 font-medium">Typ</th>}
+            {pokaz("kod") && <th className="p-2 font-medium">Kod</th>}
+            {pokaz("nazwa") && <th className="p-2 font-medium">Nazwa</th>}
+            {pokaz("dostawca") && <th className="p-2 font-medium">Dostawca</th>}
+            {pokaz("magazyn") && <th className="p-2 font-medium">Magazyn</th>}
+            {pokaz("stan") && <th className="p-2 font-medium text-right">Stan</th>}
+            {pokaz("cenaZ") && <th className="p-2 font-medium text-right">Cena zakupu</th>}
+            {pokaz("cenaS") && <th className="p-2 font-medium text-right">Cena sprzedaży</th>}
+            {pokaz("zmiana") && <th className="p-2 font-medium text-right">Zmiana</th>}
+            {pokaz("powod") && <th className="p-2 font-medium">Powód</th>}
+            <th className="p-2 font-medium">Akcje</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pozycje.map((pozycja) => (
+            <tr key={pozycja.id} className="border-b hover:bg-muted/30" data-testid={`row-staging-${pozycja.id}`}>
+              <td className="p-2">
+                <input
+                  type="checkbox"
+                  aria-label={`Zaznacz ${pozycja.kod}`}
+                  data-testid={`checkbox-staging-${pozycja.id}`}
+                  checked={zaznaczone.has(pozycja.id)}
+                  onChange={() => przelaczZaznaczenie(pozycja.id)}
+                />
+              </td>
+              {pokaz("typ") && (
+                <td className="p-2">
+                  <OdznakaTypu typ={pozycja.typZmiany} />
+                </td>
+              )}
+              {pokaz("kod") && <td className="p-2 font-mono text-xs">{pozycja.kod}</td>}
+              {pokaz("nazwa") && (
+                <td className="p-2 max-w-xs truncate" title={pozycja.nazwa}>
+                  {pozycja.nazwa}
+                </td>
+              )}
+              {pokaz("dostawca") && <td className="p-2">{pozycja.dostawca}</td>}
+              {pokaz("magazyn") && <td className="p-2">{pozycja.magazyn ?? "—"}</td>}
+              {pokaz("stan") && (
+                <td className="p-2 text-right tabular-nums">
+                  {/* Stary → nowy, bo to właśnie różnica jest tu informacją. */}
+                  {pozycja.stanStary != null && pozycja.stanStary !== pozycja.stanNowy ? (
+                    <>
+                      <span className="text-muted-foreground">{pozycja.stanStary}</span>
+                      {" → "}
+                    </>
+                  ) : null}
+                  {pozycja.stanNowy ?? "—"}
+                </td>
+              )}
+              {pokaz("cenaZ") && (
+                <td className="p-2 text-right tabular-nums">
+                  {pozycja.cenaZakupuStara != null &&
+                  pozycja.cenaZakupuStara !== pozycja.cenaZakupuNowa ? (
+                    <>
+                      <span className="text-muted-foreground">
+                        {liczba(pozycja.cenaZakupuStara)}
+                      </span>
+                      {" → "}
+                    </>
+                  ) : null}
+                  {liczba(pozycja.cenaZakupuNowa)}
+                </td>
+              )}
+              {pokaz("cenaS") && (
+                <td className="p-2 text-right tabular-nums">{liczba(pozycja.cenaSprzedazyNowa)}</td>
+              )}
+              {pokaz("zmiana") && (
+                <td className="p-2 text-right">
+                  <ZmianaProcentowa wartosc={pozycja.zmianaPct} />
+                </td>
+              )}
+              {pokaz("powod") && (
+                <td className="p-2 max-w-md">
+                  {/*
+                    `powod` i `ostrzezenie` to komunikaty PISANE DLA CZŁOWIEKA — łącznie
+                    z odtworzonym błędem produkcji „zapis naukowy ma tylko null cyfr
+                    znaczących" (backlog #11). Ustalenie z 3b: UI ma je POKAZYWAĆ, nie filtrować.
+                  */}
+                  <div className="text-xs text-muted-foreground line-clamp-2" title={pozycja.powod ?? ""}>
+                    {pozycja.powod ?? "—"}
+                  </div>
+                  {pozycja.ostrzezenie ? (
+                    <div
+                      className="mt-0.5 text-xs text-amber-700 line-clamp-2"
+                      title={pozycja.ostrzezenie}
+                      data-testid={`ostrzezenie-${pozycja.id}`}
+                    >
+                      {pozycja.ostrzezenie}
+                    </div>
+                  ) : null}
+                </td>
+              )}
+              <td className="p-2">
+                <div className="flex flex-wrap items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-testid={`button-details-${pozycja.id}`}
+                    onClick={() => otworzSzczegoly(pozycja.id)}
+                  >
+                    Szczegóły
+                  </Button>
+                  {/*
+                    Przycisk „Rozstrzygnij" / „Sprawdź kartę" — port
+                    `staging-policy-injection.js:144-152`. Oryginał doklejał go do OSTATNIEJ
+                    komórki wiersza (`row.lastElementChild?.append(b)`), czyli właśnie tutaj,
+                    za „Szczegóły".
+
+                    ⚠ WARUNEK CZYTAMY Z DANYCH, NIE Z DOM-U (plan.md D2). Oryginał testował
+                    `row.textContent`, więc ukrycie kolumny „Powód" w konfiguratorze chowało
+                    też przycisk — niezamierzony efekt uboczny nakładki, nie funkcja.
+                  */}
+                  {wymagaRozstrzygniecia(pozycja) ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-600 bg-amber-50 text-amber-800 hover:bg-amber-100"
+                      data-testid={`button-rozstrzygnij-${pozycja.id}`}
+                      onClick={() => otworzRozstrzygniecie(pozycja.id)}
+                    >
+                      {etykietaRozstrzygniecia(pozycja)}
+                    </Button>
+                  ) : null}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

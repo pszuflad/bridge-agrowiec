@@ -1,4 +1,136 @@
 # Marker triażu zmian produkcji (komenda /triaz-zmian).
-# Pełny SHA ostatnio przetworzonego commita sync(vps). Wszystko PO nim = nowe do triażu.
-740b273
-# ^ 2026-08-18 kategoriafix (backlog #2) — ostatni przetworzony ręcznie
+# Pełny SHA ostatnio striażowanego commita sync(vps) NA GAŁĘZI main (tam pisze producent).
+# Następny triaż: `git fetch origin main && git log <ten SHA>..origin/main | grep 'sync(vps)'`.
+5bd4a7baa6b39fda61b37b8f82a7aa0b68209497
+# ^ 2026-09-23 18:00 (regeneracja sellycsv). STRIAŻOWANE 2026-09-24 (ticket 151).
+#   Zakres 88fa31c..5bd4a7b = 5 commitów sync(vps) (23.09, godziny 14:00, 15:00, 16:00, 17:00, 18:00),
+#   KAŻDY zmienia wyłącznie mirror/frontend/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv.
+#   ZERO kodu → nowych wpisów backlogu NIE MA. Nagłówek CSV bajt w bajt identyczny na 88fa31c
+#   i na 5bd4a7b (60 kolumn, ostatnia „Link-do-zdjeci") — kolumna blokowanych form płatności
+#   ani nazwy kategorii się nie ruszyły.
+#   ZAKRES I15 POZOSTAJE DOMKNIĘTY NA 88fa31c — te 5 commitów to dane, nie zmiana zachowania.
+#   Regeneracja chodzi CO GODZINĘ (skutek #104), więc kolejne triaże będą zwykle puste kodowo.
+#   Następny triaż: git fetch origin main && git log 5bd4a7b..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 23.09 13:00) ---
+# 88fa31c4568ceccfed96a1670257185c416117d1
+# ^ 2026-09-23 13:00 („dotchoice”, „modeldot”). STRIAŻOWANE 2026-09-23 (ticket 112).
+#   Zakres abe5f14..88fa31c = 21 commitów: 4 z KODEM → backlog #105 (DOT/EAN W2, model MO9), #106 (decyzje
+#   o nieobecnych kartach + tabela staging_absence_decisions), #107 (wydajność uwaga_cena);
+#   16 × regeneracja sellycsv (teraz CO GODZINĘ — skutek #104) + 1 × backup_cleanup (usunięte 118 plików .bak).
+#   ⚠⚠ ZAMROŻENIE PRODUKCJI Z 22.09 NIE OBOWIĄZUJE W PRAKTYCE — Ania pracowała 23.09 od 07:44 do 12:57
+#   (7 wpisów CHANGELOG), głównie w staging_policy.cjs (488 → 665 linii w jedną dobę). Zgłoszone Pawłowi.
+#   Następny triaż: git fetch origin main && git log 88fa31c..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 22.09 19:00) ---
+# abe5f14e96fd7a72bb66f13f3fb1bea5110a6705
+# ^ 2026-09-22 19:00 („availability” + „old_agrorami_delete”). STRIAŻOWANE 2026-09-22 (ticket 110).
+#   Zakres 7d6cfc9..abe5f14 = 2 commity sync(vps) z KODEM: 3f00533 (17:30 „withdrawals”) → backlog #103,
+#   abe5f14 (18:09 „availability” + 18:13 usunięcie 179 kart MO9) → backlog #104.
+#   To są te zmiany, o których Paweł uprzedzał 22.09 („jedna/dwie w toku”) — realizują karty I15.10/I15.11.
+#   ⚠ ZAMROŻENIE PRODUKCJI obowiązuje OD TEGO COMMITA — kolejny sync(vps) z kodem zgłoś Pawłowi.
+#   Nowe tabele produkcji: supplier_feed_state, supplier_feed_versions, product_absence_checks,
+#   product_auto_suspensions. ŻYWY bundel FE też zmieniony (panel „Braki w cenniku”).
+#   Następny triaż: git fetch origin main && git log abe5f14..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 22.09 14:00) ---
+# 7d6cfc91290e9c67e6d6b5f739e1cac9a0f2448c
+# ^ 2026-09-22 14:00 „20260922T110248Z_staging_v2”. STRIAŻOWANE 2026-09-22 (ticket 104-DOCS-plan-i15).
+#   Zakres 71323ec..7d6cfc9 = 2 commity: a6dffb1 (06:00, sama regeneracja sellycsv → „Pominięte”)
+#   i 7d6cfc9 (Staging v2 — nowy importer/akceptacja, ścisły EAN, „Rozstrzygnij”, staging_matches,
+#   indeks unikalny staging_items(dostawca,kod)) → backlog #99, ✅ decyzja użytkownika 2026-09-22, karty I15.2/I15.4/I15.5.
+#   ⚠ OD 2026-09-22 PRODUKCJA ZAMROŻONA (Paweł + Ania): żadnych zmian w starym Bridge do cutoveru.
+#   Kolejny commit sync(vps) z KODEM = naruszenie ustaleń → zgłosić Pawłowi, nie dopisywać po cichu do I15.
+#   Regeneracja sellycsv o 6:00 to dane (dalej będzie przychodzić).
+#   Następny triaż: git fetch origin main && git log 7d6cfc9..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 21.09 06:00) ---
+# 71323ece87ddd427a25d7fa55bb6fc0e80ef6d5c
+# ^ 2026-09-21 06:00 (regeneracja sellycsv). STRIAŻOWANE 2026-09-22
+#   (ticket 94-CHORE-triaz-po-86d9090, gałąź chore/94-triaz-po-86d9090).
+#   Zakres 86d9090..71323ec = 3 commity sync(vps) (19.09, 20.09, 21.09, wszystkie 06:00),
+#   KAŻDY zmienia wyłącznie mirror/frontend/ex-port-files/sellycsv-*.csv — dane, nagłówek CSV bez zmian.
+#   ZERO kodu → nowych wpisów backlogu NIE MA; do planowanej I15 (#73–#83) nic nie dochodzi.
+#   Sygnał dla 13d: ostatnia zmiana w selly/ 17.09 17:00, ostatnia zmiana kodu 18.09 16:00 (4 dni ciszy).
+#   Następny triaż: git fetch origin main && git log 71323ec..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 18.09 16:00) ---
+# 86d909028cda141786f73321f38e87dfd377a514
+# ^ 2026-09-18 16:00 „20260918_entry_1539". STRIAŻOWANE 2026-09-18
+#   (ticket 57-CHORE-triaz-uzasadnienia-ani, gałąź chore/57-triaz-uzasadnienia-ani).
+#   Zakres 9d1b09f..86d9090 = 1 commit sync(vps), zmienia WYŁĄCZNIE CHANGELOG.md (+11 linii).
+#   ZERO kodu → nowego wpisu backlogu NIE MA. Treść poszła do #82 i #83 jako brakujące „dlaczego".
+#   ✅ POLECENIE Z POPRZEDNIEGO TRIAŻU WYKONANE: uzasadnienie obu zmian PRZYSZŁO.
+#     #82 (Ładowarka→Ciągnik): filtr Rolniczych nie ma pokazywać „Ładowarka"; w Rolniczych
+#       Ładowarka/ładowarka kołowa/ładowarka rolnicza → Ciągnik, w Przemysłowych bez zmian;
+#       backfill 265 rekordów, po korekcie 0 Rolniczych z „Ładowarka".
+#     #83 (szerokość): filtr „Szerokość opony" nie ma rozdzielać 5 / 5.0 / 5.00 — czyli ŚWIADOME
+#       odwrócenie decyzji Anny z 19.08, nie skutek uboczny porządków w Selly; 1297 wartości
+#       ujednoliconych, 0 niekanonicznych, integrity_check=ok. MO9 „$": products.id=105986
+#       ($7-14 → 7-14), nazwa „BKT TR 144 $7-14" bez zmian.
+#   Blokada implementacji #82/#83 ZDJĘTA — cała partia #72–#83 gotowa do wykonania.
+#
+#   ⚠ NAUKA NA PRZYSZŁOŚĆ (kosztowała jeden cykl czekania): producent potrafi przysłać KOD, a
+#   UZASADNIENIE dopiero osobnym commitem kilka godzin później. Brak wpisu w CHANGELOG znaczy
+#   „jeszcze nie opisane", nie „nie ma powodu" — przy commicie bez opisu poczekaj na kolejny
+#   sync(vps), zanim uznasz powód za NIEZNANY na stałe.
+#   ⚠ Pole „Changelog Ani (najnowszy wpis)" w TREŚCI commita bywa MYLĄCE — w 86d9090 producent
+#   wkleił tam wpis z 2026-08-18. Prawdziwą treść daje tylko `git diff <sha>^ <sha> -- CHANGELOG.md`.
+#   Następny triaż: git fetch origin main && git log 86d9090..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 18.09 15:00) ---
+# 9d1b09f1421e93d0a140c5c0fd7186ab7f783cf9
+# ^ 2026-09-18 15:00 „20260918_1500_width_norm". STRIAŻOWANE 2026-09-18
+#   (ticket 52-CHORE-triaz-produkcja-i14, gałąź chore/52-triaz-produkcja-i14).
+#   Zakres 94bdf11..9d1b09f = 24 commity sync(vps): 15 kod/schemat → backlog #72–#83 (12 wpisów),
+#   9 to sama regeneracja sellycsv-*.csv (dane, cykl 06:00) + 2 operacje na danych (9755e5f, 5cfb7ab)
+#   → sekcja „Pominięte".
+#   NAJWAŻNIEJSZE: (a) #83 — Ania odwróciła decyzję z 19.08 o zerach końcowych w products.szerokosc
+#   i skasowała blok szerokoscRaw w parseSize(); rebuild/.../tyre_params.cjs:336-366 ma go NADAL,
+#   więc odbudowa rozjeżdża się z produkcją w rdzeniu importu (różnica formatowa, nie jednostkowa).
+#   (b) #81 — ustalenie z 08.09 „Selly PUT nie przyjmuje features (HTTP 400)" OBALONE testem
+#   produkcyjnym 17.09; przesłanka, na której 13d-1 wyciął PUT features, już nie obowiązuje.
+#   (c) #79 — trigger na manual_overrides zawęża otwarty wpis #65 do 3 wpisów 'konstrukcja'.
+#   (d) #71 ZAMKNIĘTE — Ania naprawiła konstrukcję w ŻYWYM bundlu (28541ca), patrz #72.
+#   (e) 13d: docieranie Selly TRWA (5 commitów w selly/*, ostatni 17.09 wieczorem) — sygnał startu
+#   NIE zapalił się, zegar zresetowany.
+#   Dwa commity BEZ wpisu w CHANGELOG Ani (03fe892, 9d1b09f) → opis wyłącznie z diffu, powód NIEZNANY.
+#
+#   DECYZJE UŻYTKOWNIKA 2026-09-18 (ta sama sesja, gałąź chore/52-decyzje-backlog):
+#   10 × ✅ TAK (#73–#80, #82, #83), 1 × ❌ NIE (#72 — zostawiamy rozwiązanie odbudowy),
+#   1 × 🕒 PÓŹNIEJ (#81 → odłożone do 13d, zapisane w roadmapie w bloku 13d).
+#   ⏸ #82 i #83 zatwierdzone, ale IMPLEMENTACJA WSTRZYMANA — brak uzasadnienia biznesowego
+#   (oba commity bez wpisu w CHANGELOG Ani). Ania nadal pracuje nad tym obszarem i zapowiedziała,
+#   że wyjaśnienie pojawi się w kodzie i w CHANGELOG-u.
+#   >>> [WYKONANE 2026-09-18, commit 86d9090 — patrz marker wyżej]
+#   >>> NASTĘPNY TRIAŻ MA TO SPRAWDZIĆ NAJPIERW: czy w nowych commitach jest wpis CHANGELOG
+#   >>> tłumaczący (a) usunięcie „Ładowarki" z zastosowań Rolniczych i remap na „Ciągnik"
+#   >>> (03fe892, #82), (b) normalizację products.szerokosc bez zer końcowych (9d1b09f, #83).
+#   >>> Dopiero po tym wolno ruszać tyre_params.cjs / application_rules.cjs w odbudowie.
+#   Następny triaż: git fetch origin main && git log 9d1b09f..origin/main | grep 'sync(vps)'.
+#
+# --- poprzedni marker (do 09.09) ---
+# 94bdf11
+# ^ 2026-09-09. Bieżący HEAD main. STRIAŻOWANE 2026-09-09 (w ramach 46-CHORE-revert-13d1-selly).
+#   Zakres d88ac15..94bdf11 = 3 commity sync(vps) (08-09 17:00, 09-09 06:00, 09-09 09:00).
+#   WSZYSTKO to docieranie podsystemu Selly (Tor 2): sync_full przepisany (428 linii, usunięte PUT
+#   features po Selly 400), mapper_v2 v2.1 (bez vat_rate), discovery.buildProductCodeCache, weryfikacja
+#   pierwszego nocnego Tor 2 (MO5 1713 ok). ZERO zmian kodu FE/menu — tag [FRONTEND] w mailu to tylko
+#   przegenerowany sellycsv-*.csv (dane). NIE tworzymy nowej karty: to należy do ODŁOŻONEGO 13d
+#   (roadmapa blok 13d — zegar zresetowany).
+#   Wcześniej striażowane 6872aea: backlog #53–#64 + domknięcia #3/#8/#9/#10; plan I13 (13a–13f).
+#   Następny triaż: git log 94bdf11..origin/main | grep 'sync(vps)'.
+#
+# PRODUCENT ZNÓW DZIAŁA (2026-09-09): fix d88ac15 zadziałał — te 3 commity przyszły z automatu + mail.
+#
+# ZMIANA PRODUCENTA (2026-09-08): cron vps-sync.sh MILCZAŁ od 25.08 do 08.09 — grep BAKS
+#   `\.bak_pre_` zwracał 1 przy nowym nazewnictwie .bak Ani (.bak_katunify_/.bak-2026-…/.bak_b10_/
+#   .bak_bug2_) i pod set -euo pipefail ubijał skrypt przed git commit/push. NAPRAWIONE w d88ac15
+#   (wzorzec .bak rozszerzony + `|| true` na pipeline BAKS i DIFF). Producent wróci do automatu
+#   przy najbliższym cronie. DO ZROBIENIA RĘCZNIE: potwierdzić, że cron w panelu DirectAdmin nadal
+#   istnieje i że pierwszy przebieg po fixie przechodzi (mail + brak nowego commita = OK, bo
+#   6872aea ma już wszystko).
+#
+# --- poprzedni marker (do 25.08) ---
+# 08be0f326d6b6bc66782ecf0f9dafb01e4e9eb59  2026-08-25 16:00 „uwagacena"
+#   Wszystko do niego striażowane (backlog #1–#6 + wpisy sesji odbudowy).

@@ -1,0 +1,351 @@
+/**
+ * Mapowanie `audit_log` → wpisy widoku „Historia zmian".
+ *
+ * Port `GET /api/history/meta` i `GET /api/history/paged` z rdzenia produkcji
+ * (`deminified/backend-index.cjs:48335-48391`). Oba handlery mają w oryginale ten sam,
+ * skopiowany kod mapujący; tutaj jest raz i obsługuje obie trasy.
+ *
+ * ⚠ ŹRÓDŁEM JEST `audit_log`, NIE `history` I NIE `historia_cen`. Tabelę `history` czyta
+ * wyłącznie goła `GET /api/history` (`repos/dziennik-zmian.ts`).
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #87, wariant c; ticket 69): oryginał woła `U.listAudit(5e3)`
+ * (`:48336`, `:48358`) i tnie SUROWY `audit_log` do 5000 najświeższych wierszy, ZANIM odsieje
+ * akcje spoza słownika — po przekroczeniu progu najstarsze wpisy znikają, a `total` i lista
+ * dostawców liczą się na przyciętym materiale. Odbudowa nie tnie: odsiew do akcji ze słownika
+ * robi SQL (`repos/audit-historia.ts`, lista z `akcjeHistorii()`), bez limitu. Reszta —
+ * mapowanie, `dostawca`, fraza, `total`, paginacja — zostaje w pamięci, 1:1 z oryginałem
+ * (plan.md D2: fraza i `dostawca` trafiają w pola WYLICZANE, więc w SQL zmieniłyby semantykę
+ * albo zdublowały mapowanie). Poniżej progu wynik jest identyczny z oryginałem
+ * (`test/historia.wyrocznia.test.ts`), powyżej — pełny (`test/historia.powyzej-progu.test.ts`).
+ *
+ * ⚠ DRUGIE ŚWIADOME ODSTĘPSTWO (backlog #39, decyzja Ani 2026-09-21; ticket 74): widok pokazuje
+ * też dwie akcje kolejki atrybutów przepisujące produkty (`PRZEPISANIA_Z_KOLEJKI`). Oryginał ich
+ * nie ma, bo moduł kolejki w ogóle nie pisze do audytu. Na danych produkcji do dziś (snapshot)
+ * wynik się nie różni — takich wierszy tam nie ma. Różnica pojawi się przy nowych zdarzeniach.
+ */
+
+import type { WierszAudytu } from "../repos/audit.js";
+
+export type TypWpisu = "import" | "eksport" | "edycja";
+
+/** Wpis widoku — 12 pól, dokładnie tyle ma `contract/fixtures/GET_history_paged.json`. */
+export type WpisHistorii = {
+  id: number;
+  typ: TypWpisu;
+  kiedy: string;
+  dostawca: string | null;
+  uzytkownik: string | null;
+  liczbaPozycji: number | null;
+  nazwaPliku: string | null;
+  format: string | null;
+  kodProduktu: string | null;
+  zmienionePola: string[];
+  uwagi: string | null;
+};
+
+export type FiltryHistorii = {
+  page: number;
+  limit: number;
+  search: string;
+  typ: string;
+  dostawca: string;
+};
+
+export type StronaHistorii = {
+  items: WpisHistorii[];
+  total: number;
+  pages: number;
+  page: number;
+  limit: number;
+};
+
+/** Domyślne i skrajne wartości paginacji — `:48353-48354`. */
+export const DOMYSLNA_STRONA = 1;
+export const DOMYSLNY_LIMIT = 50;
+export const MAX_LIMIT = 200;
+
+/**
+ * Akcje kolejki atrybutów, które przepisują pole w `products` (masowy `UPDATE … WHERE <kol> =
+ * stara`) → etykieta wariantu w widoku. Pisze je `routes/atrybuty.ts`.
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO (backlog #39, decyzja Ani 2026-09-21, ticket 74): Ania chce śladu tych
+ * operacji „w historii", więc trafiają do słownika poniżej jako typ `edycja` — bez nowego typu,
+ * bez zmian w UI i w kontrakcie. Pozostałe akcje kolejki (`atrybut_pending_zaakceptowano`,
+ * `_odrzucono`, `_wyczyszczono`, `_skanowano`) NIE zmieniają katalogu i zostają tylko w
+ * `audit_log` — w widoku zaśmiecałyby listę.
+ */
+const PRZEPISANIA_Z_KOLEJKI: ReadonlyMap<string, string> = new Map([
+  ["atrybut_pending_zaakceptowano_z_edycja", "edycja"],
+  ["atrybut_pending_zaakceptowano_jako_alias", "alias"],
+]);
+
+/**
+ * Słownik rozpoznawanych akcji: pięć z oryginału (`:48341`, `:48363`) + dwie z kolejki atrybutów.
+ *
+ * ⚠ WSZYSTKO SPOZA SŁOWNIKA DAJE `null` I WYPADA Z WYNIKU (`filter(Boolean)`). To NIE jest
+ * usterka do naprawienia — tak działa produkcja. Akcji zapisywanych do `audit_log` jest
+ * znacznie więcej (m.in. `import_z_url`, `synchronizacja_reczna`, `akceptacja_stagingu`,
+ * `override`; w snapshocie produkcji 22 różne, z czego sam `auto_pull` to 74% wierszy) i dla
+ * tego widoku są niewidoczne — w produkcji również. Rozszerzenie słownika o te akcje byłoby
+ * odstępstwem; odrzucone świadomie (backlog #21 — ❌ NIE, 2026-09-21). Dwie akcje kolejki to
+ * INNA decyzja (backlog #39 — ✅ TAK) i dochodzą z `PRZEPISANIA_Z_KOLEJKI`, nie z ręcznego wpisu.
+ *
+ * JEDYNE źródło prawdy słownika. Czyta go i `typWpisu()` (mapowanie w pamięci), i
+ * `akcjeHistorii()` (klauzula `IN` w SQL) — dwie osobne listy mogłyby się rozjechać, a to
+ * dokładnie mechanizm backlogu #41. `Map`, nie literał obiektu: `typWpisu("constructor")`
+ * nie może trafić w prototyp.
+ */
+const SLOWNIK_AKCJI: ReadonlyMap<string, TypWpisu> = new Map<string, TypWpisu>([
+  ["upload_pliku", "import"],
+  ["import_cennika", "import"],
+  ["eksport_csv", "eksport"],
+  ["eksport_shoper", "eksport"],
+  ["edycja_produktu", "edycja"],
+  ...Array.from(PRZEPISANIA_Z_KOLEJKI.keys(), (akcja): [string, TypWpisu] => [akcja, "edycja"]),
+]);
+
+/** Akcja → typ wpisu, albo `null` dla akcji spoza słownika. */
+export function typWpisu(akcja: string): TypWpisu | null {
+  return SLOWNIK_AKCJI.get(akcja) ?? null;
+}
+
+/**
+ * Wartości `audit_log.akcja`, które SQL ma w ogóle przepuścić do mapowania — dla `typ === "all"`
+ * cały słownik, dla znanego typu jego akcje, dla każdej innej wartości `[]`.
+ *
+ * Pusta lista daje pusty wynik, a to jest dokładnie to, co dałby filtr w pamięci
+ * (`wpis.typ === typ` nie trafi w żaden z trzech typów) — więc zawężenie po `typ` w SQL nie
+ * zmienia wyniku, tylko go przyspiesza. `stronaHistorii()` i tak filtruje `typ` ponownie.
+ */
+export function akcjeHistorii(typ: string): string[] {
+  const akcje: string[] = [];
+  for (const [akcja, typAkcji] of SLOWNIK_AKCJI) {
+    if (typ === "all" || typAkcji === typ) akcje.push(akcja);
+  }
+  return akcje;
+}
+
+/**
+ * `szczegoly_json` → obiekt. Port `try { JSON.parse } catch {}` z `:48338-48342`.
+ *
+ * ⚠ DWA WEJŚCIA, KTÓRE NAPRAWDĘ WYSTĘPUJĄ W BAZIE, i oba muszą dać `{}`, a nie wyjątek:
+ *  1. `NULL` — pisze go m.in. `POST /api/dostawcy/{kod}/synchronizuj-teraz`, które woła audyt
+ *     bez czwartego argumentu (`:48240`);
+ *  2. tekst, który nie jest poprawnym JSON-em — `JSON.parse` rzuca, oryginał to łyka.
+ *
+ * W oryginale odsiew akcji następuje DOPIERO PO parsowaniu, więc ten kod dotyka tam także
+ * wierszy, które nigdy nie trafią do widoku (np. `synchronizacja_reczna`). W odbudowie takie
+ * wiersze odsiewa już SQL (`repos/audit-historia.ts`) — kolejność bez wpływu na wynik.
+ *
+ * ⚠ `GET /api/audit-log` (I12b) NIE UŻYWA tej funkcji i nie ma jej używać. Ta trasa oddaje
+ * `szczegoly_json` SUROWO, jako string (`u.json(U.listAudit(500))`, `:48735`), a
+ * `contract/fixtures/GET_audit-log.json` to zamraża — sparsowanie po stronie backendu
+ * łamie GATE (sprawdzone: „typ object, oczekiwano string"). Parsowaniem zajmuje się
+ * KONSUMENT, czyli widok „Dziennik" we froncie, który ma własną kopię tej funkcji
+ * w `rebuild/frontend/src/pages/konfiguracja/dziennik.ts` (świadoma decyzja D4 ticketu 36:
+ * BE i FE to rozłączne projekty bez wspólnego pakietu). Zmieniając tę implementację,
+ * zmień też tamtą — obie są pokryte testami na te same trzy wejścia.
+ */
+export function parsujSzczegoly(szczegolyJson: string | null): Record<string, unknown> {
+  if (!szczegolyJson) return {};
+  try {
+    const wynik: unknown = JSON.parse(szczegolyJson);
+    // `JSON.parse("5")` albo `JSON.parse("null")` daje wartość, która nie jest obiektem —
+    // oryginał przypisałby ją do `m`, a późniejsze `m.dostawca` dałoby `undefined`.
+    // `{}` zachowuje się tak samo, a chroni przed odczytem pól z tablicy albo stringa.
+    if (typeof wynik !== "object" || wynik === null || Array.isArray(wynik)) return {};
+    return wynik as Record<string, unknown>;
+  } catch {
+    return {};
+  }
+}
+
+/*
+ * ZAWĘŻENIE TYPU wobec oryginału — świadome i nieszkodliwe.
+ *
+ * Oryginał robi `m.dostawca ?? null` i `w.liczbaProduktow ?? w.wczytanych ?? …`, więc
+ * przepuszcza z `szczegoly_json` DOWOLNY typ — także string tam, gdzie kontrakt obiecuje
+ * liczbę. My bierzemy wartość tylko wtedy, gdy ma właściwy typ, i w przeciwnym razie
+ * schodzimy do kolejnego fallbacku. Dla wszystkich pisarzy `audit_log` w rebuildzie
+ * (`liczbaProduktow`, `wczytanych`, `doStagingu` są liczbami; `nazwaPliku` stringiem)
+ * zachowanie jest identyczne — różnica ujawniłaby się dopiero przy ręcznie zepsutym
+ * wierszu, gdzie oryginał złamałby kształt odpowiedzi wobec kontraktu, a my nie.
+ */
+function tekstAlboNull(wartosc: unknown): string | null {
+  return typeof wartosc === "string" ? wartosc : null;
+}
+
+function liczbaAlboNull(wartosc: unknown): number | null {
+  return typeof wartosc === "number" ? wartosc : null;
+}
+
+/** Pierwsza wartość liczbowa z listy — odpowiednik łańcucha `??` z `:48371`. */
+function pierwszaLiczba(szczegoly: Record<string, unknown>, klucze: string[]): number | null {
+  for (const klucz of klucze) {
+    const wartosc = liczbaAlboNull(szczegoly[klucz]);
+    if (wartosc !== null) return wartosc;
+  }
+  return null;
+}
+
+/**
+ * Wpis Historii dla przepisania z kolejki atrybutów (backlog #39) — tylko dla akcji
+ * z `PRZEPISANIA_Z_KOLEJKI`, więc `edycja_produktu` mapuje się dalej 1:1 z oryginałem.
+ *
+ * Front przy typie `edycja` pokazuje `liczbaPozycji`, `kodProduktu` (pogrubiony) i listę
+ * `zmienionePola`, a `uwagi` pomija (`TabelaHistorii.tsx`) — dlatego opis zmiany idzie do
+ * `kodProduktu`. `uwagi` niesie pełne zdanie dla wyszukiwarki (przeszukuje cały wpis).
+ *   Pozycji: 312 · Szczegóły: marka: „NOKIAN HAKKA” → „NOKIAN” / marka (alias z kolejki)
+ */
+function przepisanieZKolejki(
+  wpis: WpisHistorii,
+  wariant: string,
+  szczegoly: Record<string, unknown>,
+): WpisHistorii {
+  const kolumna = tekstAlboNull(szczegoly["kolumna"]) ?? tekstAlboNull(szczegoly["rodzaj"]) ?? "?";
+  const z = tekstAlboNull(szczegoly["z"]) ?? "?";
+  const na = tekstAlboNull(szczegoly["na"]) ?? "?";
+  const opis = `${kolumna}: „${z}” → „${na}”`;
+  const liczba = liczbaAlboNull(szczegoly["produktow_zaktualizowano"]);
+  return {
+    ...wpis,
+    liczbaPozycji: liczba,
+    kodProduktu: opis,
+    zmienionePola: [`${kolumna} (${wariant} z kolejki)`],
+    uwagi: `Kolejka atrybutów — ${wariant}: ${opis}, produktów: ${liczba ?? "?"}`,
+  };
+}
+
+/**
+ * Jeden wiersz `audit_log` → wpis widoku, albo `null`, gdy akcja jest spoza słownika.
+ * Port `:48360-48381` — kolejność fallbacków jest wierna i istotna.
+ *
+ * ⚠ `dostawca` bierze się z `encja_id`, gdy `encja_typ === "dostawca"`. Oryginał NIE złącza
+ * tego z tabelą `suppliers` i my też nie — audyt zapisuje ZAMIAR przed operacją, więc
+ * `encja_id` bywa kodem dostawcy, którego w `suppliers` nie ma (np. nieudana
+ * `synchronizacja_reczna`). Złączenie gubiłoby takie wpisy albo wywracało odczyt.
+ */
+export function naWpisHistorii(wiersz: WierszAudytu): WpisHistorii | null {
+  const szczegoly = parsujSzczegoly(wiersz.szczegolyJson);
+  const typ = typWpisu(wiersz.akcja);
+  if (!typ) return null;
+
+  const dostawca =
+    wiersz.encjaTyp === "dostawca" ? wiersz.encjaId : tekstAlboNull(szczegoly["dostawca"]);
+
+  const liczbaPozycji =
+    typ === "import"
+      ? pierwszaLiczba(szczegoly, ["liczbaProduktow", "wczytanych", "doStagingu"])
+      : typ === "eksport"
+        ? pierwszaLiczba(szczegoly, ["liczbaProduktow", "liczbaDostawcow"])
+        : 1;
+
+  const nazwaPliku = tekstAlboNull(szczegoly["nazwaPliku"]);
+  const format = typ === "eksport" ? (wiersz.akcja === "eksport_shoper" ? "shoper" : "csv") : null;
+
+  // Oryginał składa tu string i dopiero potem robi `z ?? null`, więc dla `typ === "edycja"`
+  // `uwagi` zawsze wychodzi `null` — a przy imporcie bez nazwy pliku wychodzi „Plik: ?".
+  // Wyjątek: przepisania z kolejki atrybutów, `przepisanieZKolejki()` niżej.
+  const uwagi =
+    typ === "import"
+      ? `Plik: ${nazwaPliku ?? "?"}`
+      : typ === "eksport"
+        ? `Format: ${format}`
+        : null;
+
+  const zmiany = szczegoly["zmiany"];
+
+  const wpis: WpisHistorii = {
+    id: wiersz.id,
+    typ,
+    kiedy: wiersz.kiedy,
+    dostawca: dostawca ?? null,
+    uzytkownik: wiersz.uzytkownikImie ?? null,
+    liczbaPozycji,
+    nazwaPliku,
+    format,
+    kodProduktu: typ === "edycja" ? wiersz.encjaId : null,
+    zmienionePola: typ === "edycja" && Array.isArray(zmiany) ? (zmiany as string[]) : [],
+    uwagi,
+  };
+
+  const wariant = PRZEPISANIA_Z_KOLEJKI.get(wiersz.akcja);
+  return wariant ? przepisanieZKolejki(wpis, wariant, szczegoly) : wpis;
+}
+
+/**
+ * Wiersze audytu → wpisy widoku, z odsianiem akcji spoza słownika (`:48382`).
+ *
+ * Trasy podają tu wiersze już zawężone w SQL do akcji ze słownika, więc odsiew jest tu
+ * zabezpieczeniem, nie filtrem — zostaje, żeby funkcja była poprawna dla dowolnego wejścia.
+ */
+export function wpisyHistorii(wiersze: WierszAudytu[]): WpisHistorii[] {
+  const wpisy: WpisHistorii[] = [];
+  for (const wiersz of wiersze) {
+    const wpis = naWpisHistorii(wiersz);
+    if (wpis) wpisy.push(wpis);
+  }
+  return wpisy;
+}
+
+/**
+ * Lista dostawców do filtra — port `:48348`.
+ * `Array.from(new Set(…)).sort()` bez komparatora, czyli porządek leksykograficzny
+ * (stąd „MO1", „MO10", „MO2" w `contract/fixtures/GET_history_meta.json` — tak ma być).
+ */
+export function dostawcyHistorii(wpisy: WpisHistorii[]): string[] {
+  const zbior = new Set<string>();
+  for (const wpis of wpisy) if (wpis.dostawca) zbior.add(wpis.dostawca);
+  return Array.from(zbior).sort();
+}
+
+/**
+ * Clamp `page` — port `:48353`: `Math.max(parseInt(String(q.page ?? "1")) || 1, 1)`.
+ *
+ * ⚠ Fallback `|| 1` stoi PO `parseInt`, inaczej niż w `pagination_module.cjs`, z którego
+ * korzysta `GET /api/staging/paged` (tam `||` działa na STRINGU przed parsowaniem i potrafi
+ * przepuścić `NaN`). Tutaj `page=0` i `page=abc` dają obie `1` i `NaN` nigdzie nie wycieka.
+ * Dwie trasy tej samej aplikacji parsują paginację inaczej — to zastane, nie do ujednolicenia.
+ */
+export function stronaZQuery(surowa: unknown): number {
+  return Math.max(parseInt(String(surowa ?? String(DOMYSLNA_STRONA))) || DOMYSLNA_STRONA, 1);
+}
+
+/** Clamp `limit` — port `:48354`: `Math.min(Math.max(parseInt(…) || 50, 1), 200)`. */
+export function limitZQuery(surowy: unknown): number {
+  return Math.min(
+    Math.max(parseInt(String(surowy ?? String(DOMYSLNY_LIMIT))) || DOMYSLNY_LIMIT, 1),
+    MAX_LIMIT,
+  );
+}
+
+/**
+ * Filtrowanie, sortowanie i wycięcie strony — port `:48383-48390`.
+ *
+ * ⚠ `search` przeszukuje `JSON.stringify` CAŁEGO zmapowanego wpisu, a nie wybranych pól —
+ * więc trafia też w `typ`, `format`, „Plik: …" i nazwy zmienionych pól. Placeholder w UI
+ * („Szukaj po kodzie produktu, dostawcy lub treści zmiany...") opisuje to węziej, niż jest.
+ */
+export function stronaHistorii(wpisy: WpisHistorii[], filtry: FiltryHistorii): StronaHistorii {
+  const { page, limit, typ, dostawca } = filtry;
+  const fraza = filtry.search.toLowerCase();
+
+  const dopasowane = wpisy
+    .filter(
+      (wpis) =>
+        (typ === "all" || wpis.typ === typ) &&
+        (dostawca === "all" || wpis.dostawca === dostawca) &&
+        (!fraza || JSON.stringify(wpis).toLowerCase().includes(fraza)),
+    )
+    .sort((a, b) => new Date(b.kiedy).getTime() - new Date(a.kiedy).getTime());
+
+  const total = dopasowane.length;
+
+  return {
+    items: dopasowane.slice((page - 1) * limit, (page - 1) * limit + limit),
+    total,
+    pages: Math.max(1, Math.ceil(total / limit)),
+    page,
+    limit,
+  };
+}

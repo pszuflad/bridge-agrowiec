@@ -1,0 +1,15 @@
+{
+  "endpoint": "/api/login",
+  "method": "POST",
+  "status": 401,
+  "json": true,
+  "body": {
+    "error": "Nieprawidłowy email lub hasło"
+  },
+  "request": {
+    "email": "marta.bieguniak@agrowiec.eu",
+    "password": "***"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Złe hasło. Kontrakt 2.3 nie deklarował tu 401."
+}

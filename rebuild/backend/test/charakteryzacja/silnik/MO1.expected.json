@@ -1,0 +1,5842 @@
+{
+  "dostawca": "MO1",
+  "wejscie": {
+    "rekordow": 199,
+    "zrodlo": "test/charakteryzacja/MO1.expected.json → rekordy (wzorzec 3a)",
+    "kompletnaOferta": false
+  },
+  "katalog": {
+    "produktow": 657,
+    "zrodlo": "db/snapshot.db → products (projekcja 37 kolumn)"
+  },
+  "overridy": {
+    "wierszy": 1207
+  },
+  "statystyki": {
+    "doStagingu": 24,
+    "odrzuconeNieOpony": 0,
+    "odrzuconeBrakDanych": 0,
+    "odrzuconeSmieciMO2": 0,
+    "nowe": 9,
+    "zmienione": 15,
+    "wycofane": 0,
+    "bezZmian": 2,
+    "autoZatwierdzone": 173,
+    "szczegolyOdrzuconych": [],
+    "pominieteWycofania": "Niepotwierdzona kompletność źródła; braków nie zliczono"
+  },
+  "wierszyPoDeduplikacji": 24,
+  "staging": [
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10000104",
+      "nazwa": "360/70R28 ALLIANCE AGRI STAR II 125D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 6,
+      "stanNowy": 6,
+      "cenaZakupuStara": 1315.6,
+      "cenaZakupuNowa": 1150.8,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -12.526603830951654,
+      "ostrzezenie": null,
+      "powod": "nazwa: 360/70R28 Alliance Agri Star II 125D Stubble Guard TL → 360/70R28 ALLIANCE AGRI STAR II 125D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10000104\",\"kodDostawcy\":\"10000104\",\"ean\":\"8903635049562\",\"eanRaw\":\"8903635049562\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"360/70R28 ALLIANCE AGRI STAR II 125D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":1150.8,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"360/70R28\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"360\",\"profil\":70,\"srednica\":28,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"125\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":121.52,\"indeks1\":\"125\",\"indeks2\":\"D\",\"indeksy\":\"125D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"78\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"102470\",\"_policyVersion\":2,\"_sourceKey\":\"7069e39825d92caababe1da7a1b3f819fa3710e1c0137808712c995538e81160\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635049562",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10000133",
+      "nazwa": "320/85R34 ALLIANCE AGRI STAR II 133D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 6,
+      "stanNowy": 6,
+      "cenaZakupuStara": 1395.35,
+      "cenaZakupuNowa": 1244.21,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -10.831690973590847,
+      "ostrzezenie": null,
+      "powod": "nazwa: 320/85R34 Alliance Agri Star II 133D Stubble Guard TL → 320/85R34 ALLIANCE AGRI STAR II 133D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10000133\",\"kodDostawcy\":\"10000133\",\"ean\":\"8903635049623\",\"eanRaw\":\"8903635049623\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"320/85R34 ALLIANCE AGRI STAR II 133D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":1244.21,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"320/85R34\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"320\",\"profil\":85,\"srednica\":34,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"133\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":140.76,\"indeks1\":\"133\",\"indeks2\":\"D\",\"indeksy\":\"133D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"92\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"115728\",\"_policyVersion\":2,\"_sourceKey\":\"422c8c83ec08b254a920ac9cdadd02d1978c676b8f239d63e90f422fa6d571d6\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635049623",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10000151",
+      "nazwa": "420/80R46 ALLIANCE AGRI STAR II 159D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 4,
+      "stanNowy": 4,
+      "cenaZakupuStara": 3652.55,
+      "cenaZakupuNowa": 3922,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 7.377037959781517,
+      "ostrzezenie": null,
+      "powod": "nazwa: 420/80R46 Alliance AGRISTAR II 159D Stubble Guard TL → 420/80R46 ALLIANCE AGRI STAR II 159D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10000151\",\"kodDostawcy\":\"10000151\",\"ean\":\"8903635049616\",\"eanRaw\":\"8903635049616\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"420/80R46 ALLIANCE AGRI STAR II 159D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":4,\"cenaZakupu\":3922,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"420/80R46\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"420\",\"profil\":80,\"srednica\":46,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"159\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":184.04,\"indeks1\":\"159\",\"indeks2\":\"D\",\"indeksy\":\"159D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"180\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"967479\",\"_policyVersion\":2,\"_sourceKey\":\"9c7dcd5e4f8663e995c545094e7d55c2ea4354076211fa49c42c44598d59c6a8\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635049616",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10001696",
+      "nazwa": "340/85R36 CEAT FARMAX R85 135A8/132D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 2,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1563.53,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10001696\",\"kodDostawcy\":\"10001696\",\"ean\":\"8904288106251\",\"eanRaw\":\"8904288106251\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"340/85R36 CEAT FARMAX R85 135A8/132D TL\",\"marka\":\"CEAT\",\"model\":\"FARMAX R85\",\"bieznik\":\"FARMAX R85\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":2,\"cenaZakupu\":1563.53,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"340/85R36\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"340\",\"profil\":85,\"srednica\":36,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"135/132\",\"indeksPredkosci\":\"A8/D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":149.24,\"indeks1\":\"135/132\",\"indeks2\":\"A8/D\",\"indeksy\":\"135A8/132D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"0ac6653080eb8c0c95b4bf7f03980cb92b04f7a8a780ebb5b1388446d340412c\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288106251",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10001717",
+      "nazwa": "420/85R24 CEAT FARMAX R85 140A8/137D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 10,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1479.02,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10001717\",\"kodDostawcy\":\"10001717\",\"ean\":\"8904288105711\",\"eanRaw\":\"8904288105711\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"420/85R24 CEAT FARMAX R85 140A8/137D TL\",\"marka\":\"CEAT\",\"model\":\"FARMAX R85\",\"bieznik\":\"FARMAX R85\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":10,\"cenaZakupu\":1479.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"420/85R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"420\",\"profil\":85,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"140/137\",\"indeksPredkosci\":\"A8/D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":132.36,\"indeks1\":\"140/137\",\"indeks2\":\"A8/D\",\"indeksy\":\"140A8/137D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"5f8b7ea683dfbc92b423ca17694c34995240b09ebbeddd839be82050c5b29c27\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288105711",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10001731",
+      "nazwa": "320/85R24 CEAT FARMAX R85 145A8/142D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 6,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 993.06,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10001731\",\"kodDostawcy\":\"10001731\",\"ean\":\"8904288105476\",\"eanRaw\":\"8904288105476\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"320/85R24 CEAT FARMAX R85 145A8/142D TL\",\"marka\":\"CEAT\",\"model\":\"FARMAX R85\",\"bieznik\":\"FARMAX R85\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":993.06,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"320/85R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"320\",\"profil\":85,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"145/142\",\"indeksPredkosci\":\"A8/D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":115.36,\"indeks1\":\"145/142\",\"indeks2\":\"A8/D\",\"indeksy\":\"145A8/142D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"e3203a4a2ec2d33826aeaec327de39a4646ca02667e99457a2f8114f6028eb13\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288105476",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10001774",
+      "nazwa": "280/70R20 CEAT FARMAX R70 119A8/116D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 4,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 676.12,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10001774\",\"kodDostawcy\":\"10001774\",\"ean\":\"8904288106275\",\"eanRaw\":\"8904288106275\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"280/70R20 CEAT FARMAX R70 119A8/116D TL\",\"marka\":\"CEAT\",\"model\":\"FARMAX R70\",\"bieznik\":\"FARMAX R70\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":4,\"cenaZakupu\":676.12,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"280/70R20\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"280\",\"profil\":70,\"srednica\":20,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"119/116\",\"indeksPredkosci\":\"A8/D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":90,\"indeks1\":\"119/116\",\"indeks2\":\"A8/D\",\"indeksy\":\"119A8/116D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"2548e04e59d24001fc2b4633c7e97dbc12df6ab709f70c7962aa488bc0267d67\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288106275",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002551",
+      "nazwa": "650/65R42 ALLIANCE AGRI STAR II 170D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 2,
+      "stanNowy": 2,
+      "cenaZakupuStara": 5048.45,
+      "cenaZakupuNowa": 4664.01,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -7.61501054779189,
+      "ostrzezenie": null,
+      "powod": "nazwa: 650/65R42 Alliance Agri Star II 170D Stubble Guard TL → 650/65R42 ALLIANCE AGRI STAR II 170D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002551\",\"kodDostawcy\":\"10002551\",\"ean\":\"8903635056324\",\"eanRaw\":\"8903635056324\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"650/65R42 ALLIANCE AGRI STAR II 170D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":2,\"cenaZakupu\":4664.01,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"650/65R42\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"650\",\"profil\":65,\"srednica\":42,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"170\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":191.18,\"indeks1\":\"170\",\"indeks2\":\"D\",\"indeksy\":\"170D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"290\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"517374\",\"_policyVersion\":2,\"_sourceKey\":\"82971caebc4fe7c7b83f15df44c2d7cc225cbf19d51eb47a28492482446bc3f4\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056324",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002552",
+      "nazwa": "480/65R24 ALLIANCE AGRI STAR II 140D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 6,
+      "stanNowy": 5,
+      "cenaZakupuStara": 1796.3,
+      "cenaZakupuNowa": 1924,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 7.109057507097926,
+      "ostrzezenie": null,
+      "powod": "nazwa: 480/65R24 Alliance Agri Star II 140D Stubble Guard TL → 480/65R24 ALLIANCE AGRI STAR II 140D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002552\",\"kodDostawcy\":\"10002552\",\"ean\":\"8903635056409\",\"eanRaw\":\"8903635056409\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"480/65R24 ALLIANCE AGRI STAR II 140D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":5,\"cenaZakupu\":1924,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"480/65R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"480\",\"profil\":65,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"140\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":123.36,\"indeks1\":\"140\",\"indeks2\":\"D\",\"indeksy\":\"140D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"122\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"856724\",\"_policyVersion\":2,\"_sourceKey\":\"c26e7a84a45e87a51b56e42cf7d9f12c4e2316406c0670b68995a8e5c06bc897\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056409",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002553",
+      "nazwa": "420/65R24 ALLIANCE AGRI STAR II 138D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 4,
+      "stanNowy": 4,
+      "cenaZakupuStara": 1518,
+      "cenaZakupuNowa": 1554,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 2.371541501976284,
+      "ostrzezenie": null,
+      "powod": "nazwa: 420/65R24 Alliance Agri Star II 138D Stubble Guard TL → 420/65R24 ALLIANCE AGRI STAR II 138D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002553\",\"kodDostawcy\":\"10002553\",\"ean\":\"8903635056447\",\"eanRaw\":\"8903635056447\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"420/65R24 ALLIANCE AGRI STAR II 138D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":4,\"cenaZakupu\":1554,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"420/65R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"420\",\"profil\":65,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"138\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":115.56,\"indeks1\":\"138\",\"indeks2\":\"D\",\"indeksy\":\"138D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"95\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"830687\",\"_policyVersion\":2,\"_sourceKey\":\"8cacfea4377fb7b4f282c4af90c6eb49fccb2937fdd56efdbc733ddb4b8bf3cf\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056447",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002554",
+      "nazwa": "420/65R20 ALLIANCE AGRI STAR II 135D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 10,
+      "stanNowy": 10,
+      "cenaZakupuStara": 1172.6,
+      "cenaZakupuNowa": 1295,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 10.438342145659227,
+      "ostrzezenie": null,
+      "powod": "nazwa: 420/65R20 Alliance AGRISTAR II 135D Stubble Guard TL → 420/65R20 ALLIANCE AGRI STAR II 135D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002554\",\"kodDostawcy\":\"10002554\",\"ean\":\"8903635056454\",\"eanRaw\":\"8903635056454\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"420/65R20 ALLIANCE AGRI STAR II 135D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":10,\"cenaZakupu\":1295,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"420/65R20\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"420\",\"profil\":65,\"srednica\":20,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"135\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":105.4,\"indeks1\":\"135\",\"indeks2\":\"D\",\"indeksy\":\"135D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"72\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"357256\",\"_policyVersion\":2,\"_sourceKey\":\"e4c0704083367737637e181b08d5b594ac3c08f0711d7a14d7a2f2ce8039526b\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056454",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002557",
+      "nazwa": "540/65R24 ALLIANCE AGRI STAR II 146D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 8,
+      "stanNowy": 6,
+      "cenaZakupuStara": 2420,
+      "cenaZakupuNowa": 2516,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 3.9669421487603307,
+      "ostrzezenie": null,
+      "powod": "nazwa: 540/65R24 Alliance Agri Star II 146D Stubble Guard TL → 540/65R24 ALLIANCE AGRI STAR II 146D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002557\",\"kodDostawcy\":\"10002557\",\"ean\":\"8903635056430\",\"eanRaw\":\"8903635056430\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"540/65R24 ALLIANCE AGRI STAR II 146D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":2516,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"540/65R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"540\",\"profil\":65,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"146\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":131.16,\"indeks1\":\"146\",\"indeks2\":\"D\",\"indeksy\":\"146D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"175\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"139796\",\"_policyVersion\":2,\"_sourceKey\":\"267b0c6295304e192336bc286b3539b7cef0371e042b5f03da1bc2dbfe0f0924\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056430",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002559",
+      "nazwa": "480/65R28 ALLIANCE AGRI STAR II 142D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 4,
+      "stanNowy": 4,
+      "cenaZakupuStara": 2277,
+      "cenaZakupuNowa": 2146,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -5.753184014053579,
+      "ostrzezenie": null,
+      "powod": "nazwa: 480/65R28 Alliance AGRISTAR II 142D Stubble Guard TL → 480/65R28 ALLIANCE AGRI STAR II 142D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002559\",\"kodDostawcy\":\"10002559\",\"ean\":\"8903635056393\",\"eanRaw\":\"8903635056393\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"480/65R28 ALLIANCE AGRI STAR II 142D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":4,\"cenaZakupu\":2146,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"480/65R28\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"480\",\"profil\":65,\"srednica\":28,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"142\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":133.52,\"indeks1\":\"142\",\"indeks2\":\"D\",\"indeksy\":\"142D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"180\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"721063\",\"_policyVersion\":2,\"_sourceKey\":\"475e303fc6b829a3aba3ac104e61f2413a994226139e9e7150773c4ed21800f6\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056393",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002560",
+      "nazwa": "540/65R28 ALLIANCE AGRI STAR II 149D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 10,
+      "stanNowy": 8,
+      "cenaZakupuStara": 2475,
+      "cenaZakupuNowa": 2302.48,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -6.970505050505049,
+      "ostrzezenie": null,
+      "powod": "nazwa: 540/65R28 Alliance AGRISTAR II 149D Stubble Guard TL → 540/65R28 ALLIANCE AGRI STAR II 149D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002560\",\"kodDostawcy\":\"10002560\",\"ean\":\"8903635054214\",\"eanRaw\":\"8903635054214\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"540/65R28 ALLIANCE AGRI STAR II 149D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":2302.48,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"540/65R28\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"540\",\"profil\":65,\"srednica\":28,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"149\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":141.32,\"indeks1\":\"149\",\"indeks2\":\"D\",\"indeksy\":\"149D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"190\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"979765\",\"_policyVersion\":2,\"_sourceKey\":\"479905395f58105c909896e3a353e5a15d622422d66e7bb7173ce9f564964646\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635054214",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002563",
+      "nazwa": "540/65R34 ALLIANCE AGRI STAR II 152D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 8,
+      "stanNowy": 8,
+      "cenaZakupuStara": 2867.7,
+      "cenaZakupuNowa": 2685.79,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -6.343411096000275,
+      "ostrzezenie": null,
+      "powod": "nazwa: 540/65R34 Alliance Agri Star II 152D Stubble Guard TL → 540/65R34 ALLIANCE AGRI STAR II 152D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002563\",\"kodDostawcy\":\"10002563\",\"ean\":\"8903635056287\",\"eanRaw\":\"8903635056287\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"540/65R34 ALLIANCE AGRI STAR II 152D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":2685.79,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"540/65R34\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"540\",\"profil\":65,\"srednica\":34,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"152\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":156.56,\"indeks1\":\"152\",\"indeks2\":\"D\",\"indeksy\":\"152D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"195\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"190726\",\"_policyVersion\":2,\"_sourceKey\":\"97f317db37708ea666568499436c2d6585c5589ea8782e5de7ad2992ad177202\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056287",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002564",
+      "nazwa": "600/65R34 ALLIANCE AGRI STAR II 157D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 6,
+      "stanNowy": 6,
+      "cenaZakupuStara": 3837.9,
+      "cenaZakupuNowa": 3424.2,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -10.779332447432196,
+      "ostrzezenie": null,
+      "powod": "nazwa: 600/65R34 Alliance Agri Star II 157D Stubble Guard TL → 600/65R34 ALLIANCE AGRI STAR II 157D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002564\",\"kodDostawcy\":\"10002564\",\"ean\":\"8903635056362\",\"eanRaw\":\"8903635056362\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"600/65R34 ALLIANCE AGRI STAR II 157D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":3424.2,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"600/65R34\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"600\",\"profil\":65,\"srednica\":34,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"157\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":164.36,\"indeks1\":\"157\",\"indeks2\":\"D\",\"indeksy\":\"157D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"230\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"701195\",\"_policyVersion\":2,\"_sourceKey\":\"b6b74bacb10a1442b3e76d767daa4cf6195fe2e44dd89e037e1460c1a44a159d\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056362",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002565",
+      "nazwa": "540/65R38 ALLIANCE AGRI STAR II 153D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 6,
+      "stanNowy": 6,
+      "cenaZakupuStara": 3275.25,
+      "cenaZakupuNowa": 2946.61,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -10.034043202808943,
+      "ostrzezenie": null,
+      "powod": "nazwa: 540/65R38 Alliance Agri Star II 153D Stubble Guard TL → 540/65R38 ALLIANCE AGRI STAR II 153D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002565\",\"kodDostawcy\":\"10002565\",\"ean\":\"8903635056386\",\"eanRaw\":\"8903635056386\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"540/65R38 ALLIANCE AGRI STAR II 153D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":2946.61,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"540/65R38\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"540\",\"profil\":65,\"srednica\":38,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"153\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":166.72,\"indeks1\":\"153\",\"indeks2\":\"D\",\"indeksy\":\"153D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"210\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"488174\",\"_policyVersion\":2,\"_sourceKey\":\"2f3f5c5a4542be87cbdf13035cefe93ed7dea4dcc0484b0422e5524645aa32cd\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056386",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10002567",
+      "nazwa": "650/65R38 ALLIANCE AGRI STAR II 171D TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 10,
+      "stanNowy": 10,
+      "cenaZakupuStara": 4383.5,
+      "cenaZakupuNowa": 4292,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -2.0873731036842704,
+      "ostrzezenie": null,
+      "powod": "nazwa: 650/65R38 Alliance AGRISTAR II 171D Stubble Guard TL → 650/65R38 ALLIANCE AGRI STAR II 171D TL",
+      "snapshotJson": "{\"kod\":\"MO1_10002567\",\"kodDostawcy\":\"10002567\",\"ean\":\"8903635056980\",\"eanRaw\":\"8903635056980\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"650/65R38 ALLIANCE AGRI STAR II 171D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":10,\"cenaZakupu\":4292,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"650/65R38\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"650\",\"profil\":65,\"srednica\":38,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"171\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":181.02,\"indeks1\":\"171\",\"indeks2\":\"D\",\"indeksy\":\"171D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"275\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"687004\",\"_policyVersion\":2,\"_sourceKey\":\"e42affc2eaebb944c495faa9d530a7deb785ff59c9e45139e65eb5bf12d111d4\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635056980",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10003357",
+      "nazwa": "360/80R20 CEAT MULTILOADMAX 147A8/143D SB TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 6,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1690.31,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10003357\",\"kodDostawcy\":\"10003357\",\"ean\":\"8904288110326\",\"eanRaw\":\"8904288110326\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"360/80R20 CEAT MULTILOADMAX 147A8/143D SB TL\",\"marka\":\"CEAT\",\"model\":\"MULTILOADMAX\",\"bieznik\":\"MULTILOADMAX\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":1690.31,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"360/80R20\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"360\",\"profil\":80,\"srednica\":20,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"147/143\",\"indeksPredkosci\":\"A8/D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":108.4,\"indeks1\":\"147/143\",\"indeks2\":\"A8/D\",\"indeksy\":\"147A8/143D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":\"SB\",\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"9a954c26ebda3d591220cadd1647c4e2280f6743980ff997d488df66fc2580d6\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288110326",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10003411",
+      "nazwa": "VF520/85R46 CFO CEAT TORQUEMAX 179D SB TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 4,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 6127.37,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10003411\",\"kodDostawcy\":\"10003411\",\"ean\":\"8904288107777\",\"eanRaw\":\"8904288107777\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"VF520/85R46 CFO CEAT TORQUEMAX 179D SB TL\",\"marka\":\"CEAT\",\"model\":\"TORQUEMAX\",\"bieznik\":\"TORQUEMAX\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":4,\"cenaZakupu\":6127.37,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"520/85R46\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"520\",\"profil\":85,\"srednica\":46,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"179\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":\"VF\",\"pr\":null,\"wysokosc\":205.24,\"indeks1\":\"179\",\"indeks2\":\"D\",\"indeksy\":\"179D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":\"SB\",\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":\"Tak\",\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"1eecc710ecb44e6dcc02d68faba93e96bde0d3add652187e78a937e69d7fd2df\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288107777",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10003451",
+      "nazwa": "480/80R38 CEAT MULTILOADMAX 166A8/161D SB TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 8,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 4514,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10003451\",\"kodDostawcy\":\"10003451\",\"ean\":\"8904288110418\",\"eanRaw\":\"8904288110418\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"480/80R38 CEAT MULTILOADMAX 166A8/161D SB TL\",\"marka\":\"CEAT\",\"model\":\"MULTILOADMAX\",\"bieznik\":\"MULTILOADMAX\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":8,\"cenaZakupu\":4514,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"480/80R38\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"480\",\"profil\":80,\"srednica\":38,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"166/161\",\"indeksPredkosci\":\"A8/D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":173.32,\"indeks1\":\"166/161\",\"indeks2\":\"A8/D\",\"indeksy\":\"166A8/161D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":\"SB\",\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"19d19977741b5448aa9abe3abe7ac84be4864fa9d7f6f920035c65edb06b04f9\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288110418",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10003452",
+      "nazwa": "400/80R28 CEAT MULTILOADMAX 158A8/153D SB TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 6,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 2619.98,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10003452\",\"kodDostawcy\":\"10003452\",\"ean\":\"8904288110371\",\"eanRaw\":\"8904288110371\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"400/80R28 CEAT MULTILOADMAX 158A8/153D SB TL\",\"marka\":\"CEAT\",\"model\":\"MULTILOADMAX\",\"bieznik\":\"MULTILOADMAX\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":2619.98,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"400/80R28\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"400\",\"profil\":80,\"srednica\":28,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"158/153\",\"indeksPredkosci\":\"A8/D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":135.12,\"indeks1\":\"158/153\",\"indeks2\":\"A8/D\",\"indeksy\":\"158A8/153D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":\"SB\",\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"0470d3bce573b10321b52fc5992c10aac283c13145839b6830bfcc2a3f6974a6\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288110371",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO1_10003596",
+      "nazwa": "750/45R26.5 CEAT FLOATMAX FT 170D SB TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": null,
+      "stanNowy": 4,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 3549.65,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO1_10003596\",\"kodDostawcy\":\"10003596\",\"ean\":\"8906117629856\",\"eanRaw\":\"8906117629856\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"750/45R26.5 CEAT FLOATMAX FT 170D SB TL\",\"marka\":\"CEAT\",\"model\":\"FLOATMAX FT\",\"bieznik\":\"FLOATMAX FT\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":4,\"cenaZakupu\":3549.65,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"750/45R26.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"750\",\"profil\":45,\"srednica\":26.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"170\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":134.81,\"indeks1\":\"170\",\"indeks2\":\"D\",\"indeksy\":\"170D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":\"SB\",\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"6ab5a21d8c74c92a94121adab9a89e69546efe28f00694551f7112225e76c98d\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8906117629856",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO1_10004811",
+      "nazwa": "VF710/85R38 CFO ALLIANCE AGRIFLEX 372 + 183D SB TL",
+      "dostawca": "MO1",
+      "magazyn": "—",
+      "magazynRaw": null,
+      "stanStary": 6,
+      "stanNowy": 6,
+      "cenaZakupuStara": 12600.5,
+      "cenaZakupuNowa": 11197.84,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": -11.131780484901393,
+      "ostrzezenie": null,
+      "powod": "nazwa: VF710/85R38 CFO Alliance Agriflex 372+ 183D SB TL → VF710/85R38 CFO ALLIANCE AGRIFLEX 372 + 183D SB TL",
+      "snapshotJson": "{\"kod\":\"MO1_10004811\",\"kodDostawcy\":\"10004811\",\"ean\":\"8903635058878\",\"eanRaw\":\"8903635058878\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"VF710/85R38 CFO ALLIANCE AGRIFLEX 372 + 183D SB TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRIFLEX 372 +\",\"bieznik\":\"AGRIFLEX 372 +\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"—\",\"magazynRaw\":null,\"stan\":6,\"cenaZakupu\":11197.84,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"710/85R38\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"710\",\"profil\":85,\"srednica\":38,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"183\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":\"VF\",\"pr\":null,\"wysokosc\":217.22,\"indeks1\":\"183\",\"indeks2\":\"D\",\"indeksy\":\"183D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":null,\"sf\":null,\"sb\":\"SB\",\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":\"Tak\",\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"873404\",\"_policyVersion\":2,\"_sourceKey\":\"9e24801641886daeff64605412854736d47df1c7270c88d467d256bfc3ca0e50\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8903635058878",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "skasowane": [],
+  "historiaCen": [
+    {
+      "id": 1,
+      "produktId": 104331,
+      "kod": "MO1_10000085",
+      "ean": "8906117626978",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "650/65R42",
+      "indeksNosnosci": "174",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5704.79,
+      "cenaSprzedazy": 7823,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 2,
+      "produktId": 104329,
+      "kod": "MO1_10000105",
+      "ean": "8903635049586",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRI STAR II",
+      "rozmiar": "250/85R24",
+      "indeksNosnosci": "109",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 603.6,
+      "cenaSprzedazy": 871,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 3,
+      "produktId": 104328,
+      "kod": "MO1_10000119",
+      "ean": "8906117628538",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "650/65R34",
+      "indeksNosnosci": "170",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5493.5,
+      "cenaSprzedazy": 8022,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 4,
+      "produktId": 104326,
+      "kod": "MO1_10000147",
+      "ean": "8903635049548",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRI STAR II",
+      "rozmiar": "580/70R42",
+      "indeksNosnosci": "158",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 7770,
+      "cenaSprzedazy": 9680,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 5,
+      "produktId": 104325,
+      "kod": "MO1_10000149",
+      "ean": "8903635049531",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRI STAR II",
+      "rozmiar": "260/70R20",
+      "indeksNosnosci": "113",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 740,
+      "cenaSprzedazy": 933,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 6,
+      "produktId": 104323,
+      "kod": "MO1_10000253",
+      "ean": "8906117627586",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MPT 808",
+      "rozmiar": "12.5-20",
+      "indeksNosnosci": "140",
+      "indeksPredkosci": "B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 845.15,
+      "cenaSprzedazy": 1063,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 7,
+      "produktId": 104322,
+      "kod": "MO1_10000254",
+      "ean": "8906117627593",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MPT 808",
+      "rozmiar": "14.5-20",
+      "indeksNosnosci": "143",
+      "indeksPredkosci": "B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1183.22,
+      "cenaSprzedazy": 1485,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 8,
+      "produktId": 104321,
+      "kod": "MO1_10000255",
+      "ean": "8906117627524",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MPT 808",
+      "rozmiar": "10.0/75-15.3",
+      "indeksNosnosci": "118/130",
+      "indeksPredkosci": "A8/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 359.19,
+      "cenaSprzedazy": 470,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 9,
+      "produktId": 104320,
+      "kod": "MO1_10000284",
+      "ean": "8906117628682",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX FT",
+      "rozmiar": "710/45R22.5",
+      "indeksNosnosci": "165",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2746.75,
+      "cenaSprzedazy": 3475,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 10,
+      "produktId": 104319,
+      "kod": "MO1_10000289",
+      "ean": "8906117626787",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX RC",
+      "rozmiar": "320/90R46",
+      "indeksNosnosci": "149/146",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2535.24,
+      "cenaSprzedazy": 2581,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 11,
+      "produktId": 104318,
+      "kod": "MO1_10000303",
+      "ean": "8906117626770",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX RC",
+      "rozmiar": "210/95R44",
+      "indeksNosnosci": "123/120",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1352.25,
+      "cenaSprzedazy": 1387,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 12,
+      "produktId": 104317,
+      "kod": "MO1_10000304",
+      "ean": "8906117626725",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX RC",
+      "rozmiar": "210/95R36",
+      "indeksNosnosci": "121/118",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1309.99,
+      "cenaSprzedazy": 1279,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 13,
+      "produktId": 104316,
+      "kod": "MO1_10000312",
+      "ean": "8906117627906",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "800/70R38",
+      "indeksNosnosci": "187",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 9930.56,
+      "cenaSprzedazy": 13109,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 14,
+      "produktId": 104315,
+      "kod": "MO1_10000322",
+      "ean": "8906117628606",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX X3 TF",
+      "rozmiar": "7.50-20",
+      "indeksNosnosci": "109",
+      "indeksPredkosci": "A6",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 376.09,
+      "cenaSprzedazy": 432,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 15,
+      "produktId": 104314,
+      "kod": "MO1_10000324",
+      "ean": "8906117628569",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "480/80R26",
+      "indeksNosnosci": "167/167",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2281.92,
+      "cenaSprzedazy": 3154,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 16,
+      "produktId": 104313,
+      "kod": "MO1_10000325",
+      "ean": "8906117628637",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "540/65R30",
+      "indeksNosnosci": "158",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3380.62,
+      "cenaSprzedazy": 5174,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 17,
+      "produktId": 104312,
+      "kod": "MO1_10000326",
+      "ean": "8906117628675",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "YIELDMAX",
+      "rozmiar": "620/75R30",
+      "indeksNosnosci": "169/169",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4986.41,
+      "cenaSprzedazy": 6684,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 18,
+      "produktId": 104311,
+      "kod": "MO1_10000345",
+      "ean": "8906117628590",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX X3 TF",
+      "rozmiar": "6.50-16",
+      "indeksNosnosci": "98",
+      "indeksPredkosci": "A6",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 207.06,
+      "cenaSprzedazy": 289,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 19,
+      "produktId": 104310,
+      "kod": "MO1_10000352",
+      "ean": "8906117628668",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "YIELDMAX",
+      "rozmiar": "620/75R34",
+      "indeksNosnosci": "170/170",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 7767.04,
+      "cenaSprzedazy": 7909,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 20,
+      "produktId": 104309,
+      "kod": "MO1_10000488",
+      "ean": "8906117628644",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "600/60R28",
+      "indeksNosnosci": "157",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3380.62,
+      "cenaSprzedazy": 5269,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 21,
+      "produktId": 104308,
+      "kod": "MO1_10000658",
+      "ean": "8906117628651",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "710/60R38",
+      "indeksNosnosci": "171",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 6127.37,
+      "cenaSprzedazy": 8248,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 22,
+      "produktId": 104307,
+      "kod": "MO1_10000775",
+      "ean": "8906117628798",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX HPT",
+      "rozmiar": "650/75R38",
+      "indeksNosnosci": "169",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5493.5,
+      "cenaSprzedazy": 8073,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 23,
+      "produktId": 104306,
+      "kod": "MO1_10000825",
+      "ean": "8906117627142",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "ELEVETA",
+      "rozmiar": "8.25-15",
+      "indeksNosnosci": "152",
+      "indeksPredkosci": "A5",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 657.12,
+      "cenaSprzedazy": 677,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 24,
+      "produktId": 104305,
+      "kod": "MO1_10000829",
+      "ean": "8906117627029",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TYROCK SUPER",
+      "rozmiar": "16.9-28",
+      "indeksNosnosci": "155",
+      "indeksPredkosci": "A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1648.05,
+      "cenaSprzedazy": 2242,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 25,
+      "produktId": 104304,
+      "kod": "MO1_10000843",
+      "ean": "8906117624783",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "440/80-24",
+      "indeksNosnosci": "168",
+      "indeksPredkosci": "A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1901.6,
+      "cenaSprzedazy": 2438,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 26,
+      "produktId": 104302,
+      "kod": "MO1_10000946",
+      "ean": "8903635046721",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "590",
+      "rozmiar": "560/60R22.5",
+      "indeksNosnosci": "169",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2311.29,
+      "cenaSprzedazy": 3431,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 27,
+      "produktId": 104301,
+      "kod": "MO1_10000953",
+      "ean": "8906117628040",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX FT",
+      "rozmiar": "650/55R26.5",
+      "indeksNosnosci": "178",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3380.62,
+      "cenaSprzedazy": 4773,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 28,
+      "produktId": 104300,
+      "kod": "MO1_10000967",
+      "ean": "8906117626589",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX RT",
+      "rozmiar": "500/60R22.5",
+      "indeksNosnosci": "155",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2282.9,
+      "cenaSprzedazy": 2365,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 29,
+      "produktId": 104299,
+      "kod": "MO1_10000978",
+      "ean": "8903635046783",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "585",
+      "rozmiar": "480/80R26",
+      "indeksNosnosci": "167/167",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2802.99,
+      "cenaSprzedazy": 4132,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 30,
+      "produktId": 104298,
+      "kod": "MO1_10000984",
+      "ean": "8906117629207",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "500/70R28",
+      "indeksNosnosci": "164/164",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4363.04,
+      "cenaSprzedazy": 4497,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 31,
+      "produktId": 104297,
+      "kod": "MO1_10000985",
+      "ean": "8906117628842",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO HARD SURFACE",
+      "rozmiar": "460/70R24",
+      "indeksNosnosci": "159/159",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2176.27,
+      "cenaSprzedazy": 2524,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 32,
+      "produktId": 104296,
+      "kod": "MO1_10001084",
+      "ean": "8906117626763",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "SPRAYMAX",
+      "rozmiar": "480/80R42",
+      "indeksNosnosci": "176",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 7222.4,
+      "cenaSprzedazy": 7355,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 33,
+      "produktId": 104783,
+      "kod": "MO1_10001141",
+      "ean": "8906117629061",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "600/65R28",
+      "indeksNosnosci": "163",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 4056.74,
+      "cenaSprzedazy": 5599,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 34,
+      "produktId": 104295,
+      "kod": "MO1_10001142",
+      "ean": "8906117626848",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "SPRAYMAX",
+      "rozmiar": "480/80R50",
+      "indeksNosnosci": "179",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5451.24,
+      "cenaSprzedazy": 7052,
+      "stan": 7,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 35,
+      "produktId": 105214,
+      "kod": "MO1_10001149",
+      "ean": "8906117627395",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX X3 TF",
+      "rozmiar": "7.50-16",
+      "indeksNosnosci": "103",
+      "indeksPredkosci": "A6",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 274.68,
+      "cenaSprzedazy": 359,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 36,
+      "produktId": 104294,
+      "kod": "MO1_10001202",
+      "ean": "8903635047032",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRIFLEX 372 +",
+      "rozmiar": "900/60R42",
+      "indeksNosnosci": "189",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 11694.81,
+      "cenaSprzedazy": 13839,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 37,
+      "produktId": 104293,
+      "kod": "MO1_10001266",
+      "ean": "8906117629184",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "405/70R24",
+      "indeksNosnosci": "152/152",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2312.5,
+      "cenaSprzedazy": 2383,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 38,
+      "produktId": 104292,
+      "kod": "MO1_10001268",
+      "ean": "8906117629177",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "380/75R20",
+      "indeksNosnosci": "148/148",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1690.31,
+      "cenaSprzedazy": 2259,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 39,
+      "produktId": 104291,
+      "kod": "MO1_10001314",
+      "ean": "8906117629191",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "440/80R24",
+      "indeksNosnosci": "161/161",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2516,
+      "cenaSprzedazy": 2593,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 40,
+      "produktId": 104290,
+      "kod": "MO1_10001521",
+      "ean": "8906117629030",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "900/60R38",
+      "indeksNosnosci": "193",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 9296.69,
+      "cenaSprzedazy": 13316,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 41,
+      "produktId": 104289,
+      "kod": "MO1_10001611",
+      "ean": "8903635023371",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "839",
+      "rozmiar": "10.00-20",
+      "indeksNosnosci": "148",
+      "indeksPredkosci": "B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 814,
+      "cenaSprzedazy": 1174,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 42,
+      "produktId": 104285,
+      "kod": "MO1_10001655",
+      "ean": "8904288105636",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "480/70R28",
+      "indeksNosnosci": "143/140",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1964.98,
+      "cenaSprzedazy": 2530,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 43,
+      "produktId": 104284,
+      "kod": "MO1_10001656",
+      "ean": "8904288106190",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "320/85R34",
+      "indeksNosnosci": "144/141",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1394.5,
+      "cenaSprzedazy": 1763,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 44,
+      "produktId": 104782,
+      "kod": "MO1_10001657",
+      "ean": "8904288106138",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "320/85R32",
+      "indeksNosnosci": "145/142",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 1162.09,
+      "cenaSprzedazy": 1424,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 45,
+      "produktId": 104283,
+      "kod": "MO1_10001658",
+      "ean": "8904288105599",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "460/85R34",
+      "indeksNosnosci": "150/147",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2188.95,
+      "cenaSprzedazy": 2901,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 46,
+      "produktId": 104281,
+      "kod": "MO1_10001661",
+      "ean": "8904288106398",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "250/85R20",
+      "indeksNosnosci": "119/116",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 845.15,
+      "cenaSprzedazy": 752,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 47,
+      "produktId": 104280,
+      "kod": "MO1_10001663",
+      "ean": "8904288106756",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "340/85R38",
+      "indeksNosnosci": "151/148",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1846.66,
+      "cenaSprzedazy": 1883,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 48,
+      "produktId": 104279,
+      "kod": "MO1_10001664",
+      "ean": "8904288106497",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "620/70R42",
+      "indeksNosnosci": "176/173",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5070.92,
+      "cenaSprzedazy": 7400,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 49,
+      "produktId": 104278,
+      "kod": "MO1_10001665",
+      "ean": "8904288105612",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "480/70R34",
+      "indeksNosnosci": "146/143",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2260.79,
+      "cenaSprzedazy": 2889,
+      "stan": 9,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 50,
+      "produktId": 104277,
+      "kod": "MO1_10001666",
+      "ean": "8904288105971",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "380/70R28",
+      "indeksNosnosci": "130/127",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1436.76,
+      "cenaSprzedazy": 1719,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 51,
+      "produktId": 104276,
+      "kod": "MO1_10001681",
+      "ean": "8904288105629",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "580/70R38",
+      "indeksNosnosci": "158/155",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3296.1,
+      "cenaSprzedazy": 4137,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 52,
+      "produktId": 104275,
+      "kod": "MO1_10001682",
+      "ean": "8904288105933",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "360/70R24",
+      "indeksNosnosci": "125/122",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1077.57,
+      "cenaSprzedazy": 1327,
+      "stan": 7,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 53,
+      "produktId": 104781,
+      "kod": "MO1_10001693",
+      "ean": "8904288106312",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "320/85R36",
+      "indeksNosnosci": "131/128",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 1479.02,
+      "cenaSprzedazy": 1685,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 54,
+      "produktId": 104886,
+      "kod": "MO1_10001695",
+      "ean": "8904288105582",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "320/85R24",
+      "indeksNosnosci": "125/122",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 929.67,
+      "cenaSprzedazy": 1149,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 55,
+      "produktId": 104274,
+      "kod": "MO1_10001698",
+      "ean": "8904288105544",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "480/70R38",
+      "indeksNosnosci": "148/145",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2303.04,
+      "cenaSprzedazy": 2411,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 56,
+      "produktId": 104780,
+      "kod": "MO1_10001699",
+      "ean": "8904288105469",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "280/85R24",
+      "indeksNosnosci": "118/115",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 760.64,
+      "cenaSprzedazy": 899,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 57,
+      "produktId": 104273,
+      "kod": "MO1_10001700",
+      "ean": "8904288106459",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "420/85R28",
+      "indeksNosnosci": "142/139",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1605.79,
+      "cenaSprzedazy": 2053,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 58,
+      "produktId": 104272,
+      "kod": "MO1_10001701",
+      "ean": "8904288106510",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "280/70R18",
+      "indeksNosnosci": "117/114",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 642.32,
+      "cenaSprzedazy": 815,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 59,
+      "produktId": 105213,
+      "kod": "MO1_10001702",
+      "ean": "8904288106350",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "600/70R28",
+      "indeksNosnosci": "164/161",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 3084.81,
+      "cenaSprzedazy": 4115,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 60,
+      "produktId": 104271,
+      "kod": "MO1_10001703",
+      "ean": "8904288106039",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "480/70R24",
+      "indeksNosnosci": "141/138",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1838.21,
+      "cenaSprzedazy": 2329,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 61,
+      "produktId": 104270,
+      "kod": "MO1_10001704",
+      "ean": "8904288105834",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "320/70R20",
+      "indeksNosnosci": "126/123",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 802.9,
+      "cenaSprzedazy": 1030,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 62,
+      "produktId": 104269,
+      "kod": "MO1_10001705",
+      "ean": "8904288105957",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "480/70R30",
+      "indeksNosnosci": "144/141",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2074.85,
+      "cenaSprzedazy": 2604,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 63,
+      "produktId": 105212,
+      "kod": "MO1_10001709",
+      "ean": "8904288105797",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "460/85R30",
+      "indeksNosnosci": "148/145",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 2129.79,
+      "cenaSprzedazy": 2764,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 64,
+      "produktId": 104268,
+      "kod": "MO1_10001710",
+      "ean": "8904288106572",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "460/85R38",
+      "indeksNosnosci": "152/149",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2484.75,
+      "cenaSprzedazy": 3101,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 65,
+      "produktId": 104267,
+      "kod": "MO1_10001711",
+      "ean": "8904288106114",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "320/85R38",
+      "indeksNosnosci": "146/143",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1563.53,
+      "cenaSprzedazy": 1887,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 66,
+      "produktId": 104266,
+      "kod": "MO1_10001712",
+      "ean": "8904288106213",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "320/70R24",
+      "indeksNosnosci": "119/116",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 845.15,
+      "cenaSprzedazy": 1125,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 67,
+      "produktId": 104265,
+      "kod": "MO1_10001713",
+      "ean": "8904288106817",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "520/85R38",
+      "indeksNosnosci": "158/155",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2915.78,
+      "cenaSprzedazy": 3864,
+      "stan": 5,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 68,
+      "produktId": 104264,
+      "kod": "MO1_10001718",
+      "ean": "8904288105698",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "280/85R28",
+      "indeksNosnosci": "121/118",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 802.9,
+      "cenaSprzedazy": 1042,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 69,
+      "produktId": 104263,
+      "kod": "MO1_10001719",
+      "ean": "8904288106176",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "320/85R28",
+      "indeksNosnosci": "127/124",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1098.7,
+      "cenaSprzedazy": 1321,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 70,
+      "produktId": 104262,
+      "kod": "MO1_10001720",
+      "ean": "8904288106435",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "340/85R28",
+      "indeksNosnosci": "130/127",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1183.22,
+      "cenaSprzedazy": 1431,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 71,
+      "produktId": 104261,
+      "kod": "MO1_10001721",
+      "ean": "8904288105506",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "380/85R34",
+      "indeksNosnosci": "140/137",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1669.18,
+      "cenaSprzedazy": 2061,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 72,
+      "produktId": 104260,
+      "kod": "MO1_10001722",
+      "ean": "8904288105810",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "420/85R38",
+      "indeksNosnosci": "147/144",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2112.89,
+      "cenaSprzedazy": 2718,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 73,
+      "produktId": 104259,
+      "kod": "MO1_10001724",
+      "ean": "8904288106473",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "710/70R38",
+      "indeksNosnosci": "175/172",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5070.92,
+      "cenaSprzedazy": 6862,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 74,
+      "produktId": 104258,
+      "kod": "MO1_10001729",
+      "ean": "8906117629115",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "YIELDMAX",
+      "rozmiar": "900/60R32",
+      "indeksNosnosci": "193/193",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 8874.12,
+      "cenaSprzedazy": 11711,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 75,
+      "produktId": 104257,
+      "kod": "MO1_10001730",
+      "ean": "8904288106374",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "250/85R28",
+      "indeksNosnosci": "115/112",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 760.64,
+      "cenaSprzedazy": 875,
+      "stan": 5,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 76,
+      "produktId": 104885,
+      "kod": "MO1_10001750",
+      "ean": "8904288105735",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "420/85R30",
+      "indeksNosnosci": "150/147",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 1817.08,
+      "cenaSprzedazy": 2549,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 77,
+      "produktId": 104884,
+      "kod": "MO1_10001754",
+      "ean": "8904288105674",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "380/85R30",
+      "indeksNosnosci": "138/135",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 1542.41,
+      "cenaSprzedazy": 1853,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 78,
+      "produktId": 104255,
+      "kod": "MO1_10001756",
+      "ean": "8904288106077",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "520/85R38",
+      "indeksNosnosci": "172/169",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3084.81,
+      "cenaSprzedazy": 4309,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 79,
+      "produktId": 104254,
+      "kod": "MO1_10001777",
+      "ean": "8904288105537",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "480/70R28",
+      "indeksNosnosci": "154/151",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2150.92,
+      "cenaSprzedazy": 2613,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 80,
+      "produktId": 104253,
+      "kod": "MO1_10001782",
+      "ean": "8904288106633",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "480/70R34",
+      "indeksNosnosci": "152/149",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3127.98,
+      "cenaSprzedazy": 3185,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 81,
+      "produktId": 104252,
+      "kod": "MO1_10001801",
+      "ean": "8904288106770",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "340/85R38",
+      "indeksNosnosci": "136/133",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1626.92,
+      "cenaSprzedazy": 1981,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 82,
+      "produktId": 104251,
+      "kod": "MO1_10001808",
+      "ean": "8904288106336",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "520/70R30",
+      "indeksNosnosci": "148/145",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2619.98,
+      "cenaSprzedazy": 3679,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 83,
+      "produktId": 104250,
+      "kod": "MO1_10001819",
+      "ean": "8904288106695",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "520/70R34",
+      "indeksNosnosci": "151/148",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2704.49,
+      "cenaSprzedazy": 3627,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 84,
+      "produktId": 104249,
+      "kod": "MO1_10001829",
+      "ean": "8904288105896",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "360/70R28",
+      "indeksNosnosci": "128/125",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1326.89,
+      "cenaSprzedazy": 1613,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 85,
+      "produktId": 104248,
+      "kod": "MO1_10001857",
+      "ean": "8906117628712",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "GRIP MASTER EX",
+      "rozmiar": "10.00-20",
+      "indeksNosnosci": "146",
+      "indeksPredkosci": "B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 954.6,
+      "cenaSprzedazy": 983,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 86,
+      "produktId": 105027,
+      "kod": "MO1_10001905",
+      "ean": "8906117627913",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX HPT",
+      "rozmiar": "800/70R38",
+      "indeksNosnosci": "181/178",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 9507.98,
+      "cenaSprzedazy": 14225,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 87,
+      "produktId": 104247,
+      "kod": "MO1_10002057",
+      "ean": "8904288105520",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "580/70R38",
+      "indeksNosnosci": "183/180",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4099,
+      "cenaSprzedazy": 5188,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 88,
+      "produktId": 104246,
+      "kod": "MO1_10002081",
+      "ean": "8906117627074",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "400/70R20",
+      "indeksNosnosci": "149/149",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1479.02,
+      "cenaSprzedazy": 2010,
+      "stan": 9,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 89,
+      "produktId": 104240,
+      "kod": "MO1_10002558",
+      "ean": "8903635056300",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRI STAR II",
+      "rozmiar": "440/65R28",
+      "indeksNosnosci": "138",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1850,
+      "cenaSprzedazy": 2307,
+      "stan": 9,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 90,
+      "produktId": 104232,
+      "kod": "MO1_10002620",
+      "ean": "8906117626947",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "440/80R28",
+      "indeksNosnosci": "156/156",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2155.14,
+      "cenaSprzedazy": 3181,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 91,
+      "produktId": 105026,
+      "kod": "MO1_10002621",
+      "ean": "8906117629825",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX FT",
+      "rozmiar": "850/50R30.5",
+      "indeksNosnosci": "182",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 6127.37,
+      "cenaSprzedazy": 8156,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 92,
+      "produktId": 104883,
+      "kod": "MO1_10002666",
+      "ean": "8904288105551",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "280/70R16",
+      "indeksNosnosci": "115/112",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 600.06,
+      "cenaSprzedazy": 685,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 93,
+      "produktId": 104779,
+      "kod": "MO1_10002668",
+      "ean": "8906117629849",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX FT",
+      "rozmiar": "710/50R30.5",
+      "indeksNosnosci": "173",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 4563.83,
+      "cenaSprzedazy": 5782,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 94,
+      "produktId": 104778,
+      "kod": "MO1_10002669",
+      "ean": "8906117629818",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX FT",
+      "rozmiar": "750/60R30.5",
+      "indeksNosnosci": "181",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 4627.22,
+      "cenaSprzedazy": 6620,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 95,
+      "produktId": 104231,
+      "kod": "MO1_10002670",
+      "ean": "8906117629801",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "710/60R42",
+      "indeksNosnosci": "173",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 6338.66,
+      "cenaSprzedazy": 8793,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 96,
+      "produktId": 104230,
+      "kod": "MO1_10002671",
+      "ean": "8906117629887",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX VF X3",
+      "rozmiar": "560/60R22.5",
+      "indeksNosnosci": "166",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3438.04,
+      "cenaSprzedazy": 3501,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 97,
+      "produktId": 104229,
+      "kod": "MO1_10002672",
+      "ean": "8906117629610",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX CARGO PLUS",
+      "rozmiar": "28L-26",
+      "indeksNosnosci": "176",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 6127.37,
+      "cenaSprzedazy": 7716,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 98,
+      "produktId": 104228,
+      "kod": "MO1_10002693",
+      "ean": "8906117629917",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO HARD SURFACE",
+      "rozmiar": "500/70R24",
+      "indeksNosnosci": "164/164",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2535.46,
+      "cenaSprzedazy": 3127,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 99,
+      "produktId": 104227,
+      "kod": "MO1_10002767",
+      "ean": "4040658123337",
+      "dostawca": "MO1",
+      "marka": "WINDPOWER",
+      "model": "WL 36",
+      "rozmiar": "20.5R25",
+      "indeksNosnosci": "193",
+      "indeksPredkosci": "A2",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4685.37,
+      "cenaSprzedazy": 4787,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 100,
+      "produktId": 104226,
+      "kod": "MO1_10002898",
+      "ean": "8906117629900",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "600/60R30",
+      "indeksNosnosci": "162",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3507.39,
+      "cenaSprzedazy": 4850,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 101,
+      "produktId": 104225,
+      "kod": "MO1_10002902",
+      "ean": "8906117629924",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "650/85R38",
+      "indeksNosnosci": "182",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 8409.28,
+      "cenaSprzedazy": 11505,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 102,
+      "produktId": 104224,
+      "kod": "MO1_10002903",
+      "ean": "8904288107227",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO HARD SURFACE",
+      "rozmiar": "405/70R20",
+      "indeksNosnosci": "149/149",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1690.31,
+      "cenaSprzedazy": 2097,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 103,
+      "produktId": 104223,
+      "kod": "MO1_10002904",
+      "ean": "8904288113372",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO HARD SURFACE",
+      "rozmiar": "405/70R18",
+      "indeksNosnosci": "147/147",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1648.05,
+      "cenaSprzedazy": 2002,
+      "stan": 9,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 104,
+      "produktId": 105045,
+      "kod": "MO1_10002906",
+      "ean": "8906117627371",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX X3 TF",
+      "rozmiar": "5.50-16",
+      "indeksNosnosci": "88",
+      "indeksPredkosci": "A6",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 181.3,
+      "cenaSprzedazy": 180,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 105,
+      "produktId": 104222,
+      "kod": "MO1_10002975",
+      "ean": "8903635023463",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "MH-504",
+      "rozmiar": "28x9-15",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 430.57,
+      "cenaSprzedazy": 633,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 106,
+      "produktId": 104221,
+      "kod": "MO1_10002992",
+      "ean": "8903635023470",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "MH-504",
+      "rozmiar": "8.25-15",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 666,
+      "cenaSprzedazy": 779,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 107,
+      "produktId": 105044,
+      "kod": "MO1_10003133",
+      "ean": "8903635065586",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "328 VALUE PLUS",
+      "rozmiar": "500/50-22.5",
+      "indeksNosnosci": "151/163",
+      "indeksPredkosci": "A8/A8",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 1332.32,
+      "cenaSprzedazy": 1951,
+      "stan": 7,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 108,
+      "produktId": 104220,
+      "kod": "MO1_10003307",
+      "ean": "8903635027874",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "FORESTAR 345",
+      "rozmiar": "23.1-26",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "A6",
+      "kategoria": "Leśne",
+      "cenaZakupu": 5597.4,
+      "cenaSprzedazy": 7807,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 109,
+      "produktId": 104219,
+      "kod": "MO1_10003353",
+      "ean": "8904288110265",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "265/70R16.5",
+      "indeksNosnosci": "130/123",
+      "indeksPredkosci": "A2/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1106.3,
+      "cenaSprzedazy": 1126,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 110,
+      "produktId": 104218,
+      "kod": "MO1_10003356",
+      "ean": "8904288110319",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "360/70R20",
+      "indeksNosnosci": "136/131",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2057.2,
+      "cenaSprzedazy": 2094,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 111,
+      "produktId": 104217,
+      "kod": "MO1_10003359",
+      "ean": "8904288110333",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "360/80R24",
+      "indeksNosnosci": "150/145",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1901.6,
+      "cenaSprzedazy": 2438,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 112,
+      "produktId": 104216,
+      "kod": "MO1_10003360",
+      "ean": "8904288110364",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "360/80R28",
+      "indeksNosnosci": "146/142",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2786.84,
+      "cenaSprzedazy": 2838,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 113,
+      "produktId": 104215,
+      "kod": "MO1_10003361",
+      "ean": "8904288107807",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "710/60R34",
+      "indeksNosnosci": "173",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 6549.94,
+      "cenaSprzedazy": 8765,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 114,
+      "produktId": 104214,
+      "kod": "MO1_10003362",
+      "ean": "8904288107814",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "650/60R38",
+      "indeksNosnosci": "173",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 6549.94,
+      "cenaSprzedazy": 8899,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 115,
+      "produktId": 104882,
+      "kod": "MO1_10003363",
+      "ean": "8906117629863",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FLOATMAX FT",
+      "rozmiar": "800/45R26.5",
+      "indeksNosnosci": "174",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 4056.74,
+      "cenaSprzedazy": 6274,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 116,
+      "produktId": 104213,
+      "kod": "MO1_10003381",
+      "ean": "8903635047025",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRIFLEX 372 +",
+      "rozmiar": "900/50R42",
+      "indeksNosnosci": "180",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 8679.47,
+      "cenaSprzedazy": 12733,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 117,
+      "produktId": 104211,
+      "kod": "MO1_10003404",
+      "ean": "8904288105452",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R85",
+      "rozmiar": "420/85R34",
+      "indeksNosnosci": "150/147",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2091.76,
+      "cenaSprzedazy": 2637,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 118,
+      "produktId": 104210,
+      "kod": "MO1_10003405",
+      "ean": "8906117629078",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "650/65R38",
+      "indeksNosnosci": "175",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5578.02,
+      "cenaSprzedazy": 8289,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 119,
+      "produktId": 104881,
+      "kod": "MO1_10003407",
+      "ean": "8904288107708",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "900/60R42",
+      "indeksNosnosci": "189",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 10353.14,
+      "cenaSprzedazy": 16579,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 120,
+      "produktId": 104209,
+      "kod": "MO1_10003421",
+      "ean": "8903635056256",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRIFLEX 363 + XT",
+      "rozmiar": "300/95R52",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3280.58,
+      "cenaSprzedazy": 4669,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 121,
+      "produktId": 104208,
+      "kod": "MO1_10003450",
+      "ean": "8904288110401",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "480/80R34",
+      "indeksNosnosci": "164/159",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3211.59,
+      "cenaSprzedazy": 5335,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 122,
+      "produktId": 104207,
+      "kod": "MO1_10003463",
+      "ean": "4040658127502",
+      "dostawca": "MO1",
+      "marka": "TURON",
+      "model": "TERRACLASSIC SKL800",
+      "rozmiar": "8.25-20",
+      "indeksNosnosci": "133",
+      "indeksPredkosci": "B",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 853.22,
+      "cenaSprzedazy": 871,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 123,
+      "produktId": 104206,
+      "kod": "MO1_10003506",
+      "ean": "8903635057505",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "350",
+      "rozmiar": "300/95R52",
+      "indeksNosnosci": "159/156",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2890.22,
+      "cenaSprzedazy": 4009,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 124,
+      "produktId": 104205,
+      "kod": "MO1_10003613",
+      "ean": "8903635047780",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "FORESTAR 644 III",
+      "rozmiar": "800/40-26.5",
+      "indeksNosnosci": "183/176",
+      "indeksPredkosci": "A2/A8",
+      "kategoria": "Leśne",
+      "cenaZakupu": 6913.61,
+      "cenaSprzedazy": 9299,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 125,
+      "produktId": 104204,
+      "kod": "MO1_10003614",
+      "ean": "8903635021773",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "601, M+S",
+      "rozmiar": "15.5/55R18",
+      "indeksNosnosci": "140/140",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1924,
+      "cenaSprzedazy": 2357,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 126,
+      "produktId": 104203,
+      "kod": "MO1_10003620",
+      "ean": "8903635063599",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "703",
+      "rozmiar": "23.5R25",
+      "indeksNosnosci": "201/185",
+      "indeksPredkosci": "A2/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5018.23,
+      "cenaSprzedazy": 7215,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 127,
+      "produktId": 104202,
+      "kod": "MO1_10003623",
+      "ean": "8903635063698",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "704",
+      "rozmiar": "26.5R25",
+      "indeksNosnosci": "209/193",
+      "indeksPredkosci": "A2/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 7400,
+      "cenaSprzedazy": 10420,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 128,
+      "produktId": 104201,
+      "kod": "MO1_10003672",
+      "ean": "8903635063681",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "704",
+      "rozmiar": "23.5R25",
+      "indeksNosnosci": "201/185",
+      "indeksPredkosci": "A2/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 7084.56,
+      "cenaSprzedazy": 8583,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 129,
+      "produktId": 105043,
+      "kod": "MO1_10003676",
+      "ean": "8903635028932",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRIFLEX 372 +",
+      "rozmiar": "710/55R30",
+      "indeksNosnosci": "165",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 4390.84,
+      "cenaSprzedazy": 6187,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 130,
+      "produktId": 104200,
+      "kod": "MO1_10003814",
+      "ean": "8906117629153",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LOADPRO",
+      "rozmiar": "340/80R18",
+      "indeksNosnosci": "143/143",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1331.12,
+      "cenaSprzedazy": 1716,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 131,
+      "produktId": 104199,
+      "kod": "MO1_10003819",
+      "ean": "8903635048091",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "FORESTAR 644 III",
+      "rozmiar": "600/55-26.5",
+      "indeksNosnosci": "177/170",
+      "indeksPredkosci": "A2/A8",
+      "kategoria": "Leśne",
+      "cenaZakupu": 5484.37,
+      "cenaSprzedazy": 7378,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 132,
+      "produktId": 104198,
+      "kod": "MO1_10003846",
+      "ean": "8904288110258",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "250/80R16",
+      "indeksNosnosci": "127/123",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 934.62,
+      "cenaSprzedazy": 951,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 133,
+      "produktId": 104197,
+      "kod": "MO1_10003901",
+      "ean": "8903635056485",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRIFLEX 373 +",
+      "rozmiar": "520/70R38",
+      "indeksNosnosci": "170",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4069.22,
+      "cenaSprzedazy": 7169,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 134,
+      "produktId": 104196,
+      "kod": "MO1_10003948",
+      "ean": "8903635057376",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRO FORESTRY 669",
+      "rozmiar": "540/65-28",
+      "indeksNosnosci": "155/152",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Leśne",
+      "cenaZakupu": 4545.04,
+      "cenaSprzedazy": 5987,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 135,
+      "produktId": 104195,
+      "kod": "MO1_10003996",
+      "ean": "8903635058069",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "350",
+      "rozmiar": "320/90R46",
+      "indeksNosnosci": "151/148",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2590,
+      "cenaSprzedazy": 2861,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 136,
+      "produktId": 104194,
+      "kod": "MO1_10004001",
+      "ean": "8903635057840",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "FLOTATION 331",
+      "rozmiar": "500/45-20",
+      "indeksNosnosci": "134/147",
+      "indeksPredkosci": "A8/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3700,
+      "cenaSprzedazy": 3618,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 137,
+      "produktId": 104193,
+      "kod": "MO1_10004030",
+      "ean": "8903635028468",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRI STAR II",
+      "rozmiar": "520/70R34",
+      "indeksNosnosci": "168",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4070,
+      "cenaSprzedazy": 5611,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 138,
+      "produktId": 104192,
+      "kod": "MO1_10004041",
+      "ean": "8903635057277",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "328 VALUE PLUS",
+      "rozmiar": "500/45-22.5",
+      "indeksNosnosci": "142/154",
+      "indeksPredkosci": "A8/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1334.76,
+      "cenaSprzedazy": 1645,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 139,
+      "produktId": 104191,
+      "kod": "MO1_10004044",
+      "ean": "8903635060239",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRIFLEX 372 +",
+      "rozmiar": "600/70R30",
+      "indeksNosnosci": "174",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4305.69,
+      "cenaSprzedazy": 5921,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 140,
+      "produktId": 104190,
+      "kod": "MO1_10004148",
+      "ean": "8903635065319",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRO FORESTRY 670",
+      "rozmiar": "710/70R38",
+      "indeksNosnosci": "175/168",
+      "indeksPredkosci": "A2/A8",
+      "kategoria": "Leśne",
+      "cenaZakupu": 7244.93,
+      "cenaSprzedazy": 10318,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 141,
+      "produktId": 104189,
+      "kod": "MO1_10004168",
+      "ean": "8904288110197",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "YIELDMAX",
+      "rozmiar": "1050/50R32",
+      "indeksNosnosci": "184/184",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 10286,
+      "cenaSprzedazy": 17385,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 142,
+      "produktId": 104188,
+      "kod": "MO1_10004221",
+      "ean": "8904288112160",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "215/65R14",
+      "indeksNosnosci": "90/90",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 392.2,
+      "cenaSprzedazy": 407,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 143,
+      "produktId": 104187,
+      "kod": "MO1_10004222",
+      "ean": "8904288112177",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "200/60R15",
+      "indeksNosnosci": "83/83",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 347.8,
+      "cenaSprzedazy": 361,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 144,
+      "produktId": 104880,
+      "kod": "MO1_10004225",
+      "ean": "8904288110173",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "280/70R16",
+      "indeksNosnosci": "112/112",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 840.93,
+      "cenaSprzedazy": 1079,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 145,
+      "produktId": 104186,
+      "kod": "MO1_10004228",
+      "ean": "8904288110180",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "360/70R24",
+      "indeksNosnosci": "122/122",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1776,
+      "cenaSprzedazy": 2494,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 146,
+      "produktId": 104185,
+      "kod": "MO1_10004234",
+      "ean": "8903635060161",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRIFLEX 372 +",
+      "rozmiar": "710/60R38",
+      "indeksNosnosci": "171",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 5455.29,
+      "cenaSprzedazy": 7272,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 147,
+      "produktId": 104184,
+      "kod": "MO1_10004241",
+      "ean": "8904288112245",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "320/70R20",
+      "indeksNosnosci": "113/113",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1098.7,
+      "cenaSprzedazy": 1406,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 148,
+      "produktId": 104183,
+      "kod": "MO1_10004253",
+      "ean": "8904288112405",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "540/80R38",
+      "indeksNosnosci": "172/167",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4225.77,
+      "cenaSprzedazy": 6630,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 149,
+      "produktId": 104182,
+      "kod": "MO1_10004254",
+      "ean": "8904288112399",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "MULTILOADMAX",
+      "rozmiar": "440/80R24",
+      "indeksNosnosci": "161/156",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2197.4,
+      "cenaSprzedazy": 2950,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 150,
+      "produktId": 104181,
+      "kod": "MO1_10004278",
+      "ean": "6977774054321",
+      "dostawca": "MO1",
+      "marka": "TURON",
+      "model": "TRAILERMOVE 201",
+      "rozmiar": "195/50R13",
+      "indeksNosnosci": "101",
+      "indeksPredkosci": "N",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 155.4,
+      "cenaSprzedazy": 161,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 151,
+      "produktId": 104180,
+      "kod": "MO1_10004281",
+      "ean": "6977774054338",
+      "dostawca": "MO1",
+      "marka": "TURON",
+      "model": "TRAILERMOVE 201",
+      "rozmiar": "185R14",
+      "indeksNosnosci": "102",
+      "indeksPredkosci": "N",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 174.64,
+      "cenaSprzedazy": 181,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 152,
+      "produktId": 104179,
+      "kod": "MO1_10004288",
+      "ean": "6977774054383",
+      "dostawca": "MO1",
+      "marka": "TURON",
+      "model": "TRAILERMOVE 201",
+      "rozmiar": "195/55R10",
+      "indeksNosnosci": "96",
+      "indeksPredkosci": "N",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 146.08,
+      "cenaSprzedazy": 133,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 153,
+      "produktId": 104178,
+      "kod": "MO1_10004294",
+      "ean": "6977774054444",
+      "dostawca": "MO1",
+      "marka": "TURON",
+      "model": "TRAILERMOVE 201",
+      "rozmiar": "165R13",
+      "indeksNosnosci": "94",
+      "indeksPredkosci": "N",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 142.82,
+      "cenaSprzedazy": 148,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 154,
+      "produktId": 104177,
+      "kod": "MO1_10004301",
+      "ean": "8904288112085",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "750/65R26",
+      "indeksNosnosci": "180",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 6893.1,
+      "cenaSprzedazy": 6679,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 155,
+      "produktId": 104176,
+      "kod": "MO1_10004304",
+      "ean": "6977774054475",
+      "dostawca": "MO1",
+      "marka": "TURON",
+      "model": "TRAILERMOVE 201",
+      "rozmiar": "155/70R12",
+      "indeksNosnosci": "102",
+      "indeksPredkosci": "N",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 117.66,
+      "cenaSprzedazy": 122,
+      "stan": 9,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 156,
+      "produktId": 104175,
+      "kod": "MO1_10004340",
+      "ean": "8903635069515",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "590",
+      "rozmiar": "30.5L-32",
+      "indeksNosnosci": "181",
+      "indeksPredkosci": "B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 7750.24,
+      "cenaSprzedazy": 8250,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 157,
+      "produktId": 104776,
+      "kod": "MO1_10004464",
+      "ean": "8904288113389",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "SPRAYMAX",
+      "rozmiar": "320/90R50",
+      "indeksNosnosci": "169",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 3380.62,
+      "cenaSprzedazy": 4717,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 158,
+      "produktId": 104173,
+      "kod": "MO1_10004485",
+      "ean": "8903635031314",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "FLOTATION 331",
+      "rozmiar": "600/40-22.5",
+      "indeksNosnosci": "169/173",
+      "indeksPredkosci": "A8/A6",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3626,
+      "cenaSprzedazy": 4686,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 159,
+      "produktId": 104172,
+      "kod": "MO1_10004486",
+      "ean": "8903635027522",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "FLOTATION 328",
+      "rozmiar": "600/55-26.5",
+      "indeksNosnosci": "159/170",
+      "indeksPredkosci": "A8/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2882.29,
+      "cenaSprzedazy": 3877,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 160,
+      "produktId": 104171,
+      "kod": "MO1_10004508",
+      "ean": "8903635058014",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "AGRO FORESTRY 670",
+      "rozmiar": "480/70-34",
+      "indeksNosnosci": "146/143",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Leśne",
+      "cenaZakupu": 4588,
+      "cenaSprzedazy": 5862,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 161,
+      "produktId": 104170,
+      "kod": "MO1_10004589",
+      "ean": "8906117626923",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "TORQUEMAX",
+      "rozmiar": "520/85R42",
+      "indeksNosnosci": "177/174",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 7770,
+      "cenaSprzedazy": 9711,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 162,
+      "produktId": 104169,
+      "kod": "MO1_10004654",
+      "ean": "8904288112153",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "240/60R12",
+      "indeksNosnosci": "89/89",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 418.1,
+      "cenaSprzedazy": 434,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 163,
+      "produktId": 104168,
+      "kod": "MO1_10004655",
+      "ean": "8904288112214",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "240/70R16",
+      "indeksNosnosci": "104/104",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 524,
+      "cenaSprzedazy": 577,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 164,
+      "produktId": 104879,
+      "kod": "MO1_10004656",
+      "ean": "8904288113341",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "LAWNMAX",
+      "rozmiar": "260/70R16",
+      "indeksNosnosci": "109/109",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 760.64,
+      "cenaSprzedazy": 841,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 165,
+      "produktId": 104167,
+      "kod": "MO1_10004682",
+      "ean": "8903635027409",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "FLOTMASTER 381",
+      "rozmiar": "500/50R17",
+      "indeksNosnosci": "146",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1595.79,
+      "cenaSprzedazy": 1956,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 166,
+      "produktId": 104166,
+      "kod": "MO1_10004699",
+      "ean": "8904288113679",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R65 X3",
+      "rozmiar": "540/65R28",
+      "indeksNosnosci": "149",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2408.69,
+      "cenaSprzedazy": 3080,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 167,
+      "produktId": 104165,
+      "kod": "MO1_10004700",
+      "ean": "8904288113693",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R65 X3",
+      "rozmiar": "540/65R30",
+      "indeksNosnosci": "150",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2366.43,
+      "cenaSprzedazy": 3210,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 168,
+      "produktId": 104775,
+      "kod": "MO1_10004701",
+      "ean": "8904288113709",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R65 X3",
+      "rozmiar": "650/65R38",
+      "indeksNosnosci": "163",
+      "indeksPredkosci": "D",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 4440,
+      "cenaSprzedazy": 6208,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 169,
+      "produktId": 104164,
+      "kod": "MO1_10004773",
+      "ean": "8904288113686",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R65 X3",
+      "rozmiar": "650/65R42",
+      "indeksNosnosci": "170",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4775.12,
+      "cenaSprzedazy": 6161,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 170,
+      "produktId": 104161,
+      "kod": "MO1_10004831",
+      "ean": "8903635048589",
+      "dostawca": "MO1",
+      "marka": "ALLIANCE",
+      "model": "380",
+      "rozmiar": "600/50R22.5",
+      "indeksNosnosci": "168",
+      "indeksPredkosci": "D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 4810,
+      "cenaSprzedazy": 6766,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 171,
+      "produktId": 104160,
+      "kod": "MO1_10004925",
+      "ean": "8904288112917",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R80",
+      "rozmiar": "480/80R46",
+      "indeksNosnosci": "161/158",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 3803.19,
+      "cenaSprzedazy": 5049,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 172,
+      "produktId": 104159,
+      "kod": "MO1_10004937",
+      "ean": "8906117626091",
+      "dostawca": "MO1",
+      "marka": "CEAT",
+      "model": "FARMAX R70",
+      "rozmiar": "380/70R24",
+      "indeksNosnosci": "128/125",
+      "indeksPredkosci": "A8/D",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1183.22,
+      "cenaSprzedazy": 1536,
+      "stan": 10,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 173,
+      "produktId": 104158,
+      "kod": "MO1_10004946",
+      "ean": "8935341233843",
+      "dostawca": "MO1",
+      "marka": "ROVELO",
+      "model": "DRIVE R1",
+      "rozmiar": "215/75R17.5",
+      "indeksNosnosci": "133",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 446,
+      "cenaSprzedazy": 582,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "zmianyProduktow": [
+    {
+      "id": 104158,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 415.62,
+          "po": 446
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104159,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1178.54,
+          "po": 1183.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.970Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104160,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4368.53,
+          "po": 3803.19
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104161,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5190.08,
+          "po": 4810
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.972Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104164,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5484.94,
+          "po": 4775.12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104165,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2718.2,
+          "po": 2366.43
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104166,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2766.74,
+          "po": 2408.69
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104167,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1500.24,
+          "po": 1595.79
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.974Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104168,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 601.89,
+          "po": 524
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104169,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 480.25,
+          "po": 418.1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104170,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7038.19,
+          "po": 7770
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104171,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4496.31,
+          "po": 4588
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.975Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104172,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2973.69,
+          "po": 2882.29
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.976Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104173,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5505.45,
+          "po": 3626
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104175,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 9605,
+          "po": 7750.24
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104176,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 135.15,
+          "po": 117.66
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104177,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7917.75,
+          "po": 6893.1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104178,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 164.05,
+          "po": 142.82
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104179,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 161.92,
+          "po": 146.08
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104180,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 200.6,
+          "po": 174.64
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104181,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 178.5,
+          "po": 155.4
+        },
+        "stan": {
+          "przed": 7,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104182,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2524.04,
+          "po": 2197.4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104183,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4853.93,
+          "po": 4225.77
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104184,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1262.02,
+          "po": 1098.7
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104185,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 8619.85,
+          "po": 5455.29
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104186,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1456.18,
+          "po": 1776
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104187,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 399.5,
+          "po": 347.8
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104188,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 450.5,
+          "po": 392.2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104189,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 11649.42,
+          "po": 10286
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104190,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7914.47,
+          "po": 7244.93
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.979Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104191,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7019.28,
+          "po": 4305.69
+        },
+        "stan": {
+          "przed": 4,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104192,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1932.77,
+          "po": 1334.76
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104193,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 6651.94,
+          "po": 4070
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104194,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4250,
+          "po": 3700
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104195,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2194.5,
+          "po": 2590
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.980Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104196,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 6672.5,
+          "po": 4545.04
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104197,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 8498.74,
+          "po": 4069.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104198,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1073.55,
+          "po": 934.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104199,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 8222.58,
+          "po": 5484.37
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104200,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1528.99,
+          "po": 1331.12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104201,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 9731.65,
+          "po": 7084.56
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104202,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 11815,
+          "po": 7400
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104203,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 8181.25,
+          "po": 5018.23
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104204,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2720,
+          "po": 1924
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104205,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 10363.93,
+          "po": 6913.61
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104206,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4753.04,
+          "po": 2890.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104207,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 980.05,
+          "po": 853.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104208,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3688.98,
+          "po": 3211.59
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104209,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5535.2,
+          "po": 3280.58
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104210,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 6407.18,
+          "po": 5578.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104211,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2402.69,
+          "po": 2091.76
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104213,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 14190.9,
+          "po": 8679.47
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104214,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7523.58,
+          "po": 6549.94
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104215,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7523.58,
+          "po": 6549.94
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104216,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3201.1,
+          "po": 2786.84
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104217,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2184.27,
+          "po": 1901.6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104218,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2363,
+          "po": 2057.2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104219,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1270.75,
+          "po": 1106.3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104220,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 8700.6,
+          "po": 5597.4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104221,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 899.3,
+          "po": 666
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104222,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 731,
+          "po": 430.57
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104223,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1893.03,
+          "po": 1648.05
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104224,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1941.57,
+          "po": 1690.31
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104225,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 9659.31,
+          "po": 8409.28
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104226,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4028.76,
+          "po": 3507.39
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104227,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5381.84,
+          "po": 4685.37
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104228,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2912.36,
+          "po": 2535.46
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104229,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7038.19,
+          "po": 6127.37
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104230,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3949.1,
+          "po": 3438.04
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104231,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7280.89,
+          "po": 6338.66
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104232,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2475.5,
+          "po": 2155.14
+        },
+        "stan": {
+          "przed": 4,
+          "po": 10
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104240,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2735.3,
+          "po": 1850
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104246,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1698.87,
+          "po": 1479.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104247,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4708.31,
+          "po": 4099
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104248,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 754.65,
+          "po": 954.6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.998Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104249,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1524.13,
+          "po": 1326.89
+        },
+        "stan": {
+          "przed": 6,
+          "po": 10
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104250,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3106.51,
+          "po": 2704.49
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104251,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3009.43,
+          "po": 2619.98
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104252,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1868.76,
+          "po": 1626.92
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104253,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3592.95,
+          "po": 3127.98
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104254,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2470.65,
+          "po": 2150.92
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104255,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3543.37,
+          "po": 3084.81
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104257,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 873.71,
+          "po": 760.64
+        },
+        "stan": {
+          "przed": 8,
+          "po": 5
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104258,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 10193.24,
+          "po": 8874.12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104259,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5824.71,
+          "po": 5070.92
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104260,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2426.96,
+          "po": 2112.89
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104261,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1917.3,
+          "po": 1669.18
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104262,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1359.1,
+          "po": 1183.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104263,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1262.02,
+          "po": 1098.7
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104264,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 922.25,
+          "po": 802.9
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104265,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3349.21,
+          "po": 2915.78
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104266,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 970.79,
+          "po": 845.15
+        },
+        "stan": {
+          "przed": 6,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104267,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1795.95,
+          "po": 1563.53
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104268,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2854.11,
+          "po": 2484.75
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104269,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2383.28,
+          "po": 2074.85
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104270,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 922.25,
+          "po": 802.9
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104271,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2111.46,
+          "po": 1838.21
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104272,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 737.8,
+          "po": 642.32
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104273,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1844.49,
+          "po": 1605.79
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104274,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2645.39,
+          "po": 2303.04
+        },
+        "stan": {
+          "przed": 3,
+          "po": 1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104275,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1237.75,
+          "po": 1077.57
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104276,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3786.06,
+          "po": 3296.1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104277,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1650.33,
+          "po": 1436.76
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104278,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2596.85,
+          "po": 2260.79
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104279,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5824.71,
+          "po": 5070.92
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104280,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2121.17,
+          "po": 1846.66
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104281,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 970.79,
+          "po": 845.15
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104283,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2514.33,
+          "po": 2188.95
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104284,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1601.8,
+          "po": 1394.5
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104285,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2257.08,
+          "po": 1964.98
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104289,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1354.9,
+          "po": 814
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104290,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 10678.64,
+          "po": 9296.69
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104291,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2890,
+          "po": 2516
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104292,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1941.57,
+          "po": 1690.31
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104293,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2656.25,
+          "po": 2312.5
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104294,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 16405,
+          "po": 11694.81
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104295,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 6261.56,
+          "po": 5451.24
+        },
+        "stan": {
+          "przed": 5,
+          "po": 7
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104296,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 8296,
+          "po": 7222.4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104297,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2499.77,
+          "po": 2176.27
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104298,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5011.6,
+          "po": 4363.04
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104299,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3169.65,
+          "po": 2802.99
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:31.000Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104300,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2622.25,
+          "po": 2282.9
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104301,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3883.14,
+          "po": 3380.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104302,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2632,
+          "po": 2311.29
+        },
+        "stan": {
+          "przed": 4,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:31.002Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104304,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2184.27,
+          "po": 1901.6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104305,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1893.03,
+          "po": 1648.05
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104306,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 754.8,
+          "po": 657.12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104307,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 6310.1,
+          "po": 5493.5
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104308,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7038.19,
+          "po": 6127.37
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104309,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3883.14,
+          "po": 3380.62
+        },
+        "stan": {
+          "przed": 8,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104310,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 8921.6,
+          "po": 7767.04
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104311,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 237.84,
+          "po": 207.06
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104312,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5727.63,
+          "po": 4986.41
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104313,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3883.14,
+          "po": 3380.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104314,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2621.12,
+          "po": 2281.92
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104315,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 331.66,
+          "po": 376.09
+        },
+        "stan": {
+          "przed": 6,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:31.003Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104316,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 11406.72,
+          "po": 9930.56
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104317,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1504.72,
+          "po": 1309.99
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104318,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1553.26,
+          "po": 1352.25
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104319,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2912.1,
+          "po": 2535.24
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104320,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3155.05,
+          "po": 2746.75
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104321,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 412.58,
+          "po": 359.19
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104322,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1139,
+          "po": 1183.22
+        },
+        "stan": {
+          "przed": 4,
+          "po": 2
+        },
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:29.741Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104323,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 970.79,
+          "po": 845.15
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104325,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1106.82,
+          "po": 740
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104326,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 11475,
+          "po": 7770
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104328,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 6310.1,
+          "po": 5493.5
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104329,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1033.6,
+          "po": 603.6
+        },
+        "stan": {
+          "przed": 8,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104331,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 6552.8,
+          "po": 5704.79
+        },
+        "stan": {
+          "przed": 8,
+          "po": 10
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104775,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5533.47,
+          "po": 4440
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104776,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3883.14,
+          "po": 3380.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104778,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5315.05,
+          "po": 4627.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104779,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 5242.24,
+          "po": 4563.83
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104780,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 873.71,
+          "po": 760.64
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104781,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1698.87,
+          "po": 1479.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104782,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1334.83,
+          "po": 1162.09
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104783,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4659.77,
+          "po": 4056.74
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104879,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 873.71,
+          "po": 760.64
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104880,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 965.93,
+          "po": 840.93
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104881,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 11892.12,
+          "po": 10353.14
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104882,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 4659.77,
+          "po": 4056.74
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104883,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 689.26,
+          "po": 600.06
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104884,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1771.68,
+          "po": 1542.41
+        },
+        "stan": {
+          "przed": 8,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104885,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2087.19,
+          "po": 1817.08
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104886,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1067.86,
+          "po": 929.67
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105026,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7038.19,
+          "po": 6127.37
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105027,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 10921.33,
+          "po": 9507.98
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105043,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 7333.75,
+          "po": 4390.84
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105044,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2292.69,
+          "po": 1332.32
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105045,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 208.25,
+          "po": 181.3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105212,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2446.38,
+          "po": 2129.79
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105213,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 3543.37,
+          "po": 3084.81
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 105214,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 315.51,
+          "po": 274.68
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T09:47:18.792Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    }
+  ]
+}

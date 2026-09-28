@@ -1,0 +1,110 @@
+{
+  "snapshot": "/home/szuflada/apinfo/projects/bridge/db/snapshot.db",
+  "slownik": {
+    "wartosci": 1665,
+    "pochodzenie": {
+      "wObu": 1660,
+      "tylkoModel": 0,
+      "tylkoBieznik": 3,
+      "zadna": [
+        "AGRIMAX RT 851",
+        "RM 500 STBT"
+      ]
+    },
+    "recznieDodane_audit": 0,
+    "produktyModelRoznyOdBieznik": 17,
+    "wartosciTylkoWModel": 13,
+    "wartosciTylkoWModelObecneWSlowniku": 0
+  },
+  "przed": {
+    "pozycji": 498,
+    "wgRodzaju": {
+      "bieznik": 296,
+      "indeks_nosnosci": 27,
+      "kategoria": 7,
+      "konstrukcja": 1,
+      "marka": 68,
+      "rozmiar": 99
+    },
+    "obecnychWSlowniku": {
+      "bieznik": 242,
+      "indeks_nosnosci": 27,
+      "konstrukcja": 1,
+      "marka": 68,
+      "rozmiar": 99
+    },
+    "pozycjiZSugestia": 443,
+    "pozycjiZSelfMatchemNaSzczycie": 437,
+    "sugestii": 607
+  },
+  "poStarcie": {
+    "usunieto": 437,
+    "dosianoDoSlownika": {
+      "kategoria": 2,
+      "vfIf": 3
+    },
+    "pozycji": 61,
+    "wgRodzaju": {
+      "bieznik": 54,
+      "kategoria": 7
+    },
+    "pozycjiZSugestia": 17,
+    "sugestii": 21,
+    "selfMatchy": 0,
+    "nowychPar": 13,
+    "nowePary": [
+      "bieznik: „Conti CrossTrac 3\" → „CONTI CROSSTRAC 3\" 100% (wystąpień 2)",
+      "bieznik: „Conti EfficientPro 5\" → „CONTI EFFICIENTPRO HD5\" 91% (wystąpień 1)",
+      "bieznik: „Conti EfficientPro 5\" → „CONTI EFFICIENTPRO HS5\" 91% (wystąpień 1)",
+      "bieznik: „FARMAX R75\" → „Farmax R75\" 100% (wystąpień 1)",
+      "bieznik: „MAGLIFT LIP NIEBRUDZĄCA Quick 3\" → „MAGLIFT LIP NIEBRUDZĄCA QUICK\" 94% (wystąpień 1)",
+      "bieznik: „MAGLIFT LIP NIEBRUDZĄCA Quick 4\" → „MAGLIFT LIP NIEBRUDZĄCA QUICK\" 94% (wystąpień 1)",
+      "bieznik: „MAGLIFT LIP NIEBRUDZĄCA Quick 8\" → „MAGLIFT LIP NIEBRUDZĄCA QUICK\" 94% (wystąpień 1)",
+      "bieznik: „MG628 NAPĘD\" → „MG638  napęd\" 91% (wystąpień 1)",
+      "bieznik: „MG638 NAPĘD\" → „MG638  napęd\" 100% (wystąpień 1)",
+      "kategoria: „rolnicze\" → „Rolnicze\" 100% (wystąpień 334)",
+      "kategoria: „ciężarowe\" → „Ciężarowe\" 100% (wystąpień 106)",
+      "kategoria: „leśne\" → „Leśne\" 100% (wystąpień 7)",
+      "kategoria: „przemyslowe\" → „Przemysłowe\" 91% (wystąpień 1)"
+    ]
+  },
+  "poSkanie": {
+    "staty": {
+      "skanowano_rodzajow": 13,
+      "nowych_wartosci": 2,
+      "zaktualizowano": 0
+    },
+    "pozycji": 63,
+    "wgRodzaju": {
+      "bieznik": 54,
+      "kategoria": 7,
+      "konstrukcja": 2
+    },
+    "pozycjiZSugestia": 17,
+    "sugestii": 21,
+    "selfMatchy": 0,
+    "nowychPar": 13,
+    "nowePary": [
+      "bieznik: „Conti CrossTrac 3\" → „CONTI CROSSTRAC 3\" 100% (wystąpień 2)",
+      "bieznik: „Conti EfficientPro 5\" → „CONTI EFFICIENTPRO HD5\" 91% (wystąpień 1)",
+      "bieznik: „Conti EfficientPro 5\" → „CONTI EFFICIENTPRO HS5\" 91% (wystąpień 1)",
+      "bieznik: „FARMAX R75\" → „Farmax R75\" 100% (wystąpień 1)",
+      "bieznik: „MAGLIFT LIP NIEBRUDZĄCA Quick 3\" → „MAGLIFT LIP NIEBRUDZĄCA QUICK\" 94% (wystąpień 1)",
+      "bieznik: „MAGLIFT LIP NIEBRUDZĄCA Quick 4\" → „MAGLIFT LIP NIEBRUDZĄCA QUICK\" 94% (wystąpień 1)",
+      "bieznik: „MAGLIFT LIP NIEBRUDZĄCA Quick 8\" → „MAGLIFT LIP NIEBRUDZĄCA QUICK\" 94% (wystąpień 1)",
+      "bieznik: „MG628 NAPĘD\" → „MG638  napęd\" 91% (wystąpień 1)",
+      "bieznik: „MG638 NAPĘD\" → „MG638  napęd\" 100% (wystąpień 1)",
+      "kategoria: „rolnicze\" → „Rolnicze\" 100% (wystąpień 334)",
+      "kategoria: „ciężarowe\" → „Ciężarowe\" 100% (wystąpień 106)",
+      "kategoria: „leśne\" → „Leśne\" 100% (wystąpień 7)",
+      "kategoria: „przemyslowe\" → „Przemysłowe\" 91% (wystąpień 1)"
+    ]
+  },
+  "alliance": {
+    "slownikMarka": [
+      "ALLIANCE",
+      "Alliance"
+    ],
+    "kolejkaPoZmianie": []
+  }
+}

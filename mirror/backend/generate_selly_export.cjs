@@ -1,9 +1,8 @@
-// Generator pliku CSV dla Selly - tylko aktywne produkty wszystkich dostawcow
-// Odwzorowuje format pliku katalog_wszyscy_wybrane_2026-07-23.csv (60 kolumn, separator ';', BOM UTF-8)
+// Generator pliku CSV dla Selly - pelny eksport wszystkich aktywnych produktow, wszyscy dostawcy
+// Odwzorowuje format pliku katalog_wszyscy_wybrane_2026-07-23.csv (59 kolumn, separator ';', BOM UTF-8)
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
-const paymentBlocks = require('./payment_blocks.cjs');
 
 const DB_PATH = '/home/admin/private_apps/bridge/data.db';
 const OUT_DIR = '/home/admin/domains/agritires.eu/public_html/panel/ex-port-files';
@@ -42,7 +41,7 @@ const columns = [
   ['Waga', 'waga'],
   ['TL/TT', 'tl_tt'],
   ['PR', 'pr'],
-  ['R/D', 'konstrukcja'], // naglowek zgodny z istniejacym mapowaniem importera Selly; wartosci pozostaja pelne: Radialna/Diagonalna
+  ['R/D', 'konstrukcja'],
   ['IF/VF', 'vf_if'],
   ['Oznaczenie-bieznika', 'oznaczenie_bieznika'],
   ['Link-do-zdjecia', 'link_zdjecia'],
@@ -72,30 +71,9 @@ const columns = [
   ['status', 'status'],
   ['Zastosowanie', 'zastosowanie'],
   ['data_aktualizacji', 'data_aktualizacji'],
-  ['Blokowane-formy-platnosci', 'blokowane_formy_platnosci'],
 ];
 
 const boolCols = new Set(['reinforced','extra_load','cut_resistant','heat_resistant','stubble_resistant','nro','cho','ms','snow_3pmsf','cfo']);
-
-const sellyCategoryNames = new Map([
-  ['rolnicze', 'Opony rolnicze'],
-  ['rolnicze male', 'Opony rolnicze'],
-  ['lesne', 'Opony leśne'],
-  ['przemyslowe', 'Opony przemysłowe'],
-  ['ciezarowe', 'Opony ciężarowe'],
-]);
-
-function toSellyCategoryName(value) {
-  if (value === null || value === undefined) return '';
-  const raw = String(value).trim();
-  const key = raw
-    .toLocaleLowerCase('pl-PL')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/ł/g, 'l')
-    .replace(/\s+/g, ' ');
-  return sellyCategoryNames.get(key) || raw;
-}
 
 function esc(val) {
   if (val === null || val === undefined) return '';
@@ -107,15 +85,7 @@ function esc(val) {
 }
 
 const sqlCols = columns.map(c => c[1]).filter(Boolean);
-// Wstrzymane produkty sa zerowane bezposrednio przez Selly API, a nastepnie
-// nie trafiaja do CSV. Ponowne pojawienie sie w pewnym dopasowaniu przywraca
-// status aktywny i wtedy produkt ponownie pojawia sie w eksporcie.
-const rows = db.prepare(`
-  SELECT *
-  FROM products
-  WHERE status = 'aktywny'
-  ORDER BY id
-`).all();
+const rows = db.prepare(`SELECT * FROM products WHERE status = 'aktywny' ORDER BY id`).all();
 
 const lines = [];
 lines.push(columns.map(c => c[0]).join(';'));
@@ -133,12 +103,6 @@ for (const row of rows) {
     if (header === 'cena_sprzedazy' && typeof v === 'number') {
       v = `${Math.floor(v)},-`; // 2026-07-31: format gola liczba + ",-" zamiast surowej liczby z kropka
     }
-    if (header === 'Kategoria') {
-      v = toSellyCategoryName(v);
-    }
-    if (header === 'Blokowane-formy-platnosci' && !v) {
-      v = paymentBlocks.getBlockedPaymentForms(row.dostawca);
-    }
     return esc(v);
   }).join(';');
   lines.push(line);
@@ -152,11 +116,9 @@ if (!fs.existsSync(OUT_DIR)) {
 }
 
 const outPath = path.join(OUT_DIR, OUT_FILE);
-const tempPath=outPath+'.tmp-'+process.pid;
-fs.writeFileSync(tempPath, BOM + csvBody, 'utf8');
-fs.renameSync(tempPath,outPath);
+fs.writeFileSync(outPath, BOM + csvBody, 'utf8');
 
 console.log('Zapisano:', outPath);
-console.log('Liczba produktow aktywnych:', rows.length);
+console.log('Liczba produktow (aktywnych):', rows.length);
 console.log('Liczba kolumn:', columns.length);
 console.log('Rozmiar pliku (bajty):', fs.statSync(outPath).size);

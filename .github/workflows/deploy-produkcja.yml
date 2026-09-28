@@ -1,0 +1,46 @@
+name: Deploy produkcja
+
+# Event-driven CD PRODUKCJI: po merge do `main` łączy się po SSH z VPS i uruchamia
+# tools/deploy-produkcja.sh. Odbicie deploy-staging.yml — różnice: gałąź, sekrety, skrypt.
+#
+# ⚠ POTRZEBNY OSOBNY KLUCZ SSH. Klucz stagingu ma w ~/.ssh/authorized_keys wymuszone
+# `command="…deploy-staging.sh"`, a wymuszone polecenie IGNORUJE to, o co prosi klient —
+# tym samym kluczem nie da się uruchomić skryptu produkcji. Instrukcja: docs/wdrozenie-produkcji.md.
+#
+# Wymagane sekrety repo (Settings → Secrets and variables → Actions):
+#   PROD_SSH_HOST         ten sam host co staging
+#   PROD_SSH_PORT         ten sam port co staging
+#   PROD_SSH_USER         admin
+#   PROD_SSH_KEY          klucz PRYWATNY (ed25519) DEDYKOWANY produkcji
+#   PROD_SSH_KNOWN_HOSTS  wynik `ssh-keyscan -p <port> <host>`
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rebuild/**"
+      - "deploy/produkcja/**"
+      - "tools/deploy-produkcja.sh"
+      - "tools/publikuj-frontend.sh"
+  workflow_dispatch: {}          # ręczne uruchomienie z zakładki Actions
+
+concurrency:
+  group: deploy-produkcja
+  cancel-in-progress: false      # nie przerywaj trwającego deployu produkcji — kolejkuj
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: produkcja       # pozwala wymusić ręczne zatwierdzenie (Settings → Environments)
+    steps:
+      - name: Deploy przez SSH
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.PROD_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
+            -p "${{ secrets.PROD_SSH_PORT }}" \
+            "${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}" \
+            'bash /home/admin/private_apps/bridge-prod/repo/tools/deploy-produkcja.sh'

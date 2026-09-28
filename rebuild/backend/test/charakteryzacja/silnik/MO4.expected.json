@@ -1,0 +1,2243 @@
+{
+  "dostawca": "MO4",
+  "wejscie": {
+    "rekordow": 101,
+    "zrodlo": "test/charakteryzacja/MO4.expected.json → rekordy (wzorzec 3a)",
+    "kompletnaOferta": false
+  },
+  "katalog": {
+    "produktow": 423,
+    "zrodlo": "db/snapshot.db → products (projekcja 37 kolumn)"
+  },
+  "overridy": {
+    "wierszy": 565
+  },
+  "statystyki": {
+    "doStagingu": 17,
+    "odrzuconeNieOpony": 0,
+    "odrzuconeBrakDanych": 0,
+    "odrzuconeSmieciMO2": 0,
+    "nowe": 10,
+    "zmienione": 7,
+    "wycofane": 0,
+    "bezZmian": 41,
+    "autoZatwierdzone": 43,
+    "szczegolyOdrzuconych": [],
+    "pominieteWycofania": "Niepotwierdzona kompletność źródła; braków nie zliczono"
+  },
+  "wierszyPoDeduplikacji": 17,
+  "staging": [
+    {
+      "typZmiany": "blad",
+      "kod": "MO4_CTCR22531560LWES1",
+      "nazwa": "315/60R22.5 CEAT WINMILE-S 154/150L 20PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 6,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 802.62,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "powod": "Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO4_CTCR22531560LWES1\",\"kodDostawcy\":\"CTCR22531560LWES1\",\"ean\":\"8904288108224\",\"eanRaw\":\"8904288108224\",\"_supplierEanOriginal\":\"8904288108224W2\",\"_eanLossy\":false,\"nazwa\":\"315/60R22.5 CEAT WINMILE-S 154/150L 20PR TL M+S 3PMSF\",\"marka\":\"CEAT\",\"model\":\"WINMILE-S\",\"bieznik\":\"WINMILE-S\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":802.62,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/60R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":60,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"154/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":94.95,\"indeks1\":\"154/150\",\"indeks2\":\"L\",\"indeksy\":\"154L/150L\",\"dot\":\"2024\",\"waga\":57.3,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"72dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"56c74072f6bfc0beebe6be0f17095c53c02cce33bbe28d1efec72a19da2c9533\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.\",\"_candidates\":[{\"kod\":\"MO4_CTCR22531560LWES0\",\"nazwa\":\"315/60R22.5 CEAT WINMILE-S 154/150L 20PR TL M+S 3PMSF\",\"marka\":\"CEAT\",\"model\":\"WINMILE-S\",\"rozmiar\":\"315/60R22.5\",\"dot\":\"2024\",\"ean\":\"8904288108224\"}],\"_completeSource\":false}",
+      "eanRaw": "8904288108224",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO4_CTCR22531580LWED0",
+      "nazwa": "315/80R22.5 CEAT WINMILE-D 156/150L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 4,
+      "stanNowy": 4,
+      "cenaZakupuStara": 1042.39,
+      "cenaZakupuNowa": 1047.62,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0.5017315975786213,
+      "ostrzezenie": null,
+      "powod": "nazwa: 315/80R22.5 CEAT WINMILE- 156/150L TL M+S 3PMSF → 315/80R22.5 CEAT WINMILE-D 156/150L TL M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_CTCR22531580LWED0\",\"kodDostawcy\":\"CTCR22531580LWED0\",\"ean\":\"8904288103182\",\"eanRaw\":\"8904288103182\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/80R22.5 CEAT WINMILE-D 156/150L TL M+S 3PMSF\",\"marka\":\"CEAT\",\"model\":\"WINMILE-D\",\"bieznik\":\"WINMILE-D\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1047.62,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":107.55,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025\",\"waga\":71.7,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"75dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"749932\",\"_policyVersion\":2,\"_sourceKey\":\"cb22dcfb313d5d4730089e4360baeb5e70a9a80c6821c3a791afe88fabe35c53\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288103182",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO4_CTCR22531580LWES0",
+      "nazwa": "315/80R22.5 CEAT WINMILE-S 156/150L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 4,
+      "stanNowy": 4,
+      "cenaZakupuStara": 1018.98,
+      "cenaZakupuNowa": 1024.1,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0.502463247561276,
+      "ostrzezenie": null,
+      "powod": "nazwa: 315/80R22.5 CEAT WINMILE- 156/150L TL M+S 3PMSF → 315/80R22.5 CEAT WINMILE-S 156/150L TL M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_CTCR22531580LWES0\",\"kodDostawcy\":\"CTCR22531580LWES0\",\"ean\":\"8904288103175\",\"eanRaw\":\"8904288103175\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/80R22.5 CEAT WINMILE-S 156/150L TL M+S 3PMSF\",\"marka\":\"CEAT\",\"model\":\"WINMILE-S\",\"bieznik\":\"WINMILE-S\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1024.1,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":107.55,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2025\",\"waga\":68.1,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"749932\",\"_policyVersion\":2,\"_sourceKey\":\"ef4e43c07d1a97b571289a43eb64aa4ede3aefd1aa35ea86b72012d6722f099f\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8904288103175",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO4_EGCR19543550JGH20",
+      "nazwa": "435/50R19.5 GOODTRIP GHT22 TRAILER 160J 22PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 12,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 959.42,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO4_EGCR19543550JGH20\",\"kodDostawcy\":\"EGCR19543550JGH20\",\"ean\":\"8859625701036\",\"eanRaw\":\"8859625701036\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"435/50R19.5 GOODTRIP GHT22 TRAILER 160J 22PR TL M+S 3PMSF\",\"marka\":\"GOODTRIP\",\"model\":\"GHT22 TRAILER\",\"bieznik\":\"GHT22 TRAILER\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":12,\"cenaZakupu\":959.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"435/50R19.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"435\",\"profil\":50,\"srednica\":19.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"160\",\"indeksPredkosci\":\"J\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"22\",\"wysokosc\":93.03,\"indeks1\":\"160\",\"indeks2\":\"J\",\"indeksy\":\"160J\",\"dot\":\"2026\",\"waga\":62.4,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"A\",\"labelNoise\":\"72dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"1ecc586fd26beb6a80685811f59e2441a03e7d0056f767856079643ddcc0c03f\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8859625701036",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "blad",
+      "kod": "MO4_AUTO_61696B5AA3EDE0164D",
+      "nazwa": "385/65R22.5 GOODTRIP GHT50 TRAILER 160K 20PR TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 9,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 890.82,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+      "powod": "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO4_AUTO_61696B5AA3EDE0164D\",\"kodDostawcy\":\"EGCR22538565KGHT1\",\"ean\":\"8859625700213\",\"eanRaw\":\"8859625700213\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"385/65R22.5 GOODTRIP GHT50 TRAILER 160K 20PR TL M+S 3PMSF\",\"marka\":\"GOODTRIP\",\"model\":\"GHT50 TRAILER\",\"bieznik\":\"GHT50 TRAILER\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":9,\"cenaZakupu\":890.82,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"385/65R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"385\",\"profil\":65,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"160\",\"indeksPredkosci\":\"K\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.21,\"indeks1\":\"160\",\"indeks2\":\"K\",\"indeksy\":\"160K\",\"dot\":\"2026\",\"waga\":69.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"69dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"9ac0c469e796a307a6df6da190c94c73e8cfa1564876573582bb5e98e7cf664a\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.\",\"_candidates\":[{\"kod\":\"MO4_EGCR22538565KGHT1\",\"nazwa\":\"385/65R22.5 GOODTRIP GHT50 TRAILER 160K 20PR TL M+S 3PMSF\",\"marka\":\"GOODTRIP\",\"model\":\"GHT50 TRAILER\",\"rozmiar\":\"385/65R22.5\",\"dot\":\"2025,2026\",\"ean\":\"8859625700213\"}],\"_completeSource\":false}",
+      "eanRaw": "8859625700213",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "blad",
+      "kod": "MO4_AUTO_2F2542C25E987EE1FD",
+      "nazwa": "315/70R22.5 DUNLOP SP346+ HL 156/150L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 2,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1635.62,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+      "powod": "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO4_AUTO_2F2542C25E987EE1FD\",\"kodDostawcy\":\"GNCR22531570L3640\",\"ean\":\"4038526073761\",\"eanRaw\":\"4038526073761\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/70R22.5 DUNLOP SP346+ HL 156/150L TL M+S 3PMSF\",\"marka\":\"DUNLOP\",\"model\":\"SP346+ HL\",\"bieznik\":\"SP346+ HL\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":1635.62,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":101.25,\"indeks1\":\"156/150\",\"indeks2\":\"L\",\"indeksy\":\"156L/150L\",\"dot\":\"2026\",\"waga\":59.8,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"74dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"1b3947378d352357e1e30c5d6edb278fe92d8d4f9cadcc905f96a92e998e8926\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.\",\"_candidates\":[{\"kod\":\"MO4_GNCR22531570L3640\",\"nazwa\":\"315/70R22.5 DUNLOP SP346+ HL 156/150L TL M+S 3PMSF\",\"marka\":\"DUNLOP\",\"model\":\"SP346+ HL\",\"rozmiar\":\"315/70R22.5\",\"dot\":\"2025,2026\",\"ean\":\"4038526073761\"}],\"_completeSource\":false}",
+      "eanRaw": "4038526073761",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO4_GNCR22531570L4641",
+      "nazwa": "315/70R22.5 DUNLOP SP446 154L/152M TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 4,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1641.5,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO4_GNCR22531570L4641\",\"kodDostawcy\":\"GNCR22531570L4641\",\"ean\":\"4038526541635\",\"eanRaw\":\"4038526541635\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/70R22.5 DUNLOP SP446 154L/152M TL M+S 3PMSF\",\"marka\":\"DUNLOP\",\"model\":\"SP446\",\"bieznik\":\"SP446\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1641.5,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"154/152\",\"indeksPredkosci\":\"L/M\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":101.25,\"indeks1\":\"154/152\",\"indeks2\":\"L/M\",\"indeksy\":\"154L/152M\",\"dot\":\"2026\",\"waga\":57.2,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"C\",\"labelNoise\":\"72dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"7ce168fe33e5afcb5af74bfaff5b0bd9e63a2a7c8601c3ff9d52601eeaecefaf\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "4038526541635",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO4_GNCR22538555K4360",
+      "nazwa": "385/55R22.5 DUNLOP SP346 160K/158L TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 2,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1743.42,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO4_GNCR22538555K4360\",\"kodDostawcy\":\"GNCR22538555K4360\",\"ean\":\"5452000540966\",\"eanRaw\":\"5452000540966\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"385/55R22.5 DUNLOP SP346 160K/158L TL M+S 3PMSF\",\"marka\":\"DUNLOP\",\"model\":\"SP346\",\"bieznik\":\"SP346\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":1743.42,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"385/55R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"385\",\"profil\":55,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"160/158\",\"indeksPredkosci\":\"K/L\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":99.51,\"indeks1\":\"160/158\",\"indeks2\":\"K/L\",\"indeksy\":\"160K/158L\",\"dot\":\"2026\",\"waga\":63,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"70dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"f22eb55370f54dd7543084da890a5f9c3c610be845a28f83d84d0f96c8bca12e\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "5452000540966",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO4_GSCR22531580MOR50",
+      "nazwa": "315/80R22.5 SAVA ORJAK 5 156L/154M TL M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 4,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1390.62,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO4_GSCR22531580MOR50\",\"kodDostawcy\":\"GSCR22531580MOR50\",\"ean\":\"5452000574770\",\"eanRaw\":\"5452000574770\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/80R22.5 SAVA ORJAK 5 156L/154M TL M+S 3PMSF\",\"marka\":\"SAVA\",\"model\":\"ORJAK 5\",\"bieznik\":\"ORJAK 5\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1390.62,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"156/154\",\"indeksPredkosci\":\"L/M\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":107.55,\"indeks1\":\"156/154\",\"indeks2\":\"L/M\",\"indeksy\":\"156L/154M\",\"dot\":\"2025,2026\",\"waga\":62.2,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"74dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"eb1f9f12cb5b185ec5fd3486ef96ef65860c81422b913336186b60a5cb338f89\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "5452000574770",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO4_HACR22538565K31T1",
+      "nazwa": "385/65R22.5 HANKOOK TH31 164K M+S",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 12,
+      "stanNowy": 12,
+      "cenaZakupuStara": 1504.3,
+      "cenaZakupuNowa": 1514.1,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0.6514657980455996,
+      "ostrzezenie": null,
+      "powod": "model: TH31 /NACZEPA → TH31 • nazwa: 385/65R22.5 Hankook TH31 /naczepa 164K M+S → 385/65R22.5 HANKOOK TH31 164K M+S",
+      "snapshotJson": "{\"kod\":\"MO4_HACR22538565K31T1\",\"kodDostawcy\":\"HACR22538565K31T1\",\"ean\":\"8808563473611\",\"eanRaw\":\"8808563473611\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"385/65R22.5 HANKOOK TH31 164K M+S\",\"marka\":\"HANKOOK\",\"model\":\"TH31\",\"bieznik\":\"TH31\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":12,\"cenaZakupu\":1514.1,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"385/65R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"385\",\"profil\":65,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"164\",\"indeksPredkosci\":\"K\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":107.21,\"indeks1\":\"164\",\"indeks2\":\"K\",\"indeksy\":\"164K\",\"dot\":\"2025\",\"waga\":71.5,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"69dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"994655\",\"_policyVersion\":2,\"_sourceKey\":\"ebbee497f157a2d49ef1d52f55c257e18bef786f5501d53ebfaca957c70dc5ae\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8808563473611",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "blad",
+      "kod": "MO4_AUTO_FD71E14E5B3B578649",
+      "nazwa": "460/70R24 MRL GT 333 MAXIMUS 159A8/159B TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 4,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1484.7,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+      "powod": "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO4_AUTO_FD71E14E5B3B578649\",\"kodDostawcy\":\"HLPR240460708G330\",\"ean\":\"8907375053599\",\"eanRaw\":\"8907375053599\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"460/70R24 MRL GT 333 MAXIMUS 159A8/159B TL\",\"marka\":\"MRL\",\"model\":\"GT 333 MAXIMUS\",\"bieznik\":\"GT 333 MAXIMUS\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":4,\"cenaZakupu\":1484.7,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"460/70R24\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"460\",\"profil\":70,\"srednica\":24,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"159/159\",\"indeksPredkosci\":\"A8/B\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":125.36,\"indeks1\":\"159/159\",\"indeks2\":\"A8/B\",\"indeksy\":\"159A8/159B\",\"dot\":\"2026\",\"waga\":91.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"35a8dd7be24d1138874487c720ebc7176caea24974fecde708025b6af61a06f7\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.\",\"_candidates\":[{\"kod\":\"MO4_HLPR240460708G330\",\"nazwa\":\"460/70R24 MRL GT 333 MAXIMUS 159A8/159B TL\",\"marka\":\"MRL\",\"model\":\"GT 333 MAXIMUS\",\"rozmiar\":\"460/70R24\",\"dot\":\"2025\",\"ean\":\"8907375053599\"}],\"_completeSource\":false}",
+      "eanRaw": "8907375053599",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO4_HLRD080F16003MG50",
+      "nazwa": "16x6.50-8 MRL MG 54 Z-WIDE 72A3 6PR TL",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 2,
+      "stanNowy": 2,
+      "cenaZakupuStara": 59.49,
+      "cenaZakupuNowa": 59.78,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0.48747688687174173,
+      "ostrzezenie": null,
+      "powod": "nazwa: 16x6.50-8 MRL MG 54 -WIDE 72A3 6PR TL → 16x6.50-8 MRL MG 54 Z-WIDE 72A3 6PR TL",
+      "snapshotJson": "{\"kod\":\"MO4_HLRD080F16003MG50\",\"kodDostawcy\":\"HLRD080F16003MG50\",\"ean\":\"8907375018901\",\"eanRaw\":\"8907375018901\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"16x6.50-8 MRL MG 54 Z-WIDE 72A3 6PR TL\",\"marka\":\"MRL\",\"model\":\"MG 54 Z-WIDE\",\"bieznik\":\"MG 54 Z-WIDE\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":59.78,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"16x6.50-8\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"6.5\",\"profil\":82,\"srednica\":8,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":\"72\",\"indeksPredkosci\":\"A3\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"6\",\"wysokosc\":47.72,\"indeks1\":\"72\",\"indeks2\":\"A3\",\"indeksy\":\"72A3\",\"dot\":\"2026\",\"waga\":3.6,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"236136\",\"_policyVersion\":2,\"_sourceKey\":\"4f9793e923fcb810166d77f69e2711809a718b3413a9ac640ed79c0fd621d073\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8907375018901",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO4_HLRD160E60006MF20",
+      "nazwa": "6.00-16 MRL MTF 222 TWO RIB 88A6/80A8 6PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 1,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 142.1,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO4_HLRD160E60006MF20\",\"kodDostawcy\":\"HLRD160E60006MF20\",\"ean\":\"8907375032075\",\"eanRaw\":\"8907375032075\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"6.00-16 MRL MTF 222 TWO RIB 88A6/80A8 6PR TT\",\"marka\":\"MRL\",\"model\":\"MTF 222 TWO RIB\",\"bieznik\":\"MTF 222 TWO RIB\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":1,\"cenaZakupu\":142.1,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"6.00-16\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"6\",\"profil\":null,\"srednica\":16,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":\"88/80\",\"indeksPredkosci\":\"A6/A8\",\"tlTt\":\"TT\",\"vfIf\":null,\"pr\":\"6\",\"wysokosc\":65.94,\"indeks1\":\"88/80\",\"indeks2\":\"A6/A8\",\"indeksy\":\"88A6/80A8\",\"dot\":\"2026\",\"waga\":10.3,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"434f797c315b11dad8795baa3183ae0c29932be55faa4dc6f30f47f068fa39c5\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8907375032075",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO4_HLRD280G49006MR20",
+      "nazwa": "14.9-28 MRL MRT 329 KIRTI 136A6/132A8 14PR TT",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": null,
+      "stanNowy": 2,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 871.71,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO4_HLRD280G49006MR20\",\"kodDostawcy\":\"HLRD280G49006MR20\",\"ean\":\"8907375015429\",\"eanRaw\":\"8907375015429\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"14.9-28 MRL MRT 329 KIRTI 136A6/132A8 14PR TT\",\"marka\":\"MRL\",\"model\":\"MRT 329 KIRTI\",\"bieznik\":\"MRT 329 KIRTI\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":2,\"cenaZakupu\":871.71,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"14.9-28\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"14.9\",\"profil\":null,\"srednica\":28,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":\"136/132\",\"indeksPredkosci\":\"A6/A8\",\"tlTt\":\"TT\",\"vfIf\":null,\"pr\":\"14\",\"wysokosc\":133.94,\"indeks1\":\"136/132\",\"indeks2\":\"A6/A8\",\"indeksy\":\"136A6/132A8\",\"dot\":\"2026\",\"waga\":71.6,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"0cdec8aa8ad687cacf17505f9b03b0143c28a0804c4bb7aad48d24656b10db0b\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8907375015429",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO4_IMCR22531580L12M1",
+      "nazwa": "315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 6,
+      "stanNowy": 6,
+      "cenaZakupuStara": 730.35,
+      "cenaZakupuNowa": 759.5,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 3.99123707811323,
+      "ostrzezenie": null,
+      "powod": "nazwa: 315/80R22.5 Mirage MG121 158/150L prowadząca 20PR M+S 3PMSF → 315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L12M1\",\"kodDostawcy\":\"IMCR22531580L12M1\",\"ean\":\"8935355525347\",\"eanRaw\":\"8935355525347\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/80R22.5 MIRAGE MG121 PROWADZĄCA 158/150L 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG121 prowadząca\",\"bieznik\":\"MG121 prowadząca\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":6,\"cenaZakupu\":759.5,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":null,\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":null,\"indeks2\":\"L\",\"indeksy\":\"L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"275267\",\"_policyVersion\":2,\"_sourceKey\":\"827c3212f17fc876208f5f9a01ba86b556795c5057e3903cf9b2458f5e400fda\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8935355525347",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO4_IMCR22531580L6380",
+      "nazwa": "315/80R22.5 MIRAGE MG638 156/ NAPĘD 20PR M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 9,
+      "stanNowy": 9,
+      "cenaZakupuStara": 793.73,
+      "cenaZakupuNowa": 808.5,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 1.8608342887379816,
+      "ostrzezenie": null,
+      "powod": "nazwa: 315/80R22.5 Mirage MG638 156/152L napęd 20PR M+S 3PMSF → 315/80R22.5 MIRAGE MG638 156/ NAPĘD 20PR M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_IMCR22531580L6380\",\"kodDostawcy\":\"IMCR22531580L6380\",\"ean\":\"6920758661633\",\"eanRaw\":\"6920758661633\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/80R22.5 MIRAGE MG638 156/ NAPĘD 20PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG638  napęd\",\"bieznik\":\"MG638  napęd\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":9,\"cenaZakupu\":808.5,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":null,\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":107.55,\"indeks1\":null,\"indeks2\":\"L\",\"indeksy\":\"L\",\"dot\":\"2026\",\"waga\":64.9,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"764890\",\"_policyVersion\":2,\"_sourceKey\":\"49b3e6a47fa2552a56ec71ae14b50b1c4e7ec954fa85cabc50f9b302467b7f49\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "6920758661633",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO4_IMCR22538565K0221",
+      "nazwa": "385/65R22.5 MIRAGE MG022 164K/158L 24PR M+S 3PMSF",
+      "dostawca": "MO4",
+      "magazyn": "Wroclaw",
+      "magazynRaw": "Wroclaw",
+      "stanStary": 12,
+      "stanNowy": 7,
+      "cenaZakupuStara": 833.72,
+      "cenaZakupuNowa": 851.62,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 2.1470037902413255,
+      "ostrzezenie": null,
+      "powod": "model: MG022 /NACZEPA → MG022 • nazwa: 385/65R22.5 Mirage MG022 /naczepa 164K/158L 24PR M+S 3PMSF → 385/65R22.5 MIRAGE MG022 164K/158L 24PR M+S 3PMSF",
+      "snapshotJson": "{\"kod\":\"MO4_IMCR22538565K0221\",\"kodDostawcy\":\"IMCR22538565K0221\",\"ean\":\"8935355526474\",\"eanRaw\":\"8935355526474\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"385/65R22.5 MIRAGE MG022 164K/158L 24PR M+S 3PMSF\",\"marka\":\"MIRAGE\",\"model\":\"MG022\",\"bieznik\":\"MG022\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Wroclaw\",\"magazynRaw\":\"Wroclaw\",\"stan\":7,\"cenaZakupu\":851.62,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"385/65R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"385\",\"profil\":65,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"164/158\",\"indeksPredkosci\":\"K/L\",\"tlTt\":null,\"vfIf\":null,\"pr\":\"24\",\"wysokosc\":107.21,\"indeks1\":\"164/158\",\"indeks2\":\"K/L\",\"indeksy\":\"164K/158L\",\"dot\":\"2026\",\"waga\":71.5,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"C\",\"labelNoise\":\"73dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 203, 204, 205, 206, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"770191\",\"_policyVersion\":2,\"_sourceKey\":\"b387be611796748ce8fdbd3cc533aeecd018582d5b6c6486de38ba4322a610bb\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8935355526474",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "skasowane": [],
+  "historiaCen": [
+    {
+      "id": 1,
+      "produktId": 100801,
+      "kod": "MO4_BFCR22529580M24F0",
+      "ean": "3286341972818",
+      "dostawca": "MO4",
+      "marka": "FIRESTONE",
+      "model": "FS424",
+      "rozmiar": "295/80R22.5",
+      "indeksNosnosci": "152/148",
+      "indeksPredkosci": "M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1396.5,
+      "cenaSprzedazy": 1811,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 2,
+      "produktId": 100800,
+      "kod": "MO4_BFCR22531570L24F0",
+      "ean": "3286341973211",
+      "dostawca": "MO4",
+      "marka": "FIRESTONE",
+      "model": "FS424",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "154/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1416.1,
+      "cenaSprzedazy": 1865,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 3,
+      "produktId": 100790,
+      "kod": "MO4_BRCR22538565KURT0",
+      "ean": "3286341085211",
+      "dostawca": "MO4",
+      "marka": "BRIDGESTONE",
+      "model": "DURT2",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1612.1,
+      "cenaSprzedazy": 2091,
+      "stan": 12,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 4,
+      "produktId": 100789,
+      "kod": "MO4_CCCR22529560LH3D1",
+      "ean": "4019238083613",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI HYBRID HD3",
+      "rozmiar": "295/60R22.5",
+      "indeksNosnosci": "150/147",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1802.22,
+      "cenaSprzedazy": 2337,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 5,
+      "produktId": 100788,
+      "kod": "MO4_CCCR22531570L5SH0",
+      "ean": "4019238084566",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI ECO HS5",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1890.42,
+      "cenaSprzedazy": 2465,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 6,
+      "produktId": 100787,
+      "kod": "MO4_CCCR22531570LCH50",
+      "ean": "4019238046120",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI HYBRID HS5",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1910.02,
+      "cenaSprzedazy": 2477,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 7,
+      "produktId": 100786,
+      "kod": "MO4_CCCR22531570LH5D0",
+      "ean": "4019238046137",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI HYBRID HD5",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "154/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1910.02,
+      "cenaSprzedazy": 2477,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 8,
+      "produktId": 100784,
+      "kod": "MO4_CCCR22531580L5SH0",
+      "ean": "4019238090406",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI ECO HS5",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1821.82,
+      "cenaSprzedazy": 2414,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 9,
+      "produktId": 100783,
+      "kod": "MO4_CCCR22531580LCH50",
+      "ean": "4019238067811",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI HYBRID HS5",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1959.02,
+      "cenaSprzedazy": 2541,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 10,
+      "produktId": 100781,
+      "kod": "MO4_CCCR22531580MHED0",
+      "ean": "4019238032574",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "HDC1 ED",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1831.62,
+      "cenaSprzedazy": 2414,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 11,
+      "produktId": 100780,
+      "kod": "MO4_CCCR22538565K5SH0",
+      "ean": "4019238099546",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "CONTI ECO HS5",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "164",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 2037.42,
+      "cenaSprzedazy": 2669,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 12,
+      "produktId": 100777,
+      "kod": "MO4_CCCR22542565KHT22",
+      "ean": "4019238032581",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "HTR2",
+      "rozmiar": "425/65R22.5",
+      "indeksNosnosci": "165",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 2478.42,
+      "cenaSprzedazy": 3215,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 13,
+      "produktId": 100776,
+      "kod": "MO4_CCCZ22531580LHWW0",
+      "ean": "4019238072617",
+      "dostawca": "MO4",
+      "marka": "CONTINENTAL",
+      "model": "HSW2+ COACH",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1723.82,
+      "cenaSprzedazy": 2312,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 14,
+      "produktId": 100766,
+      "kod": "MO4_DCPR250H4000ERM80",
+      "ean": null,
+      "dostawca": "MO4",
+      "marka": "DOUBLE COIN",
+      "model": "REM8 ",
+      "rozmiar": "385/95R25",
+      "indeksNosnosci": "170",
+      "indeksPredkosci": "F",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 2507.82,
+      "cenaSprzedazy": 3240,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 15,
+      "produktId": 104746,
+      "kod": "MO4_EGCR17523575KGHA0",
+      "ean": "8859625701241",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHA20",
+      "rozmiar": "235/75R17.5",
+      "indeksNosnosci": "143/141",
+      "indeksPredkosci": "K",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 420.42,
+      "cenaSprzedazy": 539,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 16,
+      "produktId": 100764,
+      "kod": "MO4_EGCR17523575MGH90",
+      "ean": "8859625701951",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHD22",
+      "rozmiar": "235/75R17.5",
+      "indeksNosnosci": "132/130",
+      "indeksPredkosci": "M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 416.5,
+      "cenaSprzedazy": 531,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 17,
+      "produktId": 100761,
+      "kod": "MO4_EGCR19544545JGH20",
+      "ean": "8859625701043",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHT22 TRAILER",
+      "rozmiar": "445/45R19.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "J",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 910.42,
+      "cenaSprzedazy": 1168,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 18,
+      "produktId": 100755,
+      "kod": "MO4_EGCR22531580LGHA0",
+      "ean": "8859625700091",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHA20",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "157/154",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 763.42,
+      "cenaSprzedazy": 984,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 19,
+      "produktId": 100752,
+      "kod": "MO4_EGCR22531580LGMA0",
+      "ean": "8859625700138",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GMA30 ON-OFF ROAD",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "157/154",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 792.82,
+      "cenaSprzedazy": 1031,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 20,
+      "produktId": 100751,
+      "kod": "MO4_EGCR22538555KGHT0",
+      "ean": "8859625700862",
+      "dostawca": "MO4",
+      "marka": "GOODTRIP",
+      "model": "GHT50 TRAILER",
+      "rozmiar": "385/55R22.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 890.82,
+      "cenaSprzedazy": 1142,
+      "stan": 12,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 21,
+      "produktId": 100745,
+      "kod": "MO4_GFCR22529560KRG30",
+      "ean": "5452000582492",
+      "dostawca": "MO4",
+      "marka": "FULDA",
+      "model": "REGIOFORCE 3",
+      "rozmiar": "295/60R22.5",
+      "indeksNosnosci": "150/149",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1341.62,
+      "cenaSprzedazy": 1740,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 22,
+      "produktId": 100740,
+      "kod": "MO4_GFCR22538565KRN30",
+      "ean": "5452000712288",
+      "dostawca": "MO4",
+      "marka": "FULDA",
+      "model": "REGIOTONN 3 HL",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "164/158",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1312.22,
+      "cenaSprzedazy": 1715,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 23,
+      "produktId": 100734,
+      "kod": "MO4_GGCZ22529560KUMS1",
+      "ean": "5452000539816",
+      "dostawca": "MO4",
+      "marka": "GOODYEAR",
+      "model": "ULTRAGRIP MAX",
+      "rozmiar": "295/60R22.5",
+      "indeksNosnosci": "150/149",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1870.82,
+      "cenaSprzedazy": 2460,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 24,
+      "produktId": 100728,
+      "kod": "MO4_GNCR22538565K4360",
+      "ean": "5452000424860",
+      "dostawca": "MO4",
+      "marka": "DUNLOP",
+      "model": "SP346",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160/158",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1739.5,
+      "cenaSprzedazy": 2249,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 25,
+      "produktId": 100727,
+      "kod": "MO4_GNCR22538565K7HL0",
+      "ean": "5452000711946",
+      "dostawca": "MO4",
+      "marka": "DUNLOP",
+      "model": "SP247 HL",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "164/158",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1537.62,
+      "cenaSprzedazy": 2002,
+      "stan": 5,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 26,
+      "produktId": 100726,
+      "kod": "MO4_GNCZ22531580K3620",
+      "ean": "5452000453631",
+      "dostawca": "MO4",
+      "marka": "DUNLOP",
+      "model": "SP362 PROWADZĄCA",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/154",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1308.3,
+      "cenaSprzedazy": 1727,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 27,
+      "produktId": 100725,
+      "kod": "MO4_GNCZ22531580KS460",
+      "ean": "5452000453570",
+      "dostawca": "MO4",
+      "marka": "DUNLOP",
+      "model": "SP462",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/154",
+      "indeksPredkosci": "L/M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1331.82,
+      "cenaSprzedazy": 1727,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 28,
+      "produktId": 100719,
+      "kod": "MO4_GSCR22538565KCA50",
+      "ean": "5452000711663",
+      "dostawca": "MO4",
+      "marka": "SAVA",
+      "model": "CARGO 5 HL",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "164/158",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1322.02,
+      "cenaSprzedazy": 1679,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 29,
+      "produktId": 100712,
+      "kod": "MO4_HLPD200405706MI30",
+      "ean": "8907375028320",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "405/70-20",
+      "indeksNosnosci": "160/154",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 889.55,
+      "cenaSprzedazy": 1153,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 30,
+      "produktId": 100699,
+      "kod": "MO4_HLRD145200606R7B0",
+      "ean": "8907375022830",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "RIB 707",
+      "rozmiar": "200/60-14.5",
+      "indeksNosnosci": "113/109",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 185.22,
+      "cenaSprzedazy": 241,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 31,
+      "produktId": 104877,
+      "kod": "MO4_HLRD153G10756MA01",
+      "ean": "8907375000906",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MAW 200 IMPLEMENT",
+      "rozmiar": "10.0/75-15.3",
+      "indeksNosnosci": "130/126",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 226.38,
+      "cenaSprzedazy": 293,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 32,
+      "produktId": 100690,
+      "kod": "MO4_HLRD153G10758MI33",
+      "ean": "8907375001026",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "10.0/75-15.3",
+      "indeksNosnosci": "136/130",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 330.26,
+      "cenaSprzedazy": 437,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 33,
+      "produktId": 100684,
+      "kod": "MO4_HLRD160E40008MI30",
+      "ean": "8907375026586",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "4.00-16",
+      "indeksNosnosci": "72/64",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 100.94,
+      "cenaSprzedazy": 131,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 34,
+      "produktId": 100683,
+      "kod": "MO4_HLRD160E40008MI31",
+      "ean": "8907375026494",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MIM 374",
+      "rozmiar": "4.00-16",
+      "indeksNosnosci": "69/62",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 96.04,
+      "cenaSprzedazy": 124,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 35,
+      "produktId": 104876,
+      "kod": "MO4_HLRD200G12006MR20",
+      "ean": "8907375004232",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MRT 329 KIRTI",
+      "rozmiar": "11.2-20",
+      "indeksNosnosci": "111/107",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "rolnicze",
+      "cenaZakupu": 441.98,
+      "cenaSprzedazy": 573,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 36,
+      "produktId": 100677,
+      "kod": "MO4_HLRD240G36006MR21",
+      "ean": "8907375012480",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MRT 329 KIRTI",
+      "rozmiar": "13.6-24",
+      "indeksNosnosci": "130/126",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 699.72,
+      "cenaSprzedazy": 909,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 37,
+      "produktId": 100672,
+      "kod": "MO4_HLRD320G24006MR20",
+      "ean": "8907375008582",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MRT 329 KIRTI",
+      "rozmiar": "12.4-32",
+      "indeksNosnosci": "125/121",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 769.3,
+      "cenaSprzedazy": 1003,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 38,
+      "produktId": 100671,
+      "kod": "MO4_HLRD340G69006MR20",
+      "ean": "8907375018512",
+      "dostawca": "MO4",
+      "marka": "MRL",
+      "model": "MRT 329 KIRTI",
+      "rozmiar": "16.9-34",
+      "indeksNosnosci": "146/142",
+      "indeksPredkosci": "A6/A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1243.62,
+      "cenaSprzedazy": 1626,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 39,
+      "produktId": 104875,
+      "kod": "MO4_IMCR22529580L12M0",
+      "ean": "8935355525354",
+      "dostawca": "MO4",
+      "marka": "MIRAGE",
+      "model": "MG121 PROWADZĄCA",
+      "rozmiar": "295/80R22.5",
+      "indeksNosnosci": "154/149",
+      "indeksPredkosci": "L",
+      "kategoria": "ciężarowe",
+      "cenaZakupu": 681.1,
+      "cenaSprzedazy": 875,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 40,
+      "produktId": 100661,
+      "kod": "MO4_IMCR22531570L12M2",
+      "ean": "8935355525361",
+      "dostawca": "MO4",
+      "marka": "MIRAGE",
+      "model": "MG121 PROWADZĄCA",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 665.42,
+      "cenaSprzedazy": 844,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 41,
+      "produktId": 100660,
+      "kod": "MO4_IMCR22531570L6380",
+      "ean": "8935355525095",
+      "dostawca": "MO4",
+      "marka": "MIRAGE",
+      "model": "MG638",
+      "rozmiar": "315/70R22.5",
+      "indeksNosnosci": "154/150",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 685.02,
+      "cenaSprzedazy": 888,
+      "stan": 33,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 42,
+      "produktId": 100657,
+      "kod": "MO4_IMCR22531580L7680",
+      "ean": "8935355525064",
+      "dostawca": "MO4",
+      "marka": "MIRAGE",
+      "model": "MG768",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/152",
+      "indeksPredkosci": "L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 812.42,
+      "cenaSprzedazy": 1034,
+      "stan": 14,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 43,
+      "produktId": 100654,
+      "kod": "MO4_IMCR225F3000G7021",
+      "ean": "8935355525132",
+      "dostawca": "MO4",
+      "marka": "MIRAGE",
+      "model": "MG702 PROWADZĄCA",
+      "rozmiar": "13R22.5",
+      "indeksNosnosci": "156/152",
+      "indeksPredkosci": "G",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 818.3,
+      "cenaSprzedazy": 1048,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "zmianyProduktow": [
+    {
+      "id": 100429,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100442,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100443,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100456,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100459,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100467,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100469,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100470,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100478,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100479,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100480,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100482,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100502,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100503,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100508,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100510,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100555,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100570,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100579,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100582,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100585,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100588,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100605,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100615,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100619,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100648,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100654,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 804.46,
+          "po": 818.3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.110Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100657,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 793.73,
+          "po": 812.42
+        },
+        "stan": {
+          "przed": 12,
+          "po": 14
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.119Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100660,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 681.6,
+          "po": 685.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.122Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100661,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 647.47,
+          "po": 665.42
+        },
+        "stan": {
+          "przed": 12,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.123Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100667,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100668,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100669,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100671,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1253.42,
+          "po": 1243.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100672,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 773.22,
+          "po": 769.3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100676,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100677,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 700.7,
+          "po": 699.72
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100678,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100683,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 96.33,
+          "po": 96.04
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100684,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 101.53,
+          "po": 100.94
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100687,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100688,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100689,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100690,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 332.22,
+          "po": 330.26
+        },
+        "stan": {
+          "przed": 4,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-11T10:45:26.906Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100696,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100699,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 186.1,
+          "po": 185.22
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100706,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100708,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100712,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100713,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100715,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100719,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1288.29,
+          "po": 1322.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.129Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100725,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1325.17,
+          "po": 1331.82
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.131Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100726,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1325.17,
+          "po": 1308.3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.132Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100727,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1536.25,
+          "po": 1537.62
+        },
+        "stan": {
+          "przed": 6,
+          "po": 5
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.133Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100728,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1745.38,
+          "po": 1739.5
+        },
+        "stan": {
+          "przed": 4,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-11T06:44:42.030Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100733,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100734,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1886.82,
+          "po": 1870.82
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.135Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100739,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100740,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1315.41,
+          "po": 1312.22
+        },
+        "stan": {
+          "przed": 6,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.139Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100745,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1334.92,
+          "po": 1341.62
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.143Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100751,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T13:44:41.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100752,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T12:44:41.121Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100755,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 758.52,
+          "po": 763.42
+        },
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100760,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100761,
+      "zmiany": {
+        "stan": {
+          "przed": 6,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T12:44:41.121Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100764,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T13:44:41.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100766,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2498.02,
+          "po": 2507.82
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100773,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100774,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100776,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1773.71,
+          "po": 1723.82
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.150Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100777,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2466.03,
+          "po": 2478.42
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.153Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100778,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100779,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100780,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 2047.22,
+          "po": 2037.42
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-06T06:44:42.129Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100781,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1841.42,
+          "po": 1831.62
+        },
+        "stan": {
+          "przed": 4,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T09:33:55.919Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100782,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100783,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1949.23,
+          "po": 1959.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.155Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100784,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1851.72,
+          "po": 1821.82
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.168Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100786,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1900.47,
+          "po": 1910.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.169Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100787,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1900.47,
+          "po": 1910.02
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100788,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1890.72,
+          "po": 1890.42
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.174Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100789,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1793.21,
+          "po": 1802.22
+        },
+        "stan": {
+          "przed": 4,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:30.175Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100790,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 12
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T12:44:41.121Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100792,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100793,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100794,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 100800,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 1430.55,
+          "po": 1416.1
+        },
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:29.842Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 100801,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T13:44:41.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104652,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104732,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104743,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104744,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104746,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T13:44:41.171Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104875,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104876,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104877,
+      "zmiany": {
+        "stan": {
+          "przed": 3,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T00:47:17.508Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    }
+  ]
+}

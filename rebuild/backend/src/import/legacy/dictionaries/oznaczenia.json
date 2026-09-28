@@ -1,0 +1,64 @@
+{
+  "_meta": {
+    "wersja": "1.0",
+    "data_utworzenia": "2026-06-10",
+    "zrodlo": "Raport inwentaryzacji + decyzje Anny",
+    "uwaga": "Edytowalne z poziomu UI w przyszłości (fix E Analityka). Marta może dodawać własne oznaczenia w stagingu."
+  },
+  "rolnicze_lesne_przemyslowe": {
+    "CFO": "Cyclic Field Operation - cykliczna praca w polu",
+    "CHO": "Cyclic Harvest Operation - cykliczna praca przy zbiorach",
+    "VF": "Very High Flexion - bardzo wysoka elastyczność (lepsze obciążenie przy niższym ciśnieniu)",
+    "IF": "Improved Flexion - zwiększona elastyczność",
+    "NRO": "Narrow Rim Option - opcja wąskiej obręczy",
+    "SB": "Steel Belted - opasanie stalowe",
+    "SF": "Standard Flexion - standardowa elastyczność"
+  },
+  "ciezarowe_osie": {
+    "FRT": "Front - oś przednia",
+    "S": "Steer - oś kierowana (przednia)",
+    "D": "Drive - oś napędowa",
+    "T": "Trailer - naczepa",
+    "A": "All position - wszystkie pozycje",
+    "AP": "All Position",
+    "U": "Urban - miejskie",
+    "HS": "Highway Steer",
+    "HD": "Heavy Duty",
+    "HT": "Highway Trailer"
+  },
+  "ciezarowe_inne": {
+    "3PMSF": "Three Peak Mountain Snowflake - certyfikat zimowy",
+    "M+S": "Mud and Snow - błoto i śnieg",
+    "RF": "Reinforced - wzmocniona",
+    "Reinforced": "Wzmocniona",
+    "TL": "Tubeless - bezdętkowa",
+    "TT": "Tube Type - dętkowa",
+    "TTF": "Tube Type with Flap - dętkowa z ochraniaczem",
+    "NHS": "Not Highway Service - nieprzystosowana do dróg publicznych (przemysłowa)",
+    "IND": "Industrial - przemysłowa",
+    "LIFT": "Forklift - wózek widłowy",
+    "FORK": "Forklift - wózek widłowy",
+    "FORKLIFT": "Forklift - wózek widłowy",
+    "SOLID": "Solid - pełna (bez powietrza)",
+    "PR": "Ply Rating - liczba warstw",
+    "REGROOVABLE": "Możliwa do nacięcia",
+    "RETREADABLE": "Możliwa do bieżnikowania"
+  },
+  "biezniki_przemyslowe": {
+    "L-2": "Industrial - tarcie standardowe",
+    "L-3": "Industrial - tarcie zwiększone",
+    "L-4": "Industrial - tarcie wysokie",
+    "L-5": "Industrial - tarcie ekstremalne",
+    "L-5S": "Industrial - tarcie ekstremalne, śliska nawierzchnia",
+    "E-2": "Earthmover - traction zwykłe",
+    "E-3": "Earthmover - traction zwiększone",
+    "E-4": "Earthmover - rock terrain",
+    "E-7": "Earthmover - flotation",
+    "G-2": "Grader - standardowy",
+    "G-3": "Grader - zwiększony",
+    "G-4": "Grader - mocny",
+    "G-5": "Grader - ekstremalny",
+    "C-1": "Compactor - standardowy",
+    "C-2": "Compactor - mocny"
+  }
+}

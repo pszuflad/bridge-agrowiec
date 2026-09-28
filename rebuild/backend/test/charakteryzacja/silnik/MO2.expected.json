@@ -1,0 +1,1789 @@
+{
+  "dostawca": "MO2",
+  "wejscie": {
+    "rekordow": 200,
+    "zrodlo": "test/charakteryzacja/MO2.expected.json → rekordy (wzorzec 3a)",
+    "kompletnaOferta": false
+  },
+  "katalog": {
+    "produktow": 1729,
+    "zrodlo": "db/snapshot.db → products (projekcja 37 kolumn)"
+  },
+  "overridy": {
+    "wierszy": 3215
+  },
+  "statystyki": {
+    "doStagingu": 18,
+    "odrzuconeNieOpony": 0,
+    "odrzuconeBrakDanych": 0,
+    "odrzuconeSmieciMO2": 0,
+    "nowe": 7,
+    "zmienione": 11,
+    "wycofane": 0,
+    "bezZmian": 163,
+    "autoZatwierdzone": 19,
+    "szczegolyOdrzuconych": [],
+    "pominieteWycofania": "Niepotwierdzona kompletność źródła; braków nie zliczono"
+  },
+  "wierszyPoDeduplikacji": 18,
+  "staging": [
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_050267",
+      "nazwa": "15.5/80-24 MICHELIN POWER CL 162A8 20PR TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 6,
+      "stanNowy": 6,
+      "cenaZakupuStara": 2954.55,
+      "cenaZakupuNowa": 2954.55,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 400/80-24 Michelin POWER CL 162A8 20PR TL → 15.5/80-24 MICHELIN POWER CL 162A8 20PR TL",
+      "snapshotJson": "{\"kod\":\"MO2_050267\",\"kodDostawcy\":\"050267\",\"ean\":\"3528700502671\",\"eanRaw\":\"3528700502671\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"15.5/80-24 MICHELIN POWER CL 162A8 20PR TL\",\"marka\":\"MICHELIN\",\"model\":\"POWER CL\",\"bieznik\":\"POWER CL\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":6,\"cenaZakupu\":2954.55,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"15.5/80-24\",\"rozmiarAlternatywny\":\"400/80-24\",\"szerokosc\":\"15.5\",\"profil\":80,\"srednica\":24,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":\"162\",\"indeksPredkosci\":\"A8\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"20\",\"wysokosc\":123.96,\"indeks1\":\"162\",\"indeks2\":\"A8\",\"indeksy\":\"162A8\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":74,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"916142\",\"_policyVersion\":2,\"_sourceKey\":\"176411fbade41fe557464b62e5339d93f63bfe95291b921e64dbfb94c2872d33\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "3528700502671",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO2_05129240000",
+      "nazwa": "315/70R22.5 CONTINENTAL CONTI ECO HS 5 158/150L M+S HS FRONT",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": null,
+      "stanNowy": 2,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 2174.9,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO2_05129240000\",\"kodDostawcy\":\"05129240000\",\"ean\":\"4019238298376\",\"eanRaw\":\"4019238298376\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/70R22.5 CONTINENTAL CONTI ECO HS 5 158/150L M+S HS FRONT\",\"marka\":\"CONTINENTAL\",\"model\":\"CONTI ECO 5\",\"bieznik\":\"CONTI ECO 5\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":2,\"cenaZakupu\":2174.9,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/70R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":70,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"158/150\",\"indeksPredkosci\":\"L\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":101.25,\"indeks1\":\"158/150\",\"indeks2\":\"L\",\"indeksy\":\"158L/150L\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":0,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":\"HS\",\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"B\",\"labelWet\":\"B\",\"labelNoise\":\"71dB\",\"labelNoiseClass\":\"A\",\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"3e6623eed636a2a2ec165a5016800760e92408c94405763fae3adca981f98ba6\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "4019238298376",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_05740150000",
+      "nazwa": "365/80R20 CONTINENTAL MPT81 152K TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 1,
+      "stanNowy": 1,
+      "cenaZakupuStara": 2751.37,
+      "cenaZakupuNowa": 2751.37,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 365/80R20 Continental MPT 81 152K TL M+S → 365/80R20 CONTINENTAL MPT81 152K TL",
+      "snapshotJson": "{\"kod\":\"MO2_05740150000\",\"kodDostawcy\":\"05740150000\",\"ean\":\"4019238026016\",\"eanRaw\":\"4019238026016\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"365/80R20 CONTINENTAL MPT81 152K TL\",\"marka\":\"CONTINENTAL\",\"model\":\"MPT 81\",\"bieznik\":\"MPT 81\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":2751.37,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"365/80R20\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"365\",\"profil\":80,\"srednica\":20,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"152\",\"indeksPredkosci\":\"K\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":109.2,\"indeks1\":\"152\",\"indeks2\":\"K\",\"indeksy\":\"152K\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"92\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"907679\",\"_policyVersion\":2,\"_sourceKey\":\"b3a0af833185731396b6430edee401abe1cd0dd86a479b6d7cea31cfd880f646\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "4019238026016",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_1014101010000",
+      "nazwa": "31x15.50-15 MITAS SK02 8PR TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 1,
+      "stanNowy": 1,
+      "cenaZakupuStara": 922.02,
+      "cenaZakupuNowa": 922.02,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 31x15.50-15 Mitas SK-02 8PR TL → 31x15.50-15 MITAS SK02 8PR TL",
+      "snapshotJson": "{\"kod\":\"MO2_1014101010000\",\"kodDostawcy\":\"1014101010000\",\"ean\":\"8590341078889\",\"eanRaw\":\"8590341078889\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"31x15.50-15 MITAS SK02 8PR TL\",\"marka\":\"MITAS\",\"model\":\"SK02\",\"bieznik\":\"SK02\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":922.02,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"31x15.50-15\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"31\",\"profil\":15.5,\"srednica\":15,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":\"8\",\"wysokosc\":62.5,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"nie starsza niz 3 lata\",\"waga\":27,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"683318\",\"_policyVersion\":2,\"_sourceKey\":\"5894689898dee5d296594c2523330a6871fe941aed9ebab1526064019668df62\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8590341078889",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO2_10373",
+      "nazwa": "245/70R17.5 BRIDGESTONE RD2 136M/134M DRIVE",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": null,
+      "stanNowy": 4,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1053.93,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO2_10373\",\"kodDostawcy\":\"10373\",\"ean\":\"3286341037319\",\"eanRaw\":\"3286341037319\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"245/70R17.5 BRIDGESTONE RD2 136M/134M DRIVE\",\"marka\":\"BRIDGESTONE\",\"model\":\"RD2\",\"bieznik\":\"RD2\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":4,\"cenaZakupu\":1053.93,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"245/70R17.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"245\",\"profil\":70,\"srednica\":17.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"136/134\",\"indeksPredkosci\":\"M/M\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":78.75,\"indeks1\":\"136/134\",\"indeks2\":\"M/M\",\"indeksy\":\"136M/134M\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":0,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"C\",\"labelWet\":\"B\",\"labelNoise\":\"74dB\",\"labelNoiseClass\":\"2\",\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"cd5a0d596fa6b764a0eb1b1ecc13ef39ef36371c28d3db388f3ce87a854809df\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "3286341037319",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_110650",
+      "nazwa": "255/100R16 MICHELIN XZL 126K",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 1,
+      "stanNowy": 1,
+      "cenaZakupuStara": 2804.27,
+      "cenaZakupuNowa": 2804.27,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 255/100R16 Michelin XZL 126K TL M+S → 255/100R16 MICHELIN XZL 126K",
+      "snapshotJson": "{\"kod\":\"MO2_110650\",\"kodDostawcy\":\"110650\",\"ean\":\"3528701106502\",\"eanRaw\":\"3528701106502\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"255/100R16 MICHELIN XZL 126K\",\"marka\":\"MICHELIN\",\"model\":\"XZL\",\"bieznik\":\"XZL\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":2804.27,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"255/100R16\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"255\",\"profil\":100,\"srednica\":16,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"126\",\"indeksPredkosci\":\"K\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":91.64,\"indeks1\":\"126\",\"indeks2\":\"K\",\"indeksy\":\"126K\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"44\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"322545\",\"_policyVersion\":2,\"_sourceKey\":\"da5e48a2d8a1ca3880560fecfd96bb53d1be90ce5f41191d1eb21b51dc80f6ec\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "3528701106502",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_1327700",
+      "nazwa": "340/55-16 TRELLEBORG AW305 128A8/140A8 TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 20,
+      "stanNowy": 20,
+      "cenaZakupuStara": 775.2,
+      "cenaZakupuNowa": 775.2,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 340/55-16 Trelleborg AW305 140A8 TL → 340/55-16 TRELLEBORG AW305 128A8/140A8 TL",
+      "snapshotJson": "{\"kod\":\"MO2_1327700\",\"kodDostawcy\":\"1327700\",\"ean\":\"8059971014990\",\"eanRaw\":\"8059971014990\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"340/55-16 TRELLEBORG AW305 128A8/140A8 TL\",\"marka\":\"TRELLEBORG\",\"model\":\"AW 305\",\"bieznik\":\"AW 305\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":20,\"cenaZakupu\":775.2,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"340/55-16\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"340\",\"profil\":55,\"srednica\":16,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":\"128/140\",\"indeksPredkosci\":\"A8/A8\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":78.04,\"indeks1\":\"128/140\",\"indeks2\":\"A8/A8\",\"indeksy\":\"128A8/140A8\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"50\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"219805\",\"_policyVersion\":2,\"_sourceKey\":\"3d2edbbc98295bfd5f0af0400fb79f8dff8788f8c89724a7332acaca4d3b1caf\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8059971014990",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_13417800",
+      "nazwa": "710/50R26.5 MITAS AGRITERRA ULTRA 170D TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 8,
+      "stanNowy": 7,
+      "cenaZakupuStara": 4092,
+      "cenaZakupuNowa": 4092,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 710/50R26.5 Mitas AGRITERRA ULTRA 170D TL SB → 710/50R26.5 MITAS AGRITERRA ULTRA 170D TL",
+      "snapshotJson": "{\"kod\":\"MO2_13417800\",\"kodDostawcy\":\"13417800\",\"ean\":\"0440000117795\",\"eanRaw\":\"0440000117795\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"710/50R26.5 MITAS AGRITERRA ULTRA 170D TL\",\"marka\":\"MITAS\",\"model\":\"AGRITERRA ULTRA\",\"bieznik\":\"AGRITERRA ULTRA\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":7,\"cenaZakupu\":4092,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"710/50R26.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"710\",\"profil\":50,\"srednica\":26.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"170\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":138.31,\"indeks1\":\"170\",\"indeks2\":\"D\",\"indeksy\":\"170D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":190,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"373390\",\"_policyVersion\":2,\"_sourceKey\":\"4ca1ab5d99a0c9a513bd9632ba181a11a5ebd9b6ec5b2e29ea90c69cf5243c30\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "0440000117795",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "nowa",
+      "kod": "MO2_13456",
+      "nazwa": "315/80R22.5 FIRESTONE FD833 156K/150K 3PMSF DRIVE",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": null,
+      "stanNowy": 7,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1638,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": null,
+      "powod": "Nowa pozycja w cenniku",
+      "snapshotJson": "{\"kod\":\"MO2_13456\",\"kodDostawcy\":\"13456\",\"ean\":\"3286341345612\",\"eanRaw\":\"3286341345612\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"315/80R22.5 FIRESTONE FD833 156K/150K 3PMSF DRIVE\",\"marka\":\"FIRESTONE\",\"model\":\"FD833\",\"bieznik\":\"FD833\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":7,\"cenaZakupu\":1638,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"315/80R22.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"315\",\"profil\":80,\"srednica\":22.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"156/150\",\"indeksPredkosci\":\"K/K\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":107.55,\"indeks1\":\"156/150\",\"indeks2\":\"K/K\",\"indeksy\":\"156K/150K\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":0,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"D\",\"labelWet\":\"B\",\"labelNoise\":\"75dB\",\"labelNoiseClass\":\"2\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"7d1cd578d47ba34c585c01c4c4c4a35cc625668751ba77399a11dab5bebf013d\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "3286341345612",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_1370",
+      "nazwa": "205/75R17.5 FALKEN RI151 124/122M 3PMSF M+S",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 3,
+      "stanNowy": 3,
+      "cenaZakupuStara": 663,
+      "cenaZakupuNowa": 663,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 205/75R17.5 Falken RI151 124M/122M 3PMSF M+S → 205/75R17.5 FALKEN RI151 124/122M 3PMSF M+S",
+      "snapshotJson": "{\"kod\":\"MO2_1370\",\"kodDostawcy\":\"1370\",\"ean\":\"4250427424965\",\"eanRaw\":\"4250427424965\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"205/75R17.5 FALKEN RI151 124/122M 3PMSF M+S\",\"marka\":\"FALKEN\",\"model\":\"RI151\",\"bieznik\":\"RI151\",\"kategoria\":\"Ciężarowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":3,\"cenaZakupu\":663,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"205/75R17.5\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"205\",\"profil\":75,\"srednica\":17.5,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"124/122\",\"indeksPredkosci\":\"M\",\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":75.21,\"indeks1\":\"124/122\",\"indeks2\":\"M\",\"indeksy\":\"124M/122M\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"25.2\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":\"E\",\"labelWet\":\"C\",\"labelNoise\":\"72dB\",\"labelNoiseClass\":\"B\",\"labelIce\":null,\"labelSnow\":\"Tak\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":\"Tak\",\"snow3pmsf\":\"Tak\",\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"257213\",\"_policyVersion\":2,\"_sourceKey\":\"8d5b4d21237ab82edaa99159dab11b9975d2d13574a2eb7538c004203d7c1ccb\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "4250427424965",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "blad",
+      "kod": "MO2_JMK_91010",
+      "nazwa": "180/60-10 CONTINENTAL SC20",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": null,
+      "stanNowy": 1,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1024.92,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "powod": "Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO2_JMK_91010\",\"kodDostawcy\":\"13760840000\",\"ean\":\"0440000121105\",\"eanRaw\":\"0440000121105\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"180/60-10 CONTINENTAL SC20\",\"marka\":\"CONTINENTAL\",\"model\":\"SC20\",\"bieznik\":\"SC20\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":1024.92,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"180/60-10\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"180\",\"profil\":60,\"srednica\":10,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":47,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"2012\",\"waga\":0,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"b290db53ece6fc4f00627e9cd563acda7350242163ba68c21eab99bf34017091\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.\",\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "0440000121105",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "blad",
+      "kod": "MO2_JMK_92950",
+      "nazwa": "180/60-10 CONTINENTAL SC20",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": null,
+      "stanNowy": 1,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 1024.92,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "powod": "Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO2_JMK_92950\",\"kodDostawcy\":\"13760840000\",\"ean\":\"0440000124953\",\"eanRaw\":\"0440000124953\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"180/60-10 CONTINENTAL SC20\",\"marka\":\"CONTINENTAL\",\"model\":\"SC20\",\"bieznik\":\"SC20\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":1024.92,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"180/60-10\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"180\",\"profil\":60,\"srednica\":10,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":47,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"2017\",\"waga\":0,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"d45707ff7f14338b9b2a13f589c4964057e883d3e83e4ca7ad13824e3d7ae97a\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.\",\"_candidates\":[{\"kod\":\"MO2_13760840000\",\"nazwa\":\"180/60-10 CONTINENTAL SC20\",\"marka\":\"CONTINENTAL\",\"model\":\"SC20\",\"rozmiar\":\"180/60-10\",\"dot\":\"2017\",\"ean\":\"0440000124953\"}],\"_completeSource\":false}",
+      "eanRaw": "0440000124953",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "blad",
+      "kod": "MO2_JMK_92951",
+      "nazwa": "18x7-8 CONTINENTAL SC20 MILEAGE+",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": null,
+      "stanNowy": 1,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 692.77,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "powod": "Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO2_JMK_92951\",\"kodDostawcy\":\"13763530000\",\"ean\":\"0440000124960\",\"eanRaw\":\"0440000124960\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"18x7-8 CONTINENTAL SC20 MILEAGE+\",\"marka\":\"CONTINENTAL\",\"model\":\"SC20 MILEAGE+\",\"bieznik\":\"SC20 MILEAGE+\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":692.77,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"18x7-8\",\"rozmiarAlternatywny\":\"180/70-8\",\"szerokosc\":\"7\",\"profil\":null,\"srednica\":8,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":49.84,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"2011\",\"waga\":0,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"d27769d0cbd029939fddeff35bf1c91b3350e546f5f869b2c401fca027145d83\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.\",\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "0440000124960",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "blad",
+      "kod": "MO2_JMK_92952",
+      "nazwa": "18x7-8 CONTINENTAL SC20 MILEAGE+",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": null,
+      "stanNowy": 1,
+      "cenaZakupuStara": null,
+      "cenaZakupuNowa": 692.77,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": null,
+      "ostrzezenie": "Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "powod": "Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.",
+      "snapshotJson": "{\"kod\":\"MO2_JMK_92952\",\"kodDostawcy\":\"13763530000\",\"ean\":\"0440000125042\",\"eanRaw\":\"0440000125042\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"18x7-8 CONTINENTAL SC20 MILEAGE+\",\"marka\":\"CONTINENTAL\",\"model\":\"SC20 MILEAGE+\",\"bieznik\":\"SC20 MILEAGE+\",\"kategoria\":\"Przemysłowe\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":692.77,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"18x7-8\",\"rozmiarAlternatywny\":\"180/70-8\",\"szerokosc\":\"7\",\"profil\":null,\"srednica\":8,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":null,\"indeksPredkosci\":null,\"tlTt\":null,\"vfIf\":null,\"pr\":null,\"wysokosc\":49.84,\"indeks1\":null,\"indeks2\":null,\"indeksy\":null,\"dot\":\"2012\",\"waga\":0,\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"_policyVersion\":2,\"_sourceKey\":\"9d49f3c2076d317b11e7edfb10c827f3132e8439423ddef02d719e3cf1ce7a69\",\"_catalogVersion\":null,\"_eanIssue\":null,\"_matchIssue\":\"Ten EAN występuje w katalogu, ale cechy są inne lub niepełne. Sprawdź dopasowanie.\",\"_candidates\":[{\"kod\":\"MO2_13763530000\",\"nazwa\":\"18x7-8 CONTINENTAL SC20 MILEAGE+\",\"marka\":\"CONTINENTAL\",\"model\":\"SC20 MILEAGE+\",\"rozmiar\":\"18x7-8\",\"dot\":\"2012\",\"ean\":\"0440000125042\"}],\"_completeSource\":false}",
+      "eanRaw": "0440000125042",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_1472500",
+      "nazwa": "220/60-12 TRELLEBORG T539 88A8 TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 1,
+      "stanNowy": 1,
+      "cenaZakupuStara": 583.1,
+      "cenaZakupuNowa": 583.1,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 220/60-12 Trelleborg T539 SOFT GRIP 88A8 TL → 220/60-12 TRELLEBORG T539 88A8 TL",
+      "snapshotJson": "{\"kod\":\"MO2_1472500\",\"kodDostawcy\":\"1472500\",\"ean\":\"8059971017724\",\"eanRaw\":\"8059971017724\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"220/60-12 TRELLEBORG T539 88A8 TL\",\"marka\":\"TRELLEBORG\",\"model\":\"T539\",\"bieznik\":\"T539\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":1,\"cenaZakupu\":583.1,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"220/60-12\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"220\",\"profil\":60,\"srednica\":12,\"konstrukcja\":\"Diagonalna\",\"indeksNosnosci\":\"88\",\"indeksPredkosci\":\"A8\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":56.88,\"indeks1\":\"88\",\"indeks2\":\"A8\",\"indeksy\":\"88A8\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"24\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":\"\",\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"858802\",\"_policyVersion\":2,\"_sourceKey\":\"df01d5247b0198947d5c21b54cd6aad69f24082f17edde0e07ff7bdf3800faad\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "8059971017724",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_152.28.691",
+      "nazwa": "16.9R34 ALLIANCE AGRISTAR II 142D TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 2,
+      "stanNowy": 2,
+      "cenaZakupuStara": 2145,
+      "cenaZakupuNowa": 2145,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 420/85R34 Alliance Agri Star II 142D Stubble Guard TL → 16.9R34 ALLIANCE AGRISTAR II 142D TL",
+      "snapshotJson": "{\"kod\":\"MO2_152.28.691\",\"kodDostawcy\":\"152.28.691\",\"ean\":\"0440000088538\",\"eanRaw\":\"0440000088538\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"16.9R34 ALLIANCE AGRISTAR II 142D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":2,\"cenaZakupu\":2145,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"16.9R34\",\"rozmiarAlternatywny\":\"420/85R34\",\"szerokosc\":\"16.9\",\"profil\":null,\"srednica\":34,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"142\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":157.62,\"indeks1\":\"142\",\"indeks2\":\"D\",\"indeksy\":\"142D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"130\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"564329\",\"_policyVersion\":2,\"_sourceKey\":\"dd5472801f4ed8c906818d78e5cc034683d0c0251dcef45fc462739df63c6f97\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "0440000088538",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_152.28.692",
+      "nazwa": "16.9R34 ALLIANCE AGRISTAR II 147D TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 2,
+      "stanNowy": 2,
+      "cenaZakupuStara": 2145,
+      "cenaZakupuNowa": 2145,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 420/85R34 Alliance AGRISTAR II 147D Stubble Guard TL → 16.9R34 ALLIANCE AGRISTAR II 147D TL",
+      "snapshotJson": "{\"kod\":\"MO2_152.28.692\",\"kodDostawcy\":\"152.28.692\",\"ean\":\"0440000089245\",\"eanRaw\":\"0440000089245\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"16.9R34 ALLIANCE AGRISTAR II 147D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":2,\"cenaZakupu\":2145,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"16.9R34\",\"rozmiarAlternatywny\":\"420/85R34\",\"szerokosc\":\"16.9\",\"profil\":null,\"srednica\":34,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"147\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":157.62,\"indeks1\":\"147\",\"indeks2\":\"D\",\"indeksy\":\"147D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"130\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"653963\",\"_policyVersion\":2,\"_sourceKey\":\"09734169c9a0ac670c38dbadd260c9e00d53df9788f2a075297c120605ec1e19\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "0440000089245",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "typZmiany": "zmiana_kluczowa",
+      "kod": "MO2_152.28.812",
+      "nazwa": "280/70R20 ALLIANCE AGRISTAR II 116D TL",
+      "dostawca": "MO2",
+      "magazyn": "Magazyn 1",
+      "magazynRaw": "Magazyn 1",
+      "stanStary": 2,
+      "stanNowy": 2,
+      "cenaZakupuStara": 728,
+      "cenaZakupuNowa": 728,
+      "cenaSprzedazyNowa": null,
+      "zmianaPct": 0,
+      "ostrzezenie": null,
+      "powod": "nazwa: 280/70R20 Alliance AGRISTAR II 116D Stubble Guard TL → 280/70R20 ALLIANCE AGRISTAR II 116D TL",
+      "snapshotJson": "{\"kod\":\"MO2_152.28.812\",\"kodDostawcy\":\"152.28.812\",\"ean\":\"0440000124274\",\"eanRaw\":\"0440000124274\",\"_supplierEanOriginal\":null,\"_eanLossy\":false,\"nazwa\":\"280/70R20 ALLIANCE AGRISTAR II 116D TL\",\"marka\":\"ALLIANCE\",\"model\":\"AGRI STAR II\",\"bieznik\":\"AGRI STAR II\",\"kategoria\":\"Rolnicze\",\"zastosowanie\":null,\"magazyn\":\"Magazyn 1\",\"magazynRaw\":\"Magazyn 1\",\"stan\":2,\"cenaZakupu\":728,\"uwagaCena\":null,\"cenaSprzedazy\":null,\"rozmiar\":\"280/70R20\",\"rozmiarAlternatywny\":null,\"szerokosc\":\"280\",\"profil\":70,\"srednica\":20,\"konstrukcja\":\"Radialna\",\"indeksNosnosci\":\"116\",\"indeksPredkosci\":\"D\",\"tlTt\":\"TL\",\"vfIf\":null,\"pr\":null,\"wysokosc\":90,\"indeks1\":\"116\",\"indeks2\":\"D\",\"indeksy\":\"116D\",\"dot\":\"nie starsza niz 3 lata\",\"waga\":\"40\",\"sf\":null,\"sb\":null,\"hf\":null,\"ls\":null,\"hs\":null,\"nro\":null,\"cho\":null,\"cfo\":null,\"stubbleResistant\":null,\"labelRolling\":null,\"labelWet\":null,\"labelNoise\":null,\"labelNoiseClass\":null,\"labelIce\":null,\"labelSnow\":null,\"rodzaj\":null,\"linkZdjecia\":null,\"oznaczenieBieznika\":null,\"sezon\":null,\"ms\":null,\"snow3pmsf\":null,\"wentyl\":null,\"blokowaneFormyPlatnosci\":\"201, 202, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219\",\"eanIsValid\":1,\"eanSourceStatus\":\"ok\",\"eanCandidates\":null,\"kodImportu\":\"793850\",\"_policyVersion\":2,\"_sourceKey\":\"e3a78627382a7f96da4b16674c8b0bcb03a1f49becb14ed187ac1962f6e3bbde\",\"_catalogVersion\":\"<_catalogVersion: sha256 zależne od przebiegu>\",\"_eanIssue\":null,\"_matchIssue\":null,\"_candidates\":[],\"_completeSource\":false}",
+      "eanRaw": "0440000124274",
+      "eanIsValid": 1,
+      "eanSourceStatus": "ok",
+      "eanCandidates": null,
+      "edytowanePola": null,
+      "utworzono": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "skasowane": [],
+  "historiaCen": [
+    {
+      "id": 1,
+      "produktId": 102902,
+      "kod": "MO2_05128600000",
+      "ean": "4019238099546",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "CONTI ECO HS 5",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "164",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 2071.79,
+      "cenaSprzedazy": 2701,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 2,
+      "produktId": 104798,
+      "kod": "MO2_05153280000",
+      "ean": "4019238662443",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "CONTI CROSSTRAC 3",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160/158",
+      "indeksPredkosci": "K/L",
+      "kategoria": "ciężarowe",
+      "cenaZakupu": 2007,
+      "cenaSprzedazy": 2616,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 3,
+      "produktId": 102897,
+      "kod": "MO2_05322730000",
+      "ean": "4019238071139",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "CONTI HYBRID HT5",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "164",
+      "indeksPredkosci": "K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1811.74,
+      "cenaSprzedazy": 2362,
+      "stan": 7,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 4,
+      "produktId": 102889,
+      "kod": "MO2_07020880000",
+      "ean": "0440000055615",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "IC40",
+      "rozmiar": "18x7-8",
+      "indeksNosnosci": "125",
+      "indeksPredkosci": "A5",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 423.4,
+      "cenaSprzedazy": 552,
+      "stan": 6,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 5,
+      "produktId": 102887,
+      "kod": "MO2_07021060000",
+      "ean": "0440000055639",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "IC40",
+      "rozmiar": "6.50-10",
+      "indeksNosnosci": "128",
+      "indeksPredkosci": "A5",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 519.03,
+      "cenaSprzedazy": 676,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 6,
+      "produktId": 102885,
+      "kod": "MO2_07021360000",
+      "ean": "0440000055653",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "IC40",
+      "rozmiar": "27x10-12",
+      "indeksNosnosci": "152",
+      "indeksPredkosci": "A5",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 1254.14,
+      "cenaSprzedazy": 1635,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 7,
+      "produktId": 102876,
+      "kod": "MO2_100054",
+      "ean": "3528701000541",
+      "dostawca": "MO2",
+      "marka": "MICHELIN",
+      "model": "XMCL",
+      "rozmiar": "340/80R18",
+      "indeksNosnosci": "143/143",
+      "indeksPredkosci": "A8/B",
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 2378.77,
+      "cenaSprzedazy": 3101,
+      "stan": 2,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 8,
+      "produktId": 102852,
+      "kod": "MO2_1013309710000",
+      "ean": "8590341004123",
+      "dostawca": "MO2",
+      "marka": "MITAS",
+      "model": "IM04",
+      "rozmiar": "15.0/55-17",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 884.4,
+      "cenaSprzedazy": 1153,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 9,
+      "produktId": 102842,
+      "kod": "MO2_10336",
+      "ean": "3286341033618",
+      "dostawca": "MO2",
+      "marka": "DAYTON",
+      "model": "D800M",
+      "rozmiar": "315/80R22.5",
+      "indeksNosnosci": "156/150",
+      "indeksPredkosci": "K/K",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1026,
+      "cenaSprzedazy": 1337,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 10,
+      "produktId": 102837,
+      "kod": "MO2_10376",
+      "ean": "3286341037616",
+      "dostawca": "MO2",
+      "marka": "BRIDGESTONE",
+      "model": "RS2",
+      "rozmiar": "245/70R17.5",
+      "indeksNosnosci": "136/134",
+      "indeksPredkosci": "M/M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1053.93,
+      "cenaSprzedazy": 1374,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 11,
+      "produktId": 102825,
+      "kod": "MO2_10861",
+      "ean": "3286341086119",
+      "dostawca": "MO2",
+      "marka": "BRIDGESTONE",
+      "model": "RT1",
+      "rozmiar": "245/70R17.5",
+      "indeksNosnosci": "143/146",
+      "indeksPredkosci": "J/F",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1110.36,
+      "cenaSprzedazy": 1447,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 12,
+      "produktId": 104796,
+      "kod": "MO2_112513",
+      "ean": "3528701125138",
+      "dostawca": "MO2",
+      "marka": "MICHELIN",
+      "model": "X MULTI T",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160",
+      "indeksPredkosci": "K",
+      "kategoria": "ciężarowe",
+      "cenaZakupu": 2215.97,
+      "cenaSprzedazy": 2889,
+      "stan": 1,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 13,
+      "produktId": 102762,
+      "kod": "MO2_13482",
+      "ean": "3286341348217",
+      "dostawca": "MO2",
+      "marka": "FIRESTONE",
+      "model": "FS411",
+      "rozmiar": "205/75R17.5",
+      "indeksNosnosci": "124/122",
+      "indeksPredkosci": "M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 695.61,
+      "cenaSprzedazy": 906,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 14,
+      "produktId": 102759,
+      "kod": "MO2_13491",
+      "ean": "3286341349115",
+      "dostawca": "MO2",
+      "marka": "FIRESTONE",
+      "model": "FD611",
+      "rozmiar": "205/75R17.5",
+      "indeksNosnosci": "124/122",
+      "indeksPredkosci": "M/M",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 707.4,
+      "cenaSprzedazy": 937,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 15,
+      "produktId": 102758,
+      "kod": "MO2_13496",
+      "ean": "3286341349610",
+      "dostawca": "MO2",
+      "marka": "BRIDGESTONE",
+      "model": "ECO HT2",
+      "rozmiar": "385/65R22.5",
+      "indeksNosnosci": "160/158",
+      "indeksPredkosci": "K/L",
+      "kategoria": "Ciężarowe",
+      "cenaZakupu": 1775.8,
+      "cenaSprzedazy": 2315,
+      "stan": 8,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 16,
+      "produktId": 102756,
+      "kod": "MO2_13502900",
+      "ean": "0440000124342",
+      "dostawca": "MO2",
+      "marka": "MITAS",
+      "model": "TR08",
+      "rozmiar": "550/60-22.5",
+      "indeksNosnosci": "171",
+      "indeksPredkosci": "A8",
+      "kategoria": "Rolnicze",
+      "cenaZakupu": 1993.2,
+      "cenaSprzedazy": 2598,
+      "stan": 3,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 17,
+      "produktId": 102747,
+      "kod": "MO2_13760580000",
+      "ean": "0440000009403",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "SC20",
+      "rozmiar": "125/75-8",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 548.96,
+      "cenaSprzedazy": 715,
+      "stan": 0,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 18,
+      "produktId": 102735,
+      "kod": "MO2_13763450000",
+      "ean": "0440000006242",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "SC20+",
+      "rozmiar": "125/75-8",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 422.67,
+      "cenaSprzedazy": 551,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    },
+    {
+      "id": 19,
+      "produktId": 102732,
+      "kod": "MO2_13763510000",
+      "ean": "0440000056049",
+      "dostawca": "MO2",
+      "marka": "CONTINENTAL",
+      "model": "SC20+",
+      "rozmiar": "18x7-8",
+      "indeksNosnosci": null,
+      "indeksPredkosci": null,
+      "kategoria": "Przemysłowe",
+      "cenaZakupu": 713.21,
+      "cenaSprzedazy": 929,
+      "stan": 4,
+      "zarejestrowanoAt": "<utworzono: jeden znacznik na przebieg>"
+    }
+  ],
+  "zmianyProduktow": [
+    {
+      "id": 101402,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101459,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101464,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101466,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101473,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101480,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101482,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101492,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101517,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101526,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101527,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101674,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101687,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101691,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101692,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101744,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101766,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101770,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101801,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101822,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101830,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101850,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101881,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101884,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101891,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101906,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101942,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101948,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101950,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101952,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101955,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101965,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 101987,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102077,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102084,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102118,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102137,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102149,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102151,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102157,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102183,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102190,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102210,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102236,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102241,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102247,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102261,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102280,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102329,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102345,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102405,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102423,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102424,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102444,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102450,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102506,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102519,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102546,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102555,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102587,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102601,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102660,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102679,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102732,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.892Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102735,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.889Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102747,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-05T08:38:31.019Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102752,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102756,
+      "zmiany": {
+        "stan": {
+          "przed": 5,
+          "po": 3
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.858Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102758,
+      "zmiany": {
+        "stan": {
+          "przed": 9,
+          "po": 8
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.855Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102759,
+      "zmiany": {
+        "cenaZakupu": {
+          "przed": 719.19,
+          "po": 707.4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T10:44:40.200Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102762,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-10T12:45:23.290Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102780,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102782,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102825,
+      "zmiany": {
+        "stan": {
+          "przed": 3,
+          "po": 1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-13T11:45:24.001Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102828,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102834,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102837,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 0
+        },
+        "nieobecnoscPodRzad": {
+          "przed": 2,
+          "po": 0
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-06T11:45:23.565Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102842,
+      "zmiany": {
+        "stan": {
+          "przed": 2,
+          "po": 1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.719Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102852,
+      "zmiany": {
+        "stan": {
+          "przed": 5,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.707Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102865,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102873,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 102876,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.677Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102885,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.665Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102887,
+      "zmiany": {
+        "stan": {
+          "przed": 5,
+          "po": 4
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-04T14:30:30.663Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102889,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 6
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-07T13:44:40.880Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102897,
+      "zmiany": {
+        "stan": {
+          "przed": 9,
+          "po": 7
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T11:44:40.185Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 102902,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-08-12T11:44:40.185Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104608,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104645,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104646,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104647,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104656,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104658,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104659,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104723,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104795,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104796,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 1
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-31T06:48:08.800Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104797,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 104798,
+      "zmiany": {
+        "stan": {
+          "przed": 4,
+          "po": 2
+        },
+        "dataAktualizacji": {
+          "przed": "2026-07-31T06:48:08.805Z",
+          "po": "<utworzono: jeden znacznik na przebieg>"
+        }
+      }
+    },
+    {
+      "id": 104997,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 105010,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 105030,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 105031,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    },
+    {
+      "id": 105034,
+      "zmiany": {
+        "nieobecnoscPodRzad": {
+          "przed": 1,
+          "po": 0
+        }
+      }
+    }
+  ]
+}

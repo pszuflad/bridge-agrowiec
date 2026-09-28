@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/import-archive/file/2026-09/NIE_MA__takiego.csv",
+  "method": "GET",
+  "status": 404,
+  "json": true,
+  "body": {
+    "ok": false,
+    "error": "Nie znaleziono pliku"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Poprawny kształt id, brak pliku (:232)."
+}

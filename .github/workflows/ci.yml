@@ -1,0 +1,92 @@
+name: CI
+
+# GATE mechaniczny odbudowy: testy backendu i build frontendu na każdym PR i push do develop.
+# Włącz branch protection na develop (Settings > Branches): wymagaj zielonego "backend" i "frontend".
+# Dopóki rebuild/ nie ma aplikacji (przed I1), joby przechodzą trywialnie (nic do testowania).
+
+on:
+  pull_request:
+    branches: [develop]
+  push:
+    branches: [develop]
+
+jobs:
+  # Gałąź PR-a musi zawierać całą bazę (CLAUDE.md, „Przed każdym PR"). Przy kilku kartach naraz
+  # develop przesuwa się w trakcie roboty i PR-y przychodzą z konfliktami — ten job wyłapuje to
+  # niezależnie od maszyny autora i od tego, czy ma włączone hooki repo (tools/wlacz-hooki.sh).
+  synchronizacja:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Gałąź zawiera całe origin/${{ github.base_ref }}
+        run: |
+          git fetch -q --no-tags origin "$GITHUB_BASE_REF"
+          if git merge-base --is-ancestor "origin/$GITHUB_BASE_REF" HEAD; then
+            echo "OK — gałąź zawiera całe origin/$GITHUB_BASE_REF."
+          else
+            brakuje=$(git rev-list --count "HEAD..origin/$GITHUB_BASE_REF")
+            echo "::error::Gałąź nie zawiera $brakuje commit(ów) z origin/$GITHUB_BASE_REF. Scal bazę (tools/sync-z-develop.sh), przebiegnij bramki i wypchnij ponownie."
+            exit 1
+          fi
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wykryj rebuild/backend
+        id: det
+        run: |
+          if [ -f rebuild/backend/package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@v4
+        if: steps.det.outputs.exists == 'true'
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: rebuild/backend/package-lock.json
+      - name: Install + lint + typecheck + test + build
+        if: steps.det.outputs.exists == 'true'
+        working-directory: rebuild/backend
+        run: |
+          npm ci
+          npm run lint --if-present
+          npm run typecheck --if-present
+          # Raport JSON obok zwykłego wyjścia — karmi budżety czasu z następnego kroku (ticket 132).
+          npx vitest run --reporter=default --reporter=json --outputFile.json="$RUNNER_TEMP/wyniki-testow.json"
+          npm run build --if-present
+      - name: Budżety czasu testów
+        if: steps.det.outputs.exists == 'true' && always()
+        run: node tools/czas-testow.cjs "$RUNNER_TEMP/wyniki-testow.json"
+      - name: Backendu jeszcze nie ma (I1)
+        if: steps.det.outputs.exists != 'true'
+        run: echo "rebuild/backend nie istnieje — I1 niezrobione. CI zielone (nic do testowania)."
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wykryj rebuild/frontend
+        id: det
+        run: |
+          if [ -f rebuild/frontend/package.json ]; then echo "exists=true" >> "$GITHUB_OUTPUT"; else echo "exists=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/setup-node@v4
+        if: steps.det.outputs.exists == 'true'
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: rebuild/frontend/package-lock.json
+      - name: Install + lint + typecheck + test + build
+        if: steps.det.outputs.exists == 'true'
+        working-directory: rebuild/frontend
+        run: |
+          npm ci
+          npm run lint --if-present
+          npm run typecheck --if-present   # pełny: src + test + pliki konfiguracyjne
+          npm test --if-present
+          npm run build                    # sam typecheck src/ + vite build
+      - name: Frontendu jeszcze nie ma (I1)
+        if: steps.det.outputs.exists != 'true'
+        run: echo "rebuild/frontend nie istnieje — I1 niezrobione. CI zielone (nic do testowania)."

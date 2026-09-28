@@ -1,0 +1,194 @@
+import { z } from "zod";
+
+/**
+ * Konfiguracja z zmiennych środowiskowych.
+ *
+ * ODSTĘPSTWO OD ORYGINAŁU (zatwierdzone, plan.md O2): oryginał miał
+ * `process.env.JWT_SECRET || "bridge-agrowiec-secret-2026"` (deminified/backend-index.cjs:47853).
+ * Zahardkodowany fallback pozwala każdemu z dostępem do kodu podrobić dowolny token,
+ * więc tutaj JWT_SECRET jest WYMAGANY — bez niego serwer nie wstaje (fail-fast).
+ */
+const listaOriginow = z
+  .string()
+  .default("")
+  .transform((s) =>
+    s
+      .split(",")
+      .map((o) => o.trim())
+      .filter(Boolean),
+  );
+
+const flagaBool = z
+  .enum(["true", "false", "1", "0"])
+  .transform((v) => v === "true" || v === "1");
+
+/** Ta sama składnia, ale z domyślnym „wyłączone" — dla przełączników schedulera. */
+const flagaBoolDomyslnieWylaczona = z
+  .enum(["true", "false", "1", "0"])
+  .default("false")
+  .transform((v) => v === "true" || v === "1");
+
+const schemaEnvBazowe = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  HOST: z.string().min(1).default("127.0.0.1"),
+  PORT: z.coerce.number().int().min(1).max(65535).default(5001),
+  DB_PATH: z.string().min(1),
+  JWT_SECRET: z.string().min(1, "JWT_SECRET jest wymagany — patrz .env.example"),
+  CORS_ORIGINS: listaOriginow,
+  COOKIE_SECURE: flagaBool.optional(),
+  // Katalog archiwum plików importu. Oryginał trzyma go obok `__dirname`
+  // (mirror/backend/archive_module.cjs:24); u nas musi być konfigurowalny, bo po
+  // `npm run build` `__dirname` wskazuje `dist/` (plan.md D11).
+  IMPORT_ARCHIVE_DIR: z.string().min(1).optional(),
+  /**
+   * Automatyczny polling dostawców URL (port `D4()`, blok 3f-3) — DOMYŚLNIE WYŁĄCZONY.
+   *
+   * ODSTĘPSTWO ŚWIADOME, decyzja zaklepana 2026-09-01 (roadmapa §5, blok 3f): produkcja
+   * przełącznika nie ma, automat startuje tam bezwarunkowo. U nas musi być jawnie włączony,
+   * bo włączony na stagingu odpytywałby REALNE serwery pięciu dostawców co 60 min,
+   * podmieniając dane pod Anią w trakcie testów, i — przy braku dławika alertów (decyzja
+   * 3f-2) — zalewałby tabelę alertów tempem ~24 wierszy na dobę na padniętego dostawcę.
+   */
+  IMPORT_SCHEDULER: flagaBoolDomyslnieWylaczona,
+  /**
+   * Przebieg zaraz po starcie schedulera, poza cyklem — DOMYŚLNIE WYŁĄCZONY, działa
+   * wyłącznie razem z `IMPORT_SCHEDULER`.
+   *
+   * ODSTĘPSTWO ŚWIADOME, decyzja użytkownika 2026-09-01: oryginalne `D4()` stawia sam
+   * `setInterval` (`:48125`), więc po włączeniu automatu przez GODZINĘ nie dzieje się nic.
+   * Produkcji to nie dotyczy (proces żyje ciągle), ale na stagingu jest to różnica między
+   * „widzę, że działa" a „nie wiem, czy wystartowało". Osobna zmienna, żeby proces
+   * produkcyjny został 1:1 — przy obu domyślnych wartościach zachowanie jest identyczne
+   * jak w oryginale.
+   */
+  IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG: flagaBoolDomyslnieWylaczona,
+  /**
+   * Odstęp między przebiegami wygaszacza statusu promocji w MINUTACH (karta 14f).
+   * `0` wyłącza sam cykl — przebieg startowy zostaje.
+   *
+   * ⚠ DOMYŚLNIE WŁĄCZONY, inaczej niż `IMPORT_SCHEDULER` — i to jest świadome rozróżnienie,
+   * nie niekonsekwencja (decyzja użytkownika 2026-09-18). Scheduler jest domyślnie wyłączony,
+   * bo odpytywałby REALNE serwery dostawców i podmieniał dane pod Anią. Wygaszacz rusza
+   * WYŁĄCZNIE naszą bazę i JEST tą naprawą, o którą Ania poprosiła („data ma naprawdę kończyć
+   * promocje"); domyślnie wyłączony wróciłby jako zgłoszenie „daty nadal nie kończą promocji".
+   *
+   * Domyślne 5 minut wobec 60-minutowego odstępu importów daje 12-krotny margines na kryterium
+   * karty: okno, w którym wygasła promocja jeszcze obniża cenę przy imporcie, ma być krótsze
+   * niż odstęp między importami. Koszt przebiegu to jeden `SELECT` i `UPDATE` tylko dla
+   * wierszy, które faktycznie zmieniają status.
+   */
+  PROMO_WYGASZACZ_MINUTY: z.coerce.number().int().min(0).default(5),
+  /**
+   * ── Integracja Selly.pl (Iteracja 8a) ─────────────────────────────────────
+   *
+   * Sekrety klienta REST Selly — 1:1 z oryginałem (`mirror/backend/selly/client.cjs:21-24`),
+   * łącznie z nazwami zmiennych. OPCJONALNE, i to jest świadome: `assertConfig()`
+   * (`client.cjs:28-32`) rzuca dopiero przy PIERWSZYM wywołaniu API, więc brak konfiguracji
+   * daje 500 na sześciu trasach zewnętrznych, a nie martwy proces. Cztery trasy lokalne
+   * (`status`, `log`, `csv-status`, `generate-csv`) działają bez nich (plan.md D6).
+   */
+  /**
+   * Twarda blokada integracji Selly na poziomie ŚRODOWISKA — DOMYŚLNIE `wylaczony`.
+   *
+   * ODSTĘPSTWO ŚWIADOME, decyzja użytkownika 2026-09-04 (ticket
+   * `34-FEATURE-selly-blokada-srodowiska`, D2). Produkcja takiego przełącznika nie ma —
+   * tam integracja jest zawsze pełna. Wzorzec i uzasadnienie 1:1 jak przy `IMPORT_SCHEDULER`
+   * wyżej: staging stoi na TYM SAMYM VPS co produkcja i patrzy na TEN SAM sklep Selly, więc
+   * „brak sekretów" jest zabezpieczeniem przez NIEOBECNOŚĆ, a nie przez zakaz — skopiowanie
+   * `.env` z produkcji czyni staging żywym i nic tego nie sygnalizuje.
+   *
+   * Dlaczego domyślnie WYŁĄCZONY, mimo że produkcja działa inaczej: pomyłka w konfiguracji
+   * daje wtedy widoczny błąd („nie działa"), a nie cichy zapis do cudzego, żywego sklepu.
+   * Ta asymetria skutków przeważa nad wiernością wartości domyślnej.
+   *
+   *  - `wylaczony`    — klient odmawia KAŻDEJ operacji, także z poprawnymi sekretami;
+   *  - `tylko-odczyt` — przechodzą odczyty (w tym `sync-supplier` z `dry_run: true`),
+   *                     blokowane są wszystkie zapisy do sklepu;
+   *  - `pelny`        — zachowanie 1:1 z produkcją.
+   *
+   * Egzekwowane w `src/selly/tryb.ts`, wpinane w `app.ts`. Sekrety niżej są nadal wymagane —
+   * tryb ich nie zastępuje, tylko dokłada drugi zamek.
+   */
+  /**
+   * Harmonogram synchronizacji Selly (Tor 1 co 15 min + HH:55, Tor 2 o 04:30) — DOMYŚLNIE
+   * WYŁĄCZONY, wzorem `IMPORT_SCHEDULER`; produkcja włącza go jawnie (cutover).
+   *
+   * ODSTĘPSTWO ŚWIADOME W UMIEJSCOWIENIU (karta I15.8): oryginał nie ma tu żadnego
+   * przełącznika — `extensions.cjs:486-487` woła `installScheduler(_bridgeDb)` bezwarunkowo.
+   * U nas włączony harmonogram REALNIE ZAPISUJE do cudzego sklepu `agroopony.selly24.pl`,
+   * więc na stagingu i w testach musi milczeć, dopóki ktoś go świadomie nie włączy.
+   */
+  SELLY_SCHEDULER: flagaBoolDomyslnieWylaczona,
+  SELLY_TRYB: z.enum(["wylaczony", "tylko-odczyt", "pelny"]).default("wylaczony"),
+  SELLY_SHOP_URL: z.string().default(""),
+  SELLY_CLIENT_ID: z.string().default(""),
+  SELLY_CLIENT_SECRET: z.string().default(""),
+  SELLY_SCOPE: z.string().min(1).default("READWRITE"),
+  /**
+   * Codzienny eksport CSV dla Selly (pull po stronie marketplace'u): katalog, nazwa pliku
+   * i publiczny URL. Oryginał ma je zahardkodowane w DWÓCH miejscach
+   * (`mirror/backend/selly/routes.cjs:300-301` i `:361`) oraz w skrypcie generatora
+   * (`mirror/backend/generate_selly_export.cjs:8-9`).
+   *
+   * ODSTĘPSTWO ŚWIADOME (plan.md D4, decyzja użytkownika 2026-09-04): ścieżki idą do env
+   * z domyślnymi = wartości produkcyjne, więc przy pustym `.env` zachowanie jest identyczne
+   * jak w oryginale. Bez tego testy musiałyby pisać po `/home/admin`, a `csv-status` na
+   * każdym innym środowisku zwracałby „Brak pliku CSV" niezależnie od stanu faktycznego.
+   */
+  SELLY_CSV_DIR: z
+    .string()
+    .min(1)
+    .default("/home/admin/domains/agritires.eu/public_html/panel/ex-port-files"),
+  SELLY_CSV_PLIK: z.string().min(1).default("sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
+  SELLY_CSV_URL: z
+    .string()
+    .min(1)
+    .default("https://agritires.eu/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
+});
+
+/**
+ * Strażnik konfiguracji (finalny audyt 12e, D2b).
+ *
+ * Allowlista z gwiazdką znosi cały sens allowlisty: `middleware/cors.ts` odesłałby
+ * `Access-Control-Allow-Origin: *` razem z `Allow-Credentials: true`, czyli dokładnie tę
+ * dziurę oryginału (backend-index.cjs:48926-48930), którą odbudowa zamknęła.
+ *
+ * Uwaga na to, czego tu NIE MA: pusty `CORS_ORIGINS` jest stanem DOCELOWYM, a nie brakiem
+ * konfiguracji — staging i produkcja są same-origin (front i `/api` pod tą samą domeną przez
+ * proxy Apache), więc bez allowlisty middleware CORS w ogóle się nie montuje i przeglądarka
+ * blokuje cross-origin sama. Wymaganie allowlisty byłoby konfiguracją na wyrost. Pada
+ * wyłącznie jawna gwiazdka i wyłącznie w produkcji — lokalnie bywa wygodna i nie ma czego
+ * wykraść.
+ */
+const schemaEnv = schemaEnvBazowe.superRefine((env, ctx) => {
+  if (env.NODE_ENV === "production" && env.CORS_ORIGINS.includes("*")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["CORS_ORIGINS"],
+      message:
+        'nie może zawierać "*" w produkcji — wypisz konkretne originy albo zostaw pustą ' +
+        "(produkcja jest same-origin: front i /api pod tą samą domeną przez proxy Apache)",
+    });
+  }
+});
+
+export type Env = z.infer<typeof schemaEnv> & { cookieSecure: boolean };
+
+export function wczytajEnv(source: NodeJS.ProcessEnv = process.env): Env {
+  const wynik = schemaEnv.safeParse(source);
+  if (!wynik.success) {
+    const problemy = wynik.error.issues
+      .map((i) => `  - ${i.path.join(".") || "(env)"}: ${i.message}`)
+      .join("\n");
+    throw new Error(
+      `Nieprawidłowa konfiguracja środowiska:\n${problemy}\n` +
+        `Uzupełnij zmienne (wzór: rebuild/backend/.env.example).`,
+    );
+  }
+  const env = wynik.data;
+  return {
+    ...env,
+    // Domyślnie Secure w produkcji/stagingu (za proxy HTTPS), bez Secure lokalnie po HTTP.
+    cookieSecure: env.COOKIE_SECURE ?? env.NODE_ENV === "production",
+  };
+}

@@ -1,0 +1,11 @@
+{
+  "endpoint": "/api/me",
+  "method": "GET",
+  "status": 401,
+  "json": true,
+  "body": {
+    "error": "Nieautoryzowany"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Bez tokenu. Kontrakt 2.3 deklarował tu 200/400 — produkcja oddaje 401."
+}

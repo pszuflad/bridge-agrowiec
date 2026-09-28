@@ -115,6 +115,38 @@ Co godzinę serwer snapshotuje swój stan. Podgląd działania:
 tail -20 ~/bridge-sync/tools/vps-sync.log
 ```
 
+### 🧑 Sprawdź, czy cron nadal ISTNIEJE (panel DirectAdmin)
+
+> **Dlaczego to trzeba sprawdzać.** Producent potrafi „zniknąć" na dwa sposoby: (a) sam
+> **skrypt** się wywala (tak było 25.08–08.09: `grep '\.bak_pre_'` przestał trafiać i pod
+> `set -euo pipefail` skrypt ubijał się przed `git push` — naprawione), albo (b) **cron
+> zostaje usunięty/wyłączony** w panelu (przy zmianie planu, migracji konta itp.). Ten krok
+> sprawdza (b). Na tym VPS `crontab -e/-l` z CLI bywa **zablokowany** — wpisy crona żyją w
+> panelu DirectAdmin, więc sprawdzasz je TAM, nie przez `crontab -l`.
+
+1. Zaloguj się do **DirectAdmin** → **Advanced Features** → **Cron Jobs**
+   (pol. „Zadania Cron" / „Harmonogram zadań").
+2. Poszukaj na liście wpisu, którego **polecenie zawiera `vps-sync.sh`** (albo `bridge-sync`).
+   - **Jest** → sprawdź, że: harmonogram to `0 * * * *` (min=0, godzina=`*`, dzień/mies./dzień
+     tyg.=`*`), polecenie to dokładnie linia z bloku wyżej, i że wpis **nie jest wyłączony**
+     (DirectAdmin nie ma przełącznika „disabled" — wyłączony cron to zwykle zakomentowany
+     `#` na początku polecenia albo po prostu brak wpisu).
+   - **Brak / zakomentowany** → to jest przyczyna ciszy. Dodaj go: **Cron Jobs** → wypełnij
+     pola Minute=`0`, Hour=`*`, pozostałe `*`, a w polu polecenia wklej:
+     ```
+     /bin/bash -lc '$HOME/bridge-sync/tools/vps-sync.sh >> $HOME/bridge-sync/tools/vps-sync.log 2>&1'
+     ```
+     → **Add**.
+3. **Potwierdź, że pierwszy przebieg po naprawie przechodzi** (nie czekaj godziny — odpal ręcznie):
+   ```bash
+   /bin/bash -lc '$HOME/bridge-sync/tools/vps-sync.sh'
+   tail -20 ~/bridge-sync/tools/vps-sync.log
+   ```
+   Oczekiwane: w logu linia `… brak zmian` **albo** `… wypchnięto zmiany …`, i przychodzi mail.
+   **Brak nowego commita to też OK** — jeśli wszystkie zaległości są już w repo (`6872aea`),
+   producent nie ma czego pchać; ważne, że skrypt **kończy się bez błędu** (poprzednio wywalał
+   się w połowie). Jeśli w logu widać `UWAGA: mail nie wyszedł` — patrz sekcja o `sendmail`.
+
 ---
 
 ## Jak to wygląda w codziennej pracy
@@ -131,6 +163,10 @@ tail -20 ~/bridge-sync/tools/vps-sync.log
 - `knowledge/` (eksport z Perplexity) wgrywasz z laptopa — serwer go nie dotyka.
 - `snapshot.db` (pełna baza) NIE trafia do gita. Gdy potrzebujesz binarnej bazy
   lokalnie do analizy, użyj `tools/acquire.sh` z laptopa (pobierze ją przez SSH).
+- `mirror/backend/import_archive/` jest wykluczony z rsync (`tools/vps-sync.sh`) i z gita
+  (`.gitignore`) — zrzuty importu dostawców puchły w repo (bloat, usunięte commitem
+  `72957d7`). W drzewie roboczym tych plików już nie ma; próbki do gate'u charakteryzacji
+  parserów (I3) wyciąga się z historii gita (`git show '72957d7^:mirror/backend/import_archive/...'`).
 - Częstotliwość: „co godzinę" to punkt startowy. Zmiany Ani i tak są zachowane
   na serwerze (kopie `.bak` + `CHANGELOG.md`), więc rzadszy sync = tylko grubsza
   historia, nie utrata danych. Możesz dać `0 */2 * * *` (co 2 h) albo gęściej.
