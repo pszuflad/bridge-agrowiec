@@ -1,5 +1,5 @@
 ---
-description: Start a new feature or bugfix end-to-end (plan → impl → review → docs → PR)
+description: Ticket odbudowy Bridge end-to-end — wierne odtworzenie zachowania wg kontraktu/fixtures (plan → impl → review → docs → PR)
 argument-hint: <feature/bug description — be concrete>
 ---
 
@@ -8,6 +8,29 @@ You are **Master**. You drive a ticket end-to-end in this single chat. The user 
 User request:
 
 > $ARGUMENTS
+
+---
+
+## Kontekst odbudowy — WIERNE ODTWORZENIE, nie nowy feature
+
+**To NIE jest zwykły ticket „nowa funkcja".** Odbudowujemy istniejącą, działającą produkcję
+(„Bridge dla Agrowca") w nowym stosie `rebuild/`, zachowując jej zachowanie **1:1**. Domyślna
+reguła: **odtwarzasz udokumentowane zachowanie, nie wymyślasz nowego.** Każde odstępstwo od
+zastanego zachowania musi być **świadomą decyzją użytkownika** (Krok 3), nigdy przypadkiem czy
+„ulepszeniem" z własnej inicjatywy.
+
+**Źródła prawdy (czytaj je, nie zgaduj) — w kolejności wiarygodności:**
+- `contract/fixtures/` — nagrane odpowiedzi żywego backendu (kształt + zsanityzowane wartości). **Siatka bezpieczeństwa: to, co produkcja realnie zwraca.**
+- `contract/openapi.yaml` — zamrożony kontrakt API (ścieżki, metody, kształty request/response). Patrz też `contract/README.md`.
+- `docs/spec-backend.md`, `docs/spec-frontend.md` — zweryfikowana specyfikacja zachowania.
+- `rebuild/schema/001_schema.sql` — kanoniczny schemat bazy (zgodny z produkcją); pomocniczo `db/schema.sql`.
+- `docs/prompts/mapa-kodu-do-wiki.md` — mapa starego kodu (funkcje/pliki, nie numery linii).
+- `deminified/` (`backend-index.cjs`, `frontend-index.js`) + `mirror/backend`, `mirror/frontend` — zdeminifikowany oryginał: **ostateczne źródło, gdy specyfikacja milczy**. To jego zachowanie odtwarzasz.
+- `docs/rebuild-backlog.md` — świadome zmiany Ani. **Nanosisz TYLKO wpisy oznaczone ✅ TAK; „⬜ do decyzji" i „❌ NIE" pomijasz** (nie decydujesz o tym sam).
+
+**Rozstrzyganie sprzeczności:** fixtures/kontrakt (co produkcja realnie robi) **>** spec (nasz opis)
+**>** mapa kodu. Jeśli spec i oryginał się różnią — wierzysz oryginałowi i **zgłaszasz rozjazd
+użytkownikowi** zamiast po cichu wybierać.
 
 ---
 
@@ -21,6 +44,7 @@ User request:
 - **Cross-platform.** Assume the project may be developed on Windows, macOS, or Linux. Use shell syntax that works in the user's environment, prefer cross-platform tooling, avoid OS-specific paths in code/scripts. Other agents and the user may be working in parallel — assume the main project may be running, so you can only run tests safely.
 - **Save time** — parallelize independent work. Deliver fast (but priority is HIGHEST QUALITY).
 - Don't peek at env, secrets, tokens! — you can copy `.env` to the worktree, check whether secrets are set, how many characters they have, etc., but don't read them and don't display them.
+- **PR bez konfliktów to część roboty, nie życzenie.** Zanim wypchniesz gałąź i otworzysz PR, gałąź MUSI zawierać całe `origin/develop` (`tools/sync-z-develop.sh`, Krok 16). Konflikty rozwiązujesz Ty, a po scaleniu bramki lecą od nowa. Użytkownik dostaje PR gotowy do merge'a — nigdy „Resolve conflicts".
 - **Production quality** — high-quality code expected, no tech debt, current docs, and above all that the ticket works 100% after implementation (cross-platform) and doesn't break anything else.
 
 ## Worktree rules (CRITICAL)
@@ -37,16 +61,28 @@ User request:
 
 ### Step 1: Load main docs
 
-Start with `README.md` and `docs/INDEX.md` (if it exists) — that's your map. From there, decide which other docs are relevant for the request and read them. Common candidates: a vision/PRD doc, project conventions (e.g. `docs/CLAUDE.md`), testing strategy. Don't load huge specs in full — pick relevant **sections**. If the researcher later suggests other sections — read them then.
+Twoją mapą są **źródła prawdy odbudowy** wymienione w sekcji „Kontekst odbudowy" wyżej. Zacznij od nich — nie ma tu `README.md` ani `docs/INDEX.md`. Dla danego ticketa wybierz **właściwe sekcje** (nie ładuj całych specyfikacji ani `openapi.yaml` w całości):
+- ustal, których **endpointów/ekranów** dotyczy zadanie → odczytaj odpowiednie ścieżki w `contract/openapi.yaml` i pasujące pliki w `contract/fixtures/`;
+- odczytaj odpowiednie sekcje `docs/spec-backend.md` / `docs/spec-frontend.md`;
+- jeśli ticket realizuje kartę (`P7.4`, `PR.1`…) → `cat docs/karty/<ID>/*.md` (karta + wejścia
+  od innych kart; zob. `docs/karty/README.md`), a z roadmapy tylko blok jej iteracji;
+- sprawdź `docs/rebuild-backlog.md`, czy zadania nie dotyka któraś zdecydowana zmiana (✅/⬜/❌);
+- jeśli zadanie rusza schemat/dane → `rebuild/schema/001_schema.sql`.
+
+Jeśli researcher później wskaże inne sekcje — doczytasz wtedy.
 
 ### Step 2: Spawn researcher subagent
 
 Launch `Task` with the `researcher` agent. **Don't use `isolation: "worktree"`.** At this stage the ticket worktree doesn't exist yet — researcher works in the main repo (current cwd). Pass:
 - The user's request (exactly as above)
 - Key docs sections you identified in Step 1 (paths + section numbers)
-- Instruction: "analyze the codebase as it's **actually** implemented, don't rely on docs alone — docs are often stale. You work in the main repo (read-only), don't create a worktree."
+- Instrukcja (to jest odbudowa, nie greenfield): **„Ustal DOKŁADNE udokumentowane zachowanie, które nowy kod w `rebuild/` ma odtworzyć.** Źródła w kolejności: `contract/fixtures/` i `contract/openapi.yaml` (co produkcja realnie zwraca — wiążące), potem `docs/spec-*`, a gdy milczą — zdeminifikowany oryginał (`deminified/`, `mirror/backend`, `mirror/frontend`) wskazany przez `docs/prompts/mapa-kodu-do-wiki.md`. **Docs odbudowy są świeże i zweryfikowane — traktuj je jako wiarygodne, ale każdą tezę potwierdź w fixtures/oryginale.** Pracujesz w głównym repo (read-only), nie twórz worktree."
 
-You'll get a report: relevant files, existing patterns, risks, open questions.
+Raport researchera ma zawierać:
+- **Zakres kontraktu:** które ścieżki `openapi.yaml` i które pliki `contract/fixtures/` ten ticket musi spełnić (to potem gate testów w Kroku 9).
+- Które sekcje spec i które miejsca oryginału (`deminified/`, funkcje z mapy kodu) opisują to zachowanie.
+- Istniejące w `rebuild/` wzorce do ponownego użycia (jeśli już coś jest).
+- **Rozjazdy** spec↔oryginał↔fixtures oraz pytania otwarte (trafią do Kroku 3).
 
 ### Step 3: Ask the user questions
 
@@ -73,11 +109,57 @@ Scan `ls docs/tickets/` (if the folder doesn't exist — create it). The repo ma
 
 **CRITICAL: the number is GLOBALLY UNIQUE** — one counter for all types. Never repeat a number, even if another type already "had" it. No `BUG-6` next to `DOCS-6` or `12-BUG-x` next to `12-CHORE-y`. Every ticket gets a fresh number.
 
-To find max N across both formats:
+**⚠ RÓWNOLEGŁE KARTY — `ls docs/tickets/` SAM Z SIEBIE NIE WYSTARCZY.** Folder ticketa
+równoległej sesji leży w JEJ worktree i nie istnieje w głównym repo, dopóki jej PR się nie
+zmerguje. Skan samego `docs/tickets/` widzi więc tylko tickety ZAMKNIĘTE. Zdarzyło się to
+2026-09-03: trzy karty odczytały „max = 17" i wszystkie trzy wzięły numer 18
+(`18-FEATURE-widok-alerty`, `18-FEATURE-waga-gabarytowa`, `18-FEATURE-konfiguracja-config-spedycja`).
+
+Dlatego numer bierzesz JEDNYM poleceniem, które (a) skanuje wszystkie cztery źródła naraz
+i (b) **rezerwuje numer atomowo**. `mkdir` albo się uda, albo padnie — nie ma stanu pośredniego,
+więc przy dwóch kartach w tej samej sekundzie pierwsza wygrywa, a druga przeskakuje wyżej.
+Katalog rezerwacji leży w `.worktrees/` (jest w `.gitignore`, więc nie zaśmieca repo)
+i jest WSPÓLNY dla wszystkich kart, bo wszystkie dzielą jedno główne repo.
+
 ```bash
-ls docs/tickets/ 2>/dev/null | grep -oE '(^[0-9]+|-[0-9]+-)' | grep -oE '[0-9]+' | sort -n | tail -1
+# Uruchom w GŁÓWNYM repo, nie w worktree. Wypisze numer, który jest już Twój.
+mkdir -p .worktrees/.numery
+git fetch origin --quiet 2>/dev/null
+max=$( {
+    # tickety zamknięte + worktree żywych kart: "18-FEATURE-slug" albo legacy "FEATURE-18-slug"
+    { ls docs/tickets/ 2>/dev/null
+      git worktree list --porcelain | sed -n 's|.*/\.worktrees/||p'
+    } | sed -nE 's|^([0-9]+)-.*|\1|p; s|^[A-Z]+-([0-9]+)-.*|\1|p'
+    # rezerwacje innych kart
+    ls .worktrees/.numery 2>/dev/null | sed -nE 's|^([0-9]+)$|\1|p'
+    # branche ticketowe — TYLKO numer stojący ZARAZ po prefiksie typu
+    { git branch -a --format='%(refname:short)' 2>/dev/null
+      git ls-remote --heads origin 2>/dev/null | sed 's|.*refs/heads/||'
+    } | sed -nE 's#^(remotes/[^/]+/)?(feature|fix|refactor|docs|chore)/([0-9]+)-.*#\3#p'
+  } | sort -n | tail -1 )
+n=$(( ${max:-0} + 1 ))
+while ! mkdir .worktrees/.numery/$n 2>/dev/null; do n=$(( n + 1 )); done
+echo "NUMER TICKETA: $n"
 ```
-New ticket = max + 1 (or `1` if folder is empty/missing).
+
+⚠ Dwie pułapki, obie zweryfikowane biegiem tego skryptu — nie „upraszczaj" ich z powrotem:
+- **Numery z branchy dopasowuj TYLKO zaraz po prefiksie typu** (`feature/18-`), nigdy gołym
+  `-[0-9]+-`. W repo jest `chore/triaz-2026-08-25` (slug z procedury triażu jest datą) — luźny
+  wzorzec odczytał z niego „max = 2026" i przydzielił ticket numer 2027.
+- **W `sed` dla branchy delimiterem jest `#`, nie `|`**, bo `|` jest tu alternatywą w ERE.
+  Z `|` jako delimiterem sed pada na „unknown option to `s`", a skrypt po cichu leci dalej
+  z pominiętym źródłem.
+
+Cztery skanowane źródła i po co każde:
+- `docs/tickets/` — tickety zamknięte (zmergowane).
+- `.worktrees/.numery/` — **rezerwacje**, w tym kart, które dopiero zaczęły i nie mają jeszcze
+  ani folderu, ani brancha. To jest ta warstwa, której wcześniej brakowało.
+- `git worktree list` — tickety żywych, równoległych kart.
+- lokalne i zdalne branche — tickety, które już wypchnęły branch, ale nie zostały zmergowane.
+
+Rezerwacji **nie kasujemy** po zamknięciu ticketa — katalog jest znacznikiem najwyższego użytego
+numeru i ma rosnąć. Jeśli `.worktrees/` zostanie kiedyś wyczyszczone, historię numerów odtwarzają
+trzy pozostałe źródła.
 
 **Ticket ID format (always new):**
 - `{N}-{TYPE}-{slug}`
@@ -102,7 +184,11 @@ Branch naming convention (prefix maps from ticket type — **N in branch without
 ```bash
 git fetch origin
 git worktree add .worktrees/<TICKET-ID> -b <branch-name> origin/develop
+git config --get core.hooksPath   # ma dać `.githooks`; jeśli pusto → tools/wlacz-hooki.sh
 ```
+
+Hooki repo (`pre-push`) pilnują potem, żeby nie dało się wypchnąć gałęzi nieaktualnej wobec
+`develop` — ustawienie jest wspólne dla klonu i wszystkich jego worktree.
 
 **From this point all bash operations run with `cwd=.worktrees/<TICKET-ID>`** (path relative to main repo) or use full absolute paths. `cd` in the Bash tool doesn't persist between calls — remember that, don't fall into the trap.
 
@@ -125,14 +211,26 @@ Create `docs/tickets/<TICKET-ID>/plan.md` (in the worktree!). Content — dense,
 ## Context
 [What the researcher found — key bits. Which parts of the system it will touch.]
 
+## Kontrakt i fixtures (zakres) — siatka bezpieczeństwa
+[Które ścieżki `contract/openapi.yaml` (metoda + path) i które pliki `contract/fixtures/`
+ten ticket MUSI spełnić. To jest wiążące — nowy kod musi zwracać ten sam kształt i te same
+(zsanityzowane) wartości. Jeśli ticket nie dotyka API — napisz „brak (nie dotyka kontraktu)"
+i uzasadnij. Odnotuj wszelkie znane rozjazdy spec↔oryginał↔fixtures i jak je rozstrzygamy.]
+
 ## Decisions
-[From Q&A with the user. Each decision = 1-2 lines + rationale (pros/cons we weighed).]
+[From Q&A with the user. Each decision = 1-2 lines + rationale (pros/cons we weighed).
+Osobno wypisz KAŻDE świadome odstępstwo od zachowania oryginału (np. wpis z backlogu ✅ TAK) —
+domyślnie odtwarzamy 1:1, odstępstwa muszą być zatwierdzone przez użytkownika.]
 
 ## Implementation plan
-[Low-level steps. Files you'll change/create/delete. Concrete function names, DB tables, endpoints, UI components. What in what order.]
+[Kroki odtworzenia udokumentowanego zachowania (nie wymyślania nowego). Pliki do zmiany/utworzenia/
+usunięcia. Konkretne nazwy funkcji, tabele, endpointy, komponenty UI. Co w jakiej kolejności.
+Gdzie oryginał (`deminified/`, mapa kodu) pokazuje, jak dana rzecz działa — wskaż to miejsce.]
 
 ## Testing strategy
-[Which tests to write/run. Unit? Integration? E2E? Which to skip and why.]
+[Jak zweryfikujemy zgodność z kontraktem: które fixtures z „Kontrakt i fixtures (zakres)" porównujemy
+i jak (kształt + wartości), walidacja odpowiedzi względem `openapi.yaml`, plus testy jednostkowe logiki.
+Co pomijamy i dlaczego. GATE z Kroku 9 obowiązuje: brak zgodności z fixtures/kontraktem = ticket nie jest gotowy.]
 
 ## Out of scope
 [What explicitly is NOT in this ticket.]
@@ -140,6 +238,7 @@ Create `docs/tickets/<TICKET-ID>/plan.md` (in the worktree!). Content — dense,
 ## Definition of done
 - [ ] <concrete testable outcome>
 - [ ] …
+- [ ] Gałąź zsynchronizowana z `origin/develop`, bramki zielone PO synchronizacji, PR `MERGEABLE`
 ```
 
 ### Step 7: Summary for the user + approve
@@ -174,6 +273,22 @@ Rules:
 
 Read the project's testing docs (if any — e.g. `docs/TESTING.md`) to know what test types exist and how to run them. Principle: **the minimum that gives confidence**.
 
+> **GATE ODBUDOWY (obowiązkowy, jeśli ticket dotyka API/kontraktu).**
+> Ticket **NIE jest gotowy**, dopóki nowy kod nie zgadza się z siatką bezpieczeństwa:
+> 1. **Fixtures** — dla każdej ścieżki z sekcji „Kontrakt i fixtures (zakres)" w `plan.md`
+>    porównaj odpowiedź nowego backendu z odpowiadającym plikiem w `contract/fixtures/`:
+>    **kształt (klucze, typy, zagnieżdżenie) musi się zgadzać 1:1**; wartości — tam gdzie
+>    deterministyczne (enumy, `kategoria`, `zastosowanie`, flagi) też. Różnice tylko tam,
+>    gdzie plan świadomie je przewiduje (zatwierdzone odstępstwo).
+> 2. **Kontrakt** — odpowiedzi walidują się względem schematów z `contract/openapi.yaml`
+>    (ścieżki, kody, kształty request/response).
+> 3. **Rozbieżność = STOP.** Jeśli nie możesz pogodzić kodu z fixtures/kontraktem, a to nie jest
+>    zatwierdzone odstępstwo — **nie obchodź gate'a i nie „poprawiaj" fixtures**; zatrzymaj się,
+>    opisz rozjazd użytkownikowi (fixtures pokazują, co robi produkcja — to one są wzorcem).
+>
+> Zapisz wynik gate'a w `raport.md` (które fixtures/ścieżki sprawdzone, wynik). Jeśli ticket
+> **nie dotyka** kontraktu — napisz to wprost i uzasadnij, wtedy gate nie obowiązuje.
+
 - Unit tests for new logic — yes, always if the logic is non-trivial.
 - Integration tests — if the changes warrant them or touch interactions with external systems / services.
 - E2E — only if it's a user-facing flow and the plan called for it.
@@ -201,6 +316,7 @@ Create `docs/tickets/<TICKET-ID>/raport.md`:
 [If 1:1 — "None". If you deviated — describe what and why.]
 
 ## Test results
+- **Gate odbudowy (fixtures/kontrakt):** [✓ zgodne / ✗ rozjazd / N/D — nie dotyka API] — które ścieżki i pliki `contract/fixtures/` sprawdzone; przy ✗ opisz rozjazd
 - Unit: [✓/✗/skipped + count + reason if skipped]
 - Integration: …
 - E2E: …
@@ -242,6 +358,47 @@ Limit: **3 full fix-loop iterations**. If after the 3rd iteration BLOCKERs remai
 
 Based on plan.md + raport.md + review.md + branch diff — decide which files in `docs/` may need an update. **Better too many than too few.** Generally include high-level/index docs (e.g. `INDEX.md`, `README.md`, `CLAUDE.md`, `ROADMAP.md`, a PRD if present) plus selectively any other files in `/docs/` (but not tickets, plans, reports, reviews — only `/docs/`, not deeper).
 
+> **OBOWIĄZKOWO, jeśli ticket realizował kartę odbudowy** (`docs/karty/<ID>/`, dawniej blok
+> w `docs/rebuild-roadmap.md` §5): `docs/karty/` i `docs/rebuild-backlog.md` są **zawsze**
+> w zakresie. Karta jest wejściem dla następnej sesji — prompt do niej jest jednorazowy, karta
+> zostaje (patrz `CLAUDE.md`).
+>
+> ⛔ **Karta NIE edytuje `docs/rebuild-roadmap.md`** — ani §4, ani tabeli kart, ani wspólnych
+> akapitów iteracji. Karty pracują równolegle, a każda wspólna linia w roadmapie kończyła się
+> konfliktem przy merge'u (7 przypadków w 2026-09-18…21). Roadmapę zmienia wyłącznie
+> koordynator. Pełna tabela własności i szablony: `docs/karty/README.md`.
+>
+> Doc-checker dostaje wprost polecenie, żeby:
+>
+> 1. **oznaczyć kartę jako zrobioną w JEJ pliku** — `docs/karty/<ID>/karta.md`: linia
+>    `> **Stan:** ✅ <data> · <TICKET-ID>` i sekcja „Dowiezione” z zakresem FAKTYCZNIE
+>    dowiezionym, nie planowanym — łącznie z tym, gdzie odbiegł od pierwotnego założenia.
+>    Jeśli karta nie ma jeszcze `karta.md` (okres przejściowy, patrz README), założyć go
+>    z szablonu;
+> 2. **każde ustalenie dotyczące PRZYSZŁEJ karty zapisać jako NOWY plik
+>    `docs/karty/<jej ID>/wejscie-<N>.md`** (N = numer tego ticketa) — nigdy jako dopisek
+>    w cudzym `karta.md` ani w roadmapie. Sesja 3c czyta katalog 3c; nota schowana gdzie
+>    indziej do niej nie dojdzie. To jest najczęstszy sposób, w jaki wiedza z iteracji ginie;
+> 3. **zaktualizować statusy wpisów w backlogu**, których ticket dotknął (✅/🔨/⬜/❌);
+> 4. **usunąć z WŁASNEGO `karta.md` to, co ticket obalił** — nieaktualne założenia o zakresie,
+>    sprostowane fakty o oryginale. Nie dopisywać obok. Jeśli fałsz siedzi w roadmapie albo
+>    w cudzej karcie — zapisać to w sekcji „Do koordynatora” własnego `karta.md`, nie
+>    poprawiać samemu;
+> 5. **nowe ustalenie o backendzie zapisać jako NOWY plik `docs/spec-backend/wpis-<N>.md`**
+>    (szablon: `docs/spec-backend/README.md`) — nigdy jako akapit dopisany na koniec sekcji
+>    `docs/spec-backend.md`. Poprawka W MIEJSCU zdania, które ticket obalił, jest dozwolona.
+>    Powód: karty P10.1 i PR.1 (tickety 90 i 91) dopisały się na koniec §2 w to samo miejsce
+>    i zderzyły przy merge'u — ten sam wzorzec, który w roadmapie dał 7 konfliktów.
+>
+> **Okres przejściowy:** ticket, którego worktree powstał PRZED wprowadzeniem `docs/karty/`
+> (ticket 82), kończy po staremu — w roadmapie. Sprawdzenie: `ls docs/karty/README.md`
+> w worktree ticketa.
+>
+> Jeśli w trakcie ticketa wyszło, że roadmapa przypisała jakąś funkcję do złej sesji
+> (zdarzyło się to już dwukrotnie z `bridge_ext.cjs`), zapisz dowód — numery linii
+> wywołań — w „Do koordynatora” własnego `karta.md`. **Fakt** zapisz jako fakt; **zmianę przypisania zakresu** potraktuj
+> jako decyzję użytkownika i zapytaj o nią w Kroku 3, jeśli ticket jeszcze trwa.
+
 ### Step 14: Delegate all docs to doc-checker subagents
 
 **Grouping strategy:**
@@ -271,14 +428,125 @@ git add docs/ && git commit -m "<TICKET-ID>: sync docs"
 
 ## PHASE 6 — Ship
 
-### Step 16: Push + PR
+### Step 16: Synchronizacja z `develop` (OBOWIĄZKOWA przed pushem)
+
+**Nie wypychasz gałęzi i nie otwierasz PR-a, dopóki gałąź nie zawiera całego `origin/develop`.**
+Powód: kart chodzi kilka równolegle, `develop` przesuwa się w trakcie ticketa, a PR z konfliktami
+zrzuca ich rozwiązanie na użytkownika. Konflikt rozwiązuje ta sesja, która go wywołała — tylko ona
+zna swój zakres. Użytkownik ma dostać PR gotowy do merge'a, bez „Resolve conflicts".
+
+```bash
+tools/sync-z-develop.sh        # cwd = worktree ticketa: .worktrees/<TICKET-ID>
+```
+
+Skrypt robi `git fetch origin --prune`, dociąga ewentualne commity z `origin/<gałąź>` i scala
+`origin/develop` **mergem, nie rebasem** (tak wygląda cała historia tego repo, a gałąź mogła już
+zostać wypchnięta — rebase wymusiłby `--force`). Operacje na `.git` ponawia przy blokadach
+(`tools/lib-ponow.sh`) — repo ma kilkadziesiąt worktree kart na jednym `.git`.
+
+Kody wyjścia:
+- `0` — gałąź była już aktualna, nic nie weszło → idź do Kroku 17;
+- `10` — **scalone czysto, ale coś weszło** → bramki od nowa (niżej), dopiero potem Krok 17;
+- `2` — konflikty do ręcznego rozwiązania;
+- `1` — warunek wstępny (niezacommitowane zmiany, HEAD odłączony, gałąź bazowa);
+- `3` — uwierzytelnienie przy `git fetch` — to do użytkownika, nie ponawiaj w kółko.
+
+Jeśli skryptu nie ma (stara gałąź), zrób to samo ręcznie:
+`git fetch origin && git merge --no-edit origin/develop`.
+
+**Wyjście `2` — konflikty rozwiązujesz TY, teraz:**
+1. Dla każdego pliku z listy połącz **obie** strony — zmiana z `develop` zostaje, Twoja zostaje.
+   Nie „wygrywaj" całym plikiem (`--ours` / `--theirs`) bez przeczytania, co w nim jest.
+2. `git add <plik>` dla każdego, potem `git commit --no-edit`.
+3. Uruchom skrypt ponownie — ma wyjść „Gałąź zawiera już całe origin/develop".
+4. **Nie rób `git merge --abort`** i nie omijaj synchronizacji, żeby „zdążyć z PR-em".
+5. Jeśli konflikt jest merytoryczny i nie wiesz, która wersja jest poprawna (dwie karty zmieniły
+   to samo zachowanie, cudza migracja zajęła Twój numer, ktoś zmienił sygnaturę, którą wołasz) —
+   **STOP, pytasz użytkownika**. To jedyny przypadek, w którym przerywasz ciszę Fazy 3–6.
+6. Konflikt w pliku współdzielonym (`docs/rebuild-roadmap.md`, `docs/spec-backend.md`,
+   `docs/karty/README.md`) = ktoś złamał zasadę „karty piszą we własnych plikach" (CLAUDE.md).
+   Rozwiąż zachowując OBA wpisy i odnotuj to w `raport.md` → „Follow-up".
+
+**Po każdym scaleniu, które coś przyniosło (wyjście `10`) — bramki od nowa:**
+lint, typecheck, build, test (Krok 9), a jeśli ticket dotyka kontraktu, także GATE na fixtures.
+Merge łączy dwie zmiany, z których każda osobno przechodziła; dopiero razem mogą się wykluczać.
+Czerwona bramka po merge'u = naprawiasz przed pushem, nie po. Wynik dopisz do `raport.md`
+(„Test results": że bramki przebiegły **po** synchronizacji z `develop`, z datą/SHA bazy).
+
+Sprawdź też numer migracji, jeśli ticket ją dodaje: po ściągnięciu `develop` mogło dojść do
+kolizji numeru (zob. `docs/` i zasady migracji) — dwie karty potrafią zarezerwować ten sam.
+
+### Step 17: Push + PR
+
+Dopiero teraz — po czystym Kroku 16 i zielonych bramkach. Treść PR-a (format niżej) zapisz do
+pliku i wypchnij jednym poleceniem:
+
+```bash
+tools/push-i-pr.sh --tytul "<TICKET-ID>: <title>" --tresc-plik docs/tickets/<TICKET-ID>/pr-body.md
+```
+
+Skrypt robi po kolei: sprawdza dostęp `gh` → **powtarza synchronizację z Kroku 16** (żeby nie
+wypchnąć gałęzi, którą `develop` wyprzedził w międzyczasie) → `git push -u origin <gałąź>` →
+`gh pr create --base develop` → odczyt scalalności. **Blokady ponawia sam**: przy
+`index.lock` / `cannot lock ref` / limicie GitHuba czeka 5 s, 15 s, 40 s, 90 s, 180 s i próbuje
+ponownie (`PONOW_PROBY`, `PONOW_PRZERWY` w env, jeśli chcesz inaczej). Przy `[rejected]
+(non-fast-forward)` sam robi sync i próbuje raz jeszcze. `--base develop` jest w skrypcie na
+sztywno-domyślnie (`--baza` zmienia): domyślną gałęzią repo jest `main`, a PR ticketa do `main`
+to błąd.
+
+**Kody wyjścia i co z nimi zrobić:**
+
+| Kod | Znaczenie | Twoja reakcja |
+|---|---|---|
+| `0` | wypchnięte, PR istnieje, `MERGEABLE` | Krok 18 |
+| `1` | warunek wstępny (niezacommitowane zmiany, brak pliku treści) | popraw i powtórz |
+| `2` | konflikty z `develop` | rozwiąż (Krok 16), bramki, powtórz |
+| `3` | **uwierzytelnienie `gh`/git** | **NIE ponawiaj** — zgłoś użytkownikowi, to jego decyzja (`gh auth login`) |
+| `4` | sync wciągnął zmiany z bazy | przebiegnij bramki, powtórz |
+| `5` | PR jest, ale GitHub widzi `CONFLICTING` | sync + bramki + `git push`, sprawdź ponownie |
+| `6` | blokada nie ustąpiła mimo ponawiania | poczekaj i uruchom **raz** jeszcze; dalej `6` → zgłoś użytkownikowi, co blokuje |
+
+**Nie zapętlaj się.** Skrypt już odczekał swoje. Jeśli po drugim ręcznym podejściu dalej `3` lub
+`6` — kończysz i piszesz użytkownikowi, co konkretnie blokuje (treść błędu, nie domysł).
+
+Ręczny wariant, gdy skryptu nie ma na gałęzi:
 
 ```bash
 git push -u origin <branch-name>
-gh pr create --title "<TICKET-ID>: <title>" --body "<body>"
+gh pr create --base develop --title "<TICKET-ID>: <title>" --body-file <plik>
+gh pr view --json mergeable,mergeStateStatus -q '.mergeable + " / " + .mergeStateStatus'
 ```
 
-**PR body (exactly this format):**
+W wariancie ręcznym sam ponawiasz: przy `index.lock` / `cannot lock ref` odczekaj ~15 s i powtórz
+(inna karta trzyma to samo `.git`), przy `[rejected] (non-fast-forward)` zrób sync i wypchnij
+jeszcze raz, przy `CONFLICTING` — sync + bramki + push. Błąd uwierzytelnienia = stop i zgłoszenie
+użytkownikowi.
+
+**Wariant dla sesji w przeglądarce (`claude.ai/code`) — tam NIE MA `gh`.** Zmierzone 2026-09-24
+(ticket 157): binarki `gh` nie ma w kontenerze, więc `tools/push-i-pr.sh` i każde `gh …` padnie na
+`command not found`. Wtedy:
+
+1. **Synchronizacja z `develop`: normalnie** — `tools/sync-z-develop.sh` to czysty `git` i działa.
+2. **Push: normalnie** — `git push -u origin <branch-name>`.
+3. **Pull request: narzędziami MCP GitHub**, nie `gh`. Nazwy weź z listy narzędzi swojej sesji
+   (w przelocie działały `mcp__github__get_me`, `mcp__github__list_pull_requests`); treść PR-a
+   podajesz jako tekst z `docs/tickets/<TICKET-ID>/pr-body.md`, baza to `develop`.
+4. **Odczyt scalalności:** tym samym narzędziem MCP, którym czytasz pull requesta — zamiast
+   `gh pr view --json mergeable`.
+
+⚠ **`403` przy `git push` albo przy tworzeniu gałęzi przez MCP („Claude doesn't have GitHub access
+to …") to NIE brak uprawnień użytkownika.** To brak zainstalowanej aplikacji Claude GitHub App na
+repozytorium — konto może mieć `permission: write` i `push: true`, a zapis i tak wróci z 403.
+**Ponawianie nic nie da: stop i zgłoszenie użytkownikowi** z tym rozróżnieniem i z adresem
+https://github.com/apps/claude/installations/select_target. Nie próbuj obejść tego innym zdalnym
+repozytorium ani `--force`.
+
+⚠ Hooki w takiej sesji na starcie nie są aktywne (`core.hooksPath` pusty) — włącza je `npm ci`
+w `rebuild/backend` (skrypt `prepare`) albo `tools/wlacz-hooki.sh`. Nie licz na to, że `pre-push`
+odbije nieaktualną gałąź; synchronizację z Kroku 16 przeprowadź świadomie.
+
+**PR body (exactly this format)** — zapisz go do `docs/tickets/<TICKET-ID>/pr-body.md`
+i podaj jako `--tresc-plik` (plik zostaje w repo razem z resztą artefaktów ticketa):
 
 ```markdown
 ## Ticket
@@ -317,9 +585,10 @@ gh pr create --title "<TICKET-ID>: <title>" --body "<body>"
 
 ---
 Ticket docs: `docs/tickets/<TICKET-ID>/`
+Zsynchronizowane z `develop` (`<SHA origin/develop w chwili merge'a>`); bramki przebiegnięte po synchronizacji.
 ```
 
-### Step 17: Cleanup worktree
+### Step 18: Cleanup worktree
 
 After successful push + PR create **remove the worktree**. Only if everything is clean — otherwise skip and tell the user what's blocking.
 
@@ -332,10 +601,11 @@ git worktree remove .worktrees/<TICKET-ID>
 
 Don't delete the local branch. Don't force `--force` — if `remove` failed, leave the worktree and give the user the command for manual cleanup.
 
-### Step 18: Final report to the user
+### Step 19: Final report to the user
 
 Write to the user **briefly**:
 - PR URL
+- **Stan scalalności** — jedna linia: `Zsynchronizowane z develop (<SHA>), PR: MERGEABLE` albo co konkretnie koliduje i dlaczego nie dało się rozwiązać
 - One sentence on what was done
 - Anything that didn't get done, if so
 - **If there are things requiring their manual verification** (from "Breaking changes" or "Docs review needed") — list them explicitly; same for env vars to add, etc.

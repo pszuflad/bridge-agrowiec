@@ -1,0 +1,229 @@
+/**
+ * Rama aplikacji — `deminified/frontend-index.js:16329-16456`.
+ * Sidebar ma 11 POZYCJI nawigacji (router ma 13 tras: dochodzą `/login` i `/moje-konto`,
+ * przy czym `/moje-konto` jest linkiem w stopce, a `/login` nie ma w żadnym menu).
+ *
+ * ⚠ Jedenasta pozycja, „Selly", weszła w sesji 8b i JAKO JEDYNA nie pochodzi z `l2`
+ * oryginału — produkcja dokładała ten link wstrzykiwanym skryptem
+ * (`mirror/frontend/assets/selly-injection.js:255-280`), za „Konfiguracją". Stąd 11
+ * zamiast 10 i 13 tras zamiast 12; uzasadnienie w nagłówku `src/App.tsx`.
+ */
+import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
+import { beforeEach, describe, expect, it } from "vitest";
+import { App } from "@/App";
+import { KLUCZE_STORAGE, zapiszToken } from "@/lib/api";
+import { _zresetujStanSesji } from "@/lib/auth";
+import { POZYCJE_NAWIGACJI } from "@/components/nawigacja";
+import { server } from "./msw/server";
+import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
+import { handleryPulpitu } from "./msw/pulpit";
+
+const UZYTKOWNIK = uzytkownikZFixtura();
+
+function zasiejSesje() {
+  sessionStorage.setItem(KLUCZE_STORAGE.uzytkownik, JSON.stringify(UZYTKOWNIK));
+  sessionStorage.setItem(KLUCZE_STORAGE.token, TOKEN_TESTOWY);
+  _zresetujStanSesji();
+}
+
+beforeEach(() => {
+  zapiszToken(null);
+  localStorage.clear();
+  sessionStorage.clear();
+  zasiejSesje();
+  window.history.pushState({}, "", "/");
+  // Od bloku 10f `/` to Pulpit, który pobiera pięć tras. Ten plik sprawdza ramę aplikacji,
+  // nie treść pulpitu, więc dostaje puste odpowiedzi — bez nich `onUnhandledRequest: "error"`
+  // wywaliłby każdy test tego pliku.
+  server.use(...handleryPulpitu());
+});
+
+describe("sidebar", () => {
+  it("ma dokładnie 12 pozycji nawigacji w kolejności z oryginału (+ Archiwum za Historią, Selly na końcu)", () => {
+    render(<App />);
+    const nawigacja = screen.getByRole("navigation");
+
+    const etykiety = within(nawigacja)
+      .getAllByRole("link")
+      .map((link) => link.textContent);
+
+    expect(etykiety).toEqual([
+      "Pulpit",
+      "Staging",
+      "Katalog",
+      "Narzuty i promocje",
+      "Atrybuty",
+      "Alerty",
+      "Waga gabarytowa",
+      "Analityka",
+      "Historia",
+      "Archiwum importów",
+      "Konfiguracja",
+      "Selly",
+    ]);
+    expect(POZYCJE_NAWIGACJI).toHaveLength(12);
+  });
+
+  it("pozycja „Selly” prowadzi na `/selly`", () => {
+    render(<App />);
+
+    const link = screen.getByTestId("link-nav-selly");
+    expect(link).toHaveTextContent("Selly");
+    expect(link).toHaveAttribute("href", "/selly");
+  });
+
+  it("„Moje konto” i „Wyloguj” są w stopce, poza listą nawigacji", () => {
+    render(<App />);
+
+    const nawigacja = screen.getByRole("navigation");
+    expect(within(nawigacja).queryByTestId("link-moje-konto")).toBeNull();
+    expect(screen.getByTestId("link-moje-konto")).toBeInTheDocument();
+    expect(screen.getByTestId("button-logout")).toBeInTheDocument();
+  });
+
+  it("pokazuje inicjały, imię i e-mail zalogowanego użytkownika", () => {
+    render(<App />);
+
+    expect(screen.getByTestId("text-current-user")).toHaveTextContent(UZYTKOWNIK.imieNazwisko);
+    expect(screen.getByText(UZYTKOWNIK.email)).toBeInTheDocument();
+    // „Marta Bieguniak" -> „MB"
+    const oczekiwaneInicjaly = UZYTKOWNIK.imieNazwisko
+      .split(" ")
+      .slice(0, 2)
+      .map((czlon) => czlon[0])
+      .join("")
+      .toUpperCase();
+    expect(screen.getByTestId("avatar-current-user")).toHaveTextContent(oczekiwaneInicjaly);
+  });
+});
+
+describe("nawigacja", () => {
+  it("kliknięcie pozycji przenosi na jej trasę", async () => {
+    const uzytkownik = userEvent.setup();
+    render(<App />);
+
+    await uzytkownik.click(screen.getByTestId("link-nav-katalog"));
+
+    await waitFor(() => expect(screen.getByTestId("text-page-title")).toHaveTextContent("Katalog"));
+    expect(window.location.pathname).toBe("/katalog");
+  });
+
+  it("nieznana trasa pokazuje polski ekran 404 (odstępstwo O3)", async () => {
+    window.history.pushState({}, "", "/nie-ma-takiej-strony");
+    render(<App />);
+
+    await waitFor(() =>
+      expect(screen.getByText(/nie znaleziono strony/i)).toBeInTheDocument(),
+    );
+  });
+});
+
+describe("tryb ciemny", () => {
+  it("przełącznik zmienia klasę na <html> i zapisuje wybór (odstępstwo O2)", async () => {
+    const uzytkownik = userEvent.setup();
+    render(<App />);
+    const przelacznik = screen.getByTestId("button-theme-toggle");
+
+    // Stub matchMedia w test/setup.ts zwraca „nie pasuje", więc start jest jasny.
+    expect(document.documentElement.classList.contains("dark")).toBe(false);
+    expect(przelacznik).toHaveTextContent("Tryb ciemny");
+
+    await uzytkownik.click(przelacznik);
+
+    await waitFor(() => expect(document.documentElement.classList.contains("dark")).toBe(true));
+    expect(przelacznik).toHaveTextContent("Tryb jasny");
+    expect(localStorage.getItem("bridge_theme")).toBe("dark");
+  });
+
+  it("sama wizyta bez kliknięcia NIE utrwala preferencji systemowej", () => {
+    render(<App />);
+
+    // Gdyby zapis siedział w efekcie, pierwsze renderowanie zamroziłoby
+    // `prefers-color-scheme` i aplikacja przestałaby za nim podążać.
+    expect(localStorage.getItem("bridge_theme")).toBeNull();
+  });
+});
+
+describe("wylogowanie", () => {
+  it("woła /api/logout, czyści sesję i wraca na /login", async () => {
+    const uzytkownik = userEvent.setup();
+    let zawolane = false;
+    server.use(
+      http.post("http://localhost:5173/api/logout", () => {
+        zawolane = true;
+        return HttpResponse.json({ ok: true });
+      }),
+    );
+
+    render(<App />);
+    await uzytkownik.click(screen.getByTestId("button-logout"));
+
+    await waitFor(() => expect(screen.getByTestId("text-login-title")).toBeInTheDocument());
+    expect(zawolane).toBe(true);
+    expect(sessionStorage.getItem(KLUCZE_STORAGE.uzytkownik)).toBeNull();
+    expect(sessionStorage.getItem(KLUCZE_STORAGE.token)).toBeNull();
+    expect(window.location.pathname).toBe("/login");
+  });
+});
+
+/**
+ * Rama na WSZYSTKICH trasach zalogowanego (finalny audyt 12e, D1, backlog #36).
+ *
+ * Do 12e `AppShell` wpinał się każdy widok z osobna i robiło to tylko pięć z dwunastu, więc
+ * sidebar znikał na `/katalog`, `/staging`, `/historia`, `/narzuty`, `/alerty`,
+ * `/waga-gabarytowa` i `/analityka`. Teraz wpina go router (`App.tsx`, `TRASY_Z_RAMA`),
+ * a ten blok pilnuje, żeby rozjazd nie wrócił przy kolejnym widoku.
+ *
+ * Zaślepka MSW oddaje pustą listę każdemu żądaniu do API: sprawdzamy RAMĘ, nie treść, a każdy
+ * z dwunastu widoków pobiera własny zestaw tras, których `onUnhandledRequest: "error"`
+ * nie wybacza.
+ */
+describe("rama aplikacji na każdej trasie", () => {
+  const TRASY_ZALOGOWANEGO = [
+    "/",
+    "/katalog",
+    "/staging",
+    "/konfiguracja",
+    "/historia",
+    "/narzuty",
+    "/alerty",
+    "/atrybuty",
+    "/waga-gabarytowa",
+    "/analityka",
+    "/selly",
+    "/moje-konto",
+  ];
+
+  beforeEach(() => {
+    server.use(http.get("*/api/*", () => HttpResponse.json([])));
+  });
+
+  it.each(TRASY_ZALOGOWANEGO)("%s renderuje sidebar", async (sciezka) => {
+    window.history.pushState({}, "", sciezka);
+    render(<App />);
+
+    // `/analityka` ładuje się leniwie, więc czekamy — na pozostałych trasach rama jest od razu.
+    expect(await screen.findByTestId("link-nav-katalog")).toBeInTheDocument();
+    expect(screen.getByTestId("text-current-user")).toBeInTheDocument();
+  });
+
+  it("`/login` NIE ma ramy — tak jak w oryginale", async () => {
+    sessionStorage.clear();
+    _zresetujStanSesji();
+    window.history.pushState({}, "", "/login");
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByTestId("input-email")).toBeInTheDocument());
+    expect(screen.queryByTestId("link-nav-katalog")).not.toBeInTheDocument();
+  });
+
+  it("404 NIE ma ramy — tak jak w oryginale", async () => {
+    window.history.pushState({}, "", "/nie-ma-takiej-strony");
+    render(<App />);
+
+    await waitFor(() => expect(screen.getByText(/nie znaleziono strony/i)).toBeInTheDocument());
+    expect(screen.queryByTestId("link-nav-katalog")).not.toBeInTheDocument();
+  });
+});

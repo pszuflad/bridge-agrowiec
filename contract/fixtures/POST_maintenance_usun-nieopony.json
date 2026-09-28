@@ -1,0 +1,15 @@
+{
+  "endpoint": "/api/maintenance/usun-nieopony",
+  "method": "POST",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "usuniete": 0,
+    "perDostawca": {},
+    "przyklady": []
+  },
+  "request": {},
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Nagrane PRZED products/clear, na pełnym katalogu — inaczej same zera."
+}

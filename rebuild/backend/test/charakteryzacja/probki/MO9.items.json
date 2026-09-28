@@ -1,0 +1,506 @@
+[
+  {
+    "id": 184000,
+    "sku": "106541",
+    "ean": "8903094031443",
+    "name": "385/65-22.5 BKT FLOT 648 148A8/144B 18PR TL",
+    "manufacturer": 15,
+    "weight": 57,
+    "url_key": "385-65-22-5-bkt-flot-648-148a8-144b-18pr-tl",
+    "stock_status": "OUT_OF_STOCK",
+    "stock_availability": {
+      "in_stock": false,
+      "in_stock_real": "0"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 151,
+        "name": "Inne"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 1400
+        },
+        "final_price": {
+          "value": 1722,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 1722,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106541.jpg"
+    }
+  },
+  {
+    "id": 184001,
+    "sku": "106545",
+    "ean": "8903094006816",
+    "name": "5.00-8 BKT FL 252 8PR TT",
+    "manufacturer": 15,
+    "weight": null,
+    "url_key": "5-00-8-bkt-fl-252-8pr-tt",
+    "stock_status": "OUT_OF_STOCK",
+    "stock_availability": {
+      "in_stock": false,
+      "in_stock_real": "0"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 150,
+        "name": "Opony przemysłowe"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 145
+        },
+        "final_price": {
+          "value": 178.35,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 178.35,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106545.jpg"
+    }
+  },
+  {
+    "id": 184002,
+    "sku": "106563",
+    "ean": "8903094002689",
+    "name": "16.9-28 BKT AS 2001 135A6 8PR TT",
+    "manufacturer": 15,
+    "weight": 81,
+    "url_key": "16-9-28-bkt-as-2001-135a6-8pr-tt",
+    "stock_status": "OUT_OF_STOCK",
+    "stock_availability": {
+      "in_stock": false,
+      "in_stock_real": "0"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 1750
+        },
+        "final_price": {
+          "value": 2152.5,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 2152.5,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106563.jpg"
+    }
+  },
+  {
+    "id": 184003,
+    "sku": "106564",
+    "ean": "8903094007806",
+    "name": "6.00-9 BKT PT - HD 10PR TT",
+    "manufacturer": 15,
+    "weight": 12,
+    "url_key": "6-00-9-bkt-pt-hd-10pr-tt",
+    "stock_status": "OUT_OF_STOCK",
+    "stock_availability": {
+      "in_stock": false,
+      "in_stock_real": "0"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 150,
+        "name": "Opony przemysłowe"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 270
+        },
+        "final_price": {
+          "value": 332.1,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 332.1,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106564.jpg"
+    }
+  },
+  {
+    "id": 184004,
+    "sku": "106565",
+    "ean": "8903094007219",
+    "name": "7.00-12 BKT PL 801 14PR TT",
+    "manufacturer": 15,
+    "weight": 17,
+    "url_key": "7-00-12-bkt-pl-801-14pr-tt",
+    "stock_status": "OUT_OF_STOCK",
+    "stock_availability": {
+      "in_stock": false,
+      "in_stock_real": "0"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 150,
+        "name": "Opony przemysłowe"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 375
+        },
+        "final_price": {
+          "value": 461.25,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 461.25,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106565.jpg"
+    }
+  },
+  {
+    "id": 184005,
+    "sku": "106567",
+    "ean": "8903094020584",
+    "name": "6.00-16 BKT TF 8181 88A6/80A8 6PR TT",
+    "manufacturer": 15,
+    "weight": 10,
+    "url_key": "6-00-16-bkt-tf-8181-88a6-80a8-6pr-tt",
+    "stock_status": "OUT_OF_STOCK",
+    "stock_availability": {
+      "in_stock": false,
+      "in_stock_real": "0"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 220
+        },
+        "final_price": {
+          "value": 270.6,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 270.6,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106567.jpg"
+    }
+  },
+  {
+    "id": 184006,
+    "sku": "106568",
+    "ean": "8903094020614",
+    "name": "6.50-16 BKT TF 8181 91A6/83A8 6PR TT",
+    "manufacturer": 15,
+    "weight": 11.5,
+    "url_key": "6-50-16-bkt-tf-8181-91a6-83a8-6pr-tt",
+    "stock_status": "IN_STOCK",
+    "stock_availability": {
+      "in_stock": true,
+      "in_stock_real": "1"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 242
+        },
+        "final_price": {
+          "value": 297.65999999999997,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 297.65999999999997,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106568.jpg"
+    }
+  },
+  {
+    "id": 184007,
+    "sku": "106569",
+    "ean": "8903094021024",
+    "name": "6.50-16 BKT TF 9090 91A6/83A8 6PR TT",
+    "manufacturer": 15,
+    "weight": 11,
+    "url_key": "6-50-16-bkt-tf-9090-91a6-83a8-6pr-tt",
+    "stock_status": "IN_STOCK",
+    "stock_availability": {
+      "in_stock": true,
+      "in_stock_real": "5+"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 215
+        },
+        "final_price": {
+          "value": 264.45,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 264.45,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106569.jpg"
+    }
+  },
+  {
+    "id": 184008,
+    "sku": "106571",
+    "ean": null,
+    "name": "9.00-16 BKT TF 9090 115A6/108A8 10PR TT",
+    "manufacturer": 15,
+    "weight": 24,
+    "url_key": "9-00-16-bkt-tf-9090-115a6-108a8-10pr-tt",
+    "stock_status": "OUT_OF_STOCK",
+    "stock_availability": {
+      "in_stock": false,
+      "in_stock_real": null
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 445
+        },
+        "final_price": {
+          "value": 547.35,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 547.35,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106571.jpg"
+    }
+  },
+  {
+    "id": 184009,
+    "sku": "106573",
+    "ean": "8903094003570",
+    "name": "16.9-24 BKT TR 135 133A6/129A8 8PR TT",
+    "manufacturer": 15,
+    "weight": 68,
+    "url_key": "16-9-24-bkt-tr-135-133a6-129a8-8pr-tt",
+    "stock_status": "IN_STOCK",
+    "stock_availability": {
+      "in_stock": true,
+      "in_stock_real": "1"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 1500
+        },
+        "final_price": {
+          "value": 1845,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 1845,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106573.jpg"
+    }
+  },
+  {
+    "id": 184010,
+    "sku": "106574",
+    "ean": "8903094002795",
+    "name": "18.4-26 BKT AS 2001 146A6 12PR TT",
+    "manufacturer": 15,
+    "weight": 89,
+    "url_key": "18-4-26-bkt-as-2001-146a6-12pr-tt",
+    "stock_status": "IN_STOCK",
+    "stock_availability": {
+      "in_stock": true,
+      "in_stock_real": "15+"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 2000
+        },
+        "final_price": {
+          "value": 2460,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 2460,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106574.jpg"
+    }
+  },
+  {
+    "id": 184011,
+    "sku": "106575",
+    "ean": "8903094004027",
+    "name": "23.1-26 BKT TR 135 153A6/149A8 12PR TL",
+    "manufacturer": 15,
+    "weight": 153,
+    "url_key": "23-1-26-bkt-tr-135-153a6-149a8-12pr-tl",
+    "stock_status": "IN_STOCK",
+    "stock_availability": {
+      "in_stock": true,
+      "in_stock_real": "1"
+    },
+    "categories": [
+      {
+        "id": 148,
+        "name": "Opony BKT"
+      },
+      {
+        "id": 149,
+        "name": "Opony rolnicze"
+      }
+    ],
+    "price_range": {
+      "minimum_price": {
+        "individual_price": {
+          "net": 3690
+        },
+        "final_price": {
+          "value": 4538.7,
+          "currency": "PLN"
+        },
+        "regular_price": {
+          "value": 4538.7,
+          "currency": "PLN"
+        }
+      }
+    },
+    "image": {
+      "url": "https://hurtownia.agrorami.pl/media/catalog/product/106575.jpg"
+    }
+  }
+]

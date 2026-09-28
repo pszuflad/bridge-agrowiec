@@ -1,0 +1,125 @@
+/**
+ * Drzewo aplikacji — odpowiednik `deminified/frontend-index.js:28640-28699`.
+ *
+ * Oryginał: QueryClientProvider > ThemeProvider > TooltipProvider > [Toaster, Router > AuthGate > Switch].
+ * `TooltipProvider` i `Toaster` dochodzą w iteracji, która pierwsza ich użyje —
+ * Iteracja 1 nie ma ani jednego tooltipa ani toasta, a wnoszenie nieużywanych
+ * providerów to martwy kod. **`Toaster` wszedł w sesji 4b** (`/narzuty` woła toast przy
+ * każdym zapisie, usunięciu i błędzie walidacji); `TooltipProvider` dalej czeka.
+ *
+ * TRZYNAŚCIE TRAS, gdy oryginał ma dwanaście (`deminified/frontend-index.js:28644-28677`).
+ * Różnicę robi `/selly`, dołożona w sesji 8b: w produkcji Selly NIE BYŁO trasą Reacta —
+ * wstrzykiwany `mirror/frontend/assets/selly-injection.js` trzymał adres na `#/` i overlayował
+ * `<main>`, a stan „jesteśmy w Selly" siedział w `sessionStorage.sellyViewActive`. Odbudowa
+ * zamienia to na zwykłą trasę Wouter (odstępstwo O1 ticketu 30), więc 13 jest liczbą poprawną,
+ * a nie rozjazdem do naprawienia. Nota mieszkała w `pages/placeholdery.ts`, usuniętym w I12b
+ * razem z ostatnim placeholderem (`/moje-konto`).
+ *
+ * ODSTĘPSTWO O1 (plan.md): oryginał używał routingu po hashu (`useHashLocation`
+ * + `window.location.hash ||= "#/"`) — obejście z Replita dające adresy `/#/katalog`.
+ * Nowy build stoi za Apache z poprawnym SPA fallbackiem (`deploy/staging/htaccess:16-20`),
+ * więc używamy zwykłych ścieżek.
+ */
+import { QueryClientProvider } from "@tanstack/react-query";
+import { lazy, Suspense, type ComponentType } from "react";
+import { Route, Switch } from "wouter";
+import { AppShell } from "@/components/AppShell";
+import { AuthGate } from "@/components/AuthGate";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { queryClient } from "@/lib/queryClient";
+import { ToastProvider } from "@/components/ui/toast";
+import { Alerty } from "@/pages/Alerty";
+import { ArchiwumImportow } from "@/pages/ArchiwumImportow";
+import { Atrybuty } from "@/pages/Atrybuty";
+import { Historia } from "@/pages/Historia";
+import { Katalog } from "@/pages/Katalog";
+import { Konfiguracja } from "@/pages/Konfiguracja";
+import { Narzuty } from "@/pages/Narzuty";
+import { Staging } from "@/pages/Staging";
+import { WagaGabarytowa } from "@/pages/WagaGabarytowa";
+import { Login } from "@/pages/Login";
+import { MojeKonto } from "@/pages/MojeKonto";
+import { NotFound } from "@/pages/NotFound";
+import { Pulpit } from "@/pages/Pulpit";
+import { Selly } from "@/pages/Selly";
+
+/**
+ * `/analityka` jest JEDYNĄ trasą ładowaną leniwie — i to nie z upodobania do code-splittingu,
+ * tylko z pomiaru. Recharts (wniesiony w bloku 10a, używany wyłącznie przez ten widok) podnosi
+ * wspólny bundle z 451 kB do 837 kB (gzip 140 → 254 kB). Ładowany statycznie kazałby płacić
+ * tę cenę przy każdym wejściu na logowanie, katalog czy staging. Osobny chunk zdejmuje ją
+ * ze wszystkich pozostałych widoków.
+ *
+ * Bloki 10b–10e dokładają kolejne wykresy DO TEGO SAMEGO chunku — nie trzeba nic zmieniać.
+ */
+const Analityka = lazy(async () => ({
+  default: (await import("@/pages/Analityka")).Analityka,
+}));
+
+/**
+ * Trzynaście tras zalogowanego użytkownika — każda w ramie z sidebarem (`AppShell`).
+ *
+ * ⚠ RAMĘ WPINA ROUTER, NIE WIDOK (finalny audyt 12e, D1, backlog #36). Do 12e robił to każdy
+ * widok z osobna — tak jak w oryginale, gdzie komponent każdej trasy zwraca `mn(…)`
+ * (`deminified/frontend-index.js:16329`, dwanaście wywołań) — ale w odbudowie zawijało się tak
+ * tylko PIĘĆ z dwunastu widoków, więc na `/katalog`, `/staging`, `/historia`, `/narzuty`,
+ * `/alerty`, `/waga-gabarytowa` i `/analityka` sidebar po prostu znikał. Struktura wewnętrzna
+ * odchodzi tu od oryginału (tabela zamiast powtórzenia w każdym widoku), ale DOM i zachowanie
+ * są zgodne z produkcją, a rozjazd nie ma już jak wrócić przy kolejnym widoku.
+ *
+ * `/login` i 404 zostają poza ramą — tak samo jak w oryginale, gdzie jako jedyne nie wołają
+ * `mn()`. `/selly` jest w ramie mimo że w produkcji nie było trasą Reacta: wstrzykiwany panel
+ * był overlayem NAD `<main>`, czyli WEWNĄTRZ ramy, i podświetlał swoją pozycję w sidebarze
+ * (`mirror/frontend/assets/selly-injection.js:255-280`).
+ */
+const TRASY_Z_RAMA: [string, ComponentType][] = [
+  ["/", Pulpit],
+  ["/katalog", Katalog],
+  ["/staging", Staging],
+  ["/konfiguracja", Konfiguracja],
+  ["/historia", Historia],
+  ["/archiwum", ArchiwumImportow],
+  ["/narzuty", Narzuty],
+  ["/alerty", Alerty],
+  ["/atrybuty", Atrybuty],
+  ["/waga-gabarytowa", WagaGabarytowa],
+  ["/analityka", Analityka],
+  ["/selly", Selly],
+  ["/moje-konto", MojeKonto],
+];
+
+export function Trasy() {
+  return (
+    <AuthGate>
+      <Suspense
+        fallback={
+          <div className="p-8 text-sm text-muted-foreground">Wczytywanie…</div>
+        }
+      >
+        <Switch>
+          <Route path="/login" component={Login} />
+          {TRASY_Z_RAMA.map(([sciezka, Widok]) => (
+            <Route key={sciezka} path={sciezka}>
+              <AppShell>
+                <Widok />
+              </AppShell>
+            </Route>
+          ))}
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
+    </AuthGate>
+  );
+}
+
+export function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <ToastProvider>
+          <Trasy />
+        </ToastProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+}

@@ -18,8 +18,6 @@ const adapter = require('./parsers/adapter.cjs');
 const atrybuty = require('./atrybuty_module.cjs');
 const pending = require('./pending_module.cjs');
 const archive = require('./archive_module.cjs');
-const paymentBlocks = require('./payment_blocks.cjs');
-const applicationRules = require('./application_rules.cjs');
 
 const TMP = path.join(os.tmpdir(), 'bridge_v6_imports');
 if (!fs.existsSync(TMP)) fs.mkdirSync(TMP, { recursive: true });
@@ -109,24 +107,6 @@ function register(app, ctx) {
   if (!tk || !U || !we || !be) {
     console.error('[bridge_v6] BŁĄD: brakuje ctx (tk/U/we/be) — extensions nie zostały zarejestrowane');
     return;
-  }
-
-  // Idempotentnie dopina kolumnę, uzupełnia istniejące rekordy i zakłada triggery.
-  // Dzięki triggerom każdy kolejny import zachowuje regułę per magazyn.
-  try {
-    const result = paymentBlocks.ensurePaymentBlocks();
-    console.log(`[bridge_v6] Blokowane formy płatności: ${result.rows} produktów z przypisaną regułą`);
-  } catch (e) {
-    console.error('[bridge_v6] BŁĄD inicjalizacji blokowanych form płatności:', e.message);
-  }
-
-  // Zamknięta lista zastosowań per kategoria + triggery zabezpieczające także zapisy
-  // spoza adaptera (np. odtworzenie zastosowań z zastosowania_master.csv).
-  try {
-    applicationRules.ensureApplicationRules();
-    console.log('[bridge_v6] Reguły kategorii i zastosowań: aktywne');
-  } catch (e) {
-    console.error('[bridge_v6] BŁĄD inicjalizacji reguł zastosowań:', e.message);
   }
 
   // === MODUŁ ATRYBUTÓW ===
@@ -479,16 +459,6 @@ function register(app, ctx) {
     } catch (e) {
       console.error('[bridge_v6] BLAD ladowania selly/routes:', e.message);
     }
-    // === DODANE 2026-09-07: Selly REST API sync (Tor 1 delta + Tor 2 full) ===
-    try {
-      const { registerSyncRoutes } = require('./selly/routes_sync.cjs');
-      registerSyncRoutes(app, { db: _bridgeDb, requireAuth: we });
-      const { installScheduler } = require('./selly/scheduler_selly.cjs');
-      installScheduler(_bridgeDb);
-      console.log('[bridge_v6] Selly sync: endpointy /sync-* + scheduler zaladowane');
-    } catch (e) {
-      console.error('[bridge_v6] BLAD ladowania selly/sync:', e.message);
-    }
     // === DODANE 2026-08-24: uwaga_cena patch ===
     // Kolumna products.uwaga_cena + monkey-patch acceptStaging/addProductsBulk
     // + endpoint GET /api/products/uwagi-cena dla frontendowego tooltipu przy statusie.
@@ -839,10 +809,6 @@ let schedulerStarted = false;
 const lastRunPerSupplier = {};
 
 function startScheduler(app, ctx) {
-  // One owner: the core D4 scheduler already polls all configured suppliers.
-  // Running a second timer duplicated downloads and absence counters.
-  console.log('[bridge_v6] Scheduler delegated to core D4');
-  return;
   if (schedulerStarted) return;
   schedulerStarted = true;
 
@@ -948,3 +914,4 @@ async function runAutoPull(ctx, onlyKod) {
 }
 
 module.exports = { register, runAutoPull };
+

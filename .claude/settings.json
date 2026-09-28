@@ -55,7 +55,13 @@
       "Bash(npx:*)",
 
       "Bash(git:*)",
-      "Bash(sqlite3:*)"
+      "Bash(sqlite3:*)",
+
+      "Bash(gh pr:*)",
+      "Bash(gh api user:*)",
+      "Bash(gh auth status)",
+      "Bash(tools/sync-z-develop.sh:*)",
+      "Bash(tools/push-i-pr.sh:*)"
     ]
   }
 }

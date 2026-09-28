@@ -1,0 +1,48 @@
+# Bridge PRODUKCJA (panel.agritires.eu) — reverse proxy do backendu Node na 127.0.0.1:5000
+# Frontend SPA (rebuild/frontend, base "/") serwowany statycznie z tego katalogu.
+# Ten plik jest utrzymywany w repo (deploy/produkcja/htaccess) i kopiowany do docroota
+# przez tools/deploy-produkcja.sh.
+#
+# ⚠ TEN KATALOG JEST WIDOCZNY POD DWOMA ADRESAMI:
+#   - https://panel.agritires.eu/...      (DocumentRoot = ten katalog) — TU MIESZKA PANEL
+#   - https://agritires.eu/panel/...      (DocumentRoot = public_html, /panel to podkatalog)
+# Nowy frontend ma ABSOLUTNE ścieżki do assetów (vite base "/"), więc pod drugim adresem
+# by się nie załadował (/assets/... trafiłoby w korzeń domeny). Stary panel tego nie miał,
+# bo ładował assety względnie i routował po hashu. Dlatego drugi adres przekierowujemy.
+
+RewriteEngine On
+
+# 0) Wyzwania Let's Encrypt — serwuj bez proxy, przekierowań i SPA-fallbacku
+RewriteRule ^\.well-known/acme-challenge/ - [L]
+
+# 1) ⚠ PLIK CSV DLA SELLY — serwuj WPROST, przed jakimkolwiek przekierowaniem.
+#    Selly pobiera go spod https://agritires.eu/panel/ex-port-files/sellycsv-….csv o 12:00
+#    i ten adres ma zostać nietknięty (cały argument za tym, żeby nie ruszać konfiguracji
+#    cudzego sklepu). Przekierowanie 301 z reguły 2 zerwałoby to pobranie, a katalog ma
+#    własny .htaccess z białą listą IP, którego ta reguła nie omija.
+RewriteRule ^ex-port-files/ - [L]
+
+# 2) Wejście przez agritires.eu/panel/... -> 301 na subdomenę.
+#    Zakładki Ani sprzed cutoveru trafiają tu i bez tej reguły zobaczyłaby białą stronę.
+RewriteCond %{HTTP_HOST} !^panel\.agritires\.eu$ [NC]
+RewriteRule ^(.*)$ https://panel.agritires.eu/$1 [R=301,L,QSA]
+
+# 3) API -> backend produkcji (flaga [P] = proxy; zachowuje metodę i ciało żądania)
+RewriteRule ^api/(.*)$ http://127.0.0.1:5000/api/$1 [P,L,QSA]
+
+# 4) SPA fallback: wszystko poza istniejącym plikiem/katalogiem i poza /api -> index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule ^ index.html [L]
+
+# 5) Wymuszenie HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 6) Brak cache dla index.html i bundli (żeby nowa wersja była widoczna od razu)
+<FilesMatch "\.(html|js|css)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</FilesMatch>

@@ -17,6 +17,10 @@ z naszym kodem (`deminified/backend-index.cjs`, `mirror/backend/*.cjs`,
 `02_SCHEMAT_BAZY`, `03_IMPORT_tk`, `04_WARSTWA_DANYCH`, `05_PARSERY_MODULY`,
 `06_KONFIGURACJA`, `schema.sql`.
 
+**Ustalenia odbudowy od ticketu 91** leżą w `docs/spec-backend/wpis-<N>.md` — jeden plik na
+ticket, żeby równoległe karty nie dopisywały się w to samo miejsce tego dokumentu
+(`docs/spec-backend/README.md`). Pełna specyfikacja = ten plik + tamten katalog.
+
 ---
 
 ## 1. Rozbieżności z moim audytem — 3 KOREKTY
@@ -45,23 +49,289 @@ GET  /api/alerts             GET  /api/spedycja
 GET  /api/export/shoper      GET  /api/export-shoper     ← pełny katalog CSV bez auth!
 POST /api/waga-gabarytowa/oblicz
 ```
+**Potwierdzone w 12d** (`38-CHORE-kontrakt-fixtures-odswiezenie`, 2026-09-08): lista powyżej
+zmierzona na **uruchomionym oryginale**, nie tylko wywnioskowana z czytania kodu — wszystkie
+14 tras z `security: []` realnie oddają **200** bez tokenu (`GET /api/export-shoper` akurat
+zwrócił 500 na danych snapshotu, ale bez auth — trasa jest publiczna, błąd jest gdzie indziej).
+**Przyczyna 500 ustalona w 70** (`70-CHORE-eksport-zip-odstepstwo`): bez `?dostawca=` trasa
+generuje ZIP, a lockfile produkcji trzyma `archiver@5.3.2`, który nie eksportuje `ZipArchive` —
+pada zawsze, niezależnie od danych. Świadome odstępstwo D1 (backlog #93): odbudowa ma
+`archiver@^8.0.0` i ZIP u nas działa.
+Ten sam bieg potwierdził, że **`GET /api/me` mimo `security: []` w kontrakcie NIE jest
+publiczne** — produkcja realnie oddaje **401**, chroni ją ręczny `if (!req.user)`
+(`deminified/backend-index.cjs:48179-48183`), nie wspólny middleware `we`; `POST /api/login`
+ze złym hasłem też oddaje 401. Oba kody są od tego ticketu zadeklarowane w
+`contract/openapi.yaml`.
+
 Najgroźniejsze: **`/api/export/shoper`** (każdy pobierze cały katalog),
 **`/api/audit-log`** i **`/api/history`** (log działań i zmian), **`/api/config`**.
 
-Dodatkowo subtelność z podwójnej rejestracji: `/api/history/meta` i
-`/api/history/paged` są **publiczne**, bo żywy handler to ten z rdzenia (bez `we`),
-przesłaniający wersję modułową (która auth by miała). Kolejność rejestracji ma
-skutek bezpieczeństwa.
+Dodatkowo subtelność z rejestracji tras — sprostowane w I5: rejestracje `/api/history/meta`
+i `/api/history/paged` są **trzy**, nie dwie. Rdzeń rejestruje je bez `we` (`:48335`, `:48352`);
+`mirror/backend/pagination_module.cjs:136,168` rejestruje je ponownie z `we`, a ten moduł jest
+ładowany dwukrotnie (`extensions.cjs:449-451` oraz wprost z `index.cjs`). Express bierze
+pierwszy pasujący handler, więc żywy jest handler z rdzenia (bez auth) i obie trasy są
+**faktycznie publiczne** — wniosek się nie zmienia, tylko liczba rejestracji.
+
+> **Odbudowa (I1a, `1-FEATURE-backend-fundament-logowanie`):** w `rebuild/backend`
+> zasada jest odwrócona od startu — `requireAuth` nakłada się jawnie na trasy danych,
+> publiczne zostają tylko `/api/login`, `/api/logout` i `/api/health`. Konkretne
+> endpointy z listy wyżej (products, staging, history, audit-log, export/shoper…)
+> wjeżdżają dopiero w iteracjach 2+, każdy już pod `requireAuth`; ta lista opisuje
+> stan **oryginału**, nie nowego backendu.
+>
+> **Potwierdzone w I2** (`3-FEATURE-katalog-odczyt`): `GET /api/products`, `GET /api/suppliers`
+> i `GET /api/dostawcy` wjechały pod `requireAuth`, zgodnie z zasadą powyżej — i zgodnie
+> z kontraktem, który dla tych operacji deklaruje `security: [bearerAuth, cookieAuth]`,
+> więc to nie jest odstępstwo. `GET /api/products/{id}` nie istnieje ani w produkcji, ani
+> w `contract/openapi.yaml` — nie został odtworzony (szczegóły endpointów: `spec-frontend.md`
+> / `docs/tickets/3-FEATURE-katalog-odczyt/`, nie zakres tego pliku).
+>
+> **Potwierdzone w 3b** (`5-FEATURE-staging-endpointy-importu`): `GET /api/staging` też wjechało
+> pod `requireAuth`, mimo że kontrakt ma dla niego `security: []` — świadome, dziedziczone
+> odstępstwo (D1), ten sam wzorzec co przy `/api/products`.
+>
+> **Potwierdzone w 4a** (`15-FEATURE-narzuty-promocje-ceny`): `GET/POST /api/markups`
+> i `GET/POST /api/promotions` (oraz `PATCH`/`DELETE` po `{id}`) wjechały pod `requireAuth`,
+> ten sam wzorzec D1, mimo że oryginał i `security: []` w openapi mają je publiczne.
+>
+> **Potwierdzone w I5** (`15-FEATURE-historia-zmian`, 2026-09-02): `GET /api/history`,
+> `/api/history/meta` i `/api/history/paged` też wjechały pod `requireAuth`, mimo
+> `security: []` w kontrakcie — ten sam wzorzec D1. Przy okazji sprostowane tabele: `/api/history`
+> czyta `history` (`Wa`, goła tablica wierszy, 10 pól), `/meta` i `/paged` czytają `audit_log`
+> (`Za`) i zwracają odpowiednio `{ dostawcy: string[] }` oraz `{ items, total, pages, page, limit }`
+> z 11 polami na `item` — żadna z tras nie dotyka `historia_cen`. Szczegóły:
+> `docs/tickets/15-FEATURE-historia-zmian/`.
+>
+> **Potwierdzone w I6** (`18-FEATURE-widok-alerty`, 2026-09-03): `GET /api/alerts` też
+> wjechało pod `requireAuth`, mimo `security: []` w `contract/openapi.yaml:67` — ten sam
+> wzorzec D1; bez tokenu trasa oddaje **401, kod spoza listy kontraktu** (kontrakt zna tylko
+> 200/400 dla tej ścieżki). `PATCH /api/alerts/{id}` ma auth zgodnie z kontraktem od zawsze,
+> ale dla niej **nie ma nagranej próbki** w `contract/fixtures/` — jej kształt (`{ok:true}`,
+> zawsze, także dla nieistniejącego `id`, bez walidacji `status`, bez `audit_log`) stoi
+> wyłącznie na kodzie oryginału. Szczegóły: `docs/tickets/18-FEATURE-widok-alerty/`.
+>
+> **Potwierdzone w I9** (`18-FEATURE-waga-gabarytowa`, 2026-09-03): `POST
+> /api/waga-gabarytowa/oblicz` wjechało pod `requireAuth`, mimo `security: []` w kontrakcie —
+> ten sam wzorzec D1 (odstępstwo D2). Formuła jest **paletowa/oponowa**, nie ta sama co
+> wolumetryczna licząca się na froncie (patrz `spec-frontend.md`): szerokość zaokrąglana do
+> progów półpalety (≤55 cm → 60 cm) i palety (≤80 cm → 80 cm), doliczona wysokość palety,
+> mnożnik `0.000167`, wszystko sterowane configiem `waga_gab.*`. Odpowiedź ma pięć pól
+> (`wagaGabarytowa`, `szerokoscEfektywna`, `wysokoscZPaleta`, `wspolczynnik`, `opis`); brak
+> walidacji — każde wejście, łącznie z pustym ciałem, daje 200 (kontrakt deklaruje 400,
+> nieosiągalne w oryginale). Szczegóły: `docs/tickets/18-FEATURE-waga-gabarytowa/`.
+>
+> **Potwierdzone w I11** (`18-FEATURE-konfiguracja-config-spedycja`, 2026-09-03):
+> `GET /api/config` i `GET /api/spedycja` też wjechały pod `requireAuth`, mimo `security: []`
+> w kontrakcie — ten sam wzorzec D1. `POST` na obu zasobach kontrakt i tak ma za auth
+> (bearer/cookie), więc tam odstępstwa nie ma. **Klucze `waga_gab.*`, które czyta formuła
+> z I9, są od teraz edytowalne przez `POST /api/config`** (whitelista 13 kluczy). Szczegóły:
+> `docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`.
+>
+> **Potwierdzone w 10a** (`19-FEATURE-analityka-fundament`, 2026-09-03): pięć tras
+> `/api/analytics/*` (`filters`, `status`, `kpi`, `margins`, `bootstrap-current`) wjechały pod
+> `requireAuth` — ale to **NIE jest odstępstwo D1**, inaczej niż w powyższych wpisach: kontrakt
+> już deklarował `security: [bearerAuth, cookieAuth]` i oryginał już miał `requireAuth` w każdej
+> z 27 rejestracji modułu `analytics_module.cjs`. Przy okazji: `currentWhere()` (`:60-74`),
+> zbudowana pod filtrowanie `margins` po sześciu wymiarach, ma **zero wywołań w całym module** —
+> martwy kod w produkcji; odbudowa jej świadomie nie ożywia (`GET /margins` bez query params,
+> filtrowanie po stronie klienta). Szczegóły: `docs/tickets/19-FEATURE-analityka-fundament/`.
+> Semantyka **wszystkich 27 tras** modułu (numer linii handlera, parametry query, LIMIT-y,
+> kształt odpowiedzi — trzy różne koperty!) jest spisana w `docs/analityka-bloki-10b-10f.md`.
+>
+> **Potwierdzone w 10c** (`22-FEATURE-analityka-ean`, 2026-09-03): sześć tras
+> `/api/analytics/ean/{comparison,details,unique,coverage,supplier-rank}` i legacy
+> `ean-porownanie` doszły pod `requireAuth` — ten sam brak-odstępstwa co 10a, kontrakt już
+> deklarował `security` na tych ścieżkach. `ean-porownanie` **nie jest** aliasem
+> `ean/comparison`: inny WHERE (bez `cena_zakupu > 0`), LIMIT 200 zamiast 1000, i **goła
+> tablica** zamiast koperty `{rows}`. `ean/comparison` czyta query `minDiffPct`, `ean/details`
+> i `ean-porownanie` czytają `ean` — trasy analityki NIE są bezparametrowe wszystkie naraz.
+> Szczegóły: `docs/tickets/22-FEATURE-analityka-ean/`.
+>
+> **Potwierdzone w 10d** (`23-FEATURE-analityka-dostawcy`, 2026-09-03): kolejne cztery trasy —
+> `GET /api/analytics/{suppliers/stability, suppliers/lifecycle, suppliers/stock,
+> dostawcy-stats}` — też pod `requireAuth`, ten sam wniosek co w 10a (nie jest to odstępstwo D1).
+> `suppliers/stability` ma dwie gałęzie SQL zależne od `hasHistory(db)`: z historią liczy oknem
+> `LAG()` nad `historia_cen` (drugi czytelnik tej tabeli obok `GET /api/analytics/status`), bez
+> historii liczy z `products` — kształt wiersza jest różny między gałęziami. `dostawcy-stats`
+> zwraca **gołą tablicę** (bez koperty) i nie ma konsumenta w oryginalnym frontendzie. Szczegóły:
+> `docs/tickets/23-FEATURE-analityka-dostawcy/`.
+>
+> **Potwierdzone w 10e** (`25-FEATURE-analityka-dostepnosc-rotacja`, 2026-09-04): kolejne sześć
+> tras `/api/analytics/*` (`availability/products`, `availability/sell-through`,
+> `seasonality/monthly`, `lifecycle/models`, `rotation/inactive`, `importy-timeline`), wszystkie
+> pod `requireAuth`, odtworzone 1:1 z `analytics_module.cjs`. Jedyna z sześciu czytająca
+> `req.query` to `rotation/inactive` (`?days`, zaciskane do [1, 730], domyślnie 60).
+> `importy-timeline` nie ma konsumenta w UI (świadoma decyzja, jak `bootstrap-current` w 10a).
+> **Odkrycie o produkcji:** `historia_cen` nie ma kolumny `nazwa`, o którą pytają
+> `availability/products` i `availability/sell-through` — oba zapytania wywracają się na
+> `no such column`, `safeAll()` połyka błąd, więc w PRODUKCJI obie trasy zawsze oddają `rows: []`
+> mimo migawek w historii. **Odbudowa od P10.1** (`90-FEATURE-ozywienie-kart-dostepnosci`,
+> 2026-09-22, świadome odstępstwo, `docs/rebuild-backlog.md` #32) już nie portuje tej usterki
+> 1:1 — obie trasy łączą `historia_cen` z `products` po `(dostawca, kod)` i oddają wiersze
+> (`nazwa: null` dla pozycji usuniętej z katalogu). Szczegóły:
+> `docs/tickets/25-FEATURE-analityka-dostepnosc-rotacja/`,
+> `docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/`.
+>
+> **Potwierdzone w 10f** (`26-FEATURE-analityka-export-pulpit`, 2026-09-04): `GET
+> /api/analytics/export/{view}` — 27. i **ostatnia** trasa modułu analityki (moduł kompletny
+> 27/27), pod `requireAuth`, ten sam wniosek co w 10a (nie odstępstwo D1). Jedyna
+> sparametryzowana trasa analityki czytająca `req.params` zamiast `req.query`, i **jedyna trasa
+> całego backendu, która nie oddaje JSON-a** — nagłówki `text/csv; charset=utf-8` +
+> `Content-Disposition: attachment; filename={view}.csv`, bez sanityzacji `filename` (port 1:1).
+> Dziesięć widoków (`suppliers-stability`, `suppliers-lifecycle`, `suppliers-stock`,
+> `ean-comparison`, `unique`, `prices-last`, `availability-products`, `sell-through`, `margins`,
+> `rotation-inactive`), **każdy z własnym SQL-em**, innym niż trasa dashboardu o tej samej
+> nazwie (np. `export/margins` liczy per produkt, dashboard `/margins` grupuje). LIMIT 5000 mają
+> tylko 6 z 10 (bez limitu: `suppliers-stability`, `suppliers-stock`, `ean-comparison`,
+> `unique`). W PRODUKCJI nieznany `{view}` → **200 i sam BOM, nie 404**, a `availability-products`
+> i `sell-through` dziedziczą usterkę #32 (`historia_cen.nazwa`) i zawsze oddają sam BOM mimo
+> danych; **odbudowa od P10.1** (2026-09-22, świadome odstępstwo, backlog #32/#35) łamie oba
+> punkty — nieznany widok dostaje `404 {error}`, a te dwa widoki eksportu oddają wiersze (JOIN
+> po `(dostawca, kod)` jak w dashboardzie, patrz blok 10e wyżej). Format CSV pozostałych ośmiu
+> widoków bez zmian: separator średnik, BOM zawsze na początku (także przy pustym wyniku),
+> cudzysłowy podwajane, nagłówek z kluczy pierwszego wiersza. Szczegóły:
+> `docs/tickets/26-FEATURE-analityka-export-pulpit/`,
+> `docs/tickets/90-FEATURE-ozywienie-kart-dostepnosci/`.
+>
+> **Potwierdzone w 7a** (`29-FEATURE-atrybuty-backend`, 2026-09-04): atrybuty to **13 ścieżek /
+> 18 operacji** (`atrybuty_module.cjs` 11 + `pending_module.cjs` 7; operacji jest więcej niż
+> ścieżek, bo `/api/atrybuty/pending` ma GET i DELETE — `pending_module.cjs:377`). Wszystkie
+> wjechały pod `requireAuth`, ale to **NIE jest odstępstwo D1**: oryginał wpina middleware auth
+> `we` w każdą trasę obu modułów (`extensions.cjs:80,105`). Domknięta korekta z §1: klaster
+> atrybutów w rdzeniu (`mirror/backend/index.cjs:295` — `ATTR_CORE_KINDS`, `listAtrybuty`,
+> `upsertAtrybutRodzaj`…) jest **martwy**, `grep "'/api/atrybuty" index.cjs` = 0 trafień —
+> żywe są wyłącznie oba moduły Extensions. Dwa kształty, które łatwo przeoczyć:
+> `GET /api/atrybuty` oddaje rodzaje **z** polem `utworzony`, a `GET /api/atrybuty/rodzaje`
+> **bez** (SELECT `atrybuty_module.cjs:116` go nie pobiera), zaś `GET /api/atrybuty/liczniki`
+> oddaje **gołą mapę** `"<rodzaj>::<wartosc>": liczba`, bez koperty `ok`. Audyt piszą tylko
+> 3 trasy CRUD rodzajów i 3 wartości — kolejka pending nie loguje nic, mimo że
+> `akceptuj-z-edycja`/`akceptuj-jako-alias` robią masowy `UPDATE products`. Szczegóły:
+> `docs/tickets/29-FEATURE-atrybuty-backend/`. **Świadome odstępstwo rebuildu** (2026-09-21,
+> `74-FEATURE-slad-kolejki-atrybutow`, backlog #39/#41): u nas wszystkie sześć tras kolejki
+> pisze do `audit_log`, a akceptacja z edycją/alias jest dodatkowo widoczna w Historii jako
+> `edycja`; oryginał tego nadal nie robi. Mapy rodzaj→kolumna są u nas jedne (15 rodzajów) —
+> `pending_module.cjs` w oryginale ma osobną, węższą mapę (13, bez `model`/`zastosowanie`).
+> **Kolejne świadome odstępstwo rebuildu** (2026-09-21, `78-FEATURE-seed-bieznikow-podobienstwo`,
+> backlog #40/#42): seed słownika `bieznik` u nas bierze `SELECT DISTINCT bieznik FROM products`
+> (oryginał: `model`); po każdym skanie i przy starcie po seedzie usuwamy z kolejki pending
+> pozycje, których wartość jest już dosłownie w słowniku, a reguła sugestii nigdy nie proponuje
+> napisu identycznego z pozycją (oryginał kolejki nigdy nie czyści i podpowiada samemu sobie ze
+> 100%); podobieństwo aliasów liczymy po normalizacji trim/lowercase/zwinięciu spacji, więc pary
+> różniące się tylko wielkością liter dostają teraz sugestię (oryginał porównuje surowe napisy).
+> Szczegóły: `docs/tickets/78-FEATURE-seed-bieznikow-podobienstwo/`.
+
+> **Potwierdzone w 8a** (`28-FEATURE-selly-eksport-backend`, 2026-09-04): panel Selly to **5 GET
+> + 5 POST**, nie 7+3 jak zakładała robocza notatka — `categories` i `producers` są POST-ami
+> (`mirror/backend/selly/routes.cjs:115,128`). Panel w oryginale **już stoi za `requireAuth`**
+> (`extensions.cjs:456-458`) — **NIE jest to odstępstwo D1**. Sześć z dziesięciu tras panelu
+> (`ping`, `dictionaries`, `producers`, `categories`, `sync-product`, `sync-supplier`) gadają
+> z zewnętrznym API Selly.pl (OAuth2 `client_credentials`, sekrety `SELLY_*` w env); lokalne są
+> tylko `status`, `log`, `csv-status`, `generate-csv`. **Odstępstwo D1 dotyczy wyłącznie dwóch
+> tras eksportu** — `GET /api/export-shoper` i `GET /api/export/shoper` — publicznych w
+> `contract/openapi.yaml:611,619` (`security: []`), a u nas pod `requireAuth`. Trasy to DWA różne
+> formaty, nie alias: `export-shoper` ma stały 7-kolumnowy nagłówek, filtr `?dostawca=` i bez
+> parametru oddaje `application/zip` (plik per dostawca) **— w produkcji ta gałąź zawsze 500**
+> (`archiver@5.3.2` bez `ZipArchive`; ustalone w 70, backlog #93; u nas świadomie działa, D1);
+> `export/shoper` bierze kolumny z `shoper.format_eksportu`, filtruje `?supplier=` i zawsze
+> oddaje jeden `text/csv`. Szczegóły: `docs/tickets/28-FEATURE-selly-eksport-backend/`,
+> `docs/tickets/70-CHORE-eksport-zip-odstepstwo/`.
+
+> **Potwierdzone w 12a** (`35-FEATURE-mutacje-produktow-backend`, 2026-09-05): katalog domknięty
+> do parytetu ZAPISU — `POST /api/products` (bulk), `PUT`/`PATCH`/`DELETE /api/products/{id}`,
+> `GET /api/products/uwagi-cena` i `/hold-reasons`, wszystkie pod `requireAuth` (**NIE jest to
+> odstępstwo D1** — oryginał wpina `we` w każdą z nich). **Sprostowanie faktu o oryginale:**
+> `PUT` i `PATCH /api/products/:id` NIE są w produkcji wspólnym handlerem, jak dotąd zakładano —
+> to dwie osobne, niemal identyczne funkcje, różniące się wyłącznie kolejnością audytu względem
+> pętli override/history (stan końcowy bazy identyczny); odbudowa świadomie portuje jeden wspólny
+> handler. `U.addProductsBulk` woła **sześć** rozszerzeń `bridge_ext`, nie pięć (dochodzi
+> `rememberLink` po zapisie produktu), a `mirror/backend/uwaga_cena_patch.cjs` monkey-patchuje
+> TAKŻE `addProductsBulk` (propagacja kolumny `uwaga_cena`), nie tylko dostarcza dwa endpointy
+> GET. **Tabela `history` (`Wa`) dostała w rebuildzie pierwszego pisarza** — ręczna edycja
+> produktu w katalogu — więc `GET /api/history` przestał zwracać `[]` na stagingu (domyka stan
+> przejściowy zapisany w I5, patrz §5 niżej). Szczegóły:
+> `docs/tickets/35-FEATURE-mutacje-produktow-backend/`.
+
+> **Potwierdzone w 12b** (`36-FEATURE-konto-admin-maintenance`, 2026-09-05): `GET /api/audit-log`
+> wjechało pod `requireAuth`, mimo `security: []` w kontrakcie — ten sam wzorzec D1/D2 (dziennik
+> audytu ujawnia e-maile, nazwy plików i URL-e dostawców). Trasa oddaje **surowy**
+> `listaAudytu(db, 500)`, bez mapowania: `szczegolyJson` w odpowiedzi jest STRINGIEM, nie obiektem
+> (fixture to zamraża) — parsowanie należy do frontu (`spec-frontend.md`). Sesja dowiozła też
+> siedem innych operacji, wszystkie za `requireAuth`: `POST /api/password/change` (port `P4()`,
+> kolejność `USER_NOT_FOUND`→400, `WRONG_OLD_PASSWORD`→401, `WEAK_PASSWORD`→400,
+> `SAME_PASSWORD`→400 przez `bcrypt.compare`, nie porównanie stringów), `GET /api/users`
+> (projekcja jawna `{id, email, imieNazwisko}`, `hasloHash` nie wycieka), `GET /api/admin/supplier-config`
+> + **`PATCH`** `/api/admin/supplier-config/{kod}` (nie `PUT` — pętla po 10 kodach dispatchera,
+> nie po tabeli `suppliers`, więc lista ma zawsze 10 pozycji), `GET /api/admin/suppliers-list`,
+> `POST /api/maintenance/usun-nieopony` (port `czyOpona()`/`Zc()`) i `POST /api/products/clear`
+> (wymaga ciała `{potwierdzenie:"WYCZYSC"}` porównywanego ściśle; kopia pliku bazy z
+> `wal_checkpoint(TRUNCATE)` przed `DELETE FROM products` bez `WHERE`). Szczegóły:
+> `docs/tickets/36-FEATURE-konto-admin-maintenance/`.
+
+> **Domknięte finalnym audytem 12e (2026-09-08, `39-CHORE-audyt-bezpieczenstwa-domkniecie`).**
+> Przejrzano rejestr tras zbudowanej aplikacji: ~95 operacji w 21 plikach
+> `rebuild/backend/src/routes/*.ts`, **każda trasa danych ma `requireAuth` bezpośrednio przy
+> rejestracji**. Publiczne są dokładnie trzy: `POST /api/login` (`routes/auth.ts:31`),
+> `POST /api/logout` (`routes/auth.ts:62` — JWT bezstanowy, jak w oryginale
+> `backend-index.cjs:48175-48178`) i `GET /api/health` (`app.ts:135`, nie oddaje danych).
+>
+> Odstępstwo D1 z I1 (14 tras, które produkcja oddaje publicznie, w odbudowie pod
+> `requireAuth`) **zostaje na stałe** — decyzja D6, backlog #52.
+>
+> Od 12e pilnuje tego `rebuild/backend/test/auth.rejestr.test.ts`: skanuje **realny rejestr
+> Express** (`app._router.stack`), nie listę z kontraktu. Powód: dotychczasowe testy auth
+> chodziły po listach (`kontrakt.spojnosc.test.ts` po `openapi.yaml`, testy modułowe po
+> kuratorowanych tablicach), więc trasa dodana bez `requireAuth` **i** nieopisana w kontrakcie
+> przeszłaby CI.
+>
+> **CORS — sprostowanie do zapisania jako fakt:** przy pustym `CORS_ORIGINS` middleware CORS
+> w ogóle się nie montuje, więc nie ma nagłówków `Access-Control-Allow-*` i przeglądarka
+> blokuje cross-origin sama. Staging i produkcja są same-origin (Apache proxuje `/api/*` pod
+> tą samą domeną), więc allowlista jest tam ZBĘDNA — to jest stan docelowy, nie brak
+> konfiguracji. Gdy allowlista jednak jest, `middleware/cors.ts` odsyła konkretny origin
+> z listy razem z `Allow-Credentials: true`, nigdy `*` i nigdy echa dowolnego originu — to
+> naprawa wobec produkcji, która odbijała DOWOLNY origin z `credentials:true`
+> (`backend-index.cjs:48926-48930`). Od 12e `CORS_ORIGINS` zawierający `*` przy
+> `NODE_ENV=production` **zatrzymuje start procesu**, a `server.ts` wypisuje stan CORS
+> przy starcie.
+>
+> **JWT:** `JWT_SECRET` wymagany bez fallbacku (fail-fast, `config/env.ts:36`); od 12e
+> algorytm jest przypięty jawnie (`algorithms: ["HS256"]` w `jwt.verify`) — przy sekrecie
+> symetrycznym ryzyka nie było, to porządek, nie naprawa.
+>
+> **Mass-assignment (backlog #14) domknięty na WSZYSTKICH trasach mutacji** — żadna nie robi
+> `Object.keys(req.body)` do `UPDATE` ani spreadu ciała do `SET`. Jedyny wyjątek,
+> `POST /api/products` (bulk import), filtruje na poziomie kolumn tabeli, bo import musi
+> zapisać kolumny wyliczane — opisane komentarzem i zamierzone.
+
+> **Potwierdzone w 76** (`76-FEATURE-przewoznicy-serwer-paletowy`, 2026-09-21, karta P9.1):
+> `POST /api/waga-gabarytowa/oblicz` (patrz I9 wyżej) dostał od teraz **konsumenta w UI** —
+> kalkulator paletowy obok wolumetrycznego na `/waga-gabarytowa`; trasa, kontrakt i handler
+> zostają bez zmian. Świadome odstępstwo od produkcji: lista przewoźników i dzielników
+> wagi wolumetrycznej, dotąd trzymana w IndexedDB przeglądarki, przeniosła się na serwer —
+> nowa tabela `waga_gab_przewoznicy` (migracja `007`, pierwsza migracja z seedem danych: sześciu
+> przewoźników, GEIS domyślny) i dwie trasy bez odpowiednika w produkcji, `GET`/`PUT
+> /api/waga-gabarytowa/przewoznicy` (`requireAuth`, walidacja `400 {error}`, audyt
+> `edycja_przewoznikow` z `{przed, po}`, poza whitelistą widoku Historii). Opisane w
+> `contract/openapi.yaml` nowym markerem `x-odbudowa-nowa-trasa`. Szczegóły:
+> `docs/tickets/76-FEATURE-przewoznicy-serwer-paletowy/`.
+
+> **Kolejne wpisy do tej sekcji (od ticketu 91): `docs/spec-backend/wpis-<N>.md`** — jeden plik
+> na ticket, tu już nic nie dopisujemy (reguła i powód: `docs/spec-backend/README.md`).
+> Spis: `ls docs/spec-backend/wpis-*.md` — tej linii nie aktualizuje się ręcznie.
 
 ## 3. Potwierdzone z lipca (Perplexity niezależnie zgadza się ze mną)
 
 - **CORS odbija dowolny `Origin` + `Allow-Credentials: true`** — ryzyko CSRF (`be.cjs:48926`).
+  **Odbudowa (I1a):** CORS domyślnie wyłączony; opcjonalna allowlista przez `CORS_ORIGINS`
+  (staging jest same-origin przez proxy Apache).
 - **≥4 niezależne uchwyty `better-sqlite3`** do jednej bazy (rdzeń `Qi`, Extensions
   `_bridgeDb`, Atrybuty, Pending); WAL, więc działa, ale wielu writerów = ryzyko blokad.
 - **Handler błędów przed modułami** — nie łapie błędów tras modułowych; moduły ratują
   się lokalnym `try/catch`.
 - **Podwójna rejestracja** analytics (×2) i pagination — druga warstwa martwa.
 - **`JWT_SECRET` z zahardkodowanym fallbackiem** (Perplexity nie cytuje wartości — słusznie).
+  **Odbudowa (I1a):** `JWT_SECRET` wymagany z env, bez fallbacku — serwer nie startuje bez niego.
 - **Dryf schematu** potwierdzony: tabele `atrybuty_wartosci_pending`,
   `atrybuty_wartosci_odrzucone`, `selly_kategoria_norm_map`,
   `selly_zastosowanie_category_map`; kolumny `products.kod_importu`, `products.zastosowanie`.
@@ -71,7 +341,7 @@ skutek bezpieczeństwa.
 | Element | Wartość | Weryfikacja |
 |---|---|---|
 | Endpointy rdzenia | **49** rejestracji | zgodne z naszym `deminified` |
-| Endpointy modułowe | 66 def. (64 żywe po deduplikacji) | Atrybuty 11, Analytics 27, Pending, Paginacja 4, Selly |
+| Endpointy modułowe | 66 def. (64 żywe po deduplikacji) | Atrybuty 11 **+ Pending 7** (razem 18 operacji na 13 ścieżkach — patrz 7a w §2), Analytics 27, Paginacja 4, Selly |
 | Unikalne pary metoda+ścieżka | ~113 | 49 + 66 − 2 przesłonięte |
 | Metody `U.*` | **50 zdefiniowanych** / 47 używanych | Perplexity liczy definicje (`04_WARSTWA_DANYCH`), ja użycia — obie liczby poprawne |
 | Tabele | 27 (z `sqlite_sequence`) / 26 użytkowych | bez zmian od lipca |
@@ -82,20 +352,189 @@ skutek bezpieczeństwa.
 
 `03_IMPORT_tk.md` zawiera **realny diagram decyzyjny** wyprowadzony z kodu (z cytatami
 linii) — to bezpośrednie wejście do odbudowy (Faza 4, kierunek A). Kluczowe reguły
-potwierdzone:
-- dopasowanie po kodzie → po EAN → kod zastępczy `Lq()` tylko dla opony;
-- `Gq()` = `manual_overrides`: przy konflikcie **zachowuje wartość Marty**, zapisuje do `snapshotJson`;
+potwierdzone (zweryfikowane w 3c wobec ówcześnie żywego `tk = function` w
+`deminified/backend-index.cjs:47584-47851`; **na `88fa31c` ta funkcja jest już martwa** —
+`tk` jest przypisywany wynikiem `staging_policy.install()`, patrz `docs/spec-backend/wpis-130.md`):
+- dopasowanie po kodzie → po EAN → **po EAN znormalizowanym** (`:47698`, gdy surowy EAN
+  dostawcy nie trafił w mapę, dopasowanie po wartości z `Hq()`) → kod zastępczy `Lq()`
+  tylko dla opony;
+- `Gq()` = `manual_overrides`: przy konflikcie **zachowuje wartość Marty**, zapisuje do `snapshotJson`
+  (poza zakresem 3c — `Gq()` tam jest stubem przepuszczającym, realna logika to 3d);
 - `Zc()` = klasyfikator „czy opona";
-- auto-zatwierdzenie **tylko** zmian cena/marża/stan/magazyn → wpis do `historia_cen`;
-- wycofanie po **3 kolejnych** nieobecnościach (`WYCOFANIE_PROG_IMPORTOW=3` ↔ kolumna `nieobecnosc_pod_rzad`);
-- EAN auto-zmieniany tylko dla długości 8/12/13/14 i nie kończący się pięcioma zerami;
-- `kod_importu` nadaje `bridge_ext.assignKodImportu` (nie sama `tk`), grupując po EAN
-  lub marka+rozmiar+bieznik+nazwa.
+- auto-zatwierdzenie **tylko** zmian cena/marża/stan/magazyn → wpis do `historia_cen`
+  (3c liczy tylko decyzję i licznik `autoZatwierdzone`; sam zapis efektu to 3d);
+- wycofanie po **3 kolejnych** nieobecnościach (`WYCOFANIE_PROG_IMPORTOW=3` ↔ kolumna `nieobecnosc_pod_rzad`) — pętla wycofań poza zakresem 3c, jest w 3d;
+- **SPROSTOWANIE (3c): nie ma reguły „EAN auto-zmieniany tylko dla długości 8/12/13/14 i nie
+  kończący się pięcioma zerami"**, mimo że tak twierdziły ta specyfikacja i
+  `docs/incoming/backend-perplexity/backend_doc/03_IMPORT_tk.md`. Ta reguła istnieje
+  **wyłącznie w martwej `function tk`** (`deminified/backend-index.cjs:47499-47512`),
+  nadpisanej przez późniejsze przypisanie `tk = function` (`:47584`). Żywy `tk()` buduje
+  auto-patch produktu tylko z `cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` i
+  **nigdy nie ustawia `AP.ean`** — produkcja nie aktualizuje EAN istniejącego produktu przy
+  imporcie. Reguła **nie wchodzi** do portu (decyzja D4, `docs/tickets/6-FEATURE-silnik-tk-dopasowanie-klasyfikator/plan.md`).
+  `03_IMPORT_tk.md` powtarza ten sam błąd i **zostaje bez zmian** — to materiał źródłowy
+  Perplexity, nieredagowany; sprostowanie mieszka tutaj;
+- `kod_importu` nadaje `bridge_ext.assignKodImportu` (nie sama `tk`) — potwierdzone: wywoływane
+  wyłącznie w `addProductsBulk` (`:44791`) i `acceptStaging` (`:44903`), obie poza `tk()` i poza
+  zakresem 3c (3d). **NIEAKTUALNE dla stanu zamrożonej produkcji (129, I15.4c):** opisane tu
+  grupowanie po EAN lub marka+rozmiar+bieznik+nazwa to BAZOWA wersja funkcji; `staging_policy.cjs`
+  (Staging v2) podmienia `ext.assignKodImportu` globalnie na `compatibility()`
+  (marka+model+rozmiar+opcjonalne), a dopiero potem EAN. W PRODUKCJI podmiana obejmuje obie
+  ścieżki wywołania, bo jest monkey-patchem na współdzielonym `ext`. **W ODBUDOWIE port
+  wstrzyknięto na razie tylko w ścieżkę akceptacji** (`acceptStaging`); `addProductsBulk`
+  (`src/import/bulk.ts`) pozostaje na wersji bazowej — świadomie, patrz
+  `docs/karty/I15.4c/karta.md` → „Do koordynatora" pkt 4.
+  Szczegóły: `docs/spec-backend/wpis-129.md`.
+
+Dodatkowe ustalenia z charakteryzacji 3c, niewidoczne z samego czytania kodu:
+- `U.addStaging` (`:44923`) deduplikuje po `(kod, typ_zmiany, COALESCE(powod,''))` i przy
+  trafieniu nie zapisuje nic — licznik `doStagingu` liczy długość bufora, nie liczbę
+  realnych zapisów (`:47849-47850`).
+- `d.eanIsValid === false` w klasyfikatorze (`:47712`, `:47758`) jest w praktyce martwe:
+  `Hq()` (`:47357`) zapisuje w tym polu zawsze `1` albo `0`, nigdy `boolean`.
+- Pętla porównania pól po `Vq` (`:47749`) pomija przypadek „stara wartość pusta, nowa
+  niepusta" — uzupełnienie brakującego pola klasyfikuje pozycję jako zmienioną, ale nie
+  pojawia się jako składnik `powod`.
+
+> **Odbudowa (3a, `4-FEATURE-port-parserow-charakteryzacja`):** potok WEJŚCIA do `tk()` —
+> `dispatcher.parseByKod() → parser.parseFile() → adapter.recordsToSurowe()` — jest przeportowany
+> 1:1 do `rebuild/backend/src/import/legacy/` i pokryty testem charakteryzacyjnym na próbkach
+> MO1–MO10 (potwierdza m.in., że MO9 realnie ignoruje plik i ciągnie dane z GraphQL Agrorami, zgodnie
+> z `05_PARSERY_MODULY.md`). `bridge_ext.cjs`/`tire_dims.js` i sam silnik `tk()` zostają poza zakresem
+> do sesji 3c. Szczegóły: `docs/tickets/4-FEATURE-port-parserow-charakteryzacja/`.
+>
+> **Odbudowa (3b, `5-FEATURE-staging-endpointy-importu`):** brzeg stagingu i importu
+> odtworzony (`GET /api/staging`+`/paged`+`/{id}`, `POST /api/import/parse-file`,
+> `/api/import/from-url`, `POST /api/ai-fallback/parse`); `tk()` sam pozostaje jawnym,
+> świadomie niewiernym placeholderem do 3c. Po drodze wyjaśniły się trzy osobne mechanizmy,
+> które łatwo pomylić: `/api/import/*` (bez fallbacku, `mirror/backend/extensions.cjs`),
+> `POST /api/dostawcy/:kod/upload` (rdzeń, fallback do starych parserów `Wc()`, nie AI —
+> ⚠ **przypisanie „Iteracja 11" jest NIEAKTUALNE: trasa weszła w bloku 3f-1, 2026-09-01**)
+> i `POST /api/ai-fallback/parse` (stub, nigdy nie łączy się z OpenAI). Szczegóły:
+> `docs/tickets/5-FEATURE-staging-endpointy-importu/`.
+>
+> **Odbudowa (3c, `6-FEATURE-silnik-tk-dopasowanie-klasyfikator`):** ciało silnika wymienione —
+> port `Zc`/`Hq`/`ZT`/`Kq`/`Vq`/`Xq`/`Lq` do czytelnego TS (`rebuild/backend/src/import/silnik/`),
+> wymiana ciała `tk()`, deduplikacja zapisu do stagingu (`U.addStaging`), bezpiecznik pustego
+> wejścia przeniesiony z trasy do silnika. Dowód wierności: żywe `tk()` (`:47584-47851`) da się
+> wyciąć z `mirror/backend/index.cjs` po kotwicach tekstowych i **uruchomić** na atrapach warstwy
+> danych, więc wzorzec charakteryzacji pochodzi z wykonanego kodu produkcji, nie z lektury —
+> 340 wierszy `staging_items` porównanych pole po polu z 1838 rekordów wejścia na katalogu 7405
+> produktów ze zrzutu produkcji, plus 18 scenariuszy celowanych i gate treści przez HTTP.
+> Do 3d zostają: efekty auto-zatwierdzania (decyzja i licznik liczone, zapis nie), pętla
+> wycofań, realne `Gq()`. Szczegóły: `docs/tickets/6-FEATURE-silnik-tk-dopasowanie-klasyfikator/`.
+
+> **Odbudowa (3f-1 i 3f-2, 2026-09-01) — BRZEG OPERACYJNY IMPORTU.** Dowiezione:
+> `POST /api/dostawcy/:kod/upload` (rdzeń, multer 50 MB, pole `plik`),
+> `POST /api/dostawcy/:kod/synchronizuj-teraz`, `PATCH /api/dostawcy/:id` oraz alerty pisane
+> przez import. **Fallback `Wc()` NIE wchodzi** (decyzja zaklepana): gdy parser rzuci, leci
+> czytelny błąd i alert zamiast cichej drugiej próby innym kodem — luka otwarta, opisana
+> w roadmapie. Po drodze wyjaśniły się cztery rzeczy, których ta specyfikacja nie miała:
+>
+> 1. **⭐ PRODUKCJA MA DWA RÓŻNE POBIERACZE URL, nie jeden.** `downloadUrl`
+>    (`mirror/backend/extensions.cjs:26-45`) chodzi na `node:http`/`node:https`, ma timeout
+>    **60 s** i sam śledzi przekierowania rekurencją po `location`; obsługuje
+>    `POST /api/import/from-url`. `L4()` (rdzeń, `:48038-48116`) chodzi na `fetch`
+>    + `AbortController`, ma timeout **30 s** i przekierowania zostawia `fetch`; obsługuje
+>    `synchronizuj-teraz` oraz scheduler. Różnica jest obserwowalna: komunikaty undici
+>    („fetch failed", „This operation was aborted", „terminated") trafiają dosłownie
+>    do treści alertu — tak wygląda 339 alertów „Błąd pobierania" w `db/snapshot.db`.
+>    W odbudowie są to DWA osobne moduły (`src/import/pobierz.ts` i `src/import/synchronizuj.ts`)
+>    i mają takie zostać — decyzja użytkownika 2026-09-01.
+> 2. **⭐ SCHEDULER `D4()` (`:48118-48131`) — mechanizm, którego nie miała ani ta
+>    specyfikacja, ani roadmapa.** `setInterval` per dostawca, dobór:
+>    `sposobDostarczania === "url" && url && czestotliwoscMinuty && status !== "wstrzymany"`,
+>    ponowne wywołanie czyści poprzednie interwały. Uruchamiany bezwarunkowo przy starcie
+>    (`M4()`, `:48166`). W odbudowie wchodzi w bloku **3f-3**, za przełącznikiem
+>    `IMPORT_SCHEDULER` domyślnie WYŁĄCZONYM (świadome odstępstwo — produkcja przełącznika
+>    nie ma). Wyszukanie „scheduler / polling / setInterval" w tym pliku dawało wcześniej
+>    zero trafień, bo mechanizm nie był nigdzie przypisany.
+> 3. **Alerty PISZE import, nie widok.** `U.addAlert` (`:44954`) woła `L4()` przy błędzie HTTP
+>    (`typ: "Błąd HTTP"`) i przy każdym innym wyjątku (`typ: "Błąd pobierania"` + ustawienie
+>    `suppliers.status = "blad"`), oraz upload przy każdym wgraniu (`typ: "Ręczny upload"`).
+>    Iteracja 6 obejmuje wyłącznie ODCZYT. **Bez dławika** — każda nieudana próba to osobny
+>    wiersz; skala w produkcji: 339 „Błąd pobierania" wobec 4 „Błąd HTTP" i 2127
+>    „Synchronizacja", rekord 23/dobę dla jednego dostawcy. Konsekwencje dla widoku z I6
+>    zapisane w roadmapie i w backlogu #16.
+> 4. **`ostatniaSync` znaczy „kiedy PRÓBOWALIŚMY", nie „kiedy się udało".** `L4()` ustawia ją
+>    w OBU gałęziach błędu (`:48067`, `:48110`); nietknięty zostaje wtedy `ostatniPlik`.
+>
+> Do tego dwa defekty warstwy danych, oba w backlogu: **#14** (mutacje zapisują całe ciało
+> żądania — wzorzec systemowy, dotyka też I4 i I12) i **#15** (`L4()` nie czyści timera
+> po odrzuconym `fetch`). Szczegóły bloków: `docs/rebuild-roadmap.md` §5, blok 3f.
+
+> **Odbudowa (13b, `43-CHORE-i13b-silnik-p3-caps`, 2026-09-09) — dwie zmiany produkcji
+> 25.08→08.09 doniesione do portu.** Fallback marki (**P3**, 2026-08-31) NIE siedzi w `tk()` —
+> jest w `U.acceptStaging`, przed obiema definicjami `tk`; zmienił się z
+> `nazwa.split(" ")[0] || "—"` na literał `"UNKNOWN"` (port: `src/import/akceptacja.ts`; `??`
+> przepuszcza tylko `null`/`undefined`, więc pusty łańcuch fallbacku nie uruchamia). Helper
+> równości `Xq()` (**CAPS**, 2026-09-01, port `wartosciRowne()` w `src/import/silnik/pozycja.ts`)
+> doszedł do porównania `toUpperCase()===toUpperCase()`; niesymetryczna obsługa pustych wartości
+> nietknięta. ⚠ **Rozjazd CHANGELOG↔kod:** wbrew narracji Ani, `Xq()` NIE wycisza klasyfikacji
+> `zmiana_kluczowa` — ta liczy się osobno i literalnie, case-sensitive
+> (`_KP.some(...String(vS??"")!==String(vN??"")...)`), diff 08.09 tego fragmentu nie dotknął.
+> `Xq()` zmienia tylko narrację `powod` (`POLA_ROZNIC`, w tym `ean`) i próg auto-patchu pól
+> cenowo-magazynowych (`cenaZakupu`/`cenaSprzedazy`/`marzaPct`/`stan`/`magazyn` — bez `ean`,
+> zgodnie z ustaleniem 3c wyżej). Szum case-only w `zmiana_kluczowa` usuwa dopiero migracja
+> danych `UPPER(nazwa)` — **13c**, poza zakresem tej karty. Szczegóły:
+> `docs/tickets/43-CHORE-i13b-silnik-p3-caps/`.
+
+> **Odbudowa (13c, `44-CHORE-i13c-migracje-konwencji`, 2026-09-09) — trzy migracje DANYCH
+> odtwarzają konwencje produkcji z 18.08 i 09-01.** `products.kategoria` (historyczne wpisy
+> małą literą), `products.konstrukcja` (kody `R`/`D`/`L`/`B` → `Radialna`/`Diagonalna`) i
+> `products.nazwa`/`manual_overrides.override_value` (pole `nazwa`) → `UPPER` przechodzą przez
+> `rebuild/schema/004`–`006`, uruchamiane `npm run migrate` w transakcji; są no-opem na bazie,
+> którą produkcja już zmigrowała. `UPPER(nazwa)` domyka wcześniejszy szum case-only w
+> `zmiana_kluczowa` zapowiedziany w bloku 13b wyżej — `DELETE` kasuje wiersze CASE_ONLY (SQLite
+> `UPPER()` jest ASCII-only, więc 16 wierszy z polskim diakrytykiem zostaje, tak jak w
+> produkcji). Szczegóły i pomiary: `docs/tickets/44-CHORE-i13c-migracje-konwencji/`.
+
+> **Nowa trasa, której PRODUKCJA W OGÓLE NIE MA — P6.2** (`77-FEATURE-pseudo-alerty-katalogowe`,
+> 2026-09-21): `GET`/`PUT /api/alerty-katalogu/statusy`. Oryginał liczy pseudo-alerty katalogowe
+> (marża ujemna, bardzo niska marża, nie-opona, brak importu cennika) w przeglądarce i trzyma
+> ich status w IndexedDB (`HT()`: klucz `alerty-statusy`) — do backendu w ogóle nie woła;
+> odbudowa świadomie przenosi wyłącznie STATUS na serwer (decyzja 2, backlog #26), żeby nie
+> ginął po wyczyszczeniu historii przeglądarki. `GET` oddaje gołą tablicę
+> `{id, status, kto, kiedy}` (brak wiersza = `nowy`, nie zapisuje się). `PUT` przyjmuje
+> `{ids: string[], status}` (`nowy`/`przejrzany`/`rozwiazany`); 400 dla nieznanego statusu,
+> pustej lub zbyt długiej (>20 000 pozycji) listy, `id` pustego/dłuższego niż 2000 znaków lub
+> w formie, której silnik frontu nie produkuje. Zapis w jednej transakcji wypiera stare wpisy
+> tej samej pary (produkt/dostawca + reguła, inny odcisk wartości) i kasuje sieroty
+> (`produkt_id` spoza `products`) — bez procesu w tle. Obie metody za `requireAuth`, bez
+> `audit_log` (spójnie z `PATCH /api/alerts/:id`, D4 z I6). Migracja `008` (tabela nie istnieje
+> w produkcji — `rebuild/schema/README.md`); schemat trasy jest ręczny w `contract/openapi.yaml`
+> (nagrania z produkcji być nie może — `contract/README.md`). Szczegóły:
+> `docs/tickets/77-FEATURE-pseudo-alerty-katalogowe/`.
 
 `04_WARSTWA_DANYCH.md` daje **50 metod `U.*` z dokładnymi wyrażeniami Drizzle** i mapą
 zmangowanych zmiennych (`he`=products, `He`=staging, `Bt`=markups, `hn`=promotions,
 `Yt`=overrides, `Ki`=alerts, `Wa`=history, `Ot`=suppliers, `dt`=users, `Za`=audit_log,
-`gn`=spedycja, `Jt`=config) — zgodna z moją lipcową rekonstrukcją.
+`gn`=spedycja, `Jt`=config) — zgodna z moją lipcową rekonstrukcją. ⚠ `Wa` to tabela SQL
+**`history`**, odrębna od `historia_cen` — zweryfikowane w I5,
+`docs/tickets/15-FEATURE-historia-zmian/plan.md`. `Jt`/`gn` odtworzone w I11:
+`rebuild/backend/src/routes/{config,spedycja}.ts`, `src/repos/{config,spedycja}.ts`
+(`docs/tickets/18-FEATURE-konfiguracja-config-spedycja/`). `historia_cen` ma od bloku **10a**
+dwóch pisarzy: auto-zatwierdzanie importu (od 3d-1) i `POST /api/analytics/bootstrap-current`,
+oraz trzech czytelników. `GET /api/analytics/status` (10a) zwraca z niej agregat
+`{hasHistory, snapshots, od, do}` (`COUNT`/`MIN`/`MAX` po `zarejestrowano_at`).
+`GET /api/analytics/suppliers/stability` (10d, gałąź `hasHistory: true`) liczy z niej zmiany
+cen oknem `LAG()`. `GET /api/analytics/prices/product-history` (10b) jest pierwszym
+czytelnikiem PER PRODUKT — filtruje po `?ean`/`?kod` (AND), bez LIMIT-u; `prices/inflation`
+z tego samego bloku liczy z niej inflację miesięczną, też oknem `LAG()`.
+`GET /api/analytics/margins` liczy z `products.marza_pct`, nie z `historia_cen`. Szczegóły:
+`docs/tickets/19-FEATURE-analityka-fundament/plan.md` (10a),
+`docs/tickets/24-FEATURE-analityka-ceny/plan.md` (10b),
+`docs/tickets/23-FEATURE-analityka-dostawcy/` (10d).
+
+⚠ **`historia_cen` NIE MA kolumny `nazwa`** — a `availability/products`
+i `availability/sell-through` (blok 10e) o nią pytają (`MAX(nazwa)`), więc w PRODUKCJI oba
+zapytania wywracają się na `no such column`, `safeAll()` połyka błąd i obie trasy zawsze oddają
+pustą listę. **Odbudowa od P10.1** świadomie odstępuje: łączy `historia_cen` z `products` po
+`(dostawca, kod)` i oddaje wiersze z `nazwa` (lub `null`, gdy pozycja zniknęła z katalogu).
+Patrz `docs/spec-backend/wpis-90.md` i `docs/rebuild-backlog.md` #32.
+
+> **Kolejne wpisy do tej sekcji (od ticketu 91): `docs/spec-backend/wpis-<N>.md`** — jeden plik
+> na ticket, tu już nic nie dopisujemy (reguła i powód: `docs/spec-backend/README.md`).
 
 ## 6. Korekty do propagacji
 
@@ -104,6 +543,20 @@ Do naniesienia w pozostałych dokumentach przy okazji:
   (nie „naprawione") — dopisać listę ~13 publicznych GET-ów.
 - Nowa pozycja bezpieczeństwa priorytet 1: **domknąć auth na wszystkich trasach
   danych**, zwłaszcza `/api/export/shoper`, `/api/audit-log`, `/api/history`, `/api/config`.
+- **Pozycja bezpieczeństwa priorytet 2 (dopisane 2026-09-01, blok 3f-2): mutacje
+  zapisują CAŁE ciało żądania.** `updateSupplier`/`updateMarkup`/`updatePromotion` robią
+  `.set(e)` bez listy pól, a trasy podają im `req.body` wprost (`:48230`, `:48701`, `:48724`;
+  `PATCH /api/products/:id` odsiewa tylko `_reason`). Produkcja NIE jest w tym konsekwentna —
+  `PUT /api/staging/:id` (`:48598`) ma jawną listę ośmiu pól. Dostawcy naprawieni w 3f-2;
+  **narzuty i promocje naprawione w Iteracji 4a** (`POLA_EDYTOWALNE_NARZUTU`/
+  `POLA_EDYTOWALNE_PROMOCJI`, filtr na PATCH i POST — `docs/tickets/15-FEATURE-narzuty-promocje-ceny/`),
+  z jednym świadomym odstępstwem: audyt loguje SUROWE `req.body`, więc dziennik może wskazać pole,
+  które faktycznie nie zostało zapisane. **Od karty 14f (`64-FEATURE-i14f-daty-koncza-promocje`,
+  2026-09-19) `status` wypadł z `POLA_EDYTOWALNE_PROMOCJI`** — stał się polem wyliczanym z dat
+  przez nowy wygaszacz (`promocje/wygaszacz.ts`), więc `POST`/`PATCH /api/promotions` po cichu
+  odsiewają `status` z ciała zamiast go zapisywać; **produkty naprawione w 12a** —
+  `POLA_EDYTOWALNE_PRODUKTU` (42 pola, wyprowadzone z dialogu edycji `LT()`), zamiast zapisu
+  całych 70 kolumn. Pełny rozbiór: `rebuild-backlog.md` #14.
 
 ---
 

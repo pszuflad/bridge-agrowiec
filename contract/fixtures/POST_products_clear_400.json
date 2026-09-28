@@ -1,0 +1,12 @@
+{
+  "endpoint": "/api/products/clear",
+  "method": "POST",
+  "status": 400,
+  "json": true,
+  "body": {
+    "error": "Wymagane potwierdzenie: przeslij w body { potwierdzenie: \"WYCZYSC\" } aby wyczyscic caly katalog produktow. To jest nieodwracalna operacja dotykajaca WSZYSTKICH dostawcow."
+  },
+  "request": {},
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Brak `{potwierdzenie:\"WYCZYSC\"}` — 400 z dosłownym komunikatem oryginału."
+}

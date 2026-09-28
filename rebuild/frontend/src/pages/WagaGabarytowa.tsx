@@ -1,0 +1,388 @@
+/**
+ * Widok `/waga-gabarytowa` — port `nM()` (`deminified/frontend-index.js:26514-26953`).
+ *
+ * ⚠ KALKULATOR WOLUMETRYCZNY LICZY LOKALNIE — świadomie (plan.md D1 ticketu 18). Wzór
+ * `dł × szer × wys / dzielnik` zostaje we froncie (`waga-gabarytowa/obliczenia.ts`) bez zmian.
+ *
+ * ⚠ ODSTĘPSTWA ŚWIADOME (karta P9.1, ticket 76, zatwierdzone przez Anię 2026-09-18/21):
+ *  - lista przewoźników przychodzi z SERWERA i jest wspólna dla firmy (backlog #27) — w oryginale
+ *    żyje w IndexedDB; szczegóły w `waga-gabarytowa/przewoznicy.ts`;
+ *  - pod tabelą przewoźników dochodzi kalkulator PALETOWY na `POST /api/waga-gabarytowa/oblicz`
+ *    (backlog #28) — to INNY wzór, nie zamiennik tego wyżej (`waga-gabarytowa/KalkulatorPaletowy.tsx`).
+ *
+ * W IndexedDB przez `magazynKV` zostaje stan osobisty: wybrany przewoźnik, wymiary i ostatni wynik.
+ */
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Calculator, Info } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { PageHeader } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/toast";
+import { odczytajKV, zapiszKV } from "@/lib/magazynKV";
+import { KLUCZ_PRZEWOZNIKOW, zapiszPrzewoznikow } from "./waga-gabarytowa/api";
+import { KalkulatorPaletowy } from "./waga-gabarytowa/KalkulatorPaletowy";
+import { policzWage, type WymiaryTekstem, type WynikWagi } from "./waga-gabarytowa/obliczenia";
+import {
+  KLUCZ_OSTATNIE_WYMIARY,
+  KLUCZ_OSTATNI_WYNIK,
+  KLUCZ_WYBRANY,
+  PRZEWOZNICY_DOMYSLNI,
+  WYBRANY_DOMYSLNY,
+  type Przewoznik,
+} from "./waga-gabarytowa/przewoznicy";
+import { TabelaPrzewoznikow } from "./waga-gabarytowa/TabelaPrzewoznikow";
+
+/** Wymiary startowe z oryginału (`:26545`) — paczka 60 × 50 × 50, bez wagi rzeczywistej. */
+const WYMIARY_STARTOWE: WymiaryTekstem = {
+  dlugosc: "60",
+  szerokosc: "50",
+  wysokosc: "50",
+  wagaRzeczywista: "",
+};
+
+/** Kształt zapisu wymiarów w IndexedDB — skrócone nazwy 1:1 z oryginałem (`:26689`). */
+type ZapisWymiarow = { dlug: string; szer: string; wys: string; wagaRzecz: string };
+
+export function WagaGabarytowa() {
+  const [wymiary, ustawWymiary] = useState<WymiaryTekstem>(WYMIARY_STARTOWE);
+  const [wybrany, ustawWybranego] = useState(WYBRANY_DOMYSLNY);
+  const [wynik, ustawWynik] = useState<WynikWagi | null>(null);
+  const [wczytano, ustawWczytano] = useState(false);
+  const { toast } = useToast();
+  const klient = useQueryClient();
+
+  /**
+   * Lista z serwera. `null` = sesja wygasła (`on401: "returnNull"`, `lib/queryClient.ts`) —
+   * traktujemy jak błąd odczytu, bo bez listy kalkulator nie ma czym dzielić.
+   */
+  const odczyt = useQuery<Przewoznik[] | null>({ queryKey: KLUCZ_PRZEWOZNIKOW });
+  const przewoznicy = useMemo(() => odczyt.data ?? [], [odczyt.data]);
+  const listaGotowa = przewoznicy.length > 0;
+
+  /**
+   * Numer ostatnio zleconego zapisu. Odpowiedź (albo błąd) starszego zapisu nie może nadpisać
+   * na ekranie zmiany, która poszła po nim — liczy się tylko najnowszy.
+   */
+  const ostatniZapis = useRef(0);
+
+  /**
+   * Zapis całej listy. Zapisy idą PO KOLEI (`scope`): serwer podmienia całą listę i wygrywa
+   * ostatni zapis, więc dwa równoległe PUT-y z odpowiedziami w odwrotnej kolejności
+   * utrwaliłyby na serwerze STARSZĄ listę (review, runda 2). Odpowiedź trafia do cache tylko
+   * dla najnowszego zapisu; przy błędzie najnowszego — komunikat i ponowny odczyt, żeby ekran
+   * wrócił do stanu z serwera.
+   */
+  const zapis = useMutation<Przewoznik[], Error, { lista: Przewoznik[]; nr: number }>({
+    scope: { id: "waga-gabarytowa-przewoznicy" },
+    mutationFn: ({ lista }) => zapiszPrzewoznikow(lista),
+    onSuccess: (lista, { nr }) => {
+      if (nr === ostatniZapis.current) klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
+    },
+    onError: (e, { nr }) => {
+      toast({
+        title: "Nie zapisano listy przewoźników",
+        description: e.message,
+        variant: "destructive",
+      });
+      if (nr === ostatniZapis.current) {
+        void klient.invalidateQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
+      }
+    },
+  });
+
+  /**
+   * Nowa lista liczona jest z BIEŻĄCEGO cache w chwili zapisu, nie z propsa, który mógł jeszcze
+   * nie dostać poprzedniej zmiany — dwie szybkie edycje z rzędu (dzielnik DPD, zaraz potem GLS)
+   * nie mogą po cichu cofnąć pierwszej. Cache jest aktualizowany synchronicznie, więc kolejna
+   * zmiana widzi już poprzednią.
+   */
+  const zapiszListe = async (zmiana: (aktualna: Przewoznik[]) => Przewoznik[]) => {
+    const lista = zmiana(klient.getQueryData<Przewoznik[]>(KLUCZ_PRZEWOZNIKOW) ?? []);
+    void klient.cancelQueries({ queryKey: KLUCZ_PRZEWOZNIKOW });
+    klient.setQueryData(KLUCZ_PRZEWOZNIKOW, lista);
+    ostatniZapis.current += 1;
+    try {
+      await zapis.mutateAsync({ lista, nr: ostatniZapis.current });
+      return true;
+    } catch {
+      return false; // komunikat pokazał już `onError`
+    }
+  };
+
+  /**
+   * Hydratacja stanu osobistego z IndexedDB (`:26547-26560`). Flaga `wczytano` NIE jest
+   * kosmetyką: bez niej autozapis niżej wystrzeliłby przy pierwszym renderze i nadpisał
+   * zapamiętany wybór domyślnym, zanim odczyt zdążyłby wrócić.
+   */
+  useEffect(() => {
+    void (async () => {
+      const zapisanyWybor = await odczytajKV<string>(KLUCZ_WYBRANY);
+      if (zapisanyWybor) ustawWybranego(zapisanyWybor);
+
+      const zapisaneWymiary = await odczytajKV<ZapisWymiarow>(KLUCZ_OSTATNIE_WYMIARY);
+      if (zapisaneWymiary) {
+        ustawWymiary({
+          dlugosc: zapisaneWymiary.dlug,
+          szerokosc: zapisaneWymiary.szer,
+          wysokosc: zapisaneWymiary.wys,
+          wagaRzeczywista: zapisaneWymiary.wagaRzecz,
+        });
+      }
+
+      const ostatniWynik = await odczytajKV<WynikWagi>(KLUCZ_OSTATNI_WYNIK);
+      if (ostatniWynik) ustawWynik(ostatniWynik);
+
+      ustawWczytano(true);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (wczytano) void zapiszKV(KLUCZ_WYBRANY, wybrany);
+  }, [wybrany, wczytano]);
+
+  /**
+   * Wybór cofa się na pierwszego z listy, gdy zapamiętane id już nie istnieje
+   * (`c.find(...) ?? c[0]`, `:26561`) — inaczej usunięcie przewoźnika wywróciłoby kalkulator.
+   */
+  const przewoznik = useMemo(
+    () => przewoznicy.find((p) => p.id === wybrany) ?? przewoznicy[0],
+    [przewoznicy, wybrany],
+  );
+
+  /**
+   * Lista jest wspólna, więc zapamiętanego tu przewoźnika mógł usunąć ktoś inny (plan.md D3).
+   * Liczenie i tak bierze pierwszego (wyżej); tu wyrównujemy do niego pole wyboru i zapis
+   * w IndexedDB — po cichu, jak oryginał. Czekamy na `wczytano`, żeby nie poprawiać wyboru,
+   * którego jeszcze nie odczytaliśmy.
+   */
+  useEffect(() => {
+    if (wczytano && przewoznik && przewoznik.id !== wybrany) ustawWybranego(przewoznik.id);
+  }, [wczytano, przewoznik, wybrany]);
+
+  const pole = (klucz: keyof WymiaryTekstem) => (zdarzenie: { target: { value: string } }) =>
+    ustawWymiary((poprzednie) => ({ ...poprzednie, [klucz]: zdarzenie.target.value }));
+
+  const oblicz = async () => {
+    if (!przewoznik) return;
+
+    const policzony = policzWage(wymiary, przewoznik);
+    if (!policzony) {
+      toast({
+        title: "Niepoprawne wymiary",
+        description: "Wprowadź dodatnie liczby dla długości, szerokości i wysokości.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    ustawWynik(policzony);
+    await zapiszKV(KLUCZ_OSTATNIE_WYMIARY, {
+      dlug: wymiary.dlugosc,
+      szer: wymiary.szerokosc,
+      wys: wymiary.wysokosc,
+      wagaRzecz: wymiary.wagaRzeczywista,
+    } satisfies ZapisWymiarow);
+    await zapiszKV(KLUCZ_OSTATNI_WYNIK, policzony);
+  };
+
+  return (
+    <div>
+      <PageHeader
+        title="Waga gabarytowa"
+        subtitle="Kalkulator + ustawienia przewoźników w jednym miejscu"
+      />
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h3 className="font-semibold mb-1 flex items-center gap-2">
+            <Calculator className="w-4 h-4" /> Wymiary paczki
+          </h3>
+          <p className="text-sm text-muted-foreground mb-5">
+            Podaj wymiary w centymetrach. Waga rzeczywista jest opcjonalna — gdy ją podasz,
+            wyliczamy wagę do wyceny.
+          </p>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <Label htmlFor="dlug">Długość (cm)</Label>
+                <Input
+                  id="dlug"
+                  type="number"
+                  inputMode="decimal"
+                  value={wymiary.dlugosc}
+                  onChange={pole("dlugosc")}
+                  className="mt-1"
+                  data-testid="input-dlugosc"
+                />
+              </div>
+              <div>
+                <Label htmlFor="szer">Szerokość (cm)</Label>
+                <Input
+                  id="szer"
+                  type="number"
+                  inputMode="decimal"
+                  value={wymiary.szerokosc}
+                  onChange={pole("szerokosc")}
+                  className="mt-1"
+                  data-testid="input-szerokosc"
+                />
+              </div>
+              <div>
+                <Label htmlFor="wys">Wysokość (cm)</Label>
+                <Input
+                  id="wys"
+                  type="number"
+                  inputMode="decimal"
+                  value={wymiary.wysokosc}
+                  onChange={pole("wysokosc")}
+                  className="mt-1"
+                  data-testid="input-wysokosc"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="waga-rzecz">Waga rzeczywista (kg) — opcjonalnie</Label>
+              <Input
+                id="waga-rzecz"
+                type="number"
+                inputMode="decimal"
+                placeholder="np. 12.5"
+                value={wymiary.wagaRzeczywista}
+                onChange={pole("wagaRzeczywista")}
+                className="mt-1"
+                data-testid="input-waga-rzecz"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="przewoznik">Przewoźnik</Label>
+              <select
+                id="przewoznik"
+                value={wybrany}
+                onChange={(zdarzenie) => ustawWybranego(zdarzenie.target.value)}
+                className="mt-1 w-full bg-background border border-input rounded-md h-9 px-3 text-sm"
+                data-testid="select-przewoznik"
+              >
+                {przewoznicy.map((pozycja) => (
+                  <option key={pozycja.id} value={pozycja.id}>
+                    {pozycja.nazwa} — dzielnik {pozycja.dzielnik}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Button
+              onClick={() => void oblicz()}
+              disabled={!przewoznik}
+              className="w-full"
+              data-testid="button-oblicz"
+            >
+              <Calculator className="w-4 h-4 mr-2" />
+              Oblicz wagę gabarytową
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="font-semibold mb-1">Wynik</h3>
+          <p className="text-sm text-muted-foreground mb-5">
+            Wzór: (długość × szerokość × wysokość) / dzielnik
+          </p>
+
+          {wynik ? (
+            <div className="space-y-4">
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Waga gabarytowa ({wynik.przewoznik})
+                </div>
+                <div className="text-2xl font-semibold mt-1" data-testid="text-wynik-waga">
+                  {wynik.wagaGabarytowa.toFixed(2)} kg
+                </div>
+              </div>
+
+              {wynik.wagaDoWyceny !== null ? (
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                    Waga do wyceny (większa z dwóch)
+                  </div>
+                  <div className="text-xl font-semibold mt-1" data-testid="text-waga-do-wyceny">
+                    {wynik.wagaDoWyceny.toFixed(2)} kg
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {wynik.wagaDoWyceny === wynik.wagaGabarytowa
+                      ? "Gabarytowa > rzeczywista → liczy się gabarytowa"
+                      : "Rzeczywista > gabarytowa → liczy się rzeczywista"}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="border-t pt-4 space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Obliczenie</span>
+                  <span className="font-mono text-xs">
+                    {wynik.dlugosc} × {wynik.szerokosc} × {wynik.wysokosc} ÷ {wynik.dzielnik}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Objętość</span>
+                  <span className="font-mono">{wynik.objetoscM3.toFixed(4)} m³</span>
+                </div>
+                {wynik.wagaRzeczywista !== null ? (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Waga rzeczywista</span>
+                    <span className="font-mono">{wynik.wagaRzeczywista.toFixed(2)} kg</span>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="bg-muted/30 rounded-md p-3 text-xs space-y-1">
+                <div className="flex items-start gap-2">
+                  <Info className="w-3.5 h-3.5 mt-0.5 text-muted-foreground shrink-0" />
+                  <span className="text-muted-foreground">
+                    Wynik został zapisany lokalnie — pokaże się przy następnym wejściu.
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground py-12 text-center">
+              Wypełnij wymiary i kliknij „Oblicz wagę gabarytową".
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {listaGotowa ? (
+        <TabelaPrzewoznikow
+          przewoznicy={przewoznicy}
+          zapiszListe={zapiszListe}
+          zapisuje={zapis.isPending}
+          wybrany={wybrany}
+          ustawWybranego={ustawWybranego}
+          przywrocDomyslne={async () => {
+            const zapisano = await zapiszListe(() => PRZEWOZNICY_DOMYSLNI);
+            if (zapisano) ustawWybranego(WYBRANY_DOMYSLNY);
+            return zapisano;
+          }}
+        />
+      ) : (
+        <Card className="p-6 mt-6">
+          <h3 className="font-semibold">Przewoźnicy i dzielniki</h3>
+          <p className="text-sm text-muted-foreground mt-1" data-testid="text-stan-przewoznikow">
+            {odczyt.isPending
+              ? "Wczytywanie listy przewoźników…"
+              : "Nie udało się wczytać listy przewoźników. Odśwież stronę albo zaloguj się ponownie."}
+          </p>
+        </Card>
+      )}
+
+      <KalkulatorPaletowy />
+    </div>
+  );
+}

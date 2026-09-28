@@ -1,0 +1,360 @@
+// Analityka — trasy bloków 10a, 10c, 10d i 10e. Port `registerAnalyticsRoutes`
+// (`mirror/backend/analytics_module.cjs:76-107`, `:110-143`, `:156-235`, `:279-303`, `:325-338`).
+//
+// ⚠ AUTH NIE JEST TU ODSTĘPSTWEM. Inaczej niż przy `markups`/`promotions`/`history`, gdzie
+// `contract/openapi.yaml` opisuje trasy jako publiczne (`security: []`), a odbudowa świadomie
+// dokłada `requireAuth` (decyzja D1 z I1) — wszystkie ścieżki `/api/analytics/*` mają
+// w kontrakcie `security: [{bearerAuth: []}, {cookieAuth: []}]`, a oryginał podaje
+// `requireAuth` w każdej rejestracji (`:81`, `:93`, `:98`, `:292`, `:325`). Zgodność jest
+// pełna i nie ma tu czego odnotowywać jako różnicę.
+//
+// ⚠ SIŁA SIATKI BEZPIECZEŃSTWA, NAZWANA WPROST. `contract/openapi.yaml` nie ma dla analityki
+// ŻADNYCH schematów odpowiedzi — tylko `responses: {200, 400, 401}` i `security`. Kontraktowa
+// część GATE dowodzi więc jedynie, że ścieżka istnieje, status jest zadeklarowany i ciało jest
+// JSON-em. Cały ciężar kształtu spoczywa na fixtures — twardo dla czterech GET-ów, wcale dla
+// `POST /api/analytics/bootstrap-current` (metod zapisujących nie nagrywano,
+// `contract/README.md:38`), który zamiast tego ma test jednostkowy w `analityka.agregaty.test.ts`.
+//
+// Blok 10b dołożył pięć tras cen (`:237-268`, `:333`), blok 10c — sześć tras EAN
+// (`:188-235`, `:335-338`), blok 10d — cztery trasy dostawców (`:110`, `:133`, `:143`, `:332`),
+// blok 10e — sześć tras dostępności, rotacji i cyklu życia (`:156-184`, `:279-303`, `:334`).
+// Razem z pięcioma trasami 10a dało to 26 z 27 tras modułu; ostatnią — `export/{view}` —
+// dowiózł blok 10f (`:305-322`), domykając Iterację 10. Moduł jest kompletny: 27/27.
+//
+// ⚠ JEDNA TRASA NIE ODDAJE JSON-A. `export/{view}` zwraca `text/csv`, więc wspólna asercja
+// GATE `sprawdzZgodnoscZKontraktem()` (`test/gate/asercje.ts`) jej NIE dotyczy — ta funkcja
+// wymaga `application/json` dla każdej sprawdzanej odpowiedzi. Kontrakt na to pozwala:
+// `openapi.yaml:178-188` nie deklaruje dla tej ścieżki żadnego `content`. Sposób sprawdzania
+// (ścieżka + status z kontraktu, content-type osobno) siedzi w `analityka.eksport.gate.test.ts`.
+//
+// ⚠ PIĘĆ TRAS CZYTA WŁASNY `req.query` — trzy z bloku 10c (`ean/comparison`, `ean/details`,
+// `ean-porownanie`) i dwie z 10b (`market/group-prices`, `prices/product-history`); trasy
+// dostawców z 10d nie mają żadnego WŁASNEGO parametru. Trasy EAN podają go SUROWO (`req.query.x`),
+// bo oryginał parsuje go dopiero w handlerze (`num()`,
+// `String(x || '')`) i jego luźna semantyka — tablica z powtórzonego parametru, wartość
+// nieliczbowa, pusty napis — jest częścią odtwarzanego zachowania. Rozpakowanie tego
+// wcześniej zmieniłoby wynik. Czwartym takim parametrem jest `?days` w `rotation/inactive`
+// (blok 10e) — z tą różnicą, że tam zaciski oryginału są na tyle osobne, że mieszkają
+// w nazwanej funkcji `zacisnijDniRotacji`, żeby dało się je pokryć testem bez serwera.
+//
+// ⚠ PONAD TO OSIEM TRAS Z `LIMIT`-em czyta WSPÓLNY `?limit` (karta P10.5, backlog #96):
+// `ean/unique`, `ean/comparison`, `availability/products`, `availability/sell-through`,
+// `suppliers/lifecycle`, `prices/last-import`, `rotation/inactive`, `margins`. To NIE jest
+// port oryginału, tylko świadome odstępstwo — jedyna wartość ze znaczeniem to `0` („bez
+// limitu", dla pliku CSV). Parsuje je `czyBezLimitu`; bez parametru każda z ośmiu tras
+// odpowiada dokładnie tak jak przed P10.5, co pilnują fixtures i testy limitów.
+
+import { Router, type Request, type Response } from "express";
+
+import { naCsv } from "../analityka/csv.js";
+import type { Baza } from "../db/index.js";
+import { requireAuth } from "../middleware/auth.js";
+import { widokEksportu } from "../repos/analityka-eksport.js";
+import {
+  cenyGrupRynku,
+  cyklZyciaDostawcow,
+  cyklZyciaModeli,
+  czyBezLimitu,
+  dostepnoscProduktow,
+  historiaCenProduktu,
+  inflacjaCennika,
+  kpi,
+  listyFiltrow,
+  marze,
+  osCzasuImportow,
+  pokrycieEan,
+  porownanieEan,
+  porownanieEanLegacy,
+  rankingDostawcowEan,
+  rotacjaNieaktywnych,
+  sezonowoscMiesieczna,
+  stabilnoscDostawcow,
+  stanDostawcow,
+  statusHistorii,
+  statystykiDostawcow,
+  szczegolyEan,
+  tempoSchodzenia,
+  topZmiany,
+  unikalneEan,
+  zacisnijDniRotacji,
+  zacisnijGrupeRynku,
+  zbudujSnapshotBiezacy,
+  zmianyCenOstatniegoImportu,
+} from "../repos/analityka.js";
+
+export type ZaleznosciAnalityki = {
+  db: Baza;
+};
+
+export function trasyAnalityki({ db }: ZaleznosciAnalityki): Router {
+  const router = Router();
+
+  /**
+   * Migawka aktywnego katalogu do `historia_cen` (`:81-91`).
+   *
+   * Rejestrowana PRZED trasami GET, tak jak w oryginale. Nieidempotentna — powód i skutki
+   * opisane przy `zbudujSnapshotBiezacy`. Nie ma dla niej fixture'a: GATE sprawdza tu tylko
+   * kontrakt (200/JSON) i bramkę 401.
+   */
+  router.post("/api/analytics/bootstrap-current", requireAuth, (_req: Request, res: Response) => {
+    res.json(zbudujSnapshotBiezacy(db));
+  });
+
+  /** Zasięg historii cen — nagłówek widoku `/analityka` (`:93-96`). */
+  router.get("/api/analytics/status", requireAuth, (_req: Request, res: Response) => {
+    res.json(statusHistorii(db));
+  });
+
+  /**
+   * Sześć list wartości do kontrolek filtra (`:98-107`).
+   *
+   * Odpowiedź to sześć gołych tablic i NIC więcej — `_przyciete` z fixture'a jest adnotacją
+   * nagrywarki, nie polem API (`contract/README.md:29`); szczegóły w nagłówku `repos/analityka.ts`.
+   */
+  router.get("/api/analytics/filters", requireAuth, (_req: Request, res: Response) => {
+    res.json(listyFiltrow(db));
+  });
+
+  // ─── Blok 10d · dostawcy ──────────────────────────────────────────────────────────────
+  //
+  // Trzy trasy z sekcji „Part 1: supplier analysis" oryginału, w jego kolejności rejestracji.
+  // ŻADNA nie czyta `req.query` — filtrowanie zakładki `dostawcy` jest klienckie, tak jak
+  // w sekcji marż z 10a. Czwarta trasa bloku (`dostawcy-stats`) siedzi niżej, w sekcji aliasów,
+  // bo tam ją zarejestrował oryginał.
+
+  /** Stabilność cennika dostawcy (`:110-131`). Dwie gałęzie kształtu wiersza — patrz repo. */
+  router.get("/api/analytics/suppliers/stability", requireAuth, (_req: Request, res: Response) => {
+    res.json(stabilnoscDostawcow(db));
+  });
+
+  /** Nowości i wycofania — dziennik stagingu, nie katalog (`:133-141`). */
+  router.get("/api/analytics/suppliers/lifecycle", requireAuth, (req: Request, res: Response) => {
+    res.json(cyklZyciaDostawcow(db, czyBezLimitu(req.query.limit)));
+  });
+
+  /** Stan i dostępność dostawcy (`:143-154`). Bez limitu — wiersz na dostawcę. */
+  router.get("/api/analytics/suppliers/stock", requireAuth, (_req: Request, res: Response) => {
+    res.json(stanDostawcow(db));
+  });
+
+  /** Cztery liczby nagłówka KPI (`:325-331`). W oryginalnym froncie bez konsumenta — patrz repo. */
+  router.get("/api/analytics/kpi", requireAuth, (_req: Request, res: Response) => {
+    res.json(kpi(db));
+  });
+
+  /**
+   * Statystyki dostawców (`:332`) — GOŁA TABLICA, bez koperty.
+   *
+   * Alias zgodności bez konsumenta w oryginalnym froncie (0 trafień w bundlu). Dowieziona pod
+   * GATE, świadomie bez hooka i bez karty w UI (decyzja D3 bloku 10d) — szczegóły w repo.
+   */
+  router.get("/api/analytics/dostawcy-stats", requireAuth, (_req: Request, res: Response) => {
+    res.json(statystykiDostawcow(db));
+  });
+
+  /** Marże per dostawca/kategoria/marka + listy skrajne (`:292-297`). Tylko `?limit` (P10.5). */
+  router.get("/api/analytics/margins", requireAuth, (req: Request, res: Response) => {
+    res.json(marze(db, czyBezLimitu(req.query.limit)));
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  // BLOK 10e — dostępność / rotacja / cykl.
+  //
+  // Pięć z tych sześciu tras ma konsumenta w zakładkach `dostepnosc` i `marza`; szósta,
+  // `importy-timeline`, świadomie go NIE MA (decyzja D2 — oryginalny bundle też jej nie woła).
+  //
+  // Kolejność WEWNĄTRZ bloku jest jak w oryginale; blok EAN z 10c stoi niżej, choć w module
+  // rejestruje się między `availability/*` (`:156-184`) a `seasonality/monthly` (`:279`).
+  // Nie ma to znaczenia dla zachowania — wszystkie ścieżki są literalne, więc Express dopasowuje
+  // je niezależnie od kolejności rejestracji; scalanie bloków w jedną sekwencję kosztowałoby
+  // przemeblowanie pliku bez zysku.
+  // ───────────────────────────────────────────────────────────────────────────────────────
+
+  /** „4.1 Historia dostępności pozycji" (`:156-171`). Dwie gałęzie, różne kolumny — patrz repo. */
+  router.get("/api/analytics/availability/products", requireAuth, (req: Request, res: Response) => {
+    res.json(dostepnoscProduktow(db, czyBezLimitu(req.query.limit)));
+  });
+
+  /** „4.2 Tempo schodzenia z magazynu" (`:173-184`). SQL odtworzony 1:1 z pułapką — patrz repo. */
+  router.get(
+    "/api/analytics/availability/sell-through",
+    requireAuth,
+    (req: Request, res: Response) => {
+      res.json(tempoSchodzenia(db, czyBezLimitu(req.query.limit)));
+    },
+  );
+
+  /** „4.4 Sezonowy wzorzec cen" (`:279-283`). Miesiąc bez roku, jedyna trasa bloku bez limitu. */
+  router.get("/api/analytics/seasonality/monthly", requireAuth, (_req: Request, res: Response) => {
+    res.json(sezonowoscMiesieczna(db));
+  });
+
+  /** „4.6 Cykl życia modelu" (`:285-289`). Gałęzie różnią się sortowaniem i licznikiem. */
+  router.get("/api/analytics/lifecycle/models", requireAuth, (_req: Request, res: Response) => {
+    res.json(cyklZyciaModeli(db));
+  });
+
+  /**
+   * „Rotacja / produkty bez aktualizacji" (`:299-303`).
+   *
+   * ⚠ JEDYNA TRASA ANALITYKI DOWIEZIONA DO TEJ PORY, KTÓRA CZYTA `req.query`. Zaciskanie
+   * `days` do [1, 730] — łącznie z tym, co wychodzi dla napisu nieliczbowego — siedzi
+   * w `zacisnijDniRotacji`, żeby dało się je pokryć testem bez podnoszenia serwera.
+   */
+  router.get("/api/analytics/rotation/inactive", requireAuth, (req: Request, res: Response) => {
+    res.json(
+      rotacjaNieaktywnych(db, zacisnijDniRotacji(req.query.days), czyBezLimitu(req.query.limit)),
+    );
+  });
+
+  /** Oś czasu importów z `audit_log` (`:334`). GOŁA TABLICA, bez koperty. Bez UI (decyzja D2). */
+  router.get("/api/analytics/importy-timeline", requireAuth, (_req: Request, res: Response) => {
+    res.json(osCzasuImportow(db));
+  });
+
+  // ──────────────────────────────────────────────────────────────────────────────────────
+  //  Blok 10c — EAN. Kolejność rejestracji 1:1 z oryginałem („Part 2", `:187-235`).
+  // ──────────────────────────────────────────────────────────────────────────────────────
+
+  /** Porównanie cen po EAN u ≥2 dostawców (`:188-200`). Parametr `minDiffPct` — próg spreadu. */
+  router.get("/api/analytics/ean/comparison", requireAuth, (req: Request, res: Response) => {
+    res.json(porownanieEan(db, req.query.minDiffPct, czyBezLimitu(req.query.limit)));
+  });
+
+  /**
+   * Oferty jednego EAN-u (`:202-208`). Parametr `ean`; bez niego `{ean: null, offers: []}`.
+   * Bez konsumenta w oryginalnym froncie — trasa bez UI (decyzja D6), patrz repo.
+   */
+  router.get("/api/analytics/ean/details", requireAuth, (req: Request, res: Response) => {
+    res.json(szczegolyEan(db, req.query.ean));
+  });
+
+  /** EAN-y dostępne u dokładnie jednego dostawcy (`:210-217`). Tylko `?limit` (P10.5). */
+  router.get("/api/analytics/ean/unique", requireAuth, (req: Request, res: Response) => {
+    res.json(unikalneEan(db, czyBezLimitu(req.query.limit)));
+  });
+
+  /** Rozkład „ilu dostawców ma dany EAN" (`:219-222`). Bez parametrów query i bez LIMIT-u. */
+  router.get("/api/analytics/ean/coverage", requireAuth, (_req: Request, res: Response) => {
+    res.json(pokrycieEan(db));
+  });
+
+  /** Ranking: jak często dostawca jest najtańszy (`:224-235`). Bez parametrów query. */
+  router.get("/api/analytics/ean/supplier-rank", requireAuth, (_req: Request, res: Response) => {
+    res.json(rankingDostawcowEan(db));
+  });
+
+  /**
+   * Starsza, NIEZALEŻNA trasa porównania (`:335-338`) — goła tablica, inny WHERE, inny LIMIT.
+   * Nie jest aliasem `ean/comparison`; różnice wypisane przy `porownanieEanLegacy`.
+   * W oryginale rejestrowana dopiero w sekcji aliasów, za `top-zmiany` — zachowujemy to
+   * miejsce w kolejności, na końcu routera.
+   */
+  router.get("/api/analytics/ean-porownanie", requireAuth, (req: Request, res: Response) => {
+    res.json(porownanieEanLegacy(db, req.query.ean));
+  });
+
+  // ─── BLOK 10b · CENY ──────────────────────────────────────────────────────────────
+  //
+  // Pięć tras zakładki „Ceny w czasie", w KOLEJNOŚCI REJESTRACJI Z ORYGINAŁU
+  // (`:237`, `:245`, `:250`, `:263`, `:333`). Kolejność nie wpływa tu na dopasowanie —
+  // ścieżki się nie nakładają — ale trzymamy ją, żeby porównanie z modułem oryginału
+  // szło linijka w linijkę.
+  //
+  // ⚠ DWIE Z NICH NIE MAJĄ UI I TAK MA ZOSTAĆ (decyzje D1 i D2 użytkownika, 2026-09-03):
+  // `top-zmiany` ma zero wywołań w bundlu produkcji, a `market/group-prices` jest wołana
+  // i ignorowana (martwy fetch). Uzasadnienie w nagłówku sekcji 10b w `repos/analityka.ts`.
+
+  /**
+   * Rozrzut cen w obrębie marki/modelu/rozmiaru (`:237-242`). BEZ UI (decyzja D2).
+   *
+   * `?group` zaciskamy do whitelisty `marka|model|rozmiar` — to jedyne miejsce w tym
+   * routerze, gdzie wartość z `req.query` w ogóle dociera do warstwy zapytań, i dociera
+   * jako wartość TYPU `GrupaRynku`, nie jako napis. Odpowiedź niesie `group` PO
+   * zaciśnięciu, dokładnie jak `res.json({ group, rows })` w oryginale.
+   */
+  router.get("/api/analytics/market/group-prices", requireAuth, (req: Request, res: Response) => {
+    res.json(cenyGrupRynku(db, zacisnijGrupeRynku(req.query.group)));
+  });
+
+  /** Zmiany cen z ostatnich importów — karta „3.1" (`:245-248`). Tylko `?limit` (P10.5). */
+  router.get("/api/analytics/prices/last-import", requireAuth, (req: Request, res: Response) => {
+    res.json(zmianyCenOstatniegoImportu(db, czyBezLimitu(req.query.limit)));
+  });
+
+  /**
+   * Historia ceny wybranej opony — karta „3.2 / 3.3" (`:250-261`).
+   *
+   * `String(req.query.x || "")` jest portem dosłownym i pełni tu robotę: pusty napis
+   * znaczy „nie zawężaj", a wartość nieoczekiwanego typu (tablica przy `?ean=a&ean=b`)
+   * zamienia się w napis, zamiast wysadzać zapytanie.
+   */
+  router.get(
+    "/api/analytics/prices/product-history",
+    requireAuth,
+    (req: Request, res: Response) => {
+      res.json(
+        historiaCenProduktu(db, {
+          ean: String(req.query.ean || ""),
+          kod: String(req.query.kod || ""),
+        }),
+      );
+    },
+  );
+
+  /** Inflacja cennika per dostawca i miesiąc — karta „3.6" (`:263-276`). */
+  router.get("/api/analytics/prices/inflation", requireAuth, (_req: Request, res: Response) => {
+    res.json(inflacjaCennika(db));
+  });
+
+  /**
+   * Sto największych zmian ceny co do modułu (`:333`). BEZ UI (decyzja D1).
+   *
+   * ⚠ ODPOWIEDŹ TO GOŁA TABLICA, bez koperty — jeden z trzech takich przypadków w całym
+   * module (obok `dostawcy-stats` i `importy-timeline`). Fixture to potwierdza i dlatego
+   * jego adnotacja przycięcia siedzi na najwyższym poziomie jako `_body_przyciete_z`,
+   * a nie jako `_przyciete.rows`.
+   */
+  router.get("/api/analytics/top-zmiany", requireAuth, (_req: Request, res: Response) => {
+    res.json(topZmiany(db));
+  });
+
+  /**
+   * `GET /api/analytics/export/{view}` — CSV, blok 10f (`:305-322`). 27. i ostatnia trasa
+   * modułu, i jedyna w całym backendzie, która NIE oddaje JSON-a.
+   *
+   * ⚠ JEDYNA TRASA ANALITYKI Z PARAMETREM ŚCIEŻKI. Pozostałe cztery sparametryzowane
+   * (`?ean`, `?kod`, `?group`, `?days`) czytają `req.query`; tu wartość siedzi w ścieżce
+   * i jest jednocześnie nazwą pliku.
+   *
+   * ⚠ ŚWIADOME ODSTĘPSTWO: NIEZNANY `{view}` DAJE 404 (backlog #35, decyzja użytkownika
+   * 2026-09-21, ticket 90). W oryginale ostatnią instrukcją łańcucha `if`-ów jest
+   * `return sendRows([])` (`:321`), więc `/export/cokolwiek` odpowiada 200 i CSV-em z samego
+   * BOM-u — ta sama pułapka „pusty plik wygląda jak brak danych", przez którą #32 leżało
+   * niezauważone. Front nie woła widoków spoza listy (zamknięta unia `WidokEksportu`).
+   *
+   * `filename` w `Content-Disposition` powstaje WYŁĄCZNIE z nazwy, która przeszła
+   * `widokEksportu()` — czyli z klucza mapy widoków. Oryginał wstawiał tam surowe
+   * `req.params.view` (`:308`); przy liście znanych widoków ta ścieżka przestała istnieć.
+   *
+   * Zapytania i ich pułapki: `repos/analityka-eksport.ts`. Format CSV: `analityka/csv.ts`.
+   */
+  router.get("/api/analytics/export/:view", requireAuth, (req: Request, res: Response) => {
+    const widok = req.params.view ?? "";
+    const zapytanie = widokEksportu(widok);
+    if (!zapytanie) {
+      res.status(404).json({ error: "Nieznany widok eksportu" });
+      return;
+    }
+    try {
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename=${widok}.csv`);
+      res.send(naCsv(zapytanie(db)));
+    } catch (e) {
+      // Port `catch (e) { res.status(500).json({ error: e.message }) }` (`:322`).
+      res.status(500).json({ error: e instanceof Error ? e.message : String(e) });
+    }
+  });
+
+  return router;
+}

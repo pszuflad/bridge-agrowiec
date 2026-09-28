@@ -1,0 +1,53 @@
+{
+  "endpoint": "/api/import-archive?miesiac=2026-09",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "total": 3,
+    "items": [
+      {
+        "id": "2026-09/MO6__20260921__22113__MO6.csv",
+        "dostawca": "MO6",
+        "zrodlo": "upload",
+        "uzytkownik": "Marta Bieguniak",
+        "data": "2026-09-21T22:11:35.409Z",
+        "oryginalnaNazwa": "MO6.csv",
+        "rozmiar": 237,
+        "status": "ok",
+        "blad": null,
+        "rekordy": 2,
+        "sha256": "bbe7540acfdfbfe11896af2ccc1f0508ee0e4ce176074c0a434981805235dd1d"
+      },
+      {
+        "id": "2026-09/MO7__20260921__22113__cennik_MO7.csv",
+        "dostawca": "MO7",
+        "zrodlo": "upload",
+        "uzytkownik": "Marta Bieguniak",
+        "data": "2026-09-21T22:11:34.265Z",
+        "oryginalnaNazwa": "cennik MO7.csv",
+        "rozmiar": 37,
+        "status": "blad",
+        "blad": "Quote Not Closed: the parsing is finished with an opening quote at line 2",
+        "rekordy": null,
+        "sha256": "d615e1b1c4edb014b13109a94c04b9b6c5a19b2d2a63ecf82ddedf0bfd835d3f"
+      },
+      {
+        "id": "2026-09/MO1__20260921__22113__MO1.csv",
+        "dostawca": "MO1",
+        "zrodlo": "upload",
+        "uzytkownik": "Marta Bieguniak",
+        "data": "2026-09-21T22:11:30.797Z",
+        "oryginalnaNazwa": "MO1.csv",
+        "rozmiar": 23224,
+        "status": "ok",
+        "blad": null,
+        "rekordy": 199,
+        "sha256": "c884fe5ef3c00cb336c7bd5a15d8fd1e5b0e98ebc363b834beab4b0c422a3c04"
+      }
+    ]
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Filtr miesiąca = nazwa katalogu RRRR-MM (:179)."
+}

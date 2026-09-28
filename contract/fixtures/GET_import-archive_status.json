@@ -1,0 +1,27 @@
+{
+  "endpoint": "/api/import-archive?status=blad",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "total": 1,
+    "items": [
+      {
+        "id": "2026-09/MO7__20260921__22113__cennik_MO7.csv",
+        "dostawca": "MO7",
+        "zrodlo": "upload",
+        "uzytkownik": "Marta Bieguniak",
+        "data": "2026-09-21T22:11:34.265Z",
+        "oryginalnaNazwa": "cennik MO7.csv",
+        "rozmiar": 37,
+        "status": "blad",
+        "blad": "Quote Not Closed: the parsing is finished with an opening quote at line 2",
+        "rekordy": null,
+        "sha256": "d615e1b1c4edb014b13109a94c04b9b6c5a19b2d2a63ecf82ddedf0bfd835d3f"
+      }
+    ]
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Filtr statusu (:180) — nieopisany w nagłówku modułu, używany przez widok."
+}

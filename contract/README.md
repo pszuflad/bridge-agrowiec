@@ -7,49 +7,221 @@ przepisywaniu.
 
 | Plik | Co | Stan |
 |---|---|---|
-| `openapi.yaml` | 94 ścieżki / 111 operacji: metoda, ścieżka, auth, parametry | ✅ **zamrożone** (z zweryfikowanego inwentarza, Krok 2.3) |
-| `fixtures/` | nagrane odpowiedzi GET z żywego backendu (kształt) | ✅ **Krok 2.4** — 55 GET-ów, 54×200 |
+| `openapi.yaml` | **111 ścieżek / 130 operacji**: metoda, ścieżka, auth, parametry, **kody błędów i schematy ciał** | ✅ **zamrożone** (2.3 + odświeżenie w sesji 12d); od tego czasu dorosło o trasy spoza produkcji (76-FEATURE, 77-FEATURE) i o kolejne karty, m.in. **4 trasy polityki stagingu** (129-FEATURE, I15.4c) |
+| `fixtures/` | **83 nagrania: 68 GET** + 15 tras zapisujących | ✅ Krok 2.4 + sesja 12d; **nie pokrywają wszystkich operacji** — patrz „Wyjątek” niżej |
 
-## Co jest zamrożone teraz (2.3)
+> **Liczby przeliczone 2026-09-23** (ticket `129-FEATURE-akceptacja-stagingu`), bo tabela
+> rozjechała się ze stanem plików: deklarowała 98/117 i 73 nagrania przy faktycznych 111/130
+> i 83. Rozjazd narastał wcześniej — kolejne karty dokładały trasy bez odświeżania tej komórki;
+> ticket 129 dołożył 4 operacje (świadomie bez nagrań) i przy okazji policzył resztę.
+> Metoda: `yaml.safe_load` po `paths` oraz `ls contract/fixtures/`. **Liczba operacji NIE równa
+> się liczbie nagrań** i nigdy nie była równa — nagrania pokrywają odczyty i część zapisów.
+
+## Co jest zamrożone
 
 Z `docs/spec-backend.md` + `01_ENDPOINTY.md` (cytaty `plik:linia`, nie pamięć):
-- **ścieżki i metody** wszystkich 111 operacji,
+- **ścieżki i metody** wszystkich operacji,
 - **auth** per operacja (`security` = wymaga JWT; brak `security` = **publiczne**),
-- **parametry ścieżki** (`{id}`, `{kod}`, `{value}`, `{view}`).
+- **parametry ścieżki** (`{id}`, `{kod}`, `{value}`, `{view}`),
+- **kody odpowiedzi**, w tym realne kody błędów dopisane w 12d,
+- **schematy ciał** żądań i odpowiedzi — dla każdej operacji, która ma nagranie.
 
-## Fixtures GET (Krok 2.4 — zrobione)
+## Fixtures
 
-`fixtures/GET_*.json` — 55 endpointów GET nagranych z żywego backendu (54×200;
-`/api/atrybuty/uzycie` → 400, bo wymaga parametru query). Każdy plik:
+Każdy plik ma ten sam kształt:
 ```json
 { "endpoint": "...", "method": "GET", "status": 200, "json": true, "body": {...} }
 ```
+Nagrania tras zapisujących dokładają `"request"` (ciało żądania) oraz `_zrodlo`/`_opis`.
+Klucze zaczynające się od `_` są **techniczne** — porównanie kształtu w GATE je pomija
+(`rebuild/backend/test/gate/ksztalt.ts`).
 
 **To są fixtures KSZTAŁTU, nie pełne snapshoty danych.** Duże tablice przycięto do
-5 elementów (adnotacja `_body_przyciete_z` / `_przyciete`), bo celem jest zamrożenie
-**struktury odpowiedzi** (pola, zagnieżdżenie, typy), nie archiwum danych, które
-i tak się zmieniają. Rozmiar: 27 MB → 247 KB.
+5 elementów (`_body_przyciete_z` dla gołej tablicy, `_przyciete: {klucz: ile}` dla tablicy
+w obiekcie), bo celem jest zamrożenie **struktury odpowiedzi**, nie archiwum danych.
 
 **Ustalenie kontraktowe:** API zwraca **camelCase** (`cenaZakupu`, `cenaSprzedazy`,
 `marzaPct`, `kodDostawcy`), mimo że baza jest snake_case (`cena_zakupu`). Warstwa
-API konwertuje — nowy backend musi to zachować.
+API konwertuje — nowy backend musi to zachować. **Wyjątkiem są trasy, które produkcja
+czyta surowym `better-sqlite3`** (`/api/products/uwagi-cena`, `/hold-reasons`,
+`/api/selly/log`) — te oddają nazwy KOLUMN i fixture jest tego jedynym dowodem.
 
-Sanityzacja: brak sekretów (config: klucze puste; users: bez hashy; zero JWT/Bearer).
+Sanityzacja: brak sekretów (config: klucze puste; users: bez hashy; zero JWT/Bearer —
+nagrywarka maskuje `token` i pola hasłowe do `"***"`).
 
-**Czego wciąż NIE ma:** POST/PUT/PATCH/DELETE (zapisujące) — świadomie pominięte,
-bo modyfikowałyby produkcję. Nagramy je osobno przeciwko **kopii bazy**
-(`db/snapshot.db`) w Fazie 4.
+### Skąd się biorą nagrania — dwie różne nagrywarki
+
+| Narzędzie | Co nagrywa | Przeciw czemu |
+|---|---|---|
+| `tools/record-fixtures.sh` | **tylko GET** | ŻYWA produkcja (`panel.agritires.eu`), wymaga logowania |
+| `tools/record-write-fixtures.cjs` | **GET + POST/PUT/PATCH/DELETE** | ORYGINAŁ (`mirror/backend/index.cjs`) na KOPII `db/snapshot.db` |
+
+Pierwsze narzędzie celowo nie umie nic zapisać — wysłanie POST-a modyfikowałoby dane
+produkcji. Drugie (sesja 12d) odwraca układ: stawia oryginalny backend lokalnie, więc
+zapisy są bezpieczne, a nagranie **odtwarzalne bez sekretów i bez dostępu do produkcji**:
+
+```bash
+node tools/record-write-fixtures.cjs
+```
+
+Co robi krok po kroku i dlaczego to jest wierne:
+1. kopiuje `mirror/backend/` i `db/snapshot.db` do katalogu tymczasowego (baza jako `data.db`
+   **obok** `index.cjs` — oryginał otwiera ją relatywnie, ale `products/clear` robi kopię przez
+   `__dirname`, więc CWD musi się zgadzać);
+2. **wygasza scheduler w kopii** (`czestotliwosc_minuty = NULL`). Bez tego `startScheduler`
+   (`extensions.cjs:811-838`) po 60 s realnie poszedłby po pliki sześciu dostawców;
+3. uruchamia **własny skrypt migracyjny Ani** `migrate_szer_to_text.cjs` (podmieniona wyłącznie
+   linia z zahardkodowaną ścieżką produkcyjną) — snapshot jest z 2026-08-13, starszy niż
+   migracja `szertxt` z 19/20.08;
+4. **(od 13c) doprowadza kopię do stanu produkcji po 09-01** — `migrujKonwencje()`: `kategoria`
+   idzie WŁASNYM skryptem Ani `apply_kategoria.cjs` (podmieniona wyłącznie ścieżka do bazy,
+   dokładnie jak w kroku 3 dla `migrate_szer_to_text.cjs`); `konstrukcja` i CAPS (`nazwa`)
+   idą SQL-em przepisanym z `mirror/backend/CHANGELOG.md` (wpisy 2026-09-01 11:35 i 12:30),
+   bo literalnego skryptu Ania dla nich w repo nie zostawiła. **Zasada:** stan wejściowy
+   piaskownicy doprowadzamy do stanu produkcji artefaktami PRODUKCJI, nigdy plikami
+   `rebuild/schema/00X_*.sql` — inaczej nagranie byłoby dowodem na naszą własną migrację,
+   a nie na zachowanie oryginału. Wyjątek: `DELETE` wierszy `staging_items` CASE_ONLY (CHANGELOG
+   09-01 12:30) nagrywarka celowo NIE odtwarza — CHANGELOG podaje ten `DELETE` w skrócie
+   z placeholderami (`UPPER(A)=UPPER(B)`), więc przepisanie byłoby zgadywaniem wpływającym
+   na kształt `GET /api/staging`.
+5. startuje oryginał; ten sam dokłada kolumnę `uwaga_cena` (`uwaga_cena_patch.cjs:26-34`);
+6. loguje się i odgrywa scenariusze, operacje niszczące na końcu.
+7. **(od ticketu 91) zapełnia archiwum importów kodem oryginału** — snapshot bazy archiwum nie
+   niesie (leży obok `__dirname`), więc `odegrajArchiwum()` wgrywa przez `POST /api/import/parse-file`
+   trzy pliki: próbki MO1.csv i MO6.csv z `rebuild/backend/test/charakteryzacja/probki/` (status
+   `ok`) oraz CSV z niedomkniętym cudzysłowem dla MO7 (parser rzuca → status `blad`). `.meta.json`
+   pisze więc sam `archiveBuffer()`/`updateMeta()` oryginału. Potem nagrywa `GET_import-archive*.json`
+   (lista w czterech wariantach, 401, stats, pobranie 200/400/404). Samej odpowiedzi `parse-file`
+   ten krok nie nagrywa. Pobranie pliku to jedyne nagranie z `json: false`: treść jako tekst (dekoder
+   UTF-8 zdejmuje BOM z próbki MO6 — bajty potwierdza `content-length`) i wybrane nagłówki
+   w polu technicznym `_naglowki` (`content-type`, `content-disposition`, `content-length`).
+
+**Odtwarzalne znaczy „ten sam KSZTAŁT", nie „bajt w bajt"** — `PUT`/`PATCH /api/products/{id}`
+oddają zapisany rekord z `dataAktualizacji` z zegara.
+
+⚠ Dwa moduły oryginału (`atrybuty`, `pending`) mają zahardkodowane produkcyjne ścieżki do bazy
+i lokalnie się nie podnoszą. Trasy `/api/atrybuty*` są więc w piaskownicy martwe — nie blokuje
+to zakresu 12d, ale rozszerzenie nagrań o atrybuty będzie wymagało obejścia tych ścieżek.
+
+### Czego NIE MA i dlaczego
+
+**Trwałe braki strukturalne** (nie zaległość do domknięcia):
+- `GET /api/export-shoper` i `GET /api/export/shoper` — `text/csv`/`application/zip`; nagrywarka
+  zapisuje JSON. Pokrycie: kontrakt + test formatu bajtowego.
+- `POST /api/selly/{producers,categories,sync-product,sync-supplier}` — wołają zewnętrzne API
+  Selly, nagranie zmieniałoby cudzy sklep. Pokrycie: kontrakt + atrapa klienta
+  (`rebuild/backend/test/gate/selly-atrapa.ts`).
+- `POST /api/import/from-url`, `POST /api/dostawcy/{kod}/synchronizuj-teraz` — realnie pobierają
+  pliki z URL-i dostawców.
+- `POST /api/ai-fallback/parse` — zewnętrzne AI.
+- `POST /api/dostawcy/{kod}/upload`, `POST /api/import/parse-file` — multipart, wymagają plików
+  wejściowych spoza repo.
+
+**Zaległość świadoma (kandydat na osobny ticket):** pozostałe trasy zapisujące działające
+wyłącznie na SQLite — staging, dostawcy, narzuty, promocje, overrides, atrybuty, config,
+spedycja, waga-gabarytowa. Sesja 12d objęła zakresem 12 operacji (produkty z 12a, konto/admin
+z 12b, `login`/`logout`); nagrywarka jest w repo, więc rozszerzenie to dopisanie scenariuszy.
+
+## Schematy ciał — generowane, nie pisane ręcznie
+
+`tools/generate-openapi-schemas.cjs` wnioskuje schematy z `contract/fixtures/` i wstawia je do
+`openapi.yaml` jako `$ref` do `components/schemas`.
+
+```bash
+node tools/generate-openapi-schemas.cjs            # przebuduj
+node tools/generate-openapi-schemas.cjs --sprawdz  # tylko kontrola aktualności
+```
+
+- ⭐ **Źródłem są nagrania produkcji, nigdy `rebuild/`.** Gdyby schematy powstawały z naszej
+  implementacji, kontrakt przestałby być niezależnym dowodem.
+- Generator **edytuje tekst chirurgicznie**, a nie przez `yaml.dump()` — inaczej skasowałby
+  komentarze kontraktu. `paths` zmienia się o jedną linię na operację.
+- Jest **idempotentny**; tryb `--sprawdz` pilnuje dryfu i jest wpięty w testy
+  (`rebuild/backend/test/kontrakt.spojnosc.test.ts`).
+- Operacja z kilkoma legalnymi kształtami dostaje `oneOf` — tak jest z `GET /api/products`
+  (koperta `{items,total,limit,offset}` z parametrem, **goła tablica** bez) oraz
+  z `POST /api/products` (ciało jako tablica albo jako `{items: […]}`).
+
+**Wyjątek: `GET`/`PUT /api/alerty-katalogu/statusy` (karta P6.2, ticket
+`77-FEATURE-pseudo-alerty-katalogowe`).** Trasa nie istnieje w produkcji — status pseudo-alertów
+katalogowych tam żyje w IndexedDB przeglądarki, więc nagrania z produkcji nie ma i być nie może.
+Schematy tej ścieżki są wpisane RĘCZNIE, wielowierszowo i POZA generowanym blokiem
+`components.schemas` (blok „ODSTĘPSTWO OD PRODUKCJI — P6.2" w `openapi.yaml`) — generator by je
+przy pierwszym biegu skasował. Kształt pilnuje `rebuild/backend/test/alerty-katalogu.gate.test.ts`,
+czytając schemat wprost z `openapi.yaml`. `contract/fixtures/` tej trasy nie zawiera.
+
+**Wyjątek: `404` dla `GET /api/analytics/export/{view}` (karta P10.1, ticket
+`90-FEATURE-ozywienie-kart-dostepnosci`, backlog #35).** Produkcja odpowiada na nieznany `view`
+`200` + CSV z samego BOM-u; odbudowa — `404 {error}`. Kod wpisany RĘCZNIE w `openapi.yaml`, bez
+`content` (generator zdejmuje jednowierszowy `content` tras bez fixture'a). Nagrania
+`GET_analytics_availability_products.json` i `GET_analytics_availability_sell-through.json`
+zostają **puste** (`rows: []`) jako dowód stanu produkcji — nie przenagrywamy ich pod naprawiony
+kod (#32, ta sama karta): `WyjatekGate` jest zbędny, bo `gate/ksztalt.ts` nie zagląda do
+elementów, gdy fixture ma pustą tablicę, więc rozjazd treści (dziś wiersze zamiast `rows: []`)
+nie zapala testu.
+
+**Wyjątek: cztery trasy `/api/staging/{id}/review|resolve|choose-absence-card|close-absence-review`
+(karta I15.4c, ticket `129-FEATURE-akceptacja-stagingu`).** Ścieżka i kandydat produkcji istnieją
+(`staging_policy.cjs:620-664`), ale nagrania nie ma i nie może powstać przez zwykłą nagrywarkę —
+trasy wymagają złożonego wcześniej wytworzonego stanu (`_policyVersion`, `_matchIssue`,
+`_absenceReview`). Schematy wpisane RĘCZNIE, POZA generowanym blokiem `components.schemas`.
+Dowód wierności to charakteryzacja na żywym `staging_policy.cjs` (`rebuild/backend/test/polityka.charakteryzacja.test.ts`),
+nie fixture. Odpowiedzi błędów tych czterech tras niosą `message`, nie `error` — to inny moduł
+produkcji niż reszta stagingu i różnica jest świadomie zachowana, nie ujednolicona.
 
 ## ⚠ Uwaga bezpieczeństwa wbudowana w kontrakt
 
-Operacje z `security: []` są **publiczne bez logowania** — to **stan faktyczny**,
-nie rekomendacja. 17 tras (w tym `GET /api/export/shoper` = pełny katalog CSV,
-`/api/audit-log`, `/api/history`, `/api/config`) nie ma auth. Kontrakt to
-odnotowuje, żeby przy odbudowie świadomie zdecydować: domknąć auth (zalecane)
-albo zachować dla zgodności. Szczegóły: `docs/spec-backend.md §2`.
+Operacje z `security: []` są **publiczne bez logowania** — to **stan faktyczny produkcji**,
+nie rekomendacja.
+
+**Zmierzone na uruchomionym oryginale (sesja 12d), nie wywnioskowane:** 14 z tych tras
+(m.in. `GET /api/export/shoper` = pełny katalog CSV, `/api/audit-log`, `/api/history*`,
+`/api/config`, `/api/staging`, `/api/markups`, `/api/promotions`) faktycznie oddaje **200 bez
+tokenu**. Odbudowa chroni je `requireAuth` — to świadome odstępstwo (roadmap §3, D1 z I1).
+Kontrakt tego **nie zaciera**: `security` zostaje puste (opisuje produkcję), a odstępstwo
+niesie jawna adnotacja **`x-odbudowa-auth`** przy operacji, razem z zadeklarowanym `401`.
+Dzięki temu GATE sprawdza odstępstwo kontraktem, zamiast obchodzić go osobnym testem.
+
+Spójność tych adnotacji z rzeczywistym zachowaniem backendu pilnuje test — mierzy je
+żądaniem, nie wierzy deklaracji.
+
+**Dwa `401` to NIE odstępstwo, tylko produkcja:** `GET /api/me` (oryginał chroni tę trasę
+ręcznym `if (!req.user)` zamiast wspólnym middlewarem, więc inwentarz 2.3 uznał ją za
+publiczną) i `POST /api/login` przy złym haśle. Kontrakt 2.3 nie deklarował żadnego z nich;
+oba dopisane w 12d na podstawie pomiaru i nagrania.
+
+## Trasy, których produkcja nie ma
+
+Adnotacja **`x-odbudowa-nowa-trasa`** oznacza operację spoza produkcji — nie ma jej w
+`mirror/backend/`, więc nie ma czego nagrać i fixture nie może powstać. Pierwszy przypadek:
+`GET`/`PUT /api/waga-gabarytowa/przewoznicy` (ticket 76-FEATURE-przewoznicy-serwer-paletowy,
+karta P9.1) — lista przewoźników i dzielników przeniosła się z IndexedDB przeglądarki na
+serwer, produkcja trzyma ją wyłącznie lokalnie. Uzasadnienie odstępstwa i kształt odpowiedzi
+są opisane w tekście adnotacji przy operacji, nie w linii statusu — linie statusów należą do
+`tools/generate-openapi-schemas.cjs` i dla trasy bez fixture'a zostałyby wyczyszczone; inline
+schemat zostaje tylko tam, gdzie generator go nie rusza (`requestBody`). GATE dla takich tras
+sprawdza `sprawdzZgodnoscZKontraktem` (istnienie ścieżki/metody, zadeklarowane kody 200/400/401)
+i testy trasy na prawdziwej bazie tymczasowej — nie `sprawdzZgodnoscZFixture`, bo nie ma z czym
+porównać.
 
 ## Jak używać przy odbudowie
 
 1. Nowy backend implementuje ścieżki z `openapi.yaml`.
-2. Nagrane fixtures (2.4) puszczamy na nowy backend → odpowiedzi muszą się zgadzać.
+2. Nagrane fixtures puszczamy na nowy backend → odpowiedzi muszą się zgadzać.
 3. Rozbieżność = błąd, zanim dotknie produkcji.
+
+Mechanizm z punktów 2-3 istnieje jako harness **GATE** (`rebuild/backend/test/gate/`,
+`sprawdzZgodnoscZFixture` i `sprawdzZgodnoscZKontraktem`), odpalany przez `npm test`
+w `rebuild/backend` i wpięty w CI. `wczytajFixture()` czyta z pliku wyłącznie `body`, więc
+obsługuje nagrania każdej metody bez zmian w harnessie.
+
+**Zadeklarowane wyjątki.** Gdy rozjazd jest znany i udokumentowany, GATE dopuszcza wyjątek
+(`WyjatekGate`: wzorzec ścieżki + powód + co go domyka). Wyjątek jest **samoczyszczący**:
+gdy przestaje cokolwiek pokrywać, zapala test i żąda usunięcia. Tak zniknął jedyny wyjątek
+odbudowy — `WYJATKI_SZEROKOSC` — po przenagraniu `GET_products.json` w 12d. Sam mechanizm
+pokrywają dziś testy w `test/gate.harness.test.ts`.
+
+**Zakres walidacji kontraktem** (`sprawdzZgodnoscZKontraktem`): istnienie ścieżki i metody,
+zadeklarowany kod statusu, JSON-owatość odpowiedzi. Schematy ciał są w pliku od 12d, ale GATE
+egzekwuje kształt **przez fixtures**, z których te schematy powstały — nie przez walidator
+JSON Schema. Nie czytaj „zgodne z openapi" jako gwarancji kształtu odpowiedzi.

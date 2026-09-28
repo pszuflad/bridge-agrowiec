@@ -1,0 +1,14 @@
+{
+  "endpoint": "/api/products/clear",
+  "method": "POST",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true
+  },
+  "request": {
+    "potwierdzenie": "WYCZYSC"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Kasuje CAŁY katalog. Osobna trasa od DELETE /api/products/{id}."
+}

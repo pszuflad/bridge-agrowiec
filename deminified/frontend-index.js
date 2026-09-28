@@ -9684,7 +9684,7 @@ const PRODUCT_FIELD_CONFIG = [{
     key: "konstrukcja",
     label: "Konstrukcja",
     kind: "select-static",
-    options: ["Radialna", "Diagonalna"],
+    options: ["R", "D", "B", "-"],
     section: "tech"
   }, {
     key: "indeksNosnosci",
@@ -16581,7 +16581,7 @@ function Pe({
     ...n
   })
 }
-const h2 = ["dętka", "detka", "tube", "inner tube", "ochraniacz", "flap", "tube flap", "obręcz", "obrecz", "felga", "felgi", "wheel", "rim", "wentyl", "valve", "zawór", "zawor", "łańcuch", "lancuch", "chain", "śruba", "sruba", "nakrętka", "nakretka", "płyn", "plyn", "smar", "klej", "sealant", "balast", "amortyzator", "tarcza", "łożysko", "lozysko", "bearing"],
+const h2 = ["dętka", "detka", "tube", "inner tube", "ochraniacz", "flap", "tube flap", "obręcz", "obrecz", "felga", "felgi", "wheel", "rim", "wentyl", "valve", "zawór", "zawor", "tr-", "łańcuch", "lancuch", "chain", "śruba", "sruba", "nakrętka", "nakretka", "płyn", "plyn", "smar", "klej", "sealant", "balast", "amortyzator", "tarcza", "łożysko", "lozysko", "bearing"],
   y2 = ["opona", "opony", "tire", "tyre", "bieżnik", "bieznik", "tread", "radial", "diagonal"],
   g2 = [/\b\d{2,3}(?:[.,]\d{1,2})?\s*[\/\-x×]\s*\d{1,3}\s*(?:R|-|–)\s*\d{1,3}(?:[.,]\d)?[A-Z]?\b/, /\b\d{1,2}[.,]\d{1,2}\s*[-R]\s*\d{1,3}(?:[.,]\d)?[A-Z]?\b/, /\b\d{1,2}[.,]\d{2}\s*[\-–]\s*\d{1,3}[A-Z]?\b/, /\b\d{1,3}\s*[x×]\s*\d{1,2}(?:[.,]\d{1,2})?\s*(?:[\-–]\s*\d{1,3})?\b/, /\b\d{2,3}\s*R\s*\d{1,3}(?:[.,]\d)?[A-Z]?\b/, /\b\d{2,3}\s*[\-–]\s*\d{1,2}\b(?=\s+(?:[A-Z]|\[|\d))/],
   x2 = new RegExp(g2.map(e => e.source).join("|"), "i");
@@ -16634,7 +16634,7 @@ function pv(e, t = {}) {
     const e = `${r.kod||"-"} · ${(r.nazwa||"").slice(0,60)}`,
       a = r.dataAktualizacji || (new Date).toISOString();
     if ("number" == typeof r.marzaPct && r.marzaPct < 0) {
-      const o = `${r.id}-marza-ujemna-${Math.round(r.marzaPct*10)/10}`;
+      const o = `${r.id}-marza-ujemna`;
       n.push({
         id: o,
         productId: r.id,
@@ -16646,7 +16646,7 @@ function pv(e, t = {}) {
         status: t[o] || "nowy"
       })
     } else if ("number" == typeof r.marzaPct && r.marzaPct < 5) {
-      const o = `${r.id}-marza-niska-${Math.round(r.marzaPct*10)/10}`;
+      const o = `${r.id}-marza-niska`;
       n.push({
         id: o,
         productId: r.id,
@@ -16687,7 +16687,7 @@ function pv(e, t = {}) {
     }
     const i = v2(o, r.kategoria);
     if (!i.isTire && "wysoka" === i.confidence) {
-      const o = `${r.id}-nie-opona-${(r.nazwa||'')+'|'+(r.kategoria||'')}`;
+      const o = `${r.id}-nie-opona`;
       n.push({
         id: o,
         productId: r.id,
@@ -16711,7 +16711,7 @@ function pv(e, t = {}) {
     if (w2.has(e) || !o) continue;
     const a = Math.floor((r - o) / 864e5);
     if (a >= 30) {
-      const r = `dostawca-${e}-brak-importu-${a}`;
+      const r = `dostawca-${e}-brak-importu`;
       n.push({
         id: r,
         productId: -1,
@@ -16723,7 +16723,7 @@ function pv(e, t = {}) {
         status: t[r] || "nowy"
       })
     } else if (a >= 7) {
-      const r = `dostawca-${e}-brak-importu-${a}`;
+      const r = `dostawca-${e}-brak-importu`;
       n.push({
         id: r,
         productId: -1,
@@ -16834,13 +16834,6 @@ function Si({
 }
 
 function N2() {
-  const [$AS0, $AS1] = m.useState({});
-  m.useEffect(() => {
-    const f = () => cn("alerty-statusy").then(v => $AS1(v || {}));
-    f();
-    window.addEventListener("alerty-statusy-updated", f);
-    return () => window.removeEventListener("alerty-statusy-updated", f)
-  }, []);
   const {
     data: e
   } = tt({
@@ -16857,7 +16850,7 @@ function N2() {
     data: r = []
   } = tt({
     queryKey: ["/api/history"]
-  }), a = m.useMemo(() => pv(e ?? [], $AS0).filter(e => "nowy" === e.status), [e, $AS0]), o = m.useMemo(() => {
+  }), a = m.useMemo(() => pv(e ?? [], {}).filter(e => "nowy" === e.status), [e]), o = m.useMemo(() => {
     const e = {
       krytyczny: 0,
       ostrzezenie: 1,
@@ -19156,7 +19149,7 @@ function Cd({
                   e += o.ilePrzeszlo, r.nowe += o.wynik.nowe, r.zmienione += o.wynik.zmienione, r.wycofane += o.wynik.wycofane, r.bezZmian += o.wynik.bezZmian, r.odrzuconeNieOpony += o.wynik.odrzuconeNieOpony, r.odrzuconeBrakDanych += o.wynik.odrzuconeBrakDanych, r.doStagingu += o.wynik.doStagingu
                 }
                 const a = [];
-                a.push(`Pozycji w plikach: ${e}`), r.doStagingu > 0 && a.push(`Do akceptacji w stagingu: ${r.doStagingu}`), r.nowe > 0 && a.push(`Nowe: ${r.nowe}`), r.zmienione > 0 && a.push(`Zmienione: ${r.zmienione}`), r.wycofane > 0 && a.push(`Braki w cenniku: ${r.wycofane}`), r.bezZmian > 0 && a.push(`Bez zmian: ${r.bezZmian}`), r.odrzuconeNieOpony > 0 && a.push(`Odrzucone (nie opony): ${r.odrzuconeNieOpony}`), t > 0 && a.push(`Pominięte pliki: ${t}`), x({
+                a.push(`Pozycji w plikach: ${e}`), r.doStagingu > 0 && a.push(`Do akceptacji w stagingu: ${r.doStagingu}`), r.nowe > 0 && a.push(`Nowe: ${r.nowe}`), r.zmienione > 0 && a.push(`Zmienione: ${r.zmienione}`), r.wycofane > 0 && a.push(`Wycofane: ${r.wycofane}`), r.bezZmian > 0 && a.push(`Bez zmian: ${r.bezZmian}`), r.odrzuconeNieOpony > 0 && a.push(`Odrzucone (nie opony): ${r.odrzuconeNieOpony}`), t > 0 && a.push(`Pominięte pliki: ${t}`), x({
                   title: r.doStagingu > 0 ? `${r.doStagingu} pozycji czeka na akceptację` : "Import zakończony",
                   description: a.join(" • ")
                 }), i(!1), w()
@@ -20558,7 +20551,7 @@ const Xu = PRODUCT_FIELD_CONFIG.filter(function(e) {
     l: "Nowe produkty (stare)"
   }, {
     v: "wycofana",
-    l: "Braki w cenniku"
+    l: "Wycofane"
   }, {
     v: "zmiana_kluczowa",
     l: "Zmiany kluczowe"
@@ -20597,12 +20590,12 @@ function XP({
         icon: of
       },
       wycofana: {
-        l: "Brak w cenniku",
+        l: "Wycofana",
         cls: "bg-red-600 hover:bg-red-600 text-white",
         icon: py
       },
       zniknal: {
-        l: "Brak w cenniku",
+        l: "Wycofana",
         cls: "bg-red-600 hover:bg-red-600 text-white",
         icon: py
       }
@@ -23078,7 +23071,7 @@ function OT(e, t, n = ";") {
       return Qy(e)
     }
     if ("konstrukcja" === t.key) {
-      const kv = "Radialna" === n || "R" === n ? "Radialna" : "Diagonalna" === n || "D" === n || "L" === n || "B" === n ? "Diagonalna" : "";
+      const kv = "R" === n ? "Radialna" : "D" === n || "L" === n || "B" === n ? "Diagonalna" : "";
       return Qy(kv)
     }
     if ("tlTt" === t.key) {
@@ -23108,6 +23101,13 @@ function Wfmt(s, r) {
   if (!isFinite(N)) return String(s);
   if (r) {
     const rs = String(r);
+    if (!rs.includes("/")) {
+      const xm = rs.match(/^([0-9]+(?:[.,][0-9]+)?)\s*[xX]\s*([0-9]+(?:[.,][0-9]+)?)/);
+      if (xm) {
+        const seg1 = xm[1].replace(",", ".");
+        if (Number(seg1) === N) return `${seg1}x${xm[2].replace(",",".")}`
+      }
+    }
     const M = rs.match(/[0-9]+(?:[.,][0-9]+)?/g) || [];
     for (const t of M) {
       const q = t.replace(",", ".");
@@ -23140,7 +23140,7 @@ function DT(e, t) {
     }) : w
   }
   if ("konstrukcja" === t) {
-    const kv = "Radialna" === n || "R" === n ? "Radialna" : "Diagonalna" === n || "D" === n || "L" === n || "B" === n ? "Diagonalna" : null;
+    const kv = "R" === n ? "Radialna" : "D" === n || "L" === n || "B" === n ? "Diagonalna" : null;
     return kv == null ? s.jsx("span", {
       className: "text-muted-foreground",
       children: "—"
@@ -23286,7 +23286,7 @@ function AT() {
     queryKey: ["/api/atrybuty"]
   }), L = m.useMemo(() => {
     const e = M.map(e => e.marka).filter(e => e && !/\d/.test(e)),
-      t = (I?.wartosci || []).filter(e => "marka" === e.rodzaj).map(e => e.wartosc).filter(e => e && !/\d/.test(e));
+      t = (I?.wartosci || []).filter(e => "marka" === e.rodzaj).map(e => e.wartosc);
     return Array.from(new Set([...t, ...e])).filter(Boolean).sort((e, t) => e.localeCompare(t, "pl"))
   }, [M, I]), F = m.useMemo(() => {
     const e = M.map(e => e.kategoria),
@@ -24083,7 +24083,7 @@ function LT({
           type: "number",
           step: "0.01",
           num: parseFloat
-        }), h("Konstrukcja", "konstrukcja", ["Radialna", "Diagonalna"]), p("indeks_nosnosci").length ? h("Indeks nosnosci (LI)", "indeksNosnosci", p("indeks_nosnosci")) : f("Indeks nosnosci (LI)", "indeksNosnosci"), p("indeks_predkosci").length ? h("Indeks predkosci (SI)", "indeksPredkosci", p("indeks_predkosci")) : f("Indeks predkosci (SI)", "indeksPredkosci"), h("VF/IF", "vfIf", ["VF", "IF", "CFO"]), f("PR / PLY", "pr"), h("TL/TT", "tlTt", ["TL", "TT"]), f("DOT", "dot"), f("Waga", "waga", {
+        }), h("Konstrukcja", "konstrukcja", ["R", "D", "B", "-"]), p("indeks_nosnosci").length ? h("Indeks nosnosci (LI)", "indeksNosnosci", p("indeks_nosnosci")) : f("Indeks nosnosci (LI)", "indeksNosnosci"), p("indeks_predkosci").length ? h("Indeks predkosci (SI)", "indeksPredkosci", p("indeks_predkosci")) : f("Indeks predkosci (SI)", "indeksPredkosci"), h("VF/IF", "vfIf", ["VF", "IF", "CFO"]), f("PR / PLY", "pr"), h("TL/TT", "tlTt", ["TL", "TT"]), f("DOT", "dot"), f("Waga", "waga", {
           type: "number",
           step: "0.01",
           num: parseFloat
@@ -25188,7 +25188,7 @@ function HT() {
   }, []), m.useEffect(() => {
     if (!l) return;
     const e = setTimeout(() => {
-      un(qy, o).then(() => window.dispatchEvent(new Event("alerty-statusy-updated")))
+      un(qy, o)
     }, 300);
     return () => clearTimeout(e)
   }, [o, l]);
@@ -25199,7 +25199,7 @@ function HT() {
         [e]: t
       }))
     },
-    p = m.useMemo(() => u.filter(e => "all" === t || e.poziom === t).filter(e => "all" === r || e.status === r).filter(e => e.status !== "rozwiazany" || r === "rozwiazany").sort((e, t) => {
+    p = m.useMemo(() => u.filter(e => "all" === t || e.poziom === t).filter(e => "all" === r || e.status === r).sort((e, t) => {
       const n = {
         krytyczny: 0,
         ostrzezenie: 1,

@@ -1,0 +1,346 @@
+// Pamięciowe atrapy warstwy danych dla ORYGINALNEGO `tk()` wyciętego z bundla.
+//
+// Odtwarzają zachowanie `U.*` z `deminified/backend-index.cjs:44695-44950` na tyle wiernie,
+// na ile `tk()` je widzi — łącznie z dwoma efektami, które łatwo przeoczyć:
+//
+//   • `addStaging` (:44923) NIE jest zwykłym insertem — deduplikuje po
+//     (kod, typ_zmiany, COALESCE(powod,'')) i przy trafieniu zwraca istniejący wiersz
+//     BEZ zapisu. To jedyne miejsce, w którym oryginał chroni się przed powtórzeniem
+//     tej samej pozycji przy ponownym imporcie tego samego cennika.
+//   • `updateProduct` (:44728) przy patchu ruszającym cenę i bez jawnego `status`
+//     dokłada `status: "wstrzymany"`, gdy wynikowa cena wynosi 0.
+//
+// ZAKRES 3d-1 dołożył trzy rzeczy, których 3c nie potrzebowała:
+//   • `getOverridesFor` zwraca REALNE poprawki Marty, indeksowane po (dostawca, kod) —
+//     dzięki temu oryginał wykonuje prawdziwe `Gq()` (`:47319`), a nie pustą ścieżkę;
+//   • `ww.prepare` rozpoznaje `INSERT INTO historia_cen` (`:47800`) i zapisuje argumenty,
+//     zamiast je połykać;
+//   • `__BRIDGE_EXT` to REALNY port `src/import/legacy/bridge_ext.cjs`, a nie no-op —
+//     `applyDims` naprawdę liczy wymiary i naprawdę mutuje patch auto-zatwierdzenia.
+
+import Database from "better-sqlite3";
+import { createRequire } from "node:module";
+
+const wymagaj = createRequire(import.meta.url);
+const bridgeExt = wymagaj("../../../src/import/legacy/bridge_ext.cjs");
+
+/**
+ * Pola produktu, po których liczymy `zmianyProduktow`.
+ *
+ * Pierwsza grupa to kolumny auto-patcha `AP` (`:47760-47764`) i licznik nieobecności;
+ * druga to pola, które dokłada `bridge_ext` w gałęzi auto-zatwierdzania — bez nich
+ * porównanie nie zobaczyłoby, że `applyDims` w ogóle się wykonało.
+ */
+export const POLA_PRODUKTU = [
+  "cenaZakupu",
+  "cenaSprzedazy",
+  "marzaPct",
+  "stan",
+  "magazyn",
+  "status",
+  "nieobecnoscPodRzad",
+  "dataAktualizacji",
+  "wysokosc",
+  "dlugosc",
+  "szerokoscPaczki",
+  "wysokoscPrzesylki",
+  "linkZdjecia",
+];
+
+/** Kolumny `historia_cen` w kolejności placeholderów z INSERT-a (`:47800`). */
+export const KOLUMNY_HISTORII = [
+  "produktId",
+  "kod",
+  "ean",
+  "dostawca",
+  "marka",
+  "model",
+  "rozmiar",
+  "indeksNosnosci",
+  "indeksPredkosci",
+  "kategoria",
+  "cenaZakupu",
+  "cenaSprzedazy",
+  "stan",
+  "zarejestrowanoAt",
+];
+
+/**
+ * @param {object} opcje
+ * @param {Array<Record<string, unknown>>} opcje.produkty  katalog widziany przez listProducts()
+ * @param {Array<Record<string, unknown>>} [opcje.overrides] PŁASKA lista wierszy
+ *   `manual_overrides`; `getOverridesFor(dostawca, kod)` filtruje po
+ *   `supplierKod`/`supplierProductId`, tak jak zapytanie z `:44916`. 3c jechała na pustej
+ *   liście, bo `Gq()` była wtedy przepuszczającym stubem — 3d-1 podaje realne dane.
+ */
+export function stworzAtrapy({ produkty, overrides = [] }) {
+  const staging = [];
+  const wywolaniaStagingu = [];
+  const skasowane = [];
+  const aktualizacje = [];
+  const historiaCen = [];
+  const wywolaniaBridgeExt = [];
+  let nastepneIdStagingu = 1;
+
+  /** Ile razy `tk()` przeszło po liście produktów — musi skończyć na 2. */
+  let przejsc = 0;
+
+  /**
+   * Poprawki Marty zindeksowane po kluczu, po którym pyta oryginał. `Gq()` woła
+   * `U.getOverridesFor(t, n)` raz na pozycję, więc liniowe filtrowanie 12 tys. wierszy
+   * przy 1838 rekordach byłoby zauważalne — mapa robi z tego jedno wyszukanie.
+   */
+  // Separator klucza podany JAWNIE: `supplier_product_id` bywa dowolnym napisem dostawcy
+  // i może zawierać spację, więc sklejanie spacją dałoby się podrobić. Obie strony —
+  // budowanie mapy i odczyt — muszą używać dokładnie tej samej stałej.
+  const KLUCZ = (dostawca, kodDostawcy) => `${dostawca}\u0000${kodDostawcy}`;
+
+  const overridesPoKluczu = new Map();
+  for (const wiersz of overrides) {
+    const klucz = KLUCZ(wiersz.supplierKod, wiersz.supplierProductId);
+    if (!overridesPoKluczu.has(klucz)) overridesPoKluczu.set(klucz, []);
+    overridesPoKluczu.get(klucz).push(wiersz);
+  }
+
+  /**
+   * Lista produktów, która LICZY, ile razy ktoś po niej przeszedł.
+   *
+   * PO CO: `tk()` woła `U.listProducts()` raz (`:47598`) i przechodzi po wyniku DOKŁADNIE DWA
+   * RAZY — najpierw budując mapy dopasowania (`:47601`), a po pętli głównej jeszcze raz
+   * w pętli wycofań (`:47808`). Ten licznik jest strażnikiem układu bundla: gdyby wycięty
+   * oryginał przestał mieć dwie pętle, `sprawdzUkladPetli()` rzuci zamiast po cichu porównać
+   * niewłaściwe rzeczy.
+   *
+   * Klasa powstaje WEWNĄTRZ funkcji, żeby licznik siedział w domknięciu: `:47598` robi
+   * `U.listProducts().filter(...)`, a `filter` na podklasie Array zwraca (przez
+   * ArraySpeciesCreate) NOWĄ instancję tej podklasy — pole instancji by nie przeżyło, domknięcie
+   * przeżywa. `filter`/`map`/`findIndex` chodzą po indeksach, nie po iteratorze, więc nie
+   * podbijają licznika.
+   *
+   * To OBSERWACJA, nie zmiana zachowania: iterator zwraca dokładnie to samo, co zwróciłby Array.
+   */
+  class ListaProduktow extends Array {
+    [Symbol.iterator]() {
+      przejsc += 1;
+      return super[Symbol.iterator]();
+    }
+  }
+
+  const katalog = new ListaProduktow();
+  for (const produkt of produkty) katalog.push({ ...produkt });
+
+  /** Stan wyjściowy do policzenia `zmianyProduktow` — mierzymy SKUTEK, nie wywołania. */
+  const stanPoczatkowy = new Map(
+    katalog.map((p) => [p.id, Object.fromEntries(POLA_PRODUKTU.map((k) => [k, p[k] ?? null]))]),
+  );
+
+  const poId = new Map();
+  for (const produkt of katalog) poId.set(produkt.id, produkt);
+  // Powyższa pętla przeszła po liście — to NIE jest przejście `tk()`, więc licznik zerujemy.
+  przejsc = 0;
+
+  const U = {
+    listProducts() {
+      return katalog;
+    },
+
+    getProduct(id) {
+      return poId.get(id) ?? null;
+    },
+
+    updateProduct(id, patch) {
+      let doZapisu = patch;
+      if (("cenaSprzedazy" in patch || "cenaZakupu" in patch) && !("status" in patch)) {
+        const biezacy = this.getProduct(id);
+        const cs =
+          "cenaSprzedazy" in patch ? Number(patch.cenaSprzedazy) : Number(biezacy?.cenaSprzedazy);
+        const cz = "cenaZakupu" in patch ? Number(patch.cenaZakupu) : Number(biezacy?.cenaZakupu);
+        if (cs === 0 || cz === 0) doZapisu = { ...patch, status: "wstrzymany" };
+      }
+      aktualizacje.push({ id, patch: { ...doZapisu } });
+      const produkt = poId.get(id);
+      if (produkt) Object.assign(produkt, doZapisu);
+      return produkt ?? null;
+    },
+
+    /**
+     * Port `U.deleteProduct` (`:44740`) — kasuje WYŁĄCZNIE z bazy.
+     *
+     * ⚠ Wiersz zostaje w tablicy zwróconej wcześniej przez `listProducts()`. To nie jest
+     * niedoróbka atrapy, tylko wierność: produkcyjne `deleteProduct` robi
+     * `X.delete(he).where(...)`, a `r` w `tk()` to zwykła tablica obiektów pobrana PRZED
+     * kasowaniem — SQL jej nie rusza.
+     *
+     * Ma to widoczny skutek: pętla wycofań (`:47808`) przechodzi po tej samej tablicy, więc
+     * produkt skasowany w gałęzi nie-opony NADAL jest przez nią rozpatrywany (do
+     * `dopasowaneId` nie trafił, bo tamta gałąź robi `continue` wcześniej). Przy trzeciej
+     * nieobecności produkcja wystawi więc wiersz `wycofana` dla pozycji, której już nie ma
+     * w katalogu — patrz scenariusz `kasowanie-a-potem-wycofanie`.
+     */
+    deleteProduct(id) {
+      if (!poId.has(id)) return false;
+      skasowane.push(id);
+      poId.delete(id);
+      return true;
+    },
+
+    addStaging(pozycja) {
+      wywolaniaStagingu.push(pozycja);
+      const powod = pozycja.powod ?? "";
+      const istniejaca = staging.find(
+        (w) =>
+          w.kod === pozycja.kod && w.typZmiany === pozycja.typZmiany && (w.powod ?? "") === powod,
+      );
+      if (istniejaca) return istniejaca;
+      const wiersz = { id: nastepneIdStagingu++, ...pozycja };
+      staging.push(wiersz);
+      return wiersz;
+    },
+
+    /**
+     * Port `U.getOverridesFor` (`:44915`) — filtr po parze (dostawca, kod dostawcy).
+     *
+     * ⚠ KOLEJNOŚĆ WYNIKU MA ZNACZENIE i NIE jest kolejnością wstawienia. Oryginał robi
+     * `SELECT … WHERE supplier_kod = ? AND supplier_product_id = ?` bez `ORDER BY`, a schemat
+     * ma `UNIQUE(supplier_kod, supplier_product_id, field_name)` — SQLite realizuje więc to
+     * zapytanie skanem tego indeksu i oddaje wiersze POSORTOWANE PO `field_name`
+     * (potwierdzone `EXPLAIN QUERY PLAN`).
+     *
+     * Kolejność przecieka na zewnątrz: `Gq()` zbiera z niej `naruszono`, a ta lista trafia
+     * wprost do ostrzeżenia „plik nadpisuje poprawke Marty: …", które czyta człowiek.
+     * Dla MO8_4007102010000 produkcja pisze „bieznik, model", nie „model, bieznik" — mimo
+     * odwrotnej kolejności wstawienia. Wyłapała to charakteryzacja: atrapa oddawała kolejność
+     * wstawienia i rozjechała się z portem, który gada z prawdziwym SQLite.
+     */
+    getOverridesFor(supplierKod, supplierProductId) {
+      const wiersze = overridesPoKluczu.get(KLUCZ(supplierKod, supplierProductId)) ?? [];
+      const poNazwie = (a, b) => (a.fieldName < b.fieldName ? -1 : a.fieldName > b.fieldName ? 1 : 0);
+      return [...wiersze].sort(poNazwie);
+    },
+  };
+
+  const ww = {
+    transaction: (fn) => fn,
+    /**
+     * Oryginał używa `ww.prepare` w `tk()` w JEDNYM miejscu — INSERT do `historia_cen`
+     * (`:47800`). Rozpoznajemy go po treści i zapisujemy argumenty `run()` pod nazwami
+     * kolumn; wszystko inne jest sygnalizowane, bo znaczyłoby, że silnik sięga po SQL,
+     * o którym harness nie wie.
+     */
+    prepare(sql) {
+      if (/INSERT INTO historia_cen/i.test(sql)) {
+        return {
+          run: (...argumenty) => {
+            historiaCen.push(
+              Object.fromEntries(KOLUMNY_HISTORII.map((k, i) => [k, argumenty[i] ?? null])),
+            );
+          },
+        };
+      }
+      throw new Error(
+        `Oryginalne tk() przygotowało nieznane zapytanie SQL, którego harness nie modeluje:\n${sql}`,
+      );
+    },
+  };
+
+  /**
+   * Pamięć linków dla `applyLinkMemory`. W `tk()` ta funkcja dostaje PATCH
+   * auto-zatwierdzenia (`AP`), a nie produkt — a patch nie ma ani `kod`, ani
+   * `marka/model/rozmiar`, więc wszystkie trzy ścieżki pamięci odpadają na warunku wstępnym
+   * i JEDYNYM efektem jest przepisanie `linkZdjecia` z istniejącego produktu.
+   *
+   * Nie zakładamy tego — mierzymy: prawdziwa baza `:memory:` z pustymi tabelami pamięci
+   * plus licznik zapytań, który `wzorzec.mjs` wciąga do porównania. Gdyby produkcja zaczęła
+   * tu jednak czytać pamięć, licznik przestanie być zerem i zobaczymy to w diffie.
+   */
+  const pamiecLinkow = new Database(":memory:");
+  pamiecLinkow.exec(
+    "CREATE TABLE link_pamiec_kod (kod TEXT PRIMARY KEY, link TEXT NOT NULL, updated_at TEXT);" +
+      "CREATE TABLE link_pamiec_mr (mrkey TEXT PRIMARY KEY, link TEXT NOT NULL, updated_at TEXT);",
+  );
+  let zapytanDoPamieciLinkow = 0;
+  const Qi = {
+    prepare(sql) {
+      zapytanDoPamieciLinkow += 1;
+      return pamiecLinkow.prepare(sql);
+    },
+  };
+
+  /**
+   * REALNY port rozszerzeń importu — ten sam plik, który wykonuje produkcja, i ten sam,
+   * którego używa nasz silnik. Obie strony porównania jadą więc na identycznym
+   * `bridge_ext`, a mierzymy to, co silnik z nim robi.
+   */
+  const __BRIDGE_EXT = {
+    applyDims(patch, rozmiarFallback) {
+      const wynik = bridgeExt.applyDims(patch, rozmiarFallback);
+      wywolaniaBridgeExt.push({ funkcja: "applyDims", rozmiarFallback: rozmiarFallback ?? null });
+      return wynik;
+    },
+    applyLinkMemory(db, patch, istniejacy) {
+      const wynik = bridgeExt.applyLinkMemory(db, patch, istniejacy);
+      wywolaniaBridgeExt.push({ funkcja: "applyLinkMemory", kodProduktu: istniejacy?.kod ?? null });
+      return wynik;
+    },
+  };
+
+  return {
+    zaleznosci: { U, ww, __BRIDGE_EXT, Qi },
+    /** Wiersze faktycznie zapisane — czyli po deduplikacji `addStaging`. */
+    staging,
+    /**
+     * Wszystkie wywołania `addStaging`, także te zdeduplikowane. `tk()` ustawia
+     * `doStagingu = c.length` (`:47850`), czyli liczy BUFOR, a nie zapisy — więc licznik
+     * trzeba odtworzyć stąd, nie z `staging`.
+     */
+    wywolaniaStagingu,
+    /** `products.id` skasowane przez gałąź nie-opony (`:47689`). */
+    skasowane,
+    /** Wiersze dopisane do `historia_cen` przez gałąź auto-zatwierdzania (`:47800`). */
+    historiaCen,
+    /** Ślad wywołań `bridge_ext` w kolejności. */
+    wywolaniaBridgeExt,
+    /** Ile razy `applyLinkMemory` sięgnęło do tabel pamięci linków (oczekiwane: 0). */
+    zapytanDoPamieciLinkow: () => zapytanDoPamieciLinkow,
+    /** Surowe wywołania `updateProduct` — używane już tylko przez strażnika układu pętli. */
+    aktualizacje,
+
+    /**
+     * Zmiany STANU produktów: `{id, pole: {przed, po}}`. Mierzymy skutek, a nie wywołania,
+     * bo po stronie portu tę samą rzecz odczytujemy z bazy — dzięki temu obie strony
+     * porównania patrzą na to samo, a nie na swoje instrumentacje.
+     */
+    zmianyProduktow() {
+      const zmiany = [];
+      for (const [id, przed] of stanPoczatkowy) {
+        const produkt = poId.get(id);
+        if (!produkt) continue; // skasowany — mierzy to osobno `skasowane`
+        const roznice = {};
+        for (const pole of POLA_PRODUKTU) {
+          const po = produkt[pole] ?? null;
+          if (przed[pole] !== po) roznice[pole] = { przed: przed[pole], po };
+        }
+        if (Object.keys(roznice).length > 0) zmiany.push({ id, zmiany: roznice });
+      }
+      return zmiany.sort((a, b) => a.id - b.id);
+    },
+
+    /**
+     * Strażnik układu pętli: `tk()` MUSI przejść po katalogu dokładnie dwa razy (pętla map
+     * dopasowania + pętla wycofań). Gdyby bundle się przebudował, chcemy twardego błędu,
+     * a nie cichego porównania czegoś innego.
+     */
+    sprawdzUkladPetli() {
+      if (przejsc !== 2) {
+        throw new Error(
+          `Oryginalne tk() przeszło po liście produktów ${przejsc} razy zamiast 2 — ` +
+            "układ pętli w bundlu się zmienił.",
+        );
+      }
+    },
+
+    zamknij() {
+      pamiecLinkow.close();
+    },
+  };
+}

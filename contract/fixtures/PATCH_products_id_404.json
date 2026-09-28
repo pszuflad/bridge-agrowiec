@@ -1,0 +1,14 @@
+{
+  "endpoint": "/api/products/999999999",
+  "method": "PATCH",
+  "status": 404,
+  "json": true,
+  "body": {
+    "error": "Nie znaleziono produktu"
+  },
+  "request": {
+    "nazwa": "nie istnieje"
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Nieistniejące id — kod 404 dopisany do kontraktu w 12a, tu potwierdzony nagraniem."
+}

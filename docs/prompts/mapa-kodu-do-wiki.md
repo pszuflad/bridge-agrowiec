@@ -74,7 +74,10 @@ zastępczego (tylko dla opony), `Hq` = normalizacja pozycji/EAN/rozmiaru.
 | `pending_module.cjs` | Kolejka „do akceptacji" atrybutów (`atrybuty_wartosci_pending`) |
 | `bridge_ext.cjs` | Wymiary opon, pamięci (link/nazwa/waga), **`assignKodImportu`** (grupowanie po EAN albo marka+rozmiar+bieznik+nazwa), tabele `*_pamiec` |
 | `common.cjs` | Normalizatory: EAN, cena, ilość (przy EAN w notacji naukowej zwraca `lossy:true`) |
+| `payment_blocks.cjs` | **(nowy 10.09.2026)** Blokowane formy płatności per magazyn: mapa `MO1–MO5`/`MO7–MO10` → lista ID (MO6 i nieznani = `null`), `getBlockedPaymentForms()`, `sqlCase()`, `ensurePaymentBlocks()` (runtime `ALTER TABLE` + backfill + triggery `products_blokowane_formy_ai/_au`). Wołany z `extensions.cjs:register()` i z `generate_selly_export.cjs` |
+| `application_rules.cjs` | **(nowy 13.09.2026)** Zamknięta lista zastosowań per kategoria: `CATEGORY_VALUES`, `CATEGORY_ALIASES`, `canonicalCategory()`, `normalizeApplication()`, `normalizeCategoryApplication()`, `ensureApplicationRules()` (triggery `products_zastosowanie_ai/_au`, `manual_overrides_kategoria_ai/_au`). ⚠ W `ensureApplicationRules()` **backfill MUSI iść PO podmianie triggerów** — inaczej stary trigger nadpisuje wynik (incydent 17.09) |
 | `tire_dims.js` | Formuły wymiarów opon (arkusz firmowy) |
+| `uwaga_cena_patch.cjs` | Przykład `patch_*.cjs` doklejanego do `index.cjs` po buildzie: `ALTER TABLE products ADD uwaga_cena`, monkey-patch `U.acceptStaging` **i** `U.addProductsBulk` (propagacja `uwaga_cena`), plus dwie trasy `GET /api/products/{uwagi-cena,hold-reasons}` |
 
 ## 4. Backend — parsery (`parsers/`)
 
@@ -84,7 +87,7 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
 |---|---|---|
 | `dispatcher.cjs` | — | mapa MO1–MO10 → parser + `URLS` źródłowe |
 | `adapter.cjs` | — | records → `surowe`; **`normalizeLabelSnowValue`** (flaga „Tak"/null, nie 0/1) |
-| `tyre_params.cjs` | — | rozmiar, LI/SI, marki techniczne; **`normalizeLabelFlag`** (jw.) |
+| `tyre_params.cjs` | — | rozmiar, LI/SI, marki techniczne; **`normalizeLabelFlag`** (jw.); **`normalizeCategoryApplication`** (re-export z `application_rules.cjs`, od 13.09); **`normalizeWidthValue`** (kanoniczny zapis `products.szerokosc` bez zer końcowych, od 18.09) |
 | `common.cjs` | — | patrz moduły |
 | `mo1_bohnenkamp.cjs` | Bohnenkamp | CSV Win-1250, **pozycyjny (bez nagłówka)**: A=kod, B=EAN, C=producent |
 | `mo2_jmk.cjs` | JMK | CSV UTF-8 BOM; cena="Cena klient netto"; stan=Magazyn 1 |
@@ -93,6 +96,7 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
 | `mo6_agrowiec.cjs` | Agrowiec/Uniglory | CSV UTF-8 BOM; kolumny niemieckie (Lagerbestand=stan) |
 | `mo7_nokian.cjs` | Nokian | CSV Win-1250; cena="Zakup 1 szt"; LI/SI bywa puste w źródle |
 | `mo8_trelleborg.cjs` | Trelleborg | **XLSX** (arkusze Radial/XPly); **stan zawsze 0** (stąd 624 poz. bez stanu) |
+| `generate_selly_export.cjs` | — | (poza `parsers/`, ale ten sam potok danych) Generator pełnego CSV dla Selly, **60 kolumn** od 10.09 (doszła `Blokowane-formy-platnosci`). `toSellyCategoryName()` mapuje kategorie Bridge na nazwy sklepu. Obejmuje `status IN ('aktywny','wstrzymany')`, wstrzymanym wymusza stan 0 |
 | `mo9_agrorami.cjs` + `mo9_agrorami_api.cjs` + `_agrorami_fetch_helper.cjs` | Agrorami (BKT) | **GraphQL API, NIE CSV**; stan z `stock_availability.in_stock_real`; przez `execFileSync`; tożsamość=Magento `entity_id`, kod=`sku` |
 | `mo10_gri.cjs` | GRI | CSV **albo** XLSX pod tym samym URL — **wykrywa format po sygnaturze bajtów** (`PK\x03\x04`) |
 
@@ -108,12 +112,18 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
 
 ## 6. Backend — schemat / migracje
 
-- Schemat = 26 tabel użytkowych (+ `sqlite_sequence`). `products` = 72 kolumny.
+- Schemat = 26 tabel użytkowych (+ `sqlite_sequence`). `products` = 72 kolumny **(73 od 10.09.2026
+  — `blokowane_formy_platnosci`)**.
 - Pliki SQL: `migrations/001_selly.sql`, `migration_zastosowanie.sql`,
   `kategoria_norm_map_pplx.sql`, `zastosowanie_selly_map*_pplx.sql`.
 - **Kolumny dopinane w runtime przez `bw()`** w `index.cjs` (nie w CREATE TABLE):
   `link_zdjecia, oznaczenie_bieznika, sezon, ms, snow_3pmsf, wentyl, cfo,
   wysokosc_przesylki, zastosowanie, kod_importu, nieobecnosc_pod_rzad`.
+- **Kolumny dopinane w runtime przez MODUŁY** (ten sam problem, inne miejsce — łatwe do przeoczenia,
+  bo nie ma ich ani w `CREATE TABLE`, ani w `bw()`): `uwaga_cena` (`uwaga_cena_patch.cjs`),
+  `blokowane_formy_platnosci` (`payment_blocks.cjs:ensurePaymentBlocks()`).
+  ⚠ Dla odbudowy: kolumna dopięta runtime'owym `ALTER TABLE` jest dla Drizzle **niewidoczna**,
+  dopóki nie wejdzie do modelu — patrz `CLAUDE.md`.
 
 ## 7. Frontend (`public_html/panel/`)
 
@@ -134,7 +144,10 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
 
 | Funkcjonalność | Gdzie w kodzie |
 |---|---|
-| Import cennika / różnicowanie | `tk()` w `index.cjs` + `parsers/` + `adapter.cjs` |
+| Import cennika / różnicowanie | `tk()` w `index.cjs` + `parsers/` + `adapter.cjs` — żywa wersja to `tk = function` (przesłania martwe `function tk` zdefiniowane wcześniej w bundlu) |
+| Import automatyczny — endpointy `/api/import/parse-file`, `/api/import/from-url` | `extensions.cjs:126-286` — **bez fallbacku**, wyjątek parsera kończy się zwykłym 500 |
+| Import ręczny per-dostawca — `POST /api/dostawcy/:kod/upload` | rdzeń `index.cjs`, multer, pole `plik`; fallback w `catch` to `Wc()` — stare wbudowane parsery per-dostawca, **nie AI** |
+| AI fallback (stub) — `POST /api/ai-fallback/parse` | rdzeń `index.cjs`; ręcznie wołany, nigdy nie wpięty w ścieżkę parsowania i **nigdy nie łączy się z OpenAI**: bez klucza `ai_fallback.klucz_api` w `config` zwraca 5 zmyślonych pozycji „symulacja", z kluczem — pustą listę |
 | Ceny (narzuty/promocje) | `recalcPricesFromRules()` w `index.cjs`, tabele `markups`/`promotions` |
 | Logowanie / JWT / auth | `we` w `index.cjs` (cookie `bridge_session`) |
 | Warstwa danych (CRUD) | obiekt `U` w `index.cjs` (~50 metod) |
@@ -158,6 +171,14 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
   `'Tak'`/`null`, nie liczba. Poprawione w `adapter.cjs`/`tyre_params.cjs` (18.08,
   „sniegfix"). **Do sprawdzenia, czy `label_ice`, `ms`, `reinforced` nie mają tego
   samego błędu.**
+- **`normalize('NFD')` NIE rozkłada polskiego `ł`** — to osobny znak, nie litera z diakrytykiem,
+  więc `NFD` + usunięcie `\p{Diacritic}` zostawia `przemysłowe` nietknięte i psuje slug/klucz mapy.
+  Ania musiała dołożyć jawne `.replace(/ł/g,'l')` w `generate_selly_export.cjs` (14.09). To bliźniak
+  pułapki „`UPPER()`/`LOWER()` w SQLite są ASCII-only" z `CLAUDE.md` — przy każdym porównaniu
+  bez rozróżniania wielkości liter i przy każdym slugu sprawdź, czy dane mają polskie znaki.
+- **Selly `PUT /api/products/{pid}` JEDNAK przyjmuje `features`** — mimo że `fields_edit`
+  z endpointu metadanych tego pola nie wymienia. Ustalenie z 08.09 („HTTP 400 Malformed JSON input")
+  zostało **obalone testem produkcyjnym 17.09**; komentarz w `selly/sync_full.cjs` mówi to wprost.
 - **CORS** odbija dowolny `Origin` z `Allow-Credentials: true` (ryzyko CSRF).
 - **≥4 niezależne uchwyty SQLite** do jednej bazy (rdzeń, extensions, atrybuty, pending).
 - **Dryf schematu** (obiekty tworzone ręcznie, nie kodem): tabele
@@ -166,6 +187,23 @@ Potok: **dispatcher → parser → adapter → `tk()`**.
 - **Rozjazd kontraktu frontend↔backend:** React woła `/api/attributes` i
   `/api/attribute-kinds` (nie istnieją) — poprawne to `/api/atrybuty` i
   `/api/atrybuty/rodzaje`; różnicę łata `pending-injection.js`.
+- **Trzy różne kształty odpowiedzi stagingu** (24 / 20 / 21 pól) dla `GET /api/staging`,
+  `/paged` i `/{id}` — dwa różne moduły produkcji je obsługują (rdzeń vs
+  `pagination_module.cjs`). `/paged` i `/{id}` nie mają `eanCandidates`/`magazynRaw`, mają
+  `zatwierdzono` zamiast pary `zatwierdzilUzytkownikId`/`zatwierdzonoData`.
+- **`zatwierdzilUzytkownikId`/`zatwierdzonoData` w `staging_items` są martwe** — nic ich
+  nigdy nie ustawia w całym kodzie produkcji.
+- **Stempel czasu w nazwie pliku archiwum importu jest ucięty:** `archive_module.cjs:57`
+  zapowiada w komentarzu `RRRRMMDD__GGMMSS`, ale `slice(0, 15)` obcina ostatnią cyfrę
+  sekund (`RRRRMMDD__GGMMS`).
+- **`search` w `/api/staging/paged` nie escape'uje wieloznaczników LIKE** — `%` i `_`
+  z zapytania użytkownika działają jak wzorce (`pagination_module.cjs:40`).
+- **Nieparsowalne `page`/`pageSize` w `/paged` dają `NaN`** → SQLite wiąże je jako `NULL`
+  → `LIMIT NULL` = „bez limitu", więc np. `?pageSize=abc` zwraca wszystkie wiersze.
+- **`PUT` i `PATCH /api/products/:id` to DWIE osobne funkcje w rdzeniu, nie jeden wspólny
+  handler** — kod niemal identyczny, różni się wyłącznie kolejnością audytu względem pętli
+  zapisu `manual_overrides`/`history` (stan końcowy bazy identyczny). Łatwo pomylić z
+  prawdziwym cieniowaniem nazw (§0) — to po prostu dwie rejestracje z dwiema funkcjami.
 
 ---
 

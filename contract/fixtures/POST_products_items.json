@@ -1,0 +1,29 @@
+{
+  "endpoint": "/api/products",
+  "method": "POST",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "dodano": 1
+  },
+  "request": {
+    "items": [
+      {
+        "kod": "TEST-12D-002",
+        "nazwa": "Opona testowa 12d",
+        "marka": "TestMarka",
+        "kategoria": "Rolnicze",
+        "dostawca": "MO2",
+        "stan": 4,
+        "cenaZakupu": 1200,
+        "cenaSprzedazy": 1500,
+        "vat": 23,
+        "rozmiar": "10.00/75x15.3",
+        "status": "aktywny"
+      }
+    ]
+  },
+  "_zrodlo": "mirror/backend/index.cjs na kopii db/snapshot.db (tools/record-write-fixtures.cjs)",
+  "_opis": "Ciało jako `{items: […]}` — drugi dopuszczalny kształt tej samej trasy."
+}

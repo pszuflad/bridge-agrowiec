@@ -1,0 +1,191 @@
+# 76-FEATURE-przewoznicy-serwer-paletowy — Implementation report
+
+## Summary
+
+Lista przewoźników i dzielników wagi wolumetrycznej przeniosła się z IndexedDB przeglądarki na serwer:
+tabela `waga_gab_przewoznicy` (migracja 007 z seedem Ani) i `GET`/`PUT /api/waga-gabarytowa/przewoznicy`
+z walidacją i audytem. Widok `/waga-gabarytowa` czyta listę z API. Usunięcie przewoźnika i „Przywróć
+domyślne" pytają o potwierdzenie. Pod tabelą przewoźników doszedł kalkulator paletowy, który woła
+istniejące `POST /api/waga-gabarytowa/oblicz`. Wzór wolumetryczny i wzór paletowy są bez zmian.
+
+## Changes
+
+- **New:** `rebuild/schema/007_waga_gab_przewoznicy.sql` — tabela + seed sześciu przewoźników (GEIS
+  domyślny). Pierwsza migracja wstawiająca dane do nowej tabeli.
+- `rebuild/schema/README.md` — wiersz dla 007.
+- `rebuild/backend/src/db/schema.ts` — model Drizzle `wagaGabPrzewoznicy` (dopieszczenie, `domyslny` boolean).
+- **New:** `rebuild/backend/src/waga-gabarytowa/przewoznicy.ts` — typ `Przewoznik` i `zwalidujListePrzewoznikow()`.
+- **New:** `rebuild/backend/src/repos/przewoznicy.ts` — odczyt (`ORDER BY kolejnosc`, jawna projekcja)
+  i zapis całej listy w transakcji.
+- `rebuild/backend/src/routes/waga-gabarytowa.ts` — `GET`/`PUT /api/waga-gabarytowa/przewoznicy`
+  (`requireAuth`, 400 `{error}`, audyt `edycja_przewoznikow` z `{przed, po}` w try/catch). `/oblicz` bez zmian.
+- `contract/openapi.yaml` — nowa ścieżka (get, put) z markerem `x-odbudowa-nowa-trasa`. Schemat ciała
+  PUT jest inline; kształt odpowiedzi opisuje tekst markera, bo linie statusów należą do
+  `tools/generate-openapi-schemas.cjs`.
+- `rebuild/backend/test/db.migracje.test.ts` — 007 na liście, 27 tabel.
+- **New:** `rebuild/backend/test/waga-gabarytowa.przewoznicy.test.ts` — 24 testy.
+- **New:** `rebuild/frontend/src/pages/waga-gabarytowa/api.ts` — `KLUCZ_PRZEWOZNIKOW`,
+  `zapiszPrzewoznikow`, `obliczPaletowo`, typ `WynikPaletowy`.
+- **New:** `rebuild/frontend/src/pages/waga-gabarytowa/KalkulatorPaletowy.tsx` — Card „Waga paletowa
+  (opony) — inny wzór".
+- `rebuild/frontend/src/pages/waga-gabarytowa/przewoznicy.ts` — usunięty `KLUCZ_PRZEWOZNICY`, nagłówek
+  opisuje listę na serwerze.
+- `rebuild/frontend/src/pages/waga-gabarytowa/TabelaPrzewoznikow.tsx` — szkice pól z zapisem na blur,
+  dwa `DialogPotwierdzenia`, blokada przycisków w trakcie zapisu, dopisek „Lista jest wspólna".
+- `rebuild/frontend/src/pages/WagaGabarytowa.tsx` — `useQuery` listy, `useMutation` PUT
+  (optymistycznie, zapisy po kolei przez `scope`, cache i ponowny odczyt tylko dla najnowszego zapisu), wyrównanie wyboru usuniętego przez kogoś
+  innego, stan „wczytywanie / błąd", kalkulator paletowy.
+- `rebuild/frontend/test/waga-gabarytowa.test.tsx` — przepisany na MSW z listą w pamięci (28 testów).
+
+## Deviations from plan
+
+- **Kontrakt:** plan zakładał inline schematy odpowiedzi 200 i 400. Generator schematów
+  (`kontrakt.spojnosc.test.ts` → „schematy są AKTUALNE") przepisuje linie statusów i zdejmuje z nich
+  treść, jeśli nie ma fixture'a. Kształt odpowiedzi jest więc opisany w tekście `x-odbudowa-nowa-trasa`.
+  Inline zostaje tylko schemat `requestBody` PUT. Plan zaktualizowany.
+- Poza tym zgodnie z planem.
+
+## Odpowiedzi na punkty z karty
+
+- **Stary klucz `waga-gabarytowa-przewoznicy` (C):** zostaje w IndexedDB nieczytany i niepisany.
+  `magazynKV.ts` nie ma funkcji usuwania, a karta zabrania go ruszać. Test FE dowodzi, że wpis
+  nie jest ani czytany, ani nadpisywany.
+- **Współbieżność (D):** wygrywa ostatni zapis. Jeśli dwie osoby edytują listę naraz, druga nadpisze
+  zmiany pierwszej bez ostrzeżenia. Przy jednej-dwóch osobach edytujących tę listę to przypadek
+  teoretyczny.
+- **Wartości `waga_gab.*` w `db/snapshot.db`**, czyli progi, z którymi kalkulator paletowy wystartuje
+  w produkcji: `szer_polpaleta = 55`, `szer_paleta = 80`, `wys_palety = 10`, `wspolczynnik = 0.000167`.
+- **Numer migracji:** 007. Sprawdzone 2026-09-21 na `origin/develop` (najwyższy 006) i w otwartych PR-ach
+  (jedyny otwarty, #87, nie ma migracji). Przed merge'em sprawdzić, czy karty PR.3 i P6.2 nie weszły
+  z własnym 007.
+- **Seed na produkcji:** cutover uruchamia `npm run migrate` na żywej `data.db` (`docs/cutover.md` §5),
+  więc sześciu przewoźników trafi tam bez ręcznych kroków.
+
+## Test results
+
+- **Gate odbudowy (fixtures/kontrakt):** ✓. `POST /api/waga-gabarytowa/oblicz` — istniejący
+  `waga-gabarytowa.gate.test.ts` bez zmian, zielony. `GET`/`PUT /api/waga-gabarytowa/przewoznicy` —
+  trasy spoza produkcji, fixture'a nie ma i nie może być. `sprawdzZgodnoscZKontraktem` sprawdza je dla
+  200, 400 i 401, `kontrakt.spojnosc.test.ts` jest zielony. `contract/fixtures/` nieruszane.
+- **Backend:** lint ✓, typecheck ✓, build ✓ (kopiuje 7 plików `.sql`), test ✓: 88 plików, 1361 testów (po poprawkach z review).
+  Nowe testy sprawdzają:
+  - seed migracji wprost z tabeli i jego zgodność z listą Ani / `PRZEWOZNICY_DOMYSLNI`;
+  - GET w kolejności;
+  - PUT → GET;
+  - odcięcie obcych pól;
+  - 12 przypadków walidacji 400 (lista się nie zmienia);
+  - numer pozycji w komunikacie;
+  - wpis w `audit_log` z `przed`/`po` i brak wpisu przy 400;
+  - 401 dla GET i PUT.
+- **Frontend:** lint ✓, typecheck ✓, build ✓, test ✓: 49 plików, 823 testy (po poprawkach z review). Scenariusze z karty:
+  - lista z API, a stara lista z IndexedDB nieczytana;
+  - usunięcie pyta i dopiero po potwierdzeniu robi PUT;
+  - anulowanie usunięcia i resetu niczego nie zmienia;
+  - ostatniego przewoźnika nie da się usunąć i widok nawet nie pyta;
+  - „Przywróć domyślne" pyta („dla całej firmy") i wysyła `PRZEWOZNICY_DOMYSLNI`;
+  - kalkulator paletowy woła `/oblicz` z liczbami i pokazuje pięć pól; puste pole albo liczba ujemna
+    nie wysyłają żądania, a zero przechodzi;
+  - wybrany przewoźnik usunięty przez kogoś innego → wybór przechodzi na GEIS i zapisuje się lokalnie.
+
+  Dodatkowo:
+  - zapis nazwy i dzielnika dopiero na blur;
+  - pusta nazwa albo zły dzielnik wracają do poprzedniej wartości bez PUT;
+  - błąd zapisu pokazuje toast i przywraca listę z serwera;
+  - błąd odczytu pokazuje komunikat i blokuje liczenie.
+- **`waga-gabarytowa.obliczenia.test.ts`:** przechodzi **bez zmian** (plik nietknięty, tak samo
+  `obliczenia.ts`, `formula.ts`, `magazynKV.ts`).
+- **E2E:** pominięte. Plan tego nie przewidywał, a przepływ jest pokryty RTL + MSW i testami tras na
+  prawdziwej bazie.
+
+## Review fixes applied
+
+Runda 1 (`review.md`: 1 BLOCKER, 2 SHOULD-FIX, 2 NICE-TO-HAVE):
+
+- **BLOCKER — szybkie edycje z rzędu mogły cofnąć wcześniejszą zmianę.** `zapiszListe` dostaje teraz
+  ZMIANĘ (`(aktualna) => nowa`), a nie gotową listę. Liczy ją z bieżącego cache React Query
+  i aktualizuje cache synchronicznie, więc kolejna zmiana zawsze widzi poprzednią. Do tego
+  `onSuccess` wkłada odpowiedź do cache tylko wtedy, gdy nie leci następny zapis (`isMutating`).
+  Bez tego odpowiedź starszego zapisu cofała na ekranie nowszą zmianę.
+  - Test regresyjny „odpowiedź pierwszego zapisu nie cofa drugiej, jeszcze lecącej zmiany"
+    wstrzymuje każdy PUT osobno. Na starym kodzie **pada**, na nowym przechodzi (sprawdzone).
+  - Sama nieświeżość propsa w starym kodzie trwała kilka mikrozadań i przez UI nie da się w nią
+    trafić. Pierwsza wersja testu przechodziła na starym kodzie, więc została zastąpiona.
+- **SHOULD-FIX — najwyżej jeden `domyslny`.** Nowa reguła walidacji
+  („Przewoźnik nr N: tylko jeden przewoźnik może być domyślny") + przypadek testowy.
+- **SHOULD-FIX — `contract/README.md` bez konwencji `x-odbudowa-nowa-trasa`.** Przekazane do
+  aktualizacji dokumentacji (faza docs tego ticketa).
+- **Znalezione przy okazji:** test seeda migracji 007 był tautologią, bo `beforeEach` robił wcześniej
+  PUT tą samą listą. Przeniesiony do osobnego `describe` ze świeżą bazą.
+
+Runda 2 (`review.md`, sekcja „Runda 2": 1 BLOCKER, 2 SHOULD-FIX, 2 NICE-TO-HAVE):
+
+- **BLOCKER — odpowiedzi PUT w odwrotnej kolejności.** Warunek `isMutating <= 1` z rundy 1 chronił
+  tylko przypadek, gdy odpowiedzi wracają w kolejności wysłania. Gdy nowszy zapis kończył się pierwszy,
+  spóźniona starsza odpowiedź cofała zmianę w cache. Gorzej: serwer podmienia całą listę i wygrywa
+  ostatni zapis, więc na serwerze mogła zostać STARSZA lista. Naprawa u źródła:
+  - zapisy listy idą po kolei, bo mutacja ma `scope: { id: "waga-gabarytowa-przewoznicy" }`
+    i następny PUT rusza dopiero po odpowiedzi na poprzedni;
+  - każdy zapis ma numer (`useRef`), a odpowiedź i błąd dotykają cache tylko dla najnowszego.
+- **SHOULD-FIX — `onError` bez tego samego warunku.** Naprawione tym samym numerem zapisu:
+  ponowny odczyt tylko po błędzie najnowszego.
+- **SHOULD-FIX — `setTimeout(50)` w teście.** Usunięty. Test „szybkie edycje z rzędu zapisują się po
+  kolei i nie cofają się nawzajem" czeka na `isMutating() === 2` (oba zapisy zlecone), liczy PUT-y
+  lecące naraz w atrapie serwera (musi być 1) i sprawdza cache po każdej odpowiedzi. Na kodzie z rundy 2
+  **pada deterministycznie** (dwa PUT-y naraz), na obecnym przechodzi; 5 kolejnych przebiegów zielonych.
+- **NICE-TO-HAVE — `disabled` na polach edycji w trakcie zapisu.** Niepotrzebne: zapisy są w kolejce,
+  a każdy liczy listę z bieżącego cache.
+- **Znany, zaakceptowany skrajny przypadek:** jeśli starszy zapis padnie, a nowszy (już w kolejce)
+  przejdzie, nowszy niesie w sobie także zmianę starszego. Użytkownik zobaczy toast „Nie zapisano",
+  choć zmiana finalnie trafi na serwer. Walidację i tak robi UI przed wysłaniem, więc zostaje błąd
+  sieci — przypadek rzadki, stan końcowy jest spójny z ekranem.
+
+Runda 3: 0 BLOCKER, 0 nowych SHOULD-FIX. Pozostałe NICE-TO-HAVE przeszły do „Follow-up".
+
+## Breaking changes
+
+- Nowa migracja `007` — przy wdrożeniu wymaga `npm run migrate` (standardowy krok deployu i cutoveru).
+- Użytkownicy tracą lokalne zmiany listy przewoźników z IndexedDB, bo nie są importowane. Świadome
+  założenie C, Ania potwierdziła seed.
+
+## Follow-up
+
+- **P9.2 — sprostowanie `docs/instrukcja-testow-I9.md`.** §3.11, §4 pkt 4 i pkt 6 oraz opisy „lista
+  żyje w Twojej przeglądarce" przestały być prawdziwe. Do instrukcji dochodzą:
+  - potwierdzenia usunięcia i resetu;
+  - wspólna lista;
+  - zapis po opuszczeniu pola;
+  - kalkulator paletowy.
+- Konwencja `x-odbudowa-nowa-trasa` jest nowa. Jeśli kolejne trasy spoza produkcji dojdą, warto
+  dopisać ją do `contract/README.md` i sprawdzać w `kontrakt.spojnosc.test.ts`, jak `x-odbudowa-auth`.
+- NICE-TO-HAVE z review (runda 3), bez wpływu na dane:
+  - pola edycji nazwy i dzielnika nie są wyłączane w trakcie zapisu (kolejka zapisów i tak chroni dane);
+  - brak górnego limitu długości listy w walidacji PUT;
+  - `overflow-hidden` tabeli przewoźników — linia sprzed ticketa.
+
+## Docs updates
+
+- **`docs/rebuild-roadmap.md`:**
+  - P9.1 oznaczona ✅ 2026-09-21 z dowiezionym zakresem i odstępstwem od planu (kształt odpowiedzi
+    w tekście `x-odbudowa-nowa-trasa`);
+  - P9.2 dostała pełną listę materiału do delty instrukcji I9, stan „gotowe do startu";
+  - stary blok Iteracji 9, §3 („Lokalne vs API") i tabela iteracji mają datowane noty o zmianie z P9.1;
+  - noty o zajętym numerze migracji 007 wpisane do bloków PR.3 i P6.2.
+- **`docs/rebuild-backlog.md`:**
+  - #27 i #28 — „Do nowej wersji?" ✅ TAK (odstępstwo, pytania 9.1/9.2), Status ✔ zrobione (P9.1, ticket 76);
+  - nowe pliki w polu „Pliki", akapity „Co zrobiono w odbudowie", stare decyzje „port 1:1" oznaczone
+    jako zastąpione.
+- **`docs/spec-frontend.md`:**
+  - §4 — kalkulator paletowy to pierwszy konsument `/oblicz`;
+  - §5 — ostrzeżenia przy twierdzeniach z I9 i nowy blok „Odbudowa (76)"; fakty o produkcji bez zmian.
+- **`docs/spec-backend.md`:** wpis „Potwierdzone w 76" (tabela 007 + seed, nowe trasy, audyt,
+  konsument `/oblicz`, marker `x-odbudowa-nowa-trasa`).
+- **`contract/README.md`:** licznik ścieżek i operacji 97/115, nowa sekcja „Trasy, których produkcja
+  nie ma" z opisem konwencji `x-odbudowa-nowa-trasa`.
+- **`docs/cutover.md`:**
+  - §1 i §5 krok 5 — 007 realnie wstawia 6 wierszy, w odróżnieniu od no-opów 004–006;
+  - §6 — smoke-test `SELECT count(*) FROM waga_gab_przewoznicy` → 6.
+- **Bez zmian:**
+  - `docs/deploy-setup.md` — nie dotyczy;
+  - `docs/plan.md` — dokument historyczny;
+  - `docs/instrukcja-testow-I9.md` — należy do P9.2.
+- **Pre-existing issues:** brak.

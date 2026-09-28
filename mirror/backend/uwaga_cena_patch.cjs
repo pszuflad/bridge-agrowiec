@@ -21,10 +21,6 @@ function installUwagaCena(app, ctx, db) {
     console.error('[uwaga_cena] BLAD: brak U albo db - patch nie zaladowany');
     return;
   }
-  // Acceptance may already be inside a transaction on the catalogue connection.
-  // Using the separate extensions connection for this write would wait for that
-  // same transaction and block every item in a bulk approval.
-  db = U.__bridgeMainDb || db;
 
   // === 1) Dodaj kolumnę idempotentnie ===
   try {
@@ -156,3 +152,4 @@ function installUwagaCena(app, ctx, db) {
 }
 
 module.exports = { installUwagaCena };
+
