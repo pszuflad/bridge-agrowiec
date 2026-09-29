@@ -187,6 +187,25 @@ export async function rozstrzygnijDopasowanie(
   return (await odpowiedz.json()) as { ok: boolean; id: number; kod: string };
 }
 
+export type DecyzjaSprzecznosci = "merge" | "split";
+
+/**
+ * `POST /api/staging/{id}/resolve-source-conflict` — „Połącz w jeden produkt" / „Rozdziel na
+ * dwa osobne produkty" dla sprzecznych wierszy jednego cennika.
+ *
+ * ⚠ TRASA SPOZA ORYGINAŁU — świadoma decyzja użytkownika (2026-09-29). Produkcja daje tu sam
+ * podgląd. Odpowiedź serwera już po zapisie: produkt(y) są w katalogu, zgłoszenie znika.
+ */
+export async function rozstrzygnijSprzecznosc(
+  id: number,
+  decyzja: DecyzjaSprzecznosci,
+): Promise<{ ok: boolean; kody: string[] }> {
+  const odpowiedz = await zadanie("POST", `/api/staging/${id}/resolve-source-conflict`, {
+    decision: decyzja,
+  });
+  return (await odpowiedz.json()) as { ok: boolean; kody: string[] };
+}
+
 /** `POST /api/staging/{id}/choose-absence-card` — wybór jednej karty (`:113`). */
 export async function wybierzKarte(
   id: number,

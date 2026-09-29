@@ -85,6 +85,10 @@ export function handleryStagingu(opcje: OpcjeHandlerowStagingu = {}) {
       if (bladPrzegladu) return odpowiedzBledu(bladPrzegladu);
       return HttpResponse.json(przeglad ?? { ...przegladDopasowania(), id: Number(params.id) });
     }),
+    http.post("*/api/staging/:id/resolve-source-conflict", async ({ request }) => {
+      await zapiszMutacje(request);
+      return HttpResponse.json({ ok: true, kody: ["520196", "520197"] });
+    }),
     http.post("*/api/staging/:id/resolve", async ({ request }) => {
       await zapiszMutacje(request);
       if (bladRozstrzygniecia) return odpowiedzBledu(bladRozstrzygniecia);

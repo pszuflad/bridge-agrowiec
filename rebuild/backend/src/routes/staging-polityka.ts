@@ -17,6 +17,8 @@ import { zapiszAudyt } from "../repos/audit.js";
 import { norm, version } from "../import/polityka/helpery.js";
 import { produktPoKodzie, pozycjaStagingu, type Snapshot } from "../import/polityka/kontekst.js";
 import { rozstrzygnijZgloszenie } from "../import/polityka/zgloszenia.js";
+import { rozstrzygnijSprzecznoscZrodla } from "../import/polityka/sprzecznosc-zrodla.js";
+import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
 import {
   wybierzKarteNieobecnej,
   zamknijPrzegladNieobecnej,
@@ -173,6 +175,42 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
         szczegoly: { action: cialo.action, kod: row.kod },
       });
       return res.json({ ok: true, id: row.id, kod: row.kod });
+    } catch (e) {
+      return odpowiedzBledem(res, e);
+    }
+  });
+
+  /**
+   * Sprzeczne wiersze jednego cennika: „połącz w jeden produkt" / „rozdziel na osobne".
+   *
+   * ⚠ TRASA SPOZA ORYGINAŁU — świadoma decyzja użytkownika (2026-09-29); w produkcji ten przypadek
+   * ma tylko podgląd, a `POST /resolve` odmawia. W odróżnieniu od `/resolve` decyzja od razu
+   * ZATWIERDZA wynik do katalogu (jedna transakcja), więc odpowiada też skan nowych wartości
+   * atrybutów, jak po `POST /api/staging/accept`. Szczegóły: `import/polityka/sprzecznosc-zrodla.ts`.
+   */
+  router.post("/api/staging/:id/resolve-source-conflict", requireAuth, (req, res) => {
+    try {
+      const cialo = (req.body ?? {}) as { decision?: unknown };
+      const wynik = rozstrzygnijSprzecznoscZrodla(
+        db,
+        Number(req.params.id),
+        cialo.decision,
+        req.user!.id,
+      );
+      zapiszAudyt(db, {
+        uzytkownikId: req.user?.id ?? null,
+        uzytkownikImie: req.user?.imieNazwisko ?? null,
+        akcja: "rozstrzygniecie_sprzecznosci_zrodla",
+        encjaTyp: "staging",
+        encjaId: String(req.params.id),
+        szczegoly: { decyzja: cialo.decision, kody: wynik.kody },
+      });
+      try {
+        skanujNoweWartosci(db);
+      } catch (e) {
+        console.error("[pending] skan po rozstrzygnięciu sprzeczności:", e instanceof Error ? e.message : e);
+      }
+      return res.json({ ok: true, kody: wynik.kody });
     } catch (e) {
       return odpowiedzBledem(res, e);
     }
