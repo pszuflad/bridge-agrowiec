@@ -58,7 +58,14 @@ export const POLA_SZUKAJKI = [
   "dostawca",
 ] as const;
 
-export type TrybStatusu = "all" | "dostepne" | "aktywny" | "wstrzymany" | "brak_ean";
+/**
+ * ⚠ `brak_waga` jest NOWĄ opcją (ticket 166, nie port) — reszta enuma i `filtrujStatus()`
+ * niżej odtwarza `frontend-index.js:23306`. Dodana jako cel nawigacji z wyniku przycisku
+ * „Dociągnij wagę" (Konfiguracja → Katalog, ticket 156): po dociągnięciu część produktów
+ * zostaje bez wagi (brak pasującego „bliźniaka" tej samej marki/rozmiaru/bieżnika w katalogu)
+ * — ten filtr daje do nich bezpośrednie wejście, żeby Ania mogła uzupełnić je ręcznie.
+ */
+export type TrybStatusu = "all" | "dostepne" | "aktywny" | "wstrzymany" | "brak_ean" | "brak_waga";
 export type KierunekSortowania = "asc" | "desc";
 
 /**
@@ -86,6 +93,8 @@ export function filtrujSzukajka(produkty: Produkt[], fraza: string): Produkt[] {
  *  - `dostepne`  → `typeof stan === "number" && stan > 0` (uwaga: `stan === -1`,
  *    czyli „na zamówienie", też odpada),
  *  - `brak_ean`  → puste albo brakujące `ean`,
+ *  - `brak_waga` → NOWA opcja (ticket 166, nie port) — puste albo zerowe `waga`, ten sam próg
+ *    pustości co backendowe `jestPustaWaga()` (`src/import/dziedziczenieWagi.ts`, ticket 155),
  *  - pozostałe   → dosłowne porównanie z kolumną `status`.
  */
 export function filtrujStatus(produkty: Produkt[], tryb: TrybStatusu): Produkt[] {
@@ -95,6 +104,14 @@ export function filtrujStatus(produkty: Produkt[], tryb: TrybStatusu): Produkt[]
   }
   if (tryb === "brak_ean") {
     return produkty.filter((p) => !p.ean);
+  }
+  if (tryb === "brak_waga") {
+    return produkty.filter((p) => {
+      const w = p.waga;
+      if (w === null || w === undefined || w === "") return true;
+      const n = Number(w);
+      return Number.isNaN(n) || n === 0;
+    });
   }
   return produkty.filter((p) => p.status === tryb);
 }

@@ -11,17 +11,23 @@
  * Destrukcyjny przycisk „Usuń wszystko z katalogu" (`:26101-26134`) dołożyła Iteracja 12b
  * razem z trasą `POST /api/products/clear` — karta jest od tego momentu KOMPLETNA wobec
  * oryginału (odstępstwo D3 ticketu 18 zniesione).
+ *
+ * Przycisk „Dociągnij wagę" (ticket 156, nadbudowa 166) — NOWA logika, nie port. Po
+ * uruchomieniu link „zobacz je w katalogu" (ticket 166) prowadzi do `/katalog?status=brak_waga`,
+ * żeby Ania mogła ręcznie uzupełnić produkty, dla których nie znalazł się żaden pasujący
+ * „bliźniak" z wagą w katalogu.
  */
 import { useQueryClient } from "@tanstack/react-query";
 import { Scale, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "wouter";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import { KLUCZ_KOLUMN_KATALOGU, odczytajKV, zapiszKV } from "@/lib/magazynKV";
 import { KOLUMNY, KOLUMNY_DOMYSLNE } from "../katalog/kolumny";
-import { dziedziczWage, TEKST_POTWIERDZENIA, wyczyscKatalog } from "./katalog";
+import { dziedziczWage, TEKST_POTWIERDZENIA, wyczyscKatalog, type WynikDziedziczeniaWagi } from "./katalog";
 
 export function Katalog() {
   const [wybrane, ustawWybrane] = useState<Set<string>>(new Set(KOLUMNY_DOMYSLNE));
@@ -30,6 +36,9 @@ export function Katalog() {
   const [zapisywanie, ustawZapisywanie] = useState(false);
   const [czyszczenie, ustawCzyszczenie] = useState(false);
   const [dziedziczenie, ustawDziedziczenie] = useState(false);
+  const [wynikDziedziczenia, ustawWynikDziedziczenia] = useState<WynikDziedziczeniaWagi | null>(
+    null,
+  );
   const { toast } = useToast();
   const klientZapytan = useQueryClient();
 
@@ -42,6 +51,7 @@ export function Katalog() {
     ustawDziedziczenie(true);
     try {
       const wynik = await dziedziczWage();
+      ustawWynikDziedziczenia(wynik);
       toast({
         title: "Waga dociągnięta",
         description:
@@ -51,6 +61,10 @@ export function Katalog() {
       });
       void klientZapytan.invalidateQueries({ queryKey: ["/api/products"] });
     } catch (blad) {
+      // Kasujemy wynik POPRZEDNIEGO udanego przebiegu — inaczej stary komunikat i link
+      // zostają widoczne obok toastu błędu, sugerując stan nieaktualny wobec tego, co
+      // faktycznie się stało (albo nie stało) w tym wywołaniu.
+      ustawWynikDziedziczenia(null);
       toast({
         title: "Błąd dociągania wagi",
         description: blad instanceof Error ? blad.message : String(blad),
@@ -222,6 +236,27 @@ export function Katalog() {
               <Scale className="w-4 h-4 mr-2" />
               {dziedziczenie ? "Dociąganie…" : "Dociągnij wagę"}
             </Button>
+
+            {wynikDziedziczenia ? (
+              <p className="text-[11px] text-muted-foreground mt-2" data-testid="wynik-dziedziczenia-wagi">
+                Zaktualizowano {wynikDziedziczenia.zaktualizowano} z{" "}
+                {wynikDziedziczenia.wszystkichKandydatow} produktów.{" "}
+                {wynikDziedziczenia.zaktualizowano < wynikDziedziczenia.wszystkichKandydatow ? (
+                  <>
+                    Pozostało {wynikDziedziczenia.wszystkichKandydatow - wynikDziedziczenia.zaktualizowano}{" "}
+                    bez wagi (brak pasującego produktu w katalogu, do uzupełnienia ręcznie) —{" "}
+                    <Link
+                      href="/katalog?status=brak_waga"
+                      className="underline hover:text-foreground"
+                      data-testid="link-brak-wagi"
+                    >
+                      zobacz je w katalogu
+                    </Link>
+                    .
+                  </>
+                ) : null}
+              </p>
+            ) : null}
           </div>
 
           <div className="border-t pt-3">

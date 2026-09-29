@@ -101,6 +101,21 @@ describe("filtrujStatus", () => {
     expect(filtrujStatus(dane, "brak_ean").map((p) => p.id)).toEqual([3, 4]);
   });
 
+  /**
+   * `brak_waga` — NOWA opcja (ticket 166, nie port). Ten sam próg pustości co backendowe
+   * `jestPustaWaga()`: null, undefined, pusty string, 0 i NaN wszystkie liczą się jako brak.
+   */
+  it("tryb brak_waga łapie null, zero, pusty string i wartość nieliczbową", () => {
+    const zWaga = [
+      produkt({ id: 10, waga: 78 }),
+      produkt({ id: 11, waga: null }),
+      produkt({ id: 12, waga: 0 }),
+      produkt({ id: 13, waga: "" }),
+      produkt({ id: 14, waga: "coś" }),
+    ];
+    expect(filtrujStatus(zWaga, "brak_waga").map((p) => p.id)).toEqual([11, 12, 13, 14]);
+  });
+
   it("pozostałe tryby porównują kolumnę status dosłownie", () => {
     expect(filtrujStatus(dane, "wstrzymany").map((p) => p.id)).toEqual([2]);
     expect(filtrujStatus(dane, "aktywny").map((p) => p.id)).toEqual([1, 3, 4]);
