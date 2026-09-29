@@ -494,6 +494,8 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
       await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
 
       expect(await screen.findByText("Błąd dociągania wagi")).toBeInTheDocument();
+      // Komunikat wyciągnięty z ciała odpowiedzi (`{error: "..."}"), nie surowy status+JSON.
+      expect(screen.getByText("Baza niedostępna")).toBeInTheDocument();
     });
   });
 });

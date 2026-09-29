@@ -2,7 +2,7 @@
  * Klient `POST /api/products/clear` — zakładka „Katalog" w `/konfiguracja`.
  * Port `:26101-26134` (`deminified/frontend-index.js`).
  */
-import { BAZA_API, naglowki, zadanie } from "@/lib/api";
+import { BAZA_API, naglowki } from "@/lib/api";
 
 /**
  * Backend porównuje tę wartość ŚCIŚLE (`c.body?.potwierdzenie !== "WYCZYSC"`, `:48316`),
@@ -49,8 +49,22 @@ export type WynikDziedziczeniaWagi = {
 /**
  * Klient `POST /api/products/dziedzicz-wage` — przycisk „Dociągnij wagę" w zakładce „Katalog".
  * Nie jest destrukcyjne (tylko uzupełnia braki), więc bez `window.confirm` i bez ciała żądania.
+ *
+ * ⚠ Jak `wyczyscKatalog()` wyżej — celowo NIE przez `zadanie()`/`rzucGdyBlad()`: ten ogólny
+ * helper skleja komunikat błędu ze statusem i surowym JSON-em ciała (`"500: {\"error\":...}"`),
+ * a backend przy błędzie oddaje czytelne `{error: "..."}` (patrz `routes/maintenance.ts`).
  */
 export async function dziedziczWage(): Promise<WynikDziedziczeniaWagi> {
-  const odpowiedz = await zadanie("POST", "/api/products/dziedzicz-wage");
+  const odpowiedz = await fetch(`${BAZA_API}/api/products/dziedzicz-wage`, {
+    method: "POST",
+    headers: naglowki(false),
+    credentials: "include",
+  });
+
+  if (!odpowiedz.ok) {
+    const cialo = (await odpowiedz.json().catch(() => ({}))) as { error?: string };
+    throw new Error(cialo.error || "Nie udało się dociągnąć wagi");
+  }
+
   return (await odpowiedz.json()) as WynikDziedziczeniaWagi;
 }

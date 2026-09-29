@@ -55,6 +55,21 @@ Zakres zrealizowany zgodnie z ustaleniami.
 - Frontend: `npm run lint && npm run typecheck && npm run build && npm test` —
   **1001/1001 zielone** (0 regresji, +3 nowe testy).
 
+## Review fixes applied
+
+Reviewer: 0 BLOCKER / 1 SHOULD-FIX / 2 NICE-TO-HAVE.
+
+- **SHOULD-FIX (naprawione):** `dziedziczWage()` szedł przez ogólny `zadanie()`/`rzucGdyBlad()`,
+  który przy błędzie skleja komunikat ze statusem i surowym JSON-em ciała (`"500: {"error":...}"`),
+  zamiast czytelnego tekstu. Zmieniono na ten sam wzorzec co `wyczyscKatalog()` w tym samym
+  pliku — bezpośredni `fetch` + wyciągnięcie pola `error` z ciała odpowiedzi. Dopisany test
+  sprawdza, że toast pokazuje wyciągnięty komunikat, nie surowy status+JSON.
+- **NICE-TO-HAVE (świadomie pozostawione):** guard `if (!sqlite)` w trasie wygląda na martwy kod
+  w praktyce (serwer zawsze przekazuje realny `sqlite`) — zostawiony jako defensywny fallback,
+  spójny z typem `sqlite?: BazaSqlite` w `ZaleznosciUtrzymania`, nietestowany celowo.
+- **NICE-TO-HAVE (świadomie pozostawione):** brak osobnego testu na toast z licznikami = 0 —
+  ryzyko marginalne (sam format stringa jest identyczny niezależnie od wartości liczb).
+
 ## Breaking changes
 
 Brak. Nowy endpoint, nowa sekcja UI — nic istniejącego nie zmienia zachowania.
