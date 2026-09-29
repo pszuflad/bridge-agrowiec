@@ -180,6 +180,12 @@ export function aktualizujProdukt(
     doZapisu = { ...doZapisu, wagaAutoUzupelniona: false };
   }
 
+  // Ticket 167 (NOWA logika, nie port): to samo dla oszacowania — ręczna edycja `waga`
+  // przestaje być „szacunkiem", niezależnie od tego, którą z dwóch flag miał wcześniej.
+  if ("waga" in patch && !("wagaSzacowana" in patch)) {
+    doZapisu = { ...doZapisu, wagaSzacowana: false };
+  }
+
   // ⚠ PUSTY PATCH NIE WYWOŁUJE `UPDATE` — drizzle rzuca na `set({})`. Oryginał tej gałęzi
   // nie potrzebował, bo podawał całe ciało żądania; u nas `PATCH` z samymi polami spoza listy
   // edytowalnych daje pusty patch i musi odpowiedzieć 200 z aktualnym produktem, a nie 500.

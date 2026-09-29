@@ -70,7 +70,11 @@ const HEX64 = /^[0-9a-f]{64}$/;
 /** Normalizuje `_catalogVersion` w treści snapshotu, zachowując sprawdzenie kształtu. */
 function normalizujSnapshot(snapshotJson) {
   if (typeof snapshotJson !== "string") return snapshotJson;
-  if (!snapshotJson.includes('"_catalogVersion"') && !snapshotJson.includes('"wagaAutoUzupelniona"')) {
+  if (
+    !snapshotJson.includes('"_catalogVersion"') &&
+    !snapshotJson.includes('"wagaAutoUzupelniona"') &&
+    !snapshotJson.includes('"wagaSzacowana"')
+  ) {
     return snapshotJson;
   }
   const snap = JSON.parse(snapshotJson);
@@ -82,6 +86,8 @@ function normalizujSnapshot(snapshotJson) {
   // do porównania mimo że oryginał (bez tej kolumny) nigdy jej nie miał. Usuwamy z obu stron
   // porównania, tak jak `_catalogVersion` jest podmieniane, a nie porównywane wprost.
   delete snap.wagaAutoUzupelniona;
+  // Ticket 167 (NOWA logika, nie port): to samo dla `wagaSzacowana`.
+  delete snap.wagaSzacowana;
   return JSON.stringify(snap);
 }
 

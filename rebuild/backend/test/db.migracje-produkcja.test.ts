@@ -105,7 +105,7 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
     ]);
   });
 
-  it("`products`, `selly_products`, `selly_products_old` i triggery zostają nietknięte poza migracją 014 — kształt i dane", () => {
+  it("`products`, `selly_products`, `selly_products_old` i triggery zostają nietknięte poza migracjami 014/015 — kształt i dane", () => {
     const przed = {
       products: [schematTabeli(sqlite, "products"), zrzut(sqlite, "products")],
       selly: [schematTabeli(sqlite, "selly_products"), zrzut(sqlite, "selly_products")],
@@ -114,19 +114,21 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
     };
     zastosujMigracje(sqlite, KATALOG_SCHEMATU());
 
-    // Ticket 155 (NOWA logika, nie port) — migracja 014 JEST wyjątkiem od „nietknięte":
-    // produkcja tej kolumny nie ma wcale (w przeciwieństwie do 002/003/011/013, które są tu
-    // no-opem albo już-zrobione), więc pełny łańcuch legalnie dokłada ją i dopisuje `0` do
+    // Tickety 155/167 (NOWA logika, nie port) — migracje 014/015 SĄ wyjątkiem od „nietknięte":
+    // produkcja tych kolumn nie ma wcale (w przeciwieństwie do 002/003/011/013, które są tu
+    // no-opem albo już-zrobione), więc pełny łańcuch legalnie dokłada je i dopisuje `0` do
     // każdego istniejącego wiersza — dokładnie tak samo jak 011 dokładała `blokowane_formy_platnosci`.
     const [schemaProduktowPrzed, wierszeProduktowPrzed] = przed.products;
     const oczekiwaneProducts = [
       [
         ...(schemaProduktowPrzed as Record<string, unknown>[]),
         { cid: 74, name: "waga_auto_uzupelniona", type: "INTEGER", notnull: 0, dflt_value: "0", pk: 0 },
+        { cid: 75, name: "waga_szacowana", type: "INTEGER", notnull: 0, dflt_value: "0", pk: 0 },
       ],
       (wierszeProduktowPrzed as Record<string, unknown>[]).map((w) => ({
         ...w,
         waga_auto_uzupelniona: 0,
+        waga_szacowana: 0,
       })),
     ];
 

@@ -6,7 +6,7 @@ import { basename, dirname, join } from "node:path";
 import { Router } from "express";
 
 import type { Baza, BazaSqlite } from "../db/index.js";
-import { dziedziczWageWstecznie } from "../import/dziedziczenieWagi.js";
+import { dziedziczWageWstecznie, oszacujWageWstecznie } from "../import/dziedziczenieWagi.js";
 import { czyOpona } from "../import/silnik/klasyfikator.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
@@ -221,6 +221,36 @@ export function trasyUtrzymania({ db, dbPath, sqlite }: ZaleznosciUtrzymania): R
       uzytkownikId: user.id,
       uzytkownikImie: user.imieNazwisko,
       akcja: "dziedziczenie_wagi_wsteczne",
+      encjaTyp: "produkt",
+      encjaId: "wszystkie",
+      szczegoly: wynik,
+    });
+
+    res.json({ ok: true, ...wynik });
+  });
+
+  /**
+   * Wsteczne OSZACOWANIE wagi — ticket 167-FEATURE-oszacuj-pozostale-wagi.
+   *
+   * ⚠ NOWA LOGIKA, ŚWIADOMIE MNIEJ PEWNA niż `/api/products/dziedzicz-wage` wyżej. Dla
+   * produktów, którym dokładne dopasowanie (marka+rozmiar+bieżnik) nic nie znalazło, liczy
+   * średnią wagę innych produktów SAMEGO rozmiaru (bez marki/bieżnika) i oznacza wynik flagą
+   * `wagaSzacowana` — UI pokazuje to jako wyraźnie mniej pewne niż dziedziczenie. Osobny
+   * przycisk, osobna trasa: użytkownik uruchamia to świadomie, PO „Dociągnij wagę".
+   */
+  router.post("/api/products/oszacuj-wage", requireAuth, (req, res) => {
+    if (!sqlite) {
+      res.status(500).json({ error: "Baza nie jest dostępna do operacji wstecznej." });
+      return;
+    }
+
+    const wynik = oszacujWageWstecznie(db, sqlite);
+
+    const user = req.user!;
+    zapiszAudyt(db, {
+      uzytkownikId: user.id,
+      uzytkownikImie: user.imieNazwisko,
+      akcja: "oszacowanie_wagi_wsteczne",
       encjaTyp: "produkt",
       encjaId: "wszystkie",
       szczegoly: wynik,

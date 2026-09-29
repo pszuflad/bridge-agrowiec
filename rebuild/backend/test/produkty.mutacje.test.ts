@@ -282,8 +282,8 @@ describe("Mutacje produktów", () => {
       expect(odp.status).toBe(200);
       expect(produktZBazy(id).blokowane_formy_platnosci).toBe(przed.blokowane_formy_platnosci);
       expect(Object.keys(odp.body as object)).not.toContain("blokowaneFormyPlatnosci");
-      // 73 = 72 kolumn produkcji + `wagaAutoUzupelniona` (ticket 155, NOWA logika, nie port).
-      expect(Object.keys(odp.body as object)).toHaveLength(73);
+      // 74 = 72 kolumn produkcji + `wagaAutoUzupelniona` (ticket 155) + `wagaSzacowana` (ticket 167).
+      expect(Object.keys(odp.body as object)).toHaveLength(74);
     });
   });
 

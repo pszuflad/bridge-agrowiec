@@ -1,0 +1,12 @@
+-- 015_waga_szacowana.sql — ticket 167-FEATURE-oszacuj-pozostale-wagi
+--
+-- ⚠ NOWA LOGIKA BIZNESOWA, NIE ODTWORZENIE PRODUKCJI (jak cały mechanizm wagi, tickety 155/156).
+-- Flaga: `true`, gdy `products.waga` uzupełniona SZACUNKIEM (średnia wagi innych produktów
+-- tego samego rozmiaru w katalogu, BEZ względu na markę/bieżnik) — mniej pewna niż
+-- `waga_auto_uzupelniona` (154/155: dokładne dopasowanie marka+rozmiar+bieżnik). Zerowana
+-- z powrotem na `false` przy ręcznej edycji pola `waga` (`routes/products.ts`).
+--
+-- Nullable, nie NOT NULL — z tego samego powodu co `waga_auto_uzupelniona` (014): harness
+-- charakteryzacyjny (`test/charakteryzacja/silnik/polityka.mjs`) wstawia produkty testowe
+-- RAW SQL-em z jawnym `NULL` dla kolumn, których scenariusz nie ustawił.
+ALTER TABLE products ADD COLUMN waga_szacowana INTEGER DEFAULT 0;
