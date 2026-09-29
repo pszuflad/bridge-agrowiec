@@ -189,6 +189,24 @@ describe("katalog — szukajka i filtry", () => {
     });
     expect(screen.getByTestId("row-product-999001")).toBeInTheDocument();
   });
+
+  /**
+   * Ticket 166 (NOWA logika, nie port): deep link `?status=brak_waga` z przycisku „Dociągnij
+   * wagę" (Konfiguracja → Katalog) ma od razu pokazać przefiltrowaną listę, bez ręcznego
+   * klikania w dropdown statusu.
+   */
+  it("link ?status=brak_waga otwiera katalog z filtrem już zastosowanym", async () => {
+    const bezWagi: Produkt = { ...(PRODUKTY[0] as Produkt), id: 999_002, waga: null, kod: "BEZ_WAGI" };
+    zamockujApi([...PRODUKTY, bezWagi]);
+    window.history.pushState({}, "", "/katalog?status=brak_waga");
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("text-licznik")).toHaveTextContent("wyświetlono 1 / 1");
+    });
+    expect(screen.getByTestId("row-product-999002")).toBeInTheDocument();
+    expect(screen.getByTestId("select-status")).toHaveTextContent("Brak wagi");
+  });
 });
 
 describe("katalog — sortowanie i paginacja", () => {

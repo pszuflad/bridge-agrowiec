@@ -467,6 +467,32 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
           "Zaktualizowano 2 z 5 produktów (pominięto: 1 ręczna poprawka, 1 brak marki/rozmiaru, 1 brak pasującego produktu).",
         ),
       ).toBeInTheDocument();
+
+      // Ticket 166: gdy zostają nieuzupełnione (5 kandydatów, 2 zaktualizowane), pod przyciskiem
+      // zostaje trwały (nie tylko w znikającym toaście) link do przefiltrowanego katalogu.
+      const link = await screen.findByTestId("link-brak-wagi");
+      expect(link).toHaveAttribute("href", "/katalog?status=brak_waga");
+    });
+
+    it("nie pokazuje linku do braków, gdy wszystkie produkty zostały zaktualizowane", async () => {
+      server.use(
+        http.post("*/api/products/dziedzicz-wage", () =>
+          HttpResponse.json({
+            ok: true,
+            wszystkichKandydatow: 3,
+            zaktualizowano: 3,
+            pominietoOverride: 0,
+            pominietoBrakDanych: 0,
+            pominietoBrakDopasowania: 0,
+          }),
+        ),
+      );
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
+
+      await screen.findByTestId("wynik-dziedziczenia-wagi");
+      expect(screen.queryByTestId("link-brak-wagi")).not.toBeInTheDocument();
     });
 
     it("unieważnia zapytanie /api/products po udanym dociągnięciu", async () => {

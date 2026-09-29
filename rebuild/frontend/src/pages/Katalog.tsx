@@ -24,6 +24,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Download, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useSearch } from "wouter";
 import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
 import { PageHeader } from "@/components/PageHeader";
 import { useToast } from "@/components/ui/toast";
@@ -90,6 +91,7 @@ const OPCJE_STATUSU: { wartosc: TrybStatusu; etykieta: string }[] = [
   { wartosc: "aktywny", etykieta: "Aktywny" },
   { wartosc: "wstrzymany", etykieta: "Wstrzymany" },
   { wartosc: "brak_ean", etykieta: "Brak EANu" },
+  { wartosc: "brak_waga", etykieta: "Brak wagi" },
 ];
 
 export function Katalog() {
@@ -126,7 +128,19 @@ export function Katalog() {
   const [fraza, setFraza] = useState("");
   const [marki, setMarki] = useState<Set<string>>(() => new Set());
   const [kategorie, setKategorie] = useState<Set<string>>(() => new Set());
-  const [status, setStatus] = useState<TrybStatusu>("all");
+  /**
+   * NOWE (ticket 166, nie port): filtr statusu może przyjść z linku `?status=...`, np. z
+   * przycisku „Dociągnij wagę" (Konfiguracja → Katalog), który po operacji linkuje tu do
+   * `?status=brak_waga`. Czytane TYLKO przy montowaniu (deep link), dalsze zmiany filtra idą
+   * przez `setStatus` jak dotąd — bez dwukierunkowej synchronizacji z URL-em.
+   */
+  const wyszukiwanieUrl = useSearch();
+  const [status, setStatus] = useState<TrybStatusu>(() => {
+    const zParametru = new URLSearchParams(wyszukiwanieUrl).get("status");
+    return OPCJE_STATUSU.some((opcja) => opcja.wartosc === zParametru)
+      ? (zParametru as TrybStatusu)
+      : "all";
+  });
   const [sortKolumna, setSortKolumna] = useState("");
   const [sortKierunek, setSortKierunek] = useState<KierunekSortowania>("asc");
   const [strona, setStrona] = useState(0);
