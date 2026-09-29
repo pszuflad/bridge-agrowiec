@@ -434,8 +434,8 @@ describe("Staging — okno „Rozstrzygnij”", () => {
     });
   });
 
-  describe("Gałąź „sprzeczne wiersze w jednym pliku” (sam podgląd)", () => {
-    it("pokazuje różnice, oba wiersze i zamknięcie bez akcji", async () => {
+  describe("Gałąź „sprzeczne wiersze w jednym pliku” (odstępstwo: połącz / rozdziel)", () => {
+    it("pokazuje różnice, oba wiersze i dwa przyciski decyzji", async () => {
       zamockuj({ strona: stronaZFraza(FRAZY.plik), przeglad: przegladSprzecznychWierszy() });
       const uzytkownik = userEvent.setup();
       await otworzStaging();
@@ -446,9 +446,12 @@ describe("Staging — okno „Rozstrzygnij”", () => {
           "W bieżącym pliku są dwa wiersze przypisane do jednej karty, ale ich dane się różnią. To NIE oznacza automatycznie, że EAN jest inny.",
         ),
       ).toBeInTheDocument();
-      expect(within(okno).getByTestId("roznice-wierszy")).toHaveTextContent(
-        "Różnią się: EAN, cena zakupu, stan.",
-      );
+      const roznice = within(okno).getAllByTestId("roznica-pola").map((e) => e.textContent);
+      expect(roznice).toEqual([
+        "EAN: 8903094020614 → 8903094020621",
+        "Cena zakupu: 1850 → 1910",
+        "Stan: 13 → 1",
+      ]);
 
       const pierwszy = within(okno).getByTestId("karta-wiersz-pierwszy");
       expect(pierwszy).toHaveTextContent("Pierwszy wiersz");
@@ -461,16 +464,37 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       expect(drugi).toHaveTextContent("Kod w pliku: 520197");
       expect(drugi).toHaveTextContent("Cena zakupu: 1910 · Stan: 1");
 
-      expect(
-        within(okno).getByText(
-          "Sprawdź te dwa wiersze u dostawcy. Jeśli to dwie różne opony, muszą otrzymać osobne oznaczenia; jeśli to jeden produkt, dostawca powinien wyjaśnić sprzeczne dane. Tego zgłoszenia nie można rozwiązać kliknięciem ani zaakceptować bez wyjaśnienia.",
-        ),
-      ).toBeInTheDocument();
-
-      // Sprzeczności nie rozwiązuje się kliknięciem — zostaje tylko „Zamknij”.
+      expect(within(okno).getByText(/Produkt trafia od razu do katalogu\./)).toBeInTheDocument();
+      expect(within(okno).getByTestId("button-polacz-wiersze")).toHaveTextContent(
+        "Połącz w jeden produkt",
+      );
+      expect(within(okno).getByTestId("button-rozdziel-wiersze")).toHaveTextContent(
+        "Rozdziel na dwa osobne produkty",
+      );
       expect(within(okno).queryByTestId("button-zapisz-wybor")).not.toBeInTheDocument();
-      expect(within(okno).queryByTestId("button-zapisz-wybor-karty")).not.toBeInTheDocument();
       expect(within(okno).getByTestId("button-zamknij-rozstrzygniecie")).toBeInTheDocument();
+    });
+
+    it.each([
+      ["button-polacz-wiersze", "merge"],
+      ["button-rozdziel-wiersze", "split"],
+    ])("%s wysyła `{decision: %s}` i zamyka okno", async (przycisk, decyzja) => {
+      zamockuj({ strona: stronaZFraza(FRAZY.plik), przeglad: przegladSprzecznychWierszy() });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId(przycisk));
+
+      await waitFor(() =>
+        expect(mutacje.some((m) => m.url.includes("/resolve-source-conflict"))).toBe(true),
+      );
+      const zapis = mutacje.find((m) => m.url.includes("/resolve-source-conflict"))!;
+      expect(zapis.url).toContain("/api/staging/710001/resolve-source-conflict");
+      expect(zapis.body).toEqual({ decision: decyzja });
+      await waitFor(() =>
+        expect(screen.queryByTestId("dialog-rozstrzygniecie")).not.toBeInTheDocument(),
+      );
     });
 
     it("starsze zgłoszenie bez porównania wierszy mówi, żeby wczytać cennik", async () => {
@@ -485,6 +509,8 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       expect(within(okno).getByTestId("brak-porownania-wierszy")).toHaveTextContent(
         "To starsze zgłoszenie nie zawiera porównania wierszy. Wczytaj ponownie aktualny cennik, aby zobaczyć dokładne różnice.",
       );
+      expect(within(okno).queryByTestId("button-polacz-wiersze")).not.toBeInTheDocument();
+      expect(within(okno).queryByTestId("button-rozdziel-wiersze")).not.toBeInTheDocument();
     });
   });
 

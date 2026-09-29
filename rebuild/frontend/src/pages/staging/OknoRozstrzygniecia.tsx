@@ -9,8 +9,11 @@
  *     (`POST …/choose-absence-card`). Tytuł okna się ZMIENIA.
  *  2. `matchIssue && !duplicateSource` — wybór produktu z katalogu albo osobny wpis
  *     (`POST …/resolve`).
- *  3. `duplicateSource` — dwa sprzeczne wiersze w jednym pliku dostawcy. SAM PODGLĄD:
- *     oryginał świadomie nie daje tu żadnej akcji, bo sprzeczność musi wyjaśnić dostawca.
+ *  3. `duplicateSource` — dwa sprzeczne wiersze w jednym pliku dostawcy. ⚠ ODSTĘPSTWO OD
+ *     ORYGINAŁU (decyzja użytkownika, 2026-09-29): produkcja daje tu sam podgląd, bo
+ *     sprzeczność miał wyjaśnić dostawca. Tu są dwa przyciski — „Połącz w jeden produkt"
+ *     i „Rozdziel na dwa osobne produkty" (`POST …/resolve-source-conflict`) — a wynik
+ *     trafia od razu do katalogu, bez osobnej akceptacji.
  *
  * ⚠ GAŁĘZIE 1 i 2 SĄ ROZŁĄCZNE — ZMIERZONE, nie założone (ticket 140). Oryginał ma dla nich
  * dwa OSOBNE elementy błędu (`:113` i `:127`), co sugeruje, że mogą wystąpić razem; w danych
@@ -67,6 +70,7 @@ import {
   opisStanuKandydata,
   opisStanuStarejKarty,
   rozstrzygnijDopasowanie,
+  rozstrzygnijSprzecznosc,
   wybierzKarte,
   ZAPASOWY_KOMUNIKAT_DECYZJI,
   type KandydatPrzegladu,
@@ -144,6 +148,12 @@ function linieWierszaKonfliktu(wiersz: WierszKonfliktu): string[] {
     `EAN: ${wiersz.EAN || "brak"} · DOT: ${wiersz.DOT || "brak"}`,
     `Cena zakupu: ${wiersz["cena zakupu"] ?? "brak"} · Stan: ${wiersz.stan ?? "brak"}`,
   ];
+}
+
+/** Wartość pola wiersza konfliktu do zestawienia „było → jest"; brak = „brak". */
+function wartoscPola(wiersz: WierszKonfliktu, etykieta: string): string {
+  const v = wiersz[etykieta];
+  return v == null || v === "" ? "brak" : String(v);
 }
 
 /** Pięć linii opisu kandydata — `:87-92` w oryginale. */
@@ -371,15 +381,27 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   </p>
                   {przeglad.sourceConflict ? (
                     <>
-                      <p
+                      <div
                         className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
                         data-testid="roznice-wierszy"
                       >
-                        Różnią się:{" "}
-                        {przeglad.sourceConflict.different.join(", ") ||
-                          "danymi zapisanymi w pliku"}
-                        .
-                      </p>
+                        <strong className="block">Niezgodne dane (pierwszy → drugi wiersz):</strong>
+                        {przeglad.sourceConflict.different.length ? (
+                          <ul className="mt-1 space-y-0.5">
+                            {przeglad.sourceConflict.different.map((etykieta) => (
+                              <li key={etykieta} data-testid="roznica-pola">
+                                {etykieta.charAt(0).toUpperCase() + etykieta.slice(1)}:{" "}
+                                <span className="font-semibold">
+                                  {wartoscPola(przeglad.sourceConflict!.earlier, etykieta)} →{" "}
+                                  {wartoscPola(przeglad.sourceConflict!.later, etykieta)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-1">Dane zapisane w pliku.</p>
+                        )}
+                      </div>
                       <KartaPorownania
                         tytul="Pierwszy wiersz"
                         testId="karta-wiersz-pierwszy"
@@ -398,10 +420,9 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                     </p>
                   )}
                   <p className="my-2.5">
-                    Sprawdź te dwa wiersze u dostawcy. Jeśli to dwie różne opony, muszą otrzymać
-                    osobne oznaczenia; jeśli to jeden produkt, dostawca powinien wyjaśnić sprzeczne
-                    dane. Tego zgłoszenia nie można rozwiązać kliknięciem ani zaakceptować bez
-                    wyjaśnienia.
+                    <strong>Połącz</strong> — to jedna opona: powstanie jeden produkt z danymi z
+                    drugiego wiersza. <strong>Rozdziel</strong> — to dwie opony: każdy wiersz
+                    dostanie osobny produkt (kod z pliku). Produkt trafia od razu do katalogu.
                   </p>
                 </>
               ) : null}
@@ -433,6 +454,26 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
               >
                 Zapisz wybór w katalogu
               </Button>
+            ) : null}
+
+            {przeglad && przeglad.duplicateSource && przeglad.sourceConflict ? (
+              <>
+                <Button
+                  variant="outline"
+                  disabled={zapis.isPending}
+                  onClick={() => zapis.mutate(() => rozstrzygnijSprzecznosc(przeglad.id, "split"))}
+                  data-testid="button-rozdziel-wiersze"
+                >
+                  Rozdziel na dwa osobne produkty
+                </Button>
+                <Button
+                  disabled={zapis.isPending}
+                  onClick={() => zapis.mutate(() => rozstrzygnijSprzecznosc(przeglad.id, "merge"))}
+                  data-testid="button-polacz-wiersze"
+                >
+                  Połącz w jeden produkt
+                </Button>
+              </>
             ) : null}
 
             {przeglad && pokazDopasowanie ? (
