@@ -31,6 +31,18 @@ osobny tooltip (żółty trójkąt ostrzegawczy, nie niebieska ikonka info), oso
   `db.migracja-011.test.ts`, `db.migracje-produkcja.test.ts`, `katalog.gate.test.ts`,
   `produkty.mutacje.test.ts`, `projekcja.test.ts`, `charakteryzacja/silnik/wzorzec.mjs`.
 
+## Review fixes applied
+
+Reviewer: 0 BLOCKER / 1 SHOULD-FIX / 2 NICE-TO-HAVE.
+
+- **SHOULD-FIX (naprawione):** brak testu na ochronę `manual_overrides` dla `oszacujWageWstecznie`
+  — dodany `test/oszacowanie-wagi.test.ts` „pomija produkt chroniony ręczną poprawką wagi".
+- **NICE-TO-HAVE (świadomie pozostawione):** brak testu na hipotetyczne przyszłe scalenie kroków
+  dziedziczenia+szacowania — dziś nieistotne, funkcje wołane osobno, osobnymi przyciskami.
+- **NICE-TO-HAVE (świadomie pozostawione):** sekcja „Oszacuj pozostałe wagi" w UI bez osobnego
+  nagłówka `<h3>` (ma tylko opis + przycisk, oddzielona `border-t border-dashed`) — kosmetyka,
+  nie wpływa na funkcjonalność ani czytelność.
+
 ## Test results
 
 - Backend: `npm run lint && npm run typecheck && npm run build && npm test` —

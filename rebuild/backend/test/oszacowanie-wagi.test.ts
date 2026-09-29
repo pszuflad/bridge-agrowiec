@@ -7,7 +7,7 @@ import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { Baza, BazaSqlite } from "../src/db/index.js";
-import { products } from "../src/db/schema.js";
+import { manualOverrides, products } from "../src/db/schema.js";
 import {
   kluczRozmiaru,
   oszacujWageWstecznie,
@@ -176,5 +176,33 @@ describe("oszacujWageWstecznie", () => {
       pominietoBrakDanych: 0,
       pominietoBrakSredniej: 1,
     });
+  });
+
+  it("pomija produkt chroniony ręczną poprawką wagi (decyzja 4 z plan.md)", () => {
+    db.insert(products)
+      .values([produkt({ kod: "H1", waga: 70 }), produkt({ kod: "H2", dostawca: "MO2", waga: 0 })])
+      .run();
+    db.insert(manualOverrides)
+      .values({
+        supplierKod: "MO2",
+        supplierProductId: "H2",
+        fieldName: "waga",
+        overrideValue: "0",
+        createdAt: "2026-09-29T00:00:00.000Z",
+      })
+      .run();
+
+    const wynik = oszacujWageWstecznie(db, sqlite);
+
+    expect(wynik).toEqual({
+      wszystkichKandydatow: 1,
+      zaktualizowano: 0,
+      pominietoOverride: 1,
+      pominietoBrakDanych: 0,
+      pominietoBrakSredniej: 0,
+    });
+    const po = db.select().from(products).where(eq(products.kod, "H2")).get()!;
+    expect(po.waga).toBe(0);
+    expect(po.wagaSzacowana).toBeFalsy();
   });
 });
