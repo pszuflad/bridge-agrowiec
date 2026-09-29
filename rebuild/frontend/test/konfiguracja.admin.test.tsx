@@ -467,6 +467,32 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
           "Zaktualizowano 2 z 5 produktów (pominięto: 1 ręczna poprawka, 1 brak marki/rozmiaru, 1 brak pasującego produktu).",
         ),
       ).toBeInTheDocument();
+
+      // Ticket 166: gdy zostają nieuzupełnione (5 kandydatów, 2 zaktualizowane), pod przyciskiem
+      // zostaje trwały (nie tylko w znikającym toaście) link do przefiltrowanego katalogu.
+      const link = await screen.findByTestId("link-brak-wagi");
+      expect(link).toHaveAttribute("href", "/katalog?status=brak_waga");
+    });
+
+    it("nie pokazuje linku do braków, gdy wszystkie produkty zostały zaktualizowane", async () => {
+      server.use(
+        http.post("*/api/products/dziedzicz-wage", () =>
+          HttpResponse.json({
+            ok: true,
+            wszystkichKandydatow: 3,
+            zaktualizowano: 3,
+            pominietoOverride: 0,
+            pominietoBrakDanych: 0,
+            pominietoBrakDopasowania: 0,
+          }),
+        ),
+      );
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
+
+      await screen.findByTestId("wynik-dziedziczenia-wagi");
+      expect(screen.queryByTestId("link-brak-wagi")).not.toBeInTheDocument();
     });
 
     it("unieważnia zapytanie /api/products po udanym dociągnięciu", async () => {
@@ -496,6 +522,25 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
       expect(await screen.findByText("Błąd dociągania wagi")).toBeInTheDocument();
       // Komunikat wyciągnięty z ciała odpowiedzi (`{error: "..."}"), nie surowy status+JSON.
       expect(screen.getByText("Baza niedostępna")).toBeInTheDocument();
+    });
+
+    /** Ticket 166, review fix: wynik poprzedniego SUKCESU nie może przeżyć kolejnego błędu. */
+    it("kasuje wynik poprzedniego przebiegu, gdy kolejne wywołanie się nie powiedzie", async () => {
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
+      await screen.findByTestId("link-brak-wagi");
+
+      server.use(
+        http.post("*/api/products/dziedzicz-wage", () =>
+          HttpResponse.json({ error: "Baza niedostępna" }, { status: 500 }),
+        ),
+      );
+      await userEvent.click(screen.getByTestId("button-dziedzicz-wage"));
+
+      await screen.findByText("Błąd dociągania wagi");
+      expect(screen.queryByTestId("link-brak-wagi")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("wynik-dziedziczenia-wagi")).not.toBeInTheDocument();
     });
   });
 });
