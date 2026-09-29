@@ -32,3 +32,39 @@ export async function wyczyscKatalog(): Promise<void> {
     throw new Error(cialo.error || "Nie udało się wyczyścić katalogu");
   }
 }
+
+/**
+ * Wynik `POST /api/products/dziedzicz-wage` — ticket 156 (NOWA logika, nie port). Kształt = pola
+ * `WynikDziedziczeniaWstecznego` z backendu (`src/import/dziedziczenieWagi.ts`) plus `ok`.
+ */
+export type WynikDziedziczeniaWagi = {
+  ok: true;
+  wszystkichKandydatow: number;
+  zaktualizowano: number;
+  pominietoOverride: number;
+  pominietoBrakDanych: number;
+  pominietoBrakDopasowania: number;
+};
+
+/**
+ * Klient `POST /api/products/dziedzicz-wage` — przycisk „Dociągnij wagę" w zakładce „Katalog".
+ * Nie jest destrukcyjne (tylko uzupełnia braki), więc bez `window.confirm` i bez ciała żądania.
+ *
+ * ⚠ Jak `wyczyscKatalog()` wyżej — celowo NIE przez `zadanie()`/`rzucGdyBlad()`: ten ogólny
+ * helper skleja komunikat błędu ze statusem i surowym JSON-em ciała (`"500: {\"error\":...}"`),
+ * a backend przy błędzie oddaje czytelne `{error: "..."}` (patrz `routes/maintenance.ts`).
+ */
+export async function dziedziczWage(): Promise<WynikDziedziczeniaWagi> {
+  const odpowiedz = await fetch(`${BAZA_API}/api/products/dziedzicz-wage`, {
+    method: "POST",
+    headers: naglowki(false),
+    credentials: "include",
+  });
+
+  if (!odpowiedz.ok) {
+    const cialo = (await odpowiedz.json().catch(() => ({}))) as { error?: string };
+    throw new Error(cialo.error || "Nie udało się dociągnąć wagi");
+  }
+
+  return (await odpowiedz.json()) as WynikDziedziczeniaWagi;
+}
