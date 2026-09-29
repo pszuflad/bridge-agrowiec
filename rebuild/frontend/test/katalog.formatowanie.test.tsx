@@ -118,6 +118,32 @@ describe("formatujKomorke — waga (ticket 155, NOWA logika, nie port)", () => {
       "uzupełniona automatycznie",
     );
   });
+
+  /** Ticket 167 (NOWA logika, świadomie MNIEJ PEWNA niż dziedziczenie). */
+  it("wagę SZACOWANĄ oznacza osobnym tooltipem i ikoną (nie tą samą co dziedziczenie)", () => {
+    const { container } = render(
+      <>{formatujKomorke(produkt({ waga: 80, wagaSzacowana: true }), "waga")}</>,
+    );
+    expect(container.textContent).toBe("80");
+    expect(container.querySelector("svg")).not.toBeNull();
+    const tytul = container.querySelector("[title]")?.getAttribute("title");
+    expect(tytul).toContain("SZACOWANA");
+    expect(tytul).not.toContain("uzupełniona automatycznie");
+  });
+
+  it("gdy obie flagi są ustawione (nie powinno się zdarzyć), dziedziczenie wygrywa", () => {
+    const { container } = render(
+      <>
+        {formatujKomorke(
+          produkt({ waga: 78, wagaAutoUzupelniona: true, wagaSzacowana: true }),
+          "waga",
+        )}
+      </>,
+    );
+    expect(container.querySelector("[title]")?.getAttribute("title")).toContain(
+      "uzupełniona automatycznie",
+    );
+  });
 });
 
 describe("formatujKomorke (DT)", () => {

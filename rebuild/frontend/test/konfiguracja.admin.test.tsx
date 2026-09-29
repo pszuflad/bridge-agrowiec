@@ -46,12 +46,14 @@ let patche: { kod: string; cialo: Record<string, unknown> }[] = [];
 let czyszczenia: Record<string, unknown>[] = [];
 let usunieciaNieOpon = 0;
 let dziedziczeniaWagi = 0;
+let szacowanWagi = 0;
 
 function zamockujApi(opcje: { odpowiedzPatcha?: () => Response } = {}) {
   patche = [];
   czyszczenia = [];
   usunieciaNieOpon = 0;
   dziedziczeniaWagi = 0;
+  szacowanWagi = 0;
   server.use(
     http.get("*/api/config", () => HttpResponse.json(KONFIGURACJA)),
     http.get("*/api/admin/supplier-config", () =>
@@ -91,6 +93,17 @@ function zamockujApi(opcje: { odpowiedzPatcha?: () => Response } = {}) {
         pominietoOverride: 1,
         pominietoBrakDanych: 1,
         pominietoBrakDopasowania: 1,
+      });
+    }),
+    http.post("*/api/products/oszacuj-wage", () => {
+      szacowanWagi += 1;
+      return HttpResponse.json({
+        ok: true,
+        wszystkichKandydatow: 4,
+        zaktualizowano: 3,
+        pominietoOverride: 0,
+        pominietoBrakDanych: 0,
+        pominietoBrakSredniej: 1,
       });
     }),
   );
@@ -541,6 +554,80 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
       await screen.findByText("Błąd dociągania wagi");
       expect(screen.queryByTestId("link-brak-wagi")).not.toBeInTheDocument();
       expect(screen.queryByTestId("wynik-dziedziczenia-wagi")).not.toBeInTheDocument();
+    });
+  });
+
+  /**
+   * Przycisk „Oszacuj pozostałe wagi" — ticket 167 (NOWA logika, świadomie MNIEJ PEWNA niż
+   * „Dociągnij wagę"). Bez `window.confirm`: nie jest destrukcyjny.
+   */
+  describe("Przycisk „Oszacuj pozostałe wagi”", () => {
+    it("wywołuje endpoint bez potwierdzenia i pokazuje wynik w toaście oraz link do braków", async () => {
+      const potwierdzenie = vi.spyOn(window, "confirm");
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-oszacuj-wage"));
+
+      await waitFor(() => expect(szacowanWagi).toBe(1));
+      expect(potwierdzenie).not.toHaveBeenCalled();
+      expect(await screen.findByText("Waga oszacowana")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Oszacowano 3 z 4 produktów (pominięto: 0 ręczna poprawka, 0 brak rozmiaru, 1 brak jakiegokolwiek produktu tego rozmiaru z wagą).",
+        ),
+      ).toBeInTheDocument();
+
+      const link = await screen.findByTestId("link-brak-wagi-szacowanie");
+      expect(link).toHaveAttribute("href", "/katalog?status=brak_waga");
+    });
+
+    it("nie pokazuje linku do braków, gdy wszystkie produkty zostały oszacowane", async () => {
+      server.use(
+        http.post("*/api/products/oszacuj-wage", () =>
+          HttpResponse.json({
+            ok: true,
+            wszystkichKandydatow: 2,
+            zaktualizowano: 2,
+            pominietoOverride: 0,
+            pominietoBrakDanych: 0,
+            pominietoBrakSredniej: 0,
+          }),
+        ),
+      );
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-oszacuj-wage"));
+
+      await screen.findByTestId("wynik-szacowania-wagi");
+      expect(screen.queryByTestId("link-brak-wagi-szacowanie")).not.toBeInTheDocument();
+    });
+
+    it("pokazuje błąd, gdy backend odpowie niepowodzeniem", async () => {
+      server.use(
+        http.post("*/api/products/oszacuj-wage", () =>
+          HttpResponse.json({ error: "Baza niedostępna" }, { status: 500 }),
+        ),
+      );
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-oszacuj-wage"));
+
+      expect(await screen.findByText("Błąd szacowania wagi")).toBeInTheDocument();
+      expect(screen.getByText("Baza niedostępna")).toBeInTheDocument();
+    });
+
+    it("unieważnia zapytanie /api/products po udanym oszacowaniu", async () => {
+      const uniewaznienia: unknown[] = [];
+      vi.spyOn(queryClient, "invalidateQueries").mockImplementation((filtry) => {
+        uniewaznienia.push((filtry as { queryKey?: unknown })?.queryKey);
+        return Promise.resolve();
+      });
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-oszacuj-wage"));
+
+      await waitFor(() => expect(szacowanWagi).toBe(1));
+      await waitFor(() => expect(uniewaznienia).toEqual([["/api/products"]]));
     });
   });
 });

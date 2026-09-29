@@ -466,3 +466,97 @@ describe("POST /api/products/dziedzicz-wage", () => {
     });
   });
 });
+
+/**
+ * `POST /api/products/oszacuj-wage` — ticket 167 (NOWA logika, świadomie MNIEJ PEWNA niż
+ * `dziedzicz-wage` wyżej). Trasa woła `oszacujWageWstecznie` (pokryta osobnymi testami
+ * jednostkowymi w `oszacowanie-wagi.test.ts`) — tu sprawdzamy TYLKO warstwę HTTP.
+ */
+describe("POST /api/products/oszacuj-wage", () => {
+  let srodowisko: SrodowiskoTestowe;
+  let token: string;
+
+  beforeAll(async () => {
+    srodowisko = await stworzSrodowiskoTestowe();
+    const odp = await request(srodowisko.app)
+      .post("/api/login")
+      .send({ email: srodowisko.dane.email, password: srodowisko.dane.haslo });
+    token = (odp.body as { token: string }).token;
+  });
+
+  afterAll(() => srodowisko.posprzataj());
+
+  beforeEach(() => {
+    srodowisko.sqlite.prepare("DELETE FROM products").run();
+    srodowisko.sqlite.prepare("DELETE FROM audit_log").run();
+    srodowisko.sqlite.prepare("DELETE FROM manual_overrides").run();
+  });
+
+  const oszacuj = () =>
+    request(srodowisko.app)
+      .post("/api/products/oszacuj-wage")
+      .set("Authorization", `Bearer ${token}`);
+
+  function produktZWaga(kod: string, nadpisania: Partial<NowyProdukt> = {}): NowyProdukt {
+    return {
+      ...produkt("MO1", kod, "Opona testowa"),
+      marka: "MITAS",
+      szerokosc: "16.5",
+      profil: null,
+      srednica: 12,
+      konstrukcja: "Diagonalna",
+      bieznik: "AW",
+      waga: null,
+      ...nadpisania,
+    };
+  }
+
+  it("wymaga tokenu", async () => {
+    expect((await request(srodowisko.app).post("/api/products/oszacuj-wage")).status).toBe(401);
+  });
+
+  it("oszacowuje wagę średnią dla rozmiaru, oznacza flagą wagaSzacowana, i zwraca liczniki", async () => {
+    srodowisko.db
+      .insert(products)
+      .values([
+        // Różne marki i bieżnik — przelicznik ich nie rozróżnia.
+        produktZWaga("Z1", { marka: "MITAS", bieznik: "AW", waga: 70 }),
+        produktZWaga("Z2", { marka: "ALLIANCE", bieznik: "IND", waga: 90 }),
+        produktZWaga("Z3", { waga: null }),
+      ])
+      .run();
+
+    const odp = await oszacuj();
+
+    expect(odp.status).toBe(200);
+    expect(odp.body).toEqual({
+      ok: true,
+      wszystkichKandydatow: 1,
+      zaktualizowano: 1,
+      pominietoOverride: 0,
+      pominietoBrakDanych: 0,
+      pominietoBrakSredniej: 0,
+    });
+
+    const po = listaProduktow(srodowisko.db).find((p) => p.kod === "Z3")!;
+    expect(po.waga).toBe(80);
+    expect(po.wagaSzacowana).toBe(true);
+  });
+
+  it("audytuje przebieg jako oszacowanie_wagi_wsteczne", async () => {
+    srodowisko.db
+      .insert(products)
+      .values([produktZWaga("Z4", { waga: 78 }), produktZWaga("Z5", { waga: null })])
+      .run();
+
+    await oszacuj();
+
+    const wpisy = srodowisko.db.select().from(auditLog).all();
+    expect(wpisy).toHaveLength(1);
+    expect(wpisy[0]).toMatchObject({
+      akcja: "oszacowanie_wagi_wsteczne",
+      encjaTyp: "produkt",
+      encjaId: "wszystkie",
+    });
+  });
+});

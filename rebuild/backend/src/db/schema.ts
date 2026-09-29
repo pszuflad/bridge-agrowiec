@@ -84,6 +84,9 @@ export const products = sqliteTable("products", {
 	// dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu, nie z importu/ręcznie.
 	// Zerowana z powrotem na `false` przy ręcznej edycji pola `waga` (routes/products.ts).
 	wagaAutoUzupelniona: integer("waga_auto_uzupelniona", { mode: "boolean" }).default(false),
+	// Ticket 167 (NOWA logika, nie port) — waga uzupełniona SZACUNKIEM (średnia po samym
+	// rozmiarze, bez marki/bieżnika); mniej pewna niż `wagaAutoUzupelniona`.
+	wagaSzacowana: integer("waga_szacowana", { mode: "boolean" }).default(false),
 	dlugosc: real(),
 	szerokoscPaczki: real("szerokosc_paczki"),
 	wysokosc: real(),

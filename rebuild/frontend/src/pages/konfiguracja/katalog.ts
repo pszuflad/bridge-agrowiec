@@ -68,3 +68,37 @@ export async function dziedziczWage(): Promise<WynikDziedziczeniaWagi> {
 
   return (await odpowiedz.json()) as WynikDziedziczeniaWagi;
 }
+
+/**
+ * Wynik `POST /api/products/oszacuj-wage` — ticket 167 (NOWA logika, świadomie MNIEJ PEWNA
+ * niż dziedziczenie z ticketu 156). Kształt = pola `WynikSzacowaniaWstecznego` z backendu
+ * (`src/import/dziedziczenieWagi.ts`) plus `ok`.
+ */
+export type WynikSzacowaniaWagi = {
+  ok: true;
+  wszystkichKandydatow: number;
+  zaktualizowano: number;
+  pominietoOverride: number;
+  pominietoBrakDanych: number;
+  pominietoBrakSredniej: number;
+};
+
+/**
+ * Klient `POST /api/products/oszacuj-wage` — przycisk „Oszacuj pozostałe wagi" w zakładce
+ * „Katalog". Nie jest destrukcyjne, więc bez `window.confirm` i bez ciała żądania — ten sam
+ * wzorzec co `dziedziczWage()` wyżej.
+ */
+export async function oszacujWage(): Promise<WynikSzacowaniaWagi> {
+  const odpowiedz = await fetch(`${BAZA_API}/api/products/oszacuj-wage`, {
+    method: "POST",
+    headers: naglowki(false),
+    credentials: "include",
+  });
+
+  if (!odpowiedz.ok) {
+    const cialo = (await odpowiedz.json().catch(() => ({}))) as { error?: string };
+    throw new Error(cialo.error || "Nie udało się oszacować wagi");
+  }
+
+  return (await odpowiedz.json()) as WynikSzacowaniaWagi;
+}

@@ -52,6 +52,7 @@ describe("zastosujMigracje", () => {
     "012_staging_polityka.sql",
     "013_selly_products_warianty.sql",
     "014_waga_auto_uzupelniona.sql",
+    "015_waga_szacowana.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 35 tabel i 21 indeksów", () => {
@@ -108,10 +109,11 @@ describe("zastosujMigracje", () => {
    * po cichu (ktoś doda kolumnę do `001`, zapomni o `003`), a wtedy `INSERT … SELECT *`
    * przepisze dane do złych kolumn albo migracja padnie dopiero na produkcji.
    *
-   * Dlatego porównujemy kolumny ŻYWEJ tabeli z kanonem i dopuszczamy DOKŁADNIE cztery różnice:
+   * Dlatego porównujemy kolumny ŻYWEJ tabeli z kanonem i dopuszczamy DOKŁADNIE pięć różnic:
    * `szerokosc` REAL→TEXT (ta migracja), doklejoną `uwaga_cena` (migracja 002), doklejoną
-   * `blokowane_formy_platnosci` (migracja 011) i doklejoną `waga_auto_uzupelniona`
-   * (migracja 014, ticket 155) — wszystkie trzy dochodzą PO przebudowie, 003 ich nie kopiuje.
+   * `blokowane_formy_platnosci` (migracja 011), doklejoną `waga_auto_uzupelniona`
+   * (migracja 014, ticket 155) i doklejoną `waga_szacowana` (migracja 015, ticket 167) —
+   * wszystkie cztery dochodzą PO przebudowie, 003 ich nie kopiuje.
    */
   it("003 nie rozjeżdża `products` z kanonem — zmienia wyłącznie typ `szerokosc`", () => {
     const ddlKanonu = readFileSync(join(KATALOG_SCHEMATU(), "001_schema.sql"), "utf8");
@@ -141,6 +143,8 @@ describe("zastosujMigracje", () => {
       { nazwa: "blokowane_formy_platnosci", typ: "TEXT" },
       // migracja 014 (ticket 155, NOWA logika) — dokładana PO 003, jak wyżej.
       { nazwa: "waga_auto_uzupelniona", typ: "INTEGER" },
+      // migracja 015 (ticket 167, NOWA logika) — dokładana PO 003, jak wyżej.
+      { nazwa: "waga_szacowana", typ: "INTEGER" },
     ];
 
     expect(zywe).toEqual(oczekiwane);
