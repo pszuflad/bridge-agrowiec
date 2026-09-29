@@ -11,7 +11,7 @@ import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs
 import { basename, dirname, join } from "node:path";
 import request from "supertest";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { auditLog, products } from "../src/db/schema.js";
+import { auditLog, manualOverrides, products } from "../src/db/schema.js";
 import { listaProduktow } from "../src/repos/products.js";
 import {
   stworzSrodowiskoTestowe,
@@ -342,6 +342,127 @@ describe("POST /api/products/clear", () => {
     rmSync(join(katalog, `${nazwaBazy}.bak_before_clear_2019-01-01T00-00-00-000Z`), {
       recursive: true,
       force: true,
+    });
+  });
+});
+
+/**
+ * `POST /api/products/dziedzicz-wage` — ticket 156 (NOWA logika, nie port; nadbudowa nad
+ * ticketem 155). Trasa woła dokładnie tę samą funkcję co skrypt CLI `npm run dziedzicz-wage`
+ * (`dziedziczWageWstecznie`, pokryta osobnymi testami jednostkowymi/integracyjnymi w
+ * `dziedziczenie-wagi.test.ts`/`dziedziczenie-wagi.integracja.test.ts`) — tu sprawdzamy TYLKO
+ * warstwę HTTP: autoryzację, kształt odpowiedzi i audyt.
+ */
+describe("POST /api/products/dziedzicz-wage", () => {
+  let srodowisko: SrodowiskoTestowe;
+  let token: string;
+
+  beforeAll(async () => {
+    srodowisko = await stworzSrodowiskoTestowe();
+    const odp = await request(srodowisko.app)
+      .post("/api/login")
+      .send({ email: srodowisko.dane.email, password: srodowisko.dane.haslo });
+    token = (odp.body as { token: string }).token;
+  });
+
+  afterAll(() => srodowisko.posprzataj());
+
+  beforeEach(() => {
+    srodowisko.sqlite.prepare("DELETE FROM products").run();
+    srodowisko.sqlite.prepare("DELETE FROM audit_log").run();
+    srodowisko.sqlite.prepare("DELETE FROM manual_overrides").run();
+  });
+
+  const dziedzicz = () =>
+    request(srodowisko.app)
+      .post("/api/products/dziedzicz-wage")
+      .set("Authorization", `Bearer ${token}`);
+
+  function produktZWaga(kod: string, nadpisania: Partial<NowyProdukt> = {}): NowyProdukt {
+    return {
+      ...produkt("MO1", kod, "Opona testowa"),
+      marka: "MITAS",
+      szerokosc: "16.5",
+      profil: null,
+      srednica: 12,
+      konstrukcja: "Diagonalna",
+      bieznik: "AW",
+      waga: null,
+      ...nadpisania,
+    };
+  }
+
+  it("wymaga tokenu", async () => {
+    expect((await request(srodowisko.app).post("/api/products/dziedzicz-wage")).status).toBe(401);
+  });
+
+  it("uzupełnia pustą wagę dziedziczeniem i zwraca liczniki", async () => {
+    srodowisko.db
+      .insert(products)
+      .values([
+        produktZWaga("Z1", { waga: 78 }),
+        produktZWaga("Z2", { waga: null }),
+      ])
+      .run();
+
+    const odp = await dziedzicz();
+
+    expect(odp.status).toBe(200);
+    expect(odp.body).toEqual({
+      ok: true,
+      wszystkichKandydatow: 1,
+      zaktualizowano: 1,
+      pominietoOverride: 0,
+      pominietoBrakDanych: 0,
+      pominietoBrakDopasowania: 0,
+    });
+
+    const po = listaProduktow(srodowisko.db).find((p) => p.kod === "Z2")!;
+    expect(po.waga).toBe(78);
+    expect(po.wagaAutoUzupelniona).toBe(true);
+  });
+
+  it("pomija produkt chroniony ręczną poprawką wagi", async () => {
+    srodowisko.db
+      .insert(products)
+      .values([produktZWaga("Z3", { waga: 78 }), produktZWaga("Z4", { waga: 0 })])
+      .run();
+    srodowisko.db
+      .insert(manualOverrides)
+      .values({
+        supplierKod: "MO1",
+        supplierProductId: "Z4",
+        fieldName: "waga",
+        overrideValue: "0",
+        createdAt: "2026-09-25T00:00:00.000Z",
+      })
+      .run();
+
+    const odp = await dziedzicz();
+
+    expect(odp.body).toMatchObject({ zaktualizowano: 0, pominietoOverride: 1 });
+    const po = listaProduktow(srodowisko.db).find((p) => p.kod === "Z4")!;
+    expect(po.waga).toBe(0);
+  });
+
+  it("audytuje przebieg z licznikami w szczegółach", async () => {
+    srodowisko.db
+      .insert(products)
+      .values([produktZWaga("Z5", { waga: 78 }), produktZWaga("Z6", { waga: null })])
+      .run();
+
+    await dziedzicz();
+
+    const wpisy = srodowisko.db.select().from(auditLog).all();
+    expect(wpisy).toHaveLength(1);
+    expect(wpisy[0]).toMatchObject({
+      akcja: "dziedziczenie_wagi_wsteczne",
+      encjaTyp: "produkt",
+      encjaId: "wszystkie",
+    });
+    expect(JSON.parse(wpisy[0]!.szczegolyJson!)).toMatchObject({
+      zaktualizowano: 1,
+      wszystkichKandydatow: 1,
     });
   });
 });

@@ -18793,6 +18793,28 @@ components:
       oneOf:
         - {"$ref":"#/components/schemas/POSTProductsClearZadanie"}
         - {"$ref":"#/components/schemas/POSTMaintenanceUsunNieoponyZadanie"}
+    POSTProductsDziedziczWageOdpowiedz200:
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        wszystkichKandydatow:
+          type: "integer"
+        zaktualizowano:
+          type: "integer"
+        pominietoOverride:
+          type: "integer"
+        pominietoBrakDanych:
+          type: "integer"
+        pominietoBrakDopasowania:
+          type: "integer"
+      required:
+        - "ok"
+        - "wszystkichKandydatow"
+        - "zaktualizowano"
+        - "pominietoOverride"
+        - "pominietoBrakDanych"
+        - "pominietoBrakDopasowania"
     POSTProductsOdpowiedz200:
       type: "object"
       properties:
@@ -19967,6 +19989,24 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/DELETEProductsIdOdpowiedz200" } } } }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie", content: { application/json: { schema: { $ref: "#/components/schemas/GETImportArchiveOdpowiedz401" } } } }
+  # ————————————————————————————————————————————————————————————————————————————————————
+  # dziedzicz-wage — ticket 156 (NOWA logika, nie port; nadbudowa nad ticketem 155). Produkcja
+  # nie ma tej trasy — przycisk „Dociągnij wagę" w Konfiguracji → Katalog woła dokładnie tę
+  # samą funkcję co skrypt CLI `npm run dziedzicz-wage`. Kształt odpowiedzi zamrożony
+  # fixture'em RĘCZNIE napisanym (nie nagranym z oryginału — endpoint nie istnieje w produkcji).
+  # ————————————————————————————————————————————————————————————————————————————————————
+  /api/products/dziedzicz-wage:
+    post:
+      tags: [products]
+      summary: "POST /api/products/dziedzicz-wage"
+      description: >-
+        Wsteczne dociągnięcie wagi produktów z pustą/zerową wagą, dziedziczeniem po
+        marce+rozmiarze+bieżniku (ticket 155). Nie jest destrukcyjne — nie wymaga potwierdzenia.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt zamrożony fixture'em (ticket 156)", content: { application/json: { schema: { $ref: "#/components/schemas/POSTProductsDziedziczWageOdpowiedz200" } } } }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Baza niedostępna" }
   # ————————————————————————————————————————————————————————————————————————————————————
   # uwaga_cena — DWIE ścieżki spoza pierwotnego zamrożenia (dopisane w Iteracji 12a).
   #

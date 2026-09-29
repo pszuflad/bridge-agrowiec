@@ -2,7 +2,7 @@
  * Klient `POST /api/products/clear` — zakładka „Katalog" w `/konfiguracja`.
  * Port `:26101-26134` (`deminified/frontend-index.js`).
  */
-import { BAZA_API, naglowki } from "@/lib/api";
+import { BAZA_API, naglowki, zadanie } from "@/lib/api";
 
 /**
  * Backend porównuje tę wartość ŚCIŚLE (`c.body?.potwierdzenie !== "WYCZYSC"`, `:48316`),
@@ -31,4 +31,26 @@ export async function wyczyscKatalog(): Promise<void> {
     const cialo = (await odpowiedz.json().catch(() => ({}))) as { error?: string };
     throw new Error(cialo.error || "Nie udało się wyczyścić katalogu");
   }
+}
+
+/**
+ * Wynik `POST /api/products/dziedzicz-wage` — ticket 156 (NOWA logika, nie port). Kształt = pola
+ * `WynikDziedziczeniaWstecznego` z backendu (`src/import/dziedziczenieWagi.ts`) plus `ok`.
+ */
+export type WynikDziedziczeniaWagi = {
+  ok: true;
+  wszystkichKandydatow: number;
+  zaktualizowano: number;
+  pominietoOverride: number;
+  pominietoBrakDanych: number;
+  pominietoBrakDopasowania: number;
+};
+
+/**
+ * Klient `POST /api/products/dziedzicz-wage` — przycisk „Dociągnij wagę" w zakładce „Katalog".
+ * Nie jest destrukcyjne (tylko uzupełnia braki), więc bez `window.confirm` i bez ciała żądania.
+ */
+export async function dziedziczWage(): Promise<WynikDziedziczeniaWagi> {
+  const odpowiedz = await zadanie("POST", "/api/products/dziedzicz-wage");
+  return (await odpowiedz.json()) as WynikDziedziczeniaWagi;
 }

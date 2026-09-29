@@ -45,11 +45,13 @@ const DOSTAWCA = KONFIG_DOSTAWCOW[0]!;
 let patche: { kod: string; cialo: Record<string, unknown> }[] = [];
 let czyszczenia: Record<string, unknown>[] = [];
 let usunieciaNieOpon = 0;
+let dziedziczeniaWagi = 0;
 
 function zamockujApi(opcje: { odpowiedzPatcha?: () => Response } = {}) {
   patche = [];
   czyszczenia = [];
   usunieciaNieOpon = 0;
+  dziedziczeniaWagi = 0;
   server.use(
     http.get("*/api/config", () => HttpResponse.json(KONFIGURACJA)),
     http.get("*/api/admin/supplier-config", () =>
@@ -78,6 +80,17 @@ function zamockujApi(opcje: { odpowiedzPatcha?: () => Response } = {}) {
         usuniete: 3,
         perDostawca: { MO4: 1, MO5: 2 },
         przyklady: ["MO4/N1: Zawory komplet"],
+      });
+    }),
+    http.post("*/api/products/dziedzicz-wage", () => {
+      dziedziczeniaWagi += 1;
+      return HttpResponse.json({
+        ok: true,
+        wszystkichKandydatow: 5,
+        zaktualizowano: 2,
+        pominietoOverride: 1,
+        pominietoBrakDanych: 1,
+        pominietoBrakDopasowania: 1,
       });
     }),
   );
@@ -433,5 +446,54 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
 
     expect(await screen.findByText("Błąd czyszczenia")).toBeInTheDocument();
     expect(screen.getByText("Wymagane potwierdzenie")).toBeInTheDocument();
+  });
+
+  /**
+   * Przycisk „Dociągnij wagę" — ticket 156 (NOWA logika, nie port; nadbudowa nad ticketem 155).
+   * Bez `window.confirm`: nie jest destrukcyjny.
+   */
+  describe("Przycisk „Dociągnij wagę”", () => {
+    it("wywołuje endpoint bez potwierdzenia i pokazuje wynik w toaście", async () => {
+      const potwierdzenie = vi.spyOn(window, "confirm");
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
+
+      await waitFor(() => expect(dziedziczeniaWagi).toBe(1));
+      expect(potwierdzenie).not.toHaveBeenCalled();
+      expect(await screen.findByText("Waga dociągnięta")).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Zaktualizowano 2 z 5 produktów (pominięto: 1 ręczna poprawka, 1 brak marki/rozmiaru, 1 brak pasującego produktu).",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("unieważnia zapytanie /api/products po udanym dociągnięciu", async () => {
+      const uniewaznienia: unknown[] = [];
+      vi.spyOn(queryClient, "invalidateQueries").mockImplementation((filtry) => {
+        uniewaznienia.push((filtry as { queryKey?: unknown })?.queryKey);
+        return Promise.resolve();
+      });
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
+
+      await waitFor(() => expect(dziedziczeniaWagi).toBe(1));
+      await waitFor(() => expect(uniewaznienia).toEqual([["/api/products"]]));
+    });
+
+    it("pokazuje błąd, gdy backend odpowie niepowodzeniem", async () => {
+      server.use(
+        http.post("*/api/products/dziedzicz-wage", () =>
+          HttpResponse.json({ error: "Baza niedostępna" }, { status: 500 }),
+        ),
+      );
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
+
+      expect(await screen.findByText("Błąd dociągania wagi")).toBeInTheDocument();
+    });
   });
 });

@@ -13,7 +13,7 @@
  * oryginału (odstępstwo D3 ticketu 18 zniesione).
  */
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Scale, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import { KLUCZ_KOLUMN_KATALOGU, odczytajKV, zapiszKV } from "@/lib/magazynKV";
 import { KOLUMNY, KOLUMNY_DOMYSLNE } from "../katalog/kolumny";
-import { TEKST_POTWIERDZENIA, wyczyscKatalog } from "./katalog";
+import { dziedziczWage, TEKST_POTWIERDZENIA, wyczyscKatalog } from "./katalog";
 
 export function Katalog() {
   const [wybrane, ustawWybrane] = useState<Set<string>>(new Set(KOLUMNY_DOMYSLNE));
@@ -29,8 +29,37 @@ export function Katalog() {
   const [komunikat, ustawKomunikat] = useState<string | null>(null);
   const [zapisywanie, ustawZapisywanie] = useState(false);
   const [czyszczenie, ustawCzyszczenie] = useState(false);
+  const [dziedziczenie, ustawDziedziczenie] = useState(false);
   const { toast } = useToast();
   const klientZapytan = useQueryClient();
+
+  /**
+   * Wsteczne dociągnięcie wagi — ticket 156 (NOWA logika, nie port; nadbudowa nad ticketem 155).
+   * Bez `window.confirm`: operacja tylko uzupełnia braki, nie kasuje ani nie nadpisuje niczego
+   * (ręczne poprawki i już wypełniona waga są chronione po stronie backendu).
+   */
+  async function uzupelnijWage() {
+    ustawDziedziczenie(true);
+    try {
+      const wynik = await dziedziczWage();
+      toast({
+        title: "Waga dociągnięta",
+        description:
+          `Zaktualizowano ${wynik.zaktualizowano} z ${wynik.wszystkichKandydatow} produktów ` +
+          `(pominięto: ${wynik.pominietoOverride} ręczna poprawka, ${wynik.pominietoBrakDanych} brak marki/rozmiaru, ` +
+          `${wynik.pominietoBrakDopasowania} brak pasującego produktu).`,
+      });
+      void klientZapytan.invalidateQueries({ queryKey: ["/api/products"] });
+    } catch (blad) {
+      toast({
+        title: "Błąd dociągania wagi",
+        description: blad instanceof Error ? blad.message : String(blad),
+        variant: "destructive",
+      });
+    } finally {
+      ustawDziedziczenie(false);
+    }
+  }
 
   /**
    * Czyszczenie CAŁEGO katalogu — port `:26101-26134`.
@@ -176,6 +205,24 @@ export function Katalog() {
               {komunikat}
             </p>
           ) : null}
+
+          <div className="border-t pt-3">
+            <h3 className="text-sm font-medium mb-0.5">Dziedziczenie wagi</h3>
+            <p className="text-xs text-muted-foreground mb-2">
+              Uzupełnia brakującą lub zerową wagę produktów na podstawie innych produktów tej
+              samej marki, rozmiaru i bieżnika. Nie nadpisuje wagi już wypełnionej ani wpisanej
+              ręcznie.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => void uzupelnijWage()}
+              disabled={dziedziczenie}
+              data-testid="button-dziedzicz-wage"
+            >
+              <Scale className="w-4 h-4 mr-2" />
+              {dziedziczenie ? "Dociąganie…" : "Dociągnij wagę"}
+            </Button>
+          </div>
 
           <div className="border-t pt-3">
             <Button
