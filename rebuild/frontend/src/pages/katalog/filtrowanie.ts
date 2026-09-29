@@ -35,6 +35,11 @@ export type Produkt = {
    * automatycznie dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu.
    */
   wagaAutoUzupelniona?: boolean;
+  /**
+   * Ticket 167 (NOWA logika, nie port): `true`, gdy `waga` uzupełniona SZACUNKIEM (średnia po
+   * samym rozmiarze, bez marki/bieżnika) — mniej pewne niż `wagaAutoUzupelniona`.
+   */
+  wagaSzacowana?: boolean;
   [pole: string]: unknown;
 };
 

@@ -12,7 +12,7 @@
  * „Radialna"/„Diagonalna", czerwone zero w stanie i kreska `—` zamiast pustki.
  */
 import type { ReactNode } from "react";
-import { Info } from "lucide-react";
+import { AlertTriangle, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Produkt } from "./filtrowanie";
 
@@ -265,19 +265,38 @@ export function formatujKomorke(produkt: Produkt, klucz: string): ReactNode {
    * Ticket 155 — NOWA logika, nie odtworzenie produkcji. Gdy `waga` została uzupełniona
    * automatycznie (dziedziczenie po marce+rozmiarze+bieżniku), obok wartości pokazujemy małą
    * ikonę informacyjną z tooltipem — decyzja użytkownika: bez stałego Badge, tylko ikona/tooltip.
+   *
+   * Ticket 167 — NOWY, jeszcze mniej pewny wariant: `wagaSzacowana` (średnia po samym
+   * rozmiarze, bez marki/bieżnika). Osobna ikona (amber `AlertTriangle`, nie `Info`) i osobny
+   * tekst tooltipa — Ania ma widzieć od razu, że to SZACUNEK, nie dokładne dopasowanie.
+   * Priorytet: `wagaAutoUzupelniona` (dokładniejsze) wygrywa, gdyby jakimś trafem obie flagi
+   * były kiedyś ustawione naraz (nie powinno się zdarzyć — backend ustawia tylko jedną).
    */
   if (klucz === "waga") {
     if (wartosc === null || wartosc === undefined || wartosc === "") return <Kreska />;
-    if (!produkt.wagaAutoUzupelniona) return String(wartosc);
-    return (
-      <span
-        className="inline-flex items-center gap-1"
-        title="Waga uzupełniona automatycznie na podstawie podobnego produktu (marka, rozmiar, bieżnik)"
-      >
-        {String(wartosc)}
-        <Info className="h-3 w-3 text-muted-foreground shrink-0" />
-      </span>
-    );
+    if (produkt.wagaAutoUzupelniona) {
+      return (
+        <span
+          className="inline-flex items-center gap-1"
+          title="Waga uzupełniona automatycznie na podstawie podobnego produktu (marka, rozmiar, bieżnik)"
+        >
+          {String(wartosc)}
+          <Info className="h-3 w-3 text-muted-foreground shrink-0" />
+        </span>
+      );
+    }
+    if (produkt.wagaSzacowana) {
+      return (
+        <span
+          className="inline-flex items-center gap-1"
+          title="Waga SZACOWANA na podstawie średniej dla tego rozmiaru w katalogu — nie potwierdzona"
+        >
+          {String(wartosc)}
+          <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />
+        </span>
+      );
+    }
+    return String(wartosc);
   }
 
   if (klucz === "status") {

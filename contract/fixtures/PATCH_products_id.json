@@ -58,6 +58,7 @@
     "dostepnosc": null,
     "waga": null,
     "wagaAutoUzupelniona": false,
+    "wagaSzacowana": false,
     "dlugosc": 17,
     "szerokoscPaczki": 31,
     "wysokosc": 17,

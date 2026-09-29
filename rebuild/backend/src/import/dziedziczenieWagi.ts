@@ -204,3 +204,136 @@ export function dziedziczWageWstecznie(db: Baza, sqlite: BazaSqlite): WynikDzied
 
   return wynik;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Szacowanie wagi po samym rozmiarze — ticket 167-FEATURE-oszacuj-pozostale-wagi.
+//
+// ⚠ NOWA LOGIKA, ŚWIADOMIE MNIEJ PEWNA niż dziedziczenie wyżej. Dla produktów, którym
+// `dziedziczWageWstecznie()` nie znalazła żadnego identycznego „bliźniaka" (marka+rozmiar+
+// bieżnik), użytkownik zaakceptował zgrubny szacunek: średnią wagę WSZYSTKICH innych
+// produktów w katalogu o tym samym rozmiarze (szerokość+profil+średnica), bez względu na
+// markę, bieżnik i konstrukcję. Decyzja użytkownika, 2026-09-29.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Klucz samego rozmiaru — bez marki, bieżnika i konstrukcji (decyzja 1 z Q&A ticketu 167). */
+export type KluczSamegoRozmiaru = {
+  szerokosc: string;
+  profil: number | null;
+  srednica: number | null;
+};
+
+/**
+ * Jak {@link kluczZRekordu}, ale bez marki — sam rozmiar wystarczy do szacunku. `null`, gdy
+ * brak znormalizowanej szerokości (bez niej dopasowanie nie jest wiarygodne, ten sam powód
+ * co w `kluczZRekordu`).
+ */
+export function kluczRozmiaru(rekord: Record<string, unknown>): KluczSamegoRozmiaru | null {
+  const szerokosc = rekord.szerokosc;
+  if (szerokosc === null || szerokosc === undefined || szerokosc === "") return null;
+
+  const liczbaLubNull = (v: unknown): number | null =>
+    v === null || v === undefined || v === "" ? null : Number(v);
+
+  return {
+    szerokosc: String(szerokosc),
+    profil: liczbaLubNull(rekord.profil),
+    srednica: liczbaLubNull(rekord.srednica),
+  };
+}
+
+/**
+ * Średnia waga wśród produktów pasujących SAMYM rozmiarem (bez marki/bieżnika/konstrukcji),
+ * zaokrąglona do liczby całkowitej. `null`, gdy w katalogu nie ma ŻADNEGO produktu tego
+ * rozmiaru z niepustą/niezerową wagą (decyzja 1: przelicznik działa tylko wtedy).
+ */
+export function sredniaWagaDlaRozmiaru(db: Baza, klucz: KluczSamegoRozmiaru): number | null {
+  const warunki = [
+    eq(products.szerokosc, klucz.szerokosc),
+    klucz.profil === null ? isNull(products.profil) : eq(products.profil, klucz.profil),
+    klucz.srednica === null ? isNull(products.srednica) : eq(products.srednica, klucz.srednica),
+    sql`${products.waga} IS NOT NULL AND ${products.waga} <> 0`,
+  ];
+
+  const kandydaci = db
+    .select({ waga: products.waga })
+    .from(products)
+    .where(and(...warunki))
+    .all();
+
+  if (kandydaci.length === 0) return null;
+  const suma = kandydaci.reduce((acc, k) => acc + (k.waga ?? 0), 0);
+  return Math.round(suma / kandydaci.length);
+}
+
+/** Wynik jednego przebiegu {@link oszacujWageWstecznie}. */
+export type WynikSzacowaniaWstecznego = {
+  wszystkichKandydatow: number;
+  zaktualizowano: number;
+  pominietoOverride: number;
+  pominietoBrakDanych: number;
+  pominietoBrakSredniej: number;
+};
+
+/**
+ * Wsteczne oszacowanie wagi (decyzja 3 z Q&A ticketu 167) — druga, świadomie osobna trasa dla
+ * produktów, którym `dziedziczWageWstecznie()` (dokładne dopasowanie) nic nie znalazła. Ten sam
+ * wzorzec ochrony co tam: pomija chronione ręczną poprawką, jedna transakcja.
+ */
+export function oszacujWageWstecznie(db: Baza, sqlite: BazaSqlite): WynikSzacowaniaWstecznego {
+  const kandydaci = db
+    .select()
+    .from(products)
+    .where(sql`${products.waga} IS NULL OR ${products.waga} = 0`)
+    .all();
+
+  const wynik: WynikSzacowaniaWstecznego = {
+    wszystkichKandydatow: kandydaci.length,
+    zaktualizowano: 0,
+    pominietoOverride: 0,
+    pominietoBrakDanych: 0,
+    pominietoBrakSredniej: 0,
+  };
+
+  const przetworz = sqlite.transaction(() => {
+    for (const produkt of kandydaci) {
+      if (!jestPustaWaga(produkt.waga)) continue;
+
+      const overrideWagi = db
+        .select({ id: manualOverrides.id })
+        .from(manualOverrides)
+        .where(
+          and(
+            eq(manualOverrides.supplierKod, produkt.dostawca),
+            eq(manualOverrides.supplierProductId, produkt.kod),
+            eq(manualOverrides.fieldName, "waga"),
+          ),
+        )
+        .get();
+      if (overrideWagi) {
+        wynik.pominietoOverride++;
+        continue;
+      }
+
+      const klucz = kluczRozmiaru(produkt as unknown as Record<string, unknown>);
+      if (!klucz) {
+        wynik.pominietoBrakDanych++;
+        continue;
+      }
+
+      const waga = sredniaWagaDlaRozmiaru(db, klucz);
+      if (waga === null) {
+        wynik.pominietoBrakSredniej++;
+        continue;
+      }
+
+      db.update(products)
+        .set({ waga, wagaSzacowana: true })
+        .where(eq(products.id, produkt.id))
+        .run();
+      wynik.zaktualizowano++;
+    }
+  });
+  przetworz();
+
+  return wynik;
+}

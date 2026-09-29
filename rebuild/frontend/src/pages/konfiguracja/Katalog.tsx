@@ -16,9 +16,14 @@
  * uruchomieniu link „zobacz je w katalogu" (ticket 166) prowadzi do `/katalog?status=brak_waga`,
  * żeby Ania mogła ręcznie uzupełnić produkty, dla których nie znalazł się żaden pasujący
  * „bliźniak" z wagą w katalogu.
+ *
+ * Przycisk „Oszacuj pozostałe wagi" (ticket 167) — NOWA logika, ŚWIADOMIE MNIEJ PEWNA niż
+ * „Dociągnij wagę": liczy średnią wagę wszystkich innych produktów TEGO SAMEGO rozmiaru, bez
+ * względu na markę i bieżnik. Osobny przycisk, osobna trasa — użytkownik uruchamia to świadomie,
+ * PO dokładnym dopasowaniu, bo to jest dopiero drugi, mniej dokładny krok.
  */
 import { useQueryClient } from "@tanstack/react-query";
-import { Scale, Trash2 } from "lucide-react";
+import { AlertTriangle, Scale, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 
@@ -27,7 +32,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import { KLUCZ_KOLUMN_KATALOGU, odczytajKV, zapiszKV } from "@/lib/magazynKV";
 import { KOLUMNY, KOLUMNY_DOMYSLNE } from "../katalog/kolumny";
-import { dziedziczWage, TEKST_POTWIERDZENIA, wyczyscKatalog, type WynikDziedziczeniaWagi } from "./katalog";
+import {
+  dziedziczWage,
+  oszacujWage,
+  TEKST_POTWIERDZENIA,
+  wyczyscKatalog,
+  type WynikDziedziczeniaWagi,
+  type WynikSzacowaniaWagi,
+} from "./katalog";
 
 export function Katalog() {
   const [wybrane, ustawWybrane] = useState<Set<string>>(new Set(KOLUMNY_DOMYSLNE));
@@ -39,6 +51,8 @@ export function Katalog() {
   const [wynikDziedziczenia, ustawWynikDziedziczenia] = useState<WynikDziedziczeniaWagi | null>(
     null,
   );
+  const [szacowanie, ustawSzacowanie] = useState(false);
+  const [wynikSzacowania, ustawWynikSzacowania] = useState<WynikSzacowaniaWagi | null>(null);
   const { toast } = useToast();
   const klientZapytan = useQueryClient();
 
@@ -72,6 +86,35 @@ export function Katalog() {
       });
     } finally {
       ustawDziedziczenie(false);
+    }
+  }
+
+  /**
+   * Wsteczne OSZACOWANIE wagi — ticket 167 (NOWA logika, świadomie mniej pewna niż
+   * „Dociągnij wagę"). Bez `window.confirm`: nie kasuje ani nie nadpisuje niczego.
+   */
+  async function oszacuj() {
+    ustawSzacowanie(true);
+    try {
+      const wynik = await oszacujWage();
+      ustawWynikSzacowania(wynik);
+      toast({
+        title: "Waga oszacowana",
+        description:
+          `Oszacowano ${wynik.zaktualizowano} z ${wynik.wszystkichKandydatow} produktów ` +
+          `(pominięto: ${wynik.pominietoOverride} ręczna poprawka, ${wynik.pominietoBrakDanych} brak rozmiaru, ` +
+          `${wynik.pominietoBrakSredniej} brak jakiegokolwiek produktu tego rozmiaru z wagą).`,
+      });
+      void klientZapytan.invalidateQueries({ queryKey: ["/api/products"] });
+    } catch (blad) {
+      ustawWynikSzacowania(null);
+      toast({
+        title: "Błąd szacowania wagi",
+        description: blad instanceof Error ? blad.message : String(blad),
+        variant: "destructive",
+      });
+    } finally {
+      ustawSzacowanie(false);
     }
   }
 
@@ -257,6 +300,47 @@ export function Katalog() {
                 ) : null}
               </p>
             ) : null}
+
+            <div className="mt-3 pt-3 border-t border-dashed">
+              <p className="text-xs text-muted-foreground mb-2">
+                Dla produktów bez pasującego „bliźniaka" — zgrubny szacunek: średnia wagi
+                wszystkich innych produktów tego samego rozmiaru w katalogu, bez względu na markę
+                i bieżnik. Oznaczane w tabeli jako SZACUNEK, nie potwierdzona waga.
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => void oszacuj()}
+                disabled={szacowanie}
+                data-testid="button-oszacuj-wage"
+              >
+                <AlertTriangle className="w-4 h-4 mr-2" />
+                {szacowanie ? "Szacowanie…" : "Oszacuj pozostałe wagi"}
+              </Button>
+
+              {wynikSzacowania ? (
+                <p
+                  className="text-[11px] text-muted-foreground mt-2"
+                  data-testid="wynik-szacowania-wagi"
+                >
+                  Oszacowano {wynikSzacowania.zaktualizowano} z{" "}
+                  {wynikSzacowania.wszystkichKandydatow} produktów.{" "}
+                  {wynikSzacowania.zaktualizowano < wynikSzacowania.wszystkichKandydatow ? (
+                    <>
+                      Pozostało {wynikSzacowania.wszystkichKandydatow - wynikSzacowania.zaktualizowano}{" "}
+                      bez wagi (brak jakiegokolwiek produktu tego rozmiaru z wagą w katalogu) —{" "}
+                      <Link
+                        href="/katalog?status=brak_waga"
+                        className="underline hover:text-foreground"
+                        data-testid="link-brak-wagi-szacowanie"
+                      >
+                        zobacz je w katalogu
+                      </Link>
+                      .
+                    </>
+                  ) : null}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <div className="border-t pt-3">

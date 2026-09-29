@@ -17576,6 +17576,8 @@ components:
           type: "integer"
         wagaAutoUzupelniona:
           type: "boolean"
+        wagaSzacowana:
+          type: "boolean"
         dlugosc:
           type: "integer"
         szerokoscPaczki:
@@ -17670,6 +17672,7 @@ components:
         - "dostepnosc"
         - "waga"
         - "wagaAutoUzupelniona"
+        - "wagaSzacowana"
         - "dlugosc"
         - "szerokoscPaczki"
         - "wysokosc"
@@ -18584,6 +18587,8 @@ components:
           nullable: true
         wagaAutoUzupelniona:
           type: "boolean"
+        wagaSzacowana:
+          type: "boolean"
         dlugosc:
           type: "integer"
         szerokoscPaczki:
@@ -18677,6 +18682,7 @@ components:
         - "dostepnosc"
         - "waga"
         - "wagaAutoUzupelniona"
+        - "wagaSzacowana"
         - "dlugosc"
         - "szerokoscPaczki"
         - "wysokosc"
@@ -18825,6 +18831,28 @@ components:
       required:
         - "ok"
         - "dodano"
+    POSTProductsOszacujWageOdpowiedz200:
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        wszystkichKandydatow:
+          type: "integer"
+        zaktualizowano:
+          type: "integer"
+        pominietoOverride:
+          type: "integer"
+        pominietoBrakDanych:
+          type: "integer"
+        pominietoBrakSredniej:
+          type: "integer"
+      required:
+        - "ok"
+        - "wszystkichKandydatow"
+        - "zaktualizowano"
+        - "pominietoOverride"
+        - "pominietoBrakDanych"
+        - "pominietoBrakSredniej"
     POSTProductsZadanie:
       type: "array"
       items:
@@ -20005,6 +20033,25 @@ paths:
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
         "200": { description: "OK — kształt zamrożony fixture'em (ticket 156)", content: { application/json: { schema: { $ref: "#/components/schemas/POSTProductsDziedziczWageOdpowiedz200" } } } }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Baza niedostępna" }
+  # ————————————————————————————————————————————————————————————————————————————————————
+  # oszacuj-wage — ticket 167 (NOWA logika, nie port; nadbudowa nad 155/156). Produkcja nie ma
+  # tej trasy — przycisk „Oszacuj pozostałe wagi" w Konfiguracji → Katalog woła dokładnie tę
+  # samą funkcję co skrypt CLI `npm run oszacuj-wage`. Kształt odpowiedzi zamrożony fixture'em
+  # RĘCZNIE napisanym (nie nagranym z oryginału — endpoint nie istnieje w produkcji).
+  # ————————————————————————————————————————————————————————————————————————————————————
+  /api/products/oszacuj-wage:
+    post:
+      tags: [products]
+      summary: "POST /api/products/oszacuj-wage"
+      description: >-
+        Wsteczne OSZACOWANIE wagi (średnia po samym rozmiarze, bez marki/bieżnika) dla
+        produktów, którym dokładne dopasowanie (ticket 155) nic nie znalazło. Nie jest
+        destrukcyjne — nie wymaga potwierdzenia.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt zamrożony fixture'em (ticket 167)", content: { application/json: { schema: { $ref: "#/components/schemas/POSTProductsOszacujWageOdpowiedz200" } } } }
         "401": { description: "Nieautoryzowany" }
         "500": { description: "Baza niedostępna" }
   # ————————————————————————————————————————————————————————————————————————————————————
