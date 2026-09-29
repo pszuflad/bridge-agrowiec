@@ -28,6 +28,9 @@ const wiersze = sparsujWierszeNaprawy(csvText);
 
 const { sqlite, db } = otworzBaze(dbPath);
 try {
+  // `manual_overrides`, do którego pisze naprawNazwySklejone(), musi już istnieć w schemacie —
+  // uruchomienie migracji jest bezpieczne (idempotentne) i chroni przed zapisem na bazie
+  // ze starszym schematem niż ten kod (wzorzec przejęty z `dziedzicz-wage.ts`).
   zastosujMigracje(sqlite);
 
   const wynik = naprawNazwySklejone(db, wiersze, {

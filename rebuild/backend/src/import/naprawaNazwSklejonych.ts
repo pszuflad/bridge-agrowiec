@@ -45,10 +45,13 @@ export type WynikNaprawyNazwy = {
 export function naprawNazwySklejone(
   db: Baza,
   wiersze: WierszNaprawyNazwy[],
-  opts: { reason: string; createdAt?: string } = { reason: "import CSV — naprawa nazw sklejonych" },
+  opts: { reason: string; createdAt?: string },
 ): WynikNaprawyNazwy {
   let przetworzono = 0;
   let pominietoPusteNazwy = 0;
+  // Jeden wspólny znacznik czasu dla całego przebiegu (nie per wiersz) — pozwala potem
+  // odróżnić "ten sam import" po `createdAt`, gdyby ktoś tego szukał w manual_overrides.
+  const createdAt = opts.createdAt ?? new Date().toISOString();
 
   for (const wiersz of wiersze) {
     const nazwa = wiersz.nazwa.trim();
@@ -64,7 +67,7 @@ export function naprawNazwySklejone(
       overrideValue: nazwa,
       reason: opts.reason,
       createdBy: null,
-      createdAt: opts.createdAt ?? new Date().toISOString(),
+      createdAt,
     });
     przetworzono++;
   }

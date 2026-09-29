@@ -55,6 +55,23 @@ przykładowa kolidująca para (MO1, `kod_importu=326606`) ma teraz dwie różne,
 
 None.
 
+## Review fixes applied
+
+Code review (`review.md`): 0 BLOCKER / 2 SHOULD-FIX / 2 NICE-TO-HAVE.
+
+- **SHOULD-FIX** — dopisano komentarz w `scripts/napraw-nazwy-sklejone.ts` uzasadniający wywołanie
+  `zastosujMigracje()` (chroni przed zapisem na bazie ze starszym schematem; wzorzec z
+  `dziedzicz-wage.ts`). ✓ Naprawione.
+- **SHOULD-FIX** — brak automatycznego przypomnienia o ręcznym uruchomieniu skryptu na
+  produkcji/stagingu po wdrożeniu PR-a. Pozostawione jako `Follow-up` (niżej) — ryzyko niskie,
+  już jawnie odnotowane, bez oczywistego taniego rozwiązania kodowego w zakresie tego ticketu.
+- **NICE-TO-HAVE** — usunięto martwą domyślną wartość `opts.reason` w `naprawNazwySklejone()`
+  (pole `reason` jest teraz wymagane, zawsze i tak nadpisywane przez wywołujących). ✓ Naprawione.
+- **NICE-TO-HAVE** — `createdAt` liczony teraz raz na cały przebieg importu, nie per wiersz —
+  ułatwia odróżnienie "ten sam bieg" po `createdAt` w `manual_overrides`. ✓ Naprawione.
+
+Po poprawkach: lint/typecheck zielone, 7/7 nowych testów zielone.
+
 ## Follow-up
 
 - Stały mechanizm/endpoint do powtarzalnego importu poprawek CSV — świadomie odłożone (decyzja
