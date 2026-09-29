@@ -61,6 +61,10 @@ export function Katalog() {
       });
       void klientZapytan.invalidateQueries({ queryKey: ["/api/products"] });
     } catch (blad) {
+      // Kasujemy wynik POPRZEDNIEGO udanego przebiegu — inaczej stary komunikat i link
+      // zostają widoczne obok toastu błędu, sugerując stan nieaktualny wobec tego, co
+      // faktycznie się stało (albo nie stało) w tym wywołaniu.
+      ustawWynikDziedziczenia(null);
       toast({
         title: "Błąd dociągania wagi",
         description: blad instanceof Error ? blad.message : String(blad),

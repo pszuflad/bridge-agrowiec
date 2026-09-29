@@ -31,10 +31,22 @@ zostało bez wagi.
   ustawia filtr), `test/konfiguracja.admin.test.tsx` (+1 rozszerzony test o asercję linku,
   +1 nowy: link znika, gdy wszystko zaktualizowane).
 
+## Review fixes applied
+
+Reviewer: 0 BLOCKER / 1 SHOULD-FIX / 2 NICE-TO-HAVE.
+
+- **SHOULD-FIX (naprawione):** przy błędzie `dziedziczWage()` po wcześniejszym sukcesie stary
+  `wynikDziedziczenia` (i link) zostawały widoczne obok toastu błędu, sugerując nieaktualny
+  stan. Dodano `ustawWynikDziedziczenia(null)` w `catch`. Nowy test:
+  „kasuje wynik poprzedniego przebiegu, gdy kolejne wywołanie się nie powiedzie".
+- **NICE-TO-HAVE (potwierdzone jako OK, bez zmian):** próg pustości wagi we `filtrujStatus`
+  zweryfikowany jako bajt-w-bajt identyczny z backendowym `jestPustaWaga()`; warunek widoczności
+  linku poprawnie chowa go przy `wszystkichKandydatow === 0`.
+
 ## Test results
 
 - Frontend: `npm run lint && npm run typecheck && npm run build && npm test` —
-  **1004/1004 zielone** (0 regresji, +3 nowe testy netto).
+  **1005/1005 zielone** (0 regresji, +4 nowe testy netto).
 - Backend: nietknięty tym ticketem, bramki nie uruchamiane ponownie.
 
 ## Breaking changes

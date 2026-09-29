@@ -523,5 +523,24 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
       // Komunikat wyciągnięty z ciała odpowiedzi (`{error: "..."}"), nie surowy status+JSON.
       expect(screen.getByText("Baza niedostępna")).toBeInTheDocument();
     });
+
+    /** Ticket 166, review fix: wynik poprzedniego SUKCESU nie może przeżyć kolejnego błędu. */
+    it("kasuje wynik poprzedniego przebiegu, gdy kolejne wywołanie się nie powiedzie", async () => {
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-dziedzicz-wage"));
+      await screen.findByTestId("link-brak-wagi");
+
+      server.use(
+        http.post("*/api/products/dziedzicz-wage", () =>
+          HttpResponse.json({ error: "Baza niedostępna" }, { status: 500 }),
+        ),
+      );
+      await userEvent.click(screen.getByTestId("button-dziedzicz-wage"));
+
+      await screen.findByText("Błąd dociągania wagi");
+      expect(screen.queryByTestId("link-brak-wagi")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("wynik-dziedziczenia-wagi")).not.toBeInTheDocument();
+    });
   });
 });
