@@ -150,6 +150,12 @@ function linieWierszaKonfliktu(wiersz: WierszKonfliktu): string[] {
   ];
 }
 
+/** Wartość pola wiersza konfliktu do zestawienia „było → jest"; brak = „brak". */
+function wartoscPola(wiersz: WierszKonfliktu, etykieta: string): string {
+  const v = wiersz[etykieta];
+  return v == null || v === "" ? "brak" : String(v);
+}
+
 /** Pięć linii opisu kandydata — `:87-92` w oryginale. */
 function linieKandydata(c: KandydatPrzegladu): string[] {
   return [
@@ -375,15 +381,27 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   </p>
                   {przeglad.sourceConflict ? (
                     <>
-                      <p
+                      <div
                         className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
                         data-testid="roznice-wierszy"
                       >
-                        Różnią się:{" "}
-                        {przeglad.sourceConflict.different.join(", ") ||
-                          "danymi zapisanymi w pliku"}
-                        .
-                      </p>
+                        <strong className="block">Niezgodne dane (pierwszy → drugi wiersz):</strong>
+                        {przeglad.sourceConflict.different.length ? (
+                          <ul className="mt-1 space-y-0.5">
+                            {przeglad.sourceConflict.different.map((etykieta) => (
+                              <li key={etykieta} data-testid="roznica-pola">
+                                {etykieta.charAt(0).toUpperCase() + etykieta.slice(1)}:{" "}
+                                <span className="font-semibold">
+                                  {wartoscPola(przeglad.sourceConflict!.earlier, etykieta)} →{" "}
+                                  {wartoscPola(przeglad.sourceConflict!.later, etykieta)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="mt-1">Dane zapisane w pliku.</p>
+                        )}
+                      </div>
                       <KartaPorownania
                         tytul="Pierwszy wiersz"
                         testId="karta-wiersz-pierwszy"
@@ -402,10 +420,9 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                     </p>
                   )}
                   <p className="my-2.5">
-                    Jeśli to jedna i ta sama opona, połącz wiersze w jeden produkt — dane
-                    (w tym stan i cena) zostaną z drugiego wiersza. Jeśli to dwie różne opony,
-                    rozdziel je — każdy wiersz dostanie osobny produkt z kodem z pliku. Po
-                    wyborze produkt trafia od razu do katalogu.
+                    <strong>Połącz</strong> — to jedna opona: powstanie jeden produkt z danymi z
+                    drugiego wiersza. <strong>Rozdziel</strong> — to dwie opony: każdy wiersz
+                    dostanie osobny produkt (kod z pliku). Produkt trafia od razu do katalogu.
                   </p>
                 </>
               ) : null}

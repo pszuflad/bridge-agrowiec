@@ -50,6 +50,8 @@ export type WierszKonfliktu = {
   DOT?: string | null;
   "cena zakupu"?: number | string | null;
   stan?: number | string | null;
+  /** Pozostałe pola opisowe wiersza (`kod dostawcy`, `marka`, `model`, `rozmiar`). */
+  [etykieta: string]: string | number | null | undefined;
 };
 
 export type KonfliktZrodla = {

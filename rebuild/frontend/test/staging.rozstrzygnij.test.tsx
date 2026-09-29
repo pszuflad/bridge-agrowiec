@@ -446,9 +446,12 @@ describe("Staging — okno „Rozstrzygnij”", () => {
           "W bieżącym pliku są dwa wiersze przypisane do jednej karty, ale ich dane się różnią. To NIE oznacza automatycznie, że EAN jest inny.",
         ),
       ).toBeInTheDocument();
-      expect(within(okno).getByTestId("roznice-wierszy")).toHaveTextContent(
-        "Różnią się: EAN, cena zakupu, stan.",
-      );
+      const roznice = within(okno).getAllByTestId("roznica-pola").map((e) => e.textContent);
+      expect(roznice).toEqual([
+        "EAN: 8903094020614 → 8903094020621",
+        "Cena zakupu: 1850 → 1910",
+        "Stan: 13 → 1",
+      ]);
 
       const pierwszy = within(okno).getByTestId("karta-wiersz-pierwszy");
       expect(pierwszy).toHaveTextContent("Pierwszy wiersz");
@@ -461,7 +464,7 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       expect(drugi).toHaveTextContent("Kod w pliku: 520197");
       expect(drugi).toHaveTextContent("Cena zakupu: 1910 · Stan: 1");
 
-      expect(within(okno).getByText(/Po wyborze produkt trafia od razu do katalogu\./)).toBeInTheDocument();
+      expect(within(okno).getByText(/Produkt trafia od razu do katalogu\./)).toBeInTheDocument();
       expect(within(okno).getByTestId("button-polacz-wiersze")).toHaveTextContent(
         "Połącz w jeden produkt",
       );
