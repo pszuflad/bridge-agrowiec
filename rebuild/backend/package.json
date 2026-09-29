@@ -17,6 +17,7 @@
     "selly:csv": "node dist/selly/csv-cli.js",
     "selly:csv:dev": "tsx src/selly/csv-cli.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
+    "dziedzicz-wage": "tsx scripts/dziedzicz-wage.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",

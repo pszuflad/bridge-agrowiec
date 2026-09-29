@@ -97,6 +97,29 @@ describe("formatujSzerokosc (Wfmt)", () => {
   });
 });
 
+describe("formatujKomorke — waga (ticket 155, NOWA logika, nie port)", () => {
+  it("pustą wagę pokazuje jako kreskę", () => {
+    expect(tekstKomorki(produkt({ waga: null }), "waga")).toBe("—");
+  });
+
+  it("wagę BEZ dziedziczenia pokazuje bez ikony/tooltipa", () => {
+    const { container } = render(<>{formatujKomorke(produkt({ waga: 78 }), "waga")}</>);
+    expect(container.textContent).toBe("78");
+    expect(container.querySelector("svg")).toBeNull();
+  });
+
+  it("wagę dziedziczoną automatycznie oznacza tooltipem i ikoną", () => {
+    const { container } = render(
+      <>{formatujKomorke(produkt({ waga: 78, wagaAutoUzupelniona: true }), "waga")}</>,
+    );
+    expect(container.textContent).toBe("78");
+    expect(container.querySelector("svg")).not.toBeNull();
+    expect(container.querySelector("[title]")?.getAttribute("title")).toContain(
+      "uzupełniona automatycznie",
+    );
+  });
+});
+
 describe("formatujKomorke (DT)", () => {
   it("cena zakupu ma zawsze dwie cyfry po przecinku", () => {
     expect(tekstKomorki(produkt({ cenaZakupu: 5562.4 }), "cenaZakupu")).toBe("5562.40");

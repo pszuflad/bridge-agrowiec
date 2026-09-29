@@ -57,6 +57,7 @@
     "indeks2": null,
     "dostepnosc": null,
     "waga": null,
+    "wagaAutoUzupelniona": false,
     "dlugosc": 17,
     "szerokoscPaczki": 31,
     "wysokosc": 17,

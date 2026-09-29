@@ -24,6 +24,7 @@ import {
   rememberLink,
   uchwytSqlite,
 } from "./silnik/bridge-ext.js";
+import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 
 /**
  * Pozycja wejściowa bulku. Celowo luźna — oryginał bierze ciało żądania takie, jakie przyszło,
@@ -126,6 +127,14 @@ export function dodajProduktyBulk(db: Baza, pozycje: PozycjaBulku[]): number {
         applyWagaPamiec(sqlite, rekord, istniejacy);
       } catch {
         /* jak `catch (_be) {}` */
+      }
+      // Piąte rozszerzenie, spoza portu — ticket 155, NOWA logika biznesowa (patrz
+      // `dziedziczenieWagi.ts`). Ta sama ścieżka obsługuje `POST /api/products` (ręczne
+      // dodanie z UI), więc jedno wpięcie pokrywa import i dodawanie ręczne.
+      try {
+        applyWagaDziedziczona(db, rekord);
+      } catch {
+        /* nie blokuj zapisu wiersza błędem dziedziczenia wagi */
       }
 
       // ——— Zapis (:44800) ———
