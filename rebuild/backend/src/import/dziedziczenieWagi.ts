@@ -13,8 +13,8 @@
 
 import { and, eq, isNull, or, sql } from "drizzle-orm";
 
-import type { Baza } from "../db/index.js";
-import { products } from "../db/schema.js";
+import type { Baza, BazaSqlite } from "../db/index.js";
+import { manualOverrides, products } from "../db/schema.js";
 
 /**
  * Waga `0` jest zawsze traktowana jak pusta — nigdy nie ma zostać zapisana (decyzja 4/5 z Q&A).
@@ -127,4 +127,80 @@ export function applyWagaDziedziczona(db: Baza, rekord: Record<string, unknown>)
     rekord.waga = waga;
     rekord.wagaAutoUzupelniona = true;
   }
+}
+
+/** Wynik jednego przebiegu {@link dziedziczWageWstecznie}. */
+export type WynikDziedziczeniaWstecznego = {
+  wszystkichKandydatow: number;
+  zaktualizowano: number;
+  pominietoOverride: number;
+  pominietoBrakDanych: number;
+  pominietoBrakDopasowania: number;
+};
+
+/**
+ * Wsteczne dociągnięcie wagi (decyzja 3 z Q&A) dla produktów już w katalogu z pustą/zerową
+ * wagą — wspólna logika dla skryptu CLI (`scripts/dziedzicz-wage.ts`) i trasy
+ * `POST /api/products/dziedzicz-wage` (ticket 156). Pomija produkty chronione ręczną poprawką
+ * (`manual_overrides.fieldName = 'waga'`) — decyzja 5: ręczna edycja zawsze wygrywa, backfill
+ * jej nie omija. Cały przebieg w JEDNEJ transakcji — albo wszystkie dopasowane wiersze
+ * zapisują się razem, albo (przy błędzie w trakcie) żaden.
+ */
+export function dziedziczWageWstecznie(db: Baza, sqlite: BazaSqlite): WynikDziedziczeniaWstecznego {
+  const kandydaci = db
+    .select()
+    .from(products)
+    .where(sql`${products.waga} IS NULL OR ${products.waga} = 0`)
+    .all();
+
+  const wynik: WynikDziedziczeniaWstecznego = {
+    wszystkichKandydatow: kandydaci.length,
+    zaktualizowano: 0,
+    pominietoOverride: 0,
+    pominietoBrakDanych: 0,
+    pominietoBrakDopasowania: 0,
+  };
+
+  const przetworz = sqlite.transaction(() => {
+    for (const produkt of kandydaci) {
+      if (!jestPustaWaga(produkt.waga)) continue; // filtr SQL wyżej jest zgrubny, dociskamy tym samym progiem co reszta mechanizmu
+
+      const overrideWagi = db
+        .select({ id: manualOverrides.id })
+        .from(manualOverrides)
+        .where(
+          and(
+            eq(manualOverrides.supplierKod, produkt.dostawca),
+            eq(manualOverrides.supplierProductId, produkt.kod),
+            eq(manualOverrides.fieldName, "waga"),
+          ),
+        )
+        .get();
+      if (overrideWagi) {
+        wynik.pominietoOverride++;
+        continue;
+      }
+
+      const klucz = kluczZRekordu(produkt as unknown as Record<string, unknown>);
+      if (!klucz) {
+        wynik.pominietoBrakDanych++;
+        continue;
+      }
+
+      const waga = znajdzWageDoDziedziczenia(db, klucz);
+      if (waga === null) {
+        wynik.pominietoBrakDopasowania++;
+        continue;
+      }
+
+      db.update(products)
+        .set({ waga, wagaAutoUzupelniona: true })
+        .where(eq(products.id, produkt.id))
+        .run();
+      wynik.zaktualizowano++;
+    }
+  });
+  przetworz();
+
+  return wynik;
 }

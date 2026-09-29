@@ -1,0 +1,17 @@
+{
+  "endpoint": "/api/products/dziedzicz-wage",
+  "method": "POST",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "wszystkichKandydatow": 3,
+    "zaktualizowano": 1,
+    "pominietoOverride": 1,
+    "pominietoBrakDanych": 1,
+    "pominietoBrakDopasowania": 0
+  },
+  "request": {},
+  "_zrodlo": "RĘCZNIE napisane (ticket 156) — endpoint jest NOWĄ logiką biznesową (ticket 155), produkcja go nie ma, więc nie ma czego nagrywać z oryginału.",
+  "_opis": "Kształt = pola WynikDziedziczeniaWstecznego (src/import/dziedziczenieWagi.ts) plus {ok:true}. Wartości ilustracyjne, nie z realnego przebiegu."
+}

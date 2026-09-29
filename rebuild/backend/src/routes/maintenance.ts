@@ -6,6 +6,7 @@ import { basename, dirname, join } from "node:path";
 import { Router } from "express";
 
 import type { Baza, BazaSqlite } from "../db/index.js";
+import { dziedziczWageWstecznie } from "../import/dziedziczenieWagi.js";
 import { czyOpona } from "../import/silnik/klasyfikator.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
@@ -195,6 +196,37 @@ export function trasyUtrzymania({ db, dbPath, sqlite }: ZaleznosciUtrzymania): R
     });
 
     res.json({ ok: true });
+  });
+
+  /**
+   * Wsteczne dociągnięcie wagi — ticket 156-FEATURE-dziedzicz-wage-przycisk.
+   *
+   * ⚠ NOWA LOGIKA BIZNESOWA, NIE PORT (jak cały mechanizm dziedziczenia wagi, ticket 155) —
+   * produkcja nie ma tej trasy ani tego przycisku. Woła dokładnie tę samą funkcję co skrypt
+   * CLI `npm run dziedzicz-wage` (`dziedziczWageWstecznie`), żeby przycisk w UI i skrypt
+   * terminalowy nigdy nie mogły się rozjechać zachowaniem. Nie jest destrukcyjna (tylko
+   * uzupełnia braki), więc — inaczej niż `/api/products/clear` — nie wymaga potwierdzenia
+   * w ciele ani kopii bazy przed uruchomieniem.
+   */
+  router.post("/api/products/dziedzicz-wage", requireAuth, (req, res) => {
+    if (!sqlite) {
+      res.status(500).json({ error: "Baza nie jest dostępna do operacji wstecznej." });
+      return;
+    }
+
+    const wynik = dziedziczWageWstecznie(db, sqlite);
+
+    const user = req.user!;
+    zapiszAudyt(db, {
+      uzytkownikId: user.id,
+      uzytkownikImie: user.imieNazwisko,
+      akcja: "dziedziczenie_wagi_wsteczne",
+      encjaTyp: "produkt",
+      encjaId: "wszystkie",
+      szczegoly: wynik,
+    });
+
+    res.json({ ok: true, ...wynik });
   });
 
   return router;
