@@ -133,7 +133,7 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
         expect(Object.keys(pozycja), `${sciezka} — kolumna spoza kontraktu`).not.toContain(
           "blokowaneFormyPlatnosci",
         );
-        expect(Object.keys(pozycja), sciezka).toHaveLength(72);
+        expect(Object.keys(pozycja), sciezka).toHaveLength(73);
       }
     }
   });
@@ -141,13 +141,14 @@ describe("GATE — kontrakt i fixtures dla katalogu", () => {
   /**
    * Niezmiennik, którego samo `porownajKsztalt` nie złapie: fixture ma 5 pozycji, więc
    * pole obecne tylko w części z nich mogłoby się prześlizgnąć. Tu porównujemy KOMPLETNY
-   * zbiór 72 kluczy — to on pilnuje poprawek D5 (`snow3pmsf`, tryb boolean).
+   * zbiór 73 kluczy — to on pilnuje poprawek D5 (`snow3pmsf`, tryb boolean).
+   * 73 = 72 kolumn produkcji + `wagaAutoUzupelniona` (ticket 155, NOWA logika, nie port).
    */
-  it("GET /api/products — pozycja ma dokładnie te 72 klucze co fixture", async () => {
+  it("GET /api/products — pozycja ma dokładnie te 73 klucze co fixture", async () => {
     const fixture = wczytajFixture("GET_products.json");
     const pozycjaWzorcowa = (fixture.body as { items: Record<string, unknown>[] }).items[0];
     const oczekiwane = Object.keys(pozycjaWzorcowa ?? {}).sort();
-    expect(oczekiwane).toHaveLength(72);
+    expect(oczekiwane).toHaveLength(73);
 
     const odp = await request(srodowisko.app)
       .get("/api/products?limit=5")
@@ -327,7 +328,7 @@ describe("GATE — odstępstwo 14h: `_reguly.promocja` w GET /api/products", () 
    * `dolaczReguly` na `_reguly: {}` „dla czystości API", ten test zapali się natychmiast.
    */
   it.each(["/api/products", "/api/products?limit=5"])(
-    "%s — produkt BEZ pasującej promocji nie ma `_reguly` i ma nadal dokładnie 72 klucze",
+    "%s — produkt BEZ pasującej promocji nie ma `_reguly` i ma nadal dokładnie 73 klucze",
     async (sciezka) => {
       const nietrafione = (await pozycje(sciezka)).filter(
         (p) => !MARKI_TRAFIONE.includes(String(p.marka)),
@@ -340,14 +341,14 @@ describe("GATE — odstępstwo 14h: `_reguly.promocja` w GET /api/products", () 
         expect(Object.keys(produkt), `${sciezka} / ${String(produkt.kod)}`).not.toContain(
           "_reguly",
         );
-        expect(Object.keys(produkt), `${sciezka} / ${String(produkt.kod)}`).toHaveLength(72);
+        expect(Object.keys(produkt), `${sciezka} / ${String(produkt.kod)}`).toHaveLength(73);
       }
     },
   );
 
   /** Odstępstwo ma być dokładnie JEDNYM kluczem — nie okazją do przemycenia kolejnych. */
   it.each(["/api/products", "/api/products?limit=5"])(
-    "%s — `_reguly` dokłada dokładnie jeden klucz (73), reszta kształtu nietknięta",
+    "%s — `_reguly` dokłada dokładnie jeden klucz (74), reszta kształtu nietknięta",
     async (sciezka) => {
       const fixture = wczytajFixture("GET_products.json");
       const oczekiwane = Object.keys(
@@ -358,7 +359,7 @@ describe("GATE — odstępstwo 14h: `_reguly.promocja` w GET /api/products", () 
         const klucze = Object.keys(produkt);
         const bezOdstepstwa = klucze.filter((k) => k !== "_reguly").sort();
         expect(bezOdstepstwa, `${sciezka} / ${String(produkt.kod)}`).toEqual(oczekiwane);
-        expect(klucze.length, `${sciezka} / ${String(produkt.kod)}`).toBeLessThanOrEqual(73);
+        expect(klucze.length, `${sciezka} / ${String(produkt.kod)}`).toBeLessThanOrEqual(74);
       }
     },
   );

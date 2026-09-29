@@ -173,6 +173,13 @@ export function aktualizujProdukt(
     if (cenaSprzedazy === 0 || cenaZakupu === 0) doZapisu = { ...patch, status: "wstrzymany" };
   }
 
+  // Ticket 155 (NOWA logika, nie port): ręczna edycja `waga` przestaje być „uzupełniona
+  // automatycznie" — bez tego reset flagi wymagałby osobnego zapytania i osobnego wpisu
+  // w `manual_overrides`/`history` (flaga nie jest polem edytowalnym z UI).
+  if ("waga" in patch && !("wagaAutoUzupelniona" in patch)) {
+    doZapisu = { ...doZapisu, wagaAutoUzupelniona: false };
+  }
+
   // ⚠ PUSTY PATCH NIE WYWOŁUJE `UPDATE` — drizzle rzuca na `set({})`. Oryginał tej gałęzi
   // nie potrzebował, bo podawał całe ciało żądania; u nas `PATCH` z samymi polami spoza listy
   // edytowalnych daje pusty patch i musi odpowiedzieć 200 z aktualnym produktem, a nie 500.

@@ -30,6 +30,11 @@ export type Produkt = {
    * wartość bez konwersji, więc front musi radzić sobie z obiema.
    */
   szerokosc: number | string | null;
+  /**
+   * Ticket 155 (NOWA logika, nie odtworzenie produkcji): `true`, gdy `waga` uzupełniona
+   * automatycznie dziedziczeniem po marce+rozmiarze+bieżniku podobnego produktu.
+   */
+  wagaAutoUzupelniona?: boolean;
   [pole: string]: unknown;
 };
 

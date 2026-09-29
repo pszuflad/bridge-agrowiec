@@ -17574,6 +17574,8 @@ components:
           nullable: true
         waga:
           type: "integer"
+        wagaAutoUzupelniona:
+          type: "boolean"
         dlugosc:
           type: "integer"
         szerokoscPaczki:
@@ -17667,6 +17669,7 @@ components:
         - "indeks2"
         - "dostepnosc"
         - "waga"
+        - "wagaAutoUzupelniona"
         - "dlugosc"
         - "szerokoscPaczki"
         - "wysokosc"
@@ -18579,6 +18582,8 @@ components:
           nullable: true
         waga:
           nullable: true
+        wagaAutoUzupelniona:
+          type: "boolean"
         dlugosc:
           type: "integer"
         szerokoscPaczki:
@@ -18671,6 +18676,7 @@ components:
         - "indeks2"
         - "dostepnosc"
         - "waga"
+        - "wagaAutoUzupelniona"
         - "dlugosc"
         - "szerokoscPaczki"
         - "wysokosc"

@@ -232,7 +232,11 @@ describe("011 — baza 1: świeża", () => {
   });
 
   it("dokłada kolumnę jako ostatnią i zakłada sześć triggerów dosłownie z produkcji", () => {
-    expect(kolumnyProducts(sqlite).at(-1)).toBe("blokowane_formy_platnosci");
+    // Od migracji 014 (ticket 155, NOWA logika) `blokowane_formy_platnosci` nie jest już
+    // OSTATNIĄ kolumną w łańcuchu — `waga_auto_uzupelniona` dochodzi po niej. Sprawdzamy
+    // więc kolejność względem sąsiada, nie pozycję na samym końcu tabeli.
+    expect(kolumnyProducts(sqlite).at(-2)).toBe("blokowane_formy_platnosci");
+    expect(kolumnyProducts(sqlite).at(-1)).toBe("waga_auto_uzupelniona");
     const wBazie = triggeryWBazie(sqlite);
     expect([...wBazie.keys()].sort()).toEqual([...TRIGGERY].sort());
     const zPliku = definicjeZPliku();
