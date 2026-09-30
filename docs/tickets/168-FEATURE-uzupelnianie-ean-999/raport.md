@@ -46,3 +46,6 @@ None. Nowa tabela, nowe trasy; zachowanie istniejących tras bez zmian poza uzup
 
 ## Docs updates
 Wpisy: `docs/spec-backend/wpis-168.md`, `docs/rebuild-backlog/wpis-168.md`, wiersz 017 w `rebuild/schema/README.md`. Brak karty odbudowy dla tego ticketu.
+
+## Synchronizacja z develop
+Scalono `origin/develop` (823d725); bramki (lint, typecheck, build, `npm test` — 1935 zielonych) przebiegły PO synchronizacji.
