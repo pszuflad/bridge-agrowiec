@@ -1,6 +1,6 @@
-# Backlog — wpisy ticketu 168 (`168-FEATURE-uzupelnianie-ean-999`) · 2026-09-30
+# Backlog — wpisy ticketu 168b (`168-FEATURE-uzupelnianie-ean-999`) · 2026-09-30
 
-### #168.1 · 2026-09-30 · [BACKEND][BAZA] · uzupełnianie pustych EAN (prefiks 999) + tabela par kod↔EAN
+### #168b.1 · 2026-09-30 · [BACKEND][BAZA] · uzupełnianie pustych EAN (prefiks 999) + tabela par kod↔EAN
 
 | Pole | Wartość |
 |---|---|
@@ -13,7 +13,7 @@
 **Opis biznesowy.** Katalog nie ma mieć pustych EAN-ów. Puste pola dostają EAN `999…` z licznikiem (bez kolizji),
 a para `kod`↔EAN jest zapamiętana w bazie, więc kolejny import (także po wyczyszczeniu katalogu) nie gubi numeru.
 
-**Szczegół techniczny (dla rebuildu).** Patrz `docs/spec-backend/wpis-168.md`.
+**Szczegół techniczny (dla rebuildu).** Patrz `docs/spec-backend/wpis-168b.md`.
 
 **Rekomendacja (moja).** ✅ Nanieść. Po wdrożeniu: `POST /api/ean-pary/uzupelnij` z `dry_run: true`, żeby zmierzyć
 liczbę pustych EAN-ów w produkcji, potem zwykłe wywołanie.

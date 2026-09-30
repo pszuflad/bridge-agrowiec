@@ -42,10 +42,16 @@ None. Nowa tabela, nowe trasy; zachowanie istniejących tras bez zmian poza uzup
 ## Review fixes applied
 - BLOCKER: `POST /api/products` (bulk) nadpisywał prawdziwy EAN istniejącego produktu wygenerowanym, gdy payload nie miał `ean` → `uzupelnijEanRekordu` dziedziczy EAN istniejącej karty (bulk i akceptacja); test regresji.
 - SHOULD-FIX: `dry_run` nie-boolean → 400 (test); staging pomija parę, której EAN nosi już inny produkt; poprawiony komentarz o rezerwacji numerów.
-- Dodano `docs/spec-backend/wpis-168.md` i `docs/rebuild-backlog/wpis-168.md`. Drugiego przebiegu reviewera nie robiono — poprawki są lokalne i pokryte testami.
+- Dodano `docs/spec-backend/wpis-168b.md` i `docs/rebuild-backlog/wpis-168b.md`. Drugiego przebiegu reviewera nie robiono — poprawki są lokalne i pokryte testami.
 
 ## Docs updates
-Wpisy: `docs/spec-backend/wpis-168.md`, `docs/rebuild-backlog/wpis-168.md`, wiersz 017 w `rebuild/schema/README.md`. Brak karty odbudowy dla tego ticketu.
+Wpisy: `docs/spec-backend/wpis-168b.md`, `docs/rebuild-backlog/wpis-168b.md`, wiersz 017 w `rebuild/schema/README.md`. Brak karty odbudowy dla tego ticketu.
 
 ## Synchronizacja z develop
 Scalono `origin/develop` (823d725); bramki (lint, typecheck, build, `npm test` — 1935 zielonych) przebiegły PO synchronizacji.
+
+## Kolizja numeru ticketu
+Numer 168 zajął równolegle inny ticket (okno „Sprawdź dopasowanie opony", commit 165d076 na `develop`; jego `wpis-168.md` w spec-backend). Rezerwacja numerów jest lokalna dla maszyny/sesji, więc nie widziała cudzej. Ten ticket zostaje pod katalogiem `168-FEATURE-uzupelnianie-ean-999`, ale jego wpisy dokumentacyjne noszą sufiks **b**: `docs/spec-backend/wpis-168b.md`, `docs/rebuild-backlog/wpis-168b.md` (id `#168b.1`). Wpis cudzego ticketu zostawiony bez zmian.
+
+## Stan kroku deployowego
+Krok `npm run uzupelnij-ean` w `tools/deploy-produkcja.sh` NIE jest częścią tej gałęzi (zmiana pliku wdrożeniowego czeka na decyzję użytkownika); skrypt `uzupelnij-ean` jest, uruchamiany ręcznie.

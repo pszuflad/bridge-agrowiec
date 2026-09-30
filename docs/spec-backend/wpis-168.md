@@ -1,27 +1,29 @@
-# Wpis do spec-backend od ticketu 168 · 2026-09-30
+# Wpis 168 — okno „Sprawdź dopasowanie opony": zapis od razu do katalogu, własne parametry, wyjaśnienie
 
-**Sekcja:** §2 (import/staging, akceptacja) i nowe trasy `/api/ean-pary/*`.
+> Ticket 168 (2026-09-30). **Odstępstwo od produkcji — decyzja użytkowniczki.** Dotyczy
+> `POST /api/staging/{id}/resolve` i `GET /api/staging/{id}/review`.
 
-**Nowe w 168** (`168-FEATURE-uzupelnianie-ean-999`, 2026-09-30): reguła uzupełniania PUSTYCH `products.ean`
-— ⚠ **NOWA logika biznesowa, nie odtworzenie produkcji** (produkcja ma tylko ręczny skrypt
-`mirror/backend/apply_ean_memory.cjs`). Decyzje użytkownika:
+**Co było (produkcja, `staging_policy.cjs:227-250`).** `resolve` kasował zgłoszenie i zakładał NOWE
+(`Ręcznie rozstrzygnięto: …`), które trzeba było osobno zaakceptować — każda taka opona była
+akceptowana dwa razy. Okno nie dawało sposobu poprawienia zapisu z oferty (np. zła kolejność w
+nazwie: `20.8x38 BKT TR 270 DOT 8PR TT`), więc pozycji nie dało się ani zaakceptować, ani dodać
+jako osobnego produktu. Hasło z importera (`Oznaczenie wskazuje inną oponę…`) nie mówiło, co jest nie tak.
 
-- **Tabela `ean_pary`** (migracja `017_ean_pary.sql`): `kod` (= `products.kod`) ↔ `ean`, `numer`, `status`
-  (`aktywny` / `zastapiony`); UNIQUE na `kod`, `ean` i `numer`.
-- **Format EAN:** `999` + 9-cyfrowy numer kolejny (licznik = `MAX(numer)+1`, bez losowania) + cyfra kontrolna EAN-13
-  (`src/ean-pary/generator.ts`; `validateEan` odrzuca EAN-13 z błędną sumą). Numery, których EAN już nosi produkt w
-  katalogu, są pomijane.
-- **Zakres:** wyłącznie puste `products.ean` (NULL, `''`, same spacje). Produkt z EAN nie jest ruszany — także w
-  `POST /api/products` bez klucza `ean` (dziedziczy EAN istniejącej karty).
-- **Prawdziwy EAN z importu wygrywa:** para dostaje `zastapiony`, numer pozostaje zarezerwowany.
-- **Staging:** `polityka/fabryka.ts` uzupełnia pusty EAN z pary (snapshot + `ean_raw`), więc kolejny import nie pokazuje
-  „EAN → pusty" i EAN przeżywa akceptację także po `POST /api/products/clear`. Akceptacja (`zatwierdzPozycjeStagingu`,
-  flaga `uzupelnijEan`) i `dodajProduktyBulk` nadają EAN nowym pozycjom. Flaga domyślnie wyłączona, żeby testy
-  charakteryzacji (port == oryginał) mierzyły dalej zachowanie produkcji; włączają ją `polityka/akceptacja.ts` (poza
-  wycofaniami) i `POST /api/products`.
-- **Selly:** EAN 999… idzie jak zwykły EAN (bez zmian w generatorze CSV/mapperze).
-- **Trasy (spoza `contract/openapi.yaml`, `requireAuth`):** `GET /api/ean-pary/po-kodzie/:kod`,
-  `GET /api/ean-pary/po-ean/:ean`, `POST /api/ean-pary/generuj` (`{kod}`), `POST /api/ean-pary/uzupelnij`
-  (`{dry_run?: boolean}`), `GET /api/ean-pary` (`limit`/`offset`).
+**Co jest.**
+- `resolve` w jednej transakcji: `rozstrzygnijZgloszenie` → poprawki → `zatwierdzPozycjeZPolityka`
+  (`import/polityka/rozstrzygniecie-z-zapisem.ts`). Odmowa akceptacji (np. błędny EAN) cofa całość.
+  Odpowiedź: `{ok, kod}` — bez `id` (nie ma już drugiego zgłoszenia). Po zapisie skan nowych
+  wartości atrybutów, jak po `accept`. `rozstrzygnijZgloszenie` bez zmian (charakteryzacja).
+- Ciało `corrections` (opcjonalne): `nazwa|marka|model|rozmiar|dot|ean`, tylko niepuste napisy.
+  Poprawki trafiają do snapshotu, `edytowane_pola` i — poza `dot` — do `manual_overrides`
+  (jak `PUT /api/staging/{id}`), więc kolejny import nie cofnie nazwy do zapisu z pliku.
+- `review` dostaje: `wyjasnienie: string[]` (`import/polityka/wyjasnienie.ts` — przyczyna po
+  ludzku + „Import chce ustawić nazwę: … (w katalogu jest: …)"), `propozycja` (wartości z importu do
+  pól poprawki) i `candidates[].produktId`. Nic nie zapisuje się w bazie — liczone przy odczycie.
+- Frontend: link „Zobacz tę pozycję w katalogu" → `/katalog?szukaj=<kod>` (nowy deep link,
+  czytany przy montowaniu jak `?status=`), sekcja „Popraw dane z oferty", przycisk
+  „Zapisz w katalogu".
 
-Szczegóły: `docs/tickets/168-FEATURE-uzupelnianie-ean-999/`.
+**Nie ruszone.** Gałąź „stara karta" (`choose-absence-card`) i „sprzeczne wiersze"
+(`resolve-source-conflict`, wpis 2026-09-29) — bez zmian. `dot` nie ma odpowiednika w
+`manual_overrides`, więc poprawiony DOT działa jednorazowo.

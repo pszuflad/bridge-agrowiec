@@ -176,12 +176,82 @@ describe("Staging — okno „Rozstrzygnij”", () => {
           "Pozycja z oferty: BKT · AGRIMAX RT 765 · 480/70R34 · DOT 2124 · EAN 8903094020614",
         ),
       ).toBeInTheDocument();
-      expect(within(okno).getByTestId("opis-sprawy")).toHaveTextContent(FRAZY.dopasowanie);
+      // NOWE (2026-09-30): zamiast samego hasła importera — zdania, co jest nie tak.
+      const wyjasnienie = within(okno).getByTestId("wyjasnienie");
+      expect(wyjasnienie).toHaveTextContent("Dlaczego to zgłoszenie czeka na decyzję");
+      expect(wyjasnienie).toHaveTextContent("pasuje do kilku produktów w katalogu: MO5_A, MO5_B");
+      expect(within(okno).queryByTestId("opis-sprawy")).toBeNull();
+      // Zdanie „NIE zatwierdza…” było nieprawdą po zmianie: zapis idzie od razu do katalogu.
+      expect(within(okno).queryByText(/NIE zatwierdza/)).toBeNull();
       expect(
-        within(okno).getByText(
-          "Wybierz produkt z katalogu lub utwórz osobny wpis w stagingu. „Zapisz wybór” NIE zatwierdza produktu ani nie wysyła go do sklepu. Po wyborze sprawdź nowe zgłoszenie i dopiero wtedy osobno je zaakceptuj.",
-        ),
+        within(okno).getByText(/„Zapisz w katalogu” zapisuje wybór od razu w katalogu/),
       ).toBeInTheDocument();
+    });
+
+    it("bez wyjaśnienia z serwera wraca do hasła importera", async () => {
+      zamockuj({
+        strona: stronaZFraza(FRAZY.dopasowanie),
+        przeglad: { ...przegladDopasowania(), wyjasnienie: [] },
+      });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).getByTestId("opis-sprawy")).toHaveTextContent(FRAZY.dopasowanie);
+      expect(within(okno).queryByTestId("wyjasnienie")).toBeNull();
+    });
+
+    it("każdy kandydat ma link do swojej pozycji w katalogu (szukajka po kodzie)", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).getByTestId("link-katalog-MO5_A")).toHaveAttribute(
+        "href",
+        "/katalog?szukaj=MO5_A",
+      );
+      expect(within(okno).getByTestId("link-katalog-MO5_B")).toHaveAttribute(
+        "href",
+        "/katalog?szukaj=MO5_B",
+      );
+    });
+
+    it("własne parametry: pola z propozycją importu, w żądaniu tylko to, co zmieniono", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).queryByTestId("wlasne-parametry")).toBeNull();
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      const nazwa = within(okno).getByTestId("pole-wlasne-nazwa");
+      expect(nazwa).toHaveValue("480/70R34 BKT AGRIMAX RT 765");
+
+      await uzytkownik.clear(nazwa);
+      await uzytkownik.type(nazwa, "BKT AGRIMAX RT 765 480/70R34");
+      await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-nowy"));
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-wybor"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "new",
+        corrections: { nazwa: "BKT AGRIMAX RT 765 480/70R34" },
+      });
+    });
+
+    it("otwarte, ale niezmienione własne parametry nie wysyłają `corrections`", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-MO5_A"));
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-wybor"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "link",
+        targetCode: "MO5_A",
+      });
     });
 
     it("listuje kandydatów w formacie oryginału, z dopiskiem „(inny EAN)”", async () => {
@@ -265,7 +335,7 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       const okno = await otworzOkno(uzytkownik);
 
       expect(within(okno).getByTestId("ostrzezenie-ean")).toHaveTextContent(
-        "EAN nadal wymaga poprawy w edycji zgłoszenia.",
+        "EAN z oferty jest błędny — wpisz poprawny w polu EAN (Popraw dane z oferty), inaczej zapis zostanie zatrzymany.",
       );
     });
   });

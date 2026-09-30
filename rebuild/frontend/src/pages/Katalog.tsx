@@ -125,7 +125,15 @@ export function Katalog() {
   const wartosciSlownika = useMemo(() => slownik?.wartosci ?? [], [slownik]);
 
   const [zakladka, setZakladka] = useState("all");
-  const [fraza, setFraza] = useState("");
+  /**
+   * NOWE (2026-09-30, nie port): szukajka może przyjść z linku `?szukaj=...` (okno „Sprawdź
+   * dopasowanie opony" w stagingu linkuje tu do istniejącej pozycji po kodzie). Czytane TYLKO
+   * przy montowaniu, jak `?status=` niżej.
+   */
+  const wyszukiwanieUrl = useSearch();
+  const [fraza, setFraza] = useState(
+    () => new URLSearchParams(wyszukiwanieUrl).get("szukaj") ?? "",
+  );
   const [marki, setMarki] = useState<Set<string>>(() => new Set());
   const [kategorie, setKategorie] = useState<Set<string>>(() => new Set());
   /**
@@ -134,7 +142,6 @@ export function Katalog() {
    * `?status=brak_waga`. Czytane TYLKO przy montowaniu (deep link), dalsze zmiany filtra idą
    * przez `setStatus` jak dotąd — bez dwukierunkowej synchronizacji z URL-em.
    */
-  const wyszukiwanieUrl = useSearch();
   const [status, setStatus] = useState<TrybStatusu>(() => {
     const zParametru = new URLSearchParams(wyszukiwanieUrl).get("status");
     return OPCJE_STATUSU.some((opcja) => opcja.wartosc === zParametru)
