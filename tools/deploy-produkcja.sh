@@ -156,6 +156,13 @@ log "ticket 164: naprawa nazw sklejonych opon (manual_overrides + products.nazwa
 # unikalny numer każdemu produktowi w grupie oprócz pierwszego; `nadajKodImportu()` utrzyma tę
 # naprawę przy przyszłych importach (reguła "zachowaj istniejący sześciocyfrowy kod_importu").
 # Bezwarunkowo, jak wyżej — skrypt jest idempotentny (porównanie przed zapisem).
+#
+# ⚠ TICKET 165b: ta linia (bez efektu funkcjonalnego) istnieje wyłącznie po to, żeby ten PR
+# faktycznie zmienił `tools/deploy-produkcja.sh` — ze względu na odkrycie z 164d (skrypt
+# aktualizuje sam siebie w trakcie działania), krok wyżej dodany w PR #221 nie wykonał się przy
+# PIERWSZYM deployu po jego zmergowaniu (ten deploy uruchomił jeszcze POPRZEDNIĄ wersję pliku).
+# Ten commit wymusza DRUGI deploy, który faktycznie uruchomi kod 165 — patrz
+# `docs/tickets/165-BUG-rozdziel-kod-importu/raport.md`, sekcja Follow-up.
 log "ticket 165: rozdzielenie kod_importu dla znanych kolizji (backlog #108)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run rozdziel-kod-importu 2>&1 | tee -a "$LOG" )
 
