@@ -26,7 +26,7 @@ import { useWirtualizacja } from "./wirtualizacja";
 const KLASA_NAGLOWKA =
   "px-3 py-2.5 font-medium whitespace-nowrap cursor-pointer hover:text-foreground select-none";
 /** Szerokość przyklejonej kolumny „Nazwa” — tak duża, by typowa pełna nazwa opony mieściła się bez ucinania. */
-const SZEROKOSC_NAZWY = 440;
+const SZEROKOSC_NAZWY = 340;
 const CIEN_PRZYKLEJENIA = "shadow-[2px_0_4px_rgba(0,0,0,0.1)]";
 
 /**
