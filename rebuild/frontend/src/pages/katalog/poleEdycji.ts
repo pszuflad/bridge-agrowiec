@@ -35,6 +35,11 @@ export type Kontrolka =
   | { typ: "selectAlboTekst"; rodzajSlownika: string }
   /** `y` (`:24000`) — tri-state Tak / Nie / „-". */
   | { typ: "flaga" }
+  /**
+   * Odstępstwo od produkcji (prośba użytkownika, 2026-09-30): lista wielokrotnego wyboru
+   * zastosowań dozwolonych w BIEŻĄCEJ kategorii produktu. Wartość to `A ; B`.
+   */
+  | { typ: "zastosowanie" }
   /** `g` (`:24019`) — jedno pole piszące DWA klucze naraz. */
   | { typ: "scalone"; klucze: readonly [string, string] };
 
@@ -73,9 +78,9 @@ export const POLA_EDYCJI: readonly PoleEdycji[] = [
   { etykieta: "Status", klucz: "status", sekcja: "naglowek", kontrolka: { typ: "select", opcje: ["aktywny", "wstrzymany"] } },
   { etykieta: "Link do zdjecia", klucz: "linkZdjecia", sekcja: "naglowek", kontrolka: { typ: "tekst", span: true } },
   // ⚠ ODSTĘPSTWO OD 1:1, NA PROŚBĘ UŻYTKOWNIKA (2026-09-30): dialog produkcji nie ma tego pola
-  // (`zastosowanie` jest tam tylko kolumną tabeli). Wartość bywa wieloelementowa („A + B"),
-  // więc zwykły input, nie select słownikowy.
-  { etykieta: "Zastosowanie", klucz: "zastosowanie", sekcja: "naglowek", kontrolka: { typ: "tekst", span: true } },
+  // (`zastosowanie` jest tam tylko kolumną tabeli). Wartość bywa wieloelementowa („A ; B"),
+  // więc lista wielokrotnego wyboru, zawężona do zastosowań kategorii produktu.
+  { etykieta: "Zastosowanie", klucz: "zastosowanie", sekcja: "naglowek", kontrolka: { typ: "zastosowanie" } },
 
   // ——— Parametry techniczne (`:24064-24095`) ———
   { etykieta: "Rozmiar", klucz: "rozmiar", sekcja: "techniczne", kontrolka: { typ: "selectAlboTekst", rodzajSlownika: "rozmiar" } },
@@ -186,4 +191,51 @@ export function opcjaNaFlage(opcja: string): boolean | null {
   if (opcja === "true") return true;
   if (opcja === "false") return false;
   return null;
+}
+
+/**
+ * Zastosowania dozwolone w kategorii — lustro `CATEGORY_VALUES`
+ * (`backend/src/import/legacy/application_rules.cjs`). Kolejność jest kanoniczna: tak
+ * backend układa wartości wieloelementowe, więc tak samo je składamy.
+ */
+const UNIWERSALNE = "Uniwersalne/pozostałe";
+export const ZASTOSOWANIA_WG_KATEGORII: Readonly<Record<string, readonly string[]>> = {
+  Rolnicze: ["Ciągnik", "Kombajn", "Opryskiwacz", "Przyczepa", "Kosiarka/ogród", "Wózek widłowy", UNIWERSALNE],
+  Przemysłowe: ["Ładowarka", "Koparka", "Kompaktor", "Suwnica/dźwig", "Maszyny górnicze", "Wózek widłowy", UNIWERSALNE],
+  Ciężarowe: ["All position", "Oś kierowana", "Oś napędowa", "Naczepa/przyczepa", UNIWERSALNE],
+  Leśne: ["Ciągnik leśny", "Harwester", "Forwarder", "Skidder", UNIWERSALNE],
+};
+
+/** Kategoria → klucz mapy; dopasowanie bez rozróżniania wielkości liter i polskich znaków. */
+function kluczKategorii(kategoria: unknown): string | null {
+  const bezOgonkow = (t: string) =>
+    t.trim().toLocaleLowerCase("pl").replace(/ł/g, "l").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const szukana = bezOgonkow(String(kategoria ?? ""));
+  return Object.keys(ZASTOSOWANIA_WG_KATEGORII).find((k) => bezOgonkow(k) === szukana) ?? null;
+}
+
+/** `"A ; B"` → `["A","B"]` (backend rozdziela też po `+`). */
+export function rozbijZastosowanie(wartosc: unknown): string[] {
+  return String(wartosc ?? "")
+    .split(/\s*[;+]\s*/)
+    .map((czesc) => czesc.trim())
+    .filter(Boolean);
+}
+
+/**
+ * Opcje listy: zastosowania kategorii plus wartości, które produkt już ma, a których
+ * kategoria nie zna — żeby ich nie zgubić po cichu przy pierwszym kliknięciu.
+ * `null` = kategoria nieznana, dialog pokaże zwykły input.
+ */
+export function opcjeZastosowan(kategoria: unknown, obecne: readonly string[]): string[] | null {
+  const klucz = kluczKategorii(kategoria);
+  if (!klucz) return null;
+  const dozwolone = ZASTOSOWANIA_WG_KATEGORII[klucz] as readonly string[];
+  return [...dozwolone, ...obecne.filter((w) => !dozwolone.includes(w))];
+}
+
+/** Składa wybór w kolejności opcji, rozdzielając ` ; ` jak backend. Pusty wybór → `null`. */
+export function zlaczZastosowania(opcje: readonly string[], wybrane: ReadonlySet<string>): string | null {
+  const wynik = opcje.filter((opcja) => wybrane.has(opcja));
+  return wynik.length > 0 ? wynik.join(" ; ") : null;
 }
