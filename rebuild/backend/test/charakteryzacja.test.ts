@@ -167,7 +167,10 @@ describe("2. Charakteryzacja — port daje wyjście identyczne z oryginałem", (
     // Porównanie pole po polu — przy rozjeździe komunikat wskazuje rekord i pole,
     // zamiast wyrzucać różnicę dwóch 200-elementowych tablic.
     for (let i = 0; i < wzorzec.rekordy.length; i++) {
-      const oczekiwany = wzorzec.rekordy[i]!;
+      // Jedyne świadome odstępstwo od oryginału (decyzja Anny 2026-09-30): stan MO7 = 0,
+      // a wzorzec pamięta „5+" z cennika Nokiana. Wzorzec zostaje nagraniem oryginału.
+      const oczekiwany =
+        kod === "MO7" ? { ...wzorzec.rekordy[i]!, stan: 0 } : wzorzec.rekordy[i]!;
       const otrzymany = otrzymane.rekordy[i]!;
       expect(Object.keys(otrzymany).sort(), `${kod}[${i}] zestaw pól`).toEqual(
         Object.keys(oczekiwany).sort(),

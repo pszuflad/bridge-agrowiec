@@ -175,6 +175,13 @@ export function parsujPlik(kodDostawcy: string, sciezkaPliku: string): WynikPars
 
   const rekordy = adapter.recordsToSurowe(kod, wynikParsera.records);
 
+  // Decyzja Anny 2026-09-30: stan Nokiana (MO7) zawsze 0 — cennik podaje „5+", które
+  // parser zamienia na 5 dla każdej pozycji. Nadpisanie tu, a nie w `mo7_nokian.cjs`,
+  // bo port parserów ma zostać bajt-w-bajt zgodny z `mirror/backend` (GATE 3a).
+  if (kod === "MO7") {
+    for (const r of rekordy) r.stan = 0;
+  }
+
   return {
     dostawca: wynikParsera.dostawca,
     rekordy,
