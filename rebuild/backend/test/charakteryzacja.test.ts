@@ -25,6 +25,7 @@ import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
 import { listaDostawcow, parsujBufor, parsujPlik } from "../src/import/parsuj.js";
+import { nazwaZDemo } from "../src/import/polityka/nazwa-demo.js";
 import { KODY_DOSTAWCOW } from "../src/import/typy.js";
 import type { RekordSurowy, WynikParsowania } from "../src/import/typy.js";
 import { pobierzMo9Offline } from "./charakteryzacja/mo9-offline.mjs";
@@ -167,7 +168,13 @@ describe("2. Charakteryzacja — port daje wyjście identyczne z oryginałem", (
     // Porównanie pole po polu — przy rozjeździe komunikat wskazuje rekord i pole,
     // zamiast wyrzucać różnicę dwóch 200-elementowych tablic.
     for (let i = 0; i < wzorzec.rekordy.length; i++) {
-      const oczekiwany = wzorzec.rekordy[i]!;
+      // Jedyne świadome odstępstwo od nagrania produkcji: „DEMO" na końcu nazwy przy kodzie
+      // dostawcy z „demo" (decyzja Anny 2026-09-30, `polityka/nazwa-demo.ts`).
+      const oczekiwanyZProdukcji = wzorzec.rekordy[i]!;
+      const oczekiwany = {
+        ...oczekiwanyZProdukcji,
+        nazwa: nazwaZDemo(oczekiwanyZProdukcji.nazwa, oczekiwanyZProdukcji.kodDostawcy),
+      };
       const otrzymany = otrzymane.rekordy[i]!;
       expect(Object.keys(otrzymany).sort(), `${kod}[${i}] zestaw pól`).toEqual(
         Object.keys(oczekiwany).sort(),
