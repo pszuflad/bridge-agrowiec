@@ -168,12 +168,14 @@ describe("2. Charakteryzacja — port daje wyjście identyczne z oryginałem", (
     // Porównanie pole po polu — przy rozjeździe komunikat wskazuje rekord i pole,
     // zamiast wyrzucać różnicę dwóch 200-elementowych tablic.
     for (let i = 0; i < wzorzec.rekordy.length; i++) {
-      // Jedyne świadome odstępstwo od nagrania produkcji: „DEMO" na końcu nazwy przy kodzie
-      // dostawcy z „demo" (decyzja Anny 2026-09-30, `polityka/nazwa-demo.ts`).
+      // Świadome odstępstwa od nagrania produkcji (decyzje Anny 2026-09-30):
+      //  - „DEMO" na końcu nazwy przy kodzie dostawcy z „demo" (`polityka/nazwa-demo.ts`),
+      //  - stan MO7 = 0, bo wzorzec pamięta „5+" z cennika Nokiana.
       const oczekiwanyZProdukcji = wzorzec.rekordy[i]!;
       const oczekiwany = {
         ...oczekiwanyZProdukcji,
         nazwa: nazwaZDemo(oczekiwanyZProdukcji.nazwa, oczekiwanyZProdukcji.kodDostawcy),
+        ...(kod === "MO7" ? { stan: 0 } : {}),
       };
       const otrzymany = otrzymane.rekordy[i]!;
       expect(Object.keys(otrzymany).sort(), `${kod}[${i}] zestaw pól`).toEqual(
