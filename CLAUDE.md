@@ -158,6 +158,23 @@ stan błędu zamiast danych, dopóki nikt nie doda asercji na treść. Zmierzone
 (`77-FEATURE-pseudo-alerty-katalogowe`): zapytanie o statusy w `useAlertyKatalogu()` wymagało dopisania
 `GET /api/alerty-katalogu/statusy` do `handleryPulpitu()`.
 
+**Zmiana nazwy (lub innego pola produktu) przechodzi przez `nazwa_pamiec` i `manual_overrides` —
+ZAWSZE to sprawdź i POWIEDZ użytkownikowi, zanim zaczniesz pisać kod.** Nazwa w katalogu nie jest
+zapisana na stałe: import wylicza ją od nowa w kolejności *plik dostawcy → `nazwa_pamiec`
+(po `kod_importu`, bezwarunkowo) → `manual_overrides` (po `(dostawca, kod)`, po cichu) → reguły
+nakładane na końcu (np. „DEMO", `polityka/nazwa-demo.ts`)*. Akceptacja stagingu nakłada pamięć
+nazw **jeszcze raz, a poprawek Marty już nie** — może więc zapisać inną nazwę niż ta, którą
+operator widział w stagingu. Skutek dla każdej zmiany dotykającej nazwy: (1) produkty z wpisem w
+`nazwa_pamiec` lub poprawką `nazwa` mogą zachować starą nazwę albo ją odzyskać po akceptacji;
+(2) produkty w katalogu z inną nazwą niż nowo wyliczona wejdą do stagingu jako „zmiana nazwy" i
+czekają na akceptację — nic nie zmienia się samo. Zgłoś to w pytaniach do użytkownika (Krok 3
+`feature.md`) razem z liczbą dotkniętych pozycji, jeśli da się ją zmierzyć na kopii bazy. Nową
+regułę nazwy nakładaj **na końcu łańcucha** i **poza `src/import/legacy/`** (kopia bajt-w-bajt
+oryginału, pilnuje jej test integralności). Mechanizm, dowody i otwarte ryzyko akceptacji:
+`docs/spec-backend/wpis-168.md`, `docs/rebuild-backlog/wpis-168.md` (#168.1). Ten sam błąd
+pojawił się przy regule „DEMO": bez ostatniego kroku pamięć nazw i poprawki z ticketu 164
+zdejmowały dopisek, a zauważyło to dopiero pytanie użytkownika, nie testy.
+
 ---
 
 ## Przed każdym PR — synchronizacja z `develop` (dotyczy KAŻDEJ sesji)
