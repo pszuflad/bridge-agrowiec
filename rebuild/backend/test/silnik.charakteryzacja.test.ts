@@ -22,7 +22,15 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// Ten test dowodzi 1:1 z ORYGINAŁEM, a oryginał nie dopisuje „DEMO" do nazw. Jedyne świadome
+// odstępstwo (decyzja Anny 2026-09-30, `polityka/nazwa-demo.ts`) wyłączamy więc tylko tutaj;
+// samą regułę pokrywają `nazwa-demo.test.ts` i `nazwa-demo.silnik.test.ts`.
+vi.mock("../src/import/polityka/nazwa-demo.js", () => ({
+  nazwaZDemo: (nazwa: string | null) => nazwa,
+  zastosujDemoWNazwie: <T>(rekordy: T[]) => rekordy,
+}));
 
 import { silnikStagingu, type OpcjeImportu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";

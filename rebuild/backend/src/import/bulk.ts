@@ -25,6 +25,7 @@ import {
   uchwytSqlite,
 } from "./silnik/bridge-ext.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
+import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
 /**
  * Pozycja wejściowa bulku. Celowo luźna — oryginał bierze ciało żądania takie, jakie przyszło,
@@ -123,6 +124,9 @@ export function dodajProduktyBulk(db: Baza, pozycje: PozycjaBulku[]): number {
       } catch {
         /* jak `catch (_be) {}` */
       }
+      // Odstępstwo od produkcji (2026-09-30): „DEMO" na końcu nazwy ma ostatnie słowo —
+      // także wobec pamięci nazw.
+      rekord.nazwa = nazwaZDemo(rekord.nazwa as string | null, rekord.kodDostawcy as string | null);
       try {
         applyWagaPamiec(sqlite, rekord, istniejacy);
       } catch {

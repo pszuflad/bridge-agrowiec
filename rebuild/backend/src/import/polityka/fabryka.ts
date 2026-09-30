@@ -56,6 +56,7 @@ import {
   zapiszWersjeOferty,
 } from "../../repos/staging-polityka.js";
 import { czyOpona } from "../silnik/klasyfikator.js";
+import { nazwaZDemo } from "./nazwa-demo.js";
 import { applyDims, applyLinkMemory, applyNazwaPamiec, uchwytSqlite } from "../silnik/bridge-ext.js";
 import {
   bladZapisuNazwy,
@@ -466,6 +467,9 @@ export function stworzPolitykeStagingu(
         d.kodImportu = biezacy.kodImportu;
         applyNazwaPamiec(sqlite, d);
         d = nalozPoprawki(dostawca, d, kod);
+        // Odstępstwo od produkcji (2026-09-30): „DEMO" na końcu nazwy ma ostatnie słowo —
+        // także wobec pamięci nazw i poprawek Marty (`manual_overrides`).
+        d.nazwa = nazwaZDemo(d.nazwa as string | null, d.kodDostawcy as string | null);
       }
 
       // Kandydat w trakcie przeglądu NIE może zostać uznany za wycofany (`:417`).
