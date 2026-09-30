@@ -29,6 +29,7 @@ import {
 // wykrywa go teraz wcześniej, ale kończy się tym samym wyjątkiem i tą samą odpowiedzią 400,
 // żeby nie rozjechały się dwa komunikaty o tej samej sytuacji.
 import { PustyImportBlad } from "./tk.js";
+import { zastosujDemoWNazwie } from "./polityka/nazwa-demo.js";
 
 // Moduły portu są CommonJS (.cjs), a backend jest ESM — createRequire jest tu
 // właściwym mostem. Ścieżka jest względna wobec TEGO pliku, więc działa tak samo
@@ -173,7 +174,8 @@ export function parsujPlik(kodDostawcy: string, sciezkaPliku: string): WynikPars
     throw przetlumaczBladParsera(kod, e);
   }
 
-  const rekordy = adapter.recordsToSurowe(kod, wynikParsera.records);
+  // Jedyne odstępstwo za adapterem: „DEMO" na końcu nazwy, gdy kod dostawcy ma „demo".
+  const rekordy = zastosujDemoWNazwie(adapter.recordsToSurowe(kod, wynikParsera.records));
 
   return {
     dostawca: wynikParsera.dostawca,
