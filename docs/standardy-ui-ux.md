@@ -1,6 +1,8 @@
 # Standardy UI/UX — wyciąg z dokumentu „Bridge ONE — standardy UI/UX”
 
 Źródło: dokument przekazany 2026-09-30, opisujący panel produkcyjny (bundle `index-Dg-iqfJ2.js`).
+Wartości nie były porównywane z żywym bundlem z `mirror/frontend/index.html` — przed oparciem
+na nich nowego widoku sprawdź właściwą wartość w bundlu.
 
 **To wzorzec dla NOWEJ pracy, nie polecenie zmian wstecz.** Istniejących widoków, testów ani
 fixtures nie przerabiamy pod ten plik — dotyczy on wyłącznie nowych widoków i nowych zmian.
