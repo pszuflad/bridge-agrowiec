@@ -105,7 +105,7 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
     ]);
   });
 
-  it("`products`, `selly_products`, `selly_products_old` i triggery zostają nietknięte poza migracjami 014/015 — kształt i dane", () => {
+  it("`products`, `selly_products`, `selly_products_old` i triggery zostają nietknięte poza migracjami 014/015/016 — kształt i dane", () => {
     const przed = {
       products: [schematTabeli(sqlite, "products"), zrzut(sqlite, "products")],
       selly: [schematTabeli(sqlite, "selly_products"), zrzut(sqlite, "selly_products")],
@@ -129,6 +129,8 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
         ...w,
         waga_auto_uzupelniona: 0,
         waga_szacowana: 0,
+        // Migracja 016 (decyzja Anny 2026-09-30): stan Nokiana (MO7) zerowany w katalogu.
+        ...(w.dostawca === "MO7" ? { stan: 0 } : {}),
       })),
     ];
 
