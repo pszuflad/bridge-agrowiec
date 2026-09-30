@@ -226,6 +226,22 @@ describe("katalog — szukajka i filtry", () => {
     expect(screen.getByTestId("row-product-999002")).toBeInTheDocument();
     expect(screen.getByTestId("select-status")).toHaveTextContent("Brak wagi");
   });
+
+  /**
+   * NOWE (2026-09-30, nie port): okno „Sprawdź dopasowanie opony" w stagingu linkuje do
+   * istniejącej pozycji katalogu przez `?szukaj=<kod>` — szukajka ma być już wypełniona.
+   */
+  it("link ?szukaj=<kod> otwiera katalog z wypełnioną szukajką", async () => {
+    const cel = PRODUKTY[0] as Produkt;
+    zamockujApi();
+    window.history.pushState({}, "", `/katalog?szukaj=${encodeURIComponent(cel.kod)}`);
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`row-product-${cel.id}`)).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("input-search")).toHaveValue(cel.kod);
+  });
 });
 
 describe("katalog — sortowanie i paginacja", () => {
