@@ -171,6 +171,8 @@ log "ticket 165: rozdzielenie kod_importu dla znanych kolizji (backlog #108)"
 # dostaje EAN z reguły. Idempotentne — dotyka wyłącznie pustych pól, więc bezwarunkowe uruchamianie
 # przy każdym deployu jest bezpieczne (jak naprawa nazw wyżej); kopia bazy z kroku wyżej to punkt
 # powrotu. Wynik (liczby) ląduje w logu deployu.
+# ⚠ Deploy 97825d6 (merge ticketu 168) wykonał jeszcze STARĄ wersję tego skryptu (bash czytał plik sprzed
+# `git reset --hard`), więc ten krok ruszył dopiero w następnym deployu — jak kroki 164c i 165b.
 log "ticket 168: uzupełnienie pustych EAN (999…)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run uzupelnij-ean 2>&1 | tee -a "$LOG" )
 
