@@ -194,6 +194,17 @@ zmiany, HEAD odłączony, jesteś na gałęzi bazowej).
 - PR-y ticketów idą **do `develop`** (`gh pr create --base develop`) — domyślną gałęzią repo jest
   `main`, więc bazę podawaj jawnie.
 
+**Baza PR-a — poprawki Ani (2026-09-30).** Zasada „nic do `main`, zanim nie będzie na `develop`”
+w trzech punktach; dotyczy każdej sesji, także chmurowej, gdzie PR bywa utworzony z UI
+z bazą `main` (domyślna gałąź repo):
+
+- Każdy PR z gałęzi roboczej (`claude/...`, `feature/...`, `fix/...`) ma bazę **`develop`**,
+  nigdy `main`. Jeśli taki PR powstał z bazą `main`, zmień ją na `develop`.
+- Wyjątek: PR, którego gałęzią źródłową jest sam `develop`, ma bazę **`main`**. To jedyna
+  dozwolona droga do `main`. Takiego PR-a nie przełączaj.
+- Taki PR `develop` → `main` tworzysz domyślnie. Uwaga: push do `main` z zmianami w `rebuild/`
+  uruchamia `deploy-produkcja.yml`, więc PR opisz i zmerguj dopiero po zielonych sprawdzeniach.
+
 **Push i PR jednym poleceniem, z ponawianiem blokad:**
 
 ```bash
