@@ -2,9 +2,13 @@
 
 Źródło: dokument przekazany 2026-09-30, opisujący panel produkcyjny (bundle `index-Dg-iqfJ2.js`).
 
+**To wzorzec dla NOWEJ pracy, nie polecenie zmian wstecz.** Istniejących widoków, testów ani
+fixtures nie przerabiamy pod ten plik — dotyczy on wyłącznie nowych widoków i nowych zmian.
+Nie zakładaj tickety „dostosuj istniejące widoki do standardów”.
+
 **To opis produkcji, nie źródło prawdy.** Przy każdej rozbieżności wygrywa żywy bundle
 z `mirror/frontend/index.html` i fixtures (zasada 1:1 z `CLAUDE.md`). Ten plik służy jako lista
-kontrolna przy sprawdzaniu widoków, a nie jako nowe wymagania.
+kontrolna dla nowego kodu, a nie jako nowe wymagania wobec starego.
 
 Świadomie pominięte z oryginału: zamiana `alert()`/`confirm()` na dialogi i toasty oraz
 pozostałe sekcje (typografia, layout, komponenty). Nie wprowadzamy ich bez decyzji użytkownika.
