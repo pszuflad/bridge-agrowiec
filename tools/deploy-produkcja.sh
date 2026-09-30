@@ -149,6 +149,16 @@ log "kopia bazy przed migracjami"
 log "ticket 164: naprawa nazw sklejonych opon (manual_overrides + products.nazwa)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run napraw-nazwy-sklejone 2>&1 | tee -a "$LOG" )
 
+# --- ticket 165: rozdzielenie kod_importu dla tych samych znanych kolizji (backlog #108) ---
+# Ten sam dostawca ma dwie fizycznie różne opony pod jednym kod_importu, więc Tor 1 (sync do
+# Selly co 15 min) nadpisuje sobie nawzajem zapamiętany stan w selly_products i obie stale
+# "wyglądają na zmienione". Świadome odstępstwo od 1:1 (decyzja użytkownika) — nadajemy nowy,
+# unikalny numer każdemu produktowi w grupie oprócz pierwszego; `nadajKodImportu()` utrzyma tę
+# naprawę przy przyszłych importach (reguła "zachowaj istniejący sześciocyfrowy kod_importu").
+# Bezwarunkowo, jak wyżej — skrypt jest idempotentny (porównanie przed zapisem).
+log "ticket 165: rozdzielenie kod_importu dla znanych kolizji (backlog #108)"
+( cd rebuild/backend && DB_PATH="$DATA_DB" npm run rozdziel-kod-importu 2>&1 | tee -a "$LOG" )
+
 ln -sfn "$RELEASE" "$PROD_ROOT/current"                  # atomowa podmiana
 pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
 ( cd "$PROD_ROOT/current" && PORT="$PORT" HOST="$HOST" DB_PATH="$DATA_DB" NODE_ENV=production \
