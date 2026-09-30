@@ -114,6 +114,25 @@ describe("katalog — dane i nagłówek", () => {
   });
 });
 
+describe("katalog — rozwijanie nazwy", () => {
+  it("klik w komórkę nazwy rozwija ją w całości, drugi klik zwija", async () => {
+    zamockujApi();
+    render(<App />);
+    const id = PRODUKTY[0]?.id;
+    await screen.findByTestId(`row-product-${id}`);
+    const komorka = screen.getByTestId(`cell-nazwa-${id}`);
+    expect(komorka).toHaveClass("truncate");
+    expect(komorka).not.toHaveClass("whitespace-normal");
+
+    await userEvent.click(komorka);
+    expect(komorka).toHaveClass("whitespace-normal", "break-words");
+    expect(komorka).not.toHaveClass("truncate");
+
+    await userEvent.click(komorka);
+    expect(komorka).toHaveClass("truncate");
+  });
+});
+
 describe("katalog — szukajka i filtry", () => {
   it("szukajka zawęża listę do pasujących pozycji", async () => {
     zamockujApi();
