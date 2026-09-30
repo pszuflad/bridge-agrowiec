@@ -25,6 +25,8 @@ import { useWirtualizacja } from "./wirtualizacja";
 
 const KLASA_NAGLOWKA =
   "px-3 py-2.5 font-medium whitespace-nowrap cursor-pointer hover:text-foreground select-none";
+/** Szerokość przyklejonej kolumny „Nazwa” — tak duża, by typowa pełna nazwa opony mieściła się bez ucinania. */
+const SZEROKOSC_NAZWY = 440;
 const CIEN_PRZYKLEJENIA = "shadow-[2px_0_4px_rgba(0,0,0,0.1)]";
 
 /**
@@ -109,14 +111,14 @@ export function TabelaProduktow({
             <NaglowekKolumny
               etykieta="Nazwa"
               className={`${KLASA_NAGLOWKA} sticky left-0 bg-muted/50 z-10 ${CIEN_PRZYKLEJENIA}`}
-              style={{ minWidth: 220, maxWidth: 220 }}
+              style={{ minWidth: SZEROKOSC_NAZWY, maxWidth: SZEROKOSC_NAZWY }}
               onKlik={() => onSortuj("nazwa")}
               testId="header-nazwa"
             />
             <NaglowekKolumny
               etykieta="EAN"
               className={`${KLASA_NAGLOWKA} sticky bg-muted/50 z-10 ${CIEN_PRZYKLEJENIA}`}
-              style={{ left: 220, minWidth: 140, maxWidth: 140 }}
+              style={{ left: SZEROKOSC_NAZWY, minWidth: 140, maxWidth: 140 }}
               onKlik={() => onSortuj("ean")}
               testId="header-ean"
             />
@@ -179,14 +181,14 @@ export function TabelaProduktow({
             >
               <td
                 className={`px-3 py-2 text-xs sticky left-0 bg-background truncate ${CIEN_PRZYKLEJENIA}`}
-                style={{ minWidth: 220, maxWidth: 220 }}
+                style={{ minWidth: SZEROKOSC_NAZWY, maxWidth: SZEROKOSC_NAZWY }}
                 title={produkt.nazwa}
               >
                 {produkt.nazwa}
               </td>
               <td
                 className={`px-3 py-2 font-mono text-xs sticky bg-background truncate ${CIEN_PRZYKLEJENIA}`}
-                style={{ left: 220, minWidth: 140, maxWidth: 140 }}
+                style={{ left: SZEROKOSC_NAZWY, minWidth: 140, maxWidth: 140 }}
                 title={produkt.ean ?? ""}
               >
                 {produkt.ean ?? "—"}
