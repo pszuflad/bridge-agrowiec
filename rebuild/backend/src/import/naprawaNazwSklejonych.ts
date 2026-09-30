@@ -8,8 +8,10 @@
 // po (dostawca, kod, pole), więc dwa produkty o wspólnym `kod_importu` dostają swoje własne,
 // niezależne poprawki `nazwa`.
 
+import { eq } from "drizzle-orm";
 import { parse } from "csv-parse/sync";
 
+import { products } from "../db/schema.js";
 import { zapiszPoprawke } from "../repos/overrides.js";
 import type { Baza } from "../db/index.js";
 
@@ -73,4 +75,59 @@ export function naprawNazwySklejone(
   }
 
   return { przetworzono, pominietoPusteNazwy };
+}
+
+export type WynikAktualizacjiKatalogu = {
+  zaktualizowano: number;
+  nieZnaleziono: number;
+  bezZmian: number;
+};
+
+/**
+ * Nadpisuje `products.nazwa` bezpośrednio w katalogu — TAKI SAM efekt jak ręczna edycja
+ * pola w panelu (`PUT /api/products/:id`), tylko bez zapisu do `manual_overrides` (bo ten
+ * zapis już wykonał `naprawNazwySklejone()`) i bez wpisu w dzienniku zmian (to nie jest
+ * akcja jednego użytkownika, tylko wsadowa naprawa danych z tego ticketu).
+ *
+ * ⚠ PO CO TO ISTNIEJE: `manual_overrides` samo z siebie NIE zmienia tego, co widać w
+ * `GET /api/products` — ten mechanizm jest odczytywany dopiero przy kolejnym imporcie/
+ * akceptacji stagingu (`fabryka.ts`, `akceptacja.ts`), nie przy zwykłym odczycie. Bez tej
+ * funkcji katalog pokazywałby starą, sklejoną nazwę aż do najbliższego cyklu importu — a
+ * nawet wtedy akceptacja stagingu może ją cofnąć przez bezwarunkowe `applyNazwaPamiec()`
+ * (`akceptacja.ts:204`, port oryginału — luka opisana w `docs/tickets/164-BUG-…/raport.md`).
+ * Ta funkcja daje natychmiastowy, pewny efekt: dokładnie taki, jakby Ania wpisała te nazwy
+ * ręcznie w panelu, jedna po drugiej.
+ */
+export function zastosujNazwyWKatalogu(
+  db: Baza,
+  wiersze: WierszNaprawyNazwy[],
+): WynikAktualizacjiKatalogu {
+  let zaktualizowano = 0;
+  let nieZnaleziono = 0;
+  let bezZmian = 0;
+
+  for (const wiersz of wiersze) {
+    const nazwa = wiersz.nazwa.trim();
+    if (!nazwa) continue;
+
+    const istniejacy = db
+      .select({ id: products.id, nazwa: products.nazwa })
+      .from(products)
+      .where(eq(products.kod, wiersz.kod))
+      .get();
+
+    if (!istniejacy) {
+      nieZnaleziono++;
+      continue;
+    }
+    if (istniejacy.nazwa === nazwa) {
+      bezZmian++;
+      continue;
+    }
+
+    db.update(products).set({ nazwa }).where(eq(products.id, istniejacy.id)).run();
+    zaktualizowano++;
+  }
+
+  return { zaktualizowano, nieZnaleziono, bezZmian };
 }
