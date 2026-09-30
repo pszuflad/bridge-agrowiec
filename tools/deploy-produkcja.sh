@@ -132,6 +132,23 @@ log "kopia bazy przed migracjami"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" ETYKIETA="$SHA" node scripts/kopia-bazy.cjs 2>&1 | tee -a "$LOG" )
 
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run migrate )
+
+# --- ticket 164/164b: jednorazowa naprawa nazw sklejonych opon (kolizje kod_importu) ---
+# ⚠ JEDYNY CELOWY ROZJAZD wobec deploy-staging.sh (nagłówek pliku: "poza konfiguracją
+# identyczne") — to jednorazowa naprawa DANYCH produkcyjnych, nie coś, co staging potrzebuje.
+# Samoograniczające się plikiem-znacznikiem POZA `repo/` (przetrwa `git reset --hard` i kolejne
+# release'y): uruchamia się raz, przy najbliższym deployu po tym PR-ze, potem nigdy więcej —
+# nawet jeśli deploy poleci ponownie. Bezpieczne uruchomienie wielokrotne samego skryptu (upsert
+# + porównanie przed zapisem), więc znacznik jest tu wyłącznie żeby nie robić zbędnej pracy przy
+# każdym kolejnym deployu. Usunięcie tego bloku po potwierdzeniu jednego udanego przebiegu jest
+# zaplanowanym follow-upem (`docs/tickets/164b-BUG-napraw-nazwy-katalog/raport.md`).
+NAPRAWA_NAZW_ZNACZNIK="$PROD_ROOT/.164-napraw-nazwy-wykonano"
+if [ ! -f "$NAPRAWA_NAZW_ZNACZNIK" ]; then
+  log "ticket 164: jednorazowa naprawa nazw sklejonych opon (manual_overrides + products.nazwa)"
+  ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run napraw-nazwy-sklejone 2>&1 | tee -a "$LOG" )
+  touch "$NAPRAWA_NAZW_ZNACZNIK"
+fi
+
 ln -sfn "$RELEASE" "$PROD_ROOT/current"                  # atomowa podmiana
 pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
 ( cd "$PROD_ROOT/current" && PORT="$PORT" HOST="$HOST" DB_PATH="$DATA_DB" NODE_ENV=production \

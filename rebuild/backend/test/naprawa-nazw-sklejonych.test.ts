@@ -8,15 +8,36 @@
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { eq } from "drizzle-orm";
+
 import type { Baza } from "../src/db/index.js";
-import { manualOverrides } from "../src/db/schema.js";
+import { manualOverrides, products } from "../src/db/schema.js";
 import {
   naprawNazwySklejone,
   sparsujWierszeNaprawy,
+  zastosujNazwyWKatalogu,
 } from "../src/import/naprawaNazwSklejonych.js";
 import { poprawkiMarty } from "../src/import/silnik/overrides.js";
 import type { PozycjaZnormalizowana } from "../src/import/silnik/pozycja.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
+
+type NowyProdukt = typeof products.$inferInsert;
+
+function produkt(nadpisania: Partial<NowyProdukt> & { kod: string }): NowyProdukt {
+  return {
+    nazwa: "Opona testowa",
+    marka: "MITAS",
+    kategoria: "rolnicze",
+    dostawca: "MO1",
+    magazyn: "0",
+    stan: 0,
+    cenaZakupu: 100,
+    cenaSprzedazy: 150,
+    marzaPct: 50,
+    dataAktualizacji: "2026-09-25T00:00:00.000Z",
+    ...nadpisania,
+  };
+}
 
 const NAGLOWEK = "kod_importu,dostawca,kod,ean,nazwa,marka,model,rozmiar,dot,cena_sprzedazy,stan";
 
@@ -143,5 +164,71 @@ describe("naprawNazwySklejone — zapis do manual_overrides", () => {
     // zameldowany, ale override i tak wygrywa (niesymetria 1, patrz overrides.ts).
     expect(wynikA.naruszono).toEqual(["nazwa"]);
     expect(wynikB.naruszono).toEqual(["nazwa"]);
+  });
+});
+
+describe("zastosujNazwyWKatalogu — bezpośredni zapis do products.nazwa", () => {
+  let baza: TestowaBaza;
+  let db: Baza;
+
+  beforeEach(() => {
+    baza = stworzTestowaBaze();
+    db = baza.db;
+  });
+
+  afterEach(() => {
+    baza.posprzataj();
+  });
+
+  it("nadpisuje nazwę istniejącego produktu i liczy trafienie", () => {
+    db.insert(products)
+      .values([produkt({ kod: "MO1_15126981", nazwa: "Nazwa sklejona" })])
+      .run();
+
+    const wynik = zastosujNazwyWKatalogu(db, [
+      { dostawca: "MO1", kod: "MO1_15126981", nazwa: "Nazwa poprawna A" },
+    ]);
+
+    expect(wynik).toEqual({ zaktualizowano: 1, nieZnaleziono: 0, bezZmian: 0 });
+    const po = db.select().from(products).where(eq(products.kod, "MO1_15126981")).get();
+    expect(po?.nazwa).toBe("Nazwa poprawna A");
+  });
+
+  it("nie liczy jako zmianę, gdy nazwa jest już poprawna (bezpieczne powtórne uruchomienie)", () => {
+    db.insert(products)
+      .values([produkt({ kod: "MO1_15126981", nazwa: "Nazwa poprawna A" })])
+      .run();
+
+    const wynik = zastosujNazwyWKatalogu(db, [
+      { dostawca: "MO1", kod: "MO1_15126981", nazwa: "Nazwa poprawna A" },
+    ]);
+
+    expect(wynik).toEqual({ zaktualizowano: 0, nieZnaleziono: 0, bezZmian: 1 });
+  });
+
+  it("liczy jako nieznaleziony produkt, którego nie ma jeszcze w katalogu", () => {
+    const wynik = zastosujNazwyWKatalogu(db, [
+      { dostawca: "MO1", kod: "MO1_NIEISTNIEJE", nazwa: "Cokolwiek" },
+    ]);
+    expect(wynik).toEqual({ zaktualizowano: 0, nieZnaleziono: 1, bezZmian: 0 });
+  });
+
+  it("rozróżnia dwa kolidujące produkty tego samego kod_importu po zapisie do katalogu", () => {
+    db.insert(products)
+      .values([
+        produkt({ kod: "MO1_15126981", nazwa: "Nazwa sklejona" }),
+        produkt({ kod: "MO1_15126983", nazwa: "Nazwa sklejona" }),
+      ])
+      .run();
+
+    zastosujNazwyWKatalogu(db, [
+      { dostawca: "MO1", kod: "MO1_15126981", nazwa: "Nazwa poprawna A" },
+      { dostawca: "MO1", kod: "MO1_15126983", nazwa: "Nazwa poprawna B" },
+    ]);
+
+    const a = db.select().from(products).where(eq(products.kod, "MO1_15126981")).get();
+    const b = db.select().from(products).where(eq(products.kod, "MO1_15126983")).get();
+    expect(a?.nazwa).toBe("Nazwa poprawna A");
+    expect(b?.nazwa).toBe("Nazwa poprawna B");
   });
 });
