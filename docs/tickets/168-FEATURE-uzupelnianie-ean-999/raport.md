@@ -53,5 +53,8 @@ Scalono `origin/develop` (823d725); bramki (lint, typecheck, build, `npm test` �
 ## Kolizja numeru ticketu
 Numer 168 zajął równolegle inny ticket (okno „Sprawdź dopasowanie opony", commit 165d076 na `develop`; jego `wpis-168.md` w spec-backend). Rezerwacja numerów jest lokalna dla maszyny/sesji, więc nie widziała cudzej. Ten ticket zostaje pod katalogiem `168-FEATURE-uzupelnianie-ean-999`, ale jego wpisy dokumentacyjne noszą sufiks **b**: `docs/spec-backend/wpis-168b.md`, `docs/rebuild-backlog/wpis-168b.md` (id `#168b.1`). Wpis cudzego ticketu zostawiony bez zmian.
 
-## Stan kroku deployowego
-Krok `npm run uzupelnij-ean` w `tools/deploy-produkcja.sh` NIE jest częścią tej gałęzi (zmiana pliku wdrożeniowego czeka na decyzję użytkownika); skrypt `uzupelnij-ean` jest, uruchamiany ręcznie.
+## Krok wdrożeniowy (zgoda użytkownika)
+`tools/deploy-produkcja.sh` — nowy krok po `npm run migrate`, przed podmianą release: `npm run uzupelnij-ean`
+(`scripts/uzupelnij-ean.ts`). Przy każdym deployu puste EAN-y w całym katalogu dostają EAN z reguły; idempotentne,
+wynik w logu. Sprawdzone na bazie tymczasowej (dry-run, zapis tylko pustych NULL/`''`, produkt z EAN nietknięty,
+drugie uruchomienie = 0 zmian). Staging bez zmian. Deploy ruszy dopiero po merge'u do `main`.

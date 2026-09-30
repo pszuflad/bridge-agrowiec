@@ -13,6 +13,8 @@ Katalog ma puste EAN-y; losowe „999 + cyfry" grozi kolizjami. Potrzebna unikal
 - Trasy: `GET /api/ean-pary/po-kodzie/:kod`, `GET /api/ean-pary/po-ean/:ean`, `POST /api/ean-pary/generuj`, `POST /api/ean-pary/uzupelnij` (`dry_run`), `GET /api/ean-pary`.
 - Staging (`fabryka.ts`) uzupełnia pusty EAN z pary; akceptacja i `POST /api/products` nadają EAN nowym pozycjom (opt-in `uzupelnijEan`, domyślnie wyłączone dla testów charakteryzacji).
 
+- Wdrożenie: `tools/deploy-produkcja.sh` uruchamia `npm run uzupelnij-ean` po migracjach — przy deployu puste EAN-y w katalogu dostają EAN z reguły (idempotentne, wynik w logu).
+
 ## Design decisions
 - Klucz pary = `products.kod`; licznik zamiast losowania (brak kolizji z konstrukcji).
 - Prawdziwy EAN z cennika nadpisuje 999…; numer zostaje zarezerwowany.
@@ -20,7 +22,7 @@ Katalog ma puste EAN-y; losowe „999 + cyfry" grozi kolizjami. Potrzebna unikal
 - Produkt z istniejącym EAN nigdy go nie traci (także w bulku bez klucza `ean`).
 
 ## Tests
-Lint, typecheck, build ✓; `npm test` — 1935 zielonych (12 pominiętych jak dotąd), po synchronizacji z `develop` (823d725). Nowe: `test/ean-pary.test.ts`, `test/ean-pary.staging.test.ts`. Gate kontraktu: brak zmian w `openapi.yaml`, regresje zielone.
+Lint, typecheck, build ✓; `npm test` — 1944 zielone (12 pominiętych jak dotąd), po synchronizacji z `develop` (823d725). Nowe: `test/ean-pary.test.ts`, `test/ean-pary.staging.test.ts`. Gate kontraktu: brak zmian w `openapi.yaml`, regresje zielone.
 
 ## Breaking changes
 None.

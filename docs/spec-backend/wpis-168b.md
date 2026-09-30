@@ -23,5 +23,9 @@
 - **Trasy (spoza `contract/openapi.yaml`, `requireAuth`):** `GET /api/ean-pary/po-kodzie/:kod`,
   `GET /api/ean-pary/po-ean/:ean`, `POST /api/ean-pary/generuj` (`{kod}`), `POST /api/ean-pary/uzupelnij`
   (`{dry_run?: boolean}`), `GET /api/ean-pary` (`limit`/`offset`).
+- **Wdrożenie:** `tools/deploy-produkcja.sh` po migracjach uruchamia `npm run uzupelnij-ean`
+  (`scripts/uzupelnij-ean.ts`, opcja `--dry`) przy KAŻDYM deployu produkcji — idempotentnie uzupełnia wszystkie
+  puste EAN-y w katalogu; liczby trafiają do logu deployu. Kopia bazy z kroku przed migracjami to punkt powrotu.
+  Staging (`deploy-staging.sh`) bez zmian.
 
 Szczegóły: `docs/tickets/168-FEATURE-uzupelnianie-ean-999/`.
