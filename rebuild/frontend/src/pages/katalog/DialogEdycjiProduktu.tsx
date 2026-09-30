@@ -24,6 +24,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,7 +41,10 @@ import {
   flagaNaOpcje,
   opcjaNaFlage,
   opcjeSlownika,
+  opcjeZastosowan,
   parsujLiczbe,
+  rozbijZastosowanie,
+  zlaczZastosowania,
   POLA_EDYCJI,
   PUSTA_OPCJA,
   type Kontrolka,
@@ -242,6 +251,45 @@ export function DialogEdycjiProduktu({
             </SelectContent>
           </Select>
         );
+      case "zastosowanie": {
+        // Opcje zależą od kategorii z BIEŻĄCEGO stanu edycji — zmiana kategorii w tym samym
+        // dialogu od razu zmienia listę.
+        const obecne = rozbijZastosowanie(surowa(pole.klucz));
+        const opcje = opcjeZastosowan(surowa("kategoria"), obecne);
+        if (!opcje) return poleTekstowe(pole.klucz, {});
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                id={idPola(pole.klucz)}
+                type="button"
+                variant="outline"
+                aria-label={pole.etykieta}
+                className="w-full justify-between font-normal"
+              >
+                <span className="truncate">{obecne.join(" ; ") || "-"}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="max-h-72 overflow-y-auto">
+              {opcje.map((opcja) => (
+                <DropdownMenuCheckboxItem
+                  key={opcja}
+                  checked={obecne.includes(opcja)}
+                  onSelect={(zdarzenie) => zdarzenie.preventDefault()}
+                  onCheckedChange={(zaznaczone) => {
+                    const wybrane = new Set(obecne);
+                    if (zaznaczone) wybrane.add(opcja);
+                    else wybrane.delete(opcja);
+                    zmien(pole.klucz, zlaczZastosowania(opcje, wybrane));
+                  }}
+                >
+                  {opcja}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      }
       case "scalone": {
         const [pierwszy, drugi] = kontrolka.klucze;
         return (
