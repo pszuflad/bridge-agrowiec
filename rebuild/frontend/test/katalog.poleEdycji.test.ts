@@ -44,7 +44,9 @@ describe("pola edycji — zgodność z backendem 12a", () => {
   it("wysyłane klucze są DOKŁADNIE listą pól edytowalnych backendu", () => {
     const backend = polaEdytowalneBackendu();
 
-    expect(backend).toHaveLength(42);
+    // 42 z produkcji + `zastosowanie` (odstępstwo na prośbę użytkownika, 2026-09-30).
+    expect(backend).toHaveLength(43);
+    expect(KLUCZE_PAYLOADU).toContain("zastosowanie");
     expect([...KLUCZE_PAYLOADU].sort()).toEqual([...backend].sort());
   });
 
@@ -87,7 +89,7 @@ describe("pola edycji — zgodność z backendem 12a", () => {
   });
 
   it("siatka dzieli się na nagłówek i parametry techniczne", () => {
-    expect(POLA_EDYCJI.filter((pole) => pole.sekcja === "naglowek")).toHaveLength(12);
+    expect(POLA_EDYCJI.filter((pole) => pole.sekcja === "naglowek")).toHaveLength(13); // 12 + `zastosowanie`
     expect(POLA_EDYCJI.filter((pole) => pole.sekcja === "techniczne")).toHaveLength(30);
   });
 });
