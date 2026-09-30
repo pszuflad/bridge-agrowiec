@@ -6,6 +6,11 @@
 //   DB_PATH=./data/bridge.db npm run napraw-nazwy-sklejone [ścieżka-do-csv]
 //
 // Bez podanej ścieżki używa dołączonego pliku `scripts/data/164-poprawione-nazwy.csv`.
+//
+// ⚠ Robi DWIE rzeczy, w tej kolejności: (1) zapisuje `manual_overrides`, żeby poprawka
+// przetrwała przyszłe importy; (2) nadpisuje `products.nazwa` OD RAZU, bo samo (1) nie
+// zmienia tego, co widać w katalogu dziś — patrz komentarz przy `zastosujNazwyWKatalogu()`.
+// Uruchomienie ponowne jest bezpieczne (oba kroki są idempotentne).
 
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -13,7 +18,11 @@ import path from "node:path";
 
 import { otworzBaze } from "../src/db/index.js";
 import { zastosujMigracje } from "../src/db/migrate.js";
-import { naprawNazwySklejone, sparsujWierszeNaprawy } from "../src/import/naprawaNazwSklejonych.js";
+import {
+  naprawNazwySklejone,
+  sparsujWierszeNaprawy,
+  zastosujNazwyWKatalogu,
+} from "../src/import/naprawaNazwSklejonych.js";
 
 const dbPath = process.env.DB_PATH;
 if (!dbPath) {
@@ -40,6 +49,12 @@ try {
   console.log(
     `napraw-nazwy-sklejone: zapisano ${wynik.przetworzono}/${wiersze.length} poprawek nazw ` +
       `(pominięto ${wynik.pominietoPusteNazwy} z pustą nazwą).`,
+  );
+
+  const wynikKatalogu = zastosujNazwyWKatalogu(db, wiersze);
+  console.log(
+    `napraw-nazwy-sklejone: katalog — zaktualizowano ${wynikKatalogu.zaktualizowano}, ` +
+      `bez zmian ${wynikKatalogu.bezZmian}, nie znaleziono produktu ${wynikKatalogu.nieZnaleziono}.`,
   );
 } finally {
   sqlite.close();
