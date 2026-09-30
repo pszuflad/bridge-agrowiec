@@ -54,9 +54,10 @@ describe("zastosujMigracje", () => {
     "014_waga_auto_uzupelniona.sql",
     "015_waga_szacowana.sql",
     "016_mo7_stan_zero.sql",
+    "017_ean_pary.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 35 tabel i 21 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 36 tabel i 21 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -70,7 +71,8 @@ describe("zastosujMigracje", () => {
     // (`staging_one_current_product` na `staging_items`, częściowy `staging_absence_one_choice`): +6 tabel, +2.
     // 013 (I15.6) zostawia starą `selly_products` jako `selly_products_old` (z jej indeksem
     // `_kod`), zabiera jej `_status` i zakłada nową tabelę z sześcioma indeksami: +1 tabela, +5.
-    expect(policzTabele(sqlite)).toBe(35);
+    // 017 (ticket 168) dokłada tabelę `ean_pary` — same UNIQUE (autoindeksy SQLite liczone nie są): +1 tabela, +0.
+    expect(policzTabele(sqlite)).toBe(36);
 
     const indeksy = (
       sqlite
@@ -100,7 +102,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(35);
+    expect(policzTabele(sqlite)).toBe(36);
   });
 
   /**

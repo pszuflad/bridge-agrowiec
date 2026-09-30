@@ -24,6 +24,7 @@ import {
   rememberLink,
   uchwytSqlite,
 } from "./silnik/bridge-ext.js";
+import { uzupelnijEanRekordu } from "../ean-pary/uzupelnianie.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
@@ -39,7 +40,13 @@ export type PozycjaBulku = Record<string, unknown>;
  * @returns LICZBĘ przetworzonych rekordów (nie listę!) — `POST /api/products` oddaje ją jako
  *   `{ok: true, dodano}`. Rekordy bez `kod` są po cichu pomijane i do liczby nie wchodzą.
  */
-export function dodajProduktyBulk(db: Baza, pozycje: PozycjaBulku[]): number {
+export function dodajProduktyBulk(
+  db: Baza,
+  pozycje: PozycjaBulku[],
+  // Ticket 168 (NOWA logika, nie port): uzupełnianie pustego EAN z tabeli par kod↔EAN. Domyślnie
+  // wyłączone (harness charakteryzacyjny porównuje z oryginałem); `POST /api/products` włącza.
+  opcje: { uzupelnijEan?: boolean } = {},
+): number {
   // ⚠ Znacznik czasu liczony RAZ, przed transakcją (`:44747`) — cała partia dostaje ten sam
   // `dataAktualizacji`, nawet jeśli zapis potrwa. Odtworzone dosłownie.
   const teraz = new Date().toISOString();
@@ -139,6 +146,12 @@ export function dodajProduktyBulk(db: Baza, pozycje: PozycjaBulku[]): number {
         applyWagaDziedziczona(db, rekord);
       } catch {
         /* nie blokuj zapisu wiersza błędem dziedziczenia wagi */
+      }
+      // Ticket 168 (NOWA logika): uzupełnienie pustego EAN z tabeli par kod↔EAN.
+      try {
+        if (opcje.uzupelnijEan) uzupelnijEanRekordu(db, rekord);
+      } catch {
+        /* nie blokuj zapisu wiersza błędem reguły EAN */
       }
 
       // ——— Zapis (:44800) ———

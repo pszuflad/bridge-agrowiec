@@ -28,6 +28,7 @@
 // a nadpisanie żyje w `repos/products.ts` i dotyczy `PATCH /api/products/:id` (D-130.3).
 
 import type { Baza } from "../../db/index.js";
+import { znajdzParePoKodzie } from "../../ean-pary/uzupelnianie.js";
 import {
   aktualizujProdukt,
   katalogDoImportu,
@@ -477,6 +478,20 @@ export function stworzPolitykeStagingu(
 
       d.kod = kod;
       if (!d.ean && biezacy?.ean) d.ean = biezacy.ean;
+      // Ticket 168 (NOWA logika): pusty EAN uzupełniany z tabeli par `kod`↔EAN, żeby kolejny import
+      // nie pokazywał różnicy „EAN → pusty" i nie gubił wygenerowanego numeru (także po `clear`).
+      if (!d.ean) {
+        const para = znajdzParePoKodzie(db, kod);
+        if (para) {
+          Object.assign(d, {
+            ean: para.ean,
+            eanRaw: para.ean,
+            eanIsValid: 1,
+            eanSourceStatus: "ok",
+            eanCandidates: null,
+          });
+        }
+      }
 
       const bledy: string[] = [];
       if (ev.error) {

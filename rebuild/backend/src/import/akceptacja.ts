@@ -13,6 +13,7 @@ import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
 // Wspólny z `bulk.ts` od 12a — obie ścieżki importu zapisują tę samą tabelę tym samym odsiewem.
 import { tylkoKolumnyProduktu } from "../repos/products.js";
 import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
+import { uzupelnijEanRekordu } from "../ean-pary/uzupelnianie.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
@@ -47,6 +48,10 @@ const STARE_NADAWANIE_KODU: NadawanieKoduImportu = (db, produkt, istniejacy) => 
  *
  * @param uzytkownikId trafia do `manual_overrides.createdBy` przy potwierdzaniu konfliktu
  * @param nadajKod wersja `assignKodImportu` — patrz `NadawanieKoduImportu`
+ * @param uzupelnijEan ticket 168 (NOWA logika, nie port): uzupełnia pusty EAN z tabeli par
+ *   `kod`↔EAN. Domyślnie wyłączone — harness charakteryzacyjny porównuje port z oryginałem,
+ *   który tej reguły nie ma (ta sama konstrukcja co `nadajKod`); produkcyjna ścieżka Staging v2
+ *   (`polityka/akceptacja.ts`) włącza ją jawnie.
  * @returns `false`, gdy pozycji o tym id nie było (oryginał robi ciche `return`)
  */
 export function zatwierdzPozycjeStagingu(
@@ -54,6 +59,7 @@ export function zatwierdzPozycjeStagingu(
   id: number,
   uzytkownikId: number,
   nadajKod: NadawanieKoduImportu = STARE_NADAWANIE_KODU,
+  uzupelnijEan = false,
 ): boolean {
   const pozycja = db.select().from(stagingItems).where(eq(stagingItems.id, id)).get();
   if (!pozycja) return false;
@@ -222,6 +228,13 @@ export function zatwierdzPozycjeStagingu(
     applyWagaDziedziczona(db, rekord);
   } catch {
     /* nie blokuj zapisu pozycji błędem dziedziczenia wagi */
+  }
+  // Szóste rozszerzenie, spoza portu — ticket 168, NOWA logika biznesowa (`ean-pary/uzupelnianie.ts`):
+  // pusty EAN dostaje wartość z tabeli par `kod`↔EAN (999…), niepusty zostaje nietknięty.
+  try {
+    if (uzupelnijEan) uzupelnijEanRekordu(db, rekord);
+  } catch {
+    /* nie blokuj zapisu pozycji błędem reguły EAN */
   }
 
   // ——— Zapis produktu (:44906) ———
