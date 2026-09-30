@@ -75,7 +75,7 @@ export function zatwierdzPozycjeZPolityka(db: Baza, id: number, uzytkownikId: nu
       eanSourceStatus: sv.status,
     });
 
-    zatwierdzPozycjeStagingu(db, id, uzytkownikId, nadajKodImportu);
+    zatwierdzPozycjeStagingu(db, id, uzytkownikId, nadajKodImportu, true);
 
     // ——— Ochrona ręcznego wstrzymania (#104, `:216-222`) ———
     // Produkt wstrzymany AUTOMATYCZNIE wraca do gry: znika znacznik, a świeża akceptacja

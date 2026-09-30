@@ -19,6 +19,7 @@
     "seed:dev": "tsx scripts/seed-dev.ts",
     "dziedzicz-wage": "tsx scripts/dziedzicz-wage.ts",
     "oszacuj-wage": "tsx scripts/oszacuj-wage.ts",
+    "uzupelnij-ean": "tsx scripts/uzupelnij-ean.ts",
     "napraw-nazwy-sklejone": "tsx scripts/napraw-nazwy-sklejone.ts",
     "rozdziel-kod-importu": "tsx scripts/rozdziel-kod-importu.ts",
     "test": "vitest run",

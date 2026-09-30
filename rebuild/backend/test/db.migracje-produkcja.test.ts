@@ -166,6 +166,7 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
     const nazwyPrzed = new Set(przed.map((o) => o.name));
     expect(po.filter((o) => !nazwyPrzed.has(o.name)).map((o) => o.name).sort()).toEqual([
       "alerty_katalogu_statusy",
+      "ean_pary",
       "idx_alerty_katalogu_statusy_klucz",
       "product_absence_checks",
       "product_auto_suspensions",
