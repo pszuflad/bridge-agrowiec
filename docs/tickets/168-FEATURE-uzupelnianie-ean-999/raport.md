@@ -38,3 +38,11 @@ None. Nowa tabela, nowe trasy; zachowanie istniejących tras bez zmian poza uzup
 - Brak UI (przycisk „Uzupełnij EAN”) — poza zakresem.
 - `src/selly/mapper.ts:197-203` ma znany błąd flag `'Tak'` (backlog #154.1) — niezwiązane.
 - Po wdrożeniu warto jednorazowo wywołać `POST /api/ean-pary/uzupelnij` z `dry_run: true`, żeby zmierzyć liczbę pustych EAN-ów w produkcji.
+
+## Review fixes applied
+- BLOCKER: `POST /api/products` (bulk) nadpisywał prawdziwy EAN istniejącego produktu wygenerowanym, gdy payload nie miał `ean` → `uzupelnijEanRekordu` dziedziczy EAN istniejącej karty (bulk i akceptacja); test regresji.
+- SHOULD-FIX: `dry_run` nie-boolean → 400 (test); staging pomija parę, której EAN nosi już inny produkt; poprawiony komentarz o rezerwacji numerów.
+- Dodano `docs/spec-backend/wpis-168.md` i `docs/rebuild-backlog/wpis-168.md`. Drugiego przebiegu reviewera nie robiono — poprawki są lokalne i pokryte testami.
+
+## Docs updates
+Wpisy: `docs/spec-backend/wpis-168.md`, `docs/rebuild-backlog/wpis-168.md`, wiersz 017 w `rebuild/schema/README.md`. Brak karty odbudowy dla tego ticketu.
