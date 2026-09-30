@@ -14,6 +14,7 @@ import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
 import { tylkoKolumnyProduktu } from "../repos/products.js";
 import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
+import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
 /**
  * Rekord produktu budowany z pozycji stagingu. Celowo luźny: oryginał składa go ze snapshotu
@@ -206,6 +207,9 @@ export function zatwierdzPozycjeStagingu(
   } catch {
     /* jak `catch (_be) {}` */
   }
+  // Odstępstwo od produkcji (2026-09-30): „DEMO" na końcu nazwy ma ostatnie słowo —
+  // także wobec pamięci nazw.
+  rekord.nazwa = nazwaZDemo(rekord.nazwa as string | null, rekord.kodDostawcy as string | null);
   try {
     applyWagaPamiec(sqlite, rekord, istniejacy);
   } catch {
