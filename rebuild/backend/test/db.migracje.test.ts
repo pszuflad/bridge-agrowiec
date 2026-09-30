@@ -53,6 +53,7 @@ describe("zastosujMigracje", () => {
     "013_selly_products_warianty.sql",
     "014_waga_auto_uzupelniona.sql",
     "015_waga_szacowana.sql",
+    "016_mo7_stan_zero.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 35 tabel i 21 indeksów", () => {
