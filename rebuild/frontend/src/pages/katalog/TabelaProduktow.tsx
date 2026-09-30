@@ -180,9 +180,13 @@ export function TabelaProduktow({
               data-testid={`row-product-${produkt.id}`}
             >
               <td
-                className={`px-3 py-2 text-xs sticky left-0 bg-background truncate ${CIEN_PRZYKLEJENIA}`}
+                className={`px-3 py-2 text-xs sticky left-0 bg-background cursor-pointer ${
+                  rozwinieteNazwy.has(produkt.id) ? "whitespace-normal break-words" : "truncate"
+                } ${CIEN_PRZYKLEJENIA}`}
                 style={{ minWidth: SZEROKOSC_NAZWY, maxWidth: SZEROKOSC_NAZWY }}
                 title={produkt.nazwa}
+                onClick={() => przelaczNazwe(produkt.id)}
+                data-testid={`cell-nazwa-${produkt.id}`}
               >
                 {produkt.nazwa}
               </td>
