@@ -595,3 +595,18 @@ export const stagingAbsenceDecisions = sqliteTable("staging_absence_decisions", 
 		.on(table.supplier, table.selectedSourceCode)
 		.where(sql`selected_source_code IS NOT NULL`),
 ]);
+
+// Ticket 168 (NOWA logika, nie port; migracja 017) — pary `products.kod` ↔ EAN wygenerowany
+// regułą uzupełniania pustych EAN-ów (prefiks 999). `numer` to licznik, z którego liczony jest EAN.
+export const eanPary = sqliteTable("ean_pary", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	kod: text().notNull(),
+	ean: text().notNull(),
+	numer: integer().notNull(),
+	dostawca: text(),
+	kodDostawcy: text("kod_dostawcy"),
+	status: text().default("aktywny").notNull(),
+	utworzono: text().notNull(),
+	zastapiono: text(),
+	zastapionyPrzez: text("zastapiony_przez"),
+});

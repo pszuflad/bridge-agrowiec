@@ -166,6 +166,14 @@ log "ticket 164: naprawa nazw sklejonych opon (manual_overrides + products.nazwa
 log "ticket 165: rozdzielenie kod_importu dla znanych kolizji (backlog #108)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run rozdziel-kod-importu 2>&1 | tee -a "$LOG" )
 
+# --- ticket 168: uzupełnienie pustych EAN-ów (prefiks 999, tabela ean_pary) ---
+# NOWA logika biznesowa (decyzja użytkownika 2026-09-30): przy wdrożeniu każdy produkt z PUSTYM EAN
+# dostaje EAN z reguły. Idempotentne — dotyka wyłącznie pustych pól, więc bezwarunkowe uruchamianie
+# przy każdym deployu jest bezpieczne (jak naprawa nazw wyżej); kopia bazy z kroku wyżej to punkt
+# powrotu. Wynik (liczby) ląduje w logu deployu.
+log "ticket 168: uzupełnienie pustych EAN (999…)"
+( cd rebuild/backend && DB_PATH="$DATA_DB" npm run uzupelnij-ean 2>&1 | tee -a "$LOG" )
+
 ln -sfn "$RELEASE" "$PROD_ROOT/current"                  # atomowa podmiana
 pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
 ( cd "$PROD_ROOT/current" && PORT="$PORT" HOST="$HOST" DB_PATH="$DATA_DB" NODE_ENV=production \
