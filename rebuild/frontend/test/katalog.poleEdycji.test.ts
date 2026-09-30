@@ -14,6 +14,9 @@ import { describe, expect, it } from "vitest";
 import {
   flagaNaOpcje,
   KLUCZE_PAYLOADU,
+  opcjeZastosowan,
+  rozbijZastosowanie,
+  zlaczZastosowania,
   opcjaNaFlage,
   opcjeSlownika,
   parsujLiczbe,
@@ -44,7 +47,9 @@ describe("pola edycji — zgodność z backendem 12a", () => {
   it("wysyłane klucze są DOKŁADNIE listą pól edytowalnych backendu", () => {
     const backend = polaEdytowalneBackendu();
 
-    expect(backend).toHaveLength(42);
+    // 42 z produkcji + `zastosowanie` (odstępstwo na prośbę użytkownika, 2026-09-30).
+    expect(backend).toHaveLength(43);
+    expect(KLUCZE_PAYLOADU).toContain("zastosowanie");
     expect([...KLUCZE_PAYLOADU].sort()).toEqual([...backend].sort());
   });
 
@@ -87,7 +92,7 @@ describe("pola edycji — zgodność z backendem 12a", () => {
   });
 
   it("siatka dzieli się na nagłówek i parametry techniczne", () => {
-    expect(POLA_EDYCJI.filter((pole) => pole.sekcja === "naglowek")).toHaveLength(12);
+    expect(POLA_EDYCJI.filter((pole) => pole.sekcja === "naglowek")).toHaveLength(13); // 12 + `zastosowanie`
     expect(POLA_EDYCJI.filter((pole) => pole.sekcja === "techniczne")).toHaveLength(30);
   });
 });
@@ -177,5 +182,23 @@ describe("selecty stałe", () => {
   it("status ma dokładnie dwie wartości oryginału", () => {
     const status = POLA_EDYCJI.find((pole) => pole.klucz === "status");
     expect(status?.kontrolka).toMatchObject({ opcje: ["aktywny", "wstrzymany"] });
+  });
+});
+
+describe("zastosowanie — lista zawężona do kategorii", () => {
+  it("oferuje tylko zastosowania kategorii, niezależnie od wielkości liter i ogonków", () => {
+    expect(opcjeZastosowan("Leśne", [])).toEqual([
+      "Ciągnik leśny", "Harwester", "Forwarder", "Skidder", "Uniwersalne/pozostałe",
+    ]);
+    expect(opcjeZastosowan("ciezarowe", [])).toContain("Oś napędowa");
+    expect(opcjeZastosowan("Nieznana", [])).toBeNull();
+  });
+
+  it("nie gubi wartości spoza kategorii i składa wybór w kolejności opcji", () => {
+    const opcje = opcjeZastosowan("Rolnicze", ["Koparka"]) as string[];
+    expect(opcje).toContain("Koparka");
+    expect(zlaczZastosowania(opcje, new Set(["Kombajn", "Ciągnik"]))).toBe("Ciągnik ; Kombajn");
+    expect(zlaczZastosowania(opcje, new Set())).toBeNull();
+    expect(rozbijZastosowanie("Ciągnik ; Kombajn")).toEqual(["Ciągnik", "Kombajn"]);
   });
 });

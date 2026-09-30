@@ -264,7 +264,7 @@ export function tylkoKolumnyProduktu(rekord: Record<string, unknown>): Record<st
  * CZEGO TU NIE MA I DLACZEGO:
  *  • WYLICZANE przez import — `marzaPct`, `magazyn`, `magazynRaw`, `eanRaw`, `eanIsValid`,
  *    `eanSourceStatus`, `eanCandidates`, `kodImportu`, `nieobecnoscPodRzad`, `indeksy`,
- *    `indeks1`, `indeks2`, `dostepnosc`, `rodzaj`, `sku`, `zastosowanie`, `reinforced`,
+ *    `indeks1`, `indeks2`, `dostepnosc`, `rodzaj`, `sku`, `reinforced`,
  *    `extraLoad`, `cutResistant`, `heatResistant` oraz cztery wymiary paczki (`dlugosc`,
  *    `szerokoscPaczki`, `wysokosc`, `wysokoscPrzesylki`), które liczy `applyDims`.
  *  • TOŻSAMOŚĆ i pola serwera — `id`, `kod`, `dataAktualizacji`.
@@ -289,6 +289,9 @@ export const POLA_EDYTOWALNE_PRODUKTU = [
   "ean",
   "status",
   "linkZdjecia",
+  // ⚠ Odstępstwo od produkcji (na prośbę użytkownika, 2026-09-30): oryginalny dialog tego pola nie
+  // ma. Zapis idzie do `manual_overrides`, więc import go nie nadpisze.
+  "zastosowanie",
   // ——— Parametry techniczne ———
   "rozmiar",
   "rozmiarAlternatywny",
