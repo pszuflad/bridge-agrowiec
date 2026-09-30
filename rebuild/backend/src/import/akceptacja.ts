@@ -232,7 +232,7 @@ export function zatwierdzPozycjeStagingu(
   // Szóste rozszerzenie, spoza portu — ticket 168, NOWA logika biznesowa (`ean-pary/uzupelnianie.ts`):
   // pusty EAN dostaje wartość z tabeli par `kod`↔EAN (999…), niepusty zostaje nietknięty.
   try {
-    if (uzupelnijEan) uzupelnijEanRekordu(db, rekord);
+    if (uzupelnijEan) uzupelnijEanRekordu(db, rekord, istniejacy);
   } catch {
     /* nie blokuj zapisu pozycji błędem reguły EAN */
   }

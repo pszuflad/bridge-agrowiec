@@ -149,7 +149,7 @@ export function dodajProduktyBulk(
       }
       // Ticket 168 (NOWA logika): uzupełnienie pustego EAN z tabeli par kod↔EAN.
       try {
-        if (opcje.uzupelnijEan) uzupelnijEanRekordu(db, rekord);
+        if (opcje.uzupelnijEan) uzupelnijEanRekordu(db, rekord, istniejacy);
       } catch {
         /* nie blokuj zapisu wiersza błędem reguły EAN */
       }

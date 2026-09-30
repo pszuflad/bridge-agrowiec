@@ -162,6 +162,17 @@ describe("tabela par i uzupełnianie", () => {
     expect(b2.ean).toBe("5901234123457");
   });
 
+  it("bulk bez klucza `ean` NIE nadpisuje prawdziwego EAN-u istniejącego produktu", () => {
+    db.insert(products).values(produkt({ kod: "IST", ean: "5901234123457" })).run();
+    dodajProduktyBulk(db, [{ ...produkt({ kod: "IST" }) }, { ...produkt({ kod: "IST" }), ean: null }], {
+      uzupelnijEan: true,
+    });
+    expect(db.select().from(products).where(eq(products.kod, "IST")).get()!.ean).toBe(
+      "5901234123457",
+    );
+    expect(znajdzParePoKodzie(db, "IST")).toBeNull();
+  });
+
   it("baza nie pozwala na duplikat EAN ani kodu w tabeli par", () => {
     przydzielEan(db, { kod: "K1" });
     const p = znajdzParePoKodzie(db, "K1")!;
@@ -222,6 +233,12 @@ describe("trasy /api/ean-pary", () => {
     expect((await get("/api/ean-pary/po-ean/5901234123457")).body.kod).toBe("T2");
     expect((await post("/api/ean-pary/generuj", {})).status).toBe(400);
     expect((await post("/api/ean-pary/generuj", { kod: "NIE-MA" })).status).toBe(404);
+  });
+
+  it("uzupelnij: dry_run nie-logiczny daje 400 i niczego nie zapisuje", async () => {
+    expect((await post("/api/ean-pary/uzupelnij", { dry_run: "true" })).status).toBe(400);
+    expect((await post("/api/ean-pary/uzupelnij", { dry_run: 1 })).status).toBe(400);
+    expect((await get("/api/ean-pary")).body.lacznie).toBe(0);
   });
 
   it("uzupelnij: dry_run liczy, zwykłe wywołanie zapisuje, lista zwraca pary", async () => {

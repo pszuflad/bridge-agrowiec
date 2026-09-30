@@ -82,8 +82,8 @@ export function przydzielEan(
     const ean = eanZNumeru(numer);
     const teraz = new Date().toISOString();
     if (istniejaca) {
-      // EAN tej pary zajął inny produkt — para dostaje nowy numer (stary zostaje zarezerwowany
-      // przez UNIQUE tylko jeśli ktoś go używa; tu go oddajemy, bo nikt z tej pary go nie nosi).
+      // EAN tej pary nosi teraz inny produkt — para dostaje nowy numer. Stary numer pozostaje
+      // wykluczony z puli tak długo, jak ten produkt go nosi (`wolnyNumer` sprawdza `products.ean`).
       t.update(eanPary)
         .set({ ean, numer, status: "aktywny", zastapiono: null, zastapionyPrzez: null })
         .where(eq(eanPary.id, istniejaca.id))
@@ -122,9 +122,20 @@ export function oznaczJakoZastapiona(db: Baza, kod: string, nowyEan: string): bo
  * może zablokować zapisu). Pusty EAN dostaje wartość z pary; niepusty zostaje nietknięty,
  * a ewentualna para o innym EAN-ie dostaje status `zastapiony`.
  */
-export function uzupelnijEanRekordu(db: Baza, rekord: Record<string, unknown>): void {
+export function uzupelnijEanRekordu(
+  db: Baza,
+  rekord: Record<string, unknown>,
+  istniejacy?: { ean?: unknown } | null,
+): void {
   const kod = typeof rekord.kod === "string" ? rekord.kod : "";
   if (kod === "") return;
+
+  // Produkt, który ma już EAN w katalogu, nigdy nie traci go na rzecz wygenerowanego — nawet gdy
+  // zapis (np. `POST /api/products` bez klucza `ean`) go nie niesie. Reguła dotyczy pustych pól.
+  if (pustyEan(rekord.ean) && !pustyEan(istniejacy?.ean)) {
+    rekord.ean = String(istniejacy!.ean).trim();
+    return;
+  }
 
   if (pustyEan(rekord.ean)) {
     const { ean } = przydzielEan(db, {

@@ -482,7 +482,8 @@ export function stworzPolitykeStagingu(
       // nie pokazywał różnicy „EAN → pusty" i nie gubił wygenerowanego numeru (także po `clear`).
       if (!d.ean) {
         const para = znajdzParePoKodzie(db, kod);
-        if (para) {
+        // Para, której EAN nosi już inny produkt, nie jest wstawiana — akceptacja nada nowy numer.
+        if (para && !produkty.some((p) => p.kod !== kod && p.ean === para.ean)) {
           Object.assign(d, {
             ean: para.ean,
             eanRaw: para.ean,

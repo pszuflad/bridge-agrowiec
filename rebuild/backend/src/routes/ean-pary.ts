@@ -113,7 +113,12 @@ export function trasyEanPary({ db }: ZaleznosciEanPary): Router {
 
   /** Uzupełnia puste EAN-y w całym katalogu; `dry_run: true` tylko liczy. */
   router.post("/api/ean-pary/uzupelnij", requireAuth, (req: Request, res: Response) => {
-    const dryRun = req.body?.dry_run === true;
+    const surowy = req.body?.dry_run;
+    if (surowy !== undefined && typeof surowy !== "boolean") {
+      res.status(400).json({ error: "Pole `dry_run` musi być wartością logiczną (true/false)." });
+      return;
+    }
+    const dryRun = surowy === true;
     const wynik = uzupelnijKatalog(db, { dryRun });
     if (!dryRun) {
       const user = req.user!;
