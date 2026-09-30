@@ -72,6 +72,10 @@ export const POLA_EDYCJI: readonly PoleEdycji[] = [
   { etykieta: "EAN", klucz: "ean", sekcja: "naglowek", kontrolka: { typ: "tekst", mono: true } },
   { etykieta: "Status", klucz: "status", sekcja: "naglowek", kontrolka: { typ: "select", opcje: ["aktywny", "wstrzymany"] } },
   { etykieta: "Link do zdjecia", klucz: "linkZdjecia", sekcja: "naglowek", kontrolka: { typ: "tekst", span: true } },
+  // ⚠ ODSTĘPSTWO OD 1:1, NA PROŚBĘ UŻYTKOWNIKA (2026-09-30): dialog produkcji nie ma tego pola
+  // (`zastosowanie` jest tam tylko kolumną tabeli). Wartość bywa wieloelementowa („A + B"),
+  // więc zwykły input, nie select słownikowy.
+  { etykieta: "Zastosowanie", klucz: "zastosowanie", sekcja: "naglowek", kontrolka: { typ: "tekst", span: true } },
 
   // ——— Parametry techniczne (`:24064-24095`) ———
   { etykieta: "Rozmiar", klucz: "rozmiar", sekcja: "techniczne", kontrolka: { typ: "selectAlboTekst", rodzajSlownika: "rozmiar" } },
