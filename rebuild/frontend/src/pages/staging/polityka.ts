@@ -21,6 +21,8 @@ import { zadanie } from "@/lib/api";
 /** Pozycja oferty obok starej karty — wpis `_candidates` ze snapshotu, wzbogacony przez `review`. */
 export type KandydatPrzegladu = {
   kod: string;
+  /** Id karty w katalogu (do linku „Zobacz w katalogu"); `null`, gdy karty już nie ma. */
+  produktId?: number | null;
   nazwa?: string | null;
   rozmiar?: string | null;
   dot?: string | null;
@@ -61,6 +63,31 @@ export type KonfliktZrodla = {
   later: WierszKonfliktu;
 };
 
+/** Pola, które można wpisać po swojemu przy rozstrzyganiu (kolejność = kolejność w oknie). */
+export const POLA_WLASNE = [
+  ["nazwa", "Nazwa"],
+  ["marka", "Marka"],
+  ["model", "Model"],
+  ["rozmiar", "Rozmiar"],
+  ["dot", "DOT"],
+  ["ean", "EAN"],
+] as const;
+export type PoleWlasne = (typeof POLA_WLASNE)[number][0];
+export type WlasneParametry = Partial<Record<PoleWlasne, string>>;
+
+/** Z wpisanych wartości zostawia tylko te, które różnią się od propozycji z importu. */
+export function zmienioneParametry(
+  wpisane: WlasneParametry,
+  propozycja: WlasneParametry | undefined,
+): WlasneParametry {
+  const wynik: WlasneParametry = {};
+  for (const [pole] of POLA_WLASNE) {
+    const wpis = (wpisane[pole] ?? "").trim().replace(/\s+/g, " ");
+    if (wpis && wpis !== (propozycja?.[pole] ?? "").trim()) wynik[pole] = wpis;
+  }
+  return wynik;
+}
+
 /** Odpowiedź `GET /api/staging/{id}/review` — kształt z `contract/openapi.yaml`. */
 export type PrzegladZgloszenia = {
   id: number;
@@ -73,6 +100,13 @@ export type PrzegladZgloszenia = {
   duplicateSource: boolean;
   sourceConflict: KonfliktZrodla | null;
   eanIssue: string | null;
+  /**
+   * NOWE (2026-09-30, nie port): krótkie zdania, co jest nie tak z tą pozycją — zamiast samego
+   * hasła importera. Puste = brak wyjaśnienia (stare zgłoszenie) → okno pokazuje `matchIssue`.
+   */
+  wyjasnienie?: string[];
+  /** NOWE: wartości z importu do podstawienia w polach własnej poprawki. */
+  propozycja?: Partial<Record<PoleWlasne, string>>;
   /**
    * ⚠ `stan` i `status` pochodzą z PRODUKTU W KATALOGU, reszta ze snapshotu zgłoszenia
    * (`staging-polityka.ts`, port `staging_policy.cjs:630`). Okno pokazuje więc obok siebie
@@ -173,6 +207,10 @@ export const KOD_NOWEGO_PRODUKTU = "__new__";
 /**
  * `POST /api/staging/{id}/resolve` — rozstrzygnięcie niejednoznacznego dopasowania (`:131`).
  *
+ * ⚠ ODSTĘPSTWO OD PRODUKCJI (decyzja użytkowniczki, 2026-09-30): serwer zapisuje wynik OD RAZU
+ * w katalogu (produkcja zakłada nowe zgłoszenie do drugiej akceptacji), a `corrections` niesie
+ * własne, poprawione wartości pól — tylko te, które użytkowniczka zmieniła.
+ *
  * ⚠ `targetCode` leci TYLKO przy `action: "link"`. Oryginał podaje `undefined` dla „nowego
  * produktu", a `JSON.stringify` wycina wtedy klucz — odtwarzamy to pominięciem pola, nie
  * wysłaniem `null` (backend sprawdza `produktPoKodzie(String(targetCode))`).
@@ -180,13 +218,15 @@ export const KOD_NOWEGO_PRODUKTU = "__new__";
 export async function rozstrzygnijDopasowanie(
   id: number,
   wybor: string,
-): Promise<{ ok: boolean; id: number; kod: string }> {
+  poprawki: WlasneParametry = {},
+): Promise<{ ok: boolean; kod: string }> {
   const nowy = wybor === KOD_NOWEGO_PRODUKTU;
   const odpowiedz = await zadanie("POST", `/api/staging/${id}/resolve`, {
     action: nowy ? "new" : "link",
     ...(nowy ? {} : { targetCode: wybor }),
+    ...(Object.keys(poprawki).length ? { corrections: poprawki } : {}),
   });
-  return (await odpowiedz.json()) as { ok: boolean; id: number; kod: string };
+  return (await odpowiedz.json()) as { ok: boolean; kod: string };
 }
 
 export type DecyzjaSprzecznosci = "merge" | "split";

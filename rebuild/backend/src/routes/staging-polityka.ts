@@ -16,7 +16,12 @@ import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { norm, version } from "../import/polityka/helpery.js";
 import { produktPoKodzie, pozycjaStagingu, type Snapshot } from "../import/polityka/kontekst.js";
-import { rozstrzygnijZgloszenie } from "../import/polityka/zgloszenia.js";
+import {
+  odczytajPoprawki,
+  POLA_POPRAWEK,
+  rozstrzygnijIZatwierdz,
+} from "../import/polityka/rozstrzygniecie-z-zapisem.js";
+import { wyjasnijZgloszenie } from "../import/polityka/wyjasnienie.js";
 import { rozstrzygnijSprzecznoscZrodla } from "../import/polityka/sprzecznosc-zrodla.js";
 import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
 import {
@@ -72,6 +77,7 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
     const snap = JSON.parse(row.snapshotJson || "{}") as Snapshot;
     const product = produktPoKodzie(db, row.kod);
     const kandydaci = (snap._candidates ?? []) as Array<Record<string, unknown>>;
+    const produktyKandydatow = kandydaci.map((c) => produktPoKodzie(db, String(c.kod)));
 
     return res.json({
       id: row.id,
@@ -84,6 +90,20 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
       duplicateSource: !!snap._duplicateSource,
       sourceConflict: snap._sourceConflict || null,
       eanIssue: snap._eanIssue || null,
+      // NOWE (2026-09-30): zdania dla człowieka, co jest nie tak, i dane do ręcznej poprawki.
+      wyjasnienie: wyjasnijZgloszenie({
+        snap,
+        nazwaImportu: row.nazwa,
+        powod: row.powod,
+        kandydaci: kandydaci as Array<{ kod: string; nazwa?: unknown }>,
+        produktyKandydatow,
+      }),
+      propozycja: Object.fromEntries(
+        POLA_POPRAWEK.map((pole) => [
+          pole,
+          String((pole === "nazwa" ? row.nazwa : snap[pole]) ?? ""),
+        ]),
+      ),
       incoming: {
         marka: snap.marka,
         model: snap.model,
@@ -93,8 +113,8 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
         stan: product?.stan,
         status: product?.status,
       },
-      candidates: kandydaci.map((c) => {
-        const p = produktPoKodzie(db, String(c.kod));
+      candidates: kandydaci.map((c, i) => {
+        const p = produktyKandydatow[i];
         // `selectable` to ta sama trójstronna zgodność DOT, co w `chooseAbsenceCard` —
         // panel nie może zaproponować wyboru, którego akcja i tak by odrzuciła.
         const selectable =
@@ -106,6 +126,7 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
           (!c.ean || !p.ean || norm(c.ean) === norm(p.ean));
         return {
           ...c,
+          produktId: p?.id ?? null,
           catalogStan: p?.stan ?? null,
           status: p?.status ?? null,
           catalogDot: p?.dot ?? null,
@@ -161,20 +182,43 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
     }
   });
 
-  /** Rozstrzygnięcie niejednoznacznego dopasowania — `staging_policy.cjs:657-663`. */
+  /**
+   * Rozstrzygnięcie niejednoznacznego dopasowania — `staging_policy.cjs:657-663`.
+   *
+   * ⚠ ODSTĘPSTWO OD PRODUKCJI (decyzja użytkowniczki, 2026-09-30): decyzja od razu ZATWIERDZA
+   * wynik do katalogu (bez drugiej akceptacji w stagingu) i przyjmuje `corrections` — własne,
+   * poprawione wartości pól. Szczegóły: `import/polityka/rozstrzygniecie-z-zapisem.ts`.
+   */
   router.post("/api/staging/:id/resolve", requireAuth, (req, res) => {
     try {
-      const cialo = (req.body ?? {}) as { action?: unknown; targetCode?: unknown };
-      const row = rozstrzygnijZgloszenie(db, Number(req.params.id), cialo.action, cialo.targetCode);
+      const cialo = (req.body ?? {}) as {
+        action?: unknown;
+        targetCode?: unknown;
+        corrections?: unknown;
+      };
+      const poprawki = odczytajPoprawki(cialo.corrections);
+      const wynik = rozstrzygnijIZatwierdz(
+        db,
+        Number(req.params.id),
+        cialo.action,
+        cialo.targetCode,
+        poprawki,
+        req.user!.id,
+      );
       zapiszAudyt(db, {
         uzytkownikId: req.user?.id ?? null,
         uzytkownikImie: req.user?.imieNazwisko ?? null,
         akcja: "rozstrzygniecie_stagingu",
         encjaTyp: "staging",
         encjaId: String(req.params.id),
-        szczegoly: { action: cialo.action, kod: row.kod },
+        szczegoly: { action: cialo.action, kod: wynik.kod, poprawki },
       });
-      return res.json({ ok: true, id: row.id, kod: row.kod });
+      try {
+        skanujNoweWartosci(db);
+      } catch (e) {
+        console.error("[pending] skan po rozstrzygnięciu dopasowania:", e instanceof Error ? e.message : e);
+      }
+      return res.json({ ok: true, kod: wynik.kod });
     } catch (e) {
       return odpowiedzBledem(res, e);
     }
