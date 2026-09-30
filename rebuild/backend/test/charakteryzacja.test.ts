@@ -25,6 +25,7 @@ import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
 import { listaDostawcow, parsujBufor, parsujPlik } from "../src/import/parsuj.js";
+import { nazwaZDemo } from "../src/import/polityka/nazwa-demo.js";
 import { KODY_DOSTAWCOW } from "../src/import/typy.js";
 import type { RekordSurowy, WynikParsowania } from "../src/import/typy.js";
 import { pobierzMo9Offline } from "./charakteryzacja/mo9-offline.mjs";
@@ -167,10 +168,15 @@ describe("2. Charakteryzacja — port daje wyjście identyczne z oryginałem", (
     // Porównanie pole po polu — przy rozjeździe komunikat wskazuje rekord i pole,
     // zamiast wyrzucać różnicę dwóch 200-elementowych tablic.
     for (let i = 0; i < wzorzec.rekordy.length; i++) {
-      // Jedyne świadome odstępstwo od oryginału (decyzja Anny 2026-09-30): stan MO7 = 0,
-      // a wzorzec pamięta „5+" z cennika Nokiana. Wzorzec zostaje nagraniem oryginału.
-      const oczekiwany =
-        kod === "MO7" ? { ...wzorzec.rekordy[i]!, stan: 0 } : wzorzec.rekordy[i]!;
+      // Świadome odstępstwa od nagrania produkcji (decyzje Anny 2026-09-30):
+      //  - „DEMO" na końcu nazwy przy kodzie dostawcy z „demo" (`polityka/nazwa-demo.ts`),
+      //  - stan MO7 = 0, bo wzorzec pamięta „5+" z cennika Nokiana.
+      const oczekiwanyZProdukcji = wzorzec.rekordy[i]!;
+      const oczekiwany = {
+        ...oczekiwanyZProdukcji,
+        nazwa: nazwaZDemo(oczekiwanyZProdukcji.nazwa, oczekiwanyZProdukcji.kodDostawcy),
+        ...(kod === "MO7" ? { stan: 0 } : {}),
+      };
       const otrzymany = otrzymane.rekordy[i]!;
       expect(Object.keys(otrzymany).sort(), `${kod}[${i}] zestaw pól`).toEqual(
         Object.keys(oczekiwany).sort(),
