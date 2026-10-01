@@ -87,6 +87,7 @@ import {
   version,
 } from "./helpery.js";
 // Prymitywy używane wyłącznie przez importer — oryginał ich nie eksportuje.
+import { normalizujPozycje } from "./normalizacja-pozycji.js";
 import { codeKey, LABEL, sourceKey } from "./podstawy.js";
 // Odstępstwo 2026-10-01: dopasowanie po poprawkach karty i z pokrewnymi DOT (plik opisuje powód).
 import {
@@ -397,6 +398,8 @@ export function stworzPolitykeStagingu(
       // Samo „DOT” w modelu/bieżniku to oznaczenie dostawcy w nazwie (decyzja 2026-10-01).
       if (d.model) d.model = oczyscModelZDot(d.model) as string;
       if (d.bieznik) d.bieznik = oczyscModelZDot(d.bieznik) as string;
+      // Etap 3 (2026-10-01): dopiski osi, utracone HS/LS, DOT dwucyfrowy/WWYY, konstrukcja, ucięte indeksy.
+      d = normalizujPozycje(d);
       Object.assign(d, {
         ean: ev.value,
         eanRaw: ev.raw,

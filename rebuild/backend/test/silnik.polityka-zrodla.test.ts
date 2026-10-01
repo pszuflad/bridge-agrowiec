@@ -21,6 +21,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // Ten gate porównuje port z ŻYWYM oryginałem 1:1, a oryginał nie ma tolerancji dopasowania
 // (decyzje użytkowniczki 2026-10-01, `polityka/tolerancja-dopasowania.ts`) — wyłączamy ją tylko tutaj.
 // Samą tolerancję pokrywa `tolerancja-dopasowania.test.ts`.
+// Ten sam powód dla normalizacji pozycji (Etap 3, 2026-10-01, `polityka/normalizacja-pozycji.ts`): oryginał
+// jej nie ma, a gate porównuje port z nim 1:1. Samą normalizację pokrywa `normalizacja-pozycji.test.ts`.
+vi.mock("../src/import/polityka/normalizacja-pozycji.js", () => ({
+  normalizujPozycje: <T>(d: T) => d,
+  kluczModelu: (v: unknown) => String(v ?? ""),
+}));
+
 vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
   const { compatibility, norm } = await import("../src/import/polityka/helpery.js");
   const { separateDotBatch } = await import("../src/import/polityka/podstawy.js");

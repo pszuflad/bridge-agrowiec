@@ -21,6 +21,7 @@
 // przechodzą dalej bez zmian.
 
 import { compatibility, norm, validateEan, type WynikEan } from "./helpery.js";
+import { kluczModelu } from "./normalizacja-pozycji.js";
 import { separateDotBatch } from "./podstawy.js";
 
 type Pozycja = Record<string, unknown>;
@@ -102,7 +103,11 @@ function widok(
   poprawki: readonly PoprawkaKarty[] | undefined,
   bezDot = false,
 ): Pozycja {
-  const z = zPoprawkami(d, poprawki);
+  const z0 = zPoprawkami(d, poprawki);
+  // Model porównujemy kluczem (spacje, `-`, wielkość liter, dopiski osi nie mają znaczenia — Etap 3,
+  // 2026-10-01): gdy klucze się zgadzają, wiersz dostaje zapis karty.
+  const z =
+    z0.model && p.model && kluczModelu(z0.model) === kluczModelu(p.model) ? { ...z0, model: p.model } : z0;
   if (bezDot) {
     const wynik: Pozycja = { ...z, dot: p.dot };
     for (const k of POLA_BRAK_TO_NIE_SPRZECZNOSC) {

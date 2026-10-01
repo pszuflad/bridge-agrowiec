@@ -23,6 +23,7 @@
     "napraw-nazwy-sklejone": "tsx scripts/napraw-nazwy-sklejone.ts",
     "rozdziel-kod-importu": "tsx scripts/rozdziel-kod-importu.ts",
     "scal-karty-auto": "tsx scripts/scal-karty-auto.ts",
+    "normalizuj-katalog": "tsx scripts/normalizuj-katalog.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
