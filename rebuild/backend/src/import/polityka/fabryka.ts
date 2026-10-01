@@ -91,6 +91,7 @@ import { codeKey, LABEL, sourceKey } from "./podstawy.js";
 // Odstępstwo 2026-10-01: dopasowanie po poprawkach karty i z pokrewnymi DOT (plik opisuje powód).
 import {
   dotZgodny,
+  kartaWlasnejPartii,
   osobnaPartia,
   zgodna,
   type PoprawkaKarty,
@@ -470,7 +471,17 @@ export function stworzPolitykeStagingu(
       // ——— 7. Zgodne cechy pod innym kodem — NIE auto-dopasowuje (`:396-402`) ———
       if (!biezacy && !problemDopasowania) {
         const zgodniPoCechach = produkty.filter((p) => zgodnaZ(d, p));
-        if (zgodniPoCechach.length) {
+        // Odstępstwo 2026-10-01: karta założona przez system dla TEGO wiersza (osobna partia DOT
+        // z kodem `…_AUTO_…`) to dopasowanie, nie pytanie. EAN nie przeszkadza, gdy wiersz go nie
+        // ma, jest ten sam albo karta ma wygenerowany (999…) — prawdziwy EAN z cennika go zastąpi.
+        const wlasne = zgodniPoCechach.filter(
+          (p) =>
+            kartaWlasnejPartii(d, p as unknown as Pozycja, (v) => codeKey(dostawca, v)) &&
+            (!ev.value || ev.value === p.ean || znajdzParePoKodzie(db, p.kod)?.ean === p.ean),
+        );
+        if (wlasne.length === 1 && zgodniPoCechach.length === 1) {
+          biezacy = wlasne[0]!;
+        } else if (zgodniPoCechach.length) {
           kandydaci = zgodniPoCechach;
           problemDopasowania =
             "Podobna opona jest już w katalogu, ale ma inny kod lub EAN. Sprawdź dopasowanie.";
