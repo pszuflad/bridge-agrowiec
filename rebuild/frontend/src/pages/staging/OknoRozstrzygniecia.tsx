@@ -316,7 +316,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   ))}
 
                   <p
-                    className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
+                    className="my-2.5 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2"
                     data-testid="notatka-wyboru"
                   >
                     {notatkaWyboru(zgodni)}
@@ -334,7 +334,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   */}
                   {!przeglad.duplicateSource && przeglad.wyjasnienie?.length ? (
                     <div
-                      className="my-2.5 space-y-1 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2 text-sm"
+                      className="my-2.5 space-y-1 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2 text-sm"
                       data-testid="wyjasnienie"
                     >
                       <strong className="block">Dlaczego to zgłoszenie czeka na decyzję:</strong>
@@ -467,7 +467,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   {przeglad.sourceConflict ? (
                     <>
                       <div
-                        className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
+                        className="my-2.5 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2"
                         data-testid="roznice-wierszy"
                       >
                         <strong className="block">Niezgodne dane (pierwszy → drugi wiersz):</strong>
@@ -522,6 +522,19 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
 
           {/* Stopka: „Zamknij" zawsze pierwszy, przyciski zapisu po nim (`:96`, `:110`, `:128`). */}
           <div className="mt-5 flex flex-wrap justify-end gap-2.5">
+            {/*
+              NOWE (2026-10-01): „Zapisz w katalogu” jest wyłączony, dopóki nie wybrano jednej z opcji
+              (produkt z listy albo „To osobna opona”). Samo wpisanie własnych parametrów go nie
+              odblokowuje — bez tej podpowiedzi przycisk wyglądał na zepsuty.
+            */}
+            {przeglad && pokazDopasowanie && !wybraneDopasowanie ? (
+              <p
+                className="w-full text-right text-sm text-amber-600 dark:text-amber-400"
+                data-testid="podpowiedz-wyboru"
+              >
+                Żeby zapisać, zaznacz powyżej istniejący produkt albo „To osobna opona”.
+              </p>
+            ) : null}
             <Button
               variant="outline"
               onClick={zamknij}

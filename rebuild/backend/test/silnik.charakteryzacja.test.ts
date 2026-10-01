@@ -32,6 +32,21 @@ vi.mock("../src/import/polityka/nazwa-demo.js", () => ({
   zastosujDemoWNazwie: <T>(rekordy: T[]) => rekordy,
 }));
 
+// Drugie świadome odstępstwo (decyzja użytkowniczki, 2026-10-01, `polityka/tolerancja-dopasowania.ts`):
+// dopasowanie po poprawkach karty i z pokrewnymi DOT. Oryginał porównuje surowy wiersz, więc tu
+// wracamy do jego zachowania; regułę pokrywa `tolerancja-dopasowania.test.ts`.
+vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
+  const { compatibility, norm } = await import("../src/import/polityka/helpery.js");
+  const { separateDotBatch } = await import("../src/import/polityka/podstawy.js");
+  type P = Record<string, unknown>;
+  return {
+    dotyPokrewne: (a: unknown, b: unknown) => norm(a) === norm(b),
+    zgodna: (d: P, p: P) => compatibility(d, p).ok,
+    osobnaPartia: (d: P, p: P) => separateDotBatch(d, p),
+    dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
+  };
+});
+
 import { silnikStagingu, type OpcjeImportu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
 import { historiaCen, manualOverrides, products, stagingItems } from "../src/db/schema.js";
