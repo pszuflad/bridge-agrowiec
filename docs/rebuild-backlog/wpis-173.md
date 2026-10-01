@@ -12,6 +12,6 @@ usunęła ręcznie pozycje BKT; reszta nieprzeliczona.
 
 ### #173.2 — Model Continentala: „HS5” → „5” (adapter wycina znacznik techniczny)
 
-**Status:** ⏳ czeka na zgodę (zmiana parsera legacy = odstępstwo od bramki 3a)
-**Do nowej wersji?** —
+**Status:** ❌ odrzucone 2026-10-01 — użytkowniczka: import jest dobry, zmiana niepotrzebna (parser bez zmian)
+**Do nowej wersji?** ❌ NIE
 **Źródło:** `CCCR22538555KCH50`. Propozycja: `TECH_MARK_RE` z `(?![A-Za-z])` na `(?![A-Za-z0-9])`.
