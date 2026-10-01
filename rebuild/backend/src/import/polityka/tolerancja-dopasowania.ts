@@ -45,6 +45,15 @@ const POLA_PORZEDNIE = [
   "dot",
 ] as const;
 
+/**
+ * Cechy dodatkowe, których BRAK w wierszu pliku nie jest sprzeczną z kartą (decyzja użytkowniczki,
+ * 2026-10-01): dostawca podaje je nie w każdym eksporcie (MO2 pomija `TL`, MO3 `TL/TT`), więc pusta
+ * wartość w ofercie przy wypełnionej karcie to „brak informacji”, a nie inna opona. Sprzeczność to
+ * dopiero dwie niepuste, różne wartości (oferta `TT`, karta `TL`). Odwrotnie (karta pusta, oferta
+ * wypełniona) zostaje różnicą — wtedy karta mogłaby nie być tą oponą.
+ */
+const POLA_BRAK_TO_NIE_SPRZECZNOSC = ["pr", "tlTt", "vfIf", "konstrukcja"] as const;
+
 /** Zbiór lat z zapisu DOT; dwucyfrowy rok to rok 20xx; reszta (tekst) zostaje wprost. */
 function zbiorDot(wartosc: unknown): Set<string> {
   const wynik = new Set<string>();
@@ -83,7 +92,8 @@ function zPoprawkami(d: Pozycja, poprawki: readonly PoprawkaKarty[] | undefined)
  * Wiersz pliku w postaci, w jakiej wolno go porównać z kartą `p`.
  *
  * `bezDot` = TA SAMA POZYCJA (ten sam kod): DOT nie jest kryterium, wiersz porównujemy tak, jakby
- * miał DOT karty (decyzja użytkowniczki, 2026-10-01). Bez tego DOT-y pokrewne (`2026` ⊂ `2025,2026`)
+ * miał DOT karty, a pusta cecha dodatkowa oferty (`POLA_BRAK_TO_NIE_SPRZECZNOSC`) — jakby miała
+ * wartość karty (decyzja użytkowniczki, 2026-10-01). Bez tego DOT-y pokrewne (`2026` ⊂ `2025,2026`)
  * liczą się jako zgodne, a rozłączne zostają różnicą — to dla INNEGO kodu (nowy symbol partii).
  */
 function widok(
@@ -93,7 +103,13 @@ function widok(
   bezDot = false,
 ): Pozycja {
   const z = zPoprawkami(d, poprawki);
-  if (bezDot) return { ...z, dot: p.dot };
+  if (bezDot) {
+    const wynik: Pozycja = { ...z, dot: p.dot };
+    for (const k of POLA_BRAK_TO_NIE_SPRZECZNOSC) {
+      if (!norm(z[k]) && norm(p[k])) wynik[k] = p[k];
+    }
+    return wynik;
+  }
   return dotyPokrewne(z.dot, p.dot) && norm(z.dot) !== norm(p.dot) ? { ...z, dot: p.dot } : z;
 }
 

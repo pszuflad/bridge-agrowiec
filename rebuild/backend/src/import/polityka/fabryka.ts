@@ -766,11 +766,12 @@ export function stworzPolitykeStagingu(
           }
         }
 
-        // Powrót wstrzymanej karty wymaga potwierdzenia cech (`:487-489`).
+        // Powrót wstrzymanej karty wymaga potwierdzenia cech (`:487-489`). To ta sama pozycja (ten sam
+        // kod), więc DOT nie jest kryterium — nowy DOT zapisuje się niżej po cichu (odstępstwo 2026-10-01).
         if (
           biezacy &&
           czyAutomatycznieWstrzymany(db, dostawca, biezacy.kod) &&
-          !zgodnaZ(d, biezacy) &&
+          !zgodnaBezDotZ(d, biezacy) &&
           !zmiany.length &&
           !bledy.length
         ) {
