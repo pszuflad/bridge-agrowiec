@@ -57,12 +57,12 @@ try {
       const u = await usunDuplikatySelly(sqlite, klient);
       console.log(
         `scal-karty-auto: usunięto z Selly ${u.usunietoWarianty} wariantów i ${u.usunietoProdukty} produktów ` +
-          `(duplikaty AUTO), błędów ${u.bledy}.`,
+          `(duplikaty AUTO), pominięto ${u.pominieto} (wariant współdzielony), błędów ${u.bledy}.`,
       );
       process.exitCode = u.bledy ? 1 : 0;
     } else {
       const w = await zerujWariantySelly(sqlite, klient);
-      console.log(`scal-karty-auto: wyzerowano ${w.wyzerowano} wariantów w Selly, błędów ${w.bledy}.`);
+      console.log(`scal-karty-auto: wyzerowano ${w.wyzerowano} wariantów w Selly, pominięto ${w.pominieto} (wariant współdzielony), błędów ${w.bledy}.`);
       process.exitCode = w.bledy ? 1 : 0;
     }
   } else {

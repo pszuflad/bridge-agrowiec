@@ -1,0 +1,1 @@
+Ticket 181 — `scal-karty-auto --zeruj-selly` / `--usun-duplikaty-selly` pomijają wariant Selly nadal mapowany przez aktywną kartę (272 z 273 wierszy na produkcji). Bez tej poprawki skrypty wyzerowałyby/usunęłyby towar kart, które zostają. Raport: `docs/tickets/181-BUG-scal-auto-wspoldzielony-wariant/raport.md`.

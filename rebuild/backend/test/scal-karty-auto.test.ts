@@ -152,6 +152,7 @@ describe("scalenie kart AUTO", () => {
     expect(await zerujWariantySelly(baza.sqlite, klient as never, "2026-10-02T11:00:00.000Z")).toEqual({
       wyzerowano: 1,
       bledy: 0,
+      pominieto: 0,
     });
     expect(wywolania).toEqual([[900, 901, { quantity: 0 }]]);
     expect(wiersz(baza, "SELECT wyzerowano_at FROM selly_products_scalone")?.wyzerowano_at).toBe("2026-10-02T11:00:00.000Z");
@@ -170,7 +171,7 @@ describe("scalenie kart AUTO", () => {
         throw new Error("503");
       },
     } as never);
-    expect(w).toEqual({ wyzerowano: 0, bledy: 1 });
+    expect(w).toEqual({ wyzerowano: 0, bledy: 1, pominieto: 0 });
     expect(String(wiersz(baza, "SELECT ostatni_blad FROM selly_products_scalone")?.ostatni_blad)).toContain("503");
   });
 
@@ -321,10 +322,43 @@ describe("scalenie kart AUTO", () => {
     };
     const w = await usunDuplikatySelly(baza.sqlite, klient, "2026-10-02");
     expect(wywolania).toEqual(["V10/101", "P20", "P30"]);
-    expect(w).toEqual({ usunietoWarianty: 1, usunietoProdukty: 1, bledy: 0 });
+    expect(w).toEqual({ usunietoWarianty: 1, usunietoProdukty: 1, bledy: 0, pominieto: 0 });
     expect(ile(baza, "SELECT 1 FROM selly_products_scalone WHERE usunieto_at IS NULL")).toBe(0);
     // --zeruj-selly nie dotyka wierszy do usunięcia
     const z = await zerujWariantySelly(baza.sqlite, { updateVariant: async () => null });
     expect(z.wyzerowano).toBe(0);
+  });
+
+  it("ticket 181: wariant współdzielony z aktywnym mapowaniem — ani zerowania, ani usuwania", async () => {
+    baza = stworzTestowaBaze();
+    selly(baza, REAL, "123456", 50, 501);
+    const wstaw = baza.sqlite.prepare(
+      "INSERT INTO selly_products_scalone (kod_importu, dostawca, bridge_kod, selly_product_id, selly_variant_id, " +
+        "scalono_do, scalono_at, do_usuniecia) VALUES ('1','MO5',?,50,501,?,'t',?)",
+    );
+    wstaw.run("A_ZER", REAL, 0);
+    wstaw.run("A_USUN", REAL, 1);
+    const wywolania: string[] = [];
+    const z = await zerujWariantySelly(baza.sqlite, {
+      updateVariant: async () => {
+        wywolania.push("update");
+        return null;
+      },
+    });
+    const u = await usunDuplikatySelly(baza.sqlite, {
+      listVariants: async () => ({ data: [] }) as never,
+      deleteVariant: async () => {
+        wywolania.push("delV");
+        return null;
+      },
+      deleteProduct: async () => {
+        wywolania.push("delP");
+        return null;
+      },
+    });
+    expect(wywolania).toEqual([]);
+    expect(z).toMatchObject({ wyzerowano: 0, pominieto: 1 });
+    expect(u).toMatchObject({ usunietoWarianty: 0, usunietoProdukty: 0, pominieto: 1 });
+    expect(ile(baza, "SELECT 1 FROM selly_products_scalone WHERE ostatni_blad LIKE 'pominięto:%'")).toBe(2);
   });
 });

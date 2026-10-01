@@ -42,7 +42,8 @@ export type WierszRaportu = {
   statusReal: string;
   sellyAuto: "tak" | "nie";
   sellyReal: "tak" | "nie";
-  akcjaSelly: "brak" | "wyzeruj_wariant_auto" | "przepnij_na_real" | "usun_z_selly";
+  akcjaSelly:
+    "brak" | "wyzeruj_wariant_auto" | "przepnij_na_real" | "usun_z_selly";
   overrideKonflikt: string;
   decyzja: Decyzja;
   powod: string;
@@ -59,27 +60,42 @@ export type WynikScalenia = {
 const AUTO_RE = /^MO\d+_AUTO_/;
 
 const s = (v: unknown): string => (v == null ? "" : String(v));
-const num = (v: unknown): number | null => (v == null || v === "" ? null : Number(v));
+const num = (v: unknown): number | null =>
+  v == null || v === "" ? null : Number(v);
 
-const kluczKodu = (dostawca: string, v: unknown): string => codeKey(dostawca, v);
+const kluczKodu = (dostawca: string, v: unknown): string =>
+  codeKey(dostawca, v);
 
 /** EAN wygenerowany regułą uzupełniania (tabela `ean_pary`) nie jest „prawdziwym” — nie blokuje scalenia. */
 function eanyWygenerowane(sqlite: BazaSqlite): Set<string> {
   try {
     return new Set(
-      (sqlite.prepare("SELECT ean FROM ean_pary").all() as { ean: string }[]).map((r) => r.ean),
+      (
+        sqlite.prepare("SELECT ean FROM ean_pary").all() as { ean: string }[]
+      ).map((r) => r.ean),
     );
   } catch {
     return new Set();
   }
 }
 
-type OfertaKarty = { stan: number | null; cenaZakupu: number | null; cenaSprzedazy: number | null };
+type OfertaKarty = {
+  stan: number | null;
+  cenaZakupu: number | null;
+  cenaSprzedazy: number | null;
+};
 
 /** Ostatni odczyt oferty dla karty R: kandydat o kodzie R w zgłoszeniu „Brak starego kodu” karty A. */
-function ofertaZeZgloszenia(sqlite: BazaSqlite, dostawca: string, kodAuto: string, kodReal: string): OfertaKarty | null {
+function ofertaZeZgloszenia(
+  sqlite: BazaSqlite,
+  dostawca: string,
+  kodAuto: string,
+  kodReal: string,
+): OfertaKarty | null {
   const wiersze = sqlite
-    .prepare("SELECT snapshot_json FROM staging_items WHERE dostawca=? AND kod=?")
+    .prepare(
+      "SELECT snapshot_json FROM staging_items WHERE dostawca=? AND kod=?",
+    )
     .all(dostawca, kodAuto) as { snapshot_json: string | null }[];
   for (const w of wiersze) {
     let snap: { _candidates?: Wiersz[] };
@@ -90,7 +106,11 @@ function ofertaZeZgloszenia(sqlite: BazaSqlite, dostawca: string, kodAuto: strin
     }
     const k = (snap._candidates ?? []).find((c) => s(c.kod) === kodReal);
     if (k) {
-      return { stan: num(k.stan), cenaZakupu: num(k.cenaZakupu), cenaSprzedazy: num(k.cenaSprzedazy) };
+      return {
+        stan: num(k.stan),
+        cenaZakupu: num(k.cenaZakupu),
+        cenaSprzedazy: num(k.cenaSprzedazy),
+      };
     }
   }
   return null;
@@ -116,7 +136,11 @@ export function zaplanujScalenie(sqlite: BazaSqlite): Plan[] {
     poDostawcy.set(s(p.dostawca), l);
   }
   const sellyKody = new Map<string, number>();
-  for (const r of sqlite.prepare("SELECT bridge_kod, COUNT(*) c FROM selly_products GROUP BY bridge_kod").all() as {
+  for (const r of sqlite
+    .prepare(
+      "SELECT bridge_kod, COUNT(*) c FROM selly_products GROUP BY bridge_kod",
+    )
+    .all() as {
     bridge_kod: string;
     c: number;
   }[]) {
@@ -128,11 +152,14 @@ export function zaplanujScalenie(sqlite: BazaSqlite): Plan[] {
     const kodDostawcy = s(auto.kod_dostawcy);
     const kandydaci = kodDostawcy
       ? (poDostawcy.get(dostawca) ?? []).filter(
-          (r) => kluczKodu(dostawca, r.kod) === kluczKodu(dostawca, kodDostawcy),
+          (r) =>
+            kluczKodu(dostawca, r.kod) === kluczKodu(dostawca, kodDostawcy),
         )
       : [];
     const real = kandydaci.length === 1 ? kandydaci[0]! : null;
-    const oferta = real ? ofertaZeZgloszenia(sqlite, dostawca, s(auto.kod), s(real.kod)) : null;
+    const oferta = real
+      ? ofertaZeZgloszenia(sqlite, dostawca, s(auto.kod), s(real.kod))
+      : null;
     const wiersz: WierszRaportu = {
       dostawca,
       kodAuto: s(auto.kod),
@@ -160,14 +187,25 @@ export function zaplanujScalenie(sqlite: BazaSqlite): Plan[] {
     const r = real!;
     const eA = s(auto.ean);
     const eR = s(r.ean);
-    if (eA && eR && eA !== eR && !wygenerowane.has(eA) && !wygenerowane.has(eR)) {
+    if (
+      eA &&
+      eR &&
+      eA !== eR &&
+      !wygenerowane.has(eA) &&
+      !wygenerowane.has(eR)
+    ) {
       return odrzuc("różny EAN");
     }
     const zgodne =
       zgodnaBezDot(auto, r) ||
-      (compatibility(auto, r).different.length === 0 && compatibility(auto, r).missing.every((k) => k === "dot"));
-    if (!zgodne) return odrzuc("cechy karty AUTO i prawdziwej nie są zgodne (marka/rozmiar/model)");
-    if (norm(auto.dostawca) !== norm(r.dostawca)) return odrzuc("inny dostawca");
+      (compatibility(auto, r).different.length === 0 &&
+        compatibility(auto, r).missing.every((k) => k === "dot"));
+    if (!zgodne)
+      return odrzuc(
+        "cechy karty AUTO i prawdziwej nie są zgodne (marka/rozmiar/model)",
+      );
+    if (norm(auto.dostawca) !== norm(r.dostawca))
+      return odrzuc("inny dostawca");
     return { auto, real: r, oferta, wiersz };
   });
 
@@ -186,7 +224,12 @@ export function zaplanujScalenie(sqlite: BazaSqlite): Plan[] {
     const zOferty = l.filter((p) => p.oferta != null);
     const pula = zOferty.length ? zOferty : l;
     const zeStanem = pula.filter((p) => stanAuto(p) > 0);
-    const zwyciezca = pula.length === 1 ? pula[0]! : zeStanem.length === 1 ? zeStanem[0]! : null;
+    const zwyciezca =
+      pula.length === 1
+        ? pula[0]!
+        : zeStanem.length === 1
+          ? zeStanem[0]!
+          : null;
     const reszta = l.filter((p) => p !== zwyciezca);
     if (!zwyciezca || reszta.some((p) => stanAuto(p) > 0)) {
       for (const p of l) {
@@ -198,7 +241,8 @@ export function zaplanujScalenie(sqlite: BazaSqlite): Plan[] {
     for (const p of reszta) {
       p.wiersz.decyzja = "usun_duplikat";
       p.wiersz.powod = `duplikat karty ${zwyciezca.wiersz.kodAuto} ze stanem 0 — usunięcie z Bridge i Selly`;
-      p.wiersz.akcjaSelly = p.wiersz.sellyAuto === "tak" ? "usun_z_selly" : "brak";
+      p.wiersz.akcjaSelly =
+        p.wiersz.sellyAuto === "tak" ? "usun_z_selly" : "brak";
     }
   }
 
@@ -213,12 +257,16 @@ export function zaplanujScalenie(sqlite: BazaSqlite): Plan[] {
           ? "przepnij_na_real"
           : "brak";
     const poleA = sqlite
-      .prepare("SELECT field_name FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?")
+      .prepare(
+        "SELECT field_name FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?",
+      )
       .all(w.dostawca, w.kodAuto) as { field_name: string }[];
     const poleR = new Set(
       (
         sqlite
-          .prepare("SELECT field_name FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?")
+          .prepare(
+            "SELECT field_name FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?",
+          )
           .all(w.dostawca, w.kodReal) as { field_name: string }[]
       ).map((r) => r.field_name),
     );
@@ -282,7 +330,11 @@ function przetworzPare(sqlite: BazaSqlite, p: Plan, teraz: string): void {
   const oferta: OfertaKarty | null =
     p.oferta ??
     ((num(auto.stan) ?? 0) > 0
-      ? { stan: num(auto.stan), cenaZakupu: num(auto.cena_zakupu), cenaSprzedazy: num(auto.cena_sprzedazy) }
+      ? {
+          stan: num(auto.stan),
+          cenaZakupu: num(auto.cena_zakupu),
+          cenaSprzedazy: num(auto.cena_sprzedazy),
+        }
       : null);
   const kodA = w.kodAuto;
   const kodR = w.kodReal;
@@ -305,30 +357,42 @@ function przetworzPare(sqlite: BazaSqlite, p: Plan, teraz: string): void {
     if (oferta.stan > 0 && s(real.status) !== "aktywny") {
       sets.push("status='aktywny'");
       sqlite
-        .prepare("DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?")
+        .prepare(
+          "DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?",
+        )
         .run(dostawca, kodR);
     }
-    sqlite.prepare(`UPDATE products SET ${sets.join(", ")} WHERE id=?`).run(...par, real.id);
+    sqlite
+      .prepare(`UPDATE products SET ${sets.join(", ")} WHERE id=?`)
+      .run(...par, real.id);
   }
 
   // 2. Pola ręczne i pamięci.
   const poprawkiA = sqlite
-    .prepare("SELECT * FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?")
+    .prepare(
+      "SELECT * FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?",
+    )
     .all(dostawca, kodA) as Wiersz[];
   const polaR = new Set(
     (
       sqlite
-        .prepare("SELECT field_name FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?")
+        .prepare(
+          "SELECT field_name FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?",
+        )
         .all(dostawca, kodR) as { field_name: string }[]
     ).map((x) => x.field_name),
   );
   for (const o of poprawkiA) {
     if (!polaR.has(s(o.field_name))) {
-      sqlite.prepare("UPDATE manual_overrides SET supplier_product_id=? WHERE id=?").run(kodR, o.id);
+      sqlite
+        .prepare("UPDATE manual_overrides SET supplier_product_id=? WHERE id=?")
+        .run(kodR, o.id);
     }
   }
   if (!s(real.kod_importu) && s(auto.kod_importu)) {
-    sqlite.prepare("UPDATE products SET kod_importu=? WHERE id=?").run(s(auto.kod_importu), real.id);
+    sqlite
+      .prepare("UPDATE products SET kod_importu=? WHERE id=?")
+      .run(s(auto.kod_importu), real.id);
     real.kod_importu = auto.kod_importu;
   }
   const kiR = s(real.kod_importu);
@@ -355,11 +419,15 @@ function przetworzPare(sqlite: BazaSqlite, p: Plan, teraz: string): void {
     .run(kodR, kodA);
 
   // 3. Selly.
-  const wierszeA = sqlite.prepare("SELECT * FROM selly_products WHERE bridge_kod=?").all(kodA) as Wiersz[];
+  const wierszeA = sqlite
+    .prepare("SELECT * FROM selly_products WHERE bridge_kod=?")
+    .all(kodA) as Wiersz[];
   const idyR = new Set(
-    (sqlite.prepare("SELECT id FROM selly_products WHERE bridge_kod=?").all(kodR) as { id: number }[]).map(
-      (x) => x.id,
-    ),
+    (
+      sqlite
+        .prepare("SELECT id FROM selly_products WHERE bridge_kod=?")
+        .all(kodR) as { id: number }[]
+    ).map((x) => x.id),
   );
   for (const sp of wierszeA) {
     if (idyR.has(Number(sp.id))) continue;
@@ -370,12 +438,22 @@ function przetworzPare(sqlite: BazaSqlite, p: Plan, teraz: string): void {
           "INSERT INTO selly_products_scalone (kod_importu, dostawca, bridge_kod, selly_product_id, " +
             "selly_variant_id, scalono_do, scalono_at) VALUES (?,?,?,?,?,?,?)",
         )
-        .run(sp.kod_importu, sp.dostawca, sp.bridge_kod, sp.selly_product_id, sp.selly_variant_id, kodR, teraz);
+        .run(
+          sp.kod_importu,
+          sp.dostawca,
+          sp.bridge_kod,
+          sp.selly_product_id,
+          sp.selly_variant_id,
+          kodR,
+          teraz,
+        );
       sqlite.prepare("DELETE FROM selly_products WHERE id=?").run(sp.id);
     } else {
       // Tylko A w Selly — przepinamy wiersz na R (produkt w sklepie bez zmian).
       sqlite
-        .prepare("UPDATE selly_products SET bridge_kod=?, kod_importu=? WHERE id=?")
+        .prepare(
+          "UPDATE selly_products SET bridge_kod=?, kod_importu=? WHERE id=?",
+        )
         .run(kodR, kiR || s(sp.kod_importu), sp.id);
     }
   }
@@ -386,10 +464,21 @@ function przetworzPare(sqlite: BazaSqlite, p: Plan, teraz: string): void {
       "INSERT INTO audit_log (uzytkownik_id, uzytkownik_imie, akcja, encja_typ, encja_id, szczegoly_json, kiedy) " +
         "VALUES (NULL, 'scal-karty-auto', 'scalenie_karty_auto', 'product', ?, ?, ?)",
     )
-    .run(kodR, JSON.stringify({ auto: kodA, real: kodR, stanOferta: w.stanOferta, akcjaSelly: w.akcjaSelly }), teraz);
+    .run(
+      kodR,
+      JSON.stringify({
+        auto: kodA,
+        real: kodR,
+        stanOferta: w.stanOferta,
+        akcjaSelly: w.akcjaSelly,
+      }),
+      teraz,
+    );
 
   // 5. Dopasowania i decyzje o nieobecności.
-  sqlite.prepare("DELETE FROM staging_matches WHERE supplier=? AND product_code=?").run(dostawca, kodA);
+  sqlite
+    .prepare("DELETE FROM staging_matches WHERE supplier=? AND product_code=?")
+    .run(dostawca, kodA);
   sqlite
     .prepare(
       "DELETE FROM staging_absence_decisions WHERE supplier=? AND (product_code IN (?,?) OR selected_source_code=?)",
@@ -397,13 +486,27 @@ function przetworzPare(sqlite: BazaSqlite, p: Plan, teraz: string): void {
     .run(dostawca, kodA, kodR, kodA);
 
   // 6. Kolejka.
-  sqlite.prepare("DELETE FROM staging_items WHERE dostawca=? AND kod IN (?,?)").run(dostawca, kodA, kodR);
+  sqlite
+    .prepare("DELETE FROM staging_items WHERE dostawca=? AND kod IN (?,?)")
+    .run(dostawca, kodA, kodR);
 
   // 7. Karta A → archiwum → usunięcie. Znacznik wstrzymania A też znika.
   sqlite
-    .prepare("INSERT INTO products_scalone (kod, dostawca, scalono_do, scalono_at, wiersz_json) VALUES (?,?,?,?,?)")
-    .run(kodA, dostawca, kodR, teraz, JSON.stringify({ produkt: auto, poprawki: poprawkiA }));
-  sqlite.prepare("DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?").run(dostawca, kodA);
+    .prepare(
+      "INSERT INTO products_scalone (kod, dostawca, scalono_do, scalono_at, wiersz_json) VALUES (?,?,?,?,?)",
+    )
+    .run(
+      kodA,
+      dostawca,
+      kodR,
+      teraz,
+      JSON.stringify({ produkt: auto, poprawki: poprawkiA }),
+    );
+  sqlite
+    .prepare(
+      "DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?",
+    )
+    .run(dostawca, kodA);
   sqlite.prepare("DELETE FROM products WHERE id=?").run(auto.id);
 }
 
@@ -412,34 +515,81 @@ function usunDuplikat(sqlite: BazaSqlite, p: Plan, teraz: string): void {
   const { auto, wiersz: w } = p;
   const kodA = w.kodAuto;
   const dostawca = w.dostawca;
-  for (const sp of sqlite.prepare("SELECT * FROM selly_products WHERE bridge_kod=?").all(kodA) as Wiersz[]) {
+  for (const sp of sqlite
+    .prepare("SELECT * FROM selly_products WHERE bridge_kod=?")
+    .all(kodA) as Wiersz[]) {
     sqlite
       .prepare(
         "INSERT INTO selly_products_scalone (kod_importu, dostawca, bridge_kod, selly_product_id, " +
           "selly_variant_id, scalono_do, scalono_at, do_usuniecia) VALUES (?,?,?,?,?,?,?,1)",
       )
-      .run(s(sp.kod_importu), sp.dostawca, sp.bridge_kod, sp.selly_product_id, sp.selly_variant_id, w.kodReal, teraz);
+      .run(
+        s(sp.kod_importu),
+        sp.dostawca,
+        sp.bridge_kod,
+        sp.selly_product_id,
+        sp.selly_variant_id,
+        w.kodReal,
+        teraz,
+      );
     sqlite.prepare("DELETE FROM selly_products WHERE id=?").run(sp.id);
   }
   const poprawkiA = sqlite
-    .prepare("SELECT * FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?")
+    .prepare(
+      "SELECT * FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?",
+    )
     .all(dostawca, kodA) as Wiersz[];
-  sqlite.prepare("DELETE FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?").run(dostawca, kodA);
+  sqlite
+    .prepare(
+      "DELETE FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?",
+    )
+    .run(dostawca, kodA);
   sqlite
     .prepare(
       "INSERT INTO audit_log (uzytkownik_id, uzytkownik_imie, akcja, encja_typ, encja_id, szczegoly_json, kiedy) " +
         "VALUES (NULL, 'scal-karty-auto', 'usuniecie_duplikatu_auto', 'product', ?, ?, ?)",
     )
-    .run(kodA, JSON.stringify({ auto: kodA, real: w.kodReal, powod: w.powod, akcjaSelly: w.akcjaSelly }), teraz);
-  sqlite.prepare("DELETE FROM staging_matches WHERE supplier=? AND product_code=?").run(dostawca, kodA);
+    .run(
+      kodA,
+      JSON.stringify({
+        auto: kodA,
+        real: w.kodReal,
+        powod: w.powod,
+        akcjaSelly: w.akcjaSelly,
+      }),
+      teraz,
+    );
   sqlite
-    .prepare("DELETE FROM staging_absence_decisions WHERE supplier=? AND (product_code=? OR selected_source_code=?)")
+    .prepare("DELETE FROM staging_matches WHERE supplier=? AND product_code=?")
+    .run(dostawca, kodA);
+  sqlite
+    .prepare(
+      "DELETE FROM staging_absence_decisions WHERE supplier=? AND (product_code=? OR selected_source_code=?)",
+    )
     .run(dostawca, kodA, kodA);
-  sqlite.prepare("DELETE FROM staging_items WHERE dostawca=? AND kod=?").run(dostawca, kodA);
   sqlite
-    .prepare("INSERT INTO products_scalone (kod, dostawca, scalono_do, scalono_at, wiersz_json) VALUES (?,?,?,?,?)")
-    .run(kodA, dostawca, w.kodReal, teraz, JSON.stringify({ produkt: auto, poprawki: poprawkiA, usunietyDuplikat: true }));
-  sqlite.prepare("DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?").run(dostawca, kodA);
+    .prepare("DELETE FROM staging_items WHERE dostawca=? AND kod=?")
+    .run(dostawca, kodA);
+  sqlite
+    .prepare(
+      "INSERT INTO products_scalone (kod, dostawca, scalono_do, scalono_at, wiersz_json) VALUES (?,?,?,?,?)",
+    )
+    .run(
+      kodA,
+      dostawca,
+      w.kodReal,
+      teraz,
+      JSON.stringify({
+        produkt: auto,
+        poprawki: poprawkiA,
+        usunietyDuplikat: true,
+      }),
+    );
+  sqlite
+    .prepare(
+      "DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?",
+    )
+    .run(dostawca, kodA);
   sqlite.prepare("DELETE FROM products WHERE id=?").run(auto.id);
 }
 
@@ -447,7 +597,10 @@ function usunDuplikat(sqlite: BazaSqlite, p: Plan, teraz: string): void {
  * Wykonuje scalenie (każda para w osobnej transakcji). Backup bazy robi wołający PRZED wywołaniem
  * (`VACUUM INTO`, patrz CLI). Wywołane drugi raz nie ma już czego scalać.
  */
-export function zastosujScalenie(sqlite: BazaSqlite, teraz = new Date().toISOString()): WynikScalenia {
+export function zastosujScalenie(
+  sqlite: BazaSqlite,
+  teraz = new Date().toISOString(),
+): WynikScalenia {
   const plany = zaplanujScalenie(sqlite);
   let scalono = 0;
   let usunieto = 0;
@@ -472,18 +625,66 @@ export function zastosujScalenie(sqlite: BazaSqlite, teraz = new Date().toISOStr
       p.wiersz.powod = `błąd przy scalaniu: ${e instanceof Error ? e.message : String(e)}`;
     }
   }
-  return { raport: plany.map((p) => p.wiersz), scalono, doRecznej: plany.length - scalono - usunieto, usunieto };
+  return {
+    raport: plany.map((p) => p.wiersz),
+    scalono,
+    doRecznej: plany.length - scalono - usunieto,
+    usunieto,
+  };
 }
 
 /** Raport bez zapisu. */
 export function raportScalenia(sqlite: BazaSqlite): WynikScalenia {
   const plany = zaplanujScalenie(sqlite);
   const scalono = plany.filter((p) => p.wiersz.decyzja === "scal").length;
-  const usunieto = plany.filter((p) => p.wiersz.decyzja === "usun_duplikat").length;
-  return { raport: plany.map((p) => p.wiersz), scalono, doRecznej: plany.length - scalono - usunieto, usunieto };
+  const usunieto = plany.filter(
+    (p) => p.wiersz.decyzja === "usun_duplikat",
+  ).length;
+  return {
+    raport: plany.map((p) => p.wiersz),
+    scalono,
+    doRecznej: plany.length - scalono - usunieto,
+    usunieto,
+  };
 }
 
-export type WynikZerowania = { wyzerowano: number; bledy: number };
+export type WynikZerowania = {
+  wyzerowano: number;
+  bledy: number;
+  pominieto: number;
+};
+
+/**
+ * Ticket 181: wariant Selly, którego nadal używa aktywne mapowanie (`selly_products`) — zwykle karta R
+ * wskazuje TEN SAM wariant co karta AUTO (produkcja 2026-10-01: 272 z 273 wierszy). Zerowanie albo usunięcie
+ * takiego wariantu skasowałoby towar karty, która zostaje. Zwraca `bridge_kod` właściciela albo `null`.
+ */
+function wariantWUzyciu(sqlite: BazaSqlite, variantId: unknown): string | null {
+  if (variantId == null) return null;
+  const r = sqlite
+    .prepare(
+      "SELECT bridge_kod FROM selly_products WHERE selly_variant_id=? LIMIT 1",
+    )
+    .get(variantId) as { bridge_kod: string } | undefined;
+  return r ? r.bridge_kod : null;
+}
+
+const oznaczPominiety = (
+  sqlite: BazaSqlite,
+  kolumna: "wyzerowano_at" | "usunieto_at",
+  id: unknown,
+  teraz: string,
+  kod: string,
+) =>
+  sqlite
+    .prepare(
+      `UPDATE selly_products_scalone SET ${kolumna}=?, ostatni_blad=? WHERE id=?`,
+    )
+    .run(
+      teraz,
+      `pominięto: wariant współdzielony z ${kod} — bez akcji w Selly`,
+      id,
+    );
 
 /**
  * Ustawia stan 0 na wariantach Selly kart AUTO z `selly_products_scalone` (bez usuwania produktów
@@ -495,25 +696,49 @@ export async function zerujWariantySelly(
   teraz = new Date().toISOString(),
 ): Promise<WynikZerowania> {
   const doZrobienia = sqlite
-    .prepare("SELECT * FROM selly_products_scalone WHERE wyzerowano_at IS NULL AND selly_variant_id IS NOT NULL " +
-        "AND do_usuniecia=0")
+    .prepare(
+      "SELECT * FROM selly_products_scalone WHERE wyzerowano_at IS NULL AND selly_variant_id IS NOT NULL " +
+        "AND do_usuniecia=0",
+    )
     .all() as Wiersz[];
   let wyzerowano = 0;
   let bledy = 0;
+  let pominieto = 0;
   for (const w of doZrobienia) {
+    const wlasciciel = wariantWUzyciu(sqlite, w.selly_variant_id);
+    if (wlasciciel) {
+      oznaczPominiety(sqlite, "wyzerowano_at", w.id, teraz, wlasciciel);
+      pominieto += 1;
+      continue;
+    }
     try {
-      await klient.updateVariant(Number(w.selly_product_id), Number(w.selly_variant_id), { quantity: 0 });
-      sqlite.prepare("UPDATE selly_products_scalone SET wyzerowano_at=?, ostatni_blad=NULL WHERE id=?").run(teraz, w.id);
+      await klient.updateVariant(
+        Number(w.selly_product_id),
+        Number(w.selly_variant_id),
+        { quantity: 0 },
+      );
+      sqlite
+        .prepare(
+          "UPDATE selly_products_scalone SET wyzerowano_at=?, ostatni_blad=NULL WHERE id=?",
+        )
+        .run(teraz, w.id);
       wyzerowano += 1;
     } catch (e) {
-      sqlite.prepare("UPDATE selly_products_scalone SET ostatni_blad=? WHERE id=?").run(String(e), w.id);
+      sqlite
+        .prepare("UPDATE selly_products_scalone SET ostatni_blad=? WHERE id=?")
+        .run(String(e), w.id);
       bledy += 1;
     }
   }
-  return { wyzerowano, bledy };
+  return { wyzerowano, bledy, pominieto };
 }
 
-export type WynikUsuwania = { usunietoWarianty: number; usunietoProdukty: number; bledy: number };
+export type WynikUsuwania = {
+  usunietoWarianty: number;
+  usunietoProdukty: number;
+  bledy: number;
+  pominieto: number;
+};
 
 /**
  * Ticket 180: usuwa z Selly duplikaty AUTO (`selly_products_scalone.do_usuniecia=1`). Wariant, gdy produkt
@@ -525,21 +750,40 @@ export async function usunDuplikatySelly(
   teraz = new Date().toISOString(),
 ): Promise<WynikUsuwania> {
   const doZrobienia = sqlite
-    .prepare("SELECT * FROM selly_products_scalone WHERE do_usuniecia=1 AND usunieto_at IS NULL")
+    .prepare(
+      "SELECT * FROM selly_products_scalone WHERE do_usuniecia=1 AND usunieto_at IS NULL",
+    )
     .all() as Wiersz[];
-  const wynik: WynikUsuwania = { usunietoWarianty: 0, usunietoProdukty: 0, bledy: 0 };
+  const wynik: WynikUsuwania = {
+    usunietoWarianty: 0,
+    usunietoProdukty: 0,
+    bledy: 0,
+    pominieto: 0,
+  };
   for (const w of doZrobienia) {
+    const wlasciciel = wariantWUzyciu(sqlite, w.selly_variant_id);
+    if (wlasciciel) {
+      oznaczPominiety(sqlite, "usunieto_at", w.id, teraz, wlasciciel);
+      wynik.pominieto += 1;
+      continue;
+    }
     const pid = Number(w.selly_product_id);
     const vid = w.selly_variant_id == null ? null : Number(w.selly_variant_id);
     try {
       const inneMapowania = (
-        sqlite.prepare("SELECT COUNT(*) c FROM selly_products WHERE selly_product_id=?").get(pid) as { c: number }
+        sqlite
+          .prepare(
+            "SELECT COUNT(*) c FROM selly_products WHERE selly_product_id=?",
+          )
+          .get(pid) as { c: number }
       ).c;
       let inneWarianty = 0;
       if (vid != null) {
         try {
           const lista = await klient.listVariants(pid);
-          inneWarianty = (lista?.data ?? []).filter((x) => Number(x.variant_id) !== vid).length;
+          inneWarianty = (lista?.data ?? []).filter(
+            (x) => Number(x.variant_id) !== vid,
+          ).length;
         } catch (e) {
           if ((e as { status?: number }).status !== 404) throw e;
         }
@@ -552,14 +796,22 @@ export async function usunDuplikatySelly(
           await klient.deleteProduct(pid);
           wynik.usunietoProdukty += 1;
         } else {
-          throw new Error(`produkt ${pid} ma inne mapowania Bridge, a wiersz nie ma wariantu — pomijam`);
+          throw new Error(
+            `produkt ${pid} ma inne mapowania Bridge, a wiersz nie ma wariantu — pomijam`,
+          );
         }
       } catch (e) {
         if ((e as { status?: number }).status !== 404) throw e;
       }
-      sqlite.prepare("UPDATE selly_products_scalone SET usunieto_at=?, ostatni_blad=NULL WHERE id=?").run(teraz, w.id);
+      sqlite
+        .prepare(
+          "UPDATE selly_products_scalone SET usunieto_at=?, ostatni_blad=NULL WHERE id=?",
+        )
+        .run(teraz, w.id);
     } catch (e) {
-      sqlite.prepare("UPDATE selly_products_scalone SET ostatni_blad=? WHERE id=?").run(String(e), w.id);
+      sqlite
+        .prepare("UPDATE selly_products_scalone SET ostatni_blad=? WHERE id=?")
+        .run(String(e), w.id);
       wynik.bledy += 1;
     }
   }
