@@ -5,6 +5,7 @@
 //   DB_PATH=... npm run scal-karty-auto -- --raport raport.csv              # dry-run + CSV
 //   DB_PATH=... npm run scal-karty-auto -- --apply                          # backup + scalenie
 //   SELLY_*=... npm run scal-karty-auto -- --zeruj-selly                    # stan 0 na wariantach AUTO
+//   SELLY_*=... npm run scal-karty-auto -- --usun-duplikaty-selly           # ticket 180: usuń duplikaty AUTO z Selly
 //
 // --apply: najpierw `VACUUM INTO data/backups/<baza>.bak_full_scal_auto_<YYYYMMDDHHMMSS>`.
 // Po scaleniu: `npm run selly:csv` i delta sync (patrz wypisana instrukcja).
@@ -19,6 +20,7 @@ import {
   raportCsv,
   raportScalenia,
   zastosujScalenie,
+  usunDuplikatySelly,
   zerujWariantySelly,
 } from "../src/import/migracje/scal-karty-auto.js";
 import { stworzKlientaSelly } from "../src/selly/klient.js";
@@ -32,6 +34,7 @@ if (!dbPath) {
 const args = process.argv.slice(2);
 const apply = args.includes("--apply");
 const zerujSelly = args.includes("--zeruj-selly");
+const usunSelly = args.includes("--usun-duplikaty-selly");
 const iRaport = args.indexOf("--raport");
 const plikRaportu = iRaport >= 0 ? args[iRaport + 1] : undefined;
 
@@ -39,7 +42,7 @@ const { sqlite } = otworzBaze(dbPath);
 try {
   zastosujMigracje(sqlite);
 
-  if (zerujSelly) {
+  if (zerujSelly || usunSelly) {
     const env = wczytajEnv({ JWT_SECRET: "nieuzywany", ...process.env });
     const klient = opakujKlientaTrybem(
       stworzKlientaSelly({
@@ -50,9 +53,18 @@ try {
       }),
       env.SELLY_TRYB,
     );
-    const w = await zerujWariantySelly(sqlite, klient);
-    console.log(`scal-karty-auto: wyzerowano ${w.wyzerowano} wariantów w Selly, błędów ${w.bledy}.`);
-    process.exitCode = w.bledy ? 1 : 0;
+    if (usunSelly) {
+      const u = await usunDuplikatySelly(sqlite, klient);
+      console.log(
+        `scal-karty-auto: usunięto z Selly ${u.usunietoWarianty} wariantów i ${u.usunietoProdukty} produktów ` +
+          `(duplikaty AUTO), błędów ${u.bledy}.`,
+      );
+      process.exitCode = u.bledy ? 1 : 0;
+    } else {
+      const w = await zerujWariantySelly(sqlite, klient);
+      console.log(`scal-karty-auto: wyzerowano ${w.wyzerowano} wariantów w Selly, błędów ${w.bledy}.`);
+      process.exitCode = w.bledy ? 1 : 0;
+    }
   } else {
     if (apply) {
       const znacznik = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
@@ -70,11 +82,14 @@ try {
     }
     console.log(
       `scal-karty-auto: ${apply ? "SCALONO" : "do scalenia (dry-run)"} ${wynik.scalono}, ` +
-        `do ręcznej decyzji ${wynik.doRecznej}.`,
+        `duplikatów AUTO do usunięcia ${wynik.usunieto}, do ręcznej decyzji ${wynik.doRecznej}.`,
     );
     for (const [p, n] of powody) console.log(`  do_recznej: ${n} × ${p}`);
     if (apply) {
-      console.log("Dalej: npm run selly:csv, delta sync Selly, potem --zeruj-selly (stan 0 wariantów AUTO).");
+      console.log(
+        "Dalej: npm run selly:csv, delta sync Selly, potem --zeruj-selly (stan 0 wariantów AUTO) " +
+          "i --usun-duplikaty-selly (duplikaty AUTO ze stanem 0).",
+      );
     }
   }
 } finally {

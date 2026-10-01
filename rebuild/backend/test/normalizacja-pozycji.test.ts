@@ -79,6 +79,23 @@ describe("normalizujModel (3b)", () => {
     }
   });
 
+  it("ticket 180: słownik producenta — zapis producenta z listy Ani", () => {
+    expect(normalizujModel("T-539", { marka: "TRELLEBORG" })).toBe("T539");
+    expect(normalizujModel("RD01", { marka: "CULTOR" })).toBe("RD-01");
+    expect(normalizujModel("AS AGRI 13", { marka: "CULTOR" })).toBe("AS-AGRI 13");
+    expect(normalizujModel("EM 22", { marka: "MITAS" })).toBe("EM-22");
+    expect(normalizujModel("LT20", { marka: "LINGLONG" })).toBe("L-T20");
+    expect(normalizujModel("RD30", { marka: "LINGLONG" })).toBe("R-D30");
+  });
+
+  it("ticket 180: LingLong KLT200/KLS200/KLD200/KTD300 NIE są łączone z L-T20/L-S20/L-D20/R-D30", () => {
+    for (const m of ["KLT200", "KLS200", "KLD200", "KTD300"]) {
+      expect(normalizujModel(m, { marka: "LINGLONG" })).toBe(m);
+    }
+    expect(kluczModelu("KLT200")).not.toBe(kluczModelu("L-T20"));
+    expect(kluczModelu("KTD300")).not.toBe(kluczModelu("R-D30"));
+  });
+
   it("puste i nie-tekstowe wartości przechodzą bez zmian", () => {
     expect(normalizujModel(null, {})).toBeNull();
     expect(normalizujModel("", {})).toBe("");
