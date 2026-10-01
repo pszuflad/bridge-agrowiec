@@ -205,14 +205,15 @@ describe("POST /api/staging/:id/resolve — zapis od razu do katalogu", () => {
       expect(linie.at(-1)).toMatch(/Najpewniej ta sama opona z innym zapisem nazwy/);
     });
 
-    it("różni się DOT albo rozmiar → wskazówka o osobnej partii, bez obietnicy „ta sama opona”", async () => {
-      srodowisko.db.update(products).set({ dot: "2023" }).run();
-      const a = zasiej(zgloszenie({ snapshot: { dot: "2026" } }));
+    it("DOT nie jest różnicą (zmienia się w miejscu); różni się rozmiar → wskazówka „może być inna opona”", async () => {
+      srodowisko.db.update(products).set({ dot: "2023", rozmiar: "480/70R28" }).run();
+      const a = zasiej(zgloszenie({ snapshot: { dot: "2026", rozmiar: "480/70R30" } }));
 
       const linie = (await get(a.id)).body.wyjasnienie as string[];
 
-      expect(linie).toContain("DOT: 2023 (katalog) → 2026 (oferta)");
-      expect(linie.at(-1)).toBe("To może być osobna partia lub inna opona. Sprawdź kartę w katalogu.");
+      expect(linie.some((l) => l.startsWith("DOT:")), "DOT nie jest kryterium dopasowania").toBe(false);
+      expect(linie).toContain("Rozmiar: 480/70R28 (katalog) → 480/70R30 (oferta)");
+      expect(linie.at(-1)).toMatch(/To może być inna opona/);
     });
 
     it("EAN taki sam jak w innym produkcie", async () => {

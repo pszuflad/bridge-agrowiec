@@ -90,8 +90,10 @@ import {
 import { codeKey, LABEL, sourceKey } from "./podstawy.js";
 // Odstępstwo 2026-10-01: dopasowanie po poprawkach karty i z pokrewnymi DOT (plik opisuje powód).
 import {
+  aktualizacjaDotWMiejscu,
   dotZgodny,
   kartaWlasnejPartii,
+  zgodnaBezDot,
   osobnaPartia,
   zastapBlednyEan,
   zgodna,
@@ -294,6 +296,9 @@ export function stworzPolitykeStagingu(
       zgodna(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
     const osobnaPartiaZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
       osobnaPartia(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
+    /** Ta sama pozycja (ten sam kod): zgodność cech BEZ DOT. */
+    const zgodnaBezDotZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      zgodnaBezDot(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
     const dotZgodnyZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
       dotZgodny(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
 
@@ -400,7 +405,7 @@ export function stworzPolitykeStagingu(
       const wybranyRecznie = kodProduktuDlaWybranegoZrodla(db, dostawca, kod);
       if (wybranyRecznie) {
         const wskazany = poKodzie.get(wybranyRecznie);
-        if (wskazany && zgodnaZ(d, wskazany) && dotZgodnyZ(d, wskazany)) {
+        if (wskazany && zgodnaBezDotZ(d, wskazany) && dotZgodnyZ(d, wskazany)) {
           biezacy = wskazany;
           // Operator ŚWIADOMIE zostawił starą kartę. Nowy kod źródłowy opisuje jego ofertę,
           // a nie żądanie podmiany kodu i EAN-u tej karty.
@@ -434,7 +439,7 @@ export function stworzPolitykeStagingu(
         ) {
           biezacy = kanoniczny;
         }
-        if (!biezacy && kanoniczny && zgodnaZ(d, kanoniczny)) biezacy = kanoniczny;
+        if (!biezacy && kanoniczny && zgodnaBezDotZ(d, kanoniczny)) biezacy = kanoniczny;
       }
 
       // ——— 4. Jednoznaczny kod dostawcy (`:380-384`) ———
@@ -778,6 +783,14 @@ export function stworzPolitykeStagingu(
           if (d[k] != null && norm(d[k]) !== norm((biezacy as unknown as Pozycja)[k])) {
             patch[k] = d[k];
           }
+        }
+        // Odstępstwo 2026-10-01: DOT zmienia się w miejscu, bez akceptacji (nie jest kryterium dopasowania).
+        if (
+          aktualizacjaDotWMiejscu() &&
+          String(d.dot ?? "").trim() &&
+          norm(d.dot) !== norm((biezacy as unknown as Pozycja).dot)
+        ) {
+          patch.dot = d.dot;
         }
         if (validateEan(d.ean).valid && d.ean !== biezacy.ean) {
           Object.assign(patch, {
