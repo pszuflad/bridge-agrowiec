@@ -20785,6 +20785,46 @@ paths:
           content:
             application/json:
               schema: { type: object, properties: { message: { type: string } } }
+  /api/staging/{id}/resolve-ean:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/{id}/resolve-ean"
+      description: >-
+        TRASA SPOZA ORYGINAŁU (decyzja użytkowniczki, 2026-10-01). Rozstrzygnięcie pozycji z BŁĘDNYM
+        EAN-em od dostawcy (znaki spoza cyfr, zła cyfra kontrolna), która blokuje akceptację.
+        `decision: "keep"` zostawia poprawny EAN z karty w katalogu (także wygenerowany 999…),
+        `decision: "set"` wpisuje `ean`. Decyzja w jednej transakcji ZATWIERDZA pozycję do katalogu
+        i zapisuje poprawkę `ean` z `acknowledgedSourceValue` = błędny numer z pliku — kolejny import
+        z tym samym numerem nie zgłasza go ponownie (zmiana numeru przez dostawcę przywraca pytanie).
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision: { type: string, enum: [keep, set] }
+                ean: { type: string, description: "Wymagane dla `decision: set` — poprawny EAN." }
+      responses:
+        "200":
+          description: "OK — pozycja jest już w katalogu"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  kod: { type: string }
+                  ean: { type: string }
+        "401": { description: "Nieautoryzowany" }
+        "409":
+          description: "Odmowa (karta bez poprawnego EAN dla `keep`, nieprawidłowy `ean`, pozycja bez błędnego EAN). Ciało niesie `message`."
+          content:
+            application/json:
+              schema: { type: object, properties: { message: { type: string } } }
   /api/staging/{id}/review:
     get:
       tags: [staging]
@@ -20815,6 +20855,10 @@ paths:
                   duplicateSource: { type: boolean }
                   sourceConflict: { type: object, nullable: true }
                   eanIssue: { type: string, nullable: true }
+                  eanKarty:
+                    type: string
+                    nullable: true
+                    description: "NOWE: EAN karty w katalogu — do decyzji „zostaw EAN z katalogu”."
                   wyjasnienie:
                     type: array
                     items: { type: string }

@@ -20,7 +20,7 @@
 // Wszystko to wpływa WYŁĄCZNIE na decyzję „czy to ta karta"; sama karta i zapisywane dane
 // przechodzą dalej bez zmian.
 
-import { compatibility, norm } from "./helpery.js";
+import { compatibility, norm, validateEan, type WynikEan } from "./helpery.js";
 import { separateDotBatch } from "./podstawy.js";
 
 type Pozycja = Record<string, unknown>;
@@ -133,4 +133,26 @@ export function kartaWlasnejPartii(
   if (!String(p.kod ?? "").includes("_AUTO_")) return false;
   const kodPliku = kodKlucz(d.kodDostawcy);
   return kodPliku !== "" && kodPliku === kodKlucz(p.kodDostawcy);
+}
+
+/**
+ * Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (`ean-bledny.ts`): poprawka `ean` karty
+ * z `acknowledgedSourceValue` równym TEMU błędnemu numerowi → zamiast błędu liczy się EAN poprawki.
+ * Gdy dostawca zmieni numer (inny napis), pytanie wraca.
+ */
+export function zastapBlednyEan(
+  ev: WynikEan,
+  poprawki: readonly PoprawkaKarty[] | undefined,
+): WynikEan {
+  if (!ev.error || !poprawki?.length) return ev;
+  const potwierdzona = poprawki.find(
+    (o) =>
+      o.fieldName === "ean" &&
+      o.overrideValue != null &&
+      o.acknowledgedSourceValue != null &&
+      String(o.acknowledgedSourceValue).trim() === ev.raw,
+  );
+  if (!potwierdzona) return ev;
+  const poprawiony = validateEan(potwierdzona.overrideValue);
+  return poprawiony.valid ? poprawiony : ev;
 }

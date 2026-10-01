@@ -94,6 +94,7 @@ function importuj(opcje: {
   return wiersze.map((w) => ({
     kod: w.kod,
     typ: w.typZmiany,
+    powod: w.powod as string | null,
     problem: (JSON.parse(w.snapshotJson as string) as Wiersz)._matchIssue ?? null,
   }));
 }
@@ -181,6 +182,40 @@ describe("importer — tolerancja dopasowania", () => {
     it("karta o INNYM kodzie dostawcy niż wiersz nie jest „własną” — pytanie zostaje", () => {
       const staging = importuj(karty({ kodDostawcy: "INNY_KOD" }));
       expect(staging.filter((w) => w.problem)).toHaveLength(1);
+    });
+  });
+
+  describe("błędny EAN z pliku, który już rozstrzygnięto (poprawka `ean` z potwierdzonym numerem)", () => {
+    const BLEDNY = "5901234123457_D";
+    const poprawkaEan = {
+      fieldName: "ean",
+      overrideValue: "5901234123457",
+      acknowledgedSourceValue: BLEDNY,
+    };
+    const bledy = (st: ReturnType<typeof importuj>) =>
+      st.filter((w) => w.typ === "blad" && (w.powod ?? "").includes("Błędny EAN"));
+
+    it("bez rozstrzygnięcia ten sam błędny EAN jest zgłaszany", () => {
+      const staging = importuj({ karta: { ean: "5901234123457" }, rekord: { ean: BLEDNY, eanRaw: BLEDNY } });
+      expect(bledy(staging)).toHaveLength(1);
+    });
+
+    it("po rozstrzygnięciu ten sam numer NIE jest zgłaszany ponownie", () => {
+      const staging = importuj({
+        karta: { ean: "5901234123457" },
+        rekord: { ean: BLEDNY, eanRaw: BLEDNY },
+        poprawka: poprawkaEan,
+      });
+      expect(bledy(staging)).toEqual([]);
+    });
+
+    it("dostawca zmienił błędny numer → pytanie wraca", () => {
+      const staging = importuj({
+        karta: { ean: "5901234123457" },
+        rekord: { ean: "5901234123457_X", eanRaw: "5901234123457_X" },
+        poprawka: poprawkaEan,
+      });
+      expect(bledy(staging)).toHaveLength(1);
     });
   });
 });

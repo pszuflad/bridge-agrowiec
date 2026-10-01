@@ -93,6 +93,7 @@ import {
   dotZgodny,
   kartaWlasnejPartii,
   osobnaPartia,
+  zastapBlednyEan,
   zgodna,
   type PoprawkaKarty,
 } from "./tolerancja-dopasowania.js";
@@ -370,7 +371,12 @@ export function stworzPolitykeStagingu(
       }
 
       const zrodlo: Pozycja = { ...raw };
-      const ev = validateEan(rawEan(raw), Boolean(raw.ean_lossy || raw._eanLossy));
+      // Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (poprawka `ean` z potwierdzonym
+      // numerem), nie jest zgłaszany ponownie — liczy się EAN poprawki (`ean-bledny.ts`).
+      const ev = zastapBlednyEan(
+        validateEan(rawEan(raw), Boolean(raw.ean_lossy || raw._eanLossy)),
+        poprawkiKart.get(String(raw.kod ?? "")),
+      );
       // `:354` — normalizacja liczy WYŁĄCZNIE rozmiary i parametry; EAN idzie ścisłą ścieżką.
       let d: Pozycja = znormalizujPozycje({
         ...(surowy as unknown as PozycjaZnormalizowana),
