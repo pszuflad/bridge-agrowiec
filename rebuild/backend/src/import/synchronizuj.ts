@@ -35,8 +35,15 @@ import {
 import { parsujBufor } from "./parsuj.js";
 import { silnikStagingu, type SilnikStagingu, type StatystykiImportu } from "./tk.js";
 
-/** Timeout żądania — 30 s, 1:1 z oryginałem (`:48054`). NIE mylić z 60 s w `pobierz.ts`. */
-export const TIMEOUT_SYNCHRONIZACJI_MS = 30_000;
+/**
+ * Timeout żądania — 120 s. Oryginał miał 30 s (`:48054`); w logach produkcji AbortError dotykał MO3 ×55,
+ * MO5 ×17, MO4 ×9, bo ich serwery odpowiadają wolno. Decyzja użytkowniczki 2026-10-01 (Etap 4a SPEC). NIE mylić
+ * z 60 s w `pobierz.ts`.
+ */
+export const TIMEOUT_SYNCHRONIZACJI_MS = 120_000;
+/** Dodatkowe próby po nieudanej pierwszej (razem 3), odstęp między nimi — Etap 4a. */
+export const PONOWIENIA_SYNCHRONIZACJI = 2;
+export const ODSTEP_PONOWIEN_MS = 120_000;
 
 export type WynikSynchronizacji =
   | ({ ok: true; liczbaProduktow: number } & StatystykiImportu)
@@ -48,7 +55,25 @@ export type ZaleznosciSynchronizacji = {
   katalogArchiwum?: string;
   /** Wstrzykiwany w testach, tak samo jak w `trasyImportu` i `trasyDostawcow`. */
   silnik?: SilnikStagingu;
+  /** Odstęp między ponowieniami; domyślnie `SYNC_ODSTEP_PONOWIEN_MS` z env albo 120 s (testy ustawiają 0). */
+  odstepPonowienMs?: number;
+  /** Czekanie między próbami — wstrzykiwane w testach, żeby sprawdzić odstępy bez czekania. */
+  czekaj?: (ms: number) => Promise<void>;
 };
+
+const domyslnyOdstep = (): number => {
+  const z = Number(process.env.SYNC_ODSTEP_PONOWIEN_MS);
+  return Number.isFinite(z) && process.env.SYNC_ODSTEP_PONOWIEN_MS !== undefined && z >= 0
+    ? z
+    : ODSTEP_PONOWIEN_MS;
+};
+
+/** Błąd odpowiedzi 5xx — jedyna odpowiedź HTTP, którą wolno ponowić (4xx to błąd po naszej/dostawcy stronie). */
+class OdpowiedzSerwera extends Error {
+  constructor(readonly status: number) {
+    super(`HTTP ${status}`);
+  }
+}
 
 export type OpcjeSynchronizacji = {
   /**
@@ -126,6 +151,8 @@ export function synchronizujDostawce({
   db,
   katalogArchiwum,
   silnik,
+  odstepPonowienMs,
+  czekaj,
 }: ZaleznosciSynchronizacji): (
   kod: string,
   opcje?: OpcjeSynchronizacji,
@@ -140,6 +167,47 @@ export function synchronizujDostawce({
   const oznaczWArchiwum = (id: string, patch: Partial<MetaArchiwum>) =>
     aktualizujMeta(id, patch, envArchiwum);
 
+  const odstep = odstepPonowienMs ?? domyslnyOdstep();
+  const czekajMs = czekaj ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  /** Dostawcy, których synchronizacja (z ponowieniami) właśnie trwa — kolejny cykl nie nakłada się na nią. */
+  const wTrakcie = new Set<string>();
+
+  /**
+   * Jedna próba: pobranie + odczyt ciała. Ponawiamy WYŁĄCZNIE awarie transportu (AbortError, błąd sieci,
+   * zerwane ciało) i odpowiedzi 5xx; 4xx, błędy parsera i „podejrzanie mały” nie są ponawiane (Etap 4a).
+   */
+  async function pobierzZPonowieniami(
+    url: string,
+  ): Promise<{ odpowiedz: Response; bufor: Buffer | null; proby: number }> {
+    const maxProb = 1 + PONOWIENIA_SYNCHRONIZACJI;
+    for (let proba = 1; ; proba++) {
+      const kontroler = new AbortController();
+      const licznik = setTimeout(() => kontroler.abort(), TIMEOUT_SYNCHRONIZACJI_MS);
+      try {
+        const odpowiedz = await fetch(url, { signal: kontroler.signal });
+        if (odpowiedz.status >= 500 && proba < maxProb) {
+          await odpowiedz.arrayBuffer().catch(() => undefined);
+          throw new OdpowiedzSerwera(odpowiedz.status);
+        }
+        const bufor = odpowiedz.ok ? Buffer.from(await odpowiedz.arrayBuffer()) : null;
+        return { odpowiedz, bufor, proby: proba };
+      } catch (e) {
+        if (proba >= maxProb) {
+          // Do alertu trafia liczba prób — doklejamy ją do błędu transportu.
+          (e as { proby?: number }).proby = proba;
+          throw e;
+        }
+        if (odstep > 0) await czekajMs(odstep);
+      } finally {
+        clearTimeout(licznik); // ODSTĘPSTWO 3 — patrz nagłówek funkcji
+      }
+    }
+  }
+  const opisProb = (proby: number): string =>
+    proby > 1
+      ? ` (próby: ${proby}, odstęp ${Math.round(odstep / 1000)} s, limit ${Math.round(TIMEOUT_SYNCHRONIZACJI_MS / 1000)} s)`
+      : "";
+
   return async function synchronizuj(kod, opcje = {}): Promise<WynikSynchronizacji> {
     const dostawca = dostawcaPoKodzie(db, kod);
     if (!dostawca) return { ok: false, error: "Dostawca nie istnieje" };
@@ -152,25 +220,28 @@ export function synchronizujDostawce({
       return { ok: false, error: `Dostawca ${kod} jest wyłączony z importu` };
     }
 
+    // Jedna synchronizacja na dostawcę naraz: ponowienia trwają minuty, a kolejny cykl schedulera (lub ręczne
+    // „synchronizuj teraz”) nie może się na nie nałożyć. Bez alertu — to nie awaria.
+    if (wTrakcie.has(dostawca.kod)) {
+      return { ok: false, error: "Synchronizacja tego dostawcy już trwa" };
+    }
+    wTrakcie.add(dostawca.kod);
+
     const url = dostawca.url;
     let idArchiwum: string | null = null;
+    let proby = 1;
 
     try {
-      const kontroler = new AbortController();
-      const licznik = setTimeout(() => kontroler.abort(), TIMEOUT_SYNCHRONIZACJI_MS);
-      let odpowiedz: Response;
-      try {
-        odpowiedz = await fetch(url, { signal: kontroler.signal });
-      } finally {
-        clearTimeout(licznik); // ODSTĘPSTWO 3 — patrz nagłówek funkcji
-      }
+      const pobrane = await pobierzZPonowieniami(url);
+      const odpowiedz = pobrane.odpowiedz;
+      proby = pobrane.proby;
 
       if (!odpowiedz.ok) {
         const teraz = new Date().toISOString();
         zapiszAlert(db, {
           poziom: "ostrzezenie",
           typ: "Błąd HTTP",
-          opis: `${dostawca.kod} (${dostawca.nazwa}): HTTP ${odpowiedz.status}`,
+          opis: `${dostawca.kod} (${dostawca.nazwa}): HTTP ${odpowiedz.status}${opisProb(proby)}`,
           dostawca: dostawca.kod,
           status: "nowy",
           data: teraz,
@@ -179,7 +250,7 @@ export function synchronizujDostawce({
         return { ok: false, error: `HTTP ${odpowiedz.status}` };
       }
 
-      const bufor = Buffer.from(await odpowiedz.arrayBuffer());
+      const bufor = pobrane.bufor!;
       const rozszerzenie = rozszerzenieDlaParsera(url, dostawca.formatPliku);
       const nazwaPliku = nazwaPlikuZUrl(url, rozszerzenie);
 
@@ -231,6 +302,7 @@ export function synchronizujDostawce({
       return { ok: true, liczbaProduktow: sparsowane.rekordy.length, ...statystyki };
     } catch (e) {
       const komunikat = (e instanceof Error ? e.message : String(e)).slice(0, 500);
+      const probyBledu = (e as { proby?: number } | null)?.proby ?? proby;
       console.error(`[synchronizacja] ${kod} BŁĄD:`, e);
       if (idArchiwum) oznaczWArchiwum(idArchiwum, { status: "blad", blad: komunikat });
 
@@ -238,13 +310,15 @@ export function synchronizujDostawce({
       zapiszAlert(db, {
         poziom: "ostrzezenie",
         typ: "Błąd pobierania",
-        opis: `${dostawca.kod} (${dostawca.nazwa}): ${komunikat}`,
+        opis: `${dostawca.kod} (${dostawca.nazwa}): ${komunikat}${opisProb(probyBledu)}`,
         dostawca: dostawca.kod,
         status: "nowy",
         data: teraz,
       });
       oznaczBladDostawcy(db, dostawca.id, teraz);
       return { ok: false, error: komunikat };
+    } finally {
+      wTrakcie.delete(dostawca.kod);
     }
   };
 }

@@ -25,6 +25,7 @@ import {
   productAutoSuspensions,
   stagingAbsenceDecisions,
   stagingMatches,
+  supplierFeedBlocked,
   supplierFeedState,
   supplierFeedVersions,
 } from "../db/schema.js";
@@ -100,6 +101,38 @@ export function zapiszStanOfertyDostawcy(db: Baza, stan: typeof supplierFeedStat
       },
     })
     .run();
+  // Udany import zamyka historię zablokowanej próby (ticket 179).
+  db.delete(supplierFeedBlocked).where(eq(supplierFeedBlocked.supplier, stan.supplier)).run();
+}
+
+/**
+ * Zapamiętuje liczbę pozycji z ZABLOKOWANEJ próby („cennik podejrzanie mały”), żeby ręczne
+ * `zaakceptujMniejszyCennik` wiedziało, do czego przestawić punkt odniesienia (ticket 179).
+ */
+export function zapiszZablokowanaLiczbeOferty(db: Baza, dostawca: string, liczba: number): void {
+  db.insert(supplierFeedBlocked)
+    .values({ supplier: dostawca, itemCount: liczba, blockedAt: new Date().toISOString() })
+    .onConflictDoUpdate({
+      target: supplierFeedBlocked.supplier,
+      set: { itemCount: liczba, blockedAt: new Date().toISOString() },
+    })
+    .run();
+}
+
+/**
+ * Ręczne „zaakceptuj mniejszy cennik” (ticket 179): `last_item_count` i `max_item_count` na liczbę z ostatniej
+ * zablokowanej próby, a znacznik próby czyszczony. `null` = nie ma czego akceptować (brak zablokowanej próby).
+ */
+export function zaakceptujMniejszyCennik(db: Baza, dostawca: string): { liczba: number; poprzednia: number } | null {
+  const zablokowana = db.select().from(supplierFeedBlocked).where(eq(supplierFeedBlocked.supplier, dostawca)).get();
+  const stan = stanOfertyDostawcy(db, dostawca);
+  if (!zablokowana || !stan) return null;
+  db.update(supplierFeedState)
+    .set({ lastItemCount: zablokowana.itemCount, maxItemCount: zablokowana.itemCount })
+    .where(eq(supplierFeedState.supplier, dostawca))
+    .run();
+  db.delete(supplierFeedBlocked).where(eq(supplierFeedBlocked.supplier, dostawca)).run();
+  return { liczba: zablokowana.itemCount, poprzednia: stan.lastItemCount };
 }
 
 /** Czy taki odcisk oferty już się liczył — `staging_policy.cjs:463` (`SELECT 1 … .get()`). */

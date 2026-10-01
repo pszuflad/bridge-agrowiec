@@ -175,6 +175,7 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
       "selly_products_scalone",
       "staging_absence_decisions",
       "staging_absence_one_choice",
+      "supplier_feed_blocked",
       "supplier_feed_state",
       "supplier_feed_versions",
       "waga_gab_przewoznicy",

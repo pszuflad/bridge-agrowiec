@@ -53,6 +53,9 @@ vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
     osobnaPartia: (d: P, p: P) => separateDotBatch(d, p),
     dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
     kartaWlasnejPartii: () => false,
+    // Oryginał liczył próg z historycznego maksimum (`max_item_count`); nasz — z ostatniego importu (Etap 4b).
+    minimumPozycjiOferty: (st?: { maxItemCount?: number | null }) =>
+      st?.maxItemCount ? Math.max(1, Math.ceil(st.maxItemCount * 0.8)) : 1,
     innySymbolDostawcy: () => false,
     aktualizacjaDotWMiejscu: () => false,
     wstrzymujeKandydatowPrzyNiejednoznacznosci: () => true,

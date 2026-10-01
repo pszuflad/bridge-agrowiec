@@ -262,3 +262,17 @@ export function zachowajNazweKarty(nazwa: unknown, nazwaKarty: unknown): unknown
   if (typeof nazwa !== "string" || typeof nazwaKarty !== "string") return nazwa;
   return doPorownaniaNazw(nazwa) === doPorownaniaNazw(nazwaKarty) ? nazwaKarty : nazwa;
 }
+
+/**
+ * Minimalna liczba pozycji kompletnego cennika, poniżej której import jest blokowany jako „podejrzanie mały”.
+ *
+ * Produkcja liczyła 80% HISTORYCZNEGO maksimum (`max_item_count`, które nigdy nie malało), więc dostawca,
+ * który legalnie wycofał produkty, był blokowany na stałe. Decyzja użytkowniczki (2026-10-01, Etap 4b): próg
+ * liczy się od OSTATNIEGO UDANEGO importu (`last_item_count`); spadek o ponad 20% blokuje, a ręczne
+ * „zaakceptuj mniejszy cennik” przestawia punkt odniesienia. Brak stanu albo zero → próg 1 (pusty cennik
+ * zatrzymuje osobny bezpiecznik `feed_safety`).
+ */
+export function minimumPozycjiOferty(stan: { lastItemCount?: number | null } | undefined): number {
+  const ostatni = stan?.lastItemCount ?? 0;
+  return ostatni > 0 ? Math.max(1, Math.ceil(ostatni * 0.8)) : 1;
+}

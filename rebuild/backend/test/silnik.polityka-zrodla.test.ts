@@ -39,6 +39,9 @@ vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
     osobnaPartia: (d: P, p: P) => separateDotBatch(d, p),
     dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
     kartaWlasnejPartii: () => false,
+    // Oryginał liczył próg z historycznego maksimum (`max_item_count`); nasz — z ostatniego importu (Etap 4b).
+    minimumPozycjiOferty: (st?: { maxItemCount?: number | null }) =>
+      st?.maxItemCount ? Math.max(1, Math.ceil(st.maxItemCount * 0.8)) : 1,
     innySymbolDostawcy: () => false,
     aktualizacjaDotWMiejscu: () => false,
     wstrzymujeKandydatowPrzyNiejednoznacznosci: () => true,
@@ -280,6 +283,8 @@ describe("I15.4b — polityka źródła: port == żywy staging_policy.install() 
           { rekordy: duzy, opcje: { meta: meta() } },
           { rekordy: [INNY], opcje: { meta: meta() } },
         ],
+        // Port dokleja do treści listę brakujących kodów (Etap 4b, ticket 179) — oryginał jej nie ma.
+        { rozneKomunikatyPustego: true },
       );
       expect((port.wyniki[1] as { blad: string }).blad).toContain("podejrzanie mały");
     });
