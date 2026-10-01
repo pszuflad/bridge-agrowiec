@@ -188,6 +188,25 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       ).toBeInTheDocument();
     });
 
+    it("bez wyboru przycisk jest wyłączony i podpowiada, co zaznaczyć — także po wpisaniu własnych parametrów", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      const nazwa = within(okno).getByTestId("pole-wlasne-nazwa");
+      await uzytkownik.type(nazwa, " X");
+
+      expect(within(okno).getByTestId("button-zapisz-wybor")).toBeDisabled();
+      expect(within(okno).getByTestId("podpowiedz-wyboru")).toHaveTextContent(
+        "zaznacz powyżej istniejący produkt albo „To osobna opona”",
+      );
+
+      await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-nowy"));
+      expect(within(okno).getByTestId("button-zapisz-wybor")).toBeEnabled();
+      expect(within(okno).queryByTestId("podpowiedz-wyboru")).toBeNull();
+    });
+
     it("bez wyjaśnienia z serwera wraca do hasła importera", async () => {
       zamockuj({
         strona: stronaZFraza(FRAZY.dopasowanie),
