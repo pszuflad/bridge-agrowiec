@@ -482,6 +482,28 @@ describe("Widok /staging", () => {
       expect(within(dialog).getByTestId("button-save-details")).toBeDisabled();
     });
 
+    it("404 przy zapisie (pozycję zastąpił nowy import) → zrozumiały komunikat, nie surowy JSON", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      server.use(
+        http.put("*/api/staging/:id", () =>
+          HttpResponse.json({ error: "Nie znaleziono pozycji stagingu" }, { status: 404 }),
+        ),
+      );
+
+      const pierwsza = STRONA.items[0] as { id: number };
+      await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
+      const dialog = await screen.findByTestId("dialog-staging");
+      const kategoria = within(dialog).getByTestId("input-kategoria");
+      await uzytkownik.clear(kategoria);
+      await uzytkownik.type(kategoria, "Przemysłowe");
+      await uzytkownik.click(within(dialog).getByTestId("button-save-details"));
+
+      const blad = await within(dialog).findByTestId("szczegoly-blad");
+      expect(blad).toHaveTextContent("zastąpiona nowym importem cennika");
+      expect(blad).not.toHaveTextContent("Nie znaleziono pozycji stagingu");
+    });
+
     it("przycisk zapisu jest nieaktywny, dopóki nic nie zmieniono", async () => {
       const uzytkownik = userEvent.setup();
       await otworzStaging();
