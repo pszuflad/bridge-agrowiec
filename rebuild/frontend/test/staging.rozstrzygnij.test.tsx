@@ -23,6 +23,7 @@ import { queryClient } from "@/lib/queryClient";
 import { server } from "./msw/server";
 import {
   handleryStagingu,
+  przegladBlednegoEan,
   przegladDopasowania,
   przegladSprzecznychWierszy,
   przegladStarejKarty,
@@ -37,6 +38,8 @@ const UZYTKOWNIK = uzytkownikZFixtura();
 const FRAZY = {
   dopasowanie: "Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę.",
   cechy: "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+  blednyEan:
+    "Błędny EAN „4251438404205_D”: numer zawiera znaki inne niż cyfry. Numer nie zostanie zapisany.",
   plik: "Kilka różnych pozycji dostawcy wskazuje tę samą oponę. Wymaga sprawdzenia pliku.",
   staraKarta:
     "Brak starego kodu, ale zgodne cechy są w bieżącej ofercie pod innym oznaczeniem. Sprawdź starą kartę.",
@@ -154,6 +157,57 @@ describe("Staging — okno „Rozstrzygnij”", () => {
         expect(screen.queryByRole("columnheader", { name: "Powód" })).not.toBeInTheDocument(),
       );
       expect(screen.getByTestId("button-rozstrzygnij-710001")).toBeInTheDocument();
+    });
+  });
+
+  describe("Gałąź „błędny EAN od dostawcy” (`POST …/resolve-ean`) — NOWE, 2026-10-01", () => {
+    it("pozycja z błędnym EAN-em ma przycisk „Rozstrzygnij” (wcześniej tylko „Szczegóły”)", async () => {
+      zamockuj({ strona: stronaZFraza(FRAZY.blednyEan), przeglad: przegladBlednegoEan() });
+      await otworzStaging();
+      expect(await screen.findByTestId("button-rozstrzygnij-710001")).toHaveTextContent("Rozstrzygnij");
+    });
+
+    it("pokazuje numer od dostawcy i EAN karty; „Zostaw EAN z katalogu” wysyła `{decision:\"keep\"}`", async () => {
+      zamockuj({ strona: stronaZFraza(FRAZY.blednyEan), przeglad: przegladBlednegoEan() });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).getByTestId("tytul-rozstrzygniecia")).toHaveTextContent("Błędny EAN w cenniku");
+      expect(within(okno).getByTestId("galaz-ean")).toHaveTextContent("Dostawca podał EAN „4251438404205_D”");
+      expect(within(okno).getByTestId("ean-karty")).toHaveTextContent("4251438404205");
+
+      await uzytkownik.click(within(okno).getByTestId("button-ean-zostaw"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve-ean"))).toBe(true));
+      const zapis = mutacje.find((m) => m.url.includes("/resolve-ean"))!;
+      expect(zapis.url).toContain("/api/staging/710001/resolve-ean");
+      expect(zapis.body).toEqual({ decision: "keep" });
+    });
+
+    it("bez poprawnego EAN-u na karcie nie ma „Zostaw”; „Zapisz z tym EAN” czeka na wpisany numer", async () => {
+      zamockuj({
+        strona: stronaZFraza(FRAZY.blednyEan),
+        przeglad: przegladBlednegoEan({ eanKarty: null }),
+      });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).queryByTestId("button-ean-zostaw")).toBeNull();
+      expect(within(okno).getByTestId("ean-karty-brak")).toBeInTheDocument();
+      const zapisz = within(okno).getByTestId("button-ean-wpisz");
+      expect(zapisz).toBeDisabled();
+
+      await uzytkownik.type(within(okno).getByTestId("pole-ean-poprawny"), "5901234123457");
+      expect(zapisz).toBeEnabled();
+      await uzytkownik.click(zapisz);
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve-ean"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve-ean"))!.body).toEqual({
+        decision: "set",
+        ean: "5901234123457",
+      });
     });
   });
 

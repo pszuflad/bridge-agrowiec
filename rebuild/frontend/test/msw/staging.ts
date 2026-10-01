@@ -89,6 +89,10 @@ export function handleryStagingu(opcje: OpcjeHandlerowStagingu = {}) {
       await zapiszMutacje(request);
       return HttpResponse.json({ ok: true, kody: ["520196", "520197"] });
     }),
+    http.post("*/api/staging/:id/resolve-ean", async ({ request }) => {
+      await zapiszMutacje(request);
+      return HttpResponse.json({ ok: true, kod: "MO5_OZRR420520858LOX2", ean: "4251438404205" });
+    }),
     http.post("*/api/staging/:id/resolve", async ({ request }) => {
       await zapiszMutacje(request);
       if (bladRozstrzygniecia) return odpowiedzBledu(bladRozstrzygniecia);
@@ -165,6 +169,24 @@ function szkieletPrzegladu(): PrzegladZgloszenia {
       status: "aktywny",
     },
     candidates: [],
+  };
+}
+
+/**
+ * Pozycja z BŁĘDNYM EAN-em od dostawcy (bez sprawy dopasowania) — `resolve-ean` (NOWE, 2026-10-01).
+ * Domyślnie karta w katalogu ma poprawny EAN (`eanKarty`).
+ */
+export function przegladBlednegoEan(
+  nadpisania: Partial<PrzegladZgloszenia> = {},
+): PrzegladZgloszenia {
+  const baza = szkieletPrzegladu();
+  return {
+    ...baza,
+    powod: "Błędny EAN „4251438404205_D”: numer zawiera znaki inne niż cyfry. Numer nie zostanie zapisany.",
+    eanIssue: "numer zawiera znaki inne niż cyfry",
+    eanKarty: "4251438404205",
+    incoming: { ...baza.incoming, ean: "4251438404205_D" },
+    ...nadpisania,
   };
 }
 

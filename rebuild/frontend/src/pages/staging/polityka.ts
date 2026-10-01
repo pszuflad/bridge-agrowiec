@@ -100,6 +100,8 @@ export type PrzegladZgloszenia = {
   duplicateSource: boolean;
   sourceConflict: KonfliktZrodla | null;
   eanIssue: string | null;
+  /** NOWE (2026-10-01): EAN karty w katalogu — do decyzji „zostaw EAN z katalogu". */
+  eanKarty?: string | null;
   /**
    * NOWE (2026-09-30, nie port): krótkie zdania, co jest nie tak z tą pozycją — zamiast samego
    * hasła importera. Puste = brak wyjaśnienia (stare zgłoszenie) → okno pokazuje `matchIssue`.
@@ -134,7 +136,8 @@ export type PrzegladZgloszenia = {
  * `:433`, `:577`, `:592`.
  */
 export const WZORZEC_ROZSTRZYGNIECIA =
-  /Sprawdź dopasowanie|Wybierz właściwą oponę|Wymaga sprawdzenia pliku|Sprawdź starą kartę/;
+  // „Błędny EAN" dodane 2026-10-01 (nie port): takie pozycje też da się rozstrzygnąć w oknie.
+  /Sprawdź dopasowanie|Wybierz właściwą oponę|Wymaga sprawdzenia pliku|Sprawdź starą kartę|Błędny EAN/;
 
 /** Fraza, która zmienia etykietę przycisku na „Sprawdź kartę" (`:148`). */
 const WZORZEC_STAREJ_KARTY = /Sprawdź starą kartę/;
@@ -227,6 +230,27 @@ export async function rozstrzygnijDopasowanie(
     ...(Object.keys(poprawki).length ? { corrections: poprawki } : {}),
   });
   return (await odpowiedz.json()) as { ok: boolean; kod: string };
+}
+
+export type DecyzjaEan = "keep" | "set";
+
+/**
+ * `POST /api/staging/{id}/resolve-ean` — błędny EAN od dostawcy: „zostaw EAN z katalogu" (`keep`)
+ * albo „wpisz poprawny" (`set`).
+ *
+ * ⚠ TRASA SPOZA ORYGINAŁU — decyzja użytkowniczki (2026-10-01). Decyzja od razu zapisuje pozycję
+ * w katalogu i zapamiętuje błędny numer z pliku, żeby nie wracał przy kolejnych importach.
+ */
+export async function rozstrzygnijEan(
+  id: number,
+  decyzja: DecyzjaEan,
+  ean?: string,
+): Promise<{ ok: boolean; kod: string; ean: string }> {
+  const odpowiedz = await zadanie("POST", `/api/staging/${id}/resolve-ean`, {
+    decision: decyzja,
+    ...(decyzja === "set" ? { ean } : {}),
+  });
+  return (await odpowiedz.json()) as { ok: boolean; kod: string; ean: string };
 }
 
 export type DecyzjaSprzecznosci = "merge" | "split";
