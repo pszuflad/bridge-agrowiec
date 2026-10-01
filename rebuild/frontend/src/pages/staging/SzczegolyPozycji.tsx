@@ -102,7 +102,20 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
       await klient.invalidateQueries({ queryKey: ["/api/staging"] });
       zamknij();
     },
-    onError: (e: Error) => ustawBlad(e.message),
+    onError: async (e: Error) => {
+      // NOWE (2026-10-01): 404 = pozycji nie ma już pod tym numerem. Każdy import (także
+      // automatyczny, co godzinę i po restarcie serwera) zastępuje zgłoszenia NOWYMI, więc okno
+      // otwarte przed importem trzyma numer, którego już nie ma. Surowe „404: {error…}" nic nie mówiło.
+      if (/^404\b/.test(e.message)) {
+        ustawBlad(
+          "Ta pozycja została zastąpiona nowym importem cennika, więc jej numer już nie istnieje. " +
+            "Lista została odświeżona — zamknij okno, otwórz pozycję ponownie i wpisz zmiany jeszcze raz.",
+        );
+        await klient.invalidateQueries({ queryKey: ["/api/staging"] });
+        return;
+      }
+      ustawBlad(e.message);
+    },
   });
 
   const snapshot = pozycja ? odczytajSnapshot(pozycja.snapshotJson) : null;
