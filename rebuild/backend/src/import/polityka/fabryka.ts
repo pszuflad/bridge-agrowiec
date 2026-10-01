@@ -90,9 +90,15 @@ import {
 import { codeKey, LABEL, sourceKey } from "./podstawy.js";
 // Odstępstwo 2026-10-01: dopasowanie po poprawkach karty i z pokrewnymi DOT (plik opisuje powód).
 import {
+  aktualizacjaDotWMiejscu,
   dotZgodny,
   kartaWlasnejPartii,
+  oczyscModelZDot,
+  wstrzymujeKandydatowPrzyNiejednoznacznosci,
+  zachowajNazweKarty,
+  zgodnaBezDot,
   osobnaPartia,
+  zastapBlednyEan,
   zgodna,
   type PoprawkaKarty,
 } from "./tolerancja-dopasowania.js";
@@ -293,6 +299,9 @@ export function stworzPolitykeStagingu(
       zgodna(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
     const osobnaPartiaZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
       osobnaPartia(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
+    /** Ta sama pozycja (ten sam kod): zgodność cech BEZ DOT. */
+    const zgodnaBezDotZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      zgodnaBezDot(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
     const dotZgodnyZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
       dotZgodny(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
 
@@ -370,12 +379,20 @@ export function stworzPolitykeStagingu(
       }
 
       const zrodlo: Pozycja = { ...raw };
-      const ev = validateEan(rawEan(raw), Boolean(raw.ean_lossy || raw._eanLossy));
+      // Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (poprawka `ean` z potwierdzonym
+      // numerem), nie jest zgłaszany ponownie — liczy się EAN poprawki (`ean-bledny.ts`).
+      const ev = zastapBlednyEan(
+        validateEan(rawEan(raw), Boolean(raw.ean_lossy || raw._eanLossy)),
+        poprawkiKart.get(String(raw.kod ?? "")),
+      );
       // `:354` — normalizacja liczy WYŁĄCZNIE rozmiary i parametry; EAN idzie ścisłą ścieżką.
       let d: Pozycja = znormalizujPozycje({
         ...(surowy as unknown as PozycjaZnormalizowana),
         ean: null,
       }).poz as unknown as Pozycja;
+      // Samo „DOT” w modelu/bieżniku to oznaczenie dostawcy w nazwie (decyzja 2026-10-01).
+      if (d.model) d.model = oczyscModelZDot(d.model) as string;
+      if (d.bieznik) d.bieznik = oczyscModelZDot(d.bieznik) as string;
       Object.assign(d, {
         ean: ev.value,
         eanRaw: ev.raw,
@@ -394,7 +411,7 @@ export function stworzPolitykeStagingu(
       const wybranyRecznie = kodProduktuDlaWybranegoZrodla(db, dostawca, kod);
       if (wybranyRecznie) {
         const wskazany = poKodzie.get(wybranyRecznie);
-        if (wskazany && zgodnaZ(d, wskazany) && dotZgodnyZ(d, wskazany)) {
+        if (wskazany && zgodnaBezDotZ(d, wskazany) && dotZgodnyZ(d, wskazany)) {
           biezacy = wskazany;
           // Operator ŚWIADOMIE zostawił starą kartę. Nowy kod źródłowy opisuje jego ofertę,
           // a nie żądanie podmiany kodu i EAN-u tej karty.
@@ -428,7 +445,7 @@ export function stworzPolitykeStagingu(
         ) {
           biezacy = kanoniczny;
         }
-        if (!biezacy && kanoniczny && zgodnaZ(d, kanoniczny)) biezacy = kanoniczny;
+        if (!biezacy && kanoniczny && zgodnaBezDotZ(d, kanoniczny)) biezacy = kanoniczny;
       }
 
       // ——— 4. Jednoznaczny kod dostawcy (`:380-384`) ———
@@ -509,6 +526,8 @@ export function stworzPolitykeStagingu(
         // Odstępstwo od produkcji (2026-09-30): „DEMO" na końcu nazwy ma ostatnie słowo —
         // także wobec pamięci nazw i poprawek Marty (`manual_overrides`).
         d.nazwa = nazwaZDemo(d.nazwa as string | null, d.kodDostawcy as string | null);
+        // Gdy nazwę karty od nazwy z cennika różni tylko „DOT” (i `×`/`x`), zostaje nazwa karty.
+        d.nazwa = zachowajNazweKarty(d.nazwa, biezacy.nazwa) as string;
       }
 
       // Kandydat w trakcie przeglądu NIE może zostać uznany za wycofany (`:417`).
@@ -734,8 +753,9 @@ export function stworzPolitykeStagingu(
       for (const pozycja of przygotowane.values()) {
         const { kod, biezacy, d, bledy, zmiany } = pozycja;
 
-        // Niejednoznaczne dopasowanie wstrzymuje kandydatów (`:481-486`).
-        if (kompletna && !opcje.reconcileOnly && d._matchIssue) {
+        // Niejednoznaczne dopasowanie wstrzymywało kandydatów (`:481-486`); od 2026-10-01 NIE — pozycja
+        // czekająca na decyzję nie zeruje stanu karty (`wstrzymujeKandydatowPrzyNiejednoznacznosci`).
+        if (wstrzymujeKandydatowPrzyNiejednoznacznosci() && kompletna && !opcje.reconcileOnly && d._matchIssue) {
           for (const c of (d._candidates as { kod: string }[]) ?? []) {
             const p = poKodzie.get(c.kod);
             if (p) wstrzymaj(p, czas, odcisk, "Niejednoznaczne dopasowanie w aktualnym cenniku");
@@ -772,6 +792,14 @@ export function stworzPolitykeStagingu(
           if (d[k] != null && norm(d[k]) !== norm((biezacy as unknown as Pozycja)[k])) {
             patch[k] = d[k];
           }
+        }
+        // Odstępstwo 2026-10-01: DOT zmienia się w miejscu, bez akceptacji (nie jest kryterium dopasowania).
+        if (
+          aktualizacjaDotWMiejscu() &&
+          String(d.dot ?? "").trim() &&
+          norm(d.dot) !== norm((biezacy as unknown as Pozycja).dot)
+        ) {
+          patch.dot = d.dot;
         }
         if (validateEan(d.ean).valid && d.ean !== biezacy.ean) {
           Object.assign(patch, {

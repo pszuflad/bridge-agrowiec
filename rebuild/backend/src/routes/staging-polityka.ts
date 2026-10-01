@@ -21,6 +21,7 @@ import {
   POLA_POPRAWEK,
   rozstrzygnijIZatwierdz,
 } from "../import/polityka/rozstrzygniecie-z-zapisem.js";
+import { rozstrzygnijBlednyEan } from "../import/polityka/ean-bledny.js";
 import { wyjasnijZgloszenie } from "../import/polityka/wyjasnienie.js";
 import { rozstrzygnijSprzecznoscZrodla } from "../import/polityka/sprzecznosc-zrodla.js";
 import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
@@ -90,6 +91,8 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
       duplicateSource: !!snap._duplicateSource,
       sourceConflict: snap._sourceConflict || null,
       eanIssue: snap._eanIssue || null,
+      // NOWE (2026-10-01): EAN karty w katalogu — do decyzji „zostaw EAN z katalogu".
+      eanKarty: product?.ean ?? null,
       // NOWE (2026-09-30): zdania dla człowieka, co jest nie tak, i dane do ręcznej poprawki.
       wyjasnienie: wyjasnijZgloszenie({
         snap,
@@ -219,6 +222,37 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
         console.error("[pending] skan po rozstrzygnięciu dopasowania:", e instanceof Error ? e.message : e);
       }
       return res.json({ ok: true, kod: wynik.kod });
+    } catch (e) {
+      return odpowiedzBledem(res, e);
+    }
+  });
+
+  /**
+   * Błędny EAN od dostawcy: „zostaw EAN z katalogu" (`keep`) albo „wpisz poprawny" (`set`, `ean`).
+   *
+   * ⚠ TRASA SPOZA ORYGINAŁU — decyzja użytkowniczki (2026-10-01). Decyzja od razu ZATWIERDZA pozycję
+   * i zapamiętuje się jako poprawka `ean`, żeby ten sam błędny numer nie wracał przy kolejnych
+   * importach. Szczegóły: `import/polityka/ean-bledny.ts`.
+   */
+  router.post("/api/staging/:id/resolve-ean", requireAuth, (req, res) => {
+    try {
+      const cialo = (req.body ?? {}) as { decision?: unknown; ean?: unknown };
+      const wynik = rozstrzygnijBlednyEan(
+        db,
+        Number(req.params.id),
+        cialo.decision,
+        cialo.ean,
+        req.user!.id,
+      );
+      zapiszAudyt(db, {
+        uzytkownikId: req.user?.id ?? null,
+        uzytkownikImie: req.user?.imieNazwisko ?? null,
+        akcja: "rozstrzygniecie_blednego_ean",
+        encjaTyp: "staging",
+        encjaId: String(req.params.id),
+        szczegoly: { decyzja: cialo.decision, kod: wynik.kod, ean: wynik.ean },
+      });
+      return res.json({ ok: true, kod: wynik.kod, ean: wynik.ean });
     } catch (e) {
       return odpowiedzBledem(res, e);
     }

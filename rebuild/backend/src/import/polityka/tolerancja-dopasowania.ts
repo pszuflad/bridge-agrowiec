@@ -20,7 +20,7 @@
 // Wszystko to wpływa WYŁĄCZNIE na decyzję „czy to ta karta"; sama karta i zapisywane dane
 // przechodzą dalej bez zmian.
 
-import { compatibility, norm } from "./helpery.js";
+import { compatibility, norm, validateEan, type WynikEan } from "./helpery.js";
 import { separateDotBatch } from "./podstawy.js";
 
 type Pozycja = Record<string, unknown>;
@@ -79,13 +79,21 @@ function zPoprawkami(d: Pozycja, poprawki: readonly PoprawkaKarty[] | undefined)
   return wynik ?? d;
 }
 
-/** Wiersz pliku w postaci, w jakiej wolno go porównać z kartą `p`. */
+/**
+ * Wiersz pliku w postaci, w jakiej wolno go porównać z kartą `p`.
+ *
+ * `bezDot` = TA SAMA POZYCJA (ten sam kod): DOT nie jest kryterium, wiersz porównujemy tak, jakby
+ * miał DOT karty (decyzja użytkowniczki, 2026-10-01). Bez tego DOT-y pokrewne (`2026` ⊂ `2025,2026`)
+ * liczą się jako zgodne, a rozłączne zostają różnicą — to dla INNEGO kodu (nowy symbol partii).
+ */
 function widok(
   d: Pozycja,
   p: Pozycja,
   poprawki: readonly PoprawkaKarty[] | undefined,
+  bezDot = false,
 ): Pozycja {
   const z = zPoprawkami(d, poprawki);
+  if (bezDot) return { ...z, dot: p.dot };
   return dotyPokrewne(z.dot, p.dot) && norm(z.dot) !== norm(p.dot) ? { ...z, dot: p.dot } : z;
 }
 
@@ -98,7 +106,19 @@ export function zgodna(
   return compatibility(widok(d, p, poprawki), p).ok;
 }
 
-/** `separateDotBatch(d, p)` — pokrewne DOT NIE są osobną partią. */
+/** `compatibility(d, p).ok` dla TEJ SAMEJ pozycji (ten sam kod): DOT w ogóle nie jest porównywany. */
+export function zgodnaBezDot(
+  d: Pozycja,
+  p: Pozycja,
+  poprawki?: readonly PoprawkaKarty[],
+): boolean {
+  return compatibility(widok(d, p, poprawki, true), p).ok;
+}
+
+/**
+ * `separateDotBatch(d, p)` dla INNEGO kodu (nowy symbol partii): pokrewne DOT nie są osobną partią,
+ * rozłączne — tak, jak w produkcji (osobny produkt).
+ */
 export function osobnaPartia(
   d: Pozycja,
   p: Pozycja,
@@ -107,13 +127,21 @@ export function osobnaPartia(
   return separateDotBatch(widok(d, p, poprawki), p);
 }
 
-/** `norm(d.dot) === norm(p.dot)` — z pokrewnymi DOT. */
+/** `norm(d.dot) === norm(p.dot)` dla TEJ SAMEJ pozycji (ten sam kod) — DOT nie jest kryterium, więc zawsze zgodny. */
 export function dotZgodny(
-  d: Pozycja,
-  p: Pozycja,
-  poprawki?: readonly PoprawkaKarty[],
+  _d: Pozycja,
+  _p: Pozycja,
+  _poprawki?: readonly PoprawkaKarty[],
 ): boolean {
-  return dotyPokrewne(zPoprawkami(d, poprawki).dot, p.dot);
+  return true;
+}
+
+/**
+ * Czy zmianę DOT z cennika zapisać na karcie OD RAZU (w cichej aktualizacji obok ceny i stanu), bez
+ * zgłoszenia do akceptacji. Produkcja DOT-u nie aktualizowała — inny DOT zakładał nowy produkt.
+ */
+export function aktualizacjaDotWMiejscu(): boolean {
+  return true;
 }
 
 /**
@@ -133,4 +161,61 @@ export function kartaWlasnejPartii(
   if (!String(p.kod ?? "").includes("_AUTO_")) return false;
   const kodPliku = kodKlucz(d.kodDostawcy);
   return kodPliku !== "" && kodPliku === kodKlucz(p.kodDostawcy);
+}
+
+/**
+ * Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (`ean-bledny.ts`): poprawka `ean` karty
+ * z `acknowledgedSourceValue` równym TEMU błędnemu numerowi → zamiast błędu liczy się EAN poprawki.
+ * Gdy dostawca zmieni numer (inny napis), pytanie wraca.
+ */
+export function zastapBlednyEan(
+  ev: WynikEan,
+  poprawki: readonly PoprawkaKarty[] | undefined,
+): WynikEan {
+  if (!ev.error || !poprawki?.length) return ev;
+  const potwierdzona = poprawki.find(
+    (o) =>
+      o.fieldName === "ean" &&
+      o.overrideValue != null &&
+      o.acknowledgedSourceValue != null &&
+      String(o.acknowledgedSourceValue).trim() === ev.raw,
+  );
+  if (!potwierdzona) return ev;
+  const poprawiony = validateEan(potwierdzona.overrideValue);
+  return poprawiony.valid ? poprawiony : ev;
+}
+
+/**
+ * Czy niejednoznaczne dopasowanie (`_matchIssue`) wstrzymuje karty-kandydatów i zeruje ich stan.
+ * Produkcja: tak. Decyzja użytkowniczki (2026-10-01): NIE — pozycja czekająca w stagingu na decyzję
+ * nie może zmieniać katalogu ani zerować stanu magazynowego (u dostawcy towar jest).
+ */
+export function wstrzymujeKandydatowPrzyNiejednoznacznosci(): boolean {
+  return false;
+}
+
+/** Samo słowo „DOT” (opcjonalnie z rokiem) — oznaczenie dostawcy w nazwie, nie część modelu. */
+const SLOWO_DOT_RE = /\s*\bDOT(?:\s*\d{2,4})?\b/gi;
+
+/**
+ * Model/bieżnik bez słowa „DOT” (np. `XL GRIP DOT` → `XL GRIP`, `TR 270 DOT` → `TR 270`).
+ * Dostawca MO9 pisze „(DOT)” w nazwie; parser wycina z modelu tylko „DOT” z liczbą, więc samo „DOT”
+ * zostawało w modelu i bieżniku (decyzja użytkowniczki, 2026-10-01: model BKT ma być `XL GRIP`).
+ */
+export function oczyscModelZDot(wartosc: unknown): unknown {
+  if (typeof wartosc !== "string") return wartosc;
+  const czysty = wartosc.replace(SLOWO_DOT_RE, "").replace(/\s+/g, " ").trim();
+  return czysty || wartosc;
+}
+
+const doPorownaniaNazw = (nazwa: string): string =>
+  nazwa.replace(SLOWO_DOT_RE, "").replace(/×/g, "x").replace(/\s+/g, " ").trim().toUpperCase();
+
+/**
+ * Nazwa z cennika, gdy od nazwy karty różni ją TYLKO słowo „DOT” (i zapis `×`/`x` w rozmiarze) —
+ * zostaje nazwa karty („nazwa ma pozostać taka, jaka jest”). Każda inna różnica przechodzi bez zmian.
+ */
+export function zachowajNazweKarty(nazwa: unknown, nazwaKarty: unknown): unknown {
+  if (typeof nazwa !== "string" || typeof nazwaKarty !== "string") return nazwa;
+  return doPorownaniaNazw(nazwa) === doPorownaniaNazw(nazwaKarty) ? nazwaKarty : nazwa;
 }

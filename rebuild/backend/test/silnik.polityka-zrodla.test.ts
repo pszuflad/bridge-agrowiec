@@ -16,7 +16,29 @@
 // rozjedzie, rozjedzie się z produkcją. Harness oryginału:
 // `test/charakteryzacja/silnik/polityka.mjs`.
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+// Ten gate porównuje port z ŻYWYM oryginałem 1:1, a oryginał nie ma tolerancji dopasowania
+// (decyzje użytkowniczki 2026-10-01, `polityka/tolerancja-dopasowania.ts`) — wyłączamy ją tylko tutaj.
+// Samą tolerancję pokrywa `tolerancja-dopasowania.test.ts`.
+vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
+  const { compatibility, norm } = await import("../src/import/polityka/helpery.js");
+  const { separateDotBatch } = await import("../src/import/polityka/podstawy.js");
+  type P = Record<string, unknown>;
+  return {
+    dotyPokrewne: (a: unknown, b: unknown) => norm(a) === norm(b),
+    zgodna: (d: P, p: P) => compatibility(d, p).ok,
+    zgodnaBezDot: (d: P, p: P) => compatibility(d, p).ok,
+    osobnaPartia: (d: P, p: P) => separateDotBatch(d, p),
+    dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
+    kartaWlasnejPartii: () => false,
+    aktualizacjaDotWMiejscu: () => false,
+    wstrzymujeKandydatowPrzyNiejednoznacznosci: () => true,
+    oczyscModelZDot: <T>(w: T) => w,
+    zachowajNazweKarty: <T>(n: T) => n,
+    zastapBlednyEan: <T>(ev: T) => ev,
+  };
+});
 
 import { silnikStagingu, type OpcjeImportu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";

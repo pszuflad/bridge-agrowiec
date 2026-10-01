@@ -100,7 +100,7 @@ export function rozstrzygnijIZatwierdz(
       }
     }
 
-    zatwierdzPozycjeZPolityka(db, nowe.id, uzytkownikId);
+    zatwierdzPozycjeZPolityka(db, nowe.id, uzytkownikId, true);
     return { kod: nowe.kod };
   })();
 }

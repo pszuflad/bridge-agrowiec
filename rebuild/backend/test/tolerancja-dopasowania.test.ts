@@ -1,6 +1,7 @@
 // Tolerancja dopasowania (decyzja użytkowniczki, 2026-10-01, `polityka/tolerancja-dopasowania.ts`):
 // import nie zgłasza „Oznaczenie wskazuje inną oponę", gdy różnica to (1) wartość pola już
-// poprawiona ręcznie na karcie albo (2) DOT pokrewny (zbiór lat zawiera się w drugim).
+// poprawiona ręcznie na karcie albo (2) DOT — ten sam kod = ta sama pozycja, DOT zmienia się w miejscu
+// (decyzja 2026-10-01; w pliku dostawcy inna partia DOT ma INNY symbol, więc nic się nie scala).
 //
 // Przypadek wzorcowy: Mitas TF-03 6.50-16 — karta ma model `TF03` (poprawka Marty, źródło
 // `TF-03`) i DOT `2025,2026`, cennik podaje `TF-03` i `2026`.
@@ -11,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { eanPary, manualOverrides, products, stagingItems } from "../src/db/schema.js";
+import { rozstrzygnijIZatwierdz } from "../src/import/polityka/rozstrzygniecie-z-zapisem.js";
 import { dotyPokrewne } from "../src/import/polityka/tolerancja-dopasowania.js";
 import { silnikStagingu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
@@ -54,6 +56,8 @@ function importuj(opcje: {
   /** Druga karta (np. osobna partia z kodem zastępczym) i pary kod↔EAN wygenerowane wcześniej. */
   druga?: Wiersz;
   pary?: Wiersz[];
+  /** Kompletna oferta — wtedy niejednoznaczne dopasowanie mogło (w produkcji) wstrzymywać karty. */
+  kompletna?: boolean;
 }) {
   const produkt = wczytaj<Wiersz[]>(join(katalog, "silnik", "katalog", "MO5.katalog.json")).find(
     (p) => p.kod === KOD,
@@ -89,64 +93,74 @@ function importuj(opcje: {
       } as never)
       .run();
   }
-  silnikStagingu(baza.db)("MO5", [{ ...rekord, ...opcje.rekord } as unknown as RekordSurowy], {});
+  silnikStagingu(baza.db)(
+    "MO5",
+    [{ ...rekord, ...opcje.rekord } as unknown as RekordSurowy],
+    opcje.kompletna ? { meta: { complete: true } as never } : {},
+  );
   const wiersze = baza.db.select().from(stagingItems).all();
   return wiersze.map((w) => ({
     kod: w.kod,
     typ: w.typZmiany,
+    powod: w.powod as string | null,
     problem: (JSON.parse(w.snapshotJson as string) as Wiersz)._matchIssue ?? null,
   }));
 }
 
 describe("importer — tolerancja dopasowania", () => {
-  it("DOT pokrewny (`2026` vs `2025,2026`): ta sama karta, bez zgłoszenia „inna opona”", () => {
-    const staging = importuj({ karta: { dot: "2025,2026" }, rekord: { dot: "2026" } });
-    expect(staging.filter((w) => w.problem)).toEqual([]);
-    expect(staging.every((w) => w.kod === KOD)).toBe(true); // bez kodu zastępczego `MO5_AUTO_…`
-  });
+  /** DOT karty po imporcie — z tej samej bazy, na której poszedł import. */
+  const dotKartyWiersz = (kod = KOD) =>
+    (baza!.db.select().from(products).all() as unknown as Wiersz[]).find((p) => p.kod === kod)!;
+  const dotKarty = (kod = KOD) =>
+    (baza!.db.select().from(products).all() as unknown as Wiersz[]).find((p) => p.kod === kod)!.dot;
 
-  it("DOT rozłączny (`2026` vs `2025`): nadal OSOBNA partia, jak w produkcji", () => {
-    const staging = importuj({ karta: { dot: "2025" }, rekord: { dot: "2026" } });
-    expect(staging.filter((w) => w.problem)).toEqual([]);
-    expect(staging).toHaveLength(1);
-    expect(staging[0]!.kod).toMatch(/^MO5_AUTO_/);
-    expect(staging[0]!.typ).toBe("nowa");
-  });
+  const karta = () => dotKartyWiersz();
 
-  it("poprawka modelu karty + DOT rozłączny: osobna partia, a nie fałszywa „inna opona”", () => {
-    const karta = { model: "DURAFORCE-UTILITY", dot: "2025" };
-    const rekord = { dot: "2026" };
-    const poprawka = {
-      fieldName: "model",
-      overrideValue: "DURAFORCE-UTILITY",
-      acknowledgedSourceValue: "DURAFORCE UTILITY",
-    };
-    // Bez poprawki karta „różni się modelem" od pliku → trafia do ręcznej decyzji.
-    const bez = importuj({ karta, rekord });
-    baza?.posprzataj();
-    expect(bez.filter((w) => w.problem)).toHaveLength(1);
-
-    const z = importuj({ karta, rekord, poprawka });
-    expect(z.filter((w) => w.problem)).toEqual([]);
-    expect(z[0]!.kod).toMatch(/^MO5_AUTO_/);
-  });
-
-  it("dostawca zmienił model JESZCZE RAZ: poprawka nie przesłania prawdziwej zmiany", () => {
-    const staging = importuj({
-      karta: { model: "DURAFORCE-UTILITY", dot: "2025" },
-      rekord: { dot: "2026", model: "DURAFORCE NOWY" },
-      poprawka: {
-        fieldName: "model",
-        overrideValue: "DURAFORCE-UTILITY",
-        acknowledgedSourceValue: "DURAFORCE UTILITY",
-      },
+  describe("DOT jako cecha zmienna — ta sama pozycja (ten sam kod) nie wraca do akceptacji", () => {
+    it("`2026` vs `2025,2026`: ta sama karta, bez zgłoszenia, DOT zapisany na karcie", () => {
+      const staging = importuj({ karta: { dot: "2025,2026" }, rekord: { dot: "2026" } });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(staging.every((w) => w.kod === KOD)).toBe(true);
+      expect(dotKarty()).toBe("2026");
     });
-    expect(staging.filter((w) => w.problem)).toHaveLength(1);
+
+    it("`2026` vs `2025` (rozłączne): TA SAMA karta — bez nowego produktu i bez pytania, DOT zmieniony w miejscu", () => {
+      const staging = importuj({ karta: { dot: "2025" }, rekord: { dot: "2026" } });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(staging.some((w) => w.typ === "nowa"), "nie powstaje druga karta").toBe(false);
+      expect(dotKarty()).toBe("2026");
+    });
+
+    it("zmiana DOT przy zmienionym modelu karty (poprawka Marty) też nie pyta", () => {
+      const staging = importuj({
+        karta: { model: "DURAFORCE-UTILITY", dot: "2025" },
+        rekord: { dot: "2026" },
+        poprawka: {
+          fieldName: "model",
+          overrideValue: "DURAFORCE-UTILITY",
+          acknowledgedSourceValue: "DURAFORCE UTILITY",
+        },
+      });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(dotKarty()).toBe("2026");
+    });
+
+    it("NOWY symbol dostawcy z innym DOT (kolejna partia) to nadal osobny produkt — bez pytania", () => {
+      const staging = importuj({
+        karta: { dot: "2025" },
+        rekord: { kod: "MO5_BFPR240460708DUT2", kodDostawcy: "BFPR240460708DUT2", dot: "2026" },
+      });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(staging).toHaveLength(1);
+      expect(staging[0]!.typ).toBe("nowa");
+      expect(staging[0]!.kod).toBe("MO5_BFPR240460708DUT2");
+      expect(dotKarty(), "karta z poprzednią partią nietknięta").toBe("2025");
+    });
   });
 
-  describe("karta założona przez system dla tego wiersza (osobna partia DOT z kodem `…_AUTO_…`)", () => {
+  describe("karta założona wcześniej przez system dla tego wiersza (`…_AUTO_…`, stare osobne partie DOT)", () => {
     const AUTO = "MO5_AUTO_ABC123";
-    /** Karta z kodem z pliku ma DOT 2025, a zaakceptowana partia 2026 żyje pod kodem zastępczym. */
+    /** Karta z kodem z pliku ma DOT 2025, a zaakceptowana wcześniej partia 2026 żyje pod kodem zastępczym. */
     const karty = (druga: Wiersz = {}) => ({
       karta: { dot: "2025", ean: "9990000000210" },
       druga: { kod: AUTO, dot: "2026", ean: "9990000001903", ...druga },
@@ -157,30 +171,102 @@ describe("importer — tolerancja dopasowania", () => {
       rekord: { dot: "2026", ean: null, eanRaw: null },
     });
 
-    it("kolejny import tego samego wiersza dopasowuje się do niej — bez pytania o „podobną oponę”", () => {
+    it("wiersz dopasowuje się po kodzie do karty z kodem z pliku — bez pytania i bez nowej karty", () => {
       const staging = importuj(karty());
       expect(staging.filter((w) => w.problem)).toEqual([]);
-      expect(staging.every((w) => w.kod === AUTO)).toBe(true);
-      expect(staging.some((w) => w.typ === "nowa"), "nie zakłada trzeciej karty").toBe(false);
+      expect(staging.some((w) => w.typ === "nowa")).toBe(false);
+      expect(dotKarty()).toBe("2026");
     });
 
     it("prawdziwy EAN w cenniku nie blokuje dopasowania, gdy karta ma wygenerowany 999…", () => {
       const staging = importuj({ ...karty(), rekord: { dot: "2026", ean: "5901234123457" } });
       expect(staging.filter((w) => w.problem)).toEqual([]);
     });
+  });
 
-    it("INNY prawdziwy EAN na karcie → nadal pytanie (to może być inna opona)", () => {
-      const staging = importuj({
-        ...karty({ ean: "5901234123464" }),
-        pary: [{ kod: KOD, ean: "9990000000210", numer: 21 }],
-        rekord: { dot: "2026", ean: "5901234123457" },
-      });
-      expect(staging.filter((w) => w.problem)).toHaveLength(1);
+  describe("błędny EAN z pliku, który już rozstrzygnięto (poprawka `ean` z potwierdzonym numerem)", () => {
+    const BLEDNY = "5901234123457_D";
+    const poprawkaEan = {
+      fieldName: "ean",
+      overrideValue: "5901234123457",
+      acknowledgedSourceValue: BLEDNY,
+    };
+    const bledy = (st: ReturnType<typeof importuj>) =>
+      st.filter((w) => w.typ === "blad" && (w.powod ?? "").includes("Błędny EAN"));
+
+    it("bez rozstrzygnięcia ten sam błędny EAN jest zgłaszany", () => {
+      const staging = importuj({ karta: { ean: "5901234123457" }, rekord: { ean: BLEDNY, eanRaw: BLEDNY } });
+      expect(bledy(staging)).toHaveLength(1);
     });
 
-    it("karta o INNYM kodzie dostawcy niż wiersz nie jest „własną” — pytanie zostaje", () => {
-      const staging = importuj(karty({ kodDostawcy: "INNY_KOD" }));
+    it("po rozstrzygnięciu ten sam numer NIE jest zgłaszany ponownie", () => {
+      const staging = importuj({
+        karta: { ean: "5901234123457" },
+        rekord: { ean: BLEDNY, eanRaw: BLEDNY },
+        poprawka: poprawkaEan,
+      });
+      expect(bledy(staging)).toEqual([]);
+    });
+
+    it("dostawca zmienił błędny numer → pytanie wraca", () => {
+      const staging = importuj({
+        karta: { ean: "5901234123457" },
+        rekord: { ean: "5901234123457_X", eanRaw: "5901234123457_X" },
+        poprawka: poprawkaEan,
+      });
+      expect(bledy(staging)).toHaveLength(1);
+    });
+  });
+
+  describe("czekająca pozycja nie rusza katalogu (decyzja 2026-10-01)", () => {
+    it("niejednoznaczne dopasowanie NIE wstrzymuje karty-kandydata i nie zeruje jej stanu", () => {
+      // Ta sama opona pod INNYM kodem → „podobna opona” (pytanie), kandydatem jest karta KOD.
+      const staging = importuj({
+        karta: { stan: 7, status: "aktywny" },
+        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "INNY_KOD", ean: "5901234123457", eanRaw: "5901234123457" },
+        kompletna: true,
+      });
       expect(staging.filter((w) => w.problem)).toHaveLength(1);
+      expect(karta()).toMatchObject({ status: "aktywny", stan: 7 });
+    });
+  });
+
+  describe("rozstrzygnięcie człowieka nie gubi stanu", () => {
+    it("karta wstrzymana ręcznie (bez znacznika) po „połącz” dostaje stan i status z oferty", () => {
+      importuj({
+        karta: { stan: 0, status: "wstrzymany" },
+        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "INNY_KOD", ean: "5901234123457", eanRaw: "5901234123457", stan: 4 },
+        kompletna: true,
+      });
+      const id = baza!.db.select().from(stagingItems).all()[0]!.id;
+      rozstrzygnijIZatwierdz(baza!.db, id, "link", KOD, {}, 1);
+      expect(karta()).toMatchObject({ status: "aktywny", stan: 4 });
+    });
+  });
+
+  describe("samo „DOT” w nazwie dostawcy (BKT/MO9)", () => {
+    const BKT = {
+      karta: { nazwa: "18.00x25 BKT XL GRIP 40PR TL", model: "XL GRIP", dot: "2025" },
+      rekord: {
+        nazwa: "18.00x25 BKT XL GRIP DOT 40PR TL",
+        model: "XL GRIP DOT",
+        bieznik: "XL GRIP DOT",
+        dot: "2025",
+      },
+    };
+
+    it("model i bieżnik bez „DOT”, nazwa karty zostaje — pozycja nie wraca do akceptacji", () => {
+      const staging = importuj(BKT);
+      expect(staging.filter((w) => w.typ === "zmiana_kluczowa")).toEqual([]);
+      expect(karta().nazwa).toBe("18.00x25 BKT XL GRIP 40PR TL");
+    });
+
+    it("prawdziwa zmiana nazwy (nie tylko „DOT”) nadal idzie do akceptacji", () => {
+      const staging = importuj({
+        ...BKT,
+        rekord: { ...BKT.rekord, nazwa: "18.00x25 BKT XL GRIP DOT 44PR TL" },
+      });
+      expect(staging.filter((w) => w.typ === "zmiana_kluczowa")).toHaveLength(1);
     });
   });
 });

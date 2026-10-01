@@ -42,9 +42,15 @@ vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
   return {
     dotyPokrewne: (a: unknown, b: unknown) => norm(a) === norm(b),
     zgodna: (d: P, p: P) => compatibility(d, p).ok,
+    zgodnaBezDot: (d: P, p: P) => compatibility(d, p).ok,
     osobnaPartia: (d: P, p: P) => separateDotBatch(d, p),
     dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
     kartaWlasnejPartii: () => false,
+    aktualizacjaDotWMiejscu: () => false,
+    wstrzymujeKandydatowPrzyNiejednoznacznosci: () => true,
+    oczyscModelZDot: <T>(w: T) => w,
+    zachowajNazweKarty: <T>(n: T) => n,
+    zastapBlednyEan: <T>(ev: T) => ev,
   };
 });
 

@@ -75,6 +75,7 @@ import {
   opisStanuStarejKarty,
   POLA_WLASNE,
   rozstrzygnijDopasowanie,
+  rozstrzygnijEan,
   rozstrzygnijSprzecznosc,
   wybierzKarte,
   ZAPASOWY_KOMUNIKAT_DECYZJI,
@@ -182,6 +183,8 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
   const [wybraneDopasowanie, ustawWybraneDopasowanie] = useState<string | null>(null);
   /** Własne parametry wpisane w oknie (NOWE, 2026-09-30); `null` = sekcja zwinięta, bez zmian. */
   const [wlasne, ustawWlasne] = useState<WlasneParametry | null>(null);
+  /** Wpisany poprawny EAN w gałęzi „błędny EAN" (NOWE, 2026-10-01). */
+  const [eanWpisany, ustawEanWpisany] = useState("");
   const [blad, ustawBlad] = useState<string | null>(null);
   const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<string | null>(null);
 
@@ -200,6 +203,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
     ustawWybranaKarte(null);
     ustawWybraneDopasowanie(null);
     ustawWlasne(null);
+    ustawEanWpisany("");
     ustawBlad(null);
     ustawDoPotwierdzenia(null);
   }, [id]);
@@ -230,9 +234,15 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
   const kandydatDoWersji = przeglad?.candidates.find((c) => c.kod === wybranaKarta)
     ?? (zgodni.length === 1 ? zgodni[0] : undefined);
 
+  /** Sam błędny EAN od dostawcy (bez sprawy dopasowania) — NOWE, 2026-10-01. */
+  const pokazEan =
+    !!przeglad?.eanIssue && !pokazWyborKarty && !pokazDopasowanie && !przeglad?.duplicateSource;
+
   const tytul = pokazWyborKarty
     ? "Porównaj starą kartę z obecną ofertą"
-    : "Sprawdź dopasowanie opony";
+    : pokazEan
+      ? "Błędny EAN w cenniku"
+      : "Sprawdź dopasowanie opony";
 
   /**
    * Oryginał przerywa BEZ komunikatu, gdy nie ma czym wypełnić `candidateVersion`
@@ -468,6 +478,39 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                 </>
               ) : null}
 
+              {pokazEan ? (
+                <div data-testid="galaz-ean">
+                  <p className="my-2.5">
+                    Dostawca podał EAN „{przeglad.incoming.ean}”: {przeglad.eanIssue}. Dopóki nie
+                    rozstrzygniesz, pozycji nie da się zaakceptować.
+                  </p>
+                  {przeglad.eanKarty ? (
+                    <p className="my-2.5" data-testid="ean-karty">
+                      Karta w katalogu ma EAN: <strong>{przeglad.eanKarty}</strong>.
+                    </p>
+                  ) : (
+                    <p className="my-2.5 text-muted-foreground" data-testid="ean-karty-brak">
+                      Karta w katalogu nie ma poprawnego EAN-u (albo to nowa pozycja) — wpisz
+                      właściwy numer.
+                    </p>
+                  )}
+                  <label className="my-2.5 flex items-center gap-2.5 text-sm">
+                    <span className="w-28 shrink-0">Poprawny EAN</span>
+                    <Input
+                      value={eanWpisany}
+                      onChange={(e) => ustawEanWpisany(e.target.value)}
+                      inputMode="numeric"
+                      data-testid="pole-ean-poprawny"
+                    />
+                  </label>
+                  <p className="my-2 text-sm text-muted-foreground">
+                    Decyzja zapisuje pozycję od razu w katalogu i zapamiętuje, że ten numer od
+                    dostawcy jest błędny — kolejny import go nie zgłosi (chyba że dostawca zmieni
+                    numer).
+                  </p>
+                </div>
+              ) : null}
+
               {przeglad.duplicateSource ? (
                 <>
                   <p className="my-2.5">
@@ -567,6 +610,30 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   data-testid="button-polacz-wiersze"
                 >
                   Połącz w jeden produkt
+                </Button>
+              </>
+            ) : null}
+
+            {przeglad && pokazEan ? (
+              <>
+                {przeglad.eanKarty ? (
+                  <Button
+                    variant="outline"
+                    disabled={zapis.isPending}
+                    onClick={() => zapis.mutate(() => rozstrzygnijEan(przeglad.id, "keep"))}
+                    data-testid="button-ean-zostaw"
+                  >
+                    Zostaw EAN z katalogu
+                  </Button>
+                ) : null}
+                <Button
+                  disabled={!eanWpisany.trim() || zapis.isPending}
+                  onClick={() =>
+                    zapis.mutate(() => rozstrzygnijEan(przeglad.id, "set", eanWpisany.trim()))
+                  }
+                  data-testid="button-ean-wpisz"
+                >
+                  Zapisz z tym EAN
                 </Button>
               </>
             ) : null}
