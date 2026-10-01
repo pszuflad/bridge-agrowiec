@@ -168,7 +168,8 @@ describe("POST /api/staging/:id/resolve — zapis od razu do katalogu", () => {
 
       expect(odp.status).toBe(200);
       const tekst = (odp.body.wyjasnienie as string[]).join("\n");
-      expect(tekst).toMatch(/zajęty przez inną oponę/);
+      expect(tekst).toMatch(/już jest w katalogu: MO9_37513/);
+      expect(tekst).toMatch(/nie wiadomo, czy to ta sama opona/); // ocena importera, nie fakt
       expect(tekst).toContain(`Import chce ustawić nazwę: ${NAZWA_IMPORTU}`);
       expect(tekst).toContain("w katalogu jest: 20.8X38 BKT TR 270 8PR TT");
       expect(odp.body.propozycja).toMatchObject({
@@ -179,6 +180,39 @@ describe("POST /api/staging/:id/resolve — zapis od razu do katalogu", () => {
         ean: "8903094004874",
       });
       expect(odp.body.candidates[0].produktId).toBe(7);
+    });
+
+    it("różnice z wartościami po obu stronach; DOT `24` = `2024` nie jest różnicą; wskazówka o nazwie", async () => {
+      srodowisko.db
+        .update(products)
+        .set({ nazwa: "650/65R42 ALLIANCE 365 AGRISTAR 170D/173A8 TL", model: "365 AGRISTAR", dot: "2024" })
+        .run();
+      const a = zasiej(
+        zgloszenie({
+          nazwa: "650/65R42 ALLIANCE 365 170D/173A8 TL",
+          snapshot: { nazwa: "650/65R42 ALLIANCE 365 170D/173A8 TL", model: "365", dot: "24" },
+        }),
+      );
+
+      const odp = await get(a.id);
+      const linie = odp.body.wyjasnienie as string[];
+
+      expect(linie).toContain("Model: 365 AGRISTAR (katalog) → 365 (oferta)");
+      expect(linie.some((l) => l.startsWith("DOT:")), "24 i 2024 to ten sam DOT").toBe(false);
+      expect(linie).toContain(
+        "Import chce ustawić nazwę: 650/65R42 ALLIANCE 365 170D/173A8 TL (w katalogu jest: 650/65R42 ALLIANCE 365 AGRISTAR 170D/173A8 TL).",
+      );
+      expect(linie.at(-1)).toMatch(/Najpewniej ta sama opona z innym zapisem nazwy/);
+    });
+
+    it("różni się DOT albo rozmiar → wskazówka o osobnej partii, bez obietnicy „ta sama opona”", async () => {
+      srodowisko.db.update(products).set({ dot: "2023" }).run();
+      const a = zasiej(zgloszenie({ snapshot: { dot: "2026" } }));
+
+      const linie = (await get(a.id)).body.wyjasnienie as string[];
+
+      expect(linie).toContain("DOT: 2023 (katalog) → 2026 (oferta)");
+      expect(linie.at(-1)).toBe("To może być osobna partia lub inna opona. Sprawdź kartę w katalogu.");
     });
 
     it("EAN taki sam jak w innym produkcie", async () => {

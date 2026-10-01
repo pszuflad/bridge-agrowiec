@@ -243,6 +243,18 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
     ustawDoPotwierdzenia(wybranaKarta);
   };
 
+  /** Zapis decyzji dopasowania (`resolve`) z ewentualnymi własnymi parametrami z okna. */
+  const zapiszDopasowanie = (wybor: string): void => {
+    if (!przeglad) return;
+    zapis.mutate(() =>
+      rozstrzygnijDopasowanie(
+        przeglad.id,
+        wybor,
+        wlasne ? zmienioneParametry(wlasne, przeglad.propozycja) : {},
+      ),
+    );
+  };
+
   return (
     <>
       <Dialog open={id != null} onOpenChange={(otwarty) => !otwarty && zamknij()}>
@@ -354,11 +366,9 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
 
               {pokazDopasowanie ? (
                 <>
-                  <p className="my-2.5">
-                    Wybierz produkt z katalogu lub utwórz osobny produkt. „Zapisz w katalogu” zapisuje
-                    wybór od razu w katalogu — nie trzeba go potem osobno akceptować w stagingu. Jeśli
-                    dane z oferty są błędne (np. zła kolejność w nazwie), wpisz własne wartości
-                    poniżej: do katalogu trafią Twoje.
+                  <p className="my-2.5 text-sm text-muted-foreground">
+                    „Zapisz w katalogu” zapisuje od razu, bez osobnej akceptacji w stagingu. Błędne
+                    dane z oferty możesz poprawić poniżej.
                   </p>
                   <div>
                     {przeglad.candidates.map((c) => (
@@ -522,19 +532,6 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
 
           {/* Stopka: „Zamknij" zawsze pierwszy, przyciski zapisu po nim (`:96`, `:110`, `:128`). */}
           <div className="mt-5 flex flex-wrap justify-end gap-2.5">
-            {/*
-              NOWE (2026-10-01): „Zapisz w katalogu” jest wyłączony, dopóki nie wybrano jednej z opcji
-              (produkt z listy albo „To osobna opona”). Samo wpisanie własnych parametrów go nie
-              odblokowuje — bez tej podpowiedzi przycisk wyglądał na zepsuty.
-            */}
-            {przeglad && pokazDopasowanie && !wybraneDopasowanie ? (
-              <p
-                className="w-full text-right text-sm text-amber-600 dark:text-amber-400"
-                data-testid="podpowiedz-wyboru"
-              >
-                Żeby zapisać, zaznacz powyżej istniejący produkt albo „To osobna opona”.
-              </p>
-            ) : null}
             <Button
               variant="outline"
               onClick={zamknij}
@@ -574,18 +571,44 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
               </>
             ) : null}
 
-            {przeglad && pokazDopasowanie ? (
+            {/*
+              NOWE (2026-10-01): gdy nic nie wybrano, decyzję podejmuje się PRZYCISKIEM W STOPCE —
+              okno jest długie i lista wyboru bywa poza ekranem, więc „zaznacz powyżej” nie
+              wystarczało (nie dało się zapisać zmian bez przewijania). Radio nadal działa.
+            */}
+            {przeglad && pokazDopasowanie && !wybraneDopasowanie ? (
+              <>
+                <p
+                  className="w-full text-right text-sm text-amber-600 dark:text-amber-400"
+                  data-testid="podpowiedz-wyboru"
+                >
+                  Gdzie zapisać? (albo zaznacz wybór wyżej)
+                </p>
+                {przeglad.candidates.length === 1 ? (
+                  <Button
+                    variant="outline"
+                    disabled={zapis.isPending}
+                    onClick={() => zapiszDopasowanie(przeglad.candidates[0]!.kod)}
+                    title={przeglad.candidates[0]!.kod}
+                    data-testid="button-zapisz-istniejacy"
+                  >
+                    Zapisz na istniejącej karcie
+                  </Button>
+                ) : null}
+                <Button
+                  disabled={zapis.isPending}
+                  onClick={() => zapiszDopasowanie(KOD_NOWEGO_PRODUKTU)}
+                  data-testid="button-zapisz-nowy"
+                >
+                  Zapisz jako osobny produkt
+                </Button>
+              </>
+            ) : null}
+
+            {przeglad && pokazDopasowanie && wybraneDopasowanie ? (
               <Button
-                disabled={!wybraneDopasowanie || zapis.isPending}
-                onClick={() =>
-                  zapis.mutate(() =>
-                    rozstrzygnijDopasowanie(
-                      przeglad.id,
-                      wybraneDopasowanie as string,
-                      wlasne ? zmienioneParametry(wlasne, przeglad.propozycja) : {},
-                    ),
-                  )
-                }
+                disabled={zapis.isPending}
+                onClick={() => zapiszDopasowanie(wybraneDopasowanie)}
                 data-testid="button-zapisz-wybor"
               >
                 Zapisz w katalogu
