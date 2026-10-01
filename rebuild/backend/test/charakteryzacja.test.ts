@@ -267,3 +267,11 @@ describe("5. MO9 — keyset-paginacja realnie przechodzi przez wiele stron", () 
     );
   });
 });
+
+// Ticket 182: meta kompletności cennika przeżywa `zastosujDemoWNazwie` (regresja z 821940b, 2026-09-30).
+describe("5. Meta kompletności cennika", () => {
+  it.each(Object.entries(PROBKI_PLIKOWE))("%s: parsujPlik zwraca meta.complete = true", (kod, nazwaPliku) => {
+    const wynik = parsujPlik(kod, join(katalogProbek, nazwaPliku));
+    expect(wynik.meta?.complete).toBe(true);
+  });
+});
