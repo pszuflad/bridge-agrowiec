@@ -33,7 +33,16 @@ import { chron, usunZgloszeniaPary } from "./kontekst.js";
  * (`deminified/backend-index.cjs:48544`), więc pierwsza zablokowana pozycja przerywa całe
  * żądanie, a pozycje zatwierdzone wcześniej ZOSTAJĄ zatwierdzone. Odtworzone 1:1.
  */
-export function zatwierdzPozycjeZPolityka(db: Baza, id: number, uzytkownikId: number): void {
+export function zatwierdzPozycjeZPolityka(
+  db: Baza,
+  id: number,
+  uzytkownikId: number,
+  /**
+   * Odstępstwo 2026-10-01: rozstrzygnięcie człowieka NIE zatrzymuje produktu ani nie gubi stanu —
+   * wstrzymanie bez znacznika automatycznego (ręczne) też zostaje zdjęte, a stan z oferty trafia na kartę.
+   */
+  rozstrzygniecieRecznie = false,
+): void {
   uchwytSqlite(db).transaction(() => {
     const { row, snap, current } = sprawdzAkceptacje(db, id);
 
@@ -84,7 +93,7 @@ export function zatwierdzPozycjeZPolityka(db: Baza, id: number, uzytkownikId: nu
     if (current?.status === "wstrzymany") {
       if (czyAutomatycznieWstrzymany(db, row.dostawca, row.kod)) {
         usunAutomatyczneWstrzymanie(db, row.dostawca, row.kod);
-      } else {
+      } else if (!rozstrzygniecieRecznie) {
         aktualizujProdukt(db, current.id, { status: "wstrzymany", stan: 0 });
       }
     }

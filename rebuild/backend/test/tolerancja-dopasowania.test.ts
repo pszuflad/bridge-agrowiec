@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { eanPary, manualOverrides, products, stagingItems } from "../src/db/schema.js";
+import { rozstrzygnijIZatwierdz } from "../src/import/polityka/rozstrzygniecie-z-zapisem.js";
 import { dotyPokrewne } from "../src/import/polityka/tolerancja-dopasowania.js";
 import { silnikStagingu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
@@ -227,6 +228,19 @@ describe("importer — tolerancja dopasowania", () => {
       });
       expect(staging.filter((w) => w.problem)).toHaveLength(1);
       expect(karta()).toMatchObject({ status: "aktywny", stan: 7 });
+    });
+  });
+
+  describe("rozstrzygnięcie człowieka nie gubi stanu", () => {
+    it("karta wstrzymana ręcznie (bez znacznika) po „połącz” dostaje stan i status z oferty", () => {
+      importuj({
+        karta: { stan: 0, status: "wstrzymany" },
+        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "INNY_KOD", ean: "5901234123457", eanRaw: "5901234123457", stan: 4 },
+        kompletna: true,
+      });
+      const id = baza!.db.select().from(stagingItems).all()[0]!.id;
+      rozstrzygnijIZatwierdz(baza!.db, id, "link", KOD, {}, 1);
+      expect(karta()).toMatchObject({ status: "aktywny", stan: 4 });
     });
   });
 
