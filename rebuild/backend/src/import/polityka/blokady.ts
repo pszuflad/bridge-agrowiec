@@ -13,7 +13,8 @@
 import type { Baza } from "../../db/index.js";
 import type { PozycjaStagingu } from "../../repos/staging.js";
 import type { ProduktWewnetrzny } from "../../repos/products.js";
-import { odmow, validateEan, version } from "./helpery.js";
+import { odmow, version } from "./helpery.js";
+import { validateEanDostawcy } from "./ean-dostawcy.js";
 import { produktPoKodzie, pozycjaStagingu, type Snapshot } from "./kontekst.js";
 
 export type KontekstAkceptacji = {
@@ -65,7 +66,7 @@ export function sprawdzAkceptacje(db: Baza, id: number): KontekstAkceptacji {
 
   // 5. Błędny EAN blokuje akceptację (decyzja D4 — zastępuje odstępstwo 14i, które
   //    zerowało EAN po cichu). Wycofania są wyjęte: tam EAN nie jedzie do katalogu.
-  const ev = validateEan(snap.eanRaw ?? snap.ean);
+  const ev = validateEanDostawcy(snap.eanRaw ?? snap.ean, row.dostawca);
   if (row.typZmiany !== "wycofana" && (snap._eanIssue || ev.error)) {
     odmow("Błędny EAN: popraw numer w edycji zgłoszenia przed akceptacją.");
   }

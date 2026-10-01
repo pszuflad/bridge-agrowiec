@@ -4,6 +4,10 @@ Wpisy od najnowszego. Migracje danych: z nazwą backupu (`VACUUM INTO …bak_ful
 
 ## 2026-10-01 — Naprawa kolejki stagingu (SPEC „Naprawa kolejki stagingu”)
 
+- **180 · import/migracja danych/Selly** — `polityka/ean-dostawcy.ts`: EAN Handlopexu (MO4/MO5) z oznaczeniem partii (`…DO`, `…_D`, `…W2`)
+  i ze złą cyfrą kontrolną traktowane jako prawidłowe; `slowniki/modele-producenta.ts`: zapis producenta (Trelleborg, Cultor, Mitas, LingLong);
+  `scal-karty-auto`: duplikaty AUTO ze stanem 0 usuwane z Bridge i z Selly (`--usun-duplikaty-selly`), para bez oferty bierze stan z karty A;
+  klient Selly `deleteVariant`/`deleteProduct`; migracja `020`. Powód: decyzje Ani 2026-10-01 (3 błędne EAN-y MO5, 30 kart „kilka kart AUTO”).
 - **179 · import/synchronizacja** — `synchronizuj.ts`: timeout 120 s, 2 ponowienia co 120 s (AbortError, sieć, 5xx), blokada per dostawca;
   `fabryka.ts`/`tolerancja-dopasowania.ts`: próg „podejrzanie mały” od ostatniego udanego importu, lista do 20 brakujących kodów;
   nowa trasa `POST /api/dostawcy/:kod/akceptuj-mniejszy-cennik` + przycisk na karcie dostawcy; migracja `019` (tabela `supplier_feed_blocked`,

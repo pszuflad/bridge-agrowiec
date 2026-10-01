@@ -18,6 +18,7 @@ import { zaktualizujPozycjeStagingu } from "../../repos/staging.js";
 import { uchwytSqlite } from "../silnik/bridge-ext.js";
 import { zatwierdzPozycjeZPolityka } from "./akceptacja.js";
 import { odmow, validateEan } from "./helpery.js";
+import { validateEanDostawcy } from "./ean-dostawcy.js";
 import { pozycjaStagingu, produktPoKodzie, type Snapshot } from "./kontekst.js";
 
 export type DecyzjaEan = "keep" | "set";
@@ -44,7 +45,7 @@ export function rozstrzygnijBlednyEan(
   const row = pozycjaStagingu(db, id);
   if (!row) odmow("Zgłoszenie już nie istnieje. Odśwież staging.");
   const snap = JSON.parse(row.snapshotJson || "{}") as Snapshot;
-  const bladZPliku = validateEan(snap.eanRaw ?? snap.ean);
+  const bladZPliku = validateEanDostawcy(snap.eanRaw ?? snap.ean, row.dostawca);
   if (!snap._eanIssue && !bladZPliku.error) {
     odmow("To zgłoszenie nie ma błędnego EAN-u.");
   }
@@ -55,7 +56,7 @@ export function rozstrzygnijBlednyEan(
   const karta = produktPoKodzie(db, row.kod);
   let wybrany: string;
   if (decyzja === "keep") {
-    const kartowy = validateEan(karta?.ean);
+    const kartowy = validateEanDostawcy(karta?.ean, row.dostawca);
     if (!karta || !kartowy.valid || !kartowy.value) {
       odmow("Karta w katalogu nie ma poprawnego EAN-u — wpisz właściwy numer.");
     }

@@ -283,6 +283,19 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
       Object.assign(wariant, cialo);
       return { data: structuredClone(wariant) };
     },
+
+    async deleteVariant(productId, variantId) {
+      zapisz("deleteVariant", productId, variantId);
+      const p = produktAlbo404(productId, "DELETE", `/api/products/${productId}/variants/${variantId}`);
+      p.warianty = p.warianty.filter((w) => w.variant_id !== variantId);
+      return null;
+    },
+
+    async deleteProduct(productId) {
+      zapisz("deleteProduct", productId);
+      produktAlbo404(productId, "DELETE", `/api/products/${productId}`);
+      return null;
+    },
   };
 
   return {
@@ -323,5 +336,7 @@ export function stworzAtrapeBezKonfiguracji(): KlientSelly {
     listVariants: rzuc,
     createVariant: rzuc,
     updateVariant: rzuc,
+    deleteVariant: rzuc,
+    deleteProduct: rzuc,
   };
 }

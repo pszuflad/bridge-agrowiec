@@ -22,7 +22,8 @@ import { zatwierdzPozycjeStagingu } from "../akceptacja.js";
 import { nadajKodImportu } from "./kod-importu.js";
 import { uchwytSqlite } from "../silnik/bridge-ext.js";
 import { sprawdzAkceptacje } from "./blokady.js";
-import { odmow, validateEan } from "./helpery.js";
+import { odmow } from "./helpery.js";
+import { validateEanDostawcy } from "./ean-dostawcy.js";
 import { chron, usunZgloszeniaPary } from "./kontekst.js";
 
 /**
@@ -58,14 +59,14 @@ export function zatwierdzPozycjeZPolityka(
 
     // Druga walidacja EAN-u — tym razem po nałożeniu ręcznych poprawek. Poprawka mogła
     // wprowadzić zły numer i wtedy zapis staje (`:206-207`).
-    const ev = validateEan(safe.ean);
+    const ev = validateEanDostawcy(safe.ean, row.dostawca);
     if (ev.error) odmow("Zapis został zatrzymany: nieprawidłowy EAN.");
 
     // Pusty EAN dziedziczy po karcie w katalogu — cennik bez EAN-u nie kasuje tego,
     // co już wiemy o produkcie (`:208`).
     if (!ev.value && current?.ean) safe.ean = current.ean;
 
-    const sv = validateEan(safe.ean);
+    const sv = validateEanDostawcy(safe.ean, row.dostawca);
     safe.ean = sv.value;
     safe.eanIsValid = sv.valid === null ? null : Number(sv.valid);
     safe.eanRaw = sv.raw;

@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   raportCsv,
   raportScalenia,
+  usunDuplikatySelly,
   zastosujScalenie,
   zerujWariantySelly,
 } from "../src/import/migracje/scal-karty-auto.js";
@@ -231,20 +232,99 @@ describe("scalenie kart AUTO", () => {
     expect(ile(baza, "SELECT 1 FROM products")).toBe(4);
   });
 
-  it("dwie karty AUTO na jedną prawdziwą → obie do ręcznej decyzji", () => {
+  it("dwie karty AUTO na jedną prawdziwą, obie ze stanem → obie do ręcznej decyzji", () => {
     baza = stworzTestowaBaze();
-    para(baza);
-    dodajKarte(baza, "MO5_AUTO_DRUGA", { kod_dostawcy: "BFPR240460708DUT1", dot: "2027" });
+    para(baza, { oferta: null });
+    dodajKarte(baza, "MO5_AUTO_DRUGA", { kod_dostawcy: "BFPR240460708DUT1", dot: "2027", stan: 3 });
     const wynik = zastosujScalenie(baza.sqlite);
     expect(wynik.scalono).toBe(0);
+    expect(wynik.usunieto).toBe(0);
     expect(wynik.raport.every((w) => w.powod.includes("tę samą prawdziwą"))).toBe(true);
   });
 
-  it("brak danych oferty: karta R bez zmian stanu i statusu", () => {
+  it("ticket 180: kilka kart AUTO → scalona ta z oferty, duplikat ze stanem 0 usunięty z Bridge i oznaczony do Selly", () => {
+    baza = stworzTestowaBaze();
+    para(baza);
+    dodajKarte(baza, "MO5_AUTO_DRUGA", { kod_dostawcy: "BFPR240460708DUT1", dot: "2027", stan: 0 });
+    selly(baza, "MO5_AUTO_DRUGA", "999", 77, 701);
+    const plan = raportScalenia(baza.sqlite);
+    expect(plan).toMatchObject({ scalono: 1, usunieto: 1, doRecznej: 0 });
+    expect(plan.raport.find((w) => w.kodAuto === "MO5_AUTO_DRUGA")).toMatchObject({
+      decyzja: "usun_duplikat",
+      akcjaSelly: "usun_z_selly",
+    });
+    const wynik = zastosujScalenie(baza.sqlite, "2026-10-02T10:00:00.000Z");
+    expect(wynik).toMatchObject({ scalono: 1, usunieto: 1, doRecznej: 0 });
+    expect(ile(baza, "SELECT 1 FROM products WHERE kod LIKE 'MO5_AUTO_%'")).toBe(0);
+    expect(wiersz(baza, "SELECT stan, status FROM products WHERE kod=?", REAL)).toEqual({ stan: 7, status: "aktywny" });
+    const arch = wiersz(baza, "SELECT * FROM products_scalone WHERE kod=?", "MO5_AUTO_DRUGA")!;
+    expect((JSON.parse(String(arch.wiersz_json)) as { usunietyDuplikat: boolean }).usunietyDuplikat).toBe(true);
+    expect(ile(baza, "SELECT 1 FROM selly_products WHERE bridge_kod=?", "MO5_AUTO_DRUGA")).toBe(0);
+    expect(wiersz(baza, "SELECT do_usuniecia, usunieto_at FROM selly_products_scalone WHERE bridge_kod=?", "MO5_AUTO_DRUGA"))
+      .toEqual({ do_usuniecia: 1, usunieto_at: null });
+  });
+
+  it("ticket 180: bez oferty zwycięża jedyna karta AUTO ze stanem > 0", () => {
+    baza = stworzTestowaBaze();
+    para(baza, { oferta: null });
+    dodajKarte(baza, "MO5_AUTO_DRUGA", { kod_dostawcy: "BFPR240460708DUT1", dot: "2027", stan: 0 });
+    const wynik = zastosujScalenie(baza.sqlite);
+    expect(wynik).toMatchObject({ scalono: 1, usunieto: 1 });
+    expect(wynik.raport.find((w) => w.kodAuto === AUTO)?.decyzja).toBe("scal");
+  });
+
+  it("ticket 180: brak danych oferty → stan i ceny karty R z aktywnej karty A", () => {
     baza = stworzTestowaBaze();
     para(baza, { oferta: null });
     zastosujScalenie(baza.sqlite);
+    expect(wiersz(baza, "SELECT stan, status, cena_zakupu FROM products WHERE kod=?", REAL)).toEqual({
+      stan: 11,
+      status: "aktywny",
+      cena_zakupu: 100,
+    });
+    expect(ile(baza, "SELECT 1 FROM product_auto_suspensions")).toBe(0);
+  });
+
+  it("brak danych oferty i karta A ze stanem 0: karta R bez zmian stanu i statusu", () => {
+    baza = stworzTestowaBaze();
+    para(baza, { oferta: null, auto: { stan: 0 } });
+    zastosujScalenie(baza.sqlite);
     expect(wiersz(baza, "SELECT stan, status FROM products WHERE kod=?", REAL)).toEqual({ stan: 0, status: "wstrzymany" });
     expect(ile(baza, "SELECT 1 FROM product_auto_suspensions")).toBe(1);
+  });
+
+  it("ticket 180: --usun-duplikaty-selly usuwa wariant, a gdy jedyny — cały produkt; 404 = już usunięte", async () => {
+    baza = stworzTestowaBaze();
+    const wstaw = baza.sqlite.prepare(
+      "INSERT INTO selly_products_scalone (kod_importu, dostawca, bridge_kod, selly_product_id, selly_variant_id, " +
+        "scalono_do, scalono_at, do_usuniecia) VALUES ('1','MO5',?,?,?,'R','t',1)",
+    );
+    wstaw.run("A1", 10, 101); // produkt z drugim wariantem → usuń wariant
+    wstaw.run("A2", 20, 201); // jedyny wariant → usuń produkt
+    wstaw.run("A3", 30, 301); // już usunięty w Selly (404)
+    const wywolania: string[] = [];
+    const nie404 = Object.assign(new Error("404"), { status: 404 });
+    const klient = {
+      listVariants: async (pid: number) => {
+        if (pid === 30) throw nie404;
+        return { data: pid === 10 ? [{ variant_id: 101 }, { variant_id: 102 }] : [{ variant_id: 201 }] } as never;
+      },
+      deleteVariant: async (pid: number, vid: number) => {
+        wywolania.push(`V${pid}/${vid}`);
+        return null;
+      },
+      deleteProduct: async (pid: number) => {
+        wywolania.push(`P${pid}`);
+        if (pid === 30) throw nie404;
+        return null;
+      },
+    };
+    const w = await usunDuplikatySelly(baza.sqlite, klient, "2026-10-02");
+    expect(wywolania).toEqual(["V10/101", "P20", "P30"]);
+    expect(w).toEqual({ usunietoWarianty: 1, usunietoProdukty: 1, bledy: 0 });
+    expect(ile(baza, "SELECT 1 FROM selly_products_scalone WHERE usunieto_at IS NULL")).toBe(0);
+    // --zeruj-selly nie dotyka wierszy do usunięcia
+    const z = await zerujWariantySelly(baza.sqlite, { updateVariant: async () => null });
+    expect(z.wyzerowano).toBe(0);
   });
 });
