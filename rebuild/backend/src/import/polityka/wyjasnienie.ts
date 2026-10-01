@@ -12,7 +12,6 @@
 import type { ProduktWewnetrzny } from "../../repos/products.js";
 import { norm } from "./helpery.js";
 import type { Snapshot } from "./kontekst.js";
-import { dotyPokrewne } from "./tolerancja-dopasowania.js";
 
 type Kandydat = { kod: string; nazwa?: unknown; ean?: unknown };
 
@@ -36,15 +35,14 @@ const POLA: ReadonlyArray<{ klucz: string; etykieta: string; tekstowe: boolean }
   { klucz: "tlTt", etykieta: "TL/TT", tekstowe: false },
   { klucz: "vfIf", etykieta: "VF/IF", tekstowe: false },
   { klucz: "konstrukcja", etykieta: "Konstrukcja", tekstowe: false },
-  { klucz: "dot", etykieta: "DOT", tekstowe: false },
 ];
 
 type Roznica = { etykieta: string; tekstowe: boolean; katalog: string; oferta: string };
 
 /**
  * Cechy, którymi oferta RÓŻNI SIĘ od karty, z wartościami po obu stronach. Pomija różnice, które są
- * tylko zapisem: `24` i `2024` albo `2026` i `2025,2026` to ten sam DOT (jak w importerze,
- * `tolerancja-dopasowania.ts`). Puste po obu stronach to nie różnica.
+ * tylko zapisem. DOT nie jest tu porównywany wcale — nie odróżnia opon i zmienia się w miejscu
+ * (`tolerancja-dopasowania.ts`). Puste po obu stronach to nie różnica.
  */
 function roznice(snap: Snapshot, produkt: ProduktWewnetrzny): Roznica[] {
   const p = produkt as unknown as Record<string, unknown>;
@@ -53,7 +51,6 @@ function roznice(snap: Snapshot, produkt: ProduktWewnetrzny): Roznica[] {
     const oferta = String(snap[klucz] ?? "").trim();
     const katalog = String(p[klucz] ?? "").trim();
     if (norm(oferta) === norm(katalog)) continue;
-    if (klucz === "dot" && oferta && katalog && dotyPokrewne(oferta, katalog)) continue;
     wynik.push({ etykieta, tekstowe, katalog: katalog || "brak", oferta: oferta || "brak" });
   }
   return wynik;
@@ -131,7 +128,7 @@ export function wyjasnijZgloszenie(args: {
       "Najpewniej ta sama opona z innym zapisem nazwy. Wybierz istniejący produkt, a poprawną nazwę wpisz w „Popraw dane z oferty”.",
     );
   } else if (rozn.length) {
-    linie.push("To może być osobna partia lub inna opona. Sprawdź kartę w katalogu.");
+    linie.push("To może być inna opona (rozmiar, indeksy albo konstrukcja się różnią). Sprawdź kartę w katalogu.");
   }
 
   return linie;

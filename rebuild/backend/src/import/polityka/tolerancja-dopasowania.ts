@@ -79,13 +79,21 @@ function zPoprawkami(d: Pozycja, poprawki: readonly PoprawkaKarty[] | undefined)
   return wynik ?? d;
 }
 
-/** Wiersz pliku w postaci, w jakiej wolno go porównać z kartą `p`. */
+/**
+ * Wiersz pliku w postaci, w jakiej wolno go porównać z kartą `p`.
+ *
+ * `bezDot` = TA SAMA POZYCJA (ten sam kod): DOT nie jest kryterium, wiersz porównujemy tak, jakby
+ * miał DOT karty (decyzja użytkowniczki, 2026-10-01). Bez tego DOT-y pokrewne (`2026` ⊂ `2025,2026`)
+ * liczą się jako zgodne, a rozłączne zostają różnicą — to dla INNEGO kodu (nowy symbol partii).
+ */
 function widok(
   d: Pozycja,
   p: Pozycja,
   poprawki: readonly PoprawkaKarty[] | undefined,
+  bezDot = false,
 ): Pozycja {
   const z = zPoprawkami(d, poprawki);
+  if (bezDot) return { ...z, dot: p.dot };
   return dotyPokrewne(z.dot, p.dot) && norm(z.dot) !== norm(p.dot) ? { ...z, dot: p.dot } : z;
 }
 
@@ -98,7 +106,19 @@ export function zgodna(
   return compatibility(widok(d, p, poprawki), p).ok;
 }
 
-/** `separateDotBatch(d, p)` — pokrewne DOT NIE są osobną partią. */
+/** `compatibility(d, p).ok` dla TEJ SAMEJ pozycji (ten sam kod): DOT w ogóle nie jest porównywany. */
+export function zgodnaBezDot(
+  d: Pozycja,
+  p: Pozycja,
+  poprawki?: readonly PoprawkaKarty[],
+): boolean {
+  return compatibility(widok(d, p, poprawki, true), p).ok;
+}
+
+/**
+ * `separateDotBatch(d, p)` dla INNEGO kodu (nowy symbol partii): pokrewne DOT nie są osobną partią,
+ * rozłączne — tak, jak w produkcji (osobny produkt).
+ */
 export function osobnaPartia(
   d: Pozycja,
   p: Pozycja,
@@ -107,13 +127,21 @@ export function osobnaPartia(
   return separateDotBatch(widok(d, p, poprawki), p);
 }
 
-/** `norm(d.dot) === norm(p.dot)` — z pokrewnymi DOT. */
+/** `norm(d.dot) === norm(p.dot)` dla TEJ SAMEJ pozycji (ten sam kod) — DOT nie jest kryterium, więc zawsze zgodny. */
 export function dotZgodny(
-  d: Pozycja,
-  p: Pozycja,
-  poprawki?: readonly PoprawkaKarty[],
+  _d: Pozycja,
+  _p: Pozycja,
+  _poprawki?: readonly PoprawkaKarty[],
 ): boolean {
-  return dotyPokrewne(zPoprawkami(d, poprawki).dot, p.dot);
+  return true;
+}
+
+/**
+ * Czy zmianę DOT z cennika zapisać na karcie OD RAZU (w cichej aktualizacji obok ceny i stanu), bez
+ * zgłoszenia do akceptacji. Produkcja DOT-u nie aktualizowała — inny DOT zakładał nowy produkt.
+ */
+export function aktualizacjaDotWMiejscu(): boolean {
+  return true;
 }
 
 /**
