@@ -21,6 +21,7 @@
 // przechodzą dalej bez zmian.
 
 import { compatibility, norm, validateEan, type WynikEan } from "./helpery.js";
+import { kluczModelu } from "./normalizacja-pozycji.js";
 import { separateDotBatch } from "./podstawy.js";
 
 type Pozycja = Record<string, unknown>;
@@ -44,6 +45,15 @@ const POLA_PORZEDNIE = [
   "konstrukcja",
   "dot",
 ] as const;
+
+/**
+ * Cechy dodatkowe, których BRAK w wierszu pliku nie jest sprzeczną z kartą (decyzja użytkowniczki,
+ * 2026-10-01): dostawca podaje je nie w każdym eksporcie (MO2 pomija `TL`, MO3 `TL/TT`), więc pusta
+ * wartość w ofercie przy wypełnionej karcie to „brak informacji”, a nie inna opona. Sprzeczność to
+ * dopiero dwie niepuste, różne wartości (oferta `TT`, karta `TL`). Odwrotnie (karta pusta, oferta
+ * wypełniona) zostaje różnicą — wtedy karta mogłaby nie być tą oponą.
+ */
+const POLA_BRAK_TO_NIE_SPRZECZNOSC = ["pr", "tlTt", "vfIf", "konstrukcja"] as const;
 
 /** Zbiór lat z zapisu DOT; dwucyfrowy rok to rok 20xx; reszta (tekst) zostaje wprost. */
 function zbiorDot(wartosc: unknown): Set<string> {
@@ -83,7 +93,8 @@ function zPoprawkami(d: Pozycja, poprawki: readonly PoprawkaKarty[] | undefined)
  * Wiersz pliku w postaci, w jakiej wolno go porównać z kartą `p`.
  *
  * `bezDot` = TA SAMA POZYCJA (ten sam kod): DOT nie jest kryterium, wiersz porównujemy tak, jakby
- * miał DOT karty (decyzja użytkowniczki, 2026-10-01). Bez tego DOT-y pokrewne (`2026` ⊂ `2025,2026`)
+ * miał DOT karty, a pusta cecha dodatkowa oferty (`POLA_BRAK_TO_NIE_SPRZECZNOSC`) — jakby miała
+ * wartość karty (decyzja użytkowniczki, 2026-10-01). Bez tego DOT-y pokrewne (`2026` ⊂ `2025,2026`)
  * liczą się jako zgodne, a rozłączne zostają różnicą — to dla INNEGO kodu (nowy symbol partii).
  */
 function widok(
@@ -92,8 +103,18 @@ function widok(
   poprawki: readonly PoprawkaKarty[] | undefined,
   bezDot = false,
 ): Pozycja {
-  const z = zPoprawkami(d, poprawki);
-  if (bezDot) return { ...z, dot: p.dot };
+  const z0 = zPoprawkami(d, poprawki);
+  // Model porównujemy kluczem (spacje, `-`, wielkość liter, dopiski osi nie mają znaczenia — Etap 3,
+  // 2026-10-01): gdy klucze się zgadzają, wiersz dostaje zapis karty.
+  const z =
+    z0.model && p.model && kluczModelu(z0.model) === kluczModelu(p.model) ? { ...z0, model: p.model } : z0;
+  if (bezDot) {
+    const wynik: Pozycja = { ...z, dot: p.dot };
+    for (const k of POLA_BRAK_TO_NIE_SPRZECZNOSC) {
+      if (!norm(z[k]) && norm(p[k])) wynik[k] = p[k];
+    }
+    return wynik;
+  }
   return dotyPokrewne(z.dot, p.dot) && norm(z.dot) !== norm(p.dot) ? { ...z, dot: p.dot } : z;
 }
 
@@ -164,6 +185,28 @@ export function kartaWlasnejPartii(
 }
 
 /**
+ * Czy wiersz cennika i karta `p` mają RÓŻNE symbole dostawcy (`kodDostawcy`) — wtedy to dwie osobne
+ * pozycje, nawet gdy marka, model, rozmiar, indeksy, EAN i DOT są takie same lub pokrewne.
+ *
+ * Odstępstwo 2026-10-01 (decyzja użytkowniczki): symbol dostawcy identyfikuje partię. Wspólne są
+ * wtedy tylko cechy opony, a data produkcji i warunki (cena, stan) mogą być inne — nowy symbol to
+ * NOWA karta, nie „podobna opona, sprawdź”. Produkcja pytała o to przy każdej zgodnej parze
+ * (np. Goodyear KMAX …MKD…/…MKS…, CEAT WINMILE-S …WES0/…WES1, CEAT z `SB`/bez).
+ *
+ * Gdy któryś symbol jest pusty (wiersz bez własnego kodu, stara karta) — NIE rozstrzygamy:
+ * zostaje dotychczasowe dopasowanie. Ten sam symbol to zawsze ta sama pozycja (krok „kod dostawcy”).
+ */
+export function innySymbolDostawcy(
+  d: Pozycja,
+  p: Pozycja,
+  kodKlucz: (v: unknown) => string,
+): boolean {
+  const kodPliku = kodKlucz(d.kodDostawcy);
+  const kodKarty = kodKlucz(p.kodDostawcy);
+  return kodPliku !== "" && kodKarty !== "" && kodPliku !== kodKarty;
+}
+
+/**
  * Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (`ean-bledny.ts`): poprawka `ean` karty
  * z `acknowledgedSourceValue` równym TEMU błędnemu numerowi → zamiast błędu liczy się EAN poprawki.
  * Gdy dostawca zmieni numer (inny napis), pytanie wraca.
@@ -218,4 +261,18 @@ const doPorownaniaNazw = (nazwa: string): string =>
 export function zachowajNazweKarty(nazwa: unknown, nazwaKarty: unknown): unknown {
   if (typeof nazwa !== "string" || typeof nazwaKarty !== "string") return nazwa;
   return doPorownaniaNazw(nazwa) === doPorownaniaNazw(nazwaKarty) ? nazwaKarty : nazwa;
+}
+
+/**
+ * Minimalna liczba pozycji kompletnego cennika, poniżej której import jest blokowany jako „podejrzanie mały”.
+ *
+ * Produkcja liczyła 80% HISTORYCZNEGO maksimum (`max_item_count`, które nigdy nie malało), więc dostawca,
+ * który legalnie wycofał produkty, był blokowany na stałe. Decyzja użytkowniczki (2026-10-01, Etap 4b): próg
+ * liczy się od OSTATNIEGO UDANEGO importu (`last_item_count`); spadek o ponad 20% blokuje, a ręczne
+ * „zaakceptuj mniejszy cennik” przestawia punkt odniesienia. Brak stanu albo zero → próg 1 (pusty cennik
+ * zatrzymuje osobny bezpiecznik `feed_safety`).
+ */
+export function minimumPozycjiOferty(stan: { lastItemCount?: number | null } | undefined): number {
+  const ostatni = stan?.lastItemCount ?? 0;
+  return ostatni > 0 ? Math.max(1, Math.ceil(ostatni * 0.8)) : 1;
 }

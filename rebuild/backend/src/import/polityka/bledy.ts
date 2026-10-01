@@ -53,18 +53,24 @@ export class BladOdczytuCennikaBlad extends Error {
 /**
  * Cennik mniejszy niż 80% historycznego maksimum — `staging_policy.cjs:458`.
  *
- * Próg liczony z `supplier_feed_state.max_item_count`, które NIGDY nie maleje (repo I15.4a
- * podnosi je przez `MAX(…)`). Bez tej blokady jeden obcięty plik dostawcy wystawiłby cały
- * jego katalog na wycofanie.
+ * Bez tej blokady jeden obcięty plik dostawcy wystawiłby cały jego katalog na wycofanie.
+ * Produkcja liczyła próg z historycznego maksimum (`max_item_count`); od 2026-10-01 z ostatniego udanego
+ * importu (`minimumPozycjiOferty`, ticket 179) — blokada przestała być trwała.
  */
 export class CennikPodejrzanieMalyBlad extends Error {
   constructor(
     readonly liczbaPozycji: number,
     readonly minimum: number,
+    /** Próbka (do 20) kodów kart dostawcy, których nie ma w nowym cenniku — do treści alertu. */
+    readonly brakujaceKody: readonly string[] = [],
+    readonly brakujacych = brakujaceKody.length,
   ) {
     super(
       `Cennik jest podejrzanie mały (${liczbaPozycji} zamiast co najmniej ${minimum}). ` +
-        `Import zatrzymany, bez zmiany katalogu i stagingu.`,
+        `Import zatrzymany, bez zmiany katalogu i stagingu.` +
+        (brakujaceKody.length
+          ? ` Brakuje ${brakujacych} kart, np.: ${brakujaceKody.join(", ")}.`
+          : ""),
     );
     this.name = "CennikPodejrzanieMalyBlad";
   }

@@ -192,7 +192,15 @@ describe("012 na bazie SYMULUJĄCEJ PRODUKCJĘ (zrzut 88fa31c — wszystko już 
       );
     const przed = zrzuc();
     zastosujMigracje(sqlite, KATALOG_SCHEMATU());
-    expect(zrzuc()).toEqual(przed);
+    // Jedyny wyjątek to jednorazowy reset progu z migracji 019 (ticket 179, Etap 4b): `max_item_count = last_item_count`.
+    // Sama 012 danych nie rusza — ten test sprawdza łańcuch, więc oczekiwany stan uwzględnia reset.
+    const oczekiwane = {
+      ...przed,
+      supplier_feed_state: (przed.supplier_feed_state as { last_item_count: number; max_item_count: number }[]).map(
+        (w) => ({ ...w, max_item_count: w.last_item_count > 0 ? w.last_item_count : w.max_item_count }),
+      ),
+    };
+    expect(zrzuc()).toEqual(oczekiwane);
   });
 
   it("sprzątanie duplikatów jest tu NO-OPem — indeks unikalny stoi od 22.09", () => {

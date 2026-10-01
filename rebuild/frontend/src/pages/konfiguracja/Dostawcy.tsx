@@ -37,7 +37,9 @@ import {
   formatujCzestotliwosc,
   formatujZnacznik,
   PRESETY_CZESTOTLIWOSCI,
+  akceptujMniejszyCennik,
   synchronizujTeraz,
+  TEKST_PODEJRZANIE_MALY,
   zapiszDostawce,
   type DostawcaKonfiguracji,
   type PatchDostawcy,
@@ -175,9 +177,25 @@ function KartaDostawcy({ dostawca }: { dostawca: DostawcaKonfiguracji }) {
     void klient.invalidateQueries({ queryKey: ["/api/staging"] });
   };
 
+  /** Ostatnia synchronizacja zatrzymała się na progu „cennik podejrzanie mały” — pokazujemy akceptację. */
+  const [zablokowanyMaly, ustawZablokowanyMaly] = useState(false);
+
+  const akceptacjaMniejszego = useMutation<{ ok: true; liczba: number; poprzednia: number }, Error>({
+    mutationFn: () => akceptujMniejszyCennik(dostawca.kod),
+    onSuccess: (wynik) => {
+      ustawZablokowanyMaly(false);
+      ustawKomunikat({
+        tresc: `Zaakceptowano mniejszy cennik: ${wynik.liczba} pozycji (było ${wynik.poprzednia}). Uruchom synchronizację ponownie.`,
+        blad: false,
+      });
+    },
+    onError: (e) => ustawKomunikat({ tresc: e.message, blad: true }),
+  });
+
   const synchronizacja = useMutation<WynikSynchronizacji, Error>({
     mutationFn: () => synchronizujTeraz(dostawca.kod),
     onSuccess: (wynik) => {
+      ustawZablokowanyMaly(!wynik.ok && wynik.error.includes(TEKST_PODEJRZANIE_MALY));
       // 200 z `ok: false` to NIE jest sukces dla użytkownika — trasa sygnalizuje awarię
       // ciałem, nie kodem HTTP. Rozdzielamy to tutaj, jak oryginalna karta (`:25727`).
       ustawKomunikat(
@@ -355,6 +373,19 @@ function KartaDostawcy({ dostawca }: { dostawca: DostawcaKonfiguracji }) {
           {edycja ? "Anuluj" : "Zmień"}
         </Button>
       </div>
+
+      {zablokowanyMaly ? (
+        <Button
+          variant="outline"
+          size="sm"
+          className="self-start"
+          disabled={akceptacjaMniejszego.isPending}
+          onClick={() => akceptacjaMniejszego.mutate()}
+          data-testid={`button-akceptuj-mniejszy-${dostawca.kod}`}
+        >
+          Zaakceptuj mniejszy cennik
+        </Button>
+      ) : null}
 
       {komunikat ? (
         <p

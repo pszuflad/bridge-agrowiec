@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { eanPary, manualOverrides, products, stagingItems } from "../src/db/schema.js";
+import { eanPary, manualOverrides, productAutoSuspensions, products, stagingItems } from "../src/db/schema.js";
 import { rozstrzygnijIZatwierdz } from "../src/import/polityka/rozstrzygniecie-z-zapisem.js";
 import { dotyPokrewne } from "../src/import/polityka/tolerancja-dopasowania.js";
 import { silnikStagingu } from "../src/import/tk.js";
@@ -58,6 +58,8 @@ function importuj(opcje: {
   pary?: Wiersz[];
   /** Kompletna oferta — wtedy niejednoznaczne dopasowanie mogło (w produkcji) wstrzymywać karty. */
   kompletna?: boolean;
+  /** Znacznik wstrzymania AUTOMATYCZNEGO karty (brak = wstrzymanie ręczne, jeśli status „wstrzymany”). */
+  autoWstrzymana?: boolean;
 }) {
   const produkt = wczytaj<Wiersz[]>(join(katalog, "silnik", "katalog", "MO5.katalog.json")).find(
     (p) => p.kod === KOD,
@@ -80,6 +82,17 @@ function importuj(opcje: {
     baza.db
       .insert(eanPary)
       .values({ dostawca: "MO5", status: "aktywny", utworzono: "2026-09-30T00:00:00.000Z", ...para } as never)
+      .run();
+  }
+  if (opcje.autoWstrzymana) {
+    baza.db
+      .insert(productAutoSuspensions)
+      .values({
+        supplier: "MO5",
+        productCode: KOD,
+        suspendedAt: "2026-09-30T00:00:00.000Z",
+        reason: "Brak w pełnej ofercie",
+      })
       .run();
   }
   if (opcje.poprawka) {
@@ -158,6 +171,44 @@ describe("importer — tolerancja dopasowania", () => {
     });
   });
 
+  describe("inny symbol dostawcy = osobna pozycja (decyzja użytkowniczki, 2026-10-01)", () => {
+    const NOWY = { kod: "MO5_BFPR240460708DUT2", kodDostawcy: "BFPR240460708DUT2" };
+
+    it("ten sam DOT i ten sam EAN, ale nowy symbol — nowa karta, bez pytania", () => {
+      const staging = importuj({ karta: { dot: "2026" }, rekord: { ...NOWY, dot: "2026" } });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(staging.find((w) => w.kod === NOWY.kod)).toMatchObject({ typ: "nowa" });
+      // Jednowierszowy plik testowy nie zawiera już starego symbolu, więc stara karta dostaje
+      // WŁASNY przegląd nieobecności („stara karta”) — sieć bezpieczeństwa na zmianę symbolu.
+      const stara = staging.filter((w) => w.kod === KOD);
+      expect(stara.every((w) => w.typ === "blad")).toBe(true);
+      expect(dotKarty(), "karta o starym symbolu nietknięta").toBe("2026");
+    });
+
+    it("pokrewny DOT (`2026` ⊂ `2025,2026`) i nowy symbol — też osobna karta", () => {
+      const staging = importuj({ karta: { dot: "2025,2026" }, rekord: { ...NOWY, dot: "2026" } });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(staging.find((w) => w.kod === NOWY.kod)).toMatchObject({ typ: "nowa" });
+    });
+
+    it("inny EAN, te same cechy i DOT, nowy symbol — nowa karta, bez pytania", () => {
+      const staging = importuj({
+        karta: { dot: "2026", ean: "5901234123457" },
+        rekord: { ...NOWY, dot: "2026" },
+      });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(staging.find((w) => w.kod === NOWY.kod)).toMatchObject({ typ: "nowa" });
+    });
+
+    it("TEN SAM symbol z innym kodem w katalogu nadal wskazuje tę kartę (reguła nie dotyka kroku „kod dostawcy”)", () => {
+      const staging = importuj({
+        karta: { kod: "MO5_STARY_KOD", dot: "2026" },
+        rekord: { dot: "2026" },
+      });
+      expect(staging.some((w) => w.typ === "nowa" && w.kod !== "MO5_STARY_KOD")).toBe(false);
+    });
+  });
+
   describe("karta założona wcześniej przez system dla tego wiersza (`…_AUTO_…`, stare osobne partie DOT)", () => {
     const AUTO = "MO5_AUTO_ABC123";
     /** Karta z kodem z pliku ma DOT 2025, a zaakceptowana wcześniej partia 2026 żyje pod kodem zastępczym. */
@@ -220,10 +271,11 @@ describe("importer — tolerancja dopasowania", () => {
 
   describe("czekająca pozycja nie rusza katalogu (decyzja 2026-10-01)", () => {
     it("niejednoznaczne dopasowanie NIE wstrzymuje karty-kandydata i nie zeruje jej stanu", () => {
-      // Ta sama opona pod INNYM kodem → „podobna opona” (pytanie), kandydatem jest karta KOD.
+      // Ta sama opona pod INNYM kodem i BEZ własnego symbolu dostawcy → „podobna opona” (pytanie), kandydatem jest karta KOD.
+      // (Z innym symbolem dostawcy to osobna karta — patrz „inny symbol dostawcy = osobna pozycja”.)
       const staging = importuj({
         karta: { stan: 7, status: "aktywny" },
-        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "INNY_KOD", ean: "5901234123457", eanRaw: "5901234123457" },
+        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "", ean: "5901234123457", eanRaw: "5901234123457" },
         kompletna: true,
       });
       expect(staging.filter((w) => w.problem)).toHaveLength(1);
@@ -235,7 +287,7 @@ describe("importer — tolerancja dopasowania", () => {
     it("karta wstrzymana ręcznie (bez znacznika) po „połącz” dostaje stan i status z oferty", () => {
       importuj({
         karta: { stan: 0, status: "wstrzymany" },
-        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "INNY_KOD", ean: "5901234123457", eanRaw: "5901234123457", stan: 4 },
+        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "", ean: "5901234123457", eanRaw: "5901234123457", stan: 4 },
         kompletna: true,
       });
       const id = baza!.db.select().from(stagingItems).all()[0]!.id;
@@ -267,6 +319,66 @@ describe("importer — tolerancja dopasowania", () => {
         rekord: { ...BKT.rekord, nazwa: "18.00x25 BKT XL GRIP DOT 44PR TL" },
       });
       expect(staging.filter((w) => w.typ === "zmiana_kluczowa")).toHaveLength(1);
+    });
+  });
+
+  describe("powrót wstrzymanej karty — DOT i brak cechy dodatkowej w ofercie nie są sprzecznością (Etap 2, 2026-10-01)", () => {
+    const wstrzymana = { stan: 0, status: "wstrzymany", dot: "2025", tlTt: "TL" };
+    const powroty = (st: ReturnType<typeof importuj>) =>
+      st.filter((w) => (w.powod ?? "").includes("Powrót opony wymaga sprawdzenia"));
+
+    it("(a) wstrzymana automatycznie + inny DOT → aktywna, nowy DOT, bez zgłoszeń", () => {
+      const staging = importuj({
+        karta: wstrzymana,
+        rekord: { dot: "2026", tlTt: "TL", stan: 6 },
+        autoWstrzymana: true,
+        kompletna: true,
+      });
+      expect(powroty(staging)).toEqual([]);
+      expect(staging.filter((w) => w.typ === "blad" && w.kod === KOD)).toEqual([]);
+      expect(karta()).toMatchObject({ status: "aktywny", dot: "2026", stan: 6 });
+    });
+
+    it("(b) wstrzymana RĘCZNIE + inny DOT → nadal wstrzymana, bez zgłoszeń", () => {
+      const staging = importuj({
+        karta: wstrzymana,
+        rekord: { dot: "2026", tlTt: "TL" },
+        kompletna: true,
+      });
+      expect(powroty(staging)).toEqual([]);
+      expect(karta()).toMatchObject({ status: "wstrzymany", stan: 0 });
+    });
+
+    it("(c) oferta bez TL/TT, karta TL → zgodna: karta wraca, `tlTt` karty bez zmian", () => {
+      const staging = importuj({
+        karta: wstrzymana,
+        rekord: { dot: "2026", tlTt: null },
+        autoWstrzymana: true,
+        kompletna: true,
+      });
+      expect(powroty(staging)).toEqual([]);
+      expect(karta()).toMatchObject({ status: "aktywny", tlTt: "TL", dot: "2026" });
+    });
+
+    it("(d) oferta TT, karta TL → prawdziwa sprzeczność: zgłoszenie, karta zostaje wstrzymana", () => {
+      const staging = importuj({
+        karta: wstrzymana,
+        rekord: { dot: "2026", tlTt: "TT" },
+        autoWstrzymana: true,
+        kompletna: true,
+      });
+      expect(staging.filter((w) => w.typ === "blad" && w.kod === KOD)).toHaveLength(1);
+      expect(karta()).toMatchObject({ status: "wstrzymany", tlTt: "TL", dot: "2025" });
+    });
+
+    it("karta bez cechy, oferta ją ma → nadal zgłoszenie (brak informacji po stronie karty)", () => {
+      const staging = importuj({
+        karta: { ...wstrzymana, tlTt: null },
+        rekord: { dot: "2025", tlTt: "TL" },
+        autoWstrzymana: true,
+        kompletna: true,
+      });
+      expect(staging.filter((w) => w.typ === "blad" && w.kod === KOD)).toHaveLength(1);
     });
   });
 });

@@ -35,6 +35,13 @@ vi.mock("../src/import/polityka/nazwa-demo.js", () => ({
 // Drugie świadome odstępstwo (decyzja użytkowniczki, 2026-10-01, `polityka/tolerancja-dopasowania.ts`):
 // dopasowanie po poprawkach karty i z pokrewnymi DOT. Oryginał porównuje surowy wiersz, więc tu
 // wracamy do jego zachowania; regułę pokrywa `tolerancja-dopasowania.test.ts`.
+// Ten sam powód dla normalizacji pozycji (Etap 3, 2026-10-01, `polityka/normalizacja-pozycji.ts`): oryginał
+// jej nie ma, a gate porównuje port z nim 1:1. Samą normalizację pokrywa `normalizacja-pozycji.test.ts`.
+vi.mock("../src/import/polityka/normalizacja-pozycji.js", () => ({
+  normalizujPozycje: <T>(d: T) => d,
+  kluczModelu: (v: unknown) => String(v ?? ""),
+}));
+
 vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
   const { compatibility, norm } = await import("../src/import/polityka/helpery.js");
   const { separateDotBatch } = await import("../src/import/polityka/podstawy.js");
@@ -46,6 +53,10 @@ vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
     osobnaPartia: (d: P, p: P) => separateDotBatch(d, p),
     dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
     kartaWlasnejPartii: () => false,
+    // Oryginał liczył próg z historycznego maksimum (`max_item_count`); nasz — z ostatniego importu (Etap 4b).
+    minimumPozycjiOferty: (st?: { maxItemCount?: number | null }) =>
+      st?.maxItemCount ? Math.max(1, Math.ceil(st.maxItemCount * 0.8)) : 1,
+    innySymbolDostawcy: () => false,
     aktualizacjaDotWMiejscu: () => false,
     wstrzymujeKandydatowPrzyNiejednoznacznosci: () => true,
     oczyscModelZDot: <T>(w: T) => w,

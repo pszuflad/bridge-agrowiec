@@ -180,6 +180,38 @@ describe("Zakładka „Dostawcy”", () => {
     });
   });
 
+  describe("„Zaakceptuj mniejszy cennik” (ticket 179, Etap 4b)", () => {
+    it("przycisk pojawia się TYLKO po blokadzie „podejrzanie mały”, woła nową trasę i znika", async () => {
+      const akceptacje: string[] = [];
+      zamockujApi(() =>
+        HttpResponse.json({ ok: false, error: "Cennik jest podejrzanie mały (244 zamiast co najmniej 249)." }),
+      );
+      server.use(
+        http.post("*/api/dostawcy/:kod/akceptuj-mniejszy-cennik", ({ params }) => {
+          akceptacje.push(String(params.kod));
+          return HttpResponse.json({ ok: true, liczba: 244, poprzednia: 301 });
+        }),
+      );
+      await otworzDostawcow();
+      expect(screen.queryByTestId(`button-akceptuj-mniejszy-${Z_URL.kod}`)).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId(`button-sync-${Z_URL.kod}`));
+      await userEvent.click(await screen.findByTestId(`button-akceptuj-mniejszy-${Z_URL.kod}`));
+
+      await waitFor(() => expect(akceptacje).toEqual([Z_URL.kod]));
+      expect(await screen.findByTestId(`komunikat-${Z_URL.kod}`)).toHaveTextContent("Zaakceptowano mniejszy cennik: 244");
+      expect(screen.queryByTestId(`button-akceptuj-mniejszy-${Z_URL.kod}`)).not.toBeInTheDocument();
+    });
+
+    it("zwykły błąd synchronizacji nie pokazuje przycisku", async () => {
+      zamockujApi(() => HttpResponse.json({ ok: false, error: "HTTP 500" }));
+      await otworzDostawcow();
+      await userEvent.click(screen.getByTestId(`button-sync-${Z_URL.kod}`));
+      await screen.findByTestId(`komunikat-${Z_URL.kod}`);
+      expect(screen.queryByTestId(`button-akceptuj-mniejszy-${Z_URL.kod}`)).not.toBeInTheDocument();
+    });
+  });
+
   describe("edycja pól — wchłonięty `freq-injection.js`", () => {
     it("presety częstotliwości są te same co w skrypcie Ani", async () => {
       const karta = await otworzDostawcow();

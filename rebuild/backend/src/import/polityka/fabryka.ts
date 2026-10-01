@@ -54,6 +54,7 @@ import {
   usunDowodyNieobecnosci,
   zapiszDowodyNieobecnosci,
   zapiszStanOfertyDostawcy,
+  zapiszZablokowanaLiczbeOferty,
   zapiszWersjeOferty,
 } from "../../repos/staging-polityka.js";
 import { czyOpona } from "../silnik/klasyfikator.js";
@@ -87,12 +88,15 @@ import {
   version,
 } from "./helpery.js";
 // Prymitywy używane wyłącznie przez importer — oryginał ich nie eksportuje.
+import { normalizujPozycje } from "./normalizacja-pozycji.js";
 import { codeKey, LABEL, sourceKey } from "./podstawy.js";
 // Odstępstwo 2026-10-01: dopasowanie po poprawkach karty i z pokrewnymi DOT (plik opisuje powód).
 import {
   aktualizacjaDotWMiejscu,
   dotZgodny,
+  innySymbolDostawcy,
   kartaWlasnejPartii,
+  minimumPozycjiOferty,
   oczyscModelZDot,
   wstrzymujeKandydatowPrzyNiejednoznacznosci,
   zachowajNazweKarty,
@@ -304,6 +308,9 @@ export function stworzPolitykeStagingu(
       zgodnaBezDot(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
     const dotZgodnyZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
       dotZgodny(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
+    /** Odstępstwo 2026-10-01: inny symbol dostawcy = osobna pozycja (nie kandydat do dopasowania). */
+    const innySymbolZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      innySymbolDostawcy(d, p as unknown as Pozycja, (v) => codeKey(dostawca, v));
 
     // ——— Mapy dopasowania (`:339-345`) ———
     const poKodzie = new Map<string, ProduktWewnetrzny>(
@@ -393,6 +400,8 @@ export function stworzPolitykeStagingu(
       // Samo „DOT” w modelu/bieżniku to oznaczenie dostawcy w nazwie (decyzja 2026-10-01).
       if (d.model) d.model = oczyscModelZDot(d.model) as string;
       if (d.bieznik) d.bieznik = oczyscModelZDot(d.bieznik) as string;
+      // Etap 3 (2026-10-01): dopiski osi, utracone HS/LS, DOT dwucyfrowy/WWYY, konstrukcja, ucięte indeksy.
+      d = normalizujPozycje(d);
       Object.assign(d, {
         ean: ev.value,
         eanRaw: ev.raw,
@@ -468,7 +477,7 @@ export function stworzPolitykeStagingu(
 
       // ——— 6. EAN — WYŁĄCZNIE gdy jedna zgodna opona (`:388-395`) ———
       if (!biezacy && ev.valid && ev.value) {
-        kandydaci = poEanie.get(ev.value) ?? [];
+        kandydaci = (poEanie.get(ev.value) ?? []).filter((p) => !innySymbolZ(d, p));
         const zgodni = kandydaci.filter((p) => zgodnaZ(d, p));
         if (
           zgodni.length === 1 &&
@@ -487,7 +496,7 @@ export function stworzPolitykeStagingu(
 
       // ——— 7. Zgodne cechy pod innym kodem — NIE auto-dopasowuje (`:396-402`) ———
       if (!biezacy && !problemDopasowania) {
-        const zgodniPoCechach = produkty.filter((p) => zgodnaZ(d, p));
+        const zgodniPoCechach = produkty.filter((p) => zgodnaZ(d, p) && !innySymbolZ(d, p));
         // Odstępstwo 2026-10-01: karta założona przez system dla TEGO wiersza (osobna partia DOT
         // z kodem `…_AUTO_…`) to dopasowanie, nie pytanie. EAN nie przeszkadza, gdy wiersz go nie
         // ma, jest ten sam albo karta ma wygenerowany (999…) — prawdziwy EAN z cennika go zastąpi.
@@ -693,11 +702,13 @@ export function stworzPolitykeStagingu(
     // ——— Bezpieczeństwo źródła: progi (`:455-461`) ———
     const stanOferty = stanOfertyDostawcy(db, dostawca);
     const liczbaPozycji = przygotowane.size;
-    const minimum = stanOferty?.maxItemCount
-      ? Math.max(1, Math.ceil(stanOferty.maxItemCount * 0.8))
-      : 1;
+    const minimum = minimumPozycjiOferty(stanOferty);
     if (liczbaPozycji < minimum) {
-      throw new CennikPodejrzanieMalyBlad(liczbaPozycji, minimum);
+      // Do alertu: ile i jakich kart zniknęło z pliku. Liczba zapisana, żeby „zaakceptuj mniejszy cennik”
+      // wiedziało, do czego przestawić punkt odniesienia (ticket 179).
+      const brakujace = produkty.filter((p) => !zaobserwowane.has(p.id)).map((p) => String(p.kod));
+      zapiszZablokowanaLiczbeOferty(db, dostawca, liczbaPozycji);
+      throw new CennikPodejrzanieMalyBlad(liczbaPozycji, minimum, brakujace.slice(0, 20), brakujace.length);
     }
     if (
       stanOferty &&
@@ -762,11 +773,12 @@ export function stworzPolitykeStagingu(
           }
         }
 
-        // Powrót wstrzymanej karty wymaga potwierdzenia cech (`:487-489`).
+        // Powrót wstrzymanej karty wymaga potwierdzenia cech (`:487-489`). To ta sama pozycja (ten sam
+        // kod), więc DOT nie jest kryterium — nowy DOT zapisuje się niżej po cichu (odstępstwo 2026-10-01).
         if (
           biezacy &&
           czyAutomatycznieWstrzymany(db, dostawca, biezacy.kod) &&
-          !zgodnaZ(d, biezacy) &&
+          !zgodnaBezDotZ(d, biezacy) &&
           !zmiany.length &&
           !bledy.length
         ) {
