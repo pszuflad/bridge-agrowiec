@@ -164,6 +164,28 @@ export function kartaWlasnejPartii(
 }
 
 /**
+ * Czy wiersz cennika i karta `p` mają RÓŻNE symbole dostawcy (`kodDostawcy`) — wtedy to dwie osobne
+ * pozycje, nawet gdy marka, model, rozmiar, indeksy, EAN i DOT są takie same lub pokrewne.
+ *
+ * Odstępstwo 2026-10-01 (decyzja użytkowniczki): symbol dostawcy identyfikuje partię. Wspólne są
+ * wtedy tylko cechy opony, a data produkcji i warunki (cena, stan) mogą być inne — nowy symbol to
+ * NOWA karta, nie „podobna opona, sprawdź”. Produkcja pytała o to przy każdej zgodnej parze
+ * (np. Goodyear KMAX …MKD…/…MKS…, CEAT WINMILE-S …WES0/…WES1, CEAT z `SB`/bez).
+ *
+ * Gdy któryś symbol jest pusty (wiersz bez własnego kodu, stara karta) — NIE rozstrzygamy:
+ * zostaje dotychczasowe dopasowanie. Ten sam symbol to zawsze ta sama pozycja (krok „kod dostawcy”).
+ */
+export function innySymbolDostawcy(
+  d: Pozycja,
+  p: Pozycja,
+  kodKlucz: (v: unknown) => string,
+): boolean {
+  const kodPliku = kodKlucz(d.kodDostawcy);
+  const kodKarty = kodKlucz(p.kodDostawcy);
+  return kodPliku !== "" && kodKarty !== "" && kodPliku !== kodKarty;
+}
+
+/**
  * Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (`ean-bledny.ts`): poprawka `ean` karty
  * z `acknowledgedSourceValue` równym TEMU błędnemu numerowi → zamiast błędu liczy się EAN poprawki.
  * Gdy dostawca zmieni numer (inny napis), pytanie wraca.
