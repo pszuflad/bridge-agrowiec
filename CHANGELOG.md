@@ -4,6 +4,8 @@ Wpisy od najnowszego. Migracje danych: z nazwą backupu (`VACUUM INTO …bak_ful
 
 ## 2026-10-01 — Naprawa kolejki stagingu (SPEC „Naprawa kolejki stagingu”)
 
+- **181 · migracja danych/Selly** — `scal-karty-auto`: `--zeruj-selly` i `--usun-duplikaty-selly` pomijają wariant Selly nadal mapowany
+  przez aktywną kartę (`ostatni_blad = "pominięto: wariant współdzielony…"`). Powód: na produkcji 272 z 273 wierszy archiwum wskazuje wariant karty R.
 - **180 · import/migracja danych/Selly** — `polityka/ean-dostawcy.ts`: EAN Handlopexu (MO4/MO5) z oznaczeniem partii (`…DO`, `…_D`, `…W2`)
   i ze złą cyfrą kontrolną traktowane jako prawidłowe; `slowniki/modele-producenta.ts`: zapis producenta (Trelleborg, Cultor, Mitas, LingLong);
   `scal-karty-auto`: duplikaty AUTO ze stanem 0 usuwane z Bridge i z Selly (`--usun-duplikaty-selly`), para bez oferty bierze stan z karty A;
