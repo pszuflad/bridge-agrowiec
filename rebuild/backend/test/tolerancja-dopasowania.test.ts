@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { manualOverrides, products, stagingItems } from "../src/db/schema.js";
+import { eanPary, manualOverrides, products, stagingItems } from "../src/db/schema.js";
 import { dotyPokrewne } from "../src/import/polityka/tolerancja-dopasowania.js";
 import { silnikStagingu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
@@ -51,6 +51,9 @@ function importuj(opcje: {
   karta?: Wiersz;
   rekord?: Wiersz;
   poprawka?: { fieldName: string; overrideValue: string; acknowledgedSourceValue: string };
+  /** Druga karta (np. osobna partia z kodem zastępczym) i pary kod↔EAN wygenerowane wcześniej. */
+  druga?: Wiersz;
+  pary?: Wiersz[];
 }) {
   const produkt = wczytaj<Wiersz[]>(join(katalog, "silnik", "katalog", "MO5.katalog.json")).find(
     (p) => p.kod === KOD,
@@ -63,6 +66,18 @@ function importuj(opcje: {
   // (produkcja ma już długą formę). Ujednolicamy, żeby test mierzył tolerancję, a nie ten rozjazd.
   const konstrukcja = produkt.konstrukcja === "D" ? "Diagonalna" : "Radialna";
   baza.db.insert(products).values({ ...produkt, konstrukcja, ...opcje.karta } as never).run();
+  if (opcje.druga) {
+    baza.db
+      .insert(products)
+      .values({ ...produkt, konstrukcja, id: 9_999_001, ...opcje.druga } as never)
+      .run();
+  }
+  for (const para of opcje.pary ?? []) {
+    baza.db
+      .insert(eanPary)
+      .values({ dostawca: "MO5", status: "aktywny", utworzono: "2026-09-30T00:00:00.000Z", ...para } as never)
+      .run();
+  }
   if (opcje.poprawka) {
     baza.db
       .insert(manualOverrides)
@@ -127,5 +142,45 @@ describe("importer — tolerancja dopasowania", () => {
       },
     });
     expect(staging.filter((w) => w.problem)).toHaveLength(1);
+  });
+
+  describe("karta założona przez system dla tego wiersza (osobna partia DOT z kodem `…_AUTO_…`)", () => {
+    const AUTO = "MO5_AUTO_ABC123";
+    /** Karta z kodem z pliku ma DOT 2025, a zaakceptowana partia 2026 żyje pod kodem zastępczym. */
+    const karty = (druga: Wiersz = {}) => ({
+      karta: { dot: "2025", ean: "9990000000210" },
+      druga: { kod: AUTO, dot: "2026", ean: "9990000001903", ...druga },
+      pary: [
+        { kod: KOD, ean: "9990000000210", numer: 21 },
+        { kod: AUTO, ean: "9990000001903", numer: 190 },
+      ],
+      rekord: { dot: "2026", ean: null, eanRaw: null },
+    });
+
+    it("kolejny import tego samego wiersza dopasowuje się do niej — bez pytania o „podobną oponę”", () => {
+      const staging = importuj(karty());
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+      expect(staging.every((w) => w.kod === AUTO)).toBe(true);
+      expect(staging.some((w) => w.typ === "nowa"), "nie zakłada trzeciej karty").toBe(false);
+    });
+
+    it("prawdziwy EAN w cenniku nie blokuje dopasowania, gdy karta ma wygenerowany 999…", () => {
+      const staging = importuj({ ...karty(), rekord: { dot: "2026", ean: "5901234123457" } });
+      expect(staging.filter((w) => w.problem)).toEqual([]);
+    });
+
+    it("INNY prawdziwy EAN na karcie → nadal pytanie (to może być inna opona)", () => {
+      const staging = importuj({
+        ...karty({ ean: "5901234123464" }),
+        pary: [{ kod: KOD, ean: "9990000000210", numer: 21 }],
+        rekord: { dot: "2026", ean: "5901234123457" },
+      });
+      expect(staging.filter((w) => w.problem)).toHaveLength(1);
+    });
+
+    it("karta o INNYM kodzie dostawcy niż wiersz nie jest „własną” — pytanie zostaje", () => {
+      const staging = importuj(karty({ kodDostawcy: "INNY_KOD" }));
+      expect(staging.filter((w) => w.problem)).toHaveLength(1);
+    });
   });
 });

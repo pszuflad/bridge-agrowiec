@@ -115,3 +115,22 @@ export function dotZgodny(
 ): boolean {
   return dotyPokrewne(zPoprawkami(d, poprawki).dot, p.dot);
 }
+
+/**
+ * Czy `p` jest kartą, którą SAM system założył dla tego wiersza cennika (osobna partia DOT z kodem
+ * zastępczym `…_AUTO_…`, bo kod z pliku zajmowała inna karta).
+ *
+ * Bez tego ten sam wiersz przy KAŻDYM kolejnym imporcie pytał „podobna opona pod innym kodem" —
+ * o kartę, którą wczoraj sam zaakceptowano — a w oknie pokazywał jako kandydata kartę z kodem
+ * z pliku (inną partię). Warunki: kod zastępczy + ten sam kod dostawcy w pliku i na karcie.
+ * Zgodność cech (marka/model/rozmiar/DOT…) sprawdza wołający przez `zgodna()`.
+ */
+export function kartaWlasnejPartii(
+  d: Pozycja,
+  p: Pozycja,
+  kodKlucz: (v: unknown) => string,
+): boolean {
+  if (!String(p.kod ?? "").includes("_AUTO_")) return false;
+  const kodPliku = kodKlucz(d.kodDostawcy);
+  return kodPliku !== "" && kodPliku === kodKlucz(p.kodDostawcy);
+}

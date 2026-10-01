@@ -184,11 +184,11 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       // Zdanie „NIE zatwierdza…” było nieprawdą po zmianie: zapis idzie od razu do katalogu.
       expect(within(okno).queryByText(/NIE zatwierdza/)).toBeNull();
       expect(
-        within(okno).getByText(/„Zapisz w katalogu” zapisuje wybór od razu w katalogu/),
+        within(okno).getByText(/„Zapisz w katalogu” zapisuje od razu, bez osobnej akceptacji w stagingu/),
       ).toBeInTheDocument();
     });
 
-    it("bez wyboru przycisk jest wyłączony i podpowiada, co zaznaczyć — także po wpisaniu własnych parametrów", async () => {
+    it("zmiany można zapisać BEZ przewijania do listy wyboru — przyciskiem w stopce", async () => {
       const uzytkownik = userEvent.setup();
       await otworzStaging();
       const okno = await otworzOkno(uzytkownik);
@@ -197,14 +197,52 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       const nazwa = within(okno).getByTestId("pole-wlasne-nazwa");
       await uzytkownik.type(nazwa, " X");
 
-      expect(within(okno).getByTestId("button-zapisz-wybor")).toBeDisabled();
-      expect(within(okno).getByTestId("podpowiedz-wyboru")).toHaveTextContent(
-        "zaznacz powyżej istniejący produkt albo „To osobna opona”",
-      );
+      expect(within(okno).getByTestId("podpowiedz-wyboru")).toBeInTheDocument();
+      // Dwa kandydaci → tylko „osobny produkt” (wybór jednej z kart zostaje na liście radio).
+      expect(within(okno).queryByTestId("button-zapisz-istniejacy")).toBeNull();
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-nowy"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "new",
+        corrections: { nazwa: "480/70R34 BKT AGRIMAX RT 765 X" },
+      });
+    });
+
+    it("przy JEDNEJ karcie jest też „Zapisz na istniejącej karcie” — wysyła `link` z poprawkami", async () => {
+      const [pierwszy] = przegladDopasowania().candidates;
+      zamockuj({
+        strona: stronaZFraza(FRAZY.dopasowanie),
+        przeglad: { ...przegladDopasowania(), candidates: [pierwszy!] },
+      });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      const model = within(okno).getByTestId("pole-wlasne-model");
+      await uzytkownik.clear(model);
+      await uzytkownik.type(model, "AGRIMAX RT 765 NOWY");
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-istniejacy"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "link",
+        targetCode: "MO5_A",
+        corrections: { model: "AGRIMAX RT 765 NOWY" },
+      });
+    });
+
+    it("po zaznaczeniu wyboru przyciski „gdzie zapisać” znikają, a zostaje „Zapisz w katalogu”", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
 
       await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-nowy"));
-      expect(within(okno).getByTestId("button-zapisz-wybor")).toBeEnabled();
+
+      expect(within(okno).queryByTestId("button-zapisz-nowy")).toBeNull();
       expect(within(okno).queryByTestId("podpowiedz-wyboru")).toBeNull();
+      expect(within(okno).getByTestId("button-zapisz-wybor")).toBeEnabled();
     });
 
     it("bez wyjaśnienia z serwera wraca do hasła importera", async () => {
@@ -293,15 +331,16 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       ).toBeInTheDocument();
     });
 
-    it("„Zapisz wybór” startuje wyłączony i wysyła `{action:\"link\", targetCode}`", async () => {
+    it("po zaznaczeniu produktu „Zapisz w katalogu” wysyła `{action:\"link\", targetCode}`", async () => {
       const uzytkownik = userEvent.setup();
       await otworzStaging();
       const okno = await otworzOkno(uzytkownik);
 
-      const zapisz = within(okno).getByTestId("button-zapisz-wybor");
-      expect(zapisz).toBeDisabled();
+      // Bez wyboru nie ma głównego przycisku — decyzję podejmuje się przyciskami w stopce.
+      expect(within(okno).queryByTestId("button-zapisz-wybor")).toBeNull();
 
       await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-MO5_A"));
+      const zapisz = within(okno).getByTestId("button-zapisz-wybor");
       expect(zapisz).toBeEnabled();
       await uzytkownik.click(zapisz);
 

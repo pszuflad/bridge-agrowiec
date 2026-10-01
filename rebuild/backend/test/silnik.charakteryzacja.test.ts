@@ -44,6 +44,7 @@ vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
     zgodna: (d: P, p: P) => compatibility(d, p).ok,
     osobnaPartia: (d: P, p: P) => separateDotBatch(d, p),
     dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
+    kartaWlasnejPartii: () => false,
   };
 });
 
