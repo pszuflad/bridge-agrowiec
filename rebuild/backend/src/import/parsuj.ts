@@ -174,8 +174,13 @@ export function parsujPlik(kodDostawcy: string, sciezkaPliku: string): WynikPars
     throw przetlumaczBladParsera(kod, e);
   }
 
+  // ⚠ Ticket 182: meta kompletności (`_bridgeFeedMeta`, właściwość NIEwyliczalna) zdejmujemy PRZED
+  // `zastosujDemoWNazwie` — jej `.map()` zwraca nową tablicę bez tej właściwości. Od 821940b (2026-09-30)
+  // każdy import był przez to „niekompletny”: bez automatycznych powrotów i bez liczenia nieobecności.
+  const poAdapterze = adapter.recordsToSurowe(kod, wynikParsera.records);
+  const meta = zdejmijMeta(poAdapterze);
   // Jedyne odstępstwo za adapterem: „DEMO" na końcu nazwy, gdy kod dostawcy ma „demo".
-  const rekordy = zastosujDemoWNazwie(adapter.recordsToSurowe(kod, wynikParsera.records));
+  const rekordy = zastosujDemoWNazwie(poAdapterze);
 
   // Decyzja Anny 2026-09-30: stan Nokiana (MO7) zawsze 0 — cennik podaje „5+", które
   // parser zamienia na 5 dla każdej pozycji. Nadpisanie tu, a nie w `mo7_nokian.cjs`,
@@ -190,7 +195,7 @@ export function parsujPlik(kodDostawcy: string, sciezkaPliku: string): WynikPars
     bledy: wynikParsera.errors ?? [],
     odrzucone: wynikParsera.odrzucone ?? [],
     odrzuconePrzezAdapter: wynikParsera.records.length - rekordy.length,
-    meta: zdejmijMeta(rekordy),
+    meta,
   };
 }
 
