@@ -522,6 +522,19 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
 
           {/* Stopka: „Zamknij" zawsze pierwszy, przyciski zapisu po nim (`:96`, `:110`, `:128`). */}
           <div className="mt-5 flex flex-wrap justify-end gap-2.5">
+            {/*
+              NOWE (2026-10-01): „Zapisz w katalogu” jest wyłączony, dopóki nie wybrano jednej z opcji
+              (produkt z listy albo „To osobna opona”). Samo wpisanie własnych parametrów go nie
+              odblokowuje — bez tej podpowiedzi przycisk wyglądał na zepsuty.
+            */}
+            {przeglad && pokazDopasowanie && !wybraneDopasowanie ? (
+              <p
+                className="w-full text-right text-sm text-amber-600 dark:text-amber-400"
+                data-testid="podpowiedz-wyboru"
+              >
+                Żeby zapisać, zaznacz powyżej istniejący produkt albo „To osobna opona”.
+              </p>
+            ) : null}
             <Button
               variant="outline"
               onClick={zamknij}

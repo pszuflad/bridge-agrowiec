@@ -302,6 +302,52 @@ describe("Widok /staging", () => {
      * a `stanNowy` to zawsze 0. Podgląd, który zakłada obecność snapshotu, wywraca się
      * dokładnie tutaj — a `wycofana` to 149 wierszy na realnych cennikach.
      */
+    it("szczegóły linkują do karty w katalogu (własny kod i kandydaci), z szukajką po kodzie", async () => {
+      const pozycja = {
+        ...(STRONA.items[0] as Record<string, unknown>),
+        id: 999002,
+        kod: "MO5_OZRR420520858LOX2",
+        typZmiany: "blad",
+        snapshotJson: JSON.stringify({
+          kod: "MO5_OZRR420520858LOX2",
+          _candidates: [{ kod: "MO5_INNA", nazwa: "Inna opona" }],
+        }),
+      };
+      zamockujApi({ ...STRONA, items: [pozycja] }, pozycja);
+
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await uzytkownik.click(await screen.findByTestId("button-details-999002"));
+      const dialog = await screen.findByTestId("dialog-staging");
+
+      expect(
+        await within(dialog).findByTestId("szczegoly-link-katalog-MO5_OZRR420520858LOX2"),
+      ).toHaveAttribute("href", "/katalog?szukaj=MO5_OZRR420520858LOX2");
+      expect(within(dialog).getByTestId("szczegoly-link-katalog-MO5_INNA")).toHaveAttribute(
+        "href",
+        "/katalog?szukaj=MO5_INNA",
+      );
+    });
+
+    it("nowa pozycja z kodem zastępczym nie ma linku do własnej karty (jej jeszcze nie ma)", async () => {
+      const pozycja = {
+        ...(STRONA.items[0] as Record<string, unknown>),
+        id: 999003,
+        kod: "MO5_AUTO_ABC123",
+        typZmiany: "nowa",
+        snapshotJson: JSON.stringify({ kod: "MO5_AUTO_ABC123" }),
+      };
+      zamockujApi({ ...STRONA, items: [pozycja] }, pozycja);
+
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await uzytkownik.click(await screen.findByTestId("button-details-999003"));
+      const dialog = await screen.findByTestId("dialog-staging");
+      await within(dialog).findByTestId("szczegoly-snapshot");
+
+      expect(within(dialog).queryByTestId("szczegoly-katalog")).toBeNull();
+    });
+
     it("wiersz `wycofana` renderuje się i otwiera BEZ wywrócenia podglądu", async () => {
       const wycofana = {
         ...(STRONA.items[0] as Record<string, unknown>),
@@ -401,7 +447,11 @@ describe("Widok /staging", () => {
       await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
       const dialog = await screen.findByTestId("dialog-staging");
 
-      await uzytkownik.type(within(dialog).getByTestId("input-kategoria"), "Przemysłowe");
+      // Pole niesie aktualną wartość (nie pusty placeholder) — nadpisujemy ją.
+      const kategoria = within(dialog).getByTestId("input-kategoria");
+      expect(kategoria).not.toHaveValue("");
+      await uzytkownik.clear(kategoria);
+      await uzytkownik.type(kategoria, "Przemysłowe");
       await uzytkownik.type(within(dialog).getByTestId("input-reason"), "decyzja Marty");
       await uzytkownik.click(within(dialog).getByTestId("button-save-details"));
 
@@ -411,6 +461,25 @@ describe("Widok /staging", () => {
         kategoria: "Przemysłowe",
         _reason: "decyzja Marty",
       });
+    });
+
+    it("pola są wypełnione aktualnymi wartościami; wpisanie i cofnięcie zmiany znów wyłącza zapis", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+
+      const pierwsza = STRONA.items[0] as { id: number };
+      await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
+      const dialog = await screen.findByTestId("dialog-staging");
+
+      const nazwa = within(dialog).getByTestId("input-nazwa") as HTMLInputElement;
+      const poczatkowa = nazwa.value;
+      expect(poczatkowa, "pole niesie aktualną nazwę, a nie pusty placeholder").not.toBe("");
+
+      await uzytkownik.type(nazwa, "X");
+      expect(within(dialog).getByTestId("button-save-details")).toBeEnabled();
+      await uzytkownik.type(nazwa, "{Backspace}");
+      expect(nazwa).toHaveValue(poczatkowa);
+      expect(within(dialog).getByTestId("button-save-details")).toBeDisabled();
     });
 
     it("przycisk zapisu jest nieaktywny, dopóki nic nie zmieniono", async () => {
