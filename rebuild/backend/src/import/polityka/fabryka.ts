@@ -93,6 +93,9 @@ import {
   aktualizacjaDotWMiejscu,
   dotZgodny,
   kartaWlasnejPartii,
+  oczyscModelZDot,
+  wstrzymujeKandydatowPrzyNiejednoznacznosci,
+  zachowajNazweKarty,
   zgodnaBezDot,
   osobnaPartia,
   zastapBlednyEan,
@@ -387,6 +390,9 @@ export function stworzPolitykeStagingu(
         ...(surowy as unknown as PozycjaZnormalizowana),
         ean: null,
       }).poz as unknown as Pozycja;
+      // Samo „DOT” w modelu/bieżniku to oznaczenie dostawcy w nazwie (decyzja 2026-10-01).
+      if (d.model) d.model = oczyscModelZDot(d.model) as string;
+      if (d.bieznik) d.bieznik = oczyscModelZDot(d.bieznik) as string;
       Object.assign(d, {
         ean: ev.value,
         eanRaw: ev.raw,
@@ -520,6 +526,8 @@ export function stworzPolitykeStagingu(
         // Odstępstwo od produkcji (2026-09-30): „DEMO" na końcu nazwy ma ostatnie słowo —
         // także wobec pamięci nazw i poprawek Marty (`manual_overrides`).
         d.nazwa = nazwaZDemo(d.nazwa as string | null, d.kodDostawcy as string | null);
+        // Gdy nazwę karty od nazwy z cennika różni tylko „DOT” (i `×`/`x`), zostaje nazwa karty.
+        d.nazwa = zachowajNazweKarty(d.nazwa, biezacy.nazwa) as string;
       }
 
       // Kandydat w trakcie przeglądu NIE może zostać uznany za wycofany (`:417`).
@@ -745,8 +753,9 @@ export function stworzPolitykeStagingu(
       for (const pozycja of przygotowane.values()) {
         const { kod, biezacy, d, bledy, zmiany } = pozycja;
 
-        // Niejednoznaczne dopasowanie wstrzymuje kandydatów (`:481-486`).
-        if (kompletna && !opcje.reconcileOnly && d._matchIssue) {
+        // Niejednoznaczne dopasowanie wstrzymywało kandydatów (`:481-486`); od 2026-10-01 NIE — pozycja
+        // czekająca na decyzję nie zeruje stanu karty (`wstrzymujeKandydatowPrzyNiejednoznacznosci`).
+        if (wstrzymujeKandydatowPrzyNiejednoznacznosci() && kompletna && !opcje.reconcileOnly && d._matchIssue) {
           for (const c of (d._candidates as { kod: string }[]) ?? []) {
             const p = poKodzie.get(c.kod);
             if (p) wstrzymaj(p, czas, odcisk, "Niejednoznaczne dopasowanie w aktualnym cenniku");

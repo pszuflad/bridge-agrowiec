@@ -55,6 +55,8 @@ function importuj(opcje: {
   /** Druga karta (np. osobna partia z kodem zastępczym) i pary kod↔EAN wygenerowane wcześniej. */
   druga?: Wiersz;
   pary?: Wiersz[];
+  /** Kompletna oferta — wtedy niejednoznaczne dopasowanie mogło (w produkcji) wstrzymywać karty. */
+  kompletna?: boolean;
 }) {
   const produkt = wczytaj<Wiersz[]>(join(katalog, "silnik", "katalog", "MO5.katalog.json")).find(
     (p) => p.kod === KOD,
@@ -90,7 +92,11 @@ function importuj(opcje: {
       } as never)
       .run();
   }
-  silnikStagingu(baza.db)("MO5", [{ ...rekord, ...opcje.rekord } as unknown as RekordSurowy], {});
+  silnikStagingu(baza.db)(
+    "MO5",
+    [{ ...rekord, ...opcje.rekord } as unknown as RekordSurowy],
+    opcje.kompletna ? { meta: { complete: true } as never } : {},
+  );
   const wiersze = baza.db.select().from(stagingItems).all();
   return wiersze.map((w) => ({
     kod: w.kod,
@@ -102,8 +108,12 @@ function importuj(opcje: {
 
 describe("importer — tolerancja dopasowania", () => {
   /** DOT karty po imporcie — z tej samej bazy, na której poszedł import. */
+  const dotKartyWiersz = (kod = KOD) =>
+    (baza!.db.select().from(products).all() as unknown as Wiersz[]).find((p) => p.kod === kod)!;
   const dotKarty = (kod = KOD) =>
     (baza!.db.select().from(products).all() as unknown as Wiersz[]).find((p) => p.kod === kod)!.dot;
+
+  const karta = () => dotKartyWiersz();
 
   describe("DOT jako cecha zmienna — ta sama pozycja (ten sam kod) nie wraca do akceptacji", () => {
     it("`2026` vs `2025,2026`: ta sama karta, bez zgłoszenia, DOT zapisany na karcie", () => {
@@ -204,6 +214,45 @@ describe("importer — tolerancja dopasowania", () => {
         poprawka: poprawkaEan,
       });
       expect(bledy(staging)).toHaveLength(1);
+    });
+  });
+
+  describe("czekająca pozycja nie rusza katalogu (decyzja 2026-10-01)", () => {
+    it("niejednoznaczne dopasowanie NIE wstrzymuje karty-kandydata i nie zeruje jej stanu", () => {
+      // Ta sama opona pod INNYM kodem → „podobna opona” (pytanie), kandydatem jest karta KOD.
+      const staging = importuj({
+        karta: { stan: 7, status: "aktywny" },
+        rekord: { kod: "MO5_INNY_KOD", kodDostawcy: "INNY_KOD", ean: "5901234123457", eanRaw: "5901234123457" },
+        kompletna: true,
+      });
+      expect(staging.filter((w) => w.problem)).toHaveLength(1);
+      expect(karta()).toMatchObject({ status: "aktywny", stan: 7 });
+    });
+  });
+
+  describe("samo „DOT” w nazwie dostawcy (BKT/MO9)", () => {
+    const BKT = {
+      karta: { nazwa: "18.00x25 BKT XL GRIP 40PR TL", model: "XL GRIP", dot: "2025" },
+      rekord: {
+        nazwa: "18.00x25 BKT XL GRIP DOT 40PR TL",
+        model: "XL GRIP DOT",
+        bieznik: "XL GRIP DOT",
+        dot: "2025",
+      },
+    };
+
+    it("model i bieżnik bez „DOT”, nazwa karty zostaje — pozycja nie wraca do akceptacji", () => {
+      const staging = importuj(BKT);
+      expect(staging.filter((w) => w.typ === "zmiana_kluczowa")).toEqual([]);
+      expect(karta().nazwa).toBe("18.00x25 BKT XL GRIP 40PR TL");
+    });
+
+    it("prawdziwa zmiana nazwy (nie tylko „DOT”) nadal idzie do akceptacji", () => {
+      const staging = importuj({
+        ...BKT,
+        rekord: { ...BKT.rekord, nazwa: "18.00x25 BKT XL GRIP DOT 44PR TL" },
+      });
+      expect(staging.filter((w) => w.typ === "zmiana_kluczowa")).toHaveLength(1);
     });
   });
 });

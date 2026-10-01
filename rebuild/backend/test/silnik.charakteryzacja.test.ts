@@ -47,6 +47,9 @@ vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
     dotZgodny: (d: P, p: P) => norm(d.dot) === norm(p.dot),
     kartaWlasnejPartii: () => false,
     aktualizacjaDotWMiejscu: () => false,
+    wstrzymujeKandydatowPrzyNiejednoznacznosci: () => true,
+    oczyscModelZDot: <T>(w: T) => w,
+    zachowajNazweKarty: <T>(n: T) => n,
     zastapBlednyEan: <T>(ev: T) => ev,
   };
 });

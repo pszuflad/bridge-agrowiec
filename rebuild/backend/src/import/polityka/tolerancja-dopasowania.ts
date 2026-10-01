@@ -184,3 +184,38 @@ export function zastapBlednyEan(
   const poprawiony = validateEan(potwierdzona.overrideValue);
   return poprawiony.valid ? poprawiony : ev;
 }
+
+/**
+ * Czy niejednoznaczne dopasowanie (`_matchIssue`) wstrzymuje karty-kandydatów i zeruje ich stan.
+ * Produkcja: tak. Decyzja użytkowniczki (2026-10-01): NIE — pozycja czekająca w stagingu na decyzję
+ * nie może zmieniać katalogu ani zerować stanu magazynowego (u dostawcy towar jest).
+ */
+export function wstrzymujeKandydatowPrzyNiejednoznacznosci(): boolean {
+  return false;
+}
+
+/** Samo słowo „DOT” (opcjonalnie z rokiem) — oznaczenie dostawcy w nazwie, nie część modelu. */
+const SLOWO_DOT_RE = /\s*\bDOT(?:\s*\d{2,4})?\b/gi;
+
+/**
+ * Model/bieżnik bez słowa „DOT” (np. `XL GRIP DOT` → `XL GRIP`, `TR 270 DOT` → `TR 270`).
+ * Dostawca MO9 pisze „(DOT)” w nazwie; parser wycina z modelu tylko „DOT” z liczbą, więc samo „DOT”
+ * zostawało w modelu i bieżniku (decyzja użytkowniczki, 2026-10-01: model BKT ma być `XL GRIP`).
+ */
+export function oczyscModelZDot(wartosc: unknown): unknown {
+  if (typeof wartosc !== "string") return wartosc;
+  const czysty = wartosc.replace(SLOWO_DOT_RE, "").replace(/\s+/g, " ").trim();
+  return czysty || wartosc;
+}
+
+const doPorownaniaNazw = (nazwa: string): string =>
+  nazwa.replace(SLOWO_DOT_RE, "").replace(/×/g, "x").replace(/\s+/g, " ").trim().toUpperCase();
+
+/**
+ * Nazwa z cennika, gdy od nazwy karty różni ją TYLKO słowo „DOT” (i zapis `×`/`x` w rozmiarze) —
+ * zostaje nazwa karty („nazwa ma pozostać taka, jaka jest”). Każda inna różnica przechodzi bez zmian.
+ */
+export function zachowajNazweKarty(nazwa: unknown, nazwaKarty: unknown): unknown {
+  if (typeof nazwa !== "string" || typeof nazwaKarty !== "string") return nazwa;
+  return doPorownaniaNazw(nazwa) === doPorownaniaNazw(nazwaKarty) ? nazwaKarty : nazwa;
+}
