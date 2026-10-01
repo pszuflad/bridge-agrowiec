@@ -71,6 +71,20 @@ export async function synchronizujTeraz(kod: string): Promise<WynikSynchronizacj
   return (await odpowiedz.json()) as WynikSynchronizacji;
 }
 
+/** Treść błędu z backendu, po której karta pokazuje „Zaakceptuj mniejszy cennik” (Etap 4b, ticket 179). */
+export const TEKST_PODEJRZANIE_MALY = "podejrzanie mały";
+
+/**
+ * `POST /api/dostawcy/{kod}/akceptuj-mniejszy-cennik` — NOWA trasa (ticket 179): przestawia punkt odniesienia
+ * progu „cennik podejrzanie mały” na liczbę pozycji z zablokowanej próby. 404, gdy nie ma czego akceptować.
+ */
+export async function akceptujMniejszyCennik(
+  kod: string,
+): Promise<{ ok: true; liczba: number; poprzednia: number }> {
+  const odpowiedz = await zadanie("POST", `/api/dostawcy/${encodeURIComponent(kod)}/akceptuj-mniejszy-cennik`, {});
+  return (await odpowiedz.json()) as { ok: true; liczba: number; poprzednia: number };
+}
+
 /** Pola, które zakładka pozwala edytować — te same, które backend przyjmuje w PATCH-u. */
 export type PatchDostawcy = {
   url?: string | null;

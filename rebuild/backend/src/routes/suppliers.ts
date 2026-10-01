@@ -13,6 +13,7 @@ import { jestBlokadaZrodla, silnikStagingu, type SilnikStagingu } from "../impor
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAlert } from "../repos/alerts.js";
 import { zapiszAudyt } from "../repos/audit.js";
+import { zaakceptujMniejszyCennik } from "../repos/staging-polityka.js";
 import {
   aktualizujDostawce,
   dostawcaPoId,
@@ -365,6 +366,34 @@ export function trasyDostawcow({
         uzytkownik: req.user?.imieNazwisko ?? null,
       });
       res.json(wynik);
+    },
+  );
+
+  /**
+   * Ręczne „zaakceptuj mniejszy cennik” (ticket 179, Etap 4b SPEC 2026-10-01) — NOWA trasa, spoza kontraktu
+   * produkcji. Po blokadzie „cennik podejrzanie mały” przestawia punkt odniesienia (`last_item_count`
+   * i `max_item_count`) na liczbę pozycji z ostatniej zablokowanej próby; następny import przechodzi.
+   * Za `requireAuth` (`we`), z wpisem w `audit_log`. Brak zablokowanej próby → 404.
+   */
+  router.post(
+    "/api/dostawcy/:kod/akceptuj-mniejszy-cennik",
+    requireAuth,
+    (req: Request, res: Response) => {
+      const kod = String(req.params.kod ?? "").toUpperCase();
+      const wynik = zaakceptujMniejszyCennik(db, kod);
+      if (!wynik) {
+        res.status(404).json({ error: "Brak zablokowanego cennika do zaakceptowania" });
+        return;
+      }
+      zapiszAudyt(db, {
+        uzytkownikId: req.user?.id ?? null,
+        uzytkownikImie: req.user?.imieNazwisko ?? null,
+        akcja: "akceptacja_mniejszego_cennika",
+        encjaTyp: "dostawca",
+        encjaId: kod,
+        szczegoly: wynik,
+      });
+      res.json({ ok: true, ...wynik });
     },
   );
 

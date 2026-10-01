@@ -542,6 +542,17 @@ export const supplierFeedState = sqliteTable("supplier_feed_state", {
 	lastCountedAt: text("last_counted_at"),
 });
 
+/**
+ * Migracja 019 (ticket 179): liczba pozycji z ostatniej ZABLOKOWANEJ próby („cennik podejrzanie mały”) —
+ * z niej korzysta ręczne „zaakceptuj mniejszy cennik”. Osobna tabela, bo DDL `supplier_feed_state` jest pilnowany
+ * znak w znak względem produkcji (`test/db.migracja-012.test.ts`). Brak wiersza = brak zablokowanej próby.
+ */
+export const supplierFeedBlocked = sqliteTable("supplier_feed_blocked", {
+	supplier: text().primaryKey(),
+	itemCount: integer("item_count").notNull(),
+	blockedAt: text("blocked_at").notNull(),
+});
+
 /** Odciski kompletnych ofert — wycofanie wymaga trzech RÓŻNYCH ofert (backlog #103). */
 export const supplierFeedVersions = sqliteTable("supplier_feed_versions", {
 	supplier: text().notNull(),

@@ -10,6 +10,8 @@ export default defineConfig({
     // na porcie efemerycznym — ale numer nie jest zarezerwowany, więc to jedyne miejsce w suicie,
     // gdzie równoległy bieg może się teoretycznie zderzyć o port.
     environment: "node",
+    // Ponowienia synchronizacji (ticket 179, Etap 4a) czekają w produkcji 120 s między próbami; testy nie czekają.
+    env: { SYNC_ODSTEP_PONOWIEN_MS: "0" },
     testTimeout: 20_000,
     hookTimeout: 20_000,
   },
