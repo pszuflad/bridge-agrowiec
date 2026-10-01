@@ -18,3 +18,8 @@ zachowanie produkcji.
 
 **Nie ruszone, czeka na decyzję:** model Continentala `CONTI HYBRID HS5` → `CONTI HYBRID 5` powstaje w
 `legacy/parsers/adapter.cjs` (`TECH_MARK_RE` wycina „HS” z „HS5”, bo lookahead wyklucza tylko litery).
+
+4. **Rozstrzygnięcie człowieka nie zatrzymuje produktu** (`rozstrzygnijIZatwierdz` → `zatwierdzPozycjeZPolityka(…, true)`).
+   Produkcja po akceptacji zostawiała kartę wstrzymaną bez znacznika automatycznego (wstrzymanie „ręczne”)
+   jako `wstrzymany` ze stanem 0 — stan z pliku ginął. Przy „Rozstrzygnij” tego już nie robimy: karta dostaje
+   stan i status z oferty. Zwykłe „Zaakceptuj” i import dalej chronią ręczne wstrzymanie.
