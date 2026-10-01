@@ -316,7 +316,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   ))}
 
                   <p
-                    className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
+                    className="my-2.5 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2"
                     data-testid="notatka-wyboru"
                   >
                     {notatkaWyboru(zgodni)}
@@ -334,7 +334,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   */}
                   {!przeglad.duplicateSource && przeglad.wyjasnienie?.length ? (
                     <div
-                      className="my-2.5 space-y-1 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2 text-sm"
+                      className="my-2.5 space-y-1 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2 text-sm"
                       data-testid="wyjasnienie"
                     >
                       <strong className="block">Dlaczego to zgłoszenie czeka na decyzję:</strong>
@@ -467,7 +467,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   {przeglad.sourceConflict ? (
                     <>
                       <div
-                        className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
+                        className="my-2.5 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2"
                         data-testid="roznice-wierszy"
                       >
                         <strong className="block">Niezgodne dane (pierwszy → drugi wiersz):</strong>
