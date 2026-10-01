@@ -84,10 +84,10 @@ import {
   norm,
   rawEan,
   syntheticCode,
-  validateEan,
   version,
 } from "./helpery.js";
 // Prymitywy używane wyłącznie przez importer — oryginał ich nie eksportuje.
+import { kanonicznyEanDostawcy, validateEanDostawcy } from "./ean-dostawcy.js";
 import { normalizujPozycje } from "./normalizacja-pozycji.js";
 import { codeKey, LABEL, sourceKey } from "./podstawy.js";
 // Odstępstwo 2026-10-01: dopasowanie po poprawkach karty i z pokrewnymi DOT (plik opisuje powód).
@@ -336,7 +336,7 @@ export function stworzPolitykeStagingu(
       dodajUnikalny(poKodzieDostawcy, codeKey(dostawca, p.kodDostawcy), p);
     }
     for (const p of produkty) {
-      const ev = validateEan(p.ean);
+      const ev = validateEanDostawcy(p.ean, dostawca);
       if (ev.valid && ev.value) {
         if (!poEanie.has(ev.value)) poEanie.set(ev.value, []);
         poEanie.get(ev.value)!.push(p);
@@ -389,7 +389,11 @@ export function stworzPolitykeStagingu(
       // Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (poprawka `ean` z potwierdzonym
       // numerem), nie jest zgłaszany ponownie — liczy się EAN poprawki (`ean-bledny.ts`).
       const ev = zastapBlednyEan(
-        validateEan(rawEan(raw), Boolean(raw.ean_lossy || raw._eanLossy)),
+        validateEanDostawcy(
+          kanonicznyEanDostawcy(rawEan(raw), dostawca),
+          dostawca,
+          Boolean(raw.ean_lossy || raw._eanLossy),
+        ),
         poprawkiKart.get(String(raw.kod ?? "")),
       );
       // `:354` — normalizacja liczy WYŁĄCZNIE rozmiary i parametry; EAN idzie ścisłą ścieżką.
@@ -409,6 +413,13 @@ export function stworzPolitykeStagingu(
         eanSourceStatus: ev.status,
         eanCandidates: null,
       });
+      // Ticket 180: oznaczenie partii Handlopexu zdjęte z EAN-u — surowy zapis zostaje do wglądu.
+      {
+        const surowyEan = rawEan(raw);
+        if (surowyEan != null && String(surowyEan).trim() !== ev.raw && ev.valid) {
+          d._supplierEanOriginal = String(surowyEan).trim();
+        }
+      }
 
       let kod = String(raw.kod ?? "");
       const klucz = sourceKey(dostawca, zrodlo);
@@ -813,7 +824,7 @@ export function stworzPolitykeStagingu(
         ) {
           patch.dot = d.dot;
         }
-        if (validateEan(d.ean).valid && d.ean !== biezacy.ean) {
+        if (validateEanDostawcy(d.ean, dostawca).valid && d.ean !== biezacy.ean) {
           Object.assign(patch, {
             ean: d.ean,
             eanRaw: d.eanRaw,

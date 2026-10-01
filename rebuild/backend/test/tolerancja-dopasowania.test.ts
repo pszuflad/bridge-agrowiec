@@ -236,7 +236,9 @@ describe("importer — tolerancja dopasowania", () => {
   });
 
   describe("błędny EAN z pliku, który już rozstrzygnięto (poprawka `ean` z potwierdzonym numerem)", () => {
-    const BLEDNY = "5901234123457_D";
+    // Ticket 180: `…_D` u Handlopexu (MO5, jak ten fixture) to już oznaczenie partii, nie błąd —
+    // błędny numer musi więc mieć literę W ŚRODKU, której nie zdejmuje `kanonicznyEanDostawcy`.
+    const BLEDNY = "5901234X23457";
     const poprawkaEan = {
       fieldName: "ean",
       overrideValue: "5901234123457",
@@ -248,6 +250,14 @@ describe("importer — tolerancja dopasowania", () => {
     it("bez rozstrzygnięcia ten sam błędny EAN jest zgłaszany", () => {
       const staging = importuj({ karta: { ean: "5901234123457" }, rekord: { ean: BLEDNY, eanRaw: BLEDNY } });
       expect(bledy(staging)).toHaveLength(1);
+    });
+
+    it("ticket 180: Handlopex (MO5) — EAN z oznaczeniem partii nie jest błędem", () => {
+      const staging = importuj({
+        karta: { ean: "5901234123457" },
+        rekord: { ean: "5901234123457DO", eanRaw: "5901234123457DO" },
+      });
+      expect(bledy(staging)).toEqual([]);
     });
 
     it("po rozstrzygnięciu ten sam numer NIE jest zgłaszany ponownie", () => {
@@ -262,7 +272,7 @@ describe("importer — tolerancja dopasowania", () => {
     it("dostawca zmienił błędny numer → pytanie wraca", () => {
       const staging = importuj({
         karta: { ean: "5901234123457" },
-        rekord: { ean: "5901234123457_X", eanRaw: "5901234123457_X" },
+        rekord: { ean: "5901234Y23457", eanRaw: "5901234Y23457" },
         poprawka: poprawkaEan,
       });
       expect(bledy(staging)).toHaveLength(1);

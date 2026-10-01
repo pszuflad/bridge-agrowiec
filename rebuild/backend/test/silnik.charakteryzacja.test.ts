@@ -42,6 +42,17 @@ vi.mock("../src/import/polityka/normalizacja-pozycji.js", () => ({
   kluczModelu: (v: unknown) => String(v ?? ""),
 }));
 
+// Trzecie odstępstwo (ticket 180, decyzja Ani 2026-10-01, `polityka/ean-dostawcy.ts`): oznaczenia EAN
+// Handlopexu (sufiks partii, cyfra kontrolna) są prawidłowe. Oryginał ich nie zna — tu wracamy do `validateEan`.
+vi.mock("../src/import/polityka/ean-dostawcy.js", async () => {
+  const { validateEan } = await import("../src/import/polityka/helpery.js");
+  return {
+    czyHandlopex: () => false,
+    validateEanDostawcy: (v: unknown, _d: unknown, lossy?: boolean) => validateEan(v, lossy),
+    kanonicznyEanDostawcy: (raw: unknown) => raw,
+  };
+});
+
 vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
   const { compatibility, norm } = await import("../src/import/polityka/helpery.js");
   const { separateDotBatch } = await import("../src/import/polityka/podstawy.js");

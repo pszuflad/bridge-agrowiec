@@ -57,6 +57,7 @@ describe("zastosujMigracje", () => {
     "017_ean_pary.sql",
     "018_scalone_karty_auto.sql",
     "019_feed_state_zablokowana_liczba.sql",
+    "020_scalone_duplikaty_do_usuniecia.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 39 tabel i 22 indeksy", () => {
@@ -76,6 +77,7 @@ describe("zastosujMigracje", () => {
     // 017 (ticket 168) dokłada tabelę `ean_pary` — same UNIQUE (autoindeksy SQLite liczone nie są): +1 tabela, +0.
     // 018 (ticket 177) dokłada `products_scalone` (z indeksem) i `selly_products_scalone`: +2 tabele, +1.
     // 019 (ticket 179) dokłada `supplier_feed_blocked` (klucz główny, bez osobnego indeksu): +1 tabela, +0.
+    // 020 (ticket 180) dokłada dwie kolumny `selly_products_scalone` — bilans tabel i indeksów bez zmian.
     expect(policzTabele(sqlite)).toBe(39);
 
     const indeksy = (
