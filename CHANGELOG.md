@@ -1,0 +1,17 @@
+# CHANGELOG
+
+Wpisy od najnowszego. Migracje danych: z nazwą backupu (`VACUUM INTO …bak_full_<operacja>_<RRRRMMDDGGMMSS>` w `data/backups/`).
+
+## 2026-10-01 — Naprawa kolejki stagingu (SPEC „Naprawa kolejki stagingu”)
+
+- **179 · import/synchronizacja** — `synchronizuj.ts`: timeout 120 s, 2 ponowienia co 120 s (AbortError, sieć, 5xx), blokada per dostawca;
+  `fabryka.ts`/`tolerancja-dopasowania.ts`: próg „podejrzanie mały” od ostatniego udanego importu, lista do 20 brakujących kodów;
+  nowa trasa `POST /api/dostawcy/:kod/akceptuj-mniejszy-cennik` + przycisk na karcie dostawcy; migracja `019` (tabela `supplier_feed_blocked`,
+  reset `max_item_count = last_item_count`). Powód: AbortError MO3/MO5/MO4 i trwała blokada MO4 (244 przy minimum 249).
+- **178 · import/normalizacja** — `polityka/normalizacja-pozycji.ts` (po parserze): dopiski osi, HS/LS Continentala, LingLong, DOT `NN`/`WWYY`,
+  konstrukcja, ucięte indeksy; `kluczModelu` w porównaniach; `npm run normalizuj-katalog` (backup `bak_full_normalizacja_*`). Powód: ~40 błędów
+  „Oznaczenie wskazuje inną oponę” i niespójny katalog.
+- **177 · migracja danych** — `npm run scal-karty-auto` (dry-run, `--apply` z backupem `bak_full_scal_auto_*`, `--zeruj-selly`); migracja `018`
+  (`products_scalone`, `selly_products_scalone`). Powód: 263 zgłoszenia „Brak starego kodu…” po zmianie 172 i zamrożony stan 3647 szt. na kartach AUTO.
+- **176 · import** — `fabryka.ts`/`tolerancja-dopasowania.ts`: powrót wstrzymanej karty bez porównywania DOT; pusta cecha oferty to brak informacji.
+  Powód: 48 zgłoszeń „Powrót opony wymaga sprawdzenia…”.
