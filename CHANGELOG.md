@@ -1,5 +1,14 @@
 # CHANGELOG
 
+2026-10-02 08:27
+obszar: backend
+
+pliki: docs/tickets/183-BUG-agrorami-transport/raport.md, CHANGELOG.md; kopia CHANGELOG.md: /tmp/bridge-backups-183/CHANGELOG.md.bak; wersja raportu przed uzupełnieniem: Git 80d33dd.
+
+zmiana: dopisano wynik wdrożenia 183 (8f5b9d6), udany import MO9 08:22:57, dodatkowy test 929 rekordów / 0 błędów / complete=true. API dostawcy odzyskało działanie już 08:14 przed wdrożeniem, więc nie przypisujemy ustąpienia upstream Internal server error wyłącznie zmianom Bridge.
+
+powód: rzetelny raport powdrożeniowy dla użytkowniczki.
+
 2026-10-02 08:00
 obszar: backend
 
