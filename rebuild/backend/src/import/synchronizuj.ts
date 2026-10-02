@@ -32,7 +32,7 @@ import {
   type MetaArchiwum,
   type OpcjeArchiwizacji,
 } from "./archiwum.js";
-import { parsujBufor } from "./parsuj.js";
+import { parsujAgrorami, parsujBufor } from "./parsuj.js";
 import { silnikStagingu, type SilnikStagingu, type StatystykiImportu } from "./tk.js";
 
 /**
@@ -266,7 +266,10 @@ export function synchronizujDostawce({
           status: "ok",
         })?.id ?? null;
 
-      const sparsowane = parsujBufor(dostawca.kod, bufor, nazwaPliku);
+      // MO9 ignoruje pobrany CSV: źródłem cen/stanów jest API GraphQL, nie pole magazyn w CSV.
+      const sparsowane = dostawca.kod === "MO9"
+        ? await parsujAgrorami()
+        : parsujBufor(dostawca.kod, bufor, nazwaPliku);
       if (idArchiwum) {
         oznaczWArchiwum(idArchiwum, {
           rekordy: sparsowane.rekordy.length,
