@@ -60,6 +60,10 @@ export type CechaWariantu = { feature_id?: number; name?: string; value?: string
 /** Wariant produktu Selly — cena i stan siedzą TUTAJ, nie na produkcie. */
 export type WariantSelly = {
   variant_id: number;
+  product_id?: number;
+  price?: number | null;
+  quantity?: number | null;
+  ean?: string | null;
   default?: number;
   features?: CechaWariantu[];
 };
@@ -78,7 +82,14 @@ export type CechaProduktu = { name: string; values: unknown };
  * `GET /api/products/{id}` — oryginał czyta `current.data?.data || current.data` (`sync_full.cjs:190`),
  * więc produkt może przyjść w kopercie `data` albo goły. Interesują nas tylko `features`.
  */
-export type ProduktSzczegolySelly = { product_id?: number; features?: CechaProduktu[] };
+export type ProduktSzczegolySelly = {
+  product_id?: number;
+  name?: string | null;
+  ean?: string | null;
+  price?: number | null;
+  variants?: WariantSelly[];
+  features?: CechaProduktu[];
+};
 export type OdpowiedzProduktu = ({ data?: ProduktSzczegolySelly } & ProduktSzczegolySelly) | null;
 
 /** Strona `GET /api/products` z metadanymi paginacji (`discovery.cjs:77-79`). */

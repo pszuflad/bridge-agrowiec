@@ -111,7 +111,7 @@ describe("Tor 2 — sync_full", () => {
         sklep: [
           {
             product_id: 812,
-            ean: null,
+            ean: "8903094073627",
             features: [
               { name: "Kolor", values: ["czarny"] },
               { name: "Marka", values: ["STARA MARKA"] },
@@ -138,12 +138,15 @@ describe("Tor 2 — sync_full", () => {
     });
 
     it("kanoniczny jest rekord z najbogatszymi metadanymi — drugi dostaje PUT bez cech", async () => {
+      // Wspólna karta musi reprezentować tę samą oponę, nie dwa różne rozmiary.
+      baza.sqlite.prepare("UPDATE products SET nazwa='OPONA TESTOWA' WHERE dostawca='MO9'").run();
       zmapuj336320();
       zmapuj336319();
       const { atrapa, discovery } = przygotuj({
         sklep: [
           {
             product_id: 812,
+            name: "OPONA TESTOWA",
             ean: null,
             features: [],
             warianty: [
@@ -157,9 +160,9 @@ describe("Tor 2 — sync_full", () => {
       const wynik = await syncFullForDostawca(baza.db, discovery, "MO9");
 
       expect(wynik.stats).toMatchObject({ total: 2, updated_A: 2, err: 0 });
-      // GET tylko raz — dla właściciela, czyli `MO9_336320` (więcej wypełnionych pól metadanych).
-      expect(atrapa.liczba("getProduct")).toBe(1);
-      expect(argumenty(atrapa, "getProduct")).toEqual([[812]]);
+      // Ticket184: GET tożsamości przed każdym PUT, także dla niewłaściciela metadanych.
+      expect(atrapa.liczba("getProduct")).toBe(2);
+      expect(argumenty(atrapa, "getProduct")).toEqual([[812],[812]]);
 
       const payloady = argumenty(atrapa, "updateProduct").map((a) => a[1] as PayloadPut);
       const zCechami = payloady.filter((p) => p.features !== undefined);
@@ -179,12 +182,13 @@ describe("Tor 2 — sync_full", () => {
         featureId: 5,
       });
       const { atrapa, discovery } = przygotuj({
-        sklep: [{ product_id: 812, ean: null, features: [], warianty: [{ variant_id: 4242, features: [] }] }],
+        sklep: [{ product_id: 812, ean: "8903094073627", features: [],
+          warianty: [{ variant_id: 4242, features: [magazyn("MO9",1)] }] }],
       });
 
       await syncFullForDostawca(baza.db, discovery, "MO9", { autoCreate: false });
 
-      expect(atrapa.liczba("getProduct")).toBe(0);
+      expect(atrapa.liczba("getProduct")).toBe(1);
       const payload = argumenty(atrapa, "updateProduct")[0]?.[1] as PayloadPut;
       expect(payload.features).toBeUndefined();
       expect(payload.category_id).toBeUndefined();
@@ -348,7 +352,7 @@ describe("Tor 2 — sync_full", () => {
       sklep: [
         {
           product_id: 812,
-          ean: null,
+          name: "OPONA TESTOWA",
           warianty: [
             { variant_id: 4242, features: [magazyn("MO9", 1)] },
             { variant_id: 4243, features: [magazyn("MO9", 1)] },
@@ -358,6 +362,7 @@ describe("Tor 2 — sync_full", () => {
     });
 
     it("produkt wstrzymany PO rozpoczęciu cyklu → skip, wariant nietknięty", async () => {
+      baza.sqlite.prepare("UPDATE products SET nazwa='OPONA TESTOWA' WHERE dostawca='MO9'").run();
       zmapuj336320();
       zmapuj336319();
       const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());
@@ -373,6 +378,7 @@ describe("Tor 2 — sync_full", () => {
     });
 
     it("produkt usunięty z bazy w trakcie cyklu → skip", async () => {
+      baza.sqlite.prepare("UPDATE products SET nazwa='OPONA TESTOWA' WHERE dostawca='MO9'").run();
       zmapuj336320();
       zmapuj336319();
       const { atrapa, discovery } = przygotuj(sklepZDwomaWariantami());

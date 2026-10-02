@@ -61,7 +61,8 @@ describe("Tor 1 — sync_delta", () => {
 
   const przygotuj = (opcje: OpcjeAtrapy = {}) => {
     const atrapa = stworzAtrapeSelly({
-      sklep: [{ product_id: 812, ean: null, warianty: [{ variant_id: 4242, features: [magazyn("MO9", 1)] }] }],
+      sklep: [{ product_id: 812, ean: "8903094073627", name: produktWzorcowy(0).nazwa,
+        warianty: [{ variant_id: 4242, features: [magazyn("MO9", 1)] }] }],
       ...opcje,
     });
     return { atrapa, ...stworzDiscoveryTestowe(atrapa.klient) };
@@ -236,7 +237,8 @@ describe("Tor 1 — sync_delta", () => {
 
     it("⚠ SELLY_TRYB=tylko-odczyt: PUT wariantu zablokowany, nie dociera do sklepu", async () => {
       zmapuj336320(1, 7000);
-      const atrapa = stworzAtrapeSelly();
+      const atrapa = stworzAtrapeSelly({sklep:[{product_id:812,ean:"8903094073627",
+        warianty:[{variant_id:4242,features:[magazyn("MO9",1)]}]}]});
       const { discovery } = stworzDiscoveryTestowe(opakujKlientaTrybem(atrapa.klient, "tylko-odczyt"));
 
       const wynik = await syncDelta(baza.db, discovery, "MO9");
@@ -273,7 +275,7 @@ describe("Tor 1 — sync_delta", () => {
         kodImportu: "798369",
         dostawca: "MO9",
         bridgeKod: "MO9_336319",
-        productId: 812,
+        productId: 813,
         variantId: 4243,
         featureId: 1,
         stanWyslany: 99,
@@ -284,12 +286,13 @@ describe("Tor 1 — sync_delta", () => {
       sklep: [
         {
           product_id: 812,
-          ean: null,
+          ean: "8903094073627",
           warianty: [
             { variant_id: 4242, features: [magazyn("MO9", 1)] },
-            { variant_id: 4243, features: [magazyn("MO9", 1)] },
           ],
         },
+        {product_id:813,ean:"8903094067503",name:produktWzorcowy(1).nazwa,
+          warianty:[{variant_id:4243,features:[magazyn("MO9",1)]}]},
       ],
     });
 
