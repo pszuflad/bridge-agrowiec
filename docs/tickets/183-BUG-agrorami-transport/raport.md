@@ -29,6 +29,23 @@ Synchronizacja dostawcy (automatyczna i przycisk synchronizacji) korzysta z nowe
 Stary synchroniczny `parsujPlik("MO9", ...)` pozostawiono dla charakteryzacji i ścieżki importu plikowego;
 nie jest naprawą ręcznego uploadu MO9.
 
+## Wynik wdrożenia
+
+Użytkowniczka zatwierdziła wdrożenie 02.10 o 08:18 CEST. [PR 251](https://github.com/pszuflad/bridge-agrowiec/pull/251)
+scalono do develop, [PR 252](https://github.com/pszuflad/bridge-agrowiec/pull/252) do main.
+[Deploy produkcyjny](https://github.com/pszuflad/bridge-agrowiec/actions/runs/36973145682) zakończył się sukcesem:
+release `8f5b9d6`, 08:22 CEST.
+
+API Agrorami wróciło do działania jeszcze przed wdrożeniem (udany import starym kodem o 08:14).
+Nie przypisujemy ustąpienia ich `Internal server error` wyłącznie naszej poprawce ani nie twierdzimy,
+że parametr URL był jedyną przyczyną awarii.
+Po wdrożeniu automatyczny import MO9 o 08:22:57: 929 produktów, 657 automatycznych aktualizacji,
+12 pozycji kluczowych/błędów stagingu (nie błędów połączenia).
+Dodatkowy pełny test `parsujAgrorami()` na prod: 929 rekordów, 0 błędów parsera,
+123 odrzucone przez parser, 68 przez adapter; `meta.complete=true`, `rawCount=997`, 38,5 s.
+Surowy pull: API `totalCount=1120`, po parserze 997 rekordów i 0 błędów.
+Lokalne lint/typecheck/build oraz CI zielone; 2098 testów passed, 7 skipped.
+
 ## Bezpieczeństwo
 
 Bez zmian w Selly i bez masowych poprawek danych. Nie stosujemy starego CSV jako zastępstwa API.
