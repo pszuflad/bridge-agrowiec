@@ -36,3 +36,5 @@ for (const plik of pliki) {
   cpSync(plik, cel);
 }
 console.log(`copy-parsery: skopiowano ${pliki.length} plik(ów) do dist/import/legacy/`);
+// Ticket 183: worker transportu MO9 jest poza portem legacy, ale musi trafić do release.
+cpSync(join(backendDir, "src/import/agrorami-worker.cjs"), join(backendDir, "dist/import/agrorami-worker.cjs"));

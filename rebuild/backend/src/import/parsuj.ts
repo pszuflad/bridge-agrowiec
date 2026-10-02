@@ -12,6 +12,9 @@
 // (sesje 3b/3c) — patrz docs/rebuild-roadmap.md §5.
 
 import { createRequire } from "node:module";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join } from "node:path";
@@ -55,6 +58,35 @@ interface Adapter {
 
 const dispatcher = wymagaj("./legacy/parsers/dispatcher.cjs") as Dispatcher;
 const adapter = wymagaj("./legacy/parsers/adapter.cjs") as Adapter;
+const uruchomProces = promisify(execFile);
+
+/** Ticket 183: MO9 pobierany asynchronicznie, bez blokowania panelu przez execFileSync. */
+export async function parsujAgrorami(): Promise<WynikParsowania> {
+  let stdout: string;
+  try {
+    ({ stdout } = await uruchomProces(process.execPath, [fileURLToPath(new URL("./agrorami-worker.cjs", import.meta.url))], {
+      encoding: "utf8", maxBuffer: 64 * 1024 * 1024, timeout: 600_000, env: process.env,
+    }));
+  } catch (error) {
+    // Nie kopiujemy error.message: execFile może dołączyć stdout z całym cennikiem.
+    const err = error as { stderr?: string; killed?: boolean };
+    throw new BladImportu(err.killed
+      ? "Agrorami: przekroczono limit 600 s pełnego pobierania; katalog pozostał bez zmian."
+      : err.stderr?.trim().slice(0, 600) || "Agrorami: proces pobierania zakończył się błędem; katalog pozostał bez zmian.");
+  }
+  const wynik = JSON.parse(stdout) as WynikParseraDostawcy;
+  const safety = wymagaj("./legacy/feed_safety.cjs") as {
+    attach(supplier: string, result: WynikParseraDostawcy): WynikParseraDostawcy;
+  };
+  safety.attach("MO9", wynik);
+  const poAdapterze = adapter.recordsToSurowe("MO9", wynik.records);
+  const meta = zdejmijMeta(poAdapterze);
+  return {
+    dostawca: "MO9_Agrorami", rekordy: zastosujDemoWNazwie(poAdapterze),
+    bledy: wynik.errors ?? [], odrzucone: wynik.odrzucone ?? [],
+    odrzuconePrzezAdapter: wynik.records.length - poAdapterze.length, meta,
+  };
+}
 
 export class BladImportu extends Error {
   constructor(message: string) {
