@@ -93,6 +93,7 @@ Based on the researcher report + your analysis of the request, prepare a **quest
 - **Important architectural decisions explicitly** — don't guess, ask.
 - **UI/UX decisions** — ask, even if you think you know.
 - **Edge cases** — surface them now, don't wait until they hit during implementation.
+- **Zmiana nazwy (lub innego pola produktu):** zawsze zapytaj/poinformuj o `nazwa_pamiec` i `manual_overrides` — czy produkty z wpisem w pamięci lub poprawką zachowają starą nazwę, a które wejdą do stagingu jako „zmiana nazwy" (nic nie zmienia się samo, wszystko czeka na akceptację). Zasada i mechanizm: `CLAUDE.md` (pułapka „Zmiana nazwy…"), `docs/spec-backend/wpis-168c.md`.
 - **Be concrete** — no fluff, but not low-level class names or code either; talk decisions, consequences, pros, cons.
 
 Ask the questions. The user answers. If after their answers you still don't know something **for 100% certain** — follow up. Max 2-3 Q&A rounds, then it must be crystal clear.
