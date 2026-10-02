@@ -1,5 +1,14 @@
 # CHANGELOG
 
+2026-10-02 08:00
+obszar: backend
+
+pliki: rebuild/backend/src/import/agrorami-worker.cjs (nowy), src/import/parsuj.ts, src/import/synchronizuj.ts, scripts/copy-parsery.mjs; kopie: /tmp/bridge-backups-183/{parsuj.ts,synchronizuj.ts,copy-parsery.mjs,CHANGELOG.md}.bak
+
+zmiana: ticket 183 — MO9: parametr store przeniesiony z URL do nagłówka Store; timeout API 120 s i 2 ponowienia (sieć, 429/5xx, GraphQL Internal server error); proces asynchroniczny z limitem 600 s; alert bez stack trace i sekretów. Legacy parser/mapowanie nietknięte.
+
+powód: prośba użytkowniczki 02.10; powtarzające się timeouty logowania Agrorami, po udanym logowaniu API products zwraca Internal server error. Niekompletny cennik nie jest importowany.
+
 Wpisy od najnowszego. Migracje danych: z nazwą backupu (`VACUUM INTO …bak_full_<operacja>_<RRRRMMDDGGMMSS>` w `data/backups/`).
 
 ## 2026-10-01 — Naprawa kolejki stagingu (SPEC „Naprawa kolejki stagingu”)
