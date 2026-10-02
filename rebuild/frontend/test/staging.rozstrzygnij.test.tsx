@@ -23,6 +23,7 @@ import { queryClient } from "@/lib/queryClient";
 import { server } from "./msw/server";
 import {
   handleryStagingu,
+  przegladBlednegoEan,
   przegladDopasowania,
   przegladSprzecznychWierszy,
   przegladStarejKarty,
@@ -37,6 +38,8 @@ const UZYTKOWNIK = uzytkownikZFixtura();
 const FRAZY = {
   dopasowanie: "Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę.",
   cechy: "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.",
+  blednyEan:
+    "Błędny EAN „4251438404205_D”: numer zawiera znaki inne niż cyfry. Numer nie zostanie zapisany.",
   plik: "Kilka różnych pozycji dostawcy wskazuje tę samą oponę. Wymaga sprawdzenia pliku.",
   staraKarta:
     "Brak starego kodu, ale zgodne cechy są w bieżącej ofercie pod innym oznaczeniem. Sprawdź starą kartę.",
@@ -157,6 +160,57 @@ describe("Staging — okno „Rozstrzygnij”", () => {
     });
   });
 
+  describe("Gałąź „błędny EAN od dostawcy” (`POST …/resolve-ean`) — NOWE, 2026-10-01", () => {
+    it("pozycja z błędnym EAN-em ma przycisk „Rozstrzygnij” (wcześniej tylko „Szczegóły”)", async () => {
+      zamockuj({ strona: stronaZFraza(FRAZY.blednyEan), przeglad: przegladBlednegoEan() });
+      await otworzStaging();
+      expect(await screen.findByTestId("button-rozstrzygnij-710001")).toHaveTextContent("Rozstrzygnij");
+    });
+
+    it("pokazuje numer od dostawcy i EAN karty; „Zostaw EAN z katalogu” wysyła `{decision:\"keep\"}`", async () => {
+      zamockuj({ strona: stronaZFraza(FRAZY.blednyEan), przeglad: przegladBlednegoEan() });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).getByTestId("tytul-rozstrzygniecia")).toHaveTextContent("Błędny EAN w cenniku");
+      expect(within(okno).getByTestId("galaz-ean")).toHaveTextContent("Dostawca podał EAN „4251438404205_D”");
+      expect(within(okno).getByTestId("ean-karty")).toHaveTextContent("4251438404205");
+
+      await uzytkownik.click(within(okno).getByTestId("button-ean-zostaw"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve-ean"))).toBe(true));
+      const zapis = mutacje.find((m) => m.url.includes("/resolve-ean"))!;
+      expect(zapis.url).toContain("/api/staging/710001/resolve-ean");
+      expect(zapis.body).toEqual({ decision: "keep" });
+    });
+
+    it("bez poprawnego EAN-u na karcie nie ma „Zostaw”; „Zapisz z tym EAN” czeka na wpisany numer", async () => {
+      zamockuj({
+        strona: stronaZFraza(FRAZY.blednyEan),
+        przeglad: przegladBlednegoEan({ eanKarty: null }),
+      });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).queryByTestId("button-ean-zostaw")).toBeNull();
+      expect(within(okno).getByTestId("ean-karty-brak")).toBeInTheDocument();
+      const zapisz = within(okno).getByTestId("button-ean-wpisz");
+      expect(zapisz).toBeDisabled();
+
+      await uzytkownik.type(within(okno).getByTestId("pole-ean-poprawny"), "5901234123457");
+      expect(zapisz).toBeEnabled();
+      await uzytkownik.click(zapisz);
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve-ean"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve-ean"))!.body).toEqual({
+        decision: "set",
+        ean: "5901234123457",
+      });
+    });
+  });
+
   describe("Gałąź „niejednoznaczne dopasowanie” (`POST …/resolve`)", () => {
     beforeEach(() => {
       zamockuj({ strona: stronaZFraza(FRAZY.dopasowanie), przeglad: przegladDopasowania() });
@@ -176,12 +230,139 @@ describe("Staging — okno „Rozstrzygnij”", () => {
           "Pozycja z oferty: BKT · AGRIMAX RT 765 · 480/70R34 · DOT 2124 · EAN 8903094020614",
         ),
       ).toBeInTheDocument();
-      expect(within(okno).getByTestId("opis-sprawy")).toHaveTextContent(FRAZY.dopasowanie);
+      // NOWE (2026-09-30): zamiast samego hasła importera — zdania, co jest nie tak.
+      const wyjasnienie = within(okno).getByTestId("wyjasnienie");
+      expect(wyjasnienie).toHaveTextContent("Dlaczego to zgłoszenie czeka na decyzję");
+      expect(wyjasnienie).toHaveTextContent("pasuje do kilku produktów w katalogu: MO5_A, MO5_B");
+      expect(within(okno).queryByTestId("opis-sprawy")).toBeNull();
+      // Zdanie „NIE zatwierdza…” było nieprawdą po zmianie: zapis idzie od razu do katalogu.
+      expect(within(okno).queryByText(/NIE zatwierdza/)).toBeNull();
       expect(
-        within(okno).getByText(
-          "Wybierz produkt z katalogu lub utwórz osobny wpis w stagingu. „Zapisz wybór” NIE zatwierdza produktu ani nie wysyła go do sklepu. Po wyborze sprawdź nowe zgłoszenie i dopiero wtedy osobno je zaakceptuj.",
-        ),
+        within(okno).getByText(/„Zapisz w katalogu” zapisuje od razu, bez osobnej akceptacji w stagingu/),
       ).toBeInTheDocument();
+    });
+
+    it("zmiany można zapisać BEZ przewijania do listy wyboru — przyciskiem w stopce", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      const nazwa = within(okno).getByTestId("pole-wlasne-nazwa");
+      await uzytkownik.type(nazwa, " X");
+
+      expect(within(okno).getByTestId("podpowiedz-wyboru")).toBeInTheDocument();
+      // Dwa kandydaci → tylko „osobny produkt” (wybór jednej z kart zostaje na liście radio).
+      expect(within(okno).queryByTestId("button-zapisz-istniejacy")).toBeNull();
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-nowy"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "new",
+        corrections: { nazwa: "480/70R34 BKT AGRIMAX RT 765 X" },
+      });
+    });
+
+    it("przy JEDNEJ karcie jest też „Zapisz na istniejącej karcie” — wysyła `link` z poprawkami", async () => {
+      const [pierwszy] = przegladDopasowania().candidates;
+      zamockuj({
+        strona: stronaZFraza(FRAZY.dopasowanie),
+        przeglad: { ...przegladDopasowania(), candidates: [pierwszy!] },
+      });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      const model = within(okno).getByTestId("pole-wlasne-model");
+      await uzytkownik.clear(model);
+      await uzytkownik.type(model, "AGRIMAX RT 765 NOWY");
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-istniejacy"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "link",
+        targetCode: "MO5_A",
+        corrections: { model: "AGRIMAX RT 765 NOWY" },
+      });
+    });
+
+    it("po zaznaczeniu wyboru przyciski „gdzie zapisać” znikają, a zostaje „Zapisz w katalogu”", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-nowy"));
+
+      expect(within(okno).queryByTestId("button-zapisz-nowy")).toBeNull();
+      expect(within(okno).queryByTestId("podpowiedz-wyboru")).toBeNull();
+      expect(within(okno).getByTestId("button-zapisz-wybor")).toBeEnabled();
+    });
+
+    it("bez wyjaśnienia z serwera wraca do hasła importera", async () => {
+      zamockuj({
+        strona: stronaZFraza(FRAZY.dopasowanie),
+        przeglad: { ...przegladDopasowania(), wyjasnienie: [] },
+      });
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).getByTestId("opis-sprawy")).toHaveTextContent(FRAZY.dopasowanie);
+      expect(within(okno).queryByTestId("wyjasnienie")).toBeNull();
+    });
+
+    it("każdy kandydat ma link do swojej pozycji w katalogu (szukajka po kodzie)", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).getByTestId("link-katalog-MO5_A")).toHaveAttribute(
+        "href",
+        "/katalog?szukaj=MO5_A",
+      );
+      expect(within(okno).getByTestId("link-katalog-MO5_B")).toHaveAttribute(
+        "href",
+        "/katalog?szukaj=MO5_B",
+      );
+    });
+
+    it("własne parametry: pola z propozycją importu, w żądaniu tylko to, co zmieniono", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      expect(within(okno).queryByTestId("wlasne-parametry")).toBeNull();
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      const nazwa = within(okno).getByTestId("pole-wlasne-nazwa");
+      expect(nazwa).toHaveValue("480/70R34 BKT AGRIMAX RT 765");
+
+      await uzytkownik.clear(nazwa);
+      await uzytkownik.type(nazwa, "BKT AGRIMAX RT 765 480/70R34");
+      await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-nowy"));
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-wybor"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "new",
+        corrections: { nazwa: "BKT AGRIMAX RT 765 480/70R34" },
+      });
+    });
+
+    it("otwarte, ale niezmienione własne parametry nie wysyłają `corrections`", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const okno = await otworzOkno(uzytkownik);
+
+      await uzytkownik.click(within(okno).getByTestId("button-wlasne-parametry"));
+      await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-MO5_A"));
+      await uzytkownik.click(within(okno).getByTestId("button-zapisz-wybor"));
+
+      await waitFor(() => expect(mutacje.some((m) => m.url.includes("/resolve"))).toBe(true));
+      expect(mutacje.find((m) => m.url.includes("/resolve"))!.body).toEqual({
+        action: "link",
+        targetCode: "MO5_A",
+      });
     });
 
     it("listuje kandydatów w formacie oryginału, z dopiskiem „(inny EAN)”", async () => {
@@ -204,15 +385,16 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       ).toBeInTheDocument();
     });
 
-    it("„Zapisz wybór” startuje wyłączony i wysyła `{action:\"link\", targetCode}`", async () => {
+    it("po zaznaczeniu produktu „Zapisz w katalogu” wysyła `{action:\"link\", targetCode}`", async () => {
       const uzytkownik = userEvent.setup();
       await otworzStaging();
       const okno = await otworzOkno(uzytkownik);
 
-      const zapisz = within(okno).getByTestId("button-zapisz-wybor");
-      expect(zapisz).toBeDisabled();
+      // Bez wyboru nie ma głównego przycisku — decyzję podejmuje się przyciskami w stopce.
+      expect(within(okno).queryByTestId("button-zapisz-wybor")).toBeNull();
 
       await uzytkownik.click(within(okno).getByTestId("radio-dopasowanie-MO5_A"));
+      const zapisz = within(okno).getByTestId("button-zapisz-wybor");
       expect(zapisz).toBeEnabled();
       await uzytkownik.click(zapisz);
 
@@ -265,7 +447,7 @@ describe("Staging — okno „Rozstrzygnij”", () => {
       const okno = await otworzOkno(uzytkownik);
 
       expect(within(okno).getByTestId("ostrzezenie-ean")).toHaveTextContent(
-        "EAN nadal wymaga poprawy w edycji zgłoszenia.",
+        "EAN z oferty jest błędny — wpisz poprawny w polu EAN (Popraw dane z oferty), inaczej zapis zostanie zatrzymany.",
       );
     });
   });

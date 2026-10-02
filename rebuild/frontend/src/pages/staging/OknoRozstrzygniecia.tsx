@@ -8,7 +8,9 @@
  *  1. `absenceReview` — stara karta obok pozycji z bieżącej oferty; akcja: wybór jednej karty
  *     (`POST …/choose-absence-card`). Tytuł okna się ZMIENIA.
  *  2. `matchIssue && !duplicateSource` — wybór produktu z katalogu albo osobny wpis
- *     (`POST …/resolve`).
+ *     (`POST …/resolve`). ⚠ ODSTĘPSTWO OD ORYGINAŁU (decyzja użytkowniczki, 2026-09-30, wpis
+ *     168): zapis idzie OD RAZU do katalogu (bez drugiej akceptacji w stagingu), okno tłumaczy
+ *     przyczynę (`wyjasnienie`), linkuje do pozycji w katalogu i pozwala wpisać własne parametry.
  *  3. `duplicateSource` — dwa sprzeczne wiersze w jednym pliku dostawcy. ⚠ ODSTĘPSTWO OD
  *     ORYGINAŁU (decyzja użytkownika, 2026-09-29): produkcja daje tu sam podgląd, bo
  *     sprzeczność miał wyjaśnić dostawca. Tu są dwa przyciski — „Połącz w jeden produkt"
@@ -49,9 +51,11 @@
  */
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { Link } from "wouter";
 
 import { DialogPotwierdzenia } from "@/components/DialogPotwierdzenia";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -69,13 +73,17 @@ import {
   opisOpony,
   opisStanuKandydata,
   opisStanuStarejKarty,
+  POLA_WLASNE,
   rozstrzygnijDopasowanie,
+  rozstrzygnijEan,
   rozstrzygnijSprzecznosc,
   wybierzKarte,
   ZAPASOWY_KOMUNIKAT_DECYZJI,
+  zmienioneParametry,
   type KandydatPrzegladu,
   type PrzegladZgloszenia,
   type WierszKonfliktu,
+  type WlasneParametry,
 } from "./polityka";
 
 export type WlasciwosciOknaRozstrzygniecia = {
@@ -173,6 +181,10 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
   const [wybranaKarta, ustawWybranaKarte] = useState<string | null>(null);
   /** Wybór w gałęzi dopasowania: kod kandydata albo `__new__` (`choice` w oryginale). */
   const [wybraneDopasowanie, ustawWybraneDopasowanie] = useState<string | null>(null);
+  /** Własne parametry wpisane w oknie (NOWE, 2026-09-30); `null` = sekcja zwinięta, bez zmian. */
+  const [wlasne, ustawWlasne] = useState<WlasneParametry | null>(null);
+  /** Wpisany poprawny EAN w gałęzi „błędny EAN" (NOWE, 2026-10-01). */
+  const [eanWpisany, ustawEanWpisany] = useState("");
   const [blad, ustawBlad] = useState<string | null>(null);
   const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<string | null>(null);
 
@@ -190,6 +202,8 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
   useEffect(() => {
     ustawWybranaKarte(null);
     ustawWybraneDopasowanie(null);
+    ustawWlasne(null);
+    ustawEanWpisany("");
     ustawBlad(null);
     ustawDoPotwierdzenia(null);
   }, [id]);
@@ -220,9 +234,15 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
   const kandydatDoWersji = przeglad?.candidates.find((c) => c.kod === wybranaKarta)
     ?? (zgodni.length === 1 ? zgodni[0] : undefined);
 
+  /** Sam błędny EAN od dostawcy (bez sprawy dopasowania) — NOWE, 2026-10-01. */
+  const pokazEan =
+    !!przeglad?.eanIssue && !pokazWyborKarty && !pokazDopasowanie && !przeglad?.duplicateSource;
+
   const tytul = pokazWyborKarty
     ? "Porównaj starą kartę z obecną ofertą"
-    : "Sprawdź dopasowanie opony";
+    : pokazEan
+      ? "Błędny EAN w cenniku"
+      : "Sprawdź dopasowanie opony";
 
   /**
    * Oryginał przerywa BEZ komunikatu, gdy nie ma czym wypełnić `candidateVersion`
@@ -231,6 +251,18 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
   const poprosOPotwierdzenie = (): void => {
     if (!wybranaKarta || !kandydatDoWersji) return;
     ustawDoPotwierdzenia(wybranaKarta);
+  };
+
+  /** Zapis decyzji dopasowania (`resolve`) z ewentualnymi własnymi parametrami z okna. */
+  const zapiszDopasowanie = (wybor: string): void => {
+    if (!przeglad) return;
+    zapis.mutate(() =>
+      rozstrzygnijDopasowanie(
+        przeglad.id,
+        wybor,
+        wlasne ? zmienioneParametry(wlasne, przeglad.propozycja) : {},
+      ),
+    );
   };
 
   return (
@@ -306,7 +338,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   ))}
 
                   <p
-                    className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
+                    className="my-2.5 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2"
                     data-testid="notatka-wyboru"
                   >
                     {notatkaWyboru(zgodni)}
@@ -317,40 +349,67 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   <p className="my-2.5">{przeglad.nazwa}</p>
                   <p className="my-2.5">Pozycja z oferty: {opisOpony(przeglad.incoming)}</p>
                   {/*
-                    Treść PROSTO Z SERWERA — `matchIssue` albo `powod`. Importer pisze tu
-                    zdanie dla człowieka („Kilka zgodnych produktów z tym EAN. Wybierz
-                    właściwą oponę."); UI go nie przepisuje.
+                    NOWE (2026-09-30, nie port): zdania dla człowieka liczone przez serwer
+                    (`wyjasnienie`) — co jest nie tak i jaką nazwę proponuje import. Gdy ich
+                    nie ma (stare zgłoszenie, sprzeczne wiersze), zostaje hasło z importera
+                    (`matchIssue` albo `powod`) — UI go nie przepisuje.
                   */}
-                  <p className="my-2.5" data-testid="opis-sprawy">
-                    {przeglad.matchIssue || przeglad.powod}
-                  </p>
+                  {!przeglad.duplicateSource && przeglad.wyjasnienie?.length ? (
+                    <div
+                      className="my-2.5 space-y-1 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2 text-sm"
+                      data-testid="wyjasnienie"
+                    >
+                      <strong className="block">Dlaczego to zgłoszenie czeka na decyzję:</strong>
+                      {przeglad.wyjasnienie.map((linia) => (
+                        <p key={linia} className="break-words">
+                          {linia}
+                        </p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="my-2.5" data-testid="opis-sprawy">
+                      {przeglad.matchIssue || przeglad.powod}
+                    </p>
+                  )}
                 </>
               )}
 
               {pokazDopasowanie ? (
                 <>
-                  <p className="my-2.5">
-                    Wybierz produkt z katalogu lub utwórz osobny wpis w stagingu. „Zapisz wybór”
-                    NIE zatwierdza produktu ani nie wysyła go do sklepu. Po wyborze sprawdź nowe
-                    zgłoszenie i dopiero wtedy osobno je zaakceptuj.
+                  <p className="my-2.5 text-sm text-muted-foreground">
+                    „Zapisz w katalogu” zapisuje od razu, bez osobnej akceptacji w stagingu. Błędne
+                    dane z oferty możesz poprawić poniżej.
                   </p>
                   <div>
                     {przeglad.candidates.map((c) => (
-                      <label
+                      <div
                         key={c.kod}
-                        className="my-2.5 flex cursor-pointer items-start gap-2.5 rounded-lg border p-3"
+                        className="my-2.5 rounded-lg border p-3"
+                        data-testid={`kandydat-${c.kod}`}
                       >
-                        <input
-                          type="radio"
-                          name="bs-target"
-                          className="mt-1.5 shrink-0"
-                          value={c.kod}
-                          checked={wybraneDopasowanie === c.kod}
-                          onChange={() => ustawWybraneDopasowanie(c.kod)}
-                          data-testid={`radio-dopasowanie-${c.kod}`}
-                        />
-                        <span className="break-words">{etykietaKandydata(c)}</span>
-                      </label>
+                        <label className="flex cursor-pointer items-start gap-2.5">
+                          <input
+                            type="radio"
+                            name="bs-target"
+                            className="mt-1.5 shrink-0"
+                            value={c.kod}
+                            checked={wybraneDopasowanie === c.kod}
+                            onChange={() => ustawWybraneDopasowanie(c.kod)}
+                            data-testid={`radio-dopasowanie-${c.kod}`}
+                          />
+                          <span className="break-words">{etykietaKandydata(c)}</span>
+                        </label>
+                        {c.produktId != null ? (
+                          <Link
+                            href={`/katalog?szukaj=${encodeURIComponent(c.kod)}`}
+                            onClick={zamknij}
+                            className="ml-6 mt-1 inline-block text-sm text-primary underline"
+                            data-testid={`link-katalog-${c.kod}`}
+                          >
+                            Zobacz tę pozycję w katalogu
+                          </Link>
+                        ) : null}
+                      </div>
                     ))}
                     <label className="my-2.5 flex cursor-pointer items-start gap-2.5 rounded-lg border p-3">
                       <input
@@ -365,12 +424,91 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                       <span>To osobna opona. Przygotuj ją jako nowy produkt.</span>
                     </label>
                   </div>
+
+                  {/*
+                    NOWE (2026-09-30, nie port): własne parametry. Gdy zapis z oferty jest
+                    błędny, nie da się go ani zaakceptować, ani dodać jako osobny produkt —
+                    wpisane tu wartości trafiają do katalogu zamiast tych z oferty (i zapisują
+                    się jako trwałe poprawki, żeby kolejny import ich nie cofnął).
+                  */}
+                  {wlasne == null ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="my-2"
+                      onClick={() => ustawWlasne({ ...(przeglad.propozycja ?? {}) })}
+                      data-testid="button-wlasne-parametry"
+                    >
+                      Popraw dane z oferty (nazwa, rozmiar, EAN…)
+                    </Button>
+                  ) : (
+                    <fieldset
+                      className="my-3 space-y-2 rounded-lg border p-3"
+                      data-testid="wlasne-parametry"
+                    >
+                      <legend className="px-1 text-sm font-semibold">
+                        Własne parametry — do katalogu trafią w tej postaci
+                      </legend>
+                      {POLA_WLASNE.map(([pole, etykieta]) => (
+                        <label key={pole} className="flex items-center gap-2.5 text-sm">
+                          <span className="w-20 shrink-0">{etykieta}</span>
+                          <Input
+                            value={wlasne[pole] ?? ""}
+                            onChange={(e) => ustawWlasne({ ...wlasne, [pole]: e.target.value })}
+                            data-testid={`pole-wlasne-${pole}`}
+                          />
+                        </label>
+                      ))}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => ustawWlasne(null)}
+                        data-testid="button-wlasne-anuluj"
+                      >
+                        Wróć do danych z oferty
+                      </Button>
+                    </fieldset>
+                  )}
                   {przeglad.eanIssue ? (
                     <p className="my-2.5 text-destructive" data-testid="ostrzezenie-ean">
-                      EAN nadal wymaga poprawy w edycji zgłoszenia.
+                      EAN z oferty jest błędny — wpisz poprawny w polu EAN (Popraw dane z oferty),
+                      inaczej zapis zostanie zatrzymany.
                     </p>
                   ) : null}
                 </>
+              ) : null}
+
+              {pokazEan ? (
+                <div data-testid="galaz-ean">
+                  <p className="my-2.5">
+                    Dostawca podał EAN „{przeglad.incoming.ean}”: {przeglad.eanIssue}. Dopóki nie
+                    rozstrzygniesz, pozycji nie da się zaakceptować.
+                  </p>
+                  {przeglad.eanKarty ? (
+                    <p className="my-2.5" data-testid="ean-karty">
+                      Karta w katalogu ma EAN: <strong>{przeglad.eanKarty}</strong>.
+                    </p>
+                  ) : (
+                    <p className="my-2.5 text-muted-foreground" data-testid="ean-karty-brak">
+                      Karta w katalogu nie ma poprawnego EAN-u (albo to nowa pozycja) — wpisz
+                      właściwy numer.
+                    </p>
+                  )}
+                  <label className="my-2.5 flex items-center gap-2.5 text-sm">
+                    <span className="w-28 shrink-0">Poprawny EAN</span>
+                    <Input
+                      value={eanWpisany}
+                      onChange={(e) => ustawEanWpisany(e.target.value)}
+                      inputMode="numeric"
+                      data-testid="pole-ean-poprawny"
+                    />
+                  </label>
+                  <p className="my-2 text-sm text-muted-foreground">
+                    Decyzja zapisuje pozycję od razu w katalogu i zapamiętuje, że ten numer od
+                    dostawcy jest błędny — kolejny import go nie zgłosi (chyba że dostawca zmieni
+                    numer).
+                  </p>
+                </div>
               ) : null}
 
               {przeglad.duplicateSource ? (
@@ -382,7 +520,7 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   {przeglad.sourceConflict ? (
                     <>
                       <div
-                        className="my-2.5 border-l-[3px] border-amber-600 bg-amber-50 px-3 py-2"
+                        className="my-2.5 border-l-[3px] border-amber-600 bg-amber-500/10 px-3 py-2"
                         data-testid="roznice-wierszy"
                       >
                         <strong className="block">Niezgodne dane (pierwszy → drugi wiersz):</strong>
@@ -476,17 +614,71 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
               </>
             ) : null}
 
-            {przeglad && pokazDopasowanie ? (
+            {przeglad && pokazEan ? (
+              <>
+                {przeglad.eanKarty ? (
+                  <Button
+                    variant="outline"
+                    disabled={zapis.isPending}
+                    onClick={() => zapis.mutate(() => rozstrzygnijEan(przeglad.id, "keep"))}
+                    data-testid="button-ean-zostaw"
+                  >
+                    Zostaw EAN z katalogu
+                  </Button>
+                ) : null}
+                <Button
+                  disabled={!eanWpisany.trim() || zapis.isPending}
+                  onClick={() =>
+                    zapis.mutate(() => rozstrzygnijEan(przeglad.id, "set", eanWpisany.trim()))
+                  }
+                  data-testid="button-ean-wpisz"
+                >
+                  Zapisz z tym EAN
+                </Button>
+              </>
+            ) : null}
+
+            {/*
+              NOWE (2026-10-01): gdy nic nie wybrano, decyzję podejmuje się PRZYCISKIEM W STOPCE —
+              okno jest długie i lista wyboru bywa poza ekranem, więc „zaznacz powyżej” nie
+              wystarczało (nie dało się zapisać zmian bez przewijania). Radio nadal działa.
+            */}
+            {przeglad && pokazDopasowanie && !wybraneDopasowanie ? (
+              <>
+                <p
+                  className="w-full text-right text-sm text-amber-600 dark:text-amber-400"
+                  data-testid="podpowiedz-wyboru"
+                >
+                  Gdzie zapisać? (albo zaznacz wybór wyżej)
+                </p>
+                {przeglad.candidates.length === 1 ? (
+                  <Button
+                    variant="outline"
+                    disabled={zapis.isPending}
+                    onClick={() => zapiszDopasowanie(przeglad.candidates[0]!.kod)}
+                    title={przeglad.candidates[0]!.kod}
+                    data-testid="button-zapisz-istniejacy"
+                  >
+                    Zapisz na istniejącej karcie
+                  </Button>
+                ) : null}
+                <Button
+                  disabled={zapis.isPending}
+                  onClick={() => zapiszDopasowanie(KOD_NOWEGO_PRODUKTU)}
+                  data-testid="button-zapisz-nowy"
+                >
+                  Zapisz jako osobny produkt
+                </Button>
+              </>
+            ) : null}
+
+            {przeglad && pokazDopasowanie && wybraneDopasowanie ? (
               <Button
-                disabled={!wybraneDopasowanie || zapis.isPending}
-                onClick={() =>
-                  zapis.mutate(() =>
-                    rozstrzygnijDopasowanie(przeglad.id, wybraneDopasowanie as string),
-                  )
-                }
+                disabled={zapis.isPending}
+                onClick={() => zapiszDopasowanie(wybraneDopasowanie)}
                 data-testid="button-zapisz-wybor"
               >
-                Zapisz wybór
+                Zapisz w katalogu
               </Button>
             ) : null}
           </div>

@@ -12,6 +12,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { Link } from "wouter";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +47,31 @@ function odczytajSnapshot(snapshotJson: string | null): Record<string, unknown> 
   }
 }
 
+/** Pozycja katalogu, do której prowadzi link ze szczegółów (kod + opis do pokazania). */
+type PozycjaKatalogu = { kod: string; opis: string };
+
+/**
+ * Karty katalogu, które dotyczą tej pozycji stagingu (NOWE, 2026-10-01 — nie port):
+ *  • karta o kodzie pozycji — gdy produkt już jest w katalogu (typ inny niż `nowa`) i kod nie jest
+ *    zastępczy (`…_AUTO_…` nadaje importer pozycji, której oznaczenie zajmuje inna opona),
+ *  • kandydaci z `_candidates` — karty, z którymi importer nie umiał jej jednoznacznie połączyć.
+ */
+function pozycjeKatalogu(
+  pozycja: { kod: string; typZmiany: string; nazwa: string },
+  snapshot: Record<string, unknown> | null,
+): PozycjaKatalogu[] {
+  const wynik = new Map<string, PozycjaKatalogu>();
+  if (pozycja.typZmiany !== "nowa" && !pozycja.kod.includes("_AUTO_")) {
+    wynik.set(pozycja.kod, { kod: pozycja.kod, opis: pozycja.nazwa });
+  }
+  const kandydaci = Array.isArray(snapshot?._candidates) ? snapshot._candidates : [];
+  for (const k of kandydaci as Array<{ kod?: unknown; nazwa?: unknown }>) {
+    if (typeof k?.kod !== "string" || wynik.has(k.kod)) continue;
+    wynik.set(k.kod, { kod: k.kod, opis: typeof k.nazwa === "string" ? k.nazwa : "" });
+  }
+  return [...wynik.values()];
+}
+
 export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
   const klient = useQueryClient();
   const [zmiany, ustawZmiany] = useState<Record<string, string>>({});
@@ -76,7 +102,20 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
       await klient.invalidateQueries({ queryKey: ["/api/staging"] });
       zamknij();
     },
-    onError: (e: Error) => ustawBlad(e.message),
+    onError: async (e: Error) => {
+      // NOWE (2026-10-01): 404 = pozycji nie ma już pod tym numerem. Każdy import (także
+      // automatyczny, co godzinę i po restarcie serwera) zastępuje zgłoszenia NOWYMI, więc okno
+      // otwarte przed importem trzyma numer, którego już nie ma. Surowe „404: {error…}" nic nie mówiło.
+      if (/^404\b/.test(e.message)) {
+        ustawBlad(
+          "Ta pozycja została zastąpiona nowym importem cennika, więc jej numer już nie istnieje. " +
+            "Lista została odświeżona — zamknij okno, otwórz pozycję ponownie i wpisz zmiany jeszcze raz.",
+        );
+        await klient.invalidateQueries({ queryKey: ["/api/staging"] });
+        return;
+      }
+      ustawBlad(e.message);
+    },
   });
 
   const snapshot = pozycja ? odczytajSnapshot(pozycja.snapshotJson) : null;
@@ -118,6 +157,27 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
                 </p>
               ) : null}
             </section>
+
+            {!jestWycofana && pozycjeKatalogu(pozycja, snapshot).length ? (
+              <section data-testid="szczegoly-katalog">
+                <h3 className="mb-1 text-sm font-medium">Pozycja w katalogu</h3>
+                <ul className="space-y-1 text-sm">
+                  {pozycjeKatalogu(pozycja, snapshot).map((p) => (
+                    <li key={p.kod}>
+                      <Link
+                        href={`/katalog?szukaj=${encodeURIComponent(p.kod)}`}
+                        onClick={zamknij}
+                        className="text-primary underline"
+                        data-testid={`szczegoly-link-katalog-${p.kod}`}
+                      >
+                        Zobacz w katalogu: {p.kod}
+                      </Link>
+                      {p.opis ? <span className="text-muted-foreground"> — {p.opis}</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
             <section>
               <h3 className="mb-1 text-sm font-medium">Podgląd różnic</h3>
@@ -182,28 +242,40 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
                   Zmieniona wartość zostanie zapamiętana i kolejny import jej nie nadpisze.
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-                  {POLA_EDYTOWALNE.map(({ klucz, etykieta }) => (
-                    <div key={klucz}>
-                      <Label htmlFor={`pole-${klucz}`}>{etykieta}</Label>
-                      <Input
-                        id={`pole-${klucz}`}
-                        data-testid={`input-${klucz}`}
-                        value={zmiany[klucz] ?? ""}
-                        placeholder={String(
-                          (klucz === "cenaZakupuNowa"
-                            ? pozycja.cenaZakupuNowa
-                            : klucz === "magazyn"
-                              ? pozycja.magazyn
-                              : klucz === "nazwa"
-                                ? pozycja.nazwa
-                                : snapshot?.[klucz]) ?? "",
-                        )}
-                        onChange={(e) =>
-                          ustawZmiany((poprzednie) => ({ ...poprzednie, [klucz]: e.target.value }))
-                        }
-                      />
-                    </div>
-                  ))}
+                  {POLA_EDYTOWALNE.map(({ klucz, etykieta }) => {
+                    /*
+                      NOWE (2026-10-01, nie port): pole niesie AKTUALNĄ wartość, a nie pusty tekst
+                      z szarym placeholderem — wyglądało na zablokowane i nikt nie wiedział, że da
+                      się je edytować. Do `zmiany` trafia tylko to, co różni się od aktualnej wartości.
+                    */
+                    const biezaca = String(
+                      (klucz === "cenaZakupuNowa"
+                        ? pozycja.cenaZakupuNowa
+                        : klucz === "magazyn"
+                          ? pozycja.magazyn
+                          : klucz === "nazwa"
+                            ? pozycja.nazwa
+                            : snapshot?.[klucz]) ?? "",
+                    );
+                    return (
+                      <div key={klucz}>
+                        <Label htmlFor={`pole-${klucz}`}>{etykieta}</Label>
+                        <Input
+                          id={`pole-${klucz}`}
+                          data-testid={`input-${klucz}`}
+                          value={zmiany[klucz] ?? biezaca}
+                          onChange={(e) =>
+                            ustawZmiany((poprzednie) => {
+                              const { [klucz]: _stara, ...reszta } = poprzednie;
+                              return e.target.value === biezaca
+                                ? reszta
+                                : { ...reszta, [klucz]: e.target.value };
+                            })
+                          }
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
                 <div className="mt-3">
                   <Label htmlFor="pole-uzasadnienie">Uzasadnienie (trafi do poprawki)</Label>

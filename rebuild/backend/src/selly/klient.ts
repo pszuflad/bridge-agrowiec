@@ -155,6 +155,13 @@ export type KlientSelly = {
   createVariant(productId: number, cialo: CialoWariantu): Promise<{ data?: WariantSelly } | null>;
   /** `PUT /api/products/{pid}/variants/{vid}` — Tor 1 (`sync_delta.cjs:158`) i `discovery.cjs:266`. */
   updateVariant(productId: number, variantId: number, cialo: CialoWariantu): Promise<unknown>;
+  /**
+   * `DELETE /api/products/{pid}/variants/{vid}` — ticket 180: usunięcie wariantu duplikatu karty AUTO
+   * (`scal-karty-auto -- --usun-duplikaty-selly`). Jedyny konsument: ten skrypt.
+   */
+  deleteVariant(productId: number, variantId: number): Promise<unknown>;
+  /** `DELETE /api/products/{pid}` (`client.cjs:136`) — ticket 180: gdy duplikat był jedynym wariantem produktu. */
+  deleteProduct(productId: number): Promise<unknown>;
 };
 
 /** Błąd HTTP z Selly — niesie status, żeby `api()` mogło ponowić na 401, a upsert na 400/409. */
@@ -440,5 +447,10 @@ export function stworzKlientaSelly(konfiguracja: KonfiguracjaSelly): KlientSelly
 
     updateVariant: (productId, variantId, cialo) =>
       dane("PUT", `/api/products/${productId}/variants/${variantId}`, { body: cialo }),
+
+    deleteVariant: (productId, variantId) =>
+      dane("DELETE", `/api/products/${productId}/variants/${variantId}`),
+
+    deleteProduct: (productId) => dane("DELETE", `/api/products/${productId}`),
   };
 }

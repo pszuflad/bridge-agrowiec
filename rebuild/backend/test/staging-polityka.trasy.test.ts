@@ -151,7 +151,7 @@ describe("Trasy polityki stagingu — przez HTTP", () => {
   });
 
   describe("POST /api/staging/:id/resolve", () => {
-    it("`new` oddaje NOWE id i pisze audyt", async () => {
+    it("`new` zatwierdza od razu do katalogu i pisze audyt", async () => {
       const [a] = zasiejStaging(pozycjaV2({ snapshot: { _matchIssue: "ambiguous" } }));
 
       const odp = await post(`/api/staging/${a!.id}/resolve`, { action: "new" });
@@ -159,7 +159,8 @@ describe("Trasy polityki stagingu — przez HTTP", () => {
       expect(odp.status).toBe(200);
       expect(odp.body.ok).toBe(true);
       expect(odp.body.kod).toBe("P1");
-      expect(odp.body.id, "rozstrzygnięcie zakłada nowe zgłoszenie").not.toBe(a!.id);
+      expect(odp.body.id, "nie ma już drugiego zgłoszenia do akceptacji").toBeUndefined();
+      expect(srodowisko.db.select().from(stagingItems).all()).toHaveLength(0);
 
       const wpis = audyt().find((w) => w.akcja === "rozstrzygniecie_stagingu");
       expect(wpis).toBeDefined();

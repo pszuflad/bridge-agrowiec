@@ -28,6 +28,7 @@
 // a nadpisanie żyje w `repos/products.ts` i dotyczy `PATCH /api/products/:id` (D-130.3).
 
 import type { Baza } from "../../db/index.js";
+import { znajdzParePoKodzie } from "../../ean-pary/uzupelnianie.js";
 import {
   aktualizujProdukt,
   katalogDoImportu,
@@ -53,10 +54,14 @@ import {
   usunDowodyNieobecnosci,
   zapiszDowodyNieobecnosci,
   zapiszStanOfertyDostawcy,
+  zapiszZablokowanaLiczbeOferty,
   zapiszWersjeOferty,
 } from "../../repos/staging-polityka.js";
 import { czyOpona } from "../silnik/klasyfikator.js";
 import { nazwaZDemo } from "./nazwa-demo.js";
+import { eq } from "drizzle-orm";
+
+import { manualOverrides } from "../../db/schema.js";
 import { applyDims, applyLinkMemory, applyNazwaPamiec, uchwytSqlite } from "../silnik/bridge-ext.js";
 import {
   bladZapisuNazwy,
@@ -79,11 +84,28 @@ import {
   norm,
   rawEan,
   syntheticCode,
-  validateEan,
   version,
 } from "./helpery.js";
 // Prymitywy używane wyłącznie przez importer — oryginał ich nie eksportuje.
-import { codeKey, LABEL, separateDotBatch, sourceKey } from "./podstawy.js";
+import { kanonicznyEanDostawcy, validateEanDostawcy } from "./ean-dostawcy.js";
+import { normalizujPozycje } from "./normalizacja-pozycji.js";
+import { codeKey, LABEL, sourceKey } from "./podstawy.js";
+// Odstępstwo 2026-10-01: dopasowanie po poprawkach karty i z pokrewnymi DOT (plik opisuje powód).
+import {
+  aktualizacjaDotWMiejscu,
+  dotZgodny,
+  innySymbolDostawcy,
+  kartaWlasnejPartii,
+  minimumPozycjiOferty,
+  oczyscModelZDot,
+  wstrzymujeKandydatowPrzyNiejednoznacznosci,
+  zachowajNazweKarty,
+  zgodnaBezDot,
+  osobnaPartia,
+  zastapBlednyEan,
+  zgodna,
+  type PoprawkaKarty,
+} from "./tolerancja-dopasowania.js";
 // Wspólne operacje domknięcia `install()` — też z I15.4c. `suspend()` i `protect()` mają
 // w repo JEDNĄ implementację; importer dokłada do nich wyłącznie flagę dostępności.
 import {
@@ -266,6 +288,29 @@ export function stworzPolitykeStagingu(
 
     const czas = new Date().toISOString();
     const produkty = katalogDoImportu(db, dostawca);
+    // Poprawki ręczne kart tego dostawcy — do porównania z kartą przy dopasowaniu (jedno zapytanie).
+    const poprawkiKart = new Map<string, PoprawkaKarty[]>();
+    for (const o of db
+      .select()
+      .from(manualOverrides)
+      .where(eq(manualOverrides.supplierKod, dostawca))
+      .all()) {
+      const lista = poprawkiKart.get(o.supplierProductId) ?? [];
+      lista.push(o);
+      poprawkiKart.set(o.supplierProductId, lista);
+    }
+    const zgodnaZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      zgodna(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
+    const osobnaPartiaZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      osobnaPartia(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
+    /** Ta sama pozycja (ten sam kod): zgodność cech BEZ DOT. */
+    const zgodnaBezDotZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      zgodnaBezDot(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
+    const dotZgodnyZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      dotZgodny(d, p as unknown as Pozycja, poprawkiKart.get(p.kod));
+    /** Odstępstwo 2026-10-01: inny symbol dostawcy = osobna pozycja (nie kandydat do dopasowania). */
+    const innySymbolZ = (d: Pozycja, p: ProduktWewnetrzny): boolean =>
+      innySymbolDostawcy(d, p as unknown as Pozycja, (v) => codeKey(dostawca, v));
 
     // ——— Mapy dopasowania (`:339-345`) ———
     const poKodzie = new Map<string, ProduktWewnetrzny>(
@@ -291,7 +336,7 @@ export function stworzPolitykeStagingu(
       dodajUnikalny(poKodzieDostawcy, codeKey(dostawca, p.kodDostawcy), p);
     }
     for (const p of produkty) {
-      const ev = validateEan(p.ean);
+      const ev = validateEanDostawcy(p.ean, dostawca);
       if (ev.valid && ev.value) {
         if (!poEanie.has(ev.value)) poEanie.set(ev.value, []);
         poEanie.get(ev.value)!.push(p);
@@ -341,12 +386,26 @@ export function stworzPolitykeStagingu(
       }
 
       const zrodlo: Pozycja = { ...raw };
-      const ev = validateEan(rawEan(raw), Boolean(raw.ean_lossy || raw._eanLossy));
+      // Błędny EAN z pliku, który użytkowniczka już rozstrzygnęła (poprawka `ean` z potwierdzonym
+      // numerem), nie jest zgłaszany ponownie — liczy się EAN poprawki (`ean-bledny.ts`).
+      const ev = zastapBlednyEan(
+        validateEanDostawcy(
+          kanonicznyEanDostawcy(rawEan(raw), dostawca),
+          dostawca,
+          Boolean(raw.ean_lossy || raw._eanLossy),
+        ),
+        poprawkiKart.get(String(raw.kod ?? "")),
+      );
       // `:354` — normalizacja liczy WYŁĄCZNIE rozmiary i parametry; EAN idzie ścisłą ścieżką.
       let d: Pozycja = znormalizujPozycje({
         ...(surowy as unknown as PozycjaZnormalizowana),
         ean: null,
       }).poz as unknown as Pozycja;
+      // Samo „DOT” w modelu/bieżniku to oznaczenie dostawcy w nazwie (decyzja 2026-10-01).
+      if (d.model) d.model = oczyscModelZDot(d.model) as string;
+      if (d.bieznik) d.bieznik = oczyscModelZDot(d.bieznik) as string;
+      // Etap 3 (2026-10-01): dopiski osi, utracone HS/LS, DOT dwucyfrowy/WWYY, konstrukcja, ucięte indeksy.
+      d = normalizujPozycje(d);
       Object.assign(d, {
         ean: ev.value,
         eanRaw: ev.raw,
@@ -354,6 +413,13 @@ export function stworzPolitykeStagingu(
         eanSourceStatus: ev.status,
         eanCandidates: null,
       });
+      // Ticket 180: oznaczenie partii Handlopexu zdjęte z EAN-u — surowy zapis zostaje do wglądu.
+      {
+        const surowyEan = rawEan(raw);
+        if (surowyEan != null && String(surowyEan).trim() !== ev.raw && ev.valid) {
+          d._supplierEanOriginal = String(surowyEan).trim();
+        }
+      }
 
       let kod = String(raw.kod ?? "");
       const klucz = sourceKey(dostawca, zrodlo);
@@ -365,7 +431,7 @@ export function stworzPolitykeStagingu(
       const wybranyRecznie = kodProduktuDlaWybranegoZrodla(db, dostawca, kod);
       if (wybranyRecznie) {
         const wskazany = poKodzie.get(wybranyRecznie);
-        if (wskazany && compatibility(d, wskazany).ok && norm(d.dot) === norm(wskazany.dot)) {
+        if (wskazany && zgodnaBezDotZ(d, wskazany) && dotZgodnyZ(d, wskazany)) {
           biezacy = wskazany;
           // Operator ŚWIADOMIE zostawił starą kartę. Nowy kod źródłowy opisuje jego ofertę,
           // a nie żądanie podmiany kodu i EAN-u tej karty.
@@ -387,7 +453,7 @@ export function stworzPolitykeStagingu(
       // ——— 3. Dokładny kod, z ochroną DOT (`:371-379`) ———
       if (!biezacy && kod && !syntetyczny) {
         biezacy = poKodzie.get(kod) ?? null;
-        if (biezacy && norm(d.dot) !== norm(biezacy.dot)) biezacy = null;
+        if (biezacy && !dotZgodnyZ(d, biezacy)) biezacy = null;
         const kanoniczny = poKodzieNorm.get(codeKey(dostawca, kod));
         // Zmiana samej wielkości liter w tej samej przestrzeni nazw jest stabilna.
         // Stare nieprefiksowane identyfikatory CSV (zwłaszcza MO9) NIE są identyfikatorami API.
@@ -395,19 +461,19 @@ export function stworzPolitykeStagingu(
           !biezacy &&
           kanoniczny &&
           norm(kanoniczny.kod) === norm(kod) &&
-          norm(d.dot) === norm(kanoniczny.dot)
+          dotZgodnyZ(d, kanoniczny)
         ) {
           biezacy = kanoniczny;
         }
-        if (!biezacy && kanoniczny && compatibility(d, kanoniczny).ok) biezacy = kanoniczny;
+        if (!biezacy && kanoniczny && zgodnaBezDotZ(d, kanoniczny)) biezacy = kanoniczny;
       }
 
       // ——— 4. Jednoznaczny kod dostawcy (`:380-384`) ———
       if (!biezacy && d.kodDostawcy) {
         const p = poKodzieDostawcy.get(codeKey(dostawca, d.kodDostawcy));
-        if (p && compatibility(d, p).ok && (!ev.valid || p.ean === ev.value)) {
+        if (p && zgodnaZ(d, p) && (!ev.valid || p.ean === ev.value)) {
           biezacy = p;
-        } else if (p && !separateDotBatch(d, p)) {
+        } else if (p && !osobnaPartiaZ(d, p)) {
           kandydaci = [p];
           problemDopasowania =
             "Kod dostawcy wskazuje starą kartę, ale cechy są inne lub niepełne. Sprawdź dopasowanie.";
@@ -417,13 +483,13 @@ export function stworzPolitykeStagingu(
       // ——— 5. Kod syntetyczny wskazujący istniejącą kartę (`:385-387`) ———
       if (!biezacy && syntetyczny && kod && poKodzie.has(kod)) {
         const p = poKodzie.get(kod)!;
-        if (compatibility(d, p).ok) biezacy = p;
+        if (zgodnaZ(d, p)) biezacy = p;
       }
 
       // ——— 6. EAN — WYŁĄCZNIE gdy jedna zgodna opona (`:388-395`) ———
       if (!biezacy && ev.valid && ev.value) {
-        kandydaci = poEanie.get(ev.value) ?? [];
-        const zgodni = kandydaci.filter((p) => compatibility(d, p).ok);
+        kandydaci = (poEanie.get(ev.value) ?? []).filter((p) => !innySymbolZ(d, p));
+        const zgodni = kandydaci.filter((p) => zgodnaZ(d, p));
         if (
           zgodni.length === 1 &&
           !wejscie.some(
@@ -431,7 +497,7 @@ export function stworzPolitykeStagingu(
           )
         ) {
           biezacy = zgodni[0]!;
-        } else if (kandydaci.length && !kandydaci.every((p) => separateDotBatch(d, p))) {
+        } else if (kandydaci.length && !kandydaci.every((p) => osobnaPartiaZ(d, p))) {
           problemDopasowania =
             zgodni.length > 1
               ? "Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę."
@@ -441,8 +507,18 @@ export function stworzPolitykeStagingu(
 
       // ——— 7. Zgodne cechy pod innym kodem — NIE auto-dopasowuje (`:396-402`) ———
       if (!biezacy && !problemDopasowania) {
-        const zgodniPoCechach = produkty.filter((p) => compatibility(d, p).ok);
-        if (zgodniPoCechach.length) {
+        const zgodniPoCechach = produkty.filter((p) => zgodnaZ(d, p) && !innySymbolZ(d, p));
+        // Odstępstwo 2026-10-01: karta założona przez system dla TEGO wiersza (osobna partia DOT
+        // z kodem `…_AUTO_…`) to dopasowanie, nie pytanie. EAN nie przeszkadza, gdy wiersz go nie
+        // ma, jest ten sam albo karta ma wygenerowany (999…) — prawdziwy EAN z cennika go zastąpi.
+        const wlasne = zgodniPoCechach.filter(
+          (p) =>
+            kartaWlasnejPartii(d, p as unknown as Pozycja, (v) => codeKey(dostawca, v)) &&
+            (!ev.value || ev.value === p.ean || znajdzParePoKodzie(db, p.kod)?.ean === p.ean),
+        );
+        if (wlasne.length === 1 && zgodniPoCechach.length === 1) {
+          biezacy = wlasne[0]!;
+        } else if (zgodniPoCechach.length) {
           kandydaci = zgodniPoCechach;
           problemDopasowania =
             "Podobna opona jest już w katalogu, ale ma inny kod lub EAN. Sprawdź dopasowanie.";
@@ -454,7 +530,7 @@ export function stworzPolitykeStagingu(
         const istniejacy = poKodzie.get(kod)!;
         kandydaci = [istniejacy];
         kod = syntheticCode(dostawca, d);
-        if (!separateDotBatch(d, istniejacy)) {
+        if (!osobnaPartiaZ(d, istniejacy)) {
           problemDopasowania = "Oznaczenie wskazuje inną oponę. Sprawdź dopasowanie.";
         }
       }
@@ -470,6 +546,8 @@ export function stworzPolitykeStagingu(
         // Odstępstwo od produkcji (2026-09-30): „DEMO" na końcu nazwy ma ostatnie słowo —
         // także wobec pamięci nazw i poprawek Marty (`manual_overrides`).
         d.nazwa = nazwaZDemo(d.nazwa as string | null, d.kodDostawcy as string | null);
+        // Gdy nazwę karty od nazwy z cennika różni tylko „DOT” (i `×`/`x`), zostaje nazwa karty.
+        d.nazwa = zachowajNazweKarty(d.nazwa, biezacy.nazwa) as string;
       }
 
       // Kandydat w trakcie przeglądu NIE może zostać uznany za wycofany (`:417`).
@@ -477,6 +555,21 @@ export function stworzPolitykeStagingu(
 
       d.kod = kod;
       if (!d.ean && biezacy?.ean) d.ean = biezacy.ean;
+      // Ticket 168 (NOWA logika): pusty EAN uzupełniany z tabeli par `kod`↔EAN, żeby kolejny import
+      // nie pokazywał różnicy „EAN → pusty" i nie gubił wygenerowanego numeru (także po `clear`).
+      if (!d.ean) {
+        const para = znajdzParePoKodzie(db, kod);
+        // Para, której EAN nosi już inny produkt, nie jest wstawiana — akceptacja nada nowy numer.
+        if (para && !produkty.some((p) => p.kod !== kod && p.ean === para.ean)) {
+          Object.assign(d, {
+            ean: para.ean,
+            eanRaw: para.ean,
+            eanIsValid: 1,
+            eanSourceStatus: "ok",
+            eanCandidates: null,
+          });
+        }
+      }
 
       const bledy: string[] = [];
       if (ev.error) {
@@ -620,11 +713,13 @@ export function stworzPolitykeStagingu(
     // ——— Bezpieczeństwo źródła: progi (`:455-461`) ———
     const stanOferty = stanOfertyDostawcy(db, dostawca);
     const liczbaPozycji = przygotowane.size;
-    const minimum = stanOferty?.maxItemCount
-      ? Math.max(1, Math.ceil(stanOferty.maxItemCount * 0.8))
-      : 1;
+    const minimum = minimumPozycjiOferty(stanOferty);
     if (liczbaPozycji < minimum) {
-      throw new CennikPodejrzanieMalyBlad(liczbaPozycji, minimum);
+      // Do alertu: ile i jakich kart zniknęło z pliku. Liczba zapisana, żeby „zaakceptuj mniejszy cennik”
+      // wiedziało, do czego przestawić punkt odniesienia (ticket 179).
+      const brakujace = produkty.filter((p) => !zaobserwowane.has(p.id)).map((p) => String(p.kod));
+      zapiszZablokowanaLiczbeOferty(db, dostawca, liczbaPozycji);
+      throw new CennikPodejrzanieMalyBlad(liczbaPozycji, minimum, brakujace.slice(0, 20), brakujace.length);
     }
     if (
       stanOferty &&
@@ -680,19 +775,21 @@ export function stworzPolitykeStagingu(
       for (const pozycja of przygotowane.values()) {
         const { kod, biezacy, d, bledy, zmiany } = pozycja;
 
-        // Niejednoznaczne dopasowanie wstrzymuje kandydatów (`:481-486`).
-        if (kompletna && !opcje.reconcileOnly && d._matchIssue) {
+        // Niejednoznaczne dopasowanie wstrzymywało kandydatów (`:481-486`); od 2026-10-01 NIE — pozycja
+        // czekająca na decyzję nie zeruje stanu karty (`wstrzymujeKandydatowPrzyNiejednoznacznosci`).
+        if (wstrzymujeKandydatowPrzyNiejednoznacznosci() && kompletna && !opcje.reconcileOnly && d._matchIssue) {
           for (const c of (d._candidates as { kod: string }[]) ?? []) {
             const p = poKodzie.get(c.kod);
             if (p) wstrzymaj(p, czas, odcisk, "Niejednoznaczne dopasowanie w aktualnym cenniku");
           }
         }
 
-        // Powrót wstrzymanej karty wymaga potwierdzenia cech (`:487-489`).
+        // Powrót wstrzymanej karty wymaga potwierdzenia cech (`:487-489`). To ta sama pozycja (ten sam
+        // kod), więc DOT nie jest kryterium — nowy DOT zapisuje się niżej po cichu (odstępstwo 2026-10-01).
         if (
           biezacy &&
           czyAutomatycznieWstrzymany(db, dostawca, biezacy.kod) &&
-          !compatibility(d, biezacy as unknown as Pozycja).ok &&
+          !zgodnaBezDotZ(d, biezacy) &&
           !zmiany.length &&
           !bledy.length
         ) {
@@ -719,7 +816,15 @@ export function stworzPolitykeStagingu(
             patch[k] = d[k];
           }
         }
-        if (validateEan(d.ean).valid && d.ean !== biezacy.ean) {
+        // Odstępstwo 2026-10-01: DOT zmienia się w miejscu, bez akceptacji (nie jest kryterium dopasowania).
+        if (
+          aktualizacjaDotWMiejscu() &&
+          String(d.dot ?? "").trim() &&
+          norm(d.dot) !== norm((biezacy as unknown as Pozycja).dot)
+        ) {
+          patch.dot = d.dot;
+        }
+        if (validateEanDostawcy(d.ean, dostawca).valid && d.ean !== biezacy.ean) {
           Object.assign(patch, {
             ean: d.ean,
             eanRaw: d.eanRaw,

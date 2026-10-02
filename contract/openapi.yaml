@@ -20738,8 +20738,11 @@ paths:
       description: >-
         Ręczne rozstrzygnięcie niejednoznacznego dopasowania. `action: "link"` łączy
         zgłoszenie z produktem z listy kandydatów (`targetCode`), `action: "new"` zakłada
-        osobny produkt. Rozstrzygnięcie NIE edytuje zgłoszenia — kasuje je i zakłada nowe,
-        więc `id` w odpowiedzi jest inne niż w ścieżce. Port `staging_policy.cjs:657-663`.
+        osobny produkt. Port `staging_policy.cjs:657-663`, z DWOMA ODSTĘPSTWAMI (decyzja
+        użytkowniczki, 2026-09-30): (1) decyzja od razu ZATWIERDZA wynik do katalogu w jednej
+        transakcji — nie zostaje nowe zgłoszenie do drugiej akceptacji, a odpowiedź nie niesie
+        `id`; (2) `corrections` pozwala wpisać własne wartości pól — trafiają do katalogu
+        i zapisują się jako trwałe poprawki (`manual_overrides`).
       parameters:
         - { name: id, in: path, required: true, schema: { type: string } }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
@@ -20754,20 +20757,71 @@ paths:
                 targetCode:
                   type: string
                   description: "Wymagane dla `action: link` — kod z listy kandydatów tego dostawcy."
+                corrections:
+                  type: object
+                  description: >-
+                    Własne, poprawione wartości (tylko pola do zmiany; puste pomijane).
+                    Nieudana akceptacja (np. błędny EAN) cofa całość — 409.
+                  properties:
+                    nazwa: { type: string }
+                    marka: { type: string }
+                    model: { type: string }
+                    rozmiar: { type: string }
+                    dot: { type: string }
+                    ean: { type: string }
       responses:
         "200":
-          description: "OK — `id` NOWEGO zgłoszenia"
+          description: "OK — produkt jest już w katalogu"
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   ok: { type: boolean }
-                  id: { type: integer }
-                  kod: { type: string }
+                  kod: { type: string, description: "Kod produktu w katalogu." }
         "401": { description: "Nieautoryzowany" }
         "409":
           description: "Blokada polityki. Ciało niesie `message`, NIE `error`."
+          content:
+            application/json:
+              schema: { type: object, properties: { message: { type: string } } }
+  /api/staging/{id}/resolve-ean:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/{id}/resolve-ean"
+      description: >-
+        TRASA SPOZA ORYGINAŁU (decyzja użytkowniczki, 2026-10-01). Rozstrzygnięcie pozycji z BŁĘDNYM
+        EAN-em od dostawcy (znaki spoza cyfr, zła cyfra kontrolna), która blokuje akceptację.
+        `decision: "keep"` zostawia poprawny EAN z karty w katalogu (także wygenerowany 999…),
+        `decision: "set"` wpisuje `ean`. Decyzja w jednej transakcji ZATWIERDZA pozycję do katalogu
+        i zapisuje poprawkę `ean` z `acknowledgedSourceValue` = błędny numer z pliku — kolejny import
+        z tym samym numerem nie zgłasza go ponownie (zmiana numeru przez dostawcę przywraca pytanie).
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decision: { type: string, enum: [keep, set] }
+                ean: { type: string, description: "Wymagane dla `decision: set` — poprawny EAN." }
+      responses:
+        "200":
+          description: "OK — pozycja jest już w katalogu"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  kod: { type: string }
+                  ean: { type: string }
+        "401": { description: "Nieautoryzowany" }
+        "409":
+          description: "Odmowa (karta bez poprawnego EAN dla `keep`, nieprawidłowy `ean`, pozycja bez błędnego EAN). Ciało niesie `message`."
           content:
             application/json:
               schema: { type: object, properties: { message: { type: string } } }
@@ -20801,6 +20855,18 @@ paths:
                   duplicateSource: { type: boolean }
                   sourceConflict: { type: object, nullable: true }
                   eanIssue: { type: string, nullable: true }
+                  eanKarty:
+                    type: string
+                    nullable: true
+                    description: "NOWE: EAN karty w katalogu — do decyzji „zostaw EAN z katalogu”."
+                  wyjasnienie:
+                    type: array
+                    items: { type: string }
+                    description: "NOWE (2026-09-30): zdania dla człowieka — co jest nie tak i jaką nazwę proponuje import."
+                  propozycja:
+                    type: object
+                    description: "NOWE: wartości z importu do podstawienia w polach ręcznej poprawki (nazwa, marka, model, rozmiar, dot, ean)."
+                    additionalProperties: { type: string }
                   incoming:
                     type: object
                     properties:
@@ -20821,6 +20887,7 @@ paths:
                         zgodność DOT, ten sam warunek, który stosuje `choose-absence-card`.
                       properties:
                         kod: { type: string }
+                        produktId: { type: integer, nullable: true, description: "NOWE: id karty w katalogu (do linku)." }
                         catalogStan: { type: integer, nullable: true }
                         status: { type: string, nullable: true }
                         catalogDot: { type: string, nullable: true }

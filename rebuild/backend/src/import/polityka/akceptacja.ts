@@ -22,7 +22,8 @@ import { zatwierdzPozycjeStagingu } from "../akceptacja.js";
 import { nadajKodImportu } from "./kod-importu.js";
 import { uchwytSqlite } from "../silnik/bridge-ext.js";
 import { sprawdzAkceptacje } from "./blokady.js";
-import { odmow, validateEan } from "./helpery.js";
+import { odmow } from "./helpery.js";
+import { validateEanDostawcy } from "./ean-dostawcy.js";
 import { chron, usunZgloszeniaPary } from "./kontekst.js";
 
 /**
@@ -33,7 +34,16 @@ import { chron, usunZgloszeniaPary } from "./kontekst.js";
  * (`deminified/backend-index.cjs:48544`), więc pierwsza zablokowana pozycja przerywa całe
  * żądanie, a pozycje zatwierdzone wcześniej ZOSTAJĄ zatwierdzone. Odtworzone 1:1.
  */
-export function zatwierdzPozycjeZPolityka(db: Baza, id: number, uzytkownikId: number): void {
+export function zatwierdzPozycjeZPolityka(
+  db: Baza,
+  id: number,
+  uzytkownikId: number,
+  /**
+   * Odstępstwo 2026-10-01: rozstrzygnięcie człowieka NIE zatrzymuje produktu ani nie gubi stanu —
+   * wstrzymanie bez znacznika automatycznego (ręczne) też zostaje zdjęte, a stan z oferty trafia na kartę.
+   */
+  rozstrzygniecieRecznie = false,
+): void {
   uchwytSqlite(db).transaction(() => {
     const { row, snap, current } = sprawdzAkceptacje(db, id);
 
@@ -49,14 +59,14 @@ export function zatwierdzPozycjeZPolityka(db: Baza, id: number, uzytkownikId: nu
 
     // Druga walidacja EAN-u — tym razem po nałożeniu ręcznych poprawek. Poprawka mogła
     // wprowadzić zły numer i wtedy zapis staje (`:206-207`).
-    const ev = validateEan(safe.ean);
+    const ev = validateEanDostawcy(safe.ean, row.dostawca);
     if (ev.error) odmow("Zapis został zatrzymany: nieprawidłowy EAN.");
 
     // Pusty EAN dziedziczy po karcie w katalogu — cennik bez EAN-u nie kasuje tego,
     // co już wiemy o produkcie (`:208`).
     if (!ev.value && current?.ean) safe.ean = current.ean;
 
-    const sv = validateEan(safe.ean);
+    const sv = validateEanDostawcy(safe.ean, row.dostawca);
     safe.ean = sv.value;
     safe.eanIsValid = sv.valid === null ? null : Number(sv.valid);
     safe.eanRaw = sv.raw;
@@ -75,7 +85,7 @@ export function zatwierdzPozycjeZPolityka(db: Baza, id: number, uzytkownikId: nu
       eanSourceStatus: sv.status,
     });
 
-    zatwierdzPozycjeStagingu(db, id, uzytkownikId, nadajKodImportu);
+    zatwierdzPozycjeStagingu(db, id, uzytkownikId, nadajKodImportu, true);
 
     // ——— Ochrona ręcznego wstrzymania (#104, `:216-222`) ———
     // Produkt wstrzymany AUTOMATYCZNIE wraca do gry: znika znacznik, a świeża akceptacja
@@ -84,7 +94,7 @@ export function zatwierdzPozycjeZPolityka(db: Baza, id: number, uzytkownikId: nu
     if (current?.status === "wstrzymany") {
       if (czyAutomatycznieWstrzymany(db, row.dostawca, row.kod)) {
         usunAutomatyczneWstrzymanie(db, row.dostawca, row.kod);
-      } else {
+      } else if (!rozstrzygniecieRecznie) {
         aktualizujProdukt(db, current.id, { status: "wstrzymany", stan: 0 });
       }
     }

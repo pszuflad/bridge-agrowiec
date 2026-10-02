@@ -1,0 +1,1 @@
+Ticket 182 — `parsujPlik` gubił meta kompletności cennika po `zastosujDemoWNazwie` (od 821940b, 30.09): każdy import był „niekompletny”, więc karty wstrzymane automatycznie nie wracały, a nieobecności nie były liczone. Meta zdejmowana teraz przed `.map()`. Test regresji w `charakteryzacja.test.ts` §5. Raport: `docs/tickets/182-BUG-meta-kompletnosci-cennika/raport.md`.

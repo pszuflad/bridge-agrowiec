@@ -542,6 +542,17 @@ export const supplierFeedState = sqliteTable("supplier_feed_state", {
 	lastCountedAt: text("last_counted_at"),
 });
 
+/**
+ * Migracja 019 (ticket 179): liczba pozycji z ostatniej ZABLOKOWANEJ próby („cennik podejrzanie mały”) —
+ * z niej korzysta ręczne „zaakceptuj mniejszy cennik”. Osobna tabela, bo DDL `supplier_feed_state` jest pilnowany
+ * znak w znak względem produkcji (`test/db.migracja-012.test.ts`). Brak wiersza = brak zablokowanej próby.
+ */
+export const supplierFeedBlocked = sqliteTable("supplier_feed_blocked", {
+	supplier: text().primaryKey(),
+	itemCount: integer("item_count").notNull(),
+	blockedAt: text("blocked_at").notNull(),
+});
+
 /** Odciski kompletnych ofert — wycofanie wymaga trzech RÓŻNYCH ofert (backlog #103). */
 export const supplierFeedVersions = sqliteTable("supplier_feed_versions", {
 	supplier: text().notNull(),
@@ -595,3 +606,18 @@ export const stagingAbsenceDecisions = sqliteTable("staging_absence_decisions", 
 		.on(table.supplier, table.selectedSourceCode)
 		.where(sql`selected_source_code IS NOT NULL`),
 ]);
+
+// Ticket 168 (NOWA logika, nie port; migracja 017) — pary `products.kod` ↔ EAN wygenerowany
+// regułą uzupełniania pustych EAN-ów (prefiks 999). `numer` to licznik, z którego liczony jest EAN.
+export const eanPary = sqliteTable("ean_pary", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	kod: text().notNull(),
+	ean: text().notNull(),
+	numer: integer().notNull(),
+	dostawca: text(),
+	kodDostawcy: text("kod_dostawcy"),
+	status: text().default("aktywny").notNull(),
+	utworzono: text().notNull(),
+	zastapiono: text(),
+	zastapionyPrzez: text("zastapiony_przez"),
+});

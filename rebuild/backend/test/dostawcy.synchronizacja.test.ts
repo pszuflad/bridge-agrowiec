@@ -187,7 +187,8 @@ describe("synchronizacja dostawcy spod URL (3f-2)", () => {
       expect(lista[0]!.poziom).toBe("ostrzezenie");
       expect(lista[0]!.status).toBe("nowy");
       expect(lista[0]!.dostawca).toBe("MO1");
-      expect(String(lista[0]!.opis)).toBe("MO1 (Bohnenkamp): HTTP 500");
+      // 5xx jest ponawiane (Etap 4a): alert dopiero po 3. nieudanej próbie, z liczbą prób.
+      expect(String(lista[0]!.opis)).toBe("MO1 (Bohnenkamp): HTTP 500 (próby: 3, odstęp 0 s, limit 120 s)");
 
       const wiersz = dostawca();
       expect(wiersz.status).toBe("blad");

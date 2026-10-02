@@ -54,9 +54,13 @@ describe("zastosujMigracje", () => {
     "014_waga_auto_uzupelniona.sql",
     "015_waga_szacowana.sql",
     "016_mo7_stan_zero.sql",
+    "017_ean_pary.sql",
+    "018_scalone_karty_auto.sql",
+    "019_feed_state_zablokowana_liczba.sql",
+    "020_scalone_duplikaty_do_usuniecia.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 35 tabel i 21 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 39 tabel i 22 indeksy", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -70,7 +74,11 @@ describe("zastosujMigracje", () => {
     // (`staging_one_current_product` na `staging_items`, częściowy `staging_absence_one_choice`): +6 tabel, +2.
     // 013 (I15.6) zostawia starą `selly_products` jako `selly_products_old` (z jej indeksem
     // `_kod`), zabiera jej `_status` i zakłada nową tabelę z sześcioma indeksami: +1 tabela, +5.
-    expect(policzTabele(sqlite)).toBe(35);
+    // 017 (ticket 168) dokłada tabelę `ean_pary` — same UNIQUE (autoindeksy SQLite liczone nie są): +1 tabela, +0.
+    // 018 (ticket 177) dokłada `products_scalone` (z indeksem) i `selly_products_scalone`: +2 tabele, +1.
+    // 019 (ticket 179) dokłada `supplier_feed_blocked` (klucz główny, bez osobnego indeksu): +1 tabela, +0.
+    // 020 (ticket 180) dokłada dwie kolumny `selly_products_scalone` — bilans tabel i indeksów bez zmian.
+    expect(policzTabele(sqlite)).toBe(39);
 
     const indeksy = (
       sqlite
@@ -79,7 +87,7 @@ describe("zastosujMigracje", () => {
         )
         .get() as { c: number }
     ).c;
-    expect(indeksy).toBe(21);
+    expect(indeksy).toBe(22);
   });
 
   it("baza działa w trybie WAL (jak produkcja)", () => {
@@ -100,7 +108,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(35);
+    expect(policzTabele(sqlite)).toBe(39);
   });
 
   /**

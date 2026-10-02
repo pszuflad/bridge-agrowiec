@@ -171,7 +171,7 @@ czekają na akceptację — nic nie zmienia się samo. Zgłoś to w pytaniach do
 `feature.md`) razem z liczbą dotkniętych pozycji, jeśli da się ją zmierzyć na kopii bazy. Nową
 regułę nazwy nakładaj **na końcu łańcucha** i **poza `src/import/legacy/`** (kopia bajt-w-bajt
 oryginału, pilnuje jej test integralności). Mechanizm, dowody i otwarte ryzyko akceptacji:
-`docs/spec-backend/wpis-168.md`, `docs/rebuild-backlog/wpis-168.md` (#168.1). Ten sam błąd
+`docs/spec-backend/wpis-168b.md`, `docs/rebuild-backlog/wpis-168.md` (#168.1). Ten sam błąd
 pojawił się przy regule „DEMO": bez ostatniego kroku pamięć nazw i poprawki z ticketu 164
 zdejmowały dopisek, a zauważyło to dopiero pytanie użytkownika, nie testy.
 

@@ -41,6 +41,8 @@ export const METODY_ZAPISUJACE = [
   "setProductMultiCat",
   "createVariant",
   "updateVariant",
+  "deleteVariant",
+  "deleteProduct",
 ] as const satisfies readonly (keyof KlientSelly)[];
 
 /** Metody wyłącznie odczytowe — przechodzą w trybie `tylko-odczyt`. */

@@ -89,10 +89,14 @@ export function handleryStagingu(opcje: OpcjeHandlerowStagingu = {}) {
       await zapiszMutacje(request);
       return HttpResponse.json({ ok: true, kody: ["520196", "520197"] });
     }),
+    http.post("*/api/staging/:id/resolve-ean", async ({ request }) => {
+      await zapiszMutacje(request);
+      return HttpResponse.json({ ok: true, kod: "MO5_OZRR420520858LOX2", ean: "4251438404205" });
+    }),
     http.post("*/api/staging/:id/resolve", async ({ request }) => {
       await zapiszMutacje(request);
       if (bladRozstrzygniecia) return odpowiedzBledu(bladRozstrzygniecia);
-      return HttpResponse.json({ ok: true, id: 999_001, kod: "MO5_NOWY" });
+      return HttpResponse.json({ ok: true, kod: "MO5_NOWY" });
     }),
     http.post("*/api/staging/:id/choose-absence-card", async ({ request }) => {
       await zapiszMutacje(request);
@@ -169,6 +173,24 @@ function szkieletPrzegladu(): PrzegladZgloszenia {
 }
 
 /**
+ * Pozycja z BŁĘDNYM EAN-em od dostawcy (bez sprawy dopasowania) — `resolve-ean` (NOWE, 2026-10-01).
+ * Domyślnie karta w katalogu ma poprawny EAN (`eanKarty`).
+ */
+export function przegladBlednegoEan(
+  nadpisania: Partial<PrzegladZgloszenia> = {},
+): PrzegladZgloszenia {
+  const baza = szkieletPrzegladu();
+  return {
+    ...baza,
+    powod: "Błędny EAN „4251438404205_D”: numer zawiera znaki inne niż cyfry. Numer nie zostanie zapisany.",
+    eanIssue: "numer zawiera znaki inne niż cyfry",
+    eanKarty: "4251438404205",
+    incoming: { ...baza.incoming, ean: "4251438404205_D" },
+    ...nadpisania,
+  };
+}
+
+/**
  * Gałąź „niejednoznaczne dopasowanie" — przycisk „Rozstrzygnij", akcja `POST …/resolve`.
  * `matchIssue` dosłownie z importera (`import/polityka/fabryka.ts:436`).
  */
@@ -179,9 +201,22 @@ export function przegladDopasowania(
     ...szkieletPrzegladu(),
     powod: "Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę.",
     matchIssue: "Kilka zgodnych produktów z tym EAN. Wybierz właściwą oponę.",
+    wyjasnienie: [
+      "EAN 8903094020614 pasuje do kilku produktów w katalogu: MO5_A, MO5_B. Nie wiadomo, do którego należy ta pozycja.",
+      "Nazwa z importu: 480/70R34 BKT AGRIMAX RT 765.",
+    ],
+    propozycja: {
+      nazwa: "480/70R34 BKT AGRIMAX RT 765",
+      marka: "BKT",
+      model: "AGRIMAX RT 765",
+      rozmiar: "480/70R34",
+      dot: "2124",
+      ean: "8903094020614",
+    },
     candidates: [
       {
         kod: "MO5_A",
+        produktId: 11,
         nazwa: "480/70R34 BKT AGRIMAX RT 765",
         rozmiar: "480/70R34",
         dot: "2124",
@@ -196,6 +231,7 @@ export function przegladDopasowania(
       },
       {
         kod: "MO5_B",
+        produktId: 12,
         nazwa: "480/70R34 BKT AGRIMAX RT 765 (inna partia)",
         rozmiar: "480/70R34",
         dot: "1923",
