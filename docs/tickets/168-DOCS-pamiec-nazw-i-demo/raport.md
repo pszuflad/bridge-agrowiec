@@ -4,7 +4,7 @@ Ticket dokumentacyjny, bez zmian w kodzie. Zapisuje ustalenia z sesji o regule �
 (PR #205, #210; na `main` w #206 i #211).
 
 ## Co dodano
-- `docs/spec-backend/wpis-168b.md` — kolejność nakładania nazwy przy imporcie i przy akceptacji,
+- `docs/spec-backend/wpis-168c.md` — kolejność nakładania nazwy przy imporcie i przy akceptacji,
   pochodzenie wpisów `nazwa_pamiec`, konsekwencje dla zmian dotyczących nazwy.
 - `docs/rebuild-backlog/wpis-168.md` — #168.1 (⬜ do decyzji: akceptacja nakłada `nazwa_pamiec`
   ponownie, a `manual_overrides` nie; ryzyko dla 174 poprawek z ticketu 164) i #168.2

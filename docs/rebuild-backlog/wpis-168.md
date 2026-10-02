@@ -18,7 +18,7 @@ Na imporcie poprawka wygrywa z pamięcią, więc w stagingu widać dobrą nazwę
 pamięć nazw działa jeszcze raz, a poprawki nie** — jeśli grupa ma wpis w `nazwa_pamiec`,
 do katalogu może trafić znów nazwa sklejona. Kolejny import znów pokaże zmianę w stagingu.
 
-**Szczegół techniczny (dla rebuildu).** Kolejność i dowody: `docs/spec-backend/wpis-168b.md`.
+**Szczegół techniczny (dla rebuildu).** Kolejność i dowody: `docs/spec-backend/wpis-168c.md`.
 Zachowanie akceptacji jest wiernym portem oryginału (scenariusz charakteryzacji
 `pamiec-nazwy-nadpisuje-nazwe-z-pliku`), więc to NIE jest błąd portu, tylko luka w połączeniu
 mechanizmów: pamięć (po `kod_importu`) i poprawki (po produkcie).
