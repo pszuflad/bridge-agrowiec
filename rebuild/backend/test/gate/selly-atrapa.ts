@@ -63,6 +63,8 @@ export type WywolanieSelly = { metoda: string; argumenty: unknown[] };
  */
 export type ProduktSklepu = {
   product_id: number;
+  name?: string | null;
+  price?: number | null;
   product_code?: string | null;
   provider_code?: string | null;
   ean?: string | null;
@@ -219,6 +221,10 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
       return {
         data: {
           product_id: produkt.product_id,
+          name: produkt.name,
+          ean: produkt.ean,
+          price: produkt.price,
+          variants: structuredClone(produkt.warianty),
           features: structuredClone(produkt.features ?? []),
         },
       };
