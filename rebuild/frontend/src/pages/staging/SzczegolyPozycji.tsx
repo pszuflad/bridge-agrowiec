@@ -78,10 +78,27 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
   const [uzasadnienie, ustawUzasadnienie] = useState("");
   const [blad, ustawBlad] = useState<string | null>(null);
 
-  const { data: pozycja, isLoading } = useQuery<PozycjaStaginguSzczegol | null>({
+  const {
+    data: pozycja,
+    isLoading,
+    error: bladPobrania,
+  } = useQuery<PozycjaStaginguSzczegol | null>({
     queryKey: ["/api/staging", String(id)],
     enabled: id != null,
   });
+
+  // NOWE (2026-10-02): pozycji nie udało się pobrać — najczęściej 404, bo każdy import (także
+  // automatyczny) zastępuje zgłoszenia NOWYMI, więc wiersz na liście trzyma numer, którego już nie
+  // ma. Wcześniej okno zostawało puste (sam tytuł „Pozycja stagingu” i „Zamknij”). Odświeżamy listę
+  // (bez szczegółów tej pozycji, żeby nie wołać jej w kółko), żeby po zamknięciu była aktualna.
+  const brakPozycji = id != null && !isLoading && !pozycja;
+  useEffect(() => {
+    if (!brakPozycji) return;
+    void klient.invalidateQueries({
+      queryKey: ["/api/staging"],
+      predicate: (q) => !(q.queryKey[0] === "/api/staging" && q.queryKey[1] === String(id)),
+    });
+  }, [brakPozycji, id, klient]);
 
   // Otwarcie innej pozycji zaczyna edycję od zera — inaczej wartości przeciekłyby między wierszami.
   useEffect(() => {
@@ -139,6 +156,15 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
         </DialogHeader>
 
         {isLoading ? <p className="text-sm text-muted-foreground">Ładowanie…</p> : null}
+
+        {brakPozycji ? (
+          <p className="text-sm text-destructive" role="alert" data-testid="szczegoly-brak">
+            {bladPobrania && !/^404\b/.test(bladPobrania.message)
+              ? `Nie udało się wczytać pozycji: ${bladPobrania.message}`
+              : "Ta pozycja została zastąpiona nowym importem cennika, więc jej numer już nie istnieje. " +
+                "Lista została odświeżona — zamknij okno i otwórz pozycję ponownie."}
+          </p>
+        ) : null}
 
         {pozycja ? (
           <div className="space-y-4">
@@ -304,7 +330,9 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
           {pozycja && !jestWycofana ? (
             <Button
               data-testid="button-save-details"
-              disabled={Object.keys(zmiany).length === 0 || zapis.isPending}
+              // NOWE (2026-10-02): „Zapisz” jest aktywny zawsze, także bez zmian — wtedy wysyła pusty
+              // zapis (backend przelicza status EAN i nie zakłada poprawek) i zamyka okno.
+              disabled={zapis.isPending}
               onClick={() => zapis.mutate()}
             >
               {zapis.isPending ? "Zapisywanie…" : "Zapisz"}
