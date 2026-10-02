@@ -32,6 +32,7 @@ export type WierszBridge = {
   kod_importu: string | null;
   dostawca: string | null;
   ean: string | null;
+  nazwa?: string | null;
   stan?: number | null;
   cena_sprzedazy?: number | null;
   vat_rate?: number | null;
