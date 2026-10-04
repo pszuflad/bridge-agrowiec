@@ -2,7 +2,8 @@
 // (`katalog_wszyscy_KATEGORIA_ZASTOSOWANIE_FINAL_2026-09-30`, kolumny Nazwa-produktu, Kategoria, Zastosowanie).
 //
 // NOWA LOGIKA BIZNESOWA, NIE PORT (decyzje użytkownika, 2026-10-04):
-//  • klucz dopasowania to `products.nazwa` (plik nie ma kodu produktu);
+//  • klucz dopasowania to `products.nazwa` (plik nie ma kodu produktu; dokładnie, po `trim`, z rozróżnieniem
+//    wielkości liter — ta sama nazwa u kilku dostawców dostaje tę samą parę);
 //  • para spoza listy dozwolonych jest PRZENOSZONA według zasady „zastosowanie decyduje o kategorii”
 //    (tabela {@link PRZENIESIENIA}) — nie zostawiana triggerom, które zamieniłyby ją po cichu na
 //    „Uniwersalne/pozostałe” albo (Rolnicze/Ładowarka) na „Ciągnik”;
@@ -256,6 +257,9 @@ export function raportPrzypisaniaCsv(plan: PlanPrzypisania): string {
     if (n.status !== "niejednoznaczna") continue;
     const opis = n.pary.map((p) => `${p.kategoria}/${p.zastosowanie}`).join(" | ");
     linie.push(["", "", n.nazwa, "", "", "", opis, "niejednoznaczna_pominieta"].map(esc).join(","));
+  }
+  for (const nazwa of plan.nazwyBezProduktu) {
+    linie.push(["", "", nazwa, "", "", "", "", "brak_produktu_w_bazie"].map(esc).join(","));
   }
   return linie.join("\n");
 }

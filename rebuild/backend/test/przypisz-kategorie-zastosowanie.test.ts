@@ -151,7 +151,9 @@ describe("zaplanujPrzypisanie / zastosujPrzypisanie na bazie", () => {
       { kod_produktu: "1", pole: "kategoria", stara_wartosc: "Rolnicze", nowa_wartosc: "Przemysłowe", zrodlo: "przypisanie-kat-zast" },
       { kod_produktu: "1", pole: "zastosowanie", stara_wartosc: "", nowa_wartosc: "Ładowarka", zrodlo: "przypisanie-kat-zast" },
     ]);
-    expect(raportPrzypisaniaCsv(plan)).toContain("niejednoznaczna_pominieta");
+    const raport = raportPrzypisaniaCsv(plan);
+    expect(raport).toContain("niejednoznaczna_pominieta");
+    expect(raport).toContain("brak_produktu_w_bazie");
   });
 
   it("drugie uruchomienie nic nie zmienia (idempotencja)", () => {

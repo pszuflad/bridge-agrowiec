@@ -31,3 +31,11 @@ Zapis „Rolnicze / Wózek widłowy” (import, edycja, API) trigger zamienia te
 - Sprawdzić mapy Selly (`selly_kategoria_norm_map`, `selly_zastosowanie_category_map`) pod nowe kombinacje kategoria/zastosowanie (przeniesienia zmieniają kategorię produktów → eksport do Selly).
 - Lista zastosowań Leśnych na froncie nie ma „Forwarder/Harwester” (jest „Harwester”, „Forwarder”), a baza go dopuszcza — niezwiązane z tym ticketem.
 - Dziedziczenie w `bulk` działa tylko przy braku kategorii w pozycji; ręczne dodanie z UI z kategorią podaną wprost jej nie zmienia.
+
+## Review fixes applied
+Review: 0 BLOCKER, 8 SHOULD-FIX, 5 NICE-TO-HAVE (`review.md`). Naprawione:
+- **Poprawka Marty dodana po imporcie** (`PUT /api/staging/{id}`): snapshot jej nie niesie, więc `zachowajKategorieZastosowanie` i dziedziczenie nakładają teraz WARTOŚĆ poprawki na rekord (wcześniej tylko nie ruszały pola → domyślne „Rolnicze”). Testy: poprawka na kategorii, tylko na zastosowaniu, dla nowego produktu.
+- **Skrypt:** dry-run nie wykonuje już migracji (nie zmienia bazy); przy `--apply` najpierw kopia, potem migracje i zapis (sprawdzone ręcznie: `_migracje` bez zmian po dry-runie).
+- **Raport CSV** zawiera nazwy z pliku bez produktu w bazie (`brak_produktu_w_bazie`); dopasowanie po nazwie opisane w nagłówku modułu (dokładne, po `trim`, wielkość liter ma znaczenie; ta sama nazwa u kilku dostawców → ta sama para).
+- **Testy:** gałęzie null-safe dziedziczenia (profil/średnica/konstrukcja), odpowiednik bez zastosowania.
+Nie zmieniane (świadomie): indeks `products(marka, model)` — pełny skan ~8 tys. wierszy na nowy produkt jest pomijalny kosztem; dziedziczenie nie uwzględnia bieżnika (klucz zatwierdzony: marka + model + rozmiar); test CLI (CLI to cienka nakładka, logika pokryta testami modułu).

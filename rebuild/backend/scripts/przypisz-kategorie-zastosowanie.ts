@@ -32,7 +32,17 @@ if (!plikCsv) {
 
 const { sqlite } = otworzBaze(dbPath);
 try {
-  zastosujMigracje(sqlite);
+  // Dry-run NIE dotyka bazy (żadnych migracji). Przy --apply najpierw kopia, dopiero potem migracje (021
+  // musi być zastosowana, żeby triggery przepuszczały pary docelowe) i zapis.
+  if (apply) {
+    const znacznik = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
+    const katalog = join(dirname(dbPath), "backups");
+    mkdirSync(katalog, { recursive: true });
+    const kopia = join(katalog, `${basename(dbPath)}.bak_przypisanie_kat_zast_${znacznik}`);
+    sqlite.prepare("VACUUM INTO ?").run(kopia);
+    console.log(`przypisz-kategorie-zastosowanie: kopia bazy: ${kopia}`);
+    zastosujMigracje(sqlite);
+  }
   const plan = zaplanujPrzypisanie(sqlite, wierszePliku(readFileSync(plikCsv, "utf-8")));
   const doZmiany = plan.zmiany.filter((z) => z.status === "zmiana");
   console.log(
@@ -42,12 +52,6 @@ try {
       `${plan.nazwyBezProduktu.length} nazw z pliku bez produktu w bazie.`,
   );
   if (apply) {
-    const znacznik = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
-    const katalog = join(dirname(dbPath), "backups");
-    mkdirSync(katalog, { recursive: true });
-    const kopia = join(katalog, `${basename(dbPath)}.bak_przypisanie_kat_zast_${znacznik}`);
-    sqlite.prepare("VACUUM INTO ?").run(kopia);
-    console.log(`przypisz-kategorie-zastosowanie: kopia bazy: ${kopia}`);
     const w = zastosujPrzypisanie(sqlite, plan);
     console.log(`przypisz-kategorie-zastosowanie: zapisano ${w.zapisano}; poprawionych przez triggery (≠ plik): ${w.poprawioneTriggerem.length}.`);
   }

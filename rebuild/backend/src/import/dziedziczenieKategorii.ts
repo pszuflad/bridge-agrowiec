@@ -12,8 +12,10 @@
 //     JEDNOZNACZNA — jeśli odpowiedniki mają różne pary albo nie ma żadnego, produkt dostaje to, co dziś
 //     (domyślne „Rolnicze”, puste zastosowanie).
 //
-// W obu przypadkach poprawka Marty (`manual_overrides` na `kategoria`/`zastosowanie`) wygrywa — jest już
-// nałożona na rekord przez silnik importu, więc tych pól nie ruszamy.
+// W obu przypadkach poprawka Marty (`manual_overrides` na `kategoria`/`zastosowanie`) wygrywa — jej wartość
+// jest nakładana na rekord (także, gdy dodano ją po imporcie i snapshot jej nie niesie).
+// Dziedziczenie pomija bieżnik (klucz: marka + model + rozmiar); odpowiednik bez zastosowania nie jest
+// sprzecznością, tylko brakiem danych.
 
 import { and, eq, isNull, sql } from "drizzle-orm";
 
@@ -26,20 +28,34 @@ type Rekord = Record<string, unknown>;
 
 const pusty = (v: unknown): boolean => v === null || v === undefined || String(v).trim() === "";
 
-function poleZPoprawka(db: Baza, rekord: Rekord, pole: "kategoria" | "zastosowanie"): boolean {
-  return poprawkiDla(db, String(rekord.dostawca ?? ""), String(rekord.kod ?? "")).some(
+type PoleKategorii = "kategoria" | "zastosowanie";
+
+function poprawkaPola(db: Baza, rekord: Rekord, pole: PoleKategorii) {
+  return poprawkiDla(db, String(rekord.dostawca ?? ""), String(rekord.kod ?? "")).find(
     (p) => p.fieldName === pole,
   );
 }
 
-/** Istniejący produkt: kategoria i zastosowanie zostają z bazy (chyba że ma je poprawka Marty). */
+/**
+ * Nakłada WARTOŚĆ poprawki Marty na rekord. Silnik importu robi to już na snapshocie, ale poprawka dodana
+ * PO imporcie (`PUT /api/staging/{id}`) w snapshocie jej nie ma — bez tego akceptacja zapisałaby domyślne
+ * „Rolnicze”. Zwraca `true`, gdy pole ma poprawkę (wtedy nic innego go nie rusza).
+ */
+function naloz(db: Baza, rekord: Rekord, pole: PoleKategorii): boolean {
+  const poprawka = poprawkaPola(db, rekord, pole);
+  if (!poprawka) return false;
+  rekord[pole] = poprawka.overrideValue;
+  return true;
+}
+
+/** Istniejący produkt: kategoria i zastosowanie zostają z bazy; poprawka Marty wygrywa nad bazą. */
 export function zachowajKategorieZastosowanie(
   db: Baza,
   rekord: Rekord,
   istniejacy: { kategoria: string; zastosowanie: string | null },
 ): void {
-  if (!poleZPoprawka(db, rekord, "kategoria")) rekord.kategoria = istniejacy.kategoria;
-  if (!poleZPoprawka(db, rekord, "zastosowanie")) rekord.zastosowanie = istniejacy.zastosowanie;
+  if (!naloz(db, rekord, "kategoria")) rekord.kategoria = istniejacy.kategoria;
+  if (!naloz(db, rekord, "zastosowanie")) rekord.zastosowanie = istniejacy.zastosowanie;
 }
 
 export type OpcjeDziedziczeniaKategorii = {
@@ -57,7 +73,9 @@ export function applyKategoriaDziedziczona(
   opcje: OpcjeDziedziczeniaKategorii,
 ): boolean {
   if (opcje.kategoriaPodana || !pusty(rekord.zastosowanie)) return false;
-  if (poleZPoprawka(db, rekord, "kategoria") || poleZPoprawka(db, rekord, "zastosowanie")) return false;
+  const maKategorie = naloz(db, rekord, "kategoria");
+  const maZastosowanie = naloz(db, rekord, "zastosowanie");
+  if (maKategorie || maZastosowanie) return false;
   const klucz = kluczZRekordu(rekord);
   if (!klucz || pusty(rekord.model)) return false;
   const model = String(rekord.model).trim();

@@ -80,6 +80,36 @@ describe("akceptacja stagingu — ISTNIEJĄCY produkt zachowuje kategorię i zas
   });
 });
 
+describe("poprawka Marty dodana PO imporcie (snapshot jej nie niesie)", () => {
+  const poprawka = (kod: string, pole: string, wartosc: string) =>
+    baza.sqlite
+      .prepare(
+        "INSERT INTO manual_overrides (supplier_kod, supplier_product_id, field_name, override_value, created_at) VALUES ('MO5', ?, ?, ?, '2026-10-01')",
+      )
+      .run(kod, pole, wartosc);
+
+  it("istniejący produkt: wartość poprawki jest nakładana, nie domyślne „Rolnicze”", () => {
+    baza.db.insert(products).values(odpowiednik("P1") as never).run();
+    poprawka("P1", "kategoria", "Leśne");
+    zatwierdz(nowaPozycja("P1", { kategoria: "Rolnicze" }));
+    expect(stan("P1")).toMatchObject({ kategoria: "Leśne" });
+  });
+
+  it("poprawka tylko na zastosowaniu: zastosowanie z poprawki, kategoria z bazy", () => {
+    baza.db.insert(products).values(odpowiednik("P1") as never).run();
+    poprawka("P1", "zastosowanie", "Koparka");
+    zatwierdz(nowaPozycja("P1", { kategoria: "Rolnicze" }));
+    expect(stan("P1")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Koparka" });
+  });
+
+  it("nowy produkt: wartość poprawki jest nakładana i dziedziczenie się nie włącza", () => {
+    baza.db.insert(products).values([odpowiednik("A")] as never).run();
+    poprawka("NOWY", "kategoria", "Ciężarowe");
+    zatwierdz(nowaPozycja("NOWY", { kategoria: "Rolnicze" }));
+    expect(stan("NOWY")).toEqual({ kategoria: "Ciężarowe", zastosowanie: null });
+  });
+});
+
 describe("akceptacja stagingu — NOWY produkt dziedziczy parę po odpowiedniku", () => {
   it("jednoznaczny odpowiednik (marka + model + rozmiar) → ta sama para", () => {
     baza.db.insert(products).values([odpowiednik("A"), odpowiednik("B")] as never).run();
@@ -94,6 +124,24 @@ describe("akceptacja stagingu — NOWY produkt dziedziczy parę po odpowiedniku"
       .run();
     zatwierdz(nowaPozycja("NOWY"));
     expect(stan("NOWY")).toEqual({ kategoria: "Rolnicze", zastosowanie: null });
+  });
+
+  it("rozmiar bez profilu, średnicy i konstrukcji (gałęzie null) też dziedziczy", () => {
+    baza.db
+      .insert(products)
+      .values([odpowiednik("A", { profil: null, srednica: null, konstrukcja: null })] as never)
+      .run();
+    zatwierdz(nowaPozycja("NOWY", { profil: null, srednica: null, konstrukcja: null }));
+    expect(stan("NOWY")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Ładowarka" });
+  });
+
+  it("odpowiednik bez zastosowania nie jest sprzecznością — liczą się tylko te z parą", () => {
+    baza.db
+      .insert(products)
+      .values([odpowiednik("A"), odpowiednik("B", { zastosowanie: null, kategoria: "Rolnicze" })] as never)
+      .run();
+    zatwierdz(nowaPozycja("NOWY"));
+    expect(stan("NOWY")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Ładowarka" });
   });
 
   it("inny rozmiar albo inny model → brak dziedziczenia", () => {
