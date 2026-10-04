@@ -197,10 +197,13 @@ export function opcjaNaFlage(opcja: string): boolean | null {
  * Zastosowania dozwolone w kategorii — lustro `CATEGORY_VALUES`
  * (`backend/src/import/legacy/application_rules.cjs`). Kolejność jest kanoniczna: tak
  * backend układa wartości wieloelementowe, więc tak samo je składamy.
+ *
+ * ODSTĘPSTWO od produkcji (ticket 185, decyzja użytkownika 2026-10-04): „Wózek widłowy” jest tylko
+ * w Przemysłowych — w Rolniczych go nie ma (migracja `021_zastosowania_wozek_tylko_przemyslowe.sql`).
  */
 const UNIWERSALNE = "Uniwersalne/pozostałe";
 export const ZASTOSOWANIA_WG_KATEGORII: Readonly<Record<string, readonly string[]>> = {
-  Rolnicze: ["Ciągnik", "Kombajn", "Opryskiwacz", "Przyczepa", "Kosiarka/ogród", "Wózek widłowy", UNIWERSALNE],
+  Rolnicze: ["Ciągnik", "Kombajn", "Opryskiwacz", "Przyczepa", "Kosiarka/ogród", UNIWERSALNE],
   Przemysłowe: ["Ładowarka", "Koparka", "Kompaktor", "Suwnica/dźwig", "Maszyny górnicze", "Wózek widłowy", UNIWERSALNE],
   Ciężarowe: ["All position", "Oś kierowana", "Oś napędowa", "Naczepa/przyczepa", UNIWERSALNE],
   Leśne: ["Ciągnik leśny", "Harwester", "Forwarder", "Skidder", UNIWERSALNE],

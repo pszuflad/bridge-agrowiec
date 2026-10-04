@@ -134,12 +134,25 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
       })),
     ];
 
+    // Ticket 185 (NOWA logika): migracja 021 podmienia dwa triggery zastosowań (bez „Wózek widłowy”
+    // w Rolniczych) — to jedyna legalna różnica w triggerach względem produkcji.
+    const z021 = new Map<string, string>();
+    for (const m of readFileSync(join(KATALOG_SCHEMATU(), "021_zastosowania_wozek_tylko_przemyslowe.sql"), "utf8").matchAll(
+      /^CREATE TRIGGER (\w+)[\s\S]*?^\s*END(?=;$)/gm,
+    )) {
+      z021.set(m[1]!, m[0]);
+    }
+    const oczekiwaneTriggery = (przed.triggery as { name: string; sql: string }[]).map((t) => ({
+      name: t.name,
+      sql: z021.get(t.name) ?? t.sql,
+    }));
+
     expect({
       products: [schematTabeli(sqlite, "products"), zrzut(sqlite, "products")],
       selly: [schematTabeli(sqlite, "selly_products"), zrzut(sqlite, "selly_products")],
       sellyOld: [schematTabeli(sqlite, "selly_products_old"), zrzut(sqlite, "selly_products_old")],
       triggery: sqlite.prepare(`SELECT name, sql FROM sqlite_master WHERE type = 'trigger' ORDER BY name`).all(),
-    }).toEqual({ ...przed, products: oczekiwaneProducts });
+    }).toEqual({ ...przed, products: oczekiwaneProducts, triggery: oczekiwaneTriggery });
     // Wartości, które padłyby ofiarą 003 albo gołego ALTER-a w 002, są na miejscu.
     expect(
       sqlite.prepare("SELECT kod, szerokosc, uwaga_cena FROM products ORDER BY kod").all(),
