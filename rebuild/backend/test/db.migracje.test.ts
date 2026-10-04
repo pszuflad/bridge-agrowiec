@@ -58,6 +58,7 @@ describe("zastosujMigracje", () => {
     "018_scalone_karty_auto.sql",
     "019_feed_state_zablokowana_liczba.sql",
     "020_scalone_duplikaty_do_usuniecia.sql",
+    "021_zastosowania_wozek_tylko_przemyslowe.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 39 tabel i 22 indeksy", () => {
