@@ -194,6 +194,11 @@ describe("zastosowanie — lista zawężona do kategorii", () => {
     expect(opcjeZastosowan("Nieznana", [])).toBeNull();
   });
 
+  it("„Wózek widłowy” jest tylko w Przemysłowych (ticket 185, odstępstwo od produkcji)", () => {
+    expect(opcjeZastosowan("Rolnicze", [])).not.toContain("Wózek widłowy");
+    expect(opcjeZastosowan("Przemysłowe", [])).toContain("Wózek widłowy");
+  });
+
   it("nie gubi wartości spoza kategorii i składa wybór w kolejności opcji", () => {
     const opcje = opcjeZastosowan("Rolnicze", ["Koparka"]) as string[];
     expect(opcje).toContain("Koparka");

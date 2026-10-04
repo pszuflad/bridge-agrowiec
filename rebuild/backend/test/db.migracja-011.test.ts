@@ -18,6 +18,9 @@ import { zastosujDyrektywy, zastosujMigracje } from "../src/db/migrate.js";
 import { KATALOG_SCHEMATU } from "./gate/repo.js";
 
 const PLIK_011 = "011_blokowane_formy_i_triggery.sql";
+// Ticket 185: 021 odtwarza dwa triggery zastosowań bez „Wózek widłowy” w Rolniczych (osobny test: db.migracja-021).
+const PLIK_021 = "021_zastosowania_wozek_tylko_przemyslowe.sql";
+const TRIGGERY_021 = ["products_zastosowanie_ai", "products_zastosowanie_au"];
 
 /**
  * NIEZALEŻNA kopia mapy z produkcji — `git show 7d6cfc9:mirror/backend/payment_blocks.cjs`,
@@ -52,8 +55,8 @@ const TRIGGERY = [
  * `7d6cfc9:db/schema.sql:334-385` (zweryfikowane `diff`em przy tworzeniu, ticket 107).
  * `sqlite_master.sql` trzyma tekst instrukcji bez końcowego średnika.
  */
-const definicjeZPliku = (): Map<string, string> => {
-  const sql = readFileSync(join(KATALOG_SCHEMATU(), PLIK_011), "utf8");
+const definicjeZPliku = (plik: string = PLIK_011): Map<string, string> => {
+  const sql = readFileSync(join(KATALOG_SCHEMATU(), plik), "utf8");
   const wynik = new Map<string, string>();
   for (const m of sql.matchAll(/^CREATE TRIGGER (\w+)[\s\S]*?^\s*END(?=;$)/gm)) {
     wynik.set(m[1]!, m[0]);
@@ -83,7 +86,8 @@ const katalogBez011 = (gdzie: string): string => {
   const k = join(gdzie, "schema-bez-011");
   mkdirSync(k);
   for (const plik of readdirSync(KATALOG_SCHEMATU())) {
-    if (plik.endsWith(".sql") && plik !== PLIK_011) {
+    // 011 i 021 razem: 021 nadpisuje triggery z 011, więc musi iść PO niej (nie może być już odnotowana).
+    if (plik.endsWith(".sql") && plik !== PLIK_011 && plik !== PLIK_021) {
       copyFileSync(join(KATALOG_SCHEMATU(), plik), join(k, plik));
     }
   }
@@ -241,8 +245,11 @@ describe("011 — baza 1: świeża", () => {
     const wBazie = triggeryWBazie(sqlite);
     expect([...wBazie.keys()].sort()).toEqual([...TRIGGERY].sort());
     const zPliku = definicjeZPliku();
+    const z021 = definicjeZPliku(PLIK_021);
     expect(zPliku.size).toBe(6);
-    for (const [nazwa, sql] of zPliku) expect(wBazie.get(nazwa), nazwa).toBe(sql);
+    expect([...z021.keys()].sort()).toEqual([...TRIGGERY_021].sort());
+    // Po pełnym łańcuchu dwa triggery zastosowań są z 021, pozostałe cztery — dosłownie z 011.
+    for (const [nazwa, sql] of zPliku) expect(wBazie.get(nazwa), nazwa).toBe(z021.get(nazwa) ?? sql);
   });
 
   describe("triggery blokad płatności (#73)", () => {
@@ -347,10 +354,11 @@ describe("011 — baza 3: symulacja produkcji (kolumna i triggery już są)", ()
     dodajProdukt(sqlite, "A", { dostawca: "MO2", kategoria: "Rolnicze", zastosowanie: "Kombajn" });
     const kolumnyPrzed = kolumnyProducts(sqlite);
     const triggeryPrzed = triggeryWBazie(sqlite);
+    for (const [nazwa, sql] of definicjeZPliku(PLIK_021)) triggeryPrzed.set(nazwa, sql);
     const wierszePrzed = sqlite.prepare("SELECT * FROM products ORDER BY id").all();
 
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
-    expect(wynik.zastosowane).toEqual([PLIK_011]);
+    expect(wynik.zastosowane).toEqual([PLIK_011, PLIK_021]);
     expect(kolumnyProducts(sqlite)).toEqual(kolumnyPrzed);
     expect(triggeryWBazie(sqlite)).toEqual(triggeryPrzed);
     expect(sqlite.prepare("SELECT * FROM products ORDER BY id").all()).toEqual(wierszePrzed);
@@ -413,7 +421,7 @@ it.skipIf(!process.env.SNAPSHOT_DB)(
       const przed = snap.prepare("SELECT * FROM products ORDER BY id").all() as Record<string, unknown>[];
       expect(przed.length).toBeGreaterThan(0);
 
-      expect(zastosujMigracje(snap, KATALOG_SCHEMATU()).zastosowane).toEqual([PLIK_011]);
+      expect(zastosujMigracje(snap, KATALOG_SCHEMATU()).zastosowane).toEqual([PLIK_011, PLIK_021]);
 
       const po = snap.prepare("SELECT * FROM products ORDER BY id").all() as Record<string, unknown>[];
       const oczekiwane = przed.map((w) => ({

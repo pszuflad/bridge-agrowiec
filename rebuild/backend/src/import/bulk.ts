@@ -25,6 +25,7 @@ import {
   uchwytSqlite,
 } from "./silnik/bridge-ext.js";
 import { uzupelnijEanRekordu } from "../ean-pary/uzupelnianie.js";
+import { applyKategoriaDziedziczona } from "./dziedziczenieKategorii.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
@@ -146,6 +147,14 @@ export function dodajProduktyBulk(
         applyWagaDziedziczona(db, rekord);
       } catch {
         /* nie blokuj zapisu wiersza błędem dziedziczenia wagi */
+      }
+      // Ticket 185 (NOWA logika): nowy produkt bez podanej kategorii/zastosowania dziedziczy parę po
+      // odpowiedniku (marka + model + rozmiar). Kategoria podana wprost wygrywa; istniejący produkt
+      // nie jest dotykany (ta ścieżka zapisuje to, co użytkownik podał).
+      try {
+        if (!istniejacy) applyKategoriaDziedziczona(db, rekord, { kategoriaPodana: pozycja.kategoria != null });
+      } catch {
+        /* nie blokuj zapisu wiersza błędem reguły kategorii */
       }
       // Ticket 168 (NOWA logika): uzupełnienie pustego EAN z tabeli par kod↔EAN.
       try {

@@ -14,6 +14,7 @@ import { zapiszPoprawke, poprawkiDla } from "../repos/overrides.js";
 import { tylkoKolumnyProduktu } from "../repos/products.js";
 import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
 import { uzupelnijEanRekordu } from "../ean-pary/uzupelnianie.js";
+import { applyKategoriaDziedziczona, zachowajKategorieZastosowanie } from "./dziedziczenieKategorii.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
@@ -235,6 +236,17 @@ export function zatwierdzPozycjeStagingu(
     if (uzupelnijEan) uzupelnijEanRekordu(db, rekord, istniejacy);
   } catch {
     /* nie blokuj zapisu pozycji błędem reguły EAN */
+  }
+
+  // Siódme rozszerzenie, spoza portu — ticket 185, NOWA logika biznesowa (`dziedziczenieKategorii.ts`).
+  // Plik dostawcy nie niesie kategorii ani zastosowania (parser wpisuje domyślne „Rolnicze”), więc:
+  // istniejący produkt ZACHOWUJE wartości z bazy (inaczej ten zapis całego rekordu cofnąłby przypisanie),
+  // a nowy dziedziczy parę po odpowiedniku (marka + model + rozmiar), gdy jest jednoznaczna.
+  try {
+    if (istniejacy) zachowajKategorieZastosowanie(db, rekord, istniejacy);
+    else applyKategoriaDziedziczona(db, rekord, { kategoriaPodana: false });
+  } catch {
+    /* nie blokuj zapisu pozycji błędem reguły kategorii */
   }
 
   // ——— Zapis produktu (:44906) ———
