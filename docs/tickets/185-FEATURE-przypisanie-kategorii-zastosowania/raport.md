@@ -45,5 +45,5 @@ Nie zmieniane (świadomie): indeks `products(marka, model)` — pełny skan ~8 t
 Na prośbę użytkownika przypisanie wykonuje się automatycznie: **migracja `022_przypisanie_kategorii_zastosowania_csv.sql`**
 (generowana z `scripts/data/katalog-kategoria-zastosowanie-2026-09-30.csv` przez `npm run generuj-migracje-przypisania`).
 Deploy robi kopię bazy → `npm run migrate` (021, 022) → raz na bazę dzięki `_migracje`; najpierw staging (merge do `develop`), potem
-produkcja (merge do `main`). Migracja pomija produkty z poprawką Marty i zapisuje `history` (kto = „migracja 022”). Skrypt CLI zostaje
+produkcja (merge do `main`). Migracja nadpisuje także produkty z dotychczasową poprawką Marty i **usuwa wszystkie poprawki** `kategoria`/`zastosowanie` z `manual_overrides` (decyzja użytkownika; poprawki na innych polach zostają); zapisuje `history` (kto = „migracja 022”). Poprawki dodane później działają normalnie (wartość poprawki jest nakładana przy akceptacji). Skrypt CLI zostaje
 do dry-runu i raportu (`--raport`).

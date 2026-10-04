@@ -15,4 +15,6 @@
 ładowarka, kompaktor i koparka są Przemysłowe; osie — Ciężarowe; kosiarka/ciągnik/przyczepa — Rolnicze. Przypisanie
 ma przetrwać import, a poprawka Marty ma wygrywać. Nowe produkty biorą parę po odpowiedniku (marka + model + rozmiar).
 
-**Do sprawdzenia przed `--apply`:** raport z dry-runu na kopii produkcji; mapy Selly pod nowe kombinacje.
+**Poprawki Marty:** dotychczasowe poprawki na kategorii/zastosowaniu usuwane przy wdrożeniu (migracja 022); nowe działają normalnie.
+
+**Do sprawdzenia przed wdrożeniem:** raport z dry-runu na kopii produkcji; mapy Selly pod nowe kombinacje.

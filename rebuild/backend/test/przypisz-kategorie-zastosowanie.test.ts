@@ -107,7 +107,7 @@ describe("zaplanujPrzypisanie / zastosujPrzypisanie na bazie", () => {
     { nazwa: "NIEMA", kategoria: "Leśne", zastosowanie: "Skidder" },
   ];
 
-  it("przenosi pary, pomija poprawki Marty i niejednoznaczne, nie rusza zgodnych; triggery niczego nie korygują", () => {
+  it("przenosi pary (także z poprawką Marty, którą usuwa), pomija niejednoznaczne, nie rusza zgodnych; triggery niczego nie korygują", () => {
     baza.db
       .insert(products)
       .values([
@@ -129,10 +129,11 @@ describe("zaplanujPrzypisanie / zastosujPrzypisanie na bazie", () => {
     expect(plan.juzZgodnych).toBe(1);
     expect(plan.niejednoznaczne.map((n) => n.nazwa)).toEqual(["SPRZ"]);
     expect(plan.nazwyBezProduktu).toEqual(["NIEMA"]);
-    expect(plan.zmiany.filter((z) => z.status === "pominieta_poprawka_reczna").map((z) => z.kod)).toEqual(["4"]);
 
     const wynik = zastosujPrzypisanie(baza.sqlite, plan);
-    expect(wynik.zapisano).toBe(3);
+    expect(wynik.zapisano).toBe(4);
+    expect(wynik.usunietePoprawki).toBe(1);
+    expect(baza.sqlite.prepare("SELECT count(*) c FROM manual_overrides").get()).toEqual({ c: 0 });
     expect(wynik.poprawioneTriggerem).toEqual([]);
 
     const stan = (kod: string) =>
@@ -140,7 +141,7 @@ describe("zaplanujPrzypisanie / zastosujPrzypisanie na bazie", () => {
     expect(stan("1")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Ładowarka" });
     expect(stan("2")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Wózek widłowy" });
     expect(stan("3")).toEqual({ kategoria: "Rolnicze", zastosowanie: "Ciągnik" });
-    expect(stan("4")).toEqual({ kategoria: "Rolnicze", zastosowanie: null });
+    expect(stan("4")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Ładowarka" });
     expect(stan("5")).toEqual({ kategoria: "Rolnicze", zastosowanie: null });
     expect(stan("6")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Ładowarka" });
 

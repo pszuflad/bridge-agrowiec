@@ -14,5 +14,5 @@ kategorii ani zastosowania (parsery wpisują domyślne „Rolnicze”, zastosowa
 3. Nowy produkt (akceptacja, `bulk` bez podanej kategorii) dziedziczy parę po odpowiednikach: marka + model + rozmiar
    (`szerokosc/profil/srednica/konstrukcja`), tylko gdy wszystkie odpowiedniki mają tę samą parę (`dziedziczenieKategorii.ts`).
 
-Jednorazowe przypisanie z CSV przy wdrożeniu: migracja `022` (generowana; raz na bazę, po kopii bazy z deployu). Raport/dry-run: `npm run przypisz-kategorie-zastosowanie` (domyślnie dry-run; tabela przeniesień w
+Jednorazowe przypisanie z CSV przy wdrożeniu: migracja `022` (nadpisuje też produkty z dotychczasową poprawką Marty i usuwa poprawki `kategoria`/`zastosowanie` z `manual_overrides`; decyzja użytkownika) (generowana; raz na bazę, po kopii bazy z deployu). Raport/dry-run: `npm run przypisz-kategorie-zastosowanie` (domyślnie dry-run; tabela przeniesień w
 `src/import/migracje/przypisz-kategorie-zastosowanie.ts`). Szczegóły: `docs/tickets/185-FEATURE-przypisanie-kategorii-zastosowania/`.

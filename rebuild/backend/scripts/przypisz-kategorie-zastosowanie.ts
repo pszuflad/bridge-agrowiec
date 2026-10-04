@@ -44,16 +44,14 @@ try {
     zastosujMigracje(sqlite);
   }
   const plan = zaplanujPrzypisanie(sqlite, wierszePliku(readFileSync(plikCsv, "utf-8")));
-  const doZmiany = plan.zmiany.filter((z) => z.status === "zmiana");
   console.log(
-    `przypisz-kategorie-zastosowanie: ${doZmiany.length} produktów do zmiany, ${plan.juzZgodnych} już zgodnych, ` +
-      `${plan.zmiany.length - doZmiany.length} pominiętych (poprawka ręczna), ` +
+    `przypisz-kategorie-zastosowanie: ${plan.zmiany.length} produktów do zmiany, ${plan.juzZgodnych} już zgodnych, ` +
       `${plan.niejednoznaczne.length} nazw niejednoznacznych (pominięte), ` +
       `${plan.nazwyBezProduktu.length} nazw z pliku bez produktu w bazie.`,
   );
   if (apply) {
     const w = zastosujPrzypisanie(sqlite, plan);
-    console.log(`przypisz-kategorie-zastosowanie: zapisano ${w.zapisano}; poprawionych przez triggery (≠ plik): ${w.poprawioneTriggerem.length}.`);
+    console.log(`przypisz-kategorie-zastosowanie: zapisano ${w.zapisano}; poprawionych przez triggery (≠ plik): ${w.poprawioneTriggerem.length}; usunięto poprawek Marty (kategoria/zastosowanie): ${w.usunietePoprawki}.`);
   }
   if (plikRaportu) writeFileSync(plikRaportu, "\uFEFF" + raportPrzypisaniaCsv(plan), "utf-8");
 } finally {

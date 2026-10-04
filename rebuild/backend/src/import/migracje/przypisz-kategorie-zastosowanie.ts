@@ -9,8 +9,9 @@
 //    „Uniwersalne/pozostałe” albo (Rolnicze/Ładowarka) na „Ciągnik”;
 //  • nazwa z dwoma różnymi zastosowaniami w tej samej kategorii (Ciągnik vs Uniwersalne/pozostałe)
 //    dostaje „Rolnicze / Ciągnik”; każda inna niejednoznaczność jest POMIJANA i raportowana;
-//  • produkt z poprawką Marty (`manual_overrides`) na `kategoria` lub `zastosowanie` nie jest ruszany —
-//    ręczna decyzja wygrywa.
+//  • dotychczasowe poprawki Marty (`manual_overrides` na `kategoria`/`zastosowanie`) są nieaktualne (decyzja
+//    użytkownika, 2026-10-04): produkty są nadpisywane, a same poprawki USUWANE przy zapisie. Poprawki dodane
+//    później działają normalnie.
 
 import type { BazaSqlite } from "../../db/index.js";
 
@@ -156,7 +157,6 @@ export type ZmianaProduktu = {
   stareZastosowanie: string;
   kategoria: string;
   zastosowanie: string;
-  status: "zmiana" | "pominieta_poprawka_reczna";
 };
 
 export type PlanPrzypisania = {
@@ -166,18 +166,7 @@ export type PlanPrzypisania = {
   nazwyBezProduktu: string[];
 };
 
-const POLA_CHRONIONE = new Set(["kategoria", "zastosowanie"]);
-
 export function zaplanujPrzypisanie(sqlite: BazaSqlite, wiersze: readonly WierszPliku[]): PlanPrzypisania {
-  const chronione = new Set<string>();
-  for (const o of sqlite
-    .prepare("SELECT supplier_kod, supplier_product_id, field_name FROM manual_overrides")
-    .all() as { supplier_kod: string; supplier_product_id: string; field_name: string }[]) {
-    if (POLA_CHRONIONE.has(o.field_name.toLowerCase())) {
-      chronione.add(`${o.supplier_kod}\u0000${o.supplier_product_id}`);
-    }
-  }
-
   const produkty = sqlite
     .prepare("SELECT kod, dostawca, nazwa, kategoria, zastosowanie FROM products")
     .all() as { kod: string; dostawca: string; nazwa: string; kategoria: string; zastosowanie: string | null }[];
@@ -213,14 +202,13 @@ export function zaplanujPrzypisanie(sqlite: BazaSqlite, wiersze: readonly Wiersz
         stareZastosowanie: stareZast,
         kategoria: n.para.kategoria,
         zastosowanie: n.para.zastosowanie,
-        status: chronione.has(`${p.dostawca}\u0000${p.kod}`) ? "pominieta_poprawka_reczna" : "zmiana",
       });
     }
   }
   return wynik;
 }
 
-export type WynikZapisu = { zapisano: number; poprawioneTriggerem: ZmianaProduktu[] };
+export type WynikZapisu = { zapisano: number; poprawioneTriggerem: ZmianaProduktu[]; usunietePoprawki: number };
 
 /**
  * Zapis planu (jedna transakcja) + wpisy do `history` (źródło `przypisanie-kat-zast`).
@@ -234,10 +222,9 @@ export function zastosujPrzypisanie(sqlite: BazaSqlite, plan: PlanPrzypisania, k
   const hist = sqlite.prepare(
     "INSERT INTO history (data, kod_produktu, nazwa, pole, stara_wartosc, nowa_wartosc, zrodlo, kto) VALUES (?,?,?,?,?,?,?,?)",
   );
-  const wynik: WynikZapisu = { zapisano: 0, poprawioneTriggerem: [] };
+  const wynik: WynikZapisu = { zapisano: 0, poprawioneTriggerem: [], usunietePoprawki: 0 };
   sqlite.transaction(() => {
     for (const z of plan.zmiany) {
-      if (z.status !== "zmiana") continue;
       upd.run(z.kategoria, z.zastosowanie, z.dostawca, z.kod);
       const po = odczyt.get(z.dostawca, z.kod) as { kategoria: string; zastosowanie: string | null };
       const poZast = po.zastosowanie ?? "";
@@ -250,6 +237,9 @@ export function zastosujPrzypisanie(sqlite: BazaSqlite, plan: PlanPrzypisania, k
       if (po.kategoria !== z.kategoria || poZast !== z.zastosowanie) wynik.poprawioneTriggerem.push(z);
       wynik.zapisano++;
     }
+    wynik.usunietePoprawki = sqlite
+      .prepare("DELETE FROM manual_overrides WHERE field_name IN ('kategoria', 'zastosowanie')")
+      .run().changes;
   })();
   return wynik;
 }
@@ -259,7 +249,7 @@ export function raportPrzypisaniaCsv(plan: PlanPrzypisania): string {
   const linie = ["kod,dostawca,nazwa,stara_kategoria,stare_zastosowanie,kategoria,zastosowanie,status"];
   for (const z of plan.zmiany) {
     linie.push(
-      [z.kod, z.dostawca, z.nazwa, z.staraKategoria, z.stareZastosowanie, z.kategoria, z.zastosowanie, z.status]
+      [z.kod, z.dostawca, z.nazwa, z.staraKategoria, z.stareZastosowanie, z.kategoria, z.zastosowanie, "zmiana"]
         .map(esc)
         .join(","),
     );

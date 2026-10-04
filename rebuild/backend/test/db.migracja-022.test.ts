@@ -55,11 +55,11 @@ describe("022 — przypisanie z CSV", () => {
     expect(zPliku).toBe(trescMigracjiPrzypisania(wierszePliku(readFileSync(CSV, "utf8"))));
   });
 
-  it("przenosi produkty wg tabeli, pomija poprawki Marty i nazwy spoza pliku, zapisuje history", () => {
+  it("przenosi produkty wg tabeli (także z poprawką Marty), usuwa stare poprawki, pomija nazwy spoza pliku, zapisuje history", () => {
     zastosujMigracje(sqlite, bez022());
     dodaj("1", "35/65-33 BKT LOADER SPL 42PR TL"); // CSV: Przemysłowe / Ładowarka
     dodaj("2", "620/70R42 BKT AGRIMAX FACTOR 166D/169A8 TL", "Rolnicze", "Uniwersalne/pozostałe"); // → Rolnicze / Ciągnik
-    dodaj("3", "35/65-33 BKT LOADER SPL 42PR TL", "Rolnicze", null, "MO2"); // poprawka Marty
+    dodaj("3", "35/65-33 BKT LOADER SPL 42PR TL", "Rolnicze", null, "MO2"); // stara poprawka Marty — zostanie nadpisana i usunięta
     dodaj("4", "NAZWA SPOZA PLIKU 123"); // nietknięty
     dodaj("5", "320/85R34 BKT AGRIMAX RT 855 141A8/B TL", "Rolnicze", null); // nazwa „niejednoznaczna” w CSV → Ciągnik
     sqlite
@@ -67,12 +67,20 @@ describe("022 — przypisanie z CSV", () => {
         "INSERT INTO manual_overrides (supplier_kod, supplier_product_id, field_name, override_value, created_at) VALUES ('MO2','3','zastosowanie','Kombajn','2026-10-01')",
       )
       .run();
+    // poprawka na INNYM polu zostaje (usuwane są tylko kategoria i zastosowanie)
+    sqlite
+      .prepare(
+        "INSERT INTO manual_overrides (supplier_kod, supplier_product_id, field_name, override_value, created_at) VALUES ('MO1','1','nazwa','Inna','2026-10-01')",
+      )
+      .run();
 
     expect(zastosujMigracje(sqlite, KATALOG_SCHEMATU()).zastosowane).toEqual([PLIK]);
 
     expect(stan("1")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Ładowarka" });
     expect(stan("2")).toEqual({ kategoria: "Rolnicze", zastosowanie: "Ciągnik" });
-    expect(stan("3")).toEqual({ kategoria: "Rolnicze", zastosowanie: null });
+    expect(stan("3")).toEqual({ kategoria: "Przemysłowe", zastosowanie: "Ładowarka" });
+    expect(sqlite.prepare("SELECT count(*) c FROM manual_overrides WHERE field_name IN ('kategoria','zastosowanie')").get()).toEqual({ c: 0 });
+    expect(sqlite.prepare("SELECT count(*) c FROM manual_overrides WHERE field_name = 'nazwa'").get()).toEqual({ c: 1 });
     expect(stan("4")).toEqual({ kategoria: "Rolnicze", zastosowanie: null });
     expect(stan("5")).toEqual({ kategoria: "Rolnicze", zastosowanie: "Ciągnik" });
 

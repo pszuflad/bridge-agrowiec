@@ -6,11 +6,6 @@ import { tabelaPrzypisania, type WierszPliku } from "./przypisz-kategorie-zastos
 
 const q = (t: string): string => `'${t.replace(/'/g, "''")}'`;
 
-const BEZ_POPRAWKI = `NOT EXISTS (
-    SELECT 1 FROM manual_overrides m
-    WHERE m.supplier_kod = p.dostawca AND m.supplier_product_id = p.kod AND m.field_name IN ('kategoria', 'zastosowanie')
-  )`;
-
 export function trescMigracjiPrzypisania(wiersze: readonly WierszPliku[]): string {
   const wpisy = tabelaPrzypisania(wiersze);
   const paczki: string[] = [];
@@ -29,7 +24,8 @@ export function trescMigracjiPrzypisania(wiersze: readonly WierszPliku[]): strin
 -- NOWA LOGIKA BIZNESOWA, NIE PORT (decyzje użytkownika, 2026-10-04): jednorazowe przypisanie kategorii i
 -- zastosowania produktom po \`products.nazwa\` (${wpisy.length} nazw; nazwy niejednoznaczne są pominięte).
 --  • Zmieniane są tylko wiersze, w których para różni się od docelowej.
---  • Produkt z poprawką Marty (\`manual_overrides\` na kategoria/zastosowanie) NIE jest ruszany.
+--  • Nadpisuje także produkty z dotychczasową poprawką Marty; wszystkie poprawki na kategorii i zastosowaniu
+--    (\`manual_overrides\`) są usuwane — nowe poprawki działają potem normalnie.
 --  • Każda zmiana pola ląduje w \`history\` (źródło \`przypisanie-kat-zast\`).
 --  • Wykonuje się raz na bazę (\`_migracje\`), po kopii bazy z deployu i po migracji 021.
 
@@ -40,12 +36,12 @@ ${paczki.join("\n\n")}
 INSERT INTO history (data, kod_produktu, nazwa, pole, stara_wartosc, nowa_wartosc, zrodlo, kto)
 SELECT datetime('now'), p.kod, p.nazwa, 'kategoria', p.kategoria, t.kategoria, 'przypisanie-kat-zast', 'migracja 022'
 FROM products p JOIN _przypisanie_185 t ON TRIM(p.nazwa) = t.nazwa
-WHERE p.kategoria <> t.kategoria AND ${BEZ_POPRAWKI};
+WHERE p.kategoria <> t.kategoria;
 
 INSERT INTO history (data, kod_produktu, nazwa, pole, stara_wartosc, nowa_wartosc, zrodlo, kto)
 SELECT datetime('now'), p.kod, p.nazwa, 'zastosowanie', COALESCE(p.zastosowanie, ''), t.zastosowanie, 'przypisanie-kat-zast', 'migracja 022'
 FROM products p JOIN _przypisanie_185 t ON TRIM(p.nazwa) = t.nazwa
-WHERE COALESCE(p.zastosowanie, '') <> t.zastosowanie AND ${BEZ_POPRAWKI};
+WHERE COALESCE(p.zastosowanie, '') <> t.zastosowanie;
 
 UPDATE products AS p
 SET kategoria = (SELECT t.kategoria FROM _przypisanie_185 t WHERE t.nazwa = TRIM(p.nazwa)),
@@ -53,8 +49,11 @@ SET kategoria = (SELECT t.kategoria FROM _przypisanie_185 t WHERE t.nazwa = TRIM
 WHERE EXISTS (
     SELECT 1 FROM _przypisanie_185 t
     WHERE t.nazwa = TRIM(p.nazwa) AND (p.kategoria <> t.kategoria OR COALESCE(p.zastosowanie, '') <> t.zastosowanie)
-  )
-  AND ${BEZ_POPRAWKI};
+  );
+
+-- Dotychczasowe poprawki Marty na kategorii i zastosowaniu są nieaktualne (decyzja użytkownika, 2026-10-04):
+-- znikają, żeby import nie nakładał starych wartości na snapshot. Poprawki dodane PÓŹNIEJ działają normalnie.
+DELETE FROM manual_overrides WHERE field_name IN ('kategoria', 'zastosowanie');
 
 DROP TABLE _przypisanie_185;
 `;
