@@ -2,11 +2,16 @@
  * Ticket 185 — przypisanie kategorii i zastosowania z CSV. NOWA logika biznesowa, nie port.
  * Prawdziwy SQLite (z triggerami z 011/021), bez mocków.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { products } from "../src/db/schema.js";
 import {
   PRZENIESIENIA,
+  ROZSTRZYGNIECIA_NIEJEDNOZNACZNYCH,
+  tabelaPrzypisania,
   paraDocelowa,
   parsujCsv,
   raportPrzypisaniaCsv,
@@ -178,6 +183,29 @@ describe("zaplanujPrzypisanie / zastosujPrzypisanie na bazie", () => {
         .run(`K${n++}`, `N${n}`, kategoria, zastosowanie);
       const po = baza.sqlite.prepare("SELECT kategoria, zastosowanie FROM products WHERE kod = ?").get(`K${n - 1}`);
       expect(po, cel).toEqual({ kategoria, zastosowanie });
+    }
+  });
+});
+
+describe("plik CSV final — rozstrzygnięcia niejednoznacznych nazw", () => {
+  const wiersze = wierszePliku(
+    readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../scripts/data/katalog-kategoria-zastosowanie-2026-09-30.csv"), "utf8"),
+  );
+
+  it("każda nazwa z pliku ma jedną parę (żadna nie jest pomijana jako niejednoznaczna)", () => {
+    expect(zaplanujNazwy(wiersze).filter((n) => n.status === "niejednoznaczna")).toEqual([]);
+    expect(tabelaPrzypisania(wiersze)).toHaveLength(new Set(wiersze.map((w) => w.nazwa)).size);
+  });
+
+  it("52 ręczne rozstrzygnięcia to zawsze jedna z par z pliku (po przeniesieniach)", () => {
+    expect(ROZSTRZYGNIECIA_NIEJEDNOZNACZNYCH.size).toBe(52);
+    const pary = new Map<string, Set<string>>();
+    for (const w of wiersze) {
+      const p = paraDocelowa(w.kategoria, w.zastosowanie);
+      pary.set(w.nazwa, (pary.get(w.nazwa) ?? new Set()).add(`${p.kategoria} / ${p.zastosowanie}`));
+    }
+    for (const [nazwa, wybor] of ROZSTRZYGNIECIA_NIEJEDNOZNACZNYCH) {
+      expect(pary.get(nazwa), nazwa).toContain(wybor);
     }
   });
 });

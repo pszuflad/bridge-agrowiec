@@ -8,7 +8,9 @@
 //    (tabela {@link PRZENIESIENIA}) — nie zostawiana triggerom, które zamieniłyby ją po cichu na
 //    „Uniwersalne/pozostałe” albo (Rolnicze/Ładowarka) na „Ciągnik”;
 //  • nazwa z dwoma różnymi zastosowaniami w tej samej kategorii (Ciągnik vs Uniwersalne/pozostałe)
-//    dostaje „Rolnicze / Ciągnik”; każda inna niejednoznaczność jest POMIJANA i raportowana;
+//    dostaje „Rolnicze / Ciągnik”; 52 nazwy z różnymi kategoriami rozstrzyga tabela
+//    {@link ROZSTRZYGNIECIA_NIEJEDNOZNACZNYCH} (wybór Claude'a na polecenie użytkownika); każda inna
+//    niejednoznaczność jest POMIJANA i raportowana;
 //  • dotychczasowe poprawki Marty (`manual_overrides` na `kategoria`/`zastosowanie`) są nieaktualne (decyzja
 //    użytkownika, 2026-10-04): produkty są nadpisywane, a same poprawki USUWANE przy zapisie. Poprawki dodane
 //    później działają normalnie.
@@ -44,6 +46,76 @@ export const PRZENIESIENIA: ReadonlyMap<string, Para> = new Map<string, Para>([
   [klucz("Leśne", "Ciągnik"), { kategoria: "Leśne", zastosowanie: "Ciągnik leśny" }],
   [klucz("Leśne", "Przyczepa"), { kategoria: "Leśne", zastosowanie: UNIWERSALNE }],
 ]);
+
+
+/**
+ * Rozstrzygnięcia 52 nazw, które w pliku mają DWIE różne pary (np. Ciężarowe/Oś kierowana vs Oś napędowa).
+ * Decyzja użytkownika: „przypisz do której uważasz” — wybór Claude'a wg rodzaju opony (model/bieżnik):
+ * KLS/HS/AS FRONT = oś kierowana/ciągnik, KLD/DL = napędowa, HT = naczepa, XMCL/POWER CL/DURA-UT = ładowarka-koparka,
+ * AGRO FORESTRY = leśne itd. Zawsze jedna z dwóch par z pliku. Najmniej pewne (do wglądu): Mitas NB 38 i SK-02,
+ * Alliance 570/585/324/323, Nokian TRI 2, Michelin BIBLOAD. Zmiana: edycja tej tabeli i
+ * `npm run generuj-migracje-przypisania`.
+ */
+export const ROZSTRZYGNIECIA_NIEJEDNOZNACZNYCH: ReadonlyMap<string, string> = new Map<string, string>([
+  ["18.4-26 GTK AS100 150A6 16PR TT", "Rolnicze / Ciągnik"],
+  ["460/70R24 MICHELIN XMCL 159A8/159B TL", "Przemysłowe / Koparka"],
+  ["480/80-26 MICHELIN POWER CL 167A8 12PR TL", "Przemysłowe / Koparka"],
+  ["440/80-24 MICHELIN POWER CL 168A8 TL", "Przemysłowe / Koparka"],
+  ["400/80-24 MICHELIN POWER CL 162A8 20PR TL", "Przemysłowe / Koparka"],
+  ["710/50R26.5 MITAS AGRITERRA ULTRA 170D TL SB", "Rolnicze / Przyczepa"],
+  ["405/70-24 MITAS MPT-04 152B 14PR TL", "Przemysłowe / Ładowarka"],
+  ["10.00-20 MITAS NB 38 146B 16PR TT", "Przemysłowe / Ładowarka"],
+  ["31X15.50-15 MITAS SK-02 8PR TL", "Rolnicze / Przyczepa"],
+  ["23X8.50-12 MITAS SK-02 115A4 10PR TL", "Rolnicze / Przyczepa"],
+  ["6.50-16 CULTOR AS FRONT 08 97A6/89A8 8PR TT", "Rolnicze / Ciągnik"],
+  ["265/70R19.5 LINGLONG KLS200 140/138M 16PR TL M+S 3PMSF", "Ciężarowe / Oś kierowana"],
+  ["245/70R19.5 LINGLONG KLS200 136/134M 16PR TL M+S 3PMSF", "Ciężarowe / Oś kierowana"],
+  ["265/70R17.5 LINGLONG KLS200 140/138M 16PR TL M+S 3PMSF", "Ciężarowe / Oś kierowana"],
+  ["315/70R22.5 KUMHO KXA31 156/150L 20PR TL 3PMSF", "Ciężarowe / All position"],
+  ["315/70R22.5 KUMHO KLD23 154/150L 18PR TL 3PMSF", "Ciężarowe / Oś napędowa"],
+  ["295/80R22.5 KUMHO KXS10 154/149L 18PR TL 3PMSF", "Ciężarowe / All position"],
+  ["315/70R22.5 HANKOOK DL51 154/150L M+S 3PMSF", "Ciężarowe / Oś napędowa"],
+  ["385/65R22.5 CONTINENTAL CONTI HYBRID HT5 HL 164K 20PR TL M+S 3PMSF", "Ciężarowe / Naczepa/przyczepa"],
+  ["295/80R22.5 CONTINENTAL CONTI HYBRID HS5 154/149M 16PR TL M+S 3PMSF", "Ciężarowe / Oś kierowana"],
+  ["265/70R19.5 CONTINENTAL CONTI HYBRID HT3+ 143/141K 16PR TL M+S 3PMSF", "Ciężarowe / Naczepa/przyczepa"],
+  ["460/70R24 FIRESTONE R8000 UTILITY 159A8/159B TL", "Przemysłowe / Ładowarka"],
+  ["7.50-20 CULTOR AS FRONT 08 109A6/101A8 8PR TT", "Rolnicze / Ciągnik"],
+  ["365/80R20 CONTINENTAL MPT 81 152K TL M+S", "Przemysłowe / Uniwersalne/pozostałe"],
+  ["500/70R24 ALLIANCE 580 164A8/164B TL", "Przemysłowe / Ładowarka"],
+  ["440/80R28 FIRESTONE DURA-UT 156A8 TL", "Przemysłowe / Ładowarka"],
+  ["500/70R24 FIRESTONE DURA-UT 164A/164B TL", "Przemysłowe / Koparka"],
+  ["405/70R18 FIRESTONE DURA-UT 141B", "Przemysłowe / Ładowarka"],
+  ["400/80-24 ALLIANCE TOUGH TRAC 325 162A8 TL", "Przemysłowe / Uniwersalne/pozostałe"],
+  ["440/80R28 NOKIAN TRI 2 156A8/151D SB TL", "Przemysłowe / Uniwersalne/pozostałe"],
+  ["460/70R24 ALLIANCE 585 159A8/159B SB TL", "Przemysłowe / Uniwersalne/pozostałe"],
+  ["23X8.50-12 TRELLEBORG T463 10PR TL", "Rolnicze / Kosiarka/ogród"],
+  ["500/70-24 MICHELIN POWER CL 164A8 TL", "Przemysłowe / Koparka"],
+  ["700/40-22.5 ALLIANCE 328 16PR TL", "Rolnicze / Przyczepa"],
+  ["400/70R20 MICHELIN BIBLOAD 149A8/149B TL", "Przemysłowe / Koparka"],
+  ["380/75R20 MICHELIN XMCL 148A8/148B TL", "Przemysłowe / Koparka"],
+  ["800/65R32 ALLIANCE 360 181A8/178B TL", "Rolnicze / Kombajn"],
+  ["18.4-34 NOKIAN TR FOREST 14PR TT", "Leśne / Forwarder/Harwester"],
+  ["600/65R28 GRI GREEN XLR 65 154D/157A8 R-1W TL", "Rolnicze / Ciągnik"],
+  ["710/70R38 ALLIANCE AGRO FORESTRY 670 175A2/168A8 SB TL", "Leśne / Ciągnik leśny"],
+  ["480/70-34 ALLIANCE AGRO FORESTRY 670 146A8/143B SB TL", "Leśne / Ciągnik leśny"],
+  ["19.5R24 ALLIANCE 570 156A8/153B SB TL", "Przemysłowe / Uniwersalne/pozostałe"],
+  ["17.5-24 ALLIANCE 570 12PR TL", "Przemysłowe / Uniwersalne/pozostałe"],
+  ["15.5/80-24 ALLIANCE AGRI NOVA 157A8 12PR TL", "Rolnicze / Uniwersalne/pozostałe"],
+  ["460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL", "Leśne / Forwarder/Harwester"],
+  ["380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL", "Leśne / Forwarder/Harwester"],
+  ["480/45-17 ALLIANCE FARM PRO 327 134A8/146A8 14PR TL", "Rolnicze / Przyczepa"],
+  ["380/55-17 ALLIANCE FARM PRO 327 125A8/138A8 12PR TL", "Rolnicze / Przyczepa"],
+  ["7.50-16 ALLIANCE 324 112A6 8PR TT", "Rolnicze / Uniwersalne/pozostałe"],
+  ["405/70-24 ALLIANCE TRACTION INDUSTRIAL 323 152B 14PR TL", "Przemysłowe / Uniwersalne/pozostałe"],
+  ["28L-26 NOKIAN LOGGER KING TRS-2 SF 20PR TL", "Leśne / Skidder"],
+  ["385/55R22.5 DUNLOP SP346 160K/158L TL M+S 3PMSF", "Ciężarowe / All position"],
+]);
+
+/** „Kategoria / Zastosowanie” → para. */
+function paraZTekstu(t: string): Para {
+  const i = t.indexOf(" / ");
+  return { kategoria: t.slice(0, i), zastosowanie: t.slice(i + 3) };
+}
 
 export type WierszPliku = { nazwa: string; kategoria: string; zastosowanie: string };
 
@@ -132,7 +204,13 @@ export function zaplanujNazwy(wiersze: readonly WierszPliku[]): PlanNazwy[] {
     if (tylkoRolniczeCiagnikLubUniwersalne) {
       plan.push({ nazwa, status: "ok", para: { kategoria: "Rolnicze", zastosowanie: "Ciągnik" } });
     } else {
-      plan.push({ nazwa, status: "niejednoznaczna", pary });
+      const reczne = ROZSTRZYGNIECIA_NIEJEDNOZNACZNYCH.get(nazwa);
+      const wybrana = reczne === undefined ? undefined : paraZTekstu(reczne);
+      if (wybrana && pary.some((p) => klucz(p.kategoria, p.zastosowanie) === klucz(wybrana.kategoria, wybrana.zastosowanie))) {
+        plan.push({ nazwa, status: "ok", para: wybrana });
+      } else {
+        plan.push({ nazwa, status: "niejednoznaczna", pary });
+      }
     }
   }
   return plan;

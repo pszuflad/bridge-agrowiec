@@ -20,7 +20,7 @@ None. Odstępstwa od produkcji (świadome, zatwierdzone): lista Rolniczych bez �
 - **Gate odbudowy (fixtures/kontrakt):** N/D — nie dotyka API.
 - Backend: lint ✓, typecheck ✓, build ✓, `npm test` ✓ (135 plików, 2136 testów) — po synchronizacji z `origin/develop`.
 - Frontend: tsc ✓, testy katalogu ✓ (171).
-- Przeliczenie pliku CSV: 8487 wierszy; 19 niejednoznacznych nazw rozstrzyga reguła Ciągnik/Uniwersalne, **52 nazwy (różne kategorie) są pomijane** — lista w `nazwy-niejednoznaczne-do-decyzji.csv`; po zmianach wszystkie pary są dozwolone przez triggery.
+- Przeliczenie pliku CSV: 8487 wierszy; 19 niejednoznacznych nazw rozstrzyga reguła Ciągnik/Uniwersalne, **52 nazwy (różne kategorie) rozstrzygnięte przez Claude'a na polecenie użytkownika** (tabela w kodzie; zawsze jedna z dwóch par z pliku; najmniej pewne: Mitas NB 38 i SK-02, Alliance 570/585/324/323, Nokian TRI 2, Michelin BIBLOAD) — lista w `nazwy-niejednoznaczne-rozstrzygniete.csv`; po zmianach wszystkie pary są dozwolone przez triggery.
 - Migracja 022 sprawdzona na bazie z 8487 produktami (czas ~160 ms).
 - Test mutacyjny: wyłączenie ochrony/dziedziczenia → 2 testy czerwone.
 

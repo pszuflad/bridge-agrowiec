@@ -4,7 +4,7 @@
 -- src/import/migracje/przypisz-kategorie-zastosowanie.ts. Nie edytować ręcznie (test db.migracja-022 porównuje).
 --
 -- NOWA LOGIKA BIZNESOWA, NIE PORT (decyzje użytkownika, 2026-10-04): jednorazowe przypisanie kategorii i
--- zastosowania produktom po `products.nazwa` (6978 nazw; nazwy niejednoznaczne są pominięte).
+-- zastosowania produktom po `products.nazwa` (7030 nazw; nazwy niejednoznaczne są pominięte).
 --  • Zmieniane są tylko wiersze, w których para różni się od docelowej.
 --  • Nadpisuje także produkty z dotychczasową poprawką Marty; wszystkie poprawki na kategorii i zastosowaniu
 --    (`manual_overrides`) są usuwane — nowe poprawki działają potem normalnie.
@@ -147,6 +147,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('10.00-20 MITAS EM-22 146B 16PR TT', 'Przemysłowe', 'Maszyny górnicze'),
 ('10.00-20 MITAS EM-23 146B 16PR TT', 'Przemysłowe', 'Maszyny górnicze'),
 ('10.00-20 MITAS EM23 16PR TT', 'Przemysłowe', 'Maszyny górnicze'),
+('10.00-20 MITAS NB 38 146B 16PR TT', 'Przemysłowe', 'Ładowarka'),
 ('10.00-20 MITAS NB38 16PR TT', 'Przemysłowe', 'Kompaktor'),
 ('10.00-20 MITAS NB38 EXTRA ML 16PR TT', 'Przemysłowe', 'Kompaktor'),
 ('10.00-20 MITAS NB41 16PR', 'Ciężarowe', 'Uniwersalne/pozostałe'),
@@ -412,10 +413,10 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('12.4-24 CEAT FARMAX R1 121A8 8PR TL', 'Rolnicze', 'Ciągnik'),
 ('12.4-24 CEAT FARMAX R1 125A8 10PR TL', 'Rolnicze', 'Ciągnik'),
 ('12.4-24 CULTOR AS-AGRI19 8PR TL', 'Rolnicze', 'Ciągnik'),
-('12.4-24 GRI GREEN EX RT100 12PR R-1 TT', 'Rolnicze', 'Ciągnik'),
-('12.4-24 GRI GREEN EX RT100 8PR R-1 TT', 'Rolnicze', 'Ciągnik');
+('12.4-24 GRI GREEN EX RT100 12PR R-1 TT', 'Rolnicze', 'Ciągnik');
 
 INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('12.4-24 GRI GREEN EX RT100 8PR R-1 TT', 'Rolnicze', 'Ciągnik'),
 ('12.4-24 GTK AS100 118A6 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('12.4-24 GTK AS100 124A6 12PR TT', 'Rolnicze', 'Ciągnik'),
 ('12.4-24 JK TYRE JTR 45 121A6 8PR TT', 'Przemysłowe', 'Wózek widłowy'),
@@ -814,10 +815,10 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('14.9-24 OZKA KNK 50 131A6 10PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('14.9-24 OZKA KNK 50 137A6 14PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('14.9-24 SPEEDWAYS GRIPKING HD 12PR TT', 'Rolnicze', 'Ciągnik'),
-('14.9-24 TRELLEBORG TM90 128A8 8PR TL', 'Rolnicze', 'Ciągnik'),
-('14.9-26 CEAT FARMAX R1 132A8 12PR TL', 'Rolnicze', 'Ciągnik');
+('14.9-24 TRELLEBORG TM90 128A8 8PR TL', 'Rolnicze', 'Ciągnik');
 
 INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('14.9-26 CEAT FARMAX R1 132A8 12PR TL', 'Rolnicze', 'Ciągnik'),
 ('14.9-26 CULTOR AS AGRI 10 128A6 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('14.9-26 CULTOR AS-AGRI10 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('14.9-26 GTK AS100 140A6 14PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
@@ -934,6 +935,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('15.5/70X18 BKT AT 621 10PR TL', 'Przemysłowe', 'Koparka'),
 ('15.5/80-24 ALLIANCE 324 157A6/154A8 12PR TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('15.5/80-24 ALLIANCE 533 12PR TL/TT', 'Przemysłowe', 'Koparka'),
+('15.5/80-24 ALLIANCE AGRI NOVA 157A8 12PR TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('15.5/80-24 ALLIANCE AGRI NOVA 163A8 16PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('15.5/80-24 CEAT LIFT PRO 151A6/163A6 16PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('15.5/80-24 GRI GRIP EX TL200 16PR R-4 TL', 'Przemysłowe', 'Ładowarka'),
@@ -1215,17 +1217,18 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('16X6.50-8 SPEEDWAYS TRACKING 6PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('16X6.50-8 TRELLEBORG GARDENER 2PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('16X6.50-8 TRELLEBORG T310 73A8 TT', 'Rolnicze', 'Ciągnik'),
-('16X6.50-8 TRELLEBORG T310 84A8/80B TT', 'Rolnicze', 'Ciągnik'),
-('16X6.50-8 TRELLEBORG T510 73A8 TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
-('16X6.50-8 TRELLEBORG T510 84A8/80B TT', 'Rolnicze', 'Uniwersalne/pozostałe');
+('16X6.50-8 TRELLEBORG T310 84A8/80B TT', 'Rolnicze', 'Ciągnik');
 
 INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('16X6.50-8 TRELLEBORG T510 73A8 TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
+('16X6.50-8 TRELLEBORG T510 84A8/80B TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('16X6.50-8 TRELLEBORG T539 6PR TT', 'Rolnicze', 'Kosiarka/ogród'),
 ('16X6.50-8 TRELLEBORG T539 GRIP 4PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('16X7.50-8 KENDA K500 SUPER TURF 53A4/64A4 4PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('16X7.50-8 TRELLEBORG T537 4PR TL', 'Rolnicze', 'Ciągnik'),
 ('16X7.50-8 TRELLEBORG T539 4PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('17.5-24 ALLIANCE 533 10PR TL', 'Przemysłowe', 'Koparka'),
+('17.5-24 ALLIANCE 570 12PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('17.5-24 CULTOR AGRO-INDUSTRIAL 10 12PR TL', 'Rolnicze', 'Ciągnik'),
 ('17.5-24 CULTOR INDUSTRIAL 10 12PR TL', 'Przemysłowe', 'Ładowarka'),
 ('17.5-24 GALAXY INDUSTRIAL R-1 12PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -1313,6 +1316,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('18.4-26 GRI GRIP EX R400 12PR R-4 TL', 'Przemysłowe', 'Ładowarka'),
 ('18.4-26 GRI GRIP EX R410 14PR R-4 TL', 'Przemysłowe', 'Ładowarka'),
 ('18.4-26 GRI GRIP EX R410 16PR R-4 TL', 'Przemysłowe', 'Ładowarka'),
+('18.4-26 GTK AS100 150A6 16PR TT', 'Rolnicze', 'Ciągnik'),
 ('18.4-26 GTK LD90 R-4 160A8 14PR TL', 'Przemysłowe', 'Ładowarka'),
 ('18.4-26 JK TYRE VBH PLUS II 156A8 12PR TL', 'Przemysłowe', 'Wózek widłowy'),
 ('18.4-26 LASSA EG 12PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -1372,6 +1376,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('18.4-34 MITAS TD19 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('18.4-34 MRL MRT 329 KIRTI 150A6/146A8 12PR TT', 'Rolnicze', 'Ciągnik'),
 ('18.4-34 MRL MRT 329 KIRTI 154A6/150A8 14PR TT', 'Rolnicze', 'Ciągnik'),
+('18.4-34 NOKIAN TR FOREST 14PR TT', 'Leśne', 'Forwarder/Harwester'),
 ('18.4-34 OZKA KNK 50 146A6 10PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('18.4-34 OZKA KNK 50 153A6 14PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('18.4-34 OZKA KNK 50 159A6 16PR TT', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -1526,6 +1531,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('19.5L-24 BKT RT 747 157A8/154B TL', 'Rolnicze', 'Ciągnik'),
 ('19.5L-24 BKT TR 459 12PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('19.5L-24 GRI GRIP EX R400 16PR R-4 TL', 'Przemysłowe', 'Ładowarka'),
+('19.5R24 ALLIANCE 570 156A8/153B SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('19.5R24 MITAS EM-01 164A8 TL', 'Przemysłowe', 'Ładowarka'),
 ('190-8 TRELLEBORG T537 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('190/90-16 TRELLEBORG AF302 108A8 TL', 'Rolnicze', 'Ciągnik'),
@@ -1613,15 +1619,15 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('205/65R17.5 BRIDGESTONE RT1 132J/133F 3PMSF M+S', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('205/65R17.5 CONTINENTAL HTR2 + 132/130J 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('205/65R17.5 GOODYEAR KMAX 132J/133G TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
-('205/65R17.5 KUMHO RT03 129/127J 3PMSF M+S', 'Ciężarowe', 'All position'),
+('205/65R17.5 KUMHO RT03 129/127J 3PMSF M+S', 'Ciężarowe', 'All position');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('205/65R17.5 LINGLONG -T20 129/127J 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('205/65R17.5 LINGLONG KLT200 129/127J 16PR TL M+S', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('205/65R17.5 WEST LAKE WTX1 129/127J 3PMSF M+S', 'Ciężarowe', 'Oś kierowana'),
 ('205/70R15 CONTINENTAL HTR 124/122K 14PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('205/75R17.5 BRIDGESTONE RD2 124/122M 3PMSF DRIVE', 'Ciężarowe', 'Oś napędowa'),
-('205/75R17.5 BRIDGESTONE RD2 124M TL M+S', 'Ciężarowe', 'Oś napędowa');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('205/75R17.5 BRIDGESTONE RD2 124M TL M+S', 'Ciężarowe', 'Oś napędowa'),
 ('205/75R17.5 BRIDGESTONE RS2 124M TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('205/75R17.5 CONTINENTAL CONTI HYBRID LD3 124/122M 12PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('205/75R17.5 CONTINENTAL CONTI HYBRID LS3 124/122M 12PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
@@ -2015,18 +2021,20 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('23X8.5-12 BKT SKID POWER HD 6PR TL', 'Przemysłowe', 'Ładowarka'),
 ('23X8.5-12 BKT SKID POWER HD E 12PR TL', 'Przemysłowe', 'Ładowarka'),
 ('23X8.5-12 MITAS SK-02 99A4 6PR TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
-('23X8.50-12 BKT LG 306 8PR TL', 'Rolnicze', 'Kosiarka/ogród'),
+('23X8.50-12 BKT LG 306 8PR TL', 'Rolnicze', 'Kosiarka/ogród');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('23X8.50-12 BKT SKID POWER HD 6PR TL', 'Przemysłowe', 'Ładowarka'),
 ('23X8.50-12 BKT TR 315 6PR TL', 'Rolnicze', 'Ciągnik'),
 ('23X8.50-12 CEAT TURF-XL 100A2 6PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('23X8.50-12 JOURNEY H8501 8PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('23X8.50-12 JOURNEY P332 6PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
-('23X8.50-12 KENDA K500 SUPER TURF 92A4 6PR TL', 'Rolnicze', 'Kosiarka/ogród');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('23X8.50-12 KENDA K500 SUPER TURF 92A4 6PR TL', 'Rolnicze', 'Kosiarka/ogród'),
+('23X8.50-12 MITAS SK-02 115A4 10PR TL', 'Rolnicze', 'Przyczepa'),
 ('23X8.50-12 MRL MG 54 -WIDE 102A6/106A3 12PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('23X8.50-12 TRELLEBORG SK-800 101A2 6PR TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('23X8.50-12 TRELLEBORG SK-900 116A2 12PR TL', 'Rolnicze', 'Ciągnik'),
+('23X8.50-12 TRELLEBORG T463 10PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('23X8.50-12 TRELLEBORG T463 4PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('23X8.50-12 TRELLEBORG T539 10PR TT', 'Rolnicze', 'Kosiarka/ogród'),
 ('23X8.50-12 TRELLEBORG T539 GREY 10PR TT', 'Rolnicze', 'Kosiarka/ogród'),
@@ -2139,6 +2147,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('245/70R19.5 GOODTRIP GHD22 136/134M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('245/70R19.5 GOODYEAR KMAX 136/134M TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('245/70R19.5 LINGLONG KLD200 136/134M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('245/70R19.5 LINGLONG KLS200 136/134M 16PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('245/70R19.5 MATADOR HR 4 136/134M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('245/70R19.5 MATADOR HR 5 141/140K 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('245/70R19.5 MICHELIN X MULTI Z 135/134M 3PMSF', 'Ciężarowe', 'Oś kierowana'),
@@ -2266,6 +2275,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('265/70R17.5 HANKOOK DH35 140/138M DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('265/70R17.5 HANKOOK DH35 140/138M M+S 3PMSF', 'Ciężarowe', 'Oś napędowa'),
 ('265/70R17.5 LINGLONG KLD200 140/138M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('265/70R17.5 LINGLONG KLS200 140/138M 16PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('265/70R17.5 LINGLONG L-D20 140/138M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('265/70R17.5 MICHELIN X MULTI D 140/138M 3PMSF DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('265/70R17.5 PIRELLI R02 PROFUEL DRIVE 140/138M 3PMSF M+S DRIVE', 'Ciężarowe', 'Oś napędowa'),
@@ -2286,6 +2296,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('265/70R19.5 CONTINENTAL CONTI HYBRID HD3+ 140/138M 14PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('265/70R19.5 CONTINENTAL CONTI HYBRID HS3 140/138M 14PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('265/70R19.5 CONTINENTAL CONTI HYBRID HS3+ 140/138M 14PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
+('265/70R19.5 CONTINENTAL CONTI HYBRID HT3+ 143/141K 16PR TL M+S 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('265/70R19.5 CONTINENTAL CONTI SCANDINAVIA HD3 140/138M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('265/70R19.5 CONTINENTAL CONTI SCANDINAVIA HS3 140/138M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('265/70R19.5 CONTINENTAL CONTI SCANDINAVIA HT3 143/141K 16PR TL M+S 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
@@ -2310,6 +2321,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('265/70R19.5 KUMHO KRT03 143/141J 18PR TL 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('265/70R19.5 KUMHO KXA31 144/142J 3PMSF M+S', 'Ciężarowe', 'All position'),
 ('265/70R19.5 LINGLONG KLD200 140/138M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('265/70R19.5 LINGLONG KLS200 140/138M 16PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('265/70R19.5 MARSHAL RD50 140/138M 3PMSF M+S DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('265/70R19.5 MARSHAL RS50 140M 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('265/70R19.5 MATADOR HR 4 140/138M 14PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
@@ -2411,7 +2423,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('275/70R22.5 BRIDGESTONE U-AP002 152J/150K 3PMSF M+S', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('275/70R22.5 BRIDGESTONE V-STEEL MIX M840 148/145K 3PMSF M+S', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('275/70R22.5 CONTINENTAL CONTI HYBRID HD5 148/145M 18PR TL M+S 3PMSF', 'Ciężarowe', 'Oś napędowa'),
-('275/70R22.5 CONTINENTAL CONTI URBAN HA5 152/148J 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('275/70R22.5 CONTINENTAL CONTI URBAN HA5 152/148J 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('275/70R22.5 FALKEN BI856 DRIVE 148/145M TL M+S 3PMSF', 'Ciężarowe', 'Oś napędowa'),
 ('275/70R22.5 GOLDENCROWN CR976A 148/145M M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('275/70R22.5 GOODYEAR MARATHON LHT II 152J/148L M+S', 'Ciężarowe', 'Naczepa/przyczepa'),
@@ -2423,9 +2437,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('275/70R22.5 MATADOR FU 1 CITY 148/145J 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('275/70R22.5 MATADOR FU 1 CITY 148/145J 18PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('275/70R22.5 SAVA CITY 148J/152E TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
-('275/70R22.5 WEST LAKE WAU1 URBAN MASTER 150145J 3PMSF M+S', 'Ciężarowe', 'All position');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('275/70R22.5 WEST LAKE WAU1 URBAN MASTER 150145J 3PMSF M+S', 'Ciężarowe', 'All position'),
 ('275/70R22.5 WEST LAKE WAU1 URBAN MASTER 152J/148J 3PMSF M+S', 'Ciężarowe', 'All position'),
 ('275/80R22.5 WEST LAKE CR976A 149/146M 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('275/90R22.5 MITAS SRT2 153G/163A5 TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -2590,6 +2602,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('28L-26 CEAT FLOATMAX CARGO PLUS 176D SB TL', 'Rolnicze', 'Przyczepa'),
 ('28L-26 CEAT YIELDMAX 23° 150A8 12PR TL', 'Rolnicze', 'Kombajn'),
 ('28L-26 NOKIAN FOREST KING TRS LS-2 TL SF 26PR TL', 'Leśne', 'Forwarder/Harwester'),
+('28L-26 NOKIAN LOGGER KING TRS-2 SF 20PR TL', 'Leśne', 'Skidder'),
 ('28L-26 TRELLEBORG T418 SB 20PR TT', 'Rolnicze', 'Ciągnik'),
 ('28L-26 TRELLEBORG T418 SB 26PR TL', 'Rolnicze', 'Ciągnik'),
 ('28R26 ALLIANCE 330 173A8/170B TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -2696,6 +2709,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('295/80R22.5 CONTINENTAL CONTI COACHREGIO HA3 154/149M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('295/80R22.5 CONTINENTAL CONTI ECOREGIONAL HD3 152/148M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('295/80R22.5 CONTINENTAL CONTI HYBRID HD5 152/148M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('295/80R22.5 CONTINENTAL CONTI HYBRID HS5 154/149M 16PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('295/80R22.5 CONTINENTAL CONTI SCANDINAVIA HD3 152/148M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('295/80R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 154/149M 16PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('295/80R22.5 CONTINENTAL HDW2 COACH 154/149M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -2733,6 +2747,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('295/80R22.5 KUMHO CA03 154/149J 3PMSF M+S', 'Ciężarowe', 'All position'),
 ('295/80R22.5 KUMHO KWD01 152/148L 16PR TL 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('295/80R22.5 KUMHO KXD10 154/149L 18PR TL 3PMSF', 'Ciężarowe', 'All position'),
+('295/80R22.5 KUMHO KXS10 154/149L 18PR TL 3PMSF', 'Ciężarowe', 'All position'),
 ('295/80R22.5 LINGLONG KTD300 152/148M 16PR TL M+S 3PMSF', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('295/80R22.5 LINGLONG KTS300 154/149M 18PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('295/80R22.5 LINGLONG R-D30 154/149L 18PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
@@ -2810,7 +2825,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('300/80R24 NOKIAN TRI 2 133A8/128D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('300/80X15.3 BKT AW 09 138A8 TL', 'Rolnicze', 'Przyczepa'),
 ('300/85R42 BKT AGRIMAX RT 955 144A8/141B TL', 'Rolnicze', 'Ciągnik'),
-('300/85R42 MITAS AC 90 144A8/141B TL', 'Rolnicze', 'Ciągnik'),
+('300/85R42 MITAS AC 90 144A8/141B TL', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('300/90-24 CULTOR AW-IMPLEMENT 13 132A6 TT', 'Rolnicze', 'Przyczepa'),
 ('300/95R42 FIRESTONE PERFORMER 95 147D TL', 'Rolnicze', 'Ciągnik'),
 ('300/95R42 KLEBER CROPKER 147D/150A8 TL', 'Rolnicze', 'Ciągnik'),
@@ -2825,9 +2842,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('300/95R46 FIRESTONE PERFORMER 95 148D TL', 'Rolnicze', 'Ciągnik'),
 ('300/95R46 GRI GREEN XLR 95 151D/154A8 R-1 TL', 'Rolnicze', 'Ciągnik'),
 ('300/95R46 GTK RS200 148A8/148B TL', 'Rolnicze', 'Ciągnik'),
-('300/95R46 KLEBER CROPKER 148D/151A8 TL', 'Rolnicze', 'Ciągnik');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('300/95R46 KLEBER CROPKER 148D/151A8 TL', 'Rolnicze', 'Ciągnik'),
 ('300/95R46 OZKA AGRO 10 148A8/148B TL', 'Rolnicze', 'Ciągnik'),
 ('300/95R46 TAURUS RC 95 148A8/148B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('300/95R46 TRELLEBORG TM100 148A8/148B TL', 'Rolnicze', 'Ciągnik'),
@@ -3016,11 +3031,14 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('315/70R22.5 HANKOOK DH51 SMART FLEX 154/150L 3PMSF M+S DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('315/70R22.5 HANKOOK DL20W 154/150L 3PMSF M+S DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('315/70R22.5 HANKOOK DL20W 154/150L M+S 3PMSF', 'Ciężarowe', 'Oś napędowa'),
+('315/70R22.5 HANKOOK DL51 154/150L M+S 3PMSF', 'Ciężarowe', 'Oś napędowa'),
 ('315/70R22.5 HANKOOK SMART FLEX AH51 156/150L 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('315/70R22.5 JK TYRE JETSTEEL JDL3 154L/150J 3PMSF M+S DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('315/70R22.5 JK TYRE JETWAY JUL4 156L/150J 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
+('315/70R22.5 KUMHO KLD23 154/150L 18PR TL 3PMSF', 'Ciężarowe', 'Oś napędowa'),
 ('315/70R22.5 KUMHO KWA03 154/150L 18PR TL 3PMSF', 'Ciężarowe', 'All position'),
 ('315/70R22.5 KUMHO KWD01 154/150L 18PR TL 3PMSF', 'Ciężarowe', 'Oś napędowa'),
+('315/70R22.5 KUMHO KXA31 156/150L 20PR TL 3PMSF', 'Ciężarowe', 'All position'),
 ('315/70R22.5 KUMHO KXD31 154/150L 18PR TL 3PMSF', 'Ciężarowe', 'All position'),
 ('315/70R22.5 KUMHO KXS10 156/150L 20PR TL 3PMSF', 'Ciężarowe', 'All position'),
 ('315/70R22.5 KUMHO XD31 154/150L 3PMSF M+S DRIVE', 'Ciężarowe', 'Oś napędowa'),
@@ -3209,7 +3227,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('315/80R22.5 MIRAGE MG638 156/152L NAPęD 20PR M+S 3PMSF', 'Ciężarowe', 'All position'),
 ('315/80R22.5 MIRAGE MG768 NAPęD 156/152L 20PR M+S', 'Ciężarowe', 'All position'),
 ('315/80R22.5 NOKIAN E-TRUCK DRIVE 154/150M 3PMSF DRIVE', 'Ciężarowe', 'Oś napędowa'),
-('315/80R22.5 NOKIAN E-TRUCK STEER 156/150L 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
+('315/80R22.5 NOKIAN E-TRUCK STEER 156/150L 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('315/80R22.5 NOKIAN HAKKA TRUCK DRIVE 154/150M 3PMSF DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('315/80R22.5 PIRELLI IT-D90 156/150L TL M+S 3PMSF', 'Ciężarowe', 'All position'),
 ('315/80R22.5 PIRELLI TG88 156/150K TL M+S 3PMSF', 'Ciężarowe', 'All position'),
@@ -3227,9 +3247,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('315/80R22.5 SAVA AVANT 5 156L/154M 3PMSF FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('315/80R22.5 SAVA AVANT 5 156L/154M TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('315/80R22.5 SAVA AVANT MS 2 156/150K TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
-('315/80R22.5 SAVA AVANT MSS 2 156/150K 3PMSF M+S', 'Ciężarowe', 'Oś kierowana');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('315/80R22.5 SAVA AVANT MSS 2 156/150K 3PMSF M+S', 'Ciężarowe', 'Oś kierowana'),
 ('315/80R22.5 SAVA ORJAK 5 156L/154M 3PMSF M+S DRIVE', 'Ciężarowe', 'Oś napędowa'),
 ('315/80R22.5 SAVA ORJAK 5 156L/154M TL M+S 3PMSF', 'Ciężarowe', 'Oś napędowa'),
 ('315/80R22.5 SAVA ORJAK MS 156/150K 3PMSF DRIVE', 'Ciężarowe', 'Oś napędowa'),
@@ -3259,6 +3277,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('31X15.50-15 BKT SKID POWER HD 10PR TL', 'Przemysłowe', 'Ładowarka'),
 ('31X15.50-15 BRIDGESTONE PD1 4PR TL', 'Rolnicze', 'Kosiarka/ogród'),
 ('31X15.50-15 JK TYRE JET TRAX SUPER II 132A2 8PR TL', 'Przemysłowe', 'Wózek widłowy'),
+('31X15.50-15 MITAS SK-02 8PR TL', 'Rolnicze', 'Przyczepa'),
 ('31X15.50-15 MITAS TR-07 121A8/109A8 8PR TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('31X15.50-15 MITAS TR06 8PR TL', 'Rolnicze', 'Przyczepa'),
 ('31X15.50-15 MITAS TR07 8PR TL', 'Rolnicze', 'Przyczepa'),
@@ -3610,7 +3629,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('360/70R28 CEAT FARMAX R70 128A8/125D TL', 'Rolnicze', 'Ciągnik'),
 ('360/70R28 FIRESTONE PERFORMER 70 125D/122E TL', 'Rolnicze', 'Ciągnik'),
 ('360/70R28 GRI GREEN XLR 70 125D R-1W TL', 'Rolnicze', 'Ciągnik'),
-('360/70R28 GTK RS200 125A8/125B TL', 'Rolnicze', 'Ciągnik'),
+('360/70R28 GTK RS200 125A8/125B TL', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('360/70R28 KLEBER FITKER 125A8/125B TL', 'Rolnicze', 'Ciągnik'),
 ('360/70R28 MRL FARM MAXX 70 RRT 770 125D/128A8 TL', 'Rolnicze', 'Ciągnik'),
 ('360/70R28 OZKA AGRO 10 125A8/125B TL', 'Rolnicze', 'Ciągnik'),
@@ -3629,9 +3650,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('360/80R28 NOKIAN HAKKAPELIITTA TRI 146A8/142D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('360/80R28 NOKIAN TRI 2 146A8/142D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('360/85-20 MITAS MPT-04 142D 14PR TL', 'Rolnicze', 'Ciągnik'),
-('360/85-20 MITAS MPT04 12PR TL', 'Przemysłowe', 'Maszyny górnicze');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('360/85-20 MITAS MPT04 12PR TL', 'Przemysłowe', 'Maszyny górnicze'),
 ('360/85-20 MITAS MPT04 IND 14PR TL', 'Przemysłowe', 'Maszyny górnicze'),
 ('365/70R18 APOLLO TERRA PRO1045 135B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('365/70R18 BKT MULTIMAX MP 513 133G TL', 'Rolnicze', 'Ciągnik'),
@@ -3639,6 +3658,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('365/70R18 MITAS EM-01 135B/146A2 TL', 'Rolnicze', 'Ciągnik'),
 ('365/70R18 MITAS EM01 135B TL', 'Przemysłowe', 'Maszyny górnicze'),
 ('365/80R20 BKT EARTHMAX SR33 152K TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('365/80R20 CONTINENTAL MPT 81 152K TL M+S', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('365/80R20 FIRESTONE DURA-UT 141B TL', 'Przemysłowe', 'Koparka'),
 ('365/80R20 NOKIAN MPT AGILE 152G SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('365/80R20 NOKIAN MPT AGILE 152G TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -3646,6 +3666,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('375/70R20 BKT MULTIMAX MP 513 136G TL', 'Przemysłowe', 'Ładowarka'),
 ('375/70R20 MITAS AC 70 MPT 136G TL', 'Rolnicze', 'Ciągnik'),
 ('380/105R50 ALLIANCE AGRISTAR II RC 168D/165E TL', 'Rolnicze', 'Ciągnik'),
+('380/55-17 ALLIANCE FARM PRO 327 125A8/138A8 12PR TL', 'Rolnicze', 'Przyczepa'),
 ('380/55-17 TRELLEBORG AW305 138A8 TL', 'Rolnicze', 'Przyczepa'),
 ('380/55-17 TRELLEBORG AW309 138A8 TL', 'Rolnicze', 'Ciągnik'),
 ('380/60-15 TRELLEBORG T539 SOFT GRIP 114A8 TL', 'Rolnicze', 'Kosiarka/ogród'),
@@ -3712,12 +3733,14 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('380/70R28 TRELLEBORG TM700 127A8/127B TL', 'Rolnicze', 'Ciągnik'),
 ('380/70R28 TRELLEBORG TM700 PT 127D TL', 'Rolnicze', 'Ciągnik'),
 ('380/75R20 CEAT LOADPRO 148A8/148B SB TL', 'Rolnicze', 'Ciągnik'),
+('380/75R20 MICHELIN XMCL 148A8/148B TL', 'Przemysłowe', 'Koparka'),
 ('380/80R38 ALLIANCE AGRI STAR II 152D TL', 'Rolnicze', 'Ciągnik'),
 ('380/80R38 ALLIANCE AGRISTAR II 142D TL', 'Rolnicze', 'Ciągnik'),
 ('380/80R38 GRI GREEN XLR 85 152A8/149D R-1W TL', 'Rolnicze', 'Ciągnik'),
 ('380/80R38 GRI GREEN XLR EARTH 85 152A8/149D R-1W TL', 'Rolnicze', 'Ciągnik'),
 ('380/80R38 MICHELIN AGRIBIB 2 142A8/139D TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('380/80R38 TRELLEBORG TM600 142A8/142B TL', 'Rolnicze', 'Ciągnik'),
+('380/85-24 ALLIANCE AGRO FORESTRY 333 137A8/134B 14PR SB TL', 'Leśne', 'Forwarder/Harwester'),
 ('380/85-24 NOKIAN TR FOREST 2 140A8/137B 16PR TL', 'Leśne', 'Uniwersalne/pozostałe'),
 ('380/85-24 TRELLEBORG T410 AGF 137A8 TT', 'Rolnicze', 'Ciągnik'),
 ('380/85-24 TRELLEBORG T410 AGF 143A8 TL', 'Rolnicze', 'Ciągnik'),
@@ -3833,6 +3856,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('385/55R22.5 CONTINENTAL HS5 CONTI HYBRID 160K 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('385/55R22.5 DUNLOP SP247 160K/158L TL 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('385/55R22.5 DUNLOP SP346 160K/158L 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
+('385/55R22.5 DUNLOP SP346 160K/158L TL M+S 3PMSF', 'Ciężarowe', 'All position'),
 ('385/55R22.5 FALKEN RI128 160K/158L M+S', 'Ciężarowe', 'Oś kierowana'),
 ('385/55R22.5 FALKEN RI151 160K/158L M+S', 'Ciężarowe', 'Oś kierowana'),
 ('385/55R22.5 FIRESTONE FS424 160K TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
@@ -3941,6 +3965,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('385/65R22.5 CONTINENTAL CONTI HYBRID HS5 164K 20PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('385/65R22.5 CONTINENTAL CONTI HYBRID HT3+ 164K 20PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('385/65R22.5 CONTINENTAL CONTI HYBRID HT5 164K 3PMSF M+S', 'Ciężarowe', 'Oś kierowana'),
+('385/65R22.5 CONTINENTAL CONTI HYBRID HT5 HL 164K 20PR TL M+S 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('385/65R22.5 CONTINENTAL CONTI SCANDINAVIA HS3 160K 20PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('385/65R22.5 CONTINENTAL CONTI SCANDINAVIA HT3 164K 20PR TL M+S 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('385/65R22.5 CONTINENTAL HDC 164J 20PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
@@ -4006,7 +4031,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('385/65R22.5 KUMHO KXA11 164K 24PR TL 3PMSF', 'Ciężarowe', 'Oś kierowana'),
 ('385/65R22.5 KUMHO KXA31 164K 3PMSF M+S FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('385/65R22.5 KUMHO LS03 164K 3PMSF FRONT', 'Ciężarowe', 'Oś kierowana'),
-('385/65R22.5 KUMHO MA12 160K 3PMSF', 'Ciężarowe', 'All position'),
+('385/65R22.5 KUMHO MA12 160K 3PMSF', 'Ciężarowe', 'All position');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('385/65R22.5 KUMHO XA11 164K 3PMSF', 'Ciężarowe', 'All position'),
 ('385/65R22.5 LINGLONG ETT100 164K/158L 24PR TL M+S 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('385/65R22.5 LINGLONG KTS300 164K/158L 24PR TL M+S 3PMSF', 'Ciężarowe', 'Oś kierowana'),
@@ -4031,9 +4058,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('385/65R22.5 MICHELIN XTE 3 160J TL M+S', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('385/65R22.5 MICHELIN XTE3 160J M+S', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('385/65R22.5 MIRAGE MG022 /NACZEPA 164K/158L 24PR M+S 3PMSF', 'Ciężarowe', 'All position'),
-('385/65R22.5 MITAS AR01 161F TL', 'Rolnicze', 'Przyczepa');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('385/65R22.5 MITAS AR01 161F TL', 'Rolnicze', 'Przyczepa'),
 ('385/65R22.5 NOKIAN HAKKA TRUCK 160K 3PMSF M+S', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('385/65R22.5 PROMETEON G02 PRO MULTIAXLE HL 164K/158L TL M+S 3PMSF', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('385/65R22.5 PROMETEON R02 PRO TRAILER FRT HL 164K/158L TL M+S 3PMSF', 'Ciężarowe', 'Naczepa/przyczepa'),
@@ -4207,6 +4232,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('400/70R20 FIRESTONE DURA-UT 149A TL', 'Rolnicze', 'Ciągnik'),
 ('400/70R20 FIRESTONE DURAFORCE 149A8 TL', 'Przemysłowe', 'Koparka'),
 ('400/70R20 KLEBER LUGKER 149A8/149B TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('400/70R20 MICHELIN BIBLOAD 149A8/149B TL', 'Przemysłowe', 'Koparka'),
 ('400/70R20 MICHELIN XMCL 149A8/149B TL', 'Przemysłowe', 'Koparka'),
 ('400/70R20 NOKIAN HAKKAPELIITTA TRI 149A8/144D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('400/70R20 TRELLEBORG TH400 149A8/149B TL', 'Przemysłowe', 'Ładowarka'),
@@ -4222,9 +4248,11 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('400/75R38 ALLIANCE FARM PRO II 134A8/134B TL', 'Rolnicze', 'Ciągnik'),
 ('400/75R38 CEAT FARMAX R75 141A8/138D TL', 'Rolnicze', 'Ciągnik'),
 ('400/75R38 TRELLEBORG TM600 138A8/135B TL', 'Rolnicze', 'Ciągnik'),
+('400/80-24 ALLIANCE TOUGH TRAC 325 162A8 TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('400/80-24 APOLLO IND FX-525 162A8 20PR TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('400/80-24 BKT CON STAR E 162A8 20PR TL', 'Przemysłowe', 'Koparka'),
 ('400/80-24 CEAT LOADPRO 162A8 TL', 'Rolnicze', 'Ciągnik'),
+('400/80-24 MICHELIN POWER CL 162A8 20PR TL', 'Przemysłowe', 'Koparka'),
 ('400/80-24 MITAS TI 05 162A8 TL DEMO', 'Przemysłowe', 'Koparka'),
 ('400/80-24 MRL MTU 430 ROCKY HD 162A8 20PR TL', 'Przemysłowe', 'Ładowarka'),
 ('400/80R24 BKT MULTIMAX MP 527 162A8/162B TL', 'Przemysłowe', 'Ładowarka'),
@@ -4255,12 +4283,15 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('405/70-20 MRL MIM 374 160A6/154A8 14PR TL', 'Rolnicze', 'Przyczepa'),
 ('405/70-20 MRL MIM 374 162A6/156A8 16PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('405/70-20 OZKA IND 80 R-4 166A2 16PR TL', 'Przemysłowe', 'Ładowarka'),
+('405/70-24 ALLIANCE TRACTION INDUSTRIAL 323 152B 14PR TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('405/70-24 CEAT MPT 800 152B 14PR TL', 'Rolnicze', 'Ciągnik'),
 ('405/70-24 GTK LD90 169A2 16PR TL', 'Przemysłowe', 'Ładowarka'),
 ('405/70-24 MITAS MPT-01 152B 14PR TL', 'Rolnicze', 'Ciągnik'),
+('405/70-24 MITAS MPT-04 152B 14PR TL', 'Przemysłowe', 'Ładowarka'),
 ('405/70R18 ALLIANCE 608 153A2/141B TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('405/70R18 APOLLO TERRA PRO1045 141B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('405/70R18 CEAT LOADPRO HARD SURFACE 147A8/147B SB TL', 'Rolnicze', 'Ciągnik'),
+('405/70R18 FIRESTONE DURA-UT 141B', 'Przemysłowe', 'Ładowarka'),
 ('405/70R18 MITAS EM-01 141B TL', 'Rolnicze', 'Ciągnik'),
 ('405/70R18 MITAS EM-01 156B TL', 'Rolnicze', 'Ciągnik'),
 ('405/70R18 MITAS EM01 156B TL', 'Przemysłowe', 'Maszyny górnicze'),
@@ -4402,7 +4433,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('420/85R28 GRI GREEN XLR 85 139D R-1W TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R28 GTK AGR ALFA 139A8/139B TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R28 GTK RS200 139A8/136B TL', 'Rolnicze', 'Ciągnik'),
-('420/85R28 KLEBER TRAKER 144A8/141B TL', 'Rolnicze', 'Ciągnik'),
+('420/85R28 KLEBER TRAKER 144A8/141B TL', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('420/85R28 MAXIMO RADIAL 85 139A8/136B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('420/85R28 MITAS AC 85 139A8/136B TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R28 MRL FARM XTREME 85 RRT500 139D TL', 'Rolnicze', 'Ciągnik'),
@@ -4433,9 +4466,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('420/85R34 CEAT FARMAX R85 145A8/142D TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R34 CEAT FARMAX R85 150A8/147D TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R34 CONTINENTAL TRACTOR 85 147A8/147B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
-('420/85R34 CULTOR RD-01 142A8/139B TL', 'Rolnicze', 'Ciągnik');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('420/85R34 CULTOR RD-01 142A8/139B TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R34 CULTOR RD-01 147A8/144B TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R34 FIRESTONE PERFORMER 85 142D/139E TL', 'Rolnicze', 'Ciągnik'),
 ('420/85R34 GRI GREEN XLR 85 142D R-1W TL', 'Rolnicze', 'Ciągnik'),
@@ -4556,6 +4587,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('440/70R28 MITAS AC 70 152A8 TL', 'Rolnicze', 'Ciągnik'),
 ('440/80-24 BKT CON STAR E 168A8 22PR TL', 'Przemysłowe', 'Koparka'),
 ('440/80-24 CEAT LOADPRO 168A8 TL', 'Rolnicze', 'Ciągnik'),
+('440/80-24 MICHELIN POWER CL 168A8 TL', 'Przemysłowe', 'Koparka'),
 ('440/80-28 ALLIANCE 321 PLUS 152A8 12PR TL', 'Rolnicze', 'Ciągnik'),
 ('440/80-28 BKT CON STAR E 156A8 TL', 'Przemysłowe', 'Koparka'),
 ('440/80-28 KABAT GTR-03 152A8 12PR TL', 'Rolnicze', 'Ciągnik'),
@@ -4575,10 +4607,12 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('440/80R28 ALLIANCE 585 163A8/163B TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('440/80R28 BKT RIDEMAX IT 696 156A/151D TL', 'Rolnicze', 'Ciągnik'),
 ('440/80R28 CEAT LOADPRO 156A8/156B SB TL', 'Rolnicze', 'Ciągnik'),
+('440/80R28 FIRESTONE DURA-UT 156A8 TL', 'Przemysłowe', 'Ładowarka'),
 ('440/80R28 GALAXY MULTI TOUGH 156A8 TL DEMO', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('440/80R28 MICHELIN XMCL 156A8/156B TL', 'Przemysłowe', 'Koparka'),
 ('440/80R28 MITAS HCM IND 156A8/151D TL SB', 'Rolnicze', 'Ciągnik'),
 ('440/80R28 NOKIAN HAKKAPELIITTA TRI 156A8/151D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('440/80R28 NOKIAN TRI 2 156A8/151D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('440/80R28 NOKIAN TRI 2 156A8/151D TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('440/80R28 OZKA OR 71 156A8/156B TL', 'Rolnicze', 'Przyczepa'),
 ('440/80R28 TRELLEBORG TH 400 156A8/156B TL', 'Przemysłowe', 'Ładowarka'),
@@ -4634,6 +4668,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('460/65R24 NOKIAN TRI 2 156A8/151D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('460/70-24 MICHELIN POWER CL 159A8 TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('460/70R24 ALLIANCE 580 150A8 TL DEMO', 'Rolnicze', 'Ciągnik'),
+('460/70R24 ALLIANCE 585 159A8/159B SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('460/70R24 APOLLO TERRA PRO1044 158D TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('460/70R24 APOLLO TERRA PRO1045 158D TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('460/70R24 BRIDGESTONE VH-IND 159A8/156B TL', 'Rolnicze', 'Ciągnik'),
@@ -4645,6 +4680,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('460/70R24 EMPERADOR 159A8 TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('460/70R24 FIRESTONE DURAFORCE 159A8 TL', 'Przemysłowe', 'Koparka'),
 ('460/70R24 FIRESTONE DURAFORCE UTILITY 159A8 TL', 'Rolnicze', 'Ciągnik'),
+('460/70R24 FIRESTONE R8000 UTILITY 159A8/159B TL', 'Przemysłowe', 'Ładowarka'),
 ('460/70R24 GRI GRIP XLR EARTH TH200 159A8 R-4 TL', 'Przemysłowe', 'Ładowarka'),
 ('460/70R24 GRI GRIP XLR TH200 159A8 R-4 TL', 'Przemysłowe', 'Ładowarka'),
 ('460/70R24 GRI GRIP XLR TH210 161A8 R-4 TL', 'Przemysłowe', 'Ładowarka'),
@@ -4653,6 +4689,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('460/70R24 KLEBER LUGKER 159A8/159B TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('460/70R24 LINGLONG LR451 159A8/159B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('460/70R24 MICHELIN BIBLOAD 159A8/159B TL', 'Przemysłowe', 'Koparka'),
+('460/70R24 MICHELIN XMCL 159A8/159B TL', 'Przemysłowe', 'Koparka'),
 ('460/70R24 MICHELIN XMCL 159A8/159B TL DEMO', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('460/70R24 MITAS AC 70 IMP 163A8/151A8 TL', 'Rolnicze', 'Ciągnik'),
 ('460/70R24 MRL GRIP TRAC 375 159A8 TL', 'Rolnicze', 'Ciągnik'),
@@ -4672,6 +4709,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('460/85-30 TRELLEBORG T410 AGF 150A8 TT', 'Rolnicze', 'Ciągnik'),
 ('460/85-34 NOKIAN TR FOREST 2 155A8/152B 16PR TL', 'Leśne', 'Uniwersalne/pozostałe'),
 ('460/85-34 TRELLEBORG T410 AGF 152A8 TL', 'Rolnicze', 'Ciągnik'),
+('460/85-38 ALLIANCE AGRO FORESTRY 333 154A8/151B 14PR SB TL', 'Leśne', 'Forwarder/Harwester'),
 ('460/85-38 NOKIAN TR FOREST 2 157A8/154B 16PR TL', 'Leśne', 'Uniwersalne/pozostałe'),
 ('460/85-38 TRELLEBORG T410 AGF 154A8 TT', 'Rolnicze', 'Ciągnik'),
 ('460/85R30 ALLIANCE AGRI STAR II 145D TL', 'Rolnicze', 'Ciągnik'),
@@ -4722,6 +4760,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('460/85R42 BRIDGESTONE VX TRACTOR 156D/153E TL', 'Rolnicze', 'Ciągnik'),
 ('460/85R42 FIRESTONE PERFORMER 85 150D/147E TL', 'Rolnicze', 'Ciągnik'),
 ('475/65-20 BRIDGESTONE PD1 122A6 4PR TT', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('480/45-17 ALLIANCE FARM PRO 327 134A8/146A8 14PR TL', 'Rolnicze', 'Przyczepa'),
 ('480/45-17 CEAT FLOTATION PLUS 134A8/146A8 16PR TL', 'Rolnicze', 'Przyczepa'),
 ('480/45-17 MITAS TR-01 146A8/134A8 TL', 'Rolnicze', 'Ciągnik'),
 ('480/45-17 TRELLEBORG AW305 146A8 TL', 'Rolnicze', 'Przyczepa'),
@@ -4778,6 +4817,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('480/65R28 OZKA AGROLOX 136D/139A8 TL', 'Rolnicze', 'Ciągnik'),
 ('480/65R28 TRELLEBORG TM800 PT 136D TL', 'Rolnicze', 'Ciągnik'),
 ('480/65R28 VREDESTEIN TRAXION65 136D TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
+('480/70-34 ALLIANCE AGRO FORESTRY 670 146A8/143B SB TL', 'Leśne', 'Ciągnik leśny'),
 ('480/70-38 ALLIANCE AF 670 150A8/147B TL', 'Leśne', 'Ciągnik leśny'),
 ('480/70R24 ALLIANCE AGRI STAR II 138D STUBBLE GUARD TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R24 BKT AGRIMAX RT 765 E 138D TL', 'Rolnicze', 'Ciągnik'),
@@ -4795,7 +4835,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('480/70R24 TRELLEBORG TM700 138A8/138B TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R26 OZKA AGRO 10 139A8/139B TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R26 TRELLEBORG TM700 139A8/139B TL', 'Rolnicze', 'Ciągnik'),
-('480/70R28 ALLIANCE AGRI STAR II 151D TL', 'Rolnicze', 'Ciągnik'),
+('480/70R28 ALLIANCE AGRI STAR II 151D TL', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('480/70R28 ALLIANCE AGRISTAR II 70 140D TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R28 BKT AGRIMAX FACTOR E 140D/143A8 TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R28 BKT AGRIMAX RT 765 140D TL', 'Rolnicze', 'Ciągnik'),
@@ -4835,9 +4877,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('480/70R30 CULTOR RD-02 141A8/141B TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R30 FIRESTONE PERFORMER 70 141D/138E TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R30 GRI GREEN XLR 70 141D R-1W TL', 'Rolnicze', 'Ciągnik'),
-('480/70R30 GRI GREEN XLR 70 152D R-1W TL', 'Rolnicze', 'Ciągnik');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('480/70R30 GRI GREEN XLR 70 152D R-1W TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R30 GTK RS200 141A8/138B TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R30 KLEBER FITKER 141A8/141B TL', 'Rolnicze', 'Ciągnik'),
 ('480/70R30 MITAS HC 70 141D/144A8 TL DEMO', 'Rolnicze', 'Ciągnik'),
@@ -4904,6 +4944,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('480/70R38 TRELLEBORG TM700 PT 145D TL', 'Rolnicze', 'Ciągnik'),
 ('480/80-26 ALLIANCE 321 PLUS 156A8 12PR TL', 'Rolnicze', 'Ciągnik'),
 ('480/80-26 BKT CON STAR 160A8 TL', 'Przemysłowe', 'Koparka'),
+('480/80-26 MICHELIN POWER CL 167A8 12PR TL', 'Przemysłowe', 'Koparka'),
 ('480/80R26 ALLIANCE 585 167A8/167B SB TL', 'Rolnicze', 'Ciągnik'),
 ('480/80R26 CEAT LOADPRO 167A8/167B SB TL', 'Rolnicze', 'Ciągnik'),
 ('480/80R26 FIRESTONE DURAFORCE 160A8 TL', 'Przemysłowe', 'Koparka'),
@@ -5102,9 +5143,11 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('500/65R24 NOKIAN TR MULTIPLUS 142A8/139B SB TL', 'Leśne', 'Uniwersalne/pozostałe'),
 ('500/65R28 NOKIAN TR MULTIPLUS 144A8/141B SB TL', 'Leśne', 'Uniwersalne/pozostałe'),
 ('500/65R28 NOKIAN TRACTOR KING 150D SB TL', 'Leśne', 'Ciągnik leśny'),
+('500/70-24 MICHELIN POWER CL 164A8 TL', 'Przemysłowe', 'Koparka'),
 ('500/70-24 MITAS GRIP-N-RIDE 151A8 12PR TL', 'Rolnicze', 'Ciągnik'),
 ('500/70-24 MRL MTU 430 ROCKY HD 157A8 16PR TL', 'Przemysłowe', 'Ładowarka'),
 ('500/70-28 NOKIAN FOREST KING T SF TT', 'Leśne', 'Forwarder/Harwester'),
+('500/70R24 ALLIANCE 580 164A8/164B TL', 'Przemysłowe', 'Ładowarka'),
 ('500/70R24 ALLIANCE 580 164A8/164B TL DEMO', 'Rolnicze', 'Ciągnik'),
 ('500/70R24 ALLIANCE 585 164A8/164B SB TL', 'Rolnicze', 'Ciągnik'),
 ('500/70R24 APOLLO TERRA PRO1044 162D TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
@@ -5112,6 +5155,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('500/70R24 BKT RM500 STBT E 167A8/155A8 TL', 'Rolnicze', 'Ciągnik'),
 ('500/70R24 CEAT LOADPRO 164A8/164B SB TL', 'Rolnicze', 'Ciągnik'),
 ('500/70R24 CEAT LOADPRO HARD SURFACE 164A8/164B SB TL', 'Rolnicze', 'Ciągnik'),
+('500/70R24 FIRESTONE DURA-UT 164A/164B TL', 'Przemysłowe', 'Koparka'),
 ('500/70R24 GRI GRIP XLR MP55 157A8 R-4 TL', 'Przemysłowe', 'Ładowarka'),
 ('500/70R24 GRI GRIP XLR MP55 164A8 R-4 TL', 'Przemysłowe', 'Ładowarka'),
 ('500/70R24 KLEBER LUGKER 164A8/164B TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -5193,7 +5237,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('520/85R38 ALLIANCE AGRISTAR II 85 155D STUBBLE GUARD TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R38 BKT AGRIMAX RT 855 155A8/155B TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R38 BKT AGRIMAX RT 855 E 170A8/170B TL', 'Rolnicze', 'Ciągnik'),
-('520/85R38 BRIDGESTONE VX TRACTOR 155D/152E TL', 'Rolnicze', 'Ciągnik'),
+('520/85R38 BRIDGESTONE VX TRACTOR 155D/152E TL', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('520/85R38 CEAT FARMAX R85 155D/158A8 TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R38 CEAT FARMAX R85 158A8/155D TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R38 CEAT FARMAX R85 172A8/169D TL', 'Rolnicze', 'Ciągnik'),
@@ -5237,9 +5283,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('520/85R46 ALLIANCE FARM PRO 158A8 TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R46 BKT AGRIMAX RT 855 158A8/158B TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R46 BKT AGRIMAX RT 855 173A8/173B TL', 'Rolnicze', 'Ciągnik'),
-('520/85R46 CEAT FARMAX R85 161A8/158D TL', 'Rolnicze', 'Ciągnik');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('520/85R46 CEAT FARMAX R85 161A8/158D TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R46 CONTINENTAL TRACTOR 85 158A8/158B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('520/85R46 GRI GREEN XLR 85 173D R-1W TL', 'Rolnicze', 'Ciągnik'),
 ('520/85R46 TRELLEBORG TM600 158A8/158B TL', 'Rolnicze', 'Ciągnik'),
@@ -5595,7 +5639,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('6.00X16 BKT TF 9090 6PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.00X16 BKT TF 9090 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.00X19 BKT TF 8181 6PR TT', 'Rolnicze', 'Ciągnik'),
-('6.00X19 BKT TF 9090 6PR TT', 'Rolnicze', 'Ciągnik'),
+('6.00X19 BKT TF 9090 6PR TT', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('6.00X9 BKT FL 252 10PR TT', 'Przemysłowe', 'Wózek widłowy'),
 ('6.00X9 BKT MAGLIFT LIP QUICK', 'Przemysłowe', 'Wózek widłowy'),
 ('6.00X9 BKT MAGLIFT STD', 'Przemysłowe', 'Wózek widłowy'),
@@ -5629,6 +5675,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('6.50-16 BKT TF 8181 6PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 CEAT FARMAX F2 91A6 6PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 CEAT FARMAX X3 TF 98A6 8PR TT', 'Rolnicze', 'Ciągnik'),
+('6.50-16 CULTOR AS FRONT 08 97A6/89A8 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 CULTOR AS-FRONT 08 8PR TT FRONT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 GRI GREEN EX FT2 6PR TT', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('6.50-16 GTK AS10 91A6 6PR TT', 'Rolnicze', 'Ciągnik'),
@@ -5639,9 +5686,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('6.50-16 GTK AS14 97A6 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 GTK KM400 108/107L 10PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 MITAS TF-03 97A6/89A8 8PR TT', 'Rolnicze', 'Ciągnik'),
-('6.50-16 MITAS TF03 8PR TT', 'Rolnicze', 'Ciągnik');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('6.50-16 MITAS TF03 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 MRL MIM 374 106A6/103A8 8PR TT', 'Rolnicze', 'Przyczepa'),
 ('6.50-16 MRL MR 504 MILE PLUS 111J 12PR TT', 'Rolnicze', 'Ciągnik'),
 ('6.50-16 MRL MTF 212 DABANG TR 91A6/83A8 6PR TT', 'Rolnicze', 'Ciągnik'),
@@ -5803,6 +5848,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('600/65R28 CULTOR RD-03 147D/150A8 TL', 'Rolnicze', 'Ciągnik'),
 ('600/65R28 CULTOR RD03 147D/150A8 TL', 'Rolnicze', 'Ciągnik'),
 ('600/65R28 FIRESTONE MAXI TRACTION 154D/151E TL', 'Rolnicze', 'Ciągnik'),
+('600/65R28 GRI GREEN XLR 65 154D/157A8 R-1W TL', 'Rolnicze', 'Ciągnik'),
 ('600/65R28 GTK RS200 157A8/154D TL', 'Rolnicze', 'Ciągnik'),
 ('600/65R28 MICHELIN MACHXBIB 154D/150E TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('600/65R28 MITAS AC 65 147D/150A8 TL', 'Rolnicze', 'Ciągnik'),
@@ -5995,7 +6041,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('650/55R26.5 CEAT FLOATMAX FT 178D SB TL', 'Rolnicze', 'Przyczepa'),
 ('650/55R26.5 GRI GREEN XLR F88 170D/167E I-3 TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('650/55R26.5 GRI GREEN XLR F88 177D I-3 TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
-('650/55R26.5 MITAS AGRITERRA 02 169D TL', 'Rolnicze', 'Przyczepa'),
+('650/55R26.5 MITAS AGRITERRA 02 169D TL', 'Rolnicze', 'Przyczepa');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('650/55R26.5 MITAS AGRITERRA ULTRA 169D TL SB', 'Ciężarowe', 'Naczepa/przyczepa'),
 ('650/60-26.5 NOKIAN FOREST KING TRS L-2 SF 20PR TT', 'Leśne', 'Forwarder/Harwester'),
 ('650/60R26.5 ALLIANCE 380 173D SB TL', 'Rolnicze', 'Przyczepa'),
@@ -6041,9 +6089,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('650/65R38 GTK AGR ALFA 166A8/163D TL', 'Rolnicze', 'Ciągnik'),
 ('650/65R38 GTK RS200 166A8/163D TL', 'Rolnicze', 'Ciągnik'),
 ('650/65R38 KLEBER GRIPKER 157D TL', 'Rolnicze', 'Ciągnik'),
-('650/65R38 MICHELIN MULTIBIB 157D TL', 'Rolnicze', 'Uniwersalne/pozostałe');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('650/65R38 MICHELIN MULTIBIB 157D TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('650/65R38 MITAS AC 65 157D/160A8 TL', 'Rolnicze', 'Ciągnik'),
 ('650/65R38 MITAS SFT 157D/160A8 TL SB', 'Rolnicze', 'Ciągnik'),
 ('650/65R38 MITAS SST 157D/160A8 TL DEMO', 'Rolnicze', 'Ciągnik'),
@@ -6180,6 +6226,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('7.50-15 GTK AS100 99A6 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('7.50-15 MITAS FL-08 16PR TT', 'Przemysłowe', 'Wózek widłowy'),
 ('7.50-15 OZKA KNK 50 99A6 8PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
+('7.50-16 ALLIANCE 324 112A6 8PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('7.50-16 BKT AS 504 8PR TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('7.50-16 BKT TF 8181 6PR TT', 'Rolnicze', 'Ciągnik'),
 ('7.50-16 CEAT FARMAX F2 103A6/96A8 8PR TT', 'Rolnicze', 'Ciągnik'),
@@ -6234,6 +6281,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('7.50-20 BKT TF 9090 8PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('7.50-20 CEAT FARMAX F2 108A6 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('7.50-20 CEAT FARMAX X3 TF 109A6 8PR TT', 'Rolnicze', 'Ciągnik'),
+('7.50-20 CULTOR AS FRONT 08 109A6/101A8 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('7.50-20 CULTOR AS FRONT10 109A6/101A8 8PR TL', 'Rolnicze', 'Ciągnik'),
 ('7.50-20 CULTOR AS-FRONT 08 109A6/101A8 8PR TT FRONT', 'Ciężarowe', 'Oś kierowana'),
 ('7.50-20 GRI GREEN EX FT2 8PR TT', 'Przemysłowe', 'Uniwersalne/pozostałe'),
@@ -6262,6 +6310,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('7.50X20 BKT TF 9090 8PR TT', 'Rolnicze', 'Ciągnik'),
 ('7.5L-15 BKT AS 504 8PR TT', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('7.5L-15 TRELLEBORG IM110 8PR TT', 'Rolnicze', 'Ciągnik'),
+('700/40-22.5 ALLIANCE 328 16PR TL', 'Rolnicze', 'Przyczepa'),
 ('700/40-22.5 CEAT FLOTATION T422 160A8/173A8 18PR TL', 'Rolnicze', 'Przyczepa'),
 ('700/40-22.5 GRI GREEN EX FL700 SR 18PR I-3 TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
 ('700/40X22.5 BKT FLOT 648 166 A8 16PR TL', 'Rolnicze', 'Przyczepa'),
@@ -6342,6 +6391,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('710/50R26.5 BKT FLOT 630 ULTRA 170D/181A8 TL', 'Rolnicze', 'Przyczepa'),
 ('710/50R26.5 BKT RIDEMAX FL693M HD E 179D TL', 'Rolnicze', 'Przyczepa'),
 ('710/50R26.5 GRI GREEN XLR F88 172D/169E I-3 TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('710/50R26.5 MITAS AGRITERRA ULTRA 170D TL SB', 'Rolnicze', 'Przyczepa'),
 ('710/50R26.5 MRL FLR 335 SPOWER 172D TL SB', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('710/50R26.5 MRL POWER FLR 333 172D/169E TL SB', 'Ciężarowe', 'Uniwersalne/pozostałe'),
 ('710/50R26.5 NOKIAN COUNTRY KING 170D SB TL', 'Rolnicze', 'Przyczepa'),
@@ -6370,6 +6420,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('710/70-34 NOKIAN FOREST KING TRS 2PLUS SF 24PR TT', 'Leśne', 'Forwarder/Harwester'),
 ('710/70R38 ALLIANCE AGRI STAR II 178D STUBBLE GUARD TL', 'Rolnicze', 'Ciągnik'),
 ('710/70R38 ALLIANCE AGRISTAR II 70 172D STUBBLE GUARD TL', 'Rolnicze', 'Ciągnik'),
+('710/70R38 ALLIANCE AGRO FORESTRY 670 175A2/168A8 SB TL', 'Leśne', 'Ciągnik leśny'),
 ('710/70R38 BKT AGRIMAX FACTOR E 166D/169A8', 'Rolnicze', 'Ciągnik'),
 ('710/70R38 BKT AGRIMAX RT 600 178D/181A TL', 'Rolnicze', 'Ciągnik'),
 ('710/70R38 BKT AGRIMAX RT 765 166D TL', 'Rolnicze', 'Ciągnik'),
@@ -6392,7 +6443,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('710/70R38 NOKIAN GROUND KING 177D/174E SB TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('710/70R38 NOKIAN TRACTOR KING 178D SB TL', 'Leśne', 'Ciągnik leśny'),
 ('710/70R38 OZKA AGRO 10 174A8/171D TL', 'Rolnicze', 'Ciągnik'),
-('710/70R38 OZKA AGROLOX 171D/174A8 TL', 'Rolnicze', 'Ciągnik'),
+('710/70R38 OZKA AGROLOX 171D/174A8 TL', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('710/70R38 TAURUS POINT HP 171A8/171B TL', 'Rolnicze', 'Uniwersalne/pozostałe'),
 ('710/70R38 TRELLEBORG TM 800 PT 166D TL', 'Rolnicze', 'Ciągnik'),
 ('710/70R38 TRELLEBORG TM800 171D TL', 'Rolnicze', 'Ciągnik'),
@@ -6443,9 +6496,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('710/75R42 TRELLEBORG TM900 PT 175D/172E TL', 'Rolnicze', 'Ciągnik'),
 ('750/45-30.5 TRELLEBORG T428 SB 173A8 TT', 'Rolnicze', 'Ciągnik'),
 ('750/45R22.5 BKT FL 635 168D TL', 'Rolnicze', 'Przyczepa'),
-('750/45R26.5 ALLIANCE 885 170D TL', 'Rolnicze', 'Przyczepa');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('750/45R26.5 ALLIANCE 885 170D TL', 'Rolnicze', 'Przyczepa'),
 ('750/45R26.5 BKT FL 630 SUPER STBT E 170D', 'Rolnicze', 'Przyczepa'),
 ('750/45R26.5 CEAT FLOATMAX FT 170D SB TL', 'Rolnicze', 'Przyczepa'),
 ('750/50B30.5 TRELLEBORG T428 AMPT 173D TL', 'Rolnicze', 'Ciągnik'),
@@ -6591,6 +6642,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('800/60R32 ALLIANCE 590 185D SB TL', 'Rolnicze', 'Przyczepa'),
 ('800/60R32 TRELLEBORG TWIN RADIAL 185D TL', 'Rolnicze', 'Ciągnik'),
 ('800/60R34 NOKIAN ELS RADIAL 186D SB TL', 'Przemysłowe', 'Uniwersalne/pozostałe'),
+('800/65R32 ALLIANCE 360 181A8/178B TL', 'Rolnicze', 'Kombajn'),
 ('800/65R32 ALLIANCE 360 FORESTRY 173A8/170B TL', 'Rolnicze', 'Kombajn'),
 ('800/65R32 BKT AGRIMAX RT 600 176A8/173B TL', 'Rolnicze', 'Ciągnik'),
 ('800/65R32 BKT AGRIMAX RT 600 E 181A8/178B TL', 'Rolnicze', 'Ciągnik'),
@@ -6793,7 +6845,9 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('IF800/70R32 ALLIANCE 372 182A8 TL', 'Rolnicze', 'Kombajn'),
 ('IF800/70R32 CFO TRELLEBORG TM3000 182A8 TL', 'Rolnicze', 'Ciągnik'),
 ('IF800/70R38 BKT AGRIMAX FORCE 184D TL', 'Rolnicze', 'Ciągnik'),
-('IF800/70R38 CFO TRELLEBORG TM3000 187A8 TL', 'Rolnicze', 'Ciągnik'),
+('IF800/70R38 CFO TRELLEBORG TM3000 187A8 TL', 'Rolnicze', 'Ciągnik');
+
+INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('IF800/70R42 BKT AGRIMAX FORCE 186D TL', 'Rolnicze', 'Ciągnik'),
 ('IF900/50R42 BKT AGRIMAX FORCE 180D TL', 'Rolnicze', 'Ciągnik'),
 ('IF900/60R38 BKT AGRIMAX FORCE E 184D', 'Rolnicze', 'Ciągnik'),
@@ -6845,9 +6899,7 @@ INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
 ('VF480/80R46 CEAT SPRAYMAX 177D SB TL', 'Rolnicze', 'Opryskiwacz'),
 ('VF480/80R46 CFO TRELLEBORG TM150 177D TL', 'Rolnicze', 'Ciągnik'),
 ('VF480/80R50 CEAT SPRAYMAX 179D SB TL', 'Rolnicze', 'Opryskiwacz'),
-('VF480/80R50 CFO TRELLEBORG TM1000 PT 166D TL', 'Rolnicze', 'Ciągnik');
-
-INSERT INTO _przypisanie_185 (nazwa, kategoria, zastosowanie) VALUES
+('VF480/80R50 CFO TRELLEBORG TM1000 PT 166D TL', 'Rolnicze', 'Ciągnik'),
 ('VF480/80R50 CFO TRELLEBORG TM150 179D TL', 'Rolnicze', 'Ciągnik'),
 ('VF480/95R50 ALLIANCE AGRIFLEX 354 + 176D SB TL', 'Rolnicze', 'Ciągnik'),
 ('VF500/60R22.5 ALLIANCE AGRIFLEX 389 + 160D TL', 'Rolnicze', 'Przyczepa'),
