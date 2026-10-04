@@ -20,7 +20,8 @@ None. Odstępstwa od produkcji (świadome, zatwierdzone): lista Rolniczych bez �
 - **Gate odbudowy (fixtures/kontrakt):** N/D — nie dotyka API.
 - Backend: lint ✓, typecheck ✓, build ✓, `npm test` ✓ (135 plików, 2136 testów) — po synchronizacji z `origin/develop`.
 - Frontend: tsc ✓, testy katalogu ✓ (171).
-- Przeliczenie pliku CSV (poza repo): 8487 wierszy → 314 zmienionych; po zmianach wszystkie pary są dozwolone przez triggery.
+- Przeliczenie pliku CSV: 8487 wierszy; 19 niejednoznacznych nazw rozstrzyga reguła Ciągnik/Uniwersalne, **52 nazwy (różne kategorie) są pomijane** — lista w `nazwy-niejednoznaczne-do-decyzji.csv`; po zmianach wszystkie pary są dozwolone przez triggery.
+- Migracja 022 sprawdzona na bazie z 8487 produktami (czas ~160 ms).
 - Test mutacyjny: wyłączenie ochrony/dziedziczenia → 2 testy czerwone.
 
 ## Breaking changes
@@ -39,3 +40,10 @@ Review: 0 BLOCKER, 8 SHOULD-FIX, 5 NICE-TO-HAVE (`review.md`). Naprawione:
 - **Raport CSV** zawiera nazwy z pliku bez produktu w bazie (`brak_produktu_w_bazie`); dopasowanie po nazwie opisane w nagłówku modułu (dokładne, po `trim`, wielkość liter ma znaczenie; ta sama nazwa u kilku dostawców → ta sama para).
 - **Testy:** gałęzie null-safe dziedziczenia (profil/średnica/konstrukcja), odpowiednik bez zastosowania.
 Nie zmieniane (świadomie): indeks `products(marka, model)` — pełny skan ~8 tys. wierszy na nowy produkt jest pomijalny kosztem; dziedziczenie nie uwzględnia bieżnika (klucz zatwierdzony: marka + model + rozmiar); test CLI (CLI to cienka nakładka, logika pokryta testami modułu).
+
+## Przypisanie przy wdrożeniu (bez SSH)
+Na prośbę użytkownika przypisanie wykonuje się automatycznie: **migracja `022_przypisanie_kategorii_zastosowania_csv.sql`**
+(generowana z `scripts/data/katalog-kategoria-zastosowanie-2026-09-30.csv` przez `npm run generuj-migracje-przypisania`).
+Deploy robi kopię bazy → `npm run migrate` (021, 022) → raz na bazę dzięki `_migracje`; najpierw staging (merge do `develop`), potem
+produkcja (merge do `main`). Migracja pomija produkty z poprawką Marty i zapisuje `history` (kto = „migracja 022”). Skrypt CLI zostaje
+do dry-runu i raportu (`--raport`).

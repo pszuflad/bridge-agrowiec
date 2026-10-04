@@ -137,6 +137,17 @@ export function zaplanujNazwy(wiersze: readonly WierszPliku[]): PlanNazwy[] {
   return plan;
 }
 
+export type WpisPrzypisania = { nazwa: string; kategoria: string; zastosowanie: string };
+
+/** Jednoznaczne przypisania nazwa → para (posortowane po nazwie); niejednoznaczne są pomijane. */
+export function tabelaPrzypisania(wiersze: readonly WierszPliku[]): WpisPrzypisania[] {
+  const wynik: WpisPrzypisania[] = [];
+  for (const n of zaplanujNazwy(wiersze)) {
+    if (n.status === "ok") wynik.push({ nazwa: n.nazwa, ...n.para });
+  }
+  return wynik.sort((x, y) => (x.nazwa < y.nazwa ? -1 : x.nazwa > y.nazwa ? 1 : 0));
+}
+
 export type ZmianaProduktu = {
   kod: string;
   dostawca: string;
