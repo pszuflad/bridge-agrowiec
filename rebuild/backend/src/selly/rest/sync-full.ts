@@ -30,6 +30,7 @@ import type { Baza } from "../../db/index.js";
 import type { Discovery, SlownikiSelly, WierszBridge } from "./discovery.js";
 import { globalnyLimiter } from "./limiter.js";
 import { toSellyPayloadV2, type PayloadV2, type WierszMapperaV2 } from "./mapper-v2.js";
+import { cenaBazowaJednegoWariantu, sprawdzCelSelly } from "./bezpieczenstwo.js";
 
 /** Wiersz `collectFullSyncItems` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszFull = WierszBridge &
@@ -291,18 +292,24 @@ async function updateExistingVariant(
   const metadataOwner = isMetadataOwner(db, row);
 
   let productPayload: PayloadV2 = toSellyPayloadV2(row, { includeFeatures: false });
-  if (metadataOwner && !dryRun) {
-    const current = await discovery.apiWithRetry(`GET /api/products/${productId}`, async () => ({
-      status: 200,
-      data: await discovery.klient.getProduct(productId),
-    }));
-    const currentProduct = current.data?.data || current.data || {};
+  const target = !dryRun ? await sprawdzCelSelly(discovery, row, productId, variantId as number) : null;
+  if (target) {
+    const live = db.$client.prepare("SELECT status FROM products WHERE id=?").get(row.bridge_product_id) as
+      { status: string } | undefined;
+    if (!live || live.status !== "aktywny") return {action:"skip_A"};
+  }
+  if (metadataOwner && target) {
+    const currentProduct = target.product;
     productPayload = toSellyPayloadV2(row, {
       includeFeatures: true,
       existingSellyFeatures: currentProduct.features || [],
     });
     const categoryId = dictMaps.catMap.get(String(row.kategoria || "").toLowerCase());
     if (categoryId) productPayload.category_id = categoryId;
+  }
+  if (target) {
+    const base = cenaBazowaJednegoWariantu(target.variants);
+    if (base !== undefined) productPayload.price = base;
   }
 
   if (dryRun) {
@@ -351,7 +358,10 @@ async function ensureAndUpdate(
   }
 
   const productId = mapping.product_id as number;
+  const target = await sprawdzCelSelly(discovery, row, productId, mapping.variant_id);
   const productPayload = toSellyPayloadV2(row, { includeFeatures: false });
+  const base = cenaBazowaJednegoWariantu(target.variants);
+  if (base !== undefined) productPayload.price = base;
   const putProduct = await wyslijProdukt(discovery, productId, productPayload);
   if (putProduct.status < 200 || putProduct.status >= 300) {
     throw new Error(
@@ -453,6 +463,8 @@ export async function syncFullForDostawca(
 
       if (dryRun) {
         stats.dry++;
+      } else if (result.action === "skip_A") {
+        stats.skip++;
       } else if (result.action === "updated_A") {
         stats.updated_A++;
       } else if (result.action === "created_variant_B") {
