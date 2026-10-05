@@ -24,6 +24,8 @@
     "rozdziel-kod-importu": "tsx scripts/rozdziel-kod-importu.ts",
     "scal-karty-auto": "tsx scripts/scal-karty-auto.ts",
     "normalizuj-katalog": "tsx scripts/normalizuj-katalog.ts",
+    "przypisz-kategorie-zastosowanie": "tsx scripts/przypisz-kategorie-zastosowanie.ts",
+    "generuj-migracje-przypisania": "tsx scripts/generuj-migracje-przypisania.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",

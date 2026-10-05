@@ -28,6 +28,12 @@ const flagaBoolDomyslnieWylaczona = z
   .default("false")
   .transform((v) => v === "true" || v === "1");
 
+/** Przełącznik z domyślnym „włączone” — dla funkcji, które mają działać od razu, a da się je wyłączyć. */
+const flagaBoolDomyslnieWlaczona = z
+  .enum(["true", "false", "1", "0"])
+  .default("true")
+  .transform((v) => v === "true" || v === "1");
+
 const schemaEnvBazowe = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   HOST: z.string().min(1).default("127.0.0.1"),
@@ -119,6 +125,18 @@ const schemaEnvBazowe = z.object({
    * więc na stagingu i w testach musi milczeć, dopóki ktoś go świadomie nie włączy.
    */
   SELLY_SCHEDULER: flagaBoolDomyslnieWylaczona,
+  /**
+   * Tor 3 (ticket 186): usuwanie z Selly produktów, których nie ma już w Bridge. Działa w ramach harmonogramu
+   * Selly (czyli tylko przy `SELLY_SCHEDULER=true` i `SELLY_TRYB=pelny`); ten przełącznik pozwala je
+   * wyłączyć bez ruszania reszty synchronizacji (`SELLY_USUWANIE=false`). Domyślnie WŁĄCZONE (decyzja użytkownika).
+   */
+  SELLY_USUWANIE: flagaBoolDomyslnieWlaczona,
+  /**
+   * Próg bezpiecznika Toru 3: gdy sierot jest więcej niż ten UŁAMEK wszystkich mapowań `selly_products`, przebieg
+   * się wstrzymuje (wygląda na wyczyszczenie katalogu/awarię importu). Domyślnie 0.3; po świadomym przejrzeniu
+   * zaległości można go podnieść (np. 0.6), żeby odblokować usuwanie.
+   */
+  SELLY_USUWANIE_MAKS_UDZIAL: z.coerce.number().min(0).max(1).default(0.3),
   SELLY_TRYB: z.enum(["wylaczony", "tylko-odczyt", "pelny"]).default("wylaczony"),
   SELLY_SHOP_URL: z.string().default(""),
   SELLY_CLIENT_ID: z.string().default(""),

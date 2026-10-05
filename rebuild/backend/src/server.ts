@@ -61,6 +61,8 @@ const harmonogramSelly = stworzHarmonogramSelly({
   db,
   discovery: discoverySelly,
   tryb: env.SELLY_TRYB,
+  usuwanie: env.SELLY_USUWANIE,
+  usuwanieMaksUdzial: env.SELLY_USUWANIE_MAKS_UDZIAL,
 });
 
 // Odświeżanie dostępności (karta I15.10b). Wpięcie modułu `selly/dostepnosc.ts` z I15.10:

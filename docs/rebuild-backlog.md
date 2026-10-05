@@ -4534,8 +4534,8 @@ u nas wystarczy sprzątanie duplikatów w migracji przed założeniem indeksu un
 | **Data** | 2026-09-22 (odpowiedź Ani na pytanie 1.4 rundy 3) |
 | **Kategoria** | BACKEND (Selly REST) — nowa funkcja, produkcja jej nie ma |
 | **Pliki** | produkcja: brak ścieżki; ślad ręcznego usunięcia przez API 17.09: `mirror/backend/…/product_639_pre_delete_20260917T164000Z.json`, `product_639_delete_result_20260917T164000Z.json` (`origin/main`); powiązane: osierocone mapowania `selly_products` (blok 13d w roadmapie, `5cfb7ab`) |
-| **Do nowej wersji?** | 🕒 **PÓŹNIEJ — decyzja użytkownika 2026-09-22 (D7): po cutoverze**, pierwsza nowa funkcja w nowym stosie |
-| **Status** | odłożone — w I15 port 1:1 |
+| **Do nowej wersji?** | ✅ **TAK** — decyzja użytkownika 2026-10-05 (po cutoverze) |
+| **Status** | wdrożone w kodzie — ticket 186 (`docs/rebuild-backlog/wpis-186.md`) |
 
 **Odpowiedź Ani:** „Nawet nie wiem czy jest możliwe żeby usuwać stary rekord z selly jeśli jest to trzeba taką ścieżke
 zrobić bo obecnie tego nie ma”. **Technicznie jest możliwe** — 17.09 produkt 639 został usunięty z Selly przez API

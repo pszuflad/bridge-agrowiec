@@ -1,5 +1,14 @@
 # CHANGELOG
 
+2026-10-02 16:18
+obszar: backend | baza danych
+
+pliki: rebuild/backend/src/selly/rest/bezpieczenstwo.ts (nowy), discovery.ts, sync-delta.ts, sync-full.ts, src/selly/klient.ts, test/gate/selly-atrapa.ts, test/selly.bezpieczenstwo.test.ts (nowy), test/selly.sync-delta.test.ts, test/selly.sync-full.test.ts; kopie .bak przed edycją źródeł: /tmp/bridge-backups-184/{discovery.ts,sync-delta.ts,sync-full.ts,klient.ts,selly-atrapa.ts,CHANGELOG.md}.bak. Poprzednie testy w Git acb2faf. Produkcyjna baza: /home/admin/private_apps/bridge-prod/data/data-prod.db; backup data/backups/data-prod_before_selly184_20261002141122.db.
+
+zmiana: ticket 184 — sprawdzenie tożsamości produktu (EAN lub nazwa, ochrona DEMO), przynależności wariantu i magazynu przed PUT Toru 1/2; cena bazowa wyrównywana wyłącznie dla jednego dodatniego wariantu, bez arbitralnej ceny wielowariantowej. Operacja danych: 50 mapowań naprawionych; 54 nieaktualne mapowania zachowane w selly_products_quarantine_184 i usunięte z aktywnego cache. Bez zmian katalogu products/parserów. Zmiany danych Selly dokumentowane wyłącznie w wiki.
+
+powód: Anna zleciła natychmiastową naprawę i pełny audyt produktów; błędne dawne mapowania powodowały ceny obcych produktów, a aktualizacja wariantu nie wyrównywała ceny bazowej.
+
 2026-10-02 08:27
 obszar: backend
 
@@ -19,6 +28,11 @@ zmiana: ticket 183 — MO9: parametr store przeniesiony z URL do nagłówka Stor
 powód: prośba użytkowniczki 02.10; powtarzające się timeouty logowania Agrorami, po udanym logowaniu API products zwraca Internal server error. Niekompletny cennik nie jest importowany.
 
 Wpisy od najnowszego. Migracje danych: z nazwą backupu (`VACUUM INTO …bak_full_<operacja>_<RRRRMMDDGGMMSS>` w `data/backups/`).
+
+## 2026-10-05 — Zdjęty próg „cennik podejrzanie mały”
+
+- **import** — `minimumPozycjiOferty` zawsze zwraca 1: import nie jest już blokowany spadkiem liczby pozycji (dotąd >20% poniżej ostatniego importu;
+  MO4 wpadał w to ponownie). Zatrzymuje tylko pusty cennik; bezpiecznik „masowo nierozpoznany” i timeout/ponowienia (179) bez zmian. Decyzja Ani 2026-10-05.
 
 ## 2026-10-01 — Naprawa kolejki stagingu (SPEC „Naprawa kolejki stagingu”)
 

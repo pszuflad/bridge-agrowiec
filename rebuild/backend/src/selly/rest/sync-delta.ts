@@ -19,6 +19,7 @@
 
 import type { Baza } from "../../db/index.js";
 import type { Discovery, WierszBridge, WynikMapowania } from "./discovery.js";
+import { sprawdzCelSelly } from "./bezpieczenstwo.js";
 
 /** Wiersz `findDeltaProducts` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszDelta = WierszBridge & {
@@ -308,6 +309,10 @@ export async function syncDelta(
       }
 
       // 2. Aktualizacja wariantu (quantity + price)
+      const productId = mapping.product_id as number;
+      const variantId = mapping.variant_id;
+      // Odczyt HTTP może trwać; żywy SELECT poniżej musi następować PO tej kontroli.
+      const target = !dryRun ? await sprawdzCelSelly(discovery, row, productId, variantId) : null;
       //
       // Backlog #104 (`abe5f14`): import mógł wstrzymać pozycję W TRAKCIE tego biegu, kiedy
       // discovery szukało wariantów. Migawka sprzed pętli jest wtedy nieaktualna, więc stan
@@ -347,8 +352,6 @@ export async function syncDelta(
         continue;
       }
 
-      const productId = mapping.product_id as number;
-      const variantId = mapping.variant_id;
       const putRes = await discovery.apiWithRetry(`PUT /api/products/${productId}/variants/${variantId}`, async () => {
         const data = await discovery.klient.updateVariant(productId, variantId, {
           quantity: row.stan ?? 0,
@@ -359,6 +362,13 @@ export async function syncDelta(
       });
 
       if (putRes.status >= 200 && putRes.status < 300) {
+        // Jeden wariant: cena produktu i wariantu muszą być zgodne. Wielu wariantów nie wyceniamy arbitralnie.
+        if (target?.variants.length === 1 && typeof row.cena_sprzedazy === "number" &&
+            Number.isFinite(row.cena_sprzedazy) && row.cena_sprzedazy > 0 &&
+            target.product.price !== row.cena_sprzedazy) {
+          await discovery.apiWithRetry(`PUT /api/products/${productId} price`, () =>
+            discovery.klient.updateProduct(productId, { price: row.cena_sprzedazy }));
+        }
         stats.ok++;
         markSynced(db, row, true, true);
       } else {
