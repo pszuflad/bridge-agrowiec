@@ -132,6 +132,11 @@ const schemaEnvBazowe = z.object({
    */
   SELLY_USUWANIE: flagaBoolDomyslnieWlaczona,
   /**
+   * Tor 2 (ticket 190): pełny mirror + auto-create o 04:30 w ramach harmonogramu Selly. Domyślnie WŁĄCZONY
+   * (zachowanie sprzed ticketu); `SELLY_TOR2=false` zostawia sam Tor 1 (ceny i stany) — i ewentualnie Tor 3.
+   */
+  SELLY_TOR2: flagaBoolDomyslnieWlaczona,
+  /**
    * Próg bezpiecznika Toru 3: gdy sierot jest więcej niż ten UŁAMEK wszystkich mapowań `selly_products`, przebieg
    * się wstrzymuje (wygląda na wyczyszczenie katalogu/awarię importu). Domyślnie 0.3; po świadomym przejrzeniu
    * zaległości można go podnieść (np. 0.6), żeby odblokować usuwanie.
