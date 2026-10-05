@@ -20825,6 +20825,44 @@ paths:
           content:
             application/json:
               schema: { type: object, properties: { message: { type: string } } }
+  /api/staging/{id}/keep-card:
+    post:
+      tags: [staging]
+      summary: "POST /api/staging/{id}/keep-card"
+      description: >-
+        TRASA SPOZA ORYGINAŁU (decyzja użytkowniczki, 2026-10-05). „Odrzuć” w szczegółach pozycji
+        stagingu typu `zmiana_kluczowa`: karta w katalogu zostaje BEZ ZMIAN, a każde pole tożsamości
+        (nazwa, marka, model, rozmiar, indeksy, kod dostawcy), w którym plik się różni, zapisuje się
+        jako poprawka Marty (`manual_overrides`) z OBECNĄ wartością karty i `acknowledgedSourceValue`
+        = wartość z pliku. Działa jak każda poprawka Marty: kolejny import nie zgłasza różnicy i nie
+        nadpisuje karty (Staging v2 nakłada poprawki po cichu, także gdy dostawca zmieni wartość jeszcze
+        raz); usunięcie poprawki oddaje decyzję plikowi. Zgłoszenie znika. Pola puste na karcie nie dają
+        poprawki (`pominietePola`). Cena zakupu i sprzedaży, marża, stan i magazyn z pliku wchodzą
+        OD RAZU na kartę (z wpisem do historii cen; karta wstrzymana nie dostaje stanu) — tak jak w cichej
+        aktualizacji importera, bo import odkłada cały wiersz do stagingu i do akceptacji nie rusza karty
+        (`zaktualizowanePola`).
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK — karta bez zmian, poprawki zapisane, zgłoszenie usunięte"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  kod: { type: string }
+                  zachowanePola: { type: array, items: { type: string } }
+                  pominietePola: { type: array, items: { type: string } }
+                  zaktualizowanePola: { type: array, items: { type: string } }
+        "401": { description: "Nieautoryzowany" }
+        "409":
+          description: "Odmowa (zgłoszenie nie istnieje, inny typ niż `zmiana_kluczowa`, brak karty, brak różnic). Ciało niesie `message`."
+          content:
+            application/json:
+              schema: { type: object, properties: { message: { type: string } } }
   /api/staging/{id}/review:
     get:
       tags: [staging]

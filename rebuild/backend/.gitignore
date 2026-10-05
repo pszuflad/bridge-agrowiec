@@ -10,3 +10,6 @@ dist/
 # Wygenerowane jednorazowo przez `drizzle-kit pull` (patrz README) — nie wersjonujemy
 .drizzle/
 .tmp/
+
+# Archiwum wgranych cenników — testy zapisują tu przy każdym uruchomieniu (serwer 127.0.0.1); nie wersjonujemy
+import_archive/
