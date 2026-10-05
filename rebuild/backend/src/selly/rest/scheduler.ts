@@ -32,7 +32,7 @@ import type { Discovery } from "./discovery.js";
 import type { TrybSelly } from "../tryb.js";
 import { syncDelta } from "./sync-delta.js";
 import { syncFullForDostawca } from "./sync-full.js";
-import { usunSierotyZSelly } from "./sync-usuwanie.js";
+import { sprawdzUprawnienieUsuwania, usunSierotyZSelly } from "./sync-usuwanie.js";
 import { zamknijOsieroconeWpisySync } from "../../repos/selly.js";
 
 /** `scheduler_selly.cjs:22` — dostawcy objęci oboma torami. */
@@ -238,7 +238,12 @@ export function stworzHarmonogramSelly({
       console.log(`[Selly Scheduler] Tor1 ${tag} ${hh}:${dwaZnaki(mm)}`);
       runDeltaAll(db, discovery)
         .catch((e: unknown) => console.error("[Selly Scheduler] Tor1 err:", komunikat(e)))
-        .then(() => (usuwanie ? usunSierotyZSelly(db, discovery, { tryb, maksUdzial: usuwanieMaksUdzial }) : null))
+        .then(async () => {
+          if (!usuwanie) return null;
+          // Najpierw próba uprawnień (DELETE na nieistniejący produkt) — bez prawa usuwania Tor 3 nic nie robi.
+          const { wolno } = await sprawdzUprawnienieUsuwania(db, discovery, tryb);
+          return wolno ? usunSierotyZSelly(db, discovery, { tryb, maksUdzial: usuwanieMaksUdzial }) : null;
+        })
         .catch((e: unknown) => console.error("[Selly Scheduler] Tor3 err:", komunikat(e)));
     }
 

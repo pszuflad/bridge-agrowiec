@@ -10,7 +10,13 @@ import { akcjeHistorii, wpisyHistorii } from "../src/historia/mapowanie.js";
 import { audytDlaHistorii } from "../src/repos/audit-historia.js";
 import { BladSelly } from "../src/selly/klient.js";
 import { stworzHarmonogramSelly } from "../src/selly/rest/scheduler.js";
-import { znajdzSieroty, usunSierotyZSelly } from "../src/selly/rest/sync-usuwanie.js";
+import {
+  IDENTYFIKATORY_PROBY,
+  sprawdzUprawnienieUsuwania,
+  usunSierotyZSelly,
+  zresetujProbeUprawnien,
+  znajdzSieroty,
+} from "../src/selly/rest/sync-usuwanie.js";
 import { stworzAtrapeSelly, stworzDiscoveryTestowe, stworzTestowaBaze, zasiejMapowanie, type OpcjeAtrapy, type TestowaBaza } from "./gate/index.js";
 
 const magazyn = (dostawca: string) => ({ feature_id: 1, name: "Magazyny", value: dostawca });
@@ -19,6 +25,7 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
   let baza: TestowaBaza;
   beforeEach(() => {
     baza = stworzTestowaBaze();
+    zresetujProbeUprawnien();
   });
   afterEach(() => baza.posprzataj());
 
@@ -347,7 +354,60 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     });
   });
 
+  describe("próba uprawnień do usuwania", () => {
+    const wpisyProby = () =>
+      baza.sqlite.prepare("SELECT operacja, status FROM selly_sync_log WHERE operacja LIKE 'probe_delete%'").all();
+
+    it("DELETE na nieistniejący produkt → 404: API ma prawo; nic realnego nie jest kasowane, wpis w Historii operacji", async () => {
+      const { atrapa, discovery } = przygotuj([{ product_id: 5, name: "Prawdziwy", warianty: [] }]);
+      expect(await sprawdzUprawnienieUsuwania(baza.db, discovery, "pelny")).toEqual({ wolno: true });
+      expect(atrapa.sklep.has(5)).toBe(true);
+      expect(wpisyProby()).toEqual([{ operacja: "probe_delete_ok", status: "zakonczono" }]);
+      // wynik jest pamiętany — drugie wywołanie nie odpytuje Selly ani nie dubluje wpisu
+      const przed = atrapa.wywolania.length;
+      expect(await sprawdzUprawnienieUsuwania(baza.db, discovery, "pelny")).toEqual({ wolno: true });
+      expect(atrapa.wywolania.length).toBe(przed);
+      expect(wpisyProby()).toHaveLength(1);
+    });
+
+    it("identyfikator próby, który istnieje w Selly, jest pomijany (próba nie dotyka prawdziwego produktu)", async () => {
+      const { atrapa, discovery } = przygotuj([{ product_id: IDENTYFIKATORY_PROBY[0], name: "Prawdziwy", warianty: [] }]);
+      expect(await sprawdzUprawnienieUsuwania(baza.db, discovery, "pelny")).toEqual({ wolno: true });
+      expect(atrapa.sklep.has(IDENTYFIKATORY_PROBY[0])).toBe(true);
+      expect(atrapa.wywolania.filter((w) => w.metoda === "deleteProduct").map((w) => w.argumenty[0])).toEqual([IDENTYFIKATORY_PROBY[1]]);
+    });
+
+    it("HTTP 403 → brak uprawnień: wolno=false, wpis „probe_delete_brak_uprawnien”, ponowna próba dopiero po godzinie", async () => {
+      const { atrapa, discovery } = przygotuj([], { bledy: { deleteProduct: new BladSelly("[Selly] HTTP 403", 403, {}) } });
+      let zegar = 1_000_000;
+      expect(await sprawdzUprawnienieUsuwania(baza.db, discovery, "pelny", () => zegar)).toEqual({ wolno: false });
+      expect(wpisyProby()).toEqual([{ operacja: "probe_delete_brak_uprawnien", status: "blad" }]);
+      const przed = atrapa.liczba("deleteProduct");
+      zegar += 30 * 60 * 1000;
+      await sprawdzUprawnienieUsuwania(baza.db, discovery, "pelny", () => zegar);
+      expect(atrapa.liczba("deleteProduct")).toBe(przed); // jeszcze nie minęła godzina
+      zegar += 31 * 60 * 1000;
+      await sprawdzUprawnienieUsuwania(baza.db, discovery, "pelny", () => zegar);
+      expect(atrapa.liczba("deleteProduct")).toBe(przed + 1);
+      expect(wpisyProby()).toHaveLength(1); // wynik się nie zmienił — bez dubla w dzienniku
+    });
+
+    it("5xx → wynik nieokreślony (nie usuwa), tryb inny niż pełny → w ogóle nie woła Selly", async () => {
+      const { atrapa, discovery } = przygotuj([], { bledy: { deleteProduct: new BladSelly("[Selly] HTTP 500", 500, {}) } });
+      expect(await sprawdzUprawnienieUsuwania(baza.db, discovery, "pelny")).toEqual({ wolno: false });
+      expect(wpisyProby()).toEqual([{ operacja: "probe_delete_nieokreslony", status: "blad" }]);
+      zresetujProbeUprawnien();
+      const przed = atrapa.wywolania.length;
+      expect(await sprawdzUprawnienieUsuwania(baza.db, discovery, "tylko-odczyt")).toEqual({ wolno: false });
+      expect(atrapa.wywolania.length).toBe(przed);
+    });
+  });
+
   describe("harmonogram", () => {
+    /** `deleteProduct` bez wywołań próby uprawnień (nieistniejące identyfikatory próby). */
+    const realneUsuniecia = (atrapa: ReturnType<typeof stworzAtrapeSelly>) =>
+      atrapa.wywolania.filter((w) => w.metoda === "deleteProduct" && !(IDENTYFIKATORY_PROBY as readonly number[]).includes(w.argumenty[0] as number)).length;
+
     const uruchomTick = async (usuwanie: boolean) => {
       tlo();
       sierota("S1", "MO1_STARY", 1030, 1031);
@@ -356,7 +416,7 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
       h.uruchom();
       // Czekamy na skutek (a nie stałą liczbę ms): przy `usuwanie: true` do `deleteProduct`, przy `false` — na pełny przebieg Toru 1.
       const dozwolone = Date.now() + 5000;
-      while (Date.now() < dozwolone && (usuwanie ? atrapa.liczba("deleteProduct") === 0 : baza.sqlite.prepare("SELECT COUNT(*) c FROM selly_sync_log WHERE operacja='sync_delta'").get() === undefined)) {
+      while (Date.now() < dozwolone && (usuwanie ? realneUsuniecia(atrapa) === 0 : baza.sqlite.prepare("SELECT COUNT(*) c FROM selly_sync_log WHERE operacja='sync_delta'").get() === undefined)) {
         await new Promise((r) => setTimeout(r, 20));
       }
       if (!usuwanie) await new Promise((r) => setTimeout(r, 300)); // dajemy Torowi 3 szansę, której mieć nie powinien
@@ -365,11 +425,33 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     };
 
     it("po Torze 1 uruchamia usuwanie sierot", async () => {
-      expect((await uruchomTick(true)).liczba("deleteProduct")).toBe(1);
+      expect(realneUsuniecia(await uruchomTick(true))).toBe(1);
+    });
+
+    it("brak uprawnień do DELETE (403 w próbie): harmonogram nie usuwa sierot, a wpis „brak_uprawnien” jest w Historii operacji", async () => {
+      tlo();
+      sierota("S1", "MO1_STARY", 1030, 1031);
+      const { atrapa, discovery } = przygotuj(
+        [{ product_id: 1030, name: "S", ean: eanDla(1030), warianty: [{ variant_id: 1031, features: [magazyn("MO1")] }] }],
+        { bledy: { deleteProduct: new BladSelly("[Selly] HTTP 403", 403, {}) } },
+      );
+      const h = stworzHarmonogramSelly({ db: baza.db, discovery, tryb: "pelny", teraz: () => new Date(2026, 9, 5, 9, 55), interwalMs: 20 });
+      h.uruchom();
+      const dozwolone = Date.now() + 5000;
+      while (Date.now() < dozwolone && !baza.sqlite.prepare("SELECT 1 FROM selly_sync_log WHERE operacja LIKE 'probe_delete%'").get()) {
+        await new Promise((r) => setTimeout(r, 20));
+      }
+      await new Promise((r) => setTimeout(r, 200));
+      h.zatrzymaj();
+      expect(realneUsuniecia(atrapa)).toBe(0);
+      expect(baza.sqlite.prepare("SELECT operacja FROM selly_sync_log WHERE operacja LIKE 'probe_delete%'").get()).toEqual({ operacja: "probe_delete_brak_uprawnien" });
+      expect(mapowania()).toContain("MO1_STARY");
     });
 
     it("`usuwanie: false` (SELLY_USUWANIE=false) wyłącza Tor 3, reszta synchronizacji działa", async () => {
-      expect((await uruchomTick(false)).liczba("deleteProduct")).toBe(0);
+      const atrapa = await uruchomTick(false);
+      expect(realneUsuniecia(atrapa)).toBe(0);
+      expect(atrapa.liczba("deleteProduct")).toBe(0); // bez Toru 3 nie ma też próby uprawnień
     });
   });
 });

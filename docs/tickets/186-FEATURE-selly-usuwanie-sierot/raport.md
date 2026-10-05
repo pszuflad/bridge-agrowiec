@@ -35,3 +35,10 @@ Review (`review.md`): 2 BLOCKER, 9 SHOULD-FIX, 6 NICE-TO-HAVE. Naprawione:
 - **Testy:** 21 (wariant NULL, powrót w trakcie, brak tożsamości/DEMO, 5xx na DELETE, awaria audytu, równoległe przebiegi, limit dobowy, próg); harmonogram czeka na skutek, a nie stałe 400 ms.
 Nie zmieniane (świadomie): 404 na odczycie produktu sprząta mapowanie (przy błędnej konfiguracji sklepu mogłoby to czyścić mapowania — do obserwacji w pierwszych dniach);
 ochrona EAN nie sprawdza `products_scalone` (scalenia `scal-karty-auto` idą osobną ścieżką i nie są widoczne dla Toru 3).
+
+## Próba uprawnień do usuwania (na prośbę użytkownika: „sprawdzić, czy API Selly ma prawo do usuwania”)
+Z sesji deweloperskiej nie da się wywołać Selly (brak sekretów), więc test jest **wbudowany w Tor 3** i biegnie na środowisku z sekretami:
+przed pierwszym usunięciem `DELETE /api/products/{id}` na **nieistniejący** identyfikator (`GET` najpierw potwierdza, że go nie ma; identyfikatory
+987654321–3) → 404/400/410/422 = autoryzacja przeszła („jest”), 401/403 = brak uprawnień (Tor 3 nic nie usuwa), reszta = nieokreślony. Wynik jest w „Historii
+operacji” Selly jako operacja `probe_delete_ok` / `probe_delete_brak_uprawnien` / `probe_delete_nieokreslony` (wpis tylko przy zmianie wyniku; ponowna próba najwyżej
+raz na godzinę dla „brak”/„nieokreślony”). Nic realnego nie jest kasowane. Wymaga `SELLY_TRYB=pelny` (przy `tylko-odczyt`/`wylaczony` próba się nie wykonuje).

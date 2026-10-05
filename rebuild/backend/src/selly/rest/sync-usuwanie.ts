@@ -382,6 +382,90 @@ async function usunJedna(db: Baza, discovery: Discovery, s: Sierota): Promise<Wp
  * Jeden przebieg Toru 3. `tryb` ≠ `pelny` → nic nie robi (także nie zapisuje do dziennika): blokada
  * środowiska zablokowałaby `DELETE` i każdy wiersz kończyłby się błędem.
  */
+/**
+ * PRÓBA UPRAWNIEŃ (ticket 186): zanim Tor 3 cokolwiek usunie, sprawdza, czy konto API Selly w ogóle ma prawo `DELETE`.
+ * Wysyła `DELETE /api/products/{id}` na NIEISTNIEJĄCY identyfikator (najpierw `GET` potwierdza, że go nie ma),
+ * więc niczego realnie nie kasuje. Odpowiedź „nie ma takiego produktu” (404/400/410/422) oznacza, że autoryzacja
+ * przeszła; 401/403 — brak uprawnień (wtedy Tor 3 nie usuwa nic i zapisuje to w „Historii operacji”). Wynik jest
+ * pamiętany w procesie; „brak uprawnień” i „nieokreślony” są sprawdzane ponownie najwyżej raz na godzinę.
+ */
+export const IDENTYFIKATORY_PROBY = [987654321, 987654322, 987654323] as const;
+const PONOWNA_PROBA_MS = 3600 * 1000;
+type StanProby = { wynik: "jest" | "brak" | "nieokreslony"; kiedy: number };
+let stanProby: StanProby | null = null;
+
+/** Tylko do testów — kasuje pamięć próby uprawnień. */
+export function zresetujProbeUprawnien(): void {
+  stanProby = null;
+}
+
+/**
+ * Wynik próby jest w NAZWIE operacji, bo panel Selly pokazuje w „Historii operacji” samą nazwę, liczniki i status
+ * (nie parsuje `szczegoly_json`): `probe_delete_ok` / `probe_delete_brak_uprawnien` / `probe_delete_nieokreslony`.
+ */
+function zapiszWpisProby(db: Baza, wynik: StanProby["wynik"], opis: string): void {
+  const operacja =
+    wynik === "jest" ? "probe_delete_ok" : wynik === "brak" ? "probe_delete_brak_uprawnien" : "probe_delete_nieokreslony";
+  const status = wynik === "jest" ? "zakonczono" : "blad";
+  db.$client
+    .prepare(
+      `INSERT INTO selly_sync_log (operacja, dostawca_kod, liczba_ok, liczba_blad, liczba_skip, szczegoly_json, rozpoczeto, zakonczono, status)
+       VALUES (?, 'ALL', ?, ?, 0, ?, datetime('now'), datetime('now'), ?)`,
+    )
+    .run(operacja, wynik === "jest" ? 1 : 0, wynik === "jest" ? 0 : 1, JSON.stringify({ opis }), status);
+}
+
+export async function sprawdzUprawnienieUsuwania(
+  db: Baza,
+  discovery: Discovery,
+  tryb: TrybSelly,
+  teraz: () => number = Date.now,
+): Promise<{ wolno: boolean }> {
+  if (tryb !== "pelny") return { wolno: false };
+  if (stanProby && (stanProby.wynik === "jest" || teraz() - stanProby.kiedy < PONOWNA_PROBA_MS)) {
+    return { wolno: stanProby.wynik === "jest" };
+  }
+  const poprzedni = stanProby?.wynik;
+  let wynik: StanProby["wynik"] = "nieokreslony";
+  let opis = "próba uprawnień do usuwania nie dała jednoznacznej odpowiedzi";
+  for (const id of IDENTYFIKATORY_PROBY) {
+    // 1. Identyfikator musi NIE istnieć (404), inaczej wybieramy następny — próba nie może dotknąć prawdziwego produktu.
+    try {
+      await discovery.apiWithRetry(`GET /api/products/${id} (próba uprawnień)`, () => discovery.klient.getProduct(id));
+      continue; // istnieje — nie używamy go
+    } catch (e) {
+      if (!status404(e)) {
+        opis = `próba uprawnień przerwana: odczyt zwrócił ${komunikat(e).slice(0, 120)}`;
+        break;
+      }
+    }
+    // 2. DELETE na nieistniejący produkt: odpowiedź „brak produktu” = autoryzacja przeszła; 401/403 = brak uprawnień.
+    try {
+      await discovery.apiWithRetry(`DELETE /api/products/${id} (próba uprawnień)`, () => discovery.klient.deleteProduct(id));
+      opis = `DELETE na nieistniejący produkt ${id} nie zwrócił błędu — wynik nieokreślony`;
+    } catch (e) {
+      const status = (e as { status?: number } | null)?.status;
+      if (status === 404 || status === 400 || status === 410 || status === 422) {
+        wynik = "jest";
+        opis = `API Selly ma prawo usuwania (DELETE na nieistniejący produkt ${id} → HTTP ${status})`;
+      } else if (status === 401 || status === 403) {
+        wynik = "brak";
+        opis = `API Selly NIE ma prawa usuwania (DELETE → HTTP ${status}) — usuwanie z Selly wyłączone do czasu zmiany uprawnień`;
+      } else {
+        opis = `próba uprawnień: nieoczekiwana odpowiedź ${komunikat(e).slice(0, 120)}`;
+      }
+    }
+    break;
+  }
+  stanProby = { wynik, kiedy: teraz() };
+  // Wpis w „Historii operacji” tylko przy zmianie wyniku (próba i tak biegnie najwyżej raz na godzinę).
+  if (wynik !== poprzedni) {
+    zapiszWpisProby(db, wynik, opis);
+    (wynik === "jest" ? console.log : console.warn)(`[Selly Tor3] ${opis}`);
+  }
+  return { wolno: wynik === "jest" };
+}
+
 let przebiegWToku = false;
 
 export async function usunSierotyZSelly(
