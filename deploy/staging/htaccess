@@ -1,27 +1,37 @@
-# Bridge STAGING (test.agritires.eu) — reverse proxy do backendu Node na 127.0.0.1:5001
+# Bridge STAGING (training.agroopony.eu) — reverse proxy do backendu Node na 127.0.0.1:5001
 # Frontend SPA (rebuild/frontend, base "/") serwowany statycznie z tego katalogu.
-# Wzorowane na produkcyjnym public_html/panel/.htaccess (uproszczone: bez prefiksu /panel).
-# Ten plik jest utrzymywany w repo (deploy/staging/htaccess) i kopiowany do docroota przez deploy-staging.sh.
+# Ten plik jest utrzymywany w repo (deploy/staging/htaccess) i kopiowany do docroota przez tools/deploy-staging.sh.
+#
+# Ticket 188 (2026-10-05): przeniesione na VPS vpshd86 (agroopony.eu). Aplikacja (backend, baza,
+# .env, releases) leży POD docrootem w _app/ — ma własny .htaccess "Require all denied", a reguła 1
+# niżej to drugi zamek. Wcześniej: test.agritires.eu na vpshd1242.
 
 RewriteEngine On
 
 # 0) Wyzwania Let's Encrypt (wystawianie/odnawianie SSL) — serwuj bez proxy/redirectu/SPA-fallbacku
 RewriteRule ^\.well-known/acme-challenge/ - [L]
 
-# 1) API -> backend staging (flaga [P] = proxy; zachowuje metodę i body — działa, bo mod_proxy jest włączony)
+# 1) Katalogi wewnętrzne i pliki .env — nigdy nie serwuj
+RewriteRule ^_app(/|$) - [F,L]
+RewriteRule (^|/)\.env - [F,L]
+
+# 2) Wymuszenie HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 3) Plik CSV dla Selly — serwuj WPROST (katalog ma własny .htaccess z białą listą IP)
+RewriteRule ^ex-port-files/ - [L]
+
+# 4) API -> backend (flaga [P] = proxy; zachowuje metodę i ciało żądania)
 RewriteRule ^api/(.*)$ http://127.0.0.1:5001/api/$1 [P,L,QSA]
 
-# 2) SPA fallback: wszystko poza istniejącym plikiem/katalogiem i poza /api -> index.html
+# 5) SPA fallback: wszystko poza istniejącym plikiem/katalogiem i poza /api -> index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/api/
 RewriteRule ^ index.html [L]
 
-# 3) Wymuszenie HTTPS
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# 4) Brak cache dla index.html i bundli (żeby nowa wersja była widoczna od razu)
+# 6) Brak cache dla index.html i bundli (żeby nowa wersja była widoczna od razu)
 <FilesMatch "\.(html|js|css)$">
     Header set Cache-Control "no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"

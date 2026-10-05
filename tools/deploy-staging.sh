@@ -1,7 +1,9 @@
 #!/bin/bash
 # ============================================================================
 #  Bridge — deploy-staging.sh : CD po stronie VPS (pull-based)
-#  Wdraża nową wersję (rebuild/) na środowisko STAGING (test.agritires.eu).
+#  Wdraża nową wersję (rebuild/) na środowisko STAGING (training.agroopony.eu, VPS vpshd86).
+#  ⚠ Ticket 188 (2026-10-05): staging przeniesiony z vpshd1242 (test.agritires.eu) na vpshd86.
+#  Układ: docroot public_html/training, aplikacja w public_html/training/_app (zablokowane dla WWW).
 #  Uruchamiany z crona DirectAdmin. Laptopy tego nie odpalają.
 #
 #  KONTRAKT z aplikacją (musi spełnić Iteracja 1):
@@ -22,10 +24,10 @@
 set -euo pipefail
 
 # --- konfiguracja (dostosuj do hosta) ---
-STAGING_ROOT="$HOME/private_apps/bridge-staging"          # repo/, releases/, current, data/
+DOCROOT="$HOME/domains/agroopony.eu/public_html/training" # frontend (docroot subdomeny training.agroopony.eu)
+STAGING_ROOT="$DOCROOT/_app"                              # repo/, releases/, current, data/, node/, bin/, lib/
 REPO_DIR="$STAGING_ROOT/repo"                             # klon repo śledzący develop
 DATA_DB="$STAGING_ROOT/data/data-test.db"                 # baza testu (przeżywa podmiany)
-DOCROOT="$HOME/domains/agritires.eu/public_html/test"     # frontend (docroot subdomeny)
 PM2_NAME="bridge-backend-staging"
 BRANCH="develop"
 LOG="$STAGING_ROOT/deploy.log"
@@ -46,7 +48,7 @@ export PORT=5001 HOST=127.0.0.1 NODE_ENV=production DB_PATH="$DATA_DB"
 export SELLY_TRYB=wylaczony
 export SELLY_CSV_DIR="$DOCROOT/ex-port-files"
 export SELLY_CSV_PLIK="sellycsv-staging.csv"
-export SELLY_CSV_URL="https://test.agritires.eu/ex-port-files/sellycsv-staging.csv"
+export SELLY_CSV_URL="https://training.agroopony.eu/ex-port-files/sellycsv-staging.csv"
 
 # Sekrety środowiska (JWT_SECRET) — plik POZA repo, tworzony raz ręcznie na VPS.
 # Format: jedna para KLUCZ=wartość na linię. Instrukcja: docs/deploy-setup.md.
@@ -56,6 +58,11 @@ log(){ echo "$(date '+%F %T')  $*" | tee -a "$LOG"; }
 
 # node z nvm (build wymaga node 20)
 export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" >/dev/null 2>&1 || true
+# ticket 188 (vpshd86): na nowym serwerze nie ma nvm ani globalnego pm2 — Node 20 leży w
+# $STAGING_ROOT/node/bin, a $STAGING_ROOT/bin/pm2 to nakładka na wspólny demon PM2
+# (PM2_HOME=bridgeone/_app/.pm2, autostart cronem DirectAdmin). Dokładamy je na początek PATH.
+[ -d "$STAGING_ROOT/node/bin" ] && export PATH="$STAGING_ROOT/node/bin:$PATH"
+[ -d "$STAGING_ROOT/bin" ] && export PATH="$STAGING_ROOT/bin:$PATH"
 
 cd "$REPO_DIR"
 git fetch --quiet origin "$BRANCH"
@@ -84,6 +91,15 @@ if [ -z "${SELLY_CSV_DIR:-}" ]; then
   exit 1
 fi
 
+# --- guard (ticket 188): katalog aplikacji leży POD docrootem — musi być zablokowany dla WWW ---
+# Na vpshd86 wolno nam pisać tylko w public_html/<subdomena>, więc backend, baza i .env są w
+# $STAGING_ROOT = $DOCROOT/_app. Bez `Require all denied` w $STAGING_ROOT/.htaccess baza i sekrety
+# byłyby do pobrania z internetu. Lepiej nie wdrożyć.
+if [ ! -f "$STAGING_ROOT/.htaccess" ] || ! grep -q "Require all denied" "$STAGING_ROOT/.htaccess"; then
+  log "BŁĄD: brak blokady WWW ($STAGING_ROOT/.htaccess z 'Require all denied'). Przerywam."
+  exit 1
+fi
+
 # --- backend: build -> release -> migracje -> pm2 ---
 RELEASE="$STAGING_ROOT/releases/$SHA"
 log "backend: build -> $RELEASE"
@@ -92,7 +108,7 @@ log "backend: build -> $RELEASE"
 # `--ignore-scripts`: prebuilt better-sqlite3 wymaga glibc 2.29 (box ma 2.28), a node-gyp 10 nie
 # zbuduje ze źródła na Pythonie 3.6 — więc pomijamy skrypty natywne i PODKŁADAMY działającą binarkę
 # z produkcji (ta sama wersja 11.7.0 + ten sam ABI node 20 = 115, więc jest w pełni zgodna).
-PROD_BSQLITE="/home/admin/private_apps/bridge/node_modules/better-sqlite3/build/Release/better_sqlite3.node"
+PROD_BSQLITE="$STAGING_ROOT/lib/better_sqlite3.node"   # ticket 188: stała kopia binarki 11.7.0 / ABI 115 na vpshd86
 if [ ! -f "$PROD_BSQLITE" ]; then
   log "BŁĄD: brak binarki better-sqlite3 produkcji ($PROD_BSQLITE) do podłożenia. Przerywam."
   exit 1
@@ -135,10 +151,12 @@ log "frontend: build -> $DOCROOT"
 ( cd rebuild/frontend && npm ci --include=dev && npm run build )   # jw. — build wymaga devDependencies
 # `--delete` z wyłączeniem .htaccess i katalogu CSV Selly (SELLY_CSV_DIR leży POD docrootem,
 # żeby plik był pobieralny) — bez tego każdy deploy kasował wygenerowany CSV (ticket 93).
-bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR"
+# ticket 188: $STAGING_ROOT (=$DOCROOT/_app: baza, .env, releases) i cgi-bin leżą POD docrootem —
+# MUSZĄ być chronione przed `rsync --delete`, inaczej deploy skasowałby całą aplikację z bazą.
+bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR" "$STAGING_ROOT" "$DOCROOT/cgi-bin"
 cp -f deploy/staging/htaccess "$DOCROOT/.htaccess"       # proxy utrzymywany z repo
 
 # --- sprzątanie: zostaw 5 ostatnich release ---
 ls -1dt "$STAGING_ROOT/releases"/*/ 2>/dev/null | tail -n +6 | xargs -r rm -rf
 
-log "OK — wdrożono $SHA na test.agritires.eu"
+log "OK — wdrożono $SHA na training.agroopony.eu"
