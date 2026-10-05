@@ -24,3 +24,14 @@ Po wdrożeniu na produkcji (przy `SELLY_TRYB=pelny` i `SELLY_SCHEDULER=true`) za
   przebieg się wstrzymuje (wpis „wstrzymano” w Historii operacji). Pierwszy tydzień warto obejrzeć wpisy.
 - Nie zweryfikowano, czy konto API Selly na produkcji ma prawo `DELETE` (zakres `READWRITE`); pierwszy przebieg to pokaże (wpis „błąd” z komunikatem HTTP).
 - Czas w historii to UTC (jak reszta bazy).
+
+## Review fixes applied
+Review (`review.md`): 2 BLOCKER, 9 SHOULD-FIX, 6 NICE-TO-HAVE. Naprawione:
+- **BLOCKER 1:** ponowne sprawdzenie predykatu sieroty i użycia wariantu przez żywe mapowanie tuż przed `DELETE` (produkt mógł wrócić w trakcie przebiegu). Test z powrotem produktu po odczycie z Selly; mutacyjnie potwierdzony.
+- **BLOCKER 2:** mapowanie bez wariantu, a produkt w Selly ma warianty → nic nie usuwa; kasuje cały produkt tylko gdy nie ma w nim żadnych wariantów.
+- **Tożsamość jak `sprawdzCelSelly` (184):** EAN ALBO nazwa muszą zgadzać się ze znanymi danymi (historia cen / historia); bez znanej tożsamości nic nie usuwa; zgodność „DEMO”.
+- **Atomowość:** zapis historii po udanym `DELETE` w `try/catch` (nie przerywa reszty), dziennik zamykany w `finally`; status odpowiedzi `DELETE` spoza 2xx nie jest sukcesem.
+- **Nakładanie przebiegów:** flaga „w toku”. **Limit dobowy** 200 usunięć (z `audit_log`). **Próg sierot** konfigurowalny (`SELLY_USUWANIE_MAKS_UDZIAL`, domyślnie 0.3) — odblokowuje zaległość >30% po świadomym przejrzeniu.
+- **Testy:** 21 (wariant NULL, powrót w trakcie, brak tożsamości/DEMO, 5xx na DELETE, awaria audytu, równoległe przebiegi, limit dobowy, próg); harmonogram czeka na skutek, a nie stałe 400 ms.
+Nie zmieniane (świadomie): 404 na odczycie produktu sprząta mapowanie (przy błędnej konfiguracji sklepu mogłoby to czyścić mapowania — do obserwacji w pierwszych dniach);
+ochrona EAN nie sprawdza `products_scalone` (scalenia `scal-karty-auto` idą osobną ścieżką i nie są widoczne dla Toru 3).

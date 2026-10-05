@@ -188,6 +188,8 @@ export type ZaleznosciHarmonogramu = {
   tryb: TrybSelly;
   /** Tor 3 (ticket 186): usuwanie z Selly produktów, których nie ma już w Bridge. Domyślnie włączone. */
   usuwanie?: boolean;
+  /** Próg bezpiecznika Toru 3 (ułamek sierot wśród mapowań); domyślnie `MAKS_UDZIAL_SIEROT`. */
+  usuwanieMaksUdzial?: number;
   /**
    * Zegar — WYŁĄCZNIE dla testów, produkcyjnie `new Date()`. Wzorzec jak `ZegarLimitera`
    * w `limiter.ts`: bez tego testu „Tor 2 o 04:30" nie da się napisać inaczej niż czekaniem.
@@ -210,6 +212,7 @@ export function stworzHarmonogramSelly({
   discovery,
   tryb,
   usuwanie = true,
+  usuwanieMaksUdzial,
   teraz = () => new Date(),
   interwalMs = CHECK_INTERVAL_MS,
 }: ZaleznosciHarmonogramu): Harmonogram {
@@ -235,7 +238,7 @@ export function stworzHarmonogramSelly({
       console.log(`[Selly Scheduler] Tor1 ${tag} ${hh}:${dwaZnaki(mm)}`);
       runDeltaAll(db, discovery)
         .catch((e: unknown) => console.error("[Selly Scheduler] Tor1 err:", komunikat(e)))
-        .then(() => (usuwanie ? usunSierotyZSelly(db, discovery, { tryb }) : null))
+        .then(() => (usuwanie ? usunSierotyZSelly(db, discovery, { tryb, maksUdzial: usuwanieMaksUdzial }) : null))
         .catch((e: unknown) => console.error("[Selly Scheduler] Tor3 err:", komunikat(e)));
     }
 

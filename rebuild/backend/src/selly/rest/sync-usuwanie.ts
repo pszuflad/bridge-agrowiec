@@ -37,6 +37,8 @@ import type { Discovery } from "./discovery.js";
 import type { TrybSelly } from "../tryb.js";
 
 export const LIMIT_NA_PRZEBIEG = 20;
+/** Twardy limit usunięć na DOBĘ (kroczące 24 h) — drugi próg obok limitu na przebieg (20 co 15 min = 1920/dobę). */
+export const LIMIT_DOBOWY = 200;
 export const MAKS_UDZIAL_SIEROT = 0.3;
 export const WSTRZYMANIE_CISZA_GODZIN = 6;
 
@@ -81,10 +83,8 @@ const komunikat = (e: unknown): string => (e instanceof Error ? e.message : Stri
 const teraz = (): string => new Date().toISOString().replace("T", " ").slice(0, 19);
 const status404 = (e: unknown): boolean => (e as { status?: number } | null)?.status === 404;
 
-const CZESC_SELECT = `
-  SELECT sp.id, sp.kod_importu, sp.dostawca, sp.bridge_kod, sp.selly_product_id, sp.selly_variant_id
-  FROM selly_products sp
-  WHERE sp.selly_product_id IS NOT NULL
+const WARUNKI_SIEROTY = `
+    sp.selly_product_id IS NOT NULL
     AND NOT EXISTS (SELECT 1 FROM products p WHERE p.dostawca = sp.dostawca AND p.kod_importu = sp.kod_importu)
     AND NOT EXISTS (SELECT 1 FROM products p WHERE p.kod = sp.bridge_kod)
     AND NOT EXISTS (
@@ -92,6 +92,18 @@ const CZESC_SELECT = `
       WHERE p.dostawca = sp.dostawca AND p.ean IS NOT NULL AND p.ean != ''
         AND p.ean IN (SELECT h.ean FROM historia_cen h WHERE h.kod = sp.bridge_kod AND h.ean IS NOT NULL AND h.ean != '')
     )`;
+
+const CZESC_SELECT = `
+  SELECT sp.id, sp.kod_importu, sp.dostawca, sp.bridge_kod, sp.selly_product_id, sp.selly_variant_id
+  FROM selly_products sp
+  WHERE ${WARUNKI_SIEROTY}`;
+
+/** Ponowne sprawdzenie TEGO wiersza tuż przed `DELETE` — import/akceptacja mógł w międzyczasie przywrócić produkt. */
+function nadalSierota(db: Baza, s: Sierota): boolean {
+  return !!db.$client
+    .prepare(`SELECT 1 FROM selly_products sp WHERE sp.id = ? AND ${WARUNKI_SIEROTY}`)
+    .get(s.id);
+}
 
 /** Sieroty (bez sprawdzania w Selly) — najstarsze mapowania pierwsze. */
 export function znajdzSieroty(db: Baza, limit = LIMIT_NA_PRZEBIEG): { sieroty: Sierota[]; wszystkie: number } {
@@ -148,6 +160,19 @@ function opisUsuniecia(w: WpisUsuniecia): string {
  * Wpis w widoku „Historia” (`audit_log`, akcja `selly_usuniecie`): `encja_id` = kod produktu Bridge, `kiedy` =
  * godzina usunięcia (ISO, UTC), `szczegoly.zmiany` = opis z nazwą i identyfikatorami.
  */
+/** Ile usunięć (wariant/produkt) zapisano w ostatnich 24 h — z `audit_log`, więc przeżywa restart procesu. */
+function usunieciaWOstatniejDobie(db: Baza): number {
+  const od = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  return (
+    db.$client
+      .prepare(
+        `SELECT COUNT(*) c FROM audit_log WHERE akcja = ? AND kiedy > ?
+           AND (szczegoly_json LIKE '%"akcja":"usunieto_wariant"%' OR szczegoly_json LIKE '%"akcja":"usunieto_produkt"%')`,
+      )
+      .get(AKCJA_USUNIECIA_Z_SELLY, od) as { c: number }
+  ).c;
+}
+
 function zapiszHistorie(db: Baza, w: WpisUsuniecia): void {
   zapiszAudyt(db, {
     uzytkownikId: null,
@@ -215,6 +240,14 @@ function czyJuzZapisanoWstrzymanie(db: Baza): boolean {
   return !!r;
 }
 
+/** Klient rzuca na non-2xx, ale odpowiedź ze statusem spoza 2xx nie może być uznana za sukces. */
+function sprawdzOdpowiedzDelete(odpowiedz: unknown): void {
+  const status = (odpowiedz as { status?: number } | null)?.status;
+  if (typeof status === "number" && (status < 200 || status >= 300)) {
+    throw Object.assign(new Error(`[Selly] DELETE zwrócił HTTP ${status}`), { status });
+  }
+}
+
 async function usunJedna(db: Baza, discovery: Discovery, s: Sierota): Promise<WpisUsuniecia> {
   const znane = znaneDane(db, s.bridge_kod);
   const wpis: WpisUsuniecia = {
@@ -257,9 +290,20 @@ async function usunJedna(db: Baza, discovery: Discovery, s: Sierota): Promise<Wp
   wpis.nazwa = produkt.name ?? wpis.nazwa;
   wpis.ean = produkt.ean ?? wpis.ean;
 
-  // 2. Tożsamość: jeśli znamy EAN z historii, a Selly ma inny — to nie ten produkt.
+  // 2. Tożsamość (jak `sprawdzCelSelly`, ticket 184): EAN ALBO nazwa muszą się zgadzać ze znanymi danymi z historii.
+  // Gdy nie znamy żadnej z nich — nic nie usuwamy (fail closed). „DEMO” w nazwie musi być zgodne po obu stronach.
+  const norm = (t: string | null | undefined): string => String(t ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toUpperCase();
+  const zgodnyEan = !!znane.ean && !!produkt.ean && znane.ean === produkt.ean;
+  const zgodnaNazwa = !!znane.nazwa && !!produkt.name && norm(znane.nazwa) === norm(produkt.name);
   if (znane.ean && produkt.ean && znane.ean !== produkt.ean) {
     return { ...wpis, powod: `EAN w Selly (${produkt.ean}) różni się od znanego (${znane.ean})` };
+  }
+  if (!zgodnyEan && !zgodnaNazwa) {
+    return { ...wpis, powod: "brak potwierdzenia tożsamości (EAN ani nazwa nie zgadzają się ze znanymi danymi) — nic nie usuwam" };
+  }
+  const demo = (t: string | null | undefined): boolean => /\bDEMO\b/i.test(t ?? "");
+  if (znane.nazwa && produkt.name && demo(znane.nazwa) !== demo(produkt.name)) {
+    return { ...wpis, powod: "niezgodność oznaczenia DEMO w nazwie — nic nie usuwam" };
   }
 
   // 3. Warianty produktu.
@@ -293,21 +337,34 @@ async function usunJedna(db: Baza, discovery: Discovery, s: Sierota): Promise<Wp
     if (magazyn !== s.dostawca) {
       return { ...wpis, powod: `wariant ma inny magazyn (${String(magazyn ?? "brak")}) niż dostawca ${s.dostawca}` };
     }
+  } else if (warianty.length > 0) {
+    // Mapowanie bez wariantu, a produkt ma warianty (np. innych magazynów) — nie kasujemy całego produktu.
+    return { ...wpis, powod: "mapowanie bez wariantu, a produkt w Selly ma warianty — nic nie usuwam" };
   }
 
   const innePozostaja = warianty.filter((v) => v.variant_id !== s.selly_variant_id).length > 0 || inneMapowania > 0;
 
+  // 4. Ostatnie sprawdzenie tuż przed DELETE: między początkiem przebiegu a tym miejscem było kilka wywołań HTTP,
+  // a produkt mógł wrócić do Bridge (import, akceptacja stagingu, scalanie).
+  if (!nadalSierota(db, s) || wariantUzywanyPrzezZywe(db, s)) {
+    return { ...wpis, powod: "produkt wrócił do Bridge w trakcie przebiegu — nic nie usuwam" };
+  }
+
   try {
     if (s.selly_variant_id != null && innePozostaja) {
       wpis.czas = teraz();
-      await discovery.apiWithRetry(`DELETE /api/products/${s.selly_product_id}/variants/${s.selly_variant_id}`, () =>
-        discovery.klient.deleteVariant(s.selly_product_id, s.selly_variant_id as number),
+      sprawdzOdpowiedzDelete(
+        await discovery.apiWithRetry(`DELETE /api/products/${s.selly_product_id}/variants/${s.selly_variant_id}`, () =>
+          discovery.klient.deleteVariant(s.selly_product_id, s.selly_variant_id as number),
+        ),
       );
       wpis.akcja = "usunieto_wariant";
     } else if (inneMapowania === 0) {
       wpis.czas = teraz();
-      await discovery.apiWithRetry(`DELETE /api/products/${s.selly_product_id}`, () =>
-        discovery.klient.deleteProduct(s.selly_product_id),
+      sprawdzOdpowiedzDelete(
+        await discovery.apiWithRetry(`DELETE /api/products/${s.selly_product_id}`, () =>
+          discovery.klient.deleteProduct(s.selly_product_id),
+        ),
       );
       wpis.akcja = "usunieto_produkt";
     } else {
@@ -325,15 +382,36 @@ async function usunJedna(db: Baza, discovery: Discovery, s: Sierota): Promise<Wp
  * Jeden przebieg Toru 3. `tryb` ≠ `pelny` → nic nie robi (także nie zapisuje do dziennika): blokada
  * środowiska zablokowałaby `DELETE` i każdy wiersz kończyłby się błędem.
  */
+let przebiegWToku = false;
+
 export async function usunSierotyZSelly(
   db: Baza,
   discovery: Discovery,
-  opcje: { tryb: TrybSelly; limit?: number } = { tryb: "pelny" },
+  opcje: { tryb: TrybSelly; limit?: number; maksUdzial?: number; limitDobowy?: number } = { tryb: "pelny" },
 ): Promise<WynikUsuwania | null> {
   if (opcje.tryb !== "pelny") return null;
-  const limit = opcje.limit ?? LIMIT_NA_PRZEBIEG;
+  // Przebiegi nie mogą się nakładać (dwa równoległe dałyby decyzje oparte na nieaktualnym odczycie i dubel wpisów).
+  if (przebiegWToku) return null;
+  przebiegWToku = true;
+  try {
+    return await przebieg(db, discovery, opcje);
+  } finally {
+    przebiegWToku = false;
+  }
+}
+
+async function przebieg(
+  db: Baza,
+  discovery: Discovery,
+  opcje: { tryb: TrybSelly; limit?: number; maksUdzial?: number; limitDobowy?: number },
+): Promise<WynikUsuwania | null> {
+  const maksUdzial = opcje.maksUdzial ?? MAKS_UDZIAL_SIEROT;
+  const limitDobowy = opcje.limitDobowy ?? LIMIT_DOBOWY;
+  const zostaloNaDobe = Math.max(0, limitDobowy - usunieciaWOstatniejDobie(db));
+  const limit = Math.min(opcje.limit ?? LIMIT_NA_PRZEBIEG, zostaloNaDobe);
   const { sieroty, wszystkie } = znajdzSieroty(db, limit);
   if (wszystkie === 0) return null; // cichy przebieg: nic do zrobienia — żadnego wpisu w dzienniku
+  if (limit === 0) return null; // wyczerpany limit dobowy — wznowi się, gdy najstarsze usunięcia wyjdą z okna 24 h
 
   const sqlite = db.$client;
   const produktow = (sqlite.prepare("SELECT COUNT(*) c FROM products").get() as { c: number }).c;
@@ -352,8 +430,8 @@ export async function usunSierotyZSelly(
   const podejrzane =
     produktow === 0
       ? "katalog Bridge jest pusty"
-      : mapowan > 0 && wszystkie / mapowan > MAKS_UDZIAL_SIEROT
-        ? `sierot jest ${wszystkie} z ${mapowan} mapowań (>${Math.round(MAKS_UDZIAL_SIEROT * 100)}%)`
+      : mapowan > 0 && wszystkie / mapowan > maksUdzial
+        ? `sierot jest ${wszystkie} z ${mapowan} mapowań (>${Math.round(maksUdzial * 100)}%)`
         : null;
   if (podejrzane) {
     if (czyJuzZapisanoWstrzymanie(db)) return null;
@@ -367,37 +445,45 @@ export async function usunSierotyZSelly(
 
   const logId = otworzLog(db);
   wynik.logId = logId;
-  for (const s of sieroty) {
-    let wpis: WpisUsuniecia;
-    try {
-      wpis = await usunJedna(db, discovery, s);
-    } catch (e) {
-      wpis = {
-        kod: s.bridge_kod,
-        dostawca: s.dostawca,
-        kod_importu: s.kod_importu,
-        nazwa: null,
-        ean: null,
-        selly_product_id: s.selly_product_id,
-        selly_variant_id: s.selly_variant_id,
-        akcja: "blad",
-        czas: teraz(),
-        powod: komunikat(e).slice(0, 200),
-      };
+  try {
+    for (const s of sieroty) {
+      let wpis: WpisUsuniecia;
+      try {
+        wpis = await usunJedna(db, discovery, s);
+      } catch (e) {
+        wpis = {
+          kod: s.bridge_kod,
+          dostawca: s.dostawca,
+          kod_importu: s.kod_importu,
+          nazwa: null,
+          ean: null,
+          selly_product_id: s.selly_product_id,
+          selly_variant_id: s.selly_variant_id,
+          akcja: "blad",
+          czas: teraz(),
+          powod: komunikat(e).slice(0, 200),
+        };
+      }
+      wynik.wpisy.push(wpis);
+      if (wpis.akcja === "usunieto_wariant") wynik.usuniete_warianty++;
+      else if (wpis.akcja === "usunieto_produkt") wynik.usuniete_produkty++;
+      else if (wpis.akcja === "juz_nie_istnial") wynik.juz_nie_istnialo++;
+      else if (wpis.akcja === "blad") wynik.bledy++;
+      else wynik.pominiete++;
+      if (wpis.akcja === "usunieto_wariant" || wpis.akcja === "usunieto_produkt" || wpis.akcja === "juz_nie_istnial") {
+        try {
+          zapiszHistorie(db, wpis);
+        } catch (e) {
+          // DELETE w Selly już się wykonał — brak wpisu w Historii nie może przerwać reszty ani zgubić dziennika.
+          console.error(`[Selly Tor3] nie udało się zapisać historii dla ${wpis.kod}: ${komunikat(e)}`);
+        }
+      }
     }
-    wynik.wpisy.push(wpis);
-    if (wpis.akcja === "usunieto_wariant") wynik.usuniete_warianty++;
-    else if (wpis.akcja === "usunieto_produkt") wynik.usuniete_produkty++;
-    else if (wpis.akcja === "juz_nie_istnial") wynik.juz_nie_istnialo++;
-    else if (wpis.akcja === "blad") wynik.bledy++;
-    else wynik.pominiete++;
-    if (wpis.akcja === "usunieto_wariant" || wpis.akcja === "usunieto_produkt" || wpis.akcja === "juz_nie_istnial") {
-      zapiszHistorie(db, wpis);
-    }
+  } finally {
+    const status =
+      wynik.bledy > 0 && wynik.usuniete_warianty + wynik.usuniete_produkty + wynik.juz_nie_istnialo === 0 ? "blad" : "zakonczono";
+    zamknijLog(db, logId, wynik, status);
   }
-
-  const status = wynik.bledy > 0 && wynik.usuniete_warianty + wynik.usuniete_produkty + wynik.juz_nie_istnialo === 0 ? "blad" : "zakonczono";
-  zamknijLog(db, logId, wynik, status);
   console.log(
     `[Selly Tor3] sieroty=${wszystkie}, usunięte: warianty=${wynik.usuniete_warianty}, produkty=${wynik.usuniete_produkty}, ` +
       `już nie istniało=${wynik.juz_nie_istnialo}, pominięte=${wynik.pominiete}, błędy=${wynik.bledy}`,

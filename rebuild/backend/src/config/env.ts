@@ -131,6 +131,12 @@ const schemaEnvBazowe = z.object({
    * wyłączyć bez ruszania reszty synchronizacji (`SELLY_USUWANIE=false`). Domyślnie WŁĄCZONE (decyzja użytkownika).
    */
   SELLY_USUWANIE: flagaBoolDomyslnieWlaczona,
+  /**
+   * Próg bezpiecznika Toru 3: gdy sierot jest więcej niż ten UŁAMEK wszystkich mapowań `selly_products`, przebieg
+   * się wstrzymuje (wygląda na wyczyszczenie katalogu/awarię importu). Domyślnie 0.3; po świadomym przejrzeniu
+   * zaległości można go podnieść (np. 0.6), żeby odblokować usuwanie.
+   */
+  SELLY_USUWANIE_MAKS_UDZIAL: z.coerce.number().min(0).max(1).default(0.3),
   SELLY_TRYB: z.enum(["wylaczony", "tylko-odczyt", "pelny"]).default("wylaczony"),
   SELLY_SHOP_URL: z.string().default(""),
   SELLY_CLIENT_ID: z.string().default(""),

@@ -38,8 +38,13 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     }
   };
 
-  const sierota = (kodImportu: string, kod: string, productId: number, variantId: number, dostawca = "MO1") =>
-    zasiejMapowanie(baza.sqlite, { kodImportu, dostawca, bridgeKod: kod, productId, variantId });
+  /** Sierota ze znanym EAN-em (historia cen) — bez znanej tożsamości Tor 3 niczego nie usuwa. */
+  const sierota = (kodImportu: string, kod: string, productId: number, variantId: number | null, dostawca = "MO1", ean: string | null = `590${productId}00000000`.slice(0, 13)) => {
+    zasiejMapowanie(baza.sqlite, { kodImportu, dostawca, bridgeKod: kod, productId, variantId: variantId ?? undefined });
+    if (ean) baza.sqlite.prepare("INSERT INTO historia_cen (kod, ean, dostawca, zarejestrowano_at) VALUES (?,?,?,'2026-09-01')").run(kod, ean, dostawca);
+    return ean;
+  };
+  const eanDla = (productId: number) => `590${productId}00000000`.slice(0, 13);
 
   const przygotuj = (sklep: OpcjeAtrapy["sklep"], opcje: OpcjeAtrapy = {}) => {
     const atrapa = stworzAtrapeSelly({ sklep, ...opcje });
@@ -49,8 +54,7 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
 
   it("usuwa produkt (jedyny wariant), zapisuje w Historii kod, nazwę, EAN, id w Selly i godzinę, czyści mapowanie", async () => {
     tlo();
-    sierota("S1", "MO1_STARY", 900, 901);
-    baza.sqlite.prepare("INSERT INTO historia_cen (kod, ean, dostawca, zarejestrowano_at) VALUES ('MO1_STARY','5901111111111','MO1','2026-09-01')").run();
+    sierota("S1", "MO1_STARY", 900, 901, "MO1", "5901111111111");
     const { atrapa, discovery } = przygotuj([{ product_id: 900, name: "Opona STARA 1", ean: "5901111111111", warianty: [{ variant_id: 901, features: [magazyn("MO1")] }] }]);
 
     const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
@@ -91,7 +95,7 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     zasiejMapowanie(baza.sqlite, { kodImportu: "WSPOLNY", dostawca: "MO2", bridgeKod: "MO2_ZYWY", productId: 910, variantId: 912 });
     sierota("WSPOLNY", "MO1_STARY", 910, 911);
     const { atrapa, discovery } = przygotuj([
-      { product_id: 910, name: "Wspólny", warianty: [{ variant_id: 911, features: [magazyn("MO1")] }, { variant_id: 912, features: [magazyn("MO2")] }] },
+      { product_id: 910, name: "Wspólny", ean: eanDla(910), warianty: [{ variant_id: 911, features: [magazyn("MO1")] }, { variant_id: 912, features: [magazyn("MO2")] }] },
     ]);
 
     const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
@@ -120,10 +124,9 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
   it("niezgodny magazyn albo EAN w Selly → nic nie usuwa, mapowanie zostaje, wpis jako pominięty (bez historii produktu)", async () => {
     tlo();
     sierota("S1", "MO1_STARY", 940, 941);
-    sierota("S2", "MO1_STARY2", 942, 943);
-    baza.sqlite.prepare("INSERT INTO historia_cen (kod, ean, dostawca, zarejestrowano_at) VALUES ('MO1_STARY2','5903333333333','MO1','2026-09-01')").run();
+    sierota("S2", "MO1_STARY2", 942, 943, "MO1", "5903333333333");
     const { atrapa, discovery } = przygotuj([
-      { product_id: 940, name: "Inny magazyn", warianty: [{ variant_id: 941, features: [magazyn("MO5")] }] },
+      { product_id: 940, name: "Inny magazyn", ean: eanDla(940), warianty: [{ variant_id: 941, features: [magazyn("MO5")] }] },
       { product_id: 942, name: "Inny EAN", ean: "5909999999999", warianty: [{ variant_id: 943, features: [magazyn("MO1")] }] },
     ]);
 
@@ -165,7 +168,7 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     tlo(20);
     for (let i = 0; i < 4; i++) sierota(`S${i}`, `MO1_STARY${i}`, 970 + i, 980 + i);
     const { atrapa, discovery } = przygotuj(
-      [0, 1, 2, 3].map((i) => ({ product_id: 970 + i, name: `S${i}`, warianty: [{ variant_id: 980 + i, features: [magazyn("MO1")] }] })),
+      [0, 1, 2, 3].map((i) => ({ product_id: 970 + i, name: `S${i}`, ean: eanDla(970 + i), warianty: [{ variant_id: 980 + i, features: [magazyn("MO1")] }] })),
     );
 
     const pierwszy = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny", limit: 3 });
@@ -214,14 +217,149 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     });
   });
 
+  describe("poprawki po przeglądzie (ticket 186)", () => {
+    it("mapowanie BEZ wariantu, a produkt w Selly ma warianty: nie kasuje całego produktu", async () => {
+      tlo();
+      sierota("S1", "MO1_STARY", 1040, null);
+      const { atrapa, discovery } = przygotuj([
+        { product_id: 1040, name: "X", ean: eanDla(1040), warianty: [{ variant_id: 1041, features: [magazyn("MO5")] }] },
+      ]);
+      const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+      expect(wynik?.pominiete).toBe(1);
+      expect(atrapa.liczba("deleteProduct") + atrapa.liczba("deleteVariant")).toBe(0);
+      expect(wynik?.wpisy[0]?.powod).toContain("mapowanie bez wariantu");
+    });
+
+    it("mapowanie bez wariantu i produkt bez wariantów w Selly: usuwa produkt", async () => {
+      tlo();
+      sierota("S1", "MO1_STARY", 1050, null);
+      const { atrapa, discovery } = przygotuj([{ product_id: 1050, name: "X", ean: eanDla(1050), warianty: [] }]);
+      expect((await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" }))?.usuniete_produkty).toBe(1);
+      expect(atrapa.liczba("deleteProduct")).toBe(1);
+    });
+
+    it("produkt wraca do Bridge W TRAKCIE przebiegu (po odczycie z Selly): nic nie kasuje", async () => {
+      tlo();
+      sierota("S1", "MO1_STARY", 1060, 1061);
+      const { atrapa, discovery } = przygotuj([
+        { product_id: 1060, name: "X", ean: eanDla(1060), warianty: [{ variant_id: 1061, features: [magazyn("MO1")] }] },
+      ]);
+      const getProduct = atrapa.klient.getProduct.bind(atrapa.klient);
+      atrapa.klient.getProduct = async (id) => {
+        const wynik = await getProduct(id);
+        produkt("MO1_STARY", "S1"); // import przywrócił produkt, gdy czekaliśmy na odpowiedź Selly
+        return wynik;
+      };
+      const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+      expect(wynik?.pominiete).toBe(1);
+      expect(wynik?.wpisy[0]?.powod).toContain("wrócił do Bridge");
+      expect(atrapa.liczba("deleteProduct")).toBe(0);
+      expect(mapowania()).toContain("MO1_STARY");
+    });
+
+    it("bez znanej tożsamości (brak EAN i nazwy w historii) albo przy innym EAN-ie/DEMO: nic nie usuwa", async () => {
+      tlo();
+      sierota("S1", "MO1_NIEZNANY", 1070, 1071, "MO1", null);
+      sierota("S2", "MO1_DEMO", 1072, 1073);
+      baza.sqlite.prepare("INSERT INTO history (data, kod_produktu, nazwa, pole, zrodlo, kto) VALUES ('2026-09-01','MO1_DEMO','Opona X','nazwa','t','t')").run();
+      const { atrapa, discovery } = przygotuj([
+        { product_id: 1070, name: "X", ean: "5900000000001", warianty: [{ variant_id: 1071, features: [magazyn("MO1")] }] },
+        { product_id: 1072, name: "Opona X DEMO", ean: null, warianty: [{ variant_id: 1073, features: [magazyn("MO1")] }] },
+      ]);
+      const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+      expect(wynik?.pominiete).toBe(2);
+      expect(atrapa.liczba("deleteProduct") + atrapa.liczba("deleteVariant")).toBe(0);
+    });
+
+    it("DELETE ze statusem spoza 2xx nie jest sukcesem; błąd 5xx na DELETE zostawia mapowanie, reszta przebiegu idzie dalej", async () => {
+      tlo();
+      sierota("S1", "MO1_A", 1080, 1081);
+      sierota("S2", "MO1_B", 1082, 1083);
+      const { atrapa, discovery } = przygotuj(
+        [1080, 1082].map((id) => ({ product_id: id, name: `P${id}`, ean: eanDla(id), warianty: [{ variant_id: id + 1, features: [magazyn("MO1")] }] })),
+      );
+      let n = 0;
+      atrapa.klient.deleteProduct = async (id) => {
+        n++;
+        if (n === 1) return { status: 500 } as never; // odpowiedź spoza 2xx (nie 429 — tamto ponawia apiWithRetry)
+        atrapa.sklep.delete(id);
+        return null;
+      };
+      const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+      expect(wynik).toMatchObject({ bledy: 1, usuniete_produkty: 1 });
+      expect(mapowania()).toContain("MO1_A");
+      expect(mapowania()).not.toContain("MO1_B");
+    });
+
+    it("awaria zapisu historii po udanym DELETE nie przerywa przebiegu i nie zostawia wpisu „w_trakcie”", async () => {
+      tlo();
+      sierota("S1", "MO1_A", 1090, 1091);
+      sierota("S2", "MO1_B", 1092, 1093);
+      const { atrapa, discovery } = przygotuj(
+        [1090, 1092].map((id) => ({ product_id: id, name: `P${id}`, ean: eanDla(id), warianty: [{ variant_id: id + 1, features: [magazyn("MO1")] }] })),
+      );
+      baza.sqlite.exec("CREATE TRIGGER blokuj_audyt BEFORE INSERT ON audit_log BEGIN SELECT RAISE(ABORT, 'audyt niedostępny'); END"); // zapis audytu rzuci
+      const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" }).catch((e: unknown) => e);
+      baza.sqlite.exec("DROP TRIGGER blokuj_audyt");
+      expect(atrapa.liczba("deleteProduct")).toBe(2);
+      expect(wynik).not.toBeInstanceOf(Error);
+      expect(baza.sqlite.prepare("SELECT status FROM selly_sync_log WHERE operacja='sync_delete'").get()).toEqual({ status: "zakonczono" });
+    });
+
+    it("dwa przebiegi naraz: drugi się nie uruchamia (brak dublowania)", async () => {
+      tlo();
+      sierota("S1", "MO1_A", 1100, 1101);
+      const { atrapa, discovery } = przygotuj([{ product_id: 1100, name: "P", ean: eanDla(1100), warianty: [{ variant_id: 1101, features: [magazyn("MO1")] }] }]);
+      const [a, b] = await Promise.all([usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" }), usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" })]);
+      expect([a, b].filter(Boolean)).toHaveLength(1);
+      expect(atrapa.liczba("deleteProduct")).toBe(1);
+    });
+
+    it("limit dobowy: po wyczerpaniu przebiegi nic nie robią", async () => {
+      tlo(30);
+      for (let i = 0; i < 5; i++) sierota(`S${i}`, `MO1_L${i}`, 1200 + i, 1210 + i);
+      const { atrapa, discovery } = przygotuj(
+        [0, 1, 2, 3, 4].map((i) => ({ product_id: 1200 + i, name: `L${i}`, ean: eanDla(1200 + i), warianty: [{ variant_id: 1210 + i, features: [magazyn("MO1")] }] })),
+      );
+      const pierwszy = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny", limitDobowy: 3 });
+      expect(pierwszy?.usuniete_produkty).toBe(3);
+      expect(await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny", limitDobowy: 3 })).toBeNull();
+      expect(atrapa.liczba("deleteProduct")).toBe(3);
+    });
+
+    it("próg udziału sierot jest konfigurowalny (domyślnie 30%, granica włącznie dozwolona)", async () => {
+      tlo(7);
+      for (let i = 0; i < 3; i++) sierota(`S${i}`, `MO1_P${i}`, 1300 + i, 1310 + i); // 3 z 10 = 30% — nie przekracza progu
+      const { discovery: d1 } = przygotuj([]);
+      expect((await usunSierotyZSelly(baza.db, d1, { tryb: "pelny" }))?.wstrzymano).toBeUndefined();
+      tlo(0);
+      const baza2 = stworzTestowaBaze();
+      try {
+        baza2.sqlite.prepare("INSERT INTO products (kod, nazwa, marka, kategoria, dostawca, magazyn, stan, cena_zakupu, cena_sprzedazy, marza_pct, data_aktualizacji, kod_importu) VALUES ('A','A','M','Rolnicze','MO1','0',1,1,1,0,'2026-10-01','KA')").run();
+        zasiejMapowanie(baza2.sqlite, { kodImportu: "KA", dostawca: "MO1", bridgeKod: "A", productId: 1, variantId: 2 });
+        zasiejMapowanie(baza2.sqlite, { kodImportu: "KB", dostawca: "MO1", bridgeKod: "B", productId: 3, variantId: 4 });
+        const { discovery } = przygotuj([]);
+        expect((await usunSierotyZSelly(baza2.db, discovery, { tryb: "pelny" }))?.wstrzymano).toContain("1 z 2");
+        expect((await usunSierotyZSelly(baza2.db, discovery, { tryb: "pelny", maksUdzial: 0.9 }))?.wstrzymano).toBeUndefined();
+      } finally {
+        baza2.posprzataj();
+      }
+    });
+  });
+
   describe("harmonogram", () => {
     const uruchomTick = async (usuwanie: boolean) => {
       tlo();
       sierota("S1", "MO1_STARY", 1030, 1031);
-      const { atrapa, discovery } = przygotuj([{ product_id: 1030, name: "S", warianty: [{ variant_id: 1031, features: [magazyn("MO1")] }] }]);
+      const { atrapa, discovery } = przygotuj([{ product_id: 1030, name: "S", ean: eanDla(1030), warianty: [{ variant_id: 1031, features: [magazyn("MO1")] }] }]);
       const h = stworzHarmonogramSelly({ db: baza.db, discovery, tryb: "pelny", usuwanie, teraz: () => new Date(2026, 9, 5, 9, 55), interwalMs: 20 });
       h.uruchom();
-      await new Promise((r) => setTimeout(r, 400));
+      // Czekamy na skutek (a nie stałą liczbę ms): przy `usuwanie: true` do `deleteProduct`, przy `false` — na pełny przebieg Toru 1.
+      const dozwolone = Date.now() + 5000;
+      while (Date.now() < dozwolone && (usuwanie ? atrapa.liczba("deleteProduct") === 0 : baza.sqlite.prepare("SELECT COUNT(*) c FROM selly_sync_log WHERE operacja='sync_delta'").get() === undefined)) {
+        await new Promise((r) => setTimeout(r, 20));
+      }
+      if (!usuwanie) await new Promise((r) => setTimeout(r, 300)); // dajemy Torowi 3 szansę, której mieć nie powinien
       h.zatrzymaj();
       return atrapa;
     };

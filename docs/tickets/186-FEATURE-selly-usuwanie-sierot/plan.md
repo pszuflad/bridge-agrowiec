@@ -20,7 +20,7 @@ Brak zmian API/kształtu odpowiedzi. Jedyna zmiana w widoku „Historia” (`/ap
 2. **Od początku usuwa** (bez trybu raportu).
 3. **Historia** zapisuje dokładnie który produkt został usunięty i o której godzinie → widok „Historia” (`audit_log`) + dziennik Selly (`selly_sync_log`).
 Przyjęte przeze mnie (do wglądu): limit 20 usunięć na przebieg; bezpiecznik zbiorczy (pusty katalog / >30% sierot → wstrzymanie);
-przełącznik `SELLY_USUWANIE` (domyślnie włączony); produktów Selly bez mapowania Bridge nie ruszamy.
+przełączniki `SELLY_USUWANIE` (domyślnie włączony) i `SELLY_USUWANIE_MAKS_UDZIAL` (0.3); limit dobowy 200; produktów Selly bez mapowania Bridge nie ruszamy.
 
 ## Implementation plan
 `src/selly/rest/sync-usuwanie.ts` (Tor 3) + wpięcie w `scheduler.ts` po Torze 1 + `SELLY_USUWANIE` w `config/env.ts`/`server.ts` +
