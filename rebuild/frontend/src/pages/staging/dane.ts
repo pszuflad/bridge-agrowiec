@@ -175,9 +175,23 @@ export async function odrzucWszystkie(typZmiany: string): Promise<number> {
 }
 
 /**
+ * „Odrzuć” w szczegółach pozycji — `POST /api/staging/{id}/keep-card` (NOWE, 2026-10-05, nie port).
+ *
+ * Karta w katalogu zostaje bez zmian, a każde pole, w którym plik się różni, zapisuje się jako poprawka
+ * Marty z OBECNĄ wartością karty — tak samo jak ręczna edycja (`zapiszPozycje`). Zgłoszenie znika.
+ */
+export async function zachowajKarte(
+  id: number,
+): Promise<{ zachowanePola: string[]; pominietePola: string[] }> {
+  const odpowiedz = await zadanie("POST", `/api/staging/${id}/keep-card`, {});
+  const wynik = (await odpowiedz.json()) as { zachowanePola?: string[]; pominietePola?: string[] };
+  return { zachowanePola: wynik.zachowanePola ?? [], pominietePola: wynik.pominietePola ?? [] };
+}
+
+/**
  * Zapis edycji pozycji — port `wb()` (`fe.js:9123`).
  *
- * ⭐ To JEDYNA ścieżka w całej aplikacji, która tworzy poprawki Marty. Backend zapisuje przy
+ * ⭐ Ścieżka tworząca poprawki Marty (obok „Odrzuć” → `zachowajKarte`). Backend zapisuje przy
  * okazji `manual_overrides`, więc następny import nie przywróci wartości z pliku dostawcy.
  * `_reason` trafia do `manual_overrides.reason` — to uzasadnienie zmiany, nie pole pozycji.
  */

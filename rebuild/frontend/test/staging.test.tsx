@@ -373,8 +373,10 @@ describe("Widok /staging", () => {
       await waitFor(() =>
         expect(within(dialog).getByTestId("szczegoly-wycofana")).toBeInTheDocument(),
       );
-      // Dla wycofania nie ma czego edytować — przycisk zapisu nie powstaje.
+      // Dla wycofania nie ma czego edytować — przycisk zapisu nie powstaje, ani „Odrzuć”
+      // (karta i tak zostaje; wycofanie odrzuca się na liście).
       expect(within(dialog).queryByTestId("button-save-details")).not.toBeInTheDocument();
+      expect(within(dialog).queryByTestId("button-reject-details")).not.toBeInTheDocument();
     });
   });
 
@@ -479,7 +481,8 @@ describe("Widok /staging", () => {
       expect(within(dialog).getByTestId("button-save-details")).toBeEnabled();
       await uzytkownik.type(nazwa, "{Backspace}");
       expect(nazwa).toHaveValue(poczatkowa);
-      expect(within(dialog).getByTestId("button-save-details")).toBeDisabled();
+      // „Zapisz” nie zależy od tego, czy cokolwiek zmieniono.
+      expect(within(dialog).getByTestId("button-save-details")).toBeEnabled();
     });
 
     it("404 przy zapisie (pozycję zastąpił nowy import) → zrozumiały komunikat, nie surowy JSON", async () => {
@@ -504,7 +507,7 @@ describe("Widok /staging", () => {
       expect(blad).not.toHaveTextContent("Nie znaleziono pozycji stagingu");
     });
 
-    it("przycisk zapisu jest nieaktywny, dopóki nic nie zmieniono", async () => {
+    it("przycisk zapisu jest aktywny od razu po otwarciu, także bez zmian; zapis bez zmian wysyła pusty `PUT` i zamyka okno", async () => {
       const uzytkownik = userEvent.setup();
       await otworzStaging();
 
@@ -512,7 +515,47 @@ describe("Widok /staging", () => {
       await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
       const dialog = await screen.findByTestId("dialog-staging");
 
-      expect(within(dialog).getByTestId("button-save-details")).toBeDisabled();
+      const zapisz = within(dialog).getByTestId("button-save-details");
+      expect(zapisz).toBeEnabled();
+      await uzytkownik.click(zapisz);
+
+      await waitFor(() => expect(mutacje).toHaveLength(1));
+      expect(mutacje[0]!.url).toContain(`/api/staging/${pierwsza.id}`);
+      expect(mutacje[0]!.body).toEqual({});
+      await waitFor(() => expect(screen.queryByTestId("dialog-staging")).toBeNull());
+    });
+
+    it("„Odrzuć” w szczegółach zostawia kartę (`keep-card`), odświeża listę i poprawki oraz zamyka okno", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+
+      const pierwsza = STRONA.items[0] as { id: number };
+      await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
+      const dialog = await screen.findByTestId("dialog-staging");
+
+      await uzytkownik.click(await within(dialog).findByTestId("button-reject-details"));
+
+      await waitFor(() => expect(mutacje).toHaveLength(1));
+      expect(mutacje[0]!.url).toContain(`/api/staging/${pierwsza.id}/keep-card`);
+      await waitFor(() => expect(screen.queryByTestId("dialog-staging")).toBeNull());
+    });
+
+    it("pozycji nie ma już pod tym numerem (404 przy otwarciu) → komunikat zamiast pustego okna", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      server.use(
+        http.get("*/api/staging/:id", () =>
+          HttpResponse.json({ error: "Nie znaleziono pozycji stagingu" }, { status: 404 }),
+        ),
+      );
+
+      const pierwsza = STRONA.items[0] as { id: number };
+      await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
+      const dialog = await screen.findByTestId("dialog-staging");
+
+      const brak = await within(dialog).findByTestId("szczegoly-brak");
+      expect(brak).toHaveTextContent("zastąpiona nowym importem cennika");
+      expect(within(dialog).queryByTestId("button-save-details")).toBeNull();
     });
   });
 

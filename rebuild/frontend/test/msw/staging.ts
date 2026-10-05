@@ -89,6 +89,10 @@ export function handleryStagingu(opcje: OpcjeHandlerowStagingu = {}) {
       await zapiszMutacje(request);
       return HttpResponse.json({ ok: true, kody: ["520196", "520197"] });
     }),
+    http.post("*/api/staging/:id/keep-card", async ({ request }) => {
+      await zapiszMutacje(request);
+      return HttpResponse.json({ ok: true, kod: "MO9_389", zachowanePola: ["nazwa"], pominietePola: [] });
+    }),
     http.post("*/api/staging/:id/resolve-ean", async ({ request }) => {
       await zapiszMutacje(request);
       return HttpResponse.json({ ok: true, kod: "MO5_OZRR420520858LOX2", ean: "4251438404205" });
