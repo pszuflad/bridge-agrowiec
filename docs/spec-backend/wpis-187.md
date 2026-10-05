@@ -15,11 +15,14 @@ zapamiętuje — ta sama propozycja wracała przy następnym imporcie.
    od karty, powstaje poprawka Marty (`manual_overrides`) z OBECNĄ wartością karty, `acknowledgedSourceValue` = wartość
    z pliku i powodem „Odrzucona zmiana z pliku dostawcy (staging)…”. Widać ją na karcie produktu i można ją usunąć
    (`DELETE /api/overrides/{id}`) — wtedy plik znów decyduje.
-3. Zgłoszenie znika (jedna transakcja). Cena i stan z tej pozycji nie są stosowane od razu — zrobi to zwykła cicha
-   aktualizacja przy następnym imporcie, bo różnica na polach tożsamości już nie istnieje.
+3. Zgłoszenie znika (jedna transakcja). Cena zakupu i sprzedaży, marża, stan i magazyn z pliku wchodzą OD RAZU na
+   kartę, z wpisem do historii cen — tak jak w cichej aktualizacji importera. Powód: importer odkłada cały wiersz do
+   stagingu i nie rusza wtedy karty (`fabryka.ts`: `doStagingu` + `continue`), więc dopóki zgłoszenie czeka, cena i stan
+   są nieświeże; bez tego po „Odrzuć” zostawałyby takie do następnego importu (decyzja użytkowniczki, 2026-10-05).
+   Karta wstrzymana nie dostaje stanu. Tożsamość (nazwa, model…) zostaje z karty. DOT i EAN z pliku nie są stosowane.
 4. Pola, które się różnią, ale karta ma je puste, nie dają poprawki (`pominietePola`). Gdy żadnego pola nie da się
    zachować albo pozycja już nie różni się od karty — odmowa 409.
-5. Audyt: akcja `odrzucenie_zmiany_stagingu` (kod, zachowane i pominięte pola).
+5. Audyt: akcja `odrzucenie_zmiany_stagingu` (kod, zachowane, pominięte i zaktualizowane pola).
 
 **Działa dokładnie jak każda poprawka Marty — czyli bezwarunkowo i po cichu.** Staging v2 nakłada poprawki bez alarmu
 (`fabryka.ts`, `nalozPoprawki` → `chron()`): także gdy dostawca zmieni wartość jeszcze raz, karta zostaje przy wartości

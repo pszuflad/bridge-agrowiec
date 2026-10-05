@@ -20837,7 +20837,10 @@ paths:
         = wartość z pliku. Działa jak każda poprawka Marty: kolejny import nie zgłasza różnicy i nie
         nadpisuje karty (Staging v2 nakłada poprawki po cichu, także gdy dostawca zmieni wartość jeszcze
         raz); usunięcie poprawki oddaje decyzję plikowi. Zgłoszenie znika. Pola puste na karcie nie dają
-        poprawki (`pominietePola`).
+        poprawki (`pominietePola`). Cena zakupu i sprzedaży, marża, stan i magazyn z pliku wchodzą
+        OD RAZU na kartę (z wpisem do historii cen; karta wstrzymana nie dostaje stanu) — tak jak w cichej
+        aktualizacji importera, bo import odkłada cały wiersz do stagingu i do akceptacji nie rusza karty
+        (`zaktualizowanePola`).
       parameters:
         - { name: id, in: path, required: true, schema: { type: string } }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
@@ -20853,6 +20856,7 @@ paths:
                   kod: { type: string }
                   zachowanePola: { type: array, items: { type: string } }
                   pominietePola: { type: array, items: { type: string } }
+                  zaktualizowanePola: { type: array, items: { type: string } }
         "401": { description: "Nieautoryzowany" }
         "409":
           description: "Odmowa (zgłoszenie nie istnieje, inny typ niż `zmiana_kluczowa`, brak karty, brak różnic). Ciało niesie `message`."

@@ -247,6 +247,7 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
           kod: wynik.kod,
           zachowanePola: wynik.zachowanePola,
           pominietePola: wynik.pominietePola,
+          zaktualizowanePola: wynik.zaktualizowanePola,
         },
       });
       return res.json({ ok: true, ...wynik });

@@ -14,11 +14,18 @@
 //    alarmuje (alarm „plik chciał nadpisać poprawkę” istniał tylko w starym `tk()`),
 //  • poprawka jest widoczna na karcie produktu i można ją usunąć (`DELETE /api/overrides/{id}`),
 //    wtedy plik znów decyduje.
-// Zgłoszenie znika. Cena i stan z tej pozycji NIE są stosowane teraz — zrobi to zwykła cicha
-// aktualizacja przy następnym imporcie, bo różnica na polach tożsamości już nie istnieje.
+// Zgłoszenie znika.
+//
+// ⚠ Cena, marża, stan i magazyn z pliku WCHODZĄ OD RAZU (z wpisem do historii cen). Importer odkłada cały
+// wiersz do stagingu i nie rusza wtedy karty (`fabryka.ts`: `doStagingu` + `continue`), więc dopóki
+// zgłoszenie czeka, cena i stan na karcie są nieświeże. Bez tego po „Odrzuć” zostawałyby takie aż do
+// następnego importu. Tożsamość (nazwa, model…) zostaje z karty. Karty WSTRZYMANEJ nie dotykamy stanem
+// (tak samo jak cicha aktualizacja importera: wstrzymana zostaje ze stanem 0).
 
 import type { Baza } from "../../db/index.js";
+import { zapiszHistorieCen } from "../../repos/historia.js";
 import { zapiszPoprawke } from "../../repos/overrides.js";
+import { aktualizujProdukt, type ProduktWewnetrzny } from "../../repos/products.js";
 import { odrzucPozycjeStagingu } from "../akceptacja.js";
 import { uchwytSqlite } from "../silnik/bridge-ext.js";
 import { KEYS, norm, odmow } from "./helpery.js";
@@ -30,7 +37,12 @@ export type WynikOdrzuceniaZmiany = {
   zachowanePola: string[];
   /** Pola, które się różnią, ale karta ma je puste — nie da się ich zachować poprawką. */
   pominietePola: string[];
+  /** Pola handlowe zaktualizowane z pliku od razu (cena, marża, stan, magazyn). */
+  zaktualizowanePola: string[];
 };
+
+/** Pola handlowe, które cicha aktualizacja importera zmienia bez akceptacji (`fabryka.ts`). */
+const POLA_HANDLOWE = ["cenaZakupu", "cenaSprzedazy", "marzaPct", "stan", "magazyn"] as const;
 
 export function odrzucZmianeKarty(db: Baza, id: number, uzytkownikId: number): WynikOdrzuceniaZmiany {
   const row = pozycjaStagingu(db, id);
@@ -78,6 +90,21 @@ export function odrzucZmianeKarty(db: Baza, id: number, uzytkownikId: number): W
   }
 
   const teraz = new Date().toISOString();
+
+  // Wartości handlowe z pliku — te same, co w cichej aktualizacji importera (tylko niepuste i różne od karty).
+  const wKolumnach: Record<string, unknown> = {
+    cenaZakupu: row.cenaZakupuNowa,
+    stan: row.stanNowy,
+    magazyn: row.magazyn,
+  };
+  const patch: Record<string, unknown> = {};
+  for (const pole of POLA_HANDLOWE) {
+    const wartosc = snap[pole] ?? wKolumnach[pole];
+    if (wartosc == null || norm(wartosc) === norm(kartaJakRekord[pole])) continue;
+    if (pole === "stan" && karta.status === "wstrzymany") continue;
+    patch[pole] = wartosc;
+  }
+
   uchwytSqlite(db).transaction(() => {
     for (const { pole, wartoscKarty, wartoscZPliku } of doZachowania) {
       zapiszPoprawke(db, {
@@ -92,8 +119,33 @@ export function odrzucZmianeKarty(db: Baza, id: number, uzytkownikId: number): W
         acknowledgedSourceValue: wartoscZPliku || null,
       });
     }
+    if (Object.keys(patch).length) {
+      aktualizujProdukt(db, karta.id, { ...patch, dataAktualizacji: teraz } as Partial<ProduktWewnetrzny>);
+      // Tożsamość z karty (sprzed zmiany), ceny i stan — z wartości PO (tak samo jak w imporcie).
+      zapiszHistorieCen(db, {
+        produktId: karta.id,
+        kod: karta.kod,
+        ean: karta.ean ?? null,
+        dostawca: row.dostawca,
+        marka: karta.marka,
+        model: karta.model,
+        rozmiar: karta.rozmiar,
+        indeksNosnosci: karta.indeksNosnosci,
+        indeksPredkosci: karta.indeksPredkosci,
+        kategoria: karta.kategoria,
+        cenaZakupu: (patch.cenaZakupu as number) ?? karta.cenaZakupu,
+        cenaSprzedazy: (patch.cenaSprzedazy as number) ?? karta.cenaSprzedazy,
+        stan: (patch.stan as number) ?? karta.stan,
+        zarejestrowanoAt: teraz,
+      });
+    }
     odrzucPozycjeStagingu(db, id);
   })();
 
-  return { kod: row.kod, zachowanePola: doZachowania.map((d) => d.pole), pominietePola: pominiete };
+  return {
+    kod: row.kod,
+    zachowanePola: doZachowania.map((d) => d.pole),
+    pominietePola: pominiete,
+    zaktualizowanePola: Object.keys(patch),
+  };
 }

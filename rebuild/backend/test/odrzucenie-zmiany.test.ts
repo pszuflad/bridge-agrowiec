@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { manualOverrides, products, stagingItems } from "../src/db/schema.js";
+import { historiaCen, manualOverrides, products, stagingItems } from "../src/db/schema.js";
 import { odrzucZmianeKarty } from "../src/import/polityka/odrzucenie-zmiany.js";
 import { silnikStagingu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
@@ -45,14 +45,17 @@ const kartaZBazy = () => (baza!.db.select().from(products).all() as unknown as W
 const poprawki = () => baza!.db.select().from(manualOverrides).all();
 
 describe("odrzucZmianeKarty", () => {
-  it("zostawia kartę bez zmian, zakłada poprawkę z wartością karty i usuwa zgłoszenie", () => {
+  it("zostawia tożsamość karty bez zmian, zakłada poprawkę z wartością karty i usuwa zgłoszenie", () => {
     const id = przygotuj({ model: "DURAFORCE UTILITY" }, { model: "DURAFORCE-UTILITY" });
     const przed = kartaZBazy();
 
     const wynik = odrzucZmianeKarty(baza!.db, id, 1);
 
     expect(wynik.zachowanePola).toContain("model");
-    expect(kartaZBazy()).toEqual(przed);
+    const po = kartaZBazy();
+    for (const pole of ["nazwa", "marka", "model", "rozmiar", "indeksNosnosci", "indeksPredkosci", "kodDostawcy", "ean"]) {
+      expect(po[pole], pole).toEqual(przed[pole]);
+    }
     expect(baza!.db.select().from(stagingItems).all().filter((w) => w.kod === KOD)).toHaveLength(0);
     const p = poprawki().find((x) => x.fieldName === "model")!;
     expect(p).toMatchObject({
@@ -84,6 +87,44 @@ describe("odrzucZmianeKarty", () => {
 
     expect(kartaZBazy().model).toBe("DURAFORCE UTILITY");
     expect(baza!.db.select().from(stagingItems).all().filter((w) => w.typZmiany === "zmiana_kluczowa")).toHaveLength(0);
+  });
+
+  it("cena, stan i magazyn z pliku wchodzą od razu (z historią cen), a tożsamość zostaje z karty", () => {
+    const id = przygotuj(
+      { model: "DURAFORCE UTILITY", cenaZakupu: 100, stan: 3, status: "aktywny" },
+      { model: "DURAFORCE-UTILITY", cenaZakupu: 120, stan: 7 },
+    );
+
+    const wynik = odrzucZmianeKarty(baza!.db, id, 1);
+
+    expect(wynik.zaktualizowanePola).toEqual(expect.arrayContaining(["cenaZakupu", "stan"]));
+    expect(kartaZBazy()).toMatchObject({ model: "DURAFORCE UTILITY", cenaZakupu: 120, stan: 7 });
+    const wpis = baza!.db.select().from(historiaCen).all().find((h) => h.kod === KOD);
+    expect(wpis).toMatchObject({ cenaZakupu: 120, stan: 7 });
+  });
+
+  it("karta wstrzymana zostaje ze stanem 0 — jak w cichej aktualizacji importera", () => {
+    const id = przygotuj(
+      { model: "DURAFORCE UTILITY", cenaZakupu: 100, stan: 0, status: "wstrzymany" },
+      { model: "DURAFORCE-UTILITY", cenaZakupu: 120, stan: 7 },
+    );
+
+    odrzucZmianeKarty(baza!.db, id, 1);
+
+    expect(kartaZBazy()).toMatchObject({ status: "wstrzymany", stan: 0, cenaZakupu: 120 });
+  });
+
+  it("gdy plik nie zmienia ceny ani stanu, nie ma aktualizacji ani wpisu w historii", () => {
+    const karta = wczytaj<Wiersz[]>(join(katalog, "silnik", "katalog", "MO5.katalog.json")).find((p) => p.kod === KOD)!;
+    const id = przygotuj(
+      { model: "DURAFORCE UTILITY" },
+      { model: "DURAFORCE-UTILITY", cenaZakupu: karta.cenaZakupu, stan: karta.stan },
+    );
+
+    const wynik = odrzucZmianeKarty(baza!.db, id, 1);
+
+    expect(wynik.zaktualizowanePola).not.toContain("cenaZakupu");
+    expect(wynik.zaktualizowanePola).not.toContain("stan");
   });
 
   it("odmawia, gdy zgłoszenia już nie ma", () => {
