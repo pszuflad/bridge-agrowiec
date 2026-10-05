@@ -191,6 +191,12 @@ export type ZaleznosciHarmonogramu = {
   /** Próg bezpiecznika Toru 3 (ułamek sierot wśród mapowań); domyślnie `MAKS_UDZIAL_SIEROT`. */
   usuwanieMaksUdzial?: number;
   /**
+   * Tor 2 (pełny mirror + auto-create o 04:30). Domyślnie włączony. Ticket 190: przełącznik
+   * `SELLY_TOR2=false` pozwala uruchomić sam Tor 1 (ceny i stany), bez zakładania produktów
+   * i bez nadpisywania nazw/kategorii/cech w sklepie — decyzja Ani 2026-10-05.
+   */
+  tor2?: boolean;
+  /**
    * Zegar — WYŁĄCZNIE dla testów, produkcyjnie `new Date()`. Wzorzec jak `ZegarLimitera`
    * w `limiter.ts`: bez tego testu „Tor 2 o 04:30" nie da się napisać inaczej niż czekaniem.
    */
@@ -213,6 +219,7 @@ export function stworzHarmonogramSelly({
   tryb,
   usuwanie = true,
   usuwanieMaksUdzial,
+  tor2 = true,
   teraz = () => new Date(),
   interwalMs = CHECK_INTERVAL_MS,
 }: ZaleznosciHarmonogramu): Harmonogram {
@@ -250,6 +257,10 @@ export function stworzHarmonogramSelly({
     // Tor 2: raz dziennie o 04:30 — po nocnym auto-pull dostawców o 04:00
     if (hh === TOR2_HOUR && mm === TOR2_MINUTE && lastFullKey !== dateKey) {
       lastFullKey = dateKey;
+      if (!tor2) {
+        console.log("[Selly Scheduler] Tor2 pominięty — SELLY_TOR2=false");
+        return;
+      }
       const suppliers = suppliersForFullToday(now);
       if (suppliers.length) {
         console.log(
