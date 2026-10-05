@@ -24,9 +24,8 @@ describe("minimumPozycjiOferty", () => {
   it.each([
     [undefined, 1],
     [{ lastItemCount: 0 }, 1],
-    [{ lastItemCount: 100 }, 80],
-    [{ lastItemCount: 301 }, 241],
-    [{ lastItemCount: 3 }, 3],
+    [{ lastItemCount: 100 }, 1],
+    [{ lastItemCount: 301 }, 1],
   ])("%j → %i", (stan, oczekiwane) => {
     expect(minimumPozycjiOferty(stan)).toBe(oczekiwane);
   });
@@ -49,35 +48,13 @@ const rekordy = (n: number, od = 0): RekordSurowy[] =>
   });
 const KOMPLETNY = { meta: { complete: true } as never };
 
-describe("próg od ostatniego udanego importu", () => {
-  it("−19% przechodzi, −25% blokuje (z listą kodów), a po „akceptuj” kolejny import przechodzi", () => {
+describe("brak progu względnego (2026-10-05)", () => {
+  it("spadek o 60% przechodzi bez blokady; pusty cennik nadal zatrzymuje import", () => {
     baza = stworzTestowaBaze();
     const importuj = silnikStagingu(baza.db);
-    importuj("MO4", rekordy(100), KOMPLETNY); // last = 100
-    expect(() => importuj("MO4", rekordy(81), KOMPLETNY)).not.toThrow(); // −19% → last = 81
-
-    // Katalog dostawcy: 81 kart (pozycje z ostatniego udanego cennika), żeby było czego szukać w „brakujących”.
-    for (let k = 0; k < 81; k++) {
-      baza.sqlite
-        .prepare(
-          "INSERT INTO products (kod,nazwa,marka,kategoria,dostawca,magazyn,stan,cena_zakupu,cena_sprzedazy,marza_pct,data_aktualizacji,rozmiar,model) " +
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        )
-        .run(`MO4_K${k}`, `Opona Mitas ${k}`, "MITAS", "Opony rolnicze", "MO4", "PL", 5, 100, 130, 30, "2026-09-01", "18.4R34", `M${k}`);
-    }
-
-    let blad: (Error & { brakujaceKody?: string[] }) | undefined;
-    try {
-      importuj("MO4", rekordy(60), KOMPLETNY); // −26% względem 81 → minimum 65
-    } catch (e) {
-      blad = e as Error & { brakujaceKody?: string[] };
-    }
-    expect(blad?.name).toBe("CennikPodejrzanieMalyBlad");
-    expect(blad?.message).toMatch(/Brakuje \d+ kart, np\.: MO4_K/);
-    expect(blad?.brakujaceKody).toHaveLength(20);
-    expect(
-      baza.sqlite.prepare("SELECT item_count AS b FROM supplier_feed_blocked WHERE supplier='MO4'").get(),
-    ).toEqual({ b: 60 });
+    importuj("MO4", rekordy(100), KOMPLETNY);
+    expect(() => importuj("MO4", rekordy(40), KOMPLETNY)).not.toThrow();
+    expect(() => importuj("MO4", [], KOMPLETNY)).toThrow(/Nie ma ani jednej pozycji/);
   });
 });
 
