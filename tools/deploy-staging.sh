@@ -153,7 +153,8 @@ log "frontend: build -> $DOCROOT"
 # żeby plik był pobieralny) — bez tego każdy deploy kasował wygenerowany CSV (ticket 93).
 # ticket 188: $STAGING_ROOT (=$DOCROOT/_app: baza, .env, releases) i cgi-bin leżą POD docrootem —
 # MUSZĄ być chronione przed `rsync --delete`, inaczej deploy skasowałby całą aplikację z bazą.
-bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR" "$STAGING_ROOT" "$DOCROOT/cgi-bin"
+# Ticket 189: tak samo zdjecia-produktow/ (zdjęcia produktów przeniesione z agritires.eu, ~207 MB).
+bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR" "$STAGING_ROOT" "$DOCROOT/cgi-bin" "$DOCROOT/zdjecia-produktow"
 cp -f deploy/staging/htaccess "$DOCROOT/.htaccess"       # proxy utrzymywany z repo
 
 # --- sprzątanie: zostaw 5 ostatnich release ---
