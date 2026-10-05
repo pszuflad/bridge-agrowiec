@@ -80,6 +80,15 @@ const PRZEPISANIA_Z_KOLEJKI: ReadonlyMap<string, string> = new Map([
 ]);
 
 /**
+ * Usunięcie produktu z Selly przez Tor 3 (`selly/rest/sync-usuwanie.ts`, ticket 186). ŚWIADOME ODSTĘPSTWO
+ * (decyzja użytkownika 2026-10-05: „w historii zapisywać dokładnie który produkt został usunięty i o której
+ * godzinie”): jak akcje kolejki atrybutów (#39) trafia do słownika jako typ `edycja`, bez nowego typu i bez
+ * zmian w UI/kontrakcie. Kod produktu (`encja_id`) widać pogrubiony, nazwa i identyfikatory Selly siedzą
+ * w `zmienionePola`, godzina to `kiedy` wpisu audytu.
+ */
+export const AKCJA_USUNIECIA_Z_SELLY = "selly_usuniecie";
+
+/**
  * Słownik rozpoznawanych akcji: pięć z oryginału (`:48341`, `:48363`) + dwie z kolejki atrybutów.
  *
  * ⚠ WSZYSTKO SPOZA SŁOWNIKA DAJE `null` I WYPADA Z WYNIKU (`filter(Boolean)`). To NIE jest
@@ -101,6 +110,7 @@ const SLOWNIK_AKCJI: ReadonlyMap<string, TypWpisu> = new Map<string, TypWpisu>([
   ["eksport_csv", "eksport"],
   ["eksport_shoper", "eksport"],
   ["edycja_produktu", "edycja"],
+  [AKCJA_USUNIECIA_Z_SELLY, "edycja"],
   ...Array.from(PRZEPISANIA_Z_KOLEJKI.keys(), (akcja): [string, TypWpisu] => [akcja, "edycja"]),
 ]);
 
