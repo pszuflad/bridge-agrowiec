@@ -1,5 +1,8 @@
 name: Deploy produkcja
 
+# ⚠ Ticket 188: na serwerze klucz ma wymuszone `command="…/bridgeone/_app/repo/tools/deploy-produkcja.sh"`,
+# więc polecenie niżej jest informacyjne — liczy się wpis w ~/.ssh/authorized_keys.
+#
 # Event-driven CD PRODUKCJI: po merge do `main` łączy się po SSH z VPS i uruchamia
 # tools/deploy-produkcja.sh. Odbicie deploy-staging.yml — różnice: gałąź, sekrety, skrypt.
 #
@@ -8,8 +11,8 @@ name: Deploy produkcja
 # tym samym kluczem nie da się uruchomić skryptu produkcji. Instrukcja: docs/wdrozenie-produkcji.md.
 #
 # Wymagane sekrety repo (Settings → Secrets and variables → Actions):
-#   PROD_SSH_HOST         ten sam host co staging
-#   PROD_SSH_PORT         ten sam port co staging
+#   PROD_SSH_HOST         agroopony.eu (VPS vpshd86; od ticketu 188 — wcześniej vpshd1242)
+#   PROD_SSH_PORT         222
 #   PROD_SSH_USER         admin
 #   PROD_SSH_KEY          klucz PRYWATNY (ed25519) DEDYKOWANY produkcji
 #   PROD_SSH_KNOWN_HOSTS  wynik `ssh-keyscan -p <port> <host>`
@@ -43,4 +46,4 @@ jobs:
           ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
             -p "${{ secrets.PROD_SSH_PORT }}" \
             "${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}" \
-            'bash /home/admin/private_apps/bridge-prod/repo/tools/deploy-produkcja.sh'
+            'bash /home/admin/domains/agroopony.eu/public_html/bridgeone/_app/repo/tools/deploy-produkcja.sh'
