@@ -264,15 +264,13 @@ export function zachowajNazweKarty(nazwa: unknown, nazwaKarty: unknown): unknown
 }
 
 /**
- * Minimalna liczba pozycji kompletnego cennika, poniżej której import jest blokowany jako „podejrzanie mały”.
+ * Minimalna liczba pozycji cennika — od 2026-10-05 BEZ progu względnego (decyzja Ani: „ile przychodzi, tyle przychodzi”).
  *
- * Produkcja liczyła 80% HISTORYCZNEGO maksimum (`max_item_count`, które nigdy nie malało), więc dostawca,
- * który legalnie wycofał produkty, był blokowany na stałe. Decyzja użytkowniczki (2026-10-01, Etap 4b): próg
- * liczy się od OSTATNIEGO UDANEGO importu (`last_item_count`); spadek o ponad 20% blokuje, a ręczne
- * „zaakceptuj mniejszy cennik” przestawia punkt odniesienia. Brak stanu albo zero → próg 1 (pusty cennik
- * zatrzymuje osobny bezpiecznik `feed_safety`).
+ * Produkcja blokowała import przy spadku poniżej 80% historycznego maksimum (`max_item_count`); ticket 179 przesunął
+ * punkt odniesienia na ostatni udany import, ale MO4 nadal wpadał w blokadę. Teraz zatrzymuje tylko cennik PUSTY
+ * (0 pozycji) — próg 1; kolejny bezpiecznik `feed_safety` i „masowo nierozpoznany” zostają bez zmian.
+ * Parametr `stan` zostaje, bo wołają to `fabryka.ts` i mocki w testach charakteryzacji.
  */
-export function minimumPozycjiOferty(stan: { lastItemCount?: number | null } | undefined): number {
-  const ostatni = stan?.lastItemCount ?? 0;
-  return ostatni > 0 ? Math.max(1, Math.ceil(ostatni * 0.8)) : 1;
+export function minimumPozycjiOferty(_stan?: { lastItemCount?: number | null }): number {
+  return 1;
 }

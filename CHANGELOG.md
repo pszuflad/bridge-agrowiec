@@ -29,6 +29,11 @@ powód: prośba użytkowniczki 02.10; powtarzające się timeouty logowania Agro
 
 Wpisy od najnowszego. Migracje danych: z nazwą backupu (`VACUUM INTO …bak_full_<operacja>_<RRRRMMDDGGMMSS>` w `data/backups/`).
 
+## 2026-10-05 — Zdjęty próg „cennik podejrzanie mały”
+
+- **import** — `minimumPozycjiOferty` zawsze zwraca 1: import nie jest już blokowany spadkiem liczby pozycji (dotąd >20% poniżej ostatniego importu;
+  MO4 wpadał w to ponownie). Zatrzymuje tylko pusty cennik; bezpiecznik „masowo nierozpoznany” i timeout/ponowienia (179) bez zmian. Decyzja Ani 2026-10-05.
+
 ## 2026-10-01 — Naprawa kolejki stagingu (SPEC „Naprawa kolejki stagingu”)
 
 - **182 · import** — `parsuj.ts`: meta kompletności cennika zdejmowana przed `zastosujDemoWNazwie` (jej `.map()` gubił `_bridgeFeedMeta`).
