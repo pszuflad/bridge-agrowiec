@@ -27,9 +27,11 @@ import { Label } from "@/components/ui/label";
 import { OdznakaTypu } from "./TabelaStagingu";
 import {
   POLA_EDYTOWALNE,
+  zachowajKarte,
   zapiszPozycje,
   type PozycjaStaginguSzczegol,
 } from "./dane";
+import { komunikatBledu } from "./polityka";
 
 export type WlasciwosciSzczegolow = {
   id: number | null;
@@ -135,8 +137,31 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
     },
   });
 
+  // NOWE (2026-10-05): „Odrzuć” = zostaw kartę bez zmian i zapamiętaj to jak poprawkę Marty.
+  const odrzucenie = useMutation({
+    mutationFn: async () => {
+      if (!pozycja) return;
+      await zachowajKarte(pozycja.id);
+    },
+    onSuccess: async () => {
+      // Poprawki Marty widać na karcie produktu (`/api/overrides`), a zgłoszenie znika z listy.
+      await Promise.all([
+        klient.invalidateQueries({ queryKey: ["/api/staging"] }),
+        klient.invalidateQueries({ queryKey: ["/api/overrides"] }),
+      ]);
+      zamknij();
+    },
+    onError: async (e: Error) => {
+      ustawBlad(komunikatBledu(e, "Nie udało się odrzucić zmiany. Odśwież staging i spróbuj ponownie."));
+      if (/^404\b/.test(e.message)) await klient.invalidateQueries({ queryKey: ["/api/staging"] });
+    },
+  });
+
   const snapshot = pozycja ? odczytajSnapshot(pozycja.snapshotJson) : null;
   const jestWycofana = pozycja?.typZmiany === "wycofana";
+  // „Odrzuć” ma sens tylko dla zmiany ISTNIEJĄCEJ karty — inne typy odrzuca się na liście.
+  const mozeOdrzucic = pozycja?.typZmiany === "zmiana_kluczowa";
+  const zajety = zapis.isPending || odrzucenie.isPending;
 
   return (
     <Dialog open={id != null} onOpenChange={(otwarty) => !otwarty && zamknij()}>
@@ -266,6 +291,9 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
                 </h3>
                 <p className="mb-2 text-xs text-muted-foreground">
                   Zmieniona wartość zostanie zapamiętana i kolejny import jej nie nadpisze.
+                  {mozeOdrzucic
+                    ? " „Odrzuć” zostawia kartę bez zmian i zapisuje to tak samo, jak poprawkę Marty — z obecnymi wartościami karty."
+                    : ""}
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   {POLA_EDYTOWALNE.map(({ klucz, etykieta }) => {
@@ -327,12 +355,23 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
           <Button variant="outline" onClick={zamknij} data-testid="button-close-details">
             Zamknij
           </Button>
+          {pozycja && mozeOdrzucic ? (
+            <Button
+              variant="outline"
+              data-testid="button-reject-details"
+              disabled={zajety}
+              title="Karta w katalogu zostaje bez zmian, a decyzja zapisuje się jak poprawka Marty"
+              onClick={() => odrzucenie.mutate()}
+            >
+              {odrzucenie.isPending ? "Odrzucanie…" : "Odrzuć"}
+            </Button>
+          ) : null}
           {pozycja && !jestWycofana ? (
             <Button
               data-testid="button-save-details"
               // NOWE (2026-10-02): „Zapisz” jest aktywny zawsze, także bez zmian — wtedy wysyła pusty
               // zapis (backend przelicza status EAN i nie zakłada poprawek) i zamyka okno.
-              disabled={zapis.isPending}
+              disabled={zajety}
               onClick={() => zapis.mutate()}
             >
               {zapis.isPending ? "Zapisywanie…" : "Zapisz"}

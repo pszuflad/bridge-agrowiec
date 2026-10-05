@@ -373,8 +373,10 @@ describe("Widok /staging", () => {
       await waitFor(() =>
         expect(within(dialog).getByTestId("szczegoly-wycofana")).toBeInTheDocument(),
       );
-      // Dla wycofania nie ma czego edytować — przycisk zapisu nie powstaje.
+      // Dla wycofania nie ma czego edytować — przycisk zapisu nie powstaje, ani „Odrzuć”
+      // (karta i tak zostaje; wycofanie odrzuca się na liście).
       expect(within(dialog).queryByTestId("button-save-details")).not.toBeInTheDocument();
+      expect(within(dialog).queryByTestId("button-reject-details")).not.toBeInTheDocument();
     });
   });
 
@@ -520,6 +522,21 @@ describe("Widok /staging", () => {
       await waitFor(() => expect(mutacje).toHaveLength(1));
       expect(mutacje[0]!.url).toContain(`/api/staging/${pierwsza.id}`);
       expect(mutacje[0]!.body).toEqual({});
+      await waitFor(() => expect(screen.queryByTestId("dialog-staging")).toBeNull());
+    });
+
+    it("„Odrzuć” w szczegółach zostawia kartę (`keep-card`), odświeża listę i poprawki oraz zamyka okno", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+
+      const pierwsza = STRONA.items[0] as { id: number };
+      await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
+      const dialog = await screen.findByTestId("dialog-staging");
+
+      await uzytkownik.click(await within(dialog).findByTestId("button-reject-details"));
+
+      await waitFor(() => expect(mutacje).toHaveLength(1));
+      expect(mutacje[0]!.url).toContain(`/api/staging/${pierwsza.id}/keep-card`);
       await waitFor(() => expect(screen.queryByTestId("dialog-staging")).toBeNull());
     });
 

@@ -22,6 +22,7 @@ import {
   rozstrzygnijIZatwierdz,
 } from "../import/polityka/rozstrzygniecie-z-zapisem.js";
 import { rozstrzygnijBlednyEan } from "../import/polityka/ean-bledny.js";
+import { odrzucZmianeKarty } from "../import/polityka/odrzucenie-zmiany.js";
 import { wyjasnijZgloszenie } from "../import/polityka/wyjasnienie.js";
 import { rozstrzygnijSprzecznoscZrodla } from "../import/polityka/sprzecznosc-zrodla.js";
 import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
@@ -222,6 +223,33 @@ export function trasyPolitykiStagingu({ db }: ZaleznosciPolitykiStagingu): Route
         console.error("[pending] skan po rozstrzygnięciu dopasowania:", e instanceof Error ? e.message : e);
       }
       return res.json({ ok: true, kod: wynik.kod });
+    } catch (e) {
+      return odpowiedzBledem(res, e);
+    }
+  });
+
+  /**
+   * „Odrzuć” w szczegółach: karta zostaje bez zmian, a różnice z pliku zapisują się jako poprawki Marty
+   * z wartościami karty (kolejny import ich nie zgłasza ani nie nadpisuje). Zgłoszenie znika.
+   *
+   * ⚠ TRASA SPOZA ORYGINAŁU — decyzja użytkowniczki (2026-10-05). Szczegóły: `import/polityka/odrzucenie-zmiany.ts`.
+   */
+  router.post("/api/staging/:id/keep-card", requireAuth, (req, res) => {
+    try {
+      const wynik = odrzucZmianeKarty(db, Number(req.params.id), req.user!.id);
+      zapiszAudyt(db, {
+        uzytkownikId: req.user?.id ?? null,
+        uzytkownikImie: req.user?.imieNazwisko ?? null,
+        akcja: "odrzucenie_zmiany_stagingu",
+        encjaTyp: "staging",
+        encjaId: String(req.params.id),
+        szczegoly: {
+          kod: wynik.kod,
+          zachowanePola: wynik.zachowanePola,
+          pominietePola: wynik.pominietePola,
+        },
+      });
+      return res.json({ ok: true, ...wynik });
     } catch (e) {
       return odpowiedzBledem(res, e);
     }
