@@ -75,7 +75,7 @@ describe("typWpisu — słownik rozpoznawanych akcji", () => {
 });
 
 describe("akcjeHistorii — klauzula `IN` wyliczana z tego samego słownika (backlog #87)", () => {
-  it("`all` to dokładnie siedem akcji: pięć z oryginału + dwie z kolejki (#39)", () => {
+  it("`all` to dokładnie osiem akcji: pięć z oryginału + dwie z kolejki (#39) + usunięcie z Selly (ticket 186)", () => {
     expect(akcjeHistorii("all").sort()).toEqual([
       "atrybut_pending_zaakceptowano_jako_alias",
       "atrybut_pending_zaakceptowano_z_edycja",
@@ -83,6 +83,7 @@ describe("akcjeHistorii — klauzula `IN` wyliczana z tego samego słownika (bac
       "eksport_csv",
       "eksport_shoper",
       "import_cennika",
+      "selly_usuniecie",
       "upload_pliku",
     ]);
   });
@@ -96,6 +97,7 @@ describe("akcjeHistorii — klauzula `IN` wyliczana z tego samego słownika (bac
         "edycja_produktu",
         "atrybut_pending_zaakceptowano_z_edycja",
         "atrybut_pending_zaakceptowano_jako_alias",
+        "selly_usuniecie",
       ],
     ],
   ])("typ %s → jego akcje", (typ, akcje) => {
