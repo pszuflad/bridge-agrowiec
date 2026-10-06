@@ -2,6 +2,7 @@
 //   DB_PATH=./data/data-prod.db npm run normalizuj-katalog [-- --raport zmiany.csv]   # dry-run
 //   DB_PATH=... npm run normalizuj-katalog -- --apply                                  # backup + zapis
 // Logika: src/import/migracje/normalizuj-katalog.ts. Nazwy produktów NIE są zmieniane.
+// Idempotentne: gdy nie ma zmian, --apply nie robi kopii ani zapisu (bezpieczne przy każdym deployu).
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -37,7 +38,9 @@ try {
       `${plan.length - doZmiany.length} pominiętych (poprawka ręczna).`,
   );
   for (const [p, n] of poPolu) console.log(`  ${p}: ${n}`);
-  if (apply) {
+  if (apply && doZmiany.length === 0) {
+    console.log("normalizuj-katalog: katalog już czysty — nic do zapisu, kopii nie robię.");
+  } else if (apply) {
     const znacznik = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
     const katalog = join(dirname(dbPath), "backups");
     mkdirSync(katalog, { recursive: true });

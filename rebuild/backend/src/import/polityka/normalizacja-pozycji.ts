@@ -13,6 +13,20 @@ import { MODELE_PRODUCENTA } from "../slowniki/modele-producenta.js";
 
 type Pozycja = Record<string, unknown>;
 
+/** Samo słowo „DOT” (opcjonalnie z rokiem) — oznaczenie dostawcy w nazwie, nie część modelu. */
+const SLOWO_DOT_RE = /\s*\bDOT(?:\s*\d{2,4})?\b/gi;
+
+/**
+ * Model/bieżnik bez słowa „DOT” (np. `XL GRIP DOT` → `XL GRIP`, `TR 270 DOT` → `TR 270`).
+ * Dostawca MO9 pisze „(DOT)” w nazwie; parser wycina z modelu tylko „DOT” z liczbą, więc samo „DOT”
+ * zostawało w modelu i bieżniku (decyzja użytkowniczki, 2026-10-01: model BKT ma być `XL GRIP`).
+ */
+export function oczyscModelZDot(wartosc: unknown): unknown {
+  if (typeof wartosc !== "string") return wartosc;
+  const czysty = wartosc.replace(SLOWO_DOT_RE, "").replace(/\s+/g, " ").trim();
+  return czysty || wartosc;
+}
+
 /** Dopiski osi/zastosowania doklejone do modelu przez dostawcę (nie są częścią modelu producenta). */
 const DOPISKI_RE = /\s+(?:NAP[ĘE]D(?:OWA)?|PROWADZ[ĄA]CA|NACZEPA|UNIWERSALNA)\s*$/iu;
 
@@ -116,8 +130,8 @@ export function poprawIndeksy(
 export function normalizujPozycje(d: Pozycja): Pozycja {
   const ctx = { marka: d.marka, nazwa: d.nazwa };
   const wynik: Pozycja = { ...d };
-  if (d.model) wynik.model = normalizujModel(d.model, ctx);
-  if (d.bieznik) wynik.bieznik = normalizujModel(d.bieznik, ctx);
+  if (d.model) wynik.model = normalizujModel(oczyscModelZDot(d.model), ctx);
+  if (d.bieznik) wynik.bieznik = normalizujModel(oczyscModelZDot(d.bieznik), ctx);
   if (d.dot) wynik.dot = normalizujDot(d.dot);
   if (d.konstrukcja) wynik.konstrukcja = normalizujKonstrukcje(d.konstrukcja);
   const ind = poprawIndeksy(d.nazwa, d.indeksNosnosci, d.indeksPredkosci);
