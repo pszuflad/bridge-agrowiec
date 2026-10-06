@@ -278,6 +278,11 @@ Aplikacja nie ma rejestracji ani panelu użytkowników — konto zakłada się s
 DB_PATH=<ścieżka do bazy> HASLO_TYMCZASOWE='<hasło>' npm run dodaj:uzytkownikow
 ```
 
+Na produkcji robi to samo wdrożenie (`tools/deploy-produkcja.sh`, ticket 193): przy każdym wdrożeniu uruchamia skrypt,
+jeśli w `$PROD_ROOT/.env` na serwerze jest wpis `HASLO_TYMCZASOWE=...` (jednorazowo, ręcznie — hasła nie ma w repo).
+Bez wpisu krok jest pomijany z komunikatem w logu (`deploy.log`). Skrypt jest idempotentny, więc hasło zmienione już
+przez użytkownika nie zostaje nadpisane.
+
 - Skrypt (`scripts/dodaj-uzytkownikow.ts`, logika w `src/auth/dodaj-uzytkownika.ts`) dokłada
   Erwina Wojtysiaka i Annę Naumowicz; konta, które już są (Marta, Arkadiusz), zostają nietknięte.
 - **Idempotentny:** istniejącego konta nie rusza (ani hasła, ani nazwy), więc ponowne uruchomienie

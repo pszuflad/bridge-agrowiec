@@ -192,6 +192,22 @@ log "ticket 165: rozdzielenie kod_importu dla znanych kolizji (backlog #108)"
 log "ticket 168: uzupełnienie pustych EAN (999…)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run uzupelnij-ean 2>&1 | tee -a "$LOG" )
 
+# --- ticket 193: konta Erwina Wojtysiaka i Anny Naumowicz (hasło tymczasowe z .env) ---
+# Idempotentne: istniejącego konta skrypt NIE rusza (ani hasła, ani nazwy), więc uruchamianie przy każdym
+# wdrożeniu nie nadpisze hasła, które użytkownik już zmienił w /moje-konto. Kopia bazy z kroku wyżej to punkt
+# powrotu. Hasło NIE jest w repozytorium (publiczne): jedyny ręczny krok to JEDNORAZOWY wpis
+# `HASLO_TYMCZASOWE=...` do $PROD_ROOT/.env na serwerze (wczytywany wyżej przez `set -a`). Bez tego wpisu krok
+# się POMIJA (z komunikatem w logu), a wdrożenie idzie dalej. Błąd tego kroku też nie zatrzymuje wdrożenia.
+# ⚠ Skrypt wdrożenia aktualizuje się w trakcie działania (`git reset --hard` wyżej), więc ten krok ruszy
+# dopiero w NASTĘPNYM wdrożeniu po merge'u (jak kroki 164c, 165b, 168). Hasła nie ma w logu.
+if [ -n "${HASLO_TYMCZASOWE:-}" ]; then
+  log "konta: dodaj:uzytkownikow (istniejące konta zostają nietknięte)"
+  ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run dodaj:uzytkownikow 2>&1 | tee -a "$LOG" ) \
+    || log "UWAGA: założenie kont nie powiodło się (szczegóły wyżej) — wdrożenie idzie dalej"
+else
+  log "konta: pomijam — brak HASLO_TYMCZASOWE w $PROD_ROOT/.env"
+fi
+
 ln -sfn "$RELEASE" "$PROD_ROOT/current"                  # atomowa podmiana
 pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
 ( cd "$PROD_ROOT/current" && PORT="$PORT" HOST="$HOST" DB_PATH="$DATA_DB" NODE_ENV=production \

@@ -325,8 +325,9 @@ jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skr
    użytkownika. Skrypt jest odbiciem `tools/deploy-staging.sh` — sprawdź, czy drugi nie wymaga
    tej samej zmiany (świadome rozjazdy opisuje nagłówek pliku).
 6. Konta: `npm run dodaj:uzytkownikow` (`rebuild/backend/scripts/dodaj-uzytkownikow.ts`,
-   hasło tymczasowe w env `HASLO_TYMCZASOWE`). Do czasu dopisania kroku do wdrożenia uruchamia się
-   go ręcznie — to stan przejściowy, nie wzorzec.
+   hasło tymczasowe w env `HASLO_TYMCZASOWE`) jest krokiem `tools/deploy-produkcja.sh` (ticket 193):
+   rusza przy każdym wdrożeniu, o ile `HASLO_TYMCZASOWE` jest wpisane w `$PROD_ROOT/.env` na serwerze
+   (jednorazowo, ręcznie); bez tego wpisu krok się pomija. Nowe konto = dopisz je do `KONTA` w skrypcie.
 
 ## Środowisko
 

@@ -159,6 +159,15 @@ plus certyfikat Let's Encrypt.
 
 ---
 
+## Konta użytkowników w wdrożeniu (ticket 193)
+
+`tools/deploy-produkcja.sh` zakłada konta Erwina Wojtysiaka i Anny Naumowicz (`npm run dodaj:uzytkownikow`) po kroku
+uzupełnienia EAN, przed podmianą wydania. Jedyny krok ręczny, **raz**: wpisz do `$PROD_ROOT/.env` na serwerze linię
+`HASLO_TYMCZASOWE=<hasło, min. 8 znaków>` (`PROD_ROOT` = `~/domains/agroopony.eu/public_html/bridgeone/_app`). Bez niej krok
+się pomija (wpis w `deploy.log`), a błąd kroku nie zatrzymuje wdrożenia. Konta, które już istnieją, nie są ruszane —
+hasło zmienione w **/moje-konto** zostaje. Po założeniu kont wpis można usunąć z `.env`. Nowy krok rusza dopiero
+w drugim wdrożeniu po merge'u (skrypt aktualizuje się w trakcie działania).
+
 ## Co się zmienia w codziennej pracy
 
 `develop` → auto-deploy na test → Ania klika na `test.agritires.eu` → **PR `develop` → `main`**
