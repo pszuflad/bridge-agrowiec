@@ -304,12 +304,16 @@ do VPS ani do bazy produkcyjnej (klucz SSH jest w sekretach repo, a na serwerze 
 jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skrypt, który
 `deploy-produkcja.yml` odpala po merge'u do `main`. Obowiązuje każdą sesję:
 
-1. **Poprawka danych / założenie konta / jednorazowa operacja na bazie = idempotentny skrypt w
-   `rebuild/backend/scripts/` + jego krok w `tools/deploy-produkcja.sh`** (jak tickety 164, 165,
-   168: `log "…"` + `( cd rebuild/backend && DB_PATH="$DATA_DB" npm run <skrypt> … )`).
-   Idempotentny = ponowne uruchomienie przy każdym wdrożeniu niczego nie psuje i nie nadpisuje
-   zmian użytkownika (np. hasła ustawionego już przez niego). Sama kopia bazy przed migracjami
-   to punkt powrotu — krok dopisz PO niej.
+1. **Poprawka danych / zmiana nazw / założenie konta / jednorazowa operacja na bazie = KROK
+   WDROŻENIA** w `rebuild/backend/src/kroki/rejestr.ts` (mechanizm: `src/kroki/runner.ts`,
+   uruchamia go `tools/deploy-produkcja.sh` przez `npm run kroki-wdrozenia`, PO kopii bazy).
+   Dopisujesz obiekt `{ id, opis, wymagaEnv?, uruchom }` NA KOŃCU tablicy — bez ruszania
+   `deploy-produkcja.sh`. Krok biegnie **raz** (zapis w tabeli `kroki_wdrozenia`); `id` jest stały
+   i nigdy nie zmieniany po wdrożeniu. Krok musi być odporny na ponowne uruchomienie po częściowym
+   wykonaniu (wyjątek przerywa deploy PRZED podmianą release'u i nie zapisuje kroku). Operacje,
+   które mają biec przy KAŻDYM wdrożeniu (jak tickety 164/165/168), nadal idą jako osobny
+   skrypt + linia w `deploy-produkcja.sh`. Do kroku dopisz test (wzór: `test/kroki.runner.test.ts`),
+   a nowe nazwy/pola produktu przejdź przez regułę `nazwa_pamiec`/`manual_overrides` wyżej.
 2. **Nie kończ zadania zdaniem „uruchom to na serwerze".** Jeśli skrypt wymaga ręcznego startu,
    zadanie jest niedokończone: dopisz krok do wdrożenia. Ręcznie zostaje wyłącznie wpisanie
    SEKRETU do `$PROD_ROOT/.env` na serwerze (raz) — plik jest poza repo, a `deploy-produkcja.sh`
@@ -317,16 +321,17 @@ jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skr
    a nie wywalać wdrożenia.
 3. **Sekretów (haseł, tokenów) nie wpisuj do repozytorium** — jest publiczne. Skrypty biorą je
    z env; w PR i w odpowiedzi nie powtarzaj wartości hasła tymczasowego.
-4. **Skrypt wdrożenia aktualizuje sam siebie w trakcie działania** — nowy krok wykona się dopiero
-   w DRUGIM wdrożeniu po merge'u (opisane w `docs/tickets/164d-…`, `165-BUG-…/raport.md`).
-   Uprzedź o tym użytkownika, zamiast obiecywać efekt po pierwszym.
+4. **Skrypt wdrożenia aktualizuje sam siebie w trakcie działania** — zmiana SAMEGO
+   `deploy-produkcja.sh` zadziała dopiero w DRUGIM wdrożeniu po merge'u (opisane w
+   `docs/tickets/164d-…`, `165-BUG-…/raport.md`). Nowy krok w rejestrze tego problemu nie ma, bo
+   `deploy-produkcja.sh` zostaje bez zmian. Gdy jednak go zmieniasz — uprzedź użytkownika.
 5. Zmiana `deploy-produkcja.sh` to zmiana ścieżki produkcyjnej: osobny, jasno opisany PR do
    `develop`, a potem `develop` → `main`; merge dopiero po zielonych sprawdzeniach i wyraźnym „tak"
    użytkownika. Skrypt jest odbiciem `tools/deploy-staging.sh` — sprawdź, czy drugi nie wymaga
    tej samej zmiany (świadome rozjazdy opisuje nagłówek pliku).
-6. Konta: `npm run dodaj:uzytkownikow` (`rebuild/backend/scripts/dodaj-uzytkownikow.ts`,
-   hasło tymczasowe w env `HASLO_TYMCZASOWE`). Do czasu dopisania kroku do wdrożenia uruchamia się
-   go ręcznie — to stan przejściowy, nie wzorzec.
+6. Konta: krok `2026-10-06-konta-erwin-anna` w rejestrze zakłada Erwina i Annę z hasłem z
+   `HASLO_TYMCZASOWE` (wpisanym raz do `$PROD_ROOT/.env`); bez niego jest pomijany. Ręczny
+   `npm run dodaj:uzytkownikow` zostaje tylko awaryjnie.
 
 ## Środowisko
 

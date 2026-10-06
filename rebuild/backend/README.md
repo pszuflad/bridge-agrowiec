@@ -287,6 +287,11 @@ DB_PATH=<ścieżka do bazy> HASLO_TYMCZASOWE='<hasło>' npm run dodaj:uzytkownik
 - Użytkownik ustawia własne hasło w `/moje-konto` (`POST /api/password/change`, min. 8 znaków,
   musi różnić się od aktualnego). Cały przebieg — założenie, logowanie, zmiana, ponowne dodanie
   bez nadpisania — pilnuje `test/dodaj-uzytkownika.test.ts`.
+- **Na produkcji konta zakłada krok wdrożenia** `2026-10-06-konta-erwin-anna`
+  (`src/kroki/rejestr.ts`), odpalany przez `tools/deploy-produkcja.sh` po merge'u do `main`;
+  wymaga `HASLO_TYMCZASOWE` w `$PROD_ROOT/.env` na serwerze, bez niego jest pomijany. Ręczna
+  komenda wyżej to tylko tryb awaryjny. Mechanizm kroków (raz = raz, tabela `kroki_wdrozenia`):
+  `src/kroki/runner.ts`.
 - Lista kont do założenia jest na sztywno w skrypcie (`KONTA`); kolejną osobę dopisz tam.
 - Do bazy deweloperskiej służy osobno `npm run seed:dev` (ten NADPISUJE hasło istniejącego konta).
 
