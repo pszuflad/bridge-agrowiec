@@ -7,14 +7,17 @@
 #  contract/fixtures/GET_*.json.
 #
 #  Uruchomienie:  bash tools/record-fixtures.sh
-#  Opcjonalnie:   bash tools/record-fixtures.sh https://panel.agritires.eu
+#  Opcjonalnie:   bash tools/record-fixtures.sh https://training.agroopony.eu
+#  ⚠ Od cutoveru żywy backend to ODBUDOWA, nie oryginał. Nagranie z niego = baseline regresji
+#    nowego systemu, NIE wzorzec starej produkcji — nie nadpisuj nim contract/fixtures bez decyzji
+#    (docs/po-cutoverze-proces.md §3, decyzja (b)).
 #
 #  Login i hasło podajesz w terminalu (read -s) — NIE trafiają do repo ani logu.
 #  Token żyje tylko w pamięci procesu i jest kasowany na końcu.
 # ============================================================================
 set -uo pipefail
 
-BASE="${1:-https://panel.agritires.eu}"
+BASE="${1:-https://bridgeone.agroopony.eu}"   # ticket 192: produkcja przeniesiona z panel.agritires.eu (ticket 188)
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 LIST="$ROOT/contract/fixtures/_get-endpoints.txt"
 OUT="$ROOT/contract/fixtures"

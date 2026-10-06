@@ -1,5 +1,12 @@
 # Runbook przełączenia — nowe środowisko staje się produkcją
 
+> ⚠ **STAN PO PRZEPROWADZCE (ticket 188, 2026-10-05; porządki ticket 192, 2026-10-06).** Ten dokument opisuje
+> układ na **starym serwerze vpshd1242** (`agritires.eu`, `panel.agritires.eu`, `test.agritires.eu`,
+> `~/private_apps/…`). Produkcja i staging działają od 05.10 na **vpshd86**: `bridgeone.agroopony.eu`
+> (prod) i `training.agroopony.eu` (staging), z aplikacją w `_app/` pod docrootem. Aktualny układ
+> katalogów, cron i zasady: `docs/tickets/188-CHORE-deploy-agroopony/plan.md`. Nazwy ścieżek,
+> domen i serwera poniżej czytaj jako **historię**.
+
 **Dla:** osoby wykonującej przełączenie na VPS (Paweł). **Data:** 2026-09-24.
 **Model cutoveru:** `docs/cutover.md` rozdział 0 — środowisko testowe **staje się** produkcją.
 Nie budujemy nowego release'u na starym serwerze i nie migrujemy bazy w oknie.

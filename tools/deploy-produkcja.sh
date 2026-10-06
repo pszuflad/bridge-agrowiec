@@ -45,7 +45,7 @@ export PORT=5000 HOST=127.0.0.1 NODE_ENV=production DB_PATH="$DATA_DB"
 # `rsync --delete`. Gdyby była pusta, deploy skasowałby plik CSV, po który przychodzi Selly.
 export SELLY_CSV_DIR="${SELLY_CSV_DIR:-$DOCROOT/ex-port-files}"
 
-# Sekrety środowiska — plik POZA repo, tworzony raz przez tools/przygotuj-produkcje.sh.
+# Sekrety środowiska — plik POZA repo, tworzony raz ręcznie (układ: docs/tickets/188-CHORE-deploy-agroopony/plan.md).
 if [ -f "$PROD_ROOT/.env" ]; then set -a; . "$PROD_ROOT/.env"; set +a; fi
 
 log(){ echo "$(date '+%F %T')  $*" | tee -a "$LOG"; }
@@ -74,7 +74,7 @@ fi
 
 # --- guard: sekret JWT ---
 if [ -z "${JWT_SECRET:-}" ]; then
-  log "BŁĄD: brak JWT_SECRET. Utwórz $PROD_ROOT/.env (tools/przygotuj-produkcje.sh). Przerywam."
+  log "BŁĄD: brak JWT_SECRET. Utwórz $PROD_ROOT/.env (układ: docs/tickets/188-CHORE-deploy-agroopony/plan.md). Przerywam."
   exit 1
 fi
 
@@ -89,7 +89,7 @@ fi
 # Na produkcji pusty plik oznaczałby katalog bez ani jednego produktu, generator CSV
 # oddałby Selly pusty plik, a sklep wyzerowałby stany. Lepiej nie wdrożyć.
 if [ ! -f "$DATA_DB" ]; then
-  log "BŁĄD: baza produkcji nie istnieje ($DATA_DB). Uruchom tools/przygotuj-produkcje.sh. Przerywam."
+  log "BŁĄD: baza produkcji nie istnieje ($DATA_DB). Sprawdź układ _app/ wg docs/tickets/188-CHORE-deploy-agroopony/plan.md. Przerywam."
   exit 1
 fi
 
@@ -97,7 +97,7 @@ fi
 # Gdyby go nie było, publikuj-frontend.sh utworzyłby go pustym i panel zniknąłby z internetu
 # razem z katalogiem ex-port-files.
 if [ ! -d "$DOCROOT" ]; then
-  log "BŁĄD: docroot nie istnieje ($DOCROOT). Uruchom tools/przygotuj-produkcje.sh. Przerywam."
+  log "BŁĄD: docroot nie istnieje ($DOCROOT). Sprawdź układ _app/ wg docs/tickets/188-CHORE-deploy-agroopony/plan.md. Przerywam."
   exit 1
 fi
 

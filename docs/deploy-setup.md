@@ -1,5 +1,12 @@
 # Deploy staging — konfiguracja i obsługa (Iteracja 0)
 
+> ⚠ **STAN PO PRZEPROWADZCE (ticket 188, 2026-10-05; porządki ticket 192, 2026-10-06).** Ten dokument opisuje
+> układ na **starym serwerze vpshd1242** (`agritires.eu`, `panel.agritires.eu`, `test.agritires.eu`,
+> `~/private_apps/…`). Produkcja i staging działają od 05.10 na **vpshd86**: `bridgeone.agroopony.eu`
+> (prod) i `training.agroopony.eu` (staging), z aplikacją w `_app/` pod docrootem. Aktualny układ
+> katalogów, cron i zasady: `docs/tickets/188-CHORE-deploy-agroopony/plan.md`. Nazwy ścieżek,
+> domen i serwera poniżej czytaj jako **historię**.
+
 Środowisko **STAGING** nowej wersji Bridge: `https://test.agritires.eu`.
 Izolowane od produkcji na tym samym VPS (cyber_Folks, DirectAdmin, user `admin`, bez roota).
 
