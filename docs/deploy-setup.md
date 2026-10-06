@@ -1,4 +1,4 @@
-# Deploy staging — konfiguracja i obsługa (Iteracja 0)
+# Deploy środowiska testowego — konfiguracja i obsługa (Iteracja 0)
 
 > ⚠ **STAN PO PRZEPROWADZCE (ticket 188, 2026-10-05; porządki ticket 192, 2026-10-06).** Ten dokument opisuje
 > układ na **starym serwerze vpshd1242** (`agritires.eu`, `panel.agritires.eu`, `test.agritires.eu`,
@@ -7,7 +7,7 @@
 > katalogów, cron i zasady: `docs/tickets/188-CHORE-deploy-agroopony/plan.md`. Nazwy ścieżek,
 > domen i serwera poniżej czytaj jako **historię**.
 
-Środowisko **STAGING** nowej wersji Bridge: `https://test.agritires.eu`.
+**Środowisko testowe** nowej wersji Bridge: `https://test.agritires.eu`.
 Izolowane od produkcji na tym samym VPS (cyber_Folks, DirectAdmin, user `admin`, bez roota).
 
 ## Architektura
@@ -27,7 +27,7 @@ Internet ──HTTPS 443──► Apache (test.agritires.eu, docroot public_html
 > **Przełączenie PRODUKCJI na nowy stos opisuje osobny dokument `docs/cutover.md`** (12e,
 > `39-CHORE-audyt-bezpieczenstwa-domkniecie`) — plan big-bang na TEJ SAMEJ bazie `data.db`,
 > z obowiązkową weryfikacją schematu przed migracją i rollbackiem. Korzysta z ustaleń tego
-> pliku (ścieżki, PM2, proxy Apache). Sekcja „⚠ Schemat bazy staging NIE pochodzi z naszego
+> pliku (ścieżki, PM2, proxy Apache). Sekcja „⚠ Schemat bazy środowiska testowego NIE pochodzi z naszego
 > kanonu" niżej jest tam rozwinięta o realne ryzyko dla produkcji: `002_import.sql`
 > prawdopodobnie padnie na `duplicate column name: uwaga_cena` (kolumnę dokłada patch produkcji
 > przy każdym starcie), a `003_szerokosc_text.sql` przebudowuje `products` przez `SELECT *`,
@@ -65,7 +65,7 @@ pierwszy deploy po Iteracji 1b podmienia placeholder na realny panel.
 > **`--include=dev` jest konieczne, nie kosmetyczne.** Skrypt eksportuje `NODE_ENV=production`
 > (potrzebne dla runtime backendu), a przy tej zmiennej `npm ci` pomija devDependencies — na naszym
 > lockfile frontendu **23 pakiety zamiast 383**, bez `vite` i bez `tsc` w `node_modules/.bin`.
-> Przy `set -euo pipefail` build przerwałby się na `tsc: not found` i staging zostałby na placeholderze.
+> Przy `set -euo pipefail` build przerwałby się na `tsc: not found` i środowisko testowe zostałoby na placeholderze.
 > `npm ci --omit=dev` w katalogu release'u backendu **zostaje bez zmian** — tam faktycznie chcemy
 > wyłącznie zależności produkcyjne.
 
@@ -80,12 +80,12 @@ pierwszy deploy po Iteracji 1b podmienia placeholder na realny panel.
 ## Jednorazowa konfiguracja na VPS
 
 ```bash
-# 1. Drzewo staging + klon repo (śledzi develop; użyj klucza SSH producenta — read wystarczy)
+# 1. Drzewo środowiska testowego + klon repo (śledzi develop; użyj klucza SSH producenta — read wystarczy)
 mkdir -p ~/private_apps/bridge-staging/{releases,data}
 git clone git@github.com:pszuflad/bridge-agrowiec.git ~/private_apps/bridge-staging/repo
 cd ~/private_apps/bridge-staging/repo && git checkout develop
 
-# 2. Baza staging = snapshot produkcji (sqlite 3.26 -> .backup; NIE 'VACUUM INTO')
+# 2. Baza środowiska testowego = snapshot produkcji (sqlite 3.26 -> .backup; NIE 'VACUUM INTO')
 sqlite3 /home/admin/private_apps/bridge/data.db \
   ".backup '/home/admin/private_apps/bridge-staging/data/data-nowy.db'"
 
@@ -110,7 +110,7 @@ chmod 600 ~/private_apps/bridge-staging/.env
 
 > **Selly.pl i eksport CSV (od Iteracji 8a; zabezpieczenia z ticketa 34):**
 >
-> **Staging nie wymaga tu ŻADNEJ ręcznej konfiguracji** — `tools/deploy-staging.sh` ustawia
+> **Środowisko testowe nie wymaga tu ŻADNEJ ręcznej konfiguracji** — `tools/deploy-staging.sh` ustawia
 > bezpieczne wartości sam, przy każdym deployu (linie zaraz po `export PORT=…`). Poniższe
 > dotyczy sytuacji, w której ktoś chciałby to świadomie zmienić.
 >
@@ -123,12 +123,12 @@ chmod 600 ~/private_apps/bridge-staging/.env
 >   `generate-csv`) działają bez nich normalnie.
 > - ⚠ **`SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` mają domyślne wartości wskazujące
 >   katalog PRODUKCYJNY** (`public_html/panel/ex-port-files`) — bo tam jest ich miejsce na
->   produkcji. Staging stoi na TYM SAMYM VPS, więc bez nadpisania przycisk „Wygeneruj CSV teraz"
->   podmieniłby produkcyjny plik treścią z bazy stagingowej, a Selly zaciągnąłby go o 6:00.
->   **Każde środowisko inne niż produkcja musi je nadpisać** — dla stagingu robi to skrypt
+>   produkcji. Środowisko testowe stoi na TYM SAMYM VPS, więc bez nadpisania przycisk „Wygeneruj CSV teraz"
+>   podmieniłby produkcyjny plik treścią z bazy środowiska testowego, a Selly zaciągnąłby go o 6:00.
+>   **Każde środowisko inne niż produkcja musi je nadpisać** — dla środowiska testowego robi to skrypt
 >   deployu. Znalezione i domknięte w tickecie `34-FEATURE-selly-blokada-srodowiska`.
 > - ⚠ **Skutek uboczny naprawy z ticketa 34, znaleziony i naprawiony w `93-CHORE-diagnoza-selly-csv-staging`:**
->   `SELLY_CSV_DIR` stagingu leży pod docrootem (żeby link „Pobierz CSV" działał), a krok
+>   `SELLY_CSV_DIR` środowiska testowego leży pod docrootem (żeby link „Pobierz CSV" działał), a krok
 >   publikacji frontendu robił `rsync -a --delete` na cały docroot — każdy deploy kasował
 >   wygenerowany plik CSV. `tools/publikuj-frontend.sh` wyklucza `SELLY_CSV_DIR` z `--delete`.
 >   **Po pierwszym deployu z tą poprawką trzeba raz kliknąć „Wygeneruj CSV teraz"** — katalog
@@ -234,24 +234,24 @@ a NIE przez `sqlite3` CLI hosta** — ten ma 3.26 i `VACUUM INTO` (SQLite ≥ 3.
 Zwykłe `cp` też odpada: baza chodzi w WAL, więc kopia samego pliku `.db` bywa niespójna.
 Jeśli robisz kopię ręcznie CLI-em, użyj `.backup` — tak jak w sekcji odświeżania danych niżej.
 
-## ⚠ Schemat bazy staging NIE pochodzi z naszego kanonu
+## ⚠ Schemat bazy środowiska testowego NIE pochodzi z naszego kanonu
 
-Baza staging powstaje przez `.backup` z **produkcji**, a nie z `rebuild/schema/001_schema.sql`.
+Baza środowiska testowego powstaje przez `.backup` z **produkcji**, a nie z `rebuild/schema/001_schema.sql`.
 `001_schema.sql` jest idempotentny (`CREATE TABLE IF NOT EXISTS`), więc na przywróconej bazie
 **nie tworzy niczego** — zostaje schemat produkcji. `npm run migrate` odnotowuje go jako
 zastosowany i od tej pory obie strony wyglądają na zgodne, choć wcale być takie nie muszą.
 
-**Skutek: kanon i staging mogą się po cichu różnić, a bramki tego nie pokażą.** Testy budują
-własną bazę z kanonu, więc mierzą kanon — nie to, co realnie leży na staging.
+**Skutek: kanon i środowisko testowe mogą się po cichu różnić, a bramki tego nie pokażą.** Testy budują
+własną bazę z kanonu, więc mierzą kanon — nie to, co realnie leży na środowisku testowym.
 
-Zdarzyło się to naprawdę: `products.szerokosc` był `TEXT` na produkcji i na staging (migracja
+Zdarzyło się to naprawdę: `products.szerokosc` był `TEXT` na produkcji i na środowisku testowym (migracja
 `szertxt` Ani z 2026-08-19), a `REAL` w naszym kanonie — przez wiele iteracji nikt tego nie
 widział. Domknęła to migracja `003_szerokosc_text.sql` (I3/3d-1). Weryfikacja po wdrożeniu
-pokazała, że na staging kolumna była TEXT-em JUŻ WCZEŚNIEJ, więc migracja była dla danych
+pokazała, że na środowisku testowym kolumna była TEXT-em JUŻ WCZEŚNIEJ, więc migracja była dla danych
 praktycznie no-opem — i dlatego wartości z zerami końcowymi (`8.00`) przetrwały nietknięte.
 
 **Praktyczny wniosek przy pisaniu każdej kolejnej migracji:**
-- nie zakładaj, że tabela na staging ma dokładnie kształt z `001_schema.sql`;
+- nie zakładaj, że tabela na środowisku testowym ma dokładnie kształt z `001_schema.sql`;
 - migracje przebudowujące tabelę (`INSERT INTO nowa SELECT * FROM stara`) są wrażliwe na
   liczbę i KOLEJNOŚĆ kolumn — przy rozjeździe albo padną, albo (gdy liczba się zgadza,
   a kolejność nie) po cichu przestawią dane;
@@ -261,7 +261,7 @@ praktycznie no-opem — i dlatego wartości z zerami końcowymi (`8.00`) przetrw
   ```
   z tym, co daje świeża baza z kanonu (`npm run migrate` na pustym pliku).
 
-## Odświeżenie danych staging ze snapshotu produkcji (na żądanie)
+## Odświeżenie danych środowiska testowego ze snapshotu produkcji (na żądanie)
 ```bash
 sqlite3 /home/admin/private_apps/bridge/data.db \
   ".backup '/home/admin/private_apps/bridge-staging/data/data-nowy.db'"
@@ -317,5 +317,5 @@ Cel: żaden PR ticketa nie wejdzie do `develop` bez zielonego CI — a właścic
   np. `szerokosc` — backlog #3). Przy pierwszym tickecie czytającym realne dane trzeba uzgodnić migrację snapshotu do kanonu.
 - **Kolejność reguł w `deploy/staging/htaccess`:** wymuszenie HTTPS (reguła 3) stoi PO SPA fallbacku
   (reguła 2) kończącym się `[L]` — przekierowanie łapie dopiero drugi przebieg. Działa, ale jest kruche;
-  HTTPS powinno iść zaraz za wyjątkiem na `.well-known`. Zmiana dotyka żywego stagingu — do zaplanowania.
-- **Prod Node słucha na `0.0.0.0:5000`** (potencjalnie dostępny z sieci) — osobna, produkcyjna kwestia bezpieczeństwa; staging celowo słucha tylko na `127.0.0.1`.
+  HTTPS powinno iść zaraz za wyjątkiem na `.well-known`. Zmiana dotyka żywego środowiska testowego — do zaplanowania.
+- **Prod Node słucha na `0.0.0.0:5000`** (potencjalnie dostępny z sieci) — osobna, produkcyjna kwestia bezpieczeństwa; środowisko testowe celowo słucha tylko na `127.0.0.1`.
