@@ -297,6 +297,37 @@ na każdym środowisku i dla każdego, kto tu programuje:
 
 Pełna procedura z krokami i tabelą kodów wyjścia: `.claude/commands/feature.md`, Kroki 16–17.
 
+## Poprawki danych i konta na produkcji — przez wdrożenie, nigdy ręcznie na serwerze (ustalone 2026-10-06)
+
+Użytkownik NIE ma uruchamiać ręcznie niczego na serwerze po każdej poprawce. Sesja nie ma dostępu
+do VPS ani do bazy produkcyjnej (klucz SSH jest w sekretach repo, a na serwerze wymuszone jest
+jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skrypt, który
+`deploy-produkcja.yml` odpala po merge'u do `main`. Obowiązuje każdą sesję:
+
+1. **Poprawka danych / założenie konta / jednorazowa operacja na bazie = idempotentny skrypt w
+   `rebuild/backend/scripts/` + jego krok w `tools/deploy-produkcja.sh`** (jak tickety 164, 165,
+   168: `log "…"` + `( cd rebuild/backend && DB_PATH="$DATA_DB" npm run <skrypt> … )`).
+   Idempotentny = ponowne uruchomienie przy każdym wdrożeniu niczego nie psuje i nie nadpisuje
+   zmian użytkownika (np. hasła ustawionego już przez niego). Sama kopia bazy przed migracjami
+   to punkt powrotu — krok dopisz PO niej.
+2. **Nie kończ zadania zdaniem „uruchom to na serwerze".** Jeśli skrypt wymaga ręcznego startu,
+   zadanie jest niedokończone: dopisz krok do wdrożenia. Ręcznie zostaje wyłącznie wpisanie
+   SEKRETU do `$PROD_ROOT/.env` na serwerze (raz) — plik jest poza repo, a `deploy-produkcja.sh`
+   ładuje go sam. Krok zależny od sekretu ma się POMIJAĆ (z wpisem w logu), gdy zmiennej brak,
+   a nie wywalać wdrożenia.
+3. **Sekretów (haseł, tokenów) nie wpisuj do repozytorium** — jest publiczne. Skrypty biorą je
+   z env; w PR i w odpowiedzi nie powtarzaj wartości hasła tymczasowego.
+4. **Skrypt wdrożenia aktualizuje sam siebie w trakcie działania** — nowy krok wykona się dopiero
+   w DRUGIM wdrożeniu po merge'u (opisane w `docs/tickets/164d-…`, `165-BUG-…/raport.md`).
+   Uprzedź o tym użytkownika, zamiast obiecywać efekt po pierwszym.
+5. Zmiana `deploy-produkcja.sh` to zmiana ścieżki produkcyjnej: osobny, jasno opisany PR do
+   `develop`, a potem `develop` → `main`; merge dopiero po zielonych sprawdzeniach i wyraźnym „tak"
+   użytkownika. Skrypt jest odbiciem `tools/deploy-staging.sh` — sprawdź, czy drugi nie wymaga
+   tej samej zmiany (świadome rozjazdy opisuje nagłówek pliku).
+6. Konta: `npm run dodaj:uzytkownikow` (`rebuild/backend/scripts/dodaj-uzytkownikow.ts`,
+   hasło tymczasowe w env `HASLO_TYMCZASOWE`). Do czasu dopisania kroku do wdrożenia uruchamia się
+   go ręcznie — to stan przejściowy, nie wzorzec.
+
 ## Środowisko
 
 - **Nowy klon repo (nowa maszyna, nowa osoba) — raz:** `tools/wlacz-hooki.sh`
