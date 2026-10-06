@@ -1,5 +1,12 @@
 # Runbook przełączenia — nowe środowisko staje się produkcją
 
+> ⚠ **STAN PO PRZEPROWADZCE (ticket 188, 2026-10-05; porządki ticket 192, 2026-10-06).** Ten dokument opisuje
+> układ na **starym serwerze vpshd1242** (`agritires.eu`, `panel.agritires.eu`, `test.agritires.eu`,
+> `~/private_apps/…`). Produkcja i staging działają od 05.10 na **vpshd86**: `bridgeone.agroopony.eu`
+> (prod) i `training.agroopony.eu` (staging), z aplikacją w `_app/` pod docrootem. Aktualny układ
+> katalogów, cron i zasady: `docs/tickets/188-CHORE-deploy-agroopony/plan.md`. Nazwy ścieżek,
+> domen i serwera poniżej czytaj jako **historię**.
+
 **Dla:** osoby wykonującej przełączenie na VPS (Paweł). **Data:** 2026-09-24.
 **Model cutoveru:** `docs/cutover.md` rozdział 0 — środowisko testowe **staje się** produkcją.
 Nie budujemy nowego release'u na starym serwerze i nie migrujemy bazy w oknie.
@@ -103,7 +110,7 @@ oraz katalog `ex-port-files/` z plikiem CSV i własnym `.htaccess`.
 | trzy skrypty `*-injection.js` | **znikają** — i tak mają zniknąć, są wchłonięte (I7, I8, 3f-2) |
 
 ⚠ **Warunek:** `SELLY_CSV_DIR` w `.env` musi być ustawiony **zanim** puścisz deploy (krok 4),
-bo to jego wartość trafia do `publikuj-frontend.sh` jako katalog chroniony. Przy stagingowej
+bo to jego wartość trafia do `publikuj-frontend.sh` jako katalog chroniony. Przy testowej
 wartości katalog `panel/ex-port-files` nie byłby chroniony i `--delete` **skasowałby plik,
 po który przychodzi Selly**.
 
@@ -114,7 +121,7 @@ To jest ta sama zmiana, którą opisuje krok 5 — tu tylko wartości dla warian
 | `tools/deploy-staging.sh` | Dziś | Wariant A |
 |---|---|---|
 | `DOCROOT=` (:24) | `…/public_html/test` | `…/public_html/panel` |
-| `export PORT=5001 HOST=127.0.0.1` (:28) | staging | `PORT=5000 HOST=0.0.0.0` |
+| `export PORT=5001 HOST=127.0.0.1` (:28) | testowe | `PORT=5000 HOST=0.0.0.0` |
 | `cp -f deploy/staging/htaccess …` (:135) | kopiuje plik na 5001, bez `/panel` | **zakomentuj** — `.htaccess` panelu utrzymujemy ręcznie (krok 7) |
 
 ### 1.5 Wzorzec `.htaccess` dla katalogu `panel/`
@@ -153,7 +160,7 @@ W GitHubie: Settings → Secrets/Actions → wyłącz workflow „Deploy staging
 klucz deployowy z `~/.ssh/authorized_keys` na VPS).
 
 > **Do rozstrzygnięcia po oknie, nie w oknie:** czy chcemy automatyczny deploy na produkcję
-> i czy stawiamy nowy staging. Na czas przełączenia po prostu wyłączamy automat.
+> i czy stawiamy nowe środowisko testowe. Na czas przełączenia po prostu wyłączamy automat.
 
 **Sprawdzenie:** `crontab -l | grep -c deploy-staging` → `0` albo linia zakomentowana.
 
@@ -206,7 +213,7 @@ tego NIE nadpisze.** Zmiana bazy wymaga edycji skryptu (krok 5).
 ## Krok 4 — Plik środowiska
 
 Plik: `~/private_apps/bridge-staging/.env`, `chmod 600`. Jest wczytywany przez
-`tools/deploy-staging.sh:49` **po** twardych `export`ach stagingowych z linii 42–45, więc
+`tools/deploy-staging.sh:49` **po** twardych `export`ach środowiska testowego z linii 42–45, więc
 **wygrywa** z nimi.
 
 Docelowa zawartość (wartości sekretów weź z `~/private_apps/bridge/.env` starego stosu):
@@ -239,7 +246,7 @@ SELLY_CSV_URL=https://agritires.eu/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvt
 ```
 
 **Dlaczego `SELLY_CSV_*` wpisujemy jawnie, skoro to domyślki z kodu:** bo skrypt wdrożenia
-nadpisuje je wartościami stagingowymi. Samo usunięcie z `.env` nie wystarczy.
+nadpisuje je wartościami środowiska testowego. Samo usunięcie z `.env` nie wystarczy.
 
 **`CORS_ORIGINS` zostaw PUSTE** — front i `/api` stoją pod jedną domeną. To stan docelowy, nie
 przeoczenie (`docs/cutover.md` §4).
@@ -271,7 +278,7 @@ innymi nazwami zmiennych albo podawane wprost:
 |---|---|---|
 | `DATA_DB=` (:23) | `$STAGING_ROOT/data/data-nowy.db` | `/home/admin/private_apps/bridge/data.db` |
 | `DOCROOT=` (:24) | `…/public_html/test` | `…/public_html/panel` |
-| `export PORT=5001 HOST=127.0.0.1` (:28) | staging | `PORT=5000 HOST=0.0.0.0` |
+| `export PORT=5001 HOST=127.0.0.1` (:28) | testowe | `PORT=5000 HOST=0.0.0.0` |
 
 (Dwa ostatnie wiersze to powtórzenie kroku 1.4 — trzymaj je zgodne.)
 
@@ -289,7 +296,7 @@ napisany **bez prefiksu `/panel`**. Przy wariancie A **musi być zastąpiony** w
 `.htaccess` ręcznie, dopóki nie powstanie `deploy/produkcja/htaccess` w repo.
 
 > **Alternatywa czystsza, jeśli masz na nią czas:** skopiuj skrypt na `tools/deploy-produkcja.sh`
-> i zmień w kopii. Wtedy oryginał zostaje gotowy do postawienia nowego stagingu.
+> i zmień w kopii. Wtedy oryginał zostaje gotowy do postawienia nowego środowiska testowego.
 
 ---
 

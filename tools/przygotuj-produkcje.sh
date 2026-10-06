@@ -26,6 +26,13 @@
 # ============================================================================
 set -euo pipefail
 
+# ⛔ WYCOFANY (ticket 192, 2026-10-06). Skrypt budował środowisko produkcji na vpshd1242 (private_apps/, panel.agritires.eu). Układ na vpshd86 (_app/ pod docrootem, jail, DirectAdmin cron) opisuje docs/tickets/188-CHORE-deploy-agroopony/plan.md i docs/deploy-setup.md.
+#    Przyczyna i plan: docs/po-cutoverze-proces.md §1.3, docs/tickets/192-CHORE-wycofanie-vps-sync/plan.md.
+#    Treść niżej zostaje wyłącznie jako historia.
+echo "przygotuj-produkcje.sh: WYCOFANY od przeprowadzki na vpshd86 (ticket 192) — nic nie robię." >&2
+echo "Szczegóły: docs/tickets/192-CHORE-wycofanie-vps-sync/plan.md" >&2
+exit 1
+
 SUCHO=0
 [ "${1:-}" = "--sucho" ] && SUCHO=1
 

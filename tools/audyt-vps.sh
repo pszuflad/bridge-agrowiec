@@ -4,7 +4,7 @@
 #  Wersja poprawiona 2026-07-24 (naprawiona ścieżka private_apps, autodetekcja)
 #
 #  URUCHOMIENIE — na serwerze, po zalogowaniu:
-#      ssh -p 222 admin@vpshd1242.cyber-folks.pl
+#      ssh -p 222 admin@vpshd1242.cyber-folks.pl   # ⚠ STARY serwer — od ticketu 192 nieużywany (produkcja: vpshd86)
 #      bash audyt-vps.sh
 #
 #  Skrypt jest TYLKO DO ODCZYTU — niczego nie zmienia, nie kasuje, nie restartuje.

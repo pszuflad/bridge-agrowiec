@@ -154,19 +154,20 @@ const schemaEnvBazowe = z.object({
    * (`mirror/backend/generate_selly_export.cjs:8-9`).
    *
    * ODSTĘPSTWO ŚWIADOME (plan.md D4, decyzja użytkownika 2026-09-04): ścieżki idą do env
-   * z domyślnymi = wartości produkcyjne, więc przy pustym `.env` zachowanie jest identyczne
-   * jak w oryginale. Bez tego testy musiałyby pisać po `/home/admin`, a `csv-status` na
-   * każdym innym środowisku zwracałby „Brak pliku CSV" niezależnie od stanu faktycznego.
+   * z domyślnymi = wartości produkcyjne. Ticket 192 (2026-10-06): produkcja przeniesiona na
+   * vpshd86 (ticket 188), więc domyślne wskazują `bridgeone.agroopony.eu`, a nie `agritires.eu`.
+   * Bez env testy musiałyby pisać po `/home/admin`, a `csv-status` na każdym innym środowisku
+   * zwracałby „Brak pliku CSV" niezależnie od stanu faktycznego.
    */
   SELLY_CSV_DIR: z
     .string()
     .min(1)
-    .default("/home/admin/domains/agritires.eu/public_html/panel/ex-port-files"),
+    .default("/home/admin/domains/agroopony.eu/public_html/bridgeone/ex-port-files"),
   SELLY_CSV_PLIK: z.string().min(1).default("sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
   SELLY_CSV_URL: z
     .string()
     .min(1)
-    .default("https://agritires.eu/panel/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
+    .default("https://bridgeone.agroopony.eu/ex-port-files/sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
 });
 
 /**

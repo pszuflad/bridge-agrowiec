@@ -270,6 +270,26 @@ traversal regexem dwóch segmentów + zakazem `..`, jak oryginał). Funkcje odcz
 i błędnego hasła, brak rate-limitingu/lockoutu, brak wpisu do `audit_log` przy logowaniu,
 dokładne (bez `trim`/`lowercase`) dopasowanie e-maila. Wszystko to zachowanie produkcji.
 
+### Zakładanie kont i zmiana hasła
+
+Aplikacja nie ma rejestracji ani panelu użytkowników — konto zakłada się skryptem na serwerze:
+
+```bash
+DB_PATH=<ścieżka do bazy> HASLO_TYMCZASOWE='<hasło>' npm run dodaj:uzytkownikow
+```
+
+- Skrypt (`scripts/dodaj-uzytkownikow.ts`, logika w `src/auth/dodaj-uzytkownika.ts`) dokłada
+  Erwina Wojtysiaka i Annę Naumowicz; konta, które już są (Marta, Arkadiusz), zostają nietknięte.
+- **Idempotentny:** istniejącego konta nie rusza (ani hasła, ani nazwy), więc ponowne uruchomienie
+  nie nadpisze hasła ustawionego już przez użytkownika.
+- Hasło tymczasowe idzie wyłącznie przez env `HASLO_TYMCZASOWE` (min. 8 znaków) — nie wpisuj go do
+  repozytorium (jest publiczne). Brak `DB_PATH` lub hasła kończy skrypt błędem.
+- Użytkownik ustawia własne hasło w `/moje-konto` (`POST /api/password/change`, min. 8 znaków,
+  musi różnić się od aktualnego). Cały przebieg — założenie, logowanie, zmiana, ponowne dodanie
+  bez nadpisania — pilnuje `test/dodaj-uzytkownika.test.ts`.
+- Lista kont do założenia jest na sztywno w skrypcie (`KONTA`); kolejną osobę dopisz tam.
+- Do bazy deweloperskiej służy osobno `npm run seed:dev` (ten NADPISUJE hasło istniejącego konta).
+
 ### Świadome odstępstwa od oryginału (zatwierdzone)
 
 | # | Oryginał | Tutaj | Dlaczego |
