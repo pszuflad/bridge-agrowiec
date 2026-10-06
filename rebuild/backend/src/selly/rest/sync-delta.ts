@@ -62,6 +62,31 @@ export function podsumujBledy(errors: { kod: string; error: string }[]): {
   return { bledy_wg_rodzaju: liczby, sample_errors: KOLEJNOSC_PROBKI.flatMap((r) => grupy[r]) };
 }
 
+/**
+ * Ticket 194 (#194.1, #194.3): pozycja, której zapis się nie powiódł z przyczyn „czekających na człowieka lub Tor 2”
+ * (`pending_create`, `tozsamosc`), nie jest ponawiana co 15 minut — czeka `PRZERWA_PO_BLEDZIE_MS`. Pamięć procesu
+ * (po restarcie próbujemy od nowa); nie dotyka bazy, więc nie wpływa na `selly_products` (backlog #69).
+ * Pozycje z gotowym `selly_variant_id` i błędami „inne” (HTTP, limity) nadal idą w każdym cyklu.
+ */
+export const PRZERWA_PO_BLEDZIE_MS = 6 * 60 * 60 * 1000;
+const wstrzymania = new WeakMap<object, Map<string, number>>();
+
+function czyWstrzymana(db: Baza, klucz: string, teraz: number): boolean {
+  const do_ = wstrzymania.get(db)?.get(klucz);
+  return do_ !== undefined && do_ > teraz;
+}
+
+function wstrzymajPoBledzie(db: Baza, klucz: string, komunikat: string, teraz: number): void {
+  if (rodzajBledu(komunikat) === "inne") return;
+  let m = wstrzymania.get(db);
+  if (!m) wstrzymania.set(db, (m = new Map()));
+  m.set(klucz, teraz + PRZERWA_PO_BLEDZIE_MS);
+}
+
+/** Cena do wysłania musi być dodatnią liczbą skończoną — inaczej do sklepu poszłoby 0 (#194.2). */
+const cenaWazna = (c: number | null | undefined): c is number =>
+  typeof c === "number" && Number.isFinite(c) && c > 0;
+
 /** Wiersz `findDeltaProducts` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszDelta = WierszBridge & {
   id: number;
@@ -265,6 +290,7 @@ function markSynced(db: Baza, row: WierszDelta, priceOk: boolean, stockOk: boole
  */
 function markError(db: Baza, row: WierszDelta, error: unknown): void {
   const errStr = String(error);
+  wstrzymajPoBledzie(db, kluczGrupy(row.dostawca, row.kod_importu), errStr, Date.now());
   const isPendingCreate =
     errStr.includes("brak dictMaps do createProduct") || errStr.includes("produkt nie istnieje w Selly");
   const status = isPendingCreate ? "pending_create" : "error";
@@ -315,6 +341,11 @@ export async function syncDelta(
   console.log(`[sync_delta] Start: ${rows.length} produktow, dostawca=${dostawca || "ALL"}, dryRun=${dryRun}`);
 
   for (const row of rows) {
+    const kluczWstrzymania = kluczGrupy(row.dostawca, row.kod_importu);
+    if (!dryRun && czyWstrzymana(db, kluczWstrzymania, Date.now())) {
+      stats.skip++;
+      continue;
+    }
     try {
       // 0. #108: sam raport — wiersz leci dalej normalną ścieżką i ZOSTANIE wysłany.
       // Pomijanie takiej grupy zatrzymałoby pozycje, których dane Ania uznaje za poprawne
@@ -385,6 +416,14 @@ export async function syncDelta(
         row.cena_sprzedazy = live.cena_sprzedazy;
       }
 
+      // #194.2: bez ważnej ceny nie wysyłamy ceny 0 do żywego sklepu. Wstrzymanej pozycji nadal zerujemy stan.
+      const cenaOk = cenaWazna(row.cena_sprzedazy);
+      if (!cenaOk && live.status !== "wstrzymany") {
+        stats.skip++;
+        errors.push({ kod: row.kod, error: "brak ważnej ceny sprzedaży — pominięto, żeby nie wysłać ceny 0" });
+        continue;
+      }
+
       if (dryRun) {
         stats.skip++;
         console.log(
@@ -396,7 +435,7 @@ export async function syncDelta(
       const putRes = await discovery.apiWithRetry(`PUT /api/products/${productId}/variants/${variantId}`, async () => {
         const data = await discovery.klient.updateVariant(productId, variantId, {
           quantity: row.stan ?? 0,
-          price: row.cena_sprzedazy ?? 0,
+          ...(cenaOk ? { price: row.cena_sprzedazy as number } : {}),
         });
         // Klient rzuca na non-2xx, więc dotarcie tutaj oznacza 2xx (`client.api` → `{status, data}`).
         return { status: 200, data };

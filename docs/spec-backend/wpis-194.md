@@ -11,3 +11,11 @@ Dodatki względem oryginału (nic z istniejącego zachowania nie zmienione):
   a zapis jest przycinany do 8000 znaków **z zachowaniem poprawnego JSON-a** (wcześniej ucinany w środku).
 - Strażnik nakładania Toru 1 (`stworzStraznikaPrzebiegu`, limit 30 min): kolejny tick nie startuje, gdy poprzedni
   przebieg jeszcze trwa.
+
+## Świadome odstępstwa od oryginału (decyzja użytkownika, 2026-10-06)
+
+- **Wycofanie ponawiania Toru 1 (6 h):** pozycja, której zapis skończył się `pending_create` albo odmową tożsamości
+  (`zapis zablokowany`), jest pomijana (liczona jako `skip`) przez 6 h; pamięć procesu, po restarcie próba od nowa.
+  Błędy „inne” (HTTP, limity) i pozycje z gotowym mapowaniem bez takiego błędu — bez zmian.
+- **Zawór ceny:** pozycja z ceną sprzedaży ≤ 0 lub nieskończoną nie jest wysyłana (wpis w `errors`: „brak ważnej ceny
+  sprzedaży…”); wstrzymanej pozycji nadal zerujemy stan, ale bez pola `price`.
