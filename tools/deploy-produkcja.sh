@@ -1,7 +1,9 @@
 #!/bin/bash
 # ============================================================================
 #  Bridge — deploy-produkcja.sh : CD po stronie VPS dla PRODUKCJI.
-#  Wdraża nową wersję (rebuild/) na środowisko PRODUKCYJNE (panel.agritires.eu).
+#  Wdraża nową wersję (rebuild/) na środowisko PRODUKCYJNE (bridgeone.agroopony.eu, VPS vpshd86).
+#  ⚠ Ticket 188 (2026-10-05): produkcja przeniesiona z vpshd1242 (panel.agritires.eu) na vpshd86.
+#  Układ: docroot public_html/bridgeone, aplikacja w public_html/bridgeone/_app (zablokowane dla WWW).
 #  Uruchamiany z GitHub Actions po pushu do `main`. Laptopy tego nie odpalają.
 #
 #  ⚠ To jest WIERNE ODBICIE tools/deploy-staging.sh. Różnice są WYŁĄCZNIE w konfiguracji
@@ -11,8 +13,8 @@
 #
 #  Różnice wobec stagingu:
 #   | gałąź     | develop            -> main                                   |
-#   | katalog   | public_html/test   -> public_html/panel                      |
-#   | port      | 5001 (127.0.0.1)   -> 5000 (0.0.0.0)                         |
+#   | katalog   | public_html/training -> public_html/bridgeone (agroopony.eu) |
+#   | port      | 5001 (127.0.0.1)   -> 5000 (127.0.0.1)                       |
 #   | proces    | bridge-backend-staging -> bridge-backend-prod                |
 #   | baza      | data-test.db       -> data-prod.db                           |
 #   | Selly     | twardo wyłączone   -> z .env (produkcja ma pisać do sklepu)  |
@@ -22,14 +24,14 @@
 set -euo pipefail
 
 # --- konfiguracja ---
-PROD_ROOT="$HOME/private_apps/bridge-prod"                # repo/, releases/, current, data/
+DOCROOT="$HOME/domains/agroopony.eu/public_html/bridgeone" # docroot bridgeone.agroopony.eu
+PROD_ROOT="$DOCROOT/_app"                                 # repo/, releases/, current, data/, node/, bin/, lib/
 REPO_DIR="$PROD_ROOT/repo"                                # klon repo śledzący main
 DATA_DB="$PROD_ROOT/data/data-prod.db"                    # baza produkcji
-DOCROOT="$HOME/domains/agritires.eu/public_html/panel"    # docroot panel.agritires.eu
 PM2_NAME="bridge-backend-prod"
 BRANCH="main"
 LOG="$PROD_ROOT/deploy.log"
-export PORT=5000 HOST=0.0.0.0 NODE_ENV=production DB_PATH="$DATA_DB"
+export PORT=5000 HOST=127.0.0.1 NODE_ENV=production DB_PATH="$DATA_DB"
 
 # --- Selly: produkcja MA pisać do sklepu, więc NIE ustawiamy tu żadnej blokady ---
 # Staging robi odwrotnie (deploy-staging.sh:42-45) i to jest jedyny powód, dla którego
@@ -50,6 +52,11 @@ log(){ echo "$(date '+%F %T')  $*" | tee -a "$LOG"; }
 
 # node z nvm (build wymaga node 20)
 export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" >/dev/null 2>&1 || true
+# ticket 188 (vpshd86): na nowym serwerze nie ma nvm ani globalnego pm2 — Node 20 leży w
+# $PROD_ROOT/node/bin, a $PROD_ROOT/bin/pm2 to nakładka na wspólny demon PM2
+# (PM2_HOME=bridgeone/_app/.pm2, autostart cronem DirectAdmin). Dokładamy je na początek PATH.
+[ -d "$PROD_ROOT/node/bin" ] && export PATH="$PROD_ROOT/node/bin:$PATH"
+[ -d "$PROD_ROOT/bin" ] && export PATH="$PROD_ROOT/bin:$PATH"
 
 cd "$REPO_DIR"
 git fetch --quiet origin "$BRANCH"
@@ -94,6 +101,15 @@ if [ ! -d "$DOCROOT" ]; then
   exit 1
 fi
 
+# --- guard (ticket 188): katalog aplikacji leży POD docrootem — musi być zablokowany dla WWW ---
+# Na vpshd86 wolno nam pisać tylko w public_html/<subdomena>, więc backend, baza i .env są w
+# $PROD_ROOT = $DOCROOT/_app. Bez `Require all denied` w $PROD_ROOT/.htaccess baza i sekrety
+# byłyby do pobrania z internetu. Lepiej nie wdrożyć.
+if [ ! -f "$PROD_ROOT/.htaccess" ] || ! grep -q "Require all denied" "$PROD_ROOT/.htaccess"; then
+  log "BŁĄD: brak blokady WWW ($PROD_ROOT/.htaccess z 'Require all denied'). Przerywam."
+  exit 1
+fi
+
 # --- guard PRODUKCYJNY 3: stary stos nie może chodzić równolegle ---
 # Dwa backendy na jednej bazie to dwa schedulery importu i dwie synchronizacje Selly
 # (decyzja D9, docs/cutover.md §2). PM2 starego stosu nazywa się `bridge-backend`.
@@ -108,7 +124,7 @@ log "backend: build -> $RELEASE"
 # `--include=dev` KONIECZNE (NODE_ENV=production każe npm pominąć devDependencies, a bez
 # TypeScriptu nie ma czym budować). `--ignore-scripts` + podłożenie binarki better-sqlite3:
 # prebuilt wymaga glibc 2.29 (box ma 2.28), a node-gyp 10 nie zbuduje ze źródła na Pythonie 3.6.
-PROD_BSQLITE="/home/admin/private_apps/bridge/node_modules/better-sqlite3/build/Release/better_sqlite3.node"
+PROD_BSQLITE="$PROD_ROOT/lib/better_sqlite3.node"   # ticket 188: stała kopia binarki 11.7.0 / ABI 115 na vpshd86
 if [ ! -f "$PROD_BSQLITE" ]; then
   log "BŁĄD: brak binarki better-sqlite3 ($PROD_BSQLITE) do podłożenia. Przerywam."
   exit 1
@@ -185,10 +201,13 @@ pm2 save >/dev/null 2>&1 || true
 # --- frontend: build -> publikacja do docroota ---
 log "frontend: build -> $DOCROOT"
 ( cd rebuild/frontend && npm ci --include=dev && npm run build )
-bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR"
+# ticket 188: $PROD_ROOT (=$DOCROOT/_app: baza, .env, releases) i cgi-bin leżą POD docrootem —
+# MUSZĄ być chronione przed `rsync --delete`, inaczej deploy skasowałby całą aplikację z bazą.
+# Ticket 189: tak samo zdjecia-produktow/ (zdjęcia produktów przeniesione z agritires.eu, ~207 MB).
+bash tools/publikuj-frontend.sh rebuild/frontend/dist "$DOCROOT" "$SELLY_CSV_DIR" "$PROD_ROOT" "$DOCROOT/cgi-bin" "$DOCROOT/zdjecia-produktow"
 cp -f deploy/produkcja/htaccess "$DOCROOT/.htaccess"     # proxy utrzymywany z repo
 
 # --- sprzątanie: zostaw 5 ostatnich release ---
 ls -1dt "$PROD_ROOT/releases"/*/ 2>/dev/null | tail -n +6 | xargs -r rm -rf
 
-log "OK — wdrożono $SHA na panel.agritires.eu"
+log "OK — wdrożono $SHA na bridgeone.agroopony.eu"

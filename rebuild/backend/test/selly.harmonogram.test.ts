@@ -105,7 +105,11 @@ describe("harmonogram Selly — tick", () => {
   });
 
   /** Stawia harmonogram na sterowanym zegarze; zwraca uchwyt i licznik biegów Toru 1/2. */
-  function stanowisko(godzina: () => Date, tryb: "pelny" | "wylaczony" | "tylko-odczyt" = "pelny") {
+  function stanowisko(
+    godzina: () => Date,
+    tryb: "pelny" | "wylaczony" | "tylko-odczyt" = "pelny",
+    tor2?: boolean,
+  ) {
     const baza = stworzTestowaBaze();
     const atrapa = stworzAtrapeSelly();
     const { discovery } = stworzDiscoveryTestowe(atrapa.klient);
@@ -113,6 +117,7 @@ describe("harmonogram Selly — tick", () => {
       db: baza.db,
       discovery,
       tryb,
+      tor2,
       teraz: godzina,
       interwalMs: 20,
     });
@@ -168,6 +173,16 @@ describe("harmonogram Selly — tick", () => {
     chwila = dzien(2026, 9, 21, 4, 31);
     await new Promise((r) => setTimeout(r, 120));
     expect(liczbaWpisow(baza, "sync_full")).toBe(2);
+  });
+
+  it("ticket 190: przy tor2=false o 04:30 Tor 2 nie rusza mimo rotacji", async () => {
+    // Poniedziałek 21.09.2026 → rotacja MO1+MO2, ale Tor 2 wyłączony przełącznikiem.
+    const chwila = dzien(2026, 9, 21, 4, 30);
+    const { h, baza } = stanowisko(() => chwila, "pelny", false);
+    h.uruchom();
+
+    await new Promise((r) => setTimeout(r, 120));
+    expect(liczbaWpisow(baza, "sync_full")).toBe(0);
   });
 
   it("o 04:30 w dzień bez rotacji Tor 2 nie rusza", async () => {

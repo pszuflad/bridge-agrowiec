@@ -6,6 +6,8 @@
  * Tor 1 (DELTA — stan/cena): HH:55 dla dostawców z auto-pull o HH:54 + fallback
  * HH:10/HH:25/HH:40 dla ręcznych aktualizacji. Każde uruchomienie to `syncDelta` po kolei
  * dla wszystkich dostawców z `ACTIVE_SUPPLIERS`.
+ * Tor 3 (ticket 186, NOWA funkcja): po każdym Torze 1 usuwa z Selly produkty, których nie ma już w Bridge
+ * (`sync-usuwanie.ts`), z historią w `selly_sync_log` i `history`.
  * Tor 2 (PEŁNY MIRROR + auto-create): codziennie 04:30, po auto-pull dostawców o 04:00.
  * Rotacja per dzień tygodnia (`FULL_ROTATION`), cache kodów Selly budowany RAZ na partię.
  *
@@ -30,6 +32,7 @@ import type { Discovery } from "./discovery.js";
 import type { TrybSelly } from "../tryb.js";
 import { syncDelta } from "./sync-delta.js";
 import { syncFullForDostawca } from "./sync-full.js";
+import { sprawdzUprawnienieUsuwania, usunSierotyZSelly } from "./sync-usuwanie.js";
 import { zamknijOsieroconeWpisySync } from "../../repos/selly.js";
 
 /** `scheduler_selly.cjs:22` — dostawcy objęci oboma torami. */
@@ -183,6 +186,16 @@ export type ZaleznosciHarmonogramu = {
   discovery: Discovery;
   /** Tryb integracji — przy `wylaczony` harmonogram nie startuje (odstępstwo 2 w nagłówku). */
   tryb: TrybSelly;
+  /** Tor 3 (ticket 186): usuwanie z Selly produktów, których nie ma już w Bridge. Domyślnie włączone. */
+  usuwanie?: boolean;
+  /** Próg bezpiecznika Toru 3 (ułamek sierot wśród mapowań); domyślnie `MAKS_UDZIAL_SIEROT`. */
+  usuwanieMaksUdzial?: number;
+  /**
+   * Tor 2 (pełny mirror + auto-create o 04:30). Domyślnie włączony. Ticket 190: przełącznik
+   * `SELLY_TOR2=false` pozwala uruchomić sam Tor 1 (ceny i stany), bez zakładania produktów
+   * i bez nadpisywania nazw/kategorii/cech w sklepie — decyzja Ani 2026-10-05.
+   */
+  tor2?: boolean;
   /**
    * Zegar — WYŁĄCZNIE dla testów, produkcyjnie `new Date()`. Wzorzec jak `ZegarLimitera`
    * w `limiter.ts`: bez tego testu „Tor 2 o 04:30" nie da się napisać inaczej niż czekaniem.
@@ -204,6 +217,9 @@ export function stworzHarmonogramSelly({
   db,
   discovery,
   tryb,
+  usuwanie = true,
+  usuwanieMaksUdzial,
+  tor2 = true,
   teraz = () => new Date(),
   interwalMs = CHECK_INTERVAL_MS,
 }: ZaleznosciHarmonogramu): Harmonogram {
@@ -227,14 +243,24 @@ export function stworzHarmonogramSelly({
       lastRunKey = key;
       const tag = mm === 55 ? "event-driven" : "fallback";
       console.log(`[Selly Scheduler] Tor1 ${tag} ${hh}:${dwaZnaki(mm)}`);
-      runDeltaAll(db, discovery).catch((e: unknown) =>
-        console.error("[Selly Scheduler] Tor1 err:", komunikat(e)),
-      );
+      runDeltaAll(db, discovery)
+        .catch((e: unknown) => console.error("[Selly Scheduler] Tor1 err:", komunikat(e)))
+        .then(async () => {
+          if (!usuwanie) return null;
+          // Najpierw próba uprawnień (DELETE na nieistniejący produkt) — bez prawa usuwania Tor 3 nic nie robi.
+          const { wolno } = await sprawdzUprawnienieUsuwania(db, discovery, tryb);
+          return wolno ? usunSierotyZSelly(db, discovery, { tryb, maksUdzial: usuwanieMaksUdzial }) : null;
+        })
+        .catch((e: unknown) => console.error("[Selly Scheduler] Tor3 err:", komunikat(e)));
     }
 
     // Tor 2: raz dziennie o 04:30 — po nocnym auto-pull dostawców o 04:00
     if (hh === TOR2_HOUR && mm === TOR2_MINUTE && lastFullKey !== dateKey) {
       lastFullKey = dateKey;
+      if (!tor2) {
+        console.log("[Selly Scheduler] Tor2 pominięty — SELLY_TOR2=false");
+        return;
+      }
       const suppliers = suppliersForFullToday(now);
       if (suppliers.length) {
         console.log(

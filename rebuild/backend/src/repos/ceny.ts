@@ -297,3 +297,28 @@ export function przeliczCenyZRegul(db: Baza, idProduktow?: number[]): WynikPrzel
 
   return { checked: katalog.length, updated: zmiany.length };
 }
+
+/**
+ * Ticket 190→191 (2026-10-06, zgłoszenie Ani: „ceny sprzedaży się nie zgadzają”): cena sprzedaży
+ * z reguł dla rekordu, którego CENA ZAKUPU właśnie się zmieniła poza akceptacją stagingu —
+ * w cichej aktualizacji importera (`import/polityka/fabryka.ts`) i przy „Odrzuć” w stagingu
+ * (`import/polityka/odrzucenie-zmiany.ts`).
+ *
+ * ⚠ ŚWIADOME ODSTĘPSTWO OD ORYGINAŁU: `staging_policy.cjs:495` zmieniał po cichu tylko
+ * `cenaZakupu` (adapter daje `cenaSprzedazy: null`), a cenę sprzedaży przeliczał dopiero
+ * `recalcPricesFromRules` przy edycji narzutu. Skutek na produkcji 2026-10-06: 2523 z 5447
+ * aktywnych kart z ceną sprzedaży niezgodną z narzutem, 338 poniżej ceny zakupu z VAT.
+ *
+ * Liczy na KOPII — `zastosujRegulyCenowe` ustawia też `status`, którego tu ruszać nie wolno.
+ * Zwraca `null`, gdy brak ceny zakupu albo żadna reguła nie pasuje (wtedy cena zostaje).
+ */
+export function cenaSprzedazyPoZmianieZakupu(
+  rekord: RekordCenowy,
+  narzuty: Narzut[],
+  promocje: Promocja[],
+): { cenaSprzedazy: number; marzaPct: number } | null {
+  const kopia: RekordCenowy = { ...rekord };
+  if (!(Number(kopia.cenaZakupu) > 0)) return null;
+  if (!zastosujRegulyCenowe(kopia, narzuty, promocje)) return null;
+  return { cenaSprzedazy: Number(kopia.cenaSprzedazy), marzaPct: Number(kopia.marzaPct) };
+}

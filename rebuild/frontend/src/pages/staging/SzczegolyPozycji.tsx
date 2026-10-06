@@ -27,9 +27,11 @@ import { Label } from "@/components/ui/label";
 import { OdznakaTypu } from "./TabelaStagingu";
 import {
   POLA_EDYTOWALNE,
+  zachowajKarte,
   zapiszPozycje,
   type PozycjaStaginguSzczegol,
 } from "./dane";
+import { komunikatBledu } from "./polityka";
 
 export type WlasciwosciSzczegolow = {
   id: number | null;
@@ -78,10 +80,27 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
   const [uzasadnienie, ustawUzasadnienie] = useState("");
   const [blad, ustawBlad] = useState<string | null>(null);
 
-  const { data: pozycja, isLoading } = useQuery<PozycjaStaginguSzczegol | null>({
+  const {
+    data: pozycja,
+    isLoading,
+    error: bladPobrania,
+  } = useQuery<PozycjaStaginguSzczegol | null>({
     queryKey: ["/api/staging", String(id)],
     enabled: id != null,
   });
+
+  // NOWE (2026-10-02): pozycji nie udało się pobrać — najczęściej 404, bo każdy import (także
+  // automatyczny) zastępuje zgłoszenia NOWYMI, więc wiersz na liście trzyma numer, którego już nie
+  // ma. Wcześniej okno zostawało puste (sam tytuł „Pozycja stagingu” i „Zamknij”). Odświeżamy listę
+  // (bez szczegółów tej pozycji, żeby nie wołać jej w kółko), żeby po zamknięciu była aktualna.
+  const brakPozycji = id != null && !isLoading && !pozycja;
+  useEffect(() => {
+    if (!brakPozycji) return;
+    void klient.invalidateQueries({
+      queryKey: ["/api/staging"],
+      predicate: (q) => !(q.queryKey[0] === "/api/staging" && q.queryKey[1] === String(id)),
+    });
+  }, [brakPozycji, id, klient]);
 
   // Otwarcie innej pozycji zaczyna edycję od zera — inaczej wartości przeciekłyby między wierszami.
   useEffect(() => {
@@ -118,8 +137,31 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
     },
   });
 
+  // NOWE (2026-10-05): „Odrzuć” = zostaw kartę bez zmian i zapamiętaj to jak poprawkę Marty.
+  const odrzucenie = useMutation({
+    mutationFn: async () => {
+      if (!pozycja) return;
+      await zachowajKarte(pozycja.id);
+    },
+    onSuccess: async () => {
+      // Poprawki Marty widać na karcie produktu (`/api/overrides`), a zgłoszenie znika z listy.
+      await Promise.all([
+        klient.invalidateQueries({ queryKey: ["/api/staging"] }),
+        klient.invalidateQueries({ queryKey: ["/api/overrides"] }),
+      ]);
+      zamknij();
+    },
+    onError: async (e: Error) => {
+      ustawBlad(komunikatBledu(e, "Nie udało się odrzucić zmiany. Odśwież staging i spróbuj ponownie."));
+      if (/^404\b/.test(e.message)) await klient.invalidateQueries({ queryKey: ["/api/staging"] });
+    },
+  });
+
   const snapshot = pozycja ? odczytajSnapshot(pozycja.snapshotJson) : null;
   const jestWycofana = pozycja?.typZmiany === "wycofana";
+  // „Odrzuć” ma sens tylko dla zmiany ISTNIEJĄCEJ karty — inne typy odrzuca się na liście.
+  const mozeOdrzucic = pozycja?.typZmiany === "zmiana_kluczowa";
+  const zajety = zapis.isPending || odrzucenie.isPending;
 
   return (
     <Dialog open={id != null} onOpenChange={(otwarty) => !otwarty && zamknij()}>
@@ -139,6 +181,15 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
         </DialogHeader>
 
         {isLoading ? <p className="text-sm text-muted-foreground">Ładowanie…</p> : null}
+
+        {brakPozycji ? (
+          <p className="text-sm text-destructive" role="alert" data-testid="szczegoly-brak">
+            {bladPobrania && !/^404\b/.test(bladPobrania.message)
+              ? `Nie udało się wczytać pozycji: ${bladPobrania.message}`
+              : "Ta pozycja została zastąpiona nowym importem cennika, więc jej numer już nie istnieje. " +
+                "Lista została odświeżona — zamknij okno i otwórz pozycję ponownie."}
+          </p>
+        ) : null}
 
         {pozycja ? (
           <div className="space-y-4">
@@ -240,6 +291,9 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
                 </h3>
                 <p className="mb-2 text-xs text-muted-foreground">
                   Zmieniona wartość zostanie zapamiętana i kolejny import jej nie nadpisze.
+                  {mozeOdrzucic
+                    ? " „Odrzuć” zostawia kartę bez zmian i zapisuje to tak samo, jak poprawkę Marty — z obecnymi wartościami karty."
+                    : ""}
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   {POLA_EDYTOWALNE.map(({ klucz, etykieta }) => {
@@ -301,10 +355,23 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
           <Button variant="outline" onClick={zamknij} data-testid="button-close-details">
             Zamknij
           </Button>
+          {pozycja && mozeOdrzucic ? (
+            <Button
+              variant="outline"
+              data-testid="button-reject-details"
+              disabled={zajety}
+              title="Karta w katalogu zostaje bez zmian, a decyzja zapisuje się jak poprawka Marty"
+              onClick={() => odrzucenie.mutate()}
+            >
+              {odrzucenie.isPending ? "Odrzucanie…" : "Odrzuć"}
+            </Button>
+          ) : null}
           {pozycja && !jestWycofana ? (
             <Button
               data-testid="button-save-details"
-              disabled={Object.keys(zmiany).length === 0 || zapis.isPending}
+              // NOWE (2026-10-02): „Zapisz” jest aktywny zawsze, także bez zmian — wtedy wysyła pusty
+              // zapis (backend przelicza status EAN i nie zakłada poprawek) i zamyka okno.
+              disabled={zajety}
               onClick={() => zapis.mutate()}
             >
               {zapis.isPending ? "Zapisywanie…" : "Zapisz"}
