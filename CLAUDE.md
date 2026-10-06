@@ -9,6 +9,26 @@ Praca idzie iteracjami i blokami (I3 → 3a, 3b, 3c…), opisanymi w `docs/rebui
 
 ---
 
+## Nomenklatura — dwa słowa, które łatwo pomylić (ustalone 2026-10-06)
+
+- **Staging** = zakładka w Bridge do akceptowania pozycji produktów: kolejka, do której wpadają nowe
+  i zmienione pozycje z cenników dostawców, zanim trafią do katalogu. Tylko w tym znaczeniu używamy
+  słowa „staging" (tabela `staging_items`, „Staging v2", `/api/staging…`).
+- **Środowisko testowe** („testowe") = osobna kopia aplikacji do sprawdzania zmian przed produkcją.
+  Nie nazywamy go „staging" — ani w rozmowie, ani w nowych notatkach i dokumentach („wdrożenie na
+  środowisko testowe", nie „na staging").
+- **Identyfikatory zostają bez zmian** — ich nazwy są wpisane w serwer i w sekrety GitHuba, a zmiana
+  przy okazji zerwałaby wdrożenie: `tools/deploy-staging.sh`, `.github/workflows/deploy-staging.yml`
+  (w zakładce Actions: „Deploy staging"), sekrety `STAGING_*`, `deploy/staging/`,
+  `~/private_apps/bridge-staging`, PM2 `bridge-backend-staging`. W tekście objaśniającym nazywaj to,
+  czym są: „skrypt wdrożenia środowiska testowego".
+- **Zapisu historycznego nie przepisujemy** (`docs/tickets/`, `docs/karty/`, `docs/spec-backend/wpis-*`,
+  backlog, instrukcje testów z datą) — tam „staging" znaczy to, co znaczył w dniu zapisu. Poprawione
+  zostały dokumenty żywe: `docs/deploy-setup.md`, `docs/wdrozenie-produkcji.md`, `docs/cutover.md`,
+  `docs/cutover-runbook.md`, `docs/instrukcja-pelnego-testu.md`, `START.md`.
+
+---
+
 ## Roadmapa jest wejściem dla następnej sesji — utrzymuj ją na bieżąco
 
 `docs/rebuild-roadmap.md` czyta następna sesja. Prompt, którym ją uruchamiasz, jest
