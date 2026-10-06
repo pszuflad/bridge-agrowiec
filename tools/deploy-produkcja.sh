@@ -192,6 +192,16 @@ log "ticket 165: rozdzielenie kod_importu dla znanych kolizji (backlog #108)"
 log "ticket 168: uzupełnienie pustych EAN (999…)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run uzupelnij-ean 2>&1 | tee -a "$LOG" )
 
+# --- czyszczenie katalogu: DOT tylko w nazwie (model/bieżnik bez DOT) + poprawki z ticketu 178 ---
+# Parser MO9 zostawia w modelu „DOT2016”; import czyści to od nowa, ale stare pozycje katalogu
+# zostawały z DOT w modelu i wpadały do stagingu jako „Zmiana kluczowa”. Skrypt używa tej samej
+# logiki co import (`normalizujPozycje`), NIE rusza `nazwa` i pomija pola z poprawką ręczną
+# (`manual_overrides`). Idempotentny: gdy katalog jest czysty, nie zapisuje i nie robi kopii
+# (punkt powrotu to kopia bazy sprzed migracji). Uwaga: to samo przejście poprawia też inne pola
+# z ticketu 178 (dopiski osi, konstrukcja, DOT dwucyfrowy, ucięte indeksy).
+log "czyszczenie katalogu: DOT w modelu/bieżniku (normalizuj-katalog --apply)"
+( cd rebuild/backend && DB_PATH="$DATA_DB" npm run normalizuj-katalog -- --apply 2>&1 | tee -a "$LOG" )
+
 # --- kroki wdrożenia: jednorazowe operacje na danych (zmiana nazw, konta, poprawki) ---
 # Rejestr: rebuild/backend/src/kroki/rejestr.ts. Każdy krok biegnie RAZ (zapis w tabeli
 # `kroki_wdrozenia`), PO kopii bazy z kroku wyżej. Krok z sekretem (np. HASLO_TYMCZASOWE z

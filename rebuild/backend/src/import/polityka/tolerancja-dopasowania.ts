@@ -21,7 +21,7 @@
 // przechodzą dalej bez zmian.
 
 import { compatibility, norm, validateEan, type WynikEan } from "./helpery.js";
-import { kluczModelu } from "./normalizacja-pozycji.js";
+import { kluczModelu, oczyscModelZDot } from "./normalizacja-pozycji.js";
 import { separateDotBatch } from "./podstawy.js";
 
 type Pozycja = Record<string, unknown>;
@@ -237,19 +237,9 @@ export function wstrzymujeKandydatowPrzyNiejednoznacznosci(): boolean {
   return false;
 }
 
-/** Samo słowo „DOT” (opcjonalnie z rokiem) — oznaczenie dostawcy w nazwie, nie część modelu. */
-const SLOWO_DOT_RE = /\s*\bDOT(?:\s*\d{2,4})?\b/gi;
+export { oczyscModelZDot };
 
-/**
- * Model/bieżnik bez słowa „DOT” (np. `XL GRIP DOT` → `XL GRIP`, `TR 270 DOT` → `TR 270`).
- * Dostawca MO9 pisze „(DOT)” w nazwie; parser wycina z modelu tylko „DOT” z liczbą, więc samo „DOT”
- * zostawało w modelu i bieżniku (decyzja użytkowniczki, 2026-10-01: model BKT ma być `XL GRIP`).
- */
-export function oczyscModelZDot(wartosc: unknown): unknown {
-  if (typeof wartosc !== "string") return wartosc;
-  const czysty = wartosc.replace(SLOWO_DOT_RE, "").replace(/\s+/g, " ").trim();
-  return czysty || wartosc;
-}
+const SLOWO_DOT_RE = /\s*\bDOT(?:\s*\d{2,4})?\b/gi;
 
 const doPorownaniaNazw = (nazwa: string): string =>
   nazwa.replace(SLOWO_DOT_RE, "").replace(/×/g, "x").replace(/\s+/g, " ").trim().toUpperCase();
