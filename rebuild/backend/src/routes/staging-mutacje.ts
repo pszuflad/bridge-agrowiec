@@ -352,7 +352,10 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
     // Staging v2: edycja przechodzi przez politykę, która synchronizuje bieżnik z modelem
     // i PRZELICZA status EAN (`staging_policy.cjs:168-187`). Bez tego ręcznie poprawiony EAN
     // nie zdjąłby blokady akceptacji z decyzji D4.
-    const zaktualizowana = zaktualizujZgloszenie(db, id, doZapisu);
+    const zaktualizowana = zaktualizujZgloszenie(db, id, doZapisu, {
+      uzytkownikId: req.user?.id ?? null,
+      powod: (uzasadnienie as string | undefined) ?? "edycja w stagingu",
+    });
 
     zapiszAudyt(db, {
       uzytkownikId: req.user?.id ?? null,

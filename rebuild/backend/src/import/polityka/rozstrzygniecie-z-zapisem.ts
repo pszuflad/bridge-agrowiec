@@ -87,7 +87,10 @@ export function rozstrzygnijIZatwierdz(
       }
       doZapisu.snapshotJson = JSON.stringify(snap);
       doZapisu.edytowanePola = JSON.stringify(pola);
-      zaktualizujZgloszenie(db, nowe.id, doZapisu);
+      zaktualizujZgloszenie(db, nowe.id, doZapisu, {
+        uzytkownikId,
+        powod: "poprawka przy rozstrzyganiu dopasowania",
+      });
 
       // Poprawiony EAN zdejmuje status „błąd" nadany przy rozstrzyganiu (`typZmiany: "blad"`).
       const po = pozycjaStagingu(db, nowe.id)!;

@@ -46,6 +46,11 @@ vi.mock("../src/import/polityka/tolerancja-dopasowania.js", async () => {
     aktualizacjaDotWMiejscu: () => false,
     wstrzymujeKandydatowPrzyNiejednoznacznosci: () => true,
     oczyscModelZDot: <T>(w: T) => w,
+    // Odstępstwo 2026-10-06 (kod 999991NNN + EAN zgłoszony ręcznie) wyłączone — tu liczy się filtr produkcji (`:349`).
+    czySmiecMo2: (dostawca: unknown, raw: P) =>
+      dostawca === "MO2" &&
+      /^999991$/.test(String(raw.kod ?? "").replace(/^MO2_/, "")) &&
+      (!raw.ean || !raw.marka || (/^\d/.test(String(raw.marka)) && !/[A-Za-z]{3,}/.test(String(raw.marka)))),
     zachowajNazweKarty: <T>(n: T) => n,
     zastapBlednyEan: <T>(ev: T) => ev,
   };

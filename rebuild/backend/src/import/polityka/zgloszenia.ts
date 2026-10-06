@@ -5,6 +5,7 @@ import { and, eq, sql } from "drizzle-orm";
 import type { Baza } from "../../db/index.js";
 import { stagingItems } from "../../db/schema.js";
 import type { NowaPozycjaStagingu, PozycjaStagingu } from "../../repos/staging.js";
+import { zapiszPoprawke } from "../../repos/overrides.js";
 import { zaktualizujPozycjeStagingu } from "../../repos/staging.js";
 import { uchwytSqlite } from "../silnik/bridge-ext.js";
 import { odmow, syntheticCode, validateEan, version } from "./helpery.js";
@@ -65,12 +66,20 @@ export function dodajZgloszenie(db: Baza, row: NowaPozycjaStagingu): PozycjaStag
  *
  * Dwie rzeczy dzieją się przy edycji snapshotu:
  *  • bieżnik nadąża za modelem, ale TYLKO gdy był jego automatyczną kopią (formularz edytuje
- *    model i nie pokazuje pola bieżnika — ręcznie ustawionego bieżnika nie ruszamy);
+ *    model i nie pokazuje pola bieżnika — ręcznie ustawionego bieżnika nie ruszamy). ODSTĘPSTWO
+ *    2026-10-06: gdy podano `autor`, ta zmiana bieżnika zapisuje się też w `manual_overrides`
+ *    (jak model) — inaczej stara poprawka `bieznik` (np. „360 FORESTRY") wracała przy każdym
+ *    imporcie i akceptacji;
  *  • zmiana EAN-u przelicza `eanRaw`, `eanIsValid`, `eanSourceStatus` i `_eanIssue`, i to
  *    zarówno w snapshocie, jak i w kolumnach wiersza — żeby blokada akceptacji (D4) widziała
  *    poprawiony numer, a nie ten sprzed edycji.
  */
-export function zaktualizujZgloszenie(db: Baza, id: number, patch: Record<string, unknown>) {
+export function zaktualizujZgloszenie(
+  db: Baza,
+  id: number,
+  patch: Record<string, unknown>,
+  autor?: { uzytkownikId: number | null; powod: string },
+) {
   const row = pozycjaStagingu(db, id);
   let doZapisu = patch;
 
@@ -80,6 +89,17 @@ export function zaktualizujZgloszenie(db: Baza, id: number, patch: Record<string
 
     if (snap.model !== old.model && old.bieznik === old.model && snap.bieznik === old.bieznik) {
       snap.bieznik = snap.model;
+      if (autor) {
+        zapiszPoprawke(db, {
+          supplierKod: row.dostawca,
+          supplierProductId: row.kod,
+          fieldName: "bieznik",
+          overrideValue: snap.model == null ? "" : String(snap.model),
+          reason: autor.powod,
+          createdBy: autor.uzytkownikId,
+          createdAt: new Date().toISOString(),
+        });
+      }
     }
 
     const edytowanoEan =

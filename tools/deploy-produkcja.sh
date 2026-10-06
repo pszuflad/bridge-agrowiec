@@ -202,6 +202,15 @@ log "ticket 168: uzupełnienie pustych EAN (999…)"
 log "czyszczenie katalogu: DOT w modelu/bieżniku (normalizuj-katalog --apply)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run normalizuj-katalog -- --apply 2>&1 | tee -a "$LOG" )
 
+# --- kroki wdrożenia: jednorazowe operacje na danych (zmiana nazw, konta, poprawki) ---
+# Rejestr: rebuild/backend/src/kroki/rejestr.ts. Każdy krok biegnie RAZ (zapis w tabeli
+# `kroki_wdrozenia`), PO kopii bazy z kroku wyżej. Krok z sekretem (np. HASLO_TYMCZASOWE z
+# $PROD_ROOT/.env) pomija się z wpisem w logu, gdy sekretu brak. Błąd kroku przerywa deploy PRZED
+# podmianą release'u (set -e) — poprzednia wersja dalej działa. Dzięki temu poprawka danych jedzie
+# z merge'em do `main`, a nikt nie uruchamia niczego ręcznie na serwerze.
+log "kroki wdrożenia (rejestr: rebuild/backend/src/kroki/rejestr.ts)"
+( cd rebuild/backend && DB_PATH="$DATA_DB" npm run kroki-wdrozenia 2>&1 | tee -a "$LOG" )
+
 ln -sfn "$RELEASE" "$PROD_ROOT/current"                  # atomowa podmiana
 pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
 ( cd "$PROD_ROOT/current" && PORT="$PORT" HOST="$HOST" DB_PATH="$DATA_DB" NODE_ENV=production \
