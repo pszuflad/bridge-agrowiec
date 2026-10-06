@@ -184,3 +184,16 @@ describe("normalizujPozycje + porównanie z kartą", () => {
     expect(zgodnaBezDot({ ...karta, model: "T540" }, karta)).toBe(false);
   });
 });
+
+describe("normalizujPozycje — DOT w modelu", () => {
+  it.each(["EARTH MAX SR 51 DOT2016", "EARTH MAX SR 51 DOT 2016", "EARTH MAX SR 51 DOT"])(
+    "%j → model bez DOT, nazwa nietknięta",
+    (model) => {
+      const nazwa = "23.5R25 BKT EARTH MAX SR 51 DOT2016 TL";
+      const w = normalizujPozycje({ marka: "BKT", nazwa, model, bieznik: model });
+      expect(w.model).toBe("EARTH MAX SR 51");
+      expect(w.bieznik).toBe("EARTH MAX SR 51");
+      expect(w.nazwa).toBe(nazwa);
+    },
+  );
+});
