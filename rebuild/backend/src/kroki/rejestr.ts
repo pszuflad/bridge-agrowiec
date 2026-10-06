@@ -1,4 +1,9 @@
 import { dodajUzytkownika } from "../auth/dodaj-uzytkownika.js";
+import {
+  czyKatalogIstnieje,
+  DOMYSLNY_KATALOG_IMPORTOW,
+  podmienZrodla,
+} from "../import/podmien-zrodla.js";
 import type { Krok } from "./runner.js";
 
 /**
@@ -29,6 +34,16 @@ export const KROKI_WDROZENIA: Krok[] = [
         );
       }
       return wyniki.join("; ");
+    },
+  },
+  {
+    id: "2026-10-07-zrodla-cennikow-foldery",
+    opis: "źródła cenników dostawców (poza MO2/MO3) → lokalne foldery MO#_ (plik://), widoczne w panelu",
+    async uruchom({ db, env }) {
+      const katalog = (env.IMPORTY_KATALOG as string | undefined)?.trim() || DOMYSLNY_KATALOG_IMPORTOW;
+      if (!czyKatalogIstnieje(katalog)) return `pominięto: brak katalogu ${katalog}`;
+      const zmiany = podmienZrodla(db, katalog);
+      return zmiany.length ? zmiany.join("; ") : "bez zmian";
     },
   },
 ];

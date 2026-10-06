@@ -192,12 +192,6 @@ log "ticket 165: rozdzielenie kod_importu dla znanych kolizji (backlog #108)"
 log "ticket 168: uzupełnienie pustych EAN (999…)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run uzupelnij-ean 2>&1 | tee -a "$LOG" )
 
-# --- podmiana źródeł cenników na lokalne foldery dostawców (IMPORTY_KATALOG z $PROD_ROOT/.env) ---
-# Stare adresy agroopony.eu/imports/ znikają; pole url dostawców (poza MO2 i MO3) dostaje
-# plik:///<katalog>/<KOD>_…, widoczne w panelu. Idempotentne; bez IMPORTY_KATALOG krok się pomija.
-log "podmiana źródeł cenników na foldery dostawców"
-( cd rebuild/backend && DB_PATH="$DATA_DB" npm run podmien-zrodla 2>&1 | tee -a "$LOG" )
-
 # --- czyszczenie katalogu: DOT tylko w nazwie (model/bieżnik bez DOT) + poprawki z ticketu 178 ---
 # Parser MO9 zostawia w modelu „DOT2016”; import czyści to od nowa, ale stare pozycje katalogu
 # zostawały z DOT w modelu i wpadały do stagingu jako „Zmiana kluczowa”. Skrypt używa tej samej
