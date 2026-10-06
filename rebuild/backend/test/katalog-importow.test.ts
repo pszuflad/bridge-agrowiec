@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { suppliers } from "../src/db/schema.js";
-import { czyStareZrodlo, folderDostawcy, najnowszyPlik, zapiszCsvZRekordow } from "../src/import/katalog-importow.js";
+import { czyStareZrodlo, folderDostawcy, folderZUrl, najnowszyPlik, zapiszCsvZRekordow } from "../src/import/katalog-importow.js";
 import { synchronizujDostawce } from "../src/import/synchronizuj.js";
 import { stworzTestowaBaze } from "./gate/baza.js";
 
@@ -26,6 +26,15 @@ describe("katalog importów", () => {
     expect(czyStareZrodlo("https://agroopony.eu/imports/acc_ftp3/x.csv")).toBe(true);
     expect(czyStareZrodlo("https://sklep.kolarolnicze.pl/offer/export/a.csv")).toBe(false);
     expect(czyStareZrodlo("http://46.238.100.138:5844/c.csv")).toBe(false);
+  });
+
+  it("plik:///folder jest lokalnym źródłem i wskazuje folder bez IMPORTY_KATALOG", () => {
+    expect(folderZUrl("plik:///srv/imp/MO4_x/")).toBe("/srv/imp/MO4_x");
+    expect(folderZUrl("https://agroopony.eu/imports/a.csv")).toBeNull();
+    expect(czyStareZrodlo("plik:///srv/imp/MO4_x")).toBe(true);
+    writeFileSync(join(root, "MO1_abc", "c.csv"), "a");
+    expect(najnowszyPlik("", "MO1", `plik://${join(root, "MO1_abc")}`).nazwa).toBe("c.csv");
+    expect(() => najnowszyPlik("", "MO1", "plik:///nie/ma/takiego")).toThrow(/Brak folderu/);
   });
 
   it("MO1 nie łapie folderu MO10", () => {

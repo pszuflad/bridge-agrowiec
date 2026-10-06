@@ -13,9 +13,16 @@ import { extname, join } from "node:path";
 
 const ROZSZERZENIA = new Set([".csv", ".xlsx", ".xls"]);
 
+/** `plik:///ścieżka/folderu` → `/ścieżka/folderu` (adres wpisany do pola URL dostawcy przez podmianę źródeł). */
+export function folderZUrl(url: string | null): string | null {
+  const m = url ? /^plik:\/\/(\/.+)$/i.exec(url.trim()) : null;
+  return m ? m[1]!.replace(/\/+$/, "") : null;
+}
+
 /** Stare źródło = brak URL-a albo plik na `agroopony.eu/imports/` (ten adres znika). */
 export function czyStareZrodlo(url: string | null): boolean {
   if (!url) return true;
+  if (folderZUrl(url)) return true;
   try {
     const u = new URL(url);
     return /(^|\.)agroopony\.eu$/i.test(u.hostname) && u.pathname.startsWith("/imports/");
@@ -40,10 +47,16 @@ export function folderDostawcy(katalog: string, kod: string): string | null {
 export type PlikZFolderu = { sciezka: string; nazwa: string; bufor: Buffer };
 
 /** Najnowszy cennik w folderze dostawcy; błąd z czytelną treścią, gdy folderu lub pliku brak. */
-export function najnowszyPlik(katalog: string, kod: string): PlikZFolderu {
-  const folder = folderDostawcy(katalog, kod);
+export function najnowszyPlik(katalog: string, kod: string, url: string | null = null): PlikZFolderu {
+  const folder = folderZUrl(url) ?? folderDostawcy(katalog, kod);
   if (!folder) throw new Error(`Brak folderu dostawcy ${kod} w ${katalog}`);
-  const pliki = readdirSync(folder)
+  let nazwy: string[];
+  try {
+    nazwy = readdirSync(folder);
+  } catch {
+    throw new Error(`Brak folderu dostawcy ${kod}: ${folder}`);
+  }
+  const pliki = nazwy
     .filter((n) => !n.startsWith(".") && ROZSZERZENIA.has(extname(n).toLowerCase()))
     .map((n) => ({ n, mtime: statSync(join(folder, n)).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime);
@@ -58,8 +71,14 @@ const polaCsv = (v: unknown): string => {
 };
 
 /** Rekordy z API → CSV (średnik, BOM) zapisany atomowo (tmp + rename) w folderze dostawcy. */
-export function zapiszCsvZRekordow(katalog: string, kod: string, nazwaPliku: string, rekordy: unknown[]): Buffer {
-  const folder = folderDostawcy(katalog, kod);
+export function zapiszCsvZRekordow(
+  katalog: string,
+  kod: string,
+  nazwaPliku: string,
+  rekordy: unknown[],
+  url: string | null = null,
+): Buffer {
+  const folder = folderZUrl(url) ?? folderDostawcy(katalog, kod);
   if (!folder) throw new Error(`Brak folderu dostawcy ${kod} w ${katalog}`);
   const wiersze = rekordy.filter((r): r is Record<string, unknown> => typeof r === "object" && r !== null);
   const kolumny = [...new Set(wiersze.flatMap((r) => Object.keys(r)))];

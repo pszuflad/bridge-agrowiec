@@ -19,7 +19,7 @@
  * `db/snapshot.db`. Sklejenie obu pobieraczy zmieniłoby też transport trasy z 3b.
  */
 import { extname } from "node:path";
-import { czyStareZrodlo, najnowszyPlik, zapiszCsvZRekordow } from "./katalog-importow.js";
+import { czyStareZrodlo, folderZUrl, najnowszyPlik, zapiszCsvZRekordow } from "./katalog-importow.js";
 import type { Baza } from "../db/index.js";
 import { zapiszAlert } from "../repos/alerts.js";
 import {
@@ -214,7 +214,7 @@ export function synchronizujDostawce({
     if (!dostawca) return { ok: false, error: "Dostawca nie istnieje" };
     // Gdy ustawiono IMPORTY_KATALOG, stare źródła (brak URL / agroopony.eu/imports) czytamy z lokalnego folderu.
     const katalogImportow = process.env.IMPORTY_KATALOG?.trim() || "";
-    const lokalnie = katalogImportow !== "" && czyStareZrodlo(dostawca.url);
+    const lokalnie = (katalogImportow !== "" || folderZUrl(dostawca.url) !== null) && czyStareZrodlo(dostawca.url);
     if (!dostawca.url && !lokalnie) return { ok: false, error: "Brak URL" };
     if (dostawca.status === "wstrzymany" && !opcje.recznie) {
       return { ok: false, error: "Wstrzymany" };
@@ -244,9 +244,9 @@ export function synchronizujDostawce({
         // MO9: źródłem jest API; wynik zapisujemy jako CSV w folderze MO9 (i archiwizujemy ten plik).
         sparsowane = await parsujAgrorami();
         nazwaPliku = "agrorami-api.csv";
-        bufor = zapiszCsvZRekordow(katalogImportow, "MO9", nazwaPliku, sparsowane.rekordy);
+        bufor = zapiszCsvZRekordow(katalogImportow, "MO9", nazwaPliku, sparsowane.rekordy, dostawca.url);
       } else if (lokalnie) {
-        const plik = najnowszyPlik(katalogImportow, dostawca.kod);
+        const plik = najnowszyPlik(katalogImportow, dostawca.kod, dostawca.url);
         bufor = plik.bufor;
         nazwaPliku = plik.nazwa;
       } else {
