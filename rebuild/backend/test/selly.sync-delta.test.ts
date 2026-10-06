@@ -511,7 +511,7 @@ describe("Tor 1 — sync_delta", () => {
 
     it("błąd „inne” (HTTP) nadal jest ponawiany", async () => {
       zmapuj336320(null, null);
-      const blad = new BladSelly("HTTP 500", 500);
+      const blad = new BladSelly("[Selly] HTTP 500", 500, {});
       const { discovery } = przygotuj({ bledy: { updateVariant: blad } });
 
       const pierwszy = await syncDelta(baza.db, discovery, "MO9");
