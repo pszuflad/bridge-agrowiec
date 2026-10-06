@@ -264,3 +264,23 @@ export function zachowajNazweKarty(nazwa: unknown, nazwaKarty: unknown): unknown
 export function minimumPozycjiOferty(_stan?: { lastItemCount?: number | null }): number {
   return 1;
 }
+
+/** EAN-y śmieciowych pozycji MO2 zgłoszone ręcznie — odpadają przy imporcie (nie wchodzą do stagingu). */
+const EAN_SMIECI_MO2: ReadonlySet<string> = new Set(["0440000129392"]);
+
+/**
+ * Śmieciowa pozycja MO2 — odpada przy imporcie, nie trafia do stagingu ani do katalogu.
+ *
+ * ⚠ ODSTĘPSTWO OD PRODUKCJI (zgłoszenie użytkowniczki 2026-10-06, `staging_policy.cjs:349`):
+ * produkcja łapie tylko kod DOKŁADNIE `999991`, a prawdziwe śmieci mają `999991NNN`
+ * (np. `MO2_999991711`, marka = rozmiar) — z 29 takich pozycji nagrania katalogu filtr produkcji
+ * łapie 0. Warunek na markę/EAN zostaje (pozycje `999991NNN` z prawdziwą marką są sprzedawalne).
+ * Dodatkowo EAN-y z `EAN_SMIECI_MO2` odpadają zawsze.
+ */
+export function czySmiecMo2(dostawca: unknown, raw: Record<string, unknown>): boolean {
+  if (dostawca !== "MO2") return false;
+  if (EAN_SMIECI_MO2.has(String(raw.ean ?? "").replace(/\s+/g, ""))) return true;
+  if (!/^999991\d*$/.test(String(raw.kod ?? "").replace(/^MO2_/, ""))) return false;
+  const marka = String(raw.marka ?? "");
+  return !raw.ean || !raw.marka || (/^\d/.test(marka) && !/[A-Za-z]{3,}/.test(marka));
+}
