@@ -1,6 +1,6 @@
 # Pełny test systemu — dokument 1 z 3
 
-**Dla kogo:** Ania · **Środowisko:** https://test.agritires.eu · **Data:** 2026-09-24
+**Dla kogo:** Ania · **Środowisko:** https://training.agroopony.eu (do 2026-10-05: test.agritires.eu) · **Data:** 2026-09-24
 
 > **To jest środowisko testowe, nie produkcja.** Cokolwiek tu zmienisz albo zepsujesz — produkcji nie dotyka.
 > Klikaj bez skrupułów.
@@ -27,7 +27,7 @@ i nic się nie stało" w zupełności wystarczy.
 
 | | |
 |---|---|
-| **Adres** | https://test.agritires.eu |
+| **Adres** | https://training.agroopony.eu (do 2026-10-05: https://test.agritires.eu) |
 | **Wersja** | najnowsza z gałęzi roboczej (`develop`) |
 | **Baza** | kopia produkcji z **23 września**, 8329 produktów — Twoje prawdziwe dane sprzed kilku dni |
 | **Automatyczny import** | **WŁĄCZONY** — cenniki z adresów URL pobierają się same, tak jak na produkcji |

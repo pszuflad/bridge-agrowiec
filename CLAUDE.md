@@ -15,6 +15,8 @@ Praca idzie iteracjami i blokami (I3 → 3a, 3b, 3c…), opisanymi w `docs/rebui
   i zmienione pozycje z cenników dostawców, zanim trafią do katalogu. Tylko w tym znaczeniu używamy
   słowa „staging" (tabela `staging_items`, „Staging v2", `/api/staging…`).
 - **Środowisko testowe** („testowe") = osobna kopia aplikacji do sprawdzania zmian przed produkcją.
+  Adres: **https://training.agroopony.eu** (od ticketu 188, 2026-10-05; wcześniej `test.agritires.eu`
+  na starym serwerze — to stare instrukcje testów). Produkcja: **https://bridgeone.agroopony.eu**.
   Nie nazywamy go „staging" — ani w rozmowie, ani w nowych notatkach i dokumentach („wdrożenie na
   środowisko testowe", nie „na staging").
 - **Identyfikatory zostają bez zmian** — ich nazwy są wpisane w serwer i w sekrety GitHuba, a zmiana
