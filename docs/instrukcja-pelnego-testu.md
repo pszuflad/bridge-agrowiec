@@ -2,7 +2,7 @@
 
 **Dla kogo:** Ania · **Środowisko:** https://test.agritires.eu · **Data:** 2026-09-24
 
-> **To jest STAGING, nie produkcja.** Cokolwiek tu zmienisz albo zepsujesz — produkcji nie dotyka.
+> **To jest środowisko testowe, nie produkcja.** Cokolwiek tu zmienisz albo zepsujesz — produkcji nie dotyka.
 > Klikaj bez skrupułów.
 
 ---
@@ -33,12 +33,12 @@ i nic się nie stało" w zupełności wystarczy.
 | **Automatyczny import** | **WŁĄCZONY** — cenniki z adresów URL pobierają się same, tak jak na produkcji |
 | **Selly** | **WYŁĄCZONE** — trzema niezależnymi blokadami, nic nie dotrze do sklepu |
 
-**Zanim zaczniesz — napisz nam.** Potwierdzimy, że staging stoi na najnowszym wydaniu; zdarzyło się
+**Zanim zaczniesz — napisz nam.** Potwierdzimy, że środowisko testowe stoi na najnowszym wydaniu; zdarzyło się
 już, że został o kilka dni w tyle i testowanie starszej wersji byłoby stratą Twojego czasu.
 
 **Co znaczy „Selly wyłączone":** integracja odmawia każdej operacji, nocna i dzienna
 synchronizacja nie chodzi, a hasła do sklepu celowo nie są tu wpisane. Nawet gdyby ktoś je
-wpisał, staging i tak nic nie wyśle. Komunikat **„Integracja Selly wyłączona na tym
+wpisał, środowisko testowe i tak nic nie wyśle. Komunikat **„Integracja Selly wyłączona na tym
 środowisku"** na ekranie Selly jest **poprawny** — sekcje czytające dane lokalne (status pliku
 CSV, mapowanie dostawców, historia operacji) działają przy nim normalnie.
 

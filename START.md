@@ -219,7 +219,7 @@ z 26.08–08.09 — rozliczona poza blokiem 13d (Selly).** `rebuild/backend/` (p
 analityka), `rebuild/frontend/` (12 widoków + logowanie) i `rebuild/schema/` (migracje 001–007).
 Dalej poza odbudową: przegląd 12 widoków przez Anię (`docs/przeglad-12-widokow.md`) i cutover
 (`docs/cutover.md`).
-Podział na iteracje: `docs/rebuild-roadmap.md`; deploy stagingu: `docs/deploy-setup.md`.
+Podział na iteracje: `docs/rebuild-roadmap.md`; deploy środowiska testowego: `docs/deploy-setup.md`.
 Uruchomienie lokalne (Node 20; dev frontendu proxuje `/api` na backend, więc backend musi
 działać osobno — szczegóły w README obu pakietów):
 

@@ -17,7 +17,7 @@ stary backend zatrzymany, nowy zbudowany i wystawiony w tym samym miejscu, migra
 
 - **Baza jest już zweryfikowana** (próba migracji z rozdziału 3 przeszła na kopii produkcji,
   ticket 113) — nie migrujemy jej powtórnie w oknie. Pracujemy dalej na tej bazie, na której już
-  stoi środowisko testowe/staging.
+  stoi środowisko testowe.
 - **Cutover = zmiana domeny.** Nie przenosimy kodu na serwer produkcyjny — **środowisko, na
   którym Ania dziś testuje, STAJE SIĘ produkcją**, gdy domena produkcyjna zacznie na nie wskazywać.
   Rozdział 5 („Kroki przełączenia") w części dotyczącej budowania release'u i podmiany plików na
@@ -106,9 +106,9 @@ przestoju je uporządkuje.
 > **Stary Bridge po przełączeniu NIE może
 > działać równolegle** na tej samej `data.db` (dwa schedulery importu i dwie synchronizacje Selly) — **decyzja D9 (użytkownik, 2026-09-22):
 > stary Bridge wyłączony od razu po przełączeniu**; kod i kopia bazy zostają ~2 tygodnie na rollback; zmiany po
-> cutoverze wyłącznie w nowym stosie (`develop` → staging → test → produkcja).
+> cutoverze wyłącznie w nowym stosie (`develop` → środowisko testowe → test → produkcja).
 
-- [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na staging
+- [ ] **Przegląd 12 widoków przez Anię zakończony i zaakceptowany** na środowisku testowym
       (`docs/przeglad-12-widokow.md`). To jest warunek nadrzędny — bez niego nie zaczynamy.
 - [ ] **Bramki zielone** na `develop`: `lint`, `typecheck`, `build`, `test` po obu stronach
       (backend: 80 plików / 1241 testów — 13d-1 cofnięte; frontend: 48 plików / 751 testów + 5 plików
@@ -158,9 +158,9 @@ Nasze migracje zakładają kształt tabel z `rebuild/schema/001_schema.sql`. **P
 `szertxt` z 2026-08-19) oraz łatki dokładane runtime'owo przy każdym starcie procesu
 (`uwaga_cena_patch.cjs` robi `ALTER TABLE products ADD COLUMN uwaga_cena`).
 
-Ten sam mechanizm już raz uderzył — na staging, gdzie `products.szerokosc` był TEXT-em, choć
+Ten sam mechanizm już raz uderzył — na środowisku testowym, gdzie `products.szerokosc` był TEXT-em, choć
 kanon deklarował REAL, i przez wiele iteracji nikt tego nie widział
-(`docs/deploy-setup.md`, sekcja „Schemat bazy staging NIE pochodzi z naszego kanonu").
+(`docs/deploy-setup.md`, sekcja „Schemat bazy środowiska testowego NIE pochodzi z naszego kanonu").
 
 **Dwa konkretne, przewidywalne zderzenia na produkcji:**
 
@@ -213,11 +213,11 @@ sqlite3 /tmp/kanon.db "PRAGMA table_info(products);" > /tmp/kanon-products.txt
 diff ~/cutover-proba/products.txt /tmp/kanon-products.txt
 ```
 
-### 4a. Migracje w `dist/` muszą się zgadzać z repo (lekcja ze stagingu, ticket 147)
+### 4a. Migracje w `dist/` muszą się zgadzać z repo (lekcja ze środowiska testowego, ticket 147)
 
 Runner czyta migracje z `dist/schema/`, nie z `rebuild/schema/`, i stosuje je **po nazwie pliku**.
 Do ticketu 147 `npm run build` tego katalogu nie czyścił, więc migracja usunięta albo
-przenumerowana w repo zostawała w `dist/` jako widmo i wyglądała na niezastosowaną. Na stagingu
+przenumerowana w repo zostawała w `dist/` jako widmo i wyglądała na niezastosowaną. Na środowisku testowym
 `007_selly_products_warianty.sql` z cofniętej gałęzi (revert `48d8d84`) wywracał tak **sześć
 kolejnych deployów** pod rząd na `there is already another table or index with this name:
 selly_products_old`, a log deployu urywał się bez przyczyny. Od 147 oba skrypty kopiujące
@@ -283,7 +283,7 @@ idempotentny (`CREATE TABLE IF NOT EXISTS`) i na bazie produkcyjnej ma być no-o
 
 ---
 
-## 3a. ⭐ AUDYT ŚRODOWISKA — wykonaj NA STAGINGU przed testami Ani i NA PRODUKCJI przed oknem
+## 3a. ⭐ AUDYT ŚRODOWISKA — wykonaj NA ŚRODOWISKU TESTOWYM przed testami Ani i NA PRODUKCJI przed oknem
 
 Polecenie użytkownika (2026-09-24): przed cutoverem sprawdzamy **po kolei każdą zmienną i każdy klucz API**,
 i dokonfigurowujemy to, czego brakuje — zamiast zakładać, że skoro proces wstał, to wszystko jest ustawione.
@@ -305,19 +305,19 @@ done
 pm2 logs bridge-backend-staging --lines 40 --nostream | grep -iE "scheduler|cors|DB_PATH|selly"
 ```
 
-| Zmienna | Staging (testy Ani) | Produkcja (po cutoverze) | Co się stanie po przeoczeniu |
+| Zmienna | Testowe (testy Ani) | Produkcja (po cutoverze) | Co się stanie po przeoczeniu |
 |---|---|---|---|
 | `DB_PATH`, `JWT_SECRET` | wymagane (fail-fast) | wymagane | proces nie wstanie |
 | `NODE_ENV`, `HOST`, `PORT` | `production` / `127.0.0.1` / `5001` | `production` / `0.0.0.0` / `5000` | proxy w pustkę, ciasteczko bez `Secure` |
 | `IMPORT_SCHEDULER` | **`true`** (Ania porównuje importy) | **`true`** | cenniki przestają się pobierać, panel wygląda normalnie |
 | `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` | `true` (pierwszy przebieg od razu) | do decyzji | bez niego pierwszy przebieg po pełnym cyklu |
-| `IMPORT_ARCHIVE_DIR` | katalog stagingu | **katalog archiwum starego stosu** | ekran „Archiwum importów" pusty po przełączeniu |
+| `IMPORT_ARCHIVE_DIR` | katalog środowiska testowego | **katalog archiwum starego stosu** | ekran „Archiwum importów" pusty po przełączeniu |
 | **`AGRORAMI_EMAIL`, `AGRORAMI_PASSWORD`** | **wymagane** | **wymagane** | **MO9 (jedyny dostawca z API) przestaje się importować — bez ostrzeżenia przy starcie** |
 | `AGRORAMI_GRAPHQL_URL`, `AGRORAMI_CATEGORY_ID` | domyślne OK | domyślne OK | tylko przy świadomej zmianie |
-| `SELLY_TRYB` | **`wylaczony`** | **`pelny`** (jawnie) | staging pisałby do sklepu / produkcja milczy |
+| `SELLY_TRYB` | **`wylaczony`** | **`pelny`** (jawnie) | środowisko testowe pisałoby do sklepu / produkcja milczy |
 | `SELLY_SCHEDULER` | **wyłączony** | **włączony** | brak torów API: ceny i stany nie idą do sklepu w ciągu dnia |
 | `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`, `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` | brak (celowo) | prawdziwe sekrety | sześć tras oddaje 500 „Brak konfiguracji" |
-| `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` | ścieżki stagingu (ustawia skrypt deployu) | **wartości produkcyjne** | staging nadpisałby produkcyjny plik CSV |
+| `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` | ścieżki środowiska testowego (ustawia skrypt deployu) | **wartości produkcyjne** | środowisko testowe nadpisałoby produkcyjny plik CSV |
 | `CORS_ORIGINS` | puste | **puste** (stan docelowy) | patrz rozdział 4 |
 
 **Dostawcy — co wymaga konfiguracji poza zmiennymi** (stan z tabeli `suppliers`):
@@ -338,23 +338,23 @@ pm2 logs bridge-backend-staging --lines 40 --nostream | grep -iE "scheduler|cors
 4. **PM2:** stary wpis `bridge-backend` usunięty, nowy zapisany (`pm2 save`), żeby restart serwera nie wskrzesił
    starego stosu na tej samej bazie.
 
-**WYNIK AUDYTU NA STAGINGU — 2026-09-24, wykonany.** Znalezione braki i co z nimi zrobiono:
+**WYNIK AUDYTU NA ŚRODOWISKU TESTOWYM — 2026-09-24, wykonany.** Znalezione braki i co z nimi zrobiono:
 
 | Brak | Działanie |
 |---|---|
 | `.env` miał tylko `JWT_SECRET` | dopisane `IMPORT_SCHEDULER=true`, `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG=true`, `IMPORT_ARCHIVE_DIR=…/bridge-staging/data/import_archive` |
 | brak `AGRORAMI_*` | skopiowane z `.env` produkcji (`~/private_apps/bridge/.env` — wszystkie cztery klucze tam są; to samo źródło obsłuży produkcję po cutoverze) |
 | brak katalogów `data/import_archive` i `public_html/test/ex-port-files` | założone |
-| **staging stał na wydaniu z 22.09** (`ca51238`), mimo 6 nowszych buildów | przyczyna: widmowa migracja w `dist/` — patrz 4a i ticket 147; po sprzątnięciu `dist/` deploy przeszedł, staging stoi na `c0ee7a5` (czubek `develop` z kartą I15.11) |
+| **środowisko testowe stało na wydaniu z 22.09** (`ca51238`), mimo 6 nowszych buildów | przyczyna: widmowa migracja w `dist/` — patrz 4a i ticket 147; po sprzątnięciu `dist/` deploy przeszedł, środowisko testowe stoi na `c0ee7a5` (czubek `develop` z kartą I15.11) |
 
 Sprawdzone przy okazji: produkcyjny `panel/ex-port-files/.htaccess` ma nienaruszoną białą listę
-`Require ip 212.91.27.191 46.170.251.129`; baza stagingu to kopia produkcji (8329 produktów),
+`Require ip 212.91.27.191 46.170.251.129`; baza środowiska testowego to kopia produkcji (8329 produktów),
 komplet migracji 001–013.
 
-## 4. Zmienne środowiskowe — różnice staging vs produkcja
+## 4. Zmienne środowiskowe — różnice między środowiskiem testowym a produkcją
 
 Sekrety trzymamy w pliku poza repo (`chmod 600`), wczytywanym przez skrypt startowy — tak jak
-na staging (`docs/deploy-setup.md`, punkt 4a). **Nie wpisujemy ich do repo ani do PM2 inline.**
+na środowisku testowym (`docs/deploy-setup.md`, punkt 4a). **Nie wpisujemy ich do repo ani do PM2 inline.**
 
 **Wymagane bez wartości domyślnej — bez nich proces nie wstanie (fail-fast):**
 
@@ -363,7 +363,7 @@ na staging (`docs/deploy-setup.md`, punkt 4a). **Nie wpisujemy ich do repo ani d
 | `DB_PATH` | `/home/admin/private_apps/bridge/data.db` | ta sama baza, co stary stos |
 | `JWT_SECRET` | losowy, ≥ 32 bajty | ⚠ **zmiana sekretu wylogowuje wszystkich** — patrz niżej |
 
-**Mają wartości domyślne BEZPIECZNE DLA STAGINGU, ale NIEWIERNE PRODUKCJI — trzeba je ustawić
+**Mają wartości domyślne BEZPIECZNE DLA ŚRODOWISKA TESTOWEGO, ale NIEWIERNE PRODUKCJI — trzeba je ustawić
 jawnie.** To jest najłatwiejsza rzecz do przeoczenia w całym cutoverze, bo nic nie krzyknie:
 proces wstanie i będzie wyglądał na zdrowy.
 
@@ -376,7 +376,7 @@ proces wstanie i będzie wyglądał na zdrowy.
 | `IMPORT_SCHEDULER_PIERWSZY_PRZEBIEG` | wyłączone | do decyzji | bez niego pierwszy przebieg dopiero po pełnym cyklu |
 | `SELLY_TRYB` | `wylaczony` | `pelny` | **integracja Selly milczy** — klient odmawia każdej operacji, także z poprawnymi sekretami. Od 139-FEATURE dotyczy to też modułu dostępności: przy `wylaczony` `server.ts` w ogóle go nie montuje, więc import, który zmienia dostępność, nie regeneruje CSV i nie woła Toru 1 — cicho, bez błędu (`docs/spec-backend/wpis-139.md`) |
 | `SELLY_SHOP_URL`, `SELLY_CLIENT_ID`, `SELLY_CLIENT_SECRET`, `SELLY_SCOPE` | brak / `READWRITE` | prawdziwe sekrety | sześć tras zewnętrznych oddaje 500 „Brak konfiguracji" |
-| `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` | **wartości produkcyjne** | zostawić domyślne | to jedyne trzy, których produkcja NIE nadpisuje — staging musi, produkcja nie. Od 139-FEATURE ścieżka jest pisana automatycznie po KAŻDYM imporcie, który zmienił dostępność (nie tylko ręcznym `POST /api/selly/generate-csv`), gdy `SELLY_TRYB != wylaczony` — sprawdź katalog na każdym takim środowisku |
+| `SELLY_CSV_DIR`, `SELLY_CSV_PLIK`, `SELLY_CSV_URL` | **wartości produkcyjne** | zostawić domyślne | to jedyne trzy, których produkcja NIE nadpisuje — środowisko testowe musi, produkcja nie. Od 139-FEATURE ścieżka jest pisana automatycznie po KAŻDYM imporcie, który zmienił dostępność (nie tylko ręcznym `POST /api/selly/generate-csv`), gdy `SELLY_TRYB != wylaczony` — sprawdź katalog na każdym takim środowisku |
 | `CORS_ORIGINS` | puste | **zostawić puste** | patrz niżej |
 | `IMPORT_ARCHIVE_DIR` | `<cwd>/import_archive` (`rebuild/backend/src/import/archiwum.ts:40`) | **`/home/admin/private_apps/bridge/import_archive`** — katalog archiwum STAREGO stosu | archiwum importu przepadałoby przy każdym deployu, a widok „Archiwum importów” (PR.1) nie pokazałby plików sprzed przełączenia. Proces musi mieć prawo zapisu do katalogu. Rotacja 7 dni (po `mtime`) przy pierwszym zapisie usunie starsze pliki — tak samo jak na starym stosie |
 | `AGRORAMI_EMAIL`, `AGRORAMI_PASSWORD` | brak | **te same dane logowania do hurtowni Agro-Rami, których używa stary stos** | **MO9 (Agro-Rami/BKT) przestaje się importować** — to jedyny dostawca z API (GraphQL `hurtownia.agrorami.pl`, od 2026-07-10); plik CSV z URL w tabeli `suppliers` jest ignorowany. Proces wstaje normalnie, a błąd widać dopiero jako alert importu MO9. `AGRORAMI_GRAPHQL_URL` i `AGRORAMI_CATEGORY_ID` mają domyślne wartości zgodne z produkcją |
@@ -427,7 +427,7 @@ Od 12e proces **wypisuje przy starcie**, w jakim jest stanie (`[cors] wyłączon
    ⚠ Plik musi być niepusty i mieć rozmiar zbliżony do oryginału. **To jest jedyna droga
    powrotu dla danych — nie idź dalej, jeśli kopii nie ma.**
 
-4. **Wydanie nowego kodu** — build z `develop` (ta sama mechanika, co staging: katalog
+4. **Wydanie nowego kodu** — build z `develop` (ta sama mechanika, co środowisko testowe: katalog
    `releases/<sha>` + przełączenie dowiązania `current`, żeby rollback był podmianą symlinku).
    ```bash
    cd <katalog wydania>/rebuild/backend && npm ci --include=dev && npm run build

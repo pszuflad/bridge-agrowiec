@@ -33,9 +33,9 @@ Poza konfiguracją z tej tabeli oba skrypty są **identyczne**. Zmieniasz jeden 
 
 ## Grupa A — co wchodzi tym ticketem
 
-- **`tools/deploy-produkcja.sh`** — odbicie skryptu testowego. Trzy bramki, których staging
+- **`tools/deploy-produkcja.sh`** — odbicie skryptu testowego. Trzy bramki, których środowisko testowe
   nie ma, bo na produkcji ich brak kosztuje realne pieniądze:
-  1. **baza musi już istnieć** — staging może sobie wytworzyć pustą i zmigrować; na produkcji
+  1. **baza musi już istnieć** — środowisko testowe może sobie wytworzyć pustą i zmigrować; na produkcji
      pusty plik oznacza katalog bez produktów, a generator oddałby Selly pusty plik i sklep
      wyzerowałby stany;
   2. **docroot musi istnieć** — inaczej `publikuj-frontend.sh` utworzyłby go pustym i panel
@@ -93,7 +93,7 @@ katalog. Starą `data-nowy.db` skasujesz ręcznie, gdy test chwilę popracuje na
 
 ### C1. Klucz SSH produkcji → `authorized_keys`
 
-⚠ **Osobny klucz jest konieczny, nie kosmetyczny.** Klucz stagingu ma w `~/.ssh/authorized_keys`
+⚠ **Osobny klucz jest konieczny, nie kosmetyczny.** Klucz środowiska testowego ma w `~/.ssh/authorized_keys`
 wymuszone `command="…deploy-staging.sh"`, a **wymuszone polecenie ignoruje to, o co prosi
 klient** — tym samym kluczem nie da się uruchomić skryptu produkcji.
 
@@ -108,7 +108,7 @@ printf 'command="bash /home/admin/private_apps/bridge-prod/repo/tools/deploy-pro
 |---|---|
 | `PROD_SSH_KEY` | zawartość `~/.ssh/deploy_prod_ed25519` (klucz **prywatny**) |
 | `PROD_SSH_KNOWN_HOSTS` | wynik `ssh-keyscan -p <port> <host>` |
-| `PROD_SSH_HOST`, `PROD_SSH_PORT`, `PROD_SSH_USER` | te same wartości co przy stagingu |
+| `PROD_SSH_HOST`, `PROD_SSH_PORT`, `PROD_SSH_USER` | te same wartości co przy środowisku testowym |
 
 ### C3. Environment „produkcja" — Settings → Environments
 
