@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 
 import { auditLog, manualOverrides, products, stagingItems } from "../src/db/schema.js";
+import { version } from "../src/import/polityka/helpery.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 
 /**
@@ -94,6 +95,38 @@ describe("Mutacje stagingu i poprawek Marty — przez HTTP", () => {
       expect(odp.body).toEqual({ ok: true, accepted: 2 });
       expect(katalog()).toHaveLength(2);
       expect(staging()).toHaveLength(0);
+    });
+
+    it("poprawka Marty `nazwa` wygrywa z pamięcią nazw (`nazwa_pamiec`) przy akceptacji", async () => {
+      // Karta w katalogu z ustalonym `kod_importu` (nadawanie go zachowuje), pamięć nazw ma INNĄ
+      // nazwę niż poprawka Marty.
+      const [a] = zasiej(pozycja());
+      await post("/api/staging/accept", { ids: [a!.id] });
+      srodowisko.db.update(products).set({ kodImportu: "111111" }).run();
+      const sqlite = (srodowisko.db as unknown as { $client: { prepare: (s: string) => { run: (...a: unknown[]) => void } } }).$client;
+      sqlite.prepare("CREATE TABLE IF NOT EXISTS nazwa_pamiec (kod_importu TEXT PRIMARY KEY, nazwa TEXT NOT NULL, updated_at TEXT, source TEXT)").run();
+      sqlite.prepare("INSERT OR REPLACE INTO nazwa_pamiec (kod_importu, nazwa) VALUES (?, ?)").run("111111", "NAZWA Z PAMIĘCI");
+      srodowisko.db
+        .insert(manualOverrides)
+        .values({
+          supplierKod: "MO5",
+          supplierProductId: "P1",
+          fieldName: "nazwa",
+          overrideValue: "NAZWA MARTY",
+          createdAt: "2026-10-06T00:00:00.000Z",
+        } as never)
+        .run();
+      const zywa = katalog()[0] as unknown as Record<string, unknown>;
+      const [b] = zasiej(
+        pozycja({
+          typZmiany: "zmiana_kluczowa",
+          snapshot: { _catalogVersion: version(zywa), kodImportu: "111111" },
+        }),
+      );
+
+      await post("/api/staging/accept", { ids: [b!.id] });
+
+      expect(katalog()[0]!.nazwa).toBe("NAZWA MARTY");
     });
 
     it("`allFiltered` z filtrem `typZmiany` bierze tylko pasujące pozycje", async () => {
