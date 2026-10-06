@@ -161,8 +161,9 @@ plus certyfikat Let's Encrypt.
 
 ## Co się zmienia w codziennej pracy
 
-`develop` → auto-deploy na test → Ania klika na `test.agritires.eu` → **PR `develop` → `main`**
-→ (opcjonalne zatwierdzenie w Environments) → auto-deploy na `panel.agritires.eu`.
+`develop` → auto-deploy na środowisko testowe → Ania klika na `training.agroopony.eu` → **PR `develop` → `main`**
+→ (opcjonalne zatwierdzenie w Environments) → auto-deploy na `bridgeone.agroopony.eu` (od ticketu 188; wcześniej
+`test.agritires.eu` i `panel.agritires.eu` na starym serwerze).
 
 Merge do `main` staje się **momentem wdrożenia na produkcję**. Zapis w
 `docs/rebuild-roadmap.md` §1a („PRODUKCJA (nowa) = `main` po cutoverze", lustro produkcji)

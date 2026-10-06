@@ -18,6 +18,7 @@
     "selly:csv:dev": "tsx src/selly/csv-cli.ts",
     "seed:dev": "tsx scripts/seed-dev.ts",
     "dodaj:uzytkownikow": "tsx scripts/dodaj-uzytkownikow.ts",
+    "kroki-wdrozenia": "tsx scripts/kroki-wdrozenia.ts",
     "dziedzicz-wage": "tsx scripts/dziedzicz-wage.ts",
     "oszacuj-wage": "tsx scripts/oszacuj-wage.ts",
     "uzupelnij-ean": "tsx scripts/uzupelnij-ean.ts",
