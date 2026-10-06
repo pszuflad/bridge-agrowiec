@@ -41,3 +41,13 @@ describe("zastosujOznaczenieDa", () => {
     expect(w.nazwa).toBe("X DA");
   });
 });
+
+describe("normalizujPozycje — DA w modelu (czyszczenie katalogu i import)", () => {
+  it("model i bieżnik bez DA, nazwa nietknięta", async () => {
+    const { normalizujPozycje } = await import("../src/import/polityka/normalizacja-pozycji.js");
+    const w = normalizujPozycje({ ...OZKA });
+    expect(w.model).toBe("AGROLOX");
+    expect(w.bieznik).toBe("AGROLOX");
+    expect(w.nazwa).toBe(OZKA.nazwa);
+  });
+});

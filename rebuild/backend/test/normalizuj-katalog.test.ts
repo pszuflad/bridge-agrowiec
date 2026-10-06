@@ -76,3 +76,27 @@ describe("normalizuj-katalog", () => {
     expect(zaplanujNormalizacje(baza.sqlite).filter((z) => z.status === "zmiana")).toEqual([]);
   });
 });
+
+describe("normalizuj-katalog — DA (wada kosmetyczna) tylko w nazwie", () => {
+  it("zdejmuje DA z modelu i bieżnika, nazwa nietknięta, poprawka ręczna chroni pole", () => {
+    baza = stworzTestowaBaze();
+    const nazwa = "520/85R42 OZKA AGROLOX DA 157A8/157B TL";
+    karta(baza, "MO5_A", { dostawca: "MO5", marka: "OZKA", nazwa, model: "AGROLOX DA", bieznik: "AGROLOX DA" });
+    karta(baza, "MO5_B", { dostawca: "MO5", marka: "OZKA", nazwa, model: "AGROLOX DA", bieznik: "AGROLOX DA" });
+    baza.sqlite
+      .prepare(
+        "INSERT INTO manual_overrides (supplier_kod, supplier_product_id, field_name, override_value, created_at) VALUES ('MO5','MO5_B','model','AGROLOX DA','2026-01-01')",
+      )
+      .run();
+
+    zastosujNormalizacje(baza.sqlite);
+
+    const q = (kod: string) =>
+      baza!.sqlite.prepare("SELECT nazwa, model, bieznik FROM products WHERE kod=?").get(kod);
+    expect(q("MO5_A")).toEqual({ nazwa, model: "AGROLOX", bieznik: "AGROLOX" });
+    // Poprawka Marty wygrywa: model chroniony zostaje, bieżnik (bez poprawki) się czyści.
+    expect(q("MO5_B")).toEqual({ nazwa, model: "AGROLOX DA", bieznik: "AGROLOX" });
+    // Idempotentnie: drugi przebieg niczego nie zmienia.
+    expect(zastosujNormalizacje(baza.sqlite)).toBe(0);
+  });
+});

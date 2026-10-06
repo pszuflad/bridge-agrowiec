@@ -18,6 +18,12 @@ export const maOznaczenieDa = (tekst: unknown): boolean =>
 const bezDa = (tekst: string): string =>
   tekst.replace(SLOWO_DA_GLOBALNIE, " ").replace(/\s+/g, " ").trim();
 
+/** Model/bieżnik bez samodzielnego `DA` (np. `AGROLOX DA` → `AGROLOX`); samo `DA` zostaje. */
+export function modelBezDa(wartosc: unknown): unknown {
+  if (typeof wartosc !== "string" || !maOznaczenieDa(wartosc)) return wartosc;
+  return bezDa(wartosc) || wartosc;
+}
+
 /**
  * Gdy w nazwie z pliku (albo w nazwie pozycji) jest samodzielne `DA`: zdejmuje je z modelu
  * i bieżnika, a w nazwie zostawia jedno `DA` na końcu. Inaczej zwraca pozycję bez zmian.
@@ -25,10 +31,7 @@ const bezDa = (tekst: string): string =>
 export function zastosujOznaczenieDa(d: Pozycja, nazwaZrodla: unknown): Pozycja {
   if (!maOznaczenieDa(nazwaZrodla) && !maOznaczenieDa(d.nazwa)) return d;
   const wynik: Pozycja = { ...d };
-  for (const pole of ["model", "bieznik"] as const) {
-    const v = wynik[pole];
-    if (typeof v === "string" && maOznaczenieDa(v)) wynik[pole] = bezDa(v) || v;
-  }
+  for (const pole of ["model", "bieznik"] as const) wynik[pole] = modelBezDa(wynik[pole]);
   const baza = bezDa(String(d.nazwa ?? nazwaZrodla ?? ""));
   wynik.nazwa = baza ? `${baza} DA` : "DA";
   return wynik;
