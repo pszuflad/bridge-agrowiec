@@ -61,7 +61,8 @@ import { czyOpona } from "../silnik/klasyfikator.js";
 import { nazwaZDemo } from "./nazwa-demo.js";
 import { eq } from "drizzle-orm";
 
-import { manualOverrides } from "../../db/schema.js";
+import { manualOverrides, markups, promotions } from "../../db/schema.js";
+import { cenaSprzedazyPoZmianieZakupu, type Narzut, type Promocja } from "../../repos/ceny.js";
 import { applyDims, applyLinkMemory, applyNazwaPamiec, uchwytSqlite } from "../silnik/bridge-ext.js";
 import {
   bladZapisuNazwy,
@@ -288,6 +289,13 @@ export function stworzPolitykeStagingu(
 
     const czas = new Date().toISOString();
     const produkty = katalogDoImportu(db, dostawca);
+    // Ticket 191: reguły cenowe czytane leniwie, raz na import — tylko gdy jakaś cena zakupu się zmienia.
+    let reguly: { narzuty: Narzut[]; promocje: Promocja[] } | null = null;
+    const regulyCenowe = () =>
+      (reguly ??= {
+        narzuty: db.select().from(markups).all(),
+        promocje: db.select().from(promotions).all(),
+      });
     // Poprawki ręczne kart tego dostawcy — do porównania z kartą przy dopasowaniu (jedno zapytanie).
     const poprawkiKart = new Map<string, PoprawkaKarty[]>();
     for (const o of db
@@ -814,6 +822,22 @@ export function stworzPolitykeStagingu(
         for (const k of ["cenaZakupu", "cenaSprzedazy", "marzaPct", "stan", "magazyn"]) {
           if (d[k] != null && norm(d[k]) !== norm((biezacy as unknown as Pozycja)[k])) {
             patch[k] = d[k];
+          }
+        }
+        // Ticket 191 (odstępstwo 2026-10-06): zmiana ceny zakupu przelicza cenę sprzedaży z narzutu.
+        // Gdy plik albo poprawka Marty (nałożona wyżej na `d`) niesie własną cenę sprzedaży — ona wygrywa.
+        if (patch.cenaZakupu != null && d.cenaSprzedazy == null) {
+          const { narzuty, promocje } = regulyCenowe();
+          const wynikCeny = cenaSprzedazyPoZmianieZakupu(
+            { ...(biezacy as unknown as Pozycja), ...patch },
+            narzuty,
+            promocje,
+          );
+          if (wynikCeny) {
+            if (norm(wynikCeny.cenaSprzedazy) !== norm(biezacy.cenaSprzedazy)) {
+              patch.cenaSprzedazy = wynikCeny.cenaSprzedazy;
+            }
+            if (norm(wynikCeny.marzaPct) !== norm(biezacy.marzaPct)) patch.marzaPct = wynikCeny.marzaPct;
           }
         }
         // Odstępstwo 2026-10-01: DOT zmienia się w miejscu, bez akceptacji (nie jest kryterium dopasowania).

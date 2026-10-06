@@ -22,7 +22,10 @@
 // następnego importu. Tożsamość (nazwa, model…) zostaje z karty. Karty WSTRZYMANEJ nie dotykamy stanem
 // (tak samo jak cicha aktualizacja importera: wstrzymana zostaje ze stanem 0).
 
+import { and, eq } from "drizzle-orm";
 import type { Baza } from "../../db/index.js";
+import { manualOverrides, markups, promotions } from "../../db/schema.js";
+import { cenaSprzedazyPoZmianieZakupu } from "../../repos/ceny.js";
 import { zapiszHistorieCen } from "../../repos/historia.js";
 import { zapiszPoprawke } from "../../repos/overrides.js";
 import { aktualizujProdukt, type ProduktWewnetrzny } from "../../repos/products.js";
@@ -103,6 +106,29 @@ export function odrzucZmianeKarty(db: Baza, id: number, uzytkownikId: number): W
     if (wartosc == null || norm(wartosc) === norm(kartaJakRekord[pole])) continue;
     if (pole === "stan" && karta.status === "wstrzymany") continue;
     patch[pole] = wartosc;
+  }
+
+  // Ticket 191: nowa cena zakupu z pliku przelicza cenę sprzedaży z narzutu — chyba że plik niesie
+  // własną cenę sprzedaży albo karta ma ręczną poprawkę ceny sprzedaży (`manual_overrides`).
+  if (patch.cenaZakupu != null && patch.cenaSprzedazy == null) {
+    const poprawkaCeny = db
+      .select()
+      .from(manualOverrides)
+      .where(and(eq(manualOverrides.supplierProductId, karta.kod), eq(manualOverrides.fieldName, "cenaSprzedazy")))
+      .get();
+    if (!poprawkaCeny) {
+      const wynikCeny = cenaSprzedazyPoZmianieZakupu(
+        { ...kartaJakRekord, ...patch },
+        db.select().from(markups).all(),
+        db.select().from(promotions).all(),
+      );
+      if (wynikCeny) {
+        if (norm(wynikCeny.cenaSprzedazy) !== norm(kartaJakRekord.cenaSprzedazy)) {
+          patch.cenaSprzedazy = wynikCeny.cenaSprzedazy;
+        }
+        if (norm(wynikCeny.marzaPct) !== norm(kartaJakRekord.marzaPct)) patch.marzaPct = wynikCeny.marzaPct;
+      }
+    }
   }
 
   uchwytSqlite(db).transaction(() => {
