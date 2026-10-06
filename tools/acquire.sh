@@ -6,6 +6,13 @@
 # ============================================================================
 set -euo pipefail
 
+# ⛔ WYCOFANY (ticket 192, 2026-10-06). Pobierałby zamrożony stan STAREGO serwera vpshd1242 i nadpisał nim mirror/ oraz db/snapshot.db.
+#    Przyczyna i plan: docs/po-cutoverze-proces.md §1.3, docs/tickets/192-CHORE-wycofanie-vps-sync/plan.md.
+#    Treść niżej zostaje wyłącznie jako historia.
+echo "acquire.sh: WYCOFANY od przeprowadzki na vpshd86 (ticket 192) — nic nie robię." >&2
+echo "Szczegóły: docs/tickets/192-CHORE-wycofanie-vps-sync/plan.md" >&2
+exit 1
+
 VPS="admin@vpshd1242.cyber-folks.pl"
 PORT=222
 BE_REMOTE="/home/admin/private_apps/bridge"

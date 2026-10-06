@@ -9,6 +9,13 @@
 # ============================================================================
 set -euo pipefail
 
+# ⛔ WYCOFANY (ticket 192, 2026-10-06). Na vpshd86 działa odbudowa wdrażana z `main`, a nie ręcznie łatana stara produkcja. Ten skrypt skopiowałby kod odbudowy do mirror/ (rsync --delete), skasowałby tam oryginał i wypchnąłby to na main (uruchamia deploy-produkcja.yml).
+#    Przyczyna i plan: docs/po-cutoverze-proces.md §1.3, docs/tickets/192-CHORE-wycofanie-vps-sync/plan.md.
+#    Treść niżej zostaje wyłącznie jako historia.
+echo "vps-sync.sh: WYCOFANY od przeprowadzki na vpshd86 (ticket 192) — nic nie robię." >&2
+echo "Szczegóły: docs/tickets/192-CHORE-wycofanie-vps-sync/plan.md" >&2
+exit 1
+
 REPO="$HOME/bridge-sync"                                  # klon repo na VPS
 BE_SRC="/home/admin/private_apps/bridge"                  # żywy backend
 FE_SRC="/home/admin/domains/agritires.eu/public_html/panel"  # żywy frontend

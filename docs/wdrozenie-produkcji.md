@@ -1,5 +1,12 @@
 # Wdrożenie produkcji — dwa środowiska obok siebie
 
+> ⚠ **STAN PO PRZEPROWADZCE (ticket 188, 2026-10-05; porządki ticket 192, 2026-10-06).** Ten dokument opisuje
+> układ na **starym serwerze vpshd1242** (`agritires.eu`, `panel.agritires.eu`, `test.agritires.eu`,
+> `~/private_apps/…`). Produkcja i staging działają od 05.10 na **vpshd86**: `bridgeone.agroopony.eu`
+> (prod) i `training.agroopony.eu` (staging), z aplikacją w `_app/` pod docrootem. Aktualny układ
+> katalogów, cron i zasady: `docs/tickets/188-CHORE-deploy-agroopony/plan.md`. Nazwy ścieżek,
+> domen i serwera poniżej czytaj jako **historię**.
+
 **Model (decyzja użytkownika 2026-09-24/25):** środowisko testowe **zostaje nietknięte**.
 Obok niego stawiamy **drugą, niezależną instancję produkcyjną**, budowaną z gałęzi `main`
 i wdrażaną automatycznie po każdym merge'u do `main`.

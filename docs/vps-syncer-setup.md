@@ -1,5 +1,10 @@
 # Konfiguracja producenta sync na VPS — krok po kroku
 
+> ⛔ **WYCOFANE (ticket 192, 2026-10-06).** Producent sync (`tools/vps-sync.sh`) przestał chodzić z crona
+> 28.09.2026. Po przeprowadzce na vpshd86 nie wolno go wznawiać: na nowym serwerze działa odbudowa
+> wdrażana z `main`, więc skrypt nadpisałby oryginał w `mirror/` kodem odbudowy i wypchnął to na
+> `main`. Plan po cutoverze: `docs/po-cutoverze-proces.md` §1.3. Poniżej historia konfiguracji.
+
 Cel: serwer produkcyjny sam snapshotuje swój stan do gita i wypycha na GitHub.
 Laptopy tylko `git pull`. Uwierzytelnienie do GitHuba: **deploy key (SSH), nie token.**
 
