@@ -20,6 +20,47 @@
 import type { Baza } from "../../db/index.js";
 import type { Discovery, WierszBridge, WynikMapowania } from "./discovery.js";
 import { sprawdzCelSelly } from "./bezpieczenstwo.js";
+import { szczegolyDoZapisu } from "./log-szczegoly.js";
+
+/**
+ * Rodzaj błędu synchronizacji — do rozróżnienia w panelu (ticket 194). Liczba „Błąd” w dzienniku zlewała dotąd
+ * rzeczy o zupełnie innym znaczeniu:
+ *  • `pending_create` — produktu nie ma jeszcze w Selly, a Tor 1 go NIE zakłada (bez słowników, backlog #68;
+ *    zakłada go dopiero Tor 2). To nie awaria, tylko kolejka do utworzenia;
+ *  • `tozsamosc` — zabezpieczenie z ticketu 184 odmówiło zapisu (produkt/wariant/magazyn w Selly nie zgadza
+ *    się z Bridge) — wymaga sprawdzenia człowieka;
+ *  • `inne` — reszta (HTTP, limity, odpowiedzi Selly).
+ */
+export type RodzajBledu = "pending_create" | "tozsamosc" | "inne";
+
+export function rodzajBledu(komunikat: string): RodzajBledu {
+  if (komunikat.includes("brak dictMaps do createProduct") || komunikat.includes("produkt nie istnieje w Selly"))
+    return "pending_create";
+  if (komunikat.includes("zapis zablokowany")) return "tozsamosc";
+  return "inne";
+}
+
+const KOLEJNOSC_PROBKI: RodzajBledu[] = ["inne", "tozsamosc", "pending_create"];
+const PROBKA_NA_RODZAJ = 10;
+
+/** Liczby błędów wg rodzaju i próbka (po 10 z każdego rodzaju; najpierw te, które wymagają uwagi). */
+export function podsumujBledy(errors: { kod: string; error: string }[]): {
+  bledy_wg_rodzaju: Record<RodzajBledu, number>;
+  sample_errors: { kod: string; error: string; rodzaj: RodzajBledu }[];
+} {
+  const liczby: Record<RodzajBledu, number> = { pending_create: 0, tozsamosc: 0, inne: 0 };
+  const grupy: Record<RodzajBledu, { kod: string; error: string; rodzaj: RodzajBledu }[]> = {
+    pending_create: [],
+    tozsamosc: [],
+    inne: [],
+  };
+  for (const e of errors) {
+    const rodzaj = rodzajBledu(e.error);
+    liczby[rodzaj]++;
+    if (grupy[rodzaj].length < PROBKA_NA_RODZAJ) grupy[rodzaj].push({ ...e, rodzaj });
+  }
+  return { bledy_wg_rodzaju: liczby, sample_errors: KOLEJNOSC_PROBKI.flatMap((r) => grupy[r]) };
+}
 
 /** Wiersz `findDeltaProducts` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszDelta = WierszBridge & {
@@ -199,7 +240,7 @@ function logSyncEnd(
         szczegoly_json = ?, zakonczono = datetime('now'), status = ?
     WHERE id = ?`,
     )
-    .run(ok, err, skip, JSON.stringify(details).slice(0, 8000), status, logId);
+    .run(ok, err, skip, szczegolyDoZapisu(details), status, logId);
 }
 
 /** `markSynced` (`:80-92`) — snapshot wysłanych wartości. */
@@ -393,7 +434,7 @@ export async function syncDelta(
     stats.ok,
     stats.err,
     stats.skip,
-    { stats, kolizje: kolizje.slice(0, 20), sample_errors: errors.slice(0, 20) },
+    { stats, kolizje: kolizje.slice(0, 20), ...podsumujBledy(errors) },
     stats.err > 0 && stats.ok === 0 ? "blad" : "zakonczono",
   );
 

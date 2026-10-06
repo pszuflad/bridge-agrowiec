@@ -32,7 +32,8 @@ import type { Discovery } from "./discovery.js";
 import type { TrybSelly } from "../tryb.js";
 import { syncDelta } from "./sync-delta.js";
 import { syncFullForDostawca } from "./sync-full.js";
-import { sprawdzUprawnienieUsuwania, usunSierotyZSelly } from "./sync-usuwanie.js";
+import { sprawdzUprawnienieUsuwania, usunSierotyZSelly, wynikProbyUprawnien } from "./sync-usuwanie.js";
+import { zapiszStanTor3 } from "./stan-tor3.js";
 import { zamknijOsieroconeWpisySync } from "../../repos/selly.js";
 
 /** `scheduler_selly.cjs:22` — dostawcy objęci oboma torami. */
@@ -175,6 +176,34 @@ export async function runFullBatch(
   return results;
 }
 
+/**
+ * Strażnik przebiegu Toru 1 (ticket 194). Oryginał pilnował tylko, żeby TA SAMA minuta nie odpaliła przebiegu
+ * dwa razy (`lastRunKey`), ale nie sprawdzał, czy POPRZEDNI przebieg się skończył. Gdy Tor 1 trwa dłużej niż 15 minut
+ * (dużo pozycji do wysłania, Selly zwalnia), kolejny tick (:10/:25/:40/:55) startował równolegle i te same pozycje
+ * szły do sklepu dwa razy, a w dzienniku pojawiały się podwójne wpisy.
+ *
+ * Gdy poprzedni przebieg trwa krócej niż `limitMs`, nowy jest pomijany. Po `limitMs` strażnik puszcza następny mimo
+ * wszystko — zawieszony przebieg (obietnica, która nigdy się nie kończy) nie może zablokować synchronizacji na stałe.
+ */
+export function stworzStraznikaPrzebiegu(limitMs: number, zegar: () => number = Date.now) {
+  let start: number | null = null;
+  return {
+    /** `true` = wolno uruchomić (i przebieg zaczyna się liczyć), `false` = poprzedni jeszcze trwa. */
+    sprobuj(): boolean {
+      const teraz = zegar();
+      if (start !== null && teraz - start < limitMs) return false;
+      start = teraz;
+      return true;
+    },
+    zakoncz(): void {
+      start = null;
+    },
+  };
+}
+
+/** Ile najdłużej uznajemy przebieg Toru 1 za „trwający”, zanim pozwolimy ruszyć następnemu. */
+export const MAKS_CZAS_PRZEBIEGU_TORU_1_MS = 30 * 60 * 1000;
+
 export type Harmonogram = {
   uruchom(): void;
   zatrzymaj(): void;
@@ -203,6 +232,8 @@ export type ZaleznosciHarmonogramu = {
   teraz?: () => Date;
   /** Okres ticka — WYŁĄCZNIE dla testów; produkcyjnie 60 s jak w oryginale. */
   interwalMs?: number;
+  /** Przebieg Toru 1 — WYŁĄCZNIE dla testów (długi przebieg); produkcyjnie `runDeltaAll`. */
+  biegDelta?: () => Promise<unknown>;
 };
 
 /**
@@ -222,7 +253,9 @@ export function stworzHarmonogramSelly({
   tor2 = true,
   teraz = () => new Date(),
   interwalMs = CHECK_INTERVAL_MS,
+  biegDelta,
 }: ZaleznosciHarmonogramu): Harmonogram {
+  const straznikToru1 = stworzStraznikaPrzebiegu(MAKS_CZAS_PRZEBIEGU_TORU_1_MS, () => teraz().getTime());
   let timer: ReturnType<typeof setInterval> | null = null;
   let lastRunKey: string | null = null;
   let lastFullKey: string | null = null; // "YYYY-MM-DD" — Tor 2 raz dziennie
@@ -242,16 +275,38 @@ export function stworzHarmonogramSelly({
     if (MINUTY_TORU_1.includes(mm) && lastRunKey !== key) {
       lastRunKey = key;
       const tag = mm === 55 ? "event-driven" : "fallback";
-      console.log(`[Selly Scheduler] Tor1 ${tag} ${hh}:${dwaZnaki(mm)}`);
-      runDeltaAll(db, discovery)
+      if (!straznikToru1.sprobuj()) {
+        console.warn(
+          `[Selly Scheduler] Tor1 ${tag} ${hh}:${dwaZnaki(mm)} POMINIĘTY — poprzedni przebieg jeszcze trwa ` +
+            `(nakładanie dałoby podwójną wysyłkę tych samych pozycji)`,
+        );
+      } else {
+        console.log(`[Selly Scheduler] Tor1 ${tag} ${hh}:${dwaZnaki(mm)}`);
+        (biegDelta ?? (() => runDeltaAll(db, discovery)))()
         .catch((e: unknown) => console.error("[Selly Scheduler] Tor1 err:", komunikat(e)))
+        .finally(() => straznikToru1.zakoncz())
         .then(async () => {
-          if (!usuwanie) return null;
+          if (!usuwanie) {
+            zapiszStanTor3({ wynik: "wylaczone", opis: "Usuwanie z Selly wyłączone (SELLY_USUWANIE=false)" });
+            return null;
+          }
           // Najpierw próba uprawnień (DELETE na nieistniejący produkt) — bez prawa usuwania Tor 3 nic nie robi.
           const { wolno } = await sprawdzUprawnienieUsuwania(db, discovery, tryb);
-          return wolno ? usunSierotyZSelly(db, discovery, { tryb, maksUdzial: usuwanieMaksUdzial }) : null;
+          if (!wolno) {
+            const proba = wynikProbyUprawnien();
+            if (tryb !== "pelny") {
+              zapiszStanTor3({ wynik: "wylaczone", opis: `Tryb Selly „${tryb}” — usuwanie działa tylko w trybie pełnym` });
+            } else if (proba === "brak") {
+              zapiszStanTor3({ wynik: "brak_uprawnien", opis: "API Selly nie ma prawa usuwania (DELETE → 401/403) — nic nie usuwam" });
+            } else {
+              zapiszStanTor3({ wynik: "proba_nieokreslona", opis: "Próba uprawnień do usuwania nie dała jednoznacznej odpowiedzi — ponowię za godzinę" });
+            }
+            return null;
+          }
+          return usunSierotyZSelly(db, discovery, { tryb, maksUdzial: usuwanieMaksUdzial });
         })
         .catch((e: unknown) => console.error("[Selly Scheduler] Tor3 err:", komunikat(e)));
+      }
     }
 
     // Tor 2: raz dziennie o 04:30 — po nocnym auto-pull dostawców o 04:00

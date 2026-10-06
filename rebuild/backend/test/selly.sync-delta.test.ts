@@ -136,10 +136,12 @@ describe("Tor 1 — sync_delta", () => {
         liczba_skip: 0,
         status: "zakonczono",
       });
+      // Ticket 194: błędy mają rodzaj — „produkt nie istnieje w Selly” to kolejka do utworzenia, nie awaria.
       expect(JSON.parse(String(log.szczegoly_json))).toEqual({
         stats: wynik.stats,
         kolizje: [],
-        sample_errors: wynik.errors,
+        bledy_wg_rodzaju: { pending_create: 1, tozsamosc: 0, inne: 0 },
+        sample_errors: [{ ...wynik.errors[0], rodzaj: "pending_create" }],
       });
     });
 

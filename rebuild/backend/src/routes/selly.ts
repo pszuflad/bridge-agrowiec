@@ -47,6 +47,15 @@ import {
 import type { KlientSelly } from "../selly/klient.js";
 import { naPayloadSelly, walidujPayload, type PayloadSelly } from "../selly/mapper.js";
 import { zapewnijSlowniki } from "../selly/slowniki.js";
+import { odczytajStanTor3 } from "../selly/rest/stan-tor3.js";
+import {
+  LIMIT_DOBOWY,
+  MAKS_UDZIAL_SIEROT,
+  usunieciaWOstatniejDobie,
+  wynikProbyUprawnien,
+  znajdzSieroty,
+} from "../selly/rest/sync-usuwanie.js";
+import { AKCJA_USUNIECIA_Z_SELLY } from "../historia/mapowanie.js";
 
 export type ZaleznosciSelly = {
   db: Baza;
@@ -56,6 +65,16 @@ export type ZaleznosciSelly = {
    */
   klient: KlientSelly;
   sciezkiCsv: SciezkiCsvSelly;
+  /**
+   * Konfiguracja Toru 3 (usuwanie z Selly) do `GET /api/selly/usuwanie-status`. Pominięta (testy) ⇒ trasa
+   * zakłada ustawienia domyślne: włączone, tryb pełny, harmonogram działa.
+   */
+  usuwanie?: {
+    wlaczone: boolean;
+    tryb: string;
+    harmonogram: boolean;
+    maksUdzial: number;
+  };
 };
 
 /** Komunikat błędu w kształcie, w jakim oddaje go oryginał (`e.message`, bez opakowania). */
@@ -68,7 +87,7 @@ const MAKS_BLEDOW_W_PODSUMOWANIU = 50;
 /** Maksymalna liczba przykładowych payloadów w trybie `dry_run` (`routes.cjs:215`). */
 const MAKS_PAYLOADOW_DRY_RUN = 5;
 
-export function trasySelly({ db, klient, sciezkiCsv }: ZaleznosciSelly): Router {
+export function trasySelly({ db, klient, sciezkiCsv, usuwanie }: ZaleznosciSelly): Router {
   const router = Router();
 
   /**
@@ -362,7 +381,52 @@ export function trasySelly({ db, klient, sciezkiCsv }: ZaleznosciSelly): Router 
         Number.isNaN(zParametru) || zParametru === 0 ? DOMYSLNY_LIMIT_LOGU : zParametru,
         MAKS_LIMIT_LOGU,
       );
-      res.json({ items: logSelly(db, limit) });
+      // Ticket 194: opcjonalne `?grupa=usuwanie|synchronizacja` (oryginał go nie zna i zwraca wszystko).
+      const g = req.query.grupa;
+      const grupa = g === "usuwanie" || g === "synchronizacja" ? g : undefined;
+      res.json({ items: logSelly(db, limit, grupa) });
+    } catch (e) {
+      res.status(500).json({ error: komunikat(e) });
+    }
+  });
+
+  /**
+   * Stan usuwania z Selly (Tor 3) — TRASA SPOZA ORYGINAŁU (ticket 194, decyzja użytkowniczki 2026-10-06).
+   * Przebieg bez sierot nie zostawia wpisu w dzienniku, więc „nic do usunięcia” i „Tor 3 nie działa” wyglądały
+   * tak samo. Tu: czy usuwanie jest włączone (i czemu nie), wynik ostatniego przebiegu, ile sierot czeka teraz,
+   * ile usunięto w ostatniej dobie i co usunięto jako ostatnie.
+   */
+  router.get("/api/selly/usuwanie-status", requireAuth, (_req: Request, res: Response) => {
+    try {
+      const konf = usuwanie ?? { wlaczone: true, tryb: "pelny", harmonogram: true, maksUdzial: MAKS_UDZIAL_SIEROT };
+      const powody: string[] = [];
+      if (!konf.wlaczone) powody.push("usuwanie wyłączone w ustawieniach (SELLY_USUWANIE=false)");
+      if (konf.tryb !== "pelny") powody.push(`tryb Selly „${konf.tryb}” — usuwanie działa tylko w trybie pełnym`);
+      if (!konf.harmonogram) powody.push("harmonogram Selly wyłączony (SELLY_SCHEDULER) — nic nie uruchamia przebiegów");
+
+      const { wszystkie } = znajdzSieroty(db, 0);
+      const ostatnie = db.$client
+        .prepare("SELECT kiedy, encja_id, szczegoly_json FROM audit_log WHERE akcja = ? ORDER BY id DESC LIMIT 1")
+        .get(AKCJA_USUNIECIA_Z_SELLY) as { kiedy: string; encja_id: string | null; szczegoly_json: string | null } | undefined;
+      let nazwa: string | null = null;
+      try {
+        nazwa = (JSON.parse(ostatnie?.szczegoly_json ?? "null") as { nazwa?: string | null } | null)?.nazwa ?? null;
+      } catch {
+        nazwa = null;
+      }
+
+      res.json({
+        wlaczone: powody.length === 0,
+        powody_wylaczenia: powody,
+        tryb: konf.tryb,
+        proba_uprawnien: wynikProbyUprawnien(),
+        ostatni_przebieg: odczytajStanTor3(),
+        sierot_teraz: wszystkie,
+        usuniec_24h: usunieciaWOstatniejDobie(db),
+        limit_dobowy: LIMIT_DOBOWY,
+        maks_udzial_sierot: konf.maksUdzial,
+        ostatnie_usuniecie: ostatnie ? { kiedy: ostatnie.kiedy, kod: ostatnie.encja_id, nazwa } : null,
+      });
     } catch (e) {
       res.status(500).json({ error: komunikat(e) });
     }
