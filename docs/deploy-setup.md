@@ -7,7 +7,7 @@
 > katalogów, cron i zasady: `docs/tickets/188-CHORE-deploy-agroopony/plan.md`. Nazwy ścieżek,
 > domen i serwera poniżej czytaj jako **historię**.
 
-**Środowisko testowe** nowej wersji Bridge: `https://test.agritires.eu`.
+**Środowisko testowe** nowej wersji Bridge: `https://training.agroopony.eu` (od ticketu 188; do 2026-10-05 stało pod `https://test.agritires.eu` na starym serwerze — poniższe ścieżki i przykłady dotyczą tamtego układu).
 Izolowane od produkcji na tym samym VPS (cyber_Folks, DirectAdmin, user `admin`, bez roota).
 
 ## Architektura
