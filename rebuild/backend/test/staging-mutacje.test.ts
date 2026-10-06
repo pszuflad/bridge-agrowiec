@@ -196,6 +196,42 @@ describe("Mutacje stagingu i poprawek Marty — przez HTTP", () => {
       expect(poprawka.reason).toBe("literówka");
     });
 
+    it("zmiana modelu, za którym idzie bieżnik, zapisuje poprawkę także dla `bieznik`", async () => {
+      const [a] = zasiej(
+        pozycja({ snapshot: { model: "360 FORESTRY", bieznik: "360 FORESTRY" } }),
+      );
+      srodowisko.db
+        .insert(manualOverrides)
+        .values({
+          supplierKod: "MO5",
+          supplierProductId: "P1",
+          fieldName: "bieznik",
+          overrideValue: "360 FORESTRY",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          acknowledgedSourceValue: "360",
+        } as never)
+        .run();
+
+      await put(`/api/staging/${a!.id}`, { model: "360", _reason: "bez FORESTRY" });
+
+      const snap = JSON.parse(String((staging()[0] as unknown as Record<string, unknown>).snapshotJson));
+      expect(snap.model).toBe("360");
+      expect(snap.bieznik).toBe("360");
+      const wg = Object.fromEntries(poprawki().map((p) => [p.fieldName, p]));
+      expect(wg.model!.overrideValue).toBe("360");
+      expect(wg.bieznik!.overrideValue, "stara poprawka bieznik MA zostać nadpisana").toBe("360");
+      expect(wg.bieznik!.reason).toBe("bez FORESTRY");
+      expect(wg.bieznik!.acknowledgedSourceValue, "potwierdzenie konfliktu przetrwa").toBe("360");
+    });
+
+    it("ręcznie ustawiony bieżnik (inny niż model) nie dostaje poprawki przy zmianie modelu", async () => {
+      const [a] = zasiej(pozycja({ snapshot: { model: "AGRIMAX RT 765", bieznik: "RT 765 SPECJAL" } }));
+
+      await put(`/api/staging/${a!.id}`, { model: "AGRIMAX RT 766" });
+
+      expect(poprawki().map((p) => p.fieldName)).toEqual(["model"]);
+    });
+
     it("`cenaZakupuNowa` trafia do kolumny, do snapshotu i do poprawki pod nazwą `cenaZakupu`", async () => {
       const [a] = zasiej(pozycja());
 

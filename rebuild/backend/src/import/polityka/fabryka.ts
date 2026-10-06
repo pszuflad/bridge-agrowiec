@@ -98,6 +98,7 @@ import {
   innySymbolDostawcy,
   kartaWlasnejPartii,
   minimumPozycjiOferty,
+  czySmiecMo2,
   oczyscModelZDot,
   wstrzymujeKandydatowPrzyNiejednoznacznosci,
   zachowajNazweKarty,
@@ -363,14 +364,8 @@ export function stworzPolitykeStagingu(
     for (const surowy of wejscie) {
       const raw = surowy as unknown as Pozycja;
 
-      // Filtr śmieci MO2 (`:348`).
-      if (
-        dostawca === "MO2" &&
-        /^999991$/.test(String(raw.kod ?? "").replace(/^MO2_/, "")) &&
-        (!raw.ean ||
-          !raw.marka ||
-          (/^\d/.test(String(raw.marka)) && !/[A-Za-z]{3,}/.test(String(raw.marka))))
-      ) {
+      // Filtr śmieci MO2 (`:348`) — z odstępstwem opisanym przy `czySmiecMo2`.
+      if (czySmiecMo2(dostawca, raw)) {
         stats.odrzuconeSmieciMO2 += 1;
         continue;
       }
