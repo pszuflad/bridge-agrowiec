@@ -60,3 +60,49 @@ None — all tests parallelizable (backend: `stworzTestowaBaze`/`stworzSrodowisk
 ## Overall assessment
 
 Zmiana jest czysta i bezpieczna dla Toru 3: dodatkowy zapis jest synchroniczny, osłonięty własnym `try/catch` po wykonanym DELETE i nie wpływa na przebieg usuwania; migracja jest idempotentna i addytywna; trasy mają auth i bindowane parametry; frontend i jego testy są solidne (handlery MSW wszędzie dodane). Jedyne realne problemy to niezaktualizowane testy migracji (`db.migracje.test.ts`, `db.migracje-produkcja.test.ts`), które czerwienią bramkę `backend`, oraz brak `raport.md` — po ich naprawie można mergować.
+
+---
+
+## Przegląd 2
+
+> Reviewed: 2026-10-07 (po commicie `a11a405`)
+> Zakres: `git show a11a405` + ponowny przegląd `git diff origin/develop...HEAD`. Uruchomione: `vitest` dla `selly.usuniete`, `db.migracje`, `db.migracje-produkcja` (3 pliki, 37 zielonych, 2 pominięte), `tsc --noEmit` (bez błędów).
+
+### Weryfikacja poprzednich uwag
+
+- [x] BLOCKER 1 (`db.migracje.test.ts`) — naprawione: `023_selly_usuniecia.sql` na liście `MIGRACJE`, bilans 40 tabel / 24 indeksy w tytule, obu `toBe` i w teście idempotencji (:116), dopisany komentarz do 023. Test zielony.
+- [x] BLOCKER 2 (`db.migracje-produkcja.test.ts`) — naprawione: `selly_usuniecia` i oba indeksy (`idx_selly_usuniecia_at`, `idx_selly_usuniecia_przebieg`) w oczekiwanej liście, w kolejności alfabetycznej. Test zielony.
+- [x] SHOULD-FIX 1 (`limit` ujemny/zerowy) — naprawione w `selly-usuniecia.ts:76`: `limit >= 1 ? min(trunc(limit), 200) : 20`. Zgodne ze spec/OpenAPI („błędne wracają do domyślnych”). Testy dla `limit=-5` i `limit=0` dopisane. Brak regresji: `limit=abc` → `NaN` → `undefined` → domyślny 20; `limit=0.5` → 20 (akceptowalne); `offset` ujemny/NaN → 0.
+- [x] SHOULD-FIX 2 (brak `raport.md`) — jest; zawiera wyniki bramek (backend 2242, frontend 1072) i sekcję „Review fixes applied”. Wyniki bramek biorę z raportu (nie uruchamiałem całości zgodnie z poleceniem); trzy pliki testów, które były czerwone, potwierdziłem osobno.
+- [x] SHOULD-FIX 3 (niezależność zapisów) — test dopisany (`selly.usuniete.test.ts:155-168`). Rozwiązanie z wyzwalaczem `BEFORE INSERT ON audit_log … RAISE(ABORT)` jest poprawne, a nie ozdobne: asercje `audit_log` = 0 wierszy dowodzą, że `zapiszHistorie` faktycznie rzucił i został złapany, a `selly_usuniecia` ma wiersz, `usuniete_produkty` = 1, `deleteProduct` wywołane raz. Test używa własnej bazy w katalogu tymczasowym — równoległy, bez wycieku wyzwalacza do innych testów.
+- [x] NICE (JSDoc `csv-status`) — naprawione: nowe trasy stoją przed komentarzem `csv-status`, komentarz wrócił do swojej trasy.
+
+### Nowe problemy z poprawek
+
+- Przesunięcie tras w `src/routes/selly.ts` — bez skutków ubocznych: czysta zmiana kolejności, brak tras parametrycznych `/api/selly/:x`, które mogłyby przechwycić `/api/selly/usuniete` lub `/usuniete/csv` (sprawdzone grepem). Obie trasy nadal za `requireAuth`.
+- Zmiana semantyki `limit` — brak regresji, spójna z dokumentacją. Nie dotyka logiki usuwania ani bezpieczników; `SELLY_USUWANIE` nietknięte.
+- `sync-usuwanie.ts` — dodano wyłącznie komentarz; logika bez zmian.
+
+## BLOCKER
+
+Brak.
+
+## SHOULD-FIX
+
+Brak.
+
+## NICE-TO-HAVE (nadal otwarte, nieblokujące — bez zmian względem przeglądu 1)
+
+- [ ] `rebuild/backend/src/repos/selly-usuniecia.ts:90-93` — CSV nie neutralizuje komórek zaczynających się od `=`, `+`, `-`, `@` (zgodne z `analityka/csv.ts`); warto zanotować w `docs/rebuild-backlog/wpis-195.md` jako dług wspólny eksportów. Raport (Follow-up) już to odnotowuje, wpisu backlogu nie ma.
+- [ ] `rebuild/frontend/src/pages/Selly.tsx:79-86` — `offset` nie jest resetowany po `Odśwież` ani przycinany do `total`; bez ryzyka, dopóki historia tylko rośnie.
+- [ ] `rebuild/backend/src/selly/rest/sync-usuwanie.ts:594` — spread `{ ...wpis, akcja: wpis.akcja }` jako zawężenie typu; komentarz dodany, wystarczy.
+
+## Plan compliance (przegląd 2)
+
+- Wszystkie kroki planu w diffie; nic spoza zakresu (brak zmian w logice usuwania, bezpiecznikach, `SELLY_USUWANIE`).
+- Definition of done: wszystkie pozycje spełnione (migracja idempotentna i testy migracji zielone; bramki zielone wg raportu; GATE — nowe trasy spoza oryginału, istniejące fixtures nietknięte).
+- Parallel-test concerns: None — wyzwalacz w nowym teście działa na izolowanej bazie tymczasowej.
+
+## Ocena po przeglądzie 2
+
+Wszystkie BLOCKER-y i SHOULD-FIX-y z przeglądu 1 są faktycznie naprawione (zweryfikowane w kodzie i uruchomionych testach), poprawki nie wprowadziły nowych problemów. Zmiana gotowa do merge'a; pozostają tylko drobne uwagi NICE-TO-HAVE.
