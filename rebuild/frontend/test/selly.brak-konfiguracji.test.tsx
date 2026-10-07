@@ -26,6 +26,7 @@ import {
 import {
   TOKEN_TESTOWY,
   logSellyZFixtura,
+  statusUsuwaniaTestowy,
   statusCsvZFixtura,
   statusDostawcowZFixtura,
   uzytkownikZFixtura,
@@ -48,6 +49,7 @@ const KOMUNIKAT_BRAKU =
  */
 function zamockujBezKonfiguracji(trescBledu: string) {
   server.use(
+    http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
     http.get("*/api/selly/ping", () =>
       HttpResponse.text(trescBledu, { status: 500 }),
     ),

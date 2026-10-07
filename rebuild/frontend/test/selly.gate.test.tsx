@@ -18,9 +18,11 @@ import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
 import { _zresetujStanSesji } from "@/lib/auth";
 import { queryClient } from "@/lib/queryClient";
+import { formatujCzasLokalny } from "@/pages/selly/szczegoly-logu";
 import {
   TOKEN_TESTOWY,
   logSellyZFixtura,
+  statusUsuwaniaTestowy,
   pingSellyZFixtura,
   statusCsvZFixtura,
   statusDostawcowZFixtura,
@@ -36,6 +38,7 @@ const LOG = logSellyZFixtura();
 
 function zamockujSelly() {
   server.use(
+    http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
     http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
     http.get("*/api/selly/csv-status", () => HttpResponse.json(CSV)),
     http.get("*/api/selly/status", () => HttpResponse.json({ items: DOSTAWCY })),
@@ -112,7 +115,8 @@ describe("GATE 8b — widok konsumuje kształty z fixtures", () => {
 
   it("`GET_selly_csv-status` — nieaktualny plik daje powód z API i odznakę BŁĄD", async () => {
     server.use(
-      http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
+      http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
+    http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
       http.get("*/api/selly/csv-status", () =>
         HttpResponse.json({ ...CSV, status: "stary", powod: "plik z wczoraj" }),
       ),
@@ -174,8 +178,10 @@ describe("GATE 8b — widok konsumuje kształty z fixtures", () => {
     expect(tabela).toHaveTextContent(pierwszy.operacja);
     expect(tabela).toHaveTextContent(pierwszy.dostawca_kod as string);
     expect(tabela).toHaveTextContent(String(pierwszy.liczba_ok));
-    // Data cięta ze stringa, nie parsowana — „2026-07-06 07:43:36”.
-    expect(tabela).toHaveTextContent(pierwszy.rozpoczeto.slice(0, 19).replace("T", " "));
+    // Ticket 194: oryginał wypisywał surowy tekst UTC („2026-07-06 07:43:36”), co przy 2 h różnicy do czasu
+    // lokalnego wyglądało na „stare” wpisy. Teraz czas lokalny, a surowy UTC siedzi w `title` komórki.
+    expect(tabela).toHaveTextContent(formatujCzasLokalny(pierwszy.rozpoczeto));
+    expect(within(tabela).getAllByTitle(`UTC: ${pierwszy.rozpoczeto}`).length).toBeGreaterThan(0);
   });
 
   it("pole `_przyciete` z nagrania nie przecieka do widoku", async () => {

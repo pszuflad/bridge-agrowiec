@@ -109,6 +109,41 @@ export const KLUCZ_PING = ["/api/selly/ping"] as const;
 export const KLUCZ_STATUS_CSV = ["/api/selly/csv-status"] as const;
 export const KLUCZ_STATUS = ["/api/selly/status"] as const;
 export const KLUCZ_LOG = ["/api/selly/log"] as const;
+export const KLUCZ_USUWANIE = ["/api/selly/usuwanie-status"] as const;
+
+/** Ile ostatnich wpisów dziennika pobiera panel (ticket 194: było 10 = jedna runda synchronizacji dla 10 dostawców). */
+export const LIMIT_LOGU = 100;
+
+/** `GET /api/selly/usuwanie-status` (ticket 194, trasa spoza oryginału) — stan Toru 3. */
+export type StatusUsuwania = {
+  wlaczone: boolean;
+  powody_wylaczenia: string[];
+  tryb: string;
+  proba_uprawnien: "jest" | "brak" | "nieokreslony" | null;
+  ostatni_przebieg: {
+    kiedy: string;
+    wynik:
+      | "brak_sierot"
+      | "usunieto"
+      | "pominieto"
+      | "wstrzymano"
+      | "limit_dobowy"
+      | "brak_uprawnien"
+      | "proba_nieokreslona"
+      | "wylaczone"
+      | "blad";
+    opis: string;
+    sieroty?: number;
+    usuniete?: number;
+    pominiete?: number;
+    bledy?: number;
+  } | null;
+  sierot_teraz: number;
+  usuniec_24h: number;
+  limit_dobowy: number;
+  maks_udzial_sierot: number;
+  ostatnie_usuniecie: { kiedy: string; kod: string | null; nazwa: string | null } | null;
+};
 
 /**
  * Prefiks komunikatu, którym backend 8a sygnalizuje brak sekretów `SELLY_*`
@@ -173,12 +208,22 @@ export async function pobierzStatusDostawcow(): Promise<WierszStatusuDostawcy[]>
 }
 
 /**
- * Log operacji. Limit `10` jest w ŚCIEŻCE, nie w kluczu zapytania — oryginał woła
+ * Log operacji. Ticket 194: limit podniesiony z `10` (oryginał, `selly-injection.js:653`) do `LIMIT_LOGU`, bo jedna
+ * runda synchronizacji to 10 wpisów (po jednym na dostawcę) i wypychała z okna wszystko inne, w tym wpisy Toru 3.
+ * Limit jest w ŚCIEŻCE, nie w kluczu zapytania — oryginał woła
  * `/log?limit=10` na sztywno (`selly-injection.js:653`).
  */
-export async function pobierzLog(): Promise<WpisLogu[]> {
-  const dane = await pobierz<{ items?: WpisLogu[] }>("/api/selly/log?limit=10");
+export async function pobierzLog(grupa?: "usuwanie" | "synchronizacja"): Promise<WpisLogu[]> {
+  // `grupa` (ticket 194, parametr spoza oryginału): wpisy usuwania i synchronizacji mają osobne okno `LIMIT_LOGU`,
+  // żeby częste wpisy synchronizacji nie wypychały rzadkich wpisów Toru 3.
+  const dane = await pobierz<{ items?: WpisLogu[] }>(
+    `/api/selly/log?limit=${LIMIT_LOGU}${grupa ? `&grupa=${grupa}` : ""}`,
+  );
   return dane.items ?? [];
+}
+
+export function pobierzStatusUsuwania(): Promise<StatusUsuwania> {
+  return pobierz<StatusUsuwania>("/api/selly/usuwanie-status");
 }
 
 /** `selly-injection.js:604` — ciało to dosłownie `{}`. */
