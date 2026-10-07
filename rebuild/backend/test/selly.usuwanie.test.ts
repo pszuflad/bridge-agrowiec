@@ -10,6 +10,7 @@ import { akcjeHistorii, wpisyHistorii } from "../src/historia/mapowanie.js";
 import { audytDlaHistorii } from "../src/repos/audit-historia.js";
 import { BladSelly } from "../src/selly/klient.js";
 import { stworzHarmonogramSelly } from "../src/selly/rest/scheduler.js";
+import { odczytajStanTor3, zresetujStanTor3 } from "../src/selly/rest/stan-tor3.js";
 import {
   IDENTYFIKATORY_PROBY,
   sprawdzUprawnienieUsuwania,
@@ -26,6 +27,7 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
   beforeEach(() => {
     baza = stworzTestowaBaze();
     zresetujProbeUprawnien();
+    zresetujStanTor3();
   });
   afterEach(() => baza.posprzataj());
 
@@ -184,6 +186,52 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     expect(drugi?.usuniete_produkty).toBe(1);
     expect(atrapa.liczba("deleteProduct")).toBe(4);
     expect(await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" })).toBeNull(); // nic do zrobienia — cichy przebieg
+  });
+
+  describe("stan ostatniego przebiegu (ticket 194) — panel widzi, że Tor 3 żyje, także gdy nic nie usuwa", () => {
+    it("brak sierot: cichy przebieg (bez wpisu w dzienniku), ale stan „brak_sierot” z godziną", async () => {
+      tlo();
+      const { discovery } = przygotuj([]);
+      expect(odczytajStanTor3()).toBeNull();
+
+      expect(await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" })).toBeNull();
+
+      expect(odczytajStanTor3()).toMatchObject({ wynik: "brak_sierot", sieroty: 0 });
+      expect(Date.parse(odczytajStanTor3()!.kiedy)).not.toBeNaN();
+      expect(baza.sqlite.prepare("SELECT COUNT(*) c FROM selly_sync_log WHERE operacja='sync_delete'").get()).toEqual({ c: 0 });
+    });
+
+    it("usunięcie: stan „usunieto” z liczbami", async () => {
+      tlo();
+      sierota("S1", "MO1_STARY", 1100, 1101);
+      const { discovery } = przygotuj([{ product_id: 1100, name: "Opona STARA", ean: eanDla(1100), warianty: [{ variant_id: 1101, features: [magazyn("MO1")] }] }]);
+
+      await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+
+      expect(odczytajStanTor3()).toMatchObject({ wynik: "usunieto", sieroty: 1, usuniete: 1, bledy: 0 });
+    });
+
+    it("sierota, która nie przechodzi kontroli tożsamości: stan „pominieto”, nic nie usunięto", async () => {
+      tlo();
+      sierota("S1", "MO1_STARY", 1110, 1111, "MO1", null); // brak znanej tożsamości
+      const { discovery } = przygotuj([{ product_id: 1110, name: "Opona", warianty: [{ variant_id: 1111, features: [magazyn("MO1")] }] }]);
+
+      await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+
+      expect(odczytajStanTor3()).toMatchObject({ wynik: "pominieto", sieroty: 1, usuniete: 0 });
+    });
+
+    it("bezpiecznik: stan „wstrzymano” także wtedy, gdy wpisu w dzienniku nie dubluje", async () => {
+      sierota("S1", "MO1_STARY", 1120, 1121);
+      const { discovery } = przygotuj([{ product_id: 1120, warianty: [{ variant_id: 1121, features: [magazyn("MO1")] }] }]);
+
+      await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+      zresetujStanTor3();
+      await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" }); // drugi raz: dziennik cichy (kilka godzin ciszy)
+
+      expect(odczytajStanTor3()).toMatchObject({ wynik: "wstrzymano" });
+      expect(baza.sqlite.prepare("SELECT COUNT(*) c FROM selly_sync_log WHERE operacja='sync_delete' AND status='wstrzymano'").get()).toEqual({ c: 1 });
+    });
   });
 
   describe("bezpieczniki zbiorcze", () => {
@@ -446,12 +494,14 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
       expect(realneUsuniecia(atrapa)).toBe(0);
       expect(baza.sqlite.prepare("SELECT operacja FROM selly_sync_log WHERE operacja LIKE 'probe_delete%'").get()).toEqual({ operacja: "probe_delete_brak_uprawnien" });
       expect(mapowania()).toContain("MO1_STARY");
+      expect(odczytajStanTor3()).toMatchObject({ wynik: "brak_uprawnien" }); // panel wie, czemu nic się nie dzieje
     });
 
     it("`usuwanie: false` (SELLY_USUWANIE=false) wyłącza Tor 3, reszta synchronizacji działa", async () => {
       const atrapa = await uruchomTick(false);
       expect(realneUsuniecia(atrapa)).toBe(0);
       expect(atrapa.liczba("deleteProduct")).toBe(0); // bez Toru 3 nie ma też próby uprawnień
+      expect(odczytajStanTor3()).toMatchObject({ wynik: "wylaczone" });
     });
   });
 });

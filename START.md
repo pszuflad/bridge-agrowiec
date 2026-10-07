@@ -4,7 +4,7 @@ Procedura pierwszego uruchomienia: z pustego katalogu `bridge/` do repozytorium
 Git, które jest wiernym lustrem produkcji i od tego momentu śledzi każdą zmianę Ani.
 
 **Założenia:** pusty katalog `bridge/`, dostęp do Perplexity przez przeglądarkę,
-dostęp SSH do VPS `admin@vpshd1242.cyber-folks.pl` (port 222).
+dostęp SSH do VPS `admin@vpshd86.cyber-folks.pl` (port 222; do 2026-10-05 był to vpshd1242).
 
 **Legenda właściciela kroku:**
 🤖 robi Claude (lokalnie) · 🧑 robisz Ty (terminal/SSH) · 🌐 robisz Ty (przeglądarka)
@@ -90,7 +90,7 @@ Co robi, w kolejności:
 Sekrety (`.env`) **celowo zostają tylko na serwerze** — skrypt ich nie ściąga.
 
 > Jeśli `acquire.sh` zgłosi problem ze ścieżką, sprawdź na serwerze, gdzie jest
-> backend: `ssh -p 222 admin@vpshd1242.cyber-folks.pl "ls -d /home/admin/private_apps/bridge"`.
+> backend: `ssh -p 222 admin@vpshd86.cyber-folks.pl "ls -d /home/admin/domains/agroopony.eu/public_html/bridgeone/_app"`.
 
 Weryfikacja po pobraniu:
 

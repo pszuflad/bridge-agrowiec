@@ -34,10 +34,12 @@ import {
   KLUCZ_PING,
   KLUCZ_STATUS,
   KLUCZ_STATUS_CSV,
+  KLUCZ_USUWANIE,
   pobierzLog,
   pobierzPing,
   pobierzStatusCsv,
   pobierzStatusDostawcow,
+  pobierzStatusUsuwania,
   synchronizujDostawce,
   wygenerujCsv,
   type ParametrySynchronizacji,
@@ -48,6 +50,8 @@ import { SekcjaLog } from "./selly/SekcjaLog";
 import { SekcjaMapowanie } from "./selly/SekcjaMapowanie";
 import { SekcjaPolaczenie } from "./selly/SekcjaPolaczenie";
 import { SekcjaSync } from "./selly/SekcjaSync";
+import { SekcjaUsuwanie } from "./selly/SekcjaUsuwanie";
+import type { FiltrOperacji } from "./selly/szczegoly-logu";
 
 /** Co czeka na potwierdzenie — `null`, gdy dialog jest zamknięty. */
 type Potwierdzenie =
@@ -60,7 +64,14 @@ export function Selly() {
   const ping = useQuery({ queryKey: KLUCZ_PING, queryFn: pobierzPing });
   const statusCsv = useQuery({ queryKey: KLUCZ_STATUS_CSV, queryFn: pobierzStatusCsv });
   const status = useQuery({ queryKey: KLUCZ_STATUS, queryFn: pobierzStatusDostawcow });
-  const log = useQuery({ queryKey: KLUCZ_LOG, queryFn: pobierzLog });
+  // Ticket 194: filtr grup dziennika. Klucz zaczyna się od `KLUCZ_LOG`, więc `invalidateQueries(KLUCZ_LOG)` odświeża
+  // każdy filtr, a wpisy usuwania i synchronizacji mają osobne okno (patrz `pobierzLog`).
+  const [filtrLogu, ustawFiltrLogu] = useState<FiltrOperacji>("wszystko");
+  const log = useQuery({
+    queryKey: [...KLUCZ_LOG, filtrLogu],
+    queryFn: () => pobierzLog(filtrLogu === "wszystko" ? undefined : filtrLogu),
+  });
+  const usuwanie = useQuery({ queryKey: KLUCZ_USUWANIE, queryFn: pobierzStatusUsuwania });
 
   // Formularz „Sync dostawcy". `limit: 0` = wszystko (oryginał: `value="0"`, :462).
   const [dostawca, ustawDostawce] = useState("");
@@ -185,11 +196,23 @@ export function Selly() {
         blad={synchronizacja.error}
       />
 
+      <SekcjaUsuwanie
+        status={usuwanie.data}
+        ladowanie={usuwanie.isPending}
+        blad={usuwanie.error}
+        onOdswiez={() => {
+          void klient.invalidateQueries({ queryKey: KLUCZ_USUWANIE });
+          void klient.invalidateQueries({ queryKey: KLUCZ_LOG });
+        }}
+      />
+
       <SekcjaLog
         wpisy={log.data ?? []}
         ladowanie={log.isPending}
         blad={log.error}
         onOdswiez={() => void klient.invalidateQueries({ queryKey: KLUCZ_LOG })}
+        filtr={filtrLogu}
+        onFiltr={ustawFiltrLogu}
       />
 
       <DialogPotwierdzenia

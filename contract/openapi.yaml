@@ -20222,11 +20222,64 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  /api/selly/usuwanie-status:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/usuwanie-status"
+      description: >-
+        TRASA SPOZA ORYGINAŁU (ticket 194, decyzja użytkowniczki 2026-10-06). Stan usuwania z Selly (Tor 3):
+        czy jest włączone i dlaczego nie (`powody_wylaczenia`), wynik ostatniego przebiegu
+        (`ostatni_przebieg`; w pamięci procesu — po restarcie `null` do najbliższego przebiegu HH:10/25/40/55),
+        wynik próby uprawnień (`proba_uprawnien`), liczba sierot czekających teraz (`sierot_teraz`), usunięcia w ostatnich
+        24 h względem limitu dobowego i ostatnie usunięcie (z `audit_log`). Przebieg bez sierot nie zostawia wpisu
+        w dzienniku, więc bez tej trasy „nic do usunięcia” i „Tor 3 nie działa” wyglądały tak samo.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wlaczone: { type: boolean }
+                  powody_wylaczenia: { type: array, items: { type: string } }
+                  tryb: { type: string }
+                  proba_uprawnien: { type: string, nullable: true, enum: [jest, brak, nieokreslony] }
+                  ostatni_przebieg:
+                    type: object
+                    nullable: true
+                    properties:
+                      kiedy: { type: string, description: "ISO UTC" }
+                      wynik: { type: string, enum: [brak_sierot, usunieto, pominieto, wstrzymano, limit_dobowy, brak_uprawnien, proba_nieokreslona, wylaczone, blad] }
+                      opis: { type: string }
+                      sieroty: { type: integer }
+                      usuniete: { type: integer }
+                      pominiete: { type: integer }
+                      bledy: { type: integer }
+                  sierot_teraz: { type: integer }
+                  usuniec_24h: { type: integer }
+                  limit_dobowy: { type: integer }
+                  maks_udzial_sierot: { type: number }
+                  ostatnie_usuniecie:
+                    type: object
+                    nullable: true
+                    properties:
+                      kiedy: { type: string }
+                      kod: { type: string, nullable: true }
+                      nazwa: { type: string, nullable: true }
+        "401": { description: "Nieautoryzowany" }
   /api/selly/log:
     get:
       tags: [selly]
       summary: "GET /api/selly/log"
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: grupa
+          in: query
+          required: false
+          description: "Ticket 194 (dodatek względem oryginału). `usuwanie` = tylko wpisy Toru 3 (sync_delete, probe_delete*), `synchronizacja` = wszystko inne. Bez parametru — jak w oryginale."
+          schema: { type: string, enum: [usuwanie, synchronizacja] }
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)", content: { application/json: { schema: { $ref: "#/components/schemas/GETSellyLogOdpowiedz200" } } } }
         "401": { description: "Nieautoryzowany" }

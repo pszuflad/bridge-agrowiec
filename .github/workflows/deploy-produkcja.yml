@@ -11,7 +11,7 @@ name: Deploy produkcja
 # tym samym kluczem nie da się uruchomić skryptu produkcji. Instrukcja: docs/wdrozenie-produkcji.md.
 #
 # Wymagane sekrety repo (Settings → Secrets and variables → Actions):
-#   PROD_SSH_HOST         agroopony.eu (VPS vpshd86; od ticketu 188 — wcześniej vpshd1242)
+#   PROD_SSH_HOST         vpshd86.cyber-folks.pl (od 2026-10-06, ticket 193; agroopony.eu wskazuje już Selly)
 #   PROD_SSH_PORT         222
 #   PROD_SSH_USER         admin
 #   PROD_SSH_KEY          klucz PRYWATNY (ed25519) DEDYKOWANY produkcji

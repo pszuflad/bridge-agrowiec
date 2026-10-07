@@ -10,6 +10,7 @@
 // Wszystko tu jest czystą funkcją na wartościach; żadnego dostępu do bazy.
 
 import { MODELE_PRODUCENTA } from "../slowniki/modele-producenta.js";
+import { modelBezDa } from "./oznaczenie-da.js";
 
 type Pozycja = Record<string, unknown>;
 
@@ -130,8 +131,8 @@ export function poprawIndeksy(
 export function normalizujPozycje(d: Pozycja): Pozycja {
   const ctx = { marka: d.marka, nazwa: d.nazwa };
   const wynik: Pozycja = { ...d };
-  if (d.model) wynik.model = normalizujModel(oczyscModelZDot(d.model), ctx);
-  if (d.bieznik) wynik.bieznik = normalizujModel(oczyscModelZDot(d.bieznik), ctx);
+  if (d.model) wynik.model = normalizujModel(modelBezDa(oczyscModelZDot(d.model)), ctx);
+  if (d.bieznik) wynik.bieznik = normalizujModel(modelBezDa(oczyscModelZDot(d.bieznik)), ctx);
   if (d.dot) wynik.dot = normalizujDot(d.dot);
   if (d.konstrukcja) wynik.konstrukcja = normalizujKonstrukcje(d.konstrukcja);
   const ind = poprawIndeksy(d.nazwa, d.indeksNosnosci, d.indeksPredkosci);
