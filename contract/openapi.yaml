@@ -20269,6 +20269,67 @@ paths:
                       kod: { type: string, nullable: true }
                       nazwa: { type: string, nullable: true }
         "401": { description: "Nieautoryzowany" }
+  /api/selly/usuniete:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/usuniete"
+      description: >-
+        TRASA SPOZA ORYGINAŁU (ticket 195, decyzja użytkowniczki 2026-10-07). Zbiorcza historia pozycji usuniętych z Selly
+        przez Tor 3: jeden wiersz na usuniętą pozycję (tabela `selly_usuniecia`), najnowsze pierwsze, bez limitu długości
+        (w odróżnieniu od `selly_sync_log.szczegoly_json`, przycinanego do 8000 znaków). `przebieg_id` = `selly_sync_log.id`.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: "Domyślnie 20, maks. 200."
+          schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
+        - name: offset
+          in: query
+          required: false
+          schema: { type: integer, minimum: 0, default: 0 }
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer, description: "Liczba wszystkich zapisanych usunięć" }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        usunieto_at: { type: string, description: "UTC `YYYY-MM-DD HH:MM:SS`" }
+                        przebieg_id: { type: integer, nullable: true }
+                        kod: { type: string }
+                        nazwa: { type: string, nullable: true }
+                        ean: { type: string, nullable: true }
+                        dostawca: { type: string }
+                        kod_importu: { type: string }
+                        selly_product_id: { type: integer }
+                        selly_variant_id: { type: integer, nullable: true }
+                        akcja: { type: string, enum: [usunieto_wariant, usunieto_produkt, juz_nie_istnial] }
+        "401": { description: "Nieautoryzowany" }
+  /api/selly/usuniete/csv:
+    get:
+      tags: [selly]
+      summary: "GET /api/selly/usuniete/csv"
+      description: >-
+        TRASA SPOZA ORYGINAŁU (ticket 195). Cała historia usunięć jako CSV: BOM `U+FEFF` na początku, średnik jako
+        separator, `\n` łączy wiersze (wzorzec eksportu analityki). Pierwszy wiersz to nagłówek z nazwami kolumn
+        (przy pustej historii plik zawiera sam nagłówek). Nazwa pliku `selly-usuniete-RRRR-MM-DD.csv`.
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200":
+          description: "OK"
+          content:
+            text/csv:
+              schema: { type: string }
+        "401": { description: "Nieautoryzowany" }
   /api/selly/log:
     get:
       tags: [selly]
