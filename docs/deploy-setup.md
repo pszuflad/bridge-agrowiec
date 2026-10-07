@@ -176,14 +176,14 @@ chmod 600 ~/.ssh/authorized_keys
 
 **3. Pobierz klucz serwera do weryfikacji (na dowolnej zaufanej maszynie):**
 ```bash
-ssh-keyscan -p <PORT_SSH> vpshd1242.cyber-folks.pl 2>/dev/null
+ssh-keyscan -p 222 vpshd86.cyber-folks.pl 2>/dev/null   # od 2026-10-06; wcześniej vpshd1242
 ```
 
 **4. Dodaj sekrety repo** (GitHub → Settings → Secrets and variables → Actions → New repository secret):
 | Sekret | Wartość |
 |---|---|
-| `STAGING_SSH_HOST` | `vpshd1242.cyber-folks.pl` (lub IP) |
-| `STAGING_SSH_PORT` | port SSH (np. `22`) |
+| `STAGING_SSH_HOST` | `vpshd86.cyber-folks.pl` — **nie** `agroopony.eu` (domena sklepu wskazuje Selly) |
+| `STAGING_SSH_PORT` | `222` |
 | `STAGING_SSH_USER` | `admin` |
 | `STAGING_SSH_KEY` | treść klucza PRYWATNEGO `~/gh_staging_deploy` (cała, z nagłówkami) |
 | `STAGING_SSH_KNOWN_HOSTS` | wynik `ssh-keyscan` z kroku 3 |
