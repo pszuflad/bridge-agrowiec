@@ -23,6 +23,7 @@ import {
   TOKEN_TESTOWY,
   logSellyZFixtura,
   statusUsuwaniaTestowy,
+  stronaUsunietychTestowa,
   pingSellyZFixtura,
   statusCsvZFixtura,
   statusDostawcowZFixtura,
@@ -39,6 +40,7 @@ const LOG = logSellyZFixtura();
 function zamockujSelly() {
   server.use(
     http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
+    http.get("*/api/selly/usuniete", () => HttpResponse.json(stronaUsunietychTestowa())),
     http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
     http.get("*/api/selly/csv-status", () => HttpResponse.json(CSV)),
     http.get("*/api/selly/status", () => HttpResponse.json({ items: DOSTAWCY })),
@@ -116,6 +118,7 @@ describe("GATE 8b — widok konsumuje kształty z fixtures", () => {
   it("`GET_selly_csv-status` — nieaktualny plik daje powód z API i odznakę BŁĄD", async () => {
     server.use(
       http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
+      http.get("*/api/selly/usuniete", () => HttpResponse.json(stronaUsunietychTestowa())),
     http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
       http.get("*/api/selly/csv-status", () =>
         HttpResponse.json({ ...CSV, status: "stary", powod: "plik z wczoraj" }),

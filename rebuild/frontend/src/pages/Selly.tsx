@@ -34,12 +34,15 @@ import {
   KLUCZ_PING,
   KLUCZ_STATUS,
   KLUCZ_STATUS_CSV,
+  KLUCZ_USUNIETE,
   KLUCZ_USUWANIE,
+  pobierzCsvUsunietych,
   pobierzLog,
   pobierzPing,
   pobierzStatusCsv,
   pobierzStatusDostawcow,
   pobierzStatusUsuwania,
+  pobierzUsuniete,
   synchronizujDostawce,
   wygenerujCsv,
   type ParametrySynchronizacji,
@@ -50,6 +53,7 @@ import { SekcjaLog } from "./selly/SekcjaLog";
 import { SekcjaMapowanie } from "./selly/SekcjaMapowanie";
 import { SekcjaPolaczenie } from "./selly/SekcjaPolaczenie";
 import { SekcjaSync } from "./selly/SekcjaSync";
+import { SekcjaUsuniete } from "./selly/SekcjaUsuniete";
 import { SekcjaUsuwanie } from "./selly/SekcjaUsuwanie";
 import type { FiltrOperacji } from "./selly/szczegoly-logu";
 
@@ -72,6 +76,13 @@ export function Selly() {
     queryFn: () => pobierzLog(filtrLogu === "wszystko" ? undefined : filtrLogu),
   });
   const usuwanie = useQuery({ queryKey: KLUCZ_USUWANIE, queryFn: pobierzStatusUsuwania });
+  // Ticket 195: zbiorcza historia usunięć (strona po stronie) i pobranie całości jako CSV.
+  const [offsetUsunietych, ustawOffsetUsunietych] = useState(0);
+  const usuniete = useQuery({
+    queryKey: [...KLUCZ_USUNIETE, offsetUsunietych],
+    queryFn: () => pobierzUsuniete(offsetUsunietych),
+  });
+  const csvUsunietych = useMutation({ mutationFn: pobierzCsvUsunietych });
 
   // Formularz „Sync dostawcy". `limit: 0` = wszystko (oryginał: `value="0"`, :462).
   const [dostawca, ustawDostawce] = useState("");
@@ -204,6 +215,18 @@ export function Selly() {
           void klient.invalidateQueries({ queryKey: KLUCZ_USUWANIE });
           void klient.invalidateQueries({ queryKey: KLUCZ_LOG });
         }}
+      />
+
+      <SekcjaUsuniete
+        strona={usuniete.data}
+        offset={offsetUsunietych}
+        onOffset={ustawOffsetUsunietych}
+        ladowanie={usuniete.isPending}
+        blad={usuniete.error}
+        onOdswiez={() => void klient.invalidateQueries({ queryKey: KLUCZ_USUNIETE })}
+        onPobierzCsv={() => csvUsunietych.mutate()}
+        pobieranieCsv={csvUsunietych.isPending}
+        bladCsv={csvUsunietych.error}
       />
 
       <SekcjaLog

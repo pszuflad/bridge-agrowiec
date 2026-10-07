@@ -110,6 +110,7 @@ export const KLUCZ_STATUS_CSV = ["/api/selly/csv-status"] as const;
 export const KLUCZ_STATUS = ["/api/selly/status"] as const;
 export const KLUCZ_LOG = ["/api/selly/log"] as const;
 export const KLUCZ_USUWANIE = ["/api/selly/usuwanie-status"] as const;
+export const KLUCZ_USUNIETE = ["/api/selly/usuniete"] as const;
 
 /** Ile ostatnich wpisów dziennika pobiera panel (ticket 194: było 10 = jedna runda synchronizacji dla 10 dostawców). */
 export const LIMIT_LOGU = 100;
@@ -224,6 +225,57 @@ export async function pobierzLog(grupa?: "usuwanie" | "synchronizacja"): Promise
 
 export function pobierzStatusUsuwania(): Promise<StatusUsuwania> {
   return pobierz<StatusUsuwania>("/api/selly/usuwanie-status");
+}
+
+/** Ile pozycji pokazuje jedna strona karty „Usunięte z Selly". */
+export const LIMIT_USUNIETYCH = 20;
+
+/** Jedna usunięta pozycja — `GET /api/selly/usuniete` (ticket 195, trasa spoza oryginału). */
+export type UsunietaPozycja = {
+  id: number;
+  /** UTC `YYYY-MM-DD HH:MM:SS`. */
+  usunieto_at: string;
+  /** `selly_sync_log.id` przebiegu, który usunął pozycję. */
+  przebieg_id: number | null;
+  kod: string;
+  nazwa: string | null;
+  ean: string | null;
+  dostawca: string;
+  kod_importu: string;
+  selly_product_id: number;
+  selly_variant_id: number | null;
+  akcja: "usunieto_wariant" | "usunieto_produkt" | "juz_nie_istnial";
+};
+
+export type StronaUsunietych = { items: UsunietaPozycja[]; total: number };
+
+/** `GET /api/selly/usuniete` — najnowsze pierwsze; `offset` = ile pozycji pominąć (paginacja). */
+export function pobierzUsuniete(offset: number): Promise<StronaUsunietych> {
+  return pobierz<StronaUsunietych>(`/api/selly/usuniete?limit=${LIMIT_USUNIETYCH}&offset=${offset}`);
+}
+
+/**
+ * `GET /api/selly/usuniete/csv` — CAŁA historia usunięć jako plik. Pobieramy `fetch`em z nagłówkiem autoryzacji
+ * (zwykły link nie niesie tokenu Bearer), a plik zapisujemy przez tymczasową kotwicę — tak jak archiwum importów.
+ * Nazwa pliku pochodzi z `Content-Disposition` serwera (`selly-usuniete-RRRR-MM-DD.csv`).
+ */
+export async function pobierzCsvUsunietych(): Promise<void> {
+  const odpowiedz = await fetch(`${BAZA_API}/api/selly/usuniete/csv`, {
+    headers: naglowki(false),
+    credentials: "include",
+  });
+  await rzucGdyBlad(odpowiedz);
+  const nazwa =
+    /filename="?([^";]+)"?/i.exec(odpowiedz.headers.get("content-disposition") ?? "")?.[1] ?? "selly-usuniete.csv";
+  const blob = await odpowiedz.blob();
+  const adres = URL.createObjectURL(blob);
+  const kotwica = document.createElement("a");
+  kotwica.href = adres;
+  kotwica.download = nazwa;
+  document.body.appendChild(kotwica);
+  kotwica.click();
+  kotwica.remove();
+  setTimeout(() => URL.revokeObjectURL(adres), 5000);
 }
 
 /** `selly-injection.js:604` — ciało to dosłownie `{}`. */

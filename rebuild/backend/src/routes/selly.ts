@@ -27,6 +27,7 @@ import { Router, type Request, type Response } from "express";
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
+import { csvUsuniec, listaUsuniec } from "../repos/selly-usuniecia.js";
 import {
   DOMYSLNY_LIMIT_LOGU,
   logSelly,
@@ -385,6 +386,36 @@ export function trasySelly({ db, klient, sciezkiCsv, usuwanie }: ZaleznosciSelly
       const g = req.query.grupa;
       const grupa = g === "usuwanie" || g === "synchronizacja" ? g : undefined;
       res.json({ items: logSelly(db, limit, grupa) });
+    } catch (e) {
+      res.status(500).json({ error: komunikat(e) });
+    }
+  });
+
+  /**
+   * Zbiorcza historia pozycji usuniętych z Selly (Tor 3) — TRASA SPOZA ORYGINAŁU (ticket 195, decyzja użytkowniczki
+   * 2026-10-07). Jeden wiersz na usuniętą pozycję, najnowsze pierwsze, `?limit=` (domyślnie 20, maks. 200) i `?offset=`.
+   * Źródło: tabela `selly_usuniecia` (bez limitu długości — `selly_sync_log.szczegoly_json` jest przycinany).
+   */
+  router.get("/api/selly/usuniete", requireAuth, (req: Request, res: Response) => {
+    try {
+      const limit = Number.parseInt(String(req.query.limit ?? ""), 10);
+      const offset = Number.parseInt(String(req.query.offset ?? ""), 10);
+      res.json(listaUsuniec(db, Number.isNaN(limit) ? undefined : limit, Number.isNaN(offset) ? 0 : offset));
+    } catch (e) {
+      res.status(500).json({ error: komunikat(e) });
+    }
+  });
+
+  /**
+   * Eksport CAŁEJ historii usunięć jako CSV (BOM + średnik, wzorzec `analityka/csv.ts`). Nazwa pliku z datą UTC
+   * z serwera — stała część nazwy, bez niczego z zapytania.
+   */
+  router.get("/api/selly/usuniete/csv", requireAuth, (_req: Request, res: Response) => {
+    try {
+      const dzien = new Date().toISOString().slice(0, 10);
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename=selly-usuniete-${dzien}.csv`);
+      res.send(csvUsuniec(db));
     } catch (e) {
       res.status(500).json({ error: komunikat(e) });
     }
