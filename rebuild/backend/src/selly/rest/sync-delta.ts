@@ -20,6 +20,72 @@
 import type { Baza } from "../../db/index.js";
 import type { Discovery, WierszBridge, WynikMapowania } from "./discovery.js";
 import { sprawdzCelSelly } from "./bezpieczenstwo.js";
+import { szczegolyDoZapisu } from "./log-szczegoly.js";
+
+/**
+ * Rodzaj błędu synchronizacji — do rozróżnienia w panelu (ticket 194). Liczba „Błąd” w dzienniku zlewała dotąd
+ * rzeczy o zupełnie innym znaczeniu:
+ *  • `pending_create` — produktu nie ma jeszcze w Selly, a Tor 1 go NIE zakłada (bez słowników, backlog #68;
+ *    zakłada go dopiero Tor 2). To nie awaria, tylko kolejka do utworzenia;
+ *  • `tozsamosc` — zabezpieczenie z ticketu 184 odmówiło zapisu (produkt/wariant/magazyn w Selly nie zgadza
+ *    się z Bridge) — wymaga sprawdzenia człowieka;
+ *  • `inne` — reszta (HTTP, limity, odpowiedzi Selly).
+ */
+export type RodzajBledu = "pending_create" | "tozsamosc" | "inne";
+
+export function rodzajBledu(komunikat: string): RodzajBledu {
+  if (komunikat.includes("brak dictMaps do createProduct") || komunikat.includes("produkt nie istnieje w Selly"))
+    return "pending_create";
+  if (komunikat.includes("zapis zablokowany")) return "tozsamosc";
+  return "inne";
+}
+
+const KOLEJNOSC_PROBKI: RodzajBledu[] = ["inne", "tozsamosc", "pending_create"];
+const PROBKA_NA_RODZAJ = 10;
+
+/** Liczby błędów wg rodzaju i próbka (po 10 z każdego rodzaju; najpierw te, które wymagają uwagi). */
+export function podsumujBledy(errors: { kod: string; error: string }[]): {
+  bledy_wg_rodzaju: Record<RodzajBledu, number>;
+  sample_errors: { kod: string; error: string; rodzaj: RodzajBledu }[];
+} {
+  const liczby: Record<RodzajBledu, number> = { pending_create: 0, tozsamosc: 0, inne: 0 };
+  const grupy: Record<RodzajBledu, { kod: string; error: string; rodzaj: RodzajBledu }[]> = {
+    pending_create: [],
+    tozsamosc: [],
+    inne: [],
+  };
+  for (const e of errors) {
+    const rodzaj = rodzajBledu(e.error);
+    liczby[rodzaj]++;
+    if (grupy[rodzaj].length < PROBKA_NA_RODZAJ) grupy[rodzaj].push({ ...e, rodzaj });
+  }
+  return { bledy_wg_rodzaju: liczby, sample_errors: KOLEJNOSC_PROBKI.flatMap((r) => grupy[r]) };
+}
+
+/**
+ * Ticket 194 (#194.1, #194.3): pozycja, której zapis się nie powiódł z przyczyn „czekających na człowieka lub Tor 2”
+ * (`pending_create`, `tozsamosc`), nie jest ponawiana co 15 minut — czeka `PRZERWA_PO_BLEDZIE_MS`. Pamięć procesu
+ * (po restarcie próbujemy od nowa); nie dotyka bazy, więc nie wpływa na `selly_products` (backlog #69).
+ * Pozycje z gotowym `selly_variant_id` i błędami „inne” (HTTP, limity) nadal idą w każdym cyklu.
+ */
+export const PRZERWA_PO_BLEDZIE_MS = 6 * 60 * 60 * 1000;
+const wstrzymania = new WeakMap<object, Map<string, number>>();
+
+function czyWstrzymana(db: Baza, klucz: string, teraz: number): boolean {
+  const do_ = wstrzymania.get(db)?.get(klucz);
+  return do_ !== undefined && do_ > teraz;
+}
+
+function wstrzymajPoBledzie(db: Baza, klucz: string, komunikat: string, teraz: number): void {
+  if (rodzajBledu(komunikat) === "inne") return;
+  let m = wstrzymania.get(db);
+  if (!m) wstrzymania.set(db, (m = new Map()));
+  m.set(klucz, teraz + PRZERWA_PO_BLEDZIE_MS);
+}
+
+/** Cena do wysłania musi być dodatnią liczbą skończoną — inaczej do sklepu poszłoby 0 (#194.2). */
+const cenaWazna = (c: number | null | undefined): c is number =>
+  typeof c === "number" && Number.isFinite(c) && c > 0;
 
 /** Wiersz `findDeltaProducts` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszDelta = WierszBridge & {
@@ -199,7 +265,7 @@ function logSyncEnd(
         szczegoly_json = ?, zakonczono = datetime('now'), status = ?
     WHERE id = ?`,
     )
-    .run(ok, err, skip, JSON.stringify(details).slice(0, 8000), status, logId);
+    .run(ok, err, skip, szczegolyDoZapisu(details), status, logId);
 }
 
 /** `markSynced` (`:80-92`) — snapshot wysłanych wartości. */
@@ -224,6 +290,7 @@ function markSynced(db: Baza, row: WierszDelta, priceOk: boolean, stockOk: boole
  */
 function markError(db: Baza, row: WierszDelta, error: unknown): void {
   const errStr = String(error);
+  wstrzymajPoBledzie(db, kluczGrupy(row.dostawca, row.kod_importu), errStr, Date.now());
   const isPendingCreate =
     errStr.includes("brak dictMaps do createProduct") || errStr.includes("produkt nie istnieje w Selly");
   const status = isPendingCreate ? "pending_create" : "error";
@@ -274,6 +341,11 @@ export async function syncDelta(
   console.log(`[sync_delta] Start: ${rows.length} produktow, dostawca=${dostawca || "ALL"}, dryRun=${dryRun}`);
 
   for (const row of rows) {
+    const kluczWstrzymania = kluczGrupy(row.dostawca, row.kod_importu);
+    if (!dryRun && czyWstrzymana(db, kluczWstrzymania, Date.now())) {
+      stats.skip++;
+      continue;
+    }
     try {
       // 0. #108: sam raport — wiersz leci dalej normalną ścieżką i ZOSTANIE wysłany.
       // Pomijanie takiej grupy zatrzymałoby pozycje, których dane Ania uznaje za poprawne
@@ -344,6 +416,14 @@ export async function syncDelta(
         row.cena_sprzedazy = live.cena_sprzedazy;
       }
 
+      // #194.2: bez ważnej ceny nie wysyłamy ceny 0 do żywego sklepu. Wstrzymanej pozycji nadal zerujemy stan.
+      const cenaOk = cenaWazna(row.cena_sprzedazy);
+      if (!cenaOk && live.status !== "wstrzymany") {
+        stats.skip++;
+        errors.push({ kod: row.kod, error: "brak ważnej ceny sprzedaży — pominięto, żeby nie wysłać ceny 0" });
+        continue;
+      }
+
       if (dryRun) {
         stats.skip++;
         console.log(
@@ -355,7 +435,7 @@ export async function syncDelta(
       const putRes = await discovery.apiWithRetry(`PUT /api/products/${productId}/variants/${variantId}`, async () => {
         const data = await discovery.klient.updateVariant(productId, variantId, {
           quantity: row.stan ?? 0,
-          price: row.cena_sprzedazy ?? 0,
+          ...(cenaOk ? { price: row.cena_sprzedazy as number } : {}),
         });
         // Klient rzuca na non-2xx, więc dotarcie tutaj oznacza 2xx (`client.api` → `{status, data}`).
         return { status: 200, data };
@@ -393,7 +473,7 @@ export async function syncDelta(
     stats.ok,
     stats.err,
     stats.skip,
-    { stats, kolizje: kolizje.slice(0, 20), sample_errors: errors.slice(0, 20) },
+    { stats, kolizje: kolizje.slice(0, 20), ...podsumujBledy(errors) },
     stats.err > 0 && stats.ok === 0 ? "blad" : "zakonczono",
   );
 

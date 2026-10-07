@@ -130,6 +130,31 @@ describe("Widok /moje-konto", () => {
     expect(screen.getByTestId("button-submit-change-password")).toBeDisabled();
   });
 
+  it("każde z trzech pól hasła ma oczko, które niezależnie odkrywa i ukrywa wpisany tekst", async () => {
+    await otworzKonto();
+    await wypelnij("stare-haslo", "nowe-haslo-123", "nowe-haslo-123");
+
+    const pola = ["input-old-password", "input-new-password", "input-confirm-password"].map((id) =>
+      screen.getByTestId(id),
+    );
+    pola.forEach((pole) => expect(pole).toHaveAttribute("type", "password"));
+
+    // Odkrycie „Nowego hasła” nie rusza dwóch pozostałych.
+    await userEvent.click(screen.getByTestId("button-toggle-nowe-haslo"));
+    expect(pola[1]).toHaveAttribute("type", "text");
+    expect(pola[0]).toHaveAttribute("type", "password");
+    expect(pola[2]).toHaveAttribute("type", "password");
+    expect(screen.getByTestId("button-toggle-nowe-haslo")).toHaveAccessibleName("Ukryj hasło");
+
+    await userEvent.click(screen.getByTestId("button-toggle-nowe-haslo"));
+    expect(pola[1]).toHaveAttribute("type", "password");
+
+    await userEvent.click(screen.getByTestId("button-toggle-stare-haslo"));
+    await userEvent.click(screen.getByTestId("button-toggle-powtorz-haslo"));
+    expect(pola[0]).toHaveAttribute("type", "text");
+    expect(pola[2]).toHaveAttribute("type", "text");
+  });
+
   it("wysyła {oldPassword, newPassword}, pokazuje toast i czyści pola", async () => {
     await otworzKonto();
 
@@ -139,8 +164,10 @@ describe("Widok /moje-konto", () => {
     await waitFor(() => expect(zapisy).toHaveLength(1));
     expect(zapisy[0]).toEqual({ oldPassword: "stare-haslo", newPassword: "nowe-haslo-123" });
 
-    expect(await screen.findByText("Hasło zmienione")).toBeInTheDocument();
-    expect(screen.getByText("Twoje hasło zostało zaktualizowane.")).toBeInTheDocument();
+    expect(await screen.findByText("Hasło zostało zmienione")).toBeInTheDocument();
+    expect(
+      screen.getByText("Twoje hasło zostało zmienione poprawnie. Zaloguj się ponownie."),
+    ).toBeInTheDocument();
 
     expect(screen.getByTestId("input-old-password")).toHaveValue("");
     expect(screen.getByTestId("input-new-password")).toHaveValue("");

@@ -19,6 +19,7 @@ import {
   isFirstOfMonthDay,
   runFullBatch,
   stworzHarmonogramSelly,
+  stworzStraznikaPrzebiegu,
   suppliersForFullToday,
 } from "../src/selly/rest/scheduler.js";
 import { ostatnieWpisySync, POWOD_PRZERWANIA } from "../src/repos/selly.js";
@@ -98,6 +99,20 @@ describe("harmonogram Selly — rotacja Toru 2 (`suppliersForFullToday`)", () =>
   });
 });
 
+describe("strażnik przebiegu (`stworzStraznikaPrzebiegu`)", () => {
+  it("blokuje drugi start, zwalnia po zakończeniu i po przekroczeniu limitu", () => {
+    let t = 0;
+    const s = stworzStraznikaPrzebiegu(1000, () => t);
+    expect(s.sprobuj()).toBe(true);
+    t = 999;
+    expect(s.sprobuj()).toBe(false);
+    t = 1000; // watchdog: zawieszony przebieg nie blokuje na zawsze
+    expect(s.sprobuj()).toBe(true);
+    s.zakoncz();
+    expect(s.sprobuj()).toBe(true);
+  });
+});
+
 describe("harmonogram Selly — tick", () => {
   const sprzataczki: (() => void)[] = [];
   afterEach(() => {
@@ -158,6 +173,43 @@ describe("harmonogram Selly — tick", () => {
     // Kilka kolejnych ticków w tej samej minucie — `lastRunKey` ma je wygasić.
     await new Promise((r) => setTimeout(r, 120));
     expect(liczbaWpisow(baza, "sync_delta")).toBe(PRZEBIEG_TORU_1);
+  });
+
+  it("ticket 194: przebieg Toru 1, który jeszcze trwa, blokuje kolejny tick (bez nakładania)", async () => {
+    let chwila = dzien(2026, 9, 21, 9, 10);
+    let biegi = 0;
+    let zwolnij: () => void = () => {};
+    const baza = stworzTestowaBaze();
+    const atrapa = stworzAtrapeSelly();
+    const { discovery } = stworzDiscoveryTestowe(atrapa.klient);
+    const h = stworzHarmonogramSelly({
+      db: baza.db,
+      discovery,
+      tryb: "pelny",
+      teraz: () => chwila,
+      interwalMs: 20,
+      biegDelta: () => {
+        biegi += 1;
+        return new Promise<void>((r) => {
+          zwolnij = r;
+        });
+      },
+    });
+    sprzataczki.push(() => {
+      h.zatrzymaj();
+      baza.posprzataj();
+    });
+    h.uruchom();
+
+    await poczekajNa(() => biegi === 1);
+    chwila = dzien(2026, 9, 21, 9, 25); // poprzedni przebieg wisi → pomijamy
+    await new Promise((r) => setTimeout(r, 120));
+    expect(biegi).toBe(1);
+
+    zwolnij();
+    await new Promise((r) => setTimeout(r, 40));
+    chwila = dzien(2026, 9, 21, 9, 40); // po zakończeniu znów rusza
+    await poczekajNa(() => biegi === 2);
   });
 
   it("Tor 2 rusza o 04:30 i tylko raz na dobę", async () => {

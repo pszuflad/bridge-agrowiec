@@ -7,7 +7,7 @@ name: Deploy staging
 # z VPS i uruchamia tools/deploy-staging.sh. Alternatywa dla cron-poll (patrz docs/deploy-setup.md).
 #
 # Wymagane sekrety repo (Settings → Secrets and variables → Actions):
-#   STAGING_SSH_HOST         agroopony.eu (VPS vpshd86; od ticketu 188 — wcześniej vpshd1242)
+#   STAGING_SSH_HOST         vpshd86.cyber-folks.pl (od 2026-10-06, ticket 193; agroopony.eu wskazuje już Selly)
 #   STAGING_SSH_PORT         222
 #   STAGING_SSH_USER         admin
 #   STAGING_SSH_KEY          klucz PRYWATNY (ed25519) dedykowany do deployu
