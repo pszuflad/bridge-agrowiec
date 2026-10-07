@@ -99,4 +99,39 @@ describe("kroki wdrożenia", () => {
       pobierzUzytkownikaPoEmailu(db, "anna.naumowicz4@gmail.com")?.imieNazwisko,
     ).toBe("Anna Naumowicz");
   });
+
+  it("krok źródeł cenników: stare adresy → plik://, MO2/MO3 bez zmian, drugi bieg nic nie zmienia", async () => {
+    const { mkdtempSync, mkdirSync, rmSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { suppliers } = await import("../src/db/schema.js");
+    const root = mkdtempSync(join(tmpdir(), "zrodla-"));
+    for (const k of ["MO1_a", "MO2_b", "MO4_c", "MO9_d"]) mkdirSync(join(root, k));
+    const { sqlite, db } = baza();
+    try {
+      const wiersz = (kod: string, url: string | null) =>
+        ({ kod, nazwa: kod, formatPliku: "csv", sposobDostarczania: "url", url, status: "aktywny" }) as const;
+      db.insert(suppliers)
+        .values([
+          wiersz("MO1", "https://agroopony.eu/imports/bohnenkamp.csv"),
+          wiersz("MO2", "https://agroopony.eu/imports/jmk.csv"),
+          wiersz("MO3", "https://sklep.kolarolnicze.pl/a.csv"),
+          wiersz("MO4", "https://agroopony.eu/imports/acc_ftp3/x.csv"),
+          wiersz("MO9", null),
+        ])
+        .run();
+      const krok = KROKI_WDROZENIA.find((k) => k.id === "2026-10-07-zrodla-cennikow-foldery")!;
+      await krok.uruchom({ db, sqlite, env: { IMPORTY_KATALOG: root } } as never);
+      const url = (kod: string) =>
+        (sqlite.prepare("SELECT url FROM suppliers WHERE kod=?").get(kod) as { url: string | null }).url;
+      expect(url("MO1")).toBe(`plik://${join(root, "MO1_a")}`);
+      expect(url("MO9")).toBe(`plik://${join(root, "MO9_d")}`);
+      expect(url("MO4")).toBe(`plik://${join(root, "MO4_c")}`);
+      expect(url("MO2")).toBe("https://agroopony.eu/imports/jmk.csv");
+      expect(url("MO3")).toBe("https://sklep.kolarolnicze.pl/a.csv");
+      expect(await krok.uruchom({ db, sqlite, env: { IMPORTY_KATALOG: root } } as never)).toBe("bez zmian");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
 });
