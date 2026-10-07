@@ -1,5 +1,6 @@
 import { get as getHttp, type IncomingMessage } from "node:http";
 import { get as getHttps } from "node:https";
+import { czyPlikLokalny, czytajPlikLokalny } from "./plik-lokalny.js";
 
 /**
  * Pobranie pliku dostawcy spod URL — port `downloadUrl` z
@@ -23,7 +24,12 @@ export const TIMEOUT_MS = 60_000;
  */
 export const MAX_PRZEKIEROWAN = 10;
 
-export function pobierzZUrl(url: string, pozostaloSkokow = MAX_PRZEKIEROWAN): Promise<Buffer> {
+export function pobierzZUrl(
+  url: string,
+  pozostaloSkokow = MAX_PRZEKIEROWAN,
+): Promise<Buffer> {
+  // Ticket 194: ścieżka lokalna (pod `IMPORT_KATALOG_LOKALNY`) zamiast URL-a.
+  if (czyPlikLokalny(url)) return czytajPlikLokalny(url);
   return new Promise((resolve, reject) => {
     const pobierz = url.startsWith("https") ? getHttps : getHttp;
 
@@ -39,7 +45,10 @@ export function pobierzZUrl(url: string, pozostaloSkokow = MAX_PRZEKIEROWAN): Pr
           reject(new Error(`Za dużo przekierowań dla ${url}`));
           return;
         }
-        pobierzZUrl(odpowiedz.headers.location, pozostaloSkokow - 1).then(resolve, reject);
+        pobierzZUrl(odpowiedz.headers.location, pozostaloSkokow - 1).then(
+          resolve,
+          reject,
+        );
         return;
       }
 
@@ -56,6 +65,8 @@ export function pobierzZUrl(url: string, pozostaloSkokow = MAX_PRZEKIEROWAN): Pr
     });
 
     zadanie.on("error", reject);
-    zadanie.setTimeout(TIMEOUT_MS, () => zadanie.destroy(new Error(`Timeout: ${url}`)));
+    zadanie.setTimeout(TIMEOUT_MS, () =>
+      zadanie.destroy(new Error(`Timeout: ${url}`)),
+    );
   });
 }
