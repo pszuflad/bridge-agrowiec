@@ -19,6 +19,7 @@
  * `db/snapshot.db`. Sklejenie obu pobieraczy zmieniłoby też transport trasy z 3b.
  */
 import { basename, extname } from "node:path";
+import { czyStareZrodlo, folderZUrl, najnowszyPlik, zapiszCsvZRekordow } from "./katalog-importow.js";
 import type { Baza } from "../db/index.js";
 import { zapiszAlert } from "../repos/alerts.js";
 import {
@@ -261,7 +262,10 @@ export function synchronizujDostawce({
   ): Promise<WynikSynchronizacji> {
     const dostawca = dostawcaPoKodzie(db, kod);
     if (!dostawca) return { ok: false, error: "Dostawca nie istnieje" };
-    if (!dostawca.url) return { ok: false, error: "Brak URL" };
+    // Gdy ustawiono IMPORTY_KATALOG, stare źródła (brak URL / agroopony.eu/imports) czytamy z lokalnego folderu.
+    const katalogImportow = process.env.IMPORTY_KATALOG?.trim() || "";
+    const lokalnie = (katalogImportow !== "" || folderZUrl(dostawca.url) !== null) && czyStareZrodlo(dostawca.url);
+    if (!dostawca.url && !lokalnie) return { ok: false, error: "Brak URL" };
     if (dostawca.status === "wstrzymany" && !opcje.recznie) {
       return { ok: false, error: "Wstrzymany" };
     }
@@ -277,32 +281,46 @@ export function synchronizujDostawce({
     }
     wTrakcie.add(dostawca.kod);
 
-    const url = dostawca.url;
+    const url = dostawca.url ?? "";
     let idArchiwum: string | null = null;
     let proby = 1;
 
     try {
-      const pobrane = await pobierzZPonowieniami(url);
-      const odpowiedz = pobrane.odpowiedz;
-      proby = pobrane.proby;
+      let bufor: Buffer;
+      let nazwaPliku: string;
+      let sparsowane: Awaited<ReturnType<typeof parsujAgrorami>> | null = null;
 
-      if (!odpowiedz.ok) {
-        const teraz = new Date().toISOString();
-        zapiszAlert(db, {
-          poziom: "ostrzezenie",
-          typ: "Błąd HTTP",
-          opis: `${dostawca.kod} (${dostawca.nazwa}): HTTP ${odpowiedz.status}${opisProb(proby)}`,
-          dostawca: dostawca.kod,
-          status: "nowy",
-          data: teraz,
-        });
-        oznaczBladDostawcy(db, dostawca.id, teraz);
-        return { ok: false, error: `HTTP ${odpowiedz.status}` };
+      if (lokalnie && dostawca.kod === "MO9") {
+        // MO9: źródłem jest API; wynik zapisujemy jako CSV w folderze MO9 (i archiwizujemy ten plik).
+        sparsowane = await parsujAgrorami();
+        nazwaPliku = "agrorami-api.csv";
+        bufor = zapiszCsvZRekordow(katalogImportow, "MO9", nazwaPliku, sparsowane.rekordy, dostawca.url);
+      } else if (lokalnie) {
+        const plik = najnowszyPlik(katalogImportow, dostawca.kod, dostawca.url);
+        bufor = plik.bufor;
+        nazwaPliku = plik.nazwa;
+      } else {
+        const pobrane = await pobierzZPonowieniami(url);
+        const odpowiedz = pobrane.odpowiedz;
+        proby = pobrane.proby;
+
+        if (!odpowiedz.ok) {
+          const teraz = new Date().toISOString();
+          zapiszAlert(db, {
+            poziom: "ostrzezenie",
+            typ: "Błąd HTTP",
+            opis: `${dostawca.kod} (${dostawca.nazwa}): HTTP ${odpowiedz.status}${opisProb(proby)}`,
+            dostawca: dostawca.kod,
+            status: "nowy",
+            data: teraz,
+          });
+          oznaczBladDostawcy(db, dostawca.id, teraz);
+          return { ok: false, error: `HTTP ${odpowiedz.status}` };
+        }
+
+        bufor = pobrane.bufor!;
+        nazwaPliku = nazwaPlikuZUrl(url, rozszerzenieDlaParsera(url, dostawca.formatPliku));
       }
-
-      const bufor = pobrane.bufor!;
-      const rozszerzenie = rozszerzenieDlaParsera(url, dostawca.formatPliku);
-      const nazwaPliku = nazwaPlikuZUrl(url, rozszerzenie);
 
       // Archiwum PRZED parsowaniem — dokładnie jak `nq()` (`:48013-48022`), żeby plik,
       // który wywrócił parser, też został zapisany.
@@ -311,16 +329,15 @@ export function synchronizujDostawce({
           dostawcaKod: dostawca.kod,
           oryginalnaNazwa: nazwaPliku,
           zrodlo: "auto-pull",
-          url,
+          url: lokalnie ? `plik://${nazwaPliku}` : url,
           uzytkownik: opcje.uzytkownik ?? null,
           status: "ok",
         })?.id ?? null;
 
       // MO9 ignoruje pobrany CSV: źródłem cen/stanów jest API GraphQL, nie pole magazyn w CSV.
-      const sparsowane =
-        dostawca.kod === "MO9"
-          ? await parsujAgrorami()
-          : parsujBufor(dostawca.kod, bufor, nazwaPliku);
+      sparsowane ??= dostawca.kod === "MO9"
+        ? await parsujAgrorami()
+        : parsujBufor(dostawca.kod, bufor, nazwaPliku);
       if (idArchiwum) {
         oznaczWArchiwum(idArchiwum, {
           rekordy: sparsowane.rekordy.length,

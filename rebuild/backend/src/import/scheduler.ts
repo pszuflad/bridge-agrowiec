@@ -99,7 +99,7 @@ function powodPominiecia(dostawca: DostawcaDoPlanowania, teraz: number): string 
   if (dostawca.sposobDostarczania !== "url") {
     return `sposób dostarczania: ${dostawca.sposobDostarczania || "brak"}`;
   }
-  if (!dostawca.url) return "brak URL";
+  if (!dostawca.url && !process.env.IMPORTY_KATALOG?.trim()) return "brak URL";
   if (!dostawca.czestotliwoscMinuty) return "brak częstotliwości";
   if (dostawca.status === "wstrzymany") return powodWstrzymania(dostawca, teraz);
   return null;

@@ -156,7 +156,7 @@ export function trasyAdmina({ db, przeplanujScheduler }: ZaleznosciAdmina): Rout
       const wartosc = cialo.url;
       if (wartosc === null || wartosc === "") {
         patch.url = null;
-      } else if (typeof wartosc === "string" && /^https?:\/\//i.test(wartosc.trim())) {
+      } else if (typeof wartosc === "string" && /^(https?|plik):\/\//i.test(wartosc.trim())) {
         patch.url = wartosc.trim();
       } else {
         res.status(400).json({ error: "url musi być http(s):// albo null/pusty" });

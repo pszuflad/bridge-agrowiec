@@ -59,6 +59,7 @@ import {
 } from "../../repos/staging-polityka.js";
 import { czyOpona } from "../silnik/klasyfikator.js";
 import { nazwaZDemo } from "./nazwa-demo.js";
+import { zastosujOznaczenieDa } from "./oznaczenie-da.js";
 import { eq } from "drizzle-orm";
 
 import { manualOverrides, markups, promotions } from "../../db/schema.js";
@@ -409,6 +410,9 @@ export function stworzPolitykeStagingu(
       if (d.bieznik) d.bieznik = oczyscModelZDot(d.bieznik) as string;
       // Etap 3 (2026-10-01): dopiski osi, utracone HS/LS, DOT dwucyfrowy/WWYY, konstrukcja, ucięte indeksy.
       d = normalizujPozycje(d);
+      // Odstępstwo 2026-10-06: „DA” (wada kosmetyczna) tylko na końcu nazwy, nie w modelu/bieżniku.
+      // Poprawki Marty nakładane niżej (`nalozPoprawki`) wygrywają z tą regułą.
+      d = zastosujOznaczenieDa(d, raw.nazwa);
       Object.assign(d, {
         ean: ev.value,
         eanRaw: ev.raw,
