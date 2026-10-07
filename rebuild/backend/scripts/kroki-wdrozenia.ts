@@ -23,7 +23,7 @@ try {
   );
   console.log(
     `kroki-wdrozenia: wykonano ${w.wykonane.length}, już wykonane ${w.juzWykonane.length}, ` +
-      `pominięte (brak env) ${w.pominieteBrakEnv.length}`,
+      `pominięte (brak env) ${w.pominieteBrakEnv.length}, odłożone ${w.odlozone.length}`,
   );
 } finally {
   sqlite.close();
