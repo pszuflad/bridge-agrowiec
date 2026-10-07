@@ -21,6 +21,7 @@ import {
   TOKEN_TESTOWY,
   logSellyZFixtura,
   statusUsuwaniaTestowy,
+  stronaUsunietychTestowa,
   pingSellyZFixtura,
   statusCsvZFixtura,
   statusDostawcowZFixtura,
@@ -40,6 +41,7 @@ let generowania: number;
 function zamockujSelly(nadpisania: { status?: typeof DOSTAWCY } = {}) {
   server.use(
     http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
+    http.get("*/api/selly/usuniete", () => HttpResponse.json(stronaUsunietychTestowa())),
     http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
     http.get("*/api/selly/csv-status", () => HttpResponse.json(CSV)),
     http.get("*/api/selly/status", () =>
@@ -291,6 +293,7 @@ describe("5. Odświeżanie", () => {
 
     server.use(
       http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
+      http.get("*/api/selly/usuniete", () => HttpResponse.json(stronaUsunietychTestowa())),
     http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
       http.get("*/api/selly/csv-status", () => HttpResponse.json(CSV)),
       http.get("*/api/selly/status", () => {
@@ -323,6 +326,7 @@ describe("6. Odświeżanie NIE dzieje się po błędzie syncu", () => {
 
     server.use(
       http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(statusUsuwaniaTestowy())),
+      http.get("*/api/selly/usuniete", () => HttpResponse.json(stronaUsunietychTestowa())),
     http.get("*/api/selly/ping", () => HttpResponse.json(PING)),
       http.get("*/api/selly/csv-status", () => HttpResponse.json(CSV)),
       http.get("*/api/selly/status", () => {
