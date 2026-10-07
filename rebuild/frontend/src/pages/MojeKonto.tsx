@@ -19,10 +19,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { useUzytkownik } from "@/components/AuthGate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 import { BladOdpowiedziSerwera, MIN_DLUGOSC_HASLA, zmienHaslo } from "./moje-konto/api";
+import { PoleHasla } from "./moje-konto/PoleHasla";
 
 export function MojeKonto() {
   const uzytkownik = useUzytkownik();
@@ -46,7 +46,11 @@ export function MojeKonto() {
     ustawZapisywanie(true);
     try {
       await zmienHaslo(stare, nowe);
-      toast({ title: "Hasło zmienione", description: "Twoje hasło zostało zaktualizowane." });
+      // Odstępstwo od oryginału (decyzja użytkownika 2026-10-07): treść każe zalogować się ponownie.
+      toast({
+        title: "Hasło zostało zmienione",
+        description: "Twoje hasło zostało zmienione poprawnie. Zaloguj się ponownie.",
+      });
       // Czyszczenie wszystkich trzech pól po sukcesie (`:27690`).
       ustawStare("");
       ustawNowe("");
@@ -114,9 +118,8 @@ export function MojeKonto() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="stare-haslo">Aktualne hasło</Label>
-                <Input
+                <PoleHasla
                   id="stare-haslo"
-                  type="password"
                   autoComplete="current-password"
                   data-testid="input-old-password"
                   value={stare}
@@ -126,9 +129,8 @@ export function MojeKonto() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="nowe-haslo">Nowe hasło</Label>
-                <Input
+                <PoleHasla
                   id="nowe-haslo"
-                  type="password"
                   autoComplete="new-password"
                   minLength={MIN_DLUGOSC_HASLA}
                   data-testid="input-new-password"
@@ -153,9 +155,8 @@ export function MojeKonto() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="powtorz-haslo">Powtórz nowe hasło</Label>
-                <Input
+                <PoleHasla
                   id="powtorz-haslo"
-                  type="password"
                   autoComplete="new-password"
                   data-testid="input-confirm-password"
                   value={powtorz}
