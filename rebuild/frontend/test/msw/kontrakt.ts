@@ -542,6 +542,17 @@ export function statusUsuwaniaTestowy(
 }
 
 /**
+ * `GET /api/selly/usuniete` (ticket 195, trasa spoza oryginału — brak fixtura z produkcji, kształt z backendu).
+ * Domyślnie: pusta historia usunięć. Handler musi być w KAŻDYM teście renderującym `/selly`, bo MSW z
+ * `onUnhandledRequest: "error"` zamienia brak handlera w ciche „błąd zapytania" zamiast w czerwony test.
+ */
+export function stronaUsunietychTestowa(
+  nadpisania: Partial<import("@/pages/selly/api").StronaUsunietych> = {},
+): import("@/pages/selly/api").StronaUsunietych {
+  return { items: [], total: 0, ...nadpisania };
+}
+
+/**
  * `GET /api/selly/log` — nagrane wpisy `selly_sync_log`.
  *
  * ⚠ Klucze są `snake_case` (`liczba_ok`, `dostawca_kod`, `rozpoczeto`), bo oryginał robi

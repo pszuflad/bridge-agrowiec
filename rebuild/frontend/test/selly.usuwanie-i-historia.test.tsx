@@ -21,6 +21,7 @@ import {
   statusCsvZFixtura,
   statusDostawcowZFixtura,
   statusUsuwaniaTestowy,
+  stronaUsunietychTestowa,
   uzytkownikZFixtura,
 } from "./msw/kontrakt";
 import { server } from "./msw/server";
@@ -48,6 +49,7 @@ const wpis = (id: number, nad: Partial<WpisLogu>): WpisLogu => ({
 function zamockuj(opcje: { status?: StatusUsuwania; log?: (grupa: string | null) => WpisLogu[] } = {}) {
   server.use(
     http.get("*/api/selly/usuwanie-status", () => HttpResponse.json(opcje.status ?? statusUsuwaniaTestowy())),
+    http.get("*/api/selly/usuniete", () => HttpResponse.json(stronaUsunietychTestowa())),
     http.get("*/api/selly/ping", () => HttpResponse.json(pingSellyZFixtura())),
     http.get("*/api/selly/csv-status", () => HttpResponse.json(statusCsvZFixtura())),
     http.get("*/api/selly/status", () => HttpResponse.json({ items: statusDostawcowZFixtura() })),

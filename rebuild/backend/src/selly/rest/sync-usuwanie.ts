@@ -32,6 +32,7 @@
 import type { Baza } from "../../db/index.js";
 import { AKCJA_USUNIECIA_Z_SELLY } from "../../historia/mapowanie.js";
 import { zapiszAudyt } from "../../repos/audit.js";
+import { zapiszUsuniecie } from "../../repos/selly-usuniecia.js";
 import type { ProduktSzczegolySelly, WariantSelly } from "../klient.js";
 import type { Discovery } from "./discovery.js";
 import type { TrybSelly } from "../tryb.js";
@@ -586,6 +587,14 @@ async function przebieg(
         } catch (e) {
           // DELETE w Selly już się wykonał — brak wpisu w Historii nie może przerwać reszty ani zgubić dziennika.
           console.error(`[Selly Tor3] nie udało się zapisać historii dla ${wpis.kod}: ${komunikat(e)}`);
+        }
+        // Ticket 195: zbiorcza historia (`selly_usuniecia`), jeden wiersz na pozycję, bez limitu długości. Osobny
+        // `try/catch` — awaria jednego zapisu nie może zgubić drugiego ani przerwać reszty przebiegu.
+        try {
+          // `{ ...wpis, akcja: wpis.akcja }` zawęża typ akcji do trzech „usuniętych” (wnętrze `if` wyżej).
+          zapiszUsuniecie(db, logId, { ...wpis, akcja: wpis.akcja });
+        } catch (e) {
+          console.error(`[Selly Tor3] nie udało się zapisać pozycji w selly_usuniecia dla ${wpis.kod}: ${komunikat(e)}`);
         }
       }
     }
