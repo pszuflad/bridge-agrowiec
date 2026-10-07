@@ -392,6 +392,36 @@ export function trasySelly({ db, klient, sciezkiCsv, usuwanie }: ZaleznosciSelly
   });
 
   /**
+   * Zbiorcza historia pozycji usuniętych z Selly (Tor 3) — TRASA SPOZA ORYGINAŁU (ticket 195, decyzja użytkowniczki
+   * 2026-10-07). Jeden wiersz na usuniętą pozycję, najnowsze pierwsze, `?limit=` (domyślnie 20, maks. 200) i `?offset=`.
+   * Źródło: tabela `selly_usuniecia` (bez limitu długości — `selly_sync_log.szczegoly_json` jest przycinany).
+   */
+  router.get("/api/selly/usuniete", requireAuth, (req: Request, res: Response) => {
+    try {
+      const limit = Number.parseInt(String(req.query.limit ?? ""), 10);
+      const offset = Number.parseInt(String(req.query.offset ?? ""), 10);
+      res.json(listaUsuniec(db, Number.isNaN(limit) ? undefined : limit, Number.isNaN(offset) ? 0 : offset));
+    } catch (e) {
+      res.status(500).json({ error: komunikat(e) });
+    }
+  });
+
+  /**
+   * Eksport CAŁEJ historii usunięć jako CSV (BOM + średnik, wzorzec `analityka/csv.ts`). Nazwa pliku z datą UTC
+   * z serwera — stała część nazwy, bez niczego z zapytania.
+   */
+  router.get("/api/selly/usuniete/csv", requireAuth, (_req: Request, res: Response) => {
+    try {
+      const dzien = new Date().toISOString().slice(0, 10);
+      res.setHeader("Content-Type", "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename=selly-usuniete-${dzien}.csv`);
+      res.send(csvUsuniec(db));
+    } catch (e) {
+      res.status(500).json({ error: komunikat(e) });
+    }
+  });
+
+  /**
    * Stan usuwania z Selly (Tor 3) — TRASA SPOZA ORYGINAŁU (ticket 194, decyzja użytkowniczki 2026-10-06).
    * Przebieg bez sierot nie zostawia wpisu w dzienniku, więc „nic do usunięcia” i „Tor 3 nie działa” wyglądały
    * tak samo. Tu: czy usuwanie jest włączone (i czemu nie), wynik ostatniego przebiegu, ile sierot czeka teraz,
@@ -434,36 +464,6 @@ export function trasySelly({ db, klient, sciezkiCsv, usuwanie }: ZaleznosciSelly
   });
 
   /** Status codziennego pliku CSV, po który Selly przychodzi samo (`routes.cjs:298-342`). */
-  /**
-   * Zbiorcza historia pozycji usuniętych z Selly (Tor 3) — TRASA SPOZA ORYGINAŁU (ticket 195, decyzja użytkowniczki
-   * 2026-10-07). Jeden wiersz na usuniętą pozycję, najnowsze pierwsze, `?limit=` (domyślnie 20, maks. 200) i `?offset=`.
-   * Źródło: tabela `selly_usuniecia` (bez limitu długości — `selly_sync_log.szczegoly_json` jest przycinany).
-   */
-  router.get("/api/selly/usuniete", requireAuth, (req: Request, res: Response) => {
-    try {
-      const limit = Number.parseInt(String(req.query.limit ?? ""), 10);
-      const offset = Number.parseInt(String(req.query.offset ?? ""), 10);
-      res.json(listaUsuniec(db, Number.isNaN(limit) ? undefined : limit, Number.isNaN(offset) ? 0 : offset));
-    } catch (e) {
-      res.status(500).json({ error: komunikat(e) });
-    }
-  });
-
-  /**
-   * Eksport CAŁEJ historii usunięć jako CSV (BOM + średnik, wzorzec `analityka/csv.ts`). Nazwa pliku z datą UTC
-   * z serwera — stała część nazwy, bez niczego z zapytania.
-   */
-  router.get("/api/selly/usuniete/csv", requireAuth, (_req: Request, res: Response) => {
-    try {
-      const dzien = new Date().toISOString().slice(0, 10);
-      res.setHeader("Content-Type", "text/csv; charset=utf-8");
-      res.setHeader("Content-Disposition", `attachment; filename=selly-usuniete-${dzien}.csv`);
-      res.send(csvUsuniec(db));
-    } catch (e) {
-      res.status(500).json({ error: komunikat(e) });
-    }
-  });
-
   router.get("/api/selly/csv-status", requireAuth, (_req: Request, res: Response) => {
     try {
       res.json(statusPlikuCsv(sciezkiCsv));

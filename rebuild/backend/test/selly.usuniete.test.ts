@@ -152,6 +152,21 @@ describe("Tor 3 zapisuje zbiorczą historię usunięć", () => {
     expect(baza.sqlite.prepare("SELECT status FROM selly_sync_log WHERE operacja = 'sync_delete'").get()).toEqual({ status: "zakonczono" });
   });
 
+  it("zbiorcza historia zapisuje się także wtedy, gdy zapis do audit_log zawiedzie (dwa niezależne zapisy)", async () => {
+    tlo();
+    sierota("S1", "MO1_STARY", 900, 901);
+    // Psujemy TYLKO zapis (nie tabelę): Tor 3 czyta `audit_log` do limitu dobowego, więc bez tabeli przebieg w ogóle by nie ruszył.
+    baza.sqlite.exec("CREATE TRIGGER audit_log_zepsuty BEFORE INSERT ON audit_log BEGIN SELECT RAISE(ABORT, 'zapis audytu zepsuty'); END");
+    const { atrapa, discovery } = przygotuj([{ product_id: 900, name: "Opona", ean: eanDla(900), warianty: [{ variant_id: 901, features: [magazyn("MO1")] }] }]);
+
+    const wynik = await usunSierotyZSelly(baza.db, discovery, { tryb: "pelny" });
+
+    expect(wynik?.usuniete_produkty).toBe(1);
+    expect(atrapa.liczba("deleteProduct")).toBe(1);
+    expect(baza.sqlite.prepare("SELECT COUNT(*) c FROM audit_log").get()).toEqual({ c: 0 });
+    expect(wiersze().map((w) => w.kod)).toEqual(["MO1_STARY"]);
+  });
+
   it("błąd w Selly (nic nie usunięte) nie zostawia wierszy w historii", async () => {
     tlo();
     sierota("S1", "MO1_STARY", 900, 901);
@@ -222,6 +237,8 @@ describe("GET /api/selly/usuniete i /api/selly/usuniete/csv", () => {
     // limit ponad maksimum jest obcięty do 200, a śmieci w parametrach wracają do domyślnych
     expect(((await get("/api/selly/usuniete?limit=99999")).body as { items: unknown[] }).items).toHaveLength(25);
     expect(((await get("/api/selly/usuniete?limit=abc&offset=-5")).body as { items: unknown[] }).items).toHaveLength(20);
+    expect(((await get("/api/selly/usuniete?limit=-5")).body as { items: unknown[] }).items).toHaveLength(20);
+    expect(((await get("/api/selly/usuniete?limit=0")).body as { items: unknown[] }).items).toHaveLength(20);
   });
 
   it("wiersz ma pełny, jawny zestaw pól (kontrakt)", async () => {

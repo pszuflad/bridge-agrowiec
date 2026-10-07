@@ -67,13 +67,13 @@ export function zapiszUsuniecie(db: Baza, przebiegId: number | null, w: PozycjaU
     .run(w.czas, przebiegId, w.kod, w.nazwa, w.ean, w.dostawca, w.kod_importu, w.selly_product_id, w.selly_variant_id, w.akcja);
 }
 
-/** Najnowsze pierwsze. `limit` obcięty do `1..MAKS_LIMIT_USUNIEC`, `offset` nie mniejszy niż 0. */
+/** Najnowsze pierwsze. `limit` < 1 → domyślny, ponad `MAKS_LIMIT_USUNIEC` obcinany; `offset` nie mniejszy niż 0. */
 export function listaUsuniec(
   db: Baza,
   limit: number = DOMYSLNY_LIMIT_USUNIEC,
   offset = 0,
 ): { items: WierszUsuniecia[]; total: number } {
-  const l = Math.min(Math.max(Math.trunc(limit) || DOMYSLNY_LIMIT_USUNIEC, 1), MAKS_LIMIT_USUNIEC);
+  const l = limit >= 1 ? Math.min(Math.trunc(limit), MAKS_LIMIT_USUNIEC) : DOMYSLNY_LIMIT_USUNIEC;
   const o = Math.max(Math.trunc(offset) || 0, 0);
   const total = (db.$client.prepare("SELECT COUNT(*) c FROM selly_usuniecia").get() as { c: number }).c;
   const items = db.$client.prepare(`${SELECT} LIMIT ? OFFSET ?`).all(l, o) as WierszUsuniecia[];

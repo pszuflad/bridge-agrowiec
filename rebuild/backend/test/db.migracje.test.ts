@@ -60,9 +60,10 @@ describe("zastosujMigracje", () => {
     "020_scalone_duplikaty_do_usuniecia.sql",
     "021_zastosowania_wozek_tylko_przemyslowe.sql",
     "022_przypisanie_kategorii_zastosowania_csv.sql",
+    "023_selly_usuniecia.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 39 tabel i 22 indeksy", () => {
+  it("stosuje wszystkie migracje po kolei: 40 tabel i 24 indeksy", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -81,7 +82,8 @@ describe("zastosujMigracje", () => {
     // 019 (ticket 179) dokłada `supplier_feed_blocked` (klucz główny, bez osobnego indeksu): +1 tabela, +0.
     // 020 (ticket 180) dokłada dwie kolumny `selly_products_scalone` — bilans tabel i indeksów bez zmian.
     // 021/022 (ticket 185) to triggery i migracja danych (tabela tymczasowa znika) — bilans bez zmian.
-    expect(policzTabele(sqlite)).toBe(39);
+    // 023 (ticket 195) dokłada `selly_usuniecia` (historia usunięć z Selly) z dwoma indeksami: +1 tabela, +2.
+    expect(policzTabele(sqlite)).toBe(40);
 
     const indeksy = (
       sqlite
@@ -90,7 +92,7 @@ describe("zastosujMigracje", () => {
         )
         .get() as { c: number }
     ).c;
-    expect(indeksy).toBe(22);
+    expect(indeksy).toBe(24);
   });
 
   it("baza działa w trybie WAL (jak produkcja)", () => {
@@ -111,7 +113,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(39);
+    expect(policzTabele(sqlite)).toBe(40);
   });
 
   /**
