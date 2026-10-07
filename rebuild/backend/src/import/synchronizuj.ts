@@ -18,7 +18,7 @@
  * w treści alertu i tak wyglądają wszystkie 339 alertów „Błąd pobierania" w produkcyjnym
  * `db/snapshot.db`. Sklejenie obu pobieraczy zmieniłoby też transport trasy z 3b.
  */
-import { extname } from "node:path";
+import { basename, extname } from "node:path";
 import type { Baza } from "../db/index.js";
 import { zapiszAlert } from "../repos/alerts.js";
 import {
@@ -33,7 +33,16 @@ import {
   type OpcjeArchiwizacji,
 } from "./archiwum.js";
 import { parsujAgrorami, parsujBufor } from "./parsuj.js";
-import { silnikStagingu, type SilnikStagingu, type StatystykiImportu } from "./tk.js";
+import {
+  BrakPlikuLokalnego,
+  czyPlikLokalny,
+  czytajPlikLokalny,
+} from "./plik-lokalny.js";
+import {
+  silnikStagingu,
+  type SilnikStagingu,
+  type StatystykiImportu,
+} from "./tk.js";
 
 /**
  * Timeout żądania — 120 s. Oryginał miał 30 s (`:48054`); w logach produkcji AbortError dotykał MO3 ×55,
@@ -63,7 +72,9 @@ export type ZaleznosciSynchronizacji = {
 
 const domyslnyOdstep = (): number => {
   const z = Number(process.env.SYNC_ODSTEP_PONOWIEN_MS);
-  return Number.isFinite(z) && process.env.SYNC_ODSTEP_PONOWIEN_MS !== undefined && z >= 0
+  return Number.isFinite(z) &&
+    process.env.SYNC_ODSTEP_PONOWIEN_MS !== undefined &&
+    z >= 0
     ? z
     : ODSTEP_PONOWIEN_MS;
 };
@@ -96,6 +107,8 @@ export type OpcjeSynchronizacji = {
  * do metadanych archiwum, nigdzie indziej.
  */
 function nazwaPlikuZUrl(url: string, rozszerzenie: string): string {
+  if (czyPlikLokalny(url))
+    return basename(url.replace(/^file:\/\//i, "")) || `import${rozszerzenie}`;
   try {
     const segmenty = new URL(url).pathname.split("/").filter(Boolean);
     return segmenty[segmenty.length - 1] || `import${rozszerzenie}`;
@@ -108,13 +121,18 @@ function nazwaPlikuZUrl(url: string, rozszerzenie: string): string {
  * Rozszerzenie dla parsera — 1:1 z `:48071`: z URL-a, a gdy ścieżka go nie ma,
  * z `formatPliku` dostawcy, a gdy i tego brak — `.csv`.
  */
-function rozszerzenieDlaParsera(url: string, formatPliku: string | null): string {
+function rozszerzenieDlaParsera(
+  url: string,
+  formatPliku: string | null,
+): string {
   let zUrl = "";
-  try {
-    zUrl = extname(new URL(url).pathname);
-  } catch {
-    zUrl = "";
-  }
+  if (czyPlikLokalny(url)) zUrl = extname(url.replace(/^file:\/\//i, ""));
+  else
+    try {
+      zUrl = extname(new URL(url).pathname);
+    } catch {
+      zUrl = "";
+    }
   return zUrl || `.${String(formatPliku || "csv").toLowerCase()}`;
 }
 
@@ -168,7 +186,8 @@ export function synchronizujDostawce({
     aktualizujMeta(id, patch, envArchiwum);
 
   const odstep = odstepPonowienMs ?? domyslnyOdstep();
-  const czekajMs = czekaj ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const czekajMs =
+    czekaj ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
   /** Dostawcy, których synchronizacja (z ponowieniami) właśnie trwa — kolejny cykl nie nakłada się na nią. */
   const wTrakcie = new Set<string>();
 
@@ -179,17 +198,45 @@ export function synchronizujDostawce({
   async function pobierzZPonowieniami(
     url: string,
   ): Promise<{ odpowiedz: Response; bufor: Buffer | null; proby: number }> {
+    // Ticket 194: plik na tym serwerze — bez sieci i bez ponowień; brak pliku jak HTTP 404.
+    if (czyPlikLokalny(url)) {
+      try {
+        const bufor = await czytajPlikLokalny(url);
+        return {
+          odpowiedz: new Response(null, { status: 200 }),
+          bufor,
+          proby: 1,
+        };
+      } catch (e) {
+        if (e instanceof BrakPlikuLokalnego) {
+          return {
+            odpowiedz: new Response(null, {
+              status: 404,
+              statusText: "Brak pliku",
+            }),
+            bufor: null,
+            proby: 1,
+          };
+        }
+        throw e;
+      }
+    }
     const maxProb = 1 + PONOWIENIA_SYNCHRONIZACJI;
     for (let proba = 1; ; proba++) {
       const kontroler = new AbortController();
-      const licznik = setTimeout(() => kontroler.abort(), TIMEOUT_SYNCHRONIZACJI_MS);
+      const licznik = setTimeout(
+        () => kontroler.abort(),
+        TIMEOUT_SYNCHRONIZACJI_MS,
+      );
       try {
         const odpowiedz = await fetch(url, { signal: kontroler.signal });
         if (odpowiedz.status >= 500 && proba < maxProb) {
           await odpowiedz.arrayBuffer().catch(() => undefined);
           throw new OdpowiedzSerwera(odpowiedz.status);
         }
-        const bufor = odpowiedz.ok ? Buffer.from(await odpowiedz.arrayBuffer()) : null;
+        const bufor = odpowiedz.ok
+          ? Buffer.from(await odpowiedz.arrayBuffer())
+          : null;
         return { odpowiedz, bufor, proby: proba };
       } catch (e) {
         if (proba >= maxProb) {
@@ -208,7 +255,10 @@ export function synchronizujDostawce({
       ? ` (próby: ${proby}, odstęp ${Math.round(odstep / 1000)} s, limit ${Math.round(TIMEOUT_SYNCHRONIZACJI_MS / 1000)} s)`
       : "";
 
-  return async function synchronizuj(kod, opcje = {}): Promise<WynikSynchronizacji> {
+  return async function synchronizuj(
+    kod,
+    opcje = {},
+  ): Promise<WynikSynchronizacji> {
     const dostawca = dostawcaPoKodzie(db, kod);
     if (!dostawca) return { ok: false, error: "Dostawca nie istnieje" };
     if (!dostawca.url) return { ok: false, error: "Brak URL" };
@@ -267,9 +317,10 @@ export function synchronizujDostawce({
         })?.id ?? null;
 
       // MO9 ignoruje pobrany CSV: źródłem cen/stanów jest API GraphQL, nie pole magazyn w CSV.
-      const sparsowane = dostawca.kod === "MO9"
-        ? await parsujAgrorami()
-        : parsujBufor(dostawca.kod, bufor, nazwaPliku);
+      const sparsowane =
+        dostawca.kod === "MO9"
+          ? await parsujAgrorami()
+          : parsujBufor(dostawca.kod, bufor, nazwaPliku);
       if (idArchiwum) {
         oznaczWArchiwum(idArchiwum, {
           rekordy: sparsowane.rekordy.length,
@@ -302,12 +353,20 @@ export function synchronizujDostawce({
         data: teraz,
       });
 
-      return { ok: true, liczbaProduktow: sparsowane.rekordy.length, ...statystyki };
+      return {
+        ok: true,
+        liczbaProduktow: sparsowane.rekordy.length,
+        ...statystyki,
+      };
     } catch (e) {
-      const komunikat = (e instanceof Error ? e.message : String(e)).slice(0, 500);
+      const komunikat = (e instanceof Error ? e.message : String(e)).slice(
+        0,
+        500,
+      );
       const probyBledu = (e as { proby?: number } | null)?.proby ?? proby;
       console.error(`[synchronizacja] ${kod} BŁĄD:`, e);
-      if (idArchiwum) oznaczWArchiwum(idArchiwum, { status: "blad", blad: komunikat });
+      if (idArchiwum)
+        oznaczWArchiwum(idArchiwum, { status: "blad", blad: komunikat });
 
       const teraz = new Date().toISOString();
       zapiszAlert(db, {
