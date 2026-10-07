@@ -31,6 +31,7 @@ import type { Discovery, SlownikiSelly, WierszBridge } from "./discovery.js";
 import { globalnyLimiter } from "./limiter.js";
 import { toSellyPayloadV2, type PayloadV2, type WierszMapperaV2 } from "./mapper-v2.js";
 import { cenaBazowaJednegoWariantu, sprawdzCelSelly } from "./bezpieczenstwo.js";
+import { szczegolyDoZapisu } from "./log-szczegoly.js";
 
 /** Wiersz `collectFullSyncItems` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszFull = WierszBridge &
@@ -174,7 +175,7 @@ function logSyncEnd(
         szczegoly_json = ?, zakonczono = datetime('now'), status = ?
     WHERE id = ?`,
     )
-    .run(ok, err, skip, JSON.stringify(details).slice(0, 8000), status, logId);
+    .run(ok, err, skip, szczegolyDoZapisu(details), status, logId);
 }
 
 /** `markProductSynced` (`:118-125`) — cena i stan to domena Toru 1, tu tylko `cena_zakupu_wyslana`. */

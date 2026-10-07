@@ -136,10 +136,12 @@ describe("Tor 1 — sync_delta", () => {
         liczba_skip: 0,
         status: "zakonczono",
       });
+      // Ticket 194: błędy mają rodzaj — „produkt nie istnieje w Selly” to kolejka do utworzenia, nie awaria.
       expect(JSON.parse(String(log.szczegoly_json))).toEqual({
         stats: wynik.stats,
         kolizje: [],
-        sample_errors: wynik.errors,
+        bledy_wg_rodzaju: { pending_create: 1, tozsamosc: 0, inne: 0 },
+        sample_errors: [{ ...wynik.errors[0], rodzaj: "pending_create" }],
       });
     });
 
@@ -490,6 +492,44 @@ describe("Tor 1 — sync_delta", () => {
 
       expect(wynik.stats.kolizje_kod_importu).toBe(0);
       expect(wynik.kolizje).toEqual([]);
+    });
+  });
+
+  describe("ticket 194 — wycofanie ponawiania i zawór ceny", () => {
+    it("pending_create nie jest ponawiany w kolejnym cyklu (wycofanie 6 h)", async () => {
+      const { atrapa, discovery } = przygotuj({ sklep: [] });
+
+      const pierwszy = await syncDelta(baza.db, discovery, "MO9");
+      expect(pierwszy.stats.err).toBeGreaterThan(0);
+      const odczytyPo1 = atrapa.wywolania.length;
+
+      const drugi = await syncDelta(baza.db, discovery, "MO9");
+      expect(drugi.stats.err).toBe(0);
+      expect(drugi.stats.skip).toBe(pierwszy.stats.err);
+      expect(atrapa.wywolania.length).toBe(odczytyPo1);
+    });
+
+    it("błąd „inne” (HTTP) nadal jest ponawiany", async () => {
+      zmapuj336320(null, null);
+      const blad = new BladSelly("[Selly] HTTP 500", 500, {});
+      const { discovery } = przygotuj({ bledy: { updateVariant: blad } });
+
+      const pierwszy = await syncDelta(baza.db, discovery, "MO9");
+      const drugi = await syncDelta(baza.db, discovery, "MO9");
+      expect(drugi.errors.some((e) => e.kod === "MO9_336320")).toBe(
+        pierwszy.errors.some((e) => e.kod === "MO9_336320"),
+      );
+    });
+
+    it("pozycja bez ceny sprzedaży nie wysyła ceny 0 do sklepu", async () => {
+      zmapuj336320(null, null);
+      baza.sqlite.prepare("UPDATE products SET cena_sprzedazy = 0 WHERE kod = 'MO9_336320'").run();
+      const { atrapa, discovery } = przygotuj();
+
+      const wynik = await syncDelta(baza.db, discovery, "MO9");
+
+      expect(atrapa.wywolania.filter((w) => w.metoda === "updateVariant")).toHaveLength(0);
+      expect(wynik.errors.some((e) => e.kod === "MO9_336320" && e.error.includes("brak ważnej ceny"))).toBe(true);
     });
   });
 });

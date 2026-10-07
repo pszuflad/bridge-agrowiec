@@ -515,6 +515,33 @@ export function statusDostawcowZFixtura(): WierszStatusuDostawcy[] {
 }
 
 /**
+ * `GET /api/selly/usuwanie-status` (ticket 194, trasa spoza oryginału — brak fixtura z produkcji, kształt z backendu).
+ * Domyślnie: usuwanie włączone, ostatni przebieg bez sierot, nic jeszcze nie usunięto.
+ */
+export function statusUsuwaniaTestowy(
+  nadpisania: Partial<import("@/pages/selly/api").StatusUsuwania> = {},
+): import("@/pages/selly/api").StatusUsuwania {
+  return {
+    wlaczone: true,
+    powody_wylaczenia: [],
+    tryb: "pelny",
+    proba_uprawnien: "jest",
+    ostatni_przebieg: {
+      kiedy: "2026-10-06T10:55:30.000Z",
+      wynik: "brak_sierot",
+      opis: "Przebieg wykonany — nie ma produktów do usunięcia z Selly",
+      sieroty: 0,
+    },
+    sierot_teraz: 0,
+    usuniec_24h: 0,
+    limit_dobowy: 200,
+    maks_udzial_sierot: 0.3,
+    ostatnie_usuniecie: null,
+    ...nadpisania,
+  };
+}
+
+/**
  * `GET /api/selly/log` — nagrane wpisy `selly_sync_log`.
  *
  * ⚠ Klucze są `snake_case` (`liczba_ok`, `dostawca_kod`, `rozpoczeto`), bo oryginał robi

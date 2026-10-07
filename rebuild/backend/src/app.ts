@@ -221,6 +221,13 @@ export function stworzApp({
         plik: env.SELLY_CSV_PLIK,
         url: env.SELLY_CSV_URL,
       },
+      usuwanie: {
+        wlaczone: env.SELLY_USUWANIE,
+        tryb: env.SELLY_TRYB,
+        // Jak w `server.ts`: harmonogram startuje tylko przy `SELLY_SCHEDULER` i trybie innym niż `wylaczony`.
+        harmonogram: env.SELLY_SCHEDULER && env.SELLY_TRYB !== "wylaczony",
+        maksUdzial: env.SELLY_USUWANIE_MAKS_UDZIAL,
+      },
     }),
   );
 

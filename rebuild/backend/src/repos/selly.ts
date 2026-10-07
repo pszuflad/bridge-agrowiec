@@ -6,7 +6,7 @@
  * lokalny naraz — tak jak `syncOneProduct` w oryginale (`routes.cjs:394-425`).
  */
 
-import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, not, or, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { products, sellyProducts, sellySyncLog } from "../db/schema.js";
@@ -113,14 +113,35 @@ export const DOMYSLNY_LIMIT_LOGU = 20;
  * z chronologicznym — ale przy dwóch wpisach z tej samej sekundy kolejność jest
  * nieokreślona. Tak jest w produkcji i tak zostaje.
  */
-export function logSelly(db: Baza, limit: number = DOMYSLNY_LIMIT_LOGU): WpisLoguSelly[] {
-  return db
-    .select(KOLUMNY_LOGU)
-    .from(sellySyncLog)
+export function logSelly(
+  db: Baza,
+  limit: number = DOMYSLNY_LIMIT_LOGU,
+  grupa?: GrupaLoguSelly,
+): WpisLoguSelly[] {
+  const zapytanie = db.select(KOLUMNY_LOGU).from(sellySyncLog);
+  return (
+    grupa === "usuwanie"
+      ? zapytanie.where(WARUNEK_USUWANIA)
+      : grupa === "synchronizacja"
+        ? zapytanie.where(not(WARUNEK_USUWANIA))
+        : zapytanie
+  )
     .orderBy(desc(sellySyncLog.rozpoczeto))
     .limit(limit)
     .all();
 }
+
+/**
+ * Grupa wpisów dziennika (ticket 194, parametr SPOZA oryginału — oryginał go ignoruje): `usuwanie` = Tor 3
+ * (`sync_delete`) i próba uprawnień (`probe_delete_*`), `synchronizacja` = cała reszta. Po co: jedna runda Toru 1 to
+ * 10 wpisów, więc rzadkie wpisy usuwania wypadały z listy „ostatnich N” w ciągu godzin.
+ */
+export type GrupaLoguSelly = "usuwanie" | "synchronizacja";
+
+const WARUNEK_USUWANIA = or(
+  eq(sellySyncLog.operacja, "sync_delete"),
+  sql`${sellySyncLog.operacja} LIKE 'probe_delete%'`,
+)!;
 
 /**
  * Wiersz `GET /api/selly/sync-status` → `recentLogs` (`routes_sync.cjs:26-32`).

@@ -35,6 +35,7 @@ import { zapiszAudyt } from "../../repos/audit.js";
 import type { ProduktSzczegolySelly, WariantSelly } from "../klient.js";
 import type { Discovery } from "./discovery.js";
 import type { TrybSelly } from "../tryb.js";
+import { zapiszStanTor3 } from "./stan-tor3.js";
 
 export const LIMIT_NA_PRZEBIEG = 20;
 /** Twardy limit usunięć na DOBĘ (kroczące 24 h) — drugi próg obok limitu na przebieg (20 co 15 min = 1920/dobę). */
@@ -161,7 +162,7 @@ function opisUsuniecia(w: WpisUsuniecia): string {
  * godzina usunięcia (ISO, UTC), `szczegoly.zmiany` = opis z nazwą i identyfikatorami.
  */
 /** Ile usunięć (wariant/produkt) zapisano w ostatnich 24 h — z `audit_log`, więc przeżywa restart procesu. */
-function usunieciaWOstatniejDobie(db: Baza): number {
+export function usunieciaWOstatniejDobie(db: Baza): number {
   const od = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   return (
     db.$client
@@ -394,6 +395,11 @@ const PONOWNA_PROBA_MS = 3600 * 1000;
 type StanProby = { wynik: "jest" | "brak" | "nieokreslony"; kiedy: number };
 let stanProby: StanProby | null = null;
 
+/** Wynik ostatniej próby uprawnień (`null`, gdy jeszcze jej nie było) — dla `GET /api/selly/usuwanie-status`. */
+export function wynikProbyUprawnien(): "jest" | "brak" | "nieokreslony" | null {
+  return stanProby?.wynik ?? null;
+}
+
 /** Tylko do testów — kasuje pamięć próby uprawnień. */
 export function zresetujProbeUprawnien(): void {
   stanProby = null;
@@ -479,6 +485,9 @@ export async function usunSierotyZSelly(
   przebiegWToku = true;
   try {
     return await przebieg(db, discovery, opcje);
+  } catch (e) {
+    zapiszStanTor3({ wynik: "blad", opis: `Przebieg zakończył się błędem: ${komunikat(e).slice(0, 200)}` });
+    throw e;
   } finally {
     przebiegWToku = false;
   }
@@ -494,8 +503,20 @@ async function przebieg(
   const zostaloNaDobe = Math.max(0, limitDobowy - usunieciaWOstatniejDobie(db));
   const limit = Math.min(opcje.limit ?? LIMIT_NA_PRZEBIEG, zostaloNaDobe);
   const { sieroty, wszystkie } = znajdzSieroty(db, limit);
-  if (wszystkie === 0) return null; // cichy przebieg: nic do zrobienia — żadnego wpisu w dzienniku
-  if (limit === 0) return null; // wyczerpany limit dobowy — wznowi się, gdy najstarsze usunięcia wyjdą z okna 24 h
+  if (wszystkie === 0) {
+    // cichy przebieg: nic do zrobienia — żadnego wpisu w dzienniku (ale stan w pamięci, żeby panel pokazał, że Tor 3 żyje)
+    zapiszStanTor3({ wynik: "brak_sierot", opis: "Przebieg wykonany — nie ma produktów do usunięcia z Selly", sieroty: 0 });
+    return null;
+  }
+  if (limit === 0) {
+    // wyczerpany limit dobowy — wznowi się, gdy najstarsze usunięcia wyjdą z okna 24 h
+    zapiszStanTor3({
+      wynik: "limit_dobowy",
+      opis: `Wyczerpany limit ${limitDobowy} usunięć na dobę — wznowi się, gdy najstarsze wyjdą z okna 24 h`,
+      sieroty: wszystkie,
+    });
+    return null;
+  }
 
   const sqlite = db.$client;
   const produktow = (sqlite.prepare("SELECT COUNT(*) c FROM products").get() as { c: number }).c;
@@ -518,6 +539,11 @@ async function przebieg(
         ? `sierot jest ${wszystkie} z ${mapowan} mapowań (>${Math.round(maksUdzial * 100)}%)`
         : null;
   if (podejrzane) {
+    zapiszStanTor3({
+      wynik: "wstrzymano",
+      opis: `Wstrzymano usuwanie z Selly: ${podejrzane} — nic nie usunięto`,
+      sieroty: wszystkie,
+    });
     if (czyJuzZapisanoWstrzymanie(db)) return null;
     wynik.wstrzymano = `Wstrzymano usuwanie z Selly: ${podejrzane} — wygląda na wyczyszczenie katalogu lub awarię importu, nic nie usunięto`;
     const logId = otworzLog(db);
@@ -568,6 +594,20 @@ async function przebieg(
       wynik.bledy > 0 && wynik.usuniete_warianty + wynik.usuniete_produkty + wynik.juz_nie_istnialo === 0 ? "blad" : "zakonczono";
     zamknijLog(db, logId, wynik, status);
   }
+  const usunieteRazem = wynik.usuniete_warianty + wynik.usuniete_produkty + wynik.juz_nie_istnialo;
+  zapiszStanTor3({
+    wynik: usunieteRazem > 0 ? "usunieto" : wynik.bledy > 0 ? "blad" : "pominieto",
+    opis:
+      usunieteRazem > 0
+        ? `Usunięto ${usunieteRazem} z ${wszystkie} sierot (pominięte ${wynik.pominiete}, błędy ${wynik.bledy})`
+        : wynik.bledy > 0
+          ? `Są sieroty (${wszystkie}), ale usuwanie kończyło się błędami (${wynik.bledy}) — szczegóły w Historii operacji`
+          : `Są sieroty (${wszystkie}), ale żadna nie przeszła kontroli tożsamości — nic nie usunięto (pominięte ${wynik.pominiete})`,
+    sieroty: wszystkie,
+    usuniete: usunieteRazem,
+    pominiete: wynik.pominiete,
+    bledy: wynik.bledy,
+  });
   console.log(
     `[Selly Tor3] sieroty=${wszystkie}, usunięte: warianty=${wynik.usuniete_warianty}, produkty=${wynik.usuniete_produkty}, ` +
       `już nie istniało=${wynik.juz_nie_istnialo}, pominięte=${wynik.pominiete}, błędy=${wynik.bledy}`,
