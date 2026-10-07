@@ -134,4 +134,47 @@ describe("kroki wdrożenia", () => {
       rmSync(root, { recursive: true, force: true });
     }
   });
+
+  it("krok źródeł: stan produkcji po tickecie 194 — MO9 `imports/agrorami.csv` → folder, MO4/MO5 jawne pliki bez zmian", async () => {
+    const { mkdtempSync, mkdirSync, rmSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const { suppliers } = await import("../src/db/schema.js");
+    const base = mkdtempSync(join(tmpdir(), "zrodla194-"));
+    const root = join(base, "selly-agroopony");
+    mkdirSync(root);
+    for (const k of ["MO4_c", "MO5_d", "MO9_e"]) mkdirSync(join(root, k));
+    const { sqlite, db } = baza();
+    try {
+      const wiersz = (kod: string, url: string | null) =>
+        ({ kod, nazwa: kod, formatPliku: "csv", sposobDostarczania: "url", url, status: "aktywny" }) as const;
+      const mo4 = join(root, "MO4_c", "agrowiec_wr.csv");
+      const mo5 = join(root, "MO5_d", "agrowiec_mw.csv");
+      db.insert(suppliers)
+        .values([wiersz("MO4", mo4), wiersz("MO5", mo5), wiersz("MO9", join(base, "agrorami.csv"))])
+        .run();
+      const krok = KROKI_WDROZENIA.find((k) => k.id === "2026-10-07-zrodla-cennikow-foldery")!;
+      await krok.uruchom({ db, sqlite, env: { IMPORTY_KATALOG: root } } as never);
+      const url = (kod: string) =>
+        (sqlite.prepare("SELECT url FROM suppliers WHERE kod=?").get(kod) as { url: string | null }).url;
+      expect(url("MO9")).toBe(`plik://${join(root, "MO9_e")}`);
+      expect(url("MO4")).toBe(mo4);
+      expect(url("MO5")).toBe(mo5); // `agrowiec_suma.csv` nie wygrywa „najnowszego pliku”
+    } finally {
+      rmSync(base, { recursive: true, force: true });
+    }
+  });
+
+  it("krok źródeł: brak katalogu/folderu → ODŁOŻONY, nie zapisany jako wykonany", async () => {
+    const { suppliers } = await import("../src/db/schema.js");
+    const { sqlite, db } = baza();
+    db.insert(suppliers)
+      .values([{ kod: "MO1", nazwa: "MO1", formatPliku: "csv", sposobDostarczania: "url", url: null, status: "aktywny" }])
+      .run();
+    const krok = KROKI_WDROZENIA.find((k) => k.id === "2026-10-07-zrodla-cennikow-foldery")!;
+    const w = await uruchomKroki(sqlite, db, [krok], { IMPORTY_KATALOG: "/nie/ma/takiego" });
+    expect(w.wykonane).toEqual([]);
+    expect(w.odlozone).toHaveLength(1);
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM kroki_wdrozenia").get()).toEqual({ n: 0 });
+  });
 });

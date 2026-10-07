@@ -41,8 +41,9 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "źródła cenników dostawców (poza MO2/MO3) → lokalne foldery MO#_ (plik://), widoczne w panelu",
     async uruchom({ db, env }) {
       const katalog = (env.IMPORTY_KATALOG as string | undefined)?.trim() || DOMYSLNY_KATALOG_IMPORTOW;
-      if (!czyKatalogIstnieje(katalog)) return `pominięto: brak katalogu ${katalog}`;
-      const zmiany = podmienZrodla(db, katalog);
+      if (!czyKatalogIstnieje(katalog)) return { odloz: `brak katalogu ${katalog}` };
+      const { zmiany, braki } = podmienZrodla(db, katalog);
+      if (braki.length) return { odloz: [...zmiany, ...braki].join("; ") };
       return zmiany.length ? zmiany.join("; ") : "bez zmian";
     },
   },

@@ -23,13 +23,22 @@ export type Krok = {
   /** Zmienne env (sekrety z `$PROD_ROOT/.env`). Brak którejkolwiek → krok POMINIĘTY, nie zapisany. */
   wymagaEnv?: string[];
   /** Zwrócony tekst trafia do `kroki_wdrozenia.wynik` i do logu wdrożenia. */
-  uruchom: (ctx: KontekstKroku) => Promise<string | void>;
+  uruchom: (ctx: KontekstKroku) => Promise<string | void | OdlozKrok>;
 };
+
+/**
+ * Zwrócone z kroku = „nie dało się teraz” (brak katalogu, folderu): wdrożenie idzie dalej, ale krok NIE jest
+ * zapisany jako wykonany i spróbuje przy następnym wdrożeniu. Krok musi być idempotentny.
+ */
+export type OdlozKrok = { odloz: string };
+const czyOdloz = (w: unknown): w is OdlozKrok =>
+  typeof w === "object" && w !== null && typeof (w as OdlozKrok).odloz === "string";
 
 export type WynikKrokow = {
   wykonane: string[];
   juzWykonane: string[];
   pominieteBrakEnv: { id: string; brakuje: string[] }[];
+  odlozone: { id: string; powod: string }[];
 };
 
 const TABELA = "kroki_wdrozenia";
@@ -73,6 +82,7 @@ export async function uruchomKroki(
     wykonane: [],
     juzWykonane: [],
     pominieteBrakEnv: [],
+    odlozone: [],
   };
 
   for (const krok of kroki) {
@@ -87,7 +97,13 @@ export async function uruchomKroki(
       continue;
     }
     log(`krok ${krok.id}: ${krok.opis}`);
-    const rezultat = (await krok.uruchom({ db, sqlite, env })) ?? "";
+    const odpowiedz = await krok.uruchom({ db, sqlite, env });
+    if (czyOdloz(odpowiedz)) {
+      log(`krok ${krok.id}: ODŁOŻONY (nie zapisany) — ${odpowiedz.odloz}`);
+      wynik.odlozone.push({ id: krok.id, powod: odpowiedz.odloz });
+      continue;
+    }
+    const rezultat = odpowiedz ?? "";
     zapisz.run(krok.id, new Date().toISOString(), rezultat);
     log(`krok ${krok.id}: gotowe${rezultat ? ` — ${rezultat}` : ""}`);
     wynik.wykonane.push(krok.id);
