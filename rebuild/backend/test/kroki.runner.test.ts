@@ -178,3 +178,35 @@ describe("kroki wdrożenia", () => {
     expect(sqlite.prepare("SELECT COUNT(*) AS n FROM kroki_wdrozenia").get()).toEqual({ n: 0 });
   });
 });
+
+describe("krok wdrożenia: włączenie Toru 2 i Toru 3 w .env", () => {
+  it("zmienia tylko dwa klucze, resztę (sekrety) zostawia, drugi bieg niczego nie zmienia", async () => {
+    const { mkdtempSync, writeFileSync, readFileSync, rmSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const katalog = mkdtempSync(join(tmpdir(), "envkrok-"));
+    const plik = join(katalog, ".env");
+    writeFileSync(plik, "JWT_SECRET=tajne\nSELLY_TOR2=false\nSELLY_TRYB=pelny\nexport SELLY_USUWANIE=false\n");
+    try {
+      const { ustawWEnvPliku } = await import("../src/kroki/env-plik.js");
+      const krok = KROKI_WDROZENIA.find((k) => k.id === "2026-10-08-selly-tor2-tor3-wlaczone")!;
+      const { db, sqlite } = baza();
+      const wynik = await krok.uruchom({ db, sqlite, env: { PLIK_ENV: plik } } as never);
+      expect(String(wynik)).not.toContain("tajne");
+      expect(readFileSync(plik, "utf8")).toBe(
+        "JWT_SECRET=tajne\nSELLY_TOR2=true\nSELLY_TRYB=pelny\nSELLY_USUWANIE=true\n",
+      );
+      const drugi = ustawWEnvPliku(plik, { SELLY_TOR2: "true", SELLY_USUWANIE: "true" });
+      expect(drugi?.every((o) => o.endsWith("(bez zmian)"))).toBe(true);
+      // brak wpisu → dopisanie
+      writeFileSync(plik, "JWT_SECRET=x\n");
+      ustawWEnvPliku(plik, { SELLY_TOR2: "true" });
+      expect(readFileSync(plik, "utf8")).toBe("JWT_SECRET=x\nSELLY_TOR2=true\n");
+      // brak pliku → odłożony
+      const brak = await krok.uruchom({ db, sqlite, env: { PLIK_ENV: join(katalog, "nie-ma") } } as never);
+      expect(brak).toEqual({ odloz: expect.stringContaining("brak pliku") });
+    } finally {
+      rmSync(katalog, { recursive: true, force: true });
+    }
+  });
+});
