@@ -4,6 +4,8 @@ import {
   DOMYSLNY_KATALOG_IMPORTOW,
   podmienZrodla,
 } from "../import/podmien-zrodla.js";
+import { dirname, join } from "node:path";
+import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
 
 /**
@@ -45,6 +47,19 @@ export const KROKI_WDROZENIA: Krok[] = [
       const { zmiany, braki } = podmienZrodla(db, katalog);
       if (braki.length) return { odloz: [...zmiany, ...braki].join("; ") };
       return zmiany.length ? zmiany.join("; ") : "bez zmian";
+    },
+  },
+  {
+    id: "2026-10-08-selly-tor2-tor3-wlaczone",
+    opis: "Selly: włączenie Toru 2 (pełna synchronizacja 04:30) i Toru 3 (usuwanie sierot) — SELLY_TOR2=true, SELLY_USUWANIE=true w .env",
+    async uruchom({ env }) {
+      // `.env` leży w `$PROD_ROOT`, a baza w `$PROD_ROOT/data/` (tools/deploy-produkcja.sh).
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      const opis = ustawWEnvPliku(sciezka, { SELLY_TOR2: "true", SELLY_USUWANIE: "true" });
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      return `${opis.join("; ")} — zacznie działać przy następnym wdrożeniu/restarcie (zmienne są czytane z .env przy starcie skryptu wdrożenia)`;
     },
   },
 ];
