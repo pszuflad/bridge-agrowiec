@@ -196,6 +196,22 @@ describe("naPayloadSelly i walidacja", () => {
     });
   });
 
+  it("ticket 197 (#154.1): flagi zapisane tekstem 'Tak' trafiają do opisu HTML (jak w oryginale), 0/'' nie", () => {
+    baza.sqlite
+      .prepare("UPDATE products SET ms = 'Tak', snow_3pmsf = 'Tak', reinforced = 1, extra_load = 0, cut_resistant = '' WHERE kod = 'MO9_336320'")
+      .run();
+    // Model nadal zjada 'Tak' (API wierne produkcji) — poprawka dotyczy tylko ścieżki do Selly.
+    expect(baza.sqlite.prepare("SELECT ms FROM products WHERE kod = 'MO9_336320'").get()).toEqual({ ms: "Tak" });
+
+    const opis = naPayloadSelly(baza.db, produkt("MO9_336320"), MAPY).content_html as string;
+
+    expect(opis).toContain("<b>M+S</b>");
+    expect(opis).toContain("<b>3PMSF</b>");
+    expect(opis).toContain("<b>Reinforced</b>");
+    expect(opis).not.toContain("Extra Load");
+    expect(opis).not.toContain("Odporność na przecięcia");
+  });
+
   /**
    * `provider_code` schodzi do `kod`, gdy produkt nie ma własnego kodu dostawcy. Cenniki
    * kilku dostawców tej kolumny nie mają w ogóle, więc to nie jest przypadek brzegowy.
