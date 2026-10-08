@@ -1,11 +1,14 @@
 # Bridge — zasady stałe dla każdej sesji
 
-Ten projekt to **wierna odbudowa** działającej produkcji („Bridge dla Agrowca") w nowym stosie
-w `rebuild/`. Domyślna reguła: odtwarzasz udokumentowane zachowanie 1:1, nie wymyślasz nowego.
-Każde odstępstwo musi być świadomą decyzją użytkownika. Pełny kontekst i kolejność źródeł
-prawdy: `.claude/commands/feature.md`, sekcja „Kontekst odbudowy".
+Ten projekt to **żywa produkcja** „Bridge dla Agrowca" (`https://bridgeone.agroopony.eu`) w stosie z `rebuild/`.
+Odbudowa starego systemu jest zakończona (cutover); od 2026-10-08 (ticket 198) prawdą jest **kod w `rebuild/` + testy**, nie stary
+oryginał. Stary system (`mirror/`, `deminified/`) to **archeologia** — pomaga zrozumieć, skąd się wzięło dziwne zachowanie, ale
+nie jest wzorcem. Zmiany zachowania muszą być **jawne** i zatwierdzone przez użytkownika; kontrakt API jest utrzymywany
+(`contract/openapi.yaml`), a fixtures są baseline'em regresji. Kolejność źródeł prawdy:
+`.claude/commands/feature.md`, sekcja „Kontekst utrzymania".
 
-Praca idzie iteracjami i blokami (I3 → 3a, 3b, 3c…), opisanymi w `docs/rebuild-roadmap.md` §5.
+`docs/rebuild-roadmap.md` to **archiwum planu odbudowy** (iteracje I3 → 3a, 3b…), nie plan bieżącej pracy. Otwarte sprawy:
+`docs/rebuild-backlog/` (`tools/stan-backlogu.sh`).
 
 ---
 
@@ -31,7 +34,11 @@ Praca idzie iteracjami i blokami (I3 → 3a, 3b, 3c…), opisanymi w `docs/rebui
 
 ---
 
-## Roadmapa jest wejściem dla następnej sesji — utrzymuj ją na bieżąco
+## Karty i pliki współdzielone — reguły zostają (część „roadmapowa" jest historyczna)
+
+> Od cutoveru roadmapy nie utrzymujemy — to archiwum. **Zostaje reguła nadrzędna:** nie dopisuj akapitów na końcu plików
+> współdzielonych, twórz plik-per-ticket (`docs/spec-backend/wpis-<N>.md`, `docs/rebuild-backlog/wpis-<N>.md`,
+> `docs/karty/<ID>/…`). Opis poniżej (koordynator, fale kart) dotyczy czasów odbudowy; stosuj go tylko, gdy ktoś znów uruchamia karty.
 
 `docs/rebuild-roadmap.md` czyta następna sesja. Prompt, którym ją uruchamiasz, jest
 jednorazowy — **roadmapa i karty (`docs/karty/`) zostają**. Z tego wynikają obowiązki:
@@ -88,7 +95,7 @@ najpierw trzeba poprawić roadmapę. Prompt ma pytać o decyzje, nie o fakty ju�
 Rozdzielaj przy tym dwie rzeczy: **fakt** (np. graf wywołań) zapisujesz jako fakt, a **zmianę
 przypisania zakresu** traktujesz jako decyzję użytkownika i zapisujesz osobno.
 
-**5. Uważaj na duplikaty definicji w zdeminifikowanym oryginale.**
+**5. [ARCHEOLOGIA] Uważaj na duplikaty definicji w zdeminifikowanym oryginale** (pomaga czytać stary kod; nie dotyczy `rebuild/`).
 `deminified/backend-index.cjs` ma funkcje zdefiniowane po dwa razy, gdzie wygrywa PÓŹNIEJSZA:
 `tk` (:47378 martwe / :47584 żywe), `Lq` (:46965 licznik cyfr / :47312 generator identyfikatora).
 Duplikaty są **fizycznie w wysłanym bundlu** `mirror/backend/index.cjs`, nie artefaktem naszej
@@ -138,11 +145,12 @@ odwzorować `SELECT *` oryginału, samo wypisanie projekcji jawnie NIE WYSTARCZY
 ominąć mapper: `` sql<T>`${products.<pole>}` `` w `select({...})` idzie przez `noopDecoder`, a nie
 przez `column.mapFromDriverValue` (`mapResultRow` w **korzeniu** paczki `drizzle-orm`,
 `utils.cjs:40`, wybór dekodera `:45-52` — NIE w `sqlite-core/`, tę ścieżkę łatwo zacytować źle).
-I druga strona tej monety: nie „napraw" schematu — tryb `boolean` w modelu jest wierny (oryginał
-trzyma te kolumny tak samo, `deminified/backend-index.cjs:43733-43752`), więc `GET /api/products`
-ma zostać przy `false` na `'Tak'`; poprawka należy do warstwy odczytu konkretnego konsumenta
-(`src/selly/generator-csv.ts`), nigdy do `src/db/schema.ts`. Ten sam błąd czeka nienaprawiony w
-`src/selly/mapper.ts:197-203` (sync REST do Selly, backlog `#154.1`). Szczegóły i pomiar:
+I druga strona tej monety: **nie „naprawiaj" schematu przy okazji** — dziś `GET /api/products` zwraca `false` na `'Tak'`
+(zgodnie z `contract/fixtures/GET_products.json`), a poprawka należy do warstwy odczytu konkretnego konsumenta
+(`src/selly/generator-csv.ts`, od ticketu 197 też `naniesSuroweFlagi` w `src/repos/selly.ts`), nie do `src/db/schema.ts`.
+Dawny argument „tryb `boolean` jest wierny oryginałowi" przestał być powodem: to **otwarta decyzja użytkownika** — czy
+wyczyścić dane (`'Tak'` → `1`) i naprawić schemat; do czasu decyzji nie ruszaj `schema.ts`. Ten sam błąd w
+`src/selly/mapper.ts` (opis HTML do Selly, `#154.1`) naprawił ticket 197. Szczegóły i pomiar:
 `docs/rebuild-backlog/wpis-153.md`, `docs/tickets/154-BUG-csv-selly-flagi-tak/raport.md`.
 
 **`UPPER()`/`LOWER()` w SQLite są ASCII-only.** `UPPER('prowadząca')` daje `'PROWADZąCA'` —
@@ -153,7 +161,7 @@ samą resztkę i jest to spójne (baza ma `PROWADZąCA`, plik dostawcy z `PROWAD
 niej różni). Morał: przy porównaniach case-insensitive w SQL sprawdź, czy dane mają polskie
 znaki, i nie „popraw" tego na wariant Unicode-aware bez sprawdzenia, co zrobił oryginał.
 
-**W `mirror/frontend/` bundli jest kilka, ale ŻYWY jest tylko ten z `index.html`.** Sprawdzaj to
+**[ARCHEOLOGIA] W `mirror/frontend/` bundli jest kilka, ale ŻYWY jest tylko ten z `index.html`.** Sprawdzaj to
 zawsze: `grep -o 'src="./assets/index[^"]*"' mirror/frontend/index.html` (dziś:
 `index-PRICEFMT1783512500.js`). Ania dwukrotnie łatała plik, którego produkcja nie ładuje —
 pass-through `konstrukcja` z 2026-09-01 poszedł do martwego `index-BRIDGEONE21783342500.js`
@@ -162,7 +170,7 @@ w kolumnie „Konstrukcja opony". Do tego `deminified/frontend-index.js` jest bu
 czyli sprzed czterech łatek — zanim uznasz deminifikat za stan produkcji, przeczytaj
 `deminified/README.md`.
 
-**Nazwa kopii `.bak` daje ETYKIETĘ, nie treść.** `.bak_szer_marka_20260904_1500` brzmi jak
+**[ARCHEOLOGIA] Nazwa kopii `.bak` daje ETYKIETĘ, nie treść.** `.bak_szer_marka_20260904_1500` brzmi jak
 „kolumna szerokość/marka" i tak opisały ją roadmapa i backlog, a realnie łatka zdejmuje z formatera
 szerokości gałąź „cała notacja `AxB`" (587 z 7395 pozycji zmienia zapis) i dokłada filtr „bez cyfr"
 na słownikowej gałęzi listy marek. Morał: przy łatkach FE najpierw rozłóż diff bundla
@@ -389,7 +397,7 @@ jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skr
   w `rebuild/backend/test/gate/selly-atrapa.ts`. Uwaga: `POST /api/selly/sync-supplier` z
   `dry_run=false` realnie modyfikuje cudzy sklep — nie odpalaj tego ręcznie bez sekretów
   testowych.
-- **Oryginał da się uruchomić lokalnie** — `tools/record-write-fixtures.cjs` stawia
+- **[ARCHEOLOGIA] Oryginał da się uruchomić lokalnie** — `tools/record-write-fixtures.cjs` stawia
   `mirror/backend/index.cjs` na kopii `db/snapshot.db`; to standardowa metoda dowodzenia
   wierności (nagrania fixtures), nie tylko czytanie zdeminifikowanego kodu. Trzy pułapki:
   scheduler rusza po URL-e dostawców w ciągu 60 s od startu (`extensions.cjs:811-838`,

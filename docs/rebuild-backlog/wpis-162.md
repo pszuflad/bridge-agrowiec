@@ -11,7 +11,7 @@ Nie triaż. Wpis własny: dług procesowy wykryty przy pytaniu użytkownika o `/
 | **Pliki** | `.claude/commands/feature.md`, `.claude/commands/triaz-zmian.md`, `.claude/agents/{researcher,reviewer,doc-checker}.md`, `CLAUDE.md`, `docs/rebuild-backlog.md`, `docs/rebuild-roadmap.md` |
 | **Commit** | — |
 | **Do nowej wersji?** | ✅ **TAK — decyzja użytkownika 2026-09-24**, jako karta `PO.0`, **pierwsza po przełączeniu domeny** |
-| **Status** | ⬜ czeka na cutover (warunek wstępny: stare środowisko zatrzymane) |
+| **Status** | ✅ wykonane w tickecie 198 (2026-10-08); trzy decyzje z `docs/po-cutoverze-proces.md` §3 (a, b, c) zostają otwarte |
 
 **Opis.** Komenda `/feature` i trzej agenci (`researcher`, `reviewer`, `doc-checker`) zostały
 napisane pod **wierną odbudowę**: każą traktować `contract/fixtures/` jako wzorzec „co produkcja

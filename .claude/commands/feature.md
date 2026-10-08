@@ -1,5 +1,5 @@
 ---
-description: Ticket odbudowy Bridge end-to-end — wierne odtworzenie zachowania wg kontraktu/fixtures (plan → impl → review → docs → PR)
+description: Ticket Bridge end-to-end — utrzymanie i rozwój żywej produkcji wg kodu, testów i kontraktu (plan → impl → review → docs → PR)
 argument-hint: <feature/bug description — be concrete>
 ---
 
@@ -11,26 +11,25 @@ User request:
 
 ---
 
-## Kontekst odbudowy — WIERNE ODTWORZENIE, nie nowy feature
+## Kontekst utrzymania — nowy stos JEST produkcją
 
-**To NIE jest zwykły ticket „nowa funkcja".** Odbudowujemy istniejącą, działającą produkcję
-(„Bridge dla Agrowca") w nowym stosie `rebuild/`, zachowując jej zachowanie **1:1**. Domyślna
-reguła: **odtwarzasz udokumentowane zachowanie, nie wymyślasz nowego.** Każde odstępstwo od
-zastanego zachowania musi być **świadomą decyzją użytkownika** (Krok 3), nigdy przypadkiem czy
-„ulepszeniem" z własnej inicjatywy.
+**Od cutoveru kod w `rebuild/` jest działającą produkcją** („Bridge dla Agrowca", `https://bridgeone.agroopony.eu`).
+Stary system (`mirror/`, `deminified/`) to **archeologia**: wolno do niego zajrzeć, żeby zrozumieć, *skąd się wzięło*
+dziwne zachowanie, ale **nie jest wzorcem** i nie wolno z niego wywodzić, że „tak ma być". Zgłoszenie od użytkowniczki
+(najczęściej Ani) rozstrzyga ona sama — nie to, co robił oryginał. Zmiana zachowania jest legalna, o ile jest **jawna**:
+opisana w `plan.md`, zatwierdzona przez użytkownika w Kroku 3, z aktualizacją kontraktu i fixtures tam, gdzie dotyka API.
 
 **Źródła prawdy (czytaj je, nie zgaduj) — w kolejności wiarygodności:**
-- `contract/fixtures/` — nagrane odpowiedzi żywego backendu (kształt + zsanityzowane wartości). **Siatka bezpieczeństwa: to, co produkcja realnie zwraca.**
-- `contract/openapi.yaml` — zamrożony kontrakt API (ścieżki, metody, kształty request/response). Patrz też `contract/README.md`.
-- `docs/spec-backend.md`, `docs/spec-frontend.md` — zweryfikowana specyfikacja zachowania.
-- `rebuild/schema/001_schema.sql` — kanoniczny schemat bazy (zgodny z produkcją); pomocniczo `db/schema.sql`.
-- `docs/prompts/mapa-kodu-do-wiki.md` — mapa starego kodu (funkcje/pliki, nie numery linii).
-- `deminified/` (`backend-index.cjs`, `frontend-index.js`) + `mirror/backend`, `mirror/frontend` — zdeminifikowany oryginał: **ostateczne źródło, gdy specyfikacja milczy**. To jego zachowanie odtwarzasz.
-- `docs/rebuild-backlog.md` — świadome zmiany Ani. **Nanosisz TYLKO wpisy oznaczone ✅ TAK; „⬜ do decyzji" i „❌ NIE" pomijasz** (nie decydujesz o tym sam).
+- **Kod w `rebuild/` + jego testy** — to jest to, co realnie działa.
+- `docs/spec-backend.md`, `docs/spec-backend/wpis-*.md`, `docs/spec-frontend.md` — opis zachowania. Mogą się starzeć: gdy kod mówi co innego, wierzysz kodowi i **zgłaszasz rozjazd dokumentacja ↔ kod**.
+- `contract/openapi.yaml` — **utrzymywany** kontrakt API (nie zamrożony). Patrz `contract/README.md`.
+- `contract/fixtures/` — **baseline regresji**: chroni przed *niezamierzoną* zmianą kształtu odpowiedzi. Zmiana *zamierzona* jest dozwolona (aktualizacja `openapi.yaml` + przenagranie fixture + wpis w `plan.md`).
+- `rebuild/schema/*.sql` — migracje i schemat bazy.
+- `docs/rebuild-backlog/` (+ `docs/rebuild-backlog.md`) — otwarte wpisy i decyzje użytkownika. Nanosisz tylko to, co ma decyzję „tak"; reszty nie rozstrzygasz sam.
+- **Archeologia (tylko kontekst historyczny):** `deminified/`, `mirror/`, `docs/prompts/mapa-kodu-do-wiki.md`, `docs/rebuild-roadmap.md` (archiwum planu odbudowy), `docs/tickets/` sprzed cutoveru.
 
-**Rozstrzyganie sprzeczności:** fixtures/kontrakt (co produkcja realnie robi) **>** spec (nasz opis)
-**>** mapa kodu. Jeśli spec i oryginał się różnią — wierzysz oryginałowi i **zgłaszasz rozjazd
-użytkownikowi** zamiast po cichu wybierać.
+**Kontrakty zewnętrzne, których złamanie boli natychmiast i poza repo** (to jest cel GATE'a KONTRAKTU niżej):
+REST i plik CSV do Selly (`src/selly/`), formaty cenników dostawców (CSV/XLSX, 10 dostawców), kontrakt FE↔BE (`openapi.yaml`).
 
 ---
 
@@ -61,13 +60,12 @@ użytkownikowi** zamiast po cichu wybierać.
 
 ### Step 1: Load main docs
 
-Twoją mapą są **źródła prawdy odbudowy** wymienione w sekcji „Kontekst odbudowy" wyżej. Zacznij od nich — nie ma tu `README.md` ani `docs/INDEX.md`. Dla danego ticketa wybierz **właściwe sekcje** (nie ładuj całych specyfikacji ani `openapi.yaml` w całości):
-- ustal, których **endpointów/ekranów** dotyczy zadanie → odczytaj odpowiednie ścieżki w `contract/openapi.yaml` i pasujące pliki w `contract/fixtures/`;
-- odczytaj odpowiednie sekcje `docs/spec-backend.md` / `docs/spec-frontend.md`;
-- jeśli ticket realizuje kartę (`P7.4`, `PR.1`…) → `cat docs/karty/<ID>/*.md` (karta + wejścia
-  od innych kart; zob. `docs/karty/README.md`), a z roadmapy tylko blok jej iteracji;
-- sprawdź `docs/rebuild-backlog.md`, czy zadania nie dotyka któraś zdecydowana zmiana (✅/⬜/❌);
-- jeśli zadanie rusza schemat/dane → `rebuild/schema/001_schema.sql`.
+Twoją mapą są **źródła prawdy** wymienione w sekcji „Kontekst utrzymania" wyżej. Zacznij od nich — nie ma tu `README.md` ani `docs/INDEX.md`. Dla danego ticketa wybierz **właściwe sekcje** (nie ładuj całych specyfikacji ani `openapi.yaml` w całości):
+- ustal, których **endpointów/ekranów** dotyczy zadanie → przeczytaj ich kod w `rebuild/` i testy, potem odpowiednie ścieżki w `contract/openapi.yaml` i pasujące pliki w `contract/fixtures/`;
+- odczytaj odpowiednie sekcje `docs/spec-backend.md` / `docs/spec-frontend.md` (traktuj jako opis, który mógł się zestarzeć);
+- jeśli ticket realizuje kartę (`docs/karty/<ID>/`) → `cat docs/karty/<ID>/*.md` (zob. `docs/karty/README.md`); roadmapa to archiwum planu odbudowy, nie plan bieżącej pracy;
+- sprawdź `docs/rebuild-backlog/` i `docs/rebuild-backlog.md`, czy zadania nie dotyka któraś zdecydowana zmiana (✅/⬜/❌);
+- jeśli zadanie rusza schemat/dane → `rebuild/schema/` (migracje) i `rebuild/backend/src/db/schema.ts`.
 
 Jeśli researcher później wskaże inne sekcje — doczytasz wtedy.
 
@@ -76,13 +74,13 @@ Jeśli researcher później wskaże inne sekcje — doczytasz wtedy.
 Launch `Task` with the `researcher` agent. **Don't use `isolation: "worktree"`.** At this stage the ticket worktree doesn't exist yet — researcher works in the main repo (current cwd). Pass:
 - The user's request (exactly as above)
 - Key docs sections you identified in Step 1 (paths + section numbers)
-- Instrukcja (to jest odbudowa, nie greenfield): **„Ustal DOKŁADNE udokumentowane zachowanie, które nowy kod w `rebuild/` ma odtworzyć.** Źródła w kolejności: `contract/fixtures/` i `contract/openapi.yaml` (co produkcja realnie zwraca — wiążące), potem `docs/spec-*`, a gdy milczą — zdeminifikowany oryginał (`deminified/`, `mirror/backend`, `mirror/frontend`) wskazany przez `docs/prompts/mapa-kodu-do-wiki.md`. **Docs odbudowy są świeże i zweryfikowane — traktuj je jako wiarygodne, ale każdą tezę potwierdź w fixtures/oryginale.** Pracujesz w głównym repo (read-only), nie twórz worktree."
+- Instrukcja (to jest utrzymanie działającej produkcji, nie greenfield i nie odbudowa): **„Ustal, jak zadany fragment DZIAŁA DZIŚ w `rebuild/` (kod + testy), co mówi o nim `docs/spec-*` i `contract/openapi.yaml`, i gdzie zmiana się rozchodzi.** Archeologii (`deminified/`, `mirror/`) użyj tylko, gdy trzeba zrozumieć pochodzenie dziwnego zachowania — nie traktuj jej jako wzorca. Docs mogą być nieaktualne: każdą tezę potwierdź w kodzie. Pracujesz w głównym repo (read-only), nie twórz worktree."
 
 Raport researchera ma zawierać:
-- **Zakres kontraktu:** które ścieżki `openapi.yaml` i które pliki `contract/fixtures/` ten ticket musi spełnić (to potem gate testów w Kroku 9).
-- Które sekcje spec i które miejsca oryginału (`deminified/`, funkcje z mapy kodu) opisują to zachowanie.
-- Istniejące w `rebuild/` wzorce do ponownego użycia (jeśli już coś jest).
-- **Rozjazdy** spec↔oryginał↔fixtures oraz pytania otwarte (trafią do Kroku 3).
+- **Zakres kontraktu:** które ścieżki `openapi.yaml` i które pliki `contract/fixtures/` ten ticket dotyka (to potem GATE KONTRAKTU w Kroku 9) oraz które kontrakty zewnętrzne (Selly, dostawcy) mogą ucierpieć.
+- Gdzie w `rebuild/` (pliki, funkcje, testy) leży dziś to zachowanie i które sekcje spec je opisują.
+- Istniejące wzorce do ponownego użycia.
+- **Rozjazdy dokumentacja ↔ kod** oraz pytania otwarte (trafią do Kroku 3).
 
 ### Step 3: Ask the user questions
 
@@ -212,26 +210,25 @@ Create `docs/tickets/<TICKET-ID>/plan.md` (in the worktree!). Content — dense,
 ## Context
 [What the researcher found — key bits. Which parts of the system it will touch.]
 
-## Kontrakt i fixtures (zakres) — siatka bezpieczeństwa
-[Które ścieżki `contract/openapi.yaml` (metoda + path) i które pliki `contract/fixtures/`
-ten ticket MUSI spełnić. To jest wiążące — nowy kod musi zwracać ten sam kształt i te same
-(zsanityzowane) wartości. Jeśli ticket nie dotyka API — napisz „brak (nie dotyka kontraktu)"
-i uzasadnij. Odnotuj wszelkie znane rozjazdy spec↔oryginał↔fixtures i jak je rozstrzygamy.]
+## Kontrakt i fixtures (zakres)
+[Które ścieżki `contract/openapi.yaml` (metoda + path) i które pliki `contract/fixtures/` ten ticket dotyka
+oraz które kontrakty zewnętrzne (Selly, formaty dostawców). Kształt odpowiedzi zostaje, chyba że plan JAWNIE go zmienia —
+wtedy wpisz tu, co się zmienia i że `openapi.yaml` + fixture zostaną zaktualizowane. Jeśli ticket nie dotyka API —
+napisz „brak (nie dotyka kontraktu)" i uzasadnij. Odnotuj rozjazdy dokumentacja↔kod.]
 
 ## Decisions
 [From Q&A with the user. Each decision = 1-2 lines + rationale (pros/cons we weighed).
-Osobno wypisz KAŻDE świadome odstępstwo od zachowania oryginału (np. wpis z backlogu ✅ TAK) —
-domyślnie odtwarzamy 1:1, odstępstwa muszą być zatwierdzone przez użytkownika.]
+Osobno wypisz KAŻDĄ zmianę dotychczasowego zachowania produkcji (np. wpis z backlogu z decyzją „tak") —
+zmiany muszą być zatwierdzone przez użytkownika, nie robimy ich „przy okazji".]
 
 ## Implementation plan
-[Kroki odtworzenia udokumentowanego zachowania (nie wymyślania nowego). Pliki do zmiany/utworzenia/
-usunięcia. Konkretne nazwy funkcji, tabele, endpointy, komponenty UI. Co w jakiej kolejności.
-Gdzie oryginał (`deminified/`, mapa kodu) pokazuje, jak dana rzecz działa — wskaż to miejsce.]
+[Kroki zmiany. Pliki do zmiany/utworzenia/usunięcia. Konkretne nazwy funkcji, tabele, endpointy, komponenty UI.
+Co w jakiej kolejności. Wskaż miejsca w istniejącym kodzie `rebuild/`, na których się opierasz.]
 
 ## Testing strategy
-[Jak zweryfikujemy zgodność z kontraktem: które fixtures z „Kontrakt i fixtures (zakres)" porównujemy
-i jak (kształt + wartości), walidacja odpowiedzi względem `openapi.yaml`, plus testy jednostkowe logiki.
-Co pomijamy i dlaczego. GATE z Kroku 9 obowiązuje: brak zgodności z fixtures/kontraktem = ticket nie jest gotowy.]
+[Jak zweryfikujemy, że nic nie pękło: które fixtures z „Kontrakt i fixtures (zakres)" porównujemy i jak,
+walidacja względem `openapi.yaml`, testy jednostkowe logiki, kontrakty zewnętrzne (Selly, dostawcy). Co pomijamy i dlaczego.
+GATE KONTRAKTU z Kroku 9 obowiązuje.]
 
 ## Out of scope
 [What explicitly is NOT in this ticket.]
@@ -274,21 +271,20 @@ Rules:
 
 Read the project's testing docs (if any — e.g. `docs/TESTING.md`) to know what test types exist and how to run them. Principle: **the minimum that gives confidence**.
 
-> **GATE ODBUDOWY (obowiązkowy, jeśli ticket dotyka API/kontraktu).**
-> Ticket **NIE jest gotowy**, dopóki nowy kod nie zgadza się z siatką bezpieczeństwa:
-> 1. **Fixtures** — dla każdej ścieżki z sekcji „Kontrakt i fixtures (zakres)" w `plan.md`
->    porównaj odpowiedź nowego backendu z odpowiadającym plikiem w `contract/fixtures/`:
->    **kształt (klucze, typy, zagnieżdżenie) musi się zgadzać 1:1**; wartości — tam gdzie
->    deterministyczne (enumy, `kategoria`, `zastosowanie`, flagi) też. Różnice tylko tam,
->    gdzie plan świadomie je przewiduje (zatwierdzone odstępstwo).
-> 2. **Kontrakt** — odpowiedzi walidują się względem schematów z `contract/openapi.yaml`
->    (ścieżki, kody, kształty request/response).
-> 3. **Rozbieżność = STOP.** Jeśli nie możesz pogodzić kodu z fixtures/kontraktem, a to nie jest
->    zatwierdzone odstępstwo — **nie obchodź gate'a i nie „poprawiaj" fixtures**; zatrzymaj się,
->    opisz rozjazd użytkownikowi (fixtures pokazują, co robi produkcja — to one są wzorcem).
+> **GATE KONTRAKTU (obowiązkowy, jeśli ticket dotyka API, importu od dostawców albo eksportu do Selly).**
+> Ticket **NIE jest gotowy**, dopóki zmiana nie jest zgodna z zadeklarowanym kontraktem **albo świadomie i widocznie go zmienia**:
+> 1. **Fixtures** — dla każdej ścieżki z sekcji „Kontrakt i fixtures (zakres)" w `plan.md` porównaj odpowiedź z odpowiadającym
+>    plikiem w `contract/fixtures/` (kształt: klucze, typy, zagnieżdżenie; wartości tam, gdzie deterministyczne).
+>    Różnica jest dopuszczalna tylko, gdy plan ją jawnie przewiduje i zatwierdził ją użytkownik.
+> 2. **Zamierzona zmiana kontraktu** — zaktualizuj `contract/openapi.yaml`, przenagraj fixture (z nowego backendu) i opisz zmianę
+>    w `plan.md`/`raport.md`. Nie „poprawiaj" fixtures po cichu, żeby test zazielenił się sam.
+> 3. **Kontrakty zewnętrzne** — jeśli ticket dotyka eksportu do Selly (REST/CSV) albo parsowania cenników dostawców, sprawdź to na
+>    atrapach/próbkach (testy nigdy nie wołają prawdziwego Selly) i opisz wynik.
+> 4. **Niezamierzona rozbieżność = STOP.** Jeśli kod rozjeżdża się z kontraktem, a plan tego nie przewiduje — zatrzymaj się
+>    i opisz rozjazd użytkownikowi.
 >
-> Zapisz wynik gate'a w `raport.md` (które fixtures/ścieżki sprawdzone, wynik). Jeśli ticket
-> **nie dotyka** kontraktu — napisz to wprost i uzasadnij, wtedy gate nie obowiązuje.
+> Zapisz wynik gate'a w `raport.md` (które ścieżki/fixtures sprawdzone, wynik). Jeśli ticket **nie dotyka** kontraktu — napisz to
+> wprost i uzasadnij, wtedy gate nie obowiązuje.
 
 - Unit tests for new logic — yes, always if the logic is non-trivial.
 - Integration tests — if the changes warrant them or touch interactions with external systems / services.
@@ -314,10 +310,10 @@ Create `docs/tickets/<TICKET-ID>/raport.md`:
 - **Deleted:** `path/old.ts` — …
 
 ## Deviations from plan
-[If 1:1 — "None". If you deviated — describe what and why.]
+[If as planned — "None". If you deviated — describe what and why.]
 
 ## Test results
-- **Gate odbudowy (fixtures/kontrakt):** [✓ zgodne / ✗ rozjazd / N/D — nie dotyka API] — które ścieżki i pliki `contract/fixtures/` sprawdzone; przy ✗ opisz rozjazd
+- **Gate kontraktu (fixtures/kontrakt/zewnętrzne):** [✓ zgodne / ✗ rozjazd / N/D — nie dotyka API] — które ścieżki i pliki `contract/fixtures/` sprawdzone; przy ✗ opisz rozjazd
 - Unit: [✓/✗/skipped + count + reason if skipped]
 - Integration: …
 - E2E: …
@@ -359,46 +355,10 @@ Limit: **3 full fix-loop iterations**. If after the 3rd iteration BLOCKERs remai
 
 Based on plan.md + raport.md + review.md + branch diff — decide which files in `docs/` may need an update. **Better too many than too few.** Generally include high-level/index docs (e.g. `INDEX.md`, `README.md`, `CLAUDE.md`, `ROADMAP.md`, a PRD if present) plus selectively any other files in `/docs/` (but not tickets, plans, reports, reviews — only `/docs/`, not deeper).
 
-> **OBOWIĄZKOWO, jeśli ticket realizował kartę odbudowy** (`docs/karty/<ID>/`, dawniej blok
-> w `docs/rebuild-roadmap.md` §5): `docs/karty/` i `docs/rebuild-backlog.md` są **zawsze**
-> w zakresie. Karta jest wejściem dla następnej sesji — prompt do niej jest jednorazowy, karta
-> zostaje (patrz `CLAUDE.md`).
->
-> ⛔ **Karta NIE edytuje `docs/rebuild-roadmap.md`** — ani §4, ani tabeli kart, ani wspólnych
-> akapitów iteracji. Karty pracują równolegle, a każda wspólna linia w roadmapie kończyła się
-> konfliktem przy merge'u (7 przypadków w 2026-09-18…21). Roadmapę zmienia wyłącznie
-> koordynator. Pełna tabela własności i szablony: `docs/karty/README.md`.
->
-> Doc-checker dostaje wprost polecenie, żeby:
->
-> 1. **oznaczyć kartę jako zrobioną w JEJ pliku** — `docs/karty/<ID>/karta.md`: linia
->    `> **Stan:** ✅ <data> · <TICKET-ID>` i sekcja „Dowiezione” z zakresem FAKTYCZNIE
->    dowiezionym, nie planowanym — łącznie z tym, gdzie odbiegł od pierwotnego założenia.
->    Jeśli karta nie ma jeszcze `karta.md` (okres przejściowy, patrz README), założyć go
->    z szablonu;
-> 2. **każde ustalenie dotyczące PRZYSZŁEJ karty zapisać jako NOWY plik
->    `docs/karty/<jej ID>/wejscie-<N>.md`** (N = numer tego ticketa) — nigdy jako dopisek
->    w cudzym `karta.md` ani w roadmapie. Sesja 3c czyta katalog 3c; nota schowana gdzie
->    indziej do niej nie dojdzie. To jest najczęstszy sposób, w jaki wiedza z iteracji ginie;
-> 3. **zaktualizować statusy wpisów w backlogu**, których ticket dotknął (✅/🔨/⬜/❌);
-> 4. **usunąć z WŁASNEGO `karta.md` to, co ticket obalił** — nieaktualne założenia o zakresie,
->    sprostowane fakty o oryginale. Nie dopisywać obok. Jeśli fałsz siedzi w roadmapie albo
->    w cudzej karcie — zapisać to w sekcji „Do koordynatora” własnego `karta.md`, nie
->    poprawiać samemu;
-> 5. **nowe ustalenie o backendzie zapisać jako NOWY plik `docs/spec-backend/wpis-<N>.md`**
->    (szablon: `docs/spec-backend/README.md`) — nigdy jako akapit dopisany na koniec sekcji
->    `docs/spec-backend.md`. Poprawka W MIEJSCU zdania, które ticket obalił, jest dozwolona.
->    Powód: karty P10.1 i PR.1 (tickety 90 i 91) dopisały się na koniec §2 w to samo miejsce
->    i zderzyły przy merge'u — ten sam wzorzec, który w roadmapie dał 7 konfliktów.
->
-> **Okres przejściowy:** ticket, którego worktree powstał PRZED wprowadzeniem `docs/karty/`
-> (ticket 82), kończy po staremu — w roadmapie. Sprawdzenie: `ls docs/karty/README.md`
-> w worktree ticketa.
->
-> Jeśli w trakcie ticketa wyszło, że roadmapa przypisała jakąś funkcję do złej sesji
-> (zdarzyło się to już dwukrotnie z `bridge_ext.cjs`), zapisz dowód — numery linii
-> wywołań — w „Do koordynatora” własnego `karta.md`. **Fakt** zapisz jako fakt; **zmianę przypisania zakresu** potraktuj
-> jako decyzję użytkownika i zapytaj o nią w Kroku 3, jeśli ticket jeszcze trwa.
+> **Karta:** jeśli ticket realizuje kartę (`docs/karty/<ID>/`), zasady są w `docs/karty/README.md` (stan w `karta.md`, ustalenia dla
+> przyszłej karty w `wejscie-<N>.md`). **Zawsze zostaje reguła plików-per-ticket:** nie dopisujemy akapitów na koniec plików
+> współdzielonych — nowe ustalenia o backendzie idą do `docs/spec-backend/wpis-<N>.md`, wpisy backlogu do
+> `docs/rebuild-backlog/wpis-<N>.md`. **`docs/rebuild-roadmap.md` jest archiwum planu odbudowy — ticket go nie edytuje.**
 
 ### Step 14: Delegate all docs to doc-checker subagents
 
