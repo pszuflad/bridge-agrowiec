@@ -10,7 +10,11 @@
 // charakteryzacyjne (`test/charakteryzacja/akceptacja/scenariusze.mjs` — żaden nie ma
 // `_policyVersion`) zaczęłyby padać blokadą „stary import". Warstwa jest tu po to.
 
+import { eq } from "drizzle-orm";
+
 import type { Baza } from "../../db/index.js";
+import { products } from "../../db/schema.js";
+import { poprawkiDla } from "../../repos/overrides.js";
 import { aktualizujProdukt } from "../../repos/products.js";
 import { zaktualizujPozycjeStagingu } from "../../repos/staging.js";
 import {
@@ -25,6 +29,7 @@ import { sprawdzAkceptacje } from "./blokady.js";
 import { odmow } from "./helpery.js";
 import { validateEanDostawcy } from "./ean-dostawcy.js";
 import { chron, usunZgloszeniaPary } from "./kontekst.js";
+import { nazwaZDemo } from "./nazwa-demo.js";
 
 /**
  * Zatwierdza JEDNĄ pozycję stagingu z pełną polityką Staging v2 — `:202-226`.
@@ -86,6 +91,22 @@ export function zatwierdzPozycjeZPolityka(
     });
 
     zatwierdzPozycjeStagingu(db, id, uzytkownikId, nadajKodImportu, true);
+
+    // ——— Poprawka Marty wygrywa z pamięcią nazw (odstępstwo 2026-10-06) ———
+    // Bazowa akceptacja nakłada `nazwa_pamiec` PO poprawkach, więc mogła zapisać inną nazwę,
+    // niż ta, którą Marta ustawiła (i którą widział operator w stagingu). Przywracamy poprawkę;
+    // „DEMO” ma ostatnie słowo także wobec niej (decyzja 2026-09-30).
+    const poprawkaNazwy = poprawkiDla(db, row.dostawca, row.kod).find(
+      (p) => p.fieldName === "nazwa" && p.overrideValue.trim() !== "",
+    );
+    if (poprawkaNazwy) {
+      const po = db.select().from(products).where(eq(products.kod, row.kod)).get();
+      const nazwa =
+        nazwaZDemo(poprawkaNazwy.overrideValue, po?.kodDostawcy ?? null) ?? poprawkaNazwy.overrideValue;
+      if (po && nazwa !== po.nazwa) {
+        db.update(products).set({ nazwa }).where(eq(products.id, po.id)).run();
+      }
+    }
 
     // ——— Ochrona ręcznego wstrzymania (#104, `:216-222`) ———
     // Produkt wstrzymany AUTOMATYCZNIE wraca do gry: znika znacznik, a świeża akceptacja
