@@ -22,25 +22,15 @@ You are the documentation curator. You receive a list of docs files + the contex
 
 ## Ownership of shared docs (Bridge) — CRITICAL
 
-Several tickets run in parallel and merge into `develop` independently. Any line two tickets
-both edit becomes a merge conflict. Rules (full table: `docs/karty/README.md`):
+Several tickets can run in parallel and merge into `develop` independently. Any line two tickets both edit becomes a merge conflict.
+The rule that survives from the rebuild era: **never append a new paragraph at the end of a shared file — create a per-ticket file.**
 
-- **Never edit `docs/rebuild-roadmap.md`** — not §4, not the card tables, not iteration-level
-  paragraphs. Only the coordinator session edits it. Exception: the ticket's worktree has no
-  `docs/karty/README.md` (started before ticket 82) — then the old rules from Master apply.
-- The ticket's own card: edit only `docs/karty/<own ID>/karta.md` (`> **Stan:**` line,
-  „Dowiezione”, remove what the ticket disproved). If it doesn't exist, create it from the
-  template in `docs/karty/README.md`.
-- A finding for a FUTURE card: create a NEW file `docs/karty/<its ID>/wejscie-<N>.md`
-  (N = this ticket's number). Never append to another card's `karta.md`.
-- A falsehood in the roadmap or in another card: write it under „Do koordynatora” in the
-  ticket's own `karta.md`; do not fix it there.
-- **`docs/spec-backend.md`: never append a new paragraph** (no new „Potwierdzone w N” /
-  „Odbudowa (…)” block at the end of §2, §5 or any other section). A new finding about the
-  backend goes into a NEW file `docs/spec-backend/wpis-<N>.md` (N = this ticket's number,
-  template in `docs/spec-backend/README.md`). You MAY correct in place a sentence in
-  `docs/spec-backend.md` that this ticket disproved. Reason: two parallel cards appending at
-  the end of §2 collided in tickets 90/91 (2026-09-22).
+- **`docs/spec-backend.md`:** a new finding about the backend goes into a NEW file `docs/spec-backend/wpis-<N>.md` (N = this ticket's number,
+  template in `docs/spec-backend/README.md`). You MAY correct in place a sentence that this ticket disproved.
+- **Backlog:** new entries go to `docs/rebuild-backlog/wpis-<N>.md` (id `#<N>.<k>`); in other entries change only `Status` / `Do nowej wersji?`.
+- **`docs/rebuild-roadmap.md` is an archive of the rebuild plan** — do not edit it.
+- If the ticket realizes a card (`docs/karty/<ID>/`), see `docs/karty/README.md`: edit only that card's own `karta.md` (`> **Stan:**`, „Dowiezione”)
+  and put findings for a FUTURE card into a NEW `docs/karty/<its ID>/wejscie-<N>.md`.
 
 ## Your goal
 

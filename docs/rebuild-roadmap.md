@@ -1,5 +1,10 @@
 # Mapa odbudowy Bridge — roadmap iteracji (kontrolna)
 
+> **ARCHIWUM PLANU ODBUDOWY (od cutoveru; ticket 198, 2026-10-08).** Odbudowa jest zakończona, a nowy stos jest produkcją.
+> Ten plik opisuje, jak odbudowa była planowana — **nie jest planem bieżącej pracy** i nie wolno z niego wywodzić zakresu nowych
+> ticketów. Bieżące sprawy: `docs/rebuild-backlog/` (`tools/stan-backlogu.sh`) i zgłoszenia użytkowniczki. Reguła „nie edytuj
+> wspólnych plików, twórz plik-per-ticket" nadal obowiązuje (`CLAUDE.md`).
+
 Powierzchnia kontroli nad **wierną odbudową** „Bridge dla Agrowca" w nowym stosie
 (`rebuild/`), realizowaną **pionowymi plastrami** (jedna funkcja end-to-end na iterację).
 Ten plik jest źródłem prawdy o **kolejności, zakresie i stanie** prac. Każda nowa sesja
