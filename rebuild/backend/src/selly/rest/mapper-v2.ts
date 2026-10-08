@@ -66,6 +66,9 @@ export type WierszMapperaV2 = {
   ms?: Wartosc;
   snow_3pmsf?: Wartosc;
   label_snow?: Wartosc;
+  cfo?: Wartosc;
+  nro?: Wartosc;
+  cho?: Wartosc;
 };
 
 /** Cecha produktu w payloadzie Selly — `{ name, values: [..] }`. */
@@ -143,6 +146,10 @@ export const FEATURE_MAP: readonly (readonly [string, KolumnaCechy, (v: Wartosc)
   ["Błoto + śnieg", "ms", yn],
   ["Śnieg-3PMSF", "snow_3pmsf", yn],
   ["Śnieg", "label_snow", yn],
+  // Ticket 199: oznaczenia z pliku CSV dla Selly (te same nazwy co nagłówki kolumn). Nie było ich w oryginale.
+  ["CFO", "cfo", yn],
+  ["NRO", "nro", yn],
+  ["CHO", "cho", yn],
   ["Marka", "marka", txt],
 ];
 
