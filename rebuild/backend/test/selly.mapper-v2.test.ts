@@ -76,12 +76,19 @@ describe("mapper v2 — transformacje wartości", () => {
 });
 
 describe("mapper v2 — cechy produktu", () => {
-  it("mapa ma 21 cech, bez „Lód” i bez „Magazyny”", () => {
-    expect(FEATURE_MAP).toHaveLength(21);
+  it("mapa ma 24 cechy (21 z oryginału + CFO/NRO/CHO z ticketu 199), bez „Lód” i bez „Magazyny”", () => {
+    expect(FEATURE_MAP).toHaveLength(24);
     const nazwy = FEATURE_MAP.map(([n]) => n);
     expect(nazwy).not.toContain("Lód");
     expect(nazwy).not.toContain("Magazyny");
     expect(nazwy).toContain("Bieżnik / model");
+  });
+
+  it("ticket 199: CFO/NRO/CHO jako cechy — 'Tak'/1 wchodzą, 0/puste nie", () => {
+    const features = buildFeatures({ ...WIERSZ, cfo: "Tak", nro: 1, cho: 0 });
+    expect(cecha(features, "CFO")).toEqual({ name: "CFO", values: ["Tak"] });
+    expect(cecha(features, "NRO")).toEqual({ name: "NRO", values: ["Tak"] });
+    expect(cecha(features, "CHO")).toBeUndefined();
   });
 
   it("`buildFeatures` pomija puste i bierze `bieznik`, nie `model`", () => {

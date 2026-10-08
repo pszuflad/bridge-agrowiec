@@ -27,8 +27,7 @@ folderu" ustalić przeznaczenie `suma` (połączone magazyny?) i wybrać jawną 
 **Do nowej wersji?** —
 **Źródło:** audyt. `selly/mapper.ts` (opis HTML z rekordów Drizzle) zjada `'Tak'` przez tryb `boolean`; `selly/rest/mapper-v2.ts` ma `yn()`
 akceptujące „Tak" i pełną synchronizację na surowych zapytaniach SQLite. Pomiar: 922 z 5410 aktywnych kart (≈17%) ma „Tak" w M+S/3PMSF
-(skala danych podatnych w starszym odczycie, nie liczba uszkodzonych kart w Selly). CFO/NRO/CHO nie są w mapie cech v2 — to osobna kwestia
-kompletności eksportu. Naprawa: odczyt konsumenta, nigdy `schema.ts`.
+(skala danych podatnych w starszym odczycie, nie liczba uszkodzonych kart w Selly). CFO/NRO/CHO nie były w mapie cech v2 (ani w oryginale) — dodane w tickecie 199 (decyzja użytkownika 2026-10-08). Naprawa: odczyt konsumenta, nigdy `schema.ts`.
 
 ### #196.4 — Aktualizacja statusów wpisów z listy
 
