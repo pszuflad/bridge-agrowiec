@@ -41,6 +41,7 @@ import {
   adresStrony,
   odrzucPozycje,
   odrzucWszystkie,
+  type WynikOdrzucenia,
   zatwierdzPozycje,
   zatwierdzWszystkie,
   type StronaStagingu,
@@ -77,7 +78,7 @@ export function Staging() {
    * `confirm()`, tak jak przed 7b robiła to cała odbudowa. Treści pytań przenosimy DOSŁOWNIE,
    * zmienia się wyłącznie nośnik — ten sam wzorzec co D2 z 7b, D6 z narzutów i D1 z 12c.
    */
-  const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<"akceptuj" | "odrzuc" | null>(null);
+  const [doPotwierdzenia, ustawDoPotwierdzenia] = useState<"akceptuj" | "odrzuc" | "odrzuc-zaznaczone" | "odrzuc-widoczne" | null>(null);
 
   /*
     Wybór kolumn z konfiguratora. Czytamy go RAZ przy montowaniu (leniwy inicjalizator),
@@ -131,12 +132,21 @@ export function Staging() {
    * jedną mutację, więc zbiór zdarzeń jest ten sam — bez mutowania globalnego `fetch`
    * (plan.md D4). Odrzucanie zostaje przy pasku, tak jak w produkcji.
    */
-  type OperacjaMasowa = { wykonaj: () => Promise<number>; akceptacja: boolean };
+  type OperacjaMasowa = { wykonaj: () => Promise<number | WynikOdrzucenia>; akceptacja: boolean };
 
   const akcja = useMutation({
     mutationFn: async ({ wykonaj }: OperacjaMasowa) => wykonaj(),
-    onSuccess: async (ile: number) => {
-      ustawKomunikat(`Przetworzono pozycji: ${ile}`);
+    onSuccess: async (wynik: number | WynikOdrzucenia) => {
+      if (typeof wynik === "number") {
+        ustawKomunikat(`Przetworzono pozycji: ${wynik}`);
+      } else {
+        ustawKomunikat(
+          `Przetworzono pozycji: ${wynik.ile}` +
+            (wynik.zapamietane > 0
+              ? ` — w tym ${wynik.zapamietane} zmian istniejących kart zapamiętano jak poprawki Marty (karty zostały bez zmian)`
+              : ""),
+        );
+      }
       await odswiez();
     },
     onError: (e: Error, zmienne: OperacjaMasowa) => {
@@ -152,6 +162,16 @@ export function Staging() {
 
   const idWidoczne = pozycje.map((p) => p.id);
   const idZaznaczone = [...zaznaczone];
+
+  // Ticket 202: „Odrzuć” zmiany istniejącej karty ZAPAMIĘTUJE odrzucenie (poprawka Marty). Gdy w wyborze są takie pozycje,
+  // pytamy z liczbą; wybór bez nich odrzucamy od razu, jak dotąd.
+  const liczbaZmianKart = (ids: number[]) =>
+    pozycje.filter((p) => ids.includes(p.id) && p.typZmiany === "zmiana_kluczowa").length;
+  const poprosOOdrzucenie = (rodzaj: "odrzuc-zaznaczone" | "odrzuc-widoczne", ids: number[]) => {
+    if (liczbaZmianKart(ids) > 0) ustawDoPotwierdzenia(rodzaj);
+    else akcja.mutate({ wykonaj: () => odrzucPozycje(ids), akceptacja: false });
+  };
+  const idDoOdrzucenia = doPotwierdzenia === "odrzuc-zaznaczone" ? idZaznaczone : idWidoczne;
 
   const przelaczZaznaczenie = (id: number) =>
     ustawZaznaczone((poprzednie) => {
@@ -268,7 +288,7 @@ export function Staging() {
                 variant="outline"
                 data-testid="button-reject-checked"
                 disabled={akcja.isPending}
-                onClick={() => akcja.mutate({ wykonaj: () => odrzucPozycje(idZaznaczone), akceptacja: false })}
+                onClick={() => poprosOOdrzucenie("odrzuc-zaznaczone", idZaznaczone)}
               >
                 Odrzuć zaznaczone ({idZaznaczone.length})
               </Button>
@@ -291,7 +311,7 @@ export function Staging() {
             variant="ghost"
             data-testid="button-reject-selected"
             disabled={idWidoczne.length === 0 || akcja.isPending}
-            onClick={() => akcja.mutate({ wykonaj: () => odrzucPozycje(idWidoczne), akceptacja: false })}
+            onClick={() => poprosOOdrzucenie("odrzuc-widoczne", idWidoczne)}
           >
             Odrzuć widoczne
           </Button>
@@ -405,9 +425,25 @@ export function Staging() {
       />
 
       <DialogPotwierdzenia
+        otwarty={doPotwierdzenia === "odrzuc-zaznaczone" || doPotwierdzenia === "odrzuc-widoczne"}
+        tytul="Odrzucenie pozycji"
+        tresc={`Odrzucić ${idDoOdrzucenia.length} pozycji? ${liczbaZmianKart(idDoOdrzucenia)} z nich to zmiany istniejących kart — karty zostaną bez zmian, a odrzucenie zapamiętamy jak poprawki Marty (ta sama propozycja nie wróci po kolejnym imporcie). Pozostałe pozycje zostaną usunięte.`}
+        etykietaPotwierdzenia="Odrzuć"
+        wariantPotwierdzenia="destructive"
+        zajety={akcja.isPending}
+        onPotwierdz={() => {
+          const ids = idDoOdrzucenia;
+          ustawDoPotwierdzenia(null);
+          akcja.mutate({ wykonaj: () => odrzucPozycje(ids), akceptacja: false });
+        }}
+        onZamknij={() => ustawDoPotwierdzenia(null)}
+        testId="dialog-odrzuc-wybrane"
+      />
+
+      <DialogPotwierdzenia
         otwarty={doPotwierdzenia === "odrzuc"}
         tytul="Odrzucenie wszystkich pozycji"
-        tresc={`Odrzucić wszystkie pasujące pozycje (${razem})?`}
+        tresc={`Odrzucić wszystkie pasujące pozycje (${razem})? Zmiany istniejących kart zostaną zapamiętane jak poprawki Marty (karty zostają bez zmian i ta sama propozycja nie wróci po kolejnym imporcie); pozostałe pozycje zostaną usunięte.`}
         etykietaPotwierdzenia="Odrzuć wszystkie"
         wariantPotwierdzenia="destructive"
         zajety={akcja.isPending}
