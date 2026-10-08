@@ -1,5 +1,10 @@
 # Rebuild backlog — zmiany produkcji do naniesienia na nową wersję
 
+> **Stan po cutoverze (2026-10-08, ticket 198):** ta tabela jako **lista różnic wobec starej produkcji jest zamknięta** —
+> komenda `/triaz-zmian` i marker `docs/triage-state.txt` straciły przedmiot (nie ma już commitów `sync(vps)` do triażu).
+> **Wpisy nadal żyją** i są nośnikiem otwartych spraw: nowe wpisy idą do `docs/rebuild-backlog/wpis-<ticket>.md` (id `#<ticket>.<k>`),
+> przegląd: `tools/stan-backlogu.sh`. Statusy otwartych wpisów (`⬜`/`🕒`) wolno dalej zmieniać w miejscu.
+
 Powierzchnia kontroli nad tym, **które zmiany Ani z żywej produkcji trafiają do
 odbudowywanego stosu** (`rebuild/`). Ty decydujesz per zmiana; ja opisuję i implementuję
 zatwierdzone.

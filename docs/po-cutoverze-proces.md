@@ -3,7 +3,7 @@
 > **Utworzono:** 2026-09-24, ticket `162-DOCS-proces-po-cutoverze` (zlecenie użytkownika).
 > **Karta:** `PO.0` w `docs/rebuild-roadmap.md` §6b, Blok 2 — **wchodzi jako pierwsza po
 > przełączeniu domeny** (decyzja użytkownika 2026-09-24). Wpis backlogu: `#162.1`.
-> **Ten dokument niczego nie zmienia** — jest wejściem dla sesji, która wykona kartę PO.0.
+> **Wykonane 2026-10-08 (ticket 198):** `feature.md`, trzej agenci, `CLAUDE.md`, nagłówki roadmapy i backlogu przestrojone, `/triaz-zmian` usunięty. **Otwarte decyzje (§3 a–c):** archiwizacja `mirror/`+`deminified/`, przenagranie fixtures z nowego backendu, naprawa schematu flag `'Tak'`.
 
 ## 0. Kiedy to wykonać — i dlaczego NIE teraz
 

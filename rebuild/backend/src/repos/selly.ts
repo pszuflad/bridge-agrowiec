@@ -337,7 +337,45 @@ export async function synchronizujJedenProdukt(
 
 /** Produkt po kodzie — pełny wiersz tabeli (payload potrzebuje wszystkich kolumn). */
 export function produktPoKodzie(db: Baza, kod: string): ProduktWewnetrzny | undefined {
-  return db.select().from(products).where(eq(products.kod, kod)).get();
+  const produkt = db.select().from(products).where(eq(products.kod, kod)).get();
+  return produkt ? naniesSuroweFlagi(db, [produkt])[0] : undefined;
+}
+
+/** Kolumny flagowe `products` → pola modelu. Fizycznie bywa w nich tekst `'Tak'` (CLAUDE.md, „Trzecia pułapka”). */
+const KOLUMNY_FLAG: readonly [kolumna: string, pole: keyof ProduktWewnetrzny][] = [
+  ["reinforced", "reinforced"],
+  ["extra_load", "extraLoad"],
+  ["cut_resistant", "cutResistant"],
+  ["heat_resistant", "heatResistant"],
+  ["stubble_resistant", "stubbleResistant"],
+  ["nro", "nro"],
+  ["cho", "cho"],
+  ["ms", "ms"],
+  ["snow_3pmsf", "snow3pmsf"],
+  ["cfo", "cfo"],
+];
+
+/**
+ * Ticket 197 (#154.1): tryb `boolean` w modelu robi z `'Tak'` → `false` (`Number(v) === 1`), więc opis HTML wysyłany do
+ * Selly tracił M+S, 3PMSF i odporności. Oryginał czyta `SELECT *` i sprawdza prawdziwość wartości surowej
+ * (`ms ? "tak" : null`) — to samo robi tu generator CSV. Nakładamy więc surową prawdziwość na kopię produktu; model
+ * (`schema.ts`) i `GET /api/products` zostają bez zmian.
+ */
+export function naniesSuroweFlagi(db: Baza, lista: ProduktWewnetrzny[]): ProduktWewnetrzny[] {
+  if (lista.length === 0) return lista;
+  const kolumny = KOLUMNY_FLAG.map(([k]) => k).join(", ");
+  const surowe = new Map<number, Record<string, unknown>>();
+  const zapytanie = db.$client.prepare(`SELECT id, ${kolumny} FROM products WHERE id IN (SELECT value FROM json_each(?))`);
+  for (const w of zapytanie.all(JSON.stringify(lista.map((p) => p.id))) as Record<string, unknown>[]) {
+    surowe.set(w.id as number, w);
+  }
+  return lista.map((p) => {
+    const w = surowe.get(p.id);
+    if (!w) return p;
+    const kopia = { ...p } as Record<string, unknown>;
+    for (const [kolumna, pole] of KOLUMNY_FLAG) kopia[pole] = Boolean(w[kolumna]);
+    return kopia as ProduktWewnetrzny;
+  });
 }
 
 /**
@@ -371,7 +409,7 @@ export function produktyDoSynchronizacji(
   const wiersze =
     opcje.limit && opcje.limit > 0 ? zapytanie.limit(opcje.limit).all() : zapytanie.all();
 
-  return wiersze.map((w) => w.p);
+  return naniesSuroweFlagi(db, wiersze.map((w) => w.p));
 }
 
 /** Otwarcie wpisu w dzienniku (`routes.cjs:174-178`) — status `w_trakcie`, zwraca `id`. */

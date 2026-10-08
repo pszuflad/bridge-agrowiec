@@ -11,7 +11,7 @@ Nie triaż zmian produkcji — ustalenie wyszło przy naprawie generatora CSV (k
 | **Pliki** | `rebuild/backend/src/selly/mapper.ts:197-203` (`zbudujOpisOpony`) |
 | **Commit** | — (nie zmiana produkcji; ustalenie ticketu 154) |
 | **Do nowej wersji?** | ⬜ **do decyzji** |
-| **Status** | ⬜ niezałatane — świadomie poza zakresem karty `FIX.1` |
+| **Status** | ✅ naprawione w tickecie 197 (`naniesSuroweFlagi` w `repos/selly.ts`; CFO/NRO/CHO nie wchodzą do opisu HTML — osobna sprawa) |
 
 **Opis biznesowy.** Ten sam błąd, który kazał generatorowi CSV wypisywać pustkę zamiast `Tak`
 (wpis `#153.1`, naprawione ticketem 154), siedzi **drugi raz** — w tabeli atrybutów wysyłanej do

@@ -46,7 +46,7 @@ For large changes read selectively, you don't need to read every line. Focus on:
 - Security: missing input validation, leaked secrets, SQL injection, missing auth checks, logging secrets
 - Data corruption: migrations without rollback, destructive operations without guards, races on shared state
 - Tests fail (check `raport.md` Test results — if anything ✗, that's a BLOCKER unless explicitly justified)
-- **Wierność (GATE odbudowy):** odpowiedź endpointu rozjeżdża się z kształtem `contract/fixtures/` lub schematem `contract/openapi.yaml` bez zatwierdzonego odstępstwa (przy ticketach dotykających API)
+- **Kontrakt (GATE kontraktu):** zmiana kształtu odpowiedzi API bez aktualizacji `contract/openapi.yaml`/fixtures i bez wzmianki w `plan.md`; albo zmiana eksportu do Selly / parsowania cenników dostawców bez opisu skutku w planie
 - Code violates Definition of done from plan.md
 - Breaking changes in public API not in plan.md / raport.md (unexpected)
 
