@@ -211,6 +211,11 @@ log "czyszczenie katalogu: DOT w modelu/bieżniku (normalizuj-katalog --apply)"
 log "kroki wdrożenia (rejestr: rebuild/backend/src/kroki/rejestr.ts)"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run kroki-wdrozenia 2>&1 | tee -a "$LOG" )
 
+# ticket 201: krok wdrożenia może zmienić klucze w $PROD_ROOT/.env (np. SELLY_TOR2, SELLY_USUWANIE).
+# Wczytaną na początku wersję środowiska zastępujemy aktualną, żeby PM2 wystartował z nowymi wartościami
+# już w TYM wdrożeniu (wcześniej zmiana działała dopiero w następnym).
+if [ -f "$PROD_ROOT/.env" ]; then set -a; . "$PROD_ROOT/.env"; set +a; fi
+
 ln -sfn "$RELEASE" "$PROD_ROOT/current"                  # atomowa podmiana
 pm2 delete "$PM2_NAME" >/dev/null 2>&1 || true
 ( cd "$PROD_ROOT/current" && PORT="$PORT" HOST="$HOST" DB_PATH="$DATA_DB" NODE_ENV=production \

@@ -342,6 +342,12 @@ jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skr
 6. Konta: krok `2026-10-06-konta-erwin-anna` w rejestrze zakłada Erwina i Annę z hasłem z
    `HASLO_TYMCZASOWE` (wpisanym raz do `$PROD_ROOT/.env`); bez niego jest pomijany. Ręczny
    `npm run dodaj:uzytkownikow` zostaje tylko awaryjnie.
+7. **Zmiana ustawień w `.env` (flagi, nie sekrety) = krok wdrożenia**, nigdy ręczna edycja serwera. Użyj `ustawWEnvPliku`
+   (`src/kroki/env-plik.ts`) w kroku w `kroki/rejestr.ts` (wzór: `2026-10-08-selly-tor2-tor3-wlaczone`); krok zmienia tylko podane
+   klucze, sekrety zostają. W opisie PR wypisz zmieniane klucze i co zmieniają w działaniu systemu (np. włączenie usuwania ze sklepu).
+   Od ticketu 201 `deploy-produkcja.sh` wczytuje `.env` ponownie PO krokach, więc backend startuje z nowymi wartościami w tym samym
+   wdrożeniu — ale uwaga na pkt 4: sama poprawka skryptu zadziała dopiero od drugiego wdrożenia po jej merge'u; do tego czasu uprzedź
+   użytkownika o drugim wdrożeniu. Sekretów w repo nadal nie wpisujemy.
 
 ## Środowisko
 
