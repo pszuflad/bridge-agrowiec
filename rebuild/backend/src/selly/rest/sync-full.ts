@@ -100,7 +100,7 @@ export function collectFullSyncItems(db: Baza, dostawca: string): WierszFull[] {
       p.rozmiar_alternatywny, p.konstrukcja, p.pr, p.tl_tt,
       p.indeksy, p.indeks_nosnosci, p.indeks_predkosci, p.dot,
       p.zastosowanie, p.label_wet, p.label_rolling, p.label_noise,
-      p.ms, p.snow_3pmsf, p.label_snow, p.ean_is_valid,
+      p.ms, p.snow_3pmsf, p.label_snow, p.cfo, p.nro, p.cho, p.ean_is_valid,
       p.kod_dostawcy,
       sp.selly_product_id, sp.selly_variant_id, sp.feature_id_magazyn,
       sp.stan_wyslany, sp.cena_sprzedazy_wyslana, sp.cena_zakupu_wyslana
