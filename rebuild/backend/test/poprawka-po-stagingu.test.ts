@@ -102,6 +102,38 @@ describe("poprawka Marty zapisana PO zgłoszeniu w stagingu", () => {
     expect(String(stare!.nazwa)).toMatch(/ DA$/);
   });
 
+  it("poprawka `nazwa` zgodna z kartą NIE usuwa zgłoszenia, gdy karta ma też „DA” w modelu (model jest w KEYS)", async () => {
+    const nazwaKarty = "480/70R28 BKT AGRIMAX RT 765 DA 150D TL";
+    srodowisko.db.delete(stagingItems).run();
+    srodowisko.db
+      .update(products)
+      .set({ nazwa: nazwaKarty, model: "AGRIMAX RT 765 DA", kodDostawcy: "DA-1" })
+      .run();
+    poprawka(kod, nazwaKarty);
+    await zaimportuj();
+    const w = wiersze();
+    expect(w).toHaveLength(1);
+    expect(w[0]!.typZmiany).toBe("zmiana_kluczowa");
+    expect(String(w[0]!.powod)).toMatch(/Model/i);
+    expect(w[0]!.nazwa).toBe(nazwaKarty);
+  });
+
+  it("poprawki `nazwa` i `model` zgodne z kartą → zgłoszenie znika (zmian brak)", async () => {
+    const nazwaKarty = "480/70R28 BKT AGRIMAX RT 765 DA 150D TL";
+    srodowisko.db.delete(stagingItems).run();
+    srodowisko.db.update(products).set({ nazwa: nazwaKarty, model: "AGRIMAX RT 765 DA", kodDostawcy: "DA-1" }).run();
+    poprawka(kod, nazwaKarty);
+    srodowisko.db
+      .insert(manualOverrides)
+      .values({
+        supplierKod: "MO1", supplierProductId: kod, fieldName: "model", overrideValue: "AGRIMAX RT 765 DA",
+        createdAt: new Date().toISOString(),
+      } as never)
+      .run();
+    await zaimportuj();
+    expect(wiersze().find((w) => w.kod === kod)).toBeUndefined();
+  });
+
   it("brak kolejnego importu → zgłoszenie bez zmian mimo poprawki", () => {
     poprawka(kod, "NAZWA MARTY");
     expect(String(wiersze()[0]!.nazwa)).toMatch(/ DA$/);
