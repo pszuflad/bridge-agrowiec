@@ -98,6 +98,36 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     expect(String(szczegoly.wpisy[0]!.czas)).toMatch(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/);
   });
 
+  it("ticket 203: sieroty pomijane przez kontrolę tożsamości nie zagłodzą reszty — kursor rusza dalej", async () => {
+    tlo(100);
+    const sklep: NonNullable<OpcjeAtrapy["sklep"]> = [];
+    // 25 pierwszych: w Selly inna nazwa i EAN → pomijane (brak potwierdzenia tożsamości), potem 3 do usunięcia.
+    for (let i = 0; i < 25; i++) {
+      const pid = 1000 + i;
+      zasiejMapowanie(baza.sqlite, { kodImportu: `X${i}`, dostawca: "MO1", bridgeKod: `MO1_X${i}`, productId: pid, variantId: pid + 5000 });
+      sklep.push({ product_id: pid, name: `Zupełnie inny ${i}`, ean: null, warianty: [{ variant_id: pid + 5000, features: [magazyn("MO1")] }] });
+    }
+    for (let i = 0; i < 3; i++) {
+      const pid = 2000 + i;
+      sierota(`D${i}`, `MO1_DEL${i}`, pid, pid + 5000, "MO1", `59000${pid}000000`.slice(0, 13));
+      sklep.push({ product_id: pid, name: `Do usunięcia ${i}`, ean: `59000${pid}000000`.slice(0, 13), warianty: [{ variant_id: pid + 5000, features: [magazyn("MO1")] }] });
+    }
+    const { atrapa, discovery } = przygotuj(sklep);
+
+    // Przebieg 1: sprawdza 20 pierwszych (wszystkie pominięte). Przebieg 2: rusza od kursora — dochodzi do 3 usuwalnych.
+    const opcje = { tryb: "pelny" as const, limit: 20, sprawdzenia: 20 };
+    const w1 = await usunSierotyZSelly(baza.db, discovery, opcje);
+    expect(w1?.pominiete).toBe(20);
+    expect(atrapa.liczba("deleteProduct")).toBe(0);
+    const w2 = await usunSierotyZSelly(baza.db, discovery, opcje);
+
+    expect(atrapa.liczba("deleteProduct") + atrapa.liczba("deleteVariant")).toBe(3);
+    expect(w2?.usuniete_produkty).toBe(3);
+    expect(mapowania()).not.toContain("MO1_DEL0");
+    // pominięte zostają w tabeli (nic nie usuwamy bez potwierdzenia)
+    expect(mapowania().filter((k) => k.startsWith("MO1_X"))).toHaveLength(25);
+  });
+
   it("produkt wspólny z żywym wariantem innego dostawcy: usuwa TYLKO wariant", async () => {
     tlo();
     produkt("MO2_ZYWY", "WSPOLNY", "MO2");
